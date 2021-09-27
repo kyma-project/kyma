@@ -89,7 +89,7 @@ func TestServiceDefinitionService_Create(t *testing.T) {
 		serviceRepository.On("Create", "app", applicationService).Return(nil)
 		serviceRepository.On("GetAll", "app").Return(nil, nil)
 		specService := new(specmocks.Service)
-		specService.On("PutSpec", &serviceDefinition, "gateway-url").Return(nil)
+		specService.On("PutSpec", &serviceDefinition, "http://central-application-gateway.kyma-system:8080/app/some-service").Return(nil)
 		applicationGetter := new(mocks.ApplicationGetter)
 		applicationGetter.On("Get", context.Background(), "app", v1.GetOptions{}).Return(&applicationWithUID, nil)
 
@@ -492,7 +492,7 @@ func TestServiceDefinitionService_Create(t *testing.T) {
 		serviceRepository := new(applicationsmocks.ServiceRepository)
 		serviceRepository.On("Create", "app", applicationService).Return(apperrors.Internal("some error"))
 		specService := new(specmocks.Service)
-		specService.On("PutSpec", &serviceDefinition, "gateway-url").Return(nil)
+		specService.On("PutSpec", &serviceDefinition, "http://central-application-gateway.kyma-system:8080/app/some-service").Return(nil)
 		applicationGetter := new(mocks.ApplicationGetter)
 		applicationGetter.On("Get", context.Background(), "app", v1.GetOptions{}).Return(&applicationWithUID, nil)
 
@@ -552,7 +552,7 @@ func TestServiceDefinitionService_Create(t *testing.T) {
 		serviceRepository := new(applicationsmocks.ServiceRepository)
 		serviceRepository.On("Create", "app", applicationService).Return(apperrors.NotFound("some error"))
 		specService := new(specmocks.Service)
-		specService.On("PutSpec", &serviceDefinition, "gateway-url").Return(nil)
+		specService.On("PutSpec", &serviceDefinition, "http://central-application-gateway.kyma-system:8080/app/some-service").Return(nil)
 		applicationGetter := new(mocks.ApplicationGetter)
 		applicationGetter.On("Get", context.Background(), "app", v1.GetOptions{}).Return(&applicationWithUID, nil)
 
@@ -671,7 +671,7 @@ func TestServiceDefinitionService_Create(t *testing.T) {
 		serviceRepository.On("Create", "app", applicationService).Return(nil)
 		serviceRepository.On("GetAll", "app").Return(nil, nil)
 		specService := new(specmocks.Service)
-		specService.On("PutSpec", &serviceDefinition, "gateway-url").Return(nil)
+		specService.On("PutSpec", &serviceDefinition, "http://central-application-gateway.kyma-system:8080/app/some-service").Return(nil)
 		applicationGetter := new(mocks.ApplicationGetter)
 		applicationGetter.On("Get", context.Background(), "app", v1.GetOptions{}).Return(nil, fmt.Errorf("Getting Application failed"))
 
@@ -1022,7 +1022,7 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 		serviceRepository.On("Update", "app", applicationService).Return(nil)
 
 		specService := new(specmocks.Service)
-		specService.On("PutSpec", &serviceDefinition, "gateway-url").Return(nil)
+		specService.On("PutSpec", &serviceDefinition, "http://central-application-gateway.kyma-system:8080/app/some-service").Return(nil)
 		specService.On("GetSpec", "uuid-1").Return(nil, nil, nil, nil)
 		applicationGetter := new(mocks.ApplicationGetter)
 		applicationGetter.On("Get", context.Background(), "app", v1.GetOptions{}).Return(&applicationWithUID, nil)
@@ -1459,7 +1459,7 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 
 		specService := new(specmocks.Service)
 		specService.On("GetSpec", "uuid-1").Return(nil, nil, nil, nil)
-		specService.On("PutSpec", &serviceDefinition, "gateway-url").Return(nil)
+		specService.On("PutSpec", &serviceDefinition, "http://central-application-gateway.kyma-system:8080/app/some-service").Return(nil)
 		applicationGetter := new(mocks.ApplicationGetter)
 		applicationGetter.On("Get", context.Background(), "app", v1.GetOptions{}).Return(&applicationWithUID, nil)
 
@@ -1537,7 +1537,7 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 		serviceRepository.On("Update", "app", applicationService).Return(nil)
 
 		specService := new(specmocks.Service)
-		specService.On("PutSpec", &serviceDefinition, "gateway-url").Return(nil)
+		specService.On("PutSpec", &serviceDefinition, "http://central-application-gateway.kyma-system:8080/app/some-service").Return(nil)
 		specService.On("GetSpec", "uuid-1").Return(nil, nil, nil, nil)
 		applicationGetter := new(mocks.ApplicationGetter)
 		applicationGetter.On("Get", context.Background(), "app", v1.GetOptions{}).Return(nil, fmt.Errorf("Getting Application failed"))

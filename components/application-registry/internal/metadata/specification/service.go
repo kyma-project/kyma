@@ -28,7 +28,7 @@ const (
 type Service interface {
 	GetSpec(id string) ([]byte, []byte, []byte, apperrors.AppError)
 	RemoveSpec(id string) apperrors.AppError
-	PutSpec(serviceDef *model.ServiceDefinition, gatewayUrl string) apperrors.AppError
+	PutSpec(serviceDef *model.ServiceDefinition, centralGatewayUrl string) apperrors.AppError
 }
 
 type specService struct {
@@ -56,12 +56,12 @@ func (svc *specService) RemoveSpec(id string) apperrors.AppError {
 	return svc.rafterService.Remove(id)
 }
 
-func (svc *specService) PutSpec(serviceDef *model.ServiceDefinition, gatewayUrl string) apperrors.AppError {
+func (svc *specService) PutSpec(serviceDef *model.ServiceDefinition, centralGatewayUrl string) apperrors.AppError {
 	var apiSpec []byte
 	var err apperrors.AppError
 
 	if serviceDef.Api != nil {
-		apiSpec, err = svc.processAPISpecification(serviceDef.Api, gatewayUrl)
+		apiSpec, err = svc.processAPISpecification(serviceDef.Api, centralGatewayUrl)
 		if err != nil {
 			return err
 		}
@@ -87,7 +87,7 @@ func (svc *specService) insertSpecs(id string, apiType clusterassetgroup.ApiType
 	return nil
 }
 
-func (svc *specService) processAPISpecification(api *model.API, gatewayUrl string) ([]byte, apperrors.AppError) {
+func (svc *specService) processAPISpecification(api *model.API, centralGatewayUrl string) ([]byte, apperrors.AppError) {
 	apiSpec := api.Spec
 
 	var err apperrors.AppError
@@ -100,7 +100,7 @@ func (svc *specService) processAPISpecification(api *model.API, gatewayUrl strin
 	}
 
 	if shouldModifySpec(apiSpec, api.ApiType) {
-		apiSpec, err = modifyAPISpec(apiSpec, gatewayUrl)
+		apiSpec, err = modifyAPISpec(apiSpec, centralGatewayUrl)
 		if err != nil {
 			return nil, apperrors.Internal("Modifying API spec failed, %s", err.Error())
 		}
@@ -193,7 +193,7 @@ func determineSpecUrl(api *model.API) (string, apperrors.AppError) {
 	return specUrl.String(), nil
 }
 
-func modifyAPISpec(rawApiSpec []byte, gatewayUrl string) ([]byte, apperrors.AppError) {
+func modifyAPISpec(rawApiSpec []byte, centralGatewayUrl string) ([]byte, apperrors.AppError) {
 	if rawApiSpec == nil {
 		return rawApiSpec, nil
 	}
@@ -209,7 +209,7 @@ func modifyAPISpec(rawApiSpec []byte, gatewayUrl string) ([]byte, apperrors.AppE
 		return rawApiSpec, nil
 	}
 
-	newSpec, err := updateBaseUrl(apiSpec, gatewayUrl)
+	newSpec, err := updateBaseUrl(apiSpec, centralGatewayUrl)
 	if err != nil {
 		return rawApiSpec, apperrors.Internal("Updating base url failed, %s", err.Error())
 	}
@@ -223,13 +223,13 @@ func modifyAPISpec(rawApiSpec []byte, gatewayUrl string) ([]byte, apperrors.AppE
 }
 
 // TODO: Should I use only the Central Gateway URL as the old one is deprecated?
-func updateBaseUrl(apiSpec spec.Swagger, gatewayUrl string) (spec.Swagger, apperrors.AppError) {
-	fullUrl, err := url.Parse(gatewayUrl)
+func updateBaseUrl(apiSpec spec.Swagger, centralGatewayUrl string) (spec.Swagger, apperrors.AppError) {
+	fullUrl, err := url.Parse(centralGatewayUrl)
 	if err != nil {
-		return spec.Swagger{}, apperrors.Internal("Failed to parse gateway URL, %s", err.Error())
+		return spec.Swagger{}, apperrors.Internal("Failed to parse central gateway URL, %s", err.Error())
 	}
 
-	apiSpec.Host = fullUrl.Hostname()
+	apiSpec.Host = fullUrl.Host + fullUrl.Path
 	apiSpec.BasePath = ""
 	apiSpec.Schemes = []string{"http"}
 

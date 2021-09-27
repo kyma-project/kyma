@@ -83,7 +83,7 @@ func (sds *serviceDefinitionService) Create(application string, serviceDef *mode
 	}
 	service := initService(serviceDef, serviceDef.Identifier, application)
 
-	var gatewayUrl string
+	var centralGatewayUrl string
 
 	appUID, apperr := sds.getApplicationUID(application)
 	if apperr != nil {
@@ -97,11 +97,11 @@ func (sds *serviceDefinitionService) Create(application string, serviceDef *mode
 		}
 
 		service.API = serviceAPI
-		gatewayUrl = serviceAPI.GatewayURL
+		centralGatewayUrl = serviceAPI.CentralGatewayURL
 	}
 
-	// TODO: Should we put spec with the Central App Gateway instead?
-	apperr = sds.specService.PutSpec(serviceDef, gatewayUrl)
+	// TODO: Should we put spec with the Central App Gateway instead of the old Gateway URL?
+	apperr = sds.specService.PutSpec(serviceDef, centralGatewayUrl)
 	if apperr != nil {
 		return "", apperr.Append("Determining API spec for service with ID %s failed", serviceDef.ID)
 	}
@@ -163,7 +163,7 @@ func (sds *serviceDefinitionService) Update(application string, serviceDef *mode
 
 	service := initService(serviceDef, existingSvc.Identifier, application)
 
-	var gatewayUrl string
+	var centralGatewayUrl string
 
 	appUID, apperr := sds.getApplicationUID(application)
 	if apperr != nil {
@@ -181,10 +181,10 @@ func (sds *serviceDefinitionService) Update(application string, serviceDef *mode
 			return model.ServiceDefinition{}, apperr.Append("Updating %s service failed, updating API failed", serviceDef.ID)
 		}
 
-		gatewayUrl = service.API.GatewayURL
+		centralGatewayUrl = service.API.CentralGatewayURL
 	}
 
-	apperr = sds.specService.PutSpec(serviceDef, gatewayUrl)
+	apperr = sds.specService.PutSpec(serviceDef, centralGatewayUrl)
 	if apperr != nil {
 		return model.ServiceDefinition{}, apperr.Append("Updating %s service failed, saving specification failed", serviceDef.ID)
 	}
