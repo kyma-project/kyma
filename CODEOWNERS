@@ -206,25 +206,25 @@ components/etcd-tls-setup-job/ @PK85 @piotrmiskiewicz @ksputo @jasiu001 @adamwal
 /components/console-backend-service/internal/domain/rafter @m00g3n @pPrecel @dbadura @tgorgol @rJankowski93
 
 # Connector Service Component
-/components/connector-service/ @akgalwas @janmedrek @franpog859 @Maladie @rafalpotempa @koala7659 @ralikio @everesio
+/components/connector-service/ @akgalwas @janmedrek @franpog859 @Maladie @rafalpotempa @koala7659 @ralikio
 
 # Connection Token Handler Component
-/components/connection-token-handler/ @akgalwas @janmedrek @franpog859 @Maladie @rafalpotempa @koala7659 @ralikio @everesio
+/components/connection-token-handler/ @akgalwas @janmedrek @franpog859 @Maladie @rafalpotempa @koala7659 @ralikio
 
 # Application Registry Component
-/components/application-registry/ @akgalwas @janmedrek @franpog859 @Maladie @rafalpotempa @koala7659 @ralikio @everesio
+/components/application-registry/ @akgalwas @janmedrek @franpog859 @Maladie @rafalpotempa @koala7659 @ralikio
 
 # Application Operator Component
-/components/application-operator/ @akgalwas @janmedrek @franpog859 @Maladie @rafalpotempa @koala7659 @ralikio @everesio
+/components/application-operator/ @akgalwas @janmedrek @franpog859 @Maladie @rafalpotempa @koala7659 @ralikio
 
 # Application Gateway Component
-/components/application-gateway/ @akgalwas @janmedrek @franpog859 @Maladie @rafalpotempa @koala7659 @ralikio @everesio
+/components/application-gateway/ @akgalwas @janmedrek @franpog859 @Maladie @rafalpotempa @koala7659 @ralikio
 
 # Application Connectivity Validator Component
-/components/application-connectivity-validator/ @akgalwas @janmedrek @franpog859 @Maladie @rafalpotempa @koala7659 @ralikio @everesio
+/components/application-connectivity-validator/ @akgalwas @janmedrek @franpog859 @Maladie @rafalpotempa @koala7659 @ralikio
 
 # Application Connectivity Certs Setup Job Component
-/components/application-connectivity-certs-setup-job/ @akgalwas @janmedrek @franpog859 @Maladie @rafalpotempa @koala7659 @ralikio @everesio
+/components/application-connectivity-certs-setup-job/ @akgalwas @janmedrek @franpog859 @Maladie @rafalpotempa @koala7659 @ralikio
 
 # UAA Component
 /components/uaa-activator/ @ksputo @piotrmiskiewicz @PK85 @jasiu001
@@ -245,7 +245,7 @@ components/etcd-tls-setup-job/ @PK85 @piotrmiskiewicz @ksputo @jasiu001 @adamwal
 /components/function-runtimes/ @m00g3n @pPrecel @dbadura @tgorgol @rJankowski93
 
 # Compass Runtime Agent
-/components/compass-runtime-agent/ @PK85 @tgorgol @dbadura @akgalwas @janmedrek @franpog859 @Maladie @rafalpotempa @koala7659 @ralikio @everesio
+/components/compass-runtime-agent/ @PK85 @tgorgol @dbadura @akgalwas @janmedrek @franpog859 @Maladie @rafalpotempa @koala7659 @ralikio
 
 # Event Publisher Proxy
 /components/event-publisher-proxy @k15r @lilitgh @marcobebway @nachtmaar @radufa @sayanh @themue @pxsalehi
@@ -260,10 +260,10 @@ components/etcd-tls-setup-job/ @PK85 @piotrmiskiewicz @ksputo @jasiu001 @adamwal
 /components/busola-migrator/ @m00g3n @pPrecel @dbadura @tgorgol @rJankowski93
 
 # Central Application Gateway
-/components/central-application-gateway/ @akgalwas @janmedrek @franpog859 @Maladie @rafalpotempa @koala7659 @ralikio @everesio
+/components/central-application-gateway/ @akgalwas @janmedrek @franpog859 @Maladie @rafalpotempa @koala7659 @ralikio
 
 # Central Connectivity Validator
-/components/central-application-connectivity-validator/ @akgalwas @janmedrek @franpog859 @Maladie @rafalpotempa @koala7659 @ralikio @everesio
+/components/central-application-connectivity-validator/ @akgalwas @janmedrek @franpog859 @Maladie @rafalpotempa @koala7659 @ralikio
 
 # Telemetry Operator
 /components/telemetry-operator @a-thaler @lilitgh @suleymanakbas91 @clebs @rakesh-garimella @skhalash @jeremyharisch @chrkl @shorim
