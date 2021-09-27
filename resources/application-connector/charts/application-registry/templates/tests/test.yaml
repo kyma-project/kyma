@@ -31,7 +31,7 @@ spec:
     spec:
       containers:
         - name: tests
-          image: {{ .Values.global.containerRegistry.path }}/application-registry-tests:{{ .Values.global.application_registry_tests.version }}
+          image: {{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.application_registry_tests) }}
           imagePullPolicy: IfNotPresent
           env:
           - name: METADATA_URL

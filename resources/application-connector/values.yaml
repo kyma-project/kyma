@@ -36,45 +36,70 @@ global:
   containerRegistry:
     path: eu.gcr.io/kyma-project
   images:
+    application_broker:
+      name: "application-broker"
+      version: "cddfbc5b"
+    # unused
+    # application_broker_eventing_migration:
+    #   name: "THIS_VALUE_SHOULD_HAVE_BEEN_UPDATED_SO_WHY_I_STILL_SEE_A_PLACEHOLDER_THERE"
+    #   version: "a8a6bca9"
+    application_connectivity_certs_setup_job:
+      name: "application-connectivity-certs-setup-job"
+      version: "PR-11678"
+    application_connectivity_validator:
+      name: "application-connectivity-validator"
+      version: "PR-11558"
+    application_gateway:
+      name: "pplication-gateway"
+      version: "PR-11558"
+    application_operator:
+      name: "application-operator"
+      version: "PR-12147"
+    application_registry:
+      name: "application-registry"
+      version: "PR-11623"
+    central_application_connectivity_validator:
+      name: "central-application-connectivity-validator"
+      version: "PR-11846"
+    central_application_gateway:
+      name: "central-application-gateway"
+      version: "PR-11859"
+    connection_token_handler:
+      name: "connection-token-handler"
+      version: "PR-11558"
+    connector_service:
+      name: "connector-service"
+      version: "1683d7cf"
+    # unused
+    # event_service:
+    #   name: "THIS_VALUE_SHOULD_HAVE_BEEN_UPDATED_SO_WHY_I_STILL_SEE_A_PLACEHOLDER_THERE"
+    #   version: "e6b97e48"
   testImages:
-  application_broker:
-    version: "cddfbc5b"
-  application_broker_eventing_migration:
-    version: "a8a6bca9"
-  application_connectivity_certs_setup_job:
-    version: "PR-11678"
-  application_connectivity_validator:
-    version: "PR-11558"
-  application_operator:
-    version: "PR-12147"
-  application_operator_tests:
-    version: "PR-11558"
-  application_gateway:
-    version: "PR-11558"
-  application_gateway_tests:
-    version: "68baa911"
-  application_gateway_legacy_tests:
-    version: "68baa911"
-  application_registry:
-    version: "PR-11623"
-  application_registry_tests:
-    version: "PR-11558"
-  connection_token_handler:
-    version: "PR-11558"
-  connection_token_handler_tests:
-    version: "9776cb81"
-  connector_service:
-    version: "1683d7cf"
-  connector_service_tests:
-    version: "PR-11939"
-  event_service:
-    version: "e6b97e48"
-  event_service_integration_tests:
-    version: "d6bbc47a"
-  central_application_connectivity_validator:
-    version: "PR-11846"
-  central_application_gateway:
-    version: "PR-11859"
+    application_operator_tests:
+      name: "application-operator-tests"
+      version: "PR-11558"
+    application_gateway_tests:
+      name: "application-gateway-tests"
+      version: "68baa911"
+    application_gateway_legacy_tests:
+      name: "application-gateway-legacy-tests"
+      version: "68baa911"
+    application_registry_tests:
+      name: "application-registry-tests"
+      version: "PR-11558"
+    connection_token_handler_tests:
+      name: "connection-token-handler-tests"
+      version: "9776cb81"
+    connector_service_tests:
+      name: "connector-service-tests"
+      version: "PR-11939"
+    # unused
+    # event_service_integration_tests:
+    #   name: "THIS_VALUE_SHOULD_HAVE_BEEN_UPDATED_SO_WHY_I_STILL_SEE_A_PLACEHOLDER_THERE"
+    #   version: "d6bbc47a"
+    application_connector_tests:
+      name: "application-connector-tests"
+      version: "PR-11939"
 
 application_connectivity_certs_setup_job:
   secrets:
@@ -98,5 +123,5 @@ tests:
     enabled: true
     skipSslVerify: true
     image:
-      version: "PR-11939"
+      # version: "PR-11939"
       pullPolicy: IfNotPresent

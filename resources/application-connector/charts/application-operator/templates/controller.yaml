@@ -58,9 +58,9 @@ spec:
         - "--domainName={{ .Values.global.domainName }}"
         - "--namespace={{ .Values.global.integrationNamespace }}"
         - "--helmDriver={{ .Values.controller.args.helmDriver }}"
-        - "--applicationGatewayImage={{ .Values.global.containerRegistry.path }}/application-gateway:{{ .Values.global.application_gateway.version }}"
-        - "--applicationGatewayTestsImage={{ .Values.global.containerRegistry.path }}/application-gateway-legacy-tests:{{ .Values.global.application_gateway_legacy_tests.version }}"
-        - "--applicationConnectivityValidatorImage={{ .Values.global.containerRegistry.path }}/application-connectivity-validator:{{ .Values.global.application_connectivity_validator.version }}"
+        - "--applicationGatewayImage={{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.application_gateway) }}"
+        - "--applicationGatewayTestsImage={{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.application_gateway_legacy_tests) }}"
+        - "--applicationConnectivityValidatorImage={{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.application_connectivity_validator) }}"
         - "--syncPeriod={{ .Values.controller.args.syncPeriod }}"
         - "--installationTimeout={{ .Values.controller.args.installationTimeout }}"
         - "--gatewayOncePerNamespace={{ .Values.global.disableLegacyConnectivity }}"
@@ -74,7 +74,7 @@ spec:
             value: {{ .Values.global.log.format | quote }}
           - name: APP_LOG_LEVEL
             value: {{ .Values.global.log.level | quote }}
-        image: {{ .Values.global.containerRegistry.path }}/application-operator:{{ .Values.global.application_operator.version }}
+        image: {{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.application_operator) }}
         imagePullPolicy: {{ .Values.controller.image.pullPolicy | quote }}
         resources:
           limits:
