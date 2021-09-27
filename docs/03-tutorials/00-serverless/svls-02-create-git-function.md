@@ -133,7 +133,7 @@ Follows these steps:
 
     - Open your Namespace view. In the left navigation panel, go to **Configuration** > **Secrets** and select the **Create Secret** button.
 
-    - Open the **Advanced** view and enter the secret name and type.
+    - Open the **Advanced** view and enter the Secret name and type.
 
     - Select **Add data entry** and enter these key-value pairs with credentials:
 
