@@ -163,7 +163,7 @@ Follows these steps:
 
 5. In the **Access strategies** section, select the `noop` handler from the drop-down list and leave the default settings with the `GET`, `POST`, `PUT`, `PATCH`, `DELETE`, and `HEAD` methods.
 
-6. Select **Create** to confirm changes. The pop-up box with the form will close.
+6. Select **Create** to confirm changes. The dialog box with the form will close.
 
 7. Check if you can access the Function by selecting the HTTPS link under the **Host** column for the newly created APIRule.
 
