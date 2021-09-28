@@ -281,7 +281,7 @@ kyma:
     useKymaGroups: false
     groups: ""
 virtualservice:
-  enabled: true
+  enabled: false
 grafana:
   datasource:
     derivedFields: |
