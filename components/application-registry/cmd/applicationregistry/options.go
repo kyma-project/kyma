@@ -54,8 +54,8 @@ func parseArgs() *options {
 }
 
 func (o *options) String() string {
-	return fmt.Sprintf("--externalAPIPort=%d --proxyPort=%d --uploadServiceURL=%s --centralGatewayUrlFormat=%s"+
-		"--namespace=%s --requestTimeout=%d  --requestLogging=%t --specRequestTimeout=%d"+
+	return fmt.Sprintf("--externalAPIPort=%d --proxyPort=%d --uploadServiceURL=%s --centralGatewayUrl=%s "+
+		"--namespace=%s --requestTimeout=%d  --requestLogging=%t --specRequestTimeout=%d "+
 		"--rafterRequestTimeout=%d --detailedErrorResponse=%t --insecureAssetDownload=%t --insecureSpecDownload=%t",
 		o.externalAPIPort, o.proxyPort, o.uploadServiceURL, o.centralGatewayUrl,
 		o.namespace, o.requestTimeout, o.requestLogging, o.specRequestTimeout, o.rafterRequestTimeout, o.detailedErrorResponse, o.insecureAssetDownload, o.insecureSpecDownload)
