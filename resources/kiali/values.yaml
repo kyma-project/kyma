@@ -399,7 +399,7 @@ kiali:
     # Custom annotations to be created on the Kiali pod.
     #    ---
       pod_annotations:
-        "sidecar.istio.io/inject": "false"
+        "sidecar.istio.io/inject": "true"
     #
     # Custom labels to be created on the Kiali pod.
     #    ---
