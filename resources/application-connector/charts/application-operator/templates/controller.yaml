@@ -59,7 +59,7 @@ spec:
         - "--namespace={{ .Values.global.integrationNamespace }}"
         - "--helmDriver={{ .Values.controller.args.helmDriver }}"
         - "--applicationGatewayImage={{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.application_gateway) }}"
-        - "--applicationGatewayTestsImage={{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.application_gateway_legacy_tests) }}"
+        - "--applicationGatewayTestsImage={{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.testImages.application_gateway_legacy_tests) }}"
         - "--applicationConnectivityValidatorImage={{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.application_connectivity_validator) }}"
         - "--syncPeriod={{ .Values.controller.args.syncPeriod }}"
         - "--installationTimeout={{ .Values.controller.args.installationTimeout }}"
