@@ -171,11 +171,8 @@ spec:
                   fieldPath: status.hostIP
             {{- end }}
             {{- end }}
-            {{- $issuer := include "hydra.config.urls.issuer" . -}}
-            {{- if $issuer }}
             - name: URLS_SELF_ISSUER
-              value: {{ $issuer | quote }}
-            {{- end }}
+              value: {{ .Values.global.domainName | quote }}
             - name: DSN
               valueFrom:
                 secretKeyRef:
