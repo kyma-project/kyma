@@ -10,6 +10,7 @@ cleanup() {
     fi
 }
 
+
 # Retries a command on failure.
 # $1 - the max number of attempts
 # $2... - the command to run
