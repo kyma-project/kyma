@@ -50,7 +50,7 @@ global:
       name: "application-connectivity-validator"
       version: "PR-11558"
     application_gateway:
-      name: "pplication-gateway"
+      name: "application-gateway"
       version: "PR-11558"
     application_operator:
       name: "application-operator"
