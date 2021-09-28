@@ -38,6 +38,9 @@ cluster:
 
 --> Consumers
 * There are two types of consumers i.e. Push-based and Pull-based consumers.
+  - Pull-based consumers only support `AckExplicit`, meaning they have to return a ACK.
+  - Push-based consumers support multiple ACK models like `ACKNone`, `AckAll`. ([More Info](https://docs.nats.io/jetstream/concepts/consumers#ackpolicy))
+* Do we support ACKs for consumers in Kyma eventing?
 
 ## Extra Info
 - Streams consume normal NATS subjects, any message found on those subjects will be delivered to the defined storage system.
