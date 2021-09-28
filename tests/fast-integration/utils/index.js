@@ -1308,7 +1308,7 @@ async function getResponse(url, retries) {
   });
 
   let response = await axios.get(url, {
-      timeout: 5000,
+      timeout: 15000,
   });
   return response;
 }
