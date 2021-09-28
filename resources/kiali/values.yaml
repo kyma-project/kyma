@@ -3,9 +3,6 @@ fullnameOverride: "kiali"
 
 tests:
   enabled: true
-  image:
-    name: eu.gcr.io/kyma-project/tpi/k8s-tools
-    version: 20210922-530cfc39
   labels:
     integration: true
     after-upgrade: true
@@ -18,6 +15,19 @@ global:
       namespace: kyma-system
   containerRegistry:
     path: eu.gcr.io/kyma-project
+  images:
+    kiali:
+      name: kiali
+      version: 1.38.1-e0da5a68
+      directory: tpi
+    oauth2_proxy:
+      name: oauth2-proxy
+      version: 7.1.3-4c48514d
+      directory: tpi
+    k8s_tools:
+      name: k8s-tools
+      version: 20210922-530cfc39
+      directory: tpi
   kymaRuntime:
     adminGroup: runtimeAdmin
     operatorGroup: runtimeOperator
@@ -51,8 +61,6 @@ authProxy:
     privileged: false
     runAsNonRoot: true
   image:
-    repository: eu.gcr.io/kyma-project/tpi/oauth2-proxy
-    tag: 7.1.3-4c48514d
     pullPolicy: IfNotPresent
   resources:
     limits:
@@ -289,41 +297,6 @@ kiali:
         api_version: "autoscaling/v2beta2"
         spec: {}
     #
-    # Determines which Kiali image to download and install.
-    # If you set this to a specific name (i.e. you do not leave it as the default empty string),
-    # you must make sure that image is supported by the operator.
-    # If empty, the operator will use a known supported image name based on which "version" was defined.
-    # Note that, as a security measure, a cluster admin may have configured the Kiali operator to
-    # ignore this setting. A cluster admin may do this to ensure the Kiali operator only installs
-    # a single, specific Kiali version, thus this setting may have no effect depending on how the
-    # operator itself was configured.
-    #    ---
-      image_name: "eu.gcr.io/kyma-project/tpi/kiali"
-    #
-    # The Kubernetes pull policy for the Kiali deployment.
-    # This is overridden to be "Always" if image_version is set to "latest".
-    #    ---
-    #    image_pull_policy: "IfNotPresent"
-    #
-    # The names of the secrets to be used when container images are to be pulled.
-    #    ---
-    #    image_pull_secrets: []
-    #
-    # Determines which version of Kiali to install.
-    # Choose "lastrelease" to use the last Kiali release.
-    # Choose "latest" to use the latest image (which may or may not be a released version of Kiali).
-    # Choose "operator_version" to use the image whose version is the same as the operator version.
-    # Otherwise, you can set this to any valid Kiali version (such as "v1.0").
-    # Note that if this is set to "latest" then the image_pull_policy will be "Always".
-    # If you set this to a specific version (i.e. you do not leave it as the default empty string),
-    # you must make sure that image is supported by the operator.
-    # If empty, the operator will use a known supported image version based on which "version" was defined.
-    # Note that, as a security measure, a cluster admin may have configured the Kiali operator to
-    # ignore this setting. A cluster admin may do this to ensure the Kiali operator only installs
-    # a single, specific Kiali version, thus this setting may have no effect depending on how the
-    # operator itself was configured.
-    #    ---
-      image_version: "1.38.1-e0da5a68"
     #
     # Determines if the Kiali endpoint should be exposed externally.
     # If true, an Ingress will be created if on Kubernetes or a Route if on OpenShift.

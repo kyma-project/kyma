@@ -34,7 +34,7 @@ spec:
           configMap:
             name: {{ template "kiali-server.fullname" . }}-auth-proxy
       containers:
-      - image: "{{ .Values.authProxy.image.repository }}:{{ .Values.authProxy.image.tag }}"
+      - image: {{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.oauth2_proxy) }}
         imagePullPolicy: {{ .Values.authProxy.image.pullPolicy }}
         name: auth-proxy
         args:

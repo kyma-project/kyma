@@ -50,7 +50,7 @@ spec:
       {{- end }}
       {{- end }}
       containers:
-      - image: "{{ .Values.kiali.spec.deployment.image_name }}:{{ .Values.kiali.spec.deployment.image_version }}"
+      - image: {{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.kiali) }}
         imagePullPolicy: {{ .Values.kiali.spec.deployment.image_pull_policy | default "Always" }}
         name: {{ include "kiali-server.fullname" . }}
         command:
