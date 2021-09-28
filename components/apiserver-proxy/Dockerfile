@@ -38,3 +38,9 @@ COPY --from=builder /app /app
 #
 
 ENTRYPOINT ["/app/app"]
+
+#
+# Counter 0
+#
+
+
