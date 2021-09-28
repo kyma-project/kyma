@@ -78,7 +78,7 @@ The operation was successful if the returned number of **readyReplicas** is `1`.
 3. Choose the **Advanced** view and provide the following parameters:
     - **Name**: `orders-service`
     - **Labels**: add labels `app` and `example` and set their values to `orders-service`
-    - **Containers**: enter Docker image `eu.gcr.io/kyma-project/develop/orders-service:e8175c63`
+    - **Containers**: enter Docker image `eu.gcr.io/kyma-project/develop/orders-service:68a58069`
 
     _Optionally_, to save resources, modify these parameters:
     - **Memory requests**: `10Mi`
