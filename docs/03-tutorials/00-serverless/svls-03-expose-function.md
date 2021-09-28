@@ -167,7 +167,5 @@ Follows these steps:
 
 7. Check if you can access the Function by selecting the HTTPS link under the **Host** column for the newly created APIRule.
 
-    >**CAUTION:** If you have a Minikube cluster, you must first add its IP address mapped to the hostname of the exposed Kubernetes Service to the `hosts` file on your machine.
-<!-- Minikube?? -->
     </details>
 </div>
