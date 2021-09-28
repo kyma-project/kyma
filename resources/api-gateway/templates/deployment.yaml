@@ -27,7 +27,7 @@ spec:
     spec:
       containers:
         - name: {{ .Chart.Name }}
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.api_gateway_controller) }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           command:
             - /manager
