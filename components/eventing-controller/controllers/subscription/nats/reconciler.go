@@ -2,9 +2,15 @@ package nats
 
 import (
 	"context"
+	"fmt"
 	"net/url"
 	"os"
 	"reflect"
+	"strings"
+
+	k8serrors "k8s.io/apimachinery/pkg/api/errors"
+
+	k8stypes "k8s.io/apimachinery/pkg/types"
 
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
@@ -21,6 +27,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/source"
 
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
+	events "github.com/kyma-project/kyma/components/eventing-controller/controllers/subscription"
 	"github.com/kyma-project/kyma/components/eventing-controller/logger"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/application"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
@@ -28,6 +35,8 @@ import (
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/eventtype"
 	"github.com/kyma-project/kyma/components/eventing-controller/utils"
 )
+
+type sinkValidator func(ctx context.Context, r *Reconciler, subscription *eventingv1alpha1.Subscription) error
 
 // Reconciler reconciles a Subscription object
 type Reconciler struct {
@@ -38,6 +47,7 @@ type Reconciler struct {
 	logger           *logger.Logger
 	recorder         record.EventRecorder
 	eventTypeCleaner eventtype.Cleaner
+	sinkValidator
 }
 
 var (
@@ -49,6 +59,7 @@ const (
 	NATSFirstInstanceName = "eventing-nats-1" // NATSFirstInstanceName the name of first instance of NATS cluster
 	NATSNamespace         = "kyma-system"     // NATSNamespace namespace of NATS cluster
 	reconcilerName        = "nats-subscription-reconciler"
+	clusterLocalURLSuffix = "svc.cluster.local"
 )
 
 func NewReconciler(ctx context.Context, client client.Client, applicationLister *application.Lister, cache cache.Cache, logger *logger.Logger, recorder record.EventRecorder, cfg env.NatsConfig, subsCfg env.DefaultSubscriptionConfig) *Reconciler {
@@ -66,6 +77,7 @@ func NewReconciler(ctx context.Context, client client.Client, applicationLister 
 		logger:           logger,
 		recorder:         recorder,
 		eventTypeCleaner: eventtype.NewCleaner(cfg.EventTypePrefix, applicationLister, logger),
+		sinkValidator:    DefaultSinkValidator,
 	}
 }
 
@@ -159,6 +171,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 			// remove our finalizer from the list and update it.
 			desiredSubscription.ObjectMeta.Finalizers = utils.RemoveString(desiredSubscription.ObjectMeta.Finalizers, Finalizer)
 			if err := r.Client.Update(ctx, desiredSubscription); err != nil {
+				events.EventWarn(r.recorder, desiredSubscription, events.ReasonUpdateFailed, "Update Subscription failed %s", desiredSubscription.Name)
 				log.Errorw("remove finalizer from subscription failed", "error", err)
 				return ctrl.Result{}, err
 			}
@@ -166,9 +179,10 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 			return ctrl.Result{}, nil
 		}
 	}
+
 	// Check for valid sink
-	if err := r.assertSinkValidity(actualSubscription.Spec.Sink); err != nil {
-		log.Errorw("parse sink URL failed", "error", err)
+	if err := r.sinkValidator(ctx, r, desiredSubscription); err != nil {
+		log.Errorw("sink URL validation failed", "error", err)
 		if err := r.syncSubscriptionStatus(ctx, actualSubscription, false, err.Error()); err != nil {
 			return ctrl.Result{}, err
 		}
@@ -255,15 +269,59 @@ func (r *Reconciler) syncSubscriptionStatus(ctx context.Context, sub *eventingv1
 	if !reflect.DeepEqual(sub.Status, desiredSubscription.Status) {
 		err := r.Client.Status().Update(ctx, desiredSubscription, &client.UpdateOptions{})
 		if err != nil {
+			events.EventWarn(r.recorder, desiredSubscription, events.ReasonUpdateFailed, "Update Subscription status failed %s", desiredSubscription.Name)
 			return errors.Wrapf(err, "update subscription status failed")
 		}
+		events.EventNormal(r.recorder, desiredSubscription, events.ReasonUpdate, "Update Subscription status succeeded %s", desiredSubscription.Name)
 	}
 	return nil
 }
 
-func (r *Reconciler) assertSinkValidity(sink string) error {
-	_, err := url.ParseRequestURI(sink)
-	return err
+func DefaultSinkValidator(ctx context.Context, r *Reconciler, subscription *eventingv1alpha1.Subscription) error {
+	if !isValidScheme(subscription.Spec.Sink) {
+		events.EventWarn(r.recorder, subscription, events.ReasonValidationFailed, "Sink URL scheme should be HTTP or HTTPS: %s", subscription.Spec.Sink)
+		return fmt.Errorf("sink URL scheme should be 'http' or 'https'")
+	}
+
+	sURL, err := url.ParseRequestURI(subscription.Spec.Sink)
+	if err != nil {
+		events.EventWarn(r.recorder, subscription, events.ReasonValidationFailed, "Not able to parse Sink URL with error: %s", err.Error())
+		return fmt.Errorf("not able to parse sink url with error: %s", err.Error())
+	}
+
+	// Validate sink URL is a cluster local URL
+	if !strings.HasSuffix(sURL.Host, clusterLocalURLSuffix) {
+		events.EventWarn(r.recorder, subscription, events.ReasonValidationFailed, "Sink does not contain suffix: %s", clusterLocalURLSuffix)
+		return fmt.Errorf("sink does not contain suffix: %s in the URL", clusterLocalURLSuffix)
+	}
+
+	// we expected a sink in the format "service.namespace.svc.cluster.local"
+	subDomains := strings.Split(sURL.Host, ".")
+	if len(subDomains) != 5 {
+		events.EventWarn(r.recorder, subscription, events.ReasonValidationFailed, "Sink should contain 5 sub-domains: %s", sURL.Host)
+		return fmt.Errorf("sink should contain 5 sub-domains: %s", sURL.Host)
+	}
+
+	// Assumption: Subscription CR and Subscriber should be deployed in the same namespace
+	svcNs := subDomains[1]
+	if subscription.Namespace != svcNs {
+		events.EventWarn(r.recorder, subscription, events.ReasonValidationFailed, "Namespace of subscription: %s and the subscriber: %s are different", subscription.Namespace, svcNs)
+		return fmt.Errorf("namespace of subscription: %s and the namespace of subscriber: %s are different", subscription.Namespace, svcNs)
+	}
+
+	// Validate svc is a cluster-local one
+	svcName := subDomains[0]
+	if _, err := r.getClusterLocalService(ctx, svcNs, svcName); err != nil {
+		if k8serrors.IsNotFound(err) {
+			events.EventWarn(r.recorder, subscription, events.ReasonValidationFailed, "Sink does not correspond to a valid cluster local svc")
+			return fmt.Errorf("sink is not valid cluster local svc, failed with error: %w", err)
+		}
+
+		events.EventWarn(r.recorder, subscription, events.ReasonValidationFailed, "Fetch cluster-local svc failed namespace %s name %s", svcNs, svcName)
+		return fmt.Errorf("fetch cluster-local svc failed namespace:%s name:%s with error: %w", svcNs, svcName, err)
+	}
+
+	return nil
 }
 
 func (r *Reconciler) syncInvalidSubscriptions(ctx context.Context) (ctrl.Result, error) {
@@ -283,6 +341,20 @@ func (r *Reconciler) syncInvalidSubscriptions(ctx context.Context) (ctrl.Result,
 		}
 	}
 	return ctrl.Result{}, nil
+}
+
+func (r *Reconciler) getClusterLocalService(ctx context.Context, svcNs, svcName string) (*corev1.Service, error) {
+	svcLookupKey := k8stypes.NamespacedName{Name: svcName, Namespace: svcNs}
+	svc := &corev1.Service{}
+	if err := r.Client.Get(ctx, svcLookupKey, svc); err != nil {
+		return nil, err
+	}
+	return svc, nil
+}
+
+// isValidScheme returns true if the sink scheme is http or https, otherwise returns false.
+func isValidScheme(sink string) bool {
+	return strings.HasPrefix(sink, "http://") || strings.HasPrefix(sink, "https://")
 }
 
 func (r *Reconciler) namedLogger() *zap.SugaredLogger {

@@ -29,6 +29,7 @@ import (
 
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 	recerrors "github.com/kyma-project/kyma/components/eventing-controller/controllers/errors"
+	events "github.com/kyma-project/kyma/components/eventing-controller/controllers/subscription"
 	"github.com/kyma-project/kyma/components/eventing-controller/logger"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/application"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/constants"
@@ -322,7 +323,7 @@ func (r *Reconciler) syncAPIRule(ctx context.Context, subscription *eventingv1al
 
 	sURL, err := url.ParseRequestURI(subscription.Spec.Sink)
 	if err != nil {
-		r.eventWarn(subscription, reasonValidationFailed, "Parse sink URI failed %s", subscription.Spec.Sink)
+		events.EventWarn(r.recorder, subscription, events.ReasonValidationFailed, "Parse sink URI failed %s", subscription.Spec.Sink)
 		return nil, recerrors.NewSkippable(errors.Wrapf(err, "parse sink URI failed"))
 	}
 
@@ -336,34 +337,34 @@ func (r *Reconciler) syncAPIRule(ctx context.Context, subscription *eventingv1al
 
 func (r *Reconciler) isSinkURLValid(ctx context.Context, subscription *eventingv1alpha1.Subscription) error {
 	if !isValidScheme(subscription.Spec.Sink) {
-		r.eventWarn(subscription, reasonValidationFailed, "Sink URL scheme should be HTTP or HTTPS %s", subscription.Spec.Sink)
+		events.EventWarn(r.recorder, subscription, events.ReasonValidationFailed, "Sink URL scheme should be HTTP or HTTPS %s", subscription.Spec.Sink)
 		return recerrors.NewSkippable(fmt.Errorf("sink URL scheme should be 'http' or 'https'"))
 	}
 
 	sURL, err := url.ParseRequestURI(subscription.Spec.Sink)
 	if err != nil {
-		r.eventWarn(subscription, reasonValidationFailed, "Sink URL is not valid %s", err.Error())
+		events.EventWarn(r.recorder, subscription, events.ReasonValidationFailed, "Sink URL is not valid %s", err.Error())
 		return recerrors.NewSkippable(err)
 	}
 
 	// Validate sink URL is a cluster local URL
 	trimmedHost := strings.Split(sURL.Host, ":")[0]
 	if !strings.HasSuffix(trimmedHost, clusterLocalURLSuffix) {
-		r.eventWarn(subscription, reasonValidationFailed, "Sink does not contain suffix %s", clusterLocalURLSuffix)
+		events.EventWarn(r.recorder, subscription, events.ReasonValidationFailed, "Sink does not contain suffix %s", clusterLocalURLSuffix)
 		return recerrors.NewSkippable(fmt.Errorf("sink does not contain suffix: %s in the URL", clusterLocalURLSuffix))
 	}
 
 	// we expected a sink in the format "service.namespace.svc.cluster.local"
 	subDomains := strings.Split(trimmedHost, ".")
 	if len(subDomains) != 5 {
-		r.eventWarn(subscription, reasonValidationFailed, "Sink should contain 5 sub-domains %s", trimmedHost)
+		events.EventWarn(r.recorder, subscription, events.ReasonValidationFailed, "Sink should contain 5 sub-domains %s", trimmedHost)
 		return recerrors.NewSkippable(fmt.Errorf("sink should contain 5 sub-domains: %s", trimmedHost))
 	}
 
 	// Assumption: Subscription CR and Subscriber should be deployed in the same namespace
 	svcNs := subDomains[1]
 	if subscription.Namespace != svcNs {
-		r.eventWarn(subscription, reasonValidationFailed, "Namespace of subscription %s and the subscriber %s are different", subscription.Namespace, svcNs)
+		events.EventWarn(r.recorder, subscription, events.ReasonValidationFailed, "Namespace of subscription %s and the subscriber %s are different", subscription.Namespace, svcNs)
 		return recerrors.NewSkippable(fmt.Errorf("namespace of subscription: %s and the namespace of subscriber: %s are different", subscription.Namespace, svcNs))
 	}
 
@@ -371,11 +372,11 @@ func (r *Reconciler) isSinkURLValid(ctx context.Context, subscription *eventingv
 	svcName := subDomains[0]
 	if _, err := r.getClusterLocalService(ctx, svcNs, svcName); err != nil {
 		if k8serrors.IsNotFound(err) {
-			r.eventWarn(subscription, reasonValidationFailed, "Sink does not correspond to a valid cluster local svc")
+			events.EventWarn(r.recorder, subscription, events.ReasonValidationFailed, "Sink does not correspond to a valid cluster local svc")
 			return recerrors.NewSkippable(errors.Wrapf(err, "sink is not valid cluster local svc"))
 		}
 
-		r.eventWarn(subscription, reasonValidationFailed, "Fetch cluster-local svc failed namespace %s name %s", svcNs, svcName)
+		events.EventWarn(r.recorder, subscription, events.ReasonValidationFailed, "Fetch cluster-local svc failed namespace %s name %s", svcNs, svcName)
 		return errors.Wrapf(err, "fetch cluster-local svc failed namespace:%s name:%s", svcNs, svcName)
 	}
 
@@ -435,11 +436,11 @@ func (r *Reconciler) createOrUpdateAPIRule(ctx context.Context, subscription *ev
 	// no APIRule to reuse, create a new one
 	if reusableAPIRule == nil {
 		if err := r.Client.Create(ctx, desiredAPIRule, &client.CreateOptions{}); err != nil {
-			r.eventWarn(subscription, reasonCreateFailed, "Create APIRule failed %s", desiredAPIRule.Name)
+			events.EventWarn(r.recorder, subscription, events.ReasonCreateFailed, "Create APIRule failed %s", desiredAPIRule.Name)
 			return nil, errors.Wrap(err, "create APIRule failed")
 		}
 
-		r.eventNormal(subscription, reasonCreate, "Create APIRule succeeded %s", desiredAPIRule.Name)
+		events.EventNormal(r.recorder, subscription, events.ReasonCreate, "Create APIRule succeeded %s", desiredAPIRule.Name)
 		return desiredAPIRule, nil
 	}
 	logger.Debugw("reuse APIRule", "namespace", svcNs, "name", reusableAPIRule.Name, "service", svcName)
@@ -450,10 +451,10 @@ func (r *Reconciler) createOrUpdateAPIRule(ctx context.Context, subscription *ev
 	}
 	err = r.Client.Update(ctx, desiredAPIRule, &client.UpdateOptions{})
 	if err != nil {
-		r.eventWarn(subscription, reasonUpdateFailed, "Update APIRule failed %s", desiredAPIRule.Name)
+		events.EventWarn(r.recorder, subscription, events.ReasonUpdateFailed, "Update APIRule failed %s", desiredAPIRule.Name)
 		return nil, errors.Wrap(err, "update APIRule failed")
 	}
-	r.eventNormal(subscription, reasonUpdate, "Update APIRule succeeded %s", desiredAPIRule.Name)
+	events.EventNormal(r.recorder, subscription, events.ReasonUpdate, "Update APIRule succeeded %s", desiredAPIRule.Name)
 
 	return desiredAPIRule, nil
 }
