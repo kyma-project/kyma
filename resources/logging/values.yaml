@@ -33,7 +33,7 @@ global:
       directory: tpi
     logui:
       name: log-ui
-      version: "a452b781"
+      version: "c60a3c68"
     loki:
       name: loki
       version: 2.2.1-88dec1f7
