@@ -23,7 +23,7 @@ spec:
             optional: true
       containers:
       - name: generate-certs
-        image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.xip_patch.dir }}xip-patch:{{ .Values.global.xip_patch.version }}
+        image: {{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.xip_patch) }}
         resources:
           limits:
             memory: 128Mi

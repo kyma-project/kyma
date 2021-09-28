@@ -35,7 +35,7 @@ spec:
       {{ end }}
       containers:
       - name: tests
-        image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.apiserver_proxy_integration_tests.dir }}apiserver-proxy-integration-tests:{{ .Values.global.apiserver_proxy_integration_tests.version }}
+        image: {{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.testImages.apiserver_proxy_integration_tests) }}
         imagePullPolicy: Always
         command: ["/bin/bash"]
         args: ["-c", "sleep 10; ./test.sh; exit_code=$?; curl -XPOST http://127.0.0.1:15020/quitquitquit; sleep 5; exit $exit_code;"]

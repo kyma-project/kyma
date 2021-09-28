@@ -36,7 +36,7 @@ spec:
             - "dex.{{ .Values.global.domainName }}"
       {{- end }}
       containers:
-      - image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.apiserver_proxy.dir }}apiserver-proxy:{{ .Values.global.apiserver_proxy.version }}
+      - image: {{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.apiserver_proxy) }}
         name: auth-proxy
         {{- if not .Values.global.isLocalEnv }}
         resources:

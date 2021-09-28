@@ -44,17 +44,19 @@ tests:
     runAsNonRoot: true
     runAsGroup: 65534
 global:
-  apiserver_proxy:
-    dir:
-    version: "6457fd19"
-  apiserver_proxy_integration_tests:
-    dir:
-    version: "fe9f5885"
   istio:
     gateway:
       name: kyma-gateway
   containerRegistry:
     path: eu.gcr.io/kyma-project
-  xip_patch:
-    dir:
-    version: fe9f5885
+  images:
+    apiserver_proxy:
+      name: "apiserver-proxy"
+      version: "6457fd19"
+    xip_patch:
+      name: "xip-patch"
+      version: fe9f5885
+  testImages:
+    apiserver_proxy_integration_tests:
+      name: "apiserver-proxy-integration-tests"
+      version: "fe9f5885"
