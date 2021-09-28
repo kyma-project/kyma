@@ -1,8 +1,8 @@
 jobs:
   crdsInConfigMap: 20
-  image:
-    repository: eu.gcr.io/kyma-project/tpi/k8s-tools
-    tag: "20210922-530cfc39"
+  # image:
+  #   repository: eu.gcr.io/kyma-project/tpi/k8s-tools
+  #   tag: "20210922-530cfc39"
 
 global:
   installCRDs: false
@@ -12,12 +12,30 @@ global:
   priorityClassName: ""
   priorityClassValue: 2000000
 
-containerRegistry:
-  path: eu.gcr.io/kyma-project
+  containerRegistry:
+    path: eu.gcr.io/kyma-project
+  images:
+    k8s_tools:
+      name: "k8s-tools"
+      version: "20210922-530cfc39"
+      directory: "tpi"
+    # unused?
+    # api_gateway_controller:
+    #   name: "api-gateway-controller"
+    #   version: "ac45e9ce"
+    #   directory: "incubator"
+    podpreset_webhook:
+      name: "podpreset-webhook"
+      version: "a1343c0c"
+      directory: "incubator"
+    podpreset_controller:
+      name: "podpreset-controller"
+      version: "a1343c0c"
+      directory: "incubator"
 
 image:
-  repository: eu.gcr.io/kyma-project/incubator/api-gateway-controller
-  tag: "ac45e9ce"
+  # repository: eu.gcr.io/kyma-project/incubator/api-gateway-controller
+  # tag: "ac45e9ce"
   # Image pull policy
   pullPolicy: IfNotPresent
 
