@@ -1,4 +1,4 @@
-# NATs - JetStream
+# NATS - JetStream
 
 ## Check deployment (nats operator vs helm charts)
 * NATS Operator officially discourages to use nats-operator for new deployments. Also support for JetStreams by nats-operator is questionable.
@@ -24,6 +24,25 @@ cluster:
   replicas: 3
   noAdvertise: false
 ```
+4. Install NACK using helm:
+```
+cd <NATS_HELM_CHART_DIR>
+helm install nats . -n <NAMESPACE>
+```
+
+## Configuration of streams using [NACK](https://github.com/nats-io/nack#getting-started)
+
+* NACK allows to manage JetStream streams using k8s CRDs. 
+* The CRDs includes for defining Streams and Consumers.
+* Point to Ponder: If we use NACK then in eventing-controller, do we need to create stream and consumer YAMLs instead of using NATS Go client?
+
+### -> TO deploy NACK using Helm
+1. Download latest nack helm chart from [here](https://github.com/nats-io/k8s/releases/).
+2. Install NACK using helm:
+```
+cd <NACK_HELM_CHART_DIR>
+helm install nack . --set=jetstream.nats.url=nats://nats:4222 -n <NAMESPACE>
+```
 
 ## Current NATS workload works using Jetstream
 --> Streams
@@ -33,14 +52,15 @@ cluster:
 * Two storage types supported: Memory-based or File-based.
 * Encryption at Rest supported for security, but can effect on performance.
 
---> Producers
+### --> Producers
 * If you send a Request to the subject the JetStream server will reply with an acknowledgement that it was stored.
 
---> Consumers
+### --> Consumers
 * There are two types of consumers i.e. Push-based and Pull-based consumers.
   - Pull-based consumers only support `AckExplicit`, meaning they have to return a ACK.
   - Push-based consumers support multiple ACK models like `ACKNone`, `AckAll`. ([More Info](https://docs.nats.io/jetstream/concepts/consumers#ackpolicy))
 * Do we support ACKs for consumers in Kyma eventing?
+* Consumers can define filters for subjects.
 
 ## Extra Info
 - Streams consume normal NATS subjects, any message found on those subjects will be delivered to the defined storage system.
