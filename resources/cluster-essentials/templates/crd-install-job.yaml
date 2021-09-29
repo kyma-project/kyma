@@ -25,7 +25,7 @@ spec:
       restartPolicy: OnFailure
       containers:
       - name: {{ .Release.Name }}-install-crds
-        image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.testImages.k8s_tools) }}"
+        image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.k8s_tools) }}"
         command:
         - /bin/sh
         - -c
