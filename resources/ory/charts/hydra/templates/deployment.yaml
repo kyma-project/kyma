@@ -172,7 +172,7 @@ spec:
             {{- end }}
             {{- end }}
             - name: URLS_SELF_ISSUER
-              value: {{ .Values.global.domainName | quote }}
+              value: https://oauth2.{{ .Values.global.domainName }}/
             - name: DSN
               valueFrom:
                 secretKeyRef:
