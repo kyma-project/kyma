@@ -17,7 +17,7 @@ image:
   # tag is the container tag of the eventing-controller image
   tag: "PR-12119"
   # pullPolicy is the pullPolicy for the eventing-controller image
-  pullPolicy: "IfNotPresent"
+  pullPolicy: "Always"
 
 podSecurityContext:
 

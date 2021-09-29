@@ -88,6 +88,36 @@ func newCloudeventClient(config env.NatsConfig) (cev2.Client, error) {
 	return cev2.NewClientHTTP(cev2.WithRoundTripper(transport))
 }
 
+// SyncDefaultJsStream creates a default JetStream stream for subjects
+func (n *Nats) SyncDefaultJsStream() (bool, error) {
+	// Create JetStream Context
+	js, err := n.connection.JetStream(nats.PublishAsyncMaxPending(256))
+	if err != nil {
+		n.logger.WithContext().Errorw("create NATS JetStream context failed", "error", err)
+		return false, err
+	}
+
+	streamName := "DEFAULT"
+	subjectPrefix := "sap.kyma.custom"
+
+	streamInfo, err := js.StreamInfo(streamName)
+	if err == nil {
+		n.logger.WithContext().Infow("Found default stream: " + streamInfo.Config.Name)
+	} else {
+		// Create a Stream
+		_, err = js.AddStream(&nats.StreamConfig{
+			Name:     streamName,
+			Subjects: []string{subjectPrefix + ".>"},
+		})
+		if err != nil {
+			n.logger.WithContext().Errorw("create NATS stream failed", "error", err)
+		}
+		n.logger.WithContext().Infow("Created stream: " + streamName)
+	}
+
+	return false, nil
+}
+
 // SyncSubscription synchronizes the given Kyma subscription to NATS subscription.
 // note: the returned bool should be ignored now. It should act as a marker for changed subscription status.
 func (n *Nats) SyncSubscription(sub *eventingv1alpha1.Subscription, cleaner eventtype.Cleaner, _ ...interface{}) (bool, error) {
@@ -102,6 +132,12 @@ func (n *Nats) SyncSubscription(sub *eventingv1alpha1.Subscription, cleaner even
 
 	// Format logger
 	log := utils.LoggerWithSubscription(n.namedLogger(), sub)
+
+	// Sync default Jetstream stream
+	_, err := n.SyncDefaultJsStream()
+	if err != nil {
+		return false, err
+	}
 
 	subsConfig := eventingv1alpha1.MergeSubsConfigs(sub.Spec.Config, &n.defaultSubsConfig)
 	// Create subscriptions in NATS
@@ -121,16 +157,34 @@ func (n *Nats) SyncSubscription(sub *eventingv1alpha1.Subscription, cleaner even
 			}
 		}
 
-		for i := 0; i < subsConfig.MaxInFlightMessages; i++ {
-			// queueGroupName must be unique for each subscription and subject
-			queueGroupName := createKeyPrefix(sub) + string(types.Separator) + subject
-			natsSub, subscribeErr := n.connection.QueueSubscribe(subject, queueGroupName, callback)
-			if subscribeErr != nil {
-				log.Errorw("create NATS subscription failed", "error", err)
-				return false, subscribeErr
-			}
-			n.subscriptions[createKey(sub, subject, i)] = natsSub
+		// Create JetStream Context
+		jsContext, err := n.connection.JetStream(nats.PublishAsyncMaxPending(256))
+		if err != nil {
+			n.logger.WithContext().Errorw("create NATS JetStream context failed", "error", err)
+			return false, err
 		}
+
+		// JetStream based subscriber
+		natsSub, subscribeErr := jsContext.Subscribe(subject, callback)
+		if subscribeErr != nil {
+			log.Errorw("create NATS subscription failed", "error", err)
+			return false, subscribeErr
+		}
+		n.subscriptions[createKey(sub, subject, 0)] = natsSub
+		log.Info("Created JetStream based subscriber")
+
+		// For jetStream alternative is consumer groups??????
+		//for i := 0; i < subsConfig.MaxInFlightMessages; i++ {
+		//	// queueGroupName must be unique for each subscription and subject
+		//	// queueGroupName := createKeyPrefix(sub) + string(types.Separator) + subject
+		//	natsSub, subscribeErr := jsContext.Subscribe(subject, callback)
+		//	//  natsSub, subscribeErr := n.connection.QueueSubscribe(subject, queueGroupName, callback)
+		//	if subscribeErr != nil {
+		//		log.Errorw("create NATS subscription failed", "error", err)
+		//		return false, subscribeErr
+		//	}
+		//	n.subscriptions[createKey(sub, subject, i)] = natsSub
+		//}
 	}
 	sub.Status.Config = subsConfig
 
