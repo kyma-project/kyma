@@ -15,8 +15,7 @@ Application Connector:
 - Registers APIs and event catalogs of the connected external solution.
 - Delivers events from the connected external solution to Eventing.
 - Proxies calls sent from Kyma to external APIs registered by the connected external solution.
-- Allows to map an Application to a Kyma Namespace and use its registered APIs and event catalogs in the context of that Namespace.
-<!-- TODO 1: Is the above still true -->
+- Allows to map an Application to a Kyma Namespace and use event catalogs in the context of that Namespace.
 
 All of the AC components scale independently, which allows to adjust it to fit the needs of the implementation built using Kyma.
 

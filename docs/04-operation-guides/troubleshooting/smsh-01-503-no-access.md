@@ -44,11 +44,11 @@ If this solution doesn't work, you need to change the image of the Istio Ingress
     kubectl logs -n istio-system -l app=istio-ingressgateway -c ingress-sds
     ```
 
-5. In case of certificate-related issues, make sure `kyma-gateway-certs` and `app-connector-certs` Secrets are available in the `istio-system` Namespace and that they contain proper data. Run:
+5. In case of certificate-related issues, make sure `kyma-gateway-certs` and `kyma-gateway-certs-cacert` Secrets are available in the `istio-system` Namespace and that they contain proper data. Run:
 
     ```bash
     kubectl get secrets -n istio-system kyma-gateway-certs -oyaml
-    kubectl get secrets -n istio-system app-connector-certs -oyaml
+    kubectl get secrets -n istio-system kyma-gateway-certs-cacert -oyaml
     ```
 
 <!-- Update step 6 once the long-lasting certificate is implemented. Probably, only the details about Gardener will be needed. -->

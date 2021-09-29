@@ -2,8 +2,8 @@
 title: Create a new Application
 ---
 
-<!-- TODO 3: modify to cover central gateway scenario-->
-Application Operator listens for the creation of Application custom resources. It provisions and de-provisions the necessary deployments for every created Application.
+Application Operator listens for the creation of Application custom resources. It manages Kubernetes resources necessary for every Application to run.
+To communicate with an outside world the Application use components ```central-application-connectivity-validator``` and ```central-application-gateway``` deployed in ```kyma-system``` Namespace.
 
 >**NOTE:** An Application represents a single connected external solution.
 
