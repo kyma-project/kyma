@@ -13,7 +13,7 @@ You can access every exposed Application using the assigned path. For example, t
 
 ## Central Application Connectivity Validator
 
-Application Connectivity Validator verifies the subject of the client certificate. 
+Central Application Connectivity Validator verifies the subject of the client certificate. 
 It is deployed for all Applications in ```kyma-system``` namespace, and proxies requests to Application Registry and Event Publisher.
 
 ## Connector Service
