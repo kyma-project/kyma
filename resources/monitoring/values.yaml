@@ -2,6 +2,22 @@ global:
   domainName: "kyma.example.com"
   containerRegistry:
     path: eu.gcr.io/kyma-project
+  images:
+    prometheus_operator:
+      name: quay.io/prometheus-operator/prometheus-operator
+      version: v0.43.2
+#      directory: external
+      sha: "sfsfsfsfsf"
+    prometheus_config_reloader:
+      name: quay.io/prometheus-operator/prometheus-config-reloader
+      version: v0.43.2
+      directory: external
+      sha: ""
+    configmap_reload:
+      name: jimmidyson/configmap-reload
+      version: v0.4.0
+      directory: external
+      sha: ""
   istio:
     tls:
       secretName: istio-ingress-certs
@@ -1409,8 +1425,6 @@ prometheusOperator:
   ## Prometheus-operator image
   ##
   image:
-    repository: eu.gcr.io/kyma-project/external/quay.io/prometheus-operator/prometheus-operator
-    tag: v0.43.2
     sha: ""
     pullPolicy: IfNotPresent
 
@@ -1433,20 +1447,6 @@ prometheusOperator:
     timeoutSeconds: 5
     failureThreshold: 6
     successThreshold: 1
-
-  ## Configmap-reload image to use for reloading configmaps
-  ##
-  configmapReloadImage:
-    repository: eu.gcr.io/kyma-project/external/jimmidyson/configmap-reload
-    tag: v0.4.0
-    sha: ""
-
-  ## Prometheus-config-reloader image to use for config and rule reloading
-  ##
-  prometheusConfigReloaderImage:
-    repository: eu.gcr.io/kyma-project/external/quay.io/prometheus-operator/prometheus-config-reloader
-    tag: v0.43.2
-    sha: ""
 
   ## Set the prometheus config reloader side-car CPU limit
   ##
