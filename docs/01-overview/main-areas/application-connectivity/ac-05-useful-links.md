@@ -50,5 +50,4 @@ If you're interested in learning more about the Application Connectivity area, f
   - [Application Connector components](../../../05-technical-reference/00-architecture/ac-01-application-connector-components.md)
   - [Connector Service workflow](../../../05-technical-reference/00-architecture/ac-02-connector-service.md)
   - [Application Gateway workflow](../../../05-technical-reference/00-architecture/ac-03-application-gateway.md)
-  - [Application Broker workflow](../../../05-technical-reference/00-architecture/ac-04-application-broker.md)
   - [Application Gateway details](../../../05-technical-reference/ac-02-application-gateway-details.md)

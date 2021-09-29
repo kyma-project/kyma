@@ -2,6 +2,8 @@
 title: Application Gateway details
 ---
 
+<!-- TODO 10: update to the current changes in Central Application Gateway--> 
+<!-- TODO 10 note: it seems that 001-application-connector.svg and 001-application-connector copy.svg are no longer used -->
 >**CAUTION:** This document describes Application Gateway working in the alternative Compass [mode](00-architecture/ac-01-application-connector-components.md#application-operator). See the [architecture](00-architecture/ac-03-application-gateway.md) to learn about Application Gateway working in the default legacy mode.
 
 Application Gateway is an intermediary component between a Function or a service and an external API.
