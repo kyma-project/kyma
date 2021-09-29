@@ -29,6 +29,7 @@ global:
       name: kyma-gateway
   containerRegistry:
     path: eu.gcr.io/kyma-project
-  iam_kubeconfig_service:
-    dir:
-    version: "6457fd19"
+  images:
+    iam_kubeconfig_service:
+      name: "iam-kubeconfig-service"
+      version: "6457fd19"
