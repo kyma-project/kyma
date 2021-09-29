@@ -1,10 +1,10 @@
 ---
-title: Application Gateway
+title: Central Application Gateway
 ---
 
 Central Application Gateway is an intermediary component between a Function or a service and an external API.  
-This component is deployed in ```kyma-system``` Namespace. 
-Its role is to proxy HTTP requests from user's Functions to all External Systems registered in Kyma as Applications. 
+This component is deployed as a Kubernetes service in ```kyma-system``` Namespace. 
+Its role is to proxy HTTP requests from user's Functions to all external solutions registered in Kyma as Applications. 
 
 Central Application Gateway can call services which are not secured, or are secured with:
 

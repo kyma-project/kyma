@@ -14,7 +14,7 @@ If you call a registered service and receive an error, follow these steps to det
     To fetch these logs, run this command:
     
     ```bash
-    kubectl -n kyma-integration logs -l app={APP_NAME}-application-gateway -c {APP_NAME}-application-gateway
+    kubectl -n kyma-system logs -l app={APP_NAME}-application-gateway -c {APP_NAME}-application-gateway
     ```
    
     The request that reached the Pod is logged by Application Gateway.

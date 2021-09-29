@@ -43,21 +43,22 @@ This allows routing events to Functions and services based on their source Appli
 
 An Application represents an external solution connected to Kyma. It handles the integration with other components, such as the Service Catalog or Eventing.
 Using the components of Application Connector, the Application creates a coherent identity for a connected external solution and ensures its separation.
-All Applications are instances of the Application custom resource, which also stores all of the relevant metadata. You can bind an Application to many Kyma Namespaces and use the APIs and the Event Catalogs of the connected external solution within their context.
+All Applications are instances of the Application custom resource, which also stores all of the relevant metadata.
 
 >**NOTE:** Every Application custom resource corresponds to a single Application to which you can connect an external solution.
 
-## Application Gateway
+## Central Application Gateway
 
-<!-- TODO 12: add a note on proxying -->
-Application Gateway is an intermediary component between a Function or a service and an external API.
-Application Gateway can call services which are not secured, or are secured with:
+Central Application Gateway is an intermediary component between a Function or a service and an external API.
+This component is deployed as a Kubernetes service in ```kyma-system``` Namespace.
+Its role is to proxy HTTP requests from user's Functions to all external solutions registered in Kyma as Applications.
+Central Application Gateway can call services which are not secured, or are secured with:
 
 - [Basic Authentication](https://tools.ietf.org/html/rfc7617)
 - OAuth
 - Client certificates
 
-Additionally, Application Gateway supports cross-site request forgery (CSRF) tokens as an optional layer of API protection.
+Additionally, Central Application Gateway supports cross-site request forgery (CSRF) tokens as an optional layer of API protection.
 
 
 ## Kubernetes Secret
