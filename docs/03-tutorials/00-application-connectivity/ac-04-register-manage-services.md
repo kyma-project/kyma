@@ -2,7 +2,6 @@
 title: Register a service
 ---
 
-<!-- TODO Consider adding -->
 This guide shows you how to register a service of your external solution in Kyma.
 
 ## Prerequisites

@@ -2,7 +2,7 @@
 title: Application Gateway
 ---
 
-<!-- TODO: add mention that Gateway is a central component -->
+<!-- TODO 2: add mention that Gateway is a central component -->
 
 Application Gateway is an intermediary component between a Function or a service and an external API.  
 
