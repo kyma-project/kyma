@@ -33,6 +33,9 @@ func NewNatsMessageSender(ctx context.Context, bc *pkgnats.BackendConnection, lo
 // Send dispatches the given Cloud Event to NATS and returns the response details and dispatch time.
 func (h *NatsMessageSender) Send(ctx context.Context, event *cev2event.Event) (int, error) {
 	h.logger.Infof("Sending event to NATS, id:[%s]", event.ID())
+
+	h.logger.Infof("Demoing code, id:[%s]", event.ID())
+
 	// The same Nats subject used by Nats subscription
 	subject := event.Type()
 
