@@ -151,23 +151,21 @@ Follows these steps:
 
 2. In the left navigation panel, go to **Workloads** > **Functions** and select the Function you want to expose.
 
-3. Switch to the **Configuration** tab and select **Expose Function** in the APIRules section. A pop-up box with the form will appear on the screen.
+3. Switch to the **Configuration** tab and select **Expose Function** in the APIRules section.
 
-4. In the **General settings** section of the pop-up box:
+4. In the **General settings** section of the dialog box, enter the following information:
 
-    - Enter the APIRule's **Name** matching the Function's name.
+    - The APIRule's **Name** matching the Function's name.
 
     >**NOTE:** The APIRule CR can have a name different from that of the Function, but it is recommended that all related resources share a common name.
 
-    - Enter **Hostname** to indicate the host on which you want to expose your Function.
+    - **Subdomain** to determine the host on which you want to expose your Function.
 
 5. In the **Access strategies** section, select the `noop` handler from the drop-down list and leave the default settings with the `GET`, `POST`, `PUT`, `PATCH`, `DELETE`, and `HEAD` methods.
 
-6. Select **Create** to confirm changes. The pop-up box with the form will close.
+6. Select **Create** to confirm changes. The dialog box with the form will close.
 
 7. Check if you can access the Function by selecting the HTTPS link under the **Host** column for the newly created APIRule.
-
-    >**CAUTION:** If you have a Minikube cluster, you must first add its IP address mapped to the hostname of the exposed Kubernetes Service to the `hosts` file on your machine.
 
     </details>
 </div>

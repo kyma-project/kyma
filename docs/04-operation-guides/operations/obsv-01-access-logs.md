@@ -11,7 +11,6 @@ If you want to see historical logs and use additional features, view the logs as
 ## Kubernetes logs in Kyma Dashboard
 
 You can view real-time logs in Kyma Dashboard:
-
 1. Open Kyma Dashboard and select the Namespace.
 2. Access the Pod and select the container.
 3. Click **View Logs**.
@@ -28,7 +27,7 @@ kubectl logs {POD_NAME} --namespace {NAMESPACE_NAME} --container {CONTAINER_NAME
 
 To see a visual representation and search for specific logs, follow these steps:
 
-1. In Kyma Dashboard, go to **Observability** and open **Grafana**.
+1. In the **Cluster Overview** of Kyma Dashboard, go to **Observability** and open **Grafana**.
 2. In Grafana's **Explore** section, select `Loki` as data source.
 3. Enter a query following the [query language guidelines](https://grafana.com/docs/loki/latest/logql/), for example:
 

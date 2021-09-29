@@ -77,13 +77,13 @@ The operation was successful if the returned number of **readyReplicas** is `1`.
 2. Click on **Create Deployment +**.
 3. Choose the **Advanced** view and provide the following parameters:
     - **Name**: `orders-service`
-    - **Labels**: add labels `app` and `example` and set their values to `orders-service`   
-    - **Docker image**: `eu.gcr.io/kyma-project/develop/orders-service:e8175c63`
+    - **Labels**: add labels `app` and `example` and set their values to `orders-service`
+    - **Containers**: enter Docker image `eu.gcr.io/kyma-project/develop/orders-service:68a58069`
 
     _Optionally_, to save resources, modify these parameters:
     - **Memory requests**: `10Mi`
-    - **CPU requests (m)**: `16m`
     - **Memory limits**: `32Mi`
+    - **CPU requests (m)**: `16m`
     - **CPU limits (m)**: `20m`  
     - **Port**: `80`
     - **Target Port**: `8080`
@@ -130,6 +130,7 @@ EOF
 ```
 
 To check that the Service was created successfully, run:
+
 ```bash
 kubectl get service orders-service -o=jsonpath="{.metadata.uid}"
 ```
