@@ -1,5 +1,22 @@
 apiVersion: v2
+appVersion: 2.5.0
+description: A Helm chart for the NATS.io High Speed Cloud Native Distributed Communications
+  Technology.
+home: http://github.com/nats-io/k8s
+icon: https://nats.io/img/nats-icon-color.png
+keywords:
+- nats
+- messaging
+- cncf
+maintainers:
+- email: wally@nats.io
+  name: Waldemar Quevedo
+  url: https://github.com/wallyqs
+- email: colin@nats.io
+  name: Colin Sullivan
+  url: https://github.com/ColinSullivan1
+- email: jaime@nats.io
+  name: Jaime Piña
+  url: https://github.com/variadico
 name: nats
-description: Helm chart for nats
-type: application
-version: 1.0.0
+version: 0.8.9
