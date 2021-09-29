@@ -2,6 +2,8 @@
 title: Application Operator sub-chart
 ---
 
+<!-- To be removed -->
+
 To configure the Application Operator (AO) sub-chart, override the default values of its [`values.yaml`](https://github.com/kyma-project/kyma/blob/main/resources/application-connector/charts/application-operator/values.yaml) file. This document describes parameters that you can configure.
 
 >**TIP:** See how to [change Kyma settings](../../04-operation-guides/operations/03-change-kyma-config-values.md).

@@ -2,6 +2,9 @@
 title: ApplicationMapping
 ---
 
+
+<!-- Is it still valid? -->
+
 The `applicationmappings.application.kyma-project.io` CustomResourceDefinition (CRD) is a detailed description of the kind of data and the format used to enable APIs and events from an Application as a ServiceClass in a given Namespace. To get the up-to-date CRD and show the output in the `yaml` format, run this command:
 
 ```bash

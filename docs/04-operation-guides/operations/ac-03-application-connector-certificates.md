@@ -4,7 +4,7 @@ title: Provide a custom Application Connector certificate and key
 
 Application Connector is secured with a client certificate verified by the Istio Ingress Gateway.
 
-The certificates are generated and stored as Kubernetes Secrets by Application Connector Certs Setup job.
+The CA root certificates are generated and stored as Kubernetes Secrets by Application Connector Certs Setup job.
 
 By default, the server key and certificate are automatically generated.
 You can provide a custom server certificate and key during the installation by overriding these default values:
@@ -15,7 +15,7 @@ global.applicationConnectorCa: "{BASE64_ENCODED_CERTIFICATE}"
 
 >**NOTE:** To use a custom certificate and key, you must override both values. If either the certificate or key is incorrect or isn't provided, a new certificate and key pair is generated.
 
-This is a sample ConfigMap that overrides the default values with a custom certificate and key:
+This is a sample ConfigMap that overrides the default values with a custom CA root certificate and key:
 ```yaml
 apiVersion: v1
 kind: ConfigMap

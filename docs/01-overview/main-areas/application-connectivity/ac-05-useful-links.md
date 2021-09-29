@@ -2,6 +2,8 @@
 title: Application Connectivity - useful links
 ---
 
+<!-- Link to Application Operator to be removed. -->
+
 If you're interested in learning more about the Application Connectivity area, follow these links to:
 
 - Perform some simple and more advanced tasks:

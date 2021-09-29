@@ -2,6 +2,7 @@
 title: Disable SSL certificate verification
 ---
 
+<!-- TODO: desribe how to do that in the Central Gateway scenario -->
 You can disable the [SSL certificate verification](../../01-overview/main-areas/application-connectivity/ac-04-security.md#ssl-certificate-verification) in the communication between Kyma and an application to allow Kyma to send requests and data to an unsecured application. Disabling the certificate verification can be useful in certain testing scenarios.
 
 >**NOTE:** By default, the SSL certificate verification is enabled when sending data and requests to every application.

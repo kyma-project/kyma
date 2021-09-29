@@ -2,6 +2,8 @@
 title: Call a registered external service from Kyma
 ---
 
+<!-- TODO: Get rid of Service Catalog reference -->
+
 This guide shows how to call a registered external service from Kyma using a simple Function.
 
 ## Prerequisites

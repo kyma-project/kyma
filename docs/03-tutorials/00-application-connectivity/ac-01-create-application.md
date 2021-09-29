@@ -2,6 +2,7 @@
 title: Create a new Application
 ---
 
+<!-- TODO: modify to cover central gateway scenario-->
 Application Operator listens for the creation of Application custom resources. It provisions and de-provisions the necessary deployments for every created Application.
 
 >**NOTE:** An Application represents a single connected external solution.
