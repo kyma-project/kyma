@@ -49,8 +49,8 @@ tests:
     verifySSL: "false"
     verbose: "false"
     gitServer:
-      image: "eu.gcr.io/kyma-project/gitserver"
-      tag: "c0aa144a"
+      # image: "eu.gcr.io/kyma-project/gitserver"
+      # tag: "c0aa144a"
       repoName: "function"
     pkgRegistryConfig:
       secretName: "serverless-package-registry-config"
@@ -106,6 +106,9 @@ global:
       name: "registry"
       version: "2.7.1-e0da5a68"
       directory: "tpi"
+    git_server:
+      name: "gitserver"
+      version: "c0aa144a"
   testImages:
     function_controller_test:
       name: "function-controller-test"
