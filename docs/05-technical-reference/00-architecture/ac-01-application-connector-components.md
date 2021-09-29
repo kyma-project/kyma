@@ -49,7 +49,7 @@ All Applications are instances of the Application custom resource, which also st
 
 ## Application Gateway
 
-<!-- TODO: add a note on proxying -->
+<!-- TODO 12: add a note on proxying -->
 Application Gateway is an intermediary component between a Function or a service and an external API.
 Application Gateway can call services which are not secured, or are secured with:
 

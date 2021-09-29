@@ -4,7 +4,7 @@ title: Application Gateway
 
 > **CAUTION:** This document describes Application Gateway working in the default legacy [mode](ac-01-application-connector-components.md#application-operator). Read the [details](../ac-02-application-gateway-details.md) to learn about the alternative Compass mode.
 
-<!-- TODO: update diagram and description -->
+<!-- TODO 11: update diagrams (ac-application-connector-architecture.svg and ac-architecture-proxy-service.svg) and description -->
 
 Application Gateway sends the requests from Functions and services in Kyma to external APIs registered with Application Registry. Application Gateway works in conjunction with the Access Service, which exposes Application Gateway.
 
