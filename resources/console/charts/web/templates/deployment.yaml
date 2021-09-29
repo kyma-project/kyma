@@ -34,7 +34,7 @@ spec:
       serviceAccountName: {{ template "fullname" . }}
       containers:
         - name: console
-          image: "{{ .Values.global.containerRegistry.path }}/console:{{ .Values.console.image.tag }}"
+          image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.console) }}"
           imagePullPolicy: {{ .Values.console.image.pullPolicy }}
           securityContext:
             allowPrivilegeEscalation: false

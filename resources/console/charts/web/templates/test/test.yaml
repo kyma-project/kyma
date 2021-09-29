@@ -41,7 +41,7 @@ spec:
           serviceAccountName: {{ template "fullname" . }}-tests
           containers:
             - name: tests
-              image: {{ .Values.global.containerRegistry.path }}/ui-tests:{{ .Values.global.ui_acceptance_tests.version }}
+              image: {{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.testImages.ui_acceptance_tests) }}
               imagePullPolicy: IfNotPresent
               resources:
                  requests:

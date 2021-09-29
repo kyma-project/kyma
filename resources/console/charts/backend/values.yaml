@@ -1,6 +1,6 @@
 replicaCount: 1
 image:
-  name: console-backend-service
+  # name: console-backend-service
   pullPolicy: IfNotPresent
 service:
   internalPort: 3000
