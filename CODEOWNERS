@@ -19,10 +19,10 @@
 /hack @clebs @suleymanakbas91 @adamwalach
 
 # The `installation` directory and subdirectories
-/installation/ @Tomasz-Smelcerz-SAP @strekm @werdes72 @adamwalach @mjakobczyk @m00g3n @pPrecel
+/installation/ @Tomasz-Smelcerz-SAP @strekm @werdes72 @adamwalach @mjakobczyk @m00g3n @pPrecel @dariusztutaj
 
 # The `cluster-essentials` chart
-/resources/cluster-essentials/ @PK85 @janmedrek @a-thaler @suleymanakbas91 @strekm
+/resources/cluster-essentials/ @PK85 @janmedrek @a-thaler @suleymanakbas91 @strekm @dariusztutaj
 
 # The `pod-preset` subchart
 /resources/cluster-essentials/charts/pod-preset/ @PK85 @piotrmiskiewicz @ksputo @jasiu001 @adamwalach
@@ -35,16 +35,16 @@
 /resources/core/values.yaml @kyma-project/developers
 
 # The `apiserver-proxy` chart
-/resources/apiserver-proxy/ @strekm @werdes72 @Tomasz-Smelcerz-SAP @mjakobczyk
+/resources/apiserver-proxy/ @strekm @werdes72 @Tomasz-Smelcerz-SAP @mjakobczyk @dariusztutaj
 
 # The `cluster-users` subchart
-/resources/cluster-users/ @strekm @werdes72 @Tomasz-Smelcerz-SAP @mjakobczyk
+/resources/cluster-users/ @strekm @werdes72 @Tomasz-Smelcerz-SAP @mjakobczyk @dariusztutaj
 
 # The `certificates` chart
-/resources/certificates/ @strekm @werdes72 @Tomasz-Smelcerz-SAP @mjakobczyk
+/resources/certificates/ @strekm @werdes72 @Tomasz-Smelcerz-SAP @mjakobczyk @dariusztutaj
 
 # The `iam-kubeconfig-service` chart
-/resources/iam-kubeconfig-service/ @strekm @werdes72 @Tomasz-Smelcerz-SAP @mjakobczyk
+/resources/iam-kubeconfig-service/ @strekm @werdes72 @Tomasz-Smelcerz-SAP @mjakobczyk @dariusztutaj
 
 # The `rafter` chart
 /resources/rafter/ @m00g3n @pPrecel @dbadura @tgorgol @rJankowski93
@@ -83,10 +83,10 @@
 /resources/console/ @dariadomagala @parostatkiem @akucharska @Wawrzyn321 @kwiatekus
 
 # The `dex` subchart
-/resources/dex/ @strekm @werdes72 @Tomasz-Smelcerz-SAP @mjakobczyk
+/resources/dex/ @strekm @werdes72 @Tomasz-Smelcerz-SAP @mjakobczyk @dariusztutaj
 
 # The 'gateway' subchart
-/resources/core/charts/gateway/ @strekm @werdes72 @Tomasz-Smelcerz-SAP @mjakobczyk
+/resources/core/charts/gateway/ @strekm @werdes72 @Tomasz-Smelcerz-SAP @mjakobczyk @dariusztutaj
 
 # The `helm-broker` subchart
 /resources/helm-broker/ @PK85 @piotrmiskiewicz @ksputo @jasiu001 @adamwalach
@@ -134,10 +134,10 @@
 /resources/core/templates/tests/ @PK85 @piotrmiskiewicz @ksputo @m00g3n @pPrecel @tgorgol @antiheld @jasiu001 @adamwalach @kwiatekus @k15r
 
 # The `istio` chart
-/resources/istio/ @strekm @werdes72 @Tomasz-Smelcerz-SAP @mjakobczyk
+/resources/istio/ @strekm @werdes72 @Tomasz-Smelcerz-SAP @mjakobczyk @dariusztutaj
 
 # The `istio-configuration` chart
-/resources/istio-configuration/ @strekm @werdes72 @Tomasz-Smelcerz-SAP @mjakobczyk
+/resources/istio-configuration/ @strekm @werdes72 @Tomasz-Smelcerz-SAP @mjakobczyk @dariusztutaj
 
 # The `tracing` chart
 /resources/tracing/ @a-thaler @lilitgh @suleymanakbas91 @clebs @rakesh-garimella @skhalash @jeremyharisch @chrkl @shorim
@@ -146,13 +146,13 @@
 /resources/service-catalog/ @PK85 @piotrmiskiewicz @ksputo @jasiu001 @adamwalach
 
 # The `xip-patch` chart
-/resources/xip-patch/ @strekm @werdes72 @Tomasz-Smelcerz-SAP @mjakobczyk
+/resources/xip-patch/ @strekm @werdes72 @Tomasz-Smelcerz-SAP @mjakobczyk @dariusztutaj
 
 # The `ory` chart
-/resources/ory/ @strekm @werdes72 @Tomasz-Smelcerz-SAP @mjakobczyk
+/resources/ory/ @strekm @werdes72 @Tomasz-Smelcerz-SAP @mjakobczyk @dariusztutaj
 
 # The `api-gateway` chart
-/resources/api-gateway/ @strekm @werdes72 @Tomasz-Smelcerz-SAP @mjakobczyk
+/resources/api-gateway/ @strekm @werdes72 @Tomasz-Smelcerz-SAP @mjakobczyk @dariusztutaj
 
 # The `compass-runtime-agent` chart
 /resources/compass-runtime-agent/ @PK85 @tgorgol @dbadura @akgalwas @janmedrek @franpog859 @Maladie @rafalpotempa @koala7659 @ralikio @everesio
@@ -167,7 +167,7 @@
 /resources/uaa-activator/ @ksputo @piotrmiskiewicz @PK85 @jasiu001
 
 # The `permission-controller` chart
-/resources/permission-controller/ @strekm @werdes72 @Tomasz-Smelcerz-SAP @mjakobczyk
+/resources/permission-controller/ @strekm @werdes72 @Tomasz-Smelcerz-SAP @mjakobczyk @dariusztutaj
 
 # The `busola-migrator` chart
 /resources/busola-migrator/ @m00g3n @pPrecel @dbadura @tgorgol @rJankowski93
@@ -178,7 +178,7 @@
 components/etcd-tls-setup-job/ @PK85 @piotrmiskiewicz @ksputo @jasiu001 @adamwalach
 
 #API server proxy Component
-/components/apiserver-proxy/ @strekm @werdes72 @Tomasz-Smelcerz-SAP @mjakobczyk
+/components/apiserver-proxy/ @strekm @werdes72 @Tomasz-Smelcerz-SAP @mjakobczyk @dariusztutaj
 
 # Binding Component
 /components/binding/ @PK85 @piotrmiskiewicz @jasiu001 @ksputo
@@ -187,13 +187,13 @@ components/etcd-tls-setup-job/ @PK85 @piotrmiskiewicz @ksputo @jasiu001 @adamwal
 /components/service-binding-usage-controller/ @PK85 @piotrmiskiewicz @ksputo @jasiu001 @adamwalach
 
 # Kyma Operator Component
-/components/kyma-operator/ @Tomasz-Smelcerz-SAP @strekm @werdes72 @mjakobczyk
+/components/kyma-operator/ @Tomasz-Smelcerz-SAP @strekm @werdes72 @mjakobczyk @dariusztutaj
 
 # IAM Kubeconfig Service Component
-/components/iam-kubeconfig-service/ @strekm @werdes72 @Tomasz-Smelcerz-SAP @mjakobczyk
+/components/iam-kubeconfig-service/ @strekm @werdes72 @Tomasz-Smelcerz-SAP @mjakobczyk @dariusztutaj
 
 # Istioctl Installer Component
-/components/istio-installer/ @strekm @werdes72 @Tomasz-Smelcerz-SAP @mjakobczyk
+/components/istio-installer/ @strekm @werdes72 @Tomasz-Smelcerz-SAP @mjakobczyk @dariusztutaj
 
 # Application broker Component
 /components/application-broker/ @PK85 @piotrmiskiewicz @ksputo @jasiu001 @adamwalach @lilitgh
@@ -230,13 +230,13 @@ components/etcd-tls-setup-job/ @PK85 @piotrmiskiewicz @ksputo @jasiu001 @adamwal
 /components/uaa-activator/ @ksputo @piotrmiskiewicz @PK85 @jasiu001
 
 # Xip Patch Component
-/components/xip-patch/ @strekm @werdes72 @Tomasz-Smelcerz-SAP @mjakobczyk
+/components/xip-patch/ @strekm @werdes72 @Tomasz-Smelcerz-SAP @mjakobczyk @dariusztutaj
 
 # Permission Controller Component
-/components/permission-controller/ @strekm @werdes72 @Tomasz-Smelcerz-SAP @mjakobczyk
+/components/permission-controller/ @strekm @werdes72 @Tomasz-Smelcerz-SAP @mjakobczyk @dariusztutaj
 
 # Dex Static User Configurer
-/components/dex-static-user-configurer/ @strekm @werdes72 @Tomasz-Smelcerz-SAP @mjakobczyk
+/components/dex-static-user-configurer/ @strekm @werdes72 @Tomasz-Smelcerz-SAP @mjakobczyk @dariusztutaj
 
 # Function Controller
 /components/function-controller/ @m00g3n @pPrecel @dbadura @tgorgol @rJankowski93
@@ -273,10 +273,10 @@ components/etcd-tls-setup-job/ @PK85 @piotrmiskiewicz @ksputo @jasiu001 @adamwal
 /tests/service-catalog/ @ksputo @piotrmiskiewicz @PK85 @jasiu001 @adamwalach
 
 # Cluster-users integration tests
-/tests/integration/cluster-users/ @strekm @werdes72 @Tomasz-Smelcerz-SAP @mjakobczyk
+/tests/integration/cluster-users/ @strekm @werdes72 @Tomasz-Smelcerz-SAP @mjakobczyk @dariusztutaj
 
 # Dex integration tests
-/tests/integration/dex/ @strekm @werdes72 @Tomasz-Smelcerz-SAP @mjakobczyk
+/tests/integration/dex/ @strekm @werdes72 @Tomasz-Smelcerz-SAP @mjakobczyk @dariusztutaj
 
 # monitoring tests
 /tests/integration/monitoring/ @a-thaler @lilitgh @suleymanakbas91 @clebs @rakesh-garimella @skhalash @jeremyharisch @shorim
@@ -285,10 +285,10 @@ components/etcd-tls-setup-job/ @PK85 @piotrmiskiewicz @ksputo @jasiu001 @adamwal
 /tests/integration/logging/ @a-thaler @lilitgh @suleymanakbas91 @clebs @rakesh-garimella @skhalash @jeremyharisch @chrkl @shorim
 
 # api-gateway integration tests
-/tests/integration/api-gateway/ @strekm @werdes72 @Tomasz-Smelcerz-SAP @mjakobczyk
+/tests/integration/api-gateway/ @strekm @werdes72 @Tomasz-Smelcerz-SAP @mjakobczyk @dariusztutaj
 
 # apiserver-proxy tests
-/tests/integration/apiserver-proxy/ @strekm @werdes72 @Tomasz-Smelcerz-SAP @mjakobczyk
+/tests/integration/apiserver-proxy/ @strekm @werdes72 @Tomasz-Smelcerz-SAP @mjakobczyk @dariusztutaj
 
 # Console Backend Service tests
 /tests/console-backend-service/ @dariadomagala @parostatkiem @akucharska @Wawrzyn321 @kwiatekus
@@ -332,7 +332,7 @@ components/etcd-tls-setup-job/ @PK85 @piotrmiskiewicz @ksputo @jasiu001 @adamwal
 /tools/failery/ @m00g3n @pPrecel @dbadura @tgorgol @rJankowski93
 
 # The tools/kyma-installer directory
-/tools/kyma-installer/ @strekm @werdes72 @Tomasz-Smelcerz-SAP @mjakobczyk
+/tools/kyma-installer/ @strekm @werdes72 @Tomasz-Smelcerz-SAP @mjakobczyk @dariusztutaj
 #
 # The tools/event-subscriber directory
 /tools/event-subscriber/ @lilitgh @k15r @nachtmaar @marcobebway @radufa @sayanh @themue @pxsalehi
@@ -344,7 +344,7 @@ components/etcd-tls-setup-job/ @PK85 @piotrmiskiewicz @ksputo @jasiu001 @adamwal
 /tests/end-to-end/upgrade/ @PK85 @piotrmiskiewicz @ksputo @jasiu001 @adamwalach @k15r @suleymanakbas91
 
 # E2E Api Gateway Upgrade Tests
-/tests/end-to-end/upgrade/pkg/tests/api-gateway/ @strekm @werdes72 @Tomasz-Smelcerz-SAP @mjakobczyk
+/tests/end-to-end/upgrade/pkg/tests/api-gateway/ @strekm @werdes72 @Tomasz-Smelcerz-SAP @mjakobczyk @dariusztutaj
 
 # E2E Rafter Upgrade Tests
 /tests/end-to-end/upgrade/pkg/tests/rafter/ @m00g3n @pPrecel @dbadura @tgorgol @rJankowski93
