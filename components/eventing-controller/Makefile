@@ -116,9 +116,6 @@ path-to-referenced-charts:
 	@echo "resources/eventing-manager/eventing-controller"
 
 copy-crds: manifests-local
-	@echo "copying Eventing CRDs to cluster-essentials"
-	cp ./config/crd/bases/eventing.kyma-project.io_subscriptions.yaml ./../../resources/cluster-essentials/files/subscriptions.eventing.kyma-project.io.crd.yaml
-	cp ./config/crd/bases/eventing.kyma-project.io_eventingbackends.yaml ./../../resources/cluster-essentials/files/eventingbackends.eventing.kyma-project.io.crd.yaml
 	@echo "copying Eventing CRDs to installation/eventing"
 	cp ./config/crd/bases/eventing.kyma-project.io_subscriptions.yaml ./../../installation/resources/crds/eventing/subscriptions.eventing.kyma-project.io.crd.yaml
 	cp ./config/crd/bases/eventing.kyma-project.io_eventingbackends.yaml ./../../installation/resources/crds/eventing/eventingbackends.eventing.kyma-project.io.crd.yaml
