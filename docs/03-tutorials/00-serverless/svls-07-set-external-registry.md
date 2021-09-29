@@ -232,7 +232,7 @@ EOF
 ```bash
 cat > docker-registry-overrides.yaml <<EOF
 serverless:
-  dockerRegistry.enableInternal: $(echo -n "false" | base64)
+  dockerRegistry.enableInternal: "false"
   dockerRegistry.username: $(echo -n "_json_key" | base64)
   dockerRegistry.password: "${GCS_KEY_JSON}"
   dockerRegistry.serverAddress: $(echo -n "${SERVER_ADDRESS}" | base64)
@@ -249,7 +249,7 @@ EOF
 ```bash
 cat > docker-registry-overrides.yaml <<EOF
 serverless:
-  dockerRegistry.enableInternal: $(echo -n "false" | base64)
+  dockerRegistry.enableInternal: "false"
   dockerRegistry.username: $(echo -n "${SP_APP_ID}" | base64)
   dockerRegistry.password: $(echo -n "${SP_PASSWORD}" | base64)
   dockerRegistry.serverAddress: $(echo -n "${AZ_REGISTRY_NAME}.${SERVER_ADDRESS}" | base64)
