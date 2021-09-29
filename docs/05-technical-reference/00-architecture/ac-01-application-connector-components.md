@@ -11,9 +11,10 @@ The DNS name of the Ingress is cluster-dependent and follows the `gateway.{clust
 Istio Ingress Gateway secures the endpoints with certificate validation. Each call must include a valid client certificate.
 You can access every exposed Application using the assigned path. For example, to reach the Gateway for the `user-custom` Application, use `gateway.servicemanager.cluster.kyma.cx/user-custom`.
 
-## Application Connectivity Validator
+## Central Application Connectivity Validator
 
-Application Connectivity Validator verifies the subject of the client certificate. It is deployed per Application and it proxies requests to Application Registry and Event Publisher.
+Application Connectivity Validator verifies the subject of the client certificate. 
+It is deployed for all Applications in ```kyma-system``` namespace, and proxies requests to Application Registry and Event Publisher.
 
 ## Connector Service
 
