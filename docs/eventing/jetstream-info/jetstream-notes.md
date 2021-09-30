@@ -69,7 +69,8 @@ helm install nack . --set=jetstream.nats.url=nats://nats:4222 -n <NAMESPACE>
 
 ### --> [Consumers](https://docs.nats.io/jetstream/concepts/consumers)
 * Subscribers in JetStream context are referred to as Consumers. 
-* Consumers track their progress, they know what messages were delivered, acknowledged, etc. Un-acked msgs will be redelivered. 
+* By default, a consumer is ephemeral. Consumers track their progress, they know what messages were delivered, acknowledged, etc. Un-acked msgs will be redelivered. 
+* There are also durable consumers. The name of the Consumer, which the server will track, allowing resuming consumption where left off. To make the consumer durable, set the name.
 * When we create a consumer, we need to define what message to receive as the first one form the stream. It can be from very first message of the stream, or form last message, or by seqNum or by time.
 * There are two types of consumers i.e. Push-based and Pull-based consumers.
   - Pull-based consumers queries the server for new msgs. They only support `AckExplicit`, meaning they have to return a ACK.
@@ -84,6 +85,7 @@ helm install nack . --set=jetstream.nats.url=nats://nats:4222 -n <NAMESPACE>
 
 * Simplest approach, we can have a single stream storing all subjects.
 * Or we can have separate stream for each subject, or subset of related subjects.
+* We can also use durable consumers.
 
 
 ## Check migration path
