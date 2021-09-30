@@ -2,7 +2,7 @@
 title: Create a new Application
 ---
 
-<!-- TODO Applicetion Operator will no longer be there-->
+<!-- TODO 12 Application Operator will no longer be there-->
 Application Operator listens for the creation of Application custom resources. It manages Kubernetes resources necessary for every Application to run.
 To communicate with an outside world the Application use components ```central-application-connectivity-validator``` and ```central-application-gateway``` deployed in ```kyma-system``` Namespace.
 

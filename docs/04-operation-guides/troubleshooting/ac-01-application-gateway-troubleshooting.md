@@ -19,7 +19,7 @@ If you call a registered service and receive an error, follow these steps to det
    
     The request that reached the Pod is logged by Application Gateway.
 
-2. Check for the Access Service. <!-- TODO: no longer needed -->
+2. Check for the Access Service. 
 
     If the call you tried to make is not in the logs, check if the [Access Service](../../05-technical-reference/00-architecture/ac-01-application-connector-components.md#access-service) for the service you are trying to call exists.
     ```
