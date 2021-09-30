@@ -3,8 +3,6 @@ title: Error when calling a registered service
 type: Troubleshooting
 ---
 
-<!-- TODO 3: adjust to the current state -->
-
 If you call a registered service and receive an error, follow these steps to detect the source of the problem:
 
 
