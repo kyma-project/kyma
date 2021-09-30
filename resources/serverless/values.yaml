@@ -49,8 +49,6 @@ tests:
     verifySSL: "false"
     verbose: "false"
     gitServer:
-      # image: "eu.gcr.io/kyma-project/gitserver"
-      # tag: "c0aa144a"
       repoName: "function"
     pkgRegistryConfig:
       secretName: "serverless-package-registry-config"
