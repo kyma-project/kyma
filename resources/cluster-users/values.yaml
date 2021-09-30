@@ -107,3 +107,5 @@ users:
     - "admin@kyma.cx"
   adminGroup:
   bindStaticUsers: false
+
+# test
