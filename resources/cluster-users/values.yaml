@@ -108,4 +108,7 @@ users:
   adminGroup:
   bindStaticUsers: false
 
+testValues:
+  howTOTrigger: "netlify"
+
 # test2
