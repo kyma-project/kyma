@@ -124,4 +124,3 @@ global:
       image: "quay.io/coreos/etcd"
       version: "v3.3.25-e5110645"
       directory: "tpi"
-  testImages:
