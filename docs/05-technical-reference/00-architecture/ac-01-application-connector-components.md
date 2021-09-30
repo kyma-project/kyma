@@ -11,10 +11,9 @@ The DNS name of the Ingress is cluster-dependent and follows the `gateway.{clust
 Istio Ingress Gateway secures the endpoints with certificate validation. Each call must include a valid client certificate.
 You can access every exposed Application using the assigned path. For example, to reach the Gateway for the `user-custom` Application, use `gateway.servicemanager.cluster.kyma.cx/user-custom`.
 
-## Central Application Connectivity Validator
+## Application Connectivity Validator
 
-Central Application Connectivity Validator verifies the subject of the client certificate. 
-It is deployed for all Applications in ```kyma-system``` namespace, and proxies requests to Application Registry and Event Publisher.
+Application Connectivity Validator verifies the subject of the client certificate, and proxies requests to Application Registry and Event Publisher.
 
 ## Connector Service
 
@@ -48,18 +47,18 @@ All Applications are instances of the Application custom resource, which also st
 
 >**NOTE:** Every Application custom resource corresponds to a single Application to which you can connect an external solution.
 
-## Central Application Gateway
+## Application Gateway
 
-Central Application Gateway is an intermediary component between a Function or a service and an external API.
-This component is deployed as a Kubernetes service in ```kyma-system``` Namespace.
-Its role is to proxy HTTP requests from user's Functions to all external solutions registered in Kyma as Applications.
+Application Gateway is an intermediary component between a Function or a service and an external API.
+It [proxies the requests](./ac-03-application-gateway.md) from Functions and services in Kyma to external APIs based on the configuration stored in Secrets.
+
 Central Application Gateway can call services which are not secured, or are secured with:
 
 - [Basic Authentication](https://tools.ietf.org/html/rfc7617)
 - OAuth
 - Client certificates
 
-Additionally, Central Application Gateway supports cross-site request forgery (CSRF) tokens as an optional layer of API protection.
+Additionally, Application Gateway supports cross-site request forgery (CSRF) tokens as an optional layer of API protection.
 
 
 ## Kubernetes Secret
