@@ -37,7 +37,6 @@ broker:
   metricsPort: 8072
 
 webhook:
-#   image: "eu.gcr.io/kyma-project/helm-broker-webhook:5edd6b42"
   imagePullPolicy: IfNotPresent
   securityContext: { runAsUser: 1001 }
   strategy:
@@ -117,6 +116,6 @@ global:
       name: "helm-controller"
       version: "995c0f10"
     etcd:
-      image: "etcd"
+      name: "etcd"
       version: "v3.3.25-e5110645"
       directory: "tpi/quay.io/coreos"
