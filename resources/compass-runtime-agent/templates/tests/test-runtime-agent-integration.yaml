@@ -26,7 +26,7 @@ spec:
       serviceAccountName: {{ .Chart.Name }}-tests
       containers:
         - name: {{ .Chart.Name }}-tests
-          image: {{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.testImages.runtime_agent_tests) }}
+          image: {{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.testImages.compass_runtime_agent_tests) }}
           imagePullPolicy: {{ .Values.compassRuntimeAgent.image.pullPolicy }}
           envFrom:
           - secretRef:
