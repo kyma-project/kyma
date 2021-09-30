@@ -28,9 +28,8 @@ You can install this Helm chart using either Helm or Kyma CLI.
 
 ```bash
 # Install subscriptions.eventing.kyma-project.io CRD
-kubectl apply -f resources/cluster-essentials/files/subscriptions.eventing.kyma-project.io.crd.yaml
-kubectl apply -f resources/cluster-essentials/files/eventingbackends.eventing.kyma-project.io.crd.yaml
-kubectl apply -f resources/cluster-essentials/files/.eventing.kyma-project.io.crd.yaml
+kubectl apply -f installation/resources/crds/eventing/subscriptions.eventing.kyma-project.io.crd.yaml
+kubectl apply -f installation/resources/crds/eventing/eventingbackends.eventing.kyma-project.io.crd.yaml
 
 $ helm install \
     -n kyma-system \
