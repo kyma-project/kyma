@@ -1,14 +1,6 @@
 replicaCount: 1
 
-# rbacJob:
-#   image:
-#     repository: eu.gcr.io/kyma-project/tpi/k8s-tools
-#     tag: "20210922-530cfc39"
-
 image:
-#   repository: eu.gcr.io/kyma-project/incubator/api-gateway-controller
-#   tag: "ac45e9ce"
-  # Image pull policy
   pullPolicy: IfNotPresent
 
 deployment:
@@ -114,11 +106,6 @@ global:
   containerRegistry:
     path: eu.gcr.io/kyma-project
   images:
-    # unused
-    # k8s_tools:
-    #   name: "k8s-tools"
-    #   version: "20210922-530cfc39"
-    #   directory: "tpi"
     api_gateway_controller:
       name: "api-gateway-controller"
       version: "ac45e9ce"
