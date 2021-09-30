@@ -10,9 +10,9 @@ metadata:
 data:
   config.js: |
     window.clusterConfig = {
-      authRedirectUri: 'https://console.{{ js .Values.global.ingress.domainName }}',
-      apiServerUrl: 'https://apiserver.{{ js .Values.global.ingress.domainName }}',
-      domain: '{{ js .Values.global.ingress.domainName }}',
+      authRedirectUri: 'https://console.{{ js .Values.global.domainName }}',
+      apiServerUrl: 'https://apiserver.{{ js .Values.global.domainName }}',
+      domain: '{{ js .Values.global.domainName }}',
       consoleClientId: '{{ js .Values.cluster.consoleClientId }}',
       scope: '{{ js .Values.cluster.scope }}',
       orgId: '{{ js .Values.cluster.orgId }}',
@@ -23,10 +23,10 @@ data:
       gateway_kyma_cx_api_version: 'v1alpha2',
       disabledNavigationNodes: '{{ js .Values.cluster.disabledNavigationNodes }}',
       systemNamespaces: '{{ js .Values.cluster.systemNamespaces }}',
-      graphqlApiUrl: 'https://console-backend.{{ js .Values.global.ingress.domainName }}/graphql',
-      subscriptionsApiUrl: 'wss://console-backend.{{ js .Values.global.ingress.domainName }}/graphql',
+      graphqlApiUrl: 'https://console-backend.{{ js .Values.global.domainName }}/graphql',
+      subscriptionsApiUrl: 'wss://console-backend.{{ js .Values.global.domainName }}/graphql',
       defaultIdpJwksUri: '{{ js $defaultIdpJwksUri }}',
-      defaultIdpIssuer: 'https://dex.{{ js .Values.global.ingress.domainName }}',
+      defaultIdpIssuer: 'https://dex.{{ js .Values.global.domainName }}',
       namespaceAdminGroupName: '{{ js .Values.cluster.namespaceAdminGroupName }}',
       runtimeAdminGroupName: '{{ js .Values.cluster.runtimeAdminGroupName }}',
       bebEnabled: '{{ .Values.global.isBEBEnabled }}',
@@ -50,4 +50,4 @@ data:
     };
     
   nginx-extended.conf: |
-    set $kymadomain {{ js .Values.global.ingress.domainName }};
+    set $kymadomain {{ js .Values.global.domainName }};

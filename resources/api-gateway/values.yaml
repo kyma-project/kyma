@@ -3,7 +3,7 @@ replicaCount: 1
 rbacJob:
   image:
     repository: eu.gcr.io/kyma-project/tpi/k8s-tools
-    tag: "20210817-8cdbfce3"
+    tag: "20210922-530cfc39"
 
 image:
   repository: eu.gcr.io/kyma-project/incubator/api-gateway-controller
@@ -98,7 +98,7 @@ tests:
     after-upgrade: true
   image:
     registry: "eu.gcr.io/kyma-project"
-    version: "7b9c624e"
+    version: "fe9f5885"
   env:
     testUser: "admin-user"
     timeout: 120

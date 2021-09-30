@@ -9,7 +9,7 @@ metadata:
     release: {{ .Release.Name }}
 spec:
   hosts:
-  - loki.{{ .Values.global.ingress.domainName }}
+  - loki.{{ .Values.global.domainName }}
   http:
   - route:
     - destination:

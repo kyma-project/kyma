@@ -124,7 +124,7 @@ authProxy:
   enabled: true
   replicaCount: 1
   inPort: 10001
-  configDocsLink: "https://kyma-project.io/docs"
+  configDocsLink: "https://kyma-project.io/docs/kyma/main/04-operation-guides/security/sec-06-access-expose-kiali-grafana"
   config:
     clientId: "jaeger"
     clientSecret: "oiEWUWOIEwedfgg"

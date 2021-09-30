@@ -33,8 +33,8 @@ spec:
       hostAliases:
         - ip: {{ .Values.global.minikubeIP }}
           hostnames:
-            - "connector-service.{{ .Values.global.ingress.domainName }}"
-            - "gateway.{{ .Values.global.ingress.domainName }}"
+            - "connector-service.{{ .Values.global.domainName }}"
+            - "gateway.{{ .Values.global.domainName }}"
       {{ end }}
       containers:
         - name: tests

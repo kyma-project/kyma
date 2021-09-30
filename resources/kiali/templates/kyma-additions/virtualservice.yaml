@@ -8,7 +8,7 @@ metadata:
     {{- include "kiali-server.labels" . | nindent 4 }}
 spec:
   hosts:
-  - kiali.{{ .Values.global.ingress.domainName }}
+  - kiali.{{ .Values.global.domainName }}
   gateways:
   - {{ .Values.global.istio.gateway.namespace }}/{{ .Values.global.istio.gateway.name }}
   http:

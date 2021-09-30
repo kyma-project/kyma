@@ -7,5 +7,5 @@ metadata:
 data:
   config.js: |
     window.clusterConfig = {
-      domain: '{{ .Values.global.ingress.domainName }}',
+      domain: '{{ .Values.global.domainName }}',
     };

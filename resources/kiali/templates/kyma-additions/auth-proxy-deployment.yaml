@@ -23,7 +23,7 @@ spec:
       hostAliases:
         - ip: {{ .Values.global.minikubeIP }}
           hostnames:
-          - "dex.{{ .Values.global.ingress.domainName }}"
+          - "dex.{{ .Values.global.domainName }}"
       {{- end }}
       {{- if .Values.authProxy.nodeSelector }}
       nodeSelector:
@@ -41,7 +41,7 @@ spec:
         - --http-address=0.0.0.0:{{ .Values.authProxy.port }}
         - --upstream=http://{{ template "kiali-server.fullname" . }}-server:{{ .Values.kiali.spec.server.port }}
         - --cookie-secure=true
-        - --cookie-domain=kiali.{{ .Values.global.ingress.domainName }}
+        - --cookie-domain=kiali.{{ .Values.global.domainName }}
         - --cookie-name=KYMA_KIALI_OAUTH2_PROXY_TOKEN
         - --silence-ping-logging=true
         - --reverse-proxy=true

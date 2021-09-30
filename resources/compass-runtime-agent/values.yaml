@@ -3,7 +3,7 @@ global:
     containerRegistry:
       path: eu.gcr.io/kyma-project
     runtimeAgent:
-      version: "PR-11678"
+      version: "PR-11547"
     runtimeAgentTests:
       version: "5b55dce8"
   istio:
@@ -69,7 +69,7 @@ compassRuntimeAgent:
     applicationInstallationTimeout: 180s
     graphqlLogs: false
     director:
-      url: "https://compass-gateway.{{ .Values.global.ingress.domainName }}/director/graphql"
+      url: "https://compass-gateway.{{ .Values.global.domainName }}/director/graphql"
     idProvider:
       clientTimeout: 10s
   livenessProbe:

@@ -38,7 +38,7 @@ spec:
             - name: APP_TEST_WAIT_TIMEOUT
               value: "{{ .Values.tests.envs.waitTimeout }}"
             - name: APP_TEST_DOMAIN_NAME
-              value: "{{ .Values.global.ingress.domainName }}"
+              value: "{{ .Values.global.domainName }}"
             - name: APP_TEST_VERBOSE
               value: "{{ .Values.tests.envs.verbose }}"
             - name: APP_TEST_USAGE_KIND_NAME

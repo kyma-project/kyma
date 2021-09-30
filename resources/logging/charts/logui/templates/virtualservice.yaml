@@ -6,7 +6,7 @@ metadata:
     {{- include "logui.labels" . | nindent 4 }}
 spec:
   hosts:
-  - log-ui.{{ .Values.global.ingress.domainName }}
+  - log-ui.{{ .Values.global.domainName }}
   gateways:
   - {{ .Values.global.istio.gateway.namespace }}/{{ .Values.global.istio.gateway.name }}
   http:

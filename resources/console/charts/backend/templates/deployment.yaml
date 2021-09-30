@@ -31,8 +31,8 @@ spec:
       hostAliases:
         - ip: {{ .Values.global.minikubeIP }}
           hostnames:
-            - "dex.{{ .Values.global.ingress.domainName }}"
-            - "minio.{{ .Values.global.ingress.domainName }}"
+            - "dex.{{ .Values.global.domainName }}"
+            - "minio.{{ .Values.global.domainName }}"
       {{ end }}
       containers:
       - name: {{ .Chart.Name }}
@@ -49,7 +49,7 @@ spec:
           - name: APP_HOST
             value: "0.0.0.0"
           - name: APP_ALLOWED_ORIGINS
-            value: "https://*.{{ .Values.global.ingress.domainName }},*.svc.cluster.local:44134,http://console-dev.{{ .Values.global.ingress.domainName }}:*"
+            value: "https://*.{{ .Values.global.domainName }},*.svc.cluster.local:44134,http://console-dev.{{ .Values.global.domainName }}:*"
           - name: APP_VERBOSE
             value: "true"
           - name: APP_SYSTEM_NAMESPACES
@@ -69,7 +69,7 @@ spec:
           - name: APP_APPLICATION_CONNECTOR_HTTP_CALL_TIMEOUT
             value: "2s"
           - name: APP_OIDC_ISSUER_URL
-            value: "https://dex.{{ .Values.global.ingress.domainName }}"
+            value: "https://dex.{{ .Values.global.domainName }}"
           - name: APP_OIDC_CLIENT_ID
             value: "kyma-client"
           {{ if not .Values.global.environment.gardener }}

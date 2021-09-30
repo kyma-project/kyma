@@ -55,7 +55,7 @@ spec:
         args:
         - "/manager"
         - "--appName={{ .Values.controller.args.appName }}"
-        - "--domainName={{ .Values.global.ingress.domainName }}"
+        - "--domainName={{ .Values.global.domainName }}"
         - "--namespace={{ .Values.global.integrationNamespace }}"
         - "--helmDriver={{ .Values.controller.args.helmDriver }}"
         - "--applicationGatewayImage={{ .Values.global.containerRegistry.path }}/application-gateway:{{ .Values.global.application_gateway.version }}"

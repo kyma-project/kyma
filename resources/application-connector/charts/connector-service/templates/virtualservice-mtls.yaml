@@ -13,7 +13,7 @@ metadata:
     app.kubernetes.io/instance: {{ .Release.Name }}
 spec:
   hosts:
-  - gateway.{{ .Values.global.ingress.domainName }}
+  - gateway.{{ .Values.global.domainName }}
   gateways:
   - {{ .Values.global.istio.gateway.namespace }}/{{ .Values.global.istio.gateway.nameMtls }}
   http:
