@@ -6,7 +6,7 @@ Application Connector (AC) is a custom, in-house built Kyma component that allow
 
 The external solution you connect to Kyma using AC is represented as an Application. There is always a one-to-one relationship between a connected solution and an Application, which helps to ensure the highest level of security and separation. This means that you must create five separate Applications in your cluster to connect five different external solutions and use their APIs and event catalogs in Kyma.
 
-Application Connector is secured with a client certificate verified by the Istio Ingress Gateway. The CA root certificates are generated and stored as Kubernetes Secrets by Application Connector Certs Setup job. By default, the server key and certificate are automatically generated, but you can [provide a custom server certificate and key](../../../04-operation-guides/operations/ac-03-application-connector-certificates.md) during installation.
+Application Connector is secured with a client certificate verified by the Istio Ingress Gateway. The root CA certificates are generated and stored as Kubernetes Secrets by Application Connector Certs Setup job. By default, the server key and certificate are automatically generated, but you can [provide a custom server certificate and key](../../../04-operation-guides/operations/ac-03-application-connector-certificates.md) during installation.
 
 Application Connector:
 
