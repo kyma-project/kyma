@@ -2,10 +2,6 @@
 title: Application Gateway details
 ---
 
-<!-- TODO 10: update to the current changes in Central Application Gateway--> 
-<!-- TODO 10 note: it seems that 001-application-connector.svg and 001-application-connector copy.svg are no longer used -->
->**CAUTION:** This document describes Application Gateway working in the alternative Compass [mode](00-architecture/ac-01-application-connector-components.md#application-operator). See the [architecture](00-architecture/ac-03-application-gateway.md) to learn about Application Gateway working in the default legacy mode.
-
 Application Gateway is an intermediary component between a Function or a service and an external API.
 
 ## Proxying requests
@@ -74,17 +70,6 @@ An example **CONFIGURATION** for APIs secured with BasicAuth looks as follows:
 ```
 
 > **NOTE:** All APIs defined in a single Secret use the same configuration - the same credentials, CSRF tokens, and request parameters.
-
-
-### Calling Application Gateway
-
-The Secret name and the API name are specified as path variables in the following format:
-
-```
-http://my-namespace-application-gateway:8080/secret/{SECRET_NAME}/api/{API_NAME}/{CUSTOM_PATH}
-```
-
-In order for Application Gateway to properly read Secrets, they must exist in the same Namespace as the Gateway.
 
 ## Caching
 
