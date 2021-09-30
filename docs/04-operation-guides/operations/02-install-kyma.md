@@ -12,7 +12,7 @@ Meet the prerequisites, provision a k3d cluster, and use the `deploy` command to
 
 - [Kyma CLI](https://github.com/kyma-project/cli)
 - [Docker](https://docs.docker.com/get-docker/)
-- [k3d](https://k3d.io/#installation)
+- [k3d](https://k3d.io)
 
 ### Provision and install
 
