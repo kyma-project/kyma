@@ -62,7 +62,7 @@ spec:
       serviceAccountName: {{ include "minio.serviceAccountName" . | quote }}
       containers:
         - name: {{ .Chart.Name }}
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.rafter_controller_manager) }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           {{- if .Values.pod.extraContainerProperties }}
           {{ include "rafterAsyncAPIService.tplValue" ( dict "value" .Values.pod.extraContainerProperties "context" . ) | nindent 10 }}

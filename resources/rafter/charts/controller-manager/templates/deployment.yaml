@@ -59,7 +59,7 @@ spec:
       {{- end }}
       containers:
         - name: {{ include "rafter.name" . }}
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.rafter_controller_manager) }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           {{- $replicas := int (toString (.Values.deployment.replicas)) -}}
           {{- if or .Values.metrics.enabled (gt $replicas 1) }}

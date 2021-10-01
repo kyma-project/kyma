@@ -184,7 +184,7 @@ spec:
             claimName: {{ include "rafterUploadService.fullname" . }}-migrator
       initContainers:
       - name: mode-checker
-        image: "{{ .Values.migrator.images.alpineKubectl.repository }}:{{ .Values.migrator.images.alpineKubectl.tag }}"
+        image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.k8s_tools) }}"
         imagePullPolicy: {{ .Values.migrator.images.alpineKubectl.pullPolicy }}
         {{- if .Values.pod.extraContainerProperties }}
         {{ include "rafter.tplValue" ( dict "value" .Values.pod.extraContainerProperties "context" . ) | nindent 8 }}
@@ -198,7 +198,7 @@ spec:
           mountPath: /export
       containers:
       - name: migrator
-        image: "{{ .Values.migrator.images.minioClient.repository }}:{{ .Values.migrator.images.minioClient.tag }}"
+        image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.minio_client) }}"
         imagePullPolicy: {{ .Values.migrator.images.minioClient.pullPolicy }}
         {{- if .Values.pod.extraContainerProperties }}
         {{ include "rafter.tplValue" ( dict "value" .Values.pod.extraContainerProperties "context" . ) | nindent 8 }}
@@ -272,11 +272,11 @@ spec:
             claimName: {{ include "rafterUploadService.fullname" . }}-migrator
       containers:
       - name: migrator
-        image: "{{ .Values.migrator.images.minioClient.repository }}:{{ .Values.migrator.images.minioClient.tag }}"
-        imagePullPolicy: {{ .Values.migrator.images.minioClient.pullPolicy }}
+        image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.minio_client) }}"
+ainerProperties "context" . ) | nindent 8 }}
+        {{- end }}        imagePullPolicy: {{ .Values.migrator.images.minioClient.pullPolicy }}
         {{- if .Values.pod.extraContainerProperties }}
-        {{ include "rafter.tplValue" ( dict "value" .Values.pod.extraContainerProperties "context" . ) | nindent 8 }}
-        {{- end }}
+        {{ include "rafter.tplValue" ( dict "value" .Values.pod.extraCont
         command: ["/bin/sh", "/config/initialize"]
         env:
           {{ include "rafterUploadService.createEnv" ( dict "name" "MINIO_ENDPOINT" "value" .Values.envs.upload.endpoint "context" . ) | nindent 10 }}
@@ -387,7 +387,7 @@ spec:
       serviceAccountName: {{ include "rafterUploadService.fullname" . }}-migrator-delete-pvc
       containers:
         - name: pvc-remover
-          image: "{{ .Values.migrator.images.alpineKubectl.repository }}:{{ .Values.migrator.images.alpineKubectl.tag }}"
+          image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.k8s_tools) }}"
           imagePullPolicy: {{ .Values.migrator.images.alpineKubectl.pullPolicy }}
           {{- if .Values.pod.extraContainerProperties }}
           {{ include "rafter.tplValue" ( dict "value" .Values.pod.extraContainerProperties "context" . ) | nindent 10 }}
