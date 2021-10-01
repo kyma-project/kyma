@@ -1,9 +1,6 @@
 ---
 title: Application Connectivity - useful links
 ---
-
-<!-- Link to Application Operator to be removed. -->
-
 If you're interested in learning more about the Application Connectivity area, follow these links to:
 
 - Perform some simple and more advanced tasks:
@@ -38,7 +35,6 @@ If you're interested in learning more about the Application Connectivity area, f
   - [EventActivation](../../../05-technical-reference/00-custom-resources/ac-03-eventactivation.md) CR
   - [TokenRequest](../../../05-technical-reference/00-custom-resources/ac-04-tokenrequest.md) CR
   - [Application Connector chart](../../../05-technical-reference/00-configuration-parameters/ac-01-application-connector-chart.md)
-  - [Application Operator sub-chart](../../../05-technical-reference/00-configuration-parameters/ac-02-application-operator-sub-chart.md)
   - [Application Registry sub-chart](../../../05-technical-reference/00-configuration-parameters/ac-03-application-registry-sub-chart.md)
   - [Connector Service sub-chart](../../../05-technical-reference/00-configuration-parameters/ac-04-connector-service-sub-chart.md)
   - [Application Connectivity Certs Setup Job](../../../05-technical-reference/00-configuration-parameters/ac-05-application-connectivity-certs-setup-job.md)
