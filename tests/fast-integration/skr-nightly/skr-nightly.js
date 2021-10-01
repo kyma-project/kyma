@@ -83,7 +83,7 @@ describe("SKR nightly", function () {
 
   let skr;
 
-  let deprovision;
+  let deprovision = true;
   try {
     getShootName(keb, runtimeID)
   } catch(err) {
