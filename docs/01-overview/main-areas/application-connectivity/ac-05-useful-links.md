@@ -1,6 +1,7 @@
 ---
 title: Application Connectivity - useful links
 ---
+
 If you're interested in learning more about the Application Connectivity area, follow these links to:
 
 - Perform some simple and more advanced tasks:
