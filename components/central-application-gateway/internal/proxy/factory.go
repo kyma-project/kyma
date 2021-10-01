@@ -59,24 +59,26 @@ func NewForCompass(
 	authorizationStrategyFactory authorization.StrategyFactory,
 	csrfTokenStrategyFactory csrf.TokenStrategyFactory,
 	config Config) http.Handler {
-	extractFunc := func(path string) (model.APIIdentifier, string, apperrors.AppError) {
-		trimmed := strings.Trim(path, "/")
-		split := strings.Split(trimmed, "/")
 
-		if len(split) < 3 || split[0] == path {
-			return model.APIIdentifier{}, "", apperrors.WrongInput("path must contain Application, Service and Entry name")
+		extractFunc := func(path string) (model.APIIdentifier, string, apperrors.AppError)
+		{
+			trimmed := strings.Trim(path, "/")
+			split := strings.Split(trimmed, "/")
+
+			if len(split) < 3 || split[0] == path {
+				return model.APIIdentifier{}, "", apperrors.WrongInput("path must contain Application, Service and Entry name")
+			}
+
+			apiIdentifier := model.APIIdentifier{
+				Application: split[0],
+				Service:     split[1],
+				Entry:       split[2],
+			}
+
+			targetAPIPath := strings.Join(split[3:], "/")
+
+			return apiIdentifier, targetAPIPath, nil
 		}
-
-		apiIdentifier := model.APIIdentifier{
-			Application: split[0],
-			Service:     split[1],
-			Entry:       split[2],
-		}
-
-		targetAPIPath := strings.Join(split[3:], "/")
-
-		return apiIdentifier, targetAPIPath, nil
-	}
 
 	apiExtractor := compassAPIExtractor{
 		serviceDefService: serviceDefService,
@@ -84,7 +86,7 @@ func NewForCompass(
 
 	return &proxy{
 		cache:                        NewCache(config.ProxyCacheTTL),
-		skipVerify:                   config.SkipVerify,
+		skipVerify:                   config.,
 		proxyTimeout:                 config.ProxyTimeout,
 		authorizationStrategyFactory: authorizationStrategyFactory,
 		csrfTokenStrategyFactory:     csrfTokenStrategyFactory,

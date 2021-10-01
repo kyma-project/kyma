@@ -36,7 +36,6 @@ type APIExtractor interface {
 
 // Config stores Proxy config
 type Config struct {
-	SkipVerify    bool
 	ProxyTimeout  int
 	Application   string
 	ProxyCacheTTL int

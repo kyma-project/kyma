@@ -62,6 +62,8 @@ type Service struct {
 	Tags []string
 	// Mapped to type property under entries element (type: API)
 	API *ServiceAPI
+	// skip verify of app
+	skipVerify bool
 }
 
 //go:generate mockery --name=ServiceRepository
@@ -103,6 +105,7 @@ func (r *repository) get(appName string, predicate func(service v1alpha1.Service
 	}
 	services := make([]Service, 0)
 	infos := make([]string, 0)
+	skipVerify := app.Spec.skipVerify
 	for _, service := range app.Spec.Services {
 		for _, entry := range service.Entries {
 			if predicate(service, entry) {
@@ -138,7 +141,7 @@ func (r *repository) getApplication(appName string) (*v1alpha1.Application, appe
 	return app, nil
 }
 
-func convert(service v1alpha1.Service, entry v1alpha1.Entry) Service {
+func convert(service v1alpha1.Service, entry v1alpha1.Entry, skipVerify bool) Service {
 	api := &ServiceAPI{
 		TargetURL:                   entry.TargetUrl,
 		Credentials:                 convertCredentialsFromK8sType(entry.Credentials),
@@ -153,6 +156,7 @@ func convert(service v1alpha1.Service, entry v1alpha1.Entry) Service {
 		ProviderDisplayName: service.ProviderDisplayName,
 		Tags:                service.Tags,
 		API:                 api,
+		skipVerify:          skipVerify,
 	}
 }
 
