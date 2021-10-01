@@ -2,10 +2,6 @@
 replicaCount: 1
 
 image:
-  # ORY Hydra image
-  repository: eu.gcr.io/kyma-project/external/oryd/hydra
-  # ORY Hydra version
-  tag: v1.8.5
   # Image pull policy
   pullPolicy: IfNotPresent
 
@@ -226,7 +222,3 @@ maester:
     # You only need to set this port if you change the value for
     # `service.admin.port` in the parent chart
     # port:
-
-busybox:
-  repository: eu.gcr.io/kyma-project/external/busybox
-  tag: 1.32.0-v1

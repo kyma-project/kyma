@@ -42,7 +42,7 @@ spec:
       initContainers:
         {{- if not .Values.global.ory.hydra.persistence.gcloud.enabled }} #Use only for in-cluster databases that may not be ready yet. External databases are made ready before installation.
         - name: wait-for-db
-          image: "{{ .Values.busybox.repository }}:{{ .Values.busybox.tag }}"
+          image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.busybox) }}"
           command:
             - /bin/sh
             - -c
@@ -65,7 +65,7 @@ spec:
             runAsUser: 65534
         {{- end }}
         - name: {{ .Chart.Name }}-automigrate
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.hydra) }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           command: ["hydra"]
           args: ["migrate", "sql", "-e", "--yes", "--config", "/etc/config/config.yaml"]
@@ -108,7 +108,7 @@ spec:
       {{- end }}
       containers:
         - name: {{ .Chart.Name }}
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.hydra) }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           command: ["hydra"]
           volumeMounts:
@@ -161,7 +161,7 @@ spec:
             - name: DD_ENV
               value: {{ .Values.deployment.tracing.datadog.env | default "none" | quote }}
             - name: DD_VERSION
-              value: {{ .Values.deployment.tracing.datadog.version | default .Values.image.tag | quote }}
+              value: {{ .Values.deployment.tracing.datadog.version | default .Values.global.images.hydra.version | quote }}
             - name: DD_SERVICE
               value: {{ .Values.deployment.tracing.datadog.service | default "ory/hydra" | quote }}
             {{- if .Values.deployment.tracing.datadog.useHostIP }}
