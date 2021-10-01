@@ -8,7 +8,7 @@ Application Registry stores the data of all registered services in:
 
 - Application custom resource (CR), which stores the metadata of the service.
 - AssetGroup custom resource (CR), which stores the links to API specification, event catalog, and documentation.
-- Upload Service, which stores the files contains API specification, event catalog, and documentation in a Rafter bucket.
+- Upload Service, which stores the files containing API specification, event catalog, and documentation in a Rafter bucket.
 - Kubernetes Secrets, which store sensitive data, such as OAuth credentials.
 
 ## Kubernetes APIs interaction
