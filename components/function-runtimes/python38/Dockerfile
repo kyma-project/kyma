@@ -7,7 +7,7 @@
 # We use this code to manually use newest alpine and nodejs.
 # Use official build when it will be available.
 
-FROM alpine:3.13.5
+FROM alpine:3.14.2
 
 # ensure local python is preferred over distribution python
 ENV PATH /usr/local/bin:$PATH
