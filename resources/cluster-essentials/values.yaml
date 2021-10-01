@@ -2,11 +2,11 @@ jobs:
   crdsInConfigMap: 20
   image:
     repository: eu.gcr.io/kyma-project/tpi/k8s-tools
-    tag: "20210817-8cdbfce3"
+    tag: "20210922-530cfc39"
 
 global:
   isLocalEnv: false
-  installCRDs: true
+  installCRDs: false
   disableLegacyConnectivity: false
   podSecurityPolicy:
     privileged: false

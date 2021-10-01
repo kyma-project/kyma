@@ -59,7 +59,7 @@ receivers:
     api_url: https://alert.victorops.com/integrations/generic/20131114/alert/
     routing_key: {{ .Values.global.alertTools.credentials.victorOps.routingkey | quote }}
     state_message: 'Alert: {{`{{ .CommonLabels.alertname }}`}}. Summary:{{`{{ .CommonAnnotations.description }}`}}. RawData: {{`{{ .CommonLabels }}`}}'
-    entity_display_name: {{ .Values.global.ingress.domainName }}
+    entity_display_name: {{ .Values.global.domainName }}
 {{- end }}
 {{- end }}
 {{- if and .Values.global.alertTools.credentials.slack }}
@@ -74,8 +74,8 @@ receivers:
     {{- end }}
     api_url: {{ .Values.global.alertTools.credentials.slack.apiurl | quote }}
     icon_emoji: ":ghost:"
-    title: '{{`{{ template "__subject" . }}`}} ({{ .Values.global.ingress.domainName }})'
-    title_link: 'https://console.{{ .Values.global.ingress.domainName }}'
+    title: '{{`{{ template "__subject" . }}`}} ({{ .Values.global.domainName }})'
+    title_link: 'https://console.{{ .Values.global.domainName }}'
     text: '{{`{{ range .Alerts }}`}}<!channel>{{`{{- "\n" -}}`}}{{`{{ .Annotations.description }}`}}{{`{{- "\n" -}}`}}{{`{{ end }}`}}'
 {{- end }}
 {{- end }}

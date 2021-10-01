@@ -13,7 +13,7 @@ spec:
   gateways:
     - {{ .Values.global.istio.gateway.namespace }}/{{ .Values.global.istio.gateway.name }}
   hosts:
-    - storage.{{ .Values.global.ingress.domainName }}
+    - storage.{{ .Values.global.domainName }}
   http:
     - corsPolicy:
         allowHeaders:

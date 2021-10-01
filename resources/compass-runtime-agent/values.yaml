@@ -70,7 +70,7 @@ compassRuntimeAgent:
     applicationInstallationTimeout: 180s
     graphqlLogs: false
     director:
-      url: "https://compass-gateway.{{ .Values.global.ingress.domainName }}/director/graphql"
+      url: "https://compass-gateway.{{ .Values.global.domainName }}/director/graphql"
     idProvider:
       clientTimeout: 10s
   livenessProbe:

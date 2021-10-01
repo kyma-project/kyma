@@ -198,7 +198,7 @@ async function chartList(options) {
     `global.domainName=${domain}`,
     `global.environment.gardener=${isGardener}`,
     `global.isLocalEnv=false`,
-    `global.ingress.domainName=${domain}`,
+    `global.domainName=${domain}`,
     `global.tlsCrt=ZHVtbXkK`
   ].join(',');
 
@@ -207,7 +207,7 @@ async function chartList(options) {
   if (isGardener == true) {
     registryOverrides = [
       `dockerRegistry.enableInternal=true`,
-      `global.ingress.domainName=${domain}`
+      `global.domainName=${domain}`
     ].join(',');
   } else {
     registryOverrides = [
@@ -215,7 +215,7 @@ async function chartList(options) {
       `dockerRegistry.enableInternal=false`,
       `dockerRegistry.registryAddress=registry.localhost:5000`,
       `dockerRegistry.serverAddress=registry.localhost:5000`,
-      `global.ingress.domainName=${domain}`
+      `global.domainName=${domain}`
     ].join(',');
   }
   const kialiOverrides = overrides + ',kcproxy.enabled=false,virtualservice.enabled=false';
@@ -312,7 +312,7 @@ async function chartList(options) {
     {
       release: "ingress-dns-cert",
       namespace: "istio-system",
-      values: `global.ingress.domainName=${domain},global.environment.gardener=${isGardener}`,
+      values: `global.domainName=${domain},global.environment.gardener=${isGardener}`,
       customPath: () => join(__dirname, "charts", "ingress-dns-cert"),
     },
   ];

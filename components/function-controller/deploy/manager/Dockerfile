@@ -4,7 +4,7 @@ ENV BASE_APP_DIR=/workspace/go/src/github.com/kyma-project/kyma/components/funct
     CGO_ENABLED=1 \
     GOOS=linux \
     GOARCH=amd64 \
-    LIBGIT2_VERSION=1.1.1-r1
+    LIBGIT2_VERSION=1.1.1-r2
 
 RUN apk add gcc libc-dev
 RUN apk add --no-cache --repository http://dl-cdn.alpinelinux.org/alpine/edge/community libgit2-dev=${LIBGIT2_VERSION}
@@ -25,8 +25,8 @@ FROM alpine:3.13.5 as certs
 RUN apk --update add ca-certificates
 
 # result container
-FROM alpine:3.13.5
-ENV LIBGIT2_VERSION=1.1.1-r1
+FROM eu.gcr.io/kyma-project/external/alpine:3.14.2
+ENV LIBGIT2_VERSION=1.1.1-r2
 
 RUN apk add --no-cache --repository http://dl-cdn.alpinelinux.org/alpine/edge/community libgit2=${LIBGIT2_VERSION}
 

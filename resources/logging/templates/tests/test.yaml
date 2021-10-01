@@ -28,9 +28,9 @@ spec:
       hostAliases:
         - ip: {{ .Values.global.minikubeIP }}
           hostnames:
-            - "oauth2.{{ .Values.global.ingress.domainName }}"
-            - "dex.{{ .Values.global.ingress.domainName }}"
-            - "loki.{{ .Values.global.ingress.domainName }}"
+            - "oauth2.{{ .Values.global.domainName }}"
+            - "dex.{{ .Values.global.domainName }}"
+            - "loki.{{ .Values.global.domainName }}"
       {{ end }}
       restartPolicy: Never
       containers:
@@ -44,7 +44,7 @@ spec:
         - "./test-logging"
         env:
         - name: DOMAIN
-          value: {{ .Values.global.ingress.domainName }}
+          value: {{ .Values.global.domainName }}
         - name: TEST_USER_EMAIL
           valueFrom:
             secretKeyRef:

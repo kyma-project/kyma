@@ -23,7 +23,7 @@ spec:
       hostAliases:
         - ip: {{ .Values.global.minikubeIP }}
           hostnames:
-          - "kiali.{{ .Values.global.ingress.domainName }}"
+          - "kiali.{{ .Values.global.domainName }}"
 {{ end }}
       restartPolicy: Never
       containers:
@@ -31,7 +31,7 @@ spec:
         image: {{ .Values.tests.image.name }}:{{ .Values.tests.image.version }}
         imagePullPolicy: "{{ .Values.global.imagePullPolicy }}"
         command: ['curl']
-        args: ['-k', '--retry', '10', '--retry-delay', '15', '--retry-connrefused', 'https://kiali.{{ .Values.global.ingress.domainName }}']
+        args: ['-k', '--retry', '10', '--retry-delay', '15', '--retry-connrefused', 'https://kiali.{{ .Values.global.domainName }}']
 
 {{- end}}
 {{- end}}

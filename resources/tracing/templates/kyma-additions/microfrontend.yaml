@@ -10,11 +10,11 @@ spec:
   version: v1
   category: Diagnostics
   placement: cluster
-  viewBaseUrl: https://jaeger.{{ js .Values.global.ingress.domainName }}
+  viewBaseUrl: https://jaeger.{{ js .Values.global.domainName }}
   navigationNodes:
     - label: Traces
       navigationPath: ''
       viewUrl: ''
-      externalLink: https://jaeger.{{ js .Values.global.ingress.domainName }}
+      externalLink: https://jaeger.{{ js .Values.global.domainName }}
       order: 2
 {{ end }}

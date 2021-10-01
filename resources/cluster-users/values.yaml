@@ -5,7 +5,7 @@ tests:
   enabled: true
   image:
     name: eu.gcr.io/kyma-project/tpi/k8s-tools
-    version: 20210817-8cdbfce3
+    version: 20210922-530cfc39
   env:
     namespace: default
   securityContext:
@@ -106,4 +106,4 @@ users:
   administrators:
     - "admin@kyma.cx"
   adminGroup:
-  bindStaticUsers: true
+  bindStaticUsers: false

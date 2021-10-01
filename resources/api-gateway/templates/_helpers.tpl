@@ -62,7 +62,7 @@ Create a list of domains to allowlist
 {{- range $domain := .Values.config.domainAllowList -}}
 {{ printf "%s," $domain -}}
 {{- end }}
-{{- with .Values.global.ingress.domainName }}
+{{- with .Values.global.domainName }}
 {{- printf "%s" . -}}
 {{- end }}
 {{- end -}}
@@ -74,7 +74,7 @@ Get a default domain from values if set or use the default domain name for Kyma
 {{ if .Values.config.defaultDomain }}
 {{- printf "%s" .Values.config.defaultDomain -}}
 {{ else }}
-{{- printf "%s" .Values.global.ingress.domainName -}}
+{{- printf "%s" .Values.global.domainName -}}
 {{- end }}
 {{- end -}}
 

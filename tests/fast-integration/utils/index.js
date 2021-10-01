@@ -1308,7 +1308,7 @@ async function getResponse(url, retries) {
   });
 
   let response = await axios.get(url, {
-      timeout: 5000,
+      timeout: 15000,
   });
   return response;
 }
@@ -1340,6 +1340,130 @@ function serviceInstanceObj(name, serviceClassExternalName) {
     spec: { serviceClassExternalName },
   };
 }
+
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+/**
+ * Creates eventing backend secret for event mesh (BEB)
+ * @param {string} eventMeshSecretFilePath - file path of the EventMesh secret file
+ * @param {string} name - name of the beb secret
+ * @param {string} namespace - namespace where to create the secret
+ * @returns {json} - event mesh config data
+ */
+ async function createEventingBackendK8sSecret(eventMeshSecretFilePath, name, namespace="default") {
+  // read EventMesh secret from specified file
+  const eventMeshSecret = JSON.parse(fs.readFileSync(eventMeshSecretFilePath, { encoding: "utf8" }))
+
+  const secretJson = {
+    apiVersion: "v1",
+    kind: "Secret",
+    type: "Opaque",
+    metadata: {
+      name,
+      namespace
+    },
+    data: { 
+      management: toBase64(JSON.stringify(eventMeshSecret["management"])),
+      messaging: toBase64(JSON.stringify(eventMeshSecret["messaging"])),
+      namespace: toBase64(eventMeshSecret["namespace"]),
+      serviceinstanceid: toBase64(eventMeshSecret["serviceinstanceid"]),
+      xsappname: toBase64(eventMeshSecret["xsappname"])
+    },
+  };
+
+  // apply to k8s
+  await k8sApply([secretJson], namespace, true);
+
+  return {
+    namespace: eventMeshSecret["namespace"],
+    serviceinstanceid: eventMeshSecret["serviceinstanceid"],
+    xsappname: eventMeshSecret["xsappname"]
+  }
+}
+
+/**
+ * Deletes eventing backend secret for event mesh (BEB)
+ * @param {string} name - name of the beb secret
+ * @param {string} namespace - namespace where the secret exists
+ * @returns
+ */
+ function deleteEventingBackendK8sSecret(name, namespace="default") {
+  const secretJson = {
+    apiVersion: "v1",
+    kind: "Secret",
+    type: "Opaque",
+    metadata: {
+      name,
+      namespace
+    }
+  };
+
+  return k8sDelete([secretJson], namespace)
+ }
+
+/**
+ * Switches eventing backend to specified backend-type (beb or nats)
+ * @param {string} secretName - name of the beb secret
+ * @param {string} namespace - namespace where the secret exists
+ * @param {string} backendType - backend type to switch to. (beb or nats)
+ * @returns
+ */
+async function switchEventingBackend(secretName, namespace="default", backendType="beb") {
+  // patch data to label the eventing-backend secret
+  const patch = [
+    {
+        "op": "replace",
+        "path":"/metadata/labels",
+        "value": {
+          "kyma-project.io/eventing-backend": backendType.toLowerCase()
+        }
+    }
+  ];
+
+  const options = { "headers": { "Content-type": k8s.PatchUtils.PATCH_FORMAT_JSON_PATCH}};
+
+  // apply k8s patch
+  await k8sCoreV1Api.patchNamespacedSecret(
+    secretName,
+    namespace,
+    patch,
+    undefined,
+    undefined,
+    undefined,
+    undefined,
+    options
+  );
+
+  await sleep(30 * 1000); // Putting on sleep because there may be a delay in eventing-backend status update propagation
+  await waitForEventingBackendToReady(backendType)
+}
+
+/**
+ * Waits for eventing backend until its ready
+ * @param {string} name - name of the eventing backend
+ * @param {string} namespace - namespace where the eventing backend exists
+ * @param {string} backendType - eventing backend type (beb or nats)
+ * @returns
+ */
+function waitForEventingBackendToReady(backendType="beb", name="eventing-backend", namespace = "kyma-system", timeout = 90000) {
+  return waitForK8sObject(
+    `/apis/eventing.kyma-project.io/v1alpha1/namespaces/${namespace}/eventingbackends`,
+    {},
+    (_type, _apiObj, watchObj) => {
+      return (
+        watchObj.object.metadata.name == name &&
+        watchObj.object.status.backendType.toLowerCase() == backendType.toLowerCase() &&
+        watchObj.object.status.eventingReady == true &&
+        watchObj.object.status.publisherProxyReady == true
+      );
+    },
+    timeout,
+    `Waiting for eventing-backend: ${name} to get ready  timeout (${timeout} ms)`
+  );
+}
+
 
 module.exports = {
   initializeK8sClient,
@@ -1415,4 +1539,8 @@ module.exports = {
   kubectlExecInPod,
   deleteK8sResource,
   listPods,
+  switchEventingBackend,
+  waitForEventingBackendToReady,
+  createEventingBackendK8sSecret,
+  deleteEventingBackendK8sSecret,
 };

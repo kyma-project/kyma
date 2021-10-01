@@ -27,7 +27,7 @@ spec:
         image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.dex_integration_tests.dir }}dex-integration-tests:{{ .Values.global.dex_integration_tests.version }}
         env:
         - name: DOMAIN_NAME
-          value: {{ .Values.global.ingress.domainName }}
+          value: {{ .Values.global.domainName }}
         - name: IS_LOCAL_ENV
           value: {{ .Values.global.isLocalEnv | toString | quote }}
         - name: DEX_USER_EMAIL

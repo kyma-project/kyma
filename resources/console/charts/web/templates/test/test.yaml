@@ -27,16 +27,16 @@ spec:
           hostAliases:
            - ip: {{ .Values.global.minikubeIP }}
              hostnames:
-              - "apiserver.{{ .Values.global.ingress.domainName }}"
-              - "console.{{ .Values.global.ingress.domainName }}"
-              - "catalog.{{ .Values.global.ingress.domainName }}"
-              - "instances.{{ .Values.global.ingress.domainName }}"
-              - "brokers.{{ .Values.global.ingress.domainName }}"
-              - "dex.{{ .Values.global.ingress.domainName }}"
-              - "lambdas-ui.{{ .Values.global.ingress.domainName }}"
-              - "console-backend.{{ .Values.global.ingress.domainName }}"
-              - "storage.{{ .Values.global.ingress.domainName }}"
-              - "core-ui.{{ .Values.global.ingress.domainName }}"
+              - "apiserver.{{ .Values.global.domainName }}"
+              - "console.{{ .Values.global.domainName }}"
+              - "catalog.{{ .Values.global.domainName }}"
+              - "instances.{{ .Values.global.domainName }}"
+              - "brokers.{{ .Values.global.domainName }}"
+              - "dex.{{ .Values.global.domainName }}"
+              - "lambdas-ui.{{ .Values.global.domainName }}"
+              - "console-backend.{{ .Values.global.domainName }}"
+              - "storage.{{ .Values.global.domainName }}"
+              - "core-ui.{{ .Values.global.domainName }}"
           {{ end }}
           serviceAccountName: {{ template "fullname" . }}-tests
           containers:
@@ -52,7 +52,7 @@ spec:
                    cpu: {{ .Values.test.acceptance.ui.limits.cpu }}
               env:
                 - name: CYPRESS_DOMAIN
-                  value: {{ .Values.global.ingress.domainName }}
+                  value: {{ .Values.global.domainName }}
                 - name: CYPRESS_LOGIN
                   valueFrom:
                     secretKeyRef:

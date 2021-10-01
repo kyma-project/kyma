@@ -57,9 +57,9 @@ spec:
             - name: APP_METRICS_LOGGING_TIME_INTERVAL
               value: {{ .Values.compassRuntimeAgent.metrics.loggingTimeInterval | quote }}
             - name: APP_RUNTIME_EVENTS_URL
-              value: "https://gateway.{{ .Values.global.ingress.domainName }}"
+              value: "https://gateway.{{ .Values.global.domainName }}"
             - name: APP_RUNTIME_CONSOLE_URL
-              value: "https://console.{{ .Values.global.ingress.domainName }}"
+              value: "https://console.{{ .Values.global.domainName }}"
             - name: APP_DIRECTOR_PROXY_PORT
               value: {{ .Values.compassRuntimeAgent.director.proxy.port | quote }}
             - name: APP_DIRECTOR_PROXY_INSECURE_SKIP_VERIFY
@@ -92,8 +92,8 @@ spec:
       hostAliases:
         - ip: {{ .Values.global.minikubeIP }}
           hostnames:
-            - "compass-gateway.{{ .Values.global.ingress.domainName }}"
-            - "compass-gateway-mtls.{{ .Values.global.ingress.domainName }}"
+            - "compass-gateway.{{ .Values.global.domainName }}"
+            - "compass-gateway-mtls.{{ .Values.global.domainName }}"
       {{ end }}
     {{- if .Values.global.priorityClassName }}
       priorityClassName: {{ .Values.global.priorityClassName }}
