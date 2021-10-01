@@ -215,11 +215,12 @@ Prepare yaml file with overrides that match your Docker registry provider
 ```bash
 cat > docker-registry-overrides.yaml <<EOF
 serverless:
-  dockerRegistry.enableInternal: "false"
-  dockerRegistry.username: "${USERNAME}"
-  dockerRegistry.password: "${PASSWORD}"
-  dockerRegistry.serverAddress: "${SERVER_ADDRESS}"
-  dockerRegistry.registryAddress: "${REGISTRY_ADDRESS}"
+  dockerRegistry:
+    enableInternal: false
+    username: "${USERNAME}"
+    password: "${PASSWORD}"
+    serverAddress: "${SERVER_ADDRESS}"
+    registryAddress: "${REGISTRY_ADDRESS}"
 EOF
 ```
 
@@ -232,11 +233,12 @@ EOF
 ```bash
 cat > docker-registry-overrides.yaml <<EOF
 serverless:
-  dockerRegistry.enableInternal: "false"
-  dockerRegistry.username: "_json_key"
-  dockerRegistry.password: "${GCS_KEY_JSON}"
-  dockerRegistry.serverAddress: "${SERVER_ADDRESS}"
-  dockerRegistry.registryAddress: "${SERVER_ADDRESS}/${PROJECT}"
+  dockerRegistry:
+    enableInternal: false
+    username: "_json_key"
+    password: "${GCS_KEY_JSON}"
+    serverAddress: "${SERVER_ADDRESS}"
+    registryAddress: "${SERVER_ADDRESS}/${PROJECT}"
 EOF
 ```
 
@@ -249,11 +251,12 @@ EOF
 ```bash
 cat > docker-registry-overrides.yaml <<EOF
 serverless:
-  dockerRegistry.enableInternal: "false" 
-  dockerRegistry.username: "${SP_APP_ID}" 
-  dockerRegistry.password: "${SP_PASSWORD}" 
-  dockerRegistry.serverAddress: "${AZ_REGISTRY_NAME}.${SERVER_ADDRESS}" 
-  dockerRegistry.registryAddress: "${AZ_REGISTRY_NAME}.${SERVER_ADDRESS}" 
+  dockerRegistry:
+    enableInternal: false 
+    username: "${SP_APP_ID}" 
+    password: "${SP_PASSWORD}" 
+    serverAddress: "${AZ_REGISTRY_NAME}.${SERVER_ADDRESS}" 
+    registryAddress: "${AZ_REGISTRY_NAME}.${SERVER_ADDRESS}" 
 EOF
 ```
 
