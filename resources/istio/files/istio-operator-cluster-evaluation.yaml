@@ -1,0 +1,136 @@
+apiVersion: install.istio.io/v1alpha1
+kind: IstioOperator
+spec:
+  hub: {{ include "shortimageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.istio) }}
+  tag: {{ .Values.global.images.istio.version }}
+  profile: default
+  components:
+    egressGateways:
+    - enabled: false
+      k8s:
+        resources:
+          limits:
+            cpu: 2000m
+            memory: 1024Mi
+          requests:
+            cpu: 100m
+            memory: 120Mi
+        securityContext:
+{{- toYaml .Values.istio.securityContext | nindent 14 }}
+      name: istio-egressgateway
+    ingressGateways:
+    - enabled: true
+      k8s:
+        hpaSpec:
+          maxReplicas: 1
+          metrics:
+          - resource:
+              name: cpu
+              targetAverageUtilization: 80
+            type: Resource
+          - resource:
+              name: memory
+              targetAverageUtilization: 80
+            type: Resource
+          minReplicas: 1
+        resources:
+          limits:
+            cpu: 500m
+            memory: 128Mi
+          requests:
+            cpu: 25m
+            memory: 32Mi
+        service:
+          ports:
+          - name: status-port
+            port: 15021
+            targetPort: 15021
+          - name: http2
+            port: 80
+            targetPort: 8080
+          - name: https
+            port: 443
+            targetPort: 8443
+          - name: tcp
+            port: 31400
+            targetPort: 31400
+        strategy:
+          rollingUpdate:
+            maxSurge: 100%
+            maxUnavailable: 0
+        securityContext:
+{{- toYaml .Values.istio.securityContext | nindent 14 }}
+      name: istio-ingressgateway
+    pilot:
+      enabled: true
+      k8s:
+        env:
+        - name: PILOT_HTTP10
+          value: "1"
+        hpaSpec:
+          maxReplicas: 1
+          minReplicas: 1
+        resources:
+          limits:
+            cpu: 250m
+            memory: 384Mi
+          requests:
+            cpu: 75m
+            memory: 128Mi
+        securityContext:
+{{- toYaml .Values.istio.securityContext | nindent 14 }}
+  meshConfig:
+    #How to set the logs in istio-proxy: https://istio.io/latest/docs/tasks/observability/logs/access-log/
+    accessLogFile: ""
+    trustDomain: cluster.local
+    defaultConfig:
+      proxyMetadata: {}
+      tracing:
+        sampling: 100
+        zipkin:
+          address: "{{ .Values.global.tracing.zipkinAddress }}"
+    enablePrometheusMerge: false
+    enableTracing: {{ .Values.global.tracing.enabled }}
+  values:
+    gateways:
+      istio-ingressgateway:
+        name: istio-ingressgateway
+        serviceAnnotations:
+          dns.gardener.cloud/class: garden
+          dns.gardener.cloud/dnsnames: "*.{{ .Values.global.domainName }}"
+    global:
+      defaultPodDisruptionBudget:
+        enabled: false
+      imagePullPolicy: IfNotPresent
+      logging:
+        level: all:warn
+      priorityClassName: "{{ .Values.global.priorityClassName }}"
+      proxy:
+        holdApplicationUntilProxyStarts: true
+        readinessFailureThreshold: 40
+        readinessInitialDelaySeconds: 5
+        readinessPeriodSeconds: 5
+        resources:
+          requests:
+            cpu: 25m
+            memory: 32Mi
+          limits:
+            cpu: 250m
+            memory: 254Mi
+      proxy_init:
+        resources:
+          limits:
+            cpu: 100m
+            memory: 50Mi
+          requests:
+            cpu: 10m
+            memory: 10Mi
+    pilot:
+      autoscaleEnabled: false
+      configNamespace: istio-config
+    sidecarInjectorWebhook:
+      enableNamespacesByDefault: true
+      objectSelector:
+        autoInject: true
+        enabled: false
+      rewriteAppHTTPProbe: true

@@ -1,6 +1,4 @@
 ---
-image: eu.gcr.io/kyma-project/external/istio
-
 helmValues:
   global:
     imagePullPolicy: IfNotPresent
@@ -117,8 +115,8 @@ monitoring:
 global:
   containerRegistry:
     path: eu.gcr.io/kyma-project
-    images:
-      istio:
-        name: "istio"
-        version: "1.11.2-distroless"
-        directory: "external"
+  images:
+    istio:
+      name: "istio"
+      version: "1.11.2-distroless"
+      directory: "external"
