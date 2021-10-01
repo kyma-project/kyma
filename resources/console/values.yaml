@@ -21,14 +21,7 @@ global:
   istio:
     gateway:
       name: kyma-gateway
-  images:
-    console_backend_service:
-      name: "console-backend-service"
-      version: "a06e0e38"
-    console:
-      name: "console"
-      varsion: "c60a3c68"
-  testImages:
-    ui_acceptance_tests:
-      name: "ui-tests"
-      version: "93bb0fcb"
+  ui_acceptance_tests:
+    version: "93bb0fcb"
+  console_backend_service:
+    version: "a06e0e38"
