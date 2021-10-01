@@ -83,9 +83,14 @@ describe("SKR nightly", function () {
 
   let skr;
 
+  let deprovision;
   try {
     getShootName(keb, runtimeID)
   } catch(err) {
+    deprovision = false;
+  }
+
+  if (deprovision) {
     it("Deprovision SKR", async function () {
       await deprovisionSKR(keb, runtimeID);
     });
