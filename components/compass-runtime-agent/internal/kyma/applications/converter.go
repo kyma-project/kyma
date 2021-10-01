@@ -138,8 +138,6 @@ func (c converter) toRequestParametersSecretName(applicationName string, apiPack
 	return ""
 }
 
-// builds such URL http://central-application-gateway.kyma-integration:8082/{APP_NAME}/{NORMALIZED_SERVICE_NAME}/{NORMALIZED_API_ENTRY_NAME}
-// TODO: remove this stupid comment above
 func (c converter) toCentralGatewayURL(applicationName string, apiPackageName string, apiDefinitionName string) string {
 
 	return c.centralGatewayServiceUrl + "/" + applicationName +
