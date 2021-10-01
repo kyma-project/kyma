@@ -2,7 +2,7 @@
 title: Set an external Docker registry
 ---
 
-By default, you install Kyma with Serverless that uses the internal Docker registry running on a cluster. This tutorial shows how to switch to an external Docker registry from one of these cloud providers:
+By default, you install Kyma with Serverless that uses the internal Docker registry running on a cluster. This tutorial shows how to override this default setup with an external Docker registry from one of these cloud providers:
 
 - [Docker Hub](https://hub.docker.com/)
 - [Google Container Registry (GCR)](https://cloud.google.com/container-registry)
@@ -203,7 +203,8 @@ Create an ACR and a service principal. Follow these steps:
 
 ### Override Serverless configuration
 
-Apply this Secret with an override to a cluster or Minikube. Run:
+Prepare yaml file with overrides that match your Docker registry provider
+
 
 <div tabs name="override" group="external-docker-registry">
   <details>
@@ -212,22 +213,14 @@ Apply this Secret with an override to a cluster or Minikube. Run:
   </summary>
 
 ```bash
-cat <<EOF | kubectl apply -f -
-apiVersion: v1
-kind: Secret
-metadata:
-  name: serverless-overrides
-  namespace: kyma-installer
-  labels:
-    installer: overrides
-    component: serverless
-    kyma-project.io/installation: ""
-data:
-  dockerRegistry.enableInternal: $(echo -n "false" | base64)
-  dockerRegistry.username: $(echo -n "${USERNAME}" | base64)
-  dockerRegistry.password: $(echo -n "${PASSWORD}" | base64)
-  dockerRegistry.serverAddress: $(echo -n "${SERVER_ADDRESS}" | base64)
-  dockerRegistry.registryAddress: $(echo -n "${REGISTRY_ADDRESS}" | base64)
+cat > docker-registry-overrides.yaml <<EOF
+serverless:
+  dockerRegistry:
+    enableInternal: false
+    username: "${USERNAME}"
+    password: "${PASSWORD}"
+    serverAddress: "${SERVER_ADDRESS}"
+    registryAddress: "${REGISTRY_ADDRESS}"
 EOF
 ```
 
@@ -238,22 +231,14 @@ EOF
   </summary>
 
 ```bash
-cat <<EOF | kubectl apply -f -
-apiVersion: v1
-kind: Secret
-metadata:
-  name: serverless-overrides
-  namespace: kyma-installer
-  labels:
-    installer: overrides
-    component: serverless
-    kyma-project.io/installation: ""
-data:
-  dockerRegistry.enableInternal: $(echo -n "false" | base64)
-  dockerRegistry.username: $(echo -n "_json_key" | base64)
-  dockerRegistry.password: "${GCS_KEY_JSON}"
-  dockerRegistry.serverAddress: $(echo -n "${SERVER_ADDRESS}" | base64)
-  dockerRegistry.registryAddress: $(echo -n "${SERVER_ADDRESS}/${PROJECT}" | base64)
+cat > docker-registry-overrides.yaml <<EOF
+serverless:
+  dockerRegistry:
+    enableInternal: false
+    username: "_json_key"
+    password: "${GCS_KEY_JSON}"
+    serverAddress: "${SERVER_ADDRESS}"
+    registryAddress: "${SERVER_ADDRESS}/${PROJECT}"
 EOF
 ```
 
@@ -264,22 +249,14 @@ EOF
   </summary>
 
 ```bash
-cat <<EOF | kubectl apply -f -
-apiVersion: v1
-kind: Secret
-metadata:
-  name: serverless-overrides
-  namespace: kyma-installer
-  labels:
-    installer: overrides
-    component: serverless
-    kyma-project.io/installation: ""
-data:
-  dockerRegistry.enableInternal: $(echo -n "false" | base64)
-  dockerRegistry.username: $(echo -n "${SP_APP_ID}" | base64)
-  dockerRegistry.password: $(echo -n "${SP_PASSWORD}" | base64)
-  dockerRegistry.serverAddress: $(echo -n "${AZ_REGISTRY_NAME}.${SERVER_ADDRESS}" | base64)
-  dockerRegistry.registryAddress: $(echo -n "${AZ_REGISTRY_NAME}.${SERVER_ADDRESS}" | base64)
+cat > docker-registry-overrides.yaml <<EOF
+serverless:
+  dockerRegistry:
+    enableInternal: false 
+    username: "${SP_APP_ID}" 
+    password: "${SP_PASSWORD}" 
+    serverAddress: "${AZ_REGISTRY_NAME}.${SERVER_ADDRESS}" 
+    registryAddress: "${AZ_REGISTRY_NAME}.${SERVER_ADDRESS}" 
 EOF
 ```
 
@@ -288,10 +265,14 @@ EOF
 
 >**CAUTION:** If you want to set an external Docker registry before you install Kyma, manually apply the Secret to the cluster before you run the installation script.
 
-### Trigger installation
+### Apply configuration
 
-Trigger Kyma installation or update it by labeling the Installation custom resource. Run:
+Deploy Kyma with different configuration for Docker registry . Run:
 
 ```bash
-kubectl -n default label installation/kyma-installation action=install
+kyma deploy --values-file docker-registry-overrides.yaml
 ```
+
+> **NOTE:** To learn more, read about [changing kyma configuration](../../04-operation-guides/operations/03-change-kyma-config-values.md).
+
+
