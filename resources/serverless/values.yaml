@@ -81,15 +81,15 @@ global:
 images:
   manager:
     repository: "eu.gcr.io/kyma-project/function-controller"
-    tag: "PR-12110"
+    tag: "c21665db"
     pullPolicy: IfNotPresent
   runtimes:
     nodejs12:
       repository: "eu.gcr.io/kyma-project/function-runtime-nodejs12"
-      tag: "PR-12096"
+      tag: "b0aadb76"
     nodejs14:
       repository: "eu.gcr.io/kyma-project/function-runtime-nodejs14"
-      tag: "PR-12096"
+      tag: "b0aadb76"
     python38:
       repository: "eu.gcr.io/kyma-project/function-runtime-python38"
       tag: "19830ec3"
