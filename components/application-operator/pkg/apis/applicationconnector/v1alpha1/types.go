@@ -58,7 +58,7 @@ type ApplicationSpec struct {
 	DisplayName         string   `json:"displayName"`
 	ProviderDisplayName string   `json:"providerDisplayName"`
 	LongDescription     string   `json:"longDescription"`
-	skipVerify          bool     `json:"skipVerify"`
+	SkipVerify          bool     `json:"skipVerify"`
 
 	// Deprecated
 	AccessLabel string `json:"accessLabel,omitempty"`
