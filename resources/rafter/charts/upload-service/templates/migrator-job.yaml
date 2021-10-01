@@ -273,10 +273,10 @@ spec:
       containers:
       - name: migrator
         image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.minio_client) }}"
-ainerProperties "context" . ) | nindent 8 }}
-        {{- end }}        imagePullPolicy: {{ .Values.migrator.images.minioClient.pullPolicy }}
+        imagePullPolicy: {{ .Values.migrator.images.minioClient.pullPolicy }}
         {{- if .Values.pod.extraContainerProperties }}
-        {{ include "rafter.tplValue" ( dict "value" .Values.pod.extraCont
+        {{ include "rafter.tplValue" ( dict "value" .Values.pod.extraContainerProperties "context" . ) | nindent 8 }}
+        {{- end }}
         command: ["/bin/sh", "/config/initialize"]
         env:
           {{ include "rafterUploadService.createEnv" ( dict "name" "MINIO_ENDPOINT" "value" .Values.envs.upload.endpoint "context" . ) | nindent 10 }}
