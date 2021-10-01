@@ -25,7 +25,7 @@ RUN set -eux; \
 # other runtime dependencies for Python are installed later
 
 ENV GPG_KEY E3FF2839C048B25C084DEBE9B26995E310250568
-ENV PYTHON_VERSION 3.8.12
+ENV PYTHON_VERSION 3.8.10
 
 
 # expat-dev for alpine:3.13.5 is outdated and vulnerable. We will install it from edge .
