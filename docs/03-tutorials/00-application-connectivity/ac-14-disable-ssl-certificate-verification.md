@@ -1,10 +1,10 @@
 ---
-title: Disable TLS/SSL certificate verification
+§§title: Disable SSL certificate verification
 ---
 
-You can disable the [TLS/SSL certificate verification](../../01-overview/main-areas/application-connectivity/ac-04-security.md#ssl-certificate-verification) for the connections between Kyma and external solution represented by an application. This allows Kyma to send requests and data to an unsecured application without verifying its presented TLS/SSL certificate. Disabling the certificate verification can be useful in certain testing scenarios.
+You can disable the [SSL certificate verification](../../01-overview/main-areas/application-connectivity/ac-04-security.md#ssl-certificate-verification) for the connections between Kyma and external solution represented by an application. This allows Kyma to send requests and data to an unsecured application without verifying its presented SSL certificate. Disabling the certificate verification can be useful in certain testing scenarios.
 
->**NOTE:** By default, the TLS/SSL certificate verification is enabled when sending data and requests to every application.
+>**NOTE:** By default, the SSL certificate verification is enabled when sending data and requests to every application.
 
 Follow these steps to disable SSL certificate verification:
 

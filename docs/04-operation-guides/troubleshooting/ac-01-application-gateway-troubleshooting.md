@@ -17,44 +17,11 @@ If you call a registered service and receive an error, follow these steps to det
    
     The request that reached the Pod is logged by Application Gateway.
 
-2. Check for the Access Service. 
-
-    If the call you tried to make is not in the logs, check if the [Access Service](../../05-technical-reference/00-architecture/ac-01-application-connector-components.md#access-service) for the service you are trying to call exists.
     ```
-    kubectl -n kyma-integration get svc {APP_NAME}-{SERVICE_ID}
-    ```
-3. Re-register the service.
+<--! TODO: add steps for checking secrets with credentials -->
+2. Check the API URL.
 
-    If the Access Service does not exist, deregister the service you tried to call.
-
-    <div tabs name="deregistration" group="error-when-calling-a-registered-service">
-      <details>
-      <summary label="with-a-trusted-certificate">
-      With a trusted certificate
-      </summary>
-
-      ```bash
-      curl -X DELETE https://gateway.{CLUSTER_DOMAIN}/{APP_NAME}/v1/metadata/services/{SERVICE_ID} --cert {CERTIFICATE_FILE} --key {KEY_FILE}
-      ```
-      </details>
-      <details>
-      <summary label="without-a-trusted-certificate">
-      Without a trusted certificate
-      </summary>
-
-      ```bash
-      curl -X DELETE https://gateway.{CLUSTER_DOMAIN}/{APP_NAME}/v1/metadata/services/{SERVICE_ID} --cert {CERTIFICATE_FILE} --key {KEY_FILE} -k
-      ```
-      </details>
-    </div>
-
-    Then, register the service and try calling again. Registering the service again recreates the Access Service.
-    To register a service, see [this tutorial](../../03-tutorials/00-application-connectivity/ac-04-register-manage-services.md).
-
-
-4. Check the API URL.
-
-    If your call reaches Application Gateway and the Access Service exists, but you still receive an error, check if the API URL in the service definition matches the API URL of the actual service you are trying to call.
+    If your call reaches Application Gateway, but you still receive an error, check if the API URL in the service definition matches the API URL of the actual service you are trying to call.
     To check the target URL of the API, fetch the Service definition from Application Registry:
 
     <div tabs name="verification" group="error-when-calling-a-registered-service">

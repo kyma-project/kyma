@@ -2,7 +2,7 @@
 title: Rotate the Root certificate, and the key issued by the Certificate Authority
 ---
 
-
+<!-- TODO: central Connector Service has been deprecated some time ago. This should be removed. -->
 The Central Connector Service uses the Root certificate issued by the Certificate Authority (CA) to issue new certificates for Runtimes and by the Istio Ingress Gateway to validate their identity.
 
 Two different components use the Root CA certificate. As a result, the certificate is stored in two separate Secrets:
