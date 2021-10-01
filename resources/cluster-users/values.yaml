@@ -107,8 +107,4 @@ users:
     - "admin@kyma.cx"
   adminGroup:
   bindStaticUsers: false
-
-testValues:
-  howTOTrigger: "netlify"
-
 # test2
