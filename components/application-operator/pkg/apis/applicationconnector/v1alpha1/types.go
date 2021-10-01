@@ -58,6 +58,7 @@ type ApplicationSpec struct {
 	DisplayName         string   `json:"displayName"`
 	ProviderDisplayName string   `json:"providerDisplayName"`
 	LongDescription     string   `json:"longDescription"`
+	skipVerify          bool     `json:"skipVerify"`
 
 	// Deprecated
 	AccessLabel string `json:"accessLabel,omitempty"`
@@ -80,6 +81,7 @@ type Entry struct {
 	ApiType                     string      `json:"apiType,omitempty"`
 	Credentials                 Credentials `json:"credentials,omitempty"`
 	RequestParametersSecretName string      `json:"requestParametersSecretName,omitempty"`
+	skipVerify                  bool        `json:"skipVerify"`
 
 	// New fields used by V2 version
 	Name string `json:"name"`
