@@ -12,14 +12,13 @@ global:
       version: "1.11.2-distroless"
       directory: "external"
     istio_installer:
-      image: "eu.gcr.io/kyma-project/"istio-installer"
+      name: "istio-installer"
       version: "fe9f5885"
     #istio_kyma_validate / labelJob:
     k8s_tools:
       name: "k8s-tools"
       version: "20210922-530cfc39"
       directory: "tpi"
-  testImages:
 
 kyma:
   namespaces2Label:
