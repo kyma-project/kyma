@@ -2,7 +2,7 @@
 title: Call a registered external service from Kyma
 ---
 
-This guide shows how to call a remote API of registered external service from Kyma using a simple Function.
+This guide shows how to call a registered external service from Kyma using a simple Function.
 
 ## Prerequisites
 
