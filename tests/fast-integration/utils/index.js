@@ -418,6 +418,41 @@ function waitForFunction(name, namespace = "default", timeout = 90000) {
   );
 }
 
+async function getAllSubscriptions(namespace = "default") {
+  try {
+    const path = `/apis/eventing.kyma-project.io/v1alpha1/namespaces/${namespace}/subscriptions`;
+    const response = await k8sDynamicApi.requestPromise({
+      url: k8sDynamicApi.basePath + path,
+      qs: { limit: 500 },
+    });
+    const body = JSON.parse(response.body);
+
+    // return body
+
+    return Promise.all(
+      body.items.map((sub) => {
+        // return resourceTypes(api.spec.group, api.spec.version);
+        return {
+          apiVersion: sub["apiVersion"],
+          spec: sub["spec"],
+          status: sub["status"],
+
+        }
+      })
+    ).then((results) => {
+      return results.flat();
+    });
+
+  } catch (e) {
+    if (e.statusCode == 404 || e.statusCode == 405) {
+      // do nothing
+    } else {
+      console.log("Error:", e);
+      throw e;
+    }
+  }
+}
+
 function waitForSubscription(name, namespace = "default", timeout = 90000) {
   return waitForK8sObject(
     `/apis/eventing.kyma-project.io/v1alpha1/namespaces/${namespace}/subscriptions`,
@@ -1456,7 +1491,8 @@ function waitForEventingBackendToReady(backendType="beb", name="eventing-backend
         watchObj.object.metadata.name == name &&
         watchObj.object.status.backendType.toLowerCase() == backendType.toLowerCase() &&
         watchObj.object.status.eventingReady == true &&
-        watchObj.object.status.publisherProxyReady == true
+        watchObj.object.status.publisherProxyReady == true &&
+        watchObj.object.status.subscriptionControllerReady == true
       );
     },
     timeout,
@@ -1464,6 +1500,48 @@ function waitForEventingBackendToReady(backendType="beb", name="eventing-backend
   );
 }
 
+/**
+ * Prints logs of eventing-controller from kyma-system
+ */
+async function printEventingControllerLogs() {
+  try{
+    console.log(`****** Printing logs of eventing-controller from kyma-system`)
+    await printContainerLogs('app.kubernetes.io/name=controller, app.kubernetes.io/instance=eventing', "controller", 'kyma-system');
+  }
+  catch(err) {
+    console.log(err)
+    throw err
+  }
+}
+
+/**
+ * Prints logs of eventing-publisher-proxy from kyma-system
+ */
+ async function printEventingPublisherProxyLogs() {
+  try{ 
+    console.log(`****** Printing logs of eventing-publisher-proxy from kyma-system`)
+    await printContainerLogs('app.kubernetes.io/name=eventing-publisher-proxy, app.kubernetes.io/instance=eventing', "eventing-publisher-proxy", 'kyma-system');
+  }
+  catch(err) {
+    console.log(err)
+    throw err
+  }
+}
+
+/**
+ * Prints subscriptions json
+ */
+ async function printAllSubscriptions(testNamespace) {
+  try{
+    console.log(`****** Printing all subscriptions from namespace: ${testNamespace}`)
+    const subs = await getAllSubscriptions(testNamespace)
+    console.log(JSON.stringify(subs, null, 4))
+  }
+  catch(err) {
+    console.log(err)
+    throw err
+  }
+}
 
 module.exports = {
   initializeK8sClient,
@@ -1541,6 +1619,9 @@ module.exports = {
   listPods,
   switchEventingBackend,
   waitForEventingBackendToReady,
+  printAllSubscriptions,
+  printEventingControllerLogs,
+  printEventingPublisherProxyLogs,
   createEventingBackendK8sSecret,
   deleteEventingBackendK8sSecret,
 };

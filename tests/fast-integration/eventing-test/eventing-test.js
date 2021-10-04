@@ -17,6 +17,9 @@ const {
   switchEventingBackend,
   createEventingBackendK8sSecret,
   deleteEventingBackendK8sSecret,
+  printAllSubscriptions,
+  printEventingControllerLogs,
+  printEventingPublisherProxyLogs,
 } = require("../utils");
 
 describe("Eventing tests", function () {
@@ -72,6 +75,17 @@ describe("Eventing tests", function () {
     }
   });
 
+  afterEach(async function() {
+    // runs after each test in every block
+
+    // if the test is failed, then printing some debug logs
+    if (this.currentTest.state === 'failed') {
+      await printAllSubscriptions()
+      await printEventingControllerLogs()
+      await printEventingPublisherProxyLogs()
+    }
+  });
+
   // Tests
   context('with Nats backend', function() {
     // Running Eventing end-to-end tests
@@ -82,6 +96,7 @@ describe("Eventing tests", function () {
     it("Switch Eventing Backend to BEB", async function () {
       await switchEventingBackend(backendK8sSecretName, backendK8sSecretNamespace, "beb");
       await waitForSubscriptionsTillReady(testNamespace)
+      await printAllSubscriptions()
     });
 
     // Running Eventing end-to-end tests
