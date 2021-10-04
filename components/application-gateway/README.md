@@ -34,6 +34,7 @@ The Application Gateway has the following parameters:
 - **application** is the Application name used to write and read information about services. The default Application is `default-ec`.
 - **namespace** is the Namespace in which the Application Gateway is deployed. The default Namespace is `kyma-system`.
 - **requestTimeout** is the timeout for requests sent through the Application Gateway, expressed in seconds. The default value is `1`.
+- **skipVerify** is the flag for skipping the verification of certificates for the proxy targets. The default value is `false`.
 - **requestLogging** is the flag for logging incoming requests. The default value is `false`.
 - **proxyTimeout** is the timeout for requests sent through the proxy, expressed in seconds. The default value is `10`.
 - **proxyCacheTTL** is the time to live of the remote API information stored in the proxy cache, expressed in seconds. The default value is `120`.
