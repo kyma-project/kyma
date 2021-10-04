@@ -50,6 +50,7 @@ merge-kyma() {
   step "Last commit from main"
   git log --max-count=1
 
+  step "merging changes from pull request to main"
   git merge pull-request
 }
 

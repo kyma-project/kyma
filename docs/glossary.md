@@ -23,4 +23,3 @@ Here's a list of the most commonly used terms that you may come across when brow
 | Service operator | Service Management in Kyma uses service operators. A service operator is a piece of software that provides a set of all necessary resources (such as CustomResourceDefinitions and controllers) needed to provision third-party services in your Kubernetes cluster. | [OperatorHub.io](https://operatorhub.io/) & [What is Service Management in Kyma?](./01-overview/main-areas/service-management) |
 
 >**TIP:** To learn the basic Kubernetes terminology, read the [Kubernetes glossary](https://kubernetes.io/docs/reference/glossary).
-
