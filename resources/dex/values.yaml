@@ -92,19 +92,19 @@ global:
   images:
     dex:
       name: "dex"
-      version: "c366a60e"
+      version: "1b1ee80f"
       directory: "incubator/develop"
     dex_static_user_configurer:
       name: "dex-static-user-configurer"
-      version: "7b9c624e"
+      version: "fe9f5885"
     k8s_tools:
       name: "k8s-tools"
       version: "20210817-8cdbfce3"
       directory: "tpi"
   testImages:
     dex_integration_tests:
-      name: "dex_integration_tests"
-      version: "cddfbc5b"
+      name: "dex-integration-tests"
+      version: "fe9f5885"
 
 nodeSelector: {}
 
