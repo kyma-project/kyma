@@ -15,7 +15,7 @@ func TestConverter(t *testing.T) {
 
 	t.Run("should convert application without API packages", func(t *testing.T) {
 		// given
-		converter := NewConverter(k8sconsts.NewNameResolver())
+		converter := NewConverter(k8sconsts.NewNameResolver(), false)
 
 		directorApp := model.Application{
 			ID:   "App1",
@@ -56,7 +56,7 @@ func TestConverter(t *testing.T) {
 
 	t.Run("should convert application containing API Packages with API Definitions", func(t *testing.T) {
 		// given
-		converter := NewConverter(k8sconsts.NewNameResolver())
+		converter := NewConverter(k8sconsts.NewNameResolver(), false)
 		instanceAuthRequestInputSchema := "{}"
 
 		emptyDescription := ""
@@ -229,7 +229,7 @@ func TestConverter(t *testing.T) {
 
 	t.Run("should convert application with services containing events and API, and no System Auths", func(t *testing.T) {
 		// given
-		converter := NewConverter(k8sconsts.NewNameResolver())
+		converter := NewConverter(k8sconsts.NewNameResolver(), false)
 
 		directorApp := model.Application{
 			ID:                  "App1",
