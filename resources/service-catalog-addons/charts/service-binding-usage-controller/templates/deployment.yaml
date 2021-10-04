@@ -30,7 +30,7 @@ spec:
       {{- end }}
       containers:
         - name: {{ .Chart.Name }}
-          image: "{{ .Values.global.containerRegistry.path }}/{{ .Values.global.service_binding_usage_controller.dir }}service-binding-usage-controller:{{ .Values.global.service_binding_usage_controller.version }}"
+          image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.service_binding_usage_controller) }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           securityContext:
             privileged: false
