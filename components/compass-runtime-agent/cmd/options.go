@@ -40,7 +40,7 @@ func (o *Config) String() string {
 		"ControllerSyncPeriod=%s, MinimalCompassSyncTime=%s, "+
 		"CertValidityRenewalThreshold=%f, ClusterCertificatesSecret=%s, CaCertificatesSecret=%s, "+
 		"SkipCompassTLSVerify=%v, GatewayPort=%d, UploadServiceUrl=%s, "+
-		"SkipAppTLSVerify=%v, " +
+		"SkipAppTLSVerify=%v, "+
 		"QueryLogging=%v, MetricsLoggingTimeInterval=%s, "+
 		"RuntimeEventsURL=%s, RuntimeConsoleURL=%s"+
 		"DirectorProxyPort=%v,  DirectorProxyInsecureSkipVerify=%v, HealthPort=%s, IntegrationNamespace=%s, CaCertSecretToMigrate=%s, caCertificateSecretKeysToMigrate=%s",
