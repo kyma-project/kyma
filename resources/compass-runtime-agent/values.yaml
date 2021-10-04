@@ -27,6 +27,7 @@ compassRuntimeAgent:
     uploadServiceUrl: http://rafter-upload-service.kyma-system.svc.cluster.local:80
   config:
     insecureConfigurationFetch: true
+    skipAppsTLSVerification: false
     secret:
       name: compass-agent-configuration
       namespace: compass-system
