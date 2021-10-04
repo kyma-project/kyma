@@ -67,7 +67,7 @@ spec:
           - name: ISTIO_PROXY_IMAGE_PREFIX
             value: {{ .Values.kyma.proxyResetJob.commonIstioProxyImagePrefix | quote }}
           - name: ISTIO_PROXY_IMAGE_VERSION
-            value: {{ .Chart.Version | quote }}
+            value: {{ .Values.global.images.istio.version | quote }}
           - name: RETRIES_COUNT
             value: {{ .Values.kyma.proxyResetJob.retriesCount | quote }}
           - name: DRY_RUN
