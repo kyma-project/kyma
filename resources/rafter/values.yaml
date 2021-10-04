@@ -14,11 +14,6 @@ global:
       name: "mc"
       version: "RELEASE.2019-04-03T17-59-57Z-e0da5a68"
       directory: "tpi/minio"
-    # TODO analyze
-    minio_client_edge:
-      name: "mc"
-      version: "edge"
-      directory: "tpi/minio"
     k8s_tools:
       name: "k8s-tools"
       version: "20210922-530cfc39"

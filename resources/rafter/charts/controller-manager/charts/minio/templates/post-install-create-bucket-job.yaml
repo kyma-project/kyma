@@ -55,7 +55,7 @@ spec:
         {{ end }}
       containers:
       - name: minio-mc
-        image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.minio_client_edge) }}"
+        image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.minio_client) }}"
         imagePullPolicy: {{ .Values.mcImage.pullPolicy }}
         {{- if .Values.pod.extraContainerProperties }}
         {{ include "rafter.tplValue" ( dict "value" .Values.pod.extraContainerProperties "context" . ) | nindent 8 }}
