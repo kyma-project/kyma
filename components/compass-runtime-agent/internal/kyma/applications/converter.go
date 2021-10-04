@@ -53,6 +53,7 @@ func (c converter) Do(application model.Application) v1alpha1.Application {
 		Spec: v1alpha1.ApplicationSpec{
 			Description:      description,
 			SkipInstallation: false,
+			SkipVerify:       false, // maybe later cfg.SkipAppsTLSVerify or value from labels
 			Labels:           prepareLabels(application.Labels),
 			Services:         c.toServices(application.Name, application.APIPackages),
 			CompassMetadata:  c.toCompassMetadata(application.ID, application.SystemAuthsIDs),
