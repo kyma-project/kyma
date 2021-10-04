@@ -21,6 +21,8 @@ curl -sfL https://install.goreleaser.com/github.com/golangci/golangci-lint.sh | 
 - To deploy the controllers inside a cluster, make sure you have `ko` installed and configured according to the [instructions](https://github.com/google/ko#setup). Then run:
 > Make sure the environment variables are set. The make target `set-up-local-env` uses default values. Change them as per your needs.
 
+> Existing deployment for eventing-controller should be deleted from the Kyma cluster which can interfere with reconciliation process.
+
 ```sh
 make DOMAIN=custom-domain.com deploy-local
 ```
