@@ -10,7 +10,7 @@ include $(SCRIPTS_DIR)/generic-make-go.mk
 # DEV image is used during development workflow only
 DEV_IMAGE = ko://github.com/kyma-project/kyma/components/eventing-controller/cmd/eventing-controller
 
-NAMESPACE = "eventing"
+NAMESPACE = "kyma-system"
 VERIFY_IGNORE := /vendor\|/mocks
 
 # Produce CRDs that work back to Kubernetes 1.11 (no version conversion)
@@ -31,15 +31,6 @@ all: manager
 manager: generate-local fmt-local vet-local
 	go build -o bin/controller cmd/eventing-controller/main.go
 
-# Run against the configured Kubernetes cluster in ~/.kube/config
-# TODO Useful default values have to be found.
-run: export NATS_URL ?= nats://127.0.0.1:4222
-run: export EVENT_TYPE_PREFIX ?= sap.kyma.custom
-run: export WEBHOOK_TOKEN_ENDPOINT ?= WEBHOOK_TOKEN_ENDPOINT
-run: export DOMAIN ?= example.com
-run: generate-local fmt-local vet-local manifests
-	go run cmd/eventing-controller/main.go
-
 # Install CRDs into a cluster
 install: manifests
 	kustomize build config/crd | ko apply -f -
@@ -59,17 +50,25 @@ uninstall: manifests
 # Deploy eventing-controller in the configured Kubernetes cluster in ~/.kube/config for local development
 deploy-local: manifests deploy-local-dry-run
 	kubectl create ns ${NAMESPACE} || true
-	kustomize build config/default | ko apply -f -
+	kustomize build config/default | envsubst | ko apply -f -
 
 # Undeploy the eventing-controller
 undeploy-local: manifests
 	kustomize build config/default | kubectl delete -f -
 
+set-up-local-env:
+    export NATS_URL ?= eventing-nats.kyma-system.svc.cluster.local
+    export EVENT_TYPE_PREFIX ?= sap.kyma.custom
+    export DOMAIN ?= example-domain.com
+    export WEBHOOK_TOKEN_ENDPOINT ?= "https://oauth2.${DOMAIN}/oauth2/token"
+
 # Dry run for deploying eventing-controller for local development
-deploy-local-dry-run: manifests
+deploy-local-dry-run: set-up-local-env manifests
 	cd config/manager && kustomize edit set image controller=${DEV_IMAGE} && kustomize edit set namespace ${NAMESPACE}
-	cd config/rbac && kustomize edit set namespace ${NAMESPACE}
-	kustomize build config/default
+	cd config/rbac && \
+		kustomize edit set namespace ${NAMESPACE}
+
+	kustomize build config/default | envsubst
 
 # Generate manifests e.g. CRD, RBAC etc.
 manifests-local: controller-gen-local
@@ -138,7 +137,7 @@ ifeq (, $(shell which controller-gen))
 	cd $$CONTROLLER_GEN_TMP_DIR ;\
 	if [ ! $(which go) ]; then \
 		go mod init tmp ; \
-		go get sigs.k8s.io/controller-tools/cmd/controller-gen@v0.2.5 ; \
+		go get sigs.k8s.io/controller-tools/cmd/controller-gen@v0.7.0 ; \
 		rm -rf $$CONTROLLER_GEN_TMP_DIR ; \
 	fi; \
 	}

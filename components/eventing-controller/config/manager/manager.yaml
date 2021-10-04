@@ -18,11 +18,20 @@ spec:
       serviceAccountName: default
       containers:
       - image: controller
+        env:
+          - name: NATS_URL
+            value: $NATS_URL
+          - name: EVENT_TYPE_PREFIX
+            value: $EVENT_TYPE_PREFIX
+          - name: DOMAIN
+            value: $DOMAIN
+          - name: WEBHOOK_TOKEN_ENDPOINT
+            value: $WEBHOOK_TOKEN_ENDPOINT
         name: controller
         resources:
           limits:
-            cpu: 100m
-            memory: 30Mi
+            cpu: 500m
+            memory: 200Mi
           requests:
             cpu: 100m
             memory: 20Mi

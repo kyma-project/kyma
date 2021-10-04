@@ -19,15 +19,16 @@ curl -sfL https://install.goreleaser.com/github.com/golangci/golangci-lint.sh | 
 ### Installation
 
 - To deploy the controllers inside a cluster, make sure you have `ko` installed and configured according to the [instructions](https://github.com/google/ko#setup). Then run:
+> Make sure the environment variables are set. The make target `set-up-local-env` uses default values. Change them as per your needs.
 
 ```sh
-make deploy-local
+make DOMAIN=custom-domain.com deploy-local
 ```
 
 - To verify all the manifests after the processing by Kustomize without applying to the cluster, use make target `deploy-local-dry-run`:
 
 ```sh
-make deploy-local-dry-run
+make DOMAIN=custom-domain.com deploy-local-dry-run
 ```
 
 ## Usage
