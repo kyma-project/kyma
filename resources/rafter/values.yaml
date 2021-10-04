@@ -20,7 +20,7 @@ global:
       directory: "tpi"
     rafter_controller_manager:
       name: "rafter-controller-manager"
-      version: f8031ac4
+      version: "f8031ac4"
     rafter_upload_service:
       name: "rafter-upload-service"
       version: "f8031ac4"
