@@ -203,7 +203,7 @@ Create an ACR and a service principal. Follow these steps:
 
 ### Override Serverless configuration
 
-Prepare yaml file with overrides that match your Docker registry provider
+Prepare yaml file with overrides that match your Docker registry provider:
 
 
 <div tabs name="override" group="external-docker-registry">
