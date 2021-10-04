@@ -64,3 +64,13 @@ Create chart name and version as used by the chart label.
 {{- fail (print "Tracing is not enabled across all the components. Set global.tracing.enabled to enable tracing while installing Kyma") }}
 {{- end }}
 {{- end -}}
+
+{{/*
+Create a URL for container images
+*/}}
+{{- define "imageurl" -}}
+{{- $registry := default $.reg.path $.img.containerRegistryPath -}}
+{{- $path := ternary (print $registry) (print $registry "/" $.img.directory) (empty $.img.directory) -}}
+{{- $version := ternary (print ":" $.img.version) (print "@sha256:" $.img.sha) (empty $.img.sha) -}}
+{{- print $path "/" $.img.name $version -}}
+{{- end -}}
