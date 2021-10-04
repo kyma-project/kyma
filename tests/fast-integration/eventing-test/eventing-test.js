@@ -80,7 +80,7 @@ describe("Eventing tests", function () {
 
     // if the test is failed, then printing some debug logs
     if (this.currentTest.state === 'failed') {
-      await printAllSubscriptions()
+      await printAllSubscriptions(testNamespace)
       await printEventingControllerLogs()
       await printEventingPublisherProxyLogs()
     }
@@ -96,7 +96,7 @@ describe("Eventing tests", function () {
     it("Switch Eventing Backend to BEB", async function () {
       await switchEventingBackend(backendK8sSecretName, backendK8sSecretNamespace, "beb");
       await waitForSubscriptionsTillReady(testNamespace)
-      await printAllSubscriptions()
+      await printAllSubscriptions(testNamespace)
     });
 
     // Running Eventing end-to-end tests
