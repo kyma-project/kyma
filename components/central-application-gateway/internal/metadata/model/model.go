@@ -30,6 +30,8 @@ type API struct {
 	Spec []byte
 	// RequestParameters will be used with request send by the Application Gateway
 	RequestParameters *authorization.RequestParameters
+	// skipVerify is flag set on Application CRD
+	SkipVerify bool
 }
 
 // Events contains specification for events.

@@ -25,7 +25,18 @@ func TestGetServices(t *testing.T) {
 	}
 
 	expectedServiceAPI := applications.ServiceAPI{
-		TargetURL: "https://192.168.1.2",
+		TargetURL:  "https://192.168.1.2",
+		SkipVerify: false,
+		Credentials: &applications.Credentials{
+			Type:       "OAuth",
+			SecretName: "SecretName",
+			URL:        "www.example.com/token",
+		},
+	}
+
+	expectedServiceAPISkipVerify := applications.ServiceAPI{
+		TargetURL:  "https://192.168.1.2",
+		SkipVerify: true,
 		Credentials: &applications.Credentials{
 			Type:       "OAuth",
 			SecretName: "SecretName",
@@ -36,7 +47,7 @@ func TestGetServices(t *testing.T) {
 	for _, testCase := range []testcase{
 		{
 			description: "should get service by service name",
-			application: createApplication("production"),
+			application: createApplication("production", false),
 			testFunc: func(repository applications.ServiceRepository) (applications.Service, apperrors.AppError) {
 				return repository.GetByServiceName("production", "service-1")
 			},
@@ -44,11 +55,27 @@ func TestGetServices(t *testing.T) {
 		},
 		{
 			description: "should get service by service and entry name",
-			application: createApplication("production"),
+			application: createApplication("production", false),
 			testFunc: func(repository applications.ServiceRepository) (applications.Service, apperrors.AppError) {
 				return repository.GetByEntryName("production", "service-1", "service-entry-1")
 			},
 			expectedServiceAPI: expectedServiceAPI,
+		},
+		{
+			description: "should get service by service name ",
+			application: createApplication("production", true),
+			testFunc: func(repository applications.ServiceRepository) (applications.Service, apperrors.AppError) {
+				return repository.GetByServiceName("production", "service-1")
+			},
+			expectedServiceAPI: expectedServiceAPISkipVerify,
+		},
+		{
+			description: "should get service by service and entry name",
+			application: createApplication("production", true),
+			testFunc: func(repository applications.ServiceRepository) (applications.Service, apperrors.AppError) {
+				return repository.GetByEntryName("production", "service-1", "service-entry-1")
+			},
+			expectedServiceAPI: expectedServiceAPISkipVerify,
 		},
 	} {
 		t.Run(testCase.description, func(t *testing.T) {
@@ -77,14 +104,14 @@ func TestGetServices(t *testing.T) {
 	for _, testCase := range []testcase{
 		{
 			description: "should return not found error if service doesn't exist",
-			application: createApplication("production"),
+			application: createApplication("production", false),
 			testFunc: func(repository applications.ServiceRepository) (applications.Service, apperrors.AppError) {
 				return repository.GetByServiceName("production", "not-exists")
 			},
 		},
 		{
 			description: "should return not found error if service doesn't exist",
-			application: createApplication("production"),
+			application: createApplication("production", false),
 			testFunc: func(repository applications.ServiceRepository) (applications.Service, apperrors.AppError) {
 				return repository.GetByEntryName("production", "not-exists", "service-entry-1")
 			},
@@ -92,7 +119,7 @@ func TestGetServices(t *testing.T) {
 		},
 		{
 			description: "should return not found error if service entry doesn't exist",
-			application: createApplication("production"),
+			application: createApplication("production", false),
 			testFunc: func(repository applications.ServiceRepository) (applications.Service, apperrors.AppError) {
 				return repository.GetByEntryName("production", "service-1", "not-exists")
 			},
@@ -121,14 +148,14 @@ func TestGetServices(t *testing.T) {
 
 		{
 			description: "should return bad request error if service has multiple entries with the same names",
-			application: createApplication("production"),
+			application: createApplication("production", false),
 			testFunc: func(repository applications.ServiceRepository) (applications.Service, apperrors.AppError) {
 				return repository.GetByEntryName("production", "service-3", "service-entry-duplicate")
 			},
 		},
 		{
 			description: "should return bad request error if there are multiple services with the same name",
-			application: createApplication("production"),
+			application: createApplication("production", false),
 			testFunc: func(repository applications.ServiceRepository) (applications.Service, apperrors.AppError) {
 				return repository.GetByServiceName("production", "service-4")
 			},
@@ -154,7 +181,7 @@ func TestGetServices(t *testing.T) {
 
 }
 
-func createApplication(name string) *v1alpha1.Application {
+func createApplication(name string, skipVerify bool) *v1alpha1.Application {
 
 	service1Entry := v1alpha1.Entry{
 		Type:      "API",
@@ -251,6 +278,7 @@ func createApplication(name string) *v1alpha1.Application {
 
 	spec1 := v1alpha1.ApplicationSpec{
 		Description: "test_1",
+		SkipVerify:  skipVerify,
 		Services: []v1alpha1.Service{
 			service1,
 			service2,

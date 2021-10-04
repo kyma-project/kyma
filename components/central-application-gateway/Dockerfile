@@ -7,7 +7,7 @@ COPY go.mod .
 COPY go.sum .
 RUN go mod download
 
-COPY ./licenses/ /app/licenses
+#COPY ./licenses/ /app/licenses
 COPY . $DOCK_PKG_DIR
 
 RUN echo "nobody:x:65534:5534:nobody:/:" > /etc_passwd
@@ -23,7 +23,7 @@ LABEL source=git@github.com:kyma-project/kyma.git
 
 COPY --from=certs /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 COPY --from=builder /go/src/github.com/kyma-project/kyma/components/central-application-gateway/applicationgateway .
-COPY --from=builder /app/licenses /app/licenses
+#COPY --from=builder /app/licenses /app/licenses
 
 COPY --from=builder /etc_passwd /etc/passwd
 USER nobody

@@ -42,6 +42,7 @@ type ServiceAPI struct {
 	TargetURL                   string
 	Credentials                 *Credentials
 	RequestParametersSecretName string
+	SkipVerify                  bool
 }
 
 type predicateFunc func(service v1alpha1.Service, entry v1alpha1.Entry) bool
@@ -62,8 +63,6 @@ type Service struct {
 	Tags []string
 	// Mapped to type property under entries element (type: API)
 	API *ServiceAPI
-	// skip verify of app
-	skipVerify bool
 }
 
 //go:generate mockery --name=ServiceRepository
@@ -105,11 +104,10 @@ func (r *repository) get(appName string, predicate func(service v1alpha1.Service
 	}
 	services := make([]Service, 0)
 	infos := make([]string, 0)
-	skipVerify := app.Spec.skipVerify
 	for _, service := range app.Spec.Services {
 		for _, entry := range service.Entries {
 			if predicate(service, entry) {
-				services = append(services, convert(service, entry))
+				services = append(services, convert(service, entry, app.Spec.SkipVerify))
 				infos = append(infos, fmt.Sprintf("service.ID: '%s', service.DisplayName: '%s', entry.Name: '%s'", service.ID, service.DisplayName, entry.Name))
 			}
 		}
@@ -146,6 +144,7 @@ func convert(service v1alpha1.Service, entry v1alpha1.Entry, skipVerify bool) Se
 		TargetURL:                   entry.TargetUrl,
 		Credentials:                 convertCredentialsFromK8sType(entry.Credentials),
 		RequestParametersSecretName: entry.RequestParametersSecretName,
+		SkipVerify:                  skipVerify,
 	}
 
 	return Service{
@@ -156,7 +155,6 @@ func convert(service v1alpha1.Service, entry v1alpha1.Entry, skipVerify bool) Se
 		ProviderDisplayName: service.ProviderDisplayName,
 		Tags:                service.Tags,
 		API:                 api,
-		skipVerify:          skipVerify,
 	}
 }
 

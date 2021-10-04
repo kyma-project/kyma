@@ -243,6 +243,7 @@ func TestProxyRequest(t *testing.T) {
 				TargetUrl:         ts.URL + tc.apiExtractor.targetPath,
 				Credentials:       &tc.apiExtractor.credentials,
 				RequestParameters: tc.apiExtractor.requestParameters,
+				SkipVerify:        false,
 			}, nil).Once()
 
 			handler := newProxyForTest(apiExtractorMock, authStrategyFactoryMock, csrfFactoryMock, func(path string) (metadatamodel.APIIdentifier, string, apperrors.AppError) {
@@ -442,7 +443,6 @@ func newProxyForTest(
 
 	return &proxy{
 		cache:                        NewCache(proxyConfig.ProxyCacheTTL),
-		skipVerify:                   proxyConfig.SkipVerify,
 		proxyTimeout:                 proxyConfig.ProxyTimeout,
 		authorizationStrategyFactory: authorizationStrategyFactory,
 		csrfTokenStrategyFactory:     csrfTokenStrategyFactory,
@@ -469,7 +469,6 @@ func NewTestServerForRetryTest(status int, check func(req *http.Request)) *httpt
 
 func createProxyConfig(proxyTimeout int) Config {
 	return Config{
-		SkipVerify:    true,
 		ProxyTimeout:  proxyTimeout,
 		Application:   "test",
 		ProxyCacheTTL: proxyTimeout,
