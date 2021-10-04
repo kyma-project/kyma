@@ -1,13 +1,14 @@
 ---
-title: Rotate the Root certificate and the key issued by the Certificate Authority
+title: Rotate the Root certificate, and the key issued by the Certificate Authority
 ---
 
+<!-- TODO: central Connector Service has been deprecated some time ago. This should be removed. -->
 The Central Connector Service uses the Root certificate issued by the Certificate Authority (CA) to issue new certificates for Runtimes and by the Istio Ingress Gateway to validate their identity.
 
 Two different components use the Root CA certificate. As a result, the certificate is stored in two separate Secrets:
 
   - The `connector-service-app-ca` Connector Service CA Secret responsible for signing certificate requests
-  - The `kyma-gateway-certs-cacert` Istio Secret responsible for security in the Connector Service API
+  - The `kyma-gateway-cert-cacert` Istio Secret responsible for security in the Connector Service API
 
 Keeping both Secrets up-to-date is vital for the security of your implementation as it guarantees that the Connector Service issues proper certificates and no unregistered Applications can access its API. 
 
@@ -49,10 +50,10 @@ To successfully rotate a soon-to-expire CA certificate, replace it with a new ce
    kubectl -n kyma-integration edit secret connector-service-app-ca
    ```
 
-5. Get the existing Istio CA certificate. Fetch it from the `kyma-gateway-certs-cacert` Secret and save it to the `old-ca.crt` file.
+5. Get the existing Istio CA certificate. Fetch it from the `kyma-gateway-cert-cacert` Secret and save it to the `old-ca.crt` file.
   
    ```bash
-   kubectl -n istio-system get secret kyma-gateway-certs-cacert -o=jsonpath='{.data.cacert}' | base64 --decode > old-ca.crt
+   kubectl -n istio-system get secret kyma-gateway-cert-cacert -o=jsonpath='{.data.cacert}' | base64 --decode > old-ca.crt
    ```
 
 6. Merge the old certificate and the newly generated certificate into a single `merged-ca.crt` file.
@@ -70,7 +71,7 @@ To successfully rotate a soon-to-expire CA certificate, replace it with a new ce
 8. Replace the old certificate in the Istio Secret. Edit the Secret and replace the `cacert` value with the `merged-ca.crt` base64-encoded certificate.
   
    ```bash
-   kubectl -n istio-system edit secret kyma-gateway-certs-cacert
+   kubectl -n istio-system edit secret kyma-gateway-cert-cacert
    ```
 
 9. Wait for all the client certificates to be renewed. 
@@ -88,7 +89,7 @@ To successfully rotate a soon-to-expire CA certificate, replace it with a new ce
 11. Edit the Secret and replace the `cacert` value with the base64-encoded `new-ca.crt` certificate.
   
    ```bash
-   kubectl -n istio-system edit secret kyma-gateway-certs-cacert
+   kubectl -n istio-system edit secret kyma-gateway-cert-cacert
    ```
 
 ## Rotating a compromised Root CA certificate

@@ -33,7 +33,7 @@ spec:
 ```
 
 ## Custom resource parameters
-
+<!-- TODO: add GatewayURL parameter description-->
 This table lists all the possible parameters of a given resource together with their descriptions:
 
 | Parameter   |      Required      |  Description |

@@ -13,7 +13,7 @@ You can access every exposed Application using the assigned path. For example, t
 
 ## Application Connectivity Validator
 
-Application Connectivity Validator verifies the subject of the client certificate. It is deployed per Application and it proxies requests to Application Registry and Event Publisher.
+Application Connectivity Validator verifies the subject of the client certificate, and proxies requests to Application Registry and Event Publisher.
 
 ## Connector Service
 
@@ -43,23 +43,14 @@ This allows routing events to Functions and services based on their source Appli
 
 An Application represents an external solution connected to Kyma. It handles the integration with other components, such as the Service Catalog or Eventing.
 Using the components of Application Connector, the Application creates a coherent identity for a connected external solution and ensures its separation.
-All Applications are instances of the Application custom resource, which also stores all of the relevant metadata. You can bind an Application to many Kyma Namespaces and use the APIs and the Event Catalogs of the connected external solution within their context.
-
-## Application Broker
-
-Application Broker (AB) watches all [Application](../../05-technical-reference/00-custom-resources/ac-01-application.md) custom resources (CRs). These custom resources contain definitions of the external solutions’ APIs and events. The AB exposes those APIs and events definitions as ServiceClasses to the Service Catalog. Create an ApplicationMapping to be able to provision those ServiceClasses and enable them for Kyma services. This allows you to extend the functionality of existing systems.
-
-The AB implements the [Open Service Broker API](https://www.openservicebrokerapi.org/). For more details, see the [Service Brokers documentation](../../01-overview/main-areas/service-management/smgt-02-brokers-overview.md).
-
-## Application Operator
-
-Application Operator (AO) can work in two modes. In the default legacy mode, the AO listens for creating or deleting the [Application](../00-custom-resources/ac-01-application.md) custom resources and acts accordingly, either provisioning or deprovisioning an instance of Application Gateway and Event Publisher for every custom resource. In the alternative Compass mode, it listens for an additional resource, [ServiceInstance](../../01-overview/main-areas/service-management/smgt-03-sc-resources.md). In this mode, it provisions an instance of Application Gateway once per Namespace. That means that there is always only one Application Gateway per Namespace, even if there are more ServiceInstances and Applications. Application Gateway gets deleted with the last ServiceInstance in that Namespace. The Compass mode is enabled by setting the **gatewayOncePerNamespace** [feature flag](https://github.com/kyma-project/kyma/blob/main/components/application-operator/README.md#usage) to true.
+All Applications are instances of the Application custom resource, which also stores all of the relevant metadata.
 
 >**NOTE:** Every Application custom resource corresponds to a single Application to which you can connect an external solution.
 
 ## Application Gateway
 
-Application Gateway is an intermediary component between a Function or a service and an external API. Application Gateway can work in [two modes](#application-operator), legacy (default) or Compass (required for Runtimes with the Runtime Agent connected to Compass). In the legacy mode, Application Gateway [proxies the requests](ac-03-application-gateway.md) based on the services registered with Application Registry. In the alternative Compass mode, Application Gateway [proxies the requests](../ac-02-application-gateway-details.md) from Functions and services in Kyma to external APIs based on the configuration stored in Secrets.
+Application Gateway is an intermediary component between a Function or a service and an external API.
+It [proxies the requests](./ac-03-application-gateway.md) from Functions and services in Kyma to external APIs based on the configuration stored in Secrets.
 
 Application Gateway can call services which are not secured, or are secured with:
 
@@ -69,9 +60,6 @@ Application Gateway can call services which are not secured, or are secured with
 
 Additionally, Application Gateway supports cross-site request forgery (CSRF) tokens as an optional layer of API protection.
 
-## Access Service
-
-The Access Service exposes Application Gateway and manages the access from the Functions and services deployed in Kyma to the external APIs over Application Gateway.
 
 ## Kubernetes Secret
 
