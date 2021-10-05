@@ -41,7 +41,7 @@ authProxy:
   enabled: true
   replicaCount: 1
   port: 3000
-  configDocsLink: "https://kyma-project.io/docs/kyma/main/04-operation-guides/security/sec-06-access-expose-kiali-grafana"
+  configDocsLink: "https://kyma-project.io/docs/kyma/latest/04-operation-guides/security/sec-06-access-expose-kiali-grafana"
   config:
     clientId: "kiali"
     clientSecret: "hiFWLWqIxw5d3gl"
@@ -409,7 +409,7 @@ kiali:
     # Custom annotations to be created on the Kiali pod.
     #    ---
       pod_annotations:
-        "sidecar.istio.io/inject": "false"
+        "sidecar.istio.io/inject": "true"
     #
     # Custom labels to be created on the Kiali pod.
     #    ---

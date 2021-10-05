@@ -20,12 +20,8 @@ All the in-line customizations are commented on in the respective files. Search 
 
 ## Kyma dashboards
 
-Kyma comes with some extra dashboards to enable monitoring its components. All the Kyma dashboards can be found under [kyma-dashboards](templates/grafana/kyma-dashboards). For more information on the dashboards, see [this document](charts/grafana/README.md).
+Kyma comes with some extra dashboards to enable monitoring its components. All the Kyma dashboards can be found under [kyma-dashboards](templates/grafana/kyma-dashboards).
 
 ## Kyma alerting rules
 
 Kyma comes with some additional alerting rules to enable alerting for its components. You can find all Kyma alerting rules under [kyma-rules](templates/prometheus/kyma-rules).
-
-## Details
-
-For details on Grafana usage in Kyma, see [this document](charts/grafana/README.md).

@@ -121,9 +121,6 @@ describe("Monitoring test", function () {
       "pod",
       "namespace",
     ]);
-    await assertTimeSeriesExist("kube_namespace_labels", [
-      "label_istio_injection",
-    ]);
     await assertTimeSeriesExist("kube_service_labels", ["namespace"]);
   });
 
