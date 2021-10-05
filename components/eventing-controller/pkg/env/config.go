@@ -11,22 +11,22 @@ import (
 )
 
 const (
-	BACKEND = "BACKEND"
+	backendKey = "BACKEND"
 
-	BACKEND_VALUE_BEB  = "BEB"
-	BACKEND_VALUE_NATS = "NATS"
+	backendValueBeb  = "BEB"
+	backendValueNats = "NATS"
 )
 
 // Backend returns the selected backend based on the environment variable
 // "BACKEND". "NATS" is the default value in case of an empty variable.
 func Backend() (string, error) {
-	backend := strings.ToUpper(os.Getenv(BACKEND))
+	backend := strings.ToUpper(os.Getenv(backendKey))
 
 	switch backend {
-	case BACKEND_VALUE_BEB:
-		return BACKEND_VALUE_BEB, nil
-	case BACKEND_VALUE_NATS, "":
-		return BACKEND_VALUE_NATS, nil
+	case backendValueBeb:
+		return backendValueBeb, nil
+	case backendValueNats, "":
+		return backendValueNats, nil
 	default:
 		return "", fmt.Errorf("invalid BACKEND set: %v", backend)
 	}
@@ -35,7 +35,7 @@ func Backend() (string, error) {
 // Config represents the environment config for the Eventing Controller.
 type Config struct {
 	// Following details are for eventing-controller to communicate to BEB
-	BebApiUrl     string `envconfig:"BEB_API_URL" default:"https://enterprise-messaging-pubsub.cfapps.sap.hana.ondemand.com/sap/ems/v1"`
+	BebAPIURL     string `envconfig:"BEB_API_URL" default:"https://enterprise-messaging-pubsub.cfapps.sap.hana.ondemand.com/sap/ems/v1"`
 	ClientID      string `envconfig:"CLIENT_ID" default:"client-id"`
 	ClientSecret  string `envconfig:"CLIENT_SECRET" default:"client-secret"`
 	TokenEndpoint string `envconfig:"TOKEN_ENDPOINT" default:"token-endpoint"`

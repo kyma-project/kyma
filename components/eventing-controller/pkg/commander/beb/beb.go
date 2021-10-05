@@ -19,6 +19,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 
 	apigatewayv1alpha1 "github.com/kyma-incubator/api-gateway/api/v1alpha1"
+
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 	"github.com/kyma-project/kyma/components/eventing-controller/logger"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/application"
