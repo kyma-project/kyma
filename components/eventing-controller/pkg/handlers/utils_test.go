@@ -63,14 +63,14 @@ func TestGetInternalView4Ev2(t *testing.T) {
 	expectedWebhookURL := fmt.Sprintf("%s://%s", scheme, host)
 	g := NewGomegaWithT(t)
 
-	t.Run("subscription with protocolsettings where defaults are overriden", func(t *testing.T) {
+	t.Run("subscription with protocol settings where defaults are overridden", func(t *testing.T) {
 		// given
 		subscription := reconcilertesting.NewSubscription("name", "namespace", eventingtesting.WithEventTypeFilter)
 		eventingtesting.WithValidSink("ns", svcName, subscription)
 
 		subscription.Spec.ProtocolSettings = reconcilertesting.NewProtocolSettings(eventingtesting.WithBinaryContentMode, eventingtesting.WithExemptHandshake, eventingtesting.WithAtLeastOnceQOS, eventingtesting.WithDefaultWebhookAuth)
 
-		// Values should be overriden by the given values in subscription
+		// Values should be overridden by the given values in subscription
 		expectedWebhookAuth := &types.WebhookAuth{
 			Type:         types.AuthTypeClientCredentials,
 			GrantType:    types.GrantTypeClientCredentials,
@@ -189,7 +189,7 @@ func TestGetInternalView4Ems(t *testing.T) {
 		ContentMode:     types.ContentModeStructured,
 		ExemptHandshake: true,
 		Qos:             types.QosAtLeastOnce,
-		WebhookUrl:      "https://webhook.xxx.com",
+		WebhookURL:      "https://webhook.xxx.com",
 
 		Events: []types.Event{
 			{
@@ -208,7 +208,7 @@ func TestGetInternalView4Ems(t *testing.T) {
 	g.Expect(bebSubscription.ContentMode).To(BeEquivalentTo(emsSubscription.ContentMode))
 	g.Expect(bebSubscription.ExemptHandshake).To(BeEquivalentTo(emsSubscription.ExemptHandshake))
 	g.Expect(bebSubscription.Qos).To(BeEquivalentTo(types.QosAtLeastOnce))
-	g.Expect(bebSubscription.WebhookUrl).To(BeEquivalentTo(emsSubscription.WebhookUrl))
+	g.Expect(bebSubscription.WebhookURL).To(BeEquivalentTo(emsSubscription.WebhookURL))
 
 	g.Expect(bebSubscription.Events).To(BeEquivalentTo(types.Events{
 		{

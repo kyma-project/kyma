@@ -199,7 +199,7 @@ func NewBEBSubscription(name, contentMode string, webhookURL string, events type
 		ExemptHandshake: true,
 		Events:          events,
 		WebhookAuth:     webhookAuth,
-		WebhookUrl:      webhookURL,
+		WebhookURL:      webhookURL,
 	}
 }
 
@@ -470,13 +470,13 @@ func ToSubscription(unstructuredSub *unstructured.Unstructured) (*eventingv1alph
 
 // ToUnstructuredAPIRule converts an APIRule object into a unstructured APIRule
 func ToUnstructuredAPIRule(obj interface{}) (*unstructured.Unstructured, error) {
-	unstructured := &unstructured.Unstructured{}
+	unstructrd := &unstructured.Unstructured{}
 	unstructuredObj, err := runtime.DefaultUnstructuredConverter.ToUnstructured(obj)
 	if err != nil {
 		return nil, err
 	}
-	unstructured.Object = unstructuredObj
-	return unstructured, nil
+	unstructrd.Object = unstructuredObj
+	return unstructrd, nil
 }
 
 // SetupSchemeOrDie add a scheme to eventing API schemes

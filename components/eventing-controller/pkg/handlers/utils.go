@@ -157,12 +157,12 @@ func getInternalView4Ev2(subscription *eventingv1alpha1.Subscription, apiRule *a
 		}
 	}
 
-	// WebhookUrl
+	// WebhookURL
 	urlTobeRegistered, err := getExposedURLFromAPIRule(apiRule, subscription)
 	if err != nil {
 		return nil, errors.Wrap(err, "get APIRule exposed URL failed")
 	}
-	emsSubscription.WebhookUrl = urlTobeRegistered
+	emsSubscription.WebhookURL = urlTobeRegistered
 
 	// Events
 	uniqueFilters, err := subscription.Spec.Filter.Deduplicate()
@@ -232,8 +232,8 @@ func getInternalView4Ems(subscription *types.Subscription) (*types.Subscription,
 	// Qos
 	emsSubscription.Qos = subscription.Qos
 
-	// WebhookUrl
-	emsSubscription.WebhookUrl = subscription.WebhookUrl
+	// WebhookURL
+	emsSubscription.WebhookURL = subscription.WebhookURL
 
 	// Events
 	for _, e := range subscription.Events {
