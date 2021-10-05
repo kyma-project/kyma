@@ -65,7 +65,7 @@ func NewCommander(restCfg *rest.Config, metricsAddr string, maxReconnects int, r
 
 // Init implements the Commander interface.
 func (c *Commander) Init(mgr manager.Manager) error {
-	if len(c.envCfg.Url) == 0 {
+	if len(c.envCfg.URL) == 0 {
 		return fmt.Errorf("env var URL must be a non-empty value")
 	}
 	c.mgr = mgr
