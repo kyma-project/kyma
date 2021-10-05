@@ -30,6 +30,7 @@ import (
 	. "github.com/onsi/gomega"
 
 	kymalogger "github.com/kyma-project/kyma/common/logging/logger"
+
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 	"github.com/kyma-project/kyma/components/eventing-controller/logger"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/application/applicationtest"
@@ -405,7 +406,7 @@ var _ = BeforeSuite(func(done Done) {
 	})
 	Expect(err).ToNot(HaveOccurred())
 	envConf := env.NatsConfig{
-		Url:             natsUrl,
+		URL:             natsUrl,
 		MaxReconnects:   10,
 		ReconnectWait:   time.Second,
 		EventTypePrefix: reconcilertesting.EventTypePrefix,
