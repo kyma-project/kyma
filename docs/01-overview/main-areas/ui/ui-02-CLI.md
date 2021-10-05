@@ -12,7 +12,7 @@ Kyma CLI is a command-line tool that supports Kyma developers. It provides a set
 
 ## Compatibility
 
-Kyma CLI is always released in parallel with Kyma to support the latest features, which also affects backwards compatibility: The current Kyma CLI version supports the corresponding Kyma release and the previous release, but it's incompatible with Kyma versions before the previous ones.
+Kyma CLI is always released in parallel with Kyma to support the latest features, which also affects backwards compatibility. The current Kyma CLI version supports the corresponding Kyma release and the previous release, but it's incompatible with Kyma versions before the previous ones.
 
 ## Commands and Flags
 
