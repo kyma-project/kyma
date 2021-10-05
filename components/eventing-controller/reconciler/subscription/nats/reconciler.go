@@ -1,4 +1,4 @@
-package subscription_nats
+package nats
 
 import (
 	"context"

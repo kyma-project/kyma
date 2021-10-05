@@ -26,7 +26,7 @@ import (
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/commander"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers"
-	"github.com/kyma-project/kyma/components/eventing-controller/reconciler/subscription"
+	"github.com/kyma-project/kyma/components/eventing-controller/reconciler/subscription/beb"
 )
 
 const (
@@ -97,7 +97,7 @@ func (c *Commander) Start(_ env.DefaultSubscriptionConfig, params commander.Para
 	ctrl.Log.WithName("BEB-commander").Info("using BEB name mapper",
 		"domainName", c.envCfg.Domain,
 		"maxNameLength", handlers.MaxBEBSubscriptionNameLength)
-	reconciler := subscription.NewReconciler(
+	reconciler := beb.NewReconciler(
 		ctx,
 		c.mgr.GetClient(),
 		applicationLister,

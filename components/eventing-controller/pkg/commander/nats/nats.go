@@ -23,7 +23,7 @@ import (
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/commander"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers"
-	subscription "github.com/kyma-project/kyma/components/eventing-controller/reconciler/subscription-nats"
+	subscription "github.com/kyma-project/kyma/components/eventing-controller/reconciler/subscription/nats"
 )
 
 const (
