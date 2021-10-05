@@ -4,7 +4,8 @@ const https = require('https');
 
 const {
     kubectlPortForward,
-    getResponse
+    retryPromise,
+    convertAxiosError,
 } = require("../utils");
 
 let prometheusPort = 9090;
@@ -16,32 +17,45 @@ function prometheusPortForward() {
 async function getPrometheusActiveTargets() {
     let path = "/api/v1/targets?state=active";
     let url = `http://localhost:${prometheusPort}${path}`;
-    let responseBody = await getResponse(url, 30);
-    return responseBody.data.data.activeTargets;
+    try {
+        let responseBody = await retryPromise(() => axios.get(url, {timeout: 10000}), 5);
+        return responseBody.data.data.activeTargets;
+    } catch(err) {
+        throw convertAxiosError(err, "cannot get prometheus targets");
+    }
 }
 
 async function getPrometheusAlerts() {
     let path = "/api/v1/alerts";
     let url = `http://localhost:${prometheusPort}${path}`;
-    let responseBody = await getResponse(url, 30);
-
-    return responseBody.data.data.alerts;
+    try {
+        let responseBody = await retryPromise(() => axios.get(url, {timeout: 10000}), 5);
+        return responseBody.data.data.alerts; 
+    } catch (err) {
+        throw convertAxiosError(err, "cannot get prometheus alerts");
+    }
 }
 
 async function getPrometheusRuleGroups() {
     let path = "/api/v1/rules";
     let url = `http://localhost:${prometheusPort}${path}`;
-    let responseBody = await getResponse(url, 30);
-
-    return responseBody.data.data.groups;
+    try {
+        let responseBody = await retryPromise(() => axios.get(url, {timeout: 10000}), 5);
+        return responseBody.data.data.groups;
+    } catch (err) {
+        throw convertAxiosError(err, "cannot get prometheus rules");
+    }
 }
 
 async function queryPrometheus(query) {
     let path = `/api/v1/query?query=${encodeURIComponent(query)}`;
     let url = `http://localhost:${prometheusPort}${path}`;
-    let responseBody = await getResponse(url, 30);
-
-    return responseBody.data.data.result;
+    try {
+        let responseBody = await retryPromise(() => axios.get(url, {timeout: 10000}), 5);
+        return responseBody.data.data.result;
+    } catch (err) {
+        throw convertAxiosError(err, "cannot query prometheus");
+    }
 }
 
 async function queryGrafana(url, redirectURL, ignoreSSL, httpErrorCode) {
