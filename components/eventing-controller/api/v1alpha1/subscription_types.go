@@ -1,9 +1,10 @@
 package v1alpha1
 
 import (
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
 	"github.com/mitchellh/hashstructure/v2"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
 )
 
 // WebhookAuth defines the Webhook called by an active subscription in BEB
@@ -15,14 +16,14 @@ type WebhookAuth struct {
 	// GrantType defines grant type for OAuth2
 	GrantType string `json:"grantType"`
 
-	// ClientId defines clientID for OAuth2
-	ClientId string `json:"clientId"`
+	// ClientID defines clientID for OAuth2
+	ClientID string `json:"clientId"`
 
 	// ClientSecret defines client secret for OAuth2
 	ClientSecret string `json:"clientSecret"`
 
-	// TokenUrl defines token URL for OAuth2
-	TokenUrl string `json:"tokenUrl"`
+	// TokenURL defines token URL for OAuth2
+	TokenURL string `json:"tokenUrl"`
 
 	// Scope defines scope for OAuth2
 	Scope []string `json:"scope,omitempty"`

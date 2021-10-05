@@ -14,17 +14,19 @@ import (
 
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/deployment"
 
-	"github.com/kyma-project/kyma/components/eventing-controller/utils"
 	appsv1 "k8s.io/api/apps/v1"
+
+	"github.com/kyma-project/kyma/components/eventing-controller/utils"
 
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
 
 	apigatewayv1alpha1 "github.com/kyma-incubator/api-gateway/api/v1alpha1"
+	oryv1alpha1 "github.com/ory/oathkeeper-maester/api/v1alpha1"
+
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/object"
-	oryv1alpha1 "github.com/ory/oathkeeper-maester/api/v1alpha1"
 )
 
 const (
@@ -182,9 +184,9 @@ func WithDefaultWebhookAuth(protoSettings *eventingv1alpha1.ProtocolSettings) {
 	protoSettings.WebhookAuth = &eventingv1alpha1.WebhookAuth{
 		Type:         "oauth2",
 		GrantType:    "client_credentials",
-		ClientId:     "xxx",
+		ClientID:     "xxx",
 		ClientSecret: "xxx",
-		TokenUrl:     "https://oauth2.xxx.com/oauth2/token",
+		TokenURL:     "https://oauth2.xxx.com/oauth2/token",
 		Scope:        []string{"guid-identifier"},
 	}
 }
@@ -234,9 +236,9 @@ func WithWebhookAuthForBEB(s *eventingv1alpha1.Subscription) {
 		WebhookAuth: &eventingv1alpha1.WebhookAuth{
 			Type:         "oauth2",
 			GrantType:    "client_credentials",
-			ClientId:     "xxx",
+			ClientID:     "xxx",
 			ClientSecret: "xxx",
-			TokenUrl:     "https://oauth2.xxx.com/oauth2/token",
+			TokenURL:     "https://oauth2.xxx.com/oauth2/token",
 			Scope:        []string{"guid-identifier"},
 		},
 	}
@@ -466,8 +468,8 @@ func ToSubscription(unstructuredSub *unstructured.Unstructured) (*eventingv1alph
 	return subscription, nil
 }
 
-// ToUnstructuredApiRule converts an APIRule object into a unstructured APIRule
-func ToUnstructuredApiRule(obj interface{}) (*unstructured.Unstructured, error) {
+// ToUnstructuredAPIRule converts an APIRule object into a unstructured APIRule
+func ToUnstructuredAPIRule(obj interface{}) (*unstructured.Unstructured, error) {
 	unstructured := &unstructured.Unstructured{}
 	unstructuredObj, err := runtime.DefaultUnstructuredConverter.ToUnstructured(obj)
 	if err != nil {

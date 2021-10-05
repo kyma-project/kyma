@@ -74,9 +74,9 @@ func TestGetInternalView4Ev2(t *testing.T) {
 		expectedWebhookAuth := &types.WebhookAuth{
 			Type:         types.AuthTypeClientCredentials,
 			GrantType:    types.GrantTypeClientCredentials,
-			ClientID:     subscription.Spec.ProtocolSettings.WebhookAuth.ClientId,
+			ClientID:     subscription.Spec.ProtocolSettings.WebhookAuth.ClientID,
 			ClientSecret: subscription.Spec.ProtocolSettings.WebhookAuth.ClientSecret,
-			TokenURL:     subscription.Spec.ProtocolSettings.WebhookAuth.TokenUrl,
+			TokenURL:     subscription.Spec.ProtocolSettings.WebhookAuth.TokenURL,
 		}
 		expectedBEBSubscription := eventingtesting.NewBEBSubscription(
 			defaultNameMapper.MapSubscriptionName(subscription),
@@ -130,9 +130,9 @@ func TestGetInternalView4Ev2(t *testing.T) {
 		expectedWebhookAuth := types.WebhookAuth{
 			Type:         types.AuthTypeClientCredentials,
 			GrantType:    types.GrantTypeClientCredentials,
-			ClientID:     subWithGivenWebhookAuth.Spec.ProtocolSettings.WebhookAuth.ClientId,
+			ClientID:     subWithGivenWebhookAuth.Spec.ProtocolSettings.WebhookAuth.ClientID,
 			ClientSecret: subWithGivenWebhookAuth.Spec.ProtocolSettings.WebhookAuth.ClientSecret,
-			TokenURL:     subWithGivenWebhookAuth.Spec.ProtocolSettings.WebhookAuth.TokenUrl,
+			TokenURL:     subWithGivenWebhookAuth.Spec.ProtocolSettings.WebhookAuth.TokenURL,
 		}
 
 		expectedBEBSubWithWebhookAuth := eventingtesting.NewBEBSubscription(

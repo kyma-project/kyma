@@ -182,7 +182,7 @@ func getInternalView4Ev2(subscription *eventingv1alpha1.Subscription, apiRule *a
 	auth := defaultWebhookAuth
 	if subscription.Spec.ProtocolSettings != nil && subscription.Spec.ProtocolSettings.WebhookAuth != nil {
 		auth = &types.WebhookAuth{}
-		auth.ClientID = subscription.Spec.ProtocolSettings.WebhookAuth.ClientId
+		auth.ClientID = subscription.Spec.ProtocolSettings.WebhookAuth.ClientID
 		auth.ClientSecret = subscription.Spec.ProtocolSettings.WebhookAuth.ClientSecret
 		if subscription.Spec.ProtocolSettings.WebhookAuth.GrantType == string(types.GrantTypeClientCredentials) {
 			auth.GrantType = types.GrantTypeClientCredentials
@@ -194,7 +194,7 @@ func getInternalView4Ev2(subscription *eventingv1alpha1.Subscription, apiRule *a
 		} else {
 			return nil, fmt.Errorf("invalid Type: %v", subscription.Spec.ProtocolSettings.WebhookAuth.Type)
 		}
-		auth.TokenURL = subscription.Spec.ProtocolSettings.WebhookAuth.TokenUrl
+		auth.TokenURL = subscription.Spec.ProtocolSettings.WebhookAuth.TokenURL
 	}
 	emsSubscription.WebhookAuth = auth
 	return emsSubscription, nil
