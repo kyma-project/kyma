@@ -22,9 +22,13 @@ kind: Job
 metadata:
   name: {{ .Values.jobName | quote }}
   namespace: {{ .Release.Namespace }}
+
 spec:
   backoffLimit: 0
   template:
+    metadata:
+      annotations:
+        sidecar.istio.io/inject: "false"
     spec:
       serviceAccountName: {{ .Values.jobName | quote }}
       restartPolicy: Never
