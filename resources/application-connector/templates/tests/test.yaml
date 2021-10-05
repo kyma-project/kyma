@@ -29,13 +29,6 @@ spec:
         app.kubernetes.io/instance: {{ .Release.Name }}
     spec:
       serviceAccountName: {{ .Chart.Name }}-tests
-      {{ if .Values.global.isLocalEnv }}
-      hostAliases:
-        - ip: {{ .Values.global.minikubeIP }}
-          hostnames:
-            - "connector-service.{{ .Values.global.domainName }}"
-            - "gateway.{{ .Values.global.domainName }}"
-      {{ end }}
       containers:
         - name: tests
           image: {{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.testImages.application_connector_tests) }}

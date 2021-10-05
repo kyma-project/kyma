@@ -95,7 +95,6 @@ global:
     operatorGroup: runtimeOperator
     developerGroup: runtimeDeveloper
     namespaceAdminGroup: runtimeNamespaceAdmin
-  isLocalEnv: false
   containerRegistry:
     path: "eu.gcr.io/kyma-project"
   minikubeIP: ""

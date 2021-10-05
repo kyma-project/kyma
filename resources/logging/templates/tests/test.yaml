@@ -24,14 +24,6 @@ spec:
         sidecar.istio.io/inject: "false"
     spec:
       serviceAccountName: {{ .Chart.Name }}-tests
-      {{ if .Values.global.isLocalEnv }}
-      hostAliases:
-        - ip: {{ .Values.global.minikubeIP }}
-          hostnames:
-            - "oauth2.{{ .Values.global.domainName }}"
-            - "dex.{{ .Values.global.domainName }}"
-            - "loki.{{ .Values.global.domainName }}"
-      {{ end }}
       restartPolicy: Never
       containers:
       - name: tests

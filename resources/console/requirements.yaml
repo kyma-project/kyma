@@ -1,5 +1,0 @@
-dependencies:
-  - name: web
-    condition: web.enabled
-  - name: backend
-    condition: backend.enabled

@@ -86,13 +86,6 @@ spec:
             initialDelaySeconds: {{ .Values.compassRuntimeAgent.readinessProbe.initialDelaySeconds }}
             timeoutSeconds: {{ .Values.compassRuntimeAgent.readinessProbe.timeoutSeconds }}
             periodSeconds: {{.Values.compassRuntimeAgent.readinessProbe.periodSeconds }}
-      {{ if .Values.global.isLocalEnv }}
-      hostAliases:
-        - ip: {{ .Values.global.minikubeIP }}
-          hostnames:
-            - "compass-gateway.{{ .Values.global.domainName }}"
-            - "compass-gateway-mtls.{{ .Values.global.domainName }}"
-      {{ end }}
     {{- if .Values.global.priorityClassName }}
       priorityClassName: {{ .Values.global.priorityClassName }}
     {{- end }}

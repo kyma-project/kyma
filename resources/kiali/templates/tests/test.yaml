@@ -19,12 +19,6 @@ spec:
       annotations:
         sidecar.istio.io/inject: "false"
     spec:
-{{ if .Values.global.isLocalEnv }}
-      hostAliases:
-        - ip: {{ .Values.global.minikubeIP }}
-          hostnames:
-          - "kiali.{{ .Values.global.domainName }}"
-{{ end }}
       restartPolicy: Never
       containers:
       - name: tests
