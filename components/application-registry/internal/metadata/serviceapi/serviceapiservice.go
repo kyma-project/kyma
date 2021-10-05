@@ -12,14 +12,14 @@ import (
 
 // Service manages API definition of a service
 type Service interface {
-	// New handles a new API. It creates all requires resources.
-	New(application string, appUID types.UID, id string, api *model.API) (*applications.ServiceAPI, apperrors.AppError)
+	// New handles a new API. It creates all required resources.
+	New(application string, appUID types.UID, id, displayName string, api *model.API) (*applications.ServiceAPI, apperrors.AppError)
 	// Read reads API from Application API definition. It also reads all additional information.
 	Read(application string, serviceApi *applications.ServiceAPI) (*model.API, apperrors.AppError)
 	// Delete removes API with given id.
 	Delete(application, id string) apperrors.AppError
 	// Update replaces existing API with a new one.
-	Update(application string, appUID types.UID, id string, api *model.API) (*applications.ServiceAPI, apperrors.AppError)
+	Update(application string, appUID types.UID, id, displayName string, api *model.API) (*applications.ServiceAPI, apperrors.AppError)
 }
 
 type defaultService struct {
@@ -43,15 +43,17 @@ func NewService(
 	}
 }
 
-func (sas defaultService) New(application string, appUID types.UID, id string, api *model.API) (*applications.ServiceAPI, apperrors.AppError) {
+func (sas defaultService) New(application string, appUID types.UID, id, displayName string, api *model.API) (*applications.ServiceAPI, apperrors.AppError) {
 	resourceName := sas.nameResolver.GetResourceName(application, id)
 	gatewayUrl := sas.nameResolver.GetGatewayUrl(application, id)
+	centralGatewayUrl := sas.nameResolver.GetCentralGatewayUrl(application, displayName)
 
 	serviceAPI := &applications.ServiceAPI{}
 	serviceAPI.TargetUrl = api.TargetUrl
 	serviceAPI.SpecificationUrl = api.SpecificationUrl
 	serviceAPI.ApiType = api.ApiType
 	serviceAPI.GatewayURL = gatewayUrl
+	serviceAPI.CentralGatewayURL = centralGatewayUrl
 	serviceAPI.AccessLabel = resourceName
 
 	err := sas.accessServiceManager.Create(application, appUID, id, resourceName)
@@ -127,15 +129,17 @@ func (sas defaultService) Delete(application, id string) apperrors.AppError {
 	return nil
 }
 
-func (sas defaultService) Update(application string, appUID types.UID, id string, api *model.API) (*applications.ServiceAPI, apperrors.AppError) {
+func (sas defaultService) Update(application string, appUID types.UID, id, displayName string, api *model.API) (*applications.ServiceAPI, apperrors.AppError) {
 	resourceName := sas.nameResolver.GetResourceName(application, id)
 	gatewayUrl := sas.nameResolver.GetGatewayUrl(application, id)
+	centralGatewayUrl := sas.nameResolver.GetCentralGatewayUrl(application, displayName)
 
 	serviceAPI := &applications.ServiceAPI{}
 	serviceAPI.TargetUrl = api.TargetUrl
 	serviceAPI.SpecificationUrl = api.SpecificationUrl
 	serviceAPI.ApiType = api.ApiType
 	serviceAPI.GatewayURL = gatewayUrl
+	serviceAPI.CentralGatewayURL = centralGatewayUrl
 	serviceAPI.AccessLabel = resourceName
 
 	err := sas.accessServiceManager.Upsert(application, appUID, id, resourceName)
