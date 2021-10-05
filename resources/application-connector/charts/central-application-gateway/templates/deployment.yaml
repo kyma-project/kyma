@@ -31,7 +31,7 @@ spec:
       serviceAccountName: {{.Chart.Name }}
       containers:
       - name: {{ .Chart.Name }}
-        image: {{ .Values.global.containerRegistry.path }}/central-application-gateway:{{ .Values.global.central_application_gateway.version }}
+        image: {{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.central_application_gateway) }}
         imagePullPolicy: {{ .Values.deployment.image.pullPolicy }}
         args:
           - "/applicationgateway"

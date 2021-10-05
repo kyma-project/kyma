@@ -10,7 +10,7 @@ spec:
   gateways:
     - kyma-system/kyma-gateway
   hosts:
-    - registry.{{ .Values.global.ingress.domainName }} # docker-registry.{DOMAIN}
+    - registry.{{ .Values.global.domainName }} # docker-registry.{DOMAIN}
   http:
     - corsPolicy:
         allowHeaders:

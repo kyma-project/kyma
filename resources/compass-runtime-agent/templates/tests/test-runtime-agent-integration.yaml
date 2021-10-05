@@ -56,15 +56,15 @@ spec:
             - name: APPLICATION_INSTALLATION_TIMEOUT
               value: {{ .Values.compassRuntimeAgent.tests.applicationInstallationTimeout }}
             - name: RUNTIME_EVENTS_URL
-              value: "https://gateway.{{ .Values.global.ingress.domainName }}"
+              value: "https://gateway.{{ .Values.global.domainName }}"
             - name: RUNTIME_CONSOLE_URL
-              value: "https://console.{{ .Values.global.ingress.domainName }}"
+              value: "https://console.{{ .Values.global.domainName }}"
             - name: DEX_SECRET_NAMESPACE
               value: {{ .Values.compassRuntimeAgent.resources.dexSecretNamespace }}
             - name: DEX_SECRET_NAME
               value: {{ .Values.compassRuntimeAgent.resources.dexSecretName }}
             - name: ID_PROVIDER_DOMAIN
-              value: {{ .Values.global.ingress.domainName | quote }}
+              value: {{ .Values.global.domainName | quote }}
             - name: ID_PROVIDER_CLIENT_TIMEOUT
               value: {{ .Values.compassRuntimeAgent.tests.idProvider.clientTimeout | quote }}
           command:
@@ -79,11 +79,11 @@ spec:
       hostAliases:
         - ip: {{ .Values.global.minikubeIP }}
           hostnames:
-            - "compass-gateway.{{ .Values.global.ingress.domainName }}"
-            - "compass-gateway-auth-oauth.{{ .Values.global.ingress.domainName }}"
-            - "minio.{{ .Values.global.ingress.domainName }}"
-            - "dex.{{ .Values.global.ingress.domainName }}"
-            - "gateway.{{ .Values.global.ingress.domainName }}"
+            - "compass-gateway.{{ .Values.global.domainName }}"
+            - "compass-gateway-auth-oauth.{{ .Values.global.domainName }}"
+            - "minio.{{ .Values.global.domainName }}"
+            - "dex.{{ .Values.global.domainName }}"
+            - "gateway.{{ .Values.global.domainName }}"
       {{ end }}
     restartPolicy: Never
 {{- end }}

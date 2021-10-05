@@ -12,7 +12,7 @@ metadata:
     app.kubernetes.io/instance: {{ .Release.Name }}
 spec:
   hosts:
-    - gateway.{{ .Values.global.ingress.domainName }}
+    - gateway.{{ .Values.global.domainName }}
   gateways:
     - {{ .Values.istio.gateway.nameMtls }}.{{ .Values.istio.gateway.namespace }}.svc.cluster.local
   http:

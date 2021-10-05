@@ -37,7 +37,7 @@ spec:
     spec:
       containers:
       - name: {{ .Chart.Name }}
-        image: {{ .Values.global.containerRegistry.path }}/application-registry:{{ .Values.global.application_registry.version }}
+        image: {{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.application_registry) }}
         imagePullPolicy: {{ .Values.deployment.image.pullPolicy }}
         resources:
           limits:
@@ -73,7 +73,7 @@ spec:
       hostAliases:
         - ip: {{ .Values.global.minikubeIP }}
           hostnames:
-            - "minio.{{ .Values.global.ingress.domainName }}"
+            - "minio.{{ .Values.global.domainName }}"
       {{ end }}
     {{- if .Values.global.priorityClassName }}
       priorityClassName: {{ .Values.global.priorityClassName }}

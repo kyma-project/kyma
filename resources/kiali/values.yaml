@@ -5,7 +5,7 @@ tests:
   enabled: true
   image:
     name: eu.gcr.io/kyma-project/tpi/k8s-tools
-    version: 20210817-8cdbfce3
+    version: 20210922-530cfc39
   labels:
     integration: true
     after-upgrade: true
@@ -31,7 +31,7 @@ authProxy:
   enabled: true
   replicaCount: 1
   port: 3000
-  configDocsLink: "https://kyma-project.io/docs"
+  configDocsLink: "https://kyma-project.io/docs/kyma/latest/04-operation-guides/security/sec-06-access-expose-kiali-grafana"
   config:
     clientId: "kiali"
     clientSecret: "hiFWLWqIxw5d3gl"
@@ -399,7 +399,7 @@ kiali:
     # Custom annotations to be created on the Kiali pod.
     #    ---
       pod_annotations:
-        "sidecar.istio.io/inject": "false"
+        "sidecar.istio.io/inject": "true"
     #
     # Custom labels to be created on the Kiali pod.
     #    ---
@@ -591,7 +591,7 @@ kiali:
     #      health_check_url: ""
         in_cluster_url: "http://monitoring-grafana.kyma-system:80"
     #      is_core: false
-        url: "https://grafana.{{ .Values.global.ingress.domainName }}"
+        url: "https://grafana.{{ .Values.global.domainName }}"
     #
     # **Istio-specific settings:
     # component_status:
@@ -734,7 +734,7 @@ kiali:
     #      health_check_url: ""
         in_cluster_url: "http://tracing-jaeger-query.kyma-system:16686"
     #      namespace_selector: true
-        url: "https://jaeger.{{ .Values.global.ingress.domainName }}"
+        url: "https://jaeger.{{ .Values.global.domainName }}"
         use_grpc: false
     #      whitelist_istio_system: ["jaeger-query", "istio-ingressgateway"]
 

@@ -383,11 +383,11 @@ containers:
       {{ end }}
       {{- if not .Values.env.GF_AUTH_GENERIC_OAUTH_AUTH_URL }}
       - name: GF_AUTH_GENERIC_OAUTH_AUTH_URL
-        value: "https://dex.{{ .Values.global.ingress.domainName }}/auth"
+        value: "https://dex.{{ .Values.global.domainName }}/auth"
       {{- end }}
       {{- if not .Values.env.GF_SERVER_ROOT_URL }}
       - name: GF_SERVER_ROOT_URL
-        value: "https://grafana.{{ .Values.global.ingress.domainName }}/"
+        value: "https://grafana.{{ .Values.global.domainName }}/"
       {{- end }}
       - name: GF_PATHS_DATA
         value: {{ (get .Values "grafana.ini").paths.data }}

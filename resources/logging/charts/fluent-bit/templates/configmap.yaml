@@ -31,7 +31,7 @@ data:
         Name              tail
         {{- if .Values.config.inputs.tail.alias }}
         Alias             {{ .Values.config.inputs.tail.alias }}
-        {{- end }}             
+        {{- end }}
         Tag               {{ .Values.config.inputs.tail.tag }}
         {{- if .Values.config.inputs.tail.pathKey }}
         Tag_Regex         {{ .Values.config.inputs.tail.tagRegex }}

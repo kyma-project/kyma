@@ -19,7 +19,7 @@ metadata:
 {{- end }}
 spec:
   hosts:
-  - {{ .Values.virtualservice.hostname }}.{{ .Values.global.ingress.domainName }}
+  - {{ .Values.virtualservice.hostname }}.{{ .Values.global.domainName }}
   gateways:
   - {{ .Values.global.istio.gateway.name }}
   http:

@@ -39,6 +39,21 @@ remove-cached-content() {
   ( rm -rf "${BUILD_DIR}" ) || true
 }
 
+merge-kyma() {
+  git config --global user.email "ci-website@kyma-project.io"
+  git config --global user.name "CI/CD"
+  step "Newest commit"
+  git log --max-count=1
+
+  git checkout -B pull-request
+  git checkout main
+  step "Last commit from main"
+  git log --max-count=1
+
+  step "merging changes from pull request to main"
+  git merge pull-request
+}
+
 copy-website-repo() {
   git clone -b "main" --single-branch "${WEBSITE_REPO}" "${WEBSITE_DIR}"
 }
@@ -53,6 +68,12 @@ build-preview() {
 copy-build-result() {
   mkdir -p "${DOCS_DIR}/.kyma-project-io/"
   cp -rp "${PUBLIC_DIR}/" "${DOCS_DIR}/.kyma-project-io/"
+ 
+  #  DEBUG
+  tree "${BUILD_DIR}"/content/docs
+  cat "${BUILD_DIR}"/content/docs/kyma/versions.json
+  #  DEBUG
+  echo "/ /docs/kyma/preview/" > "${DOCS_DIR}"/.kyma-project-io/public/_redirects
 }
 
 main() {
@@ -60,9 +81,17 @@ main() {
   remove-cached-content
   pass "Removed"
 
+  step "Merge changes from PR with main branch"
+  merge-kyma
+  pass "Merged"
+
   step "Copying kyma/website repo"
   copy-website-repo
   pass "Copied"
+
+  step "Remove old content from website"
+  rm -rf "${WEBSITE_DIR}"/content/docs/kyma
+  step "Removed"
 
   step "Building preview"
   build-preview

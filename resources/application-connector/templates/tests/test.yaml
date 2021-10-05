@@ -33,12 +33,12 @@ spec:
       hostAliases:
         - ip: {{ .Values.global.minikubeIP }}
           hostnames:
-            - "connector-service.{{ .Values.global.ingress.domainName }}"
-            - "gateway.{{ .Values.global.ingress.domainName }}"
+            - "connector-service.{{ .Values.global.domainName }}"
+            - "gateway.{{ .Values.global.domainName }}"
       {{ end }}
       containers:
         - name: tests
-          image: {{ .Values.global.containerRegistry.path }}/application-connector-tests:{{ .Values.tests.application_connector_tests.image.version }}
+          image: {{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.testImages.application_connector_tests) }}
           imagePullPolicy: {{ .Values.tests.application_connector_tests.image.pullPolicy }}
           env:
           - name: NAMESPACE
