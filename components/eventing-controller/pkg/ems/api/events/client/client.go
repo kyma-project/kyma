@@ -36,7 +36,7 @@ func NewClient(config *config.Config, authenticator *auth.Authenticator) *Client
 	}
 }
 
-func (c Client) GetHttpClient() *httpclient.Client {
+func (c Client) GetHTTPClient() *httpclient.Client {
 	return c.httpClient
 }
 

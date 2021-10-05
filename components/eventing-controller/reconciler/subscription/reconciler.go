@@ -203,7 +203,7 @@ func (r *Reconciler) syncSubscriptionAPIRuleStatus(actualSubscription, desiredSu
 		}
 	}
 
-	return isApiRuleStatueChanged(actualSubscription, desiredSubscription), nil
+	return isAPIRuleStatusChanged(actualSubscription, desiredSubscription), nil
 }
 
 // syncFinalizer sets the finalizer in the Subscription
