@@ -1,6 +1,5 @@
 const axios = require("axios");
 const https = require("https");
-const { expect } = require("chai");
 const httpsAgent = new https.Agent({
   rejectUnauthorized: false, // curl -k
 });
