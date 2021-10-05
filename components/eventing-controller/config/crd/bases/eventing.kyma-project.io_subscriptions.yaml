@@ -128,7 +128,7 @@ spec:
                       subscription in BEB
                     properties:
                       clientId:
-                        description: ClientId defines clientID for OAuth2
+                        description: ClientID defines clientID for OAuth2
                         type: string
                       clientSecret:
                         description: ClientSecret defines client secret for OAuth2
@@ -142,7 +142,7 @@ spec:
                           type: string
                         type: array
                       tokenUrl:
-                        description: TokenUrl defines token URL for OAuth2
+                        description: TokenURL defines token URL for OAuth2
                         type: string
                       type:
                         description: Type defines type of authentication
