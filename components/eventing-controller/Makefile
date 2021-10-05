@@ -49,7 +49,7 @@ uninstall: manifests
 
 # Deploy eventing-controller in the configured Kubernetes cluster in ~/.kube/config for local development
 deploy-local: manifests deploy-local-dry-run
-	kubectl create ns ${NAMESPACE} || true
+	-kubectl create ns ${NAMESPACE}
 	kustomize build config/default | envsubst | ko apply -f -
 
 # Undeploy the eventing-controller
