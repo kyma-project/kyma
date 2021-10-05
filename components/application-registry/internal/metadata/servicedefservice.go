@@ -100,7 +100,6 @@ func (sds *serviceDefinitionService) Create(application string, serviceDef *mode
 		centralGatewayUrl = serviceAPI.CentralGatewayURL
 	}
 
-	// TODO: Should we put spec with the Central App Gateway instead of the old Gateway URL?
 	apperr = sds.specService.PutSpec(serviceDef, centralGatewayUrl)
 	if apperr != nil {
 		return "", apperr.Append("Determining API spec for service with ID %s failed", serviceDef.ID)

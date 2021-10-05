@@ -222,7 +222,6 @@ func modifyAPISpec(rawApiSpec []byte, centralGatewayUrl string) ([]byte, apperro
 	return modifiedSpec, nil
 }
 
-// TODO: Should I use only the Central Gateway URL as the old one is deprecated?
 func updateBaseUrl(apiSpec spec.Swagger, centralGatewayUrl string) (spec.Swagger, apperrors.AppError) {
 	fullUrl, err := url.Parse(centralGatewayUrl)
 	if err != nil {

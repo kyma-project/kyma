@@ -51,7 +51,6 @@ func (resolver nameResolver) GetGatewayUrl(application, id string) string {
 	return fmt.Sprintf(metadataUrlFormat, resolver.GetResourceName(application, id), resolver.namespace)
 }
 
-// TODO: Check if it's ok
 func (resolver nameResolver) GetCentralGatewayUrl(applicationName, serviceDisplayName string) string {
 	return fmt.Sprintf(centralApplicationGatewayFormat,
 		resolver.centralGatewayUrl,
