@@ -11,6 +11,9 @@ import (
 	"github.com/avast/retry-go"
 	cev2event "github.com/cloudevents/sdk-go/v2/event"
 	kymalogger "github.com/kyma-project/kyma/common/logging/logger"
+	"github.com/nats-io/nats.go"
+	. "github.com/onsi/gomega"
+
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 	"github.com/kyma-project/kyma/components/eventing-controller/logger"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/application/applicationtest"
@@ -18,8 +21,6 @@ import (
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/eventtype"
 	eventingtesting "github.com/kyma-project/kyma/components/eventing-controller/testing"
-	"github.com/nats-io/nats.go"
-	. "github.com/onsi/gomega"
 )
 
 func TestConvertMsgToCE(t *testing.T) {
@@ -101,7 +102,7 @@ func TestSubscription(t *testing.T) {
 	}
 
 	natsConfig := env.NatsConfig{
-		Url:           natsServer.ClientURL(),
+		URL:           natsServer.ClientURL(),
 		MaxReconnects: 2,
 		ReconnectWait: time.Second,
 	}
@@ -197,7 +198,7 @@ func TestMultipleSubscriptionsToSameEvent(t *testing.T) {
 	}
 
 	natsConfig := env.NatsConfig{
-		Url:           natsServer.ClientURL(),
+		URL:           natsServer.ClientURL(),
 		MaxReconnects: 2,
 		ReconnectWait: time.Second,
 	}
@@ -298,7 +299,7 @@ func TestSubscriptionWithDuplicateFilters(t *testing.T) {
 	}
 
 	natsConfig := env.NatsConfig{
-		Url:           natsServer.ClientURL(),
+		URL:           natsServer.ClientURL(),
 		MaxReconnects: 2,
 		ReconnectWait: time.Second,
 	}
@@ -373,7 +374,7 @@ func TestSubscriptionWithMaxInFlightChange(t *testing.T) {
 	}
 
 	natsConfig := env.NatsConfig{
-		Url:           natsServer.ClientURL(),
+		URL:           natsServer.ClientURL(),
 		MaxReconnects: 2,
 		ReconnectWait: time.Second,
 	}
@@ -457,7 +458,7 @@ func TestIsValidSubscription(t *testing.T) {
 
 	// Create NATS client
 	natsConfig := env.NatsConfig{
-		Url:           natsServer.ClientURL(),
+		URL:           natsServer.ClientURL(),
 		MaxReconnects: 2,
 		ReconnectWait: time.Second,
 	}
@@ -553,7 +554,7 @@ func TestSubscriptionUsingCESDK(t *testing.T) {
 	g.Expect(err).To(BeNil())
 
 	natsConfig := env.NatsConfig{
-		Url:           natsServer.ClientURL(),
+		URL:           natsServer.ClientURL(),
 		MaxReconnects: 2,
 		ReconnectWait: time.Second,
 	}

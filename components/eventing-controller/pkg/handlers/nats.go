@@ -56,7 +56,7 @@ const (
 // Initialize creates a connection to NATS.
 func (n *Nats) Initialize(env.Config) (err error) {
 	if n.connection == nil || n.connection.Status() != nats.CONNECTED {
-		n.connection, err = nats.Connect(n.config.Url, nats.RetryOnFailedConnect(true),
+		n.connection, err = nats.Connect(n.config.URL, nats.RetryOnFailedConnect(true),
 			nats.MaxReconnects(n.config.MaxReconnects), nats.ReconnectWait(n.config.ReconnectWait))
 		if err != nil {
 			return errors.Wrapf(err, "connect to NATS failed")
