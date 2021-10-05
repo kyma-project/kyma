@@ -8,7 +8,7 @@ Learn how to list all metrics exposed by a sample Go service and watch their cha
 
 Use the [`monitoring-custom-metrics`](https://github.com/kyma-project/examples/tree/master/monitoring-custom-metrics) example and one of its services named `sample-metrics`. The service exposes its metrics on the standard `/metrics` endpoint that is available under port `8080`. You deploy the service (`deployment.yaml`) along with the ServiceMonitor custom resource (`service-monitor.yaml`) that instructs Prometheus to scrape metrics:
 
-- From the service with the `k8s-app: metrics` label
+- From the service with the `app: sample-metrics` label
 - From the `/metrics` endpoint
 - At `10s` interval
 

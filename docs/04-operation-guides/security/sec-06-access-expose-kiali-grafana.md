@@ -113,7 +113,7 @@ The following example shows how to use an OpenID Connect (OIDC) compliant identi
   </summary>
 
   ```bash
-  kubectl -n kyma-system create secret generic tracing-auth-proxy-grafana-user \
+  kubectl -n kyma-system create secret generic tracing-auth-proxy-user \
     --from-literal="OAUTH2_PROXY_CLIENT_ID=<my-client-id>" \
     --from-literal="OAUTH2_PROXY_CLIENT_SECRET=<my-client-secret>" \
     --from-literal="OAUTH2_PROXY_OIDC_ISSUER_URL=<my-token-issuer>" \

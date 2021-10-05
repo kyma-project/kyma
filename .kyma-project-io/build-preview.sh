@@ -50,11 +50,12 @@ merge-kyma() {
   step "Last commit from main"
   git log --max-count=1
 
+  step "merging changes from pull request to main"
   git merge pull-request
 }
 
 copy-website-repo() {
-  git clone -b "website-2.0" --single-branch "${WEBSITE_REPO}" "${WEBSITE_DIR}"
+  git clone -b "main" --single-branch "${WEBSITE_REPO}" "${WEBSITE_DIR}"
 }
 
 build-preview() {

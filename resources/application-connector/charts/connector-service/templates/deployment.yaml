@@ -38,7 +38,7 @@ spec:
       serviceAccountName: {{ .Chart.Name }}
       containers:
       - name: {{ .Chart.Name }}
-        image: {{ .Values.global.containerRegistry.path }}/connector-service:{{ .Values.global.connector_service.version }}
+        image: {{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.connector_service) }}
         imagePullPolicy: {{ .Values.deployment.image.pullPolicy }}
         resources:
           limits:
