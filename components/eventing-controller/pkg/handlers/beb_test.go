@@ -10,6 +10,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	kymalogger "github.com/kyma-project/kyma/common/logging/logger"
+
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 	"github.com/kyma-project/kyma/components/eventing-controller/logger"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
@@ -92,9 +93,9 @@ func fixtureValidSubscription(name, namespace string) *eventingv1alpha1.Subscrip
 				WebhookAuth: &eventingv1alpha1.WebhookAuth{
 					Type:         "oauth2",
 					GrantType:    "client_credentials",
-					ClientId:     "xxx",
+					ClientID:     "xxx",
 					ClientSecret: "xxx",
-					TokenUrl:     "https://oauth2.xxx.com/oauth2/token",
+					TokenURL:     "https://oauth2.xxx.com/oauth2/token",
 					Scope:        []string{"guid-identifier"},
 				},
 			},

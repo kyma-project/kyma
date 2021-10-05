@@ -12,8 +12,8 @@ import (
 	"golang.org/x/oauth2"
 
 	"github.com/go-logr/logr"
-	. "github.com/onsi/ginkgo"
-	. "github.com/onsi/gomega"
+	. "github.com/onsi/ginkgo" // nolint
+	. "github.com/onsi/gomega" // nolint
 
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	// gcp auth etc.
