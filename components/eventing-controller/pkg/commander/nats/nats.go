@@ -131,7 +131,8 @@ func cleanup(backend handlers.MessagingBackend, dynamicClient dynamic.Interface,
 
 	// Clean statuses.
 	isCleanupSuccessful := true
-	for _, sub := range subs.Items {
+	for _, v := range subs.Items {
+		sub := v
 		subKey := types.NamespacedName{Namespace: sub.Namespace, Name: sub.Name}
 		log := logger.With("key", subKey.String())
 

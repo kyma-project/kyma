@@ -234,7 +234,7 @@ func createKeyPrefix(sub *eventingv1alpha1.Subscription) string {
 		Namespace: sub.Namespace,
 		Name:      sub.Name,
 	}
-	return fmt.Sprintf("%s", namespacedName.String())
+	return namespacedName.String()
 }
 
 func createKeySuffix(subject string, queueGoupInstanceNo int) string {
