@@ -29,7 +29,7 @@ describe("Eventing tests", function () {
   const backendK8sSecretName = process.env.BACKEND_SECRET_NAME || "eventing-backend";
   const backendK8sSecretNamespace = process.env.BACKEND_SECRET_NAMESPACE || "default";
   const eventMeshSecretFilePath = process.env.EVENTMESH_SECRET_FILE || "";
-  const debugLogsEnabled = process.env.DEBUG_LOGS === "true";
+  const DEBUG = process.env.DEBUG;
 
   // eventingE2ETestSuite - Runs Eventing end-to-end tests
   function eventingE2ETestSuite () {
@@ -80,7 +80,7 @@ describe("Eventing tests", function () {
     // runs after each test in every block
 
     // if the test is failed, then printing some debug logs
-    if (this.currentTest.state === 'failed' && debugLogsEnabled) {
+    if (this.currentTest.state === 'failed' && DEBUG) {
       await printAllSubscriptions(testNamespace)
       await printEventingControllerLogs()
       await printEventingPublisherProxyLogs()
@@ -99,7 +99,7 @@ describe("Eventing tests", function () {
       await waitForSubscriptionsTillReady(testNamespace)
 
       // print subscriptions status when debugLogs is enabled
-      if (debugLogsEnabled) {
+      if (DEBUG) {
         await printAllSubscriptions(testNamespace)
       }
     });
