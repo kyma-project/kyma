@@ -9,6 +9,7 @@ import (
 	"go.uber.org/zap"
 
 	apigatewayv1alpha1 "github.com/kyma-incubator/api-gateway/api/v1alpha1"
+
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 	"github.com/kyma-project/kyma/components/eventing-controller/logger"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/client"
@@ -61,7 +62,7 @@ type BebResponse struct {
 func (b *Beb) Initialize(cfg env.Config) error {
 	if b.Client == nil {
 		authenticator := auth.NewAuthenticator(cfg)
-		b.Client = client.NewClient(config.GetDefaultConfig(cfg.BebApiUrl), authenticator)
+		b.Client = client.NewClient(config.GetDefaultConfig(cfg.BebAPIURL), authenticator)
 		b.WebhookAuth = getWebHookAuth(cfg, b.OAth2credentials)
 		b.ProtocolSettings = &eventingv1alpha1.ProtocolSettings{
 			ContentMode:     &cfg.ContentMode,

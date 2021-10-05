@@ -43,7 +43,7 @@ func TestCleanup(t *testing.T) {
 	bebMock := startBebMock()
 	envConf := env.Config{
 
-		BebApiUrl:                bebMock.MessagingURL,
+		BebAPIURL:                bebMock.MessagingURL,
 		ClientID:                 "client-id",
 		ClientSecret:             "client-secret",
 		TokenEndpoint:            bebMock.TokenURL,
