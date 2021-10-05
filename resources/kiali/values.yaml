@@ -297,6 +297,7 @@ kiali:
         api_version: "autoscaling/v2beta2"
         spec: {}
     #
+    #.   ATTENTION: This setting will not be effective. It has been replaced with the global.images.kiali setting.
     # Determines which Kiali image to download and install.
     # If you set this to a specific name (i.e. you do not leave it as the default empty string),
     # you must make sure that image is supported by the operator.
@@ -306,7 +307,6 @@ kiali:
     # a single, specific Kiali version, thus this setting may have no effect depending on how the
     # operator itself was configured.
     #    ---
-    #.   ATTENTION: this setting is will not be effective as it got replaced by the global.images.kiali setting. 
     #    image_name: ""
     #
     # The Kubernetes pull policy for the Kiali deployment.
@@ -318,6 +318,7 @@ kiali:
     #    ---
     #    image_pull_secrets: []
     #
+    #.   ATTENTION: This setting will not be effective. It has been replaced with the global.images.kiali setting.
     # Determines which version of Kiali to install.
     # Choose "lastrelease" to use the last Kiali release.
     # Choose "latest" to use the latest image (which may or may not be a released version of Kiali).
@@ -332,7 +333,6 @@ kiali:
     # a single, specific Kiali version, thus this setting may have no effect depending on how the
     # operator itself was configured.
     #    ---
-    #.   ATTENTION: this setting is will not be effective as it got replaced by the global.images.kiali setting. 
     #    image_version: ""
     #
     # Determines if the Kiali endpoint should be exposed externally.
