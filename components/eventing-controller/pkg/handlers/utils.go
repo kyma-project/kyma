@@ -97,11 +97,11 @@ func shortenNameAndAppendHash(name string, hash string, maxLength int) string {
 var seededRand = rand.New(rand.NewSource(time.Now().UnixNano()))
 
 func getHash(subscription *types.Subscription) (int64, error) {
-	if hash, err := hashstructure.Hash(subscription, hashstructure.FormatV2, nil); err != nil {
+	hash, err := hashstructure.Hash(subscription, hashstructure.FormatV2, nil)
+	if err != nil {
 		return 0, err
-	} else {
-		return int64(hash), nil
 	}
+	return int64(hash), nil
 }
 
 func getDefaultSubscription(protocolSettings *eventingv1alpha1.ProtocolSettings) (*types.Subscription, error) {
@@ -221,7 +221,7 @@ func getExposedURLFromAPIRule(apiRule *apigatewayv1alpha1.APIRule, sub *eventing
 	return fmt.Sprintf("%s%s%s", scheme, *apiRule.Spec.Service.Host, path), nil
 }
 
-func getInternalView4Ems(subscription *types.Subscription) (*types.Subscription, error) {
+func getInternalView4Ems(subscription *types.Subscription) *types.Subscription {
 	emsSubscription := &types.Subscription{}
 
 	// Name
@@ -242,7 +242,7 @@ func getInternalView4Ems(subscription *types.Subscription) (*types.Subscription,
 		emsSubscription.Events = append(emsSubscription.Events, types.Event{Source: s, Type: t})
 	}
 
-	return emsSubscription, nil
+	return emsSubscription
 }
 
 // GetRandString returns a random string of the given length

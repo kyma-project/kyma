@@ -37,7 +37,7 @@ import (
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/eventtype"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/object"
-	. "github.com/kyma-project/kyma/components/eventing-controller/reconciler/errors"
+	recerrors "github.com/kyma-project/kyma/components/eventing-controller/reconciler/errors"
 	"github.com/kyma-project/kyma/components/eventing-controller/utils"
 )
 
@@ -118,7 +118,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 
 	if !isInDeletion(desiredSubscription) {
 		// ensure the finalizer is set
-		if err := r.syncFinalizer(desiredSubscription, &result, ctx, log); err != nil {
+		if err := r.syncFinalizer(ctx, desiredSubscription, &result, log); err != nil {
 			return ctrl.Result{}, errors.Wrap(err, "sync finalizer failed")
 		}
 		if result.Requeue {
@@ -126,7 +126,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 		}
 
 		// sync the initial Subscription status
-		if err := r.syncInitialStatus(desiredSubscription, &result, ctx); err != nil {
+		if err := r.syncInitialStatus(ctx, desiredSubscription, &result); err != nil {
 			return ctrl.Result{}, errors.Wrap(err, "sync status failed")
 		}
 		if result.Requeue {
@@ -135,8 +135,8 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 
 		// sync APIRule
 		var err error
-		apiRule, err = r.syncAPIRule(desiredSubscription, ctx, log)
-		if !IsSkippable(err) {
+		apiRule, err = r.syncAPIRule(ctx, desiredSubscription, log)
+		if !recerrors.IsSkippable(err) {
 			return ctrl.Result{}, err
 		}
 
@@ -156,16 +156,16 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 	statusChanged := false
 
 	// Sync the BEB Subscription with the Subscription CR
-	if statusChangedForBeb, err := r.syncBEBSubscription(desiredSubscription, &result, ctx, log, apiRule); err != nil {
+	statusChangedForBeb, err := r.syncBEBSubscription(ctx, desiredSubscription, &result, log, apiRule)
+	if err != nil {
 		log.Errorw("sync BEB subscription failed", "error", err)
 		return ctrl.Result{}, err
-	} else {
-		statusChanged = statusChanged || statusChangedForBeb
 	}
+	statusChanged = statusChanged || statusChangedForBeb
 
 	if isInDeletion(desiredSubscription) {
 		// Remove finalizers
-		if err := r.removeFinalizer(desiredSubscription, ctx, log); err != nil {
+		if err := r.removeFinalizer(ctx, desiredSubscription, log); err != nil {
 			return ctrl.Result{}, err
 		}
 		result.Requeue = false
@@ -311,7 +311,7 @@ func (r *Reconciler) syncAPIRule(ctx context.Context, subscription *eventingv1al
 	sURL, err := url.ParseRequestURI(subscription.Spec.Sink)
 	if err != nil {
 		r.eventWarn(subscription, reasonValidationFailed, "Parse sink URI failed %s", subscription.Spec.Sink)
-		return nil, NewSkippable(errors.Wrapf(err, "parse sink URI failed"))
+		return nil, recerrors.NewSkippable(errors.Wrapf(err, "parse sink URI failed"))
 	}
 
 	apiRule, err := r.createOrUpdateAPIRule(ctx, subscription, *sURL, logger)
@@ -325,34 +325,34 @@ func (r *Reconciler) syncAPIRule(ctx context.Context, subscription *eventingv1al
 func (r *Reconciler) isSinkURLValid(ctx context.Context, subscription *eventingv1alpha1.Subscription) error {
 	if !isValidScheme(subscription.Spec.Sink) {
 		r.eventWarn(subscription, reasonValidationFailed, "Sink URL scheme should be HTTP or HTTPS %s", subscription.Spec.Sink)
-		return NewSkippable(fmt.Errorf("sink URL scheme should be 'http' or 'https'"))
+		return recerrors.NewSkippable(fmt.Errorf("sink URL scheme should be 'http' or 'https'"))
 	}
 
 	sURL, err := url.ParseRequestURI(subscription.Spec.Sink)
 	if err != nil {
 		r.eventWarn(subscription, reasonValidationFailed, "Sink URL is not valid %s", err.Error())
-		return NewSkippable(err)
+		return recerrors.NewSkippable(err)
 	}
 
 	// Validate sink URL is a cluster local URL
 	trimmedHost := strings.Split(sURL.Host, ":")[0]
 	if !strings.HasSuffix(trimmedHost, clusterLocalURLSuffix) {
 		r.eventWarn(subscription, reasonValidationFailed, "Sink does not contain suffix %s", clusterLocalURLSuffix)
-		return NewSkippable(fmt.Errorf("sink does not contain suffix: %s in the URL", clusterLocalURLSuffix))
+		return recerrors.NewSkippable(fmt.Errorf("sink does not contain suffix: %s in the URL", clusterLocalURLSuffix))
 	}
 
 	// we expected a sink in the format "service.namespace.svc.cluster.local"
 	subDomains := strings.Split(trimmedHost, ".")
 	if len(subDomains) != 5 {
 		r.eventWarn(subscription, reasonValidationFailed, "Sink should contain 5 sub-domains %s", trimmedHost)
-		return NewSkippable(fmt.Errorf("sink should contain 5 sub-domains: %s", trimmedHost))
+		return recerrors.NewSkippable(fmt.Errorf("sink should contain 5 sub-domains: %s", trimmedHost))
 	}
 
 	// Assumption: Subscription CR and Subscriber should be deployed in the same namespace
 	svcNs := subDomains[1]
 	if subscription.Namespace != svcNs {
 		r.eventWarn(subscription, reasonValidationFailed, "Namespace of subscription %s and the subscriber %s are different", subscription.Namespace, svcNs)
-		return NewSkippable(fmt.Errorf("namespace of subscription: %s and the namespace of subscriber: %s are different", subscription.Namespace, svcNs))
+		return recerrors.NewSkippable(fmt.Errorf("namespace of subscription: %s and the namespace of subscriber: %s are different", subscription.Namespace, svcNs))
 	}
 
 	// Validate svc is a cluster-local one
@@ -360,7 +360,7 @@ func (r *Reconciler) isSinkURLValid(ctx context.Context, subscription *eventingv
 	if _, err := r.getClusterLocalService(ctx, svcNs, svcName); err != nil {
 		if k8serrors.IsNotFound(err) {
 			r.eventWarn(subscription, reasonValidationFailed, "Sink does not correspond to a valid cluster local svc")
-			return NewSkippable(errors.Wrapf(err, "sink is not valid cluster local svc"))
+			return recerrors.NewSkippable(errors.Wrapf(err, "sink is not valid cluster local svc"))
 		}
 
 		r.eventWarn(subscription, reasonValidationFailed, "Fetch cluster-local svc failed namespace %s name %s", svcNs, svcName)
@@ -397,7 +397,7 @@ func (r *Reconciler) createOrUpdateAPIRule(ctx context.Context, subscription *ev
 	var reusableAPIRule *apigatewayv1alpha1.APIRule
 	existingAPIRules, err := r.getAPIRulesForASvc(ctx, labels, svcNs)
 	if err != nil {
-		return nil, errors.Wrapf(err, "fetch ApiRule failed for labels: %v", labels)
+		return nil, errors.Wrapf(err, "fetch APIRule failed for labels: %v", labels)
 	}
 	if existingAPIRules != nil {
 		reusableAPIRule = r.filterAPIRulesOnPort(existingAPIRules, svcPort)
@@ -410,7 +410,7 @@ func (r *Reconciler) createOrUpdateAPIRule(ctx context.Context, subscription *ev
 	}
 	filteredSubscriptions := r.filterSubscriptionsOnPort(subscriptions, svcPort)
 
-	desiredAPIRule, err := r.makeAPIRule(svcNs, svcName, labels, filteredSubscriptions, svcPort)
+	desiredAPIRule := r.makeAPIRule(svcNs, svcName, labels, filteredSubscriptions, svcPort)
 	if err != nil {
 		return nil, errors.Wrap(err, "make APIRule failed")
 	}
@@ -457,7 +457,7 @@ func (r *Reconciler) handlePreviousAPIRule(ctx context.Context, subscription *ev
 	}
 
 	// the previous APIRule for the subscription is the current one no need to update it
-	if reusableApiRule != nil && subscription.Status.APIRuleName == reusableApiRule.Name {
+	if reusableAPIRule != nil && subscription.Status.APIRuleName == reusableAPIRule.Name {
 		return nil
 	}
 
@@ -479,7 +479,7 @@ func (r *Reconciler) handlePreviousAPIRule(ctx context.Context, subscription *ev
 		}
 	}
 
-	// delete the ApiRule if the new OwnerReference list is empty
+	// delete the APIRule if the new OwnerReference list is empty
 	if len(ownerReferences) == 0 {
 		if err := r.Client.Delete(ctx, previousAPIRule); err != nil {
 			return err
@@ -487,7 +487,7 @@ func (r *Reconciler) handlePreviousAPIRule(ctx context.Context, subscription *ev
 		return nil
 	}
 
-	// update the ApiRule if the new OwnerReference list length is decreased
+	// update the APIRule if the new OwnerReference list length is decreased
 	if len(ownerReferences) < len(previousAPIRule.OwnerReferences) {
 		// list all subscriptions in the APIRule namespace
 		namespaceSubscriptions := &eventingv1alpha1.SubscriptionList{}
@@ -606,7 +606,6 @@ func (r *Reconciler) getSubscriptionsForASvc(ctx context.Context, svcNs, svcName
 			// It's ok as the relevant subscription will have a valid cluster local URL in the same namespace
 			continue
 		}
-		//svcPortForSub, err := convertURLPortForApiRulePort(*hostURL)
 		if svcNs == svcNsForSub && svcName == svcNameForSub {
 			relevantSubs = append(relevantSubs, sub)
 		}
@@ -640,7 +639,7 @@ func (r *Reconciler) filterSubscriptionsOnPort(subList []eventingv1alpha1.Subscr
 	return filteredSubs
 }
 
-func (r *Reconciler) makeAPIRule(svcNs, svcName string, labels map[string]string, subs []eventingv1alpha1.Subscription, port uint32) (*apigatewayv1alpha1.APIRule, error) {
+func (r *Reconciler) makeAPIRule(svcNs, svcName string, labels map[string]string, subs []eventingv1alpha1.Subscription, port uint32) *apigatewayv1alpha1.APIRule {
 
 	randomSuffix := handlers.GetRandString(suffixLength)
 	hostName := fmt.Sprintf("%s-%s.%s", externalHostPrefix, randomSuffix, r.Domain)
@@ -651,7 +650,7 @@ func (r *Reconciler) makeAPIRule(svcNs, svcName string, labels map[string]string
 		object.WithService(hostName, svcName, port),
 		object.WithGateway(constants.ClusterLocalAPIGateway),
 		object.WithRules(subs, http.MethodPost, http.MethodOptions))
-	return apiRule, nil
+	return apiRule
 }
 
 func (r *Reconciler) getAPIRulesForASvc(ctx context.Context, labels map[string]string, svcNs string) ([]apigatewayv1alpha1.APIRule, error) {
@@ -733,7 +732,7 @@ func (r *Reconciler) updateCondition(ctx context.Context, subscription *eventing
 
 // replaceStatusCondition replaces the given condition on the subscription. Also it sets the readiness in the status.
 // So make sure you always use this method then changing a condition
-func (r *Reconciler) replaceStatusCondition(subscription *eventingv1alpha1.Subscription, condition eventingv1alpha1.Condition) (bool, error) {
+func (r *Reconciler) replaceStatusCondition(subscription *eventingv1alpha1.Subscription, condition eventingv1alpha1.Condition) bool {
 	// the subscription is ready if all conditions are fulfilled
 	isReady := true
 
@@ -756,13 +755,13 @@ func (r *Reconciler) replaceStatusCondition(subscription *eventingv1alpha1.Subsc
 
 	// prevent unnecessary updates
 	if conditionsEquals(subscription.Status.Conditions, desiredConditions) && subscription.Status.Ready == isReady {
-		return false, nil
+		return false
 	}
 
 	// update the status
 	subscription.Status.Conditions = desiredConditions
 	subscription.Status.Ready = isReady
-	return true, nil
+	return true
 }
 
 // emitConditionEvent emits a kubernetes event and sets the event type based on the Condition status

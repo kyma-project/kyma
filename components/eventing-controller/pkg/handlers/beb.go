@@ -140,11 +140,7 @@ func (b *Beb) SyncSubscription(subscription *eventingv1alpha1.Subscription, clea
 			}
 		}
 		// get the internal view for the EMS subscription
-		sEms, err := getInternalView4Ems(bebSubscription)
-		if err != nil {
-			log.Errorw("get BEB subscription internal view failed", ErrorLogKey, err)
-			return false, err
-		}
+		sEms := getInternalView4Ems(bebSubscription)
 		newEmsHash, err := getHash(sEms)
 		if err != nil {
 			log.Errorw("get BEB subscription hash failed", ErrorLogKey, err)
@@ -199,7 +195,7 @@ func (b *Beb) deleteCreateAndHashSubscription(subscription *types.Subscription, 
 	}
 
 	// get the new hash
-	sEMS, err := getInternalView4Ems(bebSubscription)
+	sEMS := getInternalView4Ems(bebSubscription)
 	if err != nil {
 		log.Errorw("get BEB subscription internal view failed", ErrorLogKey, err)
 	}

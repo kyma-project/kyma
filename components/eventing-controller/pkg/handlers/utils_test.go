@@ -200,10 +200,9 @@ func TestGetInternalView4Ems(t *testing.T) {
 	}
 
 	// then
-	bebSubscription, err := getInternalView4Ems(emsSubscription)
+	bebSubscription := getInternalView4Ems(emsSubscription)
 
 	// when
-	g.Expect(err).ShouldNot(HaveOccurred())
 	g.Expect(bebSubscription.Name).To(BeEquivalentTo(emsSubscription.Name))
 	g.Expect(bebSubscription.ContentMode).To(BeEquivalentTo(emsSubscription.ContentMode))
 	g.Expect(bebSubscription.ExemptHandshake).To(BeEquivalentTo(emsSubscription.ExemptHandshake))
