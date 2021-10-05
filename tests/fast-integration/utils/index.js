@@ -427,11 +427,8 @@ async function getAllSubscriptions(namespace = "default") {
     });
     const body = JSON.parse(response.body);
 
-    // return body
-
     return Promise.all(
       body.items.map((sub) => {
-        // return resourceTypes(api.spec.group, api.spec.version);
         return {
           apiVersion: sub["apiVersion"],
           spec: sub["spec"],
