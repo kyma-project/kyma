@@ -385,10 +385,7 @@ func (r *Reconciler) UpdateBackendStatus(ctx context.Context, backendType eventi
 }
 
 func hasBackendTypeChanged(currentBackendStatus, desiredBackendStatus eventingv1alpha1.EventingBackendStatus) bool {
-	if currentBackendStatus.Backend != desiredBackendStatus.Backend {
-		return true
-	}
-	return false
+	return currentBackendStatus.Backend != desiredBackendStatus.Backend
 }
 
 func getDefaultBackendStatus() eventingv1alpha1.EventingBackendStatus {
@@ -526,7 +523,7 @@ func getSecretStringData(clientID, clientSecret, tokenEndpoint, grantType, publi
 		deployment.PublisherSecretClientSecretKey:  clientSecret,
 		deployment.PublisherSecretTokenEndpointKey: fmt.Sprintf(TokenEndpointFormat, tokenEndpoint, grantType),
 		deployment.PublisherSecretEMSURLKey:        fmt.Sprintf("%s%s", publishURL, BEBPublishEndpointForPublisher),
-		PublisherSecretEMSHostKey:                  fmt.Sprintf("%s", publishURL),
+		PublisherSecretEMSHostKey:                  publishURL,
 		deployment.PublisherSecretBEBNamespaceKey:  namespace,
 	}
 }

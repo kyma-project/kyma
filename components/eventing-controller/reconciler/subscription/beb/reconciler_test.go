@@ -65,7 +65,7 @@ var (
 
 var _ = Describe("Subscription Reconciliation Tests", func() {
 	var namespaceName string
-	var testId = 0
+	var testID = 0
 	var ctx context.Context
 
 	// enable me for debugging
@@ -73,7 +73,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 	// SetDefaultEventuallyPollingInterval(time.Second)
 
 	BeforeEach(func() {
-		namespaceName = fmt.Sprintf("%s%d", subscriptionNamespacePrefix, testId)
+		namespaceName = fmt.Sprintf("%s%d", subscriptionNamespacePrefix, testID)
 		// we need to reset the http requests which the mock captured
 		beb.Reset()
 
@@ -96,7 +96,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 		if err := printSubscriptions(namespaceName); err != nil {
 			logf.Log.Error(err, "print subscriptions failed")
 		}
-		testId++
+		testID++
 	})
 
 	When("Creating a Subscription with invalid Sink and fixing it", func() {
