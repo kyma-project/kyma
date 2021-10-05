@@ -453,7 +453,7 @@ async function getAllSubscriptions(namespace = "default") {
   }
 }
 
-function waitForSubscription(name, namespace = "default", timeout = 90000) {
+function waitForSubscription(name, namespace = "default", timeout = 180000) {
   return waitForK8sObject(
     `/apis/eventing.kyma-project.io/v1alpha1/namespaces/${namespace}/subscriptions`,
     {},
@@ -1482,7 +1482,7 @@ async function switchEventingBackend(secretName, namespace="default", backendTyp
  * @param {string} backendType - eventing backend type (beb or nats)
  * @returns
  */
-function waitForEventingBackendToReady(backendType="beb", name="eventing-backend", namespace = "kyma-system", timeout = 90000) {
+function waitForEventingBackendToReady(backendType="beb", name="eventing-backend", namespace = "kyma-system", timeout = 180000) {
   return waitForK8sObject(
     `/apis/eventing.kyma-project.io/v1alpha1/namespaces/${namespace}/eventingbackends`,
     {},
@@ -1506,7 +1506,7 @@ function waitForEventingBackendToReady(backendType="beb", name="eventing-backend
 async function printEventingControllerLogs() {
   try{
     console.log(`****** Printing logs of eventing-controller from kyma-system`)
-    await printContainerLogs('app.kubernetes.io/name=controller, app.kubernetes.io/instance=eventing', "controller", 'kyma-system');
+    await printContainerLogs('app.kubernetes.io/name=controller, app.kubernetes.io/instance=eventing', "controller", 'kyma-system', 180000);
   }
   catch(err) {
     console.log(err)
@@ -1520,7 +1520,7 @@ async function printEventingControllerLogs() {
  async function printEventingPublisherProxyLogs() {
   try{ 
     console.log(`****** Printing logs of eventing-publisher-proxy from kyma-system`)
-    await printContainerLogs('app.kubernetes.io/name=eventing-publisher-proxy, app.kubernetes.io/instance=eventing', "eventing-publisher-proxy", 'kyma-system');
+    await printContainerLogs('app.kubernetes.io/name=eventing-publisher-proxy, app.kubernetes.io/instance=eventing', "eventing-publisher-proxy", 'kyma-system', 180000);
   }
   catch(err) {
     console.log(err)
