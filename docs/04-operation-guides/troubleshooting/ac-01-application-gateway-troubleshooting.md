@@ -17,8 +17,6 @@ If you call a registered service and receive an error, follow these steps to det
    
     The request that reached the Pod is logged by Application Gateway.
 
-    ```
-<--! TODO: add steps for checking secrets with credentials -->
 2. Check the API URL.
 
     If your call reaches Application Gateway, but you still receive an error, check if the API URL in the service definition matches the API URL of the actual service you are trying to call.

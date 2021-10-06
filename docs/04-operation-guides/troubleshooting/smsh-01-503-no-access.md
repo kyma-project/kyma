@@ -44,7 +44,7 @@ If this solution doesn't work, you need to change the image of the Istio Ingress
     kubectl logs -n istio-system -l app=istio-ingressgateway -c ingress-sds
     ```
 
-5. In case of certificate-related issues, make sure `kyma-gateway-certs` and `kyma-gateway-certs-cacert` Secrets are available in the `istio-system` Namespace and that they contain proper data. Run:
+5. In the case of certificate-related issues, make sure that the `kyma-gateway-certs` and `kyma-gateway-certs-cacert` Secrets are available in the `istio-system` Namespace and that they contain proper data. Run:
 
     ```bash
     kubectl get secrets -n istio-system kyma-gateway-certs -oyaml

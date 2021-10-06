@@ -33,7 +33,9 @@ spec:
 ```
 
 ## Custom resource parameters
+
 <!-- TODO: add GatewayURL parameter description-->
+
 This table lists all the possible parameters of a given resource together with their descriptions:
 
 | Parameter   |      Required      |  Description |
@@ -67,15 +69,3 @@ These components use this CR:
 | Component   |  Description |
 |-----------|-------------|
 | Application Registry | Reads and saves the APIs and Event Catalog metadata of the connected external solution in this CR. |
-| Application Broker | Exposes the APIs and event definitions stored in this CR as ServiceClasses to the Service Catalog. |
-| Application Operator | Provisions and de-provisions an instance of Application Gateway and Event Publisher for every created or deleted Application CR. |
-
-## Additional information
-
-Application Operator adds the **status** section which describes the status of the Application installation to the created CR periodically. This table lists the fields of the **status** section.
-
-| Field   |  Description |
-|----------|-------------|
-| **status.installationStatus** | Describes the status of the Application installation. |
-| **status.installationStatus.description** | Provides a longer description of the installation status. |
-| **status.installationStatus.status** | Provides a short, human-readable description of the installation status. |

@@ -6,8 +6,8 @@ After you create an Application, connect it to an external solution to consume t
 
 This guide shows you how to get the client certificate.
 
->**NOTE:** The client certificate is valid for 92 days. See how to [renew the client certificate](../../03-tutorials/00-application-connectivity/ac-09-renew-client-cert.md), and 
-how to [revoke the client certificate](../../03-tutorials/00-application-connectivity/ac-10-revoke-client-cert.md), which prevents it from being renewed.
+>**NOTE:** The client certificate is valid for 92 days. See how to [renew the client certificate](ac-06-renew-client-cert.md), and 
+how to [revoke the client certificate](../../03-tutorials/00-application-connectivity/ac-07-revoke-client-cert.md), which prevents it from being renewed.
 
 ## Prerequisites
 
@@ -153,7 +153,7 @@ Use `urls.metadataUrl` and `urls.eventsUrl` to get the URLs to the Application R
 
 ## Call Application Registry and Event Publisher on local deployment
 
-Since Kyma installation on Minikube uses the self-signed certificate by default, skip TLS verification.
+Since the local Kyma installation uses the self-signed certificate by default, skip TLS verification.
 
 Call Application Registry with this command:
 

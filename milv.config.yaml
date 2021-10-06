@@ -41,7 +41,7 @@ files:
   - path: "./kyma/docs/helm-broker/08-01-configure-hb.md"
     config:
       external-links-to-ignore: [ "https://{host}/{path}/{bundle_repo_version" ]
-  - path: "./kyma/docs/03-tutorials/00-application-connectivity/ac-10-revoke-client-cert.md"
+  - path: "./kyma/docs/03-tutorials/00-application-connectivity/ac-07-revoke-client-cert.md"
     config:
       external-links-to-ignore: [ "https://gateway.{CLUSTER_DOMAIN}/v1/applications/certificates/revocations" ]
   - path: "./kyma/resources/istio/README.md"

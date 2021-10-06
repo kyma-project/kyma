@@ -41,7 +41,7 @@ This allows routing events to Functions and services based on their source Appli
 
 ## Application
 
-An Application represents an external solution connected to Kyma. It handles the integration with other components, such as the Service Catalog or Eventing.
+An Application represents an external solution connected to Kyma. It handles the integration with other components, such as Eventing.
 Using the components of Application Connector, the Application creates a coherent identity for a connected external solution and ensures its separation.
 All Applications are instances of the Application custom resource, which also stores all of the relevant metadata.
 

@@ -1,9 +1,8 @@
 ---
-title: Rotate the Root certificate, and the key issued by the Certificate Authority
+title: Rotate the Root certificate and the key issued by the Certificate Authority
 ---
 
-<!-- TODO: central Connector Service has been deprecated some time ago. This should be removed. -->
-The Central Connector Service uses the Root certificate issued by the Certificate Authority (CA) to issue new certificates for Runtimes and by the Istio Ingress Gateway to validate their identity.
+Connector Service uses the Root certificate issued by the Certificate Authority (CA) to issue new certificates for Applications and by the Istio Ingress Gateway to validate their identity.
 
 Two different components use the Root CA certificate. As a result, the certificate is stored in two separate Secrets:
 
@@ -76,7 +75,7 @@ To successfully rotate a soon-to-expire CA certificate, replace it with a new ce
 
 9. Wait for all the client certificates to be renewed. 
 
-    > **NOTE:** In the case of a Kyma Runtime connected to the central Connector Service, the system renews the certificates automatically using the information stored in the Secrets. Alternatively, you can renew the certificates in said Runtime yourself. To do that, create a CertificateRequest custom resource (CR) in the Runtime in which you want to renew the certificates.
+    > **NOTE:** In the case of an Application connected to Connector Service, the system renews the certificates automatically using the information stored in the Secrets.
 
 10. After the client certificates are renewed, remove the `kyma-gateway-certs-cacert` Secret entry which contains the old certificate. First, encode the `new-ca.crt` file with base64.
   
@@ -125,8 +124,6 @@ To successfully rotate a soon-to-expire CA certificate, replace it with a new ce
    ```bash
    kubectl -n istio-system edit secret kyma-gateway-certs-cacert
    ```
-
-6. Generate new certificates in a Runtime. To do that, create a CertificateRequest custom resource (CR) in the Runtime in which you want to generate the certificates.
 
 ## Rotating a compromised Root CA key
 
