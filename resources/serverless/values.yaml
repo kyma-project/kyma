@@ -175,7 +175,7 @@ containers:
       functionBuildExecutorImage:
         value: eu.gcr.io/kyma-project/tpi/kaniko-executor:1.6.0-7b6e8d78
       functionBuildRepoFetcherImage:
-        value: eu.gcr.io/kyma-project/function-build-init:c21665db
+        value: eu.gcr.io/kyma-project/function-build-init:a2f445a2
       functionBuildMaxSimultaneousJobs:
         value: "5"
       logLevel:
