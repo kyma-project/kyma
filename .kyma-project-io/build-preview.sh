@@ -58,6 +58,10 @@ merge-kyma() {
 
   step "Last commit from main"
   git log --max-count=1
+  # as netlify caches component state between runs,
+  # there is need to recreate branch to be sure that newest main is main from origin,
+  # not merged one in previous run
+  git checkout -B merged
 
   step "merging changes from pull request to main"
   git merge pull-request
