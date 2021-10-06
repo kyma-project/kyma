@@ -11,11 +11,15 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
+const (
+	centralGatewayServiceUrl = "http://central-application-gateway.kyma-system.svc.cluster.local:8082"
+)
+
 func TestConverter(t *testing.T) {
 
 	t.Run("should convert application without API packages", func(t *testing.T) {
 		// given
-		converter := NewConverter(k8sconsts.NewNameResolver())
+		converter := NewConverter(k8sconsts.NewNameResolver(), centralGatewayServiceUrl)
 
 		directorApp := model.Application{
 			ID:   "App1",
@@ -56,7 +60,7 @@ func TestConverter(t *testing.T) {
 
 	t.Run("should convert application containing API Packages with API Definitions", func(t *testing.T) {
 		// given
-		converter := NewConverter(k8sconsts.NewNameResolver())
+		converter := NewConverter(k8sconsts.NewNameResolver(), centralGatewayServiceUrl)
 		instanceAuthRequestInputSchema := "{}"
 
 		emptyDescription := ""
@@ -159,10 +163,11 @@ func TestConverter(t *testing.T) {
 						AuthCreateParameterSchema: &instanceAuthRequestInputSchema,
 						Entries: []v1alpha1.Entry{
 							{
-								ID:        "serviceId1",
-								Name:      "serviceName1",
-								Type:      SpecAPIType,
-								TargetUrl: "www.example.com/1",
+								ID:                "serviceId1",
+								Name:              "serviceName1",
+								Type:              SpecAPIType,
+								TargetUrl:         "www.example.com/1",
+								CentralGatewayUrl: "http://central-application-gateway.kyma-system.svc.cluster.local:8082/Appname1/packagename1/servicename1",
 								Credentials: v1alpha1.Credentials{
 									Type:              "OAuth",
 									SecretName:        "Appname1-package1",
@@ -173,10 +178,11 @@ func TestConverter(t *testing.T) {
 								},
 							},
 							{
-								ID:        "serviceId2",
-								Name:      "serviceName2",
-								Type:      SpecAPIType,
-								TargetUrl: "www.example.com/2",
+								ID:                "serviceId2",
+								Name:              "serviceName2",
+								Type:              SpecAPIType,
+								TargetUrl:         "www.example.com/2",
+								CentralGatewayUrl: "http://central-application-gateway.kyma-system.svc.cluster.local:8082/Appname1/packagename1/servicename2",
 								Credentials: v1alpha1.Credentials{
 									Type:              "OAuth",
 									SecretName:        "Appname1-package1",
@@ -196,10 +202,11 @@ func TestConverter(t *testing.T) {
 						Description: "description",
 						Entries: []v1alpha1.Entry{
 							{
-								ID:        "serviceId3",
-								Name:      "serviceName3",
-								Type:      SpecAPIType,
-								TargetUrl: "www.example.com/3",
+								ID:                "serviceId3",
+								Name:              "serviceName3",
+								Type:              SpecAPIType,
+								TargetUrl:         "www.example.com/3",
+								CentralGatewayUrl: "http://central-application-gateway.kyma-system.svc.cluster.local:8082/Appname1/packagename2/servicename3",
 								Credentials: v1alpha1.Credentials{
 									Type:       "Basic",
 									SecretName: "Appname1-package2",
@@ -229,7 +236,7 @@ func TestConverter(t *testing.T) {
 
 	t.Run("should convert application with services containing events and API, and no System Auths", func(t *testing.T) {
 		// given
-		converter := NewConverter(k8sconsts.NewNameResolver())
+		converter := NewConverter(k8sconsts.NewNameResolver(), centralGatewayServiceUrl)
 
 		directorApp := model.Application{
 			ID:                  "App1",
@@ -287,11 +294,12 @@ func TestConverter(t *testing.T) {
 						Description: "Description not provided",
 						Entries: []v1alpha1.Entry{
 							{
-								ID:        "serviceId1",
-								Name:      "veryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryverylongserviceName1",
-								Type:      SpecAPIType,
-								TargetUrl: "www.example.com/1",
-								ApiType:   string(model.APISpecTypeOpenAPI),
+								ID:                "serviceId1",
+								Name:              "veryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryverylongserviceName1",
+								Type:              SpecAPIType,
+								TargetUrl:         "www.example.com/1",
+								CentralGatewayUrl: "http://central-application-gateway.kyma-system.svc.cluster.local:8082/Appname1/packagename1/veryveryveryveryveryveryveryveryveryveryveryveryveryveryv",
+								ApiType:           string(model.APISpecTypeOpenAPI),
 							},
 							{
 								ID:   "serviceId2",

@@ -72,6 +72,8 @@ spec:
             - name: APP_CA_CERT_SECRET_KEYS_TO_MIGRATE
               value: '{{ .Values.compassRuntimeAgent.certificates.caCertificate.secret.migration.keys | default "[]" | toJson }}'
               {{ end }}
+            - name: APP_CENTRAL_GATEWAY_SERVICE_URL
+              value: {{ .Values.compassRuntimeAgent.resources.centralGatewayServiceUrl | quote }}
           livenessProbe:
             httpGet:
               port: {{ .Values.compassRuntimeAgent.healthCheck.port }}
