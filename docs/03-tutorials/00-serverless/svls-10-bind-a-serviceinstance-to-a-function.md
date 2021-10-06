@@ -12,7 +12,7 @@ To create the binding, you will use ServiceBinding and ServiceBindingUsage custo
 
 ## Prerequisites
 
-This tutorial is based on an existing Function. To create one, follow the [Create an inline Function](./svls-01-create-inline-function) tutorial.
+This tutorial is based on an existing Function. To create one, follow the [Create an inline Function](./svls-01-create-inline-function.md) tutorial.
 
 ## Steps
 
@@ -124,7 +124,7 @@ Follows these steps:
    EOF
    ```
 
-   - The **spec.serviceBindingRef** and **spec.usedBy** fields are required. **spec.serviceBindingRef** points to the ServiceBinding you have just created and **spec.usedBy** points to the Function. More specifically, **spec.usedBy** refers to the name of the Function and the cluster-specific [UsageKind CR](/components/service-catalog/#custom-resource-usage-kind) (`kind: serverless-function`) that defines how Secrets should be injected to your Function when creating a ServiceBinding.
+   - The **spec.serviceBindingRef** and **spec.usedBy** fields are required. **spec.serviceBindingRef** points to the ServiceBinding you have just created and **spec.usedBy** points to the Function. More specifically, **spec.usedBy** refers to the name of the Function and the cluster-specific [UsageKind CR](https://kyma-project-old.netlify.app/docs/components/service-catalog/#custom-resource-usage-kind) (`kind: serverless-function`) that defines how Secrets should be injected to your Function when creating a ServiceBinding.
 
    - The **spec.parameters.envPrefix.name** field is optional. On creating a ServiceBinding, it adds a prefix to all environment variables injected in a Secret to the Function. In our example, **envPrefix** is `REDIS_`, so all environment variables will follow the `REDIS_{env}` naming pattern.
 
