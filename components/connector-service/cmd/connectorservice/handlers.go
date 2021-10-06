@@ -24,8 +24,8 @@ import (
 )
 
 const (
-	appCSRInfoFmt     = "https://%s/v1/applications/signingRequests/info"
-	AppURLFormat      = "https://%s/v1/applications"
+	appCSRInfoFmt = "https://%s/v1/applications/signingRequests/info"
+	AppURLFormat  = "https://%s/v1/applications"
 )
 
 type Handlers struct {
