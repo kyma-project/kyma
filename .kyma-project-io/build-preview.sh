@@ -53,7 +53,7 @@ merge-kyma() {
 
   if [[ "${HAS_ORIGIN}" -eq "0" ]]; then
     step "add origin as it is not available"
-    git remote add origin https://github.com/kyma-project/kyma.git
+    git remote add origin https://github.com/kyma-project/community.git
   fi
 
   git fetch origin
