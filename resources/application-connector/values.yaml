@@ -65,7 +65,7 @@ global:
       version: "PR-11558"
     connector_service:
       name: "connector-service"
-      version: "1683d7cf"
+      version: "PR-12294"
   testImages:
     application_operator_tests:
       name: "application-operator-tests"
