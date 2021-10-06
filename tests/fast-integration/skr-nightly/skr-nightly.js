@@ -46,7 +46,7 @@ describe("SKR nightly", function () {
   const appName = `app-nightly`;
   const runtimeName = `kyma-nightly`;
   const scenarioName = `test-nightly`;
-  const runtimeID = `f0f05646-2fc7-441f-b1ec-ffc2ec766e8b`;
+  const runtimeID = uuid.v4();
   const oidc0 = {
     clientID: "abc-xyz",
     groupsClaim: "groups",
@@ -83,22 +83,22 @@ describe("SKR nightly", function () {
 
   let skr;
 
-  let deprovision = true;
-  try {
-    getShootName(keb, runtimeID)
-  } catch(err) {
-    deprovision = false;
-  }
-
-  if (deprovision) {
-    it("Deprovision SKR", async function () {
-      await deprovisionSKR(keb, runtimeID);
-    });
-
-    it("Unregister SKR resources from Compass", async function () {
-      await unregisterKymaFromCompass(director, scenarioName);
-    });
-  }
+  // let deprovision = false;
+  // try {
+  //   getShootName(keb, runtimeID)
+  // } catch(err) {
+  //   deprovision = false;
+  // }
+  //
+  // if (deprovision) {
+  //   it("Deprovision SKR", async function () {
+  //     await deprovisionSKR(keb, runtimeID);
+  //   });
+  //
+  //   it("Unregister SKR resources from Compass", async function () {
+  //     await unregisterKymaFromCompass(director, scenarioName);
+  //   });
+  // }
 
   it(`Provision SKR with ID ${runtimeID}`, async function () {
     const customParams = {
