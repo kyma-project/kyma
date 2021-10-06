@@ -49,13 +49,12 @@ merge-kyma() {
   git checkout main
 
   # grep return 1 as exit code when no line matches, so we need to suppress it
-  HAS_ORIGIN="$(git remote | grep -c "origin" || echo "")"
+  HAS_ORIGIN="$(git remote | grep -c "origin" || true)"
 
   if [[ "${HAS_ORIGIN}" -eq "0" ]]; then
-    echo "add origin"
+    step "add origin as it is not available"
     git remote add origin https://github.com/kyma-project/kyma.git
   fi
-  echo "checked"
 
   git fetch origin
   git pull origin main
