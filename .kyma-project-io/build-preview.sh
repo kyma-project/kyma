@@ -47,11 +47,12 @@ merge-kyma() {
 
   git checkout -B pull-request
   git checkout main
-  step "Last commit from main"
-  git log --max-count=1
 
+  git remote add origin https://github.com/kyma-project/kyma.git
+  git fetch origin
   git remote -vv
   git pull origin main
+
   step "Last commit from main"
   git log --max-count=1
 
