@@ -72,7 +72,7 @@ jaeger:
           - label: "About Kyma"
             items:
               - label: "Documentation"
-                url: "https://kyma-project.io/docs/components/tracing/"
+                url: "https://kyma-project.io/docs/kyma/latest/01-overview/main-areas/observability"
     ingress:
       enabled: false
     annotations:
