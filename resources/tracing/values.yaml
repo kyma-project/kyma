@@ -121,10 +121,6 @@ global:
       name: "jaeger-operator"
       version: "1.18.1-e0da5a68"
       directory: "tpi"
-    # all_in_one:
-    #   image: "all-in-one"
-    #   version: "1.18.1"
-    #   directory: "external/jaegertracing"
     oauth2_proxy:
       repository: "oauth2-proxy"
       version: "7.1.3-4c48514d"
