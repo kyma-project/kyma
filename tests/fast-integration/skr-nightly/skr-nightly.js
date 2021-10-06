@@ -85,10 +85,9 @@ describe("SKR nightly", function () {
 
   try {
     const runtimes = keb.runtimes();
-    const rID = runtimes[0].ruintimeID;
-    console.log(runtimes, rID);
+    console.log(runtimes);
   } catch (err) {
-    console.log(err)
+    throw err
   }
 
   // it(`Get SKR with id ${runtimeID}`, async function () {
