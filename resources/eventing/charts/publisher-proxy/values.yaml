@@ -26,4 +26,4 @@ metrics:
 
 publisherProxy:
   config:
-    portName: tcp-client
+    portName: http-client
