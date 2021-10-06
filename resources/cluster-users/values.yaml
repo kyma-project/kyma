@@ -5,7 +5,7 @@ tests:
   enabled: true
   image:
     name: eu.gcr.io/kyma-project/tpi/k8s-tools
-    version: 20210610-d25e85b1
+    version: 20210922-530cfc39
   env:
     namespace: default
   securityContext:
@@ -95,7 +95,6 @@ global:
     operatorGroup: runtimeOperator
     developerGroup: runtimeDeveloper
     namespaceAdminGroup: runtimeNamespaceAdmin
-  isLocalEnv: false
   containerRegistry:
     path: "eu.gcr.io/kyma-project"
   minikubeIP: ""
@@ -103,6 +102,7 @@ global:
     domainName: "kyma.local"
 
 users:
-  adminName: "admin@kyma.cx"
+  administrators:
+    - "admin@kyma.cx"
   adminGroup:
-  bindStaticUsers: true
+  bindStaticUsers: false

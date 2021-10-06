@@ -10,10 +10,10 @@ spec:
  version: v1
  category: Diagnostics
  placement: cluster
- viewBaseUrl: https://kiali.{{ .Values.global.ingress.domainName }}
+ viewBaseUrl: https://kiali.{{ .Values.global.domainName }}
  navigationNodes:
   - label: Service Mesh
-    externalLink: https://kiali.{{ .Values.global.ingress.domainName }}
+    externalLink: https://kiali.{{ .Values.global.domainName }}
     navigationPath: ""
     order: 3
 {{ end }}

@@ -38,7 +38,7 @@ spec:
       {{- end }}
       containers:
       - name: {{ .Chart.Name }}
-        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.sb_proxy_k8s) }}"
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         resources:
 {{ toYaml .Values.resources | indent 10 }}

@@ -1,14 +1,18 @@
 service-catalog-ui:
-  enabled: true
+  enabled: false
 
 global:
   containerRegistry:
     path: eu.gcr.io/kyma-project
+  images:
+    service_catalog_ui:
+      name: "service-catalog-ui"
+      version: "c60a3c68"
+    service_binding_usage_controller:
+      name: "service-binding-usage-controller"
+      version: "ef49b0f6"
   istio:
     gateway:
       name: kyma-gateway
-  service_binding_usage_controller:
-    dir:
-    version: "ef49b0f6"
   ingress:
     domainName: "TBD"

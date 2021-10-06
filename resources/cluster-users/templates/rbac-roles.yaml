@@ -497,11 +497,11 @@ roleRef:
   kind: ClusterRole
   name: kyma-admin
 subjects:
-{{ if .Values.users.bindStaticUsers }}
+{{- range .Values.users.administrators }}
 - kind: User
-  name: {{ .Values.users.adminName }}
+  name: {{ . }}
   apiGroup: rbac.authorization.k8s.io
-{{ end }}
+{{- end }}
 {{ if .Values.users.adminGroup }}
 - kind: Group
   name: {{ .Values.users.adminGroup }}

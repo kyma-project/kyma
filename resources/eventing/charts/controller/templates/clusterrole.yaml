@@ -13,6 +13,7 @@ rules:
   - list
   - get
   - watch
+  - delete
 - apiGroups:
   - ""
   resources:
@@ -105,12 +106,8 @@ rules:
   - update
   - watch
 - apiGroups:
-  - hydra.ory.sh
+  - nats.io
   resources:
-  - oauth2clients
+  - natsclusters
   verbs:
-  - create
   - get
-  - update
-  - list
-  - watch

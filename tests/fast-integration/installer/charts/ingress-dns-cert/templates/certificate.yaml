@@ -1,4 +1,4 @@
-{{- if eq .Values.global.ingress.domainName "local.kyma.dev" }}
+{{- if eq .Values.global.domainName "local.kyma.dev" }}
 ---
 apiVersion: v1
 kind: Secret
@@ -19,6 +19,6 @@ metadata:
   name: kyma-gateway-cert
   namespace: istio-system
 spec:
-  commonName: "*.{{ .Values.global.ingress.domainName }}"
+  commonName: "*.{{ .Values.global.domainName }}"
   secretName: "kyma-gateway-certs"
 {{- end }}

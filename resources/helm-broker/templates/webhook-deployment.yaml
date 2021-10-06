@@ -1,0 +1,80 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ template "fullname" . }}-webhook
+  labels:
+    app: {{ template "fullname" . }}-webhook
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    release: "{{ .Release.Name }}"
+    heritage: "{{ .Release.Service }}"
+spec:
+  replicas: 1
+  strategy: {{ toYaml .Values.webhook.strategy | nindent 4 }}
+  minReadySeconds: {{ .Values.webhook.minReadySeconds }}
+  selector:
+    matchLabels:
+      app: {{ template "fullname" . }}-webhook
+  template:
+    metadata:
+      labels:
+        app: {{ template "fullname" . }}-webhook
+        chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+        release: "{{ .Release.Name }}"
+        releaseRevision: "{{ .Release.Revision }}"
+        heritage: "{{ .Release.Service }}"
+      {{ if .Values.webhook.annotations }}
+      annotations:
+{{ toYaml .Values.webhook.annotations | indent 8 }}
+      {{- end }}
+    spec:
+{{- with .Values.webhook.securityContext }}
+      securityContext:
+{{ toYaml . | indent 8 }}
+{{- end }}
+      serviceAccountName: {{ template "fullname" . }}
+      containers:
+      - name: svr
+        image: {{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.helm_broker_webhook) }}
+        imagePullPolicy: {{ .Values.webhook.imagePullPolicy }}
+        resources:
+{{ toYaml .Values.webhook.resources | indent 10 }}
+        ports:
+        - containerPort: 8443
+        securityContext:
+          privileged: false
+          allowPrivilegeEscalation: false
+        volumeMounts:
+        - name: {{ template "fullname" . }}-webhook-cert
+          mountPath: /var/run/webhook
+          readOnly: true
+        {{- if .Values.webhook.healthcheck.enabled }}
+        readinessProbe:
+          httpGet:
+            port: 8081
+            path: /healthz/ready
+            scheme: HTTP
+          failureThreshold: 1
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 5
+        livenessProbe:
+          httpGet:
+            port: 8081
+            path: /healthz
+            scheme: HTTP
+          failureThreshold: 3
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 5
+        {{- end }}
+      volumes:
+      - name: helm-broker-webhook-cert
+        secret:
+          secretName: {{ template "fullname" . }}-webhook-cert
+          items:
+          - key: tls.crt
+            path: tls.crt
+          - key: tls.key
+            path: tls.key

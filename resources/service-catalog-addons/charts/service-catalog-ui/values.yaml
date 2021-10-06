@@ -1,6 +1,5 @@
 replicaCount: 1
 image:
-  tag: "a452b781"
   pullPolicy: IfNotPresent
 service:
   internalPort: 80

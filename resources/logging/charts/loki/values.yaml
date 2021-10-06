@@ -1,6 +1,4 @@
 image:
-  repository: eu.gcr.io/kyma-project/external/grafana/loki
-  tag: 2.2.1
   pullPolicy: IfNotPresent
 
   ## Optionally specify an array of imagePullSecrets.
@@ -281,7 +279,7 @@ kyma:
     useKymaGroups: false
     groups: ""
 virtualservice:
-  enabled: true
+  enabled: false
 grafana:
   datasource:
     derivedFields: |

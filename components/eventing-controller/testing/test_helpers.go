@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/types"
+
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
@@ -37,6 +39,18 @@ const (
 	EventID                       = "8945ec08-256b-11eb-9928-acde48001122"
 	EventSpecVersion              = "1.0"
 	EventData                     = "test-data"
+
+	// cloud event properties
+	CloudEventType        = "sap.kyma" + "." + ApplicationName + ".order.created.v1"
+	CloudEventSource      = "/default/sap.kyma/id"
+	CloudEventSpecVersion = "1.0"
+	CloudEventData        = "{\"foo\":\"bar\"}"
+
+	// binary CE headers
+	CeIDHeader          = "ce-id"
+	CeTypeHeader        = "ce-type"
+	CeSourceHeader      = "ce-source"
+	CeSpecVersionHeader = "ce-specversion"
 
 	StructuredCloudEvent = `{
            "id":"` + EventID + `",
@@ -133,6 +147,60 @@ func NewSubscription(name, namespace string, opts ...subOpt) *eventingv1alpha1.S
 	return newSub
 }
 
+type protoOpt func(proto *eventingv1alpha1.ProtocolSettings)
+
+func NewProtocolSettings(opts ...protoOpt) *eventingv1alpha1.ProtocolSettings {
+	protoSettings := &eventingv1alpha1.ProtocolSettings{}
+	for _, o := range opts {
+		o(protoSettings)
+	}
+	return protoSettings
+}
+
+func WithBinaryContentMode(protoSettings *eventingv1alpha1.ProtocolSettings) {
+	protoSettings.ContentMode = func() *string {
+		contentMode := eventingv1alpha1.ProtocolSettingsContentModeBinary
+		return &contentMode
+	}()
+}
+
+func WithExemptHandshake(protoSettings *eventingv1alpha1.ProtocolSettings) {
+	protoSettings.ExemptHandshake = func() *bool {
+		exemptHandshake := true
+		return &exemptHandshake
+	}()
+}
+
+func WithAtLeastOnceQOS(protoSettings *eventingv1alpha1.ProtocolSettings) {
+	protoSettings.Qos = func() *string {
+		qos := "AT-LEAST_ONCE"
+		return &qos
+	}()
+}
+
+func WithDefaultWebhookAuth(protoSettings *eventingv1alpha1.ProtocolSettings) {
+	protoSettings.WebhookAuth = &eventingv1alpha1.WebhookAuth{
+		Type:         "oauth2",
+		GrantType:    "client_credentials",
+		ClientId:     "xxx",
+		ClientSecret: "xxx",
+		TokenUrl:     "https://oauth2.xxx.com/oauth2/token",
+		Scope:        []string{"guid-identifier"},
+	}
+}
+
+func NewBEBSubscription(name, contentMode string, webhookURL string, events types.Events, webhookAuth *types.WebhookAuth) *types.Subscription {
+	return &types.Subscription{
+		Name:            name,
+		ContentMode:     contentMode,
+		Qos:             types.QosAtLeastOnce,
+		ExemptHandshake: true,
+		Events:          events,
+		WebhookAuth:     webhookAuth,
+		WebhookUrl:      webhookURL,
+	}
+}
+
 func exemptHandshake(val bool) *bool {
 	exemptHandshake := val
 	return &exemptHandshake
@@ -162,7 +230,7 @@ func WithWebhookAuthForBEB(s *eventingv1alpha1.Subscription) {
 			return &contentMode
 		}(),
 		ExemptHandshake: exemptHandshake(true),
-		Qos:             qos("AT-LEAST_ONCE"),
+		Qos:             qos("AT_LEAST_ONCE"),
 		WebhookAuth: &eventingv1alpha1.WebhookAuth{
 			Type:         "oauth2",
 			GrantType:    "client_credentials",
@@ -440,4 +508,17 @@ func NewFakeSubscriptionClient(sub *eventingv1alpha1.Subscription) (dynamic.Inte
 
 	dynamicClient := dynamicfake.NewSimpleDynamicClient(scheme, sub)
 	return dynamicClient, nil
+}
+
+func GetStructuredMessageHeaders() http.Header {
+	return http.Header{"Content-Type": []string{"application/cloudevents+json"}}
+}
+
+func GetBinaryMessageHeaders() http.Header {
+	headers := make(http.Header)
+	headers.Add(CeIDHeader, EventID)
+	headers.Add(CeTypeHeader, CloudEventType)
+	headers.Add(CeSourceHeader, CloudEventSource)
+	headers.Add(CeSpecVersionHeader, CloudEventSpecVersion)
+	return headers
 }

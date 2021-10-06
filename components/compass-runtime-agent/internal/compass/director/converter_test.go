@@ -57,7 +57,7 @@ func TestApplication_ToApplication(t *testing.T) {
 				Name:         appName,
 				ProviderName: &providerName,
 				Description:  &appDesc,
-				Labels:       Labels(appLabels),
+				Labels:       appLabels,
 				Auths: []*graphql.SystemAuth{
 					{ID: "1", Auth: &graphql.Auth{Credential: graphql.BasicCredentialData{Password: "password", Username: "user"}}},
 					{ID: "2", Auth: &graphql.Auth{Credential: graphql.OAuthCredentialData{ClientSecret: "secret", ClientID: "id"}}},
@@ -79,7 +79,7 @@ func TestApplication_ToApplication(t *testing.T) {
 				Name:         appName,
 				ProviderName: &providerName,
 				Description:  &appDesc,
-				Labels:       Labels(appLabels),
+				Labels:       appLabels,
 				Packages: &graphql.PackagePageExt{
 					Data: []*graphql.PackageExt{
 						fixCompassPackageExt("1"),
@@ -109,7 +109,7 @@ func TestApplication_ToApplication(t *testing.T) {
 				Name:         appName,
 				ProviderName: &providerName,
 				Description:  &appDesc,
-				Labels:       Labels(appLabels),
+				Labels:       appLabels,
 				Packages: &graphql.PackagePageExt{
 					Data: []*graphql.PackageExt{
 						fixCompassPackageWithDefaultInstanceAuth("1", nil),
@@ -231,7 +231,7 @@ func TestApplication_ToApplication(t *testing.T) {
 				Name:         appName,
 				ProviderName: &providerName,
 				Description:  &appDesc,
-				Labels:       Labels(appLabels),
+				Labels:       appLabels,
 				Packages: &graphql.PackagePageExt{
 					Data: []*graphql.PackageExt{
 						fixCompassPackageExt("1"),
@@ -261,7 +261,7 @@ func TestApplication_ToApplication(t *testing.T) {
 				Name:         appName,
 				Description:  &appDesc,
 				ProviderName: &providerName,
-				Labels:       Labels(appLabels),
+				Labels:       appLabels,
 			},
 			expectedApp: kymamodel.Application{
 				ID:                  appId,

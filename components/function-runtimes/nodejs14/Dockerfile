@@ -26,12 +26,13 @@
 # We use this code to manually use newest alpine and nodejs.
 # Use official build when it will be available.
 
-FROM alpine:3.13.5
+FROM alpine:3.14.2
 
-ENV NODE_VERSION 14.17.0
+ENV NODE_VERSION 14.17.6
 
 RUN addgroup -g 1000 node \
     && adduser -u 1000 -G node -s /bin/sh -D node \
+    && apk upgrade \
     && apk add --no-cache \
         libstdc++ \
     && apk add --no-cache --virtual .build-deps \
@@ -40,7 +41,7 @@ RUN addgroup -g 1000 node \
       && case "${alpineArch##*-}" in \
         x86_64) \
           ARCH='x64' \
-          CHECKSUM="019a8cae26a0ab9a8dc1264c2e1f11ad659e2093716263bb470f02189856b0a4" \
+          CHECKSUM="d9292c9fa9b4439f0d681110802d03750d34cc95a8b37a06314e5a228de827e7" \
           ;; \
         *) ;; \
       esac \

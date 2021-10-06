@@ -57,14 +57,6 @@ spec:
       {{- if .Values.pod.extraProperties }}
       {{ include "rafter.tplValue" ( dict "value" .Values.pod.extraProperties "context" . ) | nindent 6 }}
       {{- end }}
-      # MODIFIED: Block - START
-      {{ if .Values.global.isLocalEnv }}
-      hostAliases:
-        - ip: {{ .Values.global.minikubeIP }}
-          hostnames:
-            - "storage.{{ .Values.global.ingress.domainName }}"
-      {{ end }}
-      # MODIFIED: Block - END
       containers:
         - name: {{ include "rafter.name" . }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"

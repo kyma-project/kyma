@@ -15,14 +15,9 @@ spec:
     metadata:
       labels:
         app: {{ template "kiali-server.fullname" . }}-auth-proxy
+      annotations:
+        checksum/config: {{ tpl (toYaml .Values.authProxy) . | sha256sum }}
     spec:
-      {{- if .Values.global.isLocalEnv }}
-      hostNetwork: true   #only for minikube
-      hostAliases:
-        - ip: {{ .Values.global.minikubeIP }}
-          hostnames:
-          - "dex.{{ .Values.global.ingress.domainName }}"
-      {{- end }}
       {{- if .Values.authProxy.nodeSelector }}
       nodeSelector:
 {{ toYaml .Values.authProxy.nodeSelector | indent 8 }}
@@ -32,19 +27,20 @@ spec:
           configMap:
             name: {{ template "kiali-server.fullname" . }}-auth-proxy
       containers:
-      - image: "{{ .Values.authProxy.image.repository }}:{{ .Values.authProxy.image.tag }}"
+      - image: {{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.oauth2_proxy) }}
         imagePullPolicy: {{ .Values.authProxy.image.pullPolicy }}
         name: auth-proxy
         args:
         - --http-address=0.0.0.0:{{ .Values.authProxy.port }}
         - --upstream=http://{{ template "kiali-server.fullname" . }}-server:{{ .Values.kiali.spec.server.port }}
         - --cookie-secure=true
-        - --cookie-domain=kiali.{{ .Values.global.ingress.domainName }}
+        - --cookie-domain=kiali.{{ .Values.global.domainName }}
         - --cookie-name=KYMA_KIALI_OAUTH2_PROXY_TOKEN
         - --silence-ping-logging=true
         - --reverse-proxy=true
         - --auth-logging={{ .Values.authProxy.config.authLogging }}
         - --request-logging={{ .Values.authProxy.config.requestLogging }}
+        - --pass-host-header={{ .Values.authProxy.config.passHostHeader }}
         envFrom:
         - secretRef:
             name: {{ template "kiali-server.fullname" . }}-auth-proxy

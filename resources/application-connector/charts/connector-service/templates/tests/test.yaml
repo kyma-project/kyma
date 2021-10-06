@@ -23,17 +23,10 @@ spec:
       labels:
         app: {{ .Chart.Name }}-tests
     spec:
-      {{ if .Values.global.isLocalEnv }}
-      hostAliases:
-       - ip: {{ .Values.global.minikubeIP }}
-         hostnames:
-          - "connector-service.{{ .Values.global.ingress.domainName }}"
-          - "gateway.{{ .Values.global.ingress.domainName }}"
-      {{ end }}
       serviceAccountName: {{ .Chart.Name }}-tests
       containers:
       - name: tests
-        image: {{ .Values.global.containerRegistry.path }}/connector-service-tests:{{ .Values.global.connector_service_tests.version }}
+        image: {{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.testImages.connector_service_tests) }}
         imagePullPolicy: {{ .Values.tests.image.pullPolicy }}
         env:
         - name: INTERNAL_API_URL
@@ -41,7 +34,7 @@ spec:
         - name: EXTERNAL_API_URL
           value: http://{{ .Chart.Name }}-external-api.{{ .Values.global.integrationNamespace }}.svc.cluster.local:{{ .Values.service.externalapi.port }}
         - name: GATEWAY_URL
-          value: https://gateway.{{ .Values.global.ingress.domainName }}
+          value: https://gateway.{{ .Values.global.domainName }}
         - name: SKIP_SSL_VERIFY
           value: {{ .Values.tests.skipSslVerify | quote }}
         command:

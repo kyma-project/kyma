@@ -31,17 +31,16 @@ type Cache interface {
 
 type proxyHandler struct {
 	appNamePlaceholder       string
-	eventServicePathPrefixV1 string
-	eventServicePathPrefixV2 string
-	eventServiceHost         string
-	eventMeshPathPrefix      string
-	eventMeshHost            string
+	eventingPathPrefixV1     string
+	eventingPathPrefixV2     string
+	eventingPathPrefixEvents string
+	eventingPublisherHost    string
 	appRegistryPathPrefix    string
 	appRegistryHost          string
 
-	eventsProxy      *httputil.ReverseProxy
-	eventMeshProxy   *httputil.ReverseProxy
-	appRegistryProxy *httputil.ReverseProxy
+	legacyEventsProxy *httputil.ReverseProxy
+	cloudEventsProxy  *httputil.ReverseProxy
+	appRegistryProxy  *httputil.ReverseProxy
 
 	log *logger.Logger
 
@@ -50,27 +49,27 @@ type proxyHandler struct {
 
 func NewProxyHandler(
 	appNamePlaceholder string,
-	eventServicePathPrefixV1 string,
-	eventServicePathPrefixV2 string,
-	eventMeshPathPrefix string,
-	eventMeshHost string,
-	eventMeshDestinationPath string,
+	eventingPathPrefixV1 string,
+	eventingPathPrefixV2 string,
+	eventingPathPrefixEvents string,
+	eventingPublisherHost string,
+	eventingDestinationPath string,
 	appRegistryPathPrefix string,
 	appRegistryHost string,
 	cache Cache,
 	log *logger.Logger) *proxyHandler {
 	return &proxyHandler{
 		appNamePlaceholder:       appNamePlaceholder,
-		eventServicePathPrefixV1: eventServicePathPrefixV1,
-		eventServicePathPrefixV2: eventServicePathPrefixV2,
-		eventMeshPathPrefix:      eventMeshPathPrefix,
-		eventMeshHost:            eventMeshHost,
+		eventingPathPrefixV1:     eventingPathPrefixV1,
+		eventingPathPrefixV2:     eventingPathPrefixV2,
+		eventingPathPrefixEvents: eventingPathPrefixEvents,
+		eventingPublisherHost:    eventingPublisherHost,
 		appRegistryPathPrefix:    appRegistryPathPrefix,
 		appRegistryHost:          appRegistryHost,
 
-		eventsProxy:      createReverseProxy(log, eventMeshHost, withEmptyRequestHost, withEmptyXFwdClientCert, withHTTPScheme),
-		eventMeshProxy:   createReverseProxy(log, eventMeshHost, withRewriteBaseURL(eventMeshDestinationPath), withEmptyRequestHost, withEmptyXFwdClientCert, withHTTPScheme),
-		appRegistryProxy: createReverseProxy(log, appRegistryHost, withEmptyRequestHost, withHTTPScheme),
+		legacyEventsProxy: createReverseProxy(log, eventingPublisherHost, withEmptyRequestHost, withEmptyXFwdClientCert, withHTTPScheme),
+		cloudEventsProxy:  createReverseProxy(log, eventingPublisherHost, withRewriteBaseURL(eventingDestinationPath), withEmptyRequestHost, withEmptyXFwdClientCert, withHTTPScheme),
+		appRegistryProxy:  createReverseProxy(log, appRegistryHost, withEmptyRequestHost, withHTTPScheme),
 
 		cache: cache,
 		log:   log,
@@ -132,19 +131,18 @@ func (ph *proxyHandler) getClientIDsFromCache(applicationName string) ([]string,
 }
 
 func (ph *proxyHandler) mapRequestToProxy(path string, applicationName string) (*httputil.ReverseProxy, apperrors.AppError) {
-	// In a BEB enabled cluster, validator should forward the event coming to /{application}/v2/events and /{application}/events to /publish endpoint of EventPublisherProxy (https://github.com/kyma-project/kyma/tree/main/components/event-publisher-proxy#send-events)
 	switch {
-	// Events reaching with prefix /{application}/v1/events will be routed to /{application}/v1/events endpoint of event-publisher-proxy
-	case strings.HasPrefix(path, ph.getApplicationPrefix(ph.eventServicePathPrefixV1, applicationName)):
-		return ph.eventsProxy, nil
+	// legacy-events reaching /{application}/v1/events are routed to /{application}/v1/events endpoint of event-publisher-proxy
+	case strings.HasPrefix(path, ph.getApplicationPrefix(ph.eventingPathPrefixV1, applicationName)):
+		return ph.legacyEventsProxy, nil
 
-	// Events reaching /{application}/v2/events will be routed to /publish endpoint of event-publisher-proxy
-	case strings.HasPrefix(path, ph.getApplicationPrefix(ph.eventServicePathPrefixV2, applicationName)):
-		return ph.eventMeshProxy, nil
+	// cloud-events reaching /{application}/v2/events or /{application}/events are routed to /publish endpoint of event-publisher-proxy
+	case strings.HasPrefix(path, ph.getApplicationPrefix(ph.eventingPathPrefixV2, applicationName)):
+		return ph.cloudEventsProxy, nil
 
-	// Events reaching /{application}/events will be routed to /publish endpoint of event-publisher-proxy
-	case strings.HasPrefix(path, ph.getApplicationPrefix(ph.eventMeshPathPrefix, applicationName)):
-		return ph.eventMeshProxy, nil
+	// cloud-events reaching /{application}/events are routed to /publish endpoint of event-publisher-proxy
+	case strings.HasPrefix(path, ph.getApplicationPrefix(ph.eventingPathPrefixEvents, applicationName)):
+		return ph.cloudEventsProxy, nil
 
 	case strings.HasPrefix(path, ph.getApplicationPrefix(ph.appRegistryPathPrefix, applicationName)):
 		return ph.appRegistryProxy, nil

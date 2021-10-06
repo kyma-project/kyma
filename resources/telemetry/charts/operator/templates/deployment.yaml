@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "operator.fullname" . }}-controller-manager
+  labels:
+    {{- include "operator.labels" . | nindent 4 }}
+    {{- toYaml .Values.extraLabels | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "operator.selectorLabels" . | nindent 6 }}
+      {{- toYaml .Values.extraLabels | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "operator.selectorLabels" . | nindent 8 }}
+        {{- toYaml .Values.extraLabels | nindent 8 }}
+    spec:
+      serviceAccountName: {{ include "operator.serviceAccountName" . }}-controller-manager
+      terminationGracePeriodSeconds: {{ .Values.terminationGracePeriodSeconds }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - command:
+            - /manager
+          args:
+            - --leader-elect
+            - --cm-name={{ .Release.Name }}-{{ .Values.logProcessor }}-sections
+            - --ds-name={{ .Release.Name }}-{{ .Values.logProcessor }}
+            - --env-secret={{ .Release.Name }}-{{ .Values.logProcessor }}-env
+            - --files-cm={{ .Release.Name }}-{{ .Values.logProcessor }}-files
+            - --fluent-bit-ns={{ .Release.Namespace }}
+          name: manager
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.telemetry_operator) }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          livenessProbe:
+            {{- toYaml .Values.livenessProbe | nindent 12 }}
+          readinessProbe:
+            {{- toYaml .Values.readinessProbe | nindent 12 }}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}

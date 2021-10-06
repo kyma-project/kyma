@@ -1,12 +1,15 @@
 const {
   checkInClusterEventDelivery,
-  checkAppGatewayResponse,
+  checkFunctionResponse,
   sendEventAndCheckResponse,
 } = require("../test/fixtures/commerce-mock");
 const {
   printRestartReport,
   getContainerRestartsForAllNamespaces,
 } = require("../utils");
+const {
+  checkServiceInstanceExistence,
+} = require("./fixtures/helm-broker");
 
 describe("Upgrade test tests", function () {
   this.timeout(10 * 60 * 1000);
@@ -22,12 +25,16 @@ describe("Upgrade test tests", function () {
     await checkInClusterEventDelivery(testNamespace);
   });
 
-  it("function should reach Commerce mock API through app gateway", async function () {
-    await checkAppGatewayResponse();
+  it("function should be reachable through secured API Rule", async function () {
+    await checkFunctionResponse(testNamespace);
   });
 
   it("order.created.v1 event should trigger the lastorder function", async function () {
     await sendEventAndCheckResponse();
+  });
+
+  it("service instance provisioned by helm broker should be reachable", async function () {
+    await checkServiceInstanceExistence(testNamespace);
   });
 
   it("Should print report of restarted containers, skipped if no crashes happened", async function () {

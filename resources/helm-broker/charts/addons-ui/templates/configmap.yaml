@@ -14,8 +14,8 @@ data:
     urlPrefixes=urlPrefixes.concat({{ toJson .Values.global.urlRepoPrefixes.default }});
 
     window.clusterConfig = {
-      graphqlApiUrl: 'https://console-backend.{{ .Values.global.ingress.domainName }}/graphql',
-      subscriptionsApiUrl: 'wss://console-backend.{{ .Values.global.ingress.domainName }}/graphql',
+      graphqlApiUrl: 'https://console-backend.{{ .Values.global.domainName }}/graphql',
+      subscriptionsApiUrl: 'wss://console-backend.{{ .Values.global.domainName }}/graphql',
       DEFAULT_CONFIGURATION_NAME: '{{ .Values.global.cfgReposUrlName }}',
       HELM_BROKER_REPO_URL_PREFIXES: urlPrefixes
     };

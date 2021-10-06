@@ -18,8 +18,8 @@ deployment:
     caSecretNamespace: *caSecretNamespace
     rootCACertificateSecretName: *rootCACertificateSecretName
     rootCACertificateSecretNamespace: *rootCACertificateSecretNamespace
-    appsInfoURL: https://gateway.{{ .Values.global.ingress.domainName }}/v1/applications/management/info
-    runtimesInfoURL: https://gateway.{{ .Values.global.ingress.domainName }}/v1/runtimes/management/info
+    appsInfoURL: https://gateway.{{ .Values.global.domainName }}/v1/applications/management/info
+    runtimesInfoURL: https://gateway.{{ .Values.global.domainName }}/v1/runtimes/management/info
     appValidityTime: "92d"
     runtimeValidityTime: "92d"
     central: false
@@ -71,18 +71,3 @@ tests:
   skipSslVerify: true
   image:
     pullPolicy: IfNotPresent
-
-jobs:
-  image:
-    repository: eu.gcr.io/kyma-project/tpi/k8s-tools
-    tag: "20210610-d25e85b1"
-  installer:
-    namespace: kyma-installer
-
-certs:
-  cert1:
-    name: connector-service-app-ca
-    namespace: kyma-integration
-  cert2:
-    name: app-connector-certs
-    namespace: istio-system

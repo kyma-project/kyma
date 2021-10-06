@@ -20,14 +20,9 @@ spec:
       labels:
         app.kubernetes.io/instance: {{ .Release.Name }}
         app.kubernetes.io/name: auth-proxy
+      annotations:
+        checksum/config: {{ tpl (toYaml .Values.authProxy) . | sha256sum }}
     spec:
-      {{- if .Values.global.isLocalEnv }}
-      hostNetwork: true   #only for minikube
-      hostAliases:
-        - ip: {{ .Values.global.minikubeIP }}
-          hostnames:
-          - "dex.{{ .Values.global.ingress.domainName }}"
-      {{- end }}
       {{- if .Values.kyma.authProxy.nodeSelector }}
       nodeSelector:
 {{ toYaml .Values.kyma.authProxy.nodeSelector | indent 8 }}
@@ -44,12 +39,13 @@ spec:
         - --http-address=0.0.0.0:{{ .Values.kyma.authProxy.port }}
         - --upstream=http://{{ template "grafana.fullname" . }}:{{ .Values.service.port }}
         - --cookie-secure=true
-        - --cookie-domain=grafana.{{ .Values.global.ingress.domainName }}
+        - --cookie-domain=grafana.{{ .Values.global.domainName }}
         - --cookie-name=KYMA_GRAFANA_OAUTH2_PROXY_TOKEN
         - --silence-ping-logging=true
         - --reverse-proxy=true
         - --auth-logging={{ .Values.kyma.authProxy.config.authLogging }}
         - --request-logging={{ .Values.kyma.authProxy.config.requestLogging }}
+        - --pass-host-header={{ .Values.kyma.authProxy.config.passHostHeader }}
         envFrom:
         - secretRef:
             name: {{ .Release.Name }}-auth-proxy-{{ template "grafana.name" . }}

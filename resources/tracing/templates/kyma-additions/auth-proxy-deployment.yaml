@@ -16,14 +16,9 @@ spec:
       labels:
         app.kubernetes.io/name: {{ template "jaeger-operator.fullname" . }}
         app.kubernetes.io/component: auth-proxy
+      annotations:
+        checksum/config: {{ tpl (toYaml .Values.authProxy) . | sha256sum }}
     spec:
-      {{- if .Values.global.isLocalEnv }}
-      hostNetwork: true   #only for minikube
-      hostAliases:
-        - ip: {{ .Values.global.minikubeIP }}
-          hostnames:
-          - "dex.{{ .Values.global.ingress.domainName }}"
-      {{- end }}
       {{- if .Values.authProxy.nodeSelector }}
       nodeSelector:
 {{ toYaml .Values.authProxy.nodeSelector | indent 8 }}
@@ -40,12 +35,13 @@ spec:
         - --http-address=0.0.0.0:{{ .Values.authProxy.inPort }}
         - --upstream=http://{{ template "jaeger-operator.fullname" . }}-jaeger-query:{{ .Values.jaeger.kyma.uiPort }}
         - --cookie-secure=true
-        - --cookie-domain=jaeger.{{ .Values.global.ingress.domainName }}
+        - --cookie-domain=jaeger.{{ .Values.global.domainName }}
         - --cookie-name=KYMA_JAEGER_OAUTH2_PROXY_TOKEN
         - --silence-ping-logging=true
         - --reverse-proxy=true
         - --auth-logging={{ .Values.authProxy.config.authLogging }}
         - --request-logging={{ .Values.authProxy.config.requestLogging }}
+        - --pass-host-header={{ .Values.authProxy.config.passHostHeader }}
         envFrom:
         - secretRef:
             name: {{ include "jaeger-operator.fullname" . }}-auth-proxy

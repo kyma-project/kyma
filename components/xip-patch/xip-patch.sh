@@ -38,7 +38,7 @@ generateXipDomain() {
         fi
     fi
 
-    echo "${EXTERNAL_PUBLIC_IP}.xip.io"
+    echo "${EXTERNAL_PUBLIC_IP}.nip.io"
 
 }
 
@@ -58,7 +58,7 @@ generateCerts() {
 }
 
 createOverridesConfigMap() {
-    COMMON_PARAMS=$(echo --from-literal global.ingress.domainName="$INGRESS_DOMAIN" \
+    COMMON_PARAMS=$(echo --from-literal global.domainName="$INGRESS_DOMAIN" \
                          --from-literal global.ingress.tlsCrt="$INGRESS_TLS_CERT" \
                          --from-literal global.ingress.tlsKey="$INGRESS_TLS_KEY" \
                          --from-literal global.environment.gardener="$GARDENER_ENVIRONMENT") \

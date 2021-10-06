@@ -4,9 +4,6 @@ kind: Job
 metadata:
   name: {{ .Chart.Name }}-certs-setup-job
   namespace: kyma-integration
-  annotations:
-    helm.sh/hook: post-install,post-upgrade
-    helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded
   labels:
     release: {{ .Release.Name }}
     helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
@@ -31,13 +28,21 @@ spec:
       restartPolicy: OnFailure
       containers:
       - name: {{ .Chart.Name }}-certs-setup-job
-        image: "{{ .Values.global.containerRegistry.path }}/application-connectivity-certs-setup-job:{{ .Values.global.application_connectivity_certs_setup_job.version }}"
+        image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.application_connectivity_certs_setup_job) }}"
         args:
           - "/appconnectivitycertssetupjob"
           - "--connectorCertificateSecret={{ .Values.application_connectivity_certs_setup_job.secrets.connectorCertificateSecret.namespace }}/{{ .Values.application_connectivity_certs_setup_job.secrets.connectorCertificateSecret.name }}"
           - "--caCertificateSecret={{ .Values.application_connectivity_certs_setup_job.secrets.caCertificateSecret.namespace }}/{{ .Values.application_connectivity_certs_setup_job.secrets.caCertificateSecret.name }}"
           - "--caCertificate={{ .Values.global.applicationConnectorCa }}"
           - "--caKey={{ .Values.global.applicationConnectorCaKey }}"
+          {{ if  .Values.application_connectivity_certs_setup_job.secrets.caCertificateSecret.migration}}
+          - "--caCertificateSecretToMigrate={{ .Values.application_connectivity_certs_setup_job.secrets.caCertificateSecret.namespace }}/{{ .Values.application_connectivity_certs_setup_job.secrets.caCertificateSecret.migration.name | default "" }}"
+          - '--caCertificateSecretKeysToMigrate={{ .Values.application_connectivity_certs_setup_job.secrets.caCertificateSecret.migration.keys | default "[]" | toJson}}'
+          {{ end }}
+          {{ if  .Values.application_connectivity_certs_setup_job.secrets.connectorCertificateSecret.migration}}
+          - "--connectorCertificateSecretToMigrate={{ .Values.application_connectivity_certs_setup_job.secrets.connectorCertificateSecret.namespace }}/{{ .Values.application_connectivity_certs_setup_job.secrets.connectorCertificateSecret.migration.name | default "" }}"
+          - '--connectorCertificateSecretKeysToMigrate={{ .Values.application_connectivity_certs_setup_job.secrets.connectorCertificateSecret.migration.keys | default "[]" | toJson}}'
+          {{ end }}
           - "--generatedValidityTime={{ .Values.application_connectivity_certs_setup_job.certificate.validityTime }}"
         securityContext:
           runAsUser: {{ .Values.global.podSecurityPolicy.runAsUser }}

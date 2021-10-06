@@ -1,10 +1,22 @@
 const {
   listResources,
+  getVirtualService,
+  sleep,
+  waitForDeployment,
+  retryPromise,
+  k8sApply,
+  k8sDelete,
+  toBase64,
+  patchDeployment,
+  k8sAppsApi,
 } = require("../utils");
+
+const { expect } = require("chai");
 
 const {
   queryPrometheus,
   queryGrafana,
+  getPrometheusRuleGroups,
 } = require("./client");
 
 const { assert } = require("chai");
@@ -111,11 +123,212 @@ async function assertTimeSeriesExist(metric, labels) {
   assert.isEmpty(resultlessQueries, `Following queries return no results: ${resultlessQueries.join(", ")}`)
 }
 
+<<<<<<< HEAD
 async function assertGrafanaredirect() {
   console.log("here")
   let url  = "https://application-operator.rg-1.berlin.shoot.canary.k8s-hana.ondemand.com"
   res = await queryGrafana(url)
   console.log(res)
+=======
+async function retryUrl(url, redirectURL, ignoreSSL, httpStatus) {
+  let retries = 0
+  while (retries < 20) {
+    let res = await queryGrafana(url, redirectURL, ignoreSSL, httpStatus)
+    if (res === true) {
+      return res
+    }
+    await sleep(5*1000)
+    retries++
+  }
+  return false
+}
+
+async function assertGrafanaRedirect(redirectURL) {
+  let vs = await getVirtualService("kyma-system", "monitoring-grafana")
+  let ignoreSSL = false
+  if (vs.includes("local.kyma.dev")) {
+    ignoreSSL = true
+  }
+  let url = "https://"+vs
+  if (redirectURL.includes("https://dex.")) {
+    console.log("Checking redirect for dex")
+    return await retryUrl(url, redirectURL, ignoreSSL, 200)
+  }
+
+  if (redirectURL.includes("https://kyma-project.io/docs")) {
+    console.log("Checking redirect for kyma docs")
+    return await retryUrl(url, redirectURL, ignoreSSL, 403)
+  }
+
+  if (redirectURL.includes("https://accounts.google.com/signin/oauth")) {
+    console.log("Checking redirect for google")
+    return await retryUrl(url, redirectURL, ignoreSSL, 200)
+  }
+
+  if (redirectURL.includes("grafana")) {
+    console.log("Checking redirect for grafana")
+    return await retryUrl(url, redirectURL, ignoreSSL, 200)
+  }
+}
+
+async function manageSecret(action) {
+  const sec = {
+    apiVersion: "v1",
+    kind: "Secret",
+    metadata: {
+      name: "monitoring-auth-proxy-grafana-user",
+      namespace: "kyma-system",
+    },
+    type: "Opaque",
+    data: {
+      OAUTH2_PROXY_SKIP_PROVIDER_BUTTON: toBase64("true")
+    },
+  }
+  if (action === "create") {
+    console.log("Creating secret: monitoring-auth-proxy-grafana-user ")
+    await k8sApply([sec], "kyma-system");
+  } else if (action === "delete") {
+    console.log("Deleting secret: monitoring-auth-proxy-grafana-user ")
+    await k8sDelete([sec], "kyma-system");
+  }
+}
+
+async function updateProxyDeployment(fromArg, toArg) {
+  const name = "monitoring-auth-proxy-grafana"
+  const ns = "kyma-system"
+
+  const deployment = await retryPromise(
+    async () => {
+      return k8sAppsApi.readNamespacedDeployment(name, ns);
+    },
+    12,
+    5000
+  ).catch((err) => {
+    throw new Error(`Timeout: ${name} is not found`);
+  });
+
+  const argPos = deployment.body.spec.template.spec.containers[0].args.findIndex(
+      arg => arg.toString().includes(fromArg)
+  );
+  expect(argPos).to.not.equal(-1);
+
+  const patch = [
+    {
+      op: "replace",
+      path: `/spec/template/spec/containers/0/args/${argPos}`,
+      value: toArg,
+    },
+  ];
+
+  await patchDeployment(name, ns, patch)
+  const patchedDeployment = await k8sAppsApi.readNamespacedDeployment(name, ns);
+  expect(patchedDeployment.body.spec.template.spec.containers[0].args.findIndex(
+      arg => arg.toString().includes(toArg)
+  )).to.not.equal(-1);
+
+  // We have to wait for the deployment to redeploy the actual pod.
+  await sleep(1000);
+  await waitForDeployment(name, ns);
+}
+
+async function restartProxyPod() {
+  const name = "monitoring-auth-proxy-grafana"
+  const ns = "kyma-system"
+
+  const patchRep0 = [
+    {
+      op: 'replace',
+      path: '/spec/replicas',
+      value: 0,
+    },
+  ];
+  await patchDeployment(name, ns, patchRep0)
+  const patchedDeploymentRep0 = await k8sAppsApi.readNamespacedDeployment(name, ns);
+  expect(patchedDeploymentRep0.body.spec.replicas).to.be.equal(0);
+
+  const patchRep1 = [
+    {
+      op: 'replace',
+      path: '/spec/replicas',
+      value: 1,
+    },
+  ];
+  await patchDeployment(name, ns, patchRep1)
+  const patchedDeploymentRep1 = await k8sAppsApi.readNamespacedDeployment(name, ns);
+  expect(patchedDeploymentRep1.body.spec.replicas).to.be.equal(1);
+
+  // We have to wait for the deployment to redeploy the actual pod.
+  await sleep(1000);
+  await waitForDeployment(name, ns);
+}
+
+async function resetProxy() {
+  // delete secret
+  manageSecret("delete")
+  // remove add reverse proxy
+  updateProxyDeployment("--trusted-ip=0.0.0.0/0","--reverse-proxy=true")
+  // Check if the redirect works like again after reset
+  let res = await assertGrafanaRedirect("https://kyma-project.io/docs");
+  assert.isTrue(res, "Grafana redirect to kyma docs does not work!");
+
+  return res
+}
+
+async function checkGrafanaRedirectsInKyma1() {
+  let res = await assertGrafanaRedirect("https://dex.")
+  assert.isTrue(res, "Grafana redirect to dex does not work!");
+}
+
+async function checkGrafanaRedirectsInKyma2() {
+  // Checking grafana redirect to kyma docs
+  let res = await assertGrafanaRedirect("https://kyma-project.io/docs")
+  assert.isTrue(res, "Grafana redirect to kyma docs does not work!");
+
+  // Creating secret for auth proxy redirect
+  await manageSecret("create");
+  await restartProxyPod();
+  // Checking grafana redirect to OIDC provider
+  res = await assertGrafanaRedirect("https://accounts.google.com/signin/oauth");
+  assert.isTrue(res, "Grafana redirect to google does not work!");
+
+  await updateProxyDeployment("--reverse-proxy=true", "--trusted-ip=0.0.0.0/0");
+  // Checking that authentication works and redirects to grafana URL
+  res = await assertGrafanaRedirect("https://grafana.");
+  assert.isTrue(res, "Grafana redirect to grafana landing page does not work!");
+
+  res = await resetProxy() 
+  assert.isTrue(res, "Grafana Authproxy is not reset successfully!  ")
+}
+
+async function getK8sPrometheusRuleNames() {
+  let path = '/apis/monitoring.coreos.com/v1/prometheusrules';
+  let rules = await listResources(path);
+  return rules.map((o) => o.metadata.name);
+}
+
+async function getRegisteredPrometheusRuleNames() {
+  let rules = await getPrometheusRuleGroups();
+  return rules.map((o) => o.name);
+}
+
+function removeNamePrefixes(ruleNames) {
+  return ruleNames.map((rule) =>
+    rule
+      .replace("monitoring-", "")
+      .replace("kyma-", "")
+      .replace("logging-", "")
+      .replace("fluent-bit-", "")
+      .replace("loki-", "")
+  );
+}
+
+async function getNotRegisteredPrometheusRuleNames() {
+    let registeredRules = await getRegisteredPrometheusRuleNames();
+    let k8sRuleNames = await getK8sPrometheusRuleNames();
+    k8sRuleNames = removeNamePrefixes(k8sRuleNames);
+    let notRegisteredRules = k8sRuleNames.filter((rule) => !registeredRules.includes(rule));
+    return notRegisteredRules;
+>>>>>>> 5578169cc9125ad9d9367b61b76b2257cff22820
 }
 
 module.exports = {
@@ -123,5 +336,14 @@ module.exports = {
   shouldIgnoreAlert,
   buildScrapePoolSet,
   assertTimeSeriesExist,
+<<<<<<< HEAD
   assertGrafanaredirect,
+=======
+  assertGrafanaRedirect,
+  restartProxyPod,
+  updateProxyDeployment,
+  checkGrafanaRedirectsInKyma1,
+  checkGrafanaRedirectsInKyma2,
+  getNotRegisteredPrometheusRuleNames,
+>>>>>>> 5578169cc9125ad9d9367b61b76b2257cff22820
 };

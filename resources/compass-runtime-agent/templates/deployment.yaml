@@ -29,7 +29,7 @@ spec:
           ports:
             - containerPort: {{ .Values.compassRuntimeAgent.healthCheck.port }}
               name: http-health
-          image: {{ .Values.global.images.containerRegistry.path }}/compass-runtime-agent:{{ .Values.global.images.runtimeAgent.version }}
+          image: {{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.compass_runtime_agent) }}
           imagePullPolicy: {{ .Values.compassRuntimeAgent.image.pullPolicy }}
           args:
             - "/compass-runtime-agent"
@@ -57,15 +57,23 @@ spec:
             - name: APP_METRICS_LOGGING_TIME_INTERVAL
               value: {{ .Values.compassRuntimeAgent.metrics.loggingTimeInterval | quote }}
             - name: APP_RUNTIME_EVENTS_URL
-              value: "https://gateway.{{ .Values.global.ingress.domainName }}"
+              value: "https://gateway.{{ .Values.global.domainName }}"
             - name: APP_RUNTIME_CONSOLE_URL
-              value: "https://console.{{ .Values.global.ingress.domainName }}"
+              value: "https://console.{{ .Values.global.domainName }}"
             - name: APP_DIRECTOR_PROXY_PORT
               value: {{ .Values.compassRuntimeAgent.director.proxy.port | quote }}
             - name: APP_DIRECTOR_PROXY_INSECURE_SKIP_VERIFY
               value: {{ .Values.compassRuntimeAgent.director.proxy.insecureSkipVerify | quote }}
             - name: APP_HEALTH_PORT
               value: {{ .Values.compassRuntimeAgent.healthCheck.port | quote }}
+              {{ if  .Values.compassRuntimeAgent.certificates.caCertificate.secret.migration}}
+            - name: APP_CA_CERT_SECRET_TO_MIGRATE
+              value: "{{ .Values.compassRuntimeAgent.certificates.caCertificate.secret.namespace }}/{{ .Values.compassRuntimeAgent.certificates.caCertificate.secret.migration.name | default "" }}"
+            - name: APP_CA_CERT_SECRET_KEYS_TO_MIGRATE
+              value: '{{ .Values.compassRuntimeAgent.certificates.caCertificate.secret.migration.keys | default "[]" | toJson }}'
+              {{ end }}
+            - name: APP_CENTRAL_GATEWAY_SERVICE_URL
+              value: {{ .Values.compassRuntimeAgent.resources.centralGatewayServiceUrl | quote }}
           livenessProbe:
             httpGet:
               port: {{ .Values.compassRuntimeAgent.healthCheck.port }}
@@ -80,13 +88,6 @@ spec:
             initialDelaySeconds: {{ .Values.compassRuntimeAgent.readinessProbe.initialDelaySeconds }}
             timeoutSeconds: {{ .Values.compassRuntimeAgent.readinessProbe.timeoutSeconds }}
             periodSeconds: {{.Values.compassRuntimeAgent.readinessProbe.periodSeconds }}
-      {{ if .Values.global.isLocalEnv }}
-      hostAliases:
-        - ip: {{ .Values.global.minikubeIP }}
-          hostnames:
-            - "compass-gateway.{{ .Values.global.ingress.domainName }}"
-            - "compass-gateway-mtls.{{ .Values.global.ingress.domainName }}"
-      {{ end }}
     {{- if .Values.global.priorityClassName }}
       priorityClassName: {{ .Values.global.priorityClassName }}
     {{- end }}

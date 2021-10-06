@@ -15,7 +15,7 @@ image:
   # name is the name of the container image for the eventing-controller
   name: "eventing-controller"
   # tag is the container tag of the eventing-controller image
-  tag: "PR-11621"
+  tag: "PR-12154"
   # pullPolicy is the pullPolicy for the eventing-controller image
   pullPolicy: "IfNotPresent"
 
@@ -47,6 +47,19 @@ publisherProxy:
       cpu: 32m
       memory: 64Mi
 
+natsOperatorDoctor:
+  interval: 1m
+  image:
+    tag: "PR-11920"
+    name: "nats-operator-doctor"
+    pullPolicy: "IfNotPresent"
+  resources:
+    requests:
+      cpu: 10m
+      memory: 16Mi
+    limits:
+      cpu: 20m
+      memory: 32Mi
 
 metrics:
   service:

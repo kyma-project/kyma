@@ -24,9 +24,9 @@ func main() {
 	log.Println("Start repo fetcher...")
 	cfg := config{}
 	if err := envconfig.InitWithPrefix(&cfg, envPrefix); err != nil {
-		log.Fatalln("while reading env variables")
+		log.Fatalf("while reading env variables: %s", err.Error())
 	}
-	operator := git.New()
+	operator := git.NewGit2Go()
 
 	log.Println("Get auth config...")
 	gitOptions := cfg.getOptions()

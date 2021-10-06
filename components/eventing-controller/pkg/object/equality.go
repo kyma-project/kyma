@@ -7,8 +7,6 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/conversion"
 
-	hydrav1alpha1 "github.com/ory/hydra-maester/api/v1alpha1"
-
 	apigatewayv1alpha1 "github.com/kyma-incubator/api-gateway/api/v1alpha1"
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 	"github.com/kyma-project/kyma/components/eventing-controller/utils"
@@ -19,7 +17,6 @@ import (
 var Semantic = conversion.EqualitiesOrDie(
 	apiRuleEqual,
 	eventingBackendEqual,
-	oauth2ClientEqual,
 	publisherProxyDeploymentEqual,
 	eventingBackendStatusEqual,
 )
@@ -80,27 +77,6 @@ func eventingBackendEqual(b1, b2 *eventingv1alpha1.EventingBackend) bool {
 	return true
 }
 
-// oauth2ClientEqual asserts the equality of two OAuth2Client objects for the
-// eventing backend.
-func oauth2ClientEqual(oa1, oa2 *hydrav1alpha1.OAuth2Client) bool {
-	if oa1 == nil || oa2 == nil {
-		return false
-	}
-	if oa1 == oa2 {
-		return true
-	}
-
-	if !reflect.DeepEqual(oa1.Labels, oa2.Labels) {
-		return false
-	}
-
-	if !reflect.DeepEqual(oa1.Spec, oa2.Spec) {
-		return false
-	}
-
-	return true
-}
-
 // publisherProxyDeploymentEqual asserts the equality of two Deployment objects
 // for event publisher proxy deployments.
 func publisherProxyDeploymentEqual(d1, d2 *appsv1.Deployment) bool {
@@ -110,18 +86,18 @@ func publisherProxyDeploymentEqual(d1, d2 *appsv1.Deployment) bool {
 	if d1 == d2 {
 		return true
 	}
-
 	if !reflect.DeepEqual(d1.Labels, d2.Labels) {
+		return false
+	}
+	if !reflect.DeepEqual(d1.Spec.Replicas, d2.Spec.Replicas) {
 		return false
 	}
 
 	cst1 := d1.Spec.Template
 	cst2 := d2.Spec.Template
-
 	if !reflect.DeepEqual(cst1.Annotations, cst2.Annotations) {
 		return false
 	}
-
 	if !reflect.DeepEqual(cst1.Labels, cst2.Labels) {
 		return false
 	}

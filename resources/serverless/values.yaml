@@ -7,13 +7,13 @@ fullnameOverride: "serverless"
 injectCerts:
   image:
     repository: "eu.gcr.io/kyma-project/tpi/k8s-tools"
-    tag: "20210610-d25e85b1"
+    tag: "20210922-530cfc39"
     pullPolicy: IfNotPresent
 
 migration:
   image:
     repository: "eu.gcr.io/kyma-project/tpi/k8s-tools"
-    tag: "20210610-d25e85b1"
+    tag: "20210922-530cfc39"
     pullPolicy: IfNotPresent
 
 tests:
@@ -24,7 +24,7 @@ tests:
     e2e-skr: true
 
   long:
-    initTimeout: 120s
+    waitTimeout: 180s
     resources:
       requests:
         memory: 128Mi
@@ -34,14 +34,14 @@ tests:
         cpu: 200m
     image:
       repository: "eu.gcr.io/kyma-project/tpi/k8s-tools"
-      tag: "20210610-d25e85b1"
+      tag: "20210922-530cfc39"
       pullPolicy: IfNotPresent
     namespace: "long-running-function-test"
     name: longrun
 
   image:
     repository: "eu.gcr.io/kyma-project/function-controller-test"
-    tag: "PR-11656"
+    tag: "449a5e4a"
     pullPolicy: IfNotPresent
   disableConcurrency: false
   restartPolicy: Never
@@ -81,27 +81,35 @@ global:
 images:
   manager:
     repository: "eu.gcr.io/kyma-project/function-controller"
-    tag: "PR-11498"
+    tag: "c21665db"
     pullPolicy: IfNotPresent
   runtimes:
     nodejs12:
       repository: "eu.gcr.io/kyma-project/function-runtime-nodejs12"
-      tag: "6b4289ab"
+      tag: "a3baf33c"
     nodejs14:
       repository: "eu.gcr.io/kyma-project/function-runtime-nodejs14"
-      tag: "6b4289ab"
+      tag: "a3baf33c"
     python38:
       repository: "eu.gcr.io/kyma-project/function-runtime-python38"
-      tag: "6b4289ab"
+      tag: "a3baf33c"
     python39:
       repository: "eu.gcr.io/kyma-project/function-runtime-python39"
-      tag: "PR-11498"
+      tag: "a3baf33c"
 
 deployment:
   replicas: 1
   labels: {}
   annotations: {}
   extraProperties: {}
+  livenessProbe:
+    initialDelaySeconds: 50
+    timeoutSeconds: 1
+    periodSeconds: 10
+  readinessProbe:
+    initialDelaySeconds: 10
+    timeoutSeconds: 1
+    periodSeconds: 2
 
 pod:
   labels: {}
@@ -158,14 +166,16 @@ containers:
         value: '{{ template "fullname" . }}-build'
       targetCPUUtilizationPercentage:
         value: "50"
+      functionPublisherProxyAddress:
+        value: "http://eventing-publisher-proxy.kyma-system.svc.cluster.local/publish"
       functionRequeueDuration:
         value: 5m
       functionBuildExecutorArgs:
         value: "--insecure,--skip-tls-verify,--skip-unused-stages,--log-format=text,--cache=true"
       functionBuildExecutorImage:
-        value: gcr.io/kaniko-project/executor:v1.5.1
+        value: eu.gcr.io/kyma-project/tpi/kaniko-executor:1.6.0-7b6e8d78
       functionBuildRepoFetcherImage:
-        value: eu.gcr.io/kyma-project/function-build-init:3d36a7ba
+        value: eu.gcr.io/kyma-project/function-build-init:a2f445a2
       functionBuildMaxSimultaneousJobs:
         value: "5"
       logLevel:
@@ -216,8 +226,8 @@ dockerRegistry:
   username: "{{ randAlphaNum 20 | b64enc }}" # for gcr "_json_key"
   password: "{{ randAlphaNum 40 | b64enc }}" # for gcr data from json key
   internalServerAddress: '{{ template "registry-fullname" . }}.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.global.dockerServicePort }}'
-  serverAddress: "registry.{{ .Values.global.ingress.domainName -}}"
-  registryAddress: "registry.{{ .Values.global.ingress.domainName -}}"
+  serverAddress: "registry.{{ .Values.global.domainName -}}"
+  registryAddress: "registry.{{ .Values.global.domainName -}}"
 
 docker-registry:
   fullnameOverride: "serverless-docker-registry"
@@ -246,7 +256,7 @@ webhook:
   fullnameOverride: "serverless-webhook"
   image:
     repository: "eu.gcr.io/kyma-project/function-webhook"
-    tag: "PR-11498"
+    tag: "c21665db"
 
 k3s-tests:
   enabled: false # this chart is installed manually, do not flip this value

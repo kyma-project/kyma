@@ -24,9 +24,8 @@ import (
 )
 
 const (
-	TokenURLPath        = "/auth"
-	MessagingURLPath    = "/messaging"
-	TestCommanderSuffix = "commander"
+	TokenURLPath     = "/auth"
+	MessagingURLPath = "/messaging"
 )
 
 // BebMock implements a programmable mock for BEB
@@ -91,7 +90,7 @@ func (m *BebMock) Start() string {
 		w.Header().Set("Content-Type", "application/json")
 
 		// oauth2 request
-		if r.Method == http.MethodPost && r.RequestURI == TokenURLPath {
+		if r.Method == http.MethodPost && strings.HasPrefix(r.RequestURI, TokenURLPath) {
 			if m.AuthResponse != nil {
 				m.AuthResponse(w)
 			} else {
@@ -131,7 +130,10 @@ func (m *BebMock) Start() string {
 					}
 				// get on a single subscription
 				default:
-					if key := r.URL.Path; strings.HasSuffix(key, TestCommanderSuffix) {
+					key := r.URL.Path
+					if m.GetResponse != nil {
+						m.GetResponse(w, key)
+					} else {
 						subscriptionSaved := m.Subscriptions[key]
 						if subscriptionSaved != nil {
 							subscriptionSaved.SubscriptionStatus = bebtypes.SubscriptionStatusActive
@@ -140,19 +142,6 @@ func (m *BebMock) Start() string {
 							Expect(err).ShouldNot(HaveOccurred())
 						} else {
 							w.WriteHeader(http.StatusNotFound)
-						}
-					} else {
-						var subscription bebtypes.Subscription
-						_ = json.NewDecoder(r.Body).Decode(&subscription)
-						m.Requests[r] = subscription
-
-						parsedUrl, err := url.Parse(r.RequestURI)
-						Expect(err).ShouldNot(HaveOccurred())
-						subscriptionName := parsedUrl.Path
-						if m.GetResponse != nil {
-							m.GetResponse(w, subscriptionName)
-						} else {
-							BebGetSuccess(w, subscriptionName)
 						}
 					}
 				}
@@ -226,7 +215,7 @@ func IsBebSubscriptionCreate(r *http.Request, bebConfig config.Config) bool {
 	return r.Method == http.MethodPost && strings.Contains(bebConfig.CreateURL, r.RequestURI)
 }
 
-// IsBebSubscriptionCreate determines if the http request is deleting a BEB subscription.
+// IsBebSubscriptionDelete determines if the http request is deleting a BEB subscription.
 func IsBebSubscriptionDelete(r *http.Request) bool {
 	return r.Method == http.MethodDelete && strings.Contains(r.RequestURI, MessagingURLPath)
 }

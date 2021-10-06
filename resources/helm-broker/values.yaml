@@ -36,7 +36,33 @@ broker:
   statusPort: 8071
   metricsPort: 8072
 
-defaultAddonsRepository: "https://github.com/kyma-project/addons/releases/download/0.14.0/index.yaml"
+webhook:
+  imagePullPolicy: IfNotPresent
+  securityContext: { runAsUser: 1001 }
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+  minReadySeconds: 1
+  annotations:
+    sidecar.istio.io/inject: "false"
+  healthcheck:
+    enabled: false
+  # Attributes of the webhook's service resource
+  service:
+    port: 8443
+    targetPort: 8443
+  # Webhook resource requests and limits
+  # Ref: http://kubernetes.io/docs/user-guide/compute-resources/
+  resources:
+    requests:
+      cpu: 100m
+      memory: 20Mi
+    limits:
+      cpu: 100m
+      memory: 30Mi
+
+defaultAddonsRepository: "https://github.com/kyma-project/addons/releases/download/0.15.0/index.yaml" # switch to 0.15 after testing PR
 
 # A map of additional addons repositories to configure. The key is used as the name of the created ClusterAddonsConfiguration.
 # additionalAddonsRepositories:
@@ -45,7 +71,7 @@ defaultAddonsRepository: "https://github.com/kyma-project/addons/releases/downlo
 additionalAddonsRepositories: {}
 
 addons-ui:
-  enabled: true
+  enabled: false
 
 global:
   containerRegistry:
@@ -54,14 +80,7 @@ global:
   isDevelopMode: false
   # image pull policy for helm broker broker/controller containers
   image:
-    pullPolicy: IfNotPresent
-  # paths to docker images
-  helm_broker:
-    dir: ""
-    version: "d39e2c8a"
-  helm_controller:
-    dir: ""
-    version: "d39e2c8a"
+    pullPolicy: Always
   # etcd port uses by helm broker
   etcdClientPort: 2379
 
@@ -86,3 +105,17 @@ global:
     tls:
       crt: "TBD"
       key: "TBD"
+  images:
+    helm_broker_webhook:
+      name: "helm-broker-webhook"
+      version: "5edd6b42"
+    helm_broker:
+      name: "helm-broker"
+      version: "995c0f10"
+    helm_controller:
+      name: "helm-controller"
+      version: "995c0f10"
+    etcd:
+      name: "etcd"
+      version: "v3.3.25-e5110645"
+      directory: "tpi/quay.io/coreos"

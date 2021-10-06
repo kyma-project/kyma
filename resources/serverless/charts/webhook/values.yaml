@@ -28,6 +28,14 @@ deployment:
     limits:
       cpu: 300m
       memory: 300Mi
+  livenessProbe:
+    initialDelaySeconds: 50
+    timeoutSeconds: 1
+    periodSeconds: 10
+  readinessProbe:
+    initialDelaySeconds: 10
+    timeoutSeconds: 1
+    periodSeconds: 2
 
 pod:
   annotations:
@@ -157,6 +165,6 @@ values:
             "requestCpu": "1100m",
             "requestMemory": "1100Mi",
             "limitCpu": "1700m",
-            "limitMemory": "1700Mi"
+            "limitMemory": "1100Mi"
           }
         }

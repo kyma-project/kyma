@@ -133,11 +133,11 @@ migrator:
   images:
     alpineKubectl:
       repository: eu.gcr.io/kyma-project/tpi/k8s-tools
-      tag: "20210610-d25e85b1"
+      tag: "20210922-530cfc39"
       pullPolicy: IfNotPresent
     minioClient:
       repository: "eu.gcr.io/kyma-project/tpi/minio/mc"
-      tag: "RELEASE.2019-04-03T17-59-57Z-1de56388"
+      tag: "RELEASE.2019-04-03T17-59-57Z-e0da5a68"
       pullPolicy: IfNotPresent
   pre:
     minioDeploymentRefName:

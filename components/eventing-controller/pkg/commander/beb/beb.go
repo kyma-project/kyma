@@ -3,9 +3,9 @@ package beb
 import (
 	"context"
 	"fmt"
+	"strings"
 	"time"
 
-	hydrav1alpha1 "github.com/ory/hydra-maester/api/v1alpha1"
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
 
@@ -15,6 +15,7 @@ import (
 	"k8s.io/client-go/dynamic"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
 	"k8s.io/client-go/rest"
+	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 
 	apigatewayv1alpha1 "github.com/kyma-incubator/api-gateway/api/v1alpha1"
@@ -40,9 +41,6 @@ func AddToScheme(scheme *runtime.Scheme) error {
 		return err
 	}
 	if err := apigatewayv1alpha1.AddToScheme(scheme); err != nil {
-		return err
-	}
-	if err := hydrav1alpha1.AddToScheme(scheme); err != nil {
 		return err
 	}
 	return nil
@@ -94,6 +92,10 @@ func (c *Commander) Start(_ env.DefaultSubscriptionConfig, params commander.Para
 
 	// Need to read env so as to read BEB related secrets
 	c.envCfg = env.GetConfig()
+	nameMapper := handlers.NewBebSubscriptionNameMapper(strings.TrimSpace(c.envCfg.Domain), handlers.MaxBEBSubscriptionNameLength)
+	ctrl.Log.WithName("BEB-commander").Info("using BEB name mapper",
+		"domainName", c.envCfg.Domain,
+		"maxNameLength", handlers.MaxBEBSubscriptionNameLength)
 	reconciler := subscription.NewReconciler(
 		ctx,
 		c.mgr.GetClient(),
@@ -103,6 +105,7 @@ func (c *Commander) Start(_ env.DefaultSubscriptionConfig, params commander.Para
 		c.mgr.GetEventRecorderFor("eventing-controller-beb"),
 		c.envCfg,
 		oauth2credential,
+		nameMapper,
 	)
 
 	c.backend = reconciler.Backend

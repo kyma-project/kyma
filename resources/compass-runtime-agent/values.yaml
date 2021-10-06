@@ -1,10 +1,13 @@
 global:
+  containerRegistry:
+    path: eu.gcr.io/kyma-project
   images:
-    containerRegistry:
-      path: eu.gcr.io/kyma-project
-    runtimeAgent:
-      version: "PR-11558"
-    runtimeAgentTests:
+    compass_runtime_agent:
+      name: "compass-runtime-agent"
+      version: "PR-12141"
+  testImages:
+    compass_runtime_agent_tests:
+      name: "compass-runtime-agent-tests"
       version: "5b55dce8"
   istio:
     gateway:
@@ -25,6 +28,7 @@ compassRuntimeAgent:
     dexSecretName: "admin-user"
     gatewayPort: 8080
     uploadServiceUrl: http://rafter-upload-service.kyma-system.svc.cluster.local:80
+    centralGatewayServiceUrl: http://central-application-gateway.kyma-system.svc.cluster.local:8082
   config:
     insecureConfigurationFetch: true
     secret:
@@ -39,8 +43,11 @@ compassRuntimeAgent:
         namespace: compass-system
     caCertificate:
       secret:
-        name: app-connector-certs
+        name: kyma-gateway-certs-cacert
         namespace: istio-system
+        migration:
+          name: app-connector-certs
+          keys: ["cacert"]
   compass:
     skipTLSVerification: true
   director:
@@ -66,7 +73,7 @@ compassRuntimeAgent:
     applicationInstallationTimeout: 180s
     graphqlLogs: false
     director:
-      url: "https://compass-gateway.{{ .Values.global.ingress.domainName }}/director/graphql"
+      url: "https://compass-gateway.{{ .Values.global.domainName }}/director/graphql"
     idProvider:
       clientTimeout: 10s
   livenessProbe:

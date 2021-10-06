@@ -39,10 +39,10 @@ import (
 )
 
 const (
-	smallTimeOut         = 5 * time.Second
+	smallTimeout         = 5 * time.Second
 	smallPollingInterval = 1 * time.Second
 
-	timeOut         = 60 * time.Second
+	timeout         = 60 * time.Second
 	pollingInterval = 5 * time.Second
 )
 
@@ -71,16 +71,16 @@ var _ = Describe("NATS Subscription Reconciliation Tests", func() {
 			subscriptionName := fmt.Sprintf("sub-%d", testId)
 
 			// create subscriber
-			result := make(chan []byte)
-			url, shutdown := newSubscriber(result)
+			recvdMsgsChan := make(chan []byte)
+			url, shutdown := newSubscriber(recvdMsgsChan)
 			defer shutdown()
 
 			// create subscription
-			givenSubscription := reconcilertesting.NewSubscription(subscriptionName, namespaceName, reconcilertesting.WithNotCleanEventTypeFilter, reconcilertesting.WithWebhookForNats)
-			givenSubscription.Spec.Sink = url
-			ensureSubscriptionCreated(givenSubscription, ctx)
+			subscription := reconcilertesting.NewSubscription(subscriptionName, namespaceName, reconcilertesting.WithNotCleanEventTypeFilter, reconcilertesting.WithWebhookForNats)
+			subscription.Spec.Sink = url
+			ensureSubscriptionCreated(subscription, ctx)
 
-			getSubscription(givenSubscription, ctx).Should(And(
+			getSubscription(subscription, ctx).Should(And(
 				reconcilertesting.HaveSubscriptionName(subscriptionName),
 				reconcilertesting.HaveCondition(eventingv1alpha1.MakeCondition(
 					eventingv1alpha1.ConditionSubscriptionActive,
@@ -98,14 +98,13 @@ var _ = Describe("NATS Subscription Reconciliation Tests", func() {
 			Expect(err).ShouldNot(HaveOccurred())
 
 			// make sure that the subscriber received the message
-			Eventually(func() bool {
-				sent := fmt.Sprintf(`"%s"`, reconcilertesting.EventData)
-				received := string(<-result)
-				return sent == received
-			}, timeOut, pollingInterval).Should(BeTrue())
+			sent := fmt.Sprintf(`"%s"`, reconcilertesting.EventData)
+			Eventually(func() ([]byte, error) {
+				return getFromChanOrTimeout(recvdMsgsChan, smallPollingInterval)
+			}, timeout, pollingInterval).Should(WithTransform(bytesStringer, Equal(sent)))
 
-			Expect(k8sClient.Delete(ctx, givenSubscription)).Should(BeNil())
-			isSubscriptionDeleted(givenSubscription, ctx).Should(reconcilertesting.HaveNotFoundSubscription(true))
+			Expect(k8sClient.Delete(ctx, subscription)).Should(BeNil())
+			isSubscriptionDeleted(subscription, ctx).Should(reconcilertesting.HaveNotFoundSubscription(true))
 		})
 	})
 
@@ -136,16 +135,16 @@ var _ = Describe("NATS Subscription Reconciliation Tests", func() {
 			subscriptionName := fmt.Sprintf("sub-%d", testId)
 
 			// create subscriber
-			result := make(chan []byte)
-			url, shutdown := newSubscriber(result)
+			recvdMsgsChan := make(chan []byte)
+			url, shutdown := newSubscriber(recvdMsgsChan)
 			defer shutdown()
 
 			// create subscription
-			givenSubscription := reconcilertesting.NewSubscription(subscriptionName, namespaceName, reconcilertesting.WithEmptySourceEventType)
-			givenSubscription.Spec.Sink = url
-			ensureSubscriptionCreated(givenSubscription, ctx)
+			subscription := reconcilertesting.NewSubscription(subscriptionName, namespaceName, reconcilertesting.WithEmptySourceEventType)
+			subscription.Spec.Sink = url
+			ensureSubscriptionCreated(subscription, ctx)
 
-			getSubscription(givenSubscription, ctx).Should(And(
+			getSubscription(subscription, ctx).Should(And(
 				reconcilertesting.HaveSubscriptionName(subscriptionName),
 				reconcilertesting.HaveCondition(eventingv1alpha1.MakeCondition(
 					eventingv1alpha1.ConditionSubscriptionActive,
@@ -160,11 +159,10 @@ var _ = Describe("NATS Subscription Reconciliation Tests", func() {
 			Expect(err).ShouldNot(HaveOccurred())
 
 			// make sure that the subscriber received the message
-			Eventually(func() bool {
-				sent := fmt.Sprintf(`"%s"`, reconcilertesting.EventData)
-				received := string(<-result)
-				return sent == received
-			}, timeOut, pollingInterval).Should(BeTrue())
+			sent := fmt.Sprintf(`"%s"`, reconcilertesting.EventData)
+			Eventually(func() ([]byte, error) {
+				return getFromChanOrTimeout(recvdMsgsChan, smallPollingInterval)
+			}, timeout, pollingInterval).Should(WithTransform(bytesStringer, Equal(sent)))
 		})
 	})
 
@@ -175,8 +173,8 @@ var _ = Describe("NATS Subscription Reconciliation Tests", func() {
 			subscriptionName := fmt.Sprintf("sub-%d", testId)
 
 			// create subscriber
-			result := make(chan []byte)
-			url, shutdown := newSubscriber(result)
+			recvdMsgsChan := make(chan []byte)
+			url, shutdown := newSubscriber(recvdMsgsChan)
 			defer shutdown()
 
 			// create subscription
@@ -204,7 +202,7 @@ var _ = Describe("NATS Subscription Reconciliation Tests", func() {
 			}
 			Expect(k8sClient.Update(ctx, changedSub)).Should(BeNil())
 
-			Eventually(subscriptionGetter(ctx, sub.Name, sub.Namespace), timeOut, pollingInterval).
+			Eventually(subscriptionGetter(ctx, sub.Name, sub.Namespace), timeout, pollingInterval).
 				Should(And(
 					reconcilertesting.HaveSubscriptionName(subscriptionName),
 					reconcilertesting.HaveCondition(eventingv1alpha1.MakeCondition(
@@ -221,19 +219,16 @@ var _ = Describe("NATS Subscription Reconciliation Tests", func() {
 			Expect(err).ShouldNot(HaveOccurred())
 			toSend := fmt.Sprintf(`"%s"`, reconcilertesting.EventData)
 			msgData := []byte(reconcilertesting.StructuredCloudEvent)
-			Eventually(func() (string, error) {
-				// publish the message
+			// Publish the message and make sure that the subscriber received the message.
+			// Since the subscriptions on NATS are removed and recreated due to the MaxInFlight change, it could be
+			// that an immediate publication after the subscription change is not delivered, therefore, we try
+			// sending/receiving in an Eventually block.
+			Eventually(func() ([]byte, error) {
 				if err = connection.Publish(reconcilertesting.OrderCreatedEventType, msgData); err != nil {
-					return "", err
+					return nil, err
 				}
-				// make sure that the subscriber received the message
-				select {
-				case received := <-result:
-					return string(received), nil
-				case <-time.After(smallPollingInterval):
-					return "", fmt.Errorf("no message received")
-				}
-			}, timeOut, pollingInterval).Should(Equal(toSend))
+				return getFromChanOrTimeout(recvdMsgsChan, smallPollingInterval)
+			}, timeout, pollingInterval).Should(WithTransform(bytesStringer, Equal(toSend)))
 
 			Expect(k8sClient.Delete(ctx, sub)).Should(BeNil())
 			isSubscriptionDeleted(sub, ctx).Should(reconcilertesting.HaveNotFoundSubscription(true))
@@ -263,7 +258,6 @@ var _ = Describe("NATS Subscription Reconciliation Tests", func() {
 })
 
 func ensureSubscriptionCreated(subscription *eventingv1alpha1.Subscription, ctx context.Context) {
-
 	By(fmt.Sprintf("Ensuring the test namespace %q is created", subscription.Namespace))
 	if subscription.Namespace != "default " {
 		// create testing namespace
@@ -327,7 +321,7 @@ func getSubscription(subscription *eventingv1alpha1.Subscription, ctx context.Co
 		log.Printf("[Subscription] name:%s ns:%s status:%v", subscription.Name, subscription.Namespace,
 			subscription.Status)
 		return subscription
-	}, smallTimeOut, smallPollingInterval)
+	}, smallTimeout, smallPollingInterval)
 }
 
 // isSubscriptionDeleted checks a subscription is deleted and allows to make assertions on it
@@ -344,7 +338,7 @@ func isSubscriptionDeleted(subscription *eventingv1alpha1.Subscription, ctx cont
 		log.Printf("[Subscription] name:%s ns:%s status:%v", subscription.Name, subscription.Namespace,
 			subscription.Status)
 		return false
-	}, smallTimeOut, smallPollingInterval)
+	}, smallTimeout, smallPollingInterval)
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -493,4 +487,17 @@ func newSubscriber(result chan []byte) (string, func()) {
 		result <- body
 	}))
 	return server.URL, server.Close
+}
+
+func getFromChanOrTimeout(ch <-chan []byte, t time.Duration) ([]byte, error) {
+	select {
+	case received := <-ch:
+		return received, nil
+	case <-time.After(t):
+		return nil, fmt.Errorf("timed out waiting for a message")
+	}
+}
+
+func bytesStringer(bs []byte) string {
+	return string(bs)
 }

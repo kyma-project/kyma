@@ -26,7 +26,7 @@ spec:
       serviceAccountName: {{ .Chart.Name }}-tests
       containers:
         - name: {{ .Chart.Name }}-tests
-          image: {{ .Values.global.images.containerRegistry.path }}/compass-runtime-agent-tests:{{ .Values.global.images.runtimeAgentTests.version }}
+          image: {{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.testImages.compass_runtime_agent_tests) }}
           imagePullPolicy: {{ .Values.compassRuntimeAgent.image.pullPolicy }}
           envFrom:
           - secretRef:
@@ -56,15 +56,15 @@ spec:
             - name: APPLICATION_INSTALLATION_TIMEOUT
               value: {{ .Values.compassRuntimeAgent.tests.applicationInstallationTimeout }}
             - name: RUNTIME_EVENTS_URL
-              value: "https://gateway.{{ .Values.global.ingress.domainName }}"
+              value: "https://gateway.{{ .Values.global.domainName }}"
             - name: RUNTIME_CONSOLE_URL
-              value: "https://console.{{ .Values.global.ingress.domainName }}"
+              value: "https://console.{{ .Values.global.domainName }}"
             - name: DEX_SECRET_NAMESPACE
               value: {{ .Values.compassRuntimeAgent.resources.dexSecretNamespace }}
             - name: DEX_SECRET_NAME
               value: {{ .Values.compassRuntimeAgent.resources.dexSecretName }}
             - name: ID_PROVIDER_DOMAIN
-              value: {{ .Values.global.ingress.domainName | quote }}
+              value: {{ .Values.global.domainName | quote }}
             - name: ID_PROVIDER_CLIENT_TIMEOUT
               value: {{ .Values.compassRuntimeAgent.tests.idProvider.clientTimeout | quote }}
           command:
@@ -75,16 +75,6 @@ spec:
           ports:
           - containerPort: {{ .Values.compassRuntimeAgent.tests.mockService.port }}
             name: http
-      {{ if .Values.global.isLocalEnv }}
-      hostAliases:
-        - ip: {{ .Values.global.minikubeIP }}
-          hostnames:
-            - "compass-gateway.{{ .Values.global.ingress.domainName }}"
-            - "compass-gateway-auth-oauth.{{ .Values.global.ingress.domainName }}"
-            - "minio.{{ .Values.global.ingress.domainName }}"
-            - "dex.{{ .Values.global.ingress.domainName }}"
-            - "gateway.{{ .Values.global.ingress.domainName }}"
-      {{ end }}
     restartPolicy: Never
 {{- end }}
 {{ end }}

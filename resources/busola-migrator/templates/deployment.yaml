@@ -48,7 +48,7 @@ spec:
             - name: APP_PORT
               value: {{ .Values.service.targetPort | quote }}
             - name: APP_DOMAIN
-              value: {{ .Values.global.ingress.domainName | quote }}
+              value: {{ .Values.global.domainName | quote }}
             - name: APP_BUSOLA_URL
               value: {{ .Values.deployment.env.busolaURL | quote }}
             - name: APP_KUBECONFIG_ID

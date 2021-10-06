@@ -1,6 +1,8 @@
 package main
 
 import (
+	"encoding/json"
+
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/certificates"
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/compass"
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/compass/cache"
@@ -16,6 +18,7 @@ import (
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	"github.com/vrischmann/envconfig"
+	"k8s.io/apimachinery/pkg/types"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 	"sigs.k8s.io/controller-runtime/pkg/client/config"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
@@ -36,6 +39,22 @@ func main() {
 	cfg, err := config.GetConfig()
 	exitOnError(err, "Failed to set up client config")
 
+	log.Info("Migrating certificate if needed")
+	k8sResourceClientSets, err := k8sResourceClients(cfg)
+	exitOnError(err, "Failed to initialize K8s resource clients")
+
+	secretsManagerConstructor := func(namespace string) secrets.Manager {
+		return k8sResourceClientSets.core.CoreV1().Secrets(namespace)
+	}
+
+	clusterCertSecret := parseNamespacedName(options.ClusterCertificatesSecret)
+	caCertSecret := parseNamespacedName(options.CaCertificatesSecret)
+	caCertSecretToMigrate := parseNamespacedName(options.CaCertSecretToMigrate)
+	secretsRepository := secrets.NewRepository(secretsManagerConstructor)
+
+	err = migrateSecret(secretsRepository, caCertSecretToMigrate, caCertSecret, options.CaCertSecretKeysToMigrate)
+	exitOnError(err, "Failed to migrate ")
+
 	log.Info("Setting up manager")
 	mgr, err := manager.New(cfg, manager.Options{SyncPeriod: &options.ControllerSyncPeriod})
 	exitOnError(err, "Failed to set up overall controller manager")
@@ -46,18 +65,6 @@ func main() {
 	exitOnError(err, "Failed to add APIs to scheme")
 
 	log.Info("Registering Components.")
-
-	k8sResourceClientSets, err := k8sResourceClients(cfg)
-	exitOnError(err, "Failed to initialize K8s resource clients")
-
-	secretsManagerConstructor := func(namespace string) secrets.Manager {
-		return k8sResourceClientSets.core.CoreV1().Secrets(namespace)
-	}
-
-	secretsRepository := secrets.NewRepository(secretsManagerConstructor)
-
-	clusterCertSecret := parseNamespacedName(options.ClusterCertificatesSecret)
-	caCertSecret := parseNamespacedName(options.CaCertificatesSecret)
 
 	certManager := certificates.NewCredentialsManager(clusterCertSecret, caCertSecret, secretsRepository)
 
@@ -115,12 +122,52 @@ func main() {
 	exitOnError(err, "Failed to run the manager")
 }
 
+func migrateSecret(secretRepo secrets.Repository, sourceSecret, targetSecret types.NamespacedName, keysToInclude string) error {
+	unmarshallKeysList := func(keys string) (keysArray []string, err error) {
+		err = json.Unmarshal([]byte(keys), &keysArray)
+
+		return keysArray, err
+	}
+
+	keys, err := unmarshallKeysList(keysToInclude)
+	if err != nil {
+		log.Errorf("Failed to read secret keys to be migrated")
+		return err
+	}
+
+	migrator := getMigrator(secretRepo, keys)
+
+	return migrator.Do(sourceSecret, targetSecret)
+}
+
+func getMigrator(secretRepo secrets.Repository, keysToInclude []string) certificates.Migrator {
+	getIncludeSourceKeyFunc := func() certificates.IncludeKeyFunc {
+		if len(keysToInclude) == 0 {
+			return func(string) bool {
+				return true
+			}
+		}
+
+		return func(key string) bool {
+			for _, k := range keysToInclude {
+				if k == key {
+					return true
+				}
+			}
+
+			return false
+		}
+	}
+
+	return certificates.NewMigrator(secretRepo, getIncludeSourceKeyFunc())
+}
+
 func createSynchronisationService(k8sResourceClients *k8sResourceClientSets, options Config) (kyma.Service, error) {
 
 	var syncService kyma.Service
 	var err error
 
-	syncService, err = createKymaService(k8sResourceClients, options.UploadServiceUrl, options.IntegrationNamespace)
+	syncService, err = createKymaService(k8sResourceClients, options.UploadServiceUrl, options.IntegrationNamespace, options.CentralGatewayServiceUrl)
 
 	if err != nil {
 		return nil, err

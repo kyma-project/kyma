@@ -1,18 +1,5 @@
 {{ if and (.Capabilities.APIVersions.Has "monitoring.coreos.com/v1") (.Capabilities.APIVersions.Has "security.istio.io/v1beta1") }}
 ---
-apiVersion: security.istio.io/v1beta1
-kind: PeerAuthentication
-metadata:
-  name: {{ include "oathkeeper.fullname" . }}-oathkeeper-maester-metrics
-spec:
-  selector:
-    matchLabels:
-      app.kubernetes.io/instance: {{ .Release.Name }}
-      app.kubernetes.io/name: oathkeeper
-  portLevelMtls:
-    {{ .Values.oathkeeper.sidecar.port.metrics }}:
-      mode: PERMISSIVE
----
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
@@ -26,6 +13,12 @@ metadata:
 spec:
   endpoints:
   - port: metrics
+    scheme: https
+    tlsConfig: 
+      caFile: /etc/prometheus/secrets/istio.default/root-cert.pem
+      certFile: /etc/prometheus/secrets/istio.default/cert-chain.pem
+      keyFile: /etc/prometheus/secrets/istio.default/key.pem
+      insecureSkipVerify: true  # Prometheus does not support Istio security naming, thus skip verifying target pod ceritifcate
     metricRelabelings:
     - sourceLabels: [ __name__ ]
       regex: ^(go_gc_duration_seconds|go_goroutines|go_memstats_alloc_bytes|go_memstats_heap_alloc_bytes|go_memstats_heap_inuse_bytes|go_memstats_heap_sys_bytes|go_memstats_stack_inuse_bytes|go_threads|process_cpu_seconds_total|process_max_fds|process_open_fds|process_resident_memory_bytes|process_start_time_seconds|process_virtual_memory_bytes|rest_client_request_latency_seconds_bucket|rest_client_requests_total|workqueue_adds_total|workqueue_depth|workqueue_queue_duration_seconds_bucket)$

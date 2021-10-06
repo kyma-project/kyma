@@ -1,5 +1,5 @@
 virtualservice:
-  enabled: true
+  enabled: false
 
 ## set kubernetes cluster domain where minio is running
 ##
