@@ -50,7 +50,6 @@ merge-kyma() {
 
   git remote add origin https://github.com/kyma-project/kyma.git
   git fetch origin
-  git remote -vv
   git pull origin main
 
   step "Last commit from main"
