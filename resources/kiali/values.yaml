@@ -8,7 +8,6 @@ tests:
     after-upgrade: true
 
 global:
-  isLocalEnv: false
   istio:
     gateway:
       name: kyma-gateway

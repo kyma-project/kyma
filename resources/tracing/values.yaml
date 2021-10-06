@@ -106,7 +106,6 @@ serviceAccount:
   name:
 
 global:
-  isLocalEnv: false
   istio:
     gateway:
       name: kyma-gateway
