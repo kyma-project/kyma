@@ -48,7 +48,11 @@ merge-kyma() {
   git checkout -B pull-request
   git checkout main
 
-  git remote add origin https://github.com/kyma-project/kyma.git
+  HAS_ORIGIN=$(git remote | grep -c "origin")
+  if [[ ${HAS_ORIGIN} -eq "0" ]]; then
+    git remote add origin https://github.com/kyma-project/kyma.git
+  fi
+
   git fetch origin
   git pull origin main
 
