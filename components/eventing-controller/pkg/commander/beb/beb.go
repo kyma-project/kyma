@@ -153,7 +153,8 @@ func cleanup(backend handlers.MessagingBackend, dynamicClient dynamic.Interface,
 
 	// Clean APIRules.
 	isCleanupSuccessful := true
-	for _, sub := range subs.Items {
+	for _, v := range subs.Items {
+		sub := v
 		if apiRule := sub.Status.APIRuleName; apiRule != "" {
 			if err := dynamicClient.Resource(handlers.APIRuleGroupVersionResource()).Namespace(sub.Namespace).
 				Delete(ctx, apiRule, metav1.DeleteOptions{}); err != nil {
