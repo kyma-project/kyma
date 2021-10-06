@@ -119,7 +119,7 @@ global:
   images:
     jaeger_operator:
       name: "jaeger-operator"
-      tag: "1.18.1-e0da5a68"
+      version: "1.18.1-e0da5a68"
       directory: "tpi"
     # all_in_one:
     #   image: "all-in-one"
