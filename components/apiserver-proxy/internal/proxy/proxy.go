@@ -80,8 +80,8 @@ func (h *kubeRBACProxy) Handle(w http.ResponseWriter, req *http.Request) bool {
 		req.Header.Set(headerCfg.GroupsFieldName, strings.Join(r.User.GetGroups(), headerCfg.GroupSeparator))
 	}
 
+	h.cleanupConnectionHeader(req)
 	req.Header.Set("Impersonate-User", r.User.GetName())
-	h.cleanupImpersonateGroupHeader(req)
 	for _, gr := range r.User.GetGroups() {
 		req.Header.Add("Impersonate-Group", gr)
 	}
@@ -90,11 +90,9 @@ func (h *kubeRBACProxy) Handle(w http.ResponseWriter, req *http.Request) bool {
 
 	return true
 }
-
-func (h *kubeRBACProxy) cleanupImpersonateGroupHeader(req *http.Request) {
-	req.Header.Del("Impersonate-Group")
+func (h *kubeRBACProxy) cleanupConnectionHeader(req *http.Request) {
+	req.Header.Del("Connection")
 }
-
 func newKubeRBACProxyAuthorizerAttributesGetter(authzConfig *authz.Config) authorizer.RequestAttributesGetter {
 	return krpAuthorizerAttributesGetter{authzConfig, newRequestInfoResolver()}
 }
