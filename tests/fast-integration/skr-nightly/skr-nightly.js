@@ -83,12 +83,10 @@ describe("SKR nightly", function () {
 
   let skr;
 
-  runtimes(keb).then((runtime) => {
-    console.log(runtime);
-    console.log(runtime[0].runtimeID)
-  }).catch((err) => {
-    throw err;
-  })
+  it(`Ensure nightly runtime already exists`, async function () {
+    let r = await runtimes(keb);
+    console.log(r);
+  });
 
   // it(`Get SKR with id ${runtimeID}`, async function () {
   //   let s = await keb.getSKR(runtimeID)
