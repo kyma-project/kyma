@@ -58,7 +58,7 @@ spec:
                     type: string
                   filters:
                     items:
-                      description: BebFilter defines the BEB filter element as a combination
+                      description: BEBFilter defines the BEB filter element as a combination
                         of two CE filter elements
                       properties:
                         eventSource:

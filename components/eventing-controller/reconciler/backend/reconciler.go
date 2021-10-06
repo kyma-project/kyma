@@ -32,6 +32,7 @@ import (
 	"github.com/kyma-project/kyma/components/eventing-controller/utils"
 )
 
+//nolint:gosec
 const (
 	BEBBackendSecretLabelKey   = "kyma-project.io/eventing-backend"
 	BEBBackendSecretLabelValue = "beb"
@@ -192,7 +193,7 @@ func (r *Reconciler) reconcileNATSBackend(ctx context.Context) (ctrl.Result, err
 }
 
 func (r *Reconciler) reconcileBEBBackend(ctx context.Context, bebSecret *v1.Secret) (ctrl.Result, error) {
-	r.backendType = eventingv1alpha1.BebBackendType
+	r.backendType = eventingv1alpha1.BEBBackendType
 	// CreateOrUpdate CR with BEB
 	newBackend, err := r.CreateOrUpdateBackendCR(ctx)
 	if err != nil {
@@ -200,7 +201,7 @@ func (r *Reconciler) reconcileBEBBackend(ctx context.Context, bebSecret *v1.Secr
 		if updateErr != nil {
 			return ctrl.Result{}, errors.Wrapf(err, "update status when create or update backend CR failed")
 		}
-		return ctrl.Result{}, errors.Wrapf(err, "create or update EventingBackend failed, type: %s", eventingv1alpha1.BebBackendType)
+		return ctrl.Result{}, errors.Wrapf(err, "create or update EventingBackend failed, type: %s", eventingv1alpha1.BEBBackendType)
 	}
 
 	// Stop the NATS subscription controller
@@ -227,7 +228,7 @@ func (r *Reconciler) reconcileBEBBackend(ctx context.Context, bebSecret *v1.Secr
 		if updateErr != nil {
 			return ctrl.Result{}, errors.Wrapf(err, "update status when sync publisher proxy secret failed")
 		}
-		r.namedLogger().Errorw("sync publisher proxy secret failed", "backend", eventingv1alpha1.BebBackendType, "error", err)
+		r.namedLogger().Errorw("sync publisher proxy secret failed", "backend", eventingv1alpha1.BEBBackendType, "error", err)
 		return ctrl.Result{}, err
 	}
 
@@ -351,15 +352,15 @@ func (r *Reconciler) UpdateBackendStatus(ctx context.Context, backendType eventi
 	}
 
 	switch backendType {
-	case eventingv1alpha1.BebBackendType:
+	case eventingv1alpha1.BEBBackendType:
 		if bebSecret != nil {
-			desiredStatus.BebSecretName = bebSecret.Name
-			desiredStatus.BebSecretNamespace = bebSecret.Namespace
+			desiredStatus.BEBSecretName = bebSecret.Name
+			desiredStatus.BEBSecretNamespace = bebSecret.Namespace
 		}
 		subscriptionControllerReady = r.bebCommanderStarted
 	case eventingv1alpha1.NatsBackendType:
-		desiredStatus.BebSecretName = ""
-		desiredStatus.BebSecretNamespace = ""
+		desiredStatus.BEBSecretName = ""
+		desiredStatus.BEBSecretNamespace = ""
 		subscriptionControllerReady = r.natsCommanderStarted
 	}
 	eventingReady := subscriptionControllerReady && publisherReady
@@ -393,8 +394,8 @@ func getDefaultBackendStatus() eventingv1alpha1.EventingBackendStatus {
 		SubscriptionControllerReady: utils.BoolPtr(false),
 		PublisherProxyReady:         utils.BoolPtr(false),
 		EventingReady:               utils.BoolPtr(false),
-		BebSecretName:               "",
-		BebSecretNamespace:          "",
+		BEBSecretName:               "",
+		BEBSecretNamespace:          "",
 	}
 }
 
@@ -539,7 +540,7 @@ func (r *Reconciler) CreateOrUpdatePublisherProxy(ctx context.Context, backend e
 	switch backend {
 	case eventingv1alpha1.NatsBackendType:
 		desiredPublisher = deployment.NewNATSPublisherDeployment(r.cfg.PublisherConfig)
-	case eventingv1alpha1.BebBackendType:
+	case eventingv1alpha1.BEBBackendType:
 		desiredPublisher = deployment.NewBEBPublisherDeployment(r.cfg.PublisherConfig)
 	default:
 		return nil, fmt.Errorf("unknown eventing backend type %q", backend)

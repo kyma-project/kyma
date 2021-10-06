@@ -2192,28 +2192,28 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.BackendModule.Name(childComplexity), true
 
-	case "BebFilter.eventSource":
+	case "BEBFilter.eventSource":
 		if e.complexity.BebFilter.EventSource == nil {
 			break
 		}
 
 		return e.complexity.BebFilter.EventSource(childComplexity), true
 
-	case "BebFilter.eventType":
+	case "BEBFilter.eventType":
 		if e.complexity.BebFilter.EventType == nil {
 			break
 		}
 
 		return e.complexity.BebFilter.EventType(childComplexity), true
 
-	case "BebFilters.dialect":
+	case "BEBFilters.dialect":
 		if e.complexity.BebFilters.Dialect == nil {
 			break
 		}
 
 		return e.complexity.BebFilters.Dialect(childComplexity), true
 
-	case "BebFilters.filters":
+	case "BEBFilters.filters":
 		if e.complexity.BebFilters.Filters == nil {
 			break
 		}
@@ -7470,7 +7470,7 @@ type EventSubscription @goModel(model: "github.com/kyma-project/kyma/components/
 }
 
 type EventSubscriptionSpec @goModel(model: "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1.SubscriptionSpec") {
-    filter: BebFilters!
+    filter: BEBFilters!
     id: String
     protocol: String
     protocolSettings: ProtocolSettings
@@ -7493,12 +7493,12 @@ type WebhookAuth @goModel(model: "github.com/kyma-project/kyma/components/eventi
     type: String!
 }
 
-type BebFilters @goModel(model: "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1.BebFilters") {
+type BEBFilters @goModel(model: "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1.BEBFilters") {
     dialect: String!
-    filters: [BebFilter!]!
+    filters: [BEBFilter!]!
 }
 
-type BebFilter @goModel(model: "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1.BebFilter") {
+type BEBFilter @goModel(model: "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1.BEBFilter") {
     eventSource: Filter
     eventType: Filter
 }
@@ -15755,7 +15755,7 @@ func (ec *executionContext) _BebFilter_eventSource(ctx context.Context, field gr
 		}
 	}()
 	fc := &graphql.FieldContext{
-		Object:   "BebFilter",
+		Object:   "BEBFilter",
 		Field:    field,
 		Args:     nil,
 		IsMethod: false,
@@ -15786,7 +15786,7 @@ func (ec *executionContext) _BebFilter_eventType(ctx context.Context, field grap
 		}
 	}()
 	fc := &graphql.FieldContext{
-		Object:   "BebFilter",
+		Object:   "BEBFilter",
 		Field:    field,
 		Args:     nil,
 		IsMethod: false,
@@ -15817,7 +15817,7 @@ func (ec *executionContext) _BebFilters_dialect(ctx context.Context, field graph
 		}
 	}()
 	fc := &graphql.FieldContext{
-		Object:   "BebFilters",
+		Object:   "BEBFilters",
 		Field:    field,
 		Args:     nil,
 		IsMethod: false,
@@ -15851,7 +15851,7 @@ func (ec *executionContext) _BebFilters_filters(ctx context.Context, field graph
 		}
 	}()
 	fc := &graphql.FieldContext{
-		Object:   "BebFilters",
+		Object:   "BEBFilters",
 		Field:    field,
 		Args:     nil,
 		IsMethod: false,
@@ -44505,7 +44505,7 @@ func (ec *executionContext) _BackendModule(ctx context.Context, sel ast.Selectio
 	return out
 }
 
-var bebFilterImplementors = []string{"BebFilter"}
+var bebFilterImplementors = []string{"BEBFilter"}
 
 func (ec *executionContext) _BebFilter(ctx context.Context, sel ast.SelectionSet, obj *v1alpha13.BebFilter) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, bebFilterImplementors)
@@ -44515,7 +44515,7 @@ func (ec *executionContext) _BebFilter(ctx context.Context, sel ast.SelectionSet
 	for i, field := range fields {
 		switch field.Name {
 		case "__typename":
-			out.Values[i] = graphql.MarshalString("BebFilter")
+			out.Values[i] = graphql.MarshalString("BEBFilter")
 		case "eventSource":
 			out.Values[i] = ec._BebFilter_eventSource(ctx, field, obj)
 		case "eventType":
@@ -44531,7 +44531,7 @@ func (ec *executionContext) _BebFilter(ctx context.Context, sel ast.SelectionSet
 	return out
 }
 
-var bebFiltersImplementors = []string{"BebFilters"}
+var bebFiltersImplementors = []string{"BEBFilters"}
 
 func (ec *executionContext) _BebFilters(ctx context.Context, sel ast.SelectionSet, obj *v1alpha13.BebFilters) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, bebFiltersImplementors)
@@ -44541,7 +44541,7 @@ func (ec *executionContext) _BebFilters(ctx context.Context, sel ast.SelectionSe
 	for i, field := range fields {
 		switch field.Name {
 		case "__typename":
-			out.Values[i] = graphql.MarshalString("BebFilters")
+			out.Values[i] = graphql.MarshalString("BEBFilters")
 		case "dialect":
 			out.Values[i] = ec._BebFilters_dialect(ctx, field, obj)
 			if out.Values[i] == graphql.Null {

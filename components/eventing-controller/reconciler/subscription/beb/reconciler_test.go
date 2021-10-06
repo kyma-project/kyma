@@ -165,7 +165,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			))
 
 			By("Sending at least one creation requests for the Subscription")
-			_, postRequests, _ := countBebRequests(nameMapper.MapSubscriptionName(givenSubscription))
+			_, postRequests, _ := countBEBRequests(nameMapper.MapSubscriptionName(givenSubscription))
 			Expect(postRequests).Should(reconcilertesting.BeGreaterThanOrEqual(1))
 		})
 	})
@@ -239,7 +239,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			var bebSubscription bebtypes.Subscription
 			Eventually(func() bool {
 				for r, payloadObject := range beb.Requests {
-					if reconcilertesting.IsBebSubscriptionCreate(r, *beb.BebConfig) {
+					if reconcilertesting.IsBEBSubscriptionCreate(r, *beb.BEBConfig) {
 						bebSubscription = payloadObject.(bebtypes.Subscription)
 						receivedSubscriptionName := bebSubscription.Name
 						// ensure the correct subscription was created
@@ -337,11 +337,11 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			Expect(apiRuleCreated.GetDeletionTimestamp).NotTo(BeNil())
 
 			By("Sending at least one creation and one deletion request for each subscription")
-			_, creationRequestsSubscription1, deletionRequestsSubscription1 := countBebRequests(nameMapper.MapSubscriptionName(subscription1))
+			_, creationRequestsSubscription1, deletionRequestsSubscription1 := countBEBRequests(nameMapper.MapSubscriptionName(subscription1))
 			Expect(creationRequestsSubscription1).Should(reconcilertesting.BeGreaterThanOrEqual(1))
 			Expect(deletionRequestsSubscription1).Should(reconcilertesting.BeGreaterThanOrEqual(1))
 
-			_, creationRequestsSubscription2, deletionRequestsSubscription2 := countBebRequests(nameMapper.MapSubscriptionName(subscription2))
+			_, creationRequestsSubscription2, deletionRequestsSubscription2 := countBEBRequests(nameMapper.MapSubscriptionName(subscription2))
 			Expect(creationRequestsSubscription2).Should(reconcilertesting.BeGreaterThanOrEqual(1))
 			Expect(deletionRequestsSubscription2).Should(reconcilertesting.BeGreaterThanOrEqual(1))
 		})
@@ -415,7 +415,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			var bebSubscription bebtypes.Subscription
 			Eventually(func() bool {
 				for r, payloadObject := range beb.Requests {
-					if reconcilertesting.IsBebSubscriptionCreate(r, *beb.BebConfig) {
+					if reconcilertesting.IsBEBSubscriptionCreate(r, *beb.BEBConfig) {
 						bebSubscription = payloadObject.(bebtypes.Subscription)
 						receivedSubscriptionName := bebSubscription.Name
 						// ensure the correct subscription was created
@@ -448,7 +448,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			getSubscription(ctx, givenSubscription).Should(reconcilertesting.HaveSubscriptionReady())
 
 			By("Sending at least one creation request for the Subscription")
-			_, creationRequests, _ := countBebRequests(nameMapper.MapSubscriptionName(givenSubscription))
+			_, creationRequests, _ := countBEBRequests(nameMapper.MapSubscriptionName(givenSubscription))
 			Expect(creationRequests).Should(reconcilertesting.BeGreaterThanOrEqual(1))
 		})
 	})
@@ -482,7 +482,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 
 			By("BEB Subscription has the same webhook URL")
 			bebCreationRequests := make([]bebtypes.Subscription, 0)
-			getBebSubscriptionCreationRequests(bebCreationRequests).Should(And(
+			getBEBSubscriptionCreationRequests(bebCreationRequests).Should(And(
 				ContainElement(MatchFields(IgnoreMissing|IgnoreExtras,
 					Fields{
 						"Name":       BeEquivalentTo(nameMapper.MapSubscriptionName(readySubscription)),
@@ -494,7 +494,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			getAPIRule(ctx, apiRule).ShouldNot(reconcilertesting.HaveNotEmptyAPIRule())
 
 			By("Sending at least one creation request")
-			_, creationRequests, _ := countBebRequests(nameMapper.MapSubscriptionName(givenSubscription))
+			_, creationRequests, _ := countBEBRequests(nameMapper.MapSubscriptionName(givenSubscription))
 			Expect(creationRequests).Should(reconcilertesting.BeGreaterThanOrEqual(1))
 		})
 	})
@@ -540,11 +540,11 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			getAPIRule(ctx, apiRule1).ShouldNot(reconcilertesting.HaveNotEmptyAPIRule())
 
 			By("Sending at least one creation request for Subscription 1")
-			_, creationRequests, _ := countBebRequests(nameMapper.MapSubscriptionName(subscription1))
+			_, creationRequests, _ := countBEBRequests(nameMapper.MapSubscriptionName(subscription1))
 			Expect(creationRequests).Should(reconcilertesting.BeGreaterThanOrEqual(1))
 
 			By("Sending at least one creation request for Subscription 2")
-			_, creationRequests, _ = countBebRequests(nameMapper.MapSubscriptionName(subscription2))
+			_, creationRequests, _ = countBEBRequests(nameMapper.MapSubscriptionName(subscription2))
 			Expect(creationRequests).Should(reconcilertesting.BeGreaterThanOrEqual(1))
 		})
 	})
@@ -599,7 +599,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			getSubscription(ctx, givenSubscription).ShouldNot(reconcilertesting.HaveSubscriptionFinalizer(Finalizer))
 
 			By("Sending at least one creation request for the Subscription")
-			_, creationRequests, _ := countBebRequests(nameMapper.MapSubscriptionName(givenSubscription))
+			_, creationRequests, _ := countBEBRequests(nameMapper.MapSubscriptionName(givenSubscription))
 			Expect(creationRequests).Should(reconcilertesting.BeGreaterThanOrEqual(1))
 		})
 	})
@@ -615,13 +615,13 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			givenSubscription := reconcilertesting.NewSubscription(subscriptionName, namespaceName, reconcilertesting.WithWebhookAuthForBEB, reconcilertesting.WithEventTypeFilter)
 			reconcilertesting.WithValidSink(subscriberSvc.Namespace, subscriberSvc.Name, givenSubscription)
 
-			isBebSubscriptionCreated := false
+			isBEBSubscriptionCreated := false
 
 			By("preparing mock to simulate a non ready BEB subscription")
 			beb.GetResponse = func(w http.ResponseWriter, subscriptionName string) {
 				// until the BEB subscription creation call was performed, send successful get requests
-				if !isBebSubscriptionCreated {
-					reconcilertesting.BebGetSuccess(w, nameMapper.MapSubscriptionName(givenSubscription))
+				if !isBEBSubscriptionCreated {
+					reconcilertesting.BEBGetSuccess(w, nameMapper.MapSubscriptionName(givenSubscription))
 				} else {
 					// after the BEB subscription was created, set the status to paused
 					w.WriteHeader(http.StatusOK)
@@ -635,8 +635,8 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 				}
 			}
 			beb.CreateResponse = func(w http.ResponseWriter) {
-				isBebSubscriptionCreated = true
-				reconcilertesting.BebCreateSuccess(w)
+				isBEBSubscriptionCreated = true
+				reconcilertesting.BEBCreateSuccess(w)
 			}
 
 			// Create subscription
@@ -674,7 +674,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			getSubscription(ctx, givenSubscription).ShouldNot(reconcilertesting.HaveSubscriptionFinalizer(Finalizer))
 
 			By("Sending at least one creation request for the Subscription")
-			_, creationRequests, _ := countBebRequests(nameMapper.MapSubscriptionName(givenSubscription))
+			_, creationRequests, _ := countBEBRequests(nameMapper.MapSubscriptionName(givenSubscription))
 			Expect(creationRequests).Should(reconcilertesting.BeGreaterThanOrEqual(1))
 		})
 	})
@@ -709,7 +709,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 				var bebSubscription bebtypes.Subscription
 				Eventually(func() bool {
 					for r, payloadObject := range beb.Requests {
-						if reconcilertesting.IsBebSubscriptionCreate(r, *beb.BebConfig) {
+						if reconcilertesting.IsBEBSubscriptionCreate(r, *beb.BEBConfig) {
 							bebSubscription = payloadObject.(bebtypes.Subscription)
 							receivedSubscriptionName := bebSubscription.Name
 							// ensure the correct subscription was created
@@ -729,7 +729,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			By("Deleting the BEB Subscription")
 			Eventually(func() bool {
 				for r := range beb.Requests {
-					if reconcilertesting.IsBebSubscriptionDelete(r) {
+					if reconcilertesting.IsBEBSubscriptionDelete(r) {
 						receivedSubscriptionName := reconcilertesting.GetRestAPIObject(r.URL)
 						// ensure the correct subscription was created
 						return nameMapper.MapSubscriptionName(givenSubscription) == receivedSubscriptionName
@@ -751,7 +751,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			getK8sEvents(&subscriptionEvents, givenSubscription.Namespace).Should(reconcilertesting.HaveEvent(subscriptionDeletedEvent))
 
 			By("Sending at least one creation and one deletion request for the Subscription")
-			_, creationRequests, deletionRequests := countBebRequests(nameMapper.MapSubscriptionName(givenSubscription))
+			_, creationRequests, deletionRequests := countBEBRequests(nameMapper.MapSubscriptionName(givenSubscription))
 			Expect(creationRequests).Should(reconcilertesting.BeGreaterThanOrEqual(1))
 			Expect(deletionRequests).Should(reconcilertesting.BeGreaterThanOrEqual(1))
 		})
@@ -789,7 +789,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 				By("Checking BEB mock server creation requests to contain Subscription creation request", func() {
 					Eventually(func() bool {
 						for r, payload := range beb.Requests {
-							if reconcilertesting.IsBebSubscriptionCreate(r, *beb.BebConfig) {
+							if reconcilertesting.IsBEBSubscriptionCreate(r, *beb.BEBConfig) {
 								bebSubscription, ok := payload.(bebtypes.Subscription)
 								if ok {
 									return nameMapper.MapSubscriptionName(kymaSubscription) == bebSubscription.Name
@@ -830,7 +830,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			Context("Check BEB Subscription was recreated", func() {
 				By("Checking BEB mock server received a second creation request", func() {
 					Eventually(func() int {
-						_, countPost, _ := countBebRequests(nameMapper.MapSubscriptionName(kymaSubscription))
+						_, countPost, _ := countBEBRequests(nameMapper.MapSubscriptionName(kymaSubscription))
 						return countPost
 					}, bigTimeOut, bigPollingInterval).Should(Equal(2))
 				})
@@ -1009,13 +1009,13 @@ func ensureSubscriberSvcCreated(ctx context.Context, svc *v1.Service) {
 	Expect(err).Should(BeNil())
 }
 
-// getBebSubscriptionCreationRequests filters the http requests made against BEB and returns the BEB Subscriptions
-func getBebSubscriptionCreationRequests(bebSubscriptions []bebtypes.Subscription) AsyncAssertion {
+// getBEBSubscriptionCreationRequests filters the http requests made against BEB and returns the BEB Subscriptions
+func getBEBSubscriptionCreationRequests(bebSubscriptions []bebtypes.Subscription) AsyncAssertion {
 
 	return Eventually(func() []bebtypes.Subscription {
 
 		for r, payloadObject := range beb.Requests {
-			if reconcilertesting.IsBebSubscriptionCreate(r, *beb.BebConfig) {
+			if reconcilertesting.IsBEBSubscriptionCreate(r, *beb.BEBConfig) {
 				bebSubscription := payloadObject.(bebtypes.Subscription)
 				bebSubscriptions = append(bebSubscriptions, bebSubscription)
 			}
@@ -1140,7 +1140,7 @@ const (
 var cfg *rest.Config
 var k8sClient client.Client
 var testEnv *envtest.Environment
-var beb *reconcilertesting.BebMock
+var beb *reconcilertesting.BEBMock
 var nameMapper handlers.NameMapper
 
 func TestAPIs(t *testing.T) {
@@ -1178,7 +1178,7 @@ var _ = BeforeSuite(func(done Done) {
 	Expect(err).NotTo(HaveOccurred())
 	// +kubebuilder:scaffold:scheme
 
-	bebMock := startBebMock()
+	bebMock := startBEBMock()
 	// client, err := client.New()
 	// Source: https://book.kubebuilder.io/cronjob-tutorial/writing-tests.html
 	syncPeriod := time.Second * 2
@@ -1189,7 +1189,7 @@ var _ = BeforeSuite(func(done Done) {
 	})
 	Expect(err).ToNot(HaveOccurred())
 	envConf := env.Config{
-		BebAPIURL:                bebMock.MessagingURL,
+		BEBAPIURL:                bebMock.MessagingURL,
 		ClientID:                 "foo-id",
 		ClientSecret:             "foo-secret",
 		TokenEndpoint:            bebMock.TokenURL,
@@ -1213,7 +1213,7 @@ var _ = BeforeSuite(func(done Done) {
 	defaultLogger, err := logger.New(string(kymalogger.JSON), string(kymalogger.INFO))
 	Expect(err).To(BeNil())
 
-	nameMapper = handlers.NewBebSubscriptionNameMapper(domain, handlers.MaxBEBSubscriptionNameLength)
+	nameMapper = handlers.NewBEBSubscriptionNameMapper(domain, handlers.MaxBEBSubscriptionNameLength)
 
 	err = NewReconciler(context.Background(), k8sManager.GetClient(), applicationLister, k8sManager.GetCache(), defaultLogger,
 		k8sManager.GetEventRecorderFor("eventing-controller"), envConf, credentials, nameMapper).SetupUnmanaged(k8sManager)
@@ -1237,11 +1237,11 @@ var _ = AfterSuite(func() {
 	Expect(err).ToNot(HaveOccurred())
 })
 
-// startBebMock starts the beb mock and configures the controller process to use it
-func startBebMock() *reconcilertesting.BebMock {
+// startBEBMock starts the beb mock and configures the controller process to use it
+func startBEBMock() *reconcilertesting.BEBMock {
 	By("Preparing BEB Mock")
 	bebConfig := &config.Config{}
-	beb = reconcilertesting.NewBebMock(bebConfig)
+	beb = reconcilertesting.NewBEBMock(bebConfig)
 	bebURI := beb.Start()
 	logf.Log.Info("beb mock listening at", "address", bebURI)
 	tokenURL := fmt.Sprintf("%s%s", bebURI, reconcilertesting.TokenURLPath)
@@ -1249,7 +1249,7 @@ func startBebMock() *reconcilertesting.BebMock {
 	beb.TokenURL = tokenURL
 	beb.MessagingURL = messagingURL
 	bebConfig = config.GetDefaultConfig(messagingURL)
-	beb.BebConfig = bebConfig
+	beb.BEBConfig = bebConfig
 	return beb
 }
 
@@ -1278,8 +1278,9 @@ func createSubscriptionObjectsAndWaitForReadiness(ctx context.Context, givenSubs
 	return subscription, apiRule
 }
 
-// countBebRequests returns how many requests for a given subscription are sent for each HTTP method
-func countBebRequests(subscriptionName string) (countGet int, countPost int, countDelete int) {
+//nolint:unparam
+// countBEBRequests returns how many requests for a given subscription are sent for each HTTP method
+func countBEBRequests(subscriptionName string) (countGet int, countPost int, countDelete int) {
 	countGet, countPost, countDelete = 0, 0, 0
 	for req, v := range beb.Requests {
 		switch method := req.Method; method {

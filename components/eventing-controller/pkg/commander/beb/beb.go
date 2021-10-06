@@ -93,7 +93,7 @@ func (c *Commander) Start(_ env.DefaultSubscriptionConfig, params commander.Para
 
 	// Need to read env so as to read BEB related secrets
 	c.envCfg = env.GetConfig()
-	nameMapper := handlers.NewBebSubscriptionNameMapper(strings.TrimSpace(c.envCfg.Domain), handlers.MaxBEBSubscriptionNameLength)
+	nameMapper := handlers.NewBEBSubscriptionNameMapper(strings.TrimSpace(c.envCfg.Domain), handlers.MaxBEBSubscriptionNameLength)
 	ctrl.Log.WithName("BEB-commander").Info("using BEB name mapper",
 		"domainName", c.envCfg.Domain,
 		"maxNameLength", handlers.MaxBEBSubscriptionNameLength)
@@ -133,9 +133,9 @@ func cleanup(backend handlers.MessagingBackend, dynamicClient dynamic.Interface,
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	var bebBackend *handlers.Beb
+	var bebBackend *handlers.BEB
 	var ok bool
-	if bebBackend, ok = backend.(*handlers.Beb); !ok {
+	if bebBackend, ok = backend.(*handlers.BEB); !ok {
 		err := errors.New("convert backend handler to BEB handler failed")
 		logger.Errorw("no BEB backend exists", "error", err)
 		return err

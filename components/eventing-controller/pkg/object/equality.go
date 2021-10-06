@@ -247,27 +247,6 @@ func realProto(pr corev1.Protocol) corev1.Protocol {
 	return pr
 }
 
-// secretEqual asserts the equality of two Secret objects for event publisher proxy deployments.
-func secretEqual(b1, b2 *corev1.Secret) bool {
-	if b1 == nil || b2 == nil {
-		return false
-	}
-
-	if b1 == b2 {
-		return true
-	}
-
-	if !reflect.DeepEqual(b1.Labels, b2.Labels) {
-		return false
-	}
-
-	if !reflect.DeepEqual(b1.Data, b2.Data) {
-		return false
-	}
-
-	return true
-}
-
 // eventingBackendStatusEqual asserts the equality of of EventingBackendStatus objects.
 func eventingBackendStatusEqual(s1, s2 *eventingv1alpha1.EventingBackendStatus) bool {
 	if s1 == nil || s2 == nil {
@@ -289,10 +268,10 @@ func eventingBackendStatusEqual(s1, s2 *eventingv1alpha1.EventingBackendStatus) 
 	if !utils.BoolPtrEqual(s1.EventingReady, s2.EventingReady) {
 		return false
 	}
-	if s1.BebSecretName != s2.BebSecretName {
+	if s1.BEBSecretName != s2.BEBSecretName {
 		return false
 	}
-	if s1.BebSecretNamespace != s2.BebSecretNamespace {
+	if s1.BEBSecretNamespace != s2.BEBSecretNamespace {
 		return false
 	}
 

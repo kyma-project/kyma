@@ -252,8 +252,8 @@ func WithWebhookForNats(s *eventingv1alpha1.Subscription) {
 // WithNotCleanEventTypeFilter initializes subscription filter with a not clean event-type
 // A not clean event-type means it contains none-alphanumeric characters
 func WithNotCleanEventTypeFilter(s *eventingv1alpha1.Subscription) {
-	s.Spec.Filter = &eventingv1alpha1.BebFilters{
-		Filters: []*eventingv1alpha1.BebFilter{
+	s.Spec.Filter = &eventingv1alpha1.BEBFilters{
+		Filters: []*eventingv1alpha1.BEBFilter{
 			{
 				EventSource: &eventingv1alpha1.Filter{
 					Type:     "exact",
@@ -271,8 +271,8 @@ func WithNotCleanEventTypeFilter(s *eventingv1alpha1.Subscription) {
 }
 
 func WithEmptyEventTypeFilter(s *eventingv1alpha1.Subscription) {
-	s.Spec.Filter = &eventingv1alpha1.BebFilters{
-		Filters: []*eventingv1alpha1.BebFilter{
+	s.Spec.Filter = &eventingv1alpha1.BEBFilters{
+		Filters: []*eventingv1alpha1.BEBFilter{
 			{
 				EventSource: &eventingv1alpha1.Filter{
 					Type:     "exact",
@@ -290,8 +290,8 @@ func WithEmptyEventTypeFilter(s *eventingv1alpha1.Subscription) {
 }
 
 func WithEventTypeFilter(s *eventingv1alpha1.Subscription) {
-	s.Spec.Filter = &eventingv1alpha1.BebFilters{
-		Filters: []*eventingv1alpha1.BebFilter{
+	s.Spec.Filter = &eventingv1alpha1.BEBFilters{
+		Filters: []*eventingv1alpha1.BEBFilter{
 			{
 				EventSource: &eventingv1alpha1.Filter{
 					Type:     "exact",
@@ -309,8 +309,8 @@ func WithEventTypeFilter(s *eventingv1alpha1.Subscription) {
 }
 
 func WithEmptySourceEventType(s *eventingv1alpha1.Subscription) {
-	s.Spec.Filter = &eventingv1alpha1.BebFilters{
-		Filters: []*eventingv1alpha1.BebFilter{
+	s.Spec.Filter = &eventingv1alpha1.BEBFilters{
+		Filters: []*eventingv1alpha1.BEBFilter{
 			{
 				EventSource: &eventingv1alpha1.Filter{
 					Type:     "exact",

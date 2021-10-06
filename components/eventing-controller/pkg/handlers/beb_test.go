@@ -17,7 +17,7 @@ import (
 	controllertesting "github.com/kyma-project/kyma/components/eventing-controller/testing"
 )
 
-func Test_SyncBebSubscription(t *testing.T) {
+func Test_SyncBEBSubscription(t *testing.T) {
 	g := NewWithT(t)
 
 	credentials := &OAuth2ClientCredentials{
@@ -28,13 +28,13 @@ func Test_SyncBebSubscription(t *testing.T) {
 	defaultLogger, err := logger.New(string(kymalogger.JSON), string(kymalogger.INFO))
 	g.Expect(err).To(BeNil())
 
-	nameMapper := NewBebSubscriptionNameMapper("mydomain.com", MaxBEBSubscriptionNameLength)
+	nameMapper := NewBEBSubscriptionNameMapper("mydomain.com", MaxBEBSubscriptionNameLength)
 	beb := NewBEB(credentials, nameMapper, defaultLogger)
 
 	// start BEB Mock
-	bebMock := startBebMock()
+	bebMock := startBEBMock()
 	envConf := env.Config{
-		BebAPIURL:                bebMock.MessagingURL,
+		BEBAPIURL:                bebMock.MessagingURL,
 		ClientID:                 "client-id",
 		ClientSecret:             "client-secret",
 		TokenEndpoint:            bebMock.TokenURL,
@@ -100,9 +100,9 @@ func fixtureValidSubscription(name, namespace string) *eventingv1alpha1.Subscrip
 				},
 			},
 			Sink: "https://webhook.xxx.com",
-			Filter: &eventingv1alpha1.BebFilters{
+			Filter: &eventingv1alpha1.BEBFilters{
 				Dialect: "beb",
-				Filters: []*eventingv1alpha1.BebFilter{
+				Filters: []*eventingv1alpha1.BEBFilter{
 					{
 						EventSource: &eventingv1alpha1.Filter{
 							Type:     "exact",
@@ -121,16 +121,16 @@ func fixtureValidSubscription(name, namespace string) *eventingv1alpha1.Subscrip
 	}
 }
 
-func startBebMock() *controllertesting.BebMock {
+func startBEBMock() *controllertesting.BEBMock {
 	bebConfig := &config.Config{}
-	beb := controllertesting.NewBebMock(bebConfig)
+	beb := controllertesting.NewBEBMock(bebConfig)
 	bebURI := beb.Start()
 	tokenURL := fmt.Sprintf("%s%s", bebURI, controllertesting.TokenURLPath)
 	messagingURL := fmt.Sprintf("%s%s", bebURI, controllertesting.MessagingURLPath)
 	beb.TokenURL = tokenURL
 	beb.MessagingURL = messagingURL
 	bebConfig = config.GetDefaultConfig(messagingURL)
-	beb.BebConfig = bebConfig
+	beb.BEBConfig = bebConfig
 	return beb
 }
 

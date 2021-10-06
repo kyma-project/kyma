@@ -91,7 +91,7 @@ func newCloudeventClient(config env.NatsConfig) (cev2.Client, error) {
 // SyncSubscription synchronizes the given Kyma subscription to NATS subscription.
 // note: the returned bool should be ignored now. It should act as a marker for changed subscription status.
 func (n *Nats) SyncSubscription(sub *eventingv1alpha1.Subscription, cleaner eventtype.Cleaner, _ ...interface{}) (bool, error) {
-	var filters []*eventingv1alpha1.BebFilter
+	var filters []*eventingv1alpha1.BEBFilter
 	if sub.Spec.Filter != nil {
 		uniqueFilters, err := sub.Spec.Filter.Deduplicate()
 		if err != nil {
@@ -245,7 +245,7 @@ func createKey(sub *eventingv1alpha1.Subscription, subject string, queueGoupInst
 	return fmt.Sprintf("%s.%s", createKeyPrefix(sub), createKeySuffix(subject, queueGoupInstanceNo))
 }
 
-func createSubject(filter *eventingv1alpha1.BebFilter, cleaner eventtype.Cleaner) (string, error) {
+func createSubject(filter *eventingv1alpha1.BEBFilter, cleaner eventtype.Cleaner) (string, error) {
 	eventType := strings.TrimSpace(filter.EventType.Value)
 	if len(eventType) == 0 {
 		return "", nats.ErrBadSubject

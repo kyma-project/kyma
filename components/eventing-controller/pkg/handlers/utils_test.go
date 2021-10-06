@@ -1,3 +1,4 @@
+//nolint:gosec
 package handlers
 
 import (
@@ -49,7 +50,7 @@ func TestGetInternalView4Ev2(t *testing.T) {
 		ClientSecret: "clientSecret",
 		TokenURL:     "tokenURL",
 	}
-	defaultNameMapper := NewBebSubscriptionNameMapper("my-shoot", 50)
+	defaultNameMapper := NewBEBSubscriptionNameMapper("my-shoot", 50)
 
 	bebSubEvents := types.Events{types.Event{
 		Source: reconcilertesting.EventSource,
@@ -231,7 +232,7 @@ func TestGetRandSuffix(t *testing.T) {
 	}
 }
 
-func TestBebSubscriptionNameMapper(t *testing.T) {
+func TestBEBSubscriptionNameMapper(t *testing.T) {
 	g := NewGomegaWithT(t)
 
 	s1 := &eventingv1alpha1.Subscription{
@@ -303,7 +304,7 @@ func TestBebSubscriptionNameMapper(t *testing.T) {
 		},
 	}
 	for _, test := range tests {
-		mapper := NewBebSubscriptionNameMapper(test.domainName, test.maxLen)
+		mapper := NewBEBSubscriptionNameMapper(test.domainName, test.maxLen)
 		s := mapper.MapSubscriptionName(test.inputSub)
 		g.Expect(len(s)).To(BeNumerically("<=", test.maxLen))
 		// the mapped name should always end with the SHA1
@@ -314,7 +315,7 @@ func TestBebSubscriptionNameMapper(t *testing.T) {
 	}
 
 	// Same domain and subscription name/namespace should map to the same name
-	mapper := NewBebSubscriptionNameMapper(domain1, 50)
+	mapper := NewBEBSubscriptionNameMapper(domain1, 50)
 	g.Expect(mapper.MapSubscriptionName(s3)).To(Equal(mapper.MapSubscriptionName(s4)))
 
 	// If the same names are used in different order, they get mapped to different names

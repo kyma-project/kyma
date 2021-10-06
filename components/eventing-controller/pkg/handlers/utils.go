@@ -1,3 +1,4 @@
+//nolint:gosec
 package handlers
 
 import (
@@ -59,7 +60,7 @@ type bebSubscriptionNameMapper struct {
 	maxLength  int
 }
 
-func NewBebSubscriptionNameMapper(domainName string, maxNameLength int) *bebSubscriptionNameMapper {
+func NewBEBSubscriptionNameMapper(domainName string, maxNameLength int) NameMapper {
 	return &bebSubscriptionNameMapper{
 		domainName: domainName,
 		maxLength:  maxNameLength,

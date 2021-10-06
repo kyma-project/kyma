@@ -52,7 +52,7 @@ func TestConvertMsgToCE(t *testing.T) {
 				Sub:     nil,
 			},
 			expectedCloudEvent: cev2event.New(cev2event.CloudEventsVersionV1),
-			expectedErr:        errors.New("id: MUST be a non-empty string\n"),
+			expectedErr:        errors.New("id: MUST be a non-empty string\n"), //nolint:golint
 		},
 	}
 	for _, tc := range testCases {
@@ -320,7 +320,7 @@ func TestSubscriptionWithDuplicateFilters(t *testing.T) {
 	}
 
 	sub := eventingtesting.NewSubscription("sub", "foo")
-	filter := &eventingv1alpha1.BebFilter{
+	filter := &eventingv1alpha1.BEBFilter{
 		EventSource: &eventingv1alpha1.Filter{
 			Type:     "exact",
 			Property: "source",
@@ -332,8 +332,8 @@ func TestSubscriptionWithDuplicateFilters(t *testing.T) {
 			Value:    eventingtesting.OrderCreatedEventType,
 		},
 	}
-	sub.Spec.Filter = &eventingv1alpha1.BebFilters{
-		Filters: []*eventingv1alpha1.BebFilter{filter, filter},
+	sub.Spec.Filter = &eventingv1alpha1.BEBFilters{
+		Filters: []*eventingv1alpha1.BEBFilter{filter, filter},
 	}
 	sub.Spec.Sink = subscriberReceiveURL
 	idFunc := func(et string) (string, error) { return et, nil }
@@ -607,10 +607,6 @@ func TestSubscriptionUsingCESDK(t *testing.T) {
 	// Delete subscription
 	err = natsClient.DeleteSubscription(sub)
 	g.Expect(err).To(BeNil())
-}
-
-func checkIsValid(sub *nats.Subscription, t *testing.T) error {
-	return checkValidity(sub, true, t)
 }
 
 func checkIsNotValid(sub *nats.Subscription, t *testing.T) error {

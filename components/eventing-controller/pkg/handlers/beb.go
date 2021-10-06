@@ -29,22 +29,22 @@ const (
 )
 
 // compile time check
-var _ MessagingBackend = &Beb{}
+var _ MessagingBackend = &BEB{}
 
 type OAuth2ClientCredentials struct {
 	ClientID     string
 	ClientSecret string
 }
 
-func NewBEB(credentials *OAuth2ClientCredentials, mapper NameMapper, logger *logger.Logger) *Beb {
-	return &Beb{
+func NewBEB(credentials *OAuth2ClientCredentials, mapper NameMapper, logger *logger.Logger) *BEB {
+	return &BEB{
 		OAth2credentials: credentials,
 		logger:           logger,
 		SubNameMapper:    mapper,
 	}
 }
 
-type Beb struct {
+type BEB struct {
 	Client           *client.Client
 	WebhookAuth      *types.WebhookAuth
 	ProtocolSettings *eventingv1alpha1.ProtocolSettings
@@ -54,15 +54,15 @@ type Beb struct {
 	logger           *logger.Logger
 }
 
-type BebResponse struct {
+type BEBResponse struct {
 	StatusCode int
 	Error      error
 }
 
-func (b *Beb) Initialize(cfg env.Config) error {
+func (b *BEB) Initialize(cfg env.Config) error {
 	if b.Client == nil {
 		authenticator := auth.NewAuthenticator(cfg)
-		b.Client = client.NewClient(config.GetDefaultConfig(cfg.BebAPIURL), authenticator)
+		b.Client = client.NewClient(config.GetDefaultConfig(cfg.BEBAPIURL), authenticator)
 		b.WebhookAuth = getWebHookAuth(cfg, b.OAth2credentials)
 		b.ProtocolSettings = &eventingv1alpha1.ProtocolSettings{
 			ContentMode:     &cfg.ContentMode,
@@ -87,7 +87,7 @@ func getWebHookAuth(cfg env.Config, credentials *OAuth2ClientCredentials) *types
 }
 
 // SyncSubscription synchronize the EV2 subscription with the EMS subscription. It returns true, if the EV2 subscription status was changed
-func (b *Beb) SyncSubscription(subscription *eventingv1alpha1.Subscription, cleaner eventtype.Cleaner, params ...interface{}) (bool, error) {
+func (b *BEB) SyncSubscription(subscription *eventingv1alpha1.Subscription, cleaner eventtype.Cleaner, params ...interface{}) (bool, error) {
 	// Format logger
 	log := utils.LoggerWithSubscription(b.namedLogger(), subscription)
 
@@ -163,11 +163,11 @@ func (b *Beb) SyncSubscription(subscription *eventingv1alpha1.Subscription, clea
 }
 
 // DeleteSubscription deletes the corresponding EMS subscription
-func (b *Beb) DeleteSubscription(subscription *eventingv1alpha1.Subscription) error {
+func (b *BEB) DeleteSubscription(subscription *eventingv1alpha1.Subscription) error {
 	return b.deleteSubscription(b.SubNameMapper.MapSubscriptionName(subscription))
 }
 
-func (b *Beb) deleteCreateAndHashSubscription(subscription *types.Subscription, cleaner eventtype.Cleaner, log *zap.SugaredLogger) (*types.Subscription, int64, error) {
+func (b *BEB) deleteCreateAndHashSubscription(subscription *types.Subscription, cleaner eventtype.Cleaner, log *zap.SugaredLogger) (*types.Subscription, int64, error) {
 	log = log.With(BEBSubscriptionNameLogKey, subscription.Name)
 	// delete EMS subscription
 	if err := b.deleteSubscription(subscription.Name); err != nil {
@@ -208,7 +208,7 @@ func (b *Beb) deleteCreateAndHashSubscription(subscription *types.Subscription, 
 	return bebSubscription, newEmsHash, nil
 }
 
-func (b *Beb) createAndGetSubscription(subscription *types.Subscription, cleaner eventtype.Cleaner, log *zap.SugaredLogger) (*types.Subscription, error) {
+func (b *BEB) createAndGetSubscription(subscription *types.Subscription, cleaner eventtype.Cleaner, log *zap.SugaredLogger) (*types.Subscription, error) {
 	// clean the application name segment in the subscription event-types from none-alphanumeric characters
 	if err := cleanEventTypes(subscription, cleaner); err != nil {
 		log.Errorw("clean application name in the subscription event-types failed", ErrorLogKey, err)
@@ -248,7 +248,7 @@ func cleanEventTypes(subscription *types.Subscription, cleaner eventtype.Cleaner
 }
 
 // setEmsSubscriptionStatus sets the status of bebSubscription in ev2Subscription
-func (b *Beb) setEmsSubscriptionStatus(subscription *eventingv1alpha1.Subscription, bebSubscription *types.Subscription) bool {
+func (b *BEB) setEmsSubscriptionStatus(subscription *eventingv1alpha1.Subscription, bebSubscription *types.Subscription) bool {
 	var statusChanged = false
 	if subscription.Status.EmsSubscriptionStatus.SubscriptionStatus != string(bebSubscription.SubscriptionStatus) {
 		subscription.Status.EmsSubscriptionStatus.SubscriptionStatus = string(bebSubscription.SubscriptionStatus)
@@ -273,7 +273,7 @@ func (b *Beb) setEmsSubscriptionStatus(subscription *eventingv1alpha1.Subscripti
 	return statusChanged
 }
 
-func (b *Beb) getSubscription(name string) (*types.Subscription, error) {
+func (b *BEB) getSubscription(name string) (*types.Subscription, error) {
 	bebSubscription, resp, err := b.Client.Get(name)
 	if err != nil {
 		return nil, fmt.Errorf("get subscription failed: %v", err)
@@ -284,7 +284,7 @@ func (b *Beb) getSubscription(name string) (*types.Subscription, error) {
 	return bebSubscription, nil
 }
 
-func (b *Beb) deleteSubscription(name string) error {
+func (b *BEB) deleteSubscription(name string) error {
 	resp, err := b.Client.Delete(name)
 	if err != nil {
 		return fmt.Errorf("delete subscription failed: %v", err)
@@ -295,7 +295,7 @@ func (b *Beb) deleteSubscription(name string) error {
 	return nil
 }
 
-func (b *Beb) createSubscription(subscription *types.Subscription, log *zap.SugaredLogger) error {
+func (b *BEB) createSubscription(subscription *types.Subscription, log *zap.SugaredLogger) error {
 	createResponse, err := b.Client.Create(subscription)
 	if err != nil {
 		return fmt.Errorf("create subscription failed: %v", err)
@@ -307,6 +307,6 @@ func (b *Beb) createSubscription(subscription *types.Subscription, log *zap.Suga
 	return nil
 }
 
-func (b *Beb) namedLogger() *zap.SugaredLogger {
+func (b *BEB) namedLogger() *zap.SugaredLogger {
 	return b.logger.WithContext().Named(bebHandlerName)
 }

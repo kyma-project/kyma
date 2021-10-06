@@ -41,10 +41,10 @@ func TestCleanup(t *testing.T) {
 	subscription.Status.APIRuleName = apiRule.Name
 
 	// start BEB Mock
-	bebMock := startBebMock()
+	bebMock := startBEBMock()
 	envConf := env.Config{
 
-		BebAPIURL:                bebMock.MessagingURL,
+		BEBAPIURL:                bebMock.MessagingURL,
 		ClientID:                 "client-id",
 		ClientSecret:             "client-secret",
 		TokenEndpoint:            bebMock.TokenURL,
@@ -64,7 +64,7 @@ func TestCleanup(t *testing.T) {
 	g.Expect(err).To(gomega.BeNil())
 
 	// create a BEB handler to connect to BEB Mock
-	nameMapper := handlers.NewBebSubscriptionNameMapper("mydomain.com", handlers.MaxBEBSubscriptionNameLength)
+	nameMapper := handlers.NewBEBSubscriptionNameMapper("mydomain.com", handlers.MaxBEBSubscriptionNameLength)
 	bebHandler := handlers.NewBEB(credentials, nameMapper, defaultLogger)
 	err = bebHandler.Initialize(envConf)
 	g.Expect(err).To(gomega.BeNil())
@@ -88,8 +88,8 @@ func TestCleanup(t *testing.T) {
 	g.Expect(err).To(gomega.BeNil())
 
 	//  check that the susbcription exist in bebMock
-	getSubscriptionURL := fmt.Sprintf(bebMock.BebConfig.GetURLFormat, nameMapper.MapSubscriptionName(subscription))
-	resp, err := http.Get(getSubscriptionURL) // #nosec
+	getSubscriptionURL := fmt.Sprintf(bebMock.BEBConfig.GetURLFormat, nameMapper.MapSubscriptionName(subscription))
+	resp, err := http.Get(getSubscriptionURL) //nolint:gosec
 	g.Expect(err).To(gomega.BeNil())
 	g.Expect(resp.StatusCode).Should(gomega.Equal(http.StatusOK))
 
@@ -110,7 +110,7 @@ func TestCleanup(t *testing.T) {
 
 	// Expect
 	// the BEB subscription should be deleted from BEB Mock
-	resp, err = http.Get(getSubscriptionURL) // #nosec
+	resp, err = http.Get(getSubscriptionURL) //nolint:gosec
 	g.Expect(err).To(gomega.BeNil())
 	g.Expect(resp.StatusCode).Should(gomega.Equal(http.StatusNotFound))
 
@@ -129,15 +129,15 @@ func TestCleanup(t *testing.T) {
 
 }
 
-func startBebMock() *controllertesting.BebMock {
+func startBEBMock() *controllertesting.BEBMock {
 	bebConfig := &config.Config{}
-	beb := controllertesting.NewBebMock(bebConfig)
+	beb := controllertesting.NewBEBMock(bebConfig)
 	bebURI := beb.Start()
 	tokenURL := fmt.Sprintf("%s%s", bebURI, controllertesting.TokenURLPath)
 	messagingURL := fmt.Sprintf("%s%s", bebURI, controllertesting.MessagingURLPath)
 	beb.TokenURL = tokenURL
 	beb.MessagingURL = messagingURL
 	bebConfig = config.GetDefaultConfig(messagingURL)
-	beb.BebConfig = bebConfig
+	beb.BEBConfig = bebConfig
 	return beb
 }

@@ -14,7 +14,6 @@ import (
 
 	corev1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	k8slabels "k8s.io/apimachinery/pkg/labels"
 	k8stypes "k8s.io/apimachinery/pkg/types"
@@ -156,12 +155,12 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 	statusChanged := false
 
 	// Sync the BEB Subscription with the Subscription CR
-	statusChangedForBeb, err := r.syncBEBSubscription(ctx, desiredSubscription, &result, log, apiRule)
+	statusChangedForBEB, err := r.syncBEBSubscription(ctx, desiredSubscription, &result, log, apiRule)
 	if err != nil {
 		log.Errorw("sync BEB subscription failed", "error", err)
 		return ctrl.Result{}, err
 	}
-	statusChanged = statusChanged || statusChangedForBeb
+	statusChanged = statusChanged || statusChangedForBEB
 
 	if isInDeletion(desiredSubscription) {
 		// Remove finalizers
@@ -521,63 +520,6 @@ func (r *Reconciler) handlePreviousAPIRule(ctx context.Context, subscription *ev
 	}
 
 	return nil
-}
-
-func (r *Reconciler) cleanup(ctx context.Context, subscription *eventingv1alpha1.Subscription, subs []eventingv1alpha1.Subscription, apiRules []apigatewayv1alpha1.APIRule) error {
-	for _, v := range apiRules {
-		apiRule := v
-		filteredOwnerRefs := make([]metav1.OwnerReference, 0)
-		for _, or := range apiRule.OwnerReferences {
-			for _, sub := range subs {
-				if isOwnerRefBelongingToSubscription(sub, or) {
-					subSinkURL, err := url.ParseRequestURI(sub.Spec.Sink)
-					if err != nil {
-						// It's ok as this subscription doesn't have a port anyway
-						continue
-					}
-					port, err := utils.GetPortNumberFromURL(*subSinkURL)
-					if err != nil {
-						// It's ok as the port is not valid anyway
-						continue
-					}
-					if port == *apiRule.Spec.Service.Port {
-						filteredOwnerRefs = append(filteredOwnerRefs, or)
-					}
-				}
-			}
-		}
-
-		// Delete the APIRule as the port for the concerned svc is not used by any subscriptions
-		if len(filteredOwnerRefs) == 0 {
-			err := r.Client.Delete(ctx, &apiRule, &client.DeleteOptions{})
-			if err != nil {
-				r.eventWarn(subscription, reasonDeleteFailed, "Delete APIRule failed %s", apiRule.Name)
-				return errors.Wrap(err, "delete APIRule while cleanup failed")
-			}
-			r.eventNormal(subscription, reasonDelete, "Delete APIRule succeeded %s", apiRule.Name)
-			return nil
-		}
-
-		// Take the subscription out of the OwnerReferences and update the APIRule
-		desiredAPIRule := apiRule.DeepCopy()
-		object.ApplyExistingAPIRuleAttributes(&apiRule, desiredAPIRule)
-		desiredAPIRule.OwnerReferences = filteredOwnerRefs
-		err := r.Client.Update(ctx, desiredAPIRule, &client.UpdateOptions{})
-		if err != nil {
-			r.eventWarn(subscription, reasonUpdateFailed, "Update APIRule failed %s", apiRule.Name)
-			return errors.Wrap(err, "update APIRule while cleanup failed")
-		}
-		r.eventNormal(subscription, reasonUpdate, "Update APIRule succeeded %s", apiRule.Name)
-		return nil
-	}
-	return nil
-}
-
-func isOwnerRefBelongingToSubscription(sub eventingv1alpha1.Subscription, ownerRef metav1.OwnerReference) bool {
-	if sub.Name == ownerRef.Name && sub.UID == ownerRef.UID {
-		return true
-	}
-	return false
 }
 
 // getSubscriptionsForASvc returns a list of Subscriptions which are valid for the subscriber in focus
