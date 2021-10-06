@@ -34,7 +34,7 @@ spec:
       serviceAccountName: {{ template "fullname" . }}
       containers:
       - name: svr
-        image: {{ .Values.webhook.image }}
+        image: {{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.helm_broker_webhook) }}
         imagePullPolicy: {{ .Values.webhook.imagePullPolicy }}
         resources:
 {{ toYaml .Values.webhook.resources | indent 10 }}
