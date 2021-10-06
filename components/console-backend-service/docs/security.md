@@ -6,7 +6,7 @@ The application checks if the Authorization token passed by the user is signed b
 
 ## Overview
 
-The Console Backend Service uses a GraphQL implementation for authorization. Read [this](https://kyma-project.io/docs/components/security/#details-graph-ql) document for more details.
+The Console Backend Service uses a GraphQL implementation for authorization.
 
 ## How to secure a GraphQL action
 
