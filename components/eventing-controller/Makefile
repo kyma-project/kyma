@@ -113,6 +113,7 @@ copy-crds: manifests-local ## copy Eventing CRDs to installation/eventing
 	cp ./config/crd/bases/eventing.kyma-project.io_eventingbackends.yaml ./../../installation/resources/crds/eventing/eventingbackends.eventing.kyma-project.io.crd.yaml
 
 copy-external-crds: ## copy external CRDs to config/crd/external
+	mkdir -p config/crd/external
 	cp ../../installation/resources/crds/api-gateway/apirules.gateway.crd.yaml config/crd/external/apirules-gateway-kyma-project-io.yaml
 
 
