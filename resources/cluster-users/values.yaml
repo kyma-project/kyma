@@ -102,10 +102,6 @@ global:
       name: "test-hydra-login-consent"
       version: "d6e6d3bc"
       directory: "incubator"
-    k8s_tools:
-      name: "k8s-tools"
-      version: 20210922-530cfc39
-      directory: "tpi"
   minikubeIP: ""
   ingress:
     domainName: "kyma.local"
