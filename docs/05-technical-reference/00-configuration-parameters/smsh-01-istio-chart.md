@@ -14,7 +14,7 @@ This table lists the configurable parameters, their descriptions, and default va
 
 | Parameter |  Description | Default value |
 |-------|-------|:--------:|
-| **helmValues.lobal.proxy.resources.requests.cpu** | Defines requests for CPU resources for the Proxy component. | `75m` |
+| **helmValues.global.proxy.resources.requests.cpu** | Defines requests for CPU resources for the Proxy component. | `75m` |
 | **helmValues.global.proxy.resources.requests.memory** | Defines requests for memory resources for the Proxy component. | `64Mi` |
 | **helmValues.global.proxy.resources.limits.cpu** | Defines limits for CPU resources for the Proxy component. | `250m` |
 | **helmValues.global.proxy.resources.limits.memory** | Defines limits for memory resources for the Proxy component. | `256Mi` |
