@@ -83,28 +83,17 @@ describe("SKR nightly", function () {
 
   let skr;
 
-  // let deprovision = false;
-  // try {
-  //   getShootName(keb, runtimeID)
-  // } catch(err) {
-  //   deprovision = false;
-  // }
-  //
-  // if (deprovision) {
-  //   it("Deprovision SKR", async function () {
-  //     await deprovisionSKR(keb, runtimeID);
-  //   });
-  //
-  //   it("Unregister SKR resources from Compass", async function () {
-  //     await unregisterKymaFromCompass(director, scenarioName);
-  //   });
-  // }
+  try {
+    const runtimes = keb.runtimes();
+    const rID = runtimes[0].ruintimeID;
+    console.log(runtimes, rID);
+  } catch (err) {}
 
-  it(`Get SKR with id ${runtimeID}`, async function () {
-    let s = await keb.getSKR(runtimeID)
-    console.log(s)
-  });
-
+  // it(`Get SKR with id ${runtimeID}`, async function () {
+  //   let s = await keb.getSKR(runtimeID)
+  //   console.log(s)
+  // });
+  //
   // it(`Provision SKR with ID ${runtimeID}`, async function () {
   //   const customParams = {
   //     oidc: oidc0,

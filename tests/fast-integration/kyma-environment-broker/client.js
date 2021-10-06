@@ -91,6 +91,34 @@ class KEBClient {
     }
   }
 
+  async runtimes() {
+    const token = await this.token.getToken(SCOPES);
+    const url = `https://kyma-env-broker.${this.host}/runtimes?${this.subaccountID}`;
+    const request = {
+      url: url,
+      method: "get",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    };
+    try {
+      const resp = await axios.request(request);
+      if (resp.data.errors) {
+        debug(resp)
+        throw new Error(resp.data);
+      }
+      return resp.data;
+    } catch (err) {
+      debug(err);
+      const msg = "Error calling KEB";
+      if (err.response) {
+        throw new Error(`${msg}: ${err.response.status} ${err.response.statusText}`);
+      } else {
+        throw new Error(`${msg}: ${err.toString()}`);
+      }
+    }
+  }
+
   async provisionSKR(name, instanceID, platformCreds, btpOperatorCreds, customParams) {
     const payload = {
       service_id: KYMA_SERVICE_ID,
