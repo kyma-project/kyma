@@ -25,9 +25,7 @@ import (
 
 const (
 	appCSRInfoFmt     = "https://%s/v1/applications/signingRequests/info"
-	runtimeCSRInfoFmt = "https://%s/v1/runtimes/signingRequests/info"
 	AppURLFormat      = "https://%s/v1/applications"
-	RuntimeURLFormat  = "https://%s/v1/runtimes"
 )
 
 type Handlers struct {
@@ -108,24 +106,6 @@ func newExternalHandler(tokenManager tokens.Manager, tokenCreatorProvider tokens
 
 	handlerBuilder.WithApps(appHandlerConfig)
 
-	if opts.central {
-		runtimeCertificateService := certificates.NewCertificateService(secretsRepository, certificates.NewCertificateUtility(opts.runtimeCertificateValidityTime), opts.caSecretName, opts.rootCACertificateSecretName)
-		runtimeTokenTTLMinutes := time.Duration(opts.runtimeTokenExpirationMinutes) * time.Minute
-
-		runtimeHandlerConfig := externalapi.Config{
-			TokenCreator:                tokenCreatorProvider.WithTTL(runtimeTokenTTLMinutes),
-			ManagementInfoURL:           opts.runtimesInfoURL,
-			ConnectorServiceBaseURL:     fmt.Sprintf(RuntimeURLFormat, opts.connectorServiceHost),
-			CertificateProtectedBaseURL: fmt.Sprintf(RuntimeURLFormat, opts.certificateProtectedHost),
-			ContextExtractor:            contextExtractor.CreateClusterClientContextService,
-			CertService:                 runtimeCertificateService,
-			RevokedCertsRepo:            revocationListRepository,
-			HeaderParser:                headerParser,
-		}
-
-		handlerBuilder.WithRuntimes(runtimeHandlerConfig)
-	}
-
 	return handlerBuilder.GetHandler()
 }
 
@@ -152,18 +132,6 @@ func newInternalHandler(tokenManagerProvider tokens.TokenCreatorProvider, opts *
 	}, globalMiddlewares)
 
 	handlerBuilder.WithApps(appHandlerConfig)
-
-	if opts.central {
-		runtimeTokenTTLMinutes := time.Duration(opts.runtimeTokenExpirationMinutes) * time.Minute
-		runtimeHandlerConfig := internalapi.Config{
-			TokenManager:            tokenManagerProvider.WithTTL(runtimeTokenTTLMinutes),
-			CSRInfoURL:              fmt.Sprintf(runtimeCSRInfoFmt, opts.connectorServiceHost),
-			ContextExtractor:        contextExtractor.CreateClusterClientContextService,
-			RevokedRuntimeCertsRepo: revocationListRepository,
-		}
-
-		handlerBuilder.WithRuntimes(runtimeHandlerConfig)
-	}
 
 	return handlerBuilder.GetHandler()
 }
