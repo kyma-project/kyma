@@ -47,6 +47,9 @@ merge-kyma() {
 
   git checkout -B pull-request
   git checkout main
+
+  git remote -vv
+  git pull origin main
   step "Last commit from main"
   git log --max-count=1
 
