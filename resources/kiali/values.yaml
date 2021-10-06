@@ -32,9 +32,8 @@ authProxy:
   port: 3000
   configDocsLink: "https://kyma-project.io/docs/kyma/latest/04-operation-guides/security/sec-06-access-expose-kiali-grafana"
   config:
-    clientId: "kiali"
-    clientSecret: "hiFWLWqIxw5d3gl"
-    useDex: false
+    clientId: "dummy"
+    clientSecret: "dummy"
     tlsVerify: false
     emailDomains: "*"
     groups: ""
