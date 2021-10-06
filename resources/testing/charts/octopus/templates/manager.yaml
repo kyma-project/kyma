@@ -51,7 +51,7 @@ spec:
       containers:
       - command:
         - /manager
-        image: {{.Values.global.octopus.image.registry}}/{{.Values.global.octopus.image.dir}}octopus:{{.Values.global.octopus.image.version}}
+        image: {{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.octopus) }}
         imagePullPolicy: Always
         name: manager
         env:

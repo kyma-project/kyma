@@ -20,12 +20,6 @@ spec:
       annotations:
         sidecar.istio.io/inject: "true"
     spec:
-      {{ if .Values.global.isLocalEnv }}
-      hostAliases:
-        - ip: {{ .Values.global.minikubeIP }}
-          hostnames:
-            - "storage.{{ .Values.global.domainName }}"
-      {{ end }}
       securityContext:
         runAsNonRoot: true
         runAsUser: 1000

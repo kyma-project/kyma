@@ -29,7 +29,7 @@ spec:
       serviceAccountName: {{ template "fullname" . }}
       containers:
       - name: broker
-        image: "{{ .Values.global.containerRegistry.path }}/{{ .Values.global.helm_broker.dir }}helm-broker:{{ .Values.global.helm_broker.version }}"
+        image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.helm_broker) }}"
         imagePullPolicy: {{ .Values.global.image.pullPolicy }}
         env:
           - name: APP_PORT
@@ -79,7 +79,7 @@ spec:
           timeoutSeconds: 2
 
       - name: ctrl
-        image: "{{ .Values.global.containerRegistry.path }}/{{ .Values.global.helm_controller.dir }}helm-controller:{{ .Values.global.helm_controller.version }}"
+        image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.helm_controller) }}"
         imagePullPolicy: {{ .Values.global.image.pullPolicy }}
         resources:
 {{ toYaml .Values.ctrl.resources | indent 10 }}

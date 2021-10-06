@@ -47,8 +47,24 @@ merge-kyma() {
 
   git checkout -B pull-request
   git checkout main
+
+  # grep return 1 as exit code when no line matches, so we need to suppress it
+  HAS_ORIGIN="$(git remote | grep -c "origin" || true)"
+
+  if [[ "${HAS_ORIGIN}" -eq "0" ]]; then
+    step "add origin as it is not available"
+    git remote add origin https://github.com/kyma-project/kyma.git
+  fi
+
+  git fetch origin
+  git pull origin main
+
   step "Last commit from main"
   git log --max-count=1
+  # as netlify caches component state between runs,
+  # there is need to recreate branch to be sure that newest main is main from origin,
+  # not merged one in previous run
+  git checkout -B merged
 
   step "merging changes from pull request to main"
   git merge pull-request

@@ -26,6 +26,18 @@ logui:
 global:
   containerRegistry:
     path: eu.gcr.io/kyma-project
+  images:
+    fluent_bit:
+      name: fluent-bit
+      version: 1.8.7-a2d49884
+      directory: tpi
+    logui:
+      name: log-ui
+      version: "c60a3c68"
+    loki:
+      name: loki
+      version: 2.2.1-88dec1f7
+      directory: tpi
   logging_integration_tests:
     name: logging-integration-tests
     dir: 

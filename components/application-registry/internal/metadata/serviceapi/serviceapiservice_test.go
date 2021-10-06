@@ -16,12 +16,14 @@ import (
 )
 
 const (
-	resourceName = "resource-uuid-1"
-	gatewayUrl   = "url-uuid-1"
+	resourceName      = "resource-uuid-1"
+	gatewayUrl        = "url-uuid-1"
+	centralGatewayUrl = "http://central-application-gateway.kyma-system:8080/app/service-display-name"
 
-	appName   = "app"
-	appUID    = types.UID("appUID")
-	serviceId = "uuid-1"
+	appName            = "app"
+	appUID             = types.UID("appUID")
+	serviceId          = "uuid-1"
+	serviceDisplayName = "Service Display Name"
 )
 
 func TestNewService(t *testing.T) {
@@ -47,6 +49,7 @@ func TestNewService(t *testing.T) {
 		nameResolver := new(k8smocks.NameResolver)
 		nameResolver.On("GetResourceName", appName, serviceId).Return(resourceName)
 		nameResolver.On("GetGatewayUrl", appName, serviceId).Return(gatewayUrl)
+		nameResolver.On("GetCentralGatewayUrl", appName, serviceDisplayName).Return(centralGatewayUrl)
 
 		accessServiceManager := new(asmocks.AccessServiceManager)
 		accessServiceManager.On("Create", appName, appUID, serviceId, resourceName).Return(nil)
@@ -63,11 +66,12 @@ func TestNewService(t *testing.T) {
 		service := NewService(nameResolver, accessServiceManager, secretsService, nil)
 
 		// when
-		applicationServiceAPI, err := service.New(appName, appUID, serviceId, api)
+		applicationServiceAPI, err := service.New(appName, appUID, serviceId, serviceDisplayName, api)
 
 		// then
 		require.NoError(t, err)
 		assert.Equal(t, gatewayUrl, applicationServiceAPI.GatewayURL)
+		assert.Equal(t, centralGatewayUrl, applicationServiceAPI.CentralGatewayURL)
 		assert.Equal(t, resourceName, applicationServiceAPI.AccessLabel)
 		assert.Equal(t, api.TargetUrl, applicationServiceAPI.TargetUrl)
 		assert.Equal(t, api.Credentials.Oauth.URL, applicationServiceAPI.Credentials.AuthenticationUrl)
@@ -98,6 +102,7 @@ func TestNewService(t *testing.T) {
 		nameResolver := new(k8smocks.NameResolver)
 		nameResolver.On("GetResourceName", appName, serviceId).Return(resourceName)
 		nameResolver.On("GetGatewayUrl", appName, serviceId).Return(gatewayUrl)
+		nameResolver.On("GetCentralGatewayUrl", appName, serviceDisplayName).Return(centralGatewayUrl)
 
 		accessServiceManager := new(asmocks.AccessServiceManager)
 		accessServiceManager.On("Create", appName, appUID, serviceId, resourceName).Return(nil)
@@ -114,11 +119,12 @@ func TestNewService(t *testing.T) {
 		service := NewService(nameResolver, accessServiceManager, secretsService, nil)
 
 		// when
-		applicationServiceAPI, err := service.New(appName, appUID, serviceId, api)
+		applicationServiceAPI, err := service.New(appName, appUID, serviceId, serviceDisplayName, api)
 
 		// then
 		require.NoError(t, err)
 		assert.Equal(t, gatewayUrl, applicationServiceAPI.GatewayURL)
+		assert.Equal(t, centralGatewayUrl, applicationServiceAPI.CentralGatewayURL)
 		assert.Equal(t, resourceName, applicationServiceAPI.AccessLabel)
 		assert.Equal(t, api.TargetUrl, applicationServiceAPI.TargetUrl)
 		assert.Equal(t, "Basic", applicationServiceAPI.Credentials.Type)
@@ -137,6 +143,7 @@ func TestNewService(t *testing.T) {
 		nameResolver := new(k8smocks.NameResolver)
 		nameResolver.On("GetResourceName", appName, serviceId).Return(resourceName)
 		nameResolver.On("GetGatewayUrl", appName, serviceId).Return(gatewayUrl)
+		nameResolver.On("GetCentralGatewayUrl", appName, serviceDisplayName).Return(centralGatewayUrl)
 
 		accessServiceManager := new(asmocks.AccessServiceManager)
 		accessServiceManager.On("Create", appName, appUID, serviceId, resourceName).Return(nil)
@@ -144,11 +151,12 @@ func TestNewService(t *testing.T) {
 		service := NewService(nameResolver, accessServiceManager, nil, nil)
 
 		// when
-		applicationServiceAPI, err := service.New(appName, appUID, serviceId, api)
+		applicationServiceAPI, err := service.New(appName, appUID, serviceId, serviceDisplayName, api)
 
 		// then
 		require.NoError(t, err)
 		assert.Equal(t, gatewayUrl, applicationServiceAPI.GatewayURL)
+		assert.Equal(t, centralGatewayUrl, applicationServiceAPI.CentralGatewayURL)
 		assert.Equal(t, resourceName, applicationServiceAPI.AccessLabel)
 		assert.Equal(t, api.TargetUrl, applicationServiceAPI.TargetUrl)
 		assert.Equal(t, "", applicationServiceAPI.Credentials.AuthenticationUrl)
@@ -173,6 +181,7 @@ func TestNewService(t *testing.T) {
 		nameResolver := new(k8smocks.NameResolver)
 		nameResolver.On("GetResourceName", appName, serviceId).Return(resourceName)
 		nameResolver.On("GetGatewayUrl", appName, serviceId).Return(gatewayUrl)
+		nameResolver.On("GetCentralGatewayUrl", appName, serviceDisplayName).Return(centralGatewayUrl)
 
 		accessServiceManager := new(asmocks.AccessServiceManager)
 		accessServiceManager.On("Create", appName, appUID, serviceId, resourceName).Return(apperrors.Internal("some error"))
@@ -180,7 +189,7 @@ func TestNewService(t *testing.T) {
 		service := NewService(nameResolver, accessServiceManager, nil, nil)
 
 		// when
-		result, err := service.New(appName, appUID, serviceId, api)
+		result, err := service.New(appName, appUID, serviceId, serviceDisplayName, api)
 
 		// then
 		assert.Nil(t, result)
@@ -206,6 +215,7 @@ func TestNewService(t *testing.T) {
 		nameResolver := new(k8smocks.NameResolver)
 		nameResolver.On("GetResourceName", appName, serviceId).Return(resourceName)
 		nameResolver.On("GetGatewayUrl", appName, serviceId).Return(gatewayUrl)
+		nameResolver.On("GetCentralGatewayUrl", appName, serviceDisplayName).Return(centralGatewayUrl)
 
 		accessServiceManager := new(asmocks.AccessServiceManager)
 		accessServiceManager.On("Create", appName, appUID, serviceId, resourceName).Return(nil)
@@ -222,7 +232,7 @@ func TestNewService(t *testing.T) {
 		service := NewService(nameResolver, accessServiceManager, secretsService, nil)
 
 		// when
-		result, err := service.New(appName, appUID, serviceId, api)
+		result, err := service.New(appName, appUID, serviceId, serviceDisplayName, api)
 
 		// then
 		assert.Nil(t, result)
@@ -248,6 +258,7 @@ func TestNewService(t *testing.T) {
 		nameResolver := new(k8smocks.NameResolver)
 		nameResolver.On("GetResourceName", appName, serviceId).Return(resourceName)
 		nameResolver.On("GetGatewayUrl", appName, serviceId).Return(gatewayUrl)
+		nameResolver.On("GetCentralGatewayUrl", appName, serviceDisplayName).Return(centralGatewayUrl)
 
 		accessServiceManager := new(asmocks.AccessServiceManager)
 		accessServiceManager.On("Create", appName, appUID, serviceId, resourceName).Return(nil)
@@ -264,7 +275,7 @@ func TestNewService(t *testing.T) {
 		service := NewService(nameResolver, accessServiceManager, secretsService, nil)
 
 		// when
-		result, err := service.New(appName, appUID, serviceId, api)
+		result, err := service.New(appName, appUID, serviceId, serviceDisplayName, api)
 
 		// then
 		assert.Nil(t, result)
@@ -296,6 +307,7 @@ func TestNewService(t *testing.T) {
 		nameResolver := new(k8smocks.NameResolver)
 		nameResolver.On("GetResourceName", appName, serviceId).Return(resourceName)
 		nameResolver.On("GetGatewayUrl", appName, serviceId).Return(gatewayUrl)
+		nameResolver.On("GetCentralGatewayUrl", appName, serviceDisplayName).Return(centralGatewayUrl)
 
 		accessServiceManager := new(asmocks.AccessServiceManager)
 		accessServiceManager.On("Create", appName, appUID, serviceId, resourceName).Return(nil)
@@ -308,11 +320,12 @@ func TestNewService(t *testing.T) {
 		service := NewService(nameResolver, accessServiceManager, secretsService, requestParamsService)
 
 		// when
-		applicationServiceAPI, err := service.New(appName, appUID, serviceId, api)
+		applicationServiceAPI, err := service.New(appName, appUID, serviceId, serviceDisplayName, api)
 
 		// then
 		require.NoError(t, err)
 		assert.Equal(t, gatewayUrl, applicationServiceAPI.GatewayURL)
+		assert.Equal(t, centralGatewayUrl, applicationServiceAPI.CentralGatewayURL)
 		assert.Equal(t, resourceName, applicationServiceAPI.AccessLabel)
 		assert.Equal(t, api.TargetUrl, applicationServiceAPI.TargetUrl)
 		assert.Equal(t, requestParamsSecretName, applicationServiceAPI.RequestParametersSecretName)
@@ -641,6 +654,7 @@ func TestDefaultService_Update(t *testing.T) {
 		nameResolver := new(k8smocks.NameResolver)
 		nameResolver.On("GetResourceName", appName, serviceId).Return(resourceName)
 		nameResolver.On("GetGatewayUrl", appName, serviceId).Return(gatewayUrl)
+		nameResolver.On("GetCentralGatewayUrl", appName, serviceDisplayName).Return(centralGatewayUrl)
 
 		accessServiceManager := new(asmocks.AccessServiceManager)
 		accessServiceManager.On("Upsert", appName, appUID, serviceId, resourceName).Return(nil)
@@ -654,11 +668,12 @@ func TestDefaultService_Update(t *testing.T) {
 		service := NewService(nameResolver, accessServiceManager, secretsService, requestParamsService)
 
 		// when
-		applicationServiceAPI, err := service.Update(appName, appUID, serviceId, api)
+		applicationServiceAPI, err := service.Update(appName, appUID, serviceId, serviceDisplayName, api)
 
 		// then
 		require.NoError(t, err)
 		assert.Equal(t, gatewayUrl, applicationServiceAPI.GatewayURL)
+		assert.Equal(t, centralGatewayUrl, applicationServiceAPI.CentralGatewayURL)
 		assert.Equal(t, resourceName, applicationServiceAPI.AccessLabel)
 		assert.Equal(t, "http://target.com", applicationServiceAPI.TargetUrl)
 		assert.Equal(t, "http://oauth.com", applicationServiceAPI.Credentials.AuthenticationUrl)
@@ -690,6 +705,7 @@ func TestDefaultService_Update(t *testing.T) {
 		nameResolver := new(k8smocks.NameResolver)
 		nameResolver.On("GetResourceName", appName, serviceId).Return(resourceName)
 		nameResolver.On("GetGatewayUrl", appName, serviceId).Return(gatewayUrl)
+		nameResolver.On("GetCentralGatewayUrl", appName, serviceDisplayName).Return(centralGatewayUrl)
 
 		accessServiceManager := new(asmocks.AccessServiceManager)
 		accessServiceManager.On("Upsert", appName, appUID, serviceId, resourceName).Return(nil)
@@ -703,11 +719,12 @@ func TestDefaultService_Update(t *testing.T) {
 		service := NewService(nameResolver, accessServiceManager, secretsService, requestParamsService)
 
 		// when
-		applicationServiceAPI, err := service.Update(appName, appUID, serviceId, api)
+		applicationServiceAPI, err := service.Update(appName, appUID, serviceId, serviceDisplayName, api)
 
 		// then
 		require.NoError(t, err)
 		assert.Equal(t, gatewayUrl, applicationServiceAPI.GatewayURL)
+		assert.Equal(t, centralGatewayUrl, applicationServiceAPI.CentralGatewayURL)
 		assert.Equal(t, resourceName, applicationServiceAPI.AccessLabel)
 		assert.Equal(t, "http://target.com", applicationServiceAPI.TargetUrl)
 		assert.Equal(t, "Basic", applicationServiceAPI.Credentials.Type)
@@ -728,6 +745,7 @@ func TestDefaultService_Update(t *testing.T) {
 		nameResolver := new(k8smocks.NameResolver)
 		nameResolver.On("GetResourceName", appName, serviceId).Return(resourceName)
 		nameResolver.On("GetGatewayUrl", appName, serviceId).Return(gatewayUrl)
+		nameResolver.On("GetCentralGatewayUrl", appName, serviceDisplayName).Return(centralGatewayUrl)
 
 		accessServiceManager := new(asmocks.AccessServiceManager)
 		accessServiceManager.On("Upsert", appName, appUID, serviceId, resourceName).Return(nil)
@@ -741,11 +759,12 @@ func TestDefaultService_Update(t *testing.T) {
 		service := NewService(nameResolver, accessServiceManager, secretsService, requestParamsService)
 
 		// when
-		applicationServiceAPI, err := service.Update(appName, appUID, serviceId, api)
+		applicationServiceAPI, err := service.Update(appName, appUID, serviceId, serviceDisplayName, api)
 
 		// then
 		require.NoError(t, err)
 		assert.Equal(t, gatewayUrl, applicationServiceAPI.GatewayURL)
+		assert.Equal(t, centralGatewayUrl, applicationServiceAPI.CentralGatewayURL)
 		assert.Equal(t, resourceName, applicationServiceAPI.AccessLabel)
 		assert.Equal(t, "http://target.com", applicationServiceAPI.TargetUrl)
 		assert.Equal(t, "", applicationServiceAPI.Credentials.AuthenticationUrl)
@@ -772,6 +791,7 @@ func TestDefaultService_Update(t *testing.T) {
 		nameResolver := new(k8smocks.NameResolver)
 		nameResolver.On("GetResourceName", appName, serviceId).Return(resourceName)
 		nameResolver.On("GetGatewayUrl", appName, serviceId).Return(gatewayUrl)
+		nameResolver.On("GetCentralGatewayUrl", appName, serviceDisplayName).Return(centralGatewayUrl)
 
 		accessServiceManager := new(asmocks.AccessServiceManager)
 		accessServiceManager.On("Upsert", appName, appUID, serviceId, resourceName).
@@ -780,7 +800,7 @@ func TestDefaultService_Update(t *testing.T) {
 		service := NewService(nameResolver, accessServiceManager, nil, nil)
 
 		// when
-		result, err := service.Update(appName, appUID, serviceId, api)
+		result, err := service.Update(appName, appUID, serviceId, serviceDisplayName, api)
 
 		// then
 		assert.Nil(t, result)
@@ -808,6 +828,7 @@ func TestDefaultService_Update(t *testing.T) {
 		nameResolver := new(k8smocks.NameResolver)
 		nameResolver.On("GetResourceName", appName, serviceId).Return(resourceName)
 		nameResolver.On("GetGatewayUrl", appName, serviceId).Return(gatewayUrl)
+		nameResolver.On("GetCentralGatewayUrl", appName, serviceDisplayName).Return(centralGatewayUrl)
 
 		accessServiceManager := new(asmocks.AccessServiceManager)
 		accessServiceManager.On("Upsert", appName, appUID, serviceId, resourceName).Return(nil)
@@ -818,7 +839,7 @@ func TestDefaultService_Update(t *testing.T) {
 		service := NewService(nameResolver, accessServiceManager, secretsService, nil)
 
 		// when
-		result, err := service.Update(appName, appUID, serviceId, api)
+		result, err := service.Update(appName, appUID, serviceId, serviceDisplayName, api)
 
 		// then
 		assert.Nil(t, result)
@@ -846,6 +867,7 @@ func TestDefaultService_Update(t *testing.T) {
 		nameResolver := new(k8smocks.NameResolver)
 		nameResolver.On("GetResourceName", appName, serviceId).Return(resourceName)
 		nameResolver.On("GetGatewayUrl", appName, serviceId).Return(gatewayUrl)
+		nameResolver.On("GetCentralGatewayUrl", appName, serviceDisplayName).Return(centralGatewayUrl)
 
 		accessServiceManager := new(asmocks.AccessServiceManager)
 		accessServiceManager.On("Upsert", appName, appUID, serviceId, resourceName).Return(nil)
@@ -856,7 +878,7 @@ func TestDefaultService_Update(t *testing.T) {
 		service := NewService(nameResolver, accessServiceManager, secretsService, nil)
 
 		// when
-		result, err := service.Update(appName, appUID, serviceId, api)
+		result, err := service.Update(appName, appUID, serviceId, serviceDisplayName, api)
 
 		// then
 		assert.Nil(t, result)
@@ -879,6 +901,7 @@ func TestDefaultService_Update(t *testing.T) {
 		nameResolver := new(k8smocks.NameResolver)
 		nameResolver.On("GetResourceName", appName, serviceId).Return(resourceName)
 		nameResolver.On("GetGatewayUrl", appName, serviceId).Return(gatewayUrl)
+		nameResolver.On("GetCentralGatewayUrl", appName, serviceDisplayName).Return(centralGatewayUrl)
 
 		accessServiceManager := new(asmocks.AccessServiceManager)
 		accessServiceManager.On("Upsert", appName, appUID, serviceId, resourceName).Return(nil)
@@ -889,7 +912,7 @@ func TestDefaultService_Update(t *testing.T) {
 		service := NewService(nameResolver, accessServiceManager, secretsService, nil)
 
 		// when
-		result, err := service.Update(appName, appUID, serviceId, api)
+		result, err := service.Update(appName, appUID, serviceId, serviceDisplayName, api)
 
 		// then
 		assert.Nil(t, result)
@@ -923,6 +946,7 @@ func TestDefaultService_Update(t *testing.T) {
 		nameResolver := new(k8smocks.NameResolver)
 		nameResolver.On("GetResourceName", appName, serviceId).Return(resourceName)
 		nameResolver.On("GetGatewayUrl", appName, serviceId).Return(gatewayUrl)
+		nameResolver.On("GetCentralGatewayUrl", appName, serviceDisplayName).Return(centralGatewayUrl)
 
 		accessServiceManager := new(asmocks.AccessServiceManager)
 		accessServiceManager.On("Upsert", appName, appUID, serviceId, resourceName).Return(nil)
@@ -936,11 +960,12 @@ func TestDefaultService_Update(t *testing.T) {
 		service := NewService(nameResolver, accessServiceManager, secretsService, requestParamsService)
 
 		// when
-		applicationServiceAPI, err := service.Update(appName, appUID, serviceId, api)
+		applicationServiceAPI, err := service.Update(appName, appUID, serviceId, serviceDisplayName, api)
 
 		// then
 		require.NoError(t, err)
 		assert.Equal(t, gatewayUrl, applicationServiceAPI.GatewayURL)
+		assert.Equal(t, centralGatewayUrl, applicationServiceAPI.CentralGatewayURL)
 		assert.Equal(t, resourceName, applicationServiceAPI.AccessLabel)
 		assert.Equal(t, requestParamsSecretName, applicationServiceAPI.RequestParametersSecretName)
 

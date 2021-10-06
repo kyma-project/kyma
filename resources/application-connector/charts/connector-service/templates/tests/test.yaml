@@ -23,13 +23,6 @@ spec:
       labels:
         app: {{ .Chart.Name }}-tests
     spec:
-      {{ if .Values.global.isLocalEnv }}
-      hostAliases:
-       - ip: {{ .Values.global.minikubeIP }}
-         hostnames:
-          - "connector-service.{{ .Values.global.domainName }}"
-          - "gateway.{{ .Values.global.domainName }}"
-      {{ end }}
       serviceAccountName: {{ .Chart.Name }}-tests
       containers:
       - name: tests

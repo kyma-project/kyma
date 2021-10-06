@@ -1,11 +1,3 @@
-{{/* vim: set filetype=mustache: */}}
-{{/*
-Expand the name of the chart.
-*/}}
-{{- define "name" -}}
-{{- default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" -}}
-{{- end -}}
-
 {{/*
 Create a URL for container images
 */}}
@@ -15,4 +7,3 @@ Create a URL for container images
 {{- $version := ternary (print ":" $.img.version) (print "@sha256:" $.img.sha) (empty $.img.sha) -}}
 {{- print $path "/" $.img.name $version -}}
 {{- end -}}
-

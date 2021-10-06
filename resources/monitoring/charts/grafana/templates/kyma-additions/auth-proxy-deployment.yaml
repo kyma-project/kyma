@@ -23,13 +23,6 @@ spec:
       annotations:
         checksum/config: {{ tpl (toYaml .Values.authProxy) . | sha256sum }}
     spec:
-      {{- if .Values.global.isLocalEnv }}
-      hostNetwork: true   #only for minikube
-      hostAliases:
-        - ip: {{ .Values.global.minikubeIP }}
-          hostnames:
-          - "dex.{{ .Values.global.domainName }}"
-      {{- end }}
       {{- if .Values.kyma.authProxy.nodeSelector }}
       nodeSelector:
 {{ toYaml .Values.kyma.authProxy.nodeSelector | indent 8 }}

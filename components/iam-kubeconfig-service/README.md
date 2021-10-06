@@ -1,5 +1,4 @@
-# IAM Kubeconfig Service
-
+# TO BE REMOVED
 ## Overview
 
 This project is a generator of configurations used in Kyma.
@@ -10,10 +9,6 @@ The following tools are required to set up the project:
 
 - [Go](https://golang.org)
 - [Docker](https://www.docker.com/)
-
-## Installation
-
-For installation use the dedicated [Helm chart](../../resources/iam-kubeconfig-service).
 
 ## Usage
 
