@@ -28,7 +28,7 @@ spec:
       restartPolicy: Never
       containers:
       - name: tests
-        image: {{ .Values.tests.image.name }}:{{ .Values.tests.image.version }}
+        image: {{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.k8s_tools) }}
         imagePullPolicy: "{{ .Values.global.imagePullPolicy }}"
         command: ['curl']
         args: ['-k', '--retry', '10', '--retry-delay', '15', '--retry-connrefused', 'https://kiali.{{ .Values.global.domainName }}']
