@@ -7,7 +7,7 @@ const {
   updateSKR,
   ensureValidShootOIDCConfig,
   ensureValidOIDCConfigInCustomerFacingKubeconfig,
-  getShootName,
+  runtimes,
 } = require("../kyma-environment-broker");
 const {
   DirectorConfig,
@@ -83,12 +83,12 @@ describe("SKR nightly", function () {
 
   let skr;
 
-  try {
-    const runtimes = keb.runtimes();
-    console.log(runtimes);
-  } catch (err) {
-    throw err
-  }
+  runtimes(keb).then((runtime) => {
+    console.log(runtime);
+    console.log(runtime[0].runtimeID)
+  }).catch((err) => {
+    throw err;
+  })
 
   // it(`Get SKR with id ${runtimeID}`, async function () {
   //   let s = await keb.getSKR(runtimeID)
