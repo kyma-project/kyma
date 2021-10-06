@@ -1,10 +1,25 @@
 domain: kyma-project.io
+layout:
+- go.kubebuilder.io/v3
+projectName: eventing-controller
 repo: github.com/kyma-project/kyma/components/eventing-controller
 resources:
-- group: eventing
+- api:
+    crdVersion: v1
+    namespaced: true
+  controller: true
+  domain: kyma-project.io
+  group: eventing
   kind: Subscription
+  path: github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1
   version: v1alpha1
-- group: eventing
+- api:
+    crdVersion: v1
+    namespaced: true
+  controller: true
+  domain: kyma-project.io
+  group: eventing
   kind: EventingBackend
+  path: github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1
   version: v1alpha1
-version: "2"
+version: "3"

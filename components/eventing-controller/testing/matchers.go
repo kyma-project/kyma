@@ -3,7 +3,6 @@ package testing
 import (
 	"reflect"
 
-	"github.com/ory/oathkeeper-maester/api/v1alpha1"
 	"k8s.io/apimachinery/pkg/types"
 
 	. "github.com/onsi/gomega"         // nolint
@@ -117,7 +116,7 @@ func HaveAPIRuleSpecRules(ruleMethods []string, accessStrategy, path string) Gom
 }
 
 func haveAPIRuleAccessStrategies(accessStrategy string) GomegaMatcher {
-	return WithTransform(func(a *v1alpha1.Authenticator) string {
+	return WithTransform(func(a *apigatewayv1alpha1.Authenticator) string {
 		return a.Name
 	}, Equal(accessStrategy))
 }

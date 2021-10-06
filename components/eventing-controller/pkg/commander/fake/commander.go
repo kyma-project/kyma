@@ -1,11 +1,12 @@
 package fake
 
 import (
+	"k8s.io/client-go/dynamic"
+	"sigs.k8s.io/controller-runtime/pkg/manager"
+
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/commander"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers"
-	"k8s.io/client-go/dynamic"
-	"sigs.k8s.io/controller-runtime/pkg/manager"
 )
 
 type Commander struct {

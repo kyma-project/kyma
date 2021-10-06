@@ -1,36 +1,7 @@
 apiVersion: eventing.kyma-project.io/v1alpha1
 kind: Subscription
 metadata:
-  name: beb-subscription-sample
-  namespace: default
+  name: subscription-sample
 spec:
-  protocol: BEB
-  protocolsettings:
-    exemptHandshake: true
-    qos: 'AT-LEAST-ONCE'
-    webhookAuth:
-      {
-        type: 'oauth2',
-        grantType: 'client_credentials',
-        'clientId': 'xxx',
-        'clientSecret': 'xxx',
-        'tokenUrl': 'https://oauth2.xxx.com/oauth2/token',
-        'scope': ["guid-identifier"]
-      }
-  sink: "https://webhook.xxx.com"
-  filter:
-    dialect: beb,
-    filters: [
-      {
-        eventSource: {
-          type: exact,
-          property: source,
-          value: "/default/kyma/id"
-        },
-        eventType: {
-          type: exact,
-          property: type,
-          value: "sap.kyma.test-app.order.created.v1"
-        }
-      },
-    ]
+  # Add fields here
+  foo: bar

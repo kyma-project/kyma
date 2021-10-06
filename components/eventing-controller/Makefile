@@ -1,6 +1,6 @@
 APP_NAME = eventing-controller
 APP_PATH = components/$(APP_NAME)
-BUILDPACK = eu.gcr.io/kyma-project/test-infra/buildpack-golang-kubebuilder2:v20201009-5d8104e0
+BUILDPACK = eu.gcr.io/kyma-project/test-infra/buildpack-golang-kubebuilder2:v20210601-24c60b5a
 SCRIPTS_DIR = $(realpath $(shell pwd)/../..)/common/makefiles
 
 override ENTRYPOINT = main.go
@@ -13,196 +13,124 @@ DEV_IMAGE = ko://github.com/kyma-project/kyma/components/eventing-controller/cmd
 NAMESPACE = "eventing"
 VERIFY_IGNORE := /vendor\|/mocks
 
+# Image URL to use all building/pushing image targets
+IMG ?= eventing-controller:latest
 # Produce CRDs that work back to Kubernetes 1.11 (no version conversion)
-CRD_OPTIONS ?= "crd:crdVersions=v1"
+CRD_OPTIONS ?= "crd:trivialVersions=true,preserveUnknownFields=false"
 
 # Get the currently used golang install path (in GOPATH/bin, unless GOBIN is set)
-ifneq (,$(shell which go))
 ifeq (,$(shell go env GOBIN))
 GOBIN=$(shell go env GOPATH)/bin
 else
 GOBIN=$(shell go env GOBIN)
 endif
-endif
 
-all: manager
+# Setting SHELL to bash allows bash commands to be executed by recipes.
+# This is a requirement for 'setup-envtest.sh' in the test target.
+# Options are set to exit when a recipe line exits non-zero or a piped command fails.
+SHELL = /usr/bin/env bash -o pipefail
+.SHELLFLAGS = -ec
 
-# Build controller binary
-manager: generate-local fmt-local vet-local
-	go build -o bin/controller cmd/eventing-controller/main.go
+all: build
 
-# Run against the configured Kubernetes cluster in ~/.kube/config
-# TODO Useful default values have to be found.
-run: export NATS_URL ?= nats://127.0.0.1:4222
-run: export EVENT_TYPE_PREFIX ?= sap.kyma.custom
-run: export WEBHOOK_TOKEN_ENDPOINT ?= WEBHOOK_TOKEN_ENDPOINT
-run: export DOMAIN ?= example.com
-run: generate-local fmt-local vet-local manifests
-	go run cmd/eventing-controller/main.go
+##@ General
 
-# Install CRDs into a cluster
-install: manifests
-	kustomize build config/crd | ko apply -f -
+# The help target prints out all targets with their descriptions organized
+# beneath their categories. The categories are represented by '##@' and the
+# target descriptions by '##'. The awk commands is responsible for reading the
+# entire set of makefiles included in this invocation, looking for lines of the
+# file as xyz: ## something, and then pretty-format the target and help. Then,
+# if there's a line with ##@ something, that gets pretty-printed as a category.
+# More info on the usage of ANSI control characters for terminal formatting:
+# https://en.wikipedia.org/wiki/ANSI_escape_code#SGR_parameters
+# More info on the awk command:
+# http://linuxcommand.org/lc3_adv_awk.php
 
-# Install sample CRs into a cluster
-install-samples: manifests
-	ko apply -f config/samples
+help: ## Display this help.
+	@awk 'BEGIN {FS = ":.*##"; printf "\nUsage:\n  make \033[36m<target>\033[0m\n"} /^[a-zA-Z_0-9-]+:.*?##/ { printf "  \033[36m%-15s\033[0m %s\n", $$1, $$2 } /^##@/ { printf "\n\033[1m%s\033[0m\n", substr($$0, 5) } ' $(MAKEFILE_LIST)
 
-# Uninstall sample CRs into a cluster
-uninstall-samples: manifests
-	ko delete -f config/samples
+##@ Development
 
-# Uninstall CRDs from a cluster
-uninstall: manifests
-	kustomize build config/crd | ko delete -f -
-
-# Deploy eventing-controller in the configured Kubernetes cluster in ~/.kube/config for local development
-deploy-local: manifests deploy-local-dry-run
-	kubectl create ns ${NAMESPACE} || true
-	kustomize build config/default | ko apply -f -
-
-# Undeploy the eventing-controller
-undeploy-local: manifests
-	kustomize build config/default | kubectl delete -f -
-
-# Dry run for deploying eventing-controller for local development
-deploy-local-dry-run: manifests
-	cd config/manager && kustomize edit set image controller=${DEV_IMAGE} && kustomize edit set namespace ${NAMESPACE}
-	cd config/rbac && kustomize edit set namespace ${NAMESPACE}
-	kustomize build config/default
-
-# Generate manifests e.g. CRD, RBAC etc.
-manifests-local: controller-gen-local
+manifests-local: controller-gen-local ## Generate WebhookConfiguration, ClusterRole and CustomResourceDefinition objects.
 	$(CONTROLLER_GEN) $(CRD_OPTIONS) rbac:roleName=manager-role webhook paths="./..." output:crd:artifacts:config=config/crd/bases
 
-# Generate manifests e.g. CRD, RBAC etc.
-manifests:
-	$(CONTROLLER_GEN) $(CRD_OPTIONS) rbac:roleName=manager-role webhook paths="./..." output:crd:artifacts:config=config/crd/bases
-
-# Generate code
-generate-local: manifests-local controller-gen-local
+generate-local: controller-gen-local ## Generate code containing DeepCopy, DeepCopyInto, and DeepCopyObject method implementations.
 	$(CONTROLLER_GEN) object:headerFile="hack/boilerplate.go.txt" paths="./..."
 
-# Generate code
-generate: manifests
-	$(CONTROLLER_GEN) object:headerFile="hack/boilerplate.go.txt" paths="./..."
+fmt: ## Run go fmt against code.
+	go fmt ./...
 
-verify:: mod-verify
+vet: ## Run go vet against code.
+	go vet ./...
 
-resolve-local:
-	GO111MODULE=on go mod vendor -v
+ENVTEST_ASSETS_DIR=$(shell pwd)/testbin
+test: manifests-local generate-local fmt vet ## Run tests.
+	mkdir -p ${ENVTEST_ASSETS_DIR}
+	test -f ${ENVTEST_ASSETS_DIR}/setup-envtest.sh || curl -sSLo ${ENVTEST_ASSETS_DIR}/setup-envtest.sh https://raw.githubusercontent.com/kubernetes-sigs/controller-runtime/v0.8.3/hack/setup-envtest.sh
+	source ${ENVTEST_ASSETS_DIR}/setup-envtest.sh; fetch_envtest_tools $(ENVTEST_ASSETS_DIR); setup_envtest_env $(ENVTEST_ASSETS_DIR); go test ./... -coverprofile cover.out
 
-ensure-local:
-	@echo "Go modules present in component - omitting."
+##@ Build
 
-dep-status:
-	@echo "Go modules present in component - omitting."
+build: generate fmt vet ## Build manager binary.
+	go build -o bin/manager main.go
 
-dep-status-local:
-	@echo "Go modules present in component - omitting."
+run: manifests-local generate fmt vet ## Run a controller from your host.
+	go run ./cmd/eventing-controller/main.go
 
-mod-verify-local:
-	GO111MODULE=on go mod verify
+docker-build: test ## Build docker image with the manager.
+	docker build -t ${IMG} .
 
-# Use it before commit
-check-code: check-imports fmt-local vet-local lint
+docker-push: ## Push docker image with the manager.
+	docker push ${IMG}
 
-test-local: generate-local fmt-local vet-local
-	go test ./... -coverprofile cover.out
+##@ Deployment
 
-release: resolve generate verify build-image push-image copy-external-crds
+install: manifests kustomize ## Install CRDs into the K8s cluster specified in ~/.kube/config.
+	$(KUSTOMIZE) build config/crd | kubectl apply -f -
 
-path-to-referenced-charts:
-	@echo "resources/eventing-manager/eventing-controller"
+uninstall: manifests kustomize ## Uninstall CRDs from the K8s cluster specified in ~/.kube/config.
+	$(KUSTOMIZE) build config/crd | kubectl delete -f -
 
-copy-crds: manifests-local
-	@echo "copying Eventing CRDs to installation/eventing"
+deploy: manifests kustomize ## Deploy controller to the K8s cluster specified in ~/.kube/config.
+	cd config/manager && $(KUSTOMIZE) edit set image controller=${IMG}
+	$(KUSTOMIZE) build config/default | kubectl apply -f -
+
+undeploy: ## Undeploy controller from the K8s cluster specified in ~/.kube/config.
+	$(KUSTOMIZE) build config/default | kubectl delete -f -
+
+CONTROLLER_GEN = $(shell pwd)/bin/controller-gen
+controller-gen-local: ## Download controller-gen locally if necessary.
+	$(call go-get-tool,$(CONTROLLER_GEN),sigs.k8s.io/controller-tools/cmd/controller-gen@v0.4.1)
+
+KUSTOMIZE = $(shell pwd)/bin/kustomize
+kustomize: ## Download kustomize locally if necessary.
+	$(call go-get-tool,$(KUSTOMIZE),sigs.k8s.io/kustomize/kustomize/v3@v3.8.7)
+
+##@ CRD
+
+copy-crds: manifests-local ## copy Eventing CRDs to installation/eventing
 	cp ./config/crd/bases/eventing.kyma-project.io_subscriptions.yaml ./../../installation/resources/crds/eventing/subscriptions.eventing.kyma-project.io.crd.yaml
 	cp ./config/crd/bases/eventing.kyma-project.io_eventingbackends.yaml ./../../installation/resources/crds/eventing/eventingbackends.eventing.kyma-project.io.crd.yaml
 
-copy-external-crds:
-	@echo "copying external CRDs to config/crd/external"
+copy-external-crds: ## copy external CRDs to config/crd/external
 	cp ../../installation/resources/crds/api-gateway/apirules.gateway.crd.yaml config/crd/external/apirules-gateway-kyma-project-io.yaml
 
-# find or download controller-gen
-# download controller-gen if necessary
-.PHONY: controller-gen-local
-controller-gen-local:
-ifeq (, $(shell which controller-gen))
-	@{ \
-	set -e ;\
-	CONTROLLER_GEN_TMP_DIR=$$(mktemp -d) ;\
-	cd $$CONTROLLER_GEN_TMP_DIR ;\
-	if [ ! $(which go) ]; then \
-		go mod init tmp ; \
-		go get sigs.k8s.io/controller-tools/cmd/controller-gen@v0.6.0 ; \
-		rm -rf $$CONTROLLER_GEN_TMP_DIR ; \
-	fi; \
-	}
-CONTROLLER_GEN=$(GOBIN)/controller-gen
-else
-CONTROLLER_GEN=$(shell which controller-gen)
-endif
+
+# go-get-tool will 'go get' any package $2 and install it to $1.
+PROJECT_DIR := $(shell dirname $(abspath $(lastword $(MAKEFILE_LIST))))
+define go-get-tool
+@[ -f $(1) ] || { \
+set -e ;\
+TMP_DIR=$$(mktemp -d) ;\
+cd $$TMP_DIR ;\
+go mod init tmp ;\
+echo "Downloading $(2)" ;\
+GOBIN=$(PROJECT_DIR)/bin go get $(2) ;\
+rm -rf $$TMP_DIR ;\
+}
+endef
 
 $(eval $(call buildpack-cp-ro,resolve))
 $(eval $(call buildpack-mount,mod-verify))
 $(eval $(call buildpack-mount,test))
 $(eval $(call buildpack-mount,controller-gen))
-$(eval $(call buildpack-mount,generate))
-$(eval $(call buildpack-mount,manifests))
-
-# produce goals for each cmd program ("bin1 bin2 ...")
-cmds := $(foreach dir,$(wildcard cmd/*),$(notdir $(dir)))
-# produce goals to build images for each cmd program ("bin1.image bin2.image ...")
-cmds_images = $(foreach cmd,$(cmds),$(cmd).image)
-cmds_clean = $(foreach cmd,$(cmds),$(cmd).clean)
-# produce goals to push images for each cmd program ("bin1.image.push bin2.image.push ...")
-cmds_images_push = $(foreach img,$(cmds_images),$(img).push)
-
-MOUNT_TARGETS = $(cmds)
-$(foreach t,$(MOUNT_TARGETS),$(eval $(call buildpack-mount,$(t))))
-
-.PHONY: clean
-clean: $(cmds_clean) resolve_clean licenses_clean
-
-$(cmds_clean): %.clean:
-	rm -f $*
-
-resolve_clean:
-	rm -rf vendor
-
-licenses_clean:
-	rm -rf licenses
-
-build-local: $(cmds) test-local ;
-
-.PHONY: $(cmds_images) $(cmds_images_push)
-
-# override image goals from common Makefile because we need to build several images
-build-image: $(cmds_images) ;
-push-image: $(cmds_images_push) ;
-
-# Example:
-#   make eventing-controller
-GOBUILD_FLAGS := -v
-PKG := github.com/kyma-project/kyma/components/eventing-controller
-$(cmds): %: resolve-local
-	@echo "+ Building $*"
-	@CGO_ENABLED=0 go build -o $* \
-		$(GOBUILD_FLAGS) \
-		$(PKG)/cmd/$*
-
-# Example:
-#   make eventing-controller.image
-$(cmds_images): %.image: build pull-licenses
-	$(eval $@_img_name := $*)
-	@echo "+ Building container image $($@_img_name)"
-	docker image build -f cmd/$*/Dockerfile -t $($@_img_name) .
-
-# Example:
-#   make eventing-controller.image.push
-$(cmds_images_push): %.push: %
-	$(eval $@_img_name := $(subst .image,,$*))
-	@echo "+ Pushing container image $($@_img_name)"
-	docker image tag $($@_img_name) $(DOCKER_PUSH_REPOSITORY)$(DOCKER_PUSH_DIRECTORY)/$($@_img_name):$(TAG)
-	docker image push $(DOCKER_PUSH_REPOSITORY)$(DOCKER_PUSH_DIRECTORY)/$($@_img_name):$(TAG)
