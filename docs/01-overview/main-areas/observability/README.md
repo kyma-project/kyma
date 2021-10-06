@@ -2,6 +2,8 @@
 title: What is Observability in Kyma?
 ---
 
+## Observability tools
+
 Kyma comes with tools that give you the most accurate and up-to-date monitoring, logging and tracing data.
 
 - [Prometheus](https://prometheus.io/) is the open source monitoring and alerting toolkit that provides the telemetry data. This data is consumed by different addons, including [Grafana](https://grafana.com/) for analytics and monitoring, and [Alertmanager](https://prometheus.io/docs/alerting/alertmanager/) for handling alerts.

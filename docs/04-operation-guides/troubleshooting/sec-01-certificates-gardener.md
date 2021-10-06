@@ -1,15 +1,20 @@
 ---
 title: Issues with certificates on Gardener
-type: Troubleshooting
 ---
 
-During installation on Gardener, Kyma requests domain SSL certificates using the Gardener's [`Certificate`](https://gardener.cloud/docs/guides/administer_shoots/request_cert/#request-a-certificate-via-certificate) custom resource to ensure secure communication through both Kyma UI and Kubernetes CLI.
+## Symptom
 
-This process can result in the following issues:
+You're experiencing one of the following issues:
 
 - `xip-patch` or `apiserver-proxy` installation takes too long.
 - `Certificate is still not ready, status is {STATUS}. Exiting...` error occurs.
 - Certificates are no longer valid.
+
+## Cause
+
+During installation on Gardener, Kyma requests domain SSL certificates using Gardener's [`Certificate`](https://gardener.cloud/docs/guides/administer_shoots/request_cert/#request-a-certificate-via-certificate) custom resource to ensure secure communication through both Kyma UI and Kubernetes CLI.
+
+## Remedy
 
 If any of these issues appears, follow these steps:
 

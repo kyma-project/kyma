@@ -163,4 +163,6 @@ Follow these steps to set up your custom domain and prepare a certificate requir
 
    > **NOTE:** Istio requires the Certificate CR containing the Secret to be created in the `istio-system` Namespace.
 
+## Next tutorial
+
 Proceed with [this](./apix-02-expose-service-apigateway.md) tutorial to expose a service using your custom domain.
