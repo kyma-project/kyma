@@ -88,11 +88,11 @@ describe("SKR nightly", function () {
     console.log(r);
   });
 
-  // it(`Get SKR with id ${runtimeID}`, async function () {
-  //   let s = await keb.getSKR(runtimeID)
-  //   console.log(s)
-  // });
-  //
+  it(`Get SKR with id ${runtimeID}`, async function () {
+    let s = await keb.getSKR(runtimeID)
+    console.log(s)
+  });
+
   // it(`Provision SKR with ID ${runtimeID}`, async function () {
   //   const customParams = {
   //     oidc: oidc0,

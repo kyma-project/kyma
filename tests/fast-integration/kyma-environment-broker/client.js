@@ -93,12 +93,13 @@ class KEBClient {
 
   async runtimes() {
     const token = await this.token.getToken(SCOPES);
-    const url = `https://kyma-env-broker.${this.host}/runtimes?${this.subaccountID}`;
+    const url = `https://kyma-env-broker.${this.host}/runtimes?subaccount=${this.subaccountID}`;
     const request = {
       url: url,
       method: "get",
       headers: {
         Authorization: `Bearer ${token}`,
+        "X-Broker-API-Version": 2.14,
       },
     };
     try {
