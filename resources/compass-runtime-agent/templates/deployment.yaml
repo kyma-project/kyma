@@ -29,7 +29,7 @@ spec:
           ports:
             - containerPort: {{ .Values.compassRuntimeAgent.healthCheck.port }}
               name: http-health
-          image: {{ .Values.global.images.containerRegistry.path }}/compass-runtime-agent:{{ .Values.global.images.runtimeAgent.version }}
+          image: {{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.compass_runtime_agent) }}
           imagePullPolicy: {{ .Values.compassRuntimeAgent.image.pullPolicy }}
           args:
             - "/compass-runtime-agent"
