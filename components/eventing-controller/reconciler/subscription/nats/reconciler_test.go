@@ -79,9 +79,9 @@ var _ = Describe("NATS Subscription Reconciliation Tests", func() {
 			// create subscription
 			subscription := reconcilertesting.NewSubscription(subscriptionName, namespaceName, reconcilertesting.WithNotCleanEventTypeFilter, reconcilertesting.WithWebhookForNats)
 			subscription.Spec.Sink = url
-			ensureSubscriptionCreated(subscription, ctx)
+			ensureSubscriptionCreated(ctx, subscription)
 
-			getSubscription(subscription, ctx).Should(And(
+			getSubscription(ctx, subscription).Should(And(
 				reconcilertesting.HaveSubscriptionName(subscriptionName),
 				reconcilertesting.HaveCondition(eventingv1alpha1.MakeCondition(
 					eventingv1alpha1.ConditionSubscriptionActive,
@@ -105,7 +105,7 @@ var _ = Describe("NATS Subscription Reconciliation Tests", func() {
 			}, timeout, pollingInterval).Should(WithTransform(bytesStringer, Equal(sent)))
 
 			Expect(k8sClient.Delete(ctx, subscription)).Should(BeNil())
-			isSubscriptionDeleted(subscription, ctx).Should(reconcilertesting.HaveNotFoundSubscription(true))
+			isSubscriptionDeleted(ctx, subscription).Should(reconcilertesting.HaveNotFoundSubscription(true))
 		})
 	})
 
@@ -118,9 +118,9 @@ var _ = Describe("NATS Subscription Reconciliation Tests", func() {
 			givenSubscription := reconcilertesting.NewSubscription(subscriptionName, namespaceName,
 				reconcilertesting.WithNotCleanEventTypeFilter, reconcilertesting.WithWebhookForNats)
 			givenSubscription.Spec.Sink = "invalid"
-			ensureSubscriptionCreated(givenSubscription, ctx)
+			ensureSubscriptionCreated(ctx, givenSubscription)
 
-			getSubscription(givenSubscription, ctx).Should(And(
+			getSubscription(ctx, givenSubscription).Should(And(
 				reconcilertesting.HaveSubscriptionName(subscriptionName),
 				reconcilertesting.HaveCondition(eventingv1alpha1.MakeCondition(
 					eventingv1alpha1.ConditionSubscriptionActive,
@@ -143,9 +143,9 @@ var _ = Describe("NATS Subscription Reconciliation Tests", func() {
 			// create subscription
 			subscription := reconcilertesting.NewSubscription(subscriptionName, namespaceName, reconcilertesting.WithEmptySourceEventType)
 			subscription.Spec.Sink = url
-			ensureSubscriptionCreated(subscription, ctx)
+			ensureSubscriptionCreated(ctx, subscription)
 
-			getSubscription(subscription, ctx).Should(And(
+			getSubscription(ctx, subscription).Should(And(
 				reconcilertesting.HaveSubscriptionName(subscriptionName),
 				reconcilertesting.HaveCondition(eventingv1alpha1.MakeCondition(
 					eventingv1alpha1.ConditionSubscriptionActive,
@@ -181,9 +181,9 @@ var _ = Describe("NATS Subscription Reconciliation Tests", func() {
 			// create subscription
 			sub := reconcilertesting.NewSubscription(subscriptionName, namespaceName, reconcilertesting.WithEventTypeFilter, reconcilertesting.WithWebhookForNats)
 			sub.Spec.Sink = url
-			ensureSubscriptionCreated(sub, ctx)
+			ensureSubscriptionCreated(ctx, sub)
 
-			getSubscription(sub, ctx).Should(And(
+			getSubscription(ctx, sub).Should(And(
 				reconcilertesting.HaveSubscriptionName(subscriptionName),
 				reconcilertesting.HaveCondition(eventingv1alpha1.MakeCondition(
 					eventingv1alpha1.ConditionSubscriptionActive,
@@ -232,7 +232,7 @@ var _ = Describe("NATS Subscription Reconciliation Tests", func() {
 			}, timeout, pollingInterval).Should(WithTransform(bytesStringer, Equal(toSend)))
 
 			Expect(k8sClient.Delete(ctx, sub)).Should(BeNil())
-			isSubscriptionDeleted(sub, ctx).Should(reconcilertesting.HaveNotFoundSubscription(true))
+			isSubscriptionDeleted(ctx, sub).Should(reconcilertesting.HaveNotFoundSubscription(true))
 		})
 	})
 
@@ -245,9 +245,9 @@ var _ = Describe("NATS Subscription Reconciliation Tests", func() {
 			givenSubscription := reconcilertesting.NewSubscription(subscriptionName, namespaceName,
 				reconcilertesting.WithEmptyEventTypeFilter, reconcilertesting.WithWebhookForNats)
 			reconcilertesting.WithValidSink("foo", "bar", givenSubscription)
-			ensureSubscriptionCreated(givenSubscription, ctx)
+			ensureSubscriptionCreated(ctx, givenSubscription)
 
-			getSubscription(givenSubscription, ctx).Should(And(
+			getSubscription(ctx, givenSubscription).Should(And(
 				reconcilertesting.HaveSubscriptionName(subscriptionName),
 				reconcilertesting.HaveCondition(eventingv1alpha1.MakeCondition(
 					eventingv1alpha1.ConditionSubscriptionActive,
@@ -258,7 +258,7 @@ var _ = Describe("NATS Subscription Reconciliation Tests", func() {
 	})
 })
 
-func ensureSubscriptionCreated(subscription *eventingv1alpha1.Subscription, ctx context.Context) {
+func ensureSubscriptionCreated(ctx context.Context, subscription *eventingv1alpha1.Subscription) {
 	By(fmt.Sprintf("Ensuring the test namespace %q is created", subscription.Namespace))
 	if subscription.Namespace != "default " {
 		// create testing namespace
@@ -309,7 +309,7 @@ func subscriptionGetter(ctx context.Context, name, namespace string) func() (*ev
 }
 
 // getSubscription fetches a subscription using the lookupKey and allows to make assertions on it
-func getSubscription(subscription *eventingv1alpha1.Subscription, ctx context.Context) AsyncAssertion {
+func getSubscription(ctx context.Context, subscription *eventingv1alpha1.Subscription) AsyncAssertion {
 	return Eventually(func() *eventingv1alpha1.Subscription {
 		lookupKey := types.NamespacedName{
 			Namespace: subscription.Namespace,
@@ -326,7 +326,7 @@ func getSubscription(subscription *eventingv1alpha1.Subscription, ctx context.Co
 }
 
 // isSubscriptionDeleted checks a subscription is deleted and allows to make assertions on it
-func isSubscriptionDeleted(subscription *eventingv1alpha1.Subscription, ctx context.Context) AsyncAssertion {
+func isSubscriptionDeleted(ctx context.Context, subscription *eventingv1alpha1.Subscription) AsyncAssertion {
 	return Eventually(func() bool {
 		lookupKey := types.NamespacedName{
 			Namespace: subscription.Namespace,
