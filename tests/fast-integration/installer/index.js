@@ -211,7 +211,7 @@ async function chartList(options) {
     ].join(',');
   } else {
     registryOverrides = [
-      `containers.manager.envs.functionBuildExecutorImage.value=eu.gcr.io/kyma-project/external/aerfio/kaniko-executor:v1.3.0`,
+      `containers.manager.envs.functionBuildExecutorImage.value=eu.gcr.io/kyma-project/tpi/kaniko-executor:1.6.0-7b6e8d78`,
       `dockerRegistry.enableInternal=false`,
       `dockerRegistry.registryAddress=registry.localhost:5000`,
       `dockerRegistry.serverAddress=registry.localhost:5000`,
