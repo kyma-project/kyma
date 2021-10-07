@@ -4,8 +4,8 @@ go 1.14
 
 require (
 	github.com/avast/retry-go v2.4.1+incompatible
-	github.com/cloudevents/sdk-go/protocol/nats/v2 v2.3.1
-	github.com/cloudevents/sdk-go/v2 v2.4.1
+	github.com/cloudevents/sdk-go/protocol/nats/v2 v2.5.0
+	github.com/cloudevents/sdk-go/v2 v2.5.0
 	github.com/go-logr/logr v0.4.0
 	github.com/go-logr/zapr v0.4.0
 	github.com/kelseyhightower/envconfig v1.4.0
@@ -15,8 +15,8 @@ require (
 	github.com/lightstep/tracecontext.go v0.0.0-20181129014701-1757c391b1ac // indirect
 	github.com/mitchellh/hashstructure v1.1.0 // indirect
 	github.com/mitchellh/hashstructure/v2 v2.0.2
-	github.com/nats-io/nats-server/v2 v2.2.4
-	github.com/nats-io/nats.go v1.11.0
+	github.com/nats-io/nats-server/v2 v2.3.4
+	github.com/nats-io/nats.go v1.11.1-0.20210623165838-4b75fc59ae30
 	github.com/onsi/ginkgo v1.16.2
 	github.com/onsi/gomega v1.10.5
 	github.com/ory/hydra-maester v0.0.22 // indirect
