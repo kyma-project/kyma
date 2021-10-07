@@ -101,7 +101,7 @@ global:
       version: "a2f445a2"
     registry:
       name: "registry"
-      version: "2.7.1-e0da5a68"
+      version: "2.7.1-8c646ef0"
       directory: "tpi"
     git_server:
       name: "gitserver"
