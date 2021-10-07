@@ -1,4 +1,14 @@
-{{- if or .Values.global.tlsCrt .Values.global.tlsKey -}}
+{{- if and (.Values.global.domainName) (not .Values.global.tlsCrt) -}}
+---
+apiVersion: cert.gardener.cloud/v1alpha1
+kind: Certificate
+metadata:
+  name: kyma-tls-cert
+  namespace: {{ .Values.certificates.kyma.namespace }}
+spec:
+  commonName: "*.{{ .Values.global.domainName }}"
+  secretName: {{ .Values.certificates.kyma.name }}
+  {{- else -}}
 ---
 apiVersion: v1
 kind: Secret
@@ -9,14 +19,4 @@ type: Opaque
 data:
   tls.crt: {{ .Values.global.tlsCrt }}
   tls.key: {{ .Values.global.tlsKey }}
-{{- else -}}
----
-apiVersion: cert.gardener.cloud/v1alpha1
-kind: Certificate
-metadata:
-  name: kyma-tls-cert
-  namespace: {{ .Values.certificates.kyma.namespace }}
-spec:
-  commonName: "*.{{ .Values.global.domainName }}"
-  secretName: {{ .Values.certificates.kyma.name }}
 {{- end -}}

@@ -13,6 +13,7 @@
     "test": "mocha --inline-diffs --check-leaks --reporter mocha-multi-reporters --reporter-options configFile=mocha-reporter-config.json",
     "test-utils": "mocha --inline-diffs --check-leaks --reporter mocha-multi-reporters --reporter-options configFile=mocha-reporter-config.json './utils/**/*.test.js'",
     "test-commerce-mock": "mocha --inline-diffs --check-leaks --reporter mocha-multi-reporters --reporter-options configFile=mocha-reporter-config.json ./test/2-commerce-mock.js",
+    "test-certificate": "mocha --timeout 150000 --inline-diffs --check-leaks --reporter mocha-multi-reporters --reporter-options configFile=mocha-reporter-config.json ./certificate-test/",
     "test-getting-started": "mocha --inline-diffs --check-leaks --reporter mocha-multi-reporters --reporter-options configFile=mocha-reporter-config.json ./test/3-getting-started-guides.js",
     "test-compass": "mocha --inline-diffs --check-leaks --reporter mocha-multi-reporters --reporter-options configFile=mocha-reporter-config.json ./compass-test/",
     "test-skr": "mocha --inline-diffs --check-leaks --reporter mocha-multi-reporters --reporter-options configFile=mocha-reporter-config.json ./skr-test/",
@@ -41,6 +42,7 @@
     "mocha-junit-reporter": "^2.0.0",
     "mockserver-client": "^5.11.2",
     "moment": "^2.29.1",
+    "node-forge": "^0.10.0",
     "p-retry": "^4.2.0",
     "uuid": "^8.3.2",
     "yargs": "^16.2.0"

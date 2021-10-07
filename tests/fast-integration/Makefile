@@ -3,6 +3,7 @@ ci:
 	npm install
 	npm test
 	npm run test-monitoring
+	npm run test-certificate
 
 .PHONY: ci-compass
 ci-compass:
