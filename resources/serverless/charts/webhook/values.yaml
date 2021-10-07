@@ -5,6 +5,8 @@
 nameOverride:
 fullnameOverride:
 image:
+  repository: "eu.gcr.io/kyma-project/function-webhook"
+  tag: "overriden by parent chart"
   pullPolicy: IfNotPresent
 
 commonLabels:
