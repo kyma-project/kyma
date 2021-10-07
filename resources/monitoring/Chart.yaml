@@ -1,4 +1,4 @@
-apiVersion: v1
+apiVersion: v2
 description: Kyma component 'monitoring'
 name: monitoring
 version: 1.0.0
@@ -10,3 +10,7 @@ dependencies:
       condition: pushgateway.enabled
     - name: prometheus-istio
       condition: prometheus-istio.enabled
+    # Add as dependecies to make helm lint happy. refer: https://github.com/helm/helm/issues/8955
+    - name: grafana
+    - name: kube-state-metrics
+    - name: prometheus-node-exporter
