@@ -46,20 +46,6 @@ cmds_images_push = $(foreach img,$(cmds_images),$(img).push)
 GOBUILD_FLAGS := -v
 PKG := github.com/kyma-project/kyma/components/eventing-controller
 
-all: manager
-
-
-ensure-local:
-	@echo "Go modules present in component - omitting."
-
-dep-status:
-	@echo "Go modules present in component - omitting."
-
-dep-status-local:
-	@echo "Go modules present in component - omitting."
-
-
-
 ##@ General
 
 # The help target prints out all targets with their descriptions organized
@@ -109,7 +95,7 @@ $(cmds_local): %-local: resolve-local ## build binary
 
 # Example:
 #   make eventing-controller.image
-$(cmds_images): %.image: pull-licenses ## docker build image
+$(cmds_images): %.image: pull-licenses-local ## docker build image
 	$(eval $@_img_name := $*)
 	@echo "+ Building container image $($@_img_name)"
 	docker image build -f cmd/$*/Dockerfile -t $($@_img_name) .
