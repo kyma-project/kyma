@@ -41,7 +41,7 @@ const (
 // InitializeConditions sets unset conditions to Unknown
 func (s *SubscriptionStatus) InitializeConditions() {
 	initialConditions := makeConditions()
-	givenConditions := make(map[ConditionType]Condition, 0)
+	givenConditions := make(map[ConditionType]Condition)
 
 	// create map of Condition per ConditionType
 	for _, condition := range s.Conditions {

@@ -5,14 +5,14 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"time"
 
 	cev2nats "github.com/cloudevents/sdk-go/protocol/nats/v2"
 	cev2 "github.com/cloudevents/sdk-go/v2"
 	"github.com/cloudevents/sdk-go/v2/binding"
 	cev2http "github.com/cloudevents/sdk-go/v2/protocol/http"
-	"github.com/kyma-project/kyma/components/eventing-controller/testing"
 
-	"time"
+	"github.com/kyma-project/kyma/components/eventing-controller/testing"
 
 	eventingtesting "github.com/kyma-project/kyma/components/eventing-controller/testing"
 )
@@ -56,7 +56,7 @@ func SendBinaryCloudEventToNATS(natsClient *Nats, subject string) error {
 	}
 	// get a CE sender for the embedded NATS using CE-SDK
 	natsOpts := cev2nats.NatsOptions()
-	url := natsClient.config.Url
+	url := natsClient.config.URL
 	sender, err := cev2nats.NewSender(url, subject, natsOpts)
 	if err != nil {
 		return nil
@@ -98,7 +98,7 @@ func SendStructuredCloudEventToNATS(natsClient *Nats, subject string) error {
 	}
 	// get a CE sender for the embedded NATS
 	natsOpts := cev2nats.NatsOptions()
-	url := natsClient.config.Url
+	url := natsClient.config.URL
 	sender, err := cev2nats.NewSender(url, subject, natsOpts)
 	if err != nil {
 		return nil

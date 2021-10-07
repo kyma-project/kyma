@@ -9,6 +9,7 @@ import (
 	"go.uber.org/zap"
 
 	apigatewayv1alpha1 "github.com/kyma-incubator/api-gateway/api/v1alpha1"
+
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 	"github.com/kyma-project/kyma/components/eventing-controller/logger"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/client"
@@ -21,29 +22,29 @@ import (
 )
 
 const (
-	bebHandlerName                = "beb-handler"
-	MaxBEBSubscriptionNameLength  = 50
-	BEB_SUBSCRIPTION_NAME_LOG_KEY = "bebSubscriptionName"
-	ERROR_LOG_KEY                 = "error"
+	bebHandlerName               = "beb-handler"
+	MaxBEBSubscriptionNameLength = 50
+	BEBSubscriptionNameLogKey    = "bebSubscriptionName"
+	ErrorLogKey                  = "error"
 )
 
 // compile time check
-var _ MessagingBackend = &Beb{}
+var _ MessagingBackend = &BEB{}
 
 type OAuth2ClientCredentials struct {
 	ClientID     string
 	ClientSecret string
 }
 
-func NewBEB(credentials *OAuth2ClientCredentials, mapper NameMapper, logger *logger.Logger) *Beb {
-	return &Beb{
+func NewBEB(credentials *OAuth2ClientCredentials, mapper NameMapper, logger *logger.Logger) *BEB {
+	return &BEB{
 		OAth2credentials: credentials,
 		logger:           logger,
 		SubNameMapper:    mapper,
 	}
 }
 
-type Beb struct {
+type BEB struct {
 	Client           *client.Client
 	WebhookAuth      *types.WebhookAuth
 	ProtocolSettings *eventingv1alpha1.ProtocolSettings
@@ -53,15 +54,15 @@ type Beb struct {
 	logger           *logger.Logger
 }
 
-type BebResponse struct {
+type BEBResponse struct {
 	StatusCode int
 	Error      error
 }
 
-func (b *Beb) Initialize(cfg env.Config) error {
+func (b *BEB) Initialize(cfg env.Config) error {
 	if b.Client == nil {
 		authenticator := auth.NewAuthenticator(cfg)
-		b.Client = client.NewClient(config.GetDefaultConfig(cfg.BebApiUrl), authenticator)
+		b.Client = client.NewClient(config.GetDefaultConfig(cfg.BEBAPIURL), authenticator)
 		b.WebhookAuth = getWebHookAuth(cfg, b.OAth2credentials)
 		b.ProtocolSettings = &eventingv1alpha1.ProtocolSettings{
 			ContentMode:     &cfg.ContentMode,
@@ -86,27 +87,27 @@ func getWebHookAuth(cfg env.Config, credentials *OAuth2ClientCredentials) *types
 }
 
 // SyncSubscription synchronize the EV2 subscription with the EMS subscription. It returns true, if the EV2 subscription status was changed
-func (b *Beb) SyncSubscription(subscription *eventingv1alpha1.Subscription, cleaner eventtype.Cleaner, params ...interface{}) (bool, error) {
+func (b *BEB) SyncSubscription(subscription *eventingv1alpha1.Subscription, cleaner eventtype.Cleaner, params ...interface{}) (bool, error) {
 	// Format logger
 	log := utils.LoggerWithSubscription(b.namedLogger(), subscription)
 
 	apiRule, ok := params[0].(*apigatewayv1alpha1.APIRule)
 	if !ok {
 		err := fmt.Errorf("get ApiRule from params[0] failed: %v", params[0])
-		log.Errorw("wrong parameter for subscription", ERROR_LOG_KEY, err)
+		log.Errorw("wrong parameter for subscription", ErrorLogKey, err)
 	}
 
 	// get the internal view for the ev2 subscription
 	var statusChanged = false
 	sEv2, err := getInternalView4Ev2(subscription, apiRule, b.WebhookAuth, b.ProtocolSettings, b.Namespace, b.SubNameMapper)
 	if err != nil {
-		log.Errorw("get Kyma subscription internal view failed", ERROR_LOG_KEY, err)
+		log.Errorw("get Kyma subscription internal view failed", ErrorLogKey, err)
 		return false, err
 	}
 
 	newEv2Hash, err := getHash(sEv2)
 	if err != nil {
-		log.Errorw("get Kyma subscription hash failed", ERROR_LOG_KEY, err)
+		log.Errorw("get Kyma subscription hash failed", ErrorLogKey, err)
 		return false, err
 	}
 
@@ -126,10 +127,10 @@ func (b *Beb) SyncSubscription(subscription *eventingv1alpha1.Subscription, clea
 		// check if EMS subscription is the same as in the past
 		bebSubscription, err = b.getSubscription(sEv2.Name)
 		if err != nil {
-			log.Errorw("get BEB subscription failed", BEB_SUBSCRIPTION_NAME_LOG_KEY, sEv2.Name, ERROR_LOG_KEY, err)
+			log.Errorw("get BEB subscription failed", BEBSubscriptionNameLogKey, sEv2.Name, ErrorLogKey, err)
 			httpStatusNotFoundError := errors.New(strconv.Itoa(http.StatusNotFound))
 			if errors.As(err, &httpStatusNotFoundError) {
-				log.Infow("Recreate the BEB subscription", BEB_SUBSCRIPTION_NAME_LOG_KEY, sEv2.Name)
+				log.Infow("Recreate the BEB subscription", BEBSubscriptionNameLogKey, sEv2.Name)
 				bebSubscription, err = b.createAndGetSubscription(sEv2, cleaner, log)
 				if err != nil {
 					return false, err
@@ -139,14 +140,10 @@ func (b *Beb) SyncSubscription(subscription *eventingv1alpha1.Subscription, clea
 			}
 		}
 		// get the internal view for the EMS subscription
-		sEms, err := getInternalView4Ems(bebSubscription)
-		if err != nil {
-			log.Errorw("get BEB subscription internal view failed", ERROR_LOG_KEY, err)
-			return false, err
-		}
+		sEms := getInternalView4Ems(bebSubscription)
 		newEmsHash, err := getHash(sEms)
 		if err != nil {
-			log.Errorw("get BEB subscription hash failed", ERROR_LOG_KEY, err)
+			log.Errorw("get BEB subscription hash failed", ErrorLogKey, err)
 			return false, err
 		}
 		if newEmsHash != subscription.Status.Emshash {
@@ -166,69 +163,69 @@ func (b *Beb) SyncSubscription(subscription *eventingv1alpha1.Subscription, clea
 }
 
 // DeleteSubscription deletes the corresponding EMS subscription
-func (b *Beb) DeleteSubscription(subscription *eventingv1alpha1.Subscription) error {
+func (b *BEB) DeleteSubscription(subscription *eventingv1alpha1.Subscription) error {
 	return b.deleteSubscription(b.SubNameMapper.MapSubscriptionName(subscription))
 }
 
-func (b *Beb) deleteCreateAndHashSubscription(subscription *types.Subscription, cleaner eventtype.Cleaner, log *zap.SugaredLogger) (*types.Subscription, int64, error) {
-	log = log.With(BEB_SUBSCRIPTION_NAME_LOG_KEY, subscription.Name)
+func (b *BEB) deleteCreateAndHashSubscription(subscription *types.Subscription, cleaner eventtype.Cleaner, log *zap.SugaredLogger) (*types.Subscription, int64, error) {
+	log = log.With(BEBSubscriptionNameLogKey, subscription.Name)
 	// delete EMS subscription
 	if err := b.deleteSubscription(subscription.Name); err != nil {
-		log.Errorw("delete BEB subscription failed", ERROR_LOG_KEY, err)
+		log.Errorw("delete BEB subscription failed", ErrorLogKey, err)
 		return nil, 0, err
 	}
 
 	// clean the application name segment in the subscription event-types from none-alphanumeric characters
 	if err := cleanEventTypes(subscription, cleaner); err != nil {
-		log.Errorw("clean application name in the subscription event-types failed", ERROR_LOG_KEY, err)
+		log.Errorw("clean application name in the subscription event-types failed", ErrorLogKey, err)
 		return nil, 0, err
 	}
 
 	// create a new EMS subscription
 	if err := b.createSubscription(subscription, log); err != nil {
-		log.Errorw("create BEB subscription failed", ERROR_LOG_KEY, err)
+		log.Errorw("create BEB subscription failed", ErrorLogKey, err)
 		return nil, 0, err
 	}
 
 	// get the new EMS subscription
 	bebSubscription, err := b.getSubscription(subscription.Name)
 	if err != nil {
-		log.Errorw("get BEB subscription failed", ERROR_LOG_KEY, err)
+		log.Errorw("get BEB subscription failed", ErrorLogKey, err)
 		return nil, 0, err
 	}
 
 	// get the new hash
-	sEMS, err := getInternalView4Ems(bebSubscription)
+	sEMS := getInternalView4Ems(bebSubscription)
 	if err != nil {
-		log.Errorw("get BEB subscription internal view failed", ERROR_LOG_KEY, err)
+		log.Errorw("get BEB subscription internal view failed", ErrorLogKey, err)
 	}
 	newEmsHash, err := getHash(sEMS)
 	if err != nil {
-		log.Errorw("get BEB subscription hash failed", ERROR_LOG_KEY, err)
+		log.Errorw("get BEB subscription hash failed", ErrorLogKey, err)
 		return nil, 0, err
 	}
 
 	return bebSubscription, newEmsHash, nil
 }
 
-func (b *Beb) createAndGetSubscription(subscription *types.Subscription, cleaner eventtype.Cleaner, log *zap.SugaredLogger) (*types.Subscription, error) {
+func (b *BEB) createAndGetSubscription(subscription *types.Subscription, cleaner eventtype.Cleaner, log *zap.SugaredLogger) (*types.Subscription, error) {
 	// clean the application name segment in the subscription event-types from none-alphanumeric characters
 	if err := cleanEventTypes(subscription, cleaner); err != nil {
-		log.Errorw("clean application name in the subscription event-types failed", ERROR_LOG_KEY, err)
+		log.Errorw("clean application name in the subscription event-types failed", ErrorLogKey, err)
 		return nil, err
 	}
 
-	log = log.With(BEB_SUBSCRIPTION_NAME_LOG_KEY, subscription.Name)
+	log = log.With(BEBSubscriptionNameLogKey, subscription.Name)
 	// create a new EMS subscription
 	if err := b.createSubscription(subscription, log); err != nil {
-		log.Errorw("create BEB subscription failed", ERROR_LOG_KEY, err)
+		log.Errorw("create BEB subscription failed", ErrorLogKey, err)
 		return nil, err
 	}
 
 	// get the new EMS subscription
 	bebSubscription, err := b.getSubscription(subscription.Name)
 	if err != nil {
-		log.Errorw("get BEB subscription failed", ERROR_LOG_KEY, err)
+		log.Errorw("get BEB subscription failed", ErrorLogKey, err)
 		return nil, err
 	}
 
@@ -251,7 +248,7 @@ func cleanEventTypes(subscription *types.Subscription, cleaner eventtype.Cleaner
 }
 
 // setEmsSubscriptionStatus sets the status of bebSubscription in ev2Subscription
-func (b *Beb) setEmsSubscriptionStatus(subscription *eventingv1alpha1.Subscription, bebSubscription *types.Subscription) bool {
+func (b *BEB) setEmsSubscriptionStatus(subscription *eventingv1alpha1.Subscription, bebSubscription *types.Subscription) bool {
 	var statusChanged = false
 	if subscription.Status.EmsSubscriptionStatus.SubscriptionStatus != string(bebSubscription.SubscriptionStatus) {
 		subscription.Status.EmsSubscriptionStatus.SubscriptionStatus = string(bebSubscription.SubscriptionStatus)
@@ -276,7 +273,7 @@ func (b *Beb) setEmsSubscriptionStatus(subscription *eventingv1alpha1.Subscripti
 	return statusChanged
 }
 
-func (b *Beb) getSubscription(name string) (*types.Subscription, error) {
+func (b *BEB) getSubscription(name string) (*types.Subscription, error) {
 	bebSubscription, resp, err := b.Client.Get(name)
 	if err != nil {
 		return nil, fmt.Errorf("get subscription failed: %v", err)
@@ -287,7 +284,7 @@ func (b *Beb) getSubscription(name string) (*types.Subscription, error) {
 	return bebSubscription, nil
 }
 
-func (b *Beb) deleteSubscription(name string) error {
+func (b *BEB) deleteSubscription(name string) error {
 	resp, err := b.Client.Delete(name)
 	if err != nil {
 		return fmt.Errorf("delete subscription failed: %v", err)
@@ -298,7 +295,7 @@ func (b *Beb) deleteSubscription(name string) error {
 	return nil
 }
 
-func (b *Beb) createSubscription(subscription *types.Subscription, log *zap.SugaredLogger) error {
+func (b *BEB) createSubscription(subscription *types.Subscription, log *zap.SugaredLogger) error {
 	createResponse, err := b.Client.Create(subscription)
 	if err != nil {
 		return fmt.Errorf("create subscription failed: %v", err)
@@ -310,6 +307,6 @@ func (b *Beb) createSubscription(subscription *types.Subscription, log *zap.Suga
 	return nil
 }
 
-func (b *Beb) namedLogger() *zap.SugaredLogger {
+func (b *BEB) namedLogger() *zap.SugaredLogger {
 	return b.logger.WithContext().Named(bebHandlerName)
 }

@@ -252,8 +252,8 @@ func TestEventingBackendStatusEqual(t *testing.T) {
 				EventingReady:               utils.BoolPtr(false),
 				SubscriptionControllerReady: utils.BoolPtr(true),
 				PublisherProxyReady:         utils.BoolPtr(true),
-				BebSecretName:               "secret",
-				BebSecretNamespace:          "default",
+				BEBSecretName:               "secret",
+				BEBSecretNamespace:          "default",
 			},
 			backendStatus2: eventingv1alpha1.EventingBackendStatus{
 				EventingReady:               utils.BoolPtr(false),

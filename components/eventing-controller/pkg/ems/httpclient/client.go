@@ -4,22 +4,21 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"io"
+	"io/ioutil"
+	"net/http"
 
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/signals"
 
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/clientcredentials"
-
-	"io"
-	"io/ioutil"
-	"net/http"
 )
 
 type Client struct {
 	httpClient *http.Client
 }
 
-func NewHttpClient(cfg clientcredentials.Config) *Client {
+func NewHTTPClient(cfg clientcredentials.Config) *Client {
 	ctx := signals.NewReusableContext()
 	httpClient := newOauth2Client(ctx, cfg)
 	return &Client{httpClient: httpClient}
@@ -37,7 +36,7 @@ func newOauth2Client(ctx context.Context, cfg clientcredentials.Config) *http.Cl
 	return client
 }
 
-func (c *Client) GetHttpClient() *http.Client {
+func (c *Client) GetHTTPClient() *http.Client {
 	return c.httpClient
 }
 

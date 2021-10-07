@@ -6,9 +6,9 @@ import (
 	"github.com/ory/oathkeeper-maester/api/v1alpha1"
 	"k8s.io/apimachinery/pkg/types"
 
-	. "github.com/onsi/gomega"
-	. "github.com/onsi/gomega/gstruct"
-	. "github.com/onsi/gomega/types"
+	. "github.com/onsi/gomega"         // nolint
+	. "github.com/onsi/gomega/gstruct" // nolint
+	. "github.com/onsi/gomega/types"   // nolint
 
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
