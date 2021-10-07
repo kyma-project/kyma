@@ -2,9 +2,9 @@
 title: Error for kubectl port forwarding
 ---
 
-## Condition
+## Symptom
 
-When executing `kubectl port-forward` I get the following error:
+When executing `kubectl port-forward`, you get the following error:
 
 ```bash
 Unable to listen on port ... bind: address already in use

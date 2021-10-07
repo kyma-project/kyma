@@ -2,9 +2,13 @@
 title: Connection refused errors
 ---
 
-## Symptom and cause
+## Symptom
 
-Mutual TLS (mTLS) is enabled in the Service Mesh by default. As a result, every element of the Service Mesh must have an Istio sidecar with a valid TLS certificate to allow communication. Attempts to establish connection between a service without a sidecar and a service with a sidecar result in a `Connection reset by peer` or a `GOAWAY` response.
+You get a `Connection reset by peer` or a `GOAWAY` response when you attempt to establish a connection between a service without a sidecar and a service with a sidecar.
+
+## Cause
+
+By default, mutual TLS (mTLS) is enabled in the Service Mesh. As a result, every element of the Service Mesh must have an Istio sidecar with a valid TLS certificate to allow communication.
 
 ## Remedy
 

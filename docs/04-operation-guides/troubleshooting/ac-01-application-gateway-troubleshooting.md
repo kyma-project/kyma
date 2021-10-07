@@ -1,10 +1,14 @@
 ---
 title: Error when calling a registered service
-type: Troubleshooting
 ---
 
-If you call a registered service and receive an error, follow these steps to detect the source of the problem:
+## Symptom
 
+You call a registered service and receive an error.
+
+## Remedy
+
+Follow these steps to detect the source of the problem:
 
 1. Check the logs.
 
