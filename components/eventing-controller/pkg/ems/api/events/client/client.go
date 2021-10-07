@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	cloudevents "github.com/cloudevents/sdk-go/v2"
+
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/config"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/types"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/auth"
@@ -36,7 +37,7 @@ func NewClient(config *config.Config, authenticator *auth.Authenticator) *Client
 	}
 }
 
-func (c Client) GetHttpClient() *httpclient.Client {
+func (c Client) GetHTTPClient() *httpclient.Client {
 	return c.httpClient
 }
 
@@ -50,14 +51,15 @@ func (c Client) Publish(event cloudevents.Event, qos types.Qos) (*types.PublishR
 	req.Header.Set("qos", string(qos))
 
 	var response types.PublishResponse
-	if resp, responseBody, err := c.httpClient.Do(req, &response); err != nil {
+	resp, responseBody, err := c.httpClient.Do(req, &response)
+	if err != nil {
 		return nil, err
-	} else {
-		response.StatusCode = resp.StatusCode
-		response.Message = resp.Status
-		if responseBody != nil {
-			response.Message = response.Message + ";" + string(*responseBody)
-		}
+	}
+
+	response.StatusCode = resp.StatusCode
+	response.Message = resp.Status
+	if responseBody != nil {
+		response.Message = response.Message + ";" + string(*responseBody)
 	}
 
 	return &response, nil
@@ -70,19 +72,21 @@ func (c Client) Create(subscription *types.Subscription) (*types.CreateResponse,
 	}
 
 	var response *types.CreateResponse
-	if resp, responseBody, err := c.httpClient.Do(req, &response); err != nil {
+	resp, responseBody, err := c.httpClient.Do(req, &response)
+	if err != nil {
 		return nil, err
-	} else if resp == nil {
+	}
+	if resp == nil {
 		return nil, fmt.Errorf("unmarshal response failed: %v", resp)
-	} else {
-		if response == nil {
-			response = &types.CreateResponse{}
-		}
-		response.StatusCode = resp.StatusCode
-		response.Message = resp.Status
-		if responseBody != nil {
-			response.Message = response.Message + ";" + string(*responseBody)
-		}
+	}
+
+	if response == nil {
+		response = &types.CreateResponse{}
+	}
+	response.StatusCode = resp.StatusCode
+	response.Message = resp.Status
+	if responseBody != nil {
+		response.Message = response.Message + ";" + string(*responseBody)
 	}
 
 	return response, nil
@@ -96,16 +100,18 @@ func (c Client) List() (*types.Subscriptions, *types.Response, error) {
 
 	var subscriptions *types.Subscriptions
 	var response types.Response
-	if resp, responseBody, err := c.httpClient.Do(req, &subscriptions); err != nil {
+	resp, responseBody, err := c.httpClient.Do(req, &subscriptions)
+	if err != nil {
 		return nil, nil, err
-	} else if resp == nil {
+	}
+	if resp == nil {
 		return nil, nil, fmt.Errorf("unmarshal response failed: %v", resp)
-	} else {
-		response.StatusCode = resp.StatusCode
-		response.Message = resp.Status
-		if subscriptions == nil && responseBody != nil {
-			response.Message = response.Message + ";" + string(*responseBody)
-		}
+	}
+
+	response.StatusCode = resp.StatusCode
+	response.Message = resp.Status
+	if subscriptions == nil && responseBody != nil {
+		response.Message = response.Message + ";" + string(*responseBody)
 	}
 
 	return subscriptions, &response, nil
@@ -119,16 +125,18 @@ func (c Client) Get(name string) (*types.Subscription, *types.Response, error) {
 
 	var subscription *types.Subscription
 	var response types.Response
-	if resp, responseBody, err := c.httpClient.Do(req, &subscription); err != nil {
+	resp, responseBody, err := c.httpClient.Do(req, &subscription)
+	if err != nil {
 		return nil, nil, err
-	} else if resp == nil {
+	}
+	if resp == nil {
 		return nil, nil, fmt.Errorf("unmarshal response failed: %v", resp)
-	} else {
-		response.StatusCode = resp.StatusCode
-		response.Message = resp.Status
-		if subscription == nil && responseBody != nil {
-			response.Message = response.Message + ";" + string(*responseBody)
-		}
+	}
+
+	response.StatusCode = resp.StatusCode
+	response.Message = resp.Status
+	if subscription == nil && responseBody != nil {
+		response.Message = response.Message + ";" + string(*responseBody)
 	}
 
 	return subscription, &response, nil
@@ -141,14 +149,15 @@ func (c Client) Delete(name string) (*types.DeleteResponse, error) {
 	}
 
 	var response types.DeleteResponse
-	if resp, responseBody, err := c.httpClient.Do(req, &response); err != nil {
+	resp, responseBody, err := c.httpClient.Do(req, &response)
+	if err != nil {
 		return nil, err
-	} else {
-		response.StatusCode = resp.StatusCode
-		response.Message = resp.Status
-		if responseBody != nil {
-			response.Message = response.Message + ";" + string(*responseBody)
-		}
+	}
+
+	response.StatusCode = resp.StatusCode
+	response.Message = resp.Status
+	if responseBody != nil {
+		response.Message = response.Message + ";" + string(*responseBody)
 	}
 
 	return &response, nil
@@ -161,14 +170,14 @@ func (c Client) TriggerHandshake(name string) (*types.TriggerHandshake, error) {
 	}
 
 	var response types.TriggerHandshake
-	if resp, responseBody, err := c.httpClient.Do(req, &response); err != nil {
+	resp, responseBody, err := c.httpClient.Do(req, &response)
+	if err != nil {
 		return nil, err
-	} else {
-		response.StatusCode = resp.StatusCode
-		response.Message = resp.Status
-		if responseBody != nil {
-			response.Message = response.Message + ";" + string(*responseBody)
-		}
+	}
+	response.StatusCode = resp.StatusCode
+	response.Message = resp.Status
+	if responseBody != nil {
+		response.Message = response.Message + ";" + string(*responseBody)
 	}
 
 	return &response, nil
@@ -181,14 +190,14 @@ func (c Client) UpdateState(name string, state types.State) (*types.UpdateStateR
 	}
 
 	var response types.UpdateStateResponse
-	if resp, responseBody, err := c.httpClient.Do(req, &response); err != nil {
+	resp, responseBody, err := c.httpClient.Do(req, &response)
+	if err != nil {
 		return nil, err
-	} else {
-		response.StatusCode = resp.StatusCode
-		response.Message = resp.Status
-		if responseBody != nil {
-			response.Message = response.Message + ";" + string(*responseBody)
-		}
+	}
+	response.StatusCode = resp.StatusCode
+	response.Message = resp.Status
+	if responseBody != nil {
+		response.Message = response.Message + ";" + string(*responseBody)
 	}
 
 	return &response, nil

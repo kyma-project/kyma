@@ -1,4 +1,4 @@
-package subscription
+package beb
 
 import (
 	corev1 "k8s.io/api/core/v1"
@@ -17,10 +17,6 @@ const (
 	reasonUpdate reason = "Update"
 	// reasonUpdateFailed is used when an object update fails.
 	reasonUpdateFailed reason = "UpdateFailed"
-	// reasonDelete is used when an object is successfully deleted.
-	reasonDelete reason = "Delete"
-	// reasonDeleteFailed is used when an object delete fails.
-	reasonDeleteFailed reason = "DeleteFailed"
 	// reasonValidationFailed is used when an object validation fails.
 	reasonValidationFailed reason = "ValidationFailed"
 )

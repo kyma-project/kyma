@@ -9,6 +9,7 @@ import (
 	dynamicfake "k8s.io/client-go/dynamic/fake"
 
 	applicationv1alpha1 "github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
+
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/application"
 )
 
@@ -27,12 +28,4 @@ func setupSchemeOrDie() *runtime.Scheme {
 		log.Fatalf("setup scheme failed: %v", err)
 	}
 	return scheme
-}
-
-func mapToUnstructuredOrDie(app *applicationv1alpha1.Application) map[string]interface{} {
-	unstructuredMap, err := runtime.DefaultUnstructuredConverter.ToUnstructured(app)
-	if err != nil {
-		log.Fatalf("map application to unstruchtured object failed: %v", err)
-	}
-	return unstructuredMap
 }

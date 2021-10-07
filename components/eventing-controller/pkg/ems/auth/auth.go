@@ -12,7 +12,7 @@ type Authenticator struct {
 func NewAuthenticator(cfg env.Config) *Authenticator {
 	authenticator := &Authenticator{}
 	config := getDefaultOauth2Config(cfg)
-	authenticator.client = httpclient.NewHttpClient(config)
+	authenticator.client = httpclient.NewHTTPClient(config)
 	return authenticator
 }
 

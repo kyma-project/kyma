@@ -49,7 +49,7 @@ spec:
         spec:
           initContainers:
             - name: keys-generator
-              image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+              image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.oathkeeper) }}"
               command:
                 - /bin/sh
                 - -c
@@ -69,7 +69,7 @@ spec:
                   mountPath: /etc/secrets
           containers:
           - name: keys-supplier
-            image: {{ .Values.kubectlJob.image }}
+            image: {{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.k8s_tools) }}
             command:
             - /bin/bash
             - -c

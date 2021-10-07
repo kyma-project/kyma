@@ -43,7 +43,7 @@ func Test_GetNatsConfig(t *testing.T) {
 	g.Expect(config.MaxReconnects).To(Equal(maxReconnects))
 	g.Expect(config.ReconnectWait).To(Equal(reconnectWait))
 
-	g.Expect(config.Url).To(Equal(envs["NATS_URL"]))
+	g.Expect(config.URL).To(Equal(envs["NATS_URL"]))
 	g.Expect(config.EventTypePrefix).To(Equal(envs["EVENT_TYPE_PREFIX"]))
 
 	g.Expect(config.MaxIdleConns).To(Equal(maxIdleConns))

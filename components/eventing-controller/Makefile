@@ -135,7 +135,7 @@ ifeq (, $(shell which controller-gen))
 	cd $$CONTROLLER_GEN_TMP_DIR ;\
 	if [ ! $(which go) ]; then \
 		go mod init tmp ; \
-		go get sigs.k8s.io/controller-tools/cmd/controller-gen@v0.2.5 ; \
+		go get sigs.k8s.io/controller-tools/cmd/controller-gen@v0.6.0 ; \
 		rm -rf $$CONTROLLER_GEN_TMP_DIR ; \
 	fi; \
 	}

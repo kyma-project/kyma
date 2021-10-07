@@ -30,6 +30,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 
 	kymalogger "github.com/kyma-project/kyma/common/logging/logger"
+
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 	"github.com/kyma-project/kyma/components/eventing-controller/logger"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/commander"
@@ -241,8 +242,8 @@ var _ = Describe("Backend Reconciliation Tests", func() {
 					EventingReady:               utils.BoolPtr(false),
 					SubscriptionControllerReady: utils.BoolPtr(true),
 					PublisherProxyReady:         utils.BoolPtr(false),
-					BebSecretName:               "",
-					BebSecretNamespace:          "",
+					BEBSecretName:               "",
+					BEBSecretNamespace:          "",
 				}))
 		})
 		It("Should mark eventing as ready when publisher proxy is ready", func() {
@@ -254,8 +255,8 @@ var _ = Describe("Backend Reconciliation Tests", func() {
 					EventingReady:               utils.BoolPtr(true),
 					SubscriptionControllerReady: utils.BoolPtr(true),
 					PublisherProxyReady:         utils.BoolPtr(true),
-					BebSecretName:               "",
-					BebSecretNamespace:          "",
+					BEBSecretName:               "",
+					BEBSecretNamespace:          "",
 				}))
 		})
 		It("Should check that the owner of publisher deployment is the controller deployment", func() {
@@ -289,12 +290,12 @@ var _ = Describe("Backend Reconciliation Tests", func() {
 			))
 			Eventually(eventingBackendStatusGetter(ctx, eventingBackendName, kymaSystemNamespace), timeout, pollingInterval).
 				Should(Equal(&eventingv1alpha1.EventingBackendStatus{
-					Backend:                     eventingv1alpha1.BebBackendType,
+					Backend:                     eventingv1alpha1.BEBBackendType,
 					EventingReady:               utils.BoolPtr(false),
 					SubscriptionControllerReady: utils.BoolPtr(true),
 					PublisherProxyReady:         utils.BoolPtr(false),
-					BebSecretName:               bebSecret1name,
-					BebSecretNamespace:          kymaSystemNamespace,
+					BEBSecretName:               bebSecret1name,
+					BEBSecretNamespace:          kymaSystemNamespace,
 				}))
 		})
 		It("Should mark eventing as ready when publisher proxy is ready", func() {
@@ -302,12 +303,12 @@ var _ = Describe("Backend Reconciliation Tests", func() {
 			ensurePublisherProxyIsReady(ctx)
 			Eventually(eventingBackendStatusGetter(ctx, eventingBackendName, kymaSystemNamespace), timeout, pollingInterval).
 				Should(Equal(&eventingv1alpha1.EventingBackendStatus{
-					Backend:                     eventingv1alpha1.BebBackendType,
+					Backend:                     eventingv1alpha1.BEBBackendType,
 					EventingReady:               utils.BoolPtr(true),
 					SubscriptionControllerReady: utils.BoolPtr(true),
 					PublisherProxyReady:         utils.BoolPtr(true),
-					BebSecretName:               bebSecret1name,
-					BebSecretNamespace:          kymaSystemNamespace,
+					BEBSecretName:               bebSecret1name,
+					BEBSecretNamespace:          kymaSystemNamespace,
 				}))
 		})
 		It("Should check that the owner of publisher deployment is the controller deployment", func() {
@@ -326,12 +327,12 @@ var _ = Describe("Backend Reconciliation Tests", func() {
 			By("Checking EventingReady status is set to false")
 			Eventually(eventingBackendStatusGetter(ctx, eventingBackendName, kymaSystemNamespace), timeout, pollingInterval).
 				Should(Equal(&eventingv1alpha1.EventingBackendStatus{
-					Backend:                     eventingv1alpha1.BebBackendType,
+					Backend:                     eventingv1alpha1.BEBBackendType,
 					EventingReady:               utils.BoolPtr(false),
 					SubscriptionControllerReady: utils.BoolPtr(false),
 					PublisherProxyReady:         utils.BoolPtr(false),
-					BebSecretName:               "",
-					BebSecretNamespace:          "",
+					BEBSecretName:               "",
+					BEBSecretNamespace:          "",
 				}))
 		})
 	})
@@ -345,12 +346,12 @@ var _ = Describe("Backend Reconciliation Tests", func() {
 			By("Checking EventingReady status is set to true")
 			Eventually(eventingBackendStatusGetter(ctx, eventingBackendName, kymaSystemNamespace), timeout, pollingInterval).
 				Should(Equal(&eventingv1alpha1.EventingBackendStatus{
-					Backend:                     eventingv1alpha1.BebBackendType,
+					Backend:                     eventingv1alpha1.BEBBackendType,
 					EventingReady:               utils.BoolPtr(true),
 					SubscriptionControllerReady: utils.BoolPtr(true),
 					PublisherProxyReady:         utils.BoolPtr(true),
-					BebSecretName:               bebSecret1name,
-					BebSecretNamespace:          kymaSystemNamespace,
+					BEBSecretName:               bebSecret1name,
+					BEBSecretNamespace:          kymaSystemNamespace,
 				}))
 		})
 	})
@@ -370,8 +371,8 @@ var _ = Describe("Backend Reconciliation Tests", func() {
 					EventingReady:               utils.BoolPtr(false),
 					SubscriptionControllerReady: utils.BoolPtr(false),
 					PublisherProxyReady:         utils.BoolPtr(false),
-					BebSecretName:               "",
-					BebSecretNamespace:          "",
+					BEBSecretName:               "",
+					BEBSecretNamespace:          "",
 				}))
 		})
 	})
@@ -391,8 +392,8 @@ var _ = Describe("Backend Reconciliation Tests", func() {
 					EventingReady:               utils.BoolPtr(false),
 					SubscriptionControllerReady: utils.BoolPtr(true),
 					PublisherProxyReady:         utils.BoolPtr(false),
-					BebSecretName:               "",
-					BebSecretNamespace:          "",
+					BEBSecretName:               "",
+					BEBSecretNamespace:          "",
 				}))
 			By("Ensure publisher proxy secret is removed")
 			eventuallyPublisherProxySecret(ctx).Should(BeNil())
@@ -406,8 +407,8 @@ var _ = Describe("Backend Reconciliation Tests", func() {
 					EventingReady:               utils.BoolPtr(true),
 					SubscriptionControllerReady: utils.BoolPtr(true),
 					PublisherProxyReady:         utils.BoolPtr(true),
-					BebSecretName:               "",
-					BebSecretNamespace:          "",
+					BEBSecretName:               "",
+					BEBSecretNamespace:          "",
 				}))
 		})
 	})
@@ -425,12 +426,12 @@ var _ = Describe("Backend Reconciliation Tests", func() {
 			By("Checking EventingReady status is set to false")
 			Eventually(eventingBackendStatusGetter(ctx, eventingBackendName, kymaSystemNamespace), timeout, pollingInterval).
 				Should(Equal(&eventingv1alpha1.EventingBackendStatus{
-					Backend:                     eventingv1alpha1.BebBackendType,
+					Backend:                     eventingv1alpha1.BEBBackendType,
 					EventingReady:               utils.BoolPtr(false),
 					SubscriptionControllerReady: utils.BoolPtr(false),
 					PublisherProxyReady:         utils.BoolPtr(false),
-					BebSecretName:               bebSecret1name,
-					BebSecretNamespace:          kymaSystemNamespace,
+					BEBSecretName:               bebSecret1name,
+					BEBSecretNamespace:          kymaSystemNamespace,
 				}))
 			By("Checking that no BEB secret is created for publisher")
 			eventuallyPublisherProxySecret(ctx).Should(BeNil())
@@ -443,12 +444,12 @@ var _ = Describe("Backend Reconciliation Tests", func() {
 			natsCommander.stopErr = nil
 			Eventually(eventingBackendStatusGetter(ctx, eventingBackendName, kymaSystemNamespace), timeout, pollingInterval).
 				Should(Equal(&eventingv1alpha1.EventingBackendStatus{
-					Backend:                     eventingv1alpha1.BebBackendType,
+					Backend:                     eventingv1alpha1.BEBBackendType,
 					EventingReady:               utils.BoolPtr(true),
 					SubscriptionControllerReady: utils.BoolPtr(true),
 					PublisherProxyReady:         utils.BoolPtr(true),
-					BebSecretName:               bebSecret1name,
-					BebSecretNamespace:          kymaSystemNamespace,
+					BEBSecretName:               bebSecret1name,
+					BEBSecretNamespace:          kymaSystemNamespace,
 				}))
 		})
 	})
@@ -536,6 +537,7 @@ func ensureBEBSecretCreated(ctx context.Context, name, ns string) {
 	Expect(err).Should(BeNil())
 }
 
+//nolint:unparam
 func eventingBackendStatusGetter(ctx context.Context, name, namespace string) func() (*eventingv1alpha1.EventingBackendStatus, error) {
 	lookupKey := types.NamespacedName{
 		Namespace: namespace,
@@ -623,8 +625,4 @@ func (t *TestCommander) Start(_ env.DefaultSubscriptionConfig, _ commander.Param
 
 func (t *TestCommander) Stop() error {
 	return t.stopErr
-}
-
-func (t *TestCommander) reset() {
-	t.startErr, t.stopErr = nil, nil
 }

@@ -1,8 +1,7 @@
-package subscription_nats
+package nats
 
 import (
 	"context"
-	"fmt"
 	"net/url"
 	"os"
 	"reflect"
@@ -268,13 +267,6 @@ func (r *Reconciler) syncSubscriptionStatus(ctx context.Context, sub *eventingv1
 func (r *Reconciler) assertSinkValidity(sink string) error {
 	_, err := url.ParseRequestURI(sink)
 	return err
-}
-
-func (r *Reconciler) assertProtocolValidity(protocol string) error {
-	if protocol != NATSProtocol {
-		return fmt.Errorf("invalid protocol: %s", protocol)
-	}
-	return nil
 }
 
 func (r *Reconciler) syncInvalidSubscriptions(ctx context.Context) (ctrl.Result, error) {

@@ -1,3 +1,4 @@
+//nolint:gosec
 package handlers
 
 import (
@@ -49,7 +50,7 @@ func TestGetInternalView4Ev2(t *testing.T) {
 		ClientSecret: "clientSecret",
 		TokenURL:     "tokenURL",
 	}
-	defaultNameMapper := NewBebSubscriptionNameMapper("my-shoot", 50)
+	defaultNameMapper := NewBEBSubscriptionNameMapper("my-shoot", 50)
 
 	bebSubEvents := types.Events{types.Event{
 		Source: reconcilertesting.EventSource,
@@ -63,20 +64,20 @@ func TestGetInternalView4Ev2(t *testing.T) {
 	expectedWebhookURL := fmt.Sprintf("%s://%s", scheme, host)
 	g := NewGomegaWithT(t)
 
-	t.Run("subscription with protocolsettings where defaults are overriden", func(t *testing.T) {
+	t.Run("subscription with protocol settings where defaults are overridden", func(t *testing.T) {
 		// given
 		subscription := reconcilertesting.NewSubscription("name", "namespace", eventingtesting.WithEventTypeFilter)
 		eventingtesting.WithValidSink("ns", svcName, subscription)
 
 		subscription.Spec.ProtocolSettings = reconcilertesting.NewProtocolSettings(eventingtesting.WithBinaryContentMode, eventingtesting.WithExemptHandshake, eventingtesting.WithAtLeastOnceQOS, eventingtesting.WithDefaultWebhookAuth)
 
-		// Values should be overriden by the given values in subscription
+		// Values should be overridden by the given values in subscription
 		expectedWebhookAuth := &types.WebhookAuth{
 			Type:         types.AuthTypeClientCredentials,
 			GrantType:    types.GrantTypeClientCredentials,
-			ClientID:     subscription.Spec.ProtocolSettings.WebhookAuth.ClientId,
+			ClientID:     subscription.Spec.ProtocolSettings.WebhookAuth.ClientID,
 			ClientSecret: subscription.Spec.ProtocolSettings.WebhookAuth.ClientSecret,
-			TokenURL:     subscription.Spec.ProtocolSettings.WebhookAuth.TokenUrl,
+			TokenURL:     subscription.Spec.ProtocolSettings.WebhookAuth.TokenURL,
 		}
 		expectedBEBSubscription := eventingtesting.NewBEBSubscription(
 			defaultNameMapper.MapSubscriptionName(subscription),
@@ -130,9 +131,9 @@ func TestGetInternalView4Ev2(t *testing.T) {
 		expectedWebhookAuth := types.WebhookAuth{
 			Type:         types.AuthTypeClientCredentials,
 			GrantType:    types.GrantTypeClientCredentials,
-			ClientID:     subWithGivenWebhookAuth.Spec.ProtocolSettings.WebhookAuth.ClientId,
+			ClientID:     subWithGivenWebhookAuth.Spec.ProtocolSettings.WebhookAuth.ClientID,
 			ClientSecret: subWithGivenWebhookAuth.Spec.ProtocolSettings.WebhookAuth.ClientSecret,
-			TokenURL:     subWithGivenWebhookAuth.Spec.ProtocolSettings.WebhookAuth.TokenUrl,
+			TokenURL:     subWithGivenWebhookAuth.Spec.ProtocolSettings.WebhookAuth.TokenURL,
 		}
 
 		expectedBEBSubWithWebhookAuth := eventingtesting.NewBEBSubscription(
@@ -189,7 +190,7 @@ func TestGetInternalView4Ems(t *testing.T) {
 		ContentMode:     types.ContentModeStructured,
 		ExemptHandshake: true,
 		Qos:             types.QosAtLeastOnce,
-		WebhookUrl:      "https://webhook.xxx.com",
+		WebhookURL:      "https://webhook.xxx.com",
 
 		Events: []types.Event{
 			{
@@ -200,15 +201,14 @@ func TestGetInternalView4Ems(t *testing.T) {
 	}
 
 	// then
-	bebSubscription, err := getInternalView4Ems(emsSubscription)
+	bebSubscription := getInternalView4Ems(emsSubscription)
 
 	// when
-	g.Expect(err).ShouldNot(HaveOccurred())
 	g.Expect(bebSubscription.Name).To(BeEquivalentTo(emsSubscription.Name))
 	g.Expect(bebSubscription.ContentMode).To(BeEquivalentTo(emsSubscription.ContentMode))
 	g.Expect(bebSubscription.ExemptHandshake).To(BeEquivalentTo(emsSubscription.ExemptHandshake))
 	g.Expect(bebSubscription.Qos).To(BeEquivalentTo(types.QosAtLeastOnce))
-	g.Expect(bebSubscription.WebhookUrl).To(BeEquivalentTo(emsSubscription.WebhookUrl))
+	g.Expect(bebSubscription.WebhookURL).To(BeEquivalentTo(emsSubscription.WebhookURL))
 
 	g.Expect(bebSubscription.Events).To(BeEquivalentTo(types.Events{
 		{
@@ -232,7 +232,7 @@ func TestGetRandSuffix(t *testing.T) {
 	}
 }
 
-func TestBebSubscriptionNameMapper(t *testing.T) {
+func TestBEBSubscriptionNameMapper(t *testing.T) {
 	g := NewGomegaWithT(t)
 
 	s1 := &eventingv1alpha1.Subscription{
@@ -304,7 +304,7 @@ func TestBebSubscriptionNameMapper(t *testing.T) {
 		},
 	}
 	for _, test := range tests {
-		mapper := NewBebSubscriptionNameMapper(test.domainName, test.maxLen)
+		mapper := NewBEBSubscriptionNameMapper(test.domainName, test.maxLen)
 		s := mapper.MapSubscriptionName(test.inputSub)
 		g.Expect(len(s)).To(BeNumerically("<=", test.maxLen))
 		// the mapped name should always end with the SHA1
@@ -315,7 +315,7 @@ func TestBebSubscriptionNameMapper(t *testing.T) {
 	}
 
 	// Same domain and subscription name/namespace should map to the same name
-	mapper := NewBebSubscriptionNameMapper(domain1, 50)
+	mapper := NewBEBSubscriptionNameMapper(domain1, 50)
 	g.Expect(mapper.MapSubscriptionName(s3)).To(Equal(mapper.MapSubscriptionName(s4)))
 
 	// If the same names are used in different order, they get mapped to different names

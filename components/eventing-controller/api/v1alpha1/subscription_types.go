@@ -1,9 +1,10 @@
 package v1alpha1
 
 import (
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
 	"github.com/mitchellh/hashstructure/v2"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
 )
 
 // WebhookAuth defines the Webhook called by an active subscription in BEB
@@ -15,14 +16,14 @@ type WebhookAuth struct {
 	// GrantType defines grant type for OAuth2
 	GrantType string `json:"grantType"`
 
-	// ClientId defines clientID for OAuth2
-	ClientId string `json:"clientId"`
+	// ClientID defines clientID for OAuth2
+	ClientID string `json:"clientId"`
 
 	// ClientSecret defines client secret for OAuth2
 	ClientSecret string `json:"clientSecret"`
 
-	// TokenUrl defines token URL for OAuth2
-	TokenUrl string `json:"tokenUrl"`
+	// TokenURL defines token URL for OAuth2
+	TokenURL string `json:"tokenUrl"`
 
 	// Scope defines scope for OAuth2
 	Scope []string `json:"scope,omitempty"`
@@ -65,8 +66,8 @@ type Filter struct {
 	Value string `json:"value"`
 }
 
-// BebFilter defines the BEB filter element as a combination of two CE filter elements
-type BebFilter struct {
+// BEBFilter defines the BEB filter element as a combination of two CE filter elements
+type BEBFilter struct {
 	// EventSource defines the source of CE filter
 	EventSource *Filter `json:"eventSource"`
 
@@ -74,22 +75,22 @@ type BebFilter struct {
 	EventType *Filter `json:"eventType"`
 }
 
-func (bf *BebFilter) hash() (uint64, error) {
+func (bf *BEBFilter) hash() (uint64, error) {
 	return hashstructure.Hash(bf, hashstructure.FormatV2, nil)
 }
 
-// BebFilters defines the list of BEB filters
-type BebFilters struct {
+// BEBFilters defines the list of BEB filters
+type BEBFilters struct {
 	// +optional
 	Dialect string `json:"dialect,omitempty"`
 
-	Filters []*BebFilter `json:"filters"`
+	Filters []*BEBFilter `json:"filters"`
 }
 
-// Deduplicate returns a deduplicated copy of BebFilters
-func (bf *BebFilters) Deduplicate() (*BebFilters, error) {
+// Deduplicate returns a deduplicated copy of BEBFilters
+func (bf *BEBFilters) Deduplicate() (*BEBFilters, error) {
 	seen := map[uint64]struct{}{}
-	result := &BebFilters{
+	result := &BEBFilters{
 		Dialect: bf.Dialect,
 	}
 	for _, f := range bf.Filters {
@@ -144,7 +145,7 @@ type SubscriptionSpec struct {
 	Sink string `json:"sink"`
 
 	// Filter defines the list of filters
-	Filter *BebFilters `json:"filter"`
+	Filter *BEBFilters `json:"filter"`
 
 	// Config defines the configurations that can be applied to the eventing backend when creating this subscription
 	// +optional
@@ -236,6 +237,6 @@ type SubscriptionList struct {
 	Items           []Subscription `json:"items"`
 }
 
-func init() {
+func init() { //nolint:gochecknoinits
 	SchemeBuilder.Register(&Subscription{}, &SubscriptionList{})
 }
