@@ -96,12 +96,6 @@ async function getShootName(keb, instanceID) {
   return resp.data[0].shootName;
 }
 
-async function runtimes(keb) {
-  const resp = await keb.runtimes()
-  expect(resp.totalCount).to.be.greaterThan(0)
-  return  resp.data
-}
-
 async function ensureValidOIDCConfigInCustomerFacingKubeconfig(keb, instanceID, oidcConfig) {
   let kubeconfigContent;
   try {
@@ -120,7 +114,6 @@ module.exports = {
   updateSKR,
   ensureOperationSucceeded,
   getShootName,
-  runtimes,
   ensureValidShootOIDCConfig,
   ensureValidOIDCConfigInCustomerFacingKubeconfig,
 };

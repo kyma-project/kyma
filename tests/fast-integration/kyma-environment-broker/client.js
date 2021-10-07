@@ -82,41 +82,11 @@ class KEBClient {
   }
 
   async getSKR(instanceID) {
-    const payload = {};
     const endpoint = `service_instances/${instanceID}`;
     try {
-      return await this.callKEB(payload, endpoint, "get");
+      return await this.callKEB({}, endpoint, "get");
     } catch (err) {
       throw new Error(`error while getting SKR: ${err.toString()}`);
-    }
-  }
-
-  async runtimes() {
-    const token = await this.token.getToken(SCOPES);
-    const url = `https://kyma-env-broker.${this.host}/runtimes?subaccount=${this.subaccountID}`;
-    const request = {
-      url: url,
-      method: "get",
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "X-Broker-API-Version": 2.14,
-      },
-    };
-    try {
-      const resp = await axios.request(request);
-      if (resp.data.errors) {
-        debug(resp)
-        throw new Error(resp.data);
-      }
-      return resp.data;
-    } catch (err) {
-      debug(err);
-      const msg = "Error calling KEB";
-      if (err.response) {
-        throw new Error(`${msg}: ${err.response.status} ${err.response.statusText}`);
-      } else {
-        throw new Error(`${msg}: ${err.toString()}`);
-      }
     }
   }
 

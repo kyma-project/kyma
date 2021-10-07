@@ -38,8 +38,18 @@ const {
   checkAuditEventsThreshold,
 } = require("../audit-log");
 
+const {
+  KCPConfig,
+  KCPClient,
+} = require("../kcp/client")
+
+
 describe("SKR nightly", function () {
   const keb = new KEBClient(KEBConfig.fromEnv());
+
+  process.env.KCP_HOST = keb.host;
+  const kcp = new KCPClient(KCPConfig.fromEnv());
+
   const gardener = new GardenerClient(GardenerConfig.fromEnv());
   const director = new DirectorClient(DirectorConfig.fromEnv());
 
@@ -84,7 +94,7 @@ describe("SKR nightly", function () {
   let skr;
 
   it(`Ensure nightly runtime already exists`, async function () {
-    let r = await runtimes(keb);
+    const r = await kcp.runtimes({subaccount: keb.subaccountID});
     console.log(r);
   });
 
