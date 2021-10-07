@@ -22,7 +22,11 @@ import (
 	apirequest "k8s.io/apiserver/pkg/endpoints/request"
 )
 
-const KUBERNETES_SERVICE = "kubernetes.default"
+const (
+	KUBERNETES_SERVICE = "kubernetes.default"
+	impersonateGroup   = "Impersonate-Group"
+	impersonateUser    = "Impersonate-User"
+)
 
 // Config holds proxy authorization and authentication settings
 type Config struct {
@@ -80,8 +84,8 @@ func (h *kubeRBACProxy) Handle(w http.ResponseWriter, req *http.Request) bool {
 		req.Header.Set(headerCfg.GroupsFieldName, strings.Join(r.User.GetGroups(), headerCfg.GroupSeparator))
 	}
 
+	h.dropImpersonateValues(req)
 	req.Header.Set("Impersonate-User", r.User.GetName())
-	h.cleanupImpersonateGroupHeader(req)
 	for _, gr := range r.User.GetGroups() {
 		req.Header.Add("Impersonate-Group", gr)
 	}
@@ -90,11 +94,22 @@ func (h *kubeRBACProxy) Handle(w http.ResponseWriter, req *http.Request) bool {
 
 	return true
 }
+func (h *kubeRBACProxy) dropImpersonateValues(req *http.Request) {
+	headers := req.Header.Get("Connection")
+	splitValues := strings.Split(headers, ",")
+	builder := strings.Builder{}
+	for _, value := range splitValues {
+		if !strings.Contains(value, impersonateGroup) && !strings.Contains(value, impersonateUser) {
+			builder.WriteString(value)
+			builder.WriteString(",")
+		}
+	}
 
-func (h *kubeRBACProxy) cleanupImpersonateGroupHeader(req *http.Request) {
-	req.Header.Del("Impersonate-Group")
+	req.Header.Del(impersonateGroup)
+	req.Header.Del(impersonateUser)
+	req.Header.Set("Connection", builder.String())
+
 }
-
 func newKubeRBACProxyAuthorizerAttributesGetter(authzConfig *authz.Config) authorizer.RequestAttributesGetter {
 	return krpAuthorizerAttributesGetter{authzConfig, newRequestInfoResolver()}
 }

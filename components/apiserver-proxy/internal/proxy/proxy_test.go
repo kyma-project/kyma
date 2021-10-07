@@ -2,6 +2,7 @@ package proxy
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -30,6 +31,7 @@ func TestProxyWithOIDCSupport(t *testing.T) {
 	}
 
 	maliciousGroup := "malicious-group"
+	maliciousUser := "malicious-user"
 	fakeUser := user.DefaultInfo{Name: "Foo Bar", Groups: []string{"foo-bars"}}
 	authenticator := fakeOIDCAuthenticator(t, &fakeUser)
 	metrics, _ := monitoring.NewProxyMetrics()
@@ -53,12 +55,21 @@ func TestProxyWithOIDCSupport(t *testing.T) {
 			if v.verifyUser {
 				user := v.req.Header.Get(cfg.Authentication.Header.UserFieldName)
 				groups := v.req.Header.Get(cfg.Authentication.Header.GroupsFieldName)
+
 				if user != fakeUser.GetName() {
 					t.Errorf("User in the response header does not match authenticated user. Expected : %s, received : %s ", fakeUser.GetName(), user)
 				}
-
 				if strings.Contains(v.req.Header.Get("Impersonate-Group"), maliciousGroup) {
 					t.Errorf("Groups should not contain %s injected in the request", maliciousGroup)
+				}
+				if strings.Contains(v.req.Header.Get("Impersonate-User"), maliciousUser) {
+					t.Errorf("User should not contain %s injected in the request", maliciousUser)
+				}
+				if strings.Contains(v.req.Header.Get("Connection"), "Impersonate-Group") {
+					t.Errorf("Connection header should not contain Impersonate-Group key")
+				}
+				if strings.Contains(v.req.Header.Get("Connection"), "Impersonate-User") {
+					t.Errorf("Connection header should not contain Impersonate-User key")
 				}
 
 				if groups != strings.Join(fakeUser.GetGroups(), cfg.Authentication.Header.GroupSeparator) {
@@ -116,11 +127,15 @@ func TestRequestResolver(t *testing.T) {
 }
 
 func setupTestScenario() []testCase {
+	header := http.Header{}
+	const maliciousGroup = "malicious-group"
+	const maliciousUser = "malicious-user"
 	testScenario := []testCase{
+
 		{
 			description: "Request with invalid Token should be authenticated and rejected with 401",
 			given: given{
-				req:        fakeJWTRequest("GET", "/accounts", "Bearer INVALID", "malicious-group"),
+				req:        fakeJWTRequest("GET", "/accounts", "Bearer INVALID", header),
 				authorizer: denier{},
 			},
 			expected: expected{
@@ -128,9 +143,42 @@ func setupTestScenario() []testCase {
 			},
 		},
 		{
-			description: "Request with valid token, should return 200 due to sufficient permissions",
+			description: "Request with valid Token should be authenticated and accepted with 200",
 			given: given{
-				req:        fakeJWTRequest("GET", "/accounts", "Bearer VALID", "malicious-group"),
+				req:        fakeJWTRequest("GET", "/accounts", "Bearer VALID", header),
+				authorizer: denier{},
+			},
+			expected: expected{
+				status:     http.StatusOK,
+				verifyUser: true,
+			},
+		},
+		{
+			description: "Request with valid token, and malicious user/group in impersonate headers should return 200 due to sufficient permissions",
+			given: given{
+				req:        fakeJWTRequest("GET", "/accounts", "Bearer VALID", addHeaderImpersonateGroupAndUser(header, maliciousUser, maliciousGroup)),
+				authorizer: approver{},
+			},
+			expected: expected{
+				status:     http.StatusOK,
+				verifyUser: true,
+			},
+		},
+		{
+			description: "Request with valid token, and two malicious groups in Connection header should return 200 due to sufficient permissions",
+			given: given{
+				req:        fakeJWTRequest("GET", "/accounts", "Bearer VALID", addConnectionHeaderImpersonateGroupValueTwice(header, maliciousGroup, maliciousGroup)),
+				authorizer: approver{},
+			},
+			expected: expected{
+				status:     http.StatusOK,
+				verifyUser: true,
+			},
+		},
+		{
+			description: "Request with valid token, and impersonate group/user key in Connection header should return 200 due to sufficient permissions",
+			given: given{
+				req:        fakeJWTRequest("GET", "/accounts", "Bearer VALID", addConnectionHeaderImpersonateGroupImpersonateUser(header)),
 				authorizer: approver{},
 			},
 			expected: expected{
@@ -142,12 +190,39 @@ func setupTestScenario() []testCase {
 	return testScenario
 }
 
-func fakeJWTRequest(method, path, token, groups string) *http.Request {
+func addHeaderImpersonateGroupAndUser(header http.Header, maliciousUser string, maliciousGroup string) http.Header {
+	return addHeaderImpersonateGroup(addHeaderImpersonateUser(header, maliciousUser), maliciousGroup)
+}
+
+func fakeJWTRequest(method, path, token string, extraHeaders http.Header) *http.Request {
 	req := requestFor(method, path)
 	req.Header.Add("Authorization", token)
-	req.Header.Add("Impersonate-Group", groups)
-
+	for key, values := range extraHeaders {
+		for _, v := range values {
+			req.Header.Add(key, v)
+		}
+	}
 	return req
+}
+
+func addConnectionHeaderImpersonateGroupValueTwice(header http.Header, group1 string, group2 string) http.Header {
+	header.Add("Connection", fmt.Sprintf("Impersonate-Group=%s,Impersonate-Group=%s", group1, group2))
+	return header
+}
+
+func addConnectionHeaderImpersonateGroupImpersonateUser(header http.Header) http.Header {
+	header.Add("Connection", "Impersonate-Group,Impersonate-User")
+	return header
+}
+
+func addHeaderImpersonateGroup(h http.Header, group string) http.Header {
+	h.Add("Impersonate-Group", group)
+	return h
+}
+
+func addHeaderImpersonateUser(h http.Header, user string) http.Header {
+	h.Add("Impersonate-Group", user)
+	return h
 }
 
 func requestFor(method, path string) *http.Request {
