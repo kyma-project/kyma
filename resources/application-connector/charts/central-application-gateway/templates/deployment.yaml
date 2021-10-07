@@ -40,7 +40,6 @@ spec:
           - "--externalAPIPort={{ .Values.deployment.args.externalAPIPort }}"
           - "--applicationSecretsNamespace={{ .Values.global.integrationNamespace }}"
           - "--requestTimeout={{ .Values.deployment.args.requestTimeout }}"
-          - "--skipVerify={{ .Values.deployment.args.skipVerify }}"
           - "--proxyTimeout={{ .Values.deployment.args.proxyTimeout }}"
           - "--proxyCacheTTL={{ .Values.deployment.args.proxyCacheTTL }}"
           - "--requestLogging={{ .Values.deployment.args.requestLogging }}"
