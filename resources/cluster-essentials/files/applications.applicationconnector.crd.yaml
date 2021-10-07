@@ -115,6 +115,8 @@ spec:
                               - "Events"
                             gatewayUrl:
                               type: string
+                            centralGatewayUrl:
+                              type: string
                             accessLabel:
                               type: string
                               maxLength: 63

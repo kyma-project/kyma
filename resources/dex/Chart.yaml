@@ -1,7 +1,0 @@
-apiVersion: v1
-appVersion: "1b1ee80f"
-description: Kyma component 'dex'
-name: dex
-version: 1.0.0
-home: https://kyma-project.io
-icon: https://github.com/kyma-project/kyma/blob/main/logo.png?raw=true

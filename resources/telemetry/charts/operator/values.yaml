@@ -3,9 +3,7 @@
 replicaCount: 1
 
 image:
-  repository: eu.gcr.io/kyma-project/telemetry-operator
   pullPolicy: IfNotPresent
-  tag: PR-11882
 
 imagePullSecrets: []
 nameOverride: ""

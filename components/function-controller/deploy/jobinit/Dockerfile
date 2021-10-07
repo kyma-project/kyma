@@ -24,11 +24,11 @@ RUN go build -ldflags "-s -w" -a -o jobinit cmd/jobinit/main.go \
 FROM eu.gcr.io/kyma-project/external/alpine:3.14.2
 ENV LIBGIT2_VERSION=1.1.1-r2
 
+LABEL source = git@github.com:kyma-project/kyma.git
+
 RUN apk add --no-cache ca-certificates
 RUN apk add --no-cache --update --repository=http://dl-cdn.alpinelinux.org/alpine/edge/main openssh-client
 RUN apk add --no-cache --repository http://dl-cdn.alpinelinux.org/alpine/edge/community libgit2=${LIBGIT2_VERSION}
-
-LABEL source = git@github.com:kyma-project/kyma.git
 
 COPY --from=builder /app /app
 

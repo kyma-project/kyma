@@ -7,16 +7,11 @@ kind: DaemonSet
 replicaCount: 1
 
 image:
-  repository: eu.gcr.io/kyma-project/tpi/fluent-bit
-  # Overrides the image tag whose default is {{ .Chart.AppVersion }}
-  tag: 1.8.5-ea0b3c70
   pullPolicy: IfNotPresent
 
 testFramework:
   image:
-    repository: busybox
     pullPolicy: Always
-    tag: latest
 
 imagePullSecrets: []
 nameOverride: ""
@@ -267,7 +262,7 @@ command: []
 
 initContainers: 
   - name: prep-fluent-bit-config
-    image: eu.gcr.io/kyma-project/external/busybox:1.32.0-v1
+    image: {{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.busybox) }}
     volumeMounts:
     - name: shared-fluent-bit-config
       mountPath: /fluent-bit/etc/

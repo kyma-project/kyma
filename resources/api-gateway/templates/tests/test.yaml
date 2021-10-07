@@ -20,13 +20,6 @@ spec:
         app: {{ .Chart.Name }}-tests
     spec:
       serviceAccountName: {{ .Chart.Name }}-tests
-      {{- if .Values.global.isLocalEnv }}
-      hostAliases:
-        - ip: {{ .Values.global.minikubeIP }}
-          hostnames:
-            - "oauth2.{{ .Values.global.domainName }}"
-            - "dex.{{ .Values.global.domainName }}"
-      {{- end }}
       containers:
         - name: tests
           image: {{ .Values.tests.image.registry }}/api-gateway-integration-tests:{{ .Values.tests.image.version }}
@@ -67,10 +60,6 @@ spec:
             value: {{ .Values.tests.env.gatewayName }}
           - name: TEST_GATEWAY_NAMESPACE
             value: {{ .Values.tests.env.gatewayNamespace }}
-          {{- if .Values.global.isLocalEnv }}
-          - name: TEST_MINIKUBE_ENV
-            value: "true"
-          {{- end }}
           securityContext:
 {{- toYaml .Values.tests.securityContext | nindent 12 }}
       restartPolicy: Never

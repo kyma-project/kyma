@@ -88,6 +88,8 @@ type Entry struct {
 	Name string `json:"name"`
 	ID   string `json:"id"`
 
+	CentralGatewayUrl string `json:"centralGatewayUrl"`
+
 	// Deprecated
 	AccessLabel string `json:"accessLabel,omitempty"`
 	// Deprecated

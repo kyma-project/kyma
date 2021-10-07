@@ -16,7 +16,7 @@ import (
 
 const (
 	serviceId                    = "1234"
-	gatewayUrl                   = "http://1234.io"
+	centralGatewayUrl            = "http://central-application-gateway.kyma-system:8080/app/some-service"
 	defaultSpecRequestTimeout    = 20
 	defaultSpecRequestSkipVerify = true
 )
@@ -27,7 +27,7 @@ var (
 	baseDocs      = []byte("{\"baseDocs\":\"baseDocs\"}")
 
 	swaggerApiSpec      = []byte("{\"swagger\":\"2.0\"}")
-	modifiedSwaggerSpec = []byte("{\"schemes\":[\"http\"],\"swagger\":\"2.0\",\"host\":\"1234.io\",\"paths\":null}")
+	modifiedSwaggerSpec = []byte("{\"schemes\":[\"http\"],\"swagger\":\"2.0\",\"host\":\"central-application-gateway.kyma-system:8080/app/some-service\",\"paths\":null}")
 )
 
 func TestSpecService_PutSpec(t *testing.T) {
@@ -42,7 +42,7 @@ func TestSpecService_PutSpec(t *testing.T) {
 		specService := NewSpecService(rafterSvc, defaultSpecRequestTimeout, defaultSpecRequestSkipVerify)
 
 		// when
-		err := specService.PutSpec(serviceDef, gatewayUrl)
+		err := specService.PutSpec(serviceDef, centralGatewayUrl)
 
 		// then
 		require.NoError(t, err)
@@ -59,7 +59,7 @@ func TestSpecService_PutSpec(t *testing.T) {
 		specService := NewSpecService(rafterSvc, defaultSpecRequestTimeout, defaultSpecRequestSkipVerify)
 
 		// when
-		err := specService.PutSpec(serviceDef, gatewayUrl)
+		err := specService.PutSpec(serviceDef, centralGatewayUrl)
 
 		// then
 		require.NoError(t, err)
@@ -76,7 +76,7 @@ func TestSpecService_PutSpec(t *testing.T) {
 		specService := NewSpecService(rafterSvc, defaultSpecRequestTimeout, defaultSpecRequestSkipVerify)
 
 		// when
-		err := specService.PutSpec(serviceDef, gatewayUrl)
+		err := specService.PutSpec(serviceDef, centralGatewayUrl)
 
 		// then
 		require.NoError(t, err)
@@ -98,7 +98,7 @@ func TestSpecService_PutSpec(t *testing.T) {
 		specService := NewSpecService(rafterSvc, defaultSpecRequestTimeout, defaultSpecRequestSkipVerify)
 
 		// when
-		err := specService.PutSpec(serviceDef, gatewayUrl)
+		err := specService.PutSpec(serviceDef, centralGatewayUrl)
 
 		// then
 		require.NoError(t, err)
@@ -120,7 +120,7 @@ func TestSpecService_PutSpec(t *testing.T) {
 		specService := NewSpecService(rafterSvc, defaultSpecRequestTimeout, defaultSpecRequestSkipVerify)
 
 		// when
-		err := specService.PutSpec(serviceDef, gatewayUrl)
+		err := specService.PutSpec(serviceDef, centralGatewayUrl)
 
 		// then
 		require.NoError(t, err)
@@ -142,7 +142,7 @@ func TestSpecService_PutSpec(t *testing.T) {
 		specService := NewSpecService(rafterSvc, defaultSpecRequestTimeout, defaultSpecRequestSkipVerify)
 
 		// when
-		err := specService.PutSpec(serviceDef, gatewayUrl)
+		err := specService.PutSpec(serviceDef, centralGatewayUrl)
 
 		// then
 		require.NoError(t, err)
@@ -160,7 +160,7 @@ func TestSpecService_PutSpec(t *testing.T) {
 		specService := NewSpecService(rafterSvc, defaultSpecRequestTimeout, defaultSpecRequestSkipVerify)
 
 		// when
-		err := specService.PutSpec(serviceDef, gatewayUrl)
+		err := specService.PutSpec(serviceDef, centralGatewayUrl)
 
 		// then
 		require.Error(t, err)
@@ -182,7 +182,7 @@ func TestSpecService_PutSpec(t *testing.T) {
 		specService := NewSpecService(rafterSvc, defaultSpecRequestTimeout, defaultSpecRequestSkipVerify)
 
 		// when
-		err := specService.PutSpec(serviceDef, gatewayUrl)
+		err := specService.PutSpec(serviceDef, centralGatewayUrl)
 
 		// then
 		require.NoError(t, err)
@@ -199,7 +199,7 @@ func TestSpecService_PutSpec(t *testing.T) {
 		specService := NewSpecService(rafterSvc, defaultSpecRequestTimeout, defaultSpecRequestSkipVerify)
 
 		// when
-		err := specService.PutSpec(serviceDef, gatewayUrl)
+		err := specService.PutSpec(serviceDef, centralGatewayUrl)
 
 		// then
 		require.NoError(t, err)
@@ -216,7 +216,7 @@ func TestSpecService_PutSpec(t *testing.T) {
 		specService := NewSpecService(assetRafterSvc, defaultSpecRequestTimeout, defaultSpecRequestSkipVerify)
 
 		// when
-		err := specService.PutSpec(serviceDef, gatewayUrl)
+		err := specService.PutSpec(serviceDef, centralGatewayUrl)
 
 		// then
 		require.NoError(t, err)
@@ -233,7 +233,7 @@ func TestSpecService_PutSpec(t *testing.T) {
 		specService := NewSpecService(rafterSvc, defaultSpecRequestTimeout, defaultSpecRequestSkipVerify)
 
 		// when
-		err := specService.PutSpec(serviceDef, gatewayUrl)
+		err := specService.PutSpec(serviceDef, centralGatewayUrl)
 
 		// then
 		require.Error(t, err)

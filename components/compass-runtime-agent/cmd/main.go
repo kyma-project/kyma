@@ -167,7 +167,7 @@ func createSynchronisationService(k8sResourceClients *k8sResourceClientSets, opt
 	var syncService kyma.Service
 	var err error
 
-	syncService, err = createKymaService(k8sResourceClients, options.UploadServiceUrl, options.IntegrationNamespace, options.SkipAppsTLSVerify)
+	syncService, err = createKymaService(k8sResourceClients, options.UploadServiceUrl, options.IntegrationNamespace, options.CentralGatewayServiceUrl, options.SkipAppsTLSVerify)
 
 	if err != nil {
 		return nil, err

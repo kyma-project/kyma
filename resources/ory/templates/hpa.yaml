@@ -1,4 +1,4 @@
-{{- if and (not .Values.global.isLocalEnv) (.Capabilities.APIVersions.Has "autoscaling/v2beta1") }}
+{{- if .Capabilities.APIVersions.Has "autoscaling/v2beta1" }}
 {{- if .Values.hpa.oathkeeper.enabled }}
 ---
 apiVersion: autoscaling/v2beta1

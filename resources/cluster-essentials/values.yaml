@@ -5,7 +5,6 @@ jobs:
     tag: "20210922-530cfc39"
 
 global:
-  isLocalEnv: false
   installCRDs: false
   disableLegacyConnectivity: false
   podSecurityPolicy:
