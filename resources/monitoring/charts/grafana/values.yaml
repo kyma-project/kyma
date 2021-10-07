@@ -784,8 +784,8 @@ kyma:
     configDocsLink: "https://kyma-project.io/docs/kyma/latest/04-operation-guides/security/sec-06-access-expose-kiali-grafana"
     config:
       clientId: "dummy"
-      clientSecret: "dummys"
-      tlsVerify: false
+      clientSecret: "dummy"
+      tlsVerify: true
       emailDomains: "*"
       groups: ""
       useKymaGroups: false

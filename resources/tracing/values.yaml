@@ -127,7 +127,7 @@ authProxy:
   config:
     clientId: "dummy"
     clientSecret: "dummy"
-    tlsVerify: false
+    tlsVerify: true
     emailDomains: "*"
     groups: ""
     useKymaGroups: false
