@@ -4,7 +4,9 @@ title: Errors when generating or renewing a certificate
 
 ## Invalid Certificate Signing Request (CSR)
 
-If you try to generate a client certificate, you may get this error:
+### Symptom
+
+You try to generate or renew a client certificate and get this error:
 
 ```json
 {
@@ -13,7 +15,12 @@ If you try to generate a client certificate, you may get this error:
 }
 ```
 
-This error is caused by applying wrong subject information to your Certificate Signing Request.  
+### Cause
+
+This error is caused by applying wrong subject information to your Certificate Signing Request.
+
+### Remedy
+
 To ensure CSR was generated properly, check the values returned by Connector Service with the call that fetched the CSR information:
 
 ```json

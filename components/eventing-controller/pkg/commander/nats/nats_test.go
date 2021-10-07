@@ -9,13 +9,14 @@ import (
 	"github.com/onsi/gomega"
 
 	kymalogger "github.com/kyma-project/kyma/common/logging/logger"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 	"github.com/kyma-project/kyma/components/eventing-controller/logger"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/commander/fake"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers"
 	controllertesting "github.com/kyma-project/kyma/components/eventing-controller/testing"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 func TestCleanup(t *testing.T) {
@@ -51,7 +52,7 @@ func TestCleanup(t *testing.T) {
 	g.Expect(err).To(gomega.BeNil())
 
 	envConf := env.NatsConfig{
-		Url:             natsURL,
+		URL:             natsURL,
 		MaxReconnects:   10,
 		ReconnectWait:   time.Second,
 		EventTypePrefix: controllertesting.EventTypePrefix,

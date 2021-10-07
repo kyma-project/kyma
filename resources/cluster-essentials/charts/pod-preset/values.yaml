@@ -3,8 +3,6 @@ global:
 webhook:
   replicaCount: 1
   image:
-    repository: "eu.gcr.io/kyma-project/incubator/podpreset-webhook"
-    tag: "a1343c0c"
     pullPolicy: IfNotPresent
   verbosity: 6
   pdb:
@@ -22,8 +20,6 @@ webhook:
 controller:
   enabled: false
   image:
-    repository: "eu.gcr.io/kyma-project/incubator/podpreset-controller"
-    tag: "a1343c0c"
     pullPolicy: IfNotPresent
 
 securityContext:

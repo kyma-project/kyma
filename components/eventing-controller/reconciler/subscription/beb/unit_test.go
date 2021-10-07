@@ -1,4 +1,4 @@
-package subscription
+package beb
 
 import (
 	"testing"
@@ -64,7 +64,6 @@ func Test_replaceStatusCondition(t *testing.T) {
 		giveSubscription  *eventingv1alpha1.Subscription
 		giveCondition     eventingv1alpha1.Condition
 		wantStatusChanged bool
-		wantError         bool
 		wantStatus        *eventingv1alpha1.SubscriptionStatus
 		wantReady         bool
 	}{
@@ -79,7 +78,6 @@ func Test_replaceStatusCondition(t *testing.T) {
 				return eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionSubscribed, eventingv1alpha1.ConditionReasonSubscriptionCreated, corev1.ConditionTrue, "")
 			}(),
 			wantStatusChanged: true,
-			wantError:         false,
 			wantReady:         false,
 		},
 		{
@@ -108,7 +106,6 @@ func Test_replaceStatusCondition(t *testing.T) {
 				return eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionSubscribed, eventingv1alpha1.ConditionReasonSubscriptionCreated, corev1.ConditionTrue, "")
 			}(),
 			wantStatusChanged: true, // readiness changed
-			wantError:         false,
 			wantReady:         true, // all conditions are true
 		},
 	}
@@ -120,12 +117,7 @@ func Test_replaceStatusCondition(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			subscription := tt.giveSubscription
 			condition := tt.giveCondition
-			statusChanged, err := r.replaceStatusCondition(subscription, condition)
-			if tt.wantError {
-				g.Expect(err).Should(HaveOccurred())
-			} else {
-				g.Expect(err).ShouldNot(HaveOccurred())
-			}
+			statusChanged := r.replaceStatusCondition(subscription, condition)
 			g.Expect(statusChanged).To(BeEquivalentTo(tt.wantStatusChanged))
 			g.Expect(subscription.Status.Conditions).To(ContainElement(condition))
 			g.Expect(subscription.Status.Ready).To(BeEquivalentTo(tt.wantReady))

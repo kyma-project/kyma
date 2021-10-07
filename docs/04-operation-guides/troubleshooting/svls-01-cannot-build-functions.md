@@ -2,9 +2,17 @@
 title: Failure to build Functions
 ---
 
-In its default configuration, Serverless uses persistent volumes as the internal registry to store Docker images for Functions. The default storage size of such a volume is 20 GB. When this storage becomes full, you will have issues with building your Functions. As a workaround, increase the default capacity up to a maximum of 100 GB by editing the `serverless-docker-registry` PersistentVolumeClaim (PVC) object on your cluster.
+## Symptom
 
-Follow these steps:
+You have issues when building your Function.
+
+## Cause
+
+In its default configuration, Serverless uses persistent volumes as the internal registry to store Docker images for Functions. The default storage size of such a volume is 20 GB. When this storage becomes full, you will have issues with building your Functions.
+
+## Remedy
+
+As a workaround, increase the default capacity up to a maximum of 100 GB by editing the `serverless-docker-registry` PersistentVolumeClaim (PVC) object on your cluster.
 
 1. Edit the `serverless-docker-registry` PVC:
 

@@ -1,8 +1,3 @@
-job:
-  image:
-    repository: eu.gcr.io/kyma-project/tpi/k8s-tools
-    tag: "20210922-530cfc39"
-
 certificates:
   kyma:
     name: kyma-gateway-certs

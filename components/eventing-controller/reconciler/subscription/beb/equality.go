@@ -1,4 +1,4 @@
-package subscription
+package beb
 
 import (
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
@@ -39,8 +39,8 @@ func conditionEquals(existing, expected eventingv1alpha1.Condition) bool {
 	return true
 }
 
-// isApiRuleStatueChanged returns true if any property in the subscription status related to the APIRule is changed, otherwise returns false.
-func isApiRuleStatueChanged(existing, expected *eventingv1alpha1.Subscription) bool {
+// isAPIRuleStatusChanged returns true if any property in the subscription status related to the APIRule is changed, otherwise returns false.
+func isAPIRuleStatusChanged(existing, expected *eventingv1alpha1.Subscription) bool {
 	if existing.Status.APIRuleName != expected.Status.APIRuleName ||
 		existing.Status.ExternalSink != expected.Status.ExternalSink ||
 		existing.Status.GetConditionAPIRuleStatus() != expected.Status.GetConditionAPIRuleStatus() {

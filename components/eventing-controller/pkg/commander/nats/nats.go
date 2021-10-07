@@ -23,7 +23,7 @@ import (
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/commander"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers"
-	subscription "github.com/kyma-project/kyma/components/eventing-controller/reconciler/subscription-nats"
+	subscription "github.com/kyma-project/kyma/components/eventing-controller/reconciler/subscription/nats"
 )
 
 const (
@@ -65,7 +65,7 @@ func NewCommander(restCfg *rest.Config, metricsAddr string, maxReconnects int, r
 
 // Init implements the Commander interface.
 func (c *Commander) Init(mgr manager.Manager) error {
-	if len(c.envCfg.Url) == 0 {
+	if len(c.envCfg.URL) == 0 {
 		return fmt.Errorf("env var URL must be a non-empty value")
 	}
 	c.mgr = mgr
@@ -131,7 +131,8 @@ func cleanup(backend handlers.MessagingBackend, dynamicClient dynamic.Interface,
 
 	// Clean statuses.
 	isCleanupSuccessful := true
-	for _, sub := range subs.Items {
+	for _, v := range subs.Items {
+		sub := v
 		subKey := types.NamespacedName{Namespace: sub.Namespace, Name: sub.Name}
 		log := logger.With("key", subKey.String())
 

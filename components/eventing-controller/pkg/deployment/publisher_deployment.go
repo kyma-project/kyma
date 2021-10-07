@@ -8,13 +8,15 @@ import (
 
 	"k8s.io/apimachinery/pkg/api/resource"
 
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
 	appsv1 "k8s.io/api/apps/v1"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
+
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
 )
 
+//nolint:gosec
 const (
 	livenessInitialDelaySecs = int32(5)
 	livenessTimeoutSecs      = int32(1)
