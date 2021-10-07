@@ -10,7 +10,7 @@ class KCPConfig {
             getEnvOrThrow("KCP_HOST"),
             getEnvOrThrow("KCP_TECH_USER_LOGIN"),
             getEnvOrThrow("KCP_TECH_USER_PASSWORD"),
-            OAuthCredentials.fromEnv("KCP_OIDC_CLIENT_ID", "KCP_OIDC_CLIENT_SECRET")
+            OAuthCredentials.fromEnv("KCP_TECH_USER_LOGIN", "KCP_TECH_USER_PASSWORD")
         );
     }
     constructor(host, login, password, credentials) {
@@ -90,7 +90,7 @@ class KCPClient {
 }
 
 function addParameter(query, key, value) {
-    if (query.length == 0) {
+    if (query === "") {
         query += '?';
     } else {
         query += '&';
