@@ -12,7 +12,7 @@ metadata:
 spec:
   containers:
     - name: healthcheck-ready
-      image: "{{ .Values.busybox.repository }}:{{ .Values.busybox.tag }}"
+      image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.busybox) }}"
       command: ['wget']
       args:  ['{{ include "hydra.fullname" . }}-admin:{{ .Values.service.admin.port }}/health/ready']
       securityContext:
