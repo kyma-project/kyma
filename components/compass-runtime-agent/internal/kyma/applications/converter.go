@@ -20,15 +20,15 @@ type Converter interface {
 }
 
 type converter struct {
-	nameResolver k8sconsts.NameResolver
+	nameResolver             k8sconsts.NameResolver
 	centralGatewayServiceUrl string
-	appSkipTLSVerify bool
+	appSkipTLSVerify         bool
 }
 
 func NewConverter(nameResolver k8sconsts.NameResolver, centralGatewayServiceUrl string, skipVerify bool) Converter {
 	return converter{nameResolver: nameResolver,
 		centralGatewayServiceUrl: centralGatewayServiceUrl,
-		appSkipTLSVerify: skipVerify,
+		appSkipTLSVerify:         skipVerify,
 	}
 }
 
