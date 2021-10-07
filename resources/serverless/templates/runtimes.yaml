@@ -7,7 +7,6 @@ metadata:
     serverless.kyma-project.io/config: runtime
     serverless.kyma-project.io/runtime: nodejs12
 data:
-
   # scan-image: {{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.function_runtime_nodejs12) }} # This line allows security scan tools to scan this image
   Dockerfile: |-
     FROM {{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.function_runtime_nodejs12) }}
