@@ -4,7 +4,7 @@ title: Authorization in Kyma
 
 ## User authorization
 
-Kyma uses roles and user groups to manage access to the cluster. If you want to access the system through Kyma Dashboard or using kubectl, you must be authenticated with a JWT token. This token collects user information such as username, email, or `groups` claim for the system to determine whether you have access to perform certain operations.
+Kyma uses roles and user groups to manage access to the cluster. If you want to access the system through Kyma Dashboard or using kubectl, you need a `kubeconfig` file.
 
 ### Cluster-wide authorization
 
@@ -37,11 +37,9 @@ You can assign any of the predefined roles to a user or to a group of users in t
 
 >**TIP:** To ensure proper Namespace separation, use [RoleBindings](https://kubernetes.io/docs/reference/access-authn-authz/rbac/#rolebinding-and-clusterrolebinding) to give users access to the cluster. This way a group or a user can have different permissions in different Namespaces.
 
-The RoleBinding or ClusterRoleBinding must have a group specified as their subject. See the [Kubernetes documentation](https://kubernetes.io/docs/reference/access-authn-authz/rbac/) to learn how to manage Roles and RoleBindings.
-
 ## Service-to-service authorization
 
-Kyma uses the native [Istio Authorization Policy](https://istio.io/latest/docs/reference/config/security/authorization-policy/). The Authorization Policy enables access control on workloads in the mesh.
+Kyma uses the native [Istio Authorization Policy](https://istio.io/latest/docs/reference/config/security/authorization-policy/). The Authorization Policy enables access control on workloads in the mesh. <!--check if the section is still valid>
 
 ## User-to-service authorization
 
