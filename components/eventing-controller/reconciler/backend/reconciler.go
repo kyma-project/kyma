@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
@@ -347,8 +348,36 @@ func (r *Reconciler) UpdateBackendStatus(ctx context.Context, backendType eventi
 
 	// In case a publisher already exists, make sure during the switch the status of publisherReady is false
 	if publisher != nil {
-		publisherReady = publisher.Status.Replicas == publisher.Status.ReadyReplicas &&
-			*publisher.Spec.Replicas == publisher.Status.ReadyReplicas
+		// get the publisherDeployment's pods
+		var pods v1.PodList
+		if err := r.Cache.List(ctx, &pods, client.MatchingLabels{
+			deployment.AppLabelKey: deployment.PublisherName,
+		}); err != nil {
+			return err
+		}
+
+		// check the pods for right backend type
+		correctPodBackend, correctPodsCount := true, 0
+		for _, pod := range pods.Items {
+			if !correctPodBackend {
+				break
+			}
+			if pod.DeletionTimestamp.IsZero() {
+				for _, container := range pod.Spec.Containers {
+					// skip the sidecars containers
+					if container.Name != deployment.PublisherName {
+						continue
+					}
+					if strings.ToLower(container.Env[0].Value) != strings.ToLower(fmt.Sprint(backendType)) {
+						correctPodBackend = false
+						break
+					}
+					correctPodsCount++
+				}
+			}
+		}
+		// the current deployment's pods should be of the right backendType as well as the amount of replicas
+		publisherReady = correctPodBackend && correctPodsCount == int(*publisher.Spec.Replicas)
 	}
 
 	switch backendType {
