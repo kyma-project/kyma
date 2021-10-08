@@ -118,9 +118,7 @@ Create a URL for container images
 */}}
 {{- define "imageurl" -}}
 {{- $registry := default $.reg.path $.img.containerRegistryPath -}}
-{{- $version := printf ":%s" $.img.version -}}
-{{- $image := printf "%s/%s" $registry $.img.name -}}
-{{- if $.img.sha }}{{ $version = printf "@sha256:%s" $.img.sha -}}{{ end -}}
-{{- if $.img.directory }}{{ $image = printf "%s/%s/%s" $registry $.img.directory $.img.name }}{{ end -}}
-{{ $image }}{{ $version }}
+{{- $path := ternary (print $registry) (print $registry "/" $.img.directory) (empty $.img.directory) -}}
+{{- $version := ternary (print ":" $.img.version) (print "@sha256:" $.img.sha) (empty $.img.sha) -}}
+{{- print $path "/" $.img.name $version -}}
 {{- end -}}
