@@ -4,10 +4,10 @@ global:
     path: eu.gcr.io/kyma-project
   images:
     prometheus_operator:
-      name: quay.io/prometheus-operator/prometheus-operator
+      name: "prometheus-operator"
       version: v0.43.2
-#      directory: external
-      sha: "sfsfsfsfsf"
+      directory: "external/quay.io/prometheus-operator"
+      sha: ""
     prometheus_config_reloader:
       name: "prometheus-config-reloader"
       version: "v0.43.2"

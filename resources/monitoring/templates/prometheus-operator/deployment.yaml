@@ -36,7 +36,7 @@ spec:
     {{- end }}
       containers:
         - name: {{ template "kube-prometheus-stack.name" . }}
-          image: {{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.prometheus_operator) }}
+          image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.prometheus_operator) }}"
           imagePullPolicy: "{{ .Values.prometheusOperator.image.pullPolicy }}"
           args:
             {{- if .Values.prometheusOperator.kubeletService.enabled }}
