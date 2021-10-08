@@ -44,13 +44,13 @@ Follow these steps:
 2. Deploy the sample service in the `testing-monitoring` Namespace.
 
    ```bash
-   kubectl create -f https://raw.githubusercontent.com/kyma-project/examples/main/monitoring-custom-metrics/deployment/deployment.yaml --namespace=testing-monitoring
+   kubectl create -f https://raw.githubusercontent.com/kyma-project/examples/release-1.24/monitoring-custom-metrics/deployment/deployment.yaml --namespace=testing-monitoring
    ```
 
 3. Deploy the ServiceMonitor custom resource definition (CRD) in the `kyma-system` Namespace that is a default Namespace for all ServiceMonitor CRDs.
 
    ```bash
-   kubectl apply -f https://raw.githubusercontent.com/kyma-project/examples/main/monitoring-custom-metrics/deployment/service-monitor.yaml
+   kubectl apply -f https://raw.githubusercontent.com/kyma-project/examples/release-1.24/monitoring-custom-metrics/deployment/service-monitor.yaml
    ```
 
 4. Test your deployment.
