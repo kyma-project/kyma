@@ -28,6 +28,11 @@ global:
       version: "v2.22.1"
       directory: "external/quay.io/prometheus"
       sha: ""
+    pushgateway:
+      repository: "pushgateway"
+      version: v1.3.0
+      directory: "external/prom"
+
   istio:
     tls:
       secretName: istio-ingress-certs
