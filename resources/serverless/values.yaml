@@ -194,9 +194,9 @@ containers:
       functionBuildExecutorArgs:
         value: "--insecure,--skip-tls-verify,--skip-unused-stages,--log-format=text,--cache=true"
       functionBuildExecutorImage:
-        value: eu.gcr.io/kyma-project/tpi/kaniko-executor:1.6.0-7b6e8d78
+        value: include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.kaniko_executor) }}
       functionBuildRepoFetcherImage:
-        value: eu.gcr.io/kyma-project/function-build-init:a2f445a2
+        value: include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.function_build_init) }}
       functionBuildMaxSimultaneousJobs:
         value: "5"
       logLevel:
