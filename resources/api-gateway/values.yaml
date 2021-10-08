@@ -1,6 +1,9 @@
 replicaCount: 1
 
 image:
+  repository: eu.gcr.io/kyma-project/incubator/api-gateway-controller
+  tag: "f748d862"
+  # Image pull policy
   pullPolicy: IfNotPresent
 
 deployment:
