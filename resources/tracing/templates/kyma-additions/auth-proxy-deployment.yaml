@@ -28,7 +28,7 @@ spec:
           configMap:
             name: {{ .Release.Name }}-auth-proxy-{{ template "jaeger-operator.fullname" . }}-templates
       containers:
-      - image: "{{ .Values.authProxy.image.repository }}:{{ .Values.authProxy.image.tag }}"
+      - image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.oauth2_proxy) }}"
         imagePullPolicy: {{ .Values.authProxy.image.pullPolicy }}
         name: auth-proxy
         args:
