@@ -5,7 +5,7 @@ type: Tutorials
 
 This tutorial shows how you can observe your application metrics. Learn how to list all metrics exposed by a sample Go service and watch their changing values by redirecting the metrics port and the default Prometheus server port to the localhost.
 
-This tutorial uses the [`monitoring-custom-metrics`](https://github.com/kyma-project/examples/tree/main/monitoring-custom-metrics) example and one of its services named `sample-metrics-8081`. The service exposes its metrics on the standard `/metrics` endpoint that is available under port `8081`. You deploy the service (`deployment.yaml`) along with the ServiceMonitor custom resource (`service-monitor.yaml`) that instructs Prometheus to scrape metrics:
+This tutorial uses the [`monitoring-custom-metrics`](https://github.com/kyma-project/examples/tree/release-1.24/monitoring-custom-metrics) example and one of its services named `sample-metrics-8081`. The service exposes its metrics on the standard `/metrics` endpoint that is available under port `8081`. You deploy the service (`deployment.yaml`) along with the ServiceMonitor custom resource (`service-monitor.yaml`) that instructs Prometheus to scrape metrics:
 
 - From the service with the `k8s-app: metrics` label
 - From the `/metrics` endpoint
