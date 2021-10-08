@@ -337,8 +337,6 @@ configmapReload:
     ## configmap-reload container image
     ##
     image:
-      repository: eu.gcr.io/kyma-project/external/jimmidyson/configmap-reload
-      tag: v0.4.0
       pullPolicy: IfNotPresent
 
     ## Additional configmap-reload container arguments
@@ -582,8 +580,6 @@ server:
   ## Prometheus server container image
   ##
   image:
-    repository: eu.gcr.io/kyma-project/external/quay.io/prometheus/prometheus
-    tag: v2.22.1
     pullPolicy: IfNotPresent
 
   ## prometheus server priorityClassName
