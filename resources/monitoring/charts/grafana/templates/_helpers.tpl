@@ -67,8 +67,8 @@ Common labels
 {{- define "grafana.labels" -}}
 helm.sh/chart: {{ include "grafana.chart" . }}
 {{ include "grafana.selectorLabels" . }}
-{{- if or .Chart.AppVersion .Values.image.tag }}
-app.kubernetes.io/version: {{ .Values.image.tag | default .Chart.AppVersion | quote }}
+{{- if or .Chart.AppVersion .Values.global.images.grafana.version }}
+app.kubernetes.io/version: {{ .Values.global.images.grafana.version | default .Chart.AppVersion | quote }}
 {{- end }}
 app.kubernetes.io/managed-by: {{ .Release.Service }}
 {{- if .Values.extraLabels }}
@@ -90,8 +90,8 @@ Common labels
 {{- define "grafana.imageRenderer.labels" -}}
 helm.sh/chart: {{ include "grafana.chart" . }}
 {{ include "grafana.imageRenderer.selectorLabels" . }}
-{{- if or .Chart.AppVersion .Values.image.tag }}
-app.kubernetes.io/version: {{ .Values.image.tag | default .Chart.AppVersion | quote }}
+{{- if or .Chart.AppVersion .Values.global.images.grafana.version }}
+app.kubernetes.io/version: {{ .Values.global.images.grafana.version | default .Chart.AppVersion | quote }}
 {{- end }}
 app.kubernetes.io/managed-by: {{ .Release.Service }}
 {{- end -}}
