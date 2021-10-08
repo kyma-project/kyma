@@ -15,7 +15,7 @@ image:
   # name is the name of the container image for the eventing-controller
   name: "eventing-controller"
   # tag is the container tag of the eventing-controller image
-  tag: "PR-12283"
+  tag: "PR-12327"
   # pullPolicy is the pullPolicy for the eventing-controller image
   pullPolicy: "IfNotPresent"
 
@@ -38,6 +38,7 @@ publisherProxy:
     name: "event-publisher-proxy"
     tag: "947fb1cd"
     pullPolicy: IfNotPresent
+  requestTimeout: 10s
   replicas: 1
   resources:
     limits:
