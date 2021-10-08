@@ -9,14 +9,19 @@ global:
 #      directory: external
       sha: "sfsfsfsfsf"
     prometheus_config_reloader:
-      name: quay.io/prometheus-operator/prometheus-config-reloader
-      version: v0.43.2
-      directory: external
+      name: "prometheus-config-reloader"
+      version: "v0.43.2"
+      directory: "external/quay.io/prometheus-operator"
       sha: ""
     configmap_reload:
-      name: jimmidyson/configmap-reload
-      version: v0.4.0
-      directory: external
+      name: "configmap-reload"
+      version: "v0.4.0"
+      directory: "external/jimmidyson"
+      sha: ""
+    alertmanager:
+      repository: "alertmanager"
+      version: v0.23.0
+      directory: "external/quay.io/prometheus"
       sha: ""
   istio:
     tls:
@@ -414,13 +419,6 @@ alertmanager:
     podMetadata:
       annotations:
         sidecar.istio.io/inject: "true"
-
-    ## Image of Alertmanager
-    ##
-    image:
-      repository: eu.gcr.io/kyma-project/external/quay.io/prometheus/alertmanager
-      tag: v0.23.0
-      sha: ""
 
     ## If true then the user will be responsible to provide a secret with alertmanager configuration
     ## So when true the config part will be ignored (including templateFiles) and the one in the secret will be used
@@ -1425,7 +1423,6 @@ prometheusOperator:
   ## Prometheus-operator image
   ##
   image:
-    sha: ""
     pullPolicy: IfNotPresent
 
   ## Liveness and readiness probes are missing in the upstrem chart
