@@ -513,7 +513,7 @@ async function checkInClusterEventDelivery(targetNamespace) {
 }
 
 async function checkInClusterEventDeliveryHelper(targetNamespace, encoding) {
-  const eventId = "event-" + genRandom(5);
+  const eventId = "event-" + encoding + "-" + genRandom(5);
   const vs = await waitForVirtualService(targetNamespace, "lastorder");
   const mockHost = vs.spec.hosts[0];
 
