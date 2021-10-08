@@ -19,8 +19,13 @@ global:
       directory: "external/jimmidyson"
       sha: ""
     alertmanager:
-      repository: "alertmanager"
+      name: "alertmanager"
       version: v0.23.0
+      directory: "external/quay.io/prometheus"
+      sha: ""
+    prometheus:
+      name: "prometheus"
+      version: "v2.22.1"
       directory: "external/quay.io/prometheus"
       sha: ""
   istio:
@@ -1711,13 +1716,6 @@ prometheus:
     ## ref: https://prometheus.io/docs/prometheus/latest/querying/api/#tsdb-admin-apis
     ##
     enableAdminAPI: false
-
-    ## Image of Prometheus.
-    ##
-    image:
-      repository: eu.gcr.io/kyma-project/external/quay.io/prometheus/prometheus
-      tag: v2.22.1
-      sha: ""
 
     ## Tolerations for use with node taints
     ## ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
