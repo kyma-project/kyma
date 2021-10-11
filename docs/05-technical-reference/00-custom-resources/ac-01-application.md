@@ -34,8 +34,6 @@ spec:
 
 ## Custom resource parameters
 
-<!-- TODO: add GatewayURL parameter description-->
-
 This table lists all the possible parameters of a given resource together with their descriptions:
 
 | Parameter   |      Required      |  Description |
@@ -56,7 +54,7 @@ This table lists all the possible parameters of a given resource together with t
 | **spec.services.labels** | No | Specifies additional labels for the service offered by the Application. Parameter provided by Application Registry, do not edit. |
 | **spec.services.entries** | Yes | Contains the information about the APIs and events that the service offered by the Application provides. Parameter provided by Application Registry, do not edit. |
 | **spec.services.entries.type** | Yes | Specifies the entry type: API or event. Parameter provided by Application Registry, do not edit. |
-| **spec.services.entries.gatewayUrl** | No | Specifies the URL of Application Connector. This field is required for the API entry type. Parameter provided by Application Registry, do not edit. |
+| **spec.services.entries.centralGatewayUrl** | No | Specifies the URL of Application Gateway. Internal address resolvable only within the cluster. This field is required for the API entry type. Parameter provided by Application Registry, do not edit. |
 | **spec.services.entries.accessLabel** | No | Specifies the label used in Istio rules in Application Connector. This field is required for the API entry type. |
 | **spec.services.entries.targetUrl** |  No | Specifies the URL of a given API. This field is required for the API entry type. Parameter provided by Application Registry, do not edit. |
 | **spec.services.entries.oauthUrl** | No | Specifies the URL used to authorize with a given API. This field is required for the API entry type. Parameter provided by Application Registry, do not edit. |

@@ -75,8 +75,6 @@ To successfully rotate a soon-to-expire CA certificate, replace it with a new ce
 
 9. Wait for all the client certificates to be renewed. 
 
-    > **NOTE:** In the case of an Application connected to Connector Service, the system renews the certificates automatically using the information stored in the Secrets.
-
 10. After the client certificates are renewed, remove the `kyma-gateway-certs-cacert` Secret entry which contains the old certificate. First, encode the `new-ca.crt` file with base64.
   
    > **CAUTION:** Do not proceed with this step until all the client certificates are renewed!
