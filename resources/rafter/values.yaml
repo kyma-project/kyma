@@ -33,7 +33,7 @@ global:
   testImages:
     rafter_test:
       name: "rafter-test"
-      version: "PR-12096"
+      version: "PR-12326"
     mockice:
       name: "mockice"
       version: "0.1.3"
