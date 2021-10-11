@@ -19,7 +19,7 @@ spec:
       serviceAccountName: nats-operator
       containers:
       - name: nats-operator
-        image: {{include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.nats_operator) }}
+        image: "{{include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.nats_operator) }}"
         imagePullPolicy: "{{ .Values.image.pullPolicy }}"
         args:
         - nats-operator
