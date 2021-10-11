@@ -82,7 +82,6 @@ type Entry struct {
 	ApiType                     string      `json:"apiType,omitempty"`
 	Credentials                 Credentials `json:"credentials,omitempty"`
 	RequestParametersSecretName string      `json:"requestParametersSecretName,omitempty"`
-	skipVerify                  bool        `json:"skipVerify"`
 
 	// New fields used by V2 version
 	Name string `json:"name"`
