@@ -114,7 +114,7 @@ spec:
             {{ include "createEnv" ( dict "name" "APP_FUNCTION_IMAGE_PULL_ACCOUNT_NAME" "value" .Values.containers.manager.envs.imagePullAccountName "context" . ) | nindent 12 }}
             {{ include "createEnv" ( dict "name" "APP_FUNCTION_REQUEUE_DURATION" "value" .Values.containers.manager.envs.functionRequeueDuration "context" . ) | nindent 12 }}
             {{ include "createEnv" ( dict "name" "APP_FUNCTION_BUILD_EXECUTOR_ARGS" "value" .Values.containers.manager.envs.functionBuildExecutorArgs "context" . ) | nindent 12 }}
-            {{ $kaniko_executor_image := include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.kaniko_executor) }}
+            {{ $kaniko_executor_image := include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.kaniko_executor) }}
             {{ include "createEnv" ( dict "name" "APP_FUNCTION_BUILD_EXECUTOR_IMAGE" "value" (dict "value" $kaniko_executor_image) "context" . ) | nindent 12 }}
             {{ include "createEnv" ( dict "name" "APP_FUNCTION_TARGET_CPU_UTILIZATION_PERCENTAGE" "value" .Values.containers.manager.envs.targetCPUUtilizationPercentage "context" . ) | nindent 12 }}
             {{ $function_build_init_image := include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.function_build_init) }}
