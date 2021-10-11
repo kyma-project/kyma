@@ -12,10 +12,6 @@ clusterRole:
   name: ""
 
 image:
-  # name is the name of the container image for the eventing-controller
-  name: "eventing-controller"
-  # tag is the container tag of the eventing-controller image
-  tag: "PR-12283"
   # pullPolicy is the pullPolicy for the eventing-controller image
   pullPolicy: "IfNotPresent"
 
@@ -34,9 +30,6 @@ resources:
 
 publisherProxy:
   image:
-    # name is the name of the container image for the eventing-publisher-proxy
-    name: "event-publisher-proxy"
-    tag: "947fb1cd"
     pullPolicy: IfNotPresent
   replicas: 1
   resources:
@@ -50,8 +43,6 @@ publisherProxy:
 natsOperatorDoctor:
   interval: 1m
   image:
-    tag: "PR-11920"
-    name: "nats-operator-doctor"
     pullPolicy: "IfNotPresent"
   resources:
     requests:

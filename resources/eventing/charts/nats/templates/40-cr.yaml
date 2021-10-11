@@ -4,13 +4,13 @@ metadata:
   name: {{ include "nats.fullname" . }}
 spec:
   size: {{ .Values.clusterSize }}
-  version: "2.2.4"
-  serverImage: "eu.gcr.io/kyma-project/external/nats"
+  version: "{{ .Values.global.images.nats.version }}"
+  serverImage: "{{ include "shortimageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.nats) }}"
   pod:
     {{- if .Values.enableMetrics }}
     enableMetrics: {{ .Values.enableMetrics }}
-    metricsImage: "eu.gcr.io/kyma-project/external/natsio/prometheus-nats-exporter"
-    metricsImageTag: "0.7.0"
+    metricsImage: "{{ include "shortimageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.prometheus_nats_exporter) }}"
+    metricsImageTag: "{{ .Values.global.images.prometheus_nats_exporter.version }}"
     metricsImagePullPolicy: IfNotPresent
     {{- end }}
     annotations:
