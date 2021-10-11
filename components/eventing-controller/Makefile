@@ -7,9 +7,6 @@ override ENTRYPOINT = main.go
 
 include $(SCRIPTS_DIR)/generic-make-go.mk
 
-# DEV image is used during development workflow only
-DEV_IMAGE = ko://github.com/kyma-project/kyma/components/eventing-controller/cmd/eventing-controller
-
 ##PROJECT_DIR := $(shell dirname $(abspath $(lastword $(MAKEFILE_LIST))))
 PROJECT_DIR := $(shell pwd)
 
@@ -64,12 +61,22 @@ help: ## Display this help.
 	@awk 'BEGIN {FS = ":.*##"; printf "\nUsage:\n  make \033[36m<target>\033[0m\n"} /^[a-zA-Z_0-9-]+:.*?##/ { printf "  \033[36m%-15s\033[0m %s\n", $$1, $$2 } /^##@/ { printf "\n\033[1m%s\033[0m\n", substr($$0, 5) } ' $(MAKEFILE_LIST)
 
 ##@ Development
+# Deploy eventing-controller in the configured Kubernetes cluster in ~/.kube/config for local development
+deploy-local: manifests-local set-up-local-env
+	kustomize build config/default | envsubst | ko apply -f -
 
 manifests-local: controller-gen-local ## Generate WebhookConfiguration, ClusterRole and CustomResourceDefinition objects.
 	$(CONTROLLER_GEN) $(CRD_OPTIONS) rbac:roleName=manager-role webhook paths="./..." output:crd:artifacts:config=config/crd/bases
 
 generate-local: controller-gen-local ## Generate code containing DeepCopy, DeepCopyInto, and DeepCopyObject method implementations.
 	$(CONTROLLER_GEN) object:headerFile="hack/boilerplate.go.txt" paths="./..."
+
+set-up-local-env:
+    export NATS_URL ?= eventing-nats.kyma-system.svc.cluster.local
+    export EVENT_TYPE_PREFIX ?= sap.kyma.custom
+    export DOMAIN ?= example-domain.com
+    export WEBHOOK_TOKEN_ENDPOINT ?= "https://oauth2.${DOMAIN}/oauth2/token"
+
 
 ENVTEST_ASSETS_DIR=$(PROJECT_DIR)/testbin/$(shell uname)
 test-local: manifests-local generate-local ## Run tests.
@@ -79,11 +86,7 @@ test-local: manifests-local generate-local ## Run tests.
 
 check-code: check-imports fmt-local vet-local lint ## Run various linters and other code checks. Use before committing
 
-run: manifests-local generate fmt-local vet-local ## Run a controller from your host.
-	export NATS_URL ?= nats://127.0.0.1:4222
-	export EVENT_TYPE_PREFIX ?= sap.kyma.custom
-	export WEBHOOK_TOKEN_ENDPOINT ?= WEBHOOK_TOKEN_ENDPOINT
-	export DOMAIN ?= example.com
+run: manifests-local generate-local fmt-local vet-local set-up-local-env## Run a controller from your host.
 	go run ./cmd/eventing-controller/main.go
 
 ##@ Docker
@@ -127,7 +130,6 @@ uninstall: manifests-local kustomize ## Uninstall CRDs from the K8s cluster spec
 	$(KUSTOMIZE) build config/crd | kubectl delete -f -
 
 deploy: manifests-local kustomize ## Deploy controller to the K8s cluster specified in ~/.kube/config.
-	-kubectl create ns ${NAMESPACE}
 	cd config/manager && $(KUSTOMIZE) edit set image controller=${IMG}
 	$(KUSTOMIZE) build config/default | kubectl apply -f -
 
@@ -141,11 +143,10 @@ controller-gen-local: ## Download controller-gen locally if necessary.
 path-to-referenced-charts:
 	@echo "resources/eventing"
 
-# Dry run for deploying eventing-controller for local development
-deploy-local-dry-run: manifests-local
-	cd config/manager && kustomize edit set image controller=${DEV_IMAGE} && kustomize edit set namespace ${NAMESPACE}
+
+deploy-local-dry-run: set-up-local-env manifests-local ## Dry run for deploying eventing-controller for local development
 	cd config/rbac && kustomize edit set namespace ${NAMESPACE}
-	kustomize build config/default
+	kustomize build config/default | envsubst
 
 ##@ CRD
 
@@ -156,7 +157,6 @@ copy-crds: manifests-local ## copy Eventing CRDs to installation/eventing
 copy-external-crds: ## copy external CRDs to config/crd/external
 	mkdir -p config/crd/external
 	cp ../../installation/resources/crds/api-gateway/apirules.gateway.crd.yaml config/crd/external/apirules-gateway-kyma-project-io.yaml
-
 
 # go-get-tool will 'go get' any package $2 and install it to $1.
 ARCH := $(shell uname)

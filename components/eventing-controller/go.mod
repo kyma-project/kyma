@@ -17,7 +17,6 @@ require (
 	github.com/nats-io/nats.go v1.12.3
 	github.com/onsi/ginkgo v1.16.4
 	github.com/onsi/gomega v1.14.0
-	github.com/ory/oathkeeper-maester v0.1.0 // indirect
 	github.com/pkg/errors v0.9.1
 	github.com/stretchr/testify v1.7.0
 	go.uber.org/zap v1.18.1

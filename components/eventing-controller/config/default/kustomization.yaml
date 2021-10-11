@@ -1,12 +1,12 @@
 # Adds namespace to all resources.
-namespace: eveting-controller-kb3-system
+namespace: kyma-system
 
 # Value of this field is prepended to the
 # names of all resources, e.g. a deployment named
 # "wordpress" becomes "alices-wordpress".
 # Note that it should also match with the prefix (text before '-') of the namespace
 # field above.
-namePrefix: eveting-controller-kb3-
+namePrefix: eventing-
 
 # Labels to add to all resources and selectors.
 #commonLabels:
@@ -28,7 +28,10 @@ patchesStrategicMerge:
 # Protect the /metrics endpoint by putting it behind auth.
 # If you want your controller-manager to expose the /metrics
 # endpoint w/o any authn/z, please comment the following line.
-- manager_auth_proxy_patch.yaml
+#- manager_auth_proxy_patch.yaml
+- controller_ko_image.yaml
+- manager_env.yaml
+
 
 # Mount the controller config file for loading manager configurations
 # through a ComponentConfig type
