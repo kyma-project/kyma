@@ -1,0 +1,20 @@
+# permissions for end users to view eventingbackends.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: eventingbackend-viewer-role
+rules:
+- apiGroups:
+  - kyma-project.io
+  resources:
+  - eventingbackends
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - kyma-project.io
+  resources:
+  - eventingbackends/status
+  verbs:
+  - get
