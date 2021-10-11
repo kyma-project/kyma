@@ -15,6 +15,15 @@ global:
     nats_operator:
       name: nats-operator
       version: PR-12170
+    nats:
+      name: "nats"
+      version: "2.2.4"
+      directory: "external"
+    prometheus_nats_exporter:
+      name: "prometheus-nats-exporter"
+      varsion: "0.7.0"
+      directory: "external/natsio"
+    
 
   # secretName defines optionally another name than the default secret name
   secretName: ""
