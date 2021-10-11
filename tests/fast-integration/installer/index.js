@@ -211,7 +211,7 @@ async function chartList(options) {
     ].join(',');
   } else {
     registryOverrides = [
-      `global.images.kaniko_executor.directory=external/aerfio`,
+      `global.images.kaniko_executor.directory=external\/aerfio`,
       `global.images.kaniko_executor.version=v1.3.0`,
       `dockerRegistry.enableInternal=false`,
       `dockerRegistry.registryAddress=registry.localhost:5000`,
