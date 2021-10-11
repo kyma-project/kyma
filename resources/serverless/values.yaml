@@ -112,10 +112,6 @@ global:
       version: "449a5e4a"
 
 
-kaniko_executor:
-  name: "kaniko-executor"
-  version: "1.6.0-7b6e8d78"
-  directory: "tpi"
 
 images:
   function_controller:
