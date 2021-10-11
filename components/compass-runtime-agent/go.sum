@@ -497,8 +497,8 @@ github.com/kisielk/errcheck v1.1.0/go.mod h1:EZBBE59ingxPouuu3KfxchcWSUPOHkagtvW
 github.com/kisielk/errcheck v1.2.0/go.mod h1:/BMXB+zMLi60iA8Vv6Ksmxu/1UDYcXs4uQLJ+jE2L00=
 github.com/kisielk/errcheck v1.5.0/go.mod h1:pFxgyoBC7bSaBwPgfKdkLd5X25qrDl4LWUI2bnpBCr8=
 github.com/kisielk/gotool v1.0.0/go.mod h1:XhKaO+MFFWcvkIS/tQcRk01m1F5IRFswLeQ+oQHNcck=
-github.com/koala7659/kyma/components/application-operator v0.0.0-20211007073716-46c546383c56 h1:8K5McdsoNnuBTkn9UW2vUBQuMjZ1rtGc3meLr4iSMP0=
-github.com/koala7659/kyma/components/application-operator v0.0.0-20211007073716-46c546383c56/go.mod h1:tHyxTctgL2M0a0Rn25goIO6SVp1Hvo7eoZcrnDCIXxA=
+github.com/koala7659/kyma/components/application-operator v0.0.0-20211011060809-0014d04eeadd h1:XzPV9A+mOXZLNkBlCqsZopt3rbiyltHDgPQmREIYwYU=
+github.com/koala7659/kyma/components/application-operator v0.0.0-20211011060809-0014d04eeadd/go.mod h1:tHyxTctgL2M0a0Rn25goIO6SVp1Hvo7eoZcrnDCIXxA=
 github.com/kofalt/go-memoize v0.0.0-20200917044458-9b55a8d73e1c h1:iQm590VHHIeY1j9OFi2qBPgIeDqxz+PmHdDK/fUcN7s=
 github.com/kofalt/go-memoize v0.0.0-20200917044458-9b55a8d73e1c/go.mod h1:IvB2BCBCdgZFN9ZSgInoUlL1sAu0Xbvqfd7D+qqzTeo=
 github.com/konsorten/go-windows-terminal-sequences v1.0.1/go.mod h1:T0+1ngSBFLxvqU3pZ+m/2kptfBszLMUkC4ZK/EgS/cQ=
