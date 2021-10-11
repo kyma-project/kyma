@@ -1,7 +1,7 @@
 # globally shared values among Helm subcharts
 global:
   containerRegistry:
-    path: "eu.gcr.io/kyma-project"
+    path: eu.gcr.io/kyma-project
   images:
     nats_operator_doctor:
       name: nats-operator-doctor
@@ -16,13 +16,13 @@ global:
       name: nats-operator
       version: PR-12170
     nats:
-      name: "nats"
-      version: "2.2.4"
-      directory: "external"
+      name: nats
+      version: 2.2.4
+      directory: external
     prometheus_nats_exporter:
-      name: "prometheus-nats-exporter"
-      varsion: "0.7.0"
-      directory: "external/natsio"
+      name: prometheus-nats-exporter
+      varsion: 0.7.0
+      directory: external/natsio
     
 
   # secretName defines optionally another name than the default secret name
