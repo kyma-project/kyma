@@ -211,13 +211,12 @@ async function chartList(options) {
     ].join(',');
   } else {
     registryOverrides = [
-      `global.images.kanikoexecutor.name=kaniko-executor`,
-      `global.images.kanikoexecutor.directory=external/aerfio`,
-      `global.images.kanikoexecutor.version=v1.3.0`,
       `dockerRegistry.enableInternal=false`,
       `dockerRegistry.registryAddress=registry.localhost:5000`,
       `dockerRegistry.serverAddress=registry.localhost:5000`,
-      `global.domainName=${domain}`
+      `global.domainName=${domain}`,
+      `global.images.kaniko_executor.directory=external/aerfio`,
+      `global.images.kaniko_executor.version=v1.3.0`,
     ].join(',');
   }
   const kialiOverrides = overrides + ',kcproxy.enabled=false,virtualservice.enabled=false';
