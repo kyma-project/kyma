@@ -40,15 +40,17 @@ const {
 
 const {
   KCPConfig,
-  KCPClient,
+  KCPWrapper,
 } = require("../kcp/client")
 
 
 describe("SKR nightly", function () {
   const keb = new KEBClient(KEBConfig.fromEnv());
 
-  process.env.KCP_HOST = keb.host;
-  const kcp = new KCPClient(KCPConfig.fromEnv());
+  process.env.KCP_KEB_API_URL = `https://kyma-env-broker.` + keb.host;
+  process.env.KCP_GARDENER_NAMESPACE = `garden-kyma-dev`;
+  process.env.KCP_OIDC_ISSUER_URL = `https://kymatest.accounts400.ondemand.com`;
+  const kcp = new KCPWrapper(KCPConfig.fromEnv());
 
   const gardener = new GardenerClient(GardenerConfig.fromEnv());
   const director = new DirectorClient(DirectorConfig.fromEnv());
@@ -94,6 +96,7 @@ describe("SKR nightly", function () {
   let skr;
 
   it(`Ensure nightly runtime already exists`, async function () {
+    await kcp.login()
     const r = await kcp.runtimes({subaccount: keb.subaccountID});
     console.log(r);
   });

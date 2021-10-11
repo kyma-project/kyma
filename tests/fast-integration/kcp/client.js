@@ -1,105 +1,101 @@
-const axios = require("axios");
-const { OAuthCredentials, OAuthToken } = require("../lib/oauth");
+const execa = require("execa");
+const fs = require('fs');
 const {getEnvOrThrow, debug} = require("../utils");
 
-const SCOPES = ["cld:read"];
-
 class KCPConfig {
+    kcpConfigPath = `config.yaml`;
     static fromEnv() {
         return new KCPConfig(
-            getEnvOrThrow("KCP_HOST"),
+            getEnvOrThrow("KCP_KEB_API_URL"),
+            getEnvOrThrow("KCP_OIDC_ISSUER_URL"),
+            getEnvOrThrow("KCP_GARDENER_NAMESPACE"),
             getEnvOrThrow("KCP_TECH_USER_LOGIN"),
             getEnvOrThrow("KCP_TECH_USER_PASSWORD"),
-            OAuthCredentials.fromEnv("KCP_TECH_USER_LOGIN", "KCP_TECH_USER_PASSWORD")
+            getEnvOrThrow("KCP_OIDC_CLIENT_ID"),
+            getEnvOrThrow("KCP_OIDC_CLIENT_SECRET"),
         );
     }
-    constructor(host, login, password, credentials) {
+    constructor(host, issuerURL, gardenerNamespace, username, password, clientID, clientSecret) {
         this.host = host;
-        this.login = login;
+        this.issuerURL = issuerURL;
+        this.gardenerNamespace = gardenerNamespace;
+        this.login = username;
         this.password = password;
-        this.credentials = credentials;
+        this.clientID = clientID;
+        this.clientSecret = clientSecret;
+    }
+
+    file() {
+        let stream = fs.createWriteStream(`${this.kcpConfigPath}`);
+        stream.once("open", (_) => {
+            stream.write(`gardener-namespace: ${this.gardenerNamespace}\n`);
+            stream.write(`oidc-client-id: ${this.clientID}\n`);
+            stream.write(`oidc-client-secret: ${this.clientSecret}\n`);
+            stream.write(`keb-api-url: ${this.host}\n`);
+            stream.write(`oidc-issuer-url: ${this.issuerURL}\n`);
+            stream.end();
+        })
+        return this.kcpConfigPath;
     }
 }
 
-class KCPClient {
+class KCPWrapper {
     constructor(config) {
-        // TODO unhardcode it.
-        // this url is required to get proper credentials for the KCP tech client.
-        this.token = new OAuthToken(`https://kymatest.accounts400.ondemand.com`, config.credentials);
+        this.configFile = config.file();
+        this.username = config.username;
+        this.password = config.password;
         this.host = config.host;
-    }
-    async buildRequest(payload, endpoint, verb) {
-        const token = await this.token.getToken(SCOPES)
-        const url = `https://kyma-env-broker.${this.host}/${endpoint}`
-        const headers = {
-            "accept": "application/json",
-            Authorization: `Bearer ${token}`,
-        }
-        return {
-            url: url,
-            method: verb,
-            headers: headers,
-            data: payload,
-        };
     }
 
     async runtimes(...customOptions) {
-        let query;
+        let args = [`runtimes`, `--output`, `json`];
         customOptions.forEach((option) => {
             if (option.account) {
-                query = addParameter(query, `account`, option.account)
+                args += [`--account`, `${option.account}`];
             }
             if (option.subaccount) {
-                query = addParameter(query, `subaccount`, option.subaccount)
+                args += [`--subaccount`, `${option.subaccount}`];
             }
             if (option.instanceID) {
-                query = addParameter(query, `instance_id`, option.instanceID)
+                args += [`--instance-id`, `${option.instanceID}`];
             }
             if (option.runtimeID) {
-                query = addParameter(query, `runtime_id`, option.runtimeID)
+                args += [`--runtime-id`, `${option.runtimeID}`];
             }
             if (option.region) {
-                query = addParameter(query, `region`, option.region)
+                args += [`--region`, `${option.region}`];
             }
             if (option.shoot) {
-                query = addParameter(query, `shoot`, option.shoot)
+                args += [`--shoot`, `${option.shoot}`];
             }
             if (option.state) {
-                query = addParameter(query, `state`, option.state)
+                args += [`--state`, `${option.state}`];
             }
         });
+        return await this.execCmd(args);
+    }
 
-        const endpoint = `${this.host}/runtimes${query}`;
-        console.log(endpoint)
-        const req = await this.buildRequest({}, endpoint, "get")
+    async login() {
+        const args = [`login`, `--username`, `${this.username}`, `--password`, `${this.password}`];
+        return await this.execCmd(args);
+    }
+
+    async execCmd(args) {
+        debug(args);
         try {
-            const resp = await axios.request(req);
-            if (resp.data.error) {
-                debug(resp)
-                throw new Error(resp.data.error)
-            }
-            return resp.data
+            let output = await execa(`kcp`, args + [`--config`, `${this.configFile}`]);
+            debug(output);
+            return output;
         } catch (err) {
-            if (err.response) {
-                throw new Error(`KEB get runtimes error: ${err.response.status} ${err.response.statusText}`);
-            } else {
-                throw new Error(`KEB get runtimes error: ${err.toString()}`);
+            if (err.stderr === undefined) {
+                throw new Error(`failed to process kcp binary output: ${err.toString()}`);
             }
+            throw new Error(`kcp command failed: ${err.stderr.toString()}`);
         }
     }
-}
-
-function addParameter(query, key, value) {
-    if (query === "") {
-        query += '?';
-    } else {
-        query += '&';
-    }
-    query += `${key}=${value}`;
-    return query
 }
 
 module.exports = {
     KCPConfig,
-    KCPClient,
+    KCPWrapper,
 }
