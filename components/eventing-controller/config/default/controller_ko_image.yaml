@@ -11,3 +11,5 @@ spec:
       containers:
         - image: ko://github.com/kyma-project/kyma/components/eventing-controller/cmd/eventing-controller
           name: manager
+          command:
+          - /ko-app/eventing-controller

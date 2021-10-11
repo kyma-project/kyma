@@ -26,9 +26,9 @@ spec:
         runAsNonRoot: true
       containers:
       - command:
-        - /manager
-        args:
-        - --leader-elect
+        - /eventing-controller
+#        args:
+#        - --leader-elect
         image: controller
         name: manager
         securityContext:
