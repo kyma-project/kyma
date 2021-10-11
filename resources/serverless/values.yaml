@@ -92,7 +92,7 @@ global:
     function_runtime_python39:
       name: "function-runtime-python39"
       version: "a3baf33c"
-    kaniko_executor:
+    kanikoexecutor:
       name: "kaniko-executor"
       version: "1.6.0-7b6e8d78"
       directory: "tpi"
