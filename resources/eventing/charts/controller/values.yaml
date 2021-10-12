@@ -31,6 +31,7 @@ resources:
 publisherProxy:
   image:
     pullPolicy: IfNotPresent
+  requestTimeout: 10s
   replicas: 1
   resources:
     limits:
