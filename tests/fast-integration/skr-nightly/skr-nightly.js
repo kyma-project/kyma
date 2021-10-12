@@ -95,7 +95,7 @@ describe("SKR nightly", function () {
 
   let skr;
 
-  it(`Ensure nightly runtime already exists`, async function () {
+  it(`Ensure nightly runtime already exists`, async () => {
     await kcp.login()
     let query = {
       subaccount: keb.subaccountID,

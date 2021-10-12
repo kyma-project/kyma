@@ -3,7 +3,6 @@ const fs = require('fs');
 const {getEnvOrThrow, debug} = require("../utils");
 
 class KCPConfig {
-    kcpConfigPath = `config.yaml`;
     static fromEnv() {
         return new KCPConfig(
             getEnvOrThrow("KCP_KEB_API_URL"),
@@ -19,13 +18,12 @@ class KCPConfig {
         this.host = host;
         this.issuerURL = issuerURL;
         this.gardenerNamespace = gardenerNamespace;
-        this.login = username;
+        this.username = username;
         this.password = password;
         this.clientID = clientID;
         this.clientSecret = clientSecret;
-    }
+        this.kcpConfigPath = `config.yaml`;
 
-    file() {
         let stream = fs.createWriteStream(`${this.kcpConfigPath}`);
         stream.once("open", (_) => {
             stream.write(`gardener-namespace: ${this.gardenerNamespace}\n`);
@@ -35,13 +33,12 @@ class KCPConfig {
             stream.write(`oidc-issuer-url: ${this.issuerURL}\n`);
             stream.end();
         })
-        return this.kcpConfigPath;
     }
 }
 
 class KCPWrapper {
     constructor(config) {
-        // this.configFile = config.file();
+        this.kcpConfigPath = config.kcpConfigPath;
         this.gardenerNamespace = config.gardenerNamespace;
         this.clientID = config.clientID;
         this.clientSecret = config.clientSecret;
@@ -55,27 +52,26 @@ class KCPWrapper {
     async runtimes(query) {
         let args = [`runtimes`, `--output`, `json`];
         if (query.account) {
-            args.concat(`--account`, `${query.account}`);
+            args = args.concat(`--account`, `${query.account}`);
         }
         if (query.subaccount) {
-            args.concat(`--subaccount`, `${query.subaccount}`);
+            args = args.concat(`--subaccount`, `${query.subaccount}`);
         }
         if (query.instanceID) {
-            args.concat(`--instance-id`, `${query.instanceID}`);
+            args = args.concat(`--instance-id`, `${query.instanceID}`);
         }
         if (query.runtimeID) {
-            args.concat(`--runtime-id`, `${query.runtimeID}`);
+            args = args.concat(`--runtime-id`, `${query.runtimeID}`);
         }
         if (query.region) {
-            args.concat(`--region`, `${query.region}`);
+            args = args.concat(`--region`, `${query.region}`);
         }
         if (query.shoot) {
-            args.concat(`--shoot`, `${query.shoot}`);
+            args = args.concat(`--shoot`, `${query.shoot}`);
         }
         if (query.state) {
-            args.concat(`--state`, `${query.state}`);
+            args = args.concat(`--state`, `${query.state}`);
         }
-        console.log(args)
         return await this.exec(args);
     }
 
@@ -87,15 +83,11 @@ class KCPWrapper {
     async exec(args) {
         try {
             const defaultArgs = [
-                `--gardener-namespace`, `${this.gardenerNamespace}`,
-                `--keb-api-url`, `${this.host}`,
-                `--oidc-issuer-url`, `${this.issuerURL}`,
-                `--oidc-client-id`, `${this.clientID}`,
-                `--oidc-client-secret`, `${this.clientSecret}`,
+                `--config`, `${this.kcpConfigPath}`,
             ];
-            let output = await execa(`kcp`, defaultArgs.concat(args));
+            let output = await execa(`kcp`, args.concat(defaultArgs));
             debug(output);
-            return output;
+            return output.stdout;
         } catch (err) {
             if (err.stderr === undefined) {
                 throw new Error(`failed to process kcp binary output: ${err.toString()}`);
