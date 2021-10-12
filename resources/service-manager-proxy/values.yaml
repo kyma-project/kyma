@@ -38,8 +38,6 @@ sm:
 image:
   pullPolicy: IfNotPresent
   pullsecret: null
-  repository: eu.gcr.io/kyma-project/external/quay.io/service-manager/sb-proxy-k8s
-  tag: v0.9.1
 replicaCount: 1
 securityContext: { }
 service:
@@ -59,6 +57,6 @@ global:
     path: eu.gcr.io/kyma-project
   images:
     sb_proxy_k8s:
-    name: "sb-proxy-k8s"
-    version: "v0.9.1"
-    directory: "external/quay.io/service-manager"
+      name: "sb-proxy-k8s"
+      version: "v0.9.1"
+      directory: "external/quay.io/service-manager"
