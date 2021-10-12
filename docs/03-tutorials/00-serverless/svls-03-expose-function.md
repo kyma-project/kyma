@@ -137,8 +137,6 @@ Follows these steps:
     curl https://$NAME.$DOMAIN
     ```
 
-   >**CAUTION:** If you have a Minikube cluster, you must first add its IP address mapped to the hostname of the exposed Kubernetes Service to the `hosts` file on your machine.
-
     </details>
     <details>
     <summary label="busola-ui">
