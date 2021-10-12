@@ -2,6 +2,7 @@ service-catalog-ui:
   enabled: false
 
 global:
+  domainName: "kyma.example.com"
   containerRegistry:
     path: eu.gcr.io/kyma-project
   images:

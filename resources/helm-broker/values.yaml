@@ -74,6 +74,7 @@ addons-ui:
   enabled: false
 
 global:
+  domainName: "kyma.example.com"
   containerRegistry:
     path: eu.gcr.io/kyma-project
   # develop mode allows use insecure (http) url for addons configuration
