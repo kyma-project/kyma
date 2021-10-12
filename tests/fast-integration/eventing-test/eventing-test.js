@@ -33,14 +33,14 @@ describe("Eventing tests", function () {
 
   // eventingE2ETestSuite - Runs Eventing end-to-end tests
   function eventingE2ETestSuite () {
-    it("In-cluster event should be delivered (structured and binary mode)", async function () {
-      await checkInClusterEventDelivery(testNamespace);
-    });
-  
     it("lastorder function should be reachable through secured API Rule", async function () {
       await checkFunctionResponse(testNamespace);
     });
-  
+
+    it("In-cluster event should be delivered (structured and binary mode)", async function () {
+      await checkInClusterEventDelivery(testNamespace);
+    });
+
     it("order.created.v1 event from CommerceMock should trigger the lastorder function", async function () {
       await sendEventAndCheckResponse();
     });

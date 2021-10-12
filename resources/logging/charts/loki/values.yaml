@@ -278,8 +278,6 @@ kyma:
   auth:
     useKymaGroups: false
     groups: ""
-virtualservice:
-  enabled: false
 grafana:
   datasource:
     derivedFields: |
