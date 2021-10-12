@@ -11,7 +11,7 @@ global:
       version: PR-12327
     publisher_proxy:
       name: event-publisher-proxy
-      version: 947fb1cd
+      version: PR-12318
     nats_operator:
       name: nats-operator
       version: PR-12170
