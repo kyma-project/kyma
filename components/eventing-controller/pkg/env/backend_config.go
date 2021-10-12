@@ -25,6 +25,7 @@ type PublisherConfig struct {
 	Replicas        int32  `envconfig:"PUBLISHER_REPLICAS" default:"1"`
 	RequestsCPU     string `envconfig:"PUBLISHER_REQUESTS_CPU" default:"32m"`
 	RequestsMemory  string `envconfig:"PUBLISHER_REQUESTS_MEMORY" default:"64Mi"`
+	RequestTimeout  string `envconfig:"PUBLISHER_REQUEST_TIMEOUT" default:"5s"`
 	LimitsCPU       string `envconfig:"PUBLISHER_LIMITS_CPU" default:"100m"`
 	LimitsMemory    string `envconfig:"PUBLISHER_LIMITS_MEMORY" default:"128Mi"`
 }
