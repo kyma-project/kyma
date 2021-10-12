@@ -63,7 +63,6 @@ spec:
           - "--gatewayBaseURL=https://gateway.{{ .Values.global.domainName }}"
           - "--certificateProtectedHost=gateway.{{ .Values.global.domainName }}"
           - "--appsInfoURL={{ tpl .Values.deployment.args.appsInfoURL . }}"
-          - "--runtimesInfoURL={{ tpl .Values.deployment.args.runtimesInfoURL . }}"
           - "--appCertificateValidityTime={{ .Values.deployment.args.appValidityTime }}"
           - "--runtimeCertificateValidityTime={{ .Values.deployment.args.runtimeValidityTime }}"
           - "--central={{ .Values.deployment.args.central }}"
