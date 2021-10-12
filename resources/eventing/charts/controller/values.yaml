@@ -11,9 +11,6 @@ clusterRole:
   # name defines optionally another name than the default name for the cluster role
   name: ""
 
-image:
-  pullPolicy: "IfNotPresent"
-
 podSecurityContext:
 
 bebSecret:
