@@ -53,3 +53,12 @@ resources:
   requests:
     memory: 32Mi
     cpu: 30m
+
+global:
+  containerRegistry:
+    path: eu.gcr.io/kyma-project
+  images:
+    sb_proxy_k8s:
+    name: "sb-proxy-k8s"
+    version: "v0.9.1"
+    directory: "external/quay.io/service-manager"
