@@ -24,12 +24,6 @@ spec:
         exact: /v1/applications/certificates/renewals
     - uri:
         exact: /v1/applications/certificates/revocations
-    - uri:
-        exact: /v1/runtimes/management/info
-    - uri:
-        exact: /v1/runtimes/certificates/renewals
-    - uri:
-        exact: /v1/runtimes/certificates/revocations
     route:
     - destination:
         port:

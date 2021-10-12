@@ -58,6 +58,8 @@ spec:
             value: "{{ .Values.publisherProxy.image.pullPolicy }}"
           - name: PUBLISHER_REPLICAS
             value: "{{ .Values.publisherProxy.replicas }}"
+          - name: PUBLISHER_REQUEST_TIMEOUT
+            value: "{{ .Values.publisherProxy.requestTimeout }}"
           - name: DEFAULT_MAX_IN_FLIGHT_MESSAGES
             value: "{{ .Values.eventingBackend.defaultMaxInflightMessages }}"
           - name: APP_LOG_FORMAT
