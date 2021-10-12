@@ -13,8 +13,6 @@ minio:
     persistence: "on"
 
 image:
-  repository: eu.gcr.io/kyma-project/rafter-controller-manager
-  tag: 6d342230
   pullPolicy: IfNotPresent
 
 deployment:

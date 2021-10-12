@@ -8,16 +8,12 @@ clusterDomain: cluster.local
 ## Set default image, imageTag, and imagePullPolicy. mode is used to indicate the
 ##
 image:
-  repository: minio/minio
-  tag: edge
   pullPolicy: IfNotPresent
 
 ## Set default image, imageTag, and imagePullPolicy for the `mc` (the minio
 ## client used to create a default bucket).
 ##
 mcImage:
-  repository: minio/mc
-  tag: edge
   pullPolicy: IfNotPresent
 
 ## minio server mode, i.e. standalone or distributed.

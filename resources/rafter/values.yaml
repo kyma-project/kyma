@@ -3,6 +3,41 @@ global:
     gateway:
       name: kyma-gateway
       namespace: kyma-system
+  containerRegistry:
+    path: eu.gcr.io/kyma-project
+  images:
+    minio:
+      name: "minio"
+      version: "RELEASE.2020-09-21T22-31-59Z-e85e5eaf"
+      directory: "tpi/minio"
+    minio_client:
+      name: "mc"
+      version: "RELEASE.2019-04-03T17-59-57Z-e0da5a68"
+      directory: "tpi/minio"
+    k8s_tools:
+      name: "k8s-tools"
+      version: "20210922-530cfc39"
+      directory: "tpi"
+    rafter_controller_manager:
+      name: "rafter-controller-manager"
+      version: "f8031ac4"
+    rafter_upload_service:
+      name: "rafter-upload-service"
+      version: "f8031ac4"
+    rafter_front_matter_service:
+      name: "rafter-front-matter-service"
+      version: "f8031ac4"
+    rafter_asyncapi_service:
+      name: "rafter-asyncapi-service"
+      version: "f8031ac4"
+  testImages:
+    rafter_test:
+      name: "rafter-test"
+      version: "PR-12326"
+    mockice:
+      name: "mockice"
+      version: "0.1.3"
+      directory: "external/hudymi"
 
 tests:
   enabled: true
@@ -12,8 +47,6 @@ tests:
     e2e-skr: true
 
   image:
-    repository: "eu.gcr.io/kyma-project/rafter-test"
-    tag: "PR-12326"
     pullPolicy: IfNotPresent
   disableConcurrency: true
   restartPolicy: Never
@@ -21,7 +54,6 @@ tests:
     limits:
       memory: 128Mi
   envs:
-    mockiceImage: eu.gcr.io/kyma-project/external/hudymi/mockice:0.1.3
     waitTimeout: 10m
     verifySSL: "false"
 
@@ -31,8 +63,6 @@ controller-manager:
   fullnameOverride: "rafter-controller-manager"
 
   image:
-    repository: eu.gcr.io/kyma-project/rafter-controller-manager
-    tag: f8031ac4
     pullPolicy: IfNotPresent
 
   deployment:
@@ -205,13 +235,7 @@ controller-manager:
     ensureSecret:
       secretName: "rafter-minio-old-credentials"
       image:
-        repository: "eu.gcr.io/kyma-project/tpi/k8s-tools"
-        tag: "20210922-530cfc39"
         pullPolicy: IfNotPresent
-
-    image:
-      tag: RELEASE.2020-09-21T22-31-59Z-e85e5eaf
-      repository: eu.gcr.io/kyma-project/tpi/minio/minio
 
     pod:
       extraProperties:
@@ -276,8 +300,6 @@ upload-service:
       size: 10Gi
 
   image:
-    repository: eu.gcr.io/kyma-project/rafter-upload-service
-    tag: f8031ac4
     pullPolicy: IfNotPresent
 
   deployment:
@@ -363,12 +385,8 @@ upload-service:
   migrator:
     images:
       alpineKubectl:
-        repository: eu.gcr.io/kyma-project/tpi/k8s-tools
-        tag: "20210922-530cfc39"
         pullPolicy: IfNotPresent
       minioClient:
-        repository: eu.gcr.io/kyma-project/tpi/minio/mc
-        tag: RELEASE.2019-04-03T17-59-57Z-e0da5a68
         pullPolicy: IfNotPresent
     pre:
       minioDeploymentRefName:
@@ -382,8 +400,6 @@ front-matter-service:
   fullnameOverride: "rafter-front-matter-service"
 
   image:
-    repository: eu.gcr.io/kyma-project/rafter-front-matter-service
-    tag: f8031ac4
     pullPolicy: IfNotPresent
 
   deployment:
@@ -418,8 +434,6 @@ asyncapi-service:
   fullnameOverride: "rafter-asyncapi-service"
 
   image:
-    repository: eu.gcr.io/kyma-project/rafter-asyncapi-service
-    tag: f8031ac4
     pullPolicy: IfNotPresent
 
   deployment:

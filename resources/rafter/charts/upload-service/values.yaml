@@ -16,8 +16,6 @@ minio:
     persistence: "on"
 
 image:
-  repository: eu.gcr.io/kyma-project/rafter-upload-service
-  tag: 3778b2ec
   pullPolicy: IfNotPresent
 
 deployment:
@@ -132,12 +130,8 @@ envs:
 migrator:
   images:
     alpineKubectl:
-      repository: eu.gcr.io/kyma-project/tpi/k8s-tools
-      tag: "20210922-530cfc39"
       pullPolicy: IfNotPresent
     minioClient:
-      repository: "eu.gcr.io/kyma-project/tpi/minio/mc"
-      tag: "RELEASE.2019-04-03T17-59-57Z-e0da5a68"
       pullPolicy: IfNotPresent
   pre:
     minioDeploymentRefName:
