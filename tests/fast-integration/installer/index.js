@@ -214,9 +214,7 @@ async function chartList(options) {
       `dockerRegistry.enableInternal=false`,
       `dockerRegistry.registryAddress=registry.localhost:5000`,
       `dockerRegistry.serverAddress=registry.localhost:5000`,
-      `global.domainName=${domain}`,
-      `global.images.kaniko_executor.directory=external/aerfio`,
-      `global.images.kaniko_executor.version=v1.3.0`
+      `global.domainName=${domain}`
     ].join(',');
   }
   const kialiOverrides = overrides + ',kcproxy.enabled=false,virtualservice.enabled=false';
