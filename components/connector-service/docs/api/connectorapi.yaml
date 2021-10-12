@@ -225,180 +225,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/appError'
-  /v1/runtimes/tokens:
-    post:
-      parameters:
-      - in: header
-        name: Group
-        schema:
-          type: string
-          format: uuid
-        required: false
-      - in: header
-        name: Tenant
-        schema:
-          type: string
-        required: false
-      tags:
-      - runtimes internal API
-      summary: 'Creates a token used for certificate signing flow.'
-      responses:
-        '201':
-          description: 'Successful operation.'
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/runtimeTokenResponse'
-        '500':
-          description: 'Server error.'
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/appError'
-  /v1/runtimes/certificates/revocations:
-    post:
-      tags:
-      - runtimes external API
-      summary: 'Marks certificate as revoked.'
-      responses:
-        '201':
-          description: 'Successful operation.'
-        '500':
-          description: 'Server error.'
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/appError'
-  /v1/runtimes/signingRequests/info:
-    get:
-      parameters:
-      - in: query
-        name: token
-        description: 'Access Token fetched from /tokens endpoint.'
-        required: true
-        schema:
-          type: string
-      tags:
-      - runtimes external API
-      summary: 'Allows for fetching information for CSR.'
-      responses:
-        '200':
-          description: 'Successful operation.'
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/csrRuntimeInfoResponse'
-        '403':
-          description: 'Invalid token'
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/appError'
-        '500':
-          description: 'Server error.'
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/appError'
-  /v1/runtimes/management/info:
-    get:
-      tags:
-      - runtimes external API
-      summary: 'Returns information on available services.'
-      responses:
-        '200':
-          description: 'Successful operation.'
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/runtimeInfoResponse'
-        '500':
-          description: 'Server error.'
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/appError'
-  /v1/runtimes/certificates:
-    post:
-      parameters:
-      - in: query
-        name: token
-        description: 'Access Token fetched from /tokens endpoint.'
-        required: true
-        schema:
-          type: string
-      tags:
-      - runtimes external API
-      summary: 'Signs CSR.'
-      requestBody:
-        description: 'The CSR to be signed'
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/csrRequest'
-      responses:
-        '201':
-          description: 'Successful operation.'
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/csrResponse'
-        '400':
-          description: 'Improper subject values, lack of values in CSR or Group header not specified.'
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/appError'
-        '403':
-          description: 'Invalid token'
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/appError'
-        '404':
-          description: 'Not found'
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/appError'
-        '500':
-          description: 'Server error.'
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/appError'
-  /v1/runtimes/certificates/renewals:
-    post:
-      tags:
-      - runtimes external API
-      summary: 'Renews certificate using CSR.'
-      requestBody:
-        description: 'The CSR to be signed'
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/csrRequest'
-      responses:
-        '201':
-          description: 'Successful operation.'
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/csrResponse'
-        '400':
-          description: 'Improper subject values or lack of values in CSR.'
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/appError'
-        '500':
-          description: 'Server error.'
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/appError'
 components:
   schemas:
     tokenResponse:
@@ -410,32 +236,12 @@ components:
         token:
           type: 'string'
           example: '1edfc34g'
-    runtimeTokenResponse:
-      type: 'object'
-      properties:
-        url:
-          type: 'string'
-          example: 'https://connector-service.test.cluster.kyma.cx/v1/runtimes/info?token=1edfc34g'
-        token:
-          type: 'string'
-          example: '1edfc34g'
     cert:
       type: 'object'
       properties:
         subject:
           type: 'string'
           example: 'OU=Test,O=Test,L=Blacksburg,ST=Virginia,C=US,CN={TENANT}{GROUP}{APP_NAME}'
-        extensions:
-          type: 'string'
-        key-algorithm:
-          type: 'string'
-          example: 'rsa2048'
-    runtimeCert:
-      type: 'object'
-      properties:
-        subject:
-          type: 'string'
-          example: 'OU=Test,O=Test,L=Blacksburg,ST=Virginia,C=US,CN={TENANT}{GROUP}'
         extensions:
           type: 'string'
         key-algorithm:
@@ -502,52 +308,6 @@ components:
           $ref: '#/components/schemas/applicationInfoResponseUrls'
         certificate:
           $ref: '#/components/schemas/cert'
-    runtimeClientIdentity:
-      type: 'object'
-      properties:
-        group:
-          type: 'string'
-          example: 'example-group'
-        tenant:
-          type: 'string'
-          example: 'example-tenant'
-    runtimeInfoResponseUrls:
-      type: 'object'
-      properties:
-        renewCertUrl:
-          type: 'string'
-          example: 'https://connector-service.test.cluster.kyma.cx/v1/applications/certificates/renewals'
-        revokeCertUrl:
-          type: 'string'
-          example: 'https://connector-service.test.cluster.kyma.cx/v1/applications/certificates/revocations'
-    runtimeInfoResponse:
-      type: 'object'
-      properties:
-        clientIdentity:
-          $ref: '#/components/schemas/runtimeClientIdentity'
-        urls:
-          $ref: '#/components/schemas/runtimeInfoResponseUrls'
-        certificate:
-          $ref: '#/components/schemas/runtimeCert'
-    csrRuntimeApiURLs:
-      type: 'object'
-      properties:
-        infoUrl:
-          type: 'string'
-          example: 'connector-service.test.cluster.kyma.cx/v1/runtimes/management/info'
-        certificatesUrl:
-          type: 'string'
-          example: 'https://certificate-service.kyma.cluster.cx/v1/applications'
-    csrRuntimeInfoResponse:
-      type: 'object'
-      properties:
-        csrUrl:
-          type: 'string'
-          example: 'https://connector-service.test.cluster.kyma.cx/v1/runtimes/certificates?token=1edfc34g'
-        api:
-          $ref: '#/components/schemas/csrRuntimeApiURLs'
-        certificate:
-          $ref: '#/components/schemas/runtimeCert'
     appError:
       type: 'object'
       properties:

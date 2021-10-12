@@ -1,12 +1,6 @@
 nameOverride: "kiali"
 fullnameOverride: "kiali"
 
-tests:
-  enabled: true
-  labels:
-    integration: true
-    after-upgrade: true
-
 global:
   istio:
     gateway:
@@ -23,10 +17,6 @@ global:
       name: oauth2-proxy
       version: 7.1.3-4c48514d
       directory: tpi
-    k8s_tools:
-      name: k8s-tools
-      version: 20210922-530cfc39
-      directory: tpi
   kymaRuntime:
     adminGroup: runtimeAdmin
     operatorGroup: runtimeOperator
@@ -42,10 +32,9 @@ authProxy:
   port: 3000
   configDocsLink: "https://kyma-project.io/docs/kyma/latest/04-operation-guides/security/sec-06-access-expose-kiali-grafana"
   config:
-    clientId: "kiali"
-    clientSecret: "hiFWLWqIxw5d3gl"
-    useDex: false
-    tlsVerify: false
+    clientId: "dummy"
+    clientSecret: "dummy"
+    tlsVerify: true
     emailDomains: "*"
     groups: ""
     useKymaGroups: false

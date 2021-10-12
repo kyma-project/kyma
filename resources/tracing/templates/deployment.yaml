@@ -31,7 +31,7 @@ spec:
       {{- end }}
       containers:
         - name: {{ include "jaeger-operator.fullname" . }}
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.jaeger_operator) }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
           - containerPort: 8383

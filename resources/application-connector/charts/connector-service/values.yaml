@@ -19,7 +19,6 @@ deployment:
     rootCACertificateSecretName: *rootCACertificateSecretName
     rootCACertificateSecretNamespace: *rootCACertificateSecretNamespace
     appsInfoURL: https://gateway.{{ .Values.global.domainName }}/v1/applications/management/info
-    runtimesInfoURL: https://gateway.{{ .Values.global.domainName }}/v1/runtimes/management/info
     appValidityTime: "92d"
     runtimeValidityTime: "92d"
     central: false
