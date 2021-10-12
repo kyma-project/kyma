@@ -22,7 +22,7 @@ spec:
       serviceAccountName: {{ .Chart.Name }}-tests
       containers:
         - name: tests
-          image: {{ .Values.tests.image.registry }}/api-gateway-integration-tests:{{ .Values.tests.image.version }}
+          image: {{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.testImages.api_gateway_integration_tests) }}
           imagePullPolicy: Always
           command: 
           - /bin/bash
