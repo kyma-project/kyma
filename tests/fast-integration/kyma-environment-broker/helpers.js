@@ -84,8 +84,9 @@ async function ensureOperationSucceeded(keb, instanceID, operationID) {
   );
 
   debug("KEB operation:", res);
-  expect(res).to.have.property("state", "succeeded");
-
+  if(res.state !== "succeeded") {
+    throw(`operation didn't succeed in 2h: ${JSON.stringify(res)}`);
+  }
   return res;
 }
 
