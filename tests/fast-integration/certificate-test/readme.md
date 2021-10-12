@@ -7,5 +7,5 @@ This test basically warns if the installed kyma-gateway-cert is going to be inva
 Run the test scenario:
 
 ```bash
-npm run test-certificates
+npm run test-certificate
 ```
