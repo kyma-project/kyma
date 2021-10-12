@@ -12,7 +12,7 @@ This table lists the configurable parameters, their descriptions, and default va
 
 >**NOTE:** Limited memory and CPU resources on Minikube directly affect the Serverless functionality as you can process only a limited number of Functions at the same time. Also, their processing time is significantly longer. To process large workloads, we recommend using the cluster setup.
 
-| Parameter                                                          | Description                                                              | Default«««ƒ value |
+| Parameter                                                          | Description                                                              | Default value |
 | ------------------------------------------------------------------ | ------------------------------------------------------------------------ | ------------- |
 | **webhook.values.buildJob.resources.minRequestCpu**                | Minimum number of CPUs requested by the image-building Pod to operate.   | `200m`        |
 | **webhook.values.buildJob.resources.minRequestMemory**             | Minimum amount of memory requested by the image-building Pod to operate. | `200Mi`       |
