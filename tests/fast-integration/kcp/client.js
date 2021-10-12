@@ -41,49 +41,59 @@ class KCPConfig {
 
 class KCPWrapper {
     constructor(config) {
-        this.configFile = config.file();
+        // this.configFile = config.file();
+        this.gardenerNamespace = config.gardenerNamespace;
+        this.clientID = config.clientID;
+        this.clientSecret = config.clientSecret;
+        this.issuerURL = config.issuerURL;
+
         this.username = config.username;
         this.password = config.password;
         this.host = config.host;
     }
 
-    async runtimes(...customOptions) {
+    async runtimes(query) {
         let args = [`runtimes`, `--output`, `json`];
-        customOptions.forEach((option) => {
-            if (option.account) {
-                args += [`--account`, `${option.account}`];
-            }
-            if (option.subaccount) {
-                args += [`--subaccount`, `${option.subaccount}`];
-            }
-            if (option.instanceID) {
-                args += [`--instance-id`, `${option.instanceID}`];
-            }
-            if (option.runtimeID) {
-                args += [`--runtime-id`, `${option.runtimeID}`];
-            }
-            if (option.region) {
-                args += [`--region`, `${option.region}`];
-            }
-            if (option.shoot) {
-                args += [`--shoot`, `${option.shoot}`];
-            }
-            if (option.state) {
-                args += [`--state`, `${option.state}`];
-            }
-        });
-        return await this.execCmd(args);
+        if (query.account) {
+            args.concat(`--account`, `${query.account}`);
+        }
+        if (query.subaccount) {
+            args.concat(`--subaccount`, `${query.subaccount}`);
+        }
+        if (query.instanceID) {
+            args.concat(`--instance-id`, `${query.instanceID}`);
+        }
+        if (query.runtimeID) {
+            args.concat(`--runtime-id`, `${query.runtimeID}`);
+        }
+        if (query.region) {
+            args.concat(`--region`, `${query.region}`);
+        }
+        if (query.shoot) {
+            args.concat(`--shoot`, `${query.shoot}`);
+        }
+        if (query.state) {
+            args.concat(`--state`, `${query.state}`);
+        }
+        console.log(args)
+        return await this.exec(args);
     }
 
     async login() {
-        const args = [`login`, `--username`, `${this.username}`, `--password`, `${this.password}`];
-        return await this.execCmd(args);
+        const args = [`login`, `-u`, `${this.username}`, `-p`, `${this.password}`];
+        return await this.exec(args);
     }
 
-    async execCmd(args) {
-        debug(args);
+    async exec(args) {
         try {
-            let output = await execa(`kcp`, args + [`--config`, `${this.configFile}`]);
+            const defaultArgs = [
+                `--gardener-namespace`, `${this.gardenerNamespace}`,
+                `--keb-api-url`, `${this.host}`,
+                `--oidc-issuer-url`, `${this.issuerURL}`,
+                `--oidc-client-id`, `${this.clientID}`,
+                `--oidc-client-secret`, `${this.clientSecret}`,
+            ];
+            let output = await execa(`kcp`, defaultArgs.concat(args));
             debug(output);
             return output;
         } catch (err) {
