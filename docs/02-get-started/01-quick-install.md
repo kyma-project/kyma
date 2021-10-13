@@ -45,18 +45,18 @@ To manage Kyma via GUI, connect it to Kyma Dashboard.
 1. To start the Dashboard, run:
 
     ```bash
-    docker run --rm -p 3001:3001 busola/local:latest
+    kyma dashboard
     ```
-
-2. Then, go to [`http://localhost:3001/`](http://localhost:3001/) to access the Dashboard.
-3. Click the button to add your cluster to the Dashboard. 
-4. [Get your `kubeconfig` file](https://kubernetes.io/docs/concepts/configuration/organize-cluster-access-kubeconfig/). Paste it into a text editor and replace the `0.0.0.0` part in the **cluster.server** value for k3d with `host.docker.internal`. <!-- //TODO: Remove the info about replacing the **cluster.server** value when this gets fixed. -->
-5. Upload it into the Dashboard as prompted.
+    This command opens the Dashboard under [`http://localhost:3001/`](http://localhost:3001/).
+    
+2. Click the button to add your cluster to the Dashboard. 
+3. [Get your `kubeconfig` file](https://kubernetes.io/docs/concepts/configuration/organize-cluster-access-kubeconfig/). Paste it into a text editor and replace the `0.0.0.0` part in the **cluster.server** value for k3d with `host.docker.internal`. <!-- //TODO: Remove the info about replacing the **cluster.server** value when this gets fixed. -->
+4. Upload it into the Dashboard as prompted.
 
 This takes you to your Kyma Dashboard.
 
 <!--
-//TODO: Finish when Busola working with Docker gets fixed. Replace the Docker command in step 1 with `kyma dashboard --local` and the address in step 2 with `https://dashboard.kyma-project/`.
+//TODO: Finish when the following get fixed: Replace the Docker command in step 1 with `kyma dashboard --local` and the address in step 2 with `https://dashboard.kyma-project/`.
 -->
 
 ## Check the list of Deployments via Dashboard
