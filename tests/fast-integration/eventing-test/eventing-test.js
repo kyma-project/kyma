@@ -8,8 +8,10 @@ const {
   ensureCommerceMockLocalTestFixture,
   checkFunctionResponse,
   sendEventAndCheckResponse,
+  sendEventAndCheckTracing,
   cleanMockTestFixture,
   checkInClusterEventDelivery,
+  checkInClusterEventTracing,
   waitForSubscriptionsTillReady,
   setEventMeshSourceNamespace,
 } = require("../test/fixtures/commerce-mock");
@@ -43,6 +45,16 @@ describe("Eventing tests", function () {
 
     it("order.created.v1 event from CommerceMock should trigger the lastorder function", async function () {
       await sendEventAndCheckResponse();
+    });
+  }
+
+  // eventingTracingTestSuite - Runs Eventing tracing tests
+  function eventingTracingTestSuite () {
+    it("order.created.v1 event from CommerceMock should have correct tracing spans", async function () {
+      await sendEventAndCheckTracing();
+    });
+    it("In-cluster event should have correct tracing spans", async function () {
+      await checkInClusterEventTracing(testNamespace);
     });
   }
 
@@ -91,6 +103,8 @@ describe("Eventing tests", function () {
   context('with Nats backend', function() {
     // Running Eventing end-to-end tests
     eventingE2ETestSuite();
+    // Running Eventing tracing tests
+    eventingTracingTestSuite();
   });
 
   context('with BEB backend', function() {
@@ -116,5 +130,7 @@ describe("Eventing tests", function () {
 
     // Running Eventing end-to-end tests
     eventingE2ETestSuite();
+    // Running Eventing tracing tests
+    eventingTracingTestSuite();
   });
 });

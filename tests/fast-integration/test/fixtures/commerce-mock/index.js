@@ -36,12 +36,18 @@ const {
   k8sDelete,
   getSecretData,
   namespaceObj,
-  serviceInstanceObj
+  serviceInstanceObj,
+  getTraceDAG,
 } = require("../../../utils");
 
 const {
   registerOrReturnApplication,
 } = require("../../../compass");
+
+const {
+  jaegerPortForward,
+  getJaegerTrace,
+} = require("../../../monitoring/client")
 
 const {
   OAuthToken,
@@ -141,7 +147,7 @@ async function sendEventAndCheckResponse() {
   const mockHost = vs.spec.hosts[0];
   const host = mockHost.split(".").slice(1).join(".");
 
-  await retryPromise(
+  return await retryPromise(
     async () => {
       await axios
         .post(
@@ -187,6 +193,91 @@ async function sendEventAndCheckResponse() {
     30,
     2 * 1000
   );
+}
+
+async function sendEventAndCheckTracing() {
+  // Send an event and get it back from the lastorder function
+  const res = await sendEventAndCheckResponse();
+  expect(res.data).to.have.nested.property("event.headers.x-b3-traceid");
+  expect(res.data).to.have.nested.property("podName");
+
+  // Extract traceId from response
+  const traceId = res.data.event.headers["x-b3-traceid"];
+
+  // Define expected trace data
+  const correctTraceSpansLength = 6;
+  const correctTraceProcessSequence = [
+    'istio-ingressgateway.istio-system',
+    'central-application-connectivity-validator.kyma-system',
+    'central-application-connectivity-validator.kyma-system',
+    'eventing-publisher-proxy.kyma-system',
+    'eventing-controller.kyma-system',
+    `lastorder-${res.data.podName.split('-')[1]}.test`,
+  ];
+
+  // wait sometime for jaeger to complete tracing data
+  await sleep(10 * 1000)
+  await checkTrace(traceId, correctTraceSpansLength, correctTraceProcessSequence)
+}
+
+async function checkInClusterEventTracing(targetNamespace) {
+  const res = await checkInClusterEventDeliveryHelper(targetNamespace, 'structured');
+  expect(res.data).to.have.nested.property("event.headers.x-b3-traceid");
+  expect(res.data).to.have.nested.property("podName");
+
+  // Extract traceId from response
+  const traceId = res.data.event.headers["x-b3-traceid"];
+
+  // Define expected trace data
+  const correctTraceSpansLength = 4;
+  const correctTraceProcessSequence = [
+    `lastorder-${res.data.podName.split('-')[1]}.test`, // We are sending the in-cluster event from inside the lastorder pod.
+    'eventing-publisher-proxy.kyma-system',
+    'eventing-controller.kyma-system',
+    `lastorder-${res.data.podName.split('-')[1]}.test`,
+  ];
+
+  // wait sometime for jaeger to complete tracing data
+  await sleep(10 * 1000)
+  await checkTrace(traceId, correctTraceSpansLength, correctTraceProcessSequence)
+}
+
+async function checkTrace(traceId, expectedTraceLength, expectedTraceProcessSequence) {
+  // Port-forward to Jaeger and fetch trace data for the traceId
+  const cancelJaegerPortForward = await jaegerPortForward();
+  var traceRes;
+  try{
+    traceRes = await getJaegerTrace(traceId)
+  }
+  finally{
+    // finally block will run even if exception is thrown (reference: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/try...catch#the_finally-block)
+    cancelJaegerPortForward();
+  }
+
+  // the trace response should have data for single trace
+  expect(traceRes.data).to.have.length(1)
+
+  // Extract trace data from response
+  const traceData = traceRes.data[0]
+  expect(traceData["spans"]).to.have.length(expectedTraceLength)
+
+  // Generate DAG for trace spans
+  const traceDAG = await getTraceDAG(traceData)
+  expect(traceDAG).to.have.length(1)
+
+  // Check the tracing spans are correct
+  let nextSpan = traceDAG[0]
+  for (let i = 0; i < expectedTraceLength; i++) {
+    const processServiceName = traceData.processes[nextSpan.processID].serviceName;
+    debug(`Checking Trace Sequence # ${i}: Expected process: ${expectedTraceProcessSequence[i]}, Received process: ${processServiceName}`)
+    expect(processServiceName).to.be.equal(expectedTraceProcessSequence[i]);
+
+    // Traverse to next trace span
+    if (i < expectedTraceLength - 1) {
+      expect(nextSpan.childSpans).to.have.length(1)
+      nextSpan = nextSpan.childSpans[0]
+    }
+  }
 }
 
 async function registerAllApis(mockHost) {
@@ -520,11 +611,13 @@ async function checkInClusterEventDeliveryHelper(targetNamespace, encoding) {
   // send event using function query parameter send=true
   await retryPromise(() => axios.post(`https://${mockHost}`, { id: eventId }, { params: { send: true, encoding: encoding } }), 10, 1000)
   // verify if event was received using function query parameter inappevent=eventId
-  await retryPromise(async () => {
+  return await retryPromise(async () => {
     debug("Waiting for event: ", eventId);
     let response = await axios.get(`https://${mockHost}`, { params: { inappevent: eventId } })
-    expect(response).to.have.nested.property("data.id", eventId, "The same event id expected in the result");
-    expect(response).to.have.nested.property("data.shipped", true, "Order should have property shipped");
+    expect(response.data).to.have.nested.property("event.id", eventId, "The same event id expected in the result");
+    expect(response.data).to.have.nested.property("event.shipped", true, "Order should have property shipped");
+
+    return response;
   }, 30, 2 * 1000);
 }
 
@@ -532,8 +625,10 @@ module.exports = {
   ensureCommerceMockLocalTestFixture,
   ensureCommerceMockWithCompassTestFixture,
   sendEventAndCheckResponse,
+  sendEventAndCheckTracing,
   checkFunctionResponse,
   checkInClusterEventDelivery,
+  checkInClusterEventTracing,
   cleanMockTestFixture,
   deleteMockTestFixture,
   waitForSubscriptionsTillReady,
