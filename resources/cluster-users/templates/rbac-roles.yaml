@@ -1,86 +1,3 @@
-##########################################################################################
-# kyma-essentials: Minimal cluster view role necessary to render UI
-##########################################################################################
-
-apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRole
-metadata:
-  name: kyma-essentials-base
-  labels:
-    rbac.authorization.kyma-project.io/aggregate-to-kyma-essentials-base: "true"
-rules:
-- apiGroups:
-    - "authentication.kyma-project.io"
-    - "ui.kyma-project.io"
-    - "rbac.authorization.k8s.io"
-  resources:
-    - "*"
-  verbs:
-    - "list"
-- apiGroups:
-    - "servicecatalog.k8s.io"
-    - "rafter.kyma-project.io"
-  resources:
-    - "*"
-  verbs:
-    - "list"
-    - "get"
-- apiGroups:
-    - servicecatalog.kyma-project.io
-  resources:
-    - usagekinds
-  verbs:
-    - "list"
-    - "get"
-- apiGroups:
-    - applicationconnector.kyma-project.io
-  resources:
-    - applications
-  verbs:
-    - "get"
-    - "list"
-    - "watch"
-- apiGroups:
-    - ""
-  resources:
-    - namespaces
-  verbs:
-    - "list"
-    - "watch"
-- apiGroups:
-    - ""
-  resources:
-    - "configmaps"
-  resourceNames: 
-    - "serverless-webhook-envs"  
-  verbs:
-    - "get"
-- nonResourceURLs:
-    - "*" #give access to all non resource urls
-  verbs:
-    - "list"
-    - "get"
-
----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRole
-metadata:
-  name: kyma-essentials
-  labels:
-    rbac.authorization.kyma-project.io/aggregate-to-kyma-essentials: "true"
-aggregationRule:
-  clusterRoleSelectors:
-  - matchLabels:
-      rbac.authorization.kyma-project.io/aggregate-to-kyma-essentials-base: "true"
-  - matchLabels:
-      rbac.authorization.kyma-project.io/aggregate-to-kyma-crd-view: "true"
-  - matchLabels:
-      rbac.authorization.kyma-project.io/aggregate-to-kyma-authorization-self: "true"
-  - matchLabels:
-      rbac.authorization.kyma-project.io/aggregate-to-kyma-ui-view: "true"
-rules: []
-
----
 ################################################################################
 # Viewer role
 # kyma-view = view permissions on kyma resources
@@ -143,8 +60,6 @@ aggregationRule:
   - matchLabels:
       rbac.authorization.kyma-project.io/aggregate-to-kyma-nonresource-view: "true"
   - matchLabels:
-      rbac.authorization.kyma-project.io/aggregate-to-kyma-essentials: "true"
-  - matchLabels:
       rbac.authorization.kyma-project.io/aggregate-to-kyma-api-view: "true"
   - matchLabels:
       rbac.authorization.kyma-project.io/aggregate-to-kyma-istio-view: "true"
@@ -154,8 +69,6 @@ aggregationRule:
       rbac.authorization.kyma-project.io/aggregate-to-monitoring-view: "true"
   - matchLabels:
       rbac.authorization.kyma-project.io/aggregate-to-addons-view: "true"
-  - matchLabels:
-      rbac.authorization.kyma-project.io/aggregate-to-dex-view: "true"
   - matchLabels:
       rbac.authorization.kyma-project.io/aggregate-to-ory-view: "true"
   - matchLabels:
@@ -209,8 +122,6 @@ aggregationRule:
       rbac.authorization.kyma-project.io/aggregate-to-kyma-istio-edit: "true"
   - matchLabels:
       rbac.authorization.kyma-project.io/aggregate-to-monitoring-edit: "true"
-  - matchLabels:
-      rbac.authorization.kyma-project.io/aggregate-to-dex-edit: "true"
   - matchLabels:
       rbac.authorization.kyma-project.io/aggregate-to-ory-edit: "true"
 rules: []
@@ -272,8 +183,6 @@ aggregationRule:
   - matchLabels:
       rbac.authorization.kyma-project.io/aggregate-to-kyma-admin-base: "true"
   - matchLabels:
-      rbac.authorization.kyma-project.io/aggregate-to-dex-admin: "true"
-  - matchLabels:
       rbac.authorization.kyma-project.io/aggregate-to-ory-admin: "true"
   - matchLabels:
       rbac.authorization.kyma-project.io/aggregate-to-kyma-rafter-admin: "true"
@@ -281,8 +190,6 @@ aggregationRule:
       rbac.authorization.kyma-project.io/aggregate-to-kyma-snapshots: "true"
   - matchLabels:
       rbac.authorization.kyma-project.io/aggregate-to-kyma-svcat-admin: "true"
-  - matchLabels:
-      rbac.authorization.kyma-project.io/aggregate-to-kyma-ui-admin: "true"
 rules: []
 
 ---
@@ -320,37 +227,9 @@ aggregationRule:
   - matchLabels:
       rbac.authorization.kyma-project.io/aggregate-to-kyma-admin-base: "true"
   - matchLabels:
-      rbac.authorization.kyma-project.io/aggregate-to-dex-admin: "true"
-  - matchLabels:
       rbac.authorization.kyma-project.io/aggregate-to-ory-admin: "true"
   - matchLabels:
       rbac.authorization.kyma-project.io/aggregate-to-kyma-snapshots: "true"
-  - matchLabels:
-      rbac.authorization.kyma-project.io/aggregate-to-kyma-backendmodule-admin: "true"
-  - matchLabels:
-      rbac.authorization.kyma-project.io/aggregate-to-kyma-mf-view: "true"
-rules: []
-
----
-################################################################################
-# Namespace Admin role
-# kyma-namespace-admin-essentials = kyma-essentials + kyma-namespace-create
-################################################################################
-apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRole
-metadata:
-  name: kyma-namespace-admin-essentials
-  labels:
-    app: kyma
-    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
-  annotations:
-    helm.sh/hook-weight: "0"
-aggregationRule:
-  clusterRoleSelectors:
-  - matchLabels:
-      rbac.authorization.kyma-project.io/aggregate-to-kyma-essentials: "true"
-  - matchLabels:
-      rbac.authorization.kyma-project.io/aggregate-to-kyma-namespace-create: "true"
 rules: []
 
 ---
@@ -373,10 +252,6 @@ aggregationRule:
       rbac.authorization.k8s.io/aggregate-to-edit: "true"
   - matchLabels:
       rbac.authorization.kyma-project.io/aggregate-to-kyma-edit: "true"
-  - matchLabels:
-      rbac.authorization.kyma-project.io/aggregate-to-kyma-backendmodule-admin: "true"
-  - matchLabels:
-      rbac.authorization.kyma-project.io/aggregate-to-kyma-mf-view: "true"
 rules: []
 
 ---
