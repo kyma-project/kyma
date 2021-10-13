@@ -15,9 +15,9 @@ If the plain k8s Secret is created, the certificate is either provided, or the d
 ### Overrides handling
 
 Users can control the behavior of this chart using three overrides: `global.domainName`, `global.tlsCrt` and `global.tlsKey`
-These overrides are optional, but if you use TLS overrides remember to define both. If only one TLS override is defined and the other is empty, the chart assumes TLS overrides are **not** provided.
+These overrides are optional, but if you use TLS overrides remember to define both of them. If only one TLS override is defined and the other is empty, the chart assumes TLS overrides are **not** provided.
 
-The table summarizes what the generated output is basing on the overrides provided.
+The table summarizes what the generated output is, basing on the overrides provided.
 
 | Domain name | TLS overrides | What is generated |
 |--|--|--|
