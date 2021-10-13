@@ -62,22 +62,19 @@ global:
       sha: ""
     grafana_image_renderer:
       name: "grafana-image-renderer" # TODO dockerhub
-      version: "latest"
-      containerRegistryPath: "docker.io"
-      directory: "grafana"
+      version: "3.2.1"
+      directory: "external/grafana"
       sha: ""
     curl:
-      name: "curl" # TODO dockerhub
-      version: "7.73.0"
-      containerRegistryPath: "docker.io"
-      directory: "curlimages"
+      name: "curl"
+      version: "7.78.0"
+      directory: "external/curlimages"
       sha: ""
     kube_webhook_certgen:
       name: "kube-webhook-certgen" # This image is not activated in Kyma. This is kept here to keep parity with upstream charts
       version: v1.5.0
+      directory: "external/jettech"
       sha: ""
-      directory: "jettech"
-      containerRegistryPath: "docker.io"
         
   istio:
     tls:
