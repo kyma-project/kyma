@@ -21,8 +21,8 @@ If you're interested in learning more about API Exposure in Kyma, follow these l
 - Learn something more about:
 
   - [Authorization configuration](../../../05-technical-reference/apix-01-config-authorizations-apigateway.md)
-  - [Allowed domains in the API Gateway Controller](../../../05-technical-reference/apix-02-whitelisted-domains.md)
-  - [Blocked services in the API Gateway Controller](../../../05-technical-reference/apix-03-blacklisted-services.md)
+  - [Allowed domains in API Gateway Controller](../../../05-technical-reference/apix-02-whitelisted-domains.md)
+  - [Blocked services in API Gateway Controller](../../../05-technical-reference/apix-03-blacklisted-services.md)
 
 - Analyze configuration details for:
 
