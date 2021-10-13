@@ -79,10 +79,18 @@ set-up-local-env:
 
 
 ENVTEST_ASSETS_DIR=$(PROJECT_DIR)/testbin/$(shell uname)
-test-local: manifests-local generate-local ## Run tests.
+test-local: test-local-nonlocal; ## Run tests.
+
+setup-envtest:
 	mkdir -p ${ENVTEST_ASSETS_DIR}
 	test -f ${ENVTEST_ASSETS_DIR}/setup-envtest.sh || curl -sSLo ${ENVTEST_ASSETS_DIR}/setup-envtest.sh https://raw.githubusercontent.com/kubernetes-sigs/controller-runtime/v0.8.3/hack/setup-envtest.sh
-	source ${ENVTEST_ASSETS_DIR}/setup-envtest.sh; fetch_envtest_tools $(ENVTEST_ASSETS_DIR); setup_envtest_env $(ENVTEST_ASSETS_DIR); go test ./... -coverprofile cover.out
+	source ${ENVTEST_ASSETS_DIR}/setup-envtest.sh; fetch_envtest_tools $(ENVTEST_ASSETS_DIR); setup_envtest_env $(ENVTEST_ASSETS_DIR)
+
+test-local-nonlocal: manifests-local generate-local setup-envtest ## Run tests.
+	go test ./... -coverprofile cover.out
+
+test-local-local: manifests-local generate-local setup-envtest ## Run tests.
+	go test ./... -coverprofile cover.out --tags=local
 
 check-code: check-imports fmt-local vet-local lint ## Run various linters and other code checks. Use before committing
 
@@ -157,6 +165,7 @@ copy-crds: manifests-local ## copy Eventing CRDs to installation/eventing
 copy-external-crds: ## copy external CRDs to config/crd/external
 	mkdir -p config/crd/external
 	cp ../../installation/resources/crds/api-gateway/apirules.gateway.crd.yaml config/crd/external/apirules-gateway-kyma-project-io.yaml
+	cp ../../installation/resources/crds/application-connector/applications.applicationconnector.crd.yaml config/crd/external/applications-applicationconnector-kyma-project-io.yaml
 
 # go-get-tool will 'go get' any package $2 and install it to $1.
 ARCH := $(shell uname)
