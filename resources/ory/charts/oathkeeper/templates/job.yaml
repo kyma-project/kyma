@@ -66,7 +66,7 @@ spec:
     spec:
       initContainers:
         - name: keys-generator
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.oathkeeper) }}"
           volumeMounts:
           - name: {{ include "oathkeeper.name" . }}-keys-volume
             mountPath: /etc/secrets
@@ -100,7 +100,7 @@ spec:
               kubectl create secret generic {{ include "oathkeeper.fullname" . }}-jwks-secret \
                 --from-file=/etc/secrets/jwks.json \
                 -n kyma-system -o yaml --dry-run | kubectl apply -f -
-          image: {{ .Values.kubectlJob.image }}
+          image: {{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.k8s_tools) }}
           name: override-generator
           securityContext:
             allowPrivilegeEscalation: false

@@ -5,6 +5,7 @@ deployment:
     proxyPort: 8080
     externalAPIPort: &externalAPIPort 8081
     uploadServiceURL: http://rafter-upload-service.kyma-system.svc.cluster.local:80
+    centralGatewayUrl: http://central-application-gateway.kyma-system:8080
     requestTimeout: 10
     requestLogging: false
     specRequestTimeout: 20

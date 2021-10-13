@@ -31,7 +31,7 @@ spec:
     spec:
       containers:
         - name: {{ .Chart.Name }}
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.hydra_maester) }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           command:
             - /manager
@@ -74,7 +74,7 @@ spec:
             timeoutSeconds: {{ .Values.deployment.readinessProbe.timeoutSeconds }}
             periodSeconds: {{.Values.deployment.readinessProbe.periodSeconds }}
         - name: watcher
-          image: "{{ .Values.jobs.image.repository }}:{{ .Values.jobs.image.tag }}"
+          image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.k8s_tools) }}"
           securityContext:
             allowPrivilegeEscalation: false
             capabilities:

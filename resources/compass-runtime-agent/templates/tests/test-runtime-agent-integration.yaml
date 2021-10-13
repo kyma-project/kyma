@@ -26,7 +26,7 @@ spec:
       serviceAccountName: {{ .Chart.Name }}-tests
       containers:
         - name: {{ .Chart.Name }}-tests
-          image: {{ .Values.global.images.containerRegistry.path }}/compass-runtime-agent-tests:{{ .Values.global.images.runtimeAgentTests.version }}
+          image: {{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.testImages.compass_runtime_agent_tests) }}
           imagePullPolicy: {{ .Values.compassRuntimeAgent.image.pullPolicy }}
           envFrom:
           - secretRef:
@@ -75,16 +75,6 @@ spec:
           ports:
           - containerPort: {{ .Values.compassRuntimeAgent.tests.mockService.port }}
             name: http
-      {{ if .Values.global.isLocalEnv }}
-      hostAliases:
-        - ip: {{ .Values.global.minikubeIP }}
-          hostnames:
-            - "compass-gateway.{{ .Values.global.domainName }}"
-            - "compass-gateway-auth-oauth.{{ .Values.global.domainName }}"
-            - "minio.{{ .Values.global.domainName }}"
-            - "dex.{{ .Values.global.domainName }}"
-            - "gateway.{{ .Values.global.domainName }}"
-      {{ end }}
     restartPolicy: Never
 {{- end }}
 {{ end }}

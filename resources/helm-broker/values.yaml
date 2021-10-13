@@ -37,7 +37,6 @@ broker:
   metricsPort: 8072
 
 webhook:
-  image: "eu.gcr.io/kyma-project/helm-broker-webhook:5edd6b42"
   imagePullPolicy: IfNotPresent
   securityContext: { runAsUser: 1001 }
   strategy:
@@ -75,6 +74,7 @@ addons-ui:
   enabled: false
 
 global:
+  domainName: "kyma.example.com"
   containerRegistry:
     path: eu.gcr.io/kyma-project
   # develop mode allows use insecure (http) url for addons configuration
@@ -82,13 +82,6 @@ global:
   # image pull policy for helm broker broker/controller containers
   image:
     pullPolicy: Always
-  # paths to docker images
-  helm_broker:
-    dir: ""
-    version: "81dc2bd6"
-  helm_controller:
-    dir: ""
-    version: "81dc2bd6"
   # etcd port uses by helm broker
   etcdClientPort: 2379
 
@@ -113,3 +106,17 @@ global:
     tls:
       crt: "TBD"
       key: "TBD"
+  images:
+    helm_broker_webhook:
+      name: "helm-broker-webhook"
+      version: "5edd6b42"
+    helm_broker:
+      name: "helm-broker"
+      version: "995c0f10"
+    helm_controller:
+      name: "helm-controller"
+      version: "995c0f10"
+    etcd:
+      name: "etcd"
+      version: "v3.3.25-e5110645"
+      directory: "tpi/quay.io/coreos"

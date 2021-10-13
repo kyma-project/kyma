@@ -38,7 +38,7 @@ spec:
       serviceAccountName: {{ .Chart.Name }}
       containers:
       - name: {{ .Chart.Name }}
-        image: {{ .Values.global.containerRegistry.path }}/connector-service:{{ .Values.global.connector_service.version }}
+        image: {{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.connector_service) }}
         imagePullPolicy: {{ .Values.deployment.image.pullPolicy }}
         resources:
           limits:
@@ -63,7 +63,6 @@ spec:
           - "--gatewayBaseURL=https://gateway.{{ .Values.global.domainName }}"
           - "--certificateProtectedHost=gateway.{{ .Values.global.domainName }}"
           - "--appsInfoURL={{ tpl .Values.deployment.args.appsInfoURL . }}"
-          - "--runtimesInfoURL={{ tpl .Values.deployment.args.runtimesInfoURL . }}"
           - "--appCertificateValidityTime={{ .Values.deployment.args.appValidityTime }}"
           - "--runtimeCertificateValidityTime={{ .Values.deployment.args.runtimeValidityTime }}"
           - "--central={{ .Values.deployment.args.central }}"

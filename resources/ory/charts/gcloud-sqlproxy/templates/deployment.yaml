@@ -28,7 +28,7 @@ spec:
       {{- end }}
       containers:
       - name: sqlproxy
-        image: "{{ .Values.image }}:{{ .Values.imageTag }}"
+        image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.gce_proxy) }}"
         imagePullPolicy: {{ default "" .Values.imagePullPolicy | quote }}
         resources:
 {{ toYaml .Values.resources | indent 10 }}

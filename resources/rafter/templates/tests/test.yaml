@@ -20,12 +20,6 @@ spec:
       annotations:
         sidecar.istio.io/inject: "true"
     spec:
-      {{ if .Values.global.isLocalEnv }}
-      hostAliases:
-        - ip: {{ .Values.global.minikubeIP }}
-          hostnames:
-            - "storage.{{ .Values.global.domainName }}"
-      {{ end }}
       securityContext:
         runAsNonRoot: true
         runAsUser: 1000
@@ -35,7 +29,7 @@ spec:
       restartPolicy: {{ .Values.tests.restartPolicy }}
       containers:
         - name: {{ include "rafterTests.name" . }}
-          image: "{{ .Values.tests.image.repository }}:{{ .Values.tests.image.tag }}"
+          image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.testImages.rafter_test) }}"
           imagePullPolicy: {{ .Values.tests.image.pullPolicy }}
           securityContext:
             privileged: false
@@ -48,7 +42,7 @@ spec:
 {{ include (print $.Template.BasePath "/_helper_tests.txt") . | indent 14 }}
           env:
             - name: MOCKICE_IMAGE
-              value: "{{ .Values.tests.envs.mockiceImage }}"
+              value: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.testImages.mockice) }}"
             - name: APP_TEST_WAIT_TIMEOUT
               value: "{{ .Values.tests.envs.waitTimeout }}"
             - name: APP_FILE_CLIENT_CONFIG_VERIFY_SSL

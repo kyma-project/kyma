@@ -18,13 +18,6 @@ spec:
       annotations:
         checksum/config: {{ tpl (toYaml .Values.authProxy) . | sha256sum }}
     spec:
-      {{- if .Values.global.isLocalEnv }}
-      hostNetwork: true   #only for minikube
-      hostAliases:
-        - ip: {{ .Values.global.minikubeIP }}
-          hostnames:
-          - "dex.{{ .Values.global.domainName }}"
-      {{- end }}
       {{- if .Values.authProxy.nodeSelector }}
       nodeSelector:
 {{ toYaml .Values.authProxy.nodeSelector | indent 8 }}
@@ -34,7 +27,7 @@ spec:
           configMap:
             name: {{ template "kiali-server.fullname" . }}-auth-proxy
       containers:
-      - image: "{{ .Values.authProxy.image.repository }}:{{ .Values.authProxy.image.tag }}"
+      - image: {{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.oauth2_proxy) }}
         imagePullPolicy: {{ .Values.authProxy.image.pullPolicy }}
         name: auth-proxy
         args:

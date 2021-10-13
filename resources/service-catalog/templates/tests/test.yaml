@@ -26,14 +26,14 @@ spec:
       serviceAccountName: {{ .Chart.Name }}-tests
       containers:
       - name: tests
-        image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.acceptance_tests.dir }}service-catalog-acceptance-tests:{{ .Values.global.acceptance_tests.version }}
+        image: {{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.testImages.service_catalog_acceptance_tests) }}
         env:
         - name: HELM_BROKER_URL
           value: http://helm-broker.kyma-system.svc.cluster.local
         - name: APPLICATION_BROKER_URL
           value: http://application-broker.kyma-integration.svc.cluster.local
         - name: STUBS_DOCKER_IMAGE
-          value: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.acceptance_tests.dir }}service-catalog-acceptance-tests:{{ .Values.global.acceptance_tests.version }}
+          value: {{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.testImages.service_catalog_acceptance_tests) }}
         - name: BROKER_ISTIO_RBAC_ENABLED
           value: "false"
         - name: POD_NAME

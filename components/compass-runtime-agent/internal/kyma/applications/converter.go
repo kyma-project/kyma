@@ -20,11 +20,15 @@ type Converter interface {
 }
 
 type converter struct {
-	nameResolver k8sconsts.NameResolver
+	nameResolver             k8sconsts.NameResolver
+	centralGatewayServiceUrl string
 }
 
-func NewConverter(nameResolver k8sconsts.NameResolver) Converter {
-	return converter{nameResolver: nameResolver}
+func NewConverter(nameResolver k8sconsts.NameResolver, centralGatewayServiceUrl string) Converter {
+	return converter{
+		nameResolver:             nameResolver,
+		centralGatewayServiceUrl: centralGatewayServiceUrl,
+	}
 }
 
 func (c converter) Do(application model.Application) v1alpha1.Application {
@@ -118,6 +122,7 @@ func (c converter) toAPIEntry(applicationName string, apiPackage model.APIPackag
 		Type:                        SpecAPIType,
 		ApiType:                     getApiType(),
 		TargetUrl:                   apiDefinition.TargetUrl,
+		CentralGatewayUrl:           c.toCentralGatewayURL(applicationName, apiPackage.Name, apiDefinition.Name),
 		SpecificationUrl:            "", // Director returns BLOB here
 		Credentials:                 c.toCredential(applicationName, apiPackage),
 		RequestParametersSecretName: c.toRequestParametersSecretName(applicationName, apiPackage),
@@ -131,6 +136,13 @@ func (c converter) toRequestParametersSecretName(applicationName string, apiPack
 		return c.nameResolver.GetRequestParametersSecretName(applicationName, apiPackage.ID)
 	}
 	return ""
+}
+
+func (c converter) toCentralGatewayURL(applicationName string, apiPackageName string, apiDefinitionName string) string {
+
+	return c.centralGatewayServiceUrl + "/" + applicationName +
+		"/" + normalization.NormalizeName(apiPackageName) +
+		"/" + normalization.NormalizeName(apiDefinitionName)
 }
 
 func (c converter) toCredential(applicationName string, apiPackage model.APIPackage) v1alpha1.Credentials {

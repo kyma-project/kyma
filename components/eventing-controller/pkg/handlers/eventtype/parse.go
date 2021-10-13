@@ -1,7 +1,6 @@
 package eventtype
 
 import (
-	"errors"
 	"fmt"
 	"strings"
 )
@@ -13,7 +12,7 @@ import (
 // constraint: the application segment in the input event-type should not contain "."
 func parse(eventType, prefix string) (string, string, string, error) {
 	if !strings.HasPrefix(eventType, prefix) {
-		return "", "", "", errors.New(fmt.Sprintf("parse event-type [%s] failed, prefix [%s] not found", eventType, prefix))
+		return "", "", "", fmt.Errorf("parse event-type [%s] failed, prefix [%s] not found", eventType, prefix)
 	}
 
 	// remove the prefix
@@ -24,7 +23,7 @@ func parse(eventType, prefix string) (string, string, string, error) {
 	// (e.g. application.businessObject.operation.version)
 	parts := strings.Split(eventType, ".")
 	if len(parts) < 4 {
-		return "", "", "", errors.New(fmt.Sprintf("parse event-type [%s] failed, invalid format", eventType))
+		return "", "", "", fmt.Errorf("parse event-type [%s] failed, invalid format", eventType)
 	}
 
 	// parse the event-type segments

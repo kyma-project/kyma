@@ -6,8 +6,6 @@ nameOverride:
 fullnameOverride:
 
 image:
-  repository: eu.gcr.io/kyma-project/rafter-asyncapi-service
-  tag: 3778b2ec
   pullPolicy: IfNotPresent
 
 deployment:

@@ -7,7 +7,7 @@
 # We use this code to manually use newest alpine and nodejs.
 # Use official build when it will be available.
 
-FROM alpine:3.13.5
+FROM alpine:3.13.6
 
 # ensure local python is preferred over distribution python
 ENV PATH /usr/local/bin:$PATH
@@ -25,7 +25,7 @@ RUN set -eux; \
 # other runtime dependencies for Python are installed later
 
 ENV GPG_KEY E3FF2839C048B25C084DEBE9B26995E310250568
-ENV PYTHON_VERSION 3.8.10
+ENV PYTHON_VERSION 3.8.12
 
 
 # expat-dev for alpine:3.13.5 is outdated and vulnerable. We will install it from edge .
@@ -36,6 +36,7 @@ RUN set -ex \
 		gnupg \
 		tar \
 		xz \
+		ncurses-dev \
 		expat-dev \
 	\
 	&& wget -O python.tar.xz "https://www.python.org/ftp/python/${PYTHON_VERSION%%[a-z]*}/Python-$PYTHON_VERSION.tar.xz" \
@@ -63,7 +64,6 @@ RUN set -ex \
 		libtirpc-dev \
 		linux-headers \
 		make \
-		ncurses-dev \
 		openssl-dev \
 		pax-utils \
 		readline-dev \

@@ -1,14 +1,6 @@
 replicaCount: 1
 
-rbacJob:
-  image:
-    repository: eu.gcr.io/kyma-project/tpi/k8s-tools
-    tag: "20210922-530cfc39"
-
 image:
-  repository: eu.gcr.io/kyma-project/incubator/api-gateway-controller
-  tag: "ac45e9ce"
-  # Image pull policy
   pullPolicy: IfNotPresent
 
 deployment:
@@ -96,9 +88,6 @@ tests:
   labels:
     integration: true
     after-upgrade: true
-  image:
-    registry: "eu.gcr.io/kyma-project"
-    version: "fe9f5885"
   env:
     testUser: "admin-user"
     timeout: 120
@@ -112,3 +101,17 @@ tests:
     runAsUser: 65534
     runAsNonRoot: true
     runAsGroup: 65534
+
+global:
+  domainName: kyma.example.com
+  containerRegistry:
+    path: eu.gcr.io/kyma-project
+  images:
+    api_gateway_controller:
+      name: "api-gateway-controller"
+      version: "f748d862"
+      directory: "incubator"
+  testImages:
+    api_gateway_integration_tests:
+      name: "api-gateway-integration-tests"
+      version: "fe9f5885"

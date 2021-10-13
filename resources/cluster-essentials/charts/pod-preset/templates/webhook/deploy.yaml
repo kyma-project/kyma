@@ -26,7 +26,7 @@ spec:
       serviceAccountName: {{ template "pod-preset.fullname" . }}-webhook
       containers:
       - name: {{ .Chart.Name }}-webhook
-        image: "{{ .Values.webhook.image.repository }}:{{ .Values.webhook.image.tag }}"
+        image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.podpreset_webhook) }}"
         imagePullPolicy: {{ .Values.webhook.image.pullPolicy }}
         resources:
 {{ toYaml .Values.webhook.resources | indent 10 }}

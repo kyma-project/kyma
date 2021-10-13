@@ -19,13 +19,14 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 
 	apigatewayv1alpha1 "github.com/kyma-incubator/api-gateway/api/v1alpha1"
+
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 	"github.com/kyma-project/kyma/components/eventing-controller/logger"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/application"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/commander"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers"
-	"github.com/kyma-project/kyma/components/eventing-controller/reconciler/subscription"
+	"github.com/kyma-project/kyma/components/eventing-controller/reconciler/subscription/beb"
 )
 
 const (
@@ -92,11 +93,11 @@ func (c *Commander) Start(_ env.DefaultSubscriptionConfig, params commander.Para
 
 	// Need to read env so as to read BEB related secrets
 	c.envCfg = env.GetConfig()
-	nameMapper := handlers.NewBebSubscriptionNameMapper(strings.TrimSpace(c.envCfg.Domain), handlers.MaxBEBSubscriptionNameLength)
+	nameMapper := handlers.NewBEBSubscriptionNameMapper(strings.TrimSpace(c.envCfg.Domain), handlers.MaxBEBSubscriptionNameLength)
 	ctrl.Log.WithName("BEB-commander").Info("using BEB name mapper",
 		"domainName", c.envCfg.Domain,
 		"maxNameLength", handlers.MaxBEBSubscriptionNameLength)
-	reconciler := subscription.NewReconciler(
+	reconciler := beb.NewReconciler(
 		ctx,
 		c.mgr.GetClient(),
 		applicationLister,
@@ -132,9 +133,9 @@ func cleanup(backend handlers.MessagingBackend, dynamicClient dynamic.Interface,
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	var bebBackend *handlers.Beb
+	var bebBackend *handlers.BEB
 	var ok bool
-	if bebBackend, ok = backend.(*handlers.Beb); !ok {
+	if bebBackend, ok = backend.(*handlers.BEB); !ok {
 		err := errors.New("convert backend handler to BEB handler failed")
 		logger.Errorw("no BEB backend exists", "error", err)
 		return err
@@ -152,7 +153,8 @@ func cleanup(backend handlers.MessagingBackend, dynamicClient dynamic.Interface,
 
 	// Clean APIRules.
 	isCleanupSuccessful := true
-	for _, sub := range subs.Items {
+	for _, v := range subs.Items {
+		sub := v
 		if apiRule := sub.Status.APIRuleName; apiRule != "" {
 			if err := dynamicClient.Resource(handlers.APIRuleGroupVersionResource()).Namespace(sub.Namespace).
 				Delete(ctx, apiRule, metav1.DeleteOptions{}); err != nil {

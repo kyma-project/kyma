@@ -30,7 +30,7 @@ func TestAuthenticator(t *testing.T) {
 	// authenticate
 	authenticator := NewAuthenticator(cfg)
 
-	httpClient := authenticator.GetClient().GetHttpClient()
+	httpClient := authenticator.GetClient().GetHTTPClient()
 
 	secTransport, ok := httpClient.Transport.(*oauth2.Transport)
 	if !ok {

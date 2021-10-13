@@ -3,9 +3,6 @@ tests:
     integration: true
     after-upgrade: true
   enabled: true
-  image:
-    name: eu.gcr.io/kyma-project/tpi/k8s-tools
-    version: 20210922-530cfc39
   env:
     namespace: default
   securityContext:
@@ -95,9 +92,17 @@ global:
     operatorGroup: runtimeOperator
     developerGroup: runtimeDeveloper
     namespaceAdminGroup: runtimeNamespaceAdmin
-  isLocalEnv: false
   containerRegistry:
     path: "eu.gcr.io/kyma-project"
+  testImages:
+    test_hydra_login_consent:
+      name: "test-hydra-login-consent"
+      version: "d6e6d3bc"
+      directory: "incubator"
+    k8s_tools:
+      name: "k8s-tools"
+      version: "20210922-530cfc39"
+      directory: "tpi"
   minikubeIP: ""
   ingress:
     domainName: "kyma.local"

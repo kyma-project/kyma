@@ -12,8 +12,8 @@ const (
 	orderCreatedEventType   = "sap.kyma.testapp1023.order.created.v1"
 )
 
-func TestBebFilters_Deduplicate(t *testing.T) {
-	filter1 := &BebFilter{
+func TestBEBFilters_Deduplicate(t *testing.T) {
+	filter1 := &BEBFilter{
 		EventSource: &Filter{
 			Type:     "exact",
 			Property: "source",
@@ -25,7 +25,7 @@ func TestBebFilters_Deduplicate(t *testing.T) {
 			Value:    orderCreatedEventType,
 		},
 	}
-	filter2 := &BebFilter{
+	filter2 := &BEBFilter{
 		EventSource: &Filter{
 			Type:     "exact",
 			Property: "source",
@@ -37,7 +37,7 @@ func TestBebFilters_Deduplicate(t *testing.T) {
 			Value:    orderProcessedEventType,
 		},
 	}
-	filter3 := &BebFilter{
+	filter3 := &BEBFilter{
 		EventSource: &Filter{
 			Type:     "exact",
 			Property: "source",
@@ -51,26 +51,26 @@ func TestBebFilters_Deduplicate(t *testing.T) {
 	}
 	tests := []struct {
 		caseName  string
-		input     *BebFilters
-		expected  *BebFilters
+		input     *BEBFilters
+		expected  *BEBFilters
 		expectErr bool
 	}{
 		{
 			caseName:  "Only one filter",
-			input:     &BebFilters{Dialect: "beb", Filters: []*BebFilter{filter1}},
-			expected:  &BebFilters{Dialect: "beb", Filters: []*BebFilter{filter1}},
+			input:     &BEBFilters{Dialect: "beb", Filters: []*BEBFilter{filter1}},
+			expected:  &BEBFilters{Dialect: "beb", Filters: []*BEBFilter{filter1}},
 			expectErr: false,
 		},
 		{
 			caseName:  "Filters with duplicate",
-			input:     &BebFilters{Dialect: "nats", Filters: []*BebFilter{filter1, filter1}},
-			expected:  &BebFilters{Dialect: "nats", Filters: []*BebFilter{filter1}},
+			input:     &BEBFilters{Dialect: "nats", Filters: []*BEBFilter{filter1, filter1}},
+			expected:  &BEBFilters{Dialect: "nats", Filters: []*BEBFilter{filter1}},
 			expectErr: false,
 		},
 		{
 			caseName:  "Filters without duplicate",
-			input:     &BebFilters{Filters: []*BebFilter{filter1, filter2, filter3}},
-			expected:  &BebFilters{Filters: []*BebFilter{filter1, filter2, filter3}},
+			input:     &BEBFilters{Filters: []*BEBFilter{filter1, filter2, filter3}},
+			expected:  &BEBFilters{Filters: []*BEBFilter{filter1, filter2, filter3}},
 			expectErr: false,
 		},
 	}

@@ -47,7 +47,7 @@ spec:
       serviceAccountName: {{ include "rafterAsyncAPIService.fullname" . }}
       containers:
         - name: {{ include "rafterAsyncAPIService.name" . }}
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.rafter_asyncapi_service) }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           resources:
             requests:

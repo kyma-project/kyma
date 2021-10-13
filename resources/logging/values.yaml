@@ -20,22 +20,18 @@ fluent-bit:
 loki:
   enabled: true
 
-logui:
-  enabled: false
-
 global:
   containerRegistry:
     path: eu.gcr.io/kyma-project
-  logging_integration_tests:
-    name: logging-integration-tests
-    dir: 
-    version: 40007ec9
-    enabled: true
-    env:
-      testUser: "admin-user"
-    labels:
-      integration: true
-      after-upgrade: true
+  images:
+    fluent_bit:
+      name: fluent-bit
+      version: 1.8.7-a2d49884
+      directory: tpi
+    loki:
+      name: loki
+      version: 2.2.1-88dec1f7
+      directory: tpi
   kymaRuntime:
     adminGroup: runtimeAdmin
     operatorGroup: runtimeOperator

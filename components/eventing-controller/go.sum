@@ -135,12 +135,7 @@ github.com/clbanning/x2j v0.0.0-20191024224557-825249438eec/go.mod h1:jMjuTZXRI4
 github.com/client9/misspell v0.3.4/go.mod h1:qj6jICC3Q7zFZvVWo7KLAzC3yx5G7kyvSDkc90ppPyw=
 github.com/cloudevents/sdk-go/protocol/nats/v2 v2.3.1 h1:LY5dKsBPIcY6NQajjgGyQO2hlfSD96FnMpoISZ2lxJo=
 github.com/cloudevents/sdk-go/protocol/nats/v2 v2.3.1/go.mod h1:xEjXKvch0fuLkmYyNlznjNpwgtMVhELY6aeyruXKXjQ=
-github.com/cloudevents/sdk-go/protocol/nats/v2 v2.5.0 h1:BRCZBiIow5Hj9GsQX0InaaJorKo+/3GsOzU4xIc9UwU=
-github.com/cloudevents/sdk-go/protocol/nats/v2 v2.5.0/go.mod h1:69I3AikdiNccEO/188fSiEVFphftrxJ5fgLdG40PAKk=
-github.com/cloudevents/sdk-go/v2 v2.3.1 h1:QRTu0yRA4FbznjRSds0/4Hy6cVYpWV2wInlNJSHWAtw=
 github.com/cloudevents/sdk-go/v2 v2.3.1/go.mod h1:4fO2UjPMYYR1/7KPJQCwTPb0lFA8zYuitkUpAZFSY1Q=
-github.com/cloudevents/sdk-go/v2 v2.4.1 h1:rZJoz9QVLbWQmnvLPDFEmv17Czu+CfSPwMO6lhJ72xQ=
-github.com/cloudevents/sdk-go/v2 v2.4.1/go.mod h1:MZiMwmAh5tGj+fPFvtHv9hKurKqXtdB9haJYMJ/7GJY=
 github.com/cloudevents/sdk-go/v2 v2.5.0 h1:Ts6aLHbBUJfcNcZ4ouAfJ4+Np7SE1Yf2w4ADKRCd7Fo=
 github.com/cloudevents/sdk-go/v2 v2.5.0/go.mod h1:nlXhgFkf0uTopxmRXalyMwS2LG70cRGPrxzmjJgSG0U=
 github.com/cncf/udpa/go v0.0.0-20191209042840-269d4d468f6f/go.mod h1:M8M6+tZqaGXZJjfX53e64911xZQV5JYwmTeXPW+k8Sc=
