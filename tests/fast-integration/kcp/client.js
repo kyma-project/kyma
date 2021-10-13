@@ -22,17 +22,6 @@ class KCPConfig {
         this.password = password;
         this.clientID = clientID;
         this.clientSecret = clientSecret;
-        this.kcpConfigPath = `config.yaml`;
-
-        let stream = fs.createWriteStream(`${this.kcpConfigPath}`);
-        stream.once("open", (_) => {
-            stream.write(`gardener-namespace: ${this.gardenerNamespace}\n`);
-            stream.write(`oidc-client-id: ${this.clientID}\n`);
-            stream.write(`oidc-client-secret: ${this.clientSecret}\n`);
-            stream.write(`keb-api-url: ${this.host}\n`);
-            stream.write(`oidc-issuer-url: ${this.issuerURL}\n`);
-            stream.end();
-        })
     }
 }
 
@@ -47,6 +36,17 @@ class KCPWrapper {
         this.username = config.username;
         this.password = config.password;
         this.host = config.host;
+
+        this.kcpConfigPath = `config.yaml`;
+        let stream = fs.createWriteStream(`${this.kcpConfigPath}`);
+        stream.once("open", (_) => {
+            stream.write(`gardener-namespace: ${this.gardenerNamespace}\n`);
+            stream.write(`oidc-client-id: ${this.clientID}\n`);
+            stream.write(`oidc-client-secret: ${this.clientSecret}\n`);
+            stream.write(`keb-api-url: ${this.host}\n`);
+            stream.write(`oidc-issuer-url: ${this.issuerURL}\n`);
+            stream.end();
+        });
     }
 
     async runtimes(query) {
