@@ -102,18 +102,25 @@ describe("SKR nightly", function () {
       let query = {
         subaccount: keb.subaccountID,
       }
-      const runtimes = await kcp.runtimes(query);
-      console.log(runtimes)
-      runtime = runtimes.data[0];
+      let runtimes = await kcp.runtimes(query);
+      if (runtimes.data) {
+        runtime = runtimes.data[0];
+      }
     });
-    if (runtime) {
-      it(`Deprovision previous runtime with id ${runtime.instanceID}`, async function () {
+    it(`Deprovision previous runtime`, async function () {
+      if (runtime) {
         await deprovisionSKR(keb, runtime.instanceID);
-      });
-      it(`Unregister SKR resources from compass`, async function () {
+      } else {
+        this.skip();
+      }
+    });
+    it(`Unregister SKR resources from compass`, async function () {
+      if (runtime) {
         await unregisterKymaFromCompass(director, scenarioName);
-      });
-    }
+      } else {
+        this.skip();
+      }
+    });
   });
 
   // it(`Provision SKR with ID ${runtimeID}`, async function () {
