@@ -95,20 +95,25 @@ describe("SKR nightly", function () {
 
   let skr;
 
-  it(`Deprovision previous nightly SKR and unregister SKR resources from compass`, async function () {
-    await kcp.login()
-    let query = {
-      subaccount: keb.subaccountID,
+  describe(`Deprovision previous SKR nightly cluster`, function () {
+    let runtime;
+    it(`Fetch last runtime`, async function() {
+      await kcp.login()
+      let query = {
+        subaccount: keb.subaccountID,
+      }
+      const runtimes = await kcp.runtimes(query);
+      console.log(runtimes)
+      runtime = runtimes.data[0];
+    });
+    if (runtime) {
+      it(`Deprovision previous runtime with id ${runtime.instanceID}`, async function () {
+        await deprovisionSKR(keb, runtime.instanceID);
+      });
+      it(`Unregister SKR resources from compass`, async function () {
+        await unregisterKymaFromCompass(director, scenarioName);
+      });
     }
-    const runtimes = await kcp.runtimes(query);
-    console.log(runtimes)
-    if (runtimes.data == null) {
-      console.log("Deprovision not needed. Skip.");
-      return;
-    }
-    let first = runtimes.data[0];
-    await deprovisionSKR(keb, first.instanceID);
-    await unregisterKymaFromCompass(director, scenarioName);
   });
 
   // it(`Provision SKR with ID ${runtimeID}`, async function () {
