@@ -724,8 +724,6 @@ func (r *Reconciler) namedLogger() *zap.SugaredLogger {
 	return r.logger.WithContext().Named(reconcilerName).With("backend", r.backendType)
 }
 
-
-
 func getOAuth2ClientSecretName() string {
 	return deployment.ControllerName + BEBSecretNameSuffix
 }
