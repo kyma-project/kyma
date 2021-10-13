@@ -56,8 +56,6 @@ clusterRoles:
       - "addons.kyma-project.io"
     monitoring:
       - "monitoring.coreos.com"
-    dex:
-      - "dex.coreos.com"
     ory:
       - "oathkeeper.ory.sh"
       - "hydra.ory.sh"
@@ -66,8 +64,6 @@ clusterRoles:
     kymaEventing: []
     svcat:
       - "settings.svcat.k8s.io"
-    ui:
-      - "ui.kyma-project.io"
   verbs:
     edit:
       - "create"
