@@ -3,7 +3,7 @@ const {assert} = require("chai");
 const forge = require('node-forge');
 
 describe("Certificate test", async function () {
-    this.timeout(1000);
+    this.timeout(3000);
     this.slow(3 * 1000);
     it("Checking if installed ingress gateway certificate is valid", async () => {
         await checkDefaultCertificateIsValid();
