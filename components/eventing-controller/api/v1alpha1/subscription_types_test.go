@@ -8,8 +8,8 @@ import (
 )
 
 const (
-	orderProcessedEventType = "sap.kyma.testapp1023.order.processed.v1"
-	orderCreatedEventType   = "sap.kyma.testapp1023.order.created.v1"
+	orderProcessedEventType = "prefix.testapp1023.order.processed.v1"
+	orderCreatedEventType   = "prefix.testapp1023.order.created.v1"
 )
 
 func TestBEBFilters_Deduplicate(t *testing.T) {

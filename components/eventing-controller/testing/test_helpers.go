@@ -14,41 +14,40 @@ import (
 
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/deployment"
 
-	appsv1 "k8s.io/api/apps/v1"
-
 	"github.com/kyma-project/kyma/components/eventing-controller/utils"
+	appsv1 "k8s.io/api/apps/v1"
 
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
 
 	apigatewayv1alpha1 "github.com/kyma-incubator/api-gateway/api/v1alpha1"
-	oryv1alpha1 "github.com/ory/oathkeeper-maester/api/v1alpha1"
-
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/object"
+	oryv1alpha1 "github.com/ory/oathkeeper-maester/api/v1alpha1"
 )
 
 const (
 	ApplicationName         = "testapp1023"
 	ApplicationNameNotClean = "test-app_1-0+2=3"
 
-	// event properties
-	EventSource                   = "/default/kyma/id"
-	EventTypePrefix               = "sap.kyma"
-	OrderCreatedEventType         = EventTypePrefix + "." + ApplicationName + ".order.created.v1"
-	OrderCreatedEventTypeNotClean = EventTypePrefix + "." + ApplicationNameNotClean + ".order.created.v1"
-	EventID                       = "8945ec08-256b-11eb-9928-acde48001122"
-	EventSpecVersion              = "1.0"
-	EventData                     = "test-data"
+	EventSource                              = "/default/kyma/id"
+	EventTypePrefix                          = "prefix"
+	EventTypePrefixEmpty                     = ""
+	OrderCreatedV1Event                      = "order.created.v1"
+	OrderCreatedEventType                    = EventTypePrefix + "." + ApplicationName + "." + OrderCreatedV1Event
+	OrderCreatedEventTypeNotClean            = EventTypePrefix + "." + ApplicationNameNotClean + "." + OrderCreatedV1Event
+	OrderCreatedEventTypePrefixEmpty         = ApplicationName + "." + OrderCreatedV1Event
+	OrderCreatedEventTypeNotCleanPrefixEmpty = ApplicationNameNotClean + "." + OrderCreatedV1Event
+	EventID                                  = "8945ec08-256b-11eb-9928-acde48001122"
+	EventSpecVersion                         = "1.0"
+	EventData                                = "test-data"
 
-	// cloud event properties
-	CloudEventType        = "sap.kyma" + "." + ApplicationName + ".order.created.v1"
+	CloudEventType        = EventTypePrefix + "." + ApplicationName + ".order.created.v1"
 	CloudEventSource      = "/default/sap.kyma/id"
 	CloudEventSpecVersion = "1.0"
 	CloudEventData        = "{\"foo\":\"bar\"}"
 
-	// binary CE headers
 	CeIDHeader          = "ce-id"
 	CeTypeHeader        = "ce-type"
 	CeSourceHeader      = "ce-source"
@@ -133,9 +132,9 @@ func WithStatusReady(apiRule *apigatewayv1alpha1.APIRule) {
 	}
 }
 
-type subOpt func(subscription *eventingv1alpha1.Subscription)
+type SubscriptionOpt func(subscription *eventingv1alpha1.Subscription)
 
-func NewSubscription(name, namespace string, opts ...subOpt) *eventingv1alpha1.Subscription {
+func NewSubscription(name, namespace string, opts ...SubscriptionOpt) *eventingv1alpha1.Subscription {
 	newSub := &eventingv1alpha1.Subscription{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      name,
@@ -270,22 +269,25 @@ func WithNotCleanEventTypeFilter(s *eventingv1alpha1.Subscription) {
 	}
 }
 
-func WithEmptyEventTypeFilter(s *eventingv1alpha1.Subscription) {
-	s.Spec.Filter = &eventingv1alpha1.BEBFilters{
-		Filters: []*eventingv1alpha1.BEBFilter{
-			{
-				EventSource: &eventingv1alpha1.Filter{
-					Type:     "exact",
-					Property: "source",
-					Value:    EventSource,
-				},
-				EventType: &eventingv1alpha1.Filter{
-					Type:     "exact",
-					Property: "type",
-					Value:    "",
+// WithFilter sets the Subscription filter with the given event source and type.
+func WithFilter(eventSource, eventType string) SubscriptionOpt {
+	return func(subscription *eventingv1alpha1.Subscription) {
+		subscription.Spec.Filter = &eventingv1alpha1.BEBFilters{
+			Filters: []*eventingv1alpha1.BEBFilter{
+				{
+					EventSource: &eventingv1alpha1.Filter{
+						Type:     "exact",
+						Property: "source",
+						Value:    eventSource,
+					},
+					EventType: &eventingv1alpha1.Filter{
+						Type:     "exact",
+						Property: "type",
+						Value:    eventType,
+					},
 				},
 			},
-		},
+		}
 	}
 }
 
@@ -297,25 +299,6 @@ func WithEventTypeFilter(s *eventingv1alpha1.Subscription) {
 					Type:     "exact",
 					Property: "source",
 					Value:    EventSource,
-				},
-				EventType: &eventingv1alpha1.Filter{
-					Type:     "exact",
-					Property: "type",
-					Value:    OrderCreatedEventType,
-				},
-			},
-		},
-	}
-}
-
-func WithEmptySourceEventType(s *eventingv1alpha1.Subscription) {
-	s.Spec.Filter = &eventingv1alpha1.BEBFilters{
-		Filters: []*eventingv1alpha1.BEBFilter{
-			{
-				EventSource: &eventingv1alpha1.Filter{
-					Type:     "exact",
-					Property: "source",
-					Value:    "",
 				},
 				EventType: &eventingv1alpha1.Filter{
 					Type:     "exact",
@@ -468,15 +451,15 @@ func ToSubscription(unstructuredSub *unstructured.Unstructured) (*eventingv1alph
 	return subscription, nil
 }
 
-// ToUnstructuredAPIRule converts an APIRule object into a unstructured APIRule
-func ToUnstructuredAPIRule(obj interface{}) (*unstructured.Unstructured, error) {
-	unstructrd := &unstructured.Unstructured{}
+// ToUnstructuredApiRule converts an APIRule object into a unstructured APIRule
+func ToUnstructuredApiRule(obj interface{}) (*unstructured.Unstructured, error) {
+	unstructured := &unstructured.Unstructured{}
 	unstructuredObj, err := runtime.DefaultUnstructuredConverter.ToUnstructured(obj)
 	if err != nil {
 		return nil, err
 	}
-	unstructrd.Object = unstructuredObj
-	return unstructrd, nil
+	unstructured.Object = unstructuredObj
+	return unstructured, nil
 }
 
 // SetupSchemeOrDie add a scheme to eventing API schemes
