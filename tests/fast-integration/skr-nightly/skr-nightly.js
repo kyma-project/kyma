@@ -95,13 +95,13 @@ describe("SKR nightly", function () {
 
   let skr;
 
-  it(`Deprovision previous nightly SKR and unregister SKR resources from compass`, async () => {
+  it(`Deprovision previous nightly SKR and unregister SKR resources from compass`, async function () {
     await kcp.login()
     let query = {
       subaccount: keb.subaccountID,
     }
     const runtimes = await kcp.runtimes(query);
-    console.log(runtimes.data)
+    console.log(runtimes)
     if (runtimes.data == null) {
       console.log("Deprovision not needed. Skip.");
       return;

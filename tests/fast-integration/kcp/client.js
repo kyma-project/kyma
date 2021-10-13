@@ -72,7 +72,8 @@ class KCPWrapper {
         if (query.state) {
             args = args.concat(`--state`, `${query.state}`);
         }
-        return await this.exec(args);
+        let result = await this.exec(args);
+        return JSON.parse(result)
     }
 
     async login() {
