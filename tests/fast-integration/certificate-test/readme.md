@@ -1,6 +1,6 @@
 # Certificate test
 
-This test basically warns if the installed kyma-gateway-cert is going to be invalid soon
+This test warns if the `kyma-gateway-cert` is going to be invalid soon.
 
 ## Usage
 
