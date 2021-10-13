@@ -48,10 +48,10 @@ global:
       version: "PR-11558"
     application_gateway:
       name: "application-gateway"
-      version: "PR-11558"
+      version: "PR-12306"
     application_operator:
       name: "application-operator"
-      version: "PR-12141"
+      version: "PR-12306"
     application_registry:
       name: "application-registry"
       version: "PR-12181"
