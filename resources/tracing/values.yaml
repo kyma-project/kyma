@@ -103,6 +103,7 @@ serviceAccount:
   name:
 
 global:
+  domainName: "kyma.example.com"
   istio:
     gateway:
       name: kyma-gateway

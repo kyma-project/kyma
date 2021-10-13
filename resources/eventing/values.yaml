@@ -29,7 +29,7 @@ global:
   secretName: ""
 
   # domainName is the global domain used in Kyma
-  domainName: "domain"
+  domainName: "kyma.example.com"
 
   istio:
     proxy:

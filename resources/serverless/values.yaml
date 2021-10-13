@@ -66,6 +66,7 @@ tests:
       URLPython: "https://pkgs.dev.azure.com/kyma-wookiee/public-packages/_packaging/public-packages%40Release/pypi/simple/"
 
 global:
+  domainName: "kyma.example.com"
   commonLabels:
     app: '{{ template "name" . }}'
     version: "{{ .Values.images.manager.tag }}"

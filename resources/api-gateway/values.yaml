@@ -103,6 +103,7 @@ tests:
     runAsGroup: 65534
 
 global:
+  domainName: kyma.example.com
   containerRegistry:
     path: eu.gcr.io/kyma-project
   images:
