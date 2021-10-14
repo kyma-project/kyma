@@ -2,8 +2,9 @@ package git_test
 
 import (
 	"errors"
-	"github.com/stretchr/testify/require"
 	"testing"
+
+	"github.com/stretchr/testify/require"
 
 	"github.com/kyma-project/kyma/components/function-controller/internal/git"
 	"github.com/onsi/gomega"

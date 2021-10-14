@@ -114,8 +114,8 @@ func IsAuthErr(err error) bool {
 	}
 
 	/*
-	When using invalid personal access token with basic auth, libgit2 return such error.
-	 */
+		When using invalid personal access token with basic auth, libgit2 return such error.
+	*/
 
 	if strings.Contains(errMsg, "too many redirects or authentication replays") {
 		return true
