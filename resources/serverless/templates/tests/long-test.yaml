@@ -26,7 +26,7 @@ spec:
       restartPolicy: {{ .Values.tests.restartPolicy }}
       containers:
         - name: {{ include "tests.name" . }}
-          image: "{{ .Values.tests.long.image.repository  }}:{{ .Values.tests.long.image.tag }}"
+          image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.k8s_tools) }}"
           imagePullPolicy: {{ .Values.tests.long.pullPolicy }}
           command:
             - "/bin/bash"
