@@ -397,7 +397,7 @@ alertmanager:
     ##
     podMetadata:
       annotations:
-        sidecar.istio.io/inject: "true"
+        sidecar.istio.io/inject: "false"
 
     ## Image of Alertmanager
     ##
