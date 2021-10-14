@@ -54,7 +54,7 @@ Follows these steps:
       namespace: $NAMESPACE
     type: Opaque
     data:
-      key: {SSH_KEY}
+      key: {BASE64_ENCODED_PRIVATE_SSH_KEY}
     EOF
     ```
 
