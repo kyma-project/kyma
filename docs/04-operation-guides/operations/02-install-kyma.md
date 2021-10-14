@@ -23,7 +23,7 @@ You can either use an out-of-the-box k3d cluster or choose any other cluster pro
   > **TIP:** If you want to define the name of your k3d cluster and pass arguments to the Kubernetes API server (for example, to log to stderr), run:
   >
   > ```bash
-  > kyma provision k3d --name='{CUSTOM_NAME}' --server-args='--alsologtostderr'
+  > kyma provision k3d --name='{CUSTOM_NAME}' --k3s-arg='--alsologtostderr@server:0'
   > ```
 
 ## Default installation
@@ -35,9 +35,6 @@ Use the `deploy` command to install Kyma.
   ```
 
 With Kyma installed on a local k3d cluster, access Kyma Dashboard using `kyma dashboard`. The command opens a browser and takes you to localhost with the web-based administrative UI for Kyma. With Kyma installed on a remote cluster, access the Dashboard at [`https://dashboard.kyma-project.io`](https://dashboard.kyma-project.io).
-
-<!-- `kyma dashboard --local` and the URL aren't working yet, see 02-get-started/01-quick-install.md -->
-<!-- Oct 4th: `kyma dashboard` works now, but ONLY locally -->
 
 ## Choose resource consumption
 
