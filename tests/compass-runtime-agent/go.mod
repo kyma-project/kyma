@@ -30,4 +30,6 @@ replace (
 	k8s.io/api => k8s.io/api v0.16.10
 	k8s.io/apimachinery => k8s.io/apimachinery v0.16.10
 	k8s.io/client-go => k8s.io/client-go v0.16.10
+	github.com/kyma-project/kyma/components/application-broker => ../../components/application-connector/application-broker
+
 )

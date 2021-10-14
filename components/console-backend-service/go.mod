@@ -48,4 +48,5 @@ replace (
 	k8s.io/utils => k8s.io/utils v0.0.0-20191114184206-e782cd3c129f
 	// kyma/components/function-controller uses new version knative.dev, with another impelmntations functions.
 	knative.dev/pkg => knative.dev/pkg v0.0.0-20210217160502-b7d7ff183788
+	github.com/kyma-project/kyma/components/application-broker => ../application-connector/application-broker
 )
