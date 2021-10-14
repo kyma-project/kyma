@@ -67,6 +67,10 @@ global:
     connector_service:
       name: "connector-service"
       version: "PR-12294"
+    busybox:
+      name: "busybox"
+      version: "1.32.0-v1"
+      directory: "external"
   testImages:
     application_operator_tests:
       name: "application-operator-tests"
