@@ -1,6 +1,8 @@
 package git_test
 
 import (
+	"errors"
+	"github.com/stretchr/testify/require"
 	"testing"
 
 	"github.com/kyma-project/kyma/components/function-controller/internal/git"
@@ -119,4 +121,45 @@ func TestAuthOptions_ToAuthMethod(t *testing.T) {
 		g.Expect(result.CertificateCheckCallback).To(gomega.BeNil())
 
 	})
+}
+
+func TestIsAuthErr(t *testing.T) {
+	// GIVEN
+	testCases := []struct {
+		name     string
+		err      error
+		expected bool
+	}{
+		{
+			name:     "err is nil",
+			err:      nil,
+			expected: false,
+		},
+		{
+			name:     "different error",
+			err:      errors.New("Internet Server Error"),
+			expected: false,
+		},
+		{
+			name:     "err contains 403 error code",
+			err:      errors.New("nobody expected unexpected http status code: 403 while doing inquisition"),
+			expected: true,
+		},
+		{
+			name:     "error contains too many redirects",
+			err:      errors.New("too many redirects or authentication replays while cloning repository"),
+			expected: true,
+		},
+	}
+	for _, testCase := range testCases {
+		t.Run(testCase.name, func(t *testing.T) {
+			//WHEN
+			result := git.IsAuthErr(testCase.err)
+
+			//THEN
+			require.Equal(t, testCase.expected, result)
+		})
+
+	}
+
 }
