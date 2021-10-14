@@ -38,8 +38,8 @@ Follows these steps:
       namespace: $NAMESPACE
     type: Opaque
     data:
-      username: {USERNAME}
-      password: {PASSWORD_OR_TOKEN}
+      username: {BASE64_ENCODED_USERNAME}
+      password: {BASE64_ENCODED_PASSWORD_OR_TOKEN}
     EOF
     ```
 
