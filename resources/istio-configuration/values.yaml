@@ -33,6 +33,7 @@ helmValues:
 
 meshConfig:
   accessLogFile: /dev/stdout
+  accessLogEncoding: JSON
   trustDomain: cluster.local
   defaultConfig:
     tracing:
