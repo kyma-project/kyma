@@ -49,7 +49,7 @@ spec:
           name: scripts
       containers:
         - name: pause
-          image: gcr.io/google-containers/pause-amd64:3.2
+          image: {{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.google_pause) }}
           securityContext:
 {{- include "tplValue" ( dict "value" .Values.containers.daemonset.containerSecurityContext "context" . ) | nindent 12 }}
           resources:
