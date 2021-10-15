@@ -9,7 +9,7 @@ This component contains controllers for various CustomResourceDefinitions relate
 ## Prerequisites
 
 - Install [ko](https://github.com/google/ko) which is used to build and deploy the controller during local development
-- Install [kubebuilder](https://github.com/kubernetes-sigs/kubebuilder) which is the base framework for this controller
+- Install [kubebuilder](https://github.com/kubernetes-sigs/kubebuilder) which is the base framework for this controller (currently used version: 3.1)
 - Install [kustomize](https://github.com/kubernetes-sigs/kustomize) which lets you customize raw, template-free `yaml` files during local development
 - Install lint on the local environment
 ```bash
@@ -173,7 +173,7 @@ kubebuilder init --domain kyma-project.io
 2. Build the binary:
 
 ```sh
-make manager
+make eventing-controller-local
 ```
 
 3. Run the controller:
@@ -181,3 +181,5 @@ make manager
 ```sh
 make run
 ```
+
+> currently we support a buildtag `local` to avoid setting incorrect ownerRefs in the PublisherProxy deployment when running the controller on a developers machine.

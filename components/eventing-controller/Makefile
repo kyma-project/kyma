@@ -98,7 +98,7 @@ run: manifests-local generate-local fmt-local vet-local set-up-local-env## Run a
 	go run ./cmd/eventing-controller/main.go
 
 ##@ Docker
-$(cmds_local): %-local: resolve-local ## build binary
+$(cmds_local): %-local: gomod-vendor-local ## build binary
 	@echo "+ Building $*"
 	@CGO_ENABLED=0 go build -o bin/$* \
 		$(GOBUILD_FLAGS) \
