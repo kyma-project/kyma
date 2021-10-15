@@ -1,6 +1,6 @@
 APP_NAME = application-broker
-APP_PATH = components/$(APP_NAME)
-SCRIPTS_DIR = $(realpath $(shell pwd)/../..)/common/makefiles
+APP_PATH = components/application-connector/$(APP_NAME)
+SCRIPTS_DIR = $(realpath $(shell pwd)/../../..)/common/makefiles
 
 include $(SCRIPTS_DIR)/generic-make-go.mk
 

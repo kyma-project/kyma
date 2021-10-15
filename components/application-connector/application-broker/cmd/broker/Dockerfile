@@ -1,6 +1,6 @@
 FROM eu.gcr.io/kyma-project/external/golang:1.16.3-alpine as builder
 
-ENV SRC_DIR=/go/src/github.com/kyma-project/kyma/components/application-broker
+ENV SRC_DIR=/go/src/github.com/kyma-project/kyma/components/application-connector/application-broker
 ADD . $SRC_DIR
 
 # creates a non-root user to give him write permissions to tmp folder
