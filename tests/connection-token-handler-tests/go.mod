@@ -9,4 +9,7 @@ require (
 	k8s.io/client-go v0.16.10
 )
 
-replace golang.org/x/text => golang.org/x/text v0.3.3
+replace (
+	golang.org/x/text => golang.org/x/text v0.3.3
+	github.com/kyma-project/kyma/components/connection-token-handler => github.com/mvshao/kyma/components/application-connector/connection-token-handler v0.0.0-20211015131621-c4155d835961
+)

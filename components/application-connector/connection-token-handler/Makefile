@@ -1,6 +1,6 @@
 APP_NAME = connection-token-handler
 APP_PATH = components/$(APP_NAME)
-SCRIPTS_DIR = $(realpath $(shell pwd)/../..)/common/makefiles
+SCRIPTS_DIR = $(realpath $(shell pwd)/../../..)/common/makefiles
 
 override ENTRYPOINT = cmd/manager/
 
