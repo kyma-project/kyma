@@ -1,6 +1,6 @@
 APP_NAME = central-application-connectivity-validator
 APP_PATH = components/$(APP_NAME)
-SCRIPTS_DIR = $(realpath $(shell pwd)/../..)/common/makefiles
+SCRIPTS_DIR = $(realpath $(shell pwd)/../../..)/common/makefiles
 
 override ENTRYPOINT = cmd/centralapplicationconnectivityvalidator/
 
