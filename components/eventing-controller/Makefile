@@ -31,15 +31,6 @@ endif
 SHELL = /usr/bin/env bash -o pipefail
 .SHELLFLAGS = -ec
 
-# produce goals for each cmd program ("bin1 bin2 ...")
-cmds := $(foreach dir,$(wildcard cmd/*),$(notdir $(dir)))
-# produce goals to build images for each cmd program ("bin1.image bin2.image ...")
-cmds_local = $(foreach cmd,$(cmds),$(cmd)-local)
-cmds_images = $(foreach cmd,$(cmds),$(cmd).image)
-cmds_clean = $(foreach cmd,$(cmds),$(cmd).clean)
-# produce goals to push images for each cmd program ("bin1.image.push bin2.image.push ...")
-cmds_images_push = $(foreach img,$(cmds_images),$(img).push)
-
 GOBUILD_FLAGS := -v
 PKG := github.com/kyma-project/kyma/components/eventing-controller
 
@@ -97,31 +88,13 @@ check-code: check-imports fmt-local vet-local lint ## Run various linters and ot
 run: manifests-local generate-local fmt-local vet-local set-up-local-env## Run a controller from your host.
 	go run ./cmd/eventing-controller/main.go
 
+eventing-controller: gomod-vendor-local
+        @CGO_ENABLED=0 go build -o bin/eventing-controller \
+        $(GOBUILD_FLAGS) \
+        $(PKG)/cmd/eventing-controller
+
 ##@ Docker
-$(cmds_local): %-local: gomod-vendor-local ## build binary
-	@echo "+ Building $*"
-	@CGO_ENABLED=0 go build -o bin/$* \
-		$(GOBUILD_FLAGS) \
-		$(PKG)/cmd/$*
 
-# Example:
-#   make eventing-controller.image
-$(cmds_images): %.image: pull-licenses-local ## docker build image
-	$(eval $@_img_name := $*)
-	@echo "+ Building container image $($@_img_name)"
-	docker image build -f cmd/$*/Dockerfile -t $($@_img_name) .
-
-# Example:
-#   make eventing-controller.image.push
-$(cmds_images_push): %.push: %
-	$(eval $@_img_name := $(subst .image,,$*))
-	@echo "+ Pushing container image $($@_img_name)"
-	docker image tag $($@_img_name) $(DOCKER_PUSH_REPOSITORY)$(DOCKER_PUSH_DIRECTORY)/$($@_img_name):$(TAG)
-	docker image push $(DOCKER_PUSH_REPOSITORY)$(DOCKER_PUSH_DIRECTORY)/$($@_img_name):$(TAG)
-
-# override image goals from common Makefile because we need to build several images
-build-image: $(cmds_images) ; ## build all images
-push-image: $(cmds_images_push) ; ## push all images
 
 ##@ Release
 ##release: resolve-local generate-local verify-local build-image push-image copy-external-crds ## Job used by our CI to release a binary
@@ -193,8 +166,6 @@ resolve_clean:
 
 licenses_clean:
 	rm -rf licenses
-
-build-local: $(cmds-local) test-local ;
 
 .PHONY: $(cmds_images) $(cmds_images_push)
 
