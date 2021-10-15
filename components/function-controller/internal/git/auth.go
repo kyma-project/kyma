@@ -91,7 +91,7 @@ func authBasicCallback(username, password string) func(url, username string, all
 	return func(url string, username_from_url string, allowed_types git2go.CredentialType) (*git2go.Credential, error) {
 		cred, err := git2go.NewCredentialUserpassPlaintext(username, password)
 		if err != nil {
-			return nil, err
+			return nil, errors.Wrap(err, "while creating credentials with user and password")
 		}
 		return cred, nil
 	}
