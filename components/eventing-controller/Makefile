@@ -86,10 +86,10 @@ setup-envtest:
 	test -f ${ENVTEST_ASSETS_DIR}/setup-envtest.sh || curl -sSLo ${ENVTEST_ASSETS_DIR}/setup-envtest.sh https://raw.githubusercontent.com/kubernetes-sigs/controller-runtime/v0.8.3/hack/setup-envtest.sh
 	source ${ENVTEST_ASSETS_DIR}/setup-envtest.sh; fetch_envtest_tools $(ENVTEST_ASSETS_DIR); setup_envtest_env $(ENVTEST_ASSETS_DIR)
 
-test-local-nonlocal: manifests-local generate-local setup-envtest ## Run tests.
+test-local-nonlocal: manifests-local generate-local setup-envtest ## Run tests
 	go test ./... -coverprofile cover.out
 
-test-local-local: manifests-local generate-local setup-envtest ## Run tests.
+test-local-local: manifests-local generate-local setup-envtest ## Run tests with buildtag `local`
 	go test ./... -coverprofile cover.out --tags=local
 
 check-code: check-imports fmt-local vet-local lint ## Run various linters and other code checks. Use before committing
