@@ -13,4 +13,5 @@ require (
 
 replace (
 	github.com/containerd/containerd => github.com/containerd/containerd v1.4.4
+	github.com/kyma-project/kyma/components/application-operator => github.com/mvshao/kyma/components/application-connector/application-operator v0.0.0-20211015090617-5ccd48a13647
 )

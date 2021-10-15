@@ -25,8 +25,8 @@ require (
 )
 
 replace (
-	github.com/kyma-project/kyma/components/application-operator => github.com/kyma-project/kyma/components/application-operator v0.0.0-20200610105106-1066324c83cd
-
+	//github.com/kyma-project/kyma/components/application-operator => github.com/kyma-project/kyma/components/application-operator v0.0.0-20200610105106-1066324c83cd
+	github.com/kyma-project/kyma/components/application-operator => github.com/mvshao/kyma/components/application-connector/application-operator v0.0.0-20211015090617-5ccd48a13647
 	k8s.io/api => k8s.io/api v0.16.10
 	k8s.io/apimachinery => k8s.io/apimachinery v0.16.10
 	k8s.io/client-go => k8s.io/client-go v0.16.10

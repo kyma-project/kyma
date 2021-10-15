@@ -1,6 +1,6 @@
 APP_NAME = application-operator
-APP_PATH = components/$(APP_NAME)
-SCRIPTS_DIR = $(realpath $(shell pwd)/../..)/common/makefiles
+APP_PATH = components/application-connector/$(APP_NAME)
+SCRIPTS_DIR = $(realpath $(shell pwd)/../../..)/common/makefiles
 
 override ENTRYPOINT = cmd/manager/manager.go
 

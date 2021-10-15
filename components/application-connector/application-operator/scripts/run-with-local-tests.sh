@@ -31,4 +31,4 @@ echo "------------------------"
 
 kubectl -n kyma-integration delete po -l control-plane=application-operator --now --wait=false
 
-$CURRENT_DIR/../../../tests/application-operator-tests/scripts/run-local-tests.sh
+$CURRENT_DIR/../../../../tests/application-operator-tests/scripts/run-local-tests.sh

@@ -32,4 +32,8 @@ require (
 	sigs.k8s.io/controller-runtime v0.8.3
 )
 
-replace github.com/nats-io/nats.go => github.com/nats-io/nats.go v1.11.0
+replace (
+	github.com/nats-io/nats.go => github.com/nats-io/nats.go v1.11.0
+	github.com/kyma-project/kyma/components/application-operator => github.com/mvshao/kyma/components/application-connector/application-operator v0.0.0-20211015090617-5ccd48a13647
+)
+

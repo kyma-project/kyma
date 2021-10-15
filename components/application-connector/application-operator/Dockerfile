@@ -1,6 +1,6 @@
 FROM eu.gcr.io/kyma-project/external/golang:1.16.4-alpine as builder
 
-ARG DOCK_PKG_DIR=/go/src/github.com/kyma-project/kyma/components/application-operator
+ARG DOCK_PKG_DIR=/go/src/github.com/kyma-project/kyma/components/application-connector/application-operator
 WORKDIR $DOCK_PKG_DIR
 
 COPY ./licenses/ /app/licenses
@@ -16,7 +16,7 @@ LABEL source=git@github.com:kyma-project/kyma.git
 
 COPY charts/application application/
 COPY charts/gateway gateway/
-COPY --from=builder /go/src/github.com/kyma-project/kyma/components/application-operator/manager .
+COPY --from=builder /go/src/github.com/kyma-project/kyma/components/application-connector/application-operator/manager .
 COPY --from=builder /app/licenses /app/licenses
 
 COPY --from=builder /etc_passwd /etc/passwd

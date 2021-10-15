@@ -28,4 +28,5 @@ replace (
 	github.com/satori/go.uuid => github.com/google/uuid v1.2.0
 	golang.org/x/crypto => golang.org/x/crypto v0.0.0-20201221181555-eec23a3978ad
 	golang.org/x/text => golang.org/x/text v0.3.3
+	github.com/kyma-project/kyma/components/application-operator => github.com/mvshao/kyma/components/application-connector/application-operator v0.0.0-20211015090617-5ccd48a13647
 )

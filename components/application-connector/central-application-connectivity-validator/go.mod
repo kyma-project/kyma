@@ -15,3 +15,7 @@ require (
 	k8s.io/client-go v0.21.3
 	sigs.k8s.io/controller-runtime v0.9.6
 )
+
+replace (
+	github.com/kyma-project/kyma/components/application-operator => github.com/mvshao/kyma/components/application-connector/application-operator v0.0.0-20211015090617-5ccd48a13647
+)

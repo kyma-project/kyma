@@ -17,4 +17,5 @@ require (
 replace (
 	k8s.io/apimachinery => k8s.io/apimachinery v0.17.15
 	k8s.io/client-go => k8s.io/client-go v0.17.15
+	github.com/kyma-project/kyma/components/application-operator => github.com/mvshao/kyma/components/application-connector/application-operator v0.0.0-20211015090617-5ccd48a13647
 )
