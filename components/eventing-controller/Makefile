@@ -62,7 +62,7 @@ help: ## Display this help.
 
 ##@ Development
 # Deploy eventing-controller in the configured Kubernetes cluster in ~/.kube/config for local development
-deploy-local: manifests-local set-up-local-env
+deploy-local: manifests-local set-up-local-env ## build the binary locally using `ko` and deploy it to a cluster
 	kustomize build config/default | envsubst | ko apply -f -
 
 manifests-local: controller-gen-local ## Generate WebhookConfiguration, ClusterRole and CustomResourceDefinition objects.
@@ -136,10 +136,6 @@ install: manifests-local kustomize ## Install CRDs into the K8s cluster specifie
 
 uninstall: manifests-local kustomize ## Uninstall CRDs from the K8s cluster specified in ~/.kube/config.
 	$(KUSTOMIZE) build config/crd | kubectl delete -f -
-
-deploy: manifests-local kustomize ## Deploy controller to the K8s cluster specified in ~/.kube/config.
-	cd config/manager && $(KUSTOMIZE) edit set image controller=${IMG}
-	$(KUSTOMIZE) build config/default | kubectl apply -f -
 
 undeploy: ## Undeploy controller from the K8s cluster specified in ~/.kube/config.
 	$(KUSTOMIZE) build config/default | kubectl delete -f -
