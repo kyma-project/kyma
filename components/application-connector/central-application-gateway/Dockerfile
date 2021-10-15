@@ -1,6 +1,6 @@
 FROM eu.gcr.io/kyma-project/external/golang:1.14.8-alpine as builder
 
-ARG DOCK_PKG_DIR=/go/src/github.com/kyma-project/kyma/components/central-application-gateway
+ARG DOCK_PKG_DIR=/go/src/github.com/kyma-project/kyma/components/application-connector/central-application-gateway
 WORKDIR $DOCK_PKG_DIR
 
 COPY go.mod .
@@ -22,7 +22,7 @@ FROM scratch
 LABEL source=git@github.com:kyma-project/kyma.git
 
 COPY --from=certs /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
-COPY --from=builder /go/src/github.com/kyma-project/kyma/components/central-application-gateway/applicationgateway .
+COPY --from=builder /go/src/github.com/kyma-project/kyma/components/application-connector/central-application-gateway/applicationgateway .
 COPY --from=builder /app/licenses /app/licenses
 
 COPY --from=builder /etc_passwd /etc/passwd
