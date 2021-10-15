@@ -104,7 +104,7 @@
 /resources/telemetry @a-thaler @lilitgh @suleymanakbas91 @clebs @rakesh-garimella @skhalash @jeremyharisch @chrkl @lindnerby @shorim
 
 # The `eventing` chart
-/resources/eventing/ @lilitgh @k15r @nachtmaar @marcobebway @radufa @sayanh @themue @pxsalehi @mfaizanse
+/resources/eventing/ @lilitgh @k15r @nachtmaar @marcobebway @radufa @sayanh @pxsalehi @mfaizanse
 
 # The `application-broker` subchart
 /resources/application-connector/charts/application-broker/ @PK85 @piotrmiskiewicz @ksputo @szwedm @voigt @wozniakjan @adamwalach @lilitgh
@@ -245,13 +245,13 @@ components/etcd-tls-setup-job/ @PK85 @piotrmiskiewicz @ksputo @szwedm @voigt @wo
 /components/compass-runtime-agent/ @PK85 @tgorgol @dbadura @akgalwas @janmedrek @franpog859 @Maladie @rafalpotempa @koala7659 @ralikio
 
 # Event Publisher Proxy
-/components/event-publisher-proxy @k15r @lilitgh @marcobebway @nachtmaar @radufa @sayanh @themue @pxsalehi @mfaizanse
+/components/event-publisher-proxy @k15r @lilitgh @marcobebway @nachtmaar @radufa @sayanh @pxsalehi @mfaizanse
 
 # Eventing Controller
-/components/eventing-controller @k15r @lilitgh @marcobebway @nachtmaar @radufa @sayanh @themue @pxsalehi @mfaizanse
+/components/eventing-controller @k15r @lilitgh @marcobebway @nachtmaar @radufa @sayanh @pxsalehi @mfaizanse
 
 # NATS Operator
-/components/nats-operator @k15r @lilitgh @marcobebway @nachtmaar @radufa @sayanh @themue @pxsalehi @mfaizanse
+/components/nats-operator @k15r @lilitgh @marcobebway @nachtmaar @radufa @sayanh @pxsalehi @mfaizanse
 
 # Busola Migrator Component
 /components/busola-migrator/ @m00g3n @pPrecel @dbadura @tgorgol @rJankowski93
@@ -324,7 +324,7 @@ components/etcd-tls-setup-job/ @PK85 @piotrmiskiewicz @ksputo @szwedm @voigt @wo
 /tests/fast-integration/ @crabtree @pbochynski @adamwalach @voigt @wozniakjan @skhalash @shorim @rakesh-garimella @jeremyharisch @lindnerby
 
 # Fast Integration Eventing Tests
-/tests/fast-integration/eventing-test @k15r @lilitgh @marcobebway @nachtmaar @radufa @sayanh @themue @pxsalehi @mfaizanse
+/tests/fast-integration/eventing-test @k15r @lilitgh @marcobebway @nachtmaar @radufa @sayanh @pxsalehi @mfaizanse
 
 # Tools
 
@@ -335,7 +335,7 @@ components/etcd-tls-setup-job/ @PK85 @piotrmiskiewicz @ksputo @szwedm @voigt @wo
 /tools/kyma-installer/ @strekm @werdes72 @Tomasz-Smelcerz-SAP @mjakobczyk @dariusztutaj
 #
 # The tools/event-subscriber directory
-/tools/event-subscriber/ @lilitgh @k15r @nachtmaar @marcobebway @radufa @sayanh @themue @pxsalehi @mfaizanse
+/tools/event-subscriber/ @lilitgh @k15r @nachtmaar @marcobebway @radufa @sayanh @pxsalehi @mfaizanse
 
 # The tools/gitserver directory
 /tools/gitserver/ @m00g3n @pPrecel @tgorgol @dbadura @rJankowski93
