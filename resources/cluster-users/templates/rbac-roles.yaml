@@ -70,12 +70,12 @@ metadata:
     rbac.authorization.kyma-project.io/aggregate-to-kyma-essentials: "true"
 aggregationRule:
   clusterRoleSelectors:
-    - matchLabels:
-        rbac.authorization.kyma-project.io/aggregate-to-kyma-essentials-base: "true"
-    - matchLabels:
-        rbac.authorization.kyma-project.io/aggregate-to-kyma-crd-view: "true"
-    - matchLabels:
-        rbac.authorization.kyma-project.io/aggregate-to-kyma-authorization-self: "true"
+  - matchLabels:
+      rbac.authorization.kyma-project.io/aggregate-to-kyma-essentials-base: "true"
+  - matchLabels:
+      rbac.authorization.kyma-project.io/aggregate-to-kyma-crd-view: "true"
+  - matchLabels:
+      rbac.authorization.kyma-project.io/aggregate-to-kyma-authorization-self: "true"
 rules: []
 
 ---
