@@ -6,4 +6,4 @@ spec:
   labels: 
     override.deployment.args.skipVerify: "true"
   description: Commerce mock
-  skipVerify: "true"
+  skipVerify: true
