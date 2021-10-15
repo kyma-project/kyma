@@ -47,13 +47,12 @@ PKG := github.com/kyma-project/kyma/components/eventing-controller
 # More info on the awk command:
 # http://linuxcommand.org/lc3_adv_awk.php
 
-
 help: ## Display this help.
 	@awk 'BEGIN {FS = ":.*##"; printf "\nUsage:\n  make \033[36m<target>\033[0m\n"} /^[a-zA-Z_0-9-]+:.*?##/ { printf "  \033[36m%-15s\033[0m %s\n", $$1, $$2 } /^##@/ { printf "\n\033[1m%s\033[0m\n", substr($$0, 5) } ' $(MAKEFILE_LIST)
 
 ##@ Development
 # Deploy eventing-controller in the configured Kubernetes cluster in ~/.kube/config for local development
-deploy-local: manifests-local set-up-local-env ## build the binary locally using `ko` and deploy it to a cluster
+deploy: manifests-local set-up-local-env ## build the binary locally using `ko` and deploy it to a cluster
 	kustomize build config/default | envsubst | ko apply -f -
 
 manifests-local: controller-gen-local ## Generate WebhookConfiguration, ClusterRole and CustomResourceDefinition objects.
@@ -77,23 +76,21 @@ setup-envtest:
 	test -f ${ENVTEST_ASSETS_DIR}/setup-envtest.sh || curl -sSLo ${ENVTEST_ASSETS_DIR}/setup-envtest.sh https://raw.githubusercontent.com/kubernetes-sigs/controller-runtime/v0.8.3/hack/setup-envtest.sh
 	source ${ENVTEST_ASSETS_DIR}/setup-envtest.sh; fetch_envtest_tools $(ENVTEST_ASSETS_DIR); setup_envtest_env $(ENVTEST_ASSETS_DIR)
 
-test-local-nonlocal: manifests-local generate-local setup-envtest ## Run tests
+test-local-nonlocal: manifests-local generate-local setup-envtest
 	go test ./... -coverprofile cover.out
 
-test-local-local: manifests-local generate-local setup-envtest ## Run tests with buildtag `local`
+test-local-local: manifests-local generate-local setup-envtest
 	go test ./... -coverprofile cover.out --tags=local
 
 check-code: check-imports fmt-local vet-local lint ## Run various linters and other code checks. Use before committing
 
-run: manifests-local generate-local fmt-local vet-local set-up-local-env## Run a controller from your host.
-	go run ./cmd/eventing-controller/main.go
+run: manifests-local generate-local fmt-local vet-local set-up-local-env## Run a controller from your host. Runs with buildtags `local`
+	go run --tags=local ./cmd/eventing-controller/main.go
 
 eventing-controller: gomod-vendor-local
         @CGO_ENABLED=0 go build -o bin/eventing-controller \
         $(GOBUILD_FLAGS) \
         $(PKG)/cmd/eventing-controller
-
-##@ Docker
 
 
 ##@ Release
@@ -101,14 +98,7 @@ eventing-controller: gomod-vendor-local
 release:
 	$(MAKE) gomod-release-local
 
-
 ##@ Deployment
-
-install: manifests-local kustomize ## Install CRDs into the K8s cluster specified in ~/.kube/config.
-	$(KUSTOMIZE) build config/crd | kubectl apply -f -
-
-uninstall: manifests-local kustomize ## Uninstall CRDs from the K8s cluster specified in ~/.kube/config.
-	$(KUSTOMIZE) build config/crd | kubectl delete -f -
 
 undeploy: ## Undeploy controller from the K8s cluster specified in ~/.kube/config.
 	$(KUSTOMIZE) build config/default | kubectl delete -f -
@@ -157,16 +147,8 @@ $(eval $(call buildpack-mount,controller-gen))
 $(eval $(call buildpack-mount,generate))
 $(eval $(call buildpack-mount,manifests))
 
-
-MOUNT_TARGETS = $(cmds)
-$(foreach t,$(MOUNT_TARGETS),$(eval $(call buildpack-mount,$(t))))
-
 resolve_clean:
 	rm -rf vendor
 
 licenses_clean:
 	rm -rf licenses
-
-.PHONY: $(cmds_images) $(cmds_images_push)
-
-
