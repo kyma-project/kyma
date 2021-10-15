@@ -1,6 +1,6 @@
 # SKR test
 
-This test covers provisioning nightly SKR (SAP Kyma Runtime) cluster.
+This test covers deprovisioning of previous nightly SKR (SAP Kyma Runtime) cluster, provisioning a new one and executing standard set of tests on it.
 
 ## Usage
 
