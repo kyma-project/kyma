@@ -1,0 +1,11 @@
+# Required because Alertmanager cannot be in the Istio service mesh, but still has to be scraped by Prometheus
+apiVersion: security.istio.io/v1beta1
+kind: PeerAuthentication
+metadata:
+  name: {{ template "kube-prometheus-stack.name" . }}-alertmanager
+spec:
+  mtls:
+    mode: PERMISSIVE
+  selector:
+    matchLabels:
+      app: {{ template "kube-prometheus-stack.name" . }}-alertmanager
