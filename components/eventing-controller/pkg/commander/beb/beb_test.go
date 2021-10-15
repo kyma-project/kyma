@@ -76,7 +76,7 @@ func TestCleanup(t *testing.T) {
 	bebCommander.Client = fakeClient
 
 	// Create APIRule
-	unstructuredAPIRule, err := controllertesting.ToUnstructuredAPIRule(apiRule)
+	unstructuredAPIRule, err := controllertesting.ToUnstructuredApiRule(apiRule)
 	g.Expect(err).To(gomega.BeNil())
 	unstructuredAPIRuleBeforeCleanup, err := bebCommander.Client.Resource(handlers.APIRuleGroupVersionResource()).Namespace("test").Create(ctx, unstructuredAPIRule, metav1.CreateOptions{})
 	g.Expect(err).To(gomega.BeNil())

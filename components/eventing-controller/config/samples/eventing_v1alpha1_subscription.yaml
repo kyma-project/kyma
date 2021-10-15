@@ -30,7 +30,7 @@ spec:
         eventType: {
           type: exact,
           property: type,
-          value: "sap.kyma.test-app.order.created.v1"
+          value: "prefix.test-app.order.created.v1"
         }
       },
     ]

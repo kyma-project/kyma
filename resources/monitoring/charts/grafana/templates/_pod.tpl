@@ -381,10 +381,6 @@ containers:
       - name: GF_RENDERING_CALLBACK_URL
         value: http://{{ template "grafana.fullname" . }}.{{ template "grafana.namespace" . }}:{{ .Values.service.port }}/
       {{ end }}
-      {{- if not .Values.env.GF_AUTH_GENERIC_OAUTH_AUTH_URL }}
-      - name: GF_AUTH_GENERIC_OAUTH_AUTH_URL
-        value: "https://dex.{{ .Values.global.domainName }}/auth"
-      {{- end }}
       {{- if not .Values.env.GF_SERVER_ROOT_URL }}
       - name: GF_SERVER_ROOT_URL
         value: "https://grafana.{{ .Values.global.domainName }}/"

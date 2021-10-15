@@ -1,6 +1,4 @@
 ---
-image: eu.gcr.io/kyma-project/external/istio
-
 helmValues:
   global:
     imagePullPolicy: IfNotPresent
@@ -35,6 +33,7 @@ helmValues:
 
 meshConfig:
   accessLogFile: /dev/stdout
+  accessLogEncoding: JSON
   trustDomain: cluster.local
   defaultConfig:
     tracing:
@@ -112,3 +111,13 @@ monitoring:
   istioServiceMonitor:
     enabled: true
     scrapeInterval: ""
+
+
+global:
+  containerRegistry:
+    path: eu.gcr.io/kyma-project
+  images:
+    istio:
+      name: "istio"
+      version: "1.11.2-distroless"
+      directory: "external"

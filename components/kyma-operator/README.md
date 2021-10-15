@@ -50,7 +50,7 @@ kubectl get crd installations.installer.kyma-project.io -o yaml
 
 ### Sample custom resource
 
-The [Installation custom resource file](https://kyma-project.io/docs/root/kyma/#custom-resource-installation) provides the basic information for Kyma installation.
+The [Installation custom resource file](https://kyma-project-old.netlify.app/docs/root/kyma/#custom-resource-installation) provides the basic information for Kyma installation.
 
 ## Additional information
 

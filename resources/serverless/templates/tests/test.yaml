@@ -26,7 +26,7 @@ spec:
       restartPolicy: {{ .Values.tests.restartPolicy }}
       containers:
         - name: {{ include "tests.name" . }}
-          image: "{{ .Values.tests.image.repository }}:{{ .Values.tests.image.tag }}"
+          image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.testImages.function_controller_test) }}"
           imagePullPolicy: {{ .Values.tests.image.pullPolicy }}
           command:
             - "/bin/sh"
@@ -44,7 +44,7 @@ spec:
             - name: APP_TEST_USAGE_KIND_NAME
               value: "{{ .Values.usageKind.name }}"
             - name: APP_TEST_GIT_SERVER_IMAGE
-              value: "{{ .Values.tests.envs.gitServer.image }}:{{ .Values.tests.envs.gitServer.tag }}"
+              value: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.git_server) }}"
             - name: APP_TEST_GIT_SERVER_REPO_NAME
               value: "{{ .Values.tests.envs.gitServer.repoName }}"
             - name: APP_TEST_PACKAGE_REGISTRY_CONFIG_SECRET_NAME

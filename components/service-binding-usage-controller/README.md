@@ -4,7 +4,7 @@
 
 ServiceBindingUsage Controller injects **ServiceBindings** into a given application using the **ServiceBindingUsage** custom resource, which allows for binding this application to a given ServiceInstance. The ServiceBindingUsage is a Kubernetes custom resource which is Namespace-scoped.
 
-For the custom resource definition, see the [ServiceBindingUsage CRD file](../../resources/cluster-essentials/files/servicebindingusages.servicecatalog.crd.yaml). For more information on the ServiceBindingUsage Controller, see the [docs](./docs) folder in this repository. You can also refer to the corresponding [ServiceBindngUsage documentation](https://kyma-project.io/docs/components/service-catalog#custom-resource-service-binding-usage) on the website.
+For the custom resource definition, see the [ServiceBindingUsage CRD file](../../resources/cluster-essentials/files/servicebindingusages.servicecatalog.crd.yaml). For more information on the ServiceBindingUsage Controller, see the [docs](./docs) folder in this repository. You can also refer to the corresponding [ServiceBindngUsage documentation](https://kyma-project-old.netlify.app/docs/components/service-catalog/#custom-resource-service-binding-usage) on the website.
 
 ## Prerequisites
 

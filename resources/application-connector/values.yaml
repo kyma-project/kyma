@@ -8,6 +8,7 @@ central_application_gateway:
   enabled: true
 
 global:
+  domainName: kyma.example.com
   centralApplicationConnectivityValidatorEnabled: true
   disableLegacyConnectivity: false
   isLocalEnv: false
@@ -65,7 +66,11 @@ global:
       version: "PR-11558"
     connector_service:
       name: "connector-service"
-      version: "1683d7cf"
+      version: "PR-12294"
+    busybox:
+      name: "busybox"
+      version: "1.32.0-v1"
+      directory: "external"
   testImages:
     application_operator_tests:
       name: "application-operator-tests"

@@ -82,7 +82,7 @@ spec:
       {{- end }}
       containers:
       - name: vspatch
-        image: "{{ .Values.vsPatch.image.repository }}:{{ .Values.vsPatch.image.tag }}"
+        image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.k8s_tools) }}"
         imagePullPolicy: "{{ .Values.vsPatch.image.pullPolicy }}"
         securityContext:
         {{- toYaml .Values.deployment.securityContext | nindent 10 }}
