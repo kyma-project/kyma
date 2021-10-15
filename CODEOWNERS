@@ -323,6 +323,9 @@ components/etcd-tls-setup-job/ @PK85 @piotrmiskiewicz @ksputo @szwedm @voigt @wo
 # Fast Integration Tests
 /tests/fast-integration/ @crabtree @pbochynski @adamwalach @voigt @wozniakjan @skhalash @shorim @rakesh-garimella @jeremyharisch @lindnerby
 
+# Fast Integration Eventing Tests
+/tests/fast-integration/eventing-test @k15r @lilitgh @marcobebway @nachtmaar @radufa @sayanh @themue @pxsalehi @mfaizanse
+
 # Tools
 
 # The failery directory
