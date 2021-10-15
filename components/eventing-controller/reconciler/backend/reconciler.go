@@ -372,6 +372,16 @@ func (r *Reconciler) UpdateBackendStatus(ctx context.Context, backendType eventi
 						correctPodBackend = false
 						break
 					}
+					// check if the pod's status is set to Ready
+					for _, status:= range pod.Status.ContainerStatuses {
+						if status.Name != deployment.PublisherName {
+							continue
+						}
+						if status.Ready != true {
+							correctPodBackend = false
+							break
+						}
+					}
 					correctPodsCount++
 				}
 			}
