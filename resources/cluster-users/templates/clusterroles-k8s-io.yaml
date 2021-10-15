@@ -27,6 +27,26 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
+  name: kyma-authorization-self
+  labels:
+    app: kyma
+    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+    rbac.authorization.kyma-project.io/aggregate-to-kyma-authorization-self: "true"
+  annotations:
+    helm.sh/hook-weight: "0"
+rules:
+  - apiGroups:
+      - "authorization.k8s.io"
+    resources:
+      - "selfsubjectrulesreviews"
+      - "selfsubjectaccessreviews"
+    verbs:
+      - "create"
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
   name: kyma-authorization-subject
   labels:
     app: kyma
@@ -81,3 +101,19 @@ rules:
     - "*"
   verbs:
 {{ toYaml .Values.clusterRoles.verbs.view | indent 4 }}
+
+---
+#CRD view
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: kyma-crd-view
+  labels:
+    rbac.authorization.kyma-project.io/aggregate-to-kyma-crd-view: "true"
+rules:
+  - apiGroups:
+      - "apiextensions.k8s.io"
+    resources:
+      - "customresourcedefinitions"
+    verbs:
+  {{ toYaml .Values.clusterRoles.verbs.view | indent 4 }}

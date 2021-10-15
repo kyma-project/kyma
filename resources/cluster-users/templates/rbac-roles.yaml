@@ -1,3 +1,85 @@
+##########################################################################################
+# kyma-essentials: Minimal cluster view role necessary to render UI
+##########################################################################################
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: kyma-essentials-base
+  labels:
+    rbac.authorization.kyma-project.io/aggregate-to-kyma-essentials-base: "true"
+rules:
+  - apiGroups:
+      - "authentication.kyma-project.io"
+      - "ui.kyma-project.io"
+      - "rbac.authorization.k8s.io"
+    resources:
+      - "*"
+    verbs:
+      - "list"
+  - apiGroups:
+      - "servicecatalog.k8s.io"
+      - "rafter.kyma-project.io"
+    resources:
+      - "*"
+    verbs:
+      - "list"
+      - "get"
+  - apiGroups:
+      - servicecatalog.kyma-project.io
+    resources:
+      - usagekinds
+    verbs:
+      - "list"
+      - "get"
+  - apiGroups:
+      - applicationconnector.kyma-project.io
+    resources:
+      - applications
+    verbs:
+      - "get"
+      - "list"
+      - "watch"
+  - apiGroups:
+      - ""
+    resources:
+      - namespaces
+    verbs:
+      - "list"
+      - "watch"
+  - apiGroups:
+      - ""
+    resources:
+      - "configmaps"
+    resourceNames:
+      - "serverless-webhook-envs"
+    verbs:
+      - "get"
+  - nonResourceURLs:
+      - "*" #give access to all non resource urls
+    verbs:
+      - "list"
+      - "get"
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: kyma-essentials
+  labels:
+    rbac.authorization.kyma-project.io/aggregate-to-kyma-essentials: "true"
+aggregationRule:
+  clusterRoleSelectors:
+    - matchLabels:
+        rbac.authorization.kyma-project.io/aggregate-to-kyma-essentials-base: "true"
+    - matchLabels:
+        rbac.authorization.kyma-project.io/aggregate-to-kyma-crd-view: "true"
+    - matchLabels:
+        rbac.authorization.kyma-project.io/aggregate-to-kyma-authorization-self: "true"
+rules: []
+
+---
+
 ################################################################################
 # Viewer role
 # kyma-view = view permissions on kyma resources
