@@ -37,7 +37,6 @@ RUN set -ex \
 		gcc \
 		libbluetooth-dev \
 		libbz2-dev \
-		libc6-dev \
 		libexpat1-dev \
 		libffi-dev \
 		libgdbm-dev \
@@ -56,7 +55,8 @@ RUN set -ex \
 		$(command -v gpg > /dev/null || echo 'gnupg dirmngr') \
 	\
 	&& apt -t experimental install -y \
-		glibc-source \
+		libc6-dev \
+		libc-bin \
 	&& wget -O python.tar.xz "https://www.python.org/ftp/python/${PYTHON_VERSION%%[a-z]*}/Python-$PYTHON_VERSION.tar.xz" \
 	&& wget -O python.tar.xz.asc "https://www.python.org/ftp/python/${PYTHON_VERSION%%[a-z]*}/Python-$PYTHON_VERSION.tar.xz.asc" \
 	&& export GNUPGHOME="$(mktemp -d)" \
