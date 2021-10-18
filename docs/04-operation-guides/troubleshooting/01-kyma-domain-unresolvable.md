@@ -10,7 +10,9 @@ When you {were doing something}, you get the following error message:
 
 ## Cause
 
-This error is specific to a few brands of routers. {Expand explanation, if necessary}
+The k3s deployment uses `*.local.kyma.dev` for services that are directed to `127.0.0.1`. If DNS rebind protection is active, resolving this domain fails.
+
+This usually happens when the workstation is using certain routers.
 
 ## Remedy
 
