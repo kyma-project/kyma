@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"time"
 
-	"github.com/kyma-project/kyma/components/application-broker/internal"
+	"github.com/kyma-project/kyma/components/application-connector/application-broker/internal"
 
 	schema "github.com/kyma-incubator/compass/components/director/pkg/graphql"
 	"github.com/kyma-project/kyma/components/application-gateway/pkg/authorization"

@@ -8,8 +8,8 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/kyma-project/kyma/components/application-broker/internal"
-	"github.com/kyma-project/kyma/components/application-broker/internal/storage"
+	"github.com/kyma-project/kyma/components/application-connector/application-broker/internal"
+	"github.com/kyma-project/kyma/components/application-connector/application-broker/internal/storage"
 )
 
 func TestInstanceOperationGet(t *testing.T) {

@@ -8,7 +8,7 @@ import (
 
 	"github.com/asaskevich/govalidator"
 	schema "github.com/kyma-incubator/compass/components/director/pkg/graphql"
-	gcli "github.com/kyma-project/kyma/components/application-broker/third_party/machinebox/graphql"
+	gcli "github.com/kyma-project/kyma/components/application-connector/application-broker/third_party/machinebox/graphql"
 	"github.com/pkg/errors"
 )
 

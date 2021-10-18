@@ -4,10 +4,10 @@ import (
 	"sort"
 	"time"
 
-	"github.com/kyma-project/kyma/components/application-broker/internal"
+	"github.com/kyma-project/kyma/components/application-connector/application-broker/internal"
 	"github.com/pkg/errors"
 
-	pTime "github.com/kyma-project/kyma/components/application-broker/platform/time"
+	pTime "github.com/kyma-project/kyma/components/application-connector/application-broker/platform/time"
 )
 
 // NewInstanceOperation returns new instance of InstanceOperation storage.

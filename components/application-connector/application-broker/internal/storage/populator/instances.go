@@ -3,9 +3,9 @@ package populator
 import (
 	"encoding/json"
 
-	"github.com/kyma-project/kyma/components/application-broker/internal"
-	"github.com/kyma-project/kyma/components/application-broker/internal/broker"
-	"github.com/kyma-project/kyma/components/application-broker/internal/nsbroker"
+	"github.com/kyma-project/kyma/components/application-connector/application-broker/internal"
+	"github.com/kyma-project/kyma/components/application-connector/application-broker/internal/broker"
+	"github.com/kyma-project/kyma/components/application-connector/application-broker/internal/nsbroker"
 
 	"github.com/kubernetes-sigs/service-catalog/pkg/apis/servicecatalog/v1beta1"
 	"github.com/kubernetes-sigs/service-catalog/pkg/client/clientset_generated/clientset"

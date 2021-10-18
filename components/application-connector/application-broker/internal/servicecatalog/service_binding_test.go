@@ -1,7 +1,7 @@
 package servicecatalog_test
 
 import (
-	"github.com/kyma-project/kyma/components/application-broker/internal/servicecatalog"
+	"github.com/kyma-project/kyma/components/application-connector/application-broker/internal/servicecatalog"
 	"testing"
 
 	"github.com/kubernetes-sigs/service-catalog/pkg/apis/servicecatalog/v1beta1"

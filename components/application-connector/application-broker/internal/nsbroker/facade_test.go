@@ -3,13 +3,13 @@ package nsbroker_test
 import (
 	"errors"
 	"fmt"
-	"github.com/kyma-project/kyma/components/application-broker/internal/nsbroker"
+	"github.com/kyma-project/kyma/components/application-connector/application-broker/internal/nsbroker"
 	"testing"
 
 	"github.com/kubernetes-sigs/service-catalog/pkg/apis/servicecatalog/v1beta1"
 	sc_fake "github.com/kubernetes-sigs/service-catalog/pkg/client/clientset_generated/clientset/fake"
-	"github.com/kyma-project/kyma/components/application-broker/internal/nsbroker/automock"
-	"github.com/kyma-project/kyma/components/application-broker/platform/logger/spy"
+	"github.com/kyma-project/kyma/components/application-connector/application-broker/internal/nsbroker/automock"
+	"github.com/kyma-project/kyma/components/application-connector/application-broker/platform/logger/spy"
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"

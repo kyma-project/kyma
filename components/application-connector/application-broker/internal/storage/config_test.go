@@ -1,14 +1,14 @@
 package storage_test
 
 import (
-	"github.com/kyma-project/kyma/components/application-broker/internal/storage"
+	"github.com/kyma-project/kyma/components/application-connector/application-broker/internal/storage"
 	"io/ioutil"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/kyma-project/kyma/components/application-broker/internal/storage/testdata"
+	"github.com/kyma-project/kyma/components/application-connector/application-broker/internal/storage/testdata"
 )
 
 func TestConfigParse(t *testing.T) {

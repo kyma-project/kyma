@@ -5,14 +5,14 @@ import (
 	"os"
 	"time"
 
-	"github.com/kyma-project/kyma/components/application-broker/internal/director"
+	"github.com/kyma-project/kyma/components/application-connector/application-broker/internal/director"
 
 	"github.com/asaskevich/govalidator"
 	"github.com/davecgh/go-spew/spew"
 	"github.com/ghodss/yaml"
 	"github.com/imdario/mergo"
-	"github.com/kyma-project/kyma/components/application-broker/internal/storage"
-	"github.com/kyma-project/kyma/components/application-broker/platform/logger"
+	"github.com/kyma-project/kyma/components/application-connector/application-broker/internal/storage"
+	"github.com/kyma-project/kyma/components/application-connector/application-broker/platform/logger"
 	"github.com/mcuadros/go-defaults"
 	"github.com/pkg/errors"
 	"github.com/vrischmann/envconfig"

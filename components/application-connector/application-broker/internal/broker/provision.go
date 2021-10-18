@@ -18,10 +18,10 @@ import (
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/wait"
 
-	"github.com/kyma-project/kyma/components/application-broker/internal"
-	"github.com/kyma-project/kyma/components/application-broker/internal/access"
-	"github.com/kyma-project/kyma/components/application-broker/pkg/apis/applicationconnector/v1alpha1"
-	v1client "github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1"
+	"github.com/kyma-project/kyma/components/application-connector/application-broker/internal"
+	"github.com/kyma-project/kyma/components/application-connector/application-broker/internal/access"
+	"github.com/kyma-project/kyma/components/application-connector/application-broker/pkg/apis/applicationconnector/v1alpha1"
+	v1client "github.com/kyma-project/kyma/components/application-connector/application-broker/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1"
 )
 
 type RestoreProvisionRequest struct {

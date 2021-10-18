@@ -2,16 +2,16 @@ package syncer_test
 
 import (
 	"context"
-	"github.com/kyma-project/kyma/components/application-broker/internal/syncer"
+	"github.com/kyma-project/kyma/components/application-connector/application-broker/internal/syncer"
 	"io/ioutil"
 	"sync"
 	"testing"
 	"time"
 
 	"github.com/ghodss/yaml"
-	"github.com/kyma-project/kyma/components/application-broker/internal"
-	"github.com/kyma-project/kyma/components/application-broker/internal/syncer/automock"
-	"github.com/kyma-project/kyma/components/application-broker/platform/logger/spy"
+	"github.com/kyma-project/kyma/components/application-connector/application-broker/internal"
+	"github.com/kyma-project/kyma/components/application-connector/application-broker/internal/syncer/automock"
+	"github.com/kyma-project/kyma/components/application-connector/application-broker/platform/logger/spy"
 	"github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
 	"github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned/fake"
 	"github.com/kyma-project/kyma/components/application-operator/pkg/client/informers/externalversions"

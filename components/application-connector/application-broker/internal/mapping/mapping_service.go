@@ -3,7 +3,7 @@ package mapping
 import (
 	"fmt"
 
-	"github.com/kyma-project/kyma/components/application-broker/pkg/apis/applicationconnector/v1alpha1"
+	"github.com/kyma-project/kyma/components/application-connector/application-broker/pkg/apis/applicationconnector/v1alpha1"
 	"k8s.io/client-go/tools/cache"
 )
 

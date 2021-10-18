@@ -3,7 +3,7 @@ package storage
 import (
 	"time"
 
-	"github.com/kyma-project/kyma/components/application-broker/internal"
+	"github.com/kyma-project/kyma/components/application-connector/application-broker/internal"
 )
 
 // Application is an interface that describe storage layer operations for Charts

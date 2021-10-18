@@ -3,7 +3,7 @@ package broker
 import (
 	"context"
 
-	"github.com/kyma-project/kyma/components/application-broker/internal"
+	"github.com/kyma-project/kyma/components/application-connector/application-broker/internal"
 )
 
 // Deprecated, remove in https://github.com/kyma-project/kyma/issues/7415

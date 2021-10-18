@@ -4,8 +4,8 @@ import (
 	"time"
 
 	"github.com/kubernetes-sigs/service-catalog/pkg/apis/servicecatalog/v1beta1"
-	"github.com/kyma-project/kyma/components/application-broker/internal"
-	"github.com/kyma-project/kyma/components/application-broker/internal/broker"
+	"github.com/kyma-project/kyma/components/application-connector/application-broker/internal"
+	"github.com/kyma-project/kyma/components/application-connector/application-broker/internal/broker"
 )
 
 const informerResyncPeriod = 30 * time.Minute

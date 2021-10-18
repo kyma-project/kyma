@@ -3,7 +3,7 @@ package syncer
 import (
 	"encoding/json"
 
-	"github.com/kyma-project/kyma/components/application-broker/internal"
+	"github.com/kyma-project/kyma/components/application-connector/application-broker/internal"
 	"github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
 	"github.com/pkg/errors"
 )

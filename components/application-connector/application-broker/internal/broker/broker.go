@@ -3,21 +3,21 @@ package broker
 import (
 	"context"
 
-	"github.com/kyma-project/kyma/components/application-broker/internal"
-	"github.com/kyma-project/kyma/components/application-broker/internal/access"
-	"github.com/kyma-project/kyma/components/application-broker/internal/director"
-	"github.com/kyma-project/kyma/components/application-broker/internal/servicecatalog"
-	mappingCli "github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned"
-	"github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1"
-	listers "github.com/kyma-project/kyma/components/application-broker/pkg/client/listers/applicationconnector/v1alpha1"
-	"github.com/kyma-project/kyma/components/application-broker/platform/idprovider"
+	"github.com/kyma-project/kyma/components/application-connector/application-broker/internal"
+	"github.com/kyma-project/kyma/components/application-connector/application-broker/internal/access"
+	"github.com/kyma-project/kyma/components/application-connector/application-broker/internal/director"
+	"github.com/kyma-project/kyma/components/application-connector/application-broker/internal/servicecatalog"
+	mappingCli "github.com/kyma-project/kyma/components/application-connector/application-broker/pkg/client/clientset/versioned"
+	"github.com/kyma-project/kyma/components/application-connector/application-broker/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1"
+	listers "github.com/kyma-project/kyma/components/application-connector/application-broker/pkg/client/listers/applicationconnector/v1alpha1"
+	"github.com/kyma-project/kyma/components/application-connector/application-broker/platform/idprovider"
 
 	osb "github.com/kubernetes-sigs/go-open-service-broker-client/v2"
 	"github.com/sirupsen/logrus"
 	securityclientv1beta1 "istio.io/client-go/pkg/clientset/versioned/typed/security/v1beta1"
 	"k8s.io/client-go/tools/cache"
 
-	gcli "github.com/kyma-project/kyma/components/application-broker/third_party/machinebox/graphql"
+	gcli "github.com/kyma-project/kyma/components/application-connector/application-broker/third_party/machinebox/graphql"
 )
 
 //go:generate mockery -name=instanceStorage -output=automock -outpkg=automock -case=underscore

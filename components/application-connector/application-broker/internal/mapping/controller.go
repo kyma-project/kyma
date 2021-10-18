@@ -8,8 +8,8 @@ import (
 
 	apiErrors "k8s.io/apimachinery/pkg/api/errors"
 
-	"github.com/kyma-project/kyma/components/application-broker/internal/broker"
-	"github.com/kyma-project/kyma/components/application-broker/pkg/apis/applicationconnector/v1alpha1"
+	"github.com/kyma-project/kyma/components/application-connector/application-broker/internal/broker"
+	"github.com/kyma-project/kyma/components/application-connector/application-broker/pkg/apis/applicationconnector/v1alpha1"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"

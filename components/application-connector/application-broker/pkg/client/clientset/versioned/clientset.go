@@ -3,7 +3,7 @@
 package versioned
 
 import (
-	applicationconnectorv1alpha1 "github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1"
+	applicationconnectorv1alpha1 "github.com/kyma-project/kyma/components/application-connector/application-broker/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1"
 	discovery "k8s.io/client-go/discovery"
 	rest "k8s.io/client-go/rest"
 	flowcontrol "k8s.io/client-go/util/flowcontrol"

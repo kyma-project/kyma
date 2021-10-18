@@ -1,11 +1,11 @@
 package storage_test
 
 import (
-	"github.com/kyma-project/kyma/components/application-broker/internal/storage"
+	"github.com/kyma-project/kyma/components/application-connector/application-broker/internal/storage"
 	"testing"
 
-	"github.com/kyma-project/kyma/components/application-broker/internal/storage/driver/memory"
-	"github.com/kyma-project/kyma/components/application-broker/internal/storage/testdata"
+	"github.com/kyma-project/kyma/components/application-connector/application-broker/internal/storage/driver/memory"
+	"github.com/kyma-project/kyma/components/application-connector/application-broker/internal/storage/testdata"
 	"github.com/stretchr/testify/assert"
 )
 

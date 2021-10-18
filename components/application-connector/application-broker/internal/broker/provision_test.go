@@ -16,14 +16,14 @@ import (
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	k8testing "k8s.io/client-go/testing"
 
-	"github.com/kyma-project/kyma/components/application-broker/internal"
-	"github.com/kyma-project/kyma/components/application-broker/internal/access"
-	accessAutomock "github.com/kyma-project/kyma/components/application-broker/internal/access/automock"
-	"github.com/kyma-project/kyma/components/application-broker/internal/broker/automock"
-	bt "github.com/kyma-project/kyma/components/application-broker/internal/broker/testing"
+	"github.com/kyma-project/kyma/components/application-connector/application-broker/internal"
+	"github.com/kyma-project/kyma/components/application-connector/application-broker/internal/access"
+	accessAutomock "github.com/kyma-project/kyma/components/application-connector/application-broker/internal/access/automock"
+	"github.com/kyma-project/kyma/components/application-connector/application-broker/internal/broker/automock"
+	bt "github.com/kyma-project/kyma/components/application-connector/application-broker/internal/broker/testing"
 
-	"github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned/fake"
-	"github.com/kyma-project/kyma/components/application-broker/platform/logger/spy"
+	"github.com/kyma-project/kyma/components/application-connector/application-broker/pkg/client/clientset/versioned/fake"
+	"github.com/kyma-project/kyma/components/application-connector/application-broker/platform/logger/spy"
 )
 
 func TestProvisionAsync(t *testing.T) {

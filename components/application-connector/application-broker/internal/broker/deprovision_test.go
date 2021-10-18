@@ -11,11 +11,11 @@ import (
 	"github.com/stretchr/testify/mock"
 	"k8s.io/apimachinery/pkg/runtime"
 
-	"github.com/kyma-project/kyma/components/application-broker/internal"
-	"github.com/kyma-project/kyma/components/application-broker/internal/broker/automock"
-	bt "github.com/kyma-project/kyma/components/application-broker/internal/broker/testing"
-	eaFake "github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned/fake"
-	"github.com/kyma-project/kyma/components/application-broker/platform/logger/spy"
+	"github.com/kyma-project/kyma/components/application-connector/application-broker/internal"
+	"github.com/kyma-project/kyma/components/application-connector/application-broker/internal/broker/automock"
+	bt "github.com/kyma-project/kyma/components/application-connector/application-broker/internal/broker/testing"
+	eaFake "github.com/kyma-project/kyma/components/application-connector/application-broker/pkg/client/clientset/versioned/fake"
+	"github.com/kyma-project/kyma/components/application-connector/application-broker/platform/logger/spy"
 )
 
 // TestDeprovisionDeletingResourcesSuccess test that the resource cleanup is triggered

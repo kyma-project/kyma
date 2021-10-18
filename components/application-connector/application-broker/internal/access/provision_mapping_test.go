@@ -1,14 +1,14 @@
 package access_test
 
 import (
-	"github.com/kyma-project/kyma/components/application-broker/internal/access"
+	"github.com/kyma-project/kyma/components/application-connector/application-broker/internal/access"
 	"testing"
 	"time"
 
-	"github.com/kyma-project/kyma/components/application-broker/internal"
-	"github.com/kyma-project/kyma/components/application-broker/internal/access/automock"
-	mappingTypes "github.com/kyma-project/kyma/components/application-broker/pkg/apis/applicationconnector/v1alpha1"
-	"github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned/fake"
+	"github.com/kyma-project/kyma/components/application-connector/application-broker/internal"
+	"github.com/kyma-project/kyma/components/application-connector/application-broker/internal/access/automock"
+	mappingTypes "github.com/kyma-project/kyma/components/application-connector/application-broker/pkg/apis/applicationconnector/v1alpha1"
+	"github.com/kyma-project/kyma/components/application-connector/application-broker/pkg/client/clientset/versioned/fake"
 	"github.com/stretchr/testify/assert"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )

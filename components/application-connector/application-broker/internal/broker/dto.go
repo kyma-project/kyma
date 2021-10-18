@@ -1,7 +1,7 @@
 package broker
 
 import (
-	"github.com/kyma-project/kyma/components/application-broker/internal"
+	"github.com/kyma-project/kyma/components/application-connector/application-broker/internal"
 	"github.com/pkg/errors"
 )
 

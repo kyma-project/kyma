@@ -2,13 +2,13 @@ package broker_test
 
 import (
 	"fmt"
-	"github.com/kyma-project/kyma/components/application-broker/internal/broker"
+	"github.com/kyma-project/kyma/components/application-connector/application-broker/internal/broker"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/kyma-project/kyma/components/application-broker/internal"
-	"github.com/kyma-project/kyma/components/application-broker/internal/broker/automock"
+	"github.com/kyma-project/kyma/components/application-connector/application-broker/internal"
+	"github.com/kyma-project/kyma/components/application-connector/application-broker/internal/broker/automock"
 	"github.com/pkg/errors"
 )
 

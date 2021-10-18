@@ -1,7 +1,7 @@
 package testing
 
 import (
-	eaFake "github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned/fake"
+	eaFake "github.com/kyma-project/kyma/components/application-connector/application-broker/pkg/client/clientset/versioned/fake"
 	"github.com/pkg/errors"
 	fakeistioclientset "istio.io/client-go/pkg/clientset/versioned/fake"
 	"k8s.io/apimachinery/pkg/runtime"

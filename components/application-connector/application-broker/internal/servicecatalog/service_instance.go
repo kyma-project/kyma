@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/kubernetes-sigs/service-catalog/pkg/apis/servicecatalog/v1beta1"
-	"github.com/kyma-project/kyma/components/application-broker/internal/nsbroker"
+	"github.com/kyma-project/kyma/components/application-connector/application-broker/internal/nsbroker"
 	"k8s.io/client-go/tools/cache"
 )
 

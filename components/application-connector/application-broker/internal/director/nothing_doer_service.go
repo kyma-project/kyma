@@ -4,7 +4,7 @@ import (
 	"context"
 	"time"
 
-	"github.com/kyma-project/kyma/components/application-broker/internal"
+	"github.com/kyma-project/kyma/components/application-connector/application-broker/internal"
 )
 
 // NothingDoerService is a wrapper around the Director GraphQL client to support business logic

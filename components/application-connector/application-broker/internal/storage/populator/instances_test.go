@@ -2,12 +2,12 @@ package populator_test
 
 import (
 	"errors"
-	"github.com/kyma-project/kyma/components/application-broker/internal/storage/populator"
+	"github.com/kyma-project/kyma/components/application-connector/application-broker/internal/storage/populator"
 	"testing"
 
-	"github.com/kyma-project/kyma/components/application-broker/internal"
-	"github.com/kyma-project/kyma/components/application-broker/internal/broker"
-	"github.com/kyma-project/kyma/components/application-broker/internal/storage/populator/automock"
+	"github.com/kyma-project/kyma/components/application-connector/application-broker/internal"
+	"github.com/kyma-project/kyma/components/application-connector/application-broker/internal/broker"
+	"github.com/kyma-project/kyma/components/application-connector/application-broker/internal/storage/populator/automock"
 
 	scv1beta1 "github.com/kubernetes-sigs/service-catalog/pkg/apis/servicecatalog/v1beta1"
 	"github.com/kubernetes-sigs/service-catalog/pkg/client/clientset_generated/clientset/fake"

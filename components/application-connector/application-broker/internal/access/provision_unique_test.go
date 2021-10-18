@@ -2,15 +2,15 @@ package access_test
 
 import (
 	"fmt"
-	"github.com/kyma-project/kyma/components/application-broker/internal/access"
+	"github.com/kyma-project/kyma/components/application-connector/application-broker/internal/access"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/kyma-project/kyma/components/application-broker/internal"
-	"github.com/kyma-project/kyma/components/application-broker/internal/storage"
-	"github.com/kyma-project/kyma/components/application-broker/internal/storage/driver/memory"
+	"github.com/kyma-project/kyma/components/application-connector/application-broker/internal"
+	"github.com/kyma-project/kyma/components/application-connector/application-broker/internal/storage"
+	"github.com/kyma-project/kyma/components/application-connector/application-broker/internal/storage/driver/memory"
 )
 
 func TestUniquenessProvisionChecker(t *testing.T) {

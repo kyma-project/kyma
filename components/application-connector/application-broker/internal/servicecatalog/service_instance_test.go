@@ -1,7 +1,7 @@
 package servicecatalog_test
 
 import (
-	"github.com/kyma-project/kyma/components/application-broker/internal/servicecatalog"
+	"github.com/kyma-project/kyma/components/application-connector/application-broker/internal/servicecatalog"
 	"testing"
 	"time"
 
@@ -9,7 +9,7 @@ import (
 	"github.com/kubernetes-sigs/service-catalog/pkg/client/clientset_generated/clientset"
 	"github.com/kubernetes-sigs/service-catalog/pkg/client/clientset_generated/clientset/fake"
 	"github.com/kubernetes-sigs/service-catalog/pkg/client/informers_generated/externalversions"
-	"github.com/kyma-project/kyma/components/application-broker/internal/nsbroker"
+	"github.com/kyma-project/kyma/components/application-connector/application-broker/internal/nsbroker"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"

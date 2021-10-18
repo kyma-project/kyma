@@ -3,12 +3,12 @@ package syncer_test
 import (
 	"context"
 	"fmt"
-	"github.com/kyma-project/kyma/components/application-broker/internal/syncer"
+	"github.com/kyma-project/kyma/components/application-connector/application-broker/internal/syncer"
 	"testing"
 	"time"
 
-	"github.com/kyma-project/kyma/components/application-broker/internal/syncer/automock"
-	"github.com/kyma-project/kyma/components/application-broker/platform/logger/spy"
+	"github.com/kyma-project/kyma/components/application-connector/application-broker/internal/syncer/automock"
+	"github.com/kyma-project/kyma/components/application-connector/application-broker/platform/logger/spy"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"

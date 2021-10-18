@@ -9,7 +9,7 @@ import (
 	"os"
 	"testing"
 
-	gcli "github.com/kyma-project/kyma/components/application-broker/third_party/machinebox/graphql"
+	gcli "github.com/kyma-project/kyma/components/application-connector/application-broker/third_party/machinebox/graphql"
 )
 
 // Test_FindPackageInstanceAuth executes  call to a director to get an application

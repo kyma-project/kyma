@@ -3,16 +3,16 @@ package broker_test
 import (
 	"context"
 	"fmt"
-	"github.com/kyma-project/kyma/components/application-broker/internal/broker"
+	"github.com/kyma-project/kyma/components/application-connector/application-broker/internal/broker"
 	"testing"
 
 	osb "github.com/kubernetes-sigs/go-open-service-broker-client/v2"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/kyma-project/kyma/components/application-broker/internal"
-	"github.com/kyma-project/kyma/components/application-broker/internal/access"
-	"github.com/kyma-project/kyma/components/application-broker/internal/broker/automock"
+	"github.com/kyma-project/kyma/components/application-connector/application-broker/internal"
+	"github.com/kyma-project/kyma/components/application-connector/application-broker/internal/access"
+	"github.com/kyma-project/kyma/components/application-connector/application-broker/internal/broker/automock"
 )
 
 func TestGetCatalogHappyPath(t *testing.T) {

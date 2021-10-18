@@ -4,8 +4,8 @@ import (
 	"net/http"
 	"time"
 
-	mappingTypes "github.com/kyma-project/kyma/components/application-broker/pkg/apis/applicationconnector/v1alpha1"
-	mappingCli "github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned"
+	mappingTypes "github.com/kyma-project/kyma/components/application-connector/application-broker/pkg/apis/applicationconnector/v1alpha1"
+	mappingCli "github.com/kyma-project/kyma/components/application-connector/application-broker/pkg/client/clientset/versioned"
 	"k8s.io/apimachinery/pkg/util/wait"
 
 	"github.com/pkg/errors"

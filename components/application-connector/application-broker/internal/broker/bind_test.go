@@ -4,11 +4,11 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/kyma-project/kyma/components/application-broker/internal/broker"
+	"github.com/kyma-project/kyma/components/application-connector/application-broker/internal/broker"
 	"testing"
 
-	"github.com/kyma-project/kyma/components/application-broker/internal"
-	"github.com/kyma-project/kyma/components/application-broker/internal/broker/automock"
+	"github.com/kyma-project/kyma/components/application-connector/application-broker/internal"
+	"github.com/kyma-project/kyma/components/application-connector/application-broker/internal/broker/automock"
 
 	osb "github.com/kubernetes-sigs/go-open-service-broker-client/v2"
 	"github.com/kyma-project/kyma/components/application-gateway/pkg/authorization"

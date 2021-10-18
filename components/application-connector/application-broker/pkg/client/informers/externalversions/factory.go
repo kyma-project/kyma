@@ -7,9 +7,9 @@ import (
 	sync "sync"
 	time "time"
 
-	versioned "github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned"
-	applicationconnector "github.com/kyma-project/kyma/components/application-broker/pkg/client/informers/externalversions/applicationconnector"
-	internalinterfaces "github.com/kyma-project/kyma/components/application-broker/pkg/client/informers/externalversions/internalinterfaces"
+	versioned "github.com/kyma-project/kyma/components/application-connector/application-broker/pkg/client/clientset/versioned"
+	applicationconnector "github.com/kyma-project/kyma/components/application-connector/application-broker/pkg/client/informers/externalversions/applicationconnector"
+	internalinterfaces "github.com/kyma-project/kyma/components/application-connector/application-broker/pkg/client/informers/externalversions/internalinterfaces"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	runtime "k8s.io/apimachinery/pkg/runtime"
 	schema "k8s.io/apimachinery/pkg/runtime/schema"

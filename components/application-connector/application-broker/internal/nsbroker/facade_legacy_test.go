@@ -2,7 +2,7 @@ package nsbroker_test
 
 import (
 	"fmt"
-	"github.com/kyma-project/kyma/components/application-broker/internal/nsbroker"
+	"github.com/kyma-project/kyma/components/application-connector/application-broker/internal/nsbroker"
 
 	multierror "github.com/hashicorp/go-multierror"
 	"github.com/kubernetes-sigs/service-catalog/pkg/apis/servicecatalog/v1beta1"

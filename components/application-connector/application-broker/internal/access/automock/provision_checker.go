@@ -2,8 +2,8 @@
 
 package automock
 
-import access "github.com/kyma-project/kyma/components/application-broker/internal/access"
-import internal "github.com/kyma-project/kyma/components/application-broker/internal"
+import access "github.com/kyma-project/kyma/components/application-connector/application-broker/internal/access"
+import internal "github.com/kyma-project/kyma/components/application-connector/application-broker/internal"
 import mock "github.com/stretchr/testify/mock"
 import time "time"
 

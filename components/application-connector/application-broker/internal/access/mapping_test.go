@@ -5,9 +5,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/kyma-project/kyma/components/application-broker/pkg/apis/applicationconnector/v1alpha1"
-	"github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned/fake"
-	informers "github.com/kyma-project/kyma/components/application-broker/pkg/client/informers/externalversions"
+	"github.com/kyma-project/kyma/components/application-connector/application-broker/pkg/apis/applicationconnector/v1alpha1"
+	"github.com/kyma-project/kyma/components/application-connector/application-broker/pkg/client/clientset/versioned/fake"
+	informers "github.com/kyma-project/kyma/components/application-connector/application-broker/pkg/client/informers/externalversions"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"

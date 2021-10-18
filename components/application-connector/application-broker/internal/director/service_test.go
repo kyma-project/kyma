@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	schema "github.com/kyma-incubator/compass/components/director/pkg/graphql"
-	"github.com/kyma-project/kyma/components/application-broker/third_party/machinebox/graphql"
+	"github.com/kyma-project/kyma/components/application-connector/application-broker/third_party/machinebox/graphql"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

@@ -3,7 +3,7 @@
 package automock
 
 import (
-	internal "github.com/kyma-project/kyma/components/application-broker/internal"
+	internal "github.com/kyma-project/kyma/components/application-connector/application-broker/internal"
 	mock "github.com/stretchr/testify/mock"
 )
 

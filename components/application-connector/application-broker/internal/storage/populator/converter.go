@@ -2,7 +2,7 @@ package populator
 
 import (
 	"github.com/kubernetes-sigs/service-catalog/pkg/apis/servicecatalog/v1beta1"
-	"github.com/kyma-project/kyma/components/application-broker/internal"
+	"github.com/kyma-project/kyma/components/application-connector/application-broker/internal"
 )
 
 // Converter is responsible for converting Service Catalog's Service Instance to internal representation

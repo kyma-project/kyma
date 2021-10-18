@@ -12,7 +12,7 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/tools/cache"
 
-	eaFake "github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned/fake"
+	eaFake "github.com/kyma-project/kyma/components/application-connector/application-broker/pkg/client/clientset/versioned/fake"
 )
 
 const knBrokerMetricPort = uint32(9090)

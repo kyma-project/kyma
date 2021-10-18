@@ -1,7 +1,7 @@
 package storage
 
 import (
-	"github.com/kyma-project/kyma/components/application-broker/internal/storage/driver/memory"
+	"github.com/kyma-project/kyma/components/application-connector/application-broker/internal/storage/driver/memory"
 	"github.com/pkg/errors"
 	yaml "gopkg.in/yaml.v2"
 )
