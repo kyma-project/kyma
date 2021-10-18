@@ -48,7 +48,7 @@ spec:
               value: "{{ .Values.compassRuntimeAgent.certificates.caCertificate.secret.namespace }}/{{ .Values.compassRuntimeAgent.certificates.caCertificate.secret.name }}"
             - name: APP_SKIP_COMPASS_TLS_VERIFY
               value: {{ .Values.compassRuntimeAgent.compass.skipTLSVerification | quote }}
-            - name: APP_SKIP_APS_TLS_VERIFY
+            - name: APP_SKIP_APPS_TLS_VERIFY
               value: {{ .Values.compassRuntimeAgent.config.skipAppsTLSVerification | quote }}
             - name: APP_GATEWAY_PORT
               value: {{ .Values.compassRuntimeAgent.resources.gatewayPort | quote }}
