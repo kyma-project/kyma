@@ -2,8 +2,9 @@ package testing
 
 import (
 	"fmt"
-	k8sresource "k8s.io/apimachinery/pkg/api/resource"
 	"net/http"
+
+	k8sresource "k8s.io/apimachinery/pkg/api/resource"
 
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/types"
 
