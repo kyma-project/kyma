@@ -29,6 +29,9 @@ ENV PYTHON_VERSION 3.9.7
 RUN set -ex \
 	\
 	&& savedAptMark="$(apt-mark showmanual)" \
+	# TODO : 
+	&& echo "deb http://deb.debian.org/debian experimental main" >> /etc/apt/sources.list \
+	&& apt update \
 	&& apt-get update && apt-get install -y --no-install-recommends \
 		dpkg-dev \
 		gcc \
@@ -52,6 +55,8 @@ RUN set -ex \
 # as of Stretch, "gpg" is no longer included by default
 		$(command -v gpg > /dev/null || echo 'gnupg dirmngr') \
 	\
+	&& apt -t experimental install -y \
+		glibc-source \
 	&& wget -O python.tar.xz "https://www.python.org/ftp/python/${PYTHON_VERSION%%[a-z]*}/Python-$PYTHON_VERSION.tar.xz" \
 	&& wget -O python.tar.xz.asc "https://www.python.org/ftp/python/${PYTHON_VERSION%%[a-z]*}/Python-$PYTHON_VERSION.tar.xz.asc" \
 	&& export GNUPGHOME="$(mktemp -d)" \
