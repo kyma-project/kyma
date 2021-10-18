@@ -4,18 +4,18 @@ import (
 	"context"
 	"testing"
 
-	"github.com/kyma-project/kyma/components/application-operator/pkg/overrides"
+	"github.com/kyma-project/kyma/components/application-connector/application-operator/pkg/overrides"
 
 	hapi_release5 "helm.sh/helm/v3/pkg/release"
 
-	"github.com/kyma-project/kyma/components/application-operator/pkg/kymahelm/application/mocks"
+	"github.com/kyma-project/kyma/components/application-connector/application-operator/pkg/kymahelm/application/mocks"
 
 	"github.com/stretchr/testify/mock"
 
-	"github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
+	"github.com/kyma-project/kyma/components/application-connector/application-operator/pkg/apis/applicationconnector/v1alpha1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	helmmocks "github.com/kyma-project/kyma/components/application-operator/pkg/kymahelm/mocks"
+	helmmocks "github.com/kyma-project/kyma/components/application-connector/application-operator/pkg/kymahelm/mocks"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 )

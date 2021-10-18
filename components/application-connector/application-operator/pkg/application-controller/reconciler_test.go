@@ -6,9 +6,9 @@ import (
 
 	"github.com/sirupsen/logrus"
 
-	"github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
-	"github.com/kyma-project/kyma/components/application-operator/pkg/application-controller/mocks"
-	helmmocks "github.com/kyma-project/kyma/components/application-operator/pkg/kymahelm/application/mocks"
+	"github.com/kyma-project/kyma/components/application-connector/application-operator/pkg/apis/applicationconnector/v1alpha1"
+	"github.com/kyma-project/kyma/components/application-connector/application-operator/pkg/application-controller/mocks"
+	helmmocks "github.com/kyma-project/kyma/components/application-connector/application-operator/pkg/kymahelm/application/mocks"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	hapi_4 "helm.sh/helm/v3/pkg/release"

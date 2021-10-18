@@ -3,7 +3,7 @@
 package fake
 
 import (
-	v1alpha1 "github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1"
+	v1alpha1 "github.com/kyma-project/kyma/components/application-connector/application-operator/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1"
 	rest "k8s.io/client-go/rest"
 	testing "k8s.io/client-go/testing"
 )

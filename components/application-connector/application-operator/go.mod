@@ -1,4 +1,4 @@
-module github.com/kyma-project/kyma/components/application-operator
+module github.com/kyma-project/kyma/components/application-connector/application-operator
 
 go 1.16
 

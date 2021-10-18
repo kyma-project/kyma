@@ -3,8 +3,8 @@
 package applicationconnector
 
 import (
-	v1alpha1 "github.com/kyma-project/kyma/components/application-operator/pkg/client/informers/externalversions/applicationconnector/v1alpha1"
-	internalinterfaces "github.com/kyma-project/kyma/components/application-operator/pkg/client/informers/externalversions/internalinterfaces"
+	v1alpha1 "github.com/kyma-project/kyma/components/application-connector/application-operator/pkg/client/informers/externalversions/applicationconnector/v1alpha1"
+	internalinterfaces "github.com/kyma-project/kyma/components/application-connector/application-operator/pkg/client/informers/externalversions/internalinterfaces"
 )
 
 // Interface provides access to each of this group's versions.

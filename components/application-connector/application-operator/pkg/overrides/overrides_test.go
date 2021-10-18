@@ -3,7 +3,7 @@ package overrides
 import (
 	"testing"
 
-	"github.com/kyma-project/kyma/components/application-operator/pkg/utils"
+	"github.com/kyma-project/kyma/components/application-connector/application-operator/pkg/utils"
 
 	"github.com/stretchr/testify/assert"
 )

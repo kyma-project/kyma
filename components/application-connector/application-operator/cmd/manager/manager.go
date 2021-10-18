@@ -3,24 +3,24 @@ package main
 import (
 	"time"
 
-	"github.com/kyma-project/kyma/components/application-operator/pkg/overrides"
+	"github.com/kyma-project/kyma/components/application-connector/application-operator/pkg/overrides"
 
-	"github.com/kyma-project/kyma/components/application-operator/internal/healthz"
+	"github.com/kyma-project/kyma/components/application-connector/application-operator/internal/healthz"
 
 	service_instance_scheme "github.com/kubernetes-sigs/service-catalog/pkg/apis/servicecatalog/v1beta1"
 	"github.com/kubernetes-sigs/service-catalog/pkg/client/clientset_generated/clientset/typed/servicecatalog/v1beta1"
 
-	"github.com/kyma-project/kyma/components/application-operator/pkg/kymahelm/gateway"
+	"github.com/kyma-project/kyma/components/application-connector/application-operator/pkg/kymahelm/gateway"
 
-	service_instance_controller "github.com/kyma-project/kyma/components/application-operator/pkg/service-instance-controller"
+	service_instance_controller "github.com/kyma-project/kyma/components/application-connector/application-operator/pkg/service-instance-controller"
 
-	"github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned"
+	"github.com/kyma-project/kyma/components/application-connector/application-operator/pkg/client/clientset/versioned"
 	"k8s.io/client-go/rest"
 
-	application_controller "github.com/kyma-project/kyma/components/application-operator/pkg/application-controller"
-	"github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned/scheme"
-	"github.com/kyma-project/kyma/components/application-operator/pkg/kymahelm"
-	appRelease "github.com/kyma-project/kyma/components/application-operator/pkg/kymahelm/application"
+	application_controller "github.com/kyma-project/kyma/components/application-connector/application-operator/pkg/application-controller"
+	"github.com/kyma-project/kyma/components/application-connector/application-operator/pkg/client/clientset/versioned/scheme"
+	"github.com/kyma-project/kyma/components/application-connector/application-operator/pkg/kymahelm"
+	appRelease "github.com/kyma-project/kyma/components/application-connector/application-operator/pkg/kymahelm/application"
 	log "github.com/sirupsen/logrus"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 	ctrl "sigs.k8s.io/controller-runtime"

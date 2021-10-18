@@ -11,8 +11,8 @@ import (
 	"helm.sh/helm/v3/pkg/release"
 	v1 "k8s.io/client-go/kubernetes/typed/core/v1"
 
-	"github.com/kyma-project/kyma/components/application-operator/pkg/kymahelm"
-	"github.com/kyma-project/kyma/components/application-operator/pkg/utils"
+	"github.com/kyma-project/kyma/components/application-connector/application-operator/pkg/kymahelm"
+	"github.com/kyma-project/kyma/components/application-connector/application-operator/pkg/utils"
 	"github.com/pkg/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )

@@ -1,7 +1,7 @@
 package v1alpha1_test
 
 import (
-	"github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
+	"github.com/kyma-project/kyma/components/application-connector/application-operator/pkg/apis/applicationconnector/v1alpha1"
 	"testing"
 
 	"github.com/stretchr/testify/assert"

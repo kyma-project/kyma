@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/kubernetes-sigs/service-catalog/pkg/apis/servicecatalog/v1beta1"
-	"github.com/kyma-project/kyma/components/application-operator/pkg/kymahelm/gateway"
+	"github.com/kyma-project/kyma/components/application-connector/application-operator/pkg/kymahelm/gateway"
 
 	log "github.com/sirupsen/logrus"
 	"sigs.k8s.io/controller-runtime/pkg/controller"

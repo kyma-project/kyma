@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/kyma-project/kyma/components/application-operator/pkg/utils"
+	"github.com/kyma-project/kyma/components/application-connector/application-operator/pkg/utils"
 	"helm.sh/helm/v3/pkg/chart"
 	"helm.sh/helm/v3/pkg/chartutil"
 

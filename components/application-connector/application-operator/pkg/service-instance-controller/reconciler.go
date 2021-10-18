@@ -6,8 +6,8 @@ import (
 	"helm.sh/helm/v3/pkg/release"
 
 	"github.com/kubernetes-sigs/service-catalog/pkg/apis/servicecatalog/v1beta1"
-	"github.com/kyma-project/kyma/components/application-operator/pkg/kymahelm/gateway"
-	"github.com/kyma-project/kyma/components/application-operator/pkg/utils"
+	"github.com/kyma-project/kyma/components/application-connector/application-operator/pkg/kymahelm/gateway"
+	"github.com/kyma-project/kyma/components/application-connector/application-operator/pkg/utils"
 
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"

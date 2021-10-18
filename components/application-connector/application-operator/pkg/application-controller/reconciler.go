@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
-	appReleases "github.com/kyma-project/kyma/components/application-operator/pkg/kymahelm/application"
+	"github.com/kyma-project/kyma/components/application-connector/application-operator/pkg/apis/applicationconnector/v1alpha1"
+	appReleases "github.com/kyma-project/kyma/components/application-connector/application-operator/pkg/kymahelm/application"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	k8sErrors "k8s.io/apimachinery/pkg/api/errors"

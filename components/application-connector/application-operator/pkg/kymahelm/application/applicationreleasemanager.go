@@ -4,9 +4,9 @@ import (
 	"context"
 	"encoding/json"
 
-	"github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
-	"github.com/kyma-project/kyma/components/application-operator/pkg/kymahelm"
-	"github.com/kyma-project/kyma/components/application-operator/pkg/overrides"
+	"github.com/kyma-project/kyma/components/application-connector/application-operator/pkg/apis/applicationconnector/v1alpha1"
+	"github.com/kyma-project/kyma/components/application-connector/application-operator/pkg/kymahelm"
+	"github.com/kyma-project/kyma/components/application-connector/application-operator/pkg/overrides"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	hapi_4 "helm.sh/helm/v3/pkg/release"

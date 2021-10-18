@@ -7,12 +7,12 @@ import (
 	"helm.sh/helm/v3/pkg/release"
 
 	"github.com/kubernetes-sigs/service-catalog/pkg/apis/servicecatalog/v1beta1"
-	mocks2 "github.com/kyma-project/kyma/components/application-operator/pkg/kymahelm/gateway/mocks"
+	mocks2 "github.com/kyma-project/kyma/components/application-connector/application-operator/pkg/kymahelm/gateway/mocks"
 
 	"github.com/sirupsen/logrus"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
-	"github.com/kyma-project/kyma/components/application-operator/pkg/service-instance-controller/mocks"
+	"github.com/kyma-project/kyma/components/application-connector/application-operator/pkg/service-instance-controller/mocks"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 	"k8s.io/apimachinery/pkg/api/errors"

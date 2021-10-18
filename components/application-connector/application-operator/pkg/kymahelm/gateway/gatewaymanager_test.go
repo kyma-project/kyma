@@ -8,8 +8,8 @@ import (
 	"helm.sh/helm/v3/pkg/release"
 
 	"github.com/kubernetes-sigs/service-catalog/pkg/apis/servicecatalog/v1beta1"
-	"github.com/kyma-project/kyma/components/application-operator/pkg/kymahelm/gateway/mocks"
-	helmmocks "github.com/kyma-project/kyma/components/application-operator/pkg/kymahelm/mocks"
+	"github.com/kyma-project/kyma/components/application-connector/application-operator/pkg/kymahelm/gateway/mocks"
+	helmmocks "github.com/kyma-project/kyma/components/application-connector/application-operator/pkg/kymahelm/mocks"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
