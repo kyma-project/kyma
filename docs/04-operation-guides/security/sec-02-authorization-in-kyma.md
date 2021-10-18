@@ -4,7 +4,7 @@ title: Authorization in Kyma
 
 ## User authorization
 
-Kyma uses roles and user groups to manage access to the cluster. If you want to access the system through Kyma Dashboard or using kubectl, you need a `kubeconfig` file.
+Kyma uses the Kubernetes concept of roles. Assign roles to individual users or user groups to manage access to the cluster. If you want to access the system through Kyma Dashboard or using kubectl, you need a `kubeconfig` file with user context. User permissions are recognised depending on roles that are bound to this user and known from the `kubeconfig` context.
 
 ### Cluster-wide authorization
 
@@ -16,7 +16,7 @@ The predefined end-user roles are:
 
 | Role | Default group | Description |
 | --- | --- | --- |
-| **kyma-developer** | None | The role created for developers who build implementations using Kyma. It allows you to list, edit, and create Kubernetes and Kyma-specific resources. You need to bind it manually to a user or a group in the Namespaces of your choice. Use the `runtimeDeveloper` group when you run Kyma with the default `cluster-users` chart configuration. |
+| **kyma-developer** | None | The role created for developers who build implementations using Kyma. It allows you to list, edit, and create Kubernetes and Kyma-specific resources. You need to bind it manually to a user or a group in the Namespaces of your choice. |
 | **kyma-admin** | `runtimeAdmin` | The role with the highest permission level which gives access to all Kubernetes and Kyma resources and components with administrative rights. |
 | **kyma-namespace-admin** | `runtimeNamespaceAdmin` | The role which gives access to a specific Namespace with administrative rights. |
 
@@ -26,12 +26,12 @@ After creating a Kyma cluster, you become an admin of this instance and the **ky
 
 ### Role binding
 
-You can assign any of the predefined roles to a user or to a group of users in the context of:
+Assigning roles in Kyma is based on the Kubernetes RBAC concept. You can assign any of the predefined roles to a user or to a group of users in the context of:
 
 - The entire cluster by creating a [ClusterRoleBinding](https://kubernetes.io/docs/reference/access-authn-authz/rbac/#rolebinding-and-clusterrolebinding)
 - A specific Namespace by creating a [RoleBinding](https://kubernetes.io/docs/reference/access-authn-authz/rbac/#rolebinding-and-clusterrolebinding)
 
-You can assign roles to a group of users only if you use a custom identity provider. Assigning roles in Kyma is based on the Kubernetes RBAC concept.
+You can use your own Identity Provider (IdP) using OpenID Connect to authenticate. Using a custom IdP enables assigning roles to a group of users. Custom IdP allows you to define user groups and assign roles to them in Kyma. In this case, a group claim from the access token is used to recognize permissions.
 
 >**TIP:** The **Cluster Roles** and **Cluster Role Bindings** view in the **Configuration** section of Kyma Dashboard allow you to manage cluster-level bindings between user groups and roles. To manage bindings between user groups and roles in a Namespace, select the Namespace and go to **Roles** and **Role Bindings** in the **Configuration** section.
 
