@@ -10,13 +10,13 @@ import (
 	"time"
 
 	"github.com/kyma-project/kyma/components/application-gateway/pkg/authorization"
-	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/specification/download"
-	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/specification/rafter"
-	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/specification/rafter/clusterassetgroup"
+	"github.com/kyma-project/kyma/components/application-connector/application-registry/internal/metadata/specification/download"
+	"github.com/kyma-project/kyma/components/application-connector/application-registry/internal/metadata/specification/rafter"
+	"github.com/kyma-project/kyma/components/application-connector/application-registry/internal/metadata/specification/rafter/clusterassetgroup"
 
 	"github.com/go-openapi/spec"
-	"github.com/kyma-project/kyma/components/application-registry/internal/apperrors"
-	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/model"
+	"github.com/kyma-project/kyma/components/application-connector/application-registry/internal/apperrors"
+	"github.com/kyma-project/kyma/components/application-connector/application-registry/internal/metadata/model"
 )
 
 const (

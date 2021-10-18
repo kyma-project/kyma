@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/kyma-project/kyma/components/application-registry/internal/apperrors"
-	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/specification/rafter/clusterassetgroup"
+	"github.com/kyma-project/kyma/components/application-connector/application-registry/internal/apperrors"
+	"github.com/kyma-project/kyma/components/application-connector/application-registry/internal/metadata/specification/rafter/clusterassetgroup"
 	"github.com/kyma-project/rafter/pkg/apis/rafter/v1beta1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"

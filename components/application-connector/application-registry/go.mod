@@ -1,4 +1,4 @@
-module github.com/kyma-project/kyma/components/application-registry
+module github.com/kyma-project/kyma/components/application-connector/application-registry
 
 go 1.16
 

@@ -7,8 +7,8 @@ import (
 
 	"github.com/kyma-project/kyma/components/application-gateway/pkg/authorization"
 	"github.com/kyma-project/kyma/components/application-gateway/pkg/httpconsts"
-	"github.com/kyma-project/kyma/components/application-registry/internal/apperrors"
-	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/model"
+	"github.com/kyma-project/kyma/components/application-connector/application-registry/internal/apperrors"
+	"github.com/kyma-project/kyma/components/application-connector/application-registry/internal/metadata/model"
 )
 
 const timeout = 5

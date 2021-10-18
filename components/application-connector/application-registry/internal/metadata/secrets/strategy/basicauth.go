@@ -1,9 +1,9 @@
 package strategy
 
 import (
-	"github.com/kyma-project/kyma/components/application-registry/internal/apperrors"
-	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/applications"
-	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/model"
+	"github.com/kyma-project/kyma/components/application-connector/application-registry/internal/apperrors"
+	"github.com/kyma-project/kyma/components/application-connector/application-registry/internal/metadata/applications"
+	"github.com/kyma-project/kyma/components/application-connector/application-registry/internal/metadata/model"
 )
 
 const (

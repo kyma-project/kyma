@@ -1,7 +1,7 @@
 package collector
 
 import (
-	"github.com/kyma-project/kyma/components/application-registry/internal/apperrors"
+	"github.com/kyma-project/kyma/components/application-connector/application-registry/internal/apperrors"
 	"github.com/prometheus/client_golang/prometheus"
 )
 

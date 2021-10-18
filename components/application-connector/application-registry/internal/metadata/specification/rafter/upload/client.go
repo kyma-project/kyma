@@ -9,8 +9,8 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/kyma-project/kyma/components/application-registry/internal/apperrors"
-	"github.com/kyma-project/kyma/components/application-registry/internal/httpconsts"
+	"github.com/kyma-project/kyma/components/application-connector/application-registry/internal/apperrors"
+	"github.com/kyma-project/kyma/components/application-connector/application-registry/internal/httpconsts"
 	log "github.com/sirupsen/logrus"
 )
 

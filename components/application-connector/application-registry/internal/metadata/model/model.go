@@ -3,7 +3,7 @@ package model
 import (
 	"encoding/json"
 
-	"github.com/kyma-project/kyma/components/application-registry/internal/apperrors"
+	"github.com/kyma-project/kyma/components/application-connector/application-registry/internal/apperrors"
 )
 
 // API is an internal representation of a service's API.

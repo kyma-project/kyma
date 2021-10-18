@@ -1,4 +1,4 @@
-module github.com/kyma-project/kyma/components/central-application-connectivity-validator
+module github.com/kyma-project/kyma/components/application-connector/central-application-connectivity-validator
 
 go 1.16
 

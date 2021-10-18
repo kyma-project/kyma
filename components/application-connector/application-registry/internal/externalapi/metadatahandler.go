@@ -8,12 +8,12 @@ import (
 	"net/http"
 
 	"github.com/gorilla/mux"
-	"github.com/kyma-project/kyma/components/application-registry/internal/apperrors"
-	"github.com/kyma-project/kyma/components/application-registry/internal/httpconsts"
-	"github.com/kyma-project/kyma/components/application-registry/internal/httperrors"
-	"github.com/kyma-project/kyma/components/application-registry/internal/httptools"
-	"github.com/kyma-project/kyma/components/application-registry/internal/metadata"
-	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/model"
+	"github.com/kyma-project/kyma/components/application-connector/application-registry/internal/apperrors"
+	"github.com/kyma-project/kyma/components/application-connector/application-registry/internal/httpconsts"
+	"github.com/kyma-project/kyma/components/application-connector/application-registry/internal/httperrors"
+	"github.com/kyma-project/kyma/components/application-connector/application-registry/internal/httptools"
+	"github.com/kyma-project/kyma/components/application-connector/application-registry/internal/metadata"
+	"github.com/kyma-project/kyma/components/application-connector/application-registry/internal/metadata/model"
 )
 
 type metadataHandler struct {

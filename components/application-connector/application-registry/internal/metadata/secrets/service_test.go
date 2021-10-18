@@ -5,20 +5,20 @@ import (
 
 	"k8s.io/apimachinery/pkg/types"
 
-	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/secrets/strategy"
+	"github.com/kyma-project/kyma/components/application-connector/application-registry/internal/metadata/secrets/strategy"
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/kyma-project/kyma/components/application-registry/internal/apperrors"
+	"github.com/kyma-project/kyma/components/application-connector/application-registry/internal/apperrors"
 
 	"github.com/stretchr/testify/mock"
 
-	strategyMocks "github.com/kyma-project/kyma/components/application-registry/internal/metadata/secrets/strategy/mocks"
+	strategyMocks "github.com/kyma-project/kyma/components/application-connector/application-registry/internal/metadata/secrets/strategy/mocks"
 
-	k8smocks "github.com/kyma-project/kyma/components/application-registry/internal/k8sconsts/mocks"
-	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/applications"
-	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/model"
-	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/secrets/mocks"
+	k8smocks "github.com/kyma-project/kyma/components/application-connector/application-registry/internal/k8sconsts/mocks"
+	"github.com/kyma-project/kyma/components/application-connector/application-registry/internal/metadata/applications"
+	"github.com/kyma-project/kyma/components/application-connector/application-registry/internal/metadata/model"
+	"github.com/kyma-project/kyma/components/application-connector/application-registry/internal/metadata/secrets/mocks"
 	"github.com/stretchr/testify/assert"
 )
 

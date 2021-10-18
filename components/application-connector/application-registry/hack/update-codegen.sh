@@ -6,7 +6,7 @@ set -o pipefail
 
 SCRIPT_ROOT=$(dirname ${BASH_SOURCE})/..
 CODEGEN_PKG=${CODEGEN_PKG:-$(cd ${SCRIPT_ROOT}; ls -d -1 ./vendor/k8s.io/code-generator 2>/dev/null || echo ${GOPATH}/src/k8s.io/code-generator)}
-METADATA_ROOT_PKG="github.com/kyma-project/kyma/components/application-registry/pkg"
+METADATA_ROOT_PKG="github.com/kyma-project/kyma/components/application-connector/application-registry/pkg"
 
 ./hack/generate-groups.sh all \
   ${METADATA_ROOT_PKG}/client ${METADATA_ROOT_PKG}/apis \

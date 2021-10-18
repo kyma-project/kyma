@@ -3,7 +3,7 @@ package certificates_test
 import (
 	"crypto/tls"
 	"crypto/x509/pkix"
-	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/certificates"
+	"github.com/kyma-project/kyma/components/application-connector/application-registry/internal/metadata/certificates"
 	"testing"
 
 	"github.com/stretchr/testify/require"

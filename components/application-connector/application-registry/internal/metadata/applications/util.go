@@ -5,7 +5,7 @@ import (
 
 	"github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
 	"github.com/kyma-project/kyma/components/application-operator/pkg/normalization"
-	"github.com/kyma-project/kyma/components/application-registry/internal/apperrors"
+	"github.com/kyma-project/kyma/components/application-connector/application-registry/internal/apperrors"
 	log "github.com/sirupsen/logrus"
 )
 

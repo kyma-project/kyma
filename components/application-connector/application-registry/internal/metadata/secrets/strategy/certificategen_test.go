@@ -5,13 +5,13 @@ import (
 	"encoding/base64"
 	"testing"
 
-	"github.com/kyma-project/kyma/components/application-registry/internal/apperrors"
-	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/certificates"
+	"github.com/kyma-project/kyma/components/application-connector/application-registry/internal/apperrors"
+	"github.com/kyma-project/kyma/components/application-connector/application-registry/internal/metadata/certificates"
 	"github.com/stretchr/testify/require"
 
-	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/applications"
+	"github.com/kyma-project/kyma/components/application-connector/application-registry/internal/metadata/applications"
 
-	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/model"
+	"github.com/kyma-project/kyma/components/application-connector/application-registry/internal/metadata/model"
 
 	"github.com/stretchr/testify/assert"
 )

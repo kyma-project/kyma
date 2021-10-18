@@ -1,12 +1,12 @@
 package serviceapi
 
 import (
-	"github.com/kyma-project/kyma/components/application-registry/internal/apperrors"
-	"github.com/kyma-project/kyma/components/application-registry/internal/k8sconsts"
-	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/accessservice"
-	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/applications"
-	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/model"
-	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/secrets"
+	"github.com/kyma-project/kyma/components/application-connector/application-registry/internal/apperrors"
+	"github.com/kyma-project/kyma/components/application-connector/application-registry/internal/k8sconsts"
+	"github.com/kyma-project/kyma/components/application-connector/application-registry/internal/metadata/accessservice"
+	"github.com/kyma-project/kyma/components/application-connector/application-registry/internal/metadata/applications"
+	"github.com/kyma-project/kyma/components/application-connector/application-registry/internal/metadata/model"
+	"github.com/kyma-project/kyma/components/application-connector/application-registry/internal/metadata/secrets"
 	"k8s.io/apimachinery/pkg/types"
 )
 

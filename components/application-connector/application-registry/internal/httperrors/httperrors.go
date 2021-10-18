@@ -3,7 +3,7 @@ package httperrors
 import (
 	"net/http"
 
-	"github.com/kyma-project/kyma/components/application-registry/internal/apperrors"
+	"github.com/kyma-project/kyma/components/application-connector/application-registry/internal/apperrors"
 )
 
 type ErrorResponse struct {

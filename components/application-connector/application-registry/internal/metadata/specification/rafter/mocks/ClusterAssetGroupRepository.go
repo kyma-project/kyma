@@ -3,8 +3,8 @@
 package mocks
 
 import (
-	apperrors "github.com/kyma-project/kyma/components/application-registry/internal/apperrors"
-	clusterassetgroup "github.com/kyma-project/kyma/components/application-registry/internal/metadata/specification/rafter/clusterassetgroup"
+	apperrors "github.com/kyma-project/kyma/components/application-connector/application-registry/internal/apperrors"
+	clusterassetgroup "github.com/kyma-project/kyma/components/application-connector/application-registry/internal/metadata/specification/rafter/clusterassetgroup"
 	mock "github.com/stretchr/testify/mock"
 )
 

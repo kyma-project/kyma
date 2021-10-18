@@ -5,12 +5,12 @@ import (
 
 	"k8s.io/apimachinery/pkg/types"
 
-	"github.com/kyma-project/kyma/components/application-registry/internal/apperrors"
-	k8smocks "github.com/kyma-project/kyma/components/application-registry/internal/k8sconsts/mocks"
-	asmocks "github.com/kyma-project/kyma/components/application-registry/internal/metadata/accessservice/mocks"
-	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/applications"
-	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/model"
-	secretsmocks "github.com/kyma-project/kyma/components/application-registry/internal/metadata/secrets/mocks"
+	"github.com/kyma-project/kyma/components/application-connector/application-registry/internal/apperrors"
+	k8smocks "github.com/kyma-project/kyma/components/application-connector/application-registry/internal/k8sconsts/mocks"
+	asmocks "github.com/kyma-project/kyma/components/application-connector/application-registry/internal/metadata/accessservice/mocks"
+	"github.com/kyma-project/kyma/components/application-connector/application-registry/internal/metadata/applications"
+	"github.com/kyma-project/kyma/components/application-connector/application-registry/internal/metadata/model"
+	secretsmocks "github.com/kyma-project/kyma/components/application-connector/application-registry/internal/metadata/secrets/mocks"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

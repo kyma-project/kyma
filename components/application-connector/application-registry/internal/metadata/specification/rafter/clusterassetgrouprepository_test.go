@@ -7,9 +7,9 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/kyma-project/kyma/components/application-registry/internal/apperrors"
-	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/specification/rafter/clusterassetgroup"
-	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/specification/rafter/mocks"
+	"github.com/kyma-project/kyma/components/application-connector/application-registry/internal/apperrors"
+	"github.com/kyma-project/kyma/components/application-connector/application-registry/internal/metadata/specification/rafter/clusterassetgroup"
+	"github.com/kyma-project/kyma/components/application-connector/application-registry/internal/metadata/specification/rafter/mocks"
 	"github.com/kyma-project/rafter/pkg/apis/rafter/v1beta1"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"

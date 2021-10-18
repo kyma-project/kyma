@@ -3,10 +3,10 @@
 package mocks
 
 import (
-	apperrors "github.com/kyma-project/kyma/components/application-registry/internal/apperrors"
+	apperrors "github.com/kyma-project/kyma/components/application-connector/application-registry/internal/apperrors"
 	mock "github.com/stretchr/testify/mock"
 
-	model "github.com/kyma-project/kyma/components/application-registry/internal/metadata/model"
+	model "github.com/kyma-project/kyma/components/application-connector/application-registry/internal/metadata/model"
 
 	types "k8s.io/apimachinery/pkg/types"
 )

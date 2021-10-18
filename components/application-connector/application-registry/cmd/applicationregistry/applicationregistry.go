@@ -7,9 +7,9 @@ import (
 
 	"sync"
 
-	"github.com/kyma-project/kyma/components/application-registry/internal/httptools"
-	"github.com/kyma-project/kyma/components/application-registry/internal/k8sconsts"
-	"github.com/kyma-project/kyma/components/application-registry/internal/monitoring"
+	"github.com/kyma-project/kyma/components/application-connector/application-registry/internal/httptools"
+	"github.com/kyma-project/kyma/components/application-connector/application-registry/internal/k8sconsts"
+	"github.com/kyma-project/kyma/components/application-connector/application-registry/internal/monitoring"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	log "github.com/sirupsen/logrus"
 )

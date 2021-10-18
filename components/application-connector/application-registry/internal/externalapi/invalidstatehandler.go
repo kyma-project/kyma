@@ -4,9 +4,9 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/kyma-project/kyma/components/application-registry/internal/httpconsts"
-	"github.com/kyma-project/kyma/components/application-registry/internal/httperrors"
-	"github.com/kyma-project/kyma/components/application-registry/internal/httptools"
+	"github.com/kyma-project/kyma/components/application-connector/application-registry/internal/httpconsts"
+	"github.com/kyma-project/kyma/components/application-connector/application-registry/internal/httperrors"
+	"github.com/kyma-project/kyma/components/application-connector/application-registry/internal/httptools"
 )
 
 type invalidStateHandler struct {

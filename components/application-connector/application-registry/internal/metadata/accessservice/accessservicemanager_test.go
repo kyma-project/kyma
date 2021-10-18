@@ -9,9 +9,9 @@ import (
 
 	"fmt"
 
-	"github.com/kyma-project/kyma/components/application-registry/internal/apperrors"
-	"github.com/kyma-project/kyma/components/application-registry/internal/k8sconsts"
-	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/accessservice/mocks"
+	"github.com/kyma-project/kyma/components/application-connector/application-registry/internal/apperrors"
+	"github.com/kyma-project/kyma/components/application-connector/application-registry/internal/k8sconsts"
+	"github.com/kyma-project/kyma/components/application-connector/application-registry/internal/metadata/accessservice/mocks"
 	"github.com/stretchr/testify/assert"
 	corev1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"

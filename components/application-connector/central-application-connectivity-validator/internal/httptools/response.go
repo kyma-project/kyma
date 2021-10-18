@@ -6,10 +6,10 @@ import (
 
 	"go.uber.org/zap"
 
-	"github.com/kyma-project/kyma/components/central-application-connectivity-validator/internal/httpconsts"
-	"github.com/kyma-project/kyma/components/central-application-connectivity-validator/internal/httperrors"
+	"github.com/kyma-project/kyma/components/application-connector/central-application-connectivity-validator/internal/httpconsts"
+	"github.com/kyma-project/kyma/components/application-connector/central-application-connectivity-validator/internal/httperrors"
 
-	"github.com/kyma-project/kyma/components/central-application-connectivity-validator/internal/apperrors"
+	"github.com/kyma-project/kyma/components/application-connector/central-application-connectivity-validator/internal/apperrors"
 )
 
 func RespondWithError(log *zap.SugaredLogger, w http.ResponseWriter, apperr apperrors.AppError) {
