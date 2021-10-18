@@ -358,6 +358,9 @@ async function ensureCommerceMockLocalTestFixture(mockNamespace, targetNamespace
   if (withCentralApplicationConnectivity) {
     await waitForDeployment('central-application-gateway', 'kyma-system');
     await waitForDeployment('central-application-connectivity-validator', 'kyma-system');
+  } else {
+    await waitForDeployment(`${targetNamespace}-gateway`, targetNamespace);
+    await patchApplicationGateway(`${targetNamespace}-gateway`, targetNamespace);
   }
 
   const webServicesSC = await waitForServiceClass(
