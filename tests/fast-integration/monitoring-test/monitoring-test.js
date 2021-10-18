@@ -17,6 +17,7 @@ const {
   buildScrapePoolSet,
   assertTimeSeriesExist,
   getNotRegisteredPrometheusRuleNames,
+  retry,
 } = require("../monitoring/helpers");
 
 describe("Monitoring test", function () {
@@ -46,10 +47,12 @@ describe("Monitoring test", function () {
   });
 
   it("All Prometheus targets should be healthy", async () => {
-    let activeTargets = await getPrometheusActiveTargets();
-    let unhealthyTargets = activeTargets
-      .filter((t) => !shouldIgnoreTarget(t) && t.health != "up")
-      .map((t) => `${t.labels.job}: ${t.lastError}`);
+    let unhealthyTargets = await retry(async () => {
+      let activeTargets = await getPrometheusActiveTargets();
+      return activeTargets
+        .filter((t) => !shouldIgnoreTarget(t) && t.health != "up")
+        .map((t) => `${t.labels.job}: ${t.lastError}`);
+    });
 
     assert.isEmpty(
       unhealthyTargets,
@@ -58,10 +61,12 @@ describe("Monitoring test", function () {
   });
 
   it("There should be no firing critical Prometheus alerts", async () => {
-    let allAlerts = await getPrometheusAlerts();
-    let firingAlerts = allAlerts
-      .filter((a) => !shouldIgnoreAlert(a) && a.state == "firing")
-      .map((a) => a.labels.alertname);
+    let firingAlerts = await retry(async () => {
+      let allAlerts = await getPrometheusAlerts();
+      return allAlerts
+        .filter((a) => !shouldIgnoreAlert(a) && a.state == "firing")
+        .map((a) => a.labels.alertname);
+    });
 
     assert.isEmpty(
       firingAlerts,
@@ -70,27 +75,29 @@ describe("Monitoring test", function () {
   });
 
   it("Each Prometheus scrape pool should have a healthy target", async () => {
-    let scrapePools = await buildScrapePoolSet();
-    let activeTargets = await getPrometheusActiveTargets();
-
-    for (const target of activeTargets) {
-      scrapePools.delete(target.scrapePool);
-    }
+    let emptyScrapePools = await retry(async () => {
+      let scrapePools = await buildScrapePoolSet();
+      let activeTargets = await getPrometheusActiveTargets();
+  
+      for (const target of activeTargets) {
+        scrapePools.delete(target.scrapePool);
+      }
+      return Array.from(scrapePools);
+    });
 
     assert.isEmpty(
-      scrapePools,
-      `Following scrape pools have no targets: ${Array.from(scrapePools).join(
-        ", "
-      )}`
-    );
+      emptyScrapePools,
+      `Following scrape pools have no targets: ${emptyScrapePools.join(", ")}`);
   });
 
   it("All Prometheus rules should be healthy", async () => {
-    let ruleGroups = await getPrometheusRuleGroups();
-    let allRules = ruleGroups.flatMap((g) => g.rules);
-    let unhealthyRules = allRules
-      .filter((r) => r.health != "ok")
-      .map((r) => r.name);
+    let unhealthyRules = await retry(async () => {
+      let ruleGroups = await getPrometheusRuleGroups();
+      let allRules = ruleGroups.flatMap((g) => g.rules);
+      return allRules
+        .filter((r) => r.health != "ok")
+        .map((r) => r.name);
+    });
 
     assert.isEmpty(
       unhealthyRules,
@@ -125,7 +132,10 @@ describe("Monitoring test", function () {
   });
 
   it("All prometheus rules are registered", async function () {
-    let notRegisteredRules = await getNotRegisteredPrometheusRuleNames();
+    let notRegisteredRules = await retry(
+      getNotRegisteredPrometheusRuleNames
+    );
+
     assert.isEmpty(
       notRegisteredRules,
       `Following rules are not picked up by Prometheus: ${notRegisteredRules.join(", ")}`
