@@ -89,34 +89,36 @@ func (r *FunctionReconciler) updateStatus(ctx context.Context, result ctrl.Resul
 	service.Status.Conditions = r.updateCondition(service.Status.Conditions, condition)
 
 	equalConditions := r.equalConditions(instance.Status.Conditions, service.Status.Conditions)
-	if equalConditions && instance.Spec.Type != serverlessv1alpha1.SourceTypeGit {
-		return result, nil
-	}
-	// checking if status changed in gitops flow
-	if equalConditions && r.equalRepositories(instance.Status.Repository, repository) &&
-		instance.Status.Commit == commit {
-		return result, nil
+	if equalConditions {
+		if instance.Spec.Type != serverlessv1alpha1.SourceTypeGit {
+			return result, nil
+		}
+		// checking if status changed in gitops flow
+		if r.equalRepositories(instance.Status.Repository, repository) &&
+			instance.Status.Commit == commit {
+			return result, nil
+		}
 	}
 
 	if repository != nil {
 		service.Status.Repository = *repository
 		service.Status.Commit = commit
 	}
-
 	service.Status.Source = instance.Spec.Source
 	service.Status.Runtime = serverlessv1alpha1.RuntimeExtended(instance.Spec.Runtime)
 
-	if err := r.client.Status().Update(ctx, service); err != nil {
-		return ctrl.Result{}, err
+	if !r.equalFunctionStatus(service.Status, instance.Status) {
+		if err := r.client.Status().Update(ctx, service); err != nil {
+			return ctrl.Result{}, err
+		}
+
+		eventType := "Normal"
+		if condition.Status == corev1.ConditionFalse {
+			eventType = "Warning"
+		}
+
+		r.recorder.Event(instance, eventType, string(condition.Reason), condition.Message)
 	}
-
-	eventType := "Normal"
-	if condition.Status == corev1.ConditionFalse {
-		eventType = "Warning"
-	}
-
-	r.recorder.Event(instance, eventType, string(condition.Reason), condition.Message)
-
 	return result, nil
 }
 
@@ -184,4 +186,18 @@ func (r *FunctionReconciler) getConditionReason(conditions []serverlessv1alpha1.
 	}
 
 	return ""
+}
+
+func (r *FunctionReconciler) equalFunctionStatus(left, right serverlessv1alpha1.FunctionStatus) bool {
+	if !r.equalConditions(left.Conditions, right.Conditions) {
+		return false
+	}
+
+	if left.Repository != right.Repository ||
+		left.Commit != right.Commit ||
+		left.Source != right.Source ||
+		left.Runtime != right.Runtime {
+		return false
+	}
+	return true
 }
