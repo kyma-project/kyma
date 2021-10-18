@@ -2,7 +2,7 @@
 title: Enable Kyma with Runtime Agent
 ---
 
-To enable Kyma with Runtime Agent, follow the cluster Kyma installation using the [`installer-cr-cluster-runtime.yaml.tpl`](https://github.com/kyma-project/kyma/blob/master/installation/resources/installer-cr-cluster-runtime.yaml.tpl) configuration file and enable the `compass-runtime-agent` module. The default [legacy mode](../../05-technical-reference/00-architecture/ac-01-application-connector-components.md#application-operator) used in Kyma does not support integration with Compass. For that reason, before you start the installation, apply the following ConfigMap which disables components used in the legacy mode, such as Application Registry and Connector Service:
+To enable Kyma with Runtime Agent, follow the [cluster Kyma installation with specific components](02-install-kyma.md#install-specific-components) and add the `compass-runtime-agent` module to the list of components. The default [legacy mode](../../05-technical-reference/00-architecture/ac-01-application-connector-components.md#application-operator) used in Kyma does not support integration with Compass. For that reason, before you start the installation, apply the following ConfigMap which disables components used in the legacy mode, such as Application Registry and Connector Service:
 
 ```yaml
 cat <<EOF | kubectl apply -f -
