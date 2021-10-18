@@ -3,9 +3,9 @@
 package mocks
 
 import (
-	apperrors "github.com/kyma-project/kyma/components/central-application-gateway/pkg/apperrors"
+	apperrors "github.com/kyma-project/kyma/components/application-connector/central-application-gateway/pkg/apperrors"
 
-	clientcert "github.com/kyma-project/kyma/components/central-application-gateway/pkg/authorization/clientcert"
+	clientcert "github.com/kyma-project/kyma/components/application-connector/central-application-gateway/pkg/authorization/clientcert"
 
 	http "net/http"
 

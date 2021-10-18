@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/apperrors"
-	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/authorization/clientcert"
-	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/httpconsts"
+	"github.com/kyma-project/kyma/components/application-connector/central-application-gateway/pkg/apperrors"
+	"github.com/kyma-project/kyma/components/application-connector/central-application-gateway/pkg/authorization/clientcert"
+	"github.com/kyma-project/kyma/components/application-connector/central-application-gateway/pkg/httpconsts"
 	log "github.com/sirupsen/logrus"
 )
 

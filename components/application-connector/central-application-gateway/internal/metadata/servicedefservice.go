@@ -4,10 +4,10 @@ package metadata
 import (
 	"fmt"
 
-	"github.com/kyma-project/kyma/components/central-application-gateway/internal/metadata/applications"
-	"github.com/kyma-project/kyma/components/central-application-gateway/internal/metadata/model"
-	"github.com/kyma-project/kyma/components/central-application-gateway/internal/metadata/serviceapi"
-	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/apperrors"
+	"github.com/kyma-project/kyma/components/application-connector/central-application-gateway/internal/metadata/applications"
+	"github.com/kyma-project/kyma/components/application-connector/central-application-gateway/internal/metadata/model"
+	"github.com/kyma-project/kyma/components/application-connector/central-application-gateway/internal/metadata/serviceapi"
+	"github.com/kyma-project/kyma/components/application-connector/central-application-gateway/pkg/apperrors"
 	log "github.com/sirupsen/logrus"
 )
 

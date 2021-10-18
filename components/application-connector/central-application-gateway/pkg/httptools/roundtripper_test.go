@@ -15,7 +15,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/authorization/clientcert"
+	"github.com/kyma-project/kyma/components/application-connector/central-application-gateway/pkg/authorization/clientcert"
 
 	"github.com/stretchr/testify/require"
 )

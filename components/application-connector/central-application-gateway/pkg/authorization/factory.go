@@ -3,10 +3,10 @@ package authorization
 import (
 	"net/http"
 
-	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/apperrors"
-	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/authorization/clientcert"
-	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/authorization/oauth"
-	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/authorization/oauth/tokencache"
+	"github.com/kyma-project/kyma/components/application-connector/central-application-gateway/pkg/apperrors"
+	"github.com/kyma-project/kyma/components/application-connector/central-application-gateway/pkg/authorization/clientcert"
+	"github.com/kyma-project/kyma/components/application-connector/central-application-gateway/pkg/authorization/oauth"
+	"github.com/kyma-project/kyma/components/application-connector/central-application-gateway/pkg/authorization/oauth/tokencache"
 )
 
 //go:generate mockery --name=Strategy

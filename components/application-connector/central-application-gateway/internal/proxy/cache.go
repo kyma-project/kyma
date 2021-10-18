@@ -5,10 +5,10 @@ import (
 	"net/http/httputil"
 	"time"
 
-	"github.com/kyma-project/kyma/components/central-application-gateway/internal/csrf"
-	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/apperrors"
-	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/authorization"
-	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/authorization/clientcert"
+	"github.com/kyma-project/kyma/components/application-connector/central-application-gateway/internal/csrf"
+	"github.com/kyma-project/kyma/components/application-connector/central-application-gateway/pkg/apperrors"
+	"github.com/kyma-project/kyma/components/application-connector/central-application-gateway/pkg/authorization"
+	"github.com/kyma-project/kyma/components/application-connector/central-application-gateway/pkg/authorization/clientcert"
 	gocache "github.com/patrickmn/go-cache"
 )
 
