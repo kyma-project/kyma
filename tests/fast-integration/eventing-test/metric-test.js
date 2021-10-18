@@ -7,17 +7,11 @@ const httpsAgent = new https.Agent({
 axios.defaults.httpsAgent = httpsAgent;
 
 const {
-  kubectlPortForward,
   debug,
   retryPromise,
 } = require("../utils");
 
-
-const prometheusPort = 9090;
-
-function prometheusPortForward() {
-  return kubectlPortForward("kyma-system", "prometheus-monitoring-prometheus-0", prometheusPort);
-}
+const {queryPrometheus} = require("../monitoring/client")
 
 const dashboards = {
   // The delivery dashboard
@@ -25,24 +19,20 @@ const dashboards = {
     title: `Requests to publisher proxy`,
     query: 'sum(rate(promhttp_metric_handler_requests_total{namespace="kyma-system", pod=~"event.*publisher.*", code=~"2.*"}[5m]))',
     backends: ['nats', 'beb'],
-    // The assert function receives the `data` section of the query result:
+    // The assert function receives the `data.result` section of the query result:
     // https://prometheus.io/docs/prometheus/latest/querying/api/#instant-queries
-    assert: function (resp) {
-      expect(resp.result.length).to.be.greaterThan(0, "No value found in the result");
-      expect(getMetricValue(resp.result[0])).to.be.greaterThan(0);
+    assert: function (result) {
+      expect(result.length).to.be.greaterThan(0, "No value found in the result");
+      expect(getMetricValue(result[0])).to.be.greaterThan(0);
     }
   },
   delivery_applicationConnectivityValidator: {
     title: 'Requests to application connectivity validator',
     query: 'sum by(destination_service) (rate(istio_requests_total{destination_service=~"commerce-validator.kyma-integration.svc.cluster.local", response_code=~"2.*"}[5m]))',
     backends: ['nats', 'beb'],
-    assert: function (resp) {
-      let foundMetric = false;
-      resp.result.forEach(res => {
-        if (foundMetric) return;
-        foundMetric = res.metric.destination_service.includes('commerce-validator') && getMetricValue(res) > 0;
-      });
-      expect(foundMetric).to.be.true
+    assert: function (result) {
+      let foundMetric = result.find(res => res.metric.destination_service.includes('commerce-validator') && getMetricValue(res) > 0);
+      expect(foundMetric).to.be.not.undefined
     }
   },
   delivery_subscribers: {
@@ -56,13 +46,9 @@ const dashboards = {
             }[5m])
           ) by (le,source_workload_namespace,source_workload,destination_workload_namespace,destination_workload,response_code)`,
     backends: ['nats'],
-    assert: function (resp) {
-      let foundMetric = false;
-      resp.result.forEach(res => {
-        if (foundMetric === true) return;
-        foundMetric = res.metric.destination_workload.startsWith('lastorder') && getMetricValue(res) > 0;
-      })
-      expect(foundMetric).to.be.true
+    assert: function (result) {
+      let foundMetric = result.find(res => res.metric.destination_workload.startsWith('lastorder') && getMetricValue(res) > 0);
+      expect(foundMetric).to.be.not.undefined
     }
   },
   // The latency dashboard
@@ -81,30 +67,24 @@ const dashboards = {
           ) by (le,source_workload_namespace,source_workload,destination_workload_namespace,destination_workload))
         `,
     backends: ['nats', 'beb'],
-    assert: function(resp) {
-      let foundMetric = false;
-      resp.result.forEach(res => {
-        if (foundMetric) return;
-        foundMetric = res.metric.source_workload.toLowerCase() === 'commerce-connectivity-validator' &&
-          res.metric.destination_workload.toLowerCase() === 'eventing-publisher-proxy' &&
-          getMetricValue(res) > 0;
-      });
-      expect(foundMetric).to.be.true
+    assert: function (result) {
+      let foundMetric = result.find(res =>
+        res.metric.source_workload.toLowerCase() === 'commerce-connectivity-validator' &&
+        res.metric.destination_workload.toLowerCase() === 'eventing-publisher-proxy' &&
+        getMetricValue(res) > 0);
+      expect(foundMetric).to.be.not.undefined
     }
   },
   latency_eventPublisherToMessagingServer: {
     title: 'Latency of Event Publisher -> Messaging Server',
     query: 'histogram_quantile(0.99999, sum(rate(event_publish_to_messaging_server_latency_bucket{namespace="kyma-system"}[5m])) by (le,pod,namespace,service))',
     backends: ['nats', 'beb'],
-    assert: function(resp) {
-      let foundMetric = false;
-      resp.result.forEach(res => {
-        if (foundMetric) return;
-        foundMetric = res.metric.namespace.toLowerCase() === 'kyma-system' &&
-          res.metric.pod.toLowerCase().startsWith('eventing-publisher-proxy') &&
-          getMetricValue(res) > 0;
-      });
-      expect(foundMetric).to.be.true;
+    assert: function (result) {
+      let foundMetric = result.find(res =>
+        res.metric.namespace.toLowerCase() === 'kyma-system' &&
+        res.metric.pod.toLowerCase().startsWith('eventing-publisher-proxy') &&
+        getMetricValue(res) > 0);
+      expect(foundMetric).to.be.not.undefined;
     }
   },
   latency_eventDispatcherToSubscribers: {
@@ -120,15 +100,12 @@ const dashboards = {
           ) by (le,source_workload_namespace,source_workload,destination_workload_namespace,destination_workload))
         `,
     backends: ['nats'],
-    assert: function (resp) {
-      let foundMetric = false;
-      resp.result.forEach(res => {
-        if (foundMetric) return;
-        foundMetric = res.metric.source_workload === 'eventing-controller' &&
-          res.metric.destination_workload.toLowerCase().startsWith('lastorder') &&
-          getMetricValue(res) > 0;
-      });
-      expect(foundMetric).to.be.true;
+    assert: function (result) {
+      let foundMetric = result.find(res =>
+        res.metric.source_workload === 'eventing-controller' &&
+        res.metric.destination_workload.toLowerCase().startsWith('lastorder') &&
+        getMetricValue(res) > 0);
+      expect(foundMetric).to.be.not.undefined;
     }
   },
   // The pods dashboard
@@ -161,9 +138,9 @@ const dashboards = {
 }
 
 // A generic assertion for the pod dashboards
-function ensureEventingPodsArePresent (resp) {
+function ensureEventingPodsArePresent (result) {
   let controllerFound = false, publisherProxyFound = false, natsFound = false;
-  resp.result.forEach(res => {
+  result.forEach(res => {
     if (controllerFound && publisherProxyFound && natsFound) return;
     if (res.metric.pod.startsWith('eventing-nats')) natsFound = true;
     if (res.metric.pod.startsWith('eventing-controller')) controllerFound = true;
@@ -181,17 +158,13 @@ function getMetricValue(metric) {
 
 function runDashboardTestCase(dashboardName, test) {
   return retryPromise(async () => {
-    await axios.get('http://localhost:' + prometheusPort + '/api/v1/query?query=' + test.query).then(resp => {
-      debug(dashboardName + ' result: ' + JSON.stringify(resp.data, null, 2));
-      // Make sure the query was successfully processed and returned a result
-      expect(resp.status).to.be.equal(200)
-      expect(resp.data.status).to.equal("success")
-      expect(resp.data).to.have.nested.property('data.result')
-      test.assert(resp.data.data)
+    await queryPrometheus(test.query).then(result => {
+      debug(dashboardName + ' result: ' + JSON.stringify(result, null, 2));
+      test.assert(result)
     }).catch(reason => {
       throw new Error(reason)
     })
-  }, 30, 6000);
+  }, 60, 5000);
 }
 
 function eventingMonitoringTest(backend) {
@@ -205,6 +178,5 @@ function eventingMonitoringTest(backend) {
 }
 
 module.exports = {
-  eventingMonitoringTest,
-  prometheusPortForward
+  eventingMonitoringTest
 }

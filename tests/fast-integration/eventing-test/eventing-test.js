@@ -20,10 +20,9 @@ const {
   deleteEventingBackendK8sSecret,
 } = require("../utils");
 
-const {
-  prometheusPortForward,
-  eventingMonitoringTest
-} = require("./metric-test")
+const {prometheusPortForward} = require("../monitoring/client")
+
+const {eventingMonitoringTest} = require("./metric-test")
 
 describe("Eventing tests", function () {
   this.timeout(10 * 60 * 1000);
