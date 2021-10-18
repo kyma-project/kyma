@@ -3,18 +3,18 @@ package externalapi
 import (
 	"net/http"
 
-	loggingMiddlewares "github.com/kyma-project/kyma/components/connector-service/internal/logging/middlewares"
-	"github.com/kyma-project/kyma/components/connector-service/internal/revocation"
+	loggingMiddlewares "github.com/kyma-project/kyma/components/application-connector/connector-service/internal/logging/middlewares"
+	"github.com/kyma-project/kyma/components/application-connector/connector-service/internal/revocation"
 
-	"github.com/kyma-project/kyma/components/connector-service/internal/httphelpers"
+	"github.com/kyma-project/kyma/components/application-connector/connector-service/internal/httphelpers"
 
-	"github.com/kyma-project/kyma/components/connector-service/internal/certificates"
+	"github.com/kyma-project/kyma/components/application-connector/connector-service/internal/certificates"
 
-	"github.com/kyma-project/kyma/components/connector-service/internal/clientcontext"
-	"github.com/kyma-project/kyma/components/connector-service/internal/tokens"
+	"github.com/kyma-project/kyma/components/application-connector/connector-service/internal/clientcontext"
+	"github.com/kyma-project/kyma/components/application-connector/connector-service/internal/tokens"
 
 	"github.com/gorilla/mux"
-	"github.com/kyma-project/kyma/components/connector-service/internal/errorhandler"
+	"github.com/kyma-project/kyma/components/application-connector/connector-service/internal/errorhandler"
 )
 
 type Config struct {

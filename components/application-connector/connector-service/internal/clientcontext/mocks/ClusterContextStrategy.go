@@ -4,7 +4,7 @@ package mocks
 import (
 	http "net/http"
 
-	clientcontext "github.com/kyma-project/kyma/components/connector-service/internal/clientcontext"
+	clientcontext "github.com/kyma-project/kyma/components/application-connector/connector-service/internal/clientcontext"
 
 	mock "github.com/stretchr/testify/mock"
 )

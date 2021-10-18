@@ -5,7 +5,7 @@ import (
 	"strconv"
 
 	"github.com/gorilla/mux"
-	"github.com/kyma-project/kyma/components/connector-service/internal/monitoring/collector"
+	"github.com/kyma-project/kyma/components/application-connector/connector-service/internal/monitoring/collector"
 	"github.com/sirupsen/logrus"
 )
 

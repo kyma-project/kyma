@@ -4,8 +4,8 @@ import (
 	"context"
 	"testing"
 
-	"github.com/kyma-project/kyma/components/connector-service/internal/apperrors"
-	"github.com/kyma-project/kyma/components/connector-service/internal/secrets/mocks"
+	"github.com/kyma-project/kyma/components/application-connector/connector-service/internal/apperrors"
+	"github.com/kyma-project/kyma/components/application-connector/connector-service/internal/secrets/mocks"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	v1 "k8s.io/api/core/v1"

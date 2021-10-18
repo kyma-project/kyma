@@ -5,12 +5,12 @@ import (
 	"net/http"
 	"net/http/httptest"
 
-	"github.com/kyma-project/kyma/components/connector-service/internal/certificates"
-	"github.com/kyma-project/kyma/components/connector-service/internal/certificates/mocks"
+	"github.com/kyma-project/kyma/components/application-connector/connector-service/internal/certificates"
+	"github.com/kyma-project/kyma/components/application-connector/connector-service/internal/certificates/mocks"
 
 	"testing"
 
-	"github.com/kyma-project/kyma/components/connector-service/internal/clientcontext"
+	"github.com/kyma-project/kyma/components/application-connector/connector-service/internal/clientcontext"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

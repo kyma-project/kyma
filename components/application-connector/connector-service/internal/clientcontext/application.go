@@ -4,7 +4,7 @@ import (
 	"context"
 	"encoding/json"
 
-	"github.com/kyma-project/kyma/components/connector-service/internal/logging"
+	"github.com/kyma-project/kyma/components/application-connector/connector-service/internal/logging"
 	"github.com/sirupsen/logrus"
 )
 

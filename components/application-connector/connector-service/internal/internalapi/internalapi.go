@@ -4,14 +4,14 @@ import (
 	"context"
 	"net/http"
 
-	"github.com/kyma-project/kyma/components/connector-service/internal/revocation"
+	"github.com/kyma-project/kyma/components/application-connector/connector-service/internal/revocation"
 
-	"github.com/kyma-project/kyma/components/connector-service/internal/clientcontext"
+	"github.com/kyma-project/kyma/components/application-connector/connector-service/internal/clientcontext"
 
 	"github.com/gorilla/mux"
-	"github.com/kyma-project/kyma/components/connector-service/internal/errorhandler"
-	"github.com/kyma-project/kyma/components/connector-service/internal/httphelpers"
-	"github.com/kyma-project/kyma/components/connector-service/internal/tokens"
+	"github.com/kyma-project/kyma/components/application-connector/connector-service/internal/errorhandler"
+	"github.com/kyma-project/kyma/components/application-connector/connector-service/internal/httphelpers"
+	"github.com/kyma-project/kyma/components/application-connector/connector-service/internal/tokens"
 )
 
 type Config struct {

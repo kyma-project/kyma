@@ -3,8 +3,8 @@
 package mocks
 
 import (
-	apperrors "github.com/kyma-project/kyma/components/connector-service/internal/apperrors"
-	certificates "github.com/kyma-project/kyma/components/connector-service/internal/certificates"
+	apperrors "github.com/kyma-project/kyma/components/application-connector/connector-service/internal/apperrors"
+	certificates "github.com/kyma-project/kyma/components/application-connector/connector-service/internal/certificates"
 
 	mock "github.com/stretchr/testify/mock"
 

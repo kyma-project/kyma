@@ -6,9 +6,9 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/kyma-project/kyma/components/connector-service/internal/apperrors"
-	"github.com/kyma-project/kyma/components/connector-service/internal/clientcontext"
-	"github.com/kyma-project/kyma/components/connector-service/internal/tokens/mocks"
+	"github.com/kyma-project/kyma/components/application-connector/connector-service/internal/apperrors"
+	"github.com/kyma-project/kyma/components/application-connector/connector-service/internal/clientcontext"
+	"github.com/kyma-project/kyma/components/application-connector/connector-service/internal/tokens/mocks"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

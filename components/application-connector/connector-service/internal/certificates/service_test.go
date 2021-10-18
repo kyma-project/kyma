@@ -5,15 +5,15 @@ import (
 	"crypto/rsa"
 	"crypto/x509"
 	"encoding/base64"
-	"github.com/kyma-project/kyma/components/connector-service/internal/certificates"
+	"github.com/kyma-project/kyma/components/application-connector/connector-service/internal/certificates"
 	"testing"
 
 	"k8s.io/apimachinery/pkg/types"
 
-	"github.com/kyma-project/kyma/components/connector-service/internal/apperrors"
-	"github.com/kyma-project/kyma/components/connector-service/internal/certificates/mocks"
+	"github.com/kyma-project/kyma/components/application-connector/connector-service/internal/apperrors"
+	"github.com/kyma-project/kyma/components/application-connector/connector-service/internal/certificates/mocks"
 
-	secretsMock "github.com/kyma-project/kyma/components/connector-service/internal/secrets/mocks"
+	secretsMock "github.com/kyma-project/kyma/components/application-connector/connector-service/internal/secrets/mocks"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

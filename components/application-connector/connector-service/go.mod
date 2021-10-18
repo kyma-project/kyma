@@ -1,4 +1,4 @@
-module github.com/kyma-project/kyma/components/connector-service
+module github.com/kyma-project/kyma/components/application-connector/connector-service
 
 go 1.16
 

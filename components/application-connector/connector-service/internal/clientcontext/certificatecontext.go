@@ -1,6 +1,6 @@
 package clientcontext
 
-import "github.com/kyma-project/kyma/components/connector-service/internal/certificates"
+import "github.com/kyma-project/kyma/components/application-connector/connector-service/internal/certificates"
 
 type clientCertificateContext struct {
 	ClientContextService

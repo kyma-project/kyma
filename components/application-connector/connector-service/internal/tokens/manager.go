@@ -3,8 +3,8 @@ package tokens
 import (
 	"encoding/json"
 
-	"github.com/kyma-project/kyma/components/connector-service/internal/apperrors"
-	"github.com/kyma-project/kyma/components/connector-service/internal/tokens/tokencache"
+	"github.com/kyma-project/kyma/components/application-connector/connector-service/internal/apperrors"
+	"github.com/kyma-project/kyma/components/application-connector/connector-service/internal/tokens/tokencache"
 )
 
 type Manager interface {

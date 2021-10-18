@@ -3,8 +3,8 @@ package middlewares
 import (
 	"net/http"
 
-	"github.com/kyma-project/kyma/components/connector-service/internal/clientcontext"
-	"github.com/kyma-project/kyma/components/connector-service/internal/httphelpers"
+	"github.com/kyma-project/kyma/components/application-connector/connector-service/internal/clientcontext"
+	"github.com/kyma-project/kyma/components/application-connector/connector-service/internal/httphelpers"
 	"github.com/sirupsen/logrus"
 )
 

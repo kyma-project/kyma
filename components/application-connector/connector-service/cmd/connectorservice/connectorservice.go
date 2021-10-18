@@ -5,10 +5,10 @@ import (
 	"strconv"
 	"sync"
 
-	loggingMiddlewares "github.com/kyma-project/kyma/components/connector-service/internal/logging/middlewares"
-	"github.com/kyma-project/kyma/components/connector-service/internal/monitoring"
-	"github.com/kyma-project/kyma/components/connector-service/internal/tokens"
-	"github.com/kyma-project/kyma/components/connector-service/internal/tokens/tokencache"
+	loggingMiddlewares "github.com/kyma-project/kyma/components/application-connector/connector-service/internal/logging/middlewares"
+	"github.com/kyma-project/kyma/components/application-connector/connector-service/internal/monitoring"
+	"github.com/kyma-project/kyma/components/application-connector/connector-service/internal/tokens"
+	"github.com/kyma-project/kyma/components/application-connector/connector-service/internal/tokens/tokencache"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	log "github.com/sirupsen/logrus"
 )

@@ -1,8 +1,8 @@
 package externalapi
 
 import (
-	"github.com/kyma-project/kyma/components/connector-service/internal/certificates"
-	"github.com/kyma-project/kyma/components/connector-service/internal/clientcontext"
+	"github.com/kyma-project/kyma/components/application-connector/connector-service/internal/certificates"
+	"github.com/kyma-project/kyma/components/application-connector/connector-service/internal/clientcontext"
 )
 
 type certRequest struct {

@@ -5,7 +5,7 @@ package mocks
 import (
 	context "context"
 
-	apperrors "github.com/kyma-project/kyma/components/connector-service/internal/apperrors"
+	apperrors "github.com/kyma-project/kyma/components/application-connector/connector-service/internal/apperrors"
 
 	mock "github.com/stretchr/testify/mock"
 
