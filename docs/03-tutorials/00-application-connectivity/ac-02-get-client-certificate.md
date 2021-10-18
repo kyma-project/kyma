@@ -158,11 +158,11 @@ Since the local Kyma installation uses the self-signed certificate by default, s
 Call Application Registry with this command:
 
 ```bash
-curl https://gateway.kyma.local/{APP_NAME}/v1/metadata/services --cert {CLIENT_CERT_FILE_NAME}.crt --key {KEY_FILE_NAME}.key -k
+curl https://gateway.local.kyma.dev/{APP_NAME}/v1/metadata/services --cert {CLIENT_CERT_FILE_NAME}.crt --key {KEY_FILE_NAME}.key -k
 ```
 
 Use this command to call the Event Publisher:
 
 ```bash
-curl -X POST -H "Content-Type: application/json" https://gateway.kyma.local/{APP_NAME}/v1/events --cert {CLIENT_CERT_FILE_NAME}.crt --key {KEY_FILE_NAME}.key -k -d '{EVENT}'
+curl -X POST -H "Content-Type: application/json" https://gateway.local.kyma.dev/{APP_NAME}/v1/events --cert {CLIENT_CERT_FILE_NAME}.crt --key {KEY_FILE_NAME}.key -k -d '{EVENT}'
 ```
