@@ -3,7 +3,6 @@ helmValues:
   global:
     imagePullPolicy: IfNotPresent
     proxy:
-      holdApplicationUntilProxyStarts: true
       readinessFailureThreshold: 40
       readinessInitialDelaySeconds: 5
       readinessPeriodSeconds: 5
@@ -36,6 +35,7 @@ meshConfig:
   accessLogEncoding: JSON
   trustDomain: cluster.local
   defaultConfig:
+    holdApplicationUntilProxyStarts: true
     tracing:
       sampling: 1
       zipkin:
