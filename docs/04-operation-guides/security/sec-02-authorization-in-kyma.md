@@ -4,21 +4,26 @@ title: Authorization in Kyma
 
 ## User authorization
 
-Kyma uses the Kubernetes concept of roles. Assign roles to individual users or user groups to manage access to the cluster. If you want to access the system through Kyma Dashboard or using kubectl, you need a `kubeconfig` file with user context. User permissions are recognised depending on roles that are bound to this user and known from the `kubeconfig` context.
+Kyma uses the Kubernetes concept of roles. Assign roles to individual users or user groups to manage access to the cluster. If you want to access the system through Kyma Dashboard or using kubectl, you need a `kubeconfig` file with user context. User permissions are recognized depending on roles that are bound to this user and known from the `kubeconfig` context.
 
 ### Cluster-wide authorization
 
-Roles in Kyma are defined as ClusterRoles and use the Kubernetes mechanism of aggregation, which allows you to combine multiple ClusterRoles into a single ClusterRole. Kyma comes with a set of roles which are aggregated to the main end-user roles. You can use the aggregation mechanism to efficiently manage access to Kubernetes and Kyma-specific resources.
+Roles in Kyma are defined as ClusterRoles and use the Kubernetes mechanism of aggregation, which allows you to combine multiple ClusterRoles into a single ClusterRole. Kyma comes with a set of roles that are aggregated to the main end-user roles. You can use the aggregation mechanism to efficiently manage access to Kubernetes and Kyma-specific resources.
 
 >**NOTE:** Read the [Kubernetes documentation](https://kubernetes.io/docs/reference/access-authn-authz/rbac/#aggregated-clusterroles) to learn more about the aggregation mechanism used to define Kyma roles.
 
 The predefined end-user roles are:
 
-| Role | Default group | Description |
-| --- | --- | --- |
-| **kyma-developer** | None | The role created for developers who build implementations using Kyma. It allows you to list, edit, and create Kubernetes and Kyma-specific resources. You need to bind it manually to a user or a group in the Namespaces of your choice. |
-| **kyma-admin** | `runtimeAdmin` | The role with the highest permission level which gives access to all Kubernetes and Kyma resources and components with administrative rights. |
-| **kyma-namespace-admin** | `runtimeNamespaceAdmin` | The role which gives access to a specific Namespace with administrative rights. |
+| Role | Description |
+| --- | --- |
+| **kyma-essentials** | The basic role required to allow the user to access Kyma Dashboard of the cluster. This role doesn't give the user rights to modify any resources. Please note that with Kyma 2.0, the **kyma-essentials** role becomes **deprecated**. |
+| **kyma-namespace-admin-essentials** | The role that allows the user to access Kyma Dashboard and create Namespaces, built on top of the **kyma-essentials** role. |
+| **kyma-view** | The role for listing Kubernetes and Kyma-specific resources. |
+| **kyma-edit** | The role for editing Kyma-specific resources. It's [aggregated](https://kubernetes.io/docs/reference/access-authn-authz/rbac/#aggregated-clusterroles) by other roles. |
+| **kyma-snapshots** | The role for managing VolumeSnapshot CR for backups. |
+| **kyma-developer** | The role created for developers who build implementations using Kyma. It allows you to list, edit, and create Kubernetes and Kyma-specific resources except for read and write access to AddonsConfigurations. You need to bind it manually to a user or a group in the Namespaces of your choice. |
+| **kyma-admin** | The role with the highest permission level which gives access to all Kubernetes and Kyma resources and components with administrative rights. |
+| **kyma-namespace-admin** | The role which gives access to a specific Namespace with administrative rights except for the write access to AddonsConfigurations. |
 
 To learn more about the default roles and how they are constructed, see the [`rbac-roles.yaml`](https://github.com/kyma-project/kyma/blob/master/resources/cluster-users/templates/rbac-roles.yaml) file.
 
@@ -39,7 +44,7 @@ You can use your own Identity Provider (IdP) using OpenID Connect to authenticat
 
 ## Service-to-service authorization
 
-Kyma uses the native [Istio Authorization Policy](https://istio.io/latest/docs/reference/config/security/authorization-policy/). The Authorization Policy enables access control on workloads in the mesh. <!--check if the section is still valid>
+Kyma uses the native [Istio Authorization Policy](https://istio.io/latest/docs/reference/config/security/authorization-policy/). The Authorization Policy enables access control on workloads in the mesh.
 
 ## User-to-service authorization
 
