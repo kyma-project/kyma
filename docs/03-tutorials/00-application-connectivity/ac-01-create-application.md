@@ -2,8 +2,6 @@
 title: Create a new Application
 ---
 
-Application Operator listens for the creation of Application custom resources. It provisions and de-provisions the necessary deployments for every created Application.
-
 >**NOTE:** An Application represents a single connected external solution.
 
 To create a new Application, run this command:
@@ -22,14 +20,14 @@ spec:
 EOF
 ```
 
-## Check the Application status
+## Get the Application data
 
-To check the status of the created Application and show the output in the `yaml` format, run this command:
+To get the data of the created Application and show the output in the `yaml` format, run this command:
 ```bash
 kubectl get app {APP_NAME} -o yaml
 ```
 
-A successful response returns the Application custom resource with the specified name. The custom resource has the **status** section added.
+A successful response returns the Application custom resource with the specified name. 
 This is an example response:
 
 ```yaml
@@ -47,10 +45,8 @@ metadata:
 spec:
   accessLabel: {APP_NAME}
   description: {APP_DESCRIPTION}
-  labels: {}
+  labels:
+    region: "us"
+    kind: "production"
   services: []
-status:
-  installationStatus:
-    description: Install complete
-    status: deployed
 ```
