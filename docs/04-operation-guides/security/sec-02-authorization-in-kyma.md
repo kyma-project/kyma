@@ -16,7 +16,7 @@ The predefined end-user roles are:
 
 | Role | Description |
 | --- | --- |
-| **kyma-essentials** | The basic role required to allow the user to access Kyma Dashboard of the cluster. This role doesn't give the user rights to modify any resources. Please note that with Kyma 2.0, the **kyma-essentials** role becomes **deprecated**. |
+| **kyma-essentials** | The basic role required to allow the user to access Kyma Dashboard of the cluster. This role doesn't give the user rights to modify any resources. [Please note that with Kyma 2.0, the **kyma-essentials** role becomes **deprecated**.] |
 | **kyma-namespace-admin-essentials** | The role that allows the user to access Kyma Dashboard and create Namespaces, built on top of the **kyma-essentials** role. |
 | **kyma-view** | The role for listing Kubernetes and Kyma-specific resources. |
 | **kyma-edit** | The role for editing Kyma-specific resources. It's [aggregated](https://kubernetes.io/docs/reference/access-authn-authz/rbac/#aggregated-clusterroles) by other roles. |
