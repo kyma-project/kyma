@@ -72,7 +72,6 @@ controller-manager:
   pod:
     annotations:
       sidecar.istio.io/inject: "false"
-      recreate: "{{ now }}"
     resources:
       limits:
         cpu: 150m
@@ -314,7 +313,6 @@ upload-service:
   pod:
     annotations:
       sidecar.istio.io/inject: "false"
-      recreate: "{{ now }}"
 
   service:
     annotations: {}
