@@ -1,0 +1,15 @@
+{{- if .Values.auth.enabled }}
+{{- if eq .Values.auth.resolver.type "memory" }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ template "nats.name" . }}-accounts
+  labels:
+    app: {{ template "nats.name" . }}
+    chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+data:
+  accounts.conf: |-
+    {{- .Files.Get "accounts.conf" | indent 6 }}
+{{- end }}
+{{- end }}

@@ -3,9 +3,6 @@ global:
   containerRegistry:
     path: eu.gcr.io/kyma-project
   images:
-    nats_operator_doctor:
-      name: nats-operator-doctor
-      version: PR-11920
     eventing_controller:
       name: eventing-controller
       version: PR-12189

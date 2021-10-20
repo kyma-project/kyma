@@ -1,0 +1,74 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "nats.fullname" . }}
+  namespace: {{ .Release.Namespace | quote }}
+  labels:
+    {{- include "nats.labels" . | nindent 4 }}
+  {{- if .Values.serviceAnnotations}}
+  annotations:
+  {{- range $key, $value := .Values.serviceAnnotations }}
+    {{ $key }}: {{ $value | quote }}
+  {{- end }}
+  {{- end }}
+spec:
+  selector:
+    {{- include "nats.selectorLabels" . | nindent 4 }}
+  clusterIP: None
+  {{- if .Values.topologyKeys }}
+  topologyKeys:
+     {{- .Values.topologyKeys | toYaml | nindent 4 }}
+  {{- end }}
+  ports:
+  {{- if .Values.websocket.enabled }}
+  - name: websocket
+    port: {{ .Values.websocket.port }}
+    {{- if .Values.appProtocol.enabled }}
+    appProtocol: tcp
+    {{- end }}
+  {{- end }}
+  {{- if .Values.nats.profiling.enabled }}
+  - name: profiling
+    port: {{ .Values.nats.profiling.port }}
+    {{- if .Values.appProtocol.enabled }}
+    appProtocol: http
+    {{- end }}
+  {{- end }}
+  - name: client
+    port: 4222
+    {{- if .Values.appProtocol.enabled }}
+    appProtocol: tcp
+    {{- end }}
+  - name: cluster
+    port: 6222
+    {{- if .Values.appProtocol.enabled }}
+    appProtocol: tcp
+    {{- end }}
+  - name: monitor
+    port: 8222
+    {{- if .Values.appProtocol.enabled }}
+    appProtocol: http
+    {{- end }}
+  - name: metrics
+    port: 7777
+    {{- if .Values.appProtocol.enabled }}
+    appProtocol: http
+    {{- end }}
+  - name: leafnodes
+    port: 7422
+    {{- if .Values.appProtocol.enabled }}
+    appProtocol: tcp
+    {{- end }}
+  - name: gateways
+    port: 7522
+    {{- if .Values.appProtocol.enabled }}
+    appProtocol: tcp
+    {{- end }}
+  {{- if .Values.mqtt.enabled }}
+  - name: mqtt
+    port: 1883
+    {{- if .Values.appProtocol.enabled }}
+    appProtocol: tcp
+    {{- end }}
+  {{- end }}

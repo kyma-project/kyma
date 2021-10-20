@@ -1,0 +1,529 @@
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "nats.fullname" . }}
+  namespace: {{ .Release.Namespace | quote }}
+  labels:
+    {{- include "nats.labels" . | nindent 4 }}
+    {{- if .Values.statefulSetAnnotations}}
+  annotations:
+  {{- range $key, $value := .Values.statefulSetAnnotations }}
+    {{ $key }}: {{ $value | quote }}
+  {{- end }}
+  {{- end }}
+spec:
+  selector:
+    matchLabels:
+      {{- include "nats.selectorLabels" . | nindent 6 }}
+  {{- if .Values.cluster.enabled }}
+  replicas: {{ .Values.cluster.replicas }}
+  {{- else }}
+  replicas: 1
+  {{- end }}
+  serviceName: {{ include "nats.fullname" . }}
+  template:
+    metadata:
+      {{- if or .Values.podAnnotations .Values.exporter.enabled }}
+      annotations:
+      {{- if .Values.exporter.enabled }}
+        prometheus.io/path: /metrics
+        prometheus.io/port: "7777"
+        prometheus.io/scrape: "true"
+      {{- end }}
+      {{- range $key, $value := .Values.podAnnotations }}
+        {{ $key }}: {{ $value | quote }}
+      {{- end }}
+      {{- end }}
+      labels:
+        {{- include "nats.selectorLabels" . | nindent 8 }}
+        {{- if .Values.statefulSetPodLabels }}
+        {{ toYaml .Values.statefulSetPodLabels | indent 8 }}
+        {{- end }}
+    spec:
+{{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+{{- toYaml . | nindent 8 }}
+{{- end }}
+{{- with .Values.securityContext }}
+      securityContext:
+{{ toYaml . | indent 8 }}
+{{- end }}
+{{- with .Values.affinity }}
+      affinity:
+{{- tpl (toYaml .) $ | nindent 8 }}
+{{- end }}
+{{- with .Values.nodeSelector }}
+      nodeSelector: {{ toYaml . | nindent 8 }}
+{{- end }}
+{{- with .Values.tolerations }}
+      tolerations: {{ toYaml . | nindent 8 }}
+{{- end }}
+{{- if .Values.topologySpreadConstraints }}
+      topologySpreadConstraints:
+      {{- range .Values.topologySpreadConstraints }}
+      {{- if and .maxSkew .topologyKey }}
+      - maxSkew: {{ .maxSkew }}
+        topologyKey: {{ .topologyKey }}
+        {{- if .whenUnsatisfiable }}
+        whenUnsatisfiable: {{ .whenUnsatisfiable }}
+        {{- end }}
+        labelSelector:
+          matchLabels:
+            {{- include "nats.selectorLabels" $ | nindent 12 }}
+      {{- end}}
+      {{- end }}
+{{- end }}
+{{- if .Values.priorityClassName }}
+      priorityClassName: {{ .Values.priorityClassName | quote }}
+{{- end }}
+      # Common volumes for the containers.
+      volumes:
+      - name: config-volume
+        {{ if .Values.nats.customConfigSecret }}
+        secret:
+          secretName: {{ .Values.nats.customConfigSecret.name }}
+        {{ else }}
+        configMap:
+          name: {{ include "nats.fullname" . }}-config
+        {{ end }}
+
+      # Local volume shared with the reloader.
+      - name: pid
+        emptyDir: {}
+
+      {{- if and .Values.auth.enabled .Values.auth.resolver }}
+      {{- if .Values.auth.resolver.configMap }}
+      - name: resolver-volume
+        configMap:
+          name: {{ .Values.auth.resolver.configMap.name }}
+      {{- end }}
+
+      {{- if eq .Values.auth.resolver.type "URL" }}
+      - name: operator-jwt-volume
+        configMap:
+          name: {{ .Values.auth.operatorjwt.configMap.name }}
+      {{- end }}
+      {{- end }}
+
+      {{- if and .Values.nats.externalAccess .Values.nats.advertise }}
+      # Local volume shared with the advertise config initializer.
+      - name: advertiseconfig
+        emptyDir: {}
+      {{- end }}
+
+      {{- if and .Values.nats.jetstream.fileStorage.enabled .Values.nats.jetstream.fileStorage.existingClaim }}
+      # Persistent volume for jetstream running with file storage option
+      - name: {{ include "nats.fullname" . }}-js-pvc
+        persistentVolumeClaim:
+          claimName: {{ .Values.nats.jetstream.fileStorage.existingClaim | quote }}
+      {{- end }}
+
+      #################
+      #               #
+      #  TLS Volumes  #
+      #               #
+      #################
+      {{- with .Values.nats.tls }}
+      {{ $secretName := tpl .secret.name $ }}
+      - name: {{ $secretName }}-clients-volume
+        secret:
+          secretName: {{ $secretName }}
+      {{- end }}
+      {{- with .Values.mqtt.tls }}
+      {{ $secretName := tpl .secret.name $ }}
+      - name: {{ $secretName }}-mqtt-volume
+        secret:
+          secretName: {{ $secretName }}
+      {{- end }}
+      {{- with .Values.cluster.tls }}
+      {{ $secretName := tpl .secret.name $ }}
+      - name: {{ $secretName }}-cluster-volume
+        secret:
+          secretName: {{ $secretName }}
+      {{- end }}
+      {{- with .Values.leafnodes.tls }}
+      {{ $secretName := tpl .secret.name $ }}
+      - name: {{ $secretName }}-leafnodes-volume
+        secret:
+          secretName: {{ $secretName }}
+      {{- end }}
+      {{- with .Values.gateway.tls }}
+      {{ $secretName := tpl .secret.name $ }}
+      - name: {{ $secretName }}-gateways-volume
+        secret:
+          secretName: {{ $secretName }}
+      {{- end }}
+      {{- with .Values.websocket.tls }}
+      {{ $secretName := tpl .secret.name $ }}
+      - name: {{ $secretName }}-ws-volume
+        secret:
+          secretName: {{ $secretName }}
+      {{- end }}
+      {{- if .Values.leafnodes.enabled }}
+      #
+      # Leafnode credential volumes
+      #
+      {{- range .Values.leafnodes.remotes }}
+      {{- with .credentials }}
+      - name: {{ .secret.name }}-volume
+        secret:
+          secretName: {{ .secret.name }}
+      {{- end }}
+      {{- end }}
+      {{- end }}
+
+      {{ if and .Values.nats.externalAccess .Values.nats.advertise }}
+      # Assume that we only use the service account in case we want to
+      # figure out what is the current external public IP from the server
+      # in order to be able to advertise correctly.
+      serviceAccountName: {{ .Values.nats.serviceAccount }}
+      {{ end }}
+
+      # Required to be able to HUP signal and apply config
+      # reload to the server without restarting the pod.
+      shareProcessNamespace: true
+
+      {{- if and .Values.nats.externalAccess .Values.nats.advertise }}
+      # Initializer container required to be able to lookup
+      # the external ip on which this node is running.
+      initContainers:
+      - name: bootconfig
+        command:
+        - nats-pod-bootconfig
+        - -f
+        - /etc/nats-config/advertise/client_advertise.conf
+        - -gf
+        - /etc/nats-config/advertise/gateway_advertise.conf
+        env:
+        - name: KUBERNETES_NODE_NAME
+          valueFrom:
+            fieldRef:
+              apiVersion: v1
+              fieldPath: spec.nodeName
+        image: {{ .Values.bootconfig.image }}
+        imagePullPolicy: {{ .Values.bootconfig.pullPolicy }}
+        {{- if .Values.bootconfig.securityContext }}
+        securityContext:
+        {{- .Values.bootconfig.securityContext | toYaml | nindent 8 }}
+        {{- end }}
+        resources:
+          {{- toYaml .Values.bootconfig.resources | nindent 10 }}
+        volumeMounts:
+        - mountPath: /etc/nats-config/advertise
+          name: advertiseconfig
+          subPath: advertise
+      {{- end }}
+
+      #################
+      #               #
+      #  NATS Server  #
+      #               #
+      #################
+      terminationGracePeriodSeconds: {{ .Values.nats.terminationGracePeriodSeconds }}
+      containers:
+      - name: nats
+        image: {{ .Values.nats.image }}
+        imagePullPolicy: {{ .Values.nats.pullPolicy }}
+        {{- if .Values.nats.securityContext }}
+        securityContext:
+        {{- .Values.nats.securityContext | toYaml | nindent 10 }}
+        {{- end }}
+        resources:
+          {{- toYaml .Values.nats.resources | nindent 10 }}
+        ports:
+        - containerPort: 4222
+          name: client
+          {{- if .Values.nats.externalAccess }}
+          hostPort: 4222
+          {{- end }}
+        - containerPort: 7422
+          name: leafnodes
+          {{- if .Values.nats.externalAccess }}
+          hostPort: 7422
+          {{- end }}
+        - containerPort: 7522
+          name: gateways
+          {{- if .Values.nats.externalAccess }}
+          hostPort: 7522
+          {{- end }}
+        - containerPort: 6222
+          name: cluster
+        - containerPort: 8222
+          name: monitor
+        - containerPort: 7777
+          name: metrics
+        {{- if .Values.mqtt.enabled }}
+        - containerPort: 1883
+          name: mqtt
+          {{- if .Values.nats.externalAccess }}
+          hostPort: 1883
+          {{- end }}
+        {{- end }}
+        {{- if .Values.websocket.enabled }}
+        - containerPort: {{ .Values.websocket.port }}
+          name: websocket
+          {{- if .Values.nats.externalAccess }}
+          hostPort: {{ .Values.websocket.port }}
+          {{- end }}
+        {{- end }}
+        {{- if .Values.nats.profiling.enabled }}
+        - containerPort: {{ .Values.nats.profiling.port }}
+          name: profiling
+        {{- end }}
+
+        command:
+         - "nats-server"
+         - "--config"
+         - "/etc/nats-config/nats.conf"
+        {{- if .Values.nats.profiling.enabled }}
+         - "--profile={{ .Values.nats.profiling.port }}"
+        {{- end }}
+
+        # Required to be able to define an environment variable
+        # that refers to other environment variables.  This env var
+        # is later used as part of the configuration file.
+        env:
+        - name: POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        - name: POD_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        - name: CLUSTER_ADVERTISE
+          value: {{ include "nats.clusterAdvertise" . }}
+
+        {{- if .Values.nats.jetstream.enabled }}
+        {{- with .Values.nats.jetstream.encryption }}
+        {{- with .secret }}
+        - name: JS_KEY
+          valueFrom:
+            secretKeyRef:
+              name: {{ .name }}
+              key: {{ .key }}
+        {{- end }}
+        {{- end }}
+        {{- end }}
+        volumeMounts:
+          - name: config-volume
+            mountPath: /etc/nats-config
+          - name: pid
+            mountPath: /var/run/nats
+          {{- if and .Values.nats.externalAccess .Values.nats.advertise }}
+          - mountPath: /etc/nats-config/advertise
+            name: advertiseconfig
+            subPath: advertise
+          {{- end }}
+
+          {{- if and .Values.auth.enabled .Values.auth.resolver }}
+          {{- if eq .Values.auth.resolver.type "memory" }}
+          - name: resolver-volume
+            mountPath: /etc/nats-config/accounts
+          {{- end }}
+
+          {{- if eq .Values.auth.resolver.type "full" }}
+          {{- if .Values.auth.resolver.configMap }}
+          - name: resolver-volume
+            mountPath: /etc/nats-config/accounts
+          {{- end }}
+          {{- if and .Values.auth.resolver .Values.auth.resolver.store }}
+          - name: nats-jwt-pvc
+            mountPath: {{ .Values.auth.resolver.store.dir }}
+          {{- end }}
+          {{- end }}
+
+          {{- if eq .Values.auth.resolver.type "URL" }}
+          - name: operator-jwt-volume
+            mountPath: /etc/nats-config/operator
+          {{- end }}
+          {{- end }}
+
+          {{- if .Values.nats.jetstream.fileStorage.enabled }}
+          - name: {{ include "nats.fullname" . }}-js-pvc
+            mountPath: {{ .Values.nats.jetstream.fileStorage.storageDirectory }}
+          {{- end }}
+
+          {{- with .Values.nats.tls }}
+          #######################
+          #                     #
+          #  TLS Volumes Mounts #
+          #                     #
+          #######################
+          {{ $secretName := tpl .secret.name $ }}
+          - name: {{ $secretName }}-clients-volume
+            mountPath: /etc/nats-certs/clients/{{ $secretName }}
+          {{- end }}
+          {{- with .Values.mqtt.tls }}
+          {{ $secretName := tpl .secret.name $ }}
+          - name: {{ $secretName }}-mqtt-volume
+            mountPath: /etc/nats-certs/mqtt/{{ $secretName }}
+          {{- end }}
+          {{- with .Values.cluster.tls }}
+          {{ $secretName := tpl .secret.name $ }}
+          - name: {{ $secretName }}-cluster-volume
+            mountPath: /etc/nats-certs/cluster/{{ $secretName }}
+          {{- end }}
+          {{- with .Values.leafnodes.tls }}
+          {{ $secretName := tpl .secret.name $ }}
+          - name: {{ $secretName }}-leafnodes-volume
+            mountPath: /etc/nats-certs/leafnodes/{{ $secretName }}
+          {{- end }}
+          {{- with .Values.gateway.tls }}
+          {{ $secretName := tpl .secret.name $ }}
+          - name: {{ $secretName }}-gateways-volume
+            mountPath: /etc/nats-certs/gateways/{{ $secretName }}
+          {{- end }}
+
+          {{- with .Values.websocket.tls }}
+          {{ $secretName := tpl .secret.name $ }}
+          - name: {{ $secretName }}-ws-volume
+            mountPath: /etc/nats-certs/ws/{{ $secretName }}
+          {{- end }}
+
+          {{- if .Values.leafnodes.enabled }}
+          #
+          # Leafnode credential volumes
+          #
+          {{- range .Values.leafnodes.remotes }}
+          {{- with .credentials }}
+          - name: {{ .secret.name }}-volume
+            mountPath: /etc/nats-creds/{{ .secret.name }}
+          {{- end }}
+          {{- end }}
+          {{- end }}
+
+        # Liveness/Readiness probes against the monitoring.
+        #
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 8222
+          initialDelaySeconds: 10
+          timeoutSeconds: 5
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 8222
+          initialDelaySeconds: 10
+          timeoutSeconds: 5
+
+        # Gracefully stop NATS Server on pod deletion or image upgrade.
+        #
+        lifecycle:
+          preStop:
+            exec:
+              # Using the alpine based NATS image, we add an extra sleep that is
+              # the same amount as the terminationGracePeriodSeconds to allow
+              # the NATS Server to gracefully terminate the client connections.
+              #
+              command:
+              - "/bin/sh"
+              - "-c"
+              - "nats-server -sl=ldm=/var/run/nats/nats.pid && /bin/sleep {{ .Values.nats.terminationGracePeriodSeconds }}"
+
+      #################################
+      #                               #
+      #  NATS Configuration Reloader  #
+      #                               #
+      #################################
+      {{ if .Values.reloader.enabled }}
+      - name: reloader
+        image: {{ .Values.reloader.image }}
+        imagePullPolicy: {{ .Values.reloader.pullPolicy }}
+        {{- if .Values.reloader.securityContext }}
+        securityContext:
+        {{- .Values.reloader.securityContext | toYaml | nindent 10 }}
+        {{- end }}
+        resources:
+          {{- toYaml .Values.reloader.resources | nindent 10 }}
+        command:
+         - "nats-server-config-reloader"
+         - "-pid"
+         - "/var/run/nats/nats.pid"
+         - "-config"
+         - "/etc/nats-config/nats.conf"
+        volumeMounts:
+          - name: config-volume
+            mountPath: /etc/nats-config
+          - name: pid
+            mountPath: /var/run/nats
+      {{ end }}
+
+      ##############################
+      #                            #
+      #  NATS Prometheus Exporter  #
+      #                            #
+      ##############################
+      {{ if .Values.exporter.enabled }}
+      - name: metrics
+        image: {{ .Values.exporter.image }}
+        imagePullPolicy: {{ .Values.exporter.pullPolicy }}
+        {{- if .Values.exporter.securityContext }}
+        securityContext:
+        {{- .Values.exporter.securityContext | toYaml | nindent 10 }}
+        {{- end }}
+        resources:
+          {{- toYaml .Values.exporter.resources | nindent 10 }}
+        args:
+        - -connz
+        - -routez
+        - -subz
+        - -varz
+        - -prefix=nats
+        - -use_internal_server_id
+        {{- if .Values.nats.jetstream.enabled }}
+        - -jsz=all
+        {{- end }}
+        - http://localhost:8222/
+        ports:
+        - containerPort: 7777
+          name: metrics
+      {{ end }}
+
+  volumeClaimTemplates:
+  {{- if eq .Values.auth.resolver.type "full" }}
+  {{- if and .Values.auth.resolver .Values.auth.resolver.store }}
+  #####################################
+  #                                   #
+  #  Account Server Embedded JWT      #
+  #                                   #
+  #####################################
+    - metadata:
+        name: nats-jwt-pvc
+      spec:
+        accessModes:
+        - ReadWriteOnce
+        resources:
+          requests:
+            storage: {{ .Values.auth.resolver.store.size }}
+  {{- end }}
+  {{- end }}
+
+  {{- if and .Values.nats.jetstream.fileStorage.enabled (not .Values.nats.jetstream.fileStorage.existingClaim) }}
+  #####################################
+  #                                   #
+  #  Jetstream New Persistent Volume  #
+  #                                   #
+  #####################################
+    - metadata:
+        name: {{ include "nats.fullname" . }}-js-pvc
+        {{- if .Values.nats.jetstream.fileStorage.annotations }}
+        annotations:
+        {{- range $key, $value := .Values.nats.jetstream.fileStorage.annotations }}
+          {{ $key }}: {{ $value | quote }}
+        {{- end }}
+        {{- end }}
+      spec:
+        accessModes:
+        {{- range .Values.nats.jetstream.fileStorage.accessModes }}
+          - {{ . | quote }}
+        {{- end }}
+        resources:
+          requests:
+            storage: {{ .Values.nats.jetstream.fileStorage.size }}
+        {{- if .Values.nats.jetstream.fileStorage.storageClassName }}
+        storageClassName: {{ .Values.nats.jetstream.fileStorage.storageClassName | quote }}
+        {{- end }}
+  {{- end }}

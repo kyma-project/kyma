@@ -1,0 +1,30 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "{{ include "nats.fullname" . }}-test-request-reply"
+  labels:
+    {{- include "nats.labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/hook": test
+spec:
+  containers:
+    - name: nats-box
+      image: synadia/nats-box
+      env:
+        - name: NATS_HOST
+          value: {{ template "nats.fullname" . }}
+      command:
+        - /bin/sh
+        - -ec
+        - |
+          nats reply -s nats://$NATS_HOST:4222 'name.>' --command "echo {{1}}" &
+        - |
+          "&&"
+        - |
+          name=$(nats request -s nats://$NATS_HOST:4222 name.test '' 2>/dev/null)
+        - |
+          "&&"
+        - |
+          [ $name = test ]
+
+  restartPolicy: Never
