@@ -40,7 +40,6 @@ func main() {
 		os.Exit(3)
 	}
 	log, err := logger.New(format, level)
-	log.Info("bla bla bla")
 	if err != nil {
 		if logErr := logger.LogFatalError("Failed to initialize logger: %s", err.Error()); logErr != nil {
 			fmt.Printf("Failed to initializie default fatal error logger: %s, Failed to initialize logger: %s", logErr, err)
@@ -52,7 +51,7 @@ func main() {
 		os.Exit(5)
 	}
 
-	log.WithContext().With("options", options).Info("Starting Validation Proxy.")
+	log.WithContext().With("options", options).Info("Starting Validation Proxy. bla bla bla")
 
 	idCache := cache.New(
 		time.Duration(options.cacheExpirationMinutes)*time.Minute,
