@@ -40,6 +40,7 @@ clusterRoles:
       - "testing.kyma-project.io"
       - "installer.kyma-project.io"
       - "serverless.kyma-project.io"
+      - "eventing.kyma-project.io"
     addons:
       - "addons.kyma-project.io"
     monitoring:

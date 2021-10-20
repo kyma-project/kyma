@@ -12,7 +12,6 @@ metadata:
     helm.sh/hook-weight: "0"
 rules:
 - apiGroups:
-    - "eventing.kyma-project.io"
 {{ toYaml .Values.clusterRoles.apiGroups.kyma | indent 4 }}
   resources:
     - "*"
@@ -32,7 +31,6 @@ metadata:
     helm.sh/hook-weight: "0"
 rules:
 - apiGroups:
-    - "eventing.kyma-project.io"
 {{ toYaml .Values.clusterRoles.apiGroups.kyma | indent 4 }}
   resources:
     - "*"
