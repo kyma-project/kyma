@@ -35,7 +35,7 @@ func main() {
 	log.SetFormatter(formatter)
 
 	log.Info("Starting Application Gateway.")
-
+	log.Info("bla bla bla")
 	options := parseArgs()
 	log.Infof("Options: %s", options)
 

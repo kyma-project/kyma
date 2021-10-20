@@ -35,7 +35,7 @@ func main() {
 	log.SetFormatter(formatter)
 
 	log.Info("Starting Application Operator.")
-
+	log.Info("bla bla bla")
 	options, err := parseOptions()
 	if err != nil {
 		log.Fatal(err)

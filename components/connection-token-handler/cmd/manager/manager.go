@@ -26,7 +26,7 @@ func main() {
 
 	log := logf.Log.WithName("entrypoint")
 	log.Info("Starting ConnectionTokenHandler Controller.")
-
+	log.Info("bla bla bla")
 	options := parseArgs()
 	log.Info(fmt.Sprintf("Options: %s", options))
 
