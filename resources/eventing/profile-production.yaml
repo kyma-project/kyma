@@ -17,7 +17,9 @@ controller:
 
 
 nats:
-  clusterSize: 3
+  cluster:
+    enabled: true
+    replicas: 3
   resources:
     limits:
       cpu: 500m

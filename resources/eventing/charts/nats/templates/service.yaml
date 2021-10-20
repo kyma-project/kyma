@@ -36,7 +36,7 @@ spec:
     {{- end }}
   {{- end }}
   - name: client
-    port: 4222
+    port: {{ .Values.nats.ports.client }}
     {{- if .Values.appProtocol.enabled }}
     appProtocol: tcp
     {{- end }}
@@ -46,7 +46,7 @@ spec:
     appProtocol: tcp
     {{- end }}
   - name: monitor
-    port: 8222
+    port: {{ .Values.nats.ports.monitoring }}
     {{- if .Values.appProtocol.enabled }}
     appProtocol: http
     {{- end }}

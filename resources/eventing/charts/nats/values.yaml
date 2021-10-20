@@ -6,6 +6,9 @@
 nats:
   image: nats:2.6.1-alpine
   pullPolicy: IfNotPresent
+  ports:
+    client: 4222
+    monitoring: 8222
 
   # Toggle profiling.
   # This enables nats-server pprof (profiling) port, so you can see goroutines
@@ -43,7 +46,13 @@ nats:
   # This is helpful if you are updating from Chart version <=7.4
   selectorLabels: {}
 
-  resources: {}
+  resources:
+    limits:
+      cpu: 20m
+      memory: 64Mi
+    requests:
+      cpu: 5m
+      memory: 16Mi
 
   # Server settings.
   limits:
@@ -63,8 +72,8 @@ nats:
   terminationGracePeriodSeconds: 120
 
   logging:
-    debug:
-    trace:
+    debug: true
+    trace: true
     logtime:
     connectErrorReports:
     reconnectErrorReports:
