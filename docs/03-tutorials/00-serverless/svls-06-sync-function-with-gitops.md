@@ -61,7 +61,7 @@ These sections will lead you through the whole installation, configuration, and 
 2. Use the `init` Kyma CLI command to create a local workspace with default configuration for a Python Function:
 
   ```bash
-  kyma init function --runtime python38 --dir $PWD/{WORKSPACE_FOLDER}
+  kyma init function --runtime python39 --dir $PWD/{WORKSPACE_FOLDER}
   ```
 
   >**TIP:** Python 3.8 is only one of the available runtimes. Read about all [supported runtimes and sample Functions to run on them](../../05-technical-reference/svls-01-sample-functions.md).
@@ -77,7 +77,7 @@ These sections will lead you through the whole installation, configuration, and 
   ```yaml
   name: my-function
   namespace: default
-  runtime: python38
+  runtime: python39
   source:
       sourceType: inline
       sourcePath: {FULL_PATH_TO_WORKSPACE_FOLDER}

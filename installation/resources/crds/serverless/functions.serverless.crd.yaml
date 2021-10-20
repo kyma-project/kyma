@@ -235,7 +235,6 @@ spec:
                   enum:
                     - nodejs12
                     - nodejs14
-                    - python38
                     - python39
                   type: string
                 source:
@@ -281,7 +280,6 @@ spec:
                   enum:
                     - nodejs12
                     - nodejs14
-                    - python38
                     - python39
                     - nodejs10
                   type: string
