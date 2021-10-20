@@ -61,6 +61,7 @@ const (
 )
 
 var (
+	mutex = &sync.RWMutex{}
 	acceptableMethods = []string{http.MethodPost, http.MethodOptions}
 )
 
@@ -1283,8 +1284,7 @@ func createSubscriptionObjectsAndWaitForReadiness(ctx context.Context, givenSubs
 // countBEBRequests returns how many requests for a given subscription are sent for each HTTP method
 func countBEBRequests(subscriptionName string) (countGet int, countPost int, countDelete int) {
 	countGet, countPost, countDelete = 0, 0, 0
-	var mutex = &sync.Mutex{}
-	mutex.Lock()
+	mutex.RLock()
 	for req, v := range beb.Requests {
 		switch method := req.Method; method {
 		case http.MethodGet:
@@ -1306,6 +1306,6 @@ func countBEBRequests(subscriptionName string) (countGet int, countPost int, cou
 			}
 		}
 	}
-	mutex.Unlock()
+	mutex.RUnlock()
 	return countGet, countPost, countDelete
 }
