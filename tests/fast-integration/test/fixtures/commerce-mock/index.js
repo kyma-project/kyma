@@ -195,7 +195,7 @@ async function sendEventAndCheckResponse() {
   );
 }
 
-async function sendEventAndCheckTracing() {
+async function sendLegacyEventAndCheckTracing() {
   // Send an event and get it back from the lastorder function
   const res = await sendEventAndCheckResponse();
   expect(res.data).to.have.nested.property("event.headers.x-b3-traceid");
@@ -266,16 +266,16 @@ async function checkTrace(traceId, expectedTraceLength, expectedTraceProcessSequ
   expect(traceDAG).to.have.length(1)
 
   // Check the tracing spans are correct
-  let nextSpan = traceDAG[0]
+  let currentSpan = traceDAG[0]
   for (let i = 0; i < expectedTraceLength; i++) {
-    const processServiceName = traceData.processes[nextSpan.processID].serviceName;
+    const processServiceName = traceData.processes[currentSpan.processID].serviceName;
     debug(`Checking Trace Sequence # ${i}: Expected process: ${expectedTraceProcessSequence[i]}, Received process: ${processServiceName}`)
     expect(processServiceName).to.be.equal(expectedTraceProcessSequence[i]);
 
     // Traverse to next trace span
     if (i < expectedTraceLength - 1) {
-      expect(nextSpan.childSpans).to.have.length(1)
-      nextSpan = nextSpan.childSpans[0]
+      expect(currentSpan.childSpans).to.have.length(1)
+      currentSpan = currentSpan.childSpans[0]
     }
   }
 }
@@ -625,7 +625,7 @@ module.exports = {
   ensureCommerceMockLocalTestFixture,
   ensureCommerceMockWithCompassTestFixture,
   sendEventAndCheckResponse,
-  sendEventAndCheckTracing,
+  sendLegacyEventAndCheckTracing,
   checkFunctionResponse,
   checkInClusterEventDelivery,
   checkInClusterEventTracing,

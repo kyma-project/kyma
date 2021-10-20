@@ -8,7 +8,7 @@ const {
   ensureCommerceMockLocalTestFixture,
   checkFunctionResponse,
   sendEventAndCheckResponse,
-  sendEventAndCheckTracing,
+  sendLegacyEventAndCheckTracing,
   cleanMockTestFixture,
   checkInClusterEventDelivery,
   checkInClusterEventTracing,
@@ -51,7 +51,7 @@ describe("Eventing tests", function () {
   // eventingTracingTestSuite - Runs Eventing tracing tests
   function eventingTracingTestSuite () {
     it("order.created.v1 event from CommerceMock should have correct tracing spans", async function () {
-      await sendEventAndCheckTracing();
+      await sendLegacyEventAndCheckTracing();
     });
     it("In-cluster event should have correct tracing spans", async function () {
       await checkInClusterEventTracing(testNamespace);

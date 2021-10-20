@@ -10,8 +10,9 @@ const {
     debug,
 } = require("../utils");
 
+const SECOND = 1000;
 let prometheusPort = 9090;
-let jeagerPort = 16686;
+let jaegerPort = 16686;
 
 function prometheusPortForward() {
     return kubectlPortForward("kyma-system", "prometheus-monitoring-prometheus-0", prometheusPort);
@@ -95,11 +96,11 @@ async function queryGrafana(url, redirectURL, ignoreSSL, httpErrorCode) {
 
 async function jaegerPortForward() {
     const res = await getJaegerPods();
-    if (res.body.items.length == 0) {
-        throw new Error("cannot find any jeager pods");
+    if (res.body.items.length === 0) {
+        throw new Error("cannot find any jaeger pods");
     }
 
-    return kubectlPortForward("kyma-system", res.body.items[0].metadata.name, jeagerPort);
+    return kubectlPortForward("kyma-system", res.body.items[0].metadata.name, jaegerPort);
 }
 
 async function getJaegerPods() {
@@ -109,14 +110,14 @@ async function getJaegerPods() {
 
 async function getJaegerTrace(traceId) {
     let path = `/api/traces/${traceId}`;
-    let url = `http://localhost:${jeagerPort}${path}`;
+    let url = `http://localhost:${jaegerPort}${path}`;
 
     try {
-        debug(`fetching trace: ${traceId} from jeager`)
+        debug(`fetching trace: ${traceId} from jaeger`)
         let responseBody = await retryPromise(
             () => { 
                 debug(`waiting for trace (id: ${traceId}) from jaeger...`)
-                return axios.get(url, {timeout: 30000})
+                return axios.get(url, {timeout: 30 * SECOND})
             },
             30,
             1000
@@ -124,7 +125,7 @@ async function getJaegerTrace(traceId) {
         
         return responseBody.data; 
     } catch (err) {
-        throw convertAxiosError(err, "cannot get jeager trace");
+        throw convertAxiosError(err, "cannot get jaeger trace");
     }
 }
 
