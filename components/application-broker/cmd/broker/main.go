@@ -51,7 +51,7 @@ func main() {
 	fatalOnError(err)
 
 	log := logger.New(&cfg.Logger)
-
+	log.Info("bla bla bla")
 	// setup graceful shutdown signals
 	ctx, cancelFunc := context.WithCancel(context.Background())
 	defer cancelFunc()
