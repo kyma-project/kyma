@@ -27,19 +27,6 @@ func TestGetRuntimeConfig(t *testing.T) {
 					{Name: "FUNC_RUNTIME", Value: "nodejs12"}},
 			},
 		},
-		"python38": {
-			name:    "python38",
-			runtime: serverlessv1alpha1.Python38,
-			want: runtime.Config{
-				Runtime:                 serverlessv1alpha1.Python38,
-				DependencyFile:          "requirements.txt",
-				FunctionFile:            "handler.py",
-				DockerfileConfigMapName: "dockerfile-python-38",
-				RuntimeEnvs: []corev1.EnvVar{{Name: "PYTHONPATH", Value: "$(KUBELESS_INSTALL_VOLUME)/lib.python3.8/site-packages:$(KUBELESS_INSTALL_VOLUME)"},
-					{Name: "FUNC_RUNTIME", Value: "python38"},
-					{Name: "PYTHONUNBUFFERED", Value: "TRUE"}},
-			},
-		},
 		"python39": {
 			name:    "python39",
 			runtime: serverlessv1alpha1.Python39,

@@ -60,7 +60,7 @@ func TestFunctionReconciler_buildDeployment(t *testing.T) {
 	type args struct {
 		instance *serverlessv1alpha1.Function
 	}
-	rtmCfg := runtime.GetRuntimeConfig(serverlessv1alpha1.Python38)
+	rtmCfg := runtime.GetRuntimeConfig(serverlessv1alpha1.Python39)
 
 	tests := []struct {
 		name string
@@ -463,25 +463,6 @@ func TestFunctionReconciler_buildJob(t *testing.T) {
 				{Name: "runtime", MountPath: "/workspace/Dockerfile", SubPath: "Dockerfile", ReadOnly: true},
 				{Name: "credentials", MountPath: "/docker", ReadOnly: true},
 				{Name: "registry-config", MountPath: "/workspace/registry-config/.npmrc", SubPath: ".npmrc", ReadOnly: true},
-			},
-		},
-		{
-			Name:               "Success Python38",
-			Runtime:            serverlessv1alpha1.Python38,
-			ExpectedVolumesLen: 4,
-			ExpectedVolumes: []expectedVolume{
-				{name: "sources", localObjectReference: cmName},
-				{name: "runtime", localObjectReference: rtmCfg.DockerfileConfigMapName},
-				{name: "credentials", localObjectReference: dockerCfg.ActiveRegistryConfigSecretName},
-				{name: "registry-config", localObjectReference: r.config.PackageRegistryConfigSecretName},
-			},
-			ExpectedMountsLen: 5,
-			ExpectedVolumeMounts: []corev1.VolumeMount{
-				{Name: "sources", MountPath: "/workspace/src/deps.txt", SubPath: FunctionDepsKey, ReadOnly: true},
-				{Name: "sources", MountPath: "/workspace/src/function.abap", SubPath: FunctionSourceKey, ReadOnly: true},
-				{Name: "runtime", MountPath: "/workspace/Dockerfile", SubPath: "Dockerfile", ReadOnly: true},
-				{Name: "credentials", MountPath: "/docker", ReadOnly: true},
-				{Name: "registry-config", MountPath: "/workspace/registry-config/pip.conf", SubPath: "pip.conf", ReadOnly: true},
 			},
 		},
 		{
