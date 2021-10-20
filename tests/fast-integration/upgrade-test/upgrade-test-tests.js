@@ -18,7 +18,7 @@ describe("Upgrade test tests", function () {
   const testNamespace = "test";
 
   it("Listing all pods in cluster", async function () {
-    initialRestarts = await getContainerRestartsForAllNamespaces();
+    let initialRestarts = await getContainerRestartsForAllNamespaces();
   });
 
   it("in-cluster event should be delivered", async function () {
