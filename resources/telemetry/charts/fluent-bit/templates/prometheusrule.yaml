@@ -1,3 +1,4 @@
+{{- if .Values.prometheusRule.enabled }}
 apiVersion: monitoring.coreos.com/v1
 kind: PrometheusRule
 metadata:
@@ -15,4 +16,5 @@ spec:
   groups:
   - name: {{ template "fluent-bit.name" . }}
     rules: {{- toYaml .Values.prometheusRule.rules | nindent 4 }}
+{{- end }}
 {{- end }}
