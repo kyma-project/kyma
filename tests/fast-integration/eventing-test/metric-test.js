@@ -31,8 +31,7 @@ const dashboards = {
     query: 'sum by(destination_service) (rate(istio_requests_total{destination_service="central-application-connectivity-validator.kyma-system.svc.cluster.local", response_code=~"2.*"}[5m]))',
     backends: ['nats', 'beb'],
     assert: function (result) {
-      let foundMetric = result.find(res => res.metric.destination_service.startsWith('central-application-connectivity-validator')
-        && getMetricValue(res) > 0);
+      let foundMetric = result.find(res => res.metric.destination_service.startsWith('central-application-connectivity-validator'));
       expect(foundMetric).to.be.not.undefined
     }
   },
@@ -48,7 +47,7 @@ const dashboards = {
           ) by (le,source_workload_namespace,source_workload,destination_workload_namespace,destination_workload,response_code)`,
     backends: ['nats'],
     assert: function (result) {
-      let foundMetric = result.find(res => res.metric.destination_workload.startsWith('lastorder') && getMetricValue(res) > 0);
+      let foundMetric = result.find(res => res.metric.destination_workload.startsWith('lastorder'));
       expect(foundMetric).to.be.not.undefined
     }
   },
@@ -71,8 +70,7 @@ const dashboards = {
     assert: function (result) {
       let foundMetric = result.find(res =>
         res.metric.source_workload.toLowerCase() === 'central-application-connectivity-validator' &&
-        res.metric.destination_workload.toLowerCase() === 'eventing-publisher-proxy' &&
-        getMetricValue(res) > 0);
+        res.metric.destination_workload.toLowerCase() === 'eventing-publisher-proxy');
       expect(foundMetric).to.be.not.undefined
     }
   },
@@ -83,8 +81,7 @@ const dashboards = {
     assert: function (result) {
       let foundMetric = result.find(res =>
         res.metric.namespace.toLowerCase() === 'kyma-system' &&
-        res.metric.pod.toLowerCase().startsWith('eventing-publisher-proxy') &&
-        getMetricValue(res) > 0);
+        res.metric.pod.toLowerCase().startsWith('eventing-publisher-proxy'));
       expect(foundMetric).to.be.not.undefined;
     }
   },
@@ -104,8 +101,7 @@ const dashboards = {
     assert: function (result) {
       let foundMetric = result.find(res =>
         res.metric.source_workload === 'eventing-controller' &&
-        res.metric.destination_workload.toLowerCase().startsWith('lastorder') &&
-        getMetricValue(res) > 0);
+        res.metric.destination_workload.toLowerCase().startsWith('lastorder'));
       expect(foundMetric).to.be.not.undefined;
     }
   },
