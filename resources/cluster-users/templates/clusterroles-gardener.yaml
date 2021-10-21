@@ -5,7 +5,7 @@ kind: ClusterRole
 metadata:
   name: kyma-gardener-cert-view
   labels:
-    app: addons
+    app: kyma
     chart: {{ .Chart.Name }}-{{ .Chart.Version }}
     rbac.authorization.kyma-project.io/aggregate-to-gardener-cert-view: "true"
   annotations:
@@ -25,7 +25,7 @@ kind: ClusterRole
 metadata:
   name: kyma-gardener-cert-edit
   labels:
-    app: addons
+    app: kyma
     chart: {{ .Chart.Name }}-{{ .Chart.Version }}
     rbac.authorization.kyma-project.io/aggregate-to-gardener-cert-edit: "true"
   annotations:
@@ -45,7 +45,7 @@ kind: ClusterRole
 metadata:
   name: kyma-gardener-cert-admin
   labels:
-    app: addons
+    app: kyma
     chart: {{ .Chart.Name }}-{{ .Chart.Version }}
     rbac.authorization.kyma-project.io/aggregate-to-gardener-cert-admin: "true"
   annotations:
@@ -65,7 +65,7 @@ kind: ClusterRole
 metadata:
   name: kyma-gardener-dns-view
   labels:
-    app: addons
+    app: kyma
     chart: {{ .Chart.Name }}-{{ .Chart.Version }}
     rbac.authorization.kyma-project.io/aggregate-to-gardener-dns-view: "true"
   annotations:
@@ -85,7 +85,7 @@ kind: ClusterRole
 metadata:
   name: kyma-gardener-dns-edit
   labels:
-    app: addons
+    app: kyma
     chart: {{ .Chart.Name }}-{{ .Chart.Version }}
     rbac.authorization.kyma-project.io/aggregate-to-gardener-dns-edit: "true"
   annotations:
@@ -105,7 +105,7 @@ kind: ClusterRole
 metadata:
   name: kyma-gardener-dns-admin
   labels:
-    app: addons
+    app: kyma
     chart: {{ .Chart.Name }}-{{ .Chart.Version }}
     rbac.authorization.kyma-project.io/aggregate-to-gardener-dns-admin: "true"
   annotations:
