@@ -13,9 +13,3 @@ global:
       name: "busybox"
       version: "1.32.0-v1"
       directory: "external"
-  testImages:
-    busybox_latest:
-      name: "busybox"
-      version: "latest"
-      directory: "external"
-

@@ -9,7 +9,7 @@ metadata:
 spec:
   containers:
     - name: wget
-      image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.testImages.busybox_latest) }}"
+      image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.busybox) }}"
       imagePullPolicy: {{ .Values.testFramework.image.pullPolicy }}
       command: ['wget']
       args: ['{{ include "fluent-bit.fullname" . }}:{{ .Values.service.port }}']
