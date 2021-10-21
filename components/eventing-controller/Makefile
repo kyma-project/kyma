@@ -3,11 +3,10 @@ APP_PATH = components/$(APP_NAME)
 BUILDPACK = eu.gcr.io/kyma-project/test-infra/buildpack-golang-kubebuilder2:v20210601-24c60b5a
 SCRIPTS_DIR = $(realpath $(shell pwd)/../..)/common/makefiles
 
-override ENTRYPOINT = main.go
+override ENTRYPOINT = cmd/eventing-controller/main.go
 
 include $(SCRIPTS_DIR)/generic-make-go.mk
 
-##PROJECT_DIR := $(shell dirname $(abspath $(lastword $(MAKEFILE_LIST))))
 PROJECT_DIR := $(shell pwd)
 
 NAMESPACE = "kyma-system"
@@ -34,21 +33,11 @@ SHELL = /usr/bin/env bash -o pipefail
 GOBUILD_FLAGS := -v
 PKG := github.com/kyma-project/kyma/components/eventing-controller
 
-##@ General
 
-# The help target prints out all targets with their descriptions organized
-# beneath their categories. The categories are represented by '##@' and the
-# target descriptions by '##'. The awk commands is responsible for reading the
-# entire set of makefiles included in this invocation, looking for lines of the
-# file as xyz: ## something, and then pretty-format the target and help. Then,
-# if there's a line with ##@ something, that gets pretty-printed as a category.
-# More info on the usage of ANSI control characters for terminal formatting:
-# https://en.wikipedia.org/wiki/ANSI_escape_code#SGR_parameters
-# More info on the awk command:
-# http://linuxcommand.org/lc3_adv_awk.php
+help-generic:
+	@printf "\nUsage:\n  make \033[36m<target>\033[0m\n"
+	@printf "\nTargets from common makefile:\n"
 
-help: ## Display this help.
-	@awk 'BEGIN {FS = ":.*##"; printf "\nUsage:\n  make \033[36m<target>\033[0m\n"} /^[a-zA-Z_0-9-]+:.*?##/ { printf "  \033[36m%-15s\033[0m %s\n", $$1, $$2 } /^##@/ { printf "\n\033[1m%s\033[0m\n", substr($$0, 5) } ' $(MAKEFILE_LIST)
 
 ##@ Development
 # Deploy eventing-controller in the configured Kubernetes cluster in ~/.kube/config for local development
@@ -87,13 +76,14 @@ check-code: check-imports fmt-local vet-local lint ## Run various linters and ot
 run: manifests-local generate-local fmt-local vet-local set-up-local-env## Run a controller from your host. Runs with buildtags `local`
 	go run --tags=local ./cmd/eventing-controller/main.go
 
-eventing-controller: gomod-vendor-local
-        @CGO_ENABLED=0 go build -o bin/eventing-controller \
+eventing-controller: gomod-vendor-local ## Build the binary
+        @CGO_ENABLED=0 go build -o bin/$(APP_NAME) \
         $(GOBUILD_FLAGS) \
-        $(PKG)/cmd/eventing-controller
+        $(PKG)/$(ENTRYPOINT)
 
 
 ##@ Release
+
 ##release: resolve-local generate-local verify-local build-image push-image copy-external-crds ## Job used by our CI to release a binary
 release:
 	$(MAKE) gomod-release-local
@@ -101,7 +91,7 @@ release:
 ##@ Deployment
 
 undeploy: ## Undeploy controller from the K8s cluster specified in ~/.kube/config.
-	$(KUSTOMIZE) build config/default | kubectl delete -f -
+	kustomize build config/default | kubectl delete -f -
 
 CONTROLLER_GEN = $(PROJECT_DIR)/bin/$(shell uname)/controller-gen
 controller-gen-local: ## Download controller-gen locally if necessary.
@@ -111,7 +101,7 @@ path-to-referenced-charts:
 	@echo "resources/eventing"
 
 
-deploy-local-dry-run: set-up-local-env manifests-local ## Dry run for deploying eventing-controller for local development
+deploy-dry-run: set-up-local-env manifests-local ## Dry run for deploying eventing-controller for local development
 	cd config/rbac && kustomize edit set namespace ${NAMESPACE}
 	kustomize build config/default | envsubst
 
