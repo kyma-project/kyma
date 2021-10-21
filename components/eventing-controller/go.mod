@@ -24,10 +24,11 @@ require (
 	golang.org/x/oauth2 v0.0.0-20200107190931-bf48bf16ab8d
 	golang.org/x/tools v0.1.0 // indirect
 	golang.org/x/xerrors v0.0.0-20200804184101-5ec99f83aff1
-	k8s.io/api v0.20.7
-	k8s.io/apiextensions-apiserver v0.20.7 // indirect
-	k8s.io/apimachinery v0.22.2
-	k8s.io/client-go v0.20.7
+	k8s.io/api v0.20.11
+	k8s.io/apiextensions-apiserver v0.20.11 // indirect
+	k8s.io/apimachinery v0.20.11
+	k8s.io/client-go v0.20.11
+	k8s.io/utils v0.0.0-20210305010621-2afb4311ab10 // indirect
 	sigs.k8s.io/controller-runtime v0.8.3
 )
 
