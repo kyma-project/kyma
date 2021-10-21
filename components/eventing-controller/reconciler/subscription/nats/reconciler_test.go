@@ -3,7 +3,6 @@ package nats
 import (
 	"context"
 	"fmt"
-	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/nats"
 	"io/ioutil"
 	"log"
 	"net/http"
