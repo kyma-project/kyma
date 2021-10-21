@@ -159,6 +159,11 @@ func (b *BEB) SyncSubscription(subscription *eventingv1alpha1.Subscription, clea
 	// set the status of bebSubscription in ev2Subscription
 	statusChanged = b.setEmsSubscriptionStatus(subscription, bebSubscription) || statusChanged
 
+	// get the backend infrastructures
+	if statusChanged {
+		subscription.Status.BackendInfrastructures = getBackendInfrastructures(&bebSubscription.Events)
+	}
+
 	return statusChanged, nil
 }
 
@@ -282,6 +287,15 @@ func (b *BEB) getSubscription(name string) (*types.Subscription, error) {
 		return nil, fmt.Errorf("get subscription failed: %w; %v", errors.New(strconv.Itoa(resp.StatusCode)), resp.Message)
 	}
 	return bebSubscription, nil
+}
+
+func getBackendInfrastructures(events *types.Events) []eventingv1alpha1.BackendInfrastructure {
+	backendInfrastructures := make([]eventingv1alpha1.BackendInfrastructure, 0, len(*events))
+	for _, e := range *events {
+		b := eventingv1alpha1.BackendInfrastructure{EventTypeValue: e.Type}
+		backendInfrastructures = append(backendInfrastructures, b)
+	}
+	return backendInfrastructures
 }
 
 func (b *BEB) deleteSubscription(name string) error {
