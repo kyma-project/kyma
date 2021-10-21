@@ -246,11 +246,12 @@ usageKind:
 
 dockerRegistry:
   enableInternal: true
-  username: "{{ randAlphaNum 20 | b64enc }}" # for gcr "_json_key"
-  password: "{{ randAlphaNum 40 | b64enc }}" # for gcr data from json key
+  username: "" # for gcr "_json_key"
+  password: "" # for gcr data from json key
   internalServerAddress: '{{ template "registry-fullname" . }}.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.global.dockerServicePort }}'
   serverAddress: "registry.{{ .Values.global.domainName -}}"
   registryAddress: "registry.{{ .Values.global.domainName -}}"
+  rollme: ""
 
 docker-registry:
   fullnameOverride: "serverless-docker-registry"
