@@ -52,14 +52,14 @@ metadata:
   annotations:
     helm.sh/hook-weight: "0"
 rules:
-  - apiGroups:
-      - "eventing.kyma-project.io"
-      - "installer.kyma-project.io"
-  {{ toYaml .Values.clusterRoles.apiGroups.kyma | indent 4 }}
-resources:
-  - "*"
-verbs:
-  - "*"
+- apiGroups:
+    - "eventing.kyma-project.io"
+    - "installer.kyma-project.io"
+{{ toYaml .Values.clusterRoles.apiGroups.kyma | indent 4 }}
+  resources:
+    - "*"
+  verbs:
+    - "*"
 
 ---
 apiVersion: rbac.authorization.k8s.io/v1
