@@ -13,8 +13,8 @@ require (
 	github.com/kyma-project/kyma/common/logging v0.0.0-20210601142757-445a3b6021fe
 	github.com/kyma-project/kyma/components/application-operator v0.0.0-20210204131215-a368a90f2525
 	github.com/mitchellh/hashstructure/v2 v2.0.2
-	github.com/nats-io/nats-server/v2 v2.3.4
-	github.com/nats-io/nats.go v1.11.1-0.20210623165838-4b75fc59ae30
+	github.com/nats-io/nats-server/v2 v2.6.1
+	github.com/nats-io/nats.go v1.12.3
 	github.com/onsi/ginkgo v1.16.4
 	github.com/onsi/gomega v1.16.0
 	github.com/pkg/errors v0.9.1
@@ -32,8 +32,8 @@ require (
 	sigs.k8s.io/controller-runtime v0.8.3
 )
 
-replace github.com/nats-io/nats.go => github.com/nats-io/nats.go v1.11.0
-
-replace github.com/gogo/protobuf v1.3.1 => github.com/gogo/protobuf v1.3.2
-
-replace github.com/go-logr/zapr => github.com/go-logr/zapr v0.3.0
+replace (
+	github.com/go-logr/zapr => github.com/go-logr/zapr v0.3.0
+	github.com/gogo/protobuf v1.3.1 => github.com/gogo/protobuf v1.3.2
+	github.com/nats-io/nats.go => github.com/nats-io/nats.go v1.11.0
+)
