@@ -76,8 +76,6 @@ global:
       name: "application-gateway-legacy-tests"
       version: "68baa911"
 
-
-
 application_connectivity_certs_setup_job:
   secrets:
     connectorCertificateSecret:
