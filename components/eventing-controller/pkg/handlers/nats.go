@@ -90,10 +90,10 @@ func newCloudeventClient(config env.NatsConfig) (cev2.Client, error) {
 
 // SyncSubscription synchronizes the given Kyma subscription to NATS subscription.
 // note: the returned bool should be ignored now. It should act as a marker for changed subscription status.
-func (n *Nats) SyncSubscription(sub *eventingv1alpha1.Subscription, cleaner eventtype.Cleaner, _ ...interface{}) (bool, error) {
+func (n *Nats) SyncSubscription(subscription *eventingv1alpha1.Subscription, cleaner eventtype.Cleaner, _ ...interface{}) (bool, error) {
 	var filters []*eventingv1alpha1.BEBFilter
-	if sub.Spec.Filter != nil {
-		uniqueFilters, err := sub.Spec.Filter.Deduplicate()
+	if subscription.Spec.Filter != nil {
+		uniqueFilters, err := subscription.Spec.Filter.Deduplicate()
 		if err != nil {
 			return false, errors.Wrap(err, "deduplicate subscription filters failed")
 		}
@@ -101,9 +101,10 @@ func (n *Nats) SyncSubscription(sub *eventingv1alpha1.Subscription, cleaner even
 	}
 
 	// Format logger
-	log := utils.LoggerWithSubscription(n.namedLogger(), sub)
+	log := utils.LoggerWithSubscription(n.namedLogger(), subscription)
 
-	subsConfig := eventingv1alpha1.MergeSubsConfigs(sub.Spec.Config, &n.defaultSubsConfig)
+	subscriptionConfig := eventingv1alpha1.MergeSubsConfigs(subscription.Spec.Config, &n.defaultSubsConfig)
+	subscription.Status.BackendInfrastructures = make([]eventingv1alpha1.BackendInfrastructure, 0, len(filters))
 	// Create subscriptions in NATS
 	for _, filter := range filters {
 		subject, err := createSubject(filter, cleaner)
@@ -112,7 +113,7 @@ func (n *Nats) SyncSubscription(sub *eventingv1alpha1.Subscription, cleaner even
 			return false, err
 		}
 
-		callback := n.getCallback(sub.Spec.Sink)
+		callback := n.getCallback(subscription.Spec.Sink)
 
 		if n.connection.Status() != nats.CONNECTED {
 			if err := n.Initialize(env.Config{}); err != nil {
@@ -121,18 +122,22 @@ func (n *Nats) SyncSubscription(sub *eventingv1alpha1.Subscription, cleaner even
 			}
 		}
 
-		for i := 0; i < subsConfig.MaxInFlightMessages; i++ {
+		for i := 0; i < subscriptionConfig.MaxInFlightMessages; i++ {
 			// queueGroupName must be unique for each subscription and subject
-			queueGroupName := createKeyPrefix(sub) + string(types.Separator) + subject
+			queueGroupName := createKeyPrefix(subscription) + string(types.Separator) + subject
 			natsSub, subscribeErr := n.connection.QueueSubscribe(subject, queueGroupName, callback)
 			if subscribeErr != nil {
 				log.Errorw("create NATS subscription failed", "error", err)
 				return false, subscribeErr
 			}
-			n.subscriptions[createKey(sub, subject, i)] = natsSub
+			n.subscriptions[createKey(subscription, subject, i)] = natsSub
 		}
+
+		// Setting the backend infrastructures
+		backendInfrastructure := eventingv1alpha1.BackendInfrastructure{EventTypeValue: subject}
+		subscription.Status.BackendInfrastructures = append(subscription.Status.BackendInfrastructures, backendInfrastructure)
 	}
-	sub.Status.Config = subsConfig
+	subscription.Status.Config = subscriptionConfig
 
 	return false, nil
 }

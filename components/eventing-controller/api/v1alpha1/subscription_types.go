@@ -173,6 +173,13 @@ type EmsSubscriptionStatus struct {
 	// +optional
 	LastFailedDeliveryReason string `json:"lastFailedDeliveryReason,omitempty"`
 }
+// BackendInfrastructure contains the real (cleaned up) backend infrastructures values
+// +kubebuilder:subresource:status
+type BackendInfrastructure struct {
+	// Conditions defines the status conditions
+	// +optional
+	EventTypeValue string `json:"eventTypeValue,omitempty"`
+}
 
 // SubscriptionStatus defines the observed state of Subscription
 // +kubebuilder:subresource:status
@@ -183,6 +190,10 @@ type SubscriptionStatus struct {
 
 	// Ready defines the overall readiness status of a subscription
 	Ready bool `json:"ready"`
+
+	// BackendInfra defines the internal Subscription
+	// +optional
+	BackendInfrastructures []BackendInfrastructure `json:"BackendInfrastructures"`
 
 	// Ev2hash defines the hash for the Subscription custom resource
 	// +optional
