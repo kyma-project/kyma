@@ -8,10 +8,10 @@ global:
       version: PR-11920
     eventing_controller:
       name: eventing-controller
-      version: PR-12189
+      version: PR-12420
     publisher_proxy:
       name: event-publisher-proxy
-      version: PR-12189
+      version: PR-12420
     nats_operator:
       name: nats-operator
       version: PR-12170
