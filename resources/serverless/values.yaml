@@ -251,7 +251,6 @@ dockerRegistry:
   internalServerAddress: '{{ template "registry-fullname" . }}.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.global.dockerServicePort }}'
   serverAddress: "registry.{{ .Values.global.domainName -}}"
   registryAddress: "registry.{{ .Values.global.domainName -}}"
-  rollme: ""
 
 docker-registry:
   fullnameOverride: "serverless-docker-registry"

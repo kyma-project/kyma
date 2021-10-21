@@ -26,7 +26,7 @@ spec:
 {{ toYaml .Values.podLabels | indent 8 }}
         {{- end }}
       annotations:
-        rollme: {{ .Values.dockerRegistry.rollme }}
+        rollme: {{ .Values.rollme }}
 {{- if $.Values.podAnnotations }}
 {{ toYaml $.Values.podAnnotations | indent 8 }}
 {{- end }}
