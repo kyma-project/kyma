@@ -1,5 +1,6 @@
 const axios = require("axios");
 const https = require("https");
+const { expect, assert } = require("chai");
 const httpsAgent = new https.Agent({
   rejectUnauthorized: false, // curl -k
 });
@@ -19,6 +20,10 @@ const {
   deleteEventingBackendK8sSecret,
 } = require("../utils");
 
+const {prometheusPortForward} = require("../monitoring/client")
+
+const {eventingMonitoringTest} = require("./metric-test")
+
 describe("Eventing tests", function () {
   this.timeout(10 * 60 * 1000);
   this.slow(5000);
@@ -26,6 +31,7 @@ describe("Eventing tests", function () {
   const backendK8sSecretName = process.env.BACKEND_SECRET_NAME || "eventing-backend";
   const backendK8sSecretNamespace = process.env.BACKEND_SECRET_NAMESPACE || "default";
   const eventMeshSecretFilePath = process.env.EVENTMESH_SECRET_FILE || "";
+  let cancelPrometheusPortForward = null;
 
   // eventingE2ETestSuite - Runs Eventing end-to-end tests
   function eventingE2ETestSuite () {
@@ -59,6 +65,8 @@ describe("Eventing tests", function () {
       console.dir(err); // first error is logged
       return ensureCommerceMockLocalTestFixture("mocks", testNamespace);
     });
+
+    cancelPrometheusPortForward = prometheusPortForward();
   });
 
   after(async function() {
@@ -70,12 +78,14 @@ describe("Eventing tests", function () {
     if (eventMeshSecretFilePath !== "") {
       await deleteEventingBackendK8sSecret(backendK8sSecretName, backendK8sSecretNamespace);
     }
+    cancelPrometheusPortForward();
   });
 
   // Tests
   context('with Nats backend', function() {
     // Running Eventing end-to-end tests
     eventingE2ETestSuite();
+    eventingMonitoringTest('nats');
   });
 
   context('with BEB backend', function() {
@@ -86,6 +96,7 @@ describe("Eventing tests", function () {
 
     // Running Eventing end-to-end tests
     eventingE2ETestSuite();
+    eventingMonitoringTest('beb');
   });
 
   context('with Nats backend switched back from BEB', function() {
@@ -96,5 +107,6 @@ describe("Eventing tests", function () {
 
     // Running Eventing end-to-end tests
     eventingE2ETestSuite();
+    eventingMonitoringTest('nats');
   });
 });
