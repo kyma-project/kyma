@@ -90,6 +90,7 @@ generate: manifests
 verify:: mod-verify
 
 resolve-local:
+	GO111MODULE=on go mod tidy -v
 	GO111MODULE=on go mod vendor -v
 
 ensure-local:

@@ -6,7 +6,6 @@ import (
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 
 	apigatewayv1alpha1 "github.com/kyma-incubator/api-gateway/api/v1alpha1"
-	oryv1alpha1 "github.com/ory/oathkeeper-maester/api/v1alpha1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -93,13 +92,13 @@ func WithOwnerReference(subs []eventingv1alpha1.Subscription) Option {
 func WithRules(subs []eventingv1alpha1.Subscription, methods ...string) Option {
 	return func(o metav1.Object) {
 		d := o.(*apigatewayv1alpha1.APIRule)
-		handler := oryv1alpha1.Handler{
+		handler := apigatewayv1alpha1.Handler{
 			Name: OAuthHandlerName,
 		}
-		authenticator := &oryv1alpha1.Authenticator{
+		authenticator := &apigatewayv1alpha1.Authenticator{
 			Handler: &handler,
 		}
-		accessStrategies := []*oryv1alpha1.Authenticator{
+		accessStrategies := []*apigatewayv1alpha1.Authenticator{
 			authenticator,
 		}
 		rules := make([]apigatewayv1alpha1.Rule, 0)

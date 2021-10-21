@@ -24,7 +24,6 @@ import (
 	apigatewayv1alpha1 "github.com/kyma-incubator/api-gateway/api/v1alpha1"
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/object"
-	oryv1alpha1 "github.com/ory/oathkeeper-maester/api/v1alpha1"
 )
 
 const (
@@ -99,10 +98,10 @@ func WithService(host, svcName string, apiRule *apigatewayv1alpha1.APIRule) {
 
 func WithPath(apiRule *apigatewayv1alpha1.APIRule) {
 	handlerOAuth := object.OAuthHandlerName
-	handler := oryv1alpha1.Handler{
+	handler := apigatewayv1alpha1.Handler{
 		Name: handlerOAuth,
 	}
-	authenticator := &oryv1alpha1.Authenticator{
+	authenticator := &apigatewayv1alpha1.Authenticator{
 		Handler: &handler,
 	}
 	apiRule.Spec.Rules = []apigatewayv1alpha1.Rule{
@@ -112,7 +111,7 @@ func WithPath(apiRule *apigatewayv1alpha1.APIRule) {
 				http.MethodPost,
 				http.MethodOptions,
 			},
-			AccessStrategies: []*oryv1alpha1.Authenticator{
+			AccessStrategies: []*apigatewayv1alpha1.Authenticator{
 				authenticator,
 			},
 		},
@@ -451,8 +450,8 @@ func ToSubscription(unstructuredSub *unstructured.Unstructured) (*eventingv1alph
 	return subscription, nil
 }
 
-// ToUnstructuredApiRule converts an APIRule object into a unstructured APIRule
-func ToUnstructuredApiRule(obj interface{}) (*unstructured.Unstructured, error) {
+// ToUnstructuredAPIRule converts an APIRule object into a unstructured APIRule
+func ToUnstructuredAPIRule(obj interface{}) (*unstructured.Unstructured, error) {
 	unstructured := &unstructured.Unstructured{}
 	unstructuredObj, err := runtime.DefaultUnstructuredConverter.ToUnstructured(obj)
 	if err != nil {

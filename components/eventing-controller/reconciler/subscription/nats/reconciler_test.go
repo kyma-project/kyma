@@ -3,6 +3,7 @@ package nats
 import (
 	"context"
 	"fmt"
+	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/nats"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -91,7 +92,7 @@ func testCreateDeleteSubscription(id int, natsSubjectToPublish, eventTypeToSubsc
 			))
 
 			// publish a message
-			connection, err := connectToNats(natsUrl)
+			connection, err := connectToNats(natsURL)
 			Expect(err).ShouldNot(HaveOccurred())
 			err = connection.Publish(natsSubjectToPublish, []byte(reconcilertesting.StructuredCloudEvent))
 			Expect(err).ShouldNot(HaveOccurred())
@@ -155,7 +156,7 @@ func testCreateSubscriptionWithEmptyProtocolProtocolSettingsDialect(id int, nats
 			))
 
 			// publish a message
-			connection, err := connectToNats(natsUrl)
+			connection, err := connectToNats(natsURL)
 			Expect(err).ShouldNot(HaveOccurred())
 			err = connection.Publish(natsSubjectToPublish, []byte(reconcilertesting.StructuredCloudEvent))
 			Expect(err).ShouldNot(HaveOccurred())
@@ -219,7 +220,7 @@ func testChangeSubscriptionConfiguration(id int, natsSubjectToPublish, eventType
 					}),
 				))
 
-			connection, err := connectToNats(natsUrl)
+			connection, err := connectToNats(natsURL)
 			Expect(err).ShouldNot(HaveOccurred())
 			toSend := fmt.Sprintf(`"%s"`, reconcilertesting.EventData)
 			msgData := []byte(reconcilertesting.StructuredCloudEvent)
@@ -280,8 +281,8 @@ func reconcilerTestsExecutor(eventTypePrefix, natsSubjectToPublish, eventTypeToS
 		})
 
 		for _, tc := range testCases {
-			tc(testId, natsSubjectToPublish, eventTypeToSubscribe)
-			testId++
+			tc(testID, natsSubjectToPublish, eventTypeToSubscribe)
+			testID++
 		}
 	}
 }
@@ -374,8 +375,8 @@ const (
 	attachControlPlaneOutput = false
 )
 
-var testId int
-var natsUrl string
+var testID int
+var natsURL string
 var cfg *rest.Config
 var k8sClient client.Client
 var testEnv *envtest.Environment
@@ -390,7 +391,7 @@ func TestAPIs(t *testing.T) {
 
 var _ = BeforeSuite(func(done Done) {
 	By("bootstrapping test environment")
-	natsServer, natsUrl = startNATS(natsPort)
+	natsServer, natsURL = startNATS(natsPort)
 	useExistingCluster := useExistingCluster
 	testEnv = &envtest.Environment{
 		CRDDirectoryPaths: []string{
@@ -418,9 +419,9 @@ var _ = AfterSuite(func() {
 
 func startNATS(port int) (*natsserver.Server, string) {
 	natsServer := reconcilertesting.RunNatsServerOnPort(port)
-	natsUrl := natsServer.ClientURL()
-	log.Printf("NATS server started %v", natsUrl)
-	return natsServer, natsUrl
+	natsURL := natsServer.ClientURL()
+	log.Printf("NATS server started %v", natsURL)
+	return natsServer, natsURL
 }
 
 func startReconciler(eventTypePrefix string) context.CancelFunc {
@@ -439,7 +440,7 @@ func startReconciler(eventTypePrefix string) context.CancelFunc {
 	Expect(err).ToNot(HaveOccurred())
 
 	envConf := env.NatsConfig{
-		URL:             natsUrl,
+		URL:             natsURL,
 		MaxReconnects:   10,
 		ReconnectWait:   time.Second,
 		EventTypePrefix: eventTypePrefix,
@@ -476,8 +477,8 @@ func startReconciler(eventTypePrefix string) context.CancelFunc {
 	return cancel
 }
 
-func connectToNats(natsUrl string) (*nats.Conn, error) {
-	connection, err := nats.Connect(natsUrl, nats.RetryOnFailedConnect(true), nats.MaxReconnects(3), nats.ReconnectWait(time.Second))
+func connectToNats(natsURL string) (*nats.Conn, error) {
+	connection, err := nats.Connect(natsURL, nats.RetryOnFailedConnect(true), nats.MaxReconnects(3), nats.ReconnectWait(time.Second))
 	if err != nil {
 		return nil, err
 	}
