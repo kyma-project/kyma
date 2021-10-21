@@ -104,9 +104,6 @@ global:
       name: "registry"
       version: "2.7.1-8c646ef0"
       directory: "tpi"
-    git_server:
-      name: "gitserver"
-      version: "c0aa144a"
     google_pause:
       name: "pause-amd64"
       version: "3.2"
