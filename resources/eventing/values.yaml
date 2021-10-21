@@ -8,7 +8,7 @@ global:
       version: PR-11920
     eventing_controller:
       name: eventing-controller
-      version: PR-12420
+      version: PR-12424
     publisher_proxy:
       name: event-publisher-proxy
       version: PR-12420
