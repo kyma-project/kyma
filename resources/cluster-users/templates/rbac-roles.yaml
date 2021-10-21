@@ -283,7 +283,13 @@ aggregationRule:
       rbac.authorization.kyma-project.io/aggregate-to-kyma-svcat-admin: "true"
   - matchLabels:
       rbac.authorization.kyma-project.io/aggregate-to-kyma-ui-admin: "true"
-rules: []
+rules:
+  - apiGroups:
+    - "installer.kyma-project.io"
+  resources:
+    - "*"
+  verbs:
+    - "*"
 
 ---
 ##########################################################################################
