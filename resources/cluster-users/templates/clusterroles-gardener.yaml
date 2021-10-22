@@ -12,7 +12,7 @@ metadata:
     helm.sh/hook-weight: "0"
 rules:
 - apiGroups:
-{{ toYaml .Values.clusterRoles.apiGroups.gardener | indent 4 }}
+{{ toYaml .Values.clusterRoles.apiGroups.gardener.cert | indent 4 }}
   resources:
 {{ toYaml .Values.clusterRoles.resources.gardener.cert | indent 4 }}
   verbs:
@@ -32,7 +32,7 @@ metadata:
     helm.sh/hook-weight: "0"
 rules:
 - apiGroups:
-{{ toYaml .Values.clusterRoles.apiGroups.gardener | indent 4 }}
+{{ toYaml .Values.clusterRoles.apiGroups.gardener.cert | indent 4 }}
   resources:
 {{ toYaml .Values.clusterRoles.resources.gardener.cert | indent 4 }}
   verbs:
@@ -52,7 +52,7 @@ metadata:
     helm.sh/hook-weight: "0"
 rules:
 - apiGroups:
-{{ toYaml .Values.clusterRoles.apiGroups.gardener | indent 4 }}
+{{ toYaml .Values.clusterRoles.apiGroups.gardener.cert | indent 4 }}
   resources:
     - "issuers"
 {{ toYaml .Values.clusterRoles.resources.gardener.cert | indent 4 }}
@@ -72,7 +72,7 @@ metadata:
     helm.sh/hook-weight: "0"
 rules:
 - apiGroups:
-{{ toYaml .Values.clusterRoles.apiGroups.gardener | indent 4 }}
+{{ toYaml .Values.clusterRoles.apiGroups.gardener.dns | indent 4 }}
   resources:
 {{ toYaml .Values.clusterRoles.resources.gardener.dns | indent 4 }}
   verbs:
@@ -92,7 +92,7 @@ metadata:
     helm.sh/hook-weight: "0"
 rules:
 - apiGroups:
-{{ toYaml .Values.clusterRoles.apiGroups.gardener | indent 4 }}
+{{ toYaml .Values.clusterRoles.apiGroups.gardener.dns | indent 4 }}
   resources:
 {{ toYaml .Values.clusterRoles.resources.gardener.dns | indent 4 }}
   verbs:
@@ -112,7 +112,7 @@ metadata:
     helm.sh/hook-weight: "0"
 rules:
 - apiGroups:
-    {{ toYaml .Values.clusterRoles.apiGroups.gardener | indent 4 }}
+    {{ toYaml .Values.clusterRoles.apiGroups.gardener.dns | indent 4 }}
   resources:
     - "dnsproviders"
 {{ toYaml .Values.clusterRoles.resources.gardener.dns | indent 4 }}
