@@ -104,7 +104,7 @@ func (n *Nats) SyncSubscription(subscription *eventingv1alpha1.Subscription, cle
 	log := utils.LoggerWithSubscription(n.namedLogger(), subscription)
 
 	subscriptionConfig := eventingv1alpha1.MergeSubsConfigs(subscription.Spec.Config, &n.defaultSubsConfig)
-	subscription.Status.BackendInfrastructures = make([]eventingv1alpha1.BackendInfrastructure, 0, len(filters))
+	subscription.Status.CleanEventTypes = make([]string, 0, len(filters))
 	// Create subscriptions in NATS
 	for _, filter := range filters {
 		subject, err := createSubject(filter, cleaner)
@@ -133,9 +133,8 @@ func (n *Nats) SyncSubscription(subscription *eventingv1alpha1.Subscription, cle
 			n.subscriptions[createKey(subscription, subject, i)] = natsSub
 		}
 
-		// Setting the backend infrastructures
-		backendInfrastructure := eventingv1alpha1.BackendInfrastructure{EventTypeValue: subject}
-		subscription.Status.BackendInfrastructures = append(subscription.Status.BackendInfrastructures, backendInfrastructure)
+		// Setting the clean event types
+		subscription.Status.CleanEventTypes = append(subscription.Status.CleanEventTypes, subject)
 	}
 	subscription.Status.Config = subscriptionConfig
 
