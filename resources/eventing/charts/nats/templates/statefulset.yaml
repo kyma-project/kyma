@@ -223,7 +223,7 @@ spec:
       terminationGracePeriodSeconds: {{ .Values.nats.terminationGracePeriodSeconds }}
       containers:
       - name: nats
-        image: {{ .Values.nats.image }}
+        image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.nats) }}"
         imagePullPolicy: {{ .Values.nats.pullPolicy }}
         {{- if .Values.nats.securityContext }}
         securityContext:

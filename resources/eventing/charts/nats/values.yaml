@@ -4,8 +4,6 @@
 #                             #
 ###############################
 nats:
-  # using alpine image because of https://github.com/nats-io/k8s/issues/242
-  image: nats:2.6.1-alpine
   pullPolicy: IfNotPresent
   ports:
     client: 4222
