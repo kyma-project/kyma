@@ -51,14 +51,3 @@ config:
   secretName: "busola-migrator-config"
   uaaSecretName: "uaa-issuer-secret"
 
-vsPatch:
-  image:
-    pullPolicy: IfNotPresent
-  suffixToAdd: "-old"
-  virtualServices:
-    dex:
-      name: "dex-virtualservice"
-      namespace: "kyma-system"
-    console:
-      name: "console-web"
-      namespace: "kyma-system"
