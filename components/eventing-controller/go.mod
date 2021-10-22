@@ -33,7 +33,3 @@ require (
 )
 
 replace github.com/nats-io/nats.go => github.com/nats-io/nats.go v1.11.0
-
-replace github.com/gogo/protobuf v1.3.1 => github.com/gogo/protobuf v1.3.2
-
-replace github.com/go-logr/zapr => github.com/go-logr/zapr v0.3.0
