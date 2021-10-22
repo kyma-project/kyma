@@ -36,9 +36,7 @@ clusterRoles:
       - "gateway.kyma-project.io"
       - "servicecatalog.kyma-project.io"
       - "kyma.cx"
-      - "ui.kyma.cx"
       - "testing.kyma-project.io"
-      - "installer.kyma-project.io"
       - "serverless.kyma-project.io"
       - "eventing.kyma-project.io"
     addons:
