@@ -256,8 +256,8 @@ statefulSetPodLabels: {}
 serviceAnnotations: {}
 
 cluster:
-  enabled: true
-  replicas: 1
+  enabled: false
+  replicas: 3
   noAdvertise: false
   # authorization:
   #   user: foo
