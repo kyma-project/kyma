@@ -115,7 +115,7 @@ global:
   testImages:
     function_controller_test:
       name: "function-controller-test"
-      version: "449a5e4a"
+      version: "PR-12436"
 
 
 
