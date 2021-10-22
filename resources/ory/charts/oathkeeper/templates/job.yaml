@@ -127,4 +127,7 @@ spec:
         emptyDir: {}
       restartPolicy: Never
       serviceAccountName: ory-oathkeeper-keys-helper-service-account
+    {{- if .Values.global.priorityClassName }}
+      priorityClassName: {{ .Values.global.priorityClassName }}
+    {{- end }}      
 {{ end }}
