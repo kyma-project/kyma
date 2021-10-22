@@ -231,50 +231,6 @@ rules:
 
 ---
 ##########################################################################################
-# Kyma Admin role
-# kyma-admin = k8s admin + kyma-specific resources admin
-##########################################################################################
-
----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRole
-metadata:
-  name: kyma-admin
-  labels:
-    app: kyma
-    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
-  annotations:
-    helm.sh/hook-weight: "0"
-aggregationRule:
-  clusterRoleSelectors:
-  - matchLabels:
-      rbac.authorization.k8s.io/aggregate-to-admin: "true"
-  - matchLabels:
-      rbac.authorization.kyma-project.io/aggregate-to-kyma-edit: "true"
-  - matchLabels:
-      rbac.authorization.kyma-project.io/aggregate-to-kyma-authorization-subject: "true"
-  - matchLabels:
-      rbac.authorization.kyma-project.io/aggregate-to-kyma-api-admin: "true"
-  - matchLabels:
-      rbac.authorization.kyma-project.io/aggregate-to-kyma-istio-admin: "true"
-  - matchLabels:
-      rbac.authorization.kyma-project.io/aggregate-to-monitoring-admin: "true"
-  - matchLabels:
-      rbac.authorization.kyma-project.io/aggregate-to-addons-admin: "true"
-  - matchLabels:
-      rbac.authorization.kyma-project.io/aggregate-to-kyma-admin-base: "true"
-  - matchLabels:
-      rbac.authorization.kyma-project.io/aggregate-to-ory-admin: "true"
-  - matchLabels:
-      rbac.authorization.kyma-project.io/aggregate-to-kyma-rafter-admin: "true"
-  - matchLabels:
-      rbac.authorization.kyma-project.io/aggregate-to-kyma-snapshots: "true"
-  - matchLabels:
-      rbac.authorization.kyma-project.io/aggregate-to-kyma-svcat-admin: "true"
-rules: []
-
----
-##########################################################################################
 # Kyma Namespace Admin role
 # kyma-namespace-admin = kyma admin without Addons write permissions
 ##########################################################################################
