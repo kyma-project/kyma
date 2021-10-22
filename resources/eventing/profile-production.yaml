@@ -20,18 +20,23 @@ nats:
   cluster:
     enabled: true
     replicas: 3
-  jetstream:
+  reloader:
+    enabled: true
+  natsbox:
     enabled: false
-    memStorage:
-      enabled: true
-      size: 1Gi
-    fileStorage:
+  nats:
+    jetstream:
       enabled: false
-      size: 1Gi
-  resources:
-    limits:
-      cpu: 500m
-      memory: 1Gi
-    requests:
-      cpu: 400m
-      memory: 512Mi
+      memStorage:
+        enabled: true
+        size: 1Gi
+      fileStorage:
+        enabled: false
+        size: 1Gi
+    resources:
+      limits:
+        cpu: 500m
+        memory: 1Gi
+      requests:
+        cpu: 400m
+        memory: 512Mi
