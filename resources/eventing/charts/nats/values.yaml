@@ -4,6 +4,7 @@
 #                             #
 ###############################
 nats:
+  # using alpine image because of https://github.com/nats-io/k8s/issues/242
   image: nats:2.6.1-alpine
   pullPolicy: IfNotPresent
   ports:
@@ -197,7 +198,15 @@ securityContext: {}
 
 # Affinity for pod assignment
 # ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
-affinity: {}
+affinity:
+  podAntiAffinity:
+    preferredDuringSchedulingIgnoredDuringExecution:
+      - podAffinityTerm:
+          labelSelector:
+            matchLabels:
+              nats_cluster: eventing-nats
+          topologyKey: kubernetes.io/hostname
+        weight: 100
 
 ## Pod priority class name
 ## ref: https://kubernetes.io/docs/concepts/configuration/pod-priority-preemption/#priorityclass
@@ -389,14 +398,14 @@ natsbox:
 
 # The NATS config reloader image to use.
 reloader:
-  enabled: true
+  enabled: false
   image: natsio/nats-server-config-reloader:0.6.2
   pullPolicy: IfNotPresent
   securityContext: {}
 
 # Prometheus NATS Exporter configuration.
 exporter:
-  enabled: true
+  enabled: false
   image: natsio/prometheus-nats-exporter:0.8.0
   pullPolicy: IfNotPresent
   securityContext: {}

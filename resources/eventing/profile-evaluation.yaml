@@ -16,6 +16,17 @@ controller:
         memory: 16Mi
 
 nats:
+  cluster:
+    enabled: true
+    replicas: 1
+  jetstream:
+    enabled: false
+    memStorage:
+      enabled: true
+      size: 1Gi
+    fileStorage:
+      enabled: false
+      size: 1Gi
   resources:
     limits:
       cpu: 20m
