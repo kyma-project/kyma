@@ -446,8 +446,8 @@ func ToSubscription(unstructuredSub *unstructured.Unstructured) (*eventingv1alph
 	return subscription, nil
 }
 
-// ToUnstructuredApiRule converts an APIRule object into a unstructured APIRule
-func ToUnstructuredApiRule(obj interface{}) (*unstructured.Unstructured, error) {
+// ToUnstructuredAPIRule converts an APIRule object into a unstructured APIRule
+func ToUnstructuredAPIRule(obj interface{}) (*unstructured.Unstructured, error) {
 	unstructured := &unstructured.Unstructured{}
 	unstructuredObj, err := runtime.DefaultUnstructuredConverter.ToUnstructured(obj)
 	if err != nil {
