@@ -182,4 +182,4 @@ make eventing-controller-local
 make run
 ```
 
-> currently we support a buildtag `local` to avoid setting incorrect ownerRefs in the PublisherProxy deployment when running the controller on a developers machine.
+> currently we support a buildtag `local` to avoid setting incorrect OwnerRefs in the PublisherProxy deployment when running the controller on a developer's machine. Essentially the PublisherProxy deployment remains in the cluster although the controller is removed due to no OwnerRef in the PublisherProxy deployment.  
