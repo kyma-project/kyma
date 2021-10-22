@@ -310,7 +310,7 @@ aggregationRule:
   - matchLabels:
       rbac.authorization.kyma-project.io/aggregate-to-kyma-authorization-subject: "true"
   - matchLabels:
-      rbac.authorization.kyma-project.io/aggregate-to-kyma-api-admin: "true"
+      rbac.authorization.kyma-project.io/aggregate-to-kyma-api-ns-admin: "true"
   - matchLabels:
       rbac.authorization.kyma-project.io/aggregate-to-kyma-istio-admin: "true"
   - matchLabels:
