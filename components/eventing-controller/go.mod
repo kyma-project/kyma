@@ -3,7 +3,7 @@ module github.com/kyma-project/kyma/components/eventing-controller
 go 1.14
 
 require (
-	github.com/avast/retry-go v2.4.1+incompatible
+	github.com/avast/retry-go/v3 v3.1.1
 	github.com/cloudevents/sdk-go/protocol/nats/v2 v2.3.1
 	github.com/cloudevents/sdk-go/v2 v2.5.0
 	github.com/go-logr/logr v0.4.0
