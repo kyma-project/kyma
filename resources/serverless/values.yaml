@@ -246,8 +246,8 @@ usageKind:
 
 dockerRegistry:
   enableInternal: true
-  username: "" # for gcr "_json_key"
-  password: "" # for gcr data from json key
+  username: "{{ randAlphaNum 20 | b64enc }}" # for gcr "_json_key"
+  password: "{{ randAlphaNum 40 | b64enc }}" # for gcr data from json key
   internalServerAddress: '{{ template "registry-fullname" . }}.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.global.dockerServicePort }}'
   serverAddress: "registry.{{ .Values.global.domainName -}}"
   registryAddress: "registry.{{ .Values.global.domainName -}}"
@@ -273,8 +273,8 @@ docker-registry:
             path: password.txt
     - name: htpasswd-data
       emptyDir: {}
-  rollme: ""
-  registryHTTPSecret: ""
+  rollme: "{{ randAlphaNum 5}}"
+  registryHTTPSecret: "{{ randAlphaNum 16 | b64enc }}"
 
 webhook:
   enabled: true
