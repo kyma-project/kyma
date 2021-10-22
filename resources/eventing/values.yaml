@@ -5,10 +5,10 @@ global:
   images:
     eventing_controller:
       name: eventing-controller
-      version: PR-12420
+      version: PR-12432
     publisher_proxy:
       name: event-publisher-proxy
-      version: PR-12420
+      version: PR-12434
     nats:
       name: nats
       version: 2.6.1-alpine

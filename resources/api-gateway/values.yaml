@@ -111,7 +111,3 @@ global:
       name: "api-gateway-controller"
       version: "f748d862"
       directory: "incubator"
-  testImages:
-    api_gateway_integration_tests:
-      name: "api-gateway-integration-tests"
-      version: "fe9f5885"
