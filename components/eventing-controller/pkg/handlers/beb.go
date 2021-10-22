@@ -161,7 +161,7 @@ func (b *BEB) SyncSubscription(subscription *eventingv1alpha1.Subscription, clea
 
 	// get the backend infrastructures
 	if statusChanged {
-		subscription.Status.BackendInfrastructures = getBackendInfrastructures(&bebSubscription.Events)
+		subscription.Status.CleanEventTypes = getCleanEventTypes(&bebSubscription.Events)
 	}
 
 	return statusChanged, nil
@@ -289,13 +289,12 @@ func (b *BEB) getSubscription(name string) (*types.Subscription, error) {
 	return bebSubscription, nil
 }
 
-func getBackendInfrastructures(events *types.Events) []eventingv1alpha1.BackendInfrastructure {
-	backendInfrastructures := make([]eventingv1alpha1.BackendInfrastructure, 0, len(*events))
+func getCleanEventTypes(events *types.Events) []string {
+	cleanEventTypes := make([]string, 0, len(*events))
 	for _, e := range *events {
-		b := eventingv1alpha1.BackendInfrastructure{EventTypeValue: e.Type}
-		backendInfrastructures = append(backendInfrastructures, b)
+		cleanEventTypes = append(cleanEventTypes, e.Type)
 	}
-	return backendInfrastructures
+	return cleanEventTypes
 }
 
 func (b *BEB) deleteSubscription(name string) error {

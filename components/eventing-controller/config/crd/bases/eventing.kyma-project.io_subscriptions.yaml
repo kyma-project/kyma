@@ -168,6 +168,11 @@ spec:
                 description: APIRuleName defines the name of the APIRule which is
                   used by the Subscription
                 type: string
+              cleanEventTypes:
+                description: CleanEventTypes defines the clean filter event types
+                items:
+                  type: string
+                type: array
               conditions:
                 description: Conditions defines the status conditions
                 items:
