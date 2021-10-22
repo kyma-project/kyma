@@ -143,4 +143,5 @@ fullnameOverride:
 destinationRule:
   enabled: true
 
-rollme: "123"
+rollme: ""
+registryHTTPSecret: ""

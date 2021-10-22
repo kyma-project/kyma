@@ -107,7 +107,7 @@ spec:
             - name: REGISTRY_HTTP_SECRET
             # https://docs.docker.com/registry/configuration/#http, there's no problem that it is plainly seen
             # using kubectl describe
-              value: {{ randAlphaNum 16 | b64enc | quote }}
+              value: {{ .Values.registryHTTPSecret | quote }}
 {{- if .Values.tlsSecretName }}
             - name: REGISTRY_HTTP_TLS_CERTIFICATE
               value: /etc/ssl/docker/tls.crt
