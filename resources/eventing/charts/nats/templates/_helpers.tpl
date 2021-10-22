@@ -50,6 +50,7 @@ Selector labels
 {{- else }}
 app.kubernetes.io/name: {{ include "nats.name" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
+kyma-project.io/dashboard: eventing
 {{- end }}
 {{- end }}
 
