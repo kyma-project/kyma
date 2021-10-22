@@ -1,5 +1,6 @@
 # Global or kyma related overrides
 global:
+  domainName: "kyma.example.com"
   postgresql:
     postgresqlDatabase: db4hydra
     postgresqlUsername: hydra

@@ -10,8 +10,6 @@ updateStrategy:
   #   maxUnavailable: 0
 
 image:
-  repository: eu.gcr.io/kyma-project/tpi/registry
-  tag: 2.7.1-8c646ef0
   pullPolicy: IfNotPresent
 # imagePullSecrets:
     # - name: docker

@@ -83,7 +83,13 @@ func FilterEventTypeVersions(eventTypePrefix, bebNs, appName string, filters *ev
 		if filter == nil {
 			continue
 		}
-		searchingForEventPrefix := strings.ToLower(fmt.Sprintf("%s.%s.", eventTypePrefix, appName))
+
+		var prefix string
+		if len(strings.TrimSpace(eventTypePrefix)) == 0 {
+			prefix = strings.ToLower(fmt.Sprintf("%s.", appName))
+		} else {
+			prefix = strings.ToLower(fmt.Sprintf("%s.%s.", eventTypePrefix, appName))
+		}
 
 		if filter.EventSource != nil && filter.EventType != nil {
 			// TODO revisit the filtration logic as part of https://github.com/kyma-project/kyma/issues/10761
@@ -93,8 +99,8 @@ func FilterEventTypeVersions(eventTypePrefix, bebNs, appName string, filters *ev
 				continue
 			}
 
-			if strings.HasPrefix(filter.EventType.Value, searchingForEventPrefix) {
-				eventTypeVersion := strings.ReplaceAll(filter.EventType.Value, searchingForEventPrefix, "")
+			if strings.HasPrefix(filter.EventType.Value, prefix) {
+				eventTypeVersion := strings.ReplaceAll(filter.EventType.Value, prefix, "")
 				eventTypeVersionArr := strings.Split(eventTypeVersion, ".")
 				version := eventTypeVersionArr[len(eventTypeVersionArr)-1]
 				eventType := ""

@@ -4,7 +4,7 @@ go 1.15
 
 require (
 	github.com/cloudevents/sdk-go/protocol/nats/v2 v2.3.1
-	github.com/cloudevents/sdk-go/v2 v2.4.1
+	github.com/cloudevents/sdk-go/v2 v2.5.0
 	github.com/google/uuid v1.1.2
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/kyma-project/kyma/components/application-operator v0.0.0-20210520105418-ddc3a476c40a
@@ -20,9 +20,9 @@ require (
 	go.opencensus.io v0.22.4
 	golang.org/x/oauth2 v0.0.0-20200107190931-bf48bf16ab8d
 	golang.org/x/tools v0.1.1 // indirect
-	k8s.io/api v0.20.7
-	k8s.io/apimachinery v0.20.7
-	k8s.io/client-go v0.20.7
+	k8s.io/api v0.20.11
+	k8s.io/apimachinery v0.20.11
+	k8s.io/client-go v0.20.11
 	sigs.k8s.io/controller-runtime v0.8.3
 )
 

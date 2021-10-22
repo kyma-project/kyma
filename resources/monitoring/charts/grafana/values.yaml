@@ -72,7 +72,7 @@ livenessProbe:
 
 image:
   repository: eu.gcr.io/kyma-project/tpi/grafana
-  tag: 7.5.9-4c48514d
+  tag: 7.5.11-65a68aa8
   sha: ""
   pullPolicy: IfNotPresent
 

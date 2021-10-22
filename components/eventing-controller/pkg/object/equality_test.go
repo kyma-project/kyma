@@ -12,7 +12,6 @@ import (
 	appsv1 "k8s.io/api/apps/v1"
 
 	apigatewayv1alpha1 "github.com/kyma-incubator/api-gateway/api/v1alpha1"
-	rulev1alpha1 "github.com/ory/oathkeeper-maester/api/v1alpha1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -25,7 +24,7 @@ func TestApiRuleEqual(t *testing.T) {
 	labels := map[string]string{
 		"foo": "bar",
 	}
-	handler := &rulev1alpha1.Handler{
+	handler := &apigatewayv1alpha1.Handler{
 		Name: "handler",
 	}
 	rule := apigatewayv1alpha1.Rule{
@@ -33,7 +32,7 @@ func TestApiRuleEqual(t *testing.T) {
 		Methods: []string{
 			http.MethodPost,
 		},
-		AccessStrategies: []*rulev1alpha1.Authenticator{
+		AccessStrategies: []*apigatewayv1alpha1.Authenticator{
 			{
 				Handler: handler,
 			},
@@ -138,10 +137,10 @@ func TestApiRuleEqual(t *testing.T) {
 			prep: func() *apigatewayv1alpha1.APIRule {
 				apiRuleCopy := apiRule.DeepCopy()
 				newRule := rule.DeepCopy()
-				newHandler := &rulev1alpha1.Handler{
+				newHandler := &apigatewayv1alpha1.Handler{
 					Name: "foo",
 				}
-				newRule.AccessStrategies = []*rulev1alpha1.Authenticator{
+				newRule.AccessStrategies = []*apigatewayv1alpha1.Authenticator{
 					{
 						Handler: newHandler,
 					},

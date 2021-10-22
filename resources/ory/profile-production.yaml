@@ -10,6 +10,15 @@ global:
           enabled: false
 hydra:
   replicaCount: 2
+  affinity:
+    podAntiAffinity:
+      preferredDuringSchedulingIgnoredDuringExecution:
+      - weight: 100
+        podAffinityTerm:
+          labelSelector:
+            matchLabels:
+              app.kubernetes.io/name: hydra
+          topologyKey: "kubernetes.io/hostname"
 oathkeeper:
   deployment:
     resources:
@@ -17,8 +26,27 @@ oathkeeper:
         cpu: "800m"
       requests:
         cpu: "200m"
+  affinity:
+    podAntiAffinity:
+      preferredDuringSchedulingIgnoredDuringExecution:
+      - weight: 100
+        podAffinityTerm:
+          labelSelector:
+            matchLabels:
+              app: oathkeeper
+          topologyKey: "kubernetes.io/hostname"
 hpa:
   oathkeeper:
     minReplicas: 3
     maxReplicas: 10
-
+postgresql:
+  slave:
+    affinity:
+      podAntiAffinity:
+        preferredDuringSchedulingIgnoredDuringExecution:
+        - weight: 100
+          podAffinityTerm:
+            labelSelector:
+              matchLabels:
+                app: postgresql
+            topologyKey: "kubernetes.io/hostname"

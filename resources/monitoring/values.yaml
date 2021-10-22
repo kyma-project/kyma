@@ -1,4 +1,5 @@
 global:
+  domainName: "kyma.example.com"
   containerRegistry:
     path: eu.gcr.io/kyma-project
   istio:
@@ -553,6 +554,14 @@ alertmanager:
     ## ClusterAdvertiseAddress is the explicit address to advertise in cluster. Needs to be provided for non RFC1918 [1] (public) addresses. [1] RFC1918: https://tools.ietf.org/html/rfc1918
     ##
     clusterAdvertiseAddress: false
+
+    scheme: https
+
+    tlsConfig:
+      caFile: /etc/prometheus/secrets/istio.default/root-cert.pem
+      certFile: /etc/prometheus/secrets/istio.default/cert-chain.pem
+      keyFile: /etc/prometheus/secrets/istio.default/key.pem
+      insecureSkipVerify: true  # Prometheus does not support Istio security naming, thus skip verifying target pod certificate
 
 ## Using default values from https://github.com/grafana/helm-charts/blob/main/charts/grafana/values.yaml
 ##

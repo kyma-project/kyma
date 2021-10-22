@@ -20,8 +20,16 @@ hostAliases:
   {{- toYaml . | nindent 2 }}
 {{- end }}
 {{- if .Values.initContainers }}
-initContainers:
-  {{- toYaml .Values.initContainers | nindent 2 }}
+initContainers:  {{ range $container := .Values.initContainers}}
+  - name: {{ $container.name }}
+    image: "{{ include "imageurl" (dict "reg" $.Values.global.containerRegistry "img" $.Values.global.images.busybox) }}"
+    command:
+      {{- toYaml $container.command | nindent 4 }}
+  {{- if $container.volumeMounts }}
+    volumeMounts:
+      {{- toYaml $container.volumeMounts | nindent 4 }}
+  {{- end }}
+  {{ end }}
 {{- end }}
 containers:
   - name: {{ .Chart.Name }}

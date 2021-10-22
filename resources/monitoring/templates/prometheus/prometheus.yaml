@@ -27,6 +27,14 @@ spec:
         pathPrefix: "{{ .Values.alertmanager.alertmanagerSpec.routePrefix }}"
         {{- end }}
         apiVersion: {{ .Values.alertmanager.apiVersion }}
+        scheme: {{ .Values.alertmanager.alertmanagerSpec.scheme }}
+        {{- if .Values.alertmanager.alertmanagerSpec.tlsConfig }}
+        tlsConfig:
+          caFile: {{ .Values.alertmanager.alertmanagerSpec.tlsConfig.caFile }}
+          certFile: {{ .Values.alertmanager.alertmanagerSpec.tlsConfig.certFile }}
+          keyFile: {{ .Values.alertmanager.alertmanagerSpec.tlsConfig.keyFile }}
+          insecureSkipVerify: {{ .Values.alertmanager.alertmanagerSpec.tlsConfig.insecureSkipVerify }}
+        {{- end }}
 {{- else }}
       []
 {{- end }}

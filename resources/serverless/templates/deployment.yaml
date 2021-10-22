@@ -56,8 +56,8 @@ spec:
           volumeMounts:
             - name: {{ template "fullname" . }}-k8s-webhook-cert
               mountPath: /tmp/k8s-webhook-server/serving-certs
-          image: "{{ .Values.images.manager.repository }}:{{ .Values.images.manager.tag }}"
-          imagePullPolicy: {{ .Values.images.manager.pullPolicy }}
+          image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.function_controller) }}"
+          imagePullPolicy: {{ .Values.images.function_controller.pullPolicy }}
           command:
           - /app/manager
           {{- if .Values.containers.manager.resources }}
@@ -114,11 +114,11 @@ spec:
             {{ include "createEnv" ( dict "name" "APP_FUNCTION_IMAGE_PULL_ACCOUNT_NAME" "value" .Values.containers.manager.envs.imagePullAccountName "context" . ) | nindent 12 }}
             {{ include "createEnv" ( dict "name" "APP_FUNCTION_REQUEUE_DURATION" "value" .Values.containers.manager.envs.functionRequeueDuration "context" . ) | nindent 12 }}
             {{ include "createEnv" ( dict "name" "APP_FUNCTION_BUILD_EXECUTOR_ARGS" "value" .Values.containers.manager.envs.functionBuildExecutorArgs "context" . ) | nindent 12 }}
-            # scan-image: {{ .Values.containers.manager.envs.functionBuildExecutorImage.value }} # This line allows security scan tools to scan this image
-            {{ include "createEnv" ( dict "name" "APP_FUNCTION_BUILD_EXECUTOR_IMAGE" "value" .Values.containers.manager.envs.functionBuildExecutorImage "context" . ) | nindent 12 }}
+            {{ $kaniko_executor_image := include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.kaniko_executor) }}
+            {{ include "createEnv" ( dict "name" "APP_FUNCTION_BUILD_EXECUTOR_IMAGE" "value" (dict "value" $kaniko_executor_image) "context" . ) | nindent 12 }}
             {{ include "createEnv" ( dict "name" "APP_FUNCTION_TARGET_CPU_UTILIZATION_PERCENTAGE" "value" .Values.containers.manager.envs.targetCPUUtilizationPercentage "context" . ) | nindent 12 }}
-            # scan-image: {{ .Values.containers.manager.envs.functionBuildRepoFetcherImage.value }} # This line allows security scan tools to scan this image
-            {{ include "createEnv" ( dict "name" "APP_FUNCTION_BUILD_REPO_FETCHER_IMAGE" "value" .Values.containers.manager.envs.functionBuildRepoFetcherImage "context" . ) | nindent 12 }}
+            {{ $function_build_init_image := include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.function_build_init) }}
+            {{ include "createEnv" ( dict "name" "APP_FUNCTION_BUILD_REPO_FETCHER_IMAGE" "value" (dict "value" $function_build_init_image) "context" . ) | nindent 12 }}
             {{ include "createEnv" ( dict "name" "APP_FUNCTION_BUILD_MAX_SIMULTANEOUS_JOBS" "value" .Values.containers.manager.envs.functionBuildMaxSimultaneousJobs "context" . ) | nindent 12 }}
             {{ include "createEnv" ( dict "name" "APP_LOG_LEVEL" "value" .Values.containers.manager.envs.logLevel "context" . ) | nindent 12 }}
           {{- if .Values.containers.manager.extraProperties }}

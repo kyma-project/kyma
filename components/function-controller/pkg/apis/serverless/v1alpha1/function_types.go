@@ -103,6 +103,7 @@ const (
 	ConditionReasonConfigMapUpdated               ConditionReason = "ConfigMapUpdated"
 	ConditionReasonSourceUpdated                  ConditionReason = "SourceUpdated"
 	ConditionReasonSourceUpdateFailed             ConditionReason = "SourceUpdateFailed"
+	ConditionReasonGitAuthorizationFailed         ConditionReason = "GitAuthorizationFailed"
 	ConditionReasonJobFailed                      ConditionReason = "JobFailed"
 	ConditionReasonJobCreated                     ConditionReason = "JobCreated"
 	ConditionReasonJobUpdated                     ConditionReason = "JobUpdated"

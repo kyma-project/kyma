@@ -39,7 +39,10 @@ spec:
           - name: NATS_URL
             value: {{ include "controller.natsServer.url" . }}
           - name: EVENT_TYPE_PREFIX
-            value: {{ .Values.global.eventTypePrefix }}
+            valueFrom:
+              configMapKeyRef:
+                name: {{ .Values.global.configMap.name }}
+                key: {{ .Values.global.configMap.keys.eventTypePrefix }}
           - name: DOMAIN
             value: {{ .Values.global.domainName }}
           - name: WEBHOOK_TOKEN_ENDPOINT
@@ -58,6 +61,8 @@ spec:
             value: "{{ .Values.publisherProxy.image.pullPolicy }}"
           - name: PUBLISHER_REPLICAS
             value: "{{ .Values.publisherProxy.replicas }}"
+          - name: PUBLISHER_REQUEST_TIMEOUT
+            value: "{{ .Values.publisherProxy.requestTimeout }}"
           - name: DEFAULT_MAX_IN_FLIGHT_MESSAGES
             value: "{{ .Values.eventingBackend.defaultMaxInflightMessages }}"
           - name: APP_LOG_FORMAT

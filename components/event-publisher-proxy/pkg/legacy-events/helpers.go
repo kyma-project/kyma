@@ -11,6 +11,17 @@ import (
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/legacy-events/api"
 )
 
+const (
+	// eventTypeFormat is driven by BEB specification.
+	// An EventType must have at least 4 segments separated by dots in the form of:
+	// <domainNamespace>.<businessObjectName>.<operation>.<version>
+	eventTypeFormat = "%s.%s.%s.%s"
+
+	// eventTypeFormatWithoutPrefix must have at least 3 segments separated by dots in the form of:
+	// <businessObjectName>.<operation>.<version>
+	eventTypeFormatWithoutPrefix = "%s.%s.%s"
+)
+
 // ParseApplicationNameFromPath returns application name from the URL.
 // The format of the URL is: /:application-name/v1/...
 func ParseApplicationNameFromPath(path string) string {
@@ -51,5 +62,8 @@ func writeJSONResponse(w http.ResponseWriter, resp *api.PublishEventResponses) {
 
 // formatEventType4BEB format eventType as per BEB spec
 func formatEventType4BEB(eventTypePrefix, app, eventType, version string) string {
-	return fmt.Sprintf(eventTypePrefixFormat, eventTypePrefix, app, eventType, version)
+	if len(strings.TrimSpace(eventTypePrefix)) == 0 {
+		return fmt.Sprintf(eventTypeFormatWithoutPrefix, app, eventType, version)
+	}
+	return fmt.Sprintf(eventTypeFormat, eventTypePrefix, app, eventType, version)
 }

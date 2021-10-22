@@ -9,22 +9,7 @@ data:
   eventing-pods.json: |-
     {
       "annotations": {
-        "list": [
-          {
-            "builtIn": 1,
-            "datasource": "Prometheus",
-            "enable": true,
-            "expr": "time() == BOOL timestamp(rate(kube_pod_container_status_restarts_total{job=\"kube-state-metrics\", cluster=\"$cluster\", namespace=\"$namespace\", pod=\"$pod\"}[2m]) > 0)",
-            "hide": false,
-            "iconColor": "rgba(215, 44, 44, 1)",
-            "name": "Restarts",
-            "showIn": 0,
-            "tags": [
-              "restart"
-            ],
-            "type": "rows"
-          }
-        ]
+        "list": []
       },
       "editable": true,
       "gnetId": null,
@@ -65,7 +50,7 @@ data:
             "rightSide": true,
             "show": true,
             "total": false,
-            "values": false
+            "values": true
           },
           "lines": true,
           "linewidth": 1,
@@ -86,7 +71,7 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "sum by(container, pod) (container_memory_usage_bytes{job=\"kubelet\", container!=\"POD\", container !=\"\"}) * on(pod) group_left() kube_pod_labels{label_kyma_project_io_dashboard=\"eventing\", label_app=~\"$app.*\", namespace=\"$namespace\"} or sum by(container, pod) (container_memory_usage_bytes{job=\"kubelet\", container!=\"POD\", container !=\"\"}) * on(pod) group_left() kube_pod_labels{label_kyma_project_io_dashboard=\"eventing\", label_app=~\"$app.*\", namespace=\"$namespace\"}",
+              "expr": "sum by(container, pod) (container_memory_usage_bytes{job=\"kubelet\", container!=\"POD\", container !=\"\"}) * on(pod) group_left() (kube_pod_labels{label_kyma_project_io_dashboard=\"eventing\" ,namespace=\"kyma-system\"} or kube_pod_labels{label_app=\"central-application-connectivity-validator\"})",
               "format": "time_series",
               "interval": "",
               "intervalFactor": 2,
@@ -94,7 +79,7 @@ data:
               "refId": "A"
             },
             {
-              "expr": "sum by(container, pod) (kube_pod_container_resource_requests{job=\"kube-state-metrics\", resource=\"memory\"}) * on(pod) group_left() kube_pod_labels{label_kyma_project_io_dashboard=\"eventing\", label_app=~\"$app.*\", namespace=\"$namespace\"} or sum by(container, pod) (kube_pod_container_resource_requests{job=\"kube-state-metrics\", resource=\"memory\"}) * on(pod) group_left() kube_pod_labels{label_kyma_project_io_dashboard=\"eventing\", label_app=~\"$app.*\", namespace=\"$namespace\"}",
+              "expr": "sum by(container, pod) (kube_pod_container_resource_requests{job=\"kube-state-metrics\", resource=\"memory\"}) * on(pod) group_left() (kube_pod_labels{label_kyma_project_io_dashboard=\"eventing\" ,namespace=\"kyma-system\"} or kube_pod_labels{label_app=\"central-application-connectivity-validator\"})",
               "format": "time_series",
               "interval": "",
               "intervalFactor": 2,
@@ -102,7 +87,7 @@ data:
               "refId": "B"
             },
             {
-              "expr": "sum by(container, pod) (kube_pod_container_resource_limits{job=\"kube-state-metrics\", resource=\"memory\"}) * on(pod) group_left() kube_pod_labels{label_kyma_project_io_dashboard=\"eventing\", label_app=~\"$app.*\", namespace=\"$namespace\"} or sum by(container, pod) (kube_pod_container_resource_limits{job=\"kube-state-metrics\", resource=\"memory\"}) * on(pod) group_left() kube_pod_labels{label_kyma_project_io_dashboard=\"eventing\", label_app=~\"$app.*\", namespace=\"$namespace\"}",
+              "expr": "sum by(container, pod) (kube_pod_container_resource_limits{job=\"kube-state-metrics\", resource=\"memory\"}) * on(pod) group_left() (kube_pod_labels{label_kyma_project_io_dashboard=\"eventing\" ,namespace=\"kyma-system\"} or kube_pod_labels{label_app=\"central-application-connectivity-validator\"})",
               "format": "time_series",
               "interval": "",
               "intervalFactor": 2,
@@ -110,7 +95,7 @@ data:
               "refId": "C"
             },
             {
-              "expr": "sum by(container, pod) (container_memory_cache{job=\"kubelet\", container!=\"POD\", container!=\"\"}) * on(pod) group_left() kube_pod_labels{label_kyma_project_io_dashboard=\"eventing\", label_app=~\"$app.*\", namespace=\"$namespace\"} or sum by(container, pod) (container_memory_cache{job=\"kubelet\", container!=\"POD\", container!=\"\"}) * on(pod) group_left() kube_pod_labels{label_kyma_project_io_dashboard=\"eventing\", label_app=~\"$app.*\", namespace=\"$namespace\"}",
+              "expr": "sum by(container, pod) (container_memory_cache{job=\"kubelet\", container!=\"POD\", container!=\"\"}) * on(pod) group_left() (kube_pod_labels{label_kyma_project_io_dashboard=\"eventing\" ,namespace=\"kyma-system\"} or kube_pod_labels{label_app=\"central-application-connectivity-validator\"})",
               "format": "time_series",
               "interval": "",
               "intervalFactor": 2,
@@ -192,7 +177,7 @@ data:
             "rightSide": true,
             "show": true,
             "total": false,
-            "values": false
+            "values": true
           },
           "lines": true,
           "linewidth": 1,
@@ -213,14 +198,14 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "sum by (container, pod) (irate(container_cpu_usage_seconds_total{job=\"kubelet\", image!=\"\", container!=\"POD\"}[4m])) * on(pod) group_left()\nlabel_replace(max(kube_pod_labels{label_kyma_project_io_dashboard=\"eventing\", label_app=~\"$app.*\", namespace=\"$namespace\"}) by (pod), \"pod\", \"$1\", \"pod\", \"(.*)\")", 
+              "expr": "sum by (container, pod) (irate(container_cpu_usage_seconds_total{job=\"kubelet\", image!=\"\", container!=\"POD\"}[4m])) * on(pod) group_left()\nlabel_replace(max( (kube_pod_labels{label_kyma_project_io_dashboard=\"eventing\" ,namespace=\"kyma-system\"} or kube_pod_labels{label_app=\"central-application-connectivity-validator\"})) by (pod), \"pod\", \"$1\", \"pod\", \"(.*)\")",
               "format": "time_series",
               "intervalFactor": 2,
               "legendFormat": "Current: {{`{{ pod }}`}}({{`{{ container }}`}})",
               "refId": "A"
             },
             {
-              "expr": "sum by (container, pod) (irate(kube_pod_container_resource_requests{job=\"kube-state-metrics\", resource=\"cpu\"}[4m])) * on(pod) group_left() kube_pod_labels{label_kyma_project_io_dashboard=\"eventing\", label_app=~\"$app.*\", namespace=\"$namespace\"}",
+              "expr": "sum by (container, pod) (irate(kube_pod_container_resource_requests{job=\"kube-state-metrics\", resource=\"cpu\"}[4m])) * on(pod) group_left() (kube_pod_labels{label_kyma_project_io_dashboard=\"eventing\" ,namespace=\"kyma-system\"} or kube_pod_labels{label_app=\"central-application-connectivity-validator\"})",
               "format": "time_series",
               "interval": "",
               "intervalFactor": 2,
@@ -228,7 +213,7 @@ data:
               "refId": "B"
             },
             {
-              "expr": "sum by (container, pod) (kube_pod_container_resource_limits{job=\"kube-state-metrics\", resource=\"cpu\"}) * on(pod) group_left() kube_pod_labels{label_kyma_project_io_dashboard=\"eventing\", label_app=~\"$app.*\", namespace=\"$namespace\"}",
+              "expr": "sum by (container, pod) (kube_pod_container_resource_limits{job=\"kube-state-metrics\", resource=\"cpu\"}) * on(pod) group_left() (kube_pod_labels{label_kyma_project_io_dashboard=\"eventing\" ,namespace=\"kyma-system\"} or kube_pod_labels{label_app=\"central-application-connectivity-validator\"})",
               "format": "time_series",
               "intervalFactor": 2,
               "legendFormat": "Limit: {{`{{ pod }}`}}({{`{{ container }}`}})",
@@ -308,7 +293,7 @@ data:
             "rightSide": true,
             "show": true,
             "total": false,
-            "values": false
+            "values": true
           },
           "lines": true,
           "linewidth": 1,
@@ -329,14 +314,14 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "sort_desc(sum by (pod) (irate(container_network_receive_bytes_total{job=\"kubelet\"}[4m])))\n* on(pod)\nkube_pod_labels{label_kyma_project_io_dashboard=\"eventing\", label_app=~\"$app.*\", namespace=\"$namespace\"}",
+              "expr": "sort_desc(sum by (pod) (irate(container_network_receive_bytes_total{job=\"kubelet\"}[4m])))\n* on(pod)\n (kube_pod_labels{label_kyma_project_io_dashboard=\"eventing\" ,namespace=\"kyma-system\"} or kube_pod_labels{label_app=\"central-application-connectivity-validator\"})",
               "format": "time_series",
               "intervalFactor": 2,
               "legendFormat": "RX: {{` {{ pod }} `}}",
               "refId": "A"
             },
             {
-              "expr": "sort_desc(sum by (pod) (irate(container_network_transmit_bytes_total{job=\"kubelet\"}[4m])))\n* on(pod)\nkube_pod_labels{label_kyma_project_io_dashboard=\"eventing\", label_app=~\"$app.*\", namespace=\"$namespace\"}",
+              "expr": "sort_desc(sum by (pod) (irate(container_network_transmit_bytes_total{job=\"kubelet\"}[4m])))\n* on(pod)\n (kube_pod_labels{label_kyma_project_io_dashboard=\"eventing\" ,namespace=\"kyma-system\"} or kube_pod_labels{label_app=\"central-application-connectivity-validator\"})",
               "format": "time_series",
               "intervalFactor": 2,
               "legendFormat": "TX: {{` {{ pod }} `}}",
@@ -416,7 +401,7 @@ data:
             "rightSide": true,
             "show": true,
             "total": false,
-            "values": false
+            "values": true
           },
           "lines": true,
           "linewidth": 1,
@@ -437,7 +422,7 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "max by (container, pod) (kube_pod_container_status_restarts_total{job=\"kube-state-metrics\"}) * on(pod) group_left() kube_pod_labels{label_kyma_project_io_dashboard=\"eventing\", label_app=~\"$app.*\", namespace=\"$namespace\"}",
+              "expr": "max by (container, pod) (kube_pod_container_status_restarts_total{job=\"kube-state-metrics\"}) * on(pod) group_left()  (kube_pod_labels{label_kyma_project_io_dashboard=\"eventing\" ,namespace=\"kyma-system\"} or kube_pod_labels{label_app=\"central-application-connectivity-validator\"})",
               "format": "time_series",
               "intervalFactor": 2,
               "legendFormat": "Restarts: {{`{{ pod }}`}}({{`{{ container }}`}})",
@@ -494,71 +479,7 @@ data:
           "eventing"
       ],
       "templating": {
-        "list": [
-          {
-            "allValue": null,
-            "current": {
-              "selected": false,
-              "text": "kyma-system",
-              "value": "kyma-system"
-            },
-            "datasource": "Prometheus",
-            "definition": "query_result(kube_pod_labels{label_kyma_project_io_dashboard=\"eventing\"})",
-            "description": null,
-            "error": null,
-            "hide": 0,
-            "includeAll": false,
-            "label": "Namespace",
-            "multi": false,
-            "name": "namespace",
-            "options": [],
-            "query": {
-              "query": "query_result(kube_pod_labels{label_kyma_project_io_dashboard=\"eventing\"})",
-              "refId": "StandardVariableQuery"
-            },
-            "refresh": 2,
-            "regex": "/namespace=\"([a-zA-Z0-9-\\.]+)\"/",
-            "skipUrlSync": false,
-            "sort": 0,
-            "tagValuesQuery": "",
-            "tags": [],
-            "tagsQuery": "",
-            "type": "query",
-            "useTags": false
-          },
-          {
-            "allValue": null,
-            "current": {
-              "isNone": true,
-              "selected": false,
-              "text": "None",
-              "value": ""
-            },
-            "datasource": "Prometheus",
-            "definition": "label_values(kube_pod_labels{label_app=~\".*connectivity-validator\", namespace=~\"$namespace\"}, label_release)",
-            "description": null,
-            "error": null,
-            "hide": 0,
-            "includeAll": false,
-            "label": "Application",
-            "multi": false,
-            "name": "app",
-            "options": [],
-            "query": {
-              "query": "label_values(kube_pod_labels{label_app=~\".*connectivity-validator\", namespace=~\"$namespace\"}, label_release)",
-              "refId": "Prometheus-app-Variable-Query"
-            },
-            "refresh": 2,
-            "regex": "",
-            "skipUrlSync": false,
-            "sort": 1,
-            "tagValuesQuery": "",
-            "tags": [],
-            "tagsQuery": "",
-            "type": "query",
-            "useTags": false
-          }
-        ]
+        "list": []
       },
       "time": {
         "from": "now-30m",
