@@ -38,6 +38,7 @@ const {
   namespaceObj,
   serviceInstanceObj,
   getTraceDAG,
+  printStatusOfInClusterEventingInfrastructure,
 } = require("../../../utils");
 
 const {
@@ -607,6 +608,8 @@ async function checkInClusterEventDeliveryHelper(targetNamespace, encoding) {
   const eventId = "event-" + encoding + "-" + genRandom(5);
   const vs = await waitForVirtualService(targetNamespace, "lastorder");
   const mockHost = vs.spec.hosts[0];
+  // Print infrastructure set up needed for in-cluster eventing
+  await printStatusOfInClusterEventingInfrastructure(targetNamespace, encoding, "lastorder");
 
   // send event using function query parameter send=true
   await retryPromise(() => axios.post(`https://${mockHost}`, { id: eventId }, { params: { send: true, encoding: encoding } }), 10, 1000)

@@ -293,6 +293,15 @@ async function getSecret(name, namespace) {
   return body;
 }
 
+async function getFunction(name, namespace) {
+  const path = `/apis/serverless.kyma-project.io/v1alpha1/namespaces/${namespace}/functions/${name}`;
+  const response = await k8sDynamicApi.requestPromise({
+    url: k8sDynamicApi.basePath + path,
+  });
+  const body = JSON.parse(response.body);
+  return body;
+}
+
 async function getConfigMap(name, namespace) {
   const path = `/api/v1/namespaces/${namespace}/configmaps/${name}`;
   const response = await k8sDynamicApi.requestPromise({
@@ -1491,6 +1500,38 @@ async function printEventingControllerLogs() {
 }
 
 /**
+ * Prints status of the components on which in-cluster eventing happens
+ */
+ async function printStatusOfInClusterEventingInfrastructure(targetNamespace, encoding, funcName) {
+  try{
+    let kymaSystem = "kyma-system"
+    console.log(`****** Printing status of infrastructure for in-cluster eventing ${encoding} *******`)
+
+    console.log(`****** Status of eventing-publisher-proxy deployment from ns: ${kymaSystem}`)
+    let publisherDeployment = await k8sAppsApi.listNamespacedDeployment(kymaSystem,undefined, undefined,undefined, undefined, 'app.kubernetes.io/name=eventing-publisher-proxy, app.kubernetes.io/instance=eventing', undefined );
+    console.log(publisherDeployment.body.items[0].status)
+
+    console.log(`****** Status of eventing-controller deployment from ns: ${kymaSystem}`)
+    let controllerDeployment  = await k8sAppsApi.listNamespacedDeployment(kymaSystem,undefined, undefined,undefined, undefined, 'app.kubernetes.io/name=controller, app.kubernetes.io/instance=eventing', undefined );
+    console.log(controllerDeployment.body.items[0].status)
+
+    console.log(`****** Status of nats-server pods from ns: ${kymaSystem}`)
+    let natsServerPods  = await k8sAppsApi.listNamespacedPod(kymaSystem, undefined, undefined, undefined, undefined, 'kyma-project.io/dashboard=eventing, nats_cluster=eventing-nats', undefined);
+    console.log(natsServerPods.body.items[0].status)
+
+    console.log(`****** Status of function ${funcName} from ns: ${targetNamespace}`)
+    let lastOrderFunc = await getFunction(funcName, targetNamespace);
+    console.log(lastOrderFunc.status.conditions)
+
+    console.log(`****** End *******`)
+  }
+  catch(err) {
+    console.log(err)
+    throw err
+  }
+}
+
+/**
  * Prints logs of eventing-publisher-proxy from kyma-system
  */
  async function printEventingPublisherProxyLogs() {
@@ -1625,4 +1666,5 @@ module.exports = {
   createEventingBackendK8sSecret,
   deleteEventingBackendK8sSecret,
   getTraceDAG,
+  printStatusOfInClusterEventingInfrastructure,
 };
