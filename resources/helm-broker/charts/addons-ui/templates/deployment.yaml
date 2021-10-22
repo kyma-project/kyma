@@ -26,7 +26,7 @@ spec:
       serviceAccountName: {{ template "addons-ui-fullname" . }}
       containers:
         - name: {{ .Chart.Name }}
-          image: "{{ .Values.global.containerRegistry.path }}/{{ .Values.image.name }}:{{ .Values.image.version }}"
+          image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.add_ons_ui) }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           securityContext:
             allowPrivilegeEscalation: false

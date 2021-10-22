@@ -9,7 +9,7 @@ metadata:
 spec:
   containers:
     - name: wget
-      image: busybox
+      image: {{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.busybox) }}
       command: ['wget']
       args: ['{{ include "central-application-gateway.fullname" . }}:{{ .Values.service.port }}']
   restartPolicy: Never

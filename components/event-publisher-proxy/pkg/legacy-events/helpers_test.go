@@ -52,6 +52,13 @@ func TestFormatEventType4BEB(t *testing.T) {
 			version:         "v1",
 			wantedEventType: "prefix.app.order-foo.v1",
 		},
+		{
+			eventTypePrefix: "",
+			app:             "app",
+			eventType:       "order-foo",
+			version:         "v1",
+			wantedEventType: "app.order-foo.v1",
+		},
 	}
 
 	for _, tc := range testCases {

@@ -81,6 +81,15 @@ class KEBClient {
     }
   }
 
+  async getSKR(instanceID) {
+    const endpoint = `service_instances/${instanceID}`;
+    try {
+      return await this.callKEB({}, endpoint, "get");
+    } catch (err) {
+      throw new Error(`error while getting SKR: ${err.toString()}`);
+    }
+  }
+
   async provisionSKR(name, instanceID, platformCreds, btpOperatorCreds, customParams) {
     const payload = {
       service_id: KYMA_SERVICE_ID,

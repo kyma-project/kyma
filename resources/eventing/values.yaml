@@ -12,7 +12,7 @@ global:
       pullPolicy: "IfNotPresent"
     publisher_proxy:
       name: event-publisher-proxy
-      version: PR-12318
+      version: PR-12420
     nats_operator:
       name: nats-operator
       version: PR-12170
@@ -30,7 +30,7 @@ global:
   secretName: ""
 
   # domainName is the global domain used in Kyma
-  domainName: "domain"
+  domainName: "kyma.example.com"
 
   istio:
     proxy:
@@ -41,7 +41,7 @@ global:
     allowPrivilegeEscalation: false
     privileged: false
 
-  # eventTypePrefix is the prefix of the eventType
+  # eventTypePrefix is an optional prefix for the eventType
   # note that the eventType format is: eventTypePrefix.applicationName.eventName.eventVersion
   # for example: sap.kyma.custom.myapp.order.created.v1 (where the eventName is order.created)
   eventTypePrefix: "sap.kyma.custom"
@@ -49,6 +49,11 @@ global:
   log:
     format: "json"
     level: "info"
+
+  configMap:
+    name: eventing
+    keys:
+      eventTypePrefix: "eventTypePrefix"
 
 authentication:
   # oauthClientId is the Oauth2 client id used in order to get an Oauth2 token from BEB

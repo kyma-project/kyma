@@ -1519,6 +1519,31 @@ async function printEventingControllerLogs() {
   }
 }
 
+// getTraceDAG returns a DAG for the provided Jaeger tracing data
+async function getTraceDAG(trace) {
+  // Find root spans which are not child of any other span
+  const rootSpans = trace["spans"].filter((s) => !(s["references"].find((r) => r["refType"] === "CHILD_OF")))
+
+  // Find and attach child spans for each root span
+  for (const root of rootSpans) {
+    await attachTraceChildSpans(root, trace);
+  }
+  return rootSpans
+}
+
+// attachChildSpans finds child spans of current parentSpan and attach it to parentSpan object
+// and also recursively, finds and attaches further child spans of each child.
+async function attachTraceChildSpans(parentSpan, trace) {
+  // find child spans of current parentSpan and attach it to parentSpan object
+  parentSpan["childSpans"] = trace["spans"].filter((s) => s["references"].find((r) => r["refType"] === "CHILD_OF" && r["spanID"] === parentSpan["spanID"] && r["traceID"] === parentSpan["traceID"]));
+  // recursively, find and attach further child span of each parentSpan["childSpans"]
+  if (parentSpan["childSpans"] && parentSpan["childSpans"].length > 0) {
+    for (const child of parentSpan["childSpans"]) {
+      await attachTraceChildSpans(child, trace);
+    }
+  }
+}
+
 module.exports = {
   initializeK8sClient,
   retryPromise,
@@ -1599,4 +1624,5 @@ module.exports = {
   printEventingPublisherProxyLogs,
   createEventingBackendK8sSecret,
   deleteEventingBackendK8sSecret,
+  getTraceDAG,
 };

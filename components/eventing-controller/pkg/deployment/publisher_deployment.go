@@ -39,6 +39,9 @@ const (
 	PublisherSecretTokenEndpointKey = "token-endpoint"
 	PublisherSecretEMSURLKey        = "ems-publish-url"
 	PublisherSecretBEBNamespaceKey  = "beb-namespace"
+
+	configMapName               = "eventing"
+	configMapKeyEventTypePrefix = "eventTypePrefix"
 )
 
 var (
@@ -222,7 +225,17 @@ func getBEBEnvVars(publisherConfig env.PublisherConfig) []v1.EnvVar {
 	return []v1.EnvVar{
 		{Name: "BACKEND", Value: "beb"},
 		{Name: "PORT", Value: strconv.Itoa(int(publisherPortNum))},
-		{Name: "EVENT_TYPE_PREFIX", Value: "sap.kyma.custom"},
+		{
+			Name: "EVENT_TYPE_PREFIX",
+			ValueFrom: &v1.EnvVarSource{
+				ConfigMapKeyRef: &v1.ConfigMapKeySelector{
+					LocalObjectReference: v1.LocalObjectReference{
+						Name: configMapName,
+					},
+					Key: configMapKeyEventTypePrefix,
+				},
+			},
+		},
 		{Name: "REQUEST_TIMEOUT", Value: publisherConfig.RequestTimeout},
 		{
 			Name: "CLIENT_ID",
@@ -278,8 +291,28 @@ func getNATSEnvVars(publisherConfig env.PublisherConfig) []v1.EnvVar {
 		{Name: "NATS_URL", Value: "eventing-nats.kyma-system.svc.cluster.local"},
 		{Name: "REQUEST_TIMEOUT", Value: publisherConfig.RequestTimeout},
 		{Name: "LEGACY_NAMESPACE", Value: "kyma"},
-		{Name: "LEGACY_EVENT_TYPE_PREFIX", Value: "sap.kyma.custom"},
-		{Name: "EVENT_TYPE_PREFIX", Value: "sap.kyma.custom"},
+		{
+			Name: "LEGACY_EVENT_TYPE_PREFIX",
+			ValueFrom: &v1.EnvVarSource{
+				ConfigMapKeyRef: &v1.ConfigMapKeySelector{
+					LocalObjectReference: v1.LocalObjectReference{
+						Name: configMapName,
+					},
+					Key: configMapKeyEventTypePrefix,
+				},
+			},
+		},
+		{
+			Name: "EVENT_TYPE_PREFIX",
+			ValueFrom: &v1.EnvVarSource{
+				ConfigMapKeyRef: &v1.ConfigMapKeySelector{
+					LocalObjectReference: v1.LocalObjectReference{
+						Name: configMapName,
+					},
+					Key: configMapKeyEventTypePrefix,
+				},
+			},
+		},
 	}
 }
 

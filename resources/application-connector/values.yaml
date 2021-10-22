@@ -8,6 +8,7 @@ central_application_gateway:
   enabled: true
 
 global:
+  domainName: kyma.example.com
   centralApplicationConnectivityValidatorEnabled: true
   disableLegacyConnectivity: false
   isLocalEnv: false
@@ -65,29 +66,15 @@ global:
       version: "PR-11558"
     connector_service:
       name: "connector-service"
-      version: "1683d7cf"
+      version: "PR-12294"
+    busybox:
+      name: "busybox"
+      version: "1.32.0-v1"
+      directory: "external"
   testImages:
-    application_operator_tests:
-      name: "application-operator-tests"
-      version: "PR-11558"
-    application_gateway_tests:
-      name: "application-gateway-tests"
-      version: "68baa911"
     application_gateway_legacy_tests:
       name: "application-gateway-legacy-tests"
       version: "68baa911"
-    application_registry_tests:
-      name: "application-registry-tests"
-      version: "PR-11558"
-    connection_token_handler_tests:
-      name: "connection-token-handler-tests"
-      version: "9776cb81"
-    connector_service_tests:
-      name: "connector-service-tests"
-      version: "PR-11939"
-    application_connector_tests:
-      name: "application-connector-tests"
-      version: "PR-11939"
 
 application_connectivity_certs_setup_job:
   secrets:

@@ -74,6 +74,7 @@ addons-ui:
   enabled: false
 
 global:
+  domainName: "kyma.example.com"
   containerRegistry:
     path: eu.gcr.io/kyma-project
   # develop mode allows use insecure (http) url for addons configuration
@@ -119,3 +120,6 @@ global:
       name: "etcd"
       version: "v3.3.25-e5110645"
       directory: "tpi/quay.io/coreos"
+    add_ons_ui:
+      name: "add-ons-ui"
+      version: "c60a3c68"

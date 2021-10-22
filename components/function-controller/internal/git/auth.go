@@ -2,6 +2,7 @@ package git
 
 import (
 	"fmt"
+	"strings"
 
 	git2go "github.com/libgit2/git2go/v31"
 	"github.com/pkg/errors"
@@ -45,12 +46,8 @@ func GetAuth(options *AuthOptions) (git2go.RemoteCallbacks, error) {
 				return git2go.RemoteCallbacks{}, fmt.Errorf("missing field %s", PasswordKey)
 			}
 
-			cred, err := git2go.NewCredentialUserpassPlaintext(username, password)
-			if err != nil {
-				return git2go.RemoteCallbacks{}, errors.Wrap(err, "while creating basic auth")
-			}
 			return git2go.RemoteCallbacks{
-				CredentialsCallback: authCallback(cred),
+				CredentialsCallback: authBasicCallback(username, password),
 			}, nil
 		}
 	case RepositoryAuthSSHKey:
@@ -75,7 +72,7 @@ func GetAuth(options *AuthOptions) (git2go.RemoteCallbacks, error) {
 				return git2go.RemoteCallbacks{}, errors.Wrap(err, "while creating ssh credential in git2go")
 			}
 			return git2go.RemoteCallbacks{
-				CredentialsCallback:      authCallback(cred),
+				CredentialsCallback:      authSSHCallback(cred),
 				CertificateCheckCallback: sshCheckCallback(),
 			}, nil
 
@@ -84,8 +81,18 @@ func GetAuth(options *AuthOptions) (git2go.RemoteCallbacks, error) {
 	return git2go.RemoteCallbacks{}, errors.Errorf("unknown authentication type: %s", options.Type)
 }
 
-func authCallback(cred *git2go.Credential) func(url, username string, allowed_types git2go.CredentialType) (*git2go.Credential, error) {
-	return func(url, username string, allowed_types git2go.CredentialType) (*git2go.Credential, error) {
+func authSSHCallback(cred *git2go.Credential) func(url, username string, allowed_types git2go.CredentialType) (*git2go.Credential, error) {
+	return func(url string, username_from_url string, allowed_types git2go.CredentialType) (*git2go.Credential, error) {
+		return cred, nil
+	}
+}
+
+func authBasicCallback(username, password string) func(url, username string, allowed_types git2go.CredentialType) (*git2go.Credential, error) {
+	return func(url string, username_from_url string, allowed_types git2go.CredentialType) (*git2go.Credential, error) {
+		cred, err := git2go.NewCredentialUserpassPlaintext(username, password)
+		if err != nil {
+			return nil, errors.Wrap(err, "while creating credentials with user and password")
+		}
 		return cred, nil
 	}
 }
@@ -94,4 +101,24 @@ func sshCheckCallback() func(cert *git2go.Certificate, valid bool, hostname stri
 	return func(cert *git2go.Certificate, valid bool, hostname string) git2go.ErrorCode {
 		return git2go.ErrOk
 	}
+}
+
+func IsAuthErr(err error) bool {
+	if err == nil {
+		return false
+	}
+
+	errMsg := err.Error()
+	if strings.Contains(errMsg, "unexpected http status code: 403") {
+		return true
+	}
+
+	/*
+		When using invalid personal access token with basic auth, libgit2 return such error.
+	*/
+
+	if strings.Contains(errMsg, "too many redirects or authentication replays") {
+		return true
+	}
+	return false
 }

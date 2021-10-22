@@ -4,22 +4,23 @@ const (
 	ApplicationName         = "testapp1023"
 	ApplicationNameNotClean = "test.app_1-0+2=3"
 
-	// messaging system properties
-	MessagingNamespace       = "/messaging.namespace"
-	MessagingEventTypePrefix = "sap.kyma"
+	MessagingNamespace            = "/messaging.namespace"
+	MessagingEventTypePrefix      = "prefix"
+	MessagingEventTypePrefixEmpty = ""
 
-	// event properties
-	EventID                   = "8945ec08-256b-11eb-9928-acde48001122"
-	CloudEventType            = MessagingEventTypePrefix + "." + ApplicationName + ".order.created.v1"
-	CloudEventTypeNotClean    = MessagingEventTypePrefix + "." + ApplicationNameNotClean + ".order.created.v1"
-	CloudEventSource          = "/default/sap.kyma/id"
-	CloudEventSpecVersion     = "1.0"
-	CloudEventData            = `{\"key\":\"value\"}`
-	CloudEventDataContentType = "application/json"
-	LegacyEventType           = "order.created"
-	LegacyEventTypeVersion    = "v1"
-	LegacyEventTime           = "2020-04-02T21:37:00Z"
-	LegacyEventData           = `{"key": "value"}`
+	EventID                           = "8945ec08-256b-11eb-9928-acde48001122"
+	CloudEventType                    = MessagingEventTypePrefix + "." + ApplicationName + ".order.created.v1"
+	CloudEventTypePrefixEmpty         = ApplicationName + ".order.created.v1"
+	CloudEventTypeNotClean            = MessagingEventTypePrefix + "." + ApplicationNameNotClean + ".order.created.v1"
+	CloudEventTypeNotCleanPrefixEmpty = ApplicationNameNotClean + ".order.created.v1"
+	CloudEventSource                  = "/default/sap.kyma/id"
+	CloudEventSpecVersion             = "1.0"
+	CloudEventData                    = `{\"key\":\"value\"}`
+	CloudEventDataContentType         = "application/json"
+	LegacyEventType                   = "order.created"
+	LegacyEventTypeVersion            = "v1"
+	LegacyEventTime                   = "2020-04-02T21:37:00Z"
+	LegacyEventData                   = `{"key": "value"}`
 
 	StructuredCloudEventPayloadWithoutID = `{
            "type":"` + CloudEventTypeNotClean + `",

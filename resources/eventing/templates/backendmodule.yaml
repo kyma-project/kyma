@@ -1,7 +1,0 @@
-{{- if .Capabilities.APIVersions.Has "ui.kyma-project.io/v1alpha1" }}
-apiVersion: ui.kyma-project.io/v1alpha1
-kind: BackendModule
-metadata:
-  name: eventing
-  labels: {{ include "eventing.labels" . | nindent 4 }}
-{{ end }}

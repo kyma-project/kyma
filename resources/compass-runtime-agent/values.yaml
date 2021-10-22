@@ -1,14 +1,11 @@
 global:
+  domainName: kyma.example.com
   containerRegistry:
     path: eu.gcr.io/kyma-project
   images:
     compass_runtime_agent:
       name: "compass-runtime-agent"
       version: "PR-12141"
-  testImages:
-    compass_runtime_agent_tests:
-      name: "compass-runtime-agent-tests"
-      version: "5b55dce8"
   istio:
     gateway:
       name: kyma-gateway
