@@ -45,5 +45,5 @@ spec:
               value: "no" # do not clean, we'll kubectl get those resources after job completion/fail
             - name: APP_TEST_ISTIO_ENABLED
               value: "false"
-            - name: APP_GIT_SERVER_IMAGE
+            - name: APP_TEST_GIT_SERVER_IMAGE
               value: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.git_server) }}"
