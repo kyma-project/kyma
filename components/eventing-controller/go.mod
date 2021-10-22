@@ -12,27 +12,24 @@ require (
 	github.com/kyma-incubator/api-gateway v0.0.0-20200930072023-5d3f2107a1ef
 	github.com/kyma-project/kyma/common/logging v0.0.0-20210601142757-445a3b6021fe
 	github.com/kyma-project/kyma/components/application-operator v0.0.0-20210204131215-a368a90f2525
-	github.com/lightstep/tracecontext.go v0.0.0-20181129014701-1757c391b1ac // indirect
-	github.com/mitchellh/hashstructure v1.1.0 // indirect
 	github.com/mitchellh/hashstructure/v2 v2.0.2
 	github.com/nats-io/nats-server/v2 v2.2.4
 	github.com/nats-io/nats.go v1.11.0
 	github.com/onsi/ginkgo v1.16.2
 	github.com/onsi/gomega v1.10.5
-	github.com/ory/hydra-maester v0.0.22 // indirect
 	github.com/ory/oathkeeper-maester v0.1.0
 	github.com/pkg/errors v0.9.1
-	github.com/smallstep/logging v0.1.0 // indirect
 	github.com/stretchr/testify v1.7.0
-	go.opencensus.io v0.22.4 // indirect
+	go.uber.org/multierr v1.6.0 // indirect
 	go.uber.org/zap v1.16.0
 	golang.org/x/oauth2 v0.0.0-20200107190931-bf48bf16ab8d
 	golang.org/x/tools v0.1.0 // indirect
 	golang.org/x/xerrors v0.0.0-20200804184101-5ec99f83aff1
-	k8s.io/api v0.20.7
-	k8s.io/apiextensions-apiserver v0.20.7 // indirect
-	k8s.io/apimachinery v0.20.7
-	k8s.io/client-go v0.20.7
+	k8s.io/api v0.20.11
+	k8s.io/apiextensions-apiserver v0.20.11 // indirect
+	k8s.io/apimachinery v0.20.11
+	k8s.io/client-go v0.20.11
+	k8s.io/utils v0.0.0-20210305010621-2afb4311ab10 // indirect
 	sigs.k8s.io/controller-runtime v0.8.3
 )
 

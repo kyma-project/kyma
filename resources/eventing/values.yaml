@@ -5,19 +5,14 @@ global:
   images:
     eventing_controller:
       name: eventing-controller
-      version: PR-12189
+      version: PR-12420
     publisher_proxy:
       name: event-publisher-proxy
-      version: PR-12189
-### How to use this? do we need to push nats image to kyma GCR???
+      version: PR-12420
 #    nats:
 #      name: nats
 #      version: 2.2.4
 #      directory: external
-#    prometheus_nats_exporter:
-#      name: prometheus-nats-exporter
-#      varsion: 0.7.0
-#      directory: external/natsio
     
 
   # secretName defines optionally another name than the default secret name

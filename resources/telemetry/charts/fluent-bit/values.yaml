@@ -262,7 +262,6 @@ command: []
 
 initContainers: 
   - name: prep-fluent-bit-config
-    image: {{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.busybox) }}
     volumeMounts:
     - name: shared-fluent-bit-config
       mountPath: /fluent-bit/etc/
