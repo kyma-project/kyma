@@ -1,4 +1,4 @@
-FROM eu.gcr.io/kyma-project/external/golang:1.14.8-alpine as builder
+FROM eu.gcr.io/kyma-project/external/golang:1.16.0-alpine as builder
 
 ENV SRC_DIR=/go/src/github.com/kyma-project/kyma/tests/application-operator-tests
 WORKDIR $SRC_DIR
