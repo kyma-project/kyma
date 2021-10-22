@@ -27,6 +27,9 @@ config:
     port: 4455
   jwksURI: http://dex-service.kyma-system.svc.cluster.local:5556/keys
   serviceBlockList:
+    # blocks the creation of the service name across all namespaces
+    all-namespaces:
+      - api
     default:
       - kubernetes
     istio-system:
