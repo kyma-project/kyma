@@ -11,8 +11,7 @@ require (
 	github.com/kyma-project/kyma/components/eventing-controller v0.0.0-20210112215829-419ae45b5316
 	github.com/nats-io/nats-server/v2 v2.2.4
 	github.com/nats-io/nats.go v1.11.0
-	github.com/onsi/ginkgo v1.14.2 // indirect
-	github.com/onsi/gomega v1.10.4
+	github.com/onsi/gomega v1.16.0
 	github.com/pkg/errors v0.9.1
 	github.com/prometheus/client_golang v1.11.0
 	github.com/sirupsen/logrus v1.8.1
