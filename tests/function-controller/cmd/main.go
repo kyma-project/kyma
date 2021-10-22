@@ -49,6 +49,8 @@ func main() {
 	failOnError(err, logf)
 	logf.Printf("loaded config")
 
+	logf.Printf(cfg.Test.GitServerImage)
+
 	restConfig := controllerruntime.GetConfigOrDie()
 
 	scenarioName := os.Args[1]
