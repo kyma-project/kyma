@@ -17,7 +17,9 @@ nats:
     port: 6000
 
   # securityContext for the nats container
-  securityContext: {}
+  securityContext:
+    allowPrivilegeEscalation: false
+    privileged: false
 
   # Toggle whether to enable external access.
   # This binds a host port for clients, gateways and leafnodes.
@@ -398,7 +400,9 @@ natsbox:
 reloader:
   enabled: true
   pullPolicy: IfNotPresent
-  securityContext: {}
+  securityContext:
+    allowPrivilegeEscalation: false
+    privileged: false
 
 # Prometheus NATS Exporter configuration.
 exporter:
