@@ -42,7 +42,7 @@ require (
 
 replace (
 	github.com/kubernetes-sigs/service-catalog => github.com/kubernetes-sigs/service-catalog v0.2.2-0.20190920221325-ccab52343967
-	github.com/kyma-project/kyma/components/application-operator => github.com/kyma-project/kyma/components/application-operator v0.0.0-20200610105106-1066324c83cd
+	github.com/kyma-project/kyma/components/application-operator => github.com/koala7659/kyma/components/application-operator v0.0.0-20211015110346-cae2c42ab609
 	google.golang.org/grpc => google.golang.org/grpc v1.27.1
 
 	istio.io/api => istio.io/api v0.0.0-20200724154434-34e474846e0d
