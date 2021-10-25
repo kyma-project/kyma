@@ -4,7 +4,7 @@
 {{- $altName2 := printf "%s.%s.svc" $cn .Release.Namespace }}
 {{- $cert := genSignedCert $cn nil (list $altName1 $altName2) 3650 $ca }}
 apiVersion: admissionregistration.k8s.io/v1beta1
-  kind: MutatingWebhookConfiguration
+kind: MutatingWebhookConfiguration
 metadata:
   name: {{ template "fullname" . }}-webhook
 webhooks:
