@@ -2,6 +2,7 @@ service:
   type: NodePort
   externalPort: 80
 
+
 deploy:
   annotations:
     sidecar.istio.io/inject: "true"
