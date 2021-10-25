@@ -20,7 +20,7 @@ nats:
     enabled: false
     replicas: 1
   reloader:
-    enabled: true
+    enabled: false
   natsbox:
     enabled: false
   nats:

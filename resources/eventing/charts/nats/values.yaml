@@ -398,7 +398,7 @@ natsbox:
 
 # The NATS config reloader image to use.
 reloader:
-  enabled: true
+  enabled: false
   pullPolicy: IfNotPresent
   securityContext:
     allowPrivilegeEscalation: false
