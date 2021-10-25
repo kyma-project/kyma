@@ -397,7 +397,6 @@ natsbox:
 # The NATS config reloader image to use.
 reloader:
   enabled: true
-  image: natsio/nats-server-config-reloader:0.6.2
   pullPolicy: IfNotPresent
   securityContext: {}
 

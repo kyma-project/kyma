@@ -430,7 +430,7 @@ spec:
       #################################
       {{ if .Values.reloader.enabled }}
       - name: reloader
-        image: {{ .Values.reloader.image }}
+        image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.nats_config_reloader) }}"
         imagePullPolicy: {{ .Values.reloader.pullPolicy }}
         {{- if .Values.reloader.securityContext }}
         securityContext:

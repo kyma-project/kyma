@@ -13,6 +13,10 @@ global:
       name: nats
       version: 2.6.1-alpine
       directory: external
+    nats_config_reloader:
+      name: nats-server-config-reloader
+      version: 0.6.2
+      directory: external/natsio
     
 
   # secretName defines optionally another name than the default secret name
