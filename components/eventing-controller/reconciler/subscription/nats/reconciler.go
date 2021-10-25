@@ -208,16 +208,16 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 	_, err = r.Backend.SyncSubscription(desiredSubscription, r.eventTypeCleaner)
 	if err != nil {
 		log.Errorw("sync subscription failed", "error", err)
-		if err := r.syncSubscriptionStatus(ctx, actualSubscription, false, err.Error()); err != nil {
+		if err := r.syncSubscriptionStatus(ctx, desiredSubscription, false, err.Error()); err != nil {
 			return ctrl.Result{}, err
 		}
 		return ctrl.Result{}, err
 	}
 	log.Debug("create NATS subscriptions succeeded")
 
-	actualSubscription.Status.Config = desiredSubscription.Status.Config
+	//actualSubscription.Status.Config = desiredSubscription.Status.Config
 	// Update status
-	if err := r.syncSubscriptionStatus(ctx, actualSubscription, true, ""); err != nil {
+	if err := r.syncSubscriptionStatus(ctx, desiredSubscription, true, ""); err != nil {
 		return ctrl.Result{}, err
 	}
 

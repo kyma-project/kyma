@@ -291,6 +291,12 @@ func WithFilter(eventSource, eventType string) SubscriptionOpt {
 	}
 }
 
+func WithEmptyFilter(subscription *eventingv1alpha1.Subscription) {
+	subscription.Spec.Filter = &eventingv1alpha1.BEBFilters{
+		Filters: []*eventingv1alpha1.BEBFilter{},
+	}
+}
+
 func WithEventTypeFilter(s *eventingv1alpha1.Subscription) {
 	s.Spec.Filter = &eventingv1alpha1.BEBFilters{
 		Filters: []*eventingv1alpha1.BEBFilter{
