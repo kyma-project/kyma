@@ -272,22 +272,25 @@ func WithNotCleanEventTypeFilter(s *eventingv1alpha1.Subscription) {
 // WithFilter sets the Subscription filter with the given event source and type.
 func WithFilter(eventSource, eventType string) SubscriptionOpt {
 	return func(subscription *eventingv1alpha1.Subscription) {
-		subscription.Spec.Filter = &eventingv1alpha1.BEBFilters{
-			Filters: []*eventingv1alpha1.BEBFilter{
-				{
-					EventSource: &eventingv1alpha1.Filter{
-						Type:     "exact",
-						Property: "source",
-						Value:    eventSource,
-					},
-					EventType: &eventingv1alpha1.Filter{
-						Type:     "exact",
-						Property: "type",
-						Value:    eventType,
-					},
-				},
+		if subscription.Spec.Filter == nil {
+			subscription.Spec.Filter = &eventingv1alpha1.BEBFilters{
+				Filters: []*eventingv1alpha1.BEBFilter{},
+			}
+		}
+
+		filter := &eventingv1alpha1.BEBFilter{
+			EventSource: &eventingv1alpha1.Filter{
+				Type:     "exact",
+				Property: "source",
+				Value:    eventSource,
+			},
+			EventType: &eventingv1alpha1.Filter{
+				Type:     "exact",
+				Property: "type",
+				Value:    eventType,
 			},
 		}
+		subscription.Spec.Filter.Filters = append(subscription.Spec.Filter.Filters, filter)
 	}
 }
 
