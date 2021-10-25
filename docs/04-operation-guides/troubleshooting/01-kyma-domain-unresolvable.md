@@ -25,6 +25,6 @@ Add the virtual service domains to the host file of your local system.
    ```
 
 2. If that command fails, you get a list of host files.
-   Use those to execute the following:
-   - For Mac/Linux, run `sudo  /bin/sh -c 'echo \"127.0.0.1 hosts" >> /etc/hosts'`.
-   - For Windows, run `echo hosts_displayed >> "C:\\Windows\\system32\\drivers\\etc\\hosts"`.
+   Execute the following commands, replacing the placeholder with the displayed hosts:
+   - For Mac/Linux, run `sudo  /bin/sh -c 'echo \"127.0.0.1 {DISPLAYED_HOSTS}" >> /etc/hosts'`.
+   - For Windows, run `echo {DISPLAYED_HOSTS} >> "C:\\Windows\\system32\\drivers\\etc\\hosts"`.
