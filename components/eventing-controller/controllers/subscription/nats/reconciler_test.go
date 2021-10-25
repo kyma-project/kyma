@@ -60,8 +60,86 @@ var (
 		testCreateSubscriptionWithEmptyProtocolProtocolSettingsDialect,
 		testChangeSubscriptionConfiguration,
 		testCreateSubscriptionWithEmptyEventType,
+		mytestCase,
 	}
 )
+
+func mytestCase(id int, natsSubjectToPublish, eventTypeToSubscribe string) bool {
+	return When("Reconcile Subscription", func() {
+		It("should report a CleanEventTypes in the subscription status", func() {
+			// creating a subscriber
+			result := make(chan []byte)
+			subscriber, shutdown := newSubscriber(result)
+			defer shutdown()
+
+			// creating a subscription
+			subscriptionName := fmt.Sprintf(subscriptionNameFormat, id)
+			optWebhook := reconcilertesting.WithWebhookForNats
+			optEmptyFilter := reconcilertesting.WithEmptyFilter
+			subscription := reconcilertesting.NewSubscription(subscriptionName, namespaceName, optWebhook, optEmptyFilter)
+			subscription.Spec.Sink = subscriber
+
+			ctx := context.Background()
+			ensureSubscriptionCreated(subscription, ctx)
+
+			Context("Subscription without filters", func() {
+				By("Should have Subscription Status without the field 'cleanEventTypes'", func() {
+					getSubscription(subscription, ctx).Should(And(
+						reconcilertesting.HaveSubscriptionName(subscriptionName),
+						reconcilertesting.HaveCondition(eventingv1alpha1.MakeCondition(
+							eventingv1alpha1.ConditionSubscriptionActive,
+							eventingv1alpha1.ConditionReasonNATSSubscriptionActive,
+							v1.ConditionTrue, "")),
+						reconcilertesting.HaveSubsConfiguration(&eventingv1alpha1.SubscriptionConfig{
+							MaxInFlightMessages: defaultSubsConfig.MaxInFlightMessages,
+						}),
+						reconcilertesting.HaveCleanEventTypes(nil),
+					))
+				})
+			})
+
+			Context("Subscription with a single filter", func() {
+				addFilters := reconcilertesting.WithFilter(reconcilertesting.EventSource, eventTypeToSubscribe)
+				addFilters(subscription)
+				ensureSubscriptionUpdated(subscription, ctx)
+
+				By("Should have Subscription Status with the field 'cleanEventTypes'", func() {
+					getSubscription(subscription, ctx).Should(And(
+						reconcilertesting.HaveSubscriptionName(subscriptionName),
+						reconcilertesting.HaveCondition(eventingv1alpha1.MakeCondition(
+							eventingv1alpha1.ConditionSubscriptionActive,
+							eventingv1alpha1.ConditionReasonNATSSubscriptionActive,
+							v1.ConditionTrue, "")),
+						reconcilertesting.HaveSubsConfiguration(&eventingv1alpha1.SubscriptionConfig{
+							MaxInFlightMessages: defaultSubsConfig.MaxInFlightMessages,
+						}),
+						reconcilertesting.HaveCleanEventTypes([]string{natsSubjectToPublish}),
+					))
+				})
+			})
+
+			Context("Subscription with a single filter", func() {
+				addFilters := reconcilertesting.WithFilter(reconcilertesting.EventSource, eventTypeToSubscribe)
+				addFilters(subscription)
+				ensureSubscriptionUpdated(subscription, ctx)
+
+				By("Should have Subscription Status with the field 'cleanEventTypes'", func() {
+					getSubscription(subscription, ctx).Should(And(
+						reconcilertesting.HaveSubscriptionName(subscriptionName),
+						reconcilertesting.HaveCondition(eventingv1alpha1.MakeCondition(
+							eventingv1alpha1.ConditionSubscriptionActive,
+							eventingv1alpha1.ConditionReasonNATSSubscriptionActive,
+							v1.ConditionTrue, "")),
+						reconcilertesting.HaveSubsConfiguration(&eventingv1alpha1.SubscriptionConfig{
+							MaxInFlightMessages: defaultSubsConfig.MaxInFlightMessages,
+						}),
+						reconcilertesting.HaveCleanEventTypes([]string{natsSubjectToPublish}),
+					))
+				})
+			})
+		})
+	})
+}
 
 func testCreateDeleteSubscription(id int, natsSubjectToPublish, eventTypeToSubscribe string) bool {
 	return When("Create/Delete Subscription", func() {
@@ -303,6 +381,13 @@ func ensureSubscriptionCreated(ctx context.Context, subscription *eventingv1alph
 	By(fmt.Sprintf("Ensuring the subscription %q is created", subscription.Name))
 	// create subscription
 	err := k8sClient.Create(ctx, subscription)
+	Expect(err).Should(BeNil())
+}
+
+func ensureSubscriptionUpdated(subscription *eventingv1alpha1.Subscription, ctx context.Context) {
+	By(fmt.Sprintf("Ensuring the subscription %q is updated", subscription.Name))
+	// create subscription
+	err := k8sClient.Update(ctx, subscription)
 	Expect(err).Should(BeNil())
 }
 
