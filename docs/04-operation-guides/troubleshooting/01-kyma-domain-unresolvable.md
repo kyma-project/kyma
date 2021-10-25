@@ -4,7 +4,7 @@ title: Kyma domain is not resolvable
 
 ## Condition
 
-When you {were doing something}, you get the following error message:
+You get the following error message:
 
 >"The configured Kyma domain {DOMAIN} is not resolvable. This could be due to activated rebind protection of your DNS resolver. Please add virtual service domains to your hosts file."
 
@@ -18,8 +18,12 @@ This usually happens when the workstation is using certain routers.
 
 Add the virtual service domains to the host file of your local system.
 
-Run the following command:
+1. Run the following command:
 
-```bash
-kyma store hostfiles 
-```
+   ```bash
+   sudo kyma import hostfiles 
+   ```
+
+2. If that fails, execute the following:
+   - For Mac/Linux, run `sudo  /bin/sh -c 'echo \"127.0.0.1 hosts" >> /etc/hosts'`
+   - For Windows, after the list of files is displayed in `C:\\Windows\\system32\\drivers\\etc\\hosts"`, run `echo hosts_displayed >> "C:\\Windows\\system32\\drivers\\etc\\hosts"`
