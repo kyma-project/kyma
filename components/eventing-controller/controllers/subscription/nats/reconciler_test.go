@@ -60,13 +60,13 @@ var (
 		testCreateSubscriptionWithEmptyProtocolProtocolSettingsDialect,
 		testChangeSubscriptionConfiguration,
 		testCreateSubscriptionWithEmptyEventType,
-		mytestCase,
+		testCleanEventTypes,
 	}
 )
 
-func mytestCase(id int, natsSubjectToPublish, eventTypeToSubscribe string) bool {
+func testCleanEventTypes(id int, natsSubjectToPublish, eventTypeToSubscribe string) bool {
 	return When("Reconcile Subscription", func() {
-		It("should report a CleanEventTypes in the subscription status", func() {
+		It("should report CleanEventTypes in the subscription status", func() {
 			// creating a subscriber
 			result := make(chan []byte)
 			subscriber, shutdown := newSubscriber(result)
@@ -83,7 +83,7 @@ func mytestCase(id int, natsSubjectToPublish, eventTypeToSubscribe string) bool 
 			ensureSubscriptionCreated(subscription, ctx)
 
 			Context("Subscription without filters", func() {
-				By("Should have Subscription Status without the field 'cleanEventTypes'", func() {
+				By("Checking Subscription status should have 'cleanEventTypes' without filters", func() {
 					getSubscription(subscription, ctx).Should(And(
 						reconcilertesting.HaveSubscriptionName(subscriptionName),
 						reconcilertesting.HaveCondition(eventingv1alpha1.MakeCondition(
@@ -98,12 +98,27 @@ func mytestCase(id int, natsSubjectToPublish, eventTypeToSubscribe string) bool 
 				})
 			})
 
-			Context("Subscription with a single filter", func() {
-				addFilters := reconcilertesting.WithFilter(reconcilertesting.EventSource, eventTypeToSubscribe)
-				addFilters(subscription)
-				ensureSubscriptionUpdated(subscription, ctx)
+			Context("Add filters", func() {
+				natsSubjectsToPublish := []string{
+					fmt.Sprintf("%s0", natsSubjectToPublish),
+					fmt.Sprintf("%s1", natsSubjectToPublish),
+				}
 
-				By("Should have Subscription Status with the field 'cleanEventTypes'", func() {
+				eventTypesToSubscribe := []string{
+					fmt.Sprintf("%s0", eventTypeToSubscribe),
+					fmt.Sprintf("%s1", eventTypeToSubscribe),
+				}
+
+				By("Adding filters to Subscription", func() {
+					for _, f := range eventTypesToSubscribe {
+						addFilter := reconcilertesting.WithFilter(reconcilertesting.EventSource, f)
+						addFilter(subscription)
+					}
+
+					ensureSubscriptionUpdated(subscription, ctx)
+				})
+
+				By("Checking Subscription status should have 'cleanEventTypes' with the correct cleaned filter values", func() {
 					getSubscription(subscription, ctx).Should(And(
 						reconcilertesting.HaveSubscriptionName(subscriptionName),
 						reconcilertesting.HaveCondition(eventingv1alpha1.MakeCondition(
@@ -113,17 +128,26 @@ func mytestCase(id int, natsSubjectToPublish, eventTypeToSubscribe string) bool 
 						reconcilertesting.HaveSubsConfiguration(&eventingv1alpha1.SubscriptionConfig{
 							MaxInFlightMessages: defaultSubsConfig.MaxInFlightMessages,
 						}),
-						reconcilertesting.HaveCleanEventTypes([]string{natsSubjectToPublish}),
+						reconcilertesting.HaveCleanEventTypes(natsSubjectsToPublish),
 					))
 				})
 			})
 
-			Context("Subscription with a single filter", func() {
-				addFilters := reconcilertesting.WithFilter(reconcilertesting.EventSource, eventTypeToSubscribe)
-				addFilters(subscription)
-				ensureSubscriptionUpdated(subscription, ctx)
+			Context("Update Subscription filters", func() {
+				natsSubjectsToPublish := []string{
+					fmt.Sprintf("%s0alpha", natsSubjectToPublish),
+					fmt.Sprintf("%s1alpha", natsSubjectToPublish),
+				}
 
-				By("Should have Subscription Status with the field 'cleanEventTypes'", func() {
+				By("Updating Subscription filters", func() {
+					for _, f := range subscription.Spec.Filter.Filters {
+						f.EventType.Value = fmt.Sprintf("%salpha", f.EventType.Value)
+					}
+
+					ensureSubscriptionUpdated(subscription, ctx)
+				})
+
+				By("Checking Subscription status should have 'cleanEventTypes' with the correct cleaned filter values", func() {
 					getSubscription(subscription, ctx).Should(And(
 						reconcilertesting.HaveSubscriptionName(subscriptionName),
 						reconcilertesting.HaveCondition(eventingv1alpha1.MakeCondition(
@@ -133,7 +157,32 @@ func mytestCase(id int, natsSubjectToPublish, eventTypeToSubscribe string) bool 
 						reconcilertesting.HaveSubsConfiguration(&eventingv1alpha1.SubscriptionConfig{
 							MaxInFlightMessages: defaultSubsConfig.MaxInFlightMessages,
 						}),
-						reconcilertesting.HaveCleanEventTypes([]string{natsSubjectToPublish}),
+						reconcilertesting.HaveCleanEventTypes(natsSubjectsToPublish),
+					))
+				})
+			})
+
+			Context("Delete Subscription filters", func() {
+				natsSubjectsToPublish := []string{
+					fmt.Sprintf("%s0alpha", natsSubjectToPublish),
+				}
+
+				By("Deleting Subscription filters", func() {
+					subscription.Spec.Filter.Filters = subscription.Spec.Filter.Filters[:1]
+					ensureSubscriptionUpdated(subscription, ctx)
+				})
+
+				By("Checking Subscription status should have 'cleanEventTypes' with the correct cleaned filter values", func() {
+					getSubscription(subscription, ctx).Should(And(
+						reconcilertesting.HaveSubscriptionName(subscriptionName),
+						reconcilertesting.HaveCondition(eventingv1alpha1.MakeCondition(
+							eventingv1alpha1.ConditionSubscriptionActive,
+							eventingv1alpha1.ConditionReasonNATSSubscriptionActive,
+							v1.ConditionTrue, "")),
+						reconcilertesting.HaveSubsConfiguration(&eventingv1alpha1.SubscriptionConfig{
+							MaxInFlightMessages: defaultSubsConfig.MaxInFlightMessages,
+						}),
+						reconcilertesting.HaveCleanEventTypes(natsSubjectsToPublish),
 					))
 				})
 			})
