@@ -24,6 +24,7 @@ Add the virtual service domains to the host file of your local system.
    sudo kyma import hostfiles 
    ```
 
-2. If that fails, execute the following:
-   - For Mac/Linux, run `sudo  /bin/sh -c 'echo \"127.0.0.1 hosts" >> /etc/hosts'`
-   - For Windows, after the list of files is displayed in `C:\\Windows\\system32\\drivers\\etc\\hosts"`, run `echo hosts_displayed >> "C:\\Windows\\system32\\drivers\\etc\\hosts"`
+2. If that command fails, you get a list of host files.
+   Use those to execute the following:
+   - For Mac/Linux, run `sudo  /bin/sh -c 'echo \"127.0.0.1 hosts" >> /etc/hosts'`.
+   - For Windows, run `echo hosts_displayed >> "C:\\Windows\\system32\\drivers\\etc\\hosts"`.
