@@ -75,7 +75,7 @@ tests:
 jobs:
   image:
     repository: eu.gcr.io/kyma-project/tpi/k8s-tools
-    tag: "20210922-530cfc39"
+    tag: "20211022-85284bf9"
   installer:
     namespace: kyma-installer
 
