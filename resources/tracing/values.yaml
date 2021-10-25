@@ -122,6 +122,10 @@ global:
       name: "jaeger-operator"
       version: "1.18.1-e0da5a68"
       directory: "tpi"
+    jaeger_all_in_one:
+      name: "jaegertracing/all-in-one"
+      version: "1.18.1"
+      directory: "external"
     oauth2_proxy:
       name: "oauth2-proxy"
       version: "7.1.3-4c48514d"
