@@ -12,9 +12,9 @@ metadata:
     helm.sh/hook-weight: "0"
 rules:
 - apiGroups:
-{{ toYaml .Values.clusterRoles.apiGroups.gardener.cert | indent 4 }}
+    - "cert.gardener.cloud"
   resources:
-{{ toYaml .Values.clusterRoles.resources.gardener.cert | indent 4 }}
+    - "certificates"
   verbs:
 {{ toYaml .Values.clusterRoles.verbs.view | indent 4 }}
 
@@ -32,32 +32,12 @@ metadata:
     helm.sh/hook-weight: "0"
 rules:
 - apiGroups:
-{{ toYaml .Values.clusterRoles.apiGroups.gardener.cert | indent 4 }}
+    - "cert.gardener.cloud"
   resources:
-{{ toYaml .Values.clusterRoles.resources.gardener.cert | indent 4 }}
+    - "certificates"
   verbs:
 {{ toYaml .Values.clusterRoles.verbs.edit | indent 4 }}
 
----
-# Admin access to gardener cert resources
-apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRole
-metadata:
-  name: kyma-gardener-cert-admin
-  labels:
-    app: kyma
-    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
-    rbac.authorization.kyma-project.io/aggregate-to-gardener-cert-admin: "true"
-  annotations:
-    helm.sh/hook-weight: "0"
-rules:
-- apiGroups:
-{{ toYaml .Values.clusterRoles.apiGroups.gardener.cert | indent 4 }}
-  resources:
-    - "issuers"
-{{ toYaml .Values.clusterRoles.resources.gardener.cert | indent 4 }}
-  verbs:
-    - "*"
 ---
 #View access to gardener dns resources
 apiVersion: rbac.authorization.k8s.io/v1
@@ -72,9 +52,9 @@ metadata:
     helm.sh/hook-weight: "0"
 rules:
 - apiGroups:
-{{ toYaml .Values.clusterRoles.apiGroups.gardener.dns | indent 4 }}
+    - "dns.gardener.cloud"
   resources:
-{{ toYaml .Values.clusterRoles.resources.gardener.dns | indent 4 }}
+    - "dnsentries"
   verbs:
 {{ toYaml .Values.clusterRoles.verbs.view | indent 4 }}
 
@@ -92,29 +72,9 @@ metadata:
     helm.sh/hook-weight: "0"
 rules:
 - apiGroups:
-{{ toYaml .Values.clusterRoles.apiGroups.gardener.dns | indent 4 }}
+    - "dns.gardener.cloud"
   resources:
-{{ toYaml .Values.clusterRoles.resources.gardener.dns | indent 4 }}
+    - "dnsentries"
   verbs:
 {{ toYaml .Values.clusterRoles.verbs.edit | indent 4 }}
 
----
-# Admin access to gardener dns resources
-apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRole
-metadata:
-  name: kyma-gardener-dns-admin
-  labels:
-    app: kyma
-    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
-    rbac.authorization.kyma-project.io/aggregate-to-gardener-dns-admin: "true"
-  annotations:
-    helm.sh/hook-weight: "0"
-rules:
-- apiGroups:
-    {{ toYaml .Values.clusterRoles.apiGroups.gardener.dns | indent 4 }}
-  resources:
-    - "dnsproviders"
-{{ toYaml .Values.clusterRoles.resources.gardener.dns | indent 4 }}
-  verbs:
-    - "*"
