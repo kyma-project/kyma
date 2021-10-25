@@ -25,7 +25,7 @@ var rbacConfig = map[model.UserPermission]struct {
 }{
 	model.UserPermissionAdmin: {
 		clusterRoleBindingName: "cluster-admin-users",
-		clusterRoleName:        "kyma-admin",
+		clusterRoleName:        "cluser-admin",
 	},
 	model.UserPermissionDeveloper: {
 		clusterRoleBindingName: "cluster-developer-users",
