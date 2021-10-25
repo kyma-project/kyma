@@ -273,6 +273,8 @@ docker-registry:
             path: password.txt
     - name: htpasswd-data
       emptyDir: {}
+  rollme: "{{ randAlphaNum 5}}"
+  registryHTTPSecret: "{{ randAlphaNum 16 | b64enc }}"
 
 webhook:
   enabled: true
