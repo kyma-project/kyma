@@ -36,6 +36,8 @@ type FunctionResourcesDefaulting struct {
 	DefaultPreset string                     `envconfig:"default=M"`
 	Presets       map[string]ResourcesPreset `envconfig:"-"`
 	PresetsMap    string                     `envconfig:"default={}"`
+	RuntimePresetsMap string 				 `envconfig:"default={}"`
+	RuntimePresets map[string]string 		 `envconfig:"-"`
 }
 
 type BuildJobResourcesDefaulting struct {
@@ -93,7 +95,7 @@ func (spec *FunctionSpec) defaultReplicas(ctx context.Context, fn *Function) {
 func (spec *FunctionSpec) defaultFunctionResources(ctx context.Context, fn *Function) {
 	resources := spec.Resources
 	defaultingConfig := ctx.Value(DefaultingConfigKey).(DefaultingConfig).Function.Resources
-	resourcesPreset := mergeResourcesPreset(fn, FunctionResourcesPresetLabel, defaultingConfig.Presets, defaultingConfig.DefaultPreset)
+	resourcesPreset := mergeResourcesPreset(fn, FunctionResourcesPresetLabel, defaultingConfig.Presets, defaultingConfig.DefaultPreset, defaultingConfig.RuntimePresets)
 
 	spec.Resources = defaultResources(resources, resourcesPreset.RequestMemory, resourcesPreset.RequestCpu, resourcesPreset.LimitMemory, resourcesPreset.LimitCpu)
 }
@@ -182,11 +184,15 @@ func mergeReplicasPreset(fn *Function, presets map[string]ReplicasPreset, defaul
 	return replicas
 }
 
-func mergeResourcesPreset(fn *Function, presetLabel string, presets map[string]ResourcesPreset, defaultPreset string) ResourcesPreset {
+func mergeResourcesPreset(fn *Function, presetLabel string, presets map[string]ResourcesPreset, defaultPreset string, runtimePreset map[string]string) ResourcesPreset {
 	resources := ResourcesPreset{}
 
 	preset := fn.GetLabels()[presetLabel]
 	if preset == "" {
+		rtmPreset, ok := runtimePreset[string(fn.Spec.Runtime)]
+		if ok {
+			return presets[rtmPreset]
+		}
 		return presets[defaultPreset]
 	}
 
@@ -228,6 +234,14 @@ func ParseResourcePresets(presetsMap string) (map[string]ResourcesPreset, error)
 	var presets map[string]ResourcesPreset
 	if err := json.Unmarshal([]byte(presetsMap), &presets); err != nil {
 		return presets, errors.Wrap(err, "while parsing resources presets")
+	}
+	return presets, nil
+}
+
+func ParseRuntimePresets(presetsMap string) (map[string]string, error) {
+	var presets map[string]string
+	if err := json.Unmarshal([]byte(presetsMap), &presets); err != nil {
+		return presets, errors.Wrap(err, "while parsing runtime presets")
 	}
 	return presets, nil
 }
