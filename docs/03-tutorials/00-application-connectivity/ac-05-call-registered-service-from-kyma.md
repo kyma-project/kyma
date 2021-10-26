@@ -37,9 +37,10 @@ This guide shows how to call a registered external service from Kyma using a sim
    {"id":"{YOUR_SERVICE_ID}"}
    ```
 
-2. Export the ID of the registered service, the Namespace to which you bound your Application, and the name of your Application.
+2. Export your cluster domain, the ID of the registered service, the Namespace to which you bound your Application, and the name of your Application.
    
    ```bash
+   export CLUSTER_DOMAIN={YOUR_CLUSTER_DOMAIN}
    export SERVICE_ID={YOUR_SERVICE_ID}
    export NAMESPACE={YOUR_NAMESPACE}
    export APP_NAME={YOUR_APPLICATION_NAME}
@@ -115,7 +116,7 @@ This guide shows how to call a registered external service from Kyma using a sim
        methods:
        - GET
      service:
-       host: my-function-$NAMESPACE.{CLUSTER_DOMAIN}
+       host: my-function-$NAMESPACE.$CLUSTER_DOMAIN
        name: my-function
        port: 80
    EOF
@@ -130,7 +131,7 @@ This guide shows how to call a registered external service from Kyma using a sim
       </summary>
     
       ```bash
-      curl https://my-function-$NAMESPACE.{CLUSTER_DOMAIN}/ -k
+      curl https://my-function-$NAMESPACE.$CLUSTER_DOMAIN/ -k
       ```
     
       </details>

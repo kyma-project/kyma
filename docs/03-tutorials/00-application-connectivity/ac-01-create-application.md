@@ -4,6 +4,16 @@ title: Create a new Application
 
 >**NOTE:** An Application represents a single connected external solution.
 
+## Prerequisites
+
+Before you start, export the name of your application as an environment variable:
+
+```bash
+export APP_NAME={YOUR_APP_NAME}
+```
+
+## Create an Application
+
 To create a new Application, run this command:
 
 ```bash
@@ -11,7 +21,7 @@ cat <<EOF | kubectl apply -f -
 apiVersion: applicationconnector.kyma-project.io/v1alpha1
 kind: Application
 metadata:
-  name: {APP_NAME}
+  name: $APP_NAME
 spec:
   description: {APP_DESCRIPTION}
   labels:
@@ -24,7 +34,7 @@ EOF
 
 To get the data of the created Application and show the output in the `yaml` format, run this command:
 ```bash
-kubectl get app {APP_NAME} -o yaml
+kubectl get app $APP_NAME -o yaml
 ```
 
 A successful response returns the Application custom resource with the specified name. 
