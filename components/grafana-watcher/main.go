@@ -5,7 +5,7 @@ import (
 	"github.com/fsnotify/fsnotify"
 )
 
-const dataSourcesPath = "etc/grafana/provsioning/datasources"
+const dataSourcesPath = "/etc/grafana/provisioning/datasources"
 
 type watcher struct {
 	grafana *fsnotify.Watcher
@@ -26,6 +26,7 @@ func main() {
 }
 
 func (w *watcher) start() error {
+	fmt.Println("Start watching grafana datasource directory")
 	var err error
 	w.grafana, err = fsnotify.NewWatcher()
 	if err != nil {
