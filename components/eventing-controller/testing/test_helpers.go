@@ -2,8 +2,9 @@ package testing
 
 import (
 	"fmt"
-	k8sresource "k8s.io/apimachinery/pkg/api/resource"
 	"net/http"
+
+	k8sresource "k8s.io/apimachinery/pkg/api/resource"
 
 	apigatewayv1alpha1 "github.com/kyma-incubator/api-gateway/api/v1alpha1"
 	appsv1 "k8s.io/api/apps/v1"
