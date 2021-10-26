@@ -34,7 +34,11 @@ func main() {
 	log.Printf("Clone repo from url: %s and commit: %s...\n", cfg.RepositoryUrl, cfg.RepositoryCommit)
 	commit, err := operator.Clone(cfg.MountPath, gitOptions)
 	if err != nil {
-		log.Fatalln(errors.Wrapf(err, "while cloning repository: %s, from commit: %s", cfg.RepositoryUrl, cfg.RepositoryCommit))
+		if git.IsAuthErr(err) {
+			log.Printf("while cloning repository bad credentials were provided, errMsg: %s", err.Error())
+		} else {
+			log.Fatalln(errors.Wrapf(err, "while cloning repository: %s, from commit: %s", cfg.RepositoryUrl, cfg.RepositoryCommit))
+		}
 	}
 
 	log.Printf("Cloned repository: %s, from commit: %s, to path: %s", cfg.RepositoryUrl, commit, cfg.MountPath)

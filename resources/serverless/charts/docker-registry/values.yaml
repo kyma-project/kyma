@@ -142,3 +142,6 @@ fullnameOverride:
 
 destinationRule:
   enabled: true
+
+rollme: ""
+registryHTTPSecret: ""

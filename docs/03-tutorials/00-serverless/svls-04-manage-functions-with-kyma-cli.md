@@ -27,7 +27,7 @@ Follow these steps:
 1. Run the `init` Kyma CLI command to create local files with the default configuration for a Python Function. Go to the folder in which you want to initiate the workspace content and run this command:
 
   ```bash
-  kyma init function --runtime python38 --name {FUNCTION_NAME}
+  kyma init function --runtime python39 --name {FUNCTION_NAME}
   ```
 
   Alternatively, use the `--dir {FULL_FOLDER_PATH}` flag to point to the directory where you want to create the Function's source files.
@@ -48,7 +48,7 @@ Follow these steps:
   ```yaml
   name: my-function
   namespace: default
-  runtime: python38
+  runtime: python39
   source:
       sourceType: inline
       sourcePath: {FULL_PATH_TO_WORKSPACE_FOLDER}
@@ -83,7 +83,7 @@ Follow these steps:
   ```yaml
   ...
   spec:
-    runtime: python38
+    runtime: python39
     source: |-
       def main(event, context):
           return "Hello Serverless!"

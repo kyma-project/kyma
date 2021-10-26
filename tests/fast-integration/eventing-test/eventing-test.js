@@ -1,5 +1,6 @@
 const axios = require("axios");
 const https = require("https");
+const { expect, assert } = require("chai");
 const httpsAgent = new https.Agent({
   rejectUnauthorized: false, // curl -k
 });
@@ -8,8 +9,10 @@ const {
   ensureCommerceMockLocalTestFixture,
   checkFunctionResponse,
   sendEventAndCheckResponse,
+  sendLegacyEventAndCheckTracing,
   cleanMockTestFixture,
   checkInClusterEventDelivery,
+  checkInClusterEventTracing,
   waitForSubscriptionsTillReady,
   setEventMeshSourceNamespace,
 } = require("../test/fixtures/commerce-mock");
@@ -22,6 +25,10 @@ const {
   printEventingPublisherProxyLogs,
 } = require("../utils");
 
+const {prometheusPortForward} = require("../monitoring/client")
+
+const {eventingMonitoringTest} = require("./metric-test")
+
 describe("Eventing tests", function () {
   this.timeout(10 * 60 * 1000);
   this.slow(5000);
@@ -30,6 +37,7 @@ describe("Eventing tests", function () {
   const backendK8sSecretNamespace = process.env.BACKEND_SECRET_NAMESPACE || "default";
   const eventMeshSecretFilePath = process.env.EVENTMESH_SECRET_FILE || "";
   const DEBUG = process.env.DEBUG;
+  let cancelPrometheusPortForward = null;
 
   // eventingE2ETestSuite - Runs Eventing end-to-end tests
   function eventingE2ETestSuite () {
@@ -43,6 +51,16 @@ describe("Eventing tests", function () {
 
     it("order.created.v1 event from CommerceMock should trigger the lastorder function", async function () {
       await sendEventAndCheckResponse();
+    });
+  }
+
+  // eventingTracingTestSuite - Runs Eventing tracing tests
+  function eventingTracingTestSuite () {
+    it("order.created.v1 event from CommerceMock should have correct tracing spans", async function () {
+      await sendLegacyEventAndCheckTracing();
+    });
+    it("In-cluster event should have correct tracing spans", async function () {
+      await checkInClusterEventTracing(testNamespace);
     });
   }
 
@@ -63,6 +81,8 @@ describe("Eventing tests", function () {
       console.dir(err); // first error is logged
       return ensureCommerceMockLocalTestFixture("mocks", testNamespace);
     });
+
+    cancelPrometheusPortForward = prometheusPortForward();
   });
 
   after(async function() {
@@ -74,6 +94,8 @@ describe("Eventing tests", function () {
     if (eventMeshSecretFilePath !== "") {
       await deleteEventingBackendK8sSecret(backendK8sSecretName, backendK8sSecretNamespace);
     }
+
+    cancelPrometheusPortForward();
   });
 
   afterEach(async function() {
@@ -91,6 +113,10 @@ describe("Eventing tests", function () {
   context('with Nats backend', function() {
     // Running Eventing end-to-end tests
     eventingE2ETestSuite();
+    // Running Eventing tracing tests
+    eventingTracingTestSuite();
+    // Running Eventing Monitoring tests
+    eventingMonitoringTest('nats');
   });
 
   context('with BEB backend', function() {
@@ -106,6 +132,7 @@ describe("Eventing tests", function () {
 
     // Running Eventing end-to-end tests
     eventingE2ETestSuite();
+    eventingMonitoringTest('beb');
   });
 
   context('with Nats backend switched back from BEB', function() {
@@ -116,5 +143,9 @@ describe("Eventing tests", function () {
 
     // Running Eventing end-to-end tests
     eventingE2ETestSuite();
+    // Running Eventing tracing tests
+    eventingTracingTestSuite();
+    // Running Eventing Monitoring tests
+    eventingMonitoringTest('nats');
   });
 });

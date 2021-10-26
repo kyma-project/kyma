@@ -1,8 +1,9 @@
 package auth
 
 import (
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
 	"golang.org/x/oauth2/clientcredentials"
+
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
 )
 
 // Config returns a new oauth2 client credentials config instance.

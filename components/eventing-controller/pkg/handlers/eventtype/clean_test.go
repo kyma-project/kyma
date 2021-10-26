@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	kymalogger "github.com/kyma-project/kyma/common/logging/logger"
+
 	"github.com/kyma-project/kyma/components/eventing-controller/logger"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/application"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/application/applicationtest"

@@ -14,6 +14,16 @@ ci-skr:
 	npm install
 	npm run test-skr
 
+.PHONY: ci-skr-nightly
+ci-skr-nightly:
+	npm install
+	npm run nightly-skr
+
+.PHONY: ci-skr-kyma-to-kyma2-upgrade
+ci-skr-kyma-to-kyma2-upgrade:
+	npm install
+	npm run test-skr-kyma-to-kyma2-upgrade
+
 .PHONY: ci-skr-svcat-migration
 ci-skr-svcat-migration:
 	npm install

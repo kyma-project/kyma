@@ -61,10 +61,5 @@ eventPublisherProxy:
     name: eventing-event-publisher-proxy
     namespace: kyma-system
 
-# console-backend is a ServiceAccount which is installed as a part of *core* chart
-authorizationPolicy:
-  serviceAccount:
-    consoleBackendService: console-backend
-
 podSecurityPolicy:
   runAsUser: 1000

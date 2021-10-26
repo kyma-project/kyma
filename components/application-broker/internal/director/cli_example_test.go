@@ -1,3 +1,4 @@
+//go:build director_integration
 // +build director_integration
 
 package director

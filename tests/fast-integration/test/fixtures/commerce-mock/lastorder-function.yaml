@@ -31,7 +31,8 @@ spec:
             "ce-eventtypeversion": "v1",
             "ce-id": (data.id || "dummyId"),
             "ce-type": type,
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
+            "X-B3-Sampled": 1
           }
         }
       }
@@ -47,7 +48,8 @@ spec:
           data
         },
         headers: {
-          "Content-Type": "application/cloudevents+json"
+          "Content-Type": "application/cloudevents+json",
+          "X-B3-Sampled": 1
         }
       }
     }
@@ -89,18 +91,18 @@ spec:
             console.dir(e)
           }
         } else if (event.extensions.request.query.inappevent) {
-          return inAppEvent[event.extensions.request.query.inappevent];  
+          return {event:inAppEvent[event.extensions.request.query.inappevent], podName: process.env.HOSTNAME};
         } else if (event["ce-type"] && event["ce-type"].includes("order.received")){
           console.log("Got in-app event:", event.data);
-          inAppEvent[event.data.id] = { ...cloudEventHeaders(event), shipped:true, ...event.data };
+          inAppEvent[event.data.id] = { ...cloudEventHeaders(event), shipped:true, ...event.data, headers:event.extensions.request.headers };
         } else if (event["ce-type"] && event["ce-type"].includes("order.created")) {
           console.log("Order created event:", event.data)
-          lastEvent = { ...cloudEventHeaders(event), data: event.data };
+          lastEvent = { ...cloudEventHeaders(event), data: event.data, headers:event.extensions.request.headers };
         }
         if (event.data && event.data.orderCode) {
             lastOrder = await getOrder(event.data.orderCode);
         }
-        return {order:lastOrder, event:lastEvent};
+        return {order:lastOrder, event:lastEvent, podName: process.env.HOSTNAME};
       }
     }
 ---
