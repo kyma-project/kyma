@@ -2,9 +2,9 @@
 title: Certificates in Kyma
 ---
 
-In Kyma, there are 4 types of TLS certificates. Depending on how you install Kyma, you use the relevant certificate.
+In Kyma, there are 4 types of TLS certificates. The certificates differ, depending on how you install Kyma.
 
-All the certificates store a plain k8s Secret, are created in the `istio-system` Namespace and are used with the `kyma-gateway-certs` Kyma Gateway .
+All the certificates store a plain k8s Secret, are created in the `istio-system` Namespace, and are used with the `kyma-gateway-certs` Kyma Gateway.
 
 | Installation type | Certificate type | Validity | Description |
 |-------------------|------------------|----------|-------------|
