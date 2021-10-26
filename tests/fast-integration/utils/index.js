@@ -1505,24 +1505,45 @@ async function printEventingControllerLogs() {
  async function printStatusOfInClusterEventingInfrastructure(targetNamespace, encoding, funcName) {
   try{
     let kymaSystem = "kyma-system"
-    console.log(`****** Printing status of infrastructure for in-cluster eventing ${encoding} *******`)
+    let publisherProxyReady = false
+    let eventingControllerReady = false
+    let natsServerReadyCounts = 0
+    let natsServerReady = false
+    let functionReady = false
 
-    console.log(`****** Status of eventing-publisher-proxy deployment from ns: ${kymaSystem}`)
     let publisherDeployment = await k8sAppsApi.listNamespacedDeployment(kymaSystem,undefined, undefined,undefined, undefined, 'app.kubernetes.io/name=eventing-publisher-proxy, app.kubernetes.io/instance=eventing', undefined );
-    console.log(publisherDeployment.body.items[0].status)
+    if (publisherDeployment.body.items[0].status.replicas === publisherDeployment.body.items[0].status.readyReplicas) {
+      publisherProxyReady = true
+    }
 
-    console.log(`****** Status of eventing-controller deployment from ns: ${kymaSystem}`)
     let controllerDeployment  = await k8sAppsApi.listNamespacedDeployment(kymaSystem,undefined, undefined,undefined, undefined, 'app.kubernetes.io/name=controller, app.kubernetes.io/instance=eventing', undefined );
-    console.log(controllerDeployment.body.items[0].status)
+    if (controllerDeployment.body.items[0].status.replicas === controllerDeployment.body.items[0].status.readyReplicas) {
+      eventingControllerReady = true
+    }
 
-    console.log(`****** Status of nats-server pods from ns: ${kymaSystem}`)
-    let natsServerPods  = await k8sAppsApi.listNamespacedPod(kymaSystem, undefined, undefined, undefined, undefined, 'kyma-project.io/dashboard=eventing, nats_cluster=eventing-nats', undefined);
-    console.log(natsServerPods.body.items[0].status)
+    let natsServerPods  = await k8sCoreV1Api.listNamespacedPod(kymaSystem, undefined, undefined, undefined, undefined, 'kyma-project.io/dashboard=eventing, nats_cluster=eventing-nats');
+    for (let nats of natsServerPods.body.items) {
+      if (nats.status.phase === "Running") {
+        natsServerReadyCounts += 1
+      }
+    }
+    if (natsServerReadyCounts === natsServerPods.body.items.length) {
+      natsServerReady = true
+    }
 
-    console.log(`****** Status of function ${funcName} from ns: ${targetNamespace}`)
     let lastOrderFunc = await getFunction(funcName, targetNamespace);
-    console.log(lastOrderFunc.status.conditions)
+    for (let cond of lastOrderFunc.status.conditions) {
+      if (cond.type === "Running" && cond.status === "True") {
+        functionReady = true
+        break
+      }
+    }
 
+    console.log(`****** Printing status of infrastructure for in-cluster eventing, mode: ${encoding} *******`)
+    console.log(`****** Eventing-publisher-proxy deployment from ns: ${kymaSystem} ready: ${publisherProxyReady}`)
+    console.log(`****** Eventing-controller deployment from ns: ${kymaSystem} ready: ${eventingControllerReady}`)
+    console.log(`****** NATS-server pods from ns: ${kymaSystem} ready: ${natsServerReady}`)
+    console.log(`****** Function ${funcName} from ns: ${targetNamespace} ready: ${functionReady}`)
     console.log(`****** End *******`)
   }
   catch(err) {
