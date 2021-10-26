@@ -4,18 +4,17 @@ import (
 	"context"
 	"os"
 
+	"github.com/go-logr/zapr"
 	"k8s.io/apimachinery/pkg/runtime"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/healthz"
 
-	"github.com/go-logr/zapr"
-
+	"github.com/kyma-project/kyma/components/eventing-controller/controllers/backend"
 	"github.com/kyma-project/kyma/components/eventing-controller/logger"
 	"github.com/kyma-project/kyma/components/eventing-controller/options"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/commander/beb"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/commander/nats"
-	"github.com/kyma-project/kyma/components/eventing-controller/reconciler/backend"
 )
 
 func main() {

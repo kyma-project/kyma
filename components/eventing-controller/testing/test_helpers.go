@@ -4,26 +4,22 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/types"
-
+	apigatewayv1alpha1 "github.com/kyma-incubator/api-gateway/api/v1alpha1"
+	appsv1 "k8s.io/api/apps/v1"
+	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
+	"k8s.io/apimachinery/pkg/util/intstr"
 	"k8s.io/client-go/dynamic"
 	dynamicfake "k8s.io/client-go/dynamic/fake"
 
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/deployment"
-
-	"github.com/kyma-project/kyma/components/eventing-controller/utils"
-	appsv1 "k8s.io/api/apps/v1"
-
-	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/util/intstr"
-
-	apigatewayv1alpha1 "github.com/kyma-incubator/api-gateway/api/v1alpha1"
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/deployment"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/types"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/object"
+	"github.com/kyma-project/kyma/components/eventing-controller/utils"
 )
 
 const (
