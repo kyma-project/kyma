@@ -160,21 +160,27 @@ kubebuilder init --domain kyma-project.io
 
 > Currently running the controller in local developer mode is broken and needs adoptions of the latest changes.
 
-1. Export the following mandatory environment variables:
-
-| ENV VAR                  | Description                                                            | Default Value          |
-| ------------------------ | ---------------------------------------------------------------------- | ---------------------- |
-| `KUBECONFIG`             | Path to a local kubeconfig file.                                       | ~/.kube/config         |
-| `NATS_URL`               | URL of the NATS server.                                                | nats://127.0.0.1:4222  |
-| `EVENT_TYPE_PREFIX`      | Path to a local kubeconfig file.                                       | sap.kyma.custom        |
-| `WEBHOOK_TOKEN_ENDPOINT` | The Kyma public endpoint to provide Access Tokens.                     | WEBHOOK_TOKEN_ENDPOINT |
-| `DOMAIN`                 | Domain.                                                                | example.com            |
-
-2. Build the binary:
+1. Setup port-forwarding for the in-cluster NATS instance:
 
 ```sh
-make eventing-controller-local
+kubectl port-forward -n kyma-system svc/eventing-nats 4222
 ```
+
+2. Export the following environment variables:
+
+| ENV VAR                  | Description                                                            | Optional | Default Value                |
+| ------------------------ | ---------------------------------------------------------------------- | -------- | ----------------------       |
+| `KUBECONFIG`             | Path to a local kubeconfig file.                                       | yes      | ~/.kube/config               |
+| `NATS_URL`               | URL of the NATS server.                                                | no       | nats.nats.svc.cluster.local  |
+| `EVENT_TYPE_PREFIX`      | Path to a local kubeconfig file.                                       | yes      | sap.kyma.custom              |
+| `WEBHOOK_TOKEN_ENDPOINT` | The Kyma public endpoint to provide Access Tokens.                     | yes      | WEBHOOK_TOKEN_ENDPOINT       |
+| `DOMAIN`                 | Domain.                                                                | yes      | example.com                  |
+
+
+```sh
+export  NATS_URL=nats://localhost:4222
+```
+
 
 3. Run the controller:
 
@@ -183,3 +189,5 @@ make run
 ```
 
 > currently we support a buildtag `local` to avoid setting incorrect OwnerRefs in the PublisherProxy deployment when running the controller on a developer's machine. Essentially the PublisherProxy deployment remains in the cluster although the controller is removed due to no OwnerRef in the PublisherProxy deployment.  
+
+> to run the controller via your IDE make sure to specify the buildtag `local`
