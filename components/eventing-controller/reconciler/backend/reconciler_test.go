@@ -518,8 +518,8 @@ func ensurePublisherProxyPodIsCreated(ctx context.Context) {
 		deployment.AppLabelKey: deployment.PublisherName,
 	}); err == nil {
 		// remove already created pods manually
-		for _, pod := range pods.Items {
-			err := k8sClient.Delete(ctx, &pod)
+		for i := range pods.Items {
+			err := k8sClient.Delete(ctx, &pods.Items[i])
 			Expect(err).ShouldNot(HaveOccurred())
 		}
 	}
@@ -527,6 +527,7 @@ func ensurePublisherProxyPodIsCreated(ctx context.Context) {
 	Expect(err).ShouldNot(HaveOccurred())
 
 	publisherProxyDeployment, err := publisherProxyDeploymentGetter(ctx)()
+	Expect(err).ShouldNot(HaveOccurred())
 	err = ctrl.SetControllerReference(publisherProxyDeployment, pod, scheme.Scheme)
 	Expect(err).ShouldNot(HaveOccurred())
 }
@@ -538,10 +539,8 @@ func bebSecretExists(ctx context.Context) bool {
 	}); err != nil {
 		return false
 	}
-	if len(secretList.Items) > 0 {
-		return true
-	}
-	return false
+
+	return len(secretList.Items) > 0
 }
 
 func resetPublisherProxyStatus(ctx context.Context) {
