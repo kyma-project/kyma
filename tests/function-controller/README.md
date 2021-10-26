@@ -77,11 +77,6 @@ Use the following environment variables to configure the application:
 | **APP_TEST_VERBOSE**                    | No       | `true`                      | The value that controls whether tests log resources that are subject to change |
 | **APP_TEST_MAX_POLLING_TIME**           | No       | `5m`                        | The maximum period of time in which the Function must reconfigure after an update  |
 
-
-```bash
-kubectl edit testdefinitions.testing.kyma-project.io -n kyma-system function-controller
-```
-
 ## Development
 
 ### Install dependencies
