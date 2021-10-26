@@ -28,8 +28,8 @@ hydra:
         cpu: "100m"
         memory: "256Mi"
     autoscaling:
-	minReplicas: "2"
-	maxReplicas: "5"
+      minReplicas: "2"
+      maxReplicas: "5"
 oathkeeper:
   deployment:
     resources:
