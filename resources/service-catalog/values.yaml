@@ -14,10 +14,6 @@ global:
       name: "health-proxy"
       version: "bd223692"
       directory: "incubator/develop"
-  testImages:
-    service_catalog_acceptance_tests:
-      name: "service-catalog-acceptance-tests"
-      version: "bc522023"
 
 
   istio:

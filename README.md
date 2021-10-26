@@ -34,7 +34,7 @@ Kyma comes with the ready-to-use code snippets that you can use to test the exte
 ## Development
 
 Develop on your remote repository forked from the original repository in Go.
-See the example that uses the [`console-backend-service`](components/console-backend-service) project located in the `components` directory but applies to any Go project. This set of instructions uses the recommended [`git workflow`](https://kyma-project.io/community/contributing/#git-workflow-git-workflow) and the general [contribution flow](https://kyma-project.io/community/contributing/#contributing-rules-contributing-rules-contribute-code-or-content). Read also the [`CONTRIBUTING.md`](CONTRIBUTING.md) document that includes the contributing rules specific for this repository.
+Read also the [`CONTRIBUTING.md`](CONTRIBUTING.md) document that includes the contributing rules specific for this repository.
 
 Follow these steps:
 
@@ -50,25 +50,16 @@ Follow these steps:
 
     Follow the steps described in the [`git-workflow.md`](https://kyma-project.io/community/contributing/03-git-workflow/) document to configure your fork.
 
-3. Install dependencies.
-
-    Go to the main directory of the project in your workspace location and install the required dependencies:
-
-    ```bash
-    cd components/console-backend-service
-    dep ensure -vendor-only
-    ```
-
-4. Build the project.
+3. Build the project.
 
     Every project runs differently. Follow instructions in the main `README.md` document of the given project to build it.
 
-5. Create a branch and start to develop.
+4. Create a branch and start to develop.
 
     Do not forget about creating unit and acceptance tests if needed. For the unit tests, follow the instructions specified in the main `README.md` document of the given project. For the details concerning the acceptance tests, go to the corresponding directory inside the `tests` directory.
     Find the information on how to run changes on the cluster without a Docker image in the [Develop a service locally without using Docker](https://kyma-project.io/docs/kyma/latest/03-tutorials/01-develop-service-local-no-docker-kyma/) document.
 
-6. Test your changes.
+5. Test your changes.
 
 ## Kyma users
 

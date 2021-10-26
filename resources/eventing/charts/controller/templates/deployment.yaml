@@ -33,7 +33,7 @@ spec:
           securityContext: {{- toYaml .Values.global.securityContext | nindent 12 }}
           {{- end }}
         - image: "{{include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.eventing_controller) }}"
-          imagePullPolicy: "{{ .Values.image.pullPolicy }}"
+          imagePullPolicy: "{{ .Values.global.images.eventing_controller.pullPolicy }}"
           name: controller
           env:
           - name: NATS_URL
