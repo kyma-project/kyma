@@ -19,6 +19,17 @@ hydra:
             matchLabels:
               app.kubernetes.io/name: hydra
           topologyKey: "kubernetes.io/hostname"
+  deployment:
+    resources:
+      limits:
+        cpu: "500m"
+        memory: "1Gi"
+      requests:
+        cpu: "100m"
+        memory: "256Mi"
+    autoscaling:
+	minReplicas: "2"
+	maxReplicas: "5"
 oathkeeper:
   deployment:
     resources:
