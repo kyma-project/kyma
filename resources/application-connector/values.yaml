@@ -48,7 +48,7 @@ global:
       version: "PR-11558"
     application_gateway:
       name: "application-gateway"
-      version: "PR-12306"
+      version: "PR-11558"
     application_operator:
       name: "application-operator"
       version: "PR-12306"
