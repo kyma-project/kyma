@@ -16,18 +16,7 @@ spec:
   selector:
     {{- include "nats.selectorLabels" . | nindent 4 }}
   clusterIP: None
-  {{- if .Values.topologyKeys }}
-  topologyKeys:
-     {{- .Values.topologyKeys | toYaml | nindent 4 }}
-  {{- end }}
   ports:
-  {{- if .Values.websocket.enabled }}
-  - name: websocket
-    port: {{ .Values.websocket.port }}
-    {{- if .Values.appProtocol.enabled }}
-    appProtocol: tcp
-    {{- end }}
-  {{- end }}
   {{- if .Values.nats.profiling.enabled }}
   - name: profiling
     port: {{ .Values.nats.profiling.port }}
@@ -65,10 +54,3 @@ spec:
     {{- if .Values.appProtocol.enabled }}
     appProtocol: tcp
     {{- end }}
-  {{- if .Values.mqtt.enabled }}
-  - name: mqtt
-    port: 1883
-    {{- if .Values.appProtocol.enabled }}
-    appProtocol: tcp
-    {{- end }}
-  {{- end }}

@@ -1,9 +1,0 @@
-
-# Setup memory preload config.
-auth:
-  enabled: true
-  resolver:
-    type: memory
-    configMap:
-      name: nats-accounts
-      key: resolver.conf

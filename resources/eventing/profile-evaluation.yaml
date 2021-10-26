@@ -21,8 +21,6 @@ nats:
     replicas: 1
   reloader:
     enabled: false
-  natsbox:
-    enabled: false
   nats:
     jetstream:
       enabled: false

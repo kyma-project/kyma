@@ -21,19 +21,10 @@ nats:
     allowPrivilegeEscalation: false
     privileged: false
 
-  # Toggle whether to enable external access.
-  # This binds a host port for clients, gateways and leafnodes.
-  externalAccess: false
-
   # Toggle to disable client advertisements (connect_urls),
   # in case of running behind a load balancer (which is not recommended)
   # it might be required to disable advertisements.
   advertise: true
-
-  # In case both external access and advertise are enabled
-  # then a service account would be required to be able to
-  # gather the public ip from a node.
-  serviceAccount: "nats-server"
 
   # The number of connect attempts against discovered routes.
   connectRetries: 120
@@ -140,53 +131,7 @@ nats:
       annotations:
       # key: "value"
 
-  #######################
-  #                     #
-  #  TLS Configuration  #
-  #                     #
-  #######################
-  #
-  #  # You can find more on how to setup and trouble shoot TLS connnections at:
-  #
-  #  # https://docs.nats.io/nats-server/configuration/securing_nats/tls
-  #
-
-  # tls:
-  #   secret:
-  #     name: nats-client-tls
-  #   ca: "ca.crt"
-  #   cert: "tls.crt"
-  #   key: "tls.key"
-
-mqtt:
-  enabled: false
-  ackWait: 1m
-  maxAckPending: 100
-
-  #######################
-  #                     #
-  #  TLS Configuration  #
-  #                     #
-  #######################
-  #
-  #  # You can find more on how to setup and trouble shoot TLS connnections at:
-  #
-  #  # https://docs.nats.io/nats-server/configuration/securing_nats/tls
-  #
-
-  #
-  # tls:
-  #   secret:
-  #     name: nats-mqtt-tls
-  #   ca: "ca.crt"
-  #   cert: "tls.crt"
-  #   key: "tls.key"
-
 nameOverride: ""
-
-# An array of imagePullSecrets, and they have to be created manually in the same namespace
-# ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
-imagePullSecrets: []
 
 # Toggle whether to use setup a Pod Security Context
 # ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/
@@ -208,45 +153,11 @@ affinity:
           topologyKey: kubernetes.io/hostname
         weight: 100
 
-## Pod priority class name
-## ref: https://kubernetes.io/docs/concepts/configuration/pod-priority-preemption/#priorityclass
-priorityClassName: null
-
-# Service topology
-# ref: https://kubernetes.io/docs/concepts/services-networking/service-topology/
-topologyKeys: []
-
-# Pod Topology Spread Constraints
-# ref https://kubernetes.io/docs/concepts/workloads/pods/pod-topology-spread-constraints/
-topologySpreadConstraints: []
-# - maxSkew: 1
-#   topologyKey: zone
-#   whenUnsatisfiable: DoNotSchedule
-
 # Annotations to add to the NATS pods
 # ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
 podAnnotations: {
   sidecar.istio.io/inject: "false"
 }
-
-# Define a Pod Disruption Budget for the stateful set
-# ref: https://kubernetes.io/docs/concepts/workloads/pods/disruptions/
-podDisruptionBudget:
-  # minAvailable: 1
-  # maxUnavailable: 1
-
-# Node labels for pod assignment
-# Ref: https://kubernetes.io/docs/user-guide/node-selection/
-nodeSelector: {}
-
-# Node tolerations for server scheduling to nodes with taints
-# Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/
-#
-tolerations: []
-#  - key: "key"
-#    operator: "Equal|Exists"
-#    value: "value"
-#    effect: "NoSchedule|PreferNoSchedule|NoExecute(1.6 only)"
 
 # Annotations to add to the NATS StatefulSet
 statefulSetAnnotations: {}
@@ -261,140 +172,6 @@ cluster:
   enabled: false
   replicas: 3
   noAdvertise: false
-  # authorization:
-  #   user: foo
-  #   password: pwd
-  #   timeout: 0.5
-
-# Leafnode connections to extend a cluster:
-#
-# https://docs.nats.io/nats-server/configuration/leafnodes
-#
-leafnodes:
-  enabled: false
-  noAdvertise: false
-  # remotes:
-  #   - url: "tls://connect.ngs.global:7422"
-
-  #######################
-  #                     #
-  #  TLS Configuration  #
-  #                     #
-  #######################
-  #
-  #  # You can find more on how to setup and trouble shoot TLS connnections at:
-  #
-  #  # https://docs.nats.io/nats-server/configuration/securing_nats/tls
-  #
-
-  #
-  # tls:
-  #   secret:
-  #     name: nats-client-tls
-  #   ca: "ca.crt"
-  #   cert: "tls.crt"
-  #   key: "tls.key"
-
-# Gateway connections to create a super cluster
-#
-# https://docs.nats.io/nats-server/configuration/gateways
-#
-gateway:
-  enabled: false
-  name: 'default'
-  # authorization:
-  #   user: foo
-  #   password: pwd
-  #   timeout: 0.5
-
-  # You can add an implicit advertise address instead of using from Node's IP
-  # could also be a fqdn address
-  #advertise: "nats.example.com"
-
-  #############################
-  #                           #
-  #  List of remote gateways  #
-  #                           #
-  #############################
-  # gateways:
-  #   - name: other
-  #     url: nats://my-gateway-url:7522
-
-  #######################
-  #                     #
-  #  TLS Configuration  #
-  #                     #
-  #######################
-  #
-  #  # You can find more on how to setup and trouble shoot TLS connnections at:
-  #
-  #  # https://docs.nats.io/nats-server/configuration/securing_nats/tls
-  #
-  # tls:
-  #   secret:
-  #     name: nats-client-tls
-  #   ca: "ca.crt"
-  #   cert: "tls.crt"
-  #   key: "tls.key"
-
-# In case of both external access and advertisements being
-# enabled, an initializer container will be used to gather
-# the public ips.
-bootconfig:
-  image: natsio/nats-boot-config:0.5.4
-  pullPolicy: IfNotPresent
-  securityContext: {}
-  
-# NATS Box
-#
-# https://github.com/nats-io/nats-box
-#
-natsbox:
-  enabled: false
-  image: natsio/nats-box:0.6.0
-  pullPolicy: IfNotPresent
-  securityContext: {}
-
-  # Labels to add to the natsbox deployment
-  # ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
-  additionalLabels: {}
-
-  # An array of imagePullSecrets, and they have to be created manually in the same namespace
-  # ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
-  imagePullSecrets: []
-  #  - name: dockerhub
-
-  # credentials:
-  #   secret:
-  #     name: nats-sys-creds
-  #     key: sys.creds
-
-  # Annotations to add to the box pods
-  # ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
-  podAnnotations: {}
-  #  key: "value"
-
-  # Labels to add to the box pods
-  # ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
-  podLabels: {}
-  # key: "value"
-
-  # Affinity for nats box pod assignment
-  # ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
-  affinity: {}
-
-  # Node labels for pod assignment
-  # Ref: https://kubernetes.io/docs/user-guide/node-selection/
-  nodeSelector: {}
-
-  # Node tolerations for server scheduling to nodes with taints
-  # Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/
-  #
-  tolerations: []
-  #  - key: "key"
-  #    operator: "Equal|Exists"
-  #    value: "value"
-  #    effect: "NoSchedule|PreferNoSchedule|NoExecute(1.6 only)"
 
 # The NATS config reloader image to use.
 reloader:
@@ -405,6 +182,7 @@ reloader:
     privileged: false
 
 # Prometheus NATS Exporter configuration.
+# TODO disabled for now and will be solved in https://github.com/kyma-project/kyma/issues/11113
 exporter:
   enabled: false
   image: natsio/prometheus-nats-exporter:0.8.0
@@ -423,148 +201,8 @@ exporter:
     # interval:
     # scrapeTimeout:
 
-# Authentication setup
-auth:
-  enabled: false
-
-  # basic:
-  #   noAuthUser:
-  #   # List of users that can connect with basic auth,
-  #   # that belong to the global account.
-  #   users:
-
-  #   # List of accounts with users that can connect
-  #   # using basic auth.
-  #   accounts:
-
-  # Reference to the Operator JWT.
-  # operatorjwt:
-  #   configMap:
-  #     name: operator-jwt
-  #     key: KO.jwt
-
-  # Token authentication
-  # token:
-
-  # NKey authentication
-  # nkeys:
-  #   users:
-
-  # Public key of the System Account
-  # systemAccount:
-
-  resolver:
-    # Disables the resolver by default
-    type: none
-
-    ##########################################
-    #                                        #
-    # Embedded NATS Account Server Resolver  #
-    #                                        #
-    ##########################################
-    # type: full
-
-    # If the resolver type is 'full', delete when enabled will rename the jwt.
-    allowDelete: false
-
-    # Interval at which a nats-server with a nats based account resolver will compare
-    # it's state with one random nats based account resolver in the cluster and if needed,
-    # exchange jwt and converge on the same set of jwt.
-    interval: 2m
-
-    # Operator JWT
-    operator:
-
-    # System Account Public NKEY
-    systemAccount:
-
-    # resolverPreload:
-    #   <ACCOUNT>: <JWT>
-
-    # Directory in which the account JWTs will be stored.
-    store:
-      dir: "/accounts/jwt"
-
-      # Size of the account JWT storage.
-      size: 1Gi
-
-    ##############################
-    #                            #
-    # Memory resolver settings   #
-    #                            #
-    ##############################
-    # type: memory
-    #
-    # Use a configmap reference which will be mounted
-    # into the container.
-    #
-    # configMap:
-    #   name: nats-accounts
-    #   key: resolver.conf
-
-    ##########################
-    #                        #
-    #  URL resolver settings #
-    #                        #
-    ##########################
-    # type: URL
-    # url: "http://nats-account-server:9090/jwt/v1/accounts/"
-
-websocket:
-  enabled: false
-  port: 443
-  noTLS: true
-
-  sameOrigin: false
-  allowedOrigins: []
-
 appProtocol:
   enabled: true
-
-# Network Policy configuration
-networkPolicy:
-  enabled: false
-  # Don't require client label for connections
-  # When set to false, only pods with the correct client label will have network access to the ports
-  # NATS is listening on. When true, NATS will accept connections from any source
-  # (with the correct destination port).
-  allowExternal: true
-  # Add extra ingress rules to the NetworkPolicy
-  # e.g:
-  # extraIngress:
-  #   - ports:
-  #       - port: 1234
-  #     from:
-  #       - podSelector:
-  #           - matchLabels:
-  #               - role: frontend
-  #       - podSelector:
-  #           - matchExpressions:
-  #               - key: role
-  #                 operator: In
-  #                 values:
-  #                   - frontend
-  extraIngress: []
-  # Add extra ingress rules to the NetworkPolicy
-  # e.g:
-  # extraEgress:
-  #   - ports:
-  #       - port: 1234
-  #     to:
-  #       - podSelector:
-  #           - matchLabels:
-  #               - role: frontend
-  #       - podSelector:
-  #           - matchExpressions:
-  #               - key: role
-  #                 operator: In
-  #                 values:
-  #                   - frontend
-  extraEgress: []
-  # Labels to match to allow traffic from other namespaces
-  ingressNSMatchLabels: {}
-  # Pod labels to match to allow traffic from other namespaces
-  ingressNSPodMatchLabels: {}
 
 # Cluster Domain configured on the kubelets
 # https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/

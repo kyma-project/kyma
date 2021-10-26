@@ -73,46 +73,6 @@ Return the NATS cluster routes.
 {{- end }}
 
 
-{{- define "nats.tlsConfig" -}}
-tls {
-{{- if .cert }}
-    cert_file: {{ .secretPath }}/{{ .secret.name }}/{{ .cert }}
-{{- end }}
-{{- if .key }}
-    key_file:  {{ .secretPath }}/{{ .secret.name }}/{{ .key }}
-{{- end }}
-{{- if .ca }}
-    ca_file: {{ .secretPath }}/{{ .secret.name }}/{{ .ca }}
-{{- end }}
-{{- if .insecure }}
-    insecure: {{ .insecure }}
-{{- end }}
-{{- if .verify }}
-    verify: {{ .verify }}
-{{- end }}
-{{- if .verifyAndMap }}
-    verify_and_map: {{ .verifyAndMap }}
-{{- end }}
-{{- if .curvePreferences }}
-    curve_preferences: {{ .curvePreferences }}
-{{- end }}
-{{- if .timeout }}
-    timeout: {{ .timeout }}
-{{- end }}
-}
-{{- end }}
-
-{{/*
-Return the appropriate apiVersion for networkpolicy.
-*/}}
-{{- define "networkPolicy.apiVersion" -}}
-{{- if semverCompare ">=1.4-0, <1.7-0" .Capabilities.KubeVersion.GitVersion -}}
-{{- print "extensions/v1beta1" -}}
-{{- else -}}
-{{- print "networking.k8s.io/v1" -}}
-{{- end -}}
-{{- end -}}
-
 {{/*
 Renders a value that contains template.
 Usage:
