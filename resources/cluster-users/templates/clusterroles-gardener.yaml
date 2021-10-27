@@ -59,7 +59,7 @@ rules:
 {{ toYaml .Values.clusterRoles.verbs.view | indent 4 }}
 
 ---
-# Edit access to gardener dns resources
+# The role allows you to manage Gardener DNSEntry CR
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
