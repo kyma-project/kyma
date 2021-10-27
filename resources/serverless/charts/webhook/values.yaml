@@ -134,6 +134,11 @@ values:
             "limitMemory": "512Mi"
           }
         }
+      runtime: |-
+        {
+          "python39":"M"
+        }
+
   buildJob:
     resources:
       minRequestCpu: "200m"

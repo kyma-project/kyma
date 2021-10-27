@@ -3,6 +3,7 @@ package v1alpha1
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 
 	"github.com/pkg/errors"
 	corev1 "k8s.io/api/core/v1"
@@ -33,11 +34,11 @@ type FunctionReplicasDefaulting struct {
 }
 
 type FunctionResourcesDefaulting struct {
-	DefaultPreset string                     `envconfig:"default=M"`
-	Presets       map[string]ResourcesPreset `envconfig:"-"`
-	PresetsMap    string                     `envconfig:"default={}"`
-	RuntimePresetsMap string 				 `envconfig:"default={}"`
-	RuntimePresets map[string]string 		 `envconfig:"-"`
+	DefaultPreset     string                     `envconfig:"default=M"`
+	Presets           map[string]ResourcesPreset `envconfig:"-"`
+	PresetsMap        string                     `envconfig:"default={}"`
+	RuntimePresetsMap string                     `envconfig:"default={}"`
+	RuntimePresets    map[string]string          `envconfig:"-"`
 }
 
 type BuildJobResourcesDefaulting struct {
@@ -103,7 +104,7 @@ func (spec *FunctionSpec) defaultFunctionResources(ctx context.Context, fn *Func
 func (spec *FunctionSpec) defaultBuildResources(ctx context.Context, fn *Function) {
 	resources := spec.BuildResources
 	defaultingConfig := ctx.Value(DefaultingConfigKey).(DefaultingConfig).BuildJob.Resources
-	resourcesPreset := mergeResourcesPreset(fn, BuildResourcesPresetLabel, defaultingConfig.Presets, defaultingConfig.DefaultPreset)
+	resourcesPreset := mergeResourcesPreset(fn, BuildResourcesPresetLabel, defaultingConfig.Presets, defaultingConfig.DefaultPreset, nil)
 
 	spec.BuildResources = defaultResources(resources, resourcesPreset.RequestMemory, resourcesPreset.RequestCpu, resourcesPreset.LimitMemory, resourcesPreset.LimitCpu)
 }
@@ -191,6 +192,7 @@ func mergeResourcesPreset(fn *Function, presetLabel string, presets map[string]R
 	if preset == "" {
 		rtmPreset, ok := runtimePreset[string(fn.Spec.Runtime)]
 		if ok {
+			fmt.Println("Found Runtime specific presets")
 			return presets[rtmPreset]
 		}
 		return presets[defaultPreset]
