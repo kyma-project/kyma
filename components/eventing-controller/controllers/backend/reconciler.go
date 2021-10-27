@@ -402,9 +402,11 @@ func isPublisherDeploymentReady(ctx context.Context, backendType eventingv1alpha
 	}
 
 	var containers []v1.Container
+	var statuses []v1.ContainerStatus
 	for _, pod := range pods.Items {
 		if pod.DeletionTimestamp.IsZero() {
 			containers = append(containers, pod.Spec.Containers...)
+			statuses = append(statuses, pod.Status.ContainerStatuses...)
 		}
 	}
 
@@ -412,7 +414,7 @@ func isPublisherDeploymentReady(ctx context.Context, backendType eventingv1alpha
 	for _, container := range containers {
 		if container.Name == deployment.PublisherName {
 			for _, envVar := range container.Env {
-				if !strings.EqualFold(envVar.Name, "BACKEND") || !strings.EqualFold(envVar.Value, fmt.Sprint(backendType)) {
+				if strings.EqualFold(envVar.Name, "BACKEND") && !strings.EqualFold(envVar.Value, fmt.Sprint(backendType)) {
 					return false, nil
 				}
 			}
@@ -421,23 +423,17 @@ func isPublisherDeploymentReady(ctx context.Context, backendType eventingv1alpha
 
 	// check if the container's status is set to Ready
 	readyPodsCount := 0
-	for _, pod := range pods.Items {
-		if !pod.DeletionTimestamp.IsZero() {
+	for _, status := range statuses {
+		// skip the sidecars
+		if status.Name != deployment.PublisherName {
 			continue
 		}
-		for _, status := range pod.Status.ContainerStatuses {
-			// skip the sidecars
-			if status.Name != deployment.PublisherName {
-				continue
-			}
-			if !status.Ready {
-				return false, nil
-			}
+		if !status.Ready {
+			return false, nil
 		}
 		readyPodsCount++
+		// the ready pods number of the right backend type should match the spec
 	}
-
-	// the ready pods number of the right backend type should match the spec
 	return readyPodsCount == int(*publisher.Spec.Replicas), nil
 }
 
