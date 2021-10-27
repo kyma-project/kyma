@@ -16,6 +16,14 @@ spec:
           properties:
             spec:
               type: object
+              properties:
+                services:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      id:
+                        type: string
   scope: Namespaced
   names:
     plural: applicationmappings
