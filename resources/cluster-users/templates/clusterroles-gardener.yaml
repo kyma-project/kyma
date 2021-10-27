@@ -19,7 +19,7 @@ rules:
 {{ toYaml .Values.clusterRoles.verbs.view | indent 4 }}
 
 ---
-# Edit access to gardener cert resources
+# The role allows you to manage Gardener Certificate CR
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
@@ -39,7 +39,7 @@ rules:
 {{ toYaml .Values.clusterRoles.verbs.edit | indent 4 }}
 
 ---
-#View access to gardener dns resources
+# The role allows you to view Gardener DNSEntry CR
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
