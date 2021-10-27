@@ -18,68 +18,75 @@ var (
 	logger *zap.SugaredLogger
 )
 
-type watcher struct {
-	grafana    *fsnotify.Watcher
+type watcher interface {
+	stop() error
+	startGrafana() error
+	attributes() *grafanaAttributes
+	killProcess() error
+}
+
+type grafanaWatcher struct {
+	attr *grafanaAttributes
+}
+
+type grafanaAttributes struct {
 	path       string
-	eventCount int
+	process    string
+	grafana    *fsnotify.Watcher
 	cmd        *exec.Cmd
 }
 
 func main() {
 	done := make(chan bool)
 
-	rawLogger, _ := zap.NewProduction()
-	defer func(logger *zap.Logger) {
-		err := logger.Sync()
-		if err != nil {
-			return
-		}
-	}(rawLogger)
-	logger = rawLogger.Sugar()
+	if err := initLogger(); err != nil{
+		return
+	}
+	defer logger.Sync()
 
-	watcher := watcher{path: dataSourcesPath}
-	err := watcher.start()
+	watcher := &grafanaWatcher{&grafanaAttributes{path: dataSourcesPath, process: grafanaPsName}}
+	err := start(watcher)
 	if err != nil {
 		logger.Error("error occurred in grafana-watcher:", err)
-		watcher.cmd = nil
+		watcher.attributes().cmd = nil
 		return
 	}
 
 	<-done
 }
 
-func (w *watcher) start() error {
+func start(w watcher) error {
+
 	if err := w.startGrafana(); err != nil {
 		return err
 	}
 	logger.Info("Start watching Grafana datasource directory")
 	var err error
-	w.grafana, err = fsnotify.NewWatcher()
+	w.attributes().grafana, err = fsnotify.NewWatcher()
 	if err != nil {
 		return err
 	}
 
-	if err := w.grafana.Add(w.path); err != nil {
+	if err := w.attributes().grafana.Add(w.attributes().path); err != nil {
 		logger.Error("Error watching path: ", err)
 	}
 
 	go func() {
 		for {
 			select {
-			case event := <-w.grafana.Events:
+			case event := <-w.attributes().grafana.Events:
 				switch {
 				case event.Op&fsnotify.Create == fsnotify.Create || event.Op&fsnotify.Remove == fsnotify.Remove:
-					if err := killProcess(grafanaPsName); err != nil {
+					if err := w.killProcess(); err != nil {
 						logger.Errorf("Error killing process: %s", err)
 					} else {
 						if err := w.startGrafana(); err != nil {
 							logger.Errorf("Error restarting Grafana: %s", err)
 						}
 					}
-					w.eventCount++ // TODO: Make it more testable
 					logger.Infof("Datasource directory modified: %s", event.String())
 				}
-			case err := <-w.grafana.Errors:
+			case err := <-w.attributes().grafana.Errors:
 				fmt.Printf("Error %s", err)
 			}
 		}
@@ -87,25 +94,26 @@ func (w *watcher) start() error {
 	return nil
 }
 
-func (w *watcher) stop() error {
-	return w.grafana.Close()
+func (g *grafanaWatcher) attributes() *grafanaAttributes{
+	return g.attr
 }
 
-func (w *watcher) startGrafana() error {
+func (g *grafanaWatcher) startGrafana() error {
 	logger.Info("Starting Grafana...")
-	w.cmd = exec.Command(grafanaRun)
-	w.cmd.Stdout = os.Stdout
-	w.cmd.Stderr = os.Stderr
-	if err := w.cmd.Start(); err != nil {
+	g.attr.cmd = exec.Command(grafanaRun)
+	g.attr.cmd.Stdout = os.Stdout
+	g.attr.cmd.Stderr = os.Stderr
+	if err := g.attr.cmd.Start(); err != nil {
 		logger.Error("error occurred in grafana start:", err)
-		w.cmd = nil
+		g.attr.cmd = nil
 		return err
 	}
 	logger.Info("Grafana successfully started")
 	return nil
 }
 
-func killProcess(name string) error {
+func (g *grafanaWatcher) killProcess() error {
+	psName := g.attributes().process
 	processes, err := process.Processes()
 	if err != nil {
 		return err
@@ -115,10 +123,23 @@ func killProcess(name string) error {
 		if err != nil {
 			return err
 		}
-		if n == name {
-			logger.Infof("Killing process: %s", name)
+		if n == psName {
+			logger.Infof("Killing process: %s", psName)
 			return p.Kill()
 		}
 	}
-	return fmt.Errorf("process not found: %s", name)
+	return fmt.Errorf("process not found: %s", psName)
+}
+
+func (g *grafanaWatcher) stop() error {
+	return g.attr.grafana.Close()
+}
+
+func initLogger() error {
+	rawLogger, err := zap.NewProduction()
+	if err != nil {
+		return err
+	}
+	logger = rawLogger.Sugar()
+	return nil
 }
