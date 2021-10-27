@@ -39,7 +39,7 @@ global:
   images:
     application_broker:
       name: "application-broker"
-      version: "cddfbc5b"
+      version: "PR-12257"
     application_connectivity_certs_setup_job:
       name: "application-connectivity-certs-setup-job"
       version: "PR-11678"
