@@ -21,7 +21,7 @@ Add the virtual service domains to the host file of your local system.
 1. Run the following command:
 
    ```bash
-   sudo kyma import hostfiles 
+   sudo kyma import hosts 
    ```
 
 2. If that command fails, you get a list of hosts displayed.
