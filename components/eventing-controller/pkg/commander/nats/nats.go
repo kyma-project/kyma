@@ -18,12 +18,12 @@ import (
 	"go.uber.org/zap"
 
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
+	subscription "github.com/kyma-project/kyma/components/eventing-controller/controllers/subscription/nats"
 	"github.com/kyma-project/kyma/components/eventing-controller/logger"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/application"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/commander"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers"
-	subscription "github.com/kyma-project/kyma/components/eventing-controller/reconciler/subscription/nats"
 )
 
 const (

@@ -6,10 +6,11 @@ import (
 
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
 
+	appsv1 "k8s.io/api/apps/v1"
+
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/deployment"
 	"github.com/kyma-project/kyma/components/eventing-controller/utils"
-	appsv1 "k8s.io/api/apps/v1"
 
 	apigatewayv1alpha1 "github.com/kyma-incubator/api-gateway/api/v1alpha1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"

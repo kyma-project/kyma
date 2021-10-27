@@ -14,7 +14,8 @@ const (
 
 // EventingBackendSpec defines the desired state of EventingBackend
 type EventingBackendSpec struct {
-	// For now spec is empty!
+	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
+	// Important: Run "make" to regenerate code after modifying this file
 }
 
 // EventingBackendStatus defines the observed state of EventingBackend

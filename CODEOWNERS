@@ -79,9 +79,6 @@
 # The `application-connector-ingress` chart
 /resources/application-connector-ingress/ @akgalwas @janmedrek @franpog859 @Maladie @rafalpotempa @koala7659 @ralikio @everesio
 
-# The `console` subchart
-/resources/console/ @dariadomagala @parostatkiem @akucharska @Wawrzyn321 @kwiatekus
-
 # The `dex` subchart
 /resources/dex/ @strekm @werdes72 @Tomasz-Smelcerz-SAP @mjakobczyk @dariusztutaj
 
@@ -195,13 +192,6 @@ components/etcd-tls-setup-job/ @PK85 @piotrmiskiewicz @ksputo @szwedm @voigt @wo
 # Application broker Component
 /components/application-broker/ @PK85 @piotrmiskiewicz @ksputo @szwedm @voigt @wozniakjan @adamwalach @lilitgh
 
-# Console Backend Service Component
-/components/console-backend-service/ @dariadomagala @parostatkiem @akucharska @Wawrzyn321 @kwiatekus
-/components/console-backend-service/internal/gqlschema @dariadomagala @parostatkiem @akucharska @Wawrzyn321 @kwiatekus @m00g3n @pPrecel @dbadura @tgorgol @rJankowski93
-/components/console-backend-service/internal/domain/*.go @dariadomagala @parostatkiem @akucharska @Wawrzyn321 @kwiatekus @m00g3n @pPrecel @dbadura @tgorgol @rJankowski93
-/components/console-backend-service/internal/domain/serverless @m00g3n @pPrecel @dbadura @tgorgol @rJankowski93
-/components/console-backend-service/internal/domain/rafter @m00g3n @pPrecel @dbadura @tgorgol @rJankowski93
-
 # Connector Service Component
 /components/connector-service/ @akgalwas @janmedrek @franpog859 @Maladie @rafalpotempa @koala7659 @ralikio
 
@@ -286,9 +276,6 @@ components/etcd-tls-setup-job/ @PK85 @piotrmiskiewicz @ksputo @szwedm @voigt @wo
 
 # apiserver-proxy tests
 /tests/integration/apiserver-proxy/ @strekm @werdes72 @Tomasz-Smelcerz-SAP @mjakobczyk @dariusztutaj
-
-# Console Backend Service tests
-/tests/console-backend-service/ @dariadomagala @parostatkiem @akucharska @Wawrzyn321 @kwiatekus
 
 # Rafter tests
 /tests/rafter/ @m00g3n @pPrecel @dbadura @tgorgol @rJankowski93
