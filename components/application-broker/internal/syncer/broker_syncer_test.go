@@ -1,6 +1,7 @@
 package syncer
 
 import (
+	"context"
 	"testing"
 
 	"errors"
@@ -28,7 +29,7 @@ func TestServiceBrokerSync_Success(t *testing.T) {
 	err := nsBrokerSync.Sync(maxSyncRetries)
 
 	// then
-	sb, err := client.ServicecatalogV1beta1().ServiceBrokers("test").Get(nsbroker.NamespacedBrokerName, v1.GetOptions{})
+	sb, err := client.ServicecatalogV1beta1().ServiceBrokers("test").Get(context.Background(), nsbroker.NamespacedBrokerName, v1.GetOptions{})
 	require.NoError(t, err)
 
 	assert.Equal(t, int64(1), sb.Spec.RelistRequests)
@@ -54,7 +55,7 @@ func TestServiceBrokerSync_SuccessAfterRetry(t *testing.T) {
 	resultErr := nsBrokerSync.Sync(maxSyncRetries)
 
 	// then
-	sb, err := client.ServicecatalogV1beta1().ServiceBrokers("test").Get(nsbroker.NamespacedBrokerName, v1.GetOptions{})
+	sb, err := client.ServicecatalogV1beta1().ServiceBrokers("test").Get(context.Background(), nsbroker.NamespacedBrokerName, v1.GetOptions{})
 	require.NoError(t, err)
 
 	assert.Equal(t, int64(1), sb.Spec.RelistRequests)
@@ -139,7 +140,7 @@ func TestServiceBrokerSync_SyncBroker_Success(t *testing.T) {
 	err := nsBrokerSync.SyncBroker("test")
 
 	// then
-	sb, err := client.ServicecatalogV1beta1().ServiceBrokers("test").Get(nsbroker.NamespacedBrokerName, v1.GetOptions{})
+	sb, err := client.ServicecatalogV1beta1().ServiceBrokers("test").Get(context.Background(), nsbroker.NamespacedBrokerName, v1.GetOptions{})
 	require.NoError(t, err)
 
 	assert.Equal(t, int64(1), sb.Spec.RelistRequests)

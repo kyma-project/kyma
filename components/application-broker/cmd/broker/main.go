@@ -142,7 +142,7 @@ func SetupServerAndRunControllers(cfg *config.Config, log *logrus.Entry, stopCh 
 
 	// wait for api server
 	err = wait.PollImmediate(time.Second, time.Minute, func() (bool, error) {
-		_, err := k8sClient.CoreV1().Namespaces().List(metav1.ListOptions{})
+		_, err := k8sClient.CoreV1().Namespaces().List(context.Background(), metav1.ListOptions{})
 		if err != nil {
 			log.Errorf("while waiting for api server: %s", err)
 			return false, nil

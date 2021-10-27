@@ -270,7 +270,7 @@ func (svc *ProvisionService) createEaOnSuccessProvision(appName internal.Applica
 			SourceID:    string(appName),
 		},
 	}
-	_, err := svc.eaClient.EventActivations(string(ns)).Create(ea)
+	_, err := svc.eaClient.EventActivations(string(ns)).Create(context.Background(), ea, v1.CreateOptions{})
 	switch {
 	case err == nil:
 		svc.log.Infof("Created EventActivation: [%s], in namespace: [%s]", appID, ns)
@@ -286,13 +286,13 @@ func (svc *ProvisionService) createEaOnSuccessProvision(appName internal.Applica
 }
 
 func (svc *ProvisionService) ensureEaUpdate(appID, ns string, newEA *v1alpha1.EventActivation) error {
-	oldEA, err := svc.eaClient.EventActivations(ns).Get(appID, v1.GetOptions{})
+	oldEA, err := svc.eaClient.EventActivations(ns).Get(context.Background(), appID, v1.GetOptions{})
 	if err != nil {
 		return errors.Wrapf(err, "while getting EventActivation with name: %q from namespace: %q", appID, ns)
 	}
 	toUpdate := oldEA.DeepCopy()
 	oldEA.Spec = newEA.Spec
-	_, err = svc.eaClient.EventActivations(ns).Update(toUpdate)
+	_, err = svc.eaClient.EventActivations(ns).Update(context.Background(), toUpdate, v1.UpdateOptions{})
 	if err != nil {
 		return errors.Wrapf(err, "while updating EventActivation with name: %q in namespace: %q", appID, ns)
 	}
@@ -300,7 +300,7 @@ func (svc *ProvisionService) ensureEaUpdate(appID, ns string, newEA *v1alpha1.Ev
 }
 
 func (svc *ProvisionService) ensurePeerAuthentication(newPeerAuth *securityv1beta1.PeerAuthentication) error {
-	oldPeerAuth, err := svc.istioClient.PeerAuthentications(newPeerAuth.Namespace).Get(newPeerAuth.Name, v1.GetOptions{})
+	oldPeerAuth, err := svc.istioClient.PeerAuthentications(newPeerAuth.Namespace).Get(context.Background(), newPeerAuth.Name, v1.GetOptions{})
 	if err != nil {
 		return errors.Wrapf(err, "while getting Istio PeerAuthentication with name: %q in namespace: %q", newPeerAuth.Name, newPeerAuth.Namespace)
 	}
@@ -309,7 +309,7 @@ func (svc *ProvisionService) ensurePeerAuthentication(newPeerAuth *securityv1bet
 	toUpdate.Labels = newPeerAuth.Labels
 	toUpdate.Spec = newPeerAuth.Spec
 
-	if _, err := svc.istioClient.PeerAuthentications(toUpdate.Namespace).Update(toUpdate); err != nil {
+	if _, err := svc.istioClient.PeerAuthentications(toUpdate.Namespace).Update(context.Background(), toUpdate, v1.UpdateOptions{}); err != nil {
 		return errors.Wrapf(err, "while updating Istio PeerAuthentication with name: %q in namespace: %q", toUpdate.Name, newPeerAuth.Namespace)
 	}
 	return nil

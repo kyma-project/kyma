@@ -232,7 +232,7 @@ func (svc *DeprovisionService) setState(iID internal.InstanceID,
 }
 
 func (svc *DeprovisionService) deprovisionEventActivation(id internal.ApplicationServiceID, namespace internal.Namespace) error {
-	err := svc.eaClient.EventActivations(string(namespace)).Delete(string(id), &v1.DeleteOptions{})
+	err := svc.eaClient.EventActivations(string(namespace)).Delete(context.Background(), string(id), v1.DeleteOptions{})
 	if err != nil && !apierrors.IsNotFound(err) {
 		return errors.Wrap(err, "while deleting the Event Activation")
 	}

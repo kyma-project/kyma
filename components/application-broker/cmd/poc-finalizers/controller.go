@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"time"
 
 	"github.com/sirupsen/logrus"
@@ -130,7 +131,7 @@ func (c *Controller) processRE(key string) error {
 		return err
 	}
 
-	app, err := c.appInterface.Get(appName, v1.GetOptions{})
+	app, err := c.appInterface.Get(context.Background(), appName, v1.GetOptions{})
 	if err != nil {
 		return err
 	}
@@ -139,7 +140,7 @@ func (c *Controller) processRE(key string) error {
 		clone := app.DeepCopy()
 		clone.ObjectMeta.Finalizers = append(clone.ObjectMeta.Finalizers, FinalizerName)
 		c.log.Info("Adding finalizer")
-		_, err := c.appInterface.Update(clone)
+		_, err := c.appInterface.Update(context.Background(), clone, v1.UpdateOptions{})
 		c.log.Infof("Finalizer added")
 		if err != nil {
 			return err
@@ -147,7 +148,7 @@ func (c *Controller) processRE(key string) error {
 	}
 
 	if isDeletionCandidate(app) {
-		items, _ := c.emInterface.List(v1.ListOptions{})
+		items, _ := c.emInterface.List(context.Background(), v1.ListOptions{})
 		exists := false
 
 		// find if application mapping exists
@@ -164,7 +165,7 @@ func (c *Controller) processRE(key string) error {
 			clone.ObjectMeta.Finalizers = removeString(clone.ObjectMeta.Finalizers, FinalizerName)
 
 			c.log.Info("Removing finalizer")
-			_, err := c.appInterface.Update(clone)
+			_, err := c.appInterface.Update(context.Background(), clone, v1.UpdateOptions{})
 			c.log.Infof("Finalizer removed")
 			if err != nil {
 				return err

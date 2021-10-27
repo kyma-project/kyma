@@ -152,7 +152,7 @@ func TestProvisionAsync(t *testing.T) {
 			case <-asyncFinished:
 				if tc.expectedEventActivationCreated {
 					eventActivation, err := sut.eaClient.EventActivations(string(fixNs())).
-						Get(string(fixServiceID()), v1.GetOptions{})
+						Get(context.Background(), string(fixServiceID()), v1.GetOptions{})
 					assert.Nil(t, err)
 					assert.Equal(t, fixEventActivation(), eventActivation)
 				}
@@ -222,7 +222,7 @@ func TestProvisionProcessWithNewEventing(t *testing.T) {
 
 	select {
 	case <-asyncFinished:
-		eventActivation, err := provisioner.eaClient.EventActivations(string(fixNs())).Get(string(fixServiceID()), v1.GetOptions{})
+		eventActivation, err := provisioner.eaClient.EventActivations(string(fixNs())).Get(context.Background(), string(fixServiceID()), v1.GetOptions{})
 		assert.NoError(t, err)
 		assert.Equal(t, fixEventActivation(), eventActivation)
 	case <-time.After(time.Second):

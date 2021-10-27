@@ -3,6 +3,7 @@
 package v1alpha1
 
 import (
+	"context"
 	"time"
 
 	v1alpha1 "github.com/kyma-project/kyma/components/application-broker/pkg/apis/applicationconnector/v1alpha1"
@@ -21,14 +22,14 @@ type EventActivationsGetter interface {
 
 // EventActivationInterface has methods to work with EventActivation resources.
 type EventActivationInterface interface {
-	Create(*v1alpha1.EventActivation) (*v1alpha1.EventActivation, error)
-	Update(*v1alpha1.EventActivation) (*v1alpha1.EventActivation, error)
-	Delete(name string, options *v1.DeleteOptions) error
-	DeleteCollection(options *v1.DeleteOptions, listOptions v1.ListOptions) error
-	Get(name string, options v1.GetOptions) (*v1alpha1.EventActivation, error)
-	List(opts v1.ListOptions) (*v1alpha1.EventActivationList, error)
-	Watch(opts v1.ListOptions) (watch.Interface, error)
-	Patch(name string, pt types.PatchType, data []byte, subresources ...string) (result *v1alpha1.EventActivation, err error)
+	Create(ctx context.Context, eventActivation *v1alpha1.EventActivation, opts v1.CreateOptions) (*v1alpha1.EventActivation, error)
+	Update(ctx context.Context, eventActivation *v1alpha1.EventActivation, opts v1.UpdateOptions) (*v1alpha1.EventActivation, error)
+	Delete(ctx context.Context, name string, opts v1.DeleteOptions) error
+	DeleteCollection(ctx context.Context, opts v1.DeleteOptions, listOpts v1.ListOptions) error
+	Get(ctx context.Context, name string, opts v1.GetOptions) (*v1alpha1.EventActivation, error)
+	List(ctx context.Context, opts v1.ListOptions) (*v1alpha1.EventActivationList, error)
+	Watch(ctx context.Context, opts v1.ListOptions) (watch.Interface, error)
+	Patch(ctx context.Context, name string, pt types.PatchType, data []byte, opts v1.PatchOptions, subresources ...string) (result *v1alpha1.EventActivation, err error)
 	EventActivationExpansion
 }
 
@@ -47,20 +48,20 @@ func newEventActivations(c *ApplicationconnectorV1alpha1Client, namespace string
 }
 
 // Get takes name of the eventActivation, and returns the corresponding eventActivation object, and an error if there is any.
-func (c *eventActivations) Get(name string, options v1.GetOptions) (result *v1alpha1.EventActivation, err error) {
+func (c *eventActivations) Get(ctx context.Context, name string, options v1.GetOptions) (result *v1alpha1.EventActivation, err error) {
 	result = &v1alpha1.EventActivation{}
 	err = c.client.Get().
 		Namespace(c.ns).
 		Resource("eventactivations").
 		Name(name).
 		VersionedParams(&options, scheme.ParameterCodec).
-		Do().
+		Do(ctx).
 		Into(result)
 	return
 }
 
 // List takes label and field selectors, and returns the list of EventActivations that match those selectors.
-func (c *eventActivations) List(opts v1.ListOptions) (result *v1alpha1.EventActivationList, err error) {
+func (c *eventActivations) List(ctx context.Context, opts v1.ListOptions) (result *v1alpha1.EventActivationList, err error) {
 	var timeout time.Duration
 	if opts.TimeoutSeconds != nil {
 		timeout = time.Duration(*opts.TimeoutSeconds) * time.Second
@@ -71,13 +72,13 @@ func (c *eventActivations) List(opts v1.ListOptions) (result *v1alpha1.EventActi
 		Resource("eventactivations").
 		VersionedParams(&opts, scheme.ParameterCodec).
 		Timeout(timeout).
-		Do().
+		Do(ctx).
 		Into(result)
 	return
 }
 
 // Watch returns a watch.Interface that watches the requested eventActivations.
-func (c *eventActivations) Watch(opts v1.ListOptions) (watch.Interface, error) {
+func (c *eventActivations) Watch(ctx context.Context, opts v1.ListOptions) (watch.Interface, error) {
 	var timeout time.Duration
 	if opts.TimeoutSeconds != nil {
 		timeout = time.Duration(*opts.TimeoutSeconds) * time.Second
@@ -88,71 +89,74 @@ func (c *eventActivations) Watch(opts v1.ListOptions) (watch.Interface, error) {
 		Resource("eventactivations").
 		VersionedParams(&opts, scheme.ParameterCodec).
 		Timeout(timeout).
-		Watch()
+		Watch(ctx)
 }
 
 // Create takes the representation of a eventActivation and creates it.  Returns the server's representation of the eventActivation, and an error, if there is any.
-func (c *eventActivations) Create(eventActivation *v1alpha1.EventActivation) (result *v1alpha1.EventActivation, err error) {
+func (c *eventActivations) Create(ctx context.Context, eventActivation *v1alpha1.EventActivation, opts v1.CreateOptions) (result *v1alpha1.EventActivation, err error) {
 	result = &v1alpha1.EventActivation{}
 	err = c.client.Post().
 		Namespace(c.ns).
 		Resource("eventactivations").
+		VersionedParams(&opts, scheme.ParameterCodec).
 		Body(eventActivation).
-		Do().
+		Do(ctx).
 		Into(result)
 	return
 }
 
 // Update takes the representation of a eventActivation and updates it. Returns the server's representation of the eventActivation, and an error, if there is any.
-func (c *eventActivations) Update(eventActivation *v1alpha1.EventActivation) (result *v1alpha1.EventActivation, err error) {
+func (c *eventActivations) Update(ctx context.Context, eventActivation *v1alpha1.EventActivation, opts v1.UpdateOptions) (result *v1alpha1.EventActivation, err error) {
 	result = &v1alpha1.EventActivation{}
 	err = c.client.Put().
 		Namespace(c.ns).
 		Resource("eventactivations").
 		Name(eventActivation.Name).
+		VersionedParams(&opts, scheme.ParameterCodec).
 		Body(eventActivation).
-		Do().
+		Do(ctx).
 		Into(result)
 	return
 }
 
 // Delete takes name of the eventActivation and deletes it. Returns an error if one occurs.
-func (c *eventActivations) Delete(name string, options *v1.DeleteOptions) error {
+func (c *eventActivations) Delete(ctx context.Context, name string, opts v1.DeleteOptions) error {
 	return c.client.Delete().
 		Namespace(c.ns).
 		Resource("eventactivations").
 		Name(name).
-		Body(options).
-		Do().
+		Body(&opts).
+		Do(ctx).
 		Error()
 }
 
 // DeleteCollection deletes a collection of objects.
-func (c *eventActivations) DeleteCollection(options *v1.DeleteOptions, listOptions v1.ListOptions) error {
+func (c *eventActivations) DeleteCollection(ctx context.Context, opts v1.DeleteOptions, listOpts v1.ListOptions) error {
 	var timeout time.Duration
-	if listOptions.TimeoutSeconds != nil {
-		timeout = time.Duration(*listOptions.TimeoutSeconds) * time.Second
+	if listOpts.TimeoutSeconds != nil {
+		timeout = time.Duration(*listOpts.TimeoutSeconds) * time.Second
 	}
 	return c.client.Delete().
 		Namespace(c.ns).
 		Resource("eventactivations").
-		VersionedParams(&listOptions, scheme.ParameterCodec).
+		VersionedParams(&listOpts, scheme.ParameterCodec).
 		Timeout(timeout).
-		Body(options).
-		Do().
+		Body(&opts).
+		Do(ctx).
 		Error()
 }
 
 // Patch applies the patch and returns the patched eventActivation.
-func (c *eventActivations) Patch(name string, pt types.PatchType, data []byte, subresources ...string) (result *v1alpha1.EventActivation, err error) {
+func (c *eventActivations) Patch(ctx context.Context, name string, pt types.PatchType, data []byte, opts v1.PatchOptions, subresources ...string) (result *v1alpha1.EventActivation, err error) {
 	result = &v1alpha1.EventActivation{}
 	err = c.client.Patch(pt).
 		Namespace(c.ns).
 		Resource("eventactivations").
-		SubResource(subresources...).
 		Name(name).
+		SubResource(subresources...).
+		VersionedParams(&opts, scheme.ParameterCodec).
 		Body(data).
-		Do().
+		Do(ctx).
 		Into(result)
 	return
 }

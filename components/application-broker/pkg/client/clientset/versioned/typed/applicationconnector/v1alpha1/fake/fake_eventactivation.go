@@ -3,6 +3,8 @@
 package fake
 
 import (
+	"context"
+
 	v1alpha1 "github.com/kyma-project/kyma/components/application-broker/pkg/apis/applicationconnector/v1alpha1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	labels "k8s.io/apimachinery/pkg/labels"
@@ -23,7 +25,7 @@ var eventactivationsResource = schema.GroupVersionResource{Group: "applicationco
 var eventactivationsKind = schema.GroupVersionKind{Group: "applicationconnector.kyma-project.io", Version: "v1alpha1", Kind: "EventActivation"}
 
 // Get takes name of the eventActivation, and returns the corresponding eventActivation object, and an error if there is any.
-func (c *FakeEventActivations) Get(name string, options v1.GetOptions) (result *v1alpha1.EventActivation, err error) {
+func (c *FakeEventActivations) Get(ctx context.Context, name string, options v1.GetOptions) (result *v1alpha1.EventActivation, err error) {
 	obj, err := c.Fake.
 		Invokes(testing.NewGetAction(eventactivationsResource, c.ns, name), &v1alpha1.EventActivation{})
 
@@ -34,7 +36,7 @@ func (c *FakeEventActivations) Get(name string, options v1.GetOptions) (result *
 }
 
 // List takes label and field selectors, and returns the list of EventActivations that match those selectors.
-func (c *FakeEventActivations) List(opts v1.ListOptions) (result *v1alpha1.EventActivationList, err error) {
+func (c *FakeEventActivations) List(ctx context.Context, opts v1.ListOptions) (result *v1alpha1.EventActivationList, err error) {
 	obj, err := c.Fake.
 		Invokes(testing.NewListAction(eventactivationsResource, eventactivationsKind, c.ns, opts), &v1alpha1.EventActivationList{})
 
@@ -56,14 +58,14 @@ func (c *FakeEventActivations) List(opts v1.ListOptions) (result *v1alpha1.Event
 }
 
 // Watch returns a watch.Interface that watches the requested eventActivations.
-func (c *FakeEventActivations) Watch(opts v1.ListOptions) (watch.Interface, error) {
+func (c *FakeEventActivations) Watch(ctx context.Context, opts v1.ListOptions) (watch.Interface, error) {
 	return c.Fake.
 		InvokesWatch(testing.NewWatchAction(eventactivationsResource, c.ns, opts))
 
 }
 
 // Create takes the representation of a eventActivation and creates it.  Returns the server's representation of the eventActivation, and an error, if there is any.
-func (c *FakeEventActivations) Create(eventActivation *v1alpha1.EventActivation) (result *v1alpha1.EventActivation, err error) {
+func (c *FakeEventActivations) Create(ctx context.Context, eventActivation *v1alpha1.EventActivation, opts v1.CreateOptions) (result *v1alpha1.EventActivation, err error) {
 	obj, err := c.Fake.
 		Invokes(testing.NewCreateAction(eventactivationsResource, c.ns, eventActivation), &v1alpha1.EventActivation{})
 
@@ -74,7 +76,7 @@ func (c *FakeEventActivations) Create(eventActivation *v1alpha1.EventActivation)
 }
 
 // Update takes the representation of a eventActivation and updates it. Returns the server's representation of the eventActivation, and an error, if there is any.
-func (c *FakeEventActivations) Update(eventActivation *v1alpha1.EventActivation) (result *v1alpha1.EventActivation, err error) {
+func (c *FakeEventActivations) Update(ctx context.Context, eventActivation *v1alpha1.EventActivation, opts v1.UpdateOptions) (result *v1alpha1.EventActivation, err error) {
 	obj, err := c.Fake.
 		Invokes(testing.NewUpdateAction(eventactivationsResource, c.ns, eventActivation), &v1alpha1.EventActivation{})
 
@@ -85,7 +87,7 @@ func (c *FakeEventActivations) Update(eventActivation *v1alpha1.EventActivation)
 }
 
 // Delete takes name of the eventActivation and deletes it. Returns an error if one occurs.
-func (c *FakeEventActivations) Delete(name string, options *v1.DeleteOptions) error {
+func (c *FakeEventActivations) Delete(ctx context.Context, name string, opts v1.DeleteOptions) error {
 	_, err := c.Fake.
 		Invokes(testing.NewDeleteAction(eventactivationsResource, c.ns, name), &v1alpha1.EventActivation{})
 
@@ -93,15 +95,15 @@ func (c *FakeEventActivations) Delete(name string, options *v1.DeleteOptions) er
 }
 
 // DeleteCollection deletes a collection of objects.
-func (c *FakeEventActivations) DeleteCollection(options *v1.DeleteOptions, listOptions v1.ListOptions) error {
-	action := testing.NewDeleteCollectionAction(eventactivationsResource, c.ns, listOptions)
+func (c *FakeEventActivations) DeleteCollection(ctx context.Context, opts v1.DeleteOptions, listOpts v1.ListOptions) error {
+	action := testing.NewDeleteCollectionAction(eventactivationsResource, c.ns, listOpts)
 
 	_, err := c.Fake.Invokes(action, &v1alpha1.EventActivationList{})
 	return err
 }
 
 // Patch applies the patch and returns the patched eventActivation.
-func (c *FakeEventActivations) Patch(name string, pt types.PatchType, data []byte, subresources ...string) (result *v1alpha1.EventActivation, err error) {
+func (c *FakeEventActivations) Patch(ctx context.Context, name string, pt types.PatchType, data []byte, opts v1.PatchOptions, subresources ...string) (result *v1alpha1.EventActivation, err error) {
 	obj, err := c.Fake.
 		Invokes(testing.NewPatchSubresourceAction(eventactivationsResource, c.ns, name, pt, data, subresources...), &v1alpha1.EventActivation{})
 

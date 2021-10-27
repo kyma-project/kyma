@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"net/http/httptest"
 	"testing"
@@ -153,11 +154,15 @@ func newTestSuite(t *testing.T) *testSuite {
 	appClient := appfake.NewSimpleClientset()
 	istioClient, _ := bt.NewFakeClients()
 
-	k8sClientSet.CoreV1().Namespaces().Create(&corev1.Namespace{
-		ObjectMeta: metav1.ObjectMeta{
-			Name: namespace,
+	k8sClientSet.CoreV1().Namespaces().Create(
+		context.Background(),
+		&corev1.Namespace{
+			ObjectMeta: metav1.ObjectMeta{
+				Name: namespace,
+			},
 		},
-	})
+		metav1.CreateOptions{},
+	)
 
 	livenessCheckStatus := broker.LivenessCheckStatus{Succeeded: false}
 
@@ -192,7 +197,7 @@ func newOSBClient(url string) (osb.Client, error) {
 }
 
 func (ts *testSuite) createApplication() {
-	_, err := ts.appInterface.Applications().Create(&v1alpha12.Application{
+	_, err := ts.appInterface.Applications().Create(context.Background(), &v1alpha12.Application{
 		ObjectMeta: metav1.ObjectMeta{
 			Name: applicationName,
 		},
@@ -241,14 +246,15 @@ func (ts *testSuite) createApplication() {
 				},
 			},
 		},
-	})
+	},
+		metav1.CreateOptions{})
 	require.NoError(ts.t, err)
 }
 
 func (ts *testSuite) AssertServiceBrokerRegistered() {
 	timeoutCh := time.After(3 * time.Second)
 	for {
-		_, err := ts.scInterface.ServiceBrokers(namespace).Get(nsbroker.NamespacedBrokerName, metav1.GetOptions{})
+		_, err := ts.scInterface.ServiceBrokers(namespace).Get(context.Background(), nsbroker.NamespacedBrokerName, metav1.GetOptions{})
 		if err == nil {
 			return
 		}
@@ -265,7 +271,7 @@ func (ts *testSuite) AssertServiceBrokerRegistered() {
 func (ts *testSuite) AssertServiceBrokerNotRegistered() {
 	timeoutCh := time.After(3 * time.Second)
 	for {
-		_, err := ts.scInterface.ServiceBrokers(namespace).Get(nsbroker.NamespacedBrokerName, metav1.GetOptions{})
+		_, err := ts.scInterface.ServiceBrokers(namespace).Get(context.Background(), nsbroker.NamespacedBrokerName, metav1.GetOptions{})
 		if errors.IsNotFound(err) {
 			return
 		}
@@ -301,7 +307,7 @@ func (ts *testSuite) ProvisionInstance(id string) {
 
 	// The controller checks if there is any Service Instance (managed by Service Catalog).
 	// The following code simulates Service Catalog actions
-	ts.scInterface.ServiceClasses(namespace).Create(&v1beta1.ServiceClass{
+	ts.scInterface.ServiceClasses(namespace).Create(context.Background(), &v1beta1.ServiceClass{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "app-class",
 			Namespace: namespace,
@@ -309,8 +315,9 @@ func (ts *testSuite) ProvisionInstance(id string) {
 		Spec: v1beta1.ServiceClassSpec{
 			ServiceBrokerName: nsbroker.NamespacedBrokerName,
 		},
-	})
-	ts.scInterface.ServiceInstances(namespace).Create(&v1beta1.ServiceInstance{
+	},
+		metav1.CreateOptions{})
+	ts.scInterface.ServiceInstances(namespace).Create(context.Background(), &v1beta1.ServiceInstance{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "instance-001",
 			Namespace: namespace,
@@ -320,7 +327,8 @@ func (ts *testSuite) ProvisionInstance(id string) {
 				Name: "app-class",
 			},
 		},
-	})
+	},
+		metav1.CreateOptions{})
 }
 
 func (ts *testSuite) DeprovisionInstance(id string) {
@@ -334,7 +342,7 @@ func (ts *testSuite) DeprovisionInstance(id string) {
 
 	// The controller checks if there is any Service Instance (managed by Service Catalog).
 	// The following code simulates Service Catalog actions
-	ts.scInterface.ServiceInstances(namespace).Delete("instance-001", &metav1.DeleteOptions{})
+	ts.scInterface.ServiceInstances(namespace).Delete(context.Background(), "instance-001", metav1.DeleteOptions{})
 }
 
 func (ts *testSuite) AssertServicesInCatalogEndpoint(ids ...string) {
@@ -386,7 +394,7 @@ func (ts *testSuite) checkServiceIDs(ids ...string) error {
 }
 
 func (ts *testSuite) enableApplication() {
-	_, err := ts.abInterface.ApplicationMappings(namespace).Create(&v1alpha1.ApplicationMapping{
+	_, err := ts.abInterface.ApplicationMappings(namespace).Create(context.Background(), &v1alpha1.ApplicationMapping{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      applicationName,
 			Namespace: namespace,
@@ -394,12 +402,12 @@ func (ts *testSuite) enableApplication() {
 		TypeMeta: metav1.TypeMeta{
 			APIVersion: v1alpha1.SchemeGroupVersion.String(),
 		},
-	})
+	}, metav1.CreateOptions{})
 	require.NoError(ts.t, err)
 }
 
 func (ts *testSuite) disableApplication() {
-	err := ts.abInterface.ApplicationMappings(namespace).Delete(applicationName, &metav1.DeleteOptions{})
+	err := ts.abInterface.ApplicationMappings(namespace).Delete(context.Background(), applicationName, metav1.DeleteOptions{})
 	require.NoError(ts.t, err)
 }
 
@@ -409,7 +417,7 @@ func (ts *testSuite) enableApplicationServices(ids ...string) {
 		services = append(services, v1alpha1.ApplicationMappingService{ID: id})
 	}
 
-	_, err := ts.abInterface.ApplicationMappings(namespace).Create(&v1alpha1.ApplicationMapping{
+	_, err := ts.abInterface.ApplicationMappings(namespace).Create(context.Background(), &v1alpha1.ApplicationMapping{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      applicationName,
 			Namespace: namespace,
@@ -420,7 +428,7 @@ func (ts *testSuite) enableApplicationServices(ids ...string) {
 		Spec: v1alpha1.ApplicationMappingSpec{
 			Services: services,
 		},
-	})
+	}, metav1.CreateOptions{})
 	require.NoError(ts.t, err)
 }
 

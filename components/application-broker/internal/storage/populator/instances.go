@@ -1,6 +1,7 @@
 package populator
 
 import (
+	"context"
 	"encoding/json"
 
 	"github.com/kyma-project/kyma/components/application-broker/internal"
@@ -58,7 +59,7 @@ func NewInstances(
 func (p *Instances) Do() error {
 	p.log.Info("Instance storage population...")
 
-	serviceClasses, err := p.scClientSet.ServicecatalogV1beta1().ServiceClasses(v1.NamespaceAll).List(metav1.ListOptions{})
+	serviceClasses, err := p.scClientSet.ServicecatalogV1beta1().ServiceClasses(v1.NamespaceAll).List(context.Background(), metav1.ListOptions{})
 	if err != nil {
 		return errors.Wrap(err, "while listing service classes")
 	}
@@ -70,7 +71,7 @@ func (p *Instances) Do() error {
 		}
 	}
 
-	serviceInstances, err := p.scClientSet.ServicecatalogV1beta1().ServiceInstances(v1.NamespaceAll).List(metav1.ListOptions{})
+	serviceInstances, err := p.scClientSet.ServicecatalogV1beta1().ServiceInstances(v1.NamespaceAll).List(context.Background(), metav1.ListOptions{})
 	if err != nil {
 		return errors.Wrap(err, "while listing service instances")
 	}

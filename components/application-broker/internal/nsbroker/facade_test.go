@@ -1,6 +1,7 @@
 package nsbroker_test
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"testing"
@@ -38,7 +39,7 @@ func TestNsBrokerCreateHappyPath(t *testing.T) {
 
 	// THEN
 	require.NoError(t, err)
-	actualBroker, err := scFakeClientset.ServicecatalogV1beta1().ServiceBrokers(fixDestNs()).Get("application-broker", v1.GetOptions{})
+	actualBroker, err := scFakeClientset.ServicecatalogV1beta1().ServiceBrokers(fixDestNs()).Get(context.Background(), "application-broker", v1.GetOptions{})
 	require.NoError(t, err)
 	assert.Equal(t, "true", actualBroker.Labels["namespaced-application-broker"])
 	assert.Equal(t, svcURL, actualBroker.Spec.URL)
