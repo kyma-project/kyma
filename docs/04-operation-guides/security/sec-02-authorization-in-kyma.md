@@ -22,12 +22,11 @@ The predefined end-user roles are:
 | **kyma-edit** | The role for editing Kyma-specific resources. It's [aggregated](https://kubernetes.io/docs/reference/access-authn-authz/rbac/#aggregated-clusterroles) by other roles. |
 | **kyma-snapshots** | The role for managing VolumeSnapshot CR for backups. |
 | **kyma-developer** | The role created for developers who build implementations using Kyma. It allows you to list, edit, and create Kubernetes and Kyma-specific resources except for read and write access to [AddonsConfigurations](https://kyma-project-old.netlify.app/docs/components/helm-broker#custom-resource-addons-configuration). You need to bind it manually to a user or a group in the Namespaces of your choice. |
-| **cluster-admin** | The role with the highest permission level which gives access to all Kubernetes and Kyma resources and components with administrative rights. |
 | **kyma-namespace-admin** | The role which gives access to a specific Namespace with administrative rights except for the write access to [AddonsConfigurations](https://kyma-project-old.netlify.app/docs/components/helm-broker#custom-resource-addons-configuration). |
 
 To learn more about the default roles and how they are constructed, see the [`rbac-roles.yaml`](https://github.com/kyma-project/kyma/blob/master/resources/cluster-users/templates/rbac-roles.yaml) file.
 
-After creating a Kyma cluster, you become an admin of this instance and the **cluster-admin** role is assigned to you by default. As the **cluster-admin**, you can assign roles to users.
+After creating a Kyma cluster, you become an admin of this instance and the It is the role with the highest permission level which gives access to all Kubernetes and Kyma resources and components with administrative rights. As the **cluster-admin**, you can assign roles to users.
 
 ### Role binding
 
