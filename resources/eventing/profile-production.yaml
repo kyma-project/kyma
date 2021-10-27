@@ -38,3 +38,6 @@ nats:
       requests:
         cpu: 400m
         memory: 512Mi
+    logging:
+      debug: false
+      trace: false
