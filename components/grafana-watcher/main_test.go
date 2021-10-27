@@ -3,7 +3,6 @@ package main
 import (
 	"github.com/stretchr/testify/assert"
 	"os"
-	"path"
 	"path/filepath"
 	"testing"
 	"time"
@@ -18,7 +17,7 @@ func Test_watcher_watch(t *testing.T) {
 
 	wd, _ := os.Getwd()
 	directory := filepath.Join(wd, "testdata")
-	file := "testdata.txt"
+	file := filepath.Join(directory, "testdata.txt")
 
 	err := os.MkdirAll(directory, os.ModePerm)
 	assert.NoError(t, err)
@@ -26,23 +25,20 @@ func Test_watcher_watch(t *testing.T) {
 
 
 	t.Run("Creating file event notified", func(t *testing.T) {
-		var testWatcher = &grafanaWatcherMock{1, &grafanaAttributes{path:directory}}
+		var testWatcher = &grafanaWatcherMock{0, &grafanaAttributes{path:directory}}
 		err = start(testWatcher)
 		assert.NoError(t, err)
+		defer testWatcher.stop()
 
-		_, err = os.Create(filepath.Join(directory, file))
+		_, err = os.Create(file)
 		assert.NoError(t, err)
-		time.Sleep(1 * time.Second) // TODO mach mal hübsch
+		time.Sleep(500 * time.Millisecond)
+		assert.Equal(t, 1, testWatcher.eventCount)
+
+		err = os.Remove(file)
+		assert.NoError(t, err)
+		time.Sleep(500 * time.Millisecond)
 		assert.Equal(t, 2, testWatcher.eventCount)
-
-		err = os.Remove(path.Join(directory, file))
-		assert.NoError(t, err)
-		time.Sleep(1 * time.Second)
-		assert.Equal(t, 3, testWatcher.eventCount)
-
-		err = testWatcher.stop() // TODO defer
-		if err != nil {
-		}
 	})
 
 	t.Cleanup(func() {
@@ -52,10 +48,6 @@ func Test_watcher_watch(t *testing.T) {
 		}
 	})
 
-
-	// create file
-	// assert testWatcher event count
-	// stop watcher
 }
 
 type grafanaWatcherMock struct {
