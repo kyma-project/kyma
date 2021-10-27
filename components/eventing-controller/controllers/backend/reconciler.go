@@ -389,56 +389,56 @@ func (r *Reconciler) UpdateBackendStatus(ctx context.Context, backendType eventi
 
 // check the publisher proxy deployment pods for the right backend type and ready status
 func isPublisherDeploymentReady(ctx context.Context, backendType eventingv1alpha1.BackendType, publisher *appsv1.Deployment, r *Reconciler) (bool, error) {
-	if publisher != nil {
+	if publisher == nil {
+		return false, nil
+	}
 
-		// get the publisherDeployment's pods
-		var pods v1.PodList
-		if err := r.Cache.List(ctx, &pods, client.MatchingLabels{
-			deployment.AppLabelKey: deployment.PublisherName,
-		}); err != nil {
-			return false, err
+	// get the publisherDeployment's pods
+	var pods v1.PodList
+	if err := r.Cache.List(ctx, &pods, client.MatchingLabels{
+		deployment.AppLabelKey: deployment.PublisherName,
+	}); err != nil {
+		return false, err
+	}
+
+	var containers []v1.Container
+	for _, pod := range pods.Items {
+		if pod.DeletionTimestamp.IsZero() {
+			containers = append(containers, pod.Spec.Containers...)
 		}
+	}
 
-		var containers []v1.Container
-		for _, pod := range pods.Items {
-			if pod.DeletionTimestamp.IsZero() {
-				containers = append(containers, pod.Spec.Containers...)
-			}
-		}
-
-		// check the pods for right backend type
-		for _, container := range containers {
-			if container.Name == deployment.PublisherName {
-				for _, envVar := range container.Env {
-					if !strings.EqualFold(envVar.Name, "BACKEND") || !strings.EqualFold(envVar.Value, fmt.Sprint(backendType)) {
-						return false, nil
-					}
-				}
-			}
-		}
-
-		// check if the container's status is set to Ready
-		readyPodsCount := 0
-		for _, pod := range pods.Items {
-			if !pod.DeletionTimestamp.IsZero() {
-				continue
-			}
-			for _, status := range pod.Status.ContainerStatuses {
-				// skip the sidecars
-				if status.Name != deployment.PublisherName {
-					continue
-				}
-				if !status.Ready {
+	// check the pods for right backend type
+	for _, container := range containers {
+		if container.Name == deployment.PublisherName {
+			for _, envVar := range container.Env {
+				if !strings.EqualFold(envVar.Name, "BACKEND") || !strings.EqualFold(envVar.Value, fmt.Sprint(backendType)) {
 					return false, nil
 				}
 			}
-			readyPodsCount++
 		}
-
-		// the ready pods number of the right backend type should match the spec
-		return readyPodsCount == int(*publisher.Spec.Replicas), nil
 	}
-	return false, nil
+
+	// check if the container's status is set to Ready
+	readyPodsCount := 0
+	for _, pod := range pods.Items {
+		if !pod.DeletionTimestamp.IsZero() {
+			continue
+		}
+		for _, status := range pod.Status.ContainerStatuses {
+			// skip the sidecars
+			if status.Name != deployment.PublisherName {
+				continue
+			}
+			if !status.Ready {
+				return false, nil
+			}
+		}
+		readyPodsCount++
+	}
+
+	// the ready pods number of the right backend type should match the spec
+	return readyPodsCount == int(*publisher.Spec.Replicas), nil
 }
 
 func hasBackendTypeChanged(currentBackendStatus, desiredBackendStatus eventingv1alpha1.EventingBackendStatus) bool {
