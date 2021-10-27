@@ -2,9 +2,8 @@ package main
 
 import (
 	"fmt"
-	"github.com/docker/docker/pkg/integration/cmd"
 	"github.com/fsnotify/fsnotify"
-	"github.com/pkg/errors"
+	_ "github.com/pkg/errors"
 	"github.com/shirou/gopsutil/v3/process"
 	"go.uber.org/zap"
 	"os"
@@ -23,7 +22,7 @@ type watcher struct {
 	grafana    *fsnotify.Watcher
 	path       string
 	eventCount int
-	cmd *exec.Cmd
+	cmd        *exec.Cmd
 }
 
 func main() {
@@ -50,11 +49,9 @@ func main() {
 }
 
 func (w *watcher) start() error {
-	logger.Info("Starting Grafana...")
 	if err := w.startGrafana(); err != nil {
 		return err
 	}
-
 	logger.Info("Start watching Grafana datasource directory")
 	var err error
 	w.grafana, err = fsnotify.NewWatcher()
@@ -94,7 +91,8 @@ func (w *watcher) stop() error {
 	return w.grafana.Close()
 }
 
-func (w *watcher) startGrafana() error{
+func (w *watcher) startGrafana() error {
+	logger.Info("Starting Grafana...")
 	w.cmd = exec.Command(grafanaRun)
 	w.cmd.Stdout = os.Stdout
 	w.cmd.Stderr = os.Stderr
