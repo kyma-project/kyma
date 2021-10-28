@@ -154,6 +154,10 @@ aggregationRule:
       rbac.authorization.kyma-project.io/aggregate-to-ory-view: "true"
   - matchLabels:
       rbac.authorization.kyma-project.io/aggregate-to-kyma-rafter-view: "true"
+  - matchLabels:
+      rbac.authorization.kyma-project.io/aggregate-to-gardener-cert-view: "true"
+  - matchLabels:
+      rbac.authorization.kyma-project.io/aggregate-to-gardener-dns-view: "true"
 rules: []
 
 ---
@@ -205,6 +209,10 @@ aggregationRule:
       rbac.authorization.kyma-project.io/aggregate-to-monitoring-edit: "true"
   - matchLabels:
       rbac.authorization.kyma-project.io/aggregate-to-ory-edit: "true"
+  - matchLabels:
+      rbac.authorization.kyma-project.io/aggregate-to-gardener-cert-edit: "true"
+  - matchLabels:
+      rbac.authorization.kyma-project.io/aggregate-to-gardener-dns-edit: "true"
 rules: []
 
 ---
