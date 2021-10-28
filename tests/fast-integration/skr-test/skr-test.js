@@ -38,6 +38,10 @@ const {
   checkAuditEventsThreshold,
 } = require("../audit-log");
 
+const {
+  prometheusPortForward
+} = require("../monitoring/client");
+
 describe("SKR test", function () {
   const keb = new KEBClient(KEBConfig.fromEnv());
   const gardener = new GardenerClient(GardenerConfig.fromEnv());
@@ -83,6 +87,15 @@ describe("SKR test", function () {
   this.slow(5000);
 
   let skr;
+
+  let cancelPortForward = null;
+  before(() => {
+    cancelPortForward = prometheusPortForward();
+  });
+
+  after(() => {
+    cancelPortForward();
+  });
 
   it(`Provision SKR with ID ${runtimeID}`, async function () {
     const customParams = {
