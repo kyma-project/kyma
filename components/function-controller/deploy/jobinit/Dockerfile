@@ -6,7 +6,7 @@ ENV BASE_APP_DIR=/workspace/go/src/github.com/kyma-project/kyma/components/funct
     GOARCH=amd64
 
 RUN apk add gcc libc-dev
-RUN apk add --no-cache libgit2-dev
+RUN apk add --no-cache libgit2
 WORKDIR ${BASE_APP_DIR}
 
 #
@@ -25,7 +25,7 @@ LABEL source = git@github.com:kyma-project/kyma.git
 
 RUN apk add --no-cache ca-certificates
 RUN apk add --no-cache --update --repository=http://dl-cdn.alpinelinux.org/alpine/edge/main openssh-client
-RUN apk add --no-cache libgit2-dev
+RUN apk add --no-cache libgit2
 
 COPY --from=builder /app /app
 

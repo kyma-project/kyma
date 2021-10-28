@@ -6,7 +6,7 @@ ENV BASE_APP_DIR=/workspace/go/src/github.com/kyma-project/kyma/components/funct
     GOARCH=amd64
 
 RUN apk add gcc libc-dev
-RUN apk add --no-cache libgit2-dev
+RUN apk add --no-cache libgit2
 
 WORKDIR ${BASE_APP_DIR}
 
@@ -26,7 +26,7 @@ RUN apk --update add ca-certificates
 # result container
 FROM eu.gcr.io/kyma-project/external/alpine:3.14.2
 
-RUN apk add --no-cache libgit2-dev
+RUN apk add --no-cache libgit2
 
 LABEL source = git@github.com:kyma-project/kyma.git
 
