@@ -37,6 +37,7 @@ jaeger:
   spec:
     strategy: allInOne #allInOne | production
     allInOne:
+      image: '{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.jaeger_all_in_one) }}'
       options:
         log-level: info
     storage:
