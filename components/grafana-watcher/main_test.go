@@ -14,7 +14,6 @@ func Test_watcher_watch(t *testing.T) {
 	if err := initLogger(); err != nil {
 		return
 	}
-	defer logger.Sync()
 
 	wd, _ := os.Getwd()
 	directory := filepath.Join(wd, "testdata")
@@ -27,7 +26,6 @@ func Test_watcher_watch(t *testing.T) {
 		var testWatcher = &grafanaWatcherMock{0, &grafanaAttributes{path: directory}}
 		err = start(testWatcher)
 		assert.NoError(t, err)
-		defer testWatcher.stop()
 
 		_, err = os.Create(file)
 		assert.NoError(t, err)
@@ -38,13 +36,13 @@ func Test_watcher_watch(t *testing.T) {
 		assert.NoError(t, err)
 		time.Sleep(500 * time.Millisecond)
 		assert.Equal(t, 2, testWatcher.eventCount)
+		err = testWatcher.stop()
+		assert.NoError(t, err)
 	})
 
 	t.Cleanup(func() {
 		err := os.RemoveAll(directory)
-		if err != nil {
-			// TODO: Do something, research
-		}
+		assert.NoError(t, err)
 	})
 
 }

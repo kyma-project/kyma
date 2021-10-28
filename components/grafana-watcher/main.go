@@ -42,7 +42,12 @@ func main() {
 	if err := initLogger(); err != nil {
 		return
 	}
-	defer logger.Sync()
+	defer func(logger *zap.SugaredLogger) {
+		err := logger.Sync()
+		if err != nil {
+			return
+		}
+	}(logger)
 
 	watcher := &grafanaWatcher{&grafanaAttributes{path: dataSourcesPath, process: grafanaPsName}}
 	err := start(watcher)
