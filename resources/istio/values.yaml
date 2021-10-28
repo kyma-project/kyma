@@ -11,7 +11,7 @@ kyma:
     - kube-system
   labelJob:
     image: eu.gcr.io/kyma-project/tpi/k8s-tools
-    tag: "20210922-530cfc39"
+    tag: "20211022-85284bf9"
   proxyResetJob:
     commonIstioProxyImagePrefix: "eu.gcr.io/kyma-project/external/istio/proxyv2"
     retriesCount: 5
@@ -50,7 +50,7 @@ monitoring:
 test:
   istio_kyma_validate:
     image: eu.gcr.io/kyma-project/tpi/k8s-tools
-    tag: "20210922-530cfc39"
+    tag: "20211022-85284bf9"
     enabled: true
     labels:
       integration: true

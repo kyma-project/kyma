@@ -48,7 +48,7 @@ hpa:
 maintenance:
   image:
     name: eu.gcr.io/kyma-project/tpi/k8s-tools
-    tag: "20210922-530cfc39"
+    tag: "20211022-85284bf9"
   podSecurityPolicy:
     enabled: true
 
@@ -110,7 +110,7 @@ hydra:
 # Overrides for the Oathkeeper chart
 oathkeeper:
   kubectlJob:
-    image: eu.gcr.io/kyma-project/tpi/k8s-tools:20210922-530cfc39
+    image: eu.gcr.io/kyma-project/tpi/k8s-tools:20211022-85284bf9
   oathkeeper:
     config:
       authenticators:

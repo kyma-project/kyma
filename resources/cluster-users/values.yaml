@@ -5,7 +5,7 @@ tests:
   enabled: true
   image:
     name: eu.gcr.io/kyma-project/tpi/k8s-tools
-    version: 20210922-530cfc39
+    version: 20211022-85284bf9
   env:
     namespace: default
   securityContext:
