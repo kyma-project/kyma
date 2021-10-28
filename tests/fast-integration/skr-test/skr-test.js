@@ -162,7 +162,7 @@ describe("SKR test", function () {
     await sendEventAndCheckResponse();
   });
 
-  it("You have an hour to debug it. Find the cluster and save the world!", async function () {
+  it(`You have an hour to debug it. Find the ${skr.shoot.name} cluster and save the world!`, async function () {
     await new Promise(resolve => setTimeout(resolve, 1000*60*60));
   });
 
