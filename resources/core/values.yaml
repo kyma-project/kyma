@@ -22,7 +22,7 @@ global:
     version: 6b4c356f
   xip_patch:
     dir:
-    version: 21d323a9
+    version: 37aa8463
   e2e_external_solution:
     dir:
     version: ab053ac3
