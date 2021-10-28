@@ -16,15 +16,10 @@ This usually happens when the workstation is using certain routers.
 
 ## Remedy
 
-Add the virtual service domains to the host file of your local system.
+Add the virtual service domains manually to the host file of your local system.
 
-1. Run the following command:
+Run the following command:
 
-   ```bash
-   sudo kyma import hosts 
-   ```
-
-2. If that command fails, you get a list of hosts displayed.
-   Execute the following command, replacing the placeholder with the displayed hosts:
-   - For Mac/Linux, run `sudo  /bin/sh -c 'echo \"127.0.0.1 {DISPLAYED_HOSTS}" >> /etc/hosts'`.
-   - For Windows, run `echo {DISPLAYED_HOSTS} >> "C:\\Windows\\system32\\drivers\\etc\\hosts"`.
+```bash
+sudo kyma import hosts 
+```
