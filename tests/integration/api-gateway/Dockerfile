@@ -1,4 +1,4 @@
-FROM eu.gcr.io/kyma-project/test-infra/buildpack-golang:v20211013-2c064d85 as builder
+FROM eu.gcr.io/kyma-project/test-infra/buildpack-golang-toolbox:v20210601-19326f24 as builder
 
 ENV BASE_DIR /workspace/go/src/github.com/kyma-project/kyma/tests/integration/api-gateway
 WORKDIR ${BASE_DIR}
@@ -20,7 +20,7 @@ RUN mkdir /test &&\
 	mv ${BASE_DIR}/app.test /test/app.test  &&\
 	mv ${BASE_DIR}/licenses /test/licenses
 
-FROM eu.gcr.io/kyma-project/tpi/k8s-tools:20211022-85284bf9
+FROM eu.gcr.io/kyma-project/tpi/k8s-tools:20210922-530cfc39
 LABEL source=git@github.com:kyma-project/kyma.git
 WORKDIR /test
 
