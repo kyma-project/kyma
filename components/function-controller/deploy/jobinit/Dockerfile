@@ -21,6 +21,7 @@ RUN go build -ldflags "-s -w" -a -o jobinit cmd/jobinit/main.go \
 
 # result container
 FROM eu.gcr.io/kyma-project/external/alpine:3.14.2
+ENV LIBGIT2_VERSION=1.1.0-r2
 
 LABEL source = git@github.com:kyma-project/kyma.git
 
