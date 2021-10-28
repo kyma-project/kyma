@@ -28,14 +28,14 @@ type Condition struct {
 type ConditionReason string
 
 const (
-	ConditionReasonSubscriptionCreated        ConditionReason = "BEB Subscription created"
-	ConditionReasonSubscriptionCreationFailed ConditionReason = "BEB Subscription creation failed"
-	ConditionReasonSubscriptionActive         ConditionReason = "BEB Subscription active"
-	ConditionReasonSubscriptionNotActive      ConditionReason = "BEB Subscription not active"
-	ConditionReasonSubscriptionDeleted        ConditionReason = "BEB Subscription deleted"
-	ConditionReasonAPIRuleStatusReady         ConditionReason = "APIRule status ready"
-	ConditionReasonAPIRuleStatusNotReady      ConditionReason = "APIRule status not ready"
-	ConditionReasonNATSSubscriptionActive     ConditionReason = "NATS Subscription active"
+	ConditionReasonAPIRuleStatusReady            ConditionReason = "APIRule status ready"
+	ConditionReasonAPIRuleStatusNotReady         ConditionReason = "APIRule status not ready"
+	ConditionReasonBEBSubscriptionCreated        ConditionReason = "BEB Subscription created"
+	ConditionReasonBEBSubscriptionCreationFailed ConditionReason = "BEB Subscription creation failed"
+	ConditionReasonBEBSubscriptionActive         ConditionReason = "BEB Subscription active"
+	ConditionReasonBEBSubscriptionNotActive      ConditionReason = "BEB Subscription not active"
+	ConditionReasonBEBSubscriptionDeleted        ConditionReason = "BEB Subscription deleted"
+	ConditionReasonNATSSubscriptionActive        ConditionReason = "NATS Subscription active"
 )
 
 // InitializeConditions sets unset conditions to Unknown

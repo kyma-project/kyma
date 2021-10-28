@@ -160,9 +160,7 @@ func (b *BEB) SyncSubscription(subscription *eventingv1alpha1.Subscription, clea
 	statusChanged = b.setEmsSubscriptionStatus(subscription, bebSubscription) || statusChanged
 
 	// get the backend infrastructures
-	if statusChanged {
-		subscription.Status.CleanEventTypes = getCleanEventTypes(bebSubscription.Events)
-	}
+	subscription.Status.CleanEventTypes = getCleanEventTypes(bebSubscription.Events)
 
 	return statusChanged, nil
 }
