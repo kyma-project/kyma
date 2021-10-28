@@ -13,7 +13,6 @@ const (
 	ConditionSubscribed         ConditionType = "Subscribed"
 	ConditionSubscriptionActive ConditionType = "Subscription active"
 	ConditionAPIRuleStatus      ConditionType = "APIRule status"
-	ConditionWebhookCallStatus  ConditionType = "Webhook call status"
 )
 
 var allConditions = makeConditions()
