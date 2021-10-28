@@ -25,3 +25,7 @@ release: resolve generate verify build-image push-image
 
 ##@ Dynamic Function Build
 $(eval $(call buildpack-cp-ro,resolve))
+$(eval $(call buildpack-mount,mod-verify))
+$(eval $(call buildpack-mount,test))
+$(eval $(call buildpack-mount,controller-gen))
+$(eval $(call buildpack-mount,manifests))
