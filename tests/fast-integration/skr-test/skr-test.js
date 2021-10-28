@@ -175,7 +175,7 @@ describe("SKR test", function () {
     });
 
     it("Amount of audit events must not exceed a certain threshold", async function () {
-      await checkAuditEventsThreshold(2.5);
+      await checkAuditEventsThreshold(4);
     });
   }
 
