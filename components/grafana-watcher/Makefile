@@ -21,7 +21,7 @@ resolve-local:
 	GO111MODULE=on go mod vendor -v
 
 ## Will be called from Prow-Pipeline; using targets from generic make file
-release: resolve generate verify build-image push-image
+release: verify build-image push-image
 
 ##@ Dynamic Function Build
 $(eval $(call buildpack-cp-ro,resolve))
