@@ -109,14 +109,17 @@ global:
   images:
     helm_broker_webhook:
       name: "helm-broker-webhook"
-      version: "5edd6b42"
+      version: "7049631f"
     helm_broker:
       name: "helm-broker"
-      version: "995c0f10"
+      version: "7049631f"
     helm_controller:
       name: "helm-controller"
-      version: "995c0f10"
+      version: "7049631f"
     etcd:
       name: "etcd"
       version: "v3.3.25-e5110645"
       directory: "tpi/quay.io/coreos"
+    add_ons_ui:
+      name: "add-ons-ui"
+      version: "c60a3c68"

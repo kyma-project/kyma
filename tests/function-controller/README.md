@@ -77,12 +77,6 @@ Use the following environment variables to configure the application:
 | **APP_TEST_VERBOSE**                    | No       | `true`                      | The value that controls whether tests log resources that are subject to change |
 | **APP_TEST_MAX_POLLING_TIME**           | No       | `5m`                        | The maximum period of time in which the Function must reconfigure after an update  |
 
-Those can be supplied to [this](../../resources/serverless/templates/tests/test.yaml) file before installing Kyma. After you install Kyma, you can also edit the TestDefinition CR using this command:
-
-```bash
-kubectl edit testdefinitions.testing.kyma-project.io -n kyma-system function-controller
-```
-
 ## Development
 
 ### Install dependencies

@@ -34,7 +34,7 @@ spec:
       restartPolicy: Never
       containers:
         - name: test
-          image: "{{ .Values.tests.image.repository }}:{{ .Values.tests.image.tag }}"
+          image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.testImages.function_controller_test) }}"
           args: ["serverless-integration"]
           env:
             - name: APP_TEST_WAIT_TIMEOUT
@@ -44,4 +44,6 @@ spec:
             - name: APP_TEST_CLEANUP
               value: "no" # do not clean, we'll kubectl get those resources after job completion/fail
             - name: APP_TEST_ISTIO_ENABLED
-              value: "false"  
+              value: "false"
+            - name: APP_TEST_GIT_SERVER_IMAGE
+              value: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.git_server) }}"

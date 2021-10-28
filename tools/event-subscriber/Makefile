@@ -1,6 +1,6 @@
 APP_NAME = event-subscriber-tools
 APP_PATH = tools/$(APP_NAME)
-BUILDPACK = eu.gcr.io/kyma-project/test-infra/buildpack-golang:go1.13
+BUILDPACK = eu.gcr.io/kyma-project/test-infra/buildpack-golang:go1.14
 
 SCRIPTS_DIR = $(realpath $(shell pwd)/../..)/common/makefiles
 

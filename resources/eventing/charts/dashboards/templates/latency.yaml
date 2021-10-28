@@ -9,17 +9,7 @@ data:
   eventing-latency.json: |-
     {
       "annotations": {
-        "list": [
-          {
-            "builtIn": 1,
-            "datasource": "-- Grafana --",
-            "enable": true,
-            "hide": true,
-            "iconColor": "rgba(0, 211, 255, 1)",
-            "name": "Annotations & Alerts",
-            "type": "dashboard"
-          }
-        ]
+        "list": []
       },
       "editable": true,
       "gnetId": null,
@@ -91,7 +81,7 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "histogram_quantile(0.99999, sum(rate(istio_request_duration_milliseconds_bucket{source_workload_namespace=\"kyma-integration\",source_workload=~\".*connectivity-validator.*\",destination_workload_namespace=\"kyma-system\",destination_workload=~\"eventing.*publisher.*\"}[5m])) by (le,source_workload_namespace,source_workload,destination_workload_namespace,destination_workload))",
+              "expr": "histogram_quantile(0.99999, sum(rate(istio_request_duration_milliseconds_bucket{source_workload_namespace=\"kyma-system\",source_workload=\"central-application-connectivity-validator\",destination_workload_namespace=\"kyma-system\",destination_workload=\"eventing-publisher-proxy\"}[5m])) by (le,source_workload_namespace,source_workload,destination_workload_namespace,destination_workload))",
               "interval": "",
               "legendFormat": "{{`{{source_workload_namespace}}/{{source_workload}} -> {{destination_workload_namespace}}/{{destination_workload}} (99.999%)`}}",
               "refId": "A"
@@ -101,8 +91,8 @@ data:
           "timeFrom": null,
           "timeRegions": [],
           "timeShift": null,
-          "title": "Connectivity Validator -> Event Publisher",
-          "description": "This graph includes traffic from connectivity validator to event publisher proxy",
+          "title": "Central Application Connectivity Validator -> Eventing Publisher Proxy",
+          "description": "This graph includes traffic from central application connectivity validator to eventing publisher proxy",
           "tooltip": {
             "shared": true,
             "sort": 0,
@@ -201,8 +191,8 @@ data:
           "timeFrom": null,
           "timeRegions": [],
           "timeShift": null,
-          "title": "Event Publisher -> Messaging Server",
-          "description": "This graph includes traffic from event publisher proxy to eventing backend servers",
+          "title": "Eventing Publisher Proxy -> Eventing Backend Server",
+          "description": "This graph includes traffic from eventing publisher proxy to eventing backend servers",
           "tooltip": {
             "shared": true,
             "sort": 0,

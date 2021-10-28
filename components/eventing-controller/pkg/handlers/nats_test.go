@@ -8,7 +8,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/avast/retry-go"
+	"github.com/avast/retry-go/v3"
 	cev2event "github.com/cloudevents/sdk-go/v2/event"
 	kymalogger "github.com/kyma-project/kyma/common/logging/logger"
 	"github.com/nats-io/nats.go"

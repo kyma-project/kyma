@@ -17,4 +17,3 @@ Application Registry interacts with Kubernetes APIs to perform these tasks:
 
 - Modify the Application CR instance.
 - Create Secrets which contain client ID and client secret used to access OAuth-secured APIs.
-- Create the Access Service.

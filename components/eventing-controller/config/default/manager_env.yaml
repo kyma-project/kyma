@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    control-plane: controller
+  name: controller
+  namespace: system
+spec:
+  template:
+    spec:
+      containers:
+      - env:
+        - name: NATS_URL
+          value: eventing-nats.kyma-system.svc.cluster.local
+        - name: EVENT_TYPE_PREFIX
+          value: $EVENT_TYPE_PREFIX
+        - name: DOMAIN
+          value: $DOMAIN
+        - name: WEBHOOK_TOKEN_ENDPOINT
+          value: $WEBHOOK_TOKEN_ENDPOINT
+        name: manager

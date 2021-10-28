@@ -9,7 +9,7 @@ This component contains controllers for various CustomResourceDefinitions relate
 ## Prerequisites
 
 - Install [ko](https://github.com/google/ko) which is used to build and deploy the controller during local development
-- Install [kubebuilder](https://github.com/kubernetes-sigs/kubebuilder) which is the base framework for this controller
+- Install [kubebuilder](https://github.com/kubernetes-sigs/kubebuilder) which is the base framework for this controller (currently used version: 3.1)
 - Install [kustomize](https://github.com/kubernetes-sigs/kustomize) which lets you customize raw, template-free `yaml` files during local development
 - Install lint on the local environment
 ```bash
@@ -19,15 +19,18 @@ curl -sfL https://install.goreleaser.com/github.com/golangci/golangci-lint.sh | 
 ### Installation
 
 - To deploy the controllers inside a cluster, make sure you have `ko` installed and configured according to the [instructions](https://github.com/google/ko#setup). Then run:
+> Make sure the environment variables are set. The make target `set-up-local-env` uses default values. Change them as per your needs.
+
+> Existing deployment for eventing-controller should be deleted from the Kyma cluster which can interfere with reconciliation process.
 
 ```sh
-make deploy-local
+make DOMAIN=custom-domain.com deploy-local
 ```
 
 - To verify all the manifests after the processing by Kustomize without applying to the cluster, use make target `deploy-local-dry-run`:
 
 ```sh
-make deploy-local-dry-run
+make DOMAIN=custom-domain.com deploy-local-dry-run
 ```
 
 ## Usage
@@ -157,24 +160,34 @@ kubebuilder init --domain kyma-project.io
 
 > Currently running the controller in local developer mode is broken and needs adoptions of the latest changes.
 
-1. Export the following mandatory environment variables:
-
-| ENV VAR                  | Description                                                            | Default Value          |
-| ------------------------ | ---------------------------------------------------------------------- | ---------------------- |
-| `KUBECONFIG`             | Path to a local kubeconfig file.                                       | ~/.kube/config         |
-| `NATS_URL`               | URL of the NATS server.                                                | nats://127.0.0.1:4222  |
-| `EVENT_TYPE_PREFIX`      | Path to a local kubeconfig file.                                       | sap.kyma.custom        |
-| `WEBHOOK_TOKEN_ENDPOINT` | The Kyma public endpoint to provide Access Tokens.                     | WEBHOOK_TOKEN_ENDPOINT |
-| `DOMAIN`                 | Domain.                                                                | example.com            |
-
-2. Build the binary:
+1. Setup port-forwarding for the in-cluster NATS instance:
 
 ```sh
-make manager
+kubectl port-forward -n kyma-system svc/eventing-nats 4222
 ```
+
+2. Export the following environment variables:
+
+| ENV VAR                  | Description                                                            | Optional | Default Value                |
+| ------------------------ | ---------------------------------------------------------------------- | -------- | ----------------------       |
+| `KUBECONFIG`             | Path to a local kubeconfig file.                                       | yes      | ~/.kube/config               |
+| `NATS_URL`               | URL of the NATS server.                                                | no       | nats.nats.svc.cluster.local  |
+| `EVENT_TYPE_PREFIX`      | Path to a local kubeconfig file.                                       | yes      | sap.kyma.custom              |
+| `WEBHOOK_TOKEN_ENDPOINT` | The Kyma public endpoint to provide Access Tokens.                     | yes      | WEBHOOK_TOKEN_ENDPOINT       |
+| `DOMAIN`                 | Domain.                                                                | yes      | example.com                  |
+
+
+```sh
+export  NATS_URL=nats://localhost:4222
+```
+
 
 3. Run the controller:
 
 ```sh
 make run
 ```
+
+> currently we support a buildtag `local` to avoid setting incorrect OwnerRefs in the PublisherProxy deployment when running the controller on a developer's machine. Essentially the PublisherProxy deployment remains in the cluster although the controller is removed due to no OwnerRef in the PublisherProxy deployment.  
+
+> to run the controller via your IDE make sure to specify the buildtag `local`
