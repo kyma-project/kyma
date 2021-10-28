@@ -1,16 +1,17 @@
 package main
 
 import (
-	"github.com/stretchr/testify/assert"
 	"os"
 	"path/filepath"
 	"testing"
 	"time"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func Test_watcher_watch(t *testing.T) {
 
-	if err := initLogger(); err != nil{
+	if err := initLogger(); err != nil {
 		return
 	}
 	defer logger.Sync()
@@ -22,10 +23,8 @@ func Test_watcher_watch(t *testing.T) {
 	err := os.MkdirAll(directory, os.ModePerm)
 	assert.NoError(t, err)
 
-
-
 	t.Run("Creating file event notified", func(t *testing.T) {
-		var testWatcher = &grafanaWatcherMock{0, &grafanaAttributes{path:directory}}
+		var testWatcher = &grafanaWatcherMock{0, &grafanaAttributes{path: directory}}
 		err = start(testWatcher)
 		assert.NoError(t, err)
 		defer testWatcher.stop()
@@ -43,7 +42,7 @@ func Test_watcher_watch(t *testing.T) {
 
 	t.Cleanup(func() {
 		err := os.RemoveAll(directory)
-		if err != nil{
+		if err != nil {
 			// TODO: Do something, research
 		}
 	})
@@ -52,20 +51,20 @@ func Test_watcher_watch(t *testing.T) {
 
 type grafanaWatcherMock struct {
 	eventCount int
-	attr *grafanaAttributes
+	attr       *grafanaAttributes
 }
 
-func (g *grafanaWatcherMock) stop() error{
+func (g *grafanaWatcherMock) stop() error {
 	return nil
 }
-func (g *grafanaWatcherMock) startGrafana() error{
+func (g *grafanaWatcherMock) startGrafana() error {
 	return nil
 }
-func (g *grafanaWatcherMock) attributes() *grafanaAttributes{
+func (g *grafanaWatcherMock) attributes() *grafanaAttributes {
 	return g.attr
 }
 
-func (g *grafanaWatcherMock) killProcess() error{
+func (g *grafanaWatcherMock) killProcess() error {
 	g.eventCount++
 	return nil
 }

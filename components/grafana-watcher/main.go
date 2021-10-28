@@ -2,11 +2,12 @@ package main
 
 import (
 	"fmt"
+	"os"
+	"os/exec"
+
 	"github.com/fsnotify/fsnotify"
 	_ "github.com/pkg/errors"
 	"go.uber.org/zap"
-	"os"
-	"os/exec"
 )
 
 const dataSourcesPath = "/etc/grafana/provisioning/datasources"
@@ -29,16 +30,16 @@ type grafanaWatcher struct {
 }
 
 type grafanaAttributes struct {
-	path       string
-	process    string
-	grafana    *fsnotify.Watcher
-	cmd        *exec.Cmd
+	path    string
+	process string
+	grafana *fsnotify.Watcher
+	cmd     *exec.Cmd
 }
 
 func main() {
 	done := make(chan bool)
 
-	if err := initLogger(); err != nil{
+	if err := initLogger(); err != nil {
 		return
 	}
 	defer logger.Sync()
@@ -93,7 +94,7 @@ func start(w watcher) error {
 	return nil
 }
 
-func (g *grafanaWatcher) attributes() *grafanaAttributes{
+func (g *grafanaWatcher) attributes() *grafanaAttributes {
 	return g.attr
 }
 
