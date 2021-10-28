@@ -91,12 +91,12 @@ global:
       namespace: kyma-system
   dex_static_user_configurer:
     dir:
-    version: 21d323a9
+    version: 37aa8463
   containerRegistry:
     path: eu.gcr.io/kyma-project
   dex_integration_tests:
     dir:
-    version: "277f4247"
+    version: "37aa8463"
 
 nodeSelector: {}
 
