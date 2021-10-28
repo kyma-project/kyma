@@ -8,6 +8,7 @@ ENV BASE_APP_DIR=/workspace/go/src/github.com/kyma-project/kyma/components/funct
 
 RUN apk add gcc libc-dev
 RUN apk add --no-cache --repository http://dl-cdn.alpinelinux.org/alpine/v3.14/community libgit2-dev=${LIBGIT2_VERSION}
+
 WORKDIR ${BASE_APP_DIR}
 
 #
