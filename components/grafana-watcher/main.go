@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/fsnotify/fsnotify"
 	_ "github.com/pkg/errors"
-	"github.com/shirou/gopsutil/v3/process"
 	"go.uber.org/zap"
 	"os"
 	"os/exec"
@@ -114,21 +113,16 @@ func (g *grafanaWatcher) startGrafana() error {
 
 func (g *grafanaWatcher) killProcess() error {
 	psName := g.attributes().process
-	processes, err := process.Processes()
-	if err != nil {
+	g.attr.cmd = exec.Command("pkill", psName)
+	g.attr.cmd.Stdout = os.Stdout
+	g.attr.cmd.Stderr = os.Stderr
+	if err := g.attr.cmd.Start(); err != nil {
+		logger.Error("error occurred in process shutdown:", err)
+		g.attr.cmd = nil
 		return err
 	}
-	for _, p := range processes {
-		n, err := p.Name()
-		if err != nil {
-			return err
-		}
-		if n == psName {
-			logger.Infof("Killing process: %s", psName)
-			return p.Kill()
-		}
-	}
-	return fmt.Errorf("process not found: %s", psName)
+	logger.Info("Grafana successfully stopped")
+	return nil
 }
 
 func (g *grafanaWatcher) stop() error {
