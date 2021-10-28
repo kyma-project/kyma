@@ -162,6 +162,10 @@ describe("SKR test", function () {
     await sendEventAndCheckResponse();
   });
 
+  it("You have an hour to debug it. Find the cluster and save the world!", async function () {
+    await new Promise(resolve => setTimeout(resolve, 1000*60*60));
+  });
+
   it("Deletes the resources that have been created", async function () {
     await deleteMockTestFixture("mocks", testNS);
   });
