@@ -187,7 +187,9 @@ exporter:
   enabled: false
   image: natsio/prometheus-nats-exporter:0.8.0
   pullPolicy: IfNotPresent
-  securityContext: {}
+  securityContext:
+    allowPrivilegeEscalation: false
+    privileged: false
   resources: {}
   # Prometheus operator ServiceMonitor support. Exporter has to be enabled
   serviceMonitor:

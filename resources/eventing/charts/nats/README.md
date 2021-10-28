@@ -1,13 +1,14 @@
 # NATS Server
 
-This Helm chart deploy NATS: https://nats.io/ using NATS [Helm chart](https://github.com/nats-io/k8s/tree/main/helm/charts/nats).
+This Helm chart deploy NATS: https://nats.io/ using NATS [Helm chart](https://github.com/nats-io/k8s/tree/v0.9.0/helm/charts/nats).
 
 
 Steps:
 
 - Install NATS into "nats" namespace using Helm 3 :
 ```bash
-$ helm install nats nats -n nats --create-namespace --debug --wait
+kubectl create namespace nats
+helm template nats nats -n nats | kubectl apply -f -
 ```
 - Test the installation:
 ```bash
