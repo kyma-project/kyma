@@ -26,7 +26,7 @@ The predefined end-user roles are:
 
 To learn more about the default roles and how they are constructed, see the [`rbac-roles.yaml`](https://github.com/kyma-project/kyma/blob/master/resources/cluster-users/templates/rbac-roles.yaml) file.
 
-After creating a Kyma cluster, you become an admin of this instance and the It is the role with the highest permission level which gives access to all Kubernetes and Kyma resources and components with administrative rights. As the **cluster-admin**, you can assign roles to users.
+After creating a Kyma cluster, you become an admin of this instance and the Kubernetes **cluster-admin** role is assigned to you by default. It is the role with the highest permission level which gives access to all Kubernetes and Kyma resources and components with administrative rights. As the **cluster-admin**, you can assign roles to other users.
 
 ### Role binding
 
