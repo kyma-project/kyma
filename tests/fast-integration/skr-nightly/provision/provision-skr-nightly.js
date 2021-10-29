@@ -8,40 +8,40 @@ const {
   ensureValidShootOIDCConfig,
   ensureValidOIDCConfigInCustomerFacingKubeconfig,
   runtimes,
-} = require("../kyma-environment-broker");
+} = require("../../kyma-environment-broker");
 const {
   DirectorConfig,
   DirectorClient,
   addScenarioInCompass,
   assignRuntimeToScenario,
   unregisterKymaFromCompass,
-} = require("../compass");
-const { GardenerConfig, GardenerClient } = require("../gardener");
+} = require("../../compass");
+const { GardenerConfig, GardenerClient } = require("../../gardener");
 const {
   ensureCommerceMockWithCompassTestFixture,
   checkFunctionResponse,
   sendEventAndCheckResponse,
   deleteMockTestFixture,
-} = require("../test/fixtures/commerce-mock");
+} = require("../../test/fixtures/commerce-mock");
 const {
   debug,
   initializeK8sClient,
   ensureKymaAdminBindingExistsForUser,
   ensureKymaAdminBindingDoesNotExistsForUser,
   getEnvOrThrow,
-} = require("../utils");
+} = require("../../utils");
 
 const {
   AuditLogCreds,
   AuditLogClient,
   checkAuditLogs,
   checkAuditEventsThreshold,
-} = require("../audit-log");
+} = require("../../audit-log");
 
 const {
   KCPConfig,
   KCPWrapper,
-} = require("../kcp/client")
+} = require("../../kcp/client")
 
 
 describe("SKR nightly", function () {
