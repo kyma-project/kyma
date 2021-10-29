@@ -81,7 +81,7 @@ func start(w watcher) error {
 			select {
 			case event := <-w.attributes().grafana.Events:
 				switch {
-				case event.Op&fsnotify.Create == fsnotify.Create || event.Op&fsnotify.Remove == fsnotify.Remove:
+				case event.Op&fsnotify.Create == fsnotify.Create || event.Op&fsnotify.Write == fsnotify.Write:
 					if err := w.killProcess(); err != nil {
 						logger.Errorf("Error killing process: %s", err)
 					} else {
