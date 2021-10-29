@@ -608,7 +608,7 @@ async function checkInClusterEventDeliveryHelper(targetNamespace, encoding) {
   const eventId = "event-" + encoding + "-" + genRandom(5);
   const vs = await waitForVirtualService(targetNamespace, "lastorder");
   const mockHost = vs.spec.hosts[0];
-  // Print infrastructure set up needed for in-cluster eventing
+
   await printStatusOfInClusterEventingInfrastructure(targetNamespace, encoding, "lastorder");
 
   // send event using function query parameter send=true
