@@ -21,11 +21,11 @@ For a Subscription Custom Resource, the fully qualified event type takes the sam
 The event type is composed of the following components:
 - Prefix: `sap.kyma.custom`
 - Application: `commerce`
-- Event: can have two or more segments separated by `.` (For example, `order.created` or `Account.Root.Created`)
+- Event: can have two or more segments separated by `.` (for example, `order.created` or `Account.Root.Created`)
 - Version: `v1`
 
 For publishers, the event type takes this sample form:
 - `order.created` or `Account.Root.Created` for legacy events coming from the `commerce` application
 - `sap.kyma.custom.commerce.order.created.v1` or `sap.kyma.custom.commerce.AccountRoot.Created.v1` for Cloud Events.
 
->**NOTE:** In case the event contains more than two segments, Eventing will combine them into two segments when creating the underlying Eventing infrastructure (For example, `Account.Root.Created` will become `AccountRoot.Created`).
+>**NOTE:** In case the event contains more than two segments, Eventing combines them into two segments when creating the underlying Eventing infrastructure (for example, `Account.Root.Created` becomes `AccountRoot.Created`).
