@@ -45,13 +45,13 @@ app.kubernetes.io/managed-by: {{ .Release.Service }}
 Selector labels
 */}}
 {{- define "nats.selectorLabels" -}}
-{{- if .Values.nats.selectorLabels }}
+{{- if .Values.nats.selectorLabels -}}
 {{ .Values.nats.selectorLabels | toYaml }}
-{{- else }}
+{{- else -}}
 app.kubernetes.io/name: {{ include "nats.name" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
 kyma-project.io/dashboard: eventing
-{{- end }}
+{{- end -}}
 {{- end }}
 
 
