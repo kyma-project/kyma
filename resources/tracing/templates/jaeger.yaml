@@ -6,7 +6,24 @@ metadata:
   labels:
 {{ include "jaeger-operator.labels" . | indent 4 }}
 spec:
-{{ tpl (toYaml .Values.jaeger.spec | indent 2) . }}
+  strategy: {{ .Values.jaeger.spec.strategy }}
+  allInOne:
+    image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.jaeger_all_in_one) }}"
+    options:
+{{ tpl (toYaml .Values.jaeger.spec.allInOne.options | indent 6) . }}
+  annotations:
+{{ tpl (toYaml .Values.jaeger.spec.annotations | indent 4) . }}
+  storage:
+{{ toYaml .Values.jaeger.spec.storage | indent 4 }}
+  ui:
+{{ tpl (toYaml .Values.jaeger.spec.ui | indent 4) . }}
+  ingress:
+{{ tpl (toYaml .Values.jaeger.spec.ingress | indent 4) . }}
+  resources:
+{{ tpl (toYaml .Values.jaeger.spec.resources | indent 4) . }}
+  securityContext:
+{{ tpl (toYaml .Values.jaeger.spec.securityContext | indent 4) . }}
+
 {{- /*
   Customization: This if block was added to support for badger PVs.
 */ -}}
