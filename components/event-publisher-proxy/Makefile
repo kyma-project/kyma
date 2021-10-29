@@ -22,9 +22,6 @@ cmds_clean = $(foreach cmd,$(cmds),$(cmd).clean)
 # produce goals to push images for each cmd program ("bin1.image.push bin2.image.push ...")
 cmds_images_push = $(foreach img,$(cmds_images),$(img).push)
 
-# MOUNT_TARGETS = $(cmds)
-# $(foreach t,$(MOUNT_TARGETS),$(eval $(call buildpack-mount,$(t))))
-
 .PHONY: clean
 clean: $(cmds_clean) resolve_clean licenses_clean
 
