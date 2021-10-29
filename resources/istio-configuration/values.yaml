@@ -89,6 +89,14 @@ components:
   pilot:
     enabled: true
     config:
+      podAnnotations:
+        reconciler.kyma-project.io/managed-by-reconciler-disclaimer: |
+          DO NOT EDIT - This resource is managed by Kyma.
+          Any modifications are discarded and the resource is reverted to the original state.
+      serviceAnnotations:
+        reconciler.kyma-project.io/managed-by-reconciler-disclaimer: |
+          DO NOT EDIT - This resource is managed by Kyma.
+          Any modifications are discarded and the resource is reverted to the original state.
       env:
         - name: PILOT_HTTP10
           value: "1"

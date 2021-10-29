@@ -22,10 +22,6 @@ spec:
     pilot:
       enabled: {{ .Values.components.pilot.enabled }}
       k8s:
-        serviceAnnotations:
-          reconciler.kyma-project.io/managed-by-reconciler-disclaimer: DO NOT EDIT - This resource is managed by Kyma. Any modifications are discarded and the resource is reverted to the original state.
-        podAnnotations:
-          reconciler.kyma-project.io/managed-by-reconciler-disclaimer: DO NOT EDIT - This resource is managed by Kyma. Any modifications are discarded and the resource is reverted to the original state.
 {{- toYaml .Values.components.pilot.config | nindent 10}}
   meshConfig:
 {{- toYaml .Values.meshConfig | nindent 4 }}
@@ -40,9 +36,12 @@ spec:
       istio-ingressgateway:
         name: istio-ingressgateway
         podAnnotations:
-          reconciler.kyma-project.io/managed-by-reconciler-disclaimer: DO NOT EDIT - This resource is managed by Kyma. Any modifications are discarded and the resource is reverted to the original state.
+          reconciler.kyma-project.io/managed-by-reconciler-disclaimer: |
+            DO NOT EDIT - This resource is managed by Kyma.
+            Any modifications are discarded and the resource is reverted to the original state.
         serviceAnnotations:
           dns.gardener.cloud/class: garden
           dns.gardener.cloud/dnsnames: "*.{{ .Values.global.domainName }}"
-          reconciler.kyma-project.io/managed-by-reconciler-disclaimer: DO NOT EDIT - This resource is managed by Kyma. Any modifications are discarded and the resource is reverted to the original state.
-
+          reconciler.kyma-project.io/managed-by-reconciler-disclaimer: |
+            DO NOT EDIT - This resource is managed by Kyma.
+            Any modifications are discarded and the resource is reverted to the original state.
