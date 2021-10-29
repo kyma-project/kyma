@@ -21,7 +21,7 @@ export TLS_CERT={YOUR_NEW_CERTIFICATE}
 export TLS_KEY={YOUR_NEW_KEY}
 ```
 
-2. Install Kyma with your custom domain certificate. Run:
+2. Deploy Kyma with your custom domain certificate. Run:
 
 ```bash
 kyma deploy --domain $DOMAIN --tls-crt $TLS_CERT --tls-key $TLS_KEY
