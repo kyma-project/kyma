@@ -23,7 +23,7 @@ kind: Application
 metadata:
   name: $APP_NAME
 spec:
-  description: {APP_DESCRIPTION}
+  description: Application description
   labels:
     region: us
     kind: production

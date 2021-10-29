@@ -12,7 +12,7 @@ This guide shows you how to register a service of your external solution in Kyma
 
 ## Register a service
 
-1. To register a service with a Basic Authentication-secured API, follow this template to prepare the request body. Optionally, you can export it as an environment variable.
+1. To register a service with a Basic Authentication-secured API, follow this template to prepare the request body. Optionally, you can export it as an environment variable:
 
    >**NOTE:** Follow the [tutorial](ac-04-register-secured-api.md) to learn how to register APIs secured with different security schemes or protected against cross-site request forgery (CSRF) attacks.
 
@@ -111,7 +111,7 @@ This guide shows you how to register a service of your external solution in Kyma
    }'
    ```
 
-2. Include the request body you prepared in the following call to register a service:
+2. Send the request body you prepared in the following call to register a service:
 
    ```bash
    curl -X POST -d $REQUEST_BODY https://gateway.$CLUSTER_DOMAIN/$APP_NAME/v1/metadata/services --cert $CLIENT_CERT_FILE_NAME.crt --key $KEY_FILE_NAME.key -k
@@ -242,8 +242,8 @@ To register an API with a specification URL that requires specific custom header
             },
             "queryParameters": {
                 "{CUSTOM_QUERY_PARAMETER_NAME}" : ["{CUSTOM_QUERY_PARAMETER_VALUE}"]
-            },
-        }
+            }
+        },
         "credentials": {
             "basic": {
                 "username": "{USERNAME}",

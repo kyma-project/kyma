@@ -8,7 +8,7 @@ This guide shows how to call a registered external service from Kyma using a sim
 
 - An Application bound to a Namespace.
 - Client certificates generated for the connected Application.
-- Local development only: Map `my-function-production.kyma.local` to your Minikube IP to call the Function on a local Kyma deployment.
+- Local development only: Map `my-function-production.local.kyma.dev` to your k3d IP to call the Function on a local Kyma deployment.
 
 ## Steps
 
@@ -141,7 +141,7 @@ This guide shows how to call a registered external service from Kyma using a sim
       </summary>
     
       ```bash
-      curl https://my-function-$NAMESPACE.kyma.local/ -k
+      curl https://my-function-$NAMESPACE.local.kyma.dev/ -k
       ```
     
       </details>
