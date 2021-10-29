@@ -53,7 +53,7 @@ describe("SKR-Upgrade-test", function () {
   const appName = `app-${suffix}`;
   const runtimeName = `kyma-${suffix}`;
   const scenarioName = `test-${suffix}`;
-  const runtimeID = uuid.v4();
+  const instanceID = uuid.v4();
   const subAccountID = uuid.v4();
 
   keb.subaccountID = subAccountID;
@@ -61,7 +61,7 @@ describe("SKR-Upgrade-test", function () {
   debug(
     `PlanID ${getEnvOrThrow("KEB_PLAN_ID")}`,
     `SubAccountID ${subAccountID}`,
-    `RuntimeID ${runtimeID}`,
+    `InstanceID ${instanceID}`,
     `Scenario ${scenarioName}`,
     `Runtime ${runtimeName}`,
     `Application ${appName}`
@@ -91,8 +91,8 @@ describe("SKR-Upgrade-test", function () {
 
   // SKR Provisioning
 
-  it(`Provision SKR with ID ${runtimeID}`, async function () {
-    skr = await provisionSKR(keb, gardener, runtimeID, runtimeName, null, null, null);
+  it(`Provision SKR with ID ${instanceID}`, async function () {
+    skr = await provisionSKR(keb, gardener, instanceID, runtimeName, null, null, null);
   });
 
   it(`Should save kubeconfig for the SKR to ~/.kube/config`, async function() {
@@ -192,7 +192,7 @@ describe("SKR-Upgrade-test", function () {
   });
 
   it(`Perform Upgrade`, async function () {
-    let kcpUpgradeStatus = await kcpUpgrade(kcpconfigPath, subAccountID, runtimeID, kymaUpgradeVersion);
+    let kcpUpgradeStatus = await kcpUpgrade(kcpconfigPath, subAccountID, kymaUpgradeVersion);
     debug("Upgrade Done!")
   });
 
@@ -239,7 +239,7 @@ describe("SKR-Upgrade-test", function () {
     });
     
     it("Deprovision SKR", async function () {
-      await deprovisionSKR(keb, runtimeID);
+      await deprovisionSKR(keb, instanceID);
     });
 
     it("Unregister SKR resources from Compass", async function () {

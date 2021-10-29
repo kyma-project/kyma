@@ -23,11 +23,11 @@ async function kcpLogin (kcpconfigPath, kcpUser, kcpPassword) {
     }
 };
 
-async function kcpUpgrade (kcpconfigPath, subaccount, runtimeID, kymaUpgradeVersion) {
+async function kcpUpgrade (kcpconfigPath, subaccount, kymaUpgradeVersion) {
     debug(`Running kcpUpgrade...`)
     let args = []
     try {
-        args = [`upgrade`, `kyma`, `--config`, `${kcpconfigPath}`, `--version`, `"${kymaUpgradeVersion}"`, `--target`, `subaccount=${subaccount},runtime-id=${runtimeID}`]
+        args = [`upgrade`, `kyma`, `--config`, `${kcpconfigPath}`, `--version`, `"${kymaUpgradeVersion}"`, `--target`, `subaccount=${subaccount}`]
         let output = await execa(`kcp`, args);
         // output if successful: "OrchestrationID: 22f19856-679b-4e68-b533-f1a0a46b1eed"
         // so we need to extract the uuid
@@ -79,6 +79,10 @@ async function ensureOrchestrationSucceeded(kcpconfigPath, orchenstrationID) {
 
     if(res.state !== "succeeded") {
         throw(`orchestration didn't succeed in 15min: ${JSON.stringify(res)}`);
+    }
+    const descSplit = res.description.split(" ");
+    if (descSplit[1] !== "1") {
+        throw(`orchestration didn't succeed (number of scheduled operations should be equal to 1): ${JSON.stringify(res)}`);
     }
   
     return res;
