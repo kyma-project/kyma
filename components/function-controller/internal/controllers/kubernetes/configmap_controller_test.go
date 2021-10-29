@@ -19,6 +19,12 @@ import (
 )
 
 var _ = ginkgo.Describe("ConfigMap", func() {
+
+
+
+
+
+	
 	var (
 		reconciler    *ConfigMapReconciler
 		request       ctrl.Request
