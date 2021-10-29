@@ -32,7 +32,7 @@ Follow these steps:
 
   Alternatively, use the `--dir {FULL_FOLDER_PATH}` flag to point to the directory where you want to create the Function's source files.
 
-  >**NOTE:** Python 3.9 is not the only one of the available runtimes. Read about all [supported runtimes and sample Functions to run on them](../../05-technical-reference/svls-01-sample-functions.md).
+  >**NOTE:** Python 3.9 is only one of the available runtimes. Read about all [supported runtimes and sample Functions to run on them](../../05-technical-reference/svls-01-sample-functions.md).
 
   The `init` command creates these files in your workspace folder:
 
