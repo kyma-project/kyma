@@ -71,8 +71,8 @@ livenessProbe:
 # schedulerName: "default-scheduler"
 
 image:
-  repository: eu.gcr.io/kyma-project/grafana-watcher
-  tag: latest
+  repository: eu.gcr.io/kyma-project/tpi/grafana
+  tag: 7.5.11-65a68aa8
   sha: ""
   pullPolicy: IfNotPresent
 
