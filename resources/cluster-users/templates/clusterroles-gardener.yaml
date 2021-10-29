@@ -78,3 +78,4 @@ rules:
   verbs:
 {{ toYaml .Values.clusterRoles.verbs.edit | indent 4 }}
 
+
