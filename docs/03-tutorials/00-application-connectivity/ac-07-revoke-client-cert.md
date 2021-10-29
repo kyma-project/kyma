@@ -7,7 +7,7 @@ You can revoke a client certificate generated for your Application. Revocation p
 To revoke a client certificate, send a request to the `certificates/revocations` endpoint. Pass the certificate you want to revoke and a key that matches this certificate in the call. Run:
     
 ```bash
-curl -X POST https://gateway.{CLUSTER_DOMAIN}/v1/applications/certificates/revocations --cert {CERT_TO_REVOKE} --key {CERT_TO_REVOKE_KEY} -k 
+curl -X POST https://gateway.{CLUSTER_DOMAIN}/v1/applications/certificates/revocations --cert {PATH_TO_CLIENT_CERT_TO_REVOKE} --key {PATH_TO_KEY} -k 
 ```
 
 ## Revoke a certificate using the SHA256 fingerprint

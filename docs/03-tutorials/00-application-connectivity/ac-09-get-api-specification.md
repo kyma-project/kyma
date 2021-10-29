@@ -9,7 +9,7 @@ To view or download the API specification directly from this website, see the **
 To get the API specification for the Connector Service on a local Kyma deployment, run this command:
 
 ```bash
-curl https://connector-service.kyma.local/v1/api.yaml
+curl https://connector-service.local.kyma.dev/v1/api.yaml
 ```
 
 Alternatively, get the API specification directly from the Connector Service: 
