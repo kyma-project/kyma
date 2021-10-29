@@ -40,7 +40,7 @@ build: generate fmt vet ## Build manager binary.
 	go build -o bin/grafana-watcher main.go
 
 ## Will be called from Prow-Pipeline; using targets from generic make file
-release: verify build-image push-image
+release: resolve generate verify build-image push-image
 
 ##@ Dynamic Function Build
 $(eval $(call buildpack-cp-ro,resolve))
