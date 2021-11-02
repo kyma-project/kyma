@@ -10,6 +10,7 @@ Prepare the `.env` file based on the `.env.template`. Run the following command 
 export $(xargs < .env)
 ```
 
+
 Run the test scenario:
 
 ```bash
