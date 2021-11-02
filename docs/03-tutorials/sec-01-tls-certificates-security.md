@@ -13,7 +13,7 @@ The TLS certificate is a vital security element. Follow this tutorial to set up 
 
 ## Steps
 
-1. Export your domain, new certificate and key as the environment variables.
+1. Export your domain, new certificate, and key as the environment variables.
 
 ```bash
 export DOMAIN={YOUR_DOMAIN}
