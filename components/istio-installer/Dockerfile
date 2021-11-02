@@ -2,7 +2,7 @@ FROM eu.gcr.io/kyma-project/tpi/k8s-tools:20210922-530cfc39
 
 LABEL source=git@github.com:kyma-project/kyma.git
 
-ENV ISTIOCTL_VERSION 1.11.4
+ENV ISTIOCTL_VERSION 1.11.2
 ENV YQ_VERSION 3.1.1
 
 RUN curl -L https://github.com/istio/istio/releases/download/${ISTIOCTL_VERSION}/istioctl-${ISTIOCTL_VERSION}-linux-amd64.tar.gz -o istioctl.tar.gz &&\
