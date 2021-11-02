@@ -1,16 +1,30 @@
 const {
    KCPConfig,
    KCPWrapper,
-} = require("../../kcp/client");
+} = require('../../kcp/client');
 
 const {
    KEBConfig,
    KEBClient,
-} = require("../../kyma-environment-broker");
-const {initializeK8sClient} = require("../../utils");
+} = require('../../kyma-environment-broker');
+
+const {
+   GardenerClient,
+   GardenerConfig,
+} = require('../../gardener');
+
+const {initializeK8sClient} = require('../../utils');
+
+const {
+   commerceMockTests,
+   gettingStartedGuides,
+} = require('../../test');
 
 describe(`SKR Nightly periodic test`, function () {
    const kebconfig = KEBConfig.fromEnv();
+   const gardenerConfig = GardenerConfig.fromEnv();
+
+   const gardener = new GardenerClient(gardenerConfig);
    const keb = new KEBClient(kebconfig);
 
    process.env.KCP_KEB_API_URL = `https://kyma-env-broker.` + keb.host;
@@ -34,12 +48,11 @@ describe(`SKR Nightly periodic test`, function () {
          }
       });
       it (`Initialize k8s client from nightly runtime`, async function () {
-         const kubeconfig = await keb.downloadKubeconfig(runtime.instanceID);
-         initializeK8sClient({ kubeconfig: kubeconfig });
+         const shoot = await gardener.getShoot(runtime.shootName);
+         console.log(shoot.name, runtime.shootName);
+         initializeK8sClient({ kubeconfig: shoot.kubeconfig });
       });
    });
-
-   describe(`Execute tests`, function () {
-      require("../../test");
-   })
+   commerceMockTests();
+   gettingStartedGuides();
 });
