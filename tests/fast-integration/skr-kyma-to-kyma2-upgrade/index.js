@@ -160,8 +160,10 @@ describe("SKR-Upgrade-test", function () {
   const KCP_TECH_USER_LOGIN = getEnvOrThrow("KCP_TECH_USER_LOGIN")
   const KCP_TECH_USER_PASSWORD = getEnvOrThrow("KCP_TECH_USER_PASSWORD")
   const KCP_OIDC_CLIENT_ID = getEnvOrThrow("KCP_OIDC_CLIENT_ID")
-  const KCP_OIDC_CLIENT_SECRET = getEnvOrThrow("KCP_OIDC_CLIENT_SECRET")
+  // const KCP_OIDC_CLIENT_SECRET = getEnvOrThrow("KCP_OIDC_CLIENT_SECRET")
   const KCP_KEB_API_URL = "https://kyma-env-broker.cp.dev.kyma.cloud.sap"
+  const KCP_MOTHERSHIP_API_URL = "https://mothership-reconciler.cp.dev.kyma.cloud.sap/v1"
+  const KCP_KUBECONFIG_API_URL = "https://kubeconfig-service.cp.dev.kyma.cloud.sap"
   const KCP_OIDC_ISSUER_URL = "https://kymatest.accounts400.ondemand.com"
   const kcpconfigPath = "dev.yaml"
   const kymaUpgradeVersion = getEnvOrThrow("KYMA_UPGRADE_VERSION")
@@ -181,9 +183,11 @@ describe("SKR-Upgrade-test", function () {
     stream.once('open', function(fd) {
       stream.write(`gardener-namespace: garden-kyma-dev\n`);
       stream.write(`oidc-client-id: ${KCP_OIDC_CLIENT_ID}\n`);
-      stream.write(`oidc-client-secret: ${KCP_OIDC_CLIENT_SECRET}\n`);
-      stream.write(`keb-api-url: ${KCP_KEB_API_URL}\n`);
       stream.write(`oidc-issuer-url: ${KCP_OIDC_ISSUER_URL}\n`);;
+      stream.write(`keb-api-url: ${KCP_KEB_API_URL}\n`);
+      stream.write(`mothership-api-url: ${KCP_MOTHERSHIP_API_URL}\n`);
+      stream.write(`kubeconfig-api-url: ${KCP_KUBECONFIG_API_URL}\n`);
+      
       stream.end();
     });
     
