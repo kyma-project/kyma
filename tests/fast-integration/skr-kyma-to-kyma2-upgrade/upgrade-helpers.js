@@ -72,7 +72,7 @@ async function ensureOrchestrationSucceeded(kcpconfigPath, orchenstrationID) {
       () => getOrchestrationStatus(kcpconfigPath, orchenstrationID),
       (res) => res && res.state && (res.state === "succeeded" || res.state === "failed"),
       1000*60*15, // 15 min
-      1000 * 5 // 5 seconds
+      1000 * 30 // 5 seconds
     );
   
     debug("KEB Orchestration Status:", res);
