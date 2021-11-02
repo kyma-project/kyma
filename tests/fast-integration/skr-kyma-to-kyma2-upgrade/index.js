@@ -160,7 +160,6 @@ describe("SKR-Upgrade-test", function () {
   const KCP_TECH_USER_LOGIN = getEnvOrThrow("KCP_TECH_USER_LOGIN")
   const KCP_TECH_USER_PASSWORD = getEnvOrThrow("KCP_TECH_USER_PASSWORD")
   const KCP_OIDC_CLIENT_ID = getEnvOrThrow("KCP_OIDC_CLIENT_ID")
-  // const KCP_OIDC_CLIENT_SECRET = getEnvOrThrow("KCP_OIDC_CLIENT_SECRET")
   const KCP_KEB_API_URL = "https://kyma-env-broker.cp.dev.kyma.cloud.sap"
   const KCP_MOTHERSHIP_API_URL = "https://mothership-reconciler.cp.dev.kyma.cloud.sap/v1"
   const KCP_KUBECONFIG_API_URL = "https://kubeconfig-service.cp.dev.kyma.cloud.sap"
