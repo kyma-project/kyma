@@ -240,13 +240,13 @@ describe("SKR-Upgrade-test", function () {
     it("Test fixtures should be deleted", async function () {
       await cleanMockTestFixture("mocks", testNS, true)
     });
-    
-    it("Deprovision SKR", async function () {
-      await deprovisionSKR(keb, instanceID);
-    });
 
     it("Unregister SKR resources from Compass", async function () {
       await unregisterKymaFromCompass(director, scenarioName);
+    });
+
+    it("Deprovision SKR", async function () {
+      await deprovisionSKR(keb, instanceID);
     });
   }
 
