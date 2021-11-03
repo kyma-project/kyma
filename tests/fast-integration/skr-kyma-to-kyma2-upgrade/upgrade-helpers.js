@@ -53,7 +53,7 @@ async function getOrchestrationStatus (kcpconfigPath, orchestrationID) {
         args = [`orchestrations`,  `--config`, `${kcpconfigPath}`, `${orchestrationID}`, `-o`, `json`]
         let orchestrations = await execa(`kcp`, args);
         let o = JSON.parse(orchestrations.stdout)
-        debug(`getOrchestrationStatus output: ${o.state}`)
+        debug(`OrchestrationStatus: orchestrationID: ${o.orchestrationID} (${o.type}), status: ${o.state}`)
 
         return o
     } catch (error) {
