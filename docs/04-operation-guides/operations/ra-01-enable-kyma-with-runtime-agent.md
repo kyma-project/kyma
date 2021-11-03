@@ -13,8 +13,3 @@ kyma deploy --value global.disableLegacyConnectivity="true" --components-file {Y
 ```
 
 >**TIP:** Read more about how to [change Kyma settings](03-change-kyma-config-values.md) and [install Kyma with specific components](02-install-kyma.md#install-specific-components).
-
-
-
-
-
