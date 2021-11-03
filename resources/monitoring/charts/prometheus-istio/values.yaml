@@ -47,8 +47,6 @@ alertmanager:
   ## alertmanager container image
   ##
   image:
-    # repository: prom/alertmanager
-    # tag: v0.21.0
     pullPolicy: IfNotPresent
 
   ## alertmanager priorityClassName
@@ -382,8 +380,6 @@ configmapReload:
     ## configmap-reload container image
     ##
     image:
-      # repository: jimmidyson/configmap-reload
-      # tag: v0.4.0
       pullPolicy: IfNotPresent
 
     ## Additional configmap-reload container arguments
@@ -439,8 +435,6 @@ nodeExporter:
   ## node-exporter container image
   ##
   image:
-    # repository: prom/node-exporter
-    # tag: v1.0.1
     pullPolicy: IfNotPresent
 
   ## Specify if a Pod Security Policy for node-exporter must be created
@@ -985,8 +979,6 @@ pushgateway:
   ## pushgateway container image
   ##
   image:
-    # repository: prom/pushgateway
-    # tag: v1.2.0
     pullPolicy: IfNotPresent
 
   ## pushgateway priorityClassName
