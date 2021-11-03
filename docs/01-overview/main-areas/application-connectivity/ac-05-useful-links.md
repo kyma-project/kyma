@@ -23,9 +23,9 @@ If you're interested in learning more about the Application Connectivity area, f
 
 - Check Application Connectivity troubleshooting guides for:
 
-  - [Application Gateway](../../../04-operation-guides/troubleshooting/ac-01-application-gateway-troubleshooting.md) for errors when calling a registered service
-  - [Application Registry](../../../04-operation-guides/troubleshooting/ac-02-application-registry-troubleshooting.md) for certificate-related errors when trying to access the component
-  - [Connector Service](../../../04-operation-guides/troubleshooting/ac-03-connector-service-troubleshooting.md) for errors when trying to renew or rotate a certificate
+  - [Application Gateway](../../../04-operation-guides/troubleshooting/ac-01-application-gateway-troubleshooting.md), for errors when calling a registered service
+  - [Application Registry](../../../04-operation-guides/troubleshooting/ac-02-application-registry-troubleshooting.md), for certificate-related errors when trying to access the component
+  - [Connector Service](../../../04-operation-guides/troubleshooting/ac-03-connector-service-troubleshooting.md), for errors when trying to renew or rotate a certificate
 
 - Analyze Application Connectivity specification and configuration files:
 
