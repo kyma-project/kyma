@@ -2,7 +2,7 @@
 title: EventActivation
 ---
 
-The `eventactivations.applicationconnector.kyma-project.io` CustomResourceDefinition (CRD) is a detailed description of the kind of data and the format used to create a Trigger from the Kyma Console and to get an event schema. To get the up-to-date CRD and show the output in the `yaml` format, run this command:
+The `eventactivations.applicationconnector.kyma-project.io` CustomResourceDefinition (CRD) is a detailed description of the kind of data and the format used to create a Trigger from the Kyma Dashboard and to get an event schema. To get the up-to-date CRD and show the output in the `yaml` format, run this command:
 
 ```bash
 kubectl get crd eventactivations.applicationconnector.kyma-project.io -o yaml
