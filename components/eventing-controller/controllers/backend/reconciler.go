@@ -1,6 +1,7 @@
 package backend
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -68,6 +69,9 @@ type Reconciler struct {
 
 	// backendType is the type of the backend which the reconciler detects at runtime
 	backendType eventingv1alpha1.BackendType
+	// The OAuth2 credentials that are passed to the BEB subscription reconciler
+	oauth2ClientID     []byte
+	oauth2ClientSecret []byte
 }
 
 func NewReconciler(ctx context.Context, natsCommander, bebCommander commander.Commander, client client.Client, cache cache.Cache, logger *logger.Logger, recorder record.EventRecorder) *Reconciler {
@@ -218,8 +222,31 @@ func (r *Reconciler) reconcileBEBBackend(ctx context.Context, bebSecret *v1.Secr
 	// Following could return an error when the OAuth2Client CR is created for the first time, until the secret is
 	// created by the Hydra operator. However, eventually it should get resolved in the next few reconciliation loops.
 	oauth2ClientID, oauth2ClientSecret, err := r.getOAuth2ClientCredentials(ctx, getOAuth2ClientSecretName(), deployment.ControllerNamespace)
-	if err != nil {
+	if err != nil && !k8serrors.IsNotFound(err) {
 		return ctrl.Result{}, err
+	}
+	oauth2CredentialsNotFound := k8serrors.IsNotFound(err)
+	oauth2CredentialsChanged := false
+	if err == nil {
+		oauth2CredentialsChanged = !bytes.Equal(r.oauth2ClientID, oauth2ClientID) || !bytes.Equal(r.oauth2ClientSecret, oauth2ClientSecret)
+	}
+	if oauth2CredentialsNotFound || oauth2CredentialsChanged {
+		// Stop the controller and mark all subs as not ready
+		r.namedLogger().Info("stopping the BEB subscription reconciler due to change in OAuth2 credentials")
+		if err := r.bebCommander.Stop(false); err != nil {
+			return ctrl.Result{}, err
+		}
+		r.bebCommanderStarted = false
+		if updateErr := r.UpdateBackendStatus(ctx, r.backendType, newBackend, nil, bebSecret); updateErr != nil {
+			return ctrl.Result{}, errors.Wrapf(err, "update status after stopping BEB controller failed")
+		}
+	}
+	if oauth2CredentialsNotFound {
+		return ctrl.Result{}, err
+	}
+	if oauth2CredentialsChanged {
+		r.oauth2ClientID = oauth2ClientID
+		r.oauth2ClientSecret = oauth2ClientSecret
 	}
 
 	// CreateOrUpdate deployment for publisher proxy secret
@@ -241,7 +268,7 @@ func (r *Reconciler) reconcileBEBBackend(ctx context.Context, bebSecret *v1.Secr
 	}
 
 	// Start the BEB subscription controller
-	if err := r.startBEBController(string(oauth2ClientID), string(oauth2ClientSecret)); err != nil {
+	if err := r.startBEBController(oauth2ClientID, oauth2ClientSecret); err != nil {
 		updateErr := r.UpdateBackendStatus(ctx, r.backendType, newBackend, nil, bebSecret)
 		if updateErr != nil {
 			return ctrl.Result{}, errors.Wrapf(err, "update status when start BEB controller failed")
@@ -685,7 +712,7 @@ func (r *Reconciler) startNATSController() error {
 
 func (r *Reconciler) stopNATSController() error {
 	if r.natsCommanderStarted {
-		if err := r.natsCommander.Stop(); err != nil {
+		if err := r.natsCommander.Stop(true); err != nil {
 			r.namedLogger().Errorw("stop NATS commander failed", "error", err)
 			return err
 		}
@@ -695,7 +722,7 @@ func (r *Reconciler) stopNATSController() error {
 	return nil
 }
 
-func (r *Reconciler) startBEBController(clientID, clientSecret string) error {
+func (r *Reconciler) startBEBController(clientID, clientSecret []byte) error {
 	if !r.bebCommanderStarted {
 		bebCommanderParams := commander.Params{"client_id": clientID, "client_secret": clientSecret}
 		if err := r.bebCommander.Start(r.cfg.DefaultSubscriptionConfig, bebCommanderParams); err != nil {
@@ -710,7 +737,7 @@ func (r *Reconciler) startBEBController(clientID, clientSecret string) error {
 
 func (r *Reconciler) stopBEBController() error {
 	if r.bebCommanderStarted {
-		if err := r.bebCommander.Stop(); err != nil {
+		if err := r.bebCommander.Stop(true); err != nil {
 			r.namedLogger().Errorw("stop BEB commander failed", "error", err)
 			return err
 		}

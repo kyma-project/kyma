@@ -97,9 +97,11 @@ func (c *Commander) Start(defaultSubsConfig env.DefaultSubscriptionConfig, _ com
 }
 
 // Stop implements the Commander interface and stops the commander.
-func (c *Commander) Stop() error {
+func (c *Commander) Stop(runCleanup bool) error {
 	c.cancel()
-
+	if !runCleanup {
+		return nil
+	}
 	dynamicClient := dynamic.NewForConfigOrDie(c.restCfg)
 	return cleanup(c.backend, dynamicClient, c.namedLogger())
 }

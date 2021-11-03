@@ -623,6 +623,6 @@ func (t *TestCommander) Start(_ env.DefaultSubscriptionConfig, _ commander.Param
 	return t.startErr
 }
 
-func (t *TestCommander) Stop() error {
+func (t *TestCommander) Stop(_ bool) error {
 	return t.stopErr
 }
