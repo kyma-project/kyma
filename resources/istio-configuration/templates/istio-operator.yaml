@@ -25,6 +25,8 @@ spec:
 {{- toYaml .Values.components.pilot.config | nindent 10}}
   meshConfig:
 {{- toYaml .Values.meshConfig | nindent 4 }}
+    enableTracing: {{ .Values.global.tracing.enabled }}
+
   values:
     global:
 {{- toYaml .Values.helmValues.global | nindent 8 }}

@@ -41,7 +41,6 @@ meshConfig:
       zipkin:
         address: "zipkin.kyma-system:9411"
   enablePrometheusMerge: false
-  enableTracing: true
 
 components:
   egressGateways:
@@ -121,3 +120,5 @@ global:
       name: "istio"
       version: "1.11.4-distroless"
       directory: "external"
+  tracing:
+    enabled: true
