@@ -16,9 +16,8 @@ const {
 const {initializeK8sClient} = require('../../utils');
 
 const {
-   commerceMockTests,
-   gettingStartedGuides,
-} = require('../../test');
+   skrTest,
+} = require('../../skr-test');
 
 describe(`SKR Nightly periodic test`, function () {
    const kebconfig = KEBConfig.fromEnv();
@@ -49,10 +48,8 @@ describe(`SKR Nightly periodic test`, function () {
       });
       it (`Initialize k8s client from nightly runtime`, async function () {
          const shoot = await gardener.getShoot(runtime.shootName);
-         console.log(shoot.name, runtime.shootName);
          initializeK8sClient({ kubeconfig: shoot.kubeconfig });
       });
    });
-   commerceMockTests();
-   gettingStartedGuides();
+   skrTest();
 });
