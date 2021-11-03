@@ -28,6 +28,7 @@ async function kcpUpgrade (kcpconfigPath, subaccount, kymaUpgradeVersion) {
     let args = []
     try {
         args = [`upgrade`, `kyma`, `--config`, `${kcpconfigPath}`, `--version`, `"${kymaUpgradeVersion}"`, `--target`, `subaccount=${subaccount}`]
+        debug(`Executing: "kcp ${args.join(' ')}"`)
         let output = await execa(`kcp`, args);
         // output if successful: "OrchestrationID: 22f19856-679b-4e68-b533-f1a0a46b1eed"
         // so we need to extract the uuid
@@ -51,10 +52,10 @@ async function getOrchestrationStatus (kcpconfigPath, orchestrationID) {
     try {
         args = [`orchestrations`,  `--config`, `${kcpconfigPath}`, `${orchestrationID}`, `-o`, `json`]
         let orchestrations = await execa(`kcp`, args);
+        let o = JSON.parse(orchestrations.stdout)
+        debug(`getOrchestrationStatus output: ${o.state}`)
 
-        debug(`getOrchestrationStatus output: ${orchestrations.stdout}`)
-
-        return JSON.parse(orchestrations.stdout)
+        return o
     } catch (error) {
         console.log(error)
         if (error.stderr === undefined) {
@@ -72,14 +73,14 @@ async function ensureOrchestrationSucceeded(kcpconfigPath, orchenstrationID) {
       () => getOrchestrationStatus(kcpconfigPath, orchenstrationID),
       (res) => res && res.state && (res.state === "succeeded" || res.state === "failed"),
       1000*60*15, // 15 min
-      1000 * 30 // 5 seconds
+      1000 * 30 // 30 seconds
     );
-  
-    debug("KEB Orchestration Status:", res);
 
     if(res.state !== "succeeded") {
+        debug("KEB Orchestration Status:", res);
         throw(`orchestration didn't succeed in 15min: ${JSON.stringify(res)}`);
     }
+
     const descSplit = res.description.split(" ");
     if (descSplit[1] !== "1") {
         throw(`orchestration didn't succeed (number of scheduled operations should be equal to 1): ${JSON.stringify(res)}`);
@@ -87,8 +88,6 @@ async function ensureOrchestrationSucceeded(kcpconfigPath, orchenstrationID) {
   
     return res;
   }
-
-// getOrchestrationStatus ("dev.yaml", "210779e4-bd9f-4fb7-aa10-888520038da5")
 
 module.exports = {
     kcpLogin,
