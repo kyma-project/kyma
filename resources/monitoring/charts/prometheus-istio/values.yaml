@@ -382,6 +382,8 @@ configmapReload:
     ## configmap-reload container image
     ##
     image:
+      repository: jimmidyson/configmap-reloadd
+      tag: v0.4.0
       pullPolicy: IfNotPresent
 
     ## Additional configmap-reload container arguments
