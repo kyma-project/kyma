@@ -123,38 +123,38 @@ func (c *Commander) Stop(runCleanup bool) error {
 	}
 	dynamicClient := dynamic.NewForConfigOrDie(c.restCfg)
 	if !runCleanup {
-		// Mark BEB subs as not ready
-		// TODO: Should we have a separate flag for this?
-		// TODO: pass context from caller of Stop?
-		// TODO: use structured clients
-		ctx, cancel := context.WithCancel(context.Background())
-		defer cancel()
-		// Fetch all subscriptions.
-		subscriptionsUnstructured, err := dynamicClient.Resource(handlers.SubscriptionGroupVersionResource()).Namespace(corev1.NamespaceAll).List(ctx, metav1.ListOptions{})
-		if err != nil {
-			return errors.Wrapf(err, "list subscriptions failed")
-		}
-		subs, err := handlers.ToSubscriptionList(subscriptionsUnstructured)
-		if err != nil {
-			return errors.Wrapf(err, "convert subscriptionList from unstructured list failed")
-		}
-		// Mark all as not ready
-		for _, sub := range subs.Items {
-			if !sub.Status.Ready {
-				continue
-			}
-			desiredSub := handlers.SetStatusAsNotReady(sub)
-			if err = handlers.UpdateSubscriptionStatus(ctx, dynamicClient, desiredSub); err != nil {
-				c.namedLogger().Errorw("update BEB subscription status failed", "namespace", sub.Namespace, "name", sub.Name, "error", err)
-			}
-		}
-		return err
+		return markAllSubscriptionsAsNotReady(dynamicClient, c.namedLogger())
 	}
 	return cleanup(c.backend, dynamicClient, c.namedLogger())
 }
 
 func (c *Commander) namedLogger() *zap.SugaredLogger {
 	return c.logger.WithContext().Named(commanderName)
+}
+
+func markAllSubscriptionsAsNotReady(dynamicClient dynamic.Interface, logger *zap.SugaredLogger) error {
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	// Fetch all subscriptions.
+	subscriptionsUnstructured, err := dynamicClient.Resource(handlers.SubscriptionGroupVersionResource()).Namespace(corev1.NamespaceAll).List(ctx, metav1.ListOptions{})
+	if err != nil {
+		return errors.Wrapf(err, "list subscriptions failed")
+	}
+	subs, err := handlers.ToSubscriptionList(subscriptionsUnstructured)
+	if err != nil {
+		return errors.Wrapf(err, "convert subscriptionList from unstructured list failed")
+	}
+	// Mark all as not ready
+	for _, sub := range subs.Items {
+		if !sub.Status.Ready {
+			continue
+		}
+		desiredSub := handlers.SetStatusAsNotReady(sub)
+		if err = handlers.UpdateSubscriptionStatus(ctx, dynamicClient, desiredSub); err != nil {
+			logger.Errorw("update BEB subscription status failed", "namespace", sub.Namespace, "name", sub.Name, "error", err)
+		}
+	}
+	return err
 }
 
 // cleanup removes all created BEB artifacts.
