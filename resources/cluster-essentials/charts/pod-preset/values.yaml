@@ -29,6 +29,3 @@ securityContext:
     - ALL
   privileged: false
 
-# key: ""
-# cert: ""
-# caCert: ""
