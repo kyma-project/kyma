@@ -631,7 +631,7 @@ sidecar:
   image:
     repository: eu.gcr.io/kyma-project/tpi/k8s-sidecar
     tag: 1.14.2-1f7de309
-  imagePullPolicy: Always
+  imagePullPolicy: IfNotPresent
   resources:
     limits:
       cpu: 100m
