@@ -13,16 +13,15 @@ const {
   ensureKymaAdminBindingExistsForUser,
   ensureKymaAdminBindingDoesNotExistsForUser,
 } = require("../utils");
-
 const {
   AuditLogCreds,
   AuditLogClient,
   checkAuditLogs,
   checkAuditEventsThreshold,
 } = require("../audit-log");
-
 const {keb, gardener, director} = require('./helpers');
 const {addScenarioInCompass, assignRuntimeToScenario} = require("../compass");
+const {prometheusPortForward} = require("../monitoring/client");
 
 function skrTest(skr, options) {
   const runtimeID = options.runtimeID;
@@ -39,6 +38,15 @@ function skrTest(skr, options) {
   const AWS_PLAN_ID = "361c511f-f939-4621-b228-d0fb79a1fe15";
 
   describe("SKR test", function () {
+    let cancelPortForward = null;
+    before(() => {
+      cancelPortForward = prometheusPortForward();
+    });
+
+    after(() => {
+      cancelPortForward();
+    });
+
     it(`Assure initial OIDC config is applied on shoot cluster`, async function () {
       ensureValidShootOIDCConfig(skr.shoot, oidc0);
     });
@@ -121,7 +129,7 @@ function skrTest(skr, options) {
       });
 
       it("Amount of audit events must not exceed a certain threshold", async function () {
-        await checkAuditEventsThreshold(2.5);
+        await checkAuditEventsThreshold(4);
       });
     }
   });

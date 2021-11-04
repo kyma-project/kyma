@@ -8,26 +8,26 @@ const { expect } = require("chai");
 async function kcpLogin (kcpconfigPath, kcpUser, kcpPassword) {
     debug(`Running kcpLogin...`)
     let args = []
+    // Note: dummycmd is just for output
+    let dummycmd=`kcp login --config ${kcpconfigPath} -u $KCP_TECH_USER_LOGIN -p $KCP_TECH_USER_PASSWORD`
     try {
         args = [`login`, `--config`, `${kcpconfigPath}`, `-u`, `${kcpUser}`, `-p`, `${kcpPassword}`]
         let output = await execa(`kcp`, args);
-        debug(`"kcp login --config ${kcpconfigPath} -u $KCP_TECH_USER_LOGIN -p $KCP_TECH_USER_PASSWORD" exited with code ${output.exitCode}`)
+        debug(`"${dummycmd}" exited with code ${output.exitCode}`)
         return output
     } catch (error) {
-        console.log(error)
-        debug.log(error)
         if (error.stderr === undefined) {
-            throw new Error(`failed to process output of "kcp ${args.join(' ')}": ${error}`);
+            throw new Error(`failed to process output of "${dummycmd}": ${error}`);
         }
-        throw new Error(`failed "kcp ${args.join(' ')}": ${error.stderr}`);
+        throw new Error(`failed "${dummycmd}": ${error.stderr}`);
     }
 };
 
-async function kcpUpgrade (kcpconfigPath, subaccount, runtimeID, kymaUpgradeVersion) {
-    debug(`Running kcpUpgrade...`)
+async function kcpUpgrade (kcpconfigPath, subaccount, kymaUpgradeVersion) {
+    debug(`Running kymaUpgrade...`)
     let args = []
     try {
-        args = [`upgrade`, `kyma`, `--config`, `${kcpconfigPath}`, `--version`, `"${kymaUpgradeVersion}"`, `--target`, `subaccount=${subaccount},runtime-id=${runtimeID}`]
+        args = [`upgrade`, `kyma`, `--config`, `${kcpconfigPath}`, `--version`, `"${kymaUpgradeVersion}"`, `--target`, `subaccount=${subaccount}`]
         let output = await execa(`kcp`, args);
         // output if successful: "OrchestrationID: 22f19856-679b-4e68-b533-f1a0a46b1eed"
         // so we need to extract the uuid
@@ -72,13 +72,17 @@ async function ensureOrchestrationSucceeded(kcpconfigPath, orchenstrationID) {
       () => getOrchestrationStatus(kcpconfigPath, orchenstrationID),
       (res) => res && res.state && (res.state === "succeeded" || res.state === "failed"),
       1000*60*15, // 15 min
-      1000 * 5 // 5 seconds
+      1000 * 30 // 5 seconds
     );
   
     debug("KEB Orchestration Status:", res);
 
     if(res.state !== "succeeded") {
         throw(`orchestration didn't succeed in 15min: ${JSON.stringify(res)}`);
+    }
+    const descSplit = res.description.split(" ");
+    if (descSplit[1] !== "1") {
+        throw(`orchestration didn't succeed (number of scheduled operations should be equal to 1): ${JSON.stringify(res)}`);
     }
   
     return res;

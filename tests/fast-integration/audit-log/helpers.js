@@ -1,6 +1,6 @@
 const { assert } = require("chai");
 const { sleep, wait } = require ("../utils")
-const { queryPrometheus, prometheusPortForward } = require("../monitoring/client");
+const { queryPrometheus } = require("../monitoring/client");
 
 function findAuditLog(logs, group) {
     for (let element of logs) {
@@ -52,15 +52,11 @@ async function checkAuditLogs(client, groups) {
 }
 
 async function checkAuditEventsThreshold(threshold) {
-    const cancelPortForward = prometheusPortForward();
-
     // Get the max rate for apiserver audit events over the last 60 min
     const query = "max_over_time(rate(apiserver_audit_event_total{job=\"apiserver\"}[1m])[60m:])";
     const result = await queryPrometheus(query);
     const maxAuditEventsRate = result[0].value[1];
     assert.isBelow(parseFloat(maxAuditEventsRate), threshold);
-
-    cancelPortForward();
 }
 
 module.exports = {
