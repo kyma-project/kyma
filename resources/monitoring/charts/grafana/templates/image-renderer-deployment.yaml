@@ -62,7 +62,11 @@ spec:
       {{- end }}
       containers:
         - name: {{ .Chart.Name }}-image-renderer
-          image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.grafana_image_renderer) }}"
+          {{- if .Values.imageRenderer.image.sha }}
+          image: "{{ .Values.imageRenderer.image.repository }}:{{ .Values.imageRenderer.image.tag }}@sha256:{{ .Values.imageRenderer.image.sha }}"
+          {{- else }}
+          image: "{{ .Values.imageRenderer.image.repository }}:{{ .Values.imageRenderer.image.tag }}"
+          {{- end }}
           imagePullPolicy: {{ .Values.imageRenderer.image.pullPolicy }}
         {{- if .Values.imageRenderer.command }}
           command:

@@ -60,16 +60,6 @@ global:
       version: "7.1.3-4c48514d"
       directory: "tpi"
       sha: ""
-    grafana_image_renderer:
-      name: "grafana-image-renderer" # TODO dockerhub
-      version: "3.2.1"
-      directory: "external/grafana"
-      sha: ""
-    curl:
-      name: "curl"
-      version: "7.78.0"
-      directory: "external/curlimages"
-      sha: ""
         
   istio:
     tls:

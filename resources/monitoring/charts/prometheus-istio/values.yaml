@@ -47,6 +47,8 @@ alertmanager:
   ## alertmanager container image
   ##
   image:
+    repository: prom/alertmanager # This image is not activated in Kyma. This is kept here to keep parity with upstream charts
+    tag: v0.21.0
     pullPolicy: IfNotPresent
 
   ## alertmanager priorityClassName

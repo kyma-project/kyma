@@ -118,6 +118,9 @@ extraLabels: {}
 # priorityClassName:
 
 downloadDashboardsImage:
+  repository: curlimages/curl
+  tag: 7.73.0
+  sha: ""
   pullPolicy: IfNotPresent
 
 downloadDashboards:
@@ -713,6 +716,12 @@ imageRenderer:
   enabled: false
   replicas: 1
   image:
+    # image-renderer Image repository
+    repository: grafana/grafana-image-renderer
+    # image-renderer Image tag
+    tag: latest
+    # image-renderer Image sha (optional)
+    sha: ""
     # image-renderer ImagePullPolicy
     pullPolicy: Always
   # extra environment variables
