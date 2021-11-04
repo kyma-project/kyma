@@ -8,9 +8,9 @@
 {{- $encodedcert := b64enc $cert.Cert }}
 {{- $encodedkey := b64enc $cert.Kay }}
 {{- else }}
-{{- $encodedcacert := b64enc ( dict "value" .Values.cacert "context" . )  -}}
-{{- $encodedcert := b64enc ( dict "value" .Values.cert "context" . ) -}}
-{{- $encodedkey := b64enc ( dict "value" .Values.key "context" . ) -}}
+{{- $encodedcacert := b64enc ( include "tplValue" ( dict "value" .Values.cacert "context" . ))  -}}
+{{- $encodedcert := b64enc ( include "tplValue" ( dict "value" .Values.cert "context" . )) -}}
+{{- $encodedkey := b64enc ( include "tplValue" ( dict "value" .Values.key "context" . )) -}}
 {{- end }}
 
 apiVersion: admissionregistration.k8s.io/v1beta1
