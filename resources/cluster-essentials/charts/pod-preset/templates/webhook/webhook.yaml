@@ -7,9 +7,9 @@
   {{- $altName1 := printf "%s.%s" $cn .Release.Namespace }}
   {{- $altName2 := printf "%s.%s.svc" $cn .Release.Namespace }}
   {{- $cert := genSignedCert $cn nil (list $altName1 $altName2) 3650 $ca }}
-  {{- $encodedCaCert := b64enc $ca.Cert }}
-  {{- $encodedCert := b64enc $cert.Cert }}
-  {{- $encodedKey := b64enc $cert.Key }}
+  {{- $encodedCaCert = b64enc $ca.Cert }}
+  {{- $encodedCert = b64enc $cert.Cert }}
+  {{- $encodedKey = b64enc $cert.Key }}
 {{ end }}
 
 apiVersion: admissionregistration.k8s.io/v1beta1
