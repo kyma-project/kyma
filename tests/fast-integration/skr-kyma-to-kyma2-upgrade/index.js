@@ -1,5 +1,6 @@
 const uuid = require("uuid");
 const fs = require('fs');
+const execa = require("execa");
 const { 
   DirectorConfig, 
   DirectorClient,
@@ -189,12 +190,17 @@ describe("SKR-Upgrade-test", function () {
       
       stream.end();
     });
-    
+
     let loginOutput = await kcpLogin(kcpconfigPath, KCP_TECH_USER_LOGIN, KCP_TECH_USER_PASSWORD);
     // debug(loginOutput)
   });
 
   it(`Perform Upgrade`, async function () {
+    // output config for debug:
+    // let args = [`${kcpconfigPath}`]
+    // let config = await execa(`cat`, args);
+    // debug(`kcp config: \n${config.stdout}`)
+
     let kcpUpgradeStatus = await kcpUpgrade(kcpconfigPath, subAccountID, kymaUpgradeVersion);
     debug("Upgrade Done!")
   });
@@ -249,5 +255,4 @@ describe("SKR-Upgrade-test", function () {
       await deprovisionSKR(keb, instanceID);
     });
   }
-
 });
