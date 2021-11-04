@@ -10,6 +10,7 @@
         value: "{{ tpl (print $value) $ }}"
   {{- end }}
   {{- end }}
+  Moved grafana-sc-datasources container from initContainers to containers section
 */ -}}
 {{- define "grafana.pod" -}}
 {{- if .Values.schedulerName }}
