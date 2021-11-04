@@ -382,7 +382,7 @@ configmapReload:
     ## configmap-reload container image
     ##
     image:
-      repository: jimmidyson/configmap-reloadd
+      repository: jimmidyson/configmap-reload # This image is not activated in Kyma. This is kept here to keep parity with upstream charts
       tag: v0.4.0
       pullPolicy: IfNotPresent
 

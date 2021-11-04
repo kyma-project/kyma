@@ -118,7 +118,7 @@ extraLabels: {}
 # priorityClassName:
 
 downloadDashboardsImage:
-  repository: curlimages/curl
+  repository: curlimages/curl # This image is not activated in Kyma. This is kept here to keep parity with upstream charts
   tag: 7.73.0
   sha: ""
   pullPolicy: IfNotPresent
@@ -717,7 +717,7 @@ imageRenderer:
   replicas: 1
   image:
     # image-renderer Image repository
-    repository: grafana/grafana-image-renderer
+    repository: grafana/grafana-image-renderer # This image is not activated in Kyma. This is kept here to keep parity with upstream charts
     # image-renderer Image tag
     tag: latest
     # image-renderer Image sha (optional)
