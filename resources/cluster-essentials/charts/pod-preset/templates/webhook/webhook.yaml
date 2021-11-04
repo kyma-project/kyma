@@ -1,7 +1,7 @@
 {{- $encodedCaCert :=  b64enc .Values.caCert -}}
 {{- $encodedCert :=  b64enc .Values.cert -}}
 {{- $encodedKey :=  b64enc .Values.key -}}
-{{ if or (eq .Values.caCert "") (eq .Values.cert "") (eq not .Values.key "")  }}
+{{ if or (eq .Values.caCert "") (eq .Values.cert "") (eq .Values.key "")  }}
   {{- $ca := genCA "pod-preset-webhook-ca" 3650 }}
   {{- $cn := printf "%s-webhook" (include "pod-preset.fullname" .) }}
   {{- $altName1 := printf "%s.%s" $cn .Release.Namespace }}
