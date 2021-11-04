@@ -22,7 +22,7 @@ func (c *Commander) Start(_ env.DefaultSubscriptionConfig, _ commander.Params) e
 	return nil
 }
 
-func (c *Commander) Stop() error {
+func (c *Commander) Stop(_ bool) error {
 	return nil
 }
 

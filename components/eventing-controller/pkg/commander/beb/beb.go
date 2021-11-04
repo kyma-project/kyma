@@ -117,15 +117,44 @@ func (c *Commander) Start(_ env.DefaultSubscriptionConfig, params commander.Para
 }
 
 // Stop implements the Commander interface and stops the commander.
-func (c *Commander) Stop() error {
-	c.cancel()
-
+func (c *Commander) Stop(runCleanup bool) error {
+	if c.cancel != nil {
+		c.cancel()
+	}
 	dynamicClient := dynamic.NewForConfigOrDie(c.restCfg)
+	if !runCleanup {
+		return markAllSubscriptionsAsNotReady(dynamicClient, c.namedLogger())
+	}
 	return cleanup(c.backend, dynamicClient, c.namedLogger())
 }
 
 func (c *Commander) namedLogger() *zap.SugaredLogger {
 	return c.logger.WithContext().Named(commanderName)
+}
+
+func markAllSubscriptionsAsNotReady(dynamicClient dynamic.Interface, logger *zap.SugaredLogger) error {
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	// Fetch all subscriptions.
+	subscriptionsUnstructured, err := dynamicClient.Resource(handlers.SubscriptionGroupVersionResource()).Namespace(corev1.NamespaceAll).List(ctx, metav1.ListOptions{})
+	if err != nil {
+		return errors.Wrapf(err, "list subscriptions failed")
+	}
+	subs, err := handlers.ToSubscriptionList(subscriptionsUnstructured)
+	if err != nil {
+		return errors.Wrapf(err, "convert subscriptionList from unstructured list failed")
+	}
+	// Mark all as not ready
+	for _, sub := range subs.Items {
+		if !sub.Status.Ready {
+			continue
+		}
+		desiredSub := handlers.SetStatusAsNotReady(sub)
+		if err = handlers.UpdateSubscriptionStatus(ctx, dynamicClient, desiredSub); err != nil {
+			logger.Errorw("update BEB subscription status failed", "namespace", sub.Namespace, "name", sub.Name, "error", err)
+		}
+	}
+	return err
 }
 
 // cleanup removes all created BEB artifacts.
@@ -185,17 +214,17 @@ func cleanup(backend handlers.MessagingBackend, dynamicClient dynamic.Interface,
 
 func getOAuth2ClientCredentials(params commander.Params) (*handlers.OAuth2ClientCredentials, error) {
 	val := params["client_id"]
-	id, ok := val.(string)
+	id, ok := val.([]byte)
 	if !ok {
-		return nil, fmt.Errorf("expected string value for client_id, but received %T", val)
+		return nil, fmt.Errorf("expected []byte value for client_id, but received %T", val)
 	}
 	val = params["client_secret"]
-	secret, ok := val.(string)
+	secret, ok := val.([]byte)
 	if !ok {
-		return nil, fmt.Errorf("expected string value for client_secret, but received %T", val)
+		return nil, fmt.Errorf("expected []byte value for client_secret, but received %T", val)
 	}
 	return &handlers.OAuth2ClientCredentials{
-		ClientID:     id,
-		ClientSecret: secret,
+		ClientID:     string(id),
+		ClientSecret: string(secret),
 	}, nil
 }
