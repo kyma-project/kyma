@@ -7,7 +7,7 @@ jobs:
     environment:
       name: release
     container:
-      image: eu.gcr.io/kyma-project/test-infra/kyma-integration:v20201208-8f23a167-k8s1.16
+      image: eu.gcr.io/kyma-project/test-infra/kyma-integration:v20211027-f0dd11ca
     steps:
       - name: Checkout code
         uses: actions/checkout@v2

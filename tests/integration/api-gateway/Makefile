@@ -1,6 +1,6 @@
 APP_NAME = api-gateway-integration-tests
 APP_PATH = tests/integration/api-gateway
-BUILDPACK = eu.gcr.io/kyma-project/test-infra/buildpack-golang-toolbox:v20190913-65b55d1
+BUILDPACK = eu.gcr.io/kyma-project/test-infra/buildpack-golang:v20211013-2c064d85
 SCRIPTS_DIR = $(realpath $(shell pwd)/../../..)/scripts
 
 IMG_NAME := $(DOCKER_PUSH_REPOSITORY)$(DOCKER_PUSH_DIRECTORY)/$(APP_NAME)

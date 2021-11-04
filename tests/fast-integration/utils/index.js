@@ -293,6 +293,15 @@ async function getSecret(name, namespace) {
   return body;
 }
 
+async function getFunction(name, namespace) {
+  const path = `/apis/serverless.kyma-project.io/v1alpha1/namespaces/${namespace}/functions/${name}`;
+  const response = await k8sDynamicApi.requestPromise({
+    url: k8sDynamicApi.basePath + path,
+  });
+  const body = JSON.parse(response.body);
+  return body;
+}
+
 async function getConfigMap(name, namespace) {
   const path = `/api/v1/namespaces/${namespace}/configmaps/${name}`;
   const response = await k8sDynamicApi.requestPromise({
@@ -1491,6 +1500,59 @@ async function printEventingControllerLogs() {
 }
 
 /**
+ * Prints status of the components on which in-cluster eventing happens
+ */
+ async function printStatusOfInClusterEventingInfrastructure(targetNamespace, encoding, funcName) {
+  try{
+    let kymaSystem = "kyma-system"
+    let publisherProxyReady = false
+    let eventingControllerReady = false
+    let natsServerReadyCounts = 0
+    let natsServerReady = false
+    let functionReady = false
+
+    let publisherDeployment = await k8sAppsApi.listNamespacedDeployment(kymaSystem,undefined, undefined,undefined, undefined, 'app.kubernetes.io/name=eventing-publisher-proxy, app.kubernetes.io/instance=eventing', undefined );
+    if (publisherDeployment.body.items[0].status.replicas === publisherDeployment.body.items[0].status.readyReplicas) {
+      publisherProxyReady = true
+    }
+
+    let controllerDeployment  = await k8sAppsApi.listNamespacedDeployment(kymaSystem,undefined, undefined,undefined, undefined, 'app.kubernetes.io/name=controller, app.kubernetes.io/instance=eventing', undefined );
+    if (controllerDeployment.body.items[0].status.replicas === controllerDeployment.body.items[0].status.readyReplicas) {
+      eventingControllerReady = true
+    }
+
+    let natsServerPods  = await k8sCoreV1Api.listNamespacedPod(kymaSystem, undefined, undefined, undefined, undefined, 'kyma-project.io/dashboard=eventing, nats_cluster=eventing-nats');
+    for (let nats of natsServerPods.body.items) {
+      if (nats.status.phase === "Running") {
+        natsServerReadyCounts += 1
+      }
+    }
+    if (natsServerReadyCounts === natsServerPods.body.items.length) {
+      natsServerReady = true
+    }
+
+    let lastOrderFunc = await getFunction(funcName, targetNamespace);
+    for (let cond of lastOrderFunc.status.conditions) {
+      if (cond.type === "Running" && cond.status === "True") {
+        functionReady = true
+        break
+      }
+    }
+
+    console.log(`****** Printing status of infrastructure for in-cluster eventing, mode: ${encoding} *******`)
+    console.log(`****** Eventing-publisher-proxy deployment from ns: ${kymaSystem} ready: ${publisherProxyReady}`)
+    console.log(`****** Eventing-controller deployment from ns: ${kymaSystem} ready: ${eventingControllerReady}`)
+    console.log(`****** NATS-server pods from ns: ${kymaSystem} ready: ${natsServerReady}`)
+    console.log(`****** Function ${funcName} from ns: ${targetNamespace} ready: ${functionReady}`)
+    console.log(`****** End *******`)
+  }
+  catch(err) {
+    console.log(err)
+    throw err
+  }
+}
+
+/**
  * Prints logs of eventing-publisher-proxy from kyma-system
  */
  async function printEventingPublisherProxyLogs() {
@@ -1625,4 +1687,5 @@ module.exports = {
   createEventingBackendK8sSecret,
   deleteEventingBackendK8sSecret,
   getTraceDAG,
+  printStatusOfInClusterEventingInfrastructure,
 };

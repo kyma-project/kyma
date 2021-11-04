@@ -2,7 +2,7 @@
 title: Use a custom domain to expose a service
 ---
 
-This tutorial shows how to set up your custom domain and prepare a certificate for exposing a service. The components used are Gardener [External DNS Management](https://gardener.cloud/docs/concepts/networking/dns-managment/#external-dns-management) and [Certificate Management](https://gardener.cloud/docs/concepts/networking/cert-managment/).
+This tutorial shows how to set up your custom domain and prepare a certificate for exposing a service. The components used are Gardener [External DNS Management](https://github.com/gardener/external-dns-management) and [Certificate Management](https://github.com/gardener/cert-management).
 
 Once you finish the steps, learn how to [expose a service](./apix-02-expose-service-apigateway.md) or how to [expose and secure a service](./apix-03-expose-and-sercure-service.md).
 
