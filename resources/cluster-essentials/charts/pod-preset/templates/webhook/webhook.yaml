@@ -1,17 +1,16 @@
-{{- if or (not .Values.cacert) (not .Values.cert) (not .Values.key)  }}
-{{- $ca := genCA "pod-preset-webhook-ca" 3650 }}
-{{- $encodedcacert := b64enc $ca.Cert }}
-{{- $cn := printf "%s-webhook" (include "pod-preset.fullname" .) }}
-{{- $altName1 := printf "%s.%s" $cn .Release.Namespace }}
-{{- $altName2 := printf "%s.%s.svc" $cn .Release.Namespace }}
-{{- $cert := genSignedCert $cn nil (list $altName1 $altName2) 3650 $ca }}
-{{- $encodedcert := b64enc $cert.Cert }}
-{{- $encodedkey := b64enc $cert.Kay }}
-{{- else }}
-{{- $encodedcacert := b64enc ( include "tplValue" ( dict "value" .Values.cacert "context" . ))  -}}
-{{- $encodedcert := b64enc ( include "tplValue" ( dict "value" .Values.cert "context" . )) -}}
-{{- $encodedkey := b64enc ( include "tplValue" ( dict "value" .Values.key "context" . )) -}}
-{{- end }}
+{{- $encodedCaCert :=  b64enc .Values.caCert -}}
+{{- $encodedCert :=  b64enc .Values.cert -}}
+{{- $encodedKey :=  b64enc .Values.key -}}
+{{ if or (not .Values.caCert) (not .Values.cert) (not .Values.key)  }}
+  {{- $ca := genCA "pod-preset-webhook-ca" 3650 }}
+  {{- $cn := printf "%s-webhook" (include "pod-preset.fullname" .) }}
+  {{- $altName1 := printf "%s.%s" $cn .Release.Namespace }}
+  {{- $altName2 := printf "%s.%s.svc" $cn .Release.Namespace }}
+  {{- $cert := genSignedCert $cn nil (list $altName1 $altName2) 3650 $ca }}
+  {{- $encodedCaCert := b64enc $ca.Cert }}
+  {{- $encodedCert := b64enc $cert.Cert }}
+  {{- $encodedKey := b64enc $cert.Key }}
+{{ end }}
 
 apiVersion: admissionregistration.k8s.io/v1beta1
 kind: MutatingWebhookConfiguration
@@ -20,7 +19,7 @@ metadata:
   namespace: "{{ .Release.Namespace }}"
 webhooks:
 - clientConfig:
-    caBundle: {{ $encodedcacert }}
+    caBundle: {{ $encodedCaCert }}
     service:
       name: {{ template "pod-preset.fullname" . }}-webhook
       namespace: "{{ .Release.Namespace }}"
@@ -51,5 +50,5 @@ metadata:
   namespace: "{{ .Release.Namespace }}"
 type: Opaque
 data:
-  tls.crt: {{ $encodedcert }}
-  tls.key: {{ $encodedkey }}
+  tls.crt: {{ $encodedCert }}
+  tls.key: {{ $encodedKey }}
