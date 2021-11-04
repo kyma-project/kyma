@@ -17,10 +17,11 @@ describe(`SKR Nightly periodic test`, function () {
    const config = KCPConfig.fromEnv();
    const kcp = new KCPWrapper(config);
 
+   let options;
    let runtime;
    let shoot;
 
-   describe(`Prepare kube client`, function () {
+   describe(`Prepare step`, function () {
       it(`Fetch last runtime`, async function() {
          await kcp.login()
          let query = {
@@ -35,17 +36,19 @@ describe(`SKR Nightly periodic test`, function () {
          shoot = await gardener.getShoot(runtime.shootName);
          initializeK8sClient({ kubeconfig: shoot.kubeconfig });
       });
+      it('Initialize test options for nightly', async function () {
+         options = GatherOptions(
+             WithRuntimeID(runtime.instanceID),
+             WithRuntimeName('kyma-nightly'),
+             WithScenarioName('test-nightly'),
+             WithAppName('app-nightly'),
+             WithTestNS('skr-nightly'));
+         console.log(options)
+      })
    });
-   let options = GatherOptions(
-       WithRuntimeID(runtime.instanceID),
-       WithRuntimeName('kyma-nightly'),
-       WithScenarioName('test-nightly'),
-       WithAppName('app-nightly'),
-       WithTestNS('skr-nightly'));
    let skr = {
       operation: "",
       shoot
    }
-   console.log(options)
    // skrTest(skr, options);
 });
