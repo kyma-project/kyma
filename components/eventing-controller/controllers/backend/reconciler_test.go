@@ -443,6 +443,7 @@ var _ = Describe("Backend Reconciliation Tests", func() {
 			ctx := context.Background()
 			natsCommander.stopErr = nil
 			ensurePublisherProxyPodIsCreated(ctx)
+			//Eventually(pod.co).Should()
 			Eventually(eventingBackendStatusGetter(ctx, eventingBackendName, kymaSystemNamespace), timeout, pollingInterval).
 				Should(Equal(&eventingv1alpha1.EventingBackendStatus{
 					Backend:                     eventingv1alpha1.BEBBackendType,
@@ -497,7 +498,9 @@ func ensurePublisherProxyIsReady(ctx context.Context) {
 	publisherProxyDeployment, err := publisherProxyDeploymentGetter(ctx)()
 	Expect(err).ShouldNot(HaveOccurred())
 
-	ensurePublisherProxyPodIsCreated(ctx)
+	pod := ensurePublisherProxyPodIsCreated(ctx)
+	err = ctrl.SetControllerReference(publisherProxyDeployment, &pod, scheme.Scheme)
+	Expect(err).ShouldNot(HaveOccurred())
 
 	// update the deployment's status
 	updatedDeployment := publisherProxyDeployment.DeepCopy()
@@ -507,7 +510,7 @@ func ensurePublisherProxyIsReady(ctx context.Context) {
 	Expect(err).ShouldNot(HaveOccurred())
 }
 
-func ensurePublisherProxyPodIsCreated(ctx context.Context) {
+func ensurePublisherProxyPodIsCreated(ctx context.Context) corev1.Pod {
 	backendType := fmt.Sprint(eventingv1alpha1.NatsBackendType)
 	if bebSecretExists(ctx) {
 		backendType = fmt.Sprint(eventingv1alpha1.BEBBackendType)
@@ -524,12 +527,26 @@ func ensurePublisherProxyPodIsCreated(ctx context.Context) {
 		}
 	}
 	err := k8sClient.Create(ctx, pod)
-	Expect(err).ShouldNot(HaveOccurred())
+	if !k8serrors.IsAlreadyExists(err) {
+		Expect(err).Should(BeNil())
+	}
 
-	publisherProxyDeployment, err := publisherProxyDeploymentGetter(ctx)()
-	Expect(err).ShouldNot(HaveOccurred())
-	err = ctrl.SetControllerReference(publisherProxyDeployment, pod, scheme.Scheme)
-	Expect(err).ShouldNot(HaveOccurred())
+	// update the pod's status
+	updatedPod := pod.DeepCopy()
+	updatedPod.Status.InitContainerStatuses = []corev1.ContainerStatus{
+		{
+			Name:  deployment.PublisherName,
+			Ready: true,
+		}}
+	updatedPod.Status.ContainerStatuses = []corev1.ContainerStatus{
+		{
+			Name:  deployment.PublisherName,
+			Ready: true,
+		}}
+	err = k8sClient.Status().Update(ctx, updatedPod)
+	Expect(err).Should(BeNil())
+
+	return *pod
 }
 
 func bebSecretExists(ctx context.Context) bool {
