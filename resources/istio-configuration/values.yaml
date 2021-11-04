@@ -41,6 +41,7 @@ meshConfig:
       zipkin:
         address: "zipkin.kyma-system:9411"
   enablePrometheusMerge: false
+  enableTracing: "{{ .Values.global.tracing.enabled }}"
 
 components:
   egressGateways:

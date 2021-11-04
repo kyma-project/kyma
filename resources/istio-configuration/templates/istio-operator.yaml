@@ -24,8 +24,7 @@ spec:
       k8s:
 {{- toYaml .Values.components.pilot.config | nindent 10}}
   meshConfig:
-{{- toYaml .Values.meshConfig | nindent 4 }}
-    enableTracing: {{ .Values.global.tracing.enabled }}
+{{- tpl (toYaml .Values.meshConfig | nindent 4) . | replace "'true'" "true" | replace "'false'" "false" }}
 
   values:
     global:
