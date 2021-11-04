@@ -3,29 +3,13 @@ const {
    KCPWrapper,
 } = require('../../kcp/client');
 
-const {
-   KEBConfig,
-   KEBClient,
-} = require('../../kyma-environment-broker');
-
-const {
-   GardenerClient,
-   GardenerConfig,
-} = require('../../gardener');
-
 const {initializeK8sClient} = require('../../utils');
 
 const {
-   skrTest,
+   skrTest, GatherOptions, WithRuntimeID, WithRuntimeName, WithScenarioName, WithAppName, WithTestNS, keb, gardener,
 } = require('../../skr-test');
 
 describe(`SKR Nightly periodic test`, function () {
-   const kebconfig = KEBConfig.fromEnv();
-   const gardenerConfig = GardenerConfig.fromEnv();
-
-   const gardener = new GardenerClient(gardenerConfig);
-   const keb = new KEBClient(kebconfig);
-
    process.env.KCP_KEB_API_URL = `https://kyma-env-broker.` + keb.host;
    process.env.KCP_GARDENER_NAMESPACE = `garden-kyma-dev`;
    process.env.KCP_OIDC_ISSUER_URL = `https://kymatest.accounts400.ondemand.com`;
@@ -34,6 +18,7 @@ describe(`SKR Nightly periodic test`, function () {
    const kcp = new KCPWrapper(config);
 
    let runtime;
+   let shoot;
 
    describe(`Prepare kube client`, function () {
       it(`Fetch last runtime`, async function() {
@@ -47,9 +32,20 @@ describe(`SKR Nightly periodic test`, function () {
          }
       });
       it (`Initialize k8s client from nightly runtime`, async function () {
-         const shoot = await gardener.getShoot(runtime.shootName);
+         shoot = await gardener.getShoot(runtime.shootName);
          initializeK8sClient({ kubeconfig: shoot.kubeconfig });
       });
    });
-   skrTest();
+   let options = GatherOptions(
+       WithRuntimeID(runtime.instanceID),
+       WithRuntimeName('kyma-nightly'),
+       WithScenarioName('test-nightly'),
+       WithAppName('app-nightly'),
+       WithTestNS('skr-nightly'));
+   let skr = {
+      operation: "",
+      shoot
+   }
+   console.log(options)
+   // skrTest(skr, options);
 });
