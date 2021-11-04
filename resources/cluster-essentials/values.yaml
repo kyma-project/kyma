@@ -49,4 +49,4 @@ securityContext:
 pod-preset:
   key: ""
   cert: ""
-  cacert: ""
+  caCert: ""

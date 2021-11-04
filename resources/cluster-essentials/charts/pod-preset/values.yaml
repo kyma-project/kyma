@@ -31,4 +31,4 @@ securityContext:
 
 key: ""
 cert: ""
-cacert: ""
+caCert: ""
