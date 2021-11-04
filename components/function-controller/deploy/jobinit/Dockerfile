@@ -4,8 +4,10 @@ ENV BASE_APP_DIR=/workspace/go/src/github.com/kyma-project/kyma/components/funct
     CGO_ENABLED=1 \
     GOOS=linux \
     GOARCH=amd64
+
 RUN apk add gcc libc-dev
-RUN apk add --no-cache libgit2-dev
+RUN apk add --no-cache --repository http://dl-cdn.alpinelinux.org/alpine/v3.14/community libgit2-dev=1.1.0-r2
+
 WORKDIR ${BASE_APP_DIR}
 
 #
@@ -22,7 +24,7 @@ FROM alpine:3.14.2
 
 RUN apk add --no-cache ca-certificates
 RUN apk add --no-cache --update --repository=http://dl-cdn.alpinelinux.org/alpine/edge/main openssh-client
-RUN apk add --no-cache  libgit2
+RUN apk add --no-cache  libgit2=1.1.0-r2
 
 LABEL source = git@github.com:kyma-project/kyma.git
 

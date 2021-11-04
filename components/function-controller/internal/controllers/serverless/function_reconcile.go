@@ -27,7 +27,6 @@ import (
 //go:generate mockery -name=GitOperator -output=automock -outpkg=automock -case=underscore
 type GitOperator interface {
 	LastCommit(options git.Options) (string, error)
-	Clone(path string, options git.Options) (string, error)
 }
 
 type FunctionReconciler struct {
@@ -160,6 +159,18 @@ func (r *FunctionReconciler) Reconcile(request ctrl.Request) (ctrl.Result, error
 
 	revision, err := r.syncRevision(instance, gitOptions)
 	if err != nil {
+		if git.IsAuthErr(err) {
+			return r.updateStatusWithoutRepository(ctx, ctrl.Result{
+				RequeueAfter: r.config.GitFetchRequeueDuration,
+			}, instance, serverlessv1alpha1.Condition{
+				Type:               serverlessv1alpha1.ConditionConfigurationReady,
+				Status:             corev1.ConditionFalse,
+				LastTransitionTime: metav1.Now(),
+				Reason:             serverlessv1alpha1.ConditionReasonGitAuthorizationFailed,
+				Message:            fmt.Sprintf("Authorization to git server failed"),
+			})
+		}
+
 		return r.updateStatusWithoutRepository(ctx, ctrl.Result{
 			RequeueAfter: r.config.GitFetchRequeueDuration,
 		}, instance, serverlessv1alpha1.Condition{
