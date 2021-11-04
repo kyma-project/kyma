@@ -287,6 +287,19 @@ func (r *Reconciler) syncBEBSubscription(ctx context.Context, subscription *even
 			return statusChanged, err
 		}
 	}
+	// check if the last webhooks call returned an error
+	if r.checkLastFailedDelivery(subscription) {
+		reason := subscription.Status.EmsSubscriptionStatus.LastFailedDeliveryReason
+		condition := eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionSubscriptionWebhookCall, eventingv1alpha1.ConditionReasonSubscriptionWebhookCall, corev1.ConditionFalse, reason)
+		if err := r.updateCondition(ctx, subscription, condition); err != nil {
+			return statusChanged, err
+		}
+	} else {
+		condition := eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionSubscriptionWebhookCall, eventingv1alpha1.ConditionReasonSubscriptionWebhookCall, corev1.ConditionTrue, "")
+		if err := r.updateCondition(ctx, subscription, condition); err != nil {
+			return statusChanged, err
+		}
+	}
 	// OK
 	return statusChanged, nil
 }
@@ -850,6 +863,29 @@ func (r *Reconciler) checkStatusActive(subscription *eventingv1alpha1.Subscripti
 		retry = true
 	}
 	return false, retry, err
+}
+
+// checkLastFailedDelivery checks if LastFailedDelivery exists and if happened after LastSuccessfulDelivery
+func (r *Reconciler) checkLastFailedDelivery(subscription *eventingv1alpha1.Subscription) bool {
+	r.namedLogger().Infow("checkLastFailedDelivery() called!!!!!!")
+	if len(subscription.Status.EmsSubscriptionStatus.LastFailedDelivery) > 0 {
+		var lastFailedDeliveryTime, LastSuccessfulDeliveryTime time.Time
+		var err error
+		if lastFailedDeliveryTime, err = time.Parse(time.RFC3339, subscription.Status.EmsSubscriptionStatus.LastFailedDelivery); err != nil {
+			r.namedLogger().Errorw("parse LastFailedDelivery failed", "error", err)
+			return false
+		}
+		if len(subscription.Status.EmsSubscriptionStatus.LastSuccessfulDelivery) > 0 {
+			if LastSuccessfulDeliveryTime, err = time.Parse(time.RFC3339, subscription.Status.EmsSubscriptionStatus.LastSuccessfulDelivery); err != nil {
+				r.namedLogger().Errorw("parse LastSuccessfulDelivery failed", "error", err)
+				return false
+			}
+		}
+		if lastFailedDeliveryTime.After(LastSuccessfulDeliveryTime) {
+			return true
+		}
+	}
+	return false
 }
 
 func (r *Reconciler) namedLogger() *zap.SugaredLogger {

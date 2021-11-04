@@ -13,6 +13,7 @@ const (
 	ConditionSubscribed         ConditionType = "Subscribed"
 	ConditionSubscriptionActive ConditionType = "Subscription active"
 	ConditionAPIRuleStatus      ConditionType = "APIRule status"
+	ConditionSubscriptionWebhookCall ConditionType = "Webhook call status"
 )
 
 var allConditions = makeConditions()
@@ -36,6 +37,7 @@ const (
 	ConditionReasonAPIRuleStatusReady         ConditionReason = "APIRule status ready"
 	ConditionReasonAPIRuleStatusNotReady      ConditionReason = "APIRule status not ready"
 	ConditionReasonNATSSubscriptionActive     ConditionReason = "NATS Subscription active"
+	ConditionReasonSubscriptionWebhookCall    ConditionReason = "BEB Subscription webhook call"
 )
 
 // InitializeConditions sets unset conditions to Unknown
@@ -92,6 +94,11 @@ func makeConditions() []Condition {
 			LastTransitionTime: metav1.Now(),
 			Status:             corev1.ConditionUnknown,
 		},
+		{
+			Type:               ConditionSubscriptionWebhookCall,
+			LastTransitionTime: metav1.Now(),
+			Status:             corev1.ConditionUnknown,
+		},
 	}
 	return conditions
 }
@@ -134,6 +141,16 @@ func MakeCondition(conditionType ConditionType, reason ConditionReason, status c
 func (s *SubscriptionStatus) IsConditionSubscribed() bool {
 	for _, condition := range s.Conditions {
 		if condition.Type == ConditionSubscribed && condition.Status == corev1.ConditionTrue {
+			return true
+		}
+	}
+	return false
+}
+
+func (s *SubscriptionStatus) IsConditionWebhookCall() bool {
+	for _, condition := range s.Conditions {
+		if condition.Type == ConditionSubscriptionWebhookCall &&
+				(condition.Status == corev1.ConditionTrue || condition.Status == corev1.ConditionUnknown)  {
 			return true
 		}
 	}
