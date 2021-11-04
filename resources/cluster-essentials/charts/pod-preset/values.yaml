@@ -28,3 +28,7 @@ securityContext:
     drop:
     - ALL
   privileged: false
+
+key: ""
+cert: ""
+cacert: ""

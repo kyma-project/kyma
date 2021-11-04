@@ -45,3 +45,8 @@ securityContext:
   runAsGroup: 65534
   runAsNonRoot: true
   runAsUser: 65534
+
+pod-preset:
+  key: ""
+  cert: ""
+  cacert: ""
