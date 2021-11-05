@@ -11,6 +11,4 @@ require (
 	k8s.io/client-go v0.21.2
 )
 
-replace (
-	github.com/containerd/containerd => github.com/containerd/containerd v1.4.4
-)
+replace github.com/containerd/containerd => github.com/containerd/containerd v1.4.11
