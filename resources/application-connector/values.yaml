@@ -45,22 +45,22 @@ global:
       version: "PR-11678"
     application_connectivity_validator:
       name: "application-connectivity-validator"
-      version: "PR-11558"
+      version: "PR-12548"
     application_gateway:
       name: "application-gateway"
-      version: "PR-11558"
+      version: "PR-12548"
     application_operator:
       name: "application-operator"
-      version: "PR-12306"
+      version: "PR-12548"
     application_registry:
       name: "application-registry"
-      version: "PR-12181"
+      version: "PR-12548"
     central_application_connectivity_validator:
       name: "central-application-connectivity-validator"
       version: "PR-11846"
     central_application_gateway:
       name: "central-application-gateway"
-      version: "PR-11859"
+      version: "PR-12548"
     connection_token_handler:
       name: "connection-token-handler"
       version: "PR-11558"
@@ -74,7 +74,7 @@ global:
   testImages:
     application_gateway_legacy_tests:
       name: "application-gateway-legacy-tests"
-      version: "68baa911"
+      version: "PR-12548"
 
 application_connectivity_certs_setup_job:
   secrets:
