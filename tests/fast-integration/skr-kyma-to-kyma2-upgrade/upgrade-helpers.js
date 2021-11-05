@@ -1,11 +1,35 @@
 const {
     debug,
-    wait
+    wait,
+    switchDebug
 } = require("../utils");
+
 const execa = require("execa");
 const { expect } = require("chai");
+switchDebug(on = true)
+
+async function kcpVersion () {
+    let args = []
+    try {
+        args = [`--version`]
+        debug(`Executing: "kcp ${args.join(' ')}"`)
+        let output = await execa(`kcp`, args);
+        let version = output.stdout.split(" ")[2]
+
+        return version
+    } catch (error) {
+        console.log(error)
+        if (error.stderr === undefined) {
+            throw new Error(`failed to process output of "kcp ${args.join(' ')}": ${error}`);
+        }
+        throw new Error(`failed "kcp ${args.join(' ')}": ${error.stderr}`);
+    }
+};
 
 async function kcpLogin (kcpconfigPath, kcpUser, kcpPassword) {
+    let kcpVersion = await kcpVersion()
+    debug(`Using KCP-CLI Version: ${version}`)
+
     debug(`Running kcpLogin...`)
     let args = []
     // Note: dummycmd is just for output
@@ -28,6 +52,7 @@ async function kcpUpgrade (kcpconfigPath, subaccount, kymaUpgradeVersion) {
     let args = []
     try {
         args = [`upgrade`, `kyma`, `--config`, `${kcpconfigPath}`, `--version`, `"${kymaUpgradeVersion}"`, `--target`, `subaccount=${subaccount}`]
+        debug(`Executing: "kcp ${args.join(' ')}"`)
         let output = await execa(`kcp`, args);
         // output if successful: "OrchestrationID: 22f19856-679b-4e68-b533-f1a0a46b1eed"
         // so we need to extract the uuid
@@ -46,15 +71,26 @@ async function kcpUpgrade (kcpconfigPath, subaccount, kymaUpgradeVersion) {
 };
 
 async function getOrchestrationStatus (kcpconfigPath, orchestrationID) {
-    debug(`Running getOrchestrationStatus...`)
     let args = []
     try {
         args = [`orchestrations`,  `--config`, `${kcpconfigPath}`, `${orchestrationID}`, `-o`, `json`]
         let orchestrations = await execa(`kcp`, args);
+        let o = JSON.parse(orchestrations.stdout)
+        debug(`OrchestrationStatus: orchestrationID: ${o.orchestrationID} (${o.type}), status: ${o.state}`)
 
-        debug(`getOrchestrationStatus output: ${orchestrations.stdout}`)
+        let operations = await getOrchestrationsOperations(kcpconfigPath, o.orchestrationID)
+        debug(`Got ${operations.length} operations for OrchestrationID ${o.orchestrationID}`)
+        let upgradeOperation = {}
+        if (operations.length > 0) {
+            upgradeOperation = await getOrchestrationsOperationStatus(kcpconfigPath, orchestrationID, operations[0].operationID)
+            debug(`OrchestrationID: ${orchestrationID}: OperationID: ${operations[0].operationID}: OperationStatus: ${upgradeOperation.state}`)
+            debug(upgradeOperation)
+        } else {
+            debug (`No operations in OrchestrationID ${o.orchestrationID}`)
+        }
 
-        return JSON.parse(orchestrations.stdout)
+
+        return o
     } catch (error) {
         console.log(error)
         if (error.stderr === undefined) {
@@ -64,6 +100,48 @@ async function getOrchestrationStatus (kcpconfigPath, orchestrationID) {
     }
 };
 
+async function getOrchestrationsOperations(kcpconfigPath, orchestrationID) {
+    let args = []
+    try {
+        args = [`--config`, `${kcpconfigPath}`, `orchestration`,`${orchestrationID}`,`operations`, `-o`, `json`]
+        let res = await execa(`kcp`, args);
+        let operations = JSON.parse(res.stdout)
+
+        debug(`getOrchestrationsOperations output: ${operations}`)
+
+        if (operations.data === undefined) {
+            return []
+        }
+
+        return operations.data
+    } catch (error) {
+        console.log(error)
+        if (error.stderr === undefined) {
+            throw new Error(`failed to process output of "kcp ${args.join(' ')}": ${error}`);
+        }
+        throw new Error(`failed "kcp ${args.join(' ')}": ${error.stderr}`);
+    }
+}
+
+async function getOrchestrationsOperationStatus(kcpconfigPath, orchestrationID, operationID) {
+    debug(`Running getOrchestrationsOperationStatus...`)
+    let args = []
+    try {
+        args = [`--config`, `${kcpconfigPath}`, `orchestration`,`${orchestrationID}`,`--operation`, `${operationID}`, `-o`, `json`]
+        let operation = await execa(`kcp`, args);
+
+        debug(`getOrchestrationsOperationStatus output: ${operation.stdout}`)
+
+        return JSON.parse(operation.stdout)
+    } catch (error) {
+        console.log(error)
+        if (error.stderr === undefined) {
+            throw new Error(`failed to process output of "kcp ${args.join(' ')}": ${error}`);
+        }
+        throw new Error(`failed "kcp ${args.join(' ')}": ${error.stderr}`);
+    }
+}
+
 async function ensureOrchestrationSucceeded(kcpconfigPath, orchenstrationID) {
     // Decides whether to go to the next step of while or not based on
     // the orchestration result (0 = succeeded, 1 = failed, 2 = cancelled, 3 = pending/other)
@@ -72,14 +150,14 @@ async function ensureOrchestrationSucceeded(kcpconfigPath, orchenstrationID) {
       () => getOrchestrationStatus(kcpconfigPath, orchenstrationID),
       (res) => res && res.state && (res.state === "succeeded" || res.state === "failed"),
       1000*60*15, // 15 min
-      1000 * 30 // 5 seconds
+      1000 * 30 // 30 seconds
     );
-  
-    debug("KEB Orchestration Status:", res);
 
     if(res.state !== "succeeded") {
+        debug("KEB Orchestration Status:", res);
         throw(`orchestration didn't succeed in 15min: ${JSON.stringify(res)}`);
     }
+
     const descSplit = res.description.split(" ");
     if (descSplit[1] !== "1") {
         throw(`orchestration didn't succeed (number of scheduled operations should be equal to 1): ${JSON.stringify(res)}`);
@@ -88,9 +166,8 @@ async function ensureOrchestrationSucceeded(kcpconfigPath, orchenstrationID) {
     return res;
   }
 
-// getOrchestrationStatus ("dev.yaml", "210779e4-bd9f-4fb7-aa10-888520038da5")
-
 module.exports = {
     kcpLogin,
-    kcpUpgrade
+    kcpUpgrade,
+    kcpVersion
 }

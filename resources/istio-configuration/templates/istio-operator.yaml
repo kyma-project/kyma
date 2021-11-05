@@ -24,7 +24,8 @@ spec:
       k8s:
 {{- toYaml .Values.components.pilot.config | nindent 10}}
   meshConfig:
-{{- toYaml .Values.meshConfig | nindent 4 }}
+{{- tpl (toYaml .Values.meshConfig | nindent 4) . | replace "'true'" "true" | replace "'false'" "false" }}
+
   values:
     global:
 {{- toYaml .Values.helmValues.global | nindent 8 }}
