@@ -182,9 +182,9 @@ config:
       memBufLimit: 5MB
       # Exit Fluent Bit when reaching EOF of the monitored files.
       exitOnEof: "false"
-      parser: docker
+      parser: 
       # If enabled, the plugin will recombine split Docker log lines before passing them to any parser as configured above. This mode cannot be used at the same time as Multiline.
-      dockerMode: "On"
+      dockerMode: "Off"
       # Wait period time in seconds to flush queued unfinished split lines.
       dockerModeFlush: 4
       # When a message is unstructured (no parser applied), it's appended as a string under the key name log. This option allows to define an alternative name for that key.
@@ -198,7 +198,7 @@ config:
       # For new discovered files on start (without a database offset/position), read the content from the head of the file, not tail.
       readFromHead: "Off"
       # Specify one or Multiline Parser definition to apply to the content.
-      multilineParser:
+      multilineParser: docker, cri
       exclude:
         namespaces:
     additional: ""
