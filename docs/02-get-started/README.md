@@ -9,7 +9,10 @@ All the steps are performed in the `default` Namespace.
 
 ## Prerequisites
 
-- [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) (1.19 or greater)
+>**CAUTION:** As of version 1.20, [Kubernetes deprecated Docker](https://kubernetes.io/blog/2020/12/02/dont-panic-kubernetes-and-docker/) as a container runtime in favor of containerd. Due to a different way in which [containerd handles certificate authorities](https://github.com/containerd/containerd/issues/3071), Kyma's built-in Docker registry will not work correctly on clusters running with a self-signed TLS certificate on top of Kubernetes installation where containerd is used as a container runtime. If that is your case, either upgrade the cluster to use Docker instead of containerd, generate a valid TLS certificate for your Kyma instance or [configure an external Docker registry](https://kyma-project.io/docs/kyma/latest/03-tutorials/00-serverless/svls-07-set-external-registry/).
+
+- [Kubernetes](https://kubernetes.io/docs/setup/) (v1.19 or greater)
+- [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) (v1.19 or greater)
 - [curl](https://github.com/curl/curl)
 - [k3d](https://k3d.io) (v4.0.0 or greater)
 - [Kyma CLI](../04-operation-guides/operations/01-install-kyma-CLI.md)
