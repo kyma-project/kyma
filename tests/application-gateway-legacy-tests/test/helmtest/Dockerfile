@@ -7,7 +7,7 @@ COPY . $SRC_DIR
 
 RUN CGO_ENABLED=0 go test -o proxyhelmtests.test -c ./test/helmtest/proxy/tests
 
-FROM alpine:3.10
+FROM alpine:3.11.0
 
 LABEL source=git@github.com:kyma-project/kyma.git
 
