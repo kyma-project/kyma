@@ -47,7 +47,7 @@ func AddToScheme(scheme *runtime.Scheme) error {
 	return nil
 }
 
-// SubscriptionManager implements the SubscriptionManager interface.
+// SubscriptionManager implements the subscriptionmanager.Manager interface.
 type SubscriptionManager struct {
 	cancel       context.CancelFunc
 	envCfg       env.Config
