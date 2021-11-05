@@ -18,4 +18,4 @@ spec:
           value: $DOMAIN
         - name: WEBHOOK_TOKEN_ENDPOINT
           value: $WEBHOOK_TOKEN_ENDPOINT
-        name: manager
+        name: controller
