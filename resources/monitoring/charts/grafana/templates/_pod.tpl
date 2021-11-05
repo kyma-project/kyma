@@ -144,7 +144,7 @@ imagePullSecrets:
 {{- end }}
 containers:
 {{- if .Values.sidecar.datasources.enabled }}
-  - name: {{ template "grafana.name" . }}-sc-datasources
+  - name: {{ template "grafana.name" . }}-sc-datasources-watcher
     {{- if .Values.sidecar.image.sha }}
     image: "{{ .Values.sidecar.image.repository }}:{{ .Values.sidecar.image.tag }}@sha256:{{ .Values.sidecar.image.sha }}"
     {{- else }}
@@ -187,7 +187,7 @@ containers:
         mountPath: "/etc/grafana/provisioning/datasources"
 {{- end}}
 {{- if .Values.sidecar.dashboards.enabled }}
-  - name: {{ template "grafana.name" . }}-sc-dashboard
+  - name: {{ template "grafana.name" . }}-sc-dashboard-watcher
     {{- if .Values.sidecar.image.sha }}
     image: "{{ .Values.sidecar.image.repository }}:{{ .Values.sidecar.image.tag }}@sha256:{{ .Values.sidecar.image.sha }}"
     {{- else }}
