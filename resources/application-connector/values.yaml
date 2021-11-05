@@ -51,7 +51,7 @@ global:
       version: "PR-11558"
     application_operator:
       name: "application-operator"
-      version: "PR-12306"
+      version: "PR-12555"
     application_registry:
       name: "application-registry"
       version: "PR-12181"
