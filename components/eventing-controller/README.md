@@ -24,13 +24,13 @@ curl -sfL https://install.goreleaser.com/github.com/golangci/golangci-lint.sh | 
 > Existing deployment for eventing-controller should be deleted from the Kyma cluster which can interfere with reconciliation process.
 
 ```sh
-make DOMAIN=custom-domain.com deploy-local
+make DOMAIN=custom-domain.com deploy
 ```
 
 - To verify all the manifests after the processing by Kustomize without applying to the cluster, use make target `deploy-local-dry-run`:
 
 ```sh
-make DOMAIN=custom-domain.com deploy-local-dry-run
+make DOMAIN=custom-domain.com deploy-dry-run
 ```
 
 ## Usage
