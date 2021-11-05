@@ -21,13 +21,13 @@ import (
 	subscription "github.com/kyma-project/kyma/components/eventing-controller/controllers/subscription/nats"
 	"github.com/kyma-project/kyma/components/eventing-controller/logger"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/application"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/commander"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/subscriptionmanager"
 )
 
 const (
-	commanderName = "nats-commander"
+	subscriptionManagerName = "nats-subscription-manager"
 )
 
 // AddToScheme adds the own schemes to the runtime scheme.
@@ -41,8 +41,8 @@ func AddToScheme(scheme *runtime.Scheme) error {
 	return nil
 }
 
-// Commander implements the Commander interface.
-type Commander struct {
+// SubscriptionManager implements the subscriptionmanager.Manager interface.
+type SubscriptionManager struct {
 	cancel      context.CancelFunc
 	envCfg      env.NatsConfig
 	restCfg     *rest.Config
@@ -52,10 +52,10 @@ type Commander struct {
 	logger      *logger.Logger
 }
 
-// NewCommander creates the Commander for BEB and initializes it as far as it
+// NewSubscriptionManager creates the subscription manager for BEB and initializes it as far as it
 // does not depend on non-common options.
-func NewCommander(restCfg *rest.Config, metricsAddr string, maxReconnects int, reconnectWait time.Duration, logger *logger.Logger) *Commander {
-	return &Commander{
+func NewSubscriptionManager(restCfg *rest.Config, metricsAddr string, maxReconnects int, reconnectWait time.Duration, logger *logger.Logger) *SubscriptionManager {
+	return &SubscriptionManager{
 		envCfg:      env.GetNatsConfig(maxReconnects, reconnectWait), // TODO Harmonization.
 		restCfg:     restCfg,
 		metricsAddr: metricsAddr,
@@ -63,8 +63,8 @@ func NewCommander(restCfg *rest.Config, metricsAddr string, maxReconnects int, r
 	}
 }
 
-// Init implements the Commander interface.
-func (c *Commander) Init(mgr manager.Manager) error {
+// Init implements the subscriptionmanager.Manager interface.
+func (c *SubscriptionManager) Init(mgr manager.Manager) error {
 	if len(c.envCfg.URL) == 0 {
 		return fmt.Errorf("env var URL must be a non-empty value")
 	}
@@ -72,8 +72,8 @@ func (c *Commander) Init(mgr manager.Manager) error {
 	return nil
 }
 
-// Start implements the Commander interface and starts the commander.
-func (c *Commander) Start(defaultSubsConfig env.DefaultSubscriptionConfig, _ commander.Params) error {
+// Start implements the subscriptionmanager.Manager interface for the NATS subscription manager.
+func (c *SubscriptionManager) Start(defaultSubsConfig env.DefaultSubscriptionConfig, _ subscriptionmanager.Params) error {
 	ctx, cancel := context.WithCancel(context.Background())
 
 	c.cancel = cancel
@@ -96,8 +96,9 @@ func (c *Commander) Start(defaultSubsConfig env.DefaultSubscriptionConfig, _ com
 	return nil
 }
 
-// Stop implements the Commander interface and stops the commander.
-func (c *Commander) Stop(runCleanup bool) error {
+// Stop implements the subscriptionmanager.Manager interface and stops the NATS subscription manager.
+// It cleans up the subscriptions on NATS, if the runCleanup flag is true.
+func (c *SubscriptionManager) Stop(runCleanup bool) error {
 	c.cancel()
 	if !runCleanup {
 		return nil
@@ -157,6 +158,6 @@ func cleanup(backend handlers.MessagingBackend, dynamicClient dynamic.Interface,
 	return nil
 }
 
-func (c *Commander) namedLogger() *zap.SugaredLogger {
-	return c.logger.WithContext().Named(commanderName)
+func (c *SubscriptionManager) namedLogger() *zap.SugaredLogger {
+	return c.logger.WithContext().Named(subscriptionManagerName)
 }
