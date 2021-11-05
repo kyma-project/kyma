@@ -6,8 +6,10 @@ const {
 const {initializeK8sClient} = require('../../utils');
 
 const {
-   skrTest, GatherOptions, WithRuntimeID, WithRuntimeName, WithScenarioName, WithAppName, WithTestNS, keb, gardener,
+   GatherOptions, WithRuntimeID, WithRuntimeName, WithScenarioName, WithAppName, WithTestNS, keb, gardener,
+   OIDCE2ETest, CommerceMockTest,
 } = require('../../skr-test');
+
 
 describe(`SKR Nightly periodic test`, function () {
    process.env.KCP_KEB_API_URL = `https://kyma-env-broker.` + keb.host;
@@ -17,38 +19,34 @@ describe(`SKR Nightly periodic test`, function () {
    const config = KCPConfig.fromEnv();
    const kcp = new KCPWrapper(config);
 
-   let options;
    let runtime;
    let shoot;
-
-   describe(`Prepare step`, function () {
-      it(`Fetch last runtime`, async function() {
-         await kcp.login()
-         let query = {
-            subaccount: keb.subaccountID,
-         }
-         let runtimes = await kcp.runtimes(query);
-         if (runtimes.data) {
-            runtime = runtimes.data[0];
-         }
-      });
-      it (`Initialize k8s client from nightly runtime`, async function () {
-         shoot = await gardener.getShoot(runtime.shootName);
-         initializeK8sClient({ kubeconfig: shoot.kubeconfig });
-      });
-      it('Initialize test options for nightly', async function () {
-         options = GatherOptions(
-             WithRuntimeID(runtime.instanceID),
-             WithRuntimeName('kyma-nightly'),
-             WithScenarioName('test-nightly'),
-             WithAppName('app-nightly'),
-             WithTestNS('skr-nightly'));
-         console.log(options)
-      })
+   before('Provision SKR', async function () {
+      await kcp.login()
+      let query = {
+         subaccount: keb.subaccountID,
+      }
+      let runtimes = await kcp.runtimes(query);
+      if (runtimes.data) {
+         runtime = runtimes.data[0];
+      }
+      console.log(runtime);
+      shoot = await gardener.getShoot(runtime.shootName);
+      initializeK8sClient({ kubeconfig: shoot.kubeconfig });
    });
-   let skr = {
-      operation: "",
-      shoot
-   }
-   // skrTest(skr, options);
+   describe('Execute tests', function () {
+      let options = GatherOptions(
+          WithRuntimeID(runtime.instanceID),
+          WithRuntimeName('kyma-nightly'),
+          WithScenarioName('test-nightly'),
+          WithAppName('app-nightly'),
+          WithTestNS('skr-nightly'));
+      let skr = {
+         operation: "",
+         shoot
+      }
+      console.log(options);
+      OIDCE2ETest(skr, options);
+      CommerceMockTest(skr, options);
+   });
 });

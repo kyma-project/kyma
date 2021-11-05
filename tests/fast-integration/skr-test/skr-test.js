@@ -20,33 +20,17 @@ const {
   checkAuditEventsThreshold,
 } = require("../audit-log");
 const {keb, gardener, director} = require('./helpers');
-const {addScenarioInCompass, assignRuntimeToScenario} = require("../compass");
 const {prometheusPortForward} = require("../monitoring/client");
 
-function skrTest(skr, options) {
-  const runtimeID = options.runtimeID;
-  const testNS = options.testNS;
-  const appName = options.appName;
-  const scenarioName = options.scenarioName;
-
+function OIDCE2ETest(skr, options) {
   const oidc0 = options.oidc0;
   const oidc1 = options.oidc1;
+  const runtimeID = options.runtimeID;
 
   const administrator0 = options.administrator0;
   const administrators1 = options.administrators1;
 
-  const AWS_PLAN_ID = "361c511f-f939-4621-b228-d0fb79a1fe15";
-
-  describe("SKR test", function () {
-    let cancelPortForward = null;
-    before(() => {
-      cancelPortForward = prometheusPortForward();
-    });
-
-    after(() => {
-      cancelPortForward();
-    });
-
+  describe('OIDC E2E Test', function () {
     it(`Assure initial OIDC config is applied on shoot cluster`, async function () {
       ensureValidShootOIDCConfig(skr.shoot, oidc0);
     });
@@ -92,10 +76,23 @@ function skrTest(skr, options) {
       await ensureKymaAdminBindingExistsForUser(administrators1[1]);
       await ensureKymaAdminBindingDoesNotExistsForUser(administrator0);
     });
+  });
+}
 
-    it("Assign SKR to scenario", async function () {
-      await addScenarioInCompass(director, scenarioName);
-      await assignRuntimeToScenario(director, skr.shoot.compassID, scenarioName);
+function CommerceMockTest(skr, options) {
+  const testNS = options.testNS;
+  const appName = options.appName;
+  const scenarioName = options.scenarioName;
+  const AWS_PLAN_ID = "361c511f-f939-4621-b228-d0fb79a1fe15";
+
+  describe("SKR test", function () {
+    let cancelPortForward = null;
+    before(() => {
+      cancelPortForward = prometheusPortForward();
+    });
+
+    after(() => {
+      cancelPortForward();
     });
 
     it("CommerceMock test fixture should be ready", async function () {
@@ -136,5 +133,6 @@ function skrTest(skr, options) {
 }
 
 module.exports = {
-  skrTest,
+  CommerceMockTest,
+  OIDCE2ETest
 }
