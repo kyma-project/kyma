@@ -8,7 +8,7 @@ global:
       version: PR-11920
     eventing_controller:
       name: eventing-controller
-      version: PR-12535
+      version: PR-12553
       pullPolicy: "IfNotPresent"
     publisher_proxy:
       name: event-publisher-proxy
