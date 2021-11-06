@@ -205,54 +205,54 @@ describe("SKR-Upgrade-test", function () {
     debug("Upgrade Done!")
   });
 
-  // Perform Tests after Upgrade
+  // // Perform Tests after Upgrade
 
-  it("Listing all pods in cluster", async function () {
-    await getContainerRestartsForAllNamespaces();
-  });
+  // it("Listing all pods in cluster", async function () {
+  //   await getContainerRestartsForAllNamespaces();
+  // });
 
-  initialRestarts = undefined
+  // initialRestarts = undefined
 
-  it("in-cluster event should be delivered", async function () {
-    initialRestarts = await checkInClusterEventDelivery(testNS);
-  });
+  // it("in-cluster event should be delivered", async function () {
+  //   initialRestarts = await checkInClusterEventDelivery(testNS);
+  // });
 
-  it("function should be reachable through secured API Rule", async function () {
-    await checkFunctionResponse(testNS);
-  });
+  // it("function should be reachable through secured API Rule", async function () {
+  //   await checkFunctionResponse(testNS);
+  // });
 
-  it("order.created.v1 event should trigger the lastorder function", async function () {
-    await sendEventAndCheckResponse();
-  });
+  // it("order.created.v1 event should trigger the lastorder function", async function () {
+  //   await sendEventAndCheckResponse();
+  // });
 
-  it("service instance provisioned by helm broker should be reachable", async function () {
-    await checkServiceInstanceExistence(testNS);
-  });
+  // it("service instance provisioned by helm broker should be reachable", async function () {
+  //   await checkServiceInstanceExistence(testNS);
+  // });
 
-  it("Should print report of restarted containers, skipped if no crashes happened", async function () {
-    const afterTestRestarts = await getContainerRestartsForAllNamespaces();
-    printRestartReport(initialRestarts, afterTestRestarts);
-  });
+  // it("Should print report of restarted containers, skipped if no crashes happened", async function () {
+  //   const afterTestRestarts = await getContainerRestartsForAllNamespaces();
+  //   printRestartReport(initialRestarts, afterTestRestarts);
+  // });
 
 
-  // Cleanup
-  const skip_cleanup = getEnvOrThrow("SKIP_CLEANUP")
+  // // Cleanup
+  // const skip_cleanup = getEnvOrThrow("SKIP_CLEANUP")
 
-  if (skip_cleanup === "FALSE") {
-    it("Unregister Kyma resources from Compass", async function() {
-      await unregisterKymaFromCompass(director, scenarioName);
-    });
+  // if (skip_cleanup === "FALSE") {
+  //   it("Unregister Kyma resources from Compass", async function() {
+  //     await unregisterKymaFromCompass(director, scenarioName);
+  //   });
 
-    it("Test fixtures should be deleted", async function () {
-      await cleanMockTestFixture("mocks", testNS, true)
-    });
+  //   it("Test fixtures should be deleted", async function () {
+  //     await cleanMockTestFixture("mocks", testNS, true)
+  //   });
 
-    it("Unregister SKR resources from Compass", async function () {
-      await unregisterKymaFromCompass(director, scenarioName);
-    });
+  //   it("Unregister SKR resources from Compass", async function () {
+  //     await unregisterKymaFromCompass(director, scenarioName);
+  //   });
 
-    it("Deprovision SKR", async function () {
-      await deprovisionSKR(keb, instanceID);
-    });
-  }
+  //   it("Deprovision SKR", async function () {
+  //     await deprovisionSKR(keb, instanceID);
+  //   });
+  // }
 });
