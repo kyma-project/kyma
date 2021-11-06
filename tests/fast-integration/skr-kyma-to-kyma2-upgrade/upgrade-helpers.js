@@ -27,7 +27,7 @@ async function kcpVersion () {
 };
 
 async function kcpLogin (kcpconfigPath, kcpUser, kcpPassword) {
-    let kcpVersion = await kcpVersion()
+    let version = await kcpVersion()
     debug(`Using KCP-CLI Version: ${version}`)
 
     debug(`Running kcpLogin...`)
