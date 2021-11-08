@@ -71,8 +71,6 @@ async function kcpUpgrade (kcpconfigPath, subaccount, kymaUpgradeVersion) {
     }
 };
 
-kcpUpgrade("/Users/cvoigt/tmp/config-dev-auto.yaml", "cee91d4e-b54e-4ee0-8258-ee3e15d57ad2", "2.0.0-rc4")
-
 async function getOrchestrationStatus (kcpconfigPath, orchestrationID) {
     let args = []
     try {
