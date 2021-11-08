@@ -13,7 +13,7 @@ All the steps are performed in the `default` Namespace.
 
 - [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) (v1.19 or higher)
 - [curl](https://github.com/curl/curl)
-- [k3d](https://k3d.io) (v4.0.0 or higher with [Kubernetes](https://kubernetes.io/docs/setup/) v1.19, 1.20, or 1.21)
+- [k3d](https://k3d.io) (v4.0.0 or higher with [Kubernetes](https://kubernetes.io/docs/setup/) v1.19 - recommended, 1.20, or 1.21)
 - [Kyma CLI](../04-operation-guides/operations/01-install-kyma-CLI.md)
 
 ## Steps
