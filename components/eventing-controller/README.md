@@ -27,7 +27,7 @@ curl -sfL https://install.goreleaser.com/github.com/golangci/golangci-lint.sh | 
 make DOMAIN=custom-domain.com deploy
 ```
 
-- To verify all the manifests after the processing by Kustomize without applying to the cluster, use make target `deploy-local-dry-run`:
+- To verify all the manifests after the processing by Kustomize without applying to the cluster, use make target `deploy-dry-run`:
 
 ```sh
 make DOMAIN=custom-domain.com deploy-dry-run
