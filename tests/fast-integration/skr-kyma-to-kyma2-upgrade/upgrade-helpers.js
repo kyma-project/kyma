@@ -51,9 +51,10 @@ async function kcpUpgrade (kcpconfigPath, subaccount, kymaUpgradeVersion) {
     debug(`Running kymaUpgrade...`)
     let args = []
     try {
-        args = [`upgrade`, `kyma`, `--config`, `${kcpconfigPath}`, `--version`, `"${kymaUpgradeVersion}"`, `--target`, `subaccount=${subaccount}`, ` --verbose=6`]
+        args = [`--verbose=6`, `upgrade`, `kyma`, `--config`, `${kcpconfigPath}`, `--version`, `"${kymaUpgradeVersion}"`, `--target`, `subaccount=${subaccount}`]
         debug(`Executing: "kcp ${args.join(' ')}"`)
         let output = await execa(`kcp`, args);
+        debug(output)
         // output if successful: "OrchestrationID: 22f19856-679b-4e68-b533-f1a0a46b1eed"
         // so we need to extract the uuid
         let orchestrationID = output.stdout.split(" ")[1]
@@ -69,6 +70,8 @@ async function kcpUpgrade (kcpconfigPath, subaccount, kymaUpgradeVersion) {
         throw new Error(`failed "kcp ${args.join(' ')}": ${error.stderr}`);
     }
 };
+
+kcpUpgrade("/Users/cvoigt/tmp/config-dev-auto.yaml", "cee91d4e-b54e-4ee0-8258-ee3e15d57ad2", "2.0.0-rc4")
 
 async function getOrchestrationStatus (kcpconfigPath, orchestrationID) {
     let args = []
