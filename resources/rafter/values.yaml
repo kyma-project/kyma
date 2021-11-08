@@ -9,7 +9,7 @@ global:
   images:
     minio:
       name: "minio"
-      version: "RELEASE.2020-09-21T22-31-59Z-e85e5eaf"
+      version: "RELEASE.2020-09-21T22-31-59Z-9397617c"
       directory: "tpi/minio"
     minio_client:
       name: "mc"
