@@ -12,9 +12,10 @@ class KCPConfig {
             getEnvOrThrow("KCP_TECH_USER_PASSWORD"),
             getEnvOrThrow("KCP_OIDC_CLIENT_ID"),
             getEnvOrThrow("KCP_OIDC_CLIENT_SECRET"),
+            getEnvOrThrow("KCP_MOTHERSHIP_API_URL"),
         );
     }
-    constructor(host, issuerURL, gardenerNamespace, username, password, clientID, clientSecret) {
+    constructor(host, issuerURL, gardenerNamespace, username, password, clientID, clientSecret, mothershipURL) {
         this.host = host;
         this.issuerURL = issuerURL;
         this.gardenerNamespace = gardenerNamespace;
@@ -22,6 +23,7 @@ class KCPConfig {
         this.password = password;
         this.clientID = clientID;
         this.clientSecret = clientSecret;
+        this.mothershipURL = mothershipURL;
     }
 }
 
@@ -32,6 +34,7 @@ class KCPWrapper {
         this.clientID = config.clientID;
         this.clientSecret = config.clientSecret;
         this.issuerURL = config.issuerURL;
+        this.mothershipURL = config.mothershipURL;
 
         this.username = config.username;
         this.password = config.password;
@@ -45,6 +48,7 @@ class KCPWrapper {
             stream.write(`oidc-client-secret: ${this.clientSecret}\n`);
             stream.write(`keb-api-url: ${this.host}\n`);
             stream.write(`oidc-issuer-url: ${this.issuerURL}\n`);
+            stream.write(`mothership-api-url: ${this.mothershipURL}\n`)
             stream.end();
         });
     }
