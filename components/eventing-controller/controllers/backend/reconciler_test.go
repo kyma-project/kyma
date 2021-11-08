@@ -443,7 +443,6 @@ var _ = Describe("Backend Reconciliation Tests", func() {
 			ctx := context.Background()
 			natsCommander.stopErr = nil
 			ensurePublisherProxyPodIsCreated(ctx)
-			//Eventually(pod.co).Should()
 			Eventually(eventingBackendStatusGetter(ctx, eventingBackendName, kymaSystemNamespace), timeout, pollingInterval).
 				Should(Equal(&eventingv1alpha1.EventingBackendStatus{
 					Backend:                     eventingv1alpha1.BEBBackendType,
