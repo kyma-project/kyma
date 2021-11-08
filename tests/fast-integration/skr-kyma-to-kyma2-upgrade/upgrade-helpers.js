@@ -51,7 +51,7 @@ async function kcpUpgrade (kcpconfigPath, subaccount, kymaUpgradeVersion) {
     debug(`Running kymaUpgrade...`)
     let args = []
     try {
-        args = [`upgrade`, `kyma`, `--config`, `${kcpconfigPath}`, `--version`, `"${kymaUpgradeVersion}"`, `--target`, `subaccount=${subaccount}`]
+        args = [`upgrade`, `kyma`, `--config`, `${kcpconfigPath}`, `--version`, `"${kymaUpgradeVersion}"`, `--target`, `subaccount=${subaccount}`, ` --verbose=6`]
         debug(`Executing: "kcp ${args.join(' ')}"`)
         let output = await execa(`kcp`, args);
         // output if successful: "OrchestrationID: 22f19856-679b-4e68-b533-f1a0a46b1eed"
