@@ -68,14 +68,23 @@ describe("SKR-Upgrade-test", function () {
     `Application ${appName}`
   );
 
+  // debug(
+  //   `KEB_HOST: ${getEnvOrThrow("KEB_HOST")}`,
+  //   `KEB_CLIENT_ID: ${getEnvOrThrow("KEB_CLIENT_ID")}`,
+  //   `KEB_CLIENT_SECRET: ${getEnvOrThrow("KEB_CLIENT_SECRET")}`,
+  //   `KEB_GLOBALACCOUNT_ID: ${getEnvOrThrow("KEB_GLOBALACCOUNT_ID")}`,
+  //   `KEB_SUBACCOUNT_ID: ${getEnvOrThrow("KEB_SUBACCOUNT_ID")}`,
+  //   `KEB_USER_ID: ${getEnvOrThrow("KEB_USER_ID")}`,
+  //   `KEB_PLAN_ID: ${getEnvOrThrow("KEB_PLAN_ID")}`
+  // );
+
   debug(
-    `KEB_HOST: ${getEnvOrThrow("KEB_HOST")}`,
-    `KEB_CLIENT_ID: ${getEnvOrThrow("KEB_CLIENT_ID")}`,
-    `KEB_CLIENT_SECRET: ${getEnvOrThrow("KEB_CLIENT_SECRET")}`,
-    `KEB_GLOBALACCOUNT_ID: ${getEnvOrThrow("KEB_GLOBALACCOUNT_ID")}`,
-    `KEB_SUBACCOUNT_ID: ${getEnvOrThrow("KEB_SUBACCOUNT_ID")}`,
-    `KEB_USER_ID: ${getEnvOrThrow("KEB_USER_ID")}`,
-    `KEB_PLAN_ID: ${getEnvOrThrow("KEB_PLAN_ID")}`      
+    `KCP_TECH_USER_LOGIN: ${KCP_TECH_USER_LOGIN}\n`,
+    `KCP_TECH_USER_PASSWORD: ${KCP_TECH_USER_PASSWORD}\n`,
+    `KCP_OIDC_CLIENT_ID: ${KCP_OIDC_CLIENT_ID}\n`,
+    `KCP_OIDC_CLIENT_SECRET: ${KCP_OIDC_CLIENT_SECRET}\n`,
+    `KCP_KEB_API_URL: ${KCP_KEB_API_URL}\n`,
+    `KCP_OIDC_ISSUER_URL: ${KCP_OIDC_ISSUER_URL}\n`
   );
   
   // debug(
@@ -169,15 +178,6 @@ describe("SKR-Upgrade-test", function () {
   const kymaUpgradeVersion = getEnvOrThrow("KYMA_UPGRADE_VERSION")
 
   it(`Perform kcp login`, async function () {
-
-    // debug(
-    //   `KCP_TECH_USER_LOGIN: ${KCP_TECH_USER_LOGIN}\n`,
-    //   `KCP_TECH_USER_PASSWORD: ${KCP_TECH_USER_PASSWORD}\n`,
-    //   `KCP_OIDC_CLIENT_ID: ${KCP_OIDC_CLIENT_ID}\n`,
-    //   `KCP_OIDC_CLIENT_SECRET: ${KCP_OIDC_CLIENT_SECRET}\n`,
-    //   `KCP_KEB_API_URL: ${KCP_KEB_API_URL}\n`,
-    //   `KCP_OIDC_ISSUER_URL: ${KCP_OIDC_ISSUER_URL}\n`
-    // )
 
     let stream = fs.createWriteStream(kcpconfigPath);
     stream.once('open', function(fd) {
