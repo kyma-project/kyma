@@ -50,6 +50,7 @@ describe("SKR nightly", function () {
   process.env.KCP_KEB_API_URL = `https://kyma-env-broker.` + keb.host;
   process.env.KCP_GARDENER_NAMESPACE = `garden-kyma-dev`;
   process.env.KCP_OIDC_ISSUER_URL = `https://kymatest.accounts400.ondemand.com`;
+  process.env.KCP_MOTHERSHIP_API_URL = 'https://mothership-reconciler.cp.dev.kyma.cloud.sap/v1';
   const kcp = new KCPWrapper(KCPConfig.fromEnv());
 
   const gardener = new GardenerClient(GardenerConfig.fromEnv());
@@ -95,129 +96,124 @@ describe("SKR nightly", function () {
 
   let skr;
 
-  describe(`Deprovision previous SKR nightly cluster`, function () {
+  before(`Fetch previous nightly and deprovision if needed`, async function () {
     let runtime;
-    it(`Fetch last runtime`, async function() {
-      await kcp.login()
-      let query = {
-        subaccount: keb.subaccountID,
-      }
+    await kcp.login()
+    let query = {
+      subaccount: keb.subaccountID,
+    }
+    try {
       let runtimes = await kcp.runtimes(query);
       if (runtimes.data) {
         runtime = runtimes.data[0];
       }
-    });
-    it(`Deprovision previous runtime`, async function () {
       if (runtime) {
         await deprovisionSKR(keb, runtime.instanceID);
-      } else {
-        console.log("No previous SKR found. Skipping SKR deprovisioning...")
-        this.skip();
-      }
-    });
-    it(`Unregister SKR resources from compass`, async function () {
-      if (runtime) {
         await unregisterKymaFromCompass(director, scenarioName);
       } else {
-        this.skip();
+        console.log("Deprovisioning not needed - no previous SKR found.")
       }
-    });
-  });
-  describe(`Provision new SKR cluster`, function () {
-    it(`Provision SKR with ID ${runtimeID}`, async function () {
-      const customParams = {
-        oidc: oidc0,
-      };
-
-      skr = await provisionSKR(keb, gardener, runtimeID, runtimeName, null, null, customParams);
-      initializeK8sClient({ kubeconfig: skr.shoot.kubeconfig });
-    });
-  });
-  describe(`Perform tests on the new SKR cluster`, function () {
-    it(`Assure initial OIDC config is applied on shoot cluster`, async function () {
-      ensureValidShootOIDCConfig(skr.shoot, oidc0);
-    });
-
-    it(`Assure initial OIDC config is part of kubeconfig`, async function () {
-      await ensureValidOIDCConfigInCustomerFacingKubeconfig(keb, runtimeID, oidc0);
-    });
-
-    it(`Assure initial cluster admin`, async function () {
-      await ensureKymaAdminBindingExistsForUser(administrator0);
-    });
-
-    it(`Update SKR service instance with OIDC config`, async function () {
-      const customParams = {
-        oidc: oidc1,
-      };
-
-      skr = await updateSKR(keb, gardener, runtimeID, skr.shoot.name, customParams);
-    });
-
-    it(`Assure updated OIDC config is applied on shoot cluster`, async function () {
-      ensureValidShootOIDCConfig(skr.shoot, oidc1);
-    });
-
-    it(`Assure updated OIDC config is part of kubeconfig`, async function () {
-      await ensureValidOIDCConfigInCustomerFacingKubeconfig(keb, runtimeID, oidc1);
-    });
-
-    it(`Assure cluster admin is preserved`, async function () {
-      await ensureKymaAdminBindingExistsForUser(administrator0);
-    });
-
-    it(`Update SKR service instance with new admins`, async function () {
-      const customParams = {
-        administrators: administrators1,
-      };
-
-      skr = await updateSKR(keb, gardener, runtimeID, skr.shoot.name, customParams);
-    });
-
-    it(`Assure only new cluster admins are configured`, async function () {
-      await ensureKymaAdminBindingExistsForUser(administrators1[0]);
-      await ensureKymaAdminBindingExistsForUser(administrators1[1]);
-      await ensureKymaAdminBindingDoesNotExistsForUser(administrator0);
-    });
-
-    it("Assign SKR to scenario", async function () {
-      await addScenarioInCompass(director, scenarioName);
-      await assignRuntimeToScenario(director, skr.shoot.compassID, scenarioName);
-    });
-
-    it("CommerceMock test fixture should be ready", async function () {
-      await ensureCommerceMockWithCompassTestFixture(
-          director,
-          appName,
-          scenarioName,
-          "mocks",
-          testNS
-      );
-    });
-
-    it("function should be reachable through secured API Rule", async function () {
-      await checkFunctionResponse(testNS);
-    });
-
-    it("order.created.v1 event should trigger the lastorder function", async function () {
-      await sendEventAndCheckResponse();
-    });
-
-    it("Deletes the resources that have been created", async function () {
-      await deleteMockTestFixture("mocks", testNS);
-    });
-
-    //Check audit log for AWS
-    if (process.env.KEB_PLAN_ID === AWS_PLAN_ID) {
-      const auditlogs = new AuditLogClient(AuditLogCreds.fromEnv());
-
-      it("Check audit logs", async function () {
-        await checkAuditLogs(auditlogs);
-      });
-
-      it("Amount of audit events must not exceed a certain threshold", async function () {
-        await checkAuditEventsThreshold(2.5);
-      });
+    }
+     catch (e) {
+      throw new Error(`deprovisioning before hook failed: ${e.toString()}`);
     }
   });
+  it('Execute tests')
+  // describe(`Provision new SKR cluster`, function () {
+  //   it(`Provision SKR with ID ${runtimeID}`, async function () {
+  //     const customParams = {
+  //       oidc: oidc0,
+  //     };
+  //
+  //     skr = await provisionSKR(keb, gardener, runtimeID, runtimeName, null, null, customParams);
+  //     initializeK8sClient({ kubeconfig: skr.shoot.kubeconfig });
+  //   });
+  // });
+  // describe(`Perform tests on the new SKR cluster`, function () {
+  //   it(`Assure initial OIDC config is applied on shoot cluster`, async function () {
+  //     ensureValidShootOIDCConfig(skr.shoot, oidc0);
+  //   });
+  //
+  //   it(`Assure initial OIDC config is part of kubeconfig`, async function () {
+  //     await ensureValidOIDCConfigInCustomerFacingKubeconfig(keb, runtimeID, oidc0);
+  //   });
+  //
+  //   it(`Assure initial cluster admin`, async function () {
+  //     await ensureKymaAdminBindingExistsForUser(administrator0);
+  //   });
+  //
+  //   it(`Update SKR service instance with OIDC config`, async function () {
+  //     const customParams = {
+  //       oidc: oidc1,
+  //     };
+  //
+  //     skr = await updateSKR(keb, gardener, runtimeID, skr.shoot.name, customParams);
+  //   });
+  //
+  //   it(`Assure updated OIDC config is applied on shoot cluster`, async function () {
+  //     ensureValidShootOIDCConfig(skr.shoot, oidc1);
+  //   });
+  //
+  //   it(`Assure updated OIDC config is part of kubeconfig`, async function () {
+  //     await ensureValidOIDCConfigInCustomerFacingKubeconfig(keb, runtimeID, oidc1);
+  //   });
+  //
+  //   it(`Assure cluster admin is preserved`, async function () {
+  //     await ensureKymaAdminBindingExistsForUser(administrator0);
+  //   });
+  //
+  //   it(`Update SKR service instance with new admins`, async function () {
+  //     const customParams = {
+  //       administrators: administrators1,
+  //     };
+  //
+  //     skr = await updateSKR(keb, gardener, runtimeID, skr.shoot.name, customParams);
+  //   });
+  //
+  //   it(`Assure only new cluster admins are configured`, async function () {
+  //     await ensureKymaAdminBindingExistsForUser(administrators1[0]);
+  //     await ensureKymaAdminBindingExistsForUser(administrators1[1]);
+  //     await ensureKymaAdminBindingDoesNotExistsForUser(administrator0);
+  //   });
+  //
+  //   it("Assign SKR to scenario", async function () {
+  //     await addScenarioInCompass(director, scenarioName);
+  //     await assignRuntimeToScenario(director, skr.shoot.compassID, scenarioName);
+  //   });
+  //
+  //   it("CommerceMock test fixture should be ready", async function () {
+  //     await ensureCommerceMockWithCompassTestFixture(
+  //         director,
+  //         appName,
+  //         scenarioName,
+  //         "mocks",
+  //         testNS
+  //     );
+  //   });
+  //
+  //   it("function should be reachable through secured API Rule", async function () {
+  //     await checkFunctionResponse(testNS);
+  //   });
+  //
+  //   it("order.created.v1 event should trigger the lastorder function", async function () {
+  //     await sendEventAndCheckResponse();
+  //   });
+  //
+  //   it("Deletes the resources that have been created", async function () {
+  //     await deleteMockTestFixture("mocks", testNS);
+  //   });
+  //
+  //   //Check audit log for AWS
+  //   if (process.env.KEB_PLAN_ID === AWS_PLAN_ID) {
+  //     const auditlogs = new AuditLogClient(AuditLogCreds.fromEnv());
+  //
+  //     it("Check audit logs", async function () {
+  //       await checkAuditLogs(auditlogs);
+  //     });
+  //
+  //     it("Amount of audit events must not exceed a certain threshold", async function () {
+  //       await checkAuditEventsThreshold(2.5);
+  //     });
+  //   }
+  // });
 });
