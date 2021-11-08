@@ -68,15 +68,15 @@ describe("SKR-Upgrade-test", function () {
     `Application ${appName}`
   );
 
-  // debug(
-  //   `KEB_HOST: ${getEnvOrThrow("KEB_HOST")}`,
-  //   `KEB_CLIENT_ID: ${getEnvOrThrow("KEB_CLIENT_ID")}`,
-  //   `KEB_CLIENT_SECRET: ${getEnvOrThrow("KEB_CLIENT_SECRET")}`,
-  //   `KEB_GLOBALACCOUNT_ID: ${getEnvOrThrow("KEB_GLOBALACCOUNT_ID")}`,
-  //   `KEB_SUBACCOUNT_ID: ${getEnvOrThrow("KEB_SUBACCOUNT_ID")}`,
-  //   `KEB_USER_ID: ${getEnvOrThrow("KEB_USER_ID")}`,
-  //   `KEB_PLAN_ID: ${getEnvOrThrow("KEB_PLAN_ID")}`      
-  // );
+  debug(
+    `KEB_HOST: ${getEnvOrThrow("KEB_HOST")}`,
+    `KEB_CLIENT_ID: ${getEnvOrThrow("KEB_CLIENT_ID")}`,
+    `KEB_CLIENT_SECRET: ${getEnvOrThrow("KEB_CLIENT_SECRET")}`,
+    `KEB_GLOBALACCOUNT_ID: ${getEnvOrThrow("KEB_GLOBALACCOUNT_ID")}`,
+    `KEB_SUBACCOUNT_ID: ${getEnvOrThrow("KEB_SUBACCOUNT_ID")}`,
+    `KEB_USER_ID: ${getEnvOrThrow("KEB_USER_ID")}`,
+    `KEB_PLAN_ID: ${getEnvOrThrow("KEB_PLAN_ID")}`      
+  );
   
   // debug(
   //   `COMPASS_HOST: ${getEnvOrThrow("COMPASS_HOST")}`,
