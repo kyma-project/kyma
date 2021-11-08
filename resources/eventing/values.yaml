@@ -22,7 +22,7 @@ global:
       directory: external
     prometheus_nats_exporter:
       name: prometheus-nats-exporter
-      varsion: 0.7.0
+      version: 0.7.0
       directory: external/natsio
     
 
