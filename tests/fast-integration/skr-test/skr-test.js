@@ -22,15 +22,15 @@ const {
 const {keb, gardener, director} = require('./helpers');
 const {prometheusPortForward} = require("../monitoring/client");
 
-function OIDCE2ETest(skr, options) {
-  const oidc0 = options.oidc0;
-  const oidc1 = options.oidc1;
-  const runtimeID = options.runtimeID;
-
-  const administrator0 = options.administrator0;
-  const administrators1 = options.administrators1;
-
+function OIDCE2ETest(skr, runtimeId, options) {
   describe('OIDC E2E Test', function () {
+    const oidc0 = options.oidc0;
+    const oidc1 = options.oidc1;
+    const runtimeID = runtimeId;
+
+    const administrator0 = options.administrator0;
+    const administrators1 = options.administrators1;
+
     it(`Assure initial OIDC config is applied on shoot cluster`, async function () {
       ensureValidShootOIDCConfig(skr.shoot, oidc0);
     });
@@ -80,12 +80,12 @@ function OIDCE2ETest(skr, options) {
 }
 
 function CommerceMockTest(skr, options) {
-  const testNS = options.testNS;
-  const appName = options.appName;
-  const scenarioName = options.scenarioName;
-  const AWS_PLAN_ID = "361c511f-f939-4621-b228-d0fb79a1fe15";
-
   describe("SKR test", function () {
+    const testNS = options.testNS;
+    const appName = options.appName;
+    const scenarioName = options.scenarioName;
+    const AWS_PLAN_ID = "361c511f-f939-4621-b228-d0fb79a1fe15";
+
     let cancelPortForward = null;
     before(() => {
       cancelPortForward = prometheusPortForward();

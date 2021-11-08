@@ -6,7 +6,7 @@ const {
 const {initializeK8sClient} = require('../../utils');
 
 const {
-   GatherOptions, WithRuntimeID, WithRuntimeName, WithScenarioName, WithAppName, WithTestNS, keb, gardener,
+   GatherOptions, WithRuntimeName, WithScenarioName, WithAppName, WithTestNS, keb, gardener,
    OIDCE2ETest, CommerceMockTest,
 } = require('../../skr-test');
 
@@ -19,9 +19,10 @@ describe(`SKR Nightly periodic test`, function () {
    const config = KCPConfig.fromEnv();
    const kcp = new KCPWrapper(config);
 
-   let runtime;
+   let instanceID;
    let shoot;
-   before('Provision SKR', async function () {
+   before('Fetch last nightly SKR', async function () {
+      let runtime;
       await kcp.login()
       let query = {
          subaccount: keb.subaccountID,
@@ -29,6 +30,7 @@ describe(`SKR Nightly periodic test`, function () {
       let runtimes = await kcp.runtimes(query);
       if (runtimes.data) {
          runtime = runtimes.data[0];
+         instanceID = runtime.instanceID;
       }
       console.log(runtime);
       shoot = await gardener.getShoot(runtime.shootName);
@@ -36,7 +38,6 @@ describe(`SKR Nightly periodic test`, function () {
    });
    describe('Execute tests', function () {
       let options = GatherOptions(
-          WithRuntimeID(runtime.instanceID),
           WithRuntimeName('kyma-nightly'),
           WithScenarioName('test-nightly'),
           WithAppName('app-nightly'),
@@ -45,8 +46,7 @@ describe(`SKR Nightly periodic test`, function () {
          operation: "",
          shoot
       }
-      console.log(options);
-      OIDCE2ETest(skr, options);
+      OIDCE2ETest(skr, instanceID, options);
       CommerceMockTest(skr, options);
    });
 });

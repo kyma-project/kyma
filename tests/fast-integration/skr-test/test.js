@@ -1,5 +1,4 @@
 const {
-    skrTest,
     GatherOptions,
 } = require('./');
 const {provisionSKR, deprovisionSKR} = require("../kyma-environment-broker");
@@ -7,10 +6,11 @@ const {keb, gardener, director} = require("./helpers");
 const {initializeK8sClient} = require("../utils");
 const {unregisterKymaFromCompass, addScenarioInCompass, assignRuntimeToScenario} = require("../compass");
 const {OIDCE2ETest, CommerceMockTest} = require("./skr-test");
-
+const uuid = require("uuid");
 describe(`Execute SKR test`, function () {
     this.timeout(60 * 60 * 1000 * 3); // 3h
     this.slow(5000);
+    const instanceID = uuid.v4();
     let options = GatherOptions();
     let skr;
 
@@ -19,7 +19,7 @@ describe(`Execute SKR test`, function () {
             oidc: options.oidc0,
         };
         skr = await provisionSKR(keb, gardener,
-            options.runtimeID,
+            instanceID,
             options.runtimeName,
             null,
             null,
@@ -29,11 +29,11 @@ describe(`Execute SKR test`, function () {
         await assignRuntimeToScenario(director, skr.shoot.compassID, options.scenarioName);
     });
     describe('Execute tests', function () {
-        OIDCE2ETest(skr, options);
+        OIDCE2ETest(skr, instanceID, options);
         CommerceMockTest(skr, options);
     });
     after(`Deprovision SKR`, async function () {
-        await deprovisionSKR(keb, options.runtimeID);
+        await deprovisionSKR(keb, instanceID);
         await unregisterKymaFromCompass(director, options.scenarioName);
     });
 });
