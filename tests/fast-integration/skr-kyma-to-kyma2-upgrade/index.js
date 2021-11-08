@@ -78,6 +78,17 @@ describe("SKR-Upgrade-test", function () {
   //   `KEB_PLAN_ID: ${getEnvOrThrow("KEB_PLAN_ID")}`
   // );
 
+  // Credentials for KCP ODIC Login
+  const KCP_TECH_USER_LOGIN = getEnvOrThrow("KCP_TECH_USER_LOGIN")
+  const KCP_TECH_USER_PASSWORD = getEnvOrThrow("KCP_TECH_USER_PASSWORD")
+  const KCP_OIDC_CLIENT_ID = getEnvOrThrow("KCP_OIDC_CLIENT_ID")
+  const KCP_KEB_API_URL = "https://kyma-env-broker.cp.dev.kyma.cloud.sap"
+  const KCP_MOTHERSHIP_API_URL = "https://mothership-reconciler.cp.dev.kyma.cloud.sap/v1"
+  const KCP_KUBECONFIG_API_URL = "https://kubeconfig-service.cp.dev.kyma.cloud.sap"
+  const KCP_OIDC_ISSUER_URL = "https://kymatest.accounts400.ondemand.com"
+  const kcpconfigPath = "dev.yaml"
+  const kymaUpgradeVersion = getEnvOrThrow("KYMA_UPGRADE_VERSION")
+
   debug(
     `KCP_TECH_USER_LOGIN: ${KCP_TECH_USER_LOGIN}\n`,
     `KCP_TECH_USER_PASSWORD: ${KCP_TECH_USER_PASSWORD}\n`,
@@ -165,17 +176,6 @@ describe("SKR-Upgrade-test", function () {
   });
 
   // Perform Upgrade
-
-  // Credentials for KCP ODIC Login
-  const KCP_TECH_USER_LOGIN = getEnvOrThrow("KCP_TECH_USER_LOGIN")
-  const KCP_TECH_USER_PASSWORD = getEnvOrThrow("KCP_TECH_USER_PASSWORD")
-  const KCP_OIDC_CLIENT_ID = getEnvOrThrow("KCP_OIDC_CLIENT_ID")
-  const KCP_KEB_API_URL = "https://kyma-env-broker.cp.dev.kyma.cloud.sap"
-  const KCP_MOTHERSHIP_API_URL = "https://mothership-reconciler.cp.dev.kyma.cloud.sap/v1"
-  const KCP_KUBECONFIG_API_URL = "https://kubeconfig-service.cp.dev.kyma.cloud.sap"
-  const KCP_OIDC_ISSUER_URL = "https://kymatest.accounts400.ondemand.com"
-  const kcpconfigPath = "dev.yaml"
-  const kymaUpgradeVersion = getEnvOrThrow("KYMA_UPGRADE_VERSION")
 
   it(`Perform kcp login`, async function () {
 
