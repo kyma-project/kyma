@@ -11,7 +11,6 @@ Meet the prerequisites, provision a k3d cluster, and use the `deploy` command to
 - [Kubernetes](https://kubernetes.io/docs/setup/) (v1.19)
   - [k3d](https://k3d.io) (for the local installation only)
 - [Kyma CLI](https://github.com/kyma-project/cli)
-- [k3d](https://k3d.io)
 
 ## Provision and install
 
