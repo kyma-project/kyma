@@ -125,11 +125,11 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 		}
 
 		// sync the initial Subscription status
-		if err := r.syncInitialStatus(ctx, desiredSubscription, &result); err != nil {
-			return ctrl.Result{}, errors.Wrap(err, "sync status failed")
-		}
-		if result.Requeue {
-			return result, nil
+		if statusChanged := r.syncInitialStatus(desiredSubscription); statusChanged {
+			if err := r.Status().Update(ctx, desiredSubscription); err != nil {
+				return ctrl.Result{}, errors.Wrap(err, "sync status failed")
+			}
+			return ctrl.Result{Requeue: true}, nil
 		}
 
 		// sync APIRule
@@ -148,6 +148,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 			if err := r.Client.Status().Update(ctx, desiredSubscription); err != nil {
 				return ctrl.Result{}, err
 			}
+			return ctrl.Result{Requeue: true}, nil
 		}
 	}
 
@@ -640,7 +641,7 @@ func getSvcNsAndName(url string) (string, string, error) {
 }
 
 // syncInitialStatus determines the desires initial status and updates it accordingly (if conditions changed)
-func (r *Reconciler) syncInitialStatus(ctx context.Context, subscription *eventingv1alpha1.Subscription, result *ctrl.Result) error {
+func (r *Reconciler) syncInitialStatus(subscription *eventingv1alpha1.Subscription) (statusChanged bool) {
 	currentStatus := subscription.Status
 	expectedStatus := eventingv1alpha1.SubscriptionStatus{}
 	expectedStatus.InitializeConditions()
@@ -656,18 +657,25 @@ func (r *Reconciler) syncInitialStatus(ctx context.Context, subscription *eventi
 	}
 	// case: conditions are already initialized
 	if len(currentStatus.Conditions) >= len(expectedStatus.Conditions) && !updateReadyStatus {
-		return nil
+		return false
+	} else if len(currentStatus.Conditions) > 0 {
+		currentConditions := make(map[eventingv1alpha1.ConditionType]eventingv1alpha1.Condition)
+		for _, condition := range currentStatus.Conditions {
+			currentConditions[condition.Type] = condition
+		}
+		for _, expectedCondition := range expectedStatus.Conditions {
+			if _, ok := currentConditions[expectedCondition.Type]; !ok {
+				currentStatus.Conditions = append(currentStatus.Conditions, expectedCondition) // add it if missed
+			}
+		}
 	}
 	if len(currentStatus.Conditions) == 0 {
 		subscription.Status = expectedStatus
 	} else {
+		subscription.Status.Conditions = currentStatus.Conditions
 		subscription.Status.Ready = currentStatus.Ready
 	}
-	if err := r.Status().Update(ctx, subscription); err != nil {
-		return err
-	}
-	result.Requeue = true
-	return nil
+	return true
 }
 
 // updateCondition replaces the given condition on the subscription and updates the status as well as emitting a kubernetes event
@@ -867,7 +875,6 @@ func (r *Reconciler) checkStatusActive(subscription *eventingv1alpha1.Subscripti
 
 // checkLastFailedDelivery checks if LastFailedDelivery exists and if happened after LastSuccessfulDelivery
 func (r *Reconciler) checkLastFailedDelivery(subscription *eventingv1alpha1.Subscription) bool {
-	r.namedLogger().Infow("checkLastFailedDelivery() called!!!!!!")
 	if len(subscription.Status.EmsSubscriptionStatus.LastFailedDelivery) > 0 {
 		var lastFailedDeliveryTime, LastSuccessfulDeliveryTime time.Time
 		var err error

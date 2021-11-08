@@ -702,10 +702,10 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 					// after the BEB subscription was created, set lastFailedDelivery
 					w.WriteHeader(http.StatusOK)
 					s := bebtypes.Subscription{
-						Name: nameMapper.MapSubscriptionName(givenSubscription),
-						SubscriptionStatus: bebtypes.SubscriptionStatusActive,
-						LastSuccessfulDelivery: time.Now().Format(time.RFC3339), //"now",
-						LastFailedDelivery: time.Now().Add(10 * time.Second).Format(time.RFC3339), // "now + 10s"
+						Name:                     nameMapper.MapSubscriptionName(givenSubscription),
+						SubscriptionStatus:       bebtypes.SubscriptionStatusActive,
+						LastSuccessfulDelivery:   time.Now().Format(time.RFC3339),                       //"now",
+						LastFailedDelivery:       time.Now().Add(10 * time.Second).Format(time.RFC3339), // "now + 10s"
 						LastFailedDeliveryReason: lastFailedDeliveryReason,
 					}
 					err := json.NewEncoder(w).Encode(s)

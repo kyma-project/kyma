@@ -10,9 +10,9 @@ import (
 type ConditionType string
 
 const (
-	ConditionSubscribed         ConditionType = "Subscribed"
-	ConditionSubscriptionActive ConditionType = "Subscription active"
-	ConditionAPIRuleStatus      ConditionType = "APIRule status"
+	ConditionSubscribed              ConditionType = "Subscribed"
+	ConditionSubscriptionActive      ConditionType = "Subscription active"
+	ConditionAPIRuleStatus           ConditionType = "APIRule status"
 	ConditionSubscriptionWebhookCall ConditionType = "Webhook call status"
 )
 
@@ -150,7 +150,7 @@ func (s *SubscriptionStatus) IsConditionSubscribed() bool {
 func (s *SubscriptionStatus) IsConditionWebhookCall() bool {
 	for _, condition := range s.Conditions {
 		if condition.Type == ConditionSubscriptionWebhookCall &&
-				(condition.Status == corev1.ConditionTrue || condition.Status == corev1.ConditionUnknown)  {
+			(condition.Status == corev1.ConditionTrue || condition.Status == corev1.ConditionUnknown) {
 			return true
 		}
 	}
