@@ -81,12 +81,17 @@ class KCPWrapper {
         return await this.exec(args);
     }
 
+    async version() {
+        const args = [`--version`];
+        return await this.exec(args);
+    }
+
     async exec(args) {
         try {
             const defaultArgs = [
                 `--config`, `${this.kcpConfigPath}`,
             ];
-            let output = await execa(`kcp`, args.concat(defaultArgs));
+            let output = await execa(`kcp`, defaultArgs.concat(args));
             debug(output);
             return output.stdout;
         } catch (err) {
