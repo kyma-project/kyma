@@ -15,6 +15,7 @@ describe(`SKR Nightly periodic test`, function () {
    process.env.KCP_KEB_API_URL = `https://kyma-env-broker.` + keb.host;
    process.env.KCP_GARDENER_NAMESPACE = `garden-kyma-dev`;
    process.env.KCP_OIDC_ISSUER_URL = `https://kymatest.accounts400.ondemand.com`;
+   process.env.KCP_MOTHERSHIP_API_URL = 'https://mothership-reconciler.cp.dev.kyma.cloud.sap/v1';
 
    const config = KCPConfig.fromEnv();
    const kcp = new KCPWrapper(config);
