@@ -189,6 +189,7 @@ describe("SKR-Upgrade-test", function () {
       stream.write(`keb-api-url: ${KCP_KEB_API_URL}\n`);
       stream.write(`mothership-api-url: ${KCP_MOTHERSHIP_API_URL}\n`);
       stream.write(`kubeconfig-api-url: ${KCP_KUBECONFIG_API_URL}\n`);
+      stream.write(`username: ${KCP_TECH_USER_LOGIN}\n`);
       
       stream.end();
     });
@@ -202,7 +203,7 @@ describe("SKR-Upgrade-test", function () {
     let args = [`${kcpconfigPath}`]
     let config = await execa(`cat`, args);
     debug(`kcp config: \n${config.stdout}`)
-
+    debug(`Running kymaUpgrade...`)
     let kcpUpgradeStatus = await kcpUpgrade(kcpconfigPath, subAccountID, kymaUpgradeVersion);
     debug("Upgrade Done!")
   });
