@@ -183,6 +183,7 @@ describe("SKR-Upgrade-test", function () {
     stream.once('open', function(fd) {
       stream.write(`gardener-namespace: garden-kyma-dev\n`);
       stream.write(`oidc-client-id: ${KCP_OIDC_CLIENT_ID}\n`);
+      stream.write(`oidc-client-secret: ${KCP_OIDC_CLIENT_SECRET}\n`);
       stream.write(`oidc-issuer-url: ${KCP_OIDC_ISSUER_URL}\n`);;
       stream.write(`keb-api-url: ${KCP_KEB_API_URL}\n`);
       stream.write(`mothership-api-url: ${KCP_MOTHERSHIP_API_URL}\n`);
