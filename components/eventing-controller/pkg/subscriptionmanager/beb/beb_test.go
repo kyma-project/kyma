@@ -83,7 +83,7 @@ func TestCleanup(t *testing.T) {
 	g.Expect(unstructuredAPIRuleBeforeCleanup).ToNot(gomega.BeNil())
 
 	// create a BEB subscription from Kyma subscription
-	fakeCleaner := mock.Cleaner{}
+	mockCleaner := mock.Cleaner{}
 	_, err = bebSubMgr.Backend.SyncSubscription(subscription, &fakeCleaner, apiRule)
 	g.Expect(err).To(gomega.BeNil())
 
