@@ -54,6 +54,10 @@ spec:
             value: example.com
           - name: WEBHOOK_TOKEN_ENDPOINT
             value: "https://oauth2.example-domain.com/oauth2/token"
+          - name: APP_LOG_FORMAT
+            value: "json"
+          - name: APP_LOG_LEVEL
+            value: "info"
         resources:
           limits:
             cpu: 500m

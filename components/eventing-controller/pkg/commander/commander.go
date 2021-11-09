@@ -19,5 +19,5 @@ type Commander interface {
 	Start(defaultSubsConfig env.DefaultSubscriptionConfig, params Params) error
 
 	// Stop tells the commander instance to shutdown and clean-up.
-	Stop() error
+	Stop(runCleanup bool) error
 }

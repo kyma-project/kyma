@@ -8,7 +8,7 @@ global:
       version: PR-11920
     eventing_controller:
       name: eventing-controller
-      version: PR-12307
+      version: PR-12535
       pullPolicy: "IfNotPresent"
     publisher_proxy:
       name: event-publisher-proxy
@@ -22,7 +22,7 @@ global:
       directory: external
     prometheus_nats_exporter:
       name: prometheus-nats-exporter
-      varsion: 0.7.0
+      version: 0.7.0
       directory: external/natsio
     
 
