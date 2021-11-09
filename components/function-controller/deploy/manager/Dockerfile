@@ -1,4 +1,4 @@
-FROM eu.gcr.io/kyma-project/external/golang:1.16.3-alpine as builder
+FROM eu.gcr.io/kyma-project/external/golang:1.17.3-alpine as builder
 
 ENV BASE_APP_DIR=/workspace/go/src/github.com/kyma-project/kyma/components/function-controller \
     CGO_ENABLED=1 \
@@ -21,7 +21,7 @@ RUN go build -ldflags "-s -w" -a -o manager cmd/manager/main.go \
     && mv ./manager /app/manager
 
 # get latest CA certs
-FROM alpine:3.13.5 as certs
+FROM alpine:3.14.2 as certs
 RUN apk --update add ca-certificates
 
 # result container
