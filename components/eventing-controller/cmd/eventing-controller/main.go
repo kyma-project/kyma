@@ -96,7 +96,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	// Start the manager.
+	// Start the controller manager.
 	ctrLogger.WithContext().With("options", opts).Info("start controller manager")
 	if err := mgr.Start(ctrl.SetupSignalHandler()); err != nil {
 		setupLogger.Error(err, "start controller manager failed")
