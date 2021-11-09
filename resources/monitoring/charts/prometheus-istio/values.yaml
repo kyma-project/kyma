@@ -47,7 +47,7 @@ alertmanager:
   ## alertmanager container image
   ##
   image:
-    repository: prom/alertmanager
+    repository: prom/alertmanager # This image is not activated in Kyma. This is kept here to keep parity with upstream charts
     tag: v0.21.0
     pullPolicy: IfNotPresent
 
@@ -337,8 +337,6 @@ configmapReload:
     ## configmap-reload container image
     ##
     image:
-      repository: eu.gcr.io/kyma-project/external/jimmidyson/configmap-reload
-      tag: v0.4.0
       pullPolicy: IfNotPresent
 
     ## Additional configmap-reload container arguments
@@ -384,7 +382,7 @@ configmapReload:
     ## configmap-reload container image
     ##
     image:
-      repository: jimmidyson/configmap-reload
+      repository: jimmidyson/configmap-reload # This image is not activated in Kyma. This is kept here to keep parity with upstream charts
       tag: v0.4.0
       pullPolicy: IfNotPresent
 
@@ -441,8 +439,6 @@ nodeExporter:
   ## node-exporter container image
   ##
   image:
-    repository: prom/node-exporter
-    tag: v1.0.1
     pullPolicy: IfNotPresent
 
   ## Specify if a Pod Security Policy for node-exporter must be created
@@ -582,8 +578,6 @@ server:
   ## Prometheus server container image
   ##
   image:
-    repository: eu.gcr.io/kyma-project/external/quay.io/prometheus/prometheus
-    tag: v2.22.1
     pullPolicy: IfNotPresent
 
   ## prometheus server priorityClassName
@@ -989,8 +983,6 @@ pushgateway:
   ## pushgateway container image
   ##
   image:
-    repository: prom/pushgateway
-    tag: v1.2.0
     pullPolicy: IfNotPresent
 
   ## pushgateway priorityClassName

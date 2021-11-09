@@ -33,11 +33,7 @@ initContainers:
 {{- end }}
 {{- if ( and .Values.persistence.enabled .Values.initChownData.enabled ) }}
   - name: init-chown-data
-    {{- if .Values.initChownData.image.sha }}
-    image: "{{ .Values.initChownData.image.repository }}:{{ .Values.initChownData.image.tag }}@sha256:{{ .Values.initChownData.image.sha }}"
-    {{- else }}
-    image: "{{ .Values.initChownData.image.repository }}:{{ .Values.initChownData.image.tag }}"
-    {{- end }}
+    image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.busybox) }}"
     imagePullPolicy: {{ .Values.initChownData.image.pullPolicy }}
     {{- if .Values.initChownData.securityContext }}
     securityContext:
@@ -96,11 +92,7 @@ initContainers:
 {{- end }}
 {{- if .Values.sidecar.notifiers.enabled }}
   - name: {{ template "grafana.name" . }}-sc-notifiers
-    {{- if .Values.sidecar.image.sha }}
-    image: "{{ .Values.sidecar.image.repository }}:{{ .Values.sidecar.image.tag }}@sha256:{{ .Values.sidecar.image.sha }}"
-    {{- else }}
-    image: "{{ .Values.sidecar.image.repository }}:{{ .Values.sidecar.image.tag }}"
-    {{- end }}
+    image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.k8s_sidecar) }}"
     imagePullPolicy: {{ .Values.sidecar.imagePullPolicy }}
     env:
       - name: METHOD
@@ -145,11 +137,7 @@ imagePullSecrets:
 containers:
 {{- if .Values.sidecar.datasources.enabled }}
   - name: {{ template "grafana.name" . }}-sc-datasources-watcher
-    {{- if .Values.sidecar.image.sha }}
-    image: "{{ .Values.sidecar.image.repository }}:{{ .Values.sidecar.image.tag }}@sha256:{{ .Values.sidecar.image.sha }}"
-    {{- else }}
-    image: "{{ .Values.sidecar.image.repository }}:{{ .Values.sidecar.image.tag }}"
-    {{- end }}
+    image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.k8s_sidecar) }}"
     imagePullPolicy: {{ .Values.sidecar.imagePullPolicy }}
     env:
       - name: METHOD
@@ -188,11 +176,7 @@ containers:
 {{- end}}
 {{- if .Values.sidecar.dashboards.enabled }}
   - name: {{ template "grafana.name" . }}-sc-dashboard-watcher
-    {{- if .Values.sidecar.image.sha }}
-    image: "{{ .Values.sidecar.image.repository }}:{{ .Values.sidecar.image.tag }}@sha256:{{ .Values.sidecar.image.sha }}"
-    {{- else }}
-    image: "{{ .Values.sidecar.image.repository }}:{{ .Values.sidecar.image.tag }}"
-    {{- end }}
+    image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.k8s_sidecar) }}"
     imagePullPolicy: {{ .Values.sidecar.imagePullPolicy }}
     env:
       - name: METHOD
@@ -234,11 +218,7 @@ containers:
         mountPath: {{ .Values.sidecar.dashboards.folder | quote }}
 {{- end}}
   - name: {{ .Chart.Name }}
-    {{- if .Values.image.sha }}
-    image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}@sha256:{{ .Values.image.sha }}"
-    {{- else }}
-    image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
-    {{- end }}
+    image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.grafana) }}"
     imagePullPolicy: {{ .Values.image.pullPolicy }}
   {{- if .Values.command }}
     command:

@@ -32,7 +32,7 @@ spec:
         configMap:
           name: {{ .Release.Name }}-auth-proxy-{{ template "grafana.name" . }}-templates
       containers:
-      - image: "{{ .Values.kyma.authProxy.image.repository }}:{{ .Values.kyma.authProxy.image.tag }}"
+      - image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.oauth2_proxy) }}"
         imagePullPolicy: {{ .Values.kyma.authProxy.image.pullPolicy }}
         name: auth-proxy
         args:

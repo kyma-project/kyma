@@ -2,6 +2,65 @@ global:
   domainName: "kyma.example.com"
   containerRegistry:
     path: eu.gcr.io/kyma-project
+  images:
+    prometheus_operator:
+      name: "prometheus-operator"
+      version: v0.43.2
+      directory: "external/quay.io/prometheus-operator"
+      sha: ""
+    prometheus_config_reloader:
+      name: "prometheus-config-reloader"
+      version: "v0.43.2"
+      directory: "external/quay.io/prometheus-operator"
+      sha: ""
+    configmap_reload:
+      name: "configmap-reload"
+      version: "v0.4.0"
+      directory: "external/jimmidyson"
+      sha: ""
+    alertmanager:
+      name: "alertmanager"
+      version: v0.23.0
+      directory: "external/quay.io/prometheus"
+      sha: ""
+    prometheus:
+      name: "prometheus"
+      version: "v2.22.1"
+      directory: "external/quay.io/prometheus"
+      sha: ""
+    pushgateway:
+      name: "pushgateway"
+      version: v1.3.0
+      directory: "external/prom"
+    node_exporter:
+      name: "node-exporter"
+      version: "1.1.2-4c48514d"
+      directory: "tpi"
+    kube_state_metrics:
+      name: "kube-state-metrics"
+      version: v1.9.7
+      directory: "external/quay.io/coreos"
+    grafana:
+      name: "grafana"
+      version: "7.5.11-d41037db"
+      directory: "tpi"
+      sha: ""
+    busybox:
+      name: "busybox"
+      version: "1.32.0-v1"
+      directory: "external"
+      sha: ""
+    k8s_sidecar:
+      name: "k8s-sidecar"
+      version: "1.14.2-1f7de309"
+      directory: "tpi"
+      sha: ""
+    oauth2_proxy:
+      name: "oauth2-proxy"
+      version: "7.1.3-4c48514d"
+      directory: "tpi"
+      sha: ""
+        
   istio:
     tls:
       secretName: istio-ingress-certs
@@ -398,13 +457,6 @@ alertmanager:
     podMetadata:
       annotations:
         sidecar.istio.io/inject: "true"
-
-    ## Image of Alertmanager
-    ##
-    image:
-      repository: eu.gcr.io/kyma-project/external/quay.io/prometheus/alertmanager
-      tag: v0.23.0
-      sha: ""
 
     ## If true then the user will be responsible to provide a secret with alertmanager configuration
     ## So when true the config part will be ignored (including templateFiles) and the one in the secret will be used
@@ -1409,9 +1461,6 @@ prometheusOperator:
   ## Prometheus-operator image
   ##
   image:
-    repository: eu.gcr.io/kyma-project/external/quay.io/prometheus-operator/prometheus-operator
-    tag: v0.43.2
-    sha: ""
     pullPolicy: IfNotPresent
 
   ## Liveness and readiness probes are missing in the upstrem chart
@@ -1433,20 +1482,6 @@ prometheusOperator:
     timeoutSeconds: 5
     failureThreshold: 6
     successThreshold: 1
-
-  ## Configmap-reload image to use for reloading configmaps
-  ##
-  configmapReloadImage:
-    repository: eu.gcr.io/kyma-project/external/jimmidyson/configmap-reload
-    tag: v0.4.0
-    sha: ""
-
-  ## Prometheus-config-reloader image to use for config and rule reloading
-  ##
-  prometheusConfigReloaderImage:
-    repository: eu.gcr.io/kyma-project/external/quay.io/prometheus-operator/prometheus-config-reloader
-    tag: v0.43.2
-    sha: ""
 
   ## Set the prometheus config reloader side-car CPU limit
   ##
@@ -1714,13 +1749,6 @@ prometheus:
     ## ref: https://prometheus.io/docs/prometheus/latest/querying/api/#tsdb-admin-apis
     ##
     enableAdminAPI: false
-
-    ## Image of Prometheus.
-    ##
-    image:
-      repository: eu.gcr.io/kyma-project/external/quay.io/prometheus/prometheus
-      tag: v2.22.1
-      sha: ""
 
     ## Tolerations for use with node taints
     ## ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
