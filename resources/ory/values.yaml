@@ -41,11 +41,11 @@ global:
       directory: "tpi/cloudsql-docker"
     hydra:
       name: "hydra"
-      version: "v1.8.5"
+      version: "v1.10.7"
       directory: "external/oryd"
     hydra_maester:
       name: "hydra-maester"
-      version: "v0.0.21"
+      version: "v0.0.24"
       directory: "external/oryd"
     busybox:
       name: "busybox"
@@ -53,11 +53,11 @@ global:
       directory: "external"
     oathkeeper:
       name: "oathkeeper"
-      version: "v0.38.11-alpine"
+      version: "v0.38.15-alpine"
       directory: "external/oryd"
     oathkeeper_maester:
       name: "oathkeeper-maester"
-      version: "v0.1.4"
+      version: "v0.1.5"
       directory: "external/oryd"
     postgres:
       name: "postgres"
