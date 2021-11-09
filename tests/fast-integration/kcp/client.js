@@ -17,8 +17,8 @@ class KCPConfig {
             getEnvOrThrow("KCP_TECH_USER_PASSWORD"),
             getEnvOrThrow("KCP_OIDC_CLIENT_ID"),
             getEnvOrThrow("KCP_OIDC_CLIENT_SECRET"),
-            getEnvOrDefault("KCP_MOTHERSHIP_API_URL", "https://mothership-reconciler.cp.dev.kyma.cloud.sap/v1"),
-            getEnvOrDefault("KCP_KUBECONFIG_API_URL", "https://kubeconfig-service.cp.dev.kyma.cloud.sap"),
+            getEnvOrThrow("KCP_MOTHERSHIP_API_URL"),
+            getEnvOrThrow("KCP_KUBECONFIG_API_URL"),
         );
     }
     constructor(host, issuerURL, gardenerNamespace, username, password, clientID, clientSecret, motherShipApiUrl, kubeConfigApiUrl) {
@@ -101,7 +101,7 @@ class KCPWrapper {
     }
 
     async upgradeKyma (subaccount, kymaUpgradeVersion) {
-        const args = [`--verbose=6`, `upgrade`, `kyma`, `--version`, `"${kymaUpgradeVersion}"`, `--target`, `subaccount=${subaccount}`];
+        const args = [`upgrade`, `kyma`, `--version`, `"${kymaUpgradeVersion}"`, `--target`, `subaccount=${subaccount}`];
         try {
             let res = await this.exec(args);
             
