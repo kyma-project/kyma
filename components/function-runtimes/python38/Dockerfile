@@ -32,11 +32,13 @@ ENV PYTHON_VERSION 3.8.12
 
 RUN set -ex \
 	&& apk add --no-cache --virtual .fetch-deps --repository=http://dl-cdn.alpinelinux.org/alpine/edge/main \
-		gnupg \
 		tar \
-		xz \
 		ncurses-dev \
+		xz \
 		expat-dev \
+	\
+	&& apk add --no-cache --virtual .fetch-deps \
+		gnupg \
 	\
 	&& wget -O python.tar.xz "https://www.python.org/ftp/python/${PYTHON_VERSION%%[a-z]*}/Python-$PYTHON_VERSION.tar.xz" \
 	&& wget -O python.tar.xz.asc "https://www.python.org/ftp/python/${PYTHON_VERSION%%[a-z]*}/Python-$PYTHON_VERSION.tar.xz.asc" \
