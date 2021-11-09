@@ -232,7 +232,7 @@ func (r *Reconciler) reconcileBEBBackend(ctx context.Context, bebSecret *v1.Secr
 	}
 	if oauth2CredentialsNotFound || oauth2CredentialsChanged {
 		// Stop the controller and mark all subs as not ready
-		r.namedLogger().Info("stopping the BEB subscription reconciler due to change in OAuth2 credentials")
+		r.namedLogger().Info("stopping the BEB subscription manager due to change in OAuth2 credentials")
 		if err := r.bebSubMgr.Stop(false); err != nil {
 			return ctrl.Result{}, err
 		}
