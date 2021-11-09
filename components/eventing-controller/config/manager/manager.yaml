@@ -11,16 +11,23 @@ metadata:
   name: controller
   namespace: system
   labels:
-    control-plane: controller
+    app.kubernetes.io/instance: eventing
+    app.kubernetes.io/name: controller
+    kyma-project.io/dashboard: eventing
 spec:
   selector:
     matchLabels:
-      control-plane: controller
+      app.kubernetes.io/instance: eventing
+      app.kubernetes.io/name: controller
+      kyma-project.io/dashboard: eventing
   replicas: 1
   template:
     metadata:
       labels:
         control-plane: controller
+        app.kubernetes.io/instance: eventing
+        app.kubernetes.io/name: controller
+        kyma-project.io/dashboard: eventing
     spec:
       securityContext:
         runAsNonRoot: true
@@ -30,7 +37,11 @@ spec:
 #        args:
 #        - --leader-elect
         image: controller
-        name: manager
+        name: controller
+        ports:
+        - containerPort: 8080
+          name: http-metrics
+          protocol: TCP
         securityContext:
           allowPrivilegeEscalation: false
         livenessProbe:
