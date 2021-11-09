@@ -28,7 +28,7 @@ const {
   initializeK8sClient,
   ensureKymaAdminBindingExistsForUser,
   ensureKymaAdminBindingDoesNotExistsForUser,
-  getEnvOrThrow,
+  getEnvOrThrow, sleep,
 } = require("../../utils");
 
 const {
@@ -51,6 +51,7 @@ describe("SKR nightly", function () {
   process.env.KCP_GARDENER_NAMESPACE = `garden-kyma-dev`;
   process.env.KCP_OIDC_ISSUER_URL = `https://kymatest.accounts400.ondemand.com`;
   process.env.KCP_MOTHERSHIP_API_URL = 'https://mothership-reconciler.cp.dev.kyma.cloud.sap/v1';
+  process.env.KCP_KUBECONFIG_API_URL = 'https://kubeconfig-service.cp.dev.kyma.cloud.sap';
   const kcp = new KCPWrapper(KCPConfig.fromEnv());
 
   const gardener = new GardenerClient(GardenerConfig.fromEnv());
@@ -98,20 +99,23 @@ describe("SKR nightly", function () {
 
   before(`Fetch previous nightly and deprovision if needed`, async function () {
     let runtime;
+    console.log('Login to KCP.');
     await kcp.login()
     let query = {
       subaccount: keb.subaccountID,
     }
     try {
+      console.log('Fetch last SKR.');
       let runtimes = await kcp.runtimes(query);
       if (runtimes.data) {
         runtime = runtimes.data[0];
       }
       if (runtime) {
+        console.log('Deprovision last SKR.')
         await deprovisionSKR(keb, runtime.instanceID);
         await unregisterKymaFromCompass(director, scenarioName);
       } else {
-        console.log("Deprovisioning not needed - no previous SKR found.")
+        console.log("Deprovisioning not needed - no previous SKR found.");
       }
     }
      catch (e) {

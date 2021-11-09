@@ -2,7 +2,6 @@ const execa = require("execa");
 const fs = require('fs');
 const {
     getEnvOrThrow,
-    getEnvOrDefault,
     debug,
     wait
 } = require("../utils");
