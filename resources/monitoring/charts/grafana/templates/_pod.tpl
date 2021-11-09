@@ -10,6 +10,7 @@
         value: "{{ tpl (print $value) $ }}"
   {{- end }}
   {{- end }}
+  Moved grafana-sc-datasources container from initContainers to containers section
 */ -}}
 {{- define "grafana.pod" -}}
 {{- if .Values.schedulerName }}
@@ -27,7 +28,7 @@ hostAliases:
 {{- if or .Values.priorityClassName .Values.global.priorityClassName }}
 priorityClassName: {{ coalesce .Values.priorityClassName .Values.global.priorityClassName }}
 {{- end }}
-{{- if ( or .Values.persistence.enabled .Values.dashboards .Values.sidecar.datasources.enabled .Values.sidecar.notifiers.enabled .Values.extraInitContainers) }}
+{{- if ( or .Values.persistence.enabled .Values.dashboards .Values.sidecar.notifiers.enabled .Values.extraInitContainers) }}
 initContainers:
 {{- end }}
 {{- if ( and .Values.persistence.enabled .Values.initChownData.enabled ) }}
@@ -93,49 +94,6 @@ initContainers:
         readOnly: {{ .readOnly }}
     {{- end }}
 {{- end }}
-{{- if .Values.sidecar.datasources.enabled }}
-  - name: {{ template "grafana.name" . }}-sc-datasources
-    {{- if .Values.sidecar.image.sha }}
-    image: "{{ .Values.sidecar.image.repository }}:{{ .Values.sidecar.image.tag }}@sha256:{{ .Values.sidecar.image.sha }}"
-    {{- else }}
-    image: "{{ .Values.sidecar.image.repository }}:{{ .Values.sidecar.image.tag }}"
-    {{- end }}
-    imagePullPolicy: {{ .Values.sidecar.imagePullPolicy }}
-    env:
-      - name: METHOD
-        value: LIST
-      - name: LABEL
-        value: "{{ .Values.sidecar.datasources.label }}"
-      {{- if .Values.sidecar.datasources.labelValue }}
-      - name: LABEL_VALUE
-        value: {{ quote .Values.sidecar.datasources.labelValue }}
-      {{- end }}
-      - name: FOLDER
-        value: "/etc/grafana/provisioning/datasources"
-      - name: RESOURCE
-        value: {{ quote .Values.sidecar.datasources.resource }}
-      {{- if .Values.sidecar.enableUniqueFilenames }}
-      - name: UNIQUE_FILENAMES
-        value: "{{ .Values.sidecar.enableUniqueFilenames }}"
-      {{- end }}
-      {{- if .Values.sidecar.datasources.searchNamespace }}
-      - name: NAMESPACE
-        value: "{{ .Values.sidecar.datasources.searchNamespace }}"
-      {{- end }}
-      {{- if .Values.sidecar.skipTlsVerify }}
-      - name: SKIP_TLS_VERIFY
-        value: "{{ .Values.sidecar.skipTlsVerify }}"
-      {{- end }}
-    resources:
-{{ toYaml .Values.sidecar.resources | indent 6 }}
-{{- if .Values.sidecar.securityContext }}
-    securityContext:
-{{ toYaml .Values.sidecar.securityContext | indent 6 }}
-{{- end }}
-    volumeMounts:
-      - name: sc-datasources-volume
-        mountPath: "/etc/grafana/provisioning/datasources"
-{{- end}}
 {{- if .Values.sidecar.notifiers.enabled }}
   - name: {{ template "grafana.name" . }}-sc-notifiers
     {{- if .Values.sidecar.image.sha }}
@@ -185,8 +143,51 @@ imagePullSecrets:
 {{- end}}
 {{- end }}
 containers:
+{{- if .Values.sidecar.datasources.enabled }}
+  - name: {{ template "grafana.name" . }}-sc-datasources-watcher
+    {{- if .Values.sidecar.image.sha }}
+    image: "{{ .Values.sidecar.image.repository }}:{{ .Values.sidecar.image.tag }}@sha256:{{ .Values.sidecar.image.sha }}"
+    {{- else }}
+    image: "{{ .Values.sidecar.image.repository }}:{{ .Values.sidecar.image.tag }}"
+    {{- end }}
+    imagePullPolicy: {{ .Values.sidecar.imagePullPolicy }}
+    env:
+      - name: METHOD
+        value: {{ .Values.sidecar.datasources.watchMethod }}
+      - name: LABEL
+        value: "{{ .Values.sidecar.datasources.label }}"
+      {{- if .Values.sidecar.datasources.labelValue }}
+      - name: LABEL_VALUE
+        value: {{ quote .Values.sidecar.datasources.labelValue }}
+      {{- end }}
+      - name: FOLDER
+        value: "/etc/grafana/provisioning/datasources"
+      - name: RESOURCE
+        value: {{ quote .Values.sidecar.datasources.resource }}
+      {{- if .Values.sidecar.enableUniqueFilenames }}
+      - name: UNIQUE_FILENAMES
+        value: "{{ .Values.sidecar.enableUniqueFilenames }}"
+      {{- end }}
+      {{- if .Values.sidecar.datasources.searchNamespace }}
+      - name: NAMESPACE
+        value: "{{ .Values.sidecar.datasources.searchNamespace }}"
+      {{- end }}
+      {{- if .Values.sidecar.skipTlsVerify }}
+      - name: SKIP_TLS_VERIFY
+        value: "{{ .Values.sidecar.skipTlsVerify }}"
+      {{- end }}
+    resources:
+{{ toYaml .Values.sidecar.resources | indent 6 }}
+{{- if .Values.sidecar.securityContext }}
+    securityContext:
+{{ toYaml .Values.sidecar.securityContext | indent 6 }}
+{{- end }}
+    volumeMounts:
+      - name: sc-datasources-volume
+        mountPath: "/etc/grafana/provisioning/datasources"
+{{- end}}
 {{- if .Values.sidecar.dashboards.enabled }}
-  - name: {{ template "grafana.name" . }}-sc-dashboard
+  - name: {{ template "grafana.name" . }}-sc-dashboard-watcher
     {{- if .Values.sidecar.image.sha }}
     image: "{{ .Values.sidecar.image.repository }}:{{ .Values.sidecar.image.tag }}@sha256:{{ .Values.sidecar.image.sha }}"
     {{- else }}

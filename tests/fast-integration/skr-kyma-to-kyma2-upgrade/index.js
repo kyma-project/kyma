@@ -1,5 +1,6 @@
 const uuid = require("uuid");
 const fs = require('fs');
+const execa = require("execa");
 const { 
   DirectorConfig, 
   DirectorClient,
@@ -37,9 +38,9 @@ const {
   cleanMockTestFixture,
 } = require("../test/fixtures/commerce-mock");
 const {
-  kcpLogin,
-  kcpUpgrade
-} = require("./upgrade-helpers");
+  KCPConfig,
+  KCPWrapper,
+} = require("../kcp/client")
 const {
   saveKubeconfig,
 } = require("../skr-svcat-migration-test/test-helpers");
@@ -83,6 +84,31 @@ describe("SKR-Upgrade-test", function () {
   //   `COMPASS_CLIENT_SECRET: ${getEnvOrThrow("COMPASS_CLIENT_SECRET")}`,
   //   `COMPASS_TENANT: ${getEnvOrThrow("COMPASS_TENANT")}`,
   // )
+  
+  // debug(
+  //   `KCP_TECH_USER_LOGIN: ${KCP_TECH_USER_LOGIN}\n`,
+  //   `KCP_TECH_USER_PASSWORD: ${KCP_TECH_USER_PASSWORD}\n`,
+  //   `KCP_OIDC_CLIENT_ID: ${KCP_OIDC_CLIENT_ID}\n`,
+  //   `KCP_OIDC_CLIENT_SECRET: ${KCP_OIDC_CLIENT_SECRET}\n`,
+  //   `KCP_KEB_API_URL: ${KCP_KEB_API_URL}\n`,
+  //   `KCP_OIDC_ISSUER_URL: ${KCP_OIDC_ISSUER_URL}\n`
+  // )
+
+  // Credentials for KCP ODIC Login
+  
+  // process.env.KCP_TECH_USER_LOGIN    = 
+  // process.env.KCP_TECH_USER_PASSWORD = 
+  process.env.KCP_OIDC_ISSUER_URL    = "https://kymatest.accounts400.ondemand.com";
+  // process.env.KCP_OIDC_CLIENT_ID     = 
+  // process.env.KCP_OIDC_CLIENT_SECRET = 
+  process.env.KCP_KEB_API_URL        = "https://kyma-env-broker.cp.dev.kyma.cloud.sap";
+  process.env.KCP_GARDENER_NAMESPACE = "garden-kyma-dev";
+  process.env.KCP_MOTHERSHIP_API_URL = "https://mothership-reconciler.cp.dev.kyma.cloud.sap/v1"
+  process.env.KCP_KUBECONFIG_API_URL = "https://kubeconfig-service.cp.dev.kyma.cloud.sap"
+  
+  const kcp = new KCPWrapper(KCPConfig.fromEnv());
+
+  const kymaUpgradeVersion = getEnvOrThrow("KYMA_UPGRADE_VERSION")
 
   this.timeout(60 * 60 * 1000 * 3); // 3h
   this.slow(5000);
@@ -155,47 +181,19 @@ describe("SKR-Upgrade-test", function () {
   });
 
   // Perform Upgrade
-
-  // Credentials for KCP ODIC Login
-  const KCP_TECH_USER_LOGIN = getEnvOrThrow("KCP_TECH_USER_LOGIN")
-  const KCP_TECH_USER_PASSWORD = getEnvOrThrow("KCP_TECH_USER_PASSWORD")
-  const KCP_OIDC_CLIENT_ID = getEnvOrThrow("KCP_OIDC_CLIENT_ID")
-  const KCP_KEB_API_URL = "https://kyma-env-broker.cp.dev.kyma.cloud.sap"
-  const KCP_MOTHERSHIP_API_URL = "https://mothership-reconciler.cp.dev.kyma.cloud.sap/v1"
-  const KCP_KUBECONFIG_API_URL = "https://kubeconfig-service.cp.dev.kyma.cloud.sap"
-  const KCP_OIDC_ISSUER_URL = "https://kymatest.accounts400.ondemand.com"
-  const kcpconfigPath = "dev.yaml"
-  const kymaUpgradeVersion = getEnvOrThrow("KYMA_UPGRADE_VERSION")
-
+  
   it(`Perform kcp login`, async function () {
-
-    // debug(
-    //   `KCP_TECH_USER_LOGIN: ${KCP_TECH_USER_LOGIN}\n`,
-    //   `KCP_TECH_USER_PASSWORD: ${KCP_TECH_USER_PASSWORD}\n`,
-    //   `KCP_OIDC_CLIENT_ID: ${KCP_OIDC_CLIENT_ID}\n`,
-    //   `KCP_OIDC_CLIENT_SECRET: ${KCP_OIDC_CLIENT_SECRET}\n`,
-    //   `KCP_KEB_API_URL: ${KCP_KEB_API_URL}\n`,
-    //   `KCP_OIDC_ISSUER_URL: ${KCP_OIDC_ISSUER_URL}\n`
-    // )
-
-    let stream = fs.createWriteStream(kcpconfigPath);
-    stream.once('open', function(fd) {
-      stream.write(`gardener-namespace: garden-kyma-dev\n`);
-      stream.write(`oidc-client-id: ${KCP_OIDC_CLIENT_ID}\n`);
-      stream.write(`oidc-issuer-url: ${KCP_OIDC_ISSUER_URL}\n`);;
-      stream.write(`keb-api-url: ${KCP_KEB_API_URL}\n`);
-      stream.write(`mothership-api-url: ${KCP_MOTHERSHIP_API_URL}\n`);
-      stream.write(`kubeconfig-api-url: ${KCP_KUBECONFIG_API_URL}\n`);
-      
-      stream.end();
-    });
     
-    let loginOutput = await kcpLogin(kcpconfigPath, KCP_TECH_USER_LOGIN, KCP_TECH_USER_PASSWORD);
+    let version = await kcp.version([])
+    debug(version)
+    
+    await kcp.login()
     // debug(loginOutput)
   });
 
+
   it(`Perform Upgrade`, async function () {
-    let kcpUpgradeStatus = await kcpUpgrade(kcpconfigPath, subAccountID, kymaUpgradeVersion);
+    let kcpUpgradeStatus = await kcp.upgradeKyma(subAccountID, kymaUpgradeVersion)
     debug("Upgrade Done!")
   });
 
@@ -240,14 +238,13 @@ describe("SKR-Upgrade-test", function () {
     it("Test fixtures should be deleted", async function () {
       await cleanMockTestFixture("mocks", testNS, true)
     });
-    
-    it("Deprovision SKR", async function () {
-      await deprovisionSKR(keb, instanceID);
-    });
 
     it("Unregister SKR resources from Compass", async function () {
       await unregisterKymaFromCompass(director, scenarioName);
     });
-  }
 
+    it("Deprovision SKR", async function () {
+      await deprovisionSKR(keb, instanceID);
+    });
+  }
 });

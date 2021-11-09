@@ -33,8 +33,8 @@ import (
 
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 	"github.com/kyma-project/kyma/components/eventing-controller/logger"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/commander"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/deployment"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/subscriptionmanager"
 	reconcilertesting "github.com/kyma-project/kyma/components/eventing-controller/testing"
 	"github.com/kyma-project/kyma/components/eventing-controller/utils"
 )
@@ -55,8 +55,8 @@ var (
 	k8sClient     client.Client
 	testEnv       *envtest.Environment
 
-	natsCommander = &TestCommander{}
-	bebCommander  = &TestCommander{}
+	natsSubMgr = &SubMgrMock{}
+	bebSubMgr  = &SubMgrMock{}
 )
 
 // TestGetSecretForPublisher verifies the successful and failing retrieval
@@ -186,8 +186,8 @@ var _ = BeforeSuite(func(done Done) {
 
 	err = NewReconciler(
 		context.Background(),
-		natsCommander,
-		bebCommander,
+		natsSubMgr,
+		bebSubMgr,
 		k8sManager.GetClient(),
 		k8sManager.GetCache(),
 		defaultLogger,
@@ -275,7 +275,7 @@ var _ = Describe("Backend Reconciliation Tests", func() {
 			// in the reconciler will not result in a new deployment status. Let's simulate that!
 			resetPublisherProxyStatus(ctx)
 			// As there is no Hydra operator that creates secrets based on OAuth2Client CRs, we create the secret.
-			createOAuth2Secret(ctx)
+			createOAuth2Secret(ctx, []byte("id1"), []byte("secret1"))
 			ensureBEBSecretCreated(ctx, bebSecret1name, kymaSystemNamespace)
 			// Expect
 			Eventually(publisherProxyDeploymentGetter(ctx), timeout, pollingInterval).
@@ -320,6 +320,42 @@ var _ = Describe("Backend Reconciliation Tests", func() {
 		})
 	})
 
+	When("The OAuth2 secret is missing", func() {
+		It("Should mark eventing as not ready and stop the BEB subscription reconciler", func() {
+			ctx := context.Background()
+			bebSubMgr.resetState()
+			removeOAuth2Secret(ctx)
+			Eventually(eventingBackendStatusGetter(ctx, eventingBackendName, kymaSystemNamespace), timeout, pollingInterval).
+				Should(Equal(&eventingv1alpha1.EventingBackendStatus{
+					Backend:                     eventingv1alpha1.BEBBackendType,
+					EventingReady:               utils.BoolPtr(false),
+					SubscriptionControllerReady: utils.BoolPtr(false),
+					PublisherProxyReady:         utils.BoolPtr(false),
+					BEBSecretName:               bebSecret1name,
+					BEBSecretNamespace:          kymaSystemNamespace,
+				}))
+			Eventually(bebSubMgr.StopCalledWithoutCleanup, timeout, pollingInterval).Should(BeTrue())
+		})
+	})
+
+	When("The OAuth2 secret is recreated", func() {
+		It("Should mark eventing as ready and start the BEB subscription reconciler", func() {
+			ctx := context.Background()
+			bebSubMgr.resetState()
+			createOAuth2Secret(ctx, []byte("id2"), []byte("secret2"))
+			Eventually(eventingBackendStatusGetter(ctx, eventingBackendName, kymaSystemNamespace), timeout, pollingInterval).
+				Should(Equal(&eventingv1alpha1.EventingBackendStatus{
+					Backend:                     eventingv1alpha1.BEBBackendType,
+					EventingReady:               utils.BoolPtr(true),
+					SubscriptionControllerReady: utils.BoolPtr(true),
+					PublisherProxyReady:         utils.BoolPtr(true),
+					BEBSecretName:               bebSecret1name,
+					BEBSecretNamespace:          kymaSystemNamespace,
+				}))
+			Eventually(bebSubMgr.StartCalled, timeout, pollingInterval).Should(BeTrue())
+		})
+	})
+
 	When("More than one secret is found label for BEB usage", func() {
 		It("Should take down eventing", func() {
 			ctx := context.Background()
@@ -359,7 +395,7 @@ var _ = Describe("Backend Reconciliation Tests", func() {
 	When("Switching to NATS and then starting NATS controller fails", func() {
 		It("Should mark Eventing Backend CR to not ready", func() {
 			ctx := context.Background()
-			natsCommander.startErr = errors.New("I don't want to start")
+			natsSubMgr.startErr = errors.New("I don't want to start")
 			By("Un-label the BEB secret to switch to NATS")
 			bebSecret := reconcilertesting.WithBEBMessagingSecret(bebSecret1name, kymaSystemNamespace)
 			bebSecret.Labels = map[string]string{}
@@ -384,7 +420,7 @@ var _ = Describe("Backend Reconciliation Tests", func() {
 			// in the reconciler will not result in a new deployment status. Let's simulate that!
 			resetPublisherProxyStatus(ctx)
 			By("NATS controller starts and reports as ready")
-			natsCommander.startErr = nil
+			natsSubMgr.startErr = nil
 			By("Checking EventingReady status is set to false")
 			Eventually(eventingBackendStatusGetter(ctx, eventingBackendName, kymaSystemNamespace), timeout, pollingInterval).
 				Should(Equal(&eventingv1alpha1.EventingBackendStatus{
@@ -416,7 +452,7 @@ var _ = Describe("Backend Reconciliation Tests", func() {
 	When("Switching to BEB and then stopping NATS controller fails", func() {
 		It("Should mark Eventing Backend CR to not ready", func() {
 			ctx := context.Background()
-			natsCommander.stopErr = errors.New("I shan't stop")
+			natsSubMgr.stopErr = errors.New("I shan't stop")
 			By("Label the secret to switch to BEB")
 			bebSecret := reconcilertesting.WithBEBMessagingSecret(bebSecret1name, kymaSystemNamespace)
 			bebSecret.Labels = map[string]string{
@@ -441,7 +477,7 @@ var _ = Describe("Backend Reconciliation Tests", func() {
 	When("Eventually stopping NATS controller succeeds", func() {
 		It("Should mark Eventing Backend CR to ready", func() {
 			ctx := context.Background()
-			natsCommander.stopErr = nil
+			natsSubMgr.stopErr = nil
 			ensurePublisherProxyPodIsCreated(ctx)
 			Eventually(eventingBackendStatusGetter(ctx, eventingBackendName, kymaSystemNamespace), timeout, pollingInterval).
 				Should(Equal(&eventingv1alpha1.EventingBackendStatus{
@@ -570,19 +606,29 @@ func resetPublisherProxyStatus(ctx context.Context) {
 
 // creates a secret containing the oauth2 credentials that is expected to be
 // created by the Hydra operator
-func createOAuth2Secret(ctx context.Context) {
+func createOAuth2Secret(ctx context.Context, clientID, clientSecret []byte) {
 	sec := &corev1.Secret{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      getOAuth2ClientSecretName(),
 			Namespace: deployment.ControllerNamespace,
 		},
 		Data: map[string][]byte{
-			"client_id":     []byte("random_id"),
-			"client_secret": []byte("random_secret"),
+			"client_id":     clientID,
+			"client_secret": clientSecret,
 		},
 	}
 	err := k8sClient.Create(ctx, sec)
 	Expect(err).ShouldNot(HaveOccurred())
+}
+
+func removeOAuth2Secret(ctx context.Context) {
+	sec := &corev1.Secret{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      getOAuth2ClientSecretName(),
+			Namespace: deployment.ControllerNamespace,
+		},
+	}
+	Expect(k8sClient.Delete(ctx, sec)).Should(BeNil())
 }
 
 func ensureBEBSecretCreated(ctx context.Context, name, ns string) {
@@ -668,19 +714,35 @@ func eventingOwnerReferencesGetter(ctx context.Context, name, namespace string) 
 	}
 }
 
-// TestCommander simulates the the commander implementation for BEB and NATS.
-type TestCommander struct {
-	startErr, stopErr error
+// SubMgrMock is a subscription manager mock implementation for BEB and NATS.
+type SubMgrMock struct {
+	// These state variables are used to validate the mock state. Ideally, we'd use a proper mocking framework!
+	startErr, stopErr                                            error
+	StopCalledWithCleanup, StopCalledWithoutCleanup, StartCalled bool
 }
 
-func (t *TestCommander) Init(_ manager.Manager) error {
+func (t *SubMgrMock) Init(_ manager.Manager) error {
 	return nil
 }
 
-func (t *TestCommander) Start(_ env.DefaultSubscriptionConfig, _ commander.Params) error {
+func (t *SubMgrMock) Start(_ env.DefaultSubscriptionConfig, _ subscriptionmanager.Params) error {
+	t.StartCalled = true
 	return t.startErr
 }
 
-func (t *TestCommander) Stop() error {
+func (t *SubMgrMock) Stop(runCleanup bool) error {
+	if runCleanup {
+		t.StopCalledWithCleanup = true
+	} else {
+		t.StopCalledWithoutCleanup = true
+	}
 	return t.stopErr
+}
+
+func (t *SubMgrMock) resetState() {
+	t.startErr = nil
+	t.stopErr = nil
+	t.StartCalled = false
+	t.StopCalledWithoutCleanup = false
+	t.StopCalledWithCleanup = false
 }

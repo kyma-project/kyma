@@ -1,6 +1,7 @@
 package backend
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -25,10 +26,10 @@ import (
 
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 	"github.com/kyma-project/kyma/components/eventing-controller/logger"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/commander"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/deployment"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/object"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/subscriptionmanager"
 	"github.com/kyma-project/kyma/components/eventing-controller/utils"
 )
 
@@ -54,11 +55,11 @@ const (
 )
 
 type Reconciler struct {
-	ctx                  context.Context
-	natsCommander        commander.Commander
-	natsCommanderStarted bool
-	bebCommander         commander.Commander
-	bebCommanderStarted  bool
+	ctx               context.Context
+	natsSubMgr        subscriptionmanager.Manager
+	natsSubMgrStarted bool
+	bebSubMgr         subscriptionmanager.Manager
+	bebSubMgrStarted  bool
 	client.Client
 	// TODO: Do we need to explicitly pass and use a cache here? The default client that we get from manager
 	//  already uses a cache internally (check manager.DefaultNewClient)
@@ -69,19 +70,22 @@ type Reconciler struct {
 
 	// backendType is the type of the backend which the reconciler detects at runtime
 	backendType eventingv1alpha1.BackendType
+	// The OAuth2 credentials that are passed to the BEB subscription reconciler
+	oauth2ClientID     []byte
+	oauth2ClientSecret []byte
 }
 
-func NewReconciler(ctx context.Context, natsCommander, bebCommander commander.Commander, client client.Client, cache cache.Cache, logger *logger.Logger, recorder record.EventRecorder) *Reconciler {
+func NewReconciler(ctx context.Context, natsSubMgr, bebSubMgr subscriptionmanager.Manager, client client.Client, cache cache.Cache, logger *logger.Logger, recorder record.EventRecorder) *Reconciler {
 	cfg := env.GetBackendConfig()
 	return &Reconciler{
-		ctx:           ctx,
-		natsCommander: natsCommander,
-		bebCommander:  bebCommander,
-		Client:        client,
-		Cache:         cache,
-		logger:        logger,
-		record:        recorder,
-		cfg:           cfg,
+		ctx:        ctx,
+		natsSubMgr: natsSubMgr,
+		bebSubMgr:  bebSubMgr,
+		Client:     client,
+		Cache:      cache,
+		logger:     logger,
+		record:     recorder,
+		cfg:        cfg,
 	}
 }
 
@@ -219,8 +223,31 @@ func (r *Reconciler) reconcileBEBBackend(ctx context.Context, bebSecret *v1.Secr
 	// Following could return an error when the OAuth2Client CR is created for the first time, until the secret is
 	// created by the Hydra operator. However, eventually it should get resolved in the next few reconciliation loops.
 	oauth2ClientID, oauth2ClientSecret, err := r.getOAuth2ClientCredentials(ctx, getOAuth2ClientSecretName(), deployment.ControllerNamespace)
-	if err != nil {
+	if err != nil && !k8serrors.IsNotFound(err) {
 		return ctrl.Result{}, err
+	}
+	oauth2CredentialsNotFound := k8serrors.IsNotFound(err)
+	oauth2CredentialsChanged := false
+	if err == nil {
+		oauth2CredentialsChanged = !bytes.Equal(r.oauth2ClientID, oauth2ClientID) || !bytes.Equal(r.oauth2ClientSecret, oauth2ClientSecret)
+	}
+	if oauth2CredentialsNotFound || oauth2CredentialsChanged {
+		// Stop the controller and mark all subs as not ready
+		r.namedLogger().Info("stopping the BEB subscription manager due to change in OAuth2 credentials")
+		if err := r.bebSubMgr.Stop(false); err != nil {
+			return ctrl.Result{}, err
+		}
+		r.bebSubMgrStarted = false
+		if updateErr := r.UpdateBackendStatus(ctx, r.backendType, newBackend, nil, bebSecret); updateErr != nil {
+			return ctrl.Result{}, errors.Wrapf(err, "update status after stopping BEB controller failed")
+		}
+	}
+	if oauth2CredentialsNotFound {
+		return ctrl.Result{}, err
+	}
+	if oauth2CredentialsChanged {
+		r.oauth2ClientID = oauth2ClientID
+		r.oauth2ClientSecret = oauth2ClientSecret
 	}
 
 	// CreateOrUpdate deployment for publisher proxy secret
@@ -242,7 +269,7 @@ func (r *Reconciler) reconcileBEBBackend(ctx context.Context, bebSecret *v1.Secr
 	}
 
 	// Start the BEB subscription controller
-	if err := r.startBEBController(string(oauth2ClientID), string(oauth2ClientSecret)); err != nil {
+	if err := r.startBEBController(oauth2ClientID, oauth2ClientSecret); err != nil {
 		updateErr := r.UpdateBackendStatus(ctx, r.backendType, newBackend, nil, bebSecret)
 		if updateErr != nil {
 			return ctrl.Result{}, errors.Wrapf(err, "update status when start BEB controller failed")
@@ -359,11 +386,11 @@ func (r *Reconciler) UpdateBackendStatus(ctx context.Context, backendType eventi
 			desiredStatus.BEBSecretName = bebSecret.Name
 			desiredStatus.BEBSecretNamespace = bebSecret.Namespace
 		}
-		subscriptionControllerReady = r.bebCommanderStarted
+		subscriptionControllerReady = r.bebSubMgrStarted
 	case eventingv1alpha1.NatsBackendType:
 		desiredStatus.BEBSecretName = ""
 		desiredStatus.BEBSecretNamespace = ""
-		subscriptionControllerReady = r.natsCommanderStarted
+		subscriptionControllerReady = r.natsSubMgrStarted
 	}
 	eventingReady := subscriptionControllerReady && publisherReady
 
@@ -722,50 +749,50 @@ func (r *Reconciler) SetupWithManager(mgr ctrl.Manager) error {
 }
 
 func (r *Reconciler) startNATSController() error {
-	if !r.natsCommanderStarted {
-		if err := r.natsCommander.Start(r.cfg.DefaultSubscriptionConfig, commander.Params{}); err != nil {
-			r.namedLogger().Errorw("start NATS commander failed", "error", err)
+	if !r.natsSubMgrStarted {
+		if err := r.natsSubMgr.Start(r.cfg.DefaultSubscriptionConfig, subscriptionmanager.Params{}); err != nil {
+			r.namedLogger().Errorw("start NATS subscription manager failed", "error", err)
 			return err
 		}
-		r.natsCommanderStarted = true
-		r.namedLogger().Info("start NATS commander succeeded")
+		r.natsSubMgrStarted = true
+		r.namedLogger().Info("start NATS subscription manager succeeded")
 	}
 	return nil
 }
 
 func (r *Reconciler) stopNATSController() error {
-	if r.natsCommanderStarted {
-		if err := r.natsCommander.Stop(); err != nil {
-			r.namedLogger().Errorw("stop NATS commander failed", "error", err)
+	if r.natsSubMgrStarted {
+		if err := r.natsSubMgr.Stop(true); err != nil {
+			r.namedLogger().Errorw("stop NATS subscription manager failed", "error", err)
 			return err
 		}
-		r.natsCommanderStarted = false
-		r.namedLogger().Info("stop NATS commander succeeded")
+		r.natsSubMgrStarted = false
+		r.namedLogger().Info("stop NATS subscription manager succeeded")
 	}
 	return nil
 }
 
-func (r *Reconciler) startBEBController(clientID, clientSecret string) error {
-	if !r.bebCommanderStarted {
-		bebCommanderParams := commander.Params{"client_id": clientID, "client_secret": clientSecret}
-		if err := r.bebCommander.Start(r.cfg.DefaultSubscriptionConfig, bebCommanderParams); err != nil {
-			r.namedLogger().Errorw("start BEB commander failed", "error", err)
+func (r *Reconciler) startBEBController(clientID, clientSecret []byte) error {
+	if !r.bebSubMgrStarted {
+		bebSubMgrParams := subscriptionmanager.Params{"client_id": clientID, "client_secret": clientSecret}
+		if err := r.bebSubMgr.Start(r.cfg.DefaultSubscriptionConfig, bebSubMgrParams); err != nil {
+			r.namedLogger().Errorw("start BEB subscription manager failed", "error", err)
 			return err
 		}
-		r.bebCommanderStarted = true
-		r.namedLogger().Info("start BEB commander succeeded")
+		r.bebSubMgrStarted = true
+		r.namedLogger().Info("start BEB subscription manager succeeded")
 	}
 	return nil
 }
 
 func (r *Reconciler) stopBEBController() error {
-	if r.bebCommanderStarted {
-		if err := r.bebCommander.Stop(); err != nil {
-			r.namedLogger().Errorw("stop BEB commander failed", "error", err)
+	if r.bebSubMgrStarted {
+		if err := r.bebSubMgr.Stop(true); err != nil {
+			r.namedLogger().Errorw("stop BEB subscription manager failed", "error", err)
 			return err
 		}
-		r.bebCommanderStarted = false
-		r.namedLogger().Info("stop BEB commander succeeded")
+		r.bebSubMgrStarted = false
+		r.namedLogger().Info("stop BEB subscription manager succeeded")
 	}
 	return nil
 }

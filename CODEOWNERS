@@ -12,9 +12,6 @@
 # Logging library
 /common/logging @franpog859 @dbadura @janmedrek
 
-# Microfrontend k8s client
-/common/microfrontend-client/ @dariadomagala @parostatkiem @akucharska @Wawrzyn321 @kwiatekus
-
 # developer tools: linting
 /hack @clebs @suleymanakbas91 @adamwalach
 
@@ -26,10 +23,6 @@
 
 # The `pod-preset` subchart
 /resources/cluster-essentials/charts/pod-preset/ @PK85 @piotrmiskiewicz @ksputo @szwedm @voigt @wozniakjan @adamwalach
-
-# The Microfrontend CRDs
-/resources/cluster-essentials/templates/microfrontend.crd.yaml @dariadomagala @parostatkiem @akucharska @Wawrzyn321 @kwiatekus
-/resources/cluster-essentials/templates/clustermicrofrontend.crd.yaml @dariadomagala @parostatkiem @akucharska @Wawrzyn321 @kwiatekus
 
 # The `values.yaml` file for `core` chart
 /resources/core/values.yaml @kyma-project/developers
@@ -85,9 +78,6 @@
 # The `helm-broker` subchart
 /resources/helm-broker/ @PK85 @piotrmiskiewicz @ksputo @szwedm @voigt @wozniakjan @adamwalach
 
-# The `addons-ui` subchart
-/resources/helm-broker/charts/addons-ui/ @dariadomagala @parostatkiem @akucharska @Wawrzyn321 @kwiatekus
-
 # The `monitoring` subchart
 /resources/monitoring/ @a-thaler @lilitgh @suleymanakbas91 @clebs @rakesh-garimella @skhalash @jeremyharisch @chrkl @shorim
 
@@ -105,9 +95,6 @@
 
 # The `service-catalog-addons` subchart
 /resources/service-catalog-addons/ @PK85 @piotrmiskiewicz @ksputo @szwedm @voigt @wozniakjan @adamwalach
-
-# The `service-catalog-ui` subchart
-/resources/service-catalog-addons/charts/service-catalog-ui/ @dariadomagala @akucharska @parostatkiem @Wawrzyn321 @kwiatekus
 
 # The `service-catalog-addons` subchart
 /resources/service-manager-proxy/ @PK85 @piotrmiskiewicz @ksputo @szwedm @voigt @wozniakjan
@@ -335,23 +322,6 @@ milv.config.yaml @m00g3n @pPrecel @klaudiagrz @mmitoraj @majakurcius @alexandra-
 
 # performance tests
 /tests/perf/ @a-thaler @lilitgh @suleymanakbas91 @clebs @rakesh-garimella
-
-# The `api-gateway ui` micro front-end definition
-/resources/api-gateway/templates/api-rules-microfrontend.yaml @dariadomagala @parostatkiem @akucharska @Wawrzyn321 @kwiatekus
-
-# application ui microfrontend definitions
-/resources/application-connector/templates/applications-microfrontend.yaml @dariadomagala @parostatkiem @akucharska @Wawrzyn321 @kwiatekus
-
-# serverless ui microfrontend definitions
-/resources/serverless/templates/cluster-microfrontend-functions.yaml @dariadomagala @parostatkiem @akucharska @Wawrzyn321 @kwiatekus
-
-# monitoring ui microfrontend definitions
-/resources/kiali/templates/kyma-additions/clustermicrofrontend.yaml @dariadomagala @parostatkiem @akucharska @Wawrzyn321 @kwiatekus
-/resources/monitoring/charts/grafana/templates/kyma-additions/stats-metrics-microfrontend.yaml @dariadomagala @parostatkiem @akucharska @Wawrzyn321 @kwiatekus
-/resources/tracing/templates/kyma-additions/microfrontend.yaml @dariadomagala @parostatkiem @akucharska @Wawrzyn321 @kwiatekus
-
-# compass ui microfrontend definitions
-/resources/compass-runtime-agent/templates/compass-apps-microfrontend.yaml @dariadomagala @parostatkiem @akucharska @Wawrzyn321 @kwiatekus
 
 # github actions
 /.github/workflows @PK85 @piotrmiskiewicz @ksputo @szwedm @voigt @wozniakjan @adamwalach

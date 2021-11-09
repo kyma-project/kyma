@@ -996,7 +996,7 @@ async function getKymaAdminBindings() {
   const adminRoleBindings = body.items;
   return adminRoleBindings
     .filter(
-      (clusterRoleBinding) => clusterRoleBinding.roleRef.name === "kyma-admin"
+      (clusterRoleBinding) => clusterRoleBinding.roleRef.name === "cluster-admin"
     )
     .map((clusterRoleBinding) => ({
       name: clusterRoleBinding.metadata.name,
