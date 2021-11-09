@@ -24,13 +24,13 @@ import (
 	"github.com/kyma-project/kyma/components/eventing-controller/controllers/subscription/beb"
 	"github.com/kyma-project/kyma/components/eventing-controller/logger"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/application"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/commander"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/subscriptionmanager"
 )
 
 const (
-	commanderName = "beb-commander"
+	subscriptionManagerName = "beb-subscription-manager"
 )
 
 // AddToScheme adds the own schemes to the runtime scheme.
@@ -47,8 +47,8 @@ func AddToScheme(scheme *runtime.Scheme) error {
 	return nil
 }
 
-// Commander implements the Commander interface.
-type Commander struct {
+// SubscriptionManager implements the subscriptionmanager.Manager interface.
+type SubscriptionManager struct {
 	cancel       context.CancelFunc
 	envCfg       env.Config
 	restCfg      *rest.Config
@@ -59,10 +59,10 @@ type Commander struct {
 	logger       *logger.Logger
 }
 
-// NewCommander creates the Commander for BEB and initializes it as far as it
+// NewSubscriptionManager creates the SubscriptionManager for BEB and initializes it as far as it
 // does not depend on non-common options.
-func NewCommander(restCfg *rest.Config, metricsAddr string, resyncPeriod time.Duration, logger *logger.Logger) *Commander {
-	return &Commander{
+func NewSubscriptionManager(restCfg *rest.Config, metricsAddr string, resyncPeriod time.Duration, logger *logger.Logger) *SubscriptionManager {
+	return &SubscriptionManager{
 		envCfg:       env.GetConfig(),
 		restCfg:      restCfg,
 		metricsAddr:  metricsAddr,
@@ -71,8 +71,8 @@ func NewCommander(restCfg *rest.Config, metricsAddr string, resyncPeriod time.Du
 	}
 }
 
-// Init implements the Commander interface.
-func (c *Commander) Init(mgr manager.Manager) error {
+// Init implements the subscriptionmanager.Manager interface.
+func (c *SubscriptionManager) Init(mgr manager.Manager) error {
 	if len(c.envCfg.Domain) == 0 {
 		return fmt.Errorf("env var DOMAIN must be a non-empty value")
 	}
@@ -80,8 +80,8 @@ func (c *Commander) Init(mgr manager.Manager) error {
 	return nil
 }
 
-// Start implements the Commander interface and starts the manager.
-func (c *Commander) Start(_ env.DefaultSubscriptionConfig, params commander.Params) error {
+// Start implements the subscriptionmanager.Manager interface and starts the manager.
+func (c *SubscriptionManager) Start(_ env.DefaultSubscriptionConfig, params subscriptionmanager.Params) error {
 	ctx, cancel := context.WithCancel(context.Background())
 	c.cancel = cancel
 	dynamicClient := dynamic.NewForConfigOrDie(c.restCfg)
@@ -94,7 +94,7 @@ func (c *Commander) Start(_ env.DefaultSubscriptionConfig, params commander.Para
 	// Need to read env so as to read BEB related secrets
 	c.envCfg = env.GetConfig()
 	nameMapper := handlers.NewBEBSubscriptionNameMapper(strings.TrimSpace(c.envCfg.Domain), handlers.MaxBEBSubscriptionNameLength)
-	ctrl.Log.WithName("BEB-commander").Info("using BEB name mapper",
+	ctrl.Log.WithName("BEB-subscription-manager").Info("using BEB name mapper",
 		"domainName", c.envCfg.Domain,
 		"maxNameLength", handlers.MaxBEBSubscriptionNameLength)
 	reconciler := beb.NewReconciler(
@@ -116,8 +116,10 @@ func (c *Commander) Start(_ env.DefaultSubscriptionConfig, params commander.Para
 	return nil
 }
 
-// Stop implements the Commander interface and stops the commander.
-func (c *Commander) Stop(runCleanup bool) error {
+// Stop implements the subscriptionmanager.Manager interface and stops the BEB subscription manager.
+// If runCleanup is false, it will only mark the subscriptions as not ready. If it is true, it will
+// clean up subscriptions on BEB.
+func (c *SubscriptionManager) Stop(runCleanup bool) error {
 	if c.cancel != nil {
 		c.cancel()
 	}
@@ -128,8 +130,8 @@ func (c *Commander) Stop(runCleanup bool) error {
 	return cleanup(c.backend, dynamicClient, c.namedLogger())
 }
 
-func (c *Commander) namedLogger() *zap.SugaredLogger {
-	return c.logger.WithContext().Named(commanderName)
+func (c *SubscriptionManager) namedLogger() *zap.SugaredLogger {
+	return c.logger.WithContext().Named(subscriptionManagerName)
 }
 
 func markAllSubscriptionsAsNotReady(dynamicClient dynamic.Interface, logger *zap.SugaredLogger) error {
@@ -212,7 +214,7 @@ func cleanup(backend handlers.MessagingBackend, dynamicClient dynamic.Interface,
 	return nil
 }
 
-func getOAuth2ClientCredentials(params commander.Params) (*handlers.OAuth2ClientCredentials, error) {
+func getOAuth2ClientCredentials(params subscriptionmanager.Params) (*handlers.OAuth2ClientCredentials, error) {
 	val := params["client_id"]
 	id, ok := val.([]byte)
 	if !ok {

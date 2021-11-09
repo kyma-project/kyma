@@ -1,28 +1,28 @@
-package fake
+package mock
 
 import (
 	"k8s.io/client-go/dynamic"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/commander"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/subscriptionmanager"
 )
 
-type Commander struct {
+type Manager struct {
 	Client  dynamic.Interface
 	Backend handlers.MessagingBackend
 }
 
-func (c *Commander) Init(mgr manager.Manager) error {
+func (c *Manager) Init(mgr manager.Manager) error {
 	return nil
 }
 
-func (c *Commander) Start(_ env.DefaultSubscriptionConfig, _ commander.Params) error {
+func (c *Manager) Start(_ env.DefaultSubscriptionConfig, _ subscriptionmanager.Params) error {
 	return nil
 }
 
-func (c *Commander) Stop(_ bool) error {
+func (c *Manager) Stop(_ bool) error {
 	return nil
 }
 

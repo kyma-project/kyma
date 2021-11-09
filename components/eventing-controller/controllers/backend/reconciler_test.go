@@ -33,8 +33,8 @@ import (
 
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 	"github.com/kyma-project/kyma/components/eventing-controller/logger"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/commander"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/deployment"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/subscriptionmanager"
 	reconcilertesting "github.com/kyma-project/kyma/components/eventing-controller/testing"
 	"github.com/kyma-project/kyma/components/eventing-controller/utils"
 )
@@ -55,8 +55,8 @@ var (
 	k8sClient     client.Client
 	testEnv       *envtest.Environment
 
-	natsCommander = &TestCommander{}
-	bebCommander  = &TestCommander{}
+	natsSubMgr = &SubMgrMock{}
+	bebSubMgr  = &SubMgrMock{}
 )
 
 // TestGetSecretForPublisher verifies the successful and failing retrieval
@@ -186,8 +186,8 @@ var _ = BeforeSuite(func(done Done) {
 
 	err = NewReconciler(
 		context.Background(),
-		natsCommander,
-		bebCommander,
+		natsSubMgr,
+		bebSubMgr,
 		k8sManager.GetClient(),
 		k8sManager.GetCache(),
 		defaultLogger,
@@ -323,7 +323,7 @@ var _ = Describe("Backend Reconciliation Tests", func() {
 	When("The OAuth2 secret is missing", func() {
 		It("Should mark eventing as not ready and stop the BEB subscription reconciler", func() {
 			ctx := context.Background()
-			bebCommander.resetState()
+			bebSubMgr.resetState()
 			removeOAuth2Secret(ctx)
 			Eventually(eventingBackendStatusGetter(ctx, eventingBackendName, kymaSystemNamespace), timeout, pollingInterval).
 				Should(Equal(&eventingv1alpha1.EventingBackendStatus{
@@ -334,14 +334,14 @@ var _ = Describe("Backend Reconciliation Tests", func() {
 					BEBSecretName:               bebSecret1name,
 					BEBSecretNamespace:          kymaSystemNamespace,
 				}))
-			Eventually(bebCommander.StopCalledWithoutCleanup, timeout, pollingInterval).Should(BeTrue())
+			Eventually(bebSubMgr.StopCalledWithoutCleanup, timeout, pollingInterval).Should(BeTrue())
 		})
 	})
 
 	When("The OAuth2 secret is recreated", func() {
 		It("Should mark eventing as ready and start the BEB subscription reconciler", func() {
 			ctx := context.Background()
-			bebCommander.resetState()
+			bebSubMgr.resetState()
 			createOAuth2Secret(ctx, []byte("id2"), []byte("secret2"))
 			Eventually(eventingBackendStatusGetter(ctx, eventingBackendName, kymaSystemNamespace), timeout, pollingInterval).
 				Should(Equal(&eventingv1alpha1.EventingBackendStatus{
@@ -352,7 +352,7 @@ var _ = Describe("Backend Reconciliation Tests", func() {
 					BEBSecretName:               bebSecret1name,
 					BEBSecretNamespace:          kymaSystemNamespace,
 				}))
-			Eventually(bebCommander.StartCalled, timeout, pollingInterval).Should(BeTrue())
+			Eventually(bebSubMgr.StartCalled, timeout, pollingInterval).Should(BeTrue())
 		})
 	})
 
@@ -395,7 +395,7 @@ var _ = Describe("Backend Reconciliation Tests", func() {
 	When("Switching to NATS and then starting NATS controller fails", func() {
 		It("Should mark Eventing Backend CR to not ready", func() {
 			ctx := context.Background()
-			natsCommander.startErr = errors.New("I don't want to start")
+			natsSubMgr.startErr = errors.New("I don't want to start")
 			By("Un-label the BEB secret to switch to NATS")
 			bebSecret := reconcilertesting.WithBEBMessagingSecret(bebSecret1name, kymaSystemNamespace)
 			bebSecret.Labels = map[string]string{}
@@ -420,7 +420,7 @@ var _ = Describe("Backend Reconciliation Tests", func() {
 			// in the reconciler will not result in a new deployment status. Let's simulate that!
 			resetPublisherProxyStatus(ctx)
 			By("NATS controller starts and reports as ready")
-			natsCommander.startErr = nil
+			natsSubMgr.startErr = nil
 			By("Checking EventingReady status is set to false")
 			Eventually(eventingBackendStatusGetter(ctx, eventingBackendName, kymaSystemNamespace), timeout, pollingInterval).
 				Should(Equal(&eventingv1alpha1.EventingBackendStatus{
@@ -452,7 +452,7 @@ var _ = Describe("Backend Reconciliation Tests", func() {
 	When("Switching to BEB and then stopping NATS controller fails", func() {
 		It("Should mark Eventing Backend CR to not ready", func() {
 			ctx := context.Background()
-			natsCommander.stopErr = errors.New("I shan't stop")
+			natsSubMgr.stopErr = errors.New("I shan't stop")
 			By("Label the secret to switch to BEB")
 			bebSecret := reconcilertesting.WithBEBMessagingSecret(bebSecret1name, kymaSystemNamespace)
 			bebSecret.Labels = map[string]string{
@@ -477,7 +477,7 @@ var _ = Describe("Backend Reconciliation Tests", func() {
 	When("Eventually stopping NATS controller succeeds", func() {
 		It("Should mark Eventing Backend CR to ready", func() {
 			ctx := context.Background()
-			natsCommander.stopErr = nil
+			natsSubMgr.stopErr = nil
 			Eventually(eventingBackendStatusGetter(ctx, eventingBackendName, kymaSystemNamespace), timeout, pollingInterval).
 				Should(Equal(&eventingv1alpha1.EventingBackendStatus{
 					Backend:                     eventingv1alpha1.BEBBackendType,
@@ -656,23 +656,23 @@ func eventingOwnerReferencesGetter(ctx context.Context, name, namespace string) 
 	}
 }
 
-// TestCommander simulates the the commander implementation for BEB and NATS.
-type TestCommander struct {
+// SubMgrMock is a subscription manager mock implementation for BEB and NATS.
+type SubMgrMock struct {
 	// These state variables are used to validate the mock state. Ideally, we'd use a proper mocking framework!
 	startErr, stopErr                                            error
 	StopCalledWithCleanup, StopCalledWithoutCleanup, StartCalled bool
 }
 
-func (t *TestCommander) Init(_ manager.Manager) error {
+func (t *SubMgrMock) Init(_ manager.Manager) error {
 	return nil
 }
 
-func (t *TestCommander) Start(_ env.DefaultSubscriptionConfig, _ commander.Params) error {
+func (t *SubMgrMock) Start(_ env.DefaultSubscriptionConfig, _ subscriptionmanager.Params) error {
 	t.StartCalled = true
 	return t.startErr
 }
 
-func (t *TestCommander) Stop(runCleanup bool) error {
+func (t *SubMgrMock) Stop(runCleanup bool) error {
 	if runCleanup {
 		t.StopCalledWithCleanup = true
 	} else {
@@ -681,7 +681,7 @@ func (t *TestCommander) Stop(runCleanup bool) error {
 	return t.stopErr
 }
 
-func (t *TestCommander) resetState() {
+func (t *SubMgrMock) resetState() {
 	t.startErr = nil
 	t.stopErr = nil
 	t.StartCalled = false

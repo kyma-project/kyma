@@ -13,14 +13,14 @@ import (
 
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 	"github.com/kyma-project/kyma/components/eventing-controller/logger"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/commander/fake"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/subscriptionmanager/mock"
 	controllertesting "github.com/kyma-project/kyma/components/eventing-controller/testing"
 )
 
 func TestCleanup(t *testing.T) {
-	natsCommander := fake.Commander{}
+	natsSubMgr := mock.Manager{}
 	g := gomega.NewWithT(t)
 	data := "sampledata"
 	expectedDataInStore := fmt.Sprintf("\"%s\"", data)
@@ -59,19 +59,19 @@ func TestCleanup(t *testing.T) {
 	}
 	subsConfig := env.DefaultSubscriptionConfig{MaxInFlightMessages: 9}
 	natsBackend := handlers.NewNats(envConf, subsConfig, defaultLogger)
-	natsCommander.Backend = natsBackend
-	err = natsCommander.Backend.Initialize(env.Config{})
+	natsSubMgr.Backend = natsBackend
+	err = natsSubMgr.Backend.Initialize(env.Config{})
 	g.Expect(err).To(gomega.BeNil())
 
 	// Create fake Dynamic clients
 	fakeClient, err := controllertesting.NewFakeSubscriptionClient(testSub)
 	g.Expect(err).To(gomega.BeNil())
-	natsCommander.Client = fakeClient
+	natsSubMgr.Client = fakeClient
 
-	fakeCleaner := fake.Cleaner{}
+	fakeCleaner := mock.Cleaner{}
 
 	// Create NATS subscription
-	_, err = natsCommander.Backend.SyncSubscription(testSub, &fakeCleaner)
+	_, err = natsSubMgr.Backend.SyncSubscription(testSub, &fakeCleaner)
 	g.Expect(err).To(gomega.BeNil())
 
 	// Make sure subscriber works
@@ -92,11 +92,11 @@ func TestCleanup(t *testing.T) {
 	}
 
 	// Then
-	err = cleanup(natsCommander.Backend, natsCommander.Client, defaultLogger.WithContext())
+	err = cleanup(natsSubMgr.Backend, natsSubMgr.Client, defaultLogger.WithContext())
 	g.Expect(err).To(gomega.BeNil())
 
 	// Expect
-	unstructuredSub, err := natsCommander.Client.Resource(controllertesting.SubscriptionGroupVersionResource()).Namespace("test").Get(ctx, testSub.Name, metav1.GetOptions{})
+	unstructuredSub, err := natsSubMgr.Client.Resource(controllertesting.SubscriptionGroupVersionResource()).Namespace("test").Get(ctx, testSub.Name, metav1.GetOptions{})
 	g.Expect(err).To(gomega.BeNil())
 	gotSub, err := controllertesting.ToSubscription(unstructuredSub)
 	g.Expect(err).To(gomega.BeNil())
