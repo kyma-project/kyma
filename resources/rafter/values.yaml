@@ -11,10 +11,6 @@ global:
       name: "minio"
       version: "RELEASE.2020-09-21T22-31-59Z-9397617c"
       directory: "tpi/minio"
-    minio_client:
-      name: "mc"
-      version: "RELEASE.2019-04-03T17-59-57Z-e0da5a68"
-      directory: "tpi/minio"
     k8s_tools:
       name: "k8s-tools"
       version: "20211022-85284bf9"
