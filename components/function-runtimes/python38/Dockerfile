@@ -7,7 +7,7 @@
 # We use this code to manually use newest alpine and nodejs.
 # Use official build when it will be available.
 
-FROM alpine:3.13.6
+FROM alpine:3.14.2
 
 # ensure local python is preferred over distribution python
 ENV PATH /usr/local/bin:$PATH
@@ -27,20 +27,15 @@ RUN set -eux; \
 ENV GPG_KEY E3FF2839C048B25C084DEBE9B26995E310250568
 ENV PYTHON_VERSION 3.8.12
 
-
-# expat-dev for alpine:3.13.5 is outdated and vulnerable. We will install it from edge .
-# We can't upgrade fully to 3.14 because it has a dependancy on a specific recent docker version https://gitlab.alpinelinux.org/alpine/aports/-/issues/12396
-
 RUN set -ex \
 	&& apk add --no-cache --virtual .fetch-deps \
 		gnupg \
 		tar \
-		ncurses-dev \
 		xz \
-		expat-dev \
 	\
-	# && apk add --no-cache --virtual .fetch-deps --repository=http://dl-cdn.alpinelinux.org/alpine/edge/main \
-	# \
+	&& apk add --no-cache --virtual .fetch-deps --repository=http://dl-cdn.alpinelinux.org/alpine/edge/main \
+		ncurses-dev \
+	\
 	&& wget -O python.tar.xz "https://www.python.org/ftp/python/${PYTHON_VERSION%%[a-z]*}/Python-$PYTHON_VERSION.tar.xz" \
 	&& wget -O python.tar.xz.asc "https://www.python.org/ftp/python/${PYTHON_VERSION%%[a-z]*}/Python-$PYTHON_VERSION.tar.xz.asc" \
 	&& export GNUPGHOME="$(mktemp -d)" \
@@ -57,6 +52,7 @@ RUN set -ex \
 		bzip2-dev \
 		coreutils \
 		dpkg-dev dpkg \
+		expat-dev \
 		findutils \
 		gcc \
 		gdbm-dev \
