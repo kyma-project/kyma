@@ -26,7 +26,7 @@ describe(`SKR Nightly periodic test`, function () {
    const kcp = new KCPWrapper(KCPConfig.fromEnv());
 
    let instanceID;
-   let skr;
+   let shoot;
    before('Fetch last nightly SKR', async function () {
       let runtime;
       await kcp.login();
@@ -40,13 +40,9 @@ describe(`SKR Nightly periodic test`, function () {
          instanceID = runtime.instanceID;
       }
       console.log(runtime);
-      let shoot = await gardener.getShoot(runtime.shootName);
-      skr = {
-         operation: "",
-         shoot
-      }
+      shoot = await gardener.getShoot(runtime.shootName);
       initializeK8sClient({ kubeconfig: shoot.kubeconfig });
    });
-   OIDCE2ETest(skr, instanceID, options);
-   CommerceMockTest(skr, options);
+   OIDCE2ETest(shoot, instanceID, options);
+   CommerceMockTest(shoot, options);
 });

@@ -36,7 +36,7 @@ let options = GatherOptions(
     WithTestNS('skr-nightly'));
 
 let runtime;
-let skr;
+let shoot;
 
 describe("SKR nightly", function () {
   this.timeout(3600000 * 3); // 3h
@@ -66,7 +66,8 @@ describe("SKR nightly", function () {
         oidc: options.oidc0,
       };
 
-      skr = await provisionSKR(keb, gardener, instanceID, options.runtimeName, null, null, customParams);
+      let skr = await provisionSKR(keb, gardener, instanceID, options.runtimeName, null, null, customParams);
+      shoot = skr.shoot;
       initializeK8sClient({ kubeconfig: skr.shoot.kubeconfig });
 
       await addScenarioInCompass(director, options.scenarioName);
@@ -77,6 +78,6 @@ describe("SKR nightly", function () {
     }
   });
   console.log(`${instanceID}, ${options}`);
-  OIDCE2ETest(skr, instanceID, options);
+  OIDCE2ETest(shoot, instanceID, options);
   CommerceMockTest(options);
 });

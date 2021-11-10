@@ -22,17 +22,16 @@ const {
 const {keb, gardener, director} = require('./helpers');
 const {prometheusPortForward} = require("../monitoring/client");
 
-function OIDCE2ETest(skr, runtimeId, options) {
+function OIDCE2ETest(shoot, runtimeID, options) {
   describe('OIDC E2E Test', function () {
     const oidc0 = options.oidc0;
     const oidc1 = options.oidc1;
-    const runtimeID = runtimeId;
 
     const administrator0 = options.administrator0;
     const administrators1 = options.administrators1;
 
     it(`Assure initial OIDC config is applied on shoot cluster`, async function () {
-      ensureValidShootOIDCConfig(skr.shoot, oidc0);
+      ensureValidShootOIDCConfig(shoot, oidc0);
     });
 
     it(`Assure initial OIDC config is part of kubeconfig`, async function () {
@@ -48,11 +47,11 @@ function OIDCE2ETest(skr, runtimeId, options) {
         oidc: oidc1,
       };
 
-      skr = await updateSKR(keb, gardener, runtimeID, skr.shoot.name, customParams);
+      skr = await updateSKR(keb, gardener, runtimeID, shoot.name, customParams);
     });
 
     it(`Assure updated OIDC config is applied on shoot cluster`, async function () {
-      ensureValidShootOIDCConfig(skr.shoot, oidc1);
+      ensureValidShootOIDCConfig(shoot, oidc1);
     });
 
     it(`Assure updated OIDC config is part of kubeconfig`, async function () {
@@ -68,7 +67,7 @@ function OIDCE2ETest(skr, runtimeId, options) {
         administrators: administrators1,
       };
 
-      skr = await updateSKR(keb, gardener, runtimeID, skr.shoot.name, customParams);
+      await updateSKR(keb, gardener, runtimeID, shoot.name, customParams);
     });
 
     it(`Assure only new cluster admins are configured`, async function () {
