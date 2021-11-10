@@ -5,13 +5,13 @@ go 1.16
 require (
 	github.com/gorilla/mux v1.8.0
 	github.com/kyma-project/kyma/common/logging v0.0.0-20210318081026-665ca4cda3f6
-	github.com/kyma-project/kyma/components/application-operator v0.0.0-20210624133846-3e1e71e9f682
+	github.com/kyma-project/kyma/components/application-operator v0.0.0-20211110074047-13002528fca2
 	github.com/patrickmn/go-cache v2.1.0+incompatible
 	github.com/stretchr/testify v1.7.0
-	github.com/vrischmann/envconfig v1.1.0
-	go.uber.org/zap v1.17.0
-	k8s.io/apimachinery v0.21.2
-	k8s.io/client-go v0.21.2
+	github.com/vrischmann/envconfig v1.3.0
+	go.uber.org/zap v1.18.1
+	k8s.io/apimachinery v0.22.0
+	k8s.io/client-go v0.22.0
 )
 
 replace (
