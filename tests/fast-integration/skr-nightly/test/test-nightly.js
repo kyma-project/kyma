@@ -10,6 +10,12 @@ const {
    OIDCE2ETest, CommerceMockTest,
 } = require('../../skr-test');
 
+// Mocha root hook
+let options = GatherOptions(
+    WithRuntimeName('kyma-nightly'),
+    WithScenarioName('test-nightly'),
+    WithAppName('app-nightly'),
+    WithTestNS('skr-nightly'));
 
 describe(`SKR Nightly periodic test`, function () {
    process.env.KCP_KEB_API_URL = `https://kyma-env-broker.` + keb.host;
@@ -17,15 +23,13 @@ describe(`SKR Nightly periodic test`, function () {
    process.env.KCP_OIDC_ISSUER_URL = `https://kymatest.accounts400.ondemand.com`;
    process.env.KCP_MOTHERSHIP_API_URL = 'https://mothership-reconciler.cp.dev.kyma.cloud.sap/v1';
    process.env.KCP_KUBECONFIG_API_URL = 'https://kubeconfig-service.cp.dev.kyma.cloud.sap';
-
-   const config = KCPConfig.fromEnv();
-   const kcp = new KCPWrapper(config);
+   const kcp = new KCPWrapper(KCPConfig.fromEnv());
 
    let instanceID;
    let skr;
    before('Fetch last nightly SKR', async function () {
       let runtime;
-      await kcp.login()
+      await kcp.login();
       let query = {
          subaccount: keb.subaccountID,
       }
@@ -43,13 +47,6 @@ describe(`SKR Nightly periodic test`, function () {
       }
       initializeK8sClient({ kubeconfig: shoot.kubeconfig });
    });
-   describe('Execute tests', function () {
-      let options = GatherOptions(
-          WithRuntimeName('kyma-nightly'),
-          WithScenarioName('test-nightly'),
-          WithAppName('app-nightly'),
-          WithTestNS('skr-nightly'));
-      OIDCE2ETest(skr, instanceID, options);
-      CommerceMockTest(skr, options);
-   });
+   OIDCE2ETest(skr, instanceID, options);
+   CommerceMockTest(skr, options);
 });

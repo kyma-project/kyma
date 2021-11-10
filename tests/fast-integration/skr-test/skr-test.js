@@ -79,7 +79,7 @@ function OIDCE2ETest(skr, runtimeId, options) {
   });
 }
 
-function CommerceMockTest(skr, options) {
+function CommerceMockTest(options) {
   describe("SKR test", function () {
     const testNS = options.testNS;
     const appName = options.appName;

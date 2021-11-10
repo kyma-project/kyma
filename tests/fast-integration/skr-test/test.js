@@ -28,10 +28,8 @@ describe(`Execute SKR test`, function () {
         await addScenarioInCompass(director, options.scenarioName);
         await assignRuntimeToScenario(director, skr.shoot.compassID, options.scenarioName);
     });
-    describe('Execute tests', function () {
-        OIDCE2ETest(skr, instanceID, options);
-        CommerceMockTest(skr, options);
-    });
+    OIDCE2ETest(skr, instanceID, options);
+    CommerceMockTest(options);
     after(`Deprovision SKR`, async function () {
         await deprovisionSKR(keb, instanceID);
         await unregisterKymaFromCompass(director, options.scenarioName);
