@@ -11,6 +11,7 @@ var k8sDynamicApi;
 var k8sAppsApi;
 var k8sCoreV1Api;
 var k8sLog;
+var k8sServerUrl;
 
 var watch;
 var forward;
@@ -33,11 +34,27 @@ function initializeK8sClient(opts) {
     k8sLog = new k8s.Log(kc);
     watch = new k8s.Watch(kc);
     forward = new k8s.PortForward(kc);
+    k8sServerUrl = kc.getCurrentCluster() ? kc.getCurrentCluster().server : null;
+
   } catch (err) {
     console.log(err.message);
   }
 }
 initializeK8sClient();
+
+/**
+ * Gets the shoot name from k8s server url
+ *
+ * @throws
+ * @returns {String}
+ */
+function getShootNameFromK8sServerUrl() {
+  if (!k8sServerUrl || k8sServerUrl === "" || k8sServerUrl.split(".").length < 1) {
+    throw new Error(`failed to get shootName from K8s server Url: ${k8sServerUrl}`)
+  }
+  return k8sServerUrl.split(".")[1];
+}
+
 
 /**
  * Retries a promise {retriesLeft} times every {interval} miliseconds
@@ -1608,6 +1625,7 @@ async function attachTraceChildSpans(parentSpan, trace) {
 
 module.exports = {
   initializeK8sClient,
+  getShootNameFromK8sServerUrl,
   retryPromise,
   convertAxiosError,
   removeServiceInstanceFinalizer,

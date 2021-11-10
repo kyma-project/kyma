@@ -43,6 +43,11 @@ const {
 
 const {
   registerOrReturnApplication,
+  deregisterApplication,
+  removeApplicationFromScenario,
+  removeScenarioFromCompass,
+  getApplicationByName,
+  unassignRuntimeFromScenario,
 } = require("../../../compass");
 
 const {
@@ -196,7 +201,7 @@ async function sendEventAndCheckResponse() {
   );
 }
 
-async function sendLegacyEventAndCheckTracing() {
+async function sendLegacyEventAndCheckTracing(targetNamespace) {
   // Send an event and get it back from the lastorder function
   const res = await sendEventAndCheckResponse();
   expect(res.data).to.have.nested.property("event.headers.x-b3-traceid");
@@ -213,7 +218,7 @@ async function sendLegacyEventAndCheckTracing() {
     'central-application-connectivity-validator.kyma-system',
     'eventing-publisher-proxy.kyma-system',
     'eventing-controller.kyma-system',
-    `lastorder-${res.data.podName.split('-')[1]}.test`,
+    `lastorder-${res.data.podName.split('-')[1]}.${targetNamespace}`,
   ];
 
   // wait sometime for jaeger to complete tracing data
@@ -232,10 +237,10 @@ async function checkInClusterEventTracing(targetNamespace) {
   // Define expected trace data
   const correctTraceSpansLength = 4;
   const correctTraceProcessSequence = [
-    `lastorder-${res.data.podName.split('-')[1]}.test`, // We are sending the in-cluster event from inside the lastorder pod.
+    `lastorder-${res.data.podName.split('-')[1]}.${targetNamespace}`, // We are sending the in-cluster event from inside the lastorder pod.
     'eventing-publisher-proxy.kyma-system',
     'eventing-controller.kyma-system',
-    `lastorder-${res.data.podName.split('-')[1]}.test`,
+    `lastorder-${res.data.podName.split('-')[1]}.${targetNamespace}`,
   ];
 
   // wait sometime for jaeger to complete tracing data
@@ -391,7 +396,7 @@ async function ensureCommerceMockWithCompassTestFixture(client, appName, scenari
     5,
     2000
   );
-  await waitForServiceInstance("commerce", targetNamespace, 300 * 1000);
+  await waitForServiceInstance("commerce", targetNamespace, 600 * 1000);
 
   if (withCentralApplicationConnectivity) {
     await waitForDeployment('central-application-gateway', 'kyma-system');
@@ -436,6 +441,29 @@ async function ensureCommerceMockWithCompassTestFixture(client, appName, scenari
   await waitForSubscription("order-created", targetNamespace);
 
   return mockHost;
+}
+
+async function cleanCompassResourcesSKR(client, appName, scenarioName, runtimeID) {
+  const application = await getApplicationByName(client, appName, scenarioName)
+  if (application) {
+    console.log(`Removing application from scenario...`)
+    await removeApplicationFromScenario(client, application.id, scenarioName);
+
+    console.log(`De-registering application: ${application.id}...`)
+    await deregisterApplication(client, application.id);
+  }
+
+  try {
+    console.log(`Un-assigning runtime from scenario: ${scenarioName}...`)
+    await unassignRuntimeFromScenario(client, runtimeID, scenarioName);
+
+    console.log(`Removing scenario from compass: ${scenarioName}...`)
+    await removeScenarioFromCompass(client, scenarioName)
+  }
+  catch (err) {
+    console.log(`Error: Failed to remove scenario from compass`)
+    console.log(err)
+  }
 }
 
 async function ensureCommerceMockLocalTestFixture(mockNamespace, targetNamespace, withCentralApplicationConnectivity = false) {
@@ -636,4 +664,5 @@ module.exports = {
   deleteMockTestFixture,
   waitForSubscriptionsTillReady,
   setEventMeshSourceNamespace,
+  cleanCompassResourcesSKR,
 };

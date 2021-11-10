@@ -15,29 +15,48 @@ const {
   checkInClusterEventTracing,
   waitForSubscriptionsTillReady,
   setEventMeshSourceNamespace,
+  ensureCommerceMockWithCompassTestFixture,
+  cleanCompassResourcesSKR,
 } = require("../test/fixtures/commerce-mock");
 const {
+  debug,
+  getShootNameFromK8sServerUrl,
   switchEventingBackend,
   createEventingBackendK8sSecret,
   deleteEventingBackendK8sSecret,
   printAllSubscriptions,
   printEventingControllerLogs,
   printEventingPublisherProxyLogs,
+  genRandom,
 } = require("../utils");
-
+const {
+  DirectorClient,
+  DirectorConfig,
+  addScenarioInCompass,
+  assignRuntimeToScenario,
+} = require("../compass");
 const {prometheusPortForward} = require("../monitoring/client")
-
 const {eventingMonitoringTest} = require("./metric-test")
+const {GardenerClient, GardenerConfig} = require("../gardener");
+
 
 describe("Eventing tests", function () {
   this.timeout(10 * 60 * 1000);
   this.slow(5000);
-  const testNamespace = "test";
+  let suffix = genRandom(4);
+  const appName = `app-${suffix}`;
+  const scenarioName = `test-${suffix}`;
+  const testNamespace = `test-${suffix}`;
+  const mockNamespace = "mocks";
+  const isSKR = process.env.KYMA_TYPE === "SKR";
   const backendK8sSecretName = process.env.BACKEND_SECRET_NAME || "eventing-backend";
   const backendK8sSecretNamespace = process.env.BACKEND_SECRET_NAMESPACE || "default";
   const eventMeshSecretFilePath = process.env.EVENTMESH_SECRET_FILE || "";
   const DEBUG = process.env.DEBUG;
   let cancelPrometheusPortForward = null;
+  let gardener = null;
+  let director = null;
+  let skrInfo = null;
 
   // eventingE2ETestSuite - Runs Eventing end-to-end tests
   function eventingE2ETestSuite () {
@@ -56,12 +75,55 @@ describe("Eventing tests", function () {
 
   // eventingTracingTestSuite - Runs Eventing tracing tests
   function eventingTracingTestSuite () {
+    // Only run tracing tests on OSS
+    if (isSKR) {
+      console.log("Skipping eventing tracing tests on SKR...")
+      return
+    }
+
     it("order.created.v1 event from CommerceMock should have correct tracing spans", async function () {
-      await sendLegacyEventAndCheckTracing();
+      await sendLegacyEventAndCheckTracing(testNamespace);
     });
     it("In-cluster event should have correct tracing spans", async function () {
       await checkInClusterEventTracing(testNamespace);
     });
+  }
+
+  // prepareAssetsForOSSTests - Sets up CommerceMost for the OSS
+  async function prepareAssetsForOSSTests() {
+    console.log("Preparing CommerceMock test fixture on Kyma OSS")
+    await ensureCommerceMockLocalTestFixture(mockNamespace, testNamespace).catch((err) => {
+      console.dir(err); // first error is logged
+      return ensureCommerceMockLocalTestFixture(mockNamespace, testNamespace);
+    });
+  }
+
+  // prepareAssetsForSKRTests - Sets up CommerceMost for the SKR
+  async function prepareAssetsForSKRTests() {
+    console.log("Preparing for tests on SKR")
+    // create gardener & director clients
+    gardener = new GardenerClient(GardenerConfig.fromEnv());
+    director = new DirectorClient(DirectorConfig.fromEnv());
+
+    // Get shoot info from gardener to get compassID
+    const shootName = getShootNameFromK8sServerUrl();
+    console.log(`Fetching SKR info for shoot: ${shootName}`)
+    skrInfo = await gardener.getShoot(shootName)
+    debug(`appName: ${appName}, scenarioName: ${scenarioName}, testNamespace: ${testNamespace}, compassID: ${skrInfo.compassID}`);
+
+    // Assign SKR to scenario
+    console.log("Assigning SKR to scenario in Compass")
+    await addScenarioInCompass(director, scenarioName);
+    await assignRuntimeToScenario(director, skrInfo.compassID, scenarioName);
+
+    console.log("Preparing CommerceMock test fixture on Kyma SKR")
+    await ensureCommerceMockWithCompassTestFixture(
+        director,
+        appName,
+        scenarioName,
+        mockNamespace,
+        testNamespace
+    );
   }
 
   before(async function() {
@@ -76,23 +138,30 @@ describe("Eventing tests", function () {
     }
 
     // Deploy Commerce mock application, function and subscriptions for tests
-    console.log("Preparing CommerceMock test fixture")
-    await ensureCommerceMockLocalTestFixture("mocks", testNamespace).catch((err) => {
-      console.dir(err); // first error is logged
-      return ensureCommerceMockLocalTestFixture("mocks", testNamespace);
-    });
+    if (isSKR) {
+      await prepareAssetsForSKRTests();
+    }
+    else {
+      await prepareAssetsForOSSTests();
+    }
 
+    // Set port-forward to prometheus pod
     cancelPrometheusPortForward = prometheusPortForward();
   });
 
   after(async function() {
     // runs once after the last test in this block
     console.log("Cleaning: Test namespaces should be deleted")
-    await cleanMockTestFixture("mocks", testNamespace, true);
+    await cleanMockTestFixture(mockNamespace, testNamespace, true);
 
     // Delete eventing backend secret if it was created by test
     if (eventMeshSecretFilePath !== "") {
       await deleteEventingBackendK8sSecret(backendK8sSecretName, backendK8sSecretNamespace);
+    }
+
+    // Unregister SKR resources from Compass
+    if (isSKR) {
+      await cleanCompassResourcesSKR(director, appName, scenarioName, skrInfo.compassID);
     }
 
     cancelPrometheusPortForward();
@@ -132,6 +201,7 @@ describe("Eventing tests", function () {
 
     // Running Eventing end-to-end tests
     eventingE2ETestSuite();
+    // Running Eventing Monitoring tests
     eventingMonitoringTest('beb');
   });
 

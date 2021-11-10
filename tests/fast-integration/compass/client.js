@@ -207,6 +207,16 @@ class DirectorClient {
         }
     }
 
+    async deleteRuntimeLabel(runtimeID, key) {
+        const payload = gql.deleteRuntimeLabel(runtimeID, key);
+        try {
+            const res = await this.callDirector(payload);
+            return res.data;
+        } catch(err) {
+            throw new Error(`Error when deleting runtime ${runtimeID} label ${key}: ${err.toString()}`);
+        }
+    }
+
     async getRuntime(runtimeID) {
         const payload = gql.queryRuntime(runtimeID);
         try {
