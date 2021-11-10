@@ -41,7 +41,7 @@ global:
       directory: "tpi/cloudsql-docker"
     hydra:
       name: "hydra"
-      version: "v1.10.7"
+      version: "v1.10.7-sqlite"
       directory: "external/oryd"
     hydra_maester:
       name: "hydra-maester"
