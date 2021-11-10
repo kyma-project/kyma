@@ -18,11 +18,11 @@ global:
       directory: "tpi"
     podpreset_webhook:
       name: "podpreset-webhook"
-      version: "a1343c0c"
+      version: "021a99c6"
       directory: "incubator"
     podpreset_controller:
       name: "podpreset-controller"
-      version: "a1343c0c"
+      version: "021a99c6"
       directory: "incubator"
 
 image:
