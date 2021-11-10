@@ -89,7 +89,7 @@ func TestGetSecretForPublisher(t *testing.T) {
 		expectedError  error
 	}{
 		{
-			name: "with valid message and namepsace data",
+			name: "with valid message and namespace data",
 			messagingData: []byte("[{		\"broker\": {			\"type\": \"sapmgw\"		},		\"oa2\": {			\"clientid\": \"clientid\",			\"clientsecret\": \"clientsecret\",			\"granttype\": \"client_credentials\",			\"tokenendpoint\": \"https://token\"		},		\"protocol\": [\"amqp10ws\"],		\"uri\": \"wss://amqp\"	}, {		\"broker\": {			\"type\": \"sapmgw\"		},		\"oa2\": {			\"clientid\": \"clientid\",			\"clientsecret\": \"clientsecret\",			\"granttype\": \"client_credentials\",			\"tokenendpoint\": \"https://token\"		},		\"protocol\": [\"amqp10ws\"],		\"uri\": \"wss://amqp\"	},	{		\"broker\": {			\"type\": \"saprestmgw\"		},		\"oa2\": {			\"clientid\": \"rest-clientid\",			\"clientsecret\": \"rest-client-secret\",			\"granttype\": \"client_credentials\",			\"tokenendpoint\": \"https://rest-token\"		},		\"protocol\": [\"httprest\"],		\"uri\": \"https://rest-messaging\"	}]"),
 			namespaceData: []byte("valid/namespace"),
 			expectedSecret: corev1.Secret{
@@ -216,7 +216,7 @@ var _ = Describe("Backend Reconciliation Tests", func() {
 	var ownerReferences *[]metav1.OwnerReference
 
 	When("Creating a controller deployment", func() {
-		It("Should return an non empty owner to be used as a reference in publisher deployemnt", func() {
+		It("Should return an non empty owner to be used as a reference in publisher deployment", func() {
 			ctx := context.Background()
 			ensureNamespaceCreated(ctx, kymaSystemNamespace)
 			ownerReferences = ensureControllerDeploymentCreated(ctx)
@@ -478,6 +478,7 @@ var _ = Describe("Backend Reconciliation Tests", func() {
 		It("Should mark Eventing Backend CR to ready", func() {
 			ctx := context.Background()
 			natsSubMgr.stopErr = nil
+			ensurePublisherProxyPodIsCreated(ctx)
 			Eventually(eventingBackendStatusGetter(ctx, eventingBackendName, kymaSystemNamespace), timeout, pollingInterval).
 				Should(Equal(&eventingv1alpha1.EventingBackendStatus{
 					Backend:                     eventingv1alpha1.BEBBackendType,
@@ -528,13 +529,70 @@ func ensureControllerDeploymentCreated(ctx context.Context) *[]metav1.OwnerRefer
 }
 
 func ensurePublisherProxyIsReady(ctx context.Context) {
-	d, err := publisherProxyDeploymentGetter(ctx)()
+	By("Ensure publisher proxy is ready")
+	publisherProxyDeployment, err := publisherProxyDeploymentGetter(ctx)()
 	Expect(err).ShouldNot(HaveOccurred())
-	updatedDeployment := d.DeepCopy()
+
+	pod := ensurePublisherProxyPodIsCreated(ctx)
+	err = ctrl.SetControllerReference(publisherProxyDeployment, &pod, scheme.Scheme)
+	Expect(err).ShouldNot(HaveOccurred())
+
+	// update the deployment's status
+	updatedDeployment := publisherProxyDeployment.DeepCopy()
 	updatedDeployment.Status.ReadyReplicas = 1
 	updatedDeployment.Status.Replicas = 1
 	err = k8sClient.Status().Update(ctx, updatedDeployment)
 	Expect(err).ShouldNot(HaveOccurred())
+}
+
+func ensurePublisherProxyPodIsCreated(ctx context.Context) corev1.Pod {
+	backendType := fmt.Sprint(eventingv1alpha1.NatsBackendType)
+	if bebSecretExists(ctx) {
+		backendType = fmt.Sprint(eventingv1alpha1.BEBBackendType)
+	}
+	pod := reconcilertesting.WithEventingControllerPod(backendType)
+	var pods corev1.PodList
+	if err := k8sClient.List(ctx, &pods, client.MatchingLabels{
+		deployment.AppLabelKey: deployment.PublisherName,
+	}); err == nil {
+		// remove already created pods manually
+		for i := range pods.Items {
+			err := k8sClient.Delete(ctx, &pods.Items[i])
+			Expect(err).ShouldNot(HaveOccurred())
+		}
+	}
+	err := k8sClient.Create(ctx, pod)
+	if !k8serrors.IsAlreadyExists(err) {
+		Expect(err).Should(BeNil())
+	}
+
+	// update the pod's status
+	updatedPod := pod.DeepCopy()
+	updatedPod.Status.InitContainerStatuses = []corev1.ContainerStatus{
+		{
+			Name:  deployment.PublisherName,
+			Ready: true,
+		}}
+	updatedPod.Status.ContainerStatuses = []corev1.ContainerStatus{
+		{
+			Name:  deployment.PublisherName,
+			Ready: true,
+		}}
+	err = k8sClient.Status().Update(ctx, updatedPod)
+	Expect(err).Should(BeNil())
+
+	return *pod
+}
+
+func bebSecretExists(ctx context.Context) bool {
+	var secretList corev1.SecretList
+	if err := k8sClient.List(ctx, &secretList, client.MatchingLabels{
+		BEBBackendSecretLabelKey: BEBBackendSecretLabelValue,
+	}); err != nil {
+		return false
+	}
+
+	return len(secretList.Items) > 0
 }
 
 func resetPublisherProxyStatus(ctx context.Context) {

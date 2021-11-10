@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"net/http"
 
+	k8sresource "k8s.io/apimachinery/pkg/api/resource"
+
 	apigatewayv1alpha1 "github.com/kyma-incubator/api-gateway/api/v1alpha1"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -433,6 +435,40 @@ func WithEventingControllerDeployment() *appsv1.Deployment {
 			},
 		},
 		Status: appsv1.DeploymentStatus{},
+	}
+}
+func WithEventingControllerPod(backend string) *corev1.Pod {
+	labels := map[string]string{
+		deployment.AppLabelKey: deployment.PublisherName,
+	}
+	return &corev1.Pod{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "eventing-publisher-proxy-fffff",
+			Namespace: deployment.ControllerNamespace,
+			Labels:    labels,
+		},
+		Spec: corev1.PodSpec{
+			Containers: []corev1.Container{
+				{
+					Name:  deployment.PublisherName,
+					Image: "container-image1",
+					Env: []corev1.EnvVar{{
+						Name:  "BACKEND",
+						Value: backend,
+					}},
+					Resources: corev1.ResourceRequirements{
+						Limits: map[corev1.ResourceName]k8sresource.Quantity{
+							corev1.ResourceCPU:    k8sresource.MustParse("50m"),
+							corev1.ResourceMemory: k8sresource.MustParse("50Mi"),
+						},
+						Requests: map[corev1.ResourceName]k8sresource.Quantity{
+							corev1.ResourceCPU:    k8sresource.MustParse("20m"),
+							corev1.ResourceMemory: k8sresource.MustParse("20Mi"),
+						},
+					},
+				},
+			},
+		},
 	}
 }
 
