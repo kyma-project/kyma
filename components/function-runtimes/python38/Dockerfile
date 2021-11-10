@@ -33,9 +33,6 @@ RUN set -ex \
 		tar \
 		xz \
 	\
-	&& apk add --no-cache --virtual .fetch-deps --repository=http://dl-cdn.alpinelinux.org/alpine/edge/main \
-		ncurses-dev \
-	\
 	&& wget -O python.tar.xz "https://www.python.org/ftp/python/${PYTHON_VERSION%%[a-z]*}/Python-$PYTHON_VERSION.tar.xz" \
 	&& wget -O python.tar.xz.asc "https://www.python.org/ftp/python/${PYTHON_VERSION%%[a-z]*}/Python-$PYTHON_VERSION.tar.xz.asc" \
 	&& export GNUPGHOME="$(mktemp -d)" \
@@ -62,6 +59,7 @@ RUN set -ex \
 		libtirpc-dev \
 		linux-headers \
 		make \
+		ncurses-dev \
 		openssl-dev \
 		pax-utils \
 		readline-dev \
