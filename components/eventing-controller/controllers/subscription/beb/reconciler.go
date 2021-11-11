@@ -688,7 +688,7 @@ func (r *Reconciler) syncInitialStatus(subscription *eventingv1alpha1.Subscripti
 			}
 		}
 	}
-	if len(currentStatus.Conditions) == 0 {
+	if len(subscription.Status.Conditions) == 0 {
 		subscription.Status = expectedStatus
 	} else {
 		subscription.Status.Conditions = currentStatus.Conditions
