@@ -288,18 +288,17 @@ func (r *Reconciler) syncBEBSubscription(ctx context.Context, subscription *even
 			return statusChanged, err
 		}
 	}
-	// check if the last webhooks call returned an error
-	if r.checkLastFailedDelivery(subscription) {
-		reason := subscription.Status.EmsSubscriptionStatus.LastFailedDeliveryReason
-		condition := eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionSubscriptionWebhookCall, eventingv1alpha1.ConditionReasonSubscriptionWebhookCall, corev1.ConditionFalse, reason)
-		if err := r.updateCondition(ctx, subscription, condition); err != nil {
-			return statusChanged, err
-		}
+	// check if the last webhook call returned an error
+	condition := eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionWebhookCallStatus, eventingv1alpha1.ConditionReasonWebhookCallStatus, corev1.ConditionFalse, "")
+	if isWebhookCallError, err := r.checkLastFailedDelivery(subscription); err != nil {
+		condition.Message = err.Error()
+	} else if isWebhookCallError {
+		condition.Message = subscription.Status.EmsSubscriptionStatus.LastFailedDeliveryReason
 	} else {
-		condition := eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionSubscriptionWebhookCall, eventingv1alpha1.ConditionReasonSubscriptionWebhookCall, corev1.ConditionTrue, "")
-		if err := r.updateCondition(ctx, subscription, condition); err != nil {
-			return statusChanged, err
-		}
+		condition.Status = corev1.ConditionTrue
+	}
+	if err := r.updateCondition(ctx, subscription, condition); err != nil {
+		return statusChanged, err
 	}
 	// OK
 	return statusChanged, nil
@@ -642,30 +641,50 @@ func getSvcNsAndName(url string) (string, string, error) {
 
 // syncInitialStatus determines the desires initial status and updates it accordingly (if conditions changed)
 func (r *Reconciler) syncInitialStatus(subscription *eventingv1alpha1.Subscription) (statusChanged bool) {
-	currentStatus := subscription.Status
 	expectedStatus := eventingv1alpha1.SubscriptionStatus{}
 	expectedStatus.InitializeConditions()
-	currentReadyStatusFromConditions := currentStatus.IsReady()
+
+	currentReadyStatusForSubscription := subscription.Status.Ready
+	currentReadyStatusFromConditions := subscription.Status.IsReady()
 
 	var updateReadyStatus bool
-	if currentReadyStatusFromConditions && !currentStatus.Ready {
-		currentStatus.Ready = true
+	if currentReadyStatusFromConditions && !subscription.Status.Ready {
+		currentReadyStatusForSubscription = true
 		updateReadyStatus = true
-	} else if !currentReadyStatusFromConditions && currentStatus.Ready {
-		currentStatus.Ready = false
+	} else if !currentReadyStatusFromConditions && subscription.Status.Ready {
+		currentReadyStatusForSubscription = false
 		updateReadyStatus = true
 	}
 	// case: conditions are already initialized
-	if len(currentStatus.Conditions) >= len(expectedStatus.Conditions) && !updateReadyStatus {
+	if eventingv1alpha1.ContainSameConditionTypes(subscription.Status.Conditions, expectedStatus.Conditions) && !updateReadyStatus {
 		return false
-	} else if len(currentStatus.Conditions) > 0 {
+	}
+
+	var currentStatus eventingv1alpha1.SubscriptionStatus
+	if len(subscription.Status.Conditions) > 0 {
+		// determine the intersection between currentConditions and expectedConditions
 		currentConditions := make(map[eventingv1alpha1.ConditionType]eventingv1alpha1.Condition)
-		for _, condition := range currentStatus.Conditions {
+		for _, condition := range subscription.Status.Conditions {
 			currentConditions[condition.Type] = condition
 		}
-		for _, expectedCondition := range expectedStatus.Conditions {
-			if _, ok := currentConditions[expectedCondition.Type]; !ok {
-				currentStatus.Conditions = append(currentStatus.Conditions, expectedCondition) // add it if missed
+		expectedConditions := make(map[eventingv1alpha1.ConditionType]eventingv1alpha1.Condition)
+		for _, condition := range expectedStatus.Conditions {
+			expectedConditions[condition.Type] = condition
+		}
+		// remove from currentConditions all conditions which are not part of expectedConditions
+		for _, condition := range subscription.Status.Conditions {
+			if _, ok := expectedConditions[condition.Type]; !ok {
+				delete(currentConditions, condition.Type)
+			}
+		}
+		// add to currentStatus.Conditions the remained conditions
+		for _, condition := range currentConditions {
+			currentStatus.Conditions = append(currentStatus.Conditions, condition)
+		}
+		// add also to currentStatus.Conditions all new conditions from expectedConditions
+		for _, condition := range expectedStatus.Conditions {
+			if _, ok := currentConditions[condition.Type]; !ok {
+				currentStatus.Conditions = append(currentStatus.Conditions, condition)
 			}
 		}
 	}
@@ -673,7 +692,7 @@ func (r *Reconciler) syncInitialStatus(subscription *eventingv1alpha1.Subscripti
 		subscription.Status = expectedStatus
 	} else {
 		subscription.Status.Conditions = currentStatus.Conditions
-		subscription.Status.Ready = currentStatus.Ready
+		subscription.Status.Ready = currentReadyStatusForSubscription
 	}
 	return true
 }
@@ -874,25 +893,25 @@ func (r *Reconciler) checkStatusActive(subscription *eventingv1alpha1.Subscripti
 }
 
 // checkLastFailedDelivery checks if LastFailedDelivery exists and if happened after LastSuccessfulDelivery
-func (r *Reconciler) checkLastFailedDelivery(subscription *eventingv1alpha1.Subscription) bool {
+func (r *Reconciler) checkLastFailedDelivery(subscription *eventingv1alpha1.Subscription) (bool, error) {
 	if len(subscription.Status.EmsSubscriptionStatus.LastFailedDelivery) > 0 {
 		var lastFailedDeliveryTime, LastSuccessfulDeliveryTime time.Time
 		var err error
 		if lastFailedDeliveryTime, err = time.Parse(time.RFC3339, subscription.Status.EmsSubscriptionStatus.LastFailedDelivery); err != nil {
 			r.namedLogger().Errorw("parse LastFailedDelivery failed", "error", err)
-			return false
+			return true, err
 		}
 		if len(subscription.Status.EmsSubscriptionStatus.LastSuccessfulDelivery) > 0 {
 			if LastSuccessfulDeliveryTime, err = time.Parse(time.RFC3339, subscription.Status.EmsSubscriptionStatus.LastSuccessfulDelivery); err != nil {
 				r.namedLogger().Errorw("parse LastSuccessfulDelivery failed", "error", err)
-				return false
+				return true, err
 			}
 		}
 		if lastFailedDeliveryTime.After(LastSuccessfulDeliveryTime) {
-			return true
+			return true, nil
 		}
 	}
-	return false
+	return false, nil
 }
 
 func (r *Reconciler) namedLogger() *zap.SugaredLogger {

@@ -10,10 +10,10 @@ import (
 type ConditionType string
 
 const (
-	ConditionSubscribed              ConditionType = "Subscribed"
-	ConditionSubscriptionActive      ConditionType = "Subscription active"
-	ConditionAPIRuleStatus           ConditionType = "APIRule status"
-	ConditionSubscriptionWebhookCall ConditionType = "Webhook call status"
+	ConditionSubscribed         ConditionType = "Subscribed"
+	ConditionSubscriptionActive ConditionType = "Subscription active"
+	ConditionAPIRuleStatus      ConditionType = "APIRule status"
+	ConditionWebhookCallStatus  ConditionType = "Webhook call status"
 )
 
 var allConditions = makeConditions()
@@ -37,7 +37,7 @@ const (
 	ConditionReasonAPIRuleStatusReady         ConditionReason = "APIRule status ready"
 	ConditionReasonAPIRuleStatusNotReady      ConditionReason = "APIRule status not ready"
 	ConditionReasonNATSSubscriptionActive     ConditionReason = "NATS Subscription active"
-	ConditionReasonSubscriptionWebhookCall    ConditionReason = "BEB Subscription webhook call"
+	ConditionReasonWebhookCallStatus          ConditionReason = "BEB Subscription webhook call no errors status"
 )
 
 // InitializeConditions sets unset conditions to Unknown
@@ -63,7 +63,7 @@ func (s *SubscriptionStatus) InitializeConditions() {
 }
 
 func (s SubscriptionStatus) IsReady() bool {
-	if !containSameConditionTypes(allConditions, s.Conditions) {
+	if !ContainSameConditionTypes(allConditions, s.Conditions) {
 		return false
 	}
 
@@ -95,7 +95,7 @@ func makeConditions() []Condition {
 			Status:             corev1.ConditionUnknown,
 		},
 		{
-			Type:               ConditionSubscriptionWebhookCall,
+			Type:               ConditionWebhookCallStatus,
 			LastTransitionTime: metav1.Now(),
 			Status:             corev1.ConditionUnknown,
 		},
@@ -103,7 +103,7 @@ func makeConditions() []Condition {
 	return conditions
 }
 
-func containSameConditionTypes(conditions1, conditions2 []Condition) bool {
+func ContainSameConditionTypes(conditions1, conditions2 []Condition) bool {
 	if len(conditions1) != len(conditions2) {
 		return false
 	}
@@ -149,7 +149,7 @@ func (s *SubscriptionStatus) IsConditionSubscribed() bool {
 
 func (s *SubscriptionStatus) IsConditionWebhookCall() bool {
 	for _, condition := range s.Conditions {
-		if condition.Type == ConditionSubscriptionWebhookCall &&
+		if condition.Type == ConditionWebhookCallStatus &&
 			(condition.Status == corev1.ConditionTrue || condition.Status == corev1.ConditionUnknown) {
 			return true
 		}

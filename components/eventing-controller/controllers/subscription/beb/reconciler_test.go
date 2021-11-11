@@ -742,7 +742,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			))
 
 			By("Setting a subscription webhook failed condition")
-			subscriptionWebhookCallFailedCondition := eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionSubscriptionWebhookCall, eventingv1alpha1.ConditionReasonSubscriptionWebhookCall, v1.ConditionFalse, lastFailedDeliveryReason)
+			subscriptionWebhookCallFailedCondition := eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionWebhookCallStatus, eventingv1alpha1.ConditionReasonWebhookCallStatus, v1.ConditionFalse, lastFailedDeliveryReason)
 			getSubscription(ctx, givenSubscription).Should(And(
 				reconcilertesting.HaveSubscriptionName(subscriptionName),
 				reconcilertesting.HaveCondition(subscriptionWebhookCallFailedCondition),
