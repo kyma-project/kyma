@@ -45,13 +45,10 @@ var (
 )
 
 const (
-	NATSProtocol = "NATS"
-	// NATSFirstInstanceName the name of first instance of NATS cluster
-	NATSFirstInstanceName = "eventing-nats-1"
-	// NATSNamespace namespace of NATS cluster
-	NATSNamespace = "kyma-system"
-
-	reconcilerName = "nats-subscription-reconciler"
+	NATSProtocol          = "NATS"
+	NATSFirstInstanceName = "eventing-nats-1" // NATSFirstInstanceName the name of first instance of NATS cluster
+	NATSNamespace         = "kyma-system"     // NATSNamespace namespace of NATS cluster
+	reconcilerName        = "nats-subscription-reconciler"
 )
 
 func NewReconciler(ctx context.Context, client client.Client, applicationLister *application.Lister, cache cache.Cache, logger *logger.Logger, recorder record.EventRecorder, cfg env.NatsConfig, subsCfg env.DefaultSubscriptionConfig) *Reconciler {
