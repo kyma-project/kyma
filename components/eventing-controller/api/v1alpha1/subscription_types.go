@@ -184,7 +184,7 @@ type SubscriptionStatus struct {
 	// Ready defines the overall readiness status of a subscription
 	Ready bool `json:"ready"`
 
-	// CleanEventTypes defines the clean filter event types
+	// CleanEventTypes defines the filter's event types after cleanup for use with the configured backend
 	// +optional
 	CleanEventTypes []string `json:"cleanEventTypes,omitempty"`
 
