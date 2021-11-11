@@ -11,6 +11,11 @@ IMG_GOCACHE := /root/.cache/go-build
 # VERIFY_IGNORE is a grep pattern to exclude files and directories from verification
 VERIFY_IGNORE := /vendor\|/automock
 
+# IGNORE_LINTING_ISSUES enables or disables ignoring linting. 
+# enable failing builds by specifying the following in the components makefile
+# override IGNORE_LINTING_ISSUES =
+IGNORE_LINTING_ISSUES := -
+
 # Other variables
 # LOCAL_DIR in a local path to scripts folder
 LOCAL_DIR = $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
@@ -186,7 +191,7 @@ vet-local:
 
 # Lint goal is optional for now. remove the - at the beginning to make the goal fail if there are linting errors
 lint: ## Run various linters
-	-SKIP_VERIFY="true" ../../hack/verify-lint.sh $(COMPONENT_DIR) 
+	$(IGNORE_LINTING_ISSUES)SKIP_VERIFY="true" ../../hack/verify-lint.sh $(COMPONENT_DIR) 
 
 generate-local: ## Run code generation
 	go generate ./...
