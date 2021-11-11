@@ -214,8 +214,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 		return ctrl.Result{}, err
 	}
 	log.Debug("create NATS subscriptions succeeded")
-
-	//actualSubscription.Status.Config = desiredSubscription.Status.Config
+	
 	// Update status
 	if err := r.syncSubscriptionStatus(ctx, desiredSubscription, true, ""); err != nil {
 		return ctrl.Result{}, err

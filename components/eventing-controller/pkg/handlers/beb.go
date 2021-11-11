@@ -159,7 +159,7 @@ func (b *BEB) SyncSubscription(subscription *eventingv1alpha1.Subscription, clea
 	// set the status of bebSubscription in ev2Subscription
 	statusChanged = b.setEmsSubscriptionStatus(subscription, bebSubscription) || statusChanged
 
-	// get the backend infrastructures
+	// get the clean event types
 	subscription.Status.CleanEventTypes = getCleanEventTypes(bebSubscription.Events)
 
 	return statusChanged, nil
@@ -289,8 +289,8 @@ func (b *BEB) getSubscription(name string) (*types.Subscription, error) {
 
 func getCleanEventTypes(events types.Events) []string {
 	cleanEventTypes := make([]string, 0, len(events))
-	for _, e := range events {
-		cleanEventTypes = append(cleanEventTypes, e.Type)
+	for i, e := range events {
+		cleanEventTypes[i] = e.Type
 	}
 	return cleanEventTypes
 }
