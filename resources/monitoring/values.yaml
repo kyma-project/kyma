@@ -10,7 +10,7 @@ global:
       sha: ""
     prometheus_config_reloader:
       name: "prometheus-config-reloader"
-      version: "v0.43.2"
+      version: "v0.52.0"
       directory: "external/quay.io/prometheus-operator"
       sha: ""
     configmap_reload:
