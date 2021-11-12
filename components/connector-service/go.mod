@@ -1,6 +1,6 @@
 module github.com/kyma-project/kyma/components/connector-service
 
-go 1.16
+go 1.17
 
 require (
 	github.com/beorn7/perks v1.0.1 // indirect
@@ -26,6 +26,7 @@ require (
 )
 
 replace (
+	github.com/gogo/protobuf => github.com/gogo/protobuf v1.3.2
 	github.com/prometheus/client_golang => github.com/prometheus/client_golang v0.8.0
 	github.com/tidwall/gjson => github.com/tidwall/gjson v1.9.3
 
