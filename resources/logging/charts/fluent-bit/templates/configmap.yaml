@@ -60,7 +60,9 @@ data:
         Mem_Buf_Limit     {{ .Values.config.inputs.tail.memBufLimit }}
         exit_on_eof       {{ .Values.config.inputs.tail.exitOnEof }}
         {{- if eq .Values.config.inputs.tail.multiline "Off" }}
+        {{- if .Values.config.inputs.tail.parser }}
         Parser            {{ .Values.config.inputs.tail.parser }}
+        {{- end }}
         Docker_Mode       {{ .Values.config.inputs.tail.dockerMode }}
         Docker_Mode_Flush {{ .Values.config.inputs.tail.dockerModeFlush }}
         {{- end }}
