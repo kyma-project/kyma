@@ -22,90 +22,82 @@ const {
 const {keb, gardener, director} = require('./helpers');
 const {prometheusPortForward} = require("../monitoring/client");
 
-function OIDCE2ETest(shoot, runtimeID, options) {
-  describe('OIDC E2E Test', function () {
-    const oidc0 = options.oidc0;
-    const oidc1 = options.oidc1;
-
-    const administrator0 = options.administrator0;
-    const administrators1 = options.administrators1;
-
+function OIDCE2ETest() {
+  describe('OIDCE2ETest()', function () {
     it(`Assure initial OIDC config is applied on shoot cluster`, async function () {
-      ensureValidShootOIDCConfig(shoot, oidc0);
+      ensureValidShootOIDCConfig(this.shoot, this.options.oidc0);
     });
 
     it(`Assure initial OIDC config is part of kubeconfig`, async function () {
-      await ensureValidOIDCConfigInCustomerFacingKubeconfig(keb, runtimeID, oidc0);
+      await ensureValidOIDCConfigInCustomerFacingKubeconfig(keb, this.options.instanceID, this.options.oidc0);
     });
 
     it(`Assure initial cluster admin`, async function () {
-      await ensureKymaAdminBindingExistsForUser(administrator0);
+      await ensureKymaAdminBindingExistsForUser(this.options.administrator0);
     });
 
     it(`Update SKR service instance with OIDC config`, async function () {
       const customParams = {
-        oidc: oidc1,
+        oidc: this.options.oidc1,
       };
 
-      skr = await updateSKR(keb, gardener, runtimeID, shoot.name, customParams);
+      let skr = await updateSKR(keb, gardener, this.options.instanceID, this.shoot.name, customParams);
+      this.shoot = skr.shoot;
     });
 
     it(`Assure updated OIDC config is applied on shoot cluster`, async function () {
-      ensureValidShootOIDCConfig(shoot, oidc1);
+      ensureValidShootOIDCConfig(this.shoot, this.options.oidc1);
     });
 
     it(`Assure updated OIDC config is part of kubeconfig`, async function () {
-      await ensureValidOIDCConfigInCustomerFacingKubeconfig(keb, runtimeID, oidc1);
+      await ensureValidOIDCConfigInCustomerFacingKubeconfig(keb, this.options.instanceID, this.options.oidc1);
     });
 
     it(`Assure cluster admin is preserved`, async function () {
-      await ensureKymaAdminBindingExistsForUser(administrator0);
+      await ensureKymaAdminBindingExistsForUser(this.options.administrator0);
     });
 
     it(`Update SKR service instance with new admins`, async function () {
       const customParams = {
-        administrators: administrators1,
+        administrators: this.options.administrators1,
       };
 
-      await updateSKR(keb, gardener, runtimeID, shoot.name, customParams);
+      let skr = await updateSKR(keb, gardener, this.options.instanceID, this.shoot.name, customParams);
+      this.shoot = skr.shoot;
     });
 
     it(`Assure only new cluster admins are configured`, async function () {
-      await ensureKymaAdminBindingExistsForUser(administrators1[0]);
-      await ensureKymaAdminBindingExistsForUser(administrators1[1]);
-      await ensureKymaAdminBindingDoesNotExistsForUser(administrator0);
+      await ensureKymaAdminBindingExistsForUser(this.options.administrators1[0]);
+      await ensureKymaAdminBindingExistsForUser(this.options.administrators1[1]);
+      await ensureKymaAdminBindingDoesNotExistsForUser(this.options.administrator0);
     });
-  });
+  })
 }
 
-function CommerceMockTest(options) {
-  describe("SKR test", function () {
-    const testNS = options.testNS;
-    const appName = options.appName;
-    const scenarioName = options.scenarioName;
+function CommerceMockTest() {
+  describe('CommerceMockTest()', function () {
     const AWS_PLAN_ID = "361c511f-f939-4621-b228-d0fb79a1fe15";
-
     let cancelPortForward = null;
-    before(() => {
+    before(function () {
       cancelPortForward = prometheusPortForward();
     });
 
-    after(() => {
+    after(function () {
       cancelPortForward();
     });
 
     it("CommerceMock test fixture should be ready", async function () {
       await ensureCommerceMockWithCompassTestFixture(
           director,
-          appName,
-          scenarioName,
+          this.options.appName,
+          this.options.scenarioName,
           "mocks",
-          testNS
+          this.options.testNS
       );
     });
 
     it("function should be reachable through secured API Rule", async function () {
-      await checkFunctionResponse(testNS);
+      await checkFunctionResponse(this.options.testNS);
     });
 
     it("order.created.v1 event should trigger the lastorder function", async function () {
@@ -113,7 +105,7 @@ function CommerceMockTest(options) {
     });
 
     it("Deletes the resources that have been created", async function () {
-      await deleteMockTestFixture("mocks", testNS);
+      await deleteMockTestFixture("mocks", this.options.testNS);
     });
 
     //Check audit log for AWS

@@ -1,3 +1,4 @@
+const uuid = require('uuid');
 const {KEBConfig, KEBClient}= require('../kyma-environment-broker');
 const {GardenerClient, GardenerConfig} = require("../gardener");
 const {DirectorClient, DirectorConfig} = require("../compass");
@@ -6,6 +7,12 @@ const {genRandom, debug, getEnvOrThrow} = require("../utils");
 const keb = new KEBClient(KEBConfig.fromEnv());
 const gardener = new GardenerClient(GardenerConfig.fromEnv());
 const director = new DirectorClient(DirectorConfig.fromEnv());
+
+function WithInstanceID(instanceID) {
+    return function (options) {
+        options.instanceID = instanceID;
+    }
+}
 
 function WithRuntimeName(runtimeName) {
     return function (options) {
@@ -35,6 +42,7 @@ function GatherOptions(...opts) {
     const suffix = genRandom(4);
     // If no opts provided the options object will be set to these default values.
     let options = {
+        instanceID: uuid.v4(),
         runtimeName: `kyma-${suffix}`,
         appName: `app-${suffix}`,
         scenarioName: `test-${suffix}`,
@@ -72,6 +80,7 @@ function GatherOptions(...opts) {
 module.exports = {
     keb, gardener, director,
     GatherOptions,
+    WithInstanceID,
     WithAppName,
     WithRuntimeName,
     WithScenarioName,
