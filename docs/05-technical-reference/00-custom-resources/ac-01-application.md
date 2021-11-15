@@ -43,6 +43,8 @@ This table lists all the possible parameters of a given resource together with t
 | **spec.labels** | No | Defines the labels of the Application. |
 | **spec.services** | No | Contains all services that the Application provides. |
 | **spec.services.id** | Yes | Identifies the service that the Application provides. |
+| **spec.services.identifier** | No | Represents an additional identifier unique in the Application scope. Allows the external system to provide its own identifier. |
+| **spec.services.name** | No | Represents a unique name of the service. Used for proxying in Central Application Gateway. |
 | **spec.services.displayName** | Yes | Specifies a human-readable name of the Application service. Parameter provided by Application Registry, do not edit. |
 | **spec.services.description** | No | Provides a short, human-readable description of the service offered by the Application. Parameter provided by Application Registry, do not edit. |
 | **spec.services.longDescription** | No | Provides a longer, human-readable description of the service offered by the Application. Parameter provided by Application Registry, do not edit. |
