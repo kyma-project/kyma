@@ -95,7 +95,7 @@ func (n *Nats) SyncSubscription(sub *eventingv1alpha1.Subscription, cleaner even
 	if sub.Spec.Filter != nil {
 		uniqueFilters, err := sub.Spec.Filter.Deduplicate()
 		if err != nil {
-			return false, errors.Wrap(err, "deduplicate sub filters failed")
+			return false, errors.Wrap(err, "deduplicate subscription filters failed")
 		}
 		filters = uniqueFilters.Filters
 	}
@@ -103,9 +103,7 @@ func (n *Nats) SyncSubscription(sub *eventingv1alpha1.Subscription, cleaner even
 	// Format logger
 	log := utils.LoggerWithSubscription(n.namedLogger(), sub)
 
-	subscriptionConfig := eventingv1alpha1.MergeSubsConfigs(sub.Spec.Config, &n.defaultSubsConfig)
-
-	sub.Status.CleanEventTypes = []string{}
+	subsConfig := eventingv1alpha1.MergeSubsConfigs(sub.Spec.Config, &n.defaultSubsConfig)
 	// Create subscriptions in NATS
 	for _, filter := range filters {
 		subject, err := createSubject(filter, cleaner)
@@ -123,39 +121,36 @@ func (n *Nats) SyncSubscription(sub *eventingv1alpha1.Subscription, cleaner even
 			}
 		}
 
-		for i := 0; i < subscriptionConfig.MaxInFlightMessages; i++ {
-			// queueGroupName must be unique for each sub and subject
+		for i := 0; i < subsConfig.MaxInFlightMessages; i++ {
+			// queueGroupName must be unique for each subscription and subject
 			queueGroupName := createKeyPrefix(sub) + string(types.Separator) + subject
 			natsSub, subscribeErr := n.connection.QueueSubscribe(subject, queueGroupName, callback)
 			if subscribeErr != nil {
-				log.Errorw("creating NATS subscription failed", "error", err)
+				log.Errorw("create NATS subscription failed", "error", err)
 				return false, subscribeErr
 			}
 			n.subscriptions[createKey(sub, subject, i)] = natsSub
 		}
-
-		// Setting the clean event types
-		sub.Status.CleanEventTypes = append(sub.Status.CleanEventTypes, subject)
 	}
-	sub.Status.Config = subscriptionConfig
+	sub.Status.Config = subsConfig
 
 	return false, nil
 }
 
 // DeleteSubscription deletes all NATS subscriptions corresponding to a Kyma subscription
-func (n *Nats) DeleteSubscription(sub *eventingv1alpha1.Subscription) error {
-	for key, s := range n.subscriptions {
+func (n *Nats) DeleteSubscription(subscription *eventingv1alpha1.Subscription) error {
+	for key, sub := range n.subscriptions {
 		// Format logger
 		log := n.namedLogger().With(
-			"kind", sub.GetObjectKind().GroupVersionKind().Kind,
-			"name", sub.GetName(),
-			"namespace", sub.GetNamespace(),
-			"version", sub.GetGeneration(),
+			"kind", subscription.GetObjectKind().GroupVersionKind().Kind,
+			"name", subscription.GetName(),
+			"namespace", subscription.GetNamespace(),
+			"version", subscription.GetGeneration(),
 			"key", key,
-			"subject", s.Subject,
+			"subject", sub.Subject,
 		)
 
-		if strings.HasPrefix(key, createKeyPrefix(sub)) {
+		if strings.HasPrefix(key, createKeyPrefix(subscription)) {
 			// Unsubscribe call to NATS is async hence checking the status of the connection is important
 			if n.connection.Status() != nats.CONNECTED {
 				if err := n.Initialize(env.Config{}); err != nil {
@@ -163,8 +158,8 @@ func (n *Nats) DeleteSubscription(sub *eventingv1alpha1.Subscription) error {
 					return errors.Wrapf(err, "connect to NATS failed")
 				}
 			}
-			if s.IsValid() {
-				if err := s.Unsubscribe(); err != nil {
+			if sub.IsValid() {
+				if err := sub.Unsubscribe(); err != nil {
 					log.Errorw("unsubscribe failed", "error", err)
 					return errors.Wrapf(err, "unsubscribe failed")
 				}
