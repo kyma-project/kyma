@@ -95,7 +95,7 @@ func (n *Nats) SyncSubscription(sub *eventingv1alpha1.Subscription, cleaner even
 	if sub.Spec.Filter != nil {
 		uniqueFilters, err := sub.Spec.Filter.Deduplicate()
 		if err != nil {
-			return false, errors.Wrap(err, "deduplicate subscription filters failed")
+			return false, errors.Wrap(err, "deduplicate sub filters failed")
 		}
 		filters = uniqueFilters.Filters
 	}
@@ -103,7 +103,9 @@ func (n *Nats) SyncSubscription(sub *eventingv1alpha1.Subscription, cleaner even
 	// Format logger
 	log := utils.LoggerWithSubscription(n.namedLogger(), sub)
 
-	subsConfig := eventingv1alpha1.MergeSubsConfigs(sub.Spec.Config, &n.defaultSubsConfig)
+	subscriptionConfig := eventingv1alpha1.MergeSubsConfigs(sub.Spec.Config, &n.defaultSubsConfig)
+
+	sub.Status.CleanEventTypes = []string{}
 	// Create subscriptions in NATS
 	for _, filter := range filters {
 		subject, err := createSubject(filter, cleaner)
@@ -121,18 +123,21 @@ func (n *Nats) SyncSubscription(sub *eventingv1alpha1.Subscription, cleaner even
 			}
 		}
 
-		for i := 0; i < subsConfig.MaxInFlightMessages; i++ {
-			// queueGroupName must be unique for each subscription and subject
+		for i := 0; i < subscriptionConfig.MaxInFlightMessages; i++ {
+			// queueGroupName must be unique for each sub and subject
 			queueGroupName := createKeyPrefix(sub) + string(types.Separator) + subject
 			natsSub, subscribeErr := n.connection.QueueSubscribe(subject, queueGroupName, callback)
 			if subscribeErr != nil {
-				log.Errorw("create NATS subscription failed", "error", err)
+				log.Errorw("creating NATS subscription failed", "error", err)
 				return false, subscribeErr
 			}
 			n.subscriptions[createKey(sub, subject, i)] = natsSub
 		}
+
+		// Setting the clean event types
+		sub.Status.CleanEventTypes = append(sub.Status.CleanEventTypes, subject)
 	}
-	sub.Status.Config = subsConfig
+	sub.Status.Config = subscriptionConfig
 
 	return false, nil
 }
