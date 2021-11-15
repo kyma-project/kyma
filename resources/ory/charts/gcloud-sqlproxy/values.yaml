@@ -2,7 +2,7 @@
 ## ref: https://cloud.google.com/sql/docs/mysql/sql-proxy
 ## ref: https://cloud.google.com/sql/docs/postgres/sql-proxy
 image: eu.gcr.io/kyma-project/tpi/cloudsql-docker/gce-proxy
-imageTag: "v1.25.0-alpine-ef998682"
+imageTag: "v1.27.0-alpine-7c52185c"
 
 ## Specify an imagePullPolicy
 ## 'Always' if imageTag is 'latest', otherwise set to 'IfNotPresent'
