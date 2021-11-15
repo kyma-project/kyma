@@ -30,8 +30,7 @@ If you're interested in learning more about the Application Connectivity area, f
 - Analyze Application Connectivity specification and configuration files:
 
   - [Application](../../../05-technical-reference/00-custom-resources/ac-01-application.md) custom resource (CR)
-  - [EventActivation](../../../05-technical-reference/00-custom-resources/ac-02-eventactivation.md) CR
-  - [TokenRequest](../../../05-technical-reference/00-custom-resources/ac-03-tokenrequest.md) CR
+  - [TokenRequest](../../../05-technical-reference/00-custom-resources/ac-02-tokenrequest.md) CR
   - [Application Connector chart](../../../05-technical-reference/00-configuration-parameters/ac-01-application-connector-chart.md)
   - [Application Registry sub-chart](../../../05-technical-reference/00-configuration-parameters/ac-02-application-registry-sub-chart.md)
   - [Connector Service sub-chart](../../../05-technical-reference/00-configuration-parameters/ac-03-connector-service-sub-chart.md)
