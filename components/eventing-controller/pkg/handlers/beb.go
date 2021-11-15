@@ -288,7 +288,7 @@ func (b *BEB) getSubscription(name string) (*types.Subscription, error) {
 }
 
 func getCleanEventTypes(events types.Events) []string {
-	cleanEventTypes := make([]string, 0, len(events))
+	cleanEventTypes := make([]string, len(events))
 	for i, e := range events {
 		cleanEventTypes[i] = e.Type
 	}

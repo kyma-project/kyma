@@ -169,7 +169,8 @@ spec:
                   used by the Subscription
                 type: string
               cleanEventTypes:
-                description: CleanEventTypes defines the clean filter event types
+                description: CleanEventTypes defines the filter's event types after
+                  cleanup for use with the configured backend
                 items:
                   type: string
                 type: array

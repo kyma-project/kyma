@@ -159,6 +159,14 @@ func HaveCondition(condition eventingv1alpha1.Condition) gomegatypes.GomegaMatch
 	})))
 }
 
+func HaveCleanEventTypes(cleanEventTypes []string) gomegatypes.GomegaMatcher {
+	return WithTransform(
+		func(s *eventingv1alpha1.Subscription) []string {
+			return s.Status.CleanEventTypes
+		},
+		Equal(cleanEventTypes))
+}
+
 func HaveEvent(event corev1.Event) gomegatypes.GomegaMatcher {
 	return WithTransform(func(l corev1.EventList) []corev1.Event { return l.Items }, ContainElement(MatchFields(IgnoreExtras|IgnoreMissing, Fields{
 		"Reason":  Equal(event.Reason),
