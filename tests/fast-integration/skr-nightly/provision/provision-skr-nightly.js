@@ -37,9 +37,7 @@ describe("SKR nightly", function () {
       let runtime;
       this.options = GatherOptions(
           WithRuntimeName('kyma-nightly'),
-          WithScenarioName('test-nightly'),
-          WithAppName('app-nightly'),
-          WithTestNS('skr-nightly'));
+          WithScenarioName('test-nightly'));
 
       console.log('Login to KCP.');
       await kcp.login();

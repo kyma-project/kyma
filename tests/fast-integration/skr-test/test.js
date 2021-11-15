@@ -34,7 +34,7 @@ describe(`Execute SKR test`, function () {
     OIDCE2ETest();
     CommerceMockTest();
     after(`Deprovision SKR`, async function () {
-        await deprovisionSKR(keb, options.instanceID);
-        await unregisterKymaFromCompass(director, options.scenarioName);
+        await deprovisionSKR(keb, this.options.instanceID);
+        await unregisterKymaFromCompass(director, this.options.scenarioName);
     });
 });

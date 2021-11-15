@@ -7,7 +7,7 @@ const {initializeK8sClient} = require('../../utils');
 
 const {
    GatherOptions, WithRuntimeName, WithScenarioName, WithAppName, WithTestNS, keb, gardener,
-   OIDCE2ETest, CommerceMockTest, WithInstanceID,
+   CommerceMockTest, WithInstanceID,
 } = require('../../skr-test');
 
 // Mocha root hook
@@ -37,9 +37,7 @@ describe(`SKR Nightly periodic test`, function () {
          this.options = GatherOptions(
              WithInstanceID(runtime.instanceID),
              WithRuntimeName('kyma-nightly'),
-             WithScenarioName('test-nightly'),
-             WithAppName('app-nightly'),
-             WithTestNS('skr-nightly'));
+             WithScenarioName('test-nightly'));
          initializeK8sClient({ kubeconfig: this.shoot.kubeconfig });
       } catch (e) {
          throw new Error(`before hook failed: ${e.toString()}`);
