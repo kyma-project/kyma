@@ -78,7 +78,7 @@ class DirectorClient {
         };
 
         try {
-            const resp = await retry(axios.post(url, body, params));
+            const resp = await retry(() => axios.post(url, body, params));
             if(resp.data.errors) {
                 debug(resp);
                 throw resp.data;
