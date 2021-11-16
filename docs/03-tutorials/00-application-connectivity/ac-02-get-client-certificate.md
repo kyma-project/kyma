@@ -11,7 +11,7 @@ how to [revoke the client certificate](../../03-tutorials/00-application-connect
 
 ## Prerequisites
 
-- [OpenSSL toolkit](https://www.openssl.org/docs/man1.0.2/apps/openssl.html) to create a Certificate Signing Request (CSR), keys, and certificates which meet high security standards
+- [OpenSSL toolkit](https://www.openssl.org/source/) to create a Certificate Signing Request (CSR), keys, and certificates which meet high security standards
 - Your [Application name exported](ac-01-create-application.md#prerequisites) as an environment variable
 
 ## Get the configuration URL with a token
