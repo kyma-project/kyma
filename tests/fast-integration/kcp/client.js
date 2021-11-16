@@ -114,6 +114,7 @@ class KCPWrapper {
         
             return orchestrationStatus
         } catch (error) {
+            debug(error)
             throw new Error(`failed during upgradeKyma`);
         }
     };
@@ -135,6 +136,7 @@ class KCPWrapper {
 
             return operations.data
         } catch (error) {
+            debug(error)
             throw new Error(`failed during getOrchestrationsOperations`);
         }
     }
@@ -150,6 +152,7 @@ class KCPWrapper {
 
             return JSON.parse(res)
         } catch (error) {
+            debug(error)
             throw new Error(`failed during getOrchestrationsOperationStatus`);
         }
     }
@@ -176,6 +179,7 @@ class KCPWrapper {
 
             return res
         } catch (error) {
+            debug(error)
             throw new Error(`failed during getOrchestrationStatus`);
         }
     };
@@ -204,6 +208,7 @@ class KCPWrapper {
         
             return res;
         } catch (error) {
+            debug(error)
             throw new Error(`failed during ensureOrchestrationSucceeded`);
         }
       }
