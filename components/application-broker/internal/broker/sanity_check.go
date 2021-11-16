@@ -68,6 +68,9 @@ func (svc *SanityCheckService) createSampleAppMapping() error {
 		ObjectMeta: metav1.ObjectMeta{
 			Name: LivenessApplicationSampleName,
 		},
+		Spec: mappingTypes.ApplicationMappingSpec{
+			Services: []mappingTypes.ApplicationMappingService{},
+		},
 	})
 
 	switch {
