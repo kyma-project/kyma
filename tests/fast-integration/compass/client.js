@@ -78,7 +78,7 @@ class DirectorClient {
         };
 
         try {
-            const resp = await axios.post(url, body, params);
+            const resp = await retry(axios.post(url, body, params));
             if(resp.data.errors) {
                 debug(resp);
                 throw resp.data;
@@ -252,3 +252,18 @@ module.exports = {
     DirectorConfig,
     DirectorClient
 };
+
+const retry = async (fn) => {
+        try {
+            return await fn()
+        } catch (err) {
+            if (err.errors && err.errors[0].extensions.errorCode === 35) {
+                const delayMilliSeconds = 1000
+                return delay(() => retry(fn), delayMilliSeconds)
+            } else {
+                throw err
+            }
+        }
+}
+
+const delay = (fn, ms) => new Promise((resolve) => setTimeout(() => resolve(fn()), ms))
