@@ -16,9 +16,11 @@ spec:
           properties:
             spec:
               type: object
+              nullable: true
               properties:
                 services:
                   type: array
+                  nullable: true
                   items:
                     type: object
                     properties:
