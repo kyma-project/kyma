@@ -85,7 +85,6 @@ class DirectorClient {
             }
             return resp.data.data.result;
         } catch (err) {
-            console.dir(err)
             debug(err);
             const msg = "Error calling Director API"
             if (err.response) {
