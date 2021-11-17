@@ -78,7 +78,7 @@ class DirectorClient {
         };
 
         try {
-            const resp = await retry(() => axios.post(url, body, params));
+            const resp = await retryOnConcurrentUpdate(() => axios.post(url, body, params));
             if(resp.data.errors) {
                 debug(resp);
                 throw resp.data;
@@ -253,13 +253,15 @@ module.exports = {
     DirectorClient
 };
 
-const retry = async (fn) => {
+const retryOnConcurrentUpdate = async (fn) => {
         try {
             return await fn()
         } catch (err) {
+            /* 35 is compass error code for concurrent update:
+             https://github.com/kyma-incubator/compass/commit/86aa036ee48cf207230e606ee18b3cb8edbbc1e4 */
             if (err.errors && err.errors[0].extensions.errorCode === 35) {
                 const delayMilliSeconds = 1000
-                return delay(() => retry(fn), delayMilliSeconds)
+                return delay(() => retryOnConcurrentUpdate(fn), delayMilliSeconds)
             } else {
                 throw err
             }
