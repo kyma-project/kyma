@@ -1,20 +1,20 @@
 const axios = require("axios");
 const gql = require("./gql");
-const { 
-    getEnvOrThrow, 
-    debug 
+const {
+    getEnvOrThrow,
+    debug
 } = require("../utils");
 const {
     OAuthCredentials,
     OAuthToken
-  } = require("../lib/oauth");
+} = require("../lib/oauth");
 
 const SCOPES = [
     "application:read",
-    "application:write", 
+    "application:write",
     "runtime:read",
-    "runtime:write", 
-    "label_definition:read", 
+    "runtime:write",
+    "label_definition:read",
     "label_definition:write"
 ];
 
@@ -25,13 +25,13 @@ class DirectorConfig {
     /**
      * Returns DirectorConfig class initialized from
      * the environment variables.
-     * 
+     *
      * Expects the following variables to be present:
      * - COMPASS_HOST
      * - COMPASS_CLIENT_ID
      * - COMPASS_CLIENT_SECRET
      * - COMPASS_TENANT
-     * 
+     *
      * @returns {DirectorConfig}
      */
     static fromEnv() {
@@ -55,8 +55,8 @@ class DirectorConfig {
 class DirectorClient {
     /**
      * Create a DirectorClient instance.
-     * 
-     * @param {DirectorConfig} config 
+     *
+     * @param {DirectorConfig} config
      */
     constructor(config) {
         this.token = new OAuthToken(
@@ -67,6 +67,7 @@ class DirectorClient {
 
     async callDirector(payload) {
         const token = await this.token.getToken(SCOPES);
+        console.dir(${token})
         const url = `https://compass-gateway-auth-oauth.${this.host}/director/graphql`
         const body = `{"query":"${payload}"}`;
         const params = {
@@ -78,18 +79,19 @@ class DirectorClient {
         };
 
         try {
-            const resp = await retryOnConcurrentUpdate(() => axios.post(url, body, params));
-            if(resp.data.errors) {
+            const resp = await retryOnConcurrentUpdate(() => axios.post(url, body, params), 10);
+            if (resp.data.errors) {
                 debug(resp);
                 throw resp.data;
             }
             return resp.data.data.result;
-        } catch(err) {
+        } catch (err) {
+            console.dir(err)
             debug(err);
             const msg = "Error calling Director API"
             if (err.response) {
                 throw new Error(`${msg}: ${err.response.status} ${err.response.statusText}`);
-            } else if(err.errors) {
+            } else if (err.errors) {
                 throw new Error(`${msg}: GraphQL responded with errors: ${err.errors[0].message}`)
             } else {
                 throw new Error(`${msg}: ${err.toString()}`);
@@ -102,7 +104,7 @@ class DirectorClient {
         try {
             const res = await this.callDirector(payload);
             return res.id;
-        } catch(err) {
+        } catch (err) {
             throw new Error(`Error when registering application: ${err.toString()}`);
         }
     }
@@ -111,7 +113,7 @@ class DirectorClient {
         const payload = gql.unregisterApplication(applicationID);
         try {
             await this.callDirector(payload);
-        } catch(err) {
+        } catch (err) {
             throw new Error(`Error when unregistering application: ${err.message}`);
         }
     }
@@ -121,7 +123,7 @@ class DirectorClient {
         try {
             const res = await this.callDirector(payload);
             return res.id;
-        } catch(err) {
+        } catch (err) {
             throw new Error(`Error when registering runtime: ${err.toString()}`);
         }
     }
@@ -130,7 +132,7 @@ class DirectorClient {
         const payload = gql.unregisterRuntime(runtimeID);
         try {
             await this.callDirector(payload);
-        } catch(err) {
+        } catch (err) {
             throw new Error(`Error when unregistering runtime: ${err.toString()}`);
         }
     }
@@ -140,7 +142,7 @@ class DirectorClient {
         try {
             const res = await this.callDirector(payload);
             return res; // {token: '...', connectorURL: '...'}
-        } catch(err) {
+        } catch (err) {
             throw new Error(`Error when requesting token for application: ${err.toString()}`);
         }
     }
@@ -150,7 +152,7 @@ class DirectorClient {
         try {
             const res = await this.callDirector(payload);
             return res; // {token: '...', connectorURL: '...'}
-        } catch(err) {
+        } catch (err) {
             throw new Error(`Error when requesting token for runtime: ${err.toString()}`);
         }
     }
@@ -163,7 +165,7 @@ class DirectorClient {
                 res.schema = JSON.parse(res.schema);
             }
             return res;
-        } catch(err) {
+        } catch (err) {
             throw new Error(`Error when querying for label definition with key ${labelKey}: ${err.toString()}`);
         }
     }
@@ -172,7 +174,7 @@ class DirectorClient {
         const payload = gql.updateLabelDefinition(labelKey, schema);
         try {
             await this.callDirector(payload);
-        } catch(err) {
+        } catch (err) {
             throw new Error(`Error when updating label definition with key ${labelKey}: ${err.toString()}`);
         }
     }
@@ -182,7 +184,7 @@ class DirectorClient {
         try {
             const res = await this.callDirector(payload);
             return res.data;
-        } catch(err) {
+        } catch (err) {
             throw new Error(`Error when querying for runtimes filtered: ${err.toString()}`);
         }
     }
@@ -192,7 +194,7 @@ class DirectorClient {
         try {
             const res = await this.callDirector(payload);
             return res.data;
-        } catch(err) {
+        } catch (err) {
             throw new Error(`Error when querying for applications filtered: ${err.toString()}`);
         }
     }
@@ -202,7 +204,7 @@ class DirectorClient {
         try {
             const res = await this.callDirector(payload);
             return res.data;
-        } catch(err) {
+        } catch (err) {
             throw new Error(`Error when setting runtime ${runtimeID} label ${key} and value ${value}: ${err.toString()}`);
         }
     }
@@ -212,7 +214,7 @@ class DirectorClient {
         try {
             const res = await this.callDirector(payload);
             return res;
-        } catch(err) {
+        } catch (err) {
             throw new Error(`Error whe querying for the runtime with ID ${runtimeID}: ${err.toString()}`);
         }
     }
@@ -222,7 +224,7 @@ class DirectorClient {
         try {
             const res = await this.callDirector(payload);
             return res;
-        } catch(err) {
+        } catch (err) {
             throw new Error(`Error when querying for the application with ID ${appID}: ${err.toString()}`);
         }
     }
@@ -232,7 +234,7 @@ class DirectorClient {
         try {
             const res = await this.callDirector(payload);
             return res.data;
-        } catch(err) {
+        } catch (err) {
             throw new Error(`Error when setting application ${appID} label ${key} and value ${value}: ${err.toString()}`);
         }
     }
@@ -242,7 +244,7 @@ class DirectorClient {
         try {
             const res = await this.callDirector(payload);
             return res.data;
-        } catch(err) {
+        } catch (err) {
             throw new Error(`Error when deleting label ${key} from application ${appID}: ${err.toString()}`);
         }
     }
@@ -253,19 +255,23 @@ module.exports = {
     DirectorClient
 };
 
-const retryOnConcurrentUpdate = async (fn) => {
+const retryOnConcurrentUpdate = async (fn, maxAttempts) => {
+    const execute = async (attempt) => {
         try {
             return await fn()
         } catch (err) {
             /* 35 is compass error code for concurrent update:
              https://github.com/kyma-incubator/compass/commit/86aa036ee48cf207230e606ee18b3cb8edbbc1e4 */
-            if (err.errors && err.errors[0].extensions.errorCode === 35) {
-                const delayMilliSeconds = 1000
-                return delay(() => retryOnConcurrentUpdate(fn), delayMilliSeconds)
+            if (attempt <= maxAttempts && err.errors && err.errors[0].extensions.errorCode === 35) {
+                const nextAttempt = attempt + 1
+                const delayMilliSeconds = 100
+                return delay(() => execute(nextAttempt), delayMilliSeconds)
             } else {
                 throw err
             }
         }
+    }
+    return execute(1)
 }
 
 const delay = (fn, ms) => new Promise((resolve) => setTimeout(() => resolve(fn()), ms))
