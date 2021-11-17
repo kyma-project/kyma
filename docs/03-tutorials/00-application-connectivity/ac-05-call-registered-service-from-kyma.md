@@ -8,7 +8,7 @@ This guide shows how to call a registered external service from Kyma using a sim
 
 - Client certificates generated for the connected Application
 - Your [Application name exported](ac-01-create-application.md#prerequisites) as an environment variable
-- Your [cluster domain exported](ac-02-get-client-certificate.md#generate-a-csr-and-send-it-to-kyma) as environment variables
+- Your [cluster domain exported](ac-02-get-client-certificate.md#generate-a-csr-and-send-it-to-kyma) as an environment variable
 
 ## Steps
 

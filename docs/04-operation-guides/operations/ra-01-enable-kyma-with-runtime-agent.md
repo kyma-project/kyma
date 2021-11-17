@@ -5,8 +5,8 @@ title: Enable Kyma with Runtime Agent
 [Runtime Agent](../../01-overview/main-areas/application-connectivity/ra-01-runtime-agent-overview.md) is a component that is used in the [Compass mode](../../01-overview/main-areas/application-connectivity/README.md) of Application Connectivity. 
 By default, Kyma uses the [legacy Application Connectivity mode](../../01-overview/main-areas/application-connectivity/README.md), which does not support integration with Compass.
 Because of this, on installation, you must:
-- disable the components used in the legacy mode by setting the **global.disableLegacyConnectivity** value to `true`, and 
-- add the `compass-runtime-agent` module in the `compass-system` Namespace to the [list of components](https://github.com/kyma-project/kyma/blob/main/installation/resources/components.yaml)
+- Disable the components used in the legacy mode by setting the **global.disableLegacyConnectivity** value to `true`, and 
+- Add the `compass-runtime-agent` module in the `compass-system` Namespace to the [list of components](https://github.com/kyma-project/kyma/blob/main/installation/resources/components.yaml)
 
 ```yaml
 kyma deploy --value global.disableLegacyConnectivity="true" --components-file {YOUR_COMPONENTS_FILE_PATH}

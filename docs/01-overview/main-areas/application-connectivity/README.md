@@ -11,5 +11,5 @@ Application Connectivity in Kyma is an area that:
 - Provides monitoring and tracing capabilities to facilitate operational aspects
 
 Depending on your use case, Application Connectivity works in one of the two modes: 
-- **Legacy mode** (default) - using components such as [Application Registry](ac-03-application-registry.md) and [Connector Service](docs/05-technical-reference/00-architecture/ac-02-connector-service.md)
+- **Legacy mode** (default) - using components such as [Application Registry](ac-03-application-registry.md) and [Connector Service](../../../05-technical-reference/00-architecture/ac-02-connector-service.md)
 - **Compass mode** - using [Runtime Agent](ra-01-runtime-agent-overview.md) and integration with [Compass](https://github.com/kyma-incubator/compass)

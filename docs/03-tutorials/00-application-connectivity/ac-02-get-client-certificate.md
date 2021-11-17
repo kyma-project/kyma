@@ -12,6 +12,7 @@ how to [revoke the client certificate](../../03-tutorials/00-application-connect
 ## Prerequisites
 
 - [OpenSSL toolkit](https://www.openssl.org/source/) to create a Certificate Signing Request (CSR), keys, and certificates which meet high security standards
+- The [jq](https://stedolan.github.io/jq/download/) tool to prettify the JSON output
 - Your [Application name exported](ac-01-create-application.md#prerequisites) as an environment variable
 
 ## Get the configuration URL with a token
@@ -84,11 +85,11 @@ A successful call returns the following response:
 }
 ```
 
-> **NOTE:** The response contains URLs to the Application Registry API and the Events Publisher API, however, using them is not recommended. You should call the `metadata` endpoint URL, which is provided in the **api.infoUrl** property, to fetch correct URLs to the Application Registry API and to the Events Publisher API, and other configuration details.
+> **NOTE:** The response contains URLs to the Application Registry API and the Events Publisher API, however, using them is not recommended. To fetch correct URLs to these APIs, as well as other configuration details, call the `metadata` endpoint URL. It is provided in the **api.infoUrl** property.
 
 ## Generate a CSR and send it to Kyma
 
-1. Export the names of the generated CRS, client certificate and key and your [cluster domain](../../02-get-started/01-quick-install.md#export-your-cluster-domain) as environment variables:
+1. Export the names of the generated CSR, client certificate and key, and your [cluster domain](../../02-get-started/01-quick-install.md#export-your-cluster-domain) as environment variables:
 
    ```bash
    export CSR_FILE_NAME=generated
@@ -121,7 +122,33 @@ A successful call returns the following response:
    }
    ```
 
-After you receive the certificates, decode the certificate chain and use it in your Application.
+4. After you receive the certificates, decode them and save them as files.
+
+   <div tabs name="Decode and save the certificates" group="generate-csr-and-send-to-kyma">
+     <details open>
+     <summary label="Mac OS">
+     Mac OS
+     </summary>
+   
+   To do that, select the JSON response you got, copy it, and run:
+   ```bash
+   pbpaste | jq -r ".crt" | base64 -D > generated.crt
+   pbpaste | jq -r ".clientCrt" | base64 -D > generated_client.crt
+   pbpaste | jq -r ".caCrt" | base64 -D > generated_ca.crt
+   ```
+   
+     </details>
+     <details>
+     <summary label="other">
+     other
+     </summary>
+   
+      Decode the certificates manually and save them as `generated.crt`, `generated_client.crt`, and `generated_ca.crt` respectively. 
+   
+     </details>
+   </div>
+
+Now you can use the decoded certificate chain in your Application.
 
 ## Call the metadata endpoint
 
