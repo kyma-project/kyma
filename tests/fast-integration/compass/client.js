@@ -46,6 +46,7 @@ class DirectorConfig {
         this.host = host;
         this.credentials = credentials;
         this.tenantID = tenantID;
+	this.dupa = "dupa";
     }
 }
 
