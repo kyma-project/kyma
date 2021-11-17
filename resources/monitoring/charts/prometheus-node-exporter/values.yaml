@@ -33,7 +33,7 @@ prometheus:
 updateStrategy:
   type: RollingUpdate
   rollingUpdate:
-    maxUnavailable: 1
+    maxUnavailable: 33%
 
 resources:
   {}
