@@ -123,6 +123,8 @@ func TestCompassConnectionController(t *testing.T) {
 		assert.True(t, ok)
 		assert.NotEmpty(t, credentials)
 	}).Return(nil)
+	credentialsManagerMock.On("CredentialsExist").Return(true, nil)
+
 	// Config provider
 	configProviderMock := configProviderMock()
 	// Connector clients

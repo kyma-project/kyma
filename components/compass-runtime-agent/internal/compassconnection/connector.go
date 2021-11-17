@@ -107,7 +107,7 @@ func (cc *compassConnector) MaintainConnection(renewCert bool, credentialsExist 
 		return nil, v1alpha1.ManagementInfo{}, err
 	}
 
-	if !renewCert && !credentialsExist {
+	if !renewCert && credentialsExist {
 		return nil, toManagementInfo(configuration.ManagementPlaneInfo), nil
 	}
 
