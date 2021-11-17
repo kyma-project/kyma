@@ -42,10 +42,10 @@ global:
       version: "PR-12621"
     application_connectivity_certs_setup_job:
       name: "application-connectivity-certs-setup-job"
-      version: "PR-12629"
+      version: "PR-12631"
     application_connectivity_validator:
       name: "application-connectivity-validator"
-      version: "PR-12629"
+      version: "PR-12631"
     application_gateway:
       name: "application-gateway"
       version: "984ed90c"
