@@ -45,7 +45,7 @@ global:
       version: "PR-12631"
     application_connectivity_validator:
       name: "application-connectivity-validator"
-      version: "PR-12631"
+      version: "4a206dab"
     application_gateway:
       name: "application-gateway"
       version: "984ed90c"
@@ -57,7 +57,7 @@ global:
       version: "4a206dab"
     central_application_connectivity_validator:
       name: "central-application-connectivity-validator"
-      version: "b826f797"
+      version: "PR-12631"
     central_application_gateway:
       name: "central-application-gateway"
       version: "4a206dab"
