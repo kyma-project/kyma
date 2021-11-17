@@ -48,7 +48,7 @@ global:
       version: "4a206dab"
     application_gateway:
       name: "application-gateway"
-      version: "PR-12625"
+      version: "984ed90c"
     application_operator:
       name: "application-operator"
       version: "13002528"
