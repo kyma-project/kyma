@@ -42,7 +42,7 @@ global:
       version: "PR-12621"
     application_connectivity_certs_setup_job:
       name: "application-connectivity-certs-setup-job"
-      version: "PR-12631"
+      version: "8e912bbc"
     application_connectivity_validator:
       name: "application-connectivity-validator"
       version: "4a206dab"
@@ -57,7 +57,7 @@ global:
       version: "4a206dab"
     central_application_connectivity_validator:
       name: "central-application-connectivity-validator"
-      version: "PR-12631"
+      version: "PR-12632"
     central_application_gateway:
       name: "central-application-gateway"
       version: "4a206dab"
