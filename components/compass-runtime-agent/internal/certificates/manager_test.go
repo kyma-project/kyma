@@ -32,7 +32,7 @@ var (
 )
 
 func TestCredentialsExist(t *testing.T) {
-	t.Run("should check if credentials exist", func(t *testing.T) {
+	t.Run("should return false if credentials does not exist", func(t *testing.T) {
 		// given
 		expectedErr := errors.New("oh, no")
 
@@ -46,6 +46,20 @@ func TestCredentialsExist(t *testing.T) {
 		exists, err := credentialsManager.CredentialsExist()
 		assert.Equal(t, expectedErr, err)
 		assert.Equal(t, false, exists)
+	})
+
+	t.Run("should return true if credentials exist", func(t *testing.T) {
+		// given
+		secretsRepository := &mocks.Repository{}
+		secretsRepository.On("Exists", caCertSecretNamespaceName).Return(true, nil)
+
+		// when
+		credentialsManager := NewCredentialsManager(clusterCertSecretNamespaceName, caCertSecretNamespaceName, secretsRepository)
+
+		// then
+		exists, err := credentialsManager.CredentialsExist()
+		assert.Equal(t, nil, err)
+		assert.Equal(t, true, exists)
 	})
 }
 
