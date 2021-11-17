@@ -67,7 +67,6 @@ class DirectorClient {
 
     async callDirector(payload) {
         const token = await this.token.getToken(SCOPES);
-        console.dir(${token})
         const url = `https://compass-gateway-auth-oauth.${this.host}/director/graphql`
         const body = `{"query":"${payload}"}`;
         const params = {
