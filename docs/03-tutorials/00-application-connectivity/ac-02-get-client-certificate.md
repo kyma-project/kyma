@@ -15,6 +15,8 @@ how to [revoke the client certificate](../../03-tutorials/00-application-connect
 - The [jq](https://stedolan.github.io/jq/download/) tool to prettify the JSON output
 - Your [Application name exported](ac-01-create-application.md#prerequisites) as an environment variable
 
+> **CAUTION:** On a local Kyma deployment, skip SSL certificate verification when making a `curl` call, by adding the `-k` flag to it. Alternatively, add the Kyma certificates to your local certificate storage on your machine using the `kyma import certs` command.
+
 ## Get the configuration URL with a token
 
 To get the configuration URL which allows you to fetch the required configuration details, create a TokenRequest custom resource (CR). The controller which handles this CR kind adds the **status** section to the created CR. The **status** section contains the required configuration details.
@@ -162,7 +164,7 @@ Call the `metadata` endpoint with the generated certificate to get URLs to the f
 The URL to the `metadata` endpoint is returned in the response body from the configuration URL. Use the value of the **api.infoUrl** property to get the URL. Run:
 
 ```bash
-curl https://gateway.$CLUSTER_DOMAIN/v1/applications/management/info --cert $CLIENT_CERT_FILE_NAME.crt --key $KEY_FILE_NAME.key -k
+curl https://gateway.$CLUSTER_DOMAIN/v1/applications/management/info --cert $CLIENT_CERT_FILE_NAME.crt --key $KEY_FILE_NAME.key
 ```
 
 A successful call returns the following response:
@@ -196,13 +198,13 @@ Since the local Kyma installation uses the self-signed certificate by default, s
 Call Application Registry with this command:
 
 ```bash
-curl https://gateway.local.kyma.dev/$APP_NAME/v1/metadata/services --cert $CLIENT_CERT_FILE_NAME.crt --key $KEY_FILE_NAME.key -k
+curl https://gateway.local.kyma.dev/$APP_NAME/v1/metadata/services --cert $CLIENT_CERT_FILE_NAME.crt --key $KEY_FILE_NAME.key
 ```
 
 Use this command to call the Event Publisher:
 
 ```bash
-curl -X POST -H "Content-Type: application/json" https://gateway.local.kyma.dev/$APP_NAME/v1/events --cert $CLIENT_CERT_FILE_NAME.crt --key $KEY_FILE_NAME.key -k -d '{
+curl -X POST -H "Content-Type: application/json" https://gateway.local.kyma.dev/$APP_NAME/v1/events --cert $CLIENT_CERT_FILE_NAME.crt --key $KEY_FILE_NAME.key -d '{
   "event-type": "ExampleEvent",
   "event-type-version": "v1",
   "event-id": "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",

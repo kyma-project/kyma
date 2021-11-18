@@ -10,6 +10,8 @@ This guide shows you how to register a service of your external solution in Kyma
 - Your [Application name exported](ac-01-create-application.md#prerequisites) as an environment variable
 - Your [cluster domain, generated client certificate and key exported](ac-02-get-client-certificate.md#generate-a-csr-and-send-it-to-kyma) as environment variables
 
+> **CAUTION:** On a local Kyma deployment, skip SSL certificate verification when making a `curl` call, by adding the `-k` flag to it. Alternatively, add the Kyma certificates to your local certificate storage on your machine using the `kyma import certs` command.
+
 ## Register a service
 
 1. To register a service with a Basic Authentication-secured API, follow this template to prepare the request body. For convenience, export it as an environment variable:
@@ -114,7 +116,7 @@ This guide shows you how to register a service of your external solution in Kyma
 2. Send the request body you prepared in the following call to register a service:
 
    ```bash
-   curl -X POST -d $REQUEST_BODY https://gateway.$CLUSTER_DOMAIN/$APP_NAME/v1/metadata/services --cert $CLIENT_CERT_FILE_NAME.crt --key $KEY_FILE_NAME.key -k
+   curl -X POST -d $REQUEST_BODY https://gateway.$CLUSTER_DOMAIN/$APP_NAME/v1/metadata/services --cert $CLIENT_CERT_FILE_NAME.crt --key $KEY_FILE_NAME.key
    ```
 
    A successful response returns the ID of the registered service:
@@ -132,7 +134,7 @@ This guide shows you how to register a service of your external solution in Kyma
 ### Check the details of a registered service
 
 ```bash
-curl https://gateway.$CLUSTER_DOMAIN/$APP_NAME/v1/metadata/services/$SERVICE_ID --cert $CLIENT_CERT_FILE_NAME.crt --key $KEY_FILE_NAME.key -k
+curl https://gateway.$CLUSTER_DOMAIN/$APP_NAME/v1/metadata/services/$SERVICE_ID --cert $CLIENT_CERT_FILE_NAME.crt --key $KEY_FILE_NAME.key
 ```
 
 ## Register an API with a specification URL

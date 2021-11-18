@@ -25,8 +25,10 @@ By default, a client certificate you generate when you connect an external solut
    >**NOTE:** To get the URL to the certificate renewal endpoint, see the tutorial on how to [call the metadata endpoint](../../03-tutorials/00-application-connectivity/ac-02-get-client-certificate.md#call-the-metadata-endpoint).
 
    ```bash
-   curl -X POST https://gateway.{CLUSTER_DOMAIN}/v1/applications/certificates/renewals -d '{"csr":"BASE64_ENCODED_CSR"}' -k --cert {PATH_TO_OLD_CLIENT_CERT} --key {PATH_TO_KEY}
+   curl -X POST https://gateway.{CLUSTER_DOMAIN}/v1/applications/certificates/renewals -d '{"csr":"BASE64_ENCODED_CSR"}' --cert {PATH_TO_OLD_CLIENT_CERT} --key {PATH_TO_KEY}
    ```
+
+   > **CAUTION:** On a local Kyma deployment, skip SSL certificate verification when making a `curl` call, by adding the `-k` flag to it. Alternatively, add the Kyma certificates to your local certificate storage on your machine using the `kyma import certs` command.
 
    A successful call returns a renewed client certificate:
 

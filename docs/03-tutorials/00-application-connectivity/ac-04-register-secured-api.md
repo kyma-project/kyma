@@ -100,8 +100,10 @@ When you register an API with the **credentials.certificateGen** object, Applica
 You can retrieve the client certificate by sending the following request:
 
 ```bash
-curl https://gateway.$CLUSTER_DOMAIN/$APP_NAME/v1/metadata/services/$SERVICE_ID --cert $CLIENT_CERT_FILE_NAME.crt --key $KEY_FILE_NAME.key -k
+curl https://gateway.$CLUSTER_DOMAIN/$APP_NAME/v1/metadata/services/$SERVICE_ID --cert $CLIENT_CERT_FILE_NAME.crt --key $KEY_FILE_NAME.key
 ```
+
+> **CAUTION:** On a local Kyma deployment, skip SSL certificate verification when making a `curl` call, by adding the `-k` flag to it. Alternatively, add the Kyma certificates to your local certificate storage on your machine using the `kyma import certs` command.
 
 A successful call returns a response body with the details of a registered service and a base64-encoded client certificate.
 
