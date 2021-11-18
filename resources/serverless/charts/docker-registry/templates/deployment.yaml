@@ -47,7 +47,7 @@ spec:
 {{- end }}
       initContainers:
         - name: generate-htpasswd
-          image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.registry) }}"
+          image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.k8s_tools) }}"
 {{- if .Values.securityContext.enabled }}
           securityContext:
             privileged: {{ .Values.securityContext.privileged }}
@@ -63,8 +63,9 @@ spec:
           command:
           # TODO: after helm@3.5.0 is used in kyma-installer we may be able to remove that init container, as helm 3.5.0 uses sprig@3.2.0, which has `bcrypt` function
           # might want to investigate
+          # apk upgrade --no-cache && apk add --no-cache apache2-utils
             - sh
-            - -c
+            - -ec
             - |
               htpasswd -Bbn $(cat /regcred/username.txt) $(cat /regcred/password.txt) > ./data/htpasswd
               echo "Generated htpasswd file for docker-registry..."
