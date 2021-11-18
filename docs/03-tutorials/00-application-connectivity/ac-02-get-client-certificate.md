@@ -139,8 +139,8 @@ A successful call returns the following response:
    
      </details>
      <details>
-     <summary label="other">
-     other
+     <summary label="Other">
+     Other
      </summary>
    
       Decode the certificates manually and save them as `generated.crt`, `generated_client.crt`, and `generated_ca.crt` respectively. 
