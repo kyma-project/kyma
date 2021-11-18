@@ -60,7 +60,7 @@ set-up-local-env:
 
 
 ENVTEST_ASSETS_DIR=$(PROJECT_DIR)/testbin/$(shell uname)
-test-local: test-local-nonlocal; ## Run tests.
+test-local: copy-external-crds test-local-nonlocal; ## Run tests.
 
 setup-envtest:
 	mkdir -p ${ENVTEST_ASSETS_DIR}
