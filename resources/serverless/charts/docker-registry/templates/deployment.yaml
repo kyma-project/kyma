@@ -47,7 +47,7 @@ spec:
 {{- end }}
       initContainers:
         - name: generate-htpasswd
-          image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.k8s_tools) }}"
+          image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.registry) }}"
 {{- if .Values.securityContext.enabled }}
           securityContext:
             privileged: {{ .Values.securityContext.privileged }}
@@ -66,7 +66,6 @@ spec:
             - sh
             - -ec
             - |
-              apk upgrade --no-cache && apk add --no-cache apache2-utils
               htpasswd -Bbn $(cat /regcred/username.txt) $(cat /regcred/password.txt) > ./data/htpasswd
               echo "Generated htpasswd file for docker-registry..."
       containers:
