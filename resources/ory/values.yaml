@@ -49,7 +49,7 @@ global:
       directory: "external/oryd"
     busybox:
       name: "busybox"
-      version: "1.32.0-v1"
+      version: "1.34.1"
       directory: "external"
     oathkeeper:
       name: "oathkeeper"
