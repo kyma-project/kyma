@@ -2,7 +2,7 @@
 title: Get the API specification for AC components
 ---
 
-To view or download the API specification directly from this website, see the **API Consoles** section. Alternatively, get it by calling the API directly. To do so, follow the instructions in this tutorial. 
+Get the API specification by calling the API directly. To do so, follow the instructions in this tutorial. 
 
 > **NOTE:** `CLUSTER_DOMAIN`, `APP_NAME`, `CLIENT_CERT_FILE_NAME`, and `KEY_FILE_NAME` are the names of your cluster domain, your Application representing your external solution, and your client certificate and key generated for your Application respectively, [exported as environment variables](ac-02-get-client-certificate.md#generate-a-csr-and-send-it-to-kyma).
 
