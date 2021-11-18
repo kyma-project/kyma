@@ -21,6 +21,6 @@ curl https://connector-service.$CLUSTER_DOMAIN/v1/api.yaml
 To get the API specification for Application Registry for a given version of the service, run this command:
 
 ```bash
-curl https://gateway.$CLUSTER_DOMAIN/$APP_NAME/v1/metadata/api.yaml --cert $CLIENT_CERT_FILE_NAME.crt --key $KEY_FILE_NAME.crt
+curl https://gateway.$CLUSTER_DOMAIN/$APP_NAME/v1/metadata/api.yaml --cert $CLIENT_CERT_FILE_NAME.crt --key $KEY_FILE_NAME.key
 ```
 

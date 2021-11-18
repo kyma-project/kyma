@@ -105,7 +105,7 @@ A successful call returns the following response:
    ```bash
    openssl genrsa -out generated.key 2048
    openssl req -new -sha256 -out $CSR_FILE_NAME.csr -key $KEY_FILE_NAME.key -subj "/OU=OrgUnit/O=Organization/L=Waldorf/ST=Waldorf/C=DE/CN=$APP_NAME"
-   openssl base64 -in $CSR_FILE_NAME.csr
+   openssl base64 -in $CSR_FILE_NAME.csr -A
    ```
    
 3. Send the encoded CSR to Kyma. Run:
@@ -191,20 +191,12 @@ A successful call returns the following response:
 
 Use **urls.metadataUrl** and **urls.eventsUrl** to get the URLs to the Application Registry API and to the Event Publisher API.
 
-## Call Application Registry and Event Publisher on local deployment
+## Call Event Publisher
 
-Since the local Kyma installation uses the self-signed certificate by default, skip TLS verification.
-
-Call Application Registry with this command:
+Use this command to call Event Publisher:
 
 ```bash
-curl https://gateway.local.kyma.dev/$APP_NAME/v1/metadata/services --cert $CLIENT_CERT_FILE_NAME.crt --key $KEY_FILE_NAME.key
-```
-
-Use this command to call the Event Publisher:
-
-```bash
-curl -X POST -H "Content-Type: application/json" https://gateway.local.kyma.dev/$APP_NAME/v1/events --cert $CLIENT_CERT_FILE_NAME.crt --key $KEY_FILE_NAME.key -d '{
+curl -X POST -H "Content-Type: application/json" https://gateway.$CLUSTER_DOMAIN/$APP_NAME/v1/events --cert $CLIENT_CERT_FILE_NAME.crt --key $KEY_FILE_NAME.key -d '{
   "event-type": "ExampleEvent",
   "event-type-version": "v1",
   "event-id": "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
