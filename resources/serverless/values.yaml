@@ -107,8 +107,7 @@ global:
     google_pause:
       name: "pause-amd64"
       version: "3.2"
-      directory: "google-containers"
-      containerRegistryPath: "gcr.io"
+      directory: "external/gcr.io/google-containers"
   testImages:
     function_controller_test:
       name: "function-controller-test"
