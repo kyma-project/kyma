@@ -5,17 +5,17 @@ global:
   images:
     nats_operator_doctor:
       name: nats-operator-doctor
-      version: PR-11920
+      version: 94ae4939
     eventing_controller:
       name: eventing-controller
       version: 571bf38e
       pullPolicy: "IfNotPresent"
     publisher_proxy:
       name: event-publisher-proxy
-      version: PR-12616
+      version: 96f9210e
     nats_operator:
       name: nats-operator
-      version: PR-12170
+      version: e2309602
     nats:
       name: nats
       version: 2.2.4
