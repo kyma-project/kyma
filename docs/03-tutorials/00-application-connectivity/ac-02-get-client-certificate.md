@@ -126,8 +126,8 @@ A successful call returns the following response:
 
    <div tabs name="Decode and save the certificates" group="generate-csr-and-send-to-kyma">
      <details open>
-     <summary label="Mac OS">
-     Mac OS
+     <summary label="macOS">
+     macOS
      </summary>
    
    To do that, select the JSON response you got, copy it, and run:
@@ -139,8 +139,8 @@ A successful call returns the following response:
    
      </details>
      <details>
-     <summary label="Other">
-     Other
+     <summary label="other">
+     other
      </summary>
    
       Decode the certificates manually and save them as `generated.crt`, `generated_client.crt`, and `generated_ca.crt` respectively. 

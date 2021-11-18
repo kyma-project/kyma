@@ -51,6 +51,7 @@ This guide shows how to call a registered external service from Kyma using a sim
    kind: Function
    metadata:
      name: my-function
+     namespace: $NAMESPACE
      labels:
        app: my-function
        $APP_NAME-$SERVICE_ID: "true"
@@ -99,6 +100,7 @@ This guide shows how to call a registered external service from Kyma using a sim
    kind: APIRule
    metadata:
      name: my-function
+     namespace: $NAMESPACE
      labels:
        function: my-function
    spec:
