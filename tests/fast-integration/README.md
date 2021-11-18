@@ -63,6 +63,13 @@ npm install
 npm run test-eventing
 ```
 
+**NOTE:** You can change the namespace used for the Commerce Mock objects using:
+```
+MOCK_NAMESPACE=mock2 make ci-test-eventing
+```
+Using a different namespace changes the host used for the Commerce Mock APIRule as well. 
+This allows different Commerce Mocks to co-exist in different namespaces.
+
 ## Local development
 
 Here you have sample development tasks you can execute on your local machine working with the Kyma source code.
