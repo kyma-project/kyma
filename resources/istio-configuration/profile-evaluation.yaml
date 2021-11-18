@@ -29,7 +29,6 @@ helmValues:
           memory: 10Mi
   pilot:
     autoscaleEnabled: false
-    configNamespace: istio-config
 
 components:
   ingressGateways:
