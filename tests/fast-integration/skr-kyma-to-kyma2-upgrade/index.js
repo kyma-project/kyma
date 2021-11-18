@@ -25,6 +25,9 @@ const {
   switchDebug,
 } = require("../utils");
 const {
+  inspect
+} = require('util')
+const {
   ensureCommerceMockWithCompassTestFixture,
   checkInClusterEventDelivery,
   checkFunctionResponse,
@@ -119,6 +122,8 @@ describe("SKR-Upgrade-test", function () {
 
   it(`Provision SKR with ID ${instanceID}`, async function () {
     skr = await provisionSKR(keb, gardener, instanceID, runtimeName, null, null, null);
+    let runtimeStatus = await kcp.runtimes({instanceID: instanceID})
+    debug(inspect(runtimeStatus, false, null, true))
   });
 
   it(`Should save kubeconfig for the SKR to ~/.kube/config`, async function() {
@@ -195,6 +200,8 @@ describe("SKR-Upgrade-test", function () {
   it(`Perform Upgrade`, async function () {
     let kcpUpgradeStatus = await kcp.upgradeKyma(subAccountID, kymaUpgradeVersion)
     debug("Upgrade Done!")
+    let runtimeStatus = await kcp.runtimes({instanceID: instanceID})
+    debug(inspect(runtimeStatus, false, null, true))
   });
 
   // Perform Tests after Upgrade
