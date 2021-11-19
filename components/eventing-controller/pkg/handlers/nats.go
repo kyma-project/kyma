@@ -105,15 +105,17 @@ func (n *Nats) SyncSubscription(sub *eventingv1alpha1.Subscription, cleaner even
 
 	subscriptionConfig := eventingv1alpha1.MergeSubsConfigs(sub.Spec.Config, &n.defaultSubsConfig)
 
-	sub.Status.CleanEventTypes = []string{}
-	// Create subscriptions in NATS
+	var cleanSubjects []string
 	for _, filter := range filters {
 		subject, err := createSubject(filter, cleaner)
 		if err != nil {
 			log.Errorw("create NATS subject failed", "error", err)
 			return false, err
 		}
+		cleanSubjects= append(cleanSubjects, subject)
+	}
 
+	for _, subject := range cleanSubjects {
 		callback := n.getCallback(sub.Spec.Sink)
 
 		if n.connection.Status() != nats.CONNECTED {
@@ -128,19 +130,22 @@ func (n *Nats) SyncSubscription(sub *eventingv1alpha1.Subscription, cleaner even
 			queueGroupName := createKeyPrefix(sub) + string(types.Separator) + subject
 			natsSub, subscribeErr := n.connection.QueueSubscribe(subject, queueGroupName, callback)
 			if subscribeErr != nil {
-				log.Errorw("creating NATS subscription failed", "error", err)
+				log.Errorw("creating NATS subscription failed", "error", subscribeErr)
 				return false, subscribeErr
 			}
 			n.subscriptions[createKey(sub, subject, i)] = natsSub
 		}
-
-		// Setting the clean event types
-		sub.Status.CleanEventTypes = append(sub.Status.CleanEventTypes, subject)
 	}
+
+	if len(cleanSubjects) > 0 {
+		sub.Status.CleanEventTypes = cleanSubjects
+	}
+
 	sub.Status.Config = subscriptionConfig
 
 	return false, nil
 }
+
 
 // DeleteSubscription deletes all NATS subscriptions corresponding to a Kyma subscription
 func (n *Nats) DeleteSubscription(subscription *eventingv1alpha1.Subscription) error {

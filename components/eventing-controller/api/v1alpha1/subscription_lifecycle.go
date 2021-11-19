@@ -62,7 +62,7 @@ func (s *SubscriptionStatus) InitializeConditions() {
 }
 
 func (s SubscriptionStatus) IsReady() bool {
-	if !ContainSameConditionTypes(allConditions, s.Conditions) {
+	if !containSameConditionTypes(allConditions, s.Conditions) {
 		return false
 	}
 

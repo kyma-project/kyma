@@ -119,7 +119,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 						reconcilertesting.HaveSubscriptionName(subscriptionName),
 						reconcilertesting.HaveCondition(eventingv1alpha1.MakeCondition(
 							eventingv1alpha1.ConditionSubscriptionActive,
-							eventingv1alpha1.ConditionReasonBEBSubscriptionActive,
+							eventingv1alpha1.ConditionReasonSubscriptionActive,
 							v1.ConditionTrue, "")),
 						reconcilertesting.HaveCleanEventTypes(nil),
 					))
@@ -150,7 +150,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 						reconcilertesting.HaveSubscriptionName(subscriptionName),
 						reconcilertesting.HaveCondition(eventingv1alpha1.MakeCondition(
 							eventingv1alpha1.ConditionSubscriptionActive,
-							eventingv1alpha1.ConditionReasonBEBSubscriptionActive,
+							eventingv1alpha1.ConditionReasonSubscriptionActive,
 							v1.ConditionTrue, "")),
 						reconcilertesting.HaveCleanEventTypes(publishToSubjects),
 					))
@@ -176,7 +176,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 						reconcilertesting.HaveSubscriptionName(subscriptionName),
 						reconcilertesting.HaveCondition(eventingv1alpha1.MakeCondition(
 							eventingv1alpha1.ConditionSubscriptionActive,
-							eventingv1alpha1.ConditionReasonBEBSubscriptionActive,
+							eventingv1alpha1.ConditionReasonSubscriptionActive,
 							v1.ConditionTrue, "")),
 						reconcilertesting.HaveCleanEventTypes(cleanEventTypes),
 					))
@@ -198,7 +198,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 						reconcilertesting.HaveSubscriptionName(subscriptionName),
 						reconcilertesting.HaveCondition(eventingv1alpha1.MakeCondition(
 							eventingv1alpha1.ConditionSubscriptionActive,
-							eventingv1alpha1.ConditionReasonBEBSubscriptionActive,
+							eventingv1alpha1.ConditionReasonSubscriptionActive,
 							v1.ConditionTrue, "")),
 						reconcilertesting.HaveCleanEventTypes(cleanEventTypes),
 					))
@@ -252,7 +252,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			By("Setting a Subscription active condition")
 			subscriptionActiveCondition := eventingv1alpha1.MakeCondition(
 				eventingv1alpha1.ConditionSubscriptionActive,
-				eventingv1alpha1.ConditionReasonBEBSubscriptionActive,
+				eventingv1alpha1.ConditionReasonSubscriptionActive,
 				v1.ConditionTrue,
 				"",
 			)
@@ -313,7 +313,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 
 			By("Setting a subscribed condition")
 			message := eventingv1alpha1.CreateMessageForConditionReasonSubscriptionCreated(nameMapper.MapSubscriptionName(givenSubscription))
-			subscriptionCreatedCondition := eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionSubscribed, eventingv1alpha1.ConditionReasonBEBSubscriptionCreated, v1.ConditionTrue, message)
+			subscriptionCreatedCondition := eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionSubscribed, eventingv1alpha1.ConditionReasonSubscriptionCreated, v1.ConditionTrue, message)
 			getSubscription(ctx, givenSubscription).Should(And(
 				reconcilertesting.HaveSubscriptionName(subscriptionName),
 				reconcilertesting.HaveCondition(subscriptionCreatedCondition),
@@ -322,14 +322,14 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			By("Emitting a subscription created event")
 			var subscriptionEvents = v1.EventList{}
 			subscriptionCreatedEvent := v1.Event{
-				Reason:  string(eventingv1alpha1.ConditionReasonBEBSubscriptionCreated),
+				Reason:  string(eventingv1alpha1.ConditionReasonSubscriptionCreated),
 				Message: message,
 				Type:    v1.EventTypeNormal,
 			}
 			getK8sEvents(&subscriptionEvents, givenSubscription.Namespace).Should(reconcilertesting.HaveEvent(subscriptionCreatedEvent))
 
 			By("Setting a subscription active condition")
-			subscriptionActiveCondition := eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionSubscriptionActive, eventingv1alpha1.ConditionReasonBEBSubscriptionActive, v1.ConditionTrue, "")
+			subscriptionActiveCondition := eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionSubscriptionActive, eventingv1alpha1.ConditionReasonSubscriptionActive, v1.ConditionTrue, "")
 			getSubscription(ctx, givenSubscription).Should(And(
 				reconcilertesting.HaveSubscriptionName(subscriptionName),
 				reconcilertesting.HaveCondition(subscriptionActiveCondition),
@@ -337,7 +337,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 
 			By("Emitting a subscription active event")
 			subscriptionActiveEvent := v1.Event{
-				Reason:  string(eventingv1alpha1.ConditionReasonBEBSubscriptionActive),
+				Reason:  string(eventingv1alpha1.ConditionReasonSubscriptionActive),
 				Message: "",
 				Type:    v1.EventTypeNormal,
 			}
@@ -407,7 +407,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			By("Emitting a k8s Subscription deleted event")
 			var subscriptionEvents = v1.EventList{}
 			subscriptionDeletedEvent := v1.Event{
-				Reason:  string(eventingv1alpha1.ConditionReasonBEBSubscriptionDeleted),
+				Reason:  string(eventingv1alpha1.ConditionReasonSubscriptionDeleted),
 				Message: "",
 				Type:    v1.EventTypeWarning,
 			}
@@ -435,7 +435,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 
 			By("Emitting a k8s Subscription deleted event")
 			subscriptionDeletedEvent = v1.Event{
-				Reason:  string(eventingv1alpha1.ConditionReasonBEBSubscriptionDeleted),
+				Reason:  string(eventingv1alpha1.ConditionReasonSubscriptionDeleted),
 				Message: "",
 				Type:    v1.EventTypeWarning,
 			}
@@ -489,7 +489,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 
 			By("Setting a subscribed condition")
 			message := eventingv1alpha1.CreateMessageForConditionReasonSubscriptionCreated(nameMapper.MapSubscriptionName(givenSubscription))
-			subscriptionCreatedCondition := eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionSubscribed, eventingv1alpha1.ConditionReasonBEBSubscriptionCreated, v1.ConditionTrue, message)
+			subscriptionCreatedCondition := eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionSubscribed, eventingv1alpha1.ConditionReasonSubscriptionCreated, v1.ConditionTrue, message)
 			getSubscription(ctx, givenSubscription).Should(And(
 				reconcilertesting.HaveSubscriptionName(subscriptionName),
 				reconcilertesting.HaveCondition(subscriptionCreatedCondition),
@@ -498,14 +498,14 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			By("Emitting a subscription created event")
 			var subscriptionEvents = v1.EventList{}
 			subscriptionCreatedEvent := v1.Event{
-				Reason:  string(eventingv1alpha1.ConditionReasonBEBSubscriptionCreated),
+				Reason:  string(eventingv1alpha1.ConditionReasonSubscriptionCreated),
 				Message: message,
 				Type:    v1.EventTypeNormal,
 			}
 			getK8sEvents(&subscriptionEvents, givenSubscription.Namespace).Should(reconcilertesting.HaveEvent(subscriptionCreatedEvent))
 
 			By("Setting a subscription active condition")
-			subscriptionActiveCondition := eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionSubscriptionActive, eventingv1alpha1.ConditionReasonBEBSubscriptionActive, v1.ConditionTrue, "")
+			subscriptionActiveCondition := eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionSubscriptionActive, eventingv1alpha1.ConditionReasonSubscriptionActive, v1.ConditionTrue, "")
 			getSubscription(ctx, givenSubscription).Should(And(
 				reconcilertesting.HaveSubscriptionName(subscriptionName),
 				reconcilertesting.HaveCondition(subscriptionActiveCondition),
@@ -513,7 +513,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 
 			By("Emitting a subscription active event")
 			subscriptionActiveEvent := v1.Event{
-				Reason:  string(eventingv1alpha1.ConditionReasonBEBSubscriptionActive),
+				Reason:  string(eventingv1alpha1.ConditionReasonSubscriptionActive),
 				Message: "",
 				Type:    v1.EventTypeNormal,
 			}
@@ -690,7 +690,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			ensureAPIRuleStatusUpdatedWithStatusReady(ctx, &apiRuleCreated).Should(BeNil())
 
 			By("Setting a subscription not created condition")
-			subscriptionNotCreatedCondition := eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionSubscribed, eventingv1alpha1.ConditionReasonBEBSubscriptionCreationFailed, v1.ConditionFalse, "")
+			subscriptionNotCreatedCondition := eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionSubscribed, eventingv1alpha1.ConditionReasonSubscriptionCreationFailed, v1.ConditionFalse, "")
 			getSubscription(ctx, givenSubscription).Should(And(
 				reconcilertesting.HaveSubscriptionName(subscriptionName),
 				reconcilertesting.HaveCondition(subscriptionNotCreatedCondition),
@@ -765,7 +765,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			))
 
 			By("Setting a subscription not active condition")
-			subscriptionNotActiveCondition := eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionSubscriptionActive, eventingv1alpha1.ConditionReasonBEBSubscriptionNotActive, v1.ConditionFalse, "")
+			subscriptionNotActiveCondition := eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionSubscriptionActive, eventingv1alpha1.ConditionReasonSubscriptionNotActive, v1.ConditionFalse, "")
 			getSubscription(ctx, givenSubscription).Should(And(
 				reconcilertesting.HaveSubscriptionName(subscriptionName),
 				reconcilertesting.HaveCondition(subscriptionNotActiveCondition),
@@ -937,7 +937,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			By("Emitting some k8s events")
 			var subscriptionEvents = v1.EventList{}
 			subscriptionDeletedEvent := v1.Event{
-				Reason:  string(eventingv1alpha1.ConditionReasonBEBSubscriptionDeleted),
+				Reason:  string(eventingv1alpha1.ConditionReasonSubscriptionDeleted),
 				Message: "",
 				Type:    v1.EventTypeWarning,
 			}
