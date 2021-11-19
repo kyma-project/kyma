@@ -132,7 +132,7 @@ describe("SKR-Upgrade-test", function () {
   it(`Provision SKR with ID ${instanceID}`, async function () {
     skr = await provisionSKR(keb, gardener, instanceID, runtimeName, null, null, null);
     let runtimeStatus = await kcp.runtimes({instanceID: instanceID})
-    debug(inspect(runtimeStatus, false, null, true))
+    debug(inspect(runtimeStatus, false, null, false))
   });
 
   it(`Should save kubeconfig for the SKR to ~/.kube/config`, async function() {
@@ -200,7 +200,7 @@ describe("SKR-Upgrade-test", function () {
     let kcpUpgradeStatus = await kcp.upgradeKyma(subAccountID, kymaUpgradeVersion)
     debug("Upgrade Done!")
     let runtimeStatus = await kcp.runtimes({instanceID: instanceID})
-    debug(inspect(runtimeStatus, false, null, true))
+    debug(inspect(runtimeStatus, false, null, false))
   });
 
   // Perform Tests after Upgrade
