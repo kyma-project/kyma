@@ -147,9 +147,7 @@ class KCPWrapper {
             let res = await this.exec(args);
             res = JSON.parse(res)
 
-            // debug(`getOrchestrationsOperationStatus output: ${res}`)
-
-            return JSON.parse(res)
+            return res
         } catch (error) {
             debug(error)
             throw new Error(`failed during getOrchestrationsOperationStatus`);
