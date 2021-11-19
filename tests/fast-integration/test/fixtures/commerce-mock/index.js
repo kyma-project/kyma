@@ -365,10 +365,11 @@ async function connectCommerceMock(mockHost, tokenData) {
     headers: {
       "Content-Type": "application/json"
     },
-    timeout: 5000,
+    timeout: 60000,
   };
 
   try {
+    console.log("Setting timeout to 60s");
     await axios.post(url, body, params);
   } catch (err) {
     throw convertAxiosError(err, "Error during establishing connection from Commerce Mock to Kyma connector service");
