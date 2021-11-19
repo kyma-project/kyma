@@ -138,6 +138,8 @@ class KCPWrapper {
                 debug(error)
             }
 
+            throw (`Kyma Upgrade failed`);
+
         } catch (error) {
             debug(error)
             throw new Error(`failed during upgradeKyma`);

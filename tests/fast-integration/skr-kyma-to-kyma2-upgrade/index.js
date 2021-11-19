@@ -133,11 +133,6 @@ describe("SKR-Upgrade-test", function () {
     skr = await provisionSKR(keb, gardener, instanceID, runtimeName, null, null, null);
   });
 
-  it(`Get Runtime Status`, async function () {
-    let runtimeStatus = await kcp.runtimes({instanceID: instanceID})
-    debug(inspect(runtimeStatus, false, null, false))
-  });
-
   it(`Should save kubeconfig for the SKR to ~/.kube/config`, async function() {
     saveKubeconfig(skr.shoot.kubeconfig);
   });
