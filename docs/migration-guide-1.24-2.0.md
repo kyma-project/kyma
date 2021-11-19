@@ -19,7 +19,7 @@ To use the native Kubernetes authentication in Kyma, you need to remove the depr
 
 [STEPS]
 
-For more details, read the [Kyma 2.0 release notes](link).
+For more details, read the [Kyma 2.0 release notes].
 
 ### ORY Oathkeeper without Dex
 
