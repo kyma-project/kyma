@@ -2,6 +2,7 @@
 title: Migration Guide 1.24-2.0
 ---
 
+Once you upgrade to Kyma 2.0, perform the manual steps described in the Migration Guide.
 ## Security
 
 ### Native Kubernetes authentication in Kyma
