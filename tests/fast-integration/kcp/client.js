@@ -142,7 +142,7 @@ class KCPWrapper {
 
     async getOrchestrationsOperationStatus(orchestrationID, operationID) {
         // debug(`Running getOrchestrationsOperationStatus...`)
-        const args = [`--config`, `${kcpconfigPath}`, `orchestration`,`${orchestrationID}`,`--operation`, `${operationID}`, `-o`, `json`]
+        const args = [`orchestration`,`${orchestrationID}`,`--operation`, `${operationID}`, `-o`, `json`]
         try {
             let res = await this.exec(args);
             res = JSON.parse(res)
