@@ -7,6 +7,9 @@ axios.defaults.httpsAgent = httpsAgent;
 const {
   ensureCommerceMockLocalTestFixture,
   checkFunctionResponse,
+  addService,
+  updateService,
+  deleteService,
   sendEventAndCheckResponse,
   cleanMockTestFixture,
   checkInClusterEventDelivery,
@@ -55,6 +58,13 @@ function commerceMockTests() {
 
     it("function should be reachable through secured API Rule", async function () {
       await checkFunctionResponse(testNamespace);
+    });
+
+    it("should add, update and delete a service", async function () {
+      let serviceId = await addService();
+      console.dir(serviceId)
+      await updateService(serviceId)
+      await deleteService(serviceId)
     });
 
     it("order.created.v1 event should trigger the lastorder function", async function () {
