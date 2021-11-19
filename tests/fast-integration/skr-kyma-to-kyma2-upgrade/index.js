@@ -120,6 +120,15 @@ describe("SKR-Upgrade-test", function () {
 
   // SKR Provisioning
 
+  it(`Perform kcp login`, async function () {
+    
+    let version = await kcp.version([])
+    debug(version)
+    
+    await kcp.login()
+    // debug(loginOutput)
+  });
+
   it(`Provision SKR with ID ${instanceID}`, async function () {
     skr = await provisionSKR(keb, gardener, instanceID, runtimeName, null, null, null);
     let runtimeStatus = await kcp.runtimes({instanceID: instanceID})
@@ -186,16 +195,6 @@ describe("SKR-Upgrade-test", function () {
   });
 
   // Perform Upgrade
-  
-  it(`Perform kcp login`, async function () {
-    
-    let version = await kcp.version([])
-    debug(version)
-    
-    await kcp.login()
-    // debug(loginOutput)
-  });
-
 
   it(`Perform Upgrade`, async function () {
     let kcpUpgradeStatus = await kcp.upgradeKyma(subAccountID, kymaUpgradeVersion)
