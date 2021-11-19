@@ -131,6 +131,9 @@ describe("SKR-Upgrade-test", function () {
 
   it(`Provision SKR with ID ${instanceID}`, async function () {
     skr = await provisionSKR(keb, gardener, instanceID, runtimeName, null, null, null);
+  });
+
+  it(`Get Runtime Status`, async function () {
     let runtimeStatus = await kcp.runtimes({instanceID: instanceID})
     debug(inspect(runtimeStatus, false, null, false))
   });
@@ -199,6 +202,9 @@ describe("SKR-Upgrade-test", function () {
   it(`Perform Upgrade`, async function () {
     let kcpUpgradeStatus = await kcp.upgradeKyma(subAccountID, kymaUpgradeVersion)
     debug("Upgrade Done!")
+  });
+
+  it(`Get Runtime Status`, async function () {
     let runtimeStatus = await kcp.runtimes({instanceID: instanceID})
     debug(inspect(runtimeStatus, false, null, false))
   });
