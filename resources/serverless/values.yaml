@@ -102,7 +102,7 @@ global:
       directory: "tpi"
     registry:
       name: "registry"
-      version: "2.7.1-8c646ef0"
+      version: "2.7.1-0646c4cd"
       directory: "tpi"
     google_pause:
       name: "pause-amd64"

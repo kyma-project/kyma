@@ -64,7 +64,7 @@ spec:
           # TODO: after helm@3.5.0 is used in kyma-installer we may be able to remove that init container, as helm 3.5.0 uses sprig@3.2.0, which has `bcrypt` function
           # might want to investigate
             - sh
-            - -c
+            - -ec
             - |
               htpasswd -Bbn $(cat /regcred/username.txt) $(cat /regcred/password.txt) > ./data/htpasswd
               echo "Generated htpasswd file for docker-registry..."
