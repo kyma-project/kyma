@@ -2,7 +2,7 @@
 title: Connector Service
 ---
 
-Connector Service generates client certificates which are used to secure the communication between Kyma and the connected external solutions.
+Connector Service generates client certificates which are used to secure the communication between Kyma and the connected external solutions in the [legacy mode](../../01-overview/main-areas/application-connectivity/README.md).
 
 Connector Service exposes two separate APIs:
 
