@@ -11,6 +11,8 @@ const {
   updateService,
   deleteService,
   sendEventAndCheckResponse,
+  renewCommerceMockCertificate,
+  revokeCommerceMockCertificate,
   cleanMockTestFixture,
   checkInClusterEventDelivery,
 } = require("./fixtures/commerce-mock");
@@ -18,10 +20,7 @@ const {
   printRestartReport,
   getContainerRestartsForAllNamespaces,
 } = require("../utils");
-const {
-  checkLokiLogs,
-  lokiPortForward
-} = require("../logging");
+const { checkLokiLogs, lokiPortForward } = require("../logging");
 
 function commerceMockTests() {
   describe("CommerceMock tests", function () {
@@ -70,14 +69,34 @@ function commerceMockTests() {
       await deleteService(serviceId)
     });
     
-    it("Should print report of restarted containers, skipped if no crashes happened", async function () {
-      const afterTestRestarts = await getContainerRestartsForAllNamespaces();
-      printRestartReport(initialRestarts, afterTestRestarts);
-    });
+  // renew certificate
+  it("CommerceMock should renew it's certificate", async function () {
+    await renewCommerceMockCertificate();
+  });
+  // call lambda and succeed
+  it("order.created.v1 event should trigger the lastorder function", async function () {
+    await sendEventAndCheckResponse();
+  });
 
-    it("Logs from commerce mock pod should be retrieved through Loki", async function() {
-      await checkLokiLogs(testStartTimestamp);
-    });
+  // revoke certificate
+  it("should revoke Commerce Mock certificate", async function () {
+    await revokeCommerceMockCertificate();
+  });
+
+  /* TODO why is this passing, after revoking the cert
+  // call lambda and FAIL
+  it("order.created.v1 event should trigger the lastorder function", async function () {
+    await sendEventAndCheckResponse();
+  });*/
+
+  it("Should print report of restarted containers, skipped if no crashes happened", async function () {
+    const afterTestRestarts = await getContainerRestartsForAllNamespaces();
+    printRestartReport(initialRestarts, afterTestRestarts);
+  });
+
+  it("Logs from commerce mock pod should be retrieved through Loki", async function () {
+    await checkLokiLogs(testStartTimestamp);
+  });
 
     it("Test namespaces should be deleted", async function () {
       await cleanMockTestFixture("mocks", testNamespace, true);
