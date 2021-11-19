@@ -1,5 +1,5 @@
 ---
-title: Migration Guide
+title: Migration Guide 1.24-2.0
 ---
 
 ## Security
