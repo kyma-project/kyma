@@ -317,6 +317,7 @@ async function registerAllApis(mockHost) {
   return remoteApis;
 }
 
+// connectMockLocal(vs.spec.hosts[0], "test")
 async function connectMockLocal(mockHost, targetNamespace) {
   const tokenRequest = {
     apiVersion: "applicationconnector.kyma-project.io/v1alpha1",
@@ -359,18 +360,20 @@ async function connectMockCompass(client, appName, scenarioName, mockHost, targe
 }
 
 async function connectCommerceMock(mockHost, tokenData) {
+  console.log("mockHost: ", mockHost);
+  console.log("tokenData: ", tokenData);
   const url = `https://${mockHost}/connection`;
   const body = tokenData;
   const params = {
     headers: {
       "Content-Type": "application/json"
     },
-    timeout: 60000,
+    timeout: 5000,
   };
 
   try {
-    console.log("Setting timeout to 60s");
-    await axios.post(url, body, params);
+    let response = await axios.post(url, body, params);
+    console.log("response for connection request: ", response);
   } catch (err) {
     throw convertAxiosError(err, "Error during establishing connection from Commerce Mock to Kyma connector service");
   }
@@ -439,8 +442,10 @@ async function ensureCommerceMockWithCompassTestFixture(client, appName, scenari
   return mockHost;
 }
 
+// ensureCommerceMockLocalTestFixture("mocks", testNamespace), const testNamespace = "test";
 async function ensureCommerceMockLocalTestFixture(mockNamespace, targetNamespace, withCentralApplicationConnectivity = false) {
   await k8sApply(applicationObjs);
+  // mockHost --> vs.spec.hosts[0]
   const mockHost = await provisionCommerceMockResources(
     "commerce",
     mockNamespace,

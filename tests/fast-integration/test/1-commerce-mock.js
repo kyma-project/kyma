@@ -49,30 +49,30 @@ function commerceMockTests() {
       });
     });
 
-    it("in-cluster event should be delivered (structured and binary mode)", async function () {
-      await checkInClusterEventDelivery(testNamespace);
-    });
+    // it("in-cluster event should be delivered (structured and binary mode)", async function () {
+    //   await checkInClusterEventDelivery(testNamespace);
+    // });
 
-    it("function should be reachable through secured API Rule", async function () {
-      await checkFunctionResponse(testNamespace);
-    });
+    // it("function should be reachable through secured API Rule", async function () {
+    //   await checkFunctionResponse(testNamespace);
+    // });
 
-    it("order.created.v1 event should trigger the lastorder function", async function () {
-      await sendEventAndCheckResponse();
-    });
+    // it("order.created.v1 event should trigger the lastorder function", async function () {
+    //   await sendEventAndCheckResponse();
+    // });
 
-    it("Should print report of restarted containers, skipped if no crashes happened", async function () {
-      const afterTestRestarts = await getContainerRestartsForAllNamespaces();
-      printRestartReport(initialRestarts, afterTestRestarts);
-    });
+    // it("Should print report of restarted containers, skipped if no crashes happened", async function () {
+    //   const afterTestRestarts = await getContainerRestartsForAllNamespaces();
+    //   printRestartReport(initialRestarts, afterTestRestarts);
+    // });
 
-    it("Logs from commerce mock pod should be retrieved through Loki", async function() {
-      await checkLokiLogs(testStartTimestamp);
-    });
+    // it("Logs from commerce mock pod should be retrieved through Loki", async function() {
+    //   await checkLokiLogs(testStartTimestamp);
+    // });
 
-    it("Test namespaces should be deleted", async function () {
-      await cleanMockTestFixture("mocks", testNamespace, true);
-    });
+    // it("Test namespaces should be deleted", async function () {
+    //   await cleanMockTestFixture("mocks", testNamespace, true);
+    // });
   });
 }
 
