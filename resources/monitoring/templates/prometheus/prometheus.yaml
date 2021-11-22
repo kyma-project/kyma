@@ -1,6 +1,3 @@
-{{- /*
-  Customization: .Values.resourceSelector.namespaces if statement is added to make comma separated namespace list work.
-*/ -}}
 {{- if .Values.prometheus.enabled }}
 apiVersion: monitoring.coreos.com/v1
 kind: Prometheus
@@ -109,49 +106,6 @@ spec:
 {{ toYaml .Values.prometheus.prometheusSpec.configMaps | indent 4 }}
 {{- end }}
   serviceAccountName: {{ template "kube-prometheus-stack.prometheus.serviceAccountName" . }}
-
-{{- if .Values.resourceSelector.namespaces }}
-  serviceMonitorSelector: {}
-  serviceMonitorNamespaceSelector:
-    matchExpressions:
-    - key: name
-      operator: In
-      values:
-      {{- $namespaces := splitList "," .Values.resourceSelector.namespaces -}}
-      {{- range $namespaces }}
-      - {{ . }}
-      {{- end }}
-  podMonitorSelector: {}
-  podMonitorNamespaceSelector:
-    matchExpressions:
-    - key: name
-      operator: In
-      values:
-      {{- $namespaces := splitList "," .Values.resourceSelector.namespaces -}}
-      {{- range $namespaces }}
-      - {{ . }}
-      {{- end }}
-  ruleSelector: {}
-  ruleNamespaceSelector:
-    matchExpressions:
-    - key: name
-      operator: In
-      values:
-      {{- $namespaces := splitList "," .Values.resourceSelector.namespaces -}}
-      {{- range $namespaces }}
-      - {{ . }}
-      {{- end }}
-  probeSelector: {}
-  probeNamespaceSelector:
-    matchExpressions:
-    - key: name
-      operator: In
-      values:
-      {{- $namespaces := splitList "," .Values.resourceSelector.namespaces -}}
-      {{- range $namespaces }}
-      - {{ . }}
-      {{- end }}
-{{ else }}
 {{- if .Values.prometheus.prometheusSpec.serviceMonitorSelector }}
   serviceMonitorSelector:
 {{ toYaml .Values.prometheus.prometheusSpec.serviceMonitorSelector | indent 4 }}
@@ -216,7 +170,6 @@ spec:
 {{ toYaml .Values.prometheus.prometheusSpec.probeNamespaceSelector | indent 4 }}
 {{ else }}
   probeNamespaceSelector: {}
-{{- end }}
 {{- end }}
 {{- if .Values.prometheus.prometheusSpec.remoteRead }}
   remoteRead:
