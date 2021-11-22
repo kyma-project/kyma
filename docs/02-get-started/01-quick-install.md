@@ -43,7 +43,7 @@ export CLUSTER_DOMAIN={YOUR_CLUSTER_DOMAIN}
 To manage Kyma via GUI, open Kyma Dashboard:
 
 ```bash
-    kyma dashboard
+kyma dashboard
 ```
 This command takes you to your Kyma Dashboard under [`http://localhost:3001/`](http://localhost:3001/).
 
