@@ -44,9 +44,9 @@ To manage Kyma via GUI, connect it to Kyma Dashboard.
 
    To start the Dashboard, run:
 
-    ```bash
+```bash
     kyma dashboard
-    ```
+```
    This command takes you to your Kyma Dashboard under [`http://localhost:3001/`](http://localhost:3001/).
 
 ## Check the list of Deployments via Dashboard
