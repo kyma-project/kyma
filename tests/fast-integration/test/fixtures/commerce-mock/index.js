@@ -4,6 +4,7 @@ const path = require("path");
 const { expect } = require("chai");
 const https = require("https");
 const axios = require("axios").default;
+const fetch = require("node-fetch");
 const httpsAgent = new https.Agent({
   rejectUnauthorized: false, // curl -k
 });
@@ -363,19 +364,28 @@ async function connectCommerceMock(mockHost, tokenData) {
   console.log("mockHost: ", mockHost);
   console.log("tokenData: ", tokenData);
   const url = `https://${mockHost}/connection`;
-  const body = tokenData;
-  const params = {
+  // const body = tokenData;
+  // const params = {
+  //   headers: {
+  //     "Content-Type": "application/json"
+  //   },
+  //   timeout: 5000,
+  // };
+
+  const options = {
+    method: 'POST',
     headers: {
       "Content-Type": "application/json"
     },
-    timeout: 5000,
+    body: tokenData
   };
 
   try {
-    let response = await axios.post(url, body, params);
+    //let response = await axios.post(url, body, params);
+    let response = await fetch(url, options);
     console.log("response for connection request: ", response);
   } catch (err) {
-    throw convertAxiosError(err, "Error during establishing connection from Commerce Mock to Kyma connector service");
+    throw err;
   }
 }
 
