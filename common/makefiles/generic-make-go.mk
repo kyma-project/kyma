@@ -189,7 +189,9 @@ errcheck-local:
 vet-local:
 	go vet $$($(DIRS_TO_CHECK))
 
-# Lint goal is optional for now. remove the - at the beginning to make the goal fail if there are linting errors
+# Lint goal is by default optional. To force failing this target reconfigure `IGNORE_LINTING_ISSUES` in your components Makefile
+# Forcing build failing:
+# override IGNORE_LINTING_ISSUES = 
 lint: ## Run various linters
 	$(IGNORE_LINTING_ISSUES)SKIP_VERIFY="true" ../../hack/verify-lint.sh $(COMPONENT_DIR) 
 
