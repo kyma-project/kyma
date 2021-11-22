@@ -68,11 +68,11 @@ spec:
           - name: PUBLISHER_IMAGE
             value: "eu.gcr.io/kyma-project/event-publisher-proxy:PR-12616"
           - name: PUBLISHER_IMAGE_PULL_POLICY
-            value: IfNotPresent
+            value: Always
           - name: APP_LOG_FORMAT
             value: "json"
           - name: APP_LOG_LEVEL
-            value: "info"
+            value: "debug"
         resources:
           limits:
             cpu: 500m
