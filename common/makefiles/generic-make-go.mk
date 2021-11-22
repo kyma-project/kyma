@@ -68,6 +68,10 @@ $(1):
 	@docker start $(DOCKER_INTERACTIVE_START) $(DOCKER_INTERACTIVE) $$(container)
 endef
 
+##@ Common Targets (not all might be useful for your project)
+##@ Most targets with `-local` suffix can be executed without `-local` (e.g. `resolve-local` => `resolve`). If those targets are called without the `-local` suffix, then they will be executed inside a docker container with a preconfigured build environment.
+
+
 .PHONY: verify format release check-gqlgen
 
 # You may add additional targets/commands to be run on format and verify. Declare the target again in your makefile,
@@ -75,19 +79,28 @@ endef
 #
 #   verify:: errcheck
 #
-verify:: test check-imports check-fmt lint
+verify:: test check-imports check-fmt lint ## Check formatting and run linters
 format:: imports fmt
 
-release:
+
+##@ Common Release
+release: ## Release the component
 	$(MAKE) release-dep
 
-#Old Target for dep projects
-release-dep: resolve dep-status verify build-image push-image
+gomod-release:gomod-component-check build-image push-image ## Build a go mod based project. Build the image and push it. Requires DOCKER_PUSH_REPOSITORY DOCKER_PUSH_DIRECTORY
 
+gomod-release-local:gomod-component-check-local build-image push-image
+
+
+#Old Target for dep projects
+release-dep: resolve dep-status verify build-image push-image ## Release dep based project
+
+
+##@ Common Docker
 .PHONY: build-image push-image
-build-image: pull-licenses-local
+build-image: pull-licenses-local ## Build the docker image
 	docker build -t $(IMG_NAME) .
-push-image: post-pr-tag-image
+push-image: post-pr-tag-image ## Build and push the docker image. Needs DOCKER_PUSH_REPOSITORY DOCKER_PUSH_DIRECTORY 
 	docker tag $(IMG_NAME) $(IMG_NAME):$(TAG)
 	docker push $(IMG_NAME):$(TAG)
 ifeq ($(JOB_TYPE), postsubmit)
@@ -109,32 +122,31 @@ endif
 MOUNT_TARGETS = build resolve ensure dep-status check-imports imports check-fmt fmt errcheck vet generate gqlgen
 $(foreach t,$(MOUNT_TARGETS),$(eval $(call buildpack-mount,$(t))))
 
-build-local:
+build-local: ## Build the binary
 	env CGO_ENABLED=0 go build -o $(APP_NAME) ./$(ENTRYPOINT)
 	rm $(APP_NAME)
 
-resolve-local:
+
+##@ Common dep based builds
+resolve-local: ## download `dep` dependencies
 	dep ensure -vendor-only -v
 
-ensure-local:
+ensure-local: ## Run `dep ensure`
 	dep ensure -v
 
-dep-status-local:
+dep-status-local: ## Check `dep` status
 	dep status -v
 
-#Go mod
-gomod-deps-local:: gomod-vendor-local gomod-verify-local
+##@ Common go mod based builds
+gomod-deps-local:: gomod-vendor-local gomod-verify-local ## Download gomod dependencies
 $(eval $(call buildpack-mount,gomod-deps))
 
-gomod-check-local:: test-local check-imports-local check-fmt-local lint
+gomod-check-local:: test-local check-imports-local check-fmt-local lint ## Run tests and code checkers
 $(eval $(call buildpack-cp-ro,gomod-check))
 
-gomod-component-check-local:: gomod-deps-local gomod-check-local
+gomod-component-check-local:: gomod-deps-local gomod-check-local ## Download dependencies, run tests and checks
 $(eval $(call buildpack-mount,gomod-component-check))
 
-gomod-release:gomod-component-check build-image push-image
-
-gomod-release-local:gomod-component-check-local build-image push-image
 
 gomod-vendor-local:
 	GO111MODULE=on go mod vendor
@@ -145,25 +157,25 @@ gomod-verify-local:
 gomod-tidy-local:
 	GO111MODULE=on go mod tidy
 
-## Source Code tools
-check-imports-local:
+##@ Common Source Code tools
+check-imports-local: ## Check import sections
 	@if [ -n "$$(goimports -l $$($(FILES_TO_CHECK)))" ]; then \
 		echo "✗ some files contain not propery formatted imports. To repair run make imports-local"; \
 		goimports -l $$($(FILES_TO_CHECK)); \
 		exit 1; \
 	fi;
 
-imports-local:
+imports-local: ## Optimize imports
 	goimports -w -l $$($(FILES_TO_CHECK))
 
-check-fmt-local:
+check-fmt-local: ## Check source files for formatting issues
 	@if [ -n "$$(gofmt -l $$($(FILES_TO_CHECK)))" ]; then \
 		gofmt -l $$($(FILES_TO_CHECK)); \
 		echo "✗ some files contain not propery formatted imports. To repair run make imports-local"; \
 		exit 1; \
 	fi;
 
-fmt-local:
+fmt-local: ## Reformat files using `go fmt`
 	go fmt $$($(DIRS_TO_CHECK))
 
 errcheck-local:
@@ -173,10 +185,10 @@ vet-local:
 	go vet $$($(DIRS_TO_CHECK))
 
 # Lint goal is optional for now. remove the - at the beginning to make the goal fail if there are linting errors
-lint:
+lint: ## Run various linters
 	-SKIP_VERIFY="true" ../../hack/verify-lint.sh $(COMPONENT_DIR) 
 
-generate-local:
+generate-local: ## Run code generation
 	go generate ./...
 
 gqlgen-local:
@@ -192,7 +204,7 @@ check-gqlgen:
 
 pull-licenses: pull-licenses-local
 
-pull-licenses-local:
+pull-licenses-local: ## Download licenses to store them in the docker image
 ifdef LICENSE_PULLER_PATH
 	bash $(LICENSE_PULLER_PATH)
 else
@@ -203,14 +215,32 @@ endif
 COPY_TARGETS = test
 $(foreach t,$(COPY_TARGETS),$(eval $(call buildpack-cp-ro,$(t))))
 
-test-local:
+test-local: ## Run tests
 	mkdir -p /tmp/artifacts
 	go test -coverprofile=/tmp/artifacts/cover.out ./...
 	@echo -n "Total coverage: "
 	@go tool cover -func=/tmp/artifacts/cover.out | grep total | awk '{print $$3}'
 
+
+##@ Other
+
+# The help target prints out all targets with their descriptions organized
+# beneath their categories. The categories are represented by '##@' and the
+# target descriptions by '##'. The awk commands is responsible for reading the
+# entire set of makefiles included in this invocation, looking for lines of the
+# file as xyz: ## something, and then pretty-format the target and help. Then,
+# if there's a line with ##@ something, that gets pretty-printed as a category.
+# More info on the usage of ANSI control characters for terminal formatting:
+# https://en.wikipedia.org/wiki/ANSI_escape_code#SGR_parameters
+# More info on the awk command:
+# http://linuxcommand.org/lc3_adv_awk.php
+
+help: ## Display this help.
+	@awk 'BEGIN {FS = ":.*##"; printf "\nUsage:\n  make \033[36m<target>\033[0m\n" } /^[a-zA-Z_0-9-]+:.*?##/ { printf "  \033[36m%-15s\033[0m %s\n", $$1, $$2 } /^##@/ { printf "\n\033[1m%s\033[0m\n", substr($$0, 5) } ' $(MAKEFILE_LIST) <(printf "\
+		")
+
 .PHONY: list
-list:
+list: ## Generate a complete list of available Makefile targets.
 	@$(MAKE) -pRrq -f $(COMPONENT_DIR)/Makefile : 2>/dev/null | awk -v RS= -F: '/^# File/,/^# Finished Make data base/ {if ($$1 !~ "^[#.]") {print $$1}}' | sort | egrep -v -e '^[^[:alnum:]]' -e '^$@$$'
 
 .PHONY: exec

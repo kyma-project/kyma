@@ -18,7 +18,7 @@ spec:
       securityContext: {{- toYaml .Values.podSecurityContext | nindent 8 }}
       containers:
         - image: "{{include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.eventing_controller) }}"
-          imagePullPolicy: "{{ .Values.image.pullPolicy }}"
+          imagePullPolicy: "{{ .Values.global.images.eventing_controller.pullPolicy }}"
           name: controller
           env:
           - name: NATS_URL

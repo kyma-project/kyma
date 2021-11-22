@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	applicationv1alpha1 "github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
+
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/application/applicationtest"
 )
 

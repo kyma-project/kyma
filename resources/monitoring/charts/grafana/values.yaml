@@ -1,3 +1,7 @@
+# Customization:
+# Added .Values.sidecar.datasources.watchMethod 
+# Added .Values.sidecar.dashboards.watchMethod
+
 rbac:
   create: true
   ## Use an existing ClusterRole/Role (depending on rbac.namespaced false/true)
@@ -71,9 +75,6 @@ livenessProbe:
 # schedulerName: "default-scheduler"
 
 image:
-  repository: eu.gcr.io/kyma-project/tpi/grafana
-  tag: 7.5.11-65a68aa8
-  sha: ""
   pullPolicy: IfNotPresent
 
   ## Optionally specify an array of imagePullSecrets.
@@ -117,7 +118,7 @@ extraLabels: {}
 # priorityClassName:
 
 downloadDashboardsImage:
-  repository: curlimages/curl
+  repository: curlimages/curl # This image is not activated in Kyma. This is kept here to keep parity with upstream charts
   tag: 7.73.0
   sha: ""
   pullPolicy: IfNotPresent
@@ -311,9 +312,6 @@ initChownData:
   ## initChownData container image
   ##
   image:
-    repository: eu.gcr.io/kyma-project/external/busybox
-    tag: "1.32.0-v1"
-    sha: ""
     pullPolicy: IfNotPresent
 
   ## initChownData resource requests and limits
@@ -628,9 +626,6 @@ smtp:
 ## Sidecars that collect the configmaps with specified label and stores the included files them into the respective folders
 ## Requires at least Grafana 5 to work and can't be used together with parameters dashboardProviders, datasources and dashboards
 sidecar:
-  image:
-    repository: eu.gcr.io/kyma-project/tpi/k8s-sidecar
-    tag: 1.12.2-4c48514d
   imagePullPolicy: IfNotPresent
   resources:
     limits:
@@ -665,6 +660,8 @@ sidecar:
     # If specified, the sidecar will look for annotation with this name to create folder and put graph here.
     # You can use this parameter together with `provider.foldersFromFilesStructure`to annotate configmaps and create folder structure.
     folderAnnotation: null
+    # Method used by Kiwigrid K8s sidecar. If not specified default watch method will be used.
+    watchMethod: ""
     # provider configuration that lets grafana manage the dashboards
     provider:
       # name of the provider, should be unique
@@ -692,6 +689,8 @@ sidecar:
     searchNamespace: null
     # search in configmap, secret or both
     resource: both
+    # Method used by Kiwigrid K8s sidecar. If not specified default watch method will be used.
+    watchMethod: ""
   notifiers:
     enabled: false
     # label that the configmaps with notifiers are marked with
@@ -718,7 +717,7 @@ imageRenderer:
   replicas: 1
   image:
     # image-renderer Image repository
-    repository: grafana/grafana-image-renderer
+    repository: grafana/grafana-image-renderer # This image is not activated in Kyma. This is kept here to keep parity with upstream charts
     # image-renderer Image tag
     tag: latest
     # image-renderer Image sha (optional)
@@ -801,8 +800,6 @@ kyma:
       runAsNonRoot: true
     port: 3000
     image:
-      repository: eu.gcr.io/kyma-project/tpi/oauth2-proxy
-      tag: 7.1.3-4c48514d
       pullPolicy: IfNotPresent
     resources:
       limits:

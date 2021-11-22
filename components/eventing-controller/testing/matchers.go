@@ -3,17 +3,14 @@ package testing
 import (
 	"reflect"
 
-	"k8s.io/apimachinery/pkg/types"
-
+	apigatewayv1alpha1 "github.com/kyma-incubator/api-gateway/api/v1alpha1"
 	. "github.com/onsi/gomega"         // nolint
 	. "github.com/onsi/gomega/gstruct" // nolint
 	gomegatypes "github.com/onsi/gomega/types"
-
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-
-	apigatewayv1alpha1 "github.com/kyma-incubator/api-gateway/api/v1alpha1"
+	"k8s.io/apimachinery/pkg/types"
 
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/constants"

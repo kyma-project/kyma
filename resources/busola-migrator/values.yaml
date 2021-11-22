@@ -7,7 +7,7 @@ global:
       version: "PR-11619"
     k8s_tools:
       name: "k8s-tools"
-      version: "20210922-530cfc39"
+      version: "20211022-85284bf9"
       directory: "tpi"
   domainName: kyma.example.com
   ingress:

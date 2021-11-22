@@ -12,7 +12,7 @@ You're experiencing one of the following issues:
 
 ## Cause
 
-During installation on Gardener, Kyma requests domain SSL certificates using Gardener's [`Certificate`](https://gardener.cloud/docs/guides/administer_shoots/request_cert/#request-a-certificate-via-certificate) custom resource to ensure secure communication through both Kyma UI and Kubernetes CLI.
+During installation on Gardener, Kyma requests domain SSL certificates using Gardener's [`Certificate`](https://github.com/gardener/cert-management#requesting-a-certificate) custom resource to ensure secure communication through both Kyma UI and Kubernetes CLI.
 
 ## Remedy
 

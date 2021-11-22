@@ -1,4 +1,0 @@
-apiVersion: v1
-name: addons-ui
-description: Addons Configuration UI for the Kyma Console
-version: 0.1.0

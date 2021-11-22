@@ -1,0 +1,80 @@
+---
+# The role allows you to view Gardener Certificate CR
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: kyma-gardener-cert-view
+  labels:
+    app: kyma
+    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+    rbac.authorization.kyma-project.io/aggregate-to-gardener-cert-view: "true"
+  annotations:
+    helm.sh/hook-weight: "0"
+rules:
+- apiGroups:
+    - "cert.gardener.cloud"
+  resources:
+    - "certificates"
+  verbs:
+{{ toYaml .Values.clusterRoles.verbs.view | indent 4 }}
+
+---
+# The role allows you to manage Gardener Certificate CR
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: kyma-gardener-cert-edit
+  labels:
+    app: kyma
+    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+    rbac.authorization.kyma-project.io/aggregate-to-gardener-cert-edit: "true"
+  annotations:
+    helm.sh/hook-weight: "0"
+rules:
+- apiGroups:
+    - "cert.gardener.cloud"
+  resources:
+    - "certificates"
+  verbs:
+{{ toYaml .Values.clusterRoles.verbs.edit | indent 4 }}
+
+---
+# The role allows you to view Gardener DNSEntry CR
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: kyma-gardener-dns-view
+  labels:
+    app: kyma
+    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+    rbac.authorization.kyma-project.io/aggregate-to-gardener-dns-view: "true"
+  annotations:
+    helm.sh/hook-weight: "0"
+rules:
+- apiGroups:
+    - "dns.gardener.cloud"
+  resources:
+    - "dnsentries"
+  verbs:
+{{ toYaml .Values.clusterRoles.verbs.view | indent 4 }}
+
+---
+# The role allows you to manage Gardener DNSEntry CR
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: kyma-gardener-dns-edit
+  labels:
+    app: kyma
+    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+    rbac.authorization.kyma-project.io/aggregate-to-gardener-dns-edit: "true"
+  annotations:
+    helm.sh/hook-weight: "0"
+rules:
+- apiGroups:
+    - "dns.gardener.cloud"
+  resources:
+    - "dnsentries"
+  verbs:
+{{ toYaml .Values.clusterRoles.verbs.edit | indent 4 }}
+

@@ -4,18 +4,17 @@ import (
 	"context"
 	"os"
 
+	"github.com/go-logr/zapr"
 	"k8s.io/apimachinery/pkg/runtime"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/healthz"
 
-	"github.com/go-logr/zapr"
-
+	"github.com/kyma-project/kyma/components/eventing-controller/controllers/backend"
 	"github.com/kyma-project/kyma/components/eventing-controller/logger"
 	"github.com/kyma-project/kyma/components/eventing-controller/options"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/commander/beb"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/commander/nats"
-	"github.com/kyma-project/kyma/components/eventing-controller/reconciler/backend"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/subscriptionmanager/beb"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/subscriptionmanager/nats"
 )
 
 func main() {
@@ -66,16 +65,16 @@ func main() {
 		os.Exit(1)
 	}
 
-	// Instantiate and initialize all the subscription commanders.
-	natsCommander := nats.NewCommander(restCfg, opts.MetricsAddr, opts.MaxReconnects, opts.ReconnectWait, ctrLogger)
-	if err := natsCommander.Init(mgr); err != nil {
-		setupLogger.Error(err, "initialize NATS commander failed")
+	// Instantiate and initialize all the subscription managers.
+	natsSubMgr := nats.NewSubscriptionManager(restCfg, opts.MetricsAddr, opts.MaxReconnects, opts.ReconnectWait, ctrLogger)
+	if err := natsSubMgr.Init(mgr); err != nil {
+		setupLogger.Error(err, "initialize NATS subscription manager failed")
 		os.Exit(1)
 	}
 
-	bebCommander := beb.NewCommander(restCfg, opts.MetricsAddr, opts.ReconcilePeriod, ctrLogger)
-	if err := bebCommander.Init(mgr); err != nil {
-		setupLogger.Error(err, "initialize BEB commander failed")
+	bebSubMgr := beb.NewSubscriptionManager(restCfg, opts.MetricsAddr, opts.ReconcilePeriod, ctrLogger)
+	if err := bebSubMgr.Init(mgr); err != nil {
+		setupLogger.Error(err, "initialize BEB subscription manager failed")
 		os.Exit(1)
 	}
 
@@ -91,16 +90,16 @@ func main() {
 	// Start the backend manager.
 	ctx := context.Background()
 	recorder := mgr.GetEventRecorderFor("backend-controller")
-	backendReconciler := backend.NewReconciler(ctx, natsCommander, bebCommander, mgr.GetClient(), mgr.GetCache(), ctrLogger, recorder)
+	backendReconciler := backend.NewReconciler(ctx, natsSubMgr, bebSubMgr, mgr.GetClient(), mgr.GetCache(), ctrLogger, recorder)
 	if err := backendReconciler.SetupWithManager(mgr); err != nil {
 		setupLogger.Error(err, "start backend controller failed")
 		os.Exit(1)
 	}
 
-	// Start the manager.
-	ctrLogger.WithContext().With("options", opts).Info("start manager")
+	// Start the controller manager.
+	ctrLogger.WithContext().With("options", opts).Info("start controller manager")
 	if err := mgr.Start(ctrl.SetupSignalHandler()); err != nil {
-		setupLogger.Error(err, "start manager failed")
+		setupLogger.Error(err, "start controller manager failed")
 		os.Exit(1)
 	}
 }

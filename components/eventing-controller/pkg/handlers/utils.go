@@ -261,6 +261,12 @@ func RemoveStatus(sub eventingv1alpha1.Subscription) *eventingv1alpha1.Subscript
 	return desiredSub
 }
 
+func SetStatusAsNotReady(sub eventingv1alpha1.Subscription) *eventingv1alpha1.Subscription {
+	desiredSub := sub.DeepCopy()
+	desiredSub.Status.Ready = false
+	return desiredSub
+}
+
 func UpdateSubscriptionStatus(ctx context.Context, dClient dynamic.Interface, sub *eventingv1alpha1.Subscription) error {
 	unstructuredObj, err := toUnstructuredSub(sub)
 	if err != nil {

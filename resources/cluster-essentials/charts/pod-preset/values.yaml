@@ -28,3 +28,4 @@ securityContext:
     drop:
     - ALL
   privileged: false
+

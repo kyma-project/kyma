@@ -48,4 +48,4 @@ Follow these steps to detect the source of the problem:
     </div>
 
     A successful call returns a `json` response with the service definition that contains the target URL.
-    Call the target URL directly to verify that the value of `api.targetUrl` is correct.
+    Call the target URL directly to verify that the value of **api.targetUrl** is correct.
