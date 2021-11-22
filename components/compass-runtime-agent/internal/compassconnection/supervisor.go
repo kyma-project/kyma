@@ -198,7 +198,7 @@ func (s *crSupervisor) maintainCompassConnection(compassConnection *v1alpha1.Com
 		return errors.Wrap(err, "Failed to check whether credentials exist")
 	}
 
-	s.log.Infof("Trying to maintain certificates connection... Renewal: %v", shouldRenew)
+	s.log.Infof("Trying to maintain certificates connection... Renewal: %v, CreadentialsExist: %v", shouldRenew, credentialsExist)
 	newCreds, managementInfo, err := s.compassConnector.MaintainConnection(shouldRenew, credentialsExist)
 	if err != nil {
 		return errors.Wrap(err, "Failed to connect to Compass Connector")
