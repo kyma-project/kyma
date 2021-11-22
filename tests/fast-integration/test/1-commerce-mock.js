@@ -62,7 +62,6 @@ function commerceMockTests() {
 
     it("should add, update and delete a service", async function () {
       let serviceId = await addService();
-      console.dir(serviceId)
       await updateService(serviceId)
       await deleteService(serviceId)
     });
