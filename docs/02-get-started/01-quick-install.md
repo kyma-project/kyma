@@ -38,16 +38,14 @@ export CLUSTER_DOMAIN={YOUR_CLUSTER_DOMAIN}
 
 > **NOTE:** For local installation, the cluster domain is `local.kyma.dev`.
 
-## Connect to Kyma Dashboard
+## Open Kyma Dashboard
 
-To manage Kyma via GUI, connect it to Kyma Dashboard. 
-
-   To start the Dashboard, run:
+To manage Kyma via GUI, open Kyma Dashboard:
 
 ```bash
     kyma dashboard
 ```
-   This command takes you to your Kyma Dashboard under [`http://localhost:3001/`](http://localhost:3001/).
+This command takes you to your Kyma Dashboard under [`http://localhost:3001/`](http://localhost:3001/).
 
 ## Check the list of Deployments via Dashboard
 
