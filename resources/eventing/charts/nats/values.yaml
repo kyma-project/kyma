@@ -185,7 +185,6 @@ reloader:
 # TODO disabled for now and will be solved in https://github.com/kyma-project/kyma/issues/11113
 exporter:
   enabled: false
-  image: natsio/prometheus-nats-exporter:0.8.0
   pullPolicy: IfNotPresent
   securityContext:
     allowPrivilegeEscalation: false
