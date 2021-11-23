@@ -65,8 +65,6 @@ spec:
             value: example.com
           - name: WEBHOOK_TOKEN_ENDPOINT
             value: "https://oauth2.example-domain.com/oauth2/token"
-          - name: PUBLISHER_IMAGE
-            value: "eu.gcr.io/kyma-project/event-publisher-proxy:PR-12616"
           - name: PUBLISHER_IMAGE_PULL_POLICY
             value: Always
           - name: APP_LOG_FORMAT
