@@ -16,7 +16,7 @@ cluster:
 console:
   image:
     pullPolicy: IfNotPresent
-    tag: "PR-2237"
+    tag: "2340afd"
   service:
     externalPort: 80
     internalPort: 8080
@@ -32,7 +32,7 @@ console:
 core_ui:
   image:
     pullPolicy: IfNotPresent
-    tag: "PR-2237"
+    tag: "2340afd"
   service:
     externalPort: 80
     internalPort: 80
