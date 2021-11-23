@@ -42,6 +42,7 @@ help-generic:
 ##@ Development
 # Deploy eventing-controller in the configured Kubernetes cluster in ~/.kube/config for local development
 deploy: manifests-local set-up-local-env ## build the binary locally using `ko` and deploy it to a cluster
+	$(shell cd ../event-publisher-proxy; ko publish github.com/kyma-project/kyma/components/event-publisher-proxy/cmd/event-publisher-proxy -B > /dev/null)
 	kustomize build config/default | envsubst | ko apply -f -
 
 manifests-local: controller-gen-local ## Generate WebhookConfiguration, ClusterRole and CustomResourceDefinition objects.
