@@ -287,6 +287,7 @@ func WithFilter(eventSource, eventType string) SubscriptionOpt {
 				Value:    eventType,
 			},
 		}
+
 		subscription.Spec.Filter.Filters = append(subscription.Spec.Filter.Filters, filter)
 	}
 }

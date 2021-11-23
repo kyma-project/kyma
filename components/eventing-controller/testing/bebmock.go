@@ -8,6 +8,7 @@ import (
 	"net/url"
 	"path"
 	"strings"
+	"sync"
 
 	"golang.org/x/oauth2"
 
@@ -30,23 +31,24 @@ const (
 
 // BEBMock implements a programmable mock for BEB
 type BEBMock struct {
-	Requests       map[*http.Request]interface{}
-	Subscriptions  map[string]*bebtypes.Subscription
-	TokenURL       string
-	MessagingURL   string
-	BEBConfig      *config.Config
-	log            logr.Logger
-	AuthResponse   response
-	GetResponse    responseWithName
-	ListResponse   response
-	CreateResponse response
-	DeleteResponse response
+	Requests        map[*http.Request]interface{}
+	muSubscriptions sync.Mutex
+	Subscriptions   map[string]*bebtypes.Subscription
+	TokenURL        string
+	MessagingURL    string
+	BEBConfig       *config.Config
+	log             logr.Logger
+	AuthResponse    response
+	GetResponse     responseWithName
+	ListResponse    response
+	CreateResponse  response
+	DeleteResponse  response
 }
 
 func NewBEBMock(bebConfig *config.Config) *BEBMock {
 	logger := logf.Log.WithName("beb mock")
 	return &BEBMock{
-		nil, nil, "", "", bebConfig,
+		nil, sync.Mutex{}, nil, "", "", bebConfig,
 		logger,
 		nil, nil, nil, nil, nil,
 	}
@@ -72,10 +74,8 @@ func (m *BEBMock) Start() string {
 	// implementation based on https://pages.github.tools.sap/KernelServices/APIDefinitions/?urls.primaryName=Business%20Event%20Bus%20-%20CloudEvents
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		defer GinkgoRecover()
-
 		// store request
 		m.Requests[r] = nil
-
 		description := ""
 		reqBytes, err := httputil.DumpRequest(r, true)
 		if err == nil {
@@ -103,7 +103,9 @@ func (m *BEBMock) Start() string {
 			switch r.Method {
 			case http.MethodDelete:
 				key := r.URL.Path
+				m.muSubscriptions.Lock()
 				delete(m.Subscriptions, key)
+				m.muSubscriptions.Unlock()
 				if m.DeleteResponse != nil {
 					m.DeleteResponse(w)
 				} else {
@@ -114,7 +116,9 @@ func (m *BEBMock) Start() string {
 				_ = json.NewDecoder(r.Body).Decode(&subscription)
 				m.Requests[r] = subscription
 				key := r.URL.Path + "/" + subscription.Name
+				m.muSubscriptions.Lock()
 				m.Subscriptions[key] = &subscription
+				m.muSubscriptions.Unlock()
 				if m.CreateResponse != nil {
 					m.CreateResponse(w)
 				} else {
@@ -134,7 +138,9 @@ func (m *BEBMock) Start() string {
 					if m.GetResponse != nil {
 						m.GetResponse(w, key)
 					} else {
+						m.muSubscriptions.Lock()
 						subscriptionSaved := m.Subscriptions[key]
+						m.muSubscriptions.Unlock()
 						if subscriptionSaved != nil {
 							subscriptionSaved.SubscriptionStatus = bebtypes.SubscriptionStatusActive
 							w.WriteHeader(http.StatusOK)

@@ -112,7 +112,7 @@ func (n *Nats) SyncSubscription(sub *eventingv1alpha1.Subscription, cleaner even
 			log.Errorw("create NATS subject failed", "error", err)
 			return false, err
 		}
-		cleanSubjects= append(cleanSubjects, subject)
+		cleanSubjects = append(cleanSubjects, subject)
 	}
 
 	for _, subject := range cleanSubjects {
@@ -145,7 +145,6 @@ func (n *Nats) SyncSubscription(sub *eventingv1alpha1.Subscription, cleaner even
 
 	return false, nil
 }
-
 
 // DeleteSubscription deletes all NATS subscriptions corresponding to a Kyma subscription
 func (n *Nats) DeleteSubscription(subscription *eventingv1alpha1.Subscription) error {

@@ -72,7 +72,7 @@ func testCleanEventTypes(id int, natsSubjectToPublish, eventTypeToSubscribe stri
 			subscriber, shutdown := newSubscriber(result)
 			defer shutdown()
 
-			// Create a Subscription
+			// create a Subscription
 			subscriptionName := fmt.Sprintf(subscriptionNameFormat, id)
 			optEmptyFilter := reconcilertesting.WithEmptyFilter
 			optWebhook := reconcilertesting.WithWebhookForNats
