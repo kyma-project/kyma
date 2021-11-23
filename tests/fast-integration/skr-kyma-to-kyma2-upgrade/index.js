@@ -49,7 +49,7 @@ const {
 } = require("../skr-svcat-migration-test/test-helpers");
 
 describe("SKR-Upgrade-test", function () {
-  switchDebug(on = true)
+  switchDebug(on = false)
   let keb = new KEBClient(KEBConfig.fromEnv());
   const gardener = new GardenerClient(GardenerConfig.fromEnv());
 
