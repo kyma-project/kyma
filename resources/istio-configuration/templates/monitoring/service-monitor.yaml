@@ -6,7 +6,7 @@ metadata:
     meta.helm.sh/release-name: {{ $.Release.Name | quote }}	
     meta.helm.sh/release-namespace: {{ .Release.Namespace }}
   name: istio-component-monitor
-  namespace: {{ .Release.Namespace }}
+  namespace: kyma-system
   labels:
     app: {{ $.Release.Name }}	
     app.kubernetes.io/instance: {{ $.Release.Name }}	
