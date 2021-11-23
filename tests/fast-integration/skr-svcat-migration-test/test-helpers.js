@@ -3,7 +3,7 @@ const execa = require("execa");
 const fs = require('fs');
 const os = require('os');
 const {
-    getEnvOrThrow, getConfigMap, kubectlExecInPod, listPods, deleteK8sResource, sleep, deleteAllK8sResources, listResources
+    getEnvOrThrow, getConfigMap, kubectlExecInPod, listPods, deleteK8sPod, sleep, deleteAllK8sResources, listResources
 } = require("../utils");
 
 class SMCreds {
@@ -103,7 +103,12 @@ async function restartFunctionsPods() {
     for (let f of functions) {
         let pod = await getFunctionPod(f.name);
         console.log("delete pod", pod.metadata.name);
-        await deleteK8sResource(pod);
+        try {
+          await deleteK8sPod(pod);
+        } catch(err) {
+          console.log(`failed to delete pod ${pod.metadata.name}: ${err}`);
+          throw err;
+        }
         podNames[f.name] = pod.metadata.name;
     }
 
@@ -114,7 +119,13 @@ async function restartFunctionsPods() {
         for (let f of functions) {
             let labelSelector = `serverless.kyma-project.io/function-name=${f.name},serverless.kyma-project.io/resource=deployment`;
             console.log(`polling pods with labelSelector ${labelSelector}`);
-            const res = await listPods(labelSelector);
+            let res = {};
+            try {
+                res = await listPods(labelSelector);
+            } catch(err) {
+                console.log(`failed to list pods with labelSelector ${labelSelector}: ${err}`);
+                throw err;
+            }
             if (res.body.items.length != 1) {
                 // there are either multiple or 0 pods for the function, we need to wait
                 let pn = res.body.items.map(p=> {return {"pod name": p.metadata.name, phase: p.status.phase}});
