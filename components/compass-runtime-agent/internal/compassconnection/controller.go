@@ -93,6 +93,12 @@ func (r *Reconciler) Reconcile(ctx context.Context, request reconcile.Request) (
 
 	log.Infof("Processing Compass Connection, current status: %s", instance.Status)
 
+	// If minimalConfigSyncTime did not pass, skip synchronization
+	if !shouldResyncConfig(instance, r.minimalConfigSyncTime) {
+		log.Infof("Skipping config initialization/synchronization. Minimal resync time not passed. Last attempt: %v", instance.Status.SynchronizationStatus.LastAttempt)
+		return reconcile.Result{}, nil
+	}
+
 	// If connection is not established read Config Map and try to fetch Certificate
 	if instance.ShouldAttemptReconnect() {
 		log.Infof("Attempting to initialize connection with Compass...")
@@ -103,12 +109,6 @@ func (r *Reconciler) Reconcile(ctx context.Context, request reconcile.Request) (
 		}
 
 		log.Infof("Attempt to initialize Compass Connection ended with status: %s", instance.Status)
-		return reconcile.Result{}, nil
-	}
-
-	// If minimalConfigSyncTime did not pass, skip synchronization
-	if !shouldResyncConfig(instance, r.minimalConfigSyncTime) {
-		log.Infof("Skipping config synchronization. Minimal resync time not passed. Last attempt: %v", instance.Status.SynchronizationStatus.LastAttempt)
 		return reconcile.Result{}, nil
 	}
 
@@ -126,7 +126,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, request reconcile.Request) (
 	return reconcile.Result{}, nil
 }
 
-// Configuration resync is performed not more frequent that minimalConfigSyncTime,
+// Initialization and Configuration resync is performed not more frequent that minimalConfigSyncTime,
 // unless deliberately requested by spec.ResyncNow set to true
 func shouldResyncConfig(connection *v1alpha1.CompassConnection, minimalConfigSyncTime time.Duration) bool {
 	if connection.Spec.ResyncNow {
