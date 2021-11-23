@@ -328,24 +328,6 @@ func (s *crSupervisor) setConnectionMaintenanceFailedStatus(connectionCR *v1alph
 	connectionCR.Status.ConnectionStatus.Error = errorMsg
 }
 
-
-/*
-2021-11-22 06:58:43
-{"log":"time=\"2021-11-22T05:58:43Z\" level=error msg=\"Error while trying to maintain connection: Failed to connect to Compass Connector: Management info is empty\" CompassConnection=compass-connection Supervisor=CompassConnection
-","time":"2021-11-22T05:58:43.744997887Z"}
-2021-11-22 06:58:50
-{"log":"time=\"2021-11-22T05:58:50Z\" level=error msg=\"Error while trying to maintain connection: Failed to connect to Compass Connector: Management info is empty\" CompassConnection=compass-connection Supervisor=CompassConnection
-","time":"2021-11-22T05:58:50.984370156Z"}
-2021-11-22 06:58:59
-{"log":"time=\"2021-11-22T05:58:59Z\" level=error msg=\"Error while trying to maintain connection: Failed to connect to Compass Connector: Management info is empty\" CompassConnection=compass-connection Supervisor=CompassConnection
-","time":"2021-11-22T05:58:59.159868934Z"}
-2021-11-22 06:59:07
-{"log":"time=\"2021-11-22T05:59:07Z\" level=error msg=\"Error while trying to maintain connection: Failed to connect to Compass Connector: Management info is empty\" CompassConnection=compass-connection Supervisor=CompassConnection
-","time":"2021-11-22T05:59:07.17789839Z"}
-
-
-*/
-
 func (s *crSupervisor) updateCompassConnection(connectionCR *v1alpha1.CompassConnection) (*v1alpha1.CompassConnection, error) {
 	// TODO: with retries
 
