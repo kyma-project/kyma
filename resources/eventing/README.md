@@ -42,7 +42,7 @@ $ helm install \
 kyma deploy --source=local --workspace <KYMA_DIR_PATH> --component=eventing
 ```
 
-- To install eventing with NATS JetStream enabled:
+To install Eventing with NATS JetStream enabled, run:
 ```bash
 kyma deploy --source=local --value eventing.nats.nats.jetstream.enabled=true --workspace <KYMA_DIR_PATH> --component=eventing
 ```

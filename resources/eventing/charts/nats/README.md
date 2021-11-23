@@ -1,16 +1,22 @@
 # NATS Server
 
-This Helm chart deploy NATS: https://nats.io/ using NATS [Helm chart](https://github.com/nats-io/k8s/tree/v0.9.0/helm/charts/nats).
+
+## Overview
+
+This Helm chart deploys [NATS](https://nats.io/) using NATS [Helm chart](https://github.com/nats-io/k8s/tree/v0.9.0/helm/charts/nats).
 
 
-Steps:
 
-- Install NATS into "nats" namespace using Helm 3 :
+## Installation
+
+To install this chart, follow these steps:
+
+1. Install NATS into the `nats` namespace using Helm 3 :
 ```bash
 kubectl create namespace nats
 helm template nats nats -n nats | kubectl apply -f -
 ```
-- Test the installation:
+2. Test the installation:
 ```bash
 $ kubectl -n nats port-forward nats-1 4222
 ```
@@ -46,7 +52,7 @@ nats:
 
 ### Logging
 
-*Note*: It is not recommended to enable trace or debug in production since enabling it will significantly degrade performance.
+> **NOTE**: It is not recommended to enable trace or debug in production, since enabling it will significantly degrade performance.
 
 ```yaml
 nats:
@@ -57,19 +63,18 @@ nats:
     connectErrorReports: 
     reconnectErrorReports: 
 ```
-## Clustering
+### Clustering
 
-If clustering is enabled, then a 3-node cluster will be setup. More info at:
-https://docs.nats.io/nats-server/configuration/clustering#nats-server-clustering
+If clustering is enabled, then a 3-node cluster will be set up. You can find more information in the [NATS documentation](https://docs.nats.io/running-a-nats-service/introduction/running/nats-kubernetes/helm-charts#clustering).
 
 ```yaml
 cluster:
   enabled: true
   replicas: 3
 ```
-## JetStream
+### JetStream
 
-### Setting up Memory and File Storage
+To set up memory and file storage with JetStream, use this configuration: 
 
 ```yaml
 nats:
@@ -89,11 +94,9 @@ nats:
       storageClassName: default
 ```
 
-## Misc
+### Reload sidecar
 
-### Configuration Reload sidecar
-
-The NATS config reloader image to use:
+To configure the reload sidecar, use this NATS config reloader image: 
 
 ```yaml
 reloader:
