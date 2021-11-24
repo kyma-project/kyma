@@ -218,9 +218,6 @@ components/etcd-tls-setup-job/ @PK85 @piotrmiskiewicz @ksputo @szwedm @voigt @wo
 # Eventing Controller
 /components/eventing-controller @k15r @lilitgh @marcobebway @nachtmaar @radufa @sayanh @pxsalehi @mfaizanse
 
-# NATS Operator
-/components/nats-operator @k15r @lilitgh @marcobebway @nachtmaar @radufa @sayanh @pxsalehi @mfaizanse
-
 # Busola Migrator Component
 /components/busola-migrator/ @m00g3n @pPrecel @dbadura @tgorgol @rJankowski93
 
