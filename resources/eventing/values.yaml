@@ -5,7 +5,7 @@ global:
   images:
     eventing_controller:
       name: eventing-controller
-      version: 571bf38e
+      version: PR-12599
       pullPolicy: "IfNotPresent"
     publisher_proxy:
       name: event-publisher-proxy
@@ -22,7 +22,7 @@ global:
       name: prometheus-nats-exporter
       version: 0.9.0
       directory: external/natsio
-    
+
 
   # secretName defines optionally another name than the default secret name
   secretName: ""
