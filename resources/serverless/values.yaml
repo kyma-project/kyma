@@ -69,7 +69,7 @@ global:
   ingress:
     domainName:
   containerRegistry:
-    path: eu.gcr.io/kyma-project
+    path: europe-west3-docker.pkg.dev/sap-kyma-prow-workloads/test-gcr/kyma/eu.gcr.io/kyma-project
   images:
     k8s_tools:
       name: "k8s-tools"

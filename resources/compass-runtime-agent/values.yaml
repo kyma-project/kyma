@@ -1,7 +1,7 @@
 global:
   domainName: kyma.example.com
   containerRegistry:
-    path: eu.gcr.io/kyma-project
+    path: europe-west3-docker.pkg.dev/sap-kyma-prow-workloads/test-gcr/kyma/eu.gcr.io/kyma-project
   images:
     compass_runtime_agent:
       name: "compass-runtime-agent"
