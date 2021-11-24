@@ -106,8 +106,7 @@ async function restartFunctionsPods() {
         try {
           await deleteK8sPod(pod);
         } catch(err) {
-          console.log(`failed to delete pod ${pod.metadata.name}: ${err}`);
-          throw err;
+          throw new Error(`failed to delete pod ${pod.metadata.name}: ${err}`);
         }
         podNames[f.name] = pod.metadata.name;
     }
@@ -123,8 +122,7 @@ async function restartFunctionsPods() {
             try {
                 res = await listPods(labelSelector);
             } catch(err) {
-                console.log(`failed to list pods with labelSelector ${labelSelector}: ${err}`);
-                throw err;
+                throw new Error(`failed to list pods with labelSelector ${labelSelector}: ${err}`);
             }
             if (res.body.items.length != 1) {
                 // there are either multiple or 0 pods for the function, we need to wait
@@ -157,6 +155,7 @@ async function restartFunctionsPods() {
         let originalNames = JSON.stringify(podNames, null, 2);
         throw new Error(`Failed to restart function pods in 100 seconds. Expecting exactly one pod for each function with new unique names and in ready status but found:\n${info}\n\nPod names before restart:\n${originalNames}`);
     }
+    console.log("functions pods successfully restarted")
 }
 
 async function provisionPlatform(creds, svcatPlatform) {

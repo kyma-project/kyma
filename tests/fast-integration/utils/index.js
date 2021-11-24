@@ -941,19 +941,7 @@ async function deleteAllK8sResources(
 }
 
 async function deleteK8sPod(o) {
-  path = `${k8sDynamicApi.basePath}/apis/v1/namespaces/${o.metadata.namespace}/pods/${o.metadata.name}`
-  await k8sDynamicApi
-    .requestPromise({
-      url: path,
-      method: "DELETE",
-    })
-    .catch(ignore404);
-  debug(
-    "Deleted pod:",
-    o.metadata.name,
-    "namespace:",
-    o.metadata.namespace
-  );
+  return await k8sCoreV1Api.deleteNamespacedPod(o.metadata.name, o.metadata.namespace);
 }
 
 // NOTE: this no longer works, it relies on kube-api sending `selfLink` but the field has been deprecated
