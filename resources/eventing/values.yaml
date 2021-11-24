@@ -3,9 +3,6 @@ global:
   containerRegistry:
     path: eu.gcr.io/kyma-project
   images:
-    nats_operator_doctor:
-      name: nats-operator-doctor
-      version: 94ae4939
     eventing_controller:
       name: eventing-controller
       version: 571bf38e
@@ -13,13 +10,14 @@ global:
     publisher_proxy:
       name: event-publisher-proxy
       version: PR-12677
-    nats_operator:
-      name: nats-operator
-      version: e2309602
     nats:
       name: nats
-      version: 2.2.4
+      version: 2.6.1-alpine
       directory: external
+    nats_config_reloader:
+      name: nats-server-config-reloader
+      version: 0.6.2
+      directory: external/natsio
     prometheus_nats_exporter:
       name: prometheus-nats-exporter
       version: 0.9.0

@@ -1,33 +1,105 @@
-# NATS Chart
+# NATS Server
 
-This Helm chart deploy NATS: https://nats.io/  using NATS-Operator.
 
-Steps:
+## Overview
 
-- Install NATS into "nats" namespace using Helm 3 :
+This Helm chart deploys [NATS](https://nats.io/) using NATS [Helm chart](https://github.com/nats-io/k8s/tree/v0.9.0/helm/charts/nats).
+
+
+
+## Installation
+
+To install this chart, follow these steps:
+
+1. Install NATS into the `nats` namespace using Helm 3 :
 ```bash
-$ helm install nats nats -n nats --set install.enabled=true --create-namespace --debug --wait
+kubectl create namespace nats
+helm template nats nats -n nats | kubectl apply -f -
 ```
-- Test the installation:
+2. Test the installation:
 ```bash
 $ kubectl -n nats port-forward nats-1 4222
 ```
-Open two terminals.
-In the first one, create "foo" subject and subscribe to it using client ID 1:
-```bash
-$ telnet localhost 4222
-SUB foo 1
-```
-In the second terminal, publish a message to the "foo" subject. The lenght of the message must be snet before the content
-```bash
-$ telnet localhost 4222
-PUB foo 10
-Hello Kyma
-PUB foo 3
-Bye
-```
-- Uninstall NATS:
-```bash
-helm uninstall nats -n nats
+
+## Configuration
+
+### Limits
+
+```yaml
+nats:
+  # The number of connect attempts against discovered routes.
+  connectRetries: 30
+
+  # How many seconds should pass before sending a PING
+  # to a client that has no activity.
+  pingInterval: 
+
+  # Server settings.
+  limits:
+    maxConnections: 
+    maxSubscriptions: 
+    maxControlLine: 
+    maxPayload: 
+
+    writeDeadline: 
+    maxPending: 
+    maxPings: 
+    lameDuckDuration: 
+
+  # Number of seconds to wait for client connections to end after the pod termination is requested
+  terminationGracePeriodSeconds: 60
 ```
 
+### Logging
+
+> **NOTE**: It is not recommended to enable trace or debug in production, since enabling it will significantly degrade performance.
+
+```yaml
+nats:
+  logging:
+    debug: 
+    trace: 
+    logtime: 
+    connectErrorReports: 
+    reconnectErrorReports: 
+```
+### Clustering
+
+If clustering is enabled, then a 3-node cluster will be set up. You can find more information in the [NATS documentation](https://docs.nats.io/running-a-nats-service/introduction/running/nats-kubernetes/helm-charts#clustering).
+
+```yaml
+cluster:
+  enabled: true
+  replicas: 3
+```
+### JetStream
+
+To set up memory and file storage with JetStream, use this configuration: 
+
+```yaml
+nats:
+  image: nats:alpine
+
+  jetstream:
+    enabled: true
+
+    memStorage:
+      enabled: true
+      size: 2Gi
+
+    fileStorage:
+      enabled: true
+      size: 1Gi
+      storageDirectory: /data/
+      storageClassName: default
+```
+
+### Reload sidecar
+
+To configure the reload sidecar, use this NATS config reloader image: 
+
+```yaml
+reloader:
+  enabled: true
+  pullPolicy: IfNotPresent
+```

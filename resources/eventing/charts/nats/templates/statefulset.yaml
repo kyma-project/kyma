@@ -1,0 +1,270 @@
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "nats.fullname" . }}
+  namespace: {{ .Release.Namespace | quote }}
+  labels:
+    {{- include "nats.labels" . | nindent 4 }}
+    {{- if .Values.statefulSetAnnotations}}
+  annotations:
+  {{- range $key, $value := .Values.statefulSetAnnotations }}
+    {{ $key }}: {{ $value | quote }}
+  {{- end }}
+  {{- end }}
+spec:
+  selector:
+    matchLabels:
+      {{- include "nats.selectorLabels" . | nindent 6 }}
+  {{- if .Values.cluster.enabled }}
+  replicas: {{ .Values.cluster.replicas }}
+  {{- else }}
+  replicas: 1
+  {{- end }}
+  serviceName: {{ include "nats.fullname" . }}
+  template:
+    metadata:
+      {{- if or .Values.podAnnotations .Values.exporter.enabled }}
+      annotations:
+      {{- if .Values.exporter.enabled }}
+        prometheus.io/path: /metrics
+        prometheus.io/port: "7777"
+        prometheus.io/scrape: "true"
+      {{- end }}
+      {{- range $key, $value := .Values.podAnnotations }}
+        {{ $key }}: {{ $value | quote }}
+      {{- end }}
+      {{- end }}
+      labels:
+        {{- include "nats.selectorLabels" . | nindent 8 }}
+        {{- if .Values.statefulSetPodLabels }}
+        {{ toYaml .Values.statefulSetPodLabels | indent 8 }}
+        {{- end }}
+    spec:
+{{- with .Values.securityContext }}
+      securityContext:
+{{ toYaml . | indent 8 }}
+{{- end }}
+{{- with .Values.affinity }}
+      affinity:
+{{- tpl (toYaml .) $ | nindent 8 }}
+{{- end }}
+      # Common volumes for the containers.
+      volumes:
+      - name: config-volume
+        {{ if .Values.nats.customConfigSecret }}
+        secret:
+          secretName: {{ .Values.nats.customConfigSecret.name }}
+        {{ else }}
+        configMap:
+          name: {{ include "nats.fullname" . }}-config
+        {{ end }}
+
+      # Local volume shared with the reloader.
+      - name: pid
+        emptyDir: {}
+
+      {{- if and .Values.nats.jetstream.fileStorage.enabled .Values.nats.jetstream.fileStorage.existingClaim }}
+      # Persistent volume for jetstream running with file storage option
+      - name: {{ include "nats.fullname" . }}-js-pvc
+        persistentVolumeClaim:
+          claimName: {{ .Values.nats.jetstream.fileStorage.existingClaim | quote }}
+      {{- end }}
+
+      # Required to be able to HUP signal and apply config
+      # reload to the server without restarting the pod.
+      shareProcessNamespace: true
+
+      #################
+      #               #
+      #  NATS Server  #
+      #               #
+      #################
+      terminationGracePeriodSeconds: {{ .Values.nats.terminationGracePeriodSeconds }}
+      containers:
+      - name: nats
+        image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.nats) }}"
+        imagePullPolicy: {{ .Values.nats.pullPolicy }}
+        {{- if .Values.nats.securityContext }}
+        securityContext:
+        {{- .Values.nats.securityContext | toYaml | nindent 10 }}
+        {{- end }}
+        resources:
+          {{- toYaml .Values.nats.resources | nindent 10 }}
+        ports:
+        - containerPort: 4222
+          name: client
+        - containerPort: 7422
+          name: leafnodes
+        - containerPort: 7522
+          name: gateways
+        - containerPort: 6222
+          name: cluster
+        - containerPort: 8222
+          name: monitor
+        - containerPort: 7777
+          name: metrics
+        {{- if .Values.nats.profiling.enabled }}
+        - containerPort: {{ .Values.nats.profiling.port }}
+          name: profiling
+        {{- end }}
+
+        command:
+         - "nats-server"
+         - "--config"
+         - "/etc/nats-config/nats.conf"
+        {{- if .Values.nats.profiling.enabled }}
+         - "--profile={{ .Values.nats.profiling.port }}"
+        {{- end }}
+
+        # Required to be able to define an environment variable
+        # that refers to other environment variables.  This env var
+        # is later used as part of the configuration file.
+        env:
+        - name: POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        - name: POD_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        - name: CLUSTER_ADVERTISE
+          value: {{ include "nats.clusterAdvertise" . }}
+
+        {{- if .Values.nats.jetstream.enabled }}
+        {{- with .Values.nats.jetstream.encryption }}
+        {{- with .secret }}
+        - name: JS_KEY
+          valueFrom:
+            secretKeyRef:
+              name: {{ .name }}
+              key: {{ .key }}
+        {{- end }}
+        {{- end }}
+        {{- end }}
+        volumeMounts:
+          - name: config-volume
+            mountPath: /etc/nats-config
+          - name: pid
+            mountPath: /var/run/nats
+          {{- if .Values.nats.jetstream.fileStorage.enabled }}
+          - name: {{ include "nats.fullname" . }}-js-pvc
+            mountPath: {{ .Values.nats.jetstream.fileStorage.storageDirectory }}
+          {{- end }}
+
+        # Liveness/Readiness probes against the monitoring.
+        #
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 8222
+          initialDelaySeconds: 10
+          timeoutSeconds: 5
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 8222
+          initialDelaySeconds: 10
+          timeoutSeconds: 5
+
+        # Gracefully stop NATS Server on pod deletion or image upgrade.
+        #
+        lifecycle:
+          preStop:
+            exec:
+              # Using the alpine based NATS image, we add an extra sleep that is
+              # the same amount as the terminationGracePeriodSeconds to allow
+              # the NATS Server to gracefully terminate the client connections.
+              #
+              command:
+              - "/bin/sh"
+              - "-c"
+              - "nats-server -sl=ldm=/var/run/nats/nats.pid && /bin/sleep {{ .Values.nats.terminationGracePeriodSeconds }}"
+
+      #################################
+      #                               #
+      #  NATS Configuration Reloader  #
+      #                               #
+      #################################
+      {{ if .Values.reloader.enabled }}
+      - name: reloader
+        image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.nats_config_reloader) }}"
+        imagePullPolicy: {{ .Values.reloader.pullPolicy }}
+        {{- if .Values.reloader.securityContext }}
+        securityContext:
+        {{- .Values.reloader.securityContext | toYaml | nindent 10 }}
+        {{- end }}
+        resources:
+          {{- toYaml .Values.reloader.resources | nindent 10 }}
+        command:
+         - "nats-server-config-reloader"
+         - "-pid"
+         - "/var/run/nats/nats.pid"
+         - "-config"
+         - "/etc/nats-config/nats.conf"
+        volumeMounts:
+          - name: config-volume
+            mountPath: /etc/nats-config
+          - name: pid
+            mountPath: /var/run/nats
+      {{ end }}
+
+      ##############################
+      #                            #
+      #  NATS Prometheus Exporter  #
+      #                            #
+      ##############################
+      {{ if .Values.exporter.enabled }}
+      - name: metrics
+        image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.prometheus_nats_exporter) }}"
+        imagePullPolicy: {{ .Values.exporter.pullPolicy }}
+        {{- if .Values.exporter.securityContext }}
+        securityContext:
+        {{- .Values.exporter.securityContext | toYaml | nindent 10 }}
+        {{- end }}
+        resources:
+          {{- toYaml .Values.exporter.resources | nindent 10 }}
+        args:
+        - -connz
+        - -routez
+        - -subz
+        - -varz
+        - -prefix=nats
+        - -use_internal_server_id
+        {{- if .Values.nats.jetstream.enabled }}
+        - -jsz=all
+        {{- end }}
+        - http://localhost:8222/
+        ports:
+        - containerPort: 7777
+          name: metrics
+      {{ end }}
+
+  volumeClaimTemplates:
+  {{- if and .Values.nats.jetstream.fileStorage.enabled (not .Values.nats.jetstream.fileStorage.existingClaim) }}
+  #####################################
+  #                                   #
+  #  Jetstream New Persistent Volume  #
+  #                                   #
+  #####################################
+    - metadata:
+        name: {{ include "nats.fullname" . }}-js-pvc
+        {{- if .Values.nats.jetstream.fileStorage.annotations }}
+        annotations:
+        {{- range $key, $value := .Values.nats.jetstream.fileStorage.annotations }}
+          {{ $key }}: {{ $value | quote }}
+        {{- end }}
+        {{- end }}
+      spec:
+        accessModes:
+        {{- range .Values.nats.jetstream.fileStorage.accessModes }}
+          - {{ . | quote }}
+        {{- end }}
+        resources:
+          requests:
+            storage: {{ .Values.nats.jetstream.fileStorage.size }}
+        {{- if .Values.nats.jetstream.fileStorage.storageClassName }}
+        storageClassName: {{ .Values.nats.jetstream.fileStorage.storageClassName | quote }}
+        {{- end }}
+  {{- end }}
