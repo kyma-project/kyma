@@ -79,11 +79,11 @@ func testCleanEventTypes(id int, natsSubjectToPublish, eventTypeToSubscribe stri
 			subscription := reconcilertesting.NewSubscription(subscriptionName, namespaceName, optEmptyFilter, optWebhook)
 			subscription.Spec.Sink = subscriber
 			ctx := context.Background()
-			ensureSubscriptionCreated(subscription, ctx)
+			ensureSubscriptionCreated(ctx, subscription)
 
 			Context("Subscription without filters", func() {
 				By("checking if Subscription status has 'cleanEventTypes' without filters", func() {
-					getSubscription(subscription, ctx).Should(And(
+					getSubscription(ctx, subscription).Should(And(
 						reconcilertesting.HaveSubscriptionName(subscriptionName),
 						reconcilertesting.HaveCondition(eventingv1alpha1.MakeCondition(
 							eventingv1alpha1.ConditionSubscriptionActive,
@@ -114,11 +114,11 @@ func testCleanEventTypes(id int, natsSubjectToPublish, eventTypeToSubscribe stri
 						addFilter(subscription)
 					}
 
-					ensureSubscriptionUpdated(subscription, ctx)
+					ensureSubscriptionUpdated(ctx, subscription)
 				})
 
 				By("checking if Subscription status has 'cleanEventTypes' with the correct cleaned filter values", func() {
-					getSubscription(subscription, ctx).Should(And(
+					getSubscription(ctx, subscription).Should(And(
 						reconcilertesting.HaveSubscriptionName(subscriptionName),
 						reconcilertesting.HaveCondition(eventingv1alpha1.MakeCondition(
 							eventingv1alpha1.ConditionSubscriptionActive,
@@ -143,11 +143,11 @@ func testCleanEventTypes(id int, natsSubjectToPublish, eventTypeToSubscribe stri
 						f.EventType.Value = fmt.Sprintf("%salpha", f.EventType.Value)
 					}
 
-					ensureSubscriptionUpdated(subscription, ctx)
+					ensureSubscriptionUpdated(ctx, subscription)
 				})
 
 				By("checking if Subscription status has 'cleanEventTypes' with the correct cleaned and updated filter values", func() {
-					getSubscription(subscription, ctx).Should(And(
+					getSubscription(ctx, subscription).Should(And(
 						reconcilertesting.HaveSubscriptionName(subscriptionName),
 						reconcilertesting.HaveCondition(eventingv1alpha1.MakeCondition(
 							eventingv1alpha1.ConditionSubscriptionActive,
@@ -168,11 +168,11 @@ func testCleanEventTypes(id int, natsSubjectToPublish, eventTypeToSubscribe stri
 
 				By("deleting Subscription filters", func() {
 					subscription.Spec.Filter.Filters = subscription.Spec.Filter.Filters[:1]
-					ensureSubscriptionUpdated(subscription, ctx)
+					ensureSubscriptionUpdated(ctx, subscription)
 				})
 
 				By("checking if Subscription status has 'cleanEventTypes' with the correct cleaned filter values", func() {
-					getSubscription(subscription, ctx).Should(And(
+					getSubscription(ctx, subscription).Should(And(
 						reconcilertesting.HaveSubscriptionName(subscriptionName),
 						reconcilertesting.HaveCondition(eventingv1alpha1.MakeCondition(
 							eventingv1alpha1.ConditionSubscriptionActive,
@@ -203,9 +203,9 @@ func testCreateDeleteSubscription(id int, natsSubjectToPublish, eventTypeToSubsc
 			// create subscription
 			subscription := reconcilertesting.NewSubscription(subscriptionName, namespaceName, reconcilertesting.WithFilter(reconcilertesting.EventSource, eventTypeToSubscribe), reconcilertesting.WithWebhookForNats)
 			subscription.Spec.Sink = url
-			ensureSubscriptionCreated(ctx, subscription) //todo
+			ensureSubscriptionCreated(ctx, subscription)
 
-			getSubscription(subscription, ctx).Should(And(
+			getSubscription(ctx, subscription).Should(And(
 				reconcilertesting.HaveSubscriptionName(subscriptionName),
 				reconcilertesting.HaveCondition(eventingv1alpha1.MakeCondition(
 					eventingv1alpha1.ConditionSubscriptionActive,
@@ -375,9 +375,9 @@ func testCreateSubscriptionWithEmptyEventType(id int, _, _ string) bool {
 			// Create subscription
 			givenSubscription := reconcilertesting.NewSubscription(subscriptionName, namespaceName, reconcilertesting.WithFilter(reconcilertesting.EventSource, ""), reconcilertesting.WithWebhookForNats)
 			reconcilertesting.WithValidSink("foo", "bar", givenSubscription)
-			ensureSubscriptionCreated(givenSubscription, ctx)
+			ensureSubscriptionCreated(ctx, givenSubscription)
 
-			getSubscription(givenSubscription, ctx).Should(And(
+			getSubscription(ctx, givenSubscription).Should(And(
 				reconcilertesting.HaveSubscriptionName(subscriptionName),
 				reconcilertesting.HaveCondition(eventingv1alpha1.MakeCondition(
 					eventingv1alpha1.ConditionSubscriptionActive,
@@ -432,7 +432,7 @@ func ensureSubscriptionCreated(ctx context.Context, subscription *eventingv1alph
 	Expect(err).Should(BeNil())
 }
 
-func ensureSubscriptionUpdated(subscription *eventingv1alpha1.Subscription, ctx context.Context) {
+func ensureSubscriptionUpdated(ctx context.Context, subscription *eventingv1alpha1.Subscription) {
 	By(fmt.Sprintf("Ensuring the subscription %q is updated", subscription.Name))
 	// create subscription
 	err := k8sClient.Update(ctx, subscription)
@@ -507,7 +507,6 @@ const (
 	attachControlPlaneOutput = false
 )
 
-//todo
 var testID int
 var natsURL string
 var cfg *rest.Config
