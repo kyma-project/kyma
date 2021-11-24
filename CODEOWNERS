@@ -24,29 +24,17 @@
 # The `pod-preset` subchart
 /resources/cluster-essentials/charts/pod-preset/ @PK85 @piotrmiskiewicz @ksputo @szwedm @voigt @wozniakjan @adamwalach
 
-# The `values.yaml` file for `core` chart
-/resources/core/values.yaml @kyma-project/developers
-
-# The `apiserver-proxy` chart
-/resources/apiserver-proxy/ @strekm @werdes72 @Tomasz-Smelcerz-SAP @mjakobczyk @dariusztutaj
-
 # The `cluster-users` subchart
 /resources/cluster-users/ @strekm @werdes72 @Tomasz-Smelcerz-SAP @mjakobczyk @dariusztutaj @cnvergence @veichtj @piotrkpc
 
 # The `certificates` chart
 /resources/certificates/ @strekm @werdes72 @Tomasz-Smelcerz-SAP @mjakobczyk @dariusztutaj @cnvergence @veichtj @piotrkpc
 
-# The `iam-kubeconfig-service` chart
-/resources/iam-kubeconfig-service/ @strekm @werdes72 @Tomasz-Smelcerz-SAP @mjakobczyk @dariusztutaj
-
 # The `rafter` chart
 /resources/rafter/ @m00g3n @pPrecel @dbadura @rJankowski93 @kwiatekus
 
 # The `application-connector` chart
 /resources/application-connector/ @akgalwas @janmedrek @franpog859 @Maladie @rafalpotempa @koala7659 @ralikio @everesio
-
-# The `values.yaml` file for `application-connector` chart
-/resources/application-connector/values.yaml @kyma-project/developers
 
 # The `connector-service` subchart
 /resources/application-connector/charts/connector-service/ @akgalwas @janmedrek @franpog859 @Maladie @rafalpotempa @koala7659 @ralikio @everesio
@@ -65,15 +53,6 @@
 
 # The `central-application-connectivity-validator` subchart
 /resources/application-connector/charts/central-application-connectivity-validator/ @akgalwas @janmedrek @franpog859 @Maladie @rafalpotempa @koala7659 @ralikio @everesio
-
-# The `application-connector-helper` chart
-/resources/application-connector-helper/ @strekm @Tomasz-Smelcerz-SAP @akgalwas @janmedrek @franpog859 @Maladie @rafalpotempa @koala7659 @ralikio @everesio
-
-# The `application-connector-ingress` chart
-/resources/application-connector-ingress/ @akgalwas @janmedrek @franpog859 @Maladie @rafalpotempa @koala7659 @ralikio @everesio
-
-# The `dex` subchart
-/resources/dex/ @strekm @werdes72 @Tomasz-Smelcerz-SAP @mjakobczyk @dariusztutaj
 
 # The `helm-broker` subchart
 /resources/helm-broker/ @PK85 @piotrmiskiewicz @ksputo @szwedm @voigt @wozniakjan @adamwalach
@@ -102,15 +81,6 @@
 # The `testing` chart with Octopus
 /resources/testing/ @PK85 @piotrmiskiewicz @ksputo @szwedm @voigt @wozniakjan @adamwalach
 
-# The `docs` subchart
-/resources/core/charts/docs/ @m00g3n @pPrecel @PK85 @piotrmiskiewicz @ksputo @szwedm @voigt @wozniakjan @adamwalach
-
-# The `templates` chart
-/resources/core/templates/ @PK85 @piotrmiskiewicz @ksputo @szwedm @voigt @wozniakjan @adamwalach
-
-# The `templates` chart
-/resources/core/templates/tests/ @PK85 @piotrmiskiewicz @ksputo @m00g3n @pPrecel @tgorgol @antiheld @szwedm @voigt @wozniakjan @adamwalach @kwiatekus @k15r
-
 # The `istio-configuration` chart
 /resources/istio-configuration/ @strekm @werdes72 @Tomasz-Smelcerz-SAP @mjakobczyk @dariusztutaj @cnvergence @veichtj @piotrkpc
 
@@ -137,9 +107,6 @@
 
 # The `serverless` chart
 /resources/serverless/ @m00g3n @pPrecel @dbadura @rJankowski93 @kwiatekus
-
-# The `uaa-activator` chart
-/resources/uaa-activator/ @ksputo @piotrmiskiewicz @PK85 @szwedm @voigt @wozniakjan
 
 # The `busola-migrator` chart
 /resources/busola-migrator/ @m00g3n @pPrecel @dbadura @tgorgol @rJankowski93
@@ -239,12 +206,6 @@ components/etcd-tls-setup-job/ @PK85 @piotrmiskiewicz @ksputo @szwedm @voigt @wo
 
 # Dex integration tests
 /tests/integration/dex/ @strekm @werdes72 @Tomasz-Smelcerz-SAP @mjakobczyk @dariusztutaj
-
-# monitoring tests
-/tests/integration/monitoring/ @a-thaler @lilitgh @suleymanakbas91 @clebs @rakesh-garimella @skhalash @jeremyharisch @shorim
-
-# logging tests
-/tests/integration/logging/ @a-thaler @lilitgh @suleymanakbas91 @clebs @rakesh-garimella @skhalash @jeremyharisch @chrkl @shorim
 
 # api-gateway integration tests
 /tests/integration/api-gateway/ @strekm @werdes72 @Tomasz-Smelcerz-SAP @mjakobczyk @dariusztutaj
