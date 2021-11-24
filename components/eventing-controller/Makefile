@@ -58,7 +58,6 @@ set-up-local-env:
     export DOMAIN ?= example-domain.com
     export WEBHOOK_TOKEN_ENDPOINT ?= "https://oauth2.${DOMAIN}/oauth2/token"
 
-
 ENVTEST_ASSETS_DIR=$(PROJECT_DIR)/testbin/$(shell uname)
 test-local: copy-external-crds test-local-nonlocal; ## Run tests.
 
@@ -67,9 +66,11 @@ setup-envtest:
 	test -f ${ENVTEST_ASSETS_DIR}/setup-envtest.sh || curl -sSLo ${ENVTEST_ASSETS_DIR}/setup-envtest.sh https://raw.githubusercontent.com/kubernetes-sigs/controller-runtime/v0.8.3/hack/setup-envtest.sh
 	source ${ENVTEST_ASSETS_DIR}/setup-envtest.sh; fetch_envtest_tools $(ENVTEST_ASSETS_DIR); setup_envtest_env $(ENVTEST_ASSETS_DIR)
 
+# ???
 test-local-nonlocal: manifests-local generate-local setup-envtest
 	go test ./... -coverprofile cover.out
 
+# ???
 test-local-local: manifests-local generate-local setup-envtest
 	go test ./... -coverprofile cover.out --tags=local
 

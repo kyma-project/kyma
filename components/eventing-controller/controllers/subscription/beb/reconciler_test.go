@@ -1004,11 +1004,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 
 			Context("Delete BEB Subscription", func() {
 				By("Deleting its entry in BEB mock internal cache", func() {
-					for k := range beb.Subscriptions {
-						if strings.Contains(k, nameMapper.MapSubscriptionName(kymaSubscription)) {
-							delete(beb.Subscriptions, k)
-						}
-					}
+					beb.Subscriptions.DeleteSubscriptionsByName(nameMapper.MapSubscriptionName(kymaSubscription))
 				})
 			})
 

@@ -8,7 +8,6 @@ import (
 	"net/url"
 	"path"
 	"strings"
-	"sync"
 
 	"golang.org/x/oauth2"
 
@@ -31,24 +30,23 @@ const (
 
 // BEBMock implements a programmable mock for BEB
 type BEBMock struct {
-	Requests        map[*http.Request]interface{}
-	muSubscriptions sync.Mutex
-	Subscriptions   map[string]*bebtypes.Subscription
-	TokenURL        string
-	MessagingURL    string
-	BEBConfig       *config.Config
-	log             logr.Logger
-	AuthResponse    response
-	GetResponse     responseWithName
-	ListResponse    response
-	CreateResponse  response
-	DeleteResponse  response
+	Requests       map[*http.Request]interface{}
+	Subscriptions  *SafeSubscription
+	TokenURL       string
+	MessagingURL   string
+	BEBConfig      *config.Config
+	log            logr.Logger
+	AuthResponse   response
+	GetResponse    responseWithName
+	ListResponse   response
+	CreateResponse response
+	DeleteResponse response
 }
 
 func NewBEBMock(bebConfig *config.Config) *BEBMock {
-	logger := logf.Log.WithName("beb mock")
+	logger := logf.Log.WithName("BEB mock")
 	return &BEBMock{
-		nil, sync.Mutex{}, nil, "", "", bebConfig,
+		nil, NewSafeSubscription(), "", "", bebConfig,
 		logger,
 		nil, nil, nil, nil, nil,
 	}
@@ -60,7 +58,7 @@ type response func(w http.ResponseWriter)
 func (m *BEBMock) Reset() {
 	m.log.Info("Initializing requests")
 	m.Requests = make(map[*http.Request]interface{})
-	m.Subscriptions = make(map[string]*bebtypes.Subscription)
+	m.Subscriptions = NewSafeSubscription()
 	m.AuthResponse = nil
 	m.GetResponse = nil
 	m.ListResponse = nil
@@ -98,14 +96,14 @@ func (m *BEBMock) Start() string {
 			}
 			return
 		}
+
 		// messaging API request
 		if strings.HasPrefix(r.RequestURI, MessagingURLPath) {
 			switch r.Method {
 			case http.MethodDelete:
 				key := r.URL.Path
-				m.muSubscriptions.Lock()
-				delete(m.Subscriptions, key)
-				m.muSubscriptions.Unlock()
+				//delete(m.Subscriptions, key) //todo
+				m.Subscriptions.DeleteSubscription(key)
 				if m.DeleteResponse != nil {
 					m.DeleteResponse(w)
 				} else {
@@ -116,9 +114,7 @@ func (m *BEBMock) Start() string {
 				_ = json.NewDecoder(r.Body).Decode(&subscription)
 				m.Requests[r] = subscription
 				key := r.URL.Path + "/" + subscription.Name
-				m.muSubscriptions.Lock()
-				m.Subscriptions[key] = &subscription
-				m.muSubscriptions.Unlock()
+				m.Subscriptions.PutSubscription(key, &subscription)
 				if m.CreateResponse != nil {
 					m.CreateResponse(w)
 				} else {
@@ -138,9 +134,7 @@ func (m *BEBMock) Start() string {
 					if m.GetResponse != nil {
 						m.GetResponse(w, key)
 					} else {
-						m.muSubscriptions.Lock()
-						subscriptionSaved := m.Subscriptions[key]
-						m.muSubscriptions.Unlock()
+						subscriptionSaved := m.Subscriptions.GetSubscription(key)
 						if subscriptionSaved != nil {
 							subscriptionSaved.SubscriptionStatus = bebtypes.SubscriptionStatusActive
 							w.WriteHeader(http.StatusOK)
@@ -159,7 +153,6 @@ func (m *BEBMock) Start() string {
 		}
 	}))
 	uri := ts.URL
-
 	return uri
 }
 
