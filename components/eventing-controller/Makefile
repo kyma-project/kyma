@@ -4,6 +4,7 @@ BUILDPACK = eu.gcr.io/kyma-project/test-infra/buildpack-golang-kubebuilder2:v202
 SCRIPTS_DIR = $(realpath $(shell pwd)/../..)/common/makefiles
 
 override ENTRYPOINT = cmd/eventing-controller/main.go
+override IGNORE_LINTING_ISSUES =
 
 include $(SCRIPTS_DIR)/generic-make-go.mk
 
