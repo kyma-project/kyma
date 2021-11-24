@@ -359,8 +359,11 @@ async function connectMockCompass(client, appName, scenarioName, mockHost, targe
 }
 
 async function connectCommerceMock(mockHost, tokenData) {
+  debug("connectCommerceMock():")
   const url = `https://${mockHost}/connection`;
+  debug(`Url: ${url}`)
   const body = tokenData;
+  debug(`Body/Tokendata: ${body}`)
   const params = {
     headers: {
       "Content-Type": "application/json"
