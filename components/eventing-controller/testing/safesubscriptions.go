@@ -29,15 +29,15 @@ func (s *SafeSubscription) GetSubscription(key string) *bebtypes.Subscription {
 
 // DeleteSubscription deletes a Subscription via the corresponding key.
 func (s *SafeSubscription) DeleteSubscription(key string) {
-	s.mutex.RLock()
-	defer s.mutex.RUnlock()
+	s.mutex.Lock()
+	defer s.mutex.Unlock()
 	delete(s.subscriptions, key)
 }
 
 // DeleteSubscriptionsByName deletes all Subscriptions that contain the substring 'name' in their own name.
 func (s *SafeSubscription) DeleteSubscriptionsByName(name string) {
-	s.mutex.RLock()
-	defer s.mutex.RUnlock()
+	s.mutex.Lock()
+	defer s.mutex.Unlock()
 	for k := range s.subscriptions {
 		if strings.Contains(k, name) {
 			delete(s.subscriptions, k)
@@ -47,7 +47,7 @@ func (s *SafeSubscription) DeleteSubscriptionsByName(name string) {
 
 // PutSubscription sets a Subscription of SafeSubscription via the corresponding key.
 func (s *SafeSubscription) PutSubscription(key string, subscription *bebtypes.Subscription) {
-	s.mutex.RLock()
-	defer s.mutex.RUnlock()
+	s.mutex.Lock()
+	defer s.mutex.Unlock()
 	s.subscriptions[key] = subscription
 }
