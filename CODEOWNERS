@@ -180,9 +180,6 @@ components/etcd-tls-setup-job/ @PK85 @piotrmiskiewicz @ksputo @szwedm @voigt @wo
 # Binding usage controller Component
 /components/service-binding-usage-controller/ @PK85 @piotrmiskiewicz @ksputo @szwedm @voigt @wozniakjan @adamwalach
 
-# Kyma Operator Component
-/components/kyma-operator/ @Tomasz-Smelcerz-SAP @strekm @werdes72 @mjakobczyk @dariusztutaj
-
 # IAM Kubeconfig Service Component
 /components/iam-kubeconfig-service/ @strekm @werdes72 @Tomasz-Smelcerz-SAP @mjakobczyk @dariusztutaj
 
@@ -318,9 +315,6 @@ components/etcd-tls-setup-job/ @PK85 @piotrmiskiewicz @ksputo @szwedm @voigt @wo
 # The failery directory
 /tools/failery/ @m00g3n @pPrecel @dbadura @tgorgol @rJankowski93
 
-# The tools/kyma-installer directory
-/tools/kyma-installer/ @strekm @werdes72 @Tomasz-Smelcerz-SAP @mjakobczyk @dariusztutaj
-#
 # The tools/event-subscriber directory
 /tools/event-subscriber/ @lilitgh @k15r @nachtmaar @marcobebway @radufa @sayanh @pxsalehi @mfaizanse
 
