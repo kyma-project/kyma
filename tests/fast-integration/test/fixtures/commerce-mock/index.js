@@ -363,7 +363,7 @@ async function connectCommerceMock(mockHost, tokenData) {
   const url = `https://${mockHost}/connection`;
   debug(`Url: ${url}`)
   const body = tokenData;
-  debug(`Body/Tokendata: ${body}`)
+  debug(`HERE! - Body/Tokendata: ${body}`)
   const params = {
     headers: {
       "Content-Type": "application/json"
