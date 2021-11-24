@@ -6,8 +6,8 @@ title: What is Observability in Kyma?
 
 Kyma comes with tools that give you the most accurate and up-to-date monitoring, logging and tracing data.
 
-- [Prometheus](https://prometheus.io/) is the open source monitoring and alerting toolkit that provides the telemetry data. This data is consumed by different addons, including [Grafana](https://grafana.com/) for analytics and monitoring, and [Alertmanager](https://prometheus.io/docs/alerting/alertmanager/) for handling alerts.
-- For logging, Kyma uses [Loki](https://github.com/grafana/loki), a Prometheus-like log management system.
+- [Prometheus](https://prometheus.io/) is the open source monitoring and alerting toolkit that provides the telemetry data. This data is consumed by different addons, including [Grafana](https://grafana.com/) for analytics and monitoring, and [Alertmanager](https://prometheus.io/docs/alerting/alertmanager/) for handling alerts. By default, Prometheus stores up to 15 GB of data for a maximum period of 30 days. If the default size or time is exceeded, the oldest metrics are removed first.
+- For logging, Kyma uses [Loki](https://github.com/grafana/loki), a Prometheus-like log management system. By default, Loki stores up to 30 GB of data for a maximum of 5 days, with maximum ingestion rate of 3 MB/s. If the default size or time is exceeded, the oldest logs are removed first.
 - With the [Jaeger](https://github.com/jaegertracing) distributed tracing system, you can analyze the path of a request chain going through your distributed applications. This information helps you to, for example, troubleshoot your applications, or optimize the latency and performance of your solution.
 
 ## Benefits of distributed tracing
