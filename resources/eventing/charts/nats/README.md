@@ -93,13 +93,3 @@ nats:
       storageDirectory: /data/
       storageClassName: default
 ```
-
-### Reload sidecar
-
-To configure the reload sidecar, use this NATS config reloader image: 
-
-```yaml
-reloader:
-  enabled: true
-  pullPolicy: IfNotPresent
-```
