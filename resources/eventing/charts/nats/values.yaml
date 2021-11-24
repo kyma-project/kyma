@@ -1,28 +1,213 @@
-# Default values for nats.
-# This is a YAML-formatted file.
-# Declare variables to be passed into your templates.
+###############################
+#                             #
+#  NATS Server Configuration  #
+#                             #
+###############################
 nats:
+  pullPolicy: IfNotPresent
   ports:
     client: 4222
     monitoring: 8222
 
-clusterSize: 1
-enableMetrics: false
-# TODO disabled for now and will be solved in https://github.com/kyma-project/kyma/issues/11113
-enableServiceMonitor: false
+  # Toggle profiling.
+  # This enables nats-server pprof (profiling) port, so you can see goroutines
+  # stacks, memory heap sizes, etc.
+  profiling:
+    enabled: false
+    port: 6000
 
-resources:
+  # securityContext for the nats container
+  securityContext:
+    allowPrivilegeEscalation: false
+    privileged: false
+
+  # Toggle to disable client advertisements (connect_urls),
+  # in case of running behind a load balancer (which is not recommended)
+  # it might be required to disable advertisements.
+  advertise: true
+
+  # The number of connect attempts against discovered routes.
+  connectRetries: 120
+
+  # How many seconds should pass before sending a PING
+  # to a client that has no activity.
+  pingInterval:
+
+  # selector matchLabels for the server and service.
+  # If left empty defaults are used.
+  # This is helpful if you are updating from Chart version <=7.4
+  selectorLabels: {}
+
+  resources:
+    limits:
+      cpu: 20m
+      memory: 64Mi
+    requests:
+      cpu: 5m
+      memory: 16Mi
+
+  # Server settings.
   limits:
-    cpu: 20m
-    memory: 64Mi
-  requests:
-    cpu: 5m
-    memory: 16Mi
+    maxConnections:
+    maxSubscriptions:
+    maxControlLine:
+    maxPayload:
 
-image:
-  pullPolicy: "IfNotPresent"
+    writeDeadline:
+    maxPending:
+    maxPings:
 
-metrics:
-  config:
-    portName: http-metrics
-    interval: 30s
+    # NOTE: this should be at least the same as 'terminationGracePeriodSeconds'
+    lameDuckDuration: "120s"
+
+  # Default lame duck duration in the server is 2 minutes.
+  terminationGracePeriodSeconds: 120
+
+  logging:
+    debug: true
+    trace: true
+    logtime:
+    connectErrorReports:
+    reconnectErrorReports:
+
+  # customConfigSecret can be used to use an custom secret for the config
+  # of the NATS Server.
+  # NOTE: For this to work the name of the configuration has to be
+  # called `nats.conf`.
+  # 
+  # e.g. kubectl create secret generic custom-nats-conf --from-file nats.conf
+  # 
+  # customConfigSecret:
+  #  name:
+
+  jetstream:
+    enabled: false
+
+    # Jetstream Domain
+    domain:
+
+    ##########################
+    #                        #
+    #  Jetstream Encryption  #
+    #                        #
+    ##########################
+    encryption:
+      # Use key if you want to provide the key via Helm Values
+      # key: random_key
+
+      # Use a secret reference if you want to get a key from a secret
+      # secret:
+      #   name: "nats-jetstream-encryption"
+      #   key: "key"
+
+    #############################
+    #                           #
+    #  Jetstream Memory Storage #
+    #                           #
+    #############################
+    memStorage:
+      enabled: true
+      size: 1Gi
+
+    ############################
+    #                          #
+    #  Jetstream File Storage  #
+    #                          #
+    ############################
+    fileStorage:
+      enabled: false
+      storageDirectory: /data
+
+      # Set for use with existing PVC
+      # existingClaim: jetstream-pvc
+      # claimStorageSize: 1Gi
+
+      # Use below block to create new persistent volume
+      # only used if existingClaim is not specified
+      size: 1Gi
+      # storageClassName: ""
+      accessModes:
+        - ReadWriteOnce
+      annotations:
+      # key: "value"
+
+nameOverride: ""
+
+# Toggle whether to use setup a Pod Security Context
+# ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/
+securityContext: {}
+# securityContext:
+#   fsGroup: 1000
+#   runAsUser: 1000
+#   runAsNonRoot: true
+
+# Affinity for pod assignment
+# ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
+affinity:
+  podAntiAffinity:
+    preferredDuringSchedulingIgnoredDuringExecution:
+      - podAffinityTerm:
+          labelSelector:
+            matchLabels:
+              nats_cluster: eventing-nats
+          topologyKey: kubernetes.io/hostname
+        weight: 100
+
+# Annotations to add to the NATS pods
+# ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
+podAnnotations: {
+  sidecar.istio.io/inject: "false"
+}
+
+# Annotations to add to the NATS StatefulSet
+statefulSetAnnotations: {}
+
+# Labels to add to the pods of the NATS StatefulSet
+statefulSetPodLabels: {}
+
+# Annotations to add to the NATS Service
+serviceAnnotations: {}
+
+cluster:
+  enabled: false
+  replicas: 3
+  noAdvertise: false
+
+# The NATS config reloader image to use.
+reloader:
+  enabled: false
+  pullPolicy: IfNotPresent
+  securityContext:
+    allowPrivilegeEscalation: false
+    privileged: false
+
+# Prometheus NATS Exporter configuration.
+# TODO disabled for now and will be solved in https://github.com/kyma-project/kyma/issues/11113
+exporter:
+  enabled: false
+  pullPolicy: IfNotPresent
+  securityContext:
+    allowPrivilegeEscalation: false
+    privileged: false
+  resources: {}
+  # Prometheus operator ServiceMonitor support. Exporter has to be enabled
+  serviceMonitor:
+    enabled: false
+    ## Specify the namespace where Prometheus Operator is running
+    ##
+    # namespace: monitoring
+    labels: {}
+    annotations: {}
+    path: /metrics
+    # interval:
+    # scrapeTimeout:
+
+appProtocol:
+  enabled: true
+
+# Cluster Domain configured on the kubelets
+# https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/
+k8sClusterDomain: cluster.local
+
+# Add labels to all the deployed resources
+commonLabels: {}
