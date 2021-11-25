@@ -2,6 +2,8 @@ package conditionmanager
 
 import (
 	"context"
+	"k8s.io/apimachinery/pkg/util/wait"
+	"time"
 
 	installationv1alpha1 "github.com/kyma-project/kyma/components/kyma-operator/pkg/apis/installer/v1alpha1"
 	installationClientset "github.com/kyma-project/kyma/components/kyma-operator/pkg/client/clientset/versioned"
@@ -26,6 +28,13 @@ type Interface interface {
 type impl struct {
 	lister listers.InstallationLister
 	client installationClientset.Interface
+}
+
+var updateBackoff = wait.Backoff{
+	Steps:    10,
+	Duration: 10 * time.Millisecond,
+	Factor:   5.0,
+	Jitter:   0.1,
 }
 
 func (cm *impl) InstallStart() error {
@@ -193,7 +202,7 @@ func (cm *impl) setCondition(installation *installationv1alpha1.Installation, co
 }
 
 func (cm *impl) update(installation *installationv1alpha1.Installation) error {
-	retryErr := retry.RetryOnConflict(retry.DefaultRetry, func() error {
+	retryErr := retry.RetryOnConflict(updateBackoff, func() error {
 		instObj, getErr := cm.lister.Installations(env.Config.InstNamespace).Get(env.Config.InstResource)
 		if getErr != nil {
 			return getErr
