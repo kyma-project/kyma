@@ -14,6 +14,7 @@ npm install
 2. Prepare the `.env` file based on the `.env.template`. 
 ```
 KYMA_TYPE=OSS                # OSS or SKR
+KUBECONFIG=                  # Kyma cluster kubeconfig file path
 EVENTMESH_SECRET_FILE=       # Event Mesh Credentials JSON file path
 COMPASS_HOST=                # Only required if KYMA_TYPE=SKR
 COMPASS_CLIENT_ID=           # Only required if KYMA_TYPE=SKR
