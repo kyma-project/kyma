@@ -8,6 +8,8 @@ import (
 	"reflect"
 	"strings"
 
+	"github.com/kyma-project/kyma/components/eventing-controller/controllers/events"
+
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 
 	k8stypes "k8s.io/apimachinery/pkg/types"
@@ -27,7 +29,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/source"
 
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
-	events "github.com/kyma-project/kyma/components/eventing-controller/controllers/subscription"
 	"github.com/kyma-project/kyma/components/eventing-controller/logger"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/application"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
@@ -77,7 +78,7 @@ func NewReconciler(ctx context.Context, client client.Client, applicationLister 
 		logger:           logger,
 		recorder:         recorder,
 		eventTypeCleaner: eventtype.NewCleaner(cfg.EventTypePrefix, applicationLister, logger),
-		sinkValidator:    DefaultSinkValidator,
+		sinkValidator:    defaultSinkValidator,
 	}
 }
 
@@ -277,7 +278,7 @@ func (r *Reconciler) syncSubscriptionStatus(ctx context.Context, sub *eventingv1
 	return nil
 }
 
-func DefaultSinkValidator(ctx context.Context, r *Reconciler, subscription *eventingv1alpha1.Subscription) error {
+func defaultSinkValidator(ctx context.Context, r *Reconciler, subscription *eventingv1alpha1.Subscription) error {
 	if !isValidScheme(subscription.Spec.Sink) {
 		events.EventWarn(r.recorder, subscription, events.ReasonValidationFailed, "Sink URL scheme should be HTTP or HTTPS: %s", subscription.Spec.Sink)
 		return fmt.Errorf("sink URL scheme should be 'http' or 'https'")

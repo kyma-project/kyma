@@ -9,6 +9,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/kyma-project/kyma/components/eventing-controller/controllers/events"
+
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
 
@@ -29,7 +31,6 @@ import (
 
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 	recerrors "github.com/kyma-project/kyma/components/eventing-controller/controllers/errors"
-	events "github.com/kyma-project/kyma/components/eventing-controller/controllers/subscription"
 	"github.com/kyma-project/kyma/components/eventing-controller/logger"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/application"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/constants"

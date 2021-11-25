@@ -183,9 +183,9 @@ func (n *Nats) GetInvalidSubscriptions() *[]types.NamespacedName {
 	return &nsn
 }
 
-// GetAllSubscription returns the map which contains all details of subscription
+// GetAllSubscriptions returns the map which contains all details of subscription
 // Use this only for testing purposes
-func (n *Nats) GetAllSubscription() map[string]*nats.Subscription {
+func (n *Nats) GetAllSubscriptions() map[string]*nats.Subscription {
 	return n.subscriptions
 }
 

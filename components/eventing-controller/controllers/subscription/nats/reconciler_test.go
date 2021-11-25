@@ -12,7 +12,7 @@ import (
 	"testing"
 	"time"
 
-	events "github.com/kyma-project/kyma/components/eventing-controller/controllers/subscription"
+	"github.com/kyma-project/kyma/components/eventing-controller/controllers/events"
 
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers"
 
@@ -78,7 +78,7 @@ func testCreateDeleteSubscription(id int, eventTypePrefix, natsSubjectToPublish,
 	return When("Create/Delete Subscription", func() {
 		It("Should create/delete NATS Subscription", func() {
 			ctx := context.Background()
-			cancel = startReconciler(eventTypePrefix, DefaultSinkValidator)
+			cancel = startReconciler(eventTypePrefix, defaultSinkValidator)
 			defer cancel()
 			subscriptionName := fmt.Sprintf(subscriptionNameFormat, id)
 			subscriberName := fmt.Sprintf(subscriberNameFormat, id)
@@ -104,7 +104,7 @@ func testCreateDeleteSubscription(id int, eventTypePrefix, natsSubjectToPublish,
 			))
 
 			// check for subscription at nats
-			backendSubscription := getSubscriptionFromNats(natsBackend.GetAllSubscription(), subscriptionName)
+			backendSubscription := getSubscriptionFromNats(natsBackend.GetAllSubscriptions(), subscriptionName)
 			Expect(backendSubscription).NotTo(BeNil())
 			Expect(backendSubscription.IsValid()).To(BeTrue())
 			Expect(backendSubscription.Subject).Should(Equal(natsSubjectToPublish))
@@ -119,7 +119,7 @@ func testCreateSubscriptionWithInvalidSink(id int, eventTypePrefix, natsSubjectT
 	return When("Create Subscription with invalid sink", func() {
 		It("Should mark the Subscription as not ready", func() {
 			ctx := context.Background()
-			cancel = startReconciler(eventTypePrefix, DefaultSinkValidator)
+			cancel = startReconciler(eventTypePrefix, defaultSinkValidator)
 			defer cancel()
 			subscriptionName := fmt.Sprintf(subscriptionNameFormat, id)
 
@@ -263,7 +263,7 @@ func testCreateSubscriptionWithInvalidSink(id int, eventTypePrefix, natsSubjectT
 			))
 
 			// check for subscription at nats
-			backendSubscription := getSubscriptionFromNats(natsBackend.GetAllSubscription(), subscriptionName)
+			backendSubscription := getSubscriptionFromNats(natsBackend.GetAllSubscriptions(), subscriptionName)
 			Expect(backendSubscription).NotTo(BeNil())
 			Expect(backendSubscription.IsValid()).To(BeTrue())
 			Expect(backendSubscription.Subject).Should(Equal(natsSubjectToPublish))
@@ -278,7 +278,7 @@ func testCreateSubscriptionWithEmptyProtocolProtocolSettingsDialect(id int, even
 	return When("Create Subscription with empty protocol, protocolsettings and dialect", func() {
 		It("Should mark the Subscription as ready", func() {
 			ctx := context.Background()
-			cancel = startReconciler(eventTypePrefix, DefaultSinkValidator)
+			cancel = startReconciler(eventTypePrefix, defaultSinkValidator)
 			defer cancel()
 			subscriptionName := fmt.Sprintf(subscriptionNameFormat, id)
 			subscriberName := fmt.Sprintf(subscriberNameFormat, id)
@@ -301,7 +301,7 @@ func testCreateSubscriptionWithEmptyProtocolProtocolSettingsDialect(id int, even
 			))
 
 			// check for subscription at nats
-			backendSubscription := getSubscriptionFromNats(natsBackend.GetAllSubscription(), subscriptionName)
+			backendSubscription := getSubscriptionFromNats(natsBackend.GetAllSubscriptions(), subscriptionName)
 			Expect(backendSubscription).NotTo(BeNil())
 			Expect(backendSubscription.IsValid()).To(BeTrue())
 			Expect(backendSubscription.Subject).Should(Equal(natsSubjectToPublish))
@@ -314,7 +314,7 @@ func testChangeSubscriptionConfiguration(id int, eventTypePrefix, natsSubjectToP
 		It("Should reflect the new config in the subscription status", func() {
 			By("Creating the subscription using the default config")
 			ctx := context.Background()
-			cancel = startReconciler(eventTypePrefix, DefaultSinkValidator)
+			cancel = startReconciler(eventTypePrefix, defaultSinkValidator)
 			defer cancel()
 			subscriptionName := fmt.Sprintf(subscriptionNameFormat, id)
 			subscriberName := fmt.Sprintf(subscriberNameFormat, id)
@@ -362,7 +362,7 @@ func testChangeSubscriptionConfiguration(id int, eventTypePrefix, natsSubjectToP
 				))
 
 			// check for subscription at nats
-			backendSubscription := getSubscriptionFromNats(natsBackend.GetAllSubscription(), subscriptionName)
+			backendSubscription := getSubscriptionFromNats(natsBackend.GetAllSubscriptions(), subscriptionName)
 			Expect(backendSubscription).NotTo(BeNil())
 			Expect(backendSubscription.IsValid()).To(BeTrue())
 			Expect(backendSubscription.Subject).Should(Equal(natsSubjectToPublish))
@@ -377,7 +377,7 @@ func testCreateSubscriptionWithEmptyEventType(id int, eventTypePrefix, _, _ stri
 	return When("Create Subscription with empty event type", func() {
 		It("Should mark the subscription as not ready", func() {
 			ctx := context.Background()
-			cancel = startReconciler(eventTypePrefix, DefaultSinkValidator)
+			cancel = startReconciler(eventTypePrefix, defaultSinkValidator)
 			defer cancel()
 			subscriptionName := fmt.Sprintf(subscriptionNameFormat, id)
 			subscriberName := fmt.Sprintf(subscriberNameFormat, id)
