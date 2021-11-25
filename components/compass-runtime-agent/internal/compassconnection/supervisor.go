@@ -126,7 +126,7 @@ func (s *crSupervisor) SynchronizeWithCompass(connection *v1alpha1.CompassConnec
 	err := s.maintainCompassConnection(connection)
 	if err != nil {
 		errorMsg := fmt.Sprintf("Error while trying to maintain connection: %s", err.Error())
-		s.setConnectionMaintenanceFailedStatus(connection, metav1.Now(), errorMsg)
+		s.setConnectionMaintenanceFailedStatus(connection, metav1.Now(), errorMsg) // save in ConnectionStatus.LastSync
 		return s.updateCompassConnection(connection)
 	}
 
@@ -134,7 +134,7 @@ func (s *crSupervisor) SynchronizeWithCompass(connection *v1alpha1.CompassConnec
 	runtimeConfig, err := s.configProvider.GetRuntimeConfig()
 	if err != nil {
 		errorMsg := fmt.Sprintf("Failed to read Runtime config: %s", err.Error())
-		s.setSyncFailedStatus(connection, metav1.Now(), errorMsg)
+		s.setSyncFailedStatus(connection, metav1.Now(), errorMsg)   // save in SynchronizationStatus.LastAttempt
 		return s.updateCompassConnection(connection)
 	}
 
@@ -142,14 +142,14 @@ func (s *crSupervisor) SynchronizeWithCompass(connection *v1alpha1.CompassConnec
 	directorClient, err := s.clientsProvider.GetDirectorClient(runtimeConfig)
 	if err != nil {
 		errorMsg := fmt.Sprintf("Failed to prepare configuration client: %s", err.Error())
-		s.setSyncFailedStatus(connection, metav1.Now(), errorMsg)
+		s.setSyncFailedStatus(connection, metav1.Now(), errorMsg)  // save in SynchronizationStatus.LastAttempt
 		return s.updateCompassConnection(connection)
 	}
 
 	applicationsConfig, err := directorClient.FetchConfiguration()
 	if err != nil {
 		errorMsg := fmt.Sprintf("Failed to fetch configuration: %s", err.Error())
-		s.setSyncFailedStatus(connection, metav1.Now(), errorMsg)
+		s.setSyncFailedStatus(connection, metav1.Now(), errorMsg)  // save in SynchronizationStatus.LastAttempt
 		return s.updateCompassConnection(connection)
 	}
 
