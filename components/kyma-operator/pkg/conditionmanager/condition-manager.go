@@ -2,8 +2,9 @@ package conditionmanager
 
 import (
 	"context"
-	"k8s.io/apimachinery/pkg/util/wait"
 	"time"
+
+	"k8s.io/apimachinery/pkg/util/wait"
 
 	installationv1alpha1 "github.com/kyma-project/kyma/components/kyma-operator/pkg/apis/installer/v1alpha1"
 	installationClientset "github.com/kyma-project/kyma/components/kyma-operator/pkg/client/clientset/versioned"
