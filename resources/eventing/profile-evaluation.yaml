@@ -16,10 +16,27 @@ controller:
         memory: 16Mi
 
 nats:
-  resources:
-    limits:
-      cpu: 20m
-      memory: 64Mi
-    requests:
-      cpu: 10m
-      memory: 16Mi
+  cluster:
+    enabled: false
+    replicas: 1
+  reloader:
+    enabled: false
+  nats:
+    jetstream:
+      enabled: false
+      memStorage:
+        enabled: true
+        size: 1Gi
+      fileStorage:
+        enabled: false
+        size: 1Gi
+    resources:
+      limits:
+        cpu: 20m
+        memory: 64Mi
+      requests:
+        cpu: 10m
+        memory: 16Mi
+    logging:
+      debug: true
+      trace: true

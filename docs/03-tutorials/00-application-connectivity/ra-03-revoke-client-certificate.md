@@ -8,7 +8,7 @@ After you have established a secure connection with Compass and generated a clie
 
 ## Prerequisites
 
-- [OpenSSL toolkit](https://www.openssl.org/docs/man1.0.2/apps/openssl.html) to create a Certificate Signing Request (CSR), keys, and certificates which meet high security standards
+- [OpenSSL toolkit](https://www.openssl.org/source/) to create a Certificate Signing Request (CSR), keys, and certificates which meet high security standards
 - [Compass](https://github.com/kyma-incubator/compass)
 - Registered Application
 - Runtime connected to Compass

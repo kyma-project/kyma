@@ -26,6 +26,7 @@ spec:
         - name: templates-cm
           configMap:
             name: {{ template "kiali-server.fullname" . }}-auth-proxy
+      serviceAccountName: {{ template "kiali-server.fullname" . }}-auth-proxy
       containers:
       - image: {{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.oauth2_proxy) }}
         imagePullPolicy: {{ .Values.authProxy.image.pullPolicy }}

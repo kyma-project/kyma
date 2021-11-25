@@ -3,28 +3,17 @@ global:
   containerRegistry:
     path: eu.gcr.io/kyma-project
   images:
-    nats_operator_doctor:
-      name: nats-operator-doctor
-      version: 94ae4939
     eventing_controller:
       name: eventing-controller
-      version: 571bf38e
+      version: PR-12599
       pullPolicy: "IfNotPresent"
     publisher_proxy:
       name: event-publisher-proxy
       version: 96f9210e
-    nats_operator:
-      name: nats-operator
-      version: e2309602
     nats:
       name: nats
-      version: 2.2.4
+      version: 2.6.1-alpine
       directory: external
-    prometheus_nats_exporter:
-      name: prometheus-nats-exporter
-      version: 0.9.0
-      directory: external/natsio
-    
 
   # secretName defines optionally another name than the default secret name
   secretName: ""

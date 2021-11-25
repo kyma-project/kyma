@@ -9,7 +9,7 @@ Two different components use the Root CA certificate. As a result, the certifica
   - The `connector-service-app-ca` Connector Service CA Secret responsible for signing certificate requests
   - The `kyma-gateway-certs-cacert` Istio Secret responsible for security in the Connector Service API
 
-Keeping both Secrets up-to-date is vital for the security of your implementation as it guarantees that the Connector Service issues proper certificates and no unregistered Applications can access its API. 
+Keeping both Secrets up-to-date is vital for the security of your implementation as it guarantees that Connector Service issues proper certificates and no unregistered Applications can access its API. 
 
 The Root CA certificate has a set expiration date and must be renewed periodically to prevent its expiration. You must also renew the Root CA certificate and key every time they are compromised.
 
@@ -134,7 +134,7 @@ To successfully rotate a soon-to-expire CA certificate, replace it with a new ce
 2. Generate a new certificate using the key you generated and save it to the `new-ca.crt` file.
 
    ```bash
-   openssl req -new -key new-ca.key -x509 -sha256 -days {EXPIRATION_DAYS} -nodes -out new-ca.crt
+   openssl req -new -key new-ca.key -x509 -sha256 -days {TTL_DAYS} -nodes -out new-ca.crt
    ```
 
    >**NOTE:** Use the `-days` flag to set the TTL (Time to Live) of the newly generated certificate.

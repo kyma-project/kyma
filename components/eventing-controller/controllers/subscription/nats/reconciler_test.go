@@ -77,9 +77,9 @@ func testCreateDeleteSubscription(id int, natsSubjectToPublish, eventTypeToSubsc
 			// create subscription
 			subscription := reconcilertesting.NewSubscription(subscriptionName, namespaceName, reconcilertesting.WithFilter(reconcilertesting.EventSource, eventTypeToSubscribe), reconcilertesting.WithWebhookForNats)
 			subscription.Spec.Sink = url
-			ensureSubscriptionCreated(subscription, ctx)
+			ensureSubscriptionCreated(ctx, subscription)
 
-			getSubscription(subscription, ctx).Should(And(
+			getSubscription(ctx, subscription).Should(And(
 				reconcilertesting.HaveSubscriptionName(subscriptionName),
 				reconcilertesting.HaveCondition(eventingv1alpha1.MakeCondition(
 					eventingv1alpha1.ConditionSubscriptionActive,
@@ -91,7 +91,7 @@ func testCreateDeleteSubscription(id int, natsSubjectToPublish, eventTypeToSubsc
 			))
 
 			// publish a message
-			connection, err := connectToNats(natsUrl)
+			connection, err := connectToNats(natsURL)
 			Expect(err).ShouldNot(HaveOccurred())
 			err = connection.Publish(natsSubjectToPublish, []byte(reconcilertesting.StructuredCloudEvent))
 			Expect(err).ShouldNot(HaveOccurred())
@@ -103,7 +103,7 @@ func testCreateDeleteSubscription(id int, natsSubjectToPublish, eventTypeToSubsc
 			}, timeout, pollingInterval).Should(WithTransform(bytesStringer, Equal(sent)))
 
 			Expect(k8sClient.Delete(ctx, subscription)).Should(BeNil())
-			isSubscriptionDeleted(subscription, ctx).Should(reconcilertesting.HaveNotFoundSubscription(true))
+			isSubscriptionDeleted(ctx, subscription).Should(reconcilertesting.HaveNotFoundSubscription(true))
 		})
 	})
 }
@@ -117,9 +117,9 @@ func testCreateSubscriptionWithInvalidSink(id int, _, eventTypeToSubscribe strin
 			// Create subscription
 			givenSubscription := reconcilertesting.NewSubscription(subscriptionName, namespaceName, reconcilertesting.WithFilter(reconcilertesting.EventSource, eventTypeToSubscribe), reconcilertesting.WithWebhookForNats)
 			givenSubscription.Spec.Sink = "invalid"
-			ensureSubscriptionCreated(givenSubscription, ctx)
+			ensureSubscriptionCreated(ctx, givenSubscription)
 
-			getSubscription(givenSubscription, ctx).Should(And(
+			getSubscription(ctx, givenSubscription).Should(And(
 				reconcilertesting.HaveSubscriptionName(subscriptionName),
 				reconcilertesting.HaveCondition(eventingv1alpha1.MakeCondition(
 					eventingv1alpha1.ConditionSubscriptionActive,
@@ -144,9 +144,9 @@ func testCreateSubscriptionWithEmptyProtocolProtocolSettingsDialect(id int, nats
 			// create subscription
 			subscription := reconcilertesting.NewSubscription(subscriptionName, namespaceName, reconcilertesting.WithFilter("", eventTypeToSubscribe))
 			subscription.Spec.Sink = url
-			ensureSubscriptionCreated(subscription, ctx)
+			ensureSubscriptionCreated(ctx, subscription)
 
-			getSubscription(subscription, ctx).Should(And(
+			getSubscription(ctx, subscription).Should(And(
 				reconcilertesting.HaveSubscriptionName(subscriptionName),
 				reconcilertesting.HaveCondition(eventingv1alpha1.MakeCondition(
 					eventingv1alpha1.ConditionSubscriptionActive,
@@ -155,7 +155,7 @@ func testCreateSubscriptionWithEmptyProtocolProtocolSettingsDialect(id int, nats
 			))
 
 			// publish a message
-			connection, err := connectToNats(natsUrl)
+			connection, err := connectToNats(natsURL)
 			Expect(err).ShouldNot(HaveOccurred())
 			err = connection.Publish(natsSubjectToPublish, []byte(reconcilertesting.StructuredCloudEvent))
 			Expect(err).ShouldNot(HaveOccurred())
@@ -184,9 +184,9 @@ func testChangeSubscriptionConfiguration(id int, natsSubjectToPublish, eventType
 			// create subscription
 			sub := reconcilertesting.NewSubscription(subscriptionName, namespaceName, reconcilertesting.WithFilter(reconcilertesting.EventSource, eventTypeToSubscribe), reconcilertesting.WithWebhookForNats)
 			sub.Spec.Sink = url
-			ensureSubscriptionCreated(sub, ctx)
+			ensureSubscriptionCreated(ctx, sub)
 
-			getSubscription(sub, ctx).Should(And(
+			getSubscription(ctx, sub).Should(And(
 				reconcilertesting.HaveSubscriptionName(subscriptionName),
 				reconcilertesting.HaveCondition(eventingv1alpha1.MakeCondition(
 					eventingv1alpha1.ConditionSubscriptionActive,
@@ -219,7 +219,7 @@ func testChangeSubscriptionConfiguration(id int, natsSubjectToPublish, eventType
 					}),
 				))
 
-			connection, err := connectToNats(natsUrl)
+			connection, err := connectToNats(natsURL)
 			Expect(err).ShouldNot(HaveOccurred())
 			toSend := fmt.Sprintf(`"%s"`, reconcilertesting.EventData)
 			msgData := []byte(reconcilertesting.StructuredCloudEvent)
@@ -235,7 +235,7 @@ func testChangeSubscriptionConfiguration(id int, natsSubjectToPublish, eventType
 			}, timeout, pollingInterval).Should(WithTransform(bytesStringer, Equal(toSend)))
 
 			Expect(k8sClient.Delete(ctx, sub)).Should(BeNil())
-			isSubscriptionDeleted(sub, ctx).Should(reconcilertesting.HaveNotFoundSubscription(true))
+			isSubscriptionDeleted(ctx, sub).Should(reconcilertesting.HaveNotFoundSubscription(true))
 		})
 	})
 }
@@ -249,9 +249,9 @@ func testCreateSubscriptionWithEmptyEventType(id int, _, _ string) bool {
 			// Create subscription
 			givenSubscription := reconcilertesting.NewSubscription(subscriptionName, namespaceName, reconcilertesting.WithFilter(reconcilertesting.EventSource, ""), reconcilertesting.WithWebhookForNats)
 			reconcilertesting.WithValidSink("foo", "bar", givenSubscription)
-			ensureSubscriptionCreated(givenSubscription, ctx)
+			ensureSubscriptionCreated(ctx, givenSubscription)
 
-			getSubscription(givenSubscription, ctx).Should(And(
+			getSubscription(ctx, givenSubscription).Should(And(
 				reconcilertesting.HaveSubscriptionName(subscriptionName),
 				reconcilertesting.HaveCondition(eventingv1alpha1.MakeCondition(
 					eventingv1alpha1.ConditionSubscriptionActive,
@@ -280,13 +280,13 @@ func reconcilerTestsExecutor(eventTypePrefix, natsSubjectToPublish, eventTypeToS
 		})
 
 		for _, tc := range testCases {
-			tc(testId, natsSubjectToPublish, eventTypeToSubscribe)
-			testId++
+			tc(testID, natsSubjectToPublish, eventTypeToSubscribe)
+			testID++
 		}
 	}
 }
 
-func ensureSubscriptionCreated(subscription *eventingv1alpha1.Subscription, ctx context.Context) {
+func ensureSubscriptionCreated(ctx context.Context, subscription *eventingv1alpha1.Subscription) {
 	By(fmt.Sprintf("Ensuring the test namespace %q is created", subscription.Namespace))
 	if subscription.Namespace != "default " {
 		// create testing namespace
@@ -334,7 +334,7 @@ func subscriptionGetter(ctx context.Context, name, namespace string) func() (*ev
 }
 
 // getSubscription fetches a subscription using the lookupKey and allows making assertions on it
-func getSubscription(subscription *eventingv1alpha1.Subscription, ctx context.Context) AsyncAssertion {
+func getSubscription(ctx context.Context, subscription *eventingv1alpha1.Subscription) AsyncAssertion {
 	return Eventually(func() *eventingv1alpha1.Subscription {
 		lookupKey := types.NamespacedName{
 			Namespace: subscription.Namespace,
@@ -348,7 +348,7 @@ func getSubscription(subscription *eventingv1alpha1.Subscription, ctx context.Co
 }
 
 // isSubscriptionDeleted checks a subscription is deleted and allows making assertions on it
-func isSubscriptionDeleted(subscription *eventingv1alpha1.Subscription, ctx context.Context) AsyncAssertion {
+func isSubscriptionDeleted(ctx context.Context, subscription *eventingv1alpha1.Subscription) AsyncAssertion {
 	return Eventually(func() bool {
 		lookupKey := types.NamespacedName{
 			Namespace: subscription.Namespace,
@@ -374,8 +374,8 @@ const (
 	attachControlPlaneOutput = false
 )
 
-var testId int
-var natsUrl string
+var testID int
+var natsURL string
 var cfg *rest.Config
 var k8sClient client.Client
 var testEnv *envtest.Environment
@@ -390,7 +390,7 @@ func TestAPIs(t *testing.T) {
 
 var _ = BeforeSuite(func(done Done) {
 	By("bootstrapping test environment")
-	natsServer, natsUrl = startNATS(natsPort)
+	natsServer, natsURL = startNATS(natsPort)
 	useExistingCluster := useExistingCluster
 	testEnv = &envtest.Environment{
 		CRDDirectoryPaths: []string{
@@ -418,9 +418,9 @@ var _ = AfterSuite(func() {
 
 func startNATS(port int) (*natsserver.Server, string) {
 	natsServer := reconcilertesting.RunNatsServerOnPort(port)
-	natsUrl := natsServer.ClientURL()
-	log.Printf("NATS server started %v", natsUrl)
-	return natsServer, natsUrl
+	clientURL := natsServer.ClientURL()
+	log.Printf("NATS server started %v", clientURL)
+	return natsServer, clientURL
 }
 
 func startReconciler(eventTypePrefix string) context.CancelFunc {
@@ -439,7 +439,7 @@ func startReconciler(eventTypePrefix string) context.CancelFunc {
 	Expect(err).ToNot(HaveOccurred())
 
 	envConf := env.NatsConfig{
-		URL:             natsUrl,
+		URL:             natsURL,
 		MaxReconnects:   10,
 		ReconnectWait:   time.Second,
 		EventTypePrefix: eventTypePrefix,
@@ -476,8 +476,8 @@ func startReconciler(eventTypePrefix string) context.CancelFunc {
 	return cancel
 }
 
-func connectToNats(natsUrl string) (*nats.Conn, error) {
-	connection, err := nats.Connect(natsUrl, nats.RetryOnFailedConnect(true), nats.MaxReconnects(3), nats.ReconnectWait(time.Second))
+func connectToNats(natsURL string) (*nats.Conn, error) {
+	connection, err := nats.Connect(natsURL, nats.RetryOnFailedConnect(true), nats.MaxReconnects(3), nats.ReconnectWait(time.Second))
 	if err != nil {
 		return nil, err
 	}
