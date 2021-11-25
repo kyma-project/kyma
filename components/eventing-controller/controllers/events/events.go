@@ -22,12 +22,12 @@ const (
 	ReasonValidationFailed reason = "ValidationFailed"
 )
 
-// eventNormal records a normal event for an API object.
-func EventNormal(recorder record.EventRecorder, obj runtime.Object, rn reason, msgFmt string, args ...interface{}) {
+// Normal records a normal event for an API object.
+func Normal(recorder record.EventRecorder, obj runtime.Object, rn reason, msgFmt string, args ...interface{}) {
 	recorder.Eventf(obj, corev1.EventTypeNormal, string(rn), msgFmt, args...)
 }
 
-// eventWarn records a warning event for an API object.
-func EventWarn(recorder record.EventRecorder, obj runtime.Object, rn reason, msgFmt string, args ...interface{}) {
+// Warn records a warning event for an API object.
+func Warn(recorder record.EventRecorder, obj runtime.Object, rn reason, msgFmt string, args ...interface{}) {
 	recorder.Eventf(obj, corev1.EventTypeWarning, string(rn), msgFmt, args...)
 }

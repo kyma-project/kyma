@@ -324,7 +324,7 @@ func (r *Reconciler) syncAPIRule(ctx context.Context, subscription *eventingv1al
 
 	sURL, err := url.ParseRequestURI(subscription.Spec.Sink)
 	if err != nil {
-		events.EventWarn(r.recorder, subscription, events.ReasonValidationFailed, "Parse sink URI failed %s", subscription.Spec.Sink)
+		events.Warn(r.recorder, subscription, events.ReasonValidationFailed, "Parse sink URI failed %s", subscription.Spec.Sink)
 		return nil, recerrors.NewSkippable(errors.Wrapf(err, "parse sink URI failed"))
 	}
 
@@ -338,34 +338,34 @@ func (r *Reconciler) syncAPIRule(ctx context.Context, subscription *eventingv1al
 
 func (r *Reconciler) isSinkURLValid(ctx context.Context, subscription *eventingv1alpha1.Subscription) error {
 	if !isValidScheme(subscription.Spec.Sink) {
-		events.EventWarn(r.recorder, subscription, events.ReasonValidationFailed, "Sink URL scheme should be HTTP or HTTPS %s", subscription.Spec.Sink)
+		events.Warn(r.recorder, subscription, events.ReasonValidationFailed, "Sink URL scheme should be HTTP or HTTPS %s", subscription.Spec.Sink)
 		return recerrors.NewSkippable(fmt.Errorf("sink URL scheme should be 'http' or 'https'"))
 	}
 
 	sURL, err := url.ParseRequestURI(subscription.Spec.Sink)
 	if err != nil {
-		events.EventWarn(r.recorder, subscription, events.ReasonValidationFailed, "Sink URL is not valid %s", err.Error())
+		events.Warn(r.recorder, subscription, events.ReasonValidationFailed, "Sink URL is not valid %s", err.Error())
 		return recerrors.NewSkippable(err)
 	}
 
 	// Validate sink URL is a cluster local URL
 	trimmedHost := strings.Split(sURL.Host, ":")[0]
 	if !strings.HasSuffix(trimmedHost, clusterLocalURLSuffix) {
-		events.EventWarn(r.recorder, subscription, events.ReasonValidationFailed, "Sink does not contain suffix %s", clusterLocalURLSuffix)
+		events.Warn(r.recorder, subscription, events.ReasonValidationFailed, "Sink does not contain suffix %s", clusterLocalURLSuffix)
 		return recerrors.NewSkippable(fmt.Errorf("sink does not contain suffix: %s in the URL", clusterLocalURLSuffix))
 	}
 
 	// we expected a sink in the format "service.namespace.svc.cluster.local"
 	subDomains := strings.Split(trimmedHost, ".")
 	if len(subDomains) != 5 {
-		events.EventWarn(r.recorder, subscription, events.ReasonValidationFailed, "Sink should contain 5 sub-domains %s", trimmedHost)
+		events.Warn(r.recorder, subscription, events.ReasonValidationFailed, "Sink should contain 5 sub-domains %s", trimmedHost)
 		return recerrors.NewSkippable(fmt.Errorf("sink should contain 5 sub-domains: %s", trimmedHost))
 	}
 
 	// Assumption: Subscription CR and Subscriber should be deployed in the same namespace
 	svcNs := subDomains[1]
 	if subscription.Namespace != svcNs {
-		events.EventWarn(r.recorder, subscription, events.ReasonValidationFailed, "Namespace of subscription %s and the subscriber %s are different", subscription.Namespace, svcNs)
+		events.Warn(r.recorder, subscription, events.ReasonValidationFailed, "Namespace of subscription %s and the subscriber %s are different", subscription.Namespace, svcNs)
 		return recerrors.NewSkippable(fmt.Errorf("namespace of subscription: %s and the namespace of subscriber: %s are different", subscription.Namespace, svcNs))
 	}
 
@@ -373,11 +373,11 @@ func (r *Reconciler) isSinkURLValid(ctx context.Context, subscription *eventingv
 	svcName := subDomains[0]
 	if _, err := r.getClusterLocalService(ctx, svcNs, svcName); err != nil {
 		if k8serrors.IsNotFound(err) {
-			events.EventWarn(r.recorder, subscription, events.ReasonValidationFailed, "Sink does not correspond to a valid cluster local svc")
+			events.Warn(r.recorder, subscription, events.ReasonValidationFailed, "Sink does not correspond to a valid cluster local svc")
 			return recerrors.NewSkippable(errors.Wrapf(err, "sink is not valid cluster local svc"))
 		}
 
-		events.EventWarn(r.recorder, subscription, events.ReasonValidationFailed, "Fetch cluster-local svc failed namespace %s name %s", svcNs, svcName)
+		events.Warn(r.recorder, subscription, events.ReasonValidationFailed, "Fetch cluster-local svc failed namespace %s name %s", svcNs, svcName)
 		return errors.Wrapf(err, "fetch cluster-local svc failed namespace:%s name:%s", svcNs, svcName)
 	}
 
@@ -437,11 +437,11 @@ func (r *Reconciler) createOrUpdateAPIRule(ctx context.Context, subscription *ev
 	// no APIRule to reuse, create a new one
 	if reusableAPIRule == nil {
 		if err := r.Client.Create(ctx, desiredAPIRule, &client.CreateOptions{}); err != nil {
-			events.EventWarn(r.recorder, subscription, events.ReasonCreateFailed, "Create APIRule failed %s", desiredAPIRule.Name)
+			events.Warn(r.recorder, subscription, events.ReasonCreateFailed, "Create APIRule failed %s", desiredAPIRule.Name)
 			return nil, errors.Wrap(err, "create APIRule failed")
 		}
 
-		events.EventNormal(r.recorder, subscription, events.ReasonCreate, "Create APIRule succeeded %s", desiredAPIRule.Name)
+		events.Normal(r.recorder, subscription, events.ReasonCreate, "Create APIRule succeeded %s", desiredAPIRule.Name)
 		return desiredAPIRule, nil
 	}
 	logger.Debugw("reuse APIRule", "namespace", svcNs, "name", reusableAPIRule.Name, "service", svcName)
@@ -452,10 +452,10 @@ func (r *Reconciler) createOrUpdateAPIRule(ctx context.Context, subscription *ev
 	}
 	err = r.Client.Update(ctx, desiredAPIRule, &client.UpdateOptions{})
 	if err != nil {
-		events.EventWarn(r.recorder, subscription, events.ReasonUpdateFailed, "Update APIRule failed %s", desiredAPIRule.Name)
+		events.Warn(r.recorder, subscription, events.ReasonUpdateFailed, "Update APIRule failed %s", desiredAPIRule.Name)
 		return nil, errors.Wrap(err, "update APIRule failed")
 	}
-	events.EventNormal(r.recorder, subscription, events.ReasonUpdate, "Update APIRule succeeded %s", desiredAPIRule.Name)
+	events.Normal(r.recorder, subscription, events.ReasonUpdate, "Update APIRule succeeded %s", desiredAPIRule.Name)
 
 	return desiredAPIRule, nil
 }

@@ -172,7 +172,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 			// remove our finalizer from the list and update it.
 			desiredSubscription.ObjectMeta.Finalizers = utils.RemoveString(desiredSubscription.ObjectMeta.Finalizers, Finalizer)
 			if err := r.Client.Update(ctx, desiredSubscription); err != nil {
-				events.EventWarn(r.recorder, desiredSubscription, events.ReasonUpdateFailed, "Update Subscription failed %s", desiredSubscription.Name)
+				events.Warn(r.recorder, desiredSubscription, events.ReasonUpdateFailed, "Update Subscription failed %s", desiredSubscription.Name)
 				log.Errorw("remove finalizer from subscription failed", "error", err)
 				return ctrl.Result{}, err
 			}
@@ -270,43 +270,43 @@ func (r *Reconciler) syncSubscriptionStatus(ctx context.Context, sub *eventingv1
 	if !reflect.DeepEqual(sub.Status, desiredSubscription.Status) {
 		err := r.Client.Status().Update(ctx, desiredSubscription, &client.UpdateOptions{})
 		if err != nil {
-			events.EventWarn(r.recorder, desiredSubscription, events.ReasonUpdateFailed, "Update Subscription status failed %s", desiredSubscription.Name)
+			events.Warn(r.recorder, desiredSubscription, events.ReasonUpdateFailed, "Update Subscription status failed %s", desiredSubscription.Name)
 			return errors.Wrapf(err, "update subscription status failed")
 		}
-		events.EventNormal(r.recorder, desiredSubscription, events.ReasonUpdate, "Update Subscription status succeeded %s", desiredSubscription.Name)
+		events.Normal(r.recorder, desiredSubscription, events.ReasonUpdate, "Update Subscription status succeeded %s", desiredSubscription.Name)
 	}
 	return nil
 }
 
 func defaultSinkValidator(ctx context.Context, r *Reconciler, subscription *eventingv1alpha1.Subscription) error {
 	if !isValidScheme(subscription.Spec.Sink) {
-		events.EventWarn(r.recorder, subscription, events.ReasonValidationFailed, "Sink URL scheme should be HTTP or HTTPS: %s", subscription.Spec.Sink)
+		events.Warn(r.recorder, subscription, events.ReasonValidationFailed, "Sink URL scheme should be HTTP or HTTPS: %s", subscription.Spec.Sink)
 		return fmt.Errorf("sink URL scheme should be 'http' or 'https'")
 	}
 
 	sURL, err := url.ParseRequestURI(subscription.Spec.Sink)
 	if err != nil {
-		events.EventWarn(r.recorder, subscription, events.ReasonValidationFailed, "Not able to parse Sink URL with error: %s", err.Error())
+		events.Warn(r.recorder, subscription, events.ReasonValidationFailed, "Not able to parse Sink URL with error: %s", err.Error())
 		return fmt.Errorf("not able to parse sink url with error: %s", err.Error())
 	}
 
 	// Validate sink URL is a cluster local URL
 	if !strings.HasSuffix(sURL.Host, clusterLocalURLSuffix) {
-		events.EventWarn(r.recorder, subscription, events.ReasonValidationFailed, "Sink does not contain suffix: %s", clusterLocalURLSuffix)
+		events.Warn(r.recorder, subscription, events.ReasonValidationFailed, "Sink does not contain suffix: %s", clusterLocalURLSuffix)
 		return fmt.Errorf("sink does not contain suffix: %s in the URL", clusterLocalURLSuffix)
 	}
 
 	// we expected a sink in the format "service.namespace.svc.cluster.local"
 	subDomains := strings.Split(sURL.Host, ".")
 	if len(subDomains) != 5 {
-		events.EventWarn(r.recorder, subscription, events.ReasonValidationFailed, "Sink should contain 5 sub-domains: %s", sURL.Host)
+		events.Warn(r.recorder, subscription, events.ReasonValidationFailed, "Sink should contain 5 sub-domains: %s", sURL.Host)
 		return fmt.Errorf("sink should contain 5 sub-domains: %s", sURL.Host)
 	}
 
 	// Assumption: Subscription CR and Subscriber should be deployed in the same namespace
 	svcNs := subDomains[1]
 	if subscription.Namespace != svcNs {
-		events.EventWarn(r.recorder, subscription, events.ReasonValidationFailed, "Namespace of subscription: %s and the subscriber: %s are different", subscription.Namespace, svcNs)
+		events.Warn(r.recorder, subscription, events.ReasonValidationFailed, "Namespace of subscription: %s and the subscriber: %s are different", subscription.Namespace, svcNs)
 		return fmt.Errorf("namespace of subscription: %s and the namespace of subscriber: %s are different", subscription.Namespace, svcNs)
 	}
 
@@ -314,11 +314,11 @@ func defaultSinkValidator(ctx context.Context, r *Reconciler, subscription *even
 	svcName := subDomains[0]
 	if _, err := r.getClusterLocalService(ctx, svcNs, svcName); err != nil {
 		if k8serrors.IsNotFound(err) {
-			events.EventWarn(r.recorder, subscription, events.ReasonValidationFailed, "Sink does not correspond to a valid cluster local svc")
+			events.Warn(r.recorder, subscription, events.ReasonValidationFailed, "Sink does not correspond to a valid cluster local svc")
 			return fmt.Errorf("sink is not valid cluster local svc, failed with error: %w", err)
 		}
 
-		events.EventWarn(r.recorder, subscription, events.ReasonValidationFailed, "Fetch cluster-local svc failed namespace %s name %s", svcNs, svcName)
+		events.Warn(r.recorder, subscription, events.ReasonValidationFailed, "Fetch cluster-local svc failed namespace %s name %s", svcNs, svcName)
 		return fmt.Errorf("fetch cluster-local svc failed namespace:%s name:%s with error: %w", svcNs, svcName, err)
 	}
 
