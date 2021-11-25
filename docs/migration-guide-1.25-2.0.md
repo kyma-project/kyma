@@ -21,8 +21,6 @@ To use the native Kubernetes authentication in Kyma, you need to remove the depr
 
 After the successful upgrade to Kyma 2.0, run the following [script](.assets/1.25-2.0-remove-deprecated-resources.sh) which uninstalls and deletes the unsupported items.
 
-For more details about the authentication changes, read the [Kyma 2.0 release notes].
-
 ### ORY Oathkeeper without Dex
 
 With Kyma 2.0 the Dex component becomes deprecated. Existing API Rules that have a JWT access strategy defined must be enriched with an individual **jwks_url** pointing to a custom OpenID Connect-compliant identity provider. Follow these steps to migrate your API Rule custom resources (CRs):
@@ -39,4 +37,6 @@ kubectl get apirules -A -o=json | jq '.items[]|select(any( .spec.rules[].accessS
 kubectl edit {RESOURCE} n-{NAMESPACE}
 ```
 
-For more details about the Dex removal, read the [Kyma 2.0 release notes].
+## Observability
+
+With the 2.0 release, Kyma does not expose Grafana, Kiali, and Jaeger UIs by default. After the upgrade, for each servic, you can set up an identity provider of your choice. Do it securely and follow the steps outlined in the [Access and Expose Kiali, Grafana, and Jaeger](https://kyma-project.io/docs/kyma/latest/04-operation-guides/security/sec-06-access-expose-kiali-grafana) document.
