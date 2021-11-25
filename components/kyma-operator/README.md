@@ -11,7 +11,7 @@ The controller extends the api-server with the following custom resources:
 
 ## Prerequisites
 
-- recent version of Go with the support for modules
+- recent version of Go with the support for modules, for example 1.12.6
 - make
 - kubectl
 - access to Kubernetes environment: Minikube or a remote Kubernetes cluster
