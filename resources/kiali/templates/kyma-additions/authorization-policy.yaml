@@ -8,14 +8,16 @@ metadata:
 spec:
   action: ALLOW
   rules:
-  - from:
-    - source:
-        principals:
-        - cluster.local/ns/{{ .Release.Namespace }}/sa/{{ template "kiali-server.fullname" . }}-auth-proxy
-    to:
+  - to:
     - operation:
         ports:
         - "20001"
+{{ if .Values.authProxy.enabled }}
+    from:
+    - source:
+        principals:
+          - cluster.local/ns/{{ .Release.Namespace }}/sa/{{ template "kiali-server.fullname" . }}-auth-proxy
+{{ end }}
   - from:
     - source:
         principals:
