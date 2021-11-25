@@ -70,6 +70,17 @@ func TestSetDefaults(t *testing.T) {
 		},
 	}
 
+	fastBuildResources := corev1.ResourceRequirements{
+		Limits: corev1.ResourceList{
+			corev1.ResourceCPU:    resource.MustParse("1800m"),
+			corev1.ResourceMemory: resource.MustParse("1800Mi"),
+		},
+		Requests: corev1.ResourceList{
+			corev1.ResourceCPU:    resource.MustParse("1100m"),
+			corev1.ResourceMemory: resource.MustParse("1100Mi"),
+		},
+	}
+
 	for testName, testData := range map[string]struct {
 		givenFunc    Function
 		expectedFunc Function
@@ -474,29 +485,11 @@ func TestSetDefaults(t *testing.T) {
 					BuildResourcesPresetLabel:    "fast",
 				},
 			}, Spec: FunctionSpec{
-				Runtime: Nodejs14,
-				Resources: corev1.ResourceRequirements{
-					Limits: corev1.ResourceList{
-						corev1.ResourceCPU:    resource.MustParse("200m"),
-						corev1.ResourceMemory: resource.MustParse("256Mi"),
-					},
-					Requests: corev1.ResourceList{
-						corev1.ResourceCPU:    resource.MustParse("50m"),
-						corev1.ResourceMemory: resource.MustParse("64Mi"),
-					},
-				},
-				BuildResources: corev1.ResourceRequirements{
-					Limits: corev1.ResourceList{
-						corev1.ResourceCPU:    resource.MustParse("1800m"),
-						corev1.ResourceMemory: resource.MustParse("1800Mi"),
-					},
-					Requests: corev1.ResourceList{
-						corev1.ResourceCPU:    resource.MustParse("700m"),
-						corev1.ResourceMemory: resource.MustParse("700Mi"),
-					},
-				},
-				MinReplicas: &two,
-				MaxReplicas: &two,
+				Runtime:        Nodejs14,
+				Resources:      LRuntimeResources,
+				BuildResources: fastBuildResources,
+				MinReplicas:    &two,
+				MaxReplicas:    &two,
 			},
 			},
 		},
@@ -511,6 +504,7 @@ func TestSetDefaults(t *testing.T) {
 			},
 			expectedFunc: Function{ObjectMeta: v1.ObjectMeta{
 				Labels: map[string]string{
+					//FunctionResourcesPresetLabel: "L",
 				},
 			}, Spec: FunctionSpec{
 				Runtime:        Python39,

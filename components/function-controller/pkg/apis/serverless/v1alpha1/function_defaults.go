@@ -3,8 +3,6 @@ package v1alpha1
 import (
 	"context"
 	"encoding/json"
-	"fmt"
-
 	"github.com/pkg/errors"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
@@ -37,8 +35,8 @@ type FunctionResourcesDefaulting struct {
 	DefaultPreset     string                     `envconfig:"default=M"`
 	Presets           map[string]ResourcesPreset `envconfig:"-"`
 	PresetsMap        string                     `envconfig:"default={}"`
-	RuntimePresetsMap string                     `envconfig:"default={}"`
 	RuntimePresets    map[string]string          `envconfig:"-"`
+	RuntimePresetsMap string                     `envconfig:"default={}"`
 }
 
 type BuildJobResourcesDefaulting struct {
@@ -192,7 +190,6 @@ func mergeResourcesPreset(fn *Function, presetLabel string, presets map[string]R
 	if preset == "" {
 		rtmPreset, ok := runtimePreset[string(fn.Spec.Runtime)]
 		if ok {
-			fmt.Println("Found Runtime specific presets")
 			return presets[rtmPreset]
 		}
 		return presets[defaultPreset]
