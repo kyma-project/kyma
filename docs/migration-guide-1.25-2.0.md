@@ -25,7 +25,7 @@ For more details about the authentication changes, read the [Kyma 2.0 release no
 
 ### ORY Oathkeeper without Dex
 
-With Kyma 2.0 the Dex component becomes deprecated. Existing API Rules that have a JWT access strategy defined must be enriched with an individual **jwks_url** pointing to a custom OpenID Connect-compliant identity provider. Follow these step to migrate you API Rules:
+With Kyma 2.0 the Dex component becomes deprecated. Existing API Rules that have a JWT access strategy defined must be enriched with an individual **jwks_url** pointing to a custom OpenID Connect-compliant identity provider. Follow these steps to migrate your API Rules:
 
 1. List all the API Rules having a JWT access strategy defined. Run:
 
@@ -33,7 +33,7 @@ With Kyma 2.0 the Dex component becomes deprecated. Existing API Rules that have
 kubectl get apirules -A -o=json | jq '.items[]|select(any( .spec.rules[].accessStrategies[]; .handler=="jwt"))|.metadata'
 ```
 
-2. Go through the list and in each of the API Rules change the value of the **jwks_url** paramater to the relevant URL of your custom identity provider. Run:
+2. Go through the list and in each of the API Rules change the value of the **jwks_url** parameter to the relevant URL of your custom identity provider. Run:
 
 ```bash
 kubectl edit {RESOURCE} n-{NAMESPACE}
