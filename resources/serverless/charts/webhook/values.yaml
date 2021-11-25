@@ -134,7 +134,7 @@ values:
             "limitMemory": "512Mi"
           }
         }
-      runtime: |-
+      runtimePresets: |-
         {
           "python39":"M"
         }

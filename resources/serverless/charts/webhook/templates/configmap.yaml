@@ -23,7 +23,7 @@ data:
   WEBHOOK_DEFAULTING_FUNCTION_RESOURCES_PRESETS_MAP: |-
 {{ include "tplValue" ( dict "value" .Values.values.function.resources.presets "context" . ) | nindent 4 }}
   WEBHOOK_DEFAULTING_FUNCTION_RESOURCES_RUNTIMES_PRESETS_MAP: |-
-{{ include "tplValue" ( dict "value" .Values.values.function.resources.runtime "context" . ) | nindent 4 }}
+{{ include "tplValue" ( dict "value" .Values.values.function.resources.runtimePresets "context" . ) | nindent 4 }}
 
 
   WEBHOOK_VALIDATION_BUILD_JOB_RESOURCES_MIN_REQUEST_CPU: {{ include "tplValue" ( dict "value" .Values.values.buildJob.resources.minRequestCpu "context" . ) | quote }}
