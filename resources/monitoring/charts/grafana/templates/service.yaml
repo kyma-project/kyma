@@ -1,3 +1,4 @@
+{{ if .Values.service.enabled }}
 {{- /*
   Customization: due to kyma-installer limitations, extraExposePorts has to be a multi-line string and not a list
   Extra label to be included by the service monitor:
@@ -50,8 +51,8 @@ spec:
       nodePort: {{.Values.service.nodePort}}
 {{ end }}
   {{- if .Values.extraExposePorts }}
-  {{- tpl (.Values.extraExposePorts) . | indent 4 }}
+  {{- tpl (toYaml .Values.extraExposePorts) . | indent 4 }}
   {{- end }}
   selector:
     {{- include "grafana.selectorLabels" . | nindent 4 }}
-
+{{ end }}
