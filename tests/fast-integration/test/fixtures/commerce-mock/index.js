@@ -368,7 +368,7 @@ async function connectCommerceMock(mockHost, tokenData) {
     headers: {
       "Content-Type": "application/json"
     },
-    timeout: 5000,
+    timeout: 10000,
   };
 
   try {
