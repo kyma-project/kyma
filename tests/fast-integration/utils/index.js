@@ -908,6 +908,7 @@ function ignore404(e) {
   }
 }
 
+// NOTE: this no longer works, it relies on kube-api sending `selfLink` but the field has been deprecated
 async function deleteAllK8sResources(
   path,
   query = {},
@@ -939,6 +940,11 @@ async function deleteAllK8sResources(
   }
 }
 
+async function deleteK8sPod(o) {
+  return await k8sCoreV1Api.deleteNamespacedPod(o.metadata.name, o.metadata.namespace);
+}
+
+// NOTE: this no longer works, it relies on kube-api sending `selfLink` but the field has been deprecated
 async function deleteK8sResource(o, keepFinalizer = false) {
   if (o.metadata.finalizers && o.metadata.finalizers.length && !keepFinalizer) {
     const options = {
@@ -1678,6 +1684,7 @@ module.exports = {
   printContainerLogs,
   kubectlExecInPod,
   deleteK8sResource,
+  deleteK8sPod,
   listPods,
   switchEventingBackend,
   waitForEventingBackendToReady,

@@ -679,6 +679,91 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 		})
 	})
 
+	When("BEB subscription is set to have `lastFailedDelivery` and `lastFailedDeliveryReason`='Webhook endpoint response code: 401' after creation", func() {
+		It("Should not mark the subscription as ready", func() {
+			subscriptionName := "test-subscription-beb-status-not-ready-3"
+			lastFailedDeliveryReason := "Webhook endpoint response code: 401"
+
+			// Ensuring subscriber subscriberSvc
+			subscriberSvc := reconcilertesting.NewSubscriberSvc("webhook", namespaceName)
+			ensureSubscriberSvcCreated(ctx, subscriberSvc)
+
+			givenSubscription := reconcilertesting.NewSubscription(subscriptionName, namespaceName, reconcilertesting.WithWebhookAuthForBEB, reconcilertesting.WithEventTypeFilter)
+			reconcilertesting.WithValidSink(subscriberSvc.Namespace, subscriberSvc.Name, givenSubscription)
+
+			isBEBSubscriptionCreated := false
+
+			By("preparing mock to simulate a non ready BEB subscription")
+			beb.GetResponse = func(w http.ResponseWriter, subscriptionName string) {
+				// until the BEB subscription creation call was performed, send successful get requests
+				if !isBEBSubscriptionCreated {
+					reconcilertesting.BEBGetSuccess(w, nameMapper.MapSubscriptionName(givenSubscription))
+				} else {
+					// after the BEB subscription was created, set lastFailedDelivery
+					w.WriteHeader(http.StatusOK)
+					s := bebtypes.Subscription{
+						Name:                     nameMapper.MapSubscriptionName(givenSubscription),
+						SubscriptionStatus:       bebtypes.SubscriptionStatusActive,
+						LastSuccessfulDelivery:   time.Now().Format(time.RFC3339),                       //"now",
+						LastFailedDelivery:       time.Now().Add(10 * time.Second).Format(time.RFC3339), // "now + 10s"
+						LastFailedDeliveryReason: lastFailedDeliveryReason,
+					}
+					err := json.NewEncoder(w).Encode(s)
+					Expect(err).ShouldNot(HaveOccurred())
+				}
+			}
+			beb.CreateResponse = func(w http.ResponseWriter) {
+				isBEBSubscriptionCreated = true
+				reconcilertesting.BEBCreateSuccess(w)
+			}
+
+			// Create subscription
+			ensureSubscriptionCreated(ctx, givenSubscription)
+
+			By("Creating a valid APIRule")
+			getAPIRuleForASvc(ctx, subscriberSvc).Should(reconcilertesting.HaveNotEmptyAPIRule())
+
+			By("Updating the APIRule(replicating apigateway controller) status to be Ready")
+			apiRuleCreated := filterAPIRulesForASvc(getAPIRules(ctx, subscriberSvc), subscriberSvc)
+			ensureAPIRuleStatusUpdatedWithStatusReady(ctx, &apiRuleCreated).Should(BeNil())
+
+			By("Setting APIRule status to Ready")
+			subscriptionAPIReadyCondition := eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionAPIRuleStatus, eventingv1alpha1.ConditionReasonAPIRuleStatusReady, v1.ConditionTrue, "")
+			getSubscription(ctx, givenSubscription).Should(And(
+				reconcilertesting.HaveSubscriptionName(subscriptionName),
+				reconcilertesting.HaveCondition(subscriptionAPIReadyCondition),
+			))
+
+			By("Setting a subscription active condition")
+			subscriptionActiveCondition := eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionSubscriptionActive, eventingv1alpha1.ConditionReasonSubscriptionActive, v1.ConditionTrue, "")
+			getSubscription(ctx, givenSubscription).Should(And(
+				reconcilertesting.HaveSubscriptionName(subscriptionName),
+				reconcilertesting.HaveCondition(subscriptionActiveCondition),
+			))
+
+			By("Setting a subscription webhook failed condition")
+			subscriptionWebhookCallFailedCondition := eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionWebhookCallStatus, eventingv1alpha1.ConditionReasonWebhookCallStatus, v1.ConditionFalse, lastFailedDeliveryReason)
+			getSubscription(ctx, givenSubscription).Should(And(
+				reconcilertesting.HaveSubscriptionName(subscriptionName),
+				reconcilertesting.HaveCondition(subscriptionWebhookCallFailedCondition),
+			))
+
+			By("Marking it as not ready")
+			getSubscription(ctx, givenSubscription).Should(And(
+				reconcilertesting.HaveSubscriptionName(subscriptionName),
+				Not(reconcilertesting.HaveSubscriptionReady()),
+			))
+
+			By("Deleting the object to not provoke more reconciliation requests")
+			Expect(k8sClient.Delete(ctx, givenSubscription)).Should(BeNil())
+			getSubscription(ctx, givenSubscription).ShouldNot(reconcilertesting.HaveSubscriptionFinalizer(Finalizer))
+
+			By("Sending at least one creation request for the Subscription")
+			_, creationRequests, _ := countBEBRequests(nameMapper.MapSubscriptionName(givenSubscription))
+			Expect(creationRequests).Should(reconcilertesting.BeGreaterThanOrEqual(1))
+		})
+	})
+
 	When("Deleting a valid Subscription", func() {
 		It("Should reconcile the Subscription", func() {
 			subscriptionName := "test-delete-valid-subscription-1"
