@@ -153,7 +153,7 @@ func shouldReconnect(connection *v1alpha1.CompassConnection, minimalConfigSyncTi
 		return true
 	}
 
-	if connection.Status.ConnectionStatus == nil  {
+	if connection.Status.ConnectionStatus == nil {
 		return true
 	}
 
