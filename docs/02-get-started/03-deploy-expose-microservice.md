@@ -85,9 +85,11 @@ The operation was successful if the returned number of **readyReplicas** is `1`.
     - **Memory limits**: `32Mi`
     - **CPU requests (m)**: `16m`
     - **CPU limits (m)**: `20m`  
+  
+    In addition, you can also expose a separate Service for your Deployment:
+    - Check the **Expose a seperate Service** box
     - **Port**: `80`
     - **Target Port**: `8080`
-    - Check the **Expose a separate Service** box to create a Service for your Deployment and skip the [next Section](03-deploy-expose-microservice.md#create-the-service).
 4. Click **Create**.
 
 The operation was successful if the Pod **Status** for the Deployment is `RUNNING`.
