@@ -151,7 +151,6 @@ async function sendEventAndCheckResponse(mockNamespace = 'mocks') {
   const vs = await waitForVirtualService(mockNamespace, "commerce-mock");
   const mockHost = vs.spec.hosts[0];
   const host = mockHost.split(".").slice(1).join(".");
-
   return await retryPromise(
     async () => {
       await axios
@@ -480,7 +479,6 @@ async function getCommerceMockCertFiles() {
 
   const vs = await waitForVirtualService("mocks", "commerce-mock");
   const mockHost = vs.spec.hosts[0];
-  console.dir(mockHost);
   try {
     cert = await axios.get(`https://${mockHost}/connection/cert`);
     key = await axios.get(`https://${mockHost}/connection/key`);
@@ -498,10 +496,6 @@ async function revokeCommerceMockCertificate(){
   const mockHost = vs.spec.hosts[0];
   const url = mockHost.replace(/(commerce.?)/,'');
   const gateway = `https://gateway.${url}/v1/applications/certificates/revocations`;
-  console.dir("********************************")
-  console.dir(cert.data);
-  console.dir(key.data);
-  console.dir("********************************")
   const httpsAgent = new https.Agent({
     rejectUnauthorized: false, // curl -k
     cert: cert.data,
@@ -517,12 +511,6 @@ async function revokeCommerceMockCertificate(){
       headers: { 'Content-Type': 'application/json' },
       timeout: 5000
     });
-
-    /*let {cert2, key2} = await getCommerceMockCertFiles();
-    console.dir("=========")
-    console.dir(cert2.data);
-    console.dir(key2.data);
-    console.dir("========")*/
   } catch (err) {
     throw convertAxiosError(err, "Error during revoking Commerce Mock certificate via Kyma connector service");
   }
