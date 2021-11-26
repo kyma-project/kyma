@@ -8,16 +8,18 @@ metadata:
 spec:
   action: ALLOW
   rules:
-  - from:
-    - source:
-        principals:
-        - cluster.local/ns/{{ .Release.Namespace }}/sa/{{ include "jaeger-operator.fullname" . }}-auth-proxy
-        - cluster.local/ns/{{ .Release.Namespace }}/sa/kiali
-        - cluster.local/ns/{{ .Release.Namespace }}/sa/monitoring-grafana
-    to:
+  - to:
       - operation:
           ports: # Jaeger query port, limit to auth-proxy, Kiali and Grafana
           - "16686"
+{{ if .Values.authProxy.enabled }}
+    from:
+    - source:
+        principals:
+          - cluster.local/ns/{{ .Release.Namespace }}/sa/{{ include "jaeger-operator.fullname" . }}-auth-proxy
+          - cluster.local/ns/{{ .Release.Namespace }}/sa/kiali
+          - cluster.local/ns/{{ .Release.Namespace }}/sa/monitoring-grafana
+{{ end }}
   - from:
     - source:
         principals:
