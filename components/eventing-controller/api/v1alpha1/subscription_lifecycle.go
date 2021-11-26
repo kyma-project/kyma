@@ -13,6 +13,7 @@ const (
 	ConditionSubscribed         ConditionType = "Subscribed"
 	ConditionSubscriptionActive ConditionType = "Subscription active"
 	ConditionAPIRuleStatus      ConditionType = "APIRule status"
+	ConditionWebhookCallStatus  ConditionType = "Webhook call status"
 )
 
 var allConditions = makeConditions()
@@ -62,7 +63,7 @@ func (s *SubscriptionStatus) InitializeConditions() {
 }
 
 func (s SubscriptionStatus) IsReady() bool {
-	if !containSameConditionTypes(allConditions, s.Conditions) {
+	if !ContainSameConditionTypes(allConditions, s.Conditions) {
 		return false
 	}
 
