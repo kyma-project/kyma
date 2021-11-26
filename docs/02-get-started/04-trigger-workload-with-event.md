@@ -90,7 +90,7 @@ As we haven't sent our event yet, we expect to get an empty object `{}` in respo
   Kyma Dashboard
   </summary>
 
-1. From the left navigation, go to **Workloads** > **Functions** and click to create a new Function.
+1. From the left navigation, go to **Workloads** > **Functions** and click **Create Function +**.
 2. Name the Function `lastorder` and click **Create**.
 3. In the inline editor for the Function, modify its source replacing it with this code:
     ```js
@@ -109,9 +109,10 @@ As we haven't sent our event yet, we expect to get an empty object `{}` in respo
       } 
     }
     ```
-4. In your Function's view, go to the **Configuration** tab.
-5. Click on **Expose Function +**.
-6. Provide the **Name** (`lastorder`) and **Subdomain** (`lastorder`) and click **Create**.
+4. Click on **Save**
+5. In your Function's view, go to the **Configuration** tab.
+6. Click on **Expose Function +**.
+7. Provide the **Name** (`lastorder`) and **Subdomain** (`lastorder`) and click **Create**.
     > **NOTE:** Alternatively, from the left navigation go to **Discovery and Network** > **API Rules**, click on **Create API Rule +**, and continue with step 3, selecting the appropriate **Service** from the dropdown menu.
 
 To check that the Function is properly exposed, call it. 

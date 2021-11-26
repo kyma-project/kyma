@@ -206,7 +206,7 @@ EOF
   </summary>
 
 1. Using the left navigation, go to **Discovery and Network** > **Services** and select your Service.
-2. In your Services's view, click on **Expose Service +**.
+2. In your Services's view, click on **Create API Rule +**.
 3. Provide the **Name** (`orders-service`) and **Subdomain** (`orders-service`) and click **Create**.
 
 > **NOTE:** Alternatively, from the left navigation go to **Discovery and Network** > **API Rules**, click on **Create API Rule +**, and continue with step 2, selecting the appropriate **Service** from the dropdown menu.
