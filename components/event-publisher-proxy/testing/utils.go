@@ -92,8 +92,8 @@ func NewSubscription(opts ...SubscriptionOpt) *eventingv1alpha1.Subscription {
 			Protocol:         "",
 			ProtocolSettings: nil,
 			Sink:             "",
-			Filter: &eventingv1alpha1.BebFilters{
-				Filters: []*eventingv1alpha1.BebFilter{
+			Filter: &eventingv1alpha1.BEBFilters{
+				Filters: []*eventingv1alpha1.BEBFilter{
 					{
 						EventSource: &eventingv1alpha1.Filter{
 							Type:     "exact",
@@ -120,8 +120,8 @@ func NewSubscription(opts ...SubscriptionOpt) *eventingv1alpha1.Subscription {
 
 func SubscriptionWithFilter(eventSource, eventType string) SubscriptionOpt {
 	return func(subscription *eventingv1alpha1.Subscription) {
-		subscription.Spec.Filter = &eventingv1alpha1.BebFilters{
-			Filters: []*eventingv1alpha1.BebFilter{
+		subscription.Spec.Filter = &eventingv1alpha1.BEBFilters{
+			Filters: []*eventingv1alpha1.BEBFilter{
 				{
 					EventSource: &eventingv1alpha1.Filter{
 						Type:     "exact",
