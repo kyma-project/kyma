@@ -8,9 +8,6 @@ const {
   checkFunctionResponse,
   sendEventAndCheckResponse,
   deleteMockTestFixture,
-  addService,
-  updateService,
-  deleteService
 } = require("../test/fixtures/commerce-mock");
 const {
   ensureKymaAdminBindingExistsForUser,
@@ -105,12 +102,6 @@ function CommerceMockTest() {
 
     it("order.created.v1 event should trigger the lastorder function", async function () {
       await sendEventAndCheckResponse();
-    });
-
-    it("should add, update and delete a service", async function () {
-      let serviceId = await addService();
-      await updateService(serviceId)
-      await deleteService(serviceId)
     });
 
     it("Deletes the resources that have been created", async function () {
