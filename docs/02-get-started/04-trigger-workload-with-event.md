@@ -111,7 +111,7 @@ As we haven't sent our event yet, we expect to get an empty object `{}` in respo
     ```
 4. Click on **Save**
 5. In your Function's view, go to the **Configuration** tab.
-6. Click on **Expose Function +**.
+6. Click on **Create API Rule +**.
 7. Provide the **Name** (`lastorder`) and **Subdomain** (`lastorder`) and click **Create**.
     > **NOTE:** Alternatively, from the left navigation go to **Discovery and Network** > **API Rules**, click on **Create API Rule +**, and continue with step 3, selecting the appropriate **Service** from the dropdown menu.
 
