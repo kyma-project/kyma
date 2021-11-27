@@ -95,7 +95,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, request reconcile.Request) (
 
 	//If minimalConfigSyncTime did not pass from connection.Status.ConnectionStatus.LastSync, skip connection
 	if !shouldReconnect(instance, r.minimalConfigSyncTime) {
-		log.Infof("Skipping connection initialization. Minimal resync time not passed not passed. Last attempt: %v", instance.Status.ConnectionStatus.LastSync)
+		log.Infof("Skipping connection initialization. Minimal resync time not passed. Last attempt: %v", instance.Status.ConnectionStatus.LastSync)
 		return reconcile.Result{}, nil
 	}
 
