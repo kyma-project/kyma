@@ -318,7 +318,7 @@ func TestCompassConnectionController(t *testing.T) {
 		// given
 		configurationClientMock.ExpectedCalls = nil
 		configurationClientMock.Calls = nil
-		configurationClientMock.On("FetchConfiguration").After(1*time.Second).Return(nil, errors.New("error"))
+		configurationClientMock.On("FetchConfiguration").After(1*time.Second).Return(nil, nil, errors.New("error"))
 
 		// when
 		// 2 seconds wait for call + 1 second for timeout
@@ -341,7 +341,7 @@ func TestCompassConnectionController(t *testing.T) {
 		// given
 		configurationClientMock.ExpectedCalls = nil
 		configurationClientMock.Calls = nil
-		configurationClientMock.On("FetchConfiguration").After(1*time.Second).Return(nil, errors.New("error"))
+		configurationClientMock.On("FetchConfiguration").After(1*time.Second).Return(nil, nil, errors.New("error"))
 
 		// when
 		// 2 seconds wait for call + 1 second for timeout
