@@ -81,7 +81,7 @@ The operation was successful if the returned number of **readyReplicas** is `1`.
     - **Containers**: enter Docker image `eu.gcr.io/kyma-project/develop/orders-service:68a58069`
     - Check the **Expose a separate Service** box to create a Service for your Deployment and skip the [next Section](03-deploy-expose-microservice.md#create-the-service)
     - **Port**: `80`
-    - **Target Port**: `8080`
+    - **Target Port**: `8080`  
 
     _Optionally_, to save resources, modify these parameters:
     - **Memory requests**: `10Mi`
