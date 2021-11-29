@@ -63,12 +63,12 @@ npm install
 npm run test-eventing
 ```
 
-**NOTE:** You can change the namespace used for the Commerce Mock objects using:
-```
-MOCK_NAMESPACE=mock2 make ci-test-eventing
-```
-Using a different namespace changes the host used for the Commerce Mock APIRule as well. 
-This allows different Commerce Mocks to co-exist in different namespaces.
+> **NOTE:** You can change the Namespace used for the Commerce Mock objects using:
+> ```
+> MOCK_NAMESPACE=mock2 make ci-test-eventing
+> ```
+> Using a different Namespace changes the host used for the Commerce Mock APIRule as well. 
+> This allows different Commerce Mocks to co-exist in different Namespaces.
 
 ## Local development
 
