@@ -314,6 +314,119 @@ func TestCompassConnectionController(t *testing.T) {
 		assertSynchronizationStatusError(t)
 	})
 
+	t.Run("Compass Connection Controller should skip all attempts of syn state if failed to fetch configuration from Director AND minimalConfigSyncTime HAS NOT passed", func(t *testing.T) {
+		// given
+		configurationClientMock.ExpectedCalls = nil
+		configurationClientMock.Calls = nil
+		configurationClientMock.On("FetchConfiguration").After(1*time.Second).Return(nil, errors.New("error"))
+
+		// when
+		// 2 seconds wait for call + 1 second for timeout
+		err = waitFor(checkInterval, testTimeout, func() bool {
+			return mockFunctionCalled(&configurationClientMock.Mock, "FetchConfiguration")
+		})
+
+		require.NoError(t, err)
+		// Now wait for a second. Reconcile loop should run in the background.
+		// Since minimalConfigSyncTime not pass all calls to director should be skipped.
+		time.Sleep(1 * time.Second)
+
+		// then
+		require.NoError(t, waitForResourceUpdate(v1alpha1.SynchronizationFailed))
+		assertSynchronizationStatusError(t)
+		configurationClientMock.AssertNumberOfCalls(t, "FetchConfiguration", 1)
+	})
+
+	t.Run("Compass Connection Controller should resume syn state if failed to fetch configuration from Director AND minimalConfigSyncTime HAS passed", func(t *testing.T) {
+		// given
+		configurationClientMock.ExpectedCalls = nil
+		configurationClientMock.Calls = nil
+		configurationClientMock.On("FetchConfiguration").After(1*time.Second).Return(nil, errors.New("error"))
+
+		// when
+		// 2 seconds wait for call + 1 second for timeout
+		err = waitFor(checkInterval, testTimeout, func() bool {
+			return mockFunctionCalled(&configurationClientMock.Mock, "FetchConfiguration")
+		})
+
+		require.NoError(t, err)
+		// Now wait for a minimalConfigSyncTime. Reconcile loop should run in the background.
+		// After minimalConfigSyncTime passed calls to director can be resumed.
+		time.Sleep(minimalConfigSyncTime)
+
+		require.NoError(t, waitForResourceUpdate(v1alpha1.SynchronizationFailed))
+		assertSynchronizationStatusError(t)
+		configurationClientMock.AssertNumberOfCalls(t, "FetchConfiguration", 2)
+	})
+
+	t.Run("Compass Connection Controller should skip all attempts of Connection Initialisation if failed to fetch configuration from Connector AND minimalConfigSyncTime HAS NOT passed", func(t *testing.T) {
+		// given
+		badConnectorMock := &connectorMocks.Client{}
+		badConnectorMock.On("Configuration", connectorTokenHeaders).After(1*time.Second).Return(gqlschema.Configuration{}, errors.New("Failed to get configuration. Timeout!!!"))
+
+		clientsProviderMock.ExpectedCalls = nil
+		clientsProviderMock.Calls = nil
+		clientsProviderMock.On("GetConnectorTokensClient", connectorURL).Return(badConnectorMock, nil)
+
+		connectedConnection, err := compassConnectionCRClient.Get(context.Background(), compassConnectionName, v1.GetOptions{})
+		require.NoError(t, err)
+		connectedConnection.Status.State = v1alpha1.ConnectionFailed
+
+		// when
+		connectedConnection, err = compassConnectionCRClient.Update(context.Background(), connectedConnection, v1.UpdateOptions{})
+		require.NoError(t, err)
+
+		// when
+		// 2 seconds wait for call + 1 second for timeout
+		err = waitFor(checkInterval, testTimeout, func() bool {
+			return mockFunctionCalled(&badConnectorMock.Mock, "Configuration", connectorTokenHeaders)
+		})
+
+		require.NoError(t, err)
+
+		// Now wait for a second. Reconcile loop should run in the background.
+		// Since minimalConfigSyncTime not pass all calls to director should be skipped.
+		time.Sleep(1 * time.Second)
+
+		require.NoError(t, waitForResourceUpdate(v1alpha1.ConnectionFailed))
+		assertConnectionStatusError(t)
+		badConnectorMock.AssertNumberOfCalls(t, "Configuration", 1)
+	})
+
+	t.Run("Compass Connection Controller should resume attempts of Connection Initialisation if failed to fetch configuration from Connector AND minimalConfigSyncTime HAS passed", func(t *testing.T) {
+		// given
+		badConnectorMock := &connectorMocks.Client{}
+		badConnectorMock.On("Configuration", connectorTokenHeaders).After(1*time.Second).Return(gqlschema.Configuration{}, errors.New("Failed to get configuration. Timeout!!!"))
+
+		clientsProviderMock.ExpectedCalls = nil
+		clientsProviderMock.Calls = nil
+		clientsProviderMock.On("GetConnectorTokensClient", connectorURL).Return(badConnectorMock, nil)
+
+		connectedConnection, err := compassConnectionCRClient.Get(context.Background(), compassConnectionName, v1.GetOptions{})
+		require.NoError(t, err)
+		connectedConnection.Status.State = v1alpha1.ConnectionFailed
+
+		// when
+		connectedConnection, err = compassConnectionCRClient.Update(context.Background(), connectedConnection, v1.UpdateOptions{})
+		require.NoError(t, err)
+
+		// when
+		// 2 seconds wait for call + 1 second for timeout
+		err = waitFor(checkInterval, testTimeout, func() bool {
+			return mockFunctionCalled(&badConnectorMock.Mock, "Configuration", connectorTokenHeaders)
+		})
+
+		require.NoError(t, err)
+
+		// Now wait for a minimalConfigSyncTime. Reconcile loop should run in the background.
+		// After minimalConfigSyncTime passed calls to director can be resumed.
+		time.Sleep(minimalConfigSyncTime)
+
+		require.NoError(t, waitForResourceUpdate(v1alpha1.ConnectionFailed))
+		assertConnectionStatusError(t)
+		badConnectorMock.AssertNumberOfCalls(t, "Configuration", 2)
+	})
+
 	t.Run("Compass Connection should be in SynchronizationFailed state if failed create Director config client", func(t *testing.T) {
 		// given
 		clientsProviderMock.ExpectedCalls = nil

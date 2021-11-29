@@ -93,15 +93,16 @@ func (r *Reconciler) Reconcile(ctx context.Context, request reconcile.Request) (
 
 	log.Infof("Processing Compass Connection, current status: %s", instance.Status)
 
-	//If minimalConfigSyncTime did not pass from connection.Status.ConnectionStatus.LastSync, skip connection
-	if !shouldReconnect(instance, r.minimalConfigSyncTime) {
-		log.Infof("Skipping connection initialization. Minimal resync time not passed not passed. Last attempt: %v", instance.Status.ConnectionStatus.LastSync)
-		return reconcile.Result{}, nil
-	}
-
-	// If connection is not established read Config Map and try to fetch Certifice
-	if instance.ShouldAttemptReconnect() { //
+	// If connection is not established read Config Map and try to fetch Certificate
+	if instance.ShouldAttemptReconnect() {
 		log.Infof("Attempting to initialize connection with Compass...")
+
+		//If minimalConfigSyncTime did not pass from connection.Status.ConnectionStatus.LastSync, skip connection
+		if !shouldReconnect(instance, r.minimalConfigSyncTime) {
+			log.Infof("Skipping connection initialization. Minimal resync time not passed. Last attempt: %v", instance.Status.ConnectionStatus.LastSync)
+			return reconcile.Result{}, nil
+		}
+
 		instance, err := r.supervisor.InitializeCompassConnection()
 		if err != nil {
 			log.Errorf("Failed to initialize Compass Connection: %s", err.Error())
