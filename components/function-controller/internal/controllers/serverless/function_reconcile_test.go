@@ -42,7 +42,7 @@ var _ = ginkgo.Describe("Function", func() {
 		request = ctrl.Request{NamespacedName: types.NamespacedName{Namespace: function.GetNamespace(), Name: function.GetName()}}
 		gomega.Expect(resourceClient.Create(context.TODO(), function)).To(gomega.Succeed())
 
-		reconciler = NewFunction(resourceClient, log.Log, config, nil, record.NewFakeRecorder(100))
+		reconciler = NewFunction(resourceClient, log.Log, config, nil, record.NewFakeRecorder(100), make(chan bool))
 		fnLabels = reconciler.internalFunctionLabels(function)
 	})
 

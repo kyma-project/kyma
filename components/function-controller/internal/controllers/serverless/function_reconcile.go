@@ -39,19 +39,21 @@ type FunctionReconciler struct {
 	config      FunctionConfig
 	scheme      *runtime.Scheme
 	gitOperator GitOperator
+	healthCh    chan bool
 }
 
-func NewFunction(client resource.Client, log logr.Logger, config FunctionConfig, gitOperator GitOperator, recorder record.EventRecorder) *FunctionReconciler {
+func NewFunction(client resource.Client, log logr.Logger, config FunctionConfig, gitOperator GitOperator, recorder record.EventRecorder, healthCh chan bool) *FunctionReconciler {
 	return &FunctionReconciler{
-		client:      client,
 		Log:         log.WithName("controllers").WithName("function"),
-		config:      config,
+		client:      client,
 		recorder:    recorder,
+		config:      config,
 		gitOperator: gitOperator,
+		healthCh:    healthCh,
 	}
 }
 
-func (r *FunctionReconciler) SetupWithManager(mgr ctrl.Manager) error {
+func (r *FunctionReconciler) SetupWithManager(mgr ctrl.Manager) (controller.Controller, error) {
 	return ctrl.NewControllerManagedBy(mgr).
 		Named("function-controller").
 		For(&serverlessv1alpha1.Function{}).
@@ -68,7 +70,7 @@ func (r *FunctionReconciler) SetupWithManager(mgr ctrl.Manager) error {
 			),
 			MaxConcurrentReconciles: 1, // Build job scheduling mechanism requires this parameter to be set to 1. The mechanism is based on getting active and stateless jobs, concurrent reconciles makes it non deterministic . Value 1 removes data races while fetching list of jobs. https://github.com/kyma-project/kyma/issues/10037
 		}).
-		Complete(r)
+		Build(r)
 }
 
 // Reconcile reads that state of the cluster for a Function object and makes changes based on the state read and what is in the Function.Spec
@@ -89,6 +91,10 @@ func (r *FunctionReconciler) Reconcile(request ctrl.Request) (ctrl.Result, error
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
+	if IsHealthCheckRequest(request) {
+		r.healthCh <- true
+		return ctrl.Result{}, nil
+	}
 	instance := &serverlessv1alpha1.Function{}
 	err := r.client.Get(ctx, request.NamespacedName, instance)
 	if err != nil {
