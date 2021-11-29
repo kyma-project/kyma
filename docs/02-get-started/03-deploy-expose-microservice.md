@@ -79,15 +79,16 @@ The operation was successful if the returned number of **readyReplicas** is `1`.
     - **Name**: `orders-service`
     - **Labels**: add labels `app` and `example` and set their values to `orders-service`
     - **Containers**: enter Docker image `eu.gcr.io/kyma-project/develop/orders-service:68a58069`
+    - Check the **Expose a separate Service** box to create a Service for your Deployment and skip the [next Section](03-deploy-expose-microservice.md#create-the-service)
+    - **Port**: `80`
+    - **Target Port**: `8080`
 
     _Optionally_, to save resources, modify these parameters:
     - **Memory requests**: `10Mi`
     - **Memory limits**: `32Mi`
     - **CPU requests (m)**: `16m`
     - **CPU limits (m)**: `20m`  
-    - **Port**: `80`
-    - **Target Port**: `8080`
-    - Check the **Expose a separate Service** box to create a Service for your Deployment and skip the [next Section](03-deploy-expose-microservice.md#create-the-service).
+  
 4. Click **Create**.
 
 The operation was successful if the Pod **Status** for the Deployment is `RUNNING`.
@@ -206,7 +207,7 @@ EOF
   </summary>
 
 1. Using the left navigation, go to **Discovery and Network** > **Services** and select your Service.
-2. In your Services's view, click on **Expose Service +**.
+2. In your Services's view, click on **Create API Rule +**.
 3. Provide the **Name** (`orders-service`) and **Subdomain** (`orders-service`) and click **Create**.
 
 > **NOTE:** Alternatively, from the left navigation go to **Discovery and Network** > **API Rules**, click on **Create API Rule +**, and continue with step 2, selecting the appropriate **Service** from the dropdown menu.
