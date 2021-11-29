@@ -99,7 +99,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 		testID++
 	})
 
-	When("Manipulating the clean event types", func() {
+	When("Updating the clean event types in the Subscription status", func() {
 		It("Should mark the Subscription as ready", func() {
 			// Create subscriber service
 			subscriberSvc := reconcilertesting.NewSubscriberSvc("webhook", namespaceName)
@@ -1176,10 +1176,10 @@ func ensureSubscriptionCreated(ctx context.Context, subscription *eventingv1alph
 	Expect(err).Should(BeNil())
 }
 
-// ensureSubscriptionCreated creates a Subscription in the k8s cluster. If a custom namespace is used, it will be created as well.
+// ensureSubscriptionUpdated conducts an update of a Subscription.
 func ensureSubscriptionUpdated(ctx context.Context, subscription *eventingv1alpha1.Subscription) {
-	By(fmt.Sprintf("Ensuring the subscription %q is created", subscription.Name))
-	// create subscription
+	By(fmt.Sprintf("Ensuring the subscription %q is updated", subscription.Name))
+	// update subscription
 	err := k8sClient.Update(ctx, subscription)
 	Expect(err).Should(BeNil())
 }
@@ -1374,7 +1374,7 @@ var _ = BeforeSuite(func(done Done) {
 	Expect(err).NotTo(HaveOccurred())
 	// +kubebuilder:scaffold:scheme
 
-	bebMock := startBEBMock()
+	mock := startBEBMock()
 	// client, err := client.New()
 	// Source: https://book.kubebuilder.io/cronjob-tutorial/writing-tests.html
 	syncPeriod := time.Second * 2
@@ -1385,10 +1385,10 @@ var _ = BeforeSuite(func(done Done) {
 	})
 	Expect(err).ToNot(HaveOccurred())
 	envConf := env.Config{
-		BEBAPIURL:                bebMock.MessagingURL,
+		BEBAPIURL:                mock.MessagingURL,
 		ClientID:                 "foo-id",
 		ClientSecret:             "foo-secret",
-		TokenEndpoint:            bebMock.TokenURL,
+		TokenEndpoint:            mock.TokenURL,
 		WebhookActivationTimeout: 0,
 		WebhookTokenEndpoint:     "foo-token-endpoint",
 		Domain:                   domain,

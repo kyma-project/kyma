@@ -137,10 +137,7 @@ func (n *Nats) SyncSubscription(sub *eventingv1alpha1.Subscription, cleaner even
 		}
 	}
 
-	if len(cleanSubjects) > 0 {
-		sub.Status.CleanEventTypes = cleanSubjects
-	}
-
+	sub.Status.CleanEventTypes = cleanSubjects
 	sub.Status.Config = subscriptionConfig
 
 	return false, nil

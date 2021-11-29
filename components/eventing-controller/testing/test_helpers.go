@@ -266,7 +266,7 @@ func WithNotCleanEventTypeFilter(s *eventingv1alpha1.Subscription) {
 	}
 }
 
-// WithFilter sets the Subscription filter with the given event source and type.
+// WithFilter appends a filter to the existing filters of Subscription
 func WithFilter(eventSource, eventType string) SubscriptionOpt {
 	return func(subscription *eventingv1alpha1.Subscription) {
 		if subscription.Spec.Filter == nil {

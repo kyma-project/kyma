@@ -31,7 +31,7 @@ const (
 // BEBMock implements a programmable mock for BEB
 type BEBMock struct {
 	Requests       map[*http.Request]interface{}
-	Subscriptions  *SafeSubscription
+	Subscriptions  *SafeSubscriptions
 	TokenURL       string
 	MessagingURL   string
 	BEBConfig      *config.Config
@@ -46,7 +46,7 @@ type BEBMock struct {
 func NewBEBMock(bebConfig *config.Config) *BEBMock {
 	logger := logf.Log.WithName("BEB mock")
 	return &BEBMock{
-		nil, NewSafeSubscription(), "", "", bebConfig,
+		nil, NewSafeSubscriptions(), "", "", bebConfig,
 		logger,
 		nil, nil, nil, nil, nil,
 	}
@@ -58,7 +58,7 @@ type response func(w http.ResponseWriter)
 func (m *BEBMock) Reset() {
 	m.log.Info("Initializing requests")
 	m.Requests = make(map[*http.Request]interface{})
-	m.Subscriptions = NewSafeSubscription()
+	m.Subscriptions = NewSafeSubscriptions()
 	m.AuthResponse = nil
 	m.GetResponse = nil
 	m.ListResponse = nil
@@ -102,8 +102,7 @@ func (m *BEBMock) Start() string {
 			switch r.Method {
 			case http.MethodDelete:
 				key := r.URL.Path
-				//delete(m.Subscriptions, key) //todo
-				m.Subscriptions.DeleteSubscription(key)
+				m.Subscriptions.DeleteSubscriptions(key)
 				if m.DeleteResponse != nil {
 					m.DeleteResponse(w)
 				} else {
@@ -114,7 +113,7 @@ func (m *BEBMock) Start() string {
 				_ = json.NewDecoder(r.Body).Decode(&subscription)
 				m.Requests[r] = subscription
 				key := r.URL.Path + "/" + subscription.Name
-				m.Subscriptions.PutSubscription(key, &subscription)
+				m.Subscriptions.PutSubscriptions(key, &subscription)
 				if m.CreateResponse != nil {
 					m.CreateResponse(w)
 				} else {
@@ -134,7 +133,7 @@ func (m *BEBMock) Start() string {
 					if m.GetResponse != nil {
 						m.GetResponse(w, key)
 					} else {
-						subscriptionSaved := m.Subscriptions.GetSubscription(key)
+						subscriptionSaved := m.Subscriptions.GetSubscriptions(key)
 						if subscriptionSaved != nil {
 							subscriptionSaved.SubscriptionStatus = bebtypes.SubscriptionStatusActive
 							w.WriteHeader(http.StatusOK)
