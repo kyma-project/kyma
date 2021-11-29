@@ -69,7 +69,6 @@ var (
 	}
 
 	dispatcherTestCases = []testCase{
-		testDispatcherWithOneSubscriber,
 		testDispatcherWithMultipleSubscribers,
 	}
 )
@@ -402,52 +401,6 @@ func testCreateSubscriptionWithEmptyEventType(id int, eventTypePrefix, _, _ stri
 	})
 }
 
-func testDispatcherWithOneSubscriber(id int, eventTypePrefix, natsSubjectToPublish, eventTypeToSubscribe string) bool {
-	return When("Sending Events through Dispatcher", func() {
-		It("Should receive events in subscriber", func() {
-			ctx := context.Background()
-
-			// Start reconciler with empty checkSink function
-			cancel = startReconciler(eventTypePrefix, func(ctx context.Context, r *Reconciler, subscription *eventingv1alpha1.Subscription) error {
-				return nil
-			})
-			defer cancel()
-
-			subscriptionName := fmt.Sprintf(subscriptionNameFormat, id)
-
-			result := make(chan []byte)
-			url, shutdown := newSubscriber(result)
-			defer shutdown()
-
-			subscription := reconcilertesting.NewSubscription(subscriptionName, namespaceName, reconcilertesting.WithFilter(reconcilertesting.EventSource, eventTypeToSubscribe), reconcilertesting.WithWebhookForNats)
-			subscription.Spec.Sink = url
-			ensureSubscriptionCreated(ctx, subscription)
-
-			getSubscription(ctx, subscription).Should(And(
-				reconcilertesting.HaveSubscriptionName(subscriptionName),
-				reconcilertesting.HaveCondition(eventingv1alpha1.MakeCondition(
-					eventingv1alpha1.ConditionSubscriptionActive,
-					eventingv1alpha1.ConditionReasonNATSSubscriptionActive,
-					v1.ConditionTrue, "")),
-				reconcilertesting.HaveSubsConfiguration(&eventingv1alpha1.SubscriptionConfig{
-					MaxInFlightMessages: defaultSubsConfig.MaxInFlightMessages,
-				}),
-			))
-
-			connection, err := connectToNats(natsURL)
-			Expect(err).ShouldNot(HaveOccurred())
-			err = connection.Publish(natsSubjectToPublish, []byte(reconcilertesting.StructuredCloudEvent))
-			Expect(err).ShouldNot(HaveOccurred())
-
-			// make sure that the subscriber received the message
-			sent := fmt.Sprintf(`"%s"`, reconcilertesting.EventData)
-			Eventually(func() ([]byte, error) {
-				return getFromChanOrTimeout(result, smallPollingInterval)
-			}, timeout, pollingInterval).Should(WithTransform(bytesStringer, Equal(sent)))
-		})
-	})
-}
-
 func testDispatcherWithMultipleSubscribers(id int, eventTypePrefix, natsSubjectToPublish, eventTypeToSubscribe string) bool {
 	return When("Sending Events through Dispatcher for multiple subscribers", func() {
 		It("Should receive events in subscribers", func() {
@@ -489,8 +442,8 @@ func testDispatcherWithMultipleSubscribers(id int, eventTypePrefix, natsSubjectT
 			subName2 := fmt.Sprintf("subb-%d", id)
 
 			subChan2 := make(chan []byte)
-			url2, close := newSubscriber(subChan2)
-			defer close()
+			url2, shutdown2 := newSubscriber(subChan2)
+			defer shutdown2()
 
 			if eventTypePrefix != "" {
 				subscription2 = reconcilertesting.NewSubscription(subName2, namespaceName, reconcilertesting.WithFilter(reconcilertesting.EventSource, eventType), reconcilertesting.WithWebhookForNats)
