@@ -3,11 +3,9 @@ package main
 import (
 	"errors"
 	"fmt"
-	"os"
-
-	"go.uber.org/zap/zapcore"
-
 	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
+	"os"
 
 	"github.com/vrischmann/envconfig"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -45,6 +43,7 @@ type config struct {
 	LogLevel                  string `envconfig:"default=info"`
 	Kubernetes                k8s.Config
 	Function                  serverless.FunctionConfig
+	Git                       serverless.GitConfig
 }
 
 func main() {
@@ -96,7 +95,7 @@ func main() {
 		},
 	)
 
-	if err := serverless.NewFunction(resourceClient, ctrl.Log, config.Function, mgr.GetEventRecorderFor(serverlessv1alpha1.FunctionControllerValue)).
+	if err := serverless.NewFunction(resourceClient, ctrl.Log, config.Function, config.Git, mgr.GetEventRecorderFor(serverlessv1alpha1.FunctionControllerValue)).
 		SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create Function controller")
 		os.Exit(1)

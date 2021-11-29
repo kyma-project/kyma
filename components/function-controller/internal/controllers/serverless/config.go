@@ -14,8 +14,20 @@ type FunctionConfig struct {
 	TargetCPUUtilizationPercentage              int32         `envconfig:"default=50"`
 	RequeueDuration                             time.Duration `envconfig:"default=1m"`
 	FunctionReadyRequeueDuration                time.Duration `envconfig:"default=5m"`
-	GitFetchRequeueDuration                     time.Duration `envconfig:"default=30s"`
 	Build                                       BuildConfig
+}
+
+type GitConfig struct {
+	GitFetchRequeueDuration time.Duration `envconfig:"default=30s"`
+	Backoff                 GitBackoffConfig
+}
+
+type GitBackoffConfig struct {
+	Duration time.Duration `envconfig:"default=10s"`
+	Factor   float64       `envconfig:"default=2.0"`
+	Jitter   float64       `envconfig:"default=0.0"`
+	Steps    int           `envconfig:"default=5"`
+	Cap      time.Duration `envconfig:"default=180s"`
 }
 
 type BuildConfig struct {

@@ -3,6 +3,8 @@ package serverless
 import (
 	"context"
 	"fmt"
+	"github.com/prometheus/common/log"
+	"k8s.io/apimachinery/pkg/util/wait"
 
 	"github.com/go-logr/logr"
 	"github.com/pkg/errors"
@@ -34,15 +36,17 @@ type FunctionReconciler struct {
 	client      resource.Client
 	recorder    record.EventRecorder
 	config      FunctionConfig
+	gitConfig   GitConfig
 	scheme      *runtime.Scheme
 	gitOperator GitOperator
 }
 
-func NewFunction(client resource.Client, log logr.Logger, config FunctionConfig, recorder record.EventRecorder) *FunctionReconciler {
+func NewFunction(client resource.Client, log logr.Logger, config FunctionConfig, gitConfig GitConfig, recorder record.EventRecorder) *FunctionReconciler {
 	return &FunctionReconciler{
 		client:      client,
 		Log:         log.WithName("controllers").WithName("function"),
 		config:      config,
+		gitConfig:   gitConfig,
 		recorder:    recorder,
 		gitOperator: git.NewGit2Go(),
 	}
@@ -161,7 +165,7 @@ func (r *FunctionReconciler) Reconcile(request ctrl.Request) (ctrl.Result, error
 	if err != nil {
 		if git.IsAuthErr(err) {
 			return r.updateStatusWithoutRepository(ctx, ctrl.Result{
-				RequeueAfter: r.config.GitFetchRequeueDuration,
+				RequeueAfter: r.gitConfig.GitFetchRequeueDuration,
 			}, instance, serverlessv1alpha1.Condition{
 				Type:               serverlessv1alpha1.ConditionConfigurationReady,
 				Status:             corev1.ConditionFalse,
@@ -172,7 +176,7 @@ func (r *FunctionReconciler) Reconcile(request ctrl.Request) (ctrl.Result, error
 		}
 
 		return r.updateStatusWithoutRepository(ctx, ctrl.Result{
-			RequeueAfter: r.config.GitFetchRequeueDuration,
+			RequeueAfter: r.gitConfig.GitFetchRequeueDuration,
 		}, instance, serverlessv1alpha1.Condition{
 			Type:               serverlessv1alpha1.ConditionConfigurationReady,
 			Status:             corev1.ConditionFalse,
@@ -229,7 +233,28 @@ func (r *FunctionReconciler) onSourceChange(ctx context.Context, instance *serve
 
 func (r *FunctionReconciler) syncRevision(instance *serverlessv1alpha1.Function, options git.Options) (string, error) {
 	if instance.Spec.Type == serverlessv1alpha1.SourceTypeGit {
-		return r.gitOperator.LastCommit(options)
+		backoffCfg := r.gitConfig.Backoff
+		backoff := wait.Backoff{Duration: backoffCfg.Duration, Factor: backoffCfg.Factor,
+			Jitter: backoffCfg.Jitter,
+			Steps:  backoffCfg.Steps,
+			Cap:    backoffCfg.Cap,
+		}
+		log.Info("Starting fetching last commit")
+		var commit = ""
+		//check := func() (done bool, err error) {
+		//	id, err := r.gitOperator.LastCommit(options)
+		//	if err != nil {
+		//		log.Warnf("Unable to get last commit from function: %s, cause: %s", instance.Name, err.Error())
+		//		return false, nil
+		//	}
+		//	commit = id
+		//	return true, nil
+		//}
+		err := wait.ExponentialBackoff(backoff, cloningBackoff(r.gitOperator, options, instance.Name, &commit))
+		if err != nil {
+			return "", errors.Wrap(err, "while getting last version of source code")
+		}
+		return commit, nil
 	}
 	return "", nil
 }

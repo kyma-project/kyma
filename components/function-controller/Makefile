@@ -69,8 +69,8 @@ CONTROLLER_GEN=$(shell which controller-gen)
 endif
 
 .PHONY: build-image 
-build-image: build-function-webhook \
-	build-function-build-init \
+build-image: build-image-function-webhook \
+	build-image-function-build-init \
 	build-image-function-controller
 	@echo "Override generic makefile build-image target to not execute"
 
@@ -81,8 +81,8 @@ push-image: push-function-webhook \
 	@echo "Override generic makefile push-image target to not execute"
 
 .PHONY: build-image push-image
-build-image: build-function-webhook \
-	build-function-build-init \
+build-image: build-image-function-webhook \
+	build-image-function-build-init \
 	build-image-function-controller
 	@echo "Override generic makefile build-image target to not execute"
 
@@ -117,8 +117,8 @@ endif
 WEBHOOK_NAME = function-webhook
 WEBHOOK_IMG_NAME = $(DOCKER_PUSH_REPOSITORY)$(DOCKER_PUSH_DIRECTORY)/$(WEBHOOK_NAME)
 
-.PHONY: build-function-webhook push-function-webhook
-build-function-webhook:
+.PHONY: build-image-function-webhook push-function-webhook
+build-image-function-webhook:
 	docker build -t $(WEBHOOK_NAME) -f $(ROOT)/deploy/webhook/Dockerfile .
 
 push-function-webhook:
@@ -137,8 +137,8 @@ endif
 JOBINIT_NAME = function-build-init
 JOBINIT_IMG_NAME = $(DOCKER_PUSH_REPOSITORY)$(DOCKER_PUSH_DIRECTORY)/$(JOBINIT_NAME)
 
-.PHONY: build-function-build-init push-function-build-init
-build-function-build-init:
+.PHONY: build-image-function-build-init push-function-build-init
+build-image-function-build-init:
 	docker build -t $(JOBINIT_NAME) -f $(ROOT)/deploy/jobinit/Dockerfile .
 
 push-function-build-init:
