@@ -362,7 +362,7 @@ func TestCompassConnectionController(t *testing.T) {
 	t.Run("Compass Connection Controller should skip all attempts of Connection Initialisation if failed to fetch configuration from Connector AND minimalConfigSyncTime HAS NOT passed", func(t *testing.T) {
 		// given
 		badConnectorMock := &connectorMocks.Client{}
-		badConnectorMock.On("Configuration", connectorTokenHeaders).After(1*time.Second).Return(gqlschema.Configuration{}, errors.New("Failed to get configuration. Timeout!!!"))
+		badConnectorMock.On("Configuration", connectorTokenHeadersFunc).After(1*time.Second).Return(gqlschema.Configuration{}, errors.New("Failed to get configuration. Timeout!!!"))
 
 		clientsProviderMock.ExpectedCalls = nil
 		clientsProviderMock.Calls = nil
@@ -396,7 +396,7 @@ func TestCompassConnectionController(t *testing.T) {
 	t.Run("Compass Connection Controller should resume attempts of Connection Initialisation if failed to fetch configuration from Connector AND minimalConfigSyncTime HAS passed", func(t *testing.T) {
 		// given
 		badConnectorMock := &connectorMocks.Client{}
-		badConnectorMock.On("Configuration", connectorTokenHeaders).After(1*time.Second).Return(gqlschema.Configuration{}, errors.New("Failed to get configuration. Timeout!!!"))
+		badConnectorMock.On("Configuration", connectorTokenHeadersFunc).After(1*time.Second).Return(gqlschema.Configuration{}, errors.New("Failed to get configuration. Timeout!!!"))
 
 		clientsProviderMock.ExpectedCalls = nil
 		clientsProviderMock.Calls = nil
