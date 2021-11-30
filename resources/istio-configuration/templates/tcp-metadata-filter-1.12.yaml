@@ -1,0 +1,61 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: EnvoyFilter
+metadata:
+  labels:
+    install.operator.istio.io/owning-resource: default-operator
+    install.operator.istio.io/owning-resource-namespace: istio-system
+    istio.io/rev: default
+    operator.istio.io/component: Pilot
+    operator.istio.io/managed: Reconcile
+    operator.istio.io/version: 1.12.0
+  name: tcp-metadata-exchange-1.12
+  namespace: istio-system
+spec:
+  configPatches:
+  - applyTo: NETWORK_FILTER
+    match:
+      context: SIDECAR_INBOUND
+      listener: {}
+      proxy:
+        proxyVersion: ^1\.12.*
+    patch:
+      operation: INSERT_BEFORE
+      value:
+        name: istio.metadata_exchange
+        typed_config:
+          '@type': type.googleapis.com/udpa.type.v1.TypedStruct
+          type_url: type.googleapis.com/envoy.tcp.metadataexchange.config.MetadataExchange
+          value:
+            protocol: istio-peer-exchange
+  - applyTo: CLUSTER
+    match:
+      cluster: {}
+      context: SIDECAR_OUTBOUND
+      proxy:
+        proxyVersion: ^1\.12.*
+    patch:
+      operation: MERGE
+      value:
+        filters:
+        - name: istio.metadata_exchange
+          typed_config:
+            '@type': type.googleapis.com/udpa.type.v1.TypedStruct
+            type_url: type.googleapis.com/envoy.tcp.metadataexchange.config.MetadataExchange
+            value:
+              protocol: istio-peer-exchange
+  - applyTo: CLUSTER
+    match:
+      cluster: {}
+      context: GATEWAY
+      proxy:
+        proxyVersion: ^1\.12.*
+    patch:
+      operation: MERGE
+      value:
+        filters:
+        - name: istio.metadata_exchange
+          typed_config:
+            '@type': type.googleapis.com/udpa.type.v1.TypedStruct
+            type_url: type.googleapis.com/envoy.tcp.metadataexchange.config.MetadataExchange
+            value:
+              protocol: istio-peer-exchange
