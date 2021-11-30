@@ -3,11 +3,11 @@ package main
 import (
 	"errors"
 	"fmt"
-	"go.uber.org/zap"
-	"go.uber.org/zap/zapcore"
 	"os"
 
 	"github.com/vrischmann/envconfig"
+	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 	"k8s.io/apimachinery/pkg/runtime"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
@@ -43,11 +43,9 @@ type config struct {
 	LogLevel                  string `envconfig:"default=info"`
 	Kubernetes                k8s.Config
 	Function                  serverless.FunctionConfig
-	Git                       serverless.GitConfig
 }
 
 func main() {
-
 	config, err := loadConfig("APP")
 	if err != nil {
 		ctrl.SetLogger(ctrlzap.New())
@@ -94,9 +92,9 @@ func main() {
 			Handler: k8s.NewRegistryWatcher(mgr.GetClient()),
 		},
 	)
-
-	if err := serverless.NewFunction(resourceClient, ctrl.Log, config.Function, config.Git, mgr.GetEventRecorderFor(serverlessv1alpha1.FunctionControllerValue)).
-		SetupWithManager(mgr); err != nil {
+	err = serverless.NewFunction(resourceClient, ctrl.Log, config.Function, mgr.GetEventRecorderFor(serverlessv1alpha1.FunctionControllerValue)).
+		SetupWithManager(mgr)
+	if err != nil {
 		setupLog.Error(err, "unable to create Function controller")
 		os.Exit(1)
 	}

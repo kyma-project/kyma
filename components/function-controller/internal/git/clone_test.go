@@ -1,9 +1,11 @@
 package git
 
 import (
-	"github.com/stretchr/testify/require"
 	"testing"
+
+	"github.com/stretchr/testify/require"
 )
+
 // wrong branch = ErrNotFound
 func Test_testa(t *testing.T) {
 	//GIVEN

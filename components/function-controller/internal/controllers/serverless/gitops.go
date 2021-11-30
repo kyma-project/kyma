@@ -1,18 +1,49 @@
 package serverless
 
 import (
+	"context"
+	"fmt"
+
 	"github.com/kyma-project/kyma/components/function-controller/internal/git"
-	"github.com/prometheus/common/log"
+	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
+	corev1 "k8s.io/api/core/v1"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 )
-//TODO: check if backoff doesn't block the go routine
-func cloningBackoff(gitClient GitOperator, options git.Options, fnName string, commit *string) func() (done bool, err error) {
-	return func() (done bool, err error) {
-		id, err := gitClient.LastCommit(options)
-		if err != nil {
-			log.Warnf("Unable to get last commit from function: %s, cause: %s", fnName, err.Error())
-			return false, nil
-		}
-		commit = &id
-		return true, nil
+
+func (r *FunctionReconciler) syncRevision(instance *serverlessv1alpha1.Function, options git.Options) (string, error) {
+	return r.gitOperator.LastCommit(options)
+}
+
+func (r *FunctionReconciler) readGITOptions(ctx context.Context, instance *serverlessv1alpha1.Function) (git.Options, error) {
+	if instance.Spec.Type != serverlessv1alpha1.SourceTypeGit {
+		return git.Options{}, nil
 	}
+
+	var gitRepository serverlessv1alpha1.GitRepository
+	if err := r.client.Get(ctx, client.ObjectKey{Namespace: instance.Namespace, Name: instance.Spec.Source}, &gitRepository); err != nil {
+		return git.Options{}, err
+	}
+
+	var auth *git.AuthOptions
+	if gitRepository.Spec.Auth != nil {
+		var secret corev1.Secret
+		if err := r.client.Get(ctx, client.ObjectKey{Namespace: instance.Namespace, Name: gitRepository.Spec.Auth.SecretName}, &secret); err != nil {
+			return git.Options{}, err
+		}
+		auth = &git.AuthOptions{
+			Type:        git.RepositoryAuthType(gitRepository.Spec.Auth.Type),
+			Credentials: r.readSecretData(secret.Data),
+			SecretName:  gitRepository.Spec.Auth.SecretName,
+		}
+	}
+
+	if instance.Spec.Reference == "" {
+		return git.Options{}, fmt.Errorf("reference has to specified")
+	}
+
+	return git.Options{
+		URL:       gitRepository.Spec.URL,
+		Reference: instance.Spec.Reference,
+		Auth:      auth,
+	}, nil
 }
