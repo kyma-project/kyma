@@ -11,7 +11,10 @@ import (
 )
 
 func (r *FunctionReconciler) syncRevision(instance *serverlessv1alpha1.Function, options git.Options) (string, error) {
-	return r.gitOperator.LastCommit(options)
+	if instance.Spec.Type == serverlessv1alpha1.SourceTypeGit {
+		return r.gitOperator.LastCommit(options)
+	}
+	return "", nil
 }
 
 func (r *FunctionReconciler) readGITOptions(ctx context.Context, instance *serverlessv1alpha1.Function) (git.Options, error) {
