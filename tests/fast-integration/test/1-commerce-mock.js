@@ -76,25 +76,17 @@ function commerceMockTests() {
       let serviceId = await addService();
       await updateService(serviceId)
       await deleteService(serviceId)
-    });
-    
-  // renew certificate
-  it("CommerceMock should renew it's certificate", async function () {
-    await renewCommerceMockCertificate();
-  });
-  // call lambda and succeed
-  it("order.created.v1 event should trigger the lastorder function", async function () {
-    await sendEventAndCheckResponse();
-  });
 
-  // revoke certificate
-  it("should revoke Commerce Mock certificate", async function () {
-    await revokeCommerceMockCertificate();
-  });
-
-     // renew certificate
-     it("CommerceMock should renew it's certificate", async function () {
+    it("CommerceMock should renew it's certificate", async function () {
       await renewCommerceMockCertificate();
+    });
+
+    it("the event should triger the fucntion after the certificate renewal", async function () {
+      await sendEventAndCheckResponse();
+    });
+
+    it("should revoke Commerce Mock certificate", async function () {
+      await revokeCommerceMockCertificate();
     });
 
     it("Should print report of restarted containers, skipped if no crashes happened", async function () {
@@ -114,4 +106,4 @@ function commerceMockTests() {
 
 module.exports = {
   commerceMockTests,
-};
+}
