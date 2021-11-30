@@ -373,4 +373,4 @@ config:
 istio:
 # Allows you to loosen strict mTLS for exposed HTTP endpoint (basically, the /metrics endpoint)
 # If omitted or set to false the mesh-wide policy is applied which sets mTLS mode to strict
-  permissiveMtls: true
+  permissiveMtls: false
