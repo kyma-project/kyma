@@ -8,9 +8,9 @@ metadata:
   {{- end }}
   labels:
     {{- include "fluent-bit.labels" . | nindent 4 }}
-    {{- with .Values.serviceMonitor.selector }}
-    {{- toYaml . | nindent 4 }}
-    {{- end }}
+      {{- with .Values.serviceMonitor.selector }}
+      {{- toYaml . | nindent 4 }}
+      {{- end }}
 spec:
   endpoints:
     - port: http
@@ -19,9 +19,9 @@ spec:
       interval: {{ . }}
       {{- end }}
       metricRelabelings:
-      - sourceLabels: [ __name__ ]
-        regex: ^(fluentbit_.*|go_.*|process_.*)$
-        action: keep
+        - sourceLabels: [ __name__ ]
+          regex: ^(fluentbit_.*|go_.*|process_.*)$
+          action: keep
       {{- with .Values.serviceMonitor.scrapeTimeout }}
       scrapeTimeout: {{ . }}
       {{- end }}
@@ -29,7 +29,7 @@ spec:
       scheme: https
       ## tlsConfig: TLS configuration to use when scraping the endpoint. For example if using istio mTLS.
       ## Of type: https://github.com/coreos/prometheus-operator/blob/master/Documentation/api.md#tlsconfig
-      tlsConfig: 
+      tlsConfig:
         caFile: /etc/prometheus/secrets/istio.default/root-cert.pem
         certFile: /etc/prometheus/secrets/istio.default/cert-chain.pem
         keyFile: /etc/prometheus/secrets/istio.default/key.pem
@@ -40,4 +40,4 @@ spec:
   selector:
     matchLabels:
       {{- include "fluent-bit.selectorLabels" . | nindent 6 }}
-{{- end }}
+  {{- end }}
