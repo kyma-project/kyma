@@ -45,14 +45,16 @@ func TestNewRequestWithTarget(t *testing.T) {
 
 	msgSender := NewBebMessageSender(eventsEndpoint, client)
 
-	const ctxKey, ctxValue = "testKey", "testValue"
-	ctx := context.WithValue(context.Background(), ctxKey, ctxValue)
+	type ctxKey struct{}
+	const ctxValue = "testValue"
+	ctx := context.WithValue(context.Background(), ctxKey{}, ctxValue)
 	req, err := msgSender.NewRequestWithTarget(ctx, eventsEndpoint)
 	if err != nil {
 		t.Errorf("Failed to create a CloudEvent HTTP request with error: %v", err)
 	}
 	if req == nil {
 		t.Error("Failed to create a CloudEvent HTTP request want new request but got nil")
+		return
 	}
 	if req.Method != http.MethodPost {
 		t.Errorf("HTTP request has invalid method want: %s but got: %s", http.MethodPost, req.Method)
@@ -72,8 +74,8 @@ func TestNewRequestWithTarget(t *testing.T) {
 	if req.Context() != ctx {
 		t.Errorf("HTTP request context does not match original context want: %#v, but got %#v", ctx, req.Context())
 	}
-	if got := req.Context().Value(ctxKey); got != ctxValue {
-		t.Errorf("HTTP request context key:value do not match mant: %v:%v but got %v:%v", ctxKey, ctxValue, ctxKey, got)
+	if got := req.Context().Value(ctxKey{}); got != ctxValue {
+		t.Errorf("HTTP request context key:value do not match mant: %v:%v but got %v:%v", ctxKey{}, ctxValue, ctxKey{}, got)
 	}
 }
 

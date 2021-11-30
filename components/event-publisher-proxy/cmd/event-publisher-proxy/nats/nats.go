@@ -18,7 +18,7 @@ import (
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/subscribed"
 	"github.com/sirupsen/logrus"
 	"k8s.io/client-go/dynamic"
-	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
+	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp" //TODO: remove as this is only required in a dev setup
 	"sigs.k8s.io/controller-runtime/pkg/client/config"
 )
 
@@ -59,7 +59,7 @@ func (c *Commander) Start() error {
 	ctx, c.cancel = context.WithCancel(signals.NewContext())
 
 	// configure message receiver
-	messageReceiver := receiver.NewHttpMessageReceiver(c.envCfg.Port)
+	messageReceiver := receiver.NewHTTPMessageReceiver(c.envCfg.Port)
 
 	// connect to nats
 	bc := pkgnats.NewBackendConnection(c.envCfg.URL, c.envCfg.RetryOnFailedConnect, c.envCfg.MaxReconnects, c.envCfg.ReconnectWait)
