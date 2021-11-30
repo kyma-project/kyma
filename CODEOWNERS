@@ -78,9 +78,6 @@
 # The `service-catalog-addons` subchart
 /resources/service-manager-proxy/ @PK85 @piotrmiskiewicz @ksputo @szwedm @voigt @wozniakjan
 
-# The `testing` chart with Octopus
-/resources/testing/ @PK85 @piotrmiskiewicz @ksputo @szwedm @voigt @wozniakjan @adamwalach
-
 # The `istio-configuration` chart
 /resources/istio-configuration/ @strekm @werdes72 @Tomasz-Smelcerz-SAP @mjakobczyk @dariusztutaj @cnvergence @veichtj @piotrkpc
 
