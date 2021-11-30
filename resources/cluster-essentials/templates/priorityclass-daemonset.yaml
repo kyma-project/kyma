@@ -1,0 +1,9 @@
+{{- if .Values.global.daemonsetPriorityClassName }}
+apiVersion: scheduling.k8s.io/v1
+kind: PriorityClass
+metadata:
+  name: {{ .Values.global.daemonsetPriorityClassName }}
+value: {{ .Values.global.daemonsetPriorityClassValue }}
+globalDefault: false
+description: "Global scheduling priority of Kyma DaemonSet components. Must not be blocked by unschedulable non-daemonset workloads."
+{{- end }}

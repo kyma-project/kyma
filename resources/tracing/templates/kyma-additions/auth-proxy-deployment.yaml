@@ -28,6 +28,9 @@ spec:
           configMap:
             name: {{ .Release.Name }}-auth-proxy-{{ template "jaeger-operator.fullname" . }}-templates
       serviceAccountName: {{ include "jaeger-operator.fullname" . }}-auth-proxy
+      {{- if .Values.global.priorityClassName }}
+      priorityClassName: {{ .Values.global.priorityClassName }}
+      {{- end }}
       containers:
       - image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.oauth2_proxy) }}"
         imagePullPolicy: {{ .Values.authProxy.image.pullPolicy }}

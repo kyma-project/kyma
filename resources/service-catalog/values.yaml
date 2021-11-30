@@ -14,7 +14,7 @@ global:
       name: "health-proxy"
       version: "bd223692"
       directory: "incubator/develop"
-
+  priorityClassName: "kyma-system"
 
   istio:
     gateway:

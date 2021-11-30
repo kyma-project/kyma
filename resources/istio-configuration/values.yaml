@@ -1,6 +1,7 @@
 ---
 helmValues:
   global:
+    priorityClassName: "system-cluster-critical"
     imagePullPolicy: IfNotPresent
     proxy:
       readinessFailureThreshold: 40
