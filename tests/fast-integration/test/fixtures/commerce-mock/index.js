@@ -112,6 +112,7 @@ async function checkFunctionResponse(functionNamespace, mockNamespace = 'mocks')
   const mockHost = vs.spec.hosts[0];
   const host = mockHost.split(".").slice(1).join(".");
 
+  console.log("mockHost: ", mockHost)
   // get OAuth client id and client secret from Kubernetes Secret
   const oAuthSecretData = await getSecretData("lastorder-oauth", functionNamespace);
 
@@ -122,6 +123,7 @@ async function checkFunctionResponse(functionNamespace, mockNamespace = 'mocks')
   );
   const accessToken = await oAuthTokenGetter.getToken(["read", "write"]);
 
+  console.log("accessToken:", accessToken)
   // expect no error when authorized
   let res = await retryPromise(
     () => axios.post(`https://lastorder.${host}/function`, { orderCode: "789" }, { 
