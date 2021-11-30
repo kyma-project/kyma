@@ -8,7 +8,7 @@ Loki shows fewer logs than you would like to see.
 
 ## Cause
 
-By default, Loki stores up to 30 GB of data for a maximum of 5 days, with maximum ingestion rate of 3 MB/s. If the default size or time is exceeded, the oldest logs are removed first.
+There's a fixed logs retention time and size. If the default time is exceeded, the oldest logs are removed first.
 
 ## Remedy
 
