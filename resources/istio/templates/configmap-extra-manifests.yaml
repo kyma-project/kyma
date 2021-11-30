@@ -8,6 +8,14 @@ data:
 {{ tpl (.Files.Get "files/destination-rules.yaml" | printf "%s" | indent 4) . }}
   mtls-global.yaml: |-
 {{ tpl (.Files.Get "files/mtls-global-v2.yaml" | printf "%s" | indent 4) . }}
+  metadata-filter.yaml: |-
+{{ tpl (.Files.Get "files/metadata-filter-1.12.yaml" | printf "%s" | indent 4) . }}
+  stats-filter.yaml: |-
+{{ tpl (.Files.Get "files/stats-filter-1.12.yaml" | printf "%s" | indent 4) . }}
+  tcp-metadata-filter.yaml: |-
+{{ tpl (.Files.Get "files/tcp-metadata-filter-1.12.yaml" | printf "%s" | indent 4) . }}
+  tcp-stats-filter.yaml: |-
+{{ tpl (.Files.Get "files/tcp-stats-filter-1.12.yaml" | printf "%s" | indent 4) . }}
 {{- if hasKey .Values.global "minikubeIP" }}
   destination-rules-minikube.yaml: |-
 {{ tpl (.Files.Get "files/destination-rules-minikube.yaml" | printf "%s" | indent 4) . }}
