@@ -173,7 +173,7 @@ func (r *FunctionReconciler) Reconcile(request ctrl.Request) (ctrl.Result, error
 		}
 
 		return r.updateStatusWithoutRepository(ctx, ctrl.Result{
-			Requeue: true,
+			Requeue: true, // use exponential delay
 		}, instance, serverlessv1alpha1.Condition{
 			Type:               serverlessv1alpha1.ConditionConfigurationReady,
 			Status:             corev1.ConditionFalse,
