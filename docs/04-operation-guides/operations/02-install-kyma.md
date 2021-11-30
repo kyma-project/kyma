@@ -25,7 +25,7 @@ You can either use an out-of-the-box k3d cluster or choose any other cluster pro
   > **TIP:** If you want to define the name of your k3d cluster and pass arguments to the Kubernetes API server (for example, to log to stderr), run:
   >
   > ```bash
-  > kyma provision k3d --name='{CUSTOM_NAME}' --server-args='--alsologtostderr'
+  > kyma provision k3d --name='{CUSTOM_NAME}' --k3s-arg='--alsologtostderr@server:0'
   > ```
 
 ## Default installation
