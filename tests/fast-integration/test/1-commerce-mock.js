@@ -92,6 +92,11 @@ function commerceMockTests() {
     await revokeCommerceMockCertificate();
   });
 
+     // renew certificate
+     it("CommerceMock should renew it's certificate", async function () {
+      await renewCommerceMockCertificate();
+    });
+
     it("Should print report of restarted containers, skipped if no crashes happened", async function () {
       const afterTestRestarts = await getContainerRestartsForAllNamespaces();
       printRestartReport(initialRestarts, afterTestRestarts);
