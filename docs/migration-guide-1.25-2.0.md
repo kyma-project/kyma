@@ -15,7 +15,6 @@ Kyma 2.0 simplifies things and switches to the native Kubernetes authentication.
 - Dex
 - IAM Kubeconfig Service
 - Permission Controller
-- UAA Activator
 
 To use the native Kubernetes authentication in Kyma, you need to remove the deprecated components manually.
 
