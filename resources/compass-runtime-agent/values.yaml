@@ -10,6 +10,7 @@ global:
     gateway:
       name: kyma-gateway
       namespace: kyma-system
+  priorityClassName: "kyma-system"
 
 managementPlane: {} # default value
 

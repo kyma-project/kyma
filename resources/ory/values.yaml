@@ -71,6 +71,7 @@ global:
       name: "alpine"
       version: "3.14.2"
       directory: "external"
+  priorityClassName: "kyma-system"
 
 headerRewrite:
   enabled: true

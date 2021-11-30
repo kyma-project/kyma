@@ -115,8 +115,8 @@ global:
     git_server:
       name: "gitserver"
       version: "c0aa144a"
-
-
+  priorityClassName: "kyma-system"
+  daemonsetPriorityClassName: "kyma-system-daemonset"
 
 images:
   function_controller:
