@@ -2,7 +2,7 @@
 title: Adjust Loki log limits
 ---
 
-By default, Loki stores up to 30 GB of data for a maximum of 5 days, with maximum ingestion rate of 3 MB/s. If the default size or time is exceeded, the oldest logs are removed first.
+By default, Loki stores up to 30 GB of data for a maximum of 5 days, with maximum ingestion rate of 3 MB/s. If the default time is exceeded, the oldest logs are removed first.
 
 To adjust the limits to your needs, you simply create a custom YAML file based on the [Loki values.yaml](https://github.com/kyma-project/kyma/blob/main/resources/logging/charts/loki/values.yaml) and deploy it with `kyma deploy --values-file {VALUES_FILE_PATH}`.
 
