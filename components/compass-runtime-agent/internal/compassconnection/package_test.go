@@ -379,7 +379,7 @@ func TestCompassConnectionController(t *testing.T) {
 		// when
 		// 2 seconds wait for call + 1 second for timeout
 		err = waitFor(checkInterval, testTimeout, func() bool {
-			return mockFunctionCalled(&badConnectorMock.Mock, "Configuration", connectorTokenHeaders)
+			return mockFunctionCalled(&badConnectorMock.Mock, "Configuration", connectorTokenHeadersFunc)
 		})
 
 		require.NoError(t, err)
@@ -413,7 +413,7 @@ func TestCompassConnectionController(t *testing.T) {
 		// when
 		// 2 seconds wait for call + 1 second for timeout
 		err = waitFor(checkInterval, testTimeout, func() bool {
-			return mockFunctionCalled(&badConnectorMock.Mock, "Configuration", connectorTokenHeaders)
+			return mockFunctionCalled(&badConnectorMock.Mock, "Configuration", connectorTokenHeadersFunc)
 		})
 
 		require.NoError(t, err)
