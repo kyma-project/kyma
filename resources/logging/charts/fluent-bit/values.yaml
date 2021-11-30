@@ -369,3 +369,8 @@ config:
 #      name: https
 #      protocol: TLS
 #  resolution: DNS
+
+istio:
+# Allows you to loosen strict mTLS for exposed HTTP endpoint (basically, the /metrics endpoint)
+# If omitted or set to false the mesh-wide policy is applied which sets mTLS mode to strict
+  permissiveMtls: false
