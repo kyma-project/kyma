@@ -18,7 +18,7 @@ import (
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/subscribed"
 	"github.com/sirupsen/logrus"
 	"k8s.io/client-go/dynamic"
-	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp" //TODO: remove as this is only required in a dev setup
+	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp" // TODO: remove as this is only required in a dev setup
 	"sigs.k8s.io/controller-runtime/pkg/client/config"
 )
 
