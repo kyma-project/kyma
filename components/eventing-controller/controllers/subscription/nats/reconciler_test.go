@@ -406,30 +406,49 @@ func testDispatcherWithMultipleSubscribers(id int, eventTypePrefix, natsSubjectT
 		It("Should receive events in subscribers", func() {
 			ctx := context.Background()
 
-			var subscription2 *eventingv1alpha1.Subscription
-			eventType := reconcilertesting.EventTypePrefix + "." + reconcilertesting.ApplicationNameNotClean + "." + reconcilertesting.OrderUpdatedV1Event
-			emptyEventType := reconcilertesting.ApplicationNameNotClean + "." + reconcilertesting.OrderUpdatedV1Event
-			natsSubject := reconcilertesting.EventTypePrefix + "." + reconcilertesting.ApplicationName + "." + reconcilertesting.OrderUpdatedV1Event
-			emptyNatsSubject := reconcilertesting.ApplicationName + "." + reconcilertesting.OrderUpdatedV1Event
-
 			// Start reconciler with empty checkSink function
 			cancel = startReconciler(eventTypePrefix, func(ctx context.Context, r *Reconciler, subscription *eventingv1alpha1.Subscription) error {
 				return nil
 			})
 			defer cancel()
 
-			subscriptionName := fmt.Sprintf(subscriptionNameFormat, id)
+			subName1 := fmt.Sprintf(subscriptionNameFormat, id)
+			subName2 := fmt.Sprintf("subb-%d", id)
 
+			publishToSubjects := []string{
+				fmt.Sprintf("%s0", natsSubjectToPublish),
+				fmt.Sprintf("%s1", natsSubjectToPublish),
+			}
+
+			subscribeToEventTypes := []string{
+				fmt.Sprintf("%s0", eventTypeToSubscribe),
+				fmt.Sprintf("%s1", eventTypeToSubscribe),
+			}
+
+			// create subscribers
 			subChan1 := make(chan []byte)
-			url, shutdown := newSubscriber(subChan1)
+			url1, shutdown := newSubscriber(subChan1)
 			defer shutdown()
 
-			subscription := reconcilertesting.NewSubscription(subscriptionName, namespaceName, reconcilertesting.WithFilter(reconcilertesting.EventSource, eventTypeToSubscribe), reconcilertesting.WithWebhookForNats)
-			subscription.Spec.Sink = url
-			ensureSubscriptionCreated(ctx, subscription)
+			subChan2 := make(chan []byte)
+			url2, shutdown2 := newSubscriber(subChan2)
+			defer shutdown2()
 
-			getSubscription(ctx, subscription).Should(And(
-				reconcilertesting.HaveSubscriptionName(subscriptionName),
+			// create subscription
+			subscription1 := reconcilertesting.NewSubscription(subName1, namespaceName, reconcilertesting.WithFilter(reconcilertesting.EventSource, subscribeToEventTypes[0]), reconcilertesting.WithWebhookForNats)
+			subscription2 := reconcilertesting.NewSubscription(subName2, namespaceName, reconcilertesting.WithFilter(reconcilertesting.EventSource, subscribeToEventTypes[1]), reconcilertesting.WithWebhookForNats)
+
+			// assign sink URL
+			subscription1.Spec.Sink = url1
+			subscription2.Spec.Sink = url2
+
+			// ensure subscription is created
+			ensureSubscriptionCreated(ctx, subscription1)
+			ensureSubscriptionCreated(ctx, subscription2)
+
+			// retrieve subscription and check whether it is ready
+			getSubscription(ctx, subscription1).Should(And(
+				reconcilertesting.HaveSubscriptionName(subName1),
 				reconcilertesting.HaveCondition(eventingv1alpha1.MakeCondition(
 					eventingv1alpha1.ConditionSubscriptionActive,
 					eventingv1alpha1.ConditionReasonNATSSubscriptionActive,
@@ -438,21 +457,6 @@ func testDispatcherWithMultipleSubscribers(id int, eventTypePrefix, natsSubjectT
 					MaxInFlightMessages: defaultSubsConfig.MaxInFlightMessages,
 				}),
 			))
-
-			subName2 := fmt.Sprintf("subb-%d", id)
-
-			subChan2 := make(chan []byte)
-			url2, shutdown2 := newSubscriber(subChan2)
-			defer shutdown2()
-
-			if eventTypePrefix != "" {
-				subscription2 = reconcilertesting.NewSubscription(subName2, namespaceName, reconcilertesting.WithFilter(reconcilertesting.EventSource, eventType), reconcilertesting.WithWebhookForNats)
-			} else {
-				subscription2 = reconcilertesting.NewSubscription(subName2, namespaceName, reconcilertesting.WithFilter(reconcilertesting.EventSource, emptyEventType), reconcilertesting.WithWebhookForNats)
-			}
-
-			subscription2.Spec.Sink = url2
-			ensureSubscriptionCreated(ctx, subscription2)
 
 			getSubscription(ctx, subscription2).Should(And(
 				reconcilertesting.HaveSubscriptionName(subName2),
@@ -465,18 +469,16 @@ func testDispatcherWithMultipleSubscribers(id int, eventTypePrefix, natsSubjectT
 				}),
 			))
 
+			// establish connection with NATS
 			connection, err := connectToNats(natsURL)
 			Expect(err).ShouldNot(HaveOccurred())
-			err = connection.Publish(natsSubjectToPublish, []byte(reconcilertesting.StructuredCloudEvent))
+
+			// publish events to nats
+			err = connection.Publish(publishToSubjects[0], []byte(reconcilertesting.StructuredCloudEvent))
 			Expect(err).ShouldNot(HaveOccurred())
 
-			if eventTypePrefix != "" {
-				err = connection.Publish(natsSubject, []byte(reconcilertesting.StructuredCloudEventUpdated))
-				Expect(err).ShouldNot(HaveOccurred())
-			} else {
-				err = connection.Publish(emptyNatsSubject, []byte(reconcilertesting.StructuredCloudEventUpdated))
-				Expect(err).ShouldNot(HaveOccurred())
-			}
+			err = connection.Publish(publishToSubjects[1], []byte(reconcilertesting.StructuredCloudEventUpdated))
+			Expect(err).ShouldNot(HaveOccurred())
 
 			// make sure that the subscriber received the message
 			sent := fmt.Sprintf(`"%s"`, reconcilertesting.EventData)
