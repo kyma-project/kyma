@@ -9,9 +9,9 @@ metadata:
 spec:
   mtls:
     {{- if .Values.istio.permissiveMtls }}
-    mode: "PERMISSIVE"
+    mode: PERMISSIVE
     {{- else }}
-    mode: "STRICT"
+    mode: STRICT
     {{- end }}
   selector:
     matchLabels:

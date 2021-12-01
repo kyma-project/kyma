@@ -7,4 +7,4 @@ spec:
     matchLabels:
       app: {{ template "fullname" . }}
   mtls:
-    mode: "STRICT"
+    mode: STRICT
