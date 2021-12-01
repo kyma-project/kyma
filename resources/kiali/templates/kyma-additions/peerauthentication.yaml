@@ -15,4 +15,4 @@ spec:
     9090:
       mode: STRICT
     {{ .Values.kiali.spec.server.port }}:
-    mode: STRICT
+      mode: STRICT
