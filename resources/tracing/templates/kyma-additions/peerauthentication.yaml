@@ -24,7 +24,12 @@ spec:
     matchLabels:
       app.kubernetes.io/name: {{ include "jaeger-operator.fullname" . }}-jaeger
   mtls:
-    mode: STRICT
+    mode: PERMISSIVE
+  portLevelMtls: #keep metrics and query port strict
+    14269:
+      mode: STRICT
+    16686:
+      mode: STRICT
 {{- end }}
 {{- if eq .Values.jaeger.spec.strategy "production" }}
 ---
@@ -39,7 +44,10 @@ spec:
     matchLabels:
       app.kubernetes.io/name: {{ include "jaeger-operator.fullname" . }}-jaeger-collector
   mtls:
-    mode: STRICT
+    mode: PERMISSIVE
+  portLevelMtls: #keep metrics port strict
+    14269:
+      mode: STRICT
 ---
 apiVersion: security.istio.io/v1beta1
 kind: PeerAuthentication
