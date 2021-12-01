@@ -1,6 +1,9 @@
 # Eventing Test
 
-This test covers end-to-end flow for Kyma eventing.
+
+## Overview 
+
+This test covers the end-to-end flow for Eventing.
 
 ## Usage
 To run Eventing-specific tests locally, follow these steps:
