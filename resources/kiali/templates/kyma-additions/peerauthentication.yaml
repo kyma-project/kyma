@@ -13,6 +13,6 @@ spec:
     mode: "UNSET"
   portLevelMtls:
     9090:
-      mode: "STRICT"
+      mode: STRICT
     {{ .Values.kiali.spec.server.port }}:
-    mode: "STRICT"
+    mode: STRICT
