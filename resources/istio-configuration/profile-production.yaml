@@ -14,10 +14,6 @@ helmValues:
         limits:
           cpu: 500m
           memory: 1024Mi
-  pilot:
-    autoscaleMax: 5
-    autoscaleMin: 2
-    configNamespace: istio-config
 
 components:
   ingressGateways:

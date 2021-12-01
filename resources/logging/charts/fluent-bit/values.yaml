@@ -52,7 +52,7 @@ securityContext:
 service:
   type: ClusterIP
   port: 2020
-  labels: 
+  labels:
     {}
   annotations:
     {}
@@ -123,10 +123,9 @@ extraVolumeMounts: ""
 #     mountPath: /var/tmp
 
 updateStrategy:
-  {}
-  # type: RollingUpdate
-  # rollingUpdate:
-  #   maxUnavailable: 1
+ type: RollingUpdate
+ rollingUpdate:
+   maxUnavailable: 33%
 
 # Make use of a pre-defined configmap instead of the one templated here
 existingConfigMap: ""
@@ -182,7 +181,7 @@ config:
       memBufLimit: 5MB
       # Exit Fluent Bit when reaching EOF of the monitored files.
       exitOnEof: "false"
-      parser: 
+      parser:
       # If enabled, the plugin will recombine split Docker log lines before passing them to any parser as configured above. This mode cannot be used at the same time as Multiline.
       dockerMode: "Off"
       # Wait period time in seconds to flush queued unfinished split lines.
@@ -370,3 +369,8 @@ config:
 #      name: https
 #      protocol: TLS
 #  resolution: DNS
+
+istio:
+# Allows you to loosen strict mTLS for exposed HTTP endpoint (basically, the /metrics endpoint)
+# If omitted or set to false the mesh-wide policy is applied which sets mTLS mode to strict
+  permissiveMtls: false

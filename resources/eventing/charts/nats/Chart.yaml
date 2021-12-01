@@ -1,5 +1,4 @@
 apiVersion: v2
 name: nats
 description: Helm chart for nats
-type: application
-version: 1.0.0
+version: 0.9.0

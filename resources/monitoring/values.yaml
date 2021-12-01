@@ -15,7 +15,7 @@ global:
       sha: ""
     configmap_reload:
       name: "configmap-reload"
-      version: "v0.4.0"
+      version: "v0.5.0"
       directory: "external/jimmidyson"
       sha: ""
     alertmanager:
@@ -47,7 +47,7 @@ global:
       sha: ""
     busybox:
       name: "busybox"
-      version: "1.32.0-v1"
+      version: "1.34.1"
       directory: "external"
       sha: ""
     k8s_sidecar:
@@ -57,7 +57,7 @@ global:
       sha: ""
     oauth2_proxy:
       name: "oauth2-proxy"
-      version: "7.1.3-4c48514d"
+      version: "7.2.0-59f3431d"
       directory: "tpi"
       sha: ""
         
@@ -106,8 +106,6 @@ global:
   imagePullSecrets: []
   # - name: "image-pull-secret"
 
-resourceSelector:
-  namespaces:
 # Default values for kube-prometheus-stack.
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.

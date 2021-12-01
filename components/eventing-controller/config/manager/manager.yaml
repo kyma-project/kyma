@@ -65,10 +65,12 @@ spec:
             value: example.com
           - name: WEBHOOK_TOKEN_ENDPOINT
             value: "https://oauth2.example-domain.com/oauth2/token"
+          - name: PUBLISHER_IMAGE_PULL_POLICY
+            value: Always
           - name: APP_LOG_FORMAT
             value: "json"
           - name: APP_LOG_LEVEL
-            value: "info"
+            value: "debug"
         resources:
           limits:
             cpu: 500m

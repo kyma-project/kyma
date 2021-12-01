@@ -33,6 +33,7 @@ describe("Eventing tests", function () {
   this.timeout(10 * 60 * 1000);
   this.slow(5000);
   const testNamespace = "test";
+  const mockNamespace = process.env.MOCK_NAMESPACE || 'mocks'
   const backendK8sSecretName = process.env.BACKEND_SECRET_NAME || "eventing-backend";
   const backendK8sSecretNamespace = process.env.BACKEND_SECRET_NAMESPACE || "default";
   const eventMeshSecretFilePath = process.env.EVENTMESH_SECRET_FILE || "";
@@ -42,7 +43,7 @@ describe("Eventing tests", function () {
   // eventingE2ETestSuite - Runs Eventing end-to-end tests
   function eventingE2ETestSuite () {
     it("lastorder function should be reachable through secured API Rule", async function () {
-      await checkFunctionResponse(testNamespace);
+      await checkFunctionResponse(testNamespace, mockNamespace);
     });
 
     it("In-cluster event should be delivered (structured and binary mode)", async function () {
@@ -50,14 +51,14 @@ describe("Eventing tests", function () {
     });
 
     it("order.created.v1 event from CommerceMock should trigger the lastorder function", async function () {
-      await sendEventAndCheckResponse();
+      await sendEventAndCheckResponse(mockNamespace);
     });
   }
 
   // eventingTracingTestSuite - Runs Eventing tracing tests
   function eventingTracingTestSuite () {
     it("order.created.v1 event from CommerceMock should have correct tracing spans", async function () {
-      await sendLegacyEventAndCheckTracing();
+      await sendLegacyEventAndCheckTracing(mockNamespace);
     });
     it("In-cluster event should have correct tracing spans", async function () {
       await checkInClusterEventTracing(testNamespace);
@@ -66,6 +67,7 @@ describe("Eventing tests", function () {
 
   before(async function() {
     // runs once before the first test in this block
+    console.log('Running with mockNamspace =', mockNamespace)
 
     // If eventMeshSecretFilePath is specified then create a k8s secret for eventing-backend
     // else use existing k8s secret as specified in backendK8sSecretName & backendK8sSecretNamespace
@@ -77,9 +79,9 @@ describe("Eventing tests", function () {
 
     // Deploy Commerce mock application, function and subscriptions for tests
     console.log("Preparing CommerceMock test fixture")
-    await ensureCommerceMockLocalTestFixture("mocks", testNamespace).catch((err) => {
+    await ensureCommerceMockLocalTestFixture(mockNamespace, testNamespace).catch((err) => {
       console.dir(err); // first error is logged
-      return ensureCommerceMockLocalTestFixture("mocks", testNamespace);
+      return ensureCommerceMockLocalTestFixture(mockNamespace, testNamespace);
     });
 
     cancelPrometheusPortForward = prometheusPortForward();
@@ -88,7 +90,7 @@ describe("Eventing tests", function () {
   after(async function() {
     // runs once after the last test in this block
     console.log("Cleaning: Test namespaces should be deleted")
-    await cleanMockTestFixture("mocks", testNamespace, true);
+    await cleanMockTestFixture(mockNamespace, testNamespace, true);
 
     // Delete eventing backend secret if it was created by test
     if (eventMeshSecretFilePath !== "") {

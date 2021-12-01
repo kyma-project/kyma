@@ -12,8 +12,10 @@ spec:
       app.kubernetes.io/name: {{ include "jaeger-operator.fullname" . }}-jaeger
   mtls:
     mode: "PERMISSIVE"
-  portLevelMtls: #keep metrics port strict
+  portLevelMtls: #keep metrics and query port strict
     "14269":
+      mode: STRICT
+    "16686":
       mode: STRICT
 {{- end }}
 {{- if eq .Values.jaeger.spec.strategy "production" }}

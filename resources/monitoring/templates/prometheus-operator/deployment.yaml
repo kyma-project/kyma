@@ -1,5 +1,5 @@
 {{- /*
-  Customization: .Values.resourceSelector.namespaces if statement is added to make comma separated namespace list work.
+  Customization: prometheusOperator.namespaces.releaseNamespace can be defined without .additional
   Liveness/readiness probes were added since they are missing in the upstream chart
 */ -}}
 {{- $namespace := printf "%s" (include "kube-prometheus-stack.namespace" .) }}
@@ -51,16 +51,12 @@ spec:
             {{- if .Values.prometheusOperator.denyNamespaces }}
             - --deny-namespaces={{ .Values.prometheusOperator.denyNamespaces | join "," }}
             {{- end }}
-            {{- if .Values.resourceSelector.namespaces }}
-            - --namespaces={{ .Values.resourceSelector.namespaces }}
-            {{ else }}
             {{- with $.Values.prometheusOperator.namespaces }}
-            {{ $ns := .additional }}
+            {{- $ns := default (list nil) .additional }} #Customization: have a default value if no additional namespace is defined
             {{- if .releaseNamespace }}
             {{- $ns = append $ns $namespace }}
             {{- end }}
             - --namespaces={{ $ns | join "," }}
-            {{- end }}
             {{- end }}
             - --logtostderr=true
             - --localhost=127.0.0.1

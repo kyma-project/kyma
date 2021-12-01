@@ -31,11 +31,11 @@ spec:
     - operation:
         paths: ["/loki/api/v1/push"]
         methods: ["POST"]
-  # prometheus (no istio-sidecar) having a User-Agent header can query metrics
-  - to:
+  - from:
+    - source:
+        principals:
+        - cluster.local/ns/{{ .Release.Namespace }}/sa/monitoring-prometheus
+    to:
     - operation:
         paths: ["/metrics"]
         methods: ["GET"]
-    when:
-    - key: "request.headers[User-Agent]"
-      values: ["Prometheus/*"]

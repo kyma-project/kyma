@@ -2,10 +2,10 @@ const execa = require("execa");
 const fs = require('fs');
 const {
     getEnvOrThrow,
-    getEnvOrDefault,
     debug,
     wait
 } = require("../utils");
+const { inspect } = require('util')
 
 class KCPConfig {
     static fromEnv() {
@@ -101,7 +101,7 @@ class KCPWrapper {
     }
 
     async upgradeKyma (subaccount, kymaUpgradeVersion) {
-        const args = [`upgrade`, `kyma`, `--version`, `"${kymaUpgradeVersion}"`, `--target`, `subaccount=${subaccount}`];
+        const args = [`upgrade`, `kyma`, `--version=${kymaUpgradeVersion}`, `--target`, `subaccount=${subaccount}`];
         try {
             let res = await this.exec(args);
             
@@ -109,11 +109,39 @@ class KCPWrapper {
             // so we need to extract the uuid
             let orchestrationID = res.split(" ")[1]
             debug(`OrchestrationID: ${orchestrationID}`)
-            
-            let orchestrationStatus = await this.ensureOrchestrationSucceeded(orchestrationID)
-        
-            return orchestrationStatus
+
+            try {
+                let orchestrationStatus = await this.ensureOrchestrationSucceeded(orchestrationID)
+                return orchestrationStatus
+            } catch (error) {
+                debug(error)
+            }
+
+            try {
+                let runtime = await this.runtimes({subaccount: subaccount})
+                debug(`Runtime Status: ${inspect(runtime, false, null, false)}`)
+            } catch (error) {
+                debug(error)
+            }
+
+            try {
+                let orchestration = await this.getOrchestrationStatus(orchestrationID)
+                debug(`Orchestration Status: ${inspect(orchestration, false, null, false)}`)
+            } catch (error) {
+                debug(error)
+            }
+
+            try {
+                let operations = await this.getOrchestrationsOperations(orchestrationID)
+                debug (`Operations: ${inspect(operations, false, null, false)}`)
+            } catch (error) {
+                debug(error)
+            }
+
+            throw (`Kyma Upgrade failed`);
+
         } catch (error) {
+            debug(error)
             throw new Error(`failed during upgradeKyma`);
         }
     };
@@ -126,30 +154,23 @@ class KCPWrapper {
             let operations = JSON.parse(res)
             // debug(`getOrchestrationsOperations output: ${operations}`)
 
-            if (operations.count === 0) {
-                return []
-            }
-            if (operations.data === undefined) {
-                return []
-            }
-
-            return operations.data
+            return operations
         } catch (error) {
+            debug(error)
             throw new Error(`failed during getOrchestrationsOperations`);
         }
     }
 
     async getOrchestrationsOperationStatus(orchestrationID, operationID) {
         // debug(`Running getOrchestrationsOperationStatus...`)
-        const args = [`--config`, `${kcpconfigPath}`, `orchestration`,`${orchestrationID}`,`--operation`, `${operationID}`, `-o`, `json`]
+        const args = [`orchestration`,`${orchestrationID}`,`--operation`, `${operationID}`, `-o`, `json`]
         try {
             let res = await this.exec(args);
             res = JSON.parse(res)
 
-            // debug(`getOrchestrationsOperationStatus output: ${res}`)
-
-            return JSON.parse(res)
+            return res
         } catch (error) {
+            debug(error)
             throw new Error(`failed during getOrchestrationsOperationStatus`);
         }
     }
@@ -167,15 +188,16 @@ class KCPWrapper {
             // debug(`Got ${operations.length} operations for OrchestrationID ${o.orchestrationID}`)
 
             let upgradeOperation = {}
-            if (operations.length > 0) {
-                upgradeOperation = await this.getOrchestrationsOperationStatus(orchestrationID, operations[0].operationID)
-                debug(`OrchestrationID: ${orchestrationID}: OperationID: ${operations[0].operationID}: OperationStatus: ${upgradeOperation.state}`)
+            if (operations.count > 0) {
+                upgradeOperation = await this.getOrchestrationsOperationStatus(orchestrationID, operations.data[0].operationID)
+                debug(`OrchestrationID: ${orchestrationID}: OperationID: ${operations.data[0].operationID}: OperationStatus: ${upgradeOperation.state}`)
             } else {
                 debug (`No operations in OrchestrationID ${o.orchestrationID}`)
             }
 
-            return res
+            return o
         } catch (error) {
+            debug(error)
             throw new Error(`failed during getOrchestrationStatus`);
         }
     };
@@ -196,7 +218,7 @@ class KCPWrapper {
                 debug("KEB Orchestration Status:", res);
                 throw(`orchestration didn't succeed in 15min: ${JSON.stringify(res)}`);
             }
-        
+
             const descSplit = res.description.split(" ");
             if (descSplit[1] !== "1") {
                 throw(`orchestration didn't succeed (number of scheduled operations should be equal to 1): ${JSON.stringify(res)}`);
@@ -204,6 +226,7 @@ class KCPWrapper {
         
             return res;
         } catch (error) {
+            debug(error)
             throw new Error(`failed during ensureOrchestrationSucceeded`);
         }
       }
