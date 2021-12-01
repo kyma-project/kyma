@@ -103,17 +103,19 @@ describe("Eventing tests", function () {
     console.log("Preparing for tests on SKR")
     // create gardener & director clients
     gardener = new GardenerClient(GardenerConfig.fromEnv());
+    // director client for Compass
     director = new DirectorClient(DirectorConfig.fromEnv());
 
-    // Get shoot info from gardener to get compassID
+    // Get shoot info from gardener to get compassID for this shoot
     const shootName = getShootNameFromK8sServerUrl();
     console.log(`Fetching SKR info for shoot: ${shootName}`)
     skrInfo = await gardener.getShoot(shootName)
     debug(`appName: ${appName}, scenarioName: ${scenarioName}, testNamespace: ${testNamespace}, compassID: ${skrInfo.compassID}`);
 
-    // Assign SKR to scenario
     console.log("Assigning SKR to scenario in Compass")
+    // Create a new scenario (systems/formations) in compass for this test
     await addScenarioInCompass(director, scenarioName);
+    // map scenario to target SKR
     await assignRuntimeToScenario(director, skrInfo.compassID, scenarioName);
 
     console.log("Preparing CommerceMock test fixture on Kyma SKR")

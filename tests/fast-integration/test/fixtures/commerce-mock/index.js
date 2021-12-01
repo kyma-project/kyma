@@ -450,14 +450,19 @@ async function ensureCommerceMockWithCompassTestFixture(client, appName, scenari
 async function cleanCompassResourcesSKR(client, appName, scenarioName, runtimeID) {
   const application = await getApplicationByName(client, appName, scenarioName)
   if (application) {
+    // detach Commerce-mock application from scenario
+    // so that we can de-register the app from compass
     console.log(`Removing application from scenario...`)
     await removeApplicationFromScenario(client, application.id, scenarioName);
 
+    // Disconnect Commerce-mock app from compass
     console.log(`De-registering application: ${application.id}...`)
     await deregisterApplication(client, application.id);
   }
 
   try {
+    // detach the target SKR from scenario
+    // so that we can remove scenario from compass
     console.log(`Un-assigning runtime from scenario: ${scenarioName}...`)
     await unassignRuntimeFromScenario(client, runtimeID, scenarioName);
 
