@@ -5,14 +5,14 @@ global:
   images:
     eventing_controller:
       name: eventing-controller
-      version: PR-12599
+      version: PR-12567
       pullPolicy: "IfNotPresent"
     publisher_proxy:
       name: event-publisher-proxy
-      version: 96f9210e
+      version: PR-12677
     nats:
       name: nats
-      version: 2.6.1-alpine
+      version: 2.6.5-alpine
       directory: external
 
   # secretName defines optionally another name than the default secret name

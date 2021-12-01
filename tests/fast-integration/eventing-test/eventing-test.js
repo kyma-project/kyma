@@ -47,7 +47,7 @@ describe("Eventing tests", function () {
   const appName = `app-${suffix}`;
   const scenarioName = `test-${suffix}`;
   const testNamespace = `test-${suffix}`;
-  const mockNamespace = "mocks";
+  const mockNamespace = process.env.MOCK_NAMESPACE || 'mocks'
   const isSKR = process.env.KYMA_TYPE === "SKR";
   const backendK8sSecretName = process.env.BACKEND_SECRET_NAME || "eventing-backend";
   const backendK8sSecretNamespace = process.env.BACKEND_SECRET_NAMESPACE || "default";
@@ -61,7 +61,7 @@ describe("Eventing tests", function () {
   // eventingE2ETestSuite - Runs Eventing end-to-end tests
   function eventingE2ETestSuite () {
     it("lastorder function should be reachable through secured API Rule", async function () {
-      await checkFunctionResponse(testNamespace);
+      await checkFunctionResponse(testNamespace, mockNamespace);
     });
 
     it("In-cluster event should be delivered (structured and binary mode)", async function () {
@@ -69,7 +69,7 @@ describe("Eventing tests", function () {
     });
 
     it("order.created.v1 event from CommerceMock should trigger the lastorder function", async function () {
-      await sendEventAndCheckResponse();
+      await sendEventAndCheckResponse(mockNamespace);
     });
   }
 
@@ -82,7 +82,7 @@ describe("Eventing tests", function () {
     }
 
     it("order.created.v1 event from CommerceMock should have correct tracing spans", async function () {
-      await sendLegacyEventAndCheckTracing(testNamespace);
+      await sendLegacyEventAndCheckTracing(testNamespace, mockNamespace);
     });
     it("In-cluster event should have correct tracing spans", async function () {
       await checkInClusterEventTracing(testNamespace);
@@ -128,6 +128,7 @@ describe("Eventing tests", function () {
 
   before(async function() {
     // runs once before the first test in this block
+    console.log('Running with mockNamspace =', mockNamespace)
 
     // If eventMeshSecretFilePath is specified then create a k8s secret for eventing-backend
     // else use existing k8s secret as specified in backendK8sSecretName & backendK8sSecretNamespace

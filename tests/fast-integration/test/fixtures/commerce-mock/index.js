@@ -82,7 +82,6 @@ const lastorderFunctionYaml = fs.readFileSync(
   }
 );
 
-const commerceObjs = k8s.loadAllYaml(commerceMockYaml);
 const applicationObjs = k8s.loadAllYaml(applicationMockYaml);
 const lastorderObjs = k8s.loadAllYaml(lastorderFunctionYaml);
 let eventMeshSourceNamespace = "/default/sap.kyma/tunas-prow"
@@ -108,8 +107,13 @@ function prepareLastorderObjs(type = 'standard', appName = 'commerce') {
   }
 }
 
-async function checkFunctionResponse(functionNamespace) {
-  const vs = await waitForVirtualService("mocks", "commerce-mock");
+// Allows creating Commerce Mock objects in a specific namespace
+function prepareCommerceObjs(mockNamespace) {
+  return k8s.loadAllYaml(commerceMockYaml.toString().replace(/%%MOCK_NAMESPACE%%/g, mockNamespace))
+}
+
+async function checkFunctionResponse(functionNamespace, mockNamespace = 'mocks') {
+  const vs = await waitForVirtualService(mockNamespace, "commerce-mock");
   const mockHost = vs.spec.hosts[0];
   const host = mockHost.split(".").slice(1).join(".");
 
@@ -148,8 +152,8 @@ async function checkFunctionResponse(functionNamespace) {
   expect(errorOccurred).to.be.equal(true);
 }
 
-async function sendEventAndCheckResponse() {
-  const vs = await waitForVirtualService("mocks", "commerce-mock");
+async function sendEventAndCheckResponse(mockNamespace = 'mocks') {
+  const vs = await waitForVirtualService(mockNamespace, "commerce-mock");
   const mockHost = vs.spec.hosts[0];
   const host = mockHost.split(".").slice(1).join(".");
 
@@ -201,9 +205,9 @@ async function sendEventAndCheckResponse() {
   );
 }
 
-async function sendLegacyEventAndCheckTracing(targetNamespace) {
+async function sendLegacyEventAndCheckTracing(targetNamespace = "test", mockNamespace = 'mocks') {
   // Send an event and get it back from the lastorder function
-  const res = await sendEventAndCheckResponse();
+  const res = await sendEventAndCheckResponse(mockNamespace);
   expect(res.data).to.have.nested.property("event.headers.x-b3-traceid");
   expect(res.data).to.have.nested.property("podName");
 
@@ -370,7 +374,7 @@ async function connectCommerceMock(mockHost, tokenData) {
     headers: {
       "Content-Type": "application/json"
     },
-    timeout: 30000,
+    timeout: 30 * 1000,
   };
 
   try {
@@ -543,7 +547,7 @@ async function ensureCommerceMockLocalTestFixture(mockNamespace, targetNamespace
 
 async function provisionCommerceMockResources(appName, mockNamespace, targetNamespace, functionObjs = lastorderObjs) {
   await k8sApply([namespaceObj(mockNamespace), namespaceObj(targetNamespace)]);
-  await k8sApply(commerceObjs);
+  await k8sApply(prepareCommerceObjs(mockNamespace));
   await k8sApply(functionObjs, targetNamespace, true);
   await k8sApply([
     eventingSubscription(
@@ -552,8 +556,8 @@ async function provisionCommerceMockResources(appName, mockNamespace, targetName
       "order-created",
       targetNamespace)
   ]);
-  await waitForDeployment("commerce-mock", "mocks", 120 * 1000);
-  const vs = await waitForVirtualService("mocks", "commerce-mock");
+  await waitForDeployment("commerce-mock", mockNamespace, 120 * 1000);
+  const vs = await waitForVirtualService(mockNamespace, "commerce-mock");
   const mockHost = vs.spec.hosts[0];
   await retryPromise(
     () =>
@@ -597,7 +601,7 @@ function cleanMockTestFixture(mockNamespace, targetNamespace, wait = true) {
   return deleteNamespaces([mockNamespace, targetNamespace], wait);
 }
 
-async function deleteMockTestFixture(targetNamespace) {
+async function deleteMockTestFixture(mockNamespace) {
   const serviceBindingUsage = {
     apiVersion: "servicecatalog.kyma-project.io/v1alpha1",
     kind: "ServiceBindingUsage",
@@ -607,7 +611,7 @@ async function deleteMockTestFixture(targetNamespace) {
       usedBy: { kind: "serverless-function", name: "lastorder" },
     },
   };
-  await k8sDelete([serviceBindingUsage], targetNamespace);
+  await k8sDelete([serviceBindingUsage], mockNamespace);
   const serviceBinding = {
     apiVersion: "servicecatalog.k8s.io/v1beta1",
     kind: "ServiceBinding",
@@ -616,9 +620,9 @@ async function deleteMockTestFixture(targetNamespace) {
       instanceRef: { name: "commerce" },
     },
   };
-  await k8sDelete([serviceBinding], targetNamespace, false);
+  await k8sDelete([serviceBinding], mockNamespace, false);
   await k8sDelete(lastorderObjs)
-  await k8sDelete(commerceObjs)
+  await k8sDelete(prepareCommerceObjs(mockNamespace))
   await k8sDelete(applicationObjs)
 }
 
