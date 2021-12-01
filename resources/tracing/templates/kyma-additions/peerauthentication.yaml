@@ -3,7 +3,7 @@ kind: PeerAuthentication
 metadata:
   name: {{ template "jaeger-operator.fullname" . }}-jaeger-operator-metrics
   labels:
-  {{ include "jaeger-operator.labels" . | indent 4 }}
+{{ include "jaeger-operator.labels" . | indent 4 }}
 spec:
   selector:
     matchLabels:
@@ -18,7 +18,7 @@ kind: PeerAuthentication
 metadata:
   name: {{ template "jaeger-operator.fullname" . }}-jaeger-metrics
   labels:
-  {{ include "jaeger-operator.labels" . | indent 4 }}
+{{ include "jaeger-operator.labels" . | indent 4 }}
 spec:
   selector:
     matchLabels:
@@ -26,7 +26,6 @@ spec:
   mtls:
     mode: STRICT
 {{- end }}
-
 {{- if eq .Values.jaeger.spec.strategy "production" }}
 ---
 apiVersion: security.istio.io/v1beta1
@@ -34,7 +33,7 @@ kind: PeerAuthentication
 metadata:
   name: {{ template "jaeger-operator.fullname" . }}-jaeger-collector-metrics
   labels:
-  {{ include "jaeger-operator.labels" . | indent 4 }}
+{{ include "jaeger-operator.labels" . | indent 4 }}
 spec:
   selector:
     matchLabels:
@@ -47,7 +46,7 @@ kind: PeerAuthentication
 metadata:
   name: {{ template "jaeger-operator.fullname" . }}-jaeger-agent-query-metrics
   labels:
-  {{ include "jaeger-operator.labels" . | indent 4 }}
+{{ include "jaeger-operator.labels" . | indent 4 }}
 spec:
   selector:
     matchLabels:
