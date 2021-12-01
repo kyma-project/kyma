@@ -18,6 +18,9 @@
 # The `installation` directory and subdirectories
 /installation/ @Tomasz-Smelcerz-SAP @strekm @werdes72 @adamwalach @mjakobczyk @m00g3n @pPrecel @dariusztutaj
 
+# The eventing crds
+/installation/resources/crds/eventing/ @k15r @lilitgh @sayanh @marcobebway @pxsalehi @mfaizanse @radufa
+
 # The `cluster-essentials` chart
 /resources/cluster-essentials/ @PK85 @janmedrek @a-thaler @suleymanakbas91 @strekm @dariusztutaj @cnvergence @veichtj @piotrkpc
 
