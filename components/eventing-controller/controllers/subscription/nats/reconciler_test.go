@@ -74,21 +74,25 @@ var (
 	}
 )
 
-func testCleanEventTypes(id int, _, natsSubjectToPublish, eventTypeToSubscribe string) bool {
+func testCleanEventTypes(id int, eventTypePrefix, natsSubjectToPublish, eventTypeToSubscribe string) bool {
 	return When("Reconcile Subscription", func() {
 		It("should report CleanEventTypes in the subscription status", func() {
-			// create a subscriber
-			result := make(chan []byte)
-			subscriber, shutdown := newSubscriber(result)
-			defer shutdown()
-
-			// create a Subscription
+			ctx := context.Background()
+			cancel = startReconciler(eventTypePrefix, defaultSinkValidator)
+			defer cancel()
 			subscriptionName := fmt.Sprintf(subscriptionNameFormat, id)
+			subscriberName := fmt.Sprintf(subscriberNameFormat, id)
+
+			//create subscriber svc
+			subscriberSvc := reconcilertesting.NewSubscriberSvc(subscriberName, namespaceName)
+			ensureSubscriberSvcCreated(ctx, subscriberSvc)
+
+			// create subscription
 			optEmptyFilter := reconcilertesting.WithEmptyFilter
 			optWebhook := reconcilertesting.WithWebhookForNats
 			subscription := reconcilertesting.NewSubscription(subscriptionName, namespaceName, optEmptyFilter, optWebhook)
-			subscription.Spec.Sink = subscriber
-			ctx := context.Background()
+			//subscription := reconcilertesting.NewSubscription(subscriptionName, namespaceName, optWebhook)
+			reconcilertesting.WithValidSink(namespaceName, subscriberSvc.Name, subscription)
 			ensureSubscriptionCreated(ctx, subscription)
 
 			Context("Subscription without filters", func() {
@@ -272,7 +276,8 @@ func testCreateSubscriptionWithInvalidSink(id int, eventTypePrefix, natsSubjectT
 			By("Updating the subscription configuration in the spec with invalid URL scheme")
 			changedSub := givenSubscription.DeepCopy()
 			changedSub.Spec.Sink = "http://127.0.0. 1"
-			Expect(k8sClient.Update(ctx, changedSub)).Should(BeNil())
+			err := k8sClient.Update(ctx, changedSub)
+			Expect(err).ShouldNot(HaveOccurred())
 
 			getSubscription(ctx, givenSubscription).Should(And(
 				reconcilertesting.HaveSubscriptionName(subscriptionName),
@@ -292,7 +297,8 @@ func testCreateSubscriptionWithInvalidSink(id int, eventTypePrefix, natsSubjectT
 			By("Updating the subscription configuration in the spec with valid URL scheme")
 			changedSub = givenSubscription.DeepCopy()
 			changedSub.Spec.Sink = "http://127.0.0.1"
-			Expect(k8sClient.Update(ctx, changedSub)).Should(BeNil())
+			err = k8sClient.Update(ctx, changedSub)
+			Expect(err).ShouldNot(HaveOccurred())
 
 			getSubscription(ctx, givenSubscription).Should(And(
 				reconcilertesting.HaveSubscriptionName(subscriptionName),
@@ -312,14 +318,15 @@ func testCreateSubscriptionWithInvalidSink(id int, eventTypePrefix, natsSubjectT
 			By("Updating the subscription configuration in the spec with invalid service name scheme")
 			changedSub = givenSubscription.DeepCopy()
 			changedSub.Spec.Sink = fmt.Sprintf("https://%s.%s.%s.svc.cluster.local", "testapp", "testsub", "test")
-			Expect(k8sClient.Update(ctx, changedSub)).Should(BeNil())
+			err = k8sClient.Update(ctx, changedSub)
+			Expect(err).ShouldNot(HaveOccurred())
 
 			getSubscription(ctx, givenSubscription).Should(And(
 				reconcilertesting.HaveSubscriptionName(subscriptionName),
 				reconcilertesting.HaveCondition(eventingv1alpha1.MakeCondition(
 					eventingv1alpha1.ConditionSubscriptionActive,
 					eventingv1alpha1.ConditionReasonNATSSubscriptionActive,
-					v1.ConditionFalse, "sink should contain 5 sub-domains: testapp.testsub.test.svc.cluster.local")),
+					v1.ConditionFalse, "sink should contain 5 sub-domains: testapp.testsub.test.svc.cluster.local")), //TODO make this error message more clear
 			))
 
 			subscriptionEvent = v1.Event{
@@ -352,7 +359,8 @@ func testCreateSubscriptionWithInvalidSink(id int, eventTypePrefix, natsSubjectT
 			By("Updating the subscription configuration in the spec with invalid sink URL with non-existing service name")
 			changedSub = givenSubscription.DeepCopy()
 			reconcilertesting.WithValidSink(namespaceName, "testapp", changedSub)
-			Expect(k8sClient.Update(ctx, changedSub)).Should(BeNil())
+			err = k8sClient.Update(ctx, changedSub)
+			Expect(err).ShouldNot(HaveOccurred())
 
 			getSubscription(ctx, givenSubscription).Should(And(
 				reconcilertesting.HaveSubscriptionName(subscriptionName),
@@ -377,7 +385,8 @@ func testCreateSubscriptionWithInvalidSink(id int, eventTypePrefix, natsSubjectT
 			ensureSubscriberSvcCreated(ctx, subscriberSvc)
 
 			reconcilertesting.WithValidSink(namespaceName, subscriberSvc.Name, changedSub)
-			Expect(k8sClient.Update(ctx, changedSub)).Should(BeNil())
+			err = k8sClient.Update(ctx, changedSub)
+			Expect(err).ShouldNot(HaveOccurred())
 
 			getSubscription(ctx, givenSubscription).Should(And(
 				reconcilertesting.HaveSubscriptionName(subscriptionName),
@@ -634,7 +643,7 @@ func testExecutor(eventTypePrefix, natsSubjectToPublish, eventTypeToSubscribe st
 
 		for _, tc := range dispatcherTestCases {
 			tc(testId, eventTypePrefix, natsSubjectToPublish, eventTypeToSubscribe)
-			testID++
+			testId++
 		}
 	}
 }
@@ -804,7 +813,7 @@ func TestAPIs(t *testing.T) {
 
 var _ = BeforeSuite(func(done Done) {
 	By("bootstrapping test environment")
-	natsServer, natsURL = startNATS(natsPort)
+	natsServer, natsUrl = startNATS(natsPort)
 	useExistingCluster := useExistingCluster
 	testEnv = &envtest.Environment{
 		CRDDirectoryPaths: []string{
@@ -853,7 +862,7 @@ func startReconciler(eventTypePrefix string, sinkValidator sinkValidator) contex
 	Expect(err).ToNot(HaveOccurred())
 
 	envConf := env.NatsConfig{
-		URL:             natsURL,
+		URL:             natsUrl,
 		MaxReconnects:   10,
 		ReconnectWait:   time.Second,
 		EventTypePrefix: eventTypePrefix,
