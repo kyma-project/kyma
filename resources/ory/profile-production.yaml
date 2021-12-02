@@ -19,7 +19,14 @@ hydra:
             matchLabels:
               app.kubernetes.io/name: hydra
           topologyKey: "kubernetes.io/hostname"
+    autoscaling:
+      enabled: true
+      minReplicas: 2
+      maxReplicas: 3
+      targetMemoryUtilizationPercentage: 75
+      targetCPUUtilizationPercentage: 80          
 oathkeeper:
+  replicaCount: 3
   deployment:
     resources:
       limits:
