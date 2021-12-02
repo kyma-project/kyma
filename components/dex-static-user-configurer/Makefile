@@ -26,13 +26,12 @@ component_descriptor_test:
 	git clone https://github.com/Halamix2/test-infra.git ti
 	cd ti
 	git remote add origin https://github.com/Halamix2/test-infra.git
-	git fetch origin
-	git show-ref
+	git fetch origin > /dev/null
 	git checkout component_descriptor_generator
-	go run development/tools/cmd/componentdescriptorgenerator/ \
+	go run development/tools/cmd/componentdescriptorgenerator/main.go \
 	--component-name "github.com/kyma-project/kyma/dex-static-configurer-tests" \
     --component-version "0.0.1" \
-    --output-dir test_output \
+    --output-dir /tmp/artifacts \
 	--resource oci-image.yaml \
     # --sources git.yaml \
     # --component-references component-reference.yaml \
