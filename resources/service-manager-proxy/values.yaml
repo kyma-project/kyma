@@ -60,4 +60,3 @@ global:
       name: "sb-proxy-k8s"
       version: "v0.9.1"
       directory: "external/quay.io/service-manager"
-  priorityClassName: "kyma-system"

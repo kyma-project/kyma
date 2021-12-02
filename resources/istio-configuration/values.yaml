@@ -1,7 +1,6 @@
 ---
 helmValues:
   global:
-    priorityClassName: "kyma-system"
     imagePullPolicy: IfNotPresent
     proxy:
       readinessFailureThreshold: 40

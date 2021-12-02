@@ -111,4 +111,3 @@ global:
       name: "api-gateway-controller"
       version: "f748d862"
       directory: "incubator"
-  priorityClassName: "kyma-system"

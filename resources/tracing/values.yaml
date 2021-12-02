@@ -131,7 +131,6 @@ global:
       name: "oauth2-proxy"
       version: "7.2.0-59f3431d"
       directory: "tpi"
-  priorityClassName: "kyma-system"
 virtualservice:
   enabled: true
 authProxy:

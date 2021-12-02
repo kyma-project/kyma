@@ -25,7 +25,6 @@ global:
     namespaceAdminGroup: runtimeNamespaceAdmin
   tracing:
     enabled: true
-  priorityClassName: "kyma-system"
 virtualservice:
     enabled: true
 authProxy:

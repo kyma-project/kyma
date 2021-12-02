@@ -6,7 +6,7 @@ global:
   disableLegacyConnectivity: false
   podSecurityPolicy:
     privileged: false
-  priorityClassName: "kyma-system"
+  priorityClassName: ""
   daemonsetPriorityClassName: "kyma-system-daemonset"
   priorityClassValue: 2000000
   daemonsetPriorityClassValue: 2100000

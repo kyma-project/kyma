@@ -15,7 +15,6 @@ global:
   istio:
     gateway:
       name: ""
-  priorityClassName: "kyma-system"
 
 deployment:
   image:
