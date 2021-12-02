@@ -139,7 +139,7 @@ The following example shows how to use an OpenID Connect (OIDC) compliant identi
   </summary>
 
   ```bash
-  kubectl -n kyma-system delete pod -l app=kiali-auth-proxy
+  kubectl -n kyma-system rollout restart deployment kiali-auth-proxy
   ```
 
   </details>
@@ -149,7 +149,7 @@ The following example shows how to use an OpenID Connect (OIDC) compliant identi
   </summary>
 
   ```bash
-  kubectl -n kyma-system delete pod -l app.kubernetes.io/name=auth-proxy,app.kubernetes.io/instance=monitoring
+  kubectl -n kyma-system rollout restart deployment monitoring-auth-proxy-grafana
   ```
 
   </details>
@@ -159,7 +159,7 @@ The following example shows how to use an OpenID Connect (OIDC) compliant identi
   </summary>
 
   ```bash
-  kubectl -n kyma-system delete pod -l app.kubernetes.io/name=auth-proxy,app.kubernetes.io/instance=tracing
+  kubectl -n kyma-system rollout restart deployment tracing-auth-proxy
   ```
 
   </details>
