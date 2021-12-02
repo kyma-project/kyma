@@ -82,7 +82,7 @@ func testCleanEventTypes(id int, _, natsSubjectToPublish, eventTypeToSubscribe s
 			subscriber, shutdown := newSubscriber(result)
 			defer shutdown()
 
-			// Create a Subscription
+			// create a Subscription
 			subscriptionName := fmt.Sprintf(subscriptionNameFormat, id)
 			optEmptyFilter := reconcilertesting.WithEmptyFilter
 			optWebhook := reconcilertesting.WithWebhookForNats
@@ -124,7 +124,7 @@ func testCleanEventTypes(id int, _, natsSubjectToPublish, eventTypeToSubscribe s
 						addFilter(subscription)
 					}
 
-					ensureSubscriptionUpdated(subscription, ctx)
+					ensureSubscriptionUpdated(ctx, subscription)
 				})
 
 				By("checking if Subscription status has 'cleanEventTypes' with the correct cleaned filter values", func() {
@@ -153,7 +153,7 @@ func testCleanEventTypes(id int, _, natsSubjectToPublish, eventTypeToSubscribe s
 						f.EventType.Value = fmt.Sprintf("%salpha", f.EventType.Value)
 					}
 
-					ensureSubscriptionUpdated(subscription, ctx)
+					ensureSubscriptionUpdated(ctx, subscription)
 				})
 
 				By("checking if Subscription status has 'cleanEventTypes' with the correct cleaned and updated filter values", func() {
@@ -178,7 +178,7 @@ func testCleanEventTypes(id int, _, natsSubjectToPublish, eventTypeToSubscribe s
 
 				By("deleting Subscription filters", func() {
 					subscription.Spec.Filter.Filters = subscription.Spec.Filter.Filters[:1]
-					ensureSubscriptionUpdated(subscription, ctx)
+					ensureSubscriptionUpdated(ctx, subscription)
 				})
 
 				By("checking if Subscription status has 'cleanEventTypes' with the correct cleaned filter values", func() {
@@ -708,7 +708,7 @@ func ensureSubscriptionCreated(ctx context.Context, subscription *eventingv1alph
 	Expect(err).Should(BeNil())
 }
 
-func ensureSubscriptionUpdated(subscription *eventingv1alpha1.Subscription, ctx context.Context) {
+func ensureSubscriptionUpdated(ctx context.Context, subscription *eventingv1alpha1.Subscription) {
 	By(fmt.Sprintf("Ensuring the subscription %q is updated", subscription.Name))
 	// create subscription
 	err := k8sClient.Update(ctx, subscription)
