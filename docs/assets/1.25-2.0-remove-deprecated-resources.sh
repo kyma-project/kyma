@@ -75,6 +75,10 @@ kubectl -n kyma-system delete role apiserver-proxy-ssl-helper-role
 kubectl -n kyma-system delete role compass-runtime-agent-tests-dex-secrets
 kubectl -n kyma-system delete role ory-mechanism-migration
 kubectl -n kyma-system delete role ory-oathkeeper-keys-helper-job-role
+kubectl -n kyma-integration delete role application-connector-tests
+kubectl -n kyma-integration delete role application-operator-tests
+kubectl -n istio-system delete role application-connector-certs-sync
+kubectl -n istio-system delete role istio-kyma-validate
 
 echo "
 Deleting orphaned RoleBindings"
@@ -87,6 +91,11 @@ kubectl -n kyma-system delete rolebinding apiserver-proxy-ssl-helper-role-bindin
 kubectl -n kyma-system delete rolebinding compass-runtime-agent-tests-dex-secrets
 kubectl -n kyma-system delete rolebinding ory-mechanism-migration
 kubectl -n kyma-system delete rolebinding ory-oathkeeper-keys-helper-job-role-binding
+kubectl -n kyma-system delete rolebinding apiserver-proxy-certs-job-kube-system-role
+kubectl -n istio-system delete rolebinding application-connector-certs-sync
+kubectl -n istio-system delete rolebinding istio-kyma-validate
+kubectl -n kyma-integration delete rolebinding application-connector-tests
+kubectl -n kyma-integration delete rolebinding application-operator-tests
 
 echo "
 Deleting orphaned Secrets"
