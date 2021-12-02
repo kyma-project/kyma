@@ -7,12 +7,14 @@ kubectl -n kyma-system delete virtualservice logging-loki
 kubectl -n kyma-system delete virtualservice logging-log-ui
 kubectl -n kyma-system delete virtualservice helm-broker-addons-ui
 kubectl -n kyma-system delete virtualservice service-catalog-addons-service-catalog-ui-catalog
+kubectl -n kyma-system delete rafter-minio
 
 echo "
 Deleting orphaned Istio DestinationRules"
 kubectl -n kyma-system delete destinationrule helm-broker-addons-ui
 kubectl -n kyma-system delete destinationrule logging-log-ui
 kubectl -n kyma-system delete destinationrule service-catalog-addons-service-catalog-ui
+kubectl -n istio-system delete destinationrule api-server
 
 echo "
 Deleting orphaned Services"
@@ -25,6 +27,17 @@ Deleting orphaned Deployments"
 kubectl -n kyma-system delete deployment logging-log-ui
 kubectl -n kyma-system delete deployment helm-broker-addons-ui 
 kubectl -n kyma-system delete deployment service-catalog-addons-service-catalog-ui
+
+echo "
+Deleting orphaned PodSecurityPolicies"
+kubectl delete podsecuritypolicy 000-kyma-installer
+kubectl delete podsecuritypolicy application-connector-tests
+kubectl delete podsecuritypolicy application-operator-tests
+kubectl delete podsecuritypolicy application-registry-tests
+kubectl delete podsecuritypolicy connection-token-handler-tests
+kubectl delete podsecuritypolicy helm-broker-addons-ui
+kubectl delete podsecuritypolicy monitoring-alertmanager
+kubectl delete podsecuritypolicy service-catalog-addons-service-catalog-ui
 
 echo "
 Deleting orphaned ServiceAccounts"
@@ -41,6 +54,15 @@ kubectl -n kyma-system delete serviceaccount logging-tests
 kubectl -n kyma-system delete serviceaccount ory-mechanism-migration
 kubectl -n kyma-system delete serviceaccount ory-oathkeeper-keys-helper-service-account
 kubectl -n kyma-system delete serviceaccount serverless-tests
+kubectl -n kyma-system delete serviceaccount rafter-tests
+kubectl -n istio-system delete serviceaccount application-connector-certs-sync
+kubectl -n istio-system delete serviceaccount istio-job
+kubectl -n istio-system delete serviceaccount istio-kyma-validate
+kubectl -n istio-system delete serviceaccount istio-proxy-reset
+kubectl -n istio-system delete serviceaccount kyma-ns-label
+kubectl -n kyma-integration delete serviceaccount application-connector-tests
+kubectl -n kyma-integration delete serviceaccount application-operator-gateway-tests
+kubectl -n kyma-integration delete serviceaccount application-operator-tests
 
 echo "
 Deleting orphaned Roles"
@@ -85,6 +107,9 @@ kubectl -n kyma-system delete configmap cluster-essentials-crd-0
 kubectl -n kyma-system delete configmap cluster-essentials-crd-1
 kubectl -n kyma-system delete configmap cluster-essentials-crd-2
 kubectl -n kyma-system delete configmap cluster-users
+kubectl -n istio-system delete configmap kyma-extra-manifests
+kubectl -n istio-system delete configmap kyma-istio-operator-config
+kubectl -n istio-system delete configmap kyma-istio-operator-config-backup
 
 echo "
 Deleting orphaned PriorityClass"
@@ -111,6 +136,14 @@ kubectl delete clusterrole application-connector-tests
 kubectl delete clusterrole dex-admin
 kubectl delete clusterrole dex-edit
 kubectl delete clusterrole dex-view
+kubectl delete clusterrole istio-job
+kubectl delete clusterrole istio-kyma-validate
+kubectl delete clusterrole istio-proxy-reset
+kubectl delete clusterrole kyma-backendmodule-admin
+kubectl delete clusterrole kyma-installer-reader
+kubectl delete clusterrole kyma-ns-label
+kubectl delete clusterrole kyma-ui-view
+kubectl delete clusterrole rafter-tests
 
 echo "
 Deleting orphaned ClusterRoleBinding"
@@ -129,6 +162,10 @@ kubectl delete clusterrolebinding service-catalog-tests
 kubectl delete clusterrolebinding serverless-tests
 kubectl delete clusterrolebinding monitoring-tests
 kubectl delete clusterrolebinding logging-tests
+kubectl delete clusterrolebinding istio-job 
+kubectl delete clusterrolebinding istio-kyma-validate
+kubectl delete clusterrolebinding istio-proxy-reset
+kubectl delete clusterrolebinding rafter-tests
 
 echo "
 Deleting orphaned Kyma modules"
@@ -177,6 +214,10 @@ kubectl delete crd offlinesessionses.dex.coreos.com
 kubectl delete crd passwords.dex.coreos.com
 kubectl delete crd refreshtokens.dex.coreos.com
 kubectl delete crd signingkeies.dex.coreos.com
+kubectl delete crd centralconnections.applicationconnector.kyma-project.io
+kubectl delete crd certificaterequests.applicationconnector.kyma-project.io
+kubectl delete crd groups.authentication.kyma-project.io
+kubectl delete crd microfrontends.ui.kyma-project.io
 
 echo "
 Deleting orphaned namespace"
