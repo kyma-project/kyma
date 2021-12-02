@@ -3,8 +3,9 @@
 package commander
 
 import (
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
+
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
 )
 
 type Params map[string]interface{}

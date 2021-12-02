@@ -3,3 +3,5 @@ kind: EventingBackend
 metadata:
   name: eventingbackend-sample
 spec:
+  # Add fields here
+  foo: bar

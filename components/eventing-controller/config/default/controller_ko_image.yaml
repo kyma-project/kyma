@@ -1,0 +1,15 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    control-plane: controller
+  name: controller
+  namespace: system
+spec:
+  template:
+    spec:
+      containers:
+        - image: ko://github.com/kyma-project/kyma/components/eventing-controller/cmd/eventing-controller
+          name: manager
+          command:
+          - /ko-app/eventing-controller
