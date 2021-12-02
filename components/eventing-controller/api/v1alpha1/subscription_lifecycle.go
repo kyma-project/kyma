@@ -13,6 +13,7 @@ const (
 	ConditionSubscribed         ConditionType = "Subscribed"
 	ConditionSubscriptionActive ConditionType = "Subscription active"
 	ConditionAPIRuleStatus      ConditionType = "APIRule status"
+	ConditionWebhookCallStatus  ConditionType = "Webhook call status"
 )
 
 var allConditions = makeConditions()
@@ -28,14 +29,15 @@ type Condition struct {
 type ConditionReason string
 
 const (
-	ConditionReasonAPIRuleStatusReady            ConditionReason = "APIRule status ready"
-	ConditionReasonAPIRuleStatusNotReady         ConditionReason = "APIRule status not ready"
-	ConditionReasonBEBSubscriptionCreated        ConditionReason = "BEB Subscription created"
-	ConditionReasonBEBSubscriptionCreationFailed ConditionReason = "BEB Subscription creation failed"
-	ConditionReasonBEBSubscriptionActive         ConditionReason = "BEB Subscription active"
-	ConditionReasonBEBSubscriptionNotActive      ConditionReason = "BEB Subscription not active"
-	ConditionReasonBEBSubscriptionDeleted        ConditionReason = "BEB Subscription deleted"
-	ConditionReasonNATSSubscriptionActive        ConditionReason = "NATS Subscription active"
+	ConditionReasonSubscriptionCreated        ConditionReason = "BEB Subscription created"
+	ConditionReasonSubscriptionCreationFailed ConditionReason = "BEB Subscription creation failed"
+	ConditionReasonSubscriptionActive         ConditionReason = "BEB Subscription active"
+	ConditionReasonSubscriptionNotActive      ConditionReason = "BEB Subscription not active"
+	ConditionReasonSubscriptionDeleted        ConditionReason = "BEB Subscription deleted"
+	ConditionReasonAPIRuleStatusReady         ConditionReason = "APIRule status ready"
+	ConditionReasonAPIRuleStatusNotReady      ConditionReason = "APIRule status not ready"
+	ConditionReasonNATSSubscriptionActive     ConditionReason = "NATS Subscription active"
+	ConditionReasonWebhookCallStatus          ConditionReason = "BEB Subscription webhook call no errors status"
 )
 
 // InitializeConditions sets unset conditions to Unknown
@@ -61,7 +63,7 @@ func (s *SubscriptionStatus) InitializeConditions() {
 }
 
 func (s SubscriptionStatus) IsReady() bool {
-	if !containSameConditionTypes(allConditions, s.Conditions) {
+	if !ContainSameConditionTypes(allConditions, s.Conditions) {
 		return false
 	}
 
@@ -92,11 +94,16 @@ func makeConditions() []Condition {
 			LastTransitionTime: metav1.Now(),
 			Status:             corev1.ConditionUnknown,
 		},
+		{
+			Type:               ConditionWebhookCallStatus,
+			LastTransitionTime: metav1.Now(),
+			Status:             corev1.ConditionUnknown,
+		},
 	}
 	return conditions
 }
 
-func containSameConditionTypes(conditions1, conditions2 []Condition) bool {
+func ContainSameConditionTypes(conditions1, conditions2 []Condition) bool {
 	if len(conditions1) != len(conditions2) {
 		return false
 	}
@@ -134,6 +141,16 @@ func MakeCondition(conditionType ConditionType, reason ConditionReason, status c
 func (s *SubscriptionStatus) IsConditionSubscribed() bool {
 	for _, condition := range s.Conditions {
 		if condition.Type == ConditionSubscribed && condition.Status == corev1.ConditionTrue {
+			return true
+		}
+	}
+	return false
+}
+
+func (s *SubscriptionStatus) IsConditionWebhookCall() bool {
+	for _, condition := range s.Conditions {
+		if condition.Type == ConditionWebhookCallStatus &&
+			(condition.Status == corev1.ConditionTrue || condition.Status == corev1.ConditionUnknown) {
 			return true
 		}
 	}

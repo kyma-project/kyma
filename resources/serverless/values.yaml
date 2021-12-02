@@ -73,49 +73,48 @@ global:
   images:
     k8s_tools:
       name: "k8s-tools"
-      version: "20210922-530cfc39"
+      version: "20211022-85284bf9"
       directory: "tpi"
     function_controller:
       name: "function-controller"
-      version: "PR-12394"
+      version: "5051e383"
     function_webhook:
       name: "function-webhook"
-      version: "PR-12394"
+      version: "5051e383"
     function_build_init:
       name: "function-build-init"
-      version: "PR-12367"
+      version: "5051e383"
     function_runtime_nodejs12:
       name: "function-runtime-nodejs12"
-      version: "a3baf33c"
+      version: "5051e383"
     function_runtime_nodejs14:
       name: "function-runtime-nodejs14"
-      version: "a3baf33c"
+      version: "5051e383"
     function_runtime_python38:
       name: "function-runtime-python38"
-      version: "a3baf33c"
+      version: "5051e383"
     function_runtime_python39:
       name: "function-runtime-python39"
-      version: "a3baf33c"
+      version: "5051e383"
     kaniko_executor:
       name: "kaniko-executor"
-      version: "1.6.0-9b804049"
+      version: "1.7.0-a029b8df"
       directory: "tpi"
     registry:
       name: "registry"
-      version: "2.7.1-8c646ef0"
+      version: "2.7.1-0646c4cd"
       directory: "tpi"
-    git_server:
-      name: "gitserver"
-      version: "c0aa144a"
     google_pause:
       name: "pause-amd64"
       version: "3.2"
-      directory: "google-containers"
-      containerRegistryPath: "gcr.io"
+      directory: "external/gcr.io/google-containers"
   testImages:
     function_controller_test:
       name: "function-controller-test"
-      version: "PR-12436"
+      version: "ceeb73d8"
+    git_server:
+      name: "gitserver"
+      version: "c0aa144a"
 
 
 

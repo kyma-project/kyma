@@ -41,10 +41,10 @@ require (
 )
 
 replace (
+	github.com/gogo/protobuf => github.com/gogo/protobuf v1.3.2
 	github.com/kubernetes-sigs/service-catalog => github.com/kubernetes-sigs/service-catalog v0.2.2-0.20190920221325-ccab52343967
 	github.com/kyma-project/kyma/components/application-operator => github.com/kyma-project/kyma/components/application-operator v0.0.0-20200610105106-1066324c83cd
 	google.golang.org/grpc => google.golang.org/grpc v1.27.1
-
 	istio.io/api => istio.io/api v0.0.0-20200724154434-34e474846e0d
 	istio.io/client-go => istio.io/client-go v0.0.0-20200513180646-f8d9d8ff84e6
 	k8s.io/api => k8s.io/api v0.16.10

@@ -33,3 +33,9 @@ spec:
         severity: critical
       annotations:
         message: The {{ `{{ $labels.job }}` }} is experiencing {{ `{{ printf "%.2f" $value }}` }}% increase of panics.
+    - alert: LokiDiscardsLogs
+      expr: rate(loki_discarded_bytes_total[5m]) > 0
+      labels:
+        severity: warning
+      annotations:
+        message: The {{ `{{ $labels.job }}` }} is discarding logs.

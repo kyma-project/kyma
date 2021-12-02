@@ -2,7 +2,7 @@
 title: Application Registry
 ---
 
-Application Registry allows you to register the APIs and event catalogs of the services exposed by the connected external solution.
+Application Registry allows you to register the APIs and event catalogs of the services exposed by the connected external solution in the [legacy mode](README.md).
 
 Application Registry stores the data of all registered services in:
 

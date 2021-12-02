@@ -8,8 +8,6 @@
 #        enabled: true
  
 image:
-  repository: eu.gcr.io/kyma-project/external/prom/pushgateway
-  tag: v1.3.0
   pullPolicy: IfNotPresent
 
 service:

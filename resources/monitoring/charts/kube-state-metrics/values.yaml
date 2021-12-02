@@ -1,8 +1,6 @@
 # Default values for kube-state-metrics.
 prometheusScrape: true
 image:
-  repository: eu.gcr.io/kyma-project/external/quay.io/coreos/kube-state-metrics
-  tag: v1.9.7
   pullPolicy: IfNotPresent
 
 imagePullSecrets: []

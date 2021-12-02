@@ -1,5 +1,5 @@
 # Build the controller binary
-FROM eu.gcr.io/kyma-project/test-infra/buildpack-golang-kubebuilder2:v20210601-24c60b5a as builder
+FROM eu.gcr.io/kyma-project/test-infra/buildpack-golang:v20211110-ab51bd20 as builder
 ARG DOCK_PKG_DIR=/go/src/github.com/kyma-project/kyma/components/eventing-controller
 WORKDIR $DOCK_PKG_DIR
 

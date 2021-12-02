@@ -11,18 +11,6 @@ aliases:
     - mmitoraj
     - majakurcius
     - alexandra-simeonova
-  console-reviewers:
-    - parostatkiem
-    - Wawrzyn321
-    - kwiatekus
-    - dariadomagala
-    - akucharska
-  console-approvers:
-    - parostatkiem
-    - Wawrzyn321
-    - kwiatekus
-    - dariadomagala
-    - akucharska
   serverless-approvers:
     - rakesh-garimella
     - lilitgh

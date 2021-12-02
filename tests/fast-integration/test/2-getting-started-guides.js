@@ -8,38 +8,46 @@ const {
   getContainerRestartsForAllNamespaces,
 } = require("../utils");
 
-describe("Getting Started Guide Tests", function () {
-  this.timeout(10 * 60 * 1000);
-  this.slow(5000);
 
-  if (process.env.WITH_CENTRAL_APP_CONNECTIVITY) {
-    console.log("Getting Started Guide test for Central Application Connectivity not implemented. Omitting...");
-    return;
-  }
+function gettingStartedGuides() {
+  describe("Getting Started Guide Tests", function () {
+    this.timeout(10 * 60 * 1000);
+    this.slow(5000);
 
-  let initialRestarts = null;
+    if (process.env.WITH_CENTRAL_APP_CONNECTIVITY) {
+      console.log("Getting Started Guide test for Central Application Connectivity not implemented. Omitting...");
+      return;
+    }
 
-  it("Listing all pods in cluster", async function () {
-    initialRestarts = await getContainerRestartsForAllNamespaces();
-  });
+    let initialRestarts = null;
 
-  it("Getting started guide fixture should be ready", async function () {
-    await ensureGettingStartedTestFixture().catch((err) => {
-      console.dir(err); // first error is logged
-      return ensureGettingStartedTestFixture();
+    it("Listing all pods in cluster", async function () {
+      initialRestarts = await getContainerRestartsForAllNamespaces();
+    });
+
+    it("Getting started guide fixture should be ready", async function () {
+      await ensureGettingStartedTestFixture().catch((err) => {
+        console.dir(err); // first error is logged
+        return ensureGettingStartedTestFixture();
+      });
+    });
+
+    it("Order should be persisted and should survive pod restarts (redis storage)", async function () {
+      await verifyOrderPersisted();
+    });
+
+    it("Should print report of restarted containers, skipped if no crashes happened", async function () {
+      const afterTestRestarts = await getContainerRestartsForAllNamespaces();
+      printRestartReport(initialRestarts, afterTestRestarts);
+    });
+
+    it("Namespace should be deleted", async function () {
+      await cleanGettingStartedTestFixture(false);
     });
   });
+}
 
-  it("Order should be persisted and should survive pod restarts (redis storage)", async function () {
-    await verifyOrderPersisted();
-  });
 
-  it("Should print report of restarted containers, skipped if no crashes happened", async function () {
-    const afterTestRestarts = await getContainerRestartsForAllNamespaces();
-    printRestartReport(initialRestarts, afterTestRestarts);
-  });
-
-  it("Namespace should be deleted", async function () {
-    await cleanGettingStartedTestFixture(false);
-  });
-});
+module.exports = {
+  gettingStartedGuides,
+}

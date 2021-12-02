@@ -1,5 +1,5 @@
 {{- /*
-  Customization: .Values.resourceSelector.namespaces if statement is added to make comma separated namespace list work.
+  Customization: prometheusOperator.namespaces.releaseNamespace can be defined without .additional
   Liveness/readiness probes were added since they are missing in the upstream chart
 */ -}}
 {{- $namespace := printf "%s" (include "kube-prometheus-stack.namespace" .) }}
@@ -36,11 +36,7 @@ spec:
     {{- end }}
       containers:
         - name: {{ template "kube-prometheus-stack.name" . }}
-          {{- if .Values.prometheusOperator.image.sha }}
-          image: "{{ .Values.prometheusOperator.image.repository }}:{{ .Values.prometheusOperator.image.tag }}@sha256:{{ .Values.prometheusOperator.image.sha }}"
-          {{- else }}
-          image: "{{ .Values.prometheusOperator.image.repository }}:{{ .Values.prometheusOperator.image.tag }}"
-          {{- end }}
+          image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.prometheus_operator) }}"
           imagePullPolicy: "{{ .Values.prometheusOperator.image.pullPolicy }}"
           args:
             {{- if .Values.prometheusOperator.kubeletService.enabled }}
@@ -55,32 +51,20 @@ spec:
             {{- if .Values.prometheusOperator.denyNamespaces }}
             - --deny-namespaces={{ .Values.prometheusOperator.denyNamespaces | join "," }}
             {{- end }}
-            {{- if .Values.resourceSelector.namespaces }}
-            - --namespaces={{ .Values.resourceSelector.namespaces }}
-            {{ else }}
             {{- with $.Values.prometheusOperator.namespaces }}
-            {{ $ns := .additional }}
+            {{- $ns := default (list nil) .additional }} #Customization: have a default value if no additional namespace is defined
             {{- if .releaseNamespace }}
             {{- $ns = append $ns $namespace }}
             {{- end }}
             - --namespaces={{ $ns | join "," }}
             {{- end }}
-            {{- end }}
             - --logtostderr=true
             - --localhost=127.0.0.1
-            {{- if .Values.prometheusOperator.prometheusConfigReloaderImage.sha }}
-            - --prometheus-config-reloader={{ .Values.prometheusOperator.prometheusConfigReloaderImage.repository }}:{{ .Values.prometheusOperator.prometheusConfigReloaderImage.tag }}@sha256:{{ .Values.prometheusOperator.prometheusConfigReloaderImage.sha }}
-            {{- else }}
-            - --prometheus-config-reloader={{ .Values.prometheusOperator.prometheusConfigReloaderImage.repository }}:{{ .Values.prometheusOperator.prometheusConfigReloaderImage.tag }}
-            {{- end }}
+            - --prometheus-config-reloader={{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.prometheus_config_reloader) }}
             # Empty if statement to catch non-semver main tags that do not need the --config-reloader-image flag
-            {{- if regexMatch "master.*" .Values.prometheusOperator.image.tag -}}
-            {{- else if (semverCompare "< v0.43.0" .Values.prometheusOperator.image.tag) -}}
-            {{- if .Values.prometheusOperator.configmapReloadImage.sha }}
-            - --config-reloader-image={{ .Values.prometheusOperator.configmapReloadImage.repository }}:{{ .Values.prometheusOperator.configmapReloadImage.tag }}@sha256:{{ .Values.prometheusOperator.configmapReloadImage.sha }}
-            {{- else }}
-            - --config-reloader-image={{ .Values.prometheusOperator.configmapReloadImage.repository }}:{{ .Values.prometheusOperator.configmapReloadImage.tag }}
-            {{- end }}
+            {{- if regexMatch "master.*" .Values.global.images.prometheus_operator.version -}}
+            {{- else if (semverCompare "< v0.43.0" .Values.global.images.prometheus_operator.version) -}}
+            - --config-reloader-image={{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.configmap_reload) }}
             {{- end }}
             - --config-reloader-cpu={{ .Values.prometheusOperator.configReloaderCpu }}
             - --config-reloader-memory={{ .Values.prometheusOperator.configReloaderMemory }}

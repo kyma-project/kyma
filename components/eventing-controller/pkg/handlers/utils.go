@@ -33,7 +33,7 @@ type MessagingBackend interface {
 	// Initialize should initialize the communication layer with the messaging backend system
 	Initialize(cfg env.Config) error
 
-	// SyncSubscription should synchronize the Kyma eventing susbscription with the susbcriber infrastructure of messaging backend system.
+	// SyncSubscription should synchronize the Kyma eventing subscription with the subscriber infrastructure of messaging backend system.
 	// It should return true if Kyma eventing subscription status was changed during this synchronization process.
 	// It sets subscription.status.config with configurations that were applied on the messaging backend when creating the subscription.
 	// TODO: Give up the usage of variadic parameters in the favor of using only subscription as input parameter.
@@ -258,6 +258,12 @@ func GetRandString(l int) string {
 func RemoveStatus(sub eventingv1alpha1.Subscription) *eventingv1alpha1.Subscription {
 	desiredSub := sub.DeepCopy()
 	desiredSub.Status = eventingv1alpha1.SubscriptionStatus{}
+	return desiredSub
+}
+
+func SetStatusAsNotReady(sub eventingv1alpha1.Subscription) *eventingv1alpha1.Subscription {
+	desiredSub := sub.DeepCopy()
+	desiredSub.Status.Ready = false
 	return desiredSub
 }
 

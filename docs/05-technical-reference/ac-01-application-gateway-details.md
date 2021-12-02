@@ -5,7 +5,7 @@ title: Application Gateway details
 Application Gateway is an intermediary component between a Function or a service and an external API.
 
 ## Proxying requests
-<!-- TODO: describe the structure of secret storing credentials -->
+<!-- TODO: describe the structure of the Secret storing credentials -->
 Application Gateway proxies requests from Functions and services in Kyma to external APIs based on the configuration stored in Secrets.
 
 An example **CONFIGURATION** for APIs secured with OAuth looks as follows:

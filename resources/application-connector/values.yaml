@@ -39,42 +39,42 @@ global:
   images:
     application_broker:
       name: "application-broker"
-      version: "cddfbc5b"
+      version: "PR-12621"
     application_connectivity_certs_setup_job:
       name: "application-connectivity-certs-setup-job"
-      version: "PR-11678"
+      version: "8e912bbc"
     application_connectivity_validator:
       name: "application-connectivity-validator"
-      version: "PR-11558"
+      version: "4a206dab"
     application_gateway:
       name: "application-gateway"
-      version: "PR-11558"
+      version: "984ed90c"
     application_operator:
       name: "application-operator"
-      version: "PR-12141"
+      version: "13002528"
     application_registry:
       name: "application-registry"
-      version: "PR-12181"
+      version: "4a206dab"
     central_application_connectivity_validator:
       name: "central-application-connectivity-validator"
-      version: "PR-11846"
+      version: "PR-12632"
     central_application_gateway:
       name: "central-application-gateway"
-      version: "PR-11859"
+      version: "4a206dab"
     connection_token_handler:
       name: "connection-token-handler"
       version: "PR-11558"
     connector_service:
       name: "connector-service"
-      version: "PR-12294"
+      version: "186bd0da"
     busybox:
       name: "busybox"
-      version: "1.32.0-v1"
+      version: "1.34.1"
       directory: "external"
   testImages:
     application_gateway_legacy_tests:
       name: "application-gateway-legacy-tests"
-      version: "68baa911"
+      version: "38a18642"
 
 application_connectivity_certs_setup_job:
   secrets:

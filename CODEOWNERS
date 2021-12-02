@@ -12,48 +12,32 @@
 # Logging library
 /common/logging @franpog859 @dbadura @janmedrek
 
-# Microfrontend k8s client
-/common/microfrontend-client/ @dariadomagala @parostatkiem @akucharska @Wawrzyn321 @kwiatekus
-
 # developer tools: linting
 /hack @clebs @suleymanakbas91 @adamwalach
 
 # The `installation` directory and subdirectories
 /installation/ @Tomasz-Smelcerz-SAP @strekm @werdes72 @adamwalach @mjakobczyk @m00g3n @pPrecel @dariusztutaj
 
+# The eventing crds
+/installation/resources/crds/eventing/ @k15r @lilitgh @sayanh @marcobebway @pxsalehi @mfaizanse @radufa
+
 # The `cluster-essentials` chart
-/resources/cluster-essentials/ @PK85 @janmedrek @a-thaler @suleymanakbas91 @strekm @dariusztutaj
+/resources/cluster-essentials/ @PK85 @janmedrek @a-thaler @suleymanakbas91 @strekm @dariusztutaj @cnvergence @veichtj @piotrkpc
 
 # The `pod-preset` subchart
 /resources/cluster-essentials/charts/pod-preset/ @PK85 @piotrmiskiewicz @ksputo @szwedm @voigt @wozniakjan @adamwalach
 
-# The Microfrontend CRDs
-/resources/cluster-essentials/templates/microfrontend.crd.yaml @dariadomagala @parostatkiem @akucharska @Wawrzyn321 @kwiatekus
-/resources/cluster-essentials/templates/clustermicrofrontend.crd.yaml @dariadomagala @parostatkiem @akucharska @Wawrzyn321 @kwiatekus
-
-# The `values.yaml` file for `core` chart
-/resources/core/values.yaml @kyma-project/developers
-
-# The `apiserver-proxy` chart
-/resources/apiserver-proxy/ @strekm @werdes72 @Tomasz-Smelcerz-SAP @mjakobczyk @dariusztutaj
-
 # The `cluster-users` subchart
-/resources/cluster-users/ @strekm @werdes72 @Tomasz-Smelcerz-SAP @mjakobczyk @dariusztutaj
+/resources/cluster-users/ @strekm @werdes72 @Tomasz-Smelcerz-SAP @mjakobczyk @dariusztutaj @cnvergence @veichtj @piotrkpc
 
 # The `certificates` chart
-/resources/certificates/ @strekm @werdes72 @Tomasz-Smelcerz-SAP @mjakobczyk @dariusztutaj
-
-# The `iam-kubeconfig-service` chart
-/resources/iam-kubeconfig-service/ @strekm @werdes72 @Tomasz-Smelcerz-SAP @mjakobczyk @dariusztutaj
+/resources/certificates/ @strekm @werdes72 @Tomasz-Smelcerz-SAP @mjakobczyk @dariusztutaj @cnvergence @veichtj @piotrkpc
 
 # The `rafter` chart
-/resources/rafter/ @m00g3n @pPrecel @dbadura @tgorgol @rJankowski93
+/resources/rafter/ @m00g3n @pPrecel @dbadura @rJankowski93 @kwiatekus
 
 # The `application-connector` chart
 /resources/application-connector/ @akgalwas @janmedrek @franpog859 @Maladie @rafalpotempa @koala7659 @ralikio @everesio
-
-# The `values.yaml` file for `application-connector` chart
-/resources/application-connector/values.yaml @kyma-project/developers
 
 # The `connector-service` subchart
 /resources/application-connector/charts/connector-service/ @akgalwas @janmedrek @franpog859 @Maladie @rafalpotempa @koala7659 @ralikio @everesio
@@ -73,35 +57,17 @@
 # The `central-application-connectivity-validator` subchart
 /resources/application-connector/charts/central-application-connectivity-validator/ @akgalwas @janmedrek @franpog859 @Maladie @rafalpotempa @koala7659 @ralikio @everesio
 
-# The `application-connector-helper` chart
-/resources/application-connector-helper/ @strekm @Tomasz-Smelcerz-SAP @akgalwas @janmedrek @franpog859 @Maladie @rafalpotempa @koala7659 @ralikio @everesio
-
-# The `application-connector-ingress` chart
-/resources/application-connector-ingress/ @akgalwas @janmedrek @franpog859 @Maladie @rafalpotempa @koala7659 @ralikio @everesio
-
-# The `console` subchart
-/resources/console/ @dariadomagala @parostatkiem @akucharska @Wawrzyn321 @kwiatekus
-
-# The `dex` subchart
-/resources/dex/ @strekm @werdes72 @Tomasz-Smelcerz-SAP @mjakobczyk @dariusztutaj
-
-# The 'gateway' subchart
-/resources/core/charts/gateway/ @strekm @werdes72 @Tomasz-Smelcerz-SAP @mjakobczyk @dariusztutaj
-
 # The `helm-broker` subchart
 /resources/helm-broker/ @PK85 @piotrmiskiewicz @ksputo @szwedm @voigt @wozniakjan @adamwalach
 
-# The `addons-ui` subchart
-/resources/helm-broker/charts/addons-ui/ @dariadomagala @parostatkiem @akucharska @Wawrzyn321 @kwiatekus
-
 # The `monitoring` subchart
-/resources/monitoring/ @a-thaler @lilitgh @suleymanakbas91 @clebs @rakesh-garimella @skhalash @jeremyharisch @chrkl @shorim
+/resources/monitoring/ @a-thaler @lilitgh @suleymanakbas91 @clebs @rakesh-garimella @skhalash @jeremyharisch @chrkl @shorim @lindnerby
 
 # The `logging` subchart
-/resources/logging/ @a-thaler @lilitgh @suleymanakbas91 @clebs @rakesh-garimella @skhalash @jeremyharisch @chrkl @shorim
+/resources/logging/ @a-thaler @lilitgh @suleymanakbas91 @clebs @rakesh-garimella @skhalash @jeremyharisch @chrkl @shorim @lindnerby
 
 # The 'telemetry' chart
-/resources/telemetry @a-thaler @lilitgh @suleymanakbas91 @clebs @rakesh-garimella @skhalash @jeremyharisch @chrkl @lindnerby @shorim
+/resources/telemetry @a-thaler @lilitgh @suleymanakbas91 @clebs @rakesh-garimella @skhalash @jeremyharisch @chrkl @lindnerby @shorim @lindnerby
 
 # The `eventing` chart
 /resources/eventing/ @lilitgh @k15r @nachtmaar @marcobebway @radufa @sayanh @pxsalehi @mfaizanse
@@ -112,59 +78,35 @@
 # The `service-catalog-addons` subchart
 /resources/service-catalog-addons/ @PK85 @piotrmiskiewicz @ksputo @szwedm @voigt @wozniakjan @adamwalach
 
-# The `service-catalog-ui` subchart
-/resources/service-catalog-addons/charts/service-catalog-ui/ @dariadomagala @akucharska @parostatkiem @Wawrzyn321 @kwiatekus
-
 # The `service-catalog-addons` subchart
 /resources/service-manager-proxy/ @PK85 @piotrmiskiewicz @ksputo @szwedm @voigt @wozniakjan
 
-# The `testing` chart with Octopus
-/resources/testing/ @PK85 @piotrmiskiewicz @ksputo @szwedm @voigt @wozniakjan @adamwalach
-
-# The `docs` subchart
-/resources/core/charts/docs/ @m00g3n @pPrecel @PK85 @piotrmiskiewicz @ksputo @szwedm @voigt @wozniakjan @adamwalach
-
-# The `templates` chart
-/resources/core/templates/ @PK85 @piotrmiskiewicz @ksputo @szwedm @voigt @wozniakjan @adamwalach
-
-# The `templates` chart
-/resources/core/templates/tests/ @PK85 @piotrmiskiewicz @ksputo @m00g3n @pPrecel @tgorgol @antiheld @szwedm @voigt @wozniakjan @adamwalach @kwiatekus @k15r
-
-# The `istio` chart
-/resources/istio/ @strekm @werdes72 @Tomasz-Smelcerz-SAP @mjakobczyk @dariusztutaj
-
 # The `istio-configuration` chart
-/resources/istio-configuration/ @strekm @werdes72 @Tomasz-Smelcerz-SAP @mjakobczyk @dariusztutaj
+/resources/istio-configuration/ @strekm @werdes72 @Tomasz-Smelcerz-SAP @mjakobczyk @dariusztutaj @cnvergence @veichtj @piotrkpc
+
+# The monitoring of `istio-configuration` chart
+/resources/istio-configuration/templates/monitoring @a-thaler @lilitgh @rakesh-garimella @skhalash @chrkl @shorim @lindnerby
 
 # The `tracing` chart
-/resources/tracing/ @a-thaler @lilitgh @suleymanakbas91 @clebs @rakesh-garimella @skhalash @jeremyharisch @chrkl @shorim
+/resources/tracing/ @a-thaler @lilitgh @suleymanakbas91 @clebs @rakesh-garimella @skhalash @jeremyharisch @chrkl @shorim @lindnerby
 
 # The `service-catalog` chart
 /resources/service-catalog/ @PK85 @piotrmiskiewicz @ksputo @szwedm @voigt @wozniakjan @adamwalach
 
-# The `xip-patch` chart
-/resources/xip-patch/ @strekm @werdes72 @Tomasz-Smelcerz-SAP @mjakobczyk @dariusztutaj
-
 # The `ory` chart
-/resources/ory/ @strekm @werdes72 @Tomasz-Smelcerz-SAP @mjakobczyk @dariusztutaj
+/resources/ory/ @strekm @werdes72 @Tomasz-Smelcerz-SAP @mjakobczyk @dariusztutaj @cnvergence @veichtj @piotrkpc
 
 # The `api-gateway` chart
-/resources/api-gateway/ @strekm @werdes72 @Tomasz-Smelcerz-SAP @mjakobczyk @dariusztutaj
+/resources/api-gateway/ @strekm @werdes72 @Tomasz-Smelcerz-SAP @mjakobczyk @dariusztutaj @cnvergence @veichtj @piotrkpc
 
 # The `compass-runtime-agent` chart
 /resources/compass-runtime-agent/ @PK85 @tgorgol @dbadura @akgalwas @janmedrek @franpog859 @Maladie @rafalpotempa @koala7659 @ralikio @everesio
 
 # The `kiali` chart
-/resources/kiali/ @a-thaler @lilitgh @suleymanakbas91 @clebs @rakesh-garimella @skhalash @jeremyharisch @chrkl @shorim
+/resources/kiali/ @a-thaler @lilitgh @suleymanakbas91 @clebs @rakesh-garimella @skhalash @jeremyharisch @chrkl @shorim @lindnerby
 
 # The `serverless` chart
-/resources/serverless/ @m00g3n @pPrecel @dbadura @tgorgol @rJankowski93
-
-# The `uaa-activator` chart
-/resources/uaa-activator/ @ksputo @piotrmiskiewicz @PK85 @szwedm @voigt @wozniakjan
-
-# The `permission-controller` chart
-/resources/permission-controller/ @strekm @werdes72 @Tomasz-Smelcerz-SAP @mjakobczyk @dariusztutaj
+/resources/serverless/ @m00g3n @pPrecel @dbadura @rJankowski93 @kwiatekus
 
 # The `busola-migrator` chart
 /resources/busola-migrator/ @m00g3n @pPrecel @dbadura @tgorgol @rJankowski93
@@ -194,13 +136,6 @@ components/etcd-tls-setup-job/ @PK85 @piotrmiskiewicz @ksputo @szwedm @voigt @wo
 
 # Application broker Component
 /components/application-broker/ @PK85 @piotrmiskiewicz @ksputo @szwedm @voigt @wozniakjan @adamwalach @lilitgh
-
-# Console Backend Service Component
-/components/console-backend-service/ @dariadomagala @parostatkiem @akucharska @Wawrzyn321 @kwiatekus
-/components/console-backend-service/internal/gqlschema @dariadomagala @parostatkiem @akucharska @Wawrzyn321 @kwiatekus @m00g3n @pPrecel @dbadura @tgorgol @rJankowski93
-/components/console-backend-service/internal/domain/*.go @dariadomagala @parostatkiem @akucharska @Wawrzyn321 @kwiatekus @m00g3n @pPrecel @dbadura @tgorgol @rJankowski93
-/components/console-backend-service/internal/domain/serverless @m00g3n @pPrecel @dbadura @tgorgol @rJankowski93
-/components/console-backend-service/internal/domain/rafter @m00g3n @pPrecel @dbadura @tgorgol @rJankowski93
 
 # Connector Service Component
 /components/connector-service/ @akgalwas @janmedrek @franpog859 @Maladie @rafalpotempa @koala7659 @ralikio
@@ -236,10 +171,10 @@ components/etcd-tls-setup-job/ @PK85 @piotrmiskiewicz @ksputo @szwedm @voigt @wo
 /components/dex-static-user-configurer/ @strekm @werdes72 @Tomasz-Smelcerz-SAP @mjakobczyk @dariusztutaj
 
 # Function Controller
-/components/function-controller/ @m00g3n @pPrecel @dbadura @tgorgol @rJankowski93
+/components/function-controller/ @m00g3n @pPrecel @dbadura @rJankowski93 @kwiatekus
 
 # Function Controller Runtimes
-/components/function-runtimes/ @m00g3n @pPrecel @dbadura @tgorgol @rJankowski93
+/components/function-runtimes/ @m00g3n @pPrecel @dbadura @rJankowski93 @kwiatekus
 
 # Compass Runtime Agent
 /components/compass-runtime-agent/ @PK85 @tgorgol @dbadura @akgalwas @janmedrek @franpog859 @Maladie @rafalpotempa @koala7659 @ralikio
@@ -249,9 +184,6 @@ components/etcd-tls-setup-job/ @PK85 @piotrmiskiewicz @ksputo @szwedm @voigt @wo
 
 # Eventing Controller
 /components/eventing-controller @k15r @lilitgh @marcobebway @nachtmaar @radufa @sayanh @pxsalehi @mfaizanse
-
-# NATS Operator
-/components/nats-operator @k15r @lilitgh @marcobebway @nachtmaar @radufa @sayanh @pxsalehi @mfaizanse
 
 # Busola Migrator Component
 /components/busola-migrator/ @m00g3n @pPrecel @dbadura @tgorgol @rJankowski93
@@ -263,32 +195,20 @@ components/etcd-tls-setup-job/ @PK85 @piotrmiskiewicz @ksputo @szwedm @voigt @wo
 /components/central-application-connectivity-validator/ @akgalwas @janmedrek @franpog859 @Maladie @rafalpotempa @koala7659 @ralikio
 
 # Telemetry Operator
-/components/telemetry-operator @a-thaler @lilitgh @suleymanakbas91 @clebs @rakesh-garimella @skhalash @jeremyharisch @chrkl @shorim
+/components/telemetry-operator @a-thaler @lilitgh @suleymanakbas91 @clebs @rakesh-garimella @skhalash @jeremyharisch @chrkl @shorim @lindnerby
 
 # Tests
 # Service Catalog acceptance tests
 /tests/service-catalog/ @ksputo @piotrmiskiewicz @PK85 @szwedm @voigt @wozniakjan @adamwalach
 
-# Cluster-users integration tests
-/tests/integration/cluster-users/ @strekm @werdes72 @Tomasz-Smelcerz-SAP @mjakobczyk @dariusztutaj
-
 # Dex integration tests
 /tests/integration/dex/ @strekm @werdes72 @Tomasz-Smelcerz-SAP @mjakobczyk @dariusztutaj
-
-# monitoring tests
-/tests/integration/monitoring/ @a-thaler @lilitgh @suleymanakbas91 @clebs @rakesh-garimella @skhalash @jeremyharisch @shorim
-
-# logging tests
-/tests/integration/logging/ @a-thaler @lilitgh @suleymanakbas91 @clebs @rakesh-garimella @skhalash @jeremyharisch @chrkl @shorim
 
 # api-gateway integration tests
 /tests/integration/api-gateway/ @strekm @werdes72 @Tomasz-Smelcerz-SAP @mjakobczyk @dariusztutaj
 
 # apiserver-proxy tests
 /tests/integration/apiserver-proxy/ @strekm @werdes72 @Tomasz-Smelcerz-SAP @mjakobczyk @dariusztutaj
-
-# Console Backend Service tests
-/tests/console-backend-service/ @dariadomagala @parostatkiem @akucharska @Wawrzyn321 @kwiatekus
 
 # Rafter tests
 /tests/rafter/ @m00g3n @pPrecel @dbadura @tgorgol @rJankowski93
@@ -363,23 +283,6 @@ milv.config.yaml @m00g3n @pPrecel @klaudiagrz @mmitoraj @majakurcius @alexandra-
 
 # performance tests
 /tests/perf/ @a-thaler @lilitgh @suleymanakbas91 @clebs @rakesh-garimella
-
-# The `api-gateway ui` micro front-end definition
-/resources/api-gateway/templates/api-rules-microfrontend.yaml @dariadomagala @parostatkiem @akucharska @Wawrzyn321 @kwiatekus
-
-# application ui microfrontend definitions
-/resources/application-connector/templates/applications-microfrontend.yaml @dariadomagala @parostatkiem @akucharska @Wawrzyn321 @kwiatekus
-
-# serverless ui microfrontend definitions
-/resources/serverless/templates/cluster-microfrontend-functions.yaml @dariadomagala @parostatkiem @akucharska @Wawrzyn321 @kwiatekus
-
-# monitoring ui microfrontend definitions
-/resources/kiali/templates/kyma-additions/clustermicrofrontend.yaml @dariadomagala @parostatkiem @akucharska @Wawrzyn321 @kwiatekus
-/resources/monitoring/charts/grafana/templates/kyma-additions/stats-metrics-microfrontend.yaml @dariadomagala @parostatkiem @akucharska @Wawrzyn321 @kwiatekus
-/resources/tracing/templates/kyma-additions/microfrontend.yaml @dariadomagala @parostatkiem @akucharska @Wawrzyn321 @kwiatekus
-
-# compass ui microfrontend definitions
-/resources/compass-runtime-agent/templates/compass-apps-microfrontend.yaml @dariadomagala @parostatkiem @akucharska @Wawrzyn321 @kwiatekus
 
 # github actions
 /.github/workflows @PK85 @piotrmiskiewicz @ksputo @szwedm @voigt @wozniakjan @adamwalach

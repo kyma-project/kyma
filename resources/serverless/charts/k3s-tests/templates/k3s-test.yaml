@@ -46,4 +46,4 @@ spec:
             - name: APP_TEST_ISTIO_ENABLED
               value: "false"
             - name: APP_TEST_GIT_SERVER_IMAGE
-              value: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.git_server) }}"
+              value: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.testImages.git_server) }}"

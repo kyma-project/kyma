@@ -37,14 +37,4 @@ spec:
               - DELETE
             paths:
               - /{{ .Release.Name }}/v1/metadata*
-    - from:
-      - source:
-          principals:
-          - cluster.local/ns/kyma-system/sa/{{ .Values.authorizationPolicy.serviceAccount.consoleBackendService }}
-      to:
-      - operation:
-          methods:
-          - GET
-          paths:
-          - /v1/health
 {{- end }}

@@ -1,12 +1,11 @@
-FROM golang:1.15-alpine as builder
+FROM eu.gcr.io/kyma-project/test-infra/buildpack-golang:v20211110-ab51bd20 as builder
 
 ARG DOCK_PKG_DIR=/go/src/github.com/kyma-project/kyma/components/event-publisher-proxy
 
 WORKDIR $DOCK_PKG_DIR
 COPY . $DOCK_PKG_DIR
 
-RUN GOOS=linux GO111MODULE=on go mod vendor && \
-    CGO_ENABLED=0 GOOS=linux GO111MODULE=on go build -o event-publisher-proxy ./cmd/event-publisher-proxy
+RUN CGO_ENABLED=0 GOOS=linux GO111MODULE=on go build -o event-publisher-proxy ./cmd/event-publisher-proxy
 
 FROM gcr.io/distroless/static:nonroot
 LABEL source = git@github.com:kyma-project/kyma.git

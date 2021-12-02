@@ -30,38 +30,38 @@ global:
   images:
     k8s_tools:
       name: "k8s-tools"
-      version: "20210922-530cfc39"
+      version: "20211022-85284bf9"
       directory: "tpi"
     ## Google Cloud SQL Proxy image
     ## ref: https://cloud.google.com/sql/docs/mysql/sql-proxy
     ## ref: https://cloud.google.com/sql/docs/postgres/sql-proxy
     gce_proxy:
       name: "gce-proxy"
-      version: "v1.25.0-alpine-ef998682"
+      version: "v1.27.0-alpine-7c52185c"
       directory: "tpi/cloudsql-docker"
     hydra:
       name: "hydra"
-      version: "v1.8.5"
+      version: "v1.10.7-sqlite"
       directory: "external/oryd"
     hydra_maester:
       name: "hydra-maester"
-      version: "v0.0.21"
+      version: "v0.0.24"
       directory: "external/oryd"
     busybox:
       name: "busybox"
-      version: "1.32.0-v1"
+      version: "1.34.1"
       directory: "external"
     oathkeeper:
       name: "oathkeeper"
-      version: "v0.38.11-alpine"
+      version: "v0.38.15-alpine"
       directory: "external/oryd"
     oathkeeper_maester:
       name: "oathkeeper-maester"
-      version: "v0.1.4"
+      version: "v0.1.5"
       directory: "external/oryd"
     postgres:
       name: "postgres"
-      version: "11.13-alpine"
+      version: "11.14-alpine-v1"
       directory: "external"
     postgres_exporter:
       name: "postgres-exporter"
@@ -69,7 +69,7 @@ global:
       directory: "external/bitnami"
     alpine:
       name: "alpine"
-      version: "3.12.0"
+      version: "3.14.2"
       directory: "external"
 
 headerRewrite:
