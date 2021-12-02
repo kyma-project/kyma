@@ -5,8 +5,8 @@ const { prometheusPortForward } = require("../monitoring/client");
 
 function observabilityTests() {
 
-    describe("Prometheus tests", function () {
-        this.timeout(30 * 60 * 1000); // 30 min
+    describe("Prometheus tests ->", function () {
+        this.timeout(5 * 60 * 1000); // 5 min
         this.slow(5 * 1000);
 
         var cancelPortForward;
@@ -48,7 +48,7 @@ function observabilityTests() {
         });
     });
 
-    describe("Grafana tests", async function () {
+    describe("Grafana tests ->", async function () {
         this.timeout(5 * 60 * 1000); // 5 min
         this.slow(5 * 1000);
 

@@ -14,6 +14,7 @@ const {
     retryPromise,
     sleep,
     waitForDeployment,
+    waitForPodWithLabel,
 } = require("../utils");
 
 const { queryGrafana } = require("./client");
