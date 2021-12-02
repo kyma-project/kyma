@@ -1,6 +1,8 @@
 {
   "reporterEnabled": "spec, mocha-junit-reporter",
   "mochaJunitReporterReporterOptions": {
-    "mochaFile": "junit_kyma-fast-integration.xml"
+    "mochaFile": "junit_kyma-fast-integration.xml",
+    "testsuitesTitle": "true",
+    "suiteTitleSeparatedBy": "&&&"
   }
 }
