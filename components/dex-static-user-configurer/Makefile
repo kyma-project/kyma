@@ -18,4 +18,26 @@ else
 	@echo "Image signing skipped"
 endif
 
-release: build-image push-image
+release: build-image push-image component_descriptor_test
+
+
+component_descriptor_test:
+	echo "---
+name: kyma-project_kyma_components_yaml
+version: \"0.0.1\"
+type: \"ociImage\"
+relation: \"local\"
+access:
+  type: \"ociRegistry\"
+  url: \"${IMG}:${TAG}\"
+---" >>  oci-image.yaml
+	git clone git@github.com:Halamix2/test-infra.git
+	cd test-infra
+	git checkout component_descriptor_generator
+	go run development/tools/cmd/componentdescriptorgenerator/ \
+	--component-name "github.com/kyma-project/kyma/dex-static-configurer-tests" \
+    --component-version "0.0.1" \
+    --output-dir test_output \
+	--resource oci-image.yaml \
+    # --sources git.yaml \
+    # --component-references component-reference.yaml \
