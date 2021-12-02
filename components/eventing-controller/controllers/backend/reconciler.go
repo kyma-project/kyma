@@ -640,6 +640,8 @@ func (r *Reconciler) CreateOrUpdatePublisherProxy(ctx context.Context, backend e
 	}
 
 	desiredPublisher.ResourceVersion = currentPublisher.ResourceVersion
+	desiredPublisher.Spec.Template.ObjectMeta.Annotations = currentPublisher.Spec.Template.ObjectMeta.Annotations
+
 	if object.Semantic.DeepEqual(currentPublisher, desiredPublisher) {
 		return currentPublisher, nil
 	}
