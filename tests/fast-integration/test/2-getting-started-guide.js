@@ -2,14 +2,14 @@ const {
   ensureGettingStartedTestFixture,
   verifyOrderPersisted,
   cleanGettingStartedTestFixture,
-} = require("./fixtures/getting-started-guides");
+} = require("./fixtures/getting-started-guide");
 const {
   printRestartReport,
   getContainerRestartsForAllNamespaces,
 } = require("../utils");
 
 
-function gettingStartedGuides() {
+function gettingStartedGuideTests() {
   describe("Getting Started Guide Tests", function () {
     this.timeout(10 * 60 * 1000);
     this.slow(5000);
@@ -47,7 +47,6 @@ function gettingStartedGuides() {
   });
 }
 
-
 module.exports = {
-  gettingStartedGuides,
+  gettingStartedGuideTests,
 }
