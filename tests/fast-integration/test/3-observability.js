@@ -3,7 +3,7 @@ const grafana = require("./../monitoring/grafana");
 
 const { prometheusPortForward } = require("../monitoring/client");
 
-export function observabilityTests() {
+function observabilityTests() {
 
     describe("Prometheus tests", function () {
         this.timeout(30 * 60 * 1000); // 30 min
@@ -60,4 +60,8 @@ export function observabilityTests() {
             await grafana.assertGrafanaRedirectsExist();
         });
     });
+}
+
+module.exports = {
+    observabilityTests,
 }
