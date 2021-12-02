@@ -16,7 +16,7 @@ const {
     waitForDeployment,
 } = require("../utils");
 
-const { queryGrafana } = require("client");
+const { queryGrafana } = require("./client");
 
 async function checkGrafanaRedirects() {
     const kymaMajorVer = getEnvOrDefault("KYMA_MAJOR_VERSION", "2");
