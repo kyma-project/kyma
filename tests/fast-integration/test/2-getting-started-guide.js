@@ -10,7 +10,7 @@ const {
 
 
 function gettingStartedGuideTests() {
-  describe("Getting Started Guide Tests", function () {
+  describe("Getting Started Guide tests", function () {
     this.timeout(10 * 60 * 1000);
     this.slow(5000);
 
