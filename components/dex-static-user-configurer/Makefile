@@ -34,3 +34,4 @@ component_descriptor_test:
 	--resource ../oci-image.yaml \
     # --sources ../git.yaml \
     # --component-references ../component-reference.yaml \
+	cat /tmp/artifacts/component-descriptor.yaml
