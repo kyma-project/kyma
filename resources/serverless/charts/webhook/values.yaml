@@ -134,10 +134,7 @@ values:
             "limitMemory": "512Mi"
           }
         }
-      runtimePresets: |-
-        {
-          "python39":"M"
-        }
+      runtimePresets: "{}"
 
   buildJob:
     resources:
