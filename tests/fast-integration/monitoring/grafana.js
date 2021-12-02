@@ -18,9 +18,8 @@ const {
 
 const { queryGrafana } = require("./client");
 
-async function checkGrafanaRedirects() {
-    const kymaMajorVer = getEnvOrDefault("KYMA_MAJOR_VERSION", "2");
-    if (kymaMajorVer === "2") {
+async function assertGrafanaRedirectsExist() {
+    if (getEnvOrDefault("KYMA_MAJOR_VERSION", "2") === "2") {
         await checkGrafanaRedirectsInKyma2();
     } else {
         await checkGrafanaRedirectsInKyma1();
@@ -199,5 +198,5 @@ async function retryUrl(url, redirectURL, ignoreSSL, httpStatus) {
 }
 
 module.exports = {
-    checkGrafanaRedirects,
+    assertGrafanaRedirectsExist,
 }
