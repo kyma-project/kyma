@@ -26,6 +26,7 @@ component_descriptor_test:
 	git clone https://github.com/Halamix2/test-infra.git ti
 	cd ti
 	git fetch
+	git show-ref
 	git checkout component_descriptor_generator
 	go run development/tools/cmd/componentdescriptorgenerator/ \
 	--component-name "github.com/kyma-project/kyma/dex-static-configurer-tests" \
