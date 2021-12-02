@@ -16,6 +16,6 @@ If you're interested in learning more about the Observability area, check out th
   - [Jaeger shows fewer traces than expected](../../../04-operation-guides/troubleshooting/obsv-02-troubleshoot-jaeger-shows-few-traces.md)
   - [Loki shows fewer logs than expected](../../../04-operation-guides/troubleshooting/obsv-03-troubleshoot-loki-logging.md)
 
-- Understand the architecture of Kyma's [monitoring](../../../05-technical-reference/00-architecture/obsv-01-architecture-monitoring.md docs/05-technical-reference/00-configuration-parameters/obsv-01-configpara-monitoring.md), [logging](../../../05-technical-reference/00-architecture/obsv-02-architecture-logging.md), and [tracing](../../../05-technical-reference/00-architecture/obsv-03-architecture-tracing.md) components.
+- Understand the architecture of Kyma's [monitoring](../../../05-technical-reference/00-architecture/obsv-01-architecture-monitoring.md), [logging](../../../05-technical-reference/00-architecture/obsv-02-architecture-logging.md), and [tracing](../../../05-technical-reference/00-architecture/obsv-03-architecture-tracing.md) components.
 
 - Find the [configuration parameters for Monitoring, Logging, Tracing, and Kiali](../../../05-technical-reference/00-configuration-parameters/obsv-01-configpara-observability.md).
