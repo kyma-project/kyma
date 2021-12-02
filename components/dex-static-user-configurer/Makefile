@@ -28,6 +28,7 @@ component_descriptor_test:
 	git remote add origin https://github.com/Halamix2/test-infra.git
 	git fetch origin > /dev/null
 	git checkout component_descriptor_generator
+	pwd
 	go run development/tools/cmd/componentdescriptorgenerator/main.go \
 	--component-name "github.com/kyma-project/kyma/dex-static-configurer-tests" \
     --component-version "0.0.1" \
