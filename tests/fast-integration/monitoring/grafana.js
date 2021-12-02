@@ -18,6 +18,11 @@ const {
 
 const { queryGrafana } = require("./client");
 
+async function assertPodsExist() {
+    let namespace = "kyma-system";
+    await waitForPodWithLabel("app", "grafana", namespace);
+}
+
 async function assertGrafanaRedirectsExist() {
     if (getEnvOrDefault("KYMA_MAJOR_VERSION", "2") === "2") {
         await checkGrafanaRedirectsInKyma2();
@@ -198,5 +203,6 @@ async function retryUrl(url, redirectURL, ignoreSSL, httpStatus) {
 }
 
 module.exports = {
+    assertPodsExist,
     assertGrafanaRedirectsExist,
 }

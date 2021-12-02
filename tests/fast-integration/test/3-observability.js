@@ -1,5 +1,5 @@
-import * as prometheus from "./../monitoring/prometheus";
-import * as grafana from "./../monitoring/grafana";
+const prometheus = require("./../monitoring/prometheus");
+const grafana = require("./../monitoring/grafana");
 
 const { prometheusPortForward } = require("../monitoring/client");
 
@@ -35,6 +35,10 @@ export function observabilityTests() {
             await prometheus.assertScrapePoolTargetsExist();
         });
 
+        it("Prometheus rules should be registered", async () => {
+            await prometheus.assertRulesAreRegistered();
+        });
+
         it("Prometheus rules should be healthy", async () => {
             await prometheus.assertAllRulesAreHealthy();
         });
@@ -42,15 +46,15 @@ export function observabilityTests() {
         it("Metrics used by Kyma Dashboard should exist", async () => {
             await prometheus.assertMetricsExist();
         });
-
-        it("Prometheus rules should be registered", async function () {
-            await prometheus.assertRulesAreRegistered();
-        });
     });
 
     describe("Grafana tests", async function () {
         this.timeout(5 * 60 * 1000); // 5 min
         this.slow(5 * 1000);
+
+        it("Grafana pods should be ready", async () => {
+            await grafana.assertPodsExist();
+        });
 
         it("Grafana redirects should work", async () => {
             await grafana.assertGrafanaRedirectsExist();

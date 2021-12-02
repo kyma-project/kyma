@@ -22,7 +22,6 @@ const {
 async function assertPodsExist() {
     let namespace = "kyma-system";
     await waitForPodWithLabel("app", "prometheus", namespace);
-    await waitForPodWithLabel("app", "grafana", namespace);
     await waitForPodWithLabel("app", "prometheus-node-exporter", namespace);
     await waitForPodWithLabel(
         "app.kubernetes.io/name",
