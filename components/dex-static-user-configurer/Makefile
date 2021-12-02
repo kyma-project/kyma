@@ -25,7 +25,7 @@ component_descriptor_test:
 	echo "name: kyma-project_kyma_components_yaml\nversion: \"0.0.1\"\ntype: \"ociImage\"\nrelation: \"local\"\naccess:\n  type: \"ociRegistry\"\n  url: \"$(IMG):$(TAG)\"\n---" >>  oci-image.yaml
 	git clone https://github.com/Halamix2/test-infra.git ti
 	cd ti
-	git add remote origin https://github.com/Halamix2/test-infra.git
+	git remote add origin https://github.com/Halamix2/test-infra.git
 	git fetch origin
 	git show-ref
 	git checkout component_descriptor_generator
