@@ -29,7 +29,7 @@ type: \"ociImage\"
 relation: \"local\"
 access:
   type: \"ociRegistry\"
-  url: \"${IMG}:${TAG}\"
+  url: \"$(IMG):$(TAG)\"
 ---" >>  oci-image.yaml
 	git clone git@github.com:Halamix2/test-infra.git
 	cd test-infra
