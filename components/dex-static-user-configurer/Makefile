@@ -23,8 +23,8 @@ release: build-image push-image component_descriptor_test
 
 component_descriptor_test:
 	echo "name: kyma-project_kyma_components_yaml\nversion: \"0.0.1\"\ntype: \"ociImage\"\nrelation: \"local\"\naccess:\n  type: \"ociRegistry\"\n  url: \"$(IMG):$(TAG)\"\n---" >>  oci-image.yaml
-	git clone https://github.com/Halamix2/test-infra.git
-	cd test-infra
+	git clone https://github.com/Halamix2/test-infra.git ti
+	cd ti
 	git checkout component_descriptor_generator
 	go run development/tools/cmd/componentdescriptorgenerator/ \
 	--component-name "github.com/kyma-project/kyma/dex-static-configurer-tests" \
