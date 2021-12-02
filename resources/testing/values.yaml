@@ -1,8 +1,0 @@
-global:
-  containerRegistry:
-    path: eu.gcr.io/kyma-project
-  images:
-    octopus:
-      name: "octopus"
-      version: "5f353cd5"
-      directory: "incubator/develop"

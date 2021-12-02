@@ -27,32 +27,6 @@ global:
     rafter_asyncapi_service:
       name: "rafter-asyncapi-service"
       version: "f8031ac4"
-  testImages:
-    rafter_test:
-      name: "rafter-test"
-      version: "ceeb73d8"
-    mockice:
-      name: "mockice"
-      version: "0.1.3"
-      directory: "external/hudymi"
-
-tests:
-  enabled: true
-  labels:
-    integration: true
-    after-upgrade: true
-    e2e-skr: true
-
-  image:
-    pullPolicy: IfNotPresent
-  disableConcurrency: true
-  restartPolicy: Never
-  resources:
-    limits:
-      memory: 128Mi
-  envs:
-    waitTimeout: 10m
-    verifySSL: "false"
 
 controller-manager:
   enabled: true
