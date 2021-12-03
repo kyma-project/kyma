@@ -111,7 +111,7 @@ A successful call returns the following response:
 3. Send the encoded CSR to Kyma. Run:
 
    ```bash
-   curl -X POST -H "Content-Type: application/json" -d '{"csr":"BASE64_ENCODED_CSR_HERE"}' {CSR_SIGNING_URL_WITH_TOKEN}
+   curl -X POST -H "Content-Type: application/json" -d '{"csr":"BASE64_ENCODED_CSR_HERE"}' {CSR_SIGNING_URL_WITH_TOKEN} | jq .
    ```
 
    The response contains a valid client certificate signed by the Kyma Certificate Authority (CA), a CA certificate, and a certificate chain.
