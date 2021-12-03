@@ -7,6 +7,7 @@ This guide shows you how to register a service of your external solution in Kyma
 ## Prerequisites
 
 - A valid certificate signed by the Kyma Certificate Authority
+- The [jq](https://stedolan.github.io/jq/download/) tool to prettify the JSON output
 - Your [Application name exported](ac-01-create-application.md#prerequisites) as an environment variable
 - Your [cluster domain, generated client certificate and key exported](ac-02-get-client-certificate.md#generate-a-csr-and-send-it-to-kyma) as environment variables
 
@@ -134,7 +135,7 @@ This guide shows you how to register a service of your external solution in Kyma
 ### Check the details of a registered service
 
 ```bash
-curl https://gateway.$CLUSTER_DOMAIN/$APP_NAME/v1/metadata/services/$SERVICE_ID --cert $CLIENT_CERT_FILE_NAME.crt --key $KEY_FILE_NAME.key
+curl https://gateway.$CLUSTER_DOMAIN/$APP_NAME/v1/metadata/services/$SERVICE_ID --cert $CLIENT_CERT_FILE_NAME.crt --key $KEY_FILE_NAME.key | jq .
 ```
 
 ## Register an API with a specification URL
