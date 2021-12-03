@@ -207,7 +207,7 @@ func (s *crSupervisor) maintainCompassConnection(compassConnection *v1alpha1.Com
 
 	connectionTime := metav1.Now()
 
-	if (shouldRenew || !credentialsExist) && newCreds != nil {
+	if newCreds != nil {
 		s.log.Infof("Trying to save renewed certificates...")
 		err = s.credentialsManager.PreserveCredentials(*newCreds)
 		if err != nil {
