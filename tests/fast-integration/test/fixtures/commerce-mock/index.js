@@ -521,6 +521,7 @@ async function provisionCommerceMockResources(appName, mockNamespace, targetName
   await k8sApply([namespaceObj(mockNamespace), namespaceObj(targetNamespace)]);
   await k8sApply(prepareCommerceObjs(mockNamespace));
   await k8sApply(functionObjs, targetNamespace, true);
+  await waitForFunction("lastorder", targetNamespace);
   await k8sApply([
     eventingSubscription(
       `sap.kyma.custom.${appName}.order.created.v1`,

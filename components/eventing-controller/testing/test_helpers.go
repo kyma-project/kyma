@@ -32,7 +32,9 @@ const (
 	EventTypePrefix                          = "prefix"
 	EventTypePrefixEmpty                     = ""
 	OrderCreatedV1Event                      = "order.created.v1"
+	OrderUpdatedV1Event                      = "order.updated.v1"
 	OrderCreatedEventType                    = EventTypePrefix + "." + ApplicationName + "." + OrderCreatedV1Event
+	OrderUpdatedEventType                    = EventTypePrefix + "." + ApplicationName + "." + OrderUpdatedV1Event
 	OrderCreatedEventTypeNotClean            = EventTypePrefix + "." + ApplicationNameNotClean + "." + OrderCreatedV1Event
 	OrderCreatedEventTypePrefixEmpty         = ApplicationName + "." + OrderCreatedV1Event
 	OrderCreatedEventTypeNotCleanPrefixEmpty = ApplicationNameNotClean + "." + OrderCreatedV1Event
@@ -53,6 +55,14 @@ const (
 	StructuredCloudEvent = `{
            "id":"` + EventID + `",
            "type":"` + OrderCreatedEventType + `",
+           "specversion":"` + EventSpecVersion + `",
+           "source":"` + EventSource + `",
+           "data":"` + EventData + `"
+        }`
+
+	StructuredCloudEventUpdated = `{
+           "id":"` + EventID + `",
+           "type":"` + OrderUpdatedEventType + `",
            "specversion":"` + EventSpecVersion + `",
            "source":"` + EventSource + `",
            "data":"` + EventData + `"
