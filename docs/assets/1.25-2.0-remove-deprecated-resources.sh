@@ -61,7 +61,7 @@ kubectl -n istio-system delete serviceaccount istio-kyma-validate
 kubectl -n istio-system delete serviceaccount istio-proxy-reset
 kubectl -n istio-system delete serviceaccount kyma-ns-label
 kubectl -n kyma-integration delete serviceaccount application-connector-tests
-kubectl -n kyma-integration delete serviceaccount application-operator-gateway-tests
+kubectl -n kyma-integration delete serviceaccount application-operator-gateway-tests --ignore-not-found
 kubectl -n kyma-integration delete serviceaccount application-operator-tests
 
 echo "
@@ -139,7 +139,7 @@ kubectl delete clusterrole kyma-addons-edit
 kubectl delete clusterrole kyma-api-ns-admin
 kubectl delete clusterrole kyma-admin
 kubectl delete clusterrole api-gateway-tests
-kubectl delete clusterrole application-operator-gateway-tests
+kubectl delete clusterrole application-operator-gateway-tests --ignore-not-found
 kubectl delete clusterrole application-operator-tests
 kubectl delete clusterrole application-connector-tests
 kubectl delete clusterrole dex-admin
@@ -157,7 +157,7 @@ kubectl delete clusterrole rafter-tests
 echo "
 Deleting orphaned ClusterRoleBinding"
 kubectl delete clusterrolebinding api-gateway-tests
-kubectl delete clusterrolebinding application-operator-gateway-tests
+kubectl delete clusterrolebinding application-operator-gateway-tests --ignore-not-found
 kubectl delete clusterrolebinding application-operator-tests
 kubectl delete clusterrolebinding application-connector-tests
 kubectl delete clusterrolebinding cluster-users-tests
