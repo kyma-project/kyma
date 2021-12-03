@@ -492,7 +492,7 @@ var _ = Describe("Backend Reconciliation Tests", func() {
 	})
 
 	When("Reconciling existing publisher proxy deployment", func() {
-		It("Should preserve publisher proxy deployment spec template annotations", func() {
+		It("Should preserve only allowed annotations", func() {
 			ctx := context.Background()
 
 			By("Making sure the Backend reconciler is started", func() {
@@ -501,23 +501,55 @@ var _ = Describe("Backend Reconciliation Tests", func() {
 				Eventually(publisherProxyDeploymentGetter(ctx), timeout, pollingInterval).ShouldNot(BeNil())
 			})
 
-			var resourceVersionAfterUpdate string
-			annotations := map[string]string{"kubectl.kubernetes.io/restartedAt": "2021-01-01 00:00:00"}
-			By("Updating publisher proxy deployment spec template annotations", func() {
-				opt := deploymentWithSpecTemplateAnnotations(annotations)
-				resourceVersionAfterUpdate = ensurePublisherProxyDeploymentUpdated(ctx, opt)
+			Context("Publisher proxy deployment contains allowed annotations only", func() {
+				var resourceVersionAfterUpdate string
+				By("Updating publisher proxy deployment annotations", func() {
+					annotationsGiven := newMapFrom(allowedAnnotations)
+					opt := deploymentWithSpecTemplateAnnotations(annotationsGiven)
+					resourceVersionAfterUpdate = ensurePublisherProxyDeploymentUpdated(ctx, opt)
+				})
+
+				By("Making sure only allowed annotations are preserved", func() {
+					annotationsWanted := newMapFrom(allowedAnnotations)
+					Eventually(publisherProxyDeploymentSpecTemplateAnnotationsGetter(ctx), timeout, pollingInterval).Should(Equal(annotationsWanted))
+				})
+
+				By("Making sure the publisher proxy deployment ResourceVersion did not change after reconciliation", func() {
+					Expect(publisherProxyDeploymentResourceVersionGetter(ctx)()).Should(Equal(resourceVersionAfterUpdate))
+				})
 			})
 
-			By("Making sure publisher proxy deployment spec template annotations still exist after reconciliation", func() {
-				Eventually(publisherProxyDeploymentSpecTemplateAnnotationsGetter(ctx), timeout, pollingInterval).Should(Equal(annotations))
-			})
+			Context("Publisher proxy deployment contains allowed and non-allowed annotations", func() {
+				var resourceVersionAfterUpdate string
+				By("Updating publisher proxy deployment annotations", func() {
+					ignoredAnnotations := map[string]string{"ignoreMe": "true", "ignoreMeToo": "true"}
+					annotationsGiven := newMapFrom(allowedAnnotations, ignoredAnnotations)
+					opt := deploymentWithSpecTemplateAnnotations(annotationsGiven)
+					resourceVersionAfterUpdate = ensurePublisherProxyDeploymentUpdated(ctx, opt)
+				})
 
-			By("Making sure the publisher proxy deployment ResourceVersion did not change after reconciliation", func() {
-				Expect(publisherProxyDeploymentResourceVersionGetter(ctx)()).Should(Equal(resourceVersionAfterUpdate))
+				By("Making sure only allowed annotations are preserved", func() {
+					annotationsWanted := newMapFrom(allowedAnnotations)
+					Eventually(publisherProxyDeploymentSpecTemplateAnnotationsGetter(ctx), timeout, pollingInterval).Should(Equal(annotationsWanted))
+				})
+
+				By("Making sure the publisher proxy deployment ResourceVersion changed after reconciliation", func() {
+					Expect(publisherProxyDeploymentResourceVersionGetter(ctx)()).ShouldNot(Equal(resourceVersionAfterUpdate))
+				})
 			})
 		})
 	})
 })
+
+func newMapFrom(ms ...map[string]string) map[string]string {
+	mr := make(map[string]string)
+	for _, m := range ms {
+		for k, v := range m {
+			mr[k] = v
+		}
+	}
+	return mr
+}
 
 func ensureNamespaceCreated(ctx context.Context, namespace string) {
 	By(fmt.Sprintf("Ensuring the namespace %q is created", namespace))

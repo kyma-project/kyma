@@ -54,6 +54,14 @@ const (
 	reconcilerName = "backend-reconciler"
 )
 
+var (
+	// allowedAnnotations are the publisher proxy deployment spec template annotations
+	// which should be preserved during reconciliation.
+	allowedAnnotations = map[string]string{
+		"kubectl.kubernetes.io/restartedAt": "",
+	}
+)
+
 type Reconciler struct {
 	ctx               context.Context
 	natsSubMgr        subscriptionmanager.Manager
@@ -640,7 +648,14 @@ func (r *Reconciler) CreateOrUpdatePublisherProxy(ctx context.Context, backend e
 	}
 
 	desiredPublisher.ResourceVersion = currentPublisher.ResourceVersion
-	desiredPublisher.Spec.Template.ObjectMeta.Annotations = currentPublisher.Spec.Template.ObjectMeta.Annotations
+
+	// preserve only allowed annotations
+	desiredPublisher.Spec.Template.ObjectMeta.Annotations = make(map[string]string)
+	for k, v := range currentPublisher.Spec.Template.ObjectMeta.Annotations {
+		if _, ok := allowedAnnotations[k]; ok {
+			desiredPublisher.Spec.Template.ObjectMeta.Annotations[k] = v
+		}
+	}
 
 	if object.Semantic.DeepEqual(currentPublisher, desiredPublisher) {
 		return currentPublisher, nil
