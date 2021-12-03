@@ -86,7 +86,7 @@ The following example shows how to use an OpenID Connect (OIDC) compliant identi
     --from-literal="OAUTH2_PROXY_CLIENT_SECRET=<my-client-secret>" \
     --from-literal="OAUTH2_PROXY_OIDC_ISSUER_URL=<my-token-issuer>" \
     --from-literal="OAUTH2_PROXY_PROVIDER=oidc" \
-    --from-literal="OAUTH2_PROXY_SCOPE=openid" \
+    --from-literal="OAUTH2_PROXY_SCOPE=openid email" \
     --from-literal="OAUTH2_PROXY_ALLOWED_GROUPS=<my-groups>" \
     --from-literal="OAUTH2_PROXY_SKIP_PROVIDER_BUTTON=true"
   ```
@@ -103,7 +103,7 @@ The following example shows how to use an OpenID Connect (OIDC) compliant identi
     --from-literal="OAUTH2_PROXY_CLIENT_SECRET=<my-client-secret>" \
     --from-literal="OAUTH2_PROXY_OIDC_ISSUER_URL=<my-token-issuer>" \
     --from-literal="OAUTH2_PROXY_PROVIDER=oidc" \
-    --from-literal="OAUTH2_PROXY_SCOPE=openid" \
+    --from-literal="OAUTH2_PROXY_SCOPE=openid email" \
     --from-literal="OAUTH2_PROXY_ALLOWED_GROUPS=<my-groups>" \
     --from-literal="OAUTH2_PROXY_SKIP_PROVIDER_BUTTON=true"
   ```
@@ -120,7 +120,7 @@ The following example shows how to use an OpenID Connect (OIDC) compliant identi
     --from-literal="OAUTH2_PROXY_CLIENT_SECRET=<my-client-secret>" \
     --from-literal="OAUTH2_PROXY_OIDC_ISSUER_URL=<my-token-issuer>" \
     --from-literal="OAUTH2_PROXY_PROVIDER=oidc" \
-    --from-literal="OAUTH2_PROXY_SCOPE=openid" \
+    --from-literal="OAUTH2_PROXY_SCOPE=openid email" \
     --from-literal="OAUTH2_PROXY_ALLOWED_GROUPS=<my-groups>" \
     --from-literal="OAUTH2_PROXY_SKIP_PROVIDER_BUTTON=true"
   ```
