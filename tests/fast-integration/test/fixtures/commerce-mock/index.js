@@ -285,6 +285,84 @@ async function checkTrace(traceId, expectedTraceLength, expectedTraceProcessSequ
   }
 }
 
+async function addService() {
+  const vs = await waitForVirtualService("mocks", "commerce-mock");
+  const mockHost = vs.spec.hosts[0];
+  const url = `https://${mockHost}/remote/apis`;
+  const body = {
+    "name": "my-service-http-bin",
+    "provider": "myCompany",
+    "description": "This is some service",
+    "api": {
+      "targetUrl": "https://httpbin.org",
+      "spec": {
+        "swagger":"2.0"
+      }
+    }
+  }
+  const params = {
+    headers: {
+      "Content-Type": "application/json"
+    },
+    timeout: 5000,
+  };
+
+  let serviceId
+  try {
+    serviceId = await axios.post(url, body, params);
+  } catch (err) {
+    throw convertAxiosError(err, "Error during adding a Service");
+  }
+  return serviceId.data.id;
+}
+
+async function updateService(serviceId) {
+  const vs = await waitForVirtualService("mocks", "commerce-mock");
+  const mockHost = vs.spec.hosts[0];
+  const url = `https://${mockHost}/remote/apis/${serviceId}`;
+  const body = {
+    "name": "my-service-http-bin",
+    "provider": "myCompany",
+    "description": "This is some service - an updated description",
+    "api": {
+      "targetUrl": "https://httpbin.org",
+      "spec": {
+        "swagger":"2.0"
+      }
+    }
+  }
+  const params = {
+    headers: {
+      "Content-Type": "application/json"
+    },
+    timeout: 5000,
+  };
+
+  try {
+    await axios.put(url, body, params);
+  } catch (err) {
+    throw convertAxiosError(err, "Error during updating a Service");
+  }
+}
+
+async function deleteService(serviceId) {
+  const vs = await waitForVirtualService("mocks", "commerce-mock");
+  const mockHost = vs.spec.hosts[0];
+  const url = `https://${mockHost}/remote/apis/${serviceId}`;
+  const params = {
+    headers: {
+      "Content-Type": "application/json"
+    },
+    timeout: 5000,
+  };
+
+  try {
+    await axios.delete(url, params);
+  } catch (err) {
+    throw convertAxiosError(err, "Error during deleting a Service");
+  }
+}
+
 async function registerAllApis(mockHost) {
   debug("Listing Commerce Mock local APIs")
   const localApis = await axios.get(`https://${mockHost}/local/apis`, { timeout: 5000 }).catch((err) => {
@@ -634,6 +712,9 @@ module.exports = {
   ensureCommerceMockWithCompassTestFixture,
   sendEventAndCheckResponse,
   sendLegacyEventAndCheckTracing,
+  addService,
+  updateService,
+  deleteService,
   checkFunctionResponse,
   checkInClusterEventDelivery,
   checkInClusterEventTracing,
