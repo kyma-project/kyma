@@ -36,6 +36,6 @@ component_descriptor_test:
 	--sources ../git.yaml \
 	# --component-references ../component-reference.yaml \
 	cat /tmp/artifacts/componentdescriptor/component-descriptor.yaml
-	curl -L https://github.com/gardener/component-cli/releases/download/$(curl -s https://api.github.com/repos/gardener/component-cli/releases/latest | jq -r '.tag_name')/componentcli-linux-amd64.gz | gzip -d > ./component-cli
+	curl -L https://github.com/gardener/component-cli/releases/download/v0.31.0/componentcli-linux-amd64.gz | gzip -d > ./component-cli
 	chmod +x component-cli
 	./component-cli ca remote push /tmp/artifacts/componentdescriptor --repo-ctx "europe-west3-docker.pkg.dev/sap-kyma-prow-workloads/test-gcr"
