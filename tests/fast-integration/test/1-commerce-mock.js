@@ -60,16 +60,16 @@ function commerceMockTests() {
       await checkFunctionResponse(testNamespace);
     });
 
+    it("order.created.v1 event should trigger the lastorder function", async function () {
+      await sendEventAndCheckResponse();
+    });
+
     it("should add, update and delete a service", async function () {
       let serviceId = await addService();
       await updateService(serviceId)
       await deleteService(serviceId)
     });
-
-    it("order.created.v1 event should trigger the lastorder function", async function () {
-      await sendEventAndCheckResponse();
-    });
-
+    
     it("Should print report of restarted containers, skipped if no crashes happened", async function () {
       const afterTestRestarts = await getContainerRestartsForAllNamespaces();
       printRestartReport(initialRestarts, afterTestRestarts);
