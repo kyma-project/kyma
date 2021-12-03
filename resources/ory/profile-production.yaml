@@ -9,7 +9,6 @@ global:
         gcloud:
           enabled: false
 hydra:
-  replicaCount: 2
   affinity:
     podAntiAffinity:
       preferredDuringSchedulingIgnoredDuringExecution:
@@ -26,7 +25,6 @@ hydra:
       targetMemoryUtilizationPercentage: 75
       targetCPUUtilizationPercentage: 80          
 oathkeeper:
-  replicaCount: 3
   deployment:
     resources:
       limits:

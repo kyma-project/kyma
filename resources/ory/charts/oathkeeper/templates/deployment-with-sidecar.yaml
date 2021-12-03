@@ -11,7 +11,9 @@ metadata:
     mode: {{ .Values.global.ory.oathkeeper.maester.mode }}
 {{ include "oathkeeper.labels" . | indent 4 }}
 spec:
+{{- if not .Values.hpa.oathkeeper.enabled }}
   replicas: {{ .Values.replicaCount }}
+{{- end }}
   selector:
     matchLabels:
       app.kubernetes.io/name: {{ include "oathkeeper.name" . }}
