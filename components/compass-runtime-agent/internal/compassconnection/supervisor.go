@@ -118,7 +118,6 @@ func (s *crSupervisor) InitializeCompassConnection() (*v1alpha1.CompassConnectio
 	return s.updateCompassConnection(compassConnectionCR)
 }
 
-// SynchronizeWithCompass synchronizes with Compass
 func (s *crSupervisor) SynchronizeWithCompass(connection *v1alpha1.CompassConnection) (*v1alpha1.CompassConnection, error) {
 	s.log = s.log.WithField("CompassConnection", connection.Name)
 
