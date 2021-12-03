@@ -4,7 +4,7 @@ const {
     observabilityTests
 } = require('./');
 
-describe("Execute tests ->", function() {
+describe("Executing Standard Testsuite:", function() {
     commerceMockTests();
     gettingStartedGuideTests();
     observabilityTests();

@@ -21,7 +21,7 @@ const {
 } = require("../logging");
 
 function commerceMockTests() {
-  describe("CommerceMock tests", function () {
+  describe("CommerceMock Tests:", function () {
     this.timeout(10 * 60 * 1000);
     this.slow(5000);
     const withCentralAppConnectivity = (process.env.WITH_CENTRAL_APP_CONNECTIVITY === "true");
