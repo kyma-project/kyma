@@ -29,7 +29,7 @@ func (s *Server) Start(address string) error {
 		}
 
 		s.logger.Infof("Metrics server started on %v", address)
-		go s.srv.Serve(listener)
+		go s.srv.Serve(listener) //nolint:errcheck
 	}
 
 	return nil

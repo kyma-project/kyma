@@ -23,16 +23,10 @@ func IsARequestWithLegacyEvent(uri string) bool {
 	if len(uriPathSegments) != 3 {
 		return false
 	}
-	if !strings.HasSuffix(uri, LegacyEndpointSuffix) {
-		return false
-	}
-	return true
+	return strings.HasSuffix(uri, LegacyEndpointSuffix)
 }
 
 func IsARequestForSubscriptions(uri string) bool {
 	// Assuming the path should be of the form /:application/v1/events/subscribed
-	if !strings.HasSuffix(uri, SubscribedEndpointSuffix) {
-		return false
-	}
-	return true
+	return strings.HasSuffix(uri, SubscribedEndpointSuffix)
 }
