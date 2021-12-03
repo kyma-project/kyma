@@ -9,7 +9,7 @@ All the steps are performed in the `default` Namespace.
 
 ## Prerequisites
 
-- [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) (v1.19 or higher)
+- [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) (v1.19 or higher) together with the [kubelogin](https://github.com/int128/kubelogin) plugin
 - [curl](https://github.com/curl/curl)
 - [k3d](https://k3d.io) (v5.0.0 or higher with [a Kubernetes version supported by Kyma](../04-operation-guides/operations/02-install-kyma.md))
 - [Kyma CLI](../04-operation-guides/operations/01-install-kyma-CLI.md)
