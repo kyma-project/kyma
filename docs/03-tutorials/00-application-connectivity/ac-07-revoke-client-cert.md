@@ -4,6 +4,8 @@ title: Revoke a client certificate
 
 You can revoke a client certificate generated for your Application. Revocation prevents a certificate from being [renewed](ac-06-renew-client-cert.md). A revoked certificate, however, continues to be valid until it expires. 
 
+## Revoke the certificate
+
 1. Export the names of the generated client certificate and key, and your [cluster domain](../../02-get-started/01-quick-install.md#export-your-cluster-domain) as environment variables:
 
    ```bash
@@ -12,13 +14,13 @@ You can revoke a client certificate generated for your Application. Revocation p
    export CLUSTER_DOMAIN=local.kyma.dev
    ```
 
-To revoke a client certificate, send a request to the `certificates/revocations` endpoint. Pass the certificate you want to revoke and a key that matches this certificate in the call. Run:
+2. To revoke a client certificate, send a request to the `certificates/revocations` endpoint. Pass the certificate you want to revoke and the key that matches this certificate in the call. Run:
     
-```bash
-curl -X POST https://gateway.$CLUSTER_DOMAIN/v1/applications/certificates/revocations --cert $CLIENT_CERT_FILE_NAME.crt --key $KEY_FILE_NAME.key 
-```
+   ```bash
+   curl -X POST https://gateway.$CLUSTER_DOMAIN/v1/applications/certificates/revocations --cert $CLIENT_CERT_FILE_NAME.crt --key $KEY_FILE_NAME.key 
+   ```
 
-> **CAUTION:** On a local Kyma deployment, skip SSL certificate verification when making a `curl` call, by adding the `-k` flag to it. Alternatively, add the Kyma certificates to your local certificate storage on your machine using the `kyma import certs` command.
+   > **CAUTION:** On a local Kyma deployment, skip SSL certificate verification when making a `curl` call, by adding the `-k` flag to it. Alternatively, add the Kyma certificates to your local certificate storage on your machine using the `kyma import certs` command.
 
 ## Revoke a certificate using the SHA256 fingerprint
 
