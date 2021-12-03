@@ -131,7 +131,8 @@ deployment:
   #  requests:
   #    cpu: 100m
   #  memory: 128Mi
-
+  autoscaling:
+    enabled: false
   # Node labels for pod assignment.
   nodeSelector: {}
   # If you do want to specify node labels, uncomment the following

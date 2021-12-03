@@ -249,6 +249,20 @@ oathkeeper:
       requests:
         cpu: 50m
         memory: 64Mi
+    autoscaling:
+      enabled: true
+      minReplicas: 1
+      maxReplicas: 3
+      cpu: 80
+      metrics:
+      - type: Resource
+        resource:
+          name: memory
+          targetAverageUtilization: 75
+      - type: Resource
+        resource:
+          name: cpu
+          targetAverageUtilization: 80        
   oathkeeper-maester:
     deployment:
       annotations:

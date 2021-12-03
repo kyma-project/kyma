@@ -1,5 +1,5 @@
 {{- if .Capabilities.APIVersions.Has "autoscaling/v2beta1" }}
-{{- if .Values.hpa.oathkeeper.enabled }}
+{{- if .Values.deployment.autoscaling.enabled }}
 ---
 apiVersion: autoscaling/v2beta1
 kind: HorizontalPodAutoscaler
@@ -11,9 +11,9 @@ spec:
     apiVersion: apps/v1
     kind: Deployment
     name: {{ include "oathkeeper.fullname" . }}-oathkeeper
-  minReplicas: {{ .Values.hpa.oathkeeper.minReplicas }}
-  maxReplicas: {{ .Values.hpa.oathkeeper.maxReplicas }}
+  minReplicas: {{ .Values.deployment.autoscaling.minReplicas }}
+  maxReplicas: {{ .Values.deployment.autoscaling.maxReplicas }}
   metrics:
-{{ toYaml .Values.hpa.oathkeeper.metrics | trim | indent 2 }}
+{{ toYaml .Values.deployment.autoscaling.metrics | trim | indent 2 }}
 {{- end }}
 {{- end }}

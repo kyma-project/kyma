@@ -18,7 +18,7 @@ metadata:
       {{- toYaml . | nindent 4 }}
     {{- end }}
 spec:
-{{- if not .Values.hpa.oathkeeper.enabled }}
+{{- if not .Values.deployment.autoscaling.enabled }}
   replicas: {{ .Values.replicaCount }}
 {{- end }}
   selector:
