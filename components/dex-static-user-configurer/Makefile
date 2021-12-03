@@ -20,7 +20,6 @@ endif
 
 release: build-image push-image component_descriptor_test
 
-
 component_descriptor_test:
 	echo "name: kyma-project_kyma_components_$(APP_NAME)\nversion: \"0.0.1\"\ntype: \"ociImage\"\nrelation: \"local\"\naccess:\n  type: \"ociRegistry\"\n  url: \"$(IMG):$(TAG)\"\n---" >>  oci-image.yaml
 	echo "---\nname: kyma-project_kyma_$(APP_NAME)\nversion: 0.0.1\ntype: git\naccess:\n  type: github\n  repoUrl: https://github.com/kyma-project/kyma/$(APP_NAME)\n  ref: main\n  commit: $(PULL_PULL_SHA)" >>  git.yaml
@@ -33,10 +32,10 @@ component_descriptor_test:
 	--component-version "0.0.1" \
 	--output-dir /tmp/artifacts/componentdescriptor \
 	--resource ../oci-image.yaml \
-	--sources ../git.yaml \
-	# --component-references ../component-reference.yaml \
+	--sources ../git.yaml
+
 	cat /tmp/artifacts/componentdescriptor/component-descriptor.yaml
-	curl -L https://github.com/gardener/component-cli/releases/download/v0.31.0/componentcli-linux-amd64.gz | gzip -d > ./component-cli
-	chmod +x component-cli
+
+	curl -L https://github.com/gardener/component-cli/releases/download/v0.31.0/componentcli-linux-amd64.gz | gzip -d > ./component-cli; chmod +x component-cli
 	gcloud auth configure-docker europe-west3-docker.pkg.dev > /dev/null 2>&1
 	./component-cli ca remote push /tmp/artifacts/componentdescriptor --repo-ctx "europe-west3-docker.pkg.dev/sap-kyma-prow-workloads/test-gcr"
