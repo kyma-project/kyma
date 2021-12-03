@@ -130,14 +130,10 @@ kubectl delete clusterrole service-catalog-tests
 kubectl delete clusterrole serverless-tests
 kubectl delete clusterrole monitoring-tests
 kubectl delete clusterrole logging-tests
-kubectl delete clusterrole kyma-namespace-admin-essentials
-kubectl delete clusterrole kyma-namespace-create
 kubectl delete clusterrole kyma-mf-view
 kubectl delete clusterrole kyma-mf-admin
 kubectl delete clusterrole kyma-addons-admin
 kubectl delete clusterrole kyma-addons-edit
-kubectl delete clusterrole kyma-api-ns-admin
-kubectl delete clusterrole kyma-admin
 kubectl delete clusterrole api-gateway-tests
 kubectl delete clusterrole application-operator-gateway-tests --ignore-not-found
 kubectl delete clusterrole application-operator-tests
