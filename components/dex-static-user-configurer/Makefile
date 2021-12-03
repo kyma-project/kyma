@@ -37,4 +37,4 @@ component_descriptor_test:
 
 	curl -L https://github.com/gardener/component-cli/releases/download/v0.31.0/componentcli-linux-amd64.gz | gzip -d > ./component-cli; chmod +x component-cli
 	gcloud auth configure-docker europe-west3-docker.pkg.dev > /dev/null 2>&1
-	# ./component-cli ca remote push /logs/artifacts/componentdescriptor --repo-ctx "europe-west3-docker.pkg.dev/sap-kyma-prow-workloads/test-gcr"
+	./component-cli ca remote push /logs/artifacts/componentdescriptor --repo-ctx "europe-west3-docker.pkg.dev/sap-kyma-prow-workloads/test-gcr"
