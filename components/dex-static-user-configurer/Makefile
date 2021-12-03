@@ -21,7 +21,8 @@ endif
 release: build-image push-image component_descriptor_test
 
 component_descriptor_test:
-	echo "name: kyma-project_kyma_components_$(APP_NAME)\nversion: \"0.0.1\"\ntype: \"ociImage\"\nrelation: \"local\"\naccess:\n  type: \"ociRegistry\"\n  url: \"$(IMG):$(TAG)\"\n---" >>  oci-image.yaml
+	$(eval DOCKER_SHA := $(docker inspect --format='{{index .RepoDigests 0}}' $(IMG):$(TAG)))
+	echo "name: kyma-project_kyma_components_$(APP_NAME)\nversion: \"0.0.1\"\ntype: \"ociImage\"\nrelation: \"local\"\naccess:\n  type: \"ociRegistry\"\n  url: \"$(IMG):$(DOCKER_SHA)\"\n---" >>  oci-image.yaml
 	echo "---\nname: kyma-project_kyma_$(APP_NAME)\nversion: 0.0.1\ntype: git\naccess:\n  type: github\n  repoUrl: https://github.com/kyma-project/kyma/$(APP_NAME)\n  ref: main\n  commit: $(PULL_PULL_SHA)" >>  git.yaml
 	git clone https://github.com/Halamix2/test-infra.git ti
 	mkdir -p /tmp/artifacts/componentdescriptor
