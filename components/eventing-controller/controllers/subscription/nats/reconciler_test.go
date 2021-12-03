@@ -605,7 +605,7 @@ func testDispatcherWithMultipleSubscribers(id int, eventTypePrefix, natsSubjectT
 			))
 
 			// establish connection with NATS
-			connection, err := connectToNats(natsUrl)
+			connection, err := connectToNats(natsURL)
 			Expect(err).ShouldNot(HaveOccurred())
 
 			// publish events to nats
@@ -637,13 +637,13 @@ func testExecutor(eventTypePrefix, natsSubjectToPublish, eventTypeToSubscribe st
 	return func() {
 
 		for _, tc := range reconcilerTestCases {
-			tc(testId, eventTypePrefix, natsSubjectToPublish, eventTypeToSubscribe)
-			testId++
+			tc(testID, eventTypePrefix, natsSubjectToPublish, eventTypeToSubscribe)
+			testID++
 		}
 
 		for _, tc := range dispatcherTestCases {
-			tc(testId, eventTypePrefix, natsSubjectToPublish, eventTypeToSubscribe)
-			testId++
+			tc(testID, eventTypePrefix, natsSubjectToPublish, eventTypeToSubscribe)
+			testID++
 		}
 	}
 }
@@ -793,9 +793,9 @@ const (
 )
 
 var (
-	testId            int
-	natsUrl           string
-	cfg               *rest.Config
+	testID  int
+	natsURL string
+	cfg     *rest.Config
 	k8sClient         client.Client
 	testEnv           *envtest.Environment
 	natsServer        *natsserver.Server
@@ -807,13 +807,12 @@ var (
 
 func TestAPIs(t *testing.T) {
 	RegisterFailHandler(Fail)
-
 	RunSpecsWithDefaultAndCustomReporters(t, "NATS Controller Suite", []Reporter{printer.NewlineReporter{}})
 }
 
 var _ = BeforeSuite(func(done Done) {
 	By("bootstrapping test environment")
-	natsServer, natsUrl = startNATS(natsPort)
+	natsServer, natsURL = startNATS(natsPort)
 	useExistingCluster := useExistingCluster
 	testEnv = &envtest.Environment{
 		CRDDirectoryPaths: []string{
@@ -862,7 +861,7 @@ func startReconciler(eventTypePrefix string, sinkValidator sinkValidator) contex
 	Expect(err).ToNot(HaveOccurred())
 
 	envConf := env.NatsConfig{
-		URL:             natsUrl,
+		URL:             natsURL,
 		MaxReconnects:   10,
 		ReconnectWait:   time.Second,
 		EventTypePrefix: eventTypePrefix,
