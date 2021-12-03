@@ -125,7 +125,7 @@ This guide shows how to call a registered external service from Kyma using a sim
 5. To verify that everything was set up correctly, you can now call the Function through HTTPS:
 
       ```bash
-      curl https://my-function.$CLUSTER_DOMAIN/
+      curl https://my-function.$CLUSTER_DOMAIN/ | jq .
       ```
 
    >**NOTE:** If the response is empty, wait for a few moments for the Function to get ready and call it again.
