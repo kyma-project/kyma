@@ -1,8 +1,8 @@
 .PHONY: ci
 ci:
 	npm ci --loglevel verbose
-	npm test
-	npm run test-monitoring
+	# npm test
+	# npm run test-monitoring
 
 .PHONY: ci-compass
 ci-compass:
@@ -49,12 +49,12 @@ ci-post-upgrade:
 .PHONY: ci-application-connectivity-2
 ci-application-connectivity-2:
 	npm ci --loglevel verbose
-	npm run test-application-connectivity-2
+	# npm run test-application-connectivity-2
 
 .PHONY: ci-application-connectivity-2-compass
 ci-application-connectivity-2-compass:
 	npm ci --loglevel verbose
-	npm run test-application-connectivity-2-compass
+	# npm run test-application-connectivity-2-compass
 
 .PHONY: ci-test-eventing
 ci-test-eventing:
