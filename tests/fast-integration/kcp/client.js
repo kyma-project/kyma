@@ -86,6 +86,9 @@ class KCPWrapper {
         if (query.state) {
             args = args.concat(`--state`, `${query.state}`);
         }
+        if (query.ops) {
+            args = args.concat(`--ops`);
+        }
         let result = await this.exec(args);
         return JSON.parse(result)
     }

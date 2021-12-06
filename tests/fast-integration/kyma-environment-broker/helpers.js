@@ -1,5 +1,8 @@
 const { wait, debug } = require("../utils");
 const { expect } = require("chai");
+const {KCPWrapper, KCPConfig} = require("../kcp/client");
+
+const kcp = new KCPWrapper(KCPConfig.fromEnv());
 
 async function provisionSKR(
   keb,
@@ -23,7 +26,7 @@ async function provisionSKR(
   const shootName = resp.dashboard_url.split(".")[1];
   debug(`Operation ID ${operationID}`, `Shoot name ${shootName}`);
 
-  await ensureOperationSucceeded(keb, instanceID, operationID);
+  await ensureOperationSucceeded(keb, instanceID, operationID, 1000 * 60 * 30); //30m
 
   const shoot = await gardener.getShoot(shootName);
   debug(`Compass ID ${shoot.compassID}`);
@@ -53,7 +56,7 @@ async function deprovisionSKR(keb, instanceID) {
   const operationID = resp.operation;
   debug(`Operation ID ${operationID}`);
 
-  await ensureOperationSucceeded(keb, instanceID, operationID);
+  await ensureOperationSucceeded(keb, instanceID, operationID, 1000 * 60 * 30); // 30m
 
   return operationID;
 }
@@ -65,7 +68,7 @@ async function updateSKR(keb, gardener, instanceID, shootName, customParams) {
   const operationID = resp.operation;
   debug(`Operation ID ${operationID}`);
 
-  await ensureOperationSucceeded(keb, instanceID, operationID);
+  await ensureOperationSucceeded(keb, instanceID, operationID, 1000 * 60 * 60 * 2); // 2h
 
   const shoot = await gardener.getShoot(shootName);
 
@@ -75,17 +78,23 @@ async function updateSKR(keb, gardener, instanceID, shootName, customParams) {
   };
 }
 
-async function ensureOperationSucceeded(keb, instanceID, operationID) {
+async function ensureOperationSucceeded(keb, instanceID, operationID, timeout) {
   const res = await wait(
     () => keb.getOperation(instanceID, operationID),
     (res) => res && res.state && (res.state === "succeeded" || res.state === "failed"),
-    1000 * 60 * 60 * 2, // 2h
+    timeout,
     1000 * 30 // 30 seconds
-  );
+  ).catch(async (err) => {
+    await kcp.login();
+    let runtimeStatus = await kcp.runtimes({instanceID: instanceID, ops: true})
+    throw(`${err}\nRuntime status: ${JSON.stringify(runtimeStatus, null, `\t`)}`)
+  });
 
   debug("KEB operation:", res);
   if(res.state !== "succeeded") {
-    throw(`operation didn't succeed in 2h: ${JSON.stringify(res)}`);
+    await kcp.login();
+    let runtimeStatus = await kcp.runtimes({instanceID: instanceID, ops: true})
+    throw(`operation didn't succeed in time: ${JSON.stringify(res, null, `\t`)}\nRuntime status: ${JSON.stringify(runtimeStatus, null, `\t`)}`);
   }
   return res;
 }

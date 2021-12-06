@@ -13,7 +13,7 @@ describe(`Execute SKR test`, function () {
     before('Provision SKR', async function () {
         try {
             this.options = GatherOptions();
-            console.log(`Provision SKR with runtime ID ${this.options.instanceID}`);
+            console.log(`Provision SKR with instance ID ${this.options.instanceID}`);
             const customParams = {
                 oidc: this.options.oidc0,
             };
