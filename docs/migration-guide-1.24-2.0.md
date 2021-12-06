@@ -22,6 +22,10 @@ After the successful upgrade to Kyma 2.0, run the following [script](assets/1.24
 
 ### ORY Oathkeeper without Dex
 
+WARNING! If you are using Kyma in evaluation profile, it might be the case that your OAuth2 protected APIRules, no longer accessible.
+If you face the issue of getting a 401 Unauthorized with "client_id unknown" when fetching a token for your created OAuth2Clients, please restart the ory-hydra-maester pods.
+This will trigger ORY refetching the OAuth2Clients.
+
 With Kyma 2.0, the Dex component becomes deprecated. Existing API Rules that have a JWT access strategy defined must be enriched with an individual **jwks_url** pointing to a custom OpenID Connect-compliant identity provider. Follow these steps to migrate your API Rule custom resources (CRs):
 
 1. List all the API Rule CRs having a JWT access strategy defined. Run:
