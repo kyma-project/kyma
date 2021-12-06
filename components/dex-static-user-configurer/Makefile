@@ -30,6 +30,7 @@ component_descriptor_test:
 	go run development/tools/cmd/componentdescriptorgenerator/main.go \
 	--component-name "github.com/kyma-project/kyma/$(APP_NAME)" \
 	--component-version "0.0.1" \
+	--app-name $(APP_NAME) \
 	--output-dir /logs/artifacts/componentdescriptor \
 	--image-url "$(IMG):$(TAG)" \
 	--repo-context "europe-west3-docker.pkg.dev/sap-kyma-prow-workloads/test-gcr"
