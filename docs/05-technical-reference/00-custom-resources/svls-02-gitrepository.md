@@ -2,7 +2,7 @@
 title: GitRepository
 ---
 
-The `gitrepositories.serverless.kyma-project.io` CustomResourceDefinition (CRD) is a detailed description of the kind of data and the format used to define and manage Git repositories that store the Function's source code and dependencies. To get the up-to-date CRD and show the output in the YAML format, run this command:
+The `gitrepositories.serverless.kyma-project.io` Custom Resource Definition (CRD) is a detailed description of the kind of data and the format used to define and manage Git repositories that store the Function's source code and dependencies. To get the up-to-date CRD and show the output in the YAML format, run this command:
 
 ```bash
 kubectl get crd gitrepositories.serverless.kyma-project.io -o yaml
