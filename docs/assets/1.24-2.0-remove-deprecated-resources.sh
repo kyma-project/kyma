@@ -27,7 +27,7 @@ Deleting orphaned Deployments"
 kubectl -n kyma-system delete deployment logging-log-ui
 kubectl -n kyma-system delete deployment helm-broker-addons-ui 
 kubectl -n kyma-system delete deployment service-catalog-addons-service-catalog-ui
-kubectl -n kyma-system delete deployment application-connector-certs-sync 
+kubectl -n kyma-system delete deployment application-connector-certs-sync --ignore-not-found
 
 echo "
 Deleting orphaned PodSecurityPolicies"
@@ -38,7 +38,7 @@ kubectl delete podsecuritypolicy application-registry-tests
 kubectl delete podsecuritypolicy connection-token-handler-tests
 kubectl delete podsecuritypolicy helm-broker-addons-ui
 kubectl delete podsecuritypolicy service-catalog-addons-service-catalog-ui
-kubectl delete podsecuritypolic connector-service-tests
+kubectl delete podsecuritypolicy connector-service-tests
 
 echo "
 Deleting orphaned ServiceAccounts"
@@ -67,7 +67,7 @@ kubectl -n kyma-integration delete serviceaccount application-operator-tests
 kubectl -n kyma-integration delete serviceaccount connection-token-handler-tests
 kubectl -n kyma-integration delete serviceaccount application-registry-tests
 kubectl -n kyma-integration delete serviceaccount connector-service-tests
-kubectl -n kyma-integration delete serviceaccount monitoring-tests
+kubectl -n kyma-integration delete serviceaccount monitoring-tests --ignore-not-found
 
 echo "
 Deleting orphaned Roles"
@@ -77,7 +77,7 @@ kubectl -n kyma-system delete role service-catalog-addons-service-catalog-ui
 kubectl -n kyma-system delete role apiserver-proxy-certs-job
 kubectl -n kyma-system delete role apiserver-proxy-certs-job-gardener-certs-role
 kubectl -n kyma-system delete role apiserver-proxy-ssl-helper-role
-kubectl -n kyma-system delete role compass-runtime-agent-tests-dex-secrets
+kubectl -n kyma-system delete role compass-runtime-agent-tests-dex-secrets --ignore-not-found
 kubectl -n kyma-system delete role ory-mechanism-migration
 kubectl -n kyma-system delete role ory-oathkeeper-keys-helper-job-role
 kubectl -n kyma-integration delete role application-connector-tests
@@ -95,7 +95,7 @@ kubectl -n kyma-system delete rolebinding service-catalog-addons-service-catalog
 kubectl -n kyma-system delete rolebinding apiserver-proxy-certs-job
 kubectl -n kyma-system delete rolebinding apiserver-proxy-certs-job-gardener-certs-role
 kubectl -n kyma-system delete rolebinding apiserver-proxy-ssl-helper-role-binding
-kubectl -n kyma-system delete rolebinding compass-runtime-agent-tests-dex-secrets
+kubectl -n kyma-system delete rolebinding compass-runtime-agent-tests-dex-secrets --ignore-not-found
 kubectl -n kyma-system delete rolebinding ory-mechanism-migration
 kubectl -n kyma-system delete rolebinding ory-oathkeeper-keys-helper-job-role-binding
 kubectl -n kyma-system delete rolebinding apiserver-proxy-certs-job-kube-system-role
@@ -103,8 +103,8 @@ kubectl -n istio-system delete rolebinding application-connector-certs-sync
 kubectl -n istio-system delete rolebinding istio-kyma-validate
 kubectl -n kyma-integration delete rolebinding application-connector-tests
 kubectl -n kyma-integration delete rolebinding application-operator-tests
-kubectl -n kyma-integration delete rolebinding application-registry-tests
-kubectl -n kyma-integration delete rolebinding connection-token-handler-tests
+kubectl -n kyma-integration delete rolebinding application-registry-tests --ignore-not-found
+kubectl -n kyma-integration delete rolebinding connection-token-handler-tests --ignore-not-found
 
 echo "
 Deleting orphaned Secrets"
@@ -127,7 +127,7 @@ kubectl -n kyma-system delete configmap cluster-essentials-crd-2
 kubectl -n kyma-system delete configmap cluster-users
 kubectl -n istio-system delete configmap kyma-extra-manifests
 kubectl -n istio-system delete configmap kyma-istio-operator-config
-kubectl -n istio-system delete configmap kyma-istio-operator-config-backup
+kubectl -n istio-system delete configmap kyma-istio-operator-config-backup --ignore-not-found
 
 echo "
 Deleting orphaned PriorityClass"
@@ -211,7 +211,7 @@ kubectl -n kyma-system delete secret -l owner=helm,name=rafter
 kubectl -n kyma-system delete secret -l owner=helm,name=serverless
 kubectl -n kyma-system delete secret -l owner=helm,name=service-catalog-addons
 kubectl -n kyma-system delete secret -l owner=helm,name=service-catalog
-kubectl -n kyma-system delete secret -l owner=helm,name=service-manager-proxy
+kubectl -n kyma-system delete secret -l owner=helm,name=service-manager-proxy --ignore-not-found
 kubectl -n kyma-system delete secret -l owner=helm,name=tracing
 kubectl -n kyma-system delete secret -l owner=helm,name=kiali
 
