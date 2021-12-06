@@ -18,7 +18,9 @@ metadata:
       {{- toYaml . | nindent 4 }}
     {{- end }}
 spec:
+{{- if not .Values.deployment.autoscaling.enabled }}
   replicas: {{ .Values.replicaCount }}
+{{- end }}
   selector:
     matchLabels:
       app.kubernetes.io/name: {{ include "oathkeeper.name" . }}
