@@ -1,5 +1,5 @@
 ---
-title: Migration Guide 1.25-2.0
+title: Migration Guide 1.24-2.0
 ---
 
 Once you upgrade to Kyma 2.0, perform the manual steps described in the Migration Guide.
@@ -18,7 +18,7 @@ Kyma 2.0 simplifies things and switches to the native Kubernetes authentication.
 
 To use the native Kubernetes authentication in Kyma, you need to remove the deprecated components manually.
 
-After the successful upgrade to Kyma 2.0, run the following [script](.assets/1.25-2.0-remove-deprecated-resources.sh), which uninstalls and deletes the unsupported items.
+After the successful upgrade to Kyma 2.0, run the following [script](.assets/1.24-2.0-remove-deprecated-resources.sh), which uninstalls and deletes the unsupported items.
 
 ### ORY Oathkeeper without Dex
 
