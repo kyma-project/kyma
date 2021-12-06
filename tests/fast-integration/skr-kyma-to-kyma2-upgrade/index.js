@@ -48,7 +48,9 @@ const {
   saveKubeconfig,
 } = require("../skr-svcat-migration-test/test-helpers");
 
-describe("SKR-Upgrade-test", function () {
+const { observabilityTests } = require('../test/3-observability');
+
+describe("Execute SKR upgrade tests:", function () {
   switchDebug(on = true)
   let keb = new KEBClient(KEBConfig.fromEnv());
   const gardener = new GardenerClient(GardenerConfig.fromEnv());
@@ -232,8 +234,13 @@ describe("SKR-Upgrade-test", function () {
     const afterTestRestarts = await getContainerRestartsForAllNamespaces();
     printRestartReport(initialRestarts, afterTestRestarts);
   });
+});
 
+describe("Executing observability tests after upgrade:", function() {
+    observabilityTests();
+});
 
+describe("SKR-Upgrade-test clean-up:", function() {
   // Cleanup
   const skip_cleanup = getEnvOrThrow("SKIP_CLEANUP")
 
