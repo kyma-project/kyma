@@ -39,7 +39,7 @@ With Kyma 2.0, the Dex component becomes deprecated. Existing API Rules that hav
    kubectl edit {RESOURCE} -n {NAMESPACE}
    ```
 
->**CAUTION:** Once you've upgraded to Kyma 2.0 successfully, and you use the evaluation profile, your OAuth2-protected API Rules might no longer be accessible. If you get `401 Unauthorized` with the `client_id unknown` error when fetching a token for your created OAuth2 clients, restart the Ory Hydra Maester Pods. Ory will then refetch the OAuth2 clients.
+>**CAUTION:** If you use the evaluation profile, your OAuth2-protected API Rules might no longer be accessible. If you get `401 Unauthorized` with the `client_id unknown` error when fetching a token for your created OAuth2 clients, restart the Ory Hydra Maester Pods. Ory will then refetch the OAuth2 clients.
 
 
 ## Observability
