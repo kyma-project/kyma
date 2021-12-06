@@ -491,10 +491,9 @@ async function getCommerceMockCertFiles() {
 
 async function revokeCommerceMockCertificate(){
   let {cert, key} = await getCommerceMockCertFiles()
-   
   const vs = await waitForVirtualService("mocks", "commerce-mock");
   const mockHost = vs.spec.hosts[0];
-  const url = mockHost.replace(/(commerce.?)/,'');
+  const url = mockHost.replace(/(commerce.mocks.?)/,'');
   const gateway = `https://gateway.${url}/v1/applications/certificates/revocations`;
   const httpsAgent = new https.Agent({
     rejectUnauthorized: false, // curl -k
@@ -513,6 +512,27 @@ async function revokeCommerceMockCertificate(){
     });
   } catch (err) {
     throw convertAxiosError(err, "Error during revoking Commerce Mock certificate via Kyma connector service");
+  }
+}
+
+async function checkRevocation(){
+  const vs = await waitForVirtualService("mocks", "commerce-mock");
+  const mockHost = vs.spec.hosts[0];
+  const url = mockHost.replace(/(commerce.mocks.?)/,'');
+  const gateway = `https://gateway.${url}/v1/applications/certificates/renewals`;
+  const params = {
+    headers: {
+      "Content-Type": "application/json"
+    },
+    timeout: 5000,
+  };
+
+  try {
+    await axios.post(gateway, {}, params)
+  } catch (err) {
+    if(err.response.status == 403)
+      return
+    throw convertAxiosError(err, "Error during renewing the revoked Commerce Mock certificate via Kyma connector service");
   }
 }
 
@@ -780,6 +800,7 @@ module.exports = {
   checkInClusterEventDelivery,
   checkInClusterEventTracing,
   cleanMockTestFixture,
+  checkRevocation,
   deleteMockTestFixture,
   waitForSubscriptionsTillReady,
   setEventMeshSourceNamespace,

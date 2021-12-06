@@ -10,6 +10,7 @@ const {
   addService,
   updateService,
   deleteService,
+  checkRevocation,
   sendEventAndCheckResponse,
   renewCommerceMockCertificate,
   revokeCommerceMockCertificate,
@@ -74,8 +75,9 @@ function commerceMockTests() {
 
     it("should add, update and delete a service", async function () {
       let serviceId = await addService();
-      await updateService(serviceId)
-      await deleteService(serviceId)
+      await updateService(serviceId);
+      await deleteService(serviceId);
+    });
 
     it("CommerceMock should renew it's certificate", async function () {
       await renewCommerceMockCertificate();
@@ -87,6 +89,14 @@ function commerceMockTests() {
 
     it("should revoke Commerce Mock certificate", async function () {
       await revokeCommerceMockCertificate();
+    });
+
+    it("the event should triger the fucntion after revoke of the certificate", async function () {
+      await sendEventAndCheckResponse();
+    });
+
+    it("should pass if the certificated is revoked, endpoint returned 403 code", async function () {
+      await checkRevocation();
     });
 
     it("Should print report of restarted containers, skipped if no crashes happened", async function () {
@@ -106,4 +116,4 @@ function commerceMockTests() {
 
 module.exports = {
   commerceMockTests,
-}
+};
