@@ -42,19 +42,6 @@ func (r *SafeRequests) Len() int {
 	return len(r.requests)
 }
 
-// CheckIfAny iterates over requests and checks if a given func f is true for any iteration's request and payload.
-// CheckIfAny is only read-safe; f must be a read-only operation.
-func (r *SafeRequests) CheckIfAny(f func(request *http.Request, payload interface{}) bool) bool {
-	r.RLock()
-	defer r.RUnlock()
-	for req, payload := range r.requests {
-		if f(req, payload) {
-			return true
-		}
-	}
-	return false
-}
-
 // ReadEach iterates over requests and executes a given func f with each iteration's request and payload.
 func (r *SafeRequests) ReadEach(f func(request *http.Request, payload interface{})) {
 	r.RLock()
@@ -62,4 +49,31 @@ func (r *SafeRequests) ReadEach(f func(request *http.Request, payload interface{
 	for req, payload := range r.requests {
 		f(req, payload)
 	}
+}
+
+// GetSubscriptionNames converts requests to a map of http requests and the actual subscription names.
+func (r *SafeRequests) GetSubscriptionNames() map[*http.Request]string {
+	r.RLock()
+	defer r.RUnlock()
+	var subscriptionNames map[*http.Request]string
+	for req, obj := range r.requests {
+		if subscription, ok := obj.(types.Subscription); ok {
+			receivedSubscriptionName := subscription.Name
+			subscriptionNames[req] = receivedSubscriptionName
+		}
+	}
+	return subscriptionNames
+}
+
+// GetSubscriptions converts requests to a map of http requests and the actual subscriptions.
+func(r *SafeRequests) GetSubscriptions()  map[*http.Request]types.Subscription {
+	r.RLock()
+	defer r.RUnlock()
+	var subscriptions map[*http.Request]types.Subscription
+	for req, payload := range r.requests {
+		if subscription, ok := payload.(types.Subscription); ok {
+			subscriptions[req] = subscription
+		}
+	}
+	return subscriptions
 }
