@@ -25,8 +25,6 @@ After the successful upgrade to Kyma 2.0, run the following [script](assets/1.24
 
 ### ORY Oathkeeper without Dex
 
->**CAUTION:** Once you've upgraded to Kyma 2.0 successfully, and you use the evaluation profile, your OAuth2-protected API Rules might no longer be accessible. If you get `401 Unauthorized` with the `client_id unknown` error when fetching a token for your created OAuth2 clients, restart the Ory Hydra Maester Pods. Ory will then refetch the OAuth2 clients.
-
 With Kyma 2.0, the Dex component becomes deprecated. Existing API Rules that have a JWT access strategy defined must be enriched with an individual **jwks_url** pointing to a custom OpenID Connect-compliant identity provider. Follow these steps to migrate your API Rule custom resources (CRs):
 
 1. List all the API Rule CRs having a JWT access strategy defined. Run:
@@ -40,6 +38,9 @@ With Kyma 2.0, the Dex component becomes deprecated. Existing API Rules that hav
    ```bash
    kubectl edit {RESOURCE} -n {NAMESPACE}
    ```
+
+>**CAUTION:** Once you've upgraded to Kyma 2.0 successfully, and you use the evaluation profile, your OAuth2-protected API Rules might no longer be accessible. If you get `401 Unauthorized` with the `client_id unknown` error when fetching a token for your created OAuth2 clients, restart the Ory Hydra Maester Pods. Ory will then refetch the OAuth2 clients.
+
 
 ## Observability
 
