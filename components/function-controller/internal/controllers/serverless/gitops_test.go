@@ -190,7 +190,7 @@ func Test_isOnSourceChange(t *testing.T) {
 	}
 }
 
-func TestFunctionReconciler_nextRequeue(t *testing.T) {
+func TestNextRequeue(t *testing.T) {
 	//GIVEN
 	testCases := []struct {
 		name           string

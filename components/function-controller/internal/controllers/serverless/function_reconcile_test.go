@@ -5,9 +5,6 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/kyma-project/kyma/components/function-controller/internal/controllers/serverless/automock"
-	git2go "github.com/libgit2/git2go/v31"
-
 	"github.com/onsi/ginkgo"
 	"github.com/onsi/gomega"
 	appsv1 "k8s.io/api/apps/v1"
@@ -127,17 +124,6 @@ var _ = ginkgo.Describe("Function", func() {
 
 		assertSuccessfulFunctionDeployment(reconciler, request, fnLabels, "registry.kyma.local", true)
 	})
-	ginkgo.It("shoudl stop reconciliation on git unrecoverable errror", func() {
-		//GIVEN
-		gitMock := automock.GitOperator{}
-		gitErr := git2go.MakeGitError2(int(git2go.ErrorCodeNotFound))
-		gitMock.On("Last commit").Return("", gitErr)
-
-		//WHEN
-
-		//THEN
-	})
-
 	ginkgo.It("should set proper status on deployment fail", func() {
 		ginkgo.By("creating cm")
 		_, err := reconciler.Reconcile(request)

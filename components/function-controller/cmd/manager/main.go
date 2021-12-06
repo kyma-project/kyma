@@ -68,12 +68,11 @@ func main() {
 
 	setupLog.Info("Initializing controller manager")
 	mgr, err := manager.New(restConfig, manager.Options{
-		Scheme:                 scheme,
-		MetricsBindAddress:     config.MetricsAddress,
-		LeaderElection:         config.LeaderElectionEnabled,
-		LeaderElectionID:       config.LeaderElectionID,
-		Port:                   config.SecretMutatingWebhookPort,
-		HealthProbeBindAddress: ":8090", //TODO: use
+		Scheme:             scheme,
+		MetricsBindAddress: config.MetricsAddress,
+		LeaderElection:     config.LeaderElectionEnabled,
+		LeaderElectionID:   config.LeaderElectionID,
+		Port:               config.SecretMutatingWebhookPort,
 	})
 	if err != nil {
 		setupLog.Error(err, "Unable to initialize controller manager")
