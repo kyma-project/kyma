@@ -8,7 +8,7 @@ Once you upgrade to Kyma 2.0, perform the manual steps described in the Migratio
 
 ### Native Kubernetes authentication in Kyma
 
-Kyma 2.0 simplifies things and switches to the native Kubernetes authentication. As a result, we no longer support the following authentication and authorization components:
+Kyma 2.0 provides architectural simplification and switches to the native Kubernetes authentication. As a result, we no longer support the following authentication and authorization components:
 
 - API Server Proxy
 - Console Backend Service
