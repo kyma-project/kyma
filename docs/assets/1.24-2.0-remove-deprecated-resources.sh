@@ -77,7 +77,6 @@ kubectl -n kyma-system delete role service-catalog-addons-service-catalog-ui
 kubectl -n kyma-system delete role apiserver-proxy-certs-job
 kubectl -n kyma-system delete role apiserver-proxy-certs-job-gardener-certs-role
 kubectl -n kyma-system delete role apiserver-proxy-ssl-helper-role
-kubectl -n kyma-system delete role compass-runtime-agent-tests-dex-secrets --ignore-not-found
 kubectl -n kyma-system delete role ory-mechanism-migration
 kubectl -n kyma-system delete role ory-oathkeeper-keys-helper-job-role
 kubectl -n kyma-integration delete role application-connector-tests
@@ -95,7 +94,6 @@ kubectl -n kyma-system delete rolebinding service-catalog-addons-service-catalog
 kubectl -n kyma-system delete rolebinding apiserver-proxy-certs-job
 kubectl -n kyma-system delete rolebinding apiserver-proxy-certs-job-gardener-certs-role
 kubectl -n kyma-system delete rolebinding apiserver-proxy-ssl-helper-role-binding
-kubectl -n kyma-system delete rolebinding compass-runtime-agent-tests-dex-secrets --ignore-not-found
 kubectl -n kyma-system delete rolebinding ory-mechanism-migration
 kubectl -n kyma-system delete rolebinding ory-oathkeeper-keys-helper-job-role-binding
 kubectl -n kyma-system delete rolebinding apiserver-proxy-certs-job-kube-system-role
@@ -211,7 +209,6 @@ kubectl -n kyma-system delete secret -l owner=helm,name=rafter
 kubectl -n kyma-system delete secret -l owner=helm,name=serverless
 kubectl -n kyma-system delete secret -l owner=helm,name=service-catalog-addons
 kubectl -n kyma-system delete secret -l owner=helm,name=service-catalog
-kubectl -n kyma-system delete secret -l owner=helm,name=service-manager-proxy --ignore-not-found
 kubectl -n kyma-system delete secret -l owner=helm,name=tracing
 kubectl -n kyma-system delete secret -l owner=helm,name=kiali
 
