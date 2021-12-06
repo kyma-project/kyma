@@ -41,13 +41,13 @@ type FunctionReconciler struct {
 	gitOperator GitOperator
 }
 
-func NewFunction(client resource.Client, log logr.Logger, config FunctionConfig, recorder record.EventRecorder) *FunctionReconciler {
+func NewFunction(client resource.Client, log logr.Logger, config FunctionConfig, gitOperator GitOperator, recorder record.EventRecorder) *FunctionReconciler {
 	return &FunctionReconciler{
 		client:      client,
 		Log:         log.WithName("controllers").WithName("function"),
 		config:      config,
 		recorder:    recorder,
-		gitOperator: git.NewGit2Go(),
+		gitOperator: gitOperator,
 	}
 }
 
@@ -62,7 +62,7 @@ func (r *FunctionReconciler) SetupWithManager(mgr ctrl.Manager) error {
 		Owns(&autoscalingv1.HorizontalPodAutoscaler{}).
 		WithOptions(controller.Options{
 			RateLimiter: workqueue.NewMaxOfRateLimiter(
-				workqueue.NewItemExponentialFailureRateLimiter(r.config.GitFetchRequeueDuration*time.Second, 300*time.Second),
+				workqueue.NewItemExponentialFailureRateLimiter(r.config.GitFetchRequeueDuration, 300*time.Second),
 				// 10 qps, 100 bucket size.  This is only for retry speed and its only the overall factor (not per item)
 				&workqueue.BucketRateLimiter{Limiter: rate.NewLimiter(rate.Limit(10), 100)},
 			),
@@ -167,14 +167,8 @@ func (r *FunctionReconciler) Reconcile(request ctrl.Request) (ctrl.Result, error
 
 	revision, err := r.syncRevision(instance, gitOptions)
 	if err != nil {
-		errMsg := fmt.Sprintf("Sources update failed: %v", err)
-		if git.IsAuthErr(err) {
-			errMsg = "Authorization to git server failed"
-		}
-
-		return r.updateStatusWithoutRepository(ctx, ctrl.Result{
-			Requeue: true, // use exponential delay
-		}, instance, serverlessv1alpha1.Condition{
+		result, errMsg := NextRequeue(err)
+		return r.updateStatusWithoutRepository(ctx, result, instance, serverlessv1alpha1.Condition{
 			Type:               serverlessv1alpha1.ConditionConfigurationReady,
 			Status:             corev1.ConditionFalse,
 			LastTransitionTime: metav1.Now(),

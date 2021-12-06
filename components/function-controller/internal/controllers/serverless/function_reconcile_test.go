@@ -5,6 +5,9 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/kyma-project/kyma/components/function-controller/internal/controllers/serverless/automock"
+	git2go "github.com/libgit2/git2go/v31"
+
 	"github.com/onsi/ginkgo"
 	"github.com/onsi/gomega"
 	appsv1 "k8s.io/api/apps/v1"
@@ -42,7 +45,7 @@ var _ = ginkgo.Describe("Function", func() {
 		request = ctrl.Request{NamespacedName: types.NamespacedName{Namespace: function.GetNamespace(), Name: function.GetName()}}
 		gomega.Expect(resourceClient.Create(context.TODO(), function)).To(gomega.Succeed())
 
-		reconciler = NewFunction(resourceClient, log.Log, config, record.NewFakeRecorder(100))
+		reconciler = NewFunction(resourceClient, log.Log, config, nil, record.NewFakeRecorder(100))
 		fnLabels = reconciler.internalFunctionLabels(function)
 	})
 
@@ -123,6 +126,16 @@ var _ = ginkgo.Describe("Function", func() {
 		assertSuccessfulFunctionBuild(reconciler, request, fnLabels, true)
 
 		assertSuccessfulFunctionDeployment(reconciler, request, fnLabels, "registry.kyma.local", true)
+	})
+	ginkgo.It("shoudl stop reconciliation on git unrecoverable errror", func() {
+		//GIVEN
+		gitMock := automock.GitOperator{}
+		gitErr := git2go.MakeGitError2(int(git2go.ErrorCodeNotFound))
+		gitMock.On("Last commit").Return("", gitErr)
+
+		//WHEN
+
+		//THEN
 	})
 
 	ginkgo.It("should set proper status on deployment fail", func() {

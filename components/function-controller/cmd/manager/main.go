@@ -5,6 +5,11 @@ import (
 	"fmt"
 	"os"
 
+	k8s "github.com/kyma-project/kyma/components/function-controller/internal/controllers/kubernetes"
+	"github.com/kyma-project/kyma/components/function-controller/internal/controllers/serverless"
+	"github.com/kyma-project/kyma/components/function-controller/internal/git"
+	internalresource "github.com/kyma-project/kyma/components/function-controller/internal/resource"
+	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
 	"github.com/vrischmann/envconfig"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
@@ -15,11 +20,6 @@ import (
 	ctrlzap "sigs.k8s.io/controller-runtime/pkg/log/zap"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 	"sigs.k8s.io/controller-runtime/pkg/webhook"
-
-	k8s "github.com/kyma-project/kyma/components/function-controller/internal/controllers/kubernetes"
-	"github.com/kyma-project/kyma/components/function-controller/internal/controllers/serverless"
-	internalresource "github.com/kyma-project/kyma/components/function-controller/internal/resource"
-	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
 	// +kubebuilder:scaffold:imports
 )
 
@@ -68,11 +68,12 @@ func main() {
 
 	setupLog.Info("Initializing controller manager")
 	mgr, err := manager.New(restConfig, manager.Options{
-		Scheme:             scheme,
-		MetricsBindAddress: config.MetricsAddress,
-		LeaderElection:     config.LeaderElectionEnabled,
-		LeaderElectionID:   config.LeaderElectionID,
-		Port:               config.SecretMutatingWebhookPort,
+		Scheme:                 scheme,
+		MetricsBindAddress:     config.MetricsAddress,
+		LeaderElection:         config.LeaderElectionEnabled,
+		LeaderElectionID:       config.LeaderElectionID,
+		Port:                   config.SecretMutatingWebhookPort,
+		HealthProbeBindAddress: ":8090", //TODO: use
 	})
 	if err != nil {
 		setupLog.Error(err, "Unable to initialize controller manager")
@@ -92,8 +93,9 @@ func main() {
 			Handler: k8s.NewRegistryWatcher(mgr.GetClient()),
 		},
 	)
-	err = serverless.NewFunction(resourceClient, ctrl.Log, config.Function, mgr.GetEventRecorderFor(serverlessv1alpha1.FunctionControllerValue)).
-		SetupWithManager(mgr)
+
+	fnRecon := serverless.NewFunction(resourceClient, ctrl.Log, config.Function, git.NewGit2Go(), mgr.GetEventRecorderFor(serverlessv1alpha1.FunctionControllerValue))
+	err = fnRecon.SetupWithManager(mgr)
 	if err != nil {
 		setupLog.Error(err, "unable to create Function controller")
 		os.Exit(1)
