@@ -20,7 +20,7 @@ If you're interested in learning more about the Application Connectivity area, f
   - [Get the API specification for AC components](../../../03-tutorials/00-application-connectivity/ac-09-get-api-specification.md)
   - [Get subscribed events](../../../03-tutorials/00-application-connectivity/ac-10-get-subscribed-events.md)
 <!-- NOT WORKING FOR NOW, RE-ADD IT WHEN FIXED
-  - [Disable TLS certificate verification](../../../03-tutorials/00-application-connectivity/ac-11-disable-tls-certificate-verification.md)
+  - [Disable TLS certificate verification] (../../../03-tutorials/00-application-connectivity/ac-11-disable-tls-certificate-verification.md)
 -->
 
 - Check Application Connectivity troubleshooting guides for:
