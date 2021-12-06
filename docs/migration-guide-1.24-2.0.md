@@ -20,11 +20,12 @@ To use the native Kubernetes authentication in Kyma, you need to remove the depr
 
 After the successful upgrade to Kyma 2.0, run the following [script](assets/1.24-2.0-remove-deprecated-resources.sh), which uninstalls and deletes the unsupported items.
 
+>**CAUTION:** The script deletes the authentication and authorization components mentioned above, as well as the Cluster Roles that are not needed anymore. If you use these roles in your bindings, make sure to create a custom role by duplicating it, or uncomment it from deletion. If you want to keep any of the authentication and authorization components, modify the script accordingly before running it.
+
+
 ### ORY Oathkeeper without Dex
 
-WARNING! Once you've upgraded to Kyma 2.0 successfully, and you are using evaluation profile, it might be the case that your OAuth2 protected APIRules, no longer accessible.
-If you face the issue of getting a 401 Unauthorized with "client_id unknown" when fetching a token for your created OAuth2Clients, please restart once the ory-hydra-maester pods.
-This will trigger ORY to re-fetch the OAuth2Clients.
+>**CAUTION:** Once you've upgraded to Kyma 2.0 successfully, and you use the evaluation profile, your OAuth2-protected API Rules might no longer be accessible. If you get `401 Unauthorized` with the `client_id unknown` error when fetching a token for your created OAuth2 clients, restart the Ory Hydra Maester Pods. Ory will then refetch the OAuth2 clients.
 
 With Kyma 2.0, the Dex component becomes deprecated. Existing API Rules that have a JWT access strategy defined must be enriched with an individual **jwks_url** pointing to a custom OpenID Connect-compliant identity provider. Follow these steps to migrate your API Rule custom resources (CRs):
 
