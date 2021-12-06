@@ -63,7 +63,7 @@ To get the configuration URL which allows you to fetch the required configuratio
 Use the link you got in the previous step to fetch the CSR information and configuration details required to connect your external solution. Run:
 
 ```bash
-curl {CONFIGURATION_URL_WITH_TOKEN}
+curl {CONFIGURATION_URL_WITH_TOKEN} | jq .
 ```
 >**NOTE:** The URL you call in this step contains a token that is valid for 5 minutes or for a single call. You get a code `403` error if you call the same configuration URL more than once, or if you call a URL with an expired token.
 
@@ -111,7 +111,7 @@ A successful call returns the following response:
 3. Send the encoded CSR to Kyma. Run:
 
    ```bash
-   curl -X POST -H "Content-Type: application/json" -d '{"csr":"BASE64_ENCODED_CSR_HERE"}' {CSR_SIGNING_URL_WITH_TOKEN}
+   curl -X POST -H "Content-Type: application/json" -d '{"csr":"BASE64_ENCODED_CSR_HERE"}' {CSR_SIGNING_URL_WITH_TOKEN} | jq .
    ```
 
    The response contains a valid client certificate signed by the Kyma Certificate Authority (CA), a CA certificate, and a certificate chain.
@@ -164,7 +164,7 @@ Call the `metadata` endpoint with the generated certificate to get URLs to the f
 The URL to the `metadata` endpoint is returned in the response body from the configuration URL. Use the value of the **api.infoUrl** property to get the URL. Run:
 
 ```bash
-curl https://gateway.$CLUSTER_DOMAIN/v1/applications/management/info --cert $CLIENT_CERT_FILE_NAME.crt --key $KEY_FILE_NAME.key
+curl https://gateway.$CLUSTER_DOMAIN/v1/applications/management/info --cert $CLIENT_CERT_FILE_NAME.crt --key $KEY_FILE_NAME.key | jq .
 ```
 
 A successful call returns the following response:
@@ -202,5 +202,5 @@ curl -X POST -H "Content-Type: application/json" https://gateway.$CLUSTER_DOMAIN
   "event-id": "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
   "event-time": "2018-10-16T15:00:00Z",
   "data": "some data"
-  }'
+  }' | jq .
 ```

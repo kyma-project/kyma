@@ -32,7 +32,7 @@ To successfully rotate a soon-to-expire CA certificate, replace it with a new ce
 2. Generate a new certificate for the key you obtained and save it to the `new-ca.crt` file.
 
    ```bash
-   openssl req -new -key ca.key -x509 -sha256 -days {TTL_DAYS} -nodes -out new-ca.crt
+   openssl req -new -key ca.key -x509 -sha256 -days 92 -nodes -out new-ca.crt
    ```
 
    >**NOTE:** Use the `-days` flag to set the TTL (Time to live) of the newly generated certificate.
@@ -100,7 +100,7 @@ To successfully rotate a soon-to-expire CA certificate, replace it with a new ce
 2. Generate a new certificate for the key you obtained and save it to the `new-ca.crt` file.
 
    ```bash
-   openssl req -new -key ca.key -x509 -sha256 -days {TTL_DAYS} -nodes -out new-ca.crt
+   openssl req -new -key ca.key -x509 -sha256 -days 92 -nodes -out new-ca.crt
    ```
 
    >**NOTE:** Use the `-days` flag to set the TTL (Time to live) of the newly generated certificate.
@@ -134,7 +134,7 @@ To successfully rotate a soon-to-expire CA certificate, replace it with a new ce
 2. Generate a new certificate using the key you generated and save it to the `new-ca.crt` file.
 
    ```bash
-   openssl req -new -key new-ca.key -x509 -sha256 -days {TTL_DAYS} -nodes -out new-ca.crt
+   openssl req -new -key new-ca.key -x509 -sha256 -days 92 -nodes -out new-ca.crt
    ```
 
    >**NOTE:** Use the `-days` flag to set the TTL (Time to Live) of the newly generated certificate.

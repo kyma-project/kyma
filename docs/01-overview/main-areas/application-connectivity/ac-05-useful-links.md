@@ -19,7 +19,9 @@ If you're interested in learning more about the Application Connectivity area, f
   - [Rotate the Root certificate and the key issued by the Certificate Authority](../../../03-tutorials/00-application-connectivity/ac-08-rotate-root-ca.md)
   - [Get the API specification for AC components](../../../03-tutorials/00-application-connectivity/ac-09-get-api-specification.md)
   - [Get subscribed events](../../../03-tutorials/00-application-connectivity/ac-10-get-subscribed-events.md)
-  - [Disable TLS certificate verification](../../../03-tutorials/00-application-connectivity/ac-11-disable-tls-certificate-verification.md)
+<!-- NOT WORKING FOR NOW, RE-ADD IT WHEN FIXED
+  - [Disable TLS certificate verification] (../../../03-tutorials/00-application-connectivity/ac-11-disable-tls-certificate-verification.md)
+-->
 
 - Check Application Connectivity troubleshooting guides for:
 
