@@ -9,7 +9,9 @@ To provide maximum security, Application Connector uses the TLS protocol with Cl
 ## TLS certificate verification
 
 By default, the TLS certificate verification is enabled when sending data and requests to every application.
+<!-- NOT WORKING FOR NOW, RE-ADD IT WHEN FIXED
 You can [disable the TLS certificate verification](../../../03-tutorials/00-application-connectivity/ac-11-disable-tls-certificate-verification.md) in the communication between Kyma and an application to allow Kyma to send requests and data to an unsecured application. Disabling the certificate verification can be useful in certain testing scenarios.
+-->
 
 ## API security type
 
