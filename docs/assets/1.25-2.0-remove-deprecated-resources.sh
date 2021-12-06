@@ -7,7 +7,7 @@ kubectl -n kyma-system delete virtualservice logging-loki
 kubectl -n kyma-system delete virtualservice logging-log-ui
 kubectl -n kyma-system delete virtualservice helm-broker-addons-ui
 kubectl -n kyma-system delete virtualservice service-catalog-addons-service-catalog-ui-catalog
-kubectl -n kyma-system delete rafter-minio
+kubectl -n kyma-system delete virtualservice rafter-minio
 
 echo "
 Deleting orphaned Istio DestinationRules"
@@ -27,6 +27,7 @@ Deleting orphaned Deployments"
 kubectl -n kyma-system delete deployment logging-log-ui
 kubectl -n kyma-system delete deployment helm-broker-addons-ui 
 kubectl -n kyma-system delete deployment service-catalog-addons-service-catalog-ui
+kubectl -n kyma-system delete deployment application-connector-certs-sync 
 
 echo "
 Deleting orphaned PodSecurityPolicies"
@@ -36,8 +37,8 @@ kubectl delete podsecuritypolicy application-operator-tests
 kubectl delete podsecuritypolicy application-registry-tests
 kubectl delete podsecuritypolicy connection-token-handler-tests
 kubectl delete podsecuritypolicy helm-broker-addons-ui
-kubectl delete podsecuritypolicy monitoring-alertmanager
 kubectl delete podsecuritypolicy service-catalog-addons-service-catalog-ui
+kubectl delete podsecuritypolic connector-service-tests
 
 echo "
 Deleting orphaned ServiceAccounts"
@@ -63,6 +64,10 @@ kubectl -n istio-system delete serviceaccount kyma-ns-label
 kubectl -n kyma-integration delete serviceaccount application-connector-tests
 kubectl -n kyma-integration delete serviceaccount application-operator-gateway-tests --ignore-not-found
 kubectl -n kyma-integration delete serviceaccount application-operator-tests
+kubectl -n kyma-integration delete serviceaccount connection-token-handler-tests
+kubectl -n kyma-integration delete serviceaccount application-registry-tests
+kubectl -n kyma-integration delete serviceaccount connector-service-tests
+kubectl -n kyma-integration delete serviceaccount monitoring-tests
 
 echo "
 Deleting orphaned Roles"
@@ -79,6 +84,8 @@ kubectl -n kyma-integration delete role application-connector-tests
 kubectl -n kyma-integration delete role application-operator-tests
 kubectl -n istio-system delete role application-connector-certs-sync
 kubectl -n istio-system delete role istio-kyma-validate
+kubectl -n default delete role application-registry-tests
+kubectl -n default delete role connection-token-handler-tests
 
 echo "
 Deleting orphaned RoleBindings"
@@ -96,6 +103,8 @@ kubectl -n istio-system delete rolebinding application-connector-certs-sync
 kubectl -n istio-system delete rolebinding istio-kyma-validate
 kubectl -n kyma-integration delete rolebinding application-connector-tests
 kubectl -n kyma-integration delete rolebinding application-operator-tests
+kubectl -n kyma-integration delete rolebinding application-registry-tests
+kubectl -n kyma-integration delete rolebinding connection-token-handler-tests
 
 echo "
 Deleting orphaned Secrets"
@@ -149,6 +158,7 @@ kubectl delete clusterrole kyma-installer-reader
 kubectl delete clusterrole kyma-ns-label
 kubectl delete clusterrole kyma-ui-view
 kubectl delete clusterrole rafter-tests
+kubectl delete clusterrole connector-service-tests
 
 echo "
 Deleting orphaned ClusterRoleBinding"
@@ -171,6 +181,8 @@ kubectl delete clusterrolebinding istio-job
 kubectl delete clusterrolebinding istio-kyma-validate
 kubectl delete clusterrolebinding istio-proxy-reset
 kubectl delete clusterrolebinding rafter-tests
+kubectl delete clusterrolebinding connector-service-tests
+kubectl delete clusterrolebinding kube-system-view
 
 echo "
 Deleting orphaned Kyma modules"
@@ -200,6 +212,8 @@ kubectl -n kyma-system delete secret -l owner=helm,name=serverless
 kubectl -n kyma-system delete secret -l owner=helm,name=service-catalog-addons
 kubectl -n kyma-system delete secret -l owner=helm,name=service-catalog
 kubectl -n kyma-system delete secret -l owner=helm,name=service-manager-proxy
+kubectl -n kyma-system delete secret -l owner=helm,name=tracing
+kubectl -n kyma-system delete secret -l owner=helm,name=kiali
 
 echo "
 Deleting orphaned CRDs"
