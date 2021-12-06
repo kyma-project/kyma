@@ -42,7 +42,7 @@ DOCKER_PUSH_REPOSITORY=eu.gcr.io DOCKER_PUSH_DIRECTORY=/kyma-project/develop mak
 
 ## Code generation
 
-Structs related to Custom Resource Definitions are defined in `pkg/apis/application/v1alpha1/types.go` and registered in `pkg/apis/application/v1alpha1/`. After making any changes there, please run:
+Structs related to custom resource definitions are defined in `pkg/apis/application/v1alpha1/types.go` and registered in `pkg/apis/application/v1alpha1/`. After making any changes there, please run:
 
 ```bash
 ./hack/update-codegen.sh

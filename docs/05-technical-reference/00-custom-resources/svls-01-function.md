@@ -2,7 +2,7 @@
 title: Function
 ---
 
-The `functions.serverless.kyma-project.io` Custom Resource Definition (CRD) is a detailed description of the kind of data and the format used to manage Functions within Kyma. To get the up-to-date CRD and show the output in the YAML format, run this command:
+The `functions.serverless.kyma-project.io` custom resource definition (CRD) is a detailed description of the kind of data and the format used to manage Functions within Kyma. To get the up-to-date CRD and show the output in the YAML format, run this command:
 
 ```bash
 kubectl get crd functions.serverless.kyma-project.io -o yaml
