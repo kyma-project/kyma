@@ -8,6 +8,7 @@ require (
 	github.com/davecgh/go-spew v1.1.1
 	github.com/ghodss/yaml v1.0.1-0.20190212211648-25d852aebe32
 	github.com/google/go-cmp v0.5.5
+	github.com/googleapis/gnostic v0.5.5 // indirect
 	github.com/gorilla/mux v1.8.0
 	github.com/hashicorp/go-multierror v1.0.0
 	github.com/imdario/mergo v0.3.12
@@ -36,13 +37,6 @@ require (
 )
 
 replace (
-	github.com/gogo/protobuf => github.com/gogo/protobuf v1.3.2
-	github.com/kubernetes-sigs/service-catalog => github.com/kubernetes-sigs/service-catalog v0.2.2-0.20190920221325-ccab52343967
 	github.com/kyma-project/kyma/components/application-operator => github.com/koala7659/kyma/components/application-operator v0.0.0-20211207101924-24d09934d9b6
 	google.golang.org/grpc => google.golang.org/grpc v1.27.1
-	istio.io/api => istio.io/api v0.0.0-20200724154434-34e474846e0d
-	istio.io/client-go => istio.io/client-go v0.0.0-20200513180646-f8d9d8ff84e6
-	k8s.io/api => k8s.io/api v0.16.10
-	k8s.io/apimachinery => k8s.io/apimachinery v0.16.10
-	k8s.io/client-go => k8s.io/client-go v0.16.10
 )
