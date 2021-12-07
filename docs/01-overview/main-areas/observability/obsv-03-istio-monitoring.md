@@ -18,7 +18,7 @@ The main Prometheus instance supports scraping metrics using [`Strict mTLS`](htt
    
 4. Prometheus is deployed with a sidecar proxy which rotates SDS certificates and outputs them to a volume mounted to the corresponding Prometheus container. It is configured to not intercept or redirect any traffic. 
    
-5. By default, metrics from Kyma components are scraped using mTLS. As an exception, components deployed without sidecar proxy are scraped using http (for example, controllers like Prometheus operator).
+5. By default, metrics from Kyma components are scraped using mTLS. As an exception, components deployed without sidecar proxy (for example, controllers like Prometheus operator) and Istio system components (for example, the Istio sidecars proxies themselves) are scraped using http; see also [Istio's setup recommendation](https://istio.io/latest/docs/ops/integrations/prometheus/#tls-settings).
 
 >**NOTE:** Learn how to [deploy](../../../03-tutorials/00-observability/obsv-01-observe-application-metrics.md#deploy-the-example-configuration) a sample `Go` service exposing metrics, which are scraped by Prometheus using mTLS.
 
