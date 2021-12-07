@@ -96,6 +96,7 @@ function commerceMockTests() {
     });
 
     it("should pass if the certificated is revoked, endpoint returned 403 code", async function () {
+      //TODO instead of using Connector Service use Varkes or Commerce Mock, when endpoints will be avalible.  
       await checkRevocation();
     });
 
