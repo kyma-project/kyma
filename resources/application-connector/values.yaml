@@ -57,13 +57,13 @@ global:
       version: "PR-12257"
     central_application_connectivity_validator:
       name: "central-application-connectivity-validator"
-      version: "PR-12632"
+      version: "29eb2247"
     central_application_gateway:
       name: "central-application-gateway"
       version: "PR-12257"
     connection_token_handler:
       name: "connection-token-handler"
-      version: "PR-11558"
+      version: "da9a13cf"
     connector_service:
       name: "connector-service"
       version: "186bd0da"
