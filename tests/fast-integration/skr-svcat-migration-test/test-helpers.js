@@ -3,7 +3,7 @@ const execa = require("execa");
 const fs = require('fs');
 const os = require('os');
 const {
-    getEnvOrThrow, getConfigMap, kubectlExecInPod, listPods, deleteK8sResource, sleep, deleteAllK8sResources, listResources
+    getEnvOrThrow, getConfigMap, kubectlExecInPod, listPods, deleteK8sPod, sleep, deleteAllK8sResources, listResources
 } = require("../utils");
 
 class SMCreds {
@@ -42,7 +42,7 @@ async function readClusterID() {
 }
 
 async function installBTPOperatorHelmChart(creds, clusterId) {
-    const btpChart = "https://github.com/kyma-incubator/sap-btp-service-operator/releases/download/v0.1.10/sap-btp-operator-v0.1.10.tgz";
+    const btpChart = "https://github.com/kyma-incubator/sap-btp-service-operator/releases/download/v0.1.18-custom/sap-btp-operator-0.1.18.tar.gz";
     const btp = "sap-btp-operator";
     const btpValues = `manager.secret.clientid=${creds.clientId},manager.secret.clientsecret=${creds.clientSecret},manager.secret.url=${creds.smURL},manager.secret.tokenurl=${creds.url},cluster.id=${clusterId}`
     try {
@@ -103,7 +103,11 @@ async function restartFunctionsPods() {
     for (let f of functions) {
         let pod = await getFunctionPod(f.name);
         console.log("delete pod", pod.metadata.name);
-        await deleteK8sResource(pod);
+        try {
+          await deleteK8sPod(pod);
+        } catch(err) {
+          throw new Error(`failed to delete pod ${pod.metadata.name}: ${err}`);
+        }
         podNames[f.name] = pod.metadata.name;
     }
 
@@ -114,7 +118,12 @@ async function restartFunctionsPods() {
         for (let f of functions) {
             let labelSelector = `serverless.kyma-project.io/function-name=${f.name},serverless.kyma-project.io/resource=deployment`;
             console.log(`polling pods with labelSelector ${labelSelector}`);
-            const res = await listPods(labelSelector);
+            let res = {};
+            try {
+                res = await listPods(labelSelector);
+            } catch(err) {
+                throw new Error(`failed to list pods with labelSelector ${labelSelector}: ${err}`);
+            }
             if (res.body.items.length != 1) {
                 // there are either multiple or 0 pods for the function, we need to wait
                 let pn = res.body.items.map(p=> {return {"pod name": p.metadata.name, phase: p.status.phase}});
@@ -146,6 +155,7 @@ async function restartFunctionsPods() {
         let originalNames = JSON.stringify(podNames, null, 2);
         throw new Error(`Failed to restart function pods in 100 seconds. Expecting exactly one pod for each function with new unique names and in ready status but found:\n${info}\n\nPod names before restart:\n${originalNames}`);
     }
+    console.log("functions pods successfully restarted")
 }
 
 async function provisionPlatform(creds, svcatPlatform) {

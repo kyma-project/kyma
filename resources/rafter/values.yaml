@@ -9,15 +9,11 @@ global:
   images:
     minio:
       name: "minio"
-      version: "RELEASE.2020-09-21T22-31-59Z-e85e5eaf"
-      directory: "tpi/minio"
-    minio_client:
-      name: "mc"
-      version: "RELEASE.2019-04-03T17-59-57Z-e0da5a68"
+      version: "RELEASE.2020-09-21T22-31-59Z-9397617c"
       directory: "tpi/minio"
     k8s_tools:
       name: "k8s-tools"
-      version: "20210922-530cfc39"
+      version: "20211022-85284bf9"
       directory: "tpi"
     rafter_controller_manager:
       name: "rafter-controller-manager"
@@ -31,32 +27,6 @@ global:
     rafter_asyncapi_service:
       name: "rafter-asyncapi-service"
       version: "f8031ac4"
-  testImages:
-    rafter_test:
-      name: "rafter-test"
-      version: "PR-12326"
-    mockice:
-      name: "mockice"
-      version: "0.1.3"
-      directory: "external/hudymi"
-
-tests:
-  enabled: true
-  labels:
-    integration: true
-    after-upgrade: true
-    e2e-skr: true
-
-  image:
-    pullPolicy: IfNotPresent
-  disableConcurrency: true
-  restartPolicy: Never
-  resources:
-    limits:
-      memory: 128Mi
-  envs:
-    waitTimeout: 10m
-    verifySSL: "false"
 
 controller-manager:
   enabled: true

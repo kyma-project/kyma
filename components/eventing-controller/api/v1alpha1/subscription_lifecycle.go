@@ -13,6 +13,7 @@ const (
 	ConditionSubscribed         ConditionType = "Subscribed"
 	ConditionSubscriptionActive ConditionType = "Subscription active"
 	ConditionAPIRuleStatus      ConditionType = "APIRule status"
+	ConditionWebhookCallStatus  ConditionType = "Webhook call status"
 )
 
 var allConditions = makeConditions()
@@ -36,6 +37,7 @@ const (
 	ConditionReasonAPIRuleStatusReady         ConditionReason = "APIRule status ready"
 	ConditionReasonAPIRuleStatusNotReady      ConditionReason = "APIRule status not ready"
 	ConditionReasonNATSSubscriptionActive     ConditionReason = "NATS Subscription active"
+	ConditionReasonWebhookCallStatus          ConditionReason = "BEB Subscription webhook call no errors status"
 )
 
 // InitializeConditions sets unset conditions to Unknown
@@ -61,7 +63,7 @@ func (s *SubscriptionStatus) InitializeConditions() {
 }
 
 func (s SubscriptionStatus) IsReady() bool {
-	if !containSameConditionTypes(allConditions, s.Conditions) {
+	if !ContainSameConditionTypes(allConditions, s.Conditions) {
 		return false
 	}
 
@@ -92,11 +94,16 @@ func makeConditions() []Condition {
 			LastTransitionTime: metav1.Now(),
 			Status:             corev1.ConditionUnknown,
 		},
+		{
+			Type:               ConditionWebhookCallStatus,
+			LastTransitionTime: metav1.Now(),
+			Status:             corev1.ConditionUnknown,
+		},
 	}
 	return conditions
 }
 
-func containSameConditionTypes(conditions1, conditions2 []Condition) bool {
+func ContainSameConditionTypes(conditions1, conditions2 []Condition) bool {
 	if len(conditions1) != len(conditions2) {
 		return false
 	}
@@ -134,6 +141,16 @@ func MakeCondition(conditionType ConditionType, reason ConditionReason, status c
 func (s *SubscriptionStatus) IsConditionSubscribed() bool {
 	for _, condition := range s.Conditions {
 		if condition.Type == ConditionSubscribed && condition.Status == corev1.ConditionTrue {
+			return true
+		}
+	}
+	return false
+}
+
+func (s *SubscriptionStatus) IsConditionWebhookCall() bool {
+	for _, condition := range s.Conditions {
+		if condition.Type == ConditionWebhookCallStatus &&
+			(condition.Status == corev1.ConditionTrue || condition.Status == corev1.ConditionUnknown) {
 			return true
 		}
 	}

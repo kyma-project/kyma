@@ -23,5 +23,5 @@ subjects:
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
-  name: kyma-admin
+  name: cluster-admin
 {{- end }}

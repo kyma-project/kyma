@@ -9,7 +9,6 @@ If you're interested in learning more about the Application Connectivity area, f
   - [Pass the access token in the request header](../../../04-operation-guides/operations/ac-01-pass-access-token-in-request-header.md)
   - [Register an API in Application Registry](../../../04-operation-guides/operations/ac-02-api-registration.md)
   - [Provide a custom AC certificate and key](../../../04-operation-guides/operations/ac-03-application-connector-certificates.md)
-  - [Access AC on a local deployment](../../../04-operation-guides/operations/ac-04-access-ac-on-local.md)
   - [Create a new Application](../../../03-tutorials/00-application-connectivity/ac-01-create-application.md)
   - [Get the client certificate](../../../03-tutorials/00-application-connectivity/ac-02-get-client-certificate.md)
   - [Register a service](../../../03-tutorials/00-application-connectivity/ac-03-register-manage-services.md)
@@ -20,19 +19,20 @@ If you're interested in learning more about the Application Connectivity area, f
   - [Rotate the Root certificate and the key issued by the Certificate Authority](../../../03-tutorials/00-application-connectivity/ac-08-rotate-root-ca.md)
   - [Get the API specification for AC components](../../../03-tutorials/00-application-connectivity/ac-09-get-api-specification.md)
   - [Get subscribed events](../../../03-tutorials/00-application-connectivity/ac-10-get-subscribed-events.md)
-  - [Disable TLS certificate verification](../../../03-tutorials/00-application-connectivity/ac-11-disable-tls-certificate-verification.md)
+<!-- NOT WORKING FOR NOW, RE-ADD IT WHEN FIXED
+  - [Disable TLS certificate verification] (../../../03-tutorials/00-application-connectivity/ac-11-disable-tls-certificate-verification.md)
+-->
 
-- Troubleshoot Application Connectivity-related issues for:
+- Check Application Connectivity troubleshooting guides for:
 
-  - [Application Gateway](../../../04-operation-guides/troubleshooting/ac-01-application-gateway-troubleshooting.md)
-  - [Application Registry](../../../04-operation-guides/troubleshooting/ac-02-application-registry-troubleshooting.md)
-  - [Connector Service](../../../04-operation-guides/troubleshooting/ac-03-connector-service-troubleshooting.md)
+  - [Application Gateway](../../../04-operation-guides/troubleshooting/ac-01-application-gateway-troubleshooting.md) errors when calling a registered service
+  - [Application Registry](../../../04-operation-guides/troubleshooting/ac-02-application-registry-troubleshooting.md) certificate-related errors when trying to access the component
+  - [Connector Service](../../../04-operation-guides/troubleshooting/ac-03-connector-service-troubleshooting.md) errors when trying to renew or rotate a certificate
 
 - Analyze Application Connectivity specification and configuration files:
 
   - [Application](../../../05-technical-reference/00-custom-resources/ac-01-application.md) custom resource (CR)
-  - [EventActivation](../../../05-technical-reference/00-custom-resources/ac-02-eventactivation.md) CR
-  - [TokenRequest](../../../05-technical-reference/00-custom-resources/ac-03-tokenrequest.md) CR
+  - [TokenRequest](../../../05-technical-reference/00-custom-resources/ac-02-tokenrequest.md) CR
   - [Application Connector chart](../../../05-technical-reference/00-configuration-parameters/ac-01-application-connector-chart.md)
   - [Application Registry sub-chart](../../../05-technical-reference/00-configuration-parameters/ac-02-application-registry-sub-chart.md)
   - [Connector Service sub-chart](../../../05-technical-reference/00-configuration-parameters/ac-03-connector-service-sub-chart.md)

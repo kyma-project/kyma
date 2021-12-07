@@ -2,7 +2,7 @@
 title: Application
 ---
 
-The `applications.applicationconnector.kyma-project.io` CustomResourceDefinition (CRD) is a detailed description of the kind of data and the format used to register an Application in Kyma. The `Application` custom resource (CR) defines the APIs that the Application offers. After creating a new custom resource for a given Application, the Application is mapped to appropriate ServiceClasses in the Service Catalog. To get the up-to-date CRD and show the output in the YAML format, run this command:
+The `applications.applicationconnector.kyma-project.io` custom resource definition (CRD) is a detailed description of the kind of data and the format used to register an Application in Kyma. The `Application` custom resource (CR) defines the APIs that the Application offers. To get the up-to-date CRD and show the output in the YAML format, run this command:
 
 ```bash
 kubectl get crd applications.applicationconnector.kyma-project.io -o yaml
@@ -14,11 +14,11 @@ This is a sample resource that registers the `system-prod` Application which off
 
 >**NOTE:** The name of the Application must consist of lower case alphanumeric characters, `-` or `.`, and start and end with an alphanumeric character.
 
->**NOTE:** In case the Application name contains `-` or `.`, the underlying Eventing services will use a clean name with alphanumeric characters only. (For example, `system-prod` will become `systemprod`).
+>**NOTE:** In case the Application name contains `-` or `.`, the underlying Eventing services uses a clean name with alphanumeric characters only. (For example, `system-prod` becomes `systemprod`).
 >
-> This could lead to a naming collision. For example, both `system-prod` and `systemprod` will become `systemprod`.
+> This could lead to a naming collision. For example, both `system-prod` and `systemprod` become `systemprod`.
 >
-> A solution for this is to provide an `application-type` label (with alphanumeric characters only) which will be used by the Eventing services instead of the Application name. In case the `application-type` label also contains `-` or `.`, the underlying Eventing services will clean it and use the cleaned label.
+> A solution for this is to provide an `application-type` label (with alphanumeric characters only) which is then used by the Eventing services instead of the Application name. If the `application-type` label also contains `-` or `.`, the underlying Eventing services clean it and use the cleaned label.
 
 ```yaml
 apiVersion: applicationconnector.kyma-project.io/v1alpha1
@@ -40,12 +40,11 @@ This table lists all the possible parameters of a given resource together with t
 |----------|:-------------:|------|
 | **metadata.name** | Yes | Specifies the name of the CR. |
 | **spec.description** | No | Describes the connected Application.  |
-| **spec.accessLabel** | No | Labels the Application when an ApplicationMapping is created. |
 | **spec.labels** | No | Defines the labels of the Application. |
 | **spec.services** | No | Contains all services that the Application provides. |
 | **spec.services.id** | Yes | Identifies the service that the Application provides. |
-| **spec.services.identifier** | No | Provides an additional identifier of the ServiceClass. |
-| **spec.services.name** | No | Represents a unique name of the service used by the Service Catalog. |
+| **spec.services.identifier** | No | Represents an additional identifier unique in the Application scope. Allows the external system to provide its own identifier. |
+| **spec.services.name** | No | Represents a unique name of the service. Used for proxying in Central Application Gateway. |
 | **spec.services.displayName** | Yes | Specifies a human-readable name of the Application service. Parameter provided by Application Registry, do not edit. |
 | **spec.services.description** | No | Provides a short, human-readable description of the service offered by the Application. Parameter provided by Application Registry, do not edit. |
 | **spec.services.longDescription** | No | Provides a longer, human-readable description of the service offered by the Application. Parameter provided by Application Registry, do not edit. |

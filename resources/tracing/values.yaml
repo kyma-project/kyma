@@ -37,6 +37,7 @@ jaeger:
   spec:
     strategy: allInOne #allInOne | production
     allInOne:
+      image: '{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.jaeger_all_in_one) }}'
       options:
         log-level: info
     storage:
@@ -122,9 +123,13 @@ global:
       name: "jaeger-operator"
       version: "1.18.1-e0da5a68"
       directory: "tpi"
+    jaeger_all_in_one:
+      name: "jaegertracing/all-in-one"
+      version: "1.18.1"
+      directory: "external"
     oauth2_proxy:
       name: "oauth2-proxy"
-      version: "7.1.3-4c48514d"
+      version: "7.2.0-59f3431d"
       directory: "tpi"
 virtualservice:
   enabled: true

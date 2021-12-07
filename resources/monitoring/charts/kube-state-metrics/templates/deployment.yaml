@@ -157,7 +157,7 @@ spec:
           readOnly: true
 {{- end }}
         imagePullPolicy: {{ .Values.image.pullPolicy }}
-        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.kube_state_metrics) }}"
         ports:
         - containerPort: 8080
         livenessProbe:

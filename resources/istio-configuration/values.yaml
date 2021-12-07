@@ -22,6 +22,9 @@ helmValues:
         requests:
           cpu: 10m
           memory: 10Mi
+  gateways:
+    istio-ingressgateway:
+      autoscaleEnabled: true
 
   sidecarInjectorWebhook:
     enableNamespacesByDefault: true
@@ -41,7 +44,7 @@ meshConfig:
       zipkin:
         address: "zipkin.kyma-system:9411"
   enablePrometheusMerge: false
-  enableTracing: true
+  enableTracing: "{{ .Values.global.tracing.enabled }}"
 
 components:
   egressGateways:
@@ -119,5 +122,7 @@ global:
   images:
     istio:
       name: "istio"
-      version: "1.11.2-distroless"
+      version: "1.11.4-distroless"
       directory: "external"
+  tracing:
+    enabled: true

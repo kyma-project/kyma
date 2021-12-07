@@ -11,7 +11,11 @@ how to [revoke the client certificate](../../03-tutorials/00-application-connect
 
 ## Prerequisites
 
-- [OpenSSL toolkit](https://www.openssl.org/docs/man1.0.2/apps/openssl.html) to create a Certificate Signing Request (CSR), keys, and certificates which meet high security standards
+- [OpenSSL toolkit](https://www.openssl.org/source/) to create a Certificate Signing Request (CSR), keys, and certificates which meet high security standards
+- The [jq](https://stedolan.github.io/jq/download/) tool to prettify the JSON output
+- Your [Application name exported](ac-01-create-application.md#prerequisites) as an environment variable
+
+> **CAUTION:** On a local Kyma deployment, skip SSL certificate verification when making a `curl` call, by adding the `-k` flag to it. Alternatively, add the Kyma certificates to your local certificate storage on your machine using the `kyma import certs` command.
 
 ## Get the configuration URL with a token
 
@@ -24,14 +28,14 @@ To get the configuration URL which allows you to fetch the required configuratio
    apiVersion: applicationconnector.kyma-project.io/v1alpha1
    kind: TokenRequest
    metadata:
-     name: {APP_NAME}
+     name: $APP_NAME
    EOF
    ```
 
 2. Fetch the TokenRequest CR you created to get the configuration details from the **status** section. Run:
 
    ```bash
-   kubectl get tokenrequest.applicationconnector.kyma-project.io {APP_NAME} -o yaml
+   kubectl get tokenrequest.applicationconnector.kyma-project.io $APP_NAME -o yaml
    ```
 
    >**NOTE:** If the response doesn't contain the **status** section, wait for a few moments and fetch the CR again.
@@ -59,7 +63,7 @@ To get the configuration URL which allows you to fetch the required configuratio
 Use the link you got in the previous step to fetch the CSR information and configuration details required to connect your external solution. Run:
 
 ```bash
-curl {CONFIGURATION_URL_WITH_TOKEN}
+curl {CONFIGURATION_URL_WITH_TOKEN} | jq .
 ```
 >**NOTE:** The URL you call in this step contains a token that is valid for 5 minutes or for a single call. You get a code `403` error if you call the same configuration URL more than once, or if you call a URL with an expired token.
 
@@ -83,21 +87,31 @@ A successful call returns the following response:
 }
 ```
 
-> **NOTE:** The response contains URLs to the Application Registry API and the Events Publisher API, however, it is not recommended to use them. You should call the `metadata` endpoint URL, which is provided in `api.infoUrl` property, to fetch correct URLs to the Application Registry API and to the Events Publisher API, and other configuration details.
+> **NOTE:** The response contains URLs to the Application Registry API and the Events Publisher API, however, using them is not recommended. To fetch correct URLs to these APIs, as well as other configuration details, call the `metadata` endpoint URL. It is provided in the **api.infoUrl** property.
 
 ## Generate a CSR and send it to Kyma
 
-1. Generate a CSR using the certificate subject data obtained in the previous step:
+1. Export the names of the generated CSR, client certificate and key, and your [cluster domain](../../02-get-started/01-quick-install.md#export-your-cluster-domain) as environment variables:
+
+   ```bash
+   export CSR_FILE_NAME=generated
+   export CLIENT_CERT_FILE_NAME=generated
+   export KEY_FILE_NAME=generated
+   export CLUSTER_DOMAIN=local.kyma.dev
+   ```
+   
+2. Generate a CSR using the certificate subject data obtained in the previous step:
 
    ```bash
    openssl genrsa -out generated.key 2048
-   openssl req -new -sha256 -out generated.csr -key generated.key -subj "/OU=OrgUnit/O=Organization/L=Waldorf/ST=Waldorf/C=DE/CN={APP_NAME}"
-   openssl base64 -in generated.csr
+   openssl req -new -sha256 -out $CSR_FILE_NAME.csr -key $KEY_FILE_NAME.key -subj "/OU=OrgUnit/O=Organization/L=Waldorf/ST=Waldorf/C=DE/CN=$APP_NAME"
+   openssl base64 -in $CSR_FILE_NAME.csr -A
    ```
-2. Send the encoded CSR to Kyma. Run:
+   
+3. Send the encoded CSR to Kyma. Run:
 
    ```bash
-   curl -X POST -H "Content-Type: application/json" -d '{"csr":"BASE64_ENCODED_CSR_HERE"}' {CSR_SIGNING_URL_WITH_TOKEN}
+   curl -X POST -H "Content-Type: application/json" -d '{"csr":"BASE64_ENCODED_CSR_HERE"}' {CSR_SIGNING_URL_WITH_TOKEN} | jq .
    ```
 
    The response contains a valid client certificate signed by the Kyma Certificate Authority (CA), a CA certificate, and a certificate chain.
@@ -110,7 +124,33 @@ A successful call returns the following response:
    }
    ```
 
-After you receive the certificates, decode the certificate chain and use it in your Application.
+4. After you receive the certificates, decode them and save them as files.
+
+   <div tabs name="Decode and save the certificates" group="generate-csr-and-send-to-kyma">
+     <details open>
+     <summary label="macOS">
+     macOS
+     </summary>
+   
+   To do that, select the JSON response you got, copy it, and run:
+   ```bash
+   pbpaste | jq -r ".crt" | base64 -D > generated.crt
+   pbpaste | jq -r ".clientCrt" | base64 -D > generated_client.crt
+   pbpaste | jq -r ".caCrt" | base64 -D > generated_ca.crt
+   ```
+   
+     </details>
+     <details>
+     <summary label="other">
+     other
+     </summary>
+   
+      Decode the certificates manually and save them as `generated.crt`, `generated_client.crt`, and `generated_ca.crt` respectively. 
+   
+     </details>
+   </div>
+
+Now you can use the decoded certificate chain in your Application.
 
 ## Call the metadata endpoint
 
@@ -121,10 +161,10 @@ Call the `metadata` endpoint with the generated certificate to get URLs to the f
 - the certificate renewal endpoint
 - the certificate revocation endpoint
 
-The URL to the `metadata` endpoint is returned in the response body from the configuration URL. Use the value of the `api.infoUrl` property to get the URL. Run:
+The URL to the `metadata` endpoint is returned in the response body from the configuration URL. Use the value of the **api.infoUrl** property to get the URL. Run:
 
 ```bash
-curl https://gateway.{CLUSTER_DOMAIN}/v1/applications/management/info --cert {CLIENT_CERT_FILE_NAME}.crt --key {KEY_FILE_NAME}.key -k
+curl https://gateway.$CLUSTER_DOMAIN/v1/applications/management/info --cert $CLIENT_CERT_FILE_NAME.crt --key $KEY_FILE_NAME.key | jq .
 ```
 
 A successful call returns the following response:
@@ -149,20 +189,18 @@ A successful call returns the following response:
 }
 ```
 
-Use `urls.metadataUrl` and `urls.eventsUrl` to get the URLs to the Application Registry API and to the Event Publisher API.
+Use **urls.metadataUrl** and **urls.eventsUrl** to get the URLs to the Application Registry API and to the Event Publisher API.
 
-## Call Application Registry and Event Publisher on local deployment
+## Call Event Publisher
 
-Since the local Kyma installation uses the self-signed certificate by default, skip TLS verification.
-
-Call Application Registry with this command:
+Use this command to call Event Publisher:
 
 ```bash
-curl https://gateway.local.kyma.dev/{APP_NAME}/v1/metadata/services --cert {CLIENT_CERT_FILE_NAME}.crt --key {KEY_FILE_NAME}.key -k
-```
-
-Use this command to call the Event Publisher:
-
-```bash
-curl -X POST -H "Content-Type: application/json" https://gateway.local.kyma.dev/{APP_NAME}/v1/events --cert {CLIENT_CERT_FILE_NAME}.crt --key {KEY_FILE_NAME}.key -k -d '{EVENT}'
+curl -X POST -H "Content-Type: application/json" https://gateway.$CLUSTER_DOMAIN/$APP_NAME/v1/events --cert $CLIENT_CERT_FILE_NAME.crt --key $KEY_FILE_NAME.key -d '{
+  "event-type": "ExampleEvent",
+  "event-type-version": "v1",
+  "event-id": "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
+  "event-time": "2018-10-16T15:00:00Z",
+  "data": "some data"
+  }' | jq .
 ```

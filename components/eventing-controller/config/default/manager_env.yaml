@@ -18,4 +18,6 @@ spec:
           value: $DOMAIN
         - name: WEBHOOK_TOKEN_ENDPOINT
           value: $WEBHOOK_TOKEN_ENDPOINT
-        name: manager
+        - name: PUBLISHER_IMAGE
+          value: $KO_DOCKER_REPO/event-publisher-proxy
+        name: controller

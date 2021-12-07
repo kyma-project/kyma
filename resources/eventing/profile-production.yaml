@@ -17,11 +17,27 @@ controller:
 
 
 nats:
-  clusterSize: 3
-  resources:
-    limits:
-      cpu: 500m
-      memory: 1Gi
-    requests:
-      cpu: 400m
-      memory: 512Mi
+  cluster:
+    enabled: true
+    replicas: 3
+  reloader:
+    enabled: false
+  nats:
+    jetstream:
+      enabled: false
+      memStorage:
+        enabled: true
+        size: 1Gi
+      fileStorage:
+        enabled: false
+        size: 1Gi
+    resources:
+      limits:
+        cpu: 500m
+        memory: 1Gi
+      requests:
+        cpu: 400m
+        memory: 512Mi
+    logging:
+      debug: false
+      trace: false

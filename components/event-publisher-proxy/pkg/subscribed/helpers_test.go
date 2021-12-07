@@ -13,7 +13,7 @@ func TestFilterEventTypeVersions(t *testing.T) {
 		appName         string
 		eventTypePrefix string
 		bebNs           string
-		filters         *eventingv1alpha1.BebFilters
+		filters         *eventingv1alpha1.BEBFilters
 		expectedEvents  []Event
 	}{
 		{
@@ -184,10 +184,10 @@ func TestAddUniqueEventsToResult(t *testing.T) {
 	}
 }
 
-type BEBFilterOption func(filter *eventingv1alpha1.BebFilters)
+type BEBFilterOption func(filter *eventingv1alpha1.BEBFilters)
 
-func NewBEBFilters(opts ...BEBFilterOption) *eventingv1alpha1.BebFilters {
-	newFilters := &eventingv1alpha1.BebFilters{}
+func NewBEBFilters(opts ...BEBFilterOption) *eventingv1alpha1.BEBFilters {
+	newFilters := &eventingv1alpha1.BEBFilters{}
 	for _, opt := range opts {
 		opt(newFilters)
 	}
@@ -195,32 +195,32 @@ func NewBEBFilters(opts ...BEBFilterOption) *eventingv1alpha1.BebFilters {
 	return newFilters
 }
 
-func WithOneBEBFilter(bebFilters *eventingv1alpha1.BebFilters) {
+func WithOneBEBFilter(bebFilters *eventingv1alpha1.BEBFilters) {
 	evSource := "/default/foo.kyma/kt1"
 	evType := "foo.prefix.custom.foovarkes.order.created.v1"
-	bebFilters.Filters = []*eventingv1alpha1.BebFilter{
+	bebFilters.Filters = []*eventingv1alpha1.BEBFilter{
 		NewBEBFilter(evSource, evType),
 	}
 
 }
 
-func WithMultipleBEBFiltersFromSameSource(bebFilters *eventingv1alpha1.BebFilters) {
+func WithMultipleBEBFiltersFromSameSource(bebFilters *eventingv1alpha1.BEBFilters) {
 	evSource := "/default/foo.kyma/kt1"
 	evType := "foo.prefix.custom.foovarkes.order.created.v1"
-	bebFilters.Filters = []*eventingv1alpha1.BebFilter{
+	bebFilters.Filters = []*eventingv1alpha1.BEBFilter{
 		NewBEBFilter(evSource, evType),
 		NewBEBFilter(evSource, evType),
 		NewBEBFilter(evSource, evType),
 	}
 }
 
-func WithMultipleBEBFiltersFromDiffSource(bebFilters *eventingv1alpha1.BebFilters) {
+func WithMultipleBEBFiltersFromDiffSource(bebFilters *eventingv1alpha1.BEBFilters) {
 	evSource1 := "foo-match"
 	evSource2 := "/default/foo.different/kt1"
 	evSource3 := "/default/foo.different2/kt1"
 	evSource4 := ""
 	evType := "foo.prefix.custom.foovarkes.order.created.v1"
-	bebFilters.Filters = []*eventingv1alpha1.BebFilter{
+	bebFilters.Filters = []*eventingv1alpha1.BEBFilter{
 		NewBEBFilter(evSource1, evType),
 		NewBEBFilter(evSource2, evType),
 		NewBEBFilter(evSource3, evType),
@@ -228,19 +228,19 @@ func WithMultipleBEBFiltersFromDiffSource(bebFilters *eventingv1alpha1.BebFilter
 	}
 }
 
-func WithMultipleBEBFiltersFromDiffEventTypePrefix(bebFilters *eventingv1alpha1.BebFilters) {
+func WithMultipleBEBFiltersFromDiffEventTypePrefix(bebFilters *eventingv1alpha1.BEBFilters) {
 	evSource := "/default/foo.kyma/kt1"
 	evType1 := "foo.prefix.custom.foovarkes.order.created.v1"
 	evType2 := "foo.prefixdifferent.custom.foovarkes.order.created.v1"
-	bebFilters.Filters = []*eventingv1alpha1.BebFilter{
+	bebFilters.Filters = []*eventingv1alpha1.BEBFilter{
 		NewBEBFilter(evSource, evType1),
 		NewBEBFilter(evSource, evType2),
 		NewBEBFilter(evSource, evType1),
 	}
 }
 
-func NewBEBFilter(evSource, evType string) *eventingv1alpha1.BebFilter {
-	return &eventingv1alpha1.BebFilter{
+func NewBEBFilter(evSource, evType string) *eventingv1alpha1.BEBFilter {
+	return &eventingv1alpha1.BEBFilter{
 		EventSource: &eventingv1alpha1.Filter{
 			Property: "source",
 			Value:    evSource,

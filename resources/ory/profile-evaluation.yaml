@@ -24,7 +24,5 @@ oathkeeper:
     resources:
       requests:
         cpu: "10m"
-hpa:
-  oathkeeper:
-    enabled: false
-
+    autoscaling:
+      enabled: false

@@ -38,6 +38,7 @@ const {
   namespaceObj,
   serviceInstanceObj,
   getTraceDAG,
+  printStatusOfInClusterEventingInfrastructure,
 } = require("../../../utils");
 
 const {
@@ -76,7 +77,6 @@ const lastorderFunctionYaml = fs.readFileSync(
   }
 );
 
-const commerceObjs = k8s.loadAllYaml(commerceMockYaml);
 const applicationObjs = k8s.loadAllYaml(applicationMockYaml);
 const lastorderObjs = k8s.loadAllYaml(lastorderFunctionYaml);
 let eventMeshSourceNamespace = "/default/sap.kyma/tunas-prow"
@@ -102,8 +102,13 @@ function prepareLastorderObjs(type = 'standard', appName = 'commerce') {
   }
 }
 
-async function checkFunctionResponse(functionNamespace) {
-  const vs = await waitForVirtualService("mocks", "commerce-mock");
+// Allows creating Commerce Mock objects in a specific namespace
+function prepareCommerceObjs(mockNamespace) {
+  return k8s.loadAllYaml(commerceMockYaml.toString().replace(/%%MOCK_NAMESPACE%%/g, mockNamespace))
+}
+
+async function checkFunctionResponse(functionNamespace, mockNamespace = 'mocks') {
+  const vs = await waitForVirtualService(mockNamespace, "commerce-mock");
   const mockHost = vs.spec.hosts[0];
   const host = mockHost.split(".").slice(1).join(".");
 
@@ -142,8 +147,8 @@ async function checkFunctionResponse(functionNamespace) {
   expect(errorOccurred).to.be.equal(true);
 }
 
-async function sendEventAndCheckResponse() {
-  const vs = await waitForVirtualService("mocks", "commerce-mock");
+async function sendEventAndCheckResponse(mockNamespace = 'mocks') {
+  const vs = await waitForVirtualService(mockNamespace, "commerce-mock");
   const mockHost = vs.spec.hosts[0];
   const host = mockHost.split(".").slice(1).join(".");
 
@@ -195,9 +200,9 @@ async function sendEventAndCheckResponse() {
   );
 }
 
-async function sendLegacyEventAndCheckTracing() {
+async function sendLegacyEventAndCheckTracing(mockNamespace = 'mocks') {
   // Send an event and get it back from the lastorder function
-  const res = await sendEventAndCheckResponse();
+  const res = await sendEventAndCheckResponse(mockNamespace);
   expect(res.data).to.have.nested.property("event.headers.x-b3-traceid");
   expect(res.data).to.have.nested.property("podName");
 
@@ -277,6 +282,84 @@ async function checkTrace(traceId, expectedTraceLength, expectedTraceProcessSequ
       expect(currentSpan.childSpans).to.have.length(1)
       currentSpan = currentSpan.childSpans[0]
     }
+  }
+}
+
+async function addService() {
+  const vs = await waitForVirtualService("mocks", "commerce-mock");
+  const mockHost = vs.spec.hosts[0];
+  const url = `https://${mockHost}/remote/apis`;
+  const body = {
+    "name": "my-service-http-bin",
+    "provider": "myCompany",
+    "description": "This is some service",
+    "api": {
+      "targetUrl": "https://httpbin.org",
+      "spec": {
+        "swagger":"2.0"
+      }
+    }
+  }
+  const params = {
+    headers: {
+      "Content-Type": "application/json"
+    },
+    timeout: 5000,
+  };
+
+  let serviceId
+  try {
+    serviceId = await axios.post(url, body, params);
+  } catch (err) {
+    throw convertAxiosError(err, "Error during adding a Service");
+  }
+  return serviceId.data.id;
+}
+
+async function updateService(serviceId) {
+  const vs = await waitForVirtualService("mocks", "commerce-mock");
+  const mockHost = vs.spec.hosts[0];
+  const url = `https://${mockHost}/remote/apis/${serviceId}`;
+  const body = {
+    "name": "my-service-http-bin",
+    "provider": "myCompany",
+    "description": "This is some service - an updated description",
+    "api": {
+      "targetUrl": "https://httpbin.org",
+      "spec": {
+        "swagger":"2.0"
+      }
+    }
+  }
+  const params = {
+    headers: {
+      "Content-Type": "application/json"
+    },
+    timeout: 5000,
+  };
+
+  try {
+    await axios.put(url, body, params);
+  } catch (err) {
+    throw convertAxiosError(err, "Error during updating a Service");
+  }
+}
+
+async function deleteService(serviceId) {
+  const vs = await waitForVirtualService("mocks", "commerce-mock");
+  const mockHost = vs.spec.hosts[0];
+  const url = `https://${mockHost}/remote/apis/${serviceId}`;
+  const params = {
+    headers: {
+      "Content-Type": "application/json"
+    },
+    timeout: 5000,
+  };
+
+  try {
+    await axios.delete(url, params);
+  } catch (err) {
+    throw convertAxiosError(err, "Error during deleting a Service");
   }
 }
 
@@ -364,7 +447,7 @@ async function connectCommerceMock(mockHost, tokenData) {
     headers: {
       "Content-Type": "application/json"
     },
-    timeout: 5000,
+    timeout: 10 * 1000,
   };
 
   try {
@@ -512,8 +595,9 @@ async function ensureCommerceMockLocalTestFixture(mockNamespace, targetNamespace
 
 async function provisionCommerceMockResources(appName, mockNamespace, targetNamespace, functionObjs = lastorderObjs) {
   await k8sApply([namespaceObj(mockNamespace), namespaceObj(targetNamespace)]);
-  await k8sApply(commerceObjs);
+  await k8sApply(prepareCommerceObjs(mockNamespace));
   await k8sApply(functionObjs, targetNamespace, true);
+  await waitForFunction("lastorder", targetNamespace);
   await k8sApply([
     eventingSubscription(
       `sap.kyma.custom.${appName}.order.created.v1`,
@@ -521,8 +605,8 @@ async function provisionCommerceMockResources(appName, mockNamespace, targetName
       "order-created",
       targetNamespace)
   ]);
-  await waitForDeployment("commerce-mock", "mocks", 120 * 1000);
-  const vs = await waitForVirtualService("mocks", "commerce-mock");
+  await waitForDeployment("commerce-mock", mockNamespace, 120 * 1000);
+  const vs = await waitForVirtualService(mockNamespace, "commerce-mock");
   const mockHost = vs.spec.hosts[0];
   await retryPromise(
     () =>
@@ -566,7 +650,7 @@ function cleanMockTestFixture(mockNamespace, targetNamespace, wait = true) {
   return deleteNamespaces([mockNamespace, targetNamespace], wait);
 }
 
-async function deleteMockTestFixture(targetNamespace) {
+async function deleteMockTestFixture(mockNamespace) {
   const serviceBindingUsage = {
     apiVersion: "servicecatalog.kyma-project.io/v1alpha1",
     kind: "ServiceBindingUsage",
@@ -576,7 +660,7 @@ async function deleteMockTestFixture(targetNamespace) {
       usedBy: { kind: "serverless-function", name: "lastorder" },
     },
   };
-  await k8sDelete([serviceBindingUsage], targetNamespace);
+  await k8sDelete([serviceBindingUsage], mockNamespace);
   const serviceBinding = {
     apiVersion: "servicecatalog.k8s.io/v1beta1",
     kind: "ServiceBinding",
@@ -585,9 +669,9 @@ async function deleteMockTestFixture(targetNamespace) {
       instanceRef: { name: "commerce" },
     },
   };
-  await k8sDelete([serviceBinding], targetNamespace, false);
+  await k8sDelete([serviceBinding], mockNamespace, false);
   await k8sDelete(lastorderObjs)
-  await k8sDelete(commerceObjs)
+  await k8sDelete(prepareCommerceObjs(mockNamespace))
   await k8sDelete(applicationObjs)
 }
 
@@ -605,6 +689,8 @@ async function checkInClusterEventDeliveryHelper(targetNamespace, encoding) {
   const eventId = "event-" + encoding + "-" + genRandom(5);
   const vs = await waitForVirtualService(targetNamespace, "lastorder");
   const mockHost = vs.spec.hosts[0];
+
+  await printStatusOfInClusterEventingInfrastructure(targetNamespace, encoding, "lastorder");
 
   // send event using function query parameter send=true
   await retryPromise(() => axios.post(`https://${mockHost}`, { id: eventId }, { params: { send: true, encoding: encoding } }), 10, 1000)
@@ -624,6 +710,9 @@ module.exports = {
   ensureCommerceMockWithCompassTestFixture,
   sendEventAndCheckResponse,
   sendLegacyEventAndCheckTracing,
+  addService,
+  updateService,
+  deleteService,
   checkFunctionResponse,
   checkInClusterEventDelivery,
   checkInClusterEventTracing,
