@@ -108,3 +108,6 @@ files:
   - path: "./kyma/docs/04-operation-guides/operations/02-install-kyma.md"
     config:
       external-links-to-ignore: [ "https://dashboard.kyma-project.io/" ]
+  - path: "./kyma/docs/migration-guide-1.24-2.0.md"
+    config:
+      external-links-to-ignore: [ "http://dex-service.kyma-system.svc.cluster.local:5556/keys" ]

@@ -57,7 +57,6 @@ Follow these steps:
 4. Create a branch and start to develop.
 
     Do not forget about creating unit and acceptance tests if needed. For the unit tests, follow the instructions specified in the main `README.md` document of the given project. For the details concerning the acceptance tests, go to the corresponding directory inside the `tests` directory.
-    Find the information on how to run changes on the cluster without a Docker image in the [Develop a service locally without using Docker](https://kyma-project.io/docs/kyma/latest/03-tutorials/01-develop-service-local-no-docker-kyma/) document.
 
 5. Test your changes.
 
