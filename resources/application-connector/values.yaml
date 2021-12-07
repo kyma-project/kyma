@@ -75,7 +75,6 @@ global:
     application_gateway_legacy_tests:
       name: "application-gateway-legacy-tests"
       version: "38a18642"
-  priorityClassName: "kyma-system"
 
 application_connectivity_certs_setup_job:
   secrets:

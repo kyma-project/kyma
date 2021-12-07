@@ -44,8 +44,6 @@ global:
     keys:
       eventTypePrefix: "eventTypePrefix"
 
-  priorityClassName: "kyma-system"
-
 authentication:
   # oauthClientId is the Oauth2 client id used in order to get an Oauth2 token from BEB
   oauthClientId: ""

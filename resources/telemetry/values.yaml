@@ -13,5 +13,4 @@ global:
       name: "busybox"
       version: "1.34.1"
       directory: "external"
-  priorityClassName: "kyma-system"
-  daemonsetPriorityClassName: "kyma-system-daemonset"
+  highPriorityClassName: "kyma-system-priority"

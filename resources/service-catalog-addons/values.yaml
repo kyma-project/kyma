@@ -17,4 +17,3 @@ global:
       name: kyma-gateway
   ingress:
     domainName: "TBD"
-  priorityClassName: "kyma-system"

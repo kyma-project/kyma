@@ -106,8 +106,7 @@ global:
   imagePullSecrets: []
   # - name: "image-pull-secret"
 
-  priorityClassName: "kyma-system"
-  daemonsetPriorityClassName: "kyma-system-daemonset"
+  highPriorityClassName: "kyma-system-priority"
 
 # Default values for kube-prometheus-stack.
 # This is a YAML-formatted file.

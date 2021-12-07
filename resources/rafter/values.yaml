@@ -27,7 +27,6 @@ global:
     rafter_asyncapi_service:
       name: "rafter-asyncapi-service"
       version: "f8031ac4"
-  priorityClassName: "kyma-system"
 
 controller-manager:
   enabled: true

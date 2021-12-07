@@ -6,10 +6,10 @@ global:
   disableLegacyConnectivity: false
   podSecurityPolicy:
     privileged: false
-  priorityClassName: "kyma-system"
-  daemonsetPriorityClassName: "kyma-system-daemonset"
+  priorityClassName: ""
+  highPriorityClassName: "kyma-system-priority"
   priorityClassValue: 2000000
-  daemonsetPriorityClassValue: 2100000
+  highPriorityClassValue: 2100000
   containerRegistry:
     path: eu.gcr.io/kyma-project
   images:

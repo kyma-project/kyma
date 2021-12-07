@@ -43,5 +43,4 @@ global:
       namespace: kyma-system
   tracing:
     enabled: true
-  priorityClassName: "kyma-system"
-  daemonsetPriorityClassName: "kyma-system-daemonset"
+  highPriorityClassName: "kyma-system-priority"

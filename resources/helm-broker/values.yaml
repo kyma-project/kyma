@@ -123,4 +123,3 @@ global:
     add_ons_ui:
       name: "add-ons-ui"
       version: "c60a3c68"
-  priorityClassName: "kyma-system"
