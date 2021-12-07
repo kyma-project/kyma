@@ -206,7 +206,11 @@ func (n *Nats) getCallback(sink string) nats.MsgHandler {
 		// Add tracing headers to the subsequent request
 		traceCtxWithCE := tracing.AddTracingHeadersToContext(ctxWithCE, ce)
 		// set retries parameters
-		retryParams := cev2context.RetryParams{backoffStrategy, n.defaultSubsConfig.DispatcherMaxRetries, n.defaultSubsConfig.DispatchRetryPeriod}
+		retryParams := cev2context.RetryParams{
+			Strategy: backoffStrategy,
+			MaxTries: n.defaultSubsConfig.DispatcherMaxRetries,
+			Period:   n.defaultSubsConfig.DispatchRetryPeriod,
+		}
 		if result := n.doWithRetry(traceCtxWithCE, retryParams, ce); !cev2.IsACK(result) {
 			n.namedLogger().Errorw("event dispatch failed after retries", "id", ce.ID(), "source", ce.Source(), "type", ce.Type(), "sink", sink, "error", result)
 			return
