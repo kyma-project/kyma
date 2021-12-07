@@ -66,7 +66,7 @@ func (r *SafeRequests) GetSubscriptionNames() map[*http.Request]string {
 }
 
 // GetSubscriptions converts requests to a map of http requests and the actual subscriptions.
-func(r *SafeRequests) GetSubscriptions()  map[*http.Request]types.Subscription {
+func (r *SafeRequests) GetSubscriptions() map[*http.Request]types.Subscription {
 	r.RLock()
 	defer r.RUnlock()
 	subscriptions := map[*http.Request]types.Subscription{}

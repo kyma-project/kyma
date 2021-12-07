@@ -1047,7 +1047,7 @@ func getBEBSubscriptionCreationRequests(bebSubscriptions []bebtypes.Subscription
 				bebSubscriptions = append(bebSubscriptions, sub)
 			}
 		}
-	return bebSubscriptions
+		return bebSubscriptions
 	}, bigTimeOut, bigPollingInterval)
 }
 
@@ -1166,10 +1166,10 @@ const (
 )
 
 var (
-	cfg *rest.Config
-	k8sClient client.Client
-	testEnv *envtest.Environment
-	beb *reconcilertesting.BEBMock
+	cfg        *rest.Config
+	k8sClient  client.Client
+	testEnv    *envtest.Environment
+	beb        *reconcilertesting.BEBMock
 	nameMapper handlers.NameMapper
 )
 
@@ -1333,7 +1333,7 @@ func countBEBRequests(subscriptionName string) (countGet, countPost, countDelete
 					countDelete++
 				}
 			}
-	})
+		})
 	return countGet, countPost, countDelete
 }
 
