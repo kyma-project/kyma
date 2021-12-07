@@ -9,7 +9,6 @@ const {
 const {
     getPrometheusActiveTargets,
     getPrometheusAlerts,
-    getPrometheusRuleGroups,
     queryPrometheus,
     getPrometheusRuleGroups,
 } = require("./client");
