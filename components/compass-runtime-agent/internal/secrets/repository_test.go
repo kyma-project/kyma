@@ -35,6 +35,55 @@ var (
 	}
 )
 
+func TestRepository_Exists(t *testing.T) {
+	t.Run("should return true if exists", func(t *testing.T) {
+		// given
+		secret := makeSecret(namespacedName, map[string][]byte{dataKey: []byte("data")})
+
+		secretsManagerMock := &mocks.Manager{}
+		secretsManagerMock.On("Get", context.Background(), secretName, metav1.GetOptions{}).Return(secret, nil)
+
+		repository := NewRepository(prepareManagerConstructor(secretsManagerMock))
+
+		// when
+		exists, err := repository.Exists(namespacedName)
+
+		// then
+		assert.NoError(t, err)
+		assert.Equal(t, true, exists)
+	})
+
+	t.Run("should return false if secret doesn't exist", func(t *testing.T) {
+		// given
+		secretsManagerMock := &mocks.Manager{}
+		secretsManagerMock.On("Get", context.Background(), secretName, metav1.GetOptions{}).Return(nil, k8serrors.NewNotFound(schema.GroupResource{}, "secret"))
+
+		repository := NewRepository(prepareManagerConstructor(secretsManagerMock))
+
+		// when
+		exists, err := repository.Exists(namespacedName)
+
+		// then
+		assert.NoError(t, err)
+		assert.Equal(t, false, exists)
+	})
+
+	t.Run("should return error if failed to read secret", func(t *testing.T) {
+		// given
+		secretsManagerMock := &mocks.Manager{}
+		secretsManagerMock.On("Get", context.Background(), secretName, metav1.GetOptions{}).Return(nil, errors.New("oh, no"))
+
+		repository := NewRepository(prepareManagerConstructor(secretsManagerMock))
+
+		// when
+		exists, err := repository.Exists(namespacedName)
+
+		// then
+		assert.Error(t, err)
+		assert.Equal(t, false, exists)
+	})
+}
+
 func TestRepository_Get(t *testing.T) {
 	t.Run("should get given secret", func(t *testing.T) {
 		// given
