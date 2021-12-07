@@ -1,5 +1,5 @@
 ---
-title: Revoke a client certificate
+title: Revoke a client certificate (AC)
 ---
 
 You can revoke a client certificate generated for your Application. Revocation prevents a certificate from being [renewed](ac-06-renew-client-cert.md). A revoked certificate, however, continues to be valid until it expires. 
