@@ -1,9 +1,9 @@
-const prometheus = require("./../monitoring/prometheus");
-const grafana = require("./../monitoring/grafana");
+const prometheus = require("../monitoring/prometheus");
+const grafana = require("../monitoring/grafana");
 
 const { prometheusPortForward } = require("../monitoring/client");
 
-function observabilityTests() {
+function monitoringTests() {
 
     describe("Prometheus Tests:", function () {
         this.timeout(5 * 60 * 1000); // 5 min
@@ -63,5 +63,5 @@ function observabilityTests() {
 }
 
 module.exports = {
-    observabilityTests,
+    observabilityTests: monitoringTests,
 }
