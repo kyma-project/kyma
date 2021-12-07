@@ -44,6 +44,7 @@ spec:
     gateways:
       istio-ingressgateway:
         name: istio-ingressgateway
+        autoscaleEnabled: {{ index .Values "helmValues" "gateways" "istio-ingressgateway" "autoscaleEnabled" }}
         podAnnotations:
           reconciler.kyma-project.io/managed-by-reconciler-disclaimer: |
             DO NOT EDIT - This resource is managed by Kyma.

@@ -46,10 +46,8 @@ func SendEvent(endpoint, body string, headers http.Header) (*http.Response, erro
 		return nil, err
 	}
 
-	if headers != nil {
-		for k, v := range headers {
-			req.Header[k] = v
-		}
+	for k, v := range headers {
+		req.Header[k] = v
 	}
 
 	client := http.Client{}
@@ -142,7 +140,7 @@ func SubscriptionWithFilter(eventSource, eventType string) SubscriptionOpt {
 // WaitForHandlerToStart is waits for the test handler to start before testing could start
 func WaitForHandlerToStart(t *testing.T, healthEndpoint string) {
 	timeout := time.After(time.Second * 30)
-	tick := time.Tick(time.Second * 1)
+	ticker := time.NewTicker(time.Second * 1)
 
 	for {
 		select {
@@ -150,9 +148,9 @@ func WaitForHandlerToStart(t *testing.T, healthEndpoint string) {
 			{
 				t.Fatal("Failed to start handler")
 			}
-		case <-tick:
+		case <-ticker.C:
 			{
-				if resp, err := http.Get(healthEndpoint); err != nil {
+				if resp, err := http.Get(healthEndpoint); err != nil { //nolint:gosec
 					continue
 				} else if resp.StatusCode == http.StatusOK {
 					return
