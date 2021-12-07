@@ -58,9 +58,7 @@ describe("SKR-Upgrade-test", function () {
   const runtimeName = `kyma-${suffix}`;
   const scenarioName = `test-${suffix}`;
   const instanceID = uuid.v4();
-  const subAccountID = uuid.v4();
-
-  keb.subaccountID = subAccountID;
+  const subAccountID = keb.subaccountID
 
   debug(
     `PlanID ${getEnvOrThrow("KEB_PLAN_ID")}`,
