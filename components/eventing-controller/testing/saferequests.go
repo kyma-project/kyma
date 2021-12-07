@@ -55,7 +55,7 @@ func (r *SafeRequests) ReadEach(f func(request *http.Request, payload interface{
 func (r *SafeRequests) GetSubscriptionNames() map[*http.Request]string {
 	r.RLock()
 	defer r.RUnlock()
-	var subscriptionNames map[*http.Request]string
+	subscriptionNames := map[*http.Request]string{}
 	for req, obj := range r.requests {
 		if subscription, ok := obj.(types.Subscription); ok {
 			receivedSubscriptionName := subscription.Name
@@ -69,7 +69,7 @@ func (r *SafeRequests) GetSubscriptionNames() map[*http.Request]string {
 func(r *SafeRequests) GetSubscriptions()  map[*http.Request]types.Subscription {
 	r.RLock()
 	defer r.RUnlock()
-	var subscriptions map[*http.Request]types.Subscription
+	subscriptions := map[*http.Request]types.Subscription{}
 	for req, payload := range r.requests {
 		if subscription, ok := payload.(types.Subscription); ok {
 			subscriptions[req] = subscription

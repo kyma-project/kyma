@@ -1311,17 +1311,20 @@ func createSubscriptionObjectsAndWaitForReadiness(ctx context.Context, givenSubs
 // countBEBRequests returns how many requests for a given subscription are sent for each HTTP method
 func countBEBRequests(subscriptionName string) (countGet, countPost, countDelete int) {
 	countGet, countPost, countDelete = 0, 0, 0
-	for request, subscription := range beb.Requests.GetSubscriptions() {
+	beb.Requests.ReadEach(
+		func(request *http.Request, payload interface{}) {
 			switch method := request.Method; method {
 			case http.MethodGet:
 				if strings.Contains(request.URL.Path, subscriptionName) {
 					countGet++
 				}
 			case http.MethodPost:
-				if len(subscription.Events) > 0 {
-					for _, event := range subscription.Events {
-						if event.Type == reconcilertesting.OrderCreatedEventType && subscription.Name == subscriptionName {
-							countPost++
+				if subscription, ok := payload.(bebtypes.Subscription); ok {
+					if len(subscription.Events) > 0 {
+						for _, event := range subscription.Events {
+							if event.Type == reconcilertesting.OrderCreatedEventType && subscription.Name == subscriptionName {
+								countPost++
+							}
 						}
 					}
 				}
@@ -1330,7 +1333,7 @@ func countBEBRequests(subscriptionName string) (countGet, countPost, countDelete
 					countDelete++
 				}
 			}
-	}
+	})
 	return countGet, countPost, countDelete
 }
 
