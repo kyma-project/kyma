@@ -63,5 +63,5 @@ function monitoringTests() {
 }
 
 module.exports = {
-    observabilityTests: monitoringTests,
+    monitoringTests,
 }
