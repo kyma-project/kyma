@@ -4,18 +4,17 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/tracing"
+	"github.com/kyma-project/kyma/components/eventing-controller/utils"
+	"k8s.io/apimachinery/pkg/types"
 	"net/http"
 	"strconv"
 	"strings"
-	"time"
-
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/tracing"
-	"github.com/kyma-project/kyma/components/eventing-controller/utils"
-
-	"k8s.io/apimachinery/pkg/types"
 
 	cev2 "github.com/cloudevents/sdk-go/v2"
+	cev2context "github.com/cloudevents/sdk-go/v2/context"
 	cev2event "github.com/cloudevents/sdk-go/v2/event"
+	cev2protocol "github.com/cloudevents/sdk-go/v2/protocol"
 	"github.com/nats-io/nats.go"
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
@@ -48,8 +47,7 @@ func NewNats(config env.NatsConfig, subsConfig env.DefaultSubscriptionConfig, lo
 }
 
 const (
-	period          = time.Minute
-	maxTries        = 5
+	backoffStrategy = cev2context.BackoffStrategyConstant
 	natsHandlerName = "nats-handler"
 )
 
@@ -201,21 +199,36 @@ func (n *Nats) getCallback(sink string) nats.MsgHandler {
 		ctxWithCancel, cancel := context.WithCancel(context.Background())
 		defer cancel()
 
-		// Creating a context with retries
-		ctxWithRetries := cev2.ContextWithRetriesExponentialBackoff(ctxWithCancel, period, maxTries)
-
 		// Creating a context with target
-		ctxWithCE := cev2.ContextWithTarget(ctxWithRetries, sink)
+		ctxWithCE := cev2.ContextWithTarget(ctxWithCancel, sink)
 
 		// Add tracing headers to the subsequent request
 		traceCtxWithCE := tracing.AddTracingHeadersToContext(ctxWithCE, ce)
-
-		if result := n.client.Send(traceCtxWithCE, *ce); !cev2.IsACK(result) {
-			n.namedLogger().Errorw("event dispatch failed", "id", ce.ID(), "source", ce.Source(), "type", ce.Type(), "sink", sink, "error", result)
+		// set retries parameters
+		retryParams := cev2context.RetryParams{backoffStrategy, n.defaultSubsConfig.DispatcherMaxRetries, n.defaultSubsConfig.DispatchRetryPeriod}
+		if result := n.doWithRetry(traceCtxWithCE, retryParams, ce); !cev2.IsACK(result) {
+			n.namedLogger().Errorw("event dispatch failed after retries", "id", ce.ID(), "source", ce.Source(), "type", ce.Type(), "sink", sink, "error", result)
 			return
 		}
-
 		n.namedLogger().Infow("event dispatched", "id", ce.ID(), "source", ce.Source(), "type", ce.Type(), "sink", sink)
+	}
+}
+
+func (n *Nats) doWithRetry(ctx context.Context, params cev2context.RetryParams, ce *cev2event.Event) cev2protocol.Result {
+	retry := 0
+	for {
+		result := n.client.Send(ctx, *ce)
+		if cev2protocol.IsACK(result) {
+			return result
+		}
+		n.namedLogger().Errorw("event dispatch failed", "id", ce.ID(), "source", ce.Source(), "type", ce.Type(), "error", result, "retry", retry)
+		// Try again?
+		if err := params.Backoff(ctx, retry+1); err != nil {
+			// do not try again.
+			n.namedLogger().Errorw("backoff error, will not try again", "error", err)
+			return result
+		}
+		retry++
 	}
 }
 
