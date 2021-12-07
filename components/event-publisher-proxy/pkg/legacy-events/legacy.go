@@ -142,7 +142,6 @@ func (t Transformer) TransformsCEResponseToLegacyResponse(writer http.ResponseWr
 	// Success
 	response.Ok = &apiv1.PublishResponse{EventID: event.ID()}
 	writeJSONResponse(writer, response)
-	return
 }
 
 // convertPublishRequestToCloudEvent converts the given publish request to a CloudEvent.

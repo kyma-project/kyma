@@ -22,6 +22,9 @@ helmValues:
         requests:
           cpu: 10m
           memory: 10Mi
+  gateways:
+    istio-ingressgateway:
+      autoscaleEnabled: true
 
   sidecarInjectorWebhook:
     enableNamespacesByDefault: true

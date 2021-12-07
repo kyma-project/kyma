@@ -212,7 +212,7 @@ var (
 		{
 			Name: "Send a legacy event successfully with event-id",
 			ProvideMessage: func() (string, http.Header) {
-				return testingutils.ValidLegacyEventPayloadWithEventId, testingutils.GetApplicationJSONHeaders()
+				return testingutils.ValidLegacyEventPayloadWithEventID, testingutils.GetApplicationJSONHeaders()
 			},
 			WantStatusCode: http.StatusOK,
 			WantResponse: legacyapi.PublishEventResponses{
@@ -226,7 +226,7 @@ var (
 		{
 			Name: "Send a legacy event successfully without event-id",
 			ProvideMessage: func() (string, http.Header) {
-				return testingutils.ValidLegacyEventPayloadWithoutEventId, testingutils.GetApplicationJSONHeaders()
+				return testingutils.ValidLegacyEventPayloadWithoutEventID, testingutils.GetApplicationJSONHeaders()
 			},
 			WantStatusCode: http.StatusOK,
 			WantResponse: legacyapi.PublishEventResponses{
@@ -240,7 +240,7 @@ var (
 		{
 			Name: "Send a legacy event with invalid event id",
 			ProvideMessage: func() (string, http.Header) {
-				return testingutils.LegacyEventPayloadWithInvalidEventId, testingutils.GetApplicationJSONHeaders()
+				return testingutils.LegacyEventPayloadWithInvalidEventID, testingutils.GetApplicationJSONHeaders()
 			},
 			WantStatusCode: http.StatusBadRequest,
 			WantResponse: legacyapi.PublishEventResponses{

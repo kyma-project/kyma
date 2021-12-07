@@ -19,9 +19,9 @@ var _ http.Handler = (*testHandler)(nil)
 
 func TestNewHttpMessageReceiver(t *testing.T) {
 	port := testingutils.GeneratePortOrDie()
-	r := NewHttpMessageReceiver(port)
+	r := NewHTTPMessageReceiver(port)
 	if r == nil {
-		t.Fatalf("Could not create HttpMessageReceiver")
+		t.Fatalf("Could not create HTTPMessageReceiver")
 	}
 	if r.port != port {
 		t.Errorf("Port should be: %d is: %d", port, r.port)
@@ -42,15 +42,15 @@ func TestStartListener(t *testing.T) {
 	wg := sync.WaitGroup{}
 	start := make(chan bool, 1)
 	defer close(start)
+	wg.Add(1)
 	go func(t *testing.T) {
-		wg.Add(1)
+		defer wg.Done()
 		start <- true
 		t.Log("starting receiver in goroutine")
 		if err := r.StartListen(ctx, &testHandler{}); err != nil {
-			t.Fatalf("error while starting HTTPMessageReceiver: %v", err)
+			t.Errorf("error while starting HTTPMessageReceiver: %v", err)
 		}
 		t.Log("receiver goroutine ends here")
-		wg.Done()
 	}(t)
 
 	// wait for goroutine to start
@@ -76,6 +76,6 @@ func TestStartListener(t *testing.T) {
 	}
 }
 
-func fixtureReceiver() *HttpMessageReceiver {
-	return NewHttpMessageReceiver(0)
+func fixtureReceiver() *HTTPMessageReceiver {
+	return NewHTTPMessageReceiver(0)
 }

@@ -23,6 +23,8 @@ import (
 
 	"github.com/sirupsen/logrus"
 
+	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
+
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/handler"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/handler/handlertest"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/informers"
@@ -36,7 +38,6 @@ import (
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/sender"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/subscribed"
 	testingutils "github.com/kyma-project/kyma/components/event-publisher-proxy/testing"
-	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 )
 
 const (
@@ -71,6 +72,7 @@ func TestHandlerForCloudEvents(t *testing.T) {
 		defer cancel()
 		defer mockServer.Close()
 
+		// nolint:scopelint
 		for _, testCase := range handlertest.TestCasesForCloudEvents {
 			t.Run(testCase.Name, func(tt *testing.T) {
 				body, headers := testCase.ProvideMessage()
@@ -117,6 +119,7 @@ func TestHandlerForLegacyEvents(t *testing.T) {
 		defer cancel()
 		defer mockServer.Close()
 
+		// nolint:scopelint
 		for _, testCase := range handlertest.TestCasesForLegacyEvents {
 			t.Run(testCase.Name, func(t *testing.T) {
 				body, headers := testCase.ProvideMessage()
@@ -183,7 +186,7 @@ func TestHandlerForBEBFailures(t *testing.T) {
 			{
 				name: "Send a legacy event with event-id",
 				provideMessage: func() (string, http.Header) {
-					return testingutils.ValidLegacyEventPayloadWithEventId, testingutils.GetApplicationJSONHeaders()
+					return testingutils.ValidLegacyEventPayloadWithEventID, testingutils.GetApplicationJSONHeaders()
 				},
 				endPoint:       publishLegacyEndpoint,
 				wantStatusCode: http.StatusBadRequest,
@@ -203,6 +206,7 @@ func TestHandlerForBEBFailures(t *testing.T) {
 			},
 		}
 
+		// nolint:scopelint
 		for _, testCase := range testCases {
 			t.Run(testCase.name, func(t *testing.T) {
 				body, headers := testCase.provideMessage()
@@ -262,7 +266,7 @@ func TestHandlerForHugeRequests(t *testing.T) {
 			{
 				name: "Should fail with HTTP 413 with a request which is larger than 2 Bytes as the maximum accepted size is 2 Bytes",
 				provideMessage: func() (string, http.Header) {
-					return testingutils.ValidLegacyEventPayloadWithEventId, testingutils.GetApplicationJSONHeaders()
+					return testingutils.ValidLegacyEventPayloadWithEventID, testingutils.GetApplicationJSONHeaders()
 				},
 				endPoint:       publishLegacyEndpoint,
 				wantStatusCode: http.StatusRequestEntityTooLarge,
@@ -277,6 +281,7 @@ func TestHandlerForHugeRequests(t *testing.T) {
 			},
 		}
 
+		// nolint:scopelint
 		for _, testCase := range testCases {
 			t.Run(testCase.name, func(t *testing.T) {
 				body, headers := testCase.provideMessage()
@@ -322,6 +327,7 @@ func TestHandlerForSubscribedEndpoint(t *testing.T) {
 		defer cancel()
 		defer mockServer.Close()
 
+		// nolint:scopelint
 		for _, testCase := range handlertest.TestCasesForSubscribedEndpoint {
 			t.Run(testCase.Name, func(t *testing.T) {
 				subscribedURL := fmt.Sprintf(subscribedEndpointFormat, port, testCase.AppName)
@@ -423,7 +429,7 @@ func TestIsARequestWithLegacyEvent(t *testing.T) {
 }
 
 func setupTestResources(t *testing.T, port, maxRequestSize int, applicationName, expectedApplicationName,
-	healthEndpoint, bebNs, eventTypePrefix, eventType, eventsEndpoint string, requestTimeout,
+	healthEndpoint, bebNs, eventTypePrefix, eventType, eventsEndpoint string, requestTimeout, // nolint:unparam
 	serverResponseTime time.Duration) (context.CancelFunc, *testingutils.MockServer, *metrics.Collector) {
 	validator := validateApplicationName(expectedApplicationName)
 	mockServer := testingutils.NewMockServer(testingutils.WithResponseTime(serverResponseTime), testingutils.WithValidator(validator))
@@ -445,7 +451,7 @@ func setupTestResources(t *testing.T, port, maxRequestSize int, applicationName,
 	defer client.CloseIdleConnections()
 
 	msgSender := sender.NewBebMessageSender(emsCEURL, client)
-	msgReceiver := receiver.NewHttpMessageReceiver(cfg.Port)
+	msgReceiver := receiver.NewHTTPMessageReceiver(cfg.Port)
 	opts := &options.Options{MaxRequestSize: int64(maxRequestSize)}
 	appLister := handlertest.NewApplicationListerOrDie(ctx, applicationName)
 	legacyTransformer := legacy.NewTransformer(cfg.BEBNamespace, cfg.EventTypePrefix, appLister)
