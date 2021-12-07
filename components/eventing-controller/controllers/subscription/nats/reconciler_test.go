@@ -53,7 +53,7 @@ const (
 	pollingInterval = 5 * time.Second
 
 	namespaceName          = "test"
-	subscriptionNameFormat = "sub-%d"
+	subscriptionNameFormat = "nats-sub-%d"
 	subscriberNameFormat   = "subscriber-%d"
 )
 
