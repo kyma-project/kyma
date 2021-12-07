@@ -100,8 +100,8 @@ class KCPWrapper {
         return await this.exec(args);
     }
 
-    async upgradeKyma (subaccount, kymaUpgradeVersion) {
-        const args = [`upgrade`, `kyma`, `--version=${kymaUpgradeVersion}`, `--target`, `subaccount=${subaccount}`];
+    async upgradeKyma (instanceID, kymaUpgradeVersion) {
+        const args = [`upgrade`, `kyma`, `--version=${kymaUpgradeVersion}`, `--target`, `instance-id=${instanceID}`];
         try {
             let res = await this.exec(args);
             
