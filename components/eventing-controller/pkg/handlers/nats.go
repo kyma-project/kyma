@@ -4,12 +4,13 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/tracing"
-	"github.com/kyma-project/kyma/components/eventing-controller/utils"
-	"k8s.io/apimachinery/pkg/types"
 	"net/http"
 	"strconv"
 	"strings"
+
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/tracing"
+	"github.com/kyma-project/kyma/components/eventing-controller/utils"
+	"k8s.io/apimachinery/pkg/types"
 
 	cev2 "github.com/cloudevents/sdk-go/v2"
 	cev2context "github.com/cloudevents/sdk-go/v2/context"

@@ -1,9 +1,10 @@
 package env
 
 import (
-	"github.com/kelseyhightower/envconfig"
 	"log"
 	"time"
+
+	"github.com/kelseyhightower/envconfig"
 )
 
 // BackendConfig represents the environment config for the Backend Controller.
@@ -31,9 +32,9 @@ type PublisherConfig struct {
 }
 
 type DefaultSubscriptionConfig struct {
-	MaxInFlightMessages int `envconfig:"DEFAULT_MAX_IN_FLIGHT_MESSAGES" default:"10"`
-	DispatchRetryPeriod time.Duration `envconfig:"DEFAULT_DISPATCHER_RETRY_PERIOD" default:"5m"`
-	DispatcherMaxRetries int `envconfig:"DEFAULT_DISPATCHER_MAX_RETRIES" default:"10"`
+	MaxInFlightMessages  int           `envconfig:"DEFAULT_MAX_IN_FLIGHT_MESSAGES" default:"10"`
+	DispatchRetryPeriod  time.Duration `envconfig:"DEFAULT_DISPATCHER_RETRY_PERIOD" default:"5m"`
+	DispatcherMaxRetries int           `envconfig:"DEFAULT_DISPATCHER_MAX_RETRIES" default:"10"`
 }
 
 func GetBackendConfig() BackendConfig {

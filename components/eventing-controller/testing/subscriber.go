@@ -12,20 +12,20 @@ import (
 )
 
 type Subscriber struct {
-	addr          string
-	server        *http.Server
-	StoreEndpoint string
-	CheckEndpoint string
-	Return500Endpoint string
+	addr                 string
+	server               *http.Server
+	StoreEndpoint        string
+	CheckEndpoint        string
+	Return500Endpoint    string
 	CheckRetriesEndpoint string
 }
 
 func NewSubscriber(addr string) *Subscriber {
 	return &Subscriber{
-		addr:          addr,
-		StoreEndpoint: "/store",
-		CheckEndpoint: "/check",
-		Return500Endpoint: "/return500",
+		addr:                 addr,
+		StoreEndpoint:        "/store",
+		CheckEndpoint:        "/check",
+		Return500Endpoint:    "/return500",
 		CheckRetriesEndpoint: "/check_retries",
 	}
 }
@@ -67,7 +67,7 @@ func (s *Subscriber) Start() {
 		w.WriteHeader(http.StatusInternalServerError)
 	})
 	mux.HandleFunc("/check_retries", func(w http.ResponseWriter, r *http.Request) {
-		_, err := w.Write([]byte(fmt.Sprintf("%d",retries)))
+		_, err := w.Write([]byte(fmt.Sprintf("%d", retries)))
 		if err != nil {
 			log.Printf("check_retries failed: %v", err)
 			w.WriteHeader(http.StatusInternalServerError)
@@ -150,7 +150,7 @@ func (s Subscriber) CheckRetries(expectedData int, subscriberCheckRetriesURL str
 			if err != nil {
 				return pkgerrors.Wrapf(err, "read data failed")
 			}
-			if string(body) != fmt.Sprintf("%d", expectedData){
+			if string(body) != fmt.Sprintf("%d", expectedData) {
 				return fmt.Errorf("total retries not received")
 			}
 			return nil
