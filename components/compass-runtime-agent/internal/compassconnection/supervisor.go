@@ -118,7 +118,6 @@ func (s *crSupervisor) InitializeCompassConnection() (*v1alpha1.CompassConnectio
 	return s.updateCompassConnection(compassConnectionCR)
 }
 
-// SynchronizeWithCompass synchronizes with Compass
 func (s *crSupervisor) SynchronizeWithCompass(connection *v1alpha1.CompassConnection) (*v1alpha1.CompassConnection, error) {
 	s.log = s.log.WithField("CompassConnection", connection.Name)
 
@@ -194,16 +193,20 @@ func (s *crSupervisor) SynchronizeWithCompass(connection *v1alpha1.CompassConnec
 
 func (s *crSupervisor) maintainCompassConnection(compassConnection *v1alpha1.CompassConnection) error {
 	shouldRenew := compassConnection.ShouldRenewCertificate(s.certValidityRenewalThreshold, s.minimalCompassSyncTime)
+	credentialsExist, err := s.credentialsManager.CredentialsExist()
+	if err != nil {
+		return errors.Wrap(err, "Failed to check whether credentials exist")
+	}
 
-	s.log.Infof("Trying to maintain certificates connection... Renewal: %v", shouldRenew)
-	newCreds, managementInfo, err := s.compassConnector.MaintainConnection(shouldRenew)
+	s.log.Infof("Trying to maintain certificates connection... Renewal: %v, CreadentialsExist: %v", shouldRenew, credentialsExist)
+	newCreds, managementInfo, err := s.compassConnector.MaintainConnection(shouldRenew, credentialsExist)
 	if err != nil {
 		return errors.Wrap(err, "Failed to connect to Compass Connector")
 	}
 
 	connectionTime := metav1.Now()
 
-	if shouldRenew && newCreds != nil {
+	if newCreds != nil {
 		s.log.Infof("Trying to save renewed certificates...")
 		err = s.credentialsManager.PreserveCredentials(*newCreds)
 		if err != nil {
