@@ -1,6 +1,6 @@
 module github.com/kyma-project/kyma/components/telemetry-operator
 
-go 1.16
+go 1.17
 
 require (
 	github.com/go-logr/logr v0.4.0
