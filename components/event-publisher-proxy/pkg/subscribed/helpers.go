@@ -96,7 +96,7 @@ func FilterEventTypeVersions(eventTypePrefix, bebNs, appName string, filters *ev
 			// TODO revisit the filtration logic as part of https://github.com/kyma-project/kyma/issues/10761
 
 			// filter by event-source if exists
-			if len(strings.TrimSpace(filter.EventSource.Value)) > 0 && strings.ToLower(filter.EventSource.Value) != strings.ToLower(bebNs) {
+			if len(strings.TrimSpace(filter.EventSource.Value)) > 0 && !strings.EqualFold(filter.EventSource.Value, bebNs) {
 				continue
 			}
 

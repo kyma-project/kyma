@@ -291,16 +291,17 @@ func defaultSinkValidator(ctx context.Context, r *Reconciler, subscription *even
 	}
 
 	// Validate sink URL is a cluster local URL
-	if !strings.HasSuffix(sURL.Host, clusterLocalURLSuffix) {
+	trimmedHost := strings.Split(sURL.Host, ":")[0]
+	if !strings.HasSuffix(trimmedHost, clusterLocalURLSuffix) {
 		events.Warn(r.recorder, subscription, events.ReasonValidationFailed, "Sink does not contain suffix: %s", clusterLocalURLSuffix)
 		return fmt.Errorf("sink does not contain suffix: %s in the URL", clusterLocalURLSuffix)
 	}
 
 	// we expected a sink in the format "service.namespace.svc.cluster.local"
-	subDomains := strings.Split(sURL.Host, ".")
+	subDomains := strings.Split(trimmedHost, ".")
 	if len(subDomains) != 5 {
-		events.Warn(r.recorder, subscription, events.ReasonValidationFailed, "Sink should contain 5 sub-domains: %s", sURL.Host)
-		return fmt.Errorf("sink should contain 5 sub-domains: %s", sURL.Host)
+		events.Warn(r.recorder, subscription, events.ReasonValidationFailed, "Sink should contain 5 sub-domains: %s", trimmedHost)
+		return fmt.Errorf("sink should contain 5 sub-domains: %s", trimmedHost)
 	}
 
 	// Assumption: Subscription CR and Subscriber should be deployed in the same namespace

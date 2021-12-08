@@ -46,6 +46,10 @@ function setRuntimeLabel(runtimeID, key, value) {
     return `mutation { result: setRuntimeLabel(runtimeID: \\"${runtimeID}\\" key: \\"${key}\\" value: ${value}) { key value } }`;
 }
 
+function deleteRuntimeLabel(runtimeID, key) {
+    return `mutation { result: deleteRuntimeLabel(runtimeID: \\"${runtimeID}\\" key: \\"${key}\\") { key value } }`;
+}
+
 function queryRuntime(runtimeID) {
     return `query { result: runtime(id: \\"${runtimeID}\\") { id name labels status { condition } } }`;
 }
@@ -95,6 +99,7 @@ module.exports = {
     queryRuntimesWithFilter,
     queryApplicationsWithFilter,
     setRuntimeLabel,
+    deleteRuntimeLabel,
     queryRuntime,
     queryApplication,
     setApplicationLabel,

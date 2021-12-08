@@ -10,7 +10,7 @@ Event Publisher Proxy receives legacy and Cloud Event publishing requests from t
 
 ## Eventing Controller
 
-Eventing Controller manages the internal infrastructure in order to receive an event. It watches Subscription Custom Resource Definitions. When an event is received in an Application, it lays down the Eventing infrastructure in NATS in order to trigger a Function. Eventing Controller also dispatches messages to subscribers such as a Function or another workload.
+Eventing Controller manages the internal infrastructure in order to receive an event. It watches Subscription custom resource definitions. When an event is received in an Application, it lays down the Eventing infrastructure in NATS in order to trigger a Function. Eventing Controller also dispatches messages to subscribers such as a Function or another workload.
 
 ## Event types
 
