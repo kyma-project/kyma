@@ -1,8 +1,8 @@
 ---
-title: Send event from outside the Kyma cluster
+title: Send events from outside the Kyma cluster
 ---
 
-This guide shows how to send and receive events outside the Kyma cluster. Additionally, this tutorial includes commands for sending events of different [types](../../05-technical-reference/evnt-01-event-types.md).
+This guide shows how to send events from outside the Kyma cluster. Additionally, this tutorial includes commands for sending events of different [types](../../05-technical-reference/evnt-01-event-types.md).
 
 ## Prerequisites
 
@@ -38,11 +38,11 @@ one-click-integration.sh -u "${token}"
 
 2. Send the request to the gateway to publish:
 
-    > **NOTE:** In the commands below, `@-` instructs `curl` to read the data for the body of the request from STDIN. Alternatively, you could read the content of the body from a file. For example if the JSON payload for the request body is stored in `/tmp/msg.json`, you could use `--data @/tmp/msg.json`.
+    > **NOTE:** In the commands below, `@-` instructs `curl` to read the data for the body of the request from STDIN. Alternatively, you could read the content of the body from a file. For example, if the JSON payload for the request body is stored in `/tmp/msg.json`, you could use `--data @/tmp/msg.json`.
 
 
-<div tabs name="Use the generated certificates to send an event" group="send-event">
-  <details open>
+<div tabs name="Use the generated certificates to send an event">
+  <details>
   <summary label="Cloud Event (structured mode)">
   Cloud Event (structured mode)
   </summary>
