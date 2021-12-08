@@ -69,7 +69,7 @@ Note that the Target URL for publishing Cloud Events can be `https://${host}/{AP
 
   </details>
   <details>
-  <summary label="Cloud Event (structured mode)">
+  <summary label="Cloud Event (binary mode)">
   Cloud Event (binary mode)
   </summary>
 
