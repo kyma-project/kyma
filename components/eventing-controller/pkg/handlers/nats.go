@@ -209,7 +209,7 @@ func (n *Nats) getCallback(sink string) nats.MsgHandler {
 		retryParams := cev2context.RetryParams{
 			Strategy: backoffStrategy,
 			MaxTries: n.defaultSubsConfig.DispatcherMaxRetries,
-			Period:   n.defaultSubsConfig.DispatchRetryPeriod,
+			Period:   n.defaultSubsConfig.DispatcherRetryPeriod,
 		}
 		if result := n.doWithRetry(traceCtxWithCE, retryParams, ce); !cev2.IsACK(result) {
 			n.namedLogger().Errorw("event dispatch failed after retries", "id", ce.ID(), "source", ce.Source(), "type", ce.Type(), "sink", sink, "error", result)
