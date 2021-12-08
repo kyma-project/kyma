@@ -632,9 +632,9 @@ func TestRetryUsingCESDK(t *testing.T) {
 	}
 	maxRetries := 3
 	defaultSubscriptionConfig := env.DefaultSubscriptionConfig{
-		MaxInFlightMessages:  1,
-		DispatcherRetryPeriod:  time.Second,
-		DispatcherMaxRetries: maxRetries,
+		MaxInFlightMessages:   1,
+		DispatcherRetryPeriod: time.Second,
+		DispatcherMaxRetries:  maxRetries,
 	}
 	natsClient := NewNats(natsConfig, defaultSubscriptionConfig, defaultLogger)
 
