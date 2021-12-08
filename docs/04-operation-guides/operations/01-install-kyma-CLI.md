@@ -52,10 +52,10 @@ curl -Lo kyma.tar.gz "https://github.com/kyma-project/cli/releases/download/$(cu
 
 ## Windows
 
-To install Kyma CLI on Windows, download and unzip the [release artifact](https://github.com/kyma-project/cli/releases). Change the path to point to the desired version.
+To install Kyma CLI on Windows, download and unzip the [release artifact](https://github.com/kyma-project/cli/releases). Change the path to point to the desired version and architecture (`x86_64` or `i386`).
 
 ```PowerShell
-Invoke-WebRequest -OutFile kyma.zip https://github.com/kyma-project/cli/releases/download/${KYMA_VERSION}/kyma_Windows_x86_64.zip
+Invoke-WebRequest -OutFile kyma.zip https://github.com/kyma-project/cli/releases/download/${KYMA_VERSION}/kyma_Windows_${ARCH}.zip
 
 Expand-Archive -Path kyma.zip -DestinationPath .\kyma-cli
 
