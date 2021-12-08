@@ -494,13 +494,13 @@ func ToSubscription(unstructuredSub *unstructured.Unstructured) (*eventingv1alph
 
 // ToUnstructuredAPIRule converts an APIRule object into a unstructured APIRule
 func ToUnstructuredAPIRule(obj interface{}) (*unstructured.Unstructured, error) {
-	unstructured := &unstructured.Unstructured{}
+	u := &unstructured.Unstructured{}
 	unstructuredObj, err := runtime.DefaultUnstructuredConverter.ToUnstructured(obj)
 	if err != nil {
 		return nil, err
 	}
-	unstructured.Object = unstructuredObj
-	return unstructured, nil
+	u.Object = unstructuredObj
+	return u, nil
 }
 
 // SetupSchemeOrDie add a scheme to eventing API schemes
