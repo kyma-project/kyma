@@ -55,7 +55,6 @@ curl -Lo kyma.tar.gz "https://github.com/kyma-project/cli/releases/download/$(cu
 To install Kyma CLI on Windows, download and unzip the [release artifact](https://github.com/kyma-project/cli/releases). Change the path to point to the desired version.
 
 ```PowerShell
-${KYMA_VERSION}={x.x.x}
 Invoke-WebRequest -OutFile kyma.zip https://github.com/kyma-project/cli/releases/download/${KYMA_VERSION}/kyma_Windows_x86_64.zip
 
 Expand-Archive -Path kyma.zip -DestinationPath .\kyma-cli
