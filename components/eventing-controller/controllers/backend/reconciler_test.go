@@ -490,7 +490,66 @@ var _ = Describe("Backend Reconciliation Tests", func() {
 				}))
 		})
 	})
+
+	When("Reconciling existing publisher proxy deployment", func() {
+		It("Should preserve only allowed annotations", func() {
+			ctx := context.Background()
+
+			By("Making sure the Backend reconciler is started", func() {
+				ensureNamespaceCreated(ctx, kymaSystemNamespace)
+				ensureEventingBackendCreated(ctx, eventingBackendName, kymaSystemNamespace)
+				Eventually(publisherProxyDeploymentGetter(ctx), timeout, pollingInterval).ShouldNot(BeNil())
+			})
+
+			Context("Publisher proxy deployment contains allowed annotations only", func() {
+				var resourceVersionAfterUpdate string
+				By("Updating publisher proxy deployment annotations", func() {
+					annotationsGiven := newMapFrom(allowedAnnotations)
+					opt := deploymentWithSpecTemplateAnnotations(annotationsGiven)
+					resourceVersionAfterUpdate = ensurePublisherProxyDeploymentUpdated(ctx, opt)
+				})
+
+				By("Making sure only allowed annotations are preserved", func() {
+					annotationsWanted := newMapFrom(allowedAnnotations)
+					Eventually(publisherProxyDeploymentSpecTemplateAnnotationsGetter(ctx), timeout, pollingInterval).Should(Equal(annotationsWanted))
+				})
+
+				By("Making sure the publisher proxy deployment ResourceVersion did not change after reconciliation", func() {
+					Expect(publisherProxyDeploymentResourceVersionGetter(ctx)()).Should(Equal(resourceVersionAfterUpdate))
+				})
+			})
+
+			Context("Publisher proxy deployment contains allowed and non-allowed annotations", func() {
+				var resourceVersionAfterUpdate string
+				By("Updating publisher proxy deployment annotations", func() {
+					ignoredAnnotations := map[string]string{"ignoreMe": "true", "ignoreMeToo": "true"}
+					annotationsGiven := newMapFrom(allowedAnnotations, ignoredAnnotations)
+					opt := deploymentWithSpecTemplateAnnotations(annotationsGiven)
+					resourceVersionAfterUpdate = ensurePublisherProxyDeploymentUpdated(ctx, opt)
+				})
+
+				By("Making sure only allowed annotations are preserved", func() {
+					annotationsWanted := newMapFrom(allowedAnnotations)
+					Eventually(publisherProxyDeploymentSpecTemplateAnnotationsGetter(ctx), timeout, pollingInterval).Should(Equal(annotationsWanted))
+				})
+
+				By("Making sure the publisher proxy deployment ResourceVersion changed after reconciliation", func() {
+					Expect(publisherProxyDeploymentResourceVersionGetter(ctx)()).ShouldNot(Equal(resourceVersionAfterUpdate))
+				})
+			})
+		})
+	})
 })
+
+func newMapFrom(ms ...map[string]string) map[string]string {
+	mr := make(map[string]string)
+	for _, m := range ms {
+		for k, v := range m {
+			mr[k] = v
+		}
+	}
+	return mr
+}
 
 func ensureNamespaceCreated(ctx context.Context, namespace string) {
 	By(fmt.Sprintf("Ensuring the namespace %q is created", namespace))
@@ -526,6 +585,45 @@ func ensureControllerDeploymentCreated(ctx context.Context) *[]metav1.OwnerRefer
 			Kind:    "Deployment",
 		}),
 	}
+}
+
+type deploymentOpt func(*appsv1.Deployment)
+
+func deploymentWithSpecTemplateAnnotations(annotations map[string]string) deploymentOpt {
+	return func(d *appsv1.Deployment) {
+		d.Spec.Template.ObjectMeta.Annotations = annotations
+	}
+}
+
+func ensurePublisherProxyDeploymentUpdated(ctx context.Context, opts ...deploymentOpt) string {
+	var resourceVersionBeforeUpdate, resourceVersionAfterUpdate string
+
+	By("Updating publisher proxy deployment", func() {
+		d, err := publisherProxyDeploymentGetter(ctx)()
+		Expect(err).Should(BeNil())
+		Expect(d).ShouldNot(BeNil())
+
+		resourceVersionBeforeUpdate = d.ResourceVersion
+
+		for _, opt := range opts {
+			opt(d)
+		}
+
+		err = k8sClient.Update(ctx, d)
+		Expect(err).Should(BeNil())
+	})
+
+	By("Making sure publisher proxy deployment ResourceVersion is changed", func() {
+		Eventually(publisherProxyDeploymentResourceVersionGetter(ctx), timeout, pollingInterval).ShouldNot(Equal(resourceVersionBeforeUpdate))
+
+		d, err := publisherProxyDeploymentGetter(ctx)()
+		Expect(err).Should(BeNil())
+		Expect(d).ShouldNot(BeNil())
+
+		resourceVersionAfterUpdate = d.ResourceVersion
+	})
+
+	return resourceVersionAfterUpdate
 }
 
 func ensurePublisherProxyIsReady(ctx context.Context) {
@@ -667,6 +765,28 @@ func publisherProxyDeploymentGetter(ctx context.Context) func() (*appsv1.Deploym
 			return nil, err
 		}
 		return dep, nil
+	}
+}
+
+func publisherProxyDeploymentResourceVersionGetter(ctx context.Context) func() (string, error) {
+	lookupKey := types.NamespacedName{Namespace: deployment.PublisherNamespace, Name: deployment.PublisherName}
+	d := new(appsv1.Deployment)
+	return func() (string, error) {
+		if err := k8sClient.Get(ctx, lookupKey, d); err != nil {
+			return "", err
+		}
+		return d.ResourceVersion, nil
+	}
+}
+
+func publisherProxyDeploymentSpecTemplateAnnotationsGetter(ctx context.Context) func() (map[string]string, error) {
+	lookupKey := types.NamespacedName{Namespace: deployment.PublisherNamespace, Name: deployment.PublisherName}
+	d := new(appsv1.Deployment)
+	return func() (map[string]string, error) {
+		if err := k8sClient.Get(ctx, lookupKey, d); err != nil {
+			return nil, err
+		}
+		return d.Spec.Template.ObjectMeta.Annotations, nil
 	}
 }
 
