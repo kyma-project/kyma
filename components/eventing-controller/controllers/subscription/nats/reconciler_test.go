@@ -53,7 +53,7 @@ const (
 	pollingInterval = 5 * time.Second
 
 	namespaceName          = "test"
-	subscriptionNameFormat = "sub-%d"
+	subscriptionNameFormat = "nats-sub-%d"
 	subscriberNameFormat   = "subscriber-%d"
 )
 
@@ -87,7 +87,9 @@ func testCreateDeleteSubscription(id int, eventTypePrefix, natsSubjectToPublish,
 			ensureSubscriberSvcCreated(ctx, subscriberSvc)
 
 			// create subscription
-			subscription := reconcilertesting.NewSubscription(subscriptionName, namespaceName, reconcilertesting.WithFilter(reconcilertesting.EventSource, eventTypeToSubscribe), reconcilertesting.WithWebhookForNats)
+			optFilter := reconcilertesting.WithFilter(reconcilertesting.EventSource, eventTypeToSubscribe)
+			optWebhook := reconcilertesting.WithWebhookForNats
+			subscription := reconcilertesting.NewSubscription(subscriptionName, namespaceName, optFilter, optWebhook)
 			reconcilertesting.WithValidSink(namespaceName, subscriberSvc.Name, subscription)
 			ensureSubscriptionCreated(ctx, subscription)
 

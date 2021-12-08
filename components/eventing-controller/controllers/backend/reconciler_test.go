@@ -571,15 +571,15 @@ func ensureEventingBackendCreated(ctx context.Context, name, namespace string) {
 
 func ensureControllerDeploymentCreated(ctx context.Context) *[]metav1.OwnerReference {
 	By("Ensuring an Eventing-Controller Deployment is created")
-	deployment := reconcilertesting.WithEventingControllerDeployment()
+	deploy := reconcilertesting.WithEventingControllerDeployment()
 
-	err := k8sClient.Create(ctx, deployment)
+	err := k8sClient.Create(ctx, deploy)
 	if !k8serrors.IsAlreadyExists(err) {
 		Expect(err).Should(BeNil())
 	}
 
 	return &[]metav1.OwnerReference{
-		*metav1.NewControllerRef(deployment, schema.GroupVersionKind{
+		*metav1.NewControllerRef(deploy, schema.GroupVersionKind{
 			Group:   appsv1.SchemeGroupVersion.Group,
 			Version: appsv1.SchemeGroupVersion.Version,
 			Kind:    "Deployment",
@@ -825,12 +825,12 @@ func eventingOwnerReferencesGetter(ctx context.Context, name, namespace string) 
 		Namespace: namespace,
 		Name:      name,
 	}
-	deployment := new(appsv1.Deployment)
+	deploy := new(appsv1.Deployment)
 	return func() (*[]metav1.OwnerReference, error) {
-		if err := k8sClient.Get(ctx, lookupKey, deployment); err != nil {
+		if err := k8sClient.Get(ctx, lookupKey, deploy); err != nil {
 			return nil, err
 		}
-		return &deployment.OwnerReferences, nil
+		return &deploy.OwnerReferences, nil
 	}
 }
 
