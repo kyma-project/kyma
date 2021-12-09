@@ -21,13 +21,8 @@ const {
 } = require("../audit-log");
 const {keb, gardener, director} = require('./helpers');
 const {prometheusPortForward} = require("../monitoring/client");
-const {KCPWrapper, KCPConfig} = require("../kcp/client");
-
-const kcp = new KCPWrapper(KCPConfig.fromEnv());
 
 function OIDCE2ETest() {
-  const updateTimeout = 1000 * 60 * 20 // 20m
-
   describe('OIDCE2ETest()', function () {
     it(`Assure initial OIDC config is applied on shoot cluster`, async function () {
       ensureValidShootOIDCConfig(this.shoot, this.options.oidc0);
@@ -46,13 +41,8 @@ function OIDCE2ETest() {
         oidc: this.options.oidc1,
       };
 
-      let skr = await updateSKR(keb, kcp, gardener, this.options.instanceID, this.shoot.name, customParams, updateTimeout);
+      let skr = await updateSKR(keb, gardener, this.options.instanceID, this.shoot.name, customParams);
       this.shoot = skr.shoot;
-    });
-
-    it(`Should get Runtime Status after updating OIDC config`, async function () {
-      let runtimeStatus = await kcp.getRuntimeStatusOperations(this.options.instanceID)
-      console.log(`\nRuntime status: ${runtimeStatus}`)
     });
 
     it(`Assure updated OIDC config is applied on shoot cluster`, async function () {
@@ -72,13 +62,8 @@ function OIDCE2ETest() {
         administrators: this.options.administrators1,
       };
 
-      let skr = await updateSKR(keb, kcp, gardener, this.options.instanceID, this.shoot.name, customParams, updateTimeout);
+      let skr = await updateSKR(keb, gardener, this.options.instanceID, this.shoot.name, customParams);
       this.shoot = skr.shoot;
-    });
-
-    it(`Should get Runtime Status after updating admins`, async function () {
-      let runtimeStatus = await kcp.getRuntimeStatusOperations(this.options.instanceID)
-      console.log(`\nRuntime status: ${runtimeStatus}`)
     });
 
     it(`Assure only new cluster admins are configured`, async function () {
