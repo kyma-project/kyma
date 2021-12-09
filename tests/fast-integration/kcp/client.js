@@ -149,6 +149,13 @@ class KCPWrapper {
         }
     };
 
+    async getRuntimeStatusOperations(instanceID) {
+        await this.login();
+        let runtimeStatus = await this.runtimes({instanceID: instanceID, ops: true})
+
+        return JSON.stringify(runtimeStatus, null, `\t`)
+    }
+
     async getOrchestrationsOperations(orchestrationID) {
         // debug(`Running getOrchestrationsOperations...`)
         const args = [`orchestration`,`${orchestrationID}`,`operations`, `-o`, `json`]
