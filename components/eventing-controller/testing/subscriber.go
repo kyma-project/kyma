@@ -19,6 +19,7 @@ type Subscriber struct {
 	Return500Endpoint    string
 	CheckRetriesEndpoint string
 }
+
 const (
 	maxNoOfData = 5
 	maxAttempts = 5
