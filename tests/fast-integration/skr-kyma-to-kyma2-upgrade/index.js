@@ -259,10 +259,5 @@ describe("SKR-Upgrade-test", function () {
     it("Deprovision SKR", async function () {
       await deprovisionSKR(keb, kcp, instanceID, deprovisioningTimeout);
     });
-
-    it(`Should get Runtime Status after deprovisioning`, async function () {
-      let runtimeStatus = await kcp.getRuntimeStatusOperations(instanceID)
-      console.log(`\nRuntime status: ${runtimeStatus}`)
-    });
   }
 });

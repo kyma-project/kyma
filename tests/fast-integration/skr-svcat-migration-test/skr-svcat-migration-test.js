@@ -139,11 +139,6 @@ describe("SKR SVCAT migration test", function() {
     await deprovisionSKR(keb, kcp, instanceID, deprovisioningTimeout);
   });
 
-  it(`Should get Runtime Status after deprovisioning`, async function () {
-    let runtimeStatus = await kcp.getRuntimeStatusOperations(instanceID)
-    console.log(`\nRuntime status: ${runtimeStatus}`)
-  });
-
   it(`Should cleanup platform --cascade, operator instances and bindings`, async function() {
     await t.cleanupInstanceBinding(smAdminCreds, svcatPlatform, btpOperatorInstance, btpOperatorBinding);
   });
