@@ -24,6 +24,7 @@ const {KCPWrapper, KCPConfig} = require("../kcp/client");
 const kcp = new KCPWrapper(KCPConfig.fromEnv());
 
 describe("SKR SVCAT migration test", function() {
+  // debug
   const keb = new KEBClient(KEBConfig.fromEnv());
   const gardener = new GardenerClient(GardenerConfig.fromEnv());
   const smAdminCreds = t.SMCreds.fromEnv();
