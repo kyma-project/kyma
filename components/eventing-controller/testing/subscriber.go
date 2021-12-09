@@ -19,6 +19,10 @@ type Subscriber struct {
 	Return500Endpoint    string
 	CheckRetriesEndpoint string
 }
+const (
+	maxNoOfData = 5
+	maxAttempts = 5
+)
 
 func NewSubscriber(addr string) *Subscriber {
 	return &Subscriber{
@@ -31,7 +35,7 @@ func NewSubscriber(addr string) *Subscriber {
 }
 
 func (s *Subscriber) Start() {
-	store := make(chan string, 5)
+	store := make(chan string, maxNoOfData)
 	retries := 0
 	mux := http.NewServeMux()
 	mux.HandleFunc("/store", func(w http.ResponseWriter, r *http.Request) {
@@ -59,9 +63,10 @@ func (s *Subscriber) Start() {
 		}
 	})
 	mux.HandleFunc("/return500", func(w http.ResponseWriter, r *http.Request) {
-		_, err := ioutil.ReadAll(r.Body)
-		if err != nil {
+		if data, err := ioutil.ReadAll(r.Body); err != nil {
 			log.Printf("read data failed: %v", err)
+		} else {
+			store <- string(data)
 		}
 		retries++
 		w.WriteHeader(http.StatusInternalServerError)
@@ -98,7 +103,6 @@ func (s *Subscriber) Shutdown() {
 
 func (s Subscriber) CheckEvent(expectedData, subscriberCheckURL string) error {
 	var body []byte
-	maxAttempts := uint(5)
 	delay := time.Second
 	err := retry.Do(
 		func() error {
@@ -132,9 +136,9 @@ func (s Subscriber) CheckEvent(expectedData, subscriberCheckURL string) error {
 	return nil
 }
 
-func (s Subscriber) CheckRetries(expectedData int, subscriberCheckRetriesURL string) error {
+// CheckRetries checks if the number of retries specified by expectedData was done and that the sent data on each retry was correctly received
+func (s Subscriber) CheckRetries(expectedNoOfRetries int, expectedData, subscriberCheckDataURL, subscriberCheckRetriesURL string) error {
 	var body []byte
-	maxAttempts := uint(5)
 	delay := time.Second
 	err := retry.Do(
 		func() error {
@@ -150,7 +154,7 @@ func (s Subscriber) CheckRetries(expectedData int, subscriberCheckRetriesURL str
 			if err != nil {
 				return pkgerrors.Wrapf(err, "read data failed")
 			}
-			if string(body) != fmt.Sprintf("%d", expectedData) {
+			if string(body) != fmt.Sprintf("%d", expectedNoOfRetries) {
 				return fmt.Errorf("total retries not received")
 			}
 			return nil
@@ -163,6 +167,13 @@ func (s Subscriber) CheckRetries(expectedData int, subscriberCheckRetriesURL str
 	if err != nil {
 		return pkgerrors.Wrapf(err, "check event after retries failed")
 	}
+	// test if 'expectedData' was received exactly 'expectedNoOfRetries' times
+	for i := 1; i < expectedNoOfRetries; i++ {
+		if err := s.CheckEvent(expectedData, subscriberCheckDataURL); err != nil {
+			return pkgerrors.Wrapf(err, "check received data after retries failed")
+		}
+	}
+	// OK
 	return nil
 }
 

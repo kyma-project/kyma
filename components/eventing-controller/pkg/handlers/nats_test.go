@@ -613,8 +613,7 @@ func TestRetryUsingCESDK(t *testing.T) {
 	g := NewWithT(t)
 	natsPort := 5222
 	subscriberPort := 8080
-	//subscriberReceiveURL := fmt.Sprintf("http://127.0.0.1:%d/store", subscriberPort)
-	subscriberCheckURL := fmt.Sprintf("http://127.0.0.1:%d/check", subscriberPort)
+	subscriberCheckDataURL := fmt.Sprintf("http://127.0.0.1:%d/check", subscriberPort)
 	subscriberCheckRetriesURL := fmt.Sprintf("http://127.0.0.1:%d/check_retries", subscriberPort)
 	subscriberReturns500ORL := fmt.Sprintf("http://127.0.0.1:%d/return500", subscriberPort)
 
@@ -649,11 +648,11 @@ func TestRetryUsingCESDK(t *testing.T) {
 	defer subscriber.Shutdown()
 
 	// Check subscriber is running or not by checking the store
-	err = subscriber.CheckEvent("", subscriberCheckURL)
+	err = subscriber.CheckEvent("", subscriberCheckDataURL)
 	g.Expect(err).To(BeNil())
 
 	// Prepare event-type cleaner
-	application := applicationtest.NewApplication(eventingtesting.ApplicationNameNotClean, nil)
+	application := applicationtest.NewApplication(eventingtesting.ApplicationName, nil)
 	applicationLister := fake.NewApplicationListerOrDie(context.Background(), application)
 	cleaner := eventtype.NewCleaner(eventingtesting.EventTypePrefix, applicationLister, defaultLogger)
 
@@ -670,8 +669,8 @@ func TestRetryUsingCESDK(t *testing.T) {
 	err = SendStructuredCloudEventToNATS(natsClient, subject)
 	g.Expect(err).To(BeNil())
 
-	// Check for retries
-	err = subscriber.CheckRetries(maxRetries, subscriberCheckRetriesURL)
+	// Check that the retries are done and that the sent data was correctly received
+	err = subscriber.CheckRetries(maxRetries, "\""+eventingtesting.EventData+"\"", subscriberCheckDataURL, subscriberCheckRetriesURL)
 	g.Expect(err).To(BeNil())
 
 	// Delete subscription
