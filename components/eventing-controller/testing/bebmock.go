@@ -30,7 +30,7 @@ const (
 
 // BEBMock implements a programmable mock for BEB
 type BEBMock struct {
-	Requests       map[*http.Request]interface{}
+	Requests       *SafeRequests
 	Subscriptions  *SafeSubscriptions
 	TokenURL       string
 	MessagingURL   string
@@ -44,9 +44,9 @@ type BEBMock struct {
 }
 
 func NewBEBMock(bebConfig *config.Config) *BEBMock {
-	logger := logf.Log.WithName("BEB mock")
+	logger := logf.Log.WithName("beb mock")
 	return &BEBMock{
-		nil, NewSafeSubscriptions(), "", "", bebConfig,
+		NewSafeRequests(), NewSafeSubscriptions(), "", "", bebConfig,
 		logger,
 		nil, nil, nil, nil, nil,
 	}
@@ -57,7 +57,7 @@ type response func(w http.ResponseWriter)
 
 func (m *BEBMock) Reset() {
 	m.log.Info("Initializing requests")
-	m.Requests = make(map[*http.Request]interface{})
+	m.Requests = NewSafeRequests()
 	m.Subscriptions = NewSafeSubscriptions()
 	m.AuthResponse = nil
 	m.GetResponse = nil
@@ -72,8 +72,10 @@ func (m *BEBMock) Start() string {
 	// implementation based on https://pages.github.tools.sap/KernelServices/APIDefinitions/?urls.primaryName=Business%20Event%20Bus%20-%20CloudEvents
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		defer GinkgoRecover()
+
 		// store request
-		m.Requests[r] = nil
+		m.Requests.StoreRequest(r)
+
 		description := ""
 		reqBytes, err := httputil.DumpRequest(r, true)
 		if err == nil {
@@ -102,7 +104,7 @@ func (m *BEBMock) Start() string {
 			switch r.Method {
 			case http.MethodDelete:
 				key := r.URL.Path
-				m.Subscriptions.DeleteSubscriptions(key)
+				m.Subscriptions.DeleteSubscription(key)
 				if m.DeleteResponse != nil {
 					m.DeleteResponse(w)
 				} else {
@@ -111,9 +113,9 @@ func (m *BEBMock) Start() string {
 			case http.MethodPost:
 				var subscription bebtypes.Subscription
 				_ = json.NewDecoder(r.Body).Decode(&subscription)
-				m.Requests[r] = subscription
+				m.Requests.PutSubscription(r, subscription)
 				key := r.URL.Path + "/" + subscription.Name
-				m.Subscriptions.PutSubscriptions(key, &subscription)
+				m.Subscriptions.PutSubscription(key, &subscription)
 				if m.CreateResponse != nil {
 					m.CreateResponse(w)
 				} else {
@@ -133,7 +135,7 @@ func (m *BEBMock) Start() string {
 					if m.GetResponse != nil {
 						m.GetResponse(w, key)
 					} else {
-						subscriptionSaved := m.Subscriptions.GetSubscriptions(key)
+						subscriptionSaved := m.Subscriptions.GetSubscription(key)
 						if subscriptionSaved != nil {
 							subscriptionSaved.SubscriptionStatus = bebtypes.SubscriptionStatusActive
 							w.WriteHeader(http.StatusOK)

@@ -15,11 +15,13 @@ If you're interested in learning more about the Application Connectivity area, f
   - [Register a secured API](../../../03-tutorials/00-application-connectivity/ac-04-register-secured-api.md)
   - [Call a registered external service from Kyma](../../../03-tutorials/00-application-connectivity/ac-05-call-registered-service-from-kyma.md)
   - [Renew a client certificate](../../../03-tutorials/00-application-connectivity/ac-06-renew-client-cert.md)
-  - [Revoke a client certificate](../../../03-tutorials/00-application-connectivity/ac-07-revoke-client-cert.md)
+  - [Revoke a client certificate (AC)](../../../03-tutorials/00-application-connectivity/ac-07-revoke-client-cert.md)
   - [Rotate the Root certificate and the key issued by the Certificate Authority](../../../03-tutorials/00-application-connectivity/ac-08-rotate-root-ca.md)
   - [Get the API specification for AC components](../../../03-tutorials/00-application-connectivity/ac-09-get-api-specification.md)
   - [Get subscribed events](../../../03-tutorials/00-application-connectivity/ac-10-get-subscribed-events.md)
-  - [Disable TLS certificate verification](../../../03-tutorials/00-application-connectivity/ac-11-disable-tls-certificate-verification.md)
+<!-- NOT WORKING FOR NOW, RE-ADD IT WHEN FIXED
+  - [Disable TLS certificate verification] (../../../03-tutorials/00-application-connectivity/ac-11-disable-tls-certificate-verification.md)
+-->
 
 - Check Application Connectivity troubleshooting guides for:
 

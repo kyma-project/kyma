@@ -135,6 +135,12 @@ func readDefaultingConfig() *serverlessv1alhpa1.DefaultingConfig {
 	}
 	defaultingCfg.BuildJob.Resources.Presets = buildResourcesPresets
 
+	runtimePresets, err := serverlessv1alhpa1.ParseRuntimePresets(defaultingCfg.Function.Resources.RuntimePresetsMap)
+	if err != nil {
+		panic(errors.Wrap(err, "while parsing runtime preset"))
+	}
+	defaultingCfg.Function.Resources.RuntimePresets = runtimePresets
+
 	return defaultingCfg
 }
 

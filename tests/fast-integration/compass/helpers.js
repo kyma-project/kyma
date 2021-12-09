@@ -39,6 +39,16 @@ async function queryApplicationsForScenario(client, scenarioName) {
     return await client.queryApplicationsWithFilter(filter);
 }
 
+async function getApplicationByName(client, appName, scenarioName) {
+    const applications = await queryApplicationsForScenario(client, scenarioName);
+    for(let application of applications) {
+        if (application.name === appName) {
+            return application;
+        }
+    }
+    return null
+}
+
 async function registerOrReturnApplication(client, appName, scenarioName) {
     const applications = await queryApplicationsForScenario(client, scenarioName);
     const filtered = applications.filter((app) => app.name === appName);
@@ -49,14 +59,45 @@ async function registerOrReturnApplication(client, appName, scenarioName) {
     return await client.registerApplication(appName, scenarioName);
 }
 
+async function deregisterApplication(client, applicationID) {
+    return await client.unregisterApplication(applicationID);
+}
+
 async function assignRuntimeToScenario(client, runtimeID, scenarioName) {
     const runtime = await client.getRuntime(runtimeID);
+    if (!runtime) {
+        throw new Error(`Failed to find runtime: ${runtimeID}`)
+    }
+
     if(!runtime.labels[SCENARIOS_DEFINITION_NAME]) {
         runtime.labels[SCENARIOS_DEFINITION_NAME] = [];
     }
 
     const scenarios = runtime.labels[SCENARIOS_DEFINITION_NAME];
-    scenarios.push(scenarioName);
+    if (!scenarios.includes(scenarioName)) {
+        scenarios.push(scenarioName);
+    }
+
+    return await client.setRuntimeLabel(runtimeID, SCENARIOS_DEFINITION_NAME, scenarios);
+}
+
+async function unassignRuntimeFromScenario(client, runtimeID, scenarioName) {
+    const runtime = await client.getRuntime(runtimeID);
+    if(!runtime.labels[SCENARIOS_DEFINITION_NAME]) {
+        return;
+    }
+
+    const idx = runtime.labels[SCENARIOS_DEFINITION_NAME].indexOf(scenarioName);
+    if (idx === -1) {
+        return;
+    }
+
+    const scenarios = runtime.labels[SCENARIOS_DEFINITION_NAME];
+    scenarios.splice(idx, 1);
+
+    if (scenarios.length === 0) {
+        return await client.deleteRuntimeLabel(runtimeID, SCENARIOS_DEFINITION_NAME)
+    }
 
     return await client.setRuntimeLabel(runtimeID, SCENARIOS_DEFINITION_NAME, scenarios);
 }
@@ -81,7 +122,10 @@ module.exports = {
   addScenarioInCompass,
   queryRuntimesForScenario,
   queryApplicationsForScenario,
+  getApplicationByName,
   registerOrReturnApplication,
+  deregisterApplication,
   assignRuntimeToScenario,
+  unassignRuntimeFromScenario,
   removeApplicationFromScenario
 };

@@ -241,7 +241,16 @@ components/etcd-tls-setup-job/ @PK85 @piotrmiskiewicz @ksputo @szwedm @voigt @wo
 /tests/compass-runtime-agent/ @PK85 @tgorgol @dbadura @akgalwas @janmedrek @franpog859 @Maladie @rafalpotempa @koala7659 @ralikio @everesio
 
 # Fast Integration Tests
-/tests/fast-integration/ @crabtree @pbochynski @adamwalach @voigt @wozniakjan @skhalash @shorim @rakesh-garimella @jeremyharisch @lindnerby
+/tests/fast-integration/ @crabtree @pbochynski @adamwalach @voigt @skhalash @shorim @rakesh-garimella @jeremyharisch @lindnerby
+
+# Fast Integration Tests maintained by gophers
+/tests/fast-integration/kyma-environment-broker @PK85 @piotrmiskiewicz @ksputo @szwedm @voigt @wozniakjan
+/tests/fast-integration/skr-kyma-to-kyma2-upgrade @PK85 @piotrmiskiewicz @ksputo @szwedm @voigt @wozniakjan
+/tests/fast-integration/skr-svcat-migration-test @PK85 @piotrmiskiewicz @ksputo @szwedm @voigt @wozniakjan
+/tests/fast-integration/skr-test @PK85 @piotrmiskiewicz @ksputo @szwedm @voigt @wozniakjan
+/tests/fast-integration/skr-nightly @PK85 @piotrmiskiewicz @ksputo @szwedm @voigt @wozniakjan
+/tests/fast-integration/kcp @PK85 @piotrmiskiewicz @ksputo @szwedm @voigt @wozniakjan
+
 
 # Fast Integration Eventing Tests
 /tests/fast-integration/eventing-test @k15r @lilitgh @marcobebway @nachtmaar @radufa @sayanh @pxsalehi @mfaizanse

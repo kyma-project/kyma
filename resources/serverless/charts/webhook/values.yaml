@@ -134,6 +134,8 @@ values:
             "limitMemory": "512Mi"
           }
         }
+      runtimePresets: "{}"
+
   buildJob:
     resources:
       minRequestCpu: "200m"

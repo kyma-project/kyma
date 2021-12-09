@@ -9,35 +9,36 @@ import (
 
 // SafeSubscriptions encapsulates Subscriptions to provide mutual exclusion.
 type SafeSubscriptions struct {
-	mutex         *sync.RWMutex
+	sync.RWMutex
 	subscriptions map[string]*bebtypes.Subscription
 }
 
-// NewSafeSubscriptions returns a new SafeSubscriptions.
+// NewSafeSubscriptions returns a new instance of SafeSubscriptions.
 func NewSafeSubscriptions() *SafeSubscriptions {
 	return &SafeSubscriptions{
-		&sync.RWMutex{}, make(map[string]*bebtypes.Subscription),
+		sync.RWMutex{},
+		make(map[string]*bebtypes.Subscription),
 	}
 }
 
-// GetSubscriptions returns a Subscription via the corresponding the key.
-func (s *SafeSubscriptions) GetSubscriptions(key string) *bebtypes.Subscription {
-	s.mutex.RLock()
-	defer s.mutex.RUnlock()
+// GetSubscription returns a Subscription via the corresponding key.
+func (s *SafeSubscriptions) GetSubscription(key string) *bebtypes.Subscription {
+	s.RLock()
+	defer s.RUnlock()
 	return s.subscriptions[key]
 }
 
-// DeleteSubscriptions deletes a Subscription via the corresponding key.
-func (s *SafeSubscriptions) DeleteSubscriptions(key string) {
-	s.mutex.Lock()
-	defer s.mutex.Unlock()
+// DeleteSubscription deletes a Subscription via the corresponding key.
+func (s *SafeSubscriptions) DeleteSubscription(key string) {
+	s.Lock()
+	defer s.Unlock()
 	delete(s.subscriptions, key)
 }
 
-// DeleteSubscriptionsByName deletes all Subscriptions that contain the substring 'name' in their own name.
+// DeleteSubscriptionsByName deletes all Subscriptions that contain the substring name in their own name.
 func (s *SafeSubscriptions) DeleteSubscriptionsByName(name string) {
-	s.mutex.Lock()
-	defer s.mutex.Unlock()
+	s.Lock()
+	defer s.Unlock()
 	for k := range s.subscriptions {
 		if strings.Contains(k, name) {
 			delete(s.subscriptions, k)
@@ -45,9 +46,9 @@ func (s *SafeSubscriptions) DeleteSubscriptionsByName(name string) {
 	}
 }
 
-// PutSubscriptions sets a Subscription of SafeSubscriptions via the corresponding key.
-func (s *SafeSubscriptions) PutSubscriptions(key string, subscription *bebtypes.Subscription) {
-	s.mutex.Lock()
-	defer s.mutex.Unlock()
+// PutSubscription adds a Subscription and it's corresponding key to SafeSubscriptions.
+func (s *SafeSubscriptions) PutSubscription(key string, subscription *bebtypes.Subscription) {
+	s.Lock()
+	defer s.Unlock()
 	s.subscriptions[key] = subscription
 }

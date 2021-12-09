@@ -43,7 +43,7 @@ var (
 // It also assures that the messages received are compliant with the Cloud Events spec.
 type Handler struct {
 	// Receiver receives incoming HTTP requests
-	Receiver *receiver.HttpMessageReceiver
+	Receiver *receiver.HTTPMessageReceiver
 	// Sender sends requests to the broker
 	Sender *sender.BebMessageSender
 	// Defaulter sets default values to incoming events
@@ -63,7 +63,7 @@ type Handler struct {
 }
 
 // NewHandler returns a new HTTP Handler instance.
-func NewHandler(receiver *receiver.HttpMessageReceiver, sender *sender.BebMessageSender, requestTimeout time.Duration,
+func NewHandler(receiver *receiver.HTTPMessageReceiver, sender *sender.BebMessageSender, requestTimeout time.Duration,
 	legacyTransformer *legacy.Transformer, opts *options.Options, subscribedProcessor *subscribed.Processor,
 	logger *logrus.Logger, collector *metrics.Collector) *Handler {
 	return &Handler{
@@ -119,7 +119,6 @@ func (h *Handler) ServeHTTP(writer http.ResponseWriter, request *http.Request) {
 	}
 
 	h.writeResponse(writer, http.StatusNotFound, nil)
-	return
 }
 
 func (h *Handler) publishLegacyEventsAsCE(writer http.ResponseWriter, request *http.Request) {
