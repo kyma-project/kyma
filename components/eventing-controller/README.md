@@ -57,10 +57,13 @@ This section explains how to use the Eventing Controller. It expects the followi
 | **For NATS**                  |                                                                                     |
 | `NATS_URL`                    | The URL for the NATS server.                                                        |
 | `EVENT_TYPE_PREFIX`           | The Event Type Prefix for the NATS backend.                                         |
-| `MAX_IDLE_CONNS`              | The maximum number of idle connecttions for the HTTP transport of the NATS backend. |
+| `MAX_IDLE_CONNS`              | The maximum number of idle connections for the HTTP transport of the NATS backend.  |
 | `MAX_CONNS_PER_HOST`          | The maximum connections per host for the HTTP transport of the NATS backend.        |
 | `MAX_IDLE_CONNS_PER_HOST`     | The maximum idle connections per host for the HTTP transport of the NATS backend.   |
 | `IDLE_CONN_TIMEOUT`           | The idle timeout duration for the HTTP transport of the NATS backend.               |
+| `DEFAULT_MAX_IN_FLIGHT_MESSAGES` | The idle maximum "in flight messages" send by NATS to the Sink without waiting to a response. |
+| `DEFAULT_DISPATCHER_RETRY_PERIOD`| The retry period for resending an event to a sink, if the sink doesn't return 2XX. |
+| `DEFAULT_DISPATCHER_MAX_RETRIES` | The maximum number of retries to send an event to a sink in case of errors.      |
 | **For BEB**                   |                                                                                     |
 | `TOKEN_ENDPOINT`              | The Authentication Server Endpoint to provide Access Tokens.                        |
 | `WEBHOOK_ACTIVATION_TIMEOUT`  | The timeout duration used for webhook activation to acquire Access Tokens for Kyma. |
