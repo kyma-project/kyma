@@ -33,4 +33,4 @@ component_descriptor_test:
 	--app-name $(APP_NAME) \
 	--output-dir /logs/artifacts/componentdescriptor \
 	--image-url "$(IMG):$(TAG)" \
-	--repo-context "$(DOCKER_PUSH_REPOSITORY)"
+	--repo-context "europe-west3-docker.pkg.dev/sap-kyma-prow-workloads/test-gcr"
