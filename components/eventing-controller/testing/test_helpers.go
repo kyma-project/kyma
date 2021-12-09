@@ -318,7 +318,11 @@ func WithEventTypeFilter(s *eventingv1alpha1.Subscription) {
 }
 
 func WithValidSink(svcNs, svcName string, s *eventingv1alpha1.Subscription) {
-	s.Spec.Sink = fmt.Sprintf("https://%s.%s.svc.cluster.local", svcName, svcNs)
+	s.Spec.Sink = GetValidSink(svcNs, svcName)
+}
+
+func GetValidSink(svcNs, svcName string) string {
+	return fmt.Sprintf("https://%s.%s.svc.cluster.local", svcName, svcNs)
 }
 
 func NewSubscriberSvc(name, ns string) *corev1.Service {
