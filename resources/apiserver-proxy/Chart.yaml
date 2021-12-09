@@ -1,9 +1,0 @@
-apiVersion: v1
-description: Kyma component 'apiserver-proxy'
-name: apiserver-proxy
-version: 1.0.0
-home: https://kyma-project.io
-icon: https://github.com/kyma-project/kyma/blob/main/logo.png?raw=true
-dependencies:
-  - name: apiserver-proxy-init
-    version: 0.0.1
