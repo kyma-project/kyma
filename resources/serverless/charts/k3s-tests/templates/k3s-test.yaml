@@ -35,13 +35,13 @@ spec:
       containers:
         - name: test
           image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.testImages.function_controller_test) }}"
-          {{- if .Values.testSuit }}
-          args: ["{{ .Values.testSuit }}"]
+          {{- if .Values.testSuite }}
+          args: ["{{ .Values.testSuite }}"]
           {{- else }}
-           args: ["serverless-integration"]
+          args: ["serverless-integration"]
           {{- end }}
           env:
-          {{- if eq .Values.testSuit "git-auth-integration" }}
+          {{- if ( and (eq .Values.testSuite "git-auth-integration" ) (not (empty .Values.testSuite)) ) }}
             - name: GH_AUTH_PRIVATE_KEY
               value: "{{ .Values.githubPrivateKey }}"
             - name: AZURE_DEVOPS_AUTH_USERNAME
