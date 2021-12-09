@@ -34,6 +34,7 @@ type testRepo struct {
 	url                string
 	baseDir            string
 	expectedResponse   string
+	reference          string
 	secretEnvKeys      []string
 	runtime            serverlessv1alpha1.Runtime
 	auth               *serverlessv1alpha1.RepositoryAuth
@@ -46,6 +47,7 @@ var testCases []testRepo = []testRepo{
 		provider:         "Github",
 		url:              "git@github.com:moelsayed/pyhello.git",
 		baseDir:          "/",
+		reference:        "main",
 		expectedResponse: "hello world",
 		secretEnvKeys:    []string{"GH_AUTH_PRIVATE_KEY"},
 		runtime:          serverlessv1alpha1.Python39,
@@ -53,13 +55,14 @@ var testCases []testRepo = []testRepo{
 			Type:       serverlessv1alpha1.RepositoryAuthSSHKey,
 			SecretName: "github-auth-secret",
 		},
-		authSecretDataFunc: githupAuthSecretData,
+		authSecretDataFunc: githubAuthSecretData,
 	},
 	{
 		name:             "azure-devops-func",
 		provider:         "AzureDevOps",
 		url:              "https://kyma-wookiee@dev.azure.com/kyma-wookiee/kyma-function/_git/kyma-function",
 		baseDir:          "/code",
+		reference:        "main",
 		expectedResponse: "Hello Serverless",
 		secretEnvKeys: []string{
 			"AZURE_DEVOPS_AUTH_USERNAME",
@@ -82,7 +85,7 @@ func GitAuthTestSteps(restConfig *rest.Config, cfg testsuite.Config, logf *logru
 
 	genericContainer, err := setupSharedContainer(restConfig, cfg, logf)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrapf(err, "while creating Shared Container")
 	}
 	poll := poller.Poller{
 		MaxPollingTime:     cfg.MaxPollingTime,
@@ -94,7 +97,7 @@ func GitAuthTestSteps(restConfig *rest.Config, cfg testsuite.Config, logf *logru
 	for _, testCase := range testCases {
 		testSteps, err := gitAuthFunctionTestSteps(genericContainer, testCase, poll)
 		if err != nil {
-			return nil, err
+			return nil, errors.Wrapf(err, "while generated test case steps")
 		}
 		steps = append(steps, testSteps)
 	}
@@ -139,7 +142,7 @@ func gitAuthFunctionTestSteps(genericContainer shared.Container, tr testRepo, po
 
 	data, err := tr.authSecretDataFunc(tr)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrapf(err, "while generating secret data")
 	}
 
 	return step.NewSerialTestRunner(genericContainer.Log, fmt.Sprintf("%s Function auth test", tr.provider),
@@ -163,6 +166,7 @@ func gitAuthFunctionTestSteps(genericContainer shared.Container, tr testRepo, po
 			gitops.GitopsFunction(
 				gitCfg.RepoName,
 				tr.baseDir,
+				tr.reference,
 				tr.runtime),
 		),
 		teststep.NewHTTPCheck(
@@ -190,7 +194,7 @@ func azureDevOpsAuthSecretData(tr testRepo) (map[string]string, error) {
 	return data, nil
 }
 
-func githupAuthSecretData(tr testRepo) (map[string]string, error) {
+func githubAuthSecretData(tr testRepo) (map[string]string, error) {
 	privateKey, ok := os.LookupEnv(tr.secretEnvKeys[0])
 	if !ok {
 		return nil, errors.New(fmt.Sprintf("failed to lookup environment variable '%v'", tr.secretEnvKeys[0]))
