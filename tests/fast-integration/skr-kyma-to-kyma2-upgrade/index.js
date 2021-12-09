@@ -61,12 +61,12 @@ describe("SKR-Upgrade-test", function () {
   const subAccountID = keb.subaccountID
 
   debug(
-    `PlanID ${getEnvOrThrow("KEB_PLAN_ID")}`,
-    `SubAccountID ${subAccountID}`,
-    `InstanceID ${instanceID}`,
-    `Scenario ${scenarioName}`,
-    `Runtime ${runtimeName}`,
-    `Application ${appName}`
+      `PlanID ${getEnvOrThrow("KEB_PLAN_ID")}`,
+      `SubAccountID ${subAccountID}`,
+      `InstanceID ${instanceID}`,
+      `Scenario ${scenarioName}`,
+      `Runtime ${runtimeName}`,
+      `Application ${appName}`
   );
 
   // debug(
@@ -78,14 +78,14 @@ describe("SKR-Upgrade-test", function () {
   //   `KEB_USER_ID: ${getEnvOrThrow("KEB_USER_ID")}`,
   //   `KEB_PLAN_ID: ${getEnvOrThrow("KEB_PLAN_ID")}`      
   // );
-  
+
   // debug(
   //   `COMPASS_HOST: ${getEnvOrThrow("COMPASS_HOST")}`,
   //   `COMPASS_CLIENT_ID: ${getEnvOrThrow("COMPASS_CLIENT_ID")}`,
   //   `COMPASS_CLIENT_SECRET: ${getEnvOrThrow("COMPASS_CLIENT_SECRET")}`,
   //   `COMPASS_TENANT: ${getEnvOrThrow("COMPASS_TENANT")}`,
   // )
-  
+
   // debug(
   //   `KCP_TECH_USER_LOGIN: ${KCP_TECH_USER_LOGIN}\n`,
   //   `KCP_TECH_USER_PASSWORD: ${KCP_TECH_USER_PASSWORD}\n`,
@@ -96,17 +96,17 @@ describe("SKR-Upgrade-test", function () {
   // )
 
   // Credentials for KCP ODIC Login
-  
+
   // process.env.KCP_TECH_USER_LOGIN    = 
   // process.env.KCP_TECH_USER_PASSWORD = 
-  process.env.KCP_OIDC_ISSUER_URL    = "https://kymatest.accounts400.ondemand.com";
+  process.env.KCP_OIDC_ISSUER_URL = "https://kymatest.accounts400.ondemand.com";
   // process.env.KCP_OIDC_CLIENT_ID     = 
   // process.env.KCP_OIDC_CLIENT_SECRET = 
-  process.env.KCP_KEB_API_URL        = "https://kyma-env-broker.cp.dev.kyma.cloud.sap";
+  process.env.KCP_KEB_API_URL = "https://kyma-env-broker.cp.dev.kyma.cloud.sap";
   process.env.KCP_GARDENER_NAMESPACE = "garden-kyma-dev";
   process.env.KCP_MOTHERSHIP_API_URL = "https://mothership-reconciler.cp.dev.kyma.cloud.sap/v1"
   process.env.KCP_KUBECONFIG_API_URL = "https://kubeconfig-service.cp.dev.kyma.cloud.sap"
-  
+
   const kcp = new KCPWrapper(KCPConfig.fromEnv());
 
   const kymaUpgradeVersion = getEnvOrThrow("KYMA_UPGRADE_VERSION")
@@ -114,21 +114,29 @@ describe("SKR-Upgrade-test", function () {
   this.timeout(60 * 60 * 1000 * 3); // 3h
   this.slow(5000);
 
+  const provisioningTimeout = 1000 * 60 * 60 // 1h
+  const deprovisioningTimeout = 1000 * 60 * 30 // 30m
+
   let skr;
 
   // SKR Provisioning
 
   it(`Perform kcp login`, async function () {
-    
+
     let version = await kcp.version([])
     debug(version)
-    
+
     await kcp.login()
     // debug(loginOutput)
   });
 
   it(`Provision SKR with ID ${instanceID}`, async function () {
-    skr = await provisionSKR(keb, gardener, instanceID, runtimeName, null, null, null);
+    skr = await provisionSKR(keb, kcp, gardener, instanceID, runtimeName, null, null, null, provisioningTimeout);
+  });
+
+  it(`Should get Runtime Status after provisioning`, async function () {
+    let runtimeStatus = await kcp.getRuntimeStatusOperations(instanceID)
+    console.log(`\nRuntime status: ${runtimeStatus}`)
   });
 
   it(`Should save kubeconfig for the SKR to ~/.kube/config`, async function() {
@@ -197,9 +205,9 @@ describe("SKR-Upgrade-test", function () {
     debug("Upgrade Done!")
   });
 
-  it(`Get Runtime Status`, async function () {
-    let runtimeStatus = await kcp.runtimes({instanceID: instanceID})
-    debug(inspect(runtimeStatus, false, null, false))
+  it(`Should get Runtime Status after upgrade`, async function () {
+    let runtimeStatus = await kcp.getRuntimeStatusOperations(instanceID)
+    console.log(`\nRuntime status: ${runtimeStatus}`)
   });
 
   // Perform Tests after Upgrade
@@ -235,7 +243,7 @@ describe("SKR-Upgrade-test", function () {
   // Cleanup
   const skip_cleanup = getEnvOrThrow("SKIP_CLEANUP")
 
-  if (skip_cleanup === "FALSE") {
+  if (skip_cleanup === "FALSE"){
     it("Unregister Kyma resources from Compass", async function() {
       await unregisterKymaFromCompass(director, scenarioName);
     });
@@ -249,7 +257,7 @@ describe("SKR-Upgrade-test", function () {
     });
 
     it("Deprovision SKR", async function () {
-      await deprovisionSKR(keb, instanceID);
+      await deprovisionSKR(keb, kcp, instanceID, deprovisioningTimeout);
     });
   }
 });

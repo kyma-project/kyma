@@ -32,6 +32,10 @@ const kcp = new KCPWrapper(KCPConfig.fromEnv());
 describe("SKR nightly", function () {
   this.timeout(3600000 * 3); // 3h
   this.slow(5000);
+
+  const provisioningTimeout = 1000 * 60 * 60 // 1h
+  const deprovisioningTimeout = 1000 * 60 * 30 // 30m
+
   before(`Fetch last SKR and deprovision if needed`, async function () {
     try {
       let runtime;
@@ -51,7 +55,8 @@ describe("SKR nightly", function () {
       }
       if (runtime) {
         console.log('Deprovision last SKR.')
-        await deprovisionSKR(keb, runtime.instanceID);
+        await deprovisionSKR(keb, kcp, runtime.instanceID, deprovisioningTimeout);
+
         await unregisterKymaFromCompass(director, this.options.scenarioName);
       } else {
         console.log("Deprovisioning not needed - no previous SKR found.");
@@ -62,7 +67,11 @@ describe("SKR nightly", function () {
         oidc: this.options.oidc0,
       };
 
-      let skr = await provisionSKR(keb, gardener, this.options.instanceID, this.options.runtimeName, null, null, customParams);
+      let skr = await provisionSKR(keb, kcp, gardener, this.options.instanceID, this.options.runtimeName, null, null, customParams, provisioningTimeout);
+
+      let runtimeStatus = await kcp.getRuntimeStatusOperations(this.options.instanceID)
+      console.log(`\nRuntime status after provisioning: ${runtimeStatus}`)
+
       this.shoot = skr.shoot;
       await addScenarioInCompass(director, this.options.scenarioName);
       await assignRuntimeToScenario(director, this.shoot.compassID, this.options.scenarioName);

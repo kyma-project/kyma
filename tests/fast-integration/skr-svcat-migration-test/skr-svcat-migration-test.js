@@ -19,6 +19,9 @@ const {
 } = require("../utils");
 const t = require("./test-helpers");
 const sampleResources = require("./deploy-sample-resources");
+const {KCPWrapper, KCPConfig} = require("../kcp/client");
+
+const kcp = new KCPWrapper(KCPConfig.fromEnv());
 
 describe("SKR SVCAT migration test", function() {
   const keb = new KEBClient(KEBConfig.fromEnv());
@@ -28,16 +31,19 @@ describe("SKR SVCAT migration test", function() {
   const suffix = genRandom(4);
   const appName = `app-${suffix}`;
   const runtimeName = `kyma-${suffix}`;
-  const runtimeID = uuid.v4();
+  const instanceID = uuid.v4();
   
   const svcatPlatform = `svcat-${suffix}`
   const btpOperatorInstance = `btp-operator-${suffix}`
   const btpOperatorBinding = `btp-operator-binding-${suffix}`
   switchDebug(on = true)
-  debug(`RuntimeID ${runtimeID}`, `Runtime ${runtimeName}`, `Application ${appName}`, `Suffix ${suffix}`);
+  debug(`InstanceID ${instanceID}`, `Runtime ${runtimeName}`, `Application ${appName}`, `Suffix ${suffix}`);
 
   this.timeout(60 * 60 * 1000 * 3); // 3h
   this.slow(5000);
+
+  const provisioningTimeout = 1000 * 60 * 60 // 1h
+  const deprovisioningTimeout = 1000 * 60 * 30 // 30m
 
   let platformCreds;
   it(`Should provision new ServiceManager platform`, async function() {
@@ -51,7 +57,12 @@ describe("SKR SVCAT migration test", function() {
 
   let skr;
   it(`Should provision SKR`, async function() {
-    skr = await provisionSKR(keb, gardener, runtimeID, runtimeName, platformCreds, btpOperatorCreds);
+    skr = await provisionSKR(keb, kcp, gardener, instanceID, runtimeName, platformCreds, btpOperatorCreds, provisioningTimeout);
+  });
+
+  it(`Should get Runtime Status after provisioning`, async function () {
+    let runtimeStatus = await kcp.getRuntimeStatusOperations(instanceID)
+    console.log(`\nRuntime status: ${runtimeStatus}`)
   });
 
   it(`Should save kubeconfig for the SKR to ~/.kube/config`, async function() {
@@ -125,7 +136,7 @@ describe("SKR SVCAT migration test", function() {
   });
 
   it(`Should deprovision SKR`, async function() {
-    await deprovisionSKR(keb, runtimeID);
+    await deprovisionSKR(keb, kcp, instanceID, deprovisioningTimeout);
   });
 
   it(`Should cleanup platform --cascade, operator instances and bindings`, async function() {
