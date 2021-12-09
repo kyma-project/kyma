@@ -57,9 +57,6 @@ describe("SKR nightly", function () {
         console.log('Deprovision last SKR.')
         await deprovisionSKR(keb, kcp, runtime.instanceID, deprovisioningTimeout);
 
-        let runtimeStatus = await kcp.getRuntimeStatusOperations(runtime.instanceID)
-        console.log(`\nRuntime status after deprovisioning: ${runtimeStatus}`)
-
         await unregisterKymaFromCompass(director, this.options.scenarioName);
       } else {
         console.log("Deprovisioning not needed - no previous SKR found.");

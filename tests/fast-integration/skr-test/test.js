@@ -47,8 +47,6 @@ describe(`Execute SKR test`, function () {
     CommerceMockTest();
     after(`Deprovision SKR`, async function () {
         await deprovisionSKR(keb, kcp, this.options.instanceID, deprovisioningTimeout);
-        let runtimeStatus = await kcp.getRuntimeStatusOperations(this.options.instanceID)
-        console.log(`\nRuntime status after deprovisioning: ${runtimeStatus}`)
         await unregisterKymaFromCompass(director, this.options.scenarioName);
     });
 });
