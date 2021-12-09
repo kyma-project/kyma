@@ -615,7 +615,7 @@ func TestRetryUsingCESDK(t *testing.T) {
 	subscriberPort := 8080
 	subscriberCheckDataURL := fmt.Sprintf("http://127.0.0.1:%d/check", subscriberPort)
 	subscriberCheckRetriesURL := fmt.Sprintf("http://127.0.0.1:%d/check_retries", subscriberPort)
-	subscriberReturns500ORL := fmt.Sprintf("http://127.0.0.1:%d/return500", subscriberPort)
+	subscriberServerErrorURL := fmt.Sprintf("http://127.0.0.1:%d/return500", subscriberPort)
 
 	// Start Nats server
 	natsServer := eventingtesting.RunNatsServerOnPort(natsPort)
@@ -658,7 +658,7 @@ func TestRetryUsingCESDK(t *testing.T) {
 
 	// Create a subscription
 	sub := eventingtesting.NewSubscription("sub", "foo", eventingtesting.WithEventTypeFilter)
-	sub.Spec.Sink = subscriberReturns500ORL
+	sub.Spec.Sink = subscriberServerErrorURL
 	_, err = natsClient.SyncSubscription(sub, cleaner)
 	g.Expect(err).To(BeNil())
 	g.Expect(sub.Status.Config).NotTo(BeNil()) // It should apply the defaults
