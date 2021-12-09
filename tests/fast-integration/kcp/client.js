@@ -86,9 +86,6 @@ class KCPWrapper {
         if (query.state) {
             args = args.concat(`--state`, `${query.state}`);
         }
-        if (query.ops) {
-            args = args.concat(`--ops`);
-        }
         let result = await this.exec(args);
         return JSON.parse(result)
     }
@@ -148,13 +145,6 @@ class KCPWrapper {
             throw new Error(`failed during upgradeKyma`);
         }
     };
-
-    async getRuntimeStatusOperations(instanceID) {
-        await this.login();
-        let runtimeStatus = await this.runtimes({instanceID: instanceID, ops: true})
-
-        return JSON.stringify(runtimeStatus, null, `\t`)
-    }
 
     async getOrchestrationsOperations(orchestrationID) {
         // debug(`Running getOrchestrationsOperations...`)
