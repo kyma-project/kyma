@@ -35,8 +35,20 @@ spec:
       containers:
         - name: test
           image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.testImages.function_controller_test) }}"
-          args: ["serverless-integration"]
+          {{- if .Values.testSuit }}
+          args: ["{{ .Values.testSuit }}"]
+          {{- else }}
+           args: ["serverless-integration"]
+          {{- end }}
           env:
+          {{- if eq .Values.testSuit "git-auth-integration" }}
+            - name: GH_AUTH_PRIVATE_KEY
+              value: "{{ .Values.githubPrivateKey }}"
+            - name: AZURE_DEVOPS_AUTH_USERNAME
+              value: "{{ .Values.azureDevOpsUsername }}"
+            - name: AZURE_DEVOPS_AUTH_PASSWORD
+              value: "{{ .Values.azureDevOpsPassword }}"
+          {{- end }}
             - name: APP_TEST_WAIT_TIMEOUT
               value: "5m"
             - name: APP_TEST_VERBOSE
