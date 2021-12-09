@@ -14,6 +14,8 @@ RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o connectorservice 
 FROM scratch
 LABEL source = git@github.com:kyma-project/kyma.git
 
+WORKDIR /app
+
 COPY ./docs/api/connectorapi.yaml .
 COPY --from=builder /go/src/github.com/kyma-project/kyma/components/connector-service/connectorservice .
 COPY --from=builder /app/licenses /app/licenses
