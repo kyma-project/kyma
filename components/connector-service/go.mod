@@ -1,6 +1,6 @@
 module github.com/kyma-project/kyma/components/connector-service
 
-go 1.16
+go 1.17
 
 require (
 	github.com/beorn7/perks v1.0.1 // indirect
@@ -15,9 +15,9 @@ require (
 	github.com/sirupsen/logrus v1.4.2
 	github.com/stretchr/testify v1.4.0
 	github.com/tidwall/gjson v1.6.7
-	golang.org/x/net v0.0.0-20191204025024-5ee1b9f4859a // indirect
+	golang.org/x/net v0.0.0-20210805182204-aaa1db679c0d // indirect
 	golang.org/x/oauth2 v0.0.0-20191202225959-858c2ad4c8b6 // indirect
-	golang.org/x/sys v0.0.0-20191204072324-ce4227a45e2e // indirect
+	golang.org/x/sys v0.0.0-20210809222454-d867a43fc93e // indirect
 	golang.org/x/time v0.0.0-20191024005414-555d28b269f0 // indirect
 	google.golang.org/appengine v1.6.5 // indirect
 	k8s.io/api v0.18.15
@@ -26,9 +26,10 @@ require (
 )
 
 replace (
+	github.com/gogo/protobuf => github.com/gogo/protobuf v1.3.2
 	github.com/prometheus/client_golang => github.com/prometheus/client_golang v0.8.0
-	github.com/tidwall/gjson => github.com/tidwall/gjson v1.6.7
+	github.com/tidwall/gjson => github.com/tidwall/gjson v1.9.3
 
-	golang.org/x/crypto => golang.org/x/crypto v0.0.0-20201221181555-eec23a3978ad 
+	golang.org/x/crypto => golang.org/x/crypto v0.0.0-20201221181555-eec23a3978ad
 	golang.org/x/text => golang.org/x/text v0.3.3
 )

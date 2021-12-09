@@ -96,6 +96,13 @@ func (r *Reconciler) Reconcile(ctx context.Context, request reconcile.Request) (
 	// If connection is not established read Config Map and try to fetch Certificate
 	if instance.ShouldAttemptReconnect() {
 		log.Infof("Attempting to initialize connection with Compass...")
+
+		//If minimalConfigSyncTime did not pass from connection.Status.ConnectionStatus.LastSync, skip connection
+		if !shouldReconnect(instance, r.minimalConfigSyncTime) {
+			log.Infof("Skipping connection initialization. Minimal resync time not passed. Last attempt: %v", instance.Status.ConnectionStatus.LastSync)
+			return reconcile.Result{}, nil
+		}
+
 		instance, err := r.supervisor.InitializeCompassConnection()
 		if err != nil {
 			log.Errorf("Failed to initialize Compass Connection: %s", err.Error())
@@ -106,7 +113,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, request reconcile.Request) (
 		return reconcile.Result{}, nil
 	}
 
-	// If minimalConfigSyncTime did not pass, skip synchronization
+	// If minimalConfigSyncTime did not pass from SynchronizationStatus.LastAttempt, skip synchronization
 	if !shouldResyncConfig(instance, r.minimalConfigSyncTime) {
 		log.Infof("Skipping config synchronization. Minimal resync time not passed. Last attempt: %v", instance.Status.SynchronizationStatus.LastAttempt)
 		return reconcile.Result{}, nil
@@ -140,4 +147,18 @@ func shouldResyncConfig(connection *v1alpha1.CompassConnection, minimalConfigSyn
 	timeSinceLastSyncAttempt := time.Now().Unix() - connection.Status.SynchronizationStatus.LastAttempt.Unix()
 
 	return timeSinceLastSyncAttempt >= int64(minimalConfigSyncTime.Seconds())
+}
+
+func shouldReconnect(connection *v1alpha1.CompassConnection, minimalConfigSyncTime time.Duration) bool {
+	if connection.Spec.ResyncNow {
+		return true
+	}
+
+	if connection.Status.ConnectionStatus == nil {
+		return true
+	}
+
+	timeSinceLastConnAttempt := time.Now().Unix() - connection.Status.ConnectionStatus.LastSync.Unix()
+
+	return timeSinceLastConnAttempt >= int64(minimalConfigSyncTime.Seconds())
 }

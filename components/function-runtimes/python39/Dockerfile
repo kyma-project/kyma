@@ -7,7 +7,7 @@
 # We use this code to manually use newest alpine and nodejs.
 # Use official build when it will be available.
 
-FROM alpine:3.13.5
+FROM alpine:3.14.2
 
 # ensure local python is preferred over distribution python
 ENV PATH /usr/local/bin:$PATH
@@ -25,18 +25,13 @@ RUN set -eux; \
 # other runtime dependencies for Python are installed later
 
 ENV GPG_KEY E3FF2839C048B25C084DEBE9B26995E310250568
-ENV PYTHON_VERSION 3.9.5
-
-
-# expat-dev for alpine:3.13.5 is outdated and vulnerable. We will install it from edge .
-# We can't upgrade fully to 3.14 because it has a dependancy on a specific recent docker version https://gitlab.alpinelinux.org/alpine/aports/-/issues/12396
+ENV PYTHON_VERSION 3.9.8
 
 RUN set -ex \
-	&& apk add --no-cache --virtual .fetch-deps --repository=http://dl-cdn.alpinelinux.org/alpine/edge/main \
+	&& apk add --no-cache --virtual .fetch-deps \
 		gnupg \
 		tar \
 		xz \
-		expat-dev \
 	\
 	&& wget -O python.tar.xz "https://www.python.org/ftp/python/${PYTHON_VERSION%%[a-z]*}/Python-$PYTHON_VERSION.tar.xz" \
 	&& wget -O python.tar.xz.asc "https://www.python.org/ftp/python/${PYTHON_VERSION%%[a-z]*}/Python-$PYTHON_VERSION.tar.xz.asc" \
@@ -54,6 +49,7 @@ RUN set -ex \
 		bzip2-dev \
 		coreutils \
 		dpkg-dev dpkg \
+		expat-dev \
 		findutils \
 		gcc \
 		gdbm-dev \
@@ -120,7 +116,7 @@ RUN cd /usr/local/bin \
 	&& ln -s python3-config python-config
 
 # if this is called "PIP_VERSION", pip explodes with "ValueError: invalid truth value '<VERSION>'"
-ENV PYTHON_PIP_VERSION 21.0.1
+ENV PYTHON_PIP_VERSION 21.3.1
 # https://github.com/pypa/get-pip
 ENV PYTHON_GET_PIP_URL https://github.com/pypa/get-pip/raw/29f37dbe6b3842ccd52d61816a3044173962ebeb/public/get-pip.py
 ENV PYTHON_GET_PIP_SHA256 e03eb8a33d3b441ff484c56a436ff10680479d4bd14e59268e67977ed40904de

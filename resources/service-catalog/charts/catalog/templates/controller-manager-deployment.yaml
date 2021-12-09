@@ -40,7 +40,7 @@ spec:
           emptyDir: {}
       containers:
       - name: healthcheck
-        image: eu.gcr.io/kyma-project/incubator/develop/health-proxy:bd223692
+        image: {{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.health_proxy) }}
         securityContext:
           privileged: false
           allowPrivilegeEscalation: false
@@ -59,7 +59,7 @@ spec:
           successThreshold: 1
           timeoutSeconds: 5
       - name: controller-manager
-        image: {{ .Values.image }}
+        image: {{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.service_catalog) }}
         imagePullPolicy: {{ .Values.imagePullPolicy }}
         resources:
 {{ toYaml .Values.controllerManager.resources | indent 10 }}

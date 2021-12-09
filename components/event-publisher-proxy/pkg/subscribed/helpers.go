@@ -12,8 +12,9 @@ import (
 	"k8s.io/client-go/dynamic/dynamicinformer"
 	"k8s.io/client-go/rest"
 
-	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/informers"
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
+
+	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/informers"
 )
 
 var (
@@ -74,7 +75,7 @@ func AddUniqueEventsToResult(eventsSubSet []Event, uniqEvents map[Event]bool) ma
 // 1. if the eventType matches the format: <eventTypePrefix><appName>.<event-name>.<version>
 // E.g. sap.kyma.custom.varkes.order.created.v0
 // 2. if the eventSource matches BEBNamespace name
-func FilterEventTypeVersions(eventTypePrefix, bebNs, appName string, filters *eventingv1alpha1.BebFilters) []Event {
+func FilterEventTypeVersions(eventTypePrefix, bebNs, appName string, filters *eventingv1alpha1.BEBFilters) []Event {
 	events := make([]Event, 0)
 	if filters == nil {
 		return events
@@ -83,18 +84,24 @@ func FilterEventTypeVersions(eventTypePrefix, bebNs, appName string, filters *ev
 		if filter == nil {
 			continue
 		}
-		searchingForEventPrefix := strings.ToLower(fmt.Sprintf("%s.%s.", eventTypePrefix, appName))
+
+		var prefix string
+		if len(strings.TrimSpace(eventTypePrefix)) == 0 {
+			prefix = strings.ToLower(fmt.Sprintf("%s.", appName))
+		} else {
+			prefix = strings.ToLower(fmt.Sprintf("%s.%s.", eventTypePrefix, appName))
+		}
 
 		if filter.EventSource != nil && filter.EventType != nil {
 			// TODO revisit the filtration logic as part of https://github.com/kyma-project/kyma/issues/10761
 
 			// filter by event-source if exists
-			if len(strings.TrimSpace(filter.EventSource.Value)) > 0 && strings.ToLower(filter.EventSource.Value) != strings.ToLower(bebNs) {
+			if len(strings.TrimSpace(filter.EventSource.Value)) > 0 && !strings.EqualFold(filter.EventSource.Value, bebNs) {
 				continue
 			}
 
-			if strings.HasPrefix(filter.EventType.Value, searchingForEventPrefix) {
-				eventTypeVersion := strings.ReplaceAll(filter.EventType.Value, searchingForEventPrefix, "")
+			if strings.HasPrefix(filter.EventType.Value, prefix) {
+				eventTypeVersion := strings.ReplaceAll(filter.EventType.Value, prefix, "")
 				eventTypeVersionArr := strings.Split(eventTypeVersion, ".")
 				version := eventTypeVersionArr[len(eventTypeVersionArr)-1]
 				eventType := ""

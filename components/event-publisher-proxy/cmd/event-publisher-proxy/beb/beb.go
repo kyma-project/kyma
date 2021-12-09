@@ -18,7 +18,7 @@ import (
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/subscribed"
 	"github.com/sirupsen/logrus"
 	"k8s.io/client-go/dynamic"
-	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
+	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp" // TODO: remove as this is only used in a development setup
 	"sigs.k8s.io/controller-runtime/pkg/client/config"
 )
 
@@ -55,7 +55,7 @@ func (c *Commander) Start() error {
 	c.logger.Infof("Starting Event Publisher to BEB, envCfg: %v; opts: %#v", c.envCfg.String(), c.opts)
 
 	// configure message receiver
-	messageReceiver := receiver.NewHttpMessageReceiver(c.envCfg.Port)
+	messageReceiver := receiver.NewHTTPMessageReceiver(c.envCfg.Port)
 
 	// assure uniqueness
 	var ctx context.Context

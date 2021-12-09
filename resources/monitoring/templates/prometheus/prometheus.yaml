@@ -1,6 +1,3 @@
-{{- /*
-  Customization: .Values.resourceSelector.namespaces if statement is added to make comma separated namespace list work.
-*/ -}}
 {{- if .Values.prometheus.enabled }}
 apiVersion: monitoring.coreos.com/v1
 kind: Prometheus
@@ -27,6 +24,14 @@ spec:
         pathPrefix: "{{ .Values.alertmanager.alertmanagerSpec.routePrefix }}"
         {{- end }}
         apiVersion: {{ .Values.alertmanager.apiVersion }}
+        scheme: {{ .Values.alertmanager.alertmanagerSpec.scheme }}
+        {{- if .Values.alertmanager.alertmanagerSpec.tlsConfig }}
+        tlsConfig:
+          caFile: {{ .Values.alertmanager.alertmanagerSpec.tlsConfig.caFile }}
+          certFile: {{ .Values.alertmanager.alertmanagerSpec.tlsConfig.certFile }}
+          keyFile: {{ .Values.alertmanager.alertmanagerSpec.tlsConfig.keyFile }}
+          insecureSkipVerify: {{ .Values.alertmanager.alertmanagerSpec.tlsConfig.insecureSkipVerify }}
+        {{- end }}
 {{- else }}
       []
 {{- end }}
@@ -34,11 +39,11 @@ spec:
   apiserverConfig:
 {{ toYaml .Values.prometheus.prometheusSpec.apiserverConfig | indent 4}}
 {{- end }}
-{{- if .Values.prometheus.prometheusSpec.image }}
-  image: {{ .Values.prometheus.prometheusSpec.image.repository }}:{{ .Values.prometheus.prometheusSpec.image.tag }}
-  version: {{ .Values.prometheus.prometheusSpec.image.tag }}
-  {{- if .Values.prometheus.prometheusSpec.image.sha }}
-  sha: {{ .Values.prometheus.prometheusSpec.image.sha }}
+{{- if .Values.global.images.prometheus }}
+  image: {{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.prometheus) }}
+  version: {{ .Values.global.images.prometheus.version }}
+  {{- if .Values.global.images.prometheus.sha }}
+  sha: {{ .Values.global.images.prometheus.sha }}
   {{- end }}
 {{- end }}
 {{- if .Values.prometheus.prometheusSpec.externalLabels }}
@@ -101,49 +106,6 @@ spec:
 {{ toYaml .Values.prometheus.prometheusSpec.configMaps | indent 4 }}
 {{- end }}
   serviceAccountName: {{ template "kube-prometheus-stack.prometheus.serviceAccountName" . }}
-
-{{- if .Values.resourceSelector.namespaces }}
-  serviceMonitorSelector: {}
-  serviceMonitorNamespaceSelector:
-    matchExpressions:
-    - key: name
-      operator: In
-      values:
-      {{- $namespaces := splitList "," .Values.resourceSelector.namespaces -}}
-      {{- range $namespaces }}
-      - {{ . }}
-      {{- end }}
-  podMonitorSelector: {}
-  podMonitorNamespaceSelector:
-    matchExpressions:
-    - key: name
-      operator: In
-      values:
-      {{- $namespaces := splitList "," .Values.resourceSelector.namespaces -}}
-      {{- range $namespaces }}
-      - {{ . }}
-      {{- end }}
-  ruleSelector: {}
-  ruleNamespaceSelector:
-    matchExpressions:
-    - key: name
-      operator: In
-      values:
-      {{- $namespaces := splitList "," .Values.resourceSelector.namespaces -}}
-      {{- range $namespaces }}
-      - {{ . }}
-      {{- end }}
-  probeSelector: {}
-  probeNamespaceSelector:
-    matchExpressions:
-    - key: name
-      operator: In
-      values:
-      {{- $namespaces := splitList "," .Values.resourceSelector.namespaces -}}
-      {{- range $namespaces }}
-      - {{ . }}
-      {{- end }}
-{{ else }}
 {{- if .Values.prometheus.prometheusSpec.serviceMonitorSelector }}
   serviceMonitorSelector:
 {{ toYaml .Values.prometheus.prometheusSpec.serviceMonitorSelector | indent 4 }}
@@ -208,7 +170,6 @@ spec:
 {{ toYaml .Values.prometheus.prometheusSpec.probeNamespaceSelector | indent 4 }}
 {{ else }}
   probeNamespaceSelector: {}
-{{- end }}
 {{- end }}
 {{- if .Values.prometheus.prometheusSpec.remoteRead }}
   remoteRead:

@@ -56,7 +56,7 @@ const (
 // Initialize creates a connection to NATS.
 func (n *Nats) Initialize(env.Config) (err error) {
 	if n.connection == nil || n.connection.Status() != nats.CONNECTED {
-		n.connection, err = nats.Connect(n.config.Url, nats.RetryOnFailedConnect(true),
+		n.connection, err = nats.Connect(n.config.URL, nats.RetryOnFailedConnect(true),
 			nats.MaxReconnects(n.config.MaxReconnects), nats.ReconnectWait(n.config.ReconnectWait))
 		if err != nil {
 			return errors.Wrapf(err, "connect to NATS failed")
@@ -91,7 +91,7 @@ func newCloudeventClient(config env.NatsConfig) (cev2.Client, error) {
 // SyncSubscription synchronizes the given Kyma subscription to NATS subscription.
 // note: the returned bool should be ignored now. It should act as a marker for changed subscription status.
 func (n *Nats) SyncSubscription(sub *eventingv1alpha1.Subscription, cleaner eventtype.Cleaner, _ ...interface{}) (bool, error) {
-	var filters []*eventingv1alpha1.BebFilter
+	var filters []*eventingv1alpha1.BEBFilter
 	if sub.Spec.Filter != nil {
 		uniqueFilters, err := sub.Spec.Filter.Deduplicate()
 		if err != nil {
@@ -183,6 +183,12 @@ func (n *Nats) GetInvalidSubscriptions() *[]types.NamespacedName {
 	return &nsn
 }
 
+// GetAllSubscriptions returns the map which contains all details of subscription
+// Use this only for testing purposes
+func (n *Nats) GetAllSubscriptions() map[string]*nats.Subscription {
+	return n.subscriptions
+}
+
 func (n *Nats) getCallback(sink string) nats.MsgHandler {
 	return func(msg *nats.Msg) {
 		ce, err := convertMsgToCE(msg)
@@ -234,7 +240,7 @@ func createKeyPrefix(sub *eventingv1alpha1.Subscription) string {
 		Namespace: sub.Namespace,
 		Name:      sub.Name,
 	}
-	return fmt.Sprintf("%s", namespacedName.String())
+	return namespacedName.String()
 }
 
 func createKeySuffix(subject string, queueGoupInstanceNo int) string {
@@ -245,7 +251,7 @@ func createKey(sub *eventingv1alpha1.Subscription, subject string, queueGoupInst
 	return fmt.Sprintf("%s.%s", createKeyPrefix(sub), createKeySuffix(subject, queueGoupInstanceNo))
 }
 
-func createSubject(filter *eventingv1alpha1.BebFilter, cleaner eventtype.Cleaner) (string, error) {
+func createSubject(filter *eventingv1alpha1.BEBFilter, cleaner eventtype.Cleaner) (string, error) {
 	eventType := strings.TrimSpace(filter.EventType.Value)
 	if len(eventType) == 0 {
 		return "", nats.ErrBadSubject

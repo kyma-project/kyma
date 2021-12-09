@@ -3,9 +3,6 @@ tests:
     integration: true
     after-upgrade: true
   enabled: true
-  image:
-    name: eu.gcr.io/kyma-project/tpi/k8s-tools
-    version: 20210922-530cfc39
   env:
     namespace: default
   securityContext:
@@ -17,18 +14,6 @@ tests:
       drop:
       - ALL
     privileged: false
-
-bindings:
-  kymaEssentials:
-    groups: []
-  kymaView:
-    groups: []
-  kymaEdit:
-    groups: []
-  kymaAdmin:
-    groups: []
-  kymaDeveloper:
-    groups: []
 
 clusterRoles:
   apiGroups:
@@ -51,16 +36,12 @@ clusterRoles:
       - "gateway.kyma-project.io"
       - "servicecatalog.kyma-project.io"
       - "kyma.cx"
-      - "ui.kyma.cx"
-      - "testing.kyma-project.io"
-      - "installer.kyma-project.io"
       - "serverless.kyma-project.io"
+      - "eventing.kyma-project.io"
     addons:
       - "addons.kyma-project.io"
     monitoring:
       - "monitoring.coreos.com"
-    dex:
-      - "dex.coreos.com"
     ory:
       - "oathkeeper.ory.sh"
       - "hydra.ory.sh"
@@ -69,8 +50,6 @@ clusterRoles:
     kymaEventing: []
     svcat:
       - "settings.svcat.k8s.io"
-    ui:
-      - "ui.kyma-project.io"
   verbs:
     edit:
       - "create"
@@ -85,25 +64,5 @@ clusterRoles:
       - "get"
       - "list"
 global:
-  # groups for Kyma runtime e.g. for UAA integration or RBAC group bindings
-  # BE AWARE: If you are changing the name here then you need to adjust also
-  # values.yaml in `uaa-activator` chart.
-  kymaRuntime:
-    # Note that admin is not deleted although uaa-activator does not have it
-    # Because it is also used in RBAC bindings but will not be available in the XSUAA role list
-    adminGroup: runtimeAdmin
-    operatorGroup: runtimeOperator
-    developerGroup: runtimeDeveloper
-    namespaceAdminGroup: runtimeNamespaceAdmin
-  isLocalEnv: false
   containerRegistry:
     path: "eu.gcr.io/kyma-project"
-  minikubeIP: ""
-  ingress:
-    domainName: "kyma.local"
-
-users:
-  administrators:
-    - "admin@kyma.cx"
-  adminGroup:
-  bindStaticUsers: true

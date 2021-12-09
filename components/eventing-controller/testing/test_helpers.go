@@ -4,45 +4,65 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/types"
+	k8sresource "k8s.io/apimachinery/pkg/api/resource"
 
+	apigatewayv1alpha1 "github.com/kyma-incubator/api-gateway/api/v1alpha1"
+	appsv1 "k8s.io/api/apps/v1"
+	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
+	"k8s.io/apimachinery/pkg/util/intstr"
 	"k8s.io/client-go/dynamic"
 	dynamicfake "k8s.io/client-go/dynamic/fake"
 
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/deployment"
-
-	"github.com/kyma-project/kyma/components/eventing-controller/utils"
-	appsv1 "k8s.io/api/apps/v1"
-
-	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/util/intstr"
-
-	apigatewayv1alpha1 "github.com/kyma-incubator/api-gateway/api/v1alpha1"
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/deployment"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/types"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/object"
-	oryv1alpha1 "github.com/ory/oathkeeper-maester/api/v1alpha1"
+	"github.com/kyma-project/kyma/components/eventing-controller/utils"
 )
 
 const (
 	ApplicationName         = "testapp1023"
 	ApplicationNameNotClean = "test-app_1-0+2=3"
 
-	// event properties
-	EventSource                   = "/default/kyma/id"
-	EventTypePrefix               = "sap.kyma"
-	OrderCreatedEventType         = EventTypePrefix + "." + ApplicationName + ".order.created.v1"
-	OrderCreatedEventTypeNotClean = EventTypePrefix + "." + ApplicationNameNotClean + ".order.created.v1"
-	EventID                       = "8945ec08-256b-11eb-9928-acde48001122"
-	EventSpecVersion              = "1.0"
-	EventData                     = "test-data"
+	EventSource                              = "/default/kyma/id"
+	EventTypePrefix                          = "prefix"
+	EventTypePrefixEmpty                     = ""
+	OrderCreatedV1Event                      = "order.created.v1"
+	OrderUpdatedV1Event                      = "order.updated.v1"
+	OrderCreatedEventType                    = EventTypePrefix + "." + ApplicationName + "." + OrderCreatedV1Event
+	OrderUpdatedEventType                    = EventTypePrefix + "." + ApplicationName + "." + OrderUpdatedV1Event
+	OrderCreatedEventTypeNotClean            = EventTypePrefix + "." + ApplicationNameNotClean + "." + OrderCreatedV1Event
+	OrderCreatedEventTypePrefixEmpty         = ApplicationName + "." + OrderCreatedV1Event
+	OrderCreatedEventTypeNotCleanPrefixEmpty = ApplicationNameNotClean + "." + OrderCreatedV1Event
+	EventID                                  = "8945ec08-256b-11eb-9928-acde48001122"
+	EventSpecVersion                         = "1.0"
+	EventData                                = "test-data"
+
+	CloudEventType        = EventTypePrefix + "." + ApplicationName + ".order.created.v1"
+	CloudEventSource      = "/default/sap.kyma/id"
+	CloudEventSpecVersion = "1.0"
+	CloudEventData        = "{\"foo\":\"bar\"}"
+
+	CeIDHeader          = "ce-id"
+	CeTypeHeader        = "ce-type"
+	CeSourceHeader      = "ce-source"
+	CeSpecVersionHeader = "ce-specversion"
 
 	StructuredCloudEvent = `{
            "id":"` + EventID + `",
            "type":"` + OrderCreatedEventType + `",
+           "specversion":"` + EventSpecVersion + `",
+           "source":"` + EventSource + `",
+           "data":"` + EventData + `"
+        }`
+
+	StructuredCloudEventUpdated = `{
+           "id":"` + EventID + `",
+           "type":"` + OrderUpdatedEventType + `",
            "specversion":"` + EventSpecVersion + `",
            "source":"` + EventSource + `",
            "data":"` + EventData + `"
@@ -86,10 +106,10 @@ func WithService(host, svcName string, apiRule *apigatewayv1alpha1.APIRule) {
 
 func WithPath(apiRule *apigatewayv1alpha1.APIRule) {
 	handlerOAuth := object.OAuthHandlerName
-	handler := oryv1alpha1.Handler{
+	handler := apigatewayv1alpha1.Handler{
 		Name: handlerOAuth,
 	}
-	authenticator := &oryv1alpha1.Authenticator{
+	authenticator := &apigatewayv1alpha1.Authenticator{
 		Handler: &handler,
 	}
 	apiRule.Spec.Rules = []apigatewayv1alpha1.Rule{
@@ -99,7 +119,7 @@ func WithPath(apiRule *apigatewayv1alpha1.APIRule) {
 				http.MethodPost,
 				http.MethodOptions,
 			},
-			AccessStrategies: []*oryv1alpha1.Authenticator{
+			AccessStrategies: []*apigatewayv1alpha1.Authenticator{
 				authenticator,
 			},
 		},
@@ -119,9 +139,9 @@ func WithStatusReady(apiRule *apigatewayv1alpha1.APIRule) {
 	}
 }
 
-type subOpt func(subscription *eventingv1alpha1.Subscription)
+type SubscriptionOpt func(subscription *eventingv1alpha1.Subscription)
 
-func NewSubscription(name, namespace string, opts ...subOpt) *eventingv1alpha1.Subscription {
+func NewSubscription(name, namespace string, opts ...SubscriptionOpt) *eventingv1alpha1.Subscription {
 	newSub := &eventingv1alpha1.Subscription{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      name,
@@ -170,9 +190,9 @@ func WithDefaultWebhookAuth(protoSettings *eventingv1alpha1.ProtocolSettings) {
 	protoSettings.WebhookAuth = &eventingv1alpha1.WebhookAuth{
 		Type:         "oauth2",
 		GrantType:    "client_credentials",
-		ClientId:     "xxx",
+		ClientID:     "xxx",
 		ClientSecret: "xxx",
-		TokenUrl:     "https://oauth2.xxx.com/oauth2/token",
+		TokenURL:     "https://oauth2.xxx.com/oauth2/token",
 		Scope:        []string{"guid-identifier"},
 	}
 }
@@ -185,7 +205,7 @@ func NewBEBSubscription(name, contentMode string, webhookURL string, events type
 		ExemptHandshake: true,
 		Events:          events,
 		WebhookAuth:     webhookAuth,
-		WebhookUrl:      webhookURL,
+		WebhookURL:      webhookURL,
 	}
 }
 
@@ -222,9 +242,9 @@ func WithWebhookAuthForBEB(s *eventingv1alpha1.Subscription) {
 		WebhookAuth: &eventingv1alpha1.WebhookAuth{
 			Type:         "oauth2",
 			GrantType:    "client_credentials",
-			ClientId:     "xxx",
+			ClientID:     "xxx",
 			ClientSecret: "xxx",
-			TokenUrl:     "https://oauth2.xxx.com/oauth2/token",
+			TokenURL:     "https://oauth2.xxx.com/oauth2/token",
 			Scope:        []string{"guid-identifier"},
 		},
 	}
@@ -238,8 +258,8 @@ func WithWebhookForNats(s *eventingv1alpha1.Subscription) {
 // WithNotCleanEventTypeFilter initializes subscription filter with a not clean event-type
 // A not clean event-type means it contains none-alphanumeric characters
 func WithNotCleanEventTypeFilter(s *eventingv1alpha1.Subscription) {
-	s.Spec.Filter = &eventingv1alpha1.BebFilters{
-		Filters: []*eventingv1alpha1.BebFilter{
+	s.Spec.Filter = &eventingv1alpha1.BEBFilters{
+		Filters: []*eventingv1alpha1.BEBFilter{
 			{
 				EventSource: &eventingv1alpha1.Filter{
 					Type:     "exact",
@@ -256,52 +276,36 @@ func WithNotCleanEventTypeFilter(s *eventingv1alpha1.Subscription) {
 	}
 }
 
-func WithEmptyEventTypeFilter(s *eventingv1alpha1.Subscription) {
-	s.Spec.Filter = &eventingv1alpha1.BebFilters{
-		Filters: []*eventingv1alpha1.BebFilter{
-			{
-				EventSource: &eventingv1alpha1.Filter{
-					Type:     "exact",
-					Property: "source",
-					Value:    EventSource,
-				},
-				EventType: &eventingv1alpha1.Filter{
-					Type:     "exact",
-					Property: "type",
-					Value:    "",
+// WithFilter sets the Subscription filter with the given event source and type.
+func WithFilter(eventSource, eventType string) SubscriptionOpt {
+	return func(subscription *eventingv1alpha1.Subscription) {
+		subscription.Spec.Filter = &eventingv1alpha1.BEBFilters{
+			Filters: []*eventingv1alpha1.BEBFilter{
+				{
+					EventSource: &eventingv1alpha1.Filter{
+						Type:     "exact",
+						Property: "source",
+						Value:    eventSource,
+					},
+					EventType: &eventingv1alpha1.Filter{
+						Type:     "exact",
+						Property: "type",
+						Value:    eventType,
+					},
 				},
 			},
-		},
+		}
 	}
 }
 
 func WithEventTypeFilter(s *eventingv1alpha1.Subscription) {
-	s.Spec.Filter = &eventingv1alpha1.BebFilters{
-		Filters: []*eventingv1alpha1.BebFilter{
+	s.Spec.Filter = &eventingv1alpha1.BEBFilters{
+		Filters: []*eventingv1alpha1.BEBFilter{
 			{
 				EventSource: &eventingv1alpha1.Filter{
 					Type:     "exact",
 					Property: "source",
 					Value:    EventSource,
-				},
-				EventType: &eventingv1alpha1.Filter{
-					Type:     "exact",
-					Property: "type",
-					Value:    OrderCreatedEventType,
-				},
-			},
-		},
-	}
-}
-
-func WithEmptySourceEventType(s *eventingv1alpha1.Subscription) {
-	s.Spec.Filter = &eventingv1alpha1.BebFilters{
-		Filters: []*eventingv1alpha1.BebFilter{
-			{
-				EventSource: &eventingv1alpha1.Filter{
-					Type:     "exact",
-					Property: "source",
-					Value:    "",
 				},
 				EventType: &eventingv1alpha1.Filter{
 					Type:     "exact",
@@ -443,6 +447,40 @@ func WithEventingControllerDeployment() *appsv1.Deployment {
 		Status: appsv1.DeploymentStatus{},
 	}
 }
+func WithEventingControllerPod(backend string) *corev1.Pod {
+	labels := map[string]string{
+		deployment.AppLabelKey: deployment.PublisherName,
+	}
+	return &corev1.Pod{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "eventing-publisher-proxy-fffff",
+			Namespace: deployment.ControllerNamespace,
+			Labels:    labels,
+		},
+		Spec: corev1.PodSpec{
+			Containers: []corev1.Container{
+				{
+					Name:  deployment.PublisherName,
+					Image: "container-image1",
+					Env: []corev1.EnvVar{{
+						Name:  "BACKEND",
+						Value: backend,
+					}},
+					Resources: corev1.ResourceRequirements{
+						Limits: map[corev1.ResourceName]k8sresource.Quantity{
+							corev1.ResourceCPU:    k8sresource.MustParse("50m"),
+							corev1.ResourceMemory: k8sresource.MustParse("50Mi"),
+						},
+						Requests: map[corev1.ResourceName]k8sresource.Quantity{
+							corev1.ResourceCPU:    k8sresource.MustParse("20m"),
+							corev1.ResourceMemory: k8sresource.MustParse("20Mi"),
+						},
+					},
+				},
+			},
+		},
+	}
+}
 
 // ToSubscription converts an unstructured subscription into a typed one
 func ToSubscription(unstructuredSub *unstructured.Unstructured) (*eventingv1alpha1.Subscription, error) {
@@ -454,15 +492,15 @@ func ToSubscription(unstructuredSub *unstructured.Unstructured) (*eventingv1alph
 	return subscription, nil
 }
 
-// ToUnstructuredApiRule converts an APIRule object into a unstructured APIRule
-func ToUnstructuredApiRule(obj interface{}) (*unstructured.Unstructured, error) {
-	unstructured := &unstructured.Unstructured{}
+// ToUnstructuredAPIRule converts an APIRule object into a unstructured APIRule
+func ToUnstructuredAPIRule(obj interface{}) (*unstructured.Unstructured, error) {
+	u := &unstructured.Unstructured{}
 	unstructuredObj, err := runtime.DefaultUnstructuredConverter.ToUnstructured(obj)
 	if err != nil {
 		return nil, err
 	}
-	unstructured.Object = unstructuredObj
-	return unstructured, nil
+	u.Object = unstructuredObj
+	return u, nil
 }
 
 // SetupSchemeOrDie add a scheme to eventing API schemes
@@ -496,4 +534,17 @@ func NewFakeSubscriptionClient(sub *eventingv1alpha1.Subscription) (dynamic.Inte
 
 	dynamicClient := dynamicfake.NewSimpleDynamicClient(scheme, sub)
 	return dynamicClient, nil
+}
+
+func GetStructuredMessageHeaders() http.Header {
+	return http.Header{"Content-Type": []string{"application/cloudevents+json"}}
+}
+
+func GetBinaryMessageHeaders() http.Header {
+	headers := make(http.Header)
+	headers.Add(CeIDHeader, EventID)
+	headers.Add(CeTypeHeader, CloudEventType)
+	headers.Add(CeSourceHeader, CloudEventSource)
+	headers.Add(CeSpecVersionHeader, CloudEventSpecVersion)
+	return headers
 }

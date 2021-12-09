@@ -46,7 +46,7 @@ spec:
       {{- end }}
       containers:
         - name: {{ include "rafterFrontMatterService.name" . }}
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.rafter_front_matter_service) }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           resources:
             requests:

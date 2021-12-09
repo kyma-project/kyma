@@ -28,7 +28,7 @@ spec:
       restartPolicy: Always
       containers:
       - name: "{{ template "etcd-hb-fullname" . }}"
-        image: "{{.Values.etcd.image}}:{{.Values.etcd.imageTag}}"
+        image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.etcd) }}"
         ports:
         - containerPort: 2379
           name: client

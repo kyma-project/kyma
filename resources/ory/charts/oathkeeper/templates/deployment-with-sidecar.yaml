@@ -11,7 +11,9 @@ metadata:
     mode: {{ .Values.global.ory.oathkeeper.maester.mode }}
 {{ include "oathkeeper.labels" . | indent 4 }}
 spec:
+{{- if not .Values.deployment.autoscaling.enabled }}
   replicas: {{ .Values.replicaCount }}
+{{- end }}
   selector:
     matchLabels:
       app.kubernetes.io/name: {{ include "oathkeeper.name" . }}
@@ -47,7 +49,7 @@ spec:
             secretName: {{ include "oathkeeper.fullname" . }}-jwks-secret
       initContainers:
         - name: init
-          image: "{{ .Values.busybox.repository }}:{{ .Values.busybox.tag }}"
+          image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.busybox) }}"
           volumeMounts:
             - name: {{ include "oathkeeper.name" . }}-rules-volume
               mountPath: /etc/rules
@@ -69,7 +71,7 @@ spec:
             runAsUser: 65534
       containers:
         - name: {{ .Chart.Name }}
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.oathkeeper) }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           command: [ "oathkeeper", "serve", "--config", "/etc/config/config.yaml" ]
           env:
@@ -120,7 +122,7 @@ spec:
           resources:
             {{- toYaml .Values.deployment.resources | nindent 12 }}
         - name: {{ .Chart.Name }}-maester
-          image: "{{ .Values.sidecar.image.repository }}:{{ .Values.sidecar.image.tag }}"
+          image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.oathkeeper_maester) }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           command:
             - /manager

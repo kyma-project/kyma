@@ -36,7 +36,7 @@ spec:
       serviceAccount: {{ .Chart.Name }}
       containers:
       - name: {{ .Chart.Name }}
-        image: {{ .Values.global.containerRegistry.path }}/connection-token-handler:{{ .Values.global.connection_token_handler.version }}
+        image: {{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.connection_token_handler) }}
         imagePullPolicy: {{ .Values.deployment.image.pullPolicy }}
         resources:
           limits:

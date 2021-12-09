@@ -9,9 +9,9 @@
 
 ## Overview
 
-**Kyma** `/kee-ma/` is a platform for extending applications with microservices and [serverless](https://kyma-project.io/docs/components/serverless/#overview-overview) Functions. It provides CLI and UI through which you can connect your application to a Kubernetes cluster. You can also expose the application's API or events securely thanks to the built-in [Application Connector](https://kyma-project.io/docs/components/application-connector/#overview-overview). You can then implement the business logic you require by creating microservices or serverless Functions. Trigger them to react to particular events or calls to your application's API.
+**Kyma** `/kee-ma/` is a platform for extending applications with microservices and [serverless](https://kyma-project.io/docs/kyma/latest/01-overview/main-areas/serverless/) Functions. It provides CLI and UI through which you can connect your application to a Kubernetes cluster. You can also expose the application's API or events securely thanks to the built-in [Application Connector](https://kyma-project.io/docs/kyma/latest/01-overview/main-areas/application-connectivity/). You can then implement the business logic you require by creating microservices or serverless Functions. Trigger them to react to particular events or calls to your application's API.
 
-To limit the time spent on coding, use the built-in cloud services from [Service Catalog](https://kyma-project.io/docs/components/service-catalog/#overview-service-catalog), exposed by [Service Brokers](https://kyma-project.io/docs/components/service-catalog/#overview-service-brokers) from such cloud providers as GCP, Azure, and AWS.
+To limit the time spent on coding, use the built-in cloud services from [Service Management](https://kyma-project.io/docs/kyma/latest/01-overview/main-areas/service-management/smgt-01-overview/) from such cloud providers as GCP, Azure, and AWS.
 
 <p align="center">
 <a href="https://youtu.be/kP7mSELIxXw">
@@ -23,9 +23,9 @@ Go to the [Kyma project website](https://kyma-project.io/) to learn more about o
 
 ## Installation
 
-Install Kyma locally or on a cluster. See the [Installation guides](https://kyma-project.io/docs/root/kyma#installation-installation) for details.
+Install Kyma locally or on a cluster. See the [Installation guides](https://kyma-project.io/docs/kyma/latest/04-operation-guides/operations/02-install-kyma/) for details.
 
-> **NOTE:** Make sure to install the latest Kyma version and keep it up to date by [upgrading Kyma](https://kyma-project.io/docs/#installation-upgrade-kyma).
+> **NOTE:** Make sure to install the latest Kyma version and keep it up to date by [upgrading Kyma](https://kyma-project.io/docs/kyma/latest/04-operation-guides/operations/05-upgrade-kyma/).
 
 ## Usage
 
@@ -34,7 +34,7 @@ Kyma comes with the ready-to-use code snippets that you can use to test the exte
 ## Development
 
 Develop on your remote repository forked from the original repository in Go.
-See the example that uses the [`console-backend-service`](components/console-backend-service) project located in the `components` directory but applies to any Go project. This set of instructions uses the recommended [`git workflow`](https://kyma-project.io/community/contributing/#git-workflow-git-workflow) and the general [contribution flow](https://kyma-project.io/community/contributing/#contributing-rules-contributing-rules-contribute-code-or-content). Read also the [`CONTRIBUTING.md`](CONTRIBUTING.md) document that includes the contributing rules specific for this repository.
+Read also the [`CONTRIBUTING.md`](CONTRIBUTING.md) document that includes the contributing rules specific for this repository.
 
 Follow these steps:
 
@@ -48,29 +48,17 @@ Follow these steps:
     git clone git@github.com:{GitHubUsername}/kyma.git $GOPATH/src/github.com/kyma-project/kyma
     ```
 
-    Follow the steps described in the [`git-workflow.md`](https://kyma-project.io/community/contributing#git-workflow-git-workflow-steps) document to configure your fork.
+    Follow the steps described in the [`git-workflow.md`](https://kyma-project.io/community/contributing/03-git-workflow/) document to configure your fork.
 
-3. Install dependencies.
-
-    Go to the main directory of the project in your workspace location and install the required dependencies:
-
-    ```bash
-    cd components/console-backend-service
-    dep ensure -vendor-only
-    ```
-
-4. Build the project.
+3. Build the project.
 
     Every project runs differently. Follow instructions in the main `README.md` document of the given project to build it.
 
-5. Create a branch and start to develop.
+4. Create a branch and start to develop.
 
     Do not forget about creating unit and acceptance tests if needed. For the unit tests, follow the instructions specified in the main `README.md` document of the given project. For the details concerning the acceptance tests, go to the corresponding directory inside the `tests` directory.
-    Find the information on how to run changes on the cluster without a Docker image in the [Develop a service locally without using Docker](https://kyma-project.io/docs/root/kyma#tutorials-develop-a-service-locally-without-using-docker) document.
 
-6. Test your changes.
-
-    >**NOTE:** For more details about testing, go to the [Testing Kyma](https://kyma-project.io/docs/root/kyma#details-testing-kyma) document.
+5. Test your changes.
 
 ## Kyma users
 

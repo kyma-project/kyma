@@ -1,3 +1,5 @@
+{{- $rollme := include "tplValue" ( dict "value" .Values.rollme "context" . ) -}}
+{{- $registryHTTPSecret := include "tplValue" ( dict "value" .Values.registryHTTPSecret "context" . ) -}}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -26,7 +28,7 @@ spec:
 {{ toYaml .Values.podLabels | indent 8 }}
         {{- end }}
       annotations:
-        rollme: {{ randAlphaNum 5 | quote }}
+        rollme: {{ $rollme | quote }}
 {{- if $.Values.podAnnotations }}
 {{ toYaml $.Values.podAnnotations | indent 8 }}
 {{- end }}
@@ -45,7 +47,7 @@ spec:
 {{- end }}
       initContainers:
         - name: generate-htpasswd
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.registry) }}"
 {{- if .Values.securityContext.enabled }}
           securityContext:
             privileged: {{ .Values.securityContext.privileged }}
@@ -62,13 +64,13 @@ spec:
           # TODO: after helm@3.5.0 is used in kyma-installer we may be able to remove that init container, as helm 3.5.0 uses sprig@3.2.0, which has `bcrypt` function
           # might want to investigate
             - sh
-            - -c
+            - -ec
             - |
               htpasswd -Bbn $(cat /regcred/username.txt) $(cat /regcred/password.txt) > ./data/htpasswd
               echo "Generated htpasswd file for docker-registry..."
       containers:
         - name: {{ .Chart.Name }}
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.registry) }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
 {{- if .Values.securityContext.enabled }}
           securityContext:
@@ -107,7 +109,7 @@ spec:
             - name: REGISTRY_HTTP_SECRET
             # https://docs.docker.com/registry/configuration/#http, there's no problem that it is plainly seen
             # using kubectl describe
-              value: {{ randAlphaNum 16 | b64enc | quote }}
+              value: {{ $registryHTTPSecret | quote }}
 {{- if .Values.tlsSecretName }}
             - name: REGISTRY_HTTP_TLS_CERTIFICATE
               value: /etc/ssl/docker/tls.crt

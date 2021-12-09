@@ -1,9 +1,3 @@
-## Google Cloud SQL Proxy image
-## ref: https://cloud.google.com/sql/docs/mysql/sql-proxy
-## ref: https://cloud.google.com/sql/docs/postgres/sql-proxy
-image: gcr.io/cloudsql-docker/gce-proxy
-imageTag: "1.19.1-alpine"
-
 ## Specify an imagePullPolicy
 ## 'Always' if imageTag is 'latest', otherwise set to 'IfNotPresent'
 ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images

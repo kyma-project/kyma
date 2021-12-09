@@ -1,40 +1,17 @@
 APP_NAME = event-publisher-proxy
 APP_PATH = components/$(APP_NAME)
-BUILDPACK = eu.gcr.io/kyma-project/test-infra/buildpack-golang-toolbox:v20200117-d3885041
 SCRIPTS_DIR = $(realpath $(shell pwd)/../..)/common/makefiles
 
+# fail on lint issues
+override IGNORE_LINTING_ISSUES =
 override ENTRYPOINT = cmd/main.go
 
 include $(SCRIPTS_DIR)/generic-make-go.mk
 
 VERIFY_IGNORE := /vendor\|/mocks
 
-verify:: mod-verify
-
-resolve-local:
-	GO111MODULE=on go mod vendor -v
-
-ensure-local:
-	@echo "Go modules present in component - omitting."
-
-dep-status:
-	@echo "Go modules present in component - omitting."
-
-dep-status-local:
-	@echo "Go modules present in component - omitting."
-
-mod-verify-local:
-	GO111MODULE=on go mod verify
-
-# Use it before commit
-check-code: check-imports fmt-local vet-local lint
-
-test-local:
-	GO111MODULE=on go test ./... -coverprofile cover.out
-
-$(eval $(call buildpack-cp-ro,resolve))
-$(eval $(call buildpack-mount,mod-verify))
-$(eval $(call buildpack-mount,test))
+release:
+	$(MAKE) gomod-release-local
 
 path-to-referenced-charts:
 	@echo "resources/event-publisher-proxy"
@@ -46,9 +23,6 @@ cmds_images = $(foreach cmd,$(cmds),$(cmd).image)
 cmds_clean = $(foreach cmd,$(cmds),$(cmd).clean)
 # produce goals to push images for each cmd program ("bin1.image.push bin2.image.push ...")
 cmds_images_push = $(foreach img,$(cmds_images),$(img).push)
-
-MOUNT_TARGETS = $(cmds)
-$(foreach t,$(MOUNT_TARGETS),$(eval $(call buildpack-mount,$(t))))
 
 .PHONY: clean
 clean: $(cmds_clean) resolve_clean licenses_clean
@@ -74,7 +48,7 @@ push-image: $(cmds_images_push) ;
 #   make event-publisher-proxy
 GOBUILD_FLAGS := -v
 PKG := github.com/kyma-project/kyma/components/event-publisher-proxy
-$(cmds): %: resolve-local
+$(cmds): %:
 	@echo "+ Building $*"
 	@CGO_ENABLED=0 go build -o $* \
 		$(GOBUILD_FLAGS) \
@@ -82,7 +56,7 @@ $(cmds): %: resolve-local
 
 # Example:
 #   make event-publisher-proxy.image
-$(cmds_images): %.image: build pull-licenses
+$(cmds_images): %.image: build-local pull-licenses
 	$(eval $@_img_name := $*)
 	@echo "+ Building container image $($@_img_name)"
 	docker image build -f cmd/$*/Dockerfile -t $($@_img_name) .

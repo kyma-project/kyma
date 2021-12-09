@@ -46,6 +46,30 @@ npm install
 npm test
 ```
 
+To run Eventing-specific tests locally, follow these steps:
+1. Install dependencies:
+```bash
+cd kyma/tests/fast-integration
+npm install
+```
+
+2. Define the Event Mesh Credentials JSON file path in the `EVENTMESH_SECRET_FILE` environment variable:
+```
+ export EVENTMESH_SECRET_FILE="<PATH_TO_EVENT_MESH_SECRET_FILE>"
+```
+>**NOTE:** The Event Mesh Credentials JSON file can be downloaded from the BTP Cockpit under your subaccount instances.
+3. Execute the Eventing tests:
+```
+npm run test-eventing
+```
+
+> **NOTE:** You can change the Namespace used for the Commerce Mock objects using:
+> ```
+> MOCK_NAMESPACE=mock2 make ci-test-eventing
+> ```
+> Using a different Namespace changes the host used for the Commerce Mock APIRule as well. 
+> This allows different Commerce Mocks to co-exist in different Namespaces.
+
 ## Local development
 
 Here you have sample development tasks you can execute on your local machine working with the Kyma source code.

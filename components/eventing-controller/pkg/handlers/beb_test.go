@@ -10,13 +10,14 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	kymalogger "github.com/kyma-project/kyma/common/logging/logger"
+
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 	"github.com/kyma-project/kyma/components/eventing-controller/logger"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
 	controllertesting "github.com/kyma-project/kyma/components/eventing-controller/testing"
 )
 
-func Test_SyncBebSubscription(t *testing.T) {
+func Test_SyncBEBSubscription(t *testing.T) {
 	g := NewWithT(t)
 
 	credentials := &OAuth2ClientCredentials{
@@ -27,13 +28,13 @@ func Test_SyncBebSubscription(t *testing.T) {
 	defaultLogger, err := logger.New(string(kymalogger.JSON), string(kymalogger.INFO))
 	g.Expect(err).To(BeNil())
 
-	nameMapper := NewBebSubscriptionNameMapper("mydomain.com", MaxBEBSubscriptionNameLength)
+	nameMapper := NewBEBSubscriptionNameMapper("mydomain.com", MaxBEBSubscriptionNameLength)
 	beb := NewBEB(credentials, nameMapper, defaultLogger)
 
 	// start BEB Mock
-	bebMock := startBebMock()
+	bebMock := startBEBMock()
 	envConf := env.Config{
-		BebApiUrl:                bebMock.MessagingURL,
+		BEBAPIURL:                bebMock.MessagingURL,
 		ClientID:                 "client-id",
 		ClientSecret:             "client-secret",
 		TokenEndpoint:            bebMock.TokenURL,
@@ -92,16 +93,16 @@ func fixtureValidSubscription(name, namespace string) *eventingv1alpha1.Subscrip
 				WebhookAuth: &eventingv1alpha1.WebhookAuth{
 					Type:         "oauth2",
 					GrantType:    "client_credentials",
-					ClientId:     "xxx",
+					ClientID:     "xxx",
 					ClientSecret: "xxx",
-					TokenUrl:     "https://oauth2.xxx.com/oauth2/token",
+					TokenURL:     "https://oauth2.xxx.com/oauth2/token",
 					Scope:        []string{"guid-identifier"},
 				},
 			},
 			Sink: "https://webhook.xxx.com",
-			Filter: &eventingv1alpha1.BebFilters{
+			Filter: &eventingv1alpha1.BEBFilters{
 				Dialect: "beb",
-				Filters: []*eventingv1alpha1.BebFilter{
+				Filters: []*eventingv1alpha1.BEBFilter{
 					{
 						EventSource: &eventingv1alpha1.Filter{
 							Type:     "exact",
@@ -120,16 +121,16 @@ func fixtureValidSubscription(name, namespace string) *eventingv1alpha1.Subscrip
 	}
 }
 
-func startBebMock() *controllertesting.BebMock {
+func startBEBMock() *controllertesting.BEBMock {
 	bebConfig := &config.Config{}
-	beb := controllertesting.NewBebMock(bebConfig)
+	beb := controllertesting.NewBEBMock(bebConfig)
 	bebURI := beb.Start()
 	tokenURL := fmt.Sprintf("%s%s", bebURI, controllertesting.TokenURLPath)
 	messagingURL := fmt.Sprintf("%s%s", bebURI, controllertesting.MessagingURLPath)
 	beb.TokenURL = tokenURL
 	beb.MessagingURL = messagingURL
 	bebConfig = config.GetDefaultConfig(messagingURL)
-	beb.BebConfig = bebConfig
+	beb.BEBConfig = bebConfig
 	return beb
 }
 

@@ -21,10 +21,6 @@ import (
 var (
 	isValidEventTypeVersion = regexp.MustCompile(AllowedEventTypeVersionChars).MatchString
 	isValidEventID          = regexp.MustCompile(AllowedEventIDChars).MatchString
-	// eventTypePrefixFormat is driven by BEB specification.
-	// An EventType must have at least 4 segments separated by dots in the form of:
-	// <domainNamespace>.<businessObjectName>.<operation>.<version>
-	eventTypePrefixFormat = "%s.%s.%s.%s"
 )
 
 const (
@@ -146,7 +142,6 @@ func (t Transformer) TransformsCEResponseToLegacyResponse(writer http.ResponseWr
 	// Success
 	response.Ok = &apiv1.PublishResponse{EventID: event.ID()}
 	writeJSONResponse(writer, response)
-	return
 }
 
 // convertPublishRequestToCloudEvent converts the given publish request to a CloudEvent.

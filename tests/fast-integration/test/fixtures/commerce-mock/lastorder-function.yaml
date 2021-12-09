@@ -26,19 +26,20 @@ spec:
         return {
           payload: data,
           headers: {
-            "ce-source": "/default/sap.kyma/tunas-prow",
+            "ce-source": "%%BEB_NAMESPACE%%",
             "ce-specversion": "1.0",
             "ce-eventtypeversion": "v1",
             "ce-id": (data.id || "dummyId"),
             "ce-type": type,
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
+            "X-B3-Sampled": 1
           }
         }
       }
       // structured encoding
       return {
         payload: {
-          source: "/default/sap.kyma/tunas-prow",
+          source: "%%BEB_NAMESPACE%%",
           specversion: "1.0",
           eventtypeversion: "v1",
           datacontenttype: "application/json",
@@ -47,7 +48,8 @@ spec:
           data
         },
         headers: {
-          "Content-Type": "application/cloudevents+json"
+          "Content-Type": "application/cloudevents+json",
+          "X-B3-Sampled": 1
         }
       }
     }
@@ -84,23 +86,23 @@ spec:
           try {
             const encoding = event.extensions.request.query.encoding
             const response = await sendEvent("sap.kyma.custom.inapp.order.received.v1", event.data, encoding);
-            console.log("In-app message sent");
+            console.log("In-app message sent. Publisher proxy response:", response.status);
           } catch (e) {
             console.dir(e)
           }
         } else if (event.extensions.request.query.inappevent) {
-          return inAppEvent[event.extensions.request.query.inappevent];  
+          return {event:inAppEvent[event.extensions.request.query.inappevent], podName: process.env.HOSTNAME};
         } else if (event["ce-type"] && event["ce-type"].includes("order.received")){
           console.log("Got in-app event:", event.data);
-          inAppEvent[event.data.id] = { ...cloudEventHeaders(event), shipped:true, ...event.data };
+          inAppEvent[event.data.id] = { ...cloudEventHeaders(event), shipped:true, ...event.data, headers:event.extensions.request.headers };
         } else if (event["ce-type"] && event["ce-type"].includes("order.created")) {
           console.log("Order created event:", event.data)
-          lastEvent = { ...cloudEventHeaders(event), data: event.data };
+          lastEvent = { ...cloudEventHeaders(event), data: event.data, headers:event.extensions.request.headers };
         }
         if (event.data && event.data.orderCode) {
             lastOrder = await getOrder(event.data.orderCode);
         }
-        return {order:lastOrder, event:lastEvent};
+        return {order:lastOrder, event:lastEvent, podName: process.env.HOSTNAME};
       }
     }
 ---

@@ -1,11 +1,11 @@
 global:
+  domainName: kyma.example.com
+  containerRegistry:
+    path: eu.gcr.io/kyma-project
   images:
-    containerRegistry:
-      path: eu.gcr.io/kyma-project
-    runtimeAgent:
-      version: "PR-11678"
-    runtimeAgentTests:
-      version: "5b55dce8"
+    compass_runtime_agent:
+      name: "compass-runtime-agent"
+      version: "5e1e226f"
   istio:
     gateway:
       name: kyma-gateway
@@ -25,6 +25,7 @@ compassRuntimeAgent:
     dexSecretName: "admin-user"
     gatewayPort: 8080
     uploadServiceUrl: http://rafter-upload-service.kyma-system.svc.cluster.local:80
+    centralGatewayServiceUrl: http://central-application-gateway.kyma-system.svc.cluster.local:8082
   config:
     insecureConfigurationFetch: true
     secret:

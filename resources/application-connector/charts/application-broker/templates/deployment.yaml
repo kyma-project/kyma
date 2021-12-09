@@ -37,7 +37,7 @@ spec:
       serviceAccountName: {{ .Chart.Name }}
       containers:
       - name: ctrl
-        image: "{{ .Values.global.containerRegistry.path }}/application-broker:{{ .Values.global.application_broker.version }}"
+        image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.application_broker) }}"
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         resources:
 {{ toYaml .Values.ctrl.resources | indent 10 }}

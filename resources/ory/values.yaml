@@ -1,5 +1,6 @@
 # Global or kyma related overrides
 global:
+  domainName: "kyma.example.com"
   postgresql:
     postgresqlDatabase: db4hydra
     postgresqlUsername: hydra
@@ -24,31 +25,60 @@ global:
         # dbUrl: "mydb.mynamespace.svc.cluster.local:1234"
         # dbName: "db4hydra"
         # dbType: "postgres | mysql | cockroach"
+  containerRegistry:
+    path: eu.gcr.io/kyma-project
+  images:
+    k8s_tools:
+      name: "k8s-tools"
+      version: "20211022-85284bf9"
+      directory: "tpi"
+    ## Google Cloud SQL Proxy image
+    ## ref: https://cloud.google.com/sql/docs/mysql/sql-proxy
+    ## ref: https://cloud.google.com/sql/docs/postgres/sql-proxy
+    gce_proxy:
+      name: "gce-proxy"
+      version: "v1.27.0-alpine-7c52185c"
+      directory: "tpi/cloudsql-docker"
+    hydra:
+      name: "hydra"
+      version: "v1.10.7-sqlite"
+      directory: "external/oryd"
+    hydra_maester:
+      name: "hydra-maester"
+      version: "v0.0.24"
+      directory: "external/oryd"
+    busybox:
+      name: "busybox"
+      version: "1.34.1"
+      directory: "external"
+    oathkeeper:
+      name: "oathkeeper"
+      version: "v0.38.15-alpine"
+      directory: "external/oryd"
+    oathkeeper_maester:
+      name: "oathkeeper-maester"
+      version: "v0.1.5"
+      directory: "external/oryd"
+    postgres:
+      name: "postgres"
+      version: "11.14-alpine-v1"
+      directory: "external"
+    postgres_exporter:
+      name: "postgres-exporter"
+      version: "0.8.0-debian-10-r28"
+      directory: "external/bitnami"
+    alpine:
+      name: "alpine"
+      version: "3.14.2"
+      directory: "external"
+
 headerRewrite:
   enabled: true
   certificateDataHeader: "Certificate-Data"
   workloadLabel: oathkeeper
-hpa:
-  oathkeeper:
-    enabled: true
-    minReplicas: 1
-    maxReplicas: 3
-    cpu: 80
-    metrics:
-    - type: Resource
-      resource:
-        name: memory
-        targetAverageUtilization: 75
-    - type: Resource
-      resource:
-        name: cpu
-        targetAverageUtilization: 80
 
 # Maintenance options
 maintenance:
-  image:
-    name: eu.gcr.io/kyma-project/tpi/k8s-tools
-    tag: "20210922-530cfc39"
   podSecurityPolicy:
     enabled: true
 
@@ -109,8 +139,6 @@ hydra:
 
 # Overrides for the Oathkeeper chart
 oathkeeper:
-  kubectlJob:
-    image: eu.gcr.io/kyma-project/tpi/k8s-tools:20210922-530cfc39
   oathkeeper:
     config:
       authenticators:
@@ -151,7 +179,6 @@ oathkeeper:
           enabled: true
           config:
             jwks_urls:
-            - http://dex-service.kyma-system.svc.cluster.local:5556/keys
             - http://ory-hydra-public.kyma-system.svc.cluster.local:4444/.well-known/jwks.json
             scope_strategy: wildcard
       authorizers:
@@ -207,6 +234,12 @@ oathkeeper:
       requests:
         cpu: 50m
         memory: 64Mi
+    autoscaling:
+      enabled: true
+      minReplicas: 1
+      maxReplicas: 3
+      targetMemoryUtilizationPercentage: 75
+      targetCPUUtilizationPercentage: 80    
   oathkeeper-maester:
     deployment:
       annotations:

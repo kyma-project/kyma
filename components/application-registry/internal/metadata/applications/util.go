@@ -28,6 +28,7 @@ func convertFromK8sType(service v1alpha1.Service) (Service, apperrors.AppError) 
 			if entry.Type == specAPIType {
 				api = &ServiceAPI{
 					GatewayURL:                  entry.GatewayUrl,
+					CentralGatewayURL:           entry.CentralGatewayUrl,
 					AccessLabel:                 entry.AccessLabel,
 					TargetUrl:                   entry.TargetUrl,
 					SpecificationUrl:            entry.SpecificationUrl,
@@ -81,6 +82,7 @@ func convertToK8sType(service Service) v1alpha1.Service {
 		apiEntry := v1alpha1.Entry{
 			Type:                        specAPIType,
 			GatewayUrl:                  service.API.GatewayURL,
+			CentralGatewayUrl:           service.API.CentralGatewayURL,
 			AccessLabel:                 service.API.AccessLabel,
 			TargetUrl:                   service.API.TargetUrl,
 			SpecificationUrl:            service.API.SpecificationUrl,

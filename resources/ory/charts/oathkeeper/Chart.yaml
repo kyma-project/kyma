@@ -23,7 +23,5 @@ maintainers: # (optional)
 type: application
 dependencies:
   - name: oathkeeper-maester
-    version: 0.5.7
-    condition: maester.enabled
-    alias: oathkeeper-maester
-    repository: file://../oathkeeper-maester
+    version: 0.0.1
+    condition: oathkeeper-maester.enabled

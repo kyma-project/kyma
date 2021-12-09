@@ -119,52 +119,6 @@ func (hb *handlerBuilder) WithApps(appHandlerCfg Config) {
 		hb.funcMiddlwares.RuntimeURLsMiddleware)
 }
 
-func (hb *handlerBuilder) WithRuntimes(runtimeHandlerCfg Config) {
-	runtimeInfoHandler := NewCSRInfoHandler(runtimeHandlerCfg.TokenCreator, runtimeHandlerCfg.ContextExtractor, runtimeHandlerCfg.ManagementInfoURL, runtimeHandlerCfg.ConnectorServiceBaseURL)
-	runtimeRenewalHandler := NewSignatureHandler(runtimeHandlerCfg.CertService, runtimeHandlerCfg.ContextExtractor)
-	runtimeSignatureHandler := NewSignatureHandler(runtimeHandlerCfg.CertService, runtimeHandlerCfg.ContextExtractor)
-	runtimeManagementInfoHandler := NewManagementInfoHandler(runtimeHandlerCfg.ContextExtractor, runtimeHandlerCfg.CertificateProtectedBaseURL)
-	runtimeRevocationHandler := NewRevocationHandler(runtimeHandlerCfg.RevokedCertsRepo, runtimeHandlerCfg.HeaderParser)
-
-	csrRuntimesRouter := hb.router.PathPrefix("/v1/runtimes/signingRequests").Subrouter()
-	csrRuntimesRouter.HandleFunc("/info", runtimeInfoHandler.GetCSRInfo).Methods(http.MethodGet)
-	httphelpers.WithMiddlewares(
-		csrRuntimesRouter,
-		hb.funcMiddlwares.RuntimeTokenResolverMiddleware)
-
-	runtimeRenewalRouter := hb.router.Path("/v1/runtimes/certificates/renewals").Subrouter()
-	runtimeRenewalRouter.HandleFunc("", runtimeRenewalHandler.SignCSR).Methods(http.MethodPost)
-	renewalAuditLoggingMiddleware := hb.createRenewalAuditLogMiddleware(runtimeHandlerCfg.ContextExtractor)
-	httphelpers.WithMiddlewares(
-		runtimeRenewalRouter,
-		hb.funcMiddlwares.AppContextFromSubjectMiddleware,
-		renewalAuditLoggingMiddleware,
-		hb.funcMiddlwares.CheckForRevokedCertMiddleware)
-
-	runtimeRevocationRouter := hb.router.Path("/v1/runtimes/certificates/revocations").Subrouter()
-	revocationAuditLoggingMiddleware := hb.createCertificateRevocationAuditLogMiddleware(runtimeHandlerCfg.ContextExtractor)
-	runtimeRevocationRouter.HandleFunc("", runtimeRevocationHandler.Revoke).Methods(http.MethodPost)
-	httphelpers.WithMiddlewares(
-		runtimeRevocationRouter,
-		hb.funcMiddlwares.AppContextFromSubjectMiddleware,
-		revocationAuditLoggingMiddleware)
-
-	certRuntimesRouter := hb.router.PathPrefix("/v1/runtimes/certificates").Subrouter()
-	certRuntimesRouter.HandleFunc("", runtimeSignatureHandler.SignCSR).Methods(http.MethodPost)
-	signingAuditLoggingMiddleware := hb.createCertificateGenerationAuditLogMiddleware(runtimeHandlerCfg.ContextExtractor)
-	httphelpers.WithMiddlewares(
-		certRuntimesRouter,
-		hb.funcMiddlwares.RuntimeTokenResolverMiddleware,
-		signingAuditLoggingMiddleware)
-
-	mngmtRuntimeRouter := hb.router.PathPrefix("/v1/runtimes/management").Subrouter()
-	mngmtRuntimeRouter.HandleFunc("/info", runtimeManagementInfoHandler.GetManagementInfo).Methods(http.MethodGet)
-	httphelpers.WithMiddlewares(
-		mngmtRuntimeRouter,
-		hb.funcMiddlwares.AppContextFromSubjectMiddleware)
-
-}
-
 func (hb *handlerBuilder) createRenewalAuditLogMiddleware(contextExtractor clientcontext.ConnectorClientExtractor) mux.MiddlewareFunc {
 	return loggingMiddlewares.NewAuditLoggingMiddleware(contextExtractor, loggingMiddlewares.AuditLogMessages{
 		StartingOperationMsg:   "Starting certificate renewal.",

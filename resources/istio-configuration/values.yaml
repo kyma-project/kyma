@@ -1,11 +1,8 @@
 ---
-image: eu.gcr.io/kyma-project/external/istio
-
 helmValues:
   global:
     imagePullPolicy: IfNotPresent
     proxy:
-      holdApplicationUntilProxyStarts: true
       readinessFailureThreshold: 40
       readinessInitialDelaySeconds: 5
       readinessPeriodSeconds: 5
@@ -25,6 +22,9 @@ helmValues:
         requests:
           cpu: 10m
           memory: 10Mi
+  gateways:
+    istio-ingressgateway:
+      autoscaleEnabled: true
 
   sidecarInjectorWebhook:
     enableNamespacesByDefault: true
@@ -35,14 +35,16 @@ helmValues:
 
 meshConfig:
   accessLogFile: /dev/stdout
+  accessLogEncoding: JSON
   trustDomain: cluster.local
   defaultConfig:
+    holdApplicationUntilProxyStarts: true
     tracing:
       sampling: 1
       zipkin:
         address: "zipkin.kyma-system:9411"
   enablePrometheusMerge: false
-  enableTracing: true
+  enableTracing: "{{ .Values.global.tracing.enabled }}"
 
 components:
   egressGateways:
@@ -112,3 +114,15 @@ monitoring:
   istioServiceMonitor:
     enabled: true
     scrapeInterval: ""
+
+
+global:
+  containerRegistry:
+    path: eu.gcr.io/kyma-project
+  images:
+    istio:
+      name: "istio"
+      version: "1.11.4-distroless"
+      directory: "external"
+  tracing:
+    enabled: true

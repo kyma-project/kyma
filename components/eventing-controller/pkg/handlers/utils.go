@@ -1,3 +1,4 @@
+//nolint:gosec
 package handlers
 
 import (
@@ -32,7 +33,7 @@ type MessagingBackend interface {
 	// Initialize should initialize the communication layer with the messaging backend system
 	Initialize(cfg env.Config) error
 
-	// SyncSubscription should synchronize the Kyma eventing susbscription with the susbcriber infrastructure of messaging backend system.
+	// SyncSubscription should synchronize the Kyma eventing subscription with the subscriber infrastructure of messaging backend system.
 	// It should return true if Kyma eventing subscription status was changed during this synchronization process.
 	// It sets subscription.status.config with configurations that were applied on the messaging backend when creating the subscription.
 	// TODO: Give up the usage of variadic parameters in the favor of using only subscription as input parameter.
@@ -59,7 +60,7 @@ type bebSubscriptionNameMapper struct {
 	maxLength  int
 }
 
-func NewBebSubscriptionNameMapper(domainName string, maxNameLength int) *bebSubscriptionNameMapper {
+func NewBEBSubscriptionNameMapper(domainName string, maxNameLength int) NameMapper {
 	return &bebSubscriptionNameMapper{
 		domainName: domainName,
 		maxLength:  maxNameLength,
@@ -97,11 +98,11 @@ func shortenNameAndAppendHash(name string, hash string, maxLength int) string {
 var seededRand = rand.New(rand.NewSource(time.Now().UnixNano()))
 
 func getHash(subscription *types.Subscription) (int64, error) {
-	if hash, err := hashstructure.Hash(subscription, hashstructure.FormatV2, nil); err != nil {
+	hash, err := hashstructure.Hash(subscription, hashstructure.FormatV2, nil)
+	if err != nil {
 		return 0, err
-	} else {
-		return int64(hash), nil
 	}
+	return int64(hash), nil
 }
 
 func getDefaultSubscription(protocolSettings *eventingv1alpha1.ProtocolSettings) (*types.Subscription, error) {
@@ -157,12 +158,12 @@ func getInternalView4Ev2(subscription *eventingv1alpha1.Subscription, apiRule *a
 		}
 	}
 
-	// WebhookUrl
+	// WebhookURL
 	urlTobeRegistered, err := getExposedURLFromAPIRule(apiRule, subscription)
 	if err != nil {
 		return nil, errors.Wrap(err, "get APIRule exposed URL failed")
 	}
-	emsSubscription.WebhookUrl = urlTobeRegistered
+	emsSubscription.WebhookURL = urlTobeRegistered
 
 	// Events
 	uniqueFilters, err := subscription.Spec.Filter.Deduplicate()
@@ -182,7 +183,7 @@ func getInternalView4Ev2(subscription *eventingv1alpha1.Subscription, apiRule *a
 	auth := defaultWebhookAuth
 	if subscription.Spec.ProtocolSettings != nil && subscription.Spec.ProtocolSettings.WebhookAuth != nil {
 		auth = &types.WebhookAuth{}
-		auth.ClientID = subscription.Spec.ProtocolSettings.WebhookAuth.ClientId
+		auth.ClientID = subscription.Spec.ProtocolSettings.WebhookAuth.ClientID
 		auth.ClientSecret = subscription.Spec.ProtocolSettings.WebhookAuth.ClientSecret
 		if subscription.Spec.ProtocolSettings.WebhookAuth.GrantType == string(types.GrantTypeClientCredentials) {
 			auth.GrantType = types.GrantTypeClientCredentials
@@ -194,7 +195,7 @@ func getInternalView4Ev2(subscription *eventingv1alpha1.Subscription, apiRule *a
 		} else {
 			return nil, fmt.Errorf("invalid Type: %v", subscription.Spec.ProtocolSettings.WebhookAuth.Type)
 		}
-		auth.TokenURL = subscription.Spec.ProtocolSettings.WebhookAuth.TokenUrl
+		auth.TokenURL = subscription.Spec.ProtocolSettings.WebhookAuth.TokenURL
 	}
 	emsSubscription.WebhookAuth = auth
 	return emsSubscription, nil
@@ -221,7 +222,7 @@ func getExposedURLFromAPIRule(apiRule *apigatewayv1alpha1.APIRule, sub *eventing
 	return fmt.Sprintf("%s%s%s", scheme, *apiRule.Spec.Service.Host, path), nil
 }
 
-func getInternalView4Ems(subscription *types.Subscription) (*types.Subscription, error) {
+func getInternalView4Ems(subscription *types.Subscription) *types.Subscription {
 	emsSubscription := &types.Subscription{}
 
 	// Name
@@ -232,8 +233,8 @@ func getInternalView4Ems(subscription *types.Subscription) (*types.Subscription,
 	// Qos
 	emsSubscription.Qos = subscription.Qos
 
-	// WebhookUrl
-	emsSubscription.WebhookUrl = subscription.WebhookUrl
+	// WebhookURL
+	emsSubscription.WebhookURL = subscription.WebhookURL
 
 	// Events
 	for _, e := range subscription.Events {
@@ -242,7 +243,7 @@ func getInternalView4Ems(subscription *types.Subscription) (*types.Subscription,
 		emsSubscription.Events = append(emsSubscription.Events, types.Event{Source: s, Type: t})
 	}
 
-	return emsSubscription, nil
+	return emsSubscription
 }
 
 // GetRandString returns a random string of the given length
@@ -257,6 +258,12 @@ func GetRandString(l int) string {
 func RemoveStatus(sub eventingv1alpha1.Subscription) *eventingv1alpha1.Subscription {
 	desiredSub := sub.DeepCopy()
 	desiredSub.Status = eventingv1alpha1.SubscriptionStatus{}
+	return desiredSub
+}
+
+func SetStatusAsNotReady(sub eventingv1alpha1.Subscription) *eventingv1alpha1.Subscription {
+	desiredSub := sub.DeepCopy()
+	desiredSub.Status.Ready = false
 	return desiredSub
 }
 

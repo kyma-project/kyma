@@ -37,7 +37,7 @@ spec:
     spec:
       containers:
       - name: {{ .Chart.Name }}
-        image: {{ .Values.global.containerRegistry.path }}/application-registry:{{ .Values.global.application_registry.version }}
+        image: {{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.application_registry) }}
         imagePullPolicy: {{ .Values.deployment.image.pullPolicy }}
         resources:
           limits:
@@ -51,6 +51,7 @@ spec:
           - "--proxyPort={{ .Values.deployment.args.proxyPort }}"
           - "--externalAPIPort={{ .Values.deployment.args.externalAPIPort }}"
           - "--uploadServiceURL={{ .Values.deployment.args.uploadServiceURL }}"
+          - "--centralGatewayUrl={{ .Values.deployment.args.centralGatewayUrl }}"
           - "--namespace={{ .Values.global.integrationNamespace }}"
           - "--requestTimeout={{ .Values.deployment.args.requestTimeout }}"
           - "--requestLogging={{ .Values.deployment.args.requestLogging }}"
@@ -68,12 +69,6 @@ spec:
           runAsUser: {{ .Values.global.podSecurityPolicy.runAsUser }}
           privileged: {{ .Values.global.podSecurityPolicy.privileged }}
           allowPrivilegeEscalation: {{ .Values.global.podSecurityPolicy.allowPrivilegeEscalation }}
-      {{ if .Values.global.isLocalEnv }}
-      hostAliases:
-        - ip: {{ .Values.global.minikubeIP }}
-          hostnames:
-            - "minio.{{ .Values.global.domainName }}"
-      {{ end }}
     {{- if .Values.global.priorityClassName }}
       priorityClassName: {{ .Values.global.priorityClassName }}
     {{- end }}

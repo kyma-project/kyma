@@ -8,13 +8,15 @@ import (
 
 	"k8s.io/apimachinery/pkg/api/resource"
 
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
 	appsv1 "k8s.io/api/apps/v1"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
+
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
 )
 
+//nolint:gosec
 const (
 	livenessInitialDelaySecs = int32(5)
 	livenessTimeoutSecs      = int32(1)
@@ -37,6 +39,9 @@ const (
 	PublisherSecretTokenEndpointKey = "token-endpoint"
 	PublisherSecretEMSURLKey        = "ems-publish-url"
 	PublisherSecretBEBNamespaceKey  = "beb-namespace"
+
+	configMapName               = "eventing"
+	configMapKeyEventTypePrefix = "eventTypePrefix"
 )
 
 var (
@@ -70,7 +75,7 @@ func NewBEBPublisherDeployment(publisherConfig env.PublisherConfig) *appsv1.Depl
 							Name:            PublisherName,
 							Image:           publisherConfig.Image,
 							Ports:           getContainerPorts(),
-							Env:             getBEBEnvVars(),
+							Env:             getBEBEnvVars(publisherConfig),
 							LivenessProbe:   getLivenessProbe(),
 							ReadinessProbe:  getReadinessProbe(),
 							ImagePullPolicy: getImagePullPolicy(publisherConfig.ImagePullPolicy),
@@ -112,12 +117,27 @@ func NewNATSPublisherDeployment(publisherConfig env.PublisherConfig) *appsv1.Dep
 					Labels: labels,
 				},
 				Spec: v1.PodSpec{
+					Affinity: &v1.Affinity{
+						PodAntiAffinity: &v1.PodAntiAffinity{
+							PreferredDuringSchedulingIgnoredDuringExecution: []v1.WeightedPodAffinityTerm{
+								{
+									Weight: 100,
+									PodAffinityTerm: v1.PodAffinityTerm{
+										LabelSelector: &metav1.LabelSelector{
+											MatchLabels: map[string]string{AppLabelKey: PublisherName},
+										},
+										TopologyKey: "kubernetes.io/hostname",
+									},
+								},
+							},
+						},
+					},
 					Containers: []v1.Container{
 						{
 							Name:            PublisherName,
 							Image:           publisherConfig.Image,
 							Ports:           getContainerPorts(),
-							Env:             getNATSEnvVars(),
+							Env:             getNATSEnvVars(publisherConfig),
 							LivenessProbe:   getLivenessProbe(),
 							ReadinessProbe:  getReadinessProbe(),
 							ImagePullPolicy: getImagePullPolicy(publisherConfig.ImagePullPolicy),
@@ -201,12 +221,22 @@ func getContainerPorts() []v1.ContainerPort {
 	}
 }
 
-func getBEBEnvVars() []v1.EnvVar {
+func getBEBEnvVars(publisherConfig env.PublisherConfig) []v1.EnvVar {
 	return []v1.EnvVar{
 		{Name: "BACKEND", Value: "beb"},
 		{Name: "PORT", Value: strconv.Itoa(int(publisherPortNum))},
-		{Name: "REQUEST_TIMEOUT", Value: "5s"},
-		{Name: "EVENT_TYPE_PREFIX", Value: "sap.kyma.custom"},
+		{
+			Name: "EVENT_TYPE_PREFIX",
+			ValueFrom: &v1.EnvVarSource{
+				ConfigMapKeyRef: &v1.ConfigMapKeySelector{
+					LocalObjectReference: v1.LocalObjectReference{
+						Name: configMapName,
+					},
+					Key: configMapKeyEventTypePrefix,
+				},
+			},
+		},
+		{Name: "REQUEST_TIMEOUT", Value: publisherConfig.RequestTimeout},
 		{
 			Name: "CLIENT_ID",
 			ValueFrom: &v1.EnvVarSource{
@@ -254,15 +284,35 @@ func getBEBEnvVars() []v1.EnvVar {
 	}
 }
 
-func getNATSEnvVars() []v1.EnvVar {
+func getNATSEnvVars(publisherConfig env.PublisherConfig) []v1.EnvVar {
 	return []v1.EnvVar{
 		{Name: "BACKEND", Value: "nats"},
 		{Name: "PORT", Value: strconv.Itoa(int(publisherPortNum))},
 		{Name: "NATS_URL", Value: "eventing-nats.kyma-system.svc.cluster.local"},
-		{Name: "REQUEST_TIMEOUT", Value: "5s"},
+		{Name: "REQUEST_TIMEOUT", Value: publisherConfig.RequestTimeout},
 		{Name: "LEGACY_NAMESPACE", Value: "kyma"},
-		{Name: "LEGACY_EVENT_TYPE_PREFIX", Value: "sap.kyma.custom"},
-		{Name: "EVENT_TYPE_PREFIX", Value: "sap.kyma.custom"},
+		{
+			Name: "LEGACY_EVENT_TYPE_PREFIX",
+			ValueFrom: &v1.EnvVarSource{
+				ConfigMapKeyRef: &v1.ConfigMapKeySelector{
+					LocalObjectReference: v1.LocalObjectReference{
+						Name: configMapName,
+					},
+					Key: configMapKeyEventTypePrefix,
+				},
+			},
+		},
+		{
+			Name: "EVENT_TYPE_PREFIX",
+			ValueFrom: &v1.EnvVarSource{
+				ConfigMapKeyRef: &v1.ConfigMapKeySelector{
+					LocalObjectReference: v1.LocalObjectReference{
+						Name: configMapName,
+					},
+					Key: configMapKeyEventTypePrefix,
+				},
+			},
+		},
 	}
 }
 

@@ -4,10 +4,15 @@ const https = require('https');
 
 const {
     kubectlPortForward,
-    getResponse
+    retryPromise,
+    convertAxiosError,
+    listPods,
+    debug,
 } = require("../utils");
 
+const SECOND = 1000;
 let prometheusPort = 9090;
+let jaegerPort = 16686;
 
 function prometheusPortForward() {
     return kubectlPortForward("kyma-system", "prometheus-monitoring-prometheus-0", prometheusPort);
@@ -16,32 +21,45 @@ function prometheusPortForward() {
 async function getPrometheusActiveTargets() {
     let path = "/api/v1/targets?state=active";
     let url = `http://localhost:${prometheusPort}${path}`;
-    let responseBody = await getResponse(url, 30);
-    return responseBody.data.data.activeTargets;
+    try {
+        let responseBody = await retryPromise(() => axios.get(url, {timeout: 10000}), 5);
+        return responseBody.data.data.activeTargets;
+    } catch(err) {
+        throw convertAxiosError(err, "cannot get prometheus targets");
+    }
 }
 
 async function getPrometheusAlerts() {
     let path = "/api/v1/alerts";
     let url = `http://localhost:${prometheusPort}${path}`;
-    let responseBody = await getResponse(url, 30);
-
-    return responseBody.data.data.alerts;
+    try {
+        let responseBody = await retryPromise(() => axios.get(url, {timeout: 10000}), 5);
+        return responseBody.data.data.alerts; 
+    } catch (err) {
+        throw convertAxiosError(err, "cannot get prometheus alerts");
+    }
 }
 
 async function getPrometheusRuleGroups() {
     let path = "/api/v1/rules";
     let url = `http://localhost:${prometheusPort}${path}`;
-    let responseBody = await getResponse(url, 30);
-
-    return responseBody.data.data.groups;
+    try {
+        let responseBody = await retryPromise(() => axios.get(url, {timeout: 10000}), 5);
+        return responseBody.data.data.groups;
+    } catch (err) {
+        throw convertAxiosError(err, "cannot get prometheus rules");
+    }
 }
 
 async function queryPrometheus(query) {
     let path = `/api/v1/query?query=${encodeURIComponent(query)}`;
     let url = `http://localhost:${prometheusPort}${path}`;
-    let responseBody = await getResponse(url, 30);
-
-    return responseBody.data.data.result;
+    try {
+        let responseBody = await retryPromise(() => axios.get(url, {timeout: 10000}), 5);
+        return responseBody.data.data.result;
+    } catch (err) {
+        throw convertAxiosError(err, "cannot query prometheus");
+    }
 }
 
 async function queryGrafana(url, redirectURL, ignoreSSL, httpErrorCode) {
@@ -76,6 +94,41 @@ async function queryGrafana(url, redirectURL, ignoreSSL, httpErrorCode) {
     }
 }
 
+async function jaegerPortForward() {
+    const res = await getJaegerPods();
+    if (res.body.items.length === 0) {
+        throw new Error("cannot find any jaeger pods");
+    }
+
+    return kubectlPortForward("kyma-system", res.body.items[0].metadata.name, jaegerPort);
+}
+
+async function getJaegerPods() {
+    let labelSelector = `app=jaeger,app.kubernetes.io/component=all-in-one,app.kubernetes.io/instance=tracing-jaeger,app.kubernetes.io/managed-by=jaeger-operator,app.kubernetes.io/name=tracing-jaeger,app.kubernetes.io/part-of=jaeger`;
+    return listPods(labelSelector, "kyma-system");
+}
+
+async function getJaegerTrace(traceId) {
+    let path = `/api/traces/${traceId}`;
+    let url = `http://localhost:${jaegerPort}${path}`;
+
+    try {
+        debug(`fetching trace: ${traceId} from jaeger`)
+        let responseBody = await retryPromise(
+            () => { 
+                debug(`waiting for trace (id: ${traceId}) from jaeger...`)
+                return axios.get(url, {timeout: 30 * SECOND})
+            },
+            30,
+            1000
+        );
+        
+        return responseBody.data; 
+    } catch (err) {
+        throw convertAxiosError(err, "cannot get jaeger trace");
+    }
+}
+
 module.exports = {
     prometheusPortForward,
     getPrometheusActiveTargets,
@@ -83,4 +136,6 @@ module.exports = {
     getPrometheusRuleGroups,
     queryPrometheus,
     queryGrafana,
+    jaegerPortForward,
+    getJaegerTrace,
 };

@@ -12,8 +12,8 @@ import (
 	"golang.org/x/oauth2"
 
 	"github.com/go-logr/logr"
-	. "github.com/onsi/ginkgo"
-	. "github.com/onsi/gomega"
+	. "github.com/onsi/ginkgo" // nolint
+	. "github.com/onsi/gomega" // nolint
 
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	// gcp auth etc.
@@ -28,13 +28,13 @@ const (
 	MessagingURLPath = "/messaging"
 )
 
-// BebMock implements a programmable mock for BEB
-type BebMock struct {
-	Requests       map[*http.Request]interface{}
-	Subscriptions  map[string]*bebtypes.Subscription
+// BEBMock implements a programmable mock for BEB
+type BEBMock struct {
+	Requests       *SafeRequests
+	Subscriptions  *SafeSubscriptions
 	TokenURL       string
 	MessagingURL   string
-	BebConfig      *config.Config
+	BEBConfig      *config.Config
 	log            logr.Logger
 	AuthResponse   response
 	GetResponse    responseWithName
@@ -43,10 +43,10 @@ type BebMock struct {
 	DeleteResponse response
 }
 
-func NewBebMock(bebConfig *config.Config) *BebMock {
+func NewBEBMock(bebConfig *config.Config) *BEBMock {
 	logger := logf.Log.WithName("beb mock")
-	return &BebMock{
-		nil, nil, "", "", bebConfig,
+	return &BEBMock{
+		NewSafeRequests(), NewSafeSubscriptions(), "", "", bebConfig,
 		logger,
 		nil, nil, nil, nil, nil,
 	}
@@ -55,10 +55,10 @@ func NewBebMock(bebConfig *config.Config) *BebMock {
 type responseWithName func(w http.ResponseWriter, subscriptionName string)
 type response func(w http.ResponseWriter)
 
-func (m *BebMock) Reset() {
+func (m *BEBMock) Reset() {
 	m.log.Info("Initializing requests")
-	m.Requests = make(map[*http.Request]interface{})
-	m.Subscriptions = make(map[string]*bebtypes.Subscription)
+	m.Requests = NewSafeRequests()
+	m.Subscriptions = NewSafeSubscriptions()
 	m.AuthResponse = nil
 	m.GetResponse = nil
 	m.ListResponse = nil
@@ -66,7 +66,7 @@ func (m *BebMock) Reset() {
 	m.DeleteResponse = nil
 }
 
-func (m *BebMock) Start() string {
+func (m *BEBMock) Start() string {
 	m.Reset()
 
 	// implementation based on https://pages.github.tools.sap/KernelServices/APIDefinitions/?urls.primaryName=Business%20Event%20Bus%20-%20CloudEvents
@@ -74,7 +74,7 @@ func (m *BebMock) Start() string {
 		defer GinkgoRecover()
 
 		// store request
-		m.Requests[r] = nil
+		m.Requests.StoreRequest(r)
 
 		description := ""
 		reqBytes, err := httputil.DumpRequest(r, true)
@@ -94,7 +94,7 @@ func (m *BebMock) Start() string {
 			if m.AuthResponse != nil {
 				m.AuthResponse(w)
 			} else {
-				BebAuthResponseSuccess(w)
+				BEBAuthResponseSuccess(w)
 			}
 			return
 		}
@@ -103,30 +103,30 @@ func (m *BebMock) Start() string {
 			switch r.Method {
 			case http.MethodDelete:
 				key := r.URL.Path
-				delete(m.Subscriptions, key)
+				m.Subscriptions.DeleteSubscription(key)
 				if m.DeleteResponse != nil {
 					m.DeleteResponse(w)
 				} else {
-					BebDeleteResponseSuccess(w)
+					BEBDeleteResponseSuccess(w)
 				}
 			case http.MethodPost:
 				var subscription bebtypes.Subscription
 				_ = json.NewDecoder(r.Body).Decode(&subscription)
-				m.Requests[r] = subscription
+				m.Requests.PutSubscription(r, subscription)
 				key := r.URL.Path + "/" + subscription.Name
-				m.Subscriptions[key] = &subscription
+				m.Subscriptions.PutSubscription(key, &subscription)
 				if m.CreateResponse != nil {
 					m.CreateResponse(w)
 				} else {
-					BebCreateSuccess(w)
+					BEBCreateSuccess(w)
 				}
 			case http.MethodGet:
 				switch r.RequestURI {
-				case m.BebConfig.ListURL:
+				case m.BEBConfig.ListURL:
 					if m.ListResponse != nil {
 						m.ListResponse(w)
 					} else {
-						BebListSuccess(w)
+						BEBListSuccess(w)
 					}
 				// get on a single subscription
 				default:
@@ -134,7 +134,7 @@ func (m *BebMock) Start() string {
 					if m.GetResponse != nil {
 						m.GetResponse(w, key)
 					} else {
-						subscriptionSaved := m.Subscriptions[key]
+						subscriptionSaved := m.Subscriptions.GetSubscription(key)
 						if subscriptionSaved != nil {
 							subscriptionSaved.SubscriptionStatus = bebtypes.SubscriptionStatusActive
 							w.WriteHeader(http.StatusOK)
@@ -157,8 +157,8 @@ func (m *BebMock) Start() string {
 	return uri
 }
 
-// BebAuthResponseSuccess writes a oauth2 authentication response to the writer for the happy-path.
-func BebAuthResponseSuccess(w http.ResponseWriter) {
+// BEBAuthResponseSuccess writes a oauth2 authentication response to the writer for the happy-path.
+func BEBAuthResponseSuccess(w http.ResponseWriter) {
 	token := oauth2.Token{
 		AccessToken:  "some-token",
 		TokenType:    "",
@@ -169,8 +169,8 @@ func BebAuthResponseSuccess(w http.ResponseWriter) {
 	Expect(err).ShouldNot(HaveOccurred())
 }
 
-// BebCreateSuccess writes a response to the writer for the happy-path of creating a BEB subscription.
-func BebCreateSuccess(w http.ResponseWriter) {
+// BEBCreateSuccess writes a response to the writer for the happy-path of creating a BEB subscription.
+func BEBCreateSuccess(w http.ResponseWriter) {
 	w.WriteHeader(http.StatusAccepted)
 	response := bebtypes.CreateResponse{
 		Response: bebtypes.Response{
@@ -183,8 +183,8 @@ func BebCreateSuccess(w http.ResponseWriter) {
 	Expect(err).ShouldNot(HaveOccurred())
 }
 
-// BebGetSuccess writes a response to the writer for the happy-path of getting a BEB subscription.
-func BebGetSuccess(w http.ResponseWriter, name string) {
+// BEBGetSuccess writes a response to the writer for the happy-path of getting a BEB subscription.
+func BEBGetSuccess(w http.ResponseWriter, name string) {
 	w.WriteHeader(http.StatusOK)
 	s := bebtypes.Subscription{
 		Name:               name,
@@ -194,8 +194,8 @@ func BebGetSuccess(w http.ResponseWriter, name string) {
 	Expect(err).ShouldNot(HaveOccurred())
 }
 
-// BebListSuccess writes a response to the writer for the happy-path of listing a BEB subscription.
-func BebListSuccess(w http.ResponseWriter) {
+// BEBListSuccess writes a response to the writer for the happy-path of listing a BEB subscription.
+func BEBListSuccess(w http.ResponseWriter) {
 	w.WriteHeader(http.StatusAccepted)
 	response := bebtypes.Response{
 		StatusCode: http.StatusOK,
@@ -205,18 +205,18 @@ func BebListSuccess(w http.ResponseWriter) {
 	Expect(err).ShouldNot(HaveOccurred())
 }
 
-// BebDeleteResponseSuccess writes a response to the writer for the happy-path of deleting a BEB subscription.
-func BebDeleteResponseSuccess(w http.ResponseWriter) {
+// BEBDeleteResponseSuccess writes a response to the writer for the happy-path of deleting a BEB subscription.
+func BEBDeleteResponseSuccess(w http.ResponseWriter) {
 	w.WriteHeader(http.StatusNoContent)
 }
 
-// IsBebSubscriptionCreate determines if the http request is creating a BEB subscription.
-func IsBebSubscriptionCreate(r *http.Request, bebConfig config.Config) bool {
+// IsBEBSubscriptionCreate determines if the http request is creating a BEB subscription.
+func IsBEBSubscriptionCreate(r *http.Request, bebConfig config.Config) bool {
 	return r.Method == http.MethodPost && strings.Contains(bebConfig.CreateURL, r.RequestURI)
 }
 
-// IsBebSubscriptionDelete determines if the http request is deleting a BEB subscription.
-func IsBebSubscriptionDelete(r *http.Request) bool {
+// IsBEBSubscriptionDelete determines if the http request is deleting a BEB subscription.
+func IsBEBSubscriptionDelete(r *http.Request) bool {
 	return r.Method == http.MethodDelete && strings.Contains(r.RequestURI, MessagingURLPath)
 }
 

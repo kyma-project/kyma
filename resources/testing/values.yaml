@@ -1,6 +1,0 @@
-global:
-  octopus:
-    image:
-      registry: eu.gcr.io/kyma-project/incubator
-      dir: develop/
-      version: 5f353cd5

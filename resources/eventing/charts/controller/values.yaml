@@ -11,14 +11,6 @@ clusterRole:
   # name defines optionally another name than the default name for the cluster role
   name: ""
 
-image:
-  # name is the name of the container image for the eventing-controller
-  name: "eventing-controller"
-  # tag is the container tag of the eventing-controller image
-  tag: "PR-12050"
-  # pullPolicy is the pullPolicy for the eventing-controller image
-  pullPolicy: "IfNotPresent"
-
 podSecurityContext:
 
 bebSecret:
@@ -34,10 +26,8 @@ resources:
 
 publisherProxy:
   image:
-    # name is the name of the container image for the eventing-publisher-proxy
-    name: "event-publisher-proxy"
-    tag: "947fb1cd"
     pullPolicy: IfNotPresent
+  requestTimeout: 10s
   replicas: 1
   resources:
     limits:
@@ -46,20 +36,6 @@ publisherProxy:
     requests:
       cpu: 32m
       memory: 64Mi
-
-natsOperatorDoctor:
-  interval: 1m
-  image:
-    tag: "PR-11920"
-    name: "nats-operator-doctor"
-    pullPolicy: "IfNotPresent"
-  resources:
-    requests:
-      cpu: 10m
-      memory: 16Mi
-    limits:
-      cpu: 20m
-      memory: 32Mi
 
 metrics:
   service:

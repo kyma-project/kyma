@@ -47,8 +47,6 @@ spec:
 {{- if .Values.podLabels }}
 {{ toYaml .Values.podLabels | indent 8 }}
 {{- end }}
-      annotations:
-        checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
 {{- if .Values.podAnnotations }}
 {{ toYaml .Values.podAnnotations | trimSuffix "\n" | indent 8 }}
 {{- end }}
@@ -62,7 +60,7 @@ spec:
       serviceAccountName: {{ include "minio.serviceAccountName" . | quote }}
       containers:
         - name: {{ .Chart.Name }}
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.minio) }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           {{- if .Values.pod.extraContainerProperties }}
           {{ include "rafterAsyncAPIService.tplValue" ( dict "value" .Values.pod.extraContainerProperties "context" . ) | nindent 10 }}

@@ -1,6 +1,4 @@
 image:
-  repository: eu.gcr.io/kyma-project/tpi/loki
-  tag: 2.2.1-88dec1f7
   pullPolicy: IfNotPresent
 
   ## Optionally specify an array of imagePullSecrets.
@@ -67,6 +65,7 @@ config:
       #     consistent_reads: true
   limits_config:
     enforce_metric_name: false
+    ingestion_rate_mb: 3
     reject_old_samples: true
     reject_old_samples_max_age: 168h
   schema_config:
@@ -280,8 +279,6 @@ kyma:
   auth:
     useKymaGroups: false
     groups: ""
-virtualservice:
-  enabled: true
 grafana:
   datasource:
     derivedFields: |

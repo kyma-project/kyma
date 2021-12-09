@@ -18,7 +18,9 @@ metadata:
       {{- toYaml . | nindent 4 }}
     {{- end }}
 spec:
+{{- if not .Values.deployment.autoscaling.enabled }}
   replicas: {{ .Values.replicaCount }}
+{{- end }}
   selector:
     matchLabels:
       app.kubernetes.io/name: {{ include "oathkeeper.name" . }}
@@ -59,7 +61,7 @@ spec:
             secretName: {{ include "oathkeeper.fullname" . }}-jwks-secret
       containers:
         - name: {{ .Chart.Name }}
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.oathkeeper) }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           command: [ "oathkeeper", "serve", "--config", "/etc/config/config.yaml" ]
           env:
@@ -73,7 +75,7 @@ spec:
             - name: DD_ENV
               value: {{ .Values.deployment.tracing.datadog.env | default "none" | quote }}
             - name: DD_VERSION
-              value: {{ .Values.deployment.tracing.datadog.version | default .Values.image.tag | quote }}
+              value: {{ .Values.deployment.tracing.datadog.version | default .Values.global.images.oathkeeper.version | quote }}
             - name: DD_SERVICE
               value: {{ .Values.deployment.tracing.datadog.service | default "ory/oathkeeper" | quote }}
             {{- if .Values.deployment.tracing.datadog.useHostIP }}

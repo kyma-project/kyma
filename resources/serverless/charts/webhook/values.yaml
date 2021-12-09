@@ -5,8 +5,6 @@
 nameOverride:
 fullnameOverride:
 image:
-  repository: "eu.gcr.io/kyma-project/function-webhook"
-  tag: "overriden by parent chart"
   pullPolicy: IfNotPresent
 
 commonLabels:
@@ -136,6 +134,8 @@ values:
             "limitMemory": "512Mi"
           }
         }
+      runtimePresets: "{}"
+
   buildJob:
     resources:
       minRequestCpu: "200m"

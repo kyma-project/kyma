@@ -1,25 +1,31 @@
 jobs:
   crdsInConfigMap: 20
-  image:
-    repository: eu.gcr.io/kyma-project/tpi/k8s-tools
-    tag: "20210922-530cfc39"
 
 global:
-  isLocalEnv: false
-  installCRDs: true
+  installCRDs: false
   disableLegacyConnectivity: false
   podSecurityPolicy:
     privileged: false
   priorityClassName: ""
   priorityClassValue: 2000000
 
-containerRegistry:
-  path: eu.gcr.io/kyma-project
+  containerRegistry:
+    path: eu.gcr.io/kyma-project
+  images:
+    k8s_tools:
+      name: "k8s-tools"
+      version: "20211022-85284bf9"
+      directory: "tpi"
+    podpreset_webhook:
+      name: "podpreset-webhook"
+      version: "021a99c6"
+      directory: "incubator"
+    podpreset_controller:
+      name: "podpreset-controller"
+      version: "021a99c6"
+      directory: "incubator"
 
 image:
-  repository: eu.gcr.io/kyma-project/incubator/api-gateway-controller
-  tag: "ac45e9ce"
-  # Image pull policy
   pullPolicy: IfNotPresent
 
 limitRange:
@@ -39,3 +45,8 @@ securityContext:
   runAsGroup: 65534
   runAsNonRoot: true
   runAsUser: 65534
+
+pod-preset:
+  key: ""
+  cert: ""
+  caCert: ""

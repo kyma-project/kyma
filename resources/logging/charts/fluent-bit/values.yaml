@@ -7,9 +7,7 @@ kind: DaemonSet
 replicaCount: 1
 
 image:
-  repository: eu.gcr.io/kyma-project/tpi/fluent-bit
   pullPolicy: IfNotPresent
-  tag: 1.8.7-a2d49884
 
 imagePullSecrets: []
 nameOverride: ""
@@ -54,7 +52,7 @@ securityContext:
 service:
   type: ClusterIP
   port: 2020
-  labels: 
+  labels:
     {}
   annotations:
     {}
@@ -125,10 +123,9 @@ extraVolumeMounts: ""
 #     mountPath: /var/tmp
 
 updateStrategy:
-  {}
-  # type: RollingUpdate
-  # rollingUpdate:
-  #   maxUnavailable: 1
+ type: RollingUpdate
+ rollingUpdate:
+   maxUnavailable: 33%
 
 # Make use of a pre-defined configmap instead of the one templated here
 existingConfigMap: ""
@@ -184,9 +181,9 @@ config:
       memBufLimit: 5MB
       # Exit Fluent Bit when reaching EOF of the monitored files.
       exitOnEof: "false"
-      parser: docker
+      parser:
       # If enabled, the plugin will recombine split Docker log lines before passing them to any parser as configured above. This mode cannot be used at the same time as Multiline.
-      dockerMode: "On"
+      dockerMode: "Off"
       # Wait period time in seconds to flush queued unfinished split lines.
       dockerModeFlush: 4
       # When a message is unstructured (no parser applied), it's appended as a string under the key name log. This option allows to define an alternative name for that key.
@@ -200,7 +197,7 @@ config:
       # For new discovered files on start (without a database offset/position), read the content from the head of the file, not tail.
       readFromHead: "Off"
       # Specify one or Multiline Parser definition to apply to the content.
-      multilineParser:
+      multilineParser: docker, cri
       exclude:
         namespaces:
     additional: ""
@@ -372,3 +369,8 @@ config:
 #      name: https
 #      protocol: TLS
 #  resolution: DNS
+
+istio:
+# Allows you to loosen strict mTLS for exposed HTTP endpoint (basically, the /metrics endpoint)
+# If omitted or set to false the mesh-wide policy is applied which sets mTLS mode to strict
+  permissiveMtls: false

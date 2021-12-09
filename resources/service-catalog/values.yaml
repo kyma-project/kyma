@@ -1,13 +1,24 @@
 global:
-  isLocalEnv: false
   containerRegistry:
     path: eu.gcr.io/kyma-project
+  images:
+    service_catalog:
+      name: "service-catalog"
+      version: "v0.3.1-12-g880e400-dirty"
+      directory: "external/quay.io/kubernetes-service-catalog"
+    # k8s_tools:
+    #   name: "k8s-tools"
+    #   version: "20211022-85284bf9"
+    #   directory: "tpi"
+    health_proxy:
+      name: "health-proxy"
+      version: "bd223692"
+      directory: "incubator/develop"
+
+
   istio:
     gateway:
       name: kyma-gateway
-  acceptance_tests:
-    dir:
-    version: "bc522023"
   disableLegacyConnectivity: "false"
 test:
   acceptance:

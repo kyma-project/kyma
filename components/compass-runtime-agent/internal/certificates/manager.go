@@ -22,6 +22,7 @@ const (
 type Manager interface {
 	GetClientCredentials() (ClientCredentials, error)
 	PreserveCredentials(Credentials) error
+	CredentialsExist() (bool, error)
 }
 
 func NewCredentialsManager(clusterCertificateSecretName, caCertSecretName types.NamespacedName, secretsRepository secrets.Repository) *credentialsManager {
@@ -51,6 +52,10 @@ func (cm *credentialsManager) GetClientCredentials() (ClientCredentials, error) 
 	}
 
 	return pemCredentials.AsClientCredentials()
+}
+
+func (cm *credentialsManager) CredentialsExist() (bool, error) {
+	return cm.secretsRepository.Exists(cm.caCertSecretName)
 }
 
 func (cm *credentialsManager) PreserveCredentials(credentials Credentials) error {

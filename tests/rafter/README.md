@@ -18,7 +18,7 @@ Use the following tools to set up the project:
 
 To run integration tests, follow these instructions:
 
-1. [Install](https://kyma-project.io/docs/#installation-install-kyma-locally) Kyma.
+1. [Install](https://kyma-project-old.netlify.app/docs/#installation-install-kyma-locally) Kyma.
 2. Build the test image directly on the Docker engine of the Minikube node without pushing it to a registry. Run:
 
    ```bash
@@ -69,12 +69,6 @@ Use the following environment variables to configure the application:
 | **APP_TEST_CLUSTER_ASSET_GROUP_NAME** | No       | `test-cluster-asset-group` | The ClusterAssetGroup resource name                                                                                                         |
 | **APP_TEST_COMMON_ASSET_PREFIX**      | No       | `test`                     | The name of the prefix for the Asset and ClusterAsset resources                                                                             |
 | **APP_TEST_MOCKICE_NAME**             | No       | `rafter-test-svc`          | The name of the pod, service, and configmap used by the test service                                                                        |
-
-Those can be supplied to [this](../../resources/rafter/templates/tests/test.yaml) file before installing Kyma, or by editing TestDefinition CR with already installed Kyma using this command:
-
-```bash
-k edit testdefinitions.testing.kyma-project.io -n kyma-system rafter
-```
 
 ## Development
 

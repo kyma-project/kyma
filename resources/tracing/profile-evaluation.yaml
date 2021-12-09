@@ -12,7 +12,7 @@ jaeger:
     resources:
       limits:
         cpu: 50m
-        memory: 60Mi
+        memory: 200Mi
       requests:
         cpu: 10m
         memory: 40Mi
@@ -20,7 +20,7 @@ jaeger:
       type: memory
       options:
         memory:
-          max-traces: 10000
+          max-traces: 5000
 
 kcproxy:
   resources:

@@ -24,6 +24,7 @@ spec:
         heritage: "{{ .Release.Service }}"
       {{ if .Values.webhook.annotations }}
       annotations:
+        sidecar.istio.io/inject: "false"
 {{ toYaml .Values.webhook.annotations | indent 8 }}
       {{- end }}
     spec:
@@ -36,7 +37,7 @@ spec:
 {{ toYaml .Values.imagePullSecrets | indent 8 }}
       containers:
       - name: svr
-        image: {{ .Values.image }}
+        image: {{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.service_catalog) }}
         imagePullPolicy: {{ .Values.imagePullPolicy }}
         resources:
 {{ toYaml .Values.webhook.resources | indent 10 }}

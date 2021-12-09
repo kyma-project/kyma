@@ -14,10 +14,6 @@ helmValues:
         limits:
           cpu: 500m
           memory: 1024Mi
-  pilot:
-    autoscaleMax: 5
-    autoscaleMin: 2
-    configNamespace: istio-config     
 
 components:
   ingressGateways:
@@ -42,6 +38,18 @@ components:
         requests:
           cpu: 100m
           memory: 128Mi
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                - key: app
+                  operator: In
+                  values:
+                  - istio-ingressgateway
+              topologyKey: "kubernetes.io/hostname"
 
   pilot:
     enabled: true
@@ -49,3 +57,15 @@ components:
       hpaSpec:
         maxReplicas: 5
         minReplicas: 2
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                - key: app
+                  operator: In
+                  values:
+                  - istiod
+              topologyKey: "kubernetes.io/hostname"

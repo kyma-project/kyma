@@ -2,7 +2,7 @@
 defaultNamespace: kyma-system
 prerequisites:
   - name: "cluster-essentials"
-  - name: "istio"
+  - name: "istio-configuration"
     namespace: "istio-system"
   - name: "certificates"
     namespace: "istio-system"

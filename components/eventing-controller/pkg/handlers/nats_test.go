@@ -8,9 +8,12 @@ import (
 	"testing"
 	"time"
 
-	"github.com/avast/retry-go"
+	"github.com/avast/retry-go/v3"
 	cev2event "github.com/cloudevents/sdk-go/v2/event"
 	kymalogger "github.com/kyma-project/kyma/common/logging/logger"
+	"github.com/nats-io/nats.go"
+	. "github.com/onsi/gomega"
+
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 	"github.com/kyma-project/kyma/components/eventing-controller/logger"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/application/applicationtest"
@@ -18,8 +21,6 @@ import (
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/eventtype"
 	eventingtesting "github.com/kyma-project/kyma/components/eventing-controller/testing"
-	"github.com/nats-io/nats.go"
-	. "github.com/onsi/gomega"
 )
 
 func TestConvertMsgToCE(t *testing.T) {
@@ -51,7 +52,7 @@ func TestConvertMsgToCE(t *testing.T) {
 				Sub:     nil,
 			},
 			expectedCloudEvent: cev2event.New(cev2event.CloudEventsVersionV1),
-			expectedErr:        errors.New("id: MUST be a non-empty string\n"),
+			expectedErr:        errors.New("id: MUST be a non-empty string\n"), //nolint:golint
 		},
 	}
 	for _, tc := range testCases {
@@ -101,7 +102,7 @@ func TestSubscription(t *testing.T) {
 	}
 
 	natsConfig := env.NatsConfig{
-		Url:           natsServer.ClientURL(),
+		URL:           natsServer.ClientURL(),
 		MaxReconnects: 2,
 		ReconnectWait: time.Second,
 	}
@@ -197,7 +198,7 @@ func TestMultipleSubscriptionsToSameEvent(t *testing.T) {
 	}
 
 	natsConfig := env.NatsConfig{
-		Url:           natsServer.ClientURL(),
+		URL:           natsServer.ClientURL(),
 		MaxReconnects: 2,
 		ReconnectWait: time.Second,
 	}
@@ -298,7 +299,7 @@ func TestSubscriptionWithDuplicateFilters(t *testing.T) {
 	}
 
 	natsConfig := env.NatsConfig{
-		Url:           natsServer.ClientURL(),
+		URL:           natsServer.ClientURL(),
 		MaxReconnects: 2,
 		ReconnectWait: time.Second,
 	}
@@ -319,7 +320,7 @@ func TestSubscriptionWithDuplicateFilters(t *testing.T) {
 	}
 
 	sub := eventingtesting.NewSubscription("sub", "foo")
-	filter := &eventingv1alpha1.BebFilter{
+	filter := &eventingv1alpha1.BEBFilter{
 		EventSource: &eventingv1alpha1.Filter{
 			Type:     "exact",
 			Property: "source",
@@ -331,8 +332,8 @@ func TestSubscriptionWithDuplicateFilters(t *testing.T) {
 			Value:    eventingtesting.OrderCreatedEventType,
 		},
 	}
-	sub.Spec.Filter = &eventingv1alpha1.BebFilters{
-		Filters: []*eventingv1alpha1.BebFilter{filter, filter},
+	sub.Spec.Filter = &eventingv1alpha1.BEBFilters{
+		Filters: []*eventingv1alpha1.BEBFilter{filter, filter},
 	}
 	sub.Spec.Sink = subscriberReceiveURL
 	idFunc := func(et string) (string, error) { return et, nil }
@@ -373,7 +374,7 @@ func TestSubscriptionWithMaxInFlightChange(t *testing.T) {
 	}
 
 	natsConfig := env.NatsConfig{
-		Url:           natsServer.ClientURL(),
+		URL:           natsServer.ClientURL(),
 		MaxReconnects: 2,
 		ReconnectWait: time.Second,
 	}
@@ -457,7 +458,7 @@ func TestIsValidSubscription(t *testing.T) {
 
 	// Create NATS client
 	natsConfig := env.NatsConfig{
-		Url:           natsServer.ClientURL(),
+		URL:           natsServer.ClientURL(),
 		MaxReconnects: 2,
 		ReconnectWait: time.Second,
 	}
@@ -538,8 +539,74 @@ func TestIsValidSubscription(t *testing.T) {
 
 }
 
-func checkIsValid(sub *nats.Subscription, t *testing.T) error {
-	return checkValidity(sub, true, t)
+func TestSubscriptionUsingCESDK(t *testing.T) {
+	g := NewWithT(t)
+	natsPort := 5222
+	subscriberPort := 8080
+	subscriberReceiveURL := fmt.Sprintf("http://127.0.0.1:%d/store", subscriberPort)
+	subscriberCheckURL := fmt.Sprintf("http://127.0.0.1:%d/check", subscriberPort)
+
+	// Start Nats server
+	natsServer := eventingtesting.RunNatsServerOnPort(natsPort)
+	defer natsServer.Shutdown()
+
+	defaultLogger, err := logger.New(string(kymalogger.JSON), string(kymalogger.INFO))
+	g.Expect(err).To(BeNil())
+
+	natsConfig := env.NatsConfig{
+		URL:           natsServer.ClientURL(),
+		MaxReconnects: 2,
+		ReconnectWait: time.Second,
+	}
+	defaultMaxInflight := 1
+	natsClient := NewNats(natsConfig, env.DefaultSubscriptionConfig{MaxInFlightMessages: defaultMaxInflight}, defaultLogger)
+
+	err = natsClient.Initialize(env.Config{})
+	g.Expect(err).To(BeNil())
+
+	// Create a new subscriber
+	subscriber := eventingtesting.NewSubscriber(fmt.Sprintf(":%d", subscriberPort))
+	subscriber.Start()
+
+	// Shutting down subscriber
+	defer subscriber.Shutdown()
+
+	// Check subscriber is running or not by checking the store
+	err = subscriber.CheckEvent("", subscriberCheckURL)
+	g.Expect(err).To(BeNil())
+
+	// Prepare event-type cleaner
+	application := applicationtest.NewApplication(eventingtesting.ApplicationNameNotClean, nil)
+	applicationLister := fake.NewApplicationListerOrDie(context.Background(), application)
+	cleaner := eventtype.NewCleaner(eventingtesting.EventTypePrefix, applicationLister, defaultLogger)
+
+	// Create a subscription
+	sub := eventingtesting.NewSubscription("sub", "foo", eventingtesting.WithEventTypeFilter)
+	sub.Spec.Sink = subscriberReceiveURL
+	_, err = natsClient.SyncSubscription(sub, cleaner)
+	g.Expect(err).To(BeNil())
+	g.Expect(sub.Status.Config).NotTo(BeNil()) // It should apply the defaults
+	g.Expect(sub.Status.Config.MaxInFlightMessages).To(Equal(defaultMaxInflight))
+
+	subject := eventingtesting.CloudEventType
+
+	// Send a binary CE
+	err = SendBinaryCloudEventToNATS(natsClient, subject)
+	g.Expect(err).To(BeNil())
+	// Check for the event
+	err = subscriber.CheckEvent(eventingtesting.CloudEventData, subscriberCheckURL)
+	g.Expect(err).To(BeNil())
+
+	//  Send a structured CE
+	err = SendStructuredCloudEventToNATS(natsClient, subject)
+	g.Expect(err).To(BeNil())
+	// Check for the event
+	err = subscriber.CheckEvent("\""+eventingtesting.EventData+"\"", subscriberCheckURL)
+	g.Expect(err).To(BeNil())
+
+	// Delete subscription
+	err = natsClient.DeleteSubscription(sub)
+	g.Expect(err).To(BeNil())
 }
 
 func checkIsNotValid(sub *nats.Subscription, t *testing.T) error {

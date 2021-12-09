@@ -4,22 +4,8 @@ metadata:
   name: beb-subscription-sample
   namespace: default
 spec:
-  protocol: BEB
-  protocolsettings:
-    exemptHandshake: true
-    qos: 'AT-LEAST-ONCE'
-    webhookAuth:
-      {
-        type: 'oauth2',
-        grantType: 'client_credentials',
-        'clientId': 'xxx',
-        'clientSecret': 'xxx',
-        'tokenUrl': 'https://oauth2.xxx.com/oauth2/token',
-        'scope': ["guid-identifier"]
-      }
   sink: "https://webhook.xxx.com"
   filter:
-    dialect: beb,
     filters: [
       {
         eventSource: {
@@ -30,7 +16,7 @@ spec:
         eventType: {
           type: exact,
           property: type,
-          value: "sap.kyma.test-app.order.created.v1"
+          value: "prefix.test-app.order.created.v1"
         }
       },
     ]

@@ -6,13 +6,13 @@ import (
 
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
 
+	appsv1 "k8s.io/api/apps/v1"
+
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/deployment"
 	"github.com/kyma-project/kyma/components/eventing-controller/utils"
-	appsv1 "k8s.io/api/apps/v1"
 
 	apigatewayv1alpha1 "github.com/kyma-incubator/api-gateway/api/v1alpha1"
-	rulev1alpha1 "github.com/ory/oathkeeper-maester/api/v1alpha1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -25,7 +25,7 @@ func TestApiRuleEqual(t *testing.T) {
 	labels := map[string]string{
 		"foo": "bar",
 	}
-	handler := &rulev1alpha1.Handler{
+	handler := &apigatewayv1alpha1.Handler{
 		Name: "handler",
 	}
 	rule := apigatewayv1alpha1.Rule{
@@ -33,7 +33,7 @@ func TestApiRuleEqual(t *testing.T) {
 		Methods: []string{
 			http.MethodPost,
 		},
-		AccessStrategies: []*rulev1alpha1.Authenticator{
+		AccessStrategies: []*apigatewayv1alpha1.Authenticator{
 			{
 				Handler: handler,
 			},
@@ -138,10 +138,10 @@ func TestApiRuleEqual(t *testing.T) {
 			prep: func() *apigatewayv1alpha1.APIRule {
 				apiRuleCopy := apiRule.DeepCopy()
 				newRule := rule.DeepCopy()
-				newHandler := &rulev1alpha1.Handler{
+				newHandler := &apigatewayv1alpha1.Handler{
 					Name: "foo",
 				}
-				newRule.AccessStrategies = []*rulev1alpha1.Authenticator{
+				newRule.AccessStrategies = []*apigatewayv1alpha1.Authenticator{
 					{
 						Handler: newHandler,
 					},
@@ -252,8 +252,8 @@ func TestEventingBackendStatusEqual(t *testing.T) {
 				EventingReady:               utils.BoolPtr(false),
 				SubscriptionControllerReady: utils.BoolPtr(true),
 				PublisherProxyReady:         utils.BoolPtr(true),
-				BebSecretName:               "secret",
-				BebSecretNamespace:          "default",
+				BEBSecretName:               "secret",
+				BEBSecretNamespace:          "default",
 			},
 			backendStatus2: eventingv1alpha1.EventingBackendStatus{
 				EventingReady:               utils.BoolPtr(false),
@@ -350,6 +350,18 @@ func TestPublisherProxyDeploymentEqual(t *testing.T) {
 			getPublisher1: func() *appsv1.Deployment {
 				p := defaultNATSPublisher.DeepCopy()
 				p.Spec.Template.Spec.Containers[0].Env[0].Value = "new-value"
+				return p
+			},
+			getPublisher2: func() *appsv1.Deployment {
+				return defaultNATSPublisher.DeepCopy()
+			},
+			expectedResult: false,
+		},
+		"should be unequal if replicas changes": {
+			getPublisher1: func() *appsv1.Deployment {
+				replicas := int32(2)
+				p := defaultNATSPublisher.DeepCopy()
+				p.Spec.Replicas = &replicas
 				return p
 			},
 			getPublisher2: func() *appsv1.Deployment {

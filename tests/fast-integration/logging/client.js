@@ -1,7 +1,9 @@
 
+const axios = require('axios');
 const {
     kubectlPortForward,
-    getResponse,
+    retryPromise,
+    convertAxiosError,
 } = require("../utils");
 
 const lokiPort = 3100;
@@ -11,17 +13,12 @@ function lokiPortForward() {
 }
 
 async function queryLoki(labels, startTimestamp) {
+    const url = `http://localhost:${lokiPort}/api/prom/query?query=${labels}&start=${startTimestamp}`;
     try {
-        const url = `http://localhost:${lokiPort}/api/prom/query?query=${labels}&start=${startTimestamp}`;
-        const responseBody = await getResponse(url, 5);
+        const responseBody = await retryPromise(() => axios.get(url, {timeout: 10000}), 5);
         return responseBody.data;
     } catch(err) {
-        const msg = "Error when querying Loki";
-        if (err.response) {
-            throw new Error(`${msg}: ${err.response.status} ${err.response.statusText}: ${err.response.data}`);
-        } else {
-            throw new Error(`${msg}: ${err.toString()}`);
-        }
+        throw convertAxiosError(err, "cannot query loki");
     }
 }
 

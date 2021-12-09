@@ -2644,10 +2644,10 @@ data:
         "type": "row"
       }
     ],
-    "refresh": false,
+    "refresh": "10s",
     "schemaVersion": 27,
     "style": "dark",
-    "tags": [],
+    "tags": ["kyma","logging"],
     "templating": {
       "list": [
         {
@@ -2684,8 +2684,8 @@ data:
       ]
     },
     "time": {
-      "from": "now-3h",
-      "to": "now"
+        "from": "now-1h",
+        "to": "now"
     },
     "timepicker": {
       "refresh_intervals": [
@@ -2701,7 +2701,7 @@ data:
       ]
     },
     "timezone": "",
-    "title": "Loki",
+    "title": "Kyma / Logging / Loki",
     "uid": "f6fe30815b172c9da7e813c15ddfe6075",
     "version": 6
     }

@@ -68,3 +68,27 @@ Create the name of the secret to use
 {{- define "eventing.secretName" -}}
 {{ default (include "eventing.fullname" .) .Values.global.secretName }}
 {{- end }}
+
+{{/*
+Create a URL for container images
+*/}}
+{{- define "imageurl" -}}
+{{- $registry := default $.reg.path $.img.containerRegistryPath -}}
+{{- if hasKey $.img "directory" -}}
+{{- printf "%s/%s/%s:%s" $registry $.img.directory $.img.name $.img.version -}}
+{{- else -}}
+{{- printf "%s/%s:%s" $registry $.img.name $.img.version -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Create a URL for container images, without version number
+*/}}
+{{- define "shortimageurl" -}}
+{{- $registry := default $.reg.path $.img.containerRegistryPath -}}
+{{- if hasKey $.img "directory" -}}
+{{- printf "%s/%s/%s" $registry $.img.directory $.img.name -}}
+{{- else -}}
+{{- printf "%s/%s" $registry $.img.name -}}
+{{- end -}}
+{{- end -}}

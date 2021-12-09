@@ -21,6 +21,8 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 
+	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
+
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/env"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/handler/handlertest"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/informers"
@@ -33,7 +35,6 @@ import (
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/sender"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/subscribed"
 	testingutils "github.com/kyma-project/kyma/components/event-publisher-proxy/testing"
-	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 )
 
 type Test struct {
@@ -41,7 +42,7 @@ type Test struct {
 	natsConfig     *env.NatsConfig
 	natsServer     *server.Server
 	collector      *metrics.Collector
-	natsUrl        string
+	natsURL        string
 	healthEndpoint string
 }
 
@@ -53,20 +54,23 @@ func (test *Test) init() {
 	test.natsConfig = newEnvConfig(port, natsPort)
 	test.natsServer = testingutils.StartNatsServer()
 	test.collector = metrics.NewCollector()
-	test.natsUrl = test.natsServer.ClientURL()
+	test.natsURL = test.natsServer.ClientURL()
 	test.healthEndpoint = fmt.Sprintf("http://localhost:%d/healthz", port)
 }
 
-func (test *Test) setupResources(t *testing.T, subscription *eventingv1alpha1.Subscription, applicationName string) context.CancelFunc {
+func (test *Test) setupResources(t *testing.T, subscription *eventingv1alpha1.Subscription, applicationName, eventTypePrefix string) context.CancelFunc {
+	// set eventTypePrefix
+	test.natsConfig.LegacyEventTypePrefix = eventTypePrefix
+
 	// a cancelable context to be used
 	ctx, cancel := context.WithCancel(context.Background())
 
 	// configure message receiver
-	messageReceiver := receiver.NewHttpMessageReceiver(test.natsConfig.Port)
+	messageReceiver := receiver.NewHTTPMessageReceiver(test.natsConfig.Port)
 	assert.NotNil(t, messageReceiver)
 
 	// connect to nats
-	bc := pkgnats.NewBackendConnection(test.natsUrl, true, 3, time.Second)
+	bc := pkgnats.NewBackendConnection(test.natsURL, true, 3, time.Second)
 	err := bc.Connect()
 	assert.Nil(t, err)
 	assert.NotNil(t, bc.Connection)
@@ -137,30 +141,31 @@ func TestMain(m *testing.M) {
 }
 
 func TestNatsHandlerForCloudEvents(t *testing.T) {
-	exec := func(t *testing.T, applicationName, expectedNatsSubject string) {
+	exec := func(t *testing.T, applicationName, expectedNatsSubject, eventTypePrefix, eventType string) {
 		test.logger.Info("TestNatsHandlerForCloudEvents started")
 
 		// setup test environment
 		publishEndpoint := fmt.Sprintf("http://localhost:%d/publish", test.natsConfig.Port)
-		subscription := testingutils.NewSubscription(testingutils.SubscriptionWithFilter(testingutils.MessagingNamespace, testingutils.CloudEventTypeNotClean))
-		cancel := test.setupResources(t, subscription, applicationName)
+		subscription := testingutils.NewSubscription(testingutils.SubscriptionWithFilter(testingutils.MessagingNamespace, eventType))
+		cancel := test.setupResources(t, subscription, applicationName, eventTypePrefix)
 		defer cancel()
 
 		// prepare event type from subscription
 		assert.NotNil(t, subscription.Spec.Filter)
 		assert.NotEmpty(t, subscription.Spec.Filter.Filters)
-		eventType := subscription.Spec.Filter.Filters[0].EventType.Value
+		eventTypeToSubscribe := subscription.Spec.Filter.Filters[0].EventType.Value
 
 		// connect to nats
-		bc := pkgnats.NewBackendConnection(test.natsUrl, true, 3, time.Second)
+		bc := pkgnats.NewBackendConnection(test.natsURL, true, 3, time.Second)
 		err := bc.Connect()
 		assert.Nil(t, err)
 		assert.NotNil(t, bc.Connection)
 
 		// publish a message to NATS and validate it
 		validator := testingutils.ValidateNatsSubjectOrFail(t, expectedNatsSubject)
-		testingutils.SubscribeToEventOrFail(t, bc.Connection, eventType, validator)
+		testingutils.SubscribeToEventOrFail(t, bc.Connection, eventTypeToSubscribe, validator)
 
+		// nolint:scopelint
 		// run the tests for publishing cloudevents
 		for _, testCase := range handlertest.TestCasesForCloudEvents {
 			t.Run(testCase.Name, func(t *testing.T) {
@@ -180,36 +185,39 @@ func TestNatsHandlerForCloudEvents(t *testing.T) {
 		}
 	}
 
-	// make sure not to change the cloudevent, even if its event-type contains none-alphanumeric characters
-	exec(t, testingutils.ApplicationName, testingutils.CloudEventTypeNotClean)
-	exec(t, testingutils.ApplicationNameNotClean, testingutils.CloudEventTypeNotClean)
+	// make sure not to change the cloudevent, even if its event-type contains none-alphanumeric characters or the event-type-prefix is empty
+	exec(t, testingutils.ApplicationName, testingutils.CloudEventTypeNotClean, testingutils.MessagingEventTypePrefix, testingutils.CloudEventTypeNotClean)
+	exec(t, testingutils.ApplicationName, testingutils.CloudEventTypeNotClean, testingutils.MessagingEventTypePrefixEmpty, testingutils.CloudEventTypeNotCleanPrefixEmpty)
+	exec(t, testingutils.ApplicationNameNotClean, testingutils.CloudEventTypeNotClean, testingutils.MessagingEventTypePrefix, testingutils.CloudEventTypeNotClean)
+	exec(t, testingutils.ApplicationNameNotClean, testingutils.CloudEventTypeNotClean, testingutils.MessagingEventTypePrefixEmpty, testingutils.CloudEventTypeNotCleanPrefixEmpty)
 }
 
 func TestNatsHandlerForLegacyEvents(t *testing.T) {
-	exec := func(t *testing.T, applicationName string, expectedNatsSubject string) {
+	exec := func(t *testing.T, applicationName string, expectedNatsSubject, eventTypePrefix, eventType string) {
 		test.logger.Info("TestNatsHandlerForLegacyEvents started")
 
 		// setup test environment
 		publishLegacyEndpoint := fmt.Sprintf("http://localhost:%d/%s/v1/events", test.natsConfig.Port, applicationName)
-		subscription := testingutils.NewSubscription(testingutils.SubscriptionWithFilter(testingutils.MessagingNamespace, testingutils.CloudEventTypeNotClean))
-		cancel := test.setupResources(t, subscription, applicationName)
+		subscription := testingutils.NewSubscription(testingutils.SubscriptionWithFilter(testingutils.MessagingNamespace, eventType))
+		cancel := test.setupResources(t, subscription, applicationName, eventTypePrefix)
 		defer cancel()
 
 		// prepare event type from subscription
 		assert.NotNil(t, subscription.Spec.Filter)
 		assert.NotEmpty(t, subscription.Spec.Filter.Filters)
-		eventType := subscription.Spec.Filter.Filters[0].EventType.Value
+		eventTypeToSubscribe := subscription.Spec.Filter.Filters[0].EventType.Value
 
 		// connect to nats
-		bc := pkgnats.NewBackendConnection(test.natsUrl, true, 3, time.Second)
+		bc := pkgnats.NewBackendConnection(test.natsURL, true, 3, time.Second)
 		err := bc.Connect()
 		assert.Nil(t, err)
 		assert.NotNil(t, bc.Connection)
 
 		// publish a message to NATS and validate it
 		validator := testingutils.ValidateNatsSubjectOrFail(t, expectedNatsSubject)
-		testingutils.SubscribeToEventOrFail(t, bc.Connection, eventType, validator)
+		testingutils.SubscribeToEventOrFail(t, bc.Connection, eventTypeToSubscribe, validator)
 
+		// nolint:scopelint
 		// run the tests for publishing legacy events
 		for _, testCase := range handlertest.TestCasesForLegacyEvents {
 			t.Run(testCase.Name, func(t *testing.T) {
@@ -237,50 +245,54 @@ func TestNatsHandlerForLegacyEvents(t *testing.T) {
 	}
 
 	// make sure to clean the legacy event, so that its event-type is free from none-alphanumeric characters
-	exec(t, testingutils.ApplicationName, testingutils.CloudEventType)
-	exec(t, testingutils.ApplicationNameNotClean, testingutils.CloudEventType)
+	exec(t, testingutils.ApplicationName, testingutils.CloudEventType, testingutils.MessagingEventTypePrefix, testingutils.CloudEventTypeNotClean)
+	exec(t, testingutils.ApplicationName, testingutils.CloudEventType, testingutils.MessagingEventTypePrefixEmpty, testingutils.CloudEventTypeNotCleanPrefixEmpty)
+	exec(t, testingutils.ApplicationNameNotClean, testingutils.CloudEventType, testingutils.MessagingEventTypePrefix, testingutils.CloudEventTypeNotClean)
+	exec(t, testingutils.ApplicationNameNotClean, testingutils.CloudEventType, testingutils.MessagingEventTypePrefixEmpty, testingutils.CloudEventTypeNotCleanPrefixEmpty)
 }
 
 func TestNatsHandlerForSubscribedEndpoint(t *testing.T) {
 	test.logger.Info("TestNatsHandlerForSubscribedEndpoint started")
 
-	// setup test environment
-	subscribedEndpointFormat := "http://localhost:%d/%s/v1/events/subscribed"
-	subscription := testingutils.NewSubscription()
-	cancel := test.setupResources(t, subscription, testingutils.ApplicationName)
-	defer cancel()
+	exec := func(eventTypePrefix, eventType string) {
+		// setup test environment
+		subscribedEndpointFormat := "http://localhost:%d/%s/v1/events/subscribed"
+		subscription := testingutils.NewSubscription(testingutils.SubscriptionWithFilter(testingutils.MessagingNamespace, eventType))
+		cancel := test.setupResources(t, subscription, testingutils.ApplicationName, eventTypePrefix)
+		defer cancel()
 
-	// run the tests for subscribed endpoint
-	for _, testCase := range handlertest.TestCasesForSubscribedEndpoint {
-		t.Run(testCase.Name, func(t *testing.T) {
-			subscribedURL := fmt.Sprintf(subscribedEndpointFormat, test.natsConfig.Port, testCase.AppName)
-			resp, err := testingutils.QuerySubscribedEndpoint(subscribedURL)
-			if err != nil {
-				t.Fatalf("failed to send event with error: %v", err)
-			}
+		// nolint:scopelint
+		// run the tests for subscribed endpoint
+		for _, testCase := range handlertest.TestCasesForSubscribedEndpoint {
+			t.Run(testCase.Name, func(t *testing.T) {
+				subscribedURL := fmt.Sprintf(subscribedEndpointFormat, test.natsConfig.Port, testCase.AppName)
+				resp, err := testingutils.QuerySubscribedEndpoint(subscribedURL)
+				if err != nil {
+					t.Fatalf("failed to send event with error: %v", err)
+				}
 
-			if testCase.WantStatusCode != resp.StatusCode {
-				t.Fatalf("test failed, want status code:%d but got:%d", testCase.WantStatusCode, resp.StatusCode)
-			}
-			defer func() { _ = resp.Body.Close() }()
-			respBodyBytes, err := ioutil.ReadAll(resp.Body)
-			if err != nil {
-				t.Errorf("failed to convert body to bytes: %v", err)
-			}
-			gotEventsResponse := subscribed.Events{}
-			err = json.Unmarshal(respBodyBytes, &gotEventsResponse)
-			if err != nil {
-				t.Errorf("failed to unmarshal body bytes to events response: %v", err)
-			}
-			if !reflect.DeepEqual(testCase.WantResponse, gotEventsResponse) {
-				t.Errorf("incorrect response, wanted: %v, got: %v", testCase.WantResponse, gotEventsResponse)
-			}
-
-			if testingutils.Is2XX(resp.StatusCode) {
-				metricstest.EnsureMetricLatency(t, test.collector)
-			}
-		})
+				if testCase.WantStatusCode != resp.StatusCode {
+					t.Fatalf("test failed, want status code:%d but got:%d", testCase.WantStatusCode, resp.StatusCode)
+				}
+				defer func() { _ = resp.Body.Close() }()
+				respBodyBytes, err := ioutil.ReadAll(resp.Body)
+				if err != nil {
+					t.Errorf("failed to convert body to bytes: %v", err)
+				}
+				gotEventsResponse := subscribed.Events{}
+				err = json.Unmarshal(respBodyBytes, &gotEventsResponse)
+				if err != nil {
+					t.Errorf("failed to unmarshal body bytes to events response: %v", err)
+				}
+				if !reflect.DeepEqual(testCase.WantResponse, gotEventsResponse) {
+					t.Errorf("incorrect response, wanted: %v, got: %v", testCase.WantResponse, gotEventsResponse)
+				}
+			})
+		}
 	}
+
+	exec(testingutils.MessagingEventTypePrefix, testingutils.CloudEventType)
+	exec(testingutils.MessagingEventTypePrefixEmpty, testingutils.CloudEventTypePrefixEmpty)
 }
 
 func newEnvConfig(port, natsPort int) *env.NatsConfig {

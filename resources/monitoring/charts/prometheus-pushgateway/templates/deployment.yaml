@@ -23,7 +23,7 @@ spec:
       serviceAccountName: {{ template "prometheus-pushgateway.serviceAccountName" . }}
       containers:
         - name: pushgateway
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.pushgateway) }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
         {{- if .Values.extraVars }}
           env:

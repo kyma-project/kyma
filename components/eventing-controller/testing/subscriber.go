@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/avast/retry-go"
+	"github.com/avast/retry-go/v3"
 	pkgerrors "github.com/pkg/errors"
 )
 
@@ -81,7 +81,7 @@ func (s Subscriber) CheckEvent(expectedData, subscriberCheckURL string) error {
 	delay := time.Second
 	err := retry.Do(
 		func() error {
-			resp, err := http.Get(subscriberCheckURL)
+			resp, err := http.Get(subscriberCheckURL) //nolint:gosec
 			if err != nil {
 				return pkgerrors.Wrapf(err, "get HTTP request failed")
 			}

@@ -52,7 +52,7 @@ func k8sResourceClients(k8sConfig *restclient.Config) (*k8sResourceClientSets, e
 	}, nil
 }
 
-func createKymaService(k8sResourceClients *k8sResourceClientSets, uploadServiceUrl string, integrationNamespace string) (kyma.Service, error) {
+func createKymaService(k8sResourceClients *k8sResourceClientSets, uploadServiceUrl string, integrationNamespace string, centralGatewayServiceUrl string) (kyma.Service, error) {
 	nameResolver := k8sconsts.NewNameResolver()
 	secretsManagerConstructor := func(namespace string) secrets.Manager {
 		return k8sResourceClients.core.CoreV1().Secrets(namespace)
@@ -60,7 +60,7 @@ func createKymaService(k8sResourceClients *k8sResourceClientSets, uploadServiceU
 	repository := appsecrets.NewRepository(secretsManagerConstructor(integrationNamespace))
 
 	applicationManager := newApplicationManager(k8sResourceClients.application)
-	converter := applications.NewConverter(nameResolver)
+	converter := applications.NewConverter(nameResolver, centralGatewayServiceUrl)
 	rafterService := newRafter(k8sResourceClients.dynamic, uploadServiceUrl)
 	credentialsService := appsecrets.NewCredentialsService(repository, strategy.NewSecretsStrategyFactory(), nameResolver)
 	requestParametersService := appsecrets.NewRequestParametersService(repository, nameResolver)

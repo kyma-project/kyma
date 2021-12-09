@@ -8,13 +8,14 @@ import (
 type BackendType string
 
 const (
-	BebBackendType  BackendType = "BEB"
+	BEBBackendType  BackendType = "BEB"
 	NatsBackendType BackendType = "NATS"
 )
 
 // EventingBackendSpec defines the desired state of EventingBackend
 type EventingBackendSpec struct {
-	// For now spec is empty!
+	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
+	// Important: Run "make" to regenerate code after modifying this file
 }
 
 // EventingBackendStatus defines the observed state of EventingBackend
@@ -34,11 +35,11 @@ type EventingBackendStatus struct {
 
 	// The name of the secret containing BEB access tokens, required only for BEB
 	// +optional
-	BebSecretName string `json:"bebSecretName"`
+	BEBSecretName string `json:"bebSecretName"`
 
 	// The namespace of the secret containing BEB access tokens, required only for BEB
 	// +optional
-	BebSecretNamespace string `json:"bebSecretNamespace"`
+	BEBSecretNamespace string `json:"bebSecretNamespace"`
 }
 
 // +kubebuilder:object:root=true
@@ -65,6 +66,6 @@ type EventingBackendList struct {
 	Items           []EventingBackend `json:"items"`
 }
 
-func init() {
+func init() { //nolint:gochecknoinits
 	SchemeBuilder.Register(&EventingBackend{}, &EventingBackendList{})
 }

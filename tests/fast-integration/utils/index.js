@@ -4,8 +4,6 @@ const net = require("net");
 const fs = require("fs");
 const { join } = require("path");
 const { expect } = require("chai");
-const axios = require('axios');
-const axiosRetry = require('axios-retry');
 const execa = require("execa");
 
 const kc = new k8s.KubeConfig();
@@ -13,6 +11,7 @@ var k8sDynamicApi;
 var k8sAppsApi;
 var k8sCoreV1Api;
 var k8sLog;
+var k8sServerUrl;
 
 var watch;
 var forward;
@@ -35,11 +34,27 @@ function initializeK8sClient(opts) {
     k8sLog = new k8s.Log(kc);
     watch = new k8s.Watch(kc);
     forward = new k8s.PortForward(kc);
+    k8sServerUrl = kc.getCurrentCluster() ? kc.getCurrentCluster().server : null;
+
   } catch (err) {
     console.log(err.message);
   }
 }
 initializeK8sClient();
+
+/**
+ * Gets the shoot name from k8s server url
+ *
+ * @throws
+ * @returns {String}
+ */
+function getShootNameFromK8sServerUrl() {
+  if (!k8sServerUrl || k8sServerUrl === "" || k8sServerUrl.split(".").length < 1) {
+    throw new Error(`failed to get shootName from K8s server Url: ${k8sServerUrl}`)
+  }
+  return k8sServerUrl.split(".")[1];
+}
+
 
 /**
  * Retries a promise {retriesLeft} times every {interval} miliseconds
@@ -79,7 +94,7 @@ function sleep(ms) {
 
 function convertAxiosError(axiosError, message) {
   if (!axiosError.response) {
-    return axiosError;
+    return new Error(`${message}: ${axiosError.toString()}`);
   }
   if (
     axiosError.response &&
@@ -90,7 +105,6 @@ function convertAxiosError(axiosError, message) {
   }
   if (axiosError.response && axiosError.response.data) {
     message += ": " + JSON.stringify(axiosError.response.data);
-    debug(axiosError.response.data);
   }
   return new Error(message);
 }
@@ -296,6 +310,15 @@ async function getSecret(name, namespace) {
   return body;
 }
 
+async function getFunction(name, namespace) {
+  const path = `/apis/serverless.kyma-project.io/v1alpha1/namespaces/${namespace}/functions/${name}`;
+  const response = await k8sDynamicApi.requestPromise({
+    url: k8sDynamicApi.basePath + path,
+  });
+  const body = JSON.parse(response.body);
+  return body;
+}
+
 async function getConfigMap(name, namespace) {
   const path = `/api/v1/namespaces/${namespace}/configmaps/${name}`;
   const response = await k8sDynamicApi.requestPromise({
@@ -418,7 +441,39 @@ function waitForFunction(name, namespace = "default", timeout = 90000) {
   );
 }
 
-function waitForSubscription(name, namespace = "default", timeout = 90000) {
+async function getAllSubscriptions(namespace = "default") {
+  try {
+    const path = `/apis/eventing.kyma-project.io/v1alpha1/namespaces/${namespace}/subscriptions`;
+    const response = await k8sDynamicApi.requestPromise({
+      url: k8sDynamicApi.basePath + path,
+      qs: { limit: 500 },
+    });
+    const body = JSON.parse(response.body);
+
+    return Promise.all(
+      body.items.map((sub) => {
+        return {
+          apiVersion: sub["apiVersion"],
+          spec: sub["spec"],
+          status: sub["status"],
+
+        }
+      })
+    ).then((results) => {
+      return results.flat();
+    });
+
+  } catch (e) {
+    if (e.statusCode == 404 || e.statusCode == 405) {
+      // do nothing
+    } else {
+      console.log("Error:", e);
+      throw e;
+    }
+  }
+}
+
+function waitForSubscription(name, namespace = "default", timeout = 180000) {
   return waitForK8sObject(
     `/apis/eventing.kyma-project.io/v1alpha1/namespaces/${namespace}/subscriptions`,
     {},
@@ -870,6 +925,7 @@ function ignore404(e) {
   }
 }
 
+// NOTE: this no longer works, it relies on kube-api sending `selfLink` but the field has been deprecated
 async function deleteAllK8sResources(
   path,
   query = {},
@@ -901,6 +957,11 @@ async function deleteAllK8sResources(
   }
 }
 
+async function deleteK8sPod(o) {
+  return await k8sCoreV1Api.deleteNamespacedPod(o.metadata.name, o.metadata.namespace);
+}
+
+// NOTE: this no longer works, it relies on kube-api sending `selfLink` but the field has been deprecated
 async function deleteK8sResource(o, keepFinalizer = false) {
   if (o.metadata.finalizers && o.metadata.finalizers.length && !keepFinalizer) {
     const options = {
@@ -958,7 +1019,7 @@ async function getKymaAdminBindings() {
   const adminRoleBindings = body.items;
   return adminRoleBindings
     .filter(
-      (clusterRoleBinding) => clusterRoleBinding.roleRef.name === "kyma-admin"
+      (clusterRoleBinding) => clusterRoleBinding.roleRef.name === "cluster-admin"
     )
     .map((clusterRoleBinding) => ({
       name: clusterRoleBinding.metadata.name,
@@ -1295,24 +1356,6 @@ async function patchDeployment(name, ns, patch) {
   );
 }
 
-async function getResponse(url, retries) {
-  axiosRetry(axios, {
-      retries: retries,
-      retryDelay: (retryCount) => {
-          return retryCount * 5000;
-      },
-      retryCondition: (error) => {
-          console.log(error);
-          return !error.response || error.response.status != 200;
-      },
-  });
-
-  let response = await axios.get(url, {
-      timeout: 5000,
-  });
-  return response;
-}
-
 async function isKyma2() {
   try {
     const res = await k8sCoreV1Api.listNamespacedPod("kyma-installer");
@@ -1341,8 +1384,254 @@ function serviceInstanceObj(name, serviceClassExternalName) {
   };
 }
 
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+/**
+ * Creates eventing backend secret for event mesh (BEB)
+ * @param {string} eventMeshSecretFilePath - file path of the EventMesh secret file
+ * @param {string} name - name of the beb secret
+ * @param {string} namespace - namespace where to create the secret
+ * @returns {json} - event mesh config data
+ */
+ async function createEventingBackendK8sSecret(eventMeshSecretFilePath, name, namespace="default") {
+  // read EventMesh secret from specified file
+  const eventMeshSecret = JSON.parse(fs.readFileSync(eventMeshSecretFilePath, { encoding: "utf8" }))
+
+  const secretJson = {
+    apiVersion: "v1",
+    kind: "Secret",
+    type: "Opaque",
+    metadata: {
+      name,
+      namespace
+    },
+    data: { 
+      management: toBase64(JSON.stringify(eventMeshSecret["management"])),
+      messaging: toBase64(JSON.stringify(eventMeshSecret["messaging"])),
+      namespace: toBase64(eventMeshSecret["namespace"]),
+      serviceinstanceid: toBase64(eventMeshSecret["serviceinstanceid"]),
+      xsappname: toBase64(eventMeshSecret["xsappname"])
+    },
+  };
+
+  // apply to k8s
+  await k8sApply([secretJson], namespace, true);
+
+  return {
+    namespace: eventMeshSecret["namespace"],
+    serviceinstanceid: eventMeshSecret["serviceinstanceid"],
+    xsappname: eventMeshSecret["xsappname"]
+  }
+}
+
+/**
+ * Deletes eventing backend secret for event mesh (BEB)
+ * @param {string} name - name of the beb secret
+ * @param {string} namespace - namespace where the secret exists
+ * @returns
+ */
+ function deleteEventingBackendK8sSecret(name, namespace="default") {
+  const secretJson = {
+    apiVersion: "v1",
+    kind: "Secret",
+    type: "Opaque",
+    metadata: {
+      name,
+      namespace
+    }
+  };
+
+  return k8sDelete([secretJson], namespace)
+ }
+
+/**
+ * Switches eventing backend to specified backend-type (beb or nats)
+ * @param {string} secretName - name of the beb secret
+ * @param {string} namespace - namespace where the secret exists
+ * @param {string} backendType - backend type to switch to. (beb or nats)
+ * @returns
+ */
+async function switchEventingBackend(secretName, namespace="default", backendType="beb") {
+  // patch data to label the eventing-backend secret
+  const patch = [
+    {
+        "op": "replace",
+        "path":"/metadata/labels",
+        "value": {
+          "kyma-project.io/eventing-backend": backendType.toLowerCase()
+        }
+    }
+  ];
+
+  const options = { "headers": { "Content-type": k8s.PatchUtils.PATCH_FORMAT_JSON_PATCH}};
+
+  // apply k8s patch
+  await k8sCoreV1Api.patchNamespacedSecret(
+    secretName,
+    namespace,
+    patch,
+    undefined,
+    undefined,
+    undefined,
+    undefined,
+    options
+  );
+
+  await sleep(30 * 1000); // Putting on sleep because there may be a delay in eventing-backend status update propagation
+  await waitForEventingBackendToReady(backendType)
+}
+
+/**
+ * Waits for eventing backend until its ready
+ * @param {string} name - name of the eventing backend
+ * @param {string} namespace - namespace where the eventing backend exists
+ * @param {string} backendType - eventing backend type (beb or nats)
+ * @returns
+ */
+function waitForEventingBackendToReady(backendType="beb", name="eventing-backend", namespace = "kyma-system", timeout = 180000) {
+  return waitForK8sObject(
+    `/apis/eventing.kyma-project.io/v1alpha1/namespaces/${namespace}/eventingbackends`,
+    {},
+    (_type, _apiObj, watchObj) => {
+      return (
+        watchObj.object.metadata.name == name &&
+        watchObj.object.status.backendType.toLowerCase() == backendType.toLowerCase() &&
+        watchObj.object.status.eventingReady == true &&
+        watchObj.object.status.publisherProxyReady == true &&
+        watchObj.object.status.subscriptionControllerReady == true
+      );
+    },
+    timeout,
+    `Waiting for eventing-backend: ${name} to get ready  timeout (${timeout} ms)`
+  );
+}
+
+/**
+ * Prints logs of eventing-controller from kyma-system
+ */
+async function printEventingControllerLogs() {
+  try{
+    console.log(`****** Printing logs of eventing-controller from kyma-system`)
+    await printContainerLogs('app.kubernetes.io/name=controller, app.kubernetes.io/instance=eventing', "controller", 'kyma-system', 180000);
+  }
+  catch(err) {
+    console.log(err)
+    throw err
+  }
+}
+
+/**
+ * Prints status of the components on which in-cluster eventing happens
+ */
+ async function printStatusOfInClusterEventingInfrastructure(targetNamespace, encoding, funcName) {
+  try{
+    let kymaSystem = "kyma-system"
+    let publisherProxyReady = false
+    let eventingControllerReady = false
+    let natsServerReadyCounts = 0
+    let natsServerReady = false
+    let functionReady = false
+
+    let publisherDeployment = await k8sAppsApi.listNamespacedDeployment(kymaSystem,undefined, undefined,undefined, undefined, 'app.kubernetes.io/name=eventing-publisher-proxy, app.kubernetes.io/instance=eventing', undefined );
+    if (publisherDeployment.body.items[0].status.replicas === publisherDeployment.body.items[0].status.readyReplicas) {
+      publisherProxyReady = true
+    }
+
+    let controllerDeployment  = await k8sAppsApi.listNamespacedDeployment(kymaSystem,undefined, undefined,undefined, undefined, 'app.kubernetes.io/name=controller, app.kubernetes.io/instance=eventing', undefined );
+    if (controllerDeployment.body.items[0].status.replicas === controllerDeployment.body.items[0].status.readyReplicas) {
+      eventingControllerReady = true
+    }
+
+    let natsServerPods  = await k8sCoreV1Api.listNamespacedPod(kymaSystem, undefined, undefined, undefined, undefined, 'kyma-project.io/dashboard=eventing, nats_cluster=eventing-nats');
+    for (let nats of natsServerPods.body.items) {
+      if (nats.status.phase === "Running") {
+        natsServerReadyCounts += 1
+      }
+    }
+    if (natsServerReadyCounts === natsServerPods.body.items.length) {
+      natsServerReady = true
+    }
+
+    let lastOrderFunc = await getFunction(funcName, targetNamespace);
+    for (let cond of lastOrderFunc.status.conditions) {
+      if (cond.type === "Running" && cond.status === "True") {
+        functionReady = true
+        break
+      }
+    }
+
+    console.log(`****** Printing status of infrastructure for in-cluster eventing, mode: ${encoding} *******`)
+    console.log(`****** Eventing-publisher-proxy deployment from ns: ${kymaSystem} ready: ${publisherProxyReady}`)
+    console.log(`****** Eventing-controller deployment from ns: ${kymaSystem} ready: ${eventingControllerReady}`)
+    console.log(`****** NATS-server pods from ns: ${kymaSystem} ready: ${natsServerReady}`)
+    console.log(`****** Function ${funcName} from ns: ${targetNamespace} ready: ${functionReady}`)
+    console.log(`****** End *******`)
+  }
+  catch(err) {
+    console.log(err)
+    throw err
+  }
+}
+
+/**
+ * Prints logs of eventing-publisher-proxy from kyma-system
+ */
+ async function printEventingPublisherProxyLogs() {
+  try{ 
+    console.log(`****** Printing logs of eventing-publisher-proxy from kyma-system`)
+    await printContainerLogs('app.kubernetes.io/name=eventing-publisher-proxy, app.kubernetes.io/instance=eventing', "eventing-publisher-proxy", 'kyma-system', 180000);
+  }
+  catch(err) {
+    console.log(err)
+    throw err
+  }
+}
+
+/**
+ * Prints subscriptions json
+ */
+ async function printAllSubscriptions(testNamespace) {
+  try{
+    console.log(`****** Printing all subscriptions from namespace: ${testNamespace}`)
+    const subs = await getAllSubscriptions(testNamespace)
+    console.log(JSON.stringify(subs, null, 4))
+  }
+  catch(err) {
+    console.log(err)
+    throw err
+  }
+}
+
+// getTraceDAG returns a DAG for the provided Jaeger tracing data
+async function getTraceDAG(trace) {
+  // Find root spans which are not child of any other span
+  const rootSpans = trace["spans"].filter((s) => !(s["references"].find((r) => r["refType"] === "CHILD_OF")))
+
+  // Find and attach child spans for each root span
+  for (const root of rootSpans) {
+    await attachTraceChildSpans(root, trace);
+  }
+  return rootSpans
+}
+
+// attachChildSpans finds child spans of current parentSpan and attach it to parentSpan object
+// and also recursively, finds and attaches further child spans of each child.
+async function attachTraceChildSpans(parentSpan, trace) {
+  // find child spans of current parentSpan and attach it to parentSpan object
+  parentSpan["childSpans"] = trace["spans"].filter((s) => s["references"].find((r) => r["refType"] === "CHILD_OF" && r["spanID"] === parentSpan["spanID"] && r["traceID"] === parentSpan["traceID"]));
+  // recursively, find and attach further child span of each parentSpan["childSpans"]
+  if (parentSpan["childSpans"] && parentSpan["childSpans"].length > 0) {
+    for (const child of parentSpan["childSpans"]) {
+      await attachTraceChildSpans(child, trace);
+    }
+  }
+}
+
 module.exports = {
   initializeK8sClient,
+  getShootNameFromK8sServerUrl,
   retryPromise,
   convertAxiosError,
   removeServiceInstanceFinalizer,
@@ -1406,7 +1695,6 @@ module.exports = {
   eventingSubscription,
   getVirtualService,
   patchDeployment,
-  getResponse,
   isKyma2,
   namespaceObj,
   serviceInstanceObj,
@@ -1414,5 +1702,15 @@ module.exports = {
   printContainerLogs,
   kubectlExecInPod,
   deleteK8sResource,
+  deleteK8sPod,
   listPods,
+  switchEventingBackend,
+  waitForEventingBackendToReady,
+  printAllSubscriptions,
+  printEventingControllerLogs,
+  printEventingPublisherProxyLogs,
+  createEventingBackendK8sSecret,
+  deleteEventingBackendK8sSecret,
+  getTraceDAG,
+  printStatusOfInClusterEventingInfrastructure,
 };
