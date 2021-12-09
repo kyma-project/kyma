@@ -25,7 +25,7 @@ WORKDIR /app
 # Install certificates
 #
 
-RUN apk update && apk add ca-certificates && rm -rf /var/cache/apk/*
+RUN apk add --no-cache ca-certificates
 
 #
 # Copy binary
