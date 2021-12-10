@@ -82,7 +82,7 @@
 /resources/api-gateway/ @strekm @werdes72 @Tomasz-Smelcerz-SAP @mjakobczyk @dariusztutaj @cnvergence @veichtj @piotrkpc
 
 # The `compass-runtime-agent` chart
-/resources/compass-runtime-agent/ @PK85 @tgorgol @dbadura @akgalwas @janmedrek @franpog859 @Maladie @rafalpotempa @koala7659 @ralikio @everesio
+/resources/compass-runtime-agent/ @PK85 @tgorgol @dbadura @kyma-project/connectivity
 
 # The `kiali` chart
 /resources/kiali/ @kyma-project/observability
@@ -140,18 +140,6 @@ components/etcd-tls-setup-job/ @PK85 @piotrmiskiewicz @ksputo @szwedm @voigt @wo
 # Application Connectivity Certs Setup Job Component
 /components/application-connectivity-certs-setup-job/ @akgalwas @janmedrek @franpog859 @Maladie @rafalpotempa @koala7659 @ralikio
 
-# UAA Component
-/components/uaa-activator/ @ksputo @piotrmiskiewicz @PK85 @szwedm @voigt @wozniakjan
-
-# Xip Patch Component
-/components/xip-patch/ @strekm @werdes72 @Tomasz-Smelcerz-SAP @mjakobczyk @dariusztutaj
-
-# Permission Controller Component
-/components/permission-controller/ @strekm @werdes72 @Tomasz-Smelcerz-SAP @mjakobczyk @dariusztutaj
-
-# Dex Static User Configurer
-/components/dex-static-user-configurer/ @strekm @werdes72 @Tomasz-Smelcerz-SAP @mjakobczyk @dariusztutaj
-
 # Function Controller
 /components/function-controller/ @m00g3n @pPrecel @dbadura @rJankowski93 @kwiatekus
 
@@ -183,44 +171,37 @@ components/etcd-tls-setup-job/ @PK85 @piotrmiskiewicz @ksputo @szwedm @voigt @wo
 # Service Catalog acceptance tests
 /tests/service-catalog/ @ksputo @piotrmiskiewicz @PK85 @szwedm @voigt @wozniakjan @adamwalach
 
-# Dex integration tests
-/tests/integration/dex/ @strekm @werdes72 @Tomasz-Smelcerz-SAP @mjakobczyk @dariusztutaj
-
 # api-gateway integration tests
 /tests/integration/api-gateway/ @strekm @werdes72 @Tomasz-Smelcerz-SAP @mjakobczyk @dariusztutaj
-
-# apiserver-proxy tests
-/tests/integration/apiserver-proxy/ @strekm @werdes72 @Tomasz-Smelcerz-SAP @mjakobczyk @dariusztutaj
 
 # Rafter tests
 /tests/rafter/ @m00g3n @pPrecel @dbadura @tgorgol @rJankowski93
 
 # Function Controller tests
-/tests/function-controller/ @m00g3n @pPrecel @dbadura @tgorgol @rJankowski93
+/tests/function-controller/ @kyma-project/serverless
 
 # Connector Service Tests
-/tests/connector-service-tests/ @akgalwas @janmedrek @franpog859 @Maladie @rafalpotempa @koala7659 @ralikio @everesio
-
+/tests/connector-service-tests/ @kyma-project/connectivity
 # Application Registry Tests
-/tests/application-registry-tests/ @akgalwas @janmedrek @franpog859 @Maladie @rafalpotempa @koala7659 @ralikio @everesio
+/tests/application-registry-tests/ @kyma-project/connectivity
 
 # Application Gateway Tests
-/tests/application-gateway-tests/ @akgalwas @janmedrek @franpog859 @Maladie @rafalpotempa @koala7659 @ralikio @everesio
+/tests/application-gateway-tests/ @kyma-project/connectivity
 
 # Application Gateway Legacy Tests
-/tests/application-gateway-legacy-tests/ @akgalwas @janmedrek @franpog859 @Maladie @rafalpotempa @koala7659 @ralikio @everesio
+/tests/application-gateway-legacy-tests/ @kyma-project/connectivity
 
 # Application Operator Tests
-/tests/application-operator-tests/ @akgalwas @janmedrek @franpog859 @Maladie @rafalpotempa @koala7659 @ralikio @everesio
+/tests/application-operator-tests/ @kyma-project/connectivity
 
 # Application Connector Tests
-/tests/application-connector-tests/ @akgalwas @janmedrek @franpog859 @Maladie @rafalpotempa @koala7659 @ralikio @everesio
+/tests/application-connector-tests/ @kyma-project/connectivity
 
 # Connection Token Handler Tests
-/tests/connection-token-handler-tests/ @akgalwas @janmedrek @franpog859 @Maladie @rafalpotempa @koala7659 @ralikio @everesio
+/tests/connection-token-handler-tests/ @kyma-project/connectivity
 
 # Compass Runtime Agent Tests
-/tests/compass-runtime-agent/ @PK85 @tgorgol @dbadura @akgalwas @janmedrek @franpog859 @Maladie @rafalpotempa @koala7659 @ralikio @everesio
+/tests/compass-runtime-agent/ @PK85 @tgorgol @dbadura @kyma-project/connectivity
 
 # Fast Integration Tests
 /tests/fast-integration/ @crabtree @pbochynski @adamwalach @voigt @skhalash @shorim @rakesh-garimella @jeremyharisch @lindnerby
@@ -235,16 +216,13 @@ components/etcd-tls-setup-job/ @PK85 @piotrmiskiewicz @ksputo @szwedm @voigt @wo
 
 
 # Fast Integration Eventing Tests
-/tests/fast-integration/eventing-test @k15r @lilitgh @marcobebway @nachtmaar @radufa @sayanh @pxsalehi @mfaizanse @friedrichwilken @vladislavpaskar
+/tests/fast-integration/eventing-test @kyma-project/eventing
 
 # Tools
 
 # The failery directory
 /tools/failery/ @m00g3n @pPrecel @dbadura @tgorgol @rJankowski93
 
-# The tools/kyma-installer directory
-/tools/kyma-installer/ @strekm @werdes72 @Tomasz-Smelcerz-SAP @mjakobczyk @dariusztutaj
-#
 # The tools/event-subscriber directory
 /tools/event-subscriber/ @kyma-project/eventing
 
