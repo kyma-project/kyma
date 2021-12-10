@@ -17,6 +17,8 @@ RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o event-subscriber 
 FROM scratch
 LABEL source=git@github.com:kyma-project/kyma.git
 
+WORKDIR /app
+
 COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 
 COPY --from=builder $DOCK_PKG_DIR/event-subscriber .
