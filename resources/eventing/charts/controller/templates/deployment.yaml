@@ -50,6 +50,10 @@ spec:
             value: "{{ .Values.publisherProxy.requestTimeout }}"
           - name: DEFAULT_MAX_IN_FLIGHT_MESSAGES
             value: "{{ .Values.eventingBackend.defaultMaxInflightMessages }}"
+          - name: DEFAULT_DISPATCHER_RETRY_PERIOD
+            value: "{{ .Values.eventingBackend.defaultDispatcherRetryPeriod }}"
+          - name: DEFAULT_DISPATCHER_MAX_RETRIES
+            value: "{{ .Values.eventingBackend.defaultDispatcherMaxRetries }}"
           - name: APP_LOG_FORMAT
             value: {{ .Values.global.log.format | quote }}
           - name: APP_LOG_LEVEL

@@ -51,6 +51,8 @@ clusterRoleBindingSuffix: ""
 eventingBackend:
   name: eventing-backend
   defaultMaxInflightMessages: 10
+  defaultDispatcherRetryPeriod: 5m
+  defaultDispatcherMaxRetries: 10
 
 healthProbe:
   port: 8081
