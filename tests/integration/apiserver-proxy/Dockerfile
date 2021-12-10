@@ -24,9 +24,8 @@ LABEL source=git@github.com:kyma-project/kyma.git
 COPY --from=builder --chown=nobody:nogroup /test /test
 WORKDIR /test
 
-RUN apk update &&\
-	apk add curl bash grep &&\
-	curl -LO https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl &&\
+RUN apk add --no-cache curl bash grep &&\
+	curl -LO "https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl" &&\
 	chmod +x kubectl &&\
 	mv kubectl /usr/local/bin/kubectl &&\
 	chown -R nobody:nogroup /test
