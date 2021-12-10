@@ -1,4 +1,5 @@
 const { assert } = require("chai");
+const util = require('util')
 
 const {
     listResources,
@@ -42,13 +43,12 @@ async function assertNoCriticalAlertsExist() {
     let firingAlerts = await retry(async () => {
         let allAlerts = await getPrometheusAlerts();
         return allAlerts
-            .filter((a) => !shouldIgnoreAlert(a) && a.state == "firing")
-            .map((a) => a.labels.alertname);
+            .filter((a) => !shouldIgnoreAlert(a) && a.state == "firing");
     });
 
     assert.isEmpty(
         firingAlerts,
-        `Following alerts are firing: ${firingAlerts.join(", ")}`
+        `Following alerts are firing: ${firingAlerts.map((a) => util.inspect(a, false, null, true)).join(", ")}`
     );
 }
 
@@ -140,14 +140,13 @@ function shouldIgnoreTarget(target) {
 }
 
 function shouldIgnoreAlert(alert) {
+    // List of alerts that we don't care about and should be filtered
     var alertNamesToIgnore = [
-        // Watchdog is an alert meant to ensure that the entire alerting pipeline is functional, so it should always be firing,
+        // Watchdog is an alert meant to ensure that the entire alerting pipeline is functional
         "Watchdog",
         // Scrape limits can be exceeded on long-running clusters and can be ignored
         "ScrapeLimitForTargetExceeded",
-
-        // Overcommitting means that a cluster with at least 1 node taken down doesn't have enough resources to run all the pods
-        // It's fine in an e2e test scenario since the clusters are usually deliberately created small to save money
+        // If a cluster with at least 1 node taken down doesn't have enough resources to run all the pods which is fine for e2e test scenarios
         "KubeCPUOvercommit",
         "KubeMemoryOvercommit",
     ]
