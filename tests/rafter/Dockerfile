@@ -29,11 +29,9 @@ ENV TEST_DIR /go/src/github.com/kyma-project/kyma/tests/rafter
 # Install certificates and tools
 #
 
-RUN apk update --no-cache && \
-apk upgrade --no-cache && \
-apk add ca-certificates && \
-apk add --no-cache curl>=7.77.0-r1 --repository=http://dl-cdn.alpinelinux.org/alpine/edge/main && \
-rm -rf /var/cache/apk/*
+RUN apk upgrade --no-cache && \
+    apk add --no-cache ca-certificates && \
+    apk add --no-cache curl>=7.77.0-r1 --repository=http://dl-cdn.alpinelinux.org/alpine/edge/main
 
 #
 # Copy binaries
