@@ -109,6 +109,7 @@ describe("SKR-Upgrade-test", function () {
   
   const kcp = new KCPWrapper(KCPConfig.fromEnv());
 
+  const kymaVersion = getEnvOrThrow("KYMA_VERSION")
   const kymaUpgradeVersion = getEnvOrThrow("KYMA_UPGRADE_VERSION")
 
   this.timeout(60 * 60 * 1000 * 3); // 3h
@@ -128,7 +129,7 @@ describe("SKR-Upgrade-test", function () {
   });
 
   it(`Provision SKR with ID ${instanceID}`, async function () {
-    skr = await provisionSKR(keb, gardener, instanceID, runtimeName, null, null, null);
+    skr = await provisionSKR(keb, gardener, instanceID, runtimeName, null, null, {"kymaVersion": kymaVersion});
   });
 
   it(`Should save kubeconfig for the SKR to ~/.kube/config`, async function() {
