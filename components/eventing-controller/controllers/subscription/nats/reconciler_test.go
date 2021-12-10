@@ -577,7 +577,7 @@ var cfg *rest.Config
 var k8sClient client.Client
 var testEnv *envtest.Environment
 var natsServer *natsserver.Server
-var defaultSubsConfig = env.DefaultSubscriptionConfig{MaxInFlightMessages: 1}
+var defaultSubsConfig = env.DefaultSubscriptionConfig{MaxInFlightMessages: 1, DispatcherRetryPeriod: time.Second, DispatcherMaxRetries: 1}
 var reconciler *Reconciler
 var natsBackend *handlers.Nats
 var cancel context.CancelFunc
