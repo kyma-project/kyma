@@ -1,7 +1,7 @@
 FROM golang:1.12.10-alpine3.10 as builder
 
 ENV SRC_DIR=/go/src/github.com/kyma-project/kyma/tests/end-to-end/upgrade
-ADD . $SRC_DIR
+COPY . $SRC_DIR
 
 WORKDIR $SRC_DIR
 
