@@ -102,21 +102,21 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 	})
 
 	When("Updating the clean event types in the Subscription status", func() {
-		It("Should mark the Subscription as ready", func() {
-			// Create subscriber service
+		It("should mark the Subscription as ready", func() {
+			// create a subscriber service
 			subscriberSvc := reconcilertesting.NewSubscriberSvc("webhook", namespaceName)
 			ensureSubscriberSvcCreated(ctx, subscriberSvc)
 
-			// Create Subscription
+			// create a Subscription
 			subscriptionName := "test-valid-subscription-1"
-			optEmptyFilter := reconcilertesting.WithEmptyFilter
-			optWebHook := reconcilertesting.WithWebhookAuthForBEB
-			subscription := reconcilertesting.NewSubscription(subscriptionName, namespaceName, optEmptyFilter, optWebHook)
+			optFilter := reconcilertesting.WithEmptyFilter
+			optWebhook := reconcilertesting.WithWebhookAuthForBEB
+			subscription := reconcilertesting.NewSubscription(subscriptionName, namespaceName, optFilter, optWebhook)
 			reconcilertesting.WithValidSink(namespaceName, subscriberSvc.Name, subscription)
 			ensureSubscriptionCreated(ctx, subscription)
 
-			Context("Subscription without filters", func() {
-				By("Checking Subscription status should have 'cleanEventTypes' without filters", func() {
+			Context("a Subscription without filters", func() {
+				By("should have no clean event types", func() {
 					getSubscription(ctx, subscription).Should(And(
 						reconcilertesting.HaveSubscriptionName(subscriptionName),
 						reconcilertesting.HaveCondition(eventingv1alpha1.MakeCondition(
@@ -128,18 +128,17 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 				})
 			})
 
-			Context("Addition of filters to Subscription", func() {
+			Context("Addition of filters to a Subscription", func() {
 				publishToSubjects := []string{
 					fmt.Sprintf("%s0", reconcilertesting.OrderCreatedEventType),
 					fmt.Sprintf("%s1", reconcilertesting.OrderCreatedEventType),
 				}
-
 				subscribeToEventTypes := []string{
 					fmt.Sprintf("%s0", reconcilertesting.OrderCreatedEventTypeNotClean),
 					fmt.Sprintf("%s1", reconcilertesting.OrderCreatedEventTypeNotClean),
 				}
 
-				By("adding filters to Subscription", func() {
+				By("adding filters to a Subscription", func() {
 					for _, f := range subscribeToEventTypes {
 						addFilter := reconcilertesting.WithFilter(reconcilertesting.EventSource, f)
 						addFilter(subscription)
