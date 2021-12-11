@@ -609,6 +609,75 @@ func TestSubscriptionUsingCESDK(t *testing.T) {
 	g.Expect(err).To(BeNil())
 }
 
+func TestRetryUsingCESDK(t *testing.T) {
+	g := NewWithT(t)
+	natsPort := 5222
+	subscriberPort := 8080
+	subscriberCheckDataURL := fmt.Sprintf("http://127.0.0.1:%d/check", subscriberPort)
+	subscriberCheckRetriesURL := fmt.Sprintf("http://127.0.0.1:%d/check_retries", subscriberPort)
+	subscriberServerErrorURL := fmt.Sprintf("http://127.0.0.1:%d/return500", subscriberPort)
+
+	// Start Nats server
+	natsServer := eventingtesting.RunNatsServerOnPort(natsPort)
+	defer natsServer.Shutdown()
+
+	defaultLogger, err := logger.New(string(kymalogger.JSON), string(kymalogger.INFO))
+	g.Expect(err).To(BeNil())
+
+	natsConfig := env.NatsConfig{
+		URL:           natsServer.ClientURL(),
+		MaxReconnects: 2,
+		ReconnectWait: time.Second,
+	}
+	maxRetries := 3
+	defaultSubscriptionConfig := env.DefaultSubscriptionConfig{
+		MaxInFlightMessages:   1,
+		DispatcherRetryPeriod: time.Second,
+		DispatcherMaxRetries:  maxRetries,
+	}
+	natsClient := NewNats(natsConfig, defaultSubscriptionConfig, defaultLogger)
+
+	err = natsClient.Initialize(env.Config{})
+	g.Expect(err).To(BeNil())
+
+	// Create a new subscriber
+	subscriber := eventingtesting.NewSubscriber(fmt.Sprintf(":%d", subscriberPort))
+	subscriber.Start()
+
+	// Shutting down subscriber
+	defer subscriber.Shutdown()
+
+	// Check subscriber is running or not by checking the store
+	err = subscriber.CheckEvent("", subscriberCheckDataURL)
+	g.Expect(err).To(BeNil())
+
+	// Prepare event-type cleaner
+	application := applicationtest.NewApplication(eventingtesting.ApplicationName, nil)
+	applicationLister := fake.NewApplicationListerOrDie(context.Background(), application)
+	cleaner := eventtype.NewCleaner(eventingtesting.EventTypePrefix, applicationLister, defaultLogger)
+
+	// Create a subscription
+	sub := eventingtesting.NewSubscription("sub", "foo", eventingtesting.WithEventTypeFilter)
+	sub.Spec.Sink = subscriberServerErrorURL
+	_, err = natsClient.SyncSubscription(sub, cleaner)
+	g.Expect(err).To(BeNil())
+	g.Expect(sub.Status.Config).NotTo(BeNil()) // It should apply the defaults
+
+	subject := eventingtesting.CloudEventType
+
+	//  Send a structured CE
+	err = SendStructuredCloudEventToNATS(natsClient, subject)
+	g.Expect(err).To(BeNil())
+
+	// Check that the retries are done and that the sent data was correctly received
+	err = subscriber.CheckRetries(maxRetries, "\""+eventingtesting.EventData+"\"", subscriberCheckDataURL, subscriberCheckRetriesURL)
+	g.Expect(err).To(BeNil())
+
+	// Delete subscription
+	err = natsClient.DeleteSubscription(sub)
+	g.Expect(err).To(BeNil())
+}
+
 func checkIsNotValid(sub *nats.Subscription, t *testing.T) error {
 	return checkValidity(sub, false, t)
 }

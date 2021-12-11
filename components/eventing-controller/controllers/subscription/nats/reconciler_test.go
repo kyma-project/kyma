@@ -711,18 +711,16 @@ const (
 	attachControlPlaneOutput = false
 )
 
-var (
-	testID            int
-	natsURL           string
-	cfg               *rest.Config
-	k8sClient         client.Client
-	testEnv           *envtest.Environment
-	natsServer        *natsserver.Server
-	reconciler        *Reconciler
-	natsBackend       *handlers.Nats
-	cancel            context.CancelFunc
-	defaultSubsConfig = env.DefaultSubscriptionConfig{MaxInFlightMessages: 1}
-)
+var testID int
+var natsURL string
+var cfg *rest.Config
+var k8sClient client.Client
+var testEnv *envtest.Environment
+var natsServer *natsserver.Server
+var defaultSubsConfig = env.DefaultSubscriptionConfig{MaxInFlightMessages: 1, DispatcherRetryPeriod: time.Second, DispatcherMaxRetries: 1}
+var reconciler *Reconciler
+var natsBackend *handlers.Nats
+var cancel context.CancelFunc
 
 func TestAPIs(t *testing.T) {
 	RegisterFailHandler(Fail)
