@@ -171,7 +171,7 @@ func gitAuthFunctionTestSteps(genericContainer shared.Container, tr testRepo, po
 		),
 		teststep.NewHTTPCheck(
 			genericContainer.Log,
-			"Git Function pre update simple check through gateway",
+			"Git Function simple check through gateway",
 			gitCfg.InClusterURL,
 			poll, tr.expectedResponse)), nil
 }
