@@ -28,8 +28,8 @@ component_descriptor_test:
 
 	cd ti; git checkout component_descriptor_generator; \
 	go run development/tools/cmd/componentdescriptorgenerator/main.go \
-	--component-name "github.com/kyma-project/kyma" \
-	--component-version "v$(shell date +%Y%m%d)-$(PULL_PULL_SHA)" \
+	--component-name "github.com/kyma-project/kyma_$(APP_NAME)" \
+	--component-version "v$(shell date +%Y%m%d)-$(DOCKER_TAG)" \
 	--app-name $(APP_NAME) \
 	--output-dir /logs/artifacts/componentdescriptor \
 	--image-url "$(IMG):$(TAG)" \
