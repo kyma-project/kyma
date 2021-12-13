@@ -1,7 +1,6 @@
 FROM alpine:3.12
 
-RUN apk update &&\
-  apk add git-daemon apache2 apache2-utils
+RUN apk add --no-cache git-daemon apache2 apache2-utils
 COPY ./etc/git.conf /etc/apache2/conf.d/git.conf
 COPY ./etc/httpd.conf /etc/apache2/httpd.conf
 RUN git config --system http.receivepack true &&\
@@ -16,6 +15,6 @@ COPY ./etc/init_repos.sh /tmp/init_repos.sh
 COPY ./repos /tmp/repos
 RUN /tmp/init_repos.sh
 
-CMD /usr/sbin/httpd -D FOREGROUND -f /etc/apache2/httpd.conf
+CMD ["/usr/sbin/httpd", "-D", "FOREGROUND", "-f", "/etc/apache2/httpd.conf"]
 
 EXPOSE 80/tcp

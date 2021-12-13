@@ -2,7 +2,7 @@ FROM golang:1.13 as builder
 
 ENV GO111MODULE=on
 
-RUN apt-get install -y ca-certificates
+RUN apt-get install --no-install-recommends -y ca-certificates
 
 ARG DOCK_PKG_DIR=/event-subscriber
 
@@ -16,6 +16,8 @@ RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o event-subscriber 
 
 FROM scratch
 LABEL source=git@github.com:kyma-project/kyma.git
+
+WORKDIR /app
 
 COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 

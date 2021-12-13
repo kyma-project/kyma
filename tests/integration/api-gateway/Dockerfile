@@ -9,6 +9,7 @@ COPY ./licenses/ ${BASE_DIR}/licenses/
 ##
 # BUILD APP
 ##
+# hadolint ignore=DL3003
 RUN cd ${BASE_DIR}/gateway-tests &&\
 	GO111MODULE=on go mod vendor &&\
 	CGO_ENABLED=0 GOOS=linux go test -c -v -o ${BASE_DIR}/app.test main_test.go
@@ -24,8 +25,7 @@ FROM eu.gcr.io/kyma-project/tpi/k8s-tools:20210922-530cfc39
 LABEL source=git@github.com:kyma-project/kyma.git
 WORKDIR /test
 
-RUN apk update &&\
-	apk add curl bash grep ca-certificates
+RUN apk add --no-cache curl bash grep ca-certificates
 
 COPY --from=builder --chown=nobody:nogroup /test /test
 COPY gateway-tests/manifests /test/manifests

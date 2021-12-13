@@ -30,13 +30,11 @@ WORKDIR /tests
 # Install certificates and curl
 #
 
-RUN apk update &&\
-	apk add ca-certificates curl &&\
-	rm -rf /var/cache/apk/* &&\
+RUN apk add --no-cache ca-certificates curl &&\
 	chown -R nobody:nogroup /tests
 
 #
 # Run tests
 #
 USER nobody
-ENTRYPOINT /tests/entrypoint.sh
+ENTRYPOINT ["/tests/entrypoint.sh"]
