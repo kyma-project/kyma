@@ -28,7 +28,7 @@ component_descriptor_test:
 
 	cd ti; git checkout component_descriptor_generator; \
 	go run development/tools/cmd/componentdescriptorgenerator/main.go \
-	--component-name "github.com/kyma-project/kyma_$(APP_NAME)" \
+	--component-name "github.com/kyma-project/kyma" \
 	--component-version "v$(shell date +%Y%m%d)-$(PULL_PULL_SHA)" \
 	--app-name $(APP_NAME) \
 	--output-dir /logs/artifacts/componentdescriptor \
