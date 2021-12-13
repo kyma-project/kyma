@@ -32,6 +32,7 @@ The Runtime Agent uses these environment variables:
 - **APP_CLUSTER_CERTIFICATES_SECRET** specifies the Namespace and the Name of the Secret in which to store the client certificate and the key.
 - **APP_CA_CERTIFICATES_SECRET** specifies the Namespace and the Name of the Secret in which to store the CA certificate.
 - **APP_SKIP_COMPASS_TLS_VERIFY** specifies whether to communicate with the Connector Service and the Director with disabled TLS verification.
+- **APP_SKIP_APPS_TLS_VERIFY** specifies whether applications synchronized from Compass will be setup to communicate with external systems with disabled TLS verification.
 - **APP_GATEWAY_PORT** specifies the Application Gateway port.
 - **APP_UPLOAD_SERVICE_URL** specifies the URL of the upload service.
 - **APP_QUERY_LOGGING** specifies whether to log GraphQL queries.
