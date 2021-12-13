@@ -3,6 +3,7 @@ package main
 import (
 	"errors"
 	"fmt"
+	"github.com/kyma-project/kyma/components/function-controller/internal/controllers/gitrepository"
 	"os"
 
 	"go.uber.org/zap/zapcore"
@@ -99,6 +100,11 @@ func main() {
 	if err := serverless.NewFunction(resourceClient, ctrl.Log, config.Function, mgr.GetEventRecorderFor(serverlessv1alpha1.FunctionControllerValue)).
 		SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create Function controller")
+		os.Exit(1)
+	}
+
+	if err := gitrepository.NewGitRepoController(resourceClient).SetupWithManager(mgr); err != nil {
+		setupLog.Error(err, "unable to create Git Repository controller")
 		os.Exit(1)
 	}
 

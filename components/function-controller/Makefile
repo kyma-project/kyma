@@ -34,7 +34,7 @@ test-local:
 	mkdir -p /tmp/artifacts
 	go test -race -coverprofile=/tmp/artifacts/cover.out ./...
 	@echo -n "Total coverage: "
-	@go tool cover -func=/tmp/artifacts/cover.out | grep total | awk '{print $$3}'
+	@go tool cover -func=/tmp/artifacts/cover.out 1:04:48 PM: New Doc Page path: /docs/kyma/main/05-technical-reference/00-custom-resources/svls-01-function| grep total | awk '{print $$3}'
 
 # Generate manifests e.g. CRD, RBAC etc.
 .PHONY: manifests

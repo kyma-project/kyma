@@ -166,6 +166,13 @@ rules:
   verbs:
   - get
 - apiGroups:
+    - serverless.kyma-project.io
+  resources:
+    - gitrepositories/status
+  verbs:
+    - get
+    - update
+- apiGroups:
   - rbac.authorization.k8s.io
   resources:
   - roles

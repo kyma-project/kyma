@@ -37,16 +37,25 @@ const (
 	RepositoryAuthSSHKey                    = "key"
 )
 
+type GitRepositoryStatus struct {
+	LastTransitionTime metav1.Time     `json:"lastTransitionTime,omitempty"`
+	LastCommit         string          `json:"lastCommit,omitempty"`
+	Reason             ConditionReason `json:"reason,omitempty"`
+	Message            string          `json:"message,omitempty"`
+}
+
 // +kubebuilder:object:root=true
 
 // GitRepository is the Schema for the gitrepositories API
+// +kubebuilder:subresource:status
 // +kubebuilder:printcolumn:name="URL",type=string,JSONPath=`.spec.url`
 // +kubebuilder:printcolumn:name="Auth",type=string,JSONPath=`.spec.auth.type`
 type GitRepository struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
 
-	Spec GitRepositorySpec `json:"spec,omitempty"`
+	Spec   GitRepositorySpec   `json:"spec,omitempty"`
+	Status GitRepositoryStatus `json:"status,omitempty"`
 }
 
 // +kubebuilder:object:root=true

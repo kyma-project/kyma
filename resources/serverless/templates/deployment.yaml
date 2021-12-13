@@ -56,7 +56,8 @@ spec:
           volumeMounts:
             - name: {{ template "fullname" . }}-k8s-webhook-cert
               mountPath: /tmp/k8s-webhook-server/serving-certs
-          image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.function_controller) }}"
+{{/*          image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.function_controller) }}"*/}}
+          image: function-controller:latest
           imagePullPolicy: {{ .Values.images.function_controller.pullPolicy }}
           command:
           - /app/manager
