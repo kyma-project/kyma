@@ -88,7 +88,7 @@ curl -v --cert generated.crt --key generated.key -X POST "https://${host}/extern
 EOF
 ```
 
-The Target URL for publishing Cloud Events can be `https://${host}/{APPLICATION_NAME}/events` or `https://${host}/{APPLICATION_NAME}/v2/events`.
+The target URL for publishing Cloud Events can be `https://${host}/{APPLICATION_NAME}/events` or `https://${host}/{APPLICATION_NAME}/v2/events`.
 
   </details>
   <details>
@@ -111,7 +111,7 @@ curl -v --cert generated.crt --key generated.key -X POST "https://${host}/extern
 EOF
 ```
 
-The Target URL for publishing legacy events must be `https://${host}/{APPLICATION_NAME}/v1/events`.
+The target URL for publishing legacy events must be `https://${host}/{APPLICATION_NAME}/v1/events`.
 
   </details>
 </div>

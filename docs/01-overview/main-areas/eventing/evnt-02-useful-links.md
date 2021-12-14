@@ -7,7 +7,7 @@ Find out more about Eventing by following the links on this page.
 To learn more about how Eventing works, see:
 
 - [Eventing architecture](../../../05-technical-reference/00-architecture/evnt-01-architecture.md) - describes how Eventing works and the main actors involved, such as the Eventing Controller and Event Publisher Proxy.
-- [Event types](../../../05-technical-reference/evnt-01-event-types.md) - contains information about event types and event name cleanup.
+- [Event names](../../../05-technical-reference/evnt-01-event-types.md) - contains information about event names and event name cleanup.
 - [Subscription CR](../../../05-technical-reference/00-custom-resources/evnt-01-subscription.md) - describes the Subscription custom resource, which you need to subscribe to events.
 - [Cloud Events](https://cloudevents.io/) - provides information about the Cloud Events specification used in Kyma.
 - [NATS](https://nats.io/) - provides more information about the backend technology behind Eventing in Kyma.

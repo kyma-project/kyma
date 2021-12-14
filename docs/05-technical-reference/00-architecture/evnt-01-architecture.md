@@ -26,7 +26,7 @@ This diagram explains the event flow in Kyma, from the moment the Application se
 
 ## Event Publisher Proxy
 
-Event Publisher Proxy receives legacy and Cloud Event publishing requests from the cluster workloads (microservices or Functions). It converts any legacy events to Cloud Events. Then, it redirects events to the NATS server. It also fetches a list of Subscriptions for a connected application.
+Event Publisher Proxy receives legacy and Cloud Event publishing requests from the cluster workloads (microservices or Functions). It converts any legacy events to Cloud Events. Then, it redirects events to the NATS server. It also fetches a list of Subscriptions for a connected Application.
 
 ## Eventing Controller
 

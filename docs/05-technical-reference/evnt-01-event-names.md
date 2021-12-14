@@ -1,12 +1,12 @@
 ---
-title: Event types
+title: Event names
 ---
 
-Eventing supports the following event types:
+Event names depend on the type of event. Eventing supports the following event types:
 - [Cloud Events](https://cloudevents.io/) - they use a specification for describing event data in a common way.
 - legacy events - they are converted to Cloud Events by [Event Publisher Proxy](./00-architecture/evnt-01-architecture.md#event-publisher-proxy), which also adds a `sap.kyma.custom` prefix.
 
-## Event type format
+## Event name format
 
 For a Subscription Custom Resource, the fully qualified event name takes the sample form of `sap.kyma.custom.commerce.order.created.v1` or `sap.kyma.custom.commerce.Account.Root.Created.v1`.
 
