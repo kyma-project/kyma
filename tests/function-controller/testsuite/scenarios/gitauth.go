@@ -4,10 +4,13 @@ import (
 	"encoding/base64"
 	"fmt"
 	"math/rand"
+	"net/url"
 	"os"
 	"time"
 
 	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
+	"github.com/kyma-project/kyma/tests/function-controller/pkg/function"
+	"github.com/kyma-project/kyma/tests/function-controller/pkg/gitrepository"
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/poller"
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/secret"
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/shared"
@@ -129,15 +132,9 @@ func gitAuthFunctionTestSteps(genericContainer shared.Container, tr testRepo, po
 
 	secret := secret.NewSecret(tr.auth.SecretName, genericContainer)
 
-	gitCfg, err := gitops.NewGitopsConfig(
-		tr.name,
-		fmt.Sprintf("%s-repo", tr.name),
-		"",
-		"",
-		genericContainer,
-	)
+	inClusterURL, err := url.Parse(fmt.Sprintf("http://%s.%s.svc.cluster.local", tr.name, genericContainer.Namespace))
 	if err != nil {
-		return nil, errors.Wrapf(err, "while creating Git config")
+		return nil, errors.Wrapf(err, "while parsing in-cluster URL")
 	}
 
 	data, err := tr.authSecretDataFunc(tr)
@@ -153,7 +150,7 @@ func gitAuthFunctionTestSteps(genericContainer shared.Container, tr testRepo, po
 			data),
 		teststep.NewCreateGitRepository(
 			genericContainer.Log,
-			gitCfg.Repo,
+			gitrepository.New(tr.name, genericContainer),
 			fmt.Sprintf("Create GitRepository for %s", tr.provider),
 			gitops.AuthRepositorySpecWithURL(
 				tr.url,
@@ -161,10 +158,10 @@ func gitAuthFunctionTestSteps(genericContainer shared.Container, tr testRepo, po
 			)),
 		teststep.CreateFunction(
 			genericContainer.Log,
-			gitCfg.Fn,
+			function.NewFunction(tr.name, genericContainer),
 			fmt.Sprintf("Create %s Function", tr.provider),
 			gitops.GitopsFunction(
-				gitCfg.RepoName,
+				fmt.Sprintf("%s-repo", tr.name),
 				tr.baseDir,
 				tr.reference,
 				tr.runtime),
@@ -172,7 +169,7 @@ func gitAuthFunctionTestSteps(genericContainer shared.Container, tr testRepo, po
 		teststep.NewHTTPCheck(
 			genericContainer.Log,
 			"Git Function simple check through gateway",
-			gitCfg.InClusterURL,
+			inClusterURL,
 			poll, tr.expectedResponse)), nil
 }
 
