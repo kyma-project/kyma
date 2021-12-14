@@ -3,8 +3,6 @@
 package fake
 
 import (
-	"context"
-
 	v1alpha1 "github.com/kyma-project/kyma/components/application-broker/pkg/apis/applicationconnector/v1alpha1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	labels "k8s.io/apimachinery/pkg/labels"
@@ -25,7 +23,7 @@ var applicationmappingsResource = schema.GroupVersionResource{Group: "applicatio
 var applicationmappingsKind = schema.GroupVersionKind{Group: "applicationconnector.kyma-project.io", Version: "v1alpha1", Kind: "ApplicationMapping"}
 
 // Get takes name of the applicationMapping, and returns the corresponding applicationMapping object, and an error if there is any.
-func (c *FakeApplicationMappings) Get(ctx context.Context, name string, options v1.GetOptions) (result *v1alpha1.ApplicationMapping, err error) {
+func (c *FakeApplicationMappings) Get(name string, options v1.GetOptions) (result *v1alpha1.ApplicationMapping, err error) {
 	obj, err := c.Fake.
 		Invokes(testing.NewGetAction(applicationmappingsResource, c.ns, name), &v1alpha1.ApplicationMapping{})
 
@@ -36,7 +34,7 @@ func (c *FakeApplicationMappings) Get(ctx context.Context, name string, options 
 }
 
 // List takes label and field selectors, and returns the list of ApplicationMappings that match those selectors.
-func (c *FakeApplicationMappings) List(ctx context.Context, opts v1.ListOptions) (result *v1alpha1.ApplicationMappingList, err error) {
+func (c *FakeApplicationMappings) List(opts v1.ListOptions) (result *v1alpha1.ApplicationMappingList, err error) {
 	obj, err := c.Fake.
 		Invokes(testing.NewListAction(applicationmappingsResource, applicationmappingsKind, c.ns, opts), &v1alpha1.ApplicationMappingList{})
 
@@ -58,14 +56,14 @@ func (c *FakeApplicationMappings) List(ctx context.Context, opts v1.ListOptions)
 }
 
 // Watch returns a watch.Interface that watches the requested applicationMappings.
-func (c *FakeApplicationMappings) Watch(ctx context.Context, opts v1.ListOptions) (watch.Interface, error) {
+func (c *FakeApplicationMappings) Watch(opts v1.ListOptions) (watch.Interface, error) {
 	return c.Fake.
 		InvokesWatch(testing.NewWatchAction(applicationmappingsResource, c.ns, opts))
 
 }
 
 // Create takes the representation of a applicationMapping and creates it.  Returns the server's representation of the applicationMapping, and an error, if there is any.
-func (c *FakeApplicationMappings) Create(ctx context.Context, applicationMapping *v1alpha1.ApplicationMapping, opts v1.CreateOptions) (result *v1alpha1.ApplicationMapping, err error) {
+func (c *FakeApplicationMappings) Create(applicationMapping *v1alpha1.ApplicationMapping) (result *v1alpha1.ApplicationMapping, err error) {
 	obj, err := c.Fake.
 		Invokes(testing.NewCreateAction(applicationmappingsResource, c.ns, applicationMapping), &v1alpha1.ApplicationMapping{})
 
@@ -76,7 +74,7 @@ func (c *FakeApplicationMappings) Create(ctx context.Context, applicationMapping
 }
 
 // Update takes the representation of a applicationMapping and updates it. Returns the server's representation of the applicationMapping, and an error, if there is any.
-func (c *FakeApplicationMappings) Update(ctx context.Context, applicationMapping *v1alpha1.ApplicationMapping, opts v1.UpdateOptions) (result *v1alpha1.ApplicationMapping, err error) {
+func (c *FakeApplicationMappings) Update(applicationMapping *v1alpha1.ApplicationMapping) (result *v1alpha1.ApplicationMapping, err error) {
 	obj, err := c.Fake.
 		Invokes(testing.NewUpdateAction(applicationmappingsResource, c.ns, applicationMapping), &v1alpha1.ApplicationMapping{})
 
@@ -87,7 +85,7 @@ func (c *FakeApplicationMappings) Update(ctx context.Context, applicationMapping
 }
 
 // Delete takes name of the applicationMapping and deletes it. Returns an error if one occurs.
-func (c *FakeApplicationMappings) Delete(ctx context.Context, name string, opts v1.DeleteOptions) error {
+func (c *FakeApplicationMappings) Delete(name string, options *v1.DeleteOptions) error {
 	_, err := c.Fake.
 		Invokes(testing.NewDeleteAction(applicationmappingsResource, c.ns, name), &v1alpha1.ApplicationMapping{})
 
@@ -95,15 +93,15 @@ func (c *FakeApplicationMappings) Delete(ctx context.Context, name string, opts 
 }
 
 // DeleteCollection deletes a collection of objects.
-func (c *FakeApplicationMappings) DeleteCollection(ctx context.Context, opts v1.DeleteOptions, listOpts v1.ListOptions) error {
-	action := testing.NewDeleteCollectionAction(applicationmappingsResource, c.ns, listOpts)
+func (c *FakeApplicationMappings) DeleteCollection(options *v1.DeleteOptions, listOptions v1.ListOptions) error {
+	action := testing.NewDeleteCollectionAction(applicationmappingsResource, c.ns, listOptions)
 
 	_, err := c.Fake.Invokes(action, &v1alpha1.ApplicationMappingList{})
 	return err
 }
 
 // Patch applies the patch and returns the patched applicationMapping.
-func (c *FakeApplicationMappings) Patch(ctx context.Context, name string, pt types.PatchType, data []byte, opts v1.PatchOptions, subresources ...string) (result *v1alpha1.ApplicationMapping, err error) {
+func (c *FakeApplicationMappings) Patch(name string, pt types.PatchType, data []byte, subresources ...string) (result *v1alpha1.ApplicationMapping, err error) {
 	obj, err := c.Fake.
 		Invokes(testing.NewPatchSubresourceAction(applicationmappingsResource, c.ns, name, pt, data, subresources...), &v1alpha1.ApplicationMapping{})
 

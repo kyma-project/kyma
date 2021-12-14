@@ -10,10 +10,8 @@ import (
 )
 
 // EventActivationLister helps list EventActivations.
-// All objects returned here must be treated as read-only.
 type EventActivationLister interface {
 	// List lists all EventActivations in the indexer.
-	// Objects returned here must be treated as read-only.
 	List(selector labels.Selector) (ret []*v1alpha1.EventActivation, err error)
 	// EventActivations returns an object that can list and get EventActivations.
 	EventActivations(namespace string) EventActivationNamespaceLister
@@ -44,13 +42,10 @@ func (s *eventActivationLister) EventActivations(namespace string) EventActivati
 }
 
 // EventActivationNamespaceLister helps list and get EventActivations.
-// All objects returned here must be treated as read-only.
 type EventActivationNamespaceLister interface {
 	// List lists all EventActivations in the indexer for a given namespace.
-	// Objects returned here must be treated as read-only.
 	List(selector labels.Selector) (ret []*v1alpha1.EventActivation, err error)
 	// Get retrieves the EventActivation from the indexer for a given namespace and name.
-	// Objects returned here must be treated as read-only.
 	Get(name string) (*v1alpha1.EventActivation, error)
 	EventActivationNamespaceListerExpansion
 }

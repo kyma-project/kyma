@@ -10,10 +10,8 @@ import (
 )
 
 // ApplicationMappingLister helps list ApplicationMappings.
-// All objects returned here must be treated as read-only.
 type ApplicationMappingLister interface {
 	// List lists all ApplicationMappings in the indexer.
-	// Objects returned here must be treated as read-only.
 	List(selector labels.Selector) (ret []*v1alpha1.ApplicationMapping, err error)
 	// ApplicationMappings returns an object that can list and get ApplicationMappings.
 	ApplicationMappings(namespace string) ApplicationMappingNamespaceLister
@@ -44,13 +42,10 @@ func (s *applicationMappingLister) ApplicationMappings(namespace string) Applica
 }
 
 // ApplicationMappingNamespaceLister helps list and get ApplicationMappings.
-// All objects returned here must be treated as read-only.
 type ApplicationMappingNamespaceLister interface {
 	// List lists all ApplicationMappings in the indexer for a given namespace.
-	// Objects returned here must be treated as read-only.
 	List(selector labels.Selector) (ret []*v1alpha1.ApplicationMapping, err error)
 	// Get retrieves the ApplicationMapping from the indexer for a given namespace and name.
-	// Objects returned here must be treated as read-only.
 	Get(name string) (*v1alpha1.ApplicationMapping, error)
 	ApplicationMappingNamespaceListerExpansion
 }

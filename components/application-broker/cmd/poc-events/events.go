@@ -1,7 +1,6 @@
 package main
 
 import (
-	"context"
 	"flag"
 	"fmt"
 	"os"
@@ -56,7 +55,7 @@ func main() {
 	broadcaster.StartRecordingToSink(&typedV1.EventSinkImpl{Interface: clientset.CoreV1().Events(metav1.NamespaceDefault)})
 	eventRecorder := broadcaster.NewRecorder(scheme.Scheme, v1.EventSource{Component: "Application-Broker"})
 
-	app, err := appClient.ApplicationconnectorV1alpha1().Applications().Get(context.Background(), "ec-prod", metav1.GetOptions{})
+	app, err := appClient.ApplicationconnectorV1alpha1().Applications().Get("ec-prod", metav1.GetOptions{})
 	if err != nil {
 		panic(errors.Wrap(err, "on getting application"))
 	}

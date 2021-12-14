@@ -3,7 +3,6 @@
 package v1alpha1
 
 import (
-	"context"
 	"time"
 
 	v1alpha1 "github.com/kyma-project/kyma/components/application-broker/pkg/apis/applicationconnector/v1alpha1"
@@ -22,14 +21,14 @@ type ApplicationMappingsGetter interface {
 
 // ApplicationMappingInterface has methods to work with ApplicationMapping resources.
 type ApplicationMappingInterface interface {
-	Create(ctx context.Context, applicationMapping *v1alpha1.ApplicationMapping, opts v1.CreateOptions) (*v1alpha1.ApplicationMapping, error)
-	Update(ctx context.Context, applicationMapping *v1alpha1.ApplicationMapping, opts v1.UpdateOptions) (*v1alpha1.ApplicationMapping, error)
-	Delete(ctx context.Context, name string, opts v1.DeleteOptions) error
-	DeleteCollection(ctx context.Context, opts v1.DeleteOptions, listOpts v1.ListOptions) error
-	Get(ctx context.Context, name string, opts v1.GetOptions) (*v1alpha1.ApplicationMapping, error)
-	List(ctx context.Context, opts v1.ListOptions) (*v1alpha1.ApplicationMappingList, error)
-	Watch(ctx context.Context, opts v1.ListOptions) (watch.Interface, error)
-	Patch(ctx context.Context, name string, pt types.PatchType, data []byte, opts v1.PatchOptions, subresources ...string) (result *v1alpha1.ApplicationMapping, err error)
+	Create(*v1alpha1.ApplicationMapping) (*v1alpha1.ApplicationMapping, error)
+	Update(*v1alpha1.ApplicationMapping) (*v1alpha1.ApplicationMapping, error)
+	Delete(name string, options *v1.DeleteOptions) error
+	DeleteCollection(options *v1.DeleteOptions, listOptions v1.ListOptions) error
+	Get(name string, options v1.GetOptions) (*v1alpha1.ApplicationMapping, error)
+	List(opts v1.ListOptions) (*v1alpha1.ApplicationMappingList, error)
+	Watch(opts v1.ListOptions) (watch.Interface, error)
+	Patch(name string, pt types.PatchType, data []byte, subresources ...string) (result *v1alpha1.ApplicationMapping, err error)
 	ApplicationMappingExpansion
 }
 
@@ -48,20 +47,20 @@ func newApplicationMappings(c *ApplicationconnectorV1alpha1Client, namespace str
 }
 
 // Get takes name of the applicationMapping, and returns the corresponding applicationMapping object, and an error if there is any.
-func (c *applicationMappings) Get(ctx context.Context, name string, options v1.GetOptions) (result *v1alpha1.ApplicationMapping, err error) {
+func (c *applicationMappings) Get(name string, options v1.GetOptions) (result *v1alpha1.ApplicationMapping, err error) {
 	result = &v1alpha1.ApplicationMapping{}
 	err = c.client.Get().
 		Namespace(c.ns).
 		Resource("applicationmappings").
 		Name(name).
 		VersionedParams(&options, scheme.ParameterCodec).
-		Do(ctx).
+		Do().
 		Into(result)
 	return
 }
 
 // List takes label and field selectors, and returns the list of ApplicationMappings that match those selectors.
-func (c *applicationMappings) List(ctx context.Context, opts v1.ListOptions) (result *v1alpha1.ApplicationMappingList, err error) {
+func (c *applicationMappings) List(opts v1.ListOptions) (result *v1alpha1.ApplicationMappingList, err error) {
 	var timeout time.Duration
 	if opts.TimeoutSeconds != nil {
 		timeout = time.Duration(*opts.TimeoutSeconds) * time.Second
@@ -72,13 +71,13 @@ func (c *applicationMappings) List(ctx context.Context, opts v1.ListOptions) (re
 		Resource("applicationmappings").
 		VersionedParams(&opts, scheme.ParameterCodec).
 		Timeout(timeout).
-		Do(ctx).
+		Do().
 		Into(result)
 	return
 }
 
 // Watch returns a watch.Interface that watches the requested applicationMappings.
-func (c *applicationMappings) Watch(ctx context.Context, opts v1.ListOptions) (watch.Interface, error) {
+func (c *applicationMappings) Watch(opts v1.ListOptions) (watch.Interface, error) {
 	var timeout time.Duration
 	if opts.TimeoutSeconds != nil {
 		timeout = time.Duration(*opts.TimeoutSeconds) * time.Second
@@ -89,74 +88,71 @@ func (c *applicationMappings) Watch(ctx context.Context, opts v1.ListOptions) (w
 		Resource("applicationmappings").
 		VersionedParams(&opts, scheme.ParameterCodec).
 		Timeout(timeout).
-		Watch(ctx)
+		Watch()
 }
 
 // Create takes the representation of a applicationMapping and creates it.  Returns the server's representation of the applicationMapping, and an error, if there is any.
-func (c *applicationMappings) Create(ctx context.Context, applicationMapping *v1alpha1.ApplicationMapping, opts v1.CreateOptions) (result *v1alpha1.ApplicationMapping, err error) {
+func (c *applicationMappings) Create(applicationMapping *v1alpha1.ApplicationMapping) (result *v1alpha1.ApplicationMapping, err error) {
 	result = &v1alpha1.ApplicationMapping{}
 	err = c.client.Post().
 		Namespace(c.ns).
 		Resource("applicationmappings").
-		VersionedParams(&opts, scheme.ParameterCodec).
 		Body(applicationMapping).
-		Do(ctx).
+		Do().
 		Into(result)
 	return
 }
 
 // Update takes the representation of a applicationMapping and updates it. Returns the server's representation of the applicationMapping, and an error, if there is any.
-func (c *applicationMappings) Update(ctx context.Context, applicationMapping *v1alpha1.ApplicationMapping, opts v1.UpdateOptions) (result *v1alpha1.ApplicationMapping, err error) {
+func (c *applicationMappings) Update(applicationMapping *v1alpha1.ApplicationMapping) (result *v1alpha1.ApplicationMapping, err error) {
 	result = &v1alpha1.ApplicationMapping{}
 	err = c.client.Put().
 		Namespace(c.ns).
 		Resource("applicationmappings").
 		Name(applicationMapping.Name).
-		VersionedParams(&opts, scheme.ParameterCodec).
 		Body(applicationMapping).
-		Do(ctx).
+		Do().
 		Into(result)
 	return
 }
 
 // Delete takes name of the applicationMapping and deletes it. Returns an error if one occurs.
-func (c *applicationMappings) Delete(ctx context.Context, name string, opts v1.DeleteOptions) error {
+func (c *applicationMappings) Delete(name string, options *v1.DeleteOptions) error {
 	return c.client.Delete().
 		Namespace(c.ns).
 		Resource("applicationmappings").
 		Name(name).
-		Body(&opts).
-		Do(ctx).
+		Body(options).
+		Do().
 		Error()
 }
 
 // DeleteCollection deletes a collection of objects.
-func (c *applicationMappings) DeleteCollection(ctx context.Context, opts v1.DeleteOptions, listOpts v1.ListOptions) error {
+func (c *applicationMappings) DeleteCollection(options *v1.DeleteOptions, listOptions v1.ListOptions) error {
 	var timeout time.Duration
-	if listOpts.TimeoutSeconds != nil {
-		timeout = time.Duration(*listOpts.TimeoutSeconds) * time.Second
+	if listOptions.TimeoutSeconds != nil {
+		timeout = time.Duration(*listOptions.TimeoutSeconds) * time.Second
 	}
 	return c.client.Delete().
 		Namespace(c.ns).
 		Resource("applicationmappings").
-		VersionedParams(&listOpts, scheme.ParameterCodec).
+		VersionedParams(&listOptions, scheme.ParameterCodec).
 		Timeout(timeout).
-		Body(&opts).
-		Do(ctx).
+		Body(options).
+		Do().
 		Error()
 }
 
 // Patch applies the patch and returns the patched applicationMapping.
-func (c *applicationMappings) Patch(ctx context.Context, name string, pt types.PatchType, data []byte, opts v1.PatchOptions, subresources ...string) (result *v1alpha1.ApplicationMapping, err error) {
+func (c *applicationMappings) Patch(name string, pt types.PatchType, data []byte, subresources ...string) (result *v1alpha1.ApplicationMapping, err error) {
 	result = &v1alpha1.ApplicationMapping{}
 	err = c.client.Patch(pt).
 		Namespace(c.ns).
 		Resource("applicationmappings").
-		Name(name).
 		SubResource(subresources...).
-		VersionedParams(&opts, scheme.ParameterCodec).
+		Name(name).
 		Body(data).
-		Do(ctx).
+		Do().
 		Into(result)
 	return
 }

@@ -1,7 +1,6 @@
 package nsbroker
 
 import (
-	"context"
 	"fmt"
 	"time"
 
@@ -110,10 +109,10 @@ func (f *Facade) createServiceBroker(svcURL, namespace string) (*v1beta1.Service
 		},
 	}
 
-	createdBroker, err := f.brokerGetter.ServiceBrokers(namespace).Create(context.Background(), broker, metav1.CreateOptions{})
+	createdBroker, err := f.brokerGetter.ServiceBrokers(namespace).Create(broker)
 	if k8serrors.IsAlreadyExists(err) {
 		f.log.Infof("ServiceBroker for namespace [%s] already exist. Attempt to get resource.", namespace)
-		createdBroker, err = f.brokerGetter.ServiceBrokers(namespace).Get(context.Background(), NamespacedBrokerName, metav1.GetOptions{})
+		createdBroker, err = f.brokerGetter.ServiceBrokers(namespace).Get(NamespacedBrokerName, metav1.GetOptions{})
 		return createdBroker, err
 	}
 
@@ -123,7 +122,7 @@ func (f *Facade) createServiceBroker(svcURL, namespace string) (*v1beta1.Service
 // Delete removes ServiceBroker and Facade. Errors don't stop execution of method. NotFound errors are ignored.
 func (f *Facade) Delete(destinationNs string) error {
 	f.log.Infof("Deleting ServiceBroker from %s namespace", destinationNs)
-	err := f.brokerGetter.ServiceBrokers(destinationNs).Delete(context.Background(), NamespacedBrokerName, metav1.DeleteOptions{})
+	err := f.brokerGetter.ServiceBrokers(destinationNs).Delete(NamespacedBrokerName, &metav1.DeleteOptions{})
 	switch {
 	case k8serrors.IsNotFound(err):
 		return nil
@@ -141,7 +140,7 @@ func (f *Facade) Delete(destinationNs string) error {
 
 // Exist check if ServiceBroker exists.
 func (f *Facade) Exist(destinationNs string) (bool, error) {
-	_, err := f.brokerGetter.ServiceBrokers(destinationNs).Get(context.Background(), NamespacedBrokerName, metav1.GetOptions{})
+	_, err := f.brokerGetter.ServiceBrokers(destinationNs).Get(NamespacedBrokerName, metav1.GetOptions{})
 	switch {
 	case k8serrors.IsNotFound(err):
 		return false, nil

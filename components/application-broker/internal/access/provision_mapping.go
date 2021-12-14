@@ -1,13 +1,20 @@
 package access
 
 import (
+	"context"
 	"fmt"
 	"time"
 
 	"github.com/kyma-project/kyma/components/application-broker/internal"
+	"github.com/kyma-project/kyma/components/application-broker/pkg/apis/applicationconnector/v1alpha1"
 	versioned "github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1"
 	"github.com/pkg/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/util/wait"
+	"k8s.io/apimachinery/pkg/watch"
+	"k8s.io/client-go/tools/cache"
+	watchcache "k8s.io/client-go/tools/watch"
 )
 
 //go:generate mockery -name=applicationFinder -output=automock -outpkg=automock -case=underscore
@@ -41,30 +48,29 @@ func (c *MappingExistsProvisionChecker) CanProvision(serviceID internal.Applicat
 	}
 	demandedAppName := string(app.Name)
 
-	//_ := &cache.ListWatch{
-	//	ListFunc: func(options metav1.ListOptions) (runtime.Object, error) {
-	//		return c.mappingClient.ApplicationMappings(string(namespace)).List(context.Background(), options)
-	//	},
-	//	WatchFunc: func(options metav1.ListOptions) (watch.Interface, error) {
-	//		return c.mappingClient.ApplicationMappings(string(namespace)).Watch(context.Background(), options)
-	//	},
-	//}
+	lw := &cache.ListWatch{
+		ListFunc: func(options metav1.ListOptions) (runtime.Object, error) {
+			return c.mappingClient.ApplicationMappings(string(namespace)).List(options)
+		},
+		WatchFunc: func(options metav1.ListOptions) (watch.Interface, error) {
+			return c.mappingClient.ApplicationMappings(string(namespace)).Watch(options)
+		},
+	}
 
-	//ctx, cancel := context.WithTimeout(context.Background(), maxWaitTime)
-	//defer cancel()
-	//_, err = watchcache.ListWatchUntil(ctx, lw, func(event watch.Event) (bool, error) {
-	//_, err = watchcache.Until(ctx, , lw, func(event watch.Event) (bool, error) {
-	//	deepCopy := event.Object.DeepCopyObject()
-	//	appMapping, ok := deepCopy.(*v1alpha1.ApplicationMapping)
-	//	if !ok {
-	//		return false, fmt.Errorf("cannot covert object [%+v] of type %T to *ApplicationMapping", deepCopy, deepCopy)
-	//	}
-	//
-	//	if appMapping.Name == demandedAppName {
-	//		return true, nil
-	//	}
-	//	return false, nil
-	//})
+	ctx, cancel := context.WithTimeout(context.Background(), maxWaitTime)
+	defer cancel()
+	_, err = watchcache.ListWatchUntil(ctx, lw, func(event watch.Event) (bool, error) {
+		deepCopy := event.Object.DeepCopyObject()
+		appMapping, ok := deepCopy.(*v1alpha1.ApplicationMapping)
+		if !ok {
+			return false, fmt.Errorf("cannot covert object [%+v] of type %T to *ApplicationMapping", deepCopy, deepCopy)
+		}
+
+		if appMapping.Name == demandedAppName {
+			return true, nil
+		}
+		return false, nil
+	})
 
 	switch err {
 	case nil:

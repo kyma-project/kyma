@@ -1,7 +1,6 @@
 package nsbroker_test
 
 import (
-	"context"
 	"fmt"
 
 	multierror "github.com/hashicorp/go-multierror"
@@ -67,7 +66,7 @@ func (f *legacyFacade) Create(destinationNs string) error {
 		return err
 	}
 
-	if _, err := f.servicesGetter.Services(f.workingNamespace).Create(context.Background(), &corev1.Service{
+	if _, err := f.servicesGetter.Services(f.workingNamespace).Create(&corev1.Service{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      f.serviceNameProvider.GetServiceNameForNsBroker(destinationNs),
 			Namespace: f.workingNamespace,
@@ -95,7 +94,7 @@ func (f *legacyFacade) Create(destinationNs string) error {
 				},
 			},
 		},
-	}, metav1.CreateOptions{}); err != nil {
+	}); err != nil {
 		resultErr = multierror.Append(resultErr, err)
 	}
 
@@ -124,9 +123,9 @@ func (f *legacyFacade) createServiceBroker(svcURL, namespace string) (*v1beta1.S
 		},
 	}
 
-	createdBroker, err := f.brokerGetter.ServiceBrokers(namespace).Create(context.Background(), broker, metav1.CreateOptions{})
+	createdBroker, err := f.brokerGetter.ServiceBrokers(namespace).Create(broker)
 	if k8serrors.IsAlreadyExists(err) {
-		createdBroker, err = f.brokerGetter.ServiceBrokers(namespace).Get(context.Background(), nsbroker.NamespacedBrokerName, metav1.GetOptions{})
+		createdBroker, err = f.brokerGetter.ServiceBrokers(namespace).Get(nsbroker.NamespacedBrokerName, metav1.GetOptions{})
 		return createdBroker, err
 	}
 
@@ -136,11 +135,11 @@ func (f *legacyFacade) createServiceBroker(svcURL, namespace string) (*v1beta1.S
 // Delete removes ServiceBroker and legacyFacade. Errors don't stop execution of method. NotFound errors are ignored.
 func (f *legacyFacade) Delete(destinationNs string) error {
 	var resultErr *multierror.Error
-	if err := f.brokerGetter.ServiceBrokers(destinationNs).Delete(context.Background(), nsbroker.NamespacedBrokerName, metav1.DeleteOptions{}); err != nil {
+	if err := f.brokerGetter.ServiceBrokers(destinationNs).Delete(nsbroker.NamespacedBrokerName, nil); err != nil {
 		resultErr = multierror.Append(resultErr, err)
 	}
 
-	if err := f.servicesGetter.Services(f.workingNamespace).Delete(context.Background(), f.serviceNameProvider.GetServiceNameForNsBroker(destinationNs), metav1.DeleteOptions{}); err != nil {
+	if err := f.servicesGetter.Services(f.workingNamespace).Delete(f.serviceNameProvider.GetServiceNameForNsBroker(destinationNs), nil); err != nil {
 		resultErr = multierror.Append(resultErr, err)
 	}
 
@@ -153,7 +152,7 @@ func (f *legacyFacade) Delete(destinationNs string) error {
 
 // Exist check if ServiceBroker and Service exist.
 func (f *legacyFacade) Exist(destinationNs string) (bool, error) {
-	_, err := f.brokerGetter.ServiceBrokers(destinationNs).Get(context.Background(), nsbroker.NamespacedBrokerName, metav1.GetOptions{})
+	_, err := f.brokerGetter.ServiceBrokers(destinationNs).Get(nsbroker.NamespacedBrokerName, metav1.GetOptions{})
 	switch {
 	case k8serrors.IsNotFound(err):
 		return false, nil
@@ -162,7 +161,7 @@ func (f *legacyFacade) Exist(destinationNs string) (bool, error) {
 	}
 
 	svcName := f.serviceNameProvider.GetServiceNameForNsBroker(destinationNs)
-	_, err = f.servicesGetter.Services(f.workingNamespace).Get(context.Background(), svcName, metav1.GetOptions{})
+	_, err = f.servicesGetter.Services(f.workingNamespace).Get(svcName, metav1.GetOptions{})
 	switch {
 	case k8serrors.IsNotFound(err):
 		return false, nil

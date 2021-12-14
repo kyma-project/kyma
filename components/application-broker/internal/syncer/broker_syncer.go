@@ -1,7 +1,6 @@
 package syncer
 
 import (
-	"context"
 	"fmt"
 
 	multierror "github.com/hashicorp/go-multierror"
@@ -35,7 +34,7 @@ func NewServiceBrokerSyncer(serviceBrokerGetter v1beta12.ServiceBrokersGetter) *
 // Sync syncs the ServiceBrokers
 func (r *ServiceBrokerSync) Sync(maxSyncRetries int) error {
 	labelSelector := fmt.Sprintf("%s=%s", nsbroker.BrokerLabelKey, nsbroker.BrokerLabelValue)
-	brokersList, err := r.serviceBrokerGetter.ServiceBrokers(v1.NamespaceAll).List(context.Background(), v1.ListOptions{
+	brokersList, err := r.serviceBrokerGetter.ServiceBrokers(v1.NamespaceAll).List(v1.ListOptions{
 		LabelSelector: labelSelector,
 	})
 	if err != nil {
@@ -46,7 +45,7 @@ func (r *ServiceBrokerSync) Sync(maxSyncRetries int) error {
 	var resultErr *multierror.Error
 	for _, broker := range brokersList.Items {
 		for i := 0; i < maxSyncRetries; i++ {
-			retrievedBroker, err := r.serviceBrokerGetter.ServiceBrokers(broker.Namespace).Get(context.Background(), broker.Name, v1.GetOptions{})
+			retrievedBroker, err := r.serviceBrokerGetter.ServiceBrokers(broker.Namespace).Get(broker.Name, v1.GetOptions{})
 			if err != nil {
 				resultErr = multierror.Append(resultErr, errors.Wrapf(err, "while getting ServiceBroker %q [namespace: %s]", broker.Name, broker.Namespace))
 				if i == maxSyncRetries-1 {
@@ -56,7 +55,7 @@ func (r *ServiceBrokerSync) Sync(maxSyncRetries int) error {
 			}
 
 			retrievedBroker.Spec.RelistRequests = retrievedBroker.Spec.RelistRequests + 1
-			_, err = r.serviceBrokerGetter.ServiceBrokers(broker.Namespace).Update(context.Background(), retrievedBroker, v1.UpdateOptions{})
+			_, err = r.serviceBrokerGetter.ServiceBrokers(broker.Namespace).Update(retrievedBroker)
 			if err == nil {
 				r.log.Infof("Relist request for ServiceBroker %q [namespace: %s] fulfilled", broker.Name, broker.Namespace)
 				break
@@ -82,14 +81,14 @@ func (r *ServiceBrokerSync) SyncBroker(namespace string) error {
 
 	r.log.Infof("Syncing ServiceBroker in %s namespace", namespace)
 	for i := 0; i < maxSyncRetries; i++ {
-		broker, err := brokerClient.Get(context.Background(), name, v1.GetOptions{})
+		broker, err := brokerClient.Get(name, v1.GetOptions{})
 		if err != nil {
 			return errors.Wrapf(err, "while getting ServiceBroker %q [namespace: %s]", name, namespace)
 		}
 
 		broker.Spec.RelistRequests = broker.Spec.RelistRequests + 1
 
-		_, err = brokerClient.Update(context.Background(), broker, v1.UpdateOptions{})
+		_, err = brokerClient.Update(broker)
 		if err == nil {
 			return nil
 		}

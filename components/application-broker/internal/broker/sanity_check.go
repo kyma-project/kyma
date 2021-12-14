@@ -1,7 +1,6 @@
 package broker
 
 import (
-	"context"
 	"net/http"
 	"time"
 
@@ -62,7 +61,7 @@ func (svc *SanityCheckService) SanityCheck() (int, error) {
 
 func (svc *SanityCheckService) createSampleAppMapping() error {
 	mapCli := svc.mClient.ApplicationconnectorV1alpha1().ApplicationMappings(livenessTestNamespace)
-	mapping, err := mapCli.Create(context.Background(), &mappingTypes.ApplicationMapping{
+	mapping, err := mapCli.Create(&mappingTypes.ApplicationMapping{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "ApplicationMapping",
 			APIVersion: applicationConnectorAPIVersion,
@@ -75,8 +74,7 @@ func (svc *SanityCheckService) createSampleAppMapping() error {
 				{ID: LivenessServiceSampleID},
 			},
 		},
-	},
-		metav1.CreateOptions{})
+	})
 
 	switch {
 	case k8sErrors.IsAlreadyExists(err):
@@ -95,9 +93,9 @@ func (svc *SanityCheckService) createSampleAppMapping() error {
 }
 
 func (svc *SanityCheckService) deleteSampleAppMapping() error {
-	return svc.mClient.ApplicationconnectorV1alpha1().ApplicationMappings(livenessTestNamespace).Delete(context.Background(),
+	return svc.mClient.ApplicationconnectorV1alpha1().ApplicationMappings(livenessTestNamespace).Delete(
 		LivenessApplicationSampleName,
-		metav1.DeleteOptions{})
+		&metav1.DeleteOptions{})
 }
 
 func (svc *SanityCheckService) deleteSamples() error {
