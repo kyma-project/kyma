@@ -6,9 +6,9 @@ Eventing supports the following event types:
 - [Cloud Events](https://cloudevents.io/) - they use a specification for describing event data in a common way.
 - legacy events - they are converted to Cloud Events by [Event Publisher Proxy](./00-architecture/evnt-01-architecture.md#event-publisher-proxy), which also adds a `sap.kyma.custom` prefix.
 
-## Event form
+## Event type format
 
-For a Subscription Custom Resource, the fully qualified event type takes the sample form of `sap.kyma.custom.commerce.order.created.v1` or `sap.kyma.custom.commerce.Account.Root.Created.v1`.
+For a Subscription Custom Resource, the fully qualified event name takes the sample form of `sap.kyma.custom.commerce.order.created.v1` or `sap.kyma.custom.commerce.Account.Root.Created.v1`.
 
 The event type is composed of the following components:
 - Prefix: `sap.kyma.custom`
@@ -25,7 +25,7 @@ For publishers, the event type takes this sample form:
 
 In some cases, Eventing needs to modify the event name before dispatching an event. This is done in order to conform to Cloud Event specifications.
 
-If the event contains more than two segments, Eventing combines them into two segments when creating the underlying Eventing infrastructure. For example, `Account.Root.Created` becomes `AccountRoot.Created`.
+If the event name contains more than two segments, Eventing combines them into two segments when creating the underlying Eventing infrastructure. For example, `Account.Root.Created` becomes `AccountRoot.Created`.
 
 In case the Application name contains `-` or `.`, the underlying Eventing services uses a clean name with alphanumeric characters only. (For example, `system-prod` becomes `systemprod`).
 
