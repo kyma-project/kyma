@@ -37,4 +37,7 @@ type Config struct {
 	PackageRegistryConfigSecretName string           `envconfig:"default=serverless-package-registry-config"`
 	PackageRegistryConfigURLNode    string           `envconfig:"default=https://pkgs.dev.azure.com/kyma-wookiee/public-packages/_packaging/public-packages%40Release/npm/registry/"`
 	PackageRegistryConfigURLPython  string           `envconfig:"default=https://pkgs.dev.azure.com/kyma-wookiee/public-packages/_packaging/public-packages%40Release/pypi/simple/"`
+	GithubAuthPrivateKey            string           `envconfig:"GH_AUTH_PRIVATE_KEY"`
+	AzureDevOpsUsername             string           `envconfig:"AZURE_DEVOPS_AUTH_USERNAME"`
+	AzureDevOpsPassword             string           `envconfig:"AZURE_DEVOPS_AUTH_PASSWORD"`
 }

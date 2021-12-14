@@ -5,7 +5,8 @@ import (
 	"fmt"
 	"math/rand"
 	"net/url"
-	"os"
+	"reflect"
+	"strings"
 	"time"
 
 	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
@@ -26,22 +27,16 @@ import (
 	"k8s.io/client-go/rest"
 )
 
-const (
-	azureDevOpsUserEnvName = "AZURE_DEVOPS_AUTH_USERNAME"
-	azureDevOpsPassEnvName = "AZURE_DEVOPS_AUTH_PASSWORD"
-)
-
 type testRepo struct {
-	name               string
-	provider           string
-	url                string
-	baseDir            string
-	expectedResponse   string
-	reference          string
-	secretEnvKeys      []string
-	runtime            serverlessv1alpha1.Runtime
-	auth               *serverlessv1alpha1.RepositoryAuth
-	authSecretDataFunc func(testRepo) (map[string]string, error)
+	name             string
+	provider         string
+	url              string
+	baseDir          string
+	expectedResponse string
+	reference        string
+	secretKeys       []string
+	runtime          serverlessv1alpha1.Runtime
+	auth             *serverlessv1alpha1.RepositoryAuth
 }
 
 var testCases []testRepo = []testRepo{
@@ -52,13 +47,12 @@ var testCases []testRepo = []testRepo{
 		baseDir:          "/",
 		reference:        "main",
 		expectedResponse: "hello world",
-		secretEnvKeys:    []string{"GH_AUTH_PRIVATE_KEY"},
+		secretKeys:       []string{"GithubAuthPrivateKey"}, // config parameter name(s) in testsuite.Config
 		runtime:          serverlessv1alpha1.Python39,
 		auth: &serverlessv1alpha1.RepositoryAuth{
 			Type:       serverlessv1alpha1.RepositoryAuthSSHKey,
 			SecretName: "github-auth-secret",
 		},
-		authSecretDataFunc: githubAuthSecretData,
 	},
 	{
 		name:             "azure-devops-func",
@@ -67,16 +61,15 @@ var testCases []testRepo = []testRepo{
 		baseDir:          "/code",
 		reference:        "main",
 		expectedResponse: "Hello Serverless",
-		secretEnvKeys: []string{
-			"AZURE_DEVOPS_AUTH_USERNAME",
-			"AZURE_DEVOPS_AUTH_PASSWORD",
+		secretKeys: []string{ // config parameter name(s) in testsuite.Config
+			"AzureDevOpsUsername",
+			"AzureDevOpsPassword",
 		},
 		runtime: serverlessv1alpha1.Nodejs14,
 		auth: &serverlessv1alpha1.RepositoryAuth{
 			Type:       serverlessv1alpha1.RepositoryAuthBasic,
 			SecretName: "azure-devops-auth-secret",
 		},
-		authSecretDataFunc: azureDevOpsAuthSecretData,
 	},
 }
 
@@ -98,7 +91,7 @@ func GitAuthTestSteps(restConfig *rest.Config, cfg testsuite.Config, logf *logru
 	}
 	steps := []step.Step{}
 	for _, testCase := range testCases {
-		testSteps, err := gitAuthFunctionTestSteps(genericContainer, testCase, poll)
+		testSteps, err := gitAuthFunctionTestSteps(genericContainer, testCase, poll, cfg)
 		if err != nil {
 			return nil, errors.Wrapf(err, "while generated test case steps")
 		}
@@ -127,7 +120,7 @@ func setupSharedContainer(restConfig *rest.Config, cfg testsuite.Config, logf *l
 		Log:         logf,
 	}, nil
 }
-func gitAuthFunctionTestSteps(genericContainer shared.Container, tr testRepo, poll poller.Poller) (step.Step, error) {
+func gitAuthFunctionTestSteps(genericContainer shared.Container, tr testRepo, poll poller.Poller, cfg testsuite.Config) (step.Step, error) {
 	genericContainer.Log.Infof("Testing Git Function in namespace: %s", genericContainer.Namespace)
 
 	secret := secret.NewSecret(tr.auth.SecretName, genericContainer)
@@ -137,7 +130,8 @@ func gitAuthFunctionTestSteps(genericContainer shared.Container, tr testRepo, po
 		return nil, errors.Wrapf(err, "while parsing in-cluster URL")
 	}
 
-	data, err := tr.authSecretDataFunc(tr)
+	// data, err := tr.authSecretDataFunc(tr)
+	data, err := getSecretData(tr, cfg)
 	if err != nil {
 		return nil, errors.Wrapf(err, "while generating secret data")
 	}
@@ -150,7 +144,7 @@ func gitAuthFunctionTestSteps(genericContainer shared.Container, tr testRepo, po
 			data),
 		teststep.NewCreateGitRepository(
 			genericContainer.Log,
-			gitrepository.New(tr.name, genericContainer),
+			gitrepository.New(fmt.Sprintf("%s-repo", tr.name), genericContainer),
 			fmt.Sprintf("Create GitRepository for %s", tr.provider),
 			gitops.AuthRepositorySpecWithURL(
 				tr.url,
@@ -173,31 +167,26 @@ func gitAuthFunctionTestSteps(genericContainer shared.Container, tr testRepo, po
 			poll, tr.expectedResponse)), nil
 }
 
-func azureDevOpsAuthSecretData(tr testRepo) (map[string]string, error) {
+func getSecretData(tr testRepo, cfg testsuite.Config) (map[string]string, error) {
+	c := reflect.ValueOf(&cfg)
 	data := map[string]string{}
-	for _, key := range tr.secretEnvKeys {
-		value, ok := os.LookupEnv(key)
-		if !ok {
-			return nil, errors.New(fmt.Sprintf("failed to lookup environment variable '%v'", key))
+	for _, key := range tr.secretKeys {
+		value := reflect.Indirect(c).FieldByName(key)
+		if tr.auth.Type == serverlessv1alpha1.RepositoryAuthSSHKey {
+			// this value will be base64 encoded since it's passed as an environment variable.
+			// we have to decode it first before it's passed to the secret creator since it will re-encode it again.
+			decoded, err := base64.StdEncoding.DecodeString(value.String())
+			return map[string]string{"key": string(decoded)}, err
 		}
-		// I want these values to be assigned explicitly
-		if key == azureDevOpsPassEnvName {
-			data["password"] = value
+		if strings.Contains(key, "Username") {
+			data["username"] = value.String()
 		}
-		if key == azureDevOpsUserEnvName {
-			data["username"] = value
+		if strings.Contains(key, "Password") {
+			data["password"] = value.String()
 		}
+	}
+	if len(data) != 2 { // we expect a username and password
+		return nil, errors.New("failed to read secrete data from testsuite config")
 	}
 	return data, nil
-}
-
-func githubAuthSecretData(tr testRepo) (map[string]string, error) {
-	privateKey, ok := os.LookupEnv(tr.secretEnvKeys[0])
-	if !ok {
-		return nil, errors.New(fmt.Sprintf("failed to lookup environment variable '%v'", tr.secretEnvKeys[0]))
-	}
-	// this value will be base64 encoded since it's passed as an environment variable.
-	// we have to decode it first before it's passed to the secret creator since it will re-encode it again.
-	decoded, err := base64.StdEncoding.DecodeString(privateKey)
-	return map[string]string{"key": string(decoded)}, err
 }
