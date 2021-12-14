@@ -5,11 +5,14 @@ import (
 	"fmt"
 	"os"
 
-	"go.uber.org/zap/zapcore"
-
-	"go.uber.org/zap"
-
+	k8s "github.com/kyma-project/kyma/components/function-controller/internal/controllers/kubernetes"
+	"github.com/kyma-project/kyma/components/function-controller/internal/controllers/serverless"
+	"github.com/kyma-project/kyma/components/function-controller/internal/git"
+	internalresource "github.com/kyma-project/kyma/components/function-controller/internal/resource"
+	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
 	"github.com/vrischmann/envconfig"
+	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 	"k8s.io/apimachinery/pkg/runtime"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
@@ -17,11 +20,6 @@ import (
 	ctrlzap "sigs.k8s.io/controller-runtime/pkg/log/zap"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 	"sigs.k8s.io/controller-runtime/pkg/webhook"
-
-	k8s "github.com/kyma-project/kyma/components/function-controller/internal/controllers/kubernetes"
-	"github.com/kyma-project/kyma/components/function-controller/internal/controllers/serverless"
-	internalresource "github.com/kyma-project/kyma/components/function-controller/internal/resource"
-	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
 	// +kubebuilder:scaffold:imports
 )
 
@@ -48,7 +46,6 @@ type config struct {
 }
 
 func main() {
-
 	config, err := loadConfig("APP")
 	if err != nil {
 		ctrl.SetLogger(ctrlzap.New())
@@ -96,8 +93,9 @@ func main() {
 		},
 	)
 
-	if err := serverless.NewFunction(resourceClient, ctrl.Log, config.Function, mgr.GetEventRecorderFor(serverlessv1alpha1.FunctionControllerValue)).
-		SetupWithManager(mgr); err != nil {
+	fnRecon := serverless.NewFunction(resourceClient, ctrl.Log, config.Function, git.NewGit2Go(), mgr.GetEventRecorderFor(serverlessv1alpha1.FunctionControllerValue))
+	err = fnRecon.SetupWithManager(mgr)
+	if err != nil {
 		setupLog.Error(err, "unable to create Function controller")
 		os.Exit(1)
 	}
