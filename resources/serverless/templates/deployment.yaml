@@ -77,10 +77,13 @@ spec:
               name: {{ .Values.metrics.manager.port.name }}
               protocol: {{ .Values.metrics.manager.port.protocol }}
             {{- end }}
+            - containerPort: {{ .Values.containers.manager.healthz.port }}
+              name: "health"
+              protocol: TCP
           livenessProbe:
             httpGet:
-              port: {{ .Values.metrics.manager.port.port }}
-              path: "/metrics"
+              port: {{ .Values.containers.manager.healthz.port }}
+              path: "/healthz/"
             initialDelaySeconds: {{ .Values.deployment.livenessProbe.initialDelaySeconds }}
             timeoutSeconds: {{ .Values.deployment.livenessProbe.timeoutSeconds }}
             periodSeconds: {{.Values.deployment.livenessProbe.periodSeconds }}
@@ -100,6 +103,8 @@ spec:
             - name: APP_LEADER_ELECTION_ENABLED
               value: "true"
           {{- end }}
+            - name: APP_HEALTHZ_ADDRESS
+              value: ":{{ .Values.containers.manager.healthz.port }}"
             {{ include "createEnv" ( dict "name" "APP_KUBERNETES_CONFIG_MAP_REQUEUE_DURATION" "value" .Values.containers.manager.envs.configMapRequeueDuration "context" . ) | nindent 12 }}
             {{ include "createEnv" ( dict "name" "APP_KUBERNETES_SECRET_REQUEUE_DURATION" "value" .Values.containers.manager.envs.secretRequeueDuration "context" . ) | nindent 12 }}
             {{ include "createEnv" ( dict "name" "APP_KUBERNETES_SERVICE_ACCOUNT_REQUEUE_DURATION" "value" .Values.containers.manager.envs.serviceAccountRequeueDuration "context" . ) | nindent 12 }}
@@ -121,6 +126,7 @@ spec:
             {{ include "createEnv" ( dict "name" "APP_FUNCTION_BUILD_REPO_FETCHER_IMAGE" "value" (dict "value" $function_build_init_image) "context" . ) | nindent 12 }}
             {{ include "createEnv" ( dict "name" "APP_FUNCTION_BUILD_MAX_SIMULTANEOUS_JOBS" "value" .Values.containers.manager.envs.functionBuildMaxSimultaneousJobs "context" . ) | nindent 12 }}
             {{ include "createEnv" ( dict "name" "APP_LOG_LEVEL" "value" .Values.containers.manager.envs.logLevel "context" . ) | nindent 12 }}
+            {{ include "createEnv" ( dict "name" "APP_HEALTHZ_LIVENESS_TIMEOUT" "value" .Values.containers.manager.envs.healthzLivenessTimeout "context" . ) | nindent 12 }}
           {{- if .Values.containers.manager.extraProperties }}
           {{ include "tplValue" ( dict "value" .Values.containers.manager.extraProperties "context" . ) | nindent 10 }}
           {{- end }}
