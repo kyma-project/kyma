@@ -2,7 +2,7 @@
 title: Send events from outside the Kyma cluster
 ---
 
-This guide shows how to send events from outside the Kyma cluster. Additionally, this tutorial includes commands for sending events of different [types](../../05-technical-reference/evnt-01-event-types.md).
+This guide shows how to send events from outside the Kyma cluster. Additionally, this tutorial includes commands for sending events of different [types](../../05-technical-reference/evnt-01-event-names.md).
 
 ## Prerequisites
 
