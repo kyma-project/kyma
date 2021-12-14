@@ -38,7 +38,7 @@ one-click-integration.sh -u "${token}"
 
 2. Send the request to the gateway to publish:
 
-    > **NOTE:** In the commands below, `@-` instructs `curl` to read the data for the body of the request from STDIN. Alternatively, you could read the content of the body from a file. For example, if the JSON payload for the request body is stored in `/tmp/msg.json`, you could use `--data @/tmp/msg.json`.
+    > **NOTE:** In the following commands, `@-` instructs `curl` to read the data for the body of the request from STDIN. Alternatively, you could read the content of the body from a file. For example, if the JSON payload for the request body is stored in `/tmp/msg.json`, you could use `--data @/tmp/msg.json`.
 
 
 <div tabs name="Use the generated certificates to send an event">
@@ -65,7 +65,7 @@ curl -v --cert generated.crt --key generated.key -X POST "https://${host}/extern
 EOF
 ```
 
-Note that the Target URL for publishing Cloud Events can be `https://${host}/{APPLICATION_NAME}/events` or `https://${host}/{APPLICATION_NAME}/v2/events`.
+The Target URL for publishing Cloud Events can be `https://${host}/{APPLICATION_NAME}/events` or `https://${host}/{APPLICATION_NAME}/v2/events`.
 
   </details>
   <details>
@@ -88,7 +88,7 @@ curl -v --cert generated.crt --key generated.key -X POST "https://${host}/extern
 EOF
 ```
 
-Note that the Target URL for publishing Cloud Events can be `https://${host}/{APPLICATION_NAME}/events` or `https://${host}/{APPLICATION_NAME}/v2/events`.
+The Target URL for publishing Cloud Events can be `https://${host}/{APPLICATION_NAME}/events` or `https://${host}/{APPLICATION_NAME}/v2/events`.
 
   </details>
   <details>
@@ -111,7 +111,7 @@ curl -v --cert generated.crt --key generated.key -X POST "https://${host}/extern
 EOF
 ```
 
-Note that the Target URL for publishing legacy events must be `https://${host}/{APPLICATION_NAME}/v1/events`.
+The Target URL for publishing legacy events must be `https://${host}/{APPLICATION_NAME}/v1/events`.
 
   </details>
 </div>

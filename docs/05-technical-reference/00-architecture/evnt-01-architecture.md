@@ -11,7 +11,7 @@ This diagram explains the event flow in Kyma, from the moment the Application se
 
 ![Eventing flow](./assets/evnt-architecture.svg)
 
-1. The Eventing Controller watches the Subscription Custom Resource. It determines if there are any new incoming events.
+1. The Eventing Controller watches the Subscription Custom Resource. It detects if there are any new incoming events.
 
 2. The Eventing Controller creates an infrastructure for the NATS server.
 

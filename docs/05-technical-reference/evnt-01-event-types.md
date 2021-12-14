@@ -23,12 +23,12 @@ For publishers, the event type takes this sample form:
 
 ## Event name cleanup
 
-In some cases, Eventing needs to modify the event name before dispatching an event. This is done in order to conform to Cloud Event specifications.
+To conform to Cloud Event specifications, sometimes Eventing must modify the event name before dispatching an event.
 
 If the event name contains more than two segments, Eventing combines them into two segments when creating the underlying Eventing infrastructure. For example, `Account.Root.Created` becomes `AccountRoot.Created`.
 
-In case the Application name contains `-` or `.`, the underlying Eventing services uses a clean name with alphanumeric characters only. (For example, `system-prod` becomes `systemprod`).
+If the Application name contains `-` or `.`, the underlying Eventing services uses a clean name with alphanumeric characters only; for example, `system-prod` becomes `systemprod`.
 
 This could lead to a naming collision. For example, both `system-prod` and `systemprod` become `systemprod`.
 
-A solution for this is to provide an `application-type` label (with alphanumeric characters only) which is then used by the Eventing services instead of the Application name. If the `application-type` label also contains `-` or `.`, the underlying Eventing services clean it and use the cleaned label.
+A solution for this is to provide an `application-type` label (with alphanumeric characters only), which is then used by the Eventing services instead of the Application name. If the `application-type` label also contains `-` or `.`, the underlying Eventing services clean it and use the cleaned label.
