@@ -36,17 +36,13 @@
   },
   "dependencies": {
     "@kubernetes/client-node": "0.15.1",
-    "adm-zip": "^0.5.3",
     "axios": "^0.21.0",
-    "axios-retry": "^3.1.9",
     "execa": "^5.0.0",
     "mocha-junit-reporter": "^2.0.0",
     "mockserver-client": "^5.11.2",
     "moment": "^2.29.1",
     "node-forge": "^0.10.0",
-    "p-retry": "^4.2.0",
-    "uuid": "^8.3.2",
-    "yargs": "^16.2.0"
+    "uuid": "^8.3.2"
   },
   "engines": {
     "node": ">=12"
