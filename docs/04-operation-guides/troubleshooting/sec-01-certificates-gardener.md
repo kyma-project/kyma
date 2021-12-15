@@ -4,11 +4,11 @@ title: Issues with certificates on Gardener
 
 ## Symptom & Cause
 
-During installation on Gardener, Kyma requests domain SSL certificates using the Gardener's [`Certificate`](https://gardener.cloud/docs/guides/administer_shoots/request_cert/#request-a-certificate-via-certificate) custom resource to ensure secure communication through both Kyma UI and Kubernetes CLI.
+During installation on Gardener, Kyma requests domain SSL certificates using the Gardener's [Certificate](https://github.com/gardener/cert-management#requesting-a-certificate) custom resource (CR) to ensure secure communication through both Kyma UI and Kubernetes CLI.
 
 This process can result in the following issues:
 
-- `certificates` installation takes too long.
+- Certificates installation takes too long.
 - `Certificate is still not ready, status is {STATUS}. Exiting...` error occurs.
 - Certificates are no longer valid.
 
@@ -16,7 +16,7 @@ This process can result in the following issues:
 
 If any of these issues appears, follow these steps:
 
-1. Check the status of the Certificate resource:
+1. Check the status of the Certificate CR:
 
     ```bash
     kubectl get certificates.cert.gardener.cloud --all-namespaces
