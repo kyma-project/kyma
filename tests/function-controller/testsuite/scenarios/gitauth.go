@@ -1,13 +1,12 @@
 package scenarios
 
 import (
-	"encoding/base64"
 	"fmt"
 	"math/rand"
 	"net/url"
-	"reflect"
-	"strings"
 	"time"
+
+	"github.com/vrischmann/envconfig"
 
 	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/function"
@@ -34,46 +33,31 @@ type testRepo struct {
 	baseDir          string
 	expectedResponse string
 	reference        string
-	secretKeys       []string
+	secretData       map[string]string
 	runtime          serverlessv1alpha1.Runtime
 	auth             *serverlessv1alpha1.RepositoryAuth
 }
 
-var testCases []testRepo = []testRepo{
-	{
-		name:             "github-func",
-		provider:         "Github",
-		url:              "git@github.com:moelsayed/pyhello.git",
-		baseDir:          "/",
-		reference:        "main",
-		expectedResponse: "hello world",
-		secretKeys:       []string{"GithubAuthPrivateKey"}, // config parameter name(s) in testsuite.Config
-		runtime:          serverlessv1alpha1.Python39,
-		auth: &serverlessv1alpha1.RepositoryAuth{
-			Type:       serverlessv1alpha1.RepositoryAuthSSHKey,
-			SecretName: "github-auth-secret",
-		},
-	},
-	{
-		name:             "azure-devops-func",
-		provider:         "AzureDevOps",
-		url:              "https://kyma-wookiee@dev.azure.com/kyma-wookiee/kyma-function/_git/kyma-function",
-		baseDir:          "/code",
-		reference:        "main",
-		expectedResponse: "Hello Serverless",
-		secretKeys: []string{ // config parameter name(s) in testsuite.Config
-			"AzureDevOpsUsername",
-			"AzureDevOpsPassword",
-		},
-		runtime: serverlessv1alpha1.Nodejs14,
-		auth: &serverlessv1alpha1.RepositoryAuth{
-			Type:       serverlessv1alpha1.RepositoryAuthBasic,
-			SecretName: "azure-devops-auth-secret",
-		},
-	},
+type config struct {
+	AzureAuth  BasicAuth
+	GithubAuth SSHAuth
+}
+
+type SSHAuth struct {
+	Key string
+}
+
+type BasicAuth struct {
+	Username string
+	Password string
 }
 
 func GitAuthTestSteps(restConfig *rest.Config, cfg testsuite.Config, logf *logrus.Entry) (step.Step, error) {
+	testCfg := &config{}
+	if err := envconfig.InitWithPrefix(testCfg, "APP"); err != nil {
+		return nil, errors.Wrap(err, "while loading git auth test config")
+	}
+
 	coreCli, err := typedcorev1.NewForConfig(restConfig)
 	if err != nil {
 		return nil, errors.Wrapf(err, "while creating k8s core client")
@@ -89,9 +73,14 @@ func GitAuthTestSteps(restConfig *rest.Config, cfg testsuite.Config, logf *logru
 		Log:                genericContainer.Log,
 		DataKey:            testsuite.TestDataKey,
 	}
+
+	var testCases []testRepo
+	testCases = append(testCases, getGithubTestcase(createSSHAuthSecretData(testCfg.GithubAuth)))
+	testCases = append(testCases, getAzureDevopsTestcase(createBasicAuthSecretData(testCfg.AzureAuth)))
+
 	steps := []step.Step{}
 	for _, testCase := range testCases {
-		testSteps, err := gitAuthFunctionTestSteps(genericContainer, testCase, poll, cfg)
+		testSteps, err := gitAuthFunctionTestSteps(genericContainer, testCase, poll)
 		if err != nil {
 			return nil, errors.Wrapf(err, "while generated test case steps")
 		}
@@ -99,8 +88,7 @@ func GitAuthTestSteps(restConfig *rest.Config, cfg testsuite.Config, logf *logru
 	}
 	return step.NewSerialTestRunner(logf, "Test Git function authentication",
 		teststep.NewNamespaceStep("Create test namespace", coreCli, genericContainer),
-		step.NewParallelRunner(logf, "fn_tests",
-			steps...)), nil
+		step.NewParallelRunner(logf, "fn_tests", steps...)), nil
 }
 
 func setupSharedContainer(restConfig *rest.Config, cfg testsuite.Config, logf *logrus.Entry) (shared.Container, error) {
@@ -120,7 +108,8 @@ func setupSharedContainer(restConfig *rest.Config, cfg testsuite.Config, logf *l
 		Log:         logf,
 	}, nil
 }
-func gitAuthFunctionTestSteps(genericContainer shared.Container, tr testRepo, poll poller.Poller, cfg testsuite.Config) (step.Step, error) {
+
+func gitAuthFunctionTestSteps(genericContainer shared.Container, tr testRepo, poll poller.Poller) (step.Step, error) {
 	genericContainer.Log.Infof("Testing Git Function in namespace: %s", genericContainer.Namespace)
 
 	secret := secret.NewSecret(tr.auth.SecretName, genericContainer)
@@ -130,18 +119,12 @@ func gitAuthFunctionTestSteps(genericContainer shared.Container, tr testRepo, po
 		return nil, errors.Wrapf(err, "while parsing in-cluster URL")
 	}
 
-	// data, err := tr.authSecretDataFunc(tr)
-	data, err := getSecretData(tr, cfg)
-	if err != nil {
-		return nil, errors.Wrapf(err, "while generating secret data")
-	}
-
 	return step.NewSerialTestRunner(genericContainer.Log, fmt.Sprintf("%s Function auth test", tr.provider),
 		teststep.CreateSecret(
 			genericContainer.Log,
 			secret,
 			fmt.Sprintf("Create %s Auth Secret", tr.provider),
-			data),
+			tr.secretData),
 		teststep.NewCreateGitRepository(
 			genericContainer.Log,
 			gitrepository.New(fmt.Sprintf("%s-repo", tr.name), genericContainer),
@@ -167,26 +150,45 @@ func gitAuthFunctionTestSteps(genericContainer shared.Container, tr testRepo, po
 			poll, tr.expectedResponse)), nil
 }
 
-func getSecretData(tr testRepo, cfg testsuite.Config) (map[string]string, error) {
-	c := reflect.ValueOf(&cfg)
+func createBasicAuthSecretData(basicAuth BasicAuth) map[string]string {
 	data := map[string]string{}
-	for _, key := range tr.secretKeys {
-		value := reflect.Indirect(c).FieldByName(key)
-		if tr.auth.Type == serverlessv1alpha1.RepositoryAuthSSHKey {
-			// this value will be base64 encoded since it's passed as an environment variable.
-			// we have to decode it first before it's passed to the secret creator since it will re-encode it again.
-			decoded, err := base64.StdEncoding.DecodeString(value.String())
-			return map[string]string{"key": string(decoded)}, err
-		}
-		if strings.Contains(key, "Username") {
-			data["username"] = value.String()
-		}
-		if strings.Contains(key, "Password") {
-			data["password"] = value.String()
-		}
+	data["username"] = basicAuth.Username
+	data["password"] = basicAuth.Password
+	return data
+}
+
+func createSSHAuthSecretData(auth SSHAuth) map[string]string {
+	return map[string]string{"key": auth.Key}
+}
+
+func getAzureDevopsTestcase(secretData map[string]string) testRepo {
+	return testRepo{name: "azure-devops-func",
+		provider:         "AzureDevOps",
+		url:              "https://kyma-wookiee@dev.azure.com/kyma-wookiee/kyma-function/_git/kyma-function",
+		baseDir:          "/code",
+		reference:        "main",
+		expectedResponse: "Hello Serverless",
+		runtime:          serverlessv1alpha1.Nodejs14,
+		auth: &serverlessv1alpha1.RepositoryAuth{
+			Type:       serverlessv1alpha1.RepositoryAuthBasic,
+			SecretName: "azure-devops-auth-secret",
+		},
+		secretData: secretData}
+}
+
+func getGithubTestcase(secretData map[string]string) testRepo {
+	return testRepo{
+		name:             "github-func",
+		provider:         "Github",
+		url:              "git@github.com:moelsayed/pyhello.git",
+		baseDir:          "/",
+		reference:        "main",
+		expectedResponse: "hello world",
+		runtime:          serverlessv1alpha1.Python39,
+		auth: &serverlessv1alpha1.RepositoryAuth{
+			Type:       serverlessv1alpha1.RepositoryAuthSSHKey,
+			SecretName: "github-auth-secret",
+		},
+		secretData: secretData,
 	}
-	if len(data) != 2 { // we expect a username and password
-		return nil, errors.New("failed to read secrete data from testsuite config")
-	}
-	return data, nil
 }
