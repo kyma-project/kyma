@@ -9,7 +9,7 @@ global:
   images:
     kiali:
       name: kiali
-      version: 1.38.1-e0da5a68
+      version: 1.44.0-efa628c6
       directory: tpi
     oauth2_proxy:
       name: oauth2-proxy
