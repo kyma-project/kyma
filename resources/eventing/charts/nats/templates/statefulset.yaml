@@ -33,9 +33,7 @@ spec:
       labels:
         {{- include "nats.selectorLabels" . | nindent 8 }}
         {{- if .Values.statefulSetPodLabels }}
-        {{- range $key, $value := .Values.statefulSetPodLabels }}
-        {{ $key }}: {{ $value | quote }}
-        {{- end }}
+        {{ toYaml .Values.statefulSetPodLabels | nindent 8 }}
         {{- end }}
     spec:
 {{- with .Values.securityContext }}

@@ -163,9 +163,8 @@ podAnnotations: {
 statefulSetAnnotations: {}
 
 # Labels to add to the pods of the NATS StatefulSet
-statefulSetPodLabels: {
+statefulSetPodLabels:
   nats_cluster: eventing-nats
-}
 
 # Annotations to add to the NATS Service
 serviceAnnotations: {}
