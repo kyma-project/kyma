@@ -14,5 +14,5 @@ spec:
   portLevelMtls:
     9090:
       mode: STRICT
-    {{ .Values.kiali.spec.server.port }}:
+    {{ .Values.server.port }}:
       mode: STRICT

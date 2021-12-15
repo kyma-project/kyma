@@ -36,7 +36,7 @@ spec:
         name: auth-proxy
         args:
         - --http-address=0.0.0.0:{{ .Values.authProxy.port }}
-        - --upstream=http://{{ template "kiali-server.fullname" . }}-server:{{ .Values.kiali.spec.server.port }}
+        - --upstream=http://{{ template "kiali-server.fullname" . }}-server:{{ .Values.server.port }}
         - --cookie-secure=true
         - --cookie-domain=kiali.{{ .Values.global.domainName }}
         - --cookie-name=KYMA_KIALI_OAUTH2_PROXY_TOKEN

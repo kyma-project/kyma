@@ -20,5 +20,5 @@ spec:
         host: {{ template "kiali-server.fullname" . }}-server
         {{- end}}
         port:
-          number: {{ .Values.kiali.spec.server.port }}
+          number: {{ .Values.server.port }}
 {{- end }}
