@@ -53,7 +53,7 @@ spec:
       {{- toYaml .Values.deployment.host_aliases | nindent 6 }}
       {{- end }}
       containers:
-      - image: {{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.oauth2_proxy) }}
+      - image: {{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.kiali) }}
         imagePullPolicy: {{ .Values.deployment.image_pull_policy | default "Always" }}
         name: {{ include "kiali-server.fullname" . }}
         command:
