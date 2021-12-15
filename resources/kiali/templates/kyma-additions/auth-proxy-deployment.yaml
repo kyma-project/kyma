@@ -27,6 +27,9 @@ spec:
           configMap:
             name: {{ template "kiali-server.fullname" . }}-auth-proxy
       serviceAccountName: {{ template "kiali-server.fullname" . }}-auth-proxy
+      {{- if or .Values.kiali.spec.deployment.priority_class_name .Values.global.priorityClassName }}
+      priorityClassName: {{ coalesce .Values.kiali.spec.deployment.priority_class_name .Values.global.priorityClassName }}
+      {{- end }}
       containers:
       - image: {{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.oauth2_proxy) }}
         imagePullPolicy: {{ .Values.authProxy.image.pullPolicy }}
