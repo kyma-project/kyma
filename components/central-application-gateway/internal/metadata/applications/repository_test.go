@@ -62,7 +62,7 @@ func TestGetServices(t *testing.T) {
 			expectedServiceAPI: expectedServiceAPI,
 		},
 		{
-			description: "should get service by service name ",
+			description: "should get service by service name in no-TLS verification mode",
 			application: createApplication("production", true),
 			testFunc: func(repository applications.ServiceRepository) (applications.Service, apperrors.AppError) {
 				return repository.GetByServiceName("production", "service-1")
@@ -70,7 +70,7 @@ func TestGetServices(t *testing.T) {
 			expectedServiceAPI: expectedServiceAPISkipVerify,
 		},
 		{
-			description: "should get service by service and entry name",
+			description: "should get service by service and entry name in no-TLS verification mode",
 			application: createApplication("production", true),
 			testFunc: func(repository applications.ServiceRepository) (applications.Service, apperrors.AppError) {
 				return repository.GetByEntryName("production", "service-1", "service-entry-1")
