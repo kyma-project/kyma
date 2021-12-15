@@ -32,7 +32,9 @@ const (
 	EventTypePrefix                          = "prefix"
 	EventTypePrefixEmpty                     = ""
 	OrderCreatedV1Event                      = "order.created.v1"
+	OrderUpdatedV1Event                      = "order.updated.v1"
 	OrderCreatedEventType                    = EventTypePrefix + "." + ApplicationName + "." + OrderCreatedV1Event
+	OrderUpdatedEventType                    = EventTypePrefix + "." + ApplicationName + "." + OrderUpdatedV1Event
 	OrderCreatedEventTypeNotClean            = EventTypePrefix + "." + ApplicationNameNotClean + "." + OrderCreatedV1Event
 	OrderCreatedEventTypePrefixEmpty         = ApplicationName + "." + OrderCreatedV1Event
 	OrderCreatedEventTypeNotCleanPrefixEmpty = ApplicationNameNotClean + "." + OrderCreatedV1Event
@@ -53,6 +55,14 @@ const (
 	StructuredCloudEvent = `{
            "id":"` + EventID + `",
            "type":"` + OrderCreatedEventType + `",
+           "specversion":"` + EventSpecVersion + `",
+           "source":"` + EventSource + `",
+           "data":"` + EventData + `"
+        }`
+
+	StructuredCloudEventUpdated = `{
+           "id":"` + EventID + `",
+           "type":"` + OrderUpdatedEventType + `",
            "specversion":"` + EventSpecVersion + `",
            "source":"` + EventSource + `",
            "data":"` + EventData + `"
@@ -308,7 +318,11 @@ func WithEventTypeFilter(s *eventingv1alpha1.Subscription) {
 }
 
 func WithValidSink(svcNs, svcName string, s *eventingv1alpha1.Subscription) {
-	s.Spec.Sink = fmt.Sprintf("https://%s.%s.svc.cluster.local", svcName, svcNs)
+	s.Spec.Sink = GetValidSink(svcNs, svcName)
+}
+
+func GetValidSink(svcNs, svcName string) string {
+	return fmt.Sprintf("https://%s.%s.svc.cluster.local", svcName, svcNs)
 }
 
 func NewSubscriberSvc(name, ns string) *corev1.Service {
@@ -484,13 +498,13 @@ func ToSubscription(unstructuredSub *unstructured.Unstructured) (*eventingv1alph
 
 // ToUnstructuredAPIRule converts an APIRule object into a unstructured APIRule
 func ToUnstructuredAPIRule(obj interface{}) (*unstructured.Unstructured, error) {
-	unstructured := &unstructured.Unstructured{}
+	u := &unstructured.Unstructured{}
 	unstructuredObj, err := runtime.DefaultUnstructuredConverter.ToUnstructured(obj)
 	if err != nil {
 		return nil, err
 	}
-	unstructured.Object = unstructuredObj
-	return unstructured, nil
+	u.Object = unstructuredObj
+	return u, nil
 }
 
 // SetupSchemeOrDie add a scheme to eventing API schemes

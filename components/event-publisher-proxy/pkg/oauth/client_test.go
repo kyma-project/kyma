@@ -80,6 +80,7 @@ func TestGetToken(t *testing.T) {
 		},
 	}
 
+	// nolint:scopelint
 	for _, test := range testCases {
 		t.Run(test.name, func(t *testing.T) {
 			t.Parallel()

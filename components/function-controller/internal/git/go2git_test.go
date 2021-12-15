@@ -57,7 +57,7 @@ func TestNewGit2Go_LastCommit(t *testing.T) {
 			name:             "Return error when not found",
 			refName:          "testcase",
 			expectedCommitID: "11111705dabc65c12583ff5feb2e5300983afc3",
-			expectedError:    errors.New("Could't find commit, branch or tag with given ref: testcase"),
+			expectedError:    errors.New("while lookup tag: no reference found for shorthand 'testcase'"),
 		},
 	}
 

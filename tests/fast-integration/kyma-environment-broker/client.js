@@ -91,6 +91,7 @@ class KEBClient {
   }
 
   async provisionSKR(name, instanceID, platformCreds, btpOperatorCreds, customParams) {
+    debug(`Provision SKR with Custom Parameters ${customParams}`)
     const payload = {
       service_id: KYMA_SERVICE_ID,
       plan_id: this.planID,

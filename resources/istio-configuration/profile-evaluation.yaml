@@ -29,23 +29,14 @@ helmValues:
           memory: 10Mi
   pilot:
     autoscaleEnabled: false
+  gateways:
+    istio-ingressgateway:
+      autoscaleEnabled: false
 
 components:
   ingressGateways:
     enabled: true
     config:
-      hpaSpec:
-        maxReplicas: 1
-        minReplicas: 1
-        metrics:
-          - resource:
-              name: cpu
-              targetAverageUtilization: 80
-            type: Resource
-          - resource:
-              name: memory
-              targetAverageUtilization: 80
-            type: Resource
       resources:
         limits:
           cpu: 500m

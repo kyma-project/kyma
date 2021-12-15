@@ -58,9 +58,7 @@ describe("SKR-Upgrade-test", function () {
   const runtimeName = `kyma-${suffix}`;
   const scenarioName = `test-${suffix}`;
   const instanceID = uuid.v4();
-  const subAccountID = uuid.v4();
-
-  keb.subaccountID = subAccountID;
+  const subAccountID = keb.subaccountID
 
   debug(
     `PlanID ${getEnvOrThrow("KEB_PLAN_ID")}`,
@@ -111,6 +109,7 @@ describe("SKR-Upgrade-test", function () {
   
   const kcp = new KCPWrapper(KCPConfig.fromEnv());
 
+  const kymaVersion = getEnvOrThrow("KYMA_VERSION")
   const kymaUpgradeVersion = getEnvOrThrow("KYMA_UPGRADE_VERSION")
 
   this.timeout(60 * 60 * 1000 * 3); // 3h
@@ -130,7 +129,7 @@ describe("SKR-Upgrade-test", function () {
   });
 
   it(`Provision SKR with ID ${instanceID}`, async function () {
-    skr = await provisionSKR(keb, gardener, instanceID, runtimeName, null, null, null);
+    skr = await provisionSKR(keb, gardener, instanceID, runtimeName, null, null, {"kymaVersion": kymaVersion});
   });
 
   it(`Should save kubeconfig for the SKR to ~/.kube/config`, async function() {
@@ -195,7 +194,7 @@ describe("SKR-Upgrade-test", function () {
   // Perform Upgrade
 
   it(`Perform Upgrade`, async function () {
-    let kcpUpgradeStatus = await kcp.upgradeKyma(subAccountID, kymaUpgradeVersion)
+    let kcpUpgradeStatus = await kcp.upgradeKyma(instanceID, kymaUpgradeVersion)
     debug("Upgrade Done!")
   });
 

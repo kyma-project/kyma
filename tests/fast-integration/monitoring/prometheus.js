@@ -146,7 +146,7 @@ function shouldIgnoreAlert(alert) {
         "Watchdog",
         // Scrape limits can be exceeded on long-running clusters and can be ignored
         "ScrapeLimitForTargetExceeded",
-        // If a cluster with at least 1 node taken down doesn't have enough resources to run all the pods which is fine for e2e test scenarios
+        // Overcommitting resources is fine for e2e test scenarios
         "KubeCPUOvercommit",
         "KubeMemoryOvercommit",
     ]

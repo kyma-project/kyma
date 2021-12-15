@@ -42,7 +42,7 @@ async function readClusterID() {
 }
 
 async function installBTPOperatorHelmChart(creds, clusterId) {
-    const btpChart = "https://github.com/kyma-incubator/sap-btp-service-operator/releases/download/v0.1.10/sap-btp-operator-v0.1.10.tgz";
+    const btpChart = "https://github.com/kyma-incubator/sap-btp-service-operator/releases/download/v0.1.18-custom/sap-btp-operator-0.1.18.tar.gz";
     const btp = "sap-btp-operator";
     const btpValues = `manager.secret.clientid=${creds.clientId},manager.secret.clientsecret=${creds.clientSecret},manager.secret.url=${creds.smURL},manager.secret.tokenurl=${creds.url},cluster.id=${clusterId}`
     try {

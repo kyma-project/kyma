@@ -7,6 +7,9 @@ axios.defaults.httpsAgent = httpsAgent;
 const {
   ensureCommerceMockLocalTestFixture,
   checkFunctionResponse,
+  addService,
+  updateService,
+  deleteService,
   sendEventAndCheckResponse,
   cleanMockTestFixture,
   checkInClusterEventDelivery,
@@ -61,6 +64,12 @@ function commerceMockTests() {
       await sendEventAndCheckResponse();
     });
 
+    it("should add, update and delete a service", async function () {
+      let serviceId = await addService();
+      await updateService(serviceId)
+      await deleteService(serviceId)
+    });
+    
     it("Should print report of restarted containers, skipped if no crashes happened", async function () {
       const afterTestRestarts = await getContainerRestartsForAllNamespaces();
       printRestartReport(initialRestarts, afterTestRestarts);

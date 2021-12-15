@@ -14,7 +14,7 @@ const (
 
 var (
 	// invalidApplicationNameSegment used to match and replace none-alphanumeric characters in the application name
-	invalidApplicationNameSegment = regexp.MustCompile("\\W|_")
+	invalidApplicationNameSegment = regexp.MustCompile(`\W|_`)
 )
 
 // GetCleanTypeOrName cleans the application name form none-alphanumeric characters and returns it

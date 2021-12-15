@@ -17,21 +17,21 @@ const (
 	defaultShutdownTimeout = time.Minute * 1
 )
 
-// HttpMessageReceiver is responsible for receiving messages over HTTP.
-type HttpMessageReceiver struct {
+// HTTPMessageReceiver is responsible for receiving messages over HTTP.
+type HTTPMessageReceiver struct {
 	port     int
 	handler  http.Handler
 	server   *http.Server
 	listener net.Listener
 }
 
-// NewHttpMessageReceiver returns a new NewHttpMessageReceiver instance with the given port.
-func NewHttpMessageReceiver(port int) *HttpMessageReceiver {
-	return &HttpMessageReceiver{port: port}
+// NewHTTPMessageReceiver returns a new NewHTTPMessageReceiver instance with the given port.
+func NewHTTPMessageReceiver(port int) *HTTPMessageReceiver {
+	return &HTTPMessageReceiver{port: port}
 }
 
 // StartListen starts the HTTP message receiver and blocks until it receives a shutdown signal.
-func (recv *HttpMessageReceiver) StartListen(ctx context.Context, handler http.Handler) error {
+func (recv *HTTPMessageReceiver) StartListen(ctx context.Context, handler http.Handler) error {
 	var err error
 	if recv.listener, err = net.Listen("tcp", fmt.Sprintf(":%d", recv.port)); err != nil {
 		return err
