@@ -43,3 +43,4 @@ global:
       namespace: kyma-system
   tracing:
     enabled: true
+  highPriorityClassName: "kyma-system-priority"

@@ -19,6 +19,9 @@ spec:
     spec:
       serviceAccountName: {{ include "operator.serviceAccountName" . }}-controller-manager
       terminationGracePeriodSeconds: {{ .Values.terminationGracePeriodSeconds }}
+      {{- if or .Values.priorityClassName .Values.global.priorityClassName -}}
+      priorityClassName: {{ coalesce .Values.priorityClassName .Values.global.priorityClassName }}
+      {{- end }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
       containers:
