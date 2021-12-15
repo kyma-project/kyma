@@ -64,8 +64,8 @@ nats:
   terminationGracePeriodSeconds: 120
 
   logging:
-    debug: false
-    trace: false
+    debug: true
+    trace: true
     logtime:
     connectErrorReports:
     reconnectErrorReports:
@@ -171,7 +171,7 @@ statefulSetPodLabels: {
 serviceAnnotations: {}
 
 cluster:
-  enabled: true
+  enabled: false
   name: eventing-nats
   replicas: 3
   noAdvertise: false
