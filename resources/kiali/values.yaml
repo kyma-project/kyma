@@ -75,6 +75,7 @@ kiali_route_url: ""
 
 #
 # Settings that mimic the Kiali CR which are placed in the ConfigMap.
+# See https://github.com/kiali/kiali-operator/blob/master/deploy/kiali/kiali_cr to see all possible values (and what they mean).
 # Note that only those values used by the Helm Chart will be here.
 #
 
@@ -137,7 +138,7 @@ deployment:
   service_annotations: {}
   service_type: ""
   tolerations: []
-  version_label: ${HELM_IMAGE_TAG}
+  version_label: ""
   view_only_mode: true
 
 external_services:
