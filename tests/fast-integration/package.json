@@ -50,11 +50,5 @@
   },
   "engines": {
     "node": ">=12"
-  },
-  "files": [
-    "installer/**/*",
-    "utils/index.js",
-    "provisioner/**/*",
-    "kyma.js"
-  ]
+  }
 }
