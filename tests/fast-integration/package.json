@@ -1,8 +1,7 @@
 {
-  "name": "kyma-js",
+  "name": "fast-integration-tests",
   "version": "0.0.1-alpha.12",
-  "main": "installer/index.js",
-  "bin": "kyma.js",
+  "main": "test/test.js",
   "author": "Kyma contributors",
   "repository": {
     "type": "git",
