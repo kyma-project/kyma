@@ -63,7 +63,7 @@ authProxy:
 # If 'fullnameOverride' is not "kiali" and 'deployment.instance_name' is "kiali",
 # then 'deployment.instance_name' will take the value of 'fullnameOverride' value.
 # Otherwise, 'fullnameOverride' is ignored and 'deployment.instance_name' is used.
-fullnameOverride: "kiali"
+fullnameOverride: "kiali-server"
 
 # This is required for "openshift" auth strategy.
 # You have to know ahead of time what your Route URL will be because
