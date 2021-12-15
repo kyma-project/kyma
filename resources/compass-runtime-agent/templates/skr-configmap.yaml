@@ -4,4 +4,4 @@ metadata:
   name: skr-configmap
   namespace: {{ .Values.global.skrConfigmapNamespace }}
 data:
-  isManagedKymaRuntime: true
+  is-managed-kyma-runtime: "true"
