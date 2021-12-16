@@ -42,7 +42,7 @@ global:
       directory: "external/quay.io/coreos"
     grafana:
       name: "grafana"
-      version: "7.5.11-d41037db"
+      version: "7.5.12-663797e9"
       directory: "tpi"
       sha: ""
     busybox:
