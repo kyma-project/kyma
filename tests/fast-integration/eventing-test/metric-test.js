@@ -17,7 +17,7 @@ const dashboards = {
   // The delivery dashboard
   delivery_publisherProxy: {
     title: `Requests to publisher proxy`,
-    query: 'sum(rate(promhttp_metric_handler_requests_total{namespace="kyma-system", pod=~"event.*publisher.*", code=~"2.*"}[5m]))',
+    query: 'sum(rate(istio_requests_total{destination_service="eventing-event-publisher-proxy.kyma-system.svc.cluster.local", response_code=~"2.*"}[5m]))',
     backends: ['nats', 'beb'],
     // The assert function receives the `data.result` section of the query result:
     // https://prometheus.io/docs/prometheus/latest/querying/api/#instant-queries
