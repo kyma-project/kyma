@@ -9,7 +9,6 @@ kind: ClusterRole
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: {{ include "api-gateway.name" . }}-role
-  namespace:  {{ .Release.Namespace }}
 rules:
   - apiGroups: ["gateway.kyma-project.io"]
     resources: ["apirules", "apirules/status"]
@@ -32,7 +31,6 @@ kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: {{ include "api-gateway.name" . }}-role-binding
-  namespace:  {{ .Release.Namespace }}
 subjects:
   - kind: ServiceAccount
     name: {{ include "api-gateway.name" . }}-account # Service account assigned to the controller pod.
