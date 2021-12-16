@@ -1,6 +1,13 @@
 {{/* vim: set filetype=mustache: */}}
 
 {{/*
+Expand the name of the chart.
+*/}}
+{{- define "kiali-server.name" -}}
+{{- default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" -}}
+{{- end -}}
+
+{{/*
 Create a default fully qualified instance name.
 We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
 To simulate the way the operator works, use deployment.instance_name rather than the old fullnameOverride.

@@ -3,7 +3,7 @@ kind: AuthorizationPolicy
 metadata:
   labels:
     {{- include "kiali-server.labels" . | nindent 4 }}
-  name: {{ include "kiali-server.fullname" . }}
+  name: {{ include "kiali-server.name" . }}
   namespace: {{ .Release.Namespace }}
 spec:
   action: ALLOW
@@ -16,7 +16,7 @@ spec:
     from:
     - source:
         principals:
-          - cluster.local/ns/{{ .Release.Namespace }}/sa/{{ template "kiali-server.fullname" . }}-auth-proxy
+          - cluster.local/ns/{{ .Release.Namespace }}/sa/{{ template "kiali-server.name" . }}-auth-proxy
 {{ end }}
   - from:
     - source:

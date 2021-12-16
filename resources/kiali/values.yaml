@@ -50,6 +50,7 @@ authProxy:
     runAsNonRoot: true
   image:
     pullPolicy: IfNotPresent
+  priorityClassName: ""
   resources:
     limits:
       cpu: 50m
@@ -57,6 +58,8 @@ authProxy:
     requests:
       cpu: 10m
       memory: 5Mi
+
+nameOverride: "kiali"
 
 # 'fullnameOverride' is deprecated. Use 'deployment.instance_name' instead.
 # This is only supported for backward compatibility and will be removed in a future version.
