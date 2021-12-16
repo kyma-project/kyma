@@ -8,4 +8,3 @@ metadata:
 spec:
 {{ tpl (toYaml .Values.jaeger.spec | indent 2) . }}
 {{- end }}
-{{- end }}
