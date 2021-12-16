@@ -85,7 +85,6 @@ kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: {{ .Release.Name }}-application-gateway
-  namespace: {{ .Release.Namespace }}
   labels:
     app: {{ .Release.Name }}-application-gateway
     release: {{ .Release.Name }}
@@ -133,7 +132,6 @@ kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: {{ .Release.Name }}-connectivity-validator
-  namespace: {{ .Release.Namespace }}
   labels:
     app: {{ .Release.Name }}-connectivity-validator
     release: {{ .Release.Name }}
