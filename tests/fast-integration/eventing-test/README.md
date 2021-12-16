@@ -1,8 +1,7 @@
 # Eventing Test
 
 
-## Overview 
-
+## Overview
 This test covers the end-to-end flow for Eventing.
 
 ## Usage
