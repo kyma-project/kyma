@@ -24,7 +24,7 @@ crd:
 
 jaeger:
   # Specifies whether Jaeger instance should be created
-  create: false
+  create: true
   kyma:
     uiPort: 16686
     zipkinPort: 9411
@@ -81,7 +81,7 @@ rbac:
   # Specifies whether RBAC resources should be created
   create: true
   pspEnabled: false
-  clusterRole: false
+  clusterRole: true
 
 serviceAccount:
   # Specifies whether a ServiceAccount should be created
@@ -108,7 +108,7 @@ global:
   images:
     jaeger_operator:
       name: "jaeger-operator"
-      version: "1.29.1-e0da5a68"
+      version: "1.29.1-1cae1469"
       directory: "tpi"
     jaeger_all_in_one:
       name: "jaegertracing/all-in-one"

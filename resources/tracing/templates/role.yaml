@@ -7,17 +7,41 @@ metadata:
   labels:
 {{ include "jaeger-operator.labels" . | indent 4 }}
 rules:
+## our own custom resources
+- apiGroups:
+  - jaegertracing.io
+  resources:
+  - '*'
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+  ## for the operator's own deployment
+- apiGroups:
+  - apps
+  resourceNames:
+  - jaeger-operator
+  resources:
+  - deployments/finalizers
+  verbs:
+  - update
 - apiGroups:
   - ""
   resources:
-  - pods
-  - services
-  - endpoints
-  - persistentvolumeclaims
-  - events
   - configmaps
+  - persistentvolumeclaims
+  - pods
   - secrets
   - serviceaccounts
+  - services
+  - services/finalizers
+
+  - endpoints
+  - events
   verbs:
   - '*'
 - apiGroups:
@@ -77,27 +101,14 @@ rules:
   - elasticsearches
   verbs:
   - '*'
-- apiGroups:
-  - jaegertracing.io
-  resources:
-  - '*'
-  verbs:
-  - '*'
+
 - apiGroups:
   - rbac.authorization.k8s.io
   resources:
   - clusterrolebindings
   verbs:
   - '*'
-- apiGroups:
-  - apps
-  - extensions
-  resourceNames:
-  - jaeger-operator
-  resources:
-  - deployments/finalizers
-  verbs:
-  - update
+
 - apiGroups:
   - kafka.strimzi.io
   resources:
