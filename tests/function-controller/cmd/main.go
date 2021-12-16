@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"math/rand"
 	"os"
@@ -47,6 +46,10 @@ func main() {
 		os.Exit(2)
 	}
 
+	cfg, err := loadConfig("APP")
+	failOnError(err, logf)
+	logf.Printf("loaded config")
+
 	scenarioName := os.Args[1]
 	logf.Printf("Scenario: %s", scenarioName)
 	os.Args = os.Args[1:]
@@ -55,14 +58,6 @@ func main() {
 		logf.Errorf("Scenario %s not exist", scenarioName)
 		os.Exit(1)
 	}
-
-	cfg, err := loadConfig("APP")
-	failOnError(err, logf)
-	logf.Printf("loaded config")
-
-	err = validateConfig(cfg, scenarioName)
-	failOnError(err, logf)
-
 	restConfig := controllerruntime.GetConfigOrDie()
 
 	rand.Seed(time.Now().UnixNano())
@@ -110,16 +105,4 @@ func failOnError(err error, logf *logrus.Logger) {
 		logf.Error(err)
 		os.Exit(1)
 	}
-}
-
-func validateConfig(c config, scenarioName string) error {
-	if scenarioName != "git-auth-integration" {
-		return nil
-	}
-	if c.Test.GithubAuthPrivateKey == "" ||
-		c.Test.AzureDevOpsPassword == "" ||
-		c.Test.AzureDevOpsUsername == "" {
-		return errors.New("git auth credentials environment variables [GH_AUTH_PRIVATE_KEY, AZURE_DEVOPS_AUTH_USERNAME or AZURE_DEVOPS_AUTH_PASSWORD] are not set")
-	}
-	return nil
 }

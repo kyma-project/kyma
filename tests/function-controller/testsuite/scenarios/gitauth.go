@@ -151,10 +151,10 @@ func gitAuthFunctionTestSteps(genericContainer shared.Container, tr testRepo, po
 }
 
 func createBasicAuthSecretData(basicAuth BasicAuth) map[string]string {
-	data := map[string]string{}
-	data["username"] = basicAuth.Username
-	data["password"] = basicAuth.Password
-	return data
+	return map[string]string{
+		"username": basicAuth.Username,
+		"password": basicAuth.Password,
+	}
 }
 
 func createSSHAuthSecretData(auth SSHAuth) map[string]string {
