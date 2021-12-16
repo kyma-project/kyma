@@ -50,7 +50,7 @@ authProxy:
     runAsNonRoot: true
   image:
     pullPolicy: IfNotPresent
-  priorityClassName: ""
+  priorityClassName: "kyma-system-priority"
   resources:
     limits:
       cpu: 50m
@@ -122,7 +122,7 @@ deployment:
   pod_annotations:
     "sidecar.istio.io/inject": "true"
   pod_labels: {}
-  priority_class_name: ""
+  priority_class_name: "kyma-system-priority"
   replicas: 1
   resources:
     limits:
