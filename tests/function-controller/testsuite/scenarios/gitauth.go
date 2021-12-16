@@ -1,6 +1,7 @@
 package scenarios
 
 import (
+	"encoding/base64"
 	"fmt"
 	"math/rand"
 	"net/url"
@@ -75,8 +76,13 @@ func GitAuthTestSteps(restConfig *rest.Config, cfg testsuite.Config, logf *logru
 	}
 
 	var testCases []testRepo
-	testCases = append(testCases, getGithubTestcase(createSSHAuthSecretData(testCfg.GithubAuth)))
 	testCases = append(testCases, getAzureDevopsTestcase(createBasicAuthSecretData(testCfg.AzureAuth)))
+
+	sshAuthData, err := createSSHAuthSecretData(testCfg.GithubAuth)
+	if err != nil {
+		return nil, errors.Wrapf(err, "while decoding ssh key")
+	}
+	testCases = append(testCases, getGithubTestcase(sshAuthData))
 
 	steps := []step.Step{}
 	for _, testCase := range testCases {
@@ -157,8 +163,12 @@ func createBasicAuthSecretData(basicAuth BasicAuth) map[string]string {
 	}
 }
 
-func createSSHAuthSecretData(auth SSHAuth) map[string]string {
-	return map[string]string{"key": auth.Key}
+func createSSHAuthSecretData(auth SSHAuth) (map[string]string, error) {
+	// this value will be base64 encoded since it's passed as an environment variable.
+	// we have to decode it first before it's passed to the secret creator since it will re-encode it again.
+	decoded, err := base64.StdEncoding.DecodeString(auth.Key)
+
+	return map[string]string{"key": string(decoded)}, err
 }
 
 func getAzureDevopsTestcase(secretData map[string]string) testRepo {
