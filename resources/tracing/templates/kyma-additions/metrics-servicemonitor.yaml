@@ -16,7 +16,7 @@ spec:
       insecureSkipVerify: true
   selector:
     matchLabels:
-      app.kubernetes.io/name: {{ include "jaeger-operator.fullname" . }}-jaeger-operator
+      app.kubernetes.io/name: {{ include "jaeger-operator.fullname" . }}
 
 {{- if eq .Values.jaeger.spec.strategy "allInOne" }}
 ---
