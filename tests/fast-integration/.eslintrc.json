@@ -1,8 +1,8 @@
 {
     "env": {
-        "browser": true,
-        "commonjs": true,
-        "es2021": true
+        "node": true,
+        "es6": true,
+        "commonjs": true
     },
     "extends": [
         "google"
@@ -11,5 +11,8 @@
         "ecmaVersion": 13
     },
     "rules": {
+        "require-jsdoc" : 0,
+        "max-len": 
+            ["error", { "code": 120 }]
     }
 }
