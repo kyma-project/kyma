@@ -46,6 +46,7 @@ import (
 const (
 	natsPort = 4221
 
+
 	smallTimeout         = 10 * time.Second
 	smallPollingInterval = 1 * time.Second
 
