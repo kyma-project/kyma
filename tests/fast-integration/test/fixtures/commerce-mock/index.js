@@ -90,19 +90,21 @@ function setEventMeshSourceNamespace(namespace) {
   eventMeshSourceNamespace = `/${namespace.trimStart('/')}`;
 }
 
-function prepareLastorderObjs(type = 'standard', appName = 'commerce') {
-  const lastOrderFunctionDataYaml = lastorderFunctionYaml.toString().replace(/%%BEB_NAMESPACE%%/g, eventMeshSourceNamespace);
-
+function prepareFunction(type = 'standard', appName = 'commerce') {
+  const functionYaml = lastorderFunctionYaml.toString().replace(/%%BEB_NAMESPACE%%/g, eventMeshSourceNamespace);
+  const gatewayUrl = 'http://central-application-gateway.kyma-system';
   switch (type) {
     case 'central-app-gateway':
-      return k8s.loadAllYaml(lastOrderFunctionDataYaml.toString()
-          .replace('%%URL%%', '"http://central-application-gateway.kyma-system:8080/commerce/sap-commerce-cloud-commerce-webservices/site/orders/" + code'));
+      const orders = `${gatewayUrl}:8080/commerce/sap-commerce-cloud-commerce-webservices/site/orders/`;
+      return k8s.loadAllYaml(functionYaml.toString()
+          .replace('%%URL%%', `"${orders}" + code`));
     case 'central-app-gateway-compass':
-      return k8s.loadAllYaml(lastOrderFunctionDataYaml.toString()
-          .replace('%%URL%%', '"http://central-application-gateway.kyma-system:8082/%%APP_NAME%%/sap-commerce-cloud/commerce-webservices/site/orders/" + code')
+      const orderWithCompass = `${gatewayUrl}:8082/%%APP_NAME%%/sap-commerce-cloud/commerce-webservices/site/orders/`;
+      return k8s.loadAllYaml(functionYaml.toString()
+          .replace('%%URL%%', `"${orderWithCompass}" + code`)
           .replace('%%APP_NAME%%', appName));
     default:
-      return k8s.loadAllYaml(lastOrderFunctionDataYaml.toString()
+      return k8s.loadAllYaml(functionYaml.toString()
           .replace('%%URL%%', 'findEnv("GATEWAY_URL") + "/site/orders/" + code'));
   }
 }
@@ -241,7 +243,8 @@ async function checkInClusterEventTracing(targetNamespace) {
   // Define expected trace data
   const correctTraceSpansLength = 4;
   const correctTraceProcessSequence = [
-    `lastorder-${res.data.podName.split('-')[1]}.${targetNamespace}`, // We are sending the in-cluster event from inside the lastorder pod.
+    // We are sending the in-cluster event from inside the lastorder pod
+    `lastorder-${res.data.podName.split('-')[1]}.${targetNamespace}`,
     'eventing-publisher-proxy.kyma-system',
     'eventing-controller.kyma-system',
     `lastorder-${res.data.podName.split('-')[1]}.${targetNamespace}`,
@@ -259,7 +262,6 @@ async function checkTrace(traceId, expectedTraceLength, expectedTraceProcessSequ
   try {
     traceRes = await getJaegerTrace(traceId);
   } finally {
-    // finally block will run even if exception is thrown (reference: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/try...catch#the_finally-block)
     cancelJaegerPortForward();
   }
 
@@ -278,7 +280,9 @@ async function checkTrace(traceId, expectedTraceLength, expectedTraceProcessSequ
   let currentSpan = traceDAG[0];
   for (let i = 0; i < expectedTraceLength; i++) {
     const processServiceName = traceData.processes[currentSpan.processID].serviceName;
-    debug(`Checking Trace Sequence # ${i}: Expected process: ${expectedTraceProcessSequence[i]}, Received process: ${processServiceName}`);
+    debug(`Checking Trace Sequence # ${i}:
+    Expected process: ${expectedTraceProcessSequence[i]}, 
+    Received process: ${processServiceName}`);
     expect(processServiceName).to.be.equal(expectedTraceProcessSequence[i]);
 
     // Traverse to next trace span
@@ -373,7 +377,8 @@ async function registerAllApis(mockHost) {
     throw convertAxiosError(err, 'API registration error - commerce mock local API not available');
   });
   debug('Commerce Mock local APIs received');
-  const filteredApis = localApis.data.filter((api) => (api.name.includes('Commerce Webservices') || api.name.includes('Events')));
+  const filteredApis = localApis.data
+      .filter((api) => (api.name.includes('Commerce Webservices') || api.name.includes('Events')));
   for (const api of filteredApis) {
     debug('Registering', api.name);
     await axios
@@ -461,12 +466,21 @@ async function connectCommerceMock(mockHost, tokenData) {
   }
 }
 
-async function ensureCommerceMockWithCompassTestFixture(client, appName, scenarioName, mockNamespace, targetNamespace, withCentralApplicationConnectivity = false) {
+async function ensureCommerceMockWithCompassTestFixture(client,
+    appName,
+    scenarioName,
+    mockNamespace,
+    targetNamespace,
+    withCentralApplicationConnectivity = false) {
+  const lastOrderFunction = withCentralApplicationConnectivity ?
+    prepareFunction('central-app-gateway-compass', `mp-${appName}`) :
+    prepareFunction();
+
   const mockHost = await provisionCommerceMockResources(
       `mp-${appName}`,
       mockNamespace,
       targetNamespace,
-    withCentralApplicationConnectivity ? prepareLastorderObjs('central-app-gateway-compass', `mp-${appName}`) : prepareLastorderObjs());
+      lastOrderFunction);
   await retryPromise(() => connectMockCompass(client, appName, scenarioName, mockHost, targetNamespace), 10, 3000);
   await retryPromise(() => registerAllApis(mockHost), 10, 3000);
 
@@ -551,13 +565,15 @@ async function cleanCompassResourcesSKR(client, appName, scenarioName, runtimeID
   }
 }
 
-async function ensureCommerceMockLocalTestFixture(mockNamespace, targetNamespace, withCentralApplicationConnectivity = false) {
+async function ensureCommerceMockLocalTestFixture(mockNamespace,
+    targetNamespace,
+    withCentralApplicationConnectivity = false) {
   await k8sApply(applicationObjs);
   const mockHost = await provisionCommerceMockResources(
       'commerce',
       mockNamespace,
       targetNamespace,
-    withCentralApplicationConnectivity ? prepareLastorderObjs('central-app-gateway') : prepareLastorderObjs());
+    withCentralApplicationConnectivity ? prepareFunction('central-app-gateway') : prepareFunction());
   await retryPromise(() => connectMockLocal(mockHost, targetNamespace), 10, 3000);
   await retryPromise(() => registerAllApis(mockHost), 10, 3000);
 
@@ -726,7 +742,11 @@ async function checkInClusterEventDeliveryHelper(targetNamespace, encoding) {
   await printStatusOfInClusterEventingInfrastructure(targetNamespace, encoding, 'lastorder');
 
   // send event using function query parameter send=true
-  await retryPromise(() => axios.post(`https://${mockHost}`, {id: eventId}, {params: {send: true, encoding: encoding}}), 10, 1000);
+  await retryPromise(() => axios.post(`https://${mockHost}`,
+      {id: eventId},
+      {params: {send: true, encoding: encoding}}),
+  10,
+  1000);
   // verify if event was received using function query parameter inappevent=eventId
   return await retryPromise(async () => {
     debug('Waiting for event: ', eventId);

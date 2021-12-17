@@ -27,7 +27,7 @@ const sbuYaml = fs.readFileSync(path.join(__dirname, './redis-sbu.yaml'), {
   encoding: 'utf8',
 });
 
-const {expect, config} = require('chai');
+const {config} = require('chai');
 config.truncateThreshold = 0; // more verbose errors
 
 const {
@@ -68,7 +68,6 @@ const order = {
   consignmentStatus: 'PICKUP_COMPLETE',
 };
 
-
 async function verifyOrderPersisted() {
   const virtualService = await waitForVirtualService(orderService, orderService);
   const serviceDomain = await virtualService.spec.hosts[0];
@@ -87,7 +86,6 @@ async function verifyOrderPersisted() {
   // https://kyma-project.io/docs/root/getting-started/#getting-started-connect-an-external-application
   // This is covered by commerce-mock.js test
 }
-
 
 async function findOrder(serviceDomain, order) {
   const result = await axios.get(`https://${serviceDomain}/orders`);

@@ -15,7 +15,7 @@ describe('retryPromise', () => {
       new Promise((resolve, reject) => {
         if (count < 5) {
           count++;
-          reject('Count is too low!');
+          reject(new Error('Count is too low!'));
         }
         resolve('pass');
       });
