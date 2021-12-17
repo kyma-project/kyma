@@ -22,7 +22,7 @@ const {
 const {keb, gardener, director} = require('./helpers');
 const {prometheusPortForward} = require('../monitoring/client');
 
-function OIDCE2ETest() {
+function oidcE2ETest() {
   describe('OIDCE2ETest()', function() {
     it(`Assure initial OIDC config is applied on shoot cluster`, async function() {
       ensureValidShootOIDCConfig(this.shoot, this.options.oidc0);
@@ -74,7 +74,7 @@ function OIDCE2ETest() {
   });
 }
 
-function CommerceMockTest() {
+function commerceMockTest() {
   describe('CommerceMockTest()', function() {
     const AWS_PLAN_ID = '361c511f-f939-4621-b228-d0fb79a1fe15';
     let cancelPortForward = null;
@@ -124,6 +124,6 @@ function CommerceMockTest() {
 }
 
 module.exports = {
-  CommerceMockTest,
-  OIDCE2ETest,
+  commerceMockTest,
+  oidcE2ETest,
 };

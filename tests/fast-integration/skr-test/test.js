@@ -1,18 +1,17 @@
-const {
-  GatherOptions,
-} = require('./');
+const {gatherOptions} = require('./');
 const {provisionSKR, deprovisionSKR} = require('../kyma-environment-broker');
 const {keb, gardener, director} = require('./helpers');
 const {initializeK8sClient} = require('../utils');
 const {unregisterKymaFromCompass, addScenarioInCompass, assignRuntimeToScenario} = require('../compass');
-const {OIDCE2ETest, CommerceMockTest} = require('./skr-test');
+const {oidcE2ETest, commerceMockTest} = require('./skr-test');
 
 describe(`Execute SKR test`, function() {
   this.timeout(60 * 60 * 1000 * 3); // 3h
   this.slow(5000);
+
   before('Provision SKR', async function() {
     try {
-      this.options = GatherOptions();
+      this.options = gatherOptions();
       console.log(`Provision SKR with runtime ID ${this.options.instanceID}`);
       const customParams = {
         oidc: this.options.oidc0,
@@ -31,8 +30,11 @@ describe(`Execute SKR test`, function() {
       throw new Error(`before hook failed: ${e.toString()}`);
     }
   });
-  OIDCE2ETest();
-  CommerceMockTest();
+
+  oidcE2ETest();
+
+  commerceMockTest();
+
   after(`Deprovision SKR`, async function() {
     await deprovisionSKR(keb, this.options.instanceID);
     await unregisterKymaFromCompass(director, this.options.scenarioName);

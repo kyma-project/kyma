@@ -60,13 +60,15 @@ async function installRedisExample(options) {
   debug(`Waiting for pod with label app=helm-broker...`);
   await waitForPodWithLabel('app', 'helm-broker', 'kyma-system');
 
-  const clusteraddonconfigurationPath = options.resourcesPath || join(__dirname, 'fixtures', '01_clusteraddonconfiguration.yaml');
+  const clusteraddonconfigurationPath = options.resourcesPath || join(__dirname,
+      'fixtures', '01_clusteraddonconfiguration.yaml');
   debug(`Applying manifest ${clusteraddonconfigurationPath}`);
   await kubectlApply(clusteraddonconfigurationPath);
   await waitForClusterAddonsConfiguration('redis-addon');
 
   // Deploying redis instance with function and servicebindings
-  const serviceInstanceManifestPath = options.resourcesPath || join(__dirname, 'fixtures', '02_serviceinstance_redis.yaml');
+  const serviceInstanceManifestPath = options.resourcesPath || join(__dirname,
+      'fixtures', '02_serviceinstance_redis.yaml');
   const functionManifestPath = options.resourcesPath || join(__dirname, 'fixtures', '03_function_redis.yaml');
   const funcSBManifestPath = options.resourcesPath || join(__dirname, 'fixtures', '04_func-sb_redis.yaml');
   const sbuManifestPath = options.resourcesPath || join(__dirname, 'fixtures', '05_sbu_redis.yaml');
@@ -86,7 +88,8 @@ async function installAuditlogExample(options) {
 
   options = options || {};
 
-  const serviceInstanceManifestPath = options.resourcesPath || join(__dirname, 'fixtures', '02_serviceinstance_auditlog.yaml');
+  const serviceInstanceManifestPath = options.resourcesPath || join(__dirname,
+      'fixtures', '02_serviceinstance_auditlog.yaml');
   const functionManifestPath = options.resourcesPath || join(__dirname, 'fixtures', '03_function_auditlog.yaml');
   const funcSBManifestPath = options.resourcesPath || join(__dirname, 'fixtures', '04_func-sb_auditlog.yaml');
   const sbuManifestPath = options.resourcesPath || join(__dirname, 'fixtures', '05_sbu_auditlog.yaml');
@@ -107,7 +110,8 @@ async function installHTML5AppsRepoExample(options) {
 
   options = options || {};
 
-  const serviceInstanceManifestPath = options.resourcesPath || join(__dirname, 'fixtures', '02_serviceinstance_html5appsrepo.yaml');
+  const serviceInstanceManifestPath = options.resourcesPath || join(__dirname,
+      'fixtures', '02_serviceinstance_html5appsrepo.yaml');
   const functionManifestPath = options.resourcesPath || join(__dirname, 'fixtures', '03_function_html5appsrepo.yaml');
   const funcSBManifestPath = options.resourcesPath || join(__dirname, 'fixtures', '04_func-sb_html5appsrepo.yaml');
   const sbuManifestPath = options.resourcesPath || join(__dirname, 'fixtures', '05_sbu_html5appsrepo.yaml');
@@ -127,8 +131,10 @@ async function installAuditManagementExample(options) {
 
   options = options || {};
 
-  const serviceInstanceManifestPath = options.resourcesPath || join(__dirname, 'fixtures', '02_serviceinstance_auditlogmanagement.yaml');
-  const functionManifestPath = options.resourcesPath || join(__dirname, 'fixtures', '03_function_auditlogmanagement.yaml');
+  const serviceInstanceManifestPath = options.resourcesPath || join(__dirname,
+      'fixtures', '02_serviceinstance_auditlogmanagement.yaml');
+  const functionManifestPath = options.resourcesPath || join(__dirname,
+      'fixtures', '03_function_auditlogmanagement.yaml');
   const funcSBManifestPath = options.resourcesPath || join(__dirname, 'fixtures', '04_func-sb_auditlogmanagement.yaml');
   const sbuManifestPath = options.resourcesPath || join(__dirname, 'fixtures', '05_sbu_auditlogmanagement.yaml');
 
@@ -199,7 +205,7 @@ async function checkSecrets(existing) {
   // and check if this list contains our well known secrets
   allSecrets.forEach( function(secretName) {
     for (let i=0; i < reference.length; i++) {
-      if (secretName.includes(reference[i])) {
+      if (secretName.includes(reference[i])) {
         const index = missing.indexOf(reference[i]);
         if (index !== -1) {
           missing.splice(index, 1);
@@ -222,7 +228,7 @@ async function checkPodPresets(expected, existing) {
   // and check if this list still contains the same PodPresets
   allPodPresets.forEach( function(podPresetName) {
     for (let i=0; i < expected.length; i++) {
-      if (podPresetName.includes(expected[i])) {
+      if (podPresetName.includes(expected[i])) {
         const index = missing.indexOf(expected[i]);
         if (index !== -1) {
           missing.splice(index, 1);
@@ -249,9 +255,9 @@ async function deploy() {
   times.push(installHTML5AppsRepoExample());
   times.push(installAuditManagementExample());
 
-  return Promise.all(times).then(function() {
+  return Promise.all(times).then(function(...args) {
     console.log(`\nSuccessfully deployed all resources:`);
-    const items = arguments[0];
+    const items = args[0];
     items.sort(function(a, b) {
       if (a.duration < b.duration) {
         return -1;

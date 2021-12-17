@@ -112,9 +112,10 @@ describe('SKR SVCAT migration test', function() {
     await t.restartFunctionsPods();
   });
 
-  it(`Should check if pod presets injected secrets in functions containers are present after migration`, async function() {
-    await t.checkPodPresetEnvInjected();
-  });
+  it(`Should check if pod presets injected secrets in functions containers are present after migration`,
+      async function() {
+        await t.checkPodPresetEnvInjected();
+      });
 
   it(`Should destroy sample service catalog resources`, async function() {
     await sampleResources.destroy();

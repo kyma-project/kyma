@@ -8,37 +8,37 @@ const keb = new KEBClient(KEBConfig.fromEnv());
 const gardener = new GardenerClient(GardenerConfig.fromEnv());
 const director = new DirectorClient(DirectorConfig.fromEnv());
 
-function WithInstanceID(instanceID) {
+function withInstanceID(instanceID) {
   return function(options) {
     options.instanceID = instanceID;
   };
 }
 
-function WithRuntimeName(runtimeName) {
+function withRuntimeName(runtimeName) {
   return function(options) {
     options.runtimeName = runtimeName;
   };
 }
 
-function WithAppName(appName) {
+function withAppName(appName) {
   return function(options) {
     options.appName = appName;
   };
 }
 
-function WithScenarioName(scenarioName) {
+function withScenarioName(scenarioName) {
   return function(options) {
     options.scenarioName = scenarioName;
   };
 }
 
-function WithTestNS(testNS) {
+function withTestNS(testNS) {
   return function(options) {
     options.testNS = testNS;
   };
 }
 
-function GatherOptions(...opts) {
+function gatherOptions(...opts) {
   const suffix = genRandom(4);
   // If no opts provided the options object will be set to these default values.
   const options = {
@@ -78,11 +78,13 @@ function GatherOptions(...opts) {
 }
 
 module.exports = {
-  keb, gardener, director,
-  GatherOptions,
-  WithInstanceID,
-  WithAppName,
-  WithRuntimeName,
-  WithScenarioName,
-  WithTestNS,
+  keb,
+  gardener,
+  director,
+  gatherOptions,
+  withInstanceID,
+  withAppName,
+  withRuntimeName,
+  withScenarioName,
+  withTestNS,
 };

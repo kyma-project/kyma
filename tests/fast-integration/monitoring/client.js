@@ -103,7 +103,12 @@ async function jaegerPortForward() {
 }
 
 async function getJaegerPods() {
-  const labelSelector = `app=jaeger,app.kubernetes.io/component=all-in-one,app.kubernetes.io/instance=tracing-jaeger,app.kubernetes.io/managed-by=jaeger-operator,app.kubernetes.io/name=tracing-jaeger,app.kubernetes.io/part-of=jaeger`;
+  const labelSelector = 'app=jaeger,' +
+    'app.kubernetes.io/component=all-in-one,' +
+    'app.kubernetes.io/instance=tracing-jaeger,' +
+    'app.kubernetes.io/managed-by=jaeger-operator,' +
+    'app.kubernetes.io/name=tracing-jaeger,' +
+    'app.kubernetes.io/part-of=jaeger';
   return listPods(labelSelector, 'kyma-system');
 }
 

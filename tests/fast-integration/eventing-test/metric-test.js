@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 const axios = require('axios');
 const https = require('https');
 const {expect} = require('chai');

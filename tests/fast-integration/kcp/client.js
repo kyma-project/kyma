@@ -21,7 +21,8 @@ class KCPConfig {
         getEnvOrThrow('KCP_KUBECONFIG_API_URL'),
     );
   }
-  constructor(host, issuerURL, gardenerNamespace, username, password, clientID, clientSecret, motherShipApiUrl, kubeConfigApiUrl) {
+  constructor(host, issuerURL, gardenerNamespace, username, password,
+      clientID, clientSecret, motherShipApiUrl, kubeConfigApiUrl) {
     this.host = host;
     this.issuerURL = issuerURL;
     this.gardenerNamespace = gardenerNamespace;
@@ -138,16 +139,16 @@ class KCPWrapper {
         debug(error);
       }
 
-      throw (`Kyma Upgrade failed`);
+      throw new Error('Kyma Upgrade failed');
     } catch (error) {
       debug(error);
-      throw new Error(`failed during upgradeKyma`);
+      throw new Error('failed during upgradeKyma');
     }
   };
 
   async getOrchestrationsOperations(orchestrationID) {
     // debug(`Running getOrchestrationsOperations...`)
-    const args = [`orchestration`, `${orchestrationID}`, `operations`, `-o`, `json`];
+    const args = ['orchestration', `${orchestrationID}`, 'operations', '-o', 'json'];
     try {
       const res = await this.exec(args);
       const operations = JSON.parse(res);
@@ -156,13 +157,13 @@ class KCPWrapper {
       return operations;
     } catch (error) {
       debug(error);
-      throw new Error(`failed during getOrchestrationsOperations`);
+      throw new Error('failed during getOrchestrationsOperations');
     }
   }
 
   async getOrchestrationsOperationStatus(orchestrationID, operationID) {
     // debug(`Running getOrchestrationsOperationStatus...`)
-    const args = [`orchestration`, `${orchestrationID}`, `--operation`, `${operationID}`, `-o`, `json`];
+    const args = ['orchestration', `${orchestrationID}`, '--operation', `${operationID}`, '-o', 'json'];
     try {
       let res = await this.exec(args);
       res = JSON.parse(res);
@@ -170,18 +171,19 @@ class KCPWrapper {
       return res;
     } catch (error) {
       debug(error);
-      throw new Error(`failed during getOrchestrationsOperationStatus`);
+      throw new Error('failed during getOrchestrationsOperationStatus');
     }
   }
 
   async getOrchestrationStatus(orchestrationID) {
     // debug(`Running getOrchestrationStatus...`)
-    const args = [`orchestrations`, `${orchestrationID}`, `-o`, `json`];
+    const args = ['orchestrations', `${orchestrationID}`, '-o', 'json'];
     try {
       const res = await this.exec(args);
       const o = JSON.parse(res);
 
-      debug(`OrchestrationID: ${o.orchestrationID} (${o.type} to version ${o.parameters.kyma.version}), status: ${o.state}`);
+      debug(`OrchestrationID: ${o.orchestrationID} (${o.type} to version ${o.parameters.kyma.version}), 
+      status: ${o.state}`);
 
       const operations = await this.getOrchestrationsOperations(o.orchestrationID);
       // debug(`Got ${operations.length} operations for OrchestrationID ${o.orchestrationID}`)
@@ -189,15 +191,17 @@ class KCPWrapper {
       let upgradeOperation = {};
       if (operations.count > 0) {
         upgradeOperation = await this.getOrchestrationsOperationStatus(orchestrationID, operations.data[0].operationID);
-        debug(`OrchestrationID: ${orchestrationID}: OperationID: ${operations.data[0].operationID}: OperationStatus: ${upgradeOperation.state}`);
-      } else {
+        debug(`OrchestrationID: ${orchestrationID}: 
+        OperationID: ${operations.data[0].operationID}: 
+        OperationStatus: ${upgradeOperation.state}`);
+      } else {
         debug(`No operations in OrchestrationID ${o.orchestrationID}`);
       }
 
       return o;
     } catch (error) {
       debug(error);
-      throw new Error(`failed during getOrchestrationStatus`);
+      throw new Error('failed during getOrchestrationStatus');
     }
   };
 
@@ -215,18 +219,19 @@ class KCPWrapper {
 
       if (res.state !== 'succeeded') {
         debug('KEB Orchestration Status:', res);
-        throw (`orchestration didn't succeed in 15min: ${JSON.stringify(res)}`);
+        throw new Error(`orchestration didn't succeed in 15min: ${JSON.stringify(res)}`);
       }
 
       const descSplit = res.description.split(' ');
       if (descSplit[1] !== '1') {
-        throw (`orchestration didn't succeed (number of scheduled operations should be equal to 1): ${JSON.stringify(res)}`);
+        throw new Error(`orchestration didn't succeed 
+        (number of scheduled operations should be equal to 1): ${JSON.stringify(res)}`);
       }
 
       return res;
     } catch (error) {
       debug(error);
-      throw new Error(`failed during ensureOrchestrationSucceeded`);
+      throw new Error('failed during ensureOrchestrationSucceeded');
     }
   }
 

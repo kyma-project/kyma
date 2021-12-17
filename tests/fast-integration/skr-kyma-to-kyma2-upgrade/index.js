@@ -1,6 +1,4 @@
 const uuid = require('uuid');
-const fs = require('fs');
-const execa = require('execa');
 const {
   DirectorConfig,
   DirectorClient,
@@ -151,7 +149,12 @@ describe('SKR-Upgrade-test', function() {
   });
 
   it('CommerceMock test fixture should be ready', async function() {
-    await ensureCommerceMockWithCompassTestFixture(director, appName, scenarioName, 'mocks', testNS, withCentralAppConnectivity);
+    await ensureCommerceMockWithCompassTestFixture(director,
+        appName,
+        scenarioName,
+        'mocks',
+        testNS,
+        withCentralAppConnectivity);
   });
 
   it('Helm Broker test fixture should be ready', async function() {
@@ -193,7 +196,7 @@ describe('SKR-Upgrade-test', function() {
   // Perform Upgrade
 
   it(`Perform Upgrade`, async function() {
-    const kcpUpgradeStatus = await kcp.upgradeKyma(instanceID, kymaUpgradeVersion);
+    await kcp.upgradeKyma(instanceID, kymaUpgradeVersion);
     debug('Upgrade Done!');
   });
 
@@ -233,9 +236,9 @@ describe('SKR-Upgrade-test', function() {
 
 
   // Cleanup
-  const skip_cleanup = getEnvOrThrow('SKIP_CLEANUP');
+  const skipCleanup = getEnvOrThrow('SKIP_CLEANUP');
 
-  if (skip_cleanup === 'FALSE') {
+  if (skipCleanup === 'FALSE') {
     it('Unregister Kyma resources from Compass', async function() {
       await unregisterKymaFromCompass(director, scenarioName);
     });

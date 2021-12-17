@@ -1,5 +1,5 @@
 const {assert} = require('chai');
-const {sleep, wait} = require('../utils');
+const {sleep} = require('../utils');
 const {queryPrometheus} = require('../monitoring/client');
 
 function findAuditLog(logs, group) {

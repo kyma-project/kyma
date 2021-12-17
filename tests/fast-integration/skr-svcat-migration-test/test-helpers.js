@@ -42,9 +42,14 @@ async function readClusterID() {
 }
 
 async function installBTPOperatorHelmChart(creds, clusterId) {
-  const btpChart = 'https://github.com/kyma-incubator/sap-btp-service-operator/releases/download/v0.1.18-custom/sap-btp-operator-0.1.18.tar.gz';
+  const btpChart = 'https://github.com/kyma-incubator/sap-btp-service-operator/releases/download/' +
+    'v0.1.18-custom/sap-btp-operator-0.1.18.tar.gz';
   const btp = 'sap-btp-operator';
-  const btpValues = `manager.secret.clientid=${creds.clientId},manager.secret.clientsecret=${creds.clientSecret},manager.secret.url=${creds.smURL},manager.secret.tokenurl=${creds.url},cluster.id=${clusterId}`;
+  const btpValues = `manager.secret.clientid=${creds.clientId},` +
+    `manager.secret.clientsecret=${creds.clientSecret},`+
+    `manager.secret.url=${creds.smURL},` +
+    `manager.secret.tokenurl=${creds.url},` +
+    `cluster.id=${clusterId}`;
   try {
     await installer.helmInstallUpgrade(btp, btpChart, btp, btpValues, null, ['--create-namespace']);
   } catch (error) {
@@ -56,7 +61,8 @@ async function installBTPOperatorHelmChart(creds, clusterId) {
 }
 
 async function installBTPServiceOperatorMigrationHelmChart() {
-  const chart = 'https://github.com/kyma-incubator/sc-removal/releases/download/0.5.0/sap-btp-operator-migration-v0.5.0.tgz';
+  const chart = 'https://github.com/kyma-incubator/sc-removal/releases/download/' +
+    '0.5.0/sap-btp-operator-migration-v0.5.0.tgz';
   const btp = 'sap-btp-service-operator-migration';
 
   try {
@@ -70,7 +76,8 @@ async function installBTPServiceOperatorMigrationHelmChart() {
 }
 
 async function getFunctionPod(functionName) {
-  const labelSelector = `serverless.kyma-project.io/function-name=${functionName},serverless.kyma-project.io/resource=deployment`;
+  const labelSelector = `serverless.kyma-project.io/function-name=${functionName},` +
+    'serverless.kyma-project.io/resource=deployment';
   let res = {};
   for (let i = 0; i < 30; i++) {
     res = await listPods(labelSelector);
@@ -85,12 +92,14 @@ async function getFunctionPod(functionName) {
   if (res.body.items.length != 1) {
     const podNames = res.body.items.map((p)=>p.metadata.name);
     const phases = res.body.items.map((p)=>p.status.phase);
-    throw new Error(`Failed to find function ${functionName} pod in 5 minutes. Expected 1 ${labelSelector} pod with phase "Running" but found ${res.body.items.length}, ${podNames}, ${phases}`);
+    throw new Error(`Failed to find function ${functionName} pod in 5 minutes. 
+    Expected 1 ${labelSelector} pod with phase "Running" but found ${res.body.items.length}, ${podNames}, ${phases}`);
   }
 }
 
 async function checkPodPresetEnvInjected() {
-  const cmd = `for v in {vars}; do x="$(eval echo \\$$v)"; if [[ -z "$x" ]]; then echo missing $v env variable; exit 1; else echo found $v env variable; fi; done`;
+  const cmd = 'for v in {vars}; do x="$(eval echo \\$$v)"; if [[ -z "$x" ]]; ' +
+    'then echo missing $v env variable; exit 1; else echo found $v env variable; fi; done';
   for (const f of functions) {
     const pod = await getFunctionPod(f.name);
     const envCmd = cmd.replace('{vars}', f.checkEnvVars);
@@ -111,12 +120,12 @@ async function restartFunctionsPods() {
     podNames[f.name] = pod.metadata.name;
   }
 
-  const finished = false;
   let needsPoll = [];
   for (let i = 0; i < 10; i++) {
     needsPoll = [];
     for (const f of functions) {
-      const labelSelector = `serverless.kyma-project.io/function-name=${f.name},serverless.kyma-project.io/resource=deployment`;
+      const labelSelector = `serverless.kyma-project.io/function-name=${f.name},`+
+        'serverless.kyma-project.io/resource=deployment';
       console.log(`polling pods with labelSelector ${labelSelector}`);
       let res = {};
       try {
@@ -155,7 +164,10 @@ async function restartFunctionsPods() {
   if (needsPoll.length != 0) {
     const info = JSON.stringify(needsPoll, null, 2);
     const originalNames = JSON.stringify(podNames, null, 2);
-    throw new Error(`Failed to restart function pods in 100 seconds. Expecting exactly one pod for each function with new unique names and in ready status but found:\n${info}\n\nPod names before restart:\n${originalNames}`);
+    throw new Error(`Failed to restart function pods in 100 seconds.
+    Expecting exactly one pod for each function with new unique names and in ready status but found:
+    ${info}
+    Pod names before restart:\n${originalNames}`);
   }
   console.log('functions pods successfully restarted');
 }
@@ -163,8 +175,13 @@ async function restartFunctionsPods() {
 async function provisionPlatform(creds, svcatPlatform) {
   let args = [];
   try {
-    args = [`login`, `-a`, creds.url, `--param`, `subdomain=e2etestingscmigration`, `--auth-flow`, `client-credentials`];
-    await execa(`smctl`, args.concat([`--client-id`, creds.clientid, `--client-secret`, creds.clientsecret]));
+    args = ['login',
+      '-a',
+      creds.url,
+      '--param',
+      'subdomain=e2etestingscmigration',
+      '--auth-flow', 'client-credentials'];
+    await execa('smctl', args.concat(['--client-id', creds.clientid, '--client-secret', creds.clientsecret]));
 
     // $ smctl register-platform <name> kubernetes -o json
     // Output:
@@ -187,8 +204,8 @@ async function provisionPlatform(creds, svcatPlatform) {
     //   },
     //   "ready": true
     // }
-    args = [`register-platform`, svcatPlatform, `kubernetes`, `-o`, `json`];
-    const registerPlatformOut = await execa(`smctl`, args);
+    args = ['register-platform', svcatPlatform, 'kubernetes', '-o', 'json'];
+    const registerPlatformOut = await execa('smctl', args);
     const platform = JSON.parse(registerPlatformOut.stdout);
 
     return {
@@ -207,14 +224,14 @@ async function provisionPlatform(creds, svcatPlatform) {
 async function smInstanceBinding(btpOperatorInstance, btpOperatorBinding) {
   let args = [];
   try {
-    args = [`provision`, btpOperatorInstance, `service-manager`, `service-operator-access`, `--mode=sync`];
-    await execa(`smctl`, args);
+    args = ['provision', btpOperatorInstance, 'service-manager', 'service-operator-access', '--mode=sync'];
+    await execa('smctl', args);
 
     // Move to Operator Install
-    args = [`bind`, btpOperatorInstance, btpOperatorBinding, `--mode=sync`];
-    await execa(`smctl`, args);
-    args = [`get-binding`, btpOperatorBinding, `-o`, `json`];
-    const out = await execa(`smctl`, args);
+    args = ['bind', btpOperatorInstance, btpOperatorBinding, '--mode=sync'];
+    await execa('smctl', args);
+    args = ['get-binding', btpOperatorBinding, '-o', 'json'];
+    const out = await execa('smctl', args);
     const b = JSON.parse(out.stdout);
     const c = b.items[0].credentials;
 
@@ -237,8 +254,14 @@ async function markForMigration(creds, svcatPlatform, btpOperatorInstanceId) {
   let errors = [];
   let args = [];
   try {
-    args = [`login`, `-a`, creds.url, `--param`, `subdomain=e2etestingscmigration`, `--auth-flow`, `client-credentials`];
-    await execa(`smctl`, args.concat([`--client-id`, creds.clientid, `--client-secret`, creds.clientsecret]));
+    args = ['login',
+      '-a',
+      creds.url,
+      '--param',
+      'subdomain=e2etestingscmigration',
+      '--auth-flow',
+      'client-credentials'];
+    await execa('smctl', args.concat(['--client-id', creds.clientid, '--client-secret', creds.clientsecret]));
   } catch (error) {
     errors = errors.concat([`failed "smctl ${args.join(' ')}": ${error.stderr}\n${error}`]);
   }
@@ -260,15 +283,21 @@ async function cleanupInstanceBinding(creds, svcatPlatform, btpOperatorInstance,
   let errors = [];
   let args = [];
   try {
-    args = [`login`, `-a`, creds.url, `--param`, `subdomain=e2etestingscmigration`, `--auth-flow`, `client-credentials`];
-    await execa(`smctl`, args.concat([`--client-id`, creds.clientid, `--client-secret`, creds.clientsecret]));
+    args = ['login',
+      '-a',
+      creds.url,
+      '--param',
+      'subdomain=e2etestingscmigration',
+      '--auth-flow',
+      'client-credentials'];
+    await execa('smctl', args.concat(['--client-id', creds.clientid, '--client-secret', creds.clientsecret]));
   } catch (error) {
     errors = errors.concat([`failed "smctl ${args.join(' ')}": ${error.stderr}\n${error}`]);
   }
 
   try {
-    args = [`unbind`, btpOperatorInstance, btpOperatorBinding, `-f`, `--mode=sync`];
-    const {stdout} = await execa(`smctl`, args);
+    args = ['unbind', btpOperatorInstance, btpOperatorBinding, '-f', '--mode=sync'];
+    const {stdout} = await execa('smctl', args);
     if (stdout !== 'Service Binding successfully deleted.') {
       errors = errors.concat([`failed "smctl ${args.join(' ')}": ${stdout}`]);
     }
@@ -278,8 +307,8 @@ async function cleanupInstanceBinding(creds, svcatPlatform, btpOperatorInstance,
 
   try {
     // hint: probably should fail cause that instance created other instannces (after the migration is done)
-    args = [`deprovision`, btpOperatorInstance, `-f`, `--mode=sync`];
-    const {stdout} = await execa(`smctl`, args);
+    args = ['deprovision', btpOperatorInstance, '-f', '--mode=sync'];
+    const {stdout} = await execa('smctl', args);
     if (stdout !== 'Service Instance successfully deleted.') {
       errors = errors.concat([`failed "smctl ${args.join(' ')}": ${stdout}`]);
     }
@@ -288,7 +317,7 @@ async function cleanupInstanceBinding(creds, svcatPlatform, btpOperatorInstance,
   }
 
   try {
-    args = [`delete-platform`, svcatPlatform, `-f`, '--cascade'];
+    args = ['delete-platform', svcatPlatform, '-f', '--cascade'];
     await execa(`smctl`, args);
     // if (stdout !== "Platform(s) successfully deleted.") {
     //     errors = errors.concat([`failed "smctl ${args.join(' ')}": ${stdout}`])

@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 function registerApplication(appName, scenarioName) {
   return `mutation { result: registerApplication(in: { name: \\"${appName}\\" labels: { scenarios: [\\"${scenarioName}\\"] } }){id} }`;
 }

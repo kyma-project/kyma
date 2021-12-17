@@ -6,8 +6,13 @@ const {
 const {initializeK8sClient} = require('../../utils');
 
 const {
-  GatherOptions, WithRuntimeName, WithScenarioName, WithAppName, WithTestNS, keb, gardener,
-  CommerceMockTest, WithInstanceID,
+  gatherOptions,
+  withRuntimeName,
+  withScenarioName,
+  keb,
+  gardener,
+  commerceMockTest,
+  withInstanceID,
 } = require('../../skr-test');
 
 // Mocha root hook
@@ -18,7 +23,7 @@ process.env.KCP_MOTHERSHIP_API_URL = 'https://mothership-reconciler.cp.dev.kyma.
 process.env.KCP_KUBECONFIG_API_URL = 'https://kubeconfig-service.cp.dev.kyma.cloud.sap';
 const kcp = new KCPWrapper(KCPConfig.fromEnv());
 
-describe(`SKR Nightly periodic test`, function() {
+describe('SKR Nightly periodic test', function() {
   this.timeout(60 * 60 * 1000 * 3); // 3h
   this.slow(5000);
   before('Fetch last nightly SKR', async function() {
@@ -34,14 +39,14 @@ describe(`SKR Nightly periodic test`, function() {
         runtime = runtimes.data[0];
       }
       this.shoot = await gardener.getShoot(runtime.shootName);
-      this.options = GatherOptions(
-          WithInstanceID(runtime.instanceID),
-          WithRuntimeName('kyma-nightly'),
-          WithScenarioName('test-nightly'));
+      this.options = gatherOptions(
+          withInstanceID(runtime.instanceID),
+          withRuntimeName('kyma-nightly'),
+          withScenarioName('test-nightly'));
       initializeK8sClient({kubeconfig: this.shoot.kubeconfig});
     } catch (e) {
       throw new Error(`before hook failed: ${e.toString()}`);
     }
   });
-  CommerceMockTest();
+  commerceMockTest();
 });

@@ -1,6 +1,5 @@
 const axios = require('axios');
 const https = require('https');
-const {expect, assert} = require('chai');
 const httpsAgent = new https.Agent({
   rejectUnauthorized: false, // curl -k
 });
@@ -38,7 +37,6 @@ const {
 const {prometheusPortForward} = require('../monitoring/client');
 const {eventingMonitoringTest} = require('./metric-test');
 const {GardenerClient, GardenerConfig} = require('../gardener');
-
 
 describe('Eventing tests', function() {
   this.timeout(10 * 60 * 1000);
@@ -110,7 +108,10 @@ describe('Eventing tests', function() {
     const shootName = getShootNameFromK8sServerUrl();
     console.log(`Fetching SKR info for shoot: ${shootName}`);
     skrInfo = await gardener.getShoot(shootName);
-    debug(`appName: ${appName}, scenarioName: ${scenarioName}, testNamespace: ${testNamespace}, compassID: ${skrInfo.compassID}`);
+    debug(`appName: ${appName}, 
+    scenarioName: ${scenarioName}, 
+    testNamespace: ${testNamespace}, 
+    compassID: ${skrInfo.compassID}`);
 
     console.log('Assigning SKR to scenario in Compass');
     // Create a new scenario (systems/formations) in compass for this test
@@ -136,7 +137,9 @@ describe('Eventing tests', function() {
     // else use existing k8s secret as specified in backendK8sSecretName & backendK8sSecretNamespace
     if (eventMeshSecretFilePath !== '') {
       console.log('Creating Event Mesh secret');
-      const eventMeshInfo = await createEventingBackendK8sSecret(eventMeshSecretFilePath, backendK8sSecretName, backendK8sSecretNamespace);
+      const eventMeshInfo = await createEventingBackendK8sSecret(eventMeshSecretFilePath,
+          backendK8sSecretName,
+          backendK8sSecretNamespace);
       setEventMeshSourceNamespace(eventMeshInfo['namespace']);
     }
 

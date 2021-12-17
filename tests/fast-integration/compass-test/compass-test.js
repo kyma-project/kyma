@@ -5,9 +5,7 @@ const {
   unregisterKymaFromCompass,
 } = require('../compass/');
 
-const {
-  genRandom, debug,
-} = require('../utils');
+const {genRandom} = require('../utils');
 
 const {
   ensureCommerceMockWithCompassTestFixture,
@@ -35,7 +33,12 @@ describe('Kyma with Compass test', async function() {
   });
 
   it('CommerceMock test fixture should be ready', async function() {
-    await ensureCommerceMockWithCompassTestFixture(director, appName, scenarioName, 'mocks', testNS, withCentralAppConnectivity);
+    await ensureCommerceMockWithCompassTestFixture(director,
+        appName,
+        scenarioName,
+        'mocks',
+        testNS,
+        withCentralAppConnectivity);
   });
 
   it('function should be reachable through secured API Rule', async function() {

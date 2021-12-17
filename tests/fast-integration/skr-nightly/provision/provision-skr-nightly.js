@@ -1,4 +1,3 @@
-const uuid = require('uuid');
 const {
   provisionSKR,
   deprovisionSKR,
@@ -16,8 +15,15 @@ const {
   KCPConfig,
   KCPWrapper,
 } = require('../../kcp/client');
-const {OIDCE2ETest, GatherOptions, WithRuntimeName, WithScenarioName, WithAppName, WithTestNS, CommerceMockTest,
-  gardener, keb, director,
+const {
+  oidcE2ETest,
+  gatherOptions,
+  withRuntimeName,
+  withScenarioName,
+  commerceMockTest,
+  gardener,
+  keb,
+  director,
 } = require('../../skr-test');
 
 // Mocha root hook
@@ -35,9 +41,9 @@ describe('SKR nightly', function() {
   before(`Fetch last SKR and deprovision if needed`, async function() {
     try {
       let runtime;
-      this.options = GatherOptions(
-          WithRuntimeName('kyma-nightly'),
-          WithScenarioName('test-nightly'));
+      this.options = gatherOptions(
+          withRuntimeName('kyma-nightly'),
+          withScenarioName('test-nightly'));
 
       console.log('Login to KCP.');
       await kcp.login();
@@ -62,7 +68,13 @@ describe('SKR nightly', function() {
         oidc: this.options.oidc0,
       };
 
-      const skr = await provisionSKR(keb, gardener, this.options.instanceID, this.options.runtimeName, null, null, customParams);
+      const skr = await provisionSKR(keb,
+          gardener,
+          this.options.instanceID,
+          this.options.runtimeName,
+          null,
+          null,
+          customParams);
       this.shoot = skr.shoot;
       await addScenarioInCompass(director, this.options.scenarioName);
       await assignRuntimeToScenario(director, this.shoot.compassID, this.options.scenarioName);
@@ -71,6 +83,6 @@ describe('SKR nightly', function() {
       throw new Error(`before hook failed: ${e.toString()}`);
     }
   });
-  OIDCE2ETest();
-  CommerceMockTest();
+  oidcE2ETest();
+  commerceMockTest();
 });
