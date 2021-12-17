@@ -10,7 +10,6 @@ const {
   k8sApply,
   k8sDelete,
   kubectlPortForward,
-  debug,
 } = require('../utils');
 const mockServerClient = require('mockserver-client').mockServerClient;
 const mockServerPort = 1080;

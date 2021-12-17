@@ -1,4 +1,3 @@
-const {exec} = require('child_process');
 const {debug} = require('../utils');
 
 function execShellCommand(cmd) {
