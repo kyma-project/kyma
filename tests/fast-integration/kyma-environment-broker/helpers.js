@@ -1,5 +1,7 @@
 const { wait, debug } = require("../utils");
 const { expect } = require("chai");
+const fs = require("fs");
+const os = require("os");
 
 async function provisionSKR(
   keb,
@@ -109,9 +111,15 @@ async function ensureValidOIDCConfigInCustomerFacingKubeconfig(keb, instanceID, 
   expect(kubeconfigContent).to.match(new RegExp(clientIDMatchPattern, "g"));
 }
 
+async function saveKubeconfig(kubeconfig) {
+  fs.mkdirSync(`${os.homedir()}/.kube`, true);
+  fs.writeFileSync(`${os.homedir()}/.kube/config`, kubeconfig);
+}
+
 module.exports = {
   provisionSKR,
   deprovisionSKR,
+  saveKubeconfig,
   updateSKR,
   ensureOperationSucceeded,
   getShootName,

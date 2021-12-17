@@ -1,6 +1,7 @@
 const uuid = require("uuid");
 const {
     provisionSKR,
+    saveKubeconfig,
 } = require("../../kyma-environment-broker");
 
 const {
@@ -19,10 +20,6 @@ const {
     getEnvOrThrow,
     debug
 } = require("../../utils");
-
-const {
-    saveKubeconfig
-} = require("../../skr-svcat-migration-test/test-helpers");
 
 // Mocha root hook
 process.env.KCP_KEB_API_URL = `https://kyma-env-broker.` + keb.host;
