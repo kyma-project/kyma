@@ -1,14 +1,14 @@
-const uuid = require("uuid");
-const { 
+const uuid = require('uuid');
+const {
   KEBConfig,
   KEBClient,
   provisionSKR,
   deprovisionSKR,
-} = require("../kyma-environment-broker");
+} = require('../kyma-environment-broker');
 const {
   GardenerConfig,
-  GardenerClient
-} = require("../gardener");
+  GardenerClient,
+} = require('../gardener');
 const {
   debug,
   genRandom,
@@ -16,11 +16,11 @@ const {
   switchDebug,
   waitForJob,
   printContainerLogs,
-} = require("../utils");
-const t = require("./test-helpers");
-const sampleResources = require("./deploy-sample-resources");
+} = require('../utils');
+const t = require('./test-helpers');
+const sampleResources = require('./deploy-sample-resources');
 
-describe("SKR SVCAT migration test", function() {
+describe('SKR SVCAT migration test', function() {
   const keb = new KEBClient(KEBConfig.fromEnv());
   const gardener = new GardenerClient(GardenerConfig.fromEnv());
   const smAdminCreds = t.SMCreds.fromEnv();
@@ -29,11 +29,11 @@ describe("SKR SVCAT migration test", function() {
   const appName = `app-${suffix}`;
   const runtimeName = `kyma-${suffix}`;
   const runtimeID = uuid.v4();
-  
-  const svcatPlatform = `svcat-${suffix}`
-  const btpOperatorInstance = `btp-operator-${suffix}`
-  const btpOperatorBinding = `btp-operator-binding-${suffix}`
-  switchDebug(on = true)
+
+  const svcatPlatform = `svcat-${suffix}`;
+  const btpOperatorInstance = `btp-operator-${suffix}`;
+  const btpOperatorBinding = `btp-operator-binding-${suffix}`;
+  switchDebug(on = true);
   debug(`RuntimeID ${runtimeID}`, `Runtime ${runtimeName}`, `Application ${appName}`, `Suffix ${suffix}`);
 
   this.timeout(60 * 60 * 1000 * 3); // 3h
@@ -41,7 +41,7 @@ describe("SKR SVCAT migration test", function() {
 
   let platformCreds;
   it(`Should provision new ServiceManager platform`, async function() {
-    platformCreds = await t.provisionPlatform(smAdminCreds, svcatPlatform)
+    platformCreds = await t.provisionPlatform(smAdminCreds, svcatPlatform);
   });
 
   let btpOperatorCreds;
@@ -62,27 +62,27 @@ describe("SKR SVCAT migration test", function() {
     await initializeK8sClient({kubeconfig: skr.shoot.kubeconfig});
   });
 
-  let clusterid
+  let clusterid;
   it('Should read cluster id from Service Catalog ConfigMap', async function() {
-    clusterid = await  t.readClusterID()
-    debug('Found Service Catalog ClusterID: ' + clusterid)
-  })
+    clusterid = await t.readClusterID();
+    debug('Found Service Catalog ClusterID: ' + clusterid);
+  });
 
   it(`Should install sample Service Catalog resources`, async function() {
-    await sampleResources.deploy()
+    await sampleResources.deploy();
   });
 
   it('Should mark the platform for migration in Service Manager', async function() {
-    await t.markForMigration(smAdminCreds, platformCreds.clusterId, btpOperatorCreds.instanceId)
-  })
+    await t.markForMigration(smAdminCreds, platformCreds.clusterId, btpOperatorCreds.instanceId);
+  });
 
   it(`Should install BTP operator helm chart`, async function() {
     await t.installBTPOperatorHelmChart(btpOperatorCreds, clusterid);
   });
 
-  let secretsAndPresets
+  let secretsAndPresets;
   it(`Should store secrets and presets of sample resources`, async function() {
-    secretsAndPresets = await sampleResources.storeSecretsAndPresets()
+    secretsAndPresets = await sampleResources.storeSecretsAndPresets();
   });
 
   it(`Should check if pod presets injected secrets to functions containers`, async function() {
@@ -94,18 +94,18 @@ describe("SKR SVCAT migration test", function() {
   });
 
   it(`Should wait for migration job to finish`, async function() {
-    await waitForJob("sap-btp-operator-migration", "sap-btp-operator", 10 * 60 * 1000); //10 minutes
+    await waitForJob('sap-btp-operator-migration', 'sap-btp-operator', 10 * 60 * 1000); // 10 minutes
   });
-  
+
   it(`Should print the container logs of the migration job`, async function() {
     await printContainerLogs('job-name=sap-btp-operator-migration', 'migration', 'sap-btp-operator');
   });
 
   it(`Should still contain pod presets and the secrets`, async function() {
-    let existing = await sampleResources.storeSecretsAndPresets()
+    const existing = await sampleResources.storeSecretsAndPresets();
     // Check if Secrets and PodPresets are still available
-    await sampleResources.checkSecrets(existing.secrets)
-    await sampleResources.checkPodPresets(secretsAndPresets.podPresets, existing.podPresets)
+    await sampleResources.checkSecrets(existing.secrets);
+    await sampleResources.checkPodPresets(secretsAndPresets.podPresets, existing.podPresets);
   });
 
   it(`Should restart functions pods`, async function() {
@@ -117,7 +117,7 @@ describe("SKR SVCAT migration test", function() {
   });
 
   it(`Should destroy sample service catalog resources`, async function() {
-    await sampleResources.destroy()
+    await sampleResources.destroy();
   });
 
   it(`Should delete migrated BTP resources`, async function() {

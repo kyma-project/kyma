@@ -1,26 +1,26 @@
-const { wait, debug } = require("../utils");
-const { expect } = require("chai");
+const {wait, debug} = require('../utils');
+const {expect} = require('chai');
 
 async function provisionSKR(
-  keb,
-  gardener,
-  instanceID,
-  name,
-  platformCreds,
-  btpOperatorCreds,
-  customParams
-) {
-  const resp = await keb.provisionSKR(
-    name,
+    keb,
+    gardener,
     instanceID,
+    name,
     platformCreds,
     btpOperatorCreds,
-    customParams
+    customParams,
+) {
+  const resp = await keb.provisionSKR(
+      name,
+      instanceID,
+      platformCreds,
+      btpOperatorCreds,
+      customParams,
   );
-  expect(resp).to.have.property("operation");
+  expect(resp).to.have.property('operation');
 
   const operationID = resp.operation;
-  const shootName = resp.dashboard_url.split(".")[1];
+  const shootName = resp.dashboard_url.split('.')[1];
   debug(`Operation ID ${operationID}`, `Shoot name ${shootName}`);
 
   await ensureOperationSucceeded(keb, instanceID, operationID);
@@ -35,20 +35,20 @@ async function provisionSKR(
 }
 
 function ensureValidShootOIDCConfig(shoot, targetOIDCConfig) {
-  expect(shoot).to.have.nested.property("oidcConfig.clientID", targetOIDCConfig.clientID);
-  expect(shoot).to.have.nested.property("oidcConfig.issuerURL", targetOIDCConfig.issuerURL);
-  expect(shoot).to.have.nested.property("oidcConfig.groupsClaim", targetOIDCConfig.groupsClaim);
-  expect(shoot).to.have.nested.property("oidcConfig.usernameClaim", targetOIDCConfig.usernameClaim);
+  expect(shoot).to.have.nested.property('oidcConfig.clientID', targetOIDCConfig.clientID);
+  expect(shoot).to.have.nested.property('oidcConfig.issuerURL', targetOIDCConfig.issuerURL);
+  expect(shoot).to.have.nested.property('oidcConfig.groupsClaim', targetOIDCConfig.groupsClaim);
+  expect(shoot).to.have.nested.property('oidcConfig.usernameClaim', targetOIDCConfig.usernameClaim);
   expect(shoot).to.have.nested.property(
-    "oidcConfig.usernamePrefix",
-    targetOIDCConfig.usernamePrefix
+      'oidcConfig.usernamePrefix',
+      targetOIDCConfig.usernamePrefix,
   );
   expect(shoot.oidcConfig.signingAlgs).to.eql(targetOIDCConfig.signingAlgs);
 }
 
 async function deprovisionSKR(keb, instanceID) {
   const resp = await keb.deprovisionSKR(instanceID);
-  expect(resp).to.have.property("operation");
+  expect(resp).to.have.property('operation');
 
   const operationID = resp.operation;
   debug(`Operation ID ${operationID}`);
@@ -60,7 +60,7 @@ async function deprovisionSKR(keb, instanceID) {
 
 async function updateSKR(keb, gardener, instanceID, shootName, customParams) {
   const resp = await keb.updateSKR(instanceID, customParams);
-  expect(resp).to.have.property("operation");
+  expect(resp).to.have.property('operation');
 
   const operationID = resp.operation;
   debug(`Operation ID ${operationID}`);
@@ -77,15 +77,15 @@ async function updateSKR(keb, gardener, instanceID, shootName, customParams) {
 
 async function ensureOperationSucceeded(keb, instanceID, operationID) {
   const res = await wait(
-    () => keb.getOperation(instanceID, operationID),
-    (res) => res && res.state && (res.state === "succeeded" || res.state === "failed"),
-    1000 * 60 * 60 * 2, // 2h
-    1000 * 30 // 30 seconds
+      () => keb.getOperation(instanceID, operationID),
+      (res) => res && res.state && (res.state === 'succeeded' || res.state === 'failed'),
+      1000 * 60 * 60 * 2, // 2h
+      1000 * 30, // 30 seconds
   );
 
-  debug("KEB operation:", res);
-  if(res.state !== "succeeded") {
-    throw(`operation didn't succeed in 2h: ${JSON.stringify(res)}`);
+  debug('KEB operation:', res);
+  if (res.state !== 'succeeded') {
+    throw (`operation didn't succeed in 2h: ${JSON.stringify(res)}`);
   }
   return res;
 }
@@ -103,10 +103,10 @@ async function ensureValidOIDCConfigInCustomerFacingKubeconfig(keb, instanceID, 
     kubeconfigContent = await keb.downloadKubeconfig(instanceID);
   } catch (err) {}
 
-  var issuerMatchPattern = "\\b" + oidcConfig.issuerURL + "\\b";
-  var clientIDMatchPattern = "\\b" + oidcConfig.clientID + "\\b";
-  expect(kubeconfigContent).to.match(new RegExp(issuerMatchPattern, "g"));
-  expect(kubeconfigContent).to.match(new RegExp(clientIDMatchPattern, "g"));
+  const issuerMatchPattern = '\\b' + oidcConfig.issuerURL + '\\b';
+  const clientIDMatchPattern = '\\b' + oidcConfig.clientID + '\\b';
+  expect(kubeconfigContent).to.match(new RegExp(issuerMatchPattern, 'g'));
+  expect(kubeconfigContent).to.match(new RegExp(clientIDMatchPattern, 'g'));
 }
 
 module.exports = {

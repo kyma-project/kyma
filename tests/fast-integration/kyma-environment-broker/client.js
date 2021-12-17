@@ -1,21 +1,21 @@
-const axios = require("axios");
-const fs = require("fs");
-const { debug, getEnvOrThrow } = require("../utils");
-const { OAuthCredentials, OAuthToken } = require("../lib/oauth");
+const axios = require('axios');
+const fs = require('fs');
+const {debug, getEnvOrThrow} = require('../utils');
+const {OAuthCredentials, OAuthToken} = require('../lib/oauth');
 
-const SCOPES = ["broker:write", "cld:read"];
-const KYMA_SERVICE_ID = "47c9dcbf-ff30-448e-ab36-d3bad66ba281";
+const SCOPES = ['broker:write', 'cld:read'];
+const KYMA_SERVICE_ID = '47c9dcbf-ff30-448e-ab36-d3bad66ba281';
 
 class KEBConfig {
   static fromEnv() {
     return new KEBConfig(
-      getEnvOrThrow("KEB_HOST"),
-      OAuthCredentials.fromEnv("KEB_CLIENT_ID", "KEB_CLIENT_SECRET"),
-      getEnvOrThrow("KEB_GLOBALACCOUNT_ID"),
-      getEnvOrThrow("KEB_SUBACCOUNT_ID"),
-      getEnvOrThrow("KEB_USER_ID"),
-      getEnvOrThrow("KEB_PLAN_ID"),
-      process.env.KEB_REGION
+        getEnvOrThrow('KEB_HOST'),
+        OAuthCredentials.fromEnv('KEB_CLIENT_ID', 'KEB_CLIENT_SECRET'),
+        getEnvOrThrow('KEB_GLOBALACCOUNT_ID'),
+        getEnvOrThrow('KEB_SUBACCOUNT_ID'),
+        getEnvOrThrow('KEB_USER_ID'),
+        getEnvOrThrow('KEB_PLAN_ID'),
+        process.env.KEB_REGION,
     );
   }
 
@@ -46,9 +46,9 @@ class KEBClient {
     const region = this.getRegion();
     const url = `https://kyma-env-broker.${this.host}/oauth/${region}v2/${endpoint}`;
     const headers = {
-      "X-Broker-API-Version": 2.14,
-      Authorization: `Bearer ${token}`,
-      "Content-Type": "application/json",
+      'X-Broker-API-Version': 2.14,
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json',
     };
 
     const request = {
@@ -72,7 +72,7 @@ class KEBClient {
       return resp.data;
     } catch (err) {
       debug(err);
-      const msg = "Error calling KEB";
+      const msg = 'Error calling KEB';
       if (err.response) {
         throw new Error(`${msg}: ${err.response.status} ${err.response.statusText}`);
       } else {
@@ -84,14 +84,14 @@ class KEBClient {
   async getSKR(instanceID) {
     const endpoint = `service_instances/${instanceID}`;
     try {
-      return await this.callKEB({}, endpoint, "get");
+      return await this.callKEB({}, endpoint, 'get');
     } catch (err) {
       throw new Error(`error while getting SKR: ${err.toString()}`);
     }
   }
 
   async provisionSKR(name, instanceID, platformCreds, btpOperatorCreds, customParams) {
-    debug(`Provision SKR with Custom Parameters ${customParams}`)
+    debug(`Provision SKR with Custom Parameters ${customParams}`);
     const payload = {
       service_id: KYMA_SERVICE_ID,
       plan_id: this.planID,
@@ -107,7 +107,7 @@ class KEBClient {
     };
 
     if (platformCreds && btpOperatorCreds) {
-      payload.context["sm_platform_credentials"] = {
+      payload.context['sm_platform_credentials'] = {
         credentials: {
           basic: {
             username: platformCreds.credentials.username,
@@ -120,7 +120,7 @@ class KEBClient {
 
     const endpoint = `service_instances/${instanceID}`;
     try {
-      return await this.callKEB(payload, endpoint, "put");
+      return await this.callKEB(payload, endpoint, 'put');
     } catch (err) {
       throw new Error(`error while provisioning SKR: ${err.toString()}`);
     }
@@ -138,7 +138,7 @@ class KEBClient {
     };
     const endpoint = `service_instances/${instanceID}?accepts_incomplete=true`;
     try {
-      return await this.callKEB(payload, endpoint, "patch");
+      return await this.callKEB(payload, endpoint, 'patch');
     } catch (err) {
       throw new Error(`error while updating SKR: ${err.toString()}`);
     }
@@ -147,7 +147,7 @@ class KEBClient {
   async getOperation(instanceID, operationID) {
     const endpoint = `service_instances/${instanceID}/last_operation?operation=${operationID}`;
     try {
-      return await this.callKEB({}, endpoint, "get");
+      return await this.callKEB({}, endpoint, 'get');
     } catch (err) {
       debug(err.toString());
       return new Error(`error while checking SKR State: ${err.toString()}`);
@@ -157,7 +157,7 @@ class KEBClient {
   async deprovisionSKR(instanceID) {
     const endpoint = `service_instances/${instanceID}?service_id=${KYMA_SERVICE_ID}&plan_id=${this.planID}`;
     try {
-      return await this.callKEB(null, endpoint, "delete");
+      return await this.callKEB(null, endpoint, 'delete');
     } catch (err) {
       return new Error(`error while deprovisioning SKR: ${err.toString()}`);
     }
@@ -165,24 +165,24 @@ class KEBClient {
 
   async downloadKubeconfig(instanceID) {
     return new Promise(async (resolve, reject) => {
-      let writeStream = fs
-        .createWriteStream("./shoot-kubeconfig.yaml")
-        .on("error", function (err) {
-          reject(err);
-        })
-        .on("finish", function () {
-          writeStream.close();
-          fs.readFile("./shoot-kubeconfig.yaml", "utf8", (err, data) => {
-            fs.unlinkSync("./shoot-kubeconfig.yaml");
-            resolve(data);
+      const writeStream = fs
+          .createWriteStream('./shoot-kubeconfig.yaml')
+          .on('error', function(err) {
+            reject(err);
+          })
+          .on('finish', function() {
+            writeStream.close();
+            fs.readFile('./shoot-kubeconfig.yaml', 'utf8', (err, data) => {
+              fs.unlinkSync('./shoot-kubeconfig.yaml');
+              resolve(data);
+            });
           });
-        });
 
       try {
         const resp = await axios.request({
-          method: "get",
+          method: 'get',
           url: `https://kyma-env-broker.${this.host}/kubeconfig/${instanceID}`,
-          responseType: "stream",
+          responseType: 'stream',
         });
         if (resp.data.errors) {
           debug(resp);
@@ -191,17 +191,17 @@ class KEBClient {
         resp.data.pipe(writeStream);
       } catch (err) {
         debug(err);
-        fs.unlinkSync("./shoot-kubeconfig.yaml");
+        fs.unlinkSync('./shoot-kubeconfig.yaml');
         reject(err);
       }
     });
   }
 
   getRegion() {
-    if (this.region && this.region != "") {
+    if (this.region && this.region != '') {
       return `${this.region}/`;
     }
-    return "";
+    return '';
   }
 }
 
