@@ -3,7 +3,14 @@ const execa = require('execa');
 const fs = require('fs');
 const os = require('os');
 const {
-  getEnvOrThrow, getConfigMap, kubectlExecInPod, listPods, deleteK8sPod, sleep, deleteAllK8sResources, listResources,
+  getEnvOrThrow,
+  getConfigMap,
+  kubectlExecInPod,
+  listPods,
+  deleteK8sPod,
+  sleep,
+  deleteAllK8sResources,
+  listResources,
 } = require('../utils');
 
 class SMCreds {
@@ -167,7 +174,8 @@ async function restartFunctionsPods() {
     throw new Error(`Failed to restart function pods in 100 seconds.
     Expecting exactly one pod for each function with new unique names and in ready status but found:
     ${info}
-    Pod names before restart:\n${originalNames}`);
+    Pod names before restart: 
+    ${originalNames}`);
   }
   console.log('functions pods successfully restarted');
 }

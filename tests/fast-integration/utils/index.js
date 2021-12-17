@@ -1128,9 +1128,9 @@ function ignoreNotFound(e) {
 
 let DEBUG = process.env.DEBUG;
 
-function debug() {
+function debug(...args) {
   if (DEBUG) {
-    console.log.apply(null, ...args);
+    console.log.apply(null, args);
   }
 }
 

@@ -1,8 +1,6 @@
 const axios = require('axios');
 const moment = require('moment');
-const {
-  getEnvOrThrow,
-} = require('../utils');
+const {getEnvOrThrow} = require('../utils');
 
 class AuditLogCreds {
   static fromEnv() {
