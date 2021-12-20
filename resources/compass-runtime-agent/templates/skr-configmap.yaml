@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: skr-configmap
+  namespace: {{ .Values.global.skrConfigmapNamespace }}
+data:
+  is-managed-kyma-runtime: "true"

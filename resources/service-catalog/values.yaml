@@ -15,7 +15,6 @@ global:
       version: "bd223692"
       directory: "incubator/develop"
 
-
   istio:
     gateway:
       name: kyma-gateway

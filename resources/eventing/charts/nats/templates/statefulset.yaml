@@ -33,9 +33,12 @@ spec:
       labels:
         {{- include "nats.selectorLabels" . | nindent 8 }}
         {{- if .Values.statefulSetPodLabels }}
-        {{ toYaml .Values.statefulSetPodLabels | indent 8 }}
+        {{ toYaml .Values.statefulSetPodLabels | nindent 8 }}
         {{- end }}
     spec:
+{{- if or .Values.priorityClassName .Values.global.priorityClassName }}
+      priorityClassName: {{ coalesce .Values.priorityClassName .Values.global.priorityClassName }}
+{{- end }}
 {{- with .Values.securityContext }}
       securityContext:
 {{ toYaml . | indent 8 }}
