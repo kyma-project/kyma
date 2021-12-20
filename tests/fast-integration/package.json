@@ -20,7 +20,9 @@
     "test-nightly-skr": "mocha --inline-diffs --check-leaks --reporter mocha-multi-reporters --reporter-options configFile=mocha-reporter-config.json ./skr-nightly/test/",
     "test-skr-kyma-to-kyma2-upgrade": "mocha --inline-diffs --check-leaks --reporter mocha-multi-reporters --reporter-options configFile=mocha-reporter-config.json ./skr-kyma-to-kyma2-upgrade/index.js",
     "test-skr-svcat-migration": "mocha --inline-diffs --check-leaks --reporter mocha-multi-reporters --reporter-options configFile=mocha-reporter-config.json ./skr-svcat-migration-test/",
-    "test-eventing": "DEBUG=true mocha --timeout 150000 --inline-diffs --check-leaks --reporter mocha-multi-reporters --reporter-options configFile=mocha-reporter-config.json ./eventing-test/",
+    "eventing-upgrade-test-prep": "DEBUG=true mocha --timeout 150000 --inline-diffs --check-leaks --reporter mocha-multi-reporters --reporter-options configFile=mocha-reporter-config.json ./eventing-test/eventing-upgrade-test-prep.js",
+    "eventing-upgrade-test-tests": "DEBUG=true mocha --timeout 150000 --inline-diffs --check-leaks --reporter mocha-multi-reporters --reporter-options configFile=mocha-reporter-config.json ./eventing-test/eventing-upgrade-test-tests.js",
+    "eventing-upgrade-test-cleanup": "DEBUG=true mocha --timeout 150000 --inline-diffs --check-leaks --reporter mocha-multi-reporters --reporter-options configFile=mocha-reporter-config.json ./eventing-test/eventing-upgrade-test-cleanup.js",
     "test-telemetry": "mocha --timeout 130000 --inline-diffs --check-leaks --reporter mocha-multi-reporters --reporter-options configFile=mocha-reporter-config.json ./telemetry-test/",
     "upgrade-test-prep": "mocha --inline-diffs --check-leaks --reporter mocha-multi-reporters --reporter-options configFile=mocha-reporter-config.json upgrade-test/upgrade-test-prep.js",
     "upgrade-test-tests": "mocha --inline-diffs --check-leaks --reporter mocha-multi-reporters --reporter-options configFile=mocha-reporter-config.json upgrade-test/upgrade-test-tests.js",
@@ -32,13 +34,13 @@
   "devDependencies": {
     "chai": "^4.2.0",
     "mocha": "^8.3.2",
+    "mocha-junit-reporter": "^2.0.2",
     "mocha-multi-reporters": "^1.5.1"
   },
   "dependencies": {
     "@kubernetes/client-node": "0.15.1",
     "axios": "^0.21.0",
     "execa": "^5.0.0",
-    "mocha-junit-reporter": "^2.0.0",
     "mockserver-client": "^5.11.2",
     "moment": "^2.29.1",
     "node-forge": "^0.10.0",

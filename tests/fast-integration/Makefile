@@ -58,4 +58,18 @@ ci-application-connectivity-2-compass:
 .PHONY: ci-test-eventing
 ci-test-eventing:
 	npm ci
-	npm run test-eventing
+	npm run eventing-upgrade-test-prep
+	npm run eventing-upgrade-test-tests
+	npm run eventing-upgrade-test-cleanup
+
+.PHONY: ci-test-eventing-pre-upgrade
+ci-test-eventing-pre-upgrade:
+	npm ci
+	npm run eventing-upgrade-test-prep
+	npm run eventing-upgrade-test-tests
+
+.PHONY: ci-test-eventing-pre-upgrade
+ci-test-eventing-post-upgrade:
+	npm ci
+	npm run eventing-upgrade-test-tests
+	npm run eventing-upgrade-test-cleanup
