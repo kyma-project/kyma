@@ -20,7 +20,7 @@ resources:
 nodeSelector: {}
 
 crd:
-  install: true
+  install: false
 
 jaeger:
   # Specifies whether Jaeger instance should be created
@@ -81,7 +81,7 @@ rbac:
   # Specifies whether RBAC resources should be created
   create: true
   pspEnabled: false
-  clusterRole: true
+  clusterRole: false
 
 serviceAccount:
   # Specifies whether a ServiceAccount should be created
