@@ -76,6 +76,10 @@ describe("SKR SVCAT migration with KEB test", function() {
         await t.markForMigration(smAdminCreds, platformCreds.clusterId, btpOperatorCreds.instanceId)
     })
 
+    it(`Should update SKR with BTP Operator Credentials`, async function() {
+        await updateSKR(keb, gardener, runtimeID, runtimeName, null, btpOperatorCreds);
+    });
+
     let secretsAndPresets
     it(`Should store secrets and presets of sample resources`, async function() {
         secretsAndPresets = await sampleResources.storeSecretsAndPresets()

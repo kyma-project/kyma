@@ -124,7 +124,7 @@ class KEBClient {
     }
   }
 
-  async updateSKR(instanceID, customParams) {
+  async updateSKR(instanceID, customParams, btpOperatorCreds) {
     const payload = {
       service_id: KYMA_SERVICE_ID,
       context: {
@@ -134,6 +134,16 @@ class KEBClient {
         ...customParams,
       },
     };
+
+    if (btpOperatorCreds) {
+      payload.context["sm_operator_credentials"] = {
+        clientid: btpOperatorCreds.clientId,
+        clientsecret: btpOperatorCreds.clientSecret,
+        sm_url: btpOperatorCreds.smURL,
+        url: btpOperatorCreds.url,
+      };
+    }
+
     const endpoint = `service_instances/${instanceID}?accepts_incomplete=true`;
     try {
       return await this.callKEB(payload, endpoint, "patch");
