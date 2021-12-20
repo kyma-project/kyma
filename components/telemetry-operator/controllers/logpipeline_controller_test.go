@@ -5,7 +5,7 @@ Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
-    http://www.apache.org/licenses/LICENSE-2.0
+   http://www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
@@ -32,18 +32,18 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
-var _ = Describe("LoggingConfiguration controller", func() {
+var _ = Describe("LogPipeline controller", func() {
 	const (
-		LoggingConfigurationName = "logging-configuration"
-		FluentBitOutputConfig    = "[OUTPUT]\n  Name \"Null\"\n  Match *"
+		LogPipelineName       = "log-pipeline"
+		FluentBitOutputConfig = "Name \"Null\"\n  Match *"
 
 		timeout  = time.Second * 10
 		interval = time.Millisecond * 250
 	)
 
-	Context("When updating LoggingConfiguration", func() {
+	Context("When updating LogPipeline", func() {
 		It("Should sync with the Fluent Bit configuration", func() {
-			By("By creating a new LoggingConfiguration")
+			By("By creating a new LogPipeline")
 			ctx := context.Background()
 
 			secret := &corev1.Secret{
@@ -122,28 +122,28 @@ var _ = Describe("LoggingConfiguration controller", func() {
 				Name:      "my-secret",
 				Namespace: ControllerNamespace,
 			}
-			section := telemetryv1alpha1.Section{
-				Content:    FluentBitOutputConfig,
-				Files:      []telemetryv1alpha1.FileMount{file},
-				SecretRefs: []telemetryv1alpha1.SecretReference{secretRef},
+			output := telemetryv1alpha1.Output{
+				Content: FluentBitOutputConfig,
 			}
-			loggingConfiguration := &telemetryv1alpha1.LoggingConfiguration{
+			loggingConfiguration := &telemetryv1alpha1.LogPipeline{
 				TypeMeta: metav1.TypeMeta{
 					APIVersion: "telemetry.kyma-project.io/v1alpha1",
-					Kind:       "LoggingConfiguration",
+					Kind:       "LogPipeline",
 				},
 				ObjectMeta: metav1.ObjectMeta{
-					Name: LoggingConfigurationName,
+					Name: LogPipelineName,
 				},
-				Spec: telemetryv1alpha1.LoggingConfigurationSpec{
-					Sections: []telemetryv1alpha1.Section{section},
+				Spec: telemetryv1alpha1.LogPipelineSpec{
+					Outputs:    []telemetryv1alpha1.Output{output},
+					Files:      []telemetryv1alpha1.FileMount{file},
+					SecretRefs: []telemetryv1alpha1.SecretReference{secretRef},
 				},
 			}
 			Expect(k8sClient.Create(ctx, loggingConfiguration)).Should(Succeed())
 
 			// Fluent Bit config section should be copied to ConfigMap
 			Eventually(func() string {
-				cmFileName := LoggingConfigurationName + ".conf"
+				cmFileName := LogPipelineName + ".conf"
 				configMapLookupKey := types.NamespacedName{
 					Name:      FluentBitConfigMap,
 					Namespace: ControllerNamespace,
@@ -154,7 +154,7 @@ var _ = Describe("LoggingConfiguration controller", func() {
 					return err.Error()
 				}
 				return strings.TrimRight(fluentBitCm.Data[cmFileName], "\n")
-			}, timeout, interval).Should(Equal(FluentBitOutputConfig))
+			}, timeout, interval).Should(Equal("[OUTPUT]\n" + FluentBitOutputConfig))
 
 			// File content should be copied to ConfigMap
 			Eventually(func() string {
@@ -187,15 +187,15 @@ var _ = Describe("LoggingConfiguration controller", func() {
 			// Finalizers should be added
 			Eventually(func() []string {
 				loggingConfigLookupKey := types.NamespacedName{
-					Name:      LoggingConfigurationName,
+					Name:      LogPipelineName,
 					Namespace: ControllerNamespace,
 				}
-				var updatedLoggingConfiguration telemetryv1alpha1.LoggingConfiguration
-				err := k8sClient.Get(ctx, loggingConfigLookupKey, &updatedLoggingConfiguration)
+				var updatedLogPipeline telemetryv1alpha1.LogPipeline
+				err := k8sClient.Get(ctx, loggingConfigLookupKey, &updatedLogPipeline)
 				if err != nil {
 					return []string{err.Error()}
 				}
-				return updatedLoggingConfiguration.Finalizers
+				return updatedLogPipeline.Finalizers
 			}, timeout, interval).Should(ContainElement(configMapFinalizer))
 
 			Expect(k8sClient.Delete(ctx, loggingConfiguration)).Should(Succeed())

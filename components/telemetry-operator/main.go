@@ -65,7 +65,7 @@ func main() {
 	flag.BoolVar(&enableLeaderElection, "leader-elect", false,
 		"Enable leader election for controller manager. "+
 			"Enabling this will ensure there is only one active controller manager.")
-	flag.StringVar(&fluentBitConfigMap, "cm-name", "logging-fluent-bit-sections", "ConfigMap name to be written by Fluent Bit controller")
+	flag.StringVar(&fluentBitConfigMap, "cm-name", "logging-fluent-bit-config", "ConfigMap name to be written by Fluent Bit controller")
 	flag.StringVar(&fluentBitDaemonSet, "ds-name", "logging-fluent-bit", "DaemonSet name to be managed by FluentBit controller")
 	flag.StringVar(&fluentBitEnvSecret, "env-secret", "logging-fluent-bit-env", "Secret for environment variables")
 	flag.StringVar(&fluentBitFilesConfigMap, "files-cm", "logging-fluent-bit-files", "ConfigMap for referenced files")
@@ -91,7 +91,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	if err = (&controllers.LoggingConfigurationReconciler{
+	if err = (&controllers.LogPipelineReconciler{
 		Client: mgr.GetClient(),
 		Scheme: mgr.GetScheme(),
 		FluentBitConfigMap: types.NamespacedName{
@@ -111,7 +111,7 @@ func main() {
 			Namespace: fluentBitNs,
 		},
 	}).SetupWithManager(mgr); err != nil {
-		setupLog.Error(err, "unable to create controller", "controller", "LoggingConfiguration")
+		setupLog.Error(err, "unable to create controller", "controller", "LogPipeline")
 		os.Exit(1)
 	}
 	//+kubebuilder:scaffold:builder

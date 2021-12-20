@@ -90,7 +90,7 @@ var _ = BeforeSuite(func() {
 	})
 	Expect(err).ToNot(HaveOccurred())
 
-	err = (&LoggingConfigurationReconciler{
+	err = (&LogPipelineReconciler{
 		Client: k8sManager.GetClient(),
 		Scheme: k8sManager.GetScheme(),
 		FluentBitConfigMap: types.NamespacedName{

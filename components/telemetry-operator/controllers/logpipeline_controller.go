@@ -21,13 +21,12 @@ import (
 	"context"
 
 	"github.com/go-logr/logr"
-	"k8s.io/apimachinery/pkg/api/errors"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/types"
-
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
@@ -43,8 +42,8 @@ const (
 	filesFinalizer      = "FLUENT_BIT_FILES"
 )
 
-// LoggingConfigurationReconciler reconciles a LoggingConfiguration object
-type LoggingConfigurationReconciler struct {
+// LogPipelineReconciler reconciles a LogPipeline object
+type LogPipelineReconciler struct {
 	client.Client
 	Scheme                  *runtime.Scheme
 	FluentBitConfigMap      types.NamespacedName
@@ -53,9 +52,9 @@ type LoggingConfigurationReconciler struct {
 	FluentBitFilesConfigMap types.NamespacedName
 }
 
-//+kubebuilder:rbac:groups=telemetry.kyma-project.io,resources=loggingconfigurations,verbs=get;list;watch;create;update;patch;delete
-//+kubebuilder:rbac:groups=telemetry.kyma-project.io,resources=loggingconfigurations/status,verbs=get;update;patch
-//+kubebuilder:rbac:groups=telemetry.kyma-project.io,resources=loggingconfigurations/finalizers,verbs=update
+//+kubebuilder:rbac:groups=telemetry.kyma-project.io,resources=logpipelines,verbs=get;list;watch;create;update;patch;delete
+//+kubebuilder:rbac:groups=telemetry.kyma-project.io,resources=logpipelines/status,verbs=get;update;patch
+//+kubebuilder:rbac:groups=telemetry.kyma-project.io,resources=logpipelines/finalizers,verbs=update
 //+kubebuilder:rbac:groups="",resources=configmaps,verbs=get;list;watch;create;update;patch;delete
 //+kubebuilder:rbac:groups="",resources=secrets,verbs=get;list;watch;create;update;patch;delete
 //+kubebuilder:rbac:groups="",resources=pods,verbs=delete;list;watch
@@ -65,32 +64,32 @@ type LoggingConfigurationReconciler struct {
 // move the current state of the cluster closer to the desired state.
 //
 // For more details, check Reconcile and its Result here:
-// - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.8.3/pkg/reconcile
-func (r *LoggingConfigurationReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
+// - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.10.0/pkg/reconcile
+func (r *LogPipelineReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	log := log.FromContext(ctx)
 
-	var config telemetryv1alpha1.LoggingConfiguration
-	if err := r.Get(ctx, req.NamespacedName, &config); err != nil {
-		log.Info("Ignoring deleted LoggingConfiguration")
+	var logPipeline telemetryv1alpha1.LogPipeline
+	if err := r.Get(ctx, req.NamespacedName, &logPipeline); err != nil {
+		log.Info("Ignoring deleted LogPipeline")
 		// we'll ignore not-found errors, since they can't be fixed by an immediate
 		// requeue (we'll need to wait for a new notification), and we can get them
 		// on deleted requests.
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
 
-	updatedCm, err := r.syncConfigMap(ctx, &config)
+	updatedCm, err := r.syncConfigMap(ctx, &logPipeline)
 	if err != nil {
 		log.Error(err, "Failed to sync ConfigMap")
 		return ctrl.Result{}, err
 	}
 
-	updatedFiles, err := r.syncFiles(ctx, &config)
+	updatedFiles, err := r.syncFiles(ctx, &logPipeline)
 	if err != nil {
 		log.Error(err, "Failed to sync mounted files")
 		return ctrl.Result{}, err
 	}
 
-	updatedEnv, err := r.syncSecretRefs(ctx, &config)
+	updatedEnv, err := r.syncSecretRefs(ctx, &logPipeline)
 	if err != nil {
 		log.Error(err, "Failed to sync secret references")
 		return ctrl.Result{}, err
@@ -98,8 +97,8 @@ func (r *LoggingConfigurationReconciler) Reconcile(ctx context.Context, req ctrl
 
 	if updatedCm || updatedFiles || updatedEnv {
 		log.Info("Updated fluent bit configuration")
-		if err := r.Update(ctx, &config); err != nil {
-			log.Error(err, "Cannot update LoggingConfiguration")
+		if err := r.Update(ctx, &logPipeline); err != nil {
+			log.Error(err, "Cannot update LogPipeline")
 			return ctrl.Result{}, err
 		}
 
@@ -112,8 +111,8 @@ func (r *LoggingConfigurationReconciler) Reconcile(ctx context.Context, req ctrl
 	return ctrl.Result{}, nil
 }
 
-// Get fetch ConfigMap from Kubernetes API or create new one if not existing.
-func (r *LoggingConfigurationReconciler) getOrCreateConfigMap(ctx context.Context, name types.NamespacedName) (corev1.ConfigMap, error) {
+// Get ConfigMap from Kubernetes API or create new one if not existing.
+func (r *LogPipelineReconciler) getOrCreateConfigMap(ctx context.Context, name types.NamespacedName) (corev1.ConfigMap, error) {
 	var cm corev1.ConfigMap
 	if err := r.Get(ctx, name, &cm); err != nil {
 		if errors.IsNotFound(err) {
@@ -133,8 +132,8 @@ func (r *LoggingConfigurationReconciler) getOrCreateConfigMap(ctx context.Contex
 	return cm, nil
 }
 
-// Synchronize LoggingConfiguration with Fluent Bit ConfigMap.
-func (r *LoggingConfigurationReconciler) syncConfigMap(ctx context.Context, config *telemetryv1alpha1.LoggingConfiguration) (bool, error) {
+// Synchronize LogPipeline with FluentBit ConfigMap.
+func (r *LogPipelineReconciler) syncConfigMap(ctx context.Context, config *telemetryv1alpha1.LogPipeline) (bool, error) {
 	log := log.FromContext(ctx)
 	cm, err := r.getOrCreateConfigMap(ctx, r.FluentBitConfigMap)
 	if err != nil {
@@ -150,7 +149,7 @@ func (r *LoggingConfigurationReconciler) syncConfigMap(ctx context.Context, conf
 			controllerutil.RemoveFinalizer(config, configMapFinalizer)
 		}
 	} else {
-		fluentBitConfig := generateFluentBitConfig(config.Spec.Sections)
+		fluentBitConfig := mergeFluentBitConfig(config.Spec.Parsers, config.Spec.MultiLineParsers, config.Spec.Filters, config.Spec.Outputs)
 		if cm.Data == nil {
 			data := make(map[string]string)
 			data[cmKey] = fluentBitConfig
@@ -174,7 +173,7 @@ func (r *LoggingConfigurationReconciler) syncConfigMap(ctx context.Context, conf
 }
 
 // Synchronize file references with Fluent Bit files ConfigMap.
-func (r *LoggingConfigurationReconciler) syncFiles(ctx context.Context, config *telemetryv1alpha1.LoggingConfiguration) (bool, error) {
+func (r *LogPipelineReconciler) syncFiles(ctx context.Context, config *telemetryv1alpha1.LogPipeline) (bool, error) {
 	changed := false
 	cm, err := r.getOrCreateConfigMap(ctx, r.FluentBitFilesConfigMap)
 	if err != nil {
@@ -182,30 +181,28 @@ func (r *LoggingConfigurationReconciler) syncFiles(ctx context.Context, config *
 	}
 
 	// Sync files from every section
-	for _, section := range config.Spec.Sections {
-		for _, file := range section.Files {
-			if config.DeletionTimestamp != nil {
-				if _, hasKey := cm.Data[file.Name]; hasKey {
-					delete(cm.Data, file.Name)
-					controllerutil.RemoveFinalizer(config, filesFinalizer)
-					changed = true
-				}
+	for _, file := range config.Spec.Files {
+		if config.DeletionTimestamp != nil {
+			if _, hasKey := cm.Data[file.Name]; hasKey {
+				delete(cm.Data, file.Name)
+				controllerutil.RemoveFinalizer(config, filesFinalizer)
+				changed = true
+			}
+		} else {
+			if cm.Data == nil {
+				data := make(map[string]string)
+				data[file.Name] = file.Content
+				cm.Data = data
+				controllerutil.AddFinalizer(config, filesFinalizer)
+				changed = true
 			} else {
-				if cm.Data == nil {
-					data := make(map[string]string)
-					data[file.Name] = file.Content
-					cm.Data = data
-					controllerutil.AddFinalizer(config, filesFinalizer)
-					changed = true
-				} else {
-					if oldContent, hasKey := cm.Data[file.Name]; hasKey && oldContent == file.Content {
-						// Nothing changed
-						continue
-					}
-					cm.Data[file.Name] = file.Content
-					controllerutil.AddFinalizer(config, filesFinalizer)
-					changed = true
+				if oldContent, hasKey := cm.Data[file.Name]; hasKey && oldContent == file.Content {
+					// Nothing changed
+					continue
 				}
+				cm.Data[file.Name] = file.Content
+				controllerutil.AddFinalizer(config, filesFinalizer)
+				changed = true
 			}
 		}
 	}
@@ -219,7 +216,7 @@ func (r *LoggingConfigurationReconciler) syncFiles(ctx context.Context, config *
 }
 
 // Copy referenced secrets to global Fluent Bit environment secret.
-func (r *LoggingConfigurationReconciler) syncSecretRefs(ctx context.Context, config *telemetryv1alpha1.LoggingConfiguration) (bool, error) {
+func (r *LogPipelineReconciler) syncSecretRefs(ctx context.Context, config *telemetryv1alpha1.LogPipeline) (bool, error) {
 	log := log.FromContext(ctx)
 	var secret corev1.Secret
 	changed := false
@@ -243,41 +240,39 @@ func (r *LoggingConfigurationReconciler) syncSecretRefs(ctx context.Context, con
 	}
 
 	//Sync environment from referenced Secrets to Fluent Bit Secret
-	for _, section := range config.Spec.Sections {
-		for _, secretRef := range section.SecretRefs {
-			var referencedSecret corev1.Secret
-			if err := r.Get(ctx, types.NamespacedName{Name: secretRef.Name, Namespace: secretRef.Namespace}, &referencedSecret); err != nil {
-				log.Error(err, "Cannot read secret %s from namespace %s", secretRef.Name, secretRef.Namespace)
-				continue
-			}
-			for k, v := range referencedSecret.Data {
-				if config.DeletionTimestamp != nil {
-					if _, hasKey := secret.Data[k]; hasKey {
-						delete(secret.Data, k)
-						controllerutil.RemoveFinalizer(config, secretRefsFinalizer)
-						//nolint:ineffassign
-						changed = true
-					}
-				} else {
-					if secret.Data == nil {
-						data := make(map[string][]byte)
-						data[k] = v
-						secret.Data = data
-						controllerutil.AddFinalizer(config, secretRefsFinalizer)
-						//nolint:ineffassign
-						changed = true
-					} else {
-						if oldEnv, hasKey := secret.Data[k]; hasKey && bytes.Equal(oldEnv, v) {
-							continue
-						}
-						secret.Data[k] = v
-						controllerutil.AddFinalizer(config, secretRefsFinalizer)
-						//nolint:ineffassign
-						changed = true
-					}
+	for _, secretRef := range config.Spec.SecretRefs {
+		var referencedSecret corev1.Secret
+		if err := r.Get(ctx, types.NamespacedName{Name: secretRef.Name, Namespace: secretRef.Namespace}, &referencedSecret); err != nil {
+			log.Error(err, "Cannot read secret %s from namespace %s", secretRef.Name, secretRef.Namespace)
+			continue
+		}
+		for k, v := range referencedSecret.Data {
+			if config.DeletionTimestamp != nil {
+				if _, hasKey := secret.Data[k]; hasKey {
+					delete(secret.Data, k)
+					controllerutil.RemoveFinalizer(config, secretRefsFinalizer)
+					//nolint:ineffassign
+					changed = true
 				}
-				changed = true
+			} else {
+				if secret.Data == nil {
+					data := make(map[string][]byte)
+					data[k] = v
+					secret.Data = data
+					controllerutil.AddFinalizer(config, secretRefsFinalizer)
+					//nolint:ineffassign
+					changed = true
+				} else {
+					if oldEnv, hasKey := secret.Data[k]; hasKey && bytes.Equal(oldEnv, v) {
+						continue
+					}
+					secret.Data[k] = v
+					controllerutil.AddFinalizer(config, secretRefsFinalizer)
+					//nolint:ineffassign
+					changed = true
+				}
 			}
+			changed = true
 		}
 	}
 
@@ -290,7 +285,7 @@ func (r *LoggingConfigurationReconciler) syncSecretRefs(ctx context.Context, con
 }
 
 // Delete all Fluent Bit pods to apply new configuration.
-func (r *LoggingConfigurationReconciler) deleteFluentBitPods(ctx context.Context, log logr.Logger) error {
+func (r *LogPipelineReconciler) deleteFluentBitPods(ctx context.Context, log logr.Logger) error {
 	var fluentBitDs appsv1.DaemonSet
 	if err := r.Get(ctx, r.FluentBitDaemonSet, &fluentBitDs); err != nil {
 		log.Error(err, "Cannot get Fluent Bit DaemonSet")
@@ -311,18 +306,27 @@ func (r *LoggingConfigurationReconciler) deleteFluentBitPods(ctx context.Context
 	return nil
 }
 
-// Merge list of Sections to single FluentBit configuration.
-func generateFluentBitConfig(sections []telemetryv1alpha1.Section) string {
+// Merge FluentBit parsers, filters and outputs to single FluentBit configuration.
+func mergeFluentBitConfig(parsers []telemetryv1alpha1.Parser, multiLineParsers []telemetryv1alpha1.MultiLineParser, filters []telemetryv1alpha1.Filter, outputs []telemetryv1alpha1.Output) string {
 	var result string
-	for _, section := range sections {
-		result += section.Content + "\n\n"
+	for _, parser := range parsers {
+		result += "[PARSER]\n\t" + parser.Content + "\n\n"
+	}
+	for _, multiLineParser := range multiLineParsers {
+		result += "[MULTILINE_PARSER]\n" + multiLineParser.Content + "\n\n"
+	}
+	for _, filter := range filters {
+		result += "[FILTER]\n" + filter.Content + "\n\n"
+	}
+	for _, output := range outputs {
+		result += "[OUTPUT]\n" + output.Content + "\n\n"
 	}
 	return result
 }
 
 // SetupWithManager sets up the controller with the Manager.
-func (r *LoggingConfigurationReconciler) SetupWithManager(mgr ctrl.Manager) error {
+func (r *LogPipelineReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
-		For(&telemetryv1alpha1.LoggingConfiguration{}).
+		For(&telemetryv1alpha1.LogPipeline{}).
 		Complete(r)
 }
