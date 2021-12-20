@@ -15,6 +15,7 @@ const {
     initializeK8sClient,
     switchDebug,
     waitForJob,
+    waitForDeployment,
     printContainerLogs,
 } = require("../utils");
 const t = require("../skr-svcat-migration-test/test-helpers");
@@ -80,6 +81,10 @@ describe("SKR SVCAT migration with KEB test", function() {
         await updateSKR(keb, gardener, runtimeID, runtimeName, null, btpOperatorCreds);
     });
 
+    it(`Should wait for btp-operator deployment availability`, async function() {
+        await waitForJob("sap-btp-operator-controller-manager", "kyma-system", 10 * 60 * 1000); //10 minutes
+    });
+
     let secretsAndPresets
     it(`Should store secrets and presets of sample resources`, async function() {
         secretsAndPresets = await sampleResources.storeSecretsAndPresets()
@@ -90,7 +95,7 @@ describe("SKR SVCAT migration with KEB test", function() {
     });
 
     it(`Should wait for migration job to finish`, async function() {
-        await waitForJob("sap-btp-operator-migration", "sap-btp-operator", 10 * 60 * 1000); //10 minutes
+        await waitForJob("sap-btp-operator-migration", "kyma-system", 10 * 60 * 1000); //10 minutes
     });
 
     it(`Should print the container logs of the migration job`, async function() {
