@@ -177,7 +177,7 @@ func getAzureDevopsTestcase(secretData map[string]string) testRepo {
 		url:              "https://kyma-wookiee@dev.azure.com/kyma-wookiee/kyma-function/_git/kyma-function",
 		baseDir:          "/code",
 		reference:        "main",
-		expectedResponse: "Hello Serverless",
+		expectedResponse: "Hello azure",
 		runtime:          serverlessv1alpha1.Nodejs14,
 		auth: &serverlessv1alpha1.RepositoryAuth{
 			Type:       serverlessv1alpha1.RepositoryAuthBasic,
