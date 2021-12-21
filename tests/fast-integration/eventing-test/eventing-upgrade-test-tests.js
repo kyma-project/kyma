@@ -29,11 +29,13 @@ const {
     printEventingPublisherProxyLogs,
 } = require("../utils");
 const {eventingMonitoringTest} = require("./metric-test")
+const {prometheusPortForward} = require("../monitoring/client");
 
 
 describe("Eventing tests", function () {
     this.timeout(timeoutTime);
     this.slow(slowTime);
+    let cancelPortForward = null
 
     // eventingE2ETestSuite - Runs Eventing end-to-end tests
     function eventingE2ETestSuite() {
@@ -49,6 +51,14 @@ describe("Eventing tests", function () {
             await sendEventAndCheckResponse(mockNamespace);
         });
     }
+
+    before(function () {
+        cancelPortForward = prometheusPortForward();
+    });
+
+    after(function () {
+        cancelPortForward();
+    });
 
     afterEach(async function () {
         // runs after each test in every block

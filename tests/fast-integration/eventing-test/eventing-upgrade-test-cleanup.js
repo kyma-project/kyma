@@ -5,8 +5,6 @@ const httpsAgent = new https.Agent({
 });
 axios.defaults.httpsAgent = httpsAgent;
 const {
-    timeout,
-    slow,
     appName,
     scenarioName,
     testNamespace,
@@ -25,19 +23,13 @@ const {
 const {
     deleteEventingBackendK8sSecret,
 } = require("../utils");
-const {prometheusPortForward} = require("../monitoring/client")
 
 describe("Eventing tests cleanup", function () {
     this.timeout(timeoutTime);
     this.slow(slowTime);
-    let cancelPrometheusPortForward = null;
     let director = null;
     let skrInfo = null;
 
-    before(async function () {
-        // Set port-forward to prometheus pod
-        cancelPrometheusPortForward = prometheusPortForward();
-    });
 
     it("Cleaning: Test namespaces should be deleted", async function () {
         await cleanMockTestFixture(mockNamespace, testNamespace, true);
@@ -51,7 +43,5 @@ describe("Eventing tests cleanup", function () {
         if (isSKR) {
             await cleanCompassResourcesSKR(director, appName, scenarioName, skrInfo.compassID);
         }
-
-        cancelPrometheusPortForward();
     });
 });

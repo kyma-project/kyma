@@ -3,7 +3,10 @@
 
 ## Overview 
 
-This test covers the end-to-end flow for Eventing.
+This test covers the end-to-end flow for Eventing. It is divided in three parts:
+1. `upgrade-test-prep.js` - prepares all the resources and assets required for tests to be run
+2. `upgrade-test-tests.js` - the actual tests
+3. `upgrade-test-cleanup.js` - removes the test resources from the cluster
 
 ## Usage
 To run Eventing-specific tests locally, follow these steps:
