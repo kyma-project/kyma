@@ -57,6 +57,7 @@ describe("Eventing tests", function () {
     });
 
     after(function () {
+        // runs after the last test block
         cancelPortForward();
     });
 
