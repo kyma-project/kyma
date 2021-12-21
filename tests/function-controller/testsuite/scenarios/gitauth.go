@@ -193,7 +193,7 @@ func getGithubTestcase(secretData map[string]string) testRepo {
 		url:              "git@github.com:moelsayed/pyhello.git",
 		baseDir:          "/",
 		reference:        "main",
-		expectedResponse: "hello world",
+		expectedResponse: "hello github",
 		runtime:          serverlessv1alpha1.Python39,
 		auth: &serverlessv1alpha1.RepositoryAuth{
 			Type:       serverlessv1alpha1.RepositoryAuthSSHKey,
