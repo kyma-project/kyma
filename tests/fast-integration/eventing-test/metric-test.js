@@ -179,7 +179,7 @@ function runDashboardTestCase(dashboardName, test) {
     }).catch(reason => {
       throw new Error(reason)
     })
-  }, 80, 5000);
+  }, 90, 5000);
 }
 
 function eventingMonitoringTest(backend) {
