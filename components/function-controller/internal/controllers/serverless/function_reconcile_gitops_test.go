@@ -101,7 +101,7 @@ func TestGitOps(t *testing.T) {
 	for _, testData := range testDataScenarios {
 		t.Run(fmt.Sprintf("[%s] should successfully update Function]", testData.info), func(t *testing.T) {
 			//GIVEN
-			inFunction := newTestFunction(testNamespace, "ah-tak-przeciez", 1, 2)
+			inFunction := newTestGitFunction(testNamespace, "ah-tak-przeciez", 1, 2)
 			g.Expect(resourceClient.Create(context.TODO(), inFunction)).To(gomega.Succeed())
 
 			var auth *serverlessv1alpha1.RepositoryAuth
