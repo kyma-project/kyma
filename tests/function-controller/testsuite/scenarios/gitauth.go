@@ -40,8 +40,8 @@ type testRepo struct {
 }
 
 type config struct {
-	AzureAuth  BasicAuth
-	GithubAuth SSHAuth
+	Azure  AzureRepo `envconfig:AZURE`
+	Github GithubRepo
 }
 
 type SSHAuth struct {
@@ -51,6 +51,22 @@ type SSHAuth struct {
 type BasicAuth struct {
 	Username string
 	Password string
+}
+
+type RepoConfig struct {
+	URL       string
+	BaseDir   string
+	Reference string
+}
+
+type GithubRepo struct {
+	RepoConfig
+	SSHAuth
+}
+
+type AzureRepo struct {
+	RepoConfig
+	BasicAuth
 }
 
 func GitAuthTestSteps(restConfig *rest.Config, cfg testsuite.Config, logf *logrus.Entry) (step.Step, error) {
@@ -76,13 +92,13 @@ func GitAuthTestSteps(restConfig *rest.Config, cfg testsuite.Config, logf *logru
 	}
 
 	var testCases []testRepo
-	testCases = append(testCases, getAzureDevopsTestcase(createBasicAuthSecretData(testCfg.AzureAuth)))
+	testCases = append(testCases, getAzureDevopsTestcase(testCfg))
 
-	sshAuthData, err := createSSHAuthSecretData(testCfg.GithubAuth)
+	githubTestcase, err := getGithubTestcase(testCfg)
 	if err != nil {
-		return nil, errors.Wrapf(err, "while decoding ssh key")
+		return nil, errors.Wrapf(err, "while setting github testcase")
 	}
-	testCases = append(testCases, getGithubTestcase(sshAuthData))
+	testCases = append(testCases, githubTestcase)
 
 	steps := []step.Step{}
 	for _, testCase := range testCases {
@@ -171,28 +187,32 @@ func createSSHAuthSecretData(auth SSHAuth) (map[string]string, error) {
 	return map[string]string{"key": string(decoded)}, err
 }
 
-func getAzureDevopsTestcase(secretData map[string]string) testRepo {
+func getAzureDevopsTestcase(cfg *config) testRepo {
 	return testRepo{name: "azure-devops-func",
 		provider:         "AzureDevOps",
-		url:              "https://kyma-wookiee@dev.azure.com/kyma-wookiee/kyma-function/_git/kyma-function",
-		baseDir:          "/code",
-		reference:        "main",
+		url:              cfg.Azure.URL,
+		baseDir:          cfg.Azure.BaseDir,
+		reference:        cfg.Azure.Reference,
 		expectedResponse: "Hello azure",
 		runtime:          serverlessv1alpha1.Nodejs14,
 		auth: &serverlessv1alpha1.RepositoryAuth{
 			Type:       serverlessv1alpha1.RepositoryAuthBasic,
 			SecretName: "azure-devops-auth-secret",
 		},
-		secretData: secretData}
+		secretData: createBasicAuthSecretData(cfg.Azure.BasicAuth)}
 }
 
-func getGithubTestcase(secretData map[string]string) testRepo {
+func getGithubTestcase(cfg *config) (testRepo, error) {
+	secretData, err := createSSHAuthSecretData(cfg.Github.SSHAuth)
+	if err != nil {
+		return testRepo{}, errors.Wrapf(err, "while decoding ssh key")
+	}
 	return testRepo{
 		name:             "github-func",
 		provider:         "Github",
-		url:              "git@github.com:moelsayed/pyhello.git",
-		baseDir:          "/",
-		reference:        "main",
+		url:              cfg.Github.URL,
+		baseDir:          cfg.Github.BaseDir,
+		reference:        cfg.Github.Reference,
 		expectedResponse: "hello github",
 		runtime:          serverlessv1alpha1.Python39,
 		auth: &serverlessv1alpha1.RepositoryAuth{
@@ -200,5 +220,5 @@ func getGithubTestcase(secretData map[string]string) testRepo {
 			SecretName: "github-auth-secret",
 		},
 		secretData: secretData,
-	}
+	}, nil
 }
