@@ -191,7 +191,7 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "sum(rate(istio_requests_total{destination_service=\"eventing-event-publisher-proxy.kyma-system.svc.cluster.local\", response_code=~\"2.*\"}[5m]))",
+              "expr": "sum by (destination_service) (rate(istio_requests_total{destination_service=~\"event.*-publisher-proxy.kyma-system.svc.cluster.local\", response_code=~\"2.*\"}[5m]))",
               "format": "time_series",
               "hide": false,
               "instant": false,
@@ -201,14 +201,14 @@ data:
               "refId": "A"
             },
             {
-              "expr": "sum(rate(istio_requests_total{destination_service=\"eventing-event-publisher-proxy.kyma-system.svc.cluster.local\", response_code=~\"4.*\"}[5m]))",
+              "expr": "sum by (destination_service) (rate(istio_requests_total{destination_service=~\"event.*-publisher-proxy.kyma-system.svc.cluster.local\", response_code=~\"4.*\"}[5m]))",
               "hide": false,
               "interval": "",
               "legendFormat": "4XX",
               "refId": "B"
             },
             {
-              "expr": "sum(rate(istio_requests_total{destination_service=\"eventing-event-publisher-proxy.kyma-system.svc.cluster.local\", response_code=~\"5.*\"}[5m]))",
+              "expr": "sum by (destination_service) (rate(istio_requests_total{destination_service=~\"event.*-publisher-proxy.kyma-system.svc.cluster.local\", response_code=~\"5.*\"}[5m]))",
               "hide": false,
               "interval": "",
               "legendFormat": "5XX",
