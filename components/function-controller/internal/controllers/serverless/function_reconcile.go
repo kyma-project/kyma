@@ -90,6 +90,8 @@ func (r *FunctionReconciler) SetupWithManager(mgr ctrl.Manager) (controller.Cont
 func (r *FunctionReconciler) Reconcile(request ctrl.Request) (ctrl.Result, error) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
+	// reconciles since startup
+	ReconcileCounter.Inc()
 
 	if IsHealthCheckRequest(request) {
 		r.healthCh <- true
@@ -110,6 +112,7 @@ func (r *FunctionReconciler) Reconcile(request ctrl.Request) (ctrl.Result, error
 		return ctrl.Result{}, nil
 	}
 
+	ReconcileCounter.Inc()
 	var configMaps corev1.ConfigMapList
 	if err := r.client.ListByLabel(ctx, instance.GetNamespace(), r.internalFunctionLabels(instance), &configMaps); err != nil {
 		log.Error(err, "Cannot list ConfigMaps")
