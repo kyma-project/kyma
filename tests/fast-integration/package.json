@@ -9,7 +9,9 @@
     "directory": "tests/fast-integration"
   },
   "scripts": {
-    "pretest": "./node_modules/.bin/eslint --ignore-path .gitignore .",
+    "pretest": "npm run lint",
+    "lint": "./node_modules/.bin/eslint --ignore-path .gitignore .",
+    "lint-fix": "./node_modules/.bin/eslint --ignore-path .gitignore . --fix",
     "test": "mocha --inline-diffs --check-leaks --reporter mocha-multi-reporters --reporter-options configFile=mocha-reporter-config.json",
     "test-utils": "mocha --inline-diffs --check-leaks --reporter mocha-multi-reporters --reporter-options configFile=mocha-reporter-config.json './utils/**/*.test.js'",
     "test-commerce-mock": "mocha --inline-diffs --check-leaks --reporter mocha-multi-reporters --reporter-options configFile=mocha-reporter-config.json ./test/2-commerce-mock.js",
