@@ -15,6 +15,7 @@ metadata:
 spec:
   selector:
     {{- include "nats.selectorLabels" . | nindent 4 }}
+  clusterIP: None
   ports:
   {{- if .Values.nats.profiling.enabled }}
   - name: profiling
