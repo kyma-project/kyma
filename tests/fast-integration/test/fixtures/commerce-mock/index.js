@@ -502,6 +502,7 @@ async function revokeCommerceMockCertificate(){
   console.dir(url)
   console.dir("================================================")
   const gateway = `https://gateway.${url}/v1/applications/certificates/revocations`;
+
   const httpsAgent = new https.Agent({
     rejectUnauthorized: false, // curl -k
     cert: cert.data,
@@ -516,7 +517,20 @@ async function revokeCommerceMockCertificate(){
       url: gateway,
       headers: { 'Content-Type': 'application/json' },
       timeout: 5000
-    });
+    }).then(function (response) {
+      console.dir(response.config)
+      console.dir("-----------------------------")
+      console.dir(response.data);
+      console.dir("-----------------------------")
+    console.dir(response.headers)
+    console.dir("-----------------------------")
+    console.dir(response.request)
+    console.dir("-----------------------------")
+    console.dir(response.status)
+    console.dir("-----------------------------")
+    console.dir(response.statusText)
+    console.dir("-----------------------------")
+   })
   } catch (err) {
     throw convertAxiosError(err, "Error during revoking Commerce Mock certificate via Kyma connector service");
   }
