@@ -3,6 +3,7 @@ package kubernetes
 import (
 	"context"
 	"fmt"
+	"path/filepath"
 	"testing"
 
 	"github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
@@ -86,6 +87,38 @@ var _ = ginkgo.AfterSuite(func() {
 	err := testEnv.Stop()
 	gomega.Expect(err).ToNot(gomega.HaveOccurred())
 })
+
+func setUpTestEnv(g *gomega.GomegaWithT) (cl client.Client, env *envtest.Environment) {
+	testEnv := &envtest.Environment{
+		CRDDirectoryPaths: []string{
+			filepath.Join("..", "..", "..", "config", "crd", "bases"),
+		},
+		ErrorIfCRDPathMissing: true,
+	}
+	cfg, err := testEnv.Start()
+	g.Expect(err).To(gomega.BeNil())
+	g.Expect(cfg).ToNot(gomega.BeNil())
+
+	err = scheme.AddToScheme(scheme.Scheme)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+
+	k8sClient, err := client.New(cfg, client.Options{Scheme: scheme.Scheme})
+	g.Expect(err).ToNot(gomega.HaveOccurred())
+	g.Expect(k8sClient).ToNot(gomega.BeNil())
+
+	return k8sClient, testEnv
+}
+
+func tearDownTestEnv(g *gomega.GomegaWithT, testEnv *envtest.Environment) {
+	g.Expect(testEnv.Stop()).To(gomega.Succeed())
+}
+
+func setUpControllerConfig(g *gomega.GomegaWithT) Config {
+	var testCfg Config
+	err := envconfig.InitWithPrefix(&testCfg, "TEST")
+	g.Expect(err).To(gomega.BeNil())
+	return testCfg
+}
 
 func newFixBaseConfigMap(namespace, name string) *corev1.ConfigMap {
 	return &corev1.ConfigMap{
@@ -182,16 +215,16 @@ func newFixBaseRoleBinding(namespace, name, subjectNamespace string) *rbacv1.Rol
 func newFixNamespace(name string) *corev1.Namespace {
 	return &corev1.Namespace{
 		ObjectMeta: metav1.ObjectMeta{
-			GenerateName: fmt.Sprintf("%s-", name),
+			Name: name,
 		},
 	}
 }
 
-func compareConfigMaps(actual, expected *corev1.ConfigMap) {
-	gomega.Expect(actual.GetLabels()).To(gomega.Equal(expected.GetLabels()))
-	gomega.Expect(actual.GetAnnotations()).To(gomega.Equal(expected.GetAnnotations()))
-	gomega.Expect(actual.Data).To(gomega.Equal(expected.Data))
-	gomega.Expect(actual.BinaryData).To(gomega.Equal(expected.BinaryData))
+func compareConfigMaps(g *gomega.WithT, actual, expected *corev1.ConfigMap) {
+	g.Expect(actual.GetLabels()).To(gomega.Equal(expected.GetLabels()))
+	g.Expect(actual.GetAnnotations()).To(gomega.Equal(expected.GetAnnotations()))
+	g.Expect(actual.Data).To(gomega.Equal(expected.Data))
+	g.Expect(actual.BinaryData).To(gomega.Equal(expected.BinaryData))
 }
 
 func compareSecrets(actual, expected *corev1.Secret) {
