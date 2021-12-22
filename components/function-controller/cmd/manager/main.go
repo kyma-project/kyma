@@ -169,7 +169,12 @@ func main() {
 
 	setupLog.Info("Running manager")
 
-	metrics.Registry.MustRegister(serverless.ReconcileCounter, serverless.FunctionConfiguredStatusGaugeVec, serverless.FunctionBuiltStatusGaugeVec, serverless.FunctionRunningStatusGaugeVec)
+	// register additional function metrics
+	metrics.Registry.MustRegister(
+		serverless.FunctionConfiguredStatusGaugeVec,
+		serverless.FunctionBuiltStatusGaugeVec,
+		serverless.FunctionRunningStatusGaugeVec,
+	)
 
 	if err := mgr.Start(ctrl.SetupSignalHandler()); err != nil {
 		setupLog.Error(err, "Unable to run the manager")

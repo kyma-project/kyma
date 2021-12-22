@@ -17,10 +17,6 @@ const (
 )
 
 var (
-	ReconcileCounter = prometheus.NewCounter(prometheus.CounterOpts{
-		Name: "function_controller_counter",
-		Help: "number of reconciles",
-	})
 	FunctionConfiguredStatusGaugeVec = prometheus.NewGaugeVec(prometheus.GaugeOpts{
 		Name: "function_configured_status_duration_millisecond",
 		Help: "time passed per function from creation until Configured state",
