@@ -14,6 +14,12 @@ The main responsibilities of the Runtime Agent are:
 
 The Runtime Agent requires Go 1.8 or higher.
 
+##Unit testing
+
+To execute unit tests for controller functionality the Runtime Agent requires additional `etcd` binary to be installed on your local machine at location: `/usr/local/kubebuilder/bin`.
+
+See [this link](https://book.kubebuilder.io/reference/envtest.html) for installation instructions.
+
 ## Usage
 
 To start the Runtime Agent, run this command:
