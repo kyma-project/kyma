@@ -35,14 +35,15 @@ import (
 
 var _ = Describe("LogPipeline controller", func() {
 	const (
-		LogPipelineName       = "log-pipeline"
-		FluentBitParserConfig = "Name   dummy_test\nFormat   regex\nRegex   ^(?<INT>[^ ]+) (?<FLOAT>[^ ]+) (?<BOOL>[^ ]+) (?<STRING>.+)$"
-		FluentBitFilterConifg = "Name   grep\nMatch   *\nRegex   $kubernetes['labels']['app'] my-deployment"
-		FluentBitOutputConfig = "Name   stdout\nMatch   *"
-		timeout               = time.Second * 10
-		interval              = time.Millisecond * 250
+		LogPipelineName                = "log-pipeline"
+		FluentBitParserConfig          = "Name   dummy_test\nFormat   regex\nRegex   ^(?<INT>[^ ]+) (?<FLOAT>[^ ]+) (?<BOOL>[^ ]+) (?<STRING>.+)$"
+		FluentBitMultiLineParserConfig = "Name          multiline-custom-regex\n        Type          regex\n        Flush_timeout 1000\n        Rule      \"start_state\"   \"/(Dec \\d+ \\d+\\:\\d+\\:\\d+)(.*)/\"  \"cont\"\n        Rule      \"cont\"          \"/^\\s+at.*/\"                     \"cont\""
+		FluentBitFilterConifg          = "Name   grep\nMatch   *\nRegex   $kubernetes['labels']['app'] my-deployment"
+		FluentBitOutputConfig          = "Name   stdout\nMatch   *"
+		timeout                        = time.Second * 10
+		interval                       = time.Millisecond * 250
 	)
-	var expectedFluentBitConfig = fmt.Sprintf("[PARSER]\n%s\n\n[FILTER]\n%s\n\n[OUTPUT]\n%s", FluentBitParserConfig, FluentBitFilterConifg, FluentBitOutputConfig)
+	var expectedFluentBitConfig = fmt.Sprintf("[PARSER]\n%s\n\n[MULTILINE_PARSER]\n%s\n\n[FILTER]\n%s\n\n[OUTPUT]\n%s", FluentBitParserConfig, FluentBitMultiLineParserConfig, FluentBitFilterConifg, FluentBitOutputConfig)
 
 	Context("When updating LogPipeline", func() {
 		It("Should sync with the Fluent Bit configuration", func() {
@@ -128,6 +129,9 @@ var _ = Describe("LogPipeline controller", func() {
 			parser := telemetryv1alpha1.Parser{
 				Content: FluentBitParserConfig,
 			}
+			multiLineParser := telemetryv1alpha1.MultiLineParser{
+				Content: FluentBitMultiLineParserConfig,
+			}
 			filter := telemetryv1alpha1.Filter{
 				Content: FluentBitFilterConifg,
 			}
@@ -143,11 +147,12 @@ var _ = Describe("LogPipeline controller", func() {
 					Name: LogPipelineName,
 				},
 				Spec: telemetryv1alpha1.LogPipelineSpec{
-					Parsers:    []telemetryv1alpha1.Parser{parser},
-					Filters:    []telemetryv1alpha1.Filter{filter},
-					Outputs:    []telemetryv1alpha1.Output{output},
-					Files:      []telemetryv1alpha1.FileMount{file},
-					SecretRefs: []telemetryv1alpha1.SecretReference{secretRef},
+					Parsers:          []telemetryv1alpha1.Parser{parser},
+					MultiLineParsers: []telemetryv1alpha1.MultiLineParser{multiLineParser},
+					Filters:          []telemetryv1alpha1.Filter{filter},
+					Outputs:          []telemetryv1alpha1.Output{output},
+					Files:            []telemetryv1alpha1.FileMount{file},
+					SecretRefs:       []telemetryv1alpha1.SecretReference{secretRef},
 				},
 			}
 			Expect(k8sClient.Create(ctx, loggingConfiguration)).Should(Succeed())

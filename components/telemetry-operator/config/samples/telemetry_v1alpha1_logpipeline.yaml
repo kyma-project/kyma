@@ -7,17 +7,17 @@ spec:
   multilineParsers:
     - content: |
         # Example from https://docs.fluentbit.io/manual/pipeline/filters/multiline-stacktrace
-        name          multiline-custom-regex
-        type          regex
-        flush_timeout 1000
-        rule      "start_state"   "/(Dec \d+ \d+\:\d+\:\d+)(.*)/"  "cont"
-        rule      "cont"          "/^\s+at.*/"                     "cont"
+        Name          multiline-custom-regex
+        Type          regex
+        Flush_timeout 1000
+        Rule      "start_state"   "/(Dec \d+ \d+\:\d+\:\d+)(.*)/"  "cont"
+        Rule      "cont"          "/^\s+at.*/"                     "cont"
   filters:
     - content: |
-        name                  multiline
-        match                 *
-        multiline.key_content log
-        multiline.parser      go, multiline-custom-regex
+        Name                  multiline
+        Match                 *
+        Multiline.key_content log
+        Multiline.parser      go, multiline-custom-regex
     - content: |
         Name    grep
         Match   *
