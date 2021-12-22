@@ -130,12 +130,6 @@ deployment:
       cpu: 10m
       memory: 20Mi
   secret_name: "kiali"
-  # Containers securityContext, not defined in upstream chart
-  securityContext:
-    allowPrivilegeEscalation: false
-    privileged: false
-    readOnlyRootFilesystem: true
-    runAsNonRoot: true
   service_annotations: {}
   service_type: ""
   tolerations: []
@@ -153,7 +147,7 @@ external_services:
 
   istio:
     enabled: true
-    root_namespace: ""
+    root_namespace: "istio-system"
     component_status:
       components:
       - app_label: istiod
