@@ -22,7 +22,6 @@ import (
 	"strings"
 
 	"github.com/go-logr/logr"
-	"github.com/kyma-project/kyma/components/telemetry-operator/internal/fluentbit"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -35,6 +34,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/log"
 
 	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/api/v1alpha1"
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/fluentbit"
 )
 
 const (
