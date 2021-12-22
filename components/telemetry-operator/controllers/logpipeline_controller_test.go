@@ -18,18 +18,16 @@ package controllers
 
 import (
 	"context"
-	"fmt"
 	"strings"
 	"time"
-
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/types"
 
 	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/api/v1alpha1"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
@@ -37,13 +35,32 @@ var _ = Describe("LogPipeline controller", func() {
 	const (
 		LogPipelineName                = "log-pipeline"
 		FluentBitParserConfig          = "Name   dummy_test\nFormat   regex\nRegex   ^(?<INT>[^ ]+) (?<FLOAT>[^ ]+) (?<BOOL>[^ ]+) (?<STRING>.+)$"
-		FluentBitMultiLineParserConfig = "Name          multiline-custom-regex\n        Type          regex\n        Flush_timeout 1000\n        Rule      \"start_state\"   \"/(Dec \\d+ \\d+\\:\\d+\\:\\d+)(.*)/\"  \"cont\"\n        Rule      \"cont\"          \"/^\\s+at.*/\"                     \"cont\""
+		FluentBitMultiLineParserConfig = "Name          multiline-custom-regex\nType          regex\nFlush_timeout 1000\nRule      \"start_state\"   \"/(Dec \\d+ \\d+\\:\\d+\\:\\d+)(.*)/\"  \"cont\"\nRule      \"cont\"          \"/^\\s+at.*/\"                     \"cont\""
 		FluentBitFilterConifg          = "Name   grep\nMatch   *\nRegex   $kubernetes['labels']['app'] my-deployment"
 		FluentBitOutputConfig          = "Name   stdout\nMatch   *"
 		timeout                        = time.Second * 10
 		interval                       = time.Millisecond * 250
 	)
-	var expectedFluentBitConfig = fmt.Sprintf("[PARSER]\n%s\n\n[MULTILINE_PARSER]\n%s\n\n[FILTER]\n%s\n\n[OUTPUT]\n%s", FluentBitParserConfig, FluentBitMultiLineParserConfig, FluentBitFilterConifg, FluentBitOutputConfig)
+	var expectedFluentBitConfig = `[PARSER]
+    Name   dummy_test
+    Format   regex
+    Regex   ^(?<INT>[^ ]+) (?<FLOAT>[^ ]+) (?<BOOL>[^ ]+) (?<STRING>.+)$
+
+[MULTILINE_PARSER]
+    Name          multiline-custom-regex
+    Type          regex
+    Flush_timeout 1000
+    Rule      "start_state"   "/(Dec \d+ \d+\:\d+\:\d+)(.*)/"  "cont"
+    Rule      "cont"          "/^\s+at.*/"                     "cont"
+
+[FILTER]
+    Name   grep
+    Match   *
+    Regex   $kubernetes['labels']['app'] my-deployment
+
+[OUTPUT]
+    Name   stdout
+    Match   *`
 
 	Context("When updating LogPipeline", func() {
 		It("Should sync with the Fluent Bit configuration", func() {

@@ -1,0 +1,21 @@
+# permissions for end users to view logpipelines.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: logpipeline-viewer-role
+  namespace: {{ .Release.Namespace }}
+rules:
+- apiGroups:
+  - telemetry.kyma-project.io
+  resources:
+  - logpipelines
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - telemetry.kyma-project.io
+  resources:
+  - logpipelines/status
+  verbs:
+  - get

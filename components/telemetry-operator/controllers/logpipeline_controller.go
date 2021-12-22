@@ -19,8 +19,10 @@ package controllers
 import (
 	"bytes"
 	"context"
+	"strings"
 
 	"github.com/go-logr/logr"
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/fluentbit"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -308,20 +310,20 @@ func (r *LogPipelineReconciler) deleteFluentBitPods(ctx context.Context, log log
 
 // Merge FluentBit parsers, filters and outputs to single FluentBit configuration.
 func mergeFluentBitConfig(config *telemetryv1alpha1.LogPipeline) string {
-	var result string
+	var sb strings.Builder
 	for _, parser := range config.Spec.Parsers {
-		result += "[PARSER]\n" + parser.Content + "\n\n"
+		sb.WriteString(fluentbit.BuildConfigSection(fluentbit.ParserConfigHeader, parser.Content))
 	}
 	for _, multiLineParser := range config.Spec.MultiLineParsers {
-		result += "[MULTILINE_PARSER]\n" + multiLineParser.Content + "\n\n"
+		sb.WriteString(fluentbit.BuildConfigSection(fluentbit.MultiLineParserConfigHeader, multiLineParser.Content))
 	}
 	for _, filter := range config.Spec.Filters {
-		result += "[FILTER]\n" + filter.Content + "\n\n"
+		sb.WriteString(fluentbit.BuildConfigSection(fluentbit.FilterConfigHeader, filter.Content))
 	}
 	for _, output := range config.Spec.Outputs {
-		result += "[OUTPUT]\n" + output.Content + "\n\n"
+		sb.WriteString(fluentbit.BuildConfigSection(fluentbit.OutputConfigHeader, output.Content))
 	}
-	return result
+	return sb.String()
 }
 
 // SetupWithManager sets up the controller with the Manager.
