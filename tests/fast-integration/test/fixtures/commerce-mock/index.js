@@ -738,7 +738,7 @@ async function checkInClusterEventDeliveryHelper(targetNamespace, encoding) {
     expect(response.data).to.have.nested.property("event.shipped", true, "Order should have property shipped");
 
     return response;
-  }, 30, 2 * 1000);
+  }, 100000, 4 * 1000);
 }
 
 module.exports = {
