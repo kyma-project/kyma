@@ -28,8 +28,8 @@ func TestConfigMapReconciler_Reconcile(t *testing.T) {
 	testCfg := setUpControllerConfig(g)
 	configMapSvc := NewConfigMapService(resourceClient, config)
 
-	cfgNamespace := newFixNamespace(testCfg.BaseNamespace)
-	g.Expect(k8sClient.Create(context.TODO(), cfgNamespace)).To(gomega.Succeed())
+	baseNamespace := newFixNamespace(testCfg.BaseNamespace)
+	g.Expect(k8sClient.Create(context.TODO(), baseNamespace)).To(gomega.Succeed())
 
 	userNamespace := newFixNamespace("tam")
 	g.Expect(k8sClient.Create(context.TODO(), userNamespace)).To(gomega.Succeed())

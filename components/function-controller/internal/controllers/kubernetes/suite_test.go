@@ -30,7 +30,6 @@ var (
 	resourceClient    resource.Client
 	k8sClient         client.Client
 	testEnv           *envtest.Environment
-	configMapSvc      ConfigMapService
 	secretSvc         SecretService
 	serviceAccountSvc ServiceAccountService
 	roleSvc           RoleService
@@ -70,7 +69,6 @@ var _ = ginkgo.BeforeSuite(func(done ginkgo.Done) {
 	err = envconfig.InitWithPrefix(&config, "TEST")
 	gomega.Expect(err).NotTo(gomega.HaveOccurred())
 
-	configMapSvc = NewConfigMapService(resourceClient, config)
 	secretSvc = NewSecretService(resourceClient, config)
 	serviceAccountSvc = NewServiceAccountService(resourceClient, config)
 	roleSvc = NewRoleService(resourceClient, config)
