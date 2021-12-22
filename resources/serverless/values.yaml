@@ -242,6 +242,8 @@ clusterMicroFrontend:
 
 grafanaDashboard:
   enabled: true
+  functionMetrics:
+    enabled: false
 
 usageKind:
   name: serverless-function
