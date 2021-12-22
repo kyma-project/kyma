@@ -82,7 +82,7 @@ describe("SKR SVCAT migration with KEB test", function() {
     });
 
     it(`Should wait for btp-operator deployment availability`, async function() {
-        await waitForJob("sap-btp-operator-controller-manager", "kyma-system", 10 * 60 * 1000); //10 minutes
+        await waitForDeployment("sap-btp-operator-controller-manager", "kyma-system", 10 * 60 * 1000); //10 minutes
     });
 
     let secretsAndPresets
