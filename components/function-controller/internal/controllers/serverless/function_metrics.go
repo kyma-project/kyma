@@ -63,12 +63,18 @@ func updateFunctionStatusGauge(f *serverlessv1alpha1.Function, cond serverlessv1
 	if _, ok := conditionGauges[cond.Type]; !ok { // we don't have a gauge for this condition type
 		return
 	}
-
+	// a trick to avoid overriding the initial gauge values, since those are
+	// what we are interested in. If the function is updated, it initial
+	// metrics are _probably_ already collected.
+	if f.Generation > 1 {
+		return
+	}
 	gaugeID := fmt.Sprintf("%s-%s", f.UID, cond.Type)
 	if ConditionGaugeSet[gaugeID] { // the gauge for this function condition type is already set
 		return
 	}
-	// if the condition status is not true, yet, we will try later. Except for the ConfigReady condition since we set that directly to true
+	// if the condition status is not true, yet, we will try later. Except for
+	// the ConfigReady condition since we set that directly to true
 	if cond.Status != corev1.ConditionTrue && cond.Type != serverlessv1alpha1.ConditionConfigurationReady {
 		return
 	}
