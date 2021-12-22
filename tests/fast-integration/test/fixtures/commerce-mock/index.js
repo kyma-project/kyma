@@ -494,6 +494,13 @@ async function revokeCommerceMockCertificate(){
   const vs = await waitForVirtualService("mocks", "commerce-mock");
   const mockHost = vs.spec.hosts[0];
   const url = mockHost.replace(/(commerce.mocks.?)/,'');
+  console.dir("**************************************************************************************")
+  console.dir(cert);
+  console.dir(key);
+  console.dir("**************************************************************************************")
+  console.dir("================================================")
+  console.dir(url)
+  console.dir("================================================")
   const gateway = `https://gateway.${url}/v1/applications/certificates/revocations`;
   const httpsAgent = new https.Agent({
     rejectUnauthorized: false, // curl -k
