@@ -1,5 +1,7 @@
 {{- /*
-    Customization: exclude "global" and "authProxy" sections from being rendered as a part of the config.
+    Customization:
+    * exclude "global" and "authProxy" sections from being rendered as a part of the config
+    * call tpl before toYaml since some values contain templates
   */ -}}
 ---
 apiVersion: v1
@@ -25,5 +27,5 @@ data:
     {{- $_ := set $cm.login_token "signing_key" (include "kiali-server.login_token.signing_key" .) }}
     {{- $_ := set $cm.external_services.istio "root_namespace" (include "kiali-server.external_services.istio.root_namespace" .) }}
     {{- $_ := set $cm.server "web_root" (include "kiali-server.server.web_root" .) }}
-    {{- toYaml $cm | nindent 4 }}
+    {{- tpl (toYaml $cm | nindent 4) . }}
 ...

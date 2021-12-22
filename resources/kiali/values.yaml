@@ -166,9 +166,7 @@ external_services:
     url: "http://monitoring-prometheus.kyma-system:9090"
 
   tracing:
-    # 'enabled' will be overwritten with .Values.global.tracing.enabled in the template
-    #  enabled: true
-    #  health_check_url: ""
+    enabled: "{{ .Values.global.tracing.enabled }}"
     component_status:
       namespace: kyma-system
       app_label: "jaeger"
