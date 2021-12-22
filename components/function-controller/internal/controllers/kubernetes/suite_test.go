@@ -33,7 +33,6 @@ var (
 	secretSvc         SecretService
 	serviceAccountSvc ServiceAccountService
 	roleSvc           RoleService
-	roleBindingSvc    RoleBindingService
 )
 
 func TestAPIs(t *testing.T) {
@@ -72,7 +71,6 @@ var _ = ginkgo.BeforeSuite(func(done ginkgo.Done) {
 	secretSvc = NewSecretService(resourceClient, config)
 	serviceAccountSvc = NewServiceAccountService(resourceClient, config)
 	roleSvc = NewRoleService(resourceClient, config)
-	roleBindingSvc = NewRoleBindingService(resourceClient, config)
 
 	baseNamespace := &corev1.Namespace{ObjectMeta: metav1.ObjectMeta{Name: config.BaseNamespace}}
 	gomega.Expect(resourceClient.Create(context.TODO(), baseNamespace)).To(gomega.Succeed())
