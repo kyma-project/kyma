@@ -8,7 +8,7 @@ metadata:
 spec:
   selector:
     matchLabels:
-      app: {{ template "kiali-server.fullname" . }}
+      app.kubernetes.io/instance: {{ template "kiali-server.fullname" . }}
   mtls:
     mode: "UNSET"
   portLevelMtls:
