@@ -56,8 +56,9 @@ async function installBTPOperatorHelmChart(creds, clusterId) {
         await helmInstallUpgrade(btp, btpChart, btp, btpValues, null, ["--create-namespace"]);
     } catch (error) {
         if (error.stderr === undefined) {
-            throw new Error(`failed to install ${btp}: ${error}`);
+            throw new Error(`failed to install ${btp}: failed to process output of "helm upgrade"`);
         }
+        console.log(error)
         throw new Error(`failed to install ${btp}: ${error.stderr}`);
     }
 }
@@ -70,7 +71,7 @@ async function installBTPServiceOperatorMigrationHelmChart() {
         await helmInstallUpgrade(btp, chart, "sap-btp-operator", null, null, ["--create-namespace"]);
     } catch (error) {
         if (error.stderr === undefined) {
-            throw new Error(`failed to install ${btp}: ${error}`);
+            throw new Error(`failed to install ${btp}: : failed to process output of "helm upgrade"`);
         }
         throw new Error(`failed to install ${btp}: ${error.stderr}`);
     }
@@ -203,7 +204,7 @@ async function provisionPlatform(creds, svcatPlatform) {
 
     } catch (error) {
         if (error.stderr === undefined) {
-            throw new Error(`failed to process output of "smctl ${args.join(' ')}": ${error}`);
+            throw new Error(`failed to process output of "smctl ${args.join(' ')}"`);
         }
         throw new Error(`failed "smctl ${args.join(' ')}": ${error.stderr}`);
     }
@@ -233,7 +234,7 @@ async function smInstanceBinding(btpOperatorInstance, btpOperatorBinding) {
 
     } catch (error) {
         if (error.stderr === undefined) {
-            throw new Error(`failed to process output of "smctl ${args.join(' ')}": ${error}`);
+            throw new Error(`failed to process output of "smctl ${args.join(' ')}"`);
         }
         throw new Error(`failed "smctl ${args.join(' ')}": ${error.stderr}`);
     }
@@ -246,7 +247,7 @@ async function markForMigration(creds, svcatPlatform, btpOperatorInstanceId) {
         args = [`login`, `-a`, creds.url, `--param`, `subdomain=e2etestingscmigration`, `--auth-flow`, `client-credentials`]
         await execa(`smctl`, args.concat([`--client-id`, creds.clientid, `--client-secret`, creds.clientsecret]));
     } catch (error) {
-        errors = errors.concat([`failed "smctl ${args.join(' ')}": ${error.stderr}\n${error}`]);
+        errors = errors.concat([`failed "smctl ${args.join(' ')}": ${error.stderr}\n`]);
     }
 
     try {
@@ -255,7 +256,7 @@ async function markForMigration(creds, svcatPlatform, btpOperatorInstanceId) {
         args = ['curl', '-X', 'PUT', '-d', JSON.stringify(data), '/v1/migrate/service_operator/' + btpOperatorInstanceId]
         await execa('smctl', args)
     } catch (error) {
-        errors = errors.concat([`failed "smctl ${args.join(' ')}": ${error.stderr}\n${error}`]);
+        errors = errors.concat([`failed "smctl ${args.join(' ')}": ${error.stderr}\n`]);
     }
     if (errors.length > 0) {
         throw new Error(errors.join(", "));
@@ -269,7 +270,7 @@ async function cleanupInstanceBinding(creds, svcatPlatform, btpOperatorInstance,
         args = [`login`, `-a`, creds.url, `--param`, `subdomain=e2etestingscmigration`, `--auth-flow`, `client-credentials`]
         await execa(`smctl`, args.concat([`--client-id`, creds.clientid, `--client-secret`, creds.clientsecret]));
     } catch (error) {
-        errors = errors.concat([`failed "smctl ${args.join(' ')}": ${error.stderr}\n${error}`]);
+        errors = errors.concat([`failed "smctl ${args.join(' ')}": ${error.stderr}\n`]);
     }
 
     try {
@@ -279,7 +280,7 @@ async function cleanupInstanceBinding(creds, svcatPlatform, btpOperatorInstance,
              errors = errors.concat([`failed "smctl ${args.join(' ')}": ${stdout}`])
         }
     } catch (error) {
-        errors = errors.concat([`failed "smctl ${args.join(' ')}": ${error.stderr}\n${error}`]);
+        errors = errors.concat([`failed "smctl ${args.join(' ')}": ${error.stderr}\n`]);
     }
 
     try {
@@ -290,7 +291,7 @@ async function cleanupInstanceBinding(creds, svcatPlatform, btpOperatorInstance,
             errors = errors.concat([`failed "smctl ${args.join(' ')}": ${stdout}`])
         }
     } catch (error) {
-        errors = errors.concat([`failed "smctl ${args.join(' ')}": ${error.stderr}\n${error}`]);
+        errors = errors.concat([`failed "smctl ${args.join(' ')}": ${error.stderr}\n}`]);
     }
 
     try {
@@ -300,7 +301,7 @@ async function cleanupInstanceBinding(creds, svcatPlatform, btpOperatorInstance,
         //     errors = errors.concat([`failed "smctl ${args.join(' ')}": ${stdout}`])
         // }
     } catch (error) {
-        errors = errors.concat([`failed "smctl ${args.join(' ')}": ${error.stderr}\n${error}`]);
+        errors = errors.concat([`failed "smctl ${args.join(' ')}": ${error.stderr}\n`]);
     }
 
     if (errors.length > 0) {

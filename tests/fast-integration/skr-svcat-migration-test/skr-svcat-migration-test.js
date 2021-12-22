@@ -28,13 +28,13 @@ describe("SKR SVCAT migration test", function() {
   const suffix = genRandom(4);
   const appName = `app-${suffix}`;
   const runtimeName = `kyma-${suffix}`;
-  const runtimeID = uuid.v4();
+  const instanceID = uuid.v4();
   
   const svcatPlatform = `svcat-${suffix}`
   const btpOperatorInstance = `btp-operator-${suffix}`
   const btpOperatorBinding = `btp-operator-binding-${suffix}`
   switchDebug(on = true)
-  debug(`RuntimeID ${runtimeID}`, `Runtime ${runtimeName}`, `Application ${appName}`, `Suffix ${suffix}`);
+  debug(`InstanceID ${instanceID}`, `Runtime ${runtimeName}`, `Application ${appName}`, `Suffix ${suffix}`);
 
   this.timeout(60 * 60 * 1000 * 3); // 3h
   this.slow(5000);
@@ -51,7 +51,7 @@ describe("SKR SVCAT migration test", function() {
 
   let skr;
   it(`Should provision SKR`, async function() {
-    skr = await provisionSKR(keb, gardener, runtimeID, runtimeName, platformCreds, btpOperatorCreds);
+    skr = await provisionSKR(keb, gardener, instanceID, runtimeName, platformCreds, btpOperatorCreds);
   });
 
   it(`Should save kubeconfig for the SKR to ~/.kube/config`, async function() {
@@ -125,7 +125,7 @@ describe("SKR SVCAT migration test", function() {
   });
 
   it(`Should deprovision SKR`, async function() {
-    await deprovisionSKR(keb, runtimeID);
+    await deprovisionSKR(keb, instanceID);
   });
 
   it(`Should cleanup platform --cascade, operator instances and bindings`, async function() {
