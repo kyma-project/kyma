@@ -1,3 +1,6 @@
+{{- /*
+    Customization: exclude "global" and "authProxy" sections from being rendered as a part of the config.
+  */ -}}
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -9,7 +12,7 @@ metadata:
 data:
   config.yaml: |
     {{- /* Most of .Values is simply the ConfigMap - strip out the keys that are not part of the ConfigMap */}}
-    {{- $cm := omit .Values "nameOverride" "fullnameOverride" "kiali_route_url" }}
+    {{- $cm := omit .Values "nameOverride" "fullnameOverride" "kiali_route_url" "global" "authProxy" }}
     {{- /* The helm chart defines namespace for us, but pass it to the ConfigMap in case the server needs it */}}
     {{- $_ := set $cm.deployment "namespace" .Release.Namespace }}
     {{- /* Some values of the ConfigMap are generated, but might not be identical, from .Values */}}
