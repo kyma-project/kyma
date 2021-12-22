@@ -3,7 +3,7 @@ kind: LogPipeline
 metadata:
   name: logpipeline-sample
 spec:
-  parsers: [ ] # TODO should be a map, not a list
+  parsers: [ ]
   multilineParsers:
     - content: |
         # Example from https://docs.fluentbit.io/manual/pipeline/filters/multiline-stacktrace

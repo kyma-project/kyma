@@ -18,6 +18,7 @@ package controllers
 
 import (
 	"context"
+	"fmt"
 	"strings"
 	"time"
 
@@ -35,11 +36,13 @@ import (
 var _ = Describe("LogPipeline controller", func() {
 	const (
 		LogPipelineName       = "log-pipeline"
-		FluentBitOutputConfig = "Name \"Null\"\n  Match *"
-
-		timeout  = time.Second * 10
-		interval = time.Millisecond * 250
+		FluentBitParserConfig = "Name   dummy_test\nFormat   regex\nRegex   ^(?<INT>[^ ]+) (?<FLOAT>[^ ]+) (?<BOOL>[^ ]+) (?<STRING>.+)$"
+		FluentBitFilterConifg = "Name   grep\nMatch   *\nRegex   $kubernetes['labels']['app'] my-deployment"
+		FluentBitOutputConfig = "Name   stdout\nMatch   *"
+		timeout               = time.Second * 10
+		interval              = time.Millisecond * 250
 	)
+	var expectedFluentBitConfig = fmt.Sprintf("[PARSER]\n%s\n\n[FILTER]\n%s\n\n[OUTPUT]\n%s", FluentBitParserConfig, FluentBitFilterConifg, FluentBitOutputConfig)
 
 	Context("When updating LogPipeline", func() {
 		It("Should sync with the Fluent Bit configuration", func() {
@@ -122,6 +125,12 @@ var _ = Describe("LogPipeline controller", func() {
 				Name:      "my-secret",
 				Namespace: ControllerNamespace,
 			}
+			parser := telemetryv1alpha1.Parser{
+				Content: FluentBitParserConfig,
+			}
+			filter := telemetryv1alpha1.Filter{
+				Content: FluentBitFilterConifg,
+			}
 			output := telemetryv1alpha1.Output{
 				Content: FluentBitOutputConfig,
 			}
@@ -134,6 +143,8 @@ var _ = Describe("LogPipeline controller", func() {
 					Name: LogPipelineName,
 				},
 				Spec: telemetryv1alpha1.LogPipelineSpec{
+					Parsers:    []telemetryv1alpha1.Parser{parser},
+					Filters:    []telemetryv1alpha1.Filter{filter},
 					Outputs:    []telemetryv1alpha1.Output{output},
 					Files:      []telemetryv1alpha1.FileMount{file},
 					SecretRefs: []telemetryv1alpha1.SecretReference{secretRef},
@@ -154,7 +165,7 @@ var _ = Describe("LogPipeline controller", func() {
 					return err.Error()
 				}
 				return strings.TrimRight(fluentBitCm.Data[cmFileName], "\n")
-			}, timeout, interval).Should(Equal("[OUTPUT]\n" + FluentBitOutputConfig))
+			}, timeout, interval).Should(Equal(expectedFluentBitConfig))
 
 			// File content should be copied to ConfigMap
 			Eventually(func() string {

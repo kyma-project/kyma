@@ -149,7 +149,7 @@ func (r *LogPipelineReconciler) syncConfigMap(ctx context.Context, config *telem
 			controllerutil.RemoveFinalizer(config, configMapFinalizer)
 		}
 	} else {
-		fluentBitConfig := mergeFluentBitConfig(config.Spec.Parsers, config.Spec.MultiLineParsers, config.Spec.Filters, config.Spec.Outputs)
+		fluentBitConfig := mergeFluentBitConfig(config)
 		if cm.Data == nil {
 			data := make(map[string]string)
 			data[cmKey] = fluentBitConfig
@@ -307,18 +307,18 @@ func (r *LogPipelineReconciler) deleteFluentBitPods(ctx context.Context, log log
 }
 
 // Merge FluentBit parsers, filters and outputs to single FluentBit configuration.
-func mergeFluentBitConfig(parsers []telemetryv1alpha1.Parser, multiLineParsers []telemetryv1alpha1.MultiLineParser, filters []telemetryv1alpha1.Filter, outputs []telemetryv1alpha1.Output) string {
+func mergeFluentBitConfig(config *telemetryv1alpha1.LogPipeline) string {
 	var result string
-	for _, parser := range parsers {
-		result += "[PARSER]\n\t" + parser.Content + "\n\n"
+	for _, parser := range config.Spec.Parsers {
+		result += "[PARSER]\n" + parser.Content + "\n\n"
 	}
-	for _, multiLineParser := range multiLineParsers {
+	for _, multiLineParser := range config.Spec.MultiLineParsers {
 		result += "[MULTILINE_PARSER]\n" + multiLineParser.Content + "\n\n"
 	}
-	for _, filter := range filters {
+	for _, filter := range config.Spec.Filters {
 		result += "[FILTER]\n" + filter.Content + "\n\n"
 	}
-	for _, output := range outputs {
+	for _, output := range config.Spec.Outputs {
 		result += "[OUTPUT]\n" + output.Content + "\n\n"
 	}
 	return result
