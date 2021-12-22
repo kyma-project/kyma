@@ -73,3 +73,8 @@ ci-test-eventing-post-upgrade:
 	npm install
 	npm run eventing-upgrade-test-tests
 	npm run eventing-upgrade-test-cleanup
+
+.PHONY: ci-test-eventing-tests
+ci-test-eventing-post-tests:
+	npm install
+	npm run eventing-upgrade-test-tests

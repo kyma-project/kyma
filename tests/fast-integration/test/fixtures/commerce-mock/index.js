@@ -721,7 +721,7 @@ async function checkInClusterEventDelivery(targetNamespace) {
 }
 
 async function checkInClusterEventDeliveryHelper(targetNamespace, encoding) {
-  const eventId = "event-" + encoding + "-" + 'event';
+  const eventId = "event-" + encoding + "-" + genRandom(5);
   const vs = await waitForVirtualService(targetNamespace, "lastorder");
   const mockHost = vs.spec.hosts[0];
 
@@ -733,7 +733,6 @@ async function checkInClusterEventDeliveryHelper(targetNamespace, encoding) {
   return await retryPromise(async () => {
     debug("Waiting for event: ", eventId);
     let response = await axios.get(`https://${mockHost}`, { params: { inappevent: eventId } })
-    debug("host: ", `https://${mockHost}`);
     debug("response received: ", response.data);
     expect(response.data).to.have.nested.property("event.id", eventId, "The same event id expected in the result");
     expect(response.data).to.have.nested.property("event.shipped", true, "Order should have property shipped");
