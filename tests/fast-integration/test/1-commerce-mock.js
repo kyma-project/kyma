@@ -109,6 +109,10 @@ function commerceMockTests() {
       await checkLokiLogs(testStartTimestamp);
     });
 
+    it("Wait 60 min to check the logs", async function () {
+      await new Promise(resolve => setTimeout(resolve, 5000));
+    });
+
     it("Test namespaces should be deleted", async function () {
       await cleanMockTestFixture("mocks", testNamespace, true);
     });
