@@ -25,6 +25,7 @@ var _ = ginkgo.Describe("ServiceAccount", func() {
 		baseServiceAccount *corev1.ServiceAccount
 		namespace          string
 	)
+	g := gomega.NewGomegaWithT(nil)
 
 	ginkgo.BeforeEach(func() {
 		userNamespace := newFixNamespace("tam")
@@ -56,7 +57,7 @@ var _ = ginkgo.Describe("ServiceAccount", func() {
 
 		serviceAccount := &corev1.ServiceAccount{}
 		gomega.Expect(k8sClient.Get(context.TODO(), types.NamespacedName{Namespace: namespace, Name: baseServiceAccount.GetName()}, serviceAccount)).To(gomega.Succeed())
-		compareServiceAccounts(serviceAccount, baseServiceAccount)
+		compareServiceAccounts(g, serviceAccount, baseServiceAccount)
 
 		ginkgo.By("updating the base ServiceAccount")
 		copy := baseServiceAccount.DeepCopy()
@@ -71,7 +72,7 @@ var _ = ginkgo.Describe("ServiceAccount", func() {
 
 		serviceAccount = &corev1.ServiceAccount{}
 		gomega.Expect(k8sClient.Get(context.TODO(), types.NamespacedName{Namespace: namespace, Name: baseServiceAccount.GetName()}, serviceAccount)).To(gomega.Succeed())
-		compareServiceAccounts(serviceAccount, copy)
+		compareServiceAccounts(g, serviceAccount, copy)
 
 		ginkgo.By("updating the modified ServiceAccount in user namespace")
 		userCopy := serviceAccount.DeepCopy()
@@ -86,7 +87,7 @@ var _ = ginkgo.Describe("ServiceAccount", func() {
 
 		serviceAccount = &corev1.ServiceAccount{}
 		gomega.Expect(k8sClient.Get(context.TODO(), types.NamespacedName{Namespace: namespace, Name: baseServiceAccount.GetName()}, serviceAccount)).To(gomega.Succeed())
-		compareServiceAccounts(serviceAccount, copy)
+		compareServiceAccounts(g, serviceAccount, copy)
 	})
 })
 

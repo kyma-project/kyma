@@ -27,6 +27,7 @@ var _ = ginkgo.Describe("Role", func() {
 		baseRole   *rbacv1.Role
 		namespace  string
 	)
+	g := gomega.NewGomegaWithT(nil)
 
 	ginkgo.BeforeEach(func() {
 		userNamespace := newFixNamespace("tam")
@@ -53,7 +54,7 @@ var _ = ginkgo.Describe("Role", func() {
 
 		role := &rbacv1.Role{}
 		gomega.Expect(k8sClient.Get(context.TODO(), types.NamespacedName{Namespace: namespace, Name: baseRole.GetName()}, role)).To(gomega.Succeed())
-		compareRole(role, baseRole)
+		compareRole(g, role, baseRole)
 
 		ginkgo.By("updating the base Role")
 		copy := baseRole.DeepCopy()
@@ -75,7 +76,7 @@ var _ = ginkgo.Describe("Role", func() {
 
 		role = &rbacv1.Role{}
 		gomega.Expect(k8sClient.Get(context.TODO(), types.NamespacedName{Namespace: namespace, Name: baseRole.GetName()}, role)).To(gomega.Succeed())
-		compareRole(role, copy)
+		compareRole(g, role, copy)
 
 		ginkgo.By("updating the modified Role in user namespace")
 		userCopy := role.DeepCopy()
@@ -96,7 +97,7 @@ var _ = ginkgo.Describe("Role", func() {
 
 		role = &rbacv1.Role{}
 		gomega.Expect(k8sClient.Get(context.TODO(), types.NamespacedName{Namespace: namespace, Name: baseRole.GetName()}, role)).To(gomega.Succeed())
-		compareRole(role, copy)
+		compareRole(g, role, copy)
 	})
 })
 

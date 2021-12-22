@@ -27,6 +27,7 @@ var _ = ginkgo.Describe("RoleBinding", func() {
 		baseRoleBinding *rbacv1.RoleBinding
 		namespace       string
 	)
+	g := gomega.NewGomegaWithT(nil)
 
 	ginkgo.BeforeEach(func() {
 		userNamespace := newFixNamespace("tam")
@@ -53,7 +54,7 @@ var _ = ginkgo.Describe("RoleBinding", func() {
 
 		roleBinding := &rbacv1.RoleBinding{}
 		gomega.Expect(k8sClient.Get(context.TODO(), types.NamespacedName{Namespace: namespace, Name: baseRoleBinding.GetName()}, roleBinding)).To(gomega.Succeed())
-		compareRoleBinding(roleBinding, baseRoleBinding)
+		compareRoleBinding(g, roleBinding, baseRoleBinding)
 
 		ginkgo.By("updating the base RoleBinding")
 		copy := baseRoleBinding.DeepCopy()
@@ -74,7 +75,7 @@ var _ = ginkgo.Describe("RoleBinding", func() {
 
 		roleBinding = &rbacv1.RoleBinding{}
 		gomega.Expect(k8sClient.Get(context.TODO(), types.NamespacedName{Namespace: namespace, Name: baseRoleBinding.GetName()}, roleBinding)).To(gomega.Succeed())
-		compareRoleBinding(roleBinding, copy)
+		compareRoleBinding(g, roleBinding, copy)
 
 		ginkgo.By("updating the modified RoleBinding in user namespace")
 		userCopy := roleBinding.DeepCopy()
@@ -94,7 +95,7 @@ var _ = ginkgo.Describe("RoleBinding", func() {
 
 		roleBinding = &rbacv1.RoleBinding{}
 		gomega.Expect(k8sClient.Get(context.TODO(), types.NamespacedName{Namespace: namespace, Name: baseRoleBinding.GetName()}, roleBinding)).To(gomega.Succeed())
-		compareRoleBinding(roleBinding, copy)
+		compareRoleBinding(g, roleBinding, copy)
 	})
 })
 

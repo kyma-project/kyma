@@ -23,6 +23,7 @@ var _ = ginkgo.Describe("Secret", func() {
 		baseSecretWithManagedLabel       *corev1.Secret
 		namespace                        string
 	)
+	g := gomega.NewGomegaWithT(nil)
 
 	ginkgo.BeforeEach(func() {
 		userNamespace := newFixNamespace("tam")
@@ -61,7 +62,7 @@ var _ = ginkgo.Describe("Secret", func() {
 		gomega.Expect(updatedBase.Finalizers).To(gomega.ContainElement(cfgSecretFinalizerName), "created base secret should have finalizer applied")
 		secret := &corev1.Secret{}
 		gomega.Expect(k8sClient.Get(context.TODO(), types.NamespacedName{Namespace: namespace, Name: baseSecret.GetName()}, secret)).To(gomega.Succeed())
-		compareSecrets(secret, baseSecret)
+		compareSecrets(g, secret, baseSecret)
 
 		ginkgo.By("updating the base Secret")
 		copy := updatedBase.DeepCopy()
@@ -76,7 +77,7 @@ var _ = ginkgo.Describe("Secret", func() {
 
 		secret = &corev1.Secret{}
 		gomega.Expect(k8sClient.Get(context.TODO(), types.NamespacedName{Namespace: namespace, Name: baseSecret.GetName()}, secret)).To(gomega.Succeed())
-		compareSecrets(secret, copy)
+		compareSecrets(g, secret, copy)
 
 		ginkgo.By("updating the modified Secret in user namespace")
 		userCopy := secret.DeepCopy()
@@ -90,7 +91,7 @@ var _ = ginkgo.Describe("Secret", func() {
 
 		secret = &corev1.Secret{}
 		gomega.Expect(k8sClient.Get(context.TODO(), types.NamespacedName{Namespace: namespace, Name: baseSecret.GetName()}, secret)).To(gomega.Succeed())
-		compareSecrets(secret, copy)
+		compareSecrets(g, secret, copy)
 	})
 
 	ginkgo.It("should not successfully propagate Secret managed by user to user namespace", func() {
@@ -113,7 +114,7 @@ var _ = ginkgo.Describe("Secret", func() {
 		gomega.Expect(k8sClient.Get(context.TODO(), types.NamespacedName{Namespace: baseSecretWithManagedLabel.GetNamespace(), Name: baseSecretWithManagedLabel.GetName()}, updatedBase)).To(gomega.Succeed())
 		secret := &corev1.Secret{}
 		gomega.Expect(k8sClient.Get(context.TODO(), types.NamespacedName{Namespace: namespace, Name: baseSecretWithManagedLabel.GetName()}, secret)).To(gomega.Succeed())
-		compareSecrets(secret, updatedBase)
+		compareSecrets(g, secret, updatedBase)
 
 		ginkgo.By("updating the base Secret")
 		copy := updatedBase.DeepCopy()
@@ -127,7 +128,7 @@ var _ = ginkgo.Describe("Secret", func() {
 
 		secret = &corev1.Secret{}
 		gomega.Expect(k8sClient.Get(context.TODO(), types.NamespacedName{Namespace: namespace, Name: baseSecretWithManagedLabel.GetName()}, secret)).To(gomega.Succeed())
-		compareSecrets(secret, updatedBase)
+		compareSecrets(g, secret, updatedBase)
 	})
 
 	ginkgo.It("should successfully delete propagated Secrets from user namespace when base Secret is deleted", func() {
@@ -142,7 +143,7 @@ var _ = ginkgo.Describe("Secret", func() {
 		gomega.Expect(updatedBase.Finalizers).To(gomega.ContainElement(cfgSecretFinalizerName), "created base secret should have finalizer applied")
 		secret := &corev1.Secret{}
 		gomega.Expect(k8sClient.Get(context.TODO(), types.NamespacedName{Namespace: namespace, Name: baseSecret.GetName()}, secret)).To(gomega.Succeed())
-		compareSecrets(secret, baseSecret)
+		compareSecrets(g, secret, baseSecret)
 
 		ginkgo.By("deleting base Secret")
 		gomega.Expect(k8sClient.Delete(context.TODO(), updatedBase)).To(gomega.Succeed())
@@ -165,7 +166,7 @@ var _ = ginkgo.Describe("Secret", func() {
 		gomega.Expect(k8sClient.Get(context.TODO(), types.NamespacedName{Namespace: baseSecretWithManagedLabel.GetNamespace(), Name: baseSecretWithManagedLabel.GetName()}, updatedBase)).To(gomega.Succeed())
 		secret := &corev1.Secret{}
 		gomega.Expect(k8sClient.Get(context.TODO(), types.NamespacedName{Namespace: namespace, Name: baseSecretWithManagedLabel.GetName()}, secret)).To(gomega.Succeed())
-		compareSecrets(secret, updatedBase)
+		compareSecrets(g, secret, updatedBase)
 
 		ginkgo.By("deleting base Secret")
 		gomega.Expect(k8sClient.Delete(context.TODO(), updatedBase)).To(gomega.Succeed())

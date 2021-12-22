@@ -25,8 +25,6 @@ func TestConfigMapReconciler_Reconcile(t *testing.T) {
 	k8sClient, testEnv := setUpTestEnv(g)
 	defer tearDownTestEnv(g, testEnv)
 	resourceClient := resource.New(k8sClient, scheme.Scheme)
-	g.Expect(resourceClient).ToNot(gomega.BeNil())
-
 	testCfg := setUpControllerConfig(g)
 	configMapSvc := NewConfigMapService(resourceClient, config)
 

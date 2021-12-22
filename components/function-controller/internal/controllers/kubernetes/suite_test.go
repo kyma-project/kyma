@@ -227,29 +227,29 @@ func compareConfigMaps(g *gomega.WithT, actual, expected *corev1.ConfigMap) {
 	g.Expect(actual.BinaryData).To(gomega.Equal(expected.BinaryData))
 }
 
-func compareSecrets(actual, expected *corev1.Secret) {
-	gomega.Expect(actual.GetLabels()).To(gomega.Equal(expected.GetLabels()))
-	gomega.Expect(actual.GetAnnotations()).To(gomega.Equal(expected.GetAnnotations()))
-	gomega.Expect(actual.Data).To(gomega.Equal(expected.Data))
+func compareSecrets(g *gomega.WithT, actual, expected *corev1.Secret) {
+	g.Expect(actual.GetLabels()).To(gomega.Equal(expected.GetLabels()))
+	g.Expect(actual.GetAnnotations()).To(gomega.Equal(expected.GetAnnotations()))
+	g.Expect(actual.Data).To(gomega.Equal(expected.Data))
 }
 
-func compareServiceAccounts(actual, expected *corev1.ServiceAccount) {
-	gomega.Expect(actual.GetLabels()).To(gomega.Equal(expected.GetLabels()))
-	gomega.Expect(actual.GetAnnotations()).To(gomega.Equal(expected.GetAnnotations()))
-	gomega.Expect(actual.Secrets).To(gomega.Equal(expected.Secrets))
-	gomega.Expect(actual.ImagePullSecrets).To(gomega.Equal(expected.ImagePullSecrets))
-	gomega.Expect(actual.AutomountServiceAccountToken).To(gomega.Equal(expected.AutomountServiceAccountToken))
+func compareServiceAccounts(g *gomega.WithT, actual, expected *corev1.ServiceAccount) {
+	g.Expect(actual.GetLabels()).To(gomega.Equal(expected.GetLabels()))
+	g.Expect(actual.GetAnnotations()).To(gomega.Equal(expected.GetAnnotations()))
+	g.Expect(actual.Secrets).To(gomega.Equal(expected.Secrets))
+	g.Expect(actual.ImagePullSecrets).To(gomega.Equal(expected.ImagePullSecrets))
+	g.Expect(actual.AutomountServiceAccountToken).To(gomega.Equal(expected.AutomountServiceAccountToken))
 }
 
-func compareRole(actual, expected *rbacv1.Role) {
-	gomega.Expect(actual.GetLabels()).To(gomega.Equal(expected.GetLabels()))
-	gomega.Expect(actual.GetAnnotations()).To(gomega.Equal(expected.GetAnnotations()))
-	gomega.Expect(actual.Rules).To(gomega.Equal(expected.Rules))
+func compareRole(g *gomega.WithT, actual, expected *rbacv1.Role) {
+	g.Expect(actual.GetLabels()).To(gomega.Equal(expected.GetLabels()))
+	g.Expect(actual.GetAnnotations()).To(gomega.Equal(expected.GetAnnotations()))
+	g.Expect(actual.Rules).To(gomega.Equal(expected.Rules))
 }
 
-func compareRoleBinding(actual, expected *rbacv1.RoleBinding) {
-	gomega.Expect(actual.GetLabels()).To(gomega.Equal(expected.GetLabels()))
-	gomega.Expect(actual.GetAnnotations()).To(gomega.Equal(expected.GetAnnotations()))
-	gomega.Expect(actual.RoleRef).To(gomega.Equal(expected.RoleRef))
-	gomega.Expect(actual.Subjects).To(gomega.Equal(expected.Subjects))
+func compareRoleBinding(g *gomega.WithT, actual, expected *rbacv1.RoleBinding) {
+	g.Expect(actual.GetLabels()).To(gomega.Equal(expected.GetLabels()))
+	g.Expect(actual.GetAnnotations()).To(gomega.Equal(expected.GetAnnotations()))
+	g.Expect(actual.RoleRef).To(gomega.Equal(expected.RoleRef))
+	g.Expect(actual.Subjects).To(gomega.Equal(expected.Subjects))
 }
