@@ -60,8 +60,8 @@ async function deprovisionSKR(keb, kcp, instanceID, timeout) {
   return operationID;
 }
 
-async function updateSKR(keb, kcp, gardener, instanceID, shootName, customParams, btpOperatorCreds, timeout) {
-  const resp = await keb.updateSKR(instanceID, customParams, btpOperatorCreds);
+async function updateSKR(keb, kcp, gardener, instanceID, shootName, customParams, btpOperatorCreds = null, isMigration = false, timeout) {
+  const resp = await keb.updateSKR(instanceID, customParams, btpOperatorCreds, isMigration);
   expect(resp).to.have.property("operation");
 
   const operationID = resp.operation;

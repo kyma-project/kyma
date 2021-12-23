@@ -78,7 +78,7 @@ describe("SKR SVCAT migration with KEB test", function() {
     })
 
     it(`Should update SKR with BTP Operator Credentials`, async function() {
-        await updateSKR(keb, gardener, instanceID, runtimeName, null, btpOperatorCreds);
+        await updateSKR(keb, gardener, instanceID, runtimeName, null, btpOperatorCreds, true);
     });
 
     it(`Should wait for btp-operator deployment availability`, async function() {

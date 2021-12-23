@@ -124,11 +124,12 @@ class KEBClient {
     }
   }
 
-  async updateSKR(instanceID, customParams, btpOperatorCreds) {
+  async updateSKR(instanceID, customParams, btpOperatorCreds, isMigration) {
     const payload = {
       service_id: KYMA_SERVICE_ID,
       context: {
         globalaccount_id: this.globalAccountID,
+        isMigration: isMigration,
       },
       parameters: {
         ...customParams,

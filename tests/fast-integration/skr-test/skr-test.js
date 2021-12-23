@@ -45,8 +45,7 @@ function OIDCE2ETest() {
       const customParams = {
         oidc: this.options.oidc1,
       };
-
-      let skr = await updateSKR(keb, kcp, gardener, this.options.instanceID, this.shoot.name, customParams, null, updateTimeout);
+      let skr = await updateSKR(keb, kcp, gardener, this.options.instanceID, this.shoot.name, customParams, updateTimeout);
       this.shoot = skr.shoot;
     });
 
@@ -71,7 +70,7 @@ function OIDCE2ETest() {
       const customParams = {
         administrators: this.options.administrators1,
       };
-      let skr = await updateSKR(keb, kcp, gardener, this.options.instanceID, this.shoot.name, customParams, null, updateTimeout);
+      let skr = await updateSKR(keb, kcp, gardener, this.options.instanceID, this.shoot.name, customParams, updateTimeout);
       this.shoot = skr.shoot;
     });
 
