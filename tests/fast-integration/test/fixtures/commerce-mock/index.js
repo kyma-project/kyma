@@ -531,10 +531,8 @@ async function revokeCommerceMockCertificate(){
     console.dir("-----------------------------")
    })
   } catch (err) {
-    process.env.NODE_TLS_REJECT_UNAUTHORIZED = '1';
     throw convertAxiosError(err, "Error during revoking Commerce Mock certificate via Kyma connector service");
   }
-  process.env.NODE_TLS_REJECT_UNAUTHORIZED = '1';
 }
 
 async function checkRevocation(){
