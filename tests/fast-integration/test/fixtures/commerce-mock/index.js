@@ -730,6 +730,7 @@ async function checkInClusterEventDeliveryHelper(targetNamespace, encoding) {
     debug("Sending event with id: ", eventId);
     await retryPromise(async () => {
         const response = await axios.post(`https://${mockHost}`, {id: eventId}, {params: {send: true, encoding: encoding}});
+        debug("Result of event publishing: ", response.data);
         expect(response.data).to.have.nested.property("order");
         expect(response.data).to.have.nested.property("event");
         expect(response.data).to.have.nested.property("podName");
