@@ -4,7 +4,7 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.4.1
+    controller-gen.kubebuilder.io/version: v0.5.0
   creationTimestamp: null
   name: logpipelines.telemetry.kyma-project.io
 spec:
@@ -22,14 +22,10 @@ spec:
         description: LogPipeline is the Schema for the logpipelines API
         properties:
           apiVersion:
-            description: 'APIVersion defines the versioned schema of this representation
-              of an object. Servers should convert recognized schemas to the latest
-              internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+            description: 'APIVersion defines the versioned schema of this representation of an object. Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
             type: string
           kind:
-            description: 'Kind is a string value representing the REST resource this
-              object represents. Servers may infer this from the endpoint the client
-              submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+            description: 'Kind is a string value representing the REST resource this object represents. Servers may infer this from the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
             type: string
           metadata:
             type: object
@@ -38,8 +34,7 @@ spec:
             properties:
               files:
                 items:
-                  description: FileMount provides file content to be consumed by a
-                    LogPipeline configuration.
+                  description: FileMount provides file content to be consumed by a LogPipeline configuration.
                   properties:
                     content:
                       type: string
@@ -49,8 +44,7 @@ spec:
                 type: array
               filters:
                 items:
-                  description: Filter describes a Fluent Bit filter configuration
-                    section.
+                  description: Filter describes a Fluent Bit filter configuration section.
                   properties:
                     content:
                       type: string
@@ -58,8 +52,7 @@ spec:
                 type: array
               multilineParsers:
                 items:
-                  description: MultiLineParser describes a Fluent Bit multiline parser
-                    configuration section.
+                  description: MultiLineParser describes a Fluent Bit multiline parser configuration section.
                   properties:
                     content:
                       type: string
@@ -67,8 +60,7 @@ spec:
                 type: array
               outputs:
                 items:
-                  description: Output describes a Fluent Bit output configuration
-                    section.
+                  description: Output describes a Fluent Bit output configuration section.
                   properties:
                     content:
                       type: string
@@ -76,8 +68,7 @@ spec:
                 type: array
               parsers:
                 items:
-                  description: Parser describes a Fluent Bit parser configuration
-                    section.
+                  description: Parser describes a Fluent Bit parser configuration section.
                   properties:
                     content:
                       type: string
@@ -85,8 +76,7 @@ spec:
                 type: array
               secretRefs:
                 items:
-                  description: SecretReference is a pointer to a Kubernetes secret
-                    that should be provided as environment to Fluent Bit.
+                  description: SecretReference is a pointer to a Kubernetes secret that should be provided as environment to Fluent Bit.
                   properties:
                     name:
                       type: string
