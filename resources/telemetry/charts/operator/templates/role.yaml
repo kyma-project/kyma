@@ -5,24 +5,69 @@ metadata:
   name: {{ include "operator.fullname" . }}-manager-role
   namespace: {{ .Release.Namespace }}
 rules:
-  - apiGroups: [""]
-    resources: ["configmaps"]
-    verbs: ["create", "delete", "get", "list", "patch", "update", "watch"]
-  - apiGroups: [""]
-    resources: ["pods"]
-    verbs: ["delete", "list", "watch"]
-  - apiGroups: [""]
-    resources: ["secrets"]
-    verbs: ["create", "delete", "get", "list", "patch", "update", "watch"]
-  - apiGroups: ["apps"]
-    resources: ["daemonsets"]
-    verbs: ["get", "list", "watch"]
-  - apiGroups: ["telemetry.kyma-project.io"]
-    resources: ["loggingconfigurations"]
-    verbs: ["create", "delete", "get", "list", "patch", "update", "watch"]
-  - apiGroups: ["telemetry.kyma-project.io"]
-    resources: ["loggingconfigurations/finalizers"]
-    verbs: ["update"]
-  - apiGroups: ["telemetry.kyma-project.io"]
-    resources: ["loggingconfigurations/status"]
-    verbs: ["get", "patch", "update"]
+  - apiGroups:
+      - ""
+    resources:
+      - configmaps
+    verbs:
+      - create
+      - delete
+      - get
+      - list
+      - patch
+      - update
+      - watch
+  - apiGroups:
+      - ""
+    resources:
+      - pods
+    verbs:
+      - delete
+      - list
+      - watch
+  - apiGroups:
+      - ""
+    resources:
+      - secrets
+    verbs:
+      - create
+      - delete
+      - get
+      - list
+      - patch
+      - update
+      - watch
+  - apiGroups:
+      - apps
+    resources:
+      - daemonsets
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - telemetry.kyma-project.io
+    resources:
+      - logpipelines
+    verbs:
+      - create
+      - delete
+      - get
+      - list
+      - patch
+      - update
+      - watch
+  - apiGroups:
+      - telemetry.kyma-project.io
+    resources:
+      - logpipelines/finalizers
+    verbs:
+      - update
+  - apiGroups:
+      - telemetry.kyma-project.io
+    resources:
+      - logpipelines/status
+    verbs:
+      - get
+      - patch
+      - update

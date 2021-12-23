@@ -183,12 +183,6 @@ config:
         Mem_Buf_Limit 5MB
         Skip_Long_Lines On
 
-    [INPUT]
-        Name systemd
-        Tag host.*
-        Systemd_Filter _SYSTEMD_UNIT=kubelet.service
-        Read_From_Tail On
-
   ## https://docs.fluentbit.io/manual/pipeline/filters
   filters: |
     [FILTER]
@@ -200,22 +194,7 @@ config:
         K8S-Logging.Exclude On
 
   ## https://docs.fluentbit.io/manual/pipeline/outputs
-  outputs: |
-    [OUTPUT]
-        Name es
-        Match kube.*
-        Host elasticsearch-master
-        Logstash_Format On
-        Retry_Limit False
-
-    [OUTPUT]
-        Name es
-        Match host.*
-        Host elasticsearch-master
-        Logstash_Format On
-        Logstash_Prefix node
-        Retry_Limit False
-
+  outputs: ""
   ## https://docs.fluentbit.io/manual/pipeline/parsers
   customParsers: |
     [PARSER]
@@ -260,7 +239,7 @@ args: []
 
 command: []
 
-initContainers: 
+initContainers:
   - name: prep-fluent-bit-config
     volumeMounts:
     - name: shared-fluent-bit-config
