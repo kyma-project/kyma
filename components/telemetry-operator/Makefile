@@ -75,7 +75,7 @@ build: generate fmt vet ## Build manager binary.
 	go build -o bin/manager main.go
 
 run-local: manifests-local generate-local fmt-local vet-local ## Run a controller from your host.
-	go run ./main.go
+	go run ./main.go --cm-name=telemetry-fluent-bit-sections --ds-name=logging-fluent-bit --env-secret=logging-fluent-bit-env --files-cm=logging-fluent-bit-files --fluent-bit-ns=kyma-system
 
 ## Will be called from Prow-Pipeline; using targets from generic make file
 release: resolve generate verify build-image push-image
