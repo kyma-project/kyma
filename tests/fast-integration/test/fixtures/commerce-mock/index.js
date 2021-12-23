@@ -1,7 +1,7 @@
 const k8s = require("@kubernetes/client-node");
 const fs = require("fs");
 const path = require("path");
-const {expect} = require("chai");
+const { expect } = require("chai");
 const https = require("https");
 const axios = require("axios").default;
 const httpsAgent = new https.Agent({
@@ -43,11 +43,6 @@ const {
 
 const {
     registerOrReturnApplication,
-    deregisterApplication,
-    removeApplicationFromScenario,
-    removeScenarioFromCompass,
-    getApplicationByName,
-    unassignRuntimeFromScenario,
 } = require("../../../compass");
 
 const {
@@ -82,6 +77,7 @@ const lastorderFunctionYaml = fs.readFileSync(
     }
 );
 
+const commerceObjs = k8s.loadAllYaml(commerceMockYaml);
 const applicationObjs = k8s.loadAllYaml(applicationMockYaml);
 const lastorderObjs = k8s.loadAllYaml(lastorderFunctionYaml);
 let eventMeshSourceNamespace = "/default/sap.kyma/tunas-prow"
@@ -107,13 +103,8 @@ function prepareLastorderObjs(type = 'standard', appName = 'commerce') {
     }
 }
 
-// Allows creating Commerce Mock objects in a specific namespace
-function prepareCommerceObjs(mockNamespace) {
-    return k8s.loadAllYaml(commerceMockYaml.toString().replace(/%%MOCK_NAMESPACE%%/g, mockNamespace))
-}
-
-async function checkFunctionResponse(functionNamespace, mockNamespace = 'mocks') {
-    const vs = await waitForVirtualService(mockNamespace, "commerce-mock");
+async function checkFunctionResponse(functionNamespace) {
+    const vs = await waitForVirtualService("mocks", "commerce-mock");
     const mockHost = vs.spec.hosts[0];
     const host = mockHost.split(".").slice(1).join(".");
 
@@ -129,9 +120,9 @@ async function checkFunctionResponse(functionNamespace, mockNamespace = 'mocks')
 
     // expect no error when authorized
     let res = await retryPromise(
-        () => axios.post(`https://lastorder.${host}/function`, {orderCode: "789"}, {
+        () => axios.post(`https://lastorder.${host}/function`, { orderCode: "789" }, {
             timeout: 5000,
-            headers: {Authorization: `bearer ${accessToken}`}
+            headers: { Authorization: `bearer ${accessToken}`}
         }),
         45,
         2000
@@ -144,7 +135,7 @@ async function checkFunctionResponse(functionNamespace, mockNamespace = 'mocks')
     // expect error when unauthorized
     let errorOccurred = false
     try {
-        res = await axios.post(`https://lastorder.${host}/function`, {orderCode: "789"}, {timeout: 5000})
+        res = await axios.post(`https://lastorder.${host}/function`, { orderCode: "789" }, { timeout: 5000 })
     } catch (err) {
         errorOccurred = true;
         expect(err.response.status).to.be.equal(401);
@@ -152,8 +143,8 @@ async function checkFunctionResponse(functionNamespace, mockNamespace = 'mocks')
     expect(errorOccurred).to.be.equal(true);
 }
 
-async function sendEventAndCheckResponse(mockNamespace = 'mocks') {
-    const vs = await waitForVirtualService(mockNamespace, "commerce-mock");
+async function sendEventAndCheckResponse() {
+    const vs = await waitForVirtualService("mocks", "commerce-mock");
     const mockHost = vs.spec.hosts[0];
     const host = mockHost.split(".").slice(1).join(".");
 
@@ -166,7 +157,7 @@ async function sendEventAndCheckResponse(mockNamespace = 'mocks') {
                         "event-type": "order.created",
                         "event-type-version": "v1",
                         "event-time": "2020-09-28T14:47:16.491Z",
-                        "data": {"orderCode": "567"},
+                        "data": { "orderCode": "567" },
                         "event-tracing": true,
                     },
                     {
@@ -184,7 +175,7 @@ async function sendEventAndCheckResponse(mockNamespace = 'mocks') {
             await sleep(500);
 
             return axios
-                .get(`https://lastorder.${host}`, {timeout: 5000})
+                .get(`https://lastorder.${host}`, { timeout: 5000 })
                 .then((res) => {
                     expect(res.data).to.have.nested.property("event.data.orderCode", "567");
                     // See: https://github.com/kyma-project/kyma/issues/10720
@@ -205,9 +196,9 @@ async function sendEventAndCheckResponse(mockNamespace = 'mocks') {
     );
 }
 
-async function sendLegacyEventAndCheckTracing(targetNamespace = "test", mockNamespace = 'mocks') {
+async function sendLegacyEventAndCheckTracing() {
     // Send an event and get it back from the lastorder function
-    const res = await sendEventAndCheckResponse(mockNamespace);
+    const res = await sendEventAndCheckResponse();
     expect(res.data).to.have.nested.property("event.headers.x-b3-traceid");
     expect(res.data).to.have.nested.property("podName");
 
@@ -222,7 +213,7 @@ async function sendLegacyEventAndCheckTracing(targetNamespace = "test", mockName
         'central-application-connectivity-validator.kyma-system',
         'eventing-publisher-proxy.kyma-system',
         'eventing-controller.kyma-system',
-        `lastorder-${res.data.podName.split('-')[1]}.${targetNamespace}`,
+        `lastorder-${res.data.podName.split('-')[1]}.test`,
     ];
 
     // wait sometime for jaeger to complete tracing data
@@ -241,10 +232,10 @@ async function checkInClusterEventTracing(targetNamespace) {
     // Define expected trace data
     const correctTraceSpansLength = 4;
     const correctTraceProcessSequence = [
-        `lastorder-${res.data.podName.split('-')[1]}.${targetNamespace}`, // We are sending the in-cluster event from inside the lastorder pod.
+        `lastorder-${res.data.podName.split('-')[1]}.test`, // We are sending the in-cluster event from inside the lastorder pod.
         'eventing-publisher-proxy.kyma-system',
         'eventing-controller.kyma-system',
-        `lastorder-${res.data.podName.split('-')[1]}.${targetNamespace}`,
+        `lastorder-${res.data.podName.split('-')[1]}.test`,
     ];
 
     // wait sometime for jaeger to complete tracing data
@@ -256,9 +247,10 @@ async function checkTrace(traceId, expectedTraceLength, expectedTraceProcessSequ
     // Port-forward to Jaeger and fetch trace data for the traceId
     const cancelJaegerPortForward = await jaegerPortForward();
     var traceRes;
-    try {
+    try{
         traceRes = await getJaegerTrace(traceId)
-    } finally {
+    }
+    finally{
         // finally block will run even if exception is thrown (reference: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/try...catch#the_finally-block)
         cancelJaegerPortForward();
     }
@@ -289,87 +281,9 @@ async function checkTrace(traceId, expectedTraceLength, expectedTraceProcessSequ
     }
 }
 
-async function addService() {
-    const vs = await waitForVirtualService("mocks", "commerce-mock");
-    const mockHost = vs.spec.hosts[0];
-    const url = `https://${mockHost}/remote/apis`;
-    const body = {
-        "name": "my-service-http-bin",
-        "provider": "myCompany",
-        "description": "This is some service",
-        "api": {
-            "targetUrl": "https://httpbin.org",
-            "spec": {
-                "swagger": "2.0"
-            }
-        }
-    }
-    const params = {
-        headers: {
-            "Content-Type": "application/json"
-        },
-        timeout: 5000,
-    };
-
-    let serviceId
-    try {
-        serviceId = await axios.post(url, body, params);
-    } catch (err) {
-        throw convertAxiosError(err, "Error during adding a Service");
-    }
-    return serviceId.data.id;
-}
-
-async function updateService(serviceId) {
-    const vs = await waitForVirtualService("mocks", "commerce-mock");
-    const mockHost = vs.spec.hosts[0];
-    const url = `https://${mockHost}/remote/apis/${serviceId}`;
-    const body = {
-        "name": "my-service-http-bin",
-        "provider": "myCompany",
-        "description": "This is some service - an updated description",
-        "api": {
-            "targetUrl": "https://httpbin.org",
-            "spec": {
-                "swagger": "2.0"
-            }
-        }
-    }
-    const params = {
-        headers: {
-            "Content-Type": "application/json"
-        },
-        timeout: 5000,
-    };
-
-    try {
-        await axios.put(url, body, params);
-    } catch (err) {
-        throw convertAxiosError(err, "Error during updating a Service");
-    }
-}
-
-async function deleteService(serviceId) {
-    const vs = await waitForVirtualService("mocks", "commerce-mock");
-    const mockHost = vs.spec.hosts[0];
-    const url = `https://${mockHost}/remote/apis/${serviceId}`;
-    const params = {
-        headers: {
-            "Content-Type": "application/json"
-        },
-        timeout: 5000,
-    };
-
-    try {
-        await axios.delete(url, params);
-    } catch (err) {
-        throw convertAxiosError(err, "Error during deleting a Service");
-    }
-}
-
 async function registerAllApis(mockHost) {
     debug("Listing Commerce Mock local APIs")
-    const localApis = await axios.get(`https://${mockHost}/local/apis`, {timeout: 5000}).catch((err) => {
+    const localApis = await axios.get(`https://${mockHost}/local/apis`, { timeout: 5000 }).catch((err) => {
         throw convertAxiosError(err, "API registration error - commerce mock local API not available");
     });
     debug("Commerce Mock local APIs received")
@@ -407,10 +321,9 @@ async function connectMockLocal(mockHost, targetNamespace) {
     const tokenRequest = {
         apiVersion: "applicationconnector.kyma-project.io/v1alpha1",
         kind: "TokenRequest",
-        metadata: {name: "commerce", namespace: targetNamespace},
+        metadata: { name: "commerce", namespace: targetNamespace },
     };
-    await k8sDynamicApi.delete(tokenRequest).catch(() => {
-    }); // Ignore delete error
+    await k8sDynamicApi.delete(tokenRequest).catch(() => { }); // Ignore delete error
     await k8sDynamicApi.create(tokenRequest);
     const tokenObj = await waitForTokenRequest("commerce", targetNamespace);
 
@@ -452,7 +365,7 @@ async function connectCommerceMock(mockHost, tokenData) {
         headers: {
             "Content-Type": "application/json"
         },
-        timeout: 30 * 1000,
+        timeout: 5000,
     };
 
     try {
@@ -478,7 +391,7 @@ async function ensureCommerceMockWithCompassTestFixture(client, appName, scenari
         5,
         2000
     );
-    await waitForServiceInstance("commerce", targetNamespace, 600 * 1000);
+    await waitForServiceInstance("commerce", targetNamespace, 300 * 1000);
 
     if (withCentralApplicationConnectivity) {
         await waitForDeployment('central-application-gateway', 'kyma-system');
@@ -492,9 +405,9 @@ async function ensureCommerceMockWithCompassTestFixture(client, appName, scenari
     const serviceBinding = {
         apiVersion: "servicecatalog.k8s.io/v1beta1",
         kind: "ServiceBinding",
-        metadata: {name: "commerce-binding"},
+        metadata: { name: "commerce-binding" },
         spec: {
-            instanceRef: {name: "commerce"},
+            instanceRef: { name: "commerce" },
         },
     };
     await k8sApply([serviceBinding], targetNamespace, false);
@@ -503,10 +416,10 @@ async function ensureCommerceMockWithCompassTestFixture(client, appName, scenari
     const serviceBindingUsage = {
         apiVersion: "servicecatalog.kyma-project.io/v1alpha1",
         kind: "ServiceBindingUsage",
-        metadata: {name: "commerce-lastorder-sbu"},
+        metadata: { name: "commerce-lastorder-sbu" },
         spec: {
-            serviceBindingRef: {name: "commerce-binding"},
-            usedBy: {kind: "serverless-function", name: "lastorder"},
+            serviceBindingRef: { name: "commerce-binding" },
+            usedBy: { kind: "serverless-function", name: "lastorder" },
         },
     };
     await k8sApply([serviceBindingUsage], targetNamespace);
@@ -523,33 +436,6 @@ async function ensureCommerceMockWithCompassTestFixture(client, appName, scenari
     await waitForSubscription("order-created", targetNamespace);
 
     return mockHost;
-}
-
-async function cleanCompassResourcesSKR(client, appName, scenarioName, runtimeID) {
-    const application = await getApplicationByName(client, appName, scenarioName)
-    if (application) {
-        // detach Commerce-mock application from scenario
-        // so that we can de-register the app from compass
-        console.log(`Removing application from scenario...`)
-        await removeApplicationFromScenario(client, application.id, scenarioName);
-
-        // Disconnect Commerce-mock app from compass
-        console.log(`De-registering application: ${application.id}...`)
-        await deregisterApplication(client, application.id);
-    }
-
-    try {
-        // detach the target SKR from scenario
-        // so that we can remove scenario from compass
-        console.log(`Un-assigning runtime from scenario: ${scenarioName}...`)
-        await unassignRuntimeFromScenario(client, runtimeID, scenarioName);
-
-        console.log(`Removing scenario from compass: ${scenarioName}...`)
-        await removeScenarioFromCompass(client, scenarioName)
-    } catch (err) {
-        console.log(`Error: Failed to remove scenario from compass`)
-        console.log(err)
-    }
 }
 
 async function ensureCommerceMockLocalTestFixture(mockNamespace, targetNamespace, withCentralApplicationConnectivity = false) {
@@ -596,7 +482,7 @@ async function ensureCommerceMockLocalTestFixture(mockNamespace, targetNamespace
             name: "commerce-binding",
         },
         spec: {
-            instanceRef: {name: "commerce-webservices"},
+            instanceRef: { name: "commerce-webservices" },
         },
     };
     await k8sApply([serviceBinding], targetNamespace, false);
@@ -605,10 +491,10 @@ async function ensureCommerceMockLocalTestFixture(mockNamespace, targetNamespace
     const serviceBindingUsage = {
         apiVersion: "servicecatalog.kyma-project.io/v1alpha1",
         kind: "ServiceBindingUsage",
-        metadata: {name: "commerce-lastorder-sbu"},
+        metadata: { name: "commerce-lastorder-sbu" },
         spec: {
-            serviceBindingRef: {name: "commerce-binding"},
-            usedBy: {kind: "serverless-function", name: "lastorder"},
+            serviceBindingRef: { name: "commerce-binding" },
+            usedBy: { kind: "serverless-function", name: "lastorder" },
         },
     };
     await k8sApply([serviceBindingUsage], targetNamespace);
@@ -629,9 +515,8 @@ async function ensureCommerceMockLocalTestFixture(mockNamespace, targetNamespace
 
 async function provisionCommerceMockResources(appName, mockNamespace, targetNamespace, functionObjs = lastorderObjs) {
     await k8sApply([namespaceObj(mockNamespace), namespaceObj(targetNamespace)]);
-    await k8sApply(prepareCommerceObjs(mockNamespace));
+    await k8sApply(commerceObjs);
     await k8sApply(functionObjs, targetNamespace, true);
-    await waitForFunction("lastorder", targetNamespace);
     await k8sApply([
         eventingSubscription(
             `sap.kyma.custom.${appName}.order.created.v1`,
@@ -639,8 +524,8 @@ async function provisionCommerceMockResources(appName, mockNamespace, targetName
             "order-created",
             targetNamespace)
     ]);
-    await waitForDeployment("commerce-mock", mockNamespace, 120 * 1000);
-    const vs = await waitForVirtualService(mockNamespace, "commerce-mock");
+    await waitForDeployment("commerce-mock", "mocks", 120 * 1000);
+    const vs = await waitForVirtualService("mocks", "commerce-mock");
     const mockHost = vs.spec.hosts[0];
     await retryPromise(
         () =>
@@ -684,28 +569,28 @@ function cleanMockTestFixture(mockNamespace, targetNamespace, wait = true) {
     return deleteNamespaces([mockNamespace, targetNamespace], wait);
 }
 
-async function deleteMockTestFixture(mockNamespace) {
+async function deleteMockTestFixture(targetNamespace) {
     const serviceBindingUsage = {
         apiVersion: "servicecatalog.kyma-project.io/v1alpha1",
         kind: "ServiceBindingUsage",
-        metadata: {name: "commerce-lastorder-sbu"},
+        metadata: { name: "commerce-lastorder-sbu" },
         spec: {
-            serviceBindingRef: {name: "commerce-binding"},
-            usedBy: {kind: "serverless-function", name: "lastorder"},
+            serviceBindingRef: { name: "commerce-binding" },
+            usedBy: { kind: "serverless-function", name: "lastorder" },
         },
     };
-    await k8sDelete([serviceBindingUsage], mockNamespace);
+    await k8sDelete([serviceBindingUsage], targetNamespace);
     const serviceBinding = {
         apiVersion: "servicecatalog.k8s.io/v1beta1",
         kind: "ServiceBinding",
-        metadata: {name: "commerce-binding"},
+        metadata: { name: "commerce-binding" },
         spec: {
-            instanceRef: {name: "commerce"},
+            instanceRef: { name: "commerce" },
         },
     };
-    await k8sDelete([serviceBinding], mockNamespace, false);
+    await k8sDelete([serviceBinding], targetNamespace, false);
     await k8sDelete(lastorderObjs)
-    await k8sDelete(prepareCommerceObjs(mockNamespace))
+    await k8sDelete(commerceObjs)
     await k8sDelete(applicationObjs)
 }
 
@@ -745,7 +630,7 @@ async function checkInClusterEventDeliveryHelper(targetNamespace, encoding) {
         expect(response.data).to.have.nested.property("event.shipped", true, "Order should have property shipped");
 
         return response;
-    }, 30, 4 * 1000);
+    }, 30, 2 * 1000);
 }
 
 module.exports = {
@@ -753,9 +638,6 @@ module.exports = {
     ensureCommerceMockWithCompassTestFixture,
     sendEventAndCheckResponse,
     sendLegacyEventAndCheckTracing,
-    addService,
-    updateService,
-    deleteService,
     checkFunctionResponse,
     checkInClusterEventDelivery,
     checkInClusterEventTracing,
@@ -763,5 +645,4 @@ module.exports = {
     deleteMockTestFixture,
     waitForSubscriptionsTillReady,
     setEventMeshSourceNamespace,
-    cleanCompassResourcesSKR,
 };
