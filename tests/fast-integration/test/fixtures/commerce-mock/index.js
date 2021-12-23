@@ -499,7 +499,7 @@ async function revokeCommerceMockCertificate(){
   console.dir("**************************************************************************************")
   const gateway = `https://gateway.${url}/v1/applications/certificates/revocations`;
   const httpsAgent = new https.Agent({
-    //rejectUnauthorized: false, // curl -k
+    rejectUnauthorized: true,
     cert: cert.data,
     key: key.data
   });
