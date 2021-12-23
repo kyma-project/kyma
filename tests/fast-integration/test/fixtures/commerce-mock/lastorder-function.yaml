@@ -88,7 +88,7 @@ spec:
             const response = await sendEvent("sap.kyma.custom.inapp.order.received.v1", event.data, encoding);
             console.log("In-app message sent. Publisher proxy response:", response.status);
           } catch (e) {
-            console.dir(e)
+            return {error: true, errorMessage: e.response.statusText}
           }
         } else if (event.extensions.request.query.inappevent) {
           return {event:inAppEvent[event.extensions.request.query.inappevent], podName: process.env.HOSTNAME};
