@@ -65,16 +65,16 @@ ci-test-eventing:
 .PHONY: ci-test-eventing-pre-upgrade
 ci-test-eventing-pre-upgrade:
 	npm install
-	npm run eventing-upgrade-test-prep
-	npm run eventing-upgrade-test-tests
+	npm run eventing-test-prep
+	npm run eventing-test-tests
 
-.PHONY: ci-test-eventing-pre-upgrade
+.PHONY: ci-test-eventing-post-upgrade
 ci-test-eventing-post-upgrade:
 	npm install
-	npm run eventing-upgrade-test-tests
-	npm run eventing-upgrade-test-cleanup
+	npm run eventing-test-tests
+	npm run eventing-test-cleanup
 
 .PHONY: ci-test-eventing-tests
-ci-test-eventing-post-tests:
+ci-test-eventing-tests:
 	npm install
-	npm run eventing-upgrade-test-tests
+	npm run eventing-test-tests
