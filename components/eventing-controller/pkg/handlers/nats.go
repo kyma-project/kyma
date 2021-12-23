@@ -94,7 +94,7 @@ func (n *Nats) SyncSubscription(sub *eventingv1alpha1.Subscription, cleaner even
 	if sub.Spec.Filter != nil {
 		uniqueFilters, err := sub.Spec.Filter.Deduplicate()
 		if err != nil {
-			return false, errors.Wrap(err, "deduplicate sub filters failed")
+			return false, errors.Wrap(err, "deduplicate subscription filters failed")
 		}
 		filters = uniqueFilters.Filters
 	}
@@ -106,9 +106,9 @@ func (n *Nats) SyncSubscription(sub *eventingv1alpha1.Subscription, cleaner even
 
 	var cleanSubjects []string
 	for _, filter := range filters {
-		subject, err := createSubject(filter, cleaner)
+		subject, err := getCleanSubject(filter, cleaner)
 		if err != nil {
-			log.Errorw("create NATS subject failed", "error", err)
+			log.Errorw("get clean subject failed", "error", err)
 			return false, err
 		}
 		cleanSubjects = append(cleanSubjects, subject)
@@ -125,17 +125,17 @@ func (n *Nats) SyncSubscription(sub *eventingv1alpha1.Subscription, cleaner even
 		}
 
 		for i := 0; i < subscriptionConfig.MaxInFlightMessages; i++ {
-			// queueGroupName must be unique for each sub and subject
+			// queueGroupName must be unique for each subscription and subject
 			queueGroupName := createKeyPrefix(sub) + string(types.Separator) + subject
 			natsSub, err := n.connection.QueueSubscribe(subject, queueGroupName, callback)
 			if err != nil {
-				log.Errorw("creating NATS subscription failed", "error", err)
+				log.Errorw("create NATS subscription failed", "error", err)
 				return false, err
 			}
 			n.subscriptions[createKey(sub, subject, i)] = natsSub
 		}
-
 	}
+
 	// Setting the clean event types
 	sub.Status.CleanEventTypes = cleanSubjects
 	sub.Status.Config = subscriptionConfig
@@ -276,7 +276,7 @@ func createKey(sub *eventingv1alpha1.Subscription, subject string, queueGoupInst
 	return fmt.Sprintf("%s.%s", createKeyPrefix(sub), createKeySuffix(subject, queueGoupInstanceNo))
 }
 
-func createSubject(filter *eventingv1alpha1.BEBFilter, cleaner eventtype.Cleaner) (string, error) {
+func getCleanSubject(filter *eventingv1alpha1.BEBFilter, cleaner eventtype.Cleaner) (string, error) {
 	eventType := strings.TrimSpace(filter.EventType.Value)
 	if len(eventType) == 0 {
 		return "", nats.ErrBadSubject

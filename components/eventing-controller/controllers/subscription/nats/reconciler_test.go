@@ -92,8 +92,8 @@ func testCleanEventTypes(id int, eventTypePrefix, natsSubjectToPublish, eventTyp
 			defer cancel()
 
 			// create a subscriber service
-			susbscriberName := fmt.Sprintf(subscriberNameFormat, id)
-			subscriberSvc := reconcilertesting.NewSubscriberSvc(susbscriberName, namespaceName)
+			subscriberName := fmt.Sprintf(subscriberNameFormat, id)
+			subscriberSvc := reconcilertesting.NewSubscriberSvc(subscriberName, namespaceName)
 
 			ensureSubscriberSvcCreated(ctx, subscriberSvc)
 
@@ -106,7 +106,7 @@ func testCleanEventTypes(id int, eventTypePrefix, natsSubjectToPublish, eventTyp
 
 			ensureSubscriptionCreated(ctx, subscription)
 
-			Context("A Subscription withouy filters", func() {
+			Context("A Subscription without filters", func() {
 				By("should have no clean event types", func() {
 					getSubscription(ctx, subscription).Should(reconcilertesting.HaveCleanEventTypes(nil))
 				})
@@ -122,7 +122,7 @@ func testCleanEventTypes(id int, eventTypePrefix, natsSubjectToPublish, eventTyp
 			})
 
 			Context("A Subscription without filters to which filters are added", func() {
-				// the nats subsjects to publish to; these are supposed to be equal to the cleanEventTypes
+				// the nats subject list to publish to; these are supposed to be equal to the cleanEventTypes
 				natsSubjectsToPublish := []string{
 					fmt.Sprintf("%s0", natsSubjectToPublish),
 					fmt.Sprintf("%s1", natsSubjectToPublish),
@@ -154,12 +154,12 @@ func testCleanEventTypes(id int, eventTypePrefix, natsSubjectToPublish, eventTyp
 			})
 
 			Context("A Subscription with filters that are being modified", func() {
-				// the nats subjects to publish to; these are supposed to be equal to the cleanEventTypes
+				// the nats subject list to publish to; these are supposed to be equal to the cleanEventTypes
 				natsSubjectsToPublish := []string{
 					fmt.Sprintf("%s0alpha", natsSubjectToPublish),
 					fmt.Sprintf("%s1alpha", natsSubjectToPublish),
 				}
-				By("should have beend updated after the modification", func() {
+				By("should have been updated after the modification", func() {
 					for _, f := range subscription.Spec.Filter.Filters {
 						f.EventType.Value = fmt.Sprintf("%salpha", f.EventType.Value)
 					}
@@ -180,7 +180,7 @@ func testCleanEventTypes(id int, eventTypePrefix, natsSubjectToPublish, eventTyp
 			})
 
 			Context("A Subscription with filters of which one is getting deleted", func() {
-				// the nats subsjects to publish to; these are supposed to be equal to the cleanEventTypes
+				// the nats subject list to publish to; these are supposed to be equal to the cleanEventTypes
 				natsSubjectsToPublish := []string{
 					fmt.Sprintf("%s0alpha", natsSubjectToPublish),
 				}
