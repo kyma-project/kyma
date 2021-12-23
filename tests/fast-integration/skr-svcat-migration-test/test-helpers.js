@@ -58,7 +58,6 @@ async function installBTPOperatorHelmChart(creds, clusterId) {
         if (error.stderr === undefined) {
             throw new Error(`failed to install ${btp}: failed to process output of "helm upgrade"`);
         }
-        console.log(error)
         throw new Error(`failed to install ${btp}: ${error.stderr}`);
     }
 }
