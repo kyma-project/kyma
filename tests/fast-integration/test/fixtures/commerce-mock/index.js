@@ -498,9 +498,6 @@ async function revokeCommerceMockCertificate(){
   console.dir(cert);
   console.dir(key);
   console.dir("**************************************************************************************")
-  console.dir("================================================")
-  console.dir(url)
-  console.dir("================================================")
   const gateway = `https://gateway.${mockHost}/v1/applications/certificates/revocations`;
 
   const httpsAgent = new https.Agent({
@@ -552,6 +549,7 @@ async function checkRevocation(){
   } catch (err) {
     return
   }
+  throw convertAxiosError(403,"Certificate could not be revoked")
 }
 
 async function ensureCommerceMockWithCompassTestFixture(client, appName, scenarioName, mockNamespace, targetNamespace, withCentralApplicationConnectivity = false) {
