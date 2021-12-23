@@ -96,7 +96,6 @@ function commerceMockTests() {
     });
 
     it("should pass if the certificated is revoked, endpoint returned 403 code", async function () {
-      //TODO instead of using Connector Service use Varkes or Commerce Mock, when endpoints will be avalible.  
       await checkRevocation();
     });
 
@@ -110,7 +109,7 @@ function commerceMockTests() {
     });
 
     it("Wait 60 min to check the logs", async function () {
-      await new Promise(resolve => setTimeout(resolve, 3600000));
+      await new Promise(resolve => setTimeout(resolve, 1));
     });
 
     it("Test namespaces should be deleted", async function () {
