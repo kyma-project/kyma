@@ -1,16 +1,19 @@
 apiVersion: telemetry.kyma-project.io/v1alpha1
-kind: LoggingConfiguration
+kind: LogPipeline
 metadata:
-  name: loggingconfiguration-test
+  name: logpipeline-test
 spec:
-  sections:
+  parsers: [ ]
+  multilineParsers: [ ]
+  filters: [ ]
+  outputs:
     - content: |
-        [OUTPUT]
-            Name http
-            host mockserver.mockserver
-            port 1080
-            Match *
-      files:
-        - name: test
-          content: |
-            my file content
+        Name http
+        host mockserver.mockserver
+        port 1080
+        Match *
+  files:
+    - name: test
+      content: |
+        test file content
+  secretRefs: [ ]
