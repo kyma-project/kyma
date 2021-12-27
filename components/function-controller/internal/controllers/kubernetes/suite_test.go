@@ -4,14 +4,12 @@ import (
 	"context"
 	"fmt"
 	"path/filepath"
-	"testing"
 
 	"github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
 
 	rbacv1 "k8s.io/api/rbac/v1"
 
 	"github.com/kyma-project/kyma/components/function-controller/internal/resource"
-	"github.com/onsi/ginkgo"
 	"github.com/onsi/gomega"
 	"github.com/vrischmann/envconfig"
 	corev1 "k8s.io/api/core/v1"
@@ -19,16 +17,7 @@ import (
 	"k8s.io/client-go/kubernetes/scheme"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/envtest"
-	"sigs.k8s.io/controller-runtime/pkg/envtest/printer"
 )
-
-func TestAPIs(t *testing.T) {
-	gomega.RegisterFailHandler(ginkgo.Fail)
-
-	ginkgo.RunSpecsWithDefaultAndCustomReporters(t,
-		"Kubernetes Suite",
-		[]ginkgo.Reporter{printer.NewlineReporter{}})
-}
 
 func setUpTestEnv(g *gomega.GomegaWithT) (cl client.Client, env *envtest.Environment) {
 	testEnv := &envtest.Environment{
