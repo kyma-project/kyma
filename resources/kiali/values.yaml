@@ -182,12 +182,12 @@ identity: {}
 
 kiali_feature_flags:
   certificates_information_indicators:
-   enabled: true
+   enabled: false
    secrets:
    - cacerts
    - istio-ca-secret
   clustering:
-    enabled: true
+    enabled: false
 login_token:
   signing_key: ""
 
