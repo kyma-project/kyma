@@ -239,7 +239,6 @@ async function deploy() {
   let times = []
 
   await waitForPodWithLabel("app", "service-catalog-addons-service-binding-usage-controller", "kyma-system");
-  await waitForPodWithLabel("app", "service-catalog-ui", "kyma-system");
   await waitForPodWithLabel("app", "service-catalog-catalog-controller-manager", "kyma-system");
   await waitForPodWithLabel("app", "service-catalog-catalog-webhook", "kyma-system");
   await waitForPodWithLabel("app", "service-broker-proxy-k8s", "kyma-system");
