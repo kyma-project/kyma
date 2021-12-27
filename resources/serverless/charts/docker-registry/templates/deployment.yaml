@@ -37,8 +37,8 @@ spec:
       imagePullSecrets:
 {{ toYaml .Values.imagePullSecrets | indent 8 }}
       {{- end }}
-{{- if or .Values.priorityClassName .Values.global.priorityClassName }}
-      priorityClassName: "{{ coalesce .Values.priorityClassName .Values.global.priorityClassName }}"
+{{- if or .Values.priorityClassName .Values.global.highPriorityClassName }}
+      priorityClassName: "{{ coalesce .Values.priorityClassName .Values.global.highPriorityClassName }}"
 {{- end }}
 {{- if .Values.securityContext.enabled }}
       securityContext:

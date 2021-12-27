@@ -4,24 +4,28 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"time"
 
-	"go.uber.org/zap/zapcore"
+	"github.com/go-logr/zapr"
+	k8s "github.com/kyma-project/kyma/components/function-controller/internal/controllers/kubernetes"
+	"github.com/kyma-project/kyma/components/function-controller/internal/controllers/serverless"
+	"github.com/kyma-project/kyma/components/function-controller/internal/git"
+	internalresource "github.com/kyma-project/kyma/components/function-controller/internal/resource"
+	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
+	"github.com/vrischmann/envconfig"
 
 	"go.uber.org/zap"
-
-	"github.com/vrischmann/envconfig"
+	"go.uber.org/zap/zapcore"
 	"k8s.io/apimachinery/pkg/runtime"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 	ctrl "sigs.k8s.io/controller-runtime"
+	"sigs.k8s.io/controller-runtime/pkg/event"
+	"sigs.k8s.io/controller-runtime/pkg/handler"
 	ctrlzap "sigs.k8s.io/controller-runtime/pkg/log/zap"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
+	"sigs.k8s.io/controller-runtime/pkg/source"
 	"sigs.k8s.io/controller-runtime/pkg/webhook"
-
-	k8s "github.com/kyma-project/kyma/components/function-controller/internal/controllers/kubernetes"
-	"github.com/kyma-project/kyma/components/function-controller/internal/controllers/serverless"
-	internalresource "github.com/kyma-project/kyma/components/function-controller/internal/resource"
-	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
 	// +kubebuilder:scaffold:imports
 )
 
@@ -39,6 +43,7 @@ func init() {
 
 type config struct {
 	MetricsAddress            string `envconfig:"default=:8080"`
+	Healthz                   healthzConfig
 	LeaderElectionEnabled     bool   `envconfig:"default=false"`
 	LeaderElectionID          string `envconfig:"default=serverless-controller-leader-election-helper"`
 	SecretMutatingWebhookPort int    `envconfig:"default=8443"`
@@ -47,8 +52,12 @@ type config struct {
 	Function                  serverless.FunctionConfig
 }
 
-func main() {
+type healthzConfig struct {
+	Address         string        `envconfig:"default=:8090"`
+	LivenessTimeout time.Duration `envconfig:"default=1s"`
+}
 
+func main() {
 	config, err := loadConfig("APP")
 	if err != nil {
 		ctrl.SetLogger(ctrlzap.New())
@@ -64,18 +73,20 @@ func main() {
 	}
 
 	atomicLevel := zap.NewAtomicLevelAt(logLevel)
-	ctrl.SetLogger(ctrlzap.New(ctrlzap.UseDevMode(true), ctrlzap.Level(&atomicLevel)))
+	zapLogger := ctrlzap.NewRaw(ctrlzap.UseDevMode(true), ctrlzap.Level(&atomicLevel))
+	ctrl.SetLogger(zapr.NewLogger(zapLogger))
 
 	setupLog.Info("Generating Kubernetes client config")
 	restConfig := ctrl.GetConfigOrDie()
 
 	setupLog.Info("Initializing controller manager")
 	mgr, err := manager.New(restConfig, manager.Options{
-		Scheme:             scheme,
-		MetricsBindAddress: config.MetricsAddress,
-		LeaderElection:     config.LeaderElectionEnabled,
-		LeaderElectionID:   config.LeaderElectionID,
-		Port:               config.SecretMutatingWebhookPort,
+		Scheme:                 scheme,
+		MetricsBindAddress:     config.MetricsAddress,
+		LeaderElection:         config.LeaderElectionEnabled,
+		LeaderElectionID:       config.LeaderElectionID,
+		Port:                   config.SecretMutatingWebhookPort,
+		HealthProbeBindAddress: config.Healthz.Address,
 	})
 	if err != nil {
 		setupLog.Error(err, "Unable to initialize controller manager")
@@ -96,9 +107,24 @@ func main() {
 		},
 	)
 
-	if err := serverless.NewFunction(resourceClient, ctrl.Log, config.Function, mgr.GetEventRecorderFor(serverlessv1alpha1.FunctionControllerValue)).
-		SetupWithManager(mgr); err != nil {
+	events := make(chan event.GenericEvent)
+	healthCh := make(chan bool)
+	healthHandler := serverless.NewHealthChecker(events, healthCh, config.Healthz.LivenessTimeout, zapLogger.Named("healthz"))
+	if err := mgr.AddHealthzCheck("health check", healthHandler.Checker); err != nil {
+		setupLog.Error(err, "unable to register healthz")
+		os.Exit(1)
+	}
+
+	fnRecon := serverless.NewFunction(resourceClient, ctrl.Log, config.Function, git.NewGit2Go(), mgr.GetEventRecorderFor(serverlessv1alpha1.FunctionControllerValue), healthCh)
+	fnCtrl, err := fnRecon.SetupWithManager(mgr)
+	if err != nil {
 		setupLog.Error(err, "unable to create Function controller")
+		os.Exit(1)
+	}
+
+	err = fnCtrl.Watch(&source.Channel{Source: events}, &handler.EnqueueRequestForObject{})
+	if err != nil {
+		setupLog.Error(err, "unable to watch something")
 		os.Exit(1)
 	}
 

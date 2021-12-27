@@ -7,8 +7,9 @@ global:
   podSecurityPolicy:
     privileged: false
   priorityClassName: ""
+  highPriorityClassName: "kyma-system-priority"
   priorityClassValue: 2000000
-
+  highPriorityClassValue: 2100000
   containerRegistry:
     path: eu.gcr.io/kyma-project
   images:
