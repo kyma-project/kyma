@@ -1023,9 +1023,16 @@ func ensureSubscriptionCreated(ctx context.Context, subscription *eventingv1alph
 	Expect(err).Should(BeNil())
 }
 
+// ensureSubscriptionUpdated conducts an update of a Subscription.
+func ensureSubscriptionUpdated(ctx context.Context, subscription *eventingv1alpha1.Subscription) {
+	By(fmt.Sprintf("Ensuring the subscription %q is updated", subscription.Name))
+	// update subscription
+	err := k8sClient.Update(ctx, subscription)
+	Expect(err).Should(BeNil())
+}
+
 // ensureSubscriberSvcCreated creates a Service in the k8s cluster. If a custom namespace is used, it will be created as well.
 func ensureSubscriberSvcCreated(ctx context.Context, svc *v1.Service) {
-
 	By(fmt.Sprintf("Ensuring the test namespace %q is created", svc.Namespace))
 	if svc.Namespace != "default " {
 		// create testing namespace
@@ -1214,7 +1221,7 @@ var _ = BeforeSuite(func(done Done) {
 	Expect(err).NotTo(HaveOccurred())
 	// +kubebuilder:scaffold:scheme
 
-	bebMock := startBEBMock()
+	mock := startBEBMock()
 	// client, err := client.New()
 	// Source: https://book.kubebuilder.io/cronjob-tutorial/writing-tests.html
 	syncPeriod := time.Second * 2
@@ -1225,10 +1232,10 @@ var _ = BeforeSuite(func(done Done) {
 	})
 	Expect(err).ToNot(HaveOccurred())
 	envConf := env.Config{
-		BEBAPIURL:                bebMock.MessagingURL,
+		BEBAPIURL:                mock.MessagingURL,
 		ClientID:                 "foo-id",
 		ClientSecret:             "foo-secret",
-		TokenEndpoint:            bebMock.TokenURL,
+		TokenEndpoint:            mock.TokenURL,
 		WebhookActivationTimeout: 0,
 		WebhookTokenEndpoint:     "foo-token-endpoint",
 		Domain:                   domain,
