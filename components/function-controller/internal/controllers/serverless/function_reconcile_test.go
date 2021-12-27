@@ -6,8 +6,6 @@ import (
 	"testing"
 	"time"
 
-	"k8s.io/apimachinery/pkg/util/rand"
-
 	"github.com/kyma-project/kyma/components/function-controller/internal/resource"
 
 	"github.com/onsi/gomega"
@@ -35,6 +33,7 @@ const (
 )
 
 func TestFunctionReconciler_Reconcile(t *testing.T) {
+	t.Parallel()
 	g := gomega.NewGomegaWithT(t)
 	rtm := serverlessv1alpha1.Nodejs12
 	resourceClient, testEnv := setUpTestEnv(g)
@@ -45,8 +44,11 @@ func TestFunctionReconciler_Reconcile(t *testing.T) {
 	reconciler := NewFunction(resourceClient, log.Log, testCfg, nil, record.NewFakeRecorder(100), make(chan bool))
 
 	t.Run("should successfully create Function", func(t *testing.T) {
-		inFunction, tearDownFn := before(g, resourceClient)
-		defer tearDownFn()
+		g := gomega.NewGomegaWithT(t)
+		inFunction := newFixFunction(testNamespace, "success", 1, 2)
+		g.Expect(resourceClient.Create(context.TODO(), inFunction)).To(gomega.Succeed())
+		defer deleteFunction(g, resourceClient, inFunction)
+
 		fnLabels := reconciler.functionLabels(inFunction)
 		request := ctrl.Request{NamespacedName: types.NamespacedName{Namespace: inFunction.GetNamespace(), Name: inFunction.GetName()}}
 
@@ -128,8 +130,11 @@ func TestFunctionReconciler_Reconcile(t *testing.T) {
 		assertSuccessfulFunctionDeployment(t, resourceClient, reconciler, request, fnLabels, "registry.kyma.local", true)
 	})
 	t.Run("should set proper status on deployment fail", func(t *testing.T) {
-		inFunction, tearDownFn := before(g, resourceClient)
-		defer tearDownFn()
+		g := gomega.NewGomegaWithT(t)
+		inFunction := newFixFunction(testNamespace, "deployment-fail", 1, 2)
+		g.Expect(resourceClient.Create(context.TODO(), inFunction)).To(gomega.Succeed())
+		defer deleteFunction(g, resourceClient, inFunction)
+
 		fnLabels := reconciler.functionLabels(inFunction)
 		request := ctrl.Request{NamespacedName: types.NamespacedName{Namespace: inFunction.GetNamespace(), Name: inFunction.GetName()}}
 
@@ -199,8 +204,11 @@ func TestFunctionReconciler_Reconcile(t *testing.T) {
 	})
 
 	t.Run("should properly handle apiserver lags, when two resources are created by accident", func(t *testing.T) {
-		inFunction, tearDownFn := before(g, resourceClient)
-		defer tearDownFn()
+		g := gomega.NewGomegaWithT(t)
+		inFunction := newFixFunction(testNamespace, "apiserver-lags", 1, 2)
+		g.Expect(resourceClient.Create(context.TODO(), inFunction)).To(gomega.Succeed())
+		defer deleteFunction(g, resourceClient, inFunction)
+
 		fnLabels := reconciler.functionLabels(inFunction)
 		request := ctrl.Request{NamespacedName: types.NamespacedName{Namespace: inFunction.GetNamespace(), Name: inFunction.GetName()}}
 
@@ -319,7 +327,7 @@ func TestFunctionReconciler_Reconcile(t *testing.T) {
 		g.Expect(err).To(gomega.BeNil())
 		g.Expect(deployList.Items).To(gomega.HaveLen(2))
 
-		t.Log("deleting excess deployment 🔫")
+		t.Log("deleting excess deployment")
 		_, err = reconciler.Reconcile(request)
 		g.Expect(err).To(gomega.BeNil())
 
@@ -373,9 +381,9 @@ func TestFunctionReconciler_Reconcile(t *testing.T) {
 		err = reconciler.client.ListByLabel(context.TODO(), function.GetNamespace(), fnLabels, hpaList)
 		g.Expect(err).To(gomega.BeNil())
 		g.Expect(deployList.Items).To(gomega.HaveLen(1))
-
 		t.Log("creating next hpa by accident - apiserver lag")
 
+		g.Expect(hpaList.Items).To(gomega.HaveLen(1))
 		excessHpa := hpaList.Items[0].DeepCopy()
 		excessHpa.Name = "" // generateName will create this
 		excessHpa.ResourceVersion = ""
@@ -449,8 +457,11 @@ func TestFunctionReconciler_Reconcile(t *testing.T) {
 	})
 
 	t.Run("should requeue before creating a job", func(t *testing.T) {
-		inFunction, tearDownFn := before(g, resourceClient)
-		defer tearDownFn()
+		g := gomega.NewGomegaWithT(t)
+		inFunction := newFixFunction(testNamespace, "requeue-before-job", 1, 2)
+		g.Expect(resourceClient.Create(context.TODO(), inFunction)).To(gomega.Succeed())
+		defer deleteFunction(g, resourceClient, inFunction)
+
 		// Create new reconciler as this test modify reconciler configuration MaxSimultaneousJobs value
 		reconciler := NewFunction(resourceClient, log.Log, testCfg, nil, record.NewFakeRecorder(100), make(chan bool))
 
@@ -524,8 +535,11 @@ func TestFunctionReconciler_Reconcile(t *testing.T) {
 	})
 
 	t.Run("should behave correctly on label addition and subtraction", func(t *testing.T) {
-		inFunction, tearDownFn := before(g, resourceClient)
-		defer tearDownFn()
+		g := gomega.NewGomegaWithT(t)
+		inFunction := newFixFunction(testNamespace, "labels-operations", 1, 2)
+		g.Expect(resourceClient.Create(context.TODO(), inFunction)).To(gomega.Succeed())
+		defer deleteFunction(g, resourceClient, inFunction)
+
 		fnLabels := reconciler.functionLabels(inFunction)
 		request := ctrl.Request{NamespacedName: types.NamespacedName{Namespace: inFunction.GetNamespace(), Name: inFunction.GetName()}}
 
@@ -788,8 +802,11 @@ func TestFunctionReconciler_Reconcile(t *testing.T) {
 	})
 
 	t.Run("should behave correctly on label addition when job is in building phase", func(t *testing.T) {
-		inFunction, tearDownFn := before(g, resourceClient)
-		defer tearDownFn()
+		g := gomega.NewGomegaWithT(t)
+		inFunction := newFixFunction(testNamespace, "add-label-while-building", 1, 2)
+		g.Expect(resourceClient.Create(context.TODO(), inFunction)).To(gomega.Succeed())
+		defer deleteFunction(g, resourceClient, inFunction)
+
 		fnLabels := reconciler.functionLabels(inFunction)
 		request := ctrl.Request{NamespacedName: types.NamespacedName{Namespace: inFunction.GetNamespace(), Name: inFunction.GetName()}}
 
@@ -874,6 +891,7 @@ func TestFunctionReconciler_Reconcile(t *testing.T) {
 	})
 
 	t.Run("should handle reconcilation lags", func(t *testing.T) {
+		g := gomega.NewGomegaWithT(t)
 		t.Log("handling not existing Function")
 		result, err := reconciler.Reconcile(ctrl.Request{NamespacedName: types.NamespacedName{Namespace: "nope", Name: "noooooopppeee"}})
 		g.Expect(err).To(gomega.BeNil())
@@ -882,6 +900,7 @@ func TestFunctionReconciler_Reconcile(t *testing.T) {
 	})
 
 	t.Run("should return error when desired dockerfile runtime configmap not found", func(t *testing.T) {
+		g := gomega.NewGomegaWithT(t)
 		testNamespace := "test-namespace"
 		fnName := "function"
 		function := newFixFunction(testNamespace, fnName, 1, 2)
@@ -899,8 +918,11 @@ func TestFunctionReconciler_Reconcile(t *testing.T) {
 	})
 
 	t.Run("should use HPA only when needed", func(t *testing.T) {
-		inFunction, tearDownFn := before(g, resourceClient)
-		defer tearDownFn()
+		g := gomega.NewGomegaWithT(t)
+		inFunction := newFixFunction(testNamespace, "hpa", 1, 2)
+		g.Expect(resourceClient.Create(context.TODO(), inFunction)).To(gomega.Succeed())
+		defer deleteFunction(g, resourceClient, inFunction)
+
 		fnLabels := reconciler.functionLabels(inFunction)
 		request := ctrl.Request{NamespacedName: types.NamespacedName{Namespace: inFunction.GetNamespace(), Name: inFunction.GetName()}}
 
@@ -1031,8 +1053,11 @@ func TestFunctionReconciler_Reconcile(t *testing.T) {
 		g.Expect(reconciler.getConditionReason(function.Status.Conditions, serverlessv1alpha1.ConditionRunning)).To(gomega.Equal(serverlessv1alpha1.ConditionReasonDeploymentReady))
 	})
 	t.Run("should properly handle `kubectl rollout restart` changing annotations in deployment", func(t *testing.T) {
-		inFunction, tearDownFn := before(g, resourceClient)
-		defer tearDownFn()
+		g := gomega.NewGomegaWithT(t)
+		inFunction := newFixFunction(testNamespace, "rollout-restart-fn", 1, 2)
+		g.Expect(resourceClient.Create(context.TODO(), inFunction)).To(gomega.Succeed())
+		defer deleteFunction(g, resourceClient, inFunction)
+
 		fnLabels := reconciler.functionLabels(inFunction)
 		request := ctrl.Request{NamespacedName: types.NamespacedName{Namespace: inFunction.GetNamespace(), Name: inFunction.GetName()}}
 
@@ -1085,16 +1110,4 @@ func TestFunctionReconciler_Reconcile(t *testing.T) {
 func deleteFunction(g *gomega.GomegaWithT, resourceClient resource.Client, function *serverlessv1alpha1.Function) {
 	err := resourceClient.Delete(context.TODO(), function)
 	g.Expect(err).To(gomega.BeNil())
-}
-
-func before(g *gomega.WithT, resourceClient resource.Client) (*serverlessv1alpha1.Function, func()) {
-	fnName := rand.String(10)
-	fnName = "test"
-	fmt.Println(fnName)
-	inFunction := newFixFunction(testNamespace, fnName, 1, 2)
-	g.Expect(resourceClient.Create(context.TODO(), inFunction)).To(gomega.Succeed())
-
-	return inFunction, func() {
-		deleteFunction(g, resourceClient, inFunction)
-	}
 }
