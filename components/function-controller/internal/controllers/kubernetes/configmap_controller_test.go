@@ -87,7 +87,6 @@ func TestConfigMapReconciler_Reconcile(t *testing.T) {
 }
 
 func TestConfigMapReconciler_predicate(t *testing.T) {
-	g := gomega.NewGomegaWithT(t)
 	baseNs := "base_ns"
 
 	r := &ConfigMapReconciler{svc: NewConfigMapService(resource.New(&automock.K8sClient{}, runtime.NewScheme()), Config{BaseNamespace: baseNs})}
@@ -103,6 +102,7 @@ func TestConfigMapReconciler_predicate(t *testing.T) {
 	unlabelledConfigMap := &corev1.ConfigMap{}
 
 	t.Run("deleteFunc", func(t *testing.T) {
+		g := gomega.NewWithT(t)
 		deleteEventPod := event.DeleteEvent{Meta: pod.GetObjectMeta(), Object: pod}
 		deleteEventLabelledSrvAcc := event.DeleteEvent{Meta: labelledConfigmap.GetObjectMeta(), Object: labelledConfigmap}
 		deleteEventUnlabelledSrvAcc := event.DeleteEvent{Meta: unlabelledConfigMap.GetObjectMeta(), Object: unlabelledConfigMap}
@@ -114,6 +114,7 @@ func TestConfigMapReconciler_predicate(t *testing.T) {
 	})
 
 	t.Run("createFunc", func(t *testing.T) {
+		g := gomega.NewWithT(t)
 		createEventPod := event.CreateEvent{Meta: pod.GetObjectMeta(), Object: pod}
 		createEventLabelledSrvAcc := event.CreateEvent{Meta: labelledConfigmap.GetObjectMeta(), Object: labelledConfigmap}
 		createEventUnlabelledSrvAcc := event.CreateEvent{Meta: unlabelledConfigMap.GetObjectMeta(), Object: unlabelledConfigMap}
@@ -125,6 +126,7 @@ func TestConfigMapReconciler_predicate(t *testing.T) {
 	})
 
 	t.Run("genericFunc", func(t *testing.T) {
+		g := gomega.NewWithT(t)
 		genericEventPod := event.GenericEvent{Meta: pod.GetObjectMeta(), Object: pod}
 		genericEventLabelledSrvAcc := event.GenericEvent{Meta: labelledConfigmap.GetObjectMeta(), Object: labelledConfigmap}
 		genericEventUnlabelledSrvAcc := event.GenericEvent{Meta: unlabelledConfigMap.GetObjectMeta(), Object: unlabelledConfigMap}
@@ -136,6 +138,7 @@ func TestConfigMapReconciler_predicate(t *testing.T) {
 	})
 
 	t.Run("updateFunc", func(t *testing.T) {
+		g := gomega.NewWithT(t)
 		updateEventPod := event.UpdateEvent{MetaNew: pod.GetObjectMeta(), ObjectNew: pod}
 		updateEventLabelledSrvAcc := event.UpdateEvent{MetaNew: labelledConfigmap.GetObjectMeta(), ObjectNew: labelledConfigmap}
 		updateEventUnlabelledSrvAcc := event.UpdateEvent{MetaNew: unlabelledConfigMap.GetObjectMeta(), ObjectNew: unlabelledConfigMap}

@@ -208,8 +208,6 @@ func TestSecretReconciler_Reconcile(t *testing.T) {
 }
 
 func TestSecretReconciler_predicate(t *testing.T) {
-	gm := gomega.NewGomegaWithT(t)
-
 	baseSecret := &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Namespace: "base-ns", Labels: map[string]string{ConfigLabel: CredentialsLabelValue}}}
 	nonBaseSecret := &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Namespace: "some-other-ns"}}
 	pod := &corev1.Pod{ObjectMeta: metav1.ObjectMeta{Name: "pod-name"}}
@@ -222,49 +220,53 @@ func TestSecretReconciler_predicate(t *testing.T) {
 	preds := r.predicate()
 
 	t.Run("deleteFunc", func(t *testing.T) {
+		g := gomega.NewGomegaWithT(t)
 		podEvent := event.DeleteEvent{Meta: pod.GetObjectMeta(), Object: pod}
 		eventBaseSecret := event.DeleteEvent{Meta: baseSecret.GetObjectMeta(), Object: baseSecret}
 		eventNonBaseSecret := event.DeleteEvent{Meta: nonBaseSecret.GetObjectMeta(), Object: nonBaseSecret}
 
-		gm.Expect(preds.Delete(podEvent)).To(gomega.BeFalse())
-		gm.Expect(preds.Delete(eventBaseSecret)).To(gomega.BeTrue(), "should be true for base secret")
-		gm.Expect(preds.Delete(eventNonBaseSecret)).To(gomega.BeFalse())
-		gm.Expect(preds.Delete(event.DeleteEvent{})).To(gomega.BeFalse())
+		g.Expect(preds.Delete(podEvent)).To(gomega.BeFalse())
+		g.Expect(preds.Delete(eventBaseSecret)).To(gomega.BeTrue(), "should be true for base secret")
+		g.Expect(preds.Delete(eventNonBaseSecret)).To(gomega.BeFalse())
+		g.Expect(preds.Delete(event.DeleteEvent{})).To(gomega.BeFalse())
 	})
 
 	t.Run("createFunc", func(t *testing.T) {
+		g := gomega.NewGomegaWithT(t)
 		podEvent := event.CreateEvent{Meta: pod.GetObjectMeta(), Object: pod}
 		eventBaseSecret := event.CreateEvent{Meta: baseSecret.GetObjectMeta(), Object: baseSecret}
 		eventNonBaseSecret := event.CreateEvent{Meta: nonBaseSecret.GetObjectMeta(), Object: nonBaseSecret}
 
-		gm.Expect(preds.Create(podEvent)).To(gomega.BeFalse())
-		gm.Expect(preds.Create(eventNonBaseSecret)).To(gomega.BeFalse())
-		gm.Expect(preds.Create(event.CreateEvent{})).To(gomega.BeFalse())
+		g.Expect(preds.Create(podEvent)).To(gomega.BeFalse())
+		g.Expect(preds.Create(eventNonBaseSecret)).To(gomega.BeFalse())
+		g.Expect(preds.Create(event.CreateEvent{})).To(gomega.BeFalse())
 
-		gm.Expect(preds.Create(eventBaseSecret)).To(gomega.BeTrue(), "should be true for base secret")
+		g.Expect(preds.Create(eventBaseSecret)).To(gomega.BeTrue(), "should be true for base secret")
 	})
 
 	t.Run("genericFunc", func(t *testing.T) {
+		g := gomega.NewGomegaWithT(t)
 		podEvent := event.GenericEvent{Meta: pod.GetObjectMeta(), Object: pod}
 		eventBaseSecret := event.GenericEvent{Meta: baseSecret.GetObjectMeta(), Object: baseSecret}
 		eventNonBaseSecret := event.GenericEvent{Meta: nonBaseSecret.GetObjectMeta(), Object: nonBaseSecret}
 
-		gm.Expect(preds.Generic(podEvent)).To(gomega.BeFalse())
-		gm.Expect(preds.Generic(eventNonBaseSecret)).To(gomega.BeFalse())
-		gm.Expect(preds.Generic(event.GenericEvent{})).To(gomega.BeFalse())
+		g.Expect(preds.Generic(podEvent)).To(gomega.BeFalse())
+		g.Expect(preds.Generic(eventNonBaseSecret)).To(gomega.BeFalse())
+		g.Expect(preds.Generic(event.GenericEvent{})).To(gomega.BeFalse())
 
-		gm.Expect(preds.Generic(eventBaseSecret)).To(gomega.BeTrue(), "should be true for base secret")
+		g.Expect(preds.Generic(eventBaseSecret)).To(gomega.BeTrue(), "should be true for base secret")
 	})
 
 	t.Run("updateFunc", func(t *testing.T) {
+		g := gomega.NewGomegaWithT(t)
 		podEvent := event.UpdateEvent{MetaNew: pod.GetObjectMeta(), ObjectNew: pod}
 		eventBaseSecret := event.UpdateEvent{MetaNew: baseSecret.GetObjectMeta(), ObjectNew: baseSecret}
 		eventNonBaseSecret := event.UpdateEvent{MetaNew: nonBaseSecret.GetObjectMeta(), ObjectNew: nonBaseSecret}
 
-		gm.Expect(preds.Update(podEvent)).To(gomega.BeFalse())
-		gm.Expect(preds.Update(eventNonBaseSecret)).To(gomega.BeFalse())
-		gm.Expect(preds.Update(event.UpdateEvent{})).To(gomega.BeFalse())
+		g.Expect(preds.Update(podEvent)).To(gomega.BeFalse())
+		g.Expect(preds.Update(eventNonBaseSecret)).To(gomega.BeFalse())
+		g.Expect(preds.Update(event.UpdateEvent{})).To(gomega.BeFalse())
 
-		gm.Expect(preds.Update(eventBaseSecret)).To(gomega.BeTrue(), "should be true for base secret")
+		g.Expect(preds.Update(eventBaseSecret)).To(gomega.BeTrue(), "should be true for base secret")
 	})
 }

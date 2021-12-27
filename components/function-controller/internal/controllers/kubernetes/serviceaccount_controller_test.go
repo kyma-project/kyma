@@ -96,7 +96,6 @@ func TestServiceAccountReconciler_Reconcile(t *testing.T) {
 }
 
 func TestServiceAccountReconciler_getPredicates(t *testing.T) {
-	g := gomega.NewGomegaWithT(t)
 	baseNs := "base_ns"
 
 	r := &ServiceAccountReconciler{svc: NewServiceAccountService(resource.New(&automock.K8sClient{}, runtime.NewScheme()), Config{BaseNamespace: baseNs})}
@@ -112,6 +111,7 @@ func TestServiceAccountReconciler_getPredicates(t *testing.T) {
 	unlabelledSrvAcc := &corev1.ServiceAccount{}
 
 	t.Run("deleteFunc", func(t *testing.T) {
+		g := gomega.NewGomegaWithT(t)
 		deleteEventPod := event.DeleteEvent{Meta: pod.GetObjectMeta(), Object: pod}
 		deleteEventLabelledSrvAcc := event.DeleteEvent{Meta: labelledSrvAcc.GetObjectMeta(), Object: labelledSrvAcc}
 		deleteEventUnlabelledSrvAcc := event.DeleteEvent{Meta: unlabelledSrvAcc.GetObjectMeta(), Object: unlabelledSrvAcc}
@@ -123,6 +123,7 @@ func TestServiceAccountReconciler_getPredicates(t *testing.T) {
 	})
 
 	t.Run("createFunc", func(t *testing.T) {
+		g := gomega.NewGomegaWithT(t)
 		createEventPod := event.CreateEvent{Meta: pod.GetObjectMeta(), Object: pod}
 		createEventLabelledSrvAcc := event.CreateEvent{Meta: labelledSrvAcc.GetObjectMeta(), Object: labelledSrvAcc}
 		createEventUnlabelledSrvAcc := event.CreateEvent{Meta: unlabelledSrvAcc.GetObjectMeta(), Object: unlabelledSrvAcc}
@@ -134,6 +135,7 @@ func TestServiceAccountReconciler_getPredicates(t *testing.T) {
 	})
 
 	t.Run("genericFunc", func(t *testing.T) {
+		g := gomega.NewGomegaWithT(t)
 		genericEventPod := event.GenericEvent{Meta: pod.GetObjectMeta(), Object: pod}
 		genericEventLabelledSrvAcc := event.GenericEvent{Meta: labelledSrvAcc.GetObjectMeta(), Object: labelledSrvAcc}
 		genericEventUnlabelledSrvAcc := event.GenericEvent{Meta: unlabelledSrvAcc.GetObjectMeta(), Object: unlabelledSrvAcc}
@@ -145,6 +147,7 @@ func TestServiceAccountReconciler_getPredicates(t *testing.T) {
 	})
 
 	t.Run("updateFunc", func(t *testing.T) {
+		g := gomega.NewGomegaWithT(t)
 		updateEventPod := event.UpdateEvent{MetaNew: pod.GetObjectMeta(), ObjectNew: pod}
 		updateEventLabelledSrvAcc := event.UpdateEvent{MetaNew: labelledSrvAcc.GetObjectMeta(), ObjectNew: labelledSrvAcc}
 		updateEventUnlabelledSrvAcc := event.UpdateEvent{MetaNew: unlabelledSrvAcc.GetObjectMeta(), ObjectNew: unlabelledSrvAcc}

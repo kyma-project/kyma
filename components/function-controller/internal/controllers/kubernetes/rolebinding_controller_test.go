@@ -100,7 +100,6 @@ func TestRoleBindingReconciler_Reconcile(t *testing.T) {
 }
 
 func TestRoleBindingReconciler_predicate(t *testing.T) {
-	g := gomega.NewGomegaWithT(t)
 	baseNs := "base_ns"
 
 	r := &RoleBindingReconciler{svc: NewRoleBindingService(resource.New(&automock.K8sClient{}, runtime.NewScheme()), Config{BaseNamespace: baseNs})}
@@ -116,6 +115,7 @@ func TestRoleBindingReconciler_predicate(t *testing.T) {
 	unlabelledRoleBinding := &rbacv1.RoleBinding{}
 
 	t.Run("deleteFunc", func(t *testing.T) {
+		g := gomega.NewGomegaWithT(t)
 		deleteEventPod := event.DeleteEvent{Meta: pod.GetObjectMeta(), Object: pod}
 		deleteEventLabelledSrvAcc := event.DeleteEvent{Meta: labelledRoleBinding.GetObjectMeta(), Object: labelledRoleBinding}
 		deleteEventUnlabelledSrvAcc := event.DeleteEvent{Meta: unlabelledRoleBinding.GetObjectMeta(), Object: unlabelledRoleBinding}
@@ -127,6 +127,7 @@ func TestRoleBindingReconciler_predicate(t *testing.T) {
 	})
 
 	t.Run("createFunc", func(t *testing.T) {
+		g := gomega.NewGomegaWithT(t)
 		createEventPod := event.CreateEvent{Meta: pod.GetObjectMeta(), Object: pod}
 		createEventLabelledSrvAcc := event.CreateEvent{Meta: labelledRoleBinding.GetObjectMeta(), Object: labelledRoleBinding}
 		createEventUnlabelledSrvAcc := event.CreateEvent{Meta: unlabelledRoleBinding.GetObjectMeta(), Object: unlabelledRoleBinding}
@@ -138,6 +139,7 @@ func TestRoleBindingReconciler_predicate(t *testing.T) {
 	})
 
 	t.Run("genericFunc", func(t *testing.T) {
+		g := gomega.NewGomegaWithT(t)
 		genericEventPod := event.GenericEvent{Meta: pod.GetObjectMeta(), Object: pod}
 		genericEventLabelledSrvAcc := event.GenericEvent{Meta: labelledRoleBinding.GetObjectMeta(), Object: labelledRoleBinding}
 		genericEventUnlabelledSrvAcc := event.GenericEvent{Meta: unlabelledRoleBinding.GetObjectMeta(), Object: unlabelledRoleBinding}
@@ -149,6 +151,7 @@ func TestRoleBindingReconciler_predicate(t *testing.T) {
 	})
 
 	t.Run("updateFunc", func(t *testing.T) {
+		g := gomega.NewGomegaWithT(t)
 		updateEventPod := event.UpdateEvent{MetaNew: pod.GetObjectMeta(), ObjectNew: pod}
 		updateEventLabelledSrvAcc := event.UpdateEvent{MetaNew: labelledRoleBinding.GetObjectMeta(), ObjectNew: labelledRoleBinding}
 		updateEventUnlabelledSrvAcc := event.UpdateEvent{MetaNew: unlabelledRoleBinding.GetObjectMeta(), ObjectNew: unlabelledRoleBinding}

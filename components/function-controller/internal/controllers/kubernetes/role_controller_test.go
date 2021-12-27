@@ -46,6 +46,7 @@ func TestRoleReconciler_Reconcile(t *testing.T) {
 
 	//WHEN
 	t.Run("should successfully propagate base Role to user namespace", func(t *testing.T) {
+		g := gomega.NewGomegaWithT(t)
 		t.Log("reconciling Role that doesn't exist")
 		_, err := reconciler.Reconcile(ctrl.Request{NamespacedName: types.NamespacedName{Namespace: baseRole.GetNamespace(), Name: "not-existing-role"}})
 		g.Expect(err).To(gomega.BeNil(), "should not throw error on non existing Role")
@@ -106,7 +107,6 @@ func TestRoleReconciler_Reconcile(t *testing.T) {
 }
 
 func TestRoleReconciler_predicate(t *testing.T) {
-	gm := gomega.NewGomegaWithT(t)
 	baseNs := "base_ns"
 
 	r := &RoleReconciler{svc: NewRoleService(resource.New(&automock.K8sClient{}, runtime.NewScheme()), Config{BaseNamespace: baseNs})}
@@ -122,46 +122,50 @@ func TestRoleReconciler_predicate(t *testing.T) {
 	unlabelledRole := &rbacv1.Role{}
 
 	t.Run("deleteFunc", func(t *testing.T) {
+		g := gomega.NewGomegaWithT(t)
 		deleteEventPod := event.DeleteEvent{Meta: pod.GetObjectMeta(), Object: pod}
 		deleteEventLabelledSrvAcc := event.DeleteEvent{Meta: labelledRole.GetObjectMeta(), Object: labelledRole}
 		deleteEventUnlabelledSrvAcc := event.DeleteEvent{Meta: unlabelledRole.GetObjectMeta(), Object: unlabelledRole}
 
-		gm.Expect(preds.Delete(deleteEventPod)).To(gomega.BeFalse())
-		gm.Expect(preds.Delete(deleteEventLabelledSrvAcc)).To(gomega.BeFalse())
-		gm.Expect(preds.Delete(deleteEventUnlabelledSrvAcc)).To(gomega.BeFalse())
-		gm.Expect(preds.Delete(event.DeleteEvent{})).To(gomega.BeFalse())
+		g.Expect(preds.Delete(deleteEventPod)).To(gomega.BeFalse())
+		g.Expect(preds.Delete(deleteEventLabelledSrvAcc)).To(gomega.BeFalse())
+		g.Expect(preds.Delete(deleteEventUnlabelledSrvAcc)).To(gomega.BeFalse())
+		g.Expect(preds.Delete(event.DeleteEvent{})).To(gomega.BeFalse())
 	})
 
 	t.Run("createFunc", func(t *testing.T) {
+		g := gomega.NewGomegaWithT(t)
 		createEventPod := event.CreateEvent{Meta: pod.GetObjectMeta(), Object: pod}
 		createEventLabelledSrvAcc := event.CreateEvent{Meta: labelledRole.GetObjectMeta(), Object: labelledRole}
 		createEventUnlabelledSrvAcc := event.CreateEvent{Meta: unlabelledRole.GetObjectMeta(), Object: unlabelledRole}
 
-		gm.Expect(preds.Create(createEventPod)).To(gomega.BeFalse())
-		gm.Expect(preds.Create(createEventLabelledSrvAcc)).To(gomega.BeTrue())
-		gm.Expect(preds.Create(createEventUnlabelledSrvAcc)).To(gomega.BeFalse())
-		gm.Expect(preds.Create(event.CreateEvent{})).To(gomega.BeFalse())
+		g.Expect(preds.Create(createEventPod)).To(gomega.BeFalse())
+		g.Expect(preds.Create(createEventLabelledSrvAcc)).To(gomega.BeTrue())
+		g.Expect(preds.Create(createEventUnlabelledSrvAcc)).To(gomega.BeFalse())
+		g.Expect(preds.Create(event.CreateEvent{})).To(gomega.BeFalse())
 	})
 
 	t.Run("genericFunc", func(t *testing.T) {
+		g := gomega.NewGomegaWithT(t)
 		genericEventPod := event.GenericEvent{Meta: pod.GetObjectMeta(), Object: pod}
 		genericEventLabelledSrvAcc := event.GenericEvent{Meta: labelledRole.GetObjectMeta(), Object: labelledRole}
 		genericEventUnlabelledSrvAcc := event.GenericEvent{Meta: unlabelledRole.GetObjectMeta(), Object: unlabelledRole}
 
-		gm.Expect(preds.Generic(genericEventPod)).To(gomega.BeFalse())
-		gm.Expect(preds.Generic(genericEventLabelledSrvAcc)).To(gomega.BeTrue())
-		gm.Expect(preds.Generic(genericEventUnlabelledSrvAcc)).To(gomega.BeFalse())
-		gm.Expect(preds.Generic(event.GenericEvent{})).To(gomega.BeFalse())
+		g.Expect(preds.Generic(genericEventPod)).To(gomega.BeFalse())
+		g.Expect(preds.Generic(genericEventLabelledSrvAcc)).To(gomega.BeTrue())
+		g.Expect(preds.Generic(genericEventUnlabelledSrvAcc)).To(gomega.BeFalse())
+		g.Expect(preds.Generic(event.GenericEvent{})).To(gomega.BeFalse())
 	})
 
 	t.Run("updateFunc", func(t *testing.T) {
+		g := gomega.NewGomegaWithT(t)
 		updateEventPod := event.UpdateEvent{MetaNew: pod.GetObjectMeta(), ObjectNew: pod}
 		updateEventLabelledSrvAcc := event.UpdateEvent{MetaNew: labelledRole.GetObjectMeta(), ObjectNew: labelledRole}
 		updateEventUnlabelledSrvAcc := event.UpdateEvent{MetaNew: unlabelledRole.GetObjectMeta(), ObjectNew: unlabelledRole}
 
-		gm.Expect(preds.Update(updateEventPod)).To(gomega.BeFalse())
-		gm.Expect(preds.Update(updateEventUnlabelledSrvAcc)).To(gomega.BeFalse())
-		gm.Expect(preds.Update(updateEventLabelledSrvAcc)).To(gomega.BeTrue())
-		gm.Expect(preds.Update(event.UpdateEvent{})).To(gomega.BeFalse())
+		g.Expect(preds.Update(updateEventPod)).To(gomega.BeFalse())
+		g.Expect(preds.Update(updateEventUnlabelledSrvAcc)).To(gomega.BeFalse())
+		g.Expect(preds.Update(updateEventLabelledSrvAcc)).To(gomega.BeTrue())
+		g.Expect(preds.Update(event.UpdateEvent{})).To(gomega.BeFalse())
 	})
 }
