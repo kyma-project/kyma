@@ -101,6 +101,7 @@ func TestGitOps(t *testing.T) {
 	for _, testData := range testDataScenarios {
 		t.Run(fmt.Sprintf("[%s] should successfully update Function]", testData.info), func(t *testing.T) {
 			//GIVEN
+			g := gomega.NewGomegaWithT(t)
 			inFunction := newTestGitFunction(testNamespace, "ah-tak-przeciez", 1, 2)
 			g.Expect(resourceClient.Create(context.TODO(), inFunction)).To(gomega.Succeed())
 
@@ -394,6 +395,7 @@ func TestGitOps_GitErrorHandling(t *testing.T) {
 	createDockerfileForRuntime(g, resourceClient, rtm)
 	t.Run("Check if Requeue is set to true in case of recoverable error", func(t *testing.T) {
 		//GIVEN
+		g := gomega.NewGomegaWithT(t)
 		gitRepo := serverlessv1alpha1.GitRepository{
 			ObjectMeta: metav1.ObjectMeta{Name: testRepoName, Namespace: testNamespace},
 			Spec:       serverlessv1alpha1.GitRepositorySpec{},
