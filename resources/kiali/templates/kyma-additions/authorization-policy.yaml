@@ -32,4 +32,4 @@ spec:
         - /metrics
   selector:
     matchLabels:
-      {{- include "kiali-server.labels" . | nindent 6 }}
+      {{- include "kiali-server.selectorLabels" . | nindent 6 }}
