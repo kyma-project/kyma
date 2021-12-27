@@ -4,7 +4,9 @@ import (
 	"context"
 	"testing"
 
-	"github.com/onsi/ginkgo"
+	"github.com/kyma-project/kyma/components/function-controller/internal/resource"
+	"k8s.io/client-go/kubernetes/scheme"
+
 	"github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -14,170 +16,196 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/log"
 )
 
-var _ = ginkgo.Describe("Secret", func() {
-	var (
-		reconciler                       *SecretReconciler
-		request                          ctrl.Request
-		requestForSecretWithManagedLabel ctrl.Request
-		baseSecret                       *corev1.Secret
-		baseSecretWithManagedLabel       *corev1.Secret
-		namespace                        string
-	)
-	g := gomega.NewGomegaWithT(nil)
+func TestSecretReconciler_Reconcile(t *testing.T) {
+	t.Parallel()
+	g := gomega.NewGomegaWithT(t)
+	k8sClient, testEnv := setUpTestEnv(g)
+	defer tearDownTestEnv(g, testEnv)
+	resourceClient := resource.New(k8sClient, scheme.Scheme)
+	testCfg := setUpControllerConfig(g)
 
-	ginkgo.BeforeEach(func() {
-		userNamespace := newFixNamespace("tam")
-		gomega.Expect(resourceClient.Create(context.TODO(), userNamespace)).To(gomega.Succeed())
+	baseNamespace := newFixNamespace(testCfg.BaseNamespace)
+	g.Expect(k8sClient.Create(context.TODO(), baseNamespace)).To(gomega.Succeed())
 
-		baseSecret = newFixBaseSecret(config.BaseNamespace, "ah-tak-przeciez")
-		gomega.Expect(resourceClient.Create(context.TODO(), baseSecret)).To(gomega.Succeed())
-		request = ctrl.Request{NamespacedName: types.NamespacedName{Namespace: baseSecret.GetNamespace(), Name: baseSecret.GetName()}}
-		reconciler = NewSecret(k8sClient, log.Log, config, secretSvc)
+	userNamespace := newFixNamespace("tam")
+	g.Expect(resourceClient.Create(context.TODO(), userNamespace)).To(gomega.Succeed())
 
-		baseSecretWithManagedLabel = newFixBaseSecretWithManagedLabel(config.BaseNamespace, "secret-with-managed-label")
-		gomega.Expect(resourceClient.Create(context.TODO(), baseSecretWithManagedLabel)).To(gomega.Succeed())
-		requestForSecretWithManagedLabel = ctrl.Request{NamespacedName: types.NamespacedName{Namespace: baseSecretWithManagedLabel.GetNamespace(), Name: baseSecretWithManagedLabel.GetName()}}
+	secretSvc := NewSecretService(resourceClient, testCfg)
+	reconciler := NewSecret(k8sClient, log.Log, testCfg, secretSvc)
 
-		namespace = userNamespace.GetName()
-	})
+	namespace := userNamespace.GetName()
 
-	ginkgo.It("should successfully propagate base Secret to user namespace", func() {
-		ginkgo.By("reconciling non-existing secret")
+	t.Run("should successfully propagate base Secret to user namespace", func(t *testing.T) {
+		//GIVEN
+		g := gomega.NewGomegaWithT(t)
+		t.Log("reconciling non-existing secret")
+		baseSecret := newFixBaseSecret(testCfg.BaseNamespace, "successful-propagation")
+		createSecret(g, resourceClient, baseSecret)
+		defer deleteSecret(g, k8sClient, baseSecret)
 		_, err := reconciler.Reconcile(ctrl.Request{
 			NamespacedName: types.NamespacedName{
 				Namespace: baseSecret.GetNamespace(),
 				Name:      "not-existing-secret",
 			},
 		})
-		gomega.Expect(err).To(gomega.BeNil())
+		g.Expect(err).To(gomega.BeNil())
+		request := ctrl.Request{NamespacedName: types.NamespacedName{Namespace: testCfg.BaseNamespace, Name: baseSecret.GetName()}}
 
-		ginkgo.By("reconciling the Secret")
+		//WHEN
+		t.Log("reconciling the Secret")
 		result, err := reconciler.Reconcile(request)
-		gomega.Expect(err).To(gomega.BeNil())
-		gomega.Expect(result.Requeue).To(gomega.BeFalse())
-		gomega.Expect(result.RequeueAfter).To(gomega.Equal(config.SecretRequeueDuration))
+		g.Expect(err).To(gomega.BeNil())
+		g.Expect(result.Requeue).To(gomega.BeFalse())
+		g.Expect(result.RequeueAfter).To(gomega.Equal(testCfg.SecretRequeueDuration))
 
 		updatedBase := &corev1.Secret{}
-		gomega.Expect(k8sClient.Get(context.TODO(), types.NamespacedName{Namespace: baseSecret.GetNamespace(), Name: baseSecret.GetName()}, updatedBase)).To(gomega.Succeed())
-		gomega.Expect(updatedBase.Finalizers).To(gomega.ContainElement(cfgSecretFinalizerName), "created base secret should have finalizer applied")
+		g.Expect(k8sClient.Get(context.TODO(), types.NamespacedName{Namespace: baseSecret.GetNamespace(), Name: baseSecret.GetName()}, updatedBase)).To(gomega.Succeed())
+		g.Expect(updatedBase.Finalizers).To(gomega.ContainElement(cfgSecretFinalizerName), "created base secret should have finalizer applied")
 		secret := &corev1.Secret{}
-		gomega.Expect(k8sClient.Get(context.TODO(), types.NamespacedName{Namespace: namespace, Name: baseSecret.GetName()}, secret)).To(gomega.Succeed())
+		g.Expect(k8sClient.Get(context.TODO(), types.NamespacedName{Namespace: namespace, Name: baseSecret.GetName()}, secret)).To(gomega.Succeed())
 		compareSecrets(g, secret, baseSecret)
 
-		ginkgo.By("updating the base Secret")
-		copy := updatedBase.DeepCopy()
-		copy.Labels["test"] = "value"
-		copy.Data["test123"] = []byte("321tset")
-		gomega.Expect(k8sClient.Update(context.TODO(), copy)).To(gomega.Succeed())
+		t.Log("updating the base Secret")
+		updateBaseSecretCopy := updatedBase.DeepCopy()
+		updateBaseSecretCopy.Labels["test"] = "value"
+		updateBaseSecretCopy.Data["test123"] = []byte("321tset")
+		g.Expect(k8sClient.Update(context.TODO(), updateBaseSecretCopy)).To(gomega.Succeed())
 
 		result, err = reconciler.Reconcile(request)
-		gomega.Expect(err).To(gomega.BeNil())
-		gomega.Expect(result.Requeue).To(gomega.BeFalse())
-		gomega.Expect(result.RequeueAfter).To(gomega.Equal(config.SecretRequeueDuration))
+		g.Expect(err).To(gomega.BeNil())
+		g.Expect(result.Requeue).To(gomega.BeFalse())
+		g.Expect(result.RequeueAfter).To(gomega.Equal(testCfg.SecretRequeueDuration))
 
 		secret = &corev1.Secret{}
-		gomega.Expect(k8sClient.Get(context.TODO(), types.NamespacedName{Namespace: namespace, Name: baseSecret.GetName()}, secret)).To(gomega.Succeed())
-		compareSecrets(g, secret, copy)
+		g.Expect(k8sClient.Get(context.TODO(), types.NamespacedName{Namespace: namespace, Name: baseSecret.GetName()}, secret)).To(gomega.Succeed())
+		compareSecrets(g, secret, updateBaseSecretCopy)
 
-		ginkgo.By("updating the modified Secret in user namespace")
+		t.Log("updating the modified Secret in user namespace")
 		userCopy := secret.DeepCopy()
 		userCopy.Data["test123"] = []byte("321tset")
-		gomega.Expect(k8sClient.Update(context.TODO(), userCopy)).To(gomega.Succeed())
+		g.Expect(k8sClient.Update(context.TODO(), userCopy)).To(gomega.Succeed())
 
 		result, err = reconciler.Reconcile(request)
-		gomega.Expect(err).To(gomega.BeNil())
-		gomega.Expect(result.Requeue).To(gomega.BeFalse())
-		gomega.Expect(result.RequeueAfter).To(gomega.Equal(config.SecretRequeueDuration))
+		g.Expect(err).To(gomega.BeNil())
+		g.Expect(result.Requeue).To(gomega.BeFalse())
+		g.Expect(result.RequeueAfter).To(gomega.Equal(testCfg.SecretRequeueDuration))
 
 		secret = &corev1.Secret{}
-		gomega.Expect(k8sClient.Get(context.TODO(), types.NamespacedName{Namespace: namespace, Name: baseSecret.GetName()}, secret)).To(gomega.Succeed())
-		compareSecrets(g, secret, copy)
+		g.Expect(k8sClient.Get(context.TODO(), types.NamespacedName{Namespace: namespace, Name: baseSecret.GetName()}, secret)).To(gomega.Succeed())
+		compareSecrets(g, secret, updateBaseSecretCopy)
 	})
 
-	ginkgo.It("should not successfully propagate Secret managed by user to user namespace", func() {
-		ginkgo.By("reconciling non-existing secret")
+	t.Run("should not successfully propagate Secret managed by user to user namespace", func(t *testing.T) {
+		//GIVEN
+		g := gomega.NewGomegaWithT(t)
+		t.Log("reconciling non-existing secret")
+
+		baseSecretWithManagedLabel := newFixBaseSecretWithManagedLabel(testCfg.BaseNamespace, "secret-with-managed-label")
+		g.Expect(resourceClient.Create(context.TODO(), baseSecretWithManagedLabel)).To(gomega.Succeed())
+		requestForSecretWithManagedLabel := ctrl.Request{NamespacedName: types.NamespacedName{Namespace: baseSecretWithManagedLabel.GetNamespace(), Name: baseSecretWithManagedLabel.GetName()}}
+
+		baseSecret := newFixBaseSecret(testCfg.BaseNamespace, "unsuccessful-propagation")
+		createSecret(g, resourceClient, baseSecret)
+		defer deleteSecret(g, k8sClient, baseSecret)
 		_, err := reconciler.Reconcile(ctrl.Request{
 			NamespacedName: types.NamespacedName{
 				Namespace: baseSecretWithManagedLabel.GetNamespace(),
 				Name:      "not-existing-secret",
 			},
 		})
-		gomega.Expect(err).To(gomega.BeNil())
+		g.Expect(err).To(gomega.BeNil())
 
-		ginkgo.By("reconciling the Secret")
+		t.Log("reconciling the Secret")
 		result, err := reconciler.Reconcile(requestForSecretWithManagedLabel)
-		gomega.Expect(err).To(gomega.BeNil())
-		gomega.Expect(result.Requeue).To(gomega.BeFalse())
-		gomega.Expect(result.RequeueAfter).To(gomega.Equal(config.SecretRequeueDuration))
+		g.Expect(err).To(gomega.BeNil())
+		g.Expect(result.Requeue).To(gomega.BeFalse())
+		g.Expect(result.RequeueAfter).To(gomega.Equal(testCfg.SecretRequeueDuration))
 
 		updatedBase := &corev1.Secret{}
-		gomega.Expect(k8sClient.Get(context.TODO(), types.NamespacedName{Namespace: baseSecretWithManagedLabel.GetNamespace(), Name: baseSecretWithManagedLabel.GetName()}, updatedBase)).To(gomega.Succeed())
+		g.Expect(k8sClient.Get(context.TODO(), types.NamespacedName{Namespace: baseSecretWithManagedLabel.GetNamespace(), Name: baseSecretWithManagedLabel.GetName()}, updatedBase)).To(gomega.Succeed())
 		secret := &corev1.Secret{}
-		gomega.Expect(k8sClient.Get(context.TODO(), types.NamespacedName{Namespace: namespace, Name: baseSecretWithManagedLabel.GetName()}, secret)).To(gomega.Succeed())
+		g.Expect(k8sClient.Get(context.TODO(), types.NamespacedName{Namespace: namespace, Name: baseSecretWithManagedLabel.GetName()}, secret)).To(gomega.Succeed())
 		compareSecrets(g, secret, updatedBase)
 
-		ginkgo.By("updating the base Secret")
-		copy := updatedBase.DeepCopy()
-		copy.Data["test123"] = []byte("321tset")
-		gomega.Expect(k8sClient.Update(context.TODO(), copy)).To(gomega.Succeed())
+		t.Log("updating the base Secret")
+		updateBaseSecretCopy := updatedBase.DeepCopy()
+		updateBaseSecretCopy.Data["test123"] = []byte("321tset")
+		g.Expect(k8sClient.Update(context.TODO(), updateBaseSecretCopy)).To(gomega.Succeed())
 
 		result, err = reconciler.Reconcile(requestForSecretWithManagedLabel)
-		gomega.Expect(err).To(gomega.BeNil())
-		gomega.Expect(result.Requeue).To(gomega.BeFalse())
-		gomega.Expect(result.RequeueAfter).To(gomega.Equal(config.SecretRequeueDuration))
+		g.Expect(err).To(gomega.BeNil())
+		g.Expect(result.Requeue).To(gomega.BeFalse())
+		g.Expect(result.RequeueAfter).To(gomega.Equal(testCfg.SecretRequeueDuration))
 
 		secret = &corev1.Secret{}
-		gomega.Expect(k8sClient.Get(context.TODO(), types.NamespacedName{Namespace: namespace, Name: baseSecretWithManagedLabel.GetName()}, secret)).To(gomega.Succeed())
+		g.Expect(k8sClient.Get(context.TODO(), types.NamespacedName{Namespace: namespace, Name: baseSecretWithManagedLabel.GetName()}, secret)).To(gomega.Succeed())
 		compareSecrets(g, secret, updatedBase)
 	})
 
-	ginkgo.It("should successfully delete propagated Secrets from user namespace when base Secret is deleted", func() {
-		ginkgo.By("reconciling the Secret")
+	t.Run("should successfully delete propagated Secrets from user namespace when base Secret is deleted", func(t *testing.T) {
+		//GIVEN
+		g := gomega.NewGomegaWithT(t)
+		t.Log("reconciling the Secret")
+		baseSecret := newFixBaseSecret(testCfg.BaseNamespace, "successful-deletion")
+		createSecret(g, resourceClient, baseSecret)
+
+		request := ctrl.Request{NamespacedName: types.NamespacedName{Namespace: testCfg.BaseNamespace, Name: baseSecret.GetName()}}
+
+		//WHEN
 		result, err := reconciler.Reconcile(request)
-		gomega.Expect(err).To(gomega.BeNil())
-		gomega.Expect(result.Requeue).To(gomega.BeFalse())
-		gomega.Expect(result.RequeueAfter).To(gomega.Equal(config.SecretRequeueDuration))
+		g.Expect(err).To(gomega.BeNil())
+		g.Expect(result.Requeue).To(gomega.BeFalse())
+		g.Expect(result.RequeueAfter).To(gomega.Equal(testCfg.SecretRequeueDuration))
 
 		updatedBase := &corev1.Secret{}
-		gomega.Expect(k8sClient.Get(context.TODO(), types.NamespacedName{Namespace: baseSecret.GetNamespace(), Name: baseSecret.GetName()}, updatedBase)).To(gomega.Succeed())
-		gomega.Expect(updatedBase.Finalizers).To(gomega.ContainElement(cfgSecretFinalizerName), "created base secret should have finalizer applied")
+		g.Expect(k8sClient.Get(context.TODO(), types.NamespacedName{Namespace: baseSecret.GetNamespace(), Name: baseSecret.GetName()}, updatedBase)).To(gomega.Succeed())
+		g.Expect(updatedBase.Finalizers).To(gomega.ContainElement(cfgSecretFinalizerName), "created base secret should have finalizer applied")
 		secret := &corev1.Secret{}
-		gomega.Expect(k8sClient.Get(context.TODO(), types.NamespacedName{Namespace: namespace, Name: baseSecret.GetName()}, secret)).To(gomega.Succeed())
+		g.Expect(k8sClient.Get(context.TODO(), types.NamespacedName{Namespace: namespace, Name: baseSecret.GetName()}, secret)).To(gomega.Succeed())
 		compareSecrets(g, secret, baseSecret)
 
-		ginkgo.By("deleting base Secret")
-		gomega.Expect(k8sClient.Delete(context.TODO(), updatedBase)).To(gomega.Succeed())
+		t.Log("deleting base Secret")
+		g.Expect(k8sClient.Delete(context.TODO(), updatedBase)).To(gomega.Succeed())
 		result, err = reconciler.Reconcile(request)
-		gomega.Expect(err).To(gomega.BeNil())
-		gomega.Expect(result.Requeue).To(gomega.BeFalse())
-		gomega.Expect(result.RequeueAfter).To(gomega.BeZero())
-		gomega.Expect(k8sClient.Get(context.TODO(), types.NamespacedName{Namespace: updatedBase.GetNamespace(), Name: updatedBase.GetName()}, updatedBase)).To(gomega.HaveOccurred())
-		gomega.Expect(k8sClient.Get(context.TODO(), types.NamespacedName{Namespace: secret.GetNamespace(), Name: secret.GetName()}, secret)).To(gomega.HaveOccurred())
+		g.Expect(err).To(gomega.BeNil())
+		g.Expect(result.Requeue).To(gomega.BeFalse())
+		g.Expect(result.RequeueAfter).To(gomega.BeZero())
+		g.Expect(k8sClient.Get(context.TODO(), types.NamespacedName{Namespace: updatedBase.GetNamespace(), Name: updatedBase.GetName()}, updatedBase)).To(gomega.HaveOccurred())
+		g.Expect(k8sClient.Get(context.TODO(), types.NamespacedName{Namespace: secret.GetNamespace(), Name: secret.GetName()}, secret)).To(gomega.HaveOccurred())
 	})
 
-	ginkgo.It("should not successfully delete propagated Secrets from user namespace manged by user when base Secret is deleted", func() {
-		ginkgo.By("reconciling the Secret")
+	t.Run("should not successfully delete propagated Secrets from user namespace managed by user when base Secret is deleted", func(t *testing.T) {
+		g := gomega.NewGomegaWithT(t)
+		t.Log("reconciling the Secret")
+		baseSecret := newFixBaseSecret(testCfg.BaseNamespace, "unsuccessful-deletion")
+		createSecret(g, resourceClient, baseSecret)
+		defer deleteSecret(g, k8sClient, baseSecret)
+
+		baseSecretWithManagedLabel := newFixBaseSecretWithManagedLabel(testCfg.BaseNamespace, "secret-with-managed-label")
+		g.Expect(resourceClient.Create(context.TODO(), baseSecretWithManagedLabel)).To(gomega.Succeed())
+		requestForSecretWithManagedLabel := ctrl.Request{NamespacedName: types.NamespacedName{Namespace: baseSecretWithManagedLabel.GetNamespace(), Name: baseSecretWithManagedLabel.GetName()}}
+
 		result, err := reconciler.Reconcile(requestForSecretWithManagedLabel)
-		gomega.Expect(err).To(gomega.BeNil())
-		gomega.Expect(result.Requeue).To(gomega.BeFalse())
-		gomega.Expect(result.RequeueAfter).To(gomega.Equal(config.SecretRequeueDuration))
+		g.Expect(err).To(gomega.BeNil())
+		g.Expect(result.Requeue).To(gomega.BeFalse())
+		g.Expect(result.RequeueAfter).To(gomega.Equal(testCfg.SecretRequeueDuration))
 
 		updatedBase := &corev1.Secret{}
-		gomega.Expect(k8sClient.Get(context.TODO(), types.NamespacedName{Namespace: baseSecretWithManagedLabel.GetNamespace(), Name: baseSecretWithManagedLabel.GetName()}, updatedBase)).To(gomega.Succeed())
+		g.Expect(k8sClient.Get(context.TODO(), types.NamespacedName{Namespace: baseSecretWithManagedLabel.GetNamespace(), Name: baseSecretWithManagedLabel.GetName()}, updatedBase)).To(gomega.Succeed())
 		secret := &corev1.Secret{}
-		gomega.Expect(k8sClient.Get(context.TODO(), types.NamespacedName{Namespace: namespace, Name: baseSecretWithManagedLabel.GetName()}, secret)).To(gomega.Succeed())
+		g.Expect(k8sClient.Get(context.TODO(), types.NamespacedName{Namespace: namespace, Name: baseSecretWithManagedLabel.GetName()}, secret)).To(gomega.Succeed())
 		compareSecrets(g, secret, updatedBase)
 
-		ginkgo.By("deleting base Secret")
-		gomega.Expect(k8sClient.Delete(context.TODO(), updatedBase)).To(gomega.Succeed())
+		t.Log("deleting base Secret")
+		g.Expect(k8sClient.Delete(context.TODO(), updatedBase)).To(gomega.Succeed())
 		result, err = reconciler.Reconcile(requestForSecretWithManagedLabel)
-		gomega.Expect(err).To(gomega.BeNil())
-		gomega.Expect(result.Requeue).To(gomega.BeFalse())
-		gomega.Expect(result.RequeueAfter).To(gomega.BeZero())
-		gomega.Expect(k8sClient.Get(context.TODO(), types.NamespacedName{Namespace: updatedBase.GetNamespace(), Name: updatedBase.GetName()}, updatedBase)).To(gomega.HaveOccurred())
-		gomega.Expect(k8sClient.Get(context.TODO(), types.NamespacedName{Namespace: secret.GetNamespace(), Name: secret.GetName()}, secret)).To(gomega.Succeed())
+		g.Expect(err).To(gomega.BeNil())
+		g.Expect(result.Requeue).To(gomega.BeFalse())
+		g.Expect(result.RequeueAfter).To(gomega.BeZero())
+		g.Expect(k8sClient.Get(context.TODO(), types.NamespacedName{Namespace: updatedBase.GetNamespace(), Name: updatedBase.GetName()}, updatedBase)).To(gomega.HaveOccurred())
+		g.Expect(k8sClient.Get(context.TODO(), types.NamespacedName{Namespace: secret.GetNamespace(), Name: secret.GetName()}, secret)).To(gomega.Succeed())
 	})
-})
+}
 
 func TestSecretReconciler_predicate(t *testing.T) {
 	gm := gomega.NewGomegaWithT(t)

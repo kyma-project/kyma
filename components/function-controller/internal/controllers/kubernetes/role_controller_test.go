@@ -38,7 +38,7 @@ func TestRoleReconciler_Reconcile(t *testing.T) {
 	baseRole := newFixBaseRole(testCfg.BaseNamespace, "ah-tak-przeciez")
 	g.Expect(k8sClient.Create(context.TODO(), baseRole)).To(gomega.Succeed())
 
-	roleSvc = NewRoleService(resourceClient, config)
+	roleSvc := NewRoleService(resourceClient, config)
 	reconciler := NewRole(k8sClient, log.Log, testCfg, roleSvc)
 	namespace := userNamespace.GetName()
 

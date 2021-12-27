@@ -30,9 +30,7 @@ var (
 	resourceClient    resource.Client
 	k8sClient         client.Client
 	testEnv           *envtest.Environment
-	secretSvc         SecretService
 	serviceAccountSvc ServiceAccountService
-	roleSvc           RoleService
 )
 
 func TestAPIs(t *testing.T) {
@@ -68,9 +66,7 @@ var _ = ginkgo.BeforeSuite(func(done ginkgo.Done) {
 	err = envconfig.InitWithPrefix(&config, "TEST")
 	gomega.Expect(err).NotTo(gomega.HaveOccurred())
 
-	secretSvc = NewSecretService(resourceClient, config)
 	serviceAccountSvc = NewServiceAccountService(resourceClient, config)
-	roleSvc = NewRoleService(resourceClient, config)
 
 	baseNamespace := &corev1.Namespace{ObjectMeta: metav1.ObjectMeta{Name: config.BaseNamespace}}
 	gomega.Expect(resourceClient.Create(context.TODO(), baseNamespace)).To(gomega.Succeed())
@@ -131,9 +127,9 @@ func newFixBaseConfigMap(namespace, name string) *corev1.ConfigMap {
 func newFixBaseSecret(namespace, name string) *corev1.Secret {
 	return &corev1.Secret{
 		ObjectMeta: metav1.ObjectMeta{
-			GenerateName: fmt.Sprintf("%s-", name),
-			Namespace:    namespace,
-			Labels:       map[string]string{ConfigLabel: CredentialsLabelValue},
+			Name:      name,
+			Namespace: namespace,
+			Labels:    map[string]string{ConfigLabel: CredentialsLabelValue},
 		},
 		Data:       map[string][]byte{"key_1_b": []byte("value_1_b"), "key_2_b": []byte("value_2_b")},
 		StringData: map[string]string{"key_1": "value_1", "key_2": "value_2"},
@@ -206,6 +202,14 @@ func newFixBaseRoleBinding(namespace, name, subjectNamespace string) *rbacv1.Rol
 			Name:     "serverless-build",
 		},
 	}
+}
+
+func createSecret(g *gomega.WithT, resourceClient resource.Client, secret *corev1.Secret) {
+	g.Expect(resourceClient.Create(context.TODO(), secret)).To(gomega.Succeed())
+}
+
+func deleteSecret(g *gomega.WithT, k8sClient client.Client, secret *corev1.Secret) {
+	g.Expect(k8sClient.Delete(context.TODO(), secret)).To(gomega.Succeed())
 }
 
 func newFixNamespace(name string) *corev1.Namespace {
