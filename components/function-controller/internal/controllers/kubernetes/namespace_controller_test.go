@@ -27,11 +27,11 @@ func TestNamespaceReconciler_Reconcile(t *testing.T) {
 	resourceClient := resource.New(k8sClient, scheme.Scheme)
 	testCfg := setUpControllerConfig(g)
 
-	configMapSvc := NewConfigMapService(resourceClient, config)
-	secretSvc := NewSecretService(resourceClient, config)
-	serviceAccountSvc := NewServiceAccountService(resourceClient, config)
-	roleSvc := NewRoleService(resourceClient, config)
-	roleBindingSvc := NewRoleBindingService(resourceClient, config)
+	configMapSvc := NewConfigMapService(resourceClient, testCfg)
+	secretSvc := NewSecretService(resourceClient, testCfg)
+	serviceAccountSvc := NewServiceAccountService(resourceClient, testCfg)
+	roleSvc := NewRoleService(resourceClient, testCfg)
+	roleBindingSvc := NewRoleBindingService(resourceClient, testCfg)
 
 	cfgNamespace := newFixNamespace(testCfg.BaseNamespace)
 	g.Expect(k8sClient.Create(context.TODO(), cfgNamespace)).To(gomega.Succeed())

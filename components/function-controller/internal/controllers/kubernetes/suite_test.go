@@ -10,6 +10,7 @@ import (
 
 	rbacv1 "k8s.io/api/rbac/v1"
 
+	"github.com/kyma-project/kyma/components/function-controller/internal/resource"
 	"github.com/onsi/ginkgo"
 	"github.com/onsi/gomega"
 	"github.com/vrischmann/envconfig"
@@ -19,18 +20,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/envtest"
 	"sigs.k8s.io/controller-runtime/pkg/envtest/printer"
-	logf "sigs.k8s.io/controller-runtime/pkg/log"
-	"sigs.k8s.io/controller-runtime/pkg/log/zap"
-
-	"github.com/kyma-project/kyma/components/function-controller/internal/resource"
-)
-
-var (
-	config            Config
-	resourceClient    resource.Client
-	k8sClient         client.Client
-	testEnv           *envtest.Environment
-	serviceAccountSvc ServiceAccountService
 )
 
 func TestAPIs(t *testing.T) {
@@ -40,45 +29,6 @@ func TestAPIs(t *testing.T) {
 		"Kubernetes Suite",
 		[]ginkgo.Reporter{printer.NewlineReporter{}})
 }
-
-var _ = ginkgo.BeforeSuite(func(done ginkgo.Done) {
-	logf.SetLogger(zap.New(zap.UseDevMode(true), zap.WriteTo(ginkgo.GinkgoWriter)))
-	ginkgo.By("bootstrapping test environment")
-	testEnv = &envtest.Environment{
-		ErrorIfCRDPathMissing: true,
-	}
-
-	cfg, err := testEnv.Start()
-	gomega.Expect(err).ToNot(gomega.HaveOccurred())
-	gomega.Expect(cfg).ToNot(gomega.BeNil())
-
-	err = scheme.AddToScheme(scheme.Scheme)
-	gomega.Expect(err).NotTo(gomega.HaveOccurred())
-
-	// +kubebuilder:scaffold:scheme
-
-	k8sClient, err = client.New(cfg, client.Options{Scheme: scheme.Scheme})
-	gomega.Expect(err).ToNot(gomega.HaveOccurred())
-	gomega.Expect(k8sClient).ToNot(gomega.BeNil())
-
-	resourceClient = resource.New(k8sClient, scheme.Scheme)
-
-	err = envconfig.InitWithPrefix(&config, "TEST")
-	gomega.Expect(err).NotTo(gomega.HaveOccurred())
-
-	serviceAccountSvc = NewServiceAccountService(resourceClient, config)
-
-	baseNamespace := &corev1.Namespace{ObjectMeta: metav1.ObjectMeta{Name: config.BaseNamespace}}
-	gomega.Expect(resourceClient.Create(context.TODO(), baseNamespace)).To(gomega.Succeed())
-
-	close(done)
-}, 60)
-
-var _ = ginkgo.AfterSuite(func() {
-	ginkgo.By("tearing down the test environment")
-	err := testEnv.Stop()
-	gomega.Expect(err).ToNot(gomega.HaveOccurred())
-})
 
 func setUpTestEnv(g *gomega.GomegaWithT) (cl client.Client, env *envtest.Environment) {
 	testEnv := &envtest.Environment{
