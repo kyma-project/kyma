@@ -81,7 +81,7 @@ global:
 images:
   manager:
     repository: "eu.gcr.io/kyma-project/function-controller"
-    tag: "e75dc1d7"
+    tag: "PR-12944"
     pullPolicy: IfNotPresent
   runtimes:
     nodejs12:
@@ -175,7 +175,7 @@ containers:
       functionBuildExecutorImage:
         value: eu.gcr.io/kyma-project/tpi/kaniko-executor:1.7.0-a029b8df
       functionBuildRepoFetcherImage:
-        value: eu.gcr.io/kyma-project/function-build-init:e75dc1d7
+        value: eu.gcr.io/kyma-project/function-build-init:PR-12944
       functionBuildMaxSimultaneousJobs:
         value: "5"
       logLevel:
@@ -256,7 +256,7 @@ webhook:
   fullnameOverride: "serverless-webhook"
   image:
     repository: "eu.gcr.io/kyma-project/function-webhook"
-    tag: "e75dc1d7"
+    tag: "PR-12944"
 
 k3s-tests:
   enabled: false # this chart is installed manually, do not flip this value
