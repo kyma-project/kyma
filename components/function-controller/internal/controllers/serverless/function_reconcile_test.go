@@ -44,6 +44,7 @@ func TestFunctionReconciler_Reconcile(t *testing.T) {
 	reconciler := NewFunction(resourceClient, log.Log, testCfg, nil, record.NewFakeRecorder(100), make(chan bool))
 
 	t.Run("should successfully create Function", func(t *testing.T) {
+		//GIVEN
 		g := gomega.NewGomegaWithT(t)
 		inFunction := newFixFunction(testNamespace, "success", 1, 2)
 		g.Expect(resourceClient.Create(context.TODO(), inFunction)).To(gomega.Succeed())
@@ -52,6 +53,7 @@ func TestFunctionReconciler_Reconcile(t *testing.T) {
 		fnLabels := reconciler.functionLabels(inFunction)
 		request := ctrl.Request{NamespacedName: types.NamespacedName{Namespace: inFunction.GetNamespace(), Name: inFunction.GetName()}}
 
+		//WHEN
 		t.Log("creating the ConfigMap")
 		result, err := reconciler.Reconcile(request)
 		g.Expect(err).To(gomega.BeNil())
@@ -130,6 +132,7 @@ func TestFunctionReconciler_Reconcile(t *testing.T) {
 		assertSuccessfulFunctionDeployment(t, resourceClient, reconciler, request, fnLabels, "registry.kyma.local", true)
 	})
 	t.Run("should set proper status on deployment fail", func(t *testing.T) {
+		//GIVEN
 		g := gomega.NewGomegaWithT(t)
 		inFunction := newFixFunction(testNamespace, "deployment-fail", 1, 2)
 		g.Expect(resourceClient.Create(context.TODO(), inFunction)).To(gomega.Succeed())
@@ -138,6 +141,7 @@ func TestFunctionReconciler_Reconcile(t *testing.T) {
 		fnLabels := reconciler.functionLabels(inFunction)
 		request := ctrl.Request{NamespacedName: types.NamespacedName{Namespace: inFunction.GetNamespace(), Name: inFunction.GetName()}}
 
+		//WHEN
 		t.Log("creating cm")
 		_, err := reconciler.Reconcile(request)
 		g.Expect(err).To(gomega.BeNil())
@@ -204,6 +208,7 @@ func TestFunctionReconciler_Reconcile(t *testing.T) {
 	})
 
 	t.Run("should properly handle apiserver lags, when two resources are created by accident", func(t *testing.T) {
+		//GIVEN
 		g := gomega.NewGomegaWithT(t)
 		inFunction := newFixFunction(testNamespace, "apiserver-lags", 1, 2)
 		g.Expect(resourceClient.Create(context.TODO(), inFunction)).To(gomega.Succeed())
@@ -212,6 +217,7 @@ func TestFunctionReconciler_Reconcile(t *testing.T) {
 		fnLabels := reconciler.functionLabels(inFunction)
 		request := ctrl.Request{NamespacedName: types.NamespacedName{Namespace: inFunction.GetNamespace(), Name: inFunction.GetName()}}
 
+		//WHEN
 		t.Log("creating cm")
 		_, err := reconciler.Reconcile(request)
 		g.Expect(err).To(gomega.BeNil())
@@ -457,6 +463,7 @@ func TestFunctionReconciler_Reconcile(t *testing.T) {
 	})
 
 	t.Run("should requeue before creating a job", func(t *testing.T) {
+		//GIVEN
 		g := gomega.NewGomegaWithT(t)
 		inFunction := newFixFunction(testNamespace, "requeue-before-job", 1, 2)
 		g.Expect(resourceClient.Create(context.TODO(), inFunction)).To(gomega.Succeed())
@@ -464,15 +471,17 @@ func TestFunctionReconciler_Reconcile(t *testing.T) {
 
 		// Create new reconciler as this test modify reconciler configuration MaxSimultaneousJobs value
 		reconciler := NewFunction(resourceClient, log.Log, testCfg, nil, record.NewFakeRecorder(100), make(chan bool))
+		reconciler.config.Build.MaxSimultaneousJobs = 1
 
 		fnLabels := reconciler.functionLabels(inFunction)
-		request := ctrl.Request{NamespacedName: types.NamespacedName{Namespace: inFunction.GetNamespace(), Name: inFunction.GetName()}}
 
-		reconciler.config.Build.MaxSimultaneousJobs = 1
 		secondFunction := newFixFunction(testNamespace, "second-function", 1, 2)
 		secondRequest := ctrl.Request{NamespacedName: types.NamespacedName{Namespace: secondFunction.GetNamespace(), Name: secondFunction.GetName()}}
 		g.Expect(resourceClient.Create(context.TODO(), secondFunction)).To(gomega.Succeed())
 
+		request := ctrl.Request{NamespacedName: types.NamespacedName{Namespace: inFunction.GetNamespace(), Name: inFunction.GetName()}}
+
+		//WHEN
 		t.Log("creating 2 cms")
 		_, err := reconciler.Reconcile(request)
 		g.Expect(err).To(gomega.BeNil())
@@ -535,6 +544,7 @@ func TestFunctionReconciler_Reconcile(t *testing.T) {
 	})
 
 	t.Run("should behave correctly on label addition and subtraction", func(t *testing.T) {
+		//GIVEN
 		g := gomega.NewGomegaWithT(t)
 		inFunction := newFixFunction(testNamespace, "labels-operations", 1, 2)
 		g.Expect(resourceClient.Create(context.TODO(), inFunction)).To(gomega.Succeed())
@@ -543,6 +553,7 @@ func TestFunctionReconciler_Reconcile(t *testing.T) {
 		fnLabels := reconciler.functionLabels(inFunction)
 		request := ctrl.Request{NamespacedName: types.NamespacedName{Namespace: inFunction.GetNamespace(), Name: inFunction.GetName()}}
 
+		//WHEN
 		t.Log("creating cm")
 		_, err := reconciler.Reconcile(request)
 		g.Expect(err).To(gomega.BeNil())
@@ -802,6 +813,7 @@ func TestFunctionReconciler_Reconcile(t *testing.T) {
 	})
 
 	t.Run("should behave correctly on label addition when job is in building phase", func(t *testing.T) {
+		//GIVEN
 		g := gomega.NewGomegaWithT(t)
 		inFunction := newFixFunction(testNamespace, "add-label-while-building", 1, 2)
 		g.Expect(resourceClient.Create(context.TODO(), inFunction)).To(gomega.Succeed())
@@ -810,6 +822,7 @@ func TestFunctionReconciler_Reconcile(t *testing.T) {
 		fnLabels := reconciler.functionLabels(inFunction)
 		request := ctrl.Request{NamespacedName: types.NamespacedName{Namespace: inFunction.GetNamespace(), Name: inFunction.GetName()}}
 
+		//WHEN
 		t.Log("creating cm")
 		_, err := reconciler.Reconcile(request)
 		g.Expect(err).To(gomega.BeNil())
@@ -891,15 +904,21 @@ func TestFunctionReconciler_Reconcile(t *testing.T) {
 	})
 
 	t.Run("should handle reconcilation lags", func(t *testing.T) {
+		//GIVEN
 		g := gomega.NewGomegaWithT(t)
+
+		//WHEN
 		t.Log("handling not existing Function")
 		result, err := reconciler.Reconcile(ctrl.Request{NamespacedName: types.NamespacedName{Namespace: "nope", Name: "noooooopppeee"}})
+
+		//THEN
 		g.Expect(err).To(gomega.BeNil())
 		g.Expect(result.Requeue).To(gomega.BeFalse())
 		g.Expect(result.RequeueAfter).To(gomega.Equal(time.Second * 0))
 	})
 
 	t.Run("should return error when desired dockerfile runtime configmap not found", func(t *testing.T) {
+		//GIVEN
 		g := gomega.NewGomegaWithT(t)
 		testNamespace := "test-namespace"
 		fnName := "function"
@@ -911,13 +930,17 @@ func TestFunctionReconciler_Reconcile(t *testing.T) {
 		g.Expect(resourceClient.Create(context.TODO(), function)).To(gomega.Succeed())
 		defer deleteFunction(g, resourceClient, function)
 
+		//WHEN
 		_, err := reconciler.Reconcile(request)
+
+		//THEN
 		g.Expect(err).To(gomega.HaveOccurred())
 		g.Expect(err.Error()).To(gomega.ContainSubstring("Expected one config map, found 0"))
 
 	})
 
 	t.Run("should use HPA only when needed", func(t *testing.T) {
+		//GIVEN
 		g := gomega.NewGomegaWithT(t)
 		inFunction := newFixFunction(testNamespace, "hpa", 1, 2)
 		g.Expect(resourceClient.Create(context.TODO(), inFunction)).To(gomega.Succeed())
@@ -926,6 +949,7 @@ func TestFunctionReconciler_Reconcile(t *testing.T) {
 		fnLabels := reconciler.functionLabels(inFunction)
 		request := ctrl.Request{NamespacedName: types.NamespacedName{Namespace: inFunction.GetNamespace(), Name: inFunction.GetName()}}
 
+		//WHEN
 		t.Log("creating the ConfigMap")
 		result, err := reconciler.Reconcile(request)
 		g.Expect(err).To(gomega.BeNil())
@@ -1053,6 +1077,7 @@ func TestFunctionReconciler_Reconcile(t *testing.T) {
 		g.Expect(reconciler.getConditionReason(function.Status.Conditions, serverlessv1alpha1.ConditionRunning)).To(gomega.Equal(serverlessv1alpha1.ConditionReasonDeploymentReady))
 	})
 	t.Run("should properly handle `kubectl rollout restart` changing annotations in deployment", func(t *testing.T) {
+		//GIVEN
 		g := gomega.NewGomegaWithT(t)
 		inFunction := newFixFunction(testNamespace, "rollout-restart-fn", 1, 2)
 		g.Expect(resourceClient.Create(context.TODO(), inFunction)).To(gomega.Succeed())
@@ -1061,6 +1086,7 @@ func TestFunctionReconciler_Reconcile(t *testing.T) {
 		fnLabels := reconciler.functionLabels(inFunction)
 		request := ctrl.Request{NamespacedName: types.NamespacedName{Namespace: inFunction.GetNamespace(), Name: inFunction.GetName()}}
 
+		//WHEN
 		t.Log("succesfully deploying a function")
 		_, err := reconciler.Reconcile(request)
 		g.Expect(err).To(gomega.BeNil())
