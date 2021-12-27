@@ -452,7 +452,7 @@ var _ = Describe("Backend Reconciliation Tests", func() {
 	When("Switching to BEB and then stopping NATS controller fails", func() {
 		It("Should mark Eventing Backend CR to not ready", func() {
 			ctx := context.Background()
-			natsSubMgr.stopErr = errors.New("I shan't stop")
+			natsSubMgr.stopErr = errors.New("I can't stop")
 			By("Label the secret to switch to BEB")
 			bebSecret := reconcilertesting.WithBEBMessagingSecret(bebSecret1name, kymaSystemNamespace)
 			bebSecret.Labels = map[string]string{

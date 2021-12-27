@@ -399,7 +399,7 @@ func TestSubscriptionWithMaxInFlightChange(t *testing.T) {
 	}
 
 	filter := sub.Spec.Filter.Filters[0]
-	subject, err := createSubject(filter, cleaner)
+	subject, err := getCleanSubject(filter, cleaner)
 	g.Expect(err).ShouldNot(HaveOccurred())
 	g.Expect(subject).To(Not(BeEmpty()))
 
@@ -484,7 +484,7 @@ func TestIsValidSubscription(t *testing.T) {
 
 	// get filter
 	filter := sub.Spec.Filter.Filters[0]
-	subject, err := createSubject(filter, cleaner)
+	subject, err := getCleanSubject(filter, cleaner)
 	g.Expect(err).ShouldNot(HaveOccurred())
 	g.Expect(subject).To(Not(BeEmpty()))
 
