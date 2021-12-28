@@ -109,7 +109,7 @@ function commerceMockTests() {
     });
 
     it("Wait 60 min to check the logs", async function () {
-      await new Promise(resolve => setTimeout(resolve, 1));
+      await new Promise(resolve => setTimeout(resolve, 600000));
     });
 
     it("Test namespaces should be deleted", async function () {
