@@ -123,7 +123,7 @@ global:
   containerRegistry:
     path: eu.gcr.io/kyma-project
   images:
-    # these definitions aren't used by the chart, but they are required for list generation, promotion and other automatizations
+    # these definitions aren't used by the chart, but they are required by external tool for list generation
     istio_proxyv2:
       name: "proxyv2"
       version: "1.11.4-distroless"
