@@ -5,7 +5,7 @@ metadata:
   namespace: {{ .Release.Namespace }}
   name: default-operator
 spec:
-  hub: {{ .Values.image }}
+  hub: {{ .Values.repository }}
   tag: {{ .Chart.Version }}
   profile: default
   components:
