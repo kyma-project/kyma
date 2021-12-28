@@ -1023,14 +1023,6 @@ func ensureSubscriptionCreated(ctx context.Context, subscription *eventingv1alph
 	Expect(err).Should(BeNil())
 }
 
-// ensureSubscriptionUpdated conducts an update of a Subscription.
-func ensureSubscriptionUpdated(ctx context.Context, subscription *eventingv1alpha1.Subscription) {
-	By(fmt.Sprintf("Ensuring the subscription %q is updated", subscription.Name))
-	// update subscription
-	err := k8sClient.Update(ctx, subscription)
-	Expect(err).Should(BeNil())
-}
-
 // ensureSubscriberSvcCreated creates a Service in the k8s cluster. If a custom namespace is used, it will be created as well.
 func ensureSubscriberSvcCreated(ctx context.Context, svc *v1.Service) {
 	By(fmt.Sprintf("Ensuring the test namespace %q is created", svc.Namespace))
