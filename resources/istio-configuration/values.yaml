@@ -1,5 +1,5 @@
 ---
-image: eu.gcr.io/kyma-project/external/istio
+repository: eu.gcr.io/kyma-project/external/istio
 
 helmValues:
   global:
