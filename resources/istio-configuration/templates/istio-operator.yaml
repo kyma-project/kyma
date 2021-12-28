@@ -5,8 +5,8 @@ metadata:
   namespace: {{ .Release.Namespace }}
   name: default-operator
 spec:
-  hub: {{ include "shortimageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.istio) }}
-  tag: {{ .Values.global.images.istio.version }}
+  hub: {{ .Values.image }}
+  tag: {{ .Chart.Version }}
   profile: default
   components:
     egressGateways:
