@@ -18,6 +18,6 @@ It is not recommended having two Gateway CRs pointing to the same host. To solve
 
 - If there are multiple Gateway CRs pointing to the same host, delete the duplicated Gateway CR. To delete the Gateway CR, run:
 
-```bash
-kubectl -n kyma-system delete gateway $DUPLICATED_GATEWAY_NAME
-```
+   ```bash
+   kubectl -n kyma-system delete gateway $DUPLICATED_GATEWAY_NAME
+   ```
