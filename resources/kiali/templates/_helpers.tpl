@@ -58,7 +58,7 @@ Selector labels
 */}}
 {{- define "kiali-server.selectorLabels" -}}
 app.kubernetes.io/name: kiali
-app.kubernetes.io/instance: {{ include "kiali-server.fullname" . }}
+app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
 
 {{/*
