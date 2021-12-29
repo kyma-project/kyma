@@ -209,7 +209,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 	})
 
 	When("Creating a Subscription with invalid Sink and fixing it", func() {
-		It("Should update the Subscription APIRule status from not ready to ready", func() {
+		createAndFixTheSubscription := func(sinkFormat string) {
 			// Ensuring subscriber svc
 			subscriberSvc := reconcilertesting.NewSubscriberSvc("webhook", namespaceName)
 			ensureSubscriberSvcCreated(ctx, subscriberSvc)
@@ -233,7 +233,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 
 			By("Fixing the Subscription with a valid Sink")
 			path := "/path1"
-			validSink := fmt.Sprintf("https://%s.%s.svc.cluster.local%s", subscriberSvc.Name, subscriberSvc.Namespace, path)
+			validSink := fmt.Sprintf(sinkFormat, subscriberSvc.Name, subscriberSvc.Namespace, path)
 			givenSubscription.Spec.Sink = validSink
 			updateSubscription(ctx, givenSubscription).Should(reconcilertesting.HaveSubscriptionSink(validSink))
 
@@ -276,6 +276,12 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			By("Sending at least one creation requests for the Subscription")
 			_, postRequests, _ := countBEBRequests(nameMapper.MapSubscriptionName(givenSubscription))
 			Expect(postRequests).Should(reconcilertesting.BeGreaterThanOrEqual(1))
+		}
+		It("Should update the Subscription APIRule status from not ready to ready with sink containing port number", func() {
+			createAndFixTheSubscription("https://%s.%s.svc.cluster.local:8080%s")
+		})
+		It("Should update the Subscription APIRule status from not ready to ready", func() {
+			createAndFixTheSubscription("https://%s.%s.svc.cluster.local%s")
 		})
 	})
 

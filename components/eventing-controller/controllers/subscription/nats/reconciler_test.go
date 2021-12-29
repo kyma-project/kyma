@@ -62,6 +62,7 @@ type testCase func(id int, eventTypePrefix, natsSubjectToPublish, eventTypeToSub
 var (
 	reconcilerTestCases = []testCase{
 		testCreateDeleteSubscription,
+		testCreateSubscriptionWithValidSink,
 		testCreateSubscriptionWithInvalidSink,
 		testCreateSubscriptionWithEmptyProtocolProtocolSettingsDialect,
 		testChangeSubscriptionConfiguration,
@@ -245,6 +246,47 @@ func testCreateDeleteSubscription(id int, eventTypePrefix, natsSubjectToPublish,
 
 			Expect(k8sClient.Delete(ctx, subscription)).Should(BeNil())
 			isSubscriptionDeleted(ctx, subscription).Should(reconcilertesting.HaveNotFoundSubscription(true))
+		})
+	})
+}
+
+func testCreateSubscriptionWithValidSink(id int, eventTypePrefix, _, eventTypeToSubscribe string) bool {
+	subscriptionName := fmt.Sprintf(subscriptionNameFormat, id) + "-valid"
+	subscriberName := fmt.Sprintf(subscriberNameFormat, id) + "-valid"
+	sink := reconcilertesting.GetValidSink(namespaceName, subscriberName)
+	testCreatingSubscription := func(sink string) {
+		ctx := context.Background()
+		cancel = startReconciler(eventTypePrefix, defaultSinkValidator)
+		defer cancel()
+
+		// create subscriber svc
+		subscriberSvc := reconcilertesting.NewSubscriberSvc(subscriberName, namespaceName)
+		ensureSubscriberSvcCreated(ctx, subscriberSvc)
+
+		// create subscription
+		subscription := reconcilertesting.NewSubscription(subscriptionName, namespaceName, reconcilertesting.WithFilter("", eventTypeToSubscribe))
+		subscription.Spec.Sink = sink
+		ensureSubscriptionCreated(ctx, subscription)
+
+		getSubscription(ctx, subscription).Should(And(
+			reconcilertesting.HaveSubscriptionName(subscriptionName),
+			reconcilertesting.HaveCondition(eventingv1alpha1.MakeCondition(
+				eventingv1alpha1.ConditionSubscriptionActive,
+				eventingv1alpha1.ConditionReasonNATSSubscriptionActive,
+				v1.ConditionTrue, "")),
+		))
+
+		Expect(k8sClient.Delete(ctx, subscription)).Should(BeNil())
+		isSubscriptionDeleted(ctx, subscription).Should(reconcilertesting.HaveNotFoundSubscription(true))
+
+		Expect(k8sClient.Delete(ctx, subscriberSvc)).Should(BeNil())
+	}
+	return When("Create Subscription with valid sink", func() {
+		It("Should mark the Subscription with valid sink as ready", func() {
+			testCreatingSubscription(sink)
+		})
+		It("Should mark the Subscription with valid sink with the port suffix as ready", func() {
+			testCreatingSubscription(sink + ":8080")
 		})
 	})
 }
