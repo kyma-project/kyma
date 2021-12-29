@@ -132,7 +132,7 @@ describe("SKR-Upgrade-test", function () {
   });
 
   it(`Provision SKR with ID ${instanceID}`, async function () {
-    skr = await provisionSKR(keb, kcp, gardener, instanceID, runtimeName, null, null, null, provisioningTimeout);
+    skr = await provisionSKR(keb, kcp, gardener, instanceID, runtimeName, null, null, {"kymaVersion": kymaVersion}, provisioningTimeout);
   });
 
   it(`Should get Runtime Status after provisioning`, async function () {
