@@ -38,11 +38,9 @@ function WithTestNS(testNS) {
     }
 }
 
-function GatherOptions(...opts) {
-    const suffix = genRandom(4);
-    // If no opts provided the options object will be set to these default values.
-    let options = {
-        instanceID: uuid.v4(),
+function getOptions(suffix, instanceId){
+    return {
+        instanceID: instanceId,
         runtimeName: `kyma-${suffix}`,
         appName: `app-${suffix}`,
         scenarioName: `test-${suffix}`,
@@ -68,6 +66,24 @@ function GatherOptions(...opts) {
         administrator0: getEnvOrThrow("KEB_USER_ID"),
         administrators1: ["admin1@acme.com", "admin2@acme.com"],
     };
+}
+
+function GatherOptions(...opts) {
+    // If no opts provided the options object will be set to these default values.
+    let options = getOptions(genRandom(4),uuid.v4());
+
+    opts.forEach((opt) => {
+        opt(options);
+    });
+    debug(options);
+
+    return options;
+}
+
+function GatherOptionsFromEnv(...opts) {
+    const suffix = process.env.SKR_SUFFIX;
+    const instanceId = process.env.SKR_INSTANCE_ID;
+    let options = getOptions(suffix, instanceId)
 
     opts.forEach((opt) => {
         opt(options);
@@ -80,6 +96,7 @@ function GatherOptions(...opts) {
 module.exports = {
     keb, gardener, director,
     GatherOptions,
+    GatherOptionsFromEnv,
     WithInstanceID,
     WithAppName,
     WithRuntimeName,

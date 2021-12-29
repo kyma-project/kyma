@@ -7,9 +7,11 @@ const isSKR = process.env.KYMA_TYPE === "SKR";
 const backendK8sSecretName = process.env.BACKEND_SECRET_NAME || "eventing-backend";
 const backendK8sSecretNamespace = process.env.BACKEND_SECRET_NAMESPACE || "default";
 const eventMeshSecretFilePath = process.env.EVENTMESH_SECRET_FILE || "";
+const skrInstanceId = process.env.SKR_INSTANCE_ID || "";
 const DEBUG_MODE = process.env.DEBUG;
 const timeoutTime = 10 * 60 * 1000;
 const slowTime = 5000;
+const eventingScenarioName = 'kyma-eventing-e2e-tests';
 
 module.exports = {
     appName,
@@ -20,7 +22,9 @@ module.exports = {
     backendK8sSecretName,
     backendK8sSecretNamespace,
     eventMeshSecretFilePath,
+    skrInstanceId,
     DEBUG_MODE,
     timeoutTime,
-    slowTime
+    slowTime,
+    eventingScenarioName
 }

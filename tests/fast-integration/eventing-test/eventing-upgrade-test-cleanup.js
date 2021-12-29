@@ -6,7 +6,6 @@ const httpsAgent = new https.Agent({
 axios.defaults.httpsAgent = httpsAgent;
 const {
     appName,
-    scenarioName,
     testNamespace,
     mockNamespace,
     isSKR,
@@ -15,6 +14,8 @@ const {
     eventMeshSecretFilePath,
     timeoutTime,
     slowTime,
+    eventingScenarioName,
+    skrInstanceId
 } = require("./utils");
 const {
     cleanMockTestFixture,
@@ -23,13 +24,17 @@ const {
 const {
     deleteEventingBackendK8sSecret,
 } = require("../utils");
+const {
+    deprovisionSKR,
+} = require("../kyma-environment-broker");
+const {KEBClient, KEBConfig} = require("../kyma-environment-broker");
 
 describe("Eventing tests cleanup", function () {
     this.timeout(timeoutTime);
     this.slow(slowTime);
     let director = null;
     let skrInfo = null;
-
+    process.env.KEB_HOST = ""
 
     it("Cleaning: Test namespaces should be deleted", async function () {
         await cleanMockTestFixture(mockNamespace, testNamespace, true);
@@ -39,9 +44,11 @@ describe("Eventing tests cleanup", function () {
             await deleteEventingBackendK8sSecret(backendK8sSecretName, backendK8sSecretNamespace);
         }
 
-        // Unregister SKR resources from Compass
+        // Unregister SKR resources from Compass and deprovisions the cluster
         if (isSKR) {
-            await cleanCompassResourcesSKR(director, appName, scenarioName, skrInfo.compassID);
+            const keb = new KEBClient(KEBConfig.fromEnv());
+            await deprovisionSKR(keb, skrInstanceId);
+            await cleanCompassResourcesSKR(director, appName, eventingScenarioName, skrInfo.compassID);
         }
     });
 });
