@@ -498,7 +498,6 @@ async function revokeCommerceMockCertificate(){
   const httpsRevAgent = new https.Agent({
     cert: cert.data,
     key: key.data,
-    ciphers: 'DEFAULT@SECLEVEL=0',
     rejectUnauthorized: false
   });
 

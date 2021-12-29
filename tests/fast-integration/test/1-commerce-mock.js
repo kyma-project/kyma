@@ -46,6 +46,10 @@ function commerceMockTests() {
       initialRestarts = await getContainerRestartsForAllNamespaces();
     });
 
+    /*it("Wait 60 min to check the logs", async function () {
+      await new Promise(resolve => setTimeout(resolve, 600000));
+    });*/
+
     it("CommerceMock test fixture should be ready", async function () {
       await ensureCommerceMockLocalTestFixture(
         "mocks",
@@ -106,10 +110,6 @@ function commerceMockTests() {
 
     it("Logs from commerce mock pod should be retrieved through Loki", async function () {
       await checkLokiLogs(testStartTimestamp);
-    });
-
-    it("Wait 60 min to check the logs", async function () {
-      await new Promise(resolve => setTimeout(resolve, 600000));
     });
 
     it("Test namespaces should be deleted", async function () {
