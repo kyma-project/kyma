@@ -500,27 +500,16 @@ async function revokeCommerceMockCertificate(){
     key: key.data,
     rejectUnauthorized: false
   });
+  
+  axios.defaults.httpsAgent = httpsRevAgent;
 
   try {
     await axios({
-      httpAgent: httpsRevAgent,
       method: 'post',
+      headers: { 'Content-Type': 'application/json' },
       url: gateway,
       timeout: 5000
-    }).then(function (response) {
-      /*console.dir(response.config)
-      console.dir("-----------------------------")
-      console.dir(response.data);
-      console.dir("-----------------------------")
-    console.dir(response.headers)
-    console.dir("-----------------------------")
-    console.dir(response.request)
-    console.dir("-----------------------------")
-    console.dir(response.status)
-    console.dir("-----------------------------")
-    console.dir(response.statusText)
-    console.dir("-----------------------------")*/
-   })
+    })
   } catch (err) {
     throw convertAxiosError(err, "Error during revoking Commerce Mock certificate via Kyma connector service");
   }
