@@ -48,7 +48,7 @@ spec:
           readOnly: true
       initContainers:
       - name: init-service-catalog
-        image: "{{ include "imageurl" (dict "reg" .Values.global.images.initContainer.containerRegistry "img" .Values.global.images.initContainer) }}"
+        image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.busybox) }}"
         command: ['sh', '-c', "until nslookup service-catalog-catalog-webhook.{{ .Release.Namespace }}.svc.cluster.local; do echo waiting for service catalog webhook availability; sleep 2; done"]
         env:
         - name: K8S_SECRET_NAME
