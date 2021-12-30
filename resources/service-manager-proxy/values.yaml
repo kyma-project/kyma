@@ -60,3 +60,6 @@ global:
       name: "sb-proxy-k8s"
       version: "v0.9.1"
       directory: "external/quay.io/service-manager"
+    initContainer:
+      name: "busybox"
+      version: "1.31.1"

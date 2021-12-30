@@ -48,7 +48,7 @@ spec:
           readOnly: true
       initContainers:
       - name: init-service-catalog
-        image: busybox:1.31.1
+        image: "{{ .Values.global.images.initContainer.name }}:{{ .Values.global.images.initContainer.version }}"
         command: ['sh', '-c', "until nslookup service-catalog-catalog-webhook.{{ .Release.Namespace }}.svc.cluster.local; do echo waiting for service catalog webhook availability; sleep 2; done"]
         env:
         - name: K8S_SECRET_NAME
