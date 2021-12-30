@@ -46,6 +46,10 @@ spec:
         - name: config-volume
           mountPath: {{ .Values.file.location }}
           readOnly: true
+      initContainers:
+      - name: init-service-catalog
+        image: busybox:1.31.1
+        command: ['sh', '-c', "until nslookup service-catalog-catalog-webhook.{{ .Release.Namespace }}.svc.cluster.local; do echo waiting for service catalog webhook availability; sleep 2; done"]
         env:
         - name: K8S_SECRET_NAME
           value: {{ template "service-broker-proxy.fullname" . }}-regsecret
