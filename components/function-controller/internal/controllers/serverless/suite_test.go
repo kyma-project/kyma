@@ -49,6 +49,10 @@ func setUpTestEnv(g *gomega.GomegaWithT) (cl resource.Client, env *envtest.Envir
 	return resourceClient, testEnv
 }
 
+func tearDownTestEnv(g *gomega.GomegaWithT, testEnv *envtest.Environment) {
+	g.Expect(testEnv.Stop()).To(gomega.Succeed())
+}
+
 func setUpControllerConfig(g *gomega.GomegaWithT) FunctionConfig {
 	var testCfg FunctionConfig
 	err := envconfig.InitWithPrefix(&testCfg, "TEST")
@@ -85,9 +89,4 @@ func createDockerfileForRuntime(g *gomega.GomegaWithT, client resource.Client, r
 		},
 	}
 	g.Expect(client.Create(context.TODO(), &runtimeDockerfileConfigMap)).To(gomega.Succeed())
-}
-
-func tearDownTestEnv(g *gomega.GomegaWithT, testEnv *envtest.Environment) {
-	g.Expect(testEnv.Stop()).To(gomega.Succeed())
-
 }
