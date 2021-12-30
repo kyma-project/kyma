@@ -39,4 +39,3 @@ func newSecretsService(repository secrets.Repository, nameResolver k8sconsts.Nam
 
 	return secrets.NewService(repository, nameResolver, strategyFactory)
 }
-add
