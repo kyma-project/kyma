@@ -12,8 +12,6 @@ type options struct {
 	namespace             string
 	requestTimeout        int
 	requestLogging        bool
-	specRequestTimeout    int
-	rafterRequestTimeout  int
 	detailedErrorResponse bool
 	uploadServiceURL      string
 	centralGatewayUrl     string
@@ -27,8 +25,6 @@ func parseArgs() *options {
 	namespace := flag.String("namespace", "kyma-integration", "Namespace used by Application Registry")
 	requestTimeout := flag.Int("requestTimeout", 1, "Timeout for services.")
 	requestLogging := flag.Bool("requestLogging", false, "Flag for logging incoming requests.")
-	specRequestTimeout := flag.Int("specRequestTimeout", 20, "Timeout for Spec Service.")
-	rafterRequestTimeout := flag.Int("rafterRequestTimeout", 20, "Timeout for Rafter Service.")
 	detailedErrorResponse := flag.Bool("detailedErrorResponse", false, "Flag for showing full internal error response messages.")
 	uploadServiceURL := flag.String("uploadServiceURL", "http://rafter-upload-service.kyma-system.svc.cluster.local:80", "Upload Service URL.")
 	centralGatewayUrl := flag.String("centralGatewayUrl", "http://central-application-gateway.kyma-system:8080", "Central Application Gateway URL.")
@@ -43,8 +39,6 @@ func parseArgs() *options {
 		namespace:             *namespace,
 		requestTimeout:        *requestTimeout,
 		requestLogging:        *requestLogging,
-		specRequestTimeout:    *specRequestTimeout,
-		rafterRequestTimeout:  *rafterRequestTimeout,
 		detailedErrorResponse: *detailedErrorResponse,
 		uploadServiceURL:      *uploadServiceURL,
 		centralGatewayUrl:     *centralGatewayUrl,
@@ -55,8 +49,8 @@ func parseArgs() *options {
 
 func (o *options) String() string {
 	return fmt.Sprintf("--externalAPIPort=%d --proxyPort=%d --uploadServiceURL=%s --centralGatewayUrl=%s "+
-		"--namespace=%s --requestTimeout=%d  --requestLogging=%t --specRequestTimeout=%d "+
-		"--rafterRequestTimeout=%d --detailedErrorResponse=%t --insecureAssetDownload=%t --insecureSpecDownload=%t",
+		"--namespace=%s --requestTimeout=%d  --requestLogging=%t"+
+		"--detailedErrorResponse=%t --insecureAssetDownload=%t --insecureSpecDownload=%t",
 		o.externalAPIPort, o.proxyPort, o.uploadServiceURL, o.centralGatewayUrl,
-		o.namespace, o.requestTimeout, o.requestLogging, o.specRequestTimeout, o.rafterRequestTimeout, o.detailedErrorResponse, o.insecureAssetDownload, o.insecureSpecDownload)
+		o.namespace, o.requestTimeout, o.requestLogging, o.detailedErrorResponse, o.insecureAssetDownload, o.insecureSpecDownload)
 }
