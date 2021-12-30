@@ -51,7 +51,7 @@ describe("SKR SVCAT migration test", function() {
 
   let skr;
   it(`Should provision SKR`, async function() {
-    skr = await provisionSKR(keb, gardener, instanceID, runtimeName, platformCreds, btpOperatorCreds, {"kymaVersion": "PR-12956", "overridesVersion": "2.0.0"});
+    skr = await provisionSKR(keb, gardener, instanceID, runtimeName, platformCreds, btpOperatorCreds, {"kymaVersion": "PR-12958", "overridesVersion": "2.0.0"});
   });
 
   it(`Should save kubeconfig for the SKR to ~/.kube/config`, async function() {
