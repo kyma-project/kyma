@@ -44,9 +44,9 @@ func TestFunctionReconciler_Reconcile(t *testing.T) {
 	initializeServerlessResources(g, resourceClient)
 	createDockerfileForRuntime(g, resourceClient, rtm)
 	statsCollector := &automock.StatsCollector{}
-	statsCollector.On("UpdateFunctionStatusGauge", mock.Anything, mock.Anything).Return()
+	statsCollector.On("UpdateReconcileStats", mock.Anything, mock.Anything).Return()
 
-	reconciler := NewFunction(resourceClient, log.Log, testCfg, nil, record.NewFakeRecorder(100), statsCollector,make(chan bool))
+	reconciler := NewFunction(resourceClient, log.Log, testCfg, nil, record.NewFakeRecorder(100), statsCollector, make(chan bool))
 
 	t.Run("should successfully create Function", func(t *testing.T) {
 		//GIVEN
@@ -475,7 +475,10 @@ func TestFunctionReconciler_Reconcile(t *testing.T) {
 		defer deleteFunction(g, resourceClient, inFunction)
 
 		// Create new reconciler as this test modify reconciler configuration MaxSimultaneousJobs value
-		reconciler := NewFunction(resourceClient, log.Log, testCfg, nil, record.NewFakeRecorder(100), make(chan bool))
+		statsCollector := &automock.StatsCollector{}
+		statsCollector.On("UpdateReconcileStats", mock.Anything, mock.Anything).Return()
+
+		reconciler := NewFunction(resourceClient, log.Log, testCfg, nil, record.NewFakeRecorder(100), statsCollector, make(chan bool))
 		reconciler.config.Build.MaxSimultaneousJobs = 1
 
 		fnLabels := reconciler.functionLabels(inFunction)

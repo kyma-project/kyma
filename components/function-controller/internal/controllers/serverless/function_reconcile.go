@@ -34,7 +34,7 @@ type GitOperator interface {
 
 //go:generate mockery -name=StatsCollector -output=automock -outpkg=automock -case=underscore
 type StatsCollector interface {
-	UpdateFunctionStatusGauge(f *serverlessv1alpha1.Function, cond serverlessv1alpha1.Condition)
+	UpdateReconcileStats(f *serverlessv1alpha1.Function, cond serverlessv1alpha1.Condition)
 }
 
 type FunctionReconciler struct {

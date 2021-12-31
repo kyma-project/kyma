@@ -79,7 +79,7 @@ func (p *PrometheusStatsCollector) Register() {
 		p.FunctionRunningStatusGaugeVec)
 }
 
-func (p *PrometheusStatsCollector) UpdateFunctionStatusGauge(f *serverlessv1alpha1.Function, cond serverlessv1alpha1.Condition) {
+func (p *PrometheusStatsCollector) UpdateReconcileStats(f *serverlessv1alpha1.Function, cond serverlessv1alpha1.Condition) {
 	if _, ok := p.conditionGauges[cond.Type]; !ok { // we don't have a gauge for this condition type
 		return
 	}
@@ -100,7 +100,6 @@ func (p *PrometheusStatsCollector) UpdateFunctionStatusGauge(f *serverlessv1alph
 	}
 
 	labels := p.createLabels(f)
-	g, _ := p.conditionGauges[cond.Type].Va
 	p.conditionGauges[cond.Type].With(labels).Set(float64(time.Since(f.CreationTimestamp.Time).Milliseconds()))
 	p.conditionGaugeSet[gaugeID] = true
 }

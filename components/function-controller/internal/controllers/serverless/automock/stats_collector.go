@@ -13,7 +13,7 @@ type StatsCollector struct {
 	mock.Mock
 }
 
-// UpdateFunctionStatusGauge provides a mock function with given fields: f, cond
-func (_m *StatsCollector) UpdateFunctionStatusGauge(f *v1alpha1.Function, cond v1alpha1.Condition) {
+// UpdateReconcileStats provides a mock function with given fields: f, cond
+func (_m *StatsCollector) UpdateReconcileStats(f *v1alpha1.Function, cond v1alpha1.Condition) {
 	_m.Called(f, cond)
 }

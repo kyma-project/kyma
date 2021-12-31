@@ -129,14 +129,14 @@ func TestGitOps(t *testing.T) {
 			}
 			operator := newMockedGitOperator(inFunction.Name, testData.stringData, testData.authType)
 			statsCollector := &automock.StatsCollector{}
-			statsCollector.On("UpdateFunctionStatusGauge", mock.Anything, mock.Anything).Return()
+			statsCollector.On("UpdateReconcileStats", mock.Anything, mock.Anything).Return()
 
 			reconciler := &FunctionReconciler{
-				Log:         log.Log,
-				client:      resourceClient,
-				recorder:    record.NewFakeRecorder(100),
-				config:      testCfg,
-				gitOperator: operator,
+				Log:            log.Log,
+				client:         resourceClient,
+				recorder:       record.NewFakeRecorder(100),
+				config:         testCfg,
+				gitOperator:    operator,
 				statsCollector: statsCollector,
 			}
 
@@ -426,7 +426,7 @@ func TestGitOps_GitErrorHandling(t *testing.T) {
 		defer operator.AssertExpectations(t)
 
 		prometheusCollector := &automock.StatsCollector{}
-		prometheusCollector.On("UpdateFunctionStatusGauge", mock.Anything, mock.Anything).Return()
+		prometheusCollector.On("UpdateReconcileStats", mock.Anything, mock.Anything).Return()
 		request := ctrl.Request{
 			NamespacedName: types.NamespacedName{
 				Namespace: function.GetNamespace(),
