@@ -36,6 +36,7 @@ describe(`Execute SKR test`, function () {
             console.log(`\nRuntime status after provisioning: ${runtimeStatus}`)
 
             this.shoot = skr.shoot;
+            console.log(`Cluster provisioned with shootName ${this.shoot.name}`)
             await addScenarioInCompass(director, this.options.scenarioName);
             await assignRuntimeToScenario(director, this.shoot.compassID, this.options.scenarioName);
             initializeK8sClient({kubeconfig: this.shoot.kubeconfig});
