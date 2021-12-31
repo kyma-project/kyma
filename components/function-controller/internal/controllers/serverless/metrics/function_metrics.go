@@ -4,12 +4,11 @@ import (
 	"fmt"
 	"time"
 
-	"k8s.io/apimachinery/pkg/types"
-	"sigs.k8s.io/controller-runtime/pkg/metrics"
-
 	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
 	"github.com/prometheus/client_golang/prometheus"
 	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/types"
+	"sigs.k8s.io/controller-runtime/pkg/metrics"
 )
 
 const (
@@ -93,8 +92,9 @@ func (p *PrometheusStatsCollector) UpdateReconcileStats(f *serverlessv1alpha1.Fu
 	if p.conditionGaugeSet[gaugeID] { // the gauge for this function condition type is already set
 		return
 	}
-	// if the condition status is not true, yet, we will try later. Except for
-	// the ConfigReady condition since we set that directly to true
+
+	// If the condition status is not true, yet, we will try later.
+	// Except for the ConfigReady condition, we always push the metric for it.
 	if cond.Status != corev1.ConditionTrue && cond.Type != serverlessv1alpha1.ConditionConfigurationReady {
 		return
 	}
