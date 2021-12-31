@@ -2,7 +2,7 @@
 title: Kyma resource is misconfigured
 ---
 
-All resources in the Kyma-native Namespace with the `reconciler.kyma-project.io/managed-by-reconciler-disclaimer` annotation are managed by Reconciler. However, Reconciler does not support all use cases.
+All resources in the Kyma-native Namespaces with the `reconciler.kyma-project.io/managed-by-reconciler-disclaimer` annotation are managed by Reconciler. However, Reconciler does not support all use cases.
 
 ## Symptom
 
