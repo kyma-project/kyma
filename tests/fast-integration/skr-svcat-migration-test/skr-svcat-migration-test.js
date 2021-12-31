@@ -19,6 +19,9 @@ const {
 } = require("../utils");
 const t = require("./test-helpers");
 const sampleResources = require("./deploy-sample-resources");
+const {KCPWrapper, KCPConfig} = require("../kcp/client");
+
+const kcp = new KCPWrapper(KCPConfig.fromEnv());
 
 describe("SKR SVCAT migration test", function() {
   const keb = new KEBClient(KEBConfig.fromEnv());
@@ -39,6 +42,9 @@ describe("SKR SVCAT migration test", function() {
   this.timeout(60 * 60 * 1000 * 3); // 3h
   this.slow(5000);
 
+  const provisioningTimeout = 1000 * 60 * 60 // 1h
+  const deprovisioningTimeout = 1000 * 60 * 30 // 30m
+
   let platformCreds;
   it(`Should provision new ServiceManager platform`, async function() {
     platformCreds = await t.provisionPlatform(smAdminCreds, svcatPlatform)
@@ -51,7 +57,12 @@ describe("SKR SVCAT migration test", function() {
 
   let skr;
   it(`Should provision SKR`, async function() {
-    skr = await provisionSKR(keb, gardener, instanceID, runtimeName, platformCreds, btpOperatorCreds);
+    skr = await provisionSKR(keb, kcp, gardener, instanceID, runtimeName, platformCreds, btpOperatorCreds, provisioningTimeout);
+  });
+
+  it(`Should get Runtime Status after provisioning`, async function () {
+    let runtimeStatus = await kcp.getRuntimeStatusOperations(instanceID)
+    console.log(`\nRuntime status: ${runtimeStatus}`)
   });
 
   it(`Should save kubeconfig for the SKR to ~/.kube/config`, async function() {
@@ -125,7 +136,7 @@ describe("SKR SVCAT migration test", function() {
   });
 
   it(`Should deprovision SKR`, async function() {
-    await deprovisionSKR(keb, instanceID);
+    await deprovisionSKR(keb, kcp, instanceID, deprovisioningTimeout);
   });
 
   it(`Should cleanup platform --cascade, operator instances and bindings`, async function() {
