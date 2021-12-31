@@ -6,7 +6,7 @@ All resources in the Kyma-native Namespaces with the `reconciler.kyma-project.io
 
 ## Symptom
 
-A resource is not working as expected. It could be either invalid, unavailable, etc.
+A resource is not working as expected. It could be invalid, unavailable, etc.
 
 ## Cause
 
