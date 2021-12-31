@@ -6,8 +6,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/kyma-project/kyma/components/function-controller/internal/resource"
+	"github.com/kyma-project/kyma/components/function-controller/internal/controllers/serverless/automock"
+	"github.com/stretchr/testify/mock"
 
+	"github.com/kyma-project/kyma/components/function-controller/internal/resource"
 	"github.com/onsi/gomega"
 	appsv1 "k8s.io/api/apps/v1"
 	autoscalingv1 "k8s.io/api/autoscaling/v1"
@@ -41,7 +43,10 @@ func TestFunctionReconciler_Reconcile(t *testing.T) {
 	testCfg := setUpControllerConfig(g)
 	initializeServerlessResources(g, resourceClient)
 	createDockerfileForRuntime(g, resourceClient, rtm)
-	reconciler := NewFunction(resourceClient, log.Log, testCfg, nil, record.NewFakeRecorder(100), make(chan bool))
+	statsCollector := &automock.StatsCollector{}
+	statsCollector.On("UpdateFunctionStatusGauge", mock.Anything, mock.Anything).Return()
+
+	reconciler := NewFunction(resourceClient, log.Log, testCfg, nil, record.NewFakeRecorder(100), statsCollector,make(chan bool))
 
 	t.Run("should successfully create Function", func(t *testing.T) {
 		//GIVEN

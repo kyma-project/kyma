@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/stretchr/testify/mock"
+
 	git2go "github.com/libgit2/git2go/v31"
 
 	"github.com/kyma-project/kyma/components/function-controller/internal/controllers/serverless/automock"
@@ -126,6 +128,8 @@ func TestGitOps(t *testing.T) {
 				},
 			}
 			operator := newMockedGitOperator(inFunction.Name, testData.stringData, testData.authType)
+			statsCollector := &automock.StatsCollector{}
+			statsCollector.On("UpdateFunctionStatusGauge", mock.Anything, mock.Anything).Return()
 
 			reconciler := &FunctionReconciler{
 				Log:         log.Log,
@@ -133,6 +137,7 @@ func TestGitOps(t *testing.T) {
 				recorder:    record.NewFakeRecorder(100),
 				config:      testCfg,
 				gitOperator: operator,
+				statsCollector: statsCollector,
 			}
 
 			fnLabels := reconciler.internalFunctionLabels(inFunction)
@@ -420,6 +425,8 @@ func TestGitOps_GitErrorHandling(t *testing.T) {
 		operator.On("LastCommit", gitOpts).Return("", gitErr)
 		defer operator.AssertExpectations(t)
 
+		prometheusCollector := &automock.StatsCollector{}
+		prometheusCollector.On("UpdateFunctionStatusGauge", mock.Anything, mock.Anything).Return()
 		request := ctrl.Request{
 			NamespacedName: types.NamespacedName{
 				Namespace: function.GetNamespace(),
@@ -428,11 +435,12 @@ func TestGitOps_GitErrorHandling(t *testing.T) {
 		}
 
 		reconciler := &FunctionReconciler{
-			Log:         log.Log,
-			client:      resourceClient,
-			recorder:    record.NewFakeRecorder(100),
-			config:      testCfg,
-			gitOperator: operator,
+			Log:            log.Log,
+			client:         resourceClient,
+			recorder:       record.NewFakeRecorder(100),
+			config:         testCfg,
+			gitOperator:    operator,
+			statsCollector: prometheusCollector,
 		}
 
 		//WHEN

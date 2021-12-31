@@ -112,7 +112,7 @@ func (r *FunctionReconciler) updateStatus(ctx context.Context, result ctrl.Resul
 			return ctrl.Result{}, err
 		}
 
-		updateFunctionStatusGauge(instance, condition)
+		r.statsCollector.UpdateFunctionStatusGauge(instance, condition)
 
 		eventType := "Normal"
 		if condition.Status == corev1.ConditionFalse {
