@@ -4,6 +4,7 @@ const {
   KEBClient,
   provisionSKR,
   deprovisionSKR,
+  updateSKR,
 } = require("../kyma-environment-broker");
 const {
   GardenerConfig,
@@ -16,6 +17,7 @@ const {
   switchDebug,
   waitForJob,
   printContainerLogs,
+  waitForDeployment,
 } = require("../utils");
 const t = require("./test-helpers");
 const sampleResources = require("./deploy-sample-resources");
@@ -44,6 +46,7 @@ describe("SKR SVCAT migration test", function() {
 
   const provisioningTimeout = 1000 * 60 * 60 // 1h
   const deprovisioningTimeout = 1000 * 60 * 30 // 30m
+  const updateTimeout = 1000 * 60 * 15 // 15m
 
   let platformCreds;
   it(`Should provision new ServiceManager platform`, async function() {
@@ -87,8 +90,12 @@ describe("SKR SVCAT migration test", function() {
     await t.markForMigration(smAdminCreds, platformCreds.clusterId, btpOperatorCreds.instanceId)
   })
 
-  it(`Should install BTP operator helm chart`, async function() {
-    await t.installBTPOperatorHelmChart(btpOperatorCreds, clusterid);
+  it(`Should update SKR with BTP Operator Credentials`, async function() {
+    await updateSKR(keb, kcp, gardener, instanceID, runtimeName, null, btpOperatorCreds, true, updateTimeout);
+  });
+
+  it(`Should wait for btp-operator deployment availability`, async function() {
+    await waitForDeployment("sap-btp-operator-controller-manager", "kyma-system", 10 * 60 * 1000); //10 minutes
   });
 
   let secretsAndPresets
@@ -100,12 +107,8 @@ describe("SKR SVCAT migration test", function() {
     await t.checkPodPresetEnvInjected();
   });
 
-  it(`Should install BTP service operator migration helm chart`, async function() {
-    await t.installBTPServiceOperatorMigrationHelmChart();
-  });
-
   it(`Should wait for migration job to finish`, async function() {
-    await waitForJob("sap-btp-operator-migration", "sap-btp-operator", 10 * 60 * 1000); //10 minutes
+    await waitForJob("sap-btp-operator-migration", "kyma-system", 10 * 60 * 1000); //10 minutes
   });
   
   it(`Should print the container logs of the migration job`, async function() {
