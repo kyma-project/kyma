@@ -35,6 +35,7 @@ RUN set -ex \
 		gnupg \
 		tar \
 		xz \
+		curl \
 	\
 	&& curl -fsSL --compressed -o python.tar.xz "https://www.python.org/ftp/python/${PYTHON_VERSION%%[a-z]*}/Python-$PYTHON_VERSION.tar.xz" \
 	&& curl -fsSL --compressed -o python.tar.xz.asc "https://www.python.org/ftp/python/${PYTHON_VERSION%%[a-z]*}/Python-$PYTHON_VERSION.tar.xz.asc" \
