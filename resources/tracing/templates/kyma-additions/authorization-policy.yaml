@@ -17,7 +17,7 @@ spec:
     - source:
         principals:
           - cluster.local/ns/{{ .Release.Namespace }}/sa/{{ include "jaeger-operator.fullname" . }}-auth-proxy
-          - cluster.local/ns/{{ .Release.Namespace }}/sa/kiali
+          - cluster.local/ns/{{ .Release.Namespace }}/sa/kiali-server
           - cluster.local/ns/{{ .Release.Namespace }}/sa/monitoring-grafana
 {{ end }}
   - from:

@@ -42,7 +42,7 @@ global:
       directory: "external/quay.io/coreos"
     grafana:
       name: "grafana"
-      version: "7.5.11-d41037db"
+      version: "7.5.12-663797e9"
       directory: "tpi"
       sha: ""
     busybox:
@@ -1408,7 +1408,7 @@ prometheusOperator:
   resources:
     limits:
       cpu: 300m
-      memory: 500Mi
+      memory: 1Gi
     requests:
       cpu: 10m
       memory: 90Mi

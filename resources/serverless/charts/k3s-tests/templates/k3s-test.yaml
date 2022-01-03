@@ -35,8 +35,28 @@ spec:
       containers:
         - name: test
           image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.testImages.function_controller_test) }}"
-          args: ["serverless-integration"]
+          args: ["{{ .Values.testSuite }}"]
           env:
+          {{- if  (eq .Values.testSuite "git-auth-integration" ) }}
+            - name: APP_GITHUB_REPO_CONFIG_URL
+              value: "{{ .Values.gitAuth.github.url }}"
+            - name: APP_GITHUB_REPO_CONFIG_BASE_DIR
+              value: "{{ .Values.gitAuth.github.baseDir }}"
+            - name: APP_GITHUB_REPO_CONFIG_REFERENCE
+              value: "{{ .Values.gitAuth.github.reference }}"
+            - name: APP_GITHUB_SSH_AUTH_KEY
+              value: "{{ .Values.gitAuth.github.key }}"
+            - name: APP_AZURE_REPO_CONFIG_URL
+              value: "{{ .Values.gitAuth.azure.url }}"
+            - name: APP_AZURE_REPO_CONFIG_BASE_DIR
+              value: "{{ .Values.gitAuth.azure.baseDir }}"
+            - name: APP_AZURE_REPO_CONFIG_REFERENCE
+              value: "{{ .Values.gitAuth.azure.reference }}"
+            - name: APP_AZURE_BASIC_AUTH_USERNAME
+              value: "{{ .Values.gitAuth.azure.username }}"
+            - name: APP_AZURE_BASIC_AUTH_PASSWORD
+              value: "{{ .Values.gitAuth.azure.password }}"
+          {{- end }}
             - name: APP_TEST_WAIT_TIMEOUT
               value: "5m"
             - name: APP_TEST_VERBOSE

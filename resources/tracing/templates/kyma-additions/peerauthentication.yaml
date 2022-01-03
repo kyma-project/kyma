@@ -31,34 +31,3 @@ spec:
     16686:
       mode: STRICT
 {{- end }}
-{{- if eq .Values.jaeger.spec.strategy "production" }}
----
-apiVersion: security.istio.io/v1beta1
-kind: PeerAuthentication
-metadata:
-  name: {{ template "jaeger-operator.fullname" . }}-jaeger-collector-metrics
-  labels:
-{{ include "jaeger-operator.labels" . | indent 4 }}
-spec:
-  selector:
-    matchLabels:
-      app.kubernetes.io/name: {{ include "jaeger-operator.fullname" . }}-jaeger-collector
-  mtls:
-    mode: PERMISSIVE
-  portLevelMtls: #keep metrics port strict
-    14269:
-      mode: STRICT
----
-apiVersion: security.istio.io/v1beta1
-kind: PeerAuthentication
-metadata:
-  name: {{ template "jaeger-operator.fullname" . }}-jaeger-agent-query-metrics
-  labels:
-{{ include "jaeger-operator.labels" . | indent 4 }}
-spec:
-  selector:
-    matchLabels:
-      app.kubernetes.io/name: {{ include "jaeger-operator.fullname" . }}-jaeger-query
-  mtls:
-    mode: STRICT
-{{- end }}

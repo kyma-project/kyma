@@ -1,5 +1,5 @@
 {{- /*
-  Customization: Adjusted selector labels
+  Customization: Adjusted port from 8383->8080
 */ -}}
 apiVersion: v1
 kind: Service
@@ -10,9 +10,9 @@ metadata:
 spec:
   ports:
   - name: metrics
-    port: 8383
+    port: 8080
     protocol: TCP
-    targetPort: 8383
+    targetPort: 8080
   selector:
     app.kubernetes.io/name: {{ include "jaeger-operator.fullname" . }}-jaeger-operator
   type: ClusterIP

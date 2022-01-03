@@ -1,20 +1,27 @@
-const installer = require("../installer/helm");
-const execa = require("execa");
+const execa = require('execa');
 const fs = require('fs');
 const os = require('os');
+const {join} = require('path');
 const {
-    getEnvOrThrow, getConfigMap, kubectlExecInPod, listPods, deleteK8sPod, sleep, deleteAllK8sResources, listResources
-} = require("../utils");
+    getEnvOrThrow,
+    getConfigMap,
+    kubectlExecInPod,
+    listPods,
+    deleteK8sPod,
+    sleep,
+    deleteAllK8sResources,
+    listResources,
+} = require('../utils');
 
 class SMCreds {
     static fromEnv() {
         return new SMCreds(
             // TODO: rename to BTP_SM_ADMIN_CLIENTID
-            getEnvOrThrow("BTP_OPERATOR_CLIENTID"),
+            getEnvOrThrow('BTP_OPERATOR_CLIENTID'),
             // TODO: rename to BTP_SM_ADMIN_CLIENTID
-            getEnvOrThrow("BTP_OPERATOR_CLIENTSECRET"),
+            getEnvOrThrow('BTP_OPERATOR_CLIENTSECRET'),
             // TODO: rename to BTP_SM_URL
-            getEnvOrThrow("BTP_OPERATOR_URL")
+            getEnvOrThrow('BTP_OPERATOR_URL')
         );
     }
 
@@ -46,10 +53,10 @@ async function installBTPOperatorHelmChart(creds, clusterId) {
     const btp = "sap-btp-operator";
     const btpValues = `manager.secret.clientid=${creds.clientId},manager.secret.clientsecret=${creds.clientSecret},manager.secret.url=${creds.smURL},manager.secret.tokenurl=${creds.url},cluster.id=${clusterId}`
     try {
-        await installer.helmInstallUpgrade(btp, btpChart, btp, btpValues, null, ["--create-namespace"]);
+        await helmInstallUpgrade(btp, btpChart, btp, btpValues, null, ["--create-namespace"]);
     } catch (error) {
         if (error.stderr === undefined) {
-            throw new Error(`failed to install ${btp}: ${error}`);
+            throw new Error(`failed to install ${btp}: failed to process output of "helm upgrade"`);
         }
         throw new Error(`failed to install ${btp}: ${error.stderr}`);
     }
@@ -60,10 +67,10 @@ async function installBTPServiceOperatorMigrationHelmChart() {
     const btp = "sap-btp-service-operator-migration";
 
     try {
-        await installer.helmInstallUpgrade(btp, chart, "sap-btp-operator", null, null, ["--create-namespace"]);
+        await helmInstallUpgrade(btp, chart, "sap-btp-operator", null, null, ["--create-namespace"]);
     } catch (error) {
         if (error.stderr === undefined) {
-            throw new Error(`failed to install ${btp}: ${error}`);
+            throw new Error(`failed to install ${btp}: : failed to process output of "helm upgrade"`);
         }
         throw new Error(`failed to install ${btp}: ${error.stderr}`);
     }
@@ -111,7 +118,6 @@ async function restartFunctionsPods() {
         podNames[f.name] = pod.metadata.name;
     }
 
-    let finished = false;
     let needsPoll = [];
     for (let i = 0; i < 10; i++) {
         needsPoll = [];
@@ -197,7 +203,7 @@ async function provisionPlatform(creds, svcatPlatform) {
 
     } catch (error) {
         if (error.stderr === undefined) {
-            throw new Error(`failed to process output of "smctl ${args.join(' ')}": ${error}`);
+            throw new Error(`failed to process output of "smctl ${args.join(' ')}"`);
         }
         throw new Error(`failed "smctl ${args.join(' ')}": ${error.stderr}`);
     }
@@ -206,7 +212,6 @@ async function provisionPlatform(creds, svcatPlatform) {
 async function smInstanceBinding(btpOperatorInstance, btpOperatorBinding) {
     let args = [];
     try {
-
         args = [`provision`, btpOperatorInstance, `service-manager`, `service-operator-access`, `--mode=sync`]
         await execa(`smctl`, args);
 
@@ -228,7 +233,7 @@ async function smInstanceBinding(btpOperatorInstance, btpOperatorBinding) {
 
     } catch (error) {
         if (error.stderr === undefined) {
-            throw new Error(`failed to process output of "smctl ${args.join(' ')}": ${error}`);
+            throw new Error(`failed to process output of "smctl ${args.join(' ')}"`);
         }
         throw new Error(`failed "smctl ${args.join(' ')}": ${error.stderr}`);
     }
@@ -241,7 +246,7 @@ async function markForMigration(creds, svcatPlatform, btpOperatorInstanceId) {
         args = [`login`, `-a`, creds.url, `--param`, `subdomain=e2etestingscmigration`, `--auth-flow`, `client-credentials`]
         await execa(`smctl`, args.concat([`--client-id`, creds.clientid, `--client-secret`, creds.clientsecret]));
     } catch (error) {
-        errors = errors.concat([`failed "smctl ${args.join(' ')}": ${error.stderr}\n${error}`]);
+        errors = errors.concat([`failed "smctl ${args.join(' ')}": ${error.stderr}\n`]);
     }
 
     try {
@@ -250,7 +255,7 @@ async function markForMigration(creds, svcatPlatform, btpOperatorInstanceId) {
         args = ['curl', '-X', 'PUT', '-d', JSON.stringify(data), '/v1/migrate/service_operator/' + btpOperatorInstanceId]
         await execa('smctl', args)
     } catch (error) {
-        errors = errors.concat([`failed "smctl ${args.join(' ')}": ${error.stderr}\n${error}`]);
+        errors = errors.concat([`failed "smctl ${args.join(' ')}": ${error.stderr}\n`]);
     }
     if (errors.length > 0) {
         throw new Error(errors.join(", "));
@@ -264,7 +269,7 @@ async function cleanupInstanceBinding(creds, svcatPlatform, btpOperatorInstance,
         args = [`login`, `-a`, creds.url, `--param`, `subdomain=e2etestingscmigration`, `--auth-flow`, `client-credentials`]
         await execa(`smctl`, args.concat([`--client-id`, creds.clientid, `--client-secret`, creds.clientsecret]));
     } catch (error) {
-        errors = errors.concat([`failed "smctl ${args.join(' ')}": ${error.stderr}\n${error}`]);
+        errors = errors.concat([`failed "smctl ${args.join(' ')}": ${error.stderr}\n`]);
     }
 
     try {
@@ -274,7 +279,7 @@ async function cleanupInstanceBinding(creds, svcatPlatform, btpOperatorInstance,
              errors = errors.concat([`failed "smctl ${args.join(' ')}": ${stdout}`])
         }
     } catch (error) {
-        errors = errors.concat([`failed "smctl ${args.join(' ')}": ${error.stderr}\n${error}`]);
+        errors = errors.concat([`failed "smctl ${args.join(' ')}": ${error.stderr}\n`]);
     }
 
     try {
@@ -285,7 +290,7 @@ async function cleanupInstanceBinding(creds, svcatPlatform, btpOperatorInstance,
             errors = errors.concat([`failed "smctl ${args.join(' ')}": ${stdout}`])
         }
     } catch (error) {
-        errors = errors.concat([`failed "smctl ${args.join(' ')}": ${error.stderr}\n${error}`]);
+        errors = errors.concat([`failed "smctl ${args.join(' ')}": ${error.stderr}\n}`]);
     }
 
     try {
@@ -295,7 +300,7 @@ async function cleanupInstanceBinding(creds, svcatPlatform, btpOperatorInstance,
         //     errors = errors.concat([`failed "smctl ${args.join(' ')}": ${stdout}`])
         // }
     } catch (error) {
-        errors = errors.concat([`failed "smctl ${args.join(' ')}": ${error.stderr}\n${error}`]);
+        errors = errors.concat([`failed "smctl ${args.join(' ')}": ${error.stderr}\n`]);
     }
 
     if (errors.length > 0) {
@@ -333,6 +338,39 @@ async function deleteBTPResources() {
         let info = JSON.stringify(needsPoll, null, 2);
         throw new Error(`Failed to delete BTP Operator ServiceInstances and ServiceBindings in 15 minutes.\n${info}`);
     }
+}
+
+async function helmInstallUpgrade(release, chart, namespace, values, profile, additionalArgs) {
+  const args = [
+    'upgrade',
+    '--wait',
+    '-i',
+    '-n',
+    namespace,
+    release,
+    chart,
+  ];
+
+  if (Array.isArray(additionalArgs)) {
+    args.push(...additionalArgs);
+  }
+
+  if (!!profile) {
+    try {
+      const profilePath = join(chart, `profile-${profile}.yaml`);
+      if (fs.existsSync(profilePath)) {
+        args.push('-f', profilePath);
+      }
+    } catch (err) {
+      console.error(`profile-${profile}.yaml file not found in ${chart} - switching to default profile instead`)
+    }
+  }
+
+  if (!!values) {
+    args.push('--set', values);
+  }
+
+  await execa('helm', args);
 }
 
 module.exports = {
