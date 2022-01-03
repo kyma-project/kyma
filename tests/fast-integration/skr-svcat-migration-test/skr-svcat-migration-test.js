@@ -57,7 +57,7 @@ describe("SKR SVCAT migration test", function() {
 
   let skr;
   it(`Should provision SKR`, async function() {
-    skr = await provisionSKR(keb, kcp, gardener, instanceID, runtimeName, platformCreds, btpOperatorCreds, provisioningTimeout);
+    skr = await provisionSKR(keb, kcp, gardener, instanceID, runtimeName, platformCreds, btpOperatorCreds, null, provisioningTimeout);
   });
 
   it(`Should get Runtime Status after provisioning`, async function () {
