@@ -30,7 +30,7 @@ FROM alpine:3.14.2
 
 ENV NODE_VERSION 12.22.6
 
-SHELL ["/bin/sh", "-o", "pipefail", "-c"]
+SHELL ["/bin/ash", "-o", "pipefail", "-c"]
 
 # hadolint ignore=DL3003
 RUN addgroup -g 1000 node \

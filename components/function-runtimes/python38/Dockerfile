@@ -9,7 +9,7 @@
 
 FROM alpine:3.14.2
 
-SHELL ["/bin/bash", "-o", "pipefail", "-c"]
+SHELL ["/bin/ash", "-o", "pipefail", "-c"]
 
 # ensure local python is preferred over distribution python
 ENV PATH /usr/local/bin:$PATH
