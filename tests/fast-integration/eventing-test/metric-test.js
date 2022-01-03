@@ -22,8 +22,8 @@ const dashboards = {
     // The assert function receives the `data.result` section of the query result:
     // https://prometheus.io/docs/prometheus/latest/querying/api/#instant-queries
     assert: function (result) {
-      expect(result.length).to.be.greaterThan(0, "No value found in the result");
-      expect(getMetricValue(result[0])).to.be.greaterThan(0);
+      let foundMetric = result.find(res => res.metric.destination_service.startsWith('eventing-event-publisher-proxy'));
+      expect(foundMetric).to.be.not.undefined
     }
   },
   delivery_applicationConnectivityValidator: {

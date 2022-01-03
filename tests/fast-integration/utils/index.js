@@ -834,7 +834,7 @@ async function deleteNamespaces(namespaces, wait = true) {
       }
       return namespaces.length == 0 || !wait;
     },
-    120 * 1000,
+    10 * 60 * 1000,
     "Timeout for deleting namespaces: " + namespaces
   );
 

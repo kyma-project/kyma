@@ -154,18 +154,21 @@ describe("Eventing tests", function () {
 
   after(async function() {
     // runs once after the last test in this block
-    console.log("Cleaning: Test namespaces should be deleted")
-    await cleanMockTestFixture(mockNamespace, testNamespace, true);
-
-    // Delete eventing backend secret if it was created by test
-    if (eventMeshSecretFilePath !== "") {
-      await deleteEventingBackendK8sSecret(backendK8sSecretName, backendK8sSecretNamespace);
-    }
 
     // Unregister SKR resources from Compass
     if (isSKR) {
+      debug("Cleaning SKR...")
       await cleanCompassResourcesSKR(director, appName, scenarioName, skrInfo.compassID);
     }
+
+    // Delete eventing backend secret if it was created by test
+    if (eventMeshSecretFilePath !== "") {
+      debug("Removing Event Mesh secret")
+      await deleteEventingBackendK8sSecret(backendK8sSecretName, backendK8sSecretNamespace);
+    }
+
+    console.log("Cleaning: Test namespaces should be deleted")
+    await cleanMockTestFixture(mockNamespace, testNamespace, true);
 
     cancelPrometheusPortForward();
   });

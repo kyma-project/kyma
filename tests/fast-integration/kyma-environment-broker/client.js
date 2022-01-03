@@ -66,12 +66,10 @@ class KEBClient {
     try {
       const resp = await axios.request(config);
       if (resp.data.errors) {
-        debug(resp);
         throw new Error(resp.data);
       }
       return resp.data;
     } catch (err) {
-      debug(err);
       const msg = "Error calling KEB";
       if (err.response) {
         throw new Error(`${msg}: ${err.response.status} ${err.response.statusText}`);
@@ -185,7 +183,6 @@ class KEBClient {
           responseType: "stream",
         });
         if (resp.data.errors) {
-          debug(resp);
           throw new Error(resp.data);
         }
         resp.data.pipe(writeStream);
