@@ -106,5 +106,5 @@ In addition, your `eventOut.source` key needs to point at `“kyma”` to use Ky
                    type: exact
                    value: sap.kyma.custom.acme.payload.sanitised.v1
     ```
-11. The `value` key in your `handler.js` file must consist of seven elements. First three elements must remain unchanged (`sap.kyma.custom`). The last element specifies the version of the event.
+11. The `value` key in your `handler.js` file must consist of seven elements separated by dots, for example `sap.kyma.custom.acme.payload.sanitised.v1`. First three elements must remain unchanged (`sap.kyma.custom`). The last element specifies the version of the event.
 12. When you call your emitter Function, your receiver Function must also respond.
