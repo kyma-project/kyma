@@ -88,19 +88,18 @@ podSecurityPolicy:
 
   additionalVolumes: []
 
-podSecurityContext: # RG change to securityContext ?
-  enabled: false # RG true ?
+securityContext:
+  enabled: true
   runAsGroup: 65534
   runAsUser: 65534
   fsGroup: 65534
-
-securityContext:
-  allowPrivilegeEscalation: false
-  privileged: false
+  
   ## Specify security settings for a Container
 ## Allows overrides and additional options compared to (Pod) securityContext
 ## Ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container
-containerSecurityContext: {}
+containerSecurityContext:
+  allowPrivilegeEscalation: false
+  privileged: false
 
 ## Node labels for pod assignment
 ## Ref: https://kubernetes.io/docs/user-guide/node-selection/
@@ -191,7 +190,7 @@ kubeconfig:
   secret:
 
 # Namespace to be enabled for collecting resources. By default all namespaces are collected.
-# namespace: ""
+namespaces: "" #RG uncommented check it it it works. If not need to comment it out
 
 ## Override the deployment namespace
 ##
