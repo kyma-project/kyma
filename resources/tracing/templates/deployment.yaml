@@ -1,4 +1,6 @@
-{{- template "kyma.checkRequirements" . -}}
+{{- /*
+  Customization: Adjusted metrics port to 8080 as upstream has wrong port configured
+*/ -}}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -34,7 +36,7 @@ spec:
           image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.jaeger_operator) }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
-          - containerPort: 8383
+          - containerPort: 8080
             name: metrics
           args: ["start"]
           env:

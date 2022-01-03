@@ -7,20 +7,4 @@ metadata:
 {{ include "jaeger-operator.labels" . | indent 4 }}
 spec:
 {{ tpl (toYaml .Values.jaeger.spec | indent 2) . }}
-{{- /*
-  Customization: This if block was added to support for badger PVs.
-*/ -}}
-{{- if eq .Values.jaeger.spec.storage.type "badger" }}
-  volumeMounts:
-  - name: data
-    mountPath: /badger
-  volumes:
-  - name: data
-{{- if .Values.jaeger.kyma.badgerPvc.enabled}}
-    persistentVolumeClaim:
-      claimName: tracing-jaeger
-{{- else }}
-    emptyDir: {}
-{{- end }}
-{{- end }}
 {{- end }}

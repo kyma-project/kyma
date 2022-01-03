@@ -13,9 +13,5 @@ spec:
     protocol: TCP
   clusterIP: None
   selector:
-{{- if eq .Values.jaeger.spec.strategy "production" }}
-    app.kubernetes.io/name: {{ template "jaeger-operator.fullname" . }}-jaeger-collector
-{{- else }}
     app.kubernetes.io/name: {{ template "jaeger-operator.fullname" . }}-jaeger
-{{- end }}
-    app.kubernetes.io/instance: {{ template "jaeger-operator.fullname" . }}-jaeger 
+    app.kubernetes.io/instance: {{ template "jaeger-operator.fullname" . }}-jaeger

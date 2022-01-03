@@ -7,110 +7,220 @@ metadata:
   labels:
 {{ include "jaeger-operator.labels" . | indent 4 }}
 rules:
-- apiGroups:
-  - ""
-  resources:
-  - pods
-  - services
-  - endpoints
-  - persistentvolumeclaims
-  - events
-  - configmaps
-  - secrets
-  - serviceaccounts
-  verbs:
-  - '*'
-- apiGroups:
-  - apps
-  resources:
-  - deployments
-  - daemonsets
-  - replicasets
-  - statefulsets
-  verbs:
-  - '*'
-- apiGroups:
-  - monitoring.coreos.com
-  resources:
-  - servicemonitors
-  verbs:
-  - get
-  - create
-- apiGroups:
-  - io.jaegertracing
-  resources:
-  - '*'
-  verbs:
-  - '*'
-- apiGroups:
-  - networking.k8s.io
-  resources:
-  - ingresses
-  verbs:
-  - "*"
-- apiGroups:
-  - extensions
-  resources:
-  - replicasets
-  - deployments
-  - daemonsets
-  - statefulsets
-  - ingresses
-  verbs:
-  - "*"
-- apiGroups:
-  - batch
-  resources:
-  - jobs
-  - cronjobs
-  verbs:
-  - "*"
-- apiGroups:
-  - route.openshift.io
-  resources:
-  - routes
-  verbs:
-  - "*"
-- apiGroups:
-  - logging.openshift.io
-  resources:
-  - elasticsearches
-  verbs:
-  - '*'
+## our own custom resources
 - apiGroups:
   - jaegertracing.io
   resources:
   - '*'
   verbs:
-  - '*'
-- apiGroups:
-  - rbac.authorization.k8s.io
-  resources:
-  - clusterrolebindings
-  verbs:
-  - '*'
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+
+## for the operator's own deployment
 - apiGroups:
   - apps
-  - extensions
   resourceNames:
   - jaeger-operator
   resources:
   - deployments/finalizers
   verbs:
   - update
+
+## regular things the operator manages for an instance, as the result of processing CRs
+- apiGroups:
+  - ""
+  resources:
+  - configmaps
+  - persistentvolumeclaims
+  - pods
+  - secrets
+  - serviceaccounts
+  - services
+  - services/finalizers
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - apps
+  resources:
+  - deployments
+  - daemonsets
+  - replicasets
+  - statefulsets
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - extensions
+  resources:
+  - ingresses
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+# Ingress for kubernetes 1.14 or higher
+- apiGroups:
+  - networking.k8s.io
+  resources:
+  - ingresses
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - batch
+  resources:
+  - jobs
+  - cronjobs
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - route.openshift.io
+  resources:
+  - routes
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - console.openshift.io
+  resources:
+  - consolelinks
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - autoscaling
+  resources:
+  - horizontalpodautoscalers
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+
+## needed if you want the operator to create service monitors for the Jaeger instances
+- apiGroups:
+  - monitoring.coreos.com
+  resources:
+  - servicemonitors
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+
+## for the Elasticsearch auto-provisioning
+- apiGroups:
+  - logging.openshift.io
+  resources:
+  - elasticsearches
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+
+## for the Kafka auto-provisioning
 - apiGroups:
   - kafka.strimzi.io
   resources:
   - kafkas
   - kafkausers
   verbs:
-  - '*'
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+
+## Extra permissions
+## This is an extra set of permissions that the Jaeger Operator might make use of if granted
+
+## needed if support for injecting sidecars based on namespace annotation is required
 - apiGroups:
-  - autoscaling
+  - ""
   resources:
-  - horizontalpodautoscalers
+  - namespaces
   verbs:
-  - '*'
+  - 'get'
+  - 'list'
+  - 'watch'
+
+## needed if support for injecting sidecars based on deployment annotation is required, across all namespaces
+- apiGroups:
+  - apps
+  resources:
+  - deployments
+  verbs:
+  - get
+  - list
+  - patch
+  - update
+  - watch
+
+## needed only when .Spec.Ingress.Openshift.DelegateUrls is used
+- apiGroups:
+  - rbac.authorization.k8s.io
+  resources:
+  - clusterrolebindings
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
 {{- if .Values.rbac.pspEnabled }}
 - apiGroups: ['policy']
   resources: ['podsecuritypolicies']
