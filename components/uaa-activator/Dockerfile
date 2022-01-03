@@ -2,7 +2,7 @@ FROM eu.gcr.io/kyma-project/external/golang:1.16.3-alpine as builder
 
 WORKDIR /go/src/github.com/kyma-project/kyma/components/uaa-activator
 
-ADD . .
+COPY . .
 RUN CGO_ENABLED=0 go build -ldflags="-s -w" -o /uaa-activator ./main.go
 
 FROM scratch
