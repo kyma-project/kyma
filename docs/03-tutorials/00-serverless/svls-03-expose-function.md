@@ -19,7 +19,7 @@ This tutorial is based on an existing Function. To create one, follow the [Creat
 
 ## Steps
 
-Follows these steps:
+Follow these steps:
 
 <div tabs name="steps" group="expose-function">
   <details>
