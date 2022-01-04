@@ -1,18 +1,14 @@
 package specification
 
 import (
-	"crypto/tls"
 	"encoding/json"
 	"fmt"
-	"net/http"
-	"net/url"
-	"strings"
-	"time"
-
 	"github.com/kyma-project/kyma/components/application-gateway/pkg/authorization"
 	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/specification/download"
 	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/specification/rafter"
 	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/specification/rafter/clusterassetgroup"
+	"net/url"
+	"strings"
 
 	"github.com/go-openapi/spec"
 	"github.com/kyma-project/kyma/components/application-registry/internal/apperrors"
@@ -25,28 +21,20 @@ const (
 	targetSwaggerVersion = "2.0"
 )
 
-type Service interface {
+/*type Service interface {
 	GetSpec(id string) ([]byte, []byte, []byte, apperrors.AppError)
 	RemoveSpec(id string) apperrors.AppError
 	PutSpec(serviceDef *model.ServiceDefinition, centralGatewayUrl string) apperrors.AppError
-}
+}*/
 
 type specService struct {
 	rafterService  rafter.Service
 	downloadClient download.Client
 }
 
-func NewSpecService(rafterService rafter.Service, specRequestTimeout int, insecureSpecDownload bool) Service {
-	return &specService{
-		rafterService: rafterService,
-		downloadClient: download.NewClient(&http.Client{
-			Timeout: time.Duration(specRequestTimeout) * time.Second,
-			Transport: &http.Transport{
-				TLSClientConfig: &tls.Config{InsecureSkipVerify: insecureSpecDownload},
-			},
-		}, authorization.NewStrategyFactory(authorization.FactoryConfiguration{OAuthClientTimeout: specRequestTimeout})),
-	}
-}
+/*func NewSpecService(rafterService rafter.Service, specRequestTimeout int, insecureSpecDownload bool) Service {
+	return &specifciationSrv{}
+}*/
 
 func (svc *specService) GetSpec(id string) ([]byte, []byte, []byte, apperrors.AppError) {
 	return svc.rafterService.Get(id)

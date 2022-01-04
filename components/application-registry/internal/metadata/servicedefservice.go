@@ -10,7 +10,6 @@ import (
 	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/applications"
 	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/model"
 	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/serviceapi"
-	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/specification"
 	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/uuid"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -52,17 +51,15 @@ type serviceDefinitionService struct {
 	uuidGenerator         uuid.Generator
 	serviceAPIService     serviceapi.Service
 	applicationRepository applications.ServiceRepository
-	specService           specification.Service
 	applicationManager    ApplicationGetter
 }
 
 // NewServiceDefinitionService creates new ServiceDefinitionService with provided dependencies.
-func NewServiceDefinitionService(uuidGenerator uuid.Generator, serviceAPIService serviceapi.Service, applicationRepository applications.ServiceRepository, specService specification.Service, applicationManager ApplicationGetter) ServiceDefinitionService {
+func NewServiceDefinitionService(uuidGenerator uuid.Generator, serviceAPIService serviceapi.Service, applicationRepository applications.ServiceRepository, applicationManager ApplicationGetter) ServiceDefinitionService {
 	return &serviceDefinitionService{
 		uuidGenerator:         uuidGenerator,
 		serviceAPIService:     serviceAPIService,
 		applicationRepository: applicationRepository,
-		specService:           specService,
 		applicationManager:    applicationManager,
 	}
 }
@@ -83,8 +80,6 @@ func (sds *serviceDefinitionService) Create(application string, serviceDef *mode
 	}
 	service := initService(serviceDef, serviceDef.Identifier, application)
 
-	var centralGatewayUrl string
-
 	appUID, apperr := sds.getApplicationUID(application)
 	if apperr != nil {
 		return "", apperr.Append("Getting Application UID failed")
@@ -97,12 +92,6 @@ func (sds *serviceDefinitionService) Create(application string, serviceDef *mode
 		}
 
 		service.API = serviceAPI
-		centralGatewayUrl = serviceAPI.CentralGatewayURL
-	}
-
-	apperr = sds.specService.PutSpec(serviceDef, centralGatewayUrl)
-	if apperr != nil {
-		return "", apperr.Append("Determining API spec for service with ID %s failed", serviceDef.ID)
 	}
 
 	apperr = sds.applicationRepository.Create(application, *service)
@@ -162,8 +151,6 @@ func (sds *serviceDefinitionService) Update(application string, serviceDef *mode
 
 	service := initService(serviceDef, existingSvc.Identifier, application)
 
-	var centralGatewayUrl string
-
 	appUID, apperr := sds.getApplicationUID(application)
 	if apperr != nil {
 		return model.ServiceDefinition{}, apperr.Append("Getting Application UID failed")
@@ -179,13 +166,6 @@ func (sds *serviceDefinitionService) Update(application string, serviceDef *mode
 		if apperr != nil {
 			return model.ServiceDefinition{}, apperr.Append("Updating %s service failed, updating API failed", serviceDef.ID)
 		}
-
-		centralGatewayUrl = service.API.CentralGatewayURL
-	}
-
-	apperr = sds.specService.PutSpec(serviceDef, centralGatewayUrl)
-	if apperr != nil {
-		return model.ServiceDefinition{}, apperr.Append("Updating %s service failed, saving specification failed", serviceDef.ID)
 	}
 
 	apperr = sds.applicationRepository.Update(application, *service)
@@ -206,11 +186,6 @@ func (sds *serviceDefinitionService) Delete(application, id string) apperrors.Ap
 	apperr = sds.applicationRepository.Delete(application, id)
 	if apperr != nil {
 		return apperr.Append("Deleting service from Application repository failed")
-	}
-
-	apperr = sds.specService.RemoveSpec(id)
-	if apperr != nil {
-		return apperr.Append("Deleting service specification failed")
 	}
 
 	return nil
@@ -290,29 +265,12 @@ func (sds *serviceDefinitionService) ensureUniqueIdentifier(identifier, applicat
 func (sds *serviceDefinitionService) readService(application string, service applications.Service) (model.ServiceDefinition, apperrors.AppError) {
 	serviceDef := convertServiceBaseInfo(service)
 
-	documentation, apiSpec, eventsSpec, apperr := sds.specService.GetSpec(service.ID)
-	if apperr != nil {
-		return model.ServiceDefinition{}, apperr.Append("Reading specs failed")
-	}
-
 	if service.API != nil {
 		api, apperr := sds.serviceAPIService.Read(application, service.API)
 		if apperr != nil {
 			return model.ServiceDefinition{}, apperr.Append("Reading API failed")
 		}
 		serviceDef.Api = api
-
-		if apiSpec != nil {
-			serviceDef.Api.Spec = apiSpec
-		}
-	}
-
-	if eventsSpec != nil {
-		serviceDef.Events = &model.Events{Spec: eventsSpec}
-	}
-
-	if documentation != nil {
-		serviceDef.Documentation = documentation
 	}
 
 	return serviceDef, nil

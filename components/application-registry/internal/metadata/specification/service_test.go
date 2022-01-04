@@ -1,17 +1,9 @@
 package specification
 
 import (
+	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/model"
 	"net/http"
 	"net/http/httptest"
-	"testing"
-
-	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/specification/rafter/clusterassetgroup"
-
-	"github.com/kyma-project/kyma/components/application-registry/internal/apperrors"
-	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/model"
-	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/specification/rafter/mocks"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 )
 
 const (
@@ -30,7 +22,7 @@ var (
 	modifiedSwaggerSpec = []byte("{\"schemes\":[\"http\"],\"swagger\":\"2.0\",\"host\":\"central-application-gateway.kyma-system:8080/app/some-service\",\"paths\":null}")
 )
 
-func TestSpecService_PutSpec(t *testing.T) {
+/*func TestSpecService_PutSpec(t *testing.T) {
 
 	t.Run("should save inline spec", func(t *testing.T) {
 		// given
@@ -310,7 +302,7 @@ func TestSpecService_RemoveSpec(t *testing.T) {
 		require.Error(t, err)
 		assert.Equal(t, apperrors.CodeInternal, err.Code())
 	})
-}
+}*/
 
 func defaultServiceDefWithAPI(api *model.API) *model.ServiceDefinition {
 	return &model.ServiceDefinition{
