@@ -3,11 +3,12 @@ package specification
 import (
 	"encoding/json"
 	"fmt"
+	"net/url"
+	"strings"
+
 	"github.com/kyma-project/kyma/components/application-gateway/pkg/authorization"
 	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/specification/download"
 	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/specification/rafter/clusterassetgroup"
-	"net/url"
-	"strings"
 
 	"github.com/go-openapi/spec"
 	"github.com/kyma-project/kyma/components/application-registry/internal/apperrors"
@@ -25,7 +26,7 @@ type specService struct {
 }
 
 func (svc *specService) GetSpec(id string) ([]byte, []byte, []byte, apperrors.AppError) {
-	return []byte(""),[]byte(""),[]byte(""),nil
+	return []byte(""), []byte(""), []byte(""), nil
 }
 
 func (svc *specService) RemoveSpec(id string) apperrors.AppError {

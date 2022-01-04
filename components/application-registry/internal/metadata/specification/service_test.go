@@ -1,9 +1,10 @@
 package specification
 
 import (
-	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/model"
 	"net/http"
 	"net/http/httptest"
+
+	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/model"
 )
 
 const (
