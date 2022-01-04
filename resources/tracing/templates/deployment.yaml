@@ -1,5 +1,5 @@
 {{- /*
-  Customization: Adjusted metrics port to 8080 as upstream has wrong port configured
+  Customization: Set default metrics port of jaeger-operator to 8383
 */ -}}
 apiVersion: apps/v1
 kind: Deployment
@@ -36,9 +36,11 @@ spec:
           image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.jaeger_operator) }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
-          - containerPort: 8080
+          - containerPort: 8383
             name: metrics
-          args: ["start"]
+          args:
+          - start
+          - --metrics-port=8383
           env:
             - name: WATCH_NAMESPACE
               {{- if .Values.rbac.clusterRole }}
