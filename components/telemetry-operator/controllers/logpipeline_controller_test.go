@@ -41,7 +41,15 @@ var _ = Describe("LogPipeline controller", func() {
 		timeout                        = time.Second * 10
 		interval                       = time.Millisecond * 250
 	)
-	var expectedFluentBitConfig = `[PARSER]
+	var expectedFluentBitConfig = `[FILTER]
+    Name   grep
+    Match   *
+    Regex   $kubernetes['labels']['app'] my-deployment
+
+[OUTPUT]
+    Name   stdout
+    Match   *`
+	var expectedFluentBitParserConfig = `[PARSER]
     Name   dummy_test
     Format   regex
     Regex   ^(?<INT>[^ ]+) (?<FLOAT>[^ ]+) (?<BOOL>[^ ]+) (?<STRING>.+)$
@@ -51,16 +59,7 @@ var _ = Describe("LogPipeline controller", func() {
     Type          regex
     Flush_timeout 1000
     Rule      "start_state"   "/(Dec \d+ \d+\:\d+\:\d+)(.*)/"  "cont"
-    Rule      "cont"          "/^\s+at.*/"                     "cont"
-
-[FILTER]
-    Name   grep
-    Match   *
-    Regex   $kubernetes['labels']['app'] my-deployment
-
-[OUTPUT]
-    Name   stdout
-    Match   *`
+    Rule      "cont"          "/^\s+at.*/"                     "cont"`
 
 	Context("When updating LogPipeline", func() {
 		It("Should sync with the Fluent Bit configuration", func() {
@@ -178,7 +177,7 @@ var _ = Describe("LogPipeline controller", func() {
 			Eventually(func() string {
 				cmFileName := LogPipelineName + ".conf"
 				configMapLookupKey := types.NamespacedName{
-					Name:      FluentBitConfigMap,
+					Name:      FluentBitSectionsConfigMap,
 					Namespace: ControllerNamespace,
 				}
 				var fluentBitCm corev1.ConfigMap
@@ -188,6 +187,21 @@ var _ = Describe("LogPipeline controller", func() {
 				}
 				return strings.TrimRight(fluentBitCm.Data[cmFileName], "\n")
 			}, timeout, interval).Should(Equal(expectedFluentBitConfig))
+
+			// Fluent Bit parsers config should be copied to ConfigMap
+			Eventually(func() string {
+				cmFileName := "parsers.conf"
+				configMapLookupKey := types.NamespacedName{
+					Name:      FluentBitParsersConfigMap,
+					Namespace: ControllerNamespace,
+				}
+				var fluentBitParsersCm corev1.ConfigMap
+				err := k8sClient.Get(ctx, configMapLookupKey, &fluentBitParsersCm)
+				if err != nil {
+					return err.Error()
+				}
+				return strings.TrimRight(fluentBitParsersCm.Data[cmFileName], "\n")
+			}, timeout, interval).Should(Equal(expectedFluentBitParserConfig))
 
 			// File content should be copied to ConfigMap
 			Eventually(func() string {
@@ -229,7 +243,7 @@ var _ = Describe("LogPipeline controller", func() {
 					return []string{err.Error()}
 				}
 				return updatedLogPipeline.Finalizers
-			}, timeout, interval).Should(ContainElement(configMapFinalizer))
+			}, timeout, interval).Should(ContainElement(sectionsConfigMapFinalizer))
 
 			Expect(k8sClient.Delete(ctx, loggingConfiguration)).Should(Succeed())
 

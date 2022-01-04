@@ -37,11 +37,12 @@ import (
 )
 
 const (
-	ControllerNamespace     = "default"
-	FluentBitConfigMap      = "logging-fluent-bit-sections"
-	FluentBitDaemonSet      = "logging-fluent-bit"
-	FluentBitEnvSecret      = "logging-fluent-bit-env"
-	FluentBitFilesConfigMap = "logging-fluent-bit-files"
+	ControllerNamespace        = "default"
+	FluentBitSectionsConfigMap = "logging-fluent-bit-sections"
+	FluentBitParsersConfigMap  = "logging-fluent-bit-parsers"
+	FluentBitDaemonSet         = "logging-fluent-bit"
+	FluentBitEnvSecret         = "logging-fluent-bit-env"
+	FluentBitFilesConfigMap    = "logging-fluent-bit-files"
 )
 
 // These tests use Ginkgo (BDD-style Go testing framework). Refer to
@@ -93,8 +94,12 @@ var _ = BeforeSuite(func() {
 	err = (&LogPipelineReconciler{
 		Client: k8sManager.GetClient(),
 		Scheme: k8sManager.GetScheme(),
-		FluentBitConfigMap: types.NamespacedName{
-			Name:      FluentBitConfigMap,
+		FluentBitSectionsConfigMap: types.NamespacedName{
+			Name:      FluentBitSectionsConfigMap,
+			Namespace: ControllerNamespace,
+		},
+		FluentBitParsersConfigMap: types.NamespacedName{
+			Name:      FluentBitParsersConfigMap,
 			Namespace: ControllerNamespace,
 		},
 		FluentBitDaemonSet: types.NamespacedName{

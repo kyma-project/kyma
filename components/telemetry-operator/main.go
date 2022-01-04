@@ -40,13 +40,14 @@ import (
 )
 
 var (
-	scheme                  = runtime.NewScheme()
-	setupLog                = ctrl.Log.WithName("setup")
-	fluentBitConfigMap      string
-	fluentBitDaemonSet      string
-	fluentBitNs             string
-	fluentBitEnvSecret      string
-	fluentBitFilesConfigMap string
+	scheme                     = runtime.NewScheme()
+	setupLog                   = ctrl.Log.WithName("setup")
+	fluentBitSectionsConfigMap string
+	fluentBitParsersConfigMap  string
+	fluentBitDaemonSet         string
+	fluentBitNs                string
+	fluentBitEnvSecret         string
+	fluentBitFilesConfigMap    string
 )
 
 //nolint:gochecknoinits
@@ -65,7 +66,8 @@ func main() {
 	flag.StringVar(&probeAddr, "health-probe-bind-address", ":8081", "The address the probe endpoint binds to.")
 	flag.BoolVar(&enableLeaderElection, "leader-elect", false,
 		"Enable leader election for controller manager. Enabling this will ensure there is only one active controller manager.")
-	flag.StringVar(&fluentBitConfigMap, "cm-name", "", "ConfigMap name to be written by Fluent Bit controller")
+	flag.StringVar(&fluentBitSectionsConfigMap, "cm-name", "", "ConfigMap name to be written by Fluent Bit controller")
+	flag.StringVar(&fluentBitParsersConfigMap, "parser-cm-name", "", "ConfigMap name of Fluent bit Parsers to be written by Fluent Bit controller")
 	flag.StringVar(&fluentBitDaemonSet, "ds-name", "", "DaemonSet name to be managed by FluentBit controller")
 	flag.StringVar(&fluentBitEnvSecret, "env-secret", "", "Secret for environment variables")
 	flag.StringVar(&fluentBitFilesConfigMap, "files-cm", "", "ConfigMap for referenced files")
@@ -99,8 +101,12 @@ func main() {
 	if err = (&controllers.LogPipelineReconciler{
 		Client: mgr.GetClient(),
 		Scheme: mgr.GetScheme(),
-		FluentBitConfigMap: types.NamespacedName{
-			Name:      fluentBitConfigMap,
+		FluentBitSectionsConfigMap: types.NamespacedName{
+			Name:      fluentBitSectionsConfigMap,
+			Namespace: fluentBitNs,
+		},
+		FluentBitParsersConfigMap: types.NamespacedName{
+			Name:      fluentBitParsersConfigMap,
 			Namespace: fluentBitNs,
 		},
 		FluentBitDaemonSet: types.NamespacedName{
@@ -138,8 +144,11 @@ func main() {
 }
 
 func validateFlags() error {
-	if fluentBitConfigMap == "" {
+	if fluentBitSectionsConfigMap == "" {
 		return errors.New("--cm-name flag is required")
+	}
+	if fluentBitParsersConfigMap == "" {
+		return errors.New("--parser-cm-name flag is required")
 	}
 	if fluentBitDaemonSet == "" {
 		return errors.New("--ds-name flag is required")

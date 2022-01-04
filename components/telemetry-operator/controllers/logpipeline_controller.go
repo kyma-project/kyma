@@ -38,7 +38,8 @@ import (
 )
 
 const (
-	configMapFinalizer = "FLUENT_BIT_CONFIG_MAP"
+	sectionsConfigMapFinalizer = "FLUENT_BIT_SECTIONS_CONFIG_MAP"
+	parserConfigMapFinalizer   = "FLUENT_BIT_PARSERS_CONFIG_MAP"
 	//nolint:gosec
 	secretRefsFinalizer = "FLUENT_BIT_SECRETS"
 	filesFinalizer      = "FLUENT_BIT_FILES"
@@ -47,11 +48,12 @@ const (
 // LogPipelineReconciler reconciles a LogPipeline object
 type LogPipelineReconciler struct {
 	client.Client
-	Scheme                  *runtime.Scheme
-	FluentBitConfigMap      types.NamespacedName
-	FluentBitDaemonSet      types.NamespacedName
-	FluentBitEnvSecret      types.NamespacedName
-	FluentBitFilesConfigMap types.NamespacedName
+	Scheme                     *runtime.Scheme
+	FluentBitSectionsConfigMap types.NamespacedName
+	FluentBitParsersConfigMap  types.NamespacedName
+	FluentBitDaemonSet         types.NamespacedName
+	FluentBitEnvSecret         types.NamespacedName
+	FluentBitFilesConfigMap    types.NamespacedName
 }
 
 //+kubebuilder:rbac:groups=telemetry.kyma-project.io,resources=logpipelines,verbs=get;list;watch;create;update;patch;delete
@@ -79,13 +81,19 @@ func (r *LogPipelineReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
 
-	updatedCm, err := r.syncConfigMap(ctx, &logPipeline)
+	updatedSectionsCm, err := r.syncSectionsConfigMap(ctx, &logPipeline)
 	if err != nil {
-		log.Error(err, "Failed to sync ConfigMap")
+		log.Error(err, "Failed to sync Sections ConfigMap")
 		return ctrl.Result{}, err
 	}
 
-	updatedFiles, err := r.syncFiles(ctx, &logPipeline)
+	updatedParsersCm, err := r.syncParsersConfigMap(ctx, &logPipeline)
+	if err != nil {
+		log.Error(err, "Failed to sync Parsers ConfigMap")
+		return ctrl.Result{}, err
+	}
+
+	updatedFilesCm, err := r.syncFilesConfigMap(ctx, &logPipeline)
 	if err != nil {
 		log.Error(err, "Failed to sync mounted files")
 		return ctrl.Result{}, err
@@ -97,7 +105,7 @@ func (r *LogPipelineReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 		return ctrl.Result{}, err
 	}
 
-	if updatedCm || updatedFiles || updatedEnv {
+	if updatedSectionsCm || updatedParsersCm || updatedFilesCm || updatedEnv {
 		log.Info("Updated fluent bit configuration")
 		if err := r.Update(ctx, &logPipeline); err != nil {
 			log.Error(err, "Cannot update LogPipeline")
@@ -134,10 +142,10 @@ func (r *LogPipelineReconciler) getOrCreateConfigMap(ctx context.Context, name t
 	return cm, nil
 }
 
-// Synchronize LogPipeline with FluentBit ConfigMap.
-func (r *LogPipelineReconciler) syncConfigMap(ctx context.Context, logPipeline *telemetryv1alpha1.LogPipeline) (bool, error) {
+// Synchronize LogPipeline with ConfigMap of FluentBit sections (Input, Filter and Output).
+func (r *LogPipelineReconciler) syncSectionsConfigMap(ctx context.Context, logPipeline *telemetryv1alpha1.LogPipeline) (bool, error) {
 	log := log.FromContext(ctx)
-	cm, err := r.getOrCreateConfigMap(ctx, r.FluentBitConfigMap)
+	cm, err := r.getOrCreateConfigMap(ctx, r.FluentBitSectionsConfigMap)
 	if err != nil {
 		return false, err
 	}
@@ -145,10 +153,10 @@ func (r *LogPipelineReconciler) syncConfigMap(ctx context.Context, logPipeline *
 
 	// Add or remove Fluent Bit configuration sections
 	if logPipeline.DeletionTimestamp != nil {
-		if cm.Data != nil && controllerutil.ContainsFinalizer(logPipeline, configMapFinalizer) {
+		if cm.Data != nil && controllerutil.ContainsFinalizer(logPipeline, sectionsConfigMapFinalizer) {
 			log.Info("Deleting fluent bit config")
 			delete(cm.Data, cmKey)
-			controllerutil.RemoveFinalizer(logPipeline, configMapFinalizer)
+			controllerutil.RemoveFinalizer(logPipeline, sectionsConfigMapFinalizer)
 		}
 	} else {
 		fluentBitConfig := mergeFluentBitConfig(logPipeline)
@@ -163,7 +171,57 @@ func (r *LogPipelineReconciler) syncConfigMap(ctx context.Context, logPipeline *
 			}
 			cm.Data[cmKey] = fluentBitConfig
 		}
-		controllerutil.AddFinalizer(logPipeline, configMapFinalizer)
+		controllerutil.AddFinalizer(logPipeline, sectionsConfigMapFinalizer)
+	}
+
+	// Update ConfigMap
+	if err := r.Update(ctx, &cm); err != nil {
+		return false, err
+	}
+
+	return true, nil
+}
+
+// Synchronize LogPipeline with ConfigMap of FluentBit parsers (Parser and MultiLineParser).
+func (r *LogPipelineReconciler) syncParsersConfigMap(ctx context.Context, logPipeline *telemetryv1alpha1.LogPipeline) (bool, error) {
+	log := log.FromContext(ctx)
+	cm, err := r.getOrCreateConfigMap(ctx, r.FluentBitParsersConfigMap)
+	if err != nil {
+		return false, err
+	}
+	cmKey := "parsers.conf"
+
+	// Add or remove Fluent Bit configuration parsers
+	if logPipeline.DeletionTimestamp != nil {
+		if cm.Data != nil && controllerutil.ContainsFinalizer(logPipeline, parserConfigMapFinalizer) {
+			log.Info("Deleting fluent bit parsers config")
+			delete(cm.Data, cmKey)
+			controllerutil.RemoveFinalizer(logPipeline, parserConfigMapFinalizer)
+		}
+	} else {
+		var logPipelines telemetryv1alpha1.LogPipelineList
+		err = r.List(ctx, &logPipelines)
+		if err != nil {
+			return false, err
+		}
+
+		var sb strings.Builder
+		for _, pipeline := range logPipelines.Items {
+			sb.WriteString(mergeFluentBitParserConfig(&pipeline))
+		}
+		fluentBitParsersConfig := sb.String()
+		if cm.Data == nil {
+			data := make(map[string]string)
+			data[cmKey] = fluentBitParsersConfig
+			cm.Data = data
+		} else {
+			if oldConfig, hasKey := cm.Data[cmKey]; hasKey && oldConfig == fluentBitParsersConfig {
+				// Nothing changed
+				return false, nil
+			}
+			cm.Data[cmKey] = fluentBitParsersConfig
+		}
+		controllerutil.AddFinalizer(logPipeline, parserConfigMapFinalizer)
 	}
 
 	// Update ConfigMap
@@ -175,7 +233,7 @@ func (r *LogPipelineReconciler) syncConfigMap(ctx context.Context, logPipeline *
 }
 
 // Synchronize file references with Fluent Bit files ConfigMap.
-func (r *LogPipelineReconciler) syncFiles(ctx context.Context, logPipeline *telemetryv1alpha1.LogPipeline) (bool, error) {
+func (r *LogPipelineReconciler) syncFilesConfigMap(ctx context.Context, logPipeline *telemetryv1alpha1.LogPipeline) (bool, error) {
 	changed := false
 	cm, err := r.getOrCreateConfigMap(ctx, r.FluentBitFilesConfigMap)
 	if err != nil {
@@ -308,20 +366,26 @@ func (r *LogPipelineReconciler) deleteFluentBitPods(ctx context.Context, log log
 	return nil
 }
 
-// Merge FluentBit parsers, filters and outputs to single FluentBit configuration.
+// Merge FluentBit filters and outputs to single FluentBit configuration.
 func mergeFluentBitConfig(logPipeline *telemetryv1alpha1.LogPipeline) string {
+	var sb strings.Builder
+	for _, filter := range logPipeline.Spec.Filters {
+		sb.WriteString(fluentbit.BuildConfigSection(fluentbit.FilterConfigHeader, filter.Content))
+	}
+	for _, output := range logPipeline.Spec.Outputs {
+		sb.WriteString(fluentbit.BuildConfigSection(fluentbit.OutputConfigHeader, output.Content))
+	}
+	return sb.String()
+}
+
+// Merge FluentBit parsers and multiLine parsers to single FluentBit configuration.
+func mergeFluentBitParserConfig(logPipeline *telemetryv1alpha1.LogPipeline) string {
 	var sb strings.Builder
 	for _, parser := range logPipeline.Spec.Parsers {
 		sb.WriteString(fluentbit.BuildConfigSection(fluentbit.ParserConfigHeader, parser.Content))
 	}
 	for _, multiLineParser := range logPipeline.Spec.MultiLineParsers {
 		sb.WriteString(fluentbit.BuildConfigSection(fluentbit.MultiLineParserConfigHeader, multiLineParser.Content))
-	}
-	for _, filter := range logPipeline.Spec.Filters {
-		sb.WriteString(fluentbit.BuildConfigSection(fluentbit.FilterConfigHeader, filter.Content))
-	}
-	for _, output := range logPipeline.Spec.Outputs {
-		sb.WriteString(fluentbit.BuildConfigSection(fluentbit.OutputConfigHeader, output.Content))
 	}
 	return sb.String()
 }
