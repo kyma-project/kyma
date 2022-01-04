@@ -294,7 +294,7 @@ milv.config.yaml @m00g3n @pPrecel @klaudiagrz @mmitoraj @majakurcius @alexandra-
 /tests/perf/ @a-thaler @lilitgh @suleymanakbas91 @clebs @rakesh-garimella
 
 # github actions
-/.github/workflows @PK85 @piotrmiskiewicz @ksputo @szwedm @voigt @wozniakjan @adamwalach
+/.github/workflows @PK85 @piotrmiskiewicz @ksputo @szwedm @voigt @wozniakjan @kyma-project/prow
 
 # VERSION file
 VERSION @kyma-project/prow
