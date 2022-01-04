@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"github.com/kyma-project/kyma/components/application-gateway/pkg/authorization"
 	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/specification/download"
-	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/specification/rafter"
 	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/specification/rafter/clusterassetgroup"
 	"net/url"
 	"strings"
@@ -21,57 +20,19 @@ const (
 	targetSwaggerVersion = "2.0"
 )
 
-/*type Service interface {
-	GetSpec(id string) ([]byte, []byte, []byte, apperrors.AppError)
-	RemoveSpec(id string) apperrors.AppError
-	PutSpec(serviceDef *model.ServiceDefinition, centralGatewayUrl string) apperrors.AppError
-}*/
-
 type specService struct {
-	rafterService  rafter.Service
 	downloadClient download.Client
 }
 
-/*func NewSpecService(rafterService rafter.Service, specRequestTimeout int, insecureSpecDownload bool) Service {
-	return &specifciationSrv{}
-}*/
-
 func (svc *specService) GetSpec(id string) ([]byte, []byte, []byte, apperrors.AppError) {
-	return svc.rafterService.Get(id)
+	return []byte(""),[]byte(""),[]byte(""),nil
 }
 
 func (svc *specService) RemoveSpec(id string) apperrors.AppError {
-	return svc.rafterService.Remove(id)
+	return nil
 }
 
 func (svc *specService) PutSpec(serviceDef *model.ServiceDefinition, centralGatewayUrl string) apperrors.AppError {
-	var apiSpec []byte
-	var err apperrors.AppError
-
-	if serviceDef.Api != nil {
-		apiSpec, err = svc.processAPISpecification(serviceDef.Api, centralGatewayUrl)
-		if err != nil {
-			return err
-		}
-	}
-
-	apiType := toApiSpecType(serviceDef.Api)
-
-	return svc.insertSpecs(serviceDef.ID, apiType, serviceDef.Documentation, apiSpec, serviceDef.Events)
-}
-
-func (svc *specService) insertSpecs(id string, apiType clusterassetgroup.ApiType, docs []byte, apiSpec []byte, events *model.Events) apperrors.AppError {
-	var eventsSpec []byte
-
-	if events != nil {
-		eventsSpec = events.Spec
-	}
-
-	err := svc.rafterService.Put(id, apiType, docs, apiSpec, eventsSpec)
-	if err != nil {
-		return apperrors.Internal("Inserting specs failed, %s", err.Error())
-	}
-
 	return nil
 }
 
