@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/tracing"
+	//_type "google.golang.org/genproto/googleapis/actions/sdk/v2/interactionmodel/type"
 
 	cev2event "github.com/cloudevents/sdk-go/v2/event"
 	"github.com/google/uuid"
@@ -170,23 +171,29 @@ func (t Transformer) convertPublishRequestToCloudEvent(appName string, publishRe
 		event.SetID(uuid.New().String())
 	}
 
-	eventTypeCombined := combineEventTypeSegments(publishRequest.PublishrequestV1.EventType)
-	eventType := formatEventType4BEB(t.eventTypePrefix, appName, eventTypeCombined, publishRequest.PublishrequestV1.EventTypeVersion)
-	event.SetSource(t.bebNamespace)
+	eventName := combineEventNameSegments(removeNonAlphanumeric(publishRequest.PublishrequestV1.EventType))
+	prefix := removeNonAlphanumeric(t.eventTypePrefix)
+	eventType := formatEventType4BEB(prefix, appName, eventName, publishRequest.PublishrequestV1.EventTypeVersion)
 	event.SetType(eventType)
+	event.SetSource(t.bebNamespace)
 	event.SetExtension(eventTypeVersionExtensionKey, publishRequest.PublishrequestV1.EventTypeVersion)
 	event.SetDataContentType(ContentTypeApplicationJSON)
 	return &event, nil
 }
 
-// combineEventTypeSegments returns an event-type with exactly two segments separated by "." if the given event-type
+// combineEventNameSegments returns an eventName with exactly two segments separated by "." if the given event-type
 // has more than two segments separated by "." (e.g. "Account.Order.Created" becomes "AccountOrder.Created")
-func combineEventTypeSegments(eventType string) string {
-	parts := strings.Split(eventType, ".")
+func combineEventNameSegments(eventName string) string {
+	parts := strings.Split(eventName, ".")
 	if len(parts) > 2 {
 		businessObject := strings.Join(parts[0:len(parts)-1], "")
 		operation := parts[len(parts)-1]
-		eventType = fmt.Sprintf("%s.%s", businessObject, operation)
+		eventName = fmt.Sprintf("%s.%s", businessObject, operation)
 	}
-	return eventType
+	return eventName
+}
+
+// removeNonAlphanumeric returns an eventName without any non-alphanumerical character besides dot (".")
+func removeNonAlphanumeric(eventType string) string {
+	return regexp.MustCompile(("[^a-zA-Z0-9.]+")).ReplaceAllString(eventType, "")
 }
