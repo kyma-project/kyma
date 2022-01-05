@@ -133,7 +133,7 @@ func TestServiceDefinitionService_Create(t *testing.T) {
 		uuidGenerator.On("NewUUID").Return("uuid-1", nil)
 		serviceRepository := new(applicationsmocks.ServiceRepository)
 		serviceRepository.On("Create", "app", applicationService).Return(nil)
-		
+
 		applicationGetter := new(mocks.ApplicationGetter)
 		applicationGetter.On("Get", context.Background(), "app", v1.GetOptions{}).Return(&applicationWithUID, nil)
 
@@ -178,7 +178,7 @@ func TestServiceDefinitionService_Create(t *testing.T) {
 		uuidGenerator.On("NewUUID").Return("uuid-1", nil)
 		serviceRepository := new(applicationsmocks.ServiceRepository)
 		serviceRepository.On("Create", "app", applicationService).Return(nil)
-		
+
 		applicationGetter := new(mocks.ApplicationGetter)
 		applicationGetter.On("Get", context.Background(), "app", v1.GetOptions{}).Return(&applicationWithUID, nil)
 
@@ -193,7 +193,7 @@ func TestServiceDefinitionService_Create(t *testing.T) {
 
 		uuidGenerator.AssertExpectations(t)
 		serviceRepository.AssertExpectations(t)
-		
+
 	})
 
 	t.Run("should create service without specs", func(t *testing.T) {
@@ -223,7 +223,7 @@ func TestServiceDefinitionService_Create(t *testing.T) {
 		uuidGenerator.On("NewUUID").Return("uuid-1", nil)
 		serviceRepository := new(applicationsmocks.ServiceRepository)
 		serviceRepository.On("Create", "app", applicationService).Return(nil)
-		
+
 		applicationGetter := new(mocks.ApplicationGetter)
 		applicationGetter.On("Get", context.Background(), "app", v1.GetOptions{}).Return(&applicationWithUID, nil)
 
@@ -238,7 +238,7 @@ func TestServiceDefinitionService_Create(t *testing.T) {
 
 		uuidGenerator.AssertExpectations(t)
 		serviceRepository.AssertExpectations(t)
-		
+
 	})
 
 	t.Run("should override connected-app label", func(t *testing.T) {
@@ -269,7 +269,7 @@ func TestServiceDefinitionService_Create(t *testing.T) {
 		uuidGenerator.On("NewUUID").Return("uuid-1", nil)
 		serviceRepository := new(applicationsmocks.ServiceRepository)
 		serviceRepository.On("Create", "app", applicationService).Return(nil)
-		
+
 		applicationGetter := new(mocks.ApplicationGetter)
 		applicationGetter.On("Get", context.Background(), "app", v1.GetOptions{}).Return(&applicationWithUID, nil)
 
@@ -284,7 +284,7 @@ func TestServiceDefinitionService_Create(t *testing.T) {
 
 		uuidGenerator.AssertExpectations(t)
 		serviceRepository.AssertExpectations(t)
-		
+
 	})
 
 	t.Run("should create connected-app label if not provided", func(t *testing.T) {
@@ -314,7 +314,7 @@ func TestServiceDefinitionService_Create(t *testing.T) {
 		uuidGenerator.On("NewUUID").Return("uuid-1", nil)
 		serviceRepository := new(applicationsmocks.ServiceRepository)
 		serviceRepository.On("Create", "app", applicationService).Return(nil)
-		
+
 		applicationGetter := new(mocks.ApplicationGetter)
 		applicationGetter.On("Get", context.Background(), "app", v1.GetOptions{}).Return(&applicationWithUID, nil)
 
@@ -329,7 +329,7 @@ func TestServiceDefinitionService_Create(t *testing.T) {
 
 		uuidGenerator.AssertExpectations(t)
 		serviceRepository.AssertExpectations(t)
-		
+
 	})
 
 	t.Run("should add connected-app label if not provided", func(t *testing.T) {
@@ -360,7 +360,7 @@ func TestServiceDefinitionService_Create(t *testing.T) {
 		uuidGenerator.On("NewUUID").Return("uuid-1", nil)
 		serviceRepository := new(applicationsmocks.ServiceRepository)
 		serviceRepository.On("Create", "app", applicationService).Return(nil)
-		
+
 		applicationGetter := new(mocks.ApplicationGetter)
 		applicationGetter.On("Get", context.Background(), "app", v1.GetOptions{}).Return(&applicationWithUID, nil)
 
@@ -375,7 +375,7 @@ func TestServiceDefinitionService_Create(t *testing.T) {
 
 		uuidGenerator.AssertExpectations(t)
 		serviceRepository.AssertExpectations(t)
-		
+
 	})
 
 	t.Run("should return error when adding API fails", func(t *testing.T) {
@@ -449,7 +449,7 @@ func TestServiceDefinitionService_Create(t *testing.T) {
 		serviceAPIService.On("New", "app", types.UID("appUID"), "uuid-1", "Some service", serviceAPI).Return(applicationServiceAPI, nil)
 		serviceRepository := new(applicationsmocks.ServiceRepository)
 		serviceRepository.On("Create", "app", applicationService).Return(apperrors.Internal("some error"))
-		
+
 		applicationGetter := new(mocks.ApplicationGetter)
 		applicationGetter.On("Get", context.Background(), "app", v1.GetOptions{}).Return(&applicationWithUID, nil)
 
@@ -467,7 +467,7 @@ func TestServiceDefinitionService_Create(t *testing.T) {
 		uuidGenerator.AssertExpectations(t)
 		serviceAPIService.AssertExpectations(t)
 		serviceRepository.AssertExpectations(t)
-		
+
 	})
 
 	t.Run("should return not found error when creating service in application that not exists", func(t *testing.T) {
@@ -508,7 +508,7 @@ func TestServiceDefinitionService_Create(t *testing.T) {
 		serviceAPIService.On("New", "app", types.UID("appUID"), "uuid-1", "Some service", serviceAPI).Return(applicationServiceAPI, nil)
 		serviceRepository := new(applicationsmocks.ServiceRepository)
 		serviceRepository.On("Create", "app", applicationService).Return(apperrors.NotFound("some error"))
-		
+
 		applicationGetter := new(mocks.ApplicationGetter)
 		applicationGetter.On("Get", context.Background(), "app", v1.GetOptions{}).Return(&applicationWithUID, nil)
 
@@ -526,7 +526,7 @@ func TestServiceDefinitionService_Create(t *testing.T) {
 		uuidGenerator.AssertExpectations(t)
 		serviceAPIService.AssertExpectations(t)
 		serviceRepository.AssertExpectations(t)
-		
+
 	})
 
 	t.Run("should return an error when identifier conflict occurs", func(t *testing.T) {
@@ -777,7 +777,7 @@ func TestServiceDefinitionService_GetById(t *testing.T) {
 		serviceAPIService.On("Read", "app", applicationServiceAPI).Return(serviceAPI, nil)
 		serviceRepository := new(applicationsmocks.ServiceRepository)
 		serviceRepository.On("Get", "app", "uuid-1").Return(applicationService, nil)
-		
+
 		applicationGetter := new(mocks.ApplicationGetter)
 		applicationGetter.On("Get", context.Background(), "app", v1.GetOptions{}).Return(&applicationWithUID, nil)
 
@@ -800,7 +800,7 @@ func TestServiceDefinitionService_GetById(t *testing.T) {
 
 		serviceAPIService.AssertExpectations(t)
 		serviceRepository.AssertExpectations(t)
-		
+
 	})
 
 	t.Run("should return internal error when getting service from application fails", func(t *testing.T) {
@@ -940,7 +940,6 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 		serviceRepository.On("Get", "app", "uuid-1").Return(applicationService, nil)
 		serviceRepository.On("Update", "app", applicationService).Return(nil)
 
-		
 		applicationGetter := new(mocks.ApplicationGetter)
 		applicationGetter.On("Get", context.Background(), "app", v1.GetOptions{}).Return(&applicationWithUID, nil)
 
@@ -954,7 +953,7 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 
 		serviceAPIService.AssertExpectations(t)
 		serviceRepository.AssertExpectations(t)
-		
+
 	})
 
 	t.Run("should return not found when update a not existing service", func(t *testing.T) {
@@ -1046,7 +1045,6 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 		serviceRepository.On("Get", "app", "uuid-1").Return(applicationService, nil)
 		serviceRepository.On("Update", "app", applicationService).Return(nil)
 
-		
 		applicationGetter := new(mocks.ApplicationGetter)
 		applicationGetter.On("Get", context.Background(), "app", v1.GetOptions{}).Return(&applicationWithUID, nil)
 
@@ -1060,7 +1058,7 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 
 		serviceAPIService.AssertExpectations(t)
 		serviceRepository.AssertExpectations(t)
-		
+
 	})
 
 	t.Run("should preserve a service identifier", func(t *testing.T) {
@@ -1098,7 +1096,6 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 		serviceRepository.On("Get", "app", "uuid-1").Return(applicationService, nil)
 		serviceRepository.On("Update", "app", applicationService).Return(nil)
 
-		
 		applicationGetter := new(mocks.ApplicationGetter)
 		applicationGetter.On("Get", context.Background(), "app", v1.GetOptions{}).Return(&applicationWithUID, nil)
 
@@ -1112,7 +1109,7 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 
 		serviceAPIService.AssertExpectations(t)
 		serviceRepository.AssertExpectations(t)
-		
+
 	})
 
 	t.Run("should return an error if cache initialization failed", func(t *testing.T) {
@@ -1298,7 +1295,6 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 		serviceRepository.On("Get", "app", "uuid-1").Return(applicationService, nil)
 		serviceRepository.On("Update", "app", applicationService).Return(apperrors.Internal("an error"))
 
-		
 		applicationGetter := new(mocks.ApplicationGetter)
 		applicationGetter.On("Get", context.Background(), "app", v1.GetOptions{}).Return(&applicationWithUID, nil)
 
@@ -1314,7 +1310,7 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 
 		serviceAPIService.AssertExpectations(t)
 		serviceRepository.AssertExpectations(t)
-		
+
 	})
 
 	t.Run("should return an error when failed to get application UID", func(t *testing.T) {
@@ -1402,8 +1398,6 @@ func TestServiceDefinitionService_Delete(t *testing.T) {
 		uuidGenerator := new(uuidmocks.Generator)
 		uuidGenerator.On("NewUUID").Return("uuid-1", nil)
 
-		
-
 		applicationGetter := new(mocks.ApplicationGetter)
 		applicationGetter.On("Get", context.Background(), "app", v1.GetOptions{}).Return(&applicationWithUID, nil)
 
@@ -1417,7 +1411,7 @@ func TestServiceDefinitionService_Delete(t *testing.T) {
 
 		serviceAPIService.AssertExpectations(t)
 		serviceRepository.AssertExpectations(t)
-		
+
 	})
 
 	t.Run("should return an error if API deletion failed", func(t *testing.T) {
