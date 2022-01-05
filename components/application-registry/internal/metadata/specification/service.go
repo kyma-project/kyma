@@ -6,11 +6,8 @@ import (
 	"net/url"
 	"strings"
 
-	"github.com/kyma-project/kyma/components/application-gateway/pkg/authorization"
-	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/specification/download"
-	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/specification/rafter/clusterassetgroup"
-
 	"github.com/go-openapi/spec"
+	"github.com/kyma-project/kyma/components/application-gateway/pkg/authorization"
 	"github.com/kyma-project/kyma/components/application-registry/internal/apperrors"
 	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/model"
 )
@@ -21,9 +18,7 @@ const (
 	targetSwaggerVersion = "2.0"
 )
 
-type specService struct {
-	downloadClient download.Client
-}
+type specService struct{}
 
 func (svc *specService) GetSpec(id string) ([]byte, []byte, []byte, apperrors.AppError) {
 	return []byte(""), []byte(""), []byte(""), nil
@@ -71,18 +66,6 @@ func isNilOrEmpty(array []byte) bool {
 	return array == nil || len(array) == 0 || string(array) == "null"
 }
 
-func toApiSpecType(api *model.API) clusterassetgroup.ApiType {
-	if api == nil {
-		return clusterassetgroup.NoneApiType
-	}
-
-	if strings.ToLower(api.ApiType) == oDataSpecType {
-		return clusterassetgroup.ODataApiType
-	}
-
-	return clusterassetgroup.OpenApiType
-}
-
 func toSpecAuthorizationCredentials(api *model.API) *authorization.Credentials {
 	if api.SpecificationCredentials != nil {
 		basicCredentials := api.SpecificationCredentials.Basic
@@ -113,14 +96,7 @@ func toSpecAuthorizationCredentials(api *model.API) *authorization.Credentials {
 }
 
 func (svc *specService) fetchSpec(api *model.API) ([]byte, apperrors.AppError) {
-	specUrl, apperr := determineSpecUrl(api)
-	if apperr != nil {
-		return nil, apperr
-	}
-
-	specificationCredentials := toSpecAuthorizationCredentials(api)
-
-	return svc.downloadClient.Fetch(specUrl, specificationCredentials, api.SpecificationRequestParameters)
+	return []byte(""), nil
 }
 
 func determineSpecUrl(api *model.API) (string, apperrors.AppError) {
