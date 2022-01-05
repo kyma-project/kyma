@@ -381,32 +381,34 @@ async function k8sApply(resources, namespace, patch = true) {
 
 function waitForK8sObject(path, query, checkFn, timeout, timeoutMsg) {
   debug("waiting for", path);
-  return new Promise((resolve, reject) => {
-    let onFulfilled = (req) => {
-      setTimeout(() => {
-        req.abort();
-        reject(new Error(timeoutMsg));
-      }, timeout);
-    };
-    watch.watch(
-            path,
-            query,
-            (type, apiObj, watchObj) => {
-              if (checkFn(type, apiObj, watchObj)) {
-                debug("finished waiting for ", path);
-                resolve(watchObj.object);
-              }
-            },
-            (err) => {
-              if (err) {
-                reject(new Error(err))
-              }
+  let res;
+  let timer;
+  const result = new Promise((resolve, reject) => {
+    watch
+      .watch(
+        path,
+        query,
+        (type, apiObj, watchObj) => {
+          if (checkFn(type, apiObj, watchObj)) {
+            if (res) {
+              res.abort();
             }
-        )
-        .then(onFulfilled, reject).catch((reason) => {
-      reject(new Error(reason));
-    });
+            clearTimeout(timer);
+            debug("finished waiting for ", path);
+            resolve(watchObj.object);
+          }
+        },
+        () => {}
+      )
+      .then((r) => {
+        res = r;
+        timer = setTimeout(() => {
+          res.abort();
+          reject(new Error(timeoutMsg));
+        }, timeout);
+      });
   });
+  return result;
 }
 
 function waitForClusterAddonsConfiguration(name, timeout = 90000) {
