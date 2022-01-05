@@ -7,22 +7,22 @@
 # These are the default owners for the whole content of the `kyma` repository. The default owners are automatically added as reviewers when you open a pull request, unless different owners are specified in the file.
 * @pbochynski @PK85 @a-thaler
 
-/common/ @piotrmiskiewicz @Tomasz-Smelcerz-SAP @strekm @akgalwas @janmedrek @sayanh @radufa @suleymanakbas91
+/common/ @piotrmiskiewicz @Tomasz-Smelcerz-SAP @strekm @akgalwas @janmedrek @radufa
 
 # Logging library
 /common/logging @franpog859 @dbadura @janmedrek
 
 # developer tools: linting
-/hack @clebs @suleymanakbas91 @adamwalach
+/hack @clebs @adamwalach
 
 # The `installation` directory and subdirectories
 /installation/ @Tomasz-Smelcerz-SAP @strekm @werdes72 @adamwalach @mjakobczyk @m00g3n @pPrecel @dariusztutaj
 
 # The eventing crds
-/installation/resources/crds/eventing/ @k15r @lilitgh @sayanh @marcobebway @pxsalehi @mfaizanse @friedrichwilken @vladislavpaskar @radufa
+/installation/resources/crds/eventing/ @k15r @lilitgh @marcobebway @pxsalehi @mfaizanse @friedrichwilken @vladislavpaskar @radufa
 
 # The `cluster-essentials` chart
-/resources/cluster-essentials/ @PK85 @janmedrek @a-thaler @suleymanakbas91 @strekm @dariusztutaj @cnvergence @veichtj @piotrkpc
+/resources/cluster-essentials/ @PK85 @janmedrek @a-thaler @strekm @dariusztutaj @cnvergence @veichtj @piotrkpc
 
 # The `pod-preset` subchart
 /resources/cluster-essentials/charts/pod-preset/ @PK85 @piotrmiskiewicz @ksputo @szwedm @voigt @wozniakjan @adamwalach
@@ -61,13 +61,13 @@
 /resources/helm-broker/ @PK85 @piotrmiskiewicz @ksputo @szwedm @voigt @wozniakjan @adamwalach
 
 # The `monitoring` subchart
-/resources/monitoring/ @a-thaler @lilitgh @suleymanakbas91 @clebs @rakesh-garimella @skhalash @jeremyharisch @chrkl @shorim @lindnerby
+/resources/monitoring/ @a-thaler @lilitgh @clebs @rakesh-garimella @skhalash @jeremyharisch @chrkl @shorim @lindnerby
 
 # The `logging` subchart
-/resources/logging/ @a-thaler @lilitgh @suleymanakbas91 @clebs @rakesh-garimella @skhalash @jeremyharisch @chrkl @shorim @lindnerby
+/resources/logging/ @a-thaler @lilitgh @clebs @rakesh-garimella @skhalash @jeremyharisch @chrkl @shorim @lindnerby
 
 # The 'telemetry' chart
-/resources/telemetry @a-thaler @lilitgh @suleymanakbas91 @clebs @rakesh-garimella @skhalash @jeremyharisch @chrkl @lindnerby @shorim @lindnerby
+/resources/telemetry @a-thaler @lilitgh @clebs @rakesh-garimella @skhalash @jeremyharisch @chrkl @lindnerby @shorim @lindnerby
 
 # The `eventing` chart
 /resources/eventing/ @lilitgh @k15r @nachtmaar @marcobebway @radufa @pxsalehi @mfaizanse @friedrichwilken @vladislavpaskar
@@ -88,7 +88,7 @@
 /resources/istio-configuration/templates/monitoring @a-thaler @lilitgh @rakesh-garimella @skhalash @chrkl @shorim @lindnerby
 
 # The `tracing` chart
-/resources/tracing/ @a-thaler @lilitgh @suleymanakbas91 @clebs @rakesh-garimella @skhalash @jeremyharisch @chrkl @shorim @lindnerby
+/resources/tracing/ @a-thaler @lilitgh @clebs @rakesh-garimella @skhalash @jeremyharisch @chrkl @shorim @lindnerby
 
 # The `service-catalog` chart
 /resources/service-catalog/ @PK85 @piotrmiskiewicz @ksputo @szwedm @voigt @wozniakjan @adamwalach
@@ -103,7 +103,7 @@
 /resources/compass-runtime-agent/ @PK85 @tgorgol @dbadura @akgalwas @janmedrek @franpog859 @Maladie @rafalpotempa @koala7659 @ralikio @everesio
 
 # The `kiali` chart
-/resources/kiali/ @a-thaler @lilitgh @suleymanakbas91 @clebs @rakesh-garimella @skhalash @jeremyharisch @chrkl @shorim @lindnerby
+/resources/kiali/ @a-thaler @lilitgh @clebs @rakesh-garimella @skhalash @jeremyharisch @chrkl @shorim @lindnerby
 
 # The `serverless` chart
 /resources/serverless/ @m00g3n @pPrecel @dbadura @rJankowski93 @kwiatekus
@@ -195,7 +195,7 @@ components/etcd-tls-setup-job/ @PK85 @piotrmiskiewicz @ksputo @szwedm @voigt @wo
 /components/central-application-connectivity-validator/ @akgalwas @janmedrek @franpog859 @Maladie @rafalpotempa @koala7659 @ralikio
 
 # Telemetry Operator
-/components/telemetry-operator @a-thaler @lilitgh @suleymanakbas91 @clebs @rakesh-garimella @skhalash @jeremyharisch @chrkl @shorim @lindnerby
+/components/telemetry-operator @a-thaler @lilitgh @clebs @rakesh-garimella @skhalash @jeremyharisch @chrkl @shorim @lindnerby
 
 # Tests
 # Service Catalog acceptance tests
@@ -270,7 +270,7 @@ components/etcd-tls-setup-job/ @PK85 @piotrmiskiewicz @ksputo @szwedm @voigt @wo
 /tools/gitserver/ @m00g3n @pPrecel @tgorgol @dbadura @rJankowski93
 
 # E2E Upgrade Tests
-/tests/end-to-end/upgrade/ @PK85 @piotrmiskiewicz @ksputo @szwedm @voigt @wozniakjan @adamwalach @k15r @suleymanakbas91
+/tests/end-to-end/upgrade/ @PK85 @piotrmiskiewicz @ksputo @szwedm @voigt @wozniakjan @adamwalach @k15r
 
 # E2E Api Gateway Upgrade Tests
 /tests/end-to-end/upgrade/pkg/tests/api-gateway/ @strekm @werdes72 @Tomasz-Smelcerz-SAP @mjakobczyk @dariusztutaj
@@ -291,7 +291,7 @@ components/etcd-tls-setup-job/ @PK85 @piotrmiskiewicz @ksputo @szwedm @voigt @wo
 milv.config.yaml @m00g3n @pPrecel @klaudiagrz @mmitoraj @majakurcius @alexandra-simeonova @NHingerl
 
 # performance tests
-/tests/perf/ @a-thaler @lilitgh @suleymanakbas91 @clebs @rakesh-garimella
+/tests/perf/ @a-thaler @lilitgh @clebs @rakesh-garimella
 
 # github actions
 /.github/workflows @PK85 @piotrmiskiewicz @ksputo @szwedm @voigt @wozniakjan @adamwalach
