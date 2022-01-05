@@ -23,7 +23,7 @@ import (
 // EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
 // NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
 
-// LogPipelineSpec defines the desired state of LogPipeline
+// LogPipelineSpec defines the desired state of LogPipeline.
 type LogPipelineSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
@@ -68,7 +68,7 @@ type SecretReference struct {
 	Namespace string `json:"namespace,omitempty"`
 }
 
-// LogPipelineStatus defines the observed state of LogPipeline
+// LogPipelineStatus defines the observed state of LogPipeline.
 type LogPipelineStatus struct {
 	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
 	// Important: Run "make" to regenerate code after modifying this file

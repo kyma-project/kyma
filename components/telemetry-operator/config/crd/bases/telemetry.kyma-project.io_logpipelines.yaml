@@ -30,7 +30,7 @@ spec:
           metadata:
             type: object
           spec:
-            description: LogPipelineSpec defines the desired state of LogPipeline
+            description: LogPipelineSpec defines the desired state of LogPipeline.
             properties:
               files:
                 items:
@@ -86,7 +86,7 @@ spec:
                 type: array
             type: object
           status:
-            description: LogPipelineStatus defines the observed state of LogPipeline
+            description: LogPipelineStatus defines the observed state of LogPipeline.
             type: object
         type: object
     served: true
