@@ -6,7 +6,7 @@ The telemetry operator contains a logging controller that generates a Fluent Bit
 
 For now, creating Fluent Bit pods is out of scope of the operator. An existing Fluent Bit DaemonSet is expected.
 
-The generated ConfigMap (by default, `logging-fluent-bit-config` in the `kyma-system` namespace) must be mounted to the Fluent Bit pods and consumed by an `@INCLUDE` statement in an existing [configuration file](https://docs.fluentbit.io/manual/administration/configuring-fluent-bit/configuration-file). File references and environment variables are available in an additional ConfigMap or Secret.
+The generated ConfigMap (by default, `telemetry-fluent-bit-sections` in the `kyma-system` namespace) must be mounted to the Fluent Bit pods and consumed by an `@INCLUDE` statement in an existing [configuration file](https://docs.fluentbit.io/manual/administration/configuring-fluent-bit/configuration-file). Fluent Bit Parsers, File references and environment variables are available in an additional ConfigMap or Secret.
 
 See the flags that configure all ConfigMaps, Secret and DaemonSet names in [main.go](main.go).
 

@@ -197,6 +197,15 @@ func (r *LogPipelineReconciler) syncParsersConfigMap(ctx context.Context, logPip
 			log.Info("Deleting fluent bit parsers config")
 			delete(cm.Data, cmKey)
 			controllerutil.RemoveFinalizer(logPipeline, parserConfigMapFinalizer)
+
+			var logPipelines telemetryv1alpha1.LogPipelineList
+			err = r.List(ctx, &logPipelines)
+			if err != nil {
+				return false, err
+			}
+			data := make(map[string]string)
+			data[cmKey] = mergeFluentBitParsersConfig(&logPipelines)
+			cm.Data = data
 		}
 	} else {
 		var logPipelines telemetryv1alpha1.LogPipelineList
@@ -205,11 +214,7 @@ func (r *LogPipelineReconciler) syncParsersConfigMap(ctx context.Context, logPip
 			return false, err
 		}
 
-		var sb strings.Builder
-		for _, pipeline := range logPipelines.Items {
-			sb.WriteString(mergeFluentBitParserConfig(&pipeline))
-		}
-		fluentBitParsersConfig := sb.String()
+		fluentBitParsersConfig := mergeFluentBitParsersConfig(&logPipelines)
 		if cm.Data == nil {
 			data := make(map[string]string)
 			data[cmKey] = fluentBitParsersConfig
@@ -379,13 +384,15 @@ func mergeFluentBitConfig(logPipeline *telemetryv1alpha1.LogPipeline) string {
 }
 
 // Merge FluentBit parsers and multiLine parsers to single FluentBit configuration.
-func mergeFluentBitParserConfig(logPipeline *telemetryv1alpha1.LogPipeline) string {
+func mergeFluentBitParsersConfig(logPipelines *telemetryv1alpha1.LogPipelineList) string {
 	var sb strings.Builder
-	for _, parser := range logPipeline.Spec.Parsers {
-		sb.WriteString(fluentbit.BuildConfigSection(fluentbit.ParserConfigHeader, parser.Content))
-	}
-	for _, multiLineParser := range logPipeline.Spec.MultiLineParsers {
-		sb.WriteString(fluentbit.BuildConfigSection(fluentbit.MultiLineParserConfigHeader, multiLineParser.Content))
+	for _, logPipeline := range logPipelines.Items {
+		for _, parser := range logPipeline.Spec.Parsers {
+			sb.WriteString(fluentbit.BuildConfigSection(fluentbit.ParserConfigHeader, parser.Content))
+		}
+		for _, multiLineParser := range logPipeline.Spec.MultiLineParsers {
+			sb.WriteString(fluentbit.BuildConfigSection(fluentbit.MultiLineParserConfigHeader, multiLineParser.Content))
+		}
 	}
 	return sb.String()
 }
