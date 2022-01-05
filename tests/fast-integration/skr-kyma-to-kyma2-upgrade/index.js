@@ -132,6 +132,7 @@ describe("SKR-Upgrade-test", function () {
   });
 
   it(`Provision SKR with ID ${instanceID}`, async function () {
+    console.log(`Provisioning SKR with version ${kymaVersion}`)
     let customParams = {
       "kymaVersion": kymaVersion
     }
