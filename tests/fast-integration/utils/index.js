@@ -381,34 +381,32 @@ async function k8sApply(resources, namespace, patch = true) {
 
 function waitForK8sObject(path, query, checkFn, timeout, timeoutMsg) {
   debug("waiting for", path);
-  let res;
-  let timer;
-  const result = new Promise((resolve, reject) => {
-    watch
-      .watch(
-        path,
-        query,
-        (type, apiObj, watchObj) => {
-          if (checkFn(type, apiObj, watchObj)) {
-            if (res) {
-              res.abort();
+  return new Promise((resolve, reject) => {
+    let onFulfilled = (req) => {
+      setTimeout(() => {
+        req.abort();
+        reject(new Error(timeoutMsg));
+      }, timeout);
+    };
+    watch.watch(
+            path,
+            query,
+            (type, apiObj, watchObj) => {
+              if (checkFn(type, apiObj, watchObj)) {
+                debug("finished waiting for ", path);
+                resolve(watchObj.object);
+              }
+            },
+            (err) => {
+              if (err) {
+                reject(new Error(err))
+              }
             }
-            clearTimeout(timer);
-            debug("finished waiting for ", path);
-            resolve(watchObj.object);
-          }
-        },
-        () => {}
-      )
-      .then((r) => {
-        res = r;
-        timer = setTimeout(() => {
-          res.abort();
-          reject(new Error(timeoutMsg));
-        }, timeout);
-      });
+        )
+        .then(onFulfilled, reject).catch((reason) => {
+      reject(new Error(reason));
+    });
   });
-  return result;
 }
 
 function waitForClusterAddonsConfiguration(name, timeout = 90000) {
@@ -834,7 +832,7 @@ async function deleteNamespaces(namespaces, wait = true) {
       }
       return namespaces.length == 0 || !wait;
     },
-    120 * 1000,
+    1,
     "Timeout for deleting namespaces: " + namespaces
   );
 
