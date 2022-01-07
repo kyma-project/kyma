@@ -30,11 +30,11 @@ spec:
           metadata:
             type: object
           spec:
-            description: LogPipelineSpec defines the desired state of LogPipeline.
+            description: LogPipelineSpec defines the desired state of LogPipeline
             properties:
               files:
                 items:
-                  description: FileMount provides file content to be consumed by a LogPipeline configuration.
+                  description: FileMount provides file content to be consumed by a LogPipeline configuration
                   properties:
                     content:
                       type: string
@@ -44,7 +44,7 @@ spec:
                 type: array
               filters:
                 items:
-                  description: Filter describes a Fluent Bit filter configuration section.
+                  description: Filter describes a Fluent Bit filter configuration section
                   properties:
                     content:
                       type: string
@@ -52,7 +52,7 @@ spec:
                 type: array
               multilineParsers:
                 items:
-                  description: MultiLineParser describes a Fluent Bit multiline parser configuration section.
+                  description: MultiLineParser describes a Fluent Bit multiline parser configuration section
                   properties:
                     content:
                       type: string
@@ -60,7 +60,7 @@ spec:
                 type: array
               outputs:
                 items:
-                  description: Output describes a Fluent Bit output configuration section.
+                  description: Output describes a Fluent Bit output configuration section
                   properties:
                     content:
                       type: string
@@ -68,7 +68,7 @@ spec:
                 type: array
               parsers:
                 items:
-                  description: Parser describes a Fluent Bit parser configuration section.
+                  description: Parser describes a Fluent Bit parser configuration section
                   properties:
                     content:
                       type: string
@@ -76,7 +76,7 @@ spec:
                 type: array
               secretRefs:
                 items:
-                  description: SecretReference is a pointer to a Kubernetes secret that should be provided as environment to Fluent Bit.
+                  description: SecretReference is a pointer to a Kubernetes secret that should be provided as environment variable to Fluent Bit
                   properties:
                     name:
                       type: string
@@ -86,7 +86,7 @@ spec:
                 type: array
             type: object
           status:
-            description: LogPipelineStatus defines the observed state of LogPipeline.
+            description: LogPipelineStatus defines the observed state of LogPipeline
             type: object
         type: object
     served: true

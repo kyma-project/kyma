@@ -23,7 +23,7 @@ import (
 // EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
 // NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
 
-// LogPipelineSpec defines the desired state of LogPipeline.
+// LogPipelineSpec defines the desired state of LogPipeline
 type LogPipelineSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
@@ -36,39 +36,39 @@ type LogPipelineSpec struct {
 	SecretRefs       []SecretReference `json:"secretRefs,omitempty"`
 }
 
-// Parser describes a Fluent Bit parser configuration section.
+// Parser describes a Fluent Bit parser configuration section
 type Parser struct {
 	Content string `json:"content,omitempty"`
 }
 
-// MultiLineParser describes a Fluent Bit multiline parser configuration section.
+// MultiLineParser describes a Fluent Bit multiline parser configuration section
 type MultiLineParser struct {
 	Content string `json:"content,omitempty"`
 }
 
-// Filter describes a Fluent Bit filter configuration section.
+// Filter describes a Fluent Bit filter configuration section
 type Filter struct {
 	Content string `json:"content,omitempty"`
 }
 
-// Output describes a Fluent Bit output configuration section.
+// Output describes a Fluent Bit output configuration section
 type Output struct {
 	Content string `json:"content,omitempty"`
 }
 
-// FileMount provides file content to be consumed by a LogPipeline configuration.
+// FileMount provides file content to be consumed by a LogPipeline configuration
 type FileMount struct {
 	Name    string `json:"name,omitempty"`
 	Content string `json:"content,omitempty"`
 }
 
-// SecretReference is a pointer to a Kubernetes secret that should be provided as environment to Fluent Bit.
+// SecretReference is a pointer to a Kubernetes secret that should be provided as environment variable to Fluent Bit
 type SecretReference struct {
 	Name      string `json:"name,omitempty"`
 	Namespace string `json:"namespace,omitempty"`
 }
 
-// LogPipelineStatus defines the observed state of LogPipeline.
+// LogPipelineStatus defines the observed state of LogPipeline
 type LogPipelineStatus struct {
 	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
