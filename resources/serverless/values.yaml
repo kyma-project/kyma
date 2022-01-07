@@ -77,13 +77,13 @@ global:
       directory: "tpi"
     function_controller:
       name: "function-controller"
-      version: "PR-12937"
+      version: "PR-12914"
     function_webhook:
       name: "function-webhook"
-      version: "PR-12937"
+      version: "PR-12914"
     function_build_init:
       name: "function-build-init"
-      version: "PR-12937"
+      version: "PR-12914"
     function_runtime_nodejs12:
       name: "function-runtime-nodejs12"
       version: "5051e383"
@@ -111,7 +111,7 @@ global:
   testImages:
     function_controller_test:
       name: "function-controller-test"
-      version: "ceeb73d8"
+      version: "1d8e6403"
     git_server:
       name: "gitserver"
       version: "c0aa144a"
@@ -242,6 +242,8 @@ clusterMicroFrontend:
 
 grafanaDashboard:
   enabled: true
+  functionMetrics:
+    enabled: false
 
 usageKind:
   name: serverless-function

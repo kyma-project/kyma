@@ -24,6 +24,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/handler"
 	ctrlzap "sigs.k8s.io/controller-runtime/pkg/log/zap"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
+	"sigs.k8s.io/controller-runtime/pkg/metrics"
 	"sigs.k8s.io/controller-runtime/pkg/source"
 	"sigs.k8s.io/controller-runtime/pkg/webhook"
 	// +kubebuilder:scaffold:imports
@@ -167,6 +168,13 @@ func main() {
 	// +kubebuilder:scaffold:builder
 
 	setupLog.Info("Running manager")
+
+	// register additional function metrics
+	metrics.Registry.MustRegister(
+		serverless.FunctionConfiguredStatusGaugeVec,
+		serverless.FunctionBuiltStatusGaugeVec,
+		serverless.FunctionRunningStatusGaugeVec,
+	)
 
 	if err := mgr.Start(ctrl.SetupSignalHandler()); err != nil {
 		setupLog.Error(err, "Unable to run the manager")
