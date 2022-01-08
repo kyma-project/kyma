@@ -196,7 +196,6 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 	}
 
 	// Clean up the old subscriptions
-	log.Info("Clean up the old subscription", "namespace", desiredSubscription.Namespace, "name", desiredSubscription.Name)
 	err = r.Backend.DeleteSubscription(desiredSubscription)
 	if err != nil {
 		log.Error(err, "failed to delete subscriptions")
