@@ -135,7 +135,6 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 	r.Log.Info("received subscription reconciliation request", "namespace", req.Namespace, "name", req.Name)
 
 	actualSubscription := &eventingv1alpha1.Subscription{}
-	result := ctrl.Result{}
 
 	// Ensure the object was not deleted in the meantime
 	err := r.Client.Get(ctx, req.NamespacedName, actualSubscription)
@@ -173,25 +172,6 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 			return ctrl.Result{}, nil
 		}
 	}
-	// Check for valid sink
-	if err := r.assertSinkValidity(actualSubscription.Spec.Sink); err != nil {
-		r.Log.Error(err, "failed to parse sink URL")
-		if err := r.syncSubscriptionStatus(ctx, actualSubscription, false, err.Error()); err != nil {
-			return ctrl.Result{}, err
-		}
-		// No point in reconciling as the sink is invalid
-		return ctrl.Result{}, nil
-	}
-
-	// Clean up the old subscriptions
-	err = r.Backend.DeleteSubscription(desiredSubscription)
-	if err != nil {
-		log.Error(err, "failed to delete subscriptions")
-		if err := r.syncSubscriptionStatus(ctx, actualSubscription, false, err.Error()); err != nil {
-			return ctrl.Result{}, err
-		}
-		return ctrl.Result{}, err
-	}
 
 	// The object is not being deleted, so if it does not have our finalizer,
 	// then lets add the finalizer and update the object. This is equivalent
@@ -202,17 +182,34 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 		if err := r.Update(context.Background(), desiredSubscription); err != nil {
 			return ctrl.Result{}, err
 		}
-		result.Requeue = true
+		return ctrl.Result{Requeue: true}, nil
 	}
 
-	if result.Requeue {
-		return result, nil
+	// Check for valid sink
+	if err := r.assertSinkValidity(desiredSubscription.Spec.Sink); err != nil {
+		r.Log.Error(err, "failed to parse sink URL")
+		if err := r.syncSubscriptionStatus(ctx, desiredSubscription, false, err.Error()); err != nil {
+			return ctrl.Result{}, err
+		}
+		// No point in reconciling as the sink is invalid
+		return ctrl.Result{}, nil
+	}
+
+	// Clean up the old subscriptions
+	log.Info("Clean up the old subscription", "namespace", desiredSubscription.Namespace, "name", desiredSubscription.Name)
+	err = r.Backend.DeleteSubscription(desiredSubscription)
+	if err != nil {
+		log.Error(err, "failed to delete subscriptions")
+		if err := r.syncSubscriptionStatus(ctx, desiredSubscription, false, err.Error()); err != nil {
+			return ctrl.Result{}, err
+		}
+		return ctrl.Result{}, err
 	}
 
 	_, err = r.Backend.SyncSubscription(desiredSubscription, r.eventTypeCleaner)
 	if err != nil {
 		r.Log.Error(err, "failed to sync subscription")
-		if err := r.syncSubscriptionStatus(ctx, actualSubscription, false, err.Error()); err != nil {
+		if err := r.syncSubscriptionStatus(ctx, desiredSubscription, false, err.Error()); err != nil {
 			return ctrl.Result{}, err
 		}
 		return ctrl.Result{}, err
@@ -221,11 +218,11 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 	log.Info("successfully created Nats subscriptions")
 
 	// Update status
-	if err := r.syncSubscriptionStatus(ctx, actualSubscription, true, ""); err != nil {
+	if err := r.syncSubscriptionStatus(ctx, desiredSubscription, true, ""); err != nil {
 		return ctrl.Result{}, err
 	}
 
-	return result, nil
+	return ctrl.Result{}, nil
 }
 
 // syncSubscriptionStatus syncs Subscription status
