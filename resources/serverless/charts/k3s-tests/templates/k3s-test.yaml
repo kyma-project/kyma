@@ -5,24 +5,50 @@ metadata:
   namespace: {{ .Release.Namespace }}
 ---
 apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: {{ .Values.jobName | quote }}
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - namespaces
+  - secrets
+  - configmaps
+  - services
+  verbs:
+  - create
+- apiGroups:
+  - "serverless.kyma-project.io"
+  resources: 
+  - functions
+  - gitrepositories
+  verbs: ["*"]
+- apiGroups:
+  - "apps"
+  resources:
+  - deployments
+  verbs:
+  - create
+---
+apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
-  name: admin-user-crb
+  name: {{ .Values.jobName | quote }}
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
-  name: cluster-admin # yeah, cluster admin - we do NOT run those tests in cluster, only in k3s, so it's the easiest way
+  name: {{ .Values.jobName | quote }}
 subjects:
   - kind: ServiceAccount
     name: {{ .Values.jobName | quote }}
-    namespace: default
+    namespace: {{ .Release.Namespace }}
 ---
 apiVersion: batch/v1
 kind: Job
 metadata:
   name: {{ .Values.jobName | quote }}
   namespace: {{ .Release.Namespace }}
-
 spec:
   backoffLimit: 0
   template:
