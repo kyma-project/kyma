@@ -18,9 +18,10 @@ rules:
   - services
   verbs:
   - create
+  - get
 - apiGroups:
   - "serverless.kyma-project.io"
-  resources: 
+  resources:
   - functions
   - gitrepositories
   verbs: ["*"]
@@ -52,16 +53,22 @@ metadata:
 spec:
   backoffLimit: 0
   template:
-    metadata:
-      annotations:
-        sidecar.istio.io/inject: "false"
     spec:
+      shareProcessNamespace: true
       serviceAccountName: {{ .Values.jobName | quote }}
       restartPolicy: Never
       containers:
         - name: test
           image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.testImages.function_controller_test) }}"
+          # a workaround to allow the job pod to connect to the function services using istio mTLS and still allow the job to be completed.
+          {{- if .Capabilities.APIVersions.Has "security.istio.io/v1beta1" }}
+          command:
+          - sh
+          - -c
+          - "/app/main.test {{ .Values.testSuite }} ; pkill -f /usr/local/bin/pilot-agent"
+          {{- else }}
           args: ["{{ .Values.testSuite }}"]
+          {{- end }}
           env:
           {{- if  (eq .Values.testSuite "git-auth-integration" ) }}
             - name: APP_GITHUB_REPO_CONFIG_URL
