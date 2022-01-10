@@ -243,9 +243,14 @@ func (r Reconciler) syncSubscriptionStatus(ctx context.Context, sub *eventingv1a
 	for _, c := range sub.Status.Conditions {
 		var chosenCondition eventingv1alpha1.Condition
 		if c.Type == condition.Type {
-			// take given condition
-			chosenCondition = condition
-			conditionAdded = true
+			if !reflect.DeepEqual(c, condition) {
+				// take the given condition if it's different
+				chosenCondition = condition
+				conditionAdded = true
+			} else {
+				// take already present condition
+				chosenCondition = c
+			}
 		} else {
 			// take already present condition
 			chosenCondition = c
