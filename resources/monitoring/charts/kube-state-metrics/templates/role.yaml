@@ -9,8 +9,8 @@ kind: ClusterRole
 {{- end }}
 metadata:
   labels:
-    {{- include "kube-state-metrics.labels" . | nindent 4 }}
-  name: {{ template "kube-state-metrics.fullname" . }}
+    {{- include "kube-state-metrics.labels" $ | indent 4 }}
+  name: {{ template "kube-state-metrics.fullname" $ }}
 rules:
 {{ if has "certificatesigningrequests" $.Values.collectors }}
 - apiGroups: ["certificates.k8s.io"]

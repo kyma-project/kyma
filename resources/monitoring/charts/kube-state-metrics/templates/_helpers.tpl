@@ -1,27 +1,9 @@
-{{- /*
-  Customization: Some changes are made to the default label set.
-  Added labels recommended by Kubernetes and Helm:
-    helm.sh/chart
-    app.kubernetes.io/managed-by
-    app.kubernetes.io/name
-    app.kubernetes.io/instance
-
-  Added labels to be used by label selectors
-*/ -}}
-
 {{/* vim: set filetype=mustache: */}}
 {{/*
 Expand the name of the chart.
 */}}
 {{- define "kube-state-metrics.name" -}}
 {{- default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" -}}
-{{- end -}}
-
-{{/*
-Create chart name and version as used by the chart label.
-*/}}
-{{- define "kube-state-metrics.chart" -}}
-{{- printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 
 {{/*
@@ -65,18 +47,33 @@ Allow the release namespace to be overridden for multi-namespace deployments in 
 {{- end -}}
 
 {{/*
-Common labels
+Create chart name and version as used by the chart label.
 */}}
-{{- define "kube-state-metrics.labels" -}}
-helm.sh/chart: {{ include "kube-state-metrics.chart" . }}
-{{ include "kube-state-metrics.selectorLabels" . }}
-app.kubernetes.io/managed-by: {{ .Release.Service }}
+{{- define "kube-state-metrics.chart" -}}
+{{- printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
+
+{{/*
+Generate basic labels
+*/}}
+{{- define "kube-state-metrics.labels" }}
+helm.sh/chart: {{ include "kube-state-metrics.chart" . }}
+app.kubernetes.io/managed-by: {{ .Release.Service }}
+app.kubernetes.io/component: metrics
+app.kubernetes.io/part-of: {{ template "kube-state-metrics.name" . }}
+{{- include "kube-state-metrics.selectorLabels" . }}
+{{- if .Chart.AppVersion }}
+app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
+{{- end }}
+{{- if .Values.customLabels }}
+{{ toYaml .Values.customLabels }}
+{{- end }}
+{{- end }}
 
 {{/*
 Selector labels
 */}}
-{{- define "kube-state-metrics.selectorLabels" -}}
+{{- define "kube-state-metrics.selectorLabels" }}
 app.kubernetes.io/name: {{ include "kube-state-metrics.name" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
-{{- end -}}
+{{- end }}
