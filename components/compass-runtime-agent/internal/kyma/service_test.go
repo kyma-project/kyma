@@ -5,15 +5,14 @@ import (
 	"testing"
 
 	"github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/types"
-
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/apperrors"
 	appMocks "github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/applications/mocks"
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/model"
 	appSecrets "github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/secrets/mocks"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/types"
 )
 
 func TestKymaUpsertCredentialsSecrets(t *testing.T) {
@@ -890,26 +889,6 @@ func fixServiceEventAPIEntry(id string) v1alpha1.Entry {
 		ID:   id,
 		Name: "Name",
 		Type: applications.SpecEventsType,
-	}
-}
-
-func fixAPIAsset(id, name string) clusterassetgroup.Asset {
-	return clusterassetgroup.Asset{
-		ID:      fmt.Sprintf(AssetGroupNameFormat, clusterassetgroup.OpenApiType, id),
-		Name:    name,
-		Type:    clusterassetgroup.OpenApiType,
-		Format:  clusterassetgroup.SpecFormatJSON,
-		Content: []byte("spec"),
-	}
-}
-
-func fixEventAPIAsset(id, name string) clusterassetgroup.Asset {
-	return clusterassetgroup.Asset{
-		ID:      fmt.Sprintf(AssetGroupNameFormat, clusterassetgroup.AsyncApi, id),
-		Name:    name,
-		Type:    clusterassetgroup.AsyncApi,
-		Format:  clusterassetgroup.SpecFormatJSON,
-		Content: []byte("spec"),
 	}
 }
 
