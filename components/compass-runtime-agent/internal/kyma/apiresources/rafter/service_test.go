@@ -2,6 +2,7 @@ package rafter
 
 import (
 	"fmt"
+
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/apiresources/rafter/upload"
 )
 

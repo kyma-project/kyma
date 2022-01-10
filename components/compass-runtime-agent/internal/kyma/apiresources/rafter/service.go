@@ -4,6 +4,7 @@ import (
 	"crypto/md5"
 	"encoding/hex"
 	"fmt"
+
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/apiresources/rafter/upload"
 
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/apperrors"
