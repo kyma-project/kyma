@@ -24,7 +24,7 @@ webhook:
   nodeSelector:
   # healthcheck configures the readiness and liveliness probes for the webhook pod.
   healthcheck:
-    enabled: true # in Kyma we are using svc-cat together with istio and default healtcheck is not supported
+    enabled: true # when using svc-cat together with istio the healthcheck is not supported
   # Attributes of the webhook's service resource
   service:
     port: 443
