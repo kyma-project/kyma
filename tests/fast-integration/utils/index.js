@@ -1149,7 +1149,9 @@ let DEBUG = process.env.DEBUG;
 
 function debug() {
   if (DEBUG) {
-    console.log.apply(null, arguments);
+    let args = Array.prototype.slice.call(arguments);
+    args.unshift(new Date().toUTCString() + " ");
+    console.log.apply(console, args);
   }
 }
 
