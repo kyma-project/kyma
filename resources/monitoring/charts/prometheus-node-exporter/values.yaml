@@ -9,6 +9,7 @@ service:
   port: 9100
   targetPort: 9100
   nodePort:
+  portName: metrics
   listenOnAllInterfaces: true
   annotations:
     prometheus.io/scrape: "true"
@@ -18,6 +19,9 @@ prometheus:
     enabled: false
     additionalLabels: {}
     namespace: ""
+
+    jobLabel: ""
+
     scheme: http
     bearerTokenFile:
     tlsConfig: {}
@@ -27,6 +31,8 @@ prometheus:
     proxyUrl: ""
 
     relabelings: []
+    metricRelabelings: []
+    interval: ""
     scrapeTimeout: 10s
 
 ## Customize the updateStrategy if set
@@ -35,8 +41,7 @@ updateStrategy:
   rollingUpdate:
     maxUnavailable: 33%
 
-resources:
-  {}
+resources: {}
   # We usually recommend not to specify default resources and to leave this as a conscious
   # choice for the user. This also increases chances charts run on environments with little
   # resources, such as Minikube. If you do want to specify resources, uncomment the following
@@ -56,8 +61,9 @@ serviceAccount:
   name:
   annotations: {}
   imagePullSecrets: []
+  automountServiceAccountToken: false # RG: Check
 
-podSecurityContext:
+securityContext:
   fsGroup: 65534
   runAsGroup: 65534
   runAsNonRoot: true
@@ -82,6 +88,9 @@ endpoints: []
 
 # Expose the service to the host network
 hostNetwork: true
+
+# Share the host process ID namespace
+hostPID: true #RG: Needed ?
 
 ## If true, node-exporter pods mounts host / at /host/root
 ##
@@ -136,8 +145,8 @@ tolerations:
 ## Additional container arguments
 ##
 extraArgs:
-  #   - --collector.diskstats.ignored-devices=^(ram|loop|fd|(h|s|v)d[a-z]|nvme\\d+n\\d+p)\\d+$
-  #   - --collector.textfile.directory=/run/prometheus
+#   - --collector.diskstats.ignored-devices=^(ram|loop|fd|(h|s|v)d[a-z]|nvme\\d+n\\d+p)\\d+$
+#   - --collector.textfile.directory=/run/prometheus
   - --collector.filesystem.ignored-mount-points=^/(dev|proc|sys|var/lib/docker/.+)($|/)
   - --collector.filesystem.ignored-fs-types=^(autofs|binfmt_misc|cgroup|configfs|debugfs|devpts|devtmpfs|fusectl|hugetlbfs|mqueue|overlay|proc|procfs|pstore|rpc_pipefs|securityfs|sysfs|tracefs)$
 
