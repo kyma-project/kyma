@@ -90,11 +90,11 @@ spec:
           - "bin/sh"
           - "-c"
           - |
-          apk --no-cache add --update curl --repository=http://dl-cdn.alpinelinux.org/alpine/v3.14/main;
-          while [ `curl -Lk --write-out "%{http_code}\n" --silent --output /dev/null "service-catalog-catalog-webhook.{{ .Release.Namespace }}.svc.cluster.local:8081/healthz/ready"` -ne 200 ]; do
-          echo "Waiting for service catalog webhook server availability..."
-          sleep 2;
-          done
+            apk --no-cache add --update curl --repository=http://dl-cdn.alpinelinux.org/alpine/v3.14/main;
+            while [ `curl -Lk --write-out "%{http_code}\n" --silent --output /dev/null "service-catalog-catalog-webhook.{{ .Release.Namespace }}.svc.cluster.local:8081/healthz/ready"` -ne 200 ]; do
+              echo "Waiting for service catalog webhook server availability..."
+              sleep 2;
+            done
     {{- if .Values.global.priorityClassName }}
       priorityClassName: {{ .Values.global.priorityClassName }}
     {{- end }}
