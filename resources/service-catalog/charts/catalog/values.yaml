@@ -18,7 +18,8 @@ webhook:
       maxUnavailable: 0
   minReadySeconds: 1
   # annotations is a collection of annotations to add to the webhook pods.
-  annotations: {}
+  annotations:
+    sidecar.istio.io/inject: "true"
   # nodeSelector to apply to the webhook pods
   nodeSelector:
   # healthcheck configures the readiness and liveliness probes for the webhook pod.

@@ -4,3 +4,10 @@ name: serverless
 version: 1.0.0
 home: https://kyma-project.io
 icon: https://github.com/kyma-project/kyma/blob/main/logo.png?raw=true
+dependencies:
+  - name: docker-registry
+    condition: dockerRegistry.enableInternal
+  - name: webhook
+    condition: webhook.enabled
+  - name: k3s-tests
+    condition: k3s-tests.enabled # this chart is installed manually

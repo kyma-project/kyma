@@ -112,6 +112,8 @@ func (r *FunctionReconciler) updateStatus(ctx context.Context, result ctrl.Resul
 			return ctrl.Result{}, err
 		}
 
+		updateFunctionStatusGauge(instance, condition)
+
 		eventType := "Normal"
 		if condition.Status == corev1.ConditionFalse {
 			eventType = "Warning"

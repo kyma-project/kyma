@@ -5,11 +5,12 @@ global:
   images:
     compass_runtime_agent:
       name: "compass-runtime-agent"
-      version: "5e1e226f"
+      version: "2f523a88"
   istio:
     gateway:
       name: kyma-gateway
       namespace: kyma-system
+  skrConfigmapNamespace: kyma-system
 
 managementPlane: {} # default value
 

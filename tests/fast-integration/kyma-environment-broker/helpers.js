@@ -3,12 +3,14 @@ const { expect } = require("chai");
 
 async function provisionSKR(
   keb,
+  kcp,
   gardener,
   instanceID,
   name,
   platformCreds,
   btpOperatorCreds,
-  customParams
+  customParams,
+  timeout
 ) {
   const resp = await keb.provisionSKR(
     name,
@@ -23,7 +25,7 @@ async function provisionSKR(
   const shootName = resp.dashboard_url.split(".")[1];
   debug(`Operation ID ${operationID}`, `Shoot name ${shootName}`);
 
-  await ensureOperationSucceeded(keb, instanceID, operationID);
+  await ensureOperationSucceeded(keb, kcp, instanceID, operationID, timeout);
 
   const shoot = await gardener.getShoot(shootName);
   debug(`Compass ID ${shoot.compassID}`);
@@ -46,26 +48,26 @@ function ensureValidShootOIDCConfig(shoot, targetOIDCConfig) {
   expect(shoot.oidcConfig.signingAlgs).to.eql(targetOIDCConfig.signingAlgs);
 }
 
-async function deprovisionSKR(keb, instanceID) {
+async function deprovisionSKR(keb, kcp, instanceID, timeout) {
   const resp = await keb.deprovisionSKR(instanceID);
   expect(resp).to.have.property("operation");
 
   const operationID = resp.operation;
   debug(`Operation ID ${operationID}`);
 
-  await ensureOperationSucceeded(keb, instanceID, operationID);
+  await ensureOperationSucceeded(keb, kcp, instanceID, operationID, timeout);
 
   return operationID;
 }
 
-async function updateSKR(keb, gardener, instanceID, shootName, customParams) {
-  const resp = await keb.updateSKR(instanceID, customParams);
+async function updateSKR(keb, kcp, gardener, instanceID, shootName, customParams, btpOperatorCreds = null, isMigration = false, timeout) {
+  const resp = await keb.updateSKR(instanceID, customParams, btpOperatorCreds, isMigration);
   expect(resp).to.have.property("operation");
 
   const operationID = resp.operation;
   debug(`Operation ID ${operationID}`);
 
-  await ensureOperationSucceeded(keb, instanceID, operationID);
+  await ensureOperationSucceeded(keb, kcp, instanceID, operationID, timeout);
 
   const shoot = await gardener.getShoot(shootName);
 
@@ -75,17 +77,21 @@ async function updateSKR(keb, gardener, instanceID, shootName, customParams) {
   };
 }
 
-async function ensureOperationSucceeded(keb, instanceID, operationID) {
+async function ensureOperationSucceeded(keb, kcp, instanceID, operationID, timeout) {
   const res = await wait(
     () => keb.getOperation(instanceID, operationID),
     (res) => res && res.state && (res.state === "succeeded" || res.state === "failed"),
-    1000 * 60 * 60 * 2, // 2h
+    timeout,
     1000 * 30 // 30 seconds
-  );
+  ).catch(async (err) => {
+    let runtimeStatus = await kcp.getRuntimeStatusOperations(instanceID)
+    throw(`${err}\nRuntime status: ${runtimeStatus}`)
+  });
 
   debug("KEB operation:", res);
   if(res.state !== "succeeded") {
-    throw(`operation didn't succeed in 2h: ${JSON.stringify(res)}`);
+    let runtimeStatus = await kcp.getRuntimeStatusOperations(instanceID)
+    throw(`operation didn't succeed in time: ${JSON.stringify(res, null, `\t`)}\nRuntime status: ${runtimeStatus}`);
   }
   return res;
 }

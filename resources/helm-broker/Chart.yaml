@@ -4,3 +4,8 @@ name: helm-broker
 version: 1.0.0
 home: https://kyma-project.io
 icon: https://github.com/kyma-project/kyma/blob/main/logo.png?raw=true
+dependencies:
+  - name: addons-ui
+    condition: addons-ui.enabled
+  - name: etcd-stateful
+    condition: etcd-stateful.enabled

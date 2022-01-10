@@ -15,3 +15,8 @@ keywords:
   - upload
   - webhook
   - minio
+dependencies:
+  - name: minio
+    version: 2.5.*
+    repository: https://kubernetes-charts.storage.googleapis.com/
+    condition: minio.enabled

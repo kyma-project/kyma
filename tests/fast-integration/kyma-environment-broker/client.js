@@ -66,12 +66,10 @@ class KEBClient {
     try {
       const resp = await axios.request(config);
       if (resp.data.errors) {
-        debug(resp);
         throw new Error(resp.data);
       }
       return resp.data;
     } catch (err) {
-      debug(err);
       const msg = "Error calling KEB";
       if (err.response) {
         throw new Error(`${msg}: ${err.response.status} ${err.response.statusText}`);
@@ -91,7 +89,6 @@ class KEBClient {
   }
 
   async provisionSKR(name, instanceID, platformCreds, btpOperatorCreds, customParams) {
-    debug(`Provision SKR with Custom Parameters ${customParams}`)
     const payload = {
       service_id: KYMA_SERVICE_ID,
       plan_id: this.planID,
@@ -126,16 +123,27 @@ class KEBClient {
     }
   }
 
-  async updateSKR(instanceID, customParams) {
+  async updateSKR(instanceID, customParams, btpOperatorCreds, isMigration) {
     const payload = {
       service_id: KYMA_SERVICE_ID,
       context: {
         globalaccount_id: this.globalAccountID,
+        isMigration: isMigration,
       },
       parameters: {
         ...customParams,
       },
     };
+
+    if (btpOperatorCreds) {
+      payload.context["sm_operator_credentials"] = {
+        clientid: btpOperatorCreds.clientId,
+        clientsecret: btpOperatorCreds.clientSecret,
+        sm_url: btpOperatorCreds.smURL,
+        url: btpOperatorCreds.url,
+      };
+    }
+
     const endpoint = `service_instances/${instanceID}?accepts_incomplete=true`;
     try {
       return await this.callKEB(payload, endpoint, "patch");
@@ -185,12 +193,11 @@ class KEBClient {
           responseType: "stream",
         });
         if (resp.data.errors) {
-          debug(resp);
           throw new Error(resp.data);
         }
         resp.data.pipe(writeStream);
       } catch (err) {
-        debug(err);
+        debug(err.data);
         fs.unlinkSync("./shoot-kubeconfig.yaml");
         reject(err);
       }

@@ -195,7 +195,7 @@ The exposed service requires tokens with "read" scope for `GET` requests in the 
 1. Create a Function in your Namespace using the [supplied code](./assets/function.yaml):
 
   ```shell
-  kubectl -n ${NAMESPACE_NAME} apply -f https://raw.githubusercontent.com/kyma-project/kyma/master/docs/api-gateway/assets/function.yaml
+  kubectl -n ${NAMESPACE_NAME} apply -f https://raw.githubusercontent.com/kyma-project/kyma/main/docs/03-tutorials/assets/function.yaml
   ```
 
 2. Export these values as environment variables:

@@ -20,7 +20,7 @@ resources:
 nodeSelector: {}
 
 crd:
-  install: true
+  install: false
 
 jaeger:
   # Specifies whether Jaeger instance should be created
@@ -35,29 +35,16 @@ jaeger:
       size: 1Gi
       storageClassName: ""
   spec:
-    strategy: allInOne #allInOne | production
+    strategy: allInOne
     allInOne:
       image: '{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.jaeger_all_in_one) }}'
       options:
         log-level: info
     storage:
-      type: memory #memory | badger | elasticsearch | cassandra
+      type: memory
       options:
-        badger:
-          ephemeral: false
-          truncate: true
-          span-store-ttl: 24h
-          directory-key: "/badger/key"
-          directory-value: "/badger/data"
         memory:
           max-traces: 10000
-        es:
-          # Note: This assumes elasticsearch is running in the "default" namespace.
-          server-urls: http://elasticsearch-client.default.svc:9200
-        cassandra:
-          # Note: This assumes cassandra is running in the "default" namespace.
-          servers: cassandra.default.svc
-          keyspace: jaeger_v1_datacenter3
     ui:
       options:
         dependencies:
@@ -121,11 +108,11 @@ global:
   images:
     jaeger_operator:
       name: "jaeger-operator"
-      version: "1.18.1-e0da5a68"
+      version: "1.29.1-1cae1469"
       directory: "tpi"
     jaeger_all_in_one:
       name: "jaegertracing/all-in-one"
-      version: "1.18.1"
+      version: "1.29.0"
       directory: "external"
     oauth2_proxy:
       name: "oauth2-proxy"

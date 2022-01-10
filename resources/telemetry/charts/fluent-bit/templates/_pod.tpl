@@ -3,8 +3,8 @@
 imagePullSecrets:
   {{- toYaml . | nindent 2 }}
 {{- end }}
-{{- if .Values.priorityClassName }}
-priorityClassName: {{ .Values.priorityClassName }}
+{{- if or .Values.priorityClassName .Values.global.highPriorityClassName -}}
+priorityClassName: {{ coalesce .Values.priorityClassName .Values.global.highPriorityClassName }}
 {{- end }}
 serviceAccountName: {{ include "fluent-bit.serviceAccountName" . }}
 securityContext:

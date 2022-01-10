@@ -98,6 +98,7 @@ func (m *BEBMock) Start() string {
 			}
 			return
 		}
+
 		// messaging API request
 		if strings.HasPrefix(r.RequestURI, MessagingURLPath) {
 			switch r.Method {
@@ -153,7 +154,6 @@ func (m *BEBMock) Start() string {
 		}
 	}))
 	uri := ts.URL
-
 	return uri
 }
 
