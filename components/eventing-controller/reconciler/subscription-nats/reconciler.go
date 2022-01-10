@@ -3,10 +3,11 @@ package subscription_nats
 import (
 	"context"
 	"fmt"
-	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	"net/url"
 	"os"
 	"reflect"
+
+	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 
 	"github.com/go-logr/logr"
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
