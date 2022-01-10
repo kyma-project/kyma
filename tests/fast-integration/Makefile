@@ -59,3 +59,8 @@ ci-application-connectivity-2-compass:
 ci-test-eventing:
 	npm ci
 	npm run test-eventing
+
+.PHONY: ci-telemetry
+ci-telemetry:
+	npm run
+	npm run test-telemetry
