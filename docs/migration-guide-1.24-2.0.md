@@ -18,7 +18,7 @@ Kyma 2.0 provides architectural simplification and switches to the native Kubern
 
 To use the native Kubernetes authentication in Kyma, you need to remove the deprecated components manually.
 
-After the successful upgrade to Kyma 2.0, run the following [script](https://github.com/kyma-project/kyma/blob/main/docs/assets/1.24-2.0-remove-deprecated-resources.sh), which uninstalls and deletes the unsupported items.
+After the successful upgrade to Kyma 2.0, run the following [script](https://github.com/kyma-project/kyma/blob/2.0.0/docs/assets/1.24-2.0-remove-deprecated-resources.sh), which uninstalls and deletes the unsupported items.
 
 >**CAUTION:** The script deletes the authentication and authorization components mentioned above, as well as the Cluster Roles that are not needed anymore. If you use these roles in your bindings, make sure to create a custom role by duplicating it, or uncomment it from deletion. If you want to keep any of the authentication and authorization components, modify the script accordingly before running it.
 
