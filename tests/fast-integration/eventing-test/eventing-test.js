@@ -167,7 +167,7 @@ describe("Eventing tests", function () {
       await deleteEventingBackendK8sSecret(backendK8sSecretName, backendK8sSecretNamespace);
     }
 
-    console.log("Cleaning: Test namespaces should be deleted")
+    debug("Cleaning test resources")
     await cleanMockTestFixture(mockNamespace, testNamespace, true);
 
     cancelPrometheusPortForward();
