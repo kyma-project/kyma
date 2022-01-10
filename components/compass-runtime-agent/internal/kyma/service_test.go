@@ -11,9 +11,6 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/apperrors"
-	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/apiresources/rafter/clusterassetgroup"
-	rafterMocks "github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/apiresources/rafter/mocks"
-	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/applications"
 	appMocks "github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/applications/mocks"
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/model"
 	appSecrets "github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/secrets/mocks"
@@ -266,7 +263,6 @@ func TestKymaService(t *testing.T) {
 		// given
 		applicationsManagerMock := &appMocks.Repository{}
 		converterMock := &appMocks.Converter{}
-		rafterServiceMock := &rafterMocks.Service{}
 		credentialsServiceMock := &appSecrets.CredentialsService{}
 		requestParametersServiceMock := &appSecrets.RequestParametersService{}
 		applicationsManagerMock.On("List", metav1.ListOptions{}).Return(nil, apperrors.Internal("some error"))
@@ -278,21 +274,19 @@ func TestKymaService(t *testing.T) {
 		}
 
 		// when
-		kymaService := NewService(applicationsManagerMock, converterMock, rafterServiceMock, credentialsServiceMock, requestParametersServiceMock)
+		kymaService := NewService(applicationsManagerMock, converterMock, credentialsServiceMock, requestParametersServiceMock)
 		_, err := kymaService.Apply(directorApplications)
 
 		// then
 		assert.Error(t, err)
 		converterMock.AssertExpectations(t)
 		applicationsManagerMock.AssertExpectations(t)
-		rafterServiceMock.AssertExpectations(t)
 	})
 
 	t.Run("should apply Create operation", func(t *testing.T) {
 		// given
 		applicationsManagerMock := &appMocks.Repository{}
 		converterMock := &appMocks.Converter{}
-		rafterServiceMock := &rafterMocks.Service{}
 		credentialsServiceMock := &appSecrets.CredentialsService{}
 		requestParametersServiceMock := &appSecrets.RequestParametersService{}
 
@@ -325,17 +319,6 @@ func TestKymaService(t *testing.T) {
 		applicationsManagerMock.On("Create", &newRuntimeApplication).Return(&newRuntimeApplication, nil)
 		applicationsManagerMock.On("List", metav1.ListOptions{}).Return(&existingRuntimeApplications, nil)
 
-		asset1 := fixAPIAsset("API1", "name")
-		asset2 := fixEventAPIAsset("EventAPI1", "name")
-
-		expectedApiAssets1 := []clusterassetgroup.Asset{asset1}
-		expectedApiAssets2 := []clusterassetgroup.Asset{asset2}
-		expectedApiAssets3 := []clusterassetgroup.Asset{asset1, asset2}
-
-		rafterServiceMock.On("Put", "bundle1", expectedApiAssets1).Return(nil)
-		rafterServiceMock.On("Put", "bundle2", expectedApiAssets2).Return(nil)
-		rafterServiceMock.On("Put", "bundle3", expectedApiAssets3).Return(nil)
-
 		expectedResult := []Result{
 			{
 				ApplicationName: "name1",
@@ -346,7 +329,7 @@ func TestKymaService(t *testing.T) {
 		}
 
 		// when
-		kymaService := NewService(applicationsManagerMock, converterMock, rafterServiceMock, credentialsServiceMock, requestParametersServiceMock)
+		kymaService := NewService(applicationsManagerMock, converterMock, credentialsServiceMock, requestParametersServiceMock)
 		result, err := kymaService.Apply(directorApplications)
 
 		// then
@@ -354,14 +337,12 @@ func TestKymaService(t *testing.T) {
 		assert.Equal(t, expectedResult, result)
 		converterMock.AssertExpectations(t)
 		applicationsManagerMock.AssertExpectations(t)
-		rafterServiceMock.AssertExpectations(t)
 	})
 
 	t.Run("should apply Create operation and create credentials", func(t *testing.T) {
 		// given
 		applicationsManagerMock := &appMocks.Repository{}
 		converterMock := &appMocks.Converter{}
-		rafterServiceMock := &rafterMocks.Service{}
 		credentialsServiceMock := &appSecrets.CredentialsService{}
 		requestParametersServiceMock := &appSecrets.RequestParametersService{}
 
@@ -402,19 +383,6 @@ func TestKymaService(t *testing.T) {
 		applicationsManagerMock.On("Create", &newRuntimeApplication).Return(&newRuntimeApplication, nil)
 		applicationsManagerMock.On("List", metav1.ListOptions{}).Return(&existingRuntimeApplications, nil)
 
-		asset1 := fixAPIAsset("API1", "name")
-		asset2 := fixEventAPIAsset("EventAPI1", "name")
-
-		expectedApiAssets1 := []clusterassetgroup.Asset{asset1}
-		expectedApiAssets2 := []clusterassetgroup.Asset{asset2}
-		expectedApiAssets3 := []clusterassetgroup.Asset{asset1, asset2}
-		expectedApiAssets4 := []clusterassetgroup.Asset{asset1}
-
-		rafterServiceMock.On("Put", "bundle1", expectedApiAssets1).Return(nil)
-		rafterServiceMock.On("Put", "bundle2", expectedApiAssets2).Return(nil)
-		rafterServiceMock.On("Put", "bundle3", expectedApiAssets3).Return(nil)
-		rafterServiceMock.On("Put", "bundle4", expectedApiAssets4).Return(nil)
-
 		credentialsServiceMock.On("Upsert", "name1", newRuntimeApplication.UID, "bundle1", authBundle1.Credentials).Return(applications.Credentials{}, nil)
 		credentialsServiceMock.On("Upsert", "name1", newRuntimeApplication.UID, "bundle2", authBundle2.Credentials).Return(applications.Credentials{}, nil)
 		requestParametersServiceMock.On("Upsert", "name1", newRuntimeApplication.UID, "bundle2", authBundle2.RequestParameters).Return("", nil)
@@ -430,7 +398,7 @@ func TestKymaService(t *testing.T) {
 		}
 
 		// when
-		kymaService := NewService(applicationsManagerMock, converterMock, rafterServiceMock, credentialsServiceMock, requestParametersServiceMock)
+		kymaService := NewService(applicationsManagerMock, converterMock, credentialsServiceMock, requestParametersServiceMock)
 		result, err := kymaService.Apply(directorApplications)
 
 		// then
@@ -438,14 +406,12 @@ func TestKymaService(t *testing.T) {
 		assert.Equal(t, expectedResult, result)
 		converterMock.AssertExpectations(t)
 		applicationsManagerMock.AssertExpectations(t)
-		rafterServiceMock.AssertExpectations(t)
 	})
 
 	t.Run("should apply Update operation", func(t *testing.T) {
 		// given
 		applicationsManagerMock := &appMocks.Repository{}
 		converterMock := &appMocks.Converter{}
-		rafterServiceMock := &rafterMocks.Service{}
 		credentialsServiceMock := &appSecrets.CredentialsService{}
 		requestParametersServiceMock := &appSecrets.RequestParametersService{}
 
@@ -479,24 +445,9 @@ func TestKymaService(t *testing.T) {
 			Items: []v1alpha1.Application{existingRuntimeApplication},
 		}
 
-		apiAssets1 := []clusterassetgroup.Asset{
-			fixAPIAsset("API1", "Name"),
-			fixEventAPIAsset("EventAPI1", "Name"),
-		}
-
-		apiAssets2 := []clusterassetgroup.Asset{
-			fixAPIAsset("API2", "Name"),
-			fixEventAPIAsset("EventAPI2", "Name"),
-		}
-
 		converterMock.On("Do", directorApplication).Return(newRuntimeApplication)
 		applicationsManagerMock.On("Update", &newRuntimeApplication).Return(&newRuntimeApplication, nil)
 		applicationsManagerMock.On("List", metav1.ListOptions{}).Return(&existingRuntimeApplications, nil)
-
-		rafterServiceMock.On("Put", "bundle1", apiAssets1).Return(nil)
-		rafterServiceMock.On("Put", "bundle2", apiAssets2).Return(nil)
-		rafterServiceMock.On("Delete", "bundle3").Return(nil)
-		rafterServiceMock.On("Delete", "bundle4").Return(nil)
 
 		expectedResult := []Result{
 			{
@@ -508,7 +459,7 @@ func TestKymaService(t *testing.T) {
 		}
 
 		// when
-		kymaService := NewService(applicationsManagerMock, converterMock, rafterServiceMock, credentialsServiceMock, requestParametersServiceMock)
+		kymaService := NewService(applicationsManagerMock, converterMock, credentialsServiceMock, requestParametersServiceMock)
 		result, err := kymaService.Apply(directorApplications)
 
 		// then
@@ -516,14 +467,12 @@ func TestKymaService(t *testing.T) {
 		assert.Equal(t, expectedResult, result)
 		converterMock.AssertExpectations(t)
 		applicationsManagerMock.AssertExpectations(t)
-		rafterServiceMock.AssertExpectations(t)
 	})
 
 	t.Run("should apply Update operation and update credentials", func(t *testing.T) {
 		// given
 		applicationsManagerMock := &appMocks.Repository{}
 		converterMock := &appMocks.Converter{}
-		rafterServiceMock := &rafterMocks.Service{}
 		credentialsServiceMock := &appSecrets.CredentialsService{}
 		requestParametersServiceMock := &appSecrets.RequestParametersService{}
 
@@ -563,26 +512,10 @@ func TestKymaService(t *testing.T) {
 			Items: []v1alpha1.Application{existingRuntimeApplication},
 		}
 
-		apiAssets1 := []clusterassetgroup.Asset{
-			fixAPIAsset("API1", "Name"),
-			fixEventAPIAsset("EventAPI1", "Name"),
-		}
-
-		apiAssets2 := []clusterassetgroup.Asset{
-			fixAPIAsset("API2", "Name"),
-			fixEventAPIAsset("EventAPI2", "Name"),
-		}
-
 		converterMock.On("Do", directorApplication).Return(newRuntimeApplication)
 		applicationsManagerMock.On("Update", &newRuntimeApplication).Return(&newRuntimeApplication, nil)
 		applicationsManagerMock.On("List", metav1.ListOptions{}).Return(&existingRuntimeApplications, nil)
 		applicationsManagerMock.On("Get", "name1", metav1.GetOptions{}).Return(&existingRuntimeApplication, nil)
-
-		rafterServiceMock.On("Put", "bundle1", apiAssets1).Return(nil)
-		rafterServiceMock.On("Put", "bundle2", apiAssets2).Return(nil)
-		rafterServiceMock.On("Delete", "bundle3").Return(nil)
-		rafterServiceMock.On("Delete", "bundle4").Return(nil)
-		rafterServiceMock.On("Delete", "bundle5").Return(nil)
 
 		credentialsServiceMock.On("Upsert", "name1", newRuntimeApplication.UID, "bundle1", authBundle1.Credentials).Return(applications.Credentials{}, nil)
 		credentialsServiceMock.On("Delete", "name1-bundle2").Return(nil)
@@ -604,7 +537,7 @@ func TestKymaService(t *testing.T) {
 		}
 
 		// when
-		kymaService := NewService(applicationsManagerMock, converterMock, rafterServiceMock, credentialsServiceMock, requestParametersServiceMock)
+		kymaService := NewService(applicationsManagerMock, converterMock, credentialsServiceMock, requestParametersServiceMock)
 		result, err := kymaService.Apply(directorApplications)
 
 		// then
@@ -612,14 +545,12 @@ func TestKymaService(t *testing.T) {
 		assert.Equal(t, expectedResult, result)
 		converterMock.AssertExpectations(t)
 		applicationsManagerMock.AssertExpectations(t)
-		rafterServiceMock.AssertExpectations(t)
 	})
 
 	t.Run("should apply Delete operation", func(t *testing.T) {
 		// given
 		applicationsManagerMock := &appMocks.Repository{}
 		converterMock := &appMocks.Converter{}
-		rafterServiceMock := &rafterMocks.Service{}
 		credentialsServiceMock := &appSecrets.CredentialsService{}
 		requestParametersServiceMock := &appSecrets.RequestParametersService{}
 
@@ -634,7 +565,6 @@ func TestKymaService(t *testing.T) {
 
 		applicationsManagerMock.On("Delete", runtimeApplicationToDelete.Name, &metav1.DeleteOptions{}).Return(nil)
 		applicationsManagerMock.On("List", metav1.ListOptions{}).Return(&existingRuntimeApplications, nil)
-		rafterServiceMock.On("Delete", "bundle1").Return(nil)
 
 		expectedResult := []Result{
 			{
@@ -646,7 +576,7 @@ func TestKymaService(t *testing.T) {
 		}
 
 		// when
-		kymaService := NewService(applicationsManagerMock, converterMock, rafterServiceMock, credentialsServiceMock, requestParametersServiceMock)
+		kymaService := NewService(applicationsManagerMock, converterMock, credentialsServiceMock, requestParametersServiceMock)
 		result, err := kymaService.Apply([]model.Application{})
 
 		// then
@@ -654,14 +584,12 @@ func TestKymaService(t *testing.T) {
 		assert.Equal(t, expectedResult, result)
 		converterMock.AssertExpectations(t)
 		applicationsManagerMock.AssertExpectations(t)
-		rafterServiceMock.AssertExpectations(t)
 	})
 
 	t.Run("should apply Delete operation and delete credentials", func(t *testing.T) {
 		// given
 		applicationsManagerMock := &appMocks.Repository{}
 		converterMock := &appMocks.Converter{}
-		rafterServiceMock := &rafterMocks.Service{}
 		credentialsServiceMock := &appSecrets.CredentialsService{}
 		requestParametersServiceMock := &appSecrets.RequestParametersService{}
 
@@ -676,7 +604,7 @@ func TestKymaService(t *testing.T) {
 
 		applicationsManagerMock.On("Delete", runtimeApplicationToDelete.Name, &metav1.DeleteOptions{}).Return(nil)
 		applicationsManagerMock.On("List", metav1.ListOptions{}).Return(&existingRuntimeApplications, nil)
-		rafterServiceMock.On("Delete", "bundle1").Return(nil)
+
 		credentialsServiceMock.On("Delete", "name1-bundle1").Return(nil)
 		requestParametersServiceMock.On("Delete", "params-name1-bundle1").Return(nil)
 
@@ -690,7 +618,7 @@ func TestKymaService(t *testing.T) {
 		}
 
 		// when
-		kymaService := NewService(applicationsManagerMock, converterMock, rafterServiceMock, credentialsServiceMock, requestParametersServiceMock)
+		kymaService := NewService(applicationsManagerMock, converterMock, credentialsServiceMock, requestParametersServiceMock)
 		result, err := kymaService.Apply([]model.Application{})
 
 		// then
@@ -698,14 +626,12 @@ func TestKymaService(t *testing.T) {
 		assert.Equal(t, expectedResult, result)
 		converterMock.AssertExpectations(t)
 		applicationsManagerMock.AssertExpectations(t)
-		rafterServiceMock.AssertExpectations(t)
 	})
 
 	t.Run("should manage only Applications with CompassMetadata in the Spec", func(t *testing.T) {
 		// given
 		applicationsManagerMock := &appMocks.Repository{}
 		converterMock := &appMocks.Converter{}
-		rafterServiceMock := &rafterMocks.Service{}
 		credentialsServiceMock := &appSecrets.CredentialsService{}
 		requestParametersServiceMock := &appSecrets.RequestParametersService{}
 
@@ -724,7 +650,6 @@ func TestKymaService(t *testing.T) {
 
 		applicationsManagerMock.On("Delete", runtimeApplicationToDelete.Name, &metav1.DeleteOptions{}).Return(nil)
 		applicationsManagerMock.On("List", metav1.ListOptions{}).Return(&existingRuntimeApplications, nil)
-		rafterServiceMock.On("Delete", "bundle1").Return(nil)
 
 		expectedResult := []Result{
 			{
@@ -736,7 +661,7 @@ func TestKymaService(t *testing.T) {
 		}
 
 		// when
-		kymaService := NewService(applicationsManagerMock, converterMock, rafterServiceMock, credentialsServiceMock, requestParametersServiceMock)
+		kymaService := NewService(applicationsManagerMock, converterMock, credentialsServiceMock, requestParametersServiceMock)
 		result, err := kymaService.Apply([]model.Application{})
 
 		// then
@@ -744,14 +669,12 @@ func TestKymaService(t *testing.T) {
 		assert.Equal(t, expectedResult, result)
 		converterMock.AssertExpectations(t)
 		applicationsManagerMock.AssertExpectations(t)
-		rafterServiceMock.AssertExpectations(t)
 	})
 
 	t.Run("should not break execution when error occurred when applying Application CR", func(t *testing.T) {
 		// given
 		applicationsManagerMock := &appMocks.Repository{}
 		converterMock := &appMocks.Converter{}
-		rafterServiceMock := &rafterMocks.Service{}
 		credentialsServiceMock := &appSecrets.CredentialsService{}
 		requestParametersServiceMock := &appSecrets.RequestParametersService{}
 
@@ -806,10 +729,8 @@ func TestKymaService(t *testing.T) {
 		applicationsManagerMock.On("Delete", runtimeApplicationToBeDeleted.Name, &metav1.DeleteOptions{}).Return(apperrors.Internal("some error"))
 		applicationsManagerMock.On("List", metav1.ListOptions{}).Return(&existingRuntimeApplications, nil)
 
-		rafterServiceMock.On("Delete", "bundle5").Return(apperrors.Internal("some error"))
-
 		// when
-		kymaService := NewService(applicationsManagerMock, converterMock, rafterServiceMock, credentialsServiceMock, requestParametersServiceMock)
+		kymaService := NewService(applicationsManagerMock, converterMock, credentialsServiceMock, requestParametersServiceMock)
 		result, err := kymaService.Apply(directorApplications)
 
 		// then
@@ -820,7 +741,6 @@ func TestKymaService(t *testing.T) {
 		assert.NotNil(t, result[2].Error)
 		converterMock.AssertExpectations(t)
 		applicationsManagerMock.AssertExpectations(t)
-		rafterServiceMock.AssertExpectations(t)
 	})
 }
 
