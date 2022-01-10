@@ -220,7 +220,7 @@ class KCPWrapper {
             const res = await wait(
             () => this.getOrchestrationStatus(orchenstrationID),
             (res) => res && res.state && (res.state === "succeeded" || res.state === "failed"),
-            1000*60*15, // 15 min
+            1000*60*30, // 30 min
             1000 * 30 // 30 seconds
             );
         
