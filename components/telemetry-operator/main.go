@@ -17,6 +17,7 @@ limitations under the License.
 package main
 
 import (
+	"errors"
 	"flag"
 	"os"
 
@@ -39,8 +40,14 @@ import (
 )
 
 var (
-	scheme   = runtime.NewScheme()
-	setupLog = ctrl.Log.WithName("setup")
+	scheme                     = runtime.NewScheme()
+	setupLog                   = ctrl.Log.WithName("setup")
+	fluentBitSectionsConfigMap string
+	fluentBitParsersConfigMap  string
+	fluentBitDaemonSet         string
+	fluentBitNs                string
+	fluentBitEnvSecret         string
+	fluentBitFilesConfigMap    string
 )
 
 //nolint:gochecknoinits
@@ -55,26 +62,26 @@ func main() {
 	var metricsAddr string
 	var enableLeaderElection bool
 	var probeAddr string
-	var fluentBitConfigMap string
-	var fluentBitDaemonSet string
-	var fluentBitNs string
-	var fluentBitEnvSecret string
-	var fluentBitFilesConfigMap string
 	flag.StringVar(&metricsAddr, "metrics-bind-address", ":8080", "The address the metric endpoint binds to.")
 	flag.StringVar(&probeAddr, "health-probe-bind-address", ":8081", "The address the probe endpoint binds to.")
 	flag.BoolVar(&enableLeaderElection, "leader-elect", false,
-		"Enable leader election for controller manager. "+
-			"Enabling this will ensure there is only one active controller manager.")
-	flag.StringVar(&fluentBitConfigMap, "cm-name", "logging-fluent-bit-sections", "ConfigMap name to be written by Fluent Bit controller")
-	flag.StringVar(&fluentBitDaemonSet, "ds-name", "logging-fluent-bit", "DaemonSet name to be managed by FluentBit controller")
-	flag.StringVar(&fluentBitEnvSecret, "env-secret", "logging-fluent-bit-env", "Secret for environment variables")
-	flag.StringVar(&fluentBitFilesConfigMap, "files-cm", "logging-fluent-bit-files", "ConfigMap for referenced files")
-	flag.StringVar(&fluentBitNs, "fluent-bit-ns", "kyma-system", "Fluent Bit namespace")
+		"Enable leader election for controller manager. Enabling this will ensure there is only one active controller manager.")
+	flag.StringVar(&fluentBitSectionsConfigMap, "cm-name", "", "ConfigMap name to be written by Fluent Bit controller")
+	flag.StringVar(&fluentBitParsersConfigMap, "parser-cm-name", "", "ConfigMap name of Fluent bit Parsers to be written by Fluent Bit controller")
+	flag.StringVar(&fluentBitDaemonSet, "ds-name", "", "DaemonSet name to be managed by FluentBit controller")
+	flag.StringVar(&fluentBitEnvSecret, "env-secret", "", "Secret for environment variables")
+	flag.StringVar(&fluentBitFilesConfigMap, "files-cm", "", "ConfigMap for referenced files")
+	flag.StringVar(&fluentBitNs, "fluent-bit-ns", "", "Fluent Bit namespace")
 	opts := zap.Options{
 		Development: true,
 	}
 	opts.BindFlags(flag.CommandLine)
 	flag.Parse()
+
+	if err := validateFlags(); err != nil {
+		setupLog.Error(err, "invalid flag provided")
+		os.Exit(1)
+	}
 
 	ctrl.SetLogger(zap.New(zap.UseFlagOptions(&opts)))
 
@@ -91,11 +98,15 @@ func main() {
 		os.Exit(1)
 	}
 
-	if err = (&controllers.LoggingConfigurationReconciler{
+	if err = (&controllers.LogPipelineReconciler{
 		Client: mgr.GetClient(),
 		Scheme: mgr.GetScheme(),
-		FluentBitConfigMap: types.NamespacedName{
-			Name:      fluentBitConfigMap,
+		FluentBitSectionsConfigMap: types.NamespacedName{
+			Name:      fluentBitSectionsConfigMap,
+			Namespace: fluentBitNs,
+		},
+		FluentBitParsersConfigMap: types.NamespacedName{
+			Name:      fluentBitParsersConfigMap,
 			Namespace: fluentBitNs,
 		},
 		FluentBitDaemonSet: types.NamespacedName{
@@ -111,7 +122,7 @@ func main() {
 			Namespace: fluentBitNs,
 		},
 	}).SetupWithManager(mgr); err != nil {
-		setupLog.Error(err, "unable to create controller", "controller", "LoggingConfiguration")
+		setupLog.Error(err, "unable to create controller", "controller", "LogPipeline")
 		os.Exit(1)
 	}
 	//+kubebuilder:scaffold:builder
@@ -130,4 +141,27 @@ func main() {
 		setupLog.Error(err, "problem running manager")
 		os.Exit(1)
 	}
+}
+
+func validateFlags() error {
+	if fluentBitSectionsConfigMap == "" {
+		return errors.New("--cm-name flag is required")
+	}
+	if fluentBitParsersConfigMap == "" {
+		return errors.New("--parser-cm-name flag is required")
+	}
+	if fluentBitDaemonSet == "" {
+		return errors.New("--ds-name flag is required")
+	}
+	if fluentBitEnvSecret == "" {
+		return errors.New("--env-secret flag is required")
+	}
+	if fluentBitFilesConfigMap == "" {
+		return errors.New("--files-cm flag is required")
+	}
+	if fluentBitNs == "" {
+		return errors.New("--fluent-bit-ns flag is required")
+	}
+
+	return nil
 }
