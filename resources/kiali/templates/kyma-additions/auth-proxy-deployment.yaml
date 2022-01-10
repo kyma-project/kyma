@@ -47,7 +47,7 @@ spec:
         - --pass-host-header={{ .Values.authProxy.config.passHostHeader }}
         envFrom:
         - secretRef:
-            name: {{ template "kiali-server.name" . }}-auth-proxy
+            name: {{ template "kiali-server.name" . }}-auth-proxy-default
             optional: false
         - secretRef:
             name: {{ template "kiali-server.name" . }}-auth-proxy-user

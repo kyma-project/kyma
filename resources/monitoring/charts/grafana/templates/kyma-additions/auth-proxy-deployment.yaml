@@ -52,7 +52,7 @@ spec:
         - --pass-host-header={{ .Values.kyma.authProxy.config.passHostHeader }}
         envFrom:
         - secretRef:
-            name: {{ .Release.Name }}-auth-proxy-{{ template "grafana.name" . }}
+            name: {{ .Release.Name }}-auth-proxy-{{ template "grafana.name" . }}-default
             optional: false
         - secretRef:
             name: {{ .Release.Name }}-auth-proxy-{{ template "grafana.name" . }}-user
