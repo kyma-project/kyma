@@ -5,9 +5,6 @@ import (
 	"fmt"
 	"net/url"
 	"os"
-	"reflect"
-
-	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 
 	"github.com/go-logr/logr"
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
@@ -18,6 +15,7 @@ import (
 	"github.com/kyma-project/kyma/components/eventing-controller/utils"
 	"github.com/pkg/errors"
 	corev1 "k8s.io/api/core/v1"
+	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/client-go/tools/record"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/cache"
@@ -234,6 +232,7 @@ func (r Reconciler) syncSubscriptionStatus(ctx context.Context, sub *eventingv1a
 	isNatsSubReady bool, message string) error {
 	desiredConditions := make([]eventingv1alpha1.Condition, 0)
 	conditionAdded := false
+	conditionUpdated := false
 	condition := eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionSubscriptionActive,
 		eventingv1alpha1.ConditionReasonNATSSubscriptionActive, corev1.ConditionFalse, message)
 	if isNatsSubReady {
@@ -243,13 +242,14 @@ func (r Reconciler) syncSubscriptionStatus(ctx context.Context, sub *eventingv1a
 	for _, c := range sub.Status.Conditions {
 		var chosenCondition eventingv1alpha1.Condition
 		if c.Type == condition.Type {
-			if !reflect.DeepEqual(c, condition) {
-				// take the given condition if it's different
+			if c.Status == condition.Status && c.Reason == condition.Reason {
+				// take the already present condition
+				chosenCondition = c
+				conditionUpdated = true
+			} else {
+				// take the new given condition
 				chosenCondition = condition
 				conditionAdded = true
-			} else {
-				// take already present condition
-				chosenCondition = c
 			}
 		} else {
 			// take already present condition
@@ -257,10 +257,12 @@ func (r Reconciler) syncSubscriptionStatus(ctx context.Context, sub *eventingv1a
 		}
 		desiredConditions = append(desiredConditions, chosenCondition)
 	}
-	if !conditionAdded {
+	if !conditionAdded && !conditionUpdated {
 		desiredConditions = append(desiredConditions, condition)
+		conditionAdded = true
 	}
-	if !reflect.DeepEqual(sub.Status.Conditions, desiredConditions) {
+
+	if conditionAdded {
 		sub.Status.Conditions = desiredConditions
 		sub.Status.Ready = isNatsSubReady
 		err := r.Client.Status().Update(ctx, sub, &client.UpdateOptions{})
