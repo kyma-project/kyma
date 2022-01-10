@@ -123,7 +123,7 @@ In your Function's **Configuration** tab, click on the APIRule's **Host**. This 
 
 ## Create a Subscription
 
-Next, to subscribe to an event so that we can actually listen for it, we need a [Subscription](../05-technical-reference/00-custom-resources/evnt-01-subscription.md) custom resource. We're going to be listening for an event of type `order.received.v1`. 
+Next, to subscribe to an event so that we can actually listen for it, we need a [Subscription](../05-technical-reference/00-custom-resources/evnt-01-subscription.md) and an [Application](https://kyma-project.io/docs/kyma/latest/05-technical-reference/00-custom-resources/ac-01-application/#documentation-content) custom resources. We're going to be listening for an event of type `order.received.v1`. 
 
 <div tabs name="Create a Subscription" group="trigger-workload">
   <details open>
@@ -167,17 +167,22 @@ The operation was successful if the returned status says `true`.
   Kyma Dashboard
   </summary>
 
-1. Using the left navigation, go back to **Workloads** > **Functions**.
-2. Select your `lastorder` Function and navigate to the **Configuration** tab.
-3. Click on **Add Event Subscription+**.
-4. Provide the following parameters:
-    - **Application name**: `myapp`
+1. Using the left navigation go to **Apllications**.
+2. Click on **Create Application+**.
+3. Provide a name for your application, for example `myapp`.
+4. Go to **Namespaces** and click on `default`.
+5. Using the left navigation, go back to **Workloads** > **Functions**.
+6. Select your `lastorder` Function and navigate to the **Configuration** tab.
+7. Click on **Create Subscription+**.
+8. Provide the following parameters:
+    - **Subscription name**, for example `received-orders`
+    - **Application name**: choose `myapp`
     - **Event name**: `order.received`
     - **Event version**: `v1`
     **Event type** is generated automatically; in this example: `myapp.order.received.v1`. 
     
-5. Click **Add**. 
-   The name of the event Subscription is generated automatically and follows the `{FUNCTION_NAME}-{RANDOM_SUFFIX}` pattern.
+9. Click **Create**. 
+   The name of the event Subscription is generated automatically.
 
   </details>
 </div>
