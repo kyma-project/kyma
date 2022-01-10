@@ -232,6 +232,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 func (r Reconciler) syncSubscriptionStatus(ctx context.Context, sub *eventingv1alpha1.Subscription,
 	isNatsSubReady bool, message string) error {
 	desiredConditions := make([]eventingv1alpha1.Condition, 0)
+	conditionAdded := false
 	condition := eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionSubscriptionActive,
 		eventingv1alpha1.ConditionReasonNATSSubscriptionActive, corev1.ConditionFalse, message)
 	if isNatsSubReady {
@@ -243,11 +244,15 @@ func (r Reconciler) syncSubscriptionStatus(ctx context.Context, sub *eventingv1a
 		if c.Type == condition.Type {
 			// take given condition
 			chosenCondition = condition
+			conditionAdded = true
 		} else {
 			// take already present condition
 			chosenCondition = c
 		}
 		desiredConditions = append(desiredConditions, chosenCondition)
+	}
+	if !conditionAdded {
+		desiredConditions = append(desiredConditions, condition)
 	}
 	if !reflect.DeepEqual(sub.Status.Conditions, desiredConditions) {
 		sub.Status.Conditions = desiredConditions
