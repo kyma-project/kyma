@@ -25,7 +25,7 @@ kubectl -n kyma-system delete service helm-broker-addons-ui
 echo "
 Deleting orphaned Deployments"
 kubectl -n kyma-system delete deployment logging-log-ui
-kubectl -n kyma-system delete deployment helm-broker-addons-ui 
+kubectl -n kyma-system delete deployment helm-broker-addons-ui
 kubectl -n kyma-system delete deployment service-catalog-addons-service-catalog-ui
 kubectl -n kyma-system delete deployment application-connector-certs-sync --ignore-not-found
 
@@ -112,6 +112,9 @@ kubectl -n kyma-system delete secret test-no-rights-user
 kubectl -n kyma-system delete secret test-read-only-user
 kubectl -n kyma-system delete secret admin-user
 kubectl -n kyma-system delete secret apiserver-proxy-tls-cert
+kubectl -n kyma-system delete secret kiali-auth-proxy --ignore-not-found
+kubectl -n kyma-system delete secret monitoring-auth-proxy-grafana --ignore-not-found
+kubectl -n kyma-system delete secret tracing-auth-proxy --ignore-not-found
 
 echo "
 Deleting orphaned ConfigMaps"
@@ -175,7 +178,7 @@ kubectl delete clusterrolebinding service-catalog-tests
 kubectl delete clusterrolebinding serverless-tests
 kubectl delete clusterrolebinding monitoring-tests
 kubectl delete clusterrolebinding logging-tests
-kubectl delete clusterrolebinding istio-job 
+kubectl delete clusterrolebinding istio-job
 kubectl delete clusterrolebinding istio-kyma-validate
 kubectl delete clusterrolebinding istio-proxy-reset
 kubectl delete clusterrolebinding rafter-tests
@@ -187,9 +190,9 @@ Deleting orphaned Kyma modules"
 helm -n kyma-system uninstall apiserver-proxy
 helm -n kyma-system uninstall console
 helm -n kyma-system uninstall core
-helm -n kyma-system uninstall dex 
-helm -n kyma-system uninstall iam-kubeconfig-service 
-helm -n kyma-system uninstall permission-controller 
+helm -n kyma-system uninstall dex
+helm -n kyma-system uninstall iam-kubeconfig-service
+helm -n kyma-system uninstall permission-controller
 helm -n kyma-installer uninstall xip-patch
 helm -n kyma-system uninstall testing
 
