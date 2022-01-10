@@ -4,10 +4,10 @@ import (
 	"crypto/md5"
 	"encoding/hex"
 	"fmt"
+	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/apiresources/rafter/upload"
 
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/apperrors"
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/apiresources/rafter/clusterassetgroup"
-	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/apiresources/rafter/upload"
 )
 
 const (
@@ -32,38 +32,14 @@ type Service interface {
 
 type service struct {
 	clusterAssetGroupRepository ClusterAssetGroupRepository
-	uploadClient                upload.Client
 }
 
 func NewService(repository ClusterAssetGroupRepository, uploadClient upload.Client) Service {
-	return &service{
-		clusterAssetGroupRepository: repository,
-		uploadClient:                uploadClient,
-	}
+	return &service{}
 }
 
 func (s service) Put(id string, assets []clusterassetgroup.Asset) apperrors.AppError {
-	if len(assets) == 0 {
-		return nil
-	}
-
-	existingEntry, exists, err := s.getExistingEntry(id)
-	if err != nil {
-		return err
-	}
-
-	if exists {
-		if compareAssetsHash(existingEntry.Assets, assets) {
-			return nil
-		}
-
-		return s.update(id, assets)
-	}
-
-	calculateAssetHash(assets)
-
-	return s.create(id, assets)
-
+	return nil
 }
 
 func compareAssetsHash(currentAssets []clusterassetgroup.Asset, newAssets []clusterassetgroup.Asset) bool {
@@ -112,28 +88,28 @@ func (s service) getExistingEntry(id string) (clusterassetgroup.Entry, bool, app
 }
 
 func (s service) Delete(id string) apperrors.AppError {
-	return s.clusterAssetGroupRepository.Delete(id)
+	return nil
 }
 
-func (s service) create(id string, assets []clusterassetgroup.Asset) apperrors.AppError {
+/*func (s service) create(id string, assets []clusterassetgroup.Asset) apperrors.AppError {
 	assetGroup, err := s.createClusterAssetGroup(id, assets)
 	if err != nil {
 		return apperrors.Internal("Failed to upload specifications, %s.", err.Error())
 	}
 
 	return s.clusterAssetGroupRepository.Create(assetGroup)
-}
+}*/
 
-func (s service) update(id string, assets []clusterassetgroup.Asset) apperrors.AppError {
+/*func (s service) update(id string, assets []clusterassetgroup.Asset) apperrors.AppError {
 	assetGroup, err := s.createClusterAssetGroup(id, assets)
 	if err != nil {
 		return apperrors.Internal("Failed to upload specifications, %s.", err.Error())
 	}
 
 	return s.clusterAssetGroupRepository.Update(assetGroup)
-}
+}*/
 
-func (s service) createClusterAssetGroup(id string, assets []clusterassetgroup.Asset) (clusterassetgroup.Entry, apperrors.AppError) {
+/*func (s service) createClusterAssetGroup(id string, assets []clusterassetgroup.Asset) (clusterassetgroup.Entry, apperrors.AppError) {
 
 	for i := 0; i < len(assets); i++ {
 		asset := &assets[i]
@@ -151,7 +127,7 @@ func (s service) createClusterAssetGroup(id string, assets []clusterassetgroup.A
 		Labels:      map[string]string{clusterAssetGroupLabelKey: clusterAssetGroupLabelValue},
 		Assets:      assets,
 	}, nil
-}
+}*/
 
 func getApiSpecFileName(specFormat clusterassetgroup.SpecFormat, apiType clusterassetgroup.ApiType) string {
 	switch apiType {
@@ -170,7 +146,7 @@ func specFileName(fileName string, specFormat clusterassetgroup.SpecFormat) stri
 	return fmt.Sprintf("%s.%s", fileName, specFormat)
 }
 
-func (s service) uploadFile(content []byte, filename, directory string, asset *clusterassetgroup.Asset) apperrors.AppError {
+/*func (s service) uploadFile(content []byte, filename, directory string, asset *clusterassetgroup.Asset) apperrors.AppError {
 	outputFile, err := s.uploadClient.Upload(filename, directory, content)
 	if err != nil {
 		return apperrors.Internal("Failed to upload file %s, %s.", filename, err)
@@ -179,7 +155,7 @@ func (s service) uploadFile(content []byte, filename, directory string, asset *c
 	asset.Url = outputFile.RemotePath
 
 	return nil
-}
+}*/
 
 func calculateHash(content []byte) string {
 	if content == nil {
