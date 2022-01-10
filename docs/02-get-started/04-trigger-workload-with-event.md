@@ -179,6 +179,7 @@ The operation was successful if the returned status says `true`.
     - **Application name**: choose `myapp`
     - **Event name**: `order.received`
     - **Event version**: `v1`
+
     **Event type** is generated automatically; in this example: `myapp.order.received.v1`. 
     
 9. Click **Create**. 
