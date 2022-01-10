@@ -85,8 +85,9 @@ spec:
           - "--file.format={{ .Values.file.format }}"
       initContainers:
       - name: init-service-catalog
-        image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.busybox) }}"
-        command: ['sh', '-c', "until nslookup service-catalog-catalog-webhook.{{ .Release.Namespace }}.svc.cluster.local; do echo waiting for service catalog webhook availability; sleep 2; done"]
+        image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.alpine) }}"
+        command: ["/bin/sh", "-c"]
+        args: ['apk update && apk add --no-cache curl; while [ `curl -Lk --write-out "%{http_code}\n" --silent --output /dev/null "service-catalog-catalog-webhook.{{ .Release.Namespace }}.svc.cluster.local:8081/healthz/ready"` -ne 200 ]; do sleep 2; done']
     {{- if .Values.global.priorityClassName }}
       priorityClassName: {{ .Values.global.priorityClassName }}
     {{- end }}
