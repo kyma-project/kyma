@@ -38,7 +38,7 @@ global:
       directory: "tpi"
     kube_state_metrics:
       name: "kube-state-metrics"
-      version: v1.9.7
+      version: v2.3.0
       directory: "external/quay.io/coreos"
     grafana:
       name: "grafana"
