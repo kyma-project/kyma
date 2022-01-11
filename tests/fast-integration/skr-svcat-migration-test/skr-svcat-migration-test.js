@@ -46,7 +46,7 @@ describe("SKR SVCAT migration test", function() {
 
   const provisioningTimeout = 1000 * 60 * 60 // 1h
   const deprovisioningTimeout = 1000 * 60 * 30 // 30m
-  const updateTimeout = 1000 * 60 * 15 // 15m
+  const updateTimeout = 1000 * 60 * 45 // 45m
 
   let platformCreds;
   it(`Should provision new ServiceManager platform`, async function() {
@@ -69,7 +69,7 @@ describe("SKR SVCAT migration test", function() {
   });
 
   it(`Should save kubeconfig for the SKR to ~/.kube/config`, async function() {
-    t.saveKubeconfig(skr.shoot.kubeconfig);
+    await t.saveKubeconfig(skr.shoot.kubeconfig);
   });
 
   it(`Should initialize K8s client`, async function() {
