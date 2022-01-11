@@ -5,7 +5,7 @@ Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
-    http://www.apache.org/licenses/LICENSE-2.0
+   http://www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
@@ -21,29 +21,49 @@ import (
 	"strings"
 	"time"
 
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/types"
-
 	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/api/v1alpha1"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
-var _ = Describe("LoggingConfiguration controller", func() {
+var _ = Describe("LogPipeline controller", func() {
 	const (
-		LoggingConfigurationName = "logging-configuration"
-		FluentBitOutputConfig    = "[OUTPUT]\n  Name \"Null\"\n  Match *"
-
-		timeout  = time.Second * 10
-		interval = time.Millisecond * 250
+		LogPipelineName                = "log-pipeline"
+		FluentBitParserConfig          = "Name   dummy_test\nFormat   regex\nRegex   ^(?<INT>[^ ]+) (?<FLOAT>[^ ]+) (?<BOOL>[^ ]+) (?<STRING>.+)$"
+		FluentBitMultiLineParserConfig = "Name          multiline-custom-regex\nType          regex\nFlush_timeout 1000\nRule      \"start_state\"   \"/(Dec \\d+ \\d+\\:\\d+\\:\\d+)(.*)/\"  \"cont\"\nRule      \"cont\"          \"/^\\s+at.*/\"                     \"cont\""
+		FluentBitFilterConifg          = "Name   grep\nMatch   *\nRegex   $kubernetes['labels']['app'] my-deployment"
+		FluentBitOutputConfig          = "Name   stdout\nMatch   *"
+		timeout                        = time.Second * 10
+		interval                       = time.Millisecond * 250
 	)
+	var expectedFluentBitConfig = `[FILTER]
+    Name   grep
+    Match   *
+    Regex   $kubernetes['labels']['app'] my-deployment
 
-	Context("When updating LoggingConfiguration", func() {
+[OUTPUT]
+    Name   stdout
+    Match   *`
+	var expectedFluentBitParserConfig = `[PARSER]
+    Name   dummy_test
+    Format   regex
+    Regex   ^(?<INT>[^ ]+) (?<FLOAT>[^ ]+) (?<BOOL>[^ ]+) (?<STRING>.+)$
+
+[MULTILINE_PARSER]
+    Name          multiline-custom-regex
+    Type          regex
+    Flush_timeout 1000
+    Rule      "start_state"   "/(Dec \d+ \d+\:\d+\:\d+)(.*)/"  "cont"
+    Rule      "cont"          "/^\s+at.*/"                     "cont"`
+
+	Context("When updating LogPipeline", func() {
 		It("Should sync with the Fluent Bit configuration", func() {
-			By("By creating a new LoggingConfiguration")
+			By("By creating a new LogPipeline")
 			ctx := context.Background()
 
 			secret := &corev1.Secret{
@@ -122,30 +142,42 @@ var _ = Describe("LoggingConfiguration controller", func() {
 				Name:      "my-secret",
 				Namespace: ControllerNamespace,
 			}
-			section := telemetryv1alpha1.Section{
-				Content:    FluentBitOutputConfig,
-				Files:      []telemetryv1alpha1.FileMount{file},
-				SecretRefs: []telemetryv1alpha1.SecretReference{secretRef},
+			parser := telemetryv1alpha1.Parser{
+				Content: FluentBitParserConfig,
 			}
-			loggingConfiguration := &telemetryv1alpha1.LoggingConfiguration{
+			multiLineParser := telemetryv1alpha1.MultiLineParser{
+				Content: FluentBitMultiLineParserConfig,
+			}
+			filter := telemetryv1alpha1.Filter{
+				Content: FluentBitFilterConifg,
+			}
+			output := telemetryv1alpha1.Output{
+				Content: FluentBitOutputConfig,
+			}
+			loggingConfiguration := &telemetryv1alpha1.LogPipeline{
 				TypeMeta: metav1.TypeMeta{
 					APIVersion: "telemetry.kyma-project.io/v1alpha1",
-					Kind:       "LoggingConfiguration",
+					Kind:       "LogPipeline",
 				},
 				ObjectMeta: metav1.ObjectMeta{
-					Name: LoggingConfigurationName,
+					Name: LogPipelineName,
 				},
-				Spec: telemetryv1alpha1.LoggingConfigurationSpec{
-					Sections: []telemetryv1alpha1.Section{section},
+				Spec: telemetryv1alpha1.LogPipelineSpec{
+					Parsers:          []telemetryv1alpha1.Parser{parser},
+					MultiLineParsers: []telemetryv1alpha1.MultiLineParser{multiLineParser},
+					Filters:          []telemetryv1alpha1.Filter{filter},
+					Outputs:          []telemetryv1alpha1.Output{output},
+					Files:            []telemetryv1alpha1.FileMount{file},
+					SecretRefs:       []telemetryv1alpha1.SecretReference{secretRef},
 				},
 			}
 			Expect(k8sClient.Create(ctx, loggingConfiguration)).Should(Succeed())
 
 			// Fluent Bit config section should be copied to ConfigMap
 			Eventually(func() string {
-				cmFileName := LoggingConfigurationName + ".conf"
+				cmFileName := LogPipelineName + ".conf"
 				configMapLookupKey := types.NamespacedName{
-					Name:      FluentBitConfigMap,
+					Name:      FluentBitSectionsConfigMap,
 					Namespace: ControllerNamespace,
 				}
 				var fluentBitCm corev1.ConfigMap
@@ -154,7 +186,22 @@ var _ = Describe("LoggingConfiguration controller", func() {
 					return err.Error()
 				}
 				return strings.TrimRight(fluentBitCm.Data[cmFileName], "\n")
-			}, timeout, interval).Should(Equal(FluentBitOutputConfig))
+			}, timeout, interval).Should(Equal(expectedFluentBitConfig))
+
+			// Fluent Bit parsers config should be copied to ConfigMap
+			Eventually(func() string {
+				cmFileName := "parsers.conf"
+				configMapLookupKey := types.NamespacedName{
+					Name:      FluentBitParsersConfigMap,
+					Namespace: ControllerNamespace,
+				}
+				var fluentBitParsersCm corev1.ConfigMap
+				err := k8sClient.Get(ctx, configMapLookupKey, &fluentBitParsersCm)
+				if err != nil {
+					return err.Error()
+				}
+				return strings.TrimRight(fluentBitParsersCm.Data[cmFileName], "\n")
+			}, timeout, interval).Should(Equal(expectedFluentBitParserConfig))
 
 			// File content should be copied to ConfigMap
 			Eventually(func() string {
@@ -187,16 +234,16 @@ var _ = Describe("LoggingConfiguration controller", func() {
 			// Finalizers should be added
 			Eventually(func() []string {
 				loggingConfigLookupKey := types.NamespacedName{
-					Name:      LoggingConfigurationName,
+					Name:      LogPipelineName,
 					Namespace: ControllerNamespace,
 				}
-				var updatedLoggingConfiguration telemetryv1alpha1.LoggingConfiguration
-				err := k8sClient.Get(ctx, loggingConfigLookupKey, &updatedLoggingConfiguration)
+				var updatedLogPipeline telemetryv1alpha1.LogPipeline
+				err := k8sClient.Get(ctx, loggingConfigLookupKey, &updatedLogPipeline)
 				if err != nil {
 					return []string{err.Error()}
 				}
-				return updatedLoggingConfiguration.Finalizers
-			}, timeout, interval).Should(ContainElement(configMapFinalizer))
+				return updatedLogPipeline.Finalizers
+			}, timeout, interval).Should(ContainElement(sectionsConfigMapFinalizer))
 
 			Expect(k8sClient.Delete(ctx, loggingConfiguration)).Should(Succeed())
 

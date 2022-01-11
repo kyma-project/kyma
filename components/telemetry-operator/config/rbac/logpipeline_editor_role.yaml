@@ -1,20 +1,24 @@
-# permissions for end users to view loggingconfigurations.
+# permissions for end users to edit logpipelines.
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  name: loggingconfiguration-viewer-role
+  name: logpipeline-editor-role
 rules:
 - apiGroups:
   - telemetry.kyma-project.io
   resources:
-  - loggingconfigurations
+  - logpipelines
   verbs:
+  - create
+  - delete
   - get
   - list
+  - patch
+  - update
   - watch
 - apiGroups:
   - telemetry.kyma-project.io
   resources:
-  - loggingconfigurations/status
+  - logpipelines/status
   verbs:
   - get
