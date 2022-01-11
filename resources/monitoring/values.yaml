@@ -39,7 +39,7 @@ global:
     kube_state_metrics:
       name: "kube-state-metrics"
       version: v2.3.0
-      directory: "external/k8s.gcr.io/kube-state-metrics/kube-state-metrics"
+      directory: "external/k8s.gcr.io/kube-state-metrics"
     grafana:
       name: "grafana"
       version: "7.5.12-663797e9"
