@@ -167,7 +167,9 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 				Finalizer)
 			if err := r.Client.Update(ctx, subscription); err != nil {
 				log.Error(err, "failed to remove finalizer from subscription object")
-				return ctrl.Result{}, err
+				if k8serrors.IsConflict(err) {
+					return ctrl.Result{Requeue: true}, nil
+				}
 			}
 			return ctrl.Result{}, nil
 		}
@@ -180,7 +182,9 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 		log.Info("Adding finalizer to subscription object")
 		subscription.ObjectMeta.Finalizers = append(subscription.ObjectMeta.Finalizers, Finalizer)
 		if err := r.Update(context.Background(), subscription); err != nil {
-			return ctrl.Result{}, err
+			if k8serrors.IsConflict(err) {
+				return ctrl.Result{Requeue: true}, nil
+			}
 		}
 		return ctrl.Result{Requeue: true}, nil
 	}
@@ -189,7 +193,9 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 	if err := r.assertSinkValidity(subscription.Spec.Sink); err != nil {
 		r.Log.Error(err, "failed to parse sink URL")
 		if err := r.syncSubscriptionStatus(ctx, subscription, false, err.Error()); err != nil {
-			return ctrl.Result{}, err
+			if k8serrors.IsConflict(err) {
+				return ctrl.Result{Requeue: true}, nil
+			}
 		}
 		// No point in reconciling as the sink is invalid
 		return ctrl.Result{}, nil
@@ -200,7 +206,9 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 	if err != nil {
 		log.Error(err, "failed to delete subscriptions")
 		if err := r.syncSubscriptionStatus(ctx, subscription, false, err.Error()); err != nil {
-			return ctrl.Result{}, err
+			if k8serrors.IsConflict(err) {
+				return ctrl.Result{Requeue: true}, nil
+			}
 		}
 		return ctrl.Result{}, err
 	}
@@ -209,7 +217,9 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 	if err != nil {
 		r.Log.Error(err, "failed to sync subscription")
 		if err := r.syncSubscriptionStatus(ctx, subscription, false, err.Error()); err != nil {
-			return ctrl.Result{}, err
+			if k8serrors.IsConflict(err) {
+				return ctrl.Result{Requeue: true}, nil
+			}
 		}
 		return ctrl.Result{}, err
 	}
