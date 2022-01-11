@@ -131,6 +131,6 @@ global:
     istio_pilot:
       name: "pilot"
       version: "1.11.4-solo-fips-distroless"
-      directory: "external/istio"
+      directory: "external/gcr.io/istio-enterprise"
   tracing:
     enabled: true
