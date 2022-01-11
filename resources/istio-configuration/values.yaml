@@ -127,7 +127,7 @@ global:
     istio_proxyv2:
       name: "proxyv2"
       version: "1.11.4-solo-fips-distroless"
-      directory: "external/istio"
+      directory: "external/gcr.io/istio-enterprise"
     istio_pilot:
       name: "pilot"
       version: "1.11.4-solo-fips-distroless"
