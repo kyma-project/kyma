@@ -5,7 +5,7 @@ metadata:
   namespace: {{ .Release.Namespace }}
   name: default-operator
 spec:
-  hub: {{ .Values.global.path }}/{{ .Values.global.directory}}
+  hub: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.containerRegistry.directory}}
   tag: {{ .Values.global.tag }}
   profile: default
   components:
