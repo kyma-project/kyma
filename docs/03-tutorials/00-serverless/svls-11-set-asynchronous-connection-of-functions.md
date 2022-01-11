@@ -39,17 +39,17 @@ Before you start, make sure you have these tools installed:
 
 4. In the `config.yaml` file configure an API Rule to expose your Function to the incoming traffic over HTTP. Enter the subdomain name as the `host` property:
 
-  ```yaml
-  apiRules:
-    - name: incoming-http-trigger
-      service:
-        host: incoming
-      rules:
-        - methods:
-            - GET
-          accessStrategies:
-            - handler: allow
-  ```
+    ```yaml
+    apiRules:
+      - name: incoming-http-trigger
+        service:
+          host: incoming
+        rules:
+          - methods:
+              - GET
+            accessStrategies:
+              - handler: allow
+    ```
 
 5. Provide your Function logic in the `handler.js` file. In the following example you do not find an actual sanitisation logic, `sanitise` Function is just a placeholder:
 
@@ -78,9 +78,9 @@ Before you start, make sure you have these tools installed:
 
 6. Apply your emitter Function:
 
-  ```bash
-  kyma apply function
-  ```
+    ```bash
+    kyma apply function
+    ```
    Having applied it, your Function is built and deployed in Kyma runtime. Kyma will expose it via API Rule. Any incoming payload would be processed by your emitter Function. It sends the sanitised content to whatever workload that subscribes to selected event type - in our case - receiver Function.
 
 7. Go to your `receiver` folder and run the `init` Kyma CLI command to initiate your function:
