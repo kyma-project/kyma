@@ -1,0 +1,38 @@
+apiVersion: telemetry.kyma-project.io/v1alpha1
+kind: LogPipeline
+metadata:
+  name: logpipeline-sample
+spec:
+  parsers: [ ]
+  multilineParsers:
+    - content: |
+        # Example from https://docs.fluentbit.io/manual/pipeline/filters/multiline-stacktrace
+        Name          multiline-custom-regex
+        Type          regex
+        Flush_timeout 1000
+        Rule      "start_state"   "/(Dec \d+ \d+\:\d+\:\d+)(.*)/"  "cont"
+        Rule      "cont"          "/^\s+at.*/"                     "cont"
+  filters:
+    - content: |
+        Name                  multiline
+        Match                 *
+        Multiline.key_content log
+        Multiline.parser      go, multiline-custom-regex
+    - content: |
+        Name    grep
+        Match   *
+        Regex   $kubernetes['labels']['app'] my-deployment
+    - content: |
+        Name    grep
+        Match   *
+        Exclude $kubernetes['namespace_name'] kyma-system|kube-system|kyma-integration|istio-system
+    - content: |
+        Name    record_modifier
+        Match   *
+        Record  cluster_identifier ${KUBERNETES_SERVICE_HOST}
+  outputs:
+    - content: |
+        Name               stdout
+        Match              *
+  files: [ ]
+  secretRefs: [ ]

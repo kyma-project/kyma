@@ -1,4 +1,6 @@
 ---
+repository: eu.gcr.io/kyma-project/external/gcr.io/istio-enterprise
+
 helmValues:
   global:
     priorityClassName: "kyma-system-priority"
@@ -121,9 +123,14 @@ global:
   containerRegistry:
     path: eu.gcr.io/kyma-project
   images:
-    istio:
-      name: "istio"
-      version: "1.11.4-distroless"
-      directory: "external"
+    # these definitions aren't used by the chart, but they are required by external tool for list generation
+    istio_proxyv2:
+      name: "proxyv2"
+      version: "1.11.4-solo-fips-distroless"
+      directory: "external/gcr.io/istio-enterprise"
+    istio_pilot:
+      name: "pilot"
+      version: "1.11.4-solo-fips-distroless"
+      directory: "external/gcr.io/istio-enterprise"
   tracing:
     enabled: true

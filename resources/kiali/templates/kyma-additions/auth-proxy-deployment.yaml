@@ -2,7 +2,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ template "kiali-server.fullname" . }}-auth-proxy
+  name: {{ template "kiali-server.name" . }}-auth-proxy
   namespace: {{ .Release.Namespace }}
   labels:
     {{- include "kiali-server.labels" . | nindent 4 }}
@@ -10,11 +10,11 @@ spec:
   replicas: {{ .Values.authProxy.replicaCount }}
   selector:
     matchLabels:
-      app: {{ template "kiali-server.fullname" . }}-auth-proxy
+      app: {{ template "kiali-server.name" . }}-auth-proxy
   template:
     metadata:
       labels:
-        app: {{ template "kiali-server.fullname" . }}-auth-proxy
+        app: {{ template "kiali-server.name" . }}-auth-proxy
       annotations:
         checksum/config: {{ tpl (toYaml .Values.authProxy) . | sha256sum }}
     spec:
@@ -25,10 +25,10 @@ spec:
       volumes:
         - name: templates-cm
           configMap:
-            name: {{ template "kiali-server.fullname" . }}-auth-proxy
-      serviceAccountName: {{ template "kiali-server.fullname" . }}-auth-proxy
-      {{- if or .Values.kiali.spec.deployment.priority_class_name .Values.global.priorityClassName }}
-      priorityClassName: {{ coalesce .Values.kiali.spec.deployment.priority_class_name .Values.global.priorityClassName }}
+            name: {{ template "kiali-server.name" . }}-auth-proxy
+      serviceAccountName: {{ template "kiali-server.name" . }}-auth-proxy
+      {{- if or .Values.authProxy.priorityClassName .Values.global.highPriorityClassName }}
+      priorityClassName: {{ coalesce .Values.authProxy.priorityClassName .Values.global.highPriorityClassName }}
       {{- end }}
       containers:
       - image: {{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.oauth2_proxy) }}
@@ -36,7 +36,7 @@ spec:
         name: auth-proxy
         args:
         - --http-address=0.0.0.0:{{ .Values.authProxy.port }}
-        - --upstream=http://{{ template "kiali-server.fullname" . }}-server:{{ .Values.kiali.spec.server.port }}
+        - --upstream=http://{{ template "kiali-server.fullname" . }}:{{ .Values.server.port }}
         - --cookie-secure=true
         - --cookie-domain=kiali.{{ .Values.global.domainName }}
         - --cookie-name=KYMA_KIALI_OAUTH2_PROXY_TOKEN
@@ -47,10 +47,10 @@ spec:
         - --pass-host-header={{ .Values.authProxy.config.passHostHeader }}
         envFrom:
         - secretRef:
-            name: {{ template "kiali-server.fullname" . }}-auth-proxy
+            name: {{ template "kiali-server.name" . }}-auth-proxy-default
             optional: false
         - secretRef:
-            name: {{ template "kiali-server.fullname" . }}-auth-proxy-user
+            name: {{ template "kiali-server.name" . }}-auth-proxy-user
             optional: true
         ports:
         - name: http

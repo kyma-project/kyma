@@ -1,6 +1,6 @@
 apiVersion: v1
 name: istio-configuration
-version: 1.11.4-distroless
+version: 1.11.4-solo-fips-distroless
 appVersion: 1.11.4
 tillerVersion: ">=2.7.2-0"
 description: Kyma 2.0 Helm chart for Istio Operator resource
