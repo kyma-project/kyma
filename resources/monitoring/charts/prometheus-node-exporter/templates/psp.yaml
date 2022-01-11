@@ -4,8 +4,9 @@ apiVersion: policy/v1beta1
 kind: PodSecurityPolicy
 metadata:
   name: {{ template "prometheus-node-exporter.fullname" . }}
+  namespace: {{ template "prometheus-node-exporter.namespace" . }}
   labels: {{ include "prometheus-node-exporter.labels" . | indent 4 }}
-  {{- if .Values.rbac.pspAnnotations }}
+{{- if .Values.rbac.pspAnnotations }}
   annotations:
 {{ toYaml .Values.rbac.pspAnnotations | indent 4 }}
 {{- end}}
