@@ -120,10 +120,9 @@ Before you start, make sure you have these tools installed:
                    value: sap.kyma.custom.acme.payload.sanitised.v1
     ```
 11.  Apply your receiver Function:
-
-   ```bash
-   kyma apply function
-   ```
+     ```bash
+     kyma apply function
+     ```
    The Function is configured, built and deployed in Kyma runtime. The Susbscription becomes active and all events with selected type will be processed by the Function.  
 
 12.  Test the whole setup  
