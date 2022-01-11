@@ -2,6 +2,7 @@ package env
 
 import (
 	"log"
+	"time"
 
 	"github.com/kelseyhightower/envconfig"
 )
@@ -31,7 +32,9 @@ type PublisherConfig struct {
 }
 
 type DefaultSubscriptionConfig struct {
-	MaxInFlightMessages int `envconfig:"DEFAULT_MAX_IN_FLIGHT_MESSAGES" default:"10"`
+	MaxInFlightMessages   int           `envconfig:"DEFAULT_MAX_IN_FLIGHT_MESSAGES" default:"10"`
+	DispatcherRetryPeriod time.Duration `envconfig:"DEFAULT_DISPATCHER_RETRY_PERIOD" default:"5m"`
+	DispatcherMaxRetries  int           `envconfig:"DEFAULT_DISPATCHER_MAX_RETRIES" default:"10"`
 }
 
 func GetBackendConfig() BackendConfig {

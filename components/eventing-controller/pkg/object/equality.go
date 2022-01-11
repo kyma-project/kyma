@@ -96,16 +96,26 @@ func publisherProxyDeploymentEqual(d1, d2 *appsv1.Deployment) bool {
 
 	cst1 := d1.Spec.Template
 	cst2 := d2.Spec.Template
-	if !reflect.DeepEqual(cst1.Annotations, cst2.Annotations) {
+	if !mapDeepEqual(cst1.Annotations, cst2.Annotations) {
 		return false
 	}
-	if !reflect.DeepEqual(cst1.Labels, cst2.Labels) {
+	if !mapDeepEqual(cst1.Labels, cst2.Labels) {
 		return false
 	}
 
 	ps1 := &cst1.Spec
 	ps2 := &cst2.Spec
 	return podSpecEqual(ps1, ps2)
+}
+
+// mapDeepEqual returns true if two non-empty maps are equal, otherwise returns false.
+// If length of both maps evaluates to zero, it returns true.
+func mapDeepEqual(m1, m2 map[string]string) bool {
+	if len(m1) == 0 && len(m2) == 0 {
+		return true
+	}
+
+	return reflect.DeepEqual(m1, m2)
 }
 
 // podSpecEqual asserts the equality of two PodSpec objects.
