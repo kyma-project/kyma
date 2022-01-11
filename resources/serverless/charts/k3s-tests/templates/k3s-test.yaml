@@ -19,6 +19,7 @@ rules:
   verbs:
   - create
   - get
+  - delete
 - apiGroups:
   - "serverless.kyma-project.io"
   resources:
@@ -31,6 +32,7 @@ rules:
   - deployments
   verbs:
   - create
+  - delete
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
