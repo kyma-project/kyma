@@ -1,5 +1,5 @@
 ---
-repository: eu.gcr.io/kyma-project/external/gcr.io/istio-enterprise
+
 
 helmValues:
   global:
@@ -122,6 +122,8 @@ monitoring:
 global:
   containerRegistry:
     path: eu.gcr.io/kyma-project
+    directory: external/gcr.io/istio-enterprise
+  tag: 1.11.4-solo-fips-distroless
   images:
     # these definitions aren't used by the chart, but they are required by external tool for list generation
     istio_proxyv2:
