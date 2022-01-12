@@ -14,8 +14,8 @@ describe(`Execute SKR test`, function () {
     this.timeout(60 * 60 * 1000 * 3); // 3h
     this.slow(5000);
 
-    const provisioningTimeout = 1000 * 60 * 30 // 30m
-    const deprovisioningTimeout = 1000 * 60 * 95 // 95m
+    const provisioningTimeout = 1000 * 60 * 30; // 30m
+    const deprovisioningTimeout = 1000 * 60 * 95; // 95m
 
     before('Provision SKR', async function () {
         try {

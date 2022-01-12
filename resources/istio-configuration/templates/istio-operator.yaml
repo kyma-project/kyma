@@ -5,8 +5,8 @@ metadata:
   namespace: {{ .Release.Namespace }}
   name: default-operator
 spec:
-  hub: {{ .Values.repository }}
-  tag: {{ .Chart.Version }}
+  hub: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.containerRegistry.directory}}
+  tag: {{ .Values.global.tag }}
   profile: default
   components:
     egressGateways:

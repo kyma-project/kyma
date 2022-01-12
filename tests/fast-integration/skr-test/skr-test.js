@@ -25,10 +25,12 @@ const {KCPWrapper, KCPConfig} = require("../kcp/client");
 
 const kcp = new KCPWrapper(KCPConfig.fromEnv());
 
+const updateTimeout = 1000 * 60 * 20; // 20m
+
 function OIDCE2ETest() {
-  const updateTimeout = 1000 * 60 * 20 // 20m
 
   describe('OIDCE2ETest()', function () {
+
     it(`Assure initial OIDC config is applied on shoot cluster`, async function () {
       ensureValidShootOIDCConfig(this.shoot, this.options.oidc0);
     });
@@ -45,7 +47,7 @@ function OIDCE2ETest() {
       const customParams = {
         oidc: this.options.oidc1,
       };
-      let skr = await updateSKR(keb, kcp, gardener, this.options.instanceID, this.shoot.name, customParams, updateTimeout);
+      let skr = await updateSKR(keb, kcp, gardener, this.options.instanceID, this.shoot.name, customParams, updateTimeout, null, false);
       this.shoot = skr.shoot;
     });
 
@@ -70,7 +72,7 @@ function OIDCE2ETest() {
       const customParams = {
         administrators: this.options.administrators1,
       };
-      let skr = await updateSKR(keb, kcp, gardener, this.options.instanceID, this.shoot.name, customParams, updateTimeout);
+      let skr = await updateSKR(keb, kcp, gardener, this.options.instanceID, this.shoot.name, customParams, updateTimeout, null, false);
       this.shoot = skr.shoot;
     });
 
