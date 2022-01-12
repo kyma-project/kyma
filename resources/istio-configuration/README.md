@@ -1,0 +1,42 @@
+# Istio Configuration
+
+## Overview
+
+[Istio](https://istio.io/) is an open platform for providing a uniform way to integrate microservices, manage traffic flow across microservices, enforce policies, and aggregate telemetry data.
+
+The documentation here is for developers only, please follow the installation instructions from [istio.io](https://istio.io/docs/setup/install/istioctl/) for all other use cases.
+
+The Istio Configuration Helm chart consists of:
+
+- `istio-operator.yaml` file implementing Kyma-specific changes and configuration options,
+- Mutual TLS (mTLS) configuration enabling mTLS cluster-wide in a STRICT mode,
+- Istio monitoring configuration details.
+
+This chart can install the following Istio components:
+
+- ingressgateway
+- egressgateway
+- pilot
+
+To enable or disable each component, change the corresponding `enabled` flag.
+
+## Installation
+
+Installation of the Istio Operator requires [Reconciler](https://github.com/kyma-incubator/reconciler/tree/main/pkg/reconciler/instances/istio). Reconciler uses `istioctl` and a rendered `istio-operator.yaml` file to install Istio on a cluster. To install the component run:
+
+```bash
+kyma deploy --components istio-configuration@istio-system
+```
+
+## Configuration
+
+The installation of Istio Operator ships with reasonable defaults. There may be circumstances in which defaults require overrides.
+
+Istio offers an Istio Control Plane CR, which is used to configure the installation. See the list of the currently exposed parameters of the Istio Configuration component that you can override. To learn more, go to [`istio-operator.yaml`](https://github.com/kyma-project/kyma/blob/main/resources/istio-configuration/templates/istio-operator.yaml).
+
+- **mesh.Config**
+- **values.global**
+- **values.pilot**
+- **values.sidecarInjectorWebhook**
+
+To override the default values, read how to [change Kyma settings](../../docs/04-operation-guides/operations/03-change-kyma-config-values.md).
