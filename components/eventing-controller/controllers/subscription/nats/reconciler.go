@@ -160,6 +160,15 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 	log := utils.LoggerWithSubscription(r.namedLogger(), desiredSubscription)
 
 	if !desiredSubscription.ObjectMeta.DeletionTimestamp.IsZero() {
+		// Clean up the subscriptions from NATS
+		if err := r.Backend.DeleteSubscription(desiredSubscription); err != nil {
+			log.Errorw("delete subscription failed", "error", err)
+			if err := r.syncSubscriptionStatus(ctx, actualSubscription, false, err.Error()); err != nil {
+				return ctrl.Result{}, err
+			}
+			return ctrl.Result{}, err
+		}
+
 		// The object is being deleted
 		if utils.ContainsString(desiredSubscription.ObjectMeta.Finalizers, Finalizer) {
 			if err := r.Backend.DeleteSubscription(desiredSubscription); err != nil {
@@ -189,15 +198,6 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 		}
 		// No point in reconciling as the sink is invalid
 		return ctrl.Result{}, nil
-	}
-
-	// Clean up the old subscriptions
-	if err := r.Backend.DeleteSubscription(desiredSubscription); err != nil {
-		log.Errorw("delete subscription failed", "error", err)
-		if err := r.syncSubscriptionStatus(ctx, actualSubscription, false, err.Error()); err != nil {
-			return ctrl.Result{}, err
-		}
-		return ctrl.Result{}, err
 	}
 
 	// The object is not being deleted, so if it does not have our finalizer,
