@@ -2,7 +2,7 @@
 title: Default Istio setup in Kyma
 ---
 
-Istio in Kyma is installed with the help of the `istioctl` tool. The tool is driven by a configuration file containing an instance of the [IstioOperator](https://istio.io/docs/reference/config/istio.operator.v1alpha1/) custom resource.
+Istio in Kyma is installed with the help of the `istioctl` tool. The tool is driven by a configuration file containing an instance of the [Istio Operator](https://istio.io/docs/reference/config/istio.operator.v1alpha1/) custom resource.
 
 ## Istio components
 
