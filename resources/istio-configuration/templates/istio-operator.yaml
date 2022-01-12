@@ -5,8 +5,8 @@ metadata:
   namespace: {{ .Release.Namespace }}
   name: default-operator
 spec:
-  hub: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.containerRegistry.directory}}
-  tag: {{ .Values.global.tag }}
+  hub: {{ .Values.global.images.istio_pilot.containerRegistryPath }}/{{ .Values.global.images.istio_pilot.directory}}
+  tag: {{ .Values.images.istio_pilot.tag }}
   profile: default
   components:
     egressGateways:
