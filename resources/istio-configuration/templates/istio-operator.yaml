@@ -6,7 +6,7 @@ metadata:
   name: default-operator
 spec:
   hub: {{ .Values.global.images.istio_pilot.containerRegistryPath }}/{{ .Values.global.images.istio_pilot.directory}}
-  tag: {{ .Values.images.istio_pilot.tag }}
+  tag: {{ .Values.images.istio_pilot.version }}
   profile: default
   components:
     egressGateways:
