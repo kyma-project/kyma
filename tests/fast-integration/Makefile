@@ -2,7 +2,6 @@
 ci:
 	npm install
 	npm test
-	npm run test-monitoring
 
 .PHONY: ci-compass
 ci-compass:
@@ -18,6 +17,11 @@ ci-skr:
 ci-skr-nightly:
 	npm install
 	npm run nightly-skr
+
+.PHONY: ci-test-skr-nightly
+ci-test-skr-nightly:
+	npm install
+	npm run test-nightly-skr
 
 .PHONY: ci-skr-kyma-to-kyma2-upgrade
 ci-skr-kyma-to-kyma2-upgrade:

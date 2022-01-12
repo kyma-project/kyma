@@ -6,8 +6,8 @@ A custom resource (CR) is an extension to the Kubernetes API which allows you to
 
 | Area | Custom resource |
 | ---- | -------------- |
-| Application Connectivity | Application, EventActivation, TokenRequest, CompassConnection |
-| API Exposure | APIRule |
+| Application Connectivity | Application, TokenRequest, CompassConnection |
+| API Exposure | API Rule |
 | Eventing | EventSubscription |
 | Serverless | Function, GitRepository |
 

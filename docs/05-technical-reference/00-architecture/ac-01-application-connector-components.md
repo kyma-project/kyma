@@ -17,7 +17,7 @@ Application Connectivity Validator verifies the subject of the client certificat
 
 ## Connector Service
 
->**CAUTION:** With [Compass](https://github.com/kyma-incubator/compass) being the target API for the Application Connectivity topics, this component's API has been deprecated. To learn how to install Compass and integrate with it, refer to the [Compass documentation](https://github.com/kyma-incubator/compass/blob/master/docs/compass/04-01-installation.md) or to the [Director GraphQL schema](https://github.com/kyma-incubator/compass/blob/master/components/director/pkg/graphql/schema.graphql) directly. Backward compatibility is being preserved via the introduction of [Connectivity Adapter](https://github.com/kyma-incubator/compass/tree/master/components/connectivity-adapter).
+>**CAUTION:** Connector Service is used only in the [legacy mode](../../01-overview/main-areas/application-connectivity/README.md) of Application Connectivity. 
 
 Connector Service:
 
@@ -27,7 +27,7 @@ Connector Service:
 
 ## Application Registry
 
->**CAUTION:** With [Compass](https://github.com/kyma-incubator/compass) being the target API for the Application Connectivity topics, this component's API has been deprecated. To learn how to install Compass and integrate with it, refer to the [Compass documentation](https://github.com/kyma-incubator/compass/blob/master/docs/compass/04-01-installation.md) or to the [Director GraphQL schema](https://github.com/kyma-incubator/compass/blob/master/components/director/pkg/graphql/schema.graphql) directly. Backward compatibility is being preserved via the introduction of [Connectivity Adapter](https://github.com/kyma-incubator/compass/tree/master/components/connectivity-adapter).
+>**CAUTION:** Application Registry is used only in the [legacy mode](../../01-overview/main-areas/application-connectivity/README.md) of Application Connectivity.
 
 Application Registry saves and reads the APIs and Event Catalog metadata of the connected external solution in the [Application](../../05-technical-reference/00-custom-resources/ac-01-application.md) custom resource (CR).
 The system creates a new Kubernetes service for each registered API.

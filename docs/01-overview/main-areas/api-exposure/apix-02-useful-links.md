@@ -12,11 +12,12 @@ If you're interested in learning more about API Exposure in Kyma, follow these l
 
 - Troubleshoot API Exposure-related issues when:
 
-  - You [cannot connect to a service exposed by an APIRule](../../../04-operation-guides/troubleshooting/apix-01-apigateway-connect-api-rule.md)
+  - You [cannot connect to a service exposed by an API Rule](../../../04-operation-guides/troubleshooting/apix-01-apigateway-connect-api-rule.md)
   - [Connection refused](../../../04-operation-guides/troubleshooting/apix-02-dns-mgt-connection-refused.md) errors occur when you want to use your custom domain
   - You receive the [`could not resolve host`](../../../04-operation-guides/troubleshooting/apix-03-dns-mgt-could-not-resolve-host.md) error when you want to use your custom domain
   - A [resource is ignored by the controller](../../../04-operation-guides/troubleshooting/apix-04-dns-mgt-resource-ignored.md)
   - The [Issuer Custom Resource fails to be created](../../../04-operation-guides/troubleshooting/apix-05-cert-mgt-issuer-not-created.md)
+  - The [Kyma Gateway is not reachable](../../../04-operation-guides/troubleshooting/apix-06-gateway-not-reachable.md)
 
 - Learn something more about:
 

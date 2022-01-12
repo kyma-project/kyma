@@ -1,6 +1,9 @@
 ---
+
+
 helmValues:
   global:
+    priorityClassName: "kyma-system-priority"
     imagePullPolicy: IfNotPresent
     proxy:
       readinessFailureThreshold: 40
@@ -22,6 +25,9 @@ helmValues:
         requests:
           cpu: 10m
           memory: 10Mi
+  gateways:
+    istio-ingressgateway:
+      autoscaleEnabled: true
 
   sidecarInjectorWebhook:
     enableNamespacesByDefault: true
@@ -41,7 +47,7 @@ meshConfig:
       zipkin:
         address: "zipkin.kyma-system:9411"
   enablePrometheusMerge: false
-  enableTracing: true
+  enableTracing: "{{ .Values.global.tracing.enabled }}"
 
 components:
   egressGateways:
@@ -116,8 +122,17 @@ monitoring:
 global:
   containerRegistry:
     path: eu.gcr.io/kyma-project
+    directory: external/gcr.io/istio-enterprise
+  tag: 1.11.4-solo-fips-distroless
   images:
-    istio:
-      name: "istio"
-      version: "1.11.2-distroless"
-      directory: "external"
+    # these definitions aren't used by the chart, but they are required by external tool for list generation
+    istio_proxyv2:
+      name: "proxyv2"
+      version: "1.11.4-solo-fips-distroless"
+      directory: "external/gcr.io/istio-enterprise"
+    istio_pilot:
+      name: "pilot"
+      version: "1.11.4-solo-fips-distroless"
+      directory: "external/gcr.io/istio-enterprise"
+  tracing:
+    enabled: true

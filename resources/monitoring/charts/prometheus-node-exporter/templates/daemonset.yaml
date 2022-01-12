@@ -28,8 +28,8 @@ spec:
       securityContext:
 {{ toYaml .Values.podSecurityContext | indent 8 }}
 {{- end }}
-{{- if .Values.priorityClassName }}
-      priorityClassName: {{ .Values.priorityClassName }}
+{{- if or .Values.priorityClassName .Values.global.highPriorityClassName }}
+      priorityClassName: {{ coalesce .Values.priorityClassName .Values.global.highPriorityClassName }}
 {{- end }}
       {{- if .Values.extraInitContainers }}
       initContainers:
@@ -37,7 +37,7 @@ spec:
       {{- end }}
       containers:
         - name: node-exporter
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.node_exporter) }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           args:
             - --path.procfs=/host/proc

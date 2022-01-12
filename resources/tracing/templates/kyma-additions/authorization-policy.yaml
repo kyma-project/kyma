@@ -1,0 +1,44 @@
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: {{ include "jaeger-operator.fullname" . }}-jaeger
+  namespace: {{ .Release.Namespace }}
+  labels:
+{{ include "jaeger-operator.labels" . | indent 4 }}
+spec:
+  action: ALLOW
+  rules:
+  - to:
+      - operation:
+          ports: # Jaeger query port, limit to auth-proxy, Kiali and Grafana
+          - "16686"
+{{ if .Values.authProxy.enabled }}
+    from:
+    - source:
+        principals:
+          - cluster.local/ns/{{ .Release.Namespace }}/sa/{{ include "jaeger-operator.fullname" . }}-auth-proxy
+          - cluster.local/ns/{{ .Release.Namespace }}/sa/kiali-server
+          - cluster.local/ns/{{ .Release.Namespace }}/sa/monitoring-grafana
+{{ end }}
+  - from:
+    - source:
+        principals:
+        - cluster.local/ns/{{ .Release.Namespace }}/sa/monitoring-prometheus
+    to:
+      - operation:
+          ports: # Jaeger metrics, limit to Prometheus. Istio does not detect this to be an HTTP connection due to the port name. No further restriction of method and path possible.
+            - "14269"
+  - to:
+    - operation:
+        ports: # Jaeger collector ports, no access restrictions
+        - "5778"
+        - "9411"
+        - "14250"
+        - "14267"
+        - "14268"
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: all-in-one
+      app.kubernetes.io/instance: tracing-jaeger
+      app.kubernetes.io/managed-by: jaeger-operator
+      app.kubernetes.io/name: tracing-jaeger

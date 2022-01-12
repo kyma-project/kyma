@@ -37,8 +37,8 @@ spec:
       imagePullSecrets:
 {{ toYaml .Values.imagePullSecrets | indent 8 }}
       {{- end }}
-{{- if or .Values.priorityClassName .Values.global.priorityClassName }}
-      priorityClassName: "{{ coalesce .Values.priorityClassName .Values.global.priorityClassName }}"
+{{- if or .Values.priorityClassName .Values.global.highPriorityClassName }}
+      priorityClassName: "{{ coalesce .Values.priorityClassName .Values.global.highPriorityClassName }}"
 {{- end }}
 {{- if .Values.securityContext.enabled }}
       securityContext:
@@ -64,7 +64,7 @@ spec:
           # TODO: after helm@3.5.0 is used in kyma-installer we may be able to remove that init container, as helm 3.5.0 uses sprig@3.2.0, which has `bcrypt` function
           # might want to investigate
             - sh
-            - -c
+            - -ec
             - |
               htpasswd -Bbn $(cat /regcred/username.txt) $(cat /regcred/password.txt) > ./data/htpasswd
               echo "Generated htpasswd file for docker-registry..."

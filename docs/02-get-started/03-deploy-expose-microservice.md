@@ -79,15 +79,16 @@ The operation was successful if the returned number of **readyReplicas** is `1`.
     - **Name**: `orders-service`
     - **Labels**: add labels `app` and `example` and set their values to `orders-service`
     - **Containers**: enter Docker image `eu.gcr.io/kyma-project/develop/orders-service:68a58069`
+    - Check the **Expose a separate Service** box to create a Service for your Deployment and skip the [next Section](03-deploy-expose-microservice.md#create-the-service)
+    - **Port**: `80`
+    - **Target Port**: `8080`  
 
     _Optionally_, to save resources, modify these parameters:
     - **Memory requests**: `10Mi`
     - **Memory limits**: `32Mi`
     - **CPU requests (m)**: `16m`
     - **CPU limits (m)**: `20m`  
-    - **Port**: `80`
-    - **Target Port**: `8080`
-    - Check the **Expose a separate Service** box to create a Service for your Deployment and skip the [next Section](03-deploy-expose-microservice.md#create-the-service).
+  
 4. Click **Create**.
 
 The operation was successful if the Pod **Status** for the Deployment is `RUNNING`.
@@ -164,7 +165,7 @@ We have created the Service. Let's now expose it outside the cluster.
 
 > **CAUTION:** Exposing a workload to the outside world is always a potential security vulnerability, so tread carefully. In a production environment, always [secure the workload](../03-tutorials/00-api-exposure/apix-03-expose-and-secure-service.md) you expose.
 
-To expose our microservice, we must create an [APIRule](../05-technical-reference/00-custom-resources/apix-01-apirule.md) CR for it, just like when we [exposed our Function](02-deploy-expose-function.md#expose-the-function).
+To expose our microservice, we must create an [API Rule](../05-technical-reference/00-custom-resources/apix-01-apirule.md) CR for it, just like when we [exposed our Function](02-deploy-expose-function.md#expose-the-function).
 
 <div tabs name="Expose the microservice" group="deploy-expose-microservice">
   <details open>
@@ -206,7 +207,7 @@ EOF
   </summary>
 
 1. Using the left navigation, go to **Discovery and Network** > **Services** and select your Service.
-2. In your Services's view, click on **Expose Service +**.
+2. In your Services's view, click on **Create API Rule +**.
 3. Provide the **Name** (`orders-service`) and **Subdomain** (`orders-service`) and click **Create**.
 
 > **NOTE:** Alternatively, from the left navigation go to **Discovery and Network** > **API Rules**, click on **Create API Rule +**, and continue with step 2, selecting the appropriate **Service** from the dropdown menu.
@@ -237,9 +238,9 @@ The operation was successful if the command returns the (possibly empty `[]`) li
   Kyma Dashboard
   </summary>
 
-1. From your Services's view, get the APIRule's **Host**.
+1. From your Services's view, get the API Rule's **Host**.
 
-   > **NOTE:** Alternatively, from the left navigation go to **APIRules** and get the **Host** URL from there.
+   > **NOTE:** Alternatively, from the left navigation go to **API Rules** and get the **Host** URL from there.
 
 2. Paste this **Host** in your browser and add the `/orders` suffix to the end of it, like this: `{HOST}/orders`. Open it.
 

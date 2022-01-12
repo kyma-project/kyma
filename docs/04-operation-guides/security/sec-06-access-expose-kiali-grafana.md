@@ -72,6 +72,8 @@ The following example shows how to use an OpenID Connect (OIDC) compliant identi
 
    - To limit access to specific user groups, configure this with the `OAUTH2_PROXY_ALLOWED_GROUPS` variable and ensure that `OAUTH2_PROXY_OIDC_GROUPS_CLAIM` points to the groups attribute name that is used by your authentication service (`groups` is the default). To get the configuration flags required for other identity provider types, see [OAuth2 Proxy docs](https://oauth2-proxy.github.io/oauth2-proxy/docs/configuration/oauth_provider/).
 
+   - The following code works on Linux and macOS. If you are using Windows, replace the `` \ `` character by `` ` `` (PowerShell) or `` ^ `` (CMD) for multi-line commands.
+
 <div tabs>
   <details>
   <summary>
@@ -84,7 +86,7 @@ The following example shows how to use an OpenID Connect (OIDC) compliant identi
     --from-literal="OAUTH2_PROXY_CLIENT_SECRET=<my-client-secret>" \
     --from-literal="OAUTH2_PROXY_OIDC_ISSUER_URL=<my-token-issuer>" \
     --from-literal="OAUTH2_PROXY_PROVIDER=oidc" \
-    --from-literal="OAUTH2_PROXY_SCOPE=openid" \
+    --from-literal="OAUTH2_PROXY_SCOPE=openid email" \
     --from-literal="OAUTH2_PROXY_ALLOWED_GROUPS=<my-groups>" \
     --from-literal="OAUTH2_PROXY_SKIP_PROVIDER_BUTTON=true"
   ```
@@ -101,7 +103,7 @@ The following example shows how to use an OpenID Connect (OIDC) compliant identi
     --from-literal="OAUTH2_PROXY_CLIENT_SECRET=<my-client-secret>" \
     --from-literal="OAUTH2_PROXY_OIDC_ISSUER_URL=<my-token-issuer>" \
     --from-literal="OAUTH2_PROXY_PROVIDER=oidc" \
-    --from-literal="OAUTH2_PROXY_SCOPE=openid" \
+    --from-literal="OAUTH2_PROXY_SCOPE=openid email" \
     --from-literal="OAUTH2_PROXY_ALLOWED_GROUPS=<my-groups>" \
     --from-literal="OAUTH2_PROXY_SKIP_PROVIDER_BUTTON=true"
   ```
@@ -118,7 +120,7 @@ The following example shows how to use an OpenID Connect (OIDC) compliant identi
     --from-literal="OAUTH2_PROXY_CLIENT_SECRET=<my-client-secret>" \
     --from-literal="OAUTH2_PROXY_OIDC_ISSUER_URL=<my-token-issuer>" \
     --from-literal="OAUTH2_PROXY_PROVIDER=oidc" \
-    --from-literal="OAUTH2_PROXY_SCOPE=openid" \
+    --from-literal="OAUTH2_PROXY_SCOPE=openid email" \
     --from-literal="OAUTH2_PROXY_ALLOWED_GROUPS=<my-groups>" \
     --from-literal="OAUTH2_PROXY_SKIP_PROVIDER_BUTTON=true"
   ```
@@ -137,7 +139,7 @@ The following example shows how to use an OpenID Connect (OIDC) compliant identi
   </summary>
 
   ```bash
-  kubectl -n kyma-system delete pod -l app=kiali-auth-proxy
+  kubectl -n kyma-system rollout restart deployment kiali-auth-proxy
   ```
 
   </details>
@@ -147,7 +149,7 @@ The following example shows how to use an OpenID Connect (OIDC) compliant identi
   </summary>
 
   ```bash
-  kubectl -n kyma-system delete pod -l app.kubernetes.io/name=auth-proxy,app.kubernetes.io/instance=monitoring
+  kubectl -n kyma-system rollout restart deployment monitoring-auth-proxy-grafana
   ```
 
   </details>
@@ -157,7 +159,7 @@ The following example shows how to use an OpenID Connect (OIDC) compliant identi
   </summary>
 
   ```bash
-  kubectl -n kyma-system delete pod -l app.kubernetes.io/name=auth-proxy,app.kubernetes.io/instance=tracing
+  kubectl -n kyma-system rollout restart deployment tracing-auth-proxy
   ```
 
   </details>

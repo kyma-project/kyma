@@ -16,7 +16,7 @@ spec:
       insecureSkipVerify: true
   selector:
     matchLabels:
-      app.kubernetes.io/name: {{ include "jaeger-operator.fullname" . }}-jaeger-operator
+      app.kubernetes.io/name: {{ include "jaeger-operator.fullname" . }}
 
 {{- if eq .Values.jaeger.spec.strategy "allInOne" }}
 ---
@@ -39,67 +39,4 @@ spec:
   selector:
     matchLabels:
       app.kubernetes.io/name: {{ template "jaeger-operator.fullname" . }}-jaeger-metrics
-{{- end }}
-
-{{- if eq .Values.jaeger.spec.strategy "production" }}
----
-apiVersion: monitoring.coreos.com/v1
-kind: ServiceMonitor
-metadata:
-  name: {{ template "jaeger-operator.fullname" . }}-jaeger-agent
-  labels:
-{{ include "jaeger-operator.labels" . | indent 4 }}
-    prometheus: monitoring
-spec:
-  endpoints:
-  - port: metrics
-    scheme: https
-    tlsConfig:
-      caFile: /etc/prometheus/secrets/istio.default/root-cert.pem
-      certFile: /etc/prometheus/secrets/istio.default/cert-chain.pem
-      keyFile: /etc/prometheus/secrets/istio.default/key.pem
-      insecureSkipVerify: true
-  selector:
-    matchLabels:
-      app.kubernetes.io/name: {{ template "jaeger-operator.fullname" . }}-jaeger-agent-metrics
----
-apiVersion: monitoring.coreos.com/v1
-kind: ServiceMonitor
-metadata:
-  name: {{ template "jaeger-operator.fullname" . }}-jaeger-collector
-  labels:
-{{ include "jaeger-operator.labels" . | indent 4 }}
-    prometheus: monitoring
-spec:
-  endpoints:
-  - port: metrics
-    scheme: https
-    tlsConfig:
-      caFile: /etc/prometheus/secrets/istio.default/root-cert.pem
-      certFile: /etc/prometheus/secrets/istio.default/cert-chain.pem
-      keyFile: /etc/prometheus/secrets/istio.default/key.pem
-      insecureSkipVerify: true
-  selector:
-    matchLabels:
-      app.kubernetes.io/name: {{ template "jaeger-operator.fullname" . }}-jaeger-collector-metrics
----
-apiVersion: monitoring.coreos.com/v1
-kind: ServiceMonitor
-metadata:
-  name: {{ template "jaeger-operator.fullname" . }}-jaeger-query
-  labels:
-{{ include "jaeger-operator.labels" . | indent 4 }}
-    prometheus: monitoring
-spec:
-  endpoints:
-  - port: metrics
-    scheme: https
-    tlsConfig:
-      caFile: /etc/prometheus/secrets/istio.default/root-cert.pem
-      certFile: /etc/prometheus/secrets/istio.default/cert-chain.pem
-      keyFile: /etc/prometheus/secrets/istio.default/key.pem
-      insecureSkipVerify: true
-  selector:
-    matchLabels:
-      app.kubernetes.io/name: {{ template "jaeger-operator.fullname" . }}-jaeger-query-metrics
 {{- end }}

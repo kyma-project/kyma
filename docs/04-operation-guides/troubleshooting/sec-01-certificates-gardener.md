@@ -2,23 +2,21 @@
 title: Issues with certificates on Gardener
 ---
 
-## Symptom
+## Symptom & Cause
 
-You're experiencing one of the following issues:
+During installation on Gardener, Kyma requests domain SSL certificates using the Gardener's [Certificate](https://github.com/gardener/cert-management#requesting-a-certificate) custom resource (CR) to ensure secure communication through both Kyma UI and Kubernetes CLI.
 
-- `xip-patch` or `apiserver-proxy` installation takes too long.
+This process can result in the following issues:
+
+- Certificates installation takes too long.
 - `Certificate is still not ready, status is {STATUS}. Exiting...` error occurs.
 - Certificates are no longer valid.
-
-## Cause
-
-During installation on Gardener, Kyma requests domain SSL certificates using Gardener's [`Certificate`](https://gardener.cloud/docs/guides/administer_shoots/request_cert/#request-a-certificate-via-certificate) custom resource to ensure secure communication through both Kyma UI and Kubernetes CLI.
 
 ## Remedy
 
 If any of these issues appears, follow these steps:
 
-1. Check the status of the Certificate resource:
+1. Check the status of the Certificate CR:
 
     ```bash
     kubectl get certificates.cert.gardener.cloud --all-namespaces
@@ -38,19 +36,13 @@ The result describes the reason for the failure of issuing a domain SSL certific
   Error during the installation
   </summary>
 
-1. Make sure the domain name provided in the `net-global-overrides` ConfigMap is proper and it meets the Gardener requirements.
+1. Make sure the provided domain name is proper and meets the Gardener requirements.
+
 2. Check if the `istio-ingressgateway` Service in the `istio-system` Namespace contains proper annotations:
 
     ```yaml
     dns.gardener.cloud/class=garden
     dns.gardener.cloud/dnsnames=*.{DOMAIN}
-    ```
-   
-3. Check if the `apiserver-proxy-ssl` Service in the `kyma-system` Namespace contains proper annotations:
-    
-    ```yaml
-    dns.gardener.cloud/class=garden
-    dns.gardener.cloud/dnsnames=apiserver.{DOMAIN}
     ```
 
   </details>
@@ -71,7 +63,7 @@ You can create a new Certificate resource applying suggestions from the error me
 
 3. Apply the fixed Certificate.
 
->**NOTE:** If you upgrade Kyma, you may need to perform steps from **Error during the installation** tab.
+>**NOTE:** If you upgrade Kyma, you may need to perform steps from the **Error during the installation** tab.
 
   </details>
 </div>

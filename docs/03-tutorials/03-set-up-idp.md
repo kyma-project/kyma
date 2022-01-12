@@ -34,7 +34,7 @@ Configure a dedicated client (often referred to as an application) at your ident
 ### Configure your identity provider as the OIDC server
 
 In general, you have to add flags to the API server as described in the [Kubernetes documentation](https://kubernetes.io/docs/reference/access-authn-authz/authentication/#configuring-the-api-server). You will do it in different ways depending on your Kubernetes distribution.
-For example, if you want to use k3d, you need to pass additional `--k3s-server-arg` flags containing the OIDC server configuration when creating the cluster. See the [specification](https://k3d.io/usage/commands/k3d_cluster_create/) of the `k3d cluster create` command:
+For example, if you want to use k3d, you need to pass additional `--k3s-server-arg` flags containing the OIDC server configuration when creating the cluster. See the [specification](https://k3d.io/v5.1.0/usage/commands/k3d_cluster_create/) of the `k3d cluster create` command:
 
 ```bash
 k3d cluster create kyma \
@@ -104,10 +104,13 @@ With this step, you will set up the OIDC provider in the kubeconfig file to enfo
         - --oidc-client-id=YOUR_CLIENT_ID
         #- --oidc-client-secret=YOUR_CLIENT_SECRET this is not required if your OICS server supports the PKCE authentication flow
     ```
+
 4. To enforce the OIDC login, set the OIDC user as a default user in the context.
+
     ```yaml
     context:
         cluster: {YOUR_CLUSTER_NAME}
         user: oidc
     ```
+
 5. Now you can share the modified kubeconfig file with the members of your team or organization. When they use it, your identity provider will handle the authentication. The Kubernetes API server will make sure they will have access to resources according to the roles bound to them as individuals or group members.     

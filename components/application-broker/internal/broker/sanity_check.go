@@ -17,6 +17,7 @@ import (
 const (
 	livenessInhibitor              = 10
 	LivenessApplicationSampleName  = "informer.liveness.probe.application.name"
+	LivenessServiceSampleID        = "informer.liveness.probe.service.id"
 	livenessTestNamespace          = "kyma-system"
 	applicationConnectorAPIVersion = "applicationconnector.kyma-project.io/v1alpha1"
 )
@@ -67,6 +68,11 @@ func (svc *SanityCheckService) createSampleAppMapping() error {
 		},
 		ObjectMeta: metav1.ObjectMeta{
 			Name: LivenessApplicationSampleName,
+		},
+		Spec: mappingTypes.ApplicationMappingSpec{
+			Services: []mappingTypes.ApplicationMappingService{
+				{ID: LivenessServiceSampleID},
+			},
 		},
 	})
 

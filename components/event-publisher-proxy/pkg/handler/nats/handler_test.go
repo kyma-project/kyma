@@ -21,6 +21,8 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 
+	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
+
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/env"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/handler/handlertest"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/informers"
@@ -33,7 +35,6 @@ import (
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/sender"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/subscribed"
 	testingutils "github.com/kyma-project/kyma/components/event-publisher-proxy/testing"
-	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 )
 
 type Test struct {
@@ -41,7 +42,7 @@ type Test struct {
 	natsConfig     *env.NatsConfig
 	natsServer     *server.Server
 	collector      *metrics.Collector
-	natsUrl        string
+	natsURL        string
 	healthEndpoint string
 }
 
@@ -53,7 +54,7 @@ func (test *Test) init() {
 	test.natsConfig = newEnvConfig(port, natsPort)
 	test.natsServer = testingutils.StartNatsServer()
 	test.collector = metrics.NewCollector()
-	test.natsUrl = test.natsServer.ClientURL()
+	test.natsURL = test.natsServer.ClientURL()
 	test.healthEndpoint = fmt.Sprintf("http://localhost:%d/healthz", port)
 }
 
@@ -65,11 +66,11 @@ func (test *Test) setupResources(t *testing.T, subscription *eventingv1alpha1.Su
 	ctx, cancel := context.WithCancel(context.Background())
 
 	// configure message receiver
-	messageReceiver := receiver.NewHttpMessageReceiver(test.natsConfig.Port)
+	messageReceiver := receiver.NewHTTPMessageReceiver(test.natsConfig.Port)
 	assert.NotNil(t, messageReceiver)
 
 	// connect to nats
-	bc := pkgnats.NewBackendConnection(test.natsUrl, true, 3, time.Second)
+	bc := pkgnats.NewBackendConnection(test.natsURL, true, 3, time.Second)
 	err := bc.Connect()
 	assert.Nil(t, err)
 	assert.NotNil(t, bc.Connection)
@@ -155,7 +156,7 @@ func TestNatsHandlerForCloudEvents(t *testing.T) {
 		eventTypeToSubscribe := subscription.Spec.Filter.Filters[0].EventType.Value
 
 		// connect to nats
-		bc := pkgnats.NewBackendConnection(test.natsUrl, true, 3, time.Second)
+		bc := pkgnats.NewBackendConnection(test.natsURL, true, 3, time.Second)
 		err := bc.Connect()
 		assert.Nil(t, err)
 		assert.NotNil(t, bc.Connection)
@@ -164,6 +165,7 @@ func TestNatsHandlerForCloudEvents(t *testing.T) {
 		validator := testingutils.ValidateNatsSubjectOrFail(t, expectedNatsSubject)
 		testingutils.SubscribeToEventOrFail(t, bc.Connection, eventTypeToSubscribe, validator)
 
+		// nolint:scopelint
 		// run the tests for publishing cloudevents
 		for _, testCase := range handlertest.TestCasesForCloudEvents {
 			t.Run(testCase.Name, func(t *testing.T) {
@@ -206,7 +208,7 @@ func TestNatsHandlerForLegacyEvents(t *testing.T) {
 		eventTypeToSubscribe := subscription.Spec.Filter.Filters[0].EventType.Value
 
 		// connect to nats
-		bc := pkgnats.NewBackendConnection(test.natsUrl, true, 3, time.Second)
+		bc := pkgnats.NewBackendConnection(test.natsURL, true, 3, time.Second)
 		err := bc.Connect()
 		assert.Nil(t, err)
 		assert.NotNil(t, bc.Connection)
@@ -215,6 +217,7 @@ func TestNatsHandlerForLegacyEvents(t *testing.T) {
 		validator := testingutils.ValidateNatsSubjectOrFail(t, expectedNatsSubject)
 		testingutils.SubscribeToEventOrFail(t, bc.Connection, eventTypeToSubscribe, validator)
 
+		// nolint:scopelint
 		// run the tests for publishing legacy events
 		for _, testCase := range handlertest.TestCasesForLegacyEvents {
 			t.Run(testCase.Name, func(t *testing.T) {
@@ -258,6 +261,7 @@ func TestNatsHandlerForSubscribedEndpoint(t *testing.T) {
 		cancel := test.setupResources(t, subscription, testingutils.ApplicationName, eventTypePrefix)
 		defer cancel()
 
+		// nolint:scopelint
 		// run the tests for subscribed endpoint
 		for _, testCase := range handlertest.TestCasesForSubscribedEndpoint {
 			t.Run(testCase.Name, func(t *testing.T) {

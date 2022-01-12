@@ -1,6 +1,7 @@
 apiVersion: v1
 description: Kyma component 'tracing'
 name: tracing
-version: 1.0.0
+version: 2.27.1
+appVersion: 1.29.1
 home: https://kyma-project.io
 icon: https://github.com/kyma-project/kyma/blob/main/logo.png?raw=true

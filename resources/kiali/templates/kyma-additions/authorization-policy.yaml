@@ -1,0 +1,35 @@
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  labels:
+    {{- include "kiali-server.labels" . | nindent 4 }}
+  name: {{ include "kiali-server.name" . }}
+  namespace: {{ .Release.Namespace }}
+spec:
+  action: ALLOW
+  rules:
+  - to:
+    - operation:
+        ports:
+        - "20001"
+{{ if .Values.authProxy.enabled }}
+    from:
+    - source:
+        principals:
+          - cluster.local/ns/{{ .Release.Namespace }}/sa/{{ template "kiali-server.name" . }}-auth-proxy
+{{ end }}
+  - from:
+    - source:
+        principals:
+          - cluster.local/ns/{{ .Release.Namespace }}/sa/monitoring-prometheus
+    to:
+    - operation:
+        ports:
+        - "9090"
+        methods:
+        - GET
+        paths:
+        - /metrics
+  selector:
+    matchLabels:
+      {{- include "kiali-server.selectorLabels" . | nindent 6 }}

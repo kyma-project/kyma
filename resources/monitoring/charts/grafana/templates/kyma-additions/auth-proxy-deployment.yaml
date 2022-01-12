@@ -31,8 +31,12 @@ spec:
       - name: templates-cm
         configMap:
           name: {{ .Release.Name }}-auth-proxy-{{ template "grafana.name" . }}-templates
+      serviceAccountName: {{ .Release.Name }}-auth-proxy-{{ template "grafana.name" . }}
+      {{- if or .Values.priorityClassName .Values.global.priorityClassName }}
+      priorityClassName: {{ coalesce .Values.priorityClassName .Values.global.priorityClassName }}
+      {{- end }}
       containers:
-      - image: "{{ .Values.kyma.authProxy.image.repository }}:{{ .Values.kyma.authProxy.image.tag }}"
+      - image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.oauth2_proxy) }}"
         imagePullPolicy: {{ .Values.kyma.authProxy.image.pullPolicy }}
         name: auth-proxy
         args:
@@ -48,7 +52,7 @@ spec:
         - --pass-host-header={{ .Values.kyma.authProxy.config.passHostHeader }}
         envFrom:
         - secretRef:
-            name: {{ .Release.Name }}-auth-proxy-{{ template "grafana.name" . }}
+            name: {{ .Release.Name }}-auth-proxy-{{ template "grafana.name" . }}-default
             optional: false
         - secretRef:
             name: {{ .Release.Name }}-auth-proxy-{{ template "grafana.name" . }}-user

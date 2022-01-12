@@ -7,7 +7,7 @@ spec:
   template:
     spec:
       containers:
-      - name: manager
+      - name: controller
         args:
         - "--config=controller_manager_config.yaml"
         volumeMounts:

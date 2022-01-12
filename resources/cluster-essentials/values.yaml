@@ -7,22 +7,23 @@ global:
   podSecurityPolicy:
     privileged: false
   priorityClassName: ""
+  highPriorityClassName: "kyma-system-priority"
   priorityClassValue: 2000000
-
+  highPriorityClassValue: 2100000
   containerRegistry:
     path: eu.gcr.io/kyma-project
   images:
     k8s_tools:
       name: "k8s-tools"
-      version: "20210922-530cfc39"
+      version: "20211022-85284bf9"
       directory: "tpi"
     podpreset_webhook:
       name: "podpreset-webhook"
-      version: "a1343c0c"
+      version: "021a99c6"
       directory: "incubator"
     podpreset_controller:
       name: "podpreset-controller"
-      version: "a1343c0c"
+      version: "021a99c6"
       directory: "incubator"
 
 image:
@@ -45,3 +46,8 @@ securityContext:
   runAsGroup: 65534
   runAsNonRoot: true
   runAsUser: 65534
+
+pod-preset:
+  key: ""
+  cert: ""
+  caCert: ""

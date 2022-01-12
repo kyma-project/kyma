@@ -2,7 +2,7 @@
 title: Expose and secure a service
 ---
 
-This tutorial shows how to expose and secure services or Functions using API Gateway Controller. The controller reacts to an instance of the APIRule custom resource (CR) and creates an Istio Virtual Service and [Oathkeeper Access Rules](https://www.ory.sh/docs/oathkeeper/api-access-rules) according to the details specified in the CR. To interact with the secured services, the tutorial uses an OAuth2 client registered through the Hydra Maester controller.
+This tutorial shows how to expose and secure services or Functions using API Gateway Controller. The controller reacts to an instance of the API Rule custom resource (CR) and creates an Istio Virtual Service and [Oathkeeper Access Rules](https://www.ory.sh/docs/oathkeeper/api-access-rules) according to the details specified in the CR. To interact with the secured services, the tutorial uses an OAuth2 client registered through the Hydra Maester controller.
 
 The tutorial comes with a sample HttpBin service deployment and a sample Function. It may be a follow-up to the [Use a custom domain to expose a service](./apix-01-own-domain.md) tutorial.
 
@@ -150,7 +150,7 @@ Follow the instructions in the tabs to deploy an instance of the HttpBin service
    EOF
    ```
 
-4. Expose the service and secure it by creating an APIRule CR in your Namespace. If you don't want to use your custom domain but a Kyma domain, use the following Kyma Gateway: `kyma-gateway.kyma-system.svc.cluster.local`. Run:
+4. Expose the service and secure it by creating an API Rule CR in your Namespace. If you don't want to use your custom domain but a Kyma domain, use the following Kyma Gateway: `kyma-gateway.kyma-system.svc.cluster.local`. Run:
 
   ```shell
   cat <<EOF | kubectl apply -f -
@@ -195,7 +195,7 @@ The exposed service requires tokens with "read" scope for `GET` requests in the 
 1. Create a Function in your Namespace using the [supplied code](./assets/function.yaml):
 
   ```shell
-  kubectl -n ${NAMESPACE_NAME} apply -f https://raw.githubusercontent.com/kyma-project/kyma/master/docs/api-gateway/assets/function.yaml
+  kubectl -n ${NAMESPACE_NAME} apply -f https://raw.githubusercontent.com/kyma-project/kyma/main/docs/03-tutorials/assets/function.yaml
   ```
 
 2. Export these values as environment variables:
@@ -232,7 +232,7 @@ The exposed service requires tokens with "read" scope for `GET` requests in the 
    EOF
    ```
 
-4. Expose the service and secure it by creating an APIRule CR in your Namespace. If you don't want to use your custom domain but a Kyma domain, use the following Kyma Gateway: `kyma-gateway.kyma-system.svc.cluster.local`. Run:
+4. Expose the service and secure it by creating an API Rule CR in your Namespace. If you don't want to use your custom domain but a Kyma domain, use the following Kyma Gateway: `kyma-gateway.kyma-system.svc.cluster.local`. Run:
 
   ```shell
   cat <<EOF | kubectl apply -f -

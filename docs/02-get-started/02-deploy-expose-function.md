@@ -72,7 +72,7 @@ After we've got our `hello-world` Function deployed, we might want to expose it 
 
 > **CAUTION:** Exposing a workload to the outside world is always a potential security vulnerability, so tread carefully. In a production environment, always [secure the workload](../03-tutorials/00-api-exposure/apix-03-expose-and-secure-service.md) you expose.
 
-First, let's create an [APIRule](../05-technical-reference/00-custom-resources/apix-01-apirule.md) for the Function.
+First, let's create an [API Rule](../05-technical-reference/00-custom-resources/apix-01-apirule.md) for the Function.
 
 <div tabs name="Expose the Function" group="deploy-expose-function">
   <details open>
@@ -117,7 +117,7 @@ EOF
   </summary>
 
 1. In your Function's view, go to the **Configuration** tab.
-2. Click on **Expose Function +**.
+2. Click on **Create API Rule +**.
 3. Provide the **Name** (`hello-world`) and **Subdomain** (`hello-world`) and click **Create**.
 
 > **NOTE:** Alternatively, from the left navigation go to **Discovery and Network** > **API Rules**, click on **Create API Rule +**, and continue with step 3, selecting the appropriate **Service** (`hello-world`) from the dropdown menu.
@@ -148,10 +148,10 @@ The operation was successful if the call returns `Hello Serverless`.
   Kyma Dashboard
   </summary>
 
-In your Function's **Configuration** tab, click on the APIRule's **Host**.
+In your Function's **Configuration** tab, click on the API Rule's **Host**.
 This opens the Function's external address as a new page.
 
-> **NOTE:** Alternatively, from the left navigation go to **APIRules**, and click on the **Host** URL there.
+> **NOTE:** Alternatively, from the left navigation go to **API Rules**, and click on the **Host** URL there.
 
 The operation was successful if the page says `Hello World!`.
   </details>

@@ -12,8 +12,9 @@ import (
 	"k8s.io/client-go/dynamic/dynamicinformer"
 	"k8s.io/client-go/rest"
 
-	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/informers"
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
+
+	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/informers"
 )
 
 var (
@@ -74,7 +75,7 @@ func AddUniqueEventsToResult(eventsSubSet []Event, uniqEvents map[Event]bool) ma
 // 1. if the eventType matches the format: <eventTypePrefix><appName>.<event-name>.<version>
 // E.g. sap.kyma.custom.varkes.order.created.v0
 // 2. if the eventSource matches BEBNamespace name
-func FilterEventTypeVersions(eventTypePrefix, bebNs, appName string, filters *eventingv1alpha1.BebFilters) []Event {
+func FilterEventTypeVersions(eventTypePrefix, bebNs, appName string, filters *eventingv1alpha1.BEBFilters) []Event {
 	events := make([]Event, 0)
 	if filters == nil {
 		return events
@@ -95,7 +96,7 @@ func FilterEventTypeVersions(eventTypePrefix, bebNs, appName string, filters *ev
 			// TODO revisit the filtration logic as part of https://github.com/kyma-project/kyma/issues/10761
 
 			// filter by event-source if exists
-			if len(strings.TrimSpace(filter.EventSource.Value)) > 0 && strings.ToLower(filter.EventSource.Value) != strings.ToLower(bebNs) {
+			if len(strings.TrimSpace(filter.EventSource.Value)) > 0 && !strings.EqualFold(filter.EventSource.Value, bebNs) {
 				continue
 			}
 

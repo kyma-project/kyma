@@ -1,5 +1,6 @@
 const uuid = require("uuid");
 const fs = require('fs');
+const execa = require("execa");
 const { 
   DirectorConfig, 
   DirectorClient,
@@ -24,6 +25,9 @@ const {
   switchDebug,
 } = require("../utils");
 const {
+  inspect
+} = require('util')
+const {
   ensureCommerceMockWithCompassTestFixture,
   checkInClusterEventDelivery,
   checkFunctionResponse,
@@ -37,9 +41,9 @@ const {
   cleanMockTestFixture,
 } = require("../test/fixtures/commerce-mock");
 const {
-  kcpLogin,
-  kcpUpgrade
-} = require("./upgrade-helpers");
+  KCPConfig,
+  KCPWrapper,
+} = require("../kcp/client")
 const {
   saveKubeconfig,
 } = require("../skr-svcat-migration-test/test-helpers");
@@ -53,18 +57,16 @@ describe("SKR-Upgrade-test", function () {
   const appName = `app-${suffix}`;
   const runtimeName = `kyma-${suffix}`;
   const scenarioName = `test-${suffix}`;
-  const runtimeID = uuid.v4();
-  const subAccountID = uuid.v4();
-
-  keb.subaccountID = subAccountID;
+  const instanceID = uuid.v4();
+  const subAccountID = keb.subaccountID
 
   debug(
-    `PlanID ${getEnvOrThrow("KEB_PLAN_ID")}`,
-    `SubAccountID ${subAccountID}`,
-    `RuntimeID ${runtimeID}`,
-    `Scenario ${scenarioName}`,
-    `Runtime ${runtimeName}`,
-    `Application ${appName}`
+      `PlanID ${getEnvOrThrow("KEB_PLAN_ID")}`,
+      `SubAccountID ${subAccountID}`,
+      `InstanceID ${instanceID}`,
+      `Scenario ${scenarioName}`,
+      `Runtime ${runtimeName}`,
+      `Application ${appName}`
   );
 
   // debug(
@@ -76,7 +78,7 @@ describe("SKR-Upgrade-test", function () {
   //   `KEB_USER_ID: ${getEnvOrThrow("KEB_USER_ID")}`,
   //   `KEB_PLAN_ID: ${getEnvOrThrow("KEB_PLAN_ID")}`      
   // );
-  
+
   // debug(
   //   `COMPASS_HOST: ${getEnvOrThrow("COMPASS_HOST")}`,
   //   `COMPASS_CLIENT_ID: ${getEnvOrThrow("COMPASS_CLIENT_ID")}`,
@@ -84,15 +86,63 @@ describe("SKR-Upgrade-test", function () {
   //   `COMPASS_TENANT: ${getEnvOrThrow("COMPASS_TENANT")}`,
   // )
 
+  // debug(
+  //   `KCP_TECH_USER_LOGIN: ${KCP_TECH_USER_LOGIN}\n`,
+  //   `KCP_TECH_USER_PASSWORD: ${KCP_TECH_USER_PASSWORD}\n`,
+  //   `KCP_OIDC_CLIENT_ID: ${KCP_OIDC_CLIENT_ID}\n`,
+  //   `KCP_OIDC_CLIENT_SECRET: ${KCP_OIDC_CLIENT_SECRET}\n`,
+  //   `KCP_KEB_API_URL: ${KCP_KEB_API_URL}\n`,
+  //   `KCP_OIDC_ISSUER_URL: ${KCP_OIDC_ISSUER_URL}\n`
+  // )
+
+  // Credentials for KCP ODIC Login
+
+  // process.env.KCP_TECH_USER_LOGIN    = 
+  // process.env.KCP_TECH_USER_PASSWORD = 
+  process.env.KCP_OIDC_ISSUER_URL = "https://kymatest.accounts400.ondemand.com";
+  // process.env.KCP_OIDC_CLIENT_ID     = 
+  // process.env.KCP_OIDC_CLIENT_SECRET = 
+  process.env.KCP_KEB_API_URL = "https://kyma-env-broker.cp.dev.kyma.cloud.sap";
+  process.env.KCP_GARDENER_NAMESPACE = "garden-kyma-dev";
+  process.env.KCP_MOTHERSHIP_API_URL = "https://mothership-reconciler.cp.dev.kyma.cloud.sap/v1"
+  process.env.KCP_KUBECONFIG_API_URL = "https://kubeconfig-service.cp.dev.kyma.cloud.sap"
+
+  const kcp = new KCPWrapper(KCPConfig.fromEnv());
+
+  const kymaVersion = getEnvOrThrow("KYMA_VERSION")
+  const kymaUpgradeVersion = getEnvOrThrow("KYMA_UPGRADE_VERSION")
+
   this.timeout(60 * 60 * 1000 * 3); // 3h
   this.slow(5000);
+
+  const provisioningTimeout = 1000 * 60 * 60 // 1h
+  const deprovisioningTimeout = 1000 * 60 * 30 // 30m
 
   let skr;
 
   // SKR Provisioning
 
-  it(`Provision SKR with ID ${runtimeID}`, async function () {
-    skr = await provisionSKR(keb, gardener, runtimeID, runtimeName, null, null, null);
+  it(`Perform kcp login`, async function () {
+
+    let version = await kcp.version([])
+    debug(version)
+
+    await kcp.login()
+    // debug(loginOutput)
+  });
+
+  it(`Provision SKR with ID ${instanceID}`, async function () {
+    console.log(`Provisioning SKR with version ${kymaVersion}`)
+    let customParams = {
+      "kymaVersion": kymaVersion
+    }
+    debug(`Provision SKR with Custom Parameters ${JSON.stringify(customParams)}`)
+    skr = await provisionSKR(keb, kcp, gardener, instanceID, runtimeName, null, null, customParams, provisioningTimeout);
+  });
+
+  it(`Should get Runtime Status after provisioning`, async function () {
+    let runtimeStatus = await kcp.getRuntimeStatusOperations(instanceID)
+    console.log(`\nRuntime status: ${runtimeStatus}`)
   });
 
   it(`Should save kubeconfig for the SKR to ~/.kube/config`, async function() {
@@ -156,44 +206,14 @@ describe("SKR-Upgrade-test", function () {
 
   // Perform Upgrade
 
-  // Credentials for KCP ODIC Login
-  const KCP_TECH_USER_LOGIN = getEnvOrThrow("KCP_TECH_USER_LOGIN")
-  const KCP_TECH_USER_PASSWORD = getEnvOrThrow("KCP_TECH_USER_PASSWORD")
-  const KCP_OIDC_CLIENT_ID = getEnvOrThrow("KCP_OIDC_CLIENT_ID")
-  const KCP_OIDC_CLIENT_SECRET = getEnvOrThrow("KCP_OIDC_CLIENT_SECRET")
-  const KCP_KEB_API_URL = "https://kyma-env-broker.cp.dev.kyma.cloud.sap"
-  const KCP_OIDC_ISSUER_URL = "https://kymatest.accounts400.ondemand.com"
-  const kcpconfigPath = "dev.yaml"
-  const kymaUpgradeVersion = getEnvOrThrow("KYMA_UPGRADE_VERSION")
-
-  it(`Perform kcp login`, async function () {
-
-    // debug(
-    //   `KCP_TECH_USER_LOGIN: ${KCP_TECH_USER_LOGIN}\n`,
-    //   `KCP_TECH_USER_PASSWORD: ${KCP_TECH_USER_PASSWORD}\n`,
-    //   `KCP_OIDC_CLIENT_ID: ${KCP_OIDC_CLIENT_ID}\n`,
-    //   `KCP_OIDC_CLIENT_SECRET: ${KCP_OIDC_CLIENT_SECRET}\n`,
-    //   `KCP_KEB_API_URL: ${KCP_KEB_API_URL}\n`,
-    //   `KCP_OIDC_ISSUER_URL: ${KCP_OIDC_ISSUER_URL}\n`
-    // )
-
-    let stream = fs.createWriteStream(kcpconfigPath);
-    stream.once('open', function(fd) {
-      stream.write(`gardener-namespace: garden-kyma-dev\n`);
-      stream.write(`oidc-client-id: ${KCP_OIDC_CLIENT_ID}\n`);
-      stream.write(`oidc-client-secret: ${KCP_OIDC_CLIENT_SECRET}\n`);
-      stream.write(`keb-api-url: ${KCP_KEB_API_URL}\n`);
-      stream.write(`oidc-issuer-url: ${KCP_OIDC_ISSUER_URL}\n`);;
-      stream.end();
-    });
-    
-    let loginOutput = await kcpLogin(kcpconfigPath, KCP_TECH_USER_LOGIN, KCP_TECH_USER_PASSWORD);
-    // debug(loginOutput)
+  it(`Perform Upgrade`, async function () {
+    let kcpUpgradeStatus = await kcp.upgradeKyma(instanceID, kymaUpgradeVersion)
+    debug("Upgrade Done!")
   });
 
-  it(`Perform Upgrade`, async function () {
-    let kcpUpgradeStatus = await kcpUpgrade(kcpconfigPath, subAccountID, runtimeID, kymaUpgradeVersion);
-    debug("Upgrade Done!")
+  it(`Should get Runtime Status after upgrade`, async function () {
+    let runtimeStatus = await kcp.getRuntimeStatusOperations(instanceID)
+    console.log(`\nRuntime status: ${runtimeStatus}`)
   });
 
   // Perform Tests after Upgrade
@@ -229,7 +249,7 @@ describe("SKR-Upgrade-test", function () {
   // Cleanup
   const skip_cleanup = getEnvOrThrow("SKIP_CLEANUP")
 
-  if (skip_cleanup === "FALSE") {
+  if (skip_cleanup === "FALSE"){
     it("Unregister Kyma resources from Compass", async function() {
       await unregisterKymaFromCompass(director, scenarioName);
     });
@@ -237,14 +257,13 @@ describe("SKR-Upgrade-test", function () {
     it("Test fixtures should be deleted", async function () {
       await cleanMockTestFixture("mocks", testNS, true)
     });
-    
-    it("Deprovision SKR", async function () {
-      await deprovisionSKR(keb, runtimeID);
-    });
 
     it("Unregister SKR resources from Compass", async function () {
       await unregisterKymaFromCompass(director, scenarioName);
     });
-  }
 
+    it("Deprovision SKR", async function () {
+      await deprovisionSKR(keb, kcp, instanceID, deprovisioningTimeout);
+    });
+  }
 });

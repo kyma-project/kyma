@@ -37,18 +37,6 @@ publisherProxy:
       cpu: 32m
       memory: 64Mi
 
-natsOperatorDoctor:
-  interval: 1m
-  image:
-    pullPolicy: "IfNotPresent"
-  resources:
-    requests:
-      cpu: 10m
-      memory: 16Mi
-    limits:
-      cpu: 20m
-      memory: 32Mi
-
 metrics:
   service:
     nameSuffix: "-metrics"
@@ -63,6 +51,8 @@ clusterRoleBindingSuffix: ""
 eventingBackend:
   name: eventing-backend
   defaultMaxInflightMessages: 10
+  defaultDispatcherRetryPeriod: 5m
+  defaultDispatcherMaxRetries: 10
 
 healthProbe:
   port: 8081

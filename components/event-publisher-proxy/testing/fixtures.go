@@ -72,7 +72,7 @@ const (
            "datacontenttype":"` + CloudEventDataContentType + `"
         }`
 
-	ValidLegacyEventPayloadWithEventId = `{
+	ValidLegacyEventPayloadWithEventID = `{
             "event-id": "` + EventID + `",
             "event-type":"` + LegacyEventType + `",
             "event-type-version":"` + LegacyEventTypeVersion + `",
@@ -80,13 +80,13 @@ const (
             "data": ` + LegacyEventData + `
         }`
 
-	ValidLegacyEventPayloadWithoutEventId = `{
+	ValidLegacyEventPayloadWithoutEventID = `{
             "event-type":"` + LegacyEventType + `",
             "event-type-version":"` + LegacyEventTypeVersion + `",
             "event-time": "` + LegacyEventTime + `",
             "data": ` + LegacyEventData + `
         }`
-	LegacyEventPayloadWithInvalidEventId = `{
+	LegacyEventPayloadWithInvalidEventID = `{
             "event-id":"foo-bar",
             "event-type":"` + LegacyEventType + `",
             "event-type-version":"` + LegacyEventTypeVersion + `",

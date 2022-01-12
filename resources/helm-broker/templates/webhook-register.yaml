@@ -18,7 +18,6 @@ apiVersion: admissionregistration.k8s.io/v1
 kind: MutatingWebhookConfiguration
 metadata:
   name: {{ template "fullname" . }}-mutating-webhook
-  namespace: {{ .Release.Namespace }}
 webhooks:
   - name: mutating.helm-broker.kyma-project.io
     rules:
