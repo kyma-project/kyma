@@ -123,7 +123,7 @@ In your Function's **Configuration** tab, click on the APIRule's **Host**. This 
 
 ## Create a Subscription
 
-Next, to subscribe to an event so that we can actually listen for it, we need a [Subscription](../05-technical-reference/00-custom-resources/evnt-01-subscription.md) and an [Application](https://kyma-project.io/docs/kyma/latest/05-technical-reference/00-custom-resources/ac-01-application/#documentation-content) custom resources. We're going to be listening for an event of type `order.received.v1`. 
+Next, to subscribe to an event so that we can actually listen for it, we need a [Subscription](../05-technical-reference/00-custom-resources/evnt-01-subscription.md) custom resource. We're going to be listening for an event of type `order.received.v1`. 
 
 <div tabs name="Create a Subscription" group="trigger-workload">
   <details open>
