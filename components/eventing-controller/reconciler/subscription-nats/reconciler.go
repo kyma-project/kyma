@@ -238,41 +238,45 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 }
 
 // syncSubscriptionStatus syncs Subscription status
-func (r Reconciler) syncSubscriptionStatus(ctx context.Context, sub *eventingv1alpha1.Subscription,
-	isNatsSubReady bool, message string) error {
+func (r *Reconciler) syncSubscriptionStatus(ctx context.Context, sub *eventingv1alpha1.Subscription, isNatsSubReady bool, message string) error {
 	desiredConditions := make([]eventingv1alpha1.Condition, 0)
-	conditionAdded := false
-	conditionUpdated := false
+	conditionContained := false
+	conditionsUpdated := false
 	condition := eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionSubscriptionActive,
 		eventingv1alpha1.ConditionReasonNATSSubscriptionActive, corev1.ConditionFalse, message)
 	if isNatsSubReady {
 		condition = eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionSubscriptionActive,
-			eventingv1alpha1.ConditionReasonNATSSubscriptionActive, corev1.ConditionTrue, "")
+			eventingv1alpha1.ConditionReasonNATSSubscriptionActive, corev1.ConditionTrue, message)
 	}
 	for _, c := range sub.Status.Conditions {
 		var chosenCondition eventingv1alpha1.Condition
 		if c.Type == condition.Type {
-			if c.Status == condition.Status && c.Reason == condition.Reason {
-				// take the already present condition
-				chosenCondition = c
-				conditionUpdated = true
-			} else {
-				// take the new given condition
-				chosenCondition = condition
-				conditionAdded = true
+			if !conditionContained {
+				if c.Status == condition.Status && c.Reason == condition.Reason && c.Message == condition.Message {
+					// take the already present condition
+					chosenCondition = c
+				} else {
+					// take the new given condition
+					chosenCondition = condition
+					conditionsUpdated = true
+				}
+				desiredConditions = append(desiredConditions, chosenCondition)
+				conditionContained = true
 			}
+			// ignore all other conditions having the same type
+			continue
 		} else {
-			// take already present condition
+			// take the already present condition
 			chosenCondition = c
 		}
 		desiredConditions = append(desiredConditions, chosenCondition)
 	}
-	if !conditionAdded && !conditionUpdated {
+	if !conditionContained {
 		desiredConditions = append(desiredConditions, condition)
-		conditionAdded = true
+		conditionsUpdated = true
 	}
 
-	if conditionAdded {
+	if conditionsUpdated {
 		sub.Status.Conditions = desiredConditions
 		sub.Status.Ready = isNatsSubReady
 		err := r.Client.Status().Update(ctx, sub, &client.UpdateOptions{})
@@ -284,19 +288,19 @@ func (r Reconciler) syncSubscriptionStatus(ctx context.Context, sub *eventingv1a
 	return nil
 }
 
-func (r Reconciler) assertSinkValidity(sink string) error {
+func (r *Reconciler) assertSinkValidity(sink string) error {
 	_, err := url.ParseRequestURI(sink)
 	return err
 }
 
-func (r Reconciler) assertProtocolValidity(protocol string) error {
+func (r *Reconciler) assertProtocolValidity(protocol string) error {
 	if protocol != NATSProtocol {
 		return fmt.Errorf("invalid protocol: %s", protocol)
 	}
 	return nil
 }
 
-func (r Reconciler) syncInvalidSubscriptions(ctx context.Context) (ctrl.Result, error) {
+func (r *Reconciler) syncInvalidSubscriptions(ctx context.Context) (ctrl.Result, error) {
 	handler, _ := r.Backend.(*handlers.Nats)
 	namespacedName := handler.GetInvalidSubscriptions()
 	for _, v := range *namespacedName {
