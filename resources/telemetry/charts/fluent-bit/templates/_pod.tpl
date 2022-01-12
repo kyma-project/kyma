@@ -103,6 +103,13 @@ volumes:
   - name: dynamic-config
     configMap:
       name: {{ .Values.dynamicConfigMap }}
+      optional: true
+  {{- end }}
+    {{- if .Values.dynamicParsersConfigMap }}
+  - name: dynamic-parsers-config
+    configMap:
+      name: {{ .Values.dynamicParsersConfigMap }}
+      optional: true
   {{- end }}
 {{- if gt (len .Values.luaScripts) 0 }}
   - name: luascripts
