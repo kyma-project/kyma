@@ -116,7 +116,7 @@ describe("SKR-Upgrade-test", function () {
   this.slow(5000);
 
   const provisioningTimeout = 1000 * 60 * 60 // 1h
-  const deprovisioningTimeout = 1000 * 60 * 30 // 30m
+  const deprovisioningTimeout = 1000 * 60 * 60 // 30m
 
   let skr;
 
