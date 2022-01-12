@@ -171,7 +171,7 @@ The operation was successful if the returned status says `true`.
 2. In the **Configuration** tab, click on **Create Subscription+**.
 3. Provide the following parameters:
     - **Subscription name**: `lastorder-sub`
-    - **Application name**: `myapp`
+    - **Application name**: `myapp` (use the **Advanced** view for this)
     - **Event name**: `order.received`
     - **Event version**: `v1`
 
