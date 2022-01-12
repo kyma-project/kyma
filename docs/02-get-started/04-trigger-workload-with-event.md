@@ -167,14 +167,10 @@ The operation was successful if the returned status says `true`.
   Kyma Dashboard
   </summary>
 
-1. Using the left navigation, go back to the main view > **Applications**.
-2. Click on **Create Application+**.
-3. Provide a name for your application, for example `myapp`, and click **Create**.
-4. Go to **Namespaces** and click on `default`.
-5. Using the left navigation, go back to **Workloads** > **Functions**.
-6. Select your `lastorder` Function and navigate to the **Configuration** tab.
-7. Click on **Create Subscription+**.
-8. Provide the following parameters:
+1. Using the left navigation, go back to **Workloads** > **Functions**.
+2. Select your `lastorder` Function and navigate to the **Configuration** tab.
+3. Click on **Create Subscription+**.
+4. Provide the following parameters:
     - **Subscription name**: `lastorder-sub`
     - **Application name**: `myapp`
     - **Event name**: `order.received`
@@ -182,7 +178,7 @@ The operation was successful if the returned status says `true`.
 
     - **Event type** is generated automatically. For this example, it's `sap.kyma.custom.myapp.order.received.v1`. 
     
-9. Click **Create**. 
+5. Click **Create**. 
 
   </details>
 </div>
