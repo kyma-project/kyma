@@ -136,7 +136,7 @@ class KEBClient {
     };
 
     if (btpOperatorCreds) {
-      payload.context["sm_operator_credentials"] = {
+      payload.context['sm_operator_credentials'] = {
         clientid: btpOperatorCreds.clientId,
         clientsecret: btpOperatorCreds.clientSecret,
         sm_url: btpOperatorCreds.smURL,

@@ -23,9 +23,6 @@ const {
   switchDebug,
 } = require('../utils');
 const {
-  inspect,
-} = require('util');
-const {
   ensureCommerceMockWithCompassTestFixture,
   checkInClusterEventDelivery,
   checkFunctionResponse,

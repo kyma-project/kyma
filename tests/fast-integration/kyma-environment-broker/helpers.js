@@ -10,7 +10,7 @@ async function provisionSKR(
     platformCreds,
     btpOperatorCreds,
     customParams,
-    timeout
+    timeout,
 ) {
   const resp = await keb.provisionSKR(
       name,
@@ -60,7 +60,15 @@ async function deprovisionSKR(keb, kcp, instanceID, timeout) {
   return operationID;
 }
 
-async function updateSKR(keb, kcp, gardener, instanceID, shootName, customParams, timeout, btpOperatorCreds = null, isMigration = false) {
+async function updateSKR(keb,
+    kcp,
+    gardener,
+    instanceID,
+    shootName,
+    customParams,
+    timeout,
+    btpOperatorCreds = null,
+    isMigration = false) {
   const resp = await keb.updateSKR(instanceID, customParams, btpOperatorCreds, isMigration);
   expect(resp).to.have.property('operation');
 
