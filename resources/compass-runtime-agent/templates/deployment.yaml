@@ -52,8 +52,6 @@ spec:
               value: {{ .Values.compassRuntimeAgent.config.skipAppsTLSVerification | quote }}
             - name: APP_GATEWAY_PORT
               value: {{ .Values.compassRuntimeAgent.resources.gatewayPort | quote }}
-            - name: APP_UPLOAD_SERVICE_URL
-              value: {{ .Values.compassRuntimeAgent.resources.uploadServiceUrl | quote }}
             - name: APP_QUERY_LOGGING
               value: {{ .Values.compassRuntimeAgent.debug.queryLogging | quote }}
             - name: APP_METRICS_LOGGING_TIME_INTERVAL
