@@ -55,7 +55,7 @@ Before you start, make sure you have these tools installed:
 
    ```js
    const { v4: uuidv4 } = require('uuid');
-   module.exports - {
+   module.exports = {
        main: function (event, context) {
            let sanitsedData = sanitise(event.data)
            var eventOut=event.buildResponseCloudEvent(uuidv4(), "sap.kyma.custom.acme.payload.sanitised.v1", sanitisedData);
@@ -126,9 +126,9 @@ Before you start, make sure you have these tools installed:
    The Function is configured, built and deployed in Kyma runtime. The Susbscription becomes active and all events with selected type will be processed by the Function.  
 
 12.  Test the whole setup  
-Send a payload to the first Function (for example using the above-mentioned POST request). As the Functions are joined by the In-cluster Eventing, the payload is directed to both of your Functions.
+Send a payload to the first Function (for example using the above-mentioned POST request). As the Functions are joined by the In-cluster Eventing, the payload is processed in sequence by both of your Functions.
 You can see (for example in the Function logs) that both, sanitization logic (using the first Function) and the storing logic (using the second Function) are executed.
 
-Summary:
+13. Summary
 
 You can distribute application logic into specialised, event-driven Functions
