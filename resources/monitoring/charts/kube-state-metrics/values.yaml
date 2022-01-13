@@ -153,7 +153,7 @@ metricAnnotationsAllowList: []
 
 # Available collectors for kube-state-metrics.
 # By default, all available resources are enabled, comment out to disable.
-collectors: # RG Changed all of them
+collectors:
   - certificatesigningrequests
   - configmaps
   - cronjobs
@@ -190,7 +190,7 @@ kubeconfig:
   secret:
 
 # Namespace to be enabled for collecting resources. By default all namespaces are collected.
-namespaces: "" #RG uncommented check it it it works. If not need to comment it out
+# namespaces: ""
 
 ## Override the deployment namespace
 ##
