@@ -8,21 +8,21 @@ The documentation here is for developers only, please follow the installation in
 
 The Istio Configuration Helm chart consists of:
 
-- `istio-operator.yaml` file implementing Kyma-specific changes and configuration options,
-- Mutual TLS (mTLS) configuration enabling mTLS cluster-wide in a STRICT mode,
-- Istio monitoring configuration details.
+- `istio-operator.yaml` file implementing Kyma-specific changes and configuration options
+- Mutual TLS (mTLS) configuration enabling mTLS cluster-wide in a STRICT mode
+- Istio monitoring configuration details
 
-This chart can install the following Istio components:
+By default, this chart installs the following Istio components:
 
 - ingressgateway
 - egressgateway
 - istiod (pilot, citadel, and galley)
 
-To enable or disable each component, change the corresponding `enabled` flag.
+To disable any of the components, change the corresponding `enabled` flag.
 
 ## Installation
 
-Installation of the Istio Operator requires [Reconciler](https://github.com/kyma-incubator/reconciler/tree/main/pkg/reconciler/instances/istio). Reconciler uses `istioctl` and a rendered `istio-operator.yaml` file to install Istio on a cluster. To install the component run:
+Installation of the Istio Operator requires [Reconciler](https://github.com/kyma-incubator/reconciler/tree/main/pkg/reconciler/instances/istio). Reconciler uses `istioctl` and a rendered `istio-operator.yaml` file to install Istio on a cluster. To install the component, run:
 
 ```bash
 kyma deploy --components istio-configuration@istio-system
@@ -30,7 +30,7 @@ kyma deploy --components istio-configuration@istio-system
 
 ## Configuration
 
-The installation of Istio Operator ships with reasonable defaults. There may be circumstances in which defaults require overrides.
+The installation of Istio Operator ships with a default configuration. There may be circumstances in which you want to change the defaults.
 
 Istio offers an Istio Control Plane CR, which is used to configure the installation. See the list of the currently exposed parameters of the Istio Configuration component that you can override. To learn more, go to [`istio-operator.yaml`](https://github.com/kyma-project/kyma/blob/main/resources/istio-configuration/templates/istio-operator.yaml).
 
