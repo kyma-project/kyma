@@ -120,7 +120,7 @@ describe('SKR SVCAT migration test', function() {
   });
 
   it('Should print the container logs of the migration job', async function() {
-    await printContainerLogs('job-name=sap-btp-operator-migration', 'migration', 'sap-btp-operator');
+    await printContainerLogs('job-name=sap-btp-operator-migration', 'migration', 'kyma-system');
   });
 
   it('Should still contain pod presets and the secrets', async function() {

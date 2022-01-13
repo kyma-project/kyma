@@ -20,11 +20,11 @@ function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-function loadCRD(filepath) {
-  const _loggingConfigYaml = fs.readFileSync(path.join(__dirname, filepath), {
+function loadCR(filepath) {
+  const _logPipelineYaml = fs.readFileSync(path.join(__dirname, filepath), {
     encoding: 'utf8',
   });
-  return k8s.loadAllYaml(_loggingConfigYaml);
+  return k8s.loadAllYaml(_logPipelineYaml);
 }
 
 function checkMockserverWasCalled(wasCalled) {
@@ -51,7 +51,7 @@ describe('Telemetry operator', function() {
   let cancelPortForward = null;
   const fluentBitName = 'telemetry-fluent-bit';
 
-  const loggingConfigCRD = loadCRD('./logging-config.yaml');
+  const logPipelineCR = loadCR('./log-pipeline.yaml');
 
   it('Should install the operator', async () => {
     await helm.installChart(
@@ -105,13 +105,14 @@ describe('Telemetry operator', function() {
           mockServerPort,
       );
     });
+
     after(async function() {
       cancelPortForward();
+      await k8sDelete(logPipelineCR, telemetryNamespace);
       await helm.uninstallChart('mockserver', mockNamespace);
       await helm.uninstallChart('mockserver-config', mockNamespace);
       await helm.uninstallChart('telemetry', telemetryNamespace);
       await k8sCoreV1Api.deleteNamespace(mockNamespace);
-      k8sDelete(loggingConfigCRD, telemetryNamespace);
     });
 
     it('Should not receive HTTP traffic', function() {
@@ -119,7 +120,7 @@ describe('Telemetry operator', function() {
     }).timeout(5000);
 
     it('Apply HTTP output plugin to fluent-bit', async function() {
-      await k8sApply(loggingConfigCRD, telemetryNamespace);
+      await k8sApply(logPipelineCR, telemetryNamespace);
       await sleep(10000); // wait for controller to reconcile
       await waitForDaemonSet(fluentBitName, telemetryNamespace);
     });
