@@ -7,7 +7,7 @@ metadata:
 {{ include "api-gateway.labels" . | indent 4 }}
 spec:
   ports:
-    - name: metrics
+    - name: tcp-metrics
       port: {{ .Values.config.ports.metrics }}
   selector:
     app.kubernetes.io/name: {{ include "api-gateway.name" . }}
