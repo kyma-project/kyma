@@ -131,4 +131,4 @@ You can see (for example in the Function logs) that both, sanitization logic (us
 
 13. Summary
 
-You can distribute application logic into specialised, event-driven Functions
+This tutorial demonstrated only one possible use case. You can find plenty of use cases yourself on how to orchestrate your application logic into specialised Functions and benefit from decoupled, re-usable components and event-driven architecture.
