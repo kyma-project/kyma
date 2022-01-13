@@ -220,6 +220,7 @@ async function assertTimeSeriesExist(metric, labels, resource="") {
             result = await queryPrometheus(query);
         } else {
             query = `topk(10,${metric}{${label}=~\"..*\", resource=${resource}})`;
+            console.log(query)
             result = await queryPrometheus(query);
         }
 
