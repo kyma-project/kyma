@@ -157,17 +157,17 @@ describe("Eventing tests", function () {
 
     // Unregister SKR resources from Compass
     if (isSKR) {
-      debug("Cleaning SKR...")
+      debug('Cleaning SKR...');
       await cleanCompassResourcesSKR(director, appName, scenarioName, skrInfo.compassID);
     }
 
     // Delete eventing backend secret if it was created by test
     if (eventMeshSecretFilePath !== "") {
-      debug("Removing Event Mesh secret")
+      debug('Removing Event Mesh secret');
       await deleteEventingBackendK8sSecret(backendK8sSecretName, backendK8sSecretNamespace);
     }
 
-    debug("Cleaning test resources")
+    debug('Cleaning test resources');
     await cleanMockTestFixture(mockNamespace, testNamespace, true);
 
     cancelPrometheusPortForward();

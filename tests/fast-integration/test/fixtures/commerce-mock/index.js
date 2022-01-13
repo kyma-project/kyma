@@ -691,7 +691,7 @@ async function cleanMockTestFixture(mockNamespace, targetNamespace, wait = true)
     ignore404(err)
   }
 
-  debug("Deleting test namespaces")
+  debug('Deleting test namespaces');
   return deleteNamespaces([mockNamespace, targetNamespace], wait);
 }
 

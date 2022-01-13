@@ -1,38 +1,38 @@
-const uuid = require("uuid");
+const uuid = require('uuid');
 const {
     provisionSKR,
     saveKubeconfig,
-} = require("../../kyma-environment-broker");
+} = require('../../kyma-environment-broker');
 
 const {
     KCPConfig,
     KCPWrapper,
-} = require("../../kcp/client")
+} = require('../../kcp/client');
 
 const {
     gardener,
     keb,
-} = require("../../skr-test");
+} = require('../../skr-test');
 
 const {
     getEnvOrThrow,
     debug
-} = require("../../utils");
+} = require('../../utils');
 
 const instanceId = process.env.INSTANCE_ID || uuid.v4()
-const runtimeName = getEnvOrThrow("RUNTIME_NAME")
-const kymaVersion = getEnvOrThrow("KYMA_VERSION")
+const runtimeName = getEnvOrThrow('RUNTIME_NAME');
+const kymaVersion = getEnvOrThrow('KYMA_VERSION');
 const kymaOverridesVersion = process.env.KYMA_OVERRIDES_VERSION || ""
 const kcp = new KCPWrapper(KCPConfig.fromEnv());
 
 let skr;
 
-describe("Provision SKR cluster", function () {
+describe('Provision SKR cluster', function () {
     this.timeout(60 * 60 * 1000 * 2); // 2h
     this.slow(5000);
-    before(`Provision new SKR`, async function () {
+    before('Provision new SKR', async function () {
         // login to kcp, required by provisionSKR method
-        let version = await kcp.version([])
+        const version = await kcp.version([]);
         debug('Login to KCP. Version: ', version)
         await kcp.login();
 
@@ -66,8 +66,8 @@ describe("Provision SKR cluster", function () {
     });
 
     describe('Check provisioned SKR', function () {
-        it(`Should get Runtime Status after provisioning`, async function () {
-            let runtimeStatus = await kcp.getRuntimeStatusOperations(instanceId)
+        it('Should get Runtime Status after provisioning', async function () {
+            let runtimeStatus = await kcp.getRuntimeStatusOperations(instanceId);
             debug(`\nRuntime status: ${runtimeStatus}`)
         });
         it(`Should save kubeconfig for the SKR to ~/.kube/config`, async function() {
