@@ -245,16 +245,16 @@ config:
       config:
         loglevel: warn
         lineFormat: json
-        removeKeys: kubernetes, stream
+        removeKeys: stream
         labels: '{job="fluent-bit"}'
         labelMap:
           kubernetes:
             namespace_name: namespace
             labels:
               app: app
-              release: release
+              "app.kubernetes.io/component": component
+              "app.kubernetes.io/name": app
               "serverless.kyma-project.io/function-name": function
-              "serverless.kyma-project.io/uuid": functionUID
             host: node
             container_name: container
             pod_name: pod
