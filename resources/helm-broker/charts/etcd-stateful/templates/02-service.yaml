@@ -13,9 +13,9 @@ metadata:
 spec:
   ports:
   - port: 2379
-    name: client
+    name: tcp-client
   - port: 2380
-    name: peer
+    name: tcp-peer
   clusterIP: None
   selector:
     app: {{ template "etcd-hb-fullname" . }}
@@ -35,8 +35,8 @@ metadata:
 spec:
   ports:
   - port: 2379
-    name: client
+    name: tcp-client
   - port: 2381
-    name: metrics
+    name: tcp-metrics
   selector:
     app: {{ template "etcd-hb-fullname" . }}
