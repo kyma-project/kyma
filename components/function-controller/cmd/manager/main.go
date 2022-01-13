@@ -6,6 +6,8 @@ import (
 	"os"
 	"time"
 
+	"github.com/kyma-project/kyma/components/function-controller/internal/controllers/serverless/metrics"
+
 	"github.com/go-logr/zapr"
 	k8s "github.com/kyma-project/kyma/components/function-controller/internal/controllers/kubernetes"
 	"github.com/kyma-project/kyma/components/function-controller/internal/controllers/serverless"
@@ -24,7 +26,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/handler"
 	ctrlzap "sigs.k8s.io/controller-runtime/pkg/log/zap"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
-	"sigs.k8s.io/controller-runtime/pkg/metrics"
 	"sigs.k8s.io/controller-runtime/pkg/source"
 	"sigs.k8s.io/controller-runtime/pkg/webhook"
 	// +kubebuilder:scaffold:imports
@@ -80,6 +81,10 @@ func main() {
 	setupLog.Info("Generating Kubernetes client config")
 	restConfig := ctrl.GetConfigOrDie()
 
+	setupLog.Info("Registering Prometheus Stats Collector")
+	prometheusCollector := metrics.NewPrometheusStatsCollector()
+	prometheusCollector.Register()
+
 	setupLog.Info("Initializing controller manager")
 	mgr, err := manager.New(restConfig, manager.Options{
 		Scheme:                 scheme,
@@ -116,7 +121,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	fnRecon := serverless.NewFunction(resourceClient, ctrl.Log, config.Function, git.NewGit2Go(), mgr.GetEventRecorderFor(serverlessv1alpha1.FunctionControllerValue), healthCh)
+	fnRecon := serverless.NewFunction(resourceClient, ctrl.Log, config.Function, git.NewGit2Go(), mgr.GetEventRecorderFor(serverlessv1alpha1.FunctionControllerValue), prometheusCollector, healthCh)
 	fnCtrl, err := fnRecon.SetupWithManager(mgr)
 	if err != nil {
 		setupLog.Error(err, "unable to create Function controller")
@@ -168,13 +173,6 @@ func main() {
 	// +kubebuilder:scaffold:builder
 
 	setupLog.Info("Running manager")
-
-	// register additional function metrics
-	metrics.Registry.MustRegister(
-		serverless.FunctionConfiguredStatusGaugeVec,
-		serverless.FunctionBuiltStatusGaugeVec,
-		serverless.FunctionRunningStatusGaugeVec,
-	)
 
 	if err := mgr.Start(ctrl.SetupSignalHandler()); err != nil {
 		setupLog.Error(err, "Unable to run the manager")
