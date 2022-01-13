@@ -2,7 +2,7 @@
 
 ## Overview
 
-[Istio](https://istio.io/) is an open platform for providing a uniform way to integrate microservices, manage traffic flow across microservices, enforce policies, and aggregate telemetry data.
+[Istio](https://istio.io/) is an open-source service mesh providing a uniform way to integrate microservices, manage traffic flow across microservices, enforce policies, and aggregate telemetry data.
 
 The documentation here is for developers only, please follow the installation instructions from [istio.io](https://istio.io/docs/setup/install/istioctl/) for all other use cases.
 
@@ -16,7 +16,7 @@ This chart can install the following Istio components:
 
 - ingressgateway
 - egressgateway
-- pilot
+- istiod (pilot, citadel, and galley)
 
 To enable or disable each component, change the corresponding `enabled` flag.
 
