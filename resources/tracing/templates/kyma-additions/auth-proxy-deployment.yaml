@@ -48,7 +48,7 @@ spec:
         - --pass-host-header={{ .Values.authProxy.config.passHostHeader }}
         envFrom:
         - secretRef:
-            name: {{ include "jaeger-operator.fullname" . }}-auth-proxy
+            name: {{ include "jaeger-operator.fullname" . }}-auth-proxy-default
             optional: false
         - secretRef:
             name: {{ include "jaeger-operator.fullname" . }}-auth-proxy-user

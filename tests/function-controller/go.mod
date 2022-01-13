@@ -6,6 +6,7 @@ require (
 	github.com/avast/retry-go v2.6.0+incompatible
 	github.com/go-git/go-billy/v5 v5.0.0
 	github.com/go-git/go-git/v5 v5.2.0
+	github.com/go-logr/zapr v0.1.1 // indirect
 	github.com/hashicorp/errwrap v1.0.0
 	github.com/hashicorp/go-multierror v1.1.0
 	github.com/kubernetes-sigs/service-catalog v0.3.0
@@ -18,11 +19,9 @@ require (
 	github.com/spf13/pflag v1.0.5
 	github.com/vrischmann/envconfig v1.3.0
 	golang.org/x/sync v0.0.0-20201207232520-09787c993a3a
-	honnef.co/go/tools v0.0.1-2020.1.5 // indirect
 	k8s.io/api v0.19.3
 	k8s.io/apimachinery v0.19.3
 	k8s.io/client-go v11.0.1-0.20190805182717-6502b5e7b1b5+incompatible
-	knative.dev/test-infra v0.0.0-20200921012245-37f1a12adbd3 // indirect
 	sigs.k8s.io/controller-runtime v0.6.5
 )
 

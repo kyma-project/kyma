@@ -20,7 +20,7 @@ The error could result from:
 
 ## Remedy
 
-- Wait for the DNSEntry to be created and if it's in the `Ready` status. To check the CR status, run:
+- Wait for the DNS Entry to be created and if it's in the `Ready` status. To check the CR status, run:
 
 ```bash
 kubectl get dnsentry.dns.gardener.cloud dns-entry

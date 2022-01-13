@@ -165,7 +165,7 @@ We have created the Service. Let's now expose it outside the cluster.
 
 > **CAUTION:** Exposing a workload to the outside world is always a potential security vulnerability, so tread carefully. In a production environment, always [secure the workload](../03-tutorials/00-api-exposure/apix-03-expose-and-secure-service.md) you expose.
 
-To expose our microservice, we must create an [APIRule](../05-technical-reference/00-custom-resources/apix-01-apirule.md) CR for it, just like when we [exposed our Function](02-deploy-expose-function.md#expose-the-function).
+To expose our microservice, we must create an [API Rule](../05-technical-reference/00-custom-resources/apix-01-apirule.md) CR for it, just like when we [exposed our Function](02-deploy-expose-function.md#expose-the-function).
 
 <div tabs name="Expose the microservice" group="deploy-expose-microservice">
   <details open>
@@ -238,9 +238,9 @@ The operation was successful if the command returns the (possibly empty `[]`) li
   Kyma Dashboard
   </summary>
 
-1. From your Services's view, get the APIRule's **Host**.
+1. From your Services's view, get the API Rule's **Host**.
 
-   > **NOTE:** Alternatively, from the left navigation go to **APIRules** and get the **Host** URL from there.
+   > **NOTE:** Alternatively, from the left navigation go to **API Rules** and get the **Host** URL from there.
 
 2. Paste this **Host** in your browser and add the `/orders` suffix to the end of it, like this: `{HOST}/orders`. Open it.
 

@@ -1,6 +1,3 @@
-{{- /*
-  Customization: Adjusted selector labels
-*/ -}}
 apiVersion: v1
 kind: Service
 metadata:

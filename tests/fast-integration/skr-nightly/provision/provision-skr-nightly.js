@@ -10,7 +10,6 @@ const {
 const {
   initializeK8sClient,
 } = require('../../utils');
-
 const {
   KCPConfig,
   KCPWrapper,
@@ -27,9 +26,9 @@ const {
 } = require('../../skr-test');
 
 // Mocha root hook
-process.env.KCP_KEB_API_URL = `https://kyma-env-broker.` + keb.host;
-process.env.KCP_GARDENER_NAMESPACE = `garden-kyma-dev`;
-process.env.KCP_OIDC_ISSUER_URL = `https://kymatest.accounts400.ondemand.com`;
+process.env.KCP_KEB_API_URL = 'https://kyma-env-broker.' + keb.host;
+process.env.KCP_GARDENER_NAMESPACE = 'garden-kyma-dev';
+process.env.KCP_OIDC_ISSUER_URL = 'https://kymatest.accounts400.ondemand.com';
 process.env.KCP_MOTHERSHIP_API_URL = 'https://mothership-reconciler.cp.dev.kyma.cloud.sap/v1';
 process.env.KCP_KUBECONFIG_API_URL = 'https://kubeconfig-service.cp.dev.kyma.cloud.sap';
 const kcp = new KCPWrapper(KCPConfig.fromEnv());
@@ -38,7 +37,11 @@ const kcp = new KCPWrapper(KCPConfig.fromEnv());
 describe('SKR nightly', function() {
   this.timeout(3600000 * 3); // 3h
   this.slow(5000);
-  before(`Fetch last SKR and deprovision if needed`, async function() {
+
+  const provisioningTimeout = 1000 * 60 * 60; // 1h
+  const deprovisioningTimeout = 1000 * 60 * 30; // 30m
+
+  before('Fetch last SKR and deprovision if needed', async function() {
     try {
       let runtime;
       this.options = gatherOptions(
@@ -57,7 +60,7 @@ describe('SKR nightly', function() {
       }
       if (runtime) {
         console.log('Deprovision last SKR.');
-        await deprovisionSKR(keb, runtime.instanceID);
+        await deprovisionSKR(keb, kcp, runtime.instanceID, deprovisioningTimeout);
         await unregisterKymaFromCompass(director, this.options.scenarioName);
       } else {
         console.log('Deprovisioning not needed - no previous SKR found.');
@@ -69,12 +72,18 @@ describe('SKR nightly', function() {
       };
 
       const skr = await provisionSKR(keb,
+          kcp,
           gardener,
           this.options.instanceID,
           this.options.runtimeName,
           null,
           null,
-          customParams);
+          customParams,
+          provisioningTimeout);
+
+      const runtimeStatus = await kcp.getRuntimeStatusOperations(this.options.instanceID);
+      console.log(`\nRuntime status after provisioning: ${runtimeStatus}`);
+
       this.shoot = skr.shoot;
       await addScenarioInCompass(director, this.options.scenarioName);
       await assignRuntimeToScenario(director, this.shoot.compassID, this.options.scenarioName);

@@ -14,11 +14,17 @@ You can use the `--values-file` and the `--value` flag.
 
   In the following example, `{VALUES_FILE_PATH}` is the path to a YAML file containing the desired configuration:
 
+  - For `global`, the values of `images.istio_pilot.version`, `images.istio_pilot.directory` and `images.istio_pilot.containerRegistryPath` will be overriden to `1.11.4`, `istio` and `docker.io` respectively.
   - For `ory`, the values of `hydra.deployment.resources.limits.cpu` and `hydra.deployment.resources.requests.cpu` will be overriden to `153m` and `53m` respectively.
-    
   - For `monitoring`, the values of `alertmanager.alertmanagerSpec.resources.limits.memory` and `alertmanager.alertmanagerSpec.resources.requests.memory` will be overriden to `304Mi` and `204Mi` respectively.
   
   ```yaml
+  global:
+    images:
+      istio_pilot:
+        version: 1.11.4
+        directory: "istio"
+        containerRegistryPath: "docker.io"
   ory:
     hydra:
       deployment:

@@ -50,7 +50,7 @@ Follow the instruction to deploy an unsecured instance of the HttpBin service an
    EOF
    ```
 
-4. Expose the service by creating an APIRule CR in your Namespace. If you don't want to use your custom domain but a Kyma domain, use the following Kyma Gateway: `kyma-gateway.kyma-system.svc.cluster.local`. Run:
+4. Expose the service by creating an API Rule CR in your Namespace. If you don't want to use your custom domain but a Kyma domain, use the following Kyma Gateway: `kyma-gateway.kyma-system.svc.cluster.local`. Run:
 
   ```bash
   cat <<EOF | kubectl apply -f -

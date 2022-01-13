@@ -488,6 +488,23 @@ function waitForSubscription(name, namespace = 'default', timeout = 180000) {
   );
 }
 
+function waitForClusterServiceBroker(name, timeout = 90000) {
+  return waitForK8sObject(
+      '/apis/servicecatalog.k8s.io/v1beta1/clusterservicebrokers',
+      {},
+      (_type, _apiObj, watchObj) => {
+        return (
+          watchObj.object.metadata.name.includes(name) &&
+            watchObj.object.status.conditions.some(
+                (c) => c.type == 'Ready' && c.status == 'True',
+            )
+        );
+      },
+      timeout,
+      `Waiting for ${name} cluster service broker (${timeout} ms)`,
+  );
+}
+
 function waitForServiceClass(name, namespace = 'default', timeout = 90000) {
   return waitForK8sObject(
       `/apis/servicecatalog.k8s.io/v1beta1/namespaces/${namespace}/serviceclasses`,
@@ -1663,6 +1680,7 @@ module.exports = {
   k8sDelete,
   waitForK8sObject,
   waitForClusterAddonsConfiguration,
+  waitForClusterServiceBroker,
   waitForServiceClass,
   waitForServicePlanByServiceClass,
   waitForServiceInstance,

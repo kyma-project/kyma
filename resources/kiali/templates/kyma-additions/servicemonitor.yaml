@@ -1,14 +1,14 @@
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
-  name: {{ template "kiali-server.fullname" . }}
+  name: {{ template "kiali-server.name" . }}
   namespace: {{ .Release.Namespace }}
   labels:
     {{- include "kiali-server.labels" . | nindent 4 }}
 spec:
   selector:
     matchLabels:
-      app: {{ template "kiali-server.fullname" . }}
+      {{- include "kiali-server.selectorLabels" . | nindent 6 }}
   namespaceSelector:
     matchNames:
       - {{ .Release.Namespace | quote }}

@@ -21,52 +21,81 @@ const {
 } = require('../audit-log');
 const {keb, gardener, director} = require('./helpers');
 const {prometheusPortForward} = require('../monitoring/client');
+const {KCPWrapper, KCPConfig} = require('../kcp/client');
+
+const kcp = new KCPWrapper(KCPConfig.fromEnv());
+
+const updateTimeout = 1000 * 60 * 20; // 20m
 
 function oidcE2ETest() {
-  describe('OIDCE2ETest()', function() {
-    it(`Assure initial OIDC config is applied on shoot cluster`, async function() {
+  describe('OIDC E2E Test', function() {
+    it('Assure initial OIDC config is applied on shoot cluster', async function() {
       ensureValidShootOIDCConfig(this.shoot, this.options.oidc0);
     });
 
-    it(`Assure initial OIDC config is part of kubeconfig`, async function() {
+    it('Assure initial OIDC config is part of kubeconfig', async function() {
       await ensureValidOIDCConfigInCustomerFacingKubeconfig(keb, this.options.instanceID, this.options.oidc0);
     });
 
-    it(`Assure initial cluster admin`, async function() {
+    it('Assure initial cluster admin', async function() {
       await ensureKymaAdminBindingExistsForUser(this.options.administrator0);
     });
 
-    it(`Update SKR service instance with OIDC config`, async function() {
+    it('Update SKR service instance with OIDC config', async function() {
       const customParams = {
         oidc: this.options.oidc1,
       };
-
-      const skr = await updateSKR(keb, gardener, this.options.instanceID, this.shoot.name, customParams);
+      const skr = await updateSKR(keb,
+          kcp,
+          gardener,
+          this.options.instanceID,
+          this.shoot.name,
+          customParams,
+          updateTimeout,
+          null,
+          false);
       this.shoot = skr.shoot;
     });
 
-    it(`Assure updated OIDC config is applied on shoot cluster`, async function() {
+    it('Should get Runtime Status after updating OIDC config', async function() {
+      const runtimeStatus = await kcp.getRuntimeStatusOperations(this.options.instanceID);
+      console.log(`\nRuntime status: ${runtimeStatus}`);
+    });
+
+    it('Assure updated OIDC config is applied on shoot cluster', async function() {
       ensureValidShootOIDCConfig(this.shoot, this.options.oidc1);
     });
 
-    it(`Assure updated OIDC config is part of kubeconfig`, async function() {
+    it('Assure updated OIDC config is part of kubeconfig', async function() {
       await ensureValidOIDCConfigInCustomerFacingKubeconfig(keb, this.options.instanceID, this.options.oidc1);
     });
 
-    it(`Assure cluster admin is preserved`, async function() {
+    it('Assure cluster admin is preserved', async function() {
       await ensureKymaAdminBindingExistsForUser(this.options.administrator0);
     });
 
-    it(`Update SKR service instance with new admins`, async function() {
+    it('Update SKR service instance with new admins', async function() {
       const customParams = {
         administrators: this.options.administrators1,
       };
-
-      const skr = await updateSKR(keb, gardener, this.options.instanceID, this.shoot.name, customParams);
+      const skr = await updateSKR(keb,
+          kcp,
+          gardener,
+          this.options.instanceID,
+          this.shoot.name,
+          customParams,
+          updateTimeout,
+          null,
+          false);
       this.shoot = skr.shoot;
     });
 
-    it(`Assure only new cluster admins are configured`, async function() {
+    it('Should get Runtime Status after updating admins', async function() {
+      const runtimeStatus = await kcp.getRuntimeStatusOperations(this.options.instanceID);
+      console.log(`\nRuntime status: ${runtimeStatus}`);
+    });
+
+    it('Assure only new cluster admins are configured', async function() {
       await ensureKymaAdminBindingExistsForUser(this.options.administrators1[0]);
       await ensureKymaAdminBindingExistsForUser(this.options.administrators1[1]);
       await ensureKymaAdminBindingDoesNotExistsForUser(this.options.administrator0);

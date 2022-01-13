@@ -28,7 +28,8 @@ var availableScenarios = map[string][]scenario{
 	"serverless-integration": {
 		{displayName: "simple", testSuite: scenarios.SimpleFunctionTest},
 		{displayName: "gitops", testSuite: scenarios.GitopsSteps}},
-	"kyma-integration": {{displayName: "full", testSuite: scenarios.FunctionTestStep}},
+	"kyma-integration":     {{displayName: "full", testSuite: scenarios.FunctionTestStep}},
+	"git-auth-integration": {{displayName: "gitauth", testSuite: scenarios.GitAuthTestSteps}},
 }
 
 type config struct {
@@ -49,8 +50,6 @@ func main() {
 	failOnError(err, logf)
 	logf.Printf("loaded config")
 
-	restConfig := controllerruntime.GetConfigOrDie()
-
 	scenarioName := os.Args[1]
 	logf.Printf("Scenario: %s", scenarioName)
 	os.Args = os.Args[1:]
@@ -59,6 +58,7 @@ func main() {
 		logf.Errorf("Scenario %s not exist", scenarioName)
 		os.Exit(1)
 	}
+	restConfig := controllerruntime.GetConfigOrDie()
 
 	rand.Seed(time.Now().UnixNano())
 

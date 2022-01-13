@@ -113,6 +113,9 @@ describe('SKR-Upgrade-test', function() {
   this.timeout(60 * 60 * 1000 * 3); // 3h
   this.slow(5000);
 
+  const provisioningTimeout = 1000 * 60 * 60; // 1h
+  const deprovisioningTimeout = 1000 * 60 * 30; // 30m
+
   let skr;
 
   // SKR Provisioning
@@ -126,21 +129,38 @@ describe('SKR-Upgrade-test', function() {
   });
 
   it(`Provision SKR with ID ${instanceID}`, async function() {
-    skr = await provisionSKR(keb, gardener, instanceID, runtimeName, null, null, {'kymaVersion': kymaVersion});
+    console.log(`Provisioning SKR with version ${kymaVersion}`);
+    const customParams = {
+      'kymaVersion': kymaVersion,
+    };
+    debug(`Provision SKR with Custom Parameters ${JSON.stringify(customParams)}`);
+    skr = await provisionSKR(keb,
+        kcp,
+        gardener,
+        instanceID,
+        runtimeName,
+        null,
+        null,
+        customParams,
+        provisioningTimeout);
+  });
+
+  it(`Should get Runtime Status after provisioning`, async function() {
+    const runtimeStatus = await kcp.getRuntimeStatusOperations(instanceID);
+    console.log(`\nRuntime status: ${runtimeStatus}`);
   });
 
   it(`Should save kubeconfig for the SKR to ~/.kube/config`, async function() {
     saveKubeconfig(skr.shoot.kubeconfig);
   });
 
-  it(`Should initialize K8s client`, async function() {
+  it('Should initialize K8s client', async function() {
     await initializeK8sClient({kubeconfig: skr.shoot.kubeconfig});
   });
 
   // Upgrade Test Praparation
   const director = new DirectorClient(DirectorConfig.fromEnv());
   const withCentralAppConnectivity = (process.env.WITH_CENTRAL_APP_CONNECTIVITY === 'true');
-
   const testNS = 'test';
 
   it('Assign SKR to scenario', async function() {
@@ -195,14 +215,14 @@ describe('SKR-Upgrade-test', function() {
 
   // Perform Upgrade
 
-  it(`Perform Upgrade`, async function() {
+  it('Perform Upgrade', async function() {
     await kcp.upgradeKyma(instanceID, kymaUpgradeVersion);
     debug('Upgrade Done!');
   });
 
-  it(`Get Runtime Status`, async function() {
-    const runtimeStatus = await kcp.runtimes({instanceID: instanceID});
-    debug(inspect(runtimeStatus, false, null, false));
+  it('Should get Runtime Status after upgrade', async function() {
+    const runtimeStatus = await kcp.getRuntimeStatusOperations(instanceID);
+    console.log(`\nRuntime status: ${runtimeStatus}`);
   });
 
   // Perform Tests after Upgrade
@@ -237,7 +257,6 @@ describe('SKR-Upgrade-test', function() {
 
   // Cleanup
   const skipCleanup = getEnvOrThrow('SKIP_CLEANUP');
-
   if (skipCleanup === 'FALSE') {
     it('Unregister Kyma resources from Compass', async function() {
       await unregisterKymaFromCompass(director, scenarioName);
@@ -252,7 +271,7 @@ describe('SKR-Upgrade-test', function() {
     });
 
     it('Deprovision SKR', async function() {
-      await deprovisionSKR(keb, instanceID);
+      await deprovisionSKR(keb, kcp, instanceID, deprovisioningTimeout);
     });
   }
 });

@@ -359,6 +359,11 @@ func (in *SubscriptionStatus) DeepCopyInto(out *SubscriptionStatus) {
 			(*in)[i].DeepCopyInto(&(*out)[i])
 		}
 	}
+	if in.CleanEventTypes != nil {
+		in, out := &in.CleanEventTypes, &out.CleanEventTypes
+		*out = make([]string, len(*in))
+		copy(*out, *in)
+	}
 	out.EmsSubscriptionStatus = in.EmsSubscriptionStatus
 	if in.Config != nil {
 		in, out := &in.Config, &out.Config

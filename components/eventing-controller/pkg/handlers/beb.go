@@ -159,6 +159,9 @@ func (b *BEB) SyncSubscription(subscription *eventingv1alpha1.Subscription, clea
 	// set the status of bebSubscription in ev2Subscription
 	statusChanged = b.setEmsSubscriptionStatus(subscription, bebSubscription) || statusChanged
 
+	// get the clean event types
+	subscription.Status.CleanEventTypes = statusCleanEventTypes(bebSubscription.Events)
+
 	return statusChanged, nil
 }
 
@@ -282,6 +285,14 @@ func (b *BEB) getSubscription(name string) (*types.Subscription, error) {
 		return nil, fmt.Errorf("get subscription failed: %w; %v", errors.New(strconv.Itoa(resp.StatusCode)), resp.Message)
 	}
 	return bebSubscription, nil
+}
+
+func statusCleanEventTypes(events types.Events) []string {
+	var cleanEventTypes []string
+	for _, e := range events {
+		cleanEventTypes = append(cleanEventTypes, e.Type)
+	}
+	return cleanEventTypes
 }
 
 func (b *BEB) deleteSubscription(name string) error {

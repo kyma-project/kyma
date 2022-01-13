@@ -49,7 +49,7 @@ class KCPWrapper {
     this.password = config.password;
     this.host = config.host;
 
-    this.kcpConfigPath = `config.yaml`;
+    this.kcpConfigPath = 'config.yaml';
     const stream = fs.createWriteStream(`${this.kcpConfigPath}`);
     stream.once('open', (_) => {
       stream.write(`gardener-namespace: ${this.gardenerNamespace}\n`);
@@ -65,47 +65,49 @@ class KCPWrapper {
   }
 
   async runtimes(query) {
-    let args = [`runtimes`, `--output`, `json`];
+    let args = ['runtimes', '--output', 'json'];
     if (query.account) {
-      args = args.concat(`--account`, `${query.account}`);
+      args = args.concat('--account', `${query.account}`);
     }
     if (query.subaccount) {
-      args = args.concat(`--subaccount`, `${query.subaccount}`);
+      args = args.concat('--subaccount', `${query.subaccount}`);
     }
     if (query.instanceID) {
-      args = args.concat(`--instance-id`, `${query.instanceID}`);
+      args = args.concat('--instance-id', `${query.instanceID}`);
     }
     if (query.runtimeID) {
-      args = args.concat(`--runtime-id`, `${query.runtimeID}`);
+      args = args.concat('--runtime-id', `${query.runtimeID}`);
     }
     if (query.region) {
-      args = args.concat(`--region`, `${query.region}`);
+      args = args.concat('--region', `${query.region}`);
     }
     if (query.shoot) {
-      args = args.concat(`--shoot`, `${query.shoot}`);
+      args = args.concat('--shoot', `${query.shoot}`);
     }
     if (query.state) {
-      args = args.concat(`--state`, `${query.state}`);
+      args = args.concat('--state', `${query.state}`);
+    }
+    if (query.ops) {
+      args = args.concat('--ops');
     }
     const result = await this.exec(args);
     return JSON.parse(result);
   }
 
   async login() {
-    const args = [`login`, `-u`, `${this.username}`, `-p`, `${this.password}`];
+    const args = ['login', '-u', `${this.username}`, '-p', `${this.password}`];
     return await this.exec(args);
   }
 
   async version() {
-    const args = [`--version`];
+    const args = ['--version'];
     return await this.exec(args);
   }
 
   async upgradeKyma(instanceID, kymaUpgradeVersion) {
-    const args = [`upgrade`, `kyma`, `--version=${kymaUpgradeVersion}`, `--target`, `instance-id=${instanceID}`];
+    const args = ['upgrade', 'kyma', `--version=${kymaUpgradeVersion}`, '--target', `instance-id=${instanceID}`];
     try {
       const res = await this.exec(args);
-
       // output if successful: "OrchestrationID: 22f19856-679b-4e68-b533-f1a0a46b1eed"
       // so we need to extract the uuid
       const orchestrationID = res.split(' ')[1];
@@ -138,13 +140,19 @@ class KCPWrapper {
       } catch (error) {
         debug(error);
       }
-
       throw new Error('Kyma Upgrade failed');
     } catch (error) {
       debug(error);
       throw new Error('failed during upgradeKyma');
     }
   };
+
+  async getRuntimeStatusOperations(instanceID) {
+    await this.login();
+    const runtimeStatus = await this.runtimes({instanceID: instanceID, ops: true});
+
+    return JSON.stringify(runtimeStatus, null, '\t');
+  }
 
   async getOrchestrationsOperations(orchestrationID) {
     // debug(`Running getOrchestrationsOperations...`)
@@ -158,20 +166,6 @@ class KCPWrapper {
     } catch (error) {
       debug(error);
       throw new Error('failed during getOrchestrationsOperations');
-    }
-  }
-
-  async getOrchestrationsOperationStatus(orchestrationID, operationID) {
-    // debug(`Running getOrchestrationsOperationStatus...`)
-    const args = ['orchestration', `${orchestrationID}`, '--operation', `${operationID}`, '-o', 'json'];
-    try {
-      let res = await this.exec(args);
-      res = JSON.parse(res);
-
-      return res;
-    } catch (error) {
-      debug(error);
-      throw new Error('failed during getOrchestrationsOperationStatus');
     }
   }
 
@@ -238,10 +232,10 @@ class KCPWrapper {
   async exec(args) {
     try {
       const defaultArgs = [
-        `--config`, `${this.kcpConfigPath}`,
+        '--config', `${this.kcpConfigPath}`,
       ];
       // debug([`>  kcp`, defaultArgs.concat(args).join(" ")].join(" "))
-      const output = await execa(`kcp`, defaultArgs.concat(args));
+      const output = await execa('kcp', defaultArgs.concat(args));
       // debug(output);
       return output.stdout;
     } catch (err) {

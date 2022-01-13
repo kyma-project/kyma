@@ -1,16 +1,16 @@
 ---
-title: Cannot connect to a service exposed by an APIRule
+title: Cannot connect to a service exposed by an API Rule
 ---
 
 ## Basic diagnostics
 
-API Gateway is a Kubernetes controller, which operates on APIRule custom resources. To diagnose the problems, inspect the [`status`](../../05-technical-reference/00-custom-resources/apix-01-apirule.md#status-codes) field of the APIRule CR:
+API Gateway is a Kubernetes controller, which operates on API Rule custom resources. To diagnose the problems, inspect the [`status`](../../05-technical-reference/00-custom-resources/apix-01-apirule.md#status-codes) field of the API Rule CR:
 
    ```bash
    kubectl describe apirules.gateway.kyma-project.io -n {NAMESPACE} {NAME}
    ```
 
-If the status is `Error`, edit the APIRule and fix issues described in `.Status.APIRuleStatus.Desc`. If you still encounter issues, make sure the API Gateway, Hydra and Oathkeeper are running or take a look at other, more specific troubleshooting guides.
+If the status is `Error`, edit the API Rule and fix issues described in `.Status.APIRuleStatus.Desc`. If you still encounter issues, make sure the API Gateway, Hydra and Oathkeeper are running or take a look at other, more specific troubleshooting guides.
 
 ## 401 Unauthorized or 403 Forbidden
 
@@ -107,7 +107,7 @@ If you reach your service and get `404 Not Found` in response, make sure that:
   kubectl get rules.oathkeeper.ory.sh -n {NAMESPACE}
   ```
 
-  >**TIP:** Name of the Rule consists of the name of the APIRule and a random suffix.
+  >**TIP:** Name of the Rule consists of the name of the API Rule and a random suffix.
 
 - Proper VirtualService has been created:
 
@@ -115,7 +115,7 @@ If you reach your service and get `404 Not Found` in response, make sure that:
   kubectl get virtualservices.networking.istio.io -n {NAMESPACE}
   ```
 
-  >**TIP:** Name of the VirtualService consists of the name of the APIRule and a random suffix.
+  >**TIP:** Name of the VirtualService consists of the name of the API Rule and a random suffix.
 
 Sometimes Oathkeeper Maester controller stops reconciling Rules on long-living clusters. This can result in random `404 Not Found` responses, because Oathkeeper does not contain Rules reflecting the actual state of the cluster. A simple restart of the Pod resolves the issue, but you might want to verify if that is the issue you have encountered. To do so:
 

@@ -4,6 +4,7 @@ const {
   kubectlDeleteDir,
   waitForPodWithLabel,
   waitForFunction,
+  waitForClusterServiceBroker,
   waitForServiceInstance,
   waitForServiceBinding,
   waitForServiceBindingUsage,
@@ -245,10 +246,14 @@ async function deploy() {
   const times = [];
 
   await waitForPodWithLabel('app', 'service-catalog-addons-service-binding-usage-controller', 'kyma-system');
-  await waitForPodWithLabel('app', 'service-catalog-ui', 'kyma-system');
   await waitForPodWithLabel('app', 'service-catalog-catalog-controller-manager', 'kyma-system');
   await waitForPodWithLabel('app', 'service-catalog-catalog-webhook', 'kyma-system');
   await waitForPodWithLabel('app', 'service-broker-proxy-k8s', 'kyma-system');
+
+  await waitForClusterServiceBroker('helm-broker', 5 * 60 * 1000);
+  await waitForClusterServiceBroker('sm-auditlog-api', 5 * 60 * 1000);
+  await waitForClusterServiceBroker('sm-html5-apps-repo', 5 * 60 * 1000);
+  await waitForClusterServiceBroker('sm-auditlog-management', 5 * 60 * 1000);
 
   times.push(installRedisExample());
   times.push(installAuditlogExample());
@@ -256,7 +261,7 @@ async function deploy() {
   times.push(installAuditManagementExample());
 
   return Promise.all(times).then(function(...args) {
-    console.log(`\nSuccessfully deployed all resources:`);
+    console.log('\nSuccessfully deployed all resources:');
     const items = args[0];
     items.sort(function(a, b) {
       if (a.duration < b.duration) {
