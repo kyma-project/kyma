@@ -161,7 +161,7 @@ describe("Eventing tests", function () {
     }
 
     // Delete eventing backend secret if it was created by test
-    if (eventMeshSecretFilePath !== "") {
+    if (eventMeshSecretFilePath) {
       debug('Removing Event Mesh secret');
       await deleteEventingBackendK8sSecret(backendK8sSecretName, backendK8sSecretNamespace);
     }
