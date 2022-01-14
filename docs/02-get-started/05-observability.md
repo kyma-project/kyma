@@ -47,9 +47,7 @@ You can now browse the logs.
    
 2. Go to **Workloads** > **Functions**.
    
-3. Select your `lastorder` Function.
-   
-4. Click on **View Logs**.
+3. Select your `lastorder` Function and click on **View Logs**.
 
 You can now browse the logs.
   </details>
