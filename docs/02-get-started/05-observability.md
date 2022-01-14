@@ -20,16 +20,36 @@ To do that, we'll use the Grafana dashboard that comes with Kyma.
 
 ## View the logs
 
+<div tabs name="View the logs" group="view-logs">
+  <details open>
+  <summary label="Grafana dasboard">
+  Grafana dashboard
+  </summary>
+
 1. In the Grafana dashboard, use the left menu to navigate to **Explore** and choose **Loki** from the dropdown list.
 2. Click on **Log browser** and select the following values:
    - **1. Select labels to search in**: `container`, `function`
-   - **2. Find values for the selected labels**: for **function** choose `lastorder`, for **container** choose `function` 
-   
-   Click **Show logs**.
+   - **2. Find values for the selected labels**: for **function** choose `lastorder`, for **container** choose `function`
+3. Click **Show logs**.
 
     > **NOTE:** Alternatively, type or paste the `{function="lastorder", container="function"}` query and press `Shift`+`Enter` or click on **Run query**. 
 
-You can now browse the logs. 
+You can now browse the logs.
+
+  </details>
+  <details>
+  <summary label="Kyma Dashboard">
+  Kyma Dashboard
+  </summary>
+
+1. In Kyma Dashboard, go to the `default` Namespace.
+2. Go to **Workloads** > **Functions**.
+3. Select your `lastorder` Function.
+4. Click on **View Logs**.
+
+You can now browse the logs.
+  </details>
+</div>
 
 ## View the metrics
 
