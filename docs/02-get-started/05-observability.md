@@ -29,7 +29,9 @@ To do that, we'll use the Grafana dashboard that comes with Kyma.
 
     > **NOTE:** Alternatively, type or paste the `{function="lastorder", container="function"}` query and press `Shift`+`Enter` or click on **Run query**. 
 
-You can now browse the logs. 
+You can now browse the logs.  
+
+   > **NOTE:** You can also view the logs in Kyma Dashboard itself. Go to the `default` Namespace > **Workloads** > **Functions** > your `lastorder` Function, scroll down, and click on **View Logs**.
 
 ## View the metrics
 
