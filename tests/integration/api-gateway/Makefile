@@ -8,7 +8,7 @@ TAG := $(DOCKER_TAG)
 
 # include $(SCRIPTS_DIR)/go-dep.mk
 
-# test target is overriden, so it won't run actual tests
+# test target is overridden, so it won't run actual tests
 test:
 	@echo -n ""
 
