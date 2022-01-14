@@ -9,7 +9,6 @@ import (
 	"time"
 
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/tracing"
-	//_type "google.golang.org/genproto/googleapis/actions/sdk/v2/interactionmodel/type"
 
 	cev2event "github.com/cloudevents/sdk-go/v2/event"
 	"github.com/google/uuid"
