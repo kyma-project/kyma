@@ -63,9 +63,10 @@ describe("Telemetry operator", function () {
     let podList = res.body.items;
     assert.equal(podList.length, 1);
   });
+
   describe("Set up mockserver", function () {
     before(async function () {
-      await waitForDeployment("mockserver", mockNamespace);
+      // await waitForDeployment("mockserver", mockNamespace);
       let { body } = await k8sCoreV1Api.listNamespacedPod(mockNamespace);
       let mockPod = body.items[0].metadata.name;
       cancelPortForward = kubectlPortForward(
@@ -73,14 +74,6 @@ describe("Telemetry operator", function () {
         mockPod,
         mockServerPort
       );
-    });
-    after(async function () {
-      cancelPortForward();
-      await k8sDelete(logPipelineCR, telemetryNamespace);
-      await helm.uninstallChart("mockserver", mockNamespace);
-      await helm.uninstallChart("mockserver-config", mockNamespace);
-      await helm.uninstallChart("telemetry", telemetryNamespace);
-      await k8sCoreV1Api.deleteNamespace(mockNamespace);
     });
 
     it("Should not receive HTTP traffic", function () {
@@ -90,11 +83,17 @@ describe("Telemetry operator", function () {
     it("Apply HTTP output plugin to fluent-bit", async function () {
       await k8sApply(logPipelineCR, telemetryNamespace);
       await sleep(10000); // wait for controller to reconcile
-      await waitForDaemonSet(fluentBitName, telemetryNamespace, 180000);
+      await waitForDaemonSet(fluentBitName, telemetryNamespace);
     });
 
     it("Should receive HTTP traffic from fluent-bit", function () {
       return checkMockserverWasCalled(true);
     }).timeout(5000);
+
+    after(async function () {
+      cancelPortForward();
+      await k8sDelete(logPipelineCR, telemetryNamespace);
+      await k8sCoreV1Api.deleteNamespace(mockNamespace);
+    });
   });
 });
