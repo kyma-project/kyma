@@ -30,7 +30,7 @@ global:
       sha: ""
     pushgateway:
       name: "pushgateway"
-      version: v1.3.0
+      version: v1.4.2
       directory: "external/prom"
     node_exporter:
       name: "node-exporter"

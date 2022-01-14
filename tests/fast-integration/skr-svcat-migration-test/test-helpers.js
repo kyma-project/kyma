@@ -38,7 +38,9 @@ const functions = [
 ];
 
 async function saveKubeconfig(kubeconfig) {
-  fs.mkdirSync(`${os.homedir()}/.kube`, true);
+  if (!fs.existsSync(`${os.homedir()}/.kube`)) {
+    fs.mkdirSync(`${os.homedir()}/.kube`, true);
+  }
   fs.writeFileSync(`${os.homedir()}/.kube/config`, kubeconfig);
 }
 

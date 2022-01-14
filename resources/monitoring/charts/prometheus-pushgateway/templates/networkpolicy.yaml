@@ -10,7 +10,7 @@ metadata:
 {{- fail "One of `allowAll` or `customSelectors` must be specified." }}
 {{- end }}
   labels:
-{{ template "prometheus-pushgateway.defaultLabels" merge (dict "extraLabels" dict) .}}
+{{ template "prometheus-pushgateway.defaultLabels" merge (dict "extraLabels" .Values.podLabels) .  }}
 spec:
   podSelector:
     matchLabels:

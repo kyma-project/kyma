@@ -1,3 +1,7 @@
+{{- /*
+  Customization: Using prometheus-pushgateway.selectorLabels template in the label selector.
+*/ -}}
+
 {{- if .Values.podDisruptionBudget -}}
 apiVersion: policy/v1beta1
 kind: PodDisruptionBudget
@@ -8,6 +12,6 @@ metadata:
 spec:
   selector:
     matchLabels:
-      app.kubernetes.io/name: {{ template "kube-state-metrics.name" . }}
+      {{- include "prometheus-pushgateway.selectorLabels" . | nindent 6 }}
 {{ toYaml .Values.podDisruptionBudget | indent 2 }}
 {{- end -}}
