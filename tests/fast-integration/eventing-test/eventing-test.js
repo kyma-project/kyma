@@ -1,6 +1,5 @@
 const axios = require("axios");
 const https = require("https");
-const { expect, assert } = require("chai");
 const httpsAgent = new https.Agent({
   rejectUnauthorized: false, // curl -k
 });
@@ -134,8 +133,8 @@ describe("Eventing tests", function () {
 
     // If eventMeshSecretFilePath is specified then create a k8s secret for eventing-backend
     // else use existing k8s secret as specified in backendK8sSecretName & backendK8sSecretNamespace
-    if (eventMeshSecretFilePath !== "") {
-      console.log("Creating Event Mesh secret")
+    if (eventMeshSecretFilePath) {
+      console.log('Creating Event Mesh secret')
       const eventMeshInfo = await createEventingBackendK8sSecret(eventMeshSecretFilePath, backendK8sSecretName, backendK8sSecretNamespace);
       setEventMeshSourceNamespace(eventMeshInfo["namespace"]);
     }

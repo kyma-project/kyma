@@ -943,7 +943,6 @@ function ignore404(e) {
     return
   }
 
-  // otherwise throw error
   throw e
 }
 

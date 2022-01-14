@@ -22,7 +22,7 @@ const dashboards = {
     // The assert function receives the `data.result` section of the query result:
     // https://prometheus.io/docs/prometheus/latest/querying/api/#instant-queries
     assert: function (result) {
-      let foundMetric = result.find(res => res.metric.destination_service.startsWith('eventing-event-publisher-proxy'));
+      const foundMetric = result.find(res => res.metric.destination_service.startsWith('eventing-event-publisher-proxy'));
       expect(foundMetric).to.be.not.undefined
     }
   },

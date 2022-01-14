@@ -40,7 +40,7 @@ describe('Provision SKR cluster', function () {
         const provisioningTimeout = 1000 * 60 * 60 // 1h
 
         const customParams = { "kymaVersion": kymaVersion };
-        if (kymaOverridesVersion !== "") {
+        if (kymaOverridesVersion) {
             customParams["overridesVersion"] = kymaOverridesVersion;
         }
 
