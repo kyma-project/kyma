@@ -2,6 +2,7 @@
   Customization:
   * Made the dashboard not editable
   * Unset the timezone
+  * Used old name
 */ -}}
 {{- /*
 Generated from 'prometheus-remote-write' from https://raw.githubusercontent.com/prometheus-operator/kube-prometheus/master/manifests/grafana-dashboardDefinitions.yaml
@@ -9,7 +10,7 @@ Do not change in-place! In order to change this file first read following link:
 https://github.com/prometheus-community/helm-charts/tree/main/charts/kube-prometheus-stack/hack
 */ -}}
 {{- $kubeTargetVersion := default .Capabilities.KubeVersion.GitVersion .Values.kubeTargetVersionOverride }}
-{{- if and (semverCompare ">=1.14.0-0" $kubeTargetVersion) (semverCompare "<9.9.9-9" $kubeTargetVersion) .Values.grafana.enabled .Values.grafana.defaultDashboardsEnabled .Values.prometheus.prometheusSpec.remoteWriteDashboards }}
+{{- if and (or .Values.grafana.enabled .Values.grafana.forceDeployDashboards) (semverCompare ">=1.14.0-0" $kubeTargetVersion) (semverCompare "<9.9.9-9" $kubeTargetVersion) .Values.grafana.defaultDashboardsEnabled .Values.prometheus.prometheusSpec.remoteWriteDashboards }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -45,7 +46,7 @@ data:
         "links": [
 
         ],
-        "refresh": "",
+        "refresh": "60s",
         "rows": [
             {
                 "collapse": false,
@@ -60,6 +61,7 @@ data:
                         "dashes": false,
                         "datasource": "$datasource",
                         "fill": 1,
+                        "fillGradient": 0,
                         "gridPos": {
 
                         },
@@ -96,7 +98,7 @@ data:
                         "steppedLine": false,
                         "targets": [
                             {
-                                "expr": "(\n  prometheus_remote_storage_highest_timestamp_in_seconds{cluster=~\"$cluster\", instance=~\"$instance\"} \n-  \n  ignoring(remote_name, url) group_right(instance) prometheus_remote_storage_queue_highest_sent_timestamp_seconds{cluster=~\"$cluster\", instance=~\"$instance\"}\n)\n",
+                                "expr": "(\n  prometheus_remote_storage_highest_timestamp_in_seconds{cluster=~\"$cluster\", instance=~\"$instance\"} \n-  \n  ignoring(remote_name, url) group_right(instance) (prometheus_remote_storage_queue_highest_sent_timestamp_seconds{cluster=~\"$cluster\", instance=~\"$instance\"} != 0)\n)\n",
                                 "format": "time_series",
                                 "intervalFactor": 2,
                                 "legendFormat": "{{`{{`}}cluster{{`}}`}}:{{`{{`}}instance{{`}}`}} {{`{{`}}remote_name{{`}}`}}:{{`{{`}}url{{`}}`}}",
@@ -152,6 +154,7 @@ data:
                         "dashes": false,
                         "datasource": "$datasource",
                         "fill": 1,
+                        "fillGradient": 0,
                         "gridPos": {
 
                         },
@@ -188,7 +191,7 @@ data:
                         "steppedLine": false,
                         "targets": [
                             {
-                                "expr": "(\n  rate(prometheus_remote_storage_highest_timestamp_in_seconds{cluster=~\"$cluster\", instance=~\"$instance\"}[5m])  \n- \n  ignoring (remote_name, url) group_right(instance) rate(prometheus_remote_storage_queue_highest_sent_timestamp_seconds{cluster=~\"$cluster\", instance=~\"$instance\"}[5m])\n)\n",
+                                "expr": "clamp_min(\n  rate(prometheus_remote_storage_highest_timestamp_in_seconds{cluster=~\"$cluster\", instance=~\"$instance\"}[5m])  \n- \n  ignoring (remote_name, url) group_right(instance) rate(prometheus_remote_storage_queue_highest_sent_timestamp_seconds{cluster=~\"$cluster\", instance=~\"$instance\"}[5m])\n, 0)\n",
                                 "format": "time_series",
                                 "intervalFactor": 2,
                                 "legendFormat": "{{`{{`}}cluster{{`}}`}}:{{`{{`}}instance{{`}}`}} {{`{{`}}remote_name{{`}}`}}:{{`{{`}}url{{`}}`}}",
@@ -257,6 +260,7 @@ data:
                         "dashes": false,
                         "datasource": "$datasource",
                         "fill": 1,
+                        "fillGradient": 0,
                         "gridPos": {
 
                         },
@@ -293,7 +297,7 @@ data:
                         "steppedLine": false,
                         "targets": [
                             {
-                                "expr": "rate(\n  prometheus_remote_storage_samples_in_total{cluster=~\"$cluster\", instance=~\"$instance\"}[5m])\n- \n  ignoring(remote_name, url) group_right(instance) rate(prometheus_remote_storage_succeeded_samples_total{cluster=~\"$cluster\", instance=~\"$instance\"}[5m])\n- \n  rate(prometheus_remote_storage_dropped_samples_total{cluster=~\"$cluster\", instance=~\"$instance\"}[5m])\n",
+                                "expr": "rate(\n  prometheus_remote_storage_samples_in_total{cluster=~\"$cluster\", instance=~\"$instance\"}[5m])\n- \n  ignoring(remote_name, url) group_right(instance) (rate(prometheus_remote_storage_succeeded_samples_total{cluster=~\"$cluster\", instance=~\"$instance\"}[5m]) or rate(prometheus_remote_storage_samples_total{cluster=~\"$cluster\", instance=~\"$instance\"}[5m]))\n- \n  (rate(prometheus_remote_storage_dropped_samples_total{cluster=~\"$cluster\", instance=~\"$instance\"}[5m]) or rate(prometheus_remote_storage_samples_dropped_total{cluster=~\"$cluster\", instance=~\"$instance\"}[5m]))\n",
                                 "format": "time_series",
                                 "intervalFactor": 2,
                                 "legendFormat": "{{`{{`}}cluster{{`}}`}}:{{`{{`}}instance{{`}}`}} {{`{{`}}remote_name{{`}}`}}:{{`{{`}}url{{`}}`}}",
@@ -362,6 +366,7 @@ data:
                         "dashes": false,
                         "datasource": "$datasource",
                         "fill": 1,
+                        "fillGradient": 0,
                         "gridPos": {
 
                         },
@@ -455,6 +460,7 @@ data:
                         "dashes": false,
                         "datasource": "$datasource",
                         "fill": 1,
+                        "fillGradient": 0,
                         "gridPos": {
 
                         },
@@ -547,6 +553,7 @@ data:
                         "dashes": false,
                         "datasource": "$datasource",
                         "fill": 1,
+                        "fillGradient": 0,
                         "gridPos": {
 
                         },
@@ -639,6 +646,7 @@ data:
                         "dashes": false,
                         "datasource": "$datasource",
                         "fill": 1,
+                        "fillGradient": 0,
                         "gridPos": {
 
                         },
@@ -744,6 +752,7 @@ data:
                         "dashes": false,
                         "datasource": "$datasource",
                         "fill": 1,
+                        "fillGradient": 0,
                         "gridPos": {
 
                         },
@@ -836,6 +845,7 @@ data:
                         "dashes": false,
                         "datasource": "$datasource",
                         "fill": 1,
+                        "fillGradient": 0,
                         "gridPos": {
 
                         },
@@ -872,7 +882,7 @@ data:
                         "steppedLine": false,
                         "targets": [
                             {
-                                "expr": "prometheus_remote_storage_pending_samples{cluster=~\"$cluster\", instance=~\"$instance\"}",
+                                "expr": "prometheus_remote_storage_pending_samples{cluster=~\"$cluster\", instance=~\"$instance\"} or prometheus_remote_storage_samples_pending{cluster=~\"$cluster\", instance=~\"$instance\"}",
                                 "format": "time_series",
                                 "intervalFactor": 2,
                                 "legendFormat": "{{`{{`}}cluster{{`}}`}}:{{`{{`}}instance{{`}}`}} {{`{{`}}remote_name{{`}}`}}:{{`{{`}}url{{`}}`}}",
@@ -941,6 +951,7 @@ data:
                         "dashes": false,
                         "datasource": "$datasource",
                         "fill": 1,
+                        "fillGradient": 0,
                         "gridPos": {
 
                         },
@@ -1033,6 +1044,7 @@ data:
                         "dashes": false,
                         "datasource": "$datasource",
                         "fill": 1,
+                        "fillGradient": 0,
                         "gridPos": {
 
                         },
@@ -1138,6 +1150,7 @@ data:
                         "dashes": false,
                         "datasource": "$datasource",
                         "fill": 1,
+                        "fillGradient": 0,
                         "gridPos": {
 
                         },
@@ -1174,7 +1187,7 @@ data:
                         "steppedLine": false,
                         "targets": [
                             {
-                                "expr": "rate(prometheus_remote_storage_dropped_samples_total{cluster=~\"$cluster\", instance=~\"$instance\"}[5m])",
+                                "expr": "rate(prometheus_remote_storage_dropped_samples_total{cluster=~\"$cluster\", instance=~\"$instance\"}[5m]) or rate(prometheus_remote_storage_samples_dropped_total{cluster=~\"$cluster\", instance=~\"$instance\"}[5m])",
                                 "format": "time_series",
                                 "intervalFactor": 2,
                                 "legendFormat": "{{`{{`}}cluster{{`}}`}}:{{`{{`}}instance{{`}}`}} {{`{{`}}remote_name{{`}}`}}:{{`{{`}}url{{`}}`}}",
@@ -1230,6 +1243,7 @@ data:
                         "dashes": false,
                         "datasource": "$datasource",
                         "fill": 1,
+                        "fillGradient": 0,
                         "gridPos": {
 
                         },
@@ -1266,7 +1280,7 @@ data:
                         "steppedLine": false,
                         "targets": [
                             {
-                                "expr": "rate(prometheus_remote_storage_failed_samples_total{cluster=~\"$cluster\", instance=~\"$instance\"}[5m])",
+                                "fillGradient": 0,
                                 "format": "time_series",
                                 "intervalFactor": 2,
                                 "legendFormat": "{{`{{`}}cluster{{`}}`}}:{{`{{`}}instance{{`}}`}} {{`{{`}}remote_name{{`}}`}}:{{`{{`}}url{{`}}`}}",
@@ -1322,6 +1336,7 @@ data:
                         "dashes": false,
                         "datasource": "$datasource",
                         "fill": 1,
+                        "fillGradient": 0,
                         "gridPos": {
 
                         },
@@ -1358,7 +1373,7 @@ data:
                         "steppedLine": false,
                         "targets": [
                             {
-                                "expr": "rate(prometheus_remote_storage_retried_samples_total{cluster=~\"$cluster\", instance=~\"$instance\"}[5m])",
+                                "expr": "rate(prometheus_remote_storage_retried_samples_total{cluster=~\"$cluster\", instance=~\"$instance\"}[5m]) or rate(prometheus_remote_storage_samples_retried_total{cluster=~\"$cluster\", instance=~\"$instance\"}[5m])",
                                 "format": "time_series",
                                 "intervalFactor": 2,
                                 "legendFormat": "{{`{{`}}cluster{{`}}`}}:{{`{{`}}instance{{`}}`}} {{`{{`}}remote_name{{`}}`}}:{{`{{`}}url{{`}}`}}",
@@ -1414,6 +1429,7 @@ data:
                         "dashes": false,
                         "datasource": "$datasource",
                         "fill": 1,
+                        "fillGradient": 0,
                         "gridPos": {
 
                         },
@@ -1510,7 +1526,7 @@ data:
         "schemaVersion": 14,
         "style": "dark",
         "tags": [
-
+            "prometheus-mixin"
         ],
         "templating": {
             "list": [
@@ -1541,15 +1557,15 @@ data:
                         }
                     },
                     "datasource": "$datasource",
-                    "hide": 0,
+                    "hide": {{ if .Values.grafana.sidecar.dashboards.multicluster.global.enabled }}0{{ else }}2{{ end }},
                     "includeAll": true,
                     "label": null,
                     "multi": false,
-                    "name": "instance",
+                    "name": "cluster",
                     "options": [
 
                     ],
-                    "query": "label_values(prometheus_build_info, instance)",
+                    "query": "label_values(kube_pod_container_info{image=~\".*prometheus.*\"}, cluster)",
                     "refresh": 2,
                     "regex": "",
                     "sort": 0,
@@ -1580,11 +1596,11 @@ data:
                     "includeAll": true,
                     "label": null,
                     "multi": false,
-                    "name": "cluster",
+                    "name": "instance",
                     "options": [
 
                     ],
-                    "query": "label_values(kube_pod_container_info{image=~\".*prometheus.*\"}, cluster)",
+                    "query": "label_values(prometheus_build_info{cluster=~\"$cluster\"}, instance)",
                     "refresh": 2,
                     "regex": "",
                     "sort": 0,
