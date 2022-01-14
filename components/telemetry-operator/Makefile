@@ -75,7 +75,7 @@ build: generate fmt vet ## Build manager binary.
 	go build -o bin/manager main.go
 
 run-local: manifests-local generate-local fmt-local vet-local ## Run a controller from your host.
-	go run ./main.go
+	go run ./main.go --cm-name=telemetry-fluent-bit-sections --parser-cm-name=telemetry-fluent-bit-parsers --ds-name=telemetry-fluent-bit --env-secret=telemetry-fluent-bit-env --files-cm=telemetry-fluent-bit-files --fluent-bit-ns=kyma-system
 
 ## Will be called from Prow-Pipeline; using targets from generic make file
 release: resolve generate verify build-image push-image
@@ -106,7 +106,7 @@ ifeq (, $(shell which controller-gen))
 	cd $$CONTROLLER_GEN_TMP_DIR ;\
 	if [ ! $(which go) ]; then \
 		go mod init tmp ; \
-		go get sigs.k8s.io/controller-tools/cmd/controller-gen@v0.4.1 ; \
+		go get sigs.k8s.io/controller-tools/cmd/controller-gen@v0.5.0 ; \
 		rm -rf $$CONTROLLER_GEN_TMP_DIR ; \
 	fi; \
 	}
@@ -124,7 +124,7 @@ ifeq (, $(shell which controller-gen))
 	cd $$CONTROLLER_GEN_TMP_DIR ;\
 	if [ ! $(which go) ]; then \
 		go mod init tmp ; \
-		go get sigs.k8s.io/controller-tools/cmd/controller-gen@v0.4.1 ; \
+		go get sigs.k8s.io/controller-tools/cmd/controller-gen@v0.5.0 ; \
 		rm -rf $$CONTROLLER_GEN_TMP_DIR ; \
 	fi; \
 	}

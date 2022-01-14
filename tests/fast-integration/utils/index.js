@@ -11,6 +11,7 @@ var k8sDynamicApi;
 var k8sAppsApi;
 var k8sCoreV1Api;
 var k8sLog;
+var k8sServerUrl;
 
 var watch;
 var forward;
@@ -33,11 +34,27 @@ function initializeK8sClient(opts) {
     k8sLog = new k8s.Log(kc);
     watch = new k8s.Watch(kc);
     forward = new k8s.PortForward(kc);
+    k8sServerUrl = kc.getCurrentCluster() ? kc.getCurrentCluster().server : null;
+
   } catch (err) {
     console.log(err.message);
   }
 }
 initializeK8sClient();
+
+/**
+ * Gets the shoot name from k8s server url
+ *
+ * @throws
+ * @returns {String}
+ */
+function getShootNameFromK8sServerUrl() {
+  if (!k8sServerUrl || k8sServerUrl === "" || k8sServerUrl.split(".").length < 1) {
+    throw new Error(`failed to get shootName from K8s server Url: ${k8sServerUrl}`)
+  }
+  return k8sServerUrl.split(".")[1];
+}
+
 
 /**
  * Retries a promise {retriesLeft} times every {interval} miliseconds
@@ -471,6 +488,23 @@ function waitForSubscription(name, namespace = "default", timeout = 180000) {
     },
     timeout,
     `Waiting for ${name} subscription timeout (${timeout} ms)`
+  );
+}
+
+function waitForClusterServiceBroker(name, timeout = 90000) {
+  return waitForK8sObject(
+      `/apis/servicecatalog.k8s.io/v1beta1/clusterservicebrokers`,
+      {},
+      (_type, _apiObj, watchObj) => {
+        return (
+            watchObj.object.metadata.name.includes(name) &&
+            watchObj.object.status.conditions.some(
+                (c) => c.type == "Ready" && c.status == "True"
+            )
+        );
+      },
+      timeout,
+      `Waiting for ${name} cluster service broker (${timeout} ms)`
   );
 }
 
@@ -1614,6 +1648,7 @@ async function attachTraceChildSpans(parentSpan, trace) {
 
 module.exports = {
   initializeK8sClient,
+  getShootNameFromK8sServerUrl,
   retryPromise,
   convertAxiosError,
   removeServiceInstanceFinalizer,
@@ -1629,6 +1664,7 @@ module.exports = {
   k8sDelete,
   waitForK8sObject,
   waitForClusterAddonsConfiguration,
+  waitForClusterServiceBroker,
   waitForServiceClass,
   waitForServicePlanByServiceClass,
   waitForServiceInstance,

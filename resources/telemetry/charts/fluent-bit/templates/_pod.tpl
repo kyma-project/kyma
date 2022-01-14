@@ -3,8 +3,8 @@
 imagePullSecrets:
   {{- toYaml . | nindent 2 }}
 {{- end }}
-{{- if .Values.priorityClassName }}
-priorityClassName: {{ .Values.priorityClassName }}
+{{- if or .Values.priorityClassName .Values.global.highPriorityClassName -}}
+priorityClassName: {{ coalesce .Values.priorityClassName .Values.global.highPriorityClassName }}
 {{- end }}
 serviceAccountName: {{ include "fluent-bit.serviceAccountName" . }}
 securityContext:
@@ -103,6 +103,13 @@ volumes:
   - name: dynamic-config
     configMap:
       name: {{ .Values.dynamicConfigMap }}
+      optional: true
+  {{- end }}
+    {{- if .Values.dynamicParsersConfigMap }}
+  - name: dynamic-parsers-config
+    configMap:
+      name: {{ .Values.dynamicParsersConfigMap }}
+      optional: true
   {{- end }}
 {{- if gt (len .Values.luaScripts) 0 }}
   - name: luascripts

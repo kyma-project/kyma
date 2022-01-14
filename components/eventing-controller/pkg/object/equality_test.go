@@ -369,6 +369,58 @@ func TestPublisherProxyDeploymentEqual(t *testing.T) {
 			},
 			expectedResult: false,
 		},
+		"should be equal if spec annotations are nil and empty": {
+			getPublisher1: func() *appsv1.Deployment {
+				p := defaultNATSPublisher.DeepCopy()
+				p.Spec.Template.Annotations = nil
+				return p
+			},
+			getPublisher2: func() *appsv1.Deployment {
+				p := defaultNATSPublisher.DeepCopy()
+				p.Spec.Template.Annotations = map[string]string{}
+				return p
+			},
+			expectedResult: true,
+		},
+		"should be unequal if spec annotations changes": {
+			getPublisher1: func() *appsv1.Deployment {
+				p := defaultNATSPublisher.DeepCopy()
+				p.Spec.Template.Annotations = map[string]string{"key": "value1"}
+				return p
+			},
+			getPublisher2: func() *appsv1.Deployment {
+				p := defaultNATSPublisher.DeepCopy()
+				p.Spec.Template.Annotations = map[string]string{"key": "value2"}
+				return p
+			},
+			expectedResult: false,
+		},
+		"should be equal if spec Labels are nil and empty": {
+			getPublisher1: func() *appsv1.Deployment {
+				p := defaultNATSPublisher.DeepCopy()
+				p.Spec.Template.Labels = nil
+				return p
+			},
+			getPublisher2: func() *appsv1.Deployment {
+				p := defaultNATSPublisher.DeepCopy()
+				p.Spec.Template.Labels = map[string]string{}
+				return p
+			},
+			expectedResult: true,
+		},
+		"should be unequal if spec Labels changes": {
+			getPublisher1: func() *appsv1.Deployment {
+				p := defaultNATSPublisher.DeepCopy()
+				p.Spec.Template.Labels = map[string]string{"key": "value1"}
+				return p
+			},
+			getPublisher2: func() *appsv1.Deployment {
+				p := defaultNATSPublisher.DeepCopy()
+				p.Spec.Template.Labels = map[string]string{"key": "value2"}
+				return p
+			},
+			expectedResult: false,
+		},
 	}
 	for name, tc := range testCases {
 		t.Run(name, func(t *testing.T) {

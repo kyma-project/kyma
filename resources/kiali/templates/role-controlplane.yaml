@@ -1,0 +1,30 @@
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: {{ include "kiali-server.fullname" . }}-controlplane
+  namespace: {{ include "kiali-server.istio_namespace" . }}
+  labels:
+    {{- include "kiali-server.labels" . | nindent 4 }}
+rules:
+{{- if .Values.kiali_feature_flags.clustering.enabled }}
+- apiGroups: [""]
+  resources:
+  - secrets
+  verbs:
+  - list
+{{- end }}
+{{- if .Values.kiali_feature_flags.certificates_information_indicators.enabled }}
+- apiGroups: [""]
+  resourceNames:
+  {{- range .Values.kiali_feature_flags.certificates_information_indicators.secrets }}
+  - {{ . }}
+  {{- end }}
+  resources:
+  - secrets
+  verbs:
+  - get
+  - list
+  - watch
+{{- end }}
+...

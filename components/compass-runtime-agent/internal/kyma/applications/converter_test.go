@@ -38,14 +38,15 @@ func TestConverter(t *testing.T) {
 				APIVersion: "applicationconnector.kyma-project.io/v1alpha1",
 			},
 			ObjectMeta: metav1.ObjectMeta{
-				Name: "Appname1",
+				Name:   "Appname1",
+				Labels: map[string]string{managedByLabelKey: managedByLabelValue},
 			},
 			Spec: v1alpha1.ApplicationSpec{
 				Description:      "Description not provided",
 				SkipInstallation: false,
 				Services:         []v1alpha1.Service{},
 				Labels: map[string]string{
-					connectedApp: "Appname1",
+					connectedAppLabelKey: "Appname1",
 				},
 				CompassMetadata: &v1alpha1.CompassMetadata{ApplicationID: "App1", Authentication: v1alpha1.Authentication{ClientIds: []string{"auth1", "auth2"}}},
 			},
@@ -144,13 +145,14 @@ func TestConverter(t *testing.T) {
 				APIVersion: "applicationconnector.kyma-project.io/v1alpha1",
 			},
 			ObjectMeta: metav1.ObjectMeta{
-				Name: "Appname1",
+				Name:   "Appname1",
+				Labels: map[string]string{managedByLabelKey: managedByLabelValue},
 			},
 			Spec: v1alpha1.ApplicationSpec{
 				Description:      "Description",
 				SkipInstallation: false,
 				Labels: map[string]string{
-					connectedApp: "Appname1",
+					connectedAppLabelKey: "Appname1",
 				},
 				CompassMetadata: &v1alpha1.CompassMetadata{ApplicationID: "App1", Authentication: v1alpha1.Authentication{ClientIds: []string{"auth1", "auth2"}}},
 				Services: []v1alpha1.Service{
@@ -276,13 +278,14 @@ func TestConverter(t *testing.T) {
 				APIVersion: "applicationconnector.kyma-project.io/v1alpha1",
 			},
 			ObjectMeta: metav1.ObjectMeta{
-				Name: "Appname1",
+				Name:   "Appname1",
+				Labels: map[string]string{managedByLabelKey: managedByLabelValue},
 			},
 			Spec: v1alpha1.ApplicationSpec{
 				Description:      "Description",
 				SkipInstallation: false,
 				Labels: map[string]string{
-					connectedApp: "Appname1",
+					connectedAppLabelKey: "Appname1",
 				},
 				CompassMetadata: &v1alpha1.CompassMetadata{ApplicationID: "App1", Authentication: v1alpha1.Authentication{ClientIds: nil}},
 				Services: []v1alpha1.Service{

@@ -276,25 +276,35 @@ func WithNotCleanEventTypeFilter(s *eventingv1alpha1.Subscription) {
 	}
 }
 
-// WithFilter sets the Subscription filter with the given event source and type.
+// WithFilter appends a filter to the existing filters of Subscription
 func WithFilter(eventSource, eventType string) SubscriptionOpt {
 	return func(subscription *eventingv1alpha1.Subscription) {
-		subscription.Spec.Filter = &eventingv1alpha1.BEBFilters{
-			Filters: []*eventingv1alpha1.BEBFilter{
-				{
-					EventSource: &eventingv1alpha1.Filter{
-						Type:     "exact",
-						Property: "source",
-						Value:    eventSource,
-					},
-					EventType: &eventingv1alpha1.Filter{
-						Type:     "exact",
-						Property: "type",
-						Value:    eventType,
-					},
-				},
+		if subscription.Spec.Filter == nil {
+			subscription.Spec.Filter = &eventingv1alpha1.BEBFilters{
+				Filters: []*eventingv1alpha1.BEBFilter{},
+			}
+		}
+
+		filter := &eventingv1alpha1.BEBFilter{
+			EventSource: &eventingv1alpha1.Filter{
+				Type:     "exact",
+				Property: "source",
+				Value:    eventSource,
+			},
+			EventType: &eventingv1alpha1.Filter{
+				Type:     "exact",
+				Property: "type",
+				Value:    eventType,
 			},
 		}
+
+		subscription.Spec.Filter.Filters = append(subscription.Spec.Filter.Filters, filter)
+	}
+}
+
+func WithEmptyFilter(subscription *eventingv1alpha1.Subscription) {
+	subscription.Spec.Filter = &eventingv1alpha1.BEBFilters{
+		Filters: []*eventingv1alpha1.BEBFilter{},
 	}
 }
 
@@ -318,7 +328,11 @@ func WithEventTypeFilter(s *eventingv1alpha1.Subscription) {
 }
 
 func WithValidSink(svcNs, svcName string, s *eventingv1alpha1.Subscription) {
-	s.Spec.Sink = fmt.Sprintf("https://%s.%s.svc.cluster.local", svcName, svcNs)
+	s.Spec.Sink = GetValidSink(svcNs, svcName)
+}
+
+func GetValidSink(svcNs, svcName string) string {
+	return fmt.Sprintf("https://%s.%s.svc.cluster.local", svcName, svcNs)
 }
 
 func NewSubscriberSvc(name, ns string) *corev1.Service {
@@ -494,13 +508,13 @@ func ToSubscription(unstructuredSub *unstructured.Unstructured) (*eventingv1alph
 
 // ToUnstructuredAPIRule converts an APIRule object into a unstructured APIRule
 func ToUnstructuredAPIRule(obj interface{}) (*unstructured.Unstructured, error) {
-	unstructured := &unstructured.Unstructured{}
+	u := &unstructured.Unstructured{}
 	unstructuredObj, err := runtime.DefaultUnstructuredConverter.ToUnstructured(obj)
 	if err != nil {
 		return nil, err
 	}
-	unstructured.Object = unstructuredObj
-	return unstructured, nil
+	u.Object = unstructuredObj
+	return u, nil
 }
 
 // SetupSchemeOrDie add a scheme to eventing API schemes

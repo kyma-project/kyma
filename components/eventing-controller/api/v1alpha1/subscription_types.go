@@ -184,6 +184,10 @@ type SubscriptionStatus struct {
 	// Ready defines the overall readiness status of a subscription
 	Ready bool `json:"ready"`
 
+	// CleanEventTypes defines the filter's event types after cleanup for use with the configured backend
+	// +optional
+	CleanEventTypes []string `json:"cleanEventTypes,omitempty"`
+
 	// Ev2hash defines the hash for the Subscription custom resource
 	// +optional
 	Ev2hash int64 `json:"ev2hash,omitempty"`

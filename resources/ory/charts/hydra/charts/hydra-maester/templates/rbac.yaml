@@ -9,7 +9,6 @@ kind: ClusterRole
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: {{ include "hydra-maester.name" . }}-role
-  namespace:  {{ .Release.Namespace }}
 rules:
   - apiGroups: ["hydra.ory.sh"]
     resources: ["oauth2clients", "oauth2clients/status"]
@@ -22,7 +21,6 @@ kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: {{ include "hydra-maester.name" . }}-role-binding
-  namespace:  {{ .Release.Namespace }}
 subjects:
   - kind: ServiceAccount
     name: {{ include "hydra-maester.name" . }}-account # Service account assigned to the controller pod.

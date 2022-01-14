@@ -30,7 +30,7 @@ global:
       sha: ""
     pushgateway:
       name: "pushgateway"
-      version: v1.3.0
+      version: v1.4.2
       directory: "external/prom"
     node_exporter:
       name: "node-exporter"
@@ -42,7 +42,7 @@ global:
       directory: "external/quay.io/coreos"
     grafana:
       name: "grafana"
-      version: "7.5.11-d41037db"
+      version: "7.5.12-663797e9"
       directory: "tpi"
       sha: ""
     busybox:
@@ -60,7 +60,7 @@ global:
       version: "7.2.0-59f3431d"
       directory: "tpi"
       sha: ""
-        
+
   istio:
     tls:
       secretName: istio-ingress-certs
@@ -105,6 +105,8 @@ global:
   ##
   imagePullSecrets: []
   # - name: "image-pull-secret"
+
+  highPriorityClassName: "kyma-system-priority"
 
 # Default values for kube-prometheus-stack.
 # This is a YAML-formatted file.
@@ -420,7 +422,7 @@ alertmanager:
 
     ## tlsConfig: TLS configuration to use when scraping the endpoint. For example if using istio mTLS.
     ## Of type: https://github.com/coreos/prometheus-operator/blob/master/Documentation/api.md#tlsconfig
-    tlsConfig: 
+    tlsConfig:
       caFile: /etc/prometheus/secrets/istio.default/root-cert.pem
       certFile: /etc/prometheus/secrets/istio.default/cert-chain.pem
       keyFile: /etc/prometheus/secrets/istio.default/key.pem
@@ -746,7 +748,7 @@ grafana:
 ##
 kubeApiServer:
   enabled: true
-  tlsConfig: 
+  tlsConfig:
     insecureSkipVerify: false
     serverName: kubernetes
 
@@ -1406,7 +1408,7 @@ prometheusOperator:
   resources:
     limits:
       cpu: 300m
-      memory: 500Mi
+      memory: 1Gi
     requests:
       cpu: 10m
       memory: 90Mi
@@ -2021,12 +2023,12 @@ prometheus:
     #    selector: {}
 
     # Additional volumes on the output StatefulSet definition.
-    volumes: 
+    volumes:
       - emptyDir:
           medium: Memory
         name: istio-certs
     # Additional VolumeMounts on the output StatefulSet definition.
-    volumeMounts: 
+    volumeMounts:
       - mountPath: /etc/prometheus/secrets/istio.default/
         name: istio-certs
 

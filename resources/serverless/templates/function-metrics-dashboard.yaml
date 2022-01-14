@@ -1,0 +1,123 @@
+{{- if .Values.grafanaDashboard.functionMetrics.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: function-metrics-dashboard
+  labels:
+    grafana_dashboard: "1"
+    app: monitoring-grafana
+data:
+  function-metrics-dashboard.json: |-
+    {
+      "annotations": {
+        "list": [
+          {
+            "builtIn": 1,
+            "datasource": "-- Grafana --",
+            "enable": true,
+            "hide": true,
+            "iconColor": "rgba(0, 211, 255, 1)",
+            "name": "Annotations & Alerts",
+            "type": "dashboard"
+          }
+        ]
+      },
+      "editable": true,
+      "gnetId": null,
+      "graphTooltip": 0,
+      "id": 32,
+      "links": [],
+      "panels": [
+        {
+          "datasource": null,
+          "description": "Show the average time spent in all function creation phases.",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  }
+                ]
+              },
+              "unit": "ms"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 9,
+            "w": 12,
+            "x": 0,
+            "y": 0
+          },
+          "id": 2,
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "showThresholdLabels": false,
+            "showThresholdMarkers": false,
+            "text": {}
+          },
+          "pluginVersion": "",
+          "targets": [
+            {
+              "exemplar": true,
+              "expr": "avg(function_configured_status_duration_millisecond)",
+              "format": "time_series",
+              "hide": false,
+              "instant": false,
+              "interval": "",
+              "intervalFactor": 1,
+              "legendFormat": "Average Configuration time",
+              "refId": "B"
+            },
+            {
+              "exemplar": true,
+              "expr": "avg(function_built_status_duration_millisecond)",
+              "instant": false,
+              "interval": "",
+              "legendFormat": "Average Build time",
+              "refId": "A"
+            },
+            {
+              "exemplar": false,
+              "expr": "avg(function_running_status_duration_millisecond)",
+              "hide": false,
+              "interval": "",
+              "legendFormat": "Average Ready time",
+              "refId": "C"
+            }
+          ],
+          "title": "Function Startup times",
+          "transparent": true,
+          "type": "gauge"
+        }
+      ],
+      "schemaVersion": 27,
+      "style": "dark",
+      "tags": [],
+      "templating": {
+        "list": []
+      },
+      "time": {
+        "from": "now-6h",
+        "to": "now"
+      },
+      "timepicker": {},
+      "timezone": "",
+      "title": "Serverless Controller Metrics",
+      "uid": "sxh-Raonz",
+      "version": 1
+    }
+{{- end }}

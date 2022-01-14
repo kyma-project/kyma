@@ -116,7 +116,7 @@ As we haven't sent our event yet, we expect to get an empty object `{}` in respo
     > **NOTE:** Alternatively, from the left navigation go to **Discovery and Network** > **API Rules**, click on **Create API Rule +**, and continue with step 3, selecting the appropriate **Service** from the dropdown menu.
 
 To check that the Function is properly exposed, call it. 
-In your Function's **Configuration** tab, click on the APIRule's **Host**. This opens the Function's external address as a new page. As we haven't sent our event yet, we expect the page to return an empty object `{}`.
+In your Function's **Configuration** tab, click on the API Rule's **Host**. This opens the Function's external address as a new page. As we haven't sent our event yet, we expect the page to return an empty object `{}`.
 
   </details>
 </div>
@@ -225,5 +225,5 @@ date: Thu, 16 Sep 2021 13:05:03 GMT
 x-envoy-upstream-service-time: 5
 server: istio-envoy
 
-{"orderCode":"3211214"}%
+{"orderCode":"3211213"}%
 ```

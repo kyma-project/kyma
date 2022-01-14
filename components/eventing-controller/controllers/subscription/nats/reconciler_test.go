@@ -46,14 +46,14 @@ import (
 const (
 	natsPort = 4221
 
-	smallTimeout         = 5 * time.Second
+	smallTimeout         = 10 * time.Second
 	smallPollingInterval = 1 * time.Second
 
 	timeout         = 60 * time.Second
 	pollingInterval = 5 * time.Second
 
 	namespaceName          = "test"
-	subscriptionNameFormat = "sub-%d"
+	subscriptionNameFormat = "nats-sub-%d"
 	subscriberNameFormat   = "subscriber-%d"
 )
 
@@ -62,16 +62,150 @@ type testCase func(id int, eventTypePrefix, natsSubjectToPublish, eventTypeToSub
 var (
 	reconcilerTestCases = []testCase{
 		testCreateDeleteSubscription,
+		testCreateSubscriptionWithValidSink,
 		testCreateSubscriptionWithInvalidSink,
 		testCreateSubscriptionWithEmptyProtocolProtocolSettingsDialect,
 		testChangeSubscriptionConfiguration,
 		testCreateSubscriptionWithEmptyEventType,
+		testCleanEventTypes,
 	}
 
 	dispatcherTestCases = []testCase{
 		testDispatcherWithMultipleSubscribers,
 	}
 )
+
+// testCleanEventTypes tests if the reconciler can create the correct cleanEventTypes from the filters of a Subscription.
+func testCleanEventTypes(id int, eventTypePrefix, natsSubjectToPublish, eventTypeToSubscribe string) bool {
+	return When("updating the clean event types in the Subscription status", func() {
+		It("should mark the Subscription as ready", func() {
+			//  set default expectations
+			defaultCondition := eventingv1alpha1.MakeCondition(
+				eventingv1alpha1.ConditionSubscriptionActive,
+				eventingv1alpha1.ConditionReasonNATSSubscriptionActive,
+				v1.ConditionTrue, "")
+			defaultConfiguration := &eventingv1alpha1.SubscriptionConfig{
+				MaxInFlightMessages: defaultSubsConfig.MaxInFlightMessages}
+
+			// create a context
+			ctx := context.Background()
+			cancel = startReconciler(eventTypePrefix, defaultSinkValidator)
+			defer cancel()
+
+			// create a subscriber service
+			subscriberName := fmt.Sprintf(subscriberNameFormat, id)
+			subscriberSvc := reconcilertesting.NewSubscriberSvc(subscriberName, namespaceName)
+
+			ensureSubscriberSvcCreated(ctx, subscriberSvc)
+
+			// create a Subscription
+			subscriptionName := fmt.Sprintf(subscriptionNameFormat, id)
+			optFilter := reconcilertesting.WithEmptyFilter
+			optWebhook := reconcilertesting.WithWebhookForNats
+			subscription := reconcilertesting.NewSubscription(subscriptionName, namespaceName, optFilter, optWebhook)
+			reconcilertesting.WithValidSink(namespaceName, subscriberSvc.Name, subscription)
+
+			ensureSubscriptionCreated(ctx, subscription)
+
+			Context("A Subscription without filters", func() {
+				By("should have no clean event types", func() {
+					getSubscription(ctx, subscription).Should(reconcilertesting.HaveCleanEventTypes(nil))
+				})
+				By("should have the assigned subscription name", func() {
+					getSubscription(ctx, subscription).Should(reconcilertesting.HaveSubscriptionName(subscriptionName))
+				})
+				By("should have the default condition", func() {
+					getSubscription(ctx, subscription).Should(reconcilertesting.HaveCondition(defaultCondition))
+				})
+				By("should have the default configuration", func() {
+					getSubscription(ctx, subscription).Should(reconcilertesting.HaveSubsConfiguration(defaultConfiguration))
+				})
+			})
+
+			Context("A Subscription without filters to which filters are added", func() {
+				// the nats subject list to publish to; these are supposed to be equal to the cleanEventTypes
+				natsSubjectsToPublish := []string{
+					fmt.Sprintf("%s0", natsSubjectToPublish),
+					fmt.Sprintf("%s1", natsSubjectToPublish),
+				}
+				// the filter that are getting added to the subscription
+				eventTypesToSubscribe := []string{
+					fmt.Sprintf("%s0", eventTypeToSubscribe),
+					fmt.Sprintf("%s1", eventTypeToSubscribe),
+				}
+				By("should have been updated after the addition", func() {
+					for _, f := range eventTypesToSubscribe {
+						addFilter := reconcilertesting.WithFilter(reconcilertesting.EventSource, f)
+						addFilter(subscription)
+					}
+					ensureSubscriptionUpdated(ctx, subscription)
+				})
+				By("should have clean event types corresponding to the added filters", func() {
+					getSubscription(ctx, subscription).Should(reconcilertesting.HaveCleanEventTypes(natsSubjectsToPublish))
+				})
+				By("should have the same subscription name", func() {
+					getSubscription(ctx, subscription).Should(reconcilertesting.HaveSubscriptionName(subscriptionName))
+				})
+				By("should have the same default condition", func() {
+					getSubscription(ctx, subscription).Should(reconcilertesting.HaveCondition(defaultCondition))
+				})
+				By("should have the same default configuration", func() {
+					getSubscription(ctx, subscription).Should(reconcilertesting.HaveSubsConfiguration(defaultConfiguration))
+				})
+			})
+
+			Context("A Subscription with filters that are being modified", func() {
+				// the nats subject list to publish to; these are supposed to be equal to the cleanEventTypes
+				natsSubjectsToPublish := []string{
+					fmt.Sprintf("%s0alpha", natsSubjectToPublish),
+					fmt.Sprintf("%s1alpha", natsSubjectToPublish),
+				}
+				By("should have been updated after the modification", func() {
+					for _, f := range subscription.Spec.Filter.Filters {
+						f.EventType.Value = fmt.Sprintf("%salpha", f.EventType.Value)
+					}
+					ensureSubscriptionUpdated(ctx, subscription)
+				})
+				By("should have changed the clean event types according the modified filters", func() {
+					getSubscription(ctx, subscription).Should(reconcilertesting.HaveCleanEventTypes(natsSubjectsToPublish))
+				})
+				By("should have the same subscription name", func() {
+					getSubscription(ctx, subscription).Should(reconcilertesting.HaveSubscriptionName(subscriptionName))
+				})
+				By("should have the same default condition", func() {
+					getSubscription(ctx, subscription).Should(reconcilertesting.HaveCondition(defaultCondition))
+				})
+				By("should have the same default configuration", func() {
+					getSubscription(ctx, subscription).Should(reconcilertesting.HaveSubsConfiguration(defaultConfiguration))
+				})
+			})
+
+			Context("A Subscription with filters of which one is getting deleted", func() {
+				// the nats subject list to publish to; these are supposed to be equal to the cleanEventTypes
+				natsSubjectsToPublish := []string{
+					fmt.Sprintf("%s0alpha", natsSubjectToPublish),
+				}
+				By("should have been updated after the deletion", func() {
+					// remove one of the two filters
+					subscription.Spec.Filter.Filters = subscription.Spec.Filter.Filters[:1]
+					ensureSubscriptionUpdated(ctx, subscription)
+				})
+				By("should have removed one clean event type according the deletion of one the filters", func() {
+					getSubscription(ctx, subscription).Should(reconcilertesting.HaveCleanEventTypes(natsSubjectsToPublish))
+				})
+				By("should have the same subscription name", func() {
+					getSubscription(ctx, subscription).Should(reconcilertesting.HaveSubscriptionName(subscriptionName))
+				})
+				By("should have the same default condition", func() {
+					getSubscription(ctx, subscription).Should(reconcilertesting.HaveCondition(defaultCondition))
+				})
+				By("should have the same default configuration", func() {
+					getSubscription(ctx, subscription).Should(reconcilertesting.HaveSubsConfiguration(defaultConfiguration))
+				})
+			})
+		})
+	})
+}
 
 func testCreateDeleteSubscription(id int, eventTypePrefix, natsSubjectToPublish, eventTypeToSubscribe string) bool {
 	return When("Create/Delete Subscription", func() {
@@ -87,7 +221,9 @@ func testCreateDeleteSubscription(id int, eventTypePrefix, natsSubjectToPublish,
 			ensureSubscriberSvcCreated(ctx, subscriberSvc)
 
 			// create subscription
-			subscription := reconcilertesting.NewSubscription(subscriptionName, namespaceName, reconcilertesting.WithFilter(reconcilertesting.EventSource, eventTypeToSubscribe), reconcilertesting.WithWebhookForNats)
+			optFilter := reconcilertesting.WithFilter(reconcilertesting.EventSource, eventTypeToSubscribe)
+			optWebhook := reconcilertesting.WithWebhookForNats
+			subscription := reconcilertesting.NewSubscription(subscriptionName, namespaceName, optFilter, optWebhook)
 			reconcilertesting.WithValidSink(namespaceName, subscriberSvc.Name, subscription)
 			ensureSubscriptionCreated(ctx, subscription)
 
@@ -114,161 +250,124 @@ func testCreateDeleteSubscription(id int, eventTypePrefix, natsSubjectToPublish,
 	})
 }
 
-func testCreateSubscriptionWithInvalidSink(id int, eventTypePrefix, natsSubjectToPublish, eventTypeToSubscribe string) bool {
+func testCreateSubscriptionWithValidSink(id int, eventTypePrefix, _, eventTypeToSubscribe string) bool {
+	subscriptionName := fmt.Sprintf(subscriptionNameFormat, id) + "-valid"
+	subscriberName := fmt.Sprintf(subscriberNameFormat, id) + "-valid"
+	sink := reconcilertesting.GetValidSink(namespaceName, subscriberName)
+	testCreatingSubscription := func(sink string) {
+		ctx := context.Background()
+		cancel = startReconciler(eventTypePrefix, defaultSinkValidator)
+		defer cancel()
+
+		// create subscriber svc
+		subscriberSvc := reconcilertesting.NewSubscriberSvc(subscriberName, namespaceName)
+		ensureSubscriberSvcCreated(ctx, subscriberSvc)
+
+		// create subscription
+		subscription := reconcilertesting.NewSubscription(subscriptionName, namespaceName, reconcilertesting.WithFilter("", eventTypeToSubscribe))
+		subscription.Spec.Sink = sink
+		ensureSubscriptionCreated(ctx, subscription)
+
+		getSubscription(ctx, subscription).Should(And(
+			reconcilertesting.HaveSubscriptionName(subscriptionName),
+			reconcilertesting.HaveCondition(eventingv1alpha1.MakeCondition(
+				eventingv1alpha1.ConditionSubscriptionActive,
+				eventingv1alpha1.ConditionReasonNATSSubscriptionActive,
+				v1.ConditionTrue, "")),
+		))
+
+		Expect(k8sClient.Delete(ctx, subscription)).Should(BeNil())
+		isSubscriptionDeleted(ctx, subscription).Should(reconcilertesting.HaveNotFoundSubscription(true))
+
+		Expect(k8sClient.Delete(ctx, subscriberSvc)).Should(BeNil())
+	}
+	return When("Create Subscription with valid sink", func() {
+		It("Should mark the Subscription with valid sink as ready", func() {
+			testCreatingSubscription(sink)
+		})
+		It("Should mark the Subscription with valid sink with the port suffix as ready", func() {
+			testCreatingSubscription(sink + ":8080")
+		})
+		It("Should mark the Subscription with valid sink with the port suffix and path as ready", func() {
+			testCreatingSubscription(sink + ":8080" + "/myEndpoint")
+		})
+	})
+}
+
+func testCreateSubscriptionWithInvalidSink(id int, eventTypePrefix, _, eventTypeToSubscribe string) bool {
+	invalidSinkMsgCheck := func(sink, subConditionMsg, k8sEventMsg string) {
+		ctx := context.Background()
+		cancel = startReconciler(eventTypePrefix, defaultSinkValidator)
+		defer cancel()
+		subscriptionName := fmt.Sprintf(subscriptionNameFormat, id)
+
+		// Create subscription
+		givenSubscription := reconcilertesting.NewSubscription(subscriptionName, namespaceName, reconcilertesting.WithFilter(reconcilertesting.EventSource, eventTypeToSubscribe), reconcilertesting.WithWebhookForNats)
+		givenSubscription.Spec.Sink = sink
+		ensureSubscriptionCreated(ctx, givenSubscription)
+
+		getSubscription(ctx, givenSubscription).Should(And(
+			reconcilertesting.HaveSubscriptionName(subscriptionName),
+			reconcilertesting.HaveCondition(eventingv1alpha1.MakeCondition(
+				eventingv1alpha1.ConditionSubscriptionActive,
+				eventingv1alpha1.ConditionReasonNATSSubscriptionActive,
+				v1.ConditionFalse, subConditionMsg)),
+		))
+
+		var subscriptionEvents = v1.EventList{}
+		subscriptionEvent := v1.Event{
+			Reason:  string(events.ReasonValidationFailed),
+			Message: k8sEventMsg,
+			Type:    v1.EventTypeWarning,
+		}
+		getK8sEvents(&subscriptionEvents, givenSubscription.Namespace).Should(reconcilertesting.HaveEvent(subscriptionEvent))
+
+		Expect(k8sClient.Delete(ctx, givenSubscription)).Should(BeNil())
+		isSubscriptionDeleted(ctx, givenSubscription).Should(reconcilertesting.HaveNotFoundSubscription(true))
+	}
+
 	return When("Create Subscription with invalid sink", func() {
-		It("Should mark the Subscription as not ready", func() {
-			ctx := context.Background()
-			cancel = startReconciler(eventTypePrefix, defaultSinkValidator)
-			defer cancel()
-			subscriptionName := fmt.Sprintf(subscriptionNameFormat, id)
-
-			// Create subscription
-			givenSubscription := reconcilertesting.NewSubscription(subscriptionName, namespaceName, reconcilertesting.WithFilter(reconcilertesting.EventSource, eventTypeToSubscribe), reconcilertesting.WithWebhookForNats)
-			givenSubscription.Spec.Sink = "invalid"
-			ensureSubscriptionCreated(ctx, givenSubscription)
-
-			getSubscription(ctx, givenSubscription).Should(And(
-				reconcilertesting.HaveSubscriptionName(subscriptionName),
-				reconcilertesting.HaveCondition(eventingv1alpha1.MakeCondition(
-					eventingv1alpha1.ConditionSubscriptionActive,
-					eventingv1alpha1.ConditionReasonNATSSubscriptionActive,
-					v1.ConditionFalse, "sink URL scheme should be 'http' or 'https'")),
-			))
-
-			var subscriptionEvents = v1.EventList{}
-			subscriptionEvent := v1.Event{
-				Reason:  string(events.ReasonValidationFailed),
-				Message: "Sink URL scheme should be HTTP or HTTPS: invalid",
-				Type:    v1.EventTypeWarning,
-			}
-			getK8sEvents(&subscriptionEvents, givenSubscription.Namespace).Should(reconcilertesting.HaveEvent(subscriptionEvent))
-
-			By("Updating the subscription configuration in the spec with invalid URL scheme")
-			changedSub := givenSubscription.DeepCopy()
-			changedSub.Spec.Sink = "http://127.0.0. 1"
-			Expect(k8sClient.Update(ctx, changedSub)).Should(BeNil())
-
-			getSubscription(ctx, givenSubscription).Should(And(
-				reconcilertesting.HaveSubscriptionName(subscriptionName),
-				reconcilertesting.HaveCondition(eventingv1alpha1.MakeCondition(
-					eventingv1alpha1.ConditionSubscriptionActive,
-					eventingv1alpha1.ConditionReasonNATSSubscriptionActive,
-					v1.ConditionFalse, "not able to parse sink url with error: parse \"http://127.0.0. 1\": invalid character \" \" in host name")),
-			))
-
-			subscriptionEvent = v1.Event{
-				Reason:  string(events.ReasonValidationFailed),
-				Message: "Not able to parse Sink URL with error: parse \"http://127.0.0. 1\": invalid character \" \" in host name",
-				Type:    v1.EventTypeWarning,
-			}
-			getK8sEvents(&subscriptionEvents, givenSubscription.Namespace).Should(reconcilertesting.HaveEvent(subscriptionEvent))
-
-			By("Updating the subscription configuration in the spec with valid URL scheme")
-			changedSub = givenSubscription.DeepCopy()
-			changedSub.Spec.Sink = "http://127.0.0.1"
-			Expect(k8sClient.Update(ctx, changedSub)).Should(BeNil())
-
-			getSubscription(ctx, givenSubscription).Should(And(
-				reconcilertesting.HaveSubscriptionName(subscriptionName),
-				reconcilertesting.HaveCondition(eventingv1alpha1.MakeCondition(
-					eventingv1alpha1.ConditionSubscriptionActive,
-					eventingv1alpha1.ConditionReasonNATSSubscriptionActive,
-					v1.ConditionFalse, "sink does not contain suffix: svc.cluster.local in the URL")),
-			))
-
-			subscriptionEvent = v1.Event{
-				Reason:  string(events.ReasonValidationFailed),
-				Message: "Sink does not contain suffix: svc.cluster.local",
-				Type:    v1.EventTypeWarning,
-			}
-			getK8sEvents(&subscriptionEvents, givenSubscription.Namespace).Should(reconcilertesting.HaveEvent(subscriptionEvent))
-
-			By("Updating the subscription configuration in the spec with invalid service name scheme")
-			changedSub = givenSubscription.DeepCopy()
-			changedSub.Spec.Sink = fmt.Sprintf("https://%s.%s.%s.svc.cluster.local", "testapp", "testsub", "test")
-			Expect(k8sClient.Update(ctx, changedSub)).Should(BeNil())
-
-			getSubscription(ctx, givenSubscription).Should(And(
-				reconcilertesting.HaveSubscriptionName(subscriptionName),
-				reconcilertesting.HaveCondition(eventingv1alpha1.MakeCondition(
-					eventingv1alpha1.ConditionSubscriptionActive,
-					eventingv1alpha1.ConditionReasonNATSSubscriptionActive,
-					v1.ConditionFalse, "sink should contain 5 sub-domains: testapp.testsub.test.svc.cluster.local")),
-			))
-
-			subscriptionEvent = v1.Event{
-				Reason:  string(events.ReasonValidationFailed),
-				Message: "Sink should contain 5 sub-domains: testapp.testsub.test.svc.cluster.local",
-				Type:    v1.EventTypeWarning,
-			}
-			getK8sEvents(&subscriptionEvents, givenSubscription.Namespace).Should(reconcilertesting.HaveEvent(subscriptionEvent))
-
-			By("Updating the subscription configuration in the spec with invalid sink URL with subscriber namespace")
-			changedSub = givenSubscription.DeepCopy()
-			changedSub.Spec.Sink = fmt.Sprintf("https://%s.%s.svc.cluster.local", "testapp", "test-ns")
-			Expect(k8sClient.Update(ctx, changedSub)).Should(BeNil())
-
-			getSubscription(ctx, givenSubscription).Should(And(
-				reconcilertesting.HaveSubscriptionName(subscriptionName),
-				reconcilertesting.HaveCondition(eventingv1alpha1.MakeCondition(
-					eventingv1alpha1.ConditionSubscriptionActive,
-					eventingv1alpha1.ConditionReasonNATSSubscriptionActive,
-					v1.ConditionFalse, "namespace of subscription: test and the namespace of subscriber: test-ns are different")),
-			))
-
-			subscriptionEvent = v1.Event{
-				Reason:  string(events.ReasonValidationFailed),
-				Message: "Namespace of subscription: test and the subscriber: test-ns are different",
-				Type:    v1.EventTypeWarning,
-			}
-			getK8sEvents(&subscriptionEvents, givenSubscription.Namespace).Should(reconcilertesting.HaveEvent(subscriptionEvent))
-
-			By("Updating the subscription configuration in the spec with invalid sink URL with non-existing service name")
-			changedSub = givenSubscription.DeepCopy()
-			reconcilertesting.WithValidSink(namespaceName, "testapp", changedSub)
-			Expect(k8sClient.Update(ctx, changedSub)).Should(BeNil())
-
-			getSubscription(ctx, givenSubscription).Should(And(
-				reconcilertesting.HaveSubscriptionName(subscriptionName),
-				reconcilertesting.HaveCondition(eventingv1alpha1.MakeCondition(
-					eventingv1alpha1.ConditionSubscriptionActive,
-					eventingv1alpha1.ConditionReasonNATSSubscriptionActive,
-					v1.ConditionFalse, "sink is not valid cluster local svc, failed with error: Service \"testapp\" not found")),
-			))
-
-			subscriptionEvent = v1.Event{
-				Reason:  string(events.ReasonValidationFailed),
-				Message: "Sink does not correspond to a valid cluster local svc",
-				Type:    v1.EventTypeWarning,
-			}
-			getK8sEvents(&subscriptionEvents, givenSubscription.Namespace).Should(reconcilertesting.HaveEvent(subscriptionEvent))
-
-			By("Updating the subscription configuration in the spec with invalid sink URL with valid subscriber service name")
-			changedSub = givenSubscription.DeepCopy()
-
-			subscriberName := fmt.Sprintf(subscriberNameFormat, id)
-			subscriberSvc := reconcilertesting.NewSubscriberSvc(subscriberName, namespaceName)
-			ensureSubscriberSvcCreated(ctx, subscriberSvc)
-
-			reconcilertesting.WithValidSink(namespaceName, subscriberSvc.Name, changedSub)
-			Expect(k8sClient.Update(ctx, changedSub)).Should(BeNil())
-
-			getSubscription(ctx, givenSubscription).Should(And(
-				reconcilertesting.HaveSubscriptionName(subscriptionName),
-				reconcilertesting.HaveCondition(eventingv1alpha1.MakeCondition(
-					eventingv1alpha1.ConditionSubscriptionActive,
-					eventingv1alpha1.ConditionReasonNATSSubscriptionActive,
-					v1.ConditionTrue, "")),
-			))
-
-			// check for subscription at nats
-			backendSubscription := getSubscriptionFromNats(natsBackend.GetAllSubscriptions(), subscriptionName)
-			Expect(backendSubscription).NotTo(BeNil())
-			Expect(backendSubscription.IsValid()).To(BeTrue())
-			Expect(backendSubscription.Subject).Should(Equal(natsSubjectToPublish))
-
-			Expect(k8sClient.Delete(ctx, givenSubscription)).Should(BeNil())
-			isSubscriptionDeleted(ctx, givenSubscription).Should(reconcilertesting.HaveNotFoundSubscription(true))
+		It("Should mark the Subscription as not ready if sink URL scheme is not 'http' or 'https'", func() {
+			invalidSinkMsgCheck(
+				"invalid",
+				"sink URL scheme should be 'http' or 'https'",
+				"Sink URL scheme should be HTTP or HTTPS: invalid",
+			)
+		})
+		It("Should mark the Subscription as not ready if sink contains invalid characters", func() {
+			invalidSinkMsgCheck(
+				"http://127.0.0. 1",
+				"not able to parse sink url with error: parse \"http://127.0.0. 1\": invalid character \" \" in host name",
+				"Not able to parse Sink URL with error: parse \"http://127.0.0. 1\": invalid character \" \" in host name",
+			)
+		})
+		It("Should mark the Subscription as not ready if sink does not contain suffix 'svc.cluster.local'", func() {
+			invalidSinkMsgCheck(
+				"http://127.0.0.1",
+				"sink does not contain suffix: svc.cluster.local in the URL",
+				"Sink does not contain suffix: svc.cluster.local",
+			)
+		})
+		It("Should mark the Subscription as not ready if sink does not contain 5 sub-domains", func() {
+			invalidSinkMsgCheck(
+				fmt.Sprintf("https://%s.%s.%s.svc.cluster.local", "testapp", "testsub", "test"),
+				"sink should contain 5 sub-domains: testapp.testsub.test.svc.cluster.local",
+				"Sink should contain 5 sub-domains: testapp.testsub.test.svc.cluster.local",
+			)
+		})
+		It("Should mark the Subscription as not ready if sink points to different namespace", func() {
+			invalidSinkMsgCheck(
+				fmt.Sprintf("https://%s.%s.svc.cluster.local", "testapp", "test-ns"),
+				"namespace of subscription: test and the namespace of subscriber: test-ns are different",
+				"Namespace of subscription: test and the subscriber: test-ns are different",
+			)
+		})
+		It("Should mark the Subscription as not ready if sink is not a valid cluster local service", func() {
+			invalidSinkMsgCheck(
+				reconcilertesting.GetValidSink(namespaceName, "testapp"),
+				"sink is not valid cluster local svc, failed with error: Service \"testapp\" not found",
+				"Sink does not correspond to a valid cluster local svc",
+			)
 		})
 	})
 }
@@ -523,7 +622,7 @@ func getK8sEvents(eventList *v1.EventList, namespace string) AsyncAssertion {
 			return v1.EventList{}
 		}
 		return *eventList
-	})
+	}, smallTimeout, smallPollingInterval)
 }
 
 func newSubscriber(result chan []byte) (string, func()) {
@@ -579,6 +678,13 @@ func ensureSubscriptionCreated(ctx context.Context, subscription *eventingv1alph
 	By(fmt.Sprintf("Ensuring the subscription %q is created", subscription.Name))
 	// create subscription
 	err := k8sClient.Create(ctx, subscription)
+	Expect(err).Should(BeNil())
+}
+
+func ensureSubscriptionUpdated(ctx context.Context, subscription *eventingv1alpha1.Subscription) {
+	By(fmt.Sprintf("Ensuring the subscription %q is updated", subscription.Name))
+	// create subscription
+	err := k8sClient.Update(ctx, subscription)
 	Expect(err).Should(BeNil())
 }
 
@@ -656,7 +762,7 @@ var cfg *rest.Config
 var k8sClient client.Client
 var testEnv *envtest.Environment
 var natsServer *natsserver.Server
-var defaultSubsConfig = env.DefaultSubscriptionConfig{MaxInFlightMessages: 1}
+var defaultSubsConfig = env.DefaultSubscriptionConfig{MaxInFlightMessages: 1, DispatcherRetryPeriod: time.Second, DispatcherMaxRetries: 1}
 var reconciler *Reconciler
 var natsBackend *handlers.Nats
 var cancel context.CancelFunc

@@ -44,9 +44,6 @@ files:
   - path: "./kyma/docs/03-tutorials/00-application-connectivity/ac-07-revoke-client-cert.md"
     config:
       external-links-to-ignore: [ "https://gateway.{CLUSTER_DOMAIN}/v1/applications/certificates/revocations" ]
-  - path: "./kyma/resources/istio/README.md"
-    config:
-      external-links-to-ignore: [ "https://istio.io/docs/setup/kubernetes/sidecar-injection/#automatic-sidecar-injection" ]
   - path: "./kyma/docs/migration-guides/0.8-0.9.md"
     config:
       external-links-to-ignore: [ "https://github.com/kyma-project/kyma/releases/tag/0.9.0" ]
