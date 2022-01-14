@@ -1,3 +1,6 @@
+{{- /*
+  Customization: did not take selector labels from upstream as they are immuatble and it fails during upgrade
+*/ -}}
 apiVersion: apps/v1
 {{- if .Values.autosharding.enabled }}
 kind: StatefulSet
@@ -12,7 +15,7 @@ metadata:
 spec:
   selector:
     matchLabels:
-      {{- include "kube-state-metrics.selectorLabels" . | indent 6 }}
+      app.kubernetes.io/name: {{ template "kube-state-metrics.name" . }}
   replicas: {{ .Values.replicas }}
   {{- if .Values.autosharding.enabled }}
   serviceName: {{ template "kube-state-metrics.fullname" . }}
