@@ -34,7 +34,7 @@ type cleaner struct {
 	logger            *logger.Logger
 }
 
-// compile-time check
+// compile-time check of interface comliance
 var _ Cleaner = &cleaner{}
 
 func NewCleaner(eventTypePrefix string, applicationLister *application.Lister, logger *logger.Logger) Cleaner {
@@ -42,7 +42,7 @@ func NewCleaner(eventTypePrefix string, applicationLister *application.Lister, l
 }
 
 // Clean cleans the event-type from none-alphanumeric characters and returns it
-// or returns an error if the event-type parsing failed
+// or returns an error if the event-type parsing failed.
 func (c *cleaner) Clean(eventType string) (string, error) {
 	// format logger
 	log := c.namedLogger().With("prefix", c.eventTypePrefix, "type", eventType)

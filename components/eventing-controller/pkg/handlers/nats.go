@@ -26,7 +26,7 @@ import (
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/eventtype"
 )
 
-// compile time check
+// compile time check of interface compliance
 var _ MessagingBackend = &Nats{}
 
 type Nats struct {
@@ -99,7 +99,7 @@ func (n *Nats) SyncSubscription(sub *eventingv1alpha1.Subscription, cleaner even
 		filters = uniqueFilters.Filters
 	}
 
-	// Format logger
+	// format logger
 	log := utils.LoggerWithSubscription(n.namedLogger(), sub)
 
 	subscriptionConfig := eventingv1alpha1.MergeSubsConfigs(sub.Spec.Config, &n.defaultSubsConfig)
@@ -135,8 +135,6 @@ func (n *Nats) SyncSubscription(sub *eventingv1alpha1.Subscription, cleaner even
 			n.subscriptions[createKey(sub, subject, i)] = natsSub
 		}
 	}
-
-	// Setting the clean event types
 	sub.Status.CleanEventTypes = cleanSubjects
 	sub.Status.Config = subscriptionConfig
 
@@ -146,7 +144,7 @@ func (n *Nats) SyncSubscription(sub *eventingv1alpha1.Subscription, cleaner even
 // DeleteSubscription deletes all NATS subscriptions corresponding to a Kyma subscription
 func (n *Nats) DeleteSubscription(sub *eventingv1alpha1.Subscription) error {
 	for key, s := range n.subscriptions {
-		// Format logger
+		// format logger
 		log := n.namedLogger().With(
 			"kind", sub.GetObjectKind().GroupVersionKind().Kind,
 			"name", sub.GetName(),
@@ -157,7 +155,7 @@ func (n *Nats) DeleteSubscription(sub *eventingv1alpha1.Subscription) error {
 		)
 
 		if strings.HasPrefix(key, createKeyPrefix(sub)) {
-			// Unsubscribe call to NATS is async hence checking the status of the connection is important
+			// unsubscribe call to NATS is async hence checking the status of the connection is important
 			if n.connection.Status() != nats.CONNECTED {
 				if err := n.Initialize(env.Config{}); err != nil {
 					log.Errorw("connect to NATS failed", "status", n.connection.Status(), "error", err)
@@ -177,7 +175,8 @@ func (n *Nats) DeleteSubscription(sub *eventingv1alpha1.Subscription) error {
 	return nil
 }
 
-// GetInvalidSubscriptions returns the NamespacedName of Kyma subscriptions corresponding to NATS subscriptions marked as "invalid" by NATS client.
+// GetInvalidSubscriptions returns the NamespacedName of Kyma subscriptions corresponding to NATS subscriptions
+// marked as "invalid" by NATS client.
 func (n *Nats) GetInvalidSubscriptions() *[]types.NamespacedName {
 	var nsn []types.NamespacedName
 	for k, v := range n.subscriptions {
@@ -189,8 +188,8 @@ func (n *Nats) GetInvalidSubscriptions() *[]types.NamespacedName {
 	return &nsn
 }
 
-// GetAllSubscriptions returns the map which contains all details of subscription
-// Use this only for testing purposes
+// GetAllSubscriptions returns the map which contains all details of Subscription.
+// Use this only for testing purposes.
 func (n *Nats) GetAllSubscriptions() map[string]*nats.Subscription {
 	return n.subscriptions
 }
@@ -203,14 +202,14 @@ func (n *Nats) getCallback(sink string) nats.MsgHandler {
 			return
 		}
 
-		// Creating a context with cancellable
+		// creating a context with cancellable
 		ctxWithCancel, cancel := context.WithCancel(context.Background())
 		defer cancel()
 
-		// Creating a context with target
+		// creating a context with target
 		ctxWithCE := cev2.ContextWithTarget(ctxWithCancel, sink)
 
-		// Add tracing headers to the subsequent request
+		// add tracing headers to the subsequent request
 		traceCtxWithCE := tracing.AddTracingHeadersToContext(ctxWithCE, ce)
 		// set retries parameters
 		retryParams := cev2context.RetryParams{
@@ -234,7 +233,7 @@ func (n *Nats) doWithRetry(ctx context.Context, params cev2context.RetryParams, 
 			return result
 		}
 		n.namedLogger().Errorw("event dispatch failed", "id", ce.ID(), "source", ce.Source(), "type", ce.Type(), "error", result, "retry", retry)
-		// Try again?
+		// check if it's supposed to retry
 		if err := params.Backoff(ctx, retry+1); err != nil {
 			// do not try again.
 			n.namedLogger().Errorw("backoff error, will not try again", "error", err)

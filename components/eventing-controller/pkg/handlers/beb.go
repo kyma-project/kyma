@@ -157,7 +157,7 @@ func (b *BEB) SyncSubscription(subscription *eventingv1alpha1.Subscription, clea
 		}
 	}
 	// set the status of bebSubscription in ev2Subscription
-	statusChanged = b.setEmsSubscriptionStatus(subscription, bebSubscription) || statusChanged
+	statusChanged = b.setEMSSubscriptionStatus(subscription, bebSubscription) || statusChanged
 
 	// get the clean event types
 	subscription.Status.CleanEventTypes = statusCleanEventTypes(bebSubscription.Events)
@@ -250,8 +250,8 @@ func cleanEventTypes(subscription *types.Subscription, cleaner eventtype.Cleaner
 	return nil
 }
 
-// setEmsSubscriptionStatus sets the status of bebSubscription in ev2Subscription
-func (b *BEB) setEmsSubscriptionStatus(subscription *eventingv1alpha1.Subscription, bebSubscription *types.Subscription) bool {
+// setEMSSubscriptionStatus sets the status of bebSubscription in ev2Subscription
+func (b *BEB) setEMSSubscriptionStatus(subscription *eventingv1alpha1.Subscription, bebSubscription *types.Subscription) bool {
 	var statusChanged = false
 	if subscription.Status.EmsSubscriptionStatus.SubscriptionStatus != string(bebSubscription.SubscriptionStatus) {
 		subscription.Status.EmsSubscriptionStatus.SubscriptionStatus = string(bebSubscription.SubscriptionStatus)
