@@ -190,7 +190,7 @@ kubeconfig:
   secret:
 
 # Namespace to be enabled for collecting resources. By default all namespaces are collected.
-# namespaces: ""
+namespaces: ""
 
 ## Override the deployment namespace
 ##
