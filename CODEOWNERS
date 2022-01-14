@@ -270,16 +270,16 @@ components/etcd-tls-setup-job/ @PK85 @piotrmiskiewicz @ksputo @szwedm @voigt @wo
 /tests/end-to-end/upgrade/pkg/tests/rafter/ @m00g3n @pPrecel @dbadura
 
 # All .md files
-*.md @klaudiagrz @mmitoraj @majakurcius @alexandra-simeonova @NHingerl
+*.md @klaudiagrz @mmitoraj @majakurcius @alexandra-simeonova @NHingerl @grego952
 
 # All files and subdirectories in /docs
-/docs/ @klaudiagrz @mmitoraj @majakurcius @alexandra-simeonova @NHingerl
+/docs/ @klaudiagrz @mmitoraj @majakurcius @alexandra-simeonova @NHingerl @grego952
 
 # Owners of the .kyma-project-io folder
 /.kyma-project-io/ @m00g3n @pPrecel @dbadura
 
 # Config file for MILV - milv.config.yaml
-milv.config.yaml @m00g3n @pPrecel @klaudiagrz @mmitoraj @majakurcius @alexandra-simeonova @NHingerl
+milv.config.yaml @m00g3n @pPrecel @klaudiagrz @mmitoraj @majakurcius @alexandra-simeonova @NHingerl @grego952
 
 # performance tests
 /tests/perf/ @a-thaler @lilitgh @clebs @rakesh-garimella
