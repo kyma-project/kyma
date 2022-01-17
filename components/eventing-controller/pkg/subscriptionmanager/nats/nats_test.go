@@ -58,7 +58,7 @@ func TestCleanup(t *testing.T) {
 		EventTypePrefix: controllertesting.EventTypePrefix,
 	}
 	subsConfig := env.DefaultSubscriptionConfig{MaxInFlightMessages: 9}
-	natsBackend := handlers.NewNats(envConf, subsConfig, defaultLogger)
+	natsBackend := handlers.NewNats(envConf, subsConfig, nil, defaultLogger)
 	natsSubMgr.Backend = natsBackend
 	err = natsSubMgr.Backend.Initialize(env.Config{})
 	g.Expect(err).To(gomega.BeNil())

@@ -60,7 +60,7 @@ global:
       name: "sb-proxy-k8s"
       version: "v0.9.1"
       directory: "external/quay.io/service-manager"
-    busybox:
-      name: "busybox"
-      version: "1.34.1"
+    alpine:
+      name: "alpine"
+      version: "3.14.2"
       directory: "external"

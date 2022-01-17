@@ -104,10 +104,13 @@ With this step, you will set up the OIDC provider in the kubeconfig file to enfo
         - --oidc-client-id=YOUR_CLIENT_ID
         #- --oidc-client-secret=YOUR_CLIENT_SECRET this is not required if your OICS server supports the PKCE authentication flow
     ```
+
 4. To enforce the OIDC login, set the OIDC user as a default user in the context.
+
     ```yaml
     context:
         cluster: {YOUR_CLUSTER_NAME}
         user: oidc
     ```
+
 5. Now you can share the modified kubeconfig file with the members of your team or organization. When they use it, your identity provider will handle the authentication. The Kubernetes API server will make sure they will have access to resources according to the roles bound to them as individuals or group members.     

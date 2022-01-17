@@ -32,24 +32,31 @@ type GitOperator interface {
 	LastCommit(options git.Options) (string, error)
 }
 
-type FunctionReconciler struct {
-	Log         logr.Logger
-	client      resource.Client
-	recorder    record.EventRecorder
-	config      FunctionConfig
-	scheme      *runtime.Scheme
-	gitOperator GitOperator
-	healthCh    chan bool
+//go:generate mockery -name=StatsCollector -output=automock -outpkg=automock -case=underscore
+type StatsCollector interface {
+	UpdateReconcileStats(f *serverlessv1alpha1.Function, cond serverlessv1alpha1.Condition)
 }
 
-func NewFunction(client resource.Client, log logr.Logger, config FunctionConfig, gitOperator GitOperator, recorder record.EventRecorder, healthCh chan bool) *FunctionReconciler {
+type FunctionReconciler struct {
+	Log            logr.Logger
+	client         resource.Client
+	recorder       record.EventRecorder
+	config         FunctionConfig
+	scheme         *runtime.Scheme
+	gitOperator    GitOperator
+	statsCollector StatsCollector
+	healthCh       chan bool
+}
+
+func NewFunction(client resource.Client, log logr.Logger, config FunctionConfig, gitOperator GitOperator, recorder record.EventRecorder, statsCollector StatsCollector, healthCh chan bool) *FunctionReconciler {
 	return &FunctionReconciler{
-		Log:         log.WithName("controllers").WithName("function"),
-		client:      client,
-		recorder:    recorder,
-		config:      config,
-		gitOperator: gitOperator,
-		healthCh:    healthCh,
+		Log:            log.WithName("controllers").WithName("function"),
+		client:         client,
+		recorder:       recorder,
+		config:         config,
+		gitOperator:    gitOperator,
+		healthCh:       healthCh,
+		statsCollector: statsCollector,
 	}
 }
 

@@ -10,7 +10,7 @@ describe("Upgrade test cleanup", function () {
   const testNamespace = "test";
 
   it("Test namespaces should be deleted", async function () {
-    await cleanMockTestFixture("mocks", testNamespace, false);
+    await cleanMockTestFixture("mocks", testNamespace, true);
   });
 
 });
