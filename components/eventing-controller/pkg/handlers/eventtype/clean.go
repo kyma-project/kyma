@@ -34,7 +34,7 @@ type cleaner struct {
 	logger            *logger.Logger
 }
 
-// compile-time check of interface comliance
+// compile-time check of interface compliance
 var _ Cleaner = &cleaner{}
 
 func NewCleaner(eventTypePrefix string, applicationLister *application.Lister, logger *logger.Logger) Cleaner {
