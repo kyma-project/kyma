@@ -235,7 +235,7 @@ components/etcd-tls-setup-job/ @PK85 @piotrmiskiewicz @ksputo @szwedm @voigt @wo
 /tests/compass-runtime-agent/ @PK85 @dbadura @akgalwas @janmedrek @franpog859 @Maladie @koala7659 @ralikio
 
 # Fast Integration Tests
-/tests/fast-integration/ @pbochynski @adamwalach @voigt @skhalash @shorim @rakesh-garimella @jeremyharisch @lindnerby
+/tests/fast-integration/ @pbochynski @adamwalach @voigt @skhalash @shorim @rakesh-garimella @jeremyharisch @lindnerby @khlifi411 @ruanxin @tobiscr @clebs @Tomasz-Smelcerz-SAP
 
 # Fast Integration Tests maintained by gophers
 /tests/fast-integration/kyma-environment-broker @PK85 @piotrmiskiewicz @ksputo @szwedm @voigt @wozniakjan
