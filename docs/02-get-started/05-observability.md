@@ -31,7 +31,7 @@ To do that, we'll use the Grafana dashboard that comes with Kyma.
 
 You can now browse the logs.  
 
-   > **NOTE:** You can also view the logs in Kyma Dashboard itself. Go to the `default` Namespace > **Workloads** > **Functions** > your `lastorder` Function, scroll down, and click on **View Logs**.
+   > **NOTE:** You can find different ways of displaying logs (for example, in Kyma Dashboard or using `kubectl`) on the [Access Kyma application logs](https://kyma-project.io/docs/kyma/latest/04-operation-guides/operations/obsv-01-access-logs) page.
 
 ## View the metrics
 
