@@ -54,10 +54,10 @@ authProxy:
   resources:
     limits:
       cpu: 50m
-      memory: 20Mi
+      memory: 100Mi
     requests:
       cpu: 10m
-      memory: 5Mi
+      memory: 15Mi
 
 # 'fullnameOverride' is deprecated. Use 'deployment.instance_name' instead.
 # This is only supported for backward compatibility and will be removed in a future version.
