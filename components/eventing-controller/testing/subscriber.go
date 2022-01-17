@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/avast/retry-go/v3"
@@ -21,8 +22,8 @@ type Subscriber struct {
 }
 
 const (
-	maxNoOfData = 5
-	maxAttempts = 5
+	maxNoOfData = 10
+	maxAttempts = 10
 )
 
 func NewSubscriber(addr string) *Subscriber {
@@ -155,8 +156,12 @@ func (s Subscriber) CheckRetries(expectedNoOfRetries int, expectedData, subscrib
 			if err != nil {
 				return pkgerrors.Wrapf(err, "read data failed")
 			}
-			if string(body) != fmt.Sprintf("%d", expectedNoOfRetries) {
-				return fmt.Errorf("total retries not received")
+			actualRetires, err := strconv.Atoi(string(body))
+			if err != nil {
+				return pkgerrors.Wrapf(err, "read data failed")
+			}
+			if actualRetires < expectedNoOfRetries {
+				return fmt.Errorf("total retries not received. ActualRetires=%d, ExpectedRetries=%d", actualRetires, expectedNoOfRetries)
 			}
 			return nil
 		},
