@@ -76,6 +76,7 @@ data:
         multiline.parser  {{ .Values.config.inputs.tail.multilineParser }}
         {{- end }}
         Read_from_Head    {{ .Values.config.inputs.tail.readFromHead }}
+        Inotify_Watcher   {{ .Values.config.inputs.tail.inotifyWatcher }}
         
 {{- end }}
 
