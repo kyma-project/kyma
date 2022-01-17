@@ -98,7 +98,7 @@ global:
       version: "5051e383"
     kaniko_executor:
       name: "kaniko-executor"
-      version: "1.7.0-a029b8df"
+      version: "1.7.0-6d270da8"
       directory: "tpi"
     registry:
       name: "registry"
