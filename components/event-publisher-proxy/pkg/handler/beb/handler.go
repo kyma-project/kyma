@@ -132,6 +132,7 @@ func (h *Handler) publishLegacyEventsAsCE(writer http.ResponseWriter, request *h
 	defer cancel()
 	h.receive(ctx, event)
 	statusCode, dispatchTime, respBody := h.send(ctx, event)
+
 	// Change response as per old error codes
 	h.LegacyTransformer.TransformsCEResponseToLegacyResponse(writer, statusCode, event, string(respBody))
 

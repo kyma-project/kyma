@@ -46,7 +46,7 @@ describe("SKR SVCAT migration test", function() {
 
   const provisioningTimeout = 1000 * 60 * 60 // 1h
   const deprovisioningTimeout = 1000 * 60 * 30 // 30m
-  const updateTimeout = 1000 * 60 * 15 // 15m
+  const updateTimeout = 1000 * 60 * 45 // 45m
 
   let platformCreds;
   it(`Should provision new ServiceManager platform`, async function() {
@@ -69,7 +69,7 @@ describe("SKR SVCAT migration test", function() {
   });
 
   it(`Should save kubeconfig for the SKR to ~/.kube/config`, async function() {
-    t.saveKubeconfig(skr.shoot.kubeconfig);
+    await t.saveKubeconfig(skr.shoot.kubeconfig);
   });
 
   it(`Should initialize K8s client`, async function() {
@@ -85,6 +85,15 @@ describe("SKR SVCAT migration test", function() {
   it(`Should install sample Service Catalog resources`, async function() {
     await sampleResources.deploy()
   });
+  
+  let secretsAndPresets
+  it(`Should store secrets and presets of sample resources`, async function() {
+    secretsAndPresets = await sampleResources.storeSecretsAndPresets()
+  });
+
+  it(`Should check if pod presets injected secrets to functions containers`, async function() {
+    await t.checkPodPresetEnvInjected();
+  });
 
   it('Should mark the platform for migration in Service Manager', async function() {
     await t.markForMigration(smAdminCreds, platformCreds.clusterId, btpOperatorCreds.instanceId)
@@ -98,21 +107,12 @@ describe("SKR SVCAT migration test", function() {
     await waitForDeployment("sap-btp-operator-controller-manager", "kyma-system", 10 * 60 * 1000); //10 minutes
   });
 
-  let secretsAndPresets
-  it(`Should store secrets and presets of sample resources`, async function() {
-    secretsAndPresets = await sampleResources.storeSecretsAndPresets()
-  });
-
-  it(`Should check if pod presets injected secrets to functions containers`, async function() {
-    await t.checkPodPresetEnvInjected();
-  });
-
   it(`Should wait for migration job to finish`, async function() {
     await waitForJob("sap-btp-operator-migration", "kyma-system", 10 * 60 * 1000); //10 minutes
   });
   
   it(`Should print the container logs of the migration job`, async function() {
-    await printContainerLogs('job-name=sap-btp-operator-migration', 'migration', 'sap-btp-operator');
+    await printContainerLogs('job-name=sap-btp-operator-migration', 'migration', 'kyma-system');
   });
 
   it(`Should still contain pod presets and the secrets`, async function() {

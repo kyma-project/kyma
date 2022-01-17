@@ -167,17 +167,17 @@ The operation was successful if the returned status says `true`.
   Kyma Dashboard
   </summary>
 
-1. Using the left navigation, go back to **Workloads** > **Functions**.
-2. Select your `lastorder` Function and navigate to the **Configuration** tab.
-3. Click on **Add Event Subscription+**.
-4. Provide the following parameters:
+1. Go back to your `lastorder` Function's view in Kyma Dashboard.
+2. In the **Configuration** tab, click on **Create Subscription+**.
+3. Provide the following parameters:
+    - **Subscription name**: `lastorder-sub`
     - **Application name**: `myapp`
     - **Event name**: `order.received`
     - **Event version**: `v1`
-    **Event type** is generated automatically; in this example: `myapp.order.received.v1`. 
+
+    - **Event type** is generated automatically. For this example, it's `sap.kyma.custom.myapp.order.received.v1`. 
     
-5. Click **Add**. 
-   The name of the event Subscription is generated automatically and follows the `{FUNCTION_NAME}-{RANDOM_SUFFIX}` pattern.
+4. Click **Create**. 
 
   </details>
 </div>

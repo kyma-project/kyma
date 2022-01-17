@@ -174,7 +174,7 @@ oathkeeper:
             # Sets the strategy to be used to validate/match the token scope. Supports "hierarchic", "exact", "wildcard", "none". Defaults
             # to "none".
             scope_strategy: exact
-        # Enable the "jwt" section to allow for jwt authenticator configured for local Dex Id Tokens.
+        # Enable the "jwt" section to allow for jwt authenticator configured.
         jwt:
           enabled: true
           config:
