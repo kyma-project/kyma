@@ -9,7 +9,6 @@ const {
   k8sApply,
   k8sDelete,
   kubectlPortForward,
-  debug,
 } = require("../utils");
 const mockServerClient = require("mockserver-client").mockServerClient;
 const mockServerPort = 1080;
@@ -66,7 +65,7 @@ describe("Telemetry operator", function () {
 
   describe("Set up mockserver", function () {
     before(async function () {
-      // await waitForDeployment("mockserver", mockNamespace);
+      await waitForDeployment("mockserver", mockNamespace);
       let { body } = await k8sCoreV1Api.listNamespacedPod(mockNamespace);
       let mockPod = body.items[0].metadata.name;
       cancelPortForward = kubectlPortForward(
