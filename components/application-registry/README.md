@@ -34,8 +34,6 @@ The Application Registry has the following parameters:
 - **requestLogging** is the flag for logging incoming requests. The default value is `false`.
 - **specRequestTimeout** is the time-out for requests fetching specifications provided by the user. It is provided in seconds. The default time-out is `20`.
 - **detailedErrorResponse** is the flag for showing detailed internal error messages in response bodies. The default value is `false` and all internal server error messages are shortened to `Internal error`, while all other error messages are shown as usual.
-- **insecureAssetDownload** is the flag for skipping certificate verification for asset download. The default value is `false`.
-- **insecureSpecDownload** is the flag for skipping certificate verification for API specification download. The default value is `false`.
 
 ### Sample calls
 
