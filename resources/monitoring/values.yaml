@@ -30,7 +30,7 @@ global:
       sha: ""
     prometheus_istio:
       name: "prometheus"
-      version: "vv2.22.1"
+      version: "v2.22.1"
       directory: "external/quay.io/prometheus"
       sha: ""
     pushgateway:
