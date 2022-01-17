@@ -30,6 +30,10 @@ prometheus:
     ##
     proxyUrl: ""
 
+    ## Override serviceMonitor selector
+    ##
+    selectorOverride: {}
+
     relabelings: []
     metricRelabelings: []
     interval: ""
@@ -61,7 +65,7 @@ serviceAccount:
   name:
   annotations: {}
   imagePullSecrets: []
-  automountServiceAccountToken: false # RG: Check
+  automountServiceAccountToken: false
 
 securityContext:
   fsGroup: 65534

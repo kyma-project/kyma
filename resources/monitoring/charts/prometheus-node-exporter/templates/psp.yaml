@@ -1,3 +1,8 @@
+{{- /*
+  Customization:
+  * set min allowed host port to 1024
+*/ -}}
+
 {{- if .Values.rbac.create }}
 {{- if .Values.rbac.pspEnabled }}
 apiVersion: policy/v1beta1
@@ -12,12 +17,6 @@ metadata:
 {{- end}}
 spec:
   privileged: false
-  # Required to prevent escalations to root.
-  # allowPrivilegeEscalation: false
-  # This is redundant with non-root + disallow privilege escalation,
-  # but we can provide it for defense in depth.
-  #requiredDropCapabilities:
-  #  - ALL
   # Allow core volume types.
   volumes:
     - 'configMap'
@@ -42,13 +41,13 @@ spec:
   supplementalGroups:
     rule: 'MustRunAs'
     ranges:
-      # Forbid adding the root group.
+      # Allow adding the root group.
       - min: 0
         max: 65535
   fsGroup:
     rule: 'MustRunAs'
     ranges:
-      # Forbid adding the root group.
+      # Allow adding the root group.
       - min: 0
         max: 65535
   readOnlyRootFilesystem: false
