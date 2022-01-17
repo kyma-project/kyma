@@ -198,7 +198,7 @@ containers:
       functionRequeueDuration:
         value: 5m
       functionBuildExecutorArgs:
-        value: "--insecure,--skip-tls-verify,--skip-unused-stages,--log-format=text,--cache=true,--force"
+        value: "--insecure,--skip-tls-verify,--skip-unused-stages,--log-format=text,--cache=true"
       functionBuildMaxSimultaneousJobs:
         value: "5"
       logLevel:
