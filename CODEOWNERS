@@ -260,15 +260,6 @@ components/etcd-tls-setup-job/ @PK85 @piotrmiskiewicz @ksputo @szwedm @voigt @wo
 # The tools/gitserver directory
 /tools/gitserver/ @m00g3n @pPrecel @dbadura
 
-# E2E Upgrade Tests
-/tests/end-to-end/upgrade/ @PK85 @piotrmiskiewicz @ksputo @szwedm @voigt @wozniakjan @adamwalach @k15r
-
-# E2E Api Gateway Upgrade Tests
-/tests/end-to-end/upgrade/pkg/tests/api-gateway/ @strekm @werdes72 @Tomasz-Smelcerz-SAP @mjakobczyk @dariusztutaj
-
-# E2E Rafter Upgrade Tests
-/tests/end-to-end/upgrade/pkg/tests/rafter/ @m00g3n @pPrecel @dbadura
-
 # All .md files
 *.md @klaudiagrz @mmitoraj @majakurcius @alexandra-simeonova @NHingerl
 
