@@ -13,7 +13,7 @@ global:
       directory: tpi
     oauth2_proxy:
       name: oauth2-proxy
-      version: 7.2.0-59f3431d
+      version: 7.2.0-2696e5d5
       directory: tpi
   kymaRuntime:
     adminGroup: runtimeAdmin
