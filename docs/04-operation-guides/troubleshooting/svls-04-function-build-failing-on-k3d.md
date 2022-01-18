@@ -13,7 +13,7 @@ $ kubectl get functions.serverless.kyma-project.io nyfun
 NAME    CONFIGURED   BUILT   RUNNING   RUNTIME    VERSION   AGE
 myfun   True         False             nodejs14   1         3h15m
 ```
-and you  see an error log from kaniko build execution from the build job than your host k3d environment is probably affected
+and function build job shows the following error, than your host k3d environment is probably vulnerable to the problem.
 ```
 $ kubectl logs myfun-build-zqhk8-7xl6h
 kaniko should only be run inside of a container, run with the --force flag if you are sure you want to continue
