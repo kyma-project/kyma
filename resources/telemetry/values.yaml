@@ -4,7 +4,7 @@ global:
   images:
     telemetry_operator:
       name: "telemetry-operator"
-      version: "PR-12910"
+      version: "PR-13074"
     fluent_bit:
       name: "fluent-bit"
       version: "1.8.11-2696e5d5"

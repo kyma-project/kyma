@@ -12,8 +12,8 @@ global:
     #   directory: "tpi"
     health_proxy:
       name: "health-proxy"
-      version: "bd223692"
-      directory: "incubator/develop"
+      version: "PR-21"
+      directory: "incubator"
 
   istio:
     gateway:
