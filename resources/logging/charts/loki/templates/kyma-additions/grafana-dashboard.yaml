@@ -36,7 +36,7 @@ data:
         "editable": true,
         "gnetId": null,
         "graphTooltip": 1,
-        "iteration": 1641934885409,
+        "iteration": 1642498735660,
         "links": [],
         "panels": [
           {
@@ -77,9 +77,9 @@ data:
               "thresholdMarkers": true
             },
             "gridPos": {
-              "h": 4,
+              "h": 5,
               "w": 3,
-              "x": 0,
+              "x": 3,
               "y": 1
             },
             "id": 126,
@@ -132,7 +132,6 @@ data:
             ],
             "thresholds": "0,1",
             "title": "Active Pods",
-            "transparent": true,
             "type": "singlestat",
             "valueFontSize": "80%",
             "valueMaps": [
@@ -144,96 +143,6 @@ data:
               }
             ],
             "valueName": "avg"
-          },
-          {
-            "cacheTimeout": null,
-            "colorBackground": false,
-            "colorValue": false,
-            "colors": [
-              "#299c46",
-              "rgba(237, 129, 40, 0.89)",
-              "#d44a3a"
-            ],
-            "datasource": "Loki",
-            "fieldConfig": {
-              "defaults": {},
-              "overrides": []
-            },
-            "format": "percentunit",
-            "gauge": {
-              "maxValue": 100,
-              "minValue": 0,
-              "show": false,
-              "thresholdLabels": false,
-              "thresholdMarkers": true
-            },
-            "gridPos": {
-              "h": 4,
-              "w": 3,
-              "x": 3,
-              "y": 1
-            },
-            "id": 128,
-            "interval": null,
-            "links": [],
-            "mappingType": 1,
-            "mappingTypes": [
-              {
-                "$$hashKey": "object:812",
-                "name": "value to text",
-                "value": 1
-              },
-              {
-                "$$hashKey": "object:813",
-                "name": "range to text",
-                "value": 2
-              }
-            ],
-            "maxDataPoints": 100,
-            "nullPointMode": "connected",
-            "nullText": null,
-            "pluginVersion": "6.5.2",
-            "postfix": "",
-            "postfixFontSize": "50%",
-            "prefix": "",
-            "prefixFontSize": "50%",
-            "rangeMaps": [
-              {
-                "from": "null",
-                "text": "N/A",
-                "to": "null"
-              }
-            ],
-            "sparkline": {
-              "fillColor": "rgba(87, 148, 242, 0.17)",
-              "full": true,
-              "lineColor": "rgb(31, 120, 193)",
-              "show": true,
-              "ymax": null,
-              "ymin": null
-            },
-            "tableColumn": "",
-            "targets": [
-              {
-                "expr": "sum(rate({namespace=\"$namespace\", pod=~\"logging-loki.*\"} |= \"level=error\"[5m]))",
-                "refId": "A"
-              }
-            ],
-            "thresholds": "",
-            "timeFrom": null,
-            "timeShift": null,
-            "title": "Error Rate",
-            "type": "singlestat",
-            "valueFontSize": "70%",
-            "valueMaps": [
-              {
-                "$$hashKey": "object:815",
-                "op": "=",
-                "text": "N/A",
-                "value": "null"
-              }
-            ],
-            "valueName": "current"
           },
           {
             "cacheTimeout": null,
@@ -258,7 +167,7 @@ data:
               "thresholdMarkers": true
             },
             "gridPos": {
-              "h": 4,
+              "h": 5,
               "w": 3,
               "x": 6,
               "y": 1
@@ -359,7 +268,7 @@ data:
               "overrides": []
             },
             "gridPos": {
-              "h": 4,
+              "h": 5,
               "w": 3,
               "x": 9,
               "y": 1
@@ -393,7 +302,6 @@ data:
             "timeFrom": null,
             "timeShift": null,
             "title": "Memory Usage",
-            "transparent": true,
             "type": "gauge"
           },
           {
@@ -428,7 +336,7 @@ data:
               "overrides": []
             },
             "gridPos": {
-              "h": 4,
+              "h": 5,
               "w": 3,
               "x": 12,
               "y": 1
@@ -460,7 +368,6 @@ data:
             "timeFrom": null,
             "timeShift": null,
             "title": "CPU Usage",
-            "transparent": true,
             "type": "gauge"
           },
           {
@@ -495,7 +402,7 @@ data:
               "overrides": []
             },
             "gridPos": {
-              "h": 4,
+              "h": 5,
               "w": 3,
               "x": 15,
               "y": 1
@@ -517,7 +424,7 @@ data:
             "targets": [
               {
                 "exemplar": true,
-                "expr": "((kubelet_volume_stats_capacity_bytes{ persistentvolumeclaim=~\"storage-logging-loki.*\"} - kubelet_volume_stats_available_bytes{ persistentvolumeclaim=~\"storage-logging-loki.*\"}) / kubelet_volume_stats_capacity_bytes{ persistentvolumeclaim=~\"storage-logging-loki.*\"}) * 100",
+                "expr": "sum(((kubelet_volume_stats_capacity_bytes{ persistentvolumeclaim=~\"storage-logging-loki.*\"} - kubelet_volume_stats_available_bytes{ persistentvolumeclaim=~\"storage-logging-loki.*\"}) / kubelet_volume_stats_capacity_bytes{ persistentvolumeclaim=~\"storage-logging-loki.*\"}) * 100)",
                 "format": "time_series",
                 "instant": false,
                 "interval": "",
@@ -529,7 +436,6 @@ data:
             "timeFrom": null,
             "timeShift": null,
             "title": "Volume Usage",
-            "transparent": true,
             "type": "gauge"
           },
           {
@@ -573,7 +479,7 @@ data:
               "overrides": []
             },
             "gridPos": {
-              "h": 4,
+              "h": 5,
               "w": 3,
               "x": 18,
               "y": 1
@@ -595,7 +501,7 @@ data:
                 "values": false
               },
               "text": {
-                "titleSize": 20
+                "titleSize": 40
               },
               "textMode": "auto"
             },
@@ -613,96 +519,13 @@ data:
             "type": "stat"
           },
           {
-            "cacheTimeout": null,
-            "datasource": null,
-            "description": "",
-            "fieldConfig": {
-              "defaults": {
-                "color": {
-                  "mode": "thresholds"
-                },
-                "mappings": [
-                  {
-                    "$$hashKey": "object:68",
-                    "id": 0,
-                    "op": "=",
-                    "text": "0",
-                    "type": 1,
-                    "value": "null"
-                  }
-                ],
-                "thresholds": {
-                  "mode": "absolute",
-                  "steps": [
-                    {
-                      "color": "rgb(31, 255, 7)",
-                      "value": null
-                    },
-                    {
-                      "color": "rgb(31, 255, 7)",
-                      "value": 10
-                    },
-                    {
-                      "color": "rgb(31, 255, 7)",
-                      "value": 50
-                    }
-                  ]
-                },
-                "unit": "short"
-              },
-              "overrides": []
-            },
-            "gridPos": {
-              "h": 4,
-              "w": 3,
-              "x": 21,
-              "y": 1
-            },
-            "id": 130,
-            "interval": null,
-            "links": [],
-            "maxDataPoints": 100,
-            "options": {
-              "colorMode": "value",
-              "graphMode": "area",
-              "justifyMode": "auto",
-              "orientation": "horizontal",
-              "reduceOptions": {
-                "calcs": [
-                  "sum"
-                ],
-                "fields": "",
-                "values": false
-              },
-              "text": {
-                "titleSize": 20
-              },
-              "textMode": "auto"
-            },
-            "pluginVersion": "",
-            "targets": [
-              {
-                "exemplar": true,
-                "expr": "sum(rate(loki_ingester_chunks_flushed_total[1m]))",
-                "instant": true,
-                "interval": "",
-                "legendFormat": "",
-                "refId": "A"
-              }
-            ],
-            "timeFrom": null,
-            "timeShift": null,
-            "title": "Chunks Flushed/Sec",
-            "type": "stat"
-          },
-          {
             "collapsed": true,
             "datasource": null,
             "gridPos": {
               "h": 1,
               "w": 24,
               "x": 0,
-              "y": 5
+              "y": 6
             },
             "id": 17,
             "panels": [
@@ -2278,7 +2101,7 @@ data:
               "h": 1,
               "w": 24,
               "x": 0,
-              "y": 6
+              "y": 7
             },
             "id": 23,
             "panels": [
@@ -2584,7 +2407,7 @@ data:
               "h": 1,
               "w": 24,
               "x": 0,
-              "y": 7
+              "y": 8
             },
             "id": 104,
             "panels": [
@@ -2797,7 +2620,7 @@ data:
               "h": 1,
               "w": 24,
               "x": 0,
-              "y": 8
+              "y": 9
             },
             "id": 94,
             "panels": [
