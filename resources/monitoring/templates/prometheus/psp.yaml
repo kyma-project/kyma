@@ -38,13 +38,13 @@ spec:
   supplementalGroups:
     rule: 'MustRunAs'
     ranges:
-      # Allow adding the root group.
+      # Forbid adding the root group.
       - min: 0
         max: 65535
   fsGroup:
     rule: 'MustRunAs'
     ranges:
-      # Allow adding the root group.
+      # Forbid adding the root group.
       - min: 0
         max: 65535
   readOnlyRootFilesystem: false
