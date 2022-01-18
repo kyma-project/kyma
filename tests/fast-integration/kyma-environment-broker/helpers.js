@@ -1,5 +1,7 @@
 const { wait, debug } = require("../utils");
 const { expect } = require("chai");
+const fs = require("fs");
+const os = require("os");
 
 async function provisionSKR(
   keb,
@@ -48,14 +50,16 @@ function ensureValidShootOIDCConfig(shoot, targetOIDCConfig) {
   expect(shoot.oidcConfig.signingAlgs).to.eql(targetOIDCConfig.signingAlgs);
 }
 
-async function deprovisionSKR(keb, kcp, instanceID, timeout) {
+async function deprovisionSKR(keb, kcp, instanceID, timeout, ensureSuccess=true) {
   const resp = await keb.deprovisionSKR(instanceID);
   expect(resp).to.have.property("operation");
 
   const operationID = resp.operation;
   debug(`Operation ID ${operationID}`);
 
-  await ensureOperationSucceeded(keb, kcp, instanceID, operationID, timeout);
+  if (ensureSuccess) {
+    await ensureOperationSucceeded(keb, kcp, instanceID, operationID, timeout);
+  }
 
   return operationID;
 }
@@ -115,9 +119,19 @@ async function ensureValidOIDCConfigInCustomerFacingKubeconfig(keb, instanceID, 
   expect(kubeconfigContent).to.match(new RegExp(clientIDMatchPattern, "g"));
 }
 
+async function saveKubeconfig(kubeconfig) {
+  const directory = `${os.homedir()}/.kube`;
+  if (!fs.existsSync(directory)) {
+    fs.mkdirSync(directory, {recursive: true});
+  }
+
+  fs.writeFileSync(`${directory}/config`, kubeconfig);
+}
+
 module.exports = {
   provisionSKR,
   deprovisionSKR,
+  saveKubeconfig,
   updateSKR,
   ensureOperationSucceeded,
   getShootName,

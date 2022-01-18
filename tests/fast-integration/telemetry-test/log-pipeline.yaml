@@ -1,0 +1,19 @@
+apiVersion: telemetry.kyma-project.io/v1alpha1
+kind: LogPipeline
+metadata:
+  name: logpipeline-test
+spec:
+  parsers: [ ]
+  multilineParsers: [ ]
+  filters: [ ]
+  outputs:
+    - content: |
+        Name http
+        host mockserver.mockserver
+        port 1080
+        Match *
+  files:
+    - name: test
+      content: |
+        test file content
+  secretRefs: [ ]

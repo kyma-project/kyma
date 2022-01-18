@@ -1,4 +1,0 @@
-apiVersion: v1
-description: This chart populates sample data and executes upgrade tests
-name: upgrade
-version: 0.1.0
