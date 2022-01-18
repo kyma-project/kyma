@@ -1,8 +1,7 @@
-apiVersion: v2
+apiVersion: v1
 description: Kyma component 'monitoring'
 name: monitoring
 version: 1.0.0
-appVersion: 0.53.1
 # version: 11.1.1
 home: https://kyma-project.io
 icon: https://github.com/kyma-project/kyma/blob/main/logo.png?raw=true
