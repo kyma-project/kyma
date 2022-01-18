@@ -160,13 +160,6 @@ func (n *Nats) SyncSubscription(sub *eventingv1alpha1.Subscription, cleaner even
 			}
 		}
 
-		// delete extra subscriptions if maxInflight is reduced. If maxInflight is increased then it will be handled
-		// when we create/check subscriptions on nats-server
-		if err := n.deleteExtraMaxInflightSubs(sub, subject, subscriptionConfig.MaxInFlightMessages, log); err != nil {
-			log.Errorw("deleting extra subscriptions on NATS failed", "error", err)
-			return false, err
-		}
-
 		for i := 0; i < subscriptionConfig.MaxInFlightMessages; i++ {
 			// queueGroupName must be unique for each subscription and subject
 			queueGroupName := createKeyPrefix(sub) + string(types.Separator) + subject
@@ -264,41 +257,6 @@ func (n *Nats) deleteSubFromNats(natsSub *nats.Subscription, subKey string, log 
 	}
 	delete(n.subscriptions, subKey)
 	log.Infow("unsubscribe succeeded")
-
-	return nil
-}
-
-// deleteExtraMaxInflightSubs deletes extra subscriptions for a subject from NATS server
-// based on the maxInFlightMessages
-func (n *Nats) deleteExtraMaxInflightSubs(sub *eventingv1alpha1.Subscription, subject string, maxInFlightMessages int, log *zap.SugaredLogger) error {
-	// if maxInFlightMessages is not modified, then return (do nothing)
-	if sub.Status.Config == nil || sub.Status.Config.MaxInFlightMessages == maxInFlightMessages {
-		return nil
-	}
-
-	// if old maxInFlightMessages is smaller than new maxInFlightMessages, then return (do nothing)
-	// means that there are no extra subscriptions for this subject
-	if sub.Status.Config.MaxInFlightMessages < maxInFlightMessages {
-		return nil
-	}
-
-	log.Infow(
-		"deleting extra subscriptions on NATS because maxInFlight is reduced",
-		"oldMaxInFlightMessages", sub.Status.Config.MaxInFlightMessages,
-		"newMaxInFlightMessages", maxInFlightMessages,
-	)
-
-	// delete the extra subscriptions from end of the subscription map
-	for i := sub.Status.Config.MaxInFlightMessages - 1; i >= maxInFlightMessages; i-- {
-		natsSubKey := createKey(sub, subject, i)
-
-		// check if the subscription exists, then delete it from NATS
-		if s, ok := n.subscriptions[natsSubKey]; ok {
-			if err := n.deleteSubFromNats(s, natsSubKey, log); err != nil {
-				return err
-			}
-		}
-	}
 
 	return nil
 }

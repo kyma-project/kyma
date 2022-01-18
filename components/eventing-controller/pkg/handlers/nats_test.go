@@ -202,8 +202,8 @@ func TestNatsSubAfterSync_NoChange(t *testing.T) {
 	}
 
 	// create subscribers servers for testing
-	natsPort := 5223
-	subscriberPort := 8080
+	natsPort := nextPort.get()
+	subscriberPort := nextPort.get()
 	subscriberReceiveURL := fmt.Sprintf("http://127.0.0.1:%d/store", subscriberPort)
 	subscriberCheckURL := fmt.Sprintf("http://127.0.0.1:%d/check", subscriberPort)
 
@@ -229,7 +229,7 @@ func TestNatsSubAfterSync_NoChange(t *testing.T) {
 		ReconnectWait: time.Second,
 	}
 	defaultSubsConfig := env.DefaultSubscriptionConfig{MaxInFlightMessages: 5}
-	natsBackend := NewNats(natsConfig, defaultSubsConfig, defaultLogger)
+	natsBackend := NewNats(natsConfig, defaultSubsConfig, nil, defaultLogger)
 	if err := natsBackend.Initialize(env.Config{}); err != nil {
 		t.Fatalf("connect to NATS server failed: %v", err)
 	}
@@ -329,9 +329,9 @@ func TestNatsSubAfterSync_SinkChange(t *testing.T) {
 	}
 
 	// create two subscribers, as we need two sinks for this test
-	natsPort := 5223
-	subscriber1Port := 8080
-	subscriber2Port := 8081
+	natsPort := nextPort.get()
+	subscriber1Port := nextPort.get()
+	subscriber2Port := nextPort.get()
 
 	subscriber1ReceiveURL := fmt.Sprintf("http://127.0.0.1:%d/store", subscriber1Port)
 	subscriber2ReceiveURL := fmt.Sprintf("http://127.0.0.1:%d/store", subscriber2Port)
@@ -369,7 +369,7 @@ func TestNatsSubAfterSync_SinkChange(t *testing.T) {
 		ReconnectWait: time.Second,
 	}
 	defaultSubsConfig := env.DefaultSubscriptionConfig{MaxInFlightMessages: 5}
-	natsBackend := NewNats(natsConfig, defaultSubsConfig, defaultLogger)
+	natsBackend := NewNats(natsConfig, defaultSubsConfig, nil, defaultLogger)
 	if err := natsBackend.Initialize(env.Config{}); err != nil {
 		t.Fatalf("connect to NATS server failed: %v", err)
 	}
@@ -466,6 +466,8 @@ func TestNatsSubAfterSync_SinkChange(t *testing.T) {
 	}
 }
 
+// TestNatsSubAfterSync_SinkChange tests the SyncSubscription method
+// when the filters are changed in subscription
 func TestNatsSubAfterSync_FiltersChange(t *testing.T) {
 	g := NewWithT(t)
 
@@ -477,8 +479,8 @@ func TestNatsSubAfterSync_FiltersChange(t *testing.T) {
 	}
 
 	// create subscribers servers for testing
-	natsPort := 5223
-	subscriberPort := 8080
+	natsPort := nextPort.get()
+	subscriberPort := nextPort.get()
 	subscriberReceiveURL := fmt.Sprintf("http://127.0.0.1:%d/store", subscriberPort)
 	subscriberCheckURL := fmt.Sprintf("http://127.0.0.1:%d/check", subscriberPort)
 
@@ -504,7 +506,7 @@ func TestNatsSubAfterSync_FiltersChange(t *testing.T) {
 		ReconnectWait: time.Second,
 	}
 	defaultSubsConfig := env.DefaultSubscriptionConfig{MaxInFlightMessages: 5}
-	natsBackend := NewNats(natsConfig, defaultSubsConfig, defaultLogger)
+	natsBackend := NewNats(natsConfig, defaultSubsConfig, nil, defaultLogger)
 	if err := natsBackend.Initialize(env.Config{}); err != nil {
 		t.Fatalf("connect to NATS server failed: %v", err)
 	}
