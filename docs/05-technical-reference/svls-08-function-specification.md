@@ -194,4 +194,4 @@ module.exports = {
 ## /metrics endpoint  
 
 You can use the `/metrics` endpoint to return the Function metrics. All the information is gathered using Prometheus and can be displayed using the Grafana dashboard (see [Kyma observability](https://kyma-project.io/docs/kyma/latest/02-get-started/05-observability/) for more information on how to use Grafana dashboard in Kyma). As this endpoint is provided by Kubeless, it cannot be customized.  
-For more information see [Kubeless monitoring](https://kubeless.io/docs/monitoring/) and [Kubeless runtime variants](https://kubeless.io/docs/runtimes/) pages.
+For more information see [Kubeless monitoring](https://github.com/vmware-archive/kubeless/blob/master/docs/monitoring.md) and [Kubeless runtime variants](https://github.com/vmware-archive/kubeless/blob/master/docs/runtimes.md) pages.
