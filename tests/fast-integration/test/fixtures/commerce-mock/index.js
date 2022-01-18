@@ -12,6 +12,7 @@ axios.defaults.httpsAgent = httpsAgent;
 const {
   retryPromise,
   convertAxiosError,
+  ignore404,
   sleep,
   k8sApply,
   waitForServiceClass,
@@ -669,19 +670,28 @@ function getResourcePaths(namespace) {
   ];
 }
 
-function cleanMockTestFixture(mockNamespace, targetNamespace, wait = true) {
+async function cleanMockTestFixture(mockNamespace, targetNamespace, wait = true) {
   for (let path of getResourcePaths(mockNamespace).concat(
     getResourcePaths(targetNamespace)
   )) {
-    deleteAllK8sResources(path);
+    await deleteAllK8sResources(path);
   }
-  k8sDynamicApi.delete({
-    apiVersion: "applicationconnector.kyma-project.io/v1alpha1",
-    kind: "Application",
-    metadata: {
-      name: "commerce",
-    },
-  });
+
+  try {
+    debug("Deleting applicationconnector.kyma-project.io/v1alpha1")
+    await k8sDynamicApi.delete({
+      apiVersion: "applicationconnector.kyma-project.io/v1alpha1",
+      kind: "Application",
+      metadata: {
+        name: "commerce",
+      },
+    });
+  }
+  catch (err) {
+    ignore404(err)
+  }
+
+  debug('Deleting test namespaces');
   return deleteNamespaces([mockNamespace, targetNamespace], wait);
 }
 

@@ -1,6 +1,5 @@
 const axios = require("axios");
 const https = require("https");
-const { expect, assert } = require("chai");
 const httpsAgent = new https.Agent({
   rejectUnauthorized: false, // curl -k
 });
@@ -134,8 +133,8 @@ describe("Eventing tests", function () {
 
     // If eventMeshSecretFilePath is specified then create a k8s secret for eventing-backend
     // else use existing k8s secret as specified in backendK8sSecretName & backendK8sSecretNamespace
-    if (eventMeshSecretFilePath !== "") {
-      console.log("Creating Event Mesh secret")
+    if (eventMeshSecretFilePath) {
+      console.log('Creating Event Mesh secret')
       const eventMeshInfo = await createEventingBackendK8sSecret(eventMeshSecretFilePath, backendK8sSecretName, backendK8sSecretNamespace);
       setEventMeshSourceNamespace(eventMeshInfo["namespace"]);
     }
@@ -154,18 +153,21 @@ describe("Eventing tests", function () {
 
   after(async function() {
     // runs once after the last test in this block
-    console.log("Cleaning: Test namespaces should be deleted")
-    await cleanMockTestFixture(mockNamespace, testNamespace, true);
-
-    // Delete eventing backend secret if it was created by test
-    if (eventMeshSecretFilePath !== "") {
-      await deleteEventingBackendK8sSecret(backendK8sSecretName, backendK8sSecretNamespace);
-    }
 
     // Unregister SKR resources from Compass
     if (isSKR) {
+      debug('Cleaning SKR...');
       await cleanCompassResourcesSKR(director, appName, scenarioName, skrInfo.compassID);
     }
+
+    // Delete eventing backend secret if it was created by test
+    if (eventMeshSecretFilePath) {
+      debug('Removing Event Mesh secret');
+      await deleteEventingBackendK8sSecret(backendK8sSecretName, backendK8sSecretNamespace);
+    }
+
+    debug('Cleaning test resources');
+    await cleanMockTestFixture(mockNamespace, testNamespace, true);
 
     cancelPrometheusPortForward();
   });
