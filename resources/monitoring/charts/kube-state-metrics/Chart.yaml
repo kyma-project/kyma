@@ -7,11 +7,6 @@ keywords:
 - monitoring
 - prometheus
 - kubernetes
-maintainers:
-- email: tariq.ibrahim@mulesoft.com
-  name: tariq1890
-- email: manuel@rueg.eu
-  name: mrueg
 name: kube-state-metrics
 sources:
 - https://github.com/kubernetes/kube-state-metrics/
