@@ -30,6 +30,8 @@ import (
 // compile time check
 var _ MessagingBackend = &Nats{}
 
+type ConnClosedHandler func(conn *nats.Conn)
+
 type Nats struct {
 	config            env.NatsConfig
 	defaultSubsConfig env.DefaultSubscriptionConfig
@@ -38,15 +40,17 @@ type Nats struct {
 	connection        *nats.Conn
 	subscriptions     map[string]*nats.Subscription
 	sinks             map[string]string
+	connClosedHandler ConnClosedHandler
 }
 
-func NewNats(config env.NatsConfig, subsConfig env.DefaultSubscriptionConfig, logger *logger.Logger) *Nats {
+func NewNats(config env.NatsConfig, subsConfig env.DefaultSubscriptionConfig, closeHandler ConnClosedHandler, logger *logger.Logger) *Nats {
 	return &Nats{
 		config:            config,
+		defaultSubsConfig: subsConfig,
+		connClosedHandler: closeHandler,
 		logger:            logger,
 		subscriptions:     make(map[string]*nats.Subscription),
 		sinks:             make(map[string]string),
-		defaultSubsConfig: subsConfig,
 	}
 }
 
@@ -58,8 +62,15 @@ const (
 // Initialize creates a connection to NATS.
 func (n *Nats) Initialize(env.Config) (err error) {
 	if n.connection == nil || n.connection.Status() != nats.CONNECTED {
-		n.connection, err = nats.Connect(n.config.URL, nats.RetryOnFailedConnect(true),
-			nats.MaxReconnects(n.config.MaxReconnects), nats.ReconnectWait(n.config.ReconnectWait))
+		natsOptions := []nats.Option{
+			nats.RetryOnFailedConnect(true),
+			nats.MaxReconnects(n.config.MaxReconnects),
+			nats.ReconnectWait(n.config.ReconnectWait),
+		}
+		n.connection, err = nats.Connect(n.config.URL, natsOptions...)
+		if n.connClosedHandler != nil {
+			n.connection.SetClosedHandler(nats.ConnHandler(n.connClosedHandler))
+		}
 		if err != nil {
 			return errors.Wrapf(err, "connect to NATS failed")
 		}

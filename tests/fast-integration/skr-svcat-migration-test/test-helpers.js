@@ -39,41 +39,15 @@ const functions = [
 ];
 
 async function saveKubeconfig(kubeconfig) {
-    fs.mkdirSync(`${os.homedir()}/.kube`, true);
-    fs.writeFileSync(`${os.homedir()}/.kube/config`, kubeconfig);
+    if (!fs.existsSync(`${os.homedir()}/.kube`)) {
+      fs.mkdirSync(`${os.homedir()}/.kube`, true)
+    }
+    fs.writeFileSync(`${os.homedir()}/.kube/config`, kubeconfig)
 }
 
 async function readClusterID() {
     let cm = await getConfigMap("cluster-info", "kyma-system")
     return cm.data.id
-}
-
-async function installBTPOperatorHelmChart(creds, clusterId) {
-    const btpChart = "https://github.com/kyma-incubator/sap-btp-service-operator/releases/download/v0.1.18-custom/sap-btp-operator-0.1.18.tar.gz";
-    const btp = "sap-btp-operator";
-    const btpValues = `manager.secret.clientid=${creds.clientId},manager.secret.clientsecret=${creds.clientSecret},manager.secret.url=${creds.smURL},manager.secret.tokenurl=${creds.url},cluster.id=${clusterId}`
-    try {
-        await helmInstallUpgrade(btp, btpChart, btp, btpValues, null, ["--create-namespace"]);
-    } catch (error) {
-        if (error.stderr === undefined) {
-            throw new Error(`failed to install ${btp}: failed to process output of "helm upgrade"`);
-        }
-        throw new Error(`failed to install ${btp}: ${error.stderr}`);
-    }
-}
-
-async function installBTPServiceOperatorMigrationHelmChart() {
-    const chart = "https://github.com/kyma-incubator/sc-removal/releases/download/0.5.0/sap-btp-operator-migration-v0.5.0.tgz";
-    const btp = "sap-btp-service-operator-migration";
-
-    try {
-        await helmInstallUpgrade(btp, chart, "sap-btp-operator", null, null, ["--create-namespace"]);
-    } catch (error) {
-        if (error.stderr === undefined) {
-            throw new Error(`failed to install ${btp}: : failed to process output of "helm upgrade"`);
-        }
-        throw new Error(`failed to install ${btp}: ${error.stderr}`);
-    }
 }
 
 async function getFunctionPod(functionName) {
@@ -340,45 +314,10 @@ async function deleteBTPResources() {
     }
 }
 
-async function helmInstallUpgrade(release, chart, namespace, values, profile, additionalArgs) {
-  const args = [
-    'upgrade',
-    '--wait',
-    '-i',
-    '-n',
-    namespace,
-    release,
-    chart,
-  ];
-
-  if (Array.isArray(additionalArgs)) {
-    args.push(...additionalArgs);
-  }
-
-  if (!!profile) {
-    try {
-      const profilePath = join(chart, `profile-${profile}.yaml`);
-      if (fs.existsSync(profilePath)) {
-        args.push('-f', profilePath);
-      }
-    } catch (err) {
-      console.error(`profile-${profile}.yaml file not found in ${chart} - switching to default profile instead`)
-    }
-  }
-
-  if (!!values) {
-    args.push('--set', values);
-  }
-
-  await execa('helm', args);
-}
-
 module.exports = {
     provisionPlatform,
     smInstanceBinding,
     cleanupInstanceBinding,
-    installBTPOperatorHelmChart,
-    installBTPServiceOperatorMigrationHelmChart,
     saveKubeconfig,
     markForMigration,
     readClusterID,

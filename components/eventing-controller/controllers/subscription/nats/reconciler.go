@@ -8,6 +8,8 @@ import (
 	"reflect"
 	"strings"
 
+	"github.com/nats-io/nats.go"
+
 	"github.com/kyma-project/kyma/components/eventing-controller/controllers/events"
 
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
@@ -49,6 +51,8 @@ type Reconciler struct {
 	recorder         record.EventRecorder
 	eventTypeCleaner eventtype.Cleaner
 	sinkValidator
+	// This channel is used to enqueue a reconciliation request for a subscription
+	customEventsChannel chan event.GenericEvent
 }
 
 var (
@@ -56,36 +60,56 @@ var (
 )
 
 const (
-	NATSProtocol          = "NATS"
 	NATSFirstInstanceName = "eventing-nats-1" // NATSFirstInstanceName the name of first instance of NATS cluster
 	NATSNamespace         = "kyma-system"     // NATSNamespace namespace of NATS cluster
 	reconcilerName        = "nats-subscription-reconciler"
 	clusterLocalURLSuffix = "svc.cluster.local"
 )
 
-func NewReconciler(ctx context.Context, client client.Client, applicationLister *application.Lister, cache cache.Cache, logger *logger.Logger, recorder record.EventRecorder, cfg env.NatsConfig, subsCfg env.DefaultSubscriptionConfig) *Reconciler {
-	natsHandler := handlers.NewNats(cfg, subsCfg, logger)
+func NewReconciler(ctx context.Context, client client.Client, applicationLister *application.Lister, cache cache.Cache,
+	logger *logger.Logger, recorder record.EventRecorder, cfg env.NatsConfig, subsCfg env.DefaultSubscriptionConfig) *Reconciler {
+	reconciler := &Reconciler{
+		ctx:                 ctx,
+		Client:              client,
+		Cache:               cache,
+		logger:              logger,
+		recorder:            recorder,
+		eventTypeCleaner:    eventtype.NewCleaner(cfg.EventTypePrefix, applicationLister, logger),
+		sinkValidator:       defaultSinkValidator,
+		customEventsChannel: make(chan event.GenericEvent),
+	}
+	natsHandler := handlers.NewNats(cfg, subsCfg, reconciler.handleNatsConnClose, logger)
 	if err := natsHandler.Initialize(env.Config{}); err != nil {
 		logger.WithContext().Errorw("start reconciler failed", "name", reconcilerName, "error", err)
 		panic(err)
 	}
+	reconciler.Backend = natsHandler
 
-	return &Reconciler{
-		ctx:              ctx,
-		Client:           client,
-		Cache:            cache,
-		Backend:          natsHandler,
-		logger:           logger,
-		recorder:         recorder,
-		eventTypeCleaner: eventtype.NewCleaner(cfg.EventTypePrefix, applicationLister, logger),
-		sinkValidator:    defaultSinkValidator,
-	}
+	return reconciler
 }
 
-func (r *Reconciler) SetupWithManager(mgr ctrl.Manager) error {
-	return ctrl.NewControllerManagedBy(mgr).
-		For(&eventingv1alpha1.Subscription{}).
-		Complete(r)
+// handleNatsConnClose is called by NATS when the connection to the NATS server is closed. When it
+// is called, the reconnect attempts have exceeded the defined value.
+// It force reconciling the subscription to make sure the subscription is marked as not ready, until
+// it is possible to connect to the NATS server again.
+// See https://github.com/kyma-project/kyma/issues/12930
+func (r *Reconciler) handleNatsConnClose(_ *nats.Conn) {
+	r.namedLogger().Info("NATS connection is closed and reconnect attempts are exceeded")
+	subs, err := r.getAllKymaSubscriptions(context.Background())
+	if err != nil {
+		// NATS reconnect attempts are exceeded, and we cannot reconcile subscriptions! If we ignore this,
+		// there will be no future chance to retry connecting to NATS!
+		panic(err)
+	}
+	r.enqueueReconciliationForSubscriptions(subs)
+}
+
+func (r *Reconciler) getAllKymaSubscriptions(ctx context.Context) ([]eventingv1alpha1.Subscription, error) {
+	var subs eventingv1alpha1.SubscriptionList
+	if err := r.Client.List(ctx, &subs); err != nil {
+		return nil, err
+	}
+	return subs.Items, nil
 }
 
 // SetupUnmanaged creates a controller under the client control
@@ -97,7 +121,7 @@ func (r *Reconciler) SetupUnmanaged(mgr ctrl.Manager) error {
 	}
 
 	if err := ctru.Watch(&source.Kind{Type: &eventingv1alpha1.Subscription{}}, &handler.EnqueueRequestForObject{}); err != nil {
-		r.namedLogger().Errorw("watch subscriptions failed", "error", err)
+		r.namedLogger().Errorw("setup watch for subscriptions failed", "error", err)
 		return err
 	}
 
@@ -122,7 +146,12 @@ func (r *Reconciler) SetupUnmanaged(mgr ctrl.Manager) error {
 		},
 	}
 	if err := ctru.Watch(&source.Kind{Type: &corev1.Pod{}}, &handler.EnqueueRequestForObject{}, p); err != nil {
-		r.namedLogger().Errorw("watch nats server failed", "pod", NATSFirstInstanceName, "error", err)
+		r.namedLogger().Errorw("setup watch for nats server failed", "pod", NATSFirstInstanceName, "error", err)
+		return err
+	}
+
+	if err := ctru.Watch(&source.Channel{Source: r.customEventsChannel}, &handler.EnqueueRequestForObject{}); err != nil {
+		r.namedLogger().Errorw("setup watch for custom channel failed", "error", err)
 		return err
 	}
 
@@ -351,6 +380,13 @@ func (r *Reconciler) getClusterLocalService(ctx context.Context, svcNs, svcName 
 		return nil, err
 	}
 	return svc, nil
+}
+
+func (r *Reconciler) enqueueReconciliationForSubscriptions(subs []eventingv1alpha1.Subscription) {
+	r.namedLogger().Debug("enqueuing reconciliation request for all subscriptions")
+	for i := range subs {
+		r.customEventsChannel <- event.GenericEvent{Object: &subs[i]}
+	}
 }
 
 // isValidScheme returns true if the sink scheme is http or https, otherwise returns false.
