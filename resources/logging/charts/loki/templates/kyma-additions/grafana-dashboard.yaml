@@ -458,23 +458,15 @@ data:
                   }
                 ],
                 "thresholds": {
-                  "mode": "absolute",
+                  "mode": "percentage",
                   "steps": [
                     {
                       "color": "rgb(31, 255, 7)",
                       "value": null
-                    },
-                    {
-                      "color": "rgb(31, 255, 7)",
-                      "value": 10
-                    },
-                    {
-                      "color": "rgb(31, 255, 7)",
-                      "value": 50
                     }
                   ]
                 },
-                "unit": "short"
+                "unit": "bytes"
               },
               "overrides": []
             },
@@ -487,7 +479,7 @@ data:
             "id": 121,
             "interval": null,
             "links": [],
-            "maxDataPoints": 100,
+            "maxDataPoints": 1,
             "options": {
               "colorMode": "value",
               "graphMode": "area",
@@ -508,8 +500,10 @@ data:
             "pluginVersion": "",
             "targets": [
               {
-                "expr": "sum(count_over_time(({namespace=\"$namespace\", stream=~\".*\", pod=~\"logging-loki.*\"})[1m]))",
+                "expr": "sum(bytes_over_time(({namespace=\"$namespace\", stream=~\".*\", pod=~\"logging-loki.*\"})[1m]))",
                 "hide": false,
+                "instant": true,
+                "range": false,
                 "refId": "A"
               }
             ],
