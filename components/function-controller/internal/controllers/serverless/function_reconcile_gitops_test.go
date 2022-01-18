@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/stretchr/testify/mock"
+
 	git2go "github.com/libgit2/git2go/v31"
 
 	"github.com/kyma-project/kyma/components/function-controller/internal/controllers/serverless/automock"
@@ -126,13 +128,16 @@ func TestGitOps(t *testing.T) {
 				},
 			}
 			operator := newMockedGitOperator(inFunction.Name, testData.stringData, testData.authType)
+			statsCollector := &automock.StatsCollector{}
+			statsCollector.On("UpdateReconcileStats", mock.Anything, mock.Anything).Return()
 
 			reconciler := &FunctionReconciler{
-				Log:         log.Log,
-				client:      resourceClient,
-				recorder:    record.NewFakeRecorder(100),
-				config:      testCfg,
-				gitOperator: operator,
+				Log:            log.Log,
+				client:         resourceClient,
+				recorder:       record.NewFakeRecorder(100),
+				config:         testCfg,
+				gitOperator:    operator,
+				statsCollector: statsCollector,
 			}
 
 			fnLabels := reconciler.internalFunctionLabels(inFunction)
@@ -413,13 +418,15 @@ func TestGitOps_GitErrorHandling(t *testing.T) {
 			},
 		}
 		g.Expect(resourceClient.Create(context.TODO(), function)).To(gomega.Succeed())
-
-		gitErr := git2go.MakeGitError2(int(git2go.ErrorCodeNotFound))
+		// We don't use MakeGitError2 function because: https://github.com/libgit2/git2go/issues/873
+		gitErr := &git2go.GitError{Message: "NotFound", Class: 0, Code: git2go.ErrorCodeNotFound}
 		gitOpts := git.Options{URL: "", Reference: "ref"}
 		operator := &automock.GitOperator{}
 		operator.On("LastCommit", gitOpts).Return("", gitErr)
 		defer operator.AssertExpectations(t)
 
+		prometheusCollector := &automock.StatsCollector{}
+		prometheusCollector.On("UpdateReconcileStats", mock.Anything, mock.Anything).Return()
 		request := ctrl.Request{
 			NamespacedName: types.NamespacedName{
 				Namespace: function.GetNamespace(),
@@ -428,11 +435,12 @@ func TestGitOps_GitErrorHandling(t *testing.T) {
 		}
 
 		reconciler := &FunctionReconciler{
-			Log:         log.Log,
-			client:      resourceClient,
-			recorder:    record.NewFakeRecorder(100),
-			config:      testCfg,
-			gitOperator: operator,
+			Log:            log.Log,
+			client:         resourceClient,
+			recorder:       record.NewFakeRecorder(100),
+			config:         testCfg,
+			gitOperator:    operator,
+			statsCollector: prometheusCollector,
 		}
 
 		//WHEN
