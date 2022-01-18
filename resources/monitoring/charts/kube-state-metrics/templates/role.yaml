@@ -11,6 +11,9 @@ metadata:
   labels:
     {{- include "kube-state-metrics.labels" $ | indent 4 }}
   name: {{ template "kube-state-metrics.fullname" $ }}
+{{- if eq $.Values.rbac.useClusterRole false }}
+  namespace: {{ . }}
+{{- end }}
 rules:
 {{ if has "certificatesigningrequests" $.Values.collectors }}
 - apiGroups: ["certificates.k8s.io"]

@@ -1,6 +1,8 @@
 # Default values for kube-state-metrics.
 prometheusScrape: true
 image:
+  repository: k8s.gcr.io/kube-state-metrics/kube-state-metrics
+  tag: v2.3.0
   pullPolicy: IfNotPresent
 
 imagePullSecrets: []
@@ -31,6 +33,9 @@ service:
 ## Additional labels to add to all resources
 customLabels: {}
   # app: kube-state-metrics
+
+## set to true to add the release label so scraping of the servicemonitor with kube-prometheus-stack works out of the box
+releaseLabel: false
 
 hostNetwork: false
 
@@ -67,6 +72,7 @@ prometheus:
     interval: ""
     scrapeTimeout: ""
     proxyUrl: ""
+    selectorOverride: {}
     honorLabels: false
     metricRelabelings: []
     relabelings: []
@@ -93,8 +99,8 @@ securityContext:
   runAsGroup: 65534
   runAsUser: 65534
   fsGroup: 65534
-  
-  ## Specify security settings for a Container
+
+## Specify security settings for a Container
 ## Allows overrides and additional options compared to (Pod) securityContext
 ## Ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container
 containerSecurityContext:
@@ -189,7 +195,7 @@ kubeconfig:
   # base64 encoded kube-config file
   secret:
 
-# Namespace to be enabled for collecting resources. By default all namespaces are collected.
+# Comma-separated list of namespaces to be enabled for collecting resources. By default all namespaces are collected.
 namespaces: ""
 
 ## Override the deployment namespace
