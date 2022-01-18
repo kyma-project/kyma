@@ -276,7 +276,9 @@ func TestNatsSubAfterSync_NoChange(t *testing.T) {
 		g.Expect(natsSub.IsValid()).To(BeTrue())
 
 		// set metadata on nats subscription
-		natsSub.SetPendingLimits(msgLimit, bytesLimit)
+		if err := natsSub.SetPendingLimits(msgLimit, bytesLimit); err != nil {
+			t.Fatalf("set pending limits for nats subscription failed: %v", err)
+		}
 	}
 
 	// Now, sync the subscription
@@ -416,7 +418,9 @@ func TestNatsSubAfterSync_SinkChange(t *testing.T) {
 		g.Expect(natsSub.IsValid()).To(BeTrue())
 
 		// set metadata on nats subscription
-		natsSub.SetPendingLimits(msgLimit, bytesLimit)
+		if err := natsSub.SetPendingLimits(msgLimit, bytesLimit); err != nil {
+			t.Fatalf("set pending limits for nats subscription failed: %v", err)
+		}
 	}
 
 	// NATS subscription should not be re-created in sync when sink is changed.
@@ -553,7 +557,9 @@ func TestNatsSubAfterSync_FiltersChange(t *testing.T) {
 		g.Expect(natsSub.IsValid()).To(BeTrue())
 
 		// set metadata on nats subscription
-		natsSub.SetPendingLimits(msgLimit, bytesLimit)
+		if err := natsSub.SetPendingLimits(msgLimit, bytesLimit); err != nil {
+			t.Fatalf("set pending limits for nats subscription failed: %v", err)
+		}
 	}
 
 	// Now, change the filter in subscription and Sync the subscription

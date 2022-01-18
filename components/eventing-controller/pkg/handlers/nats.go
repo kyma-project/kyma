@@ -8,6 +8,7 @@ import (
 	"reflect"
 	"strconv"
 	"strings"
+	"sync"
 
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/tracing"
 	"github.com/kyma-project/kyma/components/eventing-controller/utils"
@@ -39,7 +40,7 @@ type Nats struct {
 	client            cev2.Client
 	connection        *nats.Conn
 	subscriptions     map[string]*nats.Subscription
-	sinks             map[string]string
+	sinks             sync.Map
 	connClosedHandler ConnClosedHandler
 }
 
@@ -50,7 +51,6 @@ func NewNats(config env.NatsConfig, subsConfig env.DefaultSubscriptionConfig, cl
 		connClosedHandler: closeHandler,
 		logger:            logger,
 		subscriptions:     make(map[string]*nats.Subscription),
-		sinks:             make(map[string]string),
 	}
 }
 
@@ -148,7 +148,9 @@ func (n *Nats) SyncSubscription(sub *eventingv1alpha1.Subscription, cleaner even
 
 	// add/update sink info in map for callbacks
 	subKeyPrefix := createKeyPrefix(sub)
-	n.sinks[subKeyPrefix] = sub.Spec.Sink
+	if sinkURL, ok := n.sinks.Load(subKeyPrefix); !ok || sinkURL != sub.Spec.Sink {
+		n.sinks.Store(subKeyPrefix, sub.Spec.Sink)
+	}
 
 	for _, subject := range cleanSubjects {
 		callback := n.getCallback(subKeyPrefix)
@@ -216,7 +218,7 @@ func (n *Nats) DeleteSubscription(sub *eventingv1alpha1.Subscription) error {
 			}
 
 			// delete subscription sink info from storage
-			delete(n.sinks, subKeyPrefix)
+			n.sinks.Delete(subKeyPrefix)
 		}
 	}
 	return nil
@@ -264,10 +266,12 @@ func (n *Nats) deleteSubFromNats(natsSub *nats.Subscription, subKey string, log 
 func (n *Nats) getCallback(subKeyPrefix string) nats.MsgHandler {
 	return func(msg *nats.Msg) {
 		// fetch sink info from storage
-		sink, ok := n.sinks[subKeyPrefix]
+		sinkValue, ok := n.sinks.Load(subKeyPrefix)
 		if !ok {
 			n.namedLogger().Errorw("cannot find sink url in storage", "keyPrefix", subKeyPrefix)
 		}
+		// convert interface type to string
+		sink := fmt.Sprintf("%v", sinkValue)
 
 		ce, err := convertMsgToCE(msg)
 		if err != nil {
