@@ -96,7 +96,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, request reconcile.Request) (
 	//we skip for in both cases for initialisation and maintenance of connection
 	//If minimalConfigSyncTime did not pass from connection.Status.ConnectionStatus.LastSync, skip connection
 	if !shouldReconnect(instance, r.minimalConfigSyncTime) {
-		log.Infof("Skipping connection initialization. Minimal resync time not passed. Last attempt: %v", instance.Status.ConnectionStatus.LastSync)
+		log.Infof("Skipping connection initialization/mainteneance. Minimal resync time %s not passed. Last attempt: %v", r.minimalConfigSyncTime, instance.Status.ConnectionStatus.LastSync)
 		return reconcile.Result{}, nil
 	}
 	// reconnect when connection is failed or maintain connection
@@ -113,7 +113,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, request reconcile.Request) (
 		log.Infof("Attempt to initialize Compass Connection ended with status: %s", instance.Status)
 		return reconcile.Result{}, nil
 	}
-
+	// Control path II in controller - Maintain connection using connector
 	log.Infof("Attempting to maintain connection with Compass...")
 	err = r.supervisor.MaintainCompassConnection(instance)
 
@@ -131,6 +131,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, request reconcile.Request) (
 	log.Info("Trying to connect to Compass and apply Runtime configuration...")
 
 	// Fetch and apply configuration
+	// Control path I in Controller: Synchronize applications
 	synchronized, err := r.supervisor.SynchronizeWithCompass(instance)
 	if err != nil {
 		log.Errorf("Failed to synchronize with Compass: %s", err.Error())
