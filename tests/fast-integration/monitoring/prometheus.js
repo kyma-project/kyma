@@ -84,29 +84,36 @@ async function assertAllRulesAreHealthy() {
 }
 
 async function assertMetricsExist() {
-    await assertTimeSeriesExist("kube_deployment_status_replicas_available", [
-        "deployment",
-        "namespace",
-    ]);
-    await assertTimeSeriesExist("istio_requests_total", [
-        "destination_service",
-        "response_code",
-        "source_workload",
-    ]);
-    await assertTimeSeriesExist("container_memory_usage_bytes", [
-        "pod",
-        "container",
-    ]);
-    await assertTimeSeriesExist(
-        "kube_pod_container_resource_limits_memory_bytes",
-        ["pod", "container"]
-    );
-    await assertTimeSeriesExist("container_cpu_usage_seconds_total", [
-        "container",
-        "pod",
-        "namespace",
-    ]);
-    await assertTimeSeriesExist("kube_service_labels", ["namespace"]);
+    let metricsList = [
+        {"kubelet":[
+                {"container_memory_usage_bytes": ["pod","container"]},
+                {"kubelet_volume_stats_available_bytes": ["job","namespace"]},
+                {"kubelet_pod_start_duration_seconds_count": ["cluster", "job"]}]},
+
+        {"api-server":[
+                {"apiserver_request_total": ["verb","job"]},
+                {"kubelet_volume_stats_available_bytes": ["job","namespace"]},
+                {"kubelet_pod_start_duration_seconds_count": ["job"]}]},
+
+        {"kube-state-metrics":[
+                {"kube_deployment_status_replicas_available": ["deployment","namespace"]},
+                {"kube_pod_info": ["pod"]},
+                {"kube_pod_container_resource_limits_memory_bytes": ["pod","container"]}]},
+
+        {"node_exporter":[
+                {"process_open_fds": ["service", "job"]},
+                {"process_cpu_seconds_total": ["pod"]},
+                {"go_memstats_heap_inuse_bytes": ["namespace","pod"]}]},
+    ]
+
+    for(let index in metricsList ){
+        for(const [exporter, object] of Object.entries(metricsList[index])){
+            for(const [exp, obj] of Object.entries(object)) {
+                await assertTimeSeriesExist(exporter, Object.keys(obj)[0], obj[Object.keys(obj)[0]]);
+            }
+        }
+
+    }
 }
 
 async function assertRulesAreRegistered() {
@@ -208,14 +215,14 @@ async function buildScrapePoolSet() {
     return scrapePools
 }
 
-async function assertTimeSeriesExist(metric, labels) {
+async function assertTimeSeriesExist(exporter, metric, labels) {
     let resultlessQueries = []
     for (const label of labels) {
         let query = `topk(10,${metric}{${label}=~\"..*\"})`;
         let result = await queryPrometheus(query);
 
         if (result.length == 0) {
-            resultlessQueries.push(query);
+            resultlessQueries.push(query.concat(" metric from service monitor:monitoring-".concat(exporter)));
         }
     }
     assert.isEmpty(resultlessQueries, `Following queries return no results: ${resultlessQueries.join(", ")}`)
