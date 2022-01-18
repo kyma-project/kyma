@@ -2,7 +2,7 @@
 title: Set asynchronous communication between Functions
 ---
 
-This tutorial demonstrates how to connect two Functions asynchronously. It is based on an [In-cluster Eventing example](https://github.com/kyma-project/examples/pull/188).
+This tutorial demonstrates how to connect two Functions asynchronously. It is based on an [In-cluster Eventing example](https://github.com/kyma-project/examples/tree/main/incluster_eventing).
 
 The example provides a very simple scenario of two Functions, where the first Function accepts the incoming traffic via HTTP, sanitises the payload and publishes the content as an in-cluster event via [Kyma Eventing](https://kyma-project.io/docs/kyma/latest/01-overview/main-areas/eventing/).
 The second Function is a message receiver. It subscribes to the given event type and stores the payload.
