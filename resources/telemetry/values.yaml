@@ -7,7 +7,7 @@ global:
       version: "PR-12910"
     fluent_bit:
       name: "fluent-bit"
-      version: "1.8.11-a3c89a66"
+      version: "1.8.11-2696e5d5"
       directory: "tpi"
     busybox:
       name: "busybox"
