@@ -98,27 +98,29 @@ func (r *Reconciler) Reconcile(ctx context.Context, request reconcile.Request) (
 	if !shouldReconnect(instance, r.minimalConfigSyncTime) {
 		log.Infof("Skipping connection initialization. Minimal resync time not passed. Last attempt: %v", instance.Status.ConnectionStatus.LastSync)
 		return reconcile.Result{}, nil
-	} else {
-		// If connection is not established read Config Map and try to fetch Certificate
-		if instance.ShouldAttemptReconnect() {
-			log.Infof("Attempting to initialize connection with Compass...")
+	}
+	// reconnect when connection is failed or maintain connection
+	// If connection is not established read Config Map and try to fetch Certificate
+	if instance.ShouldAttemptReconnect() {
+		log.Infof("Attempting to initialize connection with Compass...")
 
-			instance, err := r.supervisor.InitializeCompassConnection()
-			if err != nil {
-				log.Errorf("Failed to initialize Compass Connection: %s", err.Error())
-				return reconcile.Result{}, err
-			}
-
-			log.Infof("Attempt to initialize Compass Connection ended with status: %s", instance.Status)
-			return reconcile.Result{}, nil
+		instance, err := r.supervisor.InitializeCompassConnection()
+		if err != nil {
+			log.Errorf("Failed to initialize Compass Connection: %s", err.Error())
+			return reconcile.Result{}, err
 		}
 
+		log.Infof("Attempt to initialize Compass Connection ended with status: %s", instance.Status)
+		return reconcile.Result{}, nil
+	} else {
+		log.Infof("Attempting to maintain connection with Compass...")
 		err = r.supervisor.MaintainCompassConnection(instance)
 
 		if err != nil {
 			log.Errorf("Failed to maintain connection with Compass: %s", err.Error())
 			return reconcile.Result{}, err
 		}
+		// and continue processing...
 	}
 
 	// If minimalConfigSyncTime did not pass from SynchronizationStatus.LastAttempt, skip synchronization
