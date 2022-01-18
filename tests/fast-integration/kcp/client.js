@@ -103,11 +103,11 @@ class KCPWrapper {
         return await this.exec(args);
     }
 
-    async upgradeKyma (instanceID, kymaUpgradeVersion) {
+    async upgradeKyma(instanceID, kymaUpgradeVersion, subAccountID) {
         const args = [`upgrade`, `kyma`, `--version=${kymaUpgradeVersion}`, `--target`, `instance-id=${instanceID}`];
         try {
             let res = await this.exec(args);
-            
+
             // output if successful: "OrchestrationID: 22f19856-679b-4e68-b533-f1a0a46b1eed"
             // so we need to extract the uuid
             let orchestrationID = res.split(" ")[1]
@@ -121,7 +121,7 @@ class KCPWrapper {
             }
 
             try {
-                let runtime = await this.runtimes({subaccount: subaccount})
+                let runtime = await this.runtimes({subaccount: subAccountID})
                 debug(`Runtime Status: ${inspect(runtime, false, null, false)}`)
             } catch (error) {
                 debug(error)
@@ -193,7 +193,7 @@ class KCPWrapper {
             let o = JSON.parse(res)
 
             debug(`OrchestrationID: ${o.orchestrationID} (${o.type} to version ${o.parameters.kyma.version}), status: ${o.state}`)
-            
+
             let operations = await this.getOrchestrationsOperations(o.orchestrationID)
             // debug(`Got ${operations.length} operations for OrchestrationID ${o.orchestrationID}`)
 
@@ -223,7 +223,7 @@ class KCPWrapper {
             1000*60*15, // 15 min
             1000 * 30 // 30 seconds
             );
-        
+
             if(res.state !== "succeeded") {
                 debug("KEB Orchestration Status:", res);
                 throw(`orchestration didn't succeed in 15min: ${JSON.stringify(res)}`);
@@ -233,7 +233,7 @@ class KCPWrapper {
             if (descSplit[1] !== "1") {
                 throw(`orchestration didn't succeed (number of scheduled operations should be equal to 1): ${JSON.stringify(res)}`);
             }
-        
+
             return res;
         } catch (error) {
             debug(error)
