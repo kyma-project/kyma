@@ -35,4 +35,4 @@ If the Application name contains any non-alphanumeric character such as `-` or `
 
 This could lead to a naming collision. For example, both `system-prod` and `systemprod` become `systemprod`. While this won't result in an error, it can cause Kyma to not work as expected.
 
-A solution for this is to provide an `application-type` label (with alphanumeric characters only), which is then used by the Eventing services instead of the Application name. If the `application-type` label also contains `-` or `.`, the underlying Eventing services clean it and use the cleaned label.
+A solution for this is to provide an `application-type` label (with alphanumeric characters only), which is then used by the Eventing services instead of the Application name. If the `application-type` label also contains `-` or `_`, the underlying Eventing services clean it and use the cleaned label.
