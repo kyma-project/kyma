@@ -138,14 +138,6 @@ func (s *crSupervisor) MaintainCompassConnection(connection *v1alpha1.CompassCon
 
 func (s *crSupervisor) SynchronizeWithCompass(connection *v1alpha1.CompassConnection) (*v1alpha1.CompassConnection, error) {
 	s.log = s.log.WithField("CompassConnection", connection.Name)
-	//
-	//s.log.Infof("Trying to maintain connection to Connector with %s url...", connection.Spec.ManagementInfo.ConnectorURL)
-	//err := s.maintainCompassConnection(connection)
-	//if err != nil {
-	//	errorMsg := fmt.Sprintf("Error while trying to maintain connection: %s", err.Error())
-	//	s.setConnectionMaintenanceFailedStatus(connection, metav1.Now(), errorMsg) // save in ConnectionStatus.LastSync
-	//	return s.updateCompassConnection(connection)
-	//}
 
 	s.log.Infof("Reading configuration required to fetch Runtime configuration...")
 	runtimeConfig, err := s.configProvider.GetRuntimeConfig()

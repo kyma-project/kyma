@@ -373,9 +373,9 @@ func TestCompassConnectionController(t *testing.T) {
 		})
 
 		require.NoError(t, err)
-		// Now wait for a minimalConfigSyncTime. Reconcile loop should run in the background.
+		// Now wait for minimalConfigSyncTime + 1s. Reconcile loop should run in the background.
 		// After minimalConfigSyncTime passed calls to director can be resumed.
-		time.Sleep(minimalConfigSyncTime)
+		time.Sleep(minimalConfigSyncTime + time.Second)
 
 		require.NoError(t, waitForResourceUpdate(v1alpha1.SynchronizationFailed))
 		assertSynchronizationStatusError(t)
@@ -408,7 +408,7 @@ func TestCompassConnectionController(t *testing.T) {
 		// Since minimalConfigSyncTime (4s) not pass all calls to connector should be skipped.
 		time.Sleep(1 * time.Second)
 
-		require.NoError(t, waitForResourceUpdate(v1alpha1.ConnectionMaintenanceFailed))
+		require.Equal(t, true, isConnectionInState(v1alpha1.ConnectionMaintenanceFailed))
 		assertConnectionStatusError(t)
 		badConnectorMock.AssertNumberOfCalls(t, "Configuration", 1)
 
@@ -435,9 +435,9 @@ func TestCompassConnectionController(t *testing.T) {
 		})
 		require.NoError(t, err)
 
-		// Now wait for a minimalConfigSyncTime. Reconcile loop should run in the background.
+		// Now wait for a minimalConfigSyncTime + 1s. Reconcile loop should run in the background.
 		// After minimalConfigSyncTime passed calls to director can be resumed.
-		time.Sleep(minimalConfigSyncTime)
+		time.Sleep(minimalConfigSyncTime + time.Second)
 
 		require.NoError(t, waitForResourceUpdate(v1alpha1.ConnectionMaintenanceFailed))
 		assertConnectionStatusError(t)
@@ -516,9 +516,9 @@ func TestCompassConnectionController(t *testing.T) {
 		require.NoError(t, err)
 		assertConnectionStatusError(t)
 
-		// Now wait for 5 seconds. Reconcile loop should run in the background.
+		// Now wait for minimalConfigSyncTime + 1s. Reconcile loop should run in the background.
 		// After minimalConfigSyncTime passed calls to director can be resumed.
-		time.Sleep(5 * time.Second)
+		time.Sleep(minimalConfigSyncTime + time.Second)
 
 		require.Equal(t, true, isConnectionInState(v1alpha1.ConnectionFailed))
 		assertConnectionStatusError(t)
