@@ -33,9 +33,19 @@ Related issues:
 
 kaniko can be executed with `--force` flag that skips the verification. To do so, please override the kaniko execution arguments by passing `--force` flag.
 
+Introduce a file with overrides, i.e `my-overrides.yaml`
+```yaml
+serverless:
+  containers:
+    manager:
+      envs:
+        functionBuildExecutorArgs:
+          value: --insecure,--skip-tls-verify,--skip-unused-stages,--log-format=text,--cache=true,--force
 ```
-kyma provision k3d
-kyma deploy --value containers.manager.envs.functionBuildExecutorArgs="--insecure,--skip-tls-verify,--skip-unused-stages,--log-format=text,--cache=true,--force"
+
+Use the file to override default configuration while deploying kyma on your k3d instance:
+```bash
+kyma deploy --values-file my-overrides.yaml
 ```
 
 When used, the build would succeed, but kaniko would assume that it is run outside a container and would produce this log:
