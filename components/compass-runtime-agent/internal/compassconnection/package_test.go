@@ -451,7 +451,7 @@ func TestCompassConnectionController(t *testing.T) {
 	})
 
 	// Control path II in controller - fetching config from Connector fails during connection initialisation
-	t.Run("Compass Connection Controller should skip all attempts of Connection Initialisation if failed to fetch configuration from Connector AND minimalConfigSyncTime HAS NOT passed", func(t *testing.T) {
+	/*t.Run("Compass Connection Controller should skip all attempts of Connection Initialisation if failed to fetch configuration from Connector AND minimalConfigSyncTime HAS NOT passed", func(t *testing.T) {
 		// given
 		badConnectorMock := &connectorMocks.Client{}
 		badConnectorMock.On("Configuration", connectorTokenHeadersFunc).After(1*time.Second).Return(gqlschema.Configuration{}, errors.New("Failed to get configuration during initialisation. Timeout!!!"))
@@ -483,7 +483,7 @@ func TestCompassConnectionController(t *testing.T) {
 		clientsProviderMock.On("GetDirectorClient", runtimeConfig).Return(configurationClientMock, nil)
 		clientsProviderMock.On("GetConnectorCertSecuredClient").Return(certsConnectorClientMock, nil)
 		clientsProviderMock.On("GetConnectorTokensClient", connectorURL).Return(tokensConnectorClientMock, nil)
-	})
+	})*/
 
 	t.Run("Compass Connection Controller should resume attempts of Connection Initialisation if failed to fetch configuration from Connector AND minimalConfigSyncTime HAS passed", func(t *testing.T) {
 		// given
