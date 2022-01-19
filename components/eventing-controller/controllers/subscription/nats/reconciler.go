@@ -272,6 +272,7 @@ func (r *Reconciler) syncSubscriptionStatus(ctx context.Context, sub *eventingv1
 	}
 	desiredSubscription.Status.CleanEventTypes = cleanEventTypes
 
+	// todo replace DeepEqual <add link to issue here>
 	if !reflect.DeepEqual(sub.Status, desiredSubscription.Status) {
 		err := r.Client.Status().Update(ctx, desiredSubscription, &client.UpdateOptions{})
 		if err != nil {

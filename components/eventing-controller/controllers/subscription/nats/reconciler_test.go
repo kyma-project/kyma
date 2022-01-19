@@ -76,6 +76,7 @@ var (
 	}
 )
 
+// todo
 // testCleanEventTypes tests if the reconciler can create the correct cleanEventTypes from the filters of a Subscription.
 func testCleanEventTypesInvSink(id int, eventTypePrefix, natsSubjectToPublish, eventTypeToSubscribe string) bool {
 	return When("updating the clean event types in the Subscription status", func() {
@@ -99,12 +100,12 @@ func testCleanEventTypesInvSink(id int, eventTypePrefix, natsSubjectToPublish, e
 
 			// create a Subscription
 			subscriptionName := fmt.Sprintf(subscriptionNameFormat, id)
-			optFilter := reconcilertesting.WithEventTypeFilter
-			optWebhook := reconcilertesting.WithWebhookForNats
-			subscription := reconcilertesting.NewSubscription(subscriptionName, namespaceName, optFilter, optWebhook )
+			subscription := reconcilertesting.NewSubscription(subscriptionName, namespaceName,
+				reconcilertesting.WithEventTypeFilter,
+				reconcilertesting.WithWebhookForNats,
+			)
 			// adding an invalid sink to the subscription will make the reconciler mark the subscriptions status as not ready
 			reconcilertesting.SetInvalidSink(subscription)
-
 			ensureSubscriptionCreated(ctx, subscription)
 
 			Context("A Subscription with an invalid sink and a filter", func() {
@@ -152,10 +153,10 @@ func testCleanEventTypes(id int, eventTypePrefix, natsSubjectToPublish, eventTyp
 
 			// create a Subscription
 			subscriptionName := fmt.Sprintf(subscriptionNameFormat, id)
-			//optFilter := reconcilertesting.WithEmptyEventTypeFilter
-			optFilter := reconcilertesting.WithEventTypeFilter
-			optWebhook := reconcilertesting.WithWebhookForNats
-			subscription := reconcilertesting.NewSubscription(subscriptionName, namespaceName, optFilter, optWebhook )
+			subscription := reconcilertesting.NewSubscription(subscriptionName, namespaceName,
+				reconcilertesting.WithEmptyEventTypeFilter,
+				reconcilertesting.WithWebhookForNats,
+			)
 			reconcilertesting.SetValidSink(subscriberSvc.Name, namespaceName, subscription)
 
 			ensureSubscriptionCreated(ctx, subscription)
