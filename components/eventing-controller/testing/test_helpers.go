@@ -250,13 +250,18 @@ func WithWebhookAuthForBEB(s *eventingv1alpha1.Subscription) {
 	}
 }
 
+// WithStatusNotReady is a SubscriptionOpt for creating a Subscription with the status ready set to false.
+func WithStatusNotReady(s *eventingv1alpha1.Subscription) {
+	s.Status.Ready = false
+}
+
 func WithWebhookForNats(s *eventingv1alpha1.Subscription) {
 	s.Spec.Protocol = "NATS"
 	s.Spec.ProtocolSettings = &eventingv1alpha1.ProtocolSettings{}
 }
 
-// WithNotCleanEventTypeFilter initializes subscription filter with a not clean event-type
-// A not clean event-type means it contains none-alphanumeric characters
+// WithNotCleanEventTypeFilter is a SubscriptionOpt for creating a Subscription with a event type filter containing
+// a not clean event type. A not clean event type contains illegal none-alphanumeric characters.
 func WithNotCleanEventTypeFilter(s *eventingv1alpha1.Subscription) {
 	s.Spec.Filter = &eventingv1alpha1.BEBFilters{
 		Filters: []*eventingv1alpha1.BEBFilter{
@@ -276,8 +281,9 @@ func WithNotCleanEventTypeFilter(s *eventingv1alpha1.Subscription) {
 	}
 }
 
-// WithFilter appends a filter to the existing filters of Subscription
-func WithFilter(eventSource, eventType string) SubscriptionOpt {
+// WithSpecificEventTypeFilter creates a filter from the eventSource and the eventType and returns a SubscriptionOpt
+// for creatung a Subscription with this filter. For a more generic filter use WithEventTypeFilter instead.
+func WithSpecificEventTypeFilter(eventSource, eventType string) SubscriptionOpt {
 	return func(subscription *eventingv1alpha1.Subscription) {
 		if subscription.Spec.Filter == nil {
 			subscription.Spec.Filter = &eventingv1alpha1.BEBFilters{
@@ -302,12 +308,16 @@ func WithFilter(eventSource, eventType string) SubscriptionOpt {
 	}
 }
 
-func WithEmptyFilter(subscription *eventingv1alpha1.Subscription) {
+// WithEmptyEventTypeFilter is a SubscriptionOpt for creating a Subscription with an empty (but not nil)
+// event type filter.
+func WithEmptyEventTypeFilter(subscription *eventingv1alpha1.Subscription) {
 	subscription.Spec.Filter = &eventingv1alpha1.BEBFilters{
 		Filters: []*eventingv1alpha1.BEBFilter{},
 	}
 }
 
+// WithEventTypeFilter is a SubscriptionOpt for creating a Subscription with a generic event type filter.
+// For defining specififc event type filter use WithSpecificEventTypeFilter instead.
 func WithEventTypeFilter(s *eventingv1alpha1.Subscription) {
 	s.Spec.Filter = &eventingv1alpha1.BEBFilters{
 		Filters: []*eventingv1alpha1.BEBFilter{
@@ -327,12 +337,19 @@ func WithEventTypeFilter(s *eventingv1alpha1.Subscription) {
 	}
 }
 
-func WithValidSink(svcNs, svcName string, s *eventingv1alpha1.Subscription) {
-	s.Spec.Sink = GetValidSink(svcNs, svcName)
+// SetInvalidSink adds an invalid sink to subscription.
+func SetInvalidSink(subscription *eventingv1alpha1.Subscription)  {
+	subscription.Spec.Sink = "I am as shocked as you are."
 }
 
-func GetValidSink(svcNs, svcName string) string {
-	return fmt.Sprintf("https://%s.%s.svc.cluster.local", svcName, svcNs)
+// SetValidSink creates a valid sink from svcName and svcNamespace and adds it to subscription.
+func SetValidSink(svcName, svcNamespace string, subscription *eventingv1alpha1.Subscription) {
+	subscription.Spec.Sink = GetValidSink(svcName, svcNamespace)
+}
+
+// GetValidSink returns a valid sink from svcName and svcNamespace.
+func GetValidSink(svcName, svcNamespace string) string {
+	return fmt.Sprintf("https://%s.%s.svc.cluster.local", svcName, svcNamespace)
 }
 
 func NewSubscriberSvc(name, ns string) *corev1.Service {

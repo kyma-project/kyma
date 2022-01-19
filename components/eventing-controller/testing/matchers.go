@@ -21,7 +21,12 @@ import (
 //
 
 func HaveSubscriptionName(name string) gomegatypes.GomegaMatcher {
-	return WithTransform(func(s *eventingv1alpha1.Subscription) string { return s.Name }, Equal(name))
+	something :=  WithTransform(
+		func(s *eventingv1alpha1.Subscription) string {
+			name := s.Name
+			return name
+		}, Equal(name))
+	return something
 }
 
 func HaveSubscriptionSink(sink string) gomegatypes.GomegaMatcher {

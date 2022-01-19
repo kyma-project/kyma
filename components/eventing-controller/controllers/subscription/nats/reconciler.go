@@ -266,6 +266,12 @@ func (r *Reconciler) syncSubscriptionStatus(ctx context.Context, sub *eventingv1
 	desiredSubscription.Status.Conditions = desiredConditions
 	desiredSubscription.Status.Ready = isNatsSubReady
 
+	cleanEventTypes, err := r.getCleanEventTypes(sub)
+	if err != nil {
+		return err
+	}
+	desiredSubscription.Status.CleanEventTypes = cleanEventTypes
+
 	if !reflect.DeepEqual(sub.Status, desiredSubscription.Status) {
 		err := r.Client.Status().Update(ctx, desiredSubscription, &client.UpdateOptions{})
 		if err != nil {
@@ -275,6 +281,19 @@ func (r *Reconciler) syncSubscriptionStatus(ctx context.Context, sub *eventingv1
 		events.Normal(r.recorder, desiredSubscription, events.ReasonUpdate, "Update Subscription status succeeded %s", desiredSubscription.Name)
 	}
 	return nil
+}
+
+// setCleanEventTypes converts the event type filters of a subscription into clean event types.
+func (r *Reconciler) getCleanEventTypes(sub *eventingv1alpha1.Subscription) ([]string, error) {
+	cleanEventTypes := []string{}
+	for _, filter := range sub.Spec.Filter.Filters {
+		cleanEventType, err:= r.eventTypeCleaner.Clean(filter.EventType.Value)
+		if err != nil {
+			return nil, err
+		}
+		cleanEventTypes = append(cleanEventTypes, cleanEventType)
+	}
+	return cleanEventTypes, nil
 }
 
 func defaultSinkValidator(ctx context.Context, r *Reconciler, subscription *eventingv1alpha1.Subscription) error {

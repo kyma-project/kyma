@@ -109,10 +109,10 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 
 			// create a Subscription
 			subscriptionName := "test-valid-subscription-1"
-			optFilter := reconcilertesting.WithEmptyFilter
+			optFilter := reconcilertesting.WithEmptyEventTypeFilter
 			optWebhook := reconcilertesting.WithWebhookAuthForBEB
 			subscription := reconcilertesting.NewSubscription(subscriptionName, namespaceName, optFilter, optWebhook)
-			reconcilertesting.WithValidSink(namespaceName, subscriberSvc.Name, subscription)
+			reconcilertesting.SetValidSink(subscriberSvc.Name, namespaceName, subscription)
 			ensureSubscriptionCreated(ctx, subscription)
 
 			Context("a Subscription without filters", func() {
@@ -140,7 +140,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 
 				By("adding filters to a Subscription", func() {
 					for _, f := range subscribeToEventTypes {
-						addFilter := reconcilertesting.WithFilter(reconcilertesting.EventSource, f)
+						addFilter := reconcilertesting.WithSpecificEventTypeFilter(reconcilertesting.EventSource, f)
 						addFilter(subscription)
 					}
 					ensureSubscriptionUpdated(ctx, subscription)
@@ -295,7 +295,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 
 			// Creating subscription with empty protocol, protocolsettings and dialect
 			givenSubscription := reconcilertesting.NewSubscription(subscriptionName, namespaceName, reconcilertesting.WithEventTypeFilter)
-			reconcilertesting.WithValidSink(namespaceName, subscriberSvc.Name, givenSubscription)
+			reconcilertesting.SetValidSink(subscriberSvc.Name, namespaceName, givenSubscription)
 			ensureSubscriptionCreated(ctx, givenSubscription)
 
 			By("Creating a valid APIRule")
@@ -460,7 +460,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			ensureSubscriberSvcCreated(ctx, subscriberSvc)
 
 			givenSubscription := reconcilertesting.NewSubscription(subscriptionName, namespaceName, reconcilertesting.WithEventTypeFilter, reconcilertesting.WithWebhookAuthForBEB)
-			reconcilertesting.WithValidSink(namespaceName, subscriberSvc.Name, givenSubscription)
+			reconcilertesting.SetValidSink(subscriberSvc.Name, namespaceName, givenSubscription)
 			ensureSubscriptionCreated(ctx, givenSubscription)
 
 			By("Creating a valid APIRule")
@@ -553,7 +553,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			// prepare objects
 			serviceOld := reconcilertesting.NewSubscriberSvc("webhook", namespaceName)
 			givenSubscription := reconcilertesting.NewSubscription(subscriptionName, namespaceName, reconcilertesting.WithWebhookAuthForBEB, reconcilertesting.WithEventTypeFilter)
-			reconcilertesting.WithValidSink(serviceOld.Namespace, serviceOld.Name, givenSubscription)
+			reconcilertesting.SetValidSink(serviceOld.Name, serviceOld.Namespace, givenSubscription)
 
 			// create them and wait for Subscription to be ready
 			readySubscription, apiRule := createSubscriptionObjectsAndWaitForReadiness(ctx, givenSubscription, serviceOld)
@@ -561,7 +561,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			By("Updating the sink")
 			serviceNew := reconcilertesting.NewSubscriberSvc("webhook-new", namespaceName)
 			ensureSubscriberSvcCreated(ctx, serviceNew)
-			reconcilertesting.WithValidSink(serviceNew.Namespace, serviceNew.Name, readySubscription)
+			reconcilertesting.SetValidSink(serviceNew.Name, serviceNew.Namespace, readySubscription)
 			updateSubscription(ctx, readySubscription).Should(reconcilertesting.HaveSubscriptionReady())
 			getSubscription(ctx, readySubscription).ShouldNot(reconcilertesting.HaveAPIRuleName(apiRule.Name))
 
@@ -652,7 +652,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 
 			// Create subscription
 			givenSubscription := reconcilertesting.NewSubscription(subscriptionName, namespaceName, reconcilertesting.WithWebhookAuthForBEB, reconcilertesting.WithEventTypeFilter)
-			reconcilertesting.WithValidSink(subscriberSvc.Namespace, subscriberSvc.Name, givenSubscription)
+			reconcilertesting.SetValidSink(subscriberSvc.Name, subscriberSvc.Namespace, givenSubscription)
 			ensureSubscriptionCreated(ctx, givenSubscription)
 
 			By("preparing mock to simulate creation of BEB subscription failing on BEB side")
@@ -706,7 +706,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			ensureSubscriberSvcCreated(ctx, subscriberSvc)
 
 			givenSubscription := reconcilertesting.NewSubscription(subscriptionName, namespaceName, reconcilertesting.WithWebhookAuthForBEB, reconcilertesting.WithEventTypeFilter)
-			reconcilertesting.WithValidSink(subscriberSvc.Namespace, subscriberSvc.Name, givenSubscription)
+			reconcilertesting.SetValidSink(subscriberSvc.Name, subscriberSvc.Namespace, givenSubscription)
 
 			isBEBSubscriptionCreated := false
 
@@ -782,7 +782,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			ensureSubscriberSvcCreated(ctx, subscriberSvc)
 
 			givenSubscription := reconcilertesting.NewSubscription(subscriptionName, namespaceName, reconcilertesting.WithWebhookAuthForBEB, reconcilertesting.WithEventTypeFilter)
-			reconcilertesting.WithValidSink(subscriberSvc.Namespace, subscriberSvc.Name, givenSubscription)
+			reconcilertesting.SetValidSink(subscriberSvc.Name, subscriberSvc.Namespace, givenSubscription)
 
 			isBEBSubscriptionCreated := false
 
@@ -867,7 +867,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			ensureSubscriberSvcCreated(ctx, subscriberSvc)
 
 			// Create subscription
-			reconcilertesting.WithValidSink(subscriberSvc.Namespace, subscriberSvc.Name, givenSubscription)
+			reconcilertesting.SetValidSink(subscriberSvc.Name, subscriberSvc.Namespace, givenSubscription)
 			ensureSubscriptionCreated(ctx, givenSubscription)
 
 			By("Creating a valid APIRule")
@@ -929,7 +929,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 				})
 
 				By("Creating Kyma Subscription", func() {
-					reconcilertesting.WithValidSink(svc.Namespace, svc.Name, kymaSubscription)
+					reconcilertesting.SetValidSink(svc.Name, svc.Namespace, kymaSubscription)
 					ensureSubscriptionCreated(ctx, kymaSubscription)
 				})
 
@@ -991,7 +991,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			ensureSubscriberSvcCreated(ctx, subscriberSvc)
 
 			subscription := reconcilertesting.NewSubscription(subscriptionName, namespaceName, reconcilertesting.WithEventTypeFilter, reconcilertesting.WithWebhookAuthForBEB)
-			reconcilertesting.WithValidSink(namespaceName, subscriberSvc.Name, subscription)
+			reconcilertesting.SetValidSink(subscriberSvc.Name, namespaceName, subscription)
 			ensureSubscriptionCreated(ctx, subscription)
 
 			getAPIRuleForASvc(ctx, subscriberSvc).Should(reconcilertesting.HaveNotEmptyAPIRule())

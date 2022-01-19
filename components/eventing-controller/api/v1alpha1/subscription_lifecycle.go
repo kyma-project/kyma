@@ -134,6 +134,7 @@ func MakeCondition(conditionType ConditionType, reason ConditionReason, status c
 		LastTransitionTime: metav1.Now(),
 		Reason:             reason,
 		// TODO: https://github.com/kyma-project/kyma/issues/9770
+		// dear PR reviewer can you confirm that this issue is resolved and that comment can be removed?
 		Message: message,
 	}
 }

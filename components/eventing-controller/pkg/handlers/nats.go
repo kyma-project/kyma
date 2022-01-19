@@ -113,10 +113,10 @@ func (n *Nats) SyncSubscription(sub *eventingv1alpha1.Subscription, cleaner even
 		}
 		cleanSubjects = append(cleanSubjects, subject)
 	}
+	sub.Status.CleanEventTypes = cleanSubjects
 
 	for _, subject := range cleanSubjects {
 		callback := n.getCallback(sub.Spec.Sink)
-
 		if n.connection.Status() != nats.CONNECTED {
 			if err := n.Initialize(env.Config{}); err != nil {
 				log.Errorw("reset NATS connection failed", "status", n.connection.Stats(), "error", err)
@@ -135,7 +135,7 @@ func (n *Nats) SyncSubscription(sub *eventingv1alpha1.Subscription, cleaner even
 			n.subscriptions[createKey(sub, subject, i)] = natsSub
 		}
 	}
-	sub.Status.CleanEventTypes = cleanSubjects
+
 	sub.Status.Config = subscriptionConfig
 
 	return false, nil
