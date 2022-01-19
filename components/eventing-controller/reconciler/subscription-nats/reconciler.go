@@ -170,6 +170,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 				if k8serrors.IsConflict(err) {
 					return ctrl.Result{Requeue: true}, nil
 				}
+				return ctrl.Result{}, err
 			}
 			return ctrl.Result{}, nil
 		}
@@ -185,6 +186,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 			if k8serrors.IsConflict(err) {
 				return ctrl.Result{Requeue: true}, nil
 			}
+			return ctrl.Result{}, err
 		}
 		return ctrl.Result{Requeue: true}, nil
 	}
@@ -196,6 +198,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 			if k8serrors.IsConflict(err) {
 				return ctrl.Result{Requeue: true}, nil
 			}
+			return ctrl.Result{}, err
 		}
 		// No point in reconciling as the sink is invalid
 		return ctrl.Result{}, nil
@@ -209,6 +212,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 			if k8serrors.IsConflict(err) {
 				return ctrl.Result{Requeue: true}, nil
 			}
+			return ctrl.Result{}, err
 		}
 		return ctrl.Result{}, err
 	}
@@ -220,6 +224,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 			if k8serrors.IsConflict(err) {
 				return ctrl.Result{Requeue: true}, nil
 			}
+			return ctrl.Result{}, err
 		}
 		return ctrl.Result{}, err
 	}
@@ -314,6 +319,9 @@ func (r *Reconciler) syncInvalidSubscriptions(ctx context.Context) (ctrl.Result,
 		// mark the subscription to be not ready, it will throw a new reconcile call
 		if err := r.syncSubscriptionStatus(ctx, sub, false, "invalid subscription"); err != nil {
 			r.Log.Error(err, "failed to save status for invalid subscription", "namespace", v.Namespace, "name", v.Name)
+			if k8serrors.IsConflict(err) {
+				return ctrl.Result{Requeue: true}, nil
+			}
 			return ctrl.Result{}, err
 		}
 	}
