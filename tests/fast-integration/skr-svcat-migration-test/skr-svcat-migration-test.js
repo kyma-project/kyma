@@ -61,8 +61,7 @@ describe('SKR SVCAT migration test', function() {
   let skr;
   it('Should provision SKR', async function() {
     skr = await provisionSKR(keb,
-        kcp,
-        gardener,
+        kcp, gardener,
         instanceID,
         runtimeName,
         platformCreds,
@@ -94,6 +93,15 @@ describe('SKR SVCAT migration test', function() {
     await sampleResources.deploy();
   });
 
+  let secretsAndPresets;
+  it('Should store secrets and presets of sample resources', async function() {
+    secretsAndPresets = await sampleResources.storeSecretsAndPresets();
+  });
+
+  it('Should check if pod presets injected secrets to functions containers', async function() {
+    await t.checkPodPresetEnvInjected();
+  });
+
   it('Should mark the platform for migration in Service Manager', async function() {
     await t.markForMigration(smAdminCreds, platformCreds.clusterId, btpOperatorCreds.instanceId);
   });
@@ -104,15 +112,6 @@ describe('SKR SVCAT migration test', function() {
 
   it('Should wait for btp-operator deployment availability', async function() {
     await waitForDeployment('sap-btp-operator-controller-manager', 'kyma-system', 10 * 60 * 1000); // 10 minutes
-  });
-
-  let secretsAndPresets;
-  it('Should store secrets and presets of sample resources', async function() {
-    secretsAndPresets = await sampleResources.storeSecretsAndPresets();
-  });
-
-  it('Should check if pod presets injected secrets to functions containers', async function() {
-    await t.checkPodPresetEnvInjected();
   });
 
   it('Should wait for migration job to finish', async function() {

@@ -210,10 +210,8 @@ describe('SKR-Upgrade-test', function() {
     printRestartReport(initialRestarts, afterTestRestarts);
   });
 
-  // Perform Upgrade
-
   it('Perform Upgrade', async function() {
-    await kcp.upgradeKyma(instanceID, kymaUpgradeVersion);
+    await kcp.upgradeKyma(instanceID, kymaUpgradeVersion, subAccountID);
     debug('Upgrade Done!');
   });
 
@@ -223,7 +221,6 @@ describe('SKR-Upgrade-test', function() {
   });
 
   // Perform Tests after Upgrade
-
   it('Listing all pods in cluster', async function() {
     await getContainerRestartsForAllNamespaces();
   });
@@ -250,7 +247,6 @@ describe('SKR-Upgrade-test', function() {
     const afterTestRestarts = await getContainerRestartsForAllNamespaces();
     printRestartReport(initialRestarts, afterTestRestarts);
   });
-
 
   // Cleanup
   const skipCleanup = getEnvOrThrow('SKIP_CLEANUP');

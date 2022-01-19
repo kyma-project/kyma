@@ -21,8 +21,15 @@ class KCPConfig {
         getEnvOrThrow('KCP_KUBECONFIG_API_URL'),
     );
   }
-  constructor(host, issuerURL, gardenerNamespace, username, password,
-      clientID, clientSecret, motherShipApiUrl, kubeConfigApiUrl) {
+  constructor(host,
+      issuerURL,
+      gardenerNamespace,
+      username,
+      password,
+      clientID,
+      clientSecret,
+      motherShipApiUrl,
+      kubeConfigApiUrl) {
     this.host = host;
     this.issuerURL = issuerURL;
     this.gardenerNamespace = gardenerNamespace;
@@ -104,10 +111,11 @@ class KCPWrapper {
     return await this.exec(args);
   }
 
-  async upgradeKyma(instanceID, kymaUpgradeVersion) {
+  async upgradeKyma(instanceID, kymaUpgradeVersion, subAccountID) {
     const args = ['upgrade', 'kyma', `--version=${kymaUpgradeVersion}`, '--target', `instance-id=${instanceID}`];
     try {
       const res = await this.exec(args);
+
       // output if successful: "OrchestrationID: 22f19856-679b-4e68-b533-f1a0a46b1eed"
       // so we need to extract the uuid
       const orchestrationID = res.split(' ')[1];
@@ -121,7 +129,7 @@ class KCPWrapper {
       }
 
       try {
-        const runtime = await this.runtimes({subaccount: subaccount});
+        const runtime = await this.runtimes({subaccount: subAccountID});
         debug(`Runtime Status: ${inspect(runtime, false, null, false)}`);
       } catch (error) {
         debug(error);
@@ -140,6 +148,7 @@ class KCPWrapper {
       } catch (error) {
         debug(error);
       }
+
       throw new Error('Kyma Upgrade failed');
     } catch (error) {
       debug(error);
@@ -155,7 +164,7 @@ class KCPWrapper {
   }
 
   async getOrchestrationsOperations(orchestrationID) {
-    // debug(`Running getOrchestrationsOperations...`)
+    // debug('Running getOrchestrationsOperations...')
     const args = ['orchestration', `${orchestrationID}`, 'operations', '-o', 'json'];
     try {
       const res = await this.exec(args);
@@ -169,15 +178,29 @@ class KCPWrapper {
     }
   }
 
+  async getOrchestrationsOperationStatus(orchestrationID, operationID) {
+    // debug('Running getOrchestrationsOperationStatus...')
+    const args = ['orchestration', `${orchestrationID}`, '--operation', `${operationID}`, '-o', 'json'];
+    try {
+      let res = await this.exec(args);
+      res = JSON.parse(res);
+
+      return res;
+    } catch (error) {
+      debug(error);
+      throw new Error('failed during getOrchestrationsOperationStatus');
+    }
+  }
+
   async getOrchestrationStatus(orchestrationID) {
-    // debug(`Running getOrchestrationStatus...`)
+    // debug('Running getOrchestrationStatus...')
     const args = ['orchestrations', `${orchestrationID}`, '-o', 'json'];
     try {
       const res = await this.exec(args);
       const o = JSON.parse(res);
 
-      debug(`OrchestrationID: ${o.orchestrationID} (${o.type} to version ${o.parameters.kyma.version}), 
-      status: ${o.state}`);
+      debug(`OrchestrationID: ${o.orchestrationID} (${o.type} to version ${o.parameters.kyma.version})
+      Status: ${o.state}`);
 
       const operations = await this.getOrchestrationsOperations(o.orchestrationID);
       // debug(`Got ${operations.length} operations for OrchestrationID ${o.orchestrationID}`)
@@ -185,8 +208,8 @@ class KCPWrapper {
       let upgradeOperation = {};
       if (operations.count > 0) {
         upgradeOperation = await this.getOrchestrationsOperationStatus(orchestrationID, operations.data[0].operationID);
-        debug(`OrchestrationID: ${orchestrationID}: 
-        OperationID: ${operations.data[0].operationID}: 
+        debug(`OrchestrationID: ${orchestrationID}
+        OperationID: ${operations.data[0].operationID}
         OperationStatus: ${upgradeOperation.state}`);
       } else {
         debug(`No operations in OrchestrationID ${o.orchestrationID}`);
@@ -218,8 +241,8 @@ class KCPWrapper {
 
       const descSplit = res.description.split(' ');
       if (descSplit[1] !== '1') {
-        throw new Error(`orchestration didn't succeed 
-        (number of scheduled operations should be equal to 1): ${JSON.stringify(res)}`);
+        throw new Error(`orchestration didn't succeed (number of scheduled operations should be equal to 1):
+        ${JSON.stringify(res)}`);
       }
 
       return res;

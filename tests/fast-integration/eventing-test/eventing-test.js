@@ -135,7 +135,7 @@ describe('Eventing tests', function() {
 
     // If eventMeshSecretFilePath is specified then create a k8s secret for eventing-backend
     // else use existing k8s secret as specified in backendK8sSecretName & backendK8sSecretNamespace
-    if (eventMeshSecretFilePath !== '') {
+    if (eventMeshSecretFilePath) {
       console.log('Creating Event Mesh secret');
       const eventMeshInfo = await createEventingBackendK8sSecret(eventMeshSecretFilePath,
           backendK8sSecretName,
@@ -155,19 +155,20 @@ describe('Eventing tests', function() {
   });
 
   after(async function() {
-    // runs once after the last test in this block
-    console.log('Cleaning: Test namespaces should be deleted');
-    await cleanMockTestFixture(mockNamespace, testNamespace, true);
+    // Unregister SKR resources from Compass
+    if (isSKR) {
+      debug('Cleaning SKR...');
+      await cleanCompassResourcesSKR(director, appName, scenarioName, skrInfo.compassID);
+    }
 
     // Delete eventing backend secret if it was created by test
-    if (eventMeshSecretFilePath !== '') {
+    if (eventMeshSecretFilePath) {
+      debug('Removing Event Mesh secret');
       await deleteEventingBackendK8sSecret(backendK8sSecretName, backendK8sSecretNamespace);
     }
 
-    // Unregister SKR resources from Compass
-    if (isSKR) {
-      await cleanCompassResourcesSKR(director, appName, scenarioName, skrInfo.compassID);
-    }
+    debug('Cleaning test resources');
+    await cleanMockTestFixture(mockNamespace, testNamespace, true);
 
     cancelPrometheusPortForward();
   });

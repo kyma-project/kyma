@@ -116,17 +116,11 @@
 # The etcd-tls-setup directory
 components/etcd-tls-setup-job/ @PK85 @piotrmiskiewicz @ksputo @szwedm @voigt @wozniakjan @adamwalach
 
-#API server proxy Component
-/components/apiserver-proxy/ @strekm @werdes72 @Tomasz-Smelcerz-SAP @mjakobczyk @dariusztutaj
-
 # Binding Component
 /components/binding/ @PK85 @piotrmiskiewicz @ksputo @szwedm @voigt @wozniakjan
 
 # Binding usage controller Component
 /components/service-binding-usage-controller/ @PK85 @piotrmiskiewicz @ksputo @szwedm @voigt @wozniakjan @adamwalach
-
-# IAM Kubeconfig Service Component
-/components/iam-kubeconfig-service/ @strekm @werdes72 @Tomasz-Smelcerz-SAP @mjakobczyk @dariusztutaj
 
 # Istioctl Installer Component
 /components/istio-installer/ @strekm @werdes72 @Tomasz-Smelcerz-SAP @mjakobczyk @dariusztutaj
@@ -157,12 +151,6 @@ components/etcd-tls-setup-job/ @PK85 @piotrmiskiewicz @ksputo @szwedm @voigt @wo
 
 # UAA Component
 /components/uaa-activator/ @ksputo @piotrmiskiewicz @PK85 @szwedm @voigt @wozniakjan
-
-# Xip Patch Component
-/components/xip-patch/ @strekm @werdes72 @Tomasz-Smelcerz-SAP @mjakobczyk @dariusztutaj
-
-# Dex Static User Configurer
-/components/dex-static-user-configurer/ @strekm @werdes72 @Tomasz-Smelcerz-SAP @mjakobczyk @dariusztutaj
 
 # Function Controller
 /components/function-controller/ @m00g3n @pPrecel @dbadura @kwiatekus
@@ -195,14 +183,8 @@ components/etcd-tls-setup-job/ @PK85 @piotrmiskiewicz @ksputo @szwedm @voigt @wo
 # Service Catalog acceptance tests
 /tests/service-catalog/ @ksputo @piotrmiskiewicz @PK85 @szwedm @voigt @wozniakjan @adamwalach
 
-# Dex integration tests
-/tests/integration/dex/ @strekm @werdes72 @Tomasz-Smelcerz-SAP @mjakobczyk @dariusztutaj
-
 # api-gateway integration tests
 /tests/integration/api-gateway/ @strekm @werdes72 @Tomasz-Smelcerz-SAP @mjakobczyk @dariusztutaj
-
-# apiserver-proxy tests
-/tests/integration/apiserver-proxy/ @strekm @werdes72 @Tomasz-Smelcerz-SAP @mjakobczyk @dariusztutaj
 
 # Rafter tests
 /tests/rafter/ @m00g3n @pPrecel @dbadura
@@ -235,7 +217,7 @@ components/etcd-tls-setup-job/ @PK85 @piotrmiskiewicz @ksputo @szwedm @voigt @wo
 /tests/compass-runtime-agent/ @PK85 @dbadura @akgalwas @janmedrek @franpog859 @Maladie @koala7659 @ralikio
 
 # Fast Integration Tests
-/tests/fast-integration/ @pbochynski @adamwalach @voigt @skhalash @shorim @rakesh-garimella @jeremyharisch @lindnerby
+/tests/fast-integration/ @pbochynski @adamwalach @voigt @skhalash @shorim @rakesh-garimella @jeremyharisch @lindnerby @khlifi411 @ruanxin @tobiscr @clebs @Tomasz-Smelcerz-SAP
 
 # Fast Integration Tests maintained by gophers
 /tests/fast-integration/kyma-environment-broker @PK85 @piotrmiskiewicz @ksputo @szwedm @voigt @wozniakjan
@@ -260,26 +242,17 @@ components/etcd-tls-setup-job/ @PK85 @piotrmiskiewicz @ksputo @szwedm @voigt @wo
 # The tools/gitserver directory
 /tools/gitserver/ @m00g3n @pPrecel @dbadura
 
-# E2E Upgrade Tests
-/tests/end-to-end/upgrade/ @PK85 @piotrmiskiewicz @ksputo @szwedm @voigt @wozniakjan @adamwalach @k15r
-
-# E2E Api Gateway Upgrade Tests
-/tests/end-to-end/upgrade/pkg/tests/api-gateway/ @strekm @werdes72 @Tomasz-Smelcerz-SAP @mjakobczyk @dariusztutaj
-
-# E2E Rafter Upgrade Tests
-/tests/end-to-end/upgrade/pkg/tests/rafter/ @m00g3n @pPrecel @dbadura
-
 # All .md files
-*.md @klaudiagrz @mmitoraj @majakurcius @alexandra-simeonova @NHingerl
+*.md @klaudiagrz @mmitoraj @majakurcius @alexandra-simeonova @NHingerl @grego952
 
 # All files and subdirectories in /docs
-/docs/ @klaudiagrz @mmitoraj @majakurcius @alexandra-simeonova @NHingerl
+/docs/ @klaudiagrz @mmitoraj @majakurcius @alexandra-simeonova @NHingerl @grego952
 
 # Owners of the .kyma-project-io folder
 /.kyma-project-io/ @m00g3n @pPrecel @dbadura
 
 # Config file for MILV - milv.config.yaml
-milv.config.yaml @m00g3n @pPrecel @klaudiagrz @mmitoraj @majakurcius @alexandra-simeonova @NHingerl
+milv.config.yaml @m00g3n @pPrecel @klaudiagrz @mmitoraj @majakurcius @alexandra-simeonova @NHingerl @grego952
 
 # performance tests
 /tests/perf/ @a-thaler @lilitgh @clebs @rakesh-garimella

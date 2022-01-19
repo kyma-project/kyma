@@ -249,9 +249,7 @@ async function k8sDelete(listOfSpecs, namespace) {
         await deleteAllK8sResources(path);
       }
     } catch (err) {
-      if (err.response.statusCode != 404) {
-        throw err;
-      }
+      ignore404(err);
     }
   }
 }
@@ -411,7 +409,7 @@ function waitForK8sObject(path, query, checkFn, timeout, timeoutMsg) {
 
 function waitForClusterAddonsConfiguration(name, timeout = 90000) {
   return waitForK8sObject(
-      `/apis/addons.kyma-project.io/v1alpha1/clusteraddonsconfigurations`,
+      '/apis/addons.kyma-project.io/v1alpha1/clusteraddonsconfigurations',
       {},
       (_type, _apiObj, watchObj) => {
         return watchObj.object.metadata.name == name;
@@ -673,7 +671,7 @@ function waitForJob(name, namespace = 'default', timeout = 900000, success = 1) 
 }
 
 async function kubectlExecInPod(pod, container, cmd, namespace = 'default') {
-  const execCmd = [`exec`, pod, `-c`, container, `-n`, namespace, '--', ...cmd];
+  const execCmd = ['exec', pod, '-c', container, '-n', namespace, '--', ...cmd];
   try {
   } catch (error) {
     if (error.stdout === undefined) {
@@ -706,7 +704,7 @@ async function printContainerLogs(selector, container, namespace = 'default', ti
     k8sLog.log(namespace, p.metadata.name, container, logStream);
     await end;
   }
-  process.stdout.write(`Done getting logs\n`);
+  process.stdout.write('Done getting logs\n');
 }
 
 function waitForVirtualService(namespace, apiRuleName, timeout = 20000) {
@@ -755,7 +753,7 @@ function waitForTokenRequest(name, namespace, timeout = 5000) {
 }
 
 function waitForCompassConnection(name, timeout = 90000) {
-  const path = `/apis/compass.kyma-project.io/v1alpha1/compassconnections`;
+  const path = '/apis/compass.kyma-project.io/v1alpha1/compassconnections';
   return waitForK8sObject(
       path,
       {},
@@ -824,7 +822,7 @@ async function deleteNamespaces(namespaces, wait = true) {
   const waitForNamespacesResult = waitForK8sObject(
       '/api/v1/namespaces',
       {},
-      (type, apiObj, watchObj) => {
+      (type, _, watchObj) => {
         if (type == 'DELETED') {
           namespaces = namespaces.filter(
               (n) => n != watchObj.object.metadata.name,
@@ -832,7 +830,7 @@ async function deleteNamespaces(namespaces, wait = true) {
         }
         return namespaces.length == 0 || !wait;
       },
-      120 * 1000,
+      10 * 60 * 1000,
       'Timeout for deleting namespaces: ' + namespaces,
   );
 
@@ -935,9 +933,15 @@ async function getSecretData(name, namespace) {
 }
 
 function ignore404(e) {
-  if (e.statusCode != 404) {
-    throw e;
+  if (
+    (e.statusCode && e.statusCode == 404) ||
+      (e.response && e.response.statusCode && e.response.statusCode == 404)
+  ) {
+    debug('Warning: Ignoring NotFound error');
+    return;
   }
+
+  throw e;
 }
 
 // NOTE: this no longer works, it relies on kube-api sending `selfLink` but the field has been deprecated
@@ -961,14 +965,15 @@ async function deleteAllK8sResources(
       const body = JSON.parse(response.body);
       if (body.items && body.items.length) {
         for (const o of body.items) {
-          deleteK8sResource(o, keepFinalizer);
+          await deleteK8sResource(o, path, keepFinalizer);
         }
       } else if (!body.items) {
-        deleteK8sResource(body, keepFinalizer);
+        await deleteK8sResource(body, path, keepFinalizer);
       }
     }
   } catch (e) {
     debug('Error during delete ', path, String(e).substring(0, 1000));
+    debug(e);
   }
 }
 
@@ -976,8 +981,7 @@ async function deleteK8sPod(o) {
   return await k8sCoreV1Api.deleteNamespacedPod(o.metadata.name, o.metadata.namespace);
 }
 
-// NOTE: this no longer works, it relies on kube-api sending `selfLink` but the field has been deprecated
-async function deleteK8sResource(o, keepFinalizer = false) {
+async function deleteK8sResource(o, path, keepFinalizer = false) {
   if (o.metadata.finalizers && o.metadata.finalizers.length && !keepFinalizer) {
     const options = {
       headers: {'Content-type': 'application/merge-patch+json'},
@@ -994,18 +998,29 @@ async function deleteK8sResource(o, keepFinalizer = false) {
     };
 
     debug('Removing finalizers from', obj);
-
-    await k8sDynamicApi
-        .patch(obj, undefined, undefined, undefined, undefined, options)
-        .catch(ignore404);
+    try {
+      await k8sDynamicApi.patch(obj, undefined, undefined, undefined, undefined, options);
+    } catch (err) {
+      ignore404(err);
+    }
   }
 
-  await k8sDynamicApi
-      .requestPromise({
-        url: k8sDynamicApi.basePath + o.metadata.selfLink,
-        method: 'DELETE',
-      })
-      .catch(ignore404);
+  try {
+    let objectUrl = `${k8sDynamicApi.basePath + path}/${o.metadata.name}`;
+    if (o.metadata.selfLink) {
+      debug('using selfLink for deleting object');
+      objectUrl = k8sDynamicApi.basePath + o.metadata.selfLink;
+    }
+
+    debug('Deleting resource: ', objectUrl);
+    await k8sDynamicApi.requestPromise({
+      url: objectUrl,
+      method: 'DELETE',
+    });
+  } catch (err) {
+    ignore404(err);
+  }
+
   debug(
       'Deleted resource:',
       o.metadata.name,
@@ -1531,7 +1546,7 @@ function waitForEventingBackendToReady(backendType='beb',
  */
 async function printEventingControllerLogs() {
   try {
-    console.log(`****** Printing logs of eventing-controller from kyma-system`);
+    console.log('****** Printing logs of eventing-controller from kyma-system');
     await printContainerLogs('app.kubernetes.io/name=controller,app.kubernetes.io/instance=eventing',
         'controller',
         'kyma-system',
@@ -1601,7 +1616,7 @@ async function printStatusOfInClusterEventingInfrastructure(targetNamespace, enc
     console.log(`****** Eventing-controller deployment from ns: ${kymaSystem} ready: ${eventingControllerReady}`);
     console.log(`****** NATS-server pods from ns: ${kymaSystem} ready: ${natsServerReady}`);
     console.log(`****** Function ${funcName} from ns: ${targetNamespace} ready: ${functionReady}`);
-    console.log(`****** End *******`);
+    console.log('****** End *******');
   } catch (err) {
     console.log(err);
     throw err;
@@ -1613,7 +1628,7 @@ async function printStatusOfInClusterEventingInfrastructure(targetNamespace, enc
  */
 async function printEventingPublisherProxyLogs() {
   try {
-    console.log(`****** Printing logs of eventing-publisher-proxy from kyma-system`);
+    console.log('****** Printing logs of eventing-publisher-proxy from kyma-system');
     await printContainerLogs('app.kubernetes.io/name=eventing-publisher-proxy, app.kubernetes.io/instance=eventing',
         'eventing-publisher-proxy',
         'kyma-system',
@@ -1667,6 +1682,7 @@ module.exports = {
   getShootNameFromK8sServerUrl,
   retryPromise,
   convertAxiosError,
+  ignore404,
   removeServiceInstanceFinalizer,
   removeServiceBindingFinalizer,
   sleep,

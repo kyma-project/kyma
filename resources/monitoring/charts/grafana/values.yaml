@@ -804,10 +804,10 @@ kyma:
     resources:
       limits:
         cpu: 50m
-        memory: 20Mi
+        memory: 100Mi
       requests:
         cpu: 10m
-        memory: 5Mi
+        memory: 15Mi
 
 global:
   kymaRuntime:

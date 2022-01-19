@@ -5,8 +5,11 @@ import (
 	"errors"
 	"fmt"
 	"strings"
+	"sync"
 	"testing"
 	"time"
+
+	"github.com/nats-io/nats-server/v2/server"
 
 	"github.com/avast/retry-go/v3"
 	cev2event "github.com/cloudevents/sdk-go/v2/event"
@@ -21,6 +24,10 @@ import (
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/eventtype"
 	eventingtesting "github.com/kyma-project/kyma/components/eventing-controller/testing"
+)
+
+var (
+	nextPort = &portGenerator{port: 5223}
 )
 
 func TestConvertMsgToCE(t *testing.T) {
@@ -87,8 +94,8 @@ func TestConvertMsgToCE(t *testing.T) {
 
 func TestSubscription(t *testing.T) {
 	g := NewWithT(t)
-	natsPort := 5222
-	subscriberPort := 8080
+	natsPort := nextPort.get()
+	subscriberPort := nextPort.get()
 	subscriberReceiveURL := fmt.Sprintf("http://127.0.0.1:%d/store", subscriberPort)
 	subscriberCheckURL := fmt.Sprintf("http://127.0.0.1:%d/check", subscriberPort)
 
@@ -107,7 +114,7 @@ func TestSubscription(t *testing.T) {
 		ReconnectWait: time.Second,
 	}
 	defaultMaxInflight := 9
-	natsClient := NewNats(natsConfig, env.DefaultSubscriptionConfig{MaxInFlightMessages: defaultMaxInflight}, defaultLogger)
+	natsClient := NewNats(natsConfig, env.DefaultSubscriptionConfig{MaxInFlightMessages: defaultMaxInflight}, nil, defaultLogger)
 
 	if err := natsClient.Initialize(env.Config{}); err != nil {
 		t.Fatalf("connect to Nats server failed: %v", err)
@@ -183,8 +190,8 @@ func TestSubscription(t *testing.T) {
 
 func TestMultipleSubscriptionsToSameEvent(t *testing.T) {
 	g := NewWithT(t)
-	natsPort := 5222
-	subscriberPort := 8080
+	natsPort := nextPort.get()
+	subscriberPort := nextPort.get()
 	subscriberReceiveURL := fmt.Sprintf("http://127.0.0.1:%d/store", subscriberPort)
 	subscriberCheckURL := fmt.Sprintf("http://127.0.0.1:%d/check", subscriberPort)
 
@@ -203,7 +210,7 @@ func TestMultipleSubscriptionsToSameEvent(t *testing.T) {
 		ReconnectWait: time.Second,
 	}
 	defaultMaxInflight := 1
-	natsClient := NewNats(natsConfig, env.DefaultSubscriptionConfig{MaxInFlightMessages: defaultMaxInflight}, defaultLogger)
+	natsClient := NewNats(natsConfig, env.DefaultSubscriptionConfig{MaxInFlightMessages: defaultMaxInflight}, nil, defaultLogger)
 
 	if err := natsClient.Initialize(env.Config{}); err != nil {
 		t.Fatalf("connect to Nats server failed: %v", err)
@@ -285,8 +292,8 @@ func TestMultipleSubscriptionsToSameEvent(t *testing.T) {
 func TestSubscriptionWithDuplicateFilters(t *testing.T) {
 	g := NewWithT(t)
 
-	natsPort := 5223
-	subscriberPort := 8080
+	natsPort := nextPort.get()
+	subscriberPort := nextPort.get()
 	subscriberReceiveURL := fmt.Sprintf("http://127.0.0.1:%d/store", subscriberPort)
 	subscriberCheckURL := fmt.Sprintf("http://127.0.0.1:%d/check", subscriberPort)
 
@@ -303,7 +310,7 @@ func TestSubscriptionWithDuplicateFilters(t *testing.T) {
 		MaxReconnects: 2,
 		ReconnectWait: time.Second,
 	}
-	natsClient := NewNats(natsConfig, env.DefaultSubscriptionConfig{MaxInFlightMessages: 9}, defaultLogger)
+	natsClient := NewNats(natsConfig, env.DefaultSubscriptionConfig{MaxInFlightMessages: 9}, nil, defaultLogger)
 
 	if err := natsClient.Initialize(env.Config{}); err != nil {
 		t.Fatalf("start NATS eventing backend failed: %s", err.Error())
@@ -360,8 +367,8 @@ func TestSubscriptionWithDuplicateFilters(t *testing.T) {
 func TestSubscriptionWithMaxInFlightChange(t *testing.T) {
 	g := NewWithT(t)
 
-	natsPort := 5223
-	subscriberPort := 8080
+	natsPort := nextPort.get()
+	subscriberPort := nextPort.get()
 	subscriberReceiveURL := fmt.Sprintf("http://127.0.0.1:%d/store", subscriberPort)
 
 	// Start NATS server
@@ -379,7 +386,7 @@ func TestSubscriptionWithMaxInFlightChange(t *testing.T) {
 		ReconnectWait: time.Second,
 	}
 	defaultSubsConfig := env.DefaultSubscriptionConfig{MaxInFlightMessages: 5}
-	natsBackend := NewNats(natsConfig, defaultSubsConfig, defaultLogger)
+	natsBackend := NewNats(natsConfig, defaultSubsConfig, nil, defaultLogger)
 
 	if err := natsBackend.Initialize(env.Config{}); err != nil {
 		t.Fatalf("connect to NATS server failed: %v", err)
@@ -444,8 +451,8 @@ func TestSubscriptionWithMaxInFlightChange(t *testing.T) {
 func TestIsValidSubscription(t *testing.T) {
 	g := NewWithT(t)
 
-	natsPort := 5223
-	subscriberPort := 8080
+	natsPort := nextPort.get()
+	subscriberPort := nextPort.get()
 	subscriberReceiveURL := fmt.Sprintf("http://127.0.0.1:%d/store", subscriberPort)
 
 	// Start NATS server
@@ -463,7 +470,7 @@ func TestIsValidSubscription(t *testing.T) {
 		ReconnectWait: time.Second,
 	}
 	defaultSubsConfig := env.DefaultSubscriptionConfig{MaxInFlightMessages: 9}
-	natsClient := NewNats(natsConfig, defaultSubsConfig, defaultLogger)
+	natsClient := NewNats(natsConfig, defaultSubsConfig, nil, defaultLogger)
 
 	if err := natsClient.Initialize(env.Config{}); err != nil {
 		t.Fatalf("connect to NATS server failed: %v", err)
@@ -541,8 +548,8 @@ func TestIsValidSubscription(t *testing.T) {
 
 func TestSubscriptionUsingCESDK(t *testing.T) {
 	g := NewWithT(t)
-	natsPort := 5222
-	subscriberPort := 8080
+	natsPort := nextPort.get()
+	subscriberPort := nextPort.get()
 	subscriberReceiveURL := fmt.Sprintf("http://127.0.0.1:%d/store", subscriberPort)
 	subscriberCheckURL := fmt.Sprintf("http://127.0.0.1:%d/check", subscriberPort)
 
@@ -559,7 +566,7 @@ func TestSubscriptionUsingCESDK(t *testing.T) {
 		ReconnectWait: time.Second,
 	}
 	defaultMaxInflight := 1
-	natsClient := NewNats(natsConfig, env.DefaultSubscriptionConfig{MaxInFlightMessages: defaultMaxInflight}, defaultLogger)
+	natsClient := NewNats(natsConfig, env.DefaultSubscriptionConfig{MaxInFlightMessages: defaultMaxInflight}, nil, defaultLogger)
 
 	err = natsClient.Initialize(env.Config{})
 	g.Expect(err).To(BeNil())
@@ -611,8 +618,8 @@ func TestSubscriptionUsingCESDK(t *testing.T) {
 
 func TestRetryUsingCESDK(t *testing.T) {
 	g := NewWithT(t)
-	natsPort := 5222
-	subscriberPort := 8080
+	natsPort := nextPort.get()
+	subscriberPort := nextPort.get()
 	subscriberCheckDataURL := fmt.Sprintf("http://127.0.0.1:%d/check", subscriberPort)
 	subscriberCheckRetriesURL := fmt.Sprintf("http://127.0.0.1:%d/check_retries", subscriberPort)
 	subscriberServerErrorURL := fmt.Sprintf("http://127.0.0.1:%d/return500", subscriberPort)
@@ -635,7 +642,7 @@ func TestRetryUsingCESDK(t *testing.T) {
 		DispatcherRetryPeriod: time.Second,
 		DispatcherMaxRetries:  maxRetries,
 	}
-	natsClient := NewNats(natsConfig, defaultSubscriptionConfig, defaultLogger)
+	natsClient := NewNats(natsConfig, defaultSubscriptionConfig, nil, defaultLogger)
 
 	err = natsClient.Initialize(env.Config{})
 	g.Expect(err).To(BeNil())
@@ -678,6 +685,82 @@ func TestRetryUsingCESDK(t *testing.T) {
 	g.Expect(err).To(BeNil())
 }
 
+func TestSubscription_NATSServerRestart(t *testing.T) {
+	g := NewWithT(t)
+	natsServer, natsPort := startNATSServer()
+	defer natsServer.Shutdown()
+	defaultLogger := getLogger(t, kymalogger.INFO)
+	// The reconnect configs should be large enough to cover the NATS server restart period
+	natsConfig := env.NatsConfig{
+		URL:           natsServer.ClientURL(),
+		MaxReconnects: 10,
+		ReconnectWait: 3 * time.Second,
+	}
+	natsClient := NewNats(natsConfig, env.DefaultSubscriptionConfig{MaxInFlightMessages: 10}, nil, defaultLogger)
+	g.Expect(natsClient.Initialize(env.Config{})).To(BeNil())
+
+	subscriber, subscriberPort := startSubscriber()
+	defer subscriber.Shutdown()
+	subscriberReceiveURL := fmt.Sprintf("http://127.0.0.1:%d/store", subscriberPort)
+	subscriberCheckURL := fmt.Sprintf("http://127.0.0.1:%d/check", subscriberPort)
+	// Check subscriber is running or not by checking the store
+	g.Expect(subscriber.CheckEvent("", subscriberCheckURL)).To(BeNil())
+
+	// Create a subscription
+	sub := eventingtesting.NewSubscription("sub", "foo", eventingtesting.WithNotCleanEventTypeFilter)
+	sub.Spec.Sink = subscriberReceiveURL
+	cleaner := createEventTypeCleaner(eventingtesting.EventTypePrefix, eventingtesting.ApplicationName, defaultLogger)
+	_, err := natsClient.SyncSubscription(sub, cleaner)
+	g.Expect(err).To(BeNil())
+
+	ev1data := "sampledata"
+	g.Expect(SendEventToNATS(natsClient, ev1data)).To(Succeed())
+	expectedEv1Data := fmt.Sprintf("\"%s\"", ev1data)
+	g.Expect(subscriber.CheckEvent(expectedEv1Data, subscriberCheckURL)).To(Succeed())
+
+	natsServer.Shutdown()
+	g.Eventually(func() bool {
+		return natsClient.connection.IsConnected()
+	}, 60*time.Second, 2*time.Second).Should(BeFalse())
+	_ = eventingtesting.RunNatsServerOnPort(natsPort)
+	g.Eventually(func() bool {
+		return natsClient.connection.IsConnected()
+	}, 60*time.Second, 2*time.Second).Should(BeTrue())
+
+	// After reconnect, event delivery should work again
+	ev2data := "newsampledata"
+	g.Expect(SendEventToNATS(natsClient, ev2data)).To(Succeed())
+	expectedEv2Data := fmt.Sprintf("\"%s\"", ev2data)
+	g.Expect(subscriber.CheckEvent(expectedEv2Data, subscriberCheckURL)).To(Succeed())
+}
+
+func startNATSServer() (*server.Server, int) {
+	natsPort := nextPort.get()
+	natsServer := eventingtesting.RunNatsServerOnPort(natsPort)
+	return natsServer, natsPort
+}
+
+func startSubscriber() (*eventingtesting.Subscriber, int) {
+	subscriberPort := nextPort.get()
+	subscriber := eventingtesting.NewSubscriber(fmt.Sprintf(":%d", subscriberPort))
+	subscriber.Start()
+	return subscriber, subscriberPort
+}
+
+func createEventTypeCleaner(eventTypePrefix, applicationName string, logger *logger.Logger) eventtype.Cleaner {
+	application := applicationtest.NewApplication(applicationName, nil)
+	applicationLister := fake.NewApplicationListerOrDie(context.Background(), application)
+	return eventtype.NewCleaner(eventTypePrefix, applicationLister, logger)
+}
+
+func getLogger(t *testing.T, level kymalogger.Level) *logger.Logger {
+	l, err := logger.New(string(kymalogger.JSON), string(level))
+	if err != nil {
+		t.Fatalf("initialize logger failed: %v", err)
+	}
+	return l
+}
+
 func checkIsNotValid(sub *nats.Subscription, t *testing.T) error {
 	return checkValidity(sub, false, t)
 }
@@ -701,4 +784,17 @@ func checkValidity(sub *nats.Subscription, toCheckIsValid bool, t *testing.T) er
 		retry.OnRetry(func(n uint, err error) { t.Logf("[%v] try failed: %s", n, err) }),
 	)
 	return err
+}
+
+type portGenerator struct {
+	lock sync.Mutex
+	port int
+}
+
+func (pg *portGenerator) get() int {
+	pg.lock.Lock()
+	defer pg.lock.Unlock()
+	p := pg.port
+	pg.port++
+	return p
 }

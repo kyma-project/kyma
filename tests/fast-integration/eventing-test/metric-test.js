@@ -17,14 +17,14 @@ const {queryPrometheus} = require('../monitoring/client');
 const dashboards = {
   // The delivery dashboard
   delivery_publisherProxy: {
-    title: `Requests to publisher proxy`,
+    title: 'Requests to publisher proxy',
     query: 'sum by (destination_service) (rate(istio_requests_total{destination_service=~"event.*-publisher-proxy.kyma-system.svc.cluster.local", response_code=~"2.*"}[5m]))',
     backends: ['nats', 'beb'],
     // The assert function receives the `data.result` section of the query result:
     // https://prometheus.io/docs/prometheus/latest/querying/api/#instant-queries
     assert: function(result) {
-      expect(result.length).to.be.greaterThan(0, 'No value found in the result');
-      expect(getMetricValue(result[0])).to.be.greaterThan(0);
+      const foundMetric = result.find((res) => res.metric.destination_service.startsWith('eventing-event-publisher-proxy'));
+      expect(foundMetric).to.be.not.undefined;
     },
   },
   delivery_applicationConnectivityValidator: {
@@ -165,11 +165,6 @@ function ensureEventingPodsArePresent(result) {
   expect(controllerFound).to.be.true;
   expect(publisherProxyFound).to.be.true;
   expect(natsFound).to.be.true;
-}
-
-// Given a Prometheus metric result, extracts the value of the metric
-function getMetricValue(metric) {
-  return parseFloat(metric.value[1]);
 }
 
 function runDashboardTestCase(dashboardName, test) {

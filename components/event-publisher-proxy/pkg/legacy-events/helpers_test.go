@@ -32,40 +32,40 @@ func TestParseApplicationNameFromPath(t *testing.T) {
 
 func TestFormatEventType4BEB(t *testing.T) {
 	testCases := []struct {
-		eventTypePrefix string
-		app             string
-		eventType       string
-		version         string
-		wantedEventType string
+		eventTypePrefix   string
+		app               string
+		eventType         string
+		version           string
+		expectedEventType string
 	}{
 		{
-			eventTypePrefix: "prefix",
-			app:             "app",
-			eventType:       "order.foo",
-			version:         "v1",
-			wantedEventType: "prefix.app.order.foo.v1",
+			eventTypePrefix:   "prefix",
+			app:               "app",
+			eventType:         "order.foo",
+			version:           "v1",
+			expectedEventType: "prefix.app.order.foo.v1",
 		},
 		{
-			eventTypePrefix: "prefix",
-			app:             "app",
-			eventType:       "order-foo",
-			version:         "v1",
-			wantedEventType: "prefix.app.order-foo.v1",
+			eventTypePrefix:   "prefix",
+			app:               "app",
+			eventType:         "order-foo",
+			version:           "v1",
+			expectedEventType: "prefix.app.order-foo.v1",
 		},
 		{
-			eventTypePrefix: "",
-			app:             "app",
-			eventType:       "order-foo",
-			version:         "v1",
-			wantedEventType: "app.order-foo.v1",
+			eventTypePrefix:   "",
+			app:               "app",
+			eventType:         "order-foo",
+			version:           "v1",
+			expectedEventType: "app.order-foo.v1",
 		},
 	}
 
 	for _, tc := range testCases {
 		gotEventType := formatEventType4BEB(tc.eventTypePrefix, tc.app, tc.eventType, tc.version)
-		if tc.wantedEventType != gotEventType {
+		if tc.expectedEventType != gotEventType {
 			t.Errorf("incorrect formatting of eventType: "+
-				"%s, wanted: %s got: %s", tc.eventType, tc.wantedEventType, gotEventType)
+				"%s, wanted: %s got: %s", tc.eventType, tc.expectedEventType, gotEventType)
 		}
 	}
 }
