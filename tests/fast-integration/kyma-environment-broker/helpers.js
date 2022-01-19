@@ -55,7 +55,7 @@ async function deprovisionSKR(keb, kcp, instanceID, timeout, ensureSuccess=true)
   expect(resp).to.have.property("operation");
 
   const operationID = resp.operation;
-  debug(`Operation ID ${operationID}`);
+  console.log(`Deprovision SKR - operation ID ${operationID}`);
 
   if (ensureSuccess) {
     await ensureOperationSucceeded(keb, kcp, instanceID, operationID, timeout);
@@ -92,11 +92,13 @@ async function ensureOperationSucceeded(keb, kcp, instanceID, operationID, timeo
     throw(`${err}\nRuntime status: ${runtimeStatus}`)
   });
 
-  debug("KEB operation:", res);
   if(res.state !== "succeeded") {
     let runtimeStatus = await kcp.getRuntimeStatusOperations(instanceID)
     throw(`operation didn't succeed in time: ${JSON.stringify(res, null, `\t`)}\nRuntime status: ${runtimeStatus}`);
   }
+
+  console.log(`Operation ${res.operation} finished with state ${res.state}`);
+
   return res;
 }
 
