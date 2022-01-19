@@ -476,9 +476,9 @@ func TestCompassConnectionController(t *testing.T) {
 		require.NoError(t, err)
 		assertConnectionStatusError(t)
 
-		// Now wait for 3 seconds. Reconcile loop should run in the background.
+		// Now wait for 2 seconds. Reconcile loop should run in the background.
 		// Since minimalConfigSyncTime (4s) not pass all calls to connector should be skipped.
-		time.Sleep(minimalConfigSyncTime - time.Second)
+		time.Sleep(2 * time.Second)
 
 		require.Equal(t, true, isConnectionInState(v1alpha1.ConnectionFailed))
 		assertConnectionStatusError(t)
@@ -516,9 +516,9 @@ func TestCompassConnectionController(t *testing.T) {
 		require.NoError(t, err)
 		assertConnectionStatusError(t)
 
-		// Now wait for a minimalConfigSyncTime. Reconcile loop should run in the background.
+		// Now wait for 5 seconds. Reconcile loop should run in the background.
 		// After minimalConfigSyncTime passed calls to director can be resumed.
-		time.Sleep(minimalConfigSyncTime)
+		time.Sleep(5 * time.Second)
 
 		require.Equal(t, true, isConnectionInState(v1alpha1.ConnectionFailed))
 		assertConnectionStatusError(t)
