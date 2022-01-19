@@ -1,13 +1,9 @@
 {{- /*
-  Customization:
+  Customization: 
   * Made the dashboard not editable
-  * Unset the timezone
-  * Added kyma tags
-  * Prepended the name with Kyma / Monitoring
-  Generally, even though this is a deault dashboard, we masquerade it as a Kyma dashboard to fit nicely with the rest of Kyma monitoring dashboards
 */ -}}
 {{- /*
-Generated from 'prometheus' from https://raw.githubusercontent.com/prometheus-operator/kube-prometheus/master/manifests/grafana-dashboardDefinitions.yaml
+Generated from 'prometheus' from https://raw.githubusercontent.com/prometheus-operator/kube-prometheus/main/manifests/grafana-dashboardDefinitions.yaml
 Do not change in-place! In order to change this file first read following link:
 https://github.com/prometheus-community/helm-charts/tree/main/charts/kube-prometheus-stack/hack
 */ -}}
@@ -16,7 +12,7 @@ https://github.com/prometheus-community/helm-charts/tree/main/charts/kube-promet
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  namespace: {{ template "kube-prometheus-stack.namespace" . }}
+  namespace: {{ template "kube-prometheus-stack-grafana.namespace" . }}
   name: {{ printf "%s-%s" (include "kube-prometheus-stack.fullname" $) "prometheus" | trunc 63 | trimSuffix "-" }}
   annotations:
 {{ toYaml .Values.grafana.sidecar.dashboards.annotations | indent 4 }}
@@ -1128,8 +1124,7 @@ data:
         "schemaVersion": 14,
         "style": "dark",
         "tags": [
-            "monitoring",
-            "kyma"
+            "prometheus-mixin"
         ],
         "templating": {
             "list": [
@@ -1236,8 +1231,8 @@ data:
                 "30d"
             ]
         },
-        "timezone": "",
-        "title": "Kyma / Monitoring / Prometheus",
+        "timezone": "{{ .Values.grafana.defaultDashboardsTimezone }}",
+        "title": "Prometheus / Overview",
         "uid": "",
         "version": 0
     }

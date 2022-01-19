@@ -1,21 +1,14 @@
 {{- /*
-  Customization:
-  * Made the dashboard not editable
-  * Unset the timezone
-  * Prepended the name with Kubernetes
-  * Added a kube-mixin tag
-*/ -}}
-{{- /*
-Generated from 'node-rsrc-use' from https://raw.githubusercontent.com/prometheus-operator/kube-prometheus/master/manifests/grafana-dashboardDefinitions.yaml
+Generated from 'node-rsrc-use' from https://raw.githubusercontent.com/prometheus-operator/kube-prometheus/main/manifests/grafana-dashboardDefinitions.yaml
 Do not change in-place! In order to change this file first read following link:
 https://github.com/prometheus-community/helm-charts/tree/main/charts/kube-prometheus-stack/hack
 */ -}}
 {{- $kubeTargetVersion := default .Capabilities.KubeVersion.GitVersion .Values.kubeTargetVersionOverride }}
-{{- if and (semverCompare ">=1.14.0-0" $kubeTargetVersion) (semverCompare "<9.9.9-9" $kubeTargetVersion) .Values.grafana.enabled .Values.grafana.defaultDashboardsEnabled .Values.nodeExporter.enabled }}
+{{- if and (or .Values.grafana.enabled .Values.grafana.forceDeployDashboards) (semverCompare ">=1.14.0-0" $kubeTargetVersion) (semverCompare "<9.9.9-9" $kubeTargetVersion) .Values.grafana.defaultDashboardsEnabled .Values.nodeExporter.enabled }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  namespace: {{ template "kube-prometheus-stack.namespace" . }}
+  namespace: {{ template "kube-prometheus-stack-grafana.namespace" . }}
   name: {{ printf "%s-%s" (include "kube-prometheus-stack.fullname" $) "node-rsrc-use" | trunc 63 | trimSuffix "-" }}
   annotations:
 {{ toYaml .Values.grafana.sidecar.dashboards.annotations | indent 4 }}
@@ -985,7 +978,7 @@ data:
         "schemaVersion": 14,
         "style": "dark",
         "tags": [
-            "kubernetes-mixin"
+            "node-exporter-mixin"
         ],
         "templating": {
             "list": [
@@ -1089,8 +1082,8 @@ data:
                 "30d"
             ]
         },
-        "timezone": "",
-        "title": "Kubernetes / USE Method / Node",
+        "timezone": "{{ .Values.grafana.defaultDashboardsTimezone }}",
+        "title": "Node Exporter / USE Method / Node",
         "version": 0
     }
 {{- end }}

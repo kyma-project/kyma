@@ -1,11 +1,9 @@
 {{- /*
-  Customization:
+  Customization: 
   * Made the dashboard not editable
-  * Unset the timezone
-  * Used old name
 */ -}}
 {{- /*
-Generated from 'prometheus-remote-write' from https://raw.githubusercontent.com/prometheus-operator/kube-prometheus/master/manifests/grafana-dashboardDefinitions.yaml
+Generated from 'prometheus-remote-write' from https://raw.githubusercontent.com/prometheus-operator/kube-prometheus/main/manifests/grafana-dashboardDefinitions.yaml
 Do not change in-place! In order to change this file first read following link:
 https://github.com/prometheus-community/helm-charts/tree/main/charts/kube-prometheus-stack/hack
 */ -}}
@@ -14,7 +12,7 @@ https://github.com/prometheus-community/helm-charts/tree/main/charts/kube-promet
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  namespace: {{ template "kube-prometheus-stack.namespace" . }}
+  namespace: {{ template "kube-prometheus-stack-grafana.namespace" . }}
   name: {{ printf "%s-%s" (include "kube-prometheus-stack.fullname" $) "prometheus-remote-write" | trunc 63 | trimSuffix "-" }}
   annotations:
 {{ toYaml .Values.grafana.sidecar.dashboards.annotations | indent 4 }}
@@ -1280,7 +1278,7 @@ data:
                         "steppedLine": false,
                         "targets": [
                             {
-                                "fillGradient": 0,
+                                "expr": "rate(prometheus_remote_storage_failed_samples_total{cluster=~\"$cluster\", instance=~\"$instance\"}[5m]) or rate(prometheus_remote_storage_samples_failed_total{cluster=~\"$cluster\", instance=~\"$instance\"}[5m])",
                                 "format": "time_series",
                                 "intervalFactor": 2,
                                 "legendFormat": "{{`{{`}}cluster{{`}}`}}:{{`{{`}}instance{{`}}`}} {{`{{`}}remote_name{{`}}`}}:{{`{{`}}url{{`}}`}}",
@@ -1669,8 +1667,8 @@ data:
                 "30d"
             ]
         },
-        "timezone": "",
-        "title": "Prometheus Remote Write",
+        "timezone": "{{ .Values.grafana.defaultDashboardsTimezone }}",
+        "title": "Prometheus / Remote Write",
         "version": 0
     }
 {{- end }}

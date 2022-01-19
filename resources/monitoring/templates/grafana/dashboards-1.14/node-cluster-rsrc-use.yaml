@@ -1,12 +1,5 @@
 {{- /*
-  Customization:
-  * Made the dashboard not editable
-  * Unset the timezone
-  * Prepended the name with Kubernetes
-  * Added a kube-mixin tag
-*/ -}}
-{{- /*
-Generated from 'node-cluster-rsrc-use' from https://raw.githubusercontent.com/prometheus-operator/kube-prometheus/master/manifests/grafana-dashboardDefinitions.yaml
+Generated from 'node-cluster-rsrc-use' from https://raw.githubusercontent.com/prometheus-operator/kube-prometheus/main/manifests/grafana-dashboardDefinitions.yaml
 Do not change in-place! In order to change this file first read following link:
 https://github.com/prometheus-community/helm-charts/tree/main/charts/kube-prometheus-stack/hack
 */ -}}
@@ -15,7 +8,7 @@ https://github.com/prometheus-community/helm-charts/tree/main/charts/kube-promet
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  namespace: {{ template "kube-prometheus-stack.namespace" . }}
+  namespace: {{ template "kube-prometheus-stack-grafana.namespace" . }}
   name: {{ printf "%s-%s" (include "kube-prometheus-stack.fullname" $) "node-cluster-rsrc-use" | trunc 63 | trimSuffix "-" }}
   annotations:
 {{ toYaml .Values.grafana.sidecar.dashboards.annotations | indent 4 }}
@@ -25,7 +18,8 @@ metadata:
     {{- end }}
     app: {{ template "kube-prometheus-stack.name" $ }}-grafana
 {{ include "kube-prometheus-stack.labels" $ | indent 4 }}
-node-cluster-rsrc-use.json: |-
+data:
+  node-cluster-rsrc-use.json: |-
     {
         "__inputs": [
 
@@ -984,7 +978,7 @@ node-cluster-rsrc-use.json: |-
         "schemaVersion": 14,
         "style": "dark",
         "tags": [
-            "kubernetes-mixin"
+            "node-exporter-mixin"
         ],
         "templating": {
             "list": [
@@ -1062,8 +1056,8 @@ node-cluster-rsrc-use.json: |-
                 "30d"
             ]
         },
-        "timezone": "",
-        "title": "Kubernetes / USE Method / Cluster",
+        "timezone": "{{ .Values.grafana.defaultDashboardsTimezone }}",
+        "title": "Node Exporter / USE Method / Cluster",
         "version": 0
     }
 {{- end }}
