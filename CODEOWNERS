@@ -116,9 +116,6 @@
 # The etcd-tls-setup directory
 components/etcd-tls-setup-job/ @PK85 @piotrmiskiewicz @ksputo @szwedm @voigt @wozniakjan @adamwalach
 
-#API server proxy Component
-/components/apiserver-proxy/ @strekm @werdes72 @Tomasz-Smelcerz-SAP @mjakobczyk @dariusztutaj
-
 # Binding Component
 /components/binding/ @PK85 @piotrmiskiewicz @ksputo @szwedm @voigt @wozniakjan
 
@@ -188,9 +185,6 @@ components/etcd-tls-setup-job/ @PK85 @piotrmiskiewicz @ksputo @szwedm @voigt @wo
 
 # api-gateway integration tests
 /tests/integration/api-gateway/ @strekm @werdes72 @Tomasz-Smelcerz-SAP @mjakobczyk @dariusztutaj
-
-# apiserver-proxy tests
-/tests/integration/apiserver-proxy/ @strekm @werdes72 @Tomasz-Smelcerz-SAP @mjakobczyk @dariusztutaj
 
 # Rafter tests
 /tests/rafter/ @m00g3n @pPrecel @dbadura
