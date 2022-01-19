@@ -207,7 +207,7 @@ describe("SKR-Upgrade-test", function () {
   // Perform Upgrade
 
   it(`Perform Upgrade`, async function () {
-    let kcpUpgradeStatus = await kcp.upgradeKyma(instanceID, kymaUpgradeVersion)
+    let kcpUpgradeStatus = await kcp.upgradeKyma(instanceID, kymaUpgradeVersion, subAccountID)
     debug("Upgrade Done!")
   });
 

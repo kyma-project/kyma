@@ -203,9 +203,14 @@ func (r *LogPipelineReconciler) syncParsersConfigMap(ctx context.Context, logPip
 			if err != nil {
 				return false, err
 			}
-			data := make(map[string]string)
-			data[cmKey] = mergeFluentBitParsersConfig(&logPipelines)
-			cm.Data = data
+			fluentBitParsersConfig := mergeFluentBitParsersConfig(&logPipelines)
+			if fluentBitParsersConfig == "" {
+				cm.Data = nil
+			} else {
+				data := make(map[string]string)
+				data[cmKey] = fluentBitParsersConfig
+				cm.Data = data
+			}
 		}
 	} else {
 		var logPipelines telemetryv1alpha1.LogPipelineList
@@ -215,7 +220,9 @@ func (r *LogPipelineReconciler) syncParsersConfigMap(ctx context.Context, logPip
 		}
 
 		fluentBitParsersConfig := mergeFluentBitParsersConfig(&logPipelines)
-		if cm.Data == nil {
+		if fluentBitParsersConfig == "" {
+			cm.Data = nil
+		} else if cm.Data == nil {
 			data := make(map[string]string)
 			data[cmKey] = fluentBitParsersConfig
 			cm.Data = data
@@ -387,11 +394,13 @@ func mergeFluentBitConfig(logPipeline *telemetryv1alpha1.LogPipeline) string {
 func mergeFluentBitParsersConfig(logPipelines *telemetryv1alpha1.LogPipelineList) string {
 	var sb strings.Builder
 	for _, logPipeline := range logPipelines.Items {
-		for _, parser := range logPipeline.Spec.Parsers {
-			sb.WriteString(fluentbit.BuildConfigSection(fluentbit.ParserConfigHeader, parser.Content))
-		}
-		for _, multiLineParser := range logPipeline.Spec.MultiLineParsers {
-			sb.WriteString(fluentbit.BuildConfigSection(fluentbit.MultiLineParserConfigHeader, multiLineParser.Content))
+		if logPipeline.DeletionTimestamp == nil {
+			for _, parser := range logPipeline.Spec.Parsers {
+				sb.WriteString(fluentbit.BuildConfigSection(fluentbit.ParserConfigHeader, parser.Content))
+			}
+			for _, multiLineParser := range logPipeline.Spec.MultiLineParsers {
+				sb.WriteString(fluentbit.BuildConfigSection(fluentbit.MultiLineParserConfigHeader, multiLineParser.Content))
+			}
 		}
 	}
 	return sb.String()
