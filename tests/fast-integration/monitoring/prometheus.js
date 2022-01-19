@@ -87,13 +87,13 @@ async function assertMetricsExist() {
     let metricsList = [
         {"kubelet":[
                 {"container_memory_usage_bytes": ["pod","container"]},
-                {"kubelet_volume_stats_available_bytes": ["job","namespace"]},
-                {"kubelet_pod_start_duration_seconds_count": ["cluster", "job"]}]},
+                {"kubelet_volume_stats_available_bytes": ["namespace"]},
+                {"kubelet_pod_start_duration_seconds_count": ["job"]}]},
 
         {"api-server":[
                 {"apiserver_request_total": ["verb","job"]},
-                {"kubelet_volume_stats_available_bytes": ["job","namespace"]},
-                {"kubelet_pod_start_duration_seconds_count": ["job"]}]},
+                {"apiserver_request_duration_seconds_bucket": ["verb"]},
+                {"etcd_disk_backend_commit_duration_seconds_bucket": ["job"]}]},
 
         {"kube-state-metrics":[
                 {"kube_deployment_status_replicas_available": ["deployment","namespace"]},
