@@ -174,7 +174,7 @@ func (n *Nats) SyncSubscription(sub *eventingv1alpha1.Subscription, cleaner even
 						return false, err
 					}
 				} else if existingNatsSub.IsValid() {
-					log.Infow("skipping creating subscription on NATS because it already exists")
+					log.Debugw("skipping creating subscription on NATS because it already exists", "subject", subject)
 					continue
 				}
 			}
@@ -258,7 +258,7 @@ func (n *Nats) deleteSubFromNats(natsSub *nats.Subscription, subKey string, log 
 		}
 	}
 	delete(n.subscriptions, subKey)
-	log.Infow("unsubscribe succeeded")
+	log.Infow("unsubscribe succeeded", "subscriptionKey", subKey)
 
 	return nil
 }
@@ -269,9 +269,14 @@ func (n *Nats) getCallback(subKeyPrefix string) nats.MsgHandler {
 		sinkValue, ok := n.sinks.Load(subKeyPrefix)
 		if !ok {
 			n.namedLogger().Errorw("cannot find sink url in storage", "keyPrefix", subKeyPrefix)
+			return
 		}
 		// convert interface type to string
-		sink := fmt.Sprintf("%v", sinkValue)
+		sink, ok := sinkValue.(string)
+		if !ok {
+			n.namedLogger().Errorw("failed to convert sink value to string", "sinkValue", sinkValue)
+			return
+		}
 
 		ce, err := convertMsgToCE(msg)
 		if err != nil {
