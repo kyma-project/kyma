@@ -133,11 +133,14 @@ func (n *Nats) SyncSubscription(sub *eventingv1alpha1.Subscription, cleaner even
 	if len(sub.Status.CleanEventTypes) != len(cleanSubjects) ||
 		!reflect.DeepEqual(sub.Status.CleanEventTypes, cleanSubjects) {
 
-		log.Infow(
-			"deleting subscriptions on NATS because subscription filters are modified",
-			"oldSubjects", sub.Status.CleanEventTypes,
-			"newSubjects", cleanSubjects,
-		)
+		if len(sub.Status.CleanEventTypes) != 0 {
+			// Only print log if it is not a new subscription
+			log.Infow(
+				"deleting subscriptions on NATS if exists because subscription filters are modified",
+				"oldSubjects", sub.Status.CleanEventTypes,
+				"newSubjects", cleanSubjects,
+			)
+		}
 
 		// deleting subscriptions from NATS
 		if err := n.DeleteSubscription(sub); err != nil {
