@@ -27,12 +27,6 @@ kubectl create ns sap-btp-operator
 kubectl label namespace sap-btp-operator istio-injection=disabled
 ```
 
-<!---
-2. Alternative if the previous option doesn't work:
-
-kubectl patch deployment -ncert-manager cert-manager-webhook --type=json -p '[{ "op": "add", "path": "/spec/template/metadata/annotations", "value": {"sidecar.istio.io/inject": "false"} }]'
--->
-
 3. Install and set up the [SAP BTP service operator](https://github.com/SAP/sap-btp-service-operator) in your Kyma cluster. Use the option without cert-manager.
 
 4. Create a Service Instance:
@@ -56,7 +50,7 @@ EOF
 5. To see the output, run:
 
 ```
-kubectl get serviceinstance.btp<api group> btp-auditlog-2 -o yaml   
+kubectl get serviceinstances.service btp-auditlog-2 -o yaml
 ```
 
 You can see the status "created" and the message "ServiceInstance provisioned successfully".
@@ -80,13 +74,11 @@ EOF
 7. To see the output, run:
 
 ```
-kubectl get serviceinstance.btp<api group> btp-auditlog-2 -o yaml   
+kubectl get servicebindings binding -o yaml
 ```
 
 You can see the status "created" and the message "ServiceBinding provisioned successfully".
 
 8. You can now use a given service in your Kyma cluster.
 
-<!---
-You can use Kyma Dashboard to create and manage resources such as Service Instance and Service Binding. In the left navigation, go to the Service Management > BTP . Still, you need to acquire service details from BTP Cockpit.
--->
+>**TIP:** You can use Kyma Dashboard to create and manage resources such as Service Instances and Service Bindings. To do so, go to the **Service Management** tab in the left navigation of the Kyma Dashboard. Still, you need to acquire service details, such as service name and plan, from BTP Cockpit.
