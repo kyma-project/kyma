@@ -667,6 +667,7 @@ function getResourcePaths(namespace) {
     `/apis/apps/v1/namespaces/${namespace}/deployments`,
     `/api/v1/namespaces/${namespace}/services`,
     `/apis/applicationconnector.kyma-project.io/v1alpha1/namespaces/${namespace}/applicationmappings`,
+    `/apis/applicationconnector.kyma-project.io/v1alpha1/namespaces/${namespace}/applications`,
   ];
 }
 
@@ -675,20 +676,6 @@ async function cleanMockTestFixture(mockNamespace, targetNamespace, wait = true)
     getResourcePaths(targetNamespace)
   )) {
     await deleteAllK8sResources(path);
-  }
-
-  try {
-    debug("Deleting applicationconnector.kyma-project.io/v1alpha1")
-    await k8sDynamicApi.delete({
-      apiVersion: "applicationconnector.kyma-project.io/v1alpha1",
-      kind: "Application",
-      metadata: {
-        name: "commerce",
-      },
-    });
-  }
-  catch (err) {
-    ignore404(err)
   }
 
   debug('Deleting test namespaces');
