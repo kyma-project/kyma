@@ -172,8 +172,9 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 				}
 				return ctrl.Result{}, err
 			}
-			return ctrl.Result{}, nil
 		}
+		// Stop reconciliation as the object is being deleted
+		return ctrl.Result{}, nil
 	}
 
 	// The object is not being deleted, so if it does not have our finalizer,
