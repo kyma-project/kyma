@@ -451,7 +451,7 @@ func TestCompassConnectionController(t *testing.T) {
 	})
 
 	// Control path II in controller - fetching config from Connector fails during connection initialisation
-	/*t.Run("Compass Connection Controller should skip all attempts of Connection Initialisation if failed to fetch configuration from Connector AND minimalConfigSyncTime HAS NOT passed", func(t *testing.T) {
+	t.Run("Compass Connection Controller should skip all attempts of Connection Initialisation if failed to fetch configuration from Connector AND minimalConfigSyncTime HAS NOT passed", func(t *testing.T) {
 		// given
 		badConnectorMock := &connectorMocks.Client{}
 		badConnectorMock.On("Configuration", connectorTokenHeadersFunc).After(1*time.Second).Return(gqlschema.Configuration{}, errors.New("Failed to get configuration during initialisation. Timeout!!!"))
@@ -459,31 +459,37 @@ func TestCompassConnectionController(t *testing.T) {
 		clearMockCalls(&clientsProviderMock.Mock)
 		clientsProviderMock.On("GetConnectorTokensClient", connectorURL).Return(badConnectorMock, nil)
 
-		// this will enforce connection reinitialisation. Then connection will be set to v1alpha1.ConnectionFailed
+		//this will enforce immediate connection reinitialisation. Then connection will be set to v1alpha1.ConnectionFailed
 		err := compassConnectionCRClient.Delete(context.Background(), compassConnectionName, v1.DeleteOptions{})
 		require.NoError(t, err)
 
 		// when
-		// 2 seconds wait for call + 1 second for timeout
+		// 1 second for timeout
 		err = waitFor(checkInterval, testTimeout, func() bool {
 			return mockFunctionCalled(&badConnectorMock.Mock, "Configuration", connectorTokenHeadersFunc)
 		})
-
 		require.NoError(t, err)
 
-		// Now wait for a second. Reconcile loop should run in the background.
-		// Since minimalConfigSyncTime (4s) not pass all calls to connector should be skipped.
-		time.Sleep(1 * time.Second)
-
-		require.NoError(t, waitForResourceUpdate(v1alpha1.ConnectionFailed))
+		err = waitFor(checkInterval, testTimeout, func() bool {
+			return isConnectionInState(v1alpha1.ConnectionFailed)
+		})
+		require.NoError(t, err)
 		assertConnectionStatusError(t)
+
+		// Now wait for 3 seconds. Reconcile loop should run in the background.
+		// Since minimalConfigSyncTime (4s) not pass all calls to connector should be skipped.
+		time.Sleep(minimalConfigSyncTime - time.Second)
+
+		require.Equal(t, true, isConnectionInState(v1alpha1.ConnectionFailed))
+		assertConnectionStatusError(t)
+
 		badConnectorMock.AssertNumberOfCalls(t, "Configuration", 1)
 
 		clearMockCalls(&clientsProviderMock.Mock)
 		clientsProviderMock.On("GetDirectorClient", runtimeConfig).Return(configurationClientMock, nil)
 		clientsProviderMock.On("GetConnectorCertSecuredClient").Return(certsConnectorClientMock, nil)
 		clientsProviderMock.On("GetConnectorTokensClient", connectorURL).Return(tokensConnectorClientMock, nil)
-	})*/
+	})
 
 	t.Run("Compass Connection Controller should resume attempts of Connection Initialisation if failed to fetch configuration from Connector AND minimalConfigSyncTime HAS passed", func(t *testing.T) {
 		// given
@@ -498,19 +504,25 @@ func TestCompassConnectionController(t *testing.T) {
 		require.NoError(t, err)
 
 		// when
-		// 2 seconds wait for call + 1 second for timeout
+		// 1 second for timeout
 		err = waitFor(checkInterval, testTimeout, func() bool {
 			return mockFunctionCalled(&badConnectorMock.Mock, "Configuration", connectorTokenHeadersFunc)
 		})
-
 		require.NoError(t, err)
+
+		err = waitFor(checkInterval, testTimeout, func() bool {
+			return isConnectionInState(v1alpha1.ConnectionFailed)
+		})
+		require.NoError(t, err)
+		assertConnectionStatusError(t)
 
 		// Now wait for a minimalConfigSyncTime. Reconcile loop should run in the background.
 		// After minimalConfigSyncTime passed calls to director can be resumed.
 		time.Sleep(minimalConfigSyncTime)
 
-		require.NoError(t, waitForResourceUpdate(v1alpha1.ConnectionFailed))
+		require.Equal(t, true, isConnectionInState(v1alpha1.ConnectionFailed))
 		assertConnectionStatusError(t)
+
 		badConnectorMock.AssertNumberOfCalls(t, "Configuration", 2)
 
 		clearMockCalls(&clientsProviderMock.Mock)
