@@ -258,7 +258,7 @@ func (n *Nats) deleteSubFromNats(natsSub *nats.Subscription, subKey string, log 
 		}
 	}
 	delete(n.subscriptions, subKey)
-	log.Infow("unsubscribe succeeded", "subscriptionKey", subKey)
+	log.Debugw("unsubscribe succeeded", "subscriptionKey", subKey)
 
 	return nil
 }
