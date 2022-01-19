@@ -31,7 +31,7 @@ If the event name contains more than two segments, Eventing combines them into t
 
 ### Non-alphanumeric characters
 
-If the Application name contains any non-alphanumeric character such as `-`, the underlying Eventing services uses a clean name with alphanumeric characters only; for example, `system-prod` becomes `systemprod`.
+If the Application name contains any non-alphanumeric character such as `-` or `_`, the underlying Eventing services uses a clean name with alphanumeric characters only; for example, `system-prod` becomes `systemprod`.
 
 This could lead to a naming collision. For example, both `system-prod` and `systemprod` become `systemprod`. While this won't result in an error, it can cause Kyma to not work as expected.
 
