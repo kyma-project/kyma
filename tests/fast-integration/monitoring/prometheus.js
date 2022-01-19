@@ -87,13 +87,13 @@ async function assertMetricsExist() {
     let metricsList = [
         {"kubelet":[
                 {"container_memory_usage_bytes": ["pod","container"]},
-                {"kubelet_volume_stats_available_bytes": ["namespace"]},
-                {"kubelet_pod_start_duration_seconds_count": ["job"]}]},
+                {"kubelet_volume_stats_available_bytes": []},
+                {"kubelet_pod_start_duration_seconds_count": []}]},
 
         {"api-server":[
-                {"apiserver_request_total": ["verb","job"]},
-                {"apiserver_request_duration_seconds_bucket": ["verb"]},
-                {"etcd_disk_backend_commit_duration_seconds_bucket": ["job"]}]},
+                {"apiserver_request_total": []},
+                {"apiserver_request_duration_seconds_bucket": []},
+                {"etcd_disk_backend_commit_duration_seconds_bucket": []}]},
 
         {"kube-state-metrics":[
                 {"kube_deployment_status_replicas_available": ["deployment","namespace"]},
@@ -101,9 +101,9 @@ async function assertMetricsExist() {
                 {"kube_pod_container_resource_limits_memory_bytes": ["pod","container"]}]},
 
         {"node_exporter":[
-                {"process_open_fds": ["service", "job"]},
+                {"process_open_fds": []},
                 {"process_cpu_seconds_total": ["pod"]},
-                {"go_memstats_heap_inuse_bytes": ["namespace","pod"]}]},
+                {"go_memstats_heap_inuse_bytes": []}]},
     ]
 
     for(let index in metricsList ){
