@@ -2,13 +2,45 @@
 title: What is Observability in Kyma?
 ---
 
-## Observability tools
+In Kyma, we define Observability as [TO BE ADDED]. 
+<!-- input collection
+- use measurable data to get detailed insights what's happening in a system/environment (?) 
+- logs, metrics, traces
+- 
+- 
+-->
 
-Kyma comes with tools that give you the most accurate and up-to-date monitoring, logging and tracing data.
+Out of the box, Kyma provides tools to collect and expose **telemetry** data, such as metrics, traces, and log data. Of course, you'll want to view and analyze the data you're collecting. This is where **observability** tools come in.
 
-- [Prometheus](https://prometheus.io/) is the open source monitoring and alerting toolkit that provides the telemetry data. This data is consumed by different addons, including [Grafana](https://grafana.com/) for analytics and monitoring, and [Alertmanager](https://prometheus.io/docs/alerting/alertmanager/) for handling alerts. By default, Prometheus stores up to 15 GB of data for a maximum period of 30 days. If the default size or time is exceeded, the oldest records are removed first.
-- For logging, Kyma uses [Loki](https://github.com/grafana/loki), a Prometheus-like log management system. By default, Loki stores up to 30 GB of data for a maximum of 5 days, with maximum ingestion rate of 3 MB/s. If the default time is exceeded, the oldest logs are removed first.
-- With the [Jaeger](https://github.com/jaegertracing) distributed tracing system, you can analyze the path of a request chain going through your distributed applications. This information helps you to, for example, troubleshoot your applications, or optimize the latency and performance of your solution.
+## Collecting data
+
+<!-- 
+We need to add a new category on how to instrument your custom workload to be collectable, in case the auto-telemetry data is not enough. Also telling what is coming out-of-the-box and why.
+
+That section needs to give an overview and link to the guides which we have to provide
+-->
+
+Kyma collects telemetry data with several in-cluster components:
+
+- [Prometheus](https://prometheus.io/docs/introduction) collects metrics from Pods. Metrics are the time-stamped data that provide information on the running jobs, workload, CPU consumption, memory usage, and more.
+
+  > **NOTE:** All metrics relevant for observing the in-cluster Istio Service Mesh are collected separately. You can find more information about it in the [Istio monitoring documentation](../../../01-overview/main-areas/observability/obsv-03-istio-monitoring.md).
+
+- [Fluent Bit](https://fluentbit.io/) collects logs.
+
+- Traces are sent to [Jaeger](https://www.jaegertracing.io/docs).
+
+The collected telemetry data are exposed so that you can view and analyze them with observability tools.
+
+## Analyzing data
+
+You can use the following in-cluster components to observe your applications' telemetry data:
+
+- [Alertmanager](https://prometheus.io/docs/alerting/alertmanager/) receives and manages alerts coming from Prometheus. It can then forward the notifications about fired alerts to specific channels, such as Slack or an on-call paging system of your choice.
+- [Grafana](https://grafana.com/docs/guides/getting_started/) provides a dashboard and a graph editor to visualize metrics collected from Prometheus.
+- Kyma uses [Jaeger](https://www.jaegertracing.io/docs/) as a backend, which serves as the query mechanism for displaying information about traces.
+- Kyma uses [Loki](https://github.com/grafana/loki), which is a lightweight Prometheus-like log management system.
+- Kyma uses [Kiali](https://www.kiali.io) to enable validation, observe the Istio Service Mesh, and provide details on microservices included in the Service Mesh and connections between them.
 
 ## Benefits of distributed tracing
 
