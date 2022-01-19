@@ -11,6 +11,8 @@ The Subscription custom resource definition (CRD) is used to subscribe to events
 
 This sample Subscription resource subscribes to an event called `sap.kyma.custom.commerce.order.created.v1`.
 
+> **WARNING:** Non-alphanumeric characters are not allowed in event names under the **spec.filter.filters.eventType.value** property. If any are detected, Eventing will clean them up automatically. Read [Event names](../05-technical-reference/evnt-01-event-names.md#event-name-cleanup) for more information.
+
 > **NOTE:** Both the subscriber and the Subscription should exist in the same Namespace.
 
 ```yaml
@@ -51,7 +53,7 @@ This table lists all the possible parameters of a given resource together with t
 | **spec.filter.filters.eventSource.value** | Yes | Must be set to `""` for the NATS backend. |
 | **spec.filter.filters.eventType.property** | Yes | Must be set to `type`. |
 | **spec.filter.filters.eventType.type** | No | Must be set to `exact`. |
-| **spec.filter.filters.eventType.value** | Yes | Name of the event being subscribed to, for example: `sap.kyma.custom.commerce.order.created.v1`. |
+| **spec.filter.filters.eventType.value** | Yes | Name of the event being subscribed to, for example: `sap.kyma.custom.commerce.order.created.v1`. The name should not contain any non-alphanumeric characters. Read [Event names](../05-technical-reference/evnt-01-event-names.md#event-name-cleanup) for more information. |
 | **spec.protocol** | Yes | Must be set to `""`. |
 | **spec.protocolsettings** | Yes | Defines the Cloud Event protocol setting specification implementation. Must be set to `{}`. |
 | **spec.sink** | Yes | Specifies the HTTP endpoint where matching events should be sent to, for example: `test.test.svc.cluster.local`.  |

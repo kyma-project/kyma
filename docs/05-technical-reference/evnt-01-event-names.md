@@ -25,9 +25,13 @@ For publishers, the event type takes this sample form:
 
 To conform to Cloud Event specifications, sometimes Eventing must modify the event name before dispatching an event.
 
+### Events with more than two segments
+
 If the event name contains more than two segments, Eventing combines them into two segments when creating the underlying Eventing infrastructure. For example, `Account.Root.Created` becomes `AccountRoot.Created`.
 
-If the Application name contains `-` or `.`, the underlying Eventing services uses a clean name with alphanumeric characters only; for example, `system-prod` becomes `systemprod`.
+### Non-alphanumeric characters
+
+If the Application name contains any non-alphanumeric character such as `-` or `.`, the underlying Eventing services uses a clean name with alphanumeric characters only; for example, `system-prod` becomes `systemprod`.
 
 This could lead to a naming collision. For example, both `system-prod` and `systemprod` become `systemprod`. While this won't result in an error, it can cause Kyma to not work as expected.
 
