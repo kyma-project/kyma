@@ -71,6 +71,15 @@ const (
 
 type APIRuleOption func(rule *apigatewayv1alpha1.APIRule)
 
+// NewEventType will assemble and return a event-type string and especially resolves missing prefixes.
+func NewEventType(prefix, appName, event, version string) string {
+	eventType := fmt.Sprintf("%s.%s.%s", appName, event, version)
+	if prefix != "" {
+		eventType = fmt.Sprintf("%s.%s", prefix, eventType)
+	}
+	return eventType
+}
+
 // NewAPIRule returns a valid APIRule
 func NewAPIRule(subscription *eventingv1alpha1.Subscription, opts ...APIRuleOption) *apigatewayv1alpha1.APIRule {
 	apiRule := &apigatewayv1alpha1.APIRule{
@@ -250,17 +259,12 @@ func WithWebhookAuthForBEB(s *eventingv1alpha1.Subscription) {
 	}
 }
 
-// WithStatusNotReady is a SubscriptionOpt for creating a Subscription with the status ready set to false.
-func WithStatusNotReady(s *eventingv1alpha1.Subscription) {
-	s.Status.Ready = false
-}
-
 func WithWebhookForNats(s *eventingv1alpha1.Subscription) {
 	s.Spec.Protocol = "NATS"
 	s.Spec.ProtocolSettings = &eventingv1alpha1.ProtocolSettings{}
 }
 
-// WithNotCleanEventTypeFilter is a SubscriptionOpt for creating a Subscription with a event type filter containing
+// WithNotCleanEventTypeFilter is a SubscriptionOpt for creating a Subscription with an event type filter containing
 // a not clean event type. A not clean event type contains illegal none-alphanumeric characters.
 func WithNotCleanEventTypeFilter(s *eventingv1alpha1.Subscription) {
 	s.Spec.Filter = &eventingv1alpha1.BEBFilters{
@@ -337,9 +341,19 @@ func WithEventTypeFilter(s *eventingv1alpha1.Subscription) {
 	}
 }
 
-// SetInvalidSink adds an invalid sink to subscription.
-func SetInvalidSink(subscription *eventingv1alpha1.Subscription)  {
+// WithInvalidSink is a SubscriptionOpt for creating a Subcription with an invalid sink.
+// Be aware that an invalid sink will result into a Subscriptions status to be not ready.
+func WithInvalidSink(subscription *eventingv1alpha1.Subscription) {
 	subscription.Spec.Sink = "I am as shocked as you are."
+}
+
+// WithValidSink returns a SubscriptionOpt for creating a Subscription with a valid sink.
+// The sink will be created from svcName and svcNameSpace.
+func WithValidSink(svcName, svcNameSpace string) SubscriptionOpt {
+	sink := GetValidSink(svcName, svcNameSpace)
+	return func(subscription *eventingv1alpha1.Subscription) {
+		subscription.Spec.Sink = sink
+	}
 }
 
 // SetValidSink creates a valid sink from svcName and svcNamespace and adds it to subscription.

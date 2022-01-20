@@ -61,32 +61,32 @@ type testCase func(id int, eventTypePrefix, natsSubjectToPublish, eventTypeToSub
 
 var (
 	reconcilerTestCases = []testCase{
-	//	testCreateDeleteSubscription,
-		//testCreateSubscriptionWithValidSink,
-	//	testCreateSubscriptionWithInvalidSink,
-		//testCreateSubscriptionWithEmptyProtocolProtocolSettingsDialect,
-		//testChangeSubscriptionConfiguration,
-		//testCreateSubscriptionWithEmptyEventType,
-		//testCleanEventTypes,
+		testCreateDeleteSubscription,
+		testCreateSubscriptionWithValidSink,
+		testCreateSubscriptionWithInvalidSink,
+		testCreateSubscriptionWithEmptyProtocolProtocolSettingsDialect,
+		testChangeSubscriptionConfiguration,
+		testCreateSubscriptionWithEmptyEventType,
+		testCleanEventTypes,
 		testCleanEventTypesInvSink,
 	}
 
 	dispatcherTestCases = []testCase{
-		//testDispatcherWithMultipleSubscribers,
+		testDispatcherWithMultipleSubscribers,
 	}
 )
 
-// todo
-// testCleanEventTypes tests if the reconciler can create the correct cleanEventTypes from the filters of a Subscription.
+// testCleanEventTypesInvSink tests if the reconciler can create the correct cleanEventTypes from the filters of a
+// Subscription in case of an invalid sink which will cause the Subscription to be not ready
+// (`subscription.Status.Ready=false`).
 func testCleanEventTypesInvSink(id int, eventTypePrefix, natsSubjectToPublish, eventTypeToSubscribe string) bool {
 	return When("updating the clean event types in the Subscription status", func() {
-		//todo friedrich distinguish the two test cases better
-
 		It("should mark the Subscription as not ready", func() {
 			defaultCondition := eventingv1alpha1.MakeCondition(
 				eventingv1alpha1.ConditionSubscriptionActive,
 				eventingv1alpha1.ConditionReasonNATSSubscriptionActive,
-				v1.ConditionFalse, "sink URL scheme should be 'http' or 'https'")
+				v1.ConditionFalse,
+				"sink URL scheme should be 'http' or 'https'") //Todo shouldnt this exist in an const whereever this messages will be sent. Look at the eqivalent of this test for BEB too.
 			// create a context
 			ctx := context.Background()
 			cancel = startReconciler(eventTypePrefix, defaultSinkValidator)
@@ -100,12 +100,13 @@ func testCleanEventTypesInvSink(id int, eventTypePrefix, natsSubjectToPublish, e
 
 			// create a Subscription
 			subscriptionName := fmt.Sprintf(subscriptionNameFormat, id)
+			eventType := reconcilertesting.NewEventType(eventTypePrefix, "myapp", "this.done", "v1")
 			subscription := reconcilertesting.NewSubscription(subscriptionName, namespaceName,
-				reconcilertesting.WithEventTypeFilter,
 				reconcilertesting.WithWebhookForNats,
+				reconcilertesting.WithInvalidSink,
+				reconcilertesting.WithSpecificEventTypeFilter(reconcilertesting.EventSource, eventType),
 			)
-			// adding an invalid sink to the subscription will make the reconciler mark the subscriptions status as not ready
-			reconcilertesting.SetInvalidSink(subscription)
+
 			ensureSubscriptionCreated(ctx, subscription)
 
 			Context("A Subscription with an invalid sink and a filter", func() {
@@ -119,7 +120,7 @@ func testCleanEventTypesInvSink(id int, eventTypePrefix, natsSubjectToPublish, e
 					getSubscription(ctx, subscription).Should(reconcilertesting.HaveSubscriptionName(subscriptionName))
 				})
 				By("should have clean event types", func() {
-					expectedCleanEventTypes := []string{reconcilertesting.OrderCreatedEventType}
+					expectedCleanEventTypes := []string{eventType}
 					getSubscription(ctx, subscription).Should(reconcilertesting.HaveCleanEventTypes(expectedCleanEventTypes))
 				})
 			})
@@ -127,11 +128,11 @@ func testCleanEventTypesInvSink(id int, eventTypePrefix, natsSubjectToPublish, e
 	})
 }
 
-// testCleanEventTypes tests if the reconciler can create the correct cleanEventTypes from the filters of a Subscription.
+// testCleanEventTypes tests if the reconciler can resolve the clean event-types in different cenarios.
+// The test starts with empty filters, then adds filters, modfies them and then finally deletes them.
 func testCleanEventTypes(id int, eventTypePrefix, natsSubjectToPublish, eventTypeToSubscribe string) bool {
 	return When("updating the clean event types in the Subscription status", func() {
 		It("should mark the Subscription as ready", func() {
-			id++
 			//  set default expectations
 			defaultCondition := eventingv1alpha1.MakeCondition(
 				eventingv1alpha1.ConditionSubscriptionActive,
@@ -156,8 +157,8 @@ func testCleanEventTypes(id int, eventTypePrefix, natsSubjectToPublish, eventTyp
 			subscription := reconcilertesting.NewSubscription(subscriptionName, namespaceName,
 				reconcilertesting.WithEmptyEventTypeFilter,
 				reconcilertesting.WithWebhookForNats,
+				reconcilertesting.WithValidSink(subscriberSvc.Name, namespaceName),
 			)
-			reconcilertesting.SetValidSink(subscriberSvc.Name, namespaceName, subscription)
 
 			ensureSubscriptionCreated(ctx, subscription)
 
@@ -539,7 +540,10 @@ func testCreateSubscriptionWithEmptyEventType(id int, eventTypePrefix, _, _ stri
 			ensureSubscriberSvcCreated(ctx, subscriberSvc)
 
 			// Create subscription
-			givenSubscription := reconcilertesting.NewSubscription(subscriptionName, namespaceName, reconcilertesting.WithSpecificEventTypeFilter(reconcilertesting.EventSource, ""), reconcilertesting.WithWebhookForNats)
+			givenSubscription := reconcilertesting.NewSubscription(subscriptionName, namespaceName,
+				reconcilertesting.WithSpecificEventTypeFilter(reconcilertesting.EventSource, ""),
+				reconcilertesting.WithWebhookForNats,
+			)
 			reconcilertesting.SetValidSink(subscriberName, namespaceName, givenSubscription)
 			ensureSubscriptionCreated(ctx, givenSubscription)
 

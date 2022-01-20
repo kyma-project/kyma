@@ -284,10 +284,14 @@ func (r *Reconciler) syncSubscriptionStatus(ctx context.Context, sub *eventingv1
 	return nil
 }
 
-// setCleanEventTypes converts the event type filters of a subscription into clean event types.
+// getCleanEventTypes converts the event type filters of a subscription into clean event types.
 func (r *Reconciler) getCleanEventTypes(sub *eventingv1alpha1.Subscription) ([]string, error) {
 	cleanEventTypes := []string{}
 	for _, filter := range sub.Spec.Filter.Filters {
+		if filter.EventType.Value == "" {
+			continue
+		}
+
 		cleanEventType, err:= r.eventTypeCleaner.Clean(filter.EventType.Value)
 		if err != nil {
 			return nil, err
@@ -309,7 +313,7 @@ func defaultSinkValidator(ctx context.Context, r *Reconciler, subscription *even
 		return fmt.Errorf("not able to parse sink url with error: %s", err.Error())
 	}
 
-	// Validate sink URL is a cluster local URL
+	// validate sink URL is a cluster local URL
 	trimmedHost := strings.Split(sURL.Host, ":")[0]
 	if !strings.HasSuffix(trimmedHost, clusterLocalURLSuffix) {
 		events.Warn(r.recorder, subscription, events.ReasonValidationFailed, "Sink does not contain suffix: %s", clusterLocalURLSuffix)
@@ -323,14 +327,14 @@ func defaultSinkValidator(ctx context.Context, r *Reconciler, subscription *even
 		return fmt.Errorf("sink should contain 5 sub-domains: %s", trimmedHost)
 	}
 
-	// Assumption: Subscription CR and Subscriber should be deployed in the same namespace
+	// assumption: Subscription CR and Subscriber should be deployed in the same namespace
 	svcNs := subDomains[1]
 	if subscription.Namespace != svcNs {
 		events.Warn(r.recorder, subscription, events.ReasonValidationFailed, "Namespace of subscription: %s and the subscriber: %s are different", subscription.Namespace, svcNs)
 		return fmt.Errorf("namespace of subscription: %s and the namespace of subscriber: %s are different", subscription.Namespace, svcNs)
 	}
 
-	// Validate svc is a cluster-local one
+	// validate svc is a cluster-local one
 	svcName := subDomains[0]
 	if _, err := r.getClusterLocalService(ctx, svcNs, svcName); err != nil {
 		if k8serrors.IsNotFound(err) {

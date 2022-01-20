@@ -101,18 +101,49 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 		testID++
 	})
 
-	When("Updating the clean event types in the Subscription status", func() {
+	When("resolving the clean event-types of a Subscription with an invalid sink", func() {
 		It("should mark the Subscription as ready", func() {
 			// create a subscriber service
 			subscriberSvc := reconcilertesting.NewSubscriberSvc("webhook", namespaceName)
 			ensureSubscriberSvcCreated(ctx, subscriberSvc)
-
-			// create a Subscription
 			subscriptionName := "test-valid-subscription-1"
-			optFilter := reconcilertesting.WithEmptyEventTypeFilter
-			optWebhook := reconcilertesting.WithWebhookAuthForBEB
-			subscription := reconcilertesting.NewSubscription(subscriptionName, namespaceName, optFilter, optWebhook)
-			reconcilertesting.SetValidSink(subscriberSvc.Name, namespaceName, subscription)
+			// to create a subscription with the status not-ready, it will have an invalid sink
+			subscription := reconcilertesting.NewSubscription(subscriptionName, namespaceName,
+				reconcilertesting.WithEmptyEventTypeFilter,
+				reconcilertesting.WithWebhookAuthForBEB,
+				reconcilertesting.WithInvalidSink,
+			)
+
+			ensureSubscriptionCreated(ctx, subscription)
+
+			Context("a Subscription without filters", func() {
+				By("should have no clean event types", func() {
+					getSubscription(ctx, subscription).Should(And(
+						reconcilertesting.HaveSubscriptionName(subscriptionName),
+						reconcilertesting.HaveCondition(eventingv1alpha1.MakeCondition(
+							eventingv1alpha1.ConditionSubscriptionActive,
+							eventingv1alpha1.ConditionReasonSubscriptionActive,
+							v1.ConditionFalse,
+							"sink URL scheme should be 'http' or 'https'")), //Todo shouldnt this exist in an const whereever this messages will be sent. Look at the eqivalent of this test for BEB too.
+						reconcilertesting.HaveCleanEventTypes(nil),
+					))
+				})
+			})
+		})
+	})
+
+	When("resolving the clean event-types in the Subscription status", func() {
+		It("should mark the Subscription as ready", func() {
+			// create a subscriber service
+			subscriberSvc := reconcilertesting.NewSubscriberSvc("webhook", namespaceName)
+			ensureSubscriberSvcCreated(ctx, subscriberSvc)
+			subscriptionName := "test-valid-subscription-1"
+			subscription := reconcilertesting.NewSubscription(subscriptionName, namespaceName,
+				reconcilertesting.WithEmptyEventTypeFilter,
+				reconcilertesting.WithWebhookAuthForBEB,
+				reconcilertesting.WithValidSink(subscriberSvc.Name, namespaceName),
+			)
+
 			ensureSubscriptionCreated(ctx, subscription)
 
 			Context("a Subscription without filters", func() {
