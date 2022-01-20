@@ -7,13 +7,13 @@ title: Functions failing to build on k3d
 
 There are rare cases, for some k3d versions and configurations, where users experience Functions failing to be built.
 
-If you see that your Function cannot be built,
+Your Function cannot be built:
 ```
 $ kubectl get functions.serverless.kyma-project.io nyfun
 NAME    CONFIGURED   BUILT   RUNNING   RUNTIME    VERSION   AGE
 myfun   True         False             nodejs14   1         3h15m
 ```
-and the Function build job shows the following error, meaning that your host k3d environment is likely to experience the problem.
+and the Function build job shows the following error, meaning that your host k3d environment is likely to experience the problem:
 ```
 $ kubectl logs myfun-build-zqhk8-7xl6h
 kaniko should only be run inside of a container, run with the --force flag if you are sure you want to continue
@@ -43,7 +43,7 @@ serverless:
           value: --insecure,--skip-tls-verify,--skip-unused-stages,--log-format=text,--cache=true,--force
 ```
 
-Use the file to override default configuration while deploying kyma on your k3d instance:
+Use the file to override the default configuration while deploying Kyma on your k3d instance:
 ```bash
 kyma deploy --values-file my-overrides.yaml
 ```
