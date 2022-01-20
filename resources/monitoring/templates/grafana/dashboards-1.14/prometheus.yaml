@@ -1161,7 +1161,7 @@ data:
                     "options": [
 
                     ],
-                    "query": "label_values(prometheus_build_info, job), job)",
+                    "query": "label_values(prometheus_build_info, job)",
                     "refresh": 1,
                     "regex": "",
                     "sort": 2,
