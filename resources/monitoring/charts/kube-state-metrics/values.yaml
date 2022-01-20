@@ -145,8 +145,9 @@ metricDenylist: []
 # label keys you would like to allow for them (Example: '=namespaces=[k8s-label-1,k8s-label-n,...],pods=[app],...)'.
 # A single '*' can be provided per resource instead to allow any labels, but that has
 # severe performance implications (Example: '=pods=[*]').
-metricLabelsAllowlist: []
+metricLabelsAllowlist:
   # - namespaces=[k8s-label-1,k8s-label-n]
+  - pods=[kyma-project.io/component,kyma-project.io/dashboard]
 
 # Comma-separated list of Kubernetes annotations keys that will be used in the resource'
 # labels metric. By default the metric contains only name and namespace labels.
