@@ -137,7 +137,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, request reconcile.Request) (
 
 	log.Info("Trying to connect to Compass and apply Runtime configuration...")
 
-	// Control path C in Controller: Synchronize config/applications with Compass Director API
+	// Control path C executed always after successful path B in Controller: Synchronize config/applications with Compass Director API
 	synchronized, err := r.supervisor.SynchronizeWithCompass(instance)
 	if err != nil {
 		log.Errorf("Failed to synchronize with Compass: %s", err.Error())
@@ -178,3 +178,59 @@ func shouldReconnect(connection *v1alpha1.CompassConnection, minimalConfigSyncTi
 
 	return timeSinceLastConnAttempt >= int64(minimalConfigSyncTime.Seconds())
 }
+
+/*Alternatieve flow.
+
+log.Infof("Processing Compass Connection, current status: %s", instance.Status)
+
+// we can have 3 cases of communication with Compass here:
+// A - reconnect if connection is failed
+// B - maintain connection if needed
+// C - synchronize config/applications with Compass Director API.
+// Path B includes path C.
+
+//we skip for in both cases for initialisation and maintenance of connection
+//If minimalConfigSyncTime did not pass from connection.Status.ConnectionStatus.LastSync, skip connection
+if canReconnect(instance, r.minimalConfigSyncTime) {
+	// reconnect when connection is failed or maintain connection
+	// If connection is not established read Config Map and try to fetch Certificate
+	if instance.ShouldAttemptReconnect() {
+		log.Infof("Attempting to initialize connection with Compass...")
+
+		//Control path A in controller - Initialize connection with Compass Connector API
+		instance, err := r.supervisor.InitializeCompassConnection()
+		if err != nil {
+			log.Errorf("Failed to initialize Compass Connection: %s", err.Error())
+			return reconcile.Result{}, err
+		}
+		log.Infof("Attempt to initialize Compass Connection ended with status: %s", instance.Status)
+	}
+	// Control path B in controller - Maintain connection with Compass Connector API
+	log.Infof("Attempting to maintain connection with Compass...")
+	err = r.supervisor.MaintainCompassConnection(instance)
+
+	if err != nil {
+		log.Errorf("Failed to maintain connection with Compass: %s", err.Error())
+	}
+
+	return reconcile.Result{}, err
+} else {
+	log.Infof("Skipping connection initialization/mainteneance. Minimal resync time not passed. Last attempt: %v", instance.Status.ConnectionStatus.LastSync)
+}
+
+// If minimalConfigSyncTime did not pass from SynchronizationStatus.LastAttempt, skip synchronization
+if canResyncConfig(instance, r.minimalConfigSyncTime) {
+	log.Info("Trying to connect to Compass and apply Runtime configuration...")
+
+	// Control path C in Controller: Synchronize config/applications with Compass Director API
+	synchronized, err := r.supervisor.SynchronizeWithCompass(instance)
+	if err != nil {
+		log.Errorf("Failed to synchronize with Compass: %s", err.Error())
+		return reconcile.Result{}, err
+	}
+	log.Infof("Synchronization finished. Compass Connection status: %s", synchronized.Status)
+} else {
+	log.Infof("Skipping config synchronization. Minimal resync time not passed. Last attempt: %v", instance.Status.SynchronizationStatus.LastAttempt)
+}
+
+*/

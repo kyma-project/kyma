@@ -247,6 +247,7 @@ func (s *crSupervisor) maintainCompassConnection(compassConnection *v1alpha1.Com
 
 	compassConnection.Status.ConnectionStatus.LastSync = connectionTime
 	compassConnection.Status.ConnectionStatus.LastSuccess = connectionTime
+	// for alternative flow compassConnection.Status.State = v1alpha1.Connected
 
 	return nil
 }
