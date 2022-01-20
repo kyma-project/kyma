@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"net/url"
 	"os"
-	"reflect"
 
 	"github.com/go-logr/logr"
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
@@ -16,6 +15,7 @@ import (
 	"github.com/kyma-project/kyma/components/eventing-controller/utils"
 	"github.com/pkg/errors"
 	corev1 "k8s.io/api/core/v1"
+	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/client-go/tools/record"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/cache"
@@ -134,28 +134,27 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 
 	r.Log.Info("received subscription reconciliation request", "namespace", req.Namespace, "name", req.Name)
 
-	actualSubscription := &eventingv1alpha1.Subscription{}
-	result := ctrl.Result{}
+	cachedSubscription := &eventingv1alpha1.Subscription{}
 
 	// Ensure the object was not deleted in the meantime
-	err := r.Client.Get(ctx, req.NamespacedName, actualSubscription)
+	err := r.Client.Get(ctx, req.NamespacedName, cachedSubscription)
 	if err != nil {
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
 
 	// Handle only the new subscription
-	desiredSubscription := actualSubscription.DeepCopy()
+	subscription := cachedSubscription.DeepCopy()
 	//Bind fields to logger
-	log := r.Log.WithValues("kind", desiredSubscription.GetObjectKind().GroupVersionKind().Kind,
-		"name", desiredSubscription.GetName(),
-		"namespace", desiredSubscription.GetNamespace(),
-		"version", desiredSubscription.GetGeneration(),
+	log := r.Log.WithValues("kind", subscription.GetObjectKind().GroupVersionKind().Kind,
+		"name", subscription.GetName(),
+		"namespace", subscription.GetNamespace(),
+		"version", subscription.GetGeneration(),
 	)
 
-	if !desiredSubscription.ObjectMeta.DeletionTimestamp.IsZero() {
+	if !subscription.ObjectMeta.DeletionTimestamp.IsZero() {
 		// The object is being deleted
-		if utils.ContainsString(desiredSubscription.ObjectMeta.Finalizers, Finalizer) {
-			if err := r.Backend.DeleteSubscription(desiredSubscription); err != nil {
+		if utils.ContainsString(subscription.ObjectMeta.Finalizers, Finalizer) {
+			if err := r.Backend.DeleteSubscription(subscription); err != nil {
 				r.Log.Error(err, "failed to delete subscription")
 				// if failed to delete the external dependency here, return with error
 				// so that it can be retried
@@ -164,19 +163,42 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 
 			// remove our finalizer from the list and update it.
 			log.Info("Removing finalizer from subscription object")
-			desiredSubscription.ObjectMeta.Finalizers = utils.RemoveString(desiredSubscription.ObjectMeta.Finalizers,
+			subscription.ObjectMeta.Finalizers = utils.RemoveString(subscription.ObjectMeta.Finalizers,
 				Finalizer)
-			if err := r.Client.Update(ctx, desiredSubscription); err != nil {
+			if err := r.Client.Update(ctx, subscription); err != nil {
 				log.Error(err, "failed to remove finalizer from subscription object")
+				if k8serrors.IsConflict(err) {
+					return ctrl.Result{Requeue: true}, nil
+				}
 				return ctrl.Result{}, err
 			}
-			return ctrl.Result{}, nil
 		}
+		// Stop reconciliation as the object is being deleted
+		return ctrl.Result{}, nil
 	}
+
+	// The object is not being deleted, so if it does not have our finalizer,
+	// then lets add the finalizer and update the object. This is equivalent
+	// registering our finalizer.
+	if !utils.ContainsString(subscription.ObjectMeta.Finalizers, Finalizer) {
+		log.Info("Adding finalizer to subscription object")
+		subscription.ObjectMeta.Finalizers = append(subscription.ObjectMeta.Finalizers, Finalizer)
+		if err := r.Update(context.Background(), subscription); err != nil {
+			if k8serrors.IsConflict(err) {
+				return ctrl.Result{Requeue: true}, nil
+			}
+			return ctrl.Result{}, err
+		}
+		return ctrl.Result{Requeue: true}, nil
+	}
+
 	// Check for valid sink
-	if err := r.assertSinkValidity(actualSubscription.Spec.Sink); err != nil {
+	if err := r.assertSinkValidity(subscription.Spec.Sink); err != nil {
 		r.Log.Error(err, "failed to parse sink URL")
-		if err := r.syncSubscriptionStatus(ctx, actualSubscription, false, err.Error()); err != nil {
+		if err := r.syncSubscriptionStatus(ctx, subscription, false, err.Error()); err != nil {
+			if k8serrors.IsConflict(err) {
+				return ctrl.Result{Requeue: true}, nil
+			}
 			return ctrl.Result{}, err
 		}
 		// No point in reconciling as the sink is invalid
@@ -184,35 +206,25 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 	}
 
 	// Clean up the old subscriptions
-	err = r.Backend.DeleteSubscription(desiredSubscription)
+	err = r.Backend.DeleteSubscription(subscription)
 	if err != nil {
 		log.Error(err, "failed to delete subscriptions")
-		if err := r.syncSubscriptionStatus(ctx, actualSubscription, false, err.Error()); err != nil {
+		if err := r.syncSubscriptionStatus(ctx, subscription, false, err.Error()); err != nil {
+			if k8serrors.IsConflict(err) {
+				return ctrl.Result{Requeue: true}, nil
+			}
 			return ctrl.Result{}, err
 		}
 		return ctrl.Result{}, err
 	}
 
-	// The object is not being deleted, so if it does not have our finalizer,
-	// then lets add the finalizer and update the object. This is equivalent
-	// registering our finalizer.
-	if !utils.ContainsString(desiredSubscription.ObjectMeta.Finalizers, Finalizer) {
-		log.Info("Adding finalizer to subscription object")
-		desiredSubscription.ObjectMeta.Finalizers = append(desiredSubscription.ObjectMeta.Finalizers, Finalizer)
-		if err := r.Update(context.Background(), desiredSubscription); err != nil {
-			return ctrl.Result{}, err
-		}
-		result.Requeue = true
-	}
-
-	if result.Requeue {
-		return result, nil
-	}
-
-	_, err = r.Backend.SyncSubscription(desiredSubscription, r.eventTypeCleaner)
+	_, err = r.Backend.SyncSubscription(subscription, r.eventTypeCleaner)
 	if err != nil {
 		r.Log.Error(err, "failed to sync subscription")
-		if err := r.syncSubscriptionStatus(ctx, actualSubscription, false, err.Error()); err != nil {
+		if err := r.syncSubscriptionStatus(ctx, subscription, false, err.Error()); err != nil {
+			if k8serrors.IsConflict(err) {
+				return ctrl.Result{Requeue: true}, nil
+			}
 			return ctrl.Result{}, err
 		}
 		return ctrl.Result{}, err
@@ -221,45 +233,59 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 	log.Info("successfully created Nats subscriptions")
 
 	// Update status
-	if err := r.syncSubscriptionStatus(ctx, actualSubscription, true, ""); err != nil {
+	if err := r.syncSubscriptionStatus(ctx, subscription, true, ""); err != nil {
+		if k8serrors.IsConflict(err) {
+			return ctrl.Result{Requeue: true}, nil
+		}
 		return ctrl.Result{}, err
 	}
 
-	return result, nil
+	return ctrl.Result{}, nil
 }
 
 // syncSubscriptionStatus syncs Subscription status
-func (r Reconciler) syncSubscriptionStatus(ctx context.Context, sub *eventingv1alpha1.Subscription,
-	isNatsSubReady bool, message string) error {
-	desiredSubscription := sub.DeepCopy()
+func (r *Reconciler) syncSubscriptionStatus(ctx context.Context, sub *eventingv1alpha1.Subscription, isNatsSubReady bool, message string) error {
 	desiredConditions := make([]eventingv1alpha1.Condition, 0)
-	conditionAdded := false
+	conditionContained := false
+	conditionsUpdated := false
 	condition := eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionSubscriptionActive,
 		eventingv1alpha1.ConditionReasonNATSSubscriptionActive, corev1.ConditionFalse, message)
 	if isNatsSubReady {
 		condition = eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionSubscriptionActive,
-			eventingv1alpha1.ConditionReasonNATSSubscriptionActive, corev1.ConditionTrue, "")
+			eventingv1alpha1.ConditionReasonNATSSubscriptionActive, corev1.ConditionTrue, message)
 	}
 	for _, c := range sub.Status.Conditions {
 		var chosenCondition eventingv1alpha1.Condition
 		if c.Type == condition.Type {
-			// take given condition
-			chosenCondition = condition
-			conditionAdded = true
+			if !conditionContained {
+				if c.Status == condition.Status && c.Reason == condition.Reason && c.Message == condition.Message {
+					// take the already present condition
+					chosenCondition = c
+				} else {
+					// take the new given condition
+					chosenCondition = condition
+					conditionsUpdated = true
+				}
+				desiredConditions = append(desiredConditions, chosenCondition)
+				conditionContained = true
+			}
+			// ignore all other conditions having the same type
+			continue
 		} else {
-			// take already present condition
+			// take the already present condition
 			chosenCondition = c
 		}
 		desiredConditions = append(desiredConditions, chosenCondition)
 	}
-	if !conditionAdded {
+	if !conditionContained {
 		desiredConditions = append(desiredConditions, condition)
+		conditionsUpdated = true
 	}
-	desiredSubscription.Status.Conditions = desiredConditions
-	desiredSubscription.Status.Ready = isNatsSubReady
 
-	if !reflect.DeepEqual(sub.Status, desiredSubscription.Status) {
-		err := r.Client.Status().Update(ctx, desiredSubscription, &client.UpdateOptions{})
+	if conditionsUpdated {
+		sub.Status.Conditions = desiredConditions
+		sub.Status.Ready = isNatsSubReady
+		err := r.Client.Status().Update(ctx, sub, &client.UpdateOptions{})
 		if err != nil {
 			return errors.Wrapf(err, "failed to update subscription status")
 		}
@@ -268,19 +294,19 @@ func (r Reconciler) syncSubscriptionStatus(ctx context.Context, sub *eventingv1a
 	return nil
 }
 
-func (r Reconciler) assertSinkValidity(sink string) error {
+func (r *Reconciler) assertSinkValidity(sink string) error {
 	_, err := url.ParseRequestURI(sink)
 	return err
 }
 
-func (r Reconciler) assertProtocolValidity(protocol string) error {
+func (r *Reconciler) assertProtocolValidity(protocol string) error {
 	if protocol != NATSProtocol {
 		return fmt.Errorf("invalid protocol: %s", protocol)
 	}
 	return nil
 }
 
-func (r Reconciler) syncInvalidSubscriptions(ctx context.Context) (ctrl.Result, error) {
+func (r *Reconciler) syncInvalidSubscriptions(ctx context.Context) (ctrl.Result, error) {
 	handler, _ := r.Backend.(*handlers.Nats)
 	namespacedName := handler.GetInvalidSubscriptions()
 	for _, v := range *namespacedName {
@@ -294,6 +320,9 @@ func (r Reconciler) syncInvalidSubscriptions(ctx context.Context) (ctrl.Result, 
 		// mark the subscription to be not ready, it will throw a new reconcile call
 		if err := r.syncSubscriptionStatus(ctx, sub, false, "invalid subscription"); err != nil {
 			r.Log.Error(err, "failed to save status for invalid subscription", "namespace", v.Namespace, "name", v.Name)
+			if k8serrors.IsConflict(err) {
+				return ctrl.Result{Requeue: true}, nil
+			}
 			return ctrl.Result{}, err
 		}
 	}

@@ -125,7 +125,7 @@ func (n *Nats) SyncSubscription(sub *eventingv1alpha1.Subscription, cleaner even
 // DeleteSubscription deletes all NATS subscriptions corresponding to a Kyma subscription
 func (n *Nats) DeleteSubscription(subscription *eventingv1alpha1.Subscription) error {
 	for key, sub := range n.subscriptions {
-		if strings.HasPrefix(key, createKeyPrefix(subscription)) {
+		if createKeyPrefix(subscription) == createKymaSubscriptionNamespacedName(key, sub).String() {
 			n.log.Info("connection status", "status", n.connection.Status())
 			// Unsubscribe call to Nats is async hence checking the status of the connection is important
 			if n.connection.Status() != nats.CONNECTED {
