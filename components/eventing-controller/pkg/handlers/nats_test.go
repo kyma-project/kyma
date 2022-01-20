@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"strings"
+	"sync"
 	"testing"
 	"time"
 
@@ -21,6 +22,10 @@ import (
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/eventtype"
 	eventingtesting "github.com/kyma-project/kyma/components/eventing-controller/testing"
+)
+
+var (
+	nextPort = &portGenerator{port: 61000}
 )
 
 func TestConvertMsgToCE(t *testing.T) {
@@ -87,8 +92,8 @@ func TestConvertMsgToCE(t *testing.T) {
 
 func TestSubscription(t *testing.T) {
 	g := NewWithT(t)
-	natsPort := 5222
-	subscriberPort := 8080
+	natsPort := nextPort.get()
+	subscriberPort := nextPort.get()
 	subscriberReceiveURL := fmt.Sprintf("http://127.0.0.1:%d/store", subscriberPort)
 	subscriberCheckURL := fmt.Sprintf("http://127.0.0.1:%d/check", subscriberPort)
 
@@ -222,7 +227,7 @@ func TestNatsSubAfterSync_NoChange(t *testing.T) {
 		ReconnectWait: time.Second,
 	}
 	defaultSubsConfig := env.DefaultSubscriptionConfig{MaxInFlightMessages: 5}
-	natsBackend := NewNats(natsConfig, defaultSubsConfig, nil, defaultLogger)
+	natsBackend := NewNats(natsConfig, defaultSubsConfig, defaultLogger)
 	if err := natsBackend.Initialize(env.Config{}); err != nil {
 		t.Fatalf("connect to NATS server failed: %v", err)
 	}
@@ -364,7 +369,7 @@ func TestNatsSubAfterSync_SinkChange(t *testing.T) {
 		ReconnectWait: time.Second,
 	}
 	defaultSubsConfig := env.DefaultSubscriptionConfig{MaxInFlightMessages: 5}
-	natsBackend := NewNats(natsConfig, defaultSubsConfig, nil, defaultLogger)
+	natsBackend := NewNats(natsConfig, defaultSubsConfig, defaultLogger)
 	if err := natsBackend.Initialize(env.Config{}); err != nil {
 		t.Fatalf("connect to NATS server failed: %v", err)
 	}
@@ -463,7 +468,7 @@ func TestNatsSubAfterSync_SinkChange(t *testing.T) {
 	}
 }
 
-// TestNatsSubAfterSync_SinkChange tests the SyncSubscription method
+// TestNatsSubAfterSync_FiltersChange tests the SyncSubscription method
 // when the filters are changed in subscription
 func TestNatsSubAfterSync_FiltersChange(t *testing.T) {
 	g := NewWithT(t)
@@ -503,7 +508,7 @@ func TestNatsSubAfterSync_FiltersChange(t *testing.T) {
 		ReconnectWait: time.Second,
 	}
 	defaultSubsConfig := env.DefaultSubscriptionConfig{MaxInFlightMessages: 5}
-	natsBackend := NewNats(natsConfig, defaultSubsConfig, nil, defaultLogger)
+	natsBackend := NewNats(natsConfig, defaultSubsConfig, defaultLogger)
 	if err := natsBackend.Initialize(env.Config{}); err != nil {
 		t.Fatalf("connect to NATS server failed: %v", err)
 	}
@@ -612,8 +617,8 @@ func TestNatsSubAfterSync_FiltersChange(t *testing.T) {
 
 func TestMultipleSubscriptionsToSameEvent(t *testing.T) {
 	g := NewWithT(t)
-	natsPort := 5222
-	subscriberPort := 8080
+	natsPort := nextPort.get()
+	subscriberPort := nextPort.get()
 	subscriberReceiveURL := fmt.Sprintf("http://127.0.0.1:%d/store", subscriberPort)
 	subscriberCheckURL := fmt.Sprintf("http://127.0.0.1:%d/check", subscriberPort)
 
@@ -714,8 +719,8 @@ func TestMultipleSubscriptionsToSameEvent(t *testing.T) {
 func TestSubscriptionWithDuplicateFilters(t *testing.T) {
 	g := NewWithT(t)
 
-	natsPort := 5223
-	subscriberPort := 8080
+	natsPort := nextPort.get()
+	subscriberPort := nextPort.get()
 	subscriberReceiveURL := fmt.Sprintf("http://127.0.0.1:%d/store", subscriberPort)
 	subscriberCheckURL := fmt.Sprintf("http://127.0.0.1:%d/check", subscriberPort)
 
@@ -789,8 +794,8 @@ func TestSubscriptionWithDuplicateFilters(t *testing.T) {
 func TestSubscriptionWithMaxInFlightChange(t *testing.T) {
 	g := NewWithT(t)
 
-	natsPort := 5223
-	subscriberPort := 8080
+	natsPort := nextPort.get()
+	subscriberPort := nextPort.get()
 	subscriberReceiveURL := fmt.Sprintf("http://127.0.0.1:%d/store", subscriberPort)
 
 	// Start NATS server
@@ -873,8 +878,8 @@ func TestSubscriptionWithMaxInFlightChange(t *testing.T) {
 func TestIsValidSubscription(t *testing.T) {
 	g := NewWithT(t)
 
-	natsPort := 5223
-	subscriberPort := 8080
+	natsPort := nextPort.get()
+	subscriberPort := nextPort.get()
 	subscriberReceiveURL := fmt.Sprintf("http://127.0.0.1:%d/store", subscriberPort)
 
 	// Start NATS server
@@ -970,8 +975,8 @@ func TestIsValidSubscription(t *testing.T) {
 
 func TestSubscriptionUsingCESDK(t *testing.T) {
 	g := NewWithT(t)
-	natsPort := 5222
-	subscriberPort := 8080
+	natsPort := nextPort.get()
+	subscriberPort := nextPort.get()
 	subscriberReceiveURL := fmt.Sprintf("http://127.0.0.1:%d/store", subscriberPort)
 	subscriberCheckURL := fmt.Sprintf("http://127.0.0.1:%d/check", subscriberPort)
 
@@ -1040,8 +1045,8 @@ func TestSubscriptionUsingCESDK(t *testing.T) {
 
 func TestRetryUsingCESDK(t *testing.T) {
 	g := NewWithT(t)
-	natsPort := 5222
-	subscriberPort := 8080
+	natsPort := nextPort.get()
+	subscriberPort := nextPort.get()
 	subscriberCheckDataURL := fmt.Sprintf("http://127.0.0.1:%d/check", subscriberPort)
 	subscriberCheckRetriesURL := fmt.Sprintf("http://127.0.0.1:%d/check_retries", subscriberPort)
 	subscriberServerErrorURL := fmt.Sprintf("http://127.0.0.1:%d/return500", subscriberPort)
@@ -1130,4 +1135,17 @@ func checkValidity(sub *nats.Subscription, toCheckIsValid bool, t *testing.T) er
 		retry.OnRetry(func(n uint, err error) { t.Logf("[%v] try failed: %s", n, err) }),
 	)
 	return err
+}
+
+type portGenerator struct {
+	lock sync.Mutex
+	port int
+}
+
+func (pg *portGenerator) get() int {
+	pg.lock.Lock()
+	defer pg.lock.Unlock()
+	p := pg.port
+	pg.port++
+	return p
 }
