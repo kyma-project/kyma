@@ -1,0 +1,8 @@
+---
+monitoring:
+  enabled: true
+  dashboards:
+    enabled: true
+  istioServiceMonitor:
+    enabled: true
+    scrapeInterval: ""
