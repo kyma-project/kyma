@@ -9,6 +9,7 @@ import (
 	"time"
 
 	cloudevents "github.com/cloudevents/sdk-go/v2"
+	"github.com/cloudevents/sdk-go/v2/event"
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 
@@ -41,16 +42,12 @@ func TestSendCloudEvent(t *testing.T) {
 	testingutils.SubscribeToEventOrFail(t, bc.Connection, testingutils.CloudEventType, validator)
 
 	// create cloudevent
-	ce := testingutils.StructuredCloudEventPayloadWithCleanEventType
-	event := cloudevents.NewEvent()
-	event.SetType(testingutils.CloudEventType)
-	err = json.Unmarshal([]byte(ce), &event)
+	ce := cloudevents.NewEvent()
+	ce.SetType(testingutils.CloudEventType)
+	err = json.Unmarshal([]byte(testingutils.StructuredCloudEventPayloadWithCleanEventType), &ce)
 	assert.Nil(t, err)
 
-	// send cloudevent
-	status, err := sender.Send(ctx, &event)
-	assert.Nil(t, err)
-	assert.Equal(t, status, http.StatusNoContent)
+	sendEventAndAssertStatus(ctx, t, sender, &ce, http.StatusNoContent)
 
 	// wait for subscriber to receive the messages
 	if err := testingutils.WaitForChannelOrTimeout(done, time.Second*3); err != nil {
@@ -83,16 +80,12 @@ func TestSendCloudEventWithReconnect(t *testing.T) {
 	testingutils.SubscribeToEventOrFail(t, bc.Connection, testingutils.CloudEventType, validator)
 
 	// create cloudevent
-	ce := testingutils.StructuredCloudEventPayloadWithCleanEventType
-	event := cloudevents.NewEvent()
-	event.SetType(testingutils.CloudEventType)
-	err = json.Unmarshal([]byte(ce), &event)
+	ce := cloudevents.NewEvent()
+	ce.SetType(testingutils.CloudEventType)
+	err = json.Unmarshal([]byte(testingutils.StructuredCloudEventPayloadWithCleanEventType), &ce)
 	assert.Nil(t, err)
 
-	// send cloudevent
-	status, err := sender.Send(ctx, &event)
-	assert.Nil(t, err)
-	assert.Equal(t, status, http.StatusNoContent)
+	sendEventAndAssertStatus(ctx, t, sender, &ce, http.StatusNoContent)
 
 	// wait for subscriber to receive the messages
 	if err := testingutils.WaitForChannelOrTimeout(done, time.Second*3); err != nil {
@@ -101,14 +94,13 @@ func TestSendCloudEventWithReconnect(t *testing.T) {
 
 	// close connection
 	bc.Connection.Close()
+	assert.True(t, bc.Connection.IsClosed())
 
-	// send the cloudevent again, the message is not delivered cause the connection was closed
-	status, err = sender.Send(ctx, &event)
-	assert.NotNil(t, err)
-	assert.Equal(t, status, http.StatusBadGateway)
+	sendEventAndAssertStatus(ctx, t, sender, &ce, http.StatusNoContent)
+}
 
-	// send the cloudevent again, the reconnection should work
-	status, err = sender.Send(ctx, &event)
+func sendEventAndAssertStatus(ctx context.Context, t *testing.T, sender *NatsMessageSender, event *event.Event, expectedStatus int) {
+	status, err := sender.Send(ctx, event)
 	assert.Nil(t, err)
-	assert.Equal(t, status, http.StatusNoContent)
+	assert.Equal(t, expectedStatus, status)
 }

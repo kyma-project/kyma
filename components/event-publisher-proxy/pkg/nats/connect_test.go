@@ -22,7 +22,7 @@ func TestConnectToNats(t *testing.T) {
 
 	bc.Connection.Close()
 
-	err = bc.Reconnect()
+	err = bc.Connect()
 	assert.Nil(t, err)
 	assert.NotNil(t, bc.Connection)
 	assert.Equal(t, bc.Connection.Status(), nats.CONNECTED)
