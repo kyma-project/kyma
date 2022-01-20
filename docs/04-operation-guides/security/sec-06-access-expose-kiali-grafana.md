@@ -50,21 +50,22 @@ By default, Kyma does not expose Kiali, Grafana, and Jaeger. However, you can st
   </details>
 </div>
 
->**NOTE:** kubectl port-forward does not return. You will have to cancel it with Ctrl+C if you want to stop port forwarding.
+>**NOTE:** kubectl port-forward does not return. To stop port forwarding, cancel it with Ctrl+C.
 
 2. To access the respective service's UI, open `http://localhost:20001` (for Kiali), `http://localhost:3000` (for Grafana), or `http://localhost:16686` (for Jaeger) in your browser.
 
 ## Expose Kiali, Grafana, and Jaeger securely
 
-Kyma manages an [OAuth2 Proxy](https://oauth2-proxy.github.io/oauth2-proxy/) instance to secure access to Kiali, Grafana and Jaeger. To make the services accessible, configure OAuth2 Proxy by creating a Kubernetes `Secret` with your identity provider credentials.
+Kyma manages an [OAuth2 Proxy](https://oauth2-proxy.github.io/oauth2-proxy/) instance to secure access to Kiali, Grafana, and Jaeger. To make the services accessible, configure OAuth2 Proxy by creating a Kubernetes `Secret` with your identity provider credentials.
 
 ### Steps
 
-The following example shows how to use an OpenID Connect (OIDC) compliant identity provider for Kiali, Grafana and Jaeger.
+The following example shows how to use an OpenID Connect (OIDC) compliant identity provider for Kiali, Grafana, and Jaeger.
 
 >**NOTE:** The OAuth2 Proxy supports a wide range of other well-known authentication services or OpenID Connect for custom solutions. To find instructions for other authentication services, see the [list of supported providers](https://oauth2-proxy.github.io/oauth2-proxy/docs/configuration/oauth_provider).
 
-1. Create a new OpenID Connect application for your identity provider. Set the callback URL to the `/oauth2/callback` path of your service, for example, `https://kiali.kyma.example.com/oauth2/callback`. Your identity provider will return a client ID, a client secret, and a token issuer URL.
+1. Create a new OpenID Connect application for your identity provider. Set the callback URL to the `/oauth2/callback` path of your service, changing the root domain to your cluster domain; for example, `https://kiali.kyma.example.com/oauth2/callback`.
+   Your identity provider will return a client ID, a client secret, and a token issuer URL.
 
 2. Create a `Secret` for the OAuth2 Proxy configuration [environment variables](https://oauth2-proxy.github.io/oauth2-proxy/docs/configuration/overview/#environment-variables).
 
