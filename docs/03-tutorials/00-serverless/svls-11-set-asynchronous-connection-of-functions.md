@@ -2,14 +2,13 @@
 title: Set asynchronous communication between Functions
 ---
 
-This tutorial demonstrates how to connect two Functions asynchronously. It is based on an [In-cluster Eventing example](https://github.com/kyma-project/examples/tree/main/incluster_eventing).
+This tutorial demonstrates how to connect two Functions asynchronously. It is based on the [in-cluster Eventing example](https://github.com/kyma-project/examples/tree/main/incluster_eventing).
 
-The example provides a very simple scenario of two Functions, where the first Function accepts the incoming traffic via HTTP, sanitises the payload and publishes the content as an in-cluster event via [Kyma Eventing](https://kyma-project.io/docs/kyma/latest/01-overview/main-areas/eventing/).
+The example provides a very simple scenario of asynchronous communication between two Functions. The first Function accepts the incoming traffic via HTTP, sanitizes the payload, and publishes the content as an in-cluster event via [Kyma Eventing](https://kyma-project.io/docs/kyma/latest/01-overview/main-areas/eventing/).
 The second Function is a message receiver. It subscribes to the given event type and stores the payload.
 
 ## Prerequisites
 
-Before you start, make sure you have these tools installed:
 
 - [Kyma CLI](https://github.com/kyma-project/cli)
 - Kyma installed locally or on a cluster
@@ -18,10 +17,10 @@ Before you start, make sure you have these tools installed:
 
 1. Export the `KUBECONFIG` variable:
    ```bash
-   export KUBECONGIG={KUBECONFIG_PATH}
+   export KUBECONFIG={KUBECONFIG_PATH}
    ```
 2. Create two folders in your project - `emitter` and `receiver`.
-3. Go to your `emitter` folder and run the `init` Kyma CLI command to initialise a scaffold for your first Function:
+3. Go to the `emitter` folder and run Kyma CLI `init` command to initialize a scaffold for your first Function:
 
    ```bash
    kyma init function
@@ -37,7 +36,7 @@ Before you start, make sure you have these tools installed:
   
   - `package.json` with the Function's dependencies
 
-4. In the `config.yaml` file configure an API Rule to expose your Function to the incoming traffic over HTTP. Enter the subdomain name as the `host` property:
+4. In the `config.yaml` file, configure an API Rule to expose your Function to the incoming traffic over HTTP. Provide the subdomain name in the `host` property:
 
     ```yaml
     apiRules:
@@ -51,7 +50,7 @@ Before you start, make sure you have these tools installed:
               - handler: allow
     ```
 
-5. Provide your Function logic in the `handler.js` file. In the following example you do not find an actual sanitisation logic, `sanitise` Function is just a placeholder:
+5. Provide your Function logic in the `handler.js` file. In the following example, there's no actual sanitization logic, `sanitise` Function is just a placeholder:
 
    ```js
    const { v4: uuidv4 } = require('uuid');
@@ -72,16 +71,16 @@ Before you start, make sure you have these tools installed:
        return data
    }
    ```
-   The `sap.kyma.custom.acme.payload.sanitised.v1` is an exemplary event type declared by the emitter Function when publishing events. You can choose a different one that better suits your use case. Keep in mind the constraints described on the [Event names](https://kyma-project.io/docs/kyma/latest/05-technical-reference/evnt-01-event-names) page. The receiver subscribes to the event type to consume the events.
+   >**NOTE:** The `sap.kyma.custom.acme.payload.sanitised.v1` is a sample event type declared by the emitter Function when publishing events. You can choose a different one that better suits your use case. Keep in mind the constraints described on the [Event names](https://kyma-project.io/docs/kyma/latest/05-technical-reference/evnt-01-event-names) page. The receiver subscribes to the event type to consume the events.
 
-   Please note that event object provides convinience functions to build and publish events. To send the event you need to build the Cloud Event. To learn more please visit the [Function's Specification](https://kyma-project.io/docs/kyma/latest/05-technical-reference/svls-08-function-specification#event-object-sdk) page. In addition, your `eventOut.source` key needs to point at `“kyma”` to use Kyma In-cluster Eventing.
+   >**NOTE:** The event object provides convenience functions to build and publish events. To send the event, build the Cloud Event. To learn more, read [Function's specification](https://kyma-project.io/docs/kyma/latest/05-technical-reference/svls-08-function-specification#event-object-sdk). In addition, your **eventOut.source** key must point to `“kyma”` to use Kyma in-cluster Eventing.
 
 6. Apply your emitter Function:
 
     ```bash
     kyma apply function
     ```
-   Having applied it, your Function is built and deployed in Kyma runtime. Kyma will expose it via API Rule. Any incoming payload would be processed by your emitter Function. It sends the sanitised content to whatever workload that subscribes to selected event type - in our case - receiver Function.
+   Your Function is now built and deployed in Kyma runtime. Kyma will expose it via API Rule. Any incoming payload will be processed by your emitter Function. It sends the sanitized content to whatever workload that subscribes to the selected event type - in our case - the receiver Function.
 
 7. Test the first Function. Send a paylod and see if your HTTP traffic is accepted:
 
