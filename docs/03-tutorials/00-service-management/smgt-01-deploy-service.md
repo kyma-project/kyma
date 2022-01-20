@@ -2,7 +2,7 @@
 title: Deploy an SAP BTP service in your Kyma cluster
 ---
 
-This tutorial describes how you can deploy an SAP BTP service in your Kyma cluster using the SAP BTP service operator.
+This tutorial describes how you can deploy a simple SAP BTP audit log service in your Kyma cluster using the SAP BTP service operator.
 
 ## Prerequisites
 
