@@ -1,5 +1,5 @@
 # Build the manager binary
-FROM eu.gcr.io/kyma-project/external/golang:1.17.6-alpine3.15 as builder
+FROM eu.gcr.io/kyma-project/external/golang:1.16.3-alpine as builder
 
 WORKDIR /workspace
 # Copy the Go Modules manifests

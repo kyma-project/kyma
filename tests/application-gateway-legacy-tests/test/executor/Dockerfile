@@ -1,4 +1,4 @@
-FROM golang:1.17.6-alpine3.15 as builder
+FROM golang:1.15-alpine as builder
 
 ENV SRC_DIR=/go/src/github.com/kyma-project/kyma/tests/application-gateway-legacy-tests
 
