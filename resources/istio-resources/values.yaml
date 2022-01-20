@@ -6,3 +6,9 @@ monitoring:
   istioServiceMonitor:
     enabled: true
     scrapeInterval: ""
+
+global:
+  istio:
+    gateway:
+      name: kyma-gateway
+      namespace: kyma-system
