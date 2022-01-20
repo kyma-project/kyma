@@ -2,11 +2,9 @@
 {{- $serviceName := include "prometheus-pushgateway.fullname" . }}
 {{- $servicePort := .Values.service.port -}}
 {{- $ingressPath := .Values.ingress.path -}}
-{{- if semverCompare ">=1.14.0-0" .Capabilities.KubeVersion.GitVersion }}
-apiVersion: networking.k8s.io/v1beta1
-{{- else }}
-apiVersion: extensions/v1beta1
-{{- end }}
+{{- $ingressClassName := .Values.ingress.className -}}
+{{- $ingressPathType := .Values.ingress.pathType -}}
+apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
 {{- if .Values.ingress.annotations }}
@@ -14,18 +12,22 @@ metadata:
 {{ toYaml .Values.ingress.annotations | indent 4}}
 {{- end }}
   labels:
-{{ template "prometheus-pushgateway.defaultLabels" merge (dict "extraLabels" dict) .}}
+{{ template "prometheus-pushgateway.defaultLabels" merge (dict "extraLabels" dict) .  }}
   name: {{ template "prometheus-pushgateway.fullname" . }}
 spec:
+  ingressClassName: {{ $ingressClassName }}
   rules:
     {{- range $host := .Values.ingress.hosts }}
     - host: {{ $host }}
       http:
         paths:
           - path: {{ $ingressPath }}
+            pathType: {{ $ingressPathType }}
             backend:
-              serviceName: {{ $serviceName }}
-              servicePort: {{ $servicePort }}
+              service:
+                name: {{ $serviceName }}
+                port:
+                  number: {{ $servicePort }}
     {{- end -}}
 {{- if .Values.ingress.tls }}
   tls:

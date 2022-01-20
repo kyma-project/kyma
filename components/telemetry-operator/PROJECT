@@ -10,7 +10,7 @@ resources:
   controller: true
   domain: kyma-project.io
   group: telemetry
-  kind: LoggingConfiguration
+  kind: LogPipeline
   path: github.com/kyma-project/kyma/components/telemetry-operator/api/v1alpha1
   version: v1alpha1
 version: "3"

@@ -24,6 +24,10 @@ jobs:
         shell: bash
         run: |
           NEXT_RELEASE=$(cat "VERSION")
+          if [[ $NEXT_RELEASE == main ]]; then
+              echo "You can't create a release with the version set to 'main'"
+              exit 1
+          fi
           RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" https://api.github.com/repos/${{ github.event.repository.owner.login }}/${{ github.event.repository.name }}/releases/tags/"${NEXT_RELEASE}")
           if [[ $RESPONSE != 404* ]]; then
               echo "The ${NEXT_RELEASE} is already published on github. Stopping."

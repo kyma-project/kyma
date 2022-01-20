@@ -116,7 +116,7 @@ As we haven't sent our event yet, we expect to get an empty object `{}` in respo
     > **NOTE:** Alternatively, from the left navigation go to **Discovery and Network** > **API Rules**, click on **Create API Rule +**, and continue with step 3, selecting the appropriate **Service** from the dropdown menu.
 
 To check that the Function is properly exposed, call it. 
-In your Function's **Configuration** tab, click on the APIRule's **Host**. This opens the Function's external address as a new page. As we haven't sent our event yet, we expect the page to return an empty object `{}`.
+In your Function's **Configuration** tab, click on the API Rule's **Host**. This opens the Function's external address as a new page. As we haven't sent our event yet, we expect the page to return an empty object `{}`.
 
   </details>
 </div>
@@ -167,17 +167,17 @@ The operation was successful if the returned status says `true`.
   Kyma Dashboard
   </summary>
 
-1. Using the left navigation, go back to **Workloads** > **Functions**.
-2. Select your `lastorder` Function and navigate to the **Configuration** tab.
-3. Click on **Add Event Subscription+**.
-4. Provide the following parameters:
+1. Go back to your `lastorder` Function's view in Kyma Dashboard.
+2. In the **Configuration** tab, click on **Create Subscription+**.
+3. Provide the following parameters:
+    - **Subscription name**: `lastorder-sub`
     - **Application name**: `myapp`
     - **Event name**: `order.received`
     - **Event version**: `v1`
-    **Event type** is generated automatically; in this example: `myapp.order.received.v1`. 
+
+    - **Event type** is generated automatically. For this example, it's `sap.kyma.custom.myapp.order.received.v1`. 
     
-5. Click **Add**. 
-   The name of the event Subscription is generated automatically and follows the `{FUNCTION_NAME}-{RANDOM_SUFFIX}` pattern.
+4. Click **Create**. 
 
   </details>
 </div>
@@ -225,5 +225,5 @@ date: Thu, 16 Sep 2021 13:05:03 GMT
 x-envoy-upstream-service-time: 5
 server: istio-envoy
 
-{"orderCode":"3211214"}%
+{"orderCode":"3211213"}%
 ```

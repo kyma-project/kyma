@@ -150,6 +150,12 @@ func HaveSubscriptionReady() gomegatypes.GomegaMatcher {
 	}, BeTrue())
 }
 
+func HaveSubscriptionNotReady() gomegatypes.GomegaMatcher {
+	return WithTransform(func(s *eventingv1alpha1.Subscription) bool {
+		return s.Status.Ready
+	}, BeFalse())
+}
+
 func HaveCondition(condition eventingv1alpha1.Condition) gomegatypes.GomegaMatcher {
 	return WithTransform(func(s *eventingv1alpha1.Subscription) []eventingv1alpha1.Condition { return s.Status.Conditions }, ContainElement(MatchFields(IgnoreExtras|IgnoreMissing, Fields{
 		"Type":    Equal(condition.Type),
@@ -157,6 +163,14 @@ func HaveCondition(condition eventingv1alpha1.Condition) gomegatypes.GomegaMatch
 		"Message": Equal(condition.Message),
 		"Status":  Equal(condition.Status),
 	})))
+}
+
+func HaveCleanEventTypes(cleanEventTypes []string) gomegatypes.GomegaMatcher {
+	return WithTransform(
+		func(s *eventingv1alpha1.Subscription) []string {
+			return s.Status.CleanEventTypes
+		},
+		Equal(cleanEventTypes))
 }
 
 func HaveEvent(event corev1.Event) gomegatypes.GomegaMatcher {

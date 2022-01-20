@@ -250,9 +250,7 @@ async function k8sDelete(listOfSpecs, namespace) {
         await deleteAllK8sResources(path);
       }
     } catch (err) {
-      if (err.response.statusCode != 404) {
-        throw err;
-      }
+      ignore404(err)
     }
   }
 }
@@ -488,6 +486,23 @@ function waitForSubscription(name, namespace = "default", timeout = 180000) {
     },
     timeout,
     `Waiting for ${name} subscription timeout (${timeout} ms)`
+  );
+}
+
+function waitForClusterServiceBroker(name, timeout = 90000) {
+  return waitForK8sObject(
+      `/apis/servicecatalog.k8s.io/v1beta1/clusterservicebrokers`,
+      {},
+      (_type, _apiObj, watchObj) => {
+        return (
+            watchObj.object.metadata.name.includes(name) &&
+            watchObj.object.status.conditions.some(
+                (c) => c.type == "Ready" && c.status == "True"
+            )
+        );
+      },
+      timeout,
+      `Waiting for ${name} cluster service broker (${timeout} ms)`
   );
 }
 
@@ -817,7 +832,7 @@ async function deleteNamespaces(namespaces, wait = true) {
       }
       return namespaces.length == 0 || !wait;
     },
-    120 * 1000,
+    10 * 60 * 1000,
     "Timeout for deleting namespaces: " + namespaces
   );
 
@@ -920,9 +935,15 @@ async function getSecretData(name, namespace) {
 }
 
 function ignore404(e) {
-  if (e.statusCode != 404) {
-    throw e;
+  if (
+      (e.statusCode && e.statusCode == 404) ||
+      (e.response && e.response.statusCode && e.response.statusCode == 404)
+  ){
+    debug("Warning: Ignoring NotFound error")
+    return
   }
+
+  throw e
 }
 
 // NOTE: this no longer works, it relies on kube-api sending `selfLink` but the field has been deprecated
@@ -946,14 +967,15 @@ async function deleteAllK8sResources(
       const body = JSON.parse(response.body);
       if (body.items && body.items.length) {
         for (let o of body.items) {
-          deleteK8sResource(o, keepFinalizer);
+          await deleteK8sResource(o, path, keepFinalizer);
         }
       } else if (!body.items) {
-        deleteK8sResource(body, keepFinalizer);
+        await deleteK8sResource(body, path, keepFinalizer);
       }
     }
   } catch (e) {
     debug("Error during delete ", path, String(e).substring(0, 1000));
+    debug(e);
   }
 }
 
@@ -961,8 +983,7 @@ async function deleteK8sPod(o) {
   return await k8sCoreV1Api.deleteNamespacedPod(o.metadata.name, o.metadata.namespace);
 }
 
-// NOTE: this no longer works, it relies on kube-api sending `selfLink` but the field has been deprecated
-async function deleteK8sResource(o, keepFinalizer = false) {
+async function deleteK8sResource(o, path, keepFinalizer = false) {
   if (o.metadata.finalizers && o.metadata.finalizers.length && !keepFinalizer) {
     const options = {
       headers: { "Content-type": "application/merge-patch+json" },
@@ -979,18 +1000,31 @@ async function deleteK8sResource(o, keepFinalizer = false) {
     };
 
     debug("Removing finalizers from", obj);
-
-    await k8sDynamicApi
-      .patch(obj, undefined, undefined, undefined, undefined, options)
-      .catch(ignore404);
+    try {
+      await k8sDynamicApi.patch(obj, undefined, undefined, undefined, undefined, options)
+    }
+    catch (err) {
+      ignore404(err)
+    }
   }
 
-  await k8sDynamicApi
-    .requestPromise({
-      url: k8sDynamicApi.basePath + o.metadata.selfLink,
+  try {
+    let objectUrl = `${k8sDynamicApi.basePath + path}/${o.metadata.name}`
+    if (o.metadata.selfLink) {
+      debug("using selfLink for deleting object")
+      objectUrl = k8sDynamicApi.basePath + o.metadata.selfLink
+    }
+
+    debug("Deleting resource: ", objectUrl)
+    await k8sDynamicApi.requestPromise({
+      url: objectUrl,
       method: "DELETE",
     })
-    .catch(ignore404);
+  }
+  catch (err) {
+    ignore404(err)
+  }
+
   debug(
     "Deleted resource:",
     o.metadata.name,
@@ -1634,6 +1668,7 @@ module.exports = {
   getShootNameFromK8sServerUrl,
   retryPromise,
   convertAxiosError,
+  ignore404,
   removeServiceInstanceFinalizer,
   removeServiceBindingFinalizer,
   sleep,
@@ -1647,6 +1682,7 @@ module.exports = {
   k8sDelete,
   waitForK8sObject,
   waitForClusterAddonsConfiguration,
+  waitForClusterServiceBroker,
   waitForServiceClass,
   waitForServicePlanByServiceClass,
   waitForServiceInstance,

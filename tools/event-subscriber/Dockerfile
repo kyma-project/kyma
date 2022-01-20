@@ -1,8 +1,8 @@
-FROM golang:1.13 as builder
+FROM eu.gcr.io/kyma-project/external/golang:1.17.5-alpine3.15 as builder
 
 ENV GO111MODULE=on
 
-RUN apt-get install -y ca-certificates
+RUN apk add --no-cache ca-certificates
 
 ARG DOCK_PKG_DIR=/event-subscriber
 

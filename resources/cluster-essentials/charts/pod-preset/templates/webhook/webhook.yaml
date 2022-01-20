@@ -16,7 +16,6 @@ apiVersion: admissionregistration.k8s.io/v1beta1
 kind: MutatingWebhookConfiguration
 metadata:
   name: {{ template "pod-preset.fullname" . }}-webhook
-  namespace: "{{ .Release.Namespace }}"
 webhooks:
 - clientConfig:
     caBundle: {{ $encodedCaCert }}

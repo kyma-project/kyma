@@ -3,8 +3,8 @@
 imagePullSecrets:
   {{- toYaml . | nindent 2 }}
 {{- end }}
-{{- if .Values.priorityClassName }}
-priorityClassName: {{ .Values.priorityClassName }}
+{{- if or .Values.priorityClassName .Values.global.highPriorityClassName -}}
+priorityClassName: {{ coalesce .Values.priorityClassName .Values.global.highPriorityClassName }}
 {{- end }}
 serviceAccountName: {{ include "fluent-bit.serviceAccountName" . }}
 securityContext:
@@ -86,6 +86,11 @@ containers:
     {{- end }}
     {{- if eq .Values.kind "DaemonSet" }}
       {{- toYaml .Values.daemonSetVolumeMounts | nindent 6 }}
+      {{- if .Values.volumes.mountMachineIdFile }}
+      - name: etcmachineid
+        mountPath: /etc/machine-id
+        readOnly: true
+      {{- end }}
     {{- end }}
     {{- if .Values.extraVolumeMounts }}
       {{- toYaml .Values.extraVolumeMounts | nindent 6 }}
@@ -103,6 +108,13 @@ volumes:
   - name: dynamic-config
     configMap:
       name: {{ .Values.dynamicConfigMap }}
+      optional: true
+  {{- end }}
+    {{- if .Values.dynamicParsersConfigMap }}
+  - name: dynamic-parsers-config
+    configMap:
+      name: {{ .Values.dynamicParsersConfigMap }}
+      optional: true
   {{- end }}
 {{- if gt (len .Values.luaScripts) 0 }}
   - name: luascripts
@@ -111,6 +123,12 @@ volumes:
 {{- end }}
 {{- if eq .Values.kind "DaemonSet" }}
   {{- toYaml .Values.daemonSetVolumes | nindent 2 }}
+  {{- if .Values.volumes.mountMachineIdFile }}
+  - name: etcmachineid
+    hostPath:
+      path: /etc/machine-id
+      type: File
+  {{- end }}
 {{- end }}
 {{- if .Values.extraVolumes }}
   {{- toYaml .Values.extraVolumes | nindent 2 }}

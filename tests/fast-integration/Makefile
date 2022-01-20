@@ -2,7 +2,6 @@
 ci:
 	npm install
 	npm test
-	npm run test-monitoring
 
 .PHONY: ci-compass
 ci-compass:
@@ -60,3 +59,13 @@ ci-application-connectivity-2-compass:
 ci-test-eventing:
 	npm ci
 	npm run test-eventing
+
+.PHONY: ci-test-eventing-provision-skr
+ci-test-eventing-provision-skr:
+	npm ci
+	npm run test-eventing-provision-skr
+
+.PHONY: ci-test-eventing-deprovision-skr
+ci-test-eventing-deprovision-skr:
+	npm ci
+	npm run test-eventing-deprovision-skr
