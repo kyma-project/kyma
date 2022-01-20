@@ -93,6 +93,12 @@ func (r *Reconciler) Reconcile(ctx context.Context, request reconcile.Request) (
 
 	log.Infof("Processing Compass Connection, current status: %s", instance.Status)
 
+	// we can have 3 cases of communication with Compass here:
+	// A - reconnect if connection is failed
+	// B - maintain connection if needed
+	// C - synchronize config/applications with Compass Director API.
+	// Path B includes path C.
+
 	//we skip for in both cases for initialisation and maintenance of connection
 	//If minimalConfigSyncTime did not pass from connection.Status.ConnectionStatus.LastSync, skip connection
 	if !shouldReconnect(instance, r.minimalConfigSyncTime) {
@@ -104,7 +110,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, request reconcile.Request) (
 	if instance.ShouldAttemptReconnect() {
 		log.Infof("Attempting to initialize connection with Compass...")
 
-		//Control path II in controller - Initialize connection with Compass Connector API
+		//Control path A in controller - Initialize connection with Compass Connector API
 		instance, err := r.supervisor.InitializeCompassConnection()
 		if err != nil {
 			log.Errorf("Failed to initialize Compass Connection: %s", err.Error())
@@ -114,7 +120,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, request reconcile.Request) (
 		log.Infof("Attempt to initialize Compass Connection ended with status: %s", instance.Status)
 		return reconcile.Result{}, nil
 	}
-	// Control path II in controller - Maintain connection with Compass Connector API
+	// Control path B in controller - Maintain connection with Compass Connector API
 	log.Infof("Attempting to maintain connection with Compass...")
 	err = r.supervisor.MaintainCompassConnection(instance)
 
@@ -131,7 +137,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, request reconcile.Request) (
 
 	log.Info("Trying to connect to Compass and apply Runtime configuration...")
 
-	// Control path III in Controller: Synchronize config/applications with Compass Director API
+	// Control path C in Controller: Synchronize config/applications with Compass Director API
 	synchronized, err := r.supervisor.SynchronizeWithCompass(instance)
 	if err != nil {
 		log.Errorf("Failed to synchronize with Compass: %s", err.Error())
