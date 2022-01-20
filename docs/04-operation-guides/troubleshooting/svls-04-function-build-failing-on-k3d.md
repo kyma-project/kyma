@@ -47,9 +47,3 @@ Use the file to override default configuration while deploying kyma on your k3d 
 ```bash
 kyma deploy --values-file my-overrides.yaml
 ```
-
-When used, the build would succeed, but kaniko would assume that it is run outside a container and would produce this log:
-```
-$ k logs myfun-build-gmzhz-9rnmm
-time="2022-01-14T08:25:16Z" level=warning msg="kaniko is being run outside of a container. This can have dangerous effects on your system"
-```
