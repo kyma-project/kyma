@@ -39,7 +39,7 @@ global:
   images:
     application_broker:
       name: "application-broker"
-      version: "676c2f76"
+      version: "c8a2ae16"
     application_connectivity_certs_setup_job:
       name: "application-connectivity-certs-setup-job"
       version: "8e912bbc"
