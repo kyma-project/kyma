@@ -53,7 +53,7 @@ This table lists all the possible parameters of a given resource together with t
 | **spec.filter.filters.eventSource.value** | Yes | Must be set to `""` for the NATS backend. |
 | **spec.filter.filters.eventType.property** | Yes | Must be set to `type`. |
 | **spec.filter.filters.eventType.type** | No | Must be set to `exact`. |
-| **spec.filter.filters.eventType.value** | Yes | Name of the event being subscribed to, for example: `sap.kyma.custom.commerce.order.created.v1`. The name should not contain any non-alphanumeric characters. Read [Event names](../evnt-01-event-names.md#event-name-cleanup) for more information. |
+| **spec.filter.filters.eventType.value** | Yes | Name of the event being subscribed to, for example: `sap.kyma.custom.commerce.order.created.v1`. The name cannot contain any non-alphanumeric characters. Read [Event names](../evnt-01-event-names.md#event-name-cleanup) for more information. |
 | **spec.protocol** | Yes | Must be set to `""`. |
 | **spec.protocolsettings** | Yes | Defines the Cloud Event protocol setting specification implementation. Must be set to `{}`. |
 | **spec.sink** | Yes | Specifies the HTTP endpoint where matching events should be sent to, for example: `test.test.svc.cluster.local`.  |
