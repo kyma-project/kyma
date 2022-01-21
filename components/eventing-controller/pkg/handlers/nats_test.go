@@ -551,7 +551,7 @@ func TestNatsSubAfterSync_FiltersChange(t *testing.T) {
 	// so that we can later verify if the nats subscriptions are the same (not re-created by Sync)
 	msgLimit, bytesLimit := 2048, 2048
 	g.Expect(len(natsBackend.subscriptions)).To(Equal(defaultSubsConfig.MaxInFlightMessages))
-	for key, _ := range natsBackend.subscriptions {
+	for key := range natsBackend.subscriptions {
 		// set metadata on nats subscription
 		if err := natsBackend.subscriptions[key].SetPendingLimits(msgLimit, bytesLimit); err != nil {
 			t.Fatalf("set pending limits for nats subscription failed: %v", err)
@@ -682,7 +682,7 @@ func TestNatsSubAfterSync_FilterAdded(t *testing.T) {
 	// so that we can later verify if the nats subscriptions are the same (not re-created by Sync)
 	msgLimit, bytesLimit := 2048, 2048
 	g.Expect(len(natsBackend.subscriptions)).To(Equal(defaultSubsConfig.MaxInFlightMessages))
-	for key, _ := range natsBackend.subscriptions {
+	for key := range natsBackend.subscriptions {
 		// set metadata on nats subscription
 		if err := natsBackend.subscriptions[key].SetPendingLimits(msgLimit, bytesLimit); err != nil {
 			t.Fatalf("set pending limits for nats subscription failed: %v", err)
@@ -834,7 +834,7 @@ func TestNatsSubAfterSync_FilterRemoved(t *testing.T) {
 	// set metadata on NATS subscriptions
 	// so that we can later verify if the nats subscriptions are the same (not re-created by Sync)
 	msgLimit, bytesLimit := 2048, 2048
-	for key, _ := range natsBackend.subscriptions {
+	for key := range natsBackend.subscriptions {
 		// set metadata on nats subscription
 		if err := natsBackend.subscriptions[key].SetPendingLimits(msgLimit, bytesLimit); err != nil {
 			t.Fatalf("set pending limits for nats subscription failed: %v", err)
