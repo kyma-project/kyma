@@ -98,8 +98,9 @@ async function assertMetricsExist() {
     'container',
   ]);
   await assertTimeSeriesExist(
-      'kube_pod_container_resource_limits_memory_bytes',
+      'kube_pod_container_resource_limits',
       ['pod', 'container'],
+      'memory',
   );
   await assertTimeSeriesExist('container_cpu_usage_seconds_total', [
     'container',
@@ -208,11 +209,19 @@ async function buildScrapePoolSet() {
   return scrapePools;
 }
 
-async function assertTimeSeriesExist(metric, labels) {
+async function assertTimeSeriesExist(metric, labels, resource='') {
   const resultlessQueries = [];
+  let result = '';
+  let query = '';
+
   for (const label of labels) {
-    const query = `topk(10,${metric}{${label}=~\"..*\"})`;
-    const result = await queryPrometheus(query);
+    if (resource === '') {
+      query = `topk(10,${metric}{${label}=~\"..*\"})`;
+      result = await queryPrometheus(query);
+    } else {
+      query = `topk(10,${metric}{${label}=~\"..*\", resource=\"${resource}\"})`;
+      result = await queryPrometheus(query);
+    }
 
     if (result.length == 0) {
       resultlessQueries.push(query);
