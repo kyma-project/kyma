@@ -4,10 +4,10 @@ title: Set asynchronous communication between Functions
 
 This tutorial demonstrates how to connect two Functions asynchronously. It is based on the [in-cluster Eventing example](https://github.com/kyma-project/examples/tree/main/incluster_eventing).
 
-The example provides a very simple scenario of asynchronous communication between two Functions. The first Function accepts the incoming traffic via HTTP, sanitizes the payload, and publishes the content as an in-cluster event using [Kyma Eventing](https://kyma-project.io/docs/kyma/latest/01-overview/main-areas/eventing/).
+The example provides a very simple scenario of asynchronous communication between two Functions. The first Function accepts the incoming traffic via HTTP, sanitizes the payload, and publishes the content as an in-cluster event using [Kyma Eventing](../../01-overview/main-areas/eventing).
 The second Function is a message receiver. It subscribes to the given event type and stores the payload.
 
-It shows only one possible use case. You can find plenty of use cases yourself on how to orchestrate your application logic into specialised Functions and benefit from decoupled, re-usable components and event-driven architecture.
+This tutorial shows only one possible use case. There are many more use cases on how to orchestrate your application logic into specialized Functions and benefit from decoupled, re-usable components and event-driven architecture.
 
 ## Prerequisites
 
@@ -21,11 +21,11 @@ It shows only one possible use case. You can find plenty of use cases yourself o
    ```bash
    export KUBECONFIG={KUBECONFIG_PATH}
    ```
-2. Create two folders in your project - `emitter` and `receiver`.
+2. Create the `emitter` and `receiver` folders in your project.
 
 ### Create the emitter Function
 
-1. Go to the `emitter` folder and run Kyma CLI `init` command to initialize a scaffold for your first Function:
+1. Go to the `emitter` folder and run Kyma CLI `init` command to initialize the scaffold for your first Function:
 
    ```bash
    kyma init function
@@ -77,9 +77,9 @@ It shows only one possible use case. You can find plenty of use cases yourself o
        return data
    }
    ```
-   >**NOTE:** The `sap.kyma.custom.acme.payload.sanitised.v1` is a sample event type declared by the emitter Function when publishing events. You can choose a different one that better suits your use case. Keep in mind the constraints described on the [Event names](https://kyma-project.io/docs/kyma/latest/05-technical-reference/evnt-01-event-names) page. The receiver subscribes to the event type to consume the events.
+   >**NOTE:** The `sap.kyma.custom.acme.payload.sanitised.v1` is a sample event type declared by the emitter Function when publishing events. You can choose a different one that better suits your use case. Keep in mind the constraints described on the [Event names](../../05-technical-reference/evnt-01-event-names.md) page. The receiver subscribes to the event type to consume the events.
 
-   >**NOTE:** The event object provides convenience functions to build and publish events. To send the event, build the Cloud Event. To learn more, read [Function's specification](https://kyma-project.io/docs/kyma/latest/05-technical-reference/svls-08-function-specification#event-object-sdk). In addition, your **eventOut.source** key must point to `“kyma”` to use Kyma in-cluster Eventing.
+   >**NOTE:** The event object provides convenience functions to build and publish events. To send the event, build the Cloud Event. To learn more, read [Function's specification](../../05-technical-reference/svls-08-function-specification#event-object-sdk). In addition, your **eventOut.source** key must point to `“kyma”` to use Kyma in-cluster Eventing.
 
 4. Apply your emitter Function:
 
@@ -99,7 +99,7 @@ It shows only one possible use case. You can find plenty of use cases yourself o
       ```
 ### Create the receiver Function
 
-1. Go to your `receiver` folder and run Kyma CLI `init` Kyma CLI command to initialize the scaffold for your second Function:
+1. Go to your `receiver` folder and run Kyma CLI `init` command to initialize the scaffold for your second Function:
    ```bash
    kyma init function
    ```
@@ -131,6 +131,6 @@ It shows only one possible use case. You can find plenty of use cases yourself o
      ```
    The Function is configured, built, and deployed in Kyma runtime. The Subscription becomes active and all events with the selected type are processed by the Function.  
 
-5.  Test the whole setup  
-Send a payload to the first Function (for example using the above-mentioned POST request). As the Functions are joined by the In-cluster Eventing, the payload is processed in sequence by both of your Functions.
-You can see (for example in the Function logs) that both, sanitization logic (using the first Function) and the storing logic (using the second Function) are executed.
+### Test the whole setup  
+Send a payload to the first Function. For example, use the POST request mentioned above. As the Functions are joined by the in-cluster Eventing, the payload is processed in sequence by both of your Functions.
+In the Function's logs, you can see that both sanitization logic (using the first Function) and the storing logic (using the second Function) are executed.
