@@ -1,11 +1,11 @@
 const {
-    commerceMockTests,
-    gettingStartedGuideTests,
-    monitoringTests
+  commerceMockTests,
+  gettingStartedGuideTests,
+  monitoringTests,
 } = require('./');
 
-describe("Executing Standard Testsuite:", function() {
-    commerceMockTests();
-    gettingStartedGuideTests();
-    monitoringTests();
+describe('Executing Standard Testsuite:', function() {
+  commerceMockTests();
+  gettingStartedGuideTests();
+  monitoringTests();
 });
