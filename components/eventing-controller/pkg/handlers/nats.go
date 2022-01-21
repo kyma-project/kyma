@@ -5,8 +5,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"reflect"
 	"strconv"
 	"strings"
+	"sync"
 
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/tracing"
 	"github.com/kyma-project/kyma/components/eventing-controller/utils"
@@ -36,6 +38,7 @@ type Nats struct {
 	client            cev2.Client
 	connection        *nats.Conn
 	subscriptions     map[string]*nats.Subscription
+	sinks             sync.Map
 }
 
 func NewNats(config env.NatsConfig, subsConfig env.DefaultSubscriptionConfig, logger *logger.Logger) *Nats {
@@ -102,16 +105,47 @@ func (n *Nats) SyncSubscription(sub *eventingv1alpha1.Subscription, cleaner even
 	// Format logger
 	log := utils.LoggerWithSubscription(n.namedLogger(), sub)
 
-	subsConfig := eventingv1alpha1.MergeSubsConfigs(sub.Spec.Config, &n.defaultSubsConfig)
-	// Create subscriptions in NATS
+	subscriptionConfig := eventingv1alpha1.MergeSubsConfigs(sub.Spec.Config, &n.defaultSubsConfig)
+
+	var cleanSubjects []string
 	for _, filter := range filters {
-		subject, err := createSubject(filter, cleaner)
+		subject, err := getCleanSubject(filter, cleaner)
 		if err != nil {
-			log.Errorw("create NATS subject failed", "error", err)
+			log.Errorw("get clean subject failed", "error", err)
 			return false, err
 		}
+		cleanSubjects = append(cleanSubjects, subject)
+	}
 
-		callback := n.getCallback(sub.Spec.Sink)
+	// if subscription filters are modified, then delete subscriptions from NATS
+	// so that new subscriptions are created accordingly
+	if len(sub.Status.CleanEventTypes) != len(cleanSubjects) ||
+		!reflect.DeepEqual(sub.Status.CleanEventTypes, cleanSubjects) {
+
+		if len(sub.Status.CleanEventTypes) != 0 {
+			// Only print log if it is not a new subscription
+			log.Infow(
+				"deleting subscriptions on NATS if exists because subscription filters are modified",
+				"oldSubjects", sub.Status.CleanEventTypes,
+				"newSubjects", cleanSubjects,
+			)
+		}
+
+		// deleting subscriptions from NATS
+		if err := n.DeleteSubscription(sub); err != nil {
+			log.Errorw("delete subscriptions on nats failed", "error", err)
+			return false, err
+		}
+	}
+
+	// add/update sink info in map for callbacks
+	subKeyPrefix := createKeyPrefix(sub)
+	if sinkURL, ok := n.sinks.Load(subKeyPrefix); !ok || sinkURL != sub.Spec.Sink {
+		n.sinks.Store(subKeyPrefix, sub.Spec.Sink)
+	}
+
+	for _, subject := range cleanSubjects {
+		callback := n.getCallback(subKeyPrefix)
 
 		if n.connection.Status() != nats.CONNECTED {
 			if err := n.Initialize(env.Config{}); err != nil {
@@ -120,51 +154,63 @@ func (n *Nats) SyncSubscription(sub *eventingv1alpha1.Subscription, cleaner even
 			}
 		}
 
-		for i := 0; i < subsConfig.MaxInFlightMessages; i++ {
+		for i := 0; i < subscriptionConfig.MaxInFlightMessages; i++ {
 			// queueGroupName must be unique for each subscription and subject
 			queueGroupName := createKeyPrefix(sub) + string(types.Separator) + subject
-			natsSub, subscribeErr := n.connection.QueueSubscribe(subject, queueGroupName, callback)
-			if subscribeErr != nil {
-				log.Errorw("create NATS subscription failed", "error", err)
-				return false, subscribeErr
+			natsSubKey := createKey(sub, subject, i)
+
+			// check if the subscription already exists, and it is valid.
+			if existingNatsSub, ok := n.subscriptions[natsSubKey]; ok {
+				if existingNatsSub.Subject != subject {
+					if err := n.deleteSubFromNats(existingNatsSub, natsSubKey, log); err != nil {
+						return false, err
+					}
+				} else if existingNatsSub.IsValid() {
+					log.Debugw("skipping creating subscription on NATS because it already exists", "subject", subject)
+					continue
+				}
 			}
-			n.subscriptions[createKey(sub, subject, i)] = natsSub
+
+			// otherwise, create subscription on nats
+			natsSub, err := n.connection.QueueSubscribe(subject, queueGroupName, callback)
+			if err != nil {
+				log.Errorw("create NATS subscription failed", "error", err)
+				return false, err
+			}
+
+			// save created nats subscription in storage
+			n.subscriptions[natsSubKey] = natsSub
 		}
 	}
-	sub.Status.Config = subsConfig
+
+	// Setting the clean event types
+	sub.Status.CleanEventTypes = cleanSubjects
+	sub.Status.Config = subscriptionConfig
 
 	return false, nil
 }
 
 // DeleteSubscription deletes all NATS subscriptions corresponding to a Kyma subscription
-func (n *Nats) DeleteSubscription(subscription *eventingv1alpha1.Subscription) error {
-	for key, sub := range n.subscriptions {
+func (n *Nats) DeleteSubscription(sub *eventingv1alpha1.Subscription) error {
+	subKeyPrefix := createKeyPrefix(sub)
+	for key, s := range n.subscriptions {
 		// Format logger
 		log := n.namedLogger().With(
-			"kind", subscription.GetObjectKind().GroupVersionKind().Kind,
-			"name", subscription.GetName(),
-			"namespace", subscription.GetNamespace(),
-			"version", subscription.GetGeneration(),
+			"kind", sub.GetObjectKind().GroupVersionKind().Kind,
+			"name", sub.GetName(),
+			"namespace", sub.GetNamespace(),
+			"version", sub.GetGeneration(),
 			"key", key,
-			"subject", sub.Subject,
+			"subject", s.Subject,
 		)
 
-		if strings.HasPrefix(key, createKeyPrefix(subscription)) {
-			// Unsubscribe call to NATS is async hence checking the status of the connection is important
-			if n.connection.Status() != nats.CONNECTED {
-				if err := n.Initialize(env.Config{}); err != nil {
-					log.Errorw("connect to NATS failed", "status", n.connection.Status(), "error", err)
-					return errors.Wrapf(err, "connect to NATS failed")
-				}
+		if strings.HasPrefix(key, subKeyPrefix) {
+			if err := n.deleteSubFromNats(s, key, log); err != nil {
+				return err
 			}
-			if sub.IsValid() {
-				if err := sub.Unsubscribe(); err != nil {
-					log.Errorw("unsubscribe failed", "error", err)
-					return errors.Wrapf(err, "unsubscribe failed")
-				}
-			}
-			delete(n.subscriptions, key)
-			log.Infow("unsubscribe succeeded")
+
+			// delete subscription sink info from storage
+			n.sinks.Delete(subKeyPrefix)
 		}
 	}
 	return nil
@@ -188,8 +234,42 @@ func (n *Nats) GetAllSubscriptions() map[string]*nats.Subscription {
 	return n.subscriptions
 }
 
-func (n *Nats) getCallback(sink string) nats.MsgHandler {
+// deleteSubFromNats deletes subscription from NATS and from in-memory db
+func (n *Nats) deleteSubFromNats(natsSub *nats.Subscription, subKey string, log *zap.SugaredLogger) error {
+	// Unsubscribe call to NATS is async hence checking the status of the connection is important
+	if n.connection.Status() != nats.CONNECTED {
+		if err := n.Initialize(env.Config{}); err != nil {
+			log.Errorw("connect to NATS failed", "status", n.connection.Status(), "error", err)
+			return errors.Wrapf(err, "connect to NATS failed")
+		}
+	}
+	if natsSub.IsValid() {
+		if err := natsSub.Unsubscribe(); err != nil {
+			log.Errorw("unsubscribe failed", "error", err)
+			return errors.Wrapf(err, "unsubscribe failed")
+		}
+	}
+	delete(n.subscriptions, subKey)
+	log.Debugw("unsubscribe succeeded", "subscriptionKey", subKey)
+
+	return nil
+}
+
+func (n *Nats) getCallback(subKeyPrefix string) nats.MsgHandler {
 	return func(msg *nats.Msg) {
+		// fetch sink info from storage
+		sinkValue, ok := n.sinks.Load(subKeyPrefix)
+		if !ok {
+			n.namedLogger().Errorw("cannot find sink url in storage", "keyPrefix", subKeyPrefix)
+			return
+		}
+		// convert interface type to string
+		sink, ok := sinkValue.(string)
+		if !ok {
+			n.namedLogger().Errorw("failed to convert sink value to string", "sinkValue", sinkValue)
+			return
+		}
+
 		ce, err := convertMsgToCE(msg)
 		if err != nil {
 			n.namedLogger().Errorw("convert NATS message to CE failed", "error", err)
@@ -269,7 +349,7 @@ func createKey(sub *eventingv1alpha1.Subscription, subject string, queueGoupInst
 	return fmt.Sprintf("%s.%s", createKeyPrefix(sub), createKeySuffix(subject, queueGoupInstanceNo))
 }
 
-func createSubject(filter *eventingv1alpha1.BEBFilter, cleaner eventtype.Cleaner) (string, error) {
+func getCleanSubject(filter *eventingv1alpha1.BEBFilter, cleaner eventtype.Cleaner) (string, error) {
 	eventType := strings.TrimSpace(filter.EventType.Value)
 	if len(eventType) == 0 {
 		return "", nats.ErrBadSubject

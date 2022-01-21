@@ -101,6 +101,113 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 		testID++
 	})
 
+	When("Updating the clean event types in the Subscription status", func() {
+		It("should mark the Subscription as ready", func() {
+			// create a subscriber service
+			subscriberSvc := reconcilertesting.NewSubscriberSvc("webhook", namespaceName)
+			ensureSubscriberSvcCreated(ctx, subscriberSvc)
+
+			// create a Subscription
+			subscriptionName := "test-valid-subscription-1"
+			optFilter := reconcilertesting.WithEmptyFilter
+			optWebhook := reconcilertesting.WithWebhookAuthForBEB
+			subscription := reconcilertesting.NewSubscription(subscriptionName, namespaceName, optFilter, optWebhook)
+			reconcilertesting.WithValidSink(namespaceName, subscriberSvc.Name, subscription)
+			ensureSubscriptionCreated(ctx, subscription)
+
+			Context("a Subscription without filters", func() {
+				By("should have no clean event types", func() {
+					getSubscription(ctx, subscription).Should(And(
+						reconcilertesting.HaveSubscriptionName(subscriptionName),
+						reconcilertesting.HaveCondition(eventingv1alpha1.MakeCondition(
+							eventingv1alpha1.ConditionSubscriptionActive,
+							eventingv1alpha1.ConditionReasonSubscriptionActive,
+							v1.ConditionTrue, "")),
+						reconcilertesting.HaveCleanEventTypes(nil),
+					))
+				})
+			})
+
+			Context("Addition of filters to a Subscription", func() {
+				publishToSubjects := []string{
+					fmt.Sprintf("%s0", reconcilertesting.OrderCreatedEventType),
+					fmt.Sprintf("%s1", reconcilertesting.OrderCreatedEventType),
+				}
+				subscribeToEventTypes := []string{
+					fmt.Sprintf("%s0", reconcilertesting.OrderCreatedEventTypeNotClean),
+					fmt.Sprintf("%s1", reconcilertesting.OrderCreatedEventTypeNotClean),
+				}
+
+				By("adding filters to a Subscription", func() {
+					for _, f := range subscribeToEventTypes {
+						addFilter := reconcilertesting.WithFilter(reconcilertesting.EventSource, f)
+						addFilter(subscription)
+					}
+					ensureSubscriptionUpdated(ctx, subscription)
+				})
+
+				By("checking if Subscription status has 'cleanEventTypes' with the correct cleaned filter values", func() {
+					getSubscription(ctx, subscription).Should(And(
+						reconcilertesting.HaveSubscriptionName(subscriptionName),
+						reconcilertesting.HaveCondition(eventingv1alpha1.MakeCondition(
+							eventingv1alpha1.ConditionSubscriptionActive,
+							eventingv1alpha1.ConditionReasonSubscriptionActive,
+							v1.ConditionTrue, "")),
+						reconcilertesting.HaveCleanEventTypes(publishToSubjects),
+					))
+				})
+			})
+
+			Context("Updating Subscription filters", func() {
+				cleanEventTypes := []string{
+					fmt.Sprintf("%s0alpha", reconcilertesting.OrderCreatedEventType),
+					fmt.Sprintf("%s1alpha", reconcilertesting.OrderCreatedEventType),
+				}
+
+				By("updating the Subscription filters", func() {
+					for _, f := range subscription.Spec.Filter.Filters {
+						f.EventType.Value = fmt.Sprintf("%salpha", f.EventType.Value)
+					}
+
+					ensureSubscriptionUpdated(ctx, subscription)
+				})
+
+				By("checking if Subscription status has 'cleanEventTypes' with the correct cleaned and updated filter values", func() {
+					getSubscription(ctx, subscription).Should(And(
+						reconcilertesting.HaveSubscriptionName(subscriptionName),
+						reconcilertesting.HaveCondition(eventingv1alpha1.MakeCondition(
+							eventingv1alpha1.ConditionSubscriptionActive,
+							eventingv1alpha1.ConditionReasonSubscriptionActive,
+							v1.ConditionTrue, "")),
+						reconcilertesting.HaveCleanEventTypes(cleanEventTypes),
+					))
+				})
+			})
+
+			Context("Deletion Subscription filters", func() {
+				cleanEventTypes := []string{
+					fmt.Sprintf("%s0alpha", reconcilertesting.OrderCreatedEventType),
+				}
+
+				By("deleting Subscription filters", func() {
+					subscription.Spec.Filter.Filters = subscription.Spec.Filter.Filters[:1]
+					ensureSubscriptionUpdated(ctx, subscription)
+				})
+
+				By("checking if Subscription status has 'cleanEventTypes' with the correct cleaned filter values", func() {
+					getSubscription(ctx, subscription).Should(And(
+						reconcilertesting.HaveSubscriptionName(subscriptionName),
+						reconcilertesting.HaveCondition(eventingv1alpha1.MakeCondition(
+							eventingv1alpha1.ConditionSubscriptionActive,
+							eventingv1alpha1.ConditionReasonSubscriptionActive,
+							v1.ConditionTrue, "")),
+						reconcilertesting.HaveCleanEventTypes(cleanEventTypes),
+					))
+				})
+			})
+		})
+	})
+
 	When("Creating a Subscription with invalid Sink and fixing it", func() {
 		It("Should update the Subscription APIRule status from not ready to ready", func() {
 			// Ensuring subscriber svc
@@ -1017,9 +1124,16 @@ func ensureSubscriptionCreated(ctx context.Context, subscription *eventingv1alph
 	Expect(err).Should(BeNil())
 }
 
+// ensureSubscriptionUpdated conducts an update of a Subscription.
+func ensureSubscriptionUpdated(ctx context.Context, subscription *eventingv1alpha1.Subscription) {
+	By(fmt.Sprintf("Ensuring the subscription %q is updated", subscription.Name))
+	// update subscription
+	err := k8sClient.Update(ctx, subscription)
+	Expect(err).Should(BeNil())
+}
+
 // ensureSubscriberSvcCreated creates a Service in the k8s cluster. If a custom namespace is used, it will be created as well.
 func ensureSubscriberSvcCreated(ctx context.Context, svc *v1.Service) {
-
 	By(fmt.Sprintf("Ensuring the test namespace %q is created", svc.Namespace))
 	if svc.Namespace != "default " {
 		// create testing namespace
@@ -1208,7 +1322,7 @@ var _ = BeforeSuite(func(done Done) {
 	Expect(err).NotTo(HaveOccurred())
 	// +kubebuilder:scaffold:scheme
 
-	bebMock := startBEBMock()
+	mock := startBEBMock()
 	// client, err := client.New()
 	// Source: https://book.kubebuilder.io/cronjob-tutorial/writing-tests.html
 	syncPeriod := time.Second * 2
@@ -1219,10 +1333,10 @@ var _ = BeforeSuite(func(done Done) {
 	})
 	Expect(err).ToNot(HaveOccurred())
 	envConf := env.Config{
-		BEBAPIURL:                bebMock.MessagingURL,
+		BEBAPIURL:                mock.MessagingURL,
 		ClientID:                 "foo-id",
 		ClientSecret:             "foo-secret",
-		TokenEndpoint:            bebMock.TokenURL,
+		TokenEndpoint:            mock.TokenURL,
 		WebhookActivationTimeout: 0,
 		WebhookTokenEndpoint:     "foo-token-endpoint",
 		Domain:                   domain,
