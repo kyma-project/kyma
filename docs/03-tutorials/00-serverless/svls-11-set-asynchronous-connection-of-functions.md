@@ -4,7 +4,7 @@ title: Set asynchronous communication between Functions
 
 This tutorial demonstrates how to connect two Functions asynchronously. It is based on the [in-cluster Eventing example](https://github.com/kyma-project/examples/tree/main/incluster_eventing).
 
-The example provides a very simple scenario of asynchronous communication between two Functions. The first Function accepts the incoming traffic via HTTP, sanitizes the payload, and publishes the content as an in-cluster event via [Kyma Eventing](https://kyma-project.io/docs/kyma/latest/01-overview/main-areas/eventing/).
+The example provides a very simple scenario of asynchronous communication between two Functions. The first Function accepts the incoming traffic via HTTP, sanitizes the payload, and publishes the content as an in-cluster event using [Kyma Eventing](https://kyma-project.io/docs/kyma/latest/01-overview/main-areas/eventing/).
 The second Function is a message receiver. It subscribes to the given event type and stores the payload.
 
 It shows only one possible use case. You can find plenty of use cases yourself on how to orchestrate your application logic into specialised Functions and benefit from decoupled, re-usable components and event-driven architecture.
@@ -55,7 +55,8 @@ It shows only one possible use case. You can find plenty of use cases yourself o
               - handler: allow
     ```
 
-3. Provide your Function logic in the `handler.js` file. In the following example, there's no actual sanitization logic, `sanitise` Function is just a placeholder:
+3. Provide your Function logic in the `handler.js` file:
+>**NOTE:** In this example, there's no sanitization logic. The `sanitize` Function is just a placeholder.
 
    ```js
    const { v4: uuidv4 } = require('uuid');
@@ -85,12 +86,12 @@ It shows only one possible use case. You can find plenty of use cases yourself o
     ```bash
     kyma apply function
     ```
-   Your Function is now built and deployed in Kyma runtime. Kyma will expose it via API Rule. Any incoming payload will be processed by your emitter Function. It sends the sanitized content to whatever workload that subscribes to the selected event type - in our case - the receiver Function.
+   Your Function is now built and deployed in Kyma runtime. Kyma exposes it through the API Rule. The incoming payloads are processed by your emitter Function. It then sends the sanitized content to the workload that subscribes to the selected event type. In our case, it's the receiver Function.
 
-5. Test the first Function. Send a paylod and see if your HTTP traffic is accepted:
+5. Test the first Function. Send the payload and see if your HTTP traffic is accepted:
 
       ```bash
-      export KYMA_DOMAIN=.... # export the variable for you Kyma domain
+      export KYMA_DOMAIN={KYMA_DOMAIN_VARIABLE}
       
       curl -X POST https://incoming.${KYMA_DOMAIN}
       -H 'Content-Type: application/json'
@@ -98,12 +99,12 @@ It shows only one possible use case. You can find plenty of use cases yourself o
       ```
 ### Create the receiver Function
 
-1. Go to your `receiver` folder and run the `init` Kyma CLI command to to initialise the scaffold for your second Function:
+1. Go to your `receiver` folder and run Kyma CLI `init` Kyma CLI command to initialize the scaffold for your second Function:
    ```bash
    kyma init function
    ```
 2.  The `init` command creates the same files as in the `emitter` folder.
-3. In the `config.yaml` file configure which event types your Function should subscribe to:
+3. In the `config.yaml` file, configure event types your Function will subscribe to:
     ```yaml
     name: event-receiver
     namespace: default
@@ -128,7 +129,7 @@ It shows only one possible use case. You can find plenty of use cases yourself o
      ```bash
      kyma apply function
      ```
-   The Function is configured, built and deployed in Kyma runtime. The Susbscription becomes active and all events with selected type will be processed by the Function.  
+   The Function is configured, built, and deployed in Kyma runtime. The Subscription becomes active and all events with the selected type are processed by the Function.  
 
 5.  Test the whole setup  
 Send a payload to the first Function (for example using the above-mentioned POST request). As the Functions are joined by the In-cluster Eventing, the payload is processed in sequence by both of your Functions.
