@@ -7,13 +7,15 @@ This tutorial demonstrates how to connect two Functions asynchronously. It is ba
 The example provides a very simple scenario of asynchronous communication between two Functions. The first Function accepts the incoming traffic via HTTP, sanitizes the payload, and publishes the content as an in-cluster event via [Kyma Eventing](https://kyma-project.io/docs/kyma/latest/01-overview/main-areas/eventing/).
 The second Function is a message receiver. It subscribes to the given event type and stores the payload.
 
+It shows only one possible use case. You can find plenty of use cases yourself on how to orchestrate your application logic into specialised Functions and benefit from decoupled, re-usable components and event-driven architecture.
+
 ## Prerequisites
 
 
 - [Kyma CLI](https://github.com/kyma-project/cli)
 - Kyma installed locally or on a cluster
 
-## Initial steps
+## Steps
 
 1. Export the `KUBECONFIG` variable:
    ```bash
@@ -21,7 +23,7 @@ The second Function is a message receiver. It subscribes to the given event type
    ```
 2. Create two folders in your project - `emitter` and `receiver`.
 
-## Create the emitter Function
+### Create the emitter Function
 
 1. Go to the `emitter` folder and run Kyma CLI `init` command to initialize a scaffold for your first Function:
 
@@ -33,7 +35,7 @@ The second Function is a message receiver. It subscribes to the given event type
 
   - `config.yaml`	with the Function's configuration
 
-   >**NOTE:** See the detailed description of all fields available in the [`config.yaml` file](../../05-technical-reference/svls-06-function-configuration-file.md).
+      >**NOTE:** See the detailed description of all fields available in the [`config.yaml` file](../../05-technical-reference/svls-06-function-configuration-file.md).
 
   - `handler.js` with the Function's code and the simple "Hello Serverless" logic
   
@@ -94,7 +96,7 @@ The second Function is a message receiver. It subscribes to the given event type
       -H 'Content-Type: application/json'
       -d '{"foo":"bar"}'
       ```
-## Create the receiver Function
+### Create the receiver Function
 
 1. Go to your `receiver` folder and run the `init` Kyma CLI command to to initialise the scaffold for your second Function:
    ```bash
@@ -131,7 +133,3 @@ The second Function is a message receiver. It subscribes to the given event type
 5.  Test the whole setup  
 Send a payload to the first Function (for example using the above-mentioned POST request). As the Functions are joined by the In-cluster Eventing, the payload is processed in sequence by both of your Functions.
 You can see (for example in the Function logs) that both, sanitization logic (using the first Function) and the storing logic (using the second Function) are executed.
-
-## Summary
-
-This tutorial demonstrated only one possible use case. You can find plenty of use cases yourself on how to orchestrate your application logic into specialised Functions and benefit from decoupled, re-usable components and event-driven architecture.
