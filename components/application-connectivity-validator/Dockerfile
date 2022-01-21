@@ -14,6 +14,8 @@ RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o applicationconnec
 FROM scratch
 LABEL source=git@github.com:kyma-project/kyma.git
 
+WORKDIR /app
+
 COPY --from=builder /go/src/github.com/kyma-project/kyma/components/application-connectivity-validator/applicationconnectivityvalidator .
 COPY --from=builder /app/licenses /app/licenses
 

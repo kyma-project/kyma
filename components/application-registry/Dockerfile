@@ -16,6 +16,8 @@ RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o applicationregist
 FROM scratch
 LABEL source=git@github.com:kyma-project/kyma.git
 
+WORKDIR /app
+
 COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 
 COPY ./docs/api/api.yaml .
