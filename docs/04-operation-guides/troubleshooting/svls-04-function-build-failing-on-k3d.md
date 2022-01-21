@@ -23,7 +23,7 @@ kaniko should only be run inside of a container, run with the --force flag if yo
 
 This problem originates in kaniko - the container image build tool used in Kyma. kaniko is designed to be run in a container and this is how it is executed in Kyma (as build jobs).
 kaniko has a detection mechanism to verify whether the build is actually executed in a container and fails in case it is not.
-This detection mechanism has issues and in some circumstances (i.e hosts with cgroups in version 2 or other, not yet clearly identified) it shows false positive result. 
+This detection mechanism has issues and in some circumstances (i.e. hosts with cgroups in version 2 or other, not yet clearly identified) it shows false positive result. 
 
 Related issues:
  - https://github.com/kyma-project/kyma/issues/13051
@@ -31,9 +31,9 @@ Related issues:
  
 ## Remedy
 
-kaniko can be executed with `--force` flag that skips the verification. To do so, please override the kaniko execution arguments by passing `--force` flag.
+kaniko can be executed with a `--force` flag that skips the verification. To do so, please override the kaniko execution arguments by passing the `--force` flag.
 
-Introduce a file with overrides, i.e `my-overrides.yaml`
+Introduce a file with overrides, i.e. `my-overrides.yaml`
 ```yaml
 serverless:
   containers:
