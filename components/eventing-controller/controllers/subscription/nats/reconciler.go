@@ -241,18 +241,6 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 		return ctrl.Result{}, nil
 	}
 
-	// Clean up the old subscriptions
-	if err := r.Backend.DeleteSubscription(subscription); err != nil {
-		log.Errorw("delete subscription failed", "error", err)
-		if err := r.syncSubscriptionStatus(ctx, subscription, false, false, err.Error()); err != nil {
-			if k8serrors.IsConflict(err) {
-				return ctrl.Result{Requeue: true}, nil
-			}
-			return ctrl.Result{}, err
-		}
-		return ctrl.Result{}, err
-	}
-
 	// Synchronize Kyma subscription to NATS backend
 	subscriptionStatusChanged, err := r.Backend.SyncSubscription(subscription, r.eventTypeCleaner)
 	if err != nil {
