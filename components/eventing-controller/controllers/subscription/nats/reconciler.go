@@ -282,7 +282,7 @@ func (r *Reconciler) syncSubscriptionStatus(ctx context.Context, sub *eventingv1
 		var chosenCondition eventingv1alpha1.Condition
 		if c.Type == condition.Type {
 			if !conditionContained {
-				if c.Status == condition.Status && c.Reason == condition.Reason && c.Message == condition.Message {
+				if equalsConditionsIgnoringTime(c, condition) {
 					// take the already present condition
 					chosenCondition = c
 				} else {
@@ -320,6 +320,53 @@ func (r *Reconciler) syncSubscriptionStatus(ctx context.Context, sub *eventingv1
 	return nil
 }
 
+func (r *Reconciler) syncInvalidSubscriptions(ctx context.Context) (ctrl.Result, error) {
+	natsHandler, _ := r.Backend.(*handlers.Nats)
+	namespacedName := natsHandler.GetInvalidSubscriptions()
+	for _, v := range *namespacedName {
+		r.namedLogger().Debugw("found invalid subscription", "namespace", v.Namespace, "name", v.Name)
+		sub := &eventingv1alpha1.Subscription{}
+		if err := r.Client.Get(ctx, v, sub); err != nil {
+			r.namedLogger().Errorw("get invalid subscription failed", "namespace", v.Namespace, "name", v.Name, "error", err)
+			continue
+		}
+		// mark the subscription to be not ready, it will throw a new reconcile call
+		if err := r.syncSubscriptionStatus(ctx, sub, false, false, "invalid subscription"); err != nil {
+			r.namedLogger().Errorw("sync status for invalid subscription failed", "namespace", v.Namespace, "name", v.Name, "error", err)
+			if k8serrors.IsConflict(err) {
+				return ctrl.Result{Requeue: true}, nil
+			}
+			return ctrl.Result{}, err
+		}
+	}
+	return ctrl.Result{}, nil
+}
+
+func (r *Reconciler) getClusterLocalService(ctx context.Context, svcNs, svcName string) (*corev1.Service, error) {
+	svcLookupKey := k8stypes.NamespacedName{Name: svcName, Namespace: svcNs}
+	svc := &corev1.Service{}
+	if err := r.Client.Get(ctx, svcLookupKey, svc); err != nil {
+		return nil, err
+	}
+	return svc, nil
+}
+
+func (r *Reconciler) enqueueReconciliationForSubscriptions(subs []eventingv1alpha1.Subscription) {
+	r.namedLogger().Debug("enqueuing reconciliation request for all subscriptions")
+	for i := range subs {
+		r.customEventsChannel <- event.GenericEvent{Object: &subs[i]}
+	}
+}
+
+func (r *Reconciler) namedLogger() *zap.SugaredLogger {
+	return r.logger.WithContext().Named(reconcilerName)
+}
+
+//
+// utilities functions
+//
+
+// defaultSinkValidator validates the "sink" defined in Kyma subscriptions
 func defaultSinkValidator(ctx context.Context, r *Reconciler, subscription *eventingv1alpha1.Subscription) error {
 	if !isValidScheme(subscription.Spec.Sink) {
 		events.Warn(r.recorder, subscription, events.ReasonValidationFailed, "Sink URL scheme should be HTTP or HTTPS: %s", subscription.Spec.Sink)
@@ -368,49 +415,15 @@ func defaultSinkValidator(ctx context.Context, r *Reconciler, subscription *even
 	return nil
 }
 
-func (r *Reconciler) syncInvalidSubscriptions(ctx context.Context) (ctrl.Result, error) {
-	natsHandler, _ := r.Backend.(*handlers.Nats)
-	namespacedName := natsHandler.GetInvalidSubscriptions()
-	for _, v := range *namespacedName {
-		r.namedLogger().Debugw("found invalid subscription", "namespace", v.Namespace, "name", v.Name)
-		sub := &eventingv1alpha1.Subscription{}
-		if err := r.Client.Get(ctx, v, sub); err != nil {
-			r.namedLogger().Errorw("get invalid subscription failed", "namespace", v.Namespace, "name", v.Name, "error", err)
-			continue
-		}
-		// mark the subscription to be not ready, it will throw a new reconcile call
-		if err := r.syncSubscriptionStatus(ctx, sub, false, false, "invalid subscription"); err != nil {
-			r.namedLogger().Errorw("sync status for invalid subscription failed", "namespace", v.Namespace, "name", v.Name, "error", err)
-			if k8serrors.IsConflict(err) {
-				return ctrl.Result{Requeue: true}, nil
-			}
-			return ctrl.Result{}, err
-		}
-	}
-	return ctrl.Result{}, nil
-}
-
-func (r *Reconciler) getClusterLocalService(ctx context.Context, svcNs, svcName string) (*corev1.Service, error) {
-	svcLookupKey := k8stypes.NamespacedName{Name: svcName, Namespace: svcNs}
-	svc := &corev1.Service{}
-	if err := r.Client.Get(ctx, svcLookupKey, svc); err != nil {
-		return nil, err
-	}
-	return svc, nil
-}
-
-func (r *Reconciler) enqueueReconciliationForSubscriptions(subs []eventingv1alpha1.Subscription) {
-	r.namedLogger().Debug("enqueuing reconciliation request for all subscriptions")
-	for i := range subs {
-		r.customEventsChannel <- event.GenericEvent{Object: &subs[i]}
-	}
-}
-
 // isValidScheme returns true if the sink scheme is http or https, otherwise returns false.
 func isValidScheme(sink string) bool {
 	return strings.HasPrefix(sink, "http://") || strings.HasPrefix(sink, "https://")
 }
 
-func (r *Reconciler) namedLogger() *zap.SugaredLogger {
-	return r.logger.WithContext().Named(reconcilerName)
+// equalsConditionsIgnoringTime checks if two conditions are equal, ignoring lastTransitionTime
+func equalsConditionsIgnoringTime(a, b eventingv1alpha1.Condition) bool {
+	if a.Type == b.Type && a.Status == b.Status && a.Reason == b.Reason && a.Message == b.Message {
+		return true
+	}
+	return false
 }
