@@ -27,7 +27,7 @@ type TestEnvironment struct {
 	context context.Context
 	// a NATS server
 	natsServer *server.Server
-	// TODO:
+	// a connection to the NATS server
 	backendConnection *pkgnats.BackendConnection
 	// a sender for publishing events to the NATS server
 	natsMessageSender *NatsMessageSender
@@ -75,15 +75,15 @@ func setupTestEnvironment(t *testing.T, connectionOpts ...pkgnats.BackendConnect
 	}
 }
 
-// TODO:
-// TestSendCloudEvent ensures that
+// Send an event to the NATS server and
 func TestSendCloudEvent(t *testing.T) {
 	// given
 	testEnv := setupTestEnvironment(t)
+
 	// subscribe to subject
-	done := make(chan bool, 1)
-	validator := testingutils.ValidateNatsMessageDataOrFail(t, fmt.Sprintf(`"%s"`, testingutils.CloudEventData), done)
-	testingutils.SubscribeToEventOrFail(t, testEnv.backendConnection.Connection, testingutils.CloudEventType, validator)
+	subject := fmt.Sprintf(`"%s"`, testingutils.CloudEventData)
+	done := subscribeToSubject(t, testEnv.backendConnection, subject)
+
 	// create cloudevent
 	ce := cloudevents.NewEvent()
 	ce.SetType(testingutils.CloudEventType)
@@ -103,9 +103,8 @@ func TestSendCloudEventWithReconnect(t *testing.T) {
 	testEnv := setupTestEnvironment(t, pkgnats.WithBackendConnectionRetries(10))
 
 	// subscribe to subject
-	done := make(chan bool, 1)
-	validator := testingutils.ValidateNatsMessageDataOrFail(t, fmt.Sprintf(`"%s"`, testingutils.CloudEventData), done)
-	testingutils.SubscribeToEventOrFail(t, testEnv.backendConnection.Connection, testingutils.CloudEventType, validator)
+	subject := fmt.Sprintf(`"%s"`, testingutils.CloudEventData)
+	done := subscribeToSubject(t, testEnv.backendConnection, subject)
 
 	// create cloudevent
 	ce := cloudevents.NewEvent()
@@ -130,4 +129,12 @@ func sendEventAndAssertStatus(ctx context.Context, t *testing.T, sender *NatsMes
 	status, err := sender.Send(ctx, event)
 	assert.Nil(t, err)
 	assert.Equal(t, expectedStatus, status)
+}
+
+func subscribeToSubject(t *testing.T, connection *pkgnats.BackendConnection, subject string) chan bool {
+	// subscribe to subject
+	done := make(chan bool, 1)
+	validator := testingutils.ValidateNatsMessageDataOrFail(t, subject, done)
+	testingutils.SubscribeToEventOrFail(t, connection.Connection, testingutils.CloudEventType, validator)
+	return done
 }
