@@ -98,7 +98,7 @@ async function assertMetricsExist() {
         {"kube-state-metrics":[
                 {"kube_deployment_status_replicas_available": ["deployment","namespace"]},
                 {"kube_pod_info": ["pod"]},
-                {"kube_pod_container_resource_limits_memory_bytes": ["pod","container"]}]},
+                {"kube_pod_container_resource_limits": ["pod","container"]}]},
 
         {"node_exporter":[
                 {"process_open_fds": []},
@@ -215,7 +215,7 @@ async function buildScrapePoolSet() {
   return scrapePools;
 }
 
-async function assertTimeSeriesExist(metric, labels, resource='') {
+async function assertTimeSeriesExist(exporter, metric, labels, resource='') {
   const resultlessQueries = [];
   let result = '';
   let query = '';
@@ -230,7 +230,7 @@ async function assertTimeSeriesExist(metric, labels, resource='') {
     }
 
     if (result.length == 0) {
-      resultlessQueries.push(query);
+      resultlessQueries.push(query.concat(" metric from service monitor:monitoring-".concat(exporter)));
 
     }
   }
