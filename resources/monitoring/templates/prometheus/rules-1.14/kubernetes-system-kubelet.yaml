@@ -62,7 +62,7 @@ spec:
         )
         /
         max by(node) (
-          kube_node_status_capacity_pods{job="kube-state-metrics"} != 1
+          kube_node_status_capacity{resouce="pods", job="kube-state-metrics"} != 1
         ) > 0.95
       for: 15m
       labels:
