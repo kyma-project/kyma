@@ -1,3 +1,6 @@
+// Tests in this file are integration tests.
+// They do use a real NATS server using `github.com/nats-io/nats-server/v2/server`.
+// Messages are sent using `NatsMessageSender` interface.
 package sender
 
 import (
@@ -18,24 +21,20 @@ import (
 	testingutils "github.com/kyma-project/kyma/components/event-publisher-proxy/testing"
 )
 
-// Tests in this file are integration tests.
-// They do use a real NATS server using `github.com/nats-io/nats-server/v2/server`.
-// Messages are sent using `NatsMessageSender` interface.
-
 // TestEnvironment contains the necessary entities to perform NATS integration tests
 type TestEnvironment struct {
 	context context.Context
+	// a logger
+	logger *logrus.Logger
 	// a NATS server
 	natsServer *server.Server
 	// a connection to the NATS server
 	backendConnection *pkgnats.BackendConnection
 	// a sender for publishing events to the NATS server
 	natsMessageSender *NatsMessageSender
-	// a logger
-	logger *logrus.Logger
 }
 
-// setupTestEnvironment creates the test environment for the integration tests in this file
+// setupTestEnvironment creates the test environment for the integration tests in this file.setupTestEnvironment.
 // It performs the follow steps:
 // - create logger
 // - create and start NATS server
@@ -43,7 +42,7 @@ type TestEnvironment struct {
 // - create a sender to publish messsages to NATS
 // TODO: what if I want configure something else than the nats server ?
 // NOTE: if you need any of these objects to be customized, add it to the method signature and overwrite the default instance
-func setupTestEnvironment(t *testing.T, connectionOpts ...pkgnats.BackendConnectionOption) TestEnvironment {
+func setupTestEnvironment(t *testing.T, connectionOpts ...pkgnats.BackendConnectionOpt) TestEnvironment {
 
 	// Create logger
 	logger := logrus.New()
@@ -76,6 +75,7 @@ func setupTestEnvironment(t *testing.T, connectionOpts ...pkgnats.BackendConnect
 	}
 }
 
+// TestSendCloudEventsToNats
 func TestSendCloudEventsToNats(t *testing.T) {
 	testCases := []struct {
 		name         string
@@ -86,6 +86,10 @@ func TestSendCloudEventsToNats(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
+			////////////////////////////
+			// given
+			///////////////////////////
+
 			testEnv := setupTestEnvironment(t, pkgnats.WithBackendConnectionRetries(tc.givenRetries))
 			defer testEnv.natsServer.Shutdown()
 
@@ -99,7 +103,9 @@ func TestSendCloudEventsToNats(t *testing.T) {
 			err := json.Unmarshal([]byte(testingutils.StructuredCloudEventPayloadWithCleanEventType), &ce)
 			assert.Nil(t, err)
 
-			sendEventAndAssertStatus(testEnv.context, t, testEnv.natsMessageSender, &ce, http.StatusNoContent)
+			// TODO: separate sending and assertions ? basically separate then and when part
+			// then & when
+			sendEventAndAssertHTTPStatusCode(testEnv.context, t, testEnv.natsMessageSender, &ce, http.StatusNoContent)
 
 			// TODO: rewrite using assertion
 			// wait for subscriber to receive the messages
@@ -110,12 +116,16 @@ func TestSendCloudEventsToNats(t *testing.T) {
 			// close connection
 			testEnv.backendConnection.Connection.Close()
 			assert.True(t, testEnv.backendConnection.Connection.IsClosed())
-			sendEventAndAssertStatus(testEnv.context, t, testEnv.natsMessageSender, &ce, http.StatusNoContent)
+
+			// then & when
+			// ensure that the reconnect works
+			sendEventAndAssertHTTPStatusCode(testEnv.context, t, testEnv.natsMessageSender, &ce, http.StatusNoContent)
 		})
 	}
 }
 
-func sendEventAndAssertStatus(ctx context.Context, t *testing.T, sender *NatsMessageSender, event *event.Event, expectedStatus int) {
+// sendEventAndAssertHTTPStatusCode sends the event to NATS and esures that a 204 HTTP status code is returned
+func sendEventAndAssertHTTPStatusCode(ctx context.Context, t *testing.T, sender *NatsMessageSender, event *event.Event, expectedStatus int) {
 	status, err := sender.Send(ctx, event)
 	assert.Nil(t, err)
 	assert.Equal(t, expectedStatus, status)
