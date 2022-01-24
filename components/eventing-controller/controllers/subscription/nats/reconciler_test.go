@@ -254,6 +254,83 @@ func testCleanEventTypes(id int, eventTypePrefix, natsSubjectToPublish, eventTyp
 	})
 }
 
+// testUpdateSubscriptionStatus tests if the reconciler can create and update the Status of a Subscription as expected.
+func testUpdateSubscriptionStatus(id int, eventTypePrefix, natsSubjectToPublish, eventTypeToSubscribe string) bool {
+	return When("updating the clean event types in the Subscription status", func() {
+		It("should mark the Subscription as ready", func() {
+			//  set default expectations
+			defaultCondition := eventingv1alpha1.MakeCondition(
+				eventingv1alpha1.ConditionSubscriptionActive,
+				eventingv1alpha1.ConditionReasonNATSSubscriptionActive,
+				v1.ConditionTrue, "")
+			defaultConfiguration := &eventingv1alpha1.SubscriptionConfig{
+				MaxInFlightMessages: defaultSubsConfig.MaxInFlightMessages}
+			multipleConditions := reconcilertesting.NewDefaultMultipleConditions()
+
+			// create a context
+			ctx := context.Background()
+			cancel = startReconciler(eventTypePrefix, defaultSinkValidator, natsURL)
+			defer cancel()
+
+			// create a subscriber service
+			subscriberName := fmt.Sprintf(subscriberNameFormat, id)
+			subscriberSvc := reconcilertesting.NewSubscriberSvc(subscriberName, namespaceName)
+
+			ensureSubscriberSvcCreated(ctx, subscriberSvc)
+
+			// create a Subscription
+			subscriptionName := fmt.Sprintf(subscriptionNameFormat, id)
+			optFilter := reconcilertesting.WithEmptyFilter
+			optWebhook := reconcilertesting.WithWebhookForNats
+			optConditions := reconcilertesting.WithMultipleConditions
+			subscription := reconcilertesting.NewSubscription(subscriptionName, namespaceName, optFilter, optWebhook, optConditions)
+			reconcilertesting.WithValidSink(namespaceName, subscriberSvc.Name, subscription)
+
+			ensureSubscriptionCreated(ctx, subscription)
+
+			Context("A Subscription with default fake conditions", func() {
+				// the nats subject list to publish to; these are supposed to be equal to the cleanEventTypes
+				natsSubjectsToPublish := []string{
+					fmt.Sprintf("%s0", natsSubjectToPublish),
+				}
+				// the filter that are getting added to the subscription
+				eventTypesToSubscribe := []string{
+					fmt.Sprintf("%s0", eventTypeToSubscribe),
+				}
+				By("should have been updated after the addition", func() {
+					for _, f := range eventTypesToSubscribe {
+						addFilter := reconcilertesting.WithFilter(reconcilertesting.EventSource, f)
+						addFilter(subscription)
+					}
+					ensureSubscriptionUpdated(ctx, subscription)
+				})
+
+				By("should have the assigned subscription name", func() {
+					getSubscription(ctx, subscription).Should(reconcilertesting.HaveSubscriptionName(subscriptionName))
+				})
+				By("should have the default condition", func() {
+					getSubscription(ctx, subscription).Should(reconcilertesting.HaveCondition(defaultCondition))
+				})
+				By("should not have the additional fake condition - foo", func() {
+					getSubscription(ctx, subscription).ShouldNot(reconcilertesting.HaveCondition(multipleConditions[0]))
+				})
+				By("should not have the additional fake condition - bar", func() {
+					getSubscription(ctx, subscription).ShouldNot(reconcilertesting.HaveCondition(multipleConditions[1]))
+				})
+				By("should have the default configuration", func() {
+					getSubscription(ctx, subscription).Should(reconcilertesting.HaveSubsConfiguration(defaultConfiguration))
+				})
+				By("should have clean event types corresponding to the added filters", func() {
+					getSubscription(ctx, subscription).Should(reconcilertesting.HaveCleanEventTypes(natsSubjectsToPublish))
+				})
+				By("should have subscription ready", func() {
+					getSubscription(ctx, subscription).Should(reconcilertesting.HaveSubscriptionReady())
+				})
+			})
+		})
+	})
+}
+
 func testCreateDeleteSubscription(id int, eventTypePrefix, natsSubjectToPublish, eventTypeToSubscribe string) bool {
 	return When("Create/Delete Subscription", func() {
 		It("Should create/delete NATS Subscription", func() {

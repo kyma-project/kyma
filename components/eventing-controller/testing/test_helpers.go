@@ -1,6 +1,7 @@
 package testing
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 
@@ -67,6 +68,9 @@ const (
            "source":"` + EventSource + `",
            "data":"` + EventData + `"
         }`
+
+	FakeCondition1 = `{ Type: "foo", Status: "foo", Reason: "foo-reason", Message: "foo-message" }`
+	FakeCondition2 = `{ Type: "bar", Status: "bar", Reason: "bar-reason", Message: "bar-message" }`
 )
 
 type APIRuleOption func(rule *apigatewayv1alpha1.APIRule)
@@ -494,6 +498,17 @@ func WithEventingControllerPod(backend string) *corev1.Pod {
 			},
 		},
 	}
+}
+
+func WithMultipleConditions(s *eventingv1alpha1.Subscription) {
+	s.Status.Conditions = NewDefaultMultipleConditions()
+}
+
+func NewDefaultMultipleConditions() []eventingv1alpha1.Condition {
+	var cond1, cond2 eventingv1alpha1.Condition
+	json.Unmarshal([]byte(FakeCondition1), cond1)
+	json.Unmarshal([]byte(FakeCondition2), cond2)
+	return []eventingv1alpha1.Condition{cond1, cond2}
 }
 
 // ToSubscription converts an unstructured subscription into a typed one
