@@ -84,6 +84,7 @@ async function assertAllRulesAreHealthy() {
 }
 
 async function assertMetricsExist() {
+    // Object with exporter, its corressponding metrics followed by labels and resources.
   const metricsList = [
     {'kubelet': [
       {'container_memory_usage_bytes': [['pod', 'container']]},
@@ -96,14 +97,14 @@ async function assertMetricsExist() {
       {'etcd_disk_backend_commit_duration_seconds_bucket': [[]]}]},
 
     {'kube-state-metrics': [
-      {'kube_deployment_status_replicas_available': ['deployment', 'namespace']},
-      {'kube_pod_info': ['pod']},
+      {'kube_deployment_status_replicas_available': [['deployment', 'namespace']]},
+      {'kube_pod_info': [['pod']]},
       {'kube_pod_container_resource_limits': [['pod', 'container'], ['memory']]}]},
 
     {'node_exporter': [
       {'process_open_fds': [[]]},
       {'process_cpu_seconds_total': [['pod']]},
-      {'go_memstats_heap_inuse_bytes': [[]]}]},
+      {'go_memstats_heap_inuse_bytes': [['pod']]}]},
   ];
 
   for (let index=0; index < metricsList.length; index++ ) {
