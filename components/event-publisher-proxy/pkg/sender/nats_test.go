@@ -40,8 +40,6 @@ type TestEnvironment struct {
 // - create and start NATS server
 // - establish a connection to the NATS server `TestEnvironment.backendConnection`
 // - create a sender to publish messsages to NATS
-// TODO: what if I want configure something else than the nats server ?
-// NOTE: if you need any of these objects to be customized, add it to the method signature and overwrite the default instance
 func setupTestEnvironment(t *testing.T, connectionOpts ...pkgnats.BackendConnectionOpt) TestEnvironment {
 
 	// Create logger
@@ -51,7 +49,6 @@ func setupTestEnvironment(t *testing.T, connectionOpts ...pkgnats.BackendConnect
 	natsServer := testingutils.StartNatsServer()
 	assert.NotNil(t, natsServer)
 
-	// TODO: move backend connection outside ?
 	// connect to nats
 	bc := pkgnats.NewBackendConnection(natsServer.ClientURL(), true, 1, time.Second)
 	for _, opt := range connectionOpts {

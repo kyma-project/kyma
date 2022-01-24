@@ -19,7 +19,16 @@ type BackendConnection struct {
 	Connection     *nats.Conn
 }
 
+type BackendConnectionOpt func(*BackendConnection)
+
+func WithBackendConnectionRetries(n int) BackendConnectionOpt {
+	return func(bc *BackendConnection) {
+		bc.connectionData.reconnects = n
+	}
+}
+
 // NewBackendConnection returns a new NewNatsConnection instance with the given NATS connection data.
+// TODO: make use of option pattern here
 func NewBackendConnection(url string, retry bool, reconnects int, wait time.Duration) *BackendConnection {
 	return &BackendConnection{
 		connectionData: connectionData{
@@ -45,12 +54,4 @@ func (bc *BackendConnection) Connect() error {
 	// OK
 	bc.Connection = connection
 	return nil
-}
-
-type BackendConnectionOption func(*BackendConnection)
-
-func WithBackendConnectionRetries(n int) BackendConnectionOption {
-	return func(bc *BackendConnection) {
-		bc.connectionData.reconnects = n
-	}
 }
