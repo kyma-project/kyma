@@ -68,6 +68,7 @@ var (
 		testChangeSubscriptionConfiguration,
 		testCreateSubscriptionWithEmptyEventType,
 		testCleanEventTypes,
+		testUpdateSubscriptionStatus,
 		testNATSUnavailabilityReflectedInSubscriptionStatus,
 	}
 

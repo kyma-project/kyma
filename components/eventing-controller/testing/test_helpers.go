@@ -506,8 +506,8 @@ func WithMultipleConditions(s *eventingv1alpha1.Subscription) {
 
 func NewDefaultMultipleConditions() []eventingv1alpha1.Condition {
 	var cond1, cond2 eventingv1alpha1.Condition
-	json.Unmarshal([]byte(FakeCondition1), cond1)
-	json.Unmarshal([]byte(FakeCondition2), cond2)
+	_ = json.Unmarshal([]byte(FakeCondition1), &cond1)
+	_ = json.Unmarshal([]byte(FakeCondition2), &cond2)
 	return []eventingv1alpha1.Condition{cond1, cond2}
 }
 
