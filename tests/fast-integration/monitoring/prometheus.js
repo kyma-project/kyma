@@ -84,7 +84,7 @@ async function assertAllRulesAreHealthy() {
 }
 
 async function assertMetricsExist() {
-    // Object with exporter, its corressponding metrics followed by labels and resources.
+  // Object with exporter, its corressponding metrics followed by labels and resources.
   const metricsList = [
     {'kubelet': [
       {'container_memory_usage_bytes': [['pod', 'container']]},
