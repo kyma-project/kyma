@@ -41,9 +41,10 @@ type TestEnvironment struct {
 // - create and start NATS server
 // - establish a connection to the NATS server `TestEnvironment.backendConnection`
 // - create a sender to publish messsages to NATS
-// TODO:
+// TODO: what if I want configure something else than the nats server ?
 // NOTE: if you need any of these objects to be customized, add it to the method signature and overwrite the default instance
 func setupTestEnvironment(t *testing.T, connectionOpts ...pkgnats.BackendConnectionOption) TestEnvironment {
+
 	// Create logger
 	logger := logrus.New()
 
@@ -51,6 +52,7 @@ func setupTestEnvironment(t *testing.T, connectionOpts ...pkgnats.BackendConnect
 	natsServer := testingutils.StartNatsServer()
 	assert.NotNil(t, natsServer)
 
+	// TODO: move backend connection outside ?
 	// connect to nats
 	bc := pkgnats.NewBackendConnection(natsServer.ClientURL(), true, 1, time.Second)
 	for _, opt := range connectionOpts {
@@ -80,7 +82,7 @@ func TestSendCloudEventsToNats(t *testing.T) {
 		givenRetries int
 	}{
 		{name: "1 retry", givenRetries: 1},
-		{name: "1 retries", givenRetries: 10},
+		{name: "10 retries", givenRetries: 10},
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
@@ -91,7 +93,7 @@ func TestSendCloudEventsToNats(t *testing.T) {
 			subject := fmt.Sprintf(`"%s"`, testingutils.CloudEventData)
 			done := subscribeToSubject(t, testEnv.backendConnection, subject)
 
-			// create cloudevent
+			// create cloudevent with default data (testing.CloudEventData)
 			ce := cloudevents.NewEvent()
 			ce.SetType(testingutils.CloudEventType)
 			err := json.Unmarshal([]byte(testingutils.StructuredCloudEventPayloadWithCleanEventType), &ce)
@@ -113,68 +115,18 @@ func TestSendCloudEventsToNats(t *testing.T) {
 	}
 }
 
-// Send an event to the NATS server and
-func TestSendCloudEvent(t *testing.T) {
-	// given
-	testEnv := setupTestEnvironment(t)
-	defer testEnv.natsServer.Shutdown()
-
-	// subscribe to subject
-	subject := fmt.Sprintf(`"%s"`, testingutils.CloudEventData)
-	done := subscribeToSubject(t, testEnv.backendConnection, subject)
-
-	// create cloudevent
-	ce := cloudevents.NewEvent()
-	ce.SetType(testingutils.CloudEventType)
-	err := json.Unmarshal([]byte(testingutils.StructuredCloudEventPayloadWithCleanEventType), &ce)
-	assert.Nil(t, err)
-
-	// then & when
-	sendEventAndAssertStatus(testEnv.context, t, testEnv.natsMessageSender, &ce, http.StatusNoContent)
-	// wait for subscriber to receive the messages
-	// TODO: rewrite using assertion lib
-	if err := testingutils.WaitForChannelOrTimeout(done, time.Second*3); err != nil {
-		t.Fatalf("Subscriber did not receive the message with error: %v", err)
-	}
-}
-
-func TestSendCloudEventWithReconnect(t *testing.T) {
-	testEnv := setupTestEnvironment(t, pkgnats.WithBackendConnectionRetries(10))
-	defer testEnv.natsServer.Shutdown()
-
-	// subscribe to subject
-	subject := fmt.Sprintf(`"%s"`, testingutils.CloudEventData)
-	done := subscribeToSubject(t, testEnv.backendConnection, subject)
-
-	// create cloudevent
-	ce := cloudevents.NewEvent()
-	ce.SetType(testingutils.CloudEventType)
-	err := json.Unmarshal([]byte(testingutils.StructuredCloudEventPayloadWithCleanEventType), &ce)
-	assert.Nil(t, err)
-
-	sendEventAndAssertStatus(testEnv.context, t, testEnv.natsMessageSender, &ce, http.StatusNoContent)
-
-	// wait for subscriber to receive the messages
-	if err := testingutils.WaitForChannelOrTimeout(done, time.Second*3); err != nil {
-		t.Fatalf("Subscriber did not receive the message with error: %v", err)
-	}
-
-	// close connection
-	testEnv.backendConnection.Connection.Close()
-	assert.True(t, testEnv.backendConnection.Connection.IsClosed())
-	sendEventAndAssertStatus(testEnv.context, t, testEnv.natsMessageSender, &ce, http.StatusNoContent)
-}
-
 func sendEventAndAssertStatus(ctx context.Context, t *testing.T, sender *NatsMessageSender, event *event.Event, expectedStatus int) {
 	status, err := sender.Send(ctx, event)
 	assert.Nil(t, err)
 	assert.Equal(t, expectedStatus, status)
 }
 
+// subscribeToSubject subscribes to the given subject using the given connection.
+// It then ensures that the data received on the subject
 func subscribeToSubject(t *testing.T, connection *pkgnats.BackendConnection, subject string) chan bool {
-	// subscribe to subject
 	done := make(chan bool, 1)
-	validator := testingutils.ValidateNatsMessageDataOrFail(t, subject, done)
-	testingutils.SubscribeToEventOrFail(t, connection.Connection, testingutils.CloudEventType, validator)
+	natsMessageDataValidator := testingutils.ValidateNatsMessageDataOrFail(t, subject, done)
+	// TODO: how does validation of message data work ?
+	testingutils.SubscribeToEventOrFail(t, connection.Connection, testingutils.CloudEventType, natsMessageDataValidator)
 	return done
 }
