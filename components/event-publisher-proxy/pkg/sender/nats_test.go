@@ -75,6 +75,44 @@ func setupTestEnvironment(t *testing.T, connectionOpts ...pkgnats.BackendConnect
 	}
 }
 
+func TestSendCloudEventsToNats(t *testing.T) {
+	testCases := []struct {
+		name         string
+		givenRetries int
+	}{
+		{name: "1 retry", givenRetries: 1},
+		{name: "1 retries", givenRetries: 10},
+	}
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			testEnv := setupTestEnvironment(t, pkgnats.WithBackendConnectionRetries(tc.givenRetries))
+
+			// subscribe to subject
+			subject := fmt.Sprintf(`"%s"`, testingutils.CloudEventData)
+			done := subscribeToSubject(t, testEnv.backendConnection, subject)
+
+			// create cloudevent
+			ce := cloudevents.NewEvent()
+			ce.SetType(testingutils.CloudEventType)
+			err := json.Unmarshal([]byte(testingutils.StructuredCloudEventPayloadWithCleanEventType), &ce)
+			assert.Nil(t, err)
+
+			sendEventAndAssertStatus(testEnv.context, t, testEnv.natsMessageSender, &ce, http.StatusNoContent)
+
+			// TODO: rewrite using assertion
+			// wait for subscriber to receive the messages
+			if err := testingutils.WaitForChannelOrTimeout(done, time.Second*3); err != nil {
+				t.Fatalf("Subscriber did not receive the message with error: %v", err)
+			}
+
+			// close connection
+			testEnv.backendConnection.Connection.Close()
+			assert.True(t, testEnv.backendConnection.Connection.IsClosed())
+			sendEventAndAssertStatus(testEnv.context, t, testEnv.natsMessageSender, &ce, http.StatusNoContent)
+		})
+	}
+}
+
 // Send an event to the NATS server and
 func TestSendCloudEvent(t *testing.T) {
 	// given
