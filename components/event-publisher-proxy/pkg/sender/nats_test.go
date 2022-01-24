@@ -50,7 +50,6 @@ func setupTestEnvironment(t *testing.T, connectionOpts ...pkgnats.BackendConnect
 	// Start Nats server
 	natsServer := testingutils.StartNatsServer()
 	assert.NotNil(t, natsServer)
-	defer natsServer.Shutdown()
 
 	// connect to nats
 	bc := pkgnats.NewBackendConnection(natsServer.ClientURL(), true, 1, time.Second)
@@ -86,6 +85,7 @@ func TestSendCloudEventsToNats(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			testEnv := setupTestEnvironment(t, pkgnats.WithBackendConnectionRetries(tc.givenRetries))
+			defer testEnv.natsServer.Shutdown()
 
 			// subscribe to subject
 			subject := fmt.Sprintf(`"%s"`, testingutils.CloudEventData)
@@ -117,6 +117,7 @@ func TestSendCloudEventsToNats(t *testing.T) {
 func TestSendCloudEvent(t *testing.T) {
 	// given
 	testEnv := setupTestEnvironment(t)
+	defer testEnv.natsServer.Shutdown()
 
 	// subscribe to subject
 	subject := fmt.Sprintf(`"%s"`, testingutils.CloudEventData)
@@ -139,6 +140,7 @@ func TestSendCloudEvent(t *testing.T) {
 
 func TestSendCloudEventWithReconnect(t *testing.T) {
 	testEnv := setupTestEnvironment(t, pkgnats.WithBackendConnectionRetries(10))
+	defer testEnv.natsServer.Shutdown()
 
 	// subscribe to subject
 	subject := fmt.Sprintf(`"%s"`, testingutils.CloudEventData)
