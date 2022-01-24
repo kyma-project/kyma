@@ -9,6 +9,9 @@
     "directory": "tests/fast-integration"
   },
   "scripts": {
+    "pretest": "npm run lint",
+    "lint": "./node_modules/.bin/eslint --ignore-path .gitignore .",
+    "lint-fix": "./node_modules/.bin/eslint --ignore-path .gitignore . --fix",
     "test": "mocha --inline-diffs --check-leaks --reporter mocha-multi-reporters --reporter-options configFile=mocha-reporter-config.json",
     "test-utils": "mocha --inline-diffs --check-leaks --reporter mocha-multi-reporters --reporter-options configFile=mocha-reporter-config.json './utils/**/*.test.js'",
     "test-commerce-mock": "mocha --inline-diffs --check-leaks --reporter mocha-multi-reporters --reporter-options configFile=mocha-reporter-config.json ./test/2-commerce-mock.js",
@@ -20,17 +23,21 @@
     "test-nightly-skr": "mocha --inline-diffs --check-leaks --reporter mocha-multi-reporters --reporter-options configFile=mocha-reporter-config.json ./skr-nightly/test/",
     "test-skr-kyma-to-kyma2-upgrade": "mocha --inline-diffs --check-leaks --reporter mocha-multi-reporters --reporter-options configFile=mocha-reporter-config.json ./skr-kyma-to-kyma2-upgrade/index.js",
     "test-skr-svcat-migration": "mocha --inline-diffs --check-leaks --reporter mocha-multi-reporters --reporter-options configFile=mocha-reporter-config.json ./skr-svcat-migration-test/",
-    "test-eventing": "DEBUG=true mocha --timeout 150000 --inline-diffs --check-leaks --reporter mocha-multi-reporters --reporter-options configFile=mocha-reporter-config.json ./eventing-test/",
+    "test-eventing": "DEBUG=true mocha --timeout 150000 --inline-diffs --check-leaks --reporter mocha-multi-reporters --reporter-options configFile=mocha-reporter-config.json ./eventing-test/eventing-test.js",
+    "test-eventing-provision-skr": "DEBUG=true mocha --timeout 150000 --inline-diffs --check-leaks --reporter mocha-multi-reporters --reporter-options configFile=mocha-reporter-config.json ./eventing-test/provision/provision-skr.js",
+    "test-eventing-deprovision-skr": "DEBUG=true mocha --timeout 150000 --inline-diffs --check-leaks --reporter mocha-multi-reporters --reporter-options configFile=mocha-reporter-config.json ./eventing-test/provision/deprovision-skr.js",
     "test-telemetry": "mocha --timeout 130000 --inline-diffs --check-leaks --reporter mocha-multi-reporters --reporter-options configFile=mocha-reporter-config.json ./telemetry-test/",
     "upgrade-test-prep": "mocha --inline-diffs --check-leaks --reporter mocha-multi-reporters --reporter-options configFile=mocha-reporter-config.json upgrade-test/upgrade-test-prep.js",
     "upgrade-test-tests": "mocha --inline-diffs --check-leaks --reporter mocha-multi-reporters --reporter-options configFile=mocha-reporter-config.json upgrade-test/upgrade-test-tests.js",
-    "upgrade-test-cleanup": "mocha --inline-diffs --check-leaks --reporter mocha-multi-reporters --reporter-options configFile=mocha-reporter-config.json upgrade-test/upgrade-test-cleanup.js",
+    "upgrade-test-cleanup": "DEBUG=true mocha --inline-diffs --check-leaks --reporter mocha-multi-reporters --reporter-options configFile=mocha-reporter-config.json upgrade-test/upgrade-test-cleanup.js",
     "test-application-connectivity-2": "env WITH_CENTRAL_APP_CONNECTIVITY=true mocha --inline-diffs --check-leaks --reporter mocha-multi-reporters --reporter-options configFile=mocha-reporter-config.json",
     "test-application-connectivity-2-compass": "env WITH_CENTRAL_APP_CONNECTIVITY=true mocha --inline-diffs --check-leaks --reporter mocha-multi-reporters --reporter-options configFile=mocha-reporter-config.json ./compass-test/"
   },
   "license": "Apache-2.0",
   "devDependencies": {
     "chai": "^4.2.0",
+    "eslint": "^8.4.1",
+    "eslint-config-google": "^0.14.0",
     "mocha": "^8.3.2",
     "mocha-multi-reporters": "^1.5.1"
   },

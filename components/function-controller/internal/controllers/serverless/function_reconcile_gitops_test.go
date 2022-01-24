@@ -418,8 +418,8 @@ func TestGitOps_GitErrorHandling(t *testing.T) {
 			},
 		}
 		g.Expect(resourceClient.Create(context.TODO(), function)).To(gomega.Succeed())
-
-		gitErr := git2go.MakeGitError2(int(git2go.ErrorCodeNotFound))
+		// We don't use MakeGitError2 function because: https://github.com/libgit2/git2go/issues/873
+		gitErr := &git2go.GitError{Message: "NotFound", Class: 0, Code: git2go.ErrorCodeNotFound}
 		gitOpts := git.Options{URL: "", Reference: "ref"}
 		operator := &automock.GitOperator{}
 		operator.On("LastCommit", gitOpts).Return("", gitErr)

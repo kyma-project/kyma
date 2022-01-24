@@ -1,3 +1,13 @@
+.PHONY: lint
+lint:
+	npm install
+	npm run lint
+
+.PHONY: lint-fix
+lint-fix:
+	npm install
+	npm run lint-fix
+
 .PHONY: ci
 ci:
 	npm install
@@ -59,3 +69,13 @@ ci-application-connectivity-2-compass:
 ci-test-eventing:
 	npm ci
 	npm run test-eventing
+
+.PHONY: ci-test-eventing-provision-skr
+ci-test-eventing-provision-skr:
+	npm ci
+	npm run test-eventing-provision-skr
+
+.PHONY: ci-test-eventing-deprovision-skr
+ci-test-eventing-deprovision-skr:
+	npm ci
+	npm run test-eventing-deprovision-skr

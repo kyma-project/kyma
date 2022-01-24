@@ -41,7 +41,7 @@ func Test_UpdateFunctionStatusGauge(t *testing.T) {
 
 		//THEN
 		value := testutil.ToFloat64(stas.FunctionRunningStatusGaugeVec.With(stas.createLabels(f)))
-		require.InDelta(t, time.Since(startTimestamp.Time).Milliseconds(), value, 0.1, "The gauge value wasn't set")
+		require.InDelta(t, time.Since(startTimestamp.Time).Milliseconds(), value, 1, "The gauge value wasn't set")
 		require.True(t, stas.conditionGaugeSet[stas.createGaugeID(f.UID, cond.Type)])
 
 		// The next update of stats within the same condition shouldn't update gauge value,
@@ -55,7 +55,7 @@ func Test_UpdateFunctionStatusGauge(t *testing.T) {
 
 		//THEN
 		value = testutil.ToFloat64(stas.FunctionRunningStatusGaugeVec.With(stas.createLabels(f)))
-		require.InDelta(t, time.Since(startTimestamp.Time).Milliseconds(), value, 0.1, "The gauge value was updated but shouldn't")
+		require.InDelta(t, time.Since(startTimestamp.Time).Milliseconds(), value, 1, "The gauge value was updated but shouldn't")
 	})
 
 	t.Run("Always collect metrics for Configuration ready condition", func(t *testing.T) {
@@ -84,7 +84,7 @@ func Test_UpdateFunctionStatusGauge(t *testing.T) {
 
 		//THEN
 		value := testutil.ToFloat64(stas.FunctionConfiguredStatusGaugeVec.With(stas.createLabels(f)))
-		require.InDelta(t, time.Since(startTimestamp.Time).Milliseconds(), value, 0.1, "The gauge value wasn't set")
+		require.InDelta(t, time.Since(startTimestamp.Time).Milliseconds(), value, 1, "The gauge value wasn't set")
 		require.True(t, stas.conditionGaugeSet[stas.createGaugeID(f.UID, cond.Type)])
 	})
 	t.Run("Don't collect metrics for condition status false", func(t *testing.T) {
@@ -113,7 +113,7 @@ func Test_UpdateFunctionStatusGauge(t *testing.T) {
 
 		//THEN
 		value := testutil.ToFloat64(stas.FunctionRunningStatusGaugeVec.With(stas.createLabels(f)))
-		require.InDelta(t, 0, value, 0.1, "The gauge value was updated but shouldn't")
+		require.InDelta(t, 0, value, 1, "The gauge value was updated but shouldn't")
 		require.False(t, stas.conditionGaugeSet[stas.createGaugeID(f.UID, cond.Type)])
 	})
 }
