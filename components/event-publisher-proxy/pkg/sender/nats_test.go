@@ -35,31 +35,72 @@ type TestEnvironment struct {
 	logger *logrus.Logger
 }
 
+// setupTestEnvironment creates the test environment for the integration tests in this file
+// It performs the follow steps:
+// - create logger
+// - create and start NATS server
+// - establish a connection to the NATS server `TestEnvironment.backendConnection`
+// - create a sender to publish messsages to NATS
+// TODO:
+// NOTE: if you need any of these objects to be customized, add it to the method signature and overwrite the default instance
+func setupTestEnvironment(t *testing.T, connectionOpts ...pkgnats.BackendConnectionOption) TestEnvironment {
+	// Create logger
+	logger := logrus.New()
+
+	// Start Nats server
+	natsServer := testingutils.StartNatsServer()
+	assert.NotNil(t, natsServer)
+	defer natsServer.Shutdown()
+
+	// connect to nats
+	bc := pkgnats.NewBackendConnection(natsServer.ClientURL(), true, 1, time.Second)
+	for _, opt := range connectionOpts {
+		opt(bc)
+	}
+	err := bc.Connect()
+	assert.Nil(t, err)
+	assert.NotNil(t, bc.Connection)
+
+	// create message sender
+	ctx := context.Background()
+	sender := NewNatsMessageSender(ctx, bc, logger)
+	logger.Info("TestNatsSender started")
+
+	return TestEnvironment{
+		context:           ctx,
+		natsServer:        natsServer,
+		backendConnection: bc,
+		natsMessageSender: sender,
+		logger:            logger,
+	}
+}
+
+// TODO:
 // TestSendCloudEvent ensures that
 func TestSendCloudEvent(t *testing.T) {
+	// given
 	testEnv := setupTestEnvironment(t)
-
 	// subscribe to subject
 	done := make(chan bool, 1)
 	validator := testingutils.ValidateNatsMessageDataOrFail(t, fmt.Sprintf(`"%s"`, testingutils.CloudEventData), done)
 	testingutils.SubscribeToEventOrFail(t, testEnv.backendConnection.Connection, testingutils.CloudEventType, validator)
-
 	// create cloudevent
 	ce := cloudevents.NewEvent()
 	ce.SetType(testingutils.CloudEventType)
 	err := json.Unmarshal([]byte(testingutils.StructuredCloudEventPayloadWithCleanEventType), &ce)
 	assert.Nil(t, err)
 
+	// then & when
 	sendEventAndAssertStatus(testEnv.context, t, testEnv.natsMessageSender, &ce, http.StatusNoContent)
-
 	// wait for subscriber to receive the messages
+	// TODO: rewrite using assertion lib
 	if err := testingutils.WaitForChannelOrTimeout(done, time.Second*3); err != nil {
 		t.Fatalf("Subscriber did not receive the message with error: %v", err)
 	}
 }
 
 func TestSendCloudEventWithReconnect(t *testing.T) {
-	testEnv := setupTestEnvironment(t)
+	testEnv := setupTestEnvironment(t, pkgnats.WithBackendConnectionRetries(10))
 
 	// subscribe to subject
 	done := make(chan bool, 1)
@@ -89,39 +130,4 @@ func sendEventAndAssertStatus(ctx context.Context, t *testing.T, sender *NatsMes
 	status, err := sender.Send(ctx, event)
 	assert.Nil(t, err)
 	assert.Equal(t, expectedStatus, status)
-}
-
-// setupTestEnvironment creates the test environment for the integration tests in this file
-// It performs the follow steps:
-// - create logger
-// - create and start NATS server
-// - establish a connection to the NATS server `TestEnvironment.backendConnection`
-// - create a sender to publish messsages to NATS
-func setupTestEnvironment(t *testing.T) TestEnvironment {
-	// Create logger
-	logger := logrus.New()
-
-	// Start Nats server
-	natsServer := testingutils.StartNatsServer()
-	assert.NotNil(t, natsServer)
-	defer natsServer.Shutdown()
-
-	// connect to nats
-	bc := pkgnats.NewBackendConnection(natsServer.ClientURL(), true, 1, time.Second)
-	err := bc.Connect()
-	assert.Nil(t, err)
-	assert.NotNil(t, bc.Connection)
-
-	// create message sender
-	ctx := context.Background()
-	sender := NewNatsMessageSender(ctx, bc, logger)
-	logger.Info("TestNatsSender started")
-
-	return TestEnvironment{
-		context:           ctx,
-		natsServer:        natsServer,
-		backendConnection: bc,
-		natsMessageSender: sender,
-		logger:            logger,
-	}
 }

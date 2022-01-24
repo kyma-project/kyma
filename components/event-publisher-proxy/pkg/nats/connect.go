@@ -46,3 +46,11 @@ func (bc *BackendConnection) Connect() error {
 	bc.Connection = connection
 	return nil
 }
+
+type BackendConnectionOption func(*BackendConnection)
+
+func WithBackendConnectionRetries(n int) BackendConnectionOption {
+	return func(bc *BackendConnection) {
+		bc.connectionData.reconnects = n
+	}
+}
