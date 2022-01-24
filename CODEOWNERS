@@ -84,6 +84,9 @@
 # The `istio-configuration` chart
 /resources/istio-configuration/ @strekm @werdes72 @Tomasz-Smelcerz-SAP @mjakobczyk @dariusztutaj @cnvergence @veichtj @piotrkpc
 
+# The `istio-resources` chart
+/resources/istio-resources/ @strekm @werdes72 @Tomasz-Smelcerz-SAP @mjakobczyk @dariusztutaj @cnvergence @veichtj @piotrkpc
+
 # The monitoring of `istio-configuration` chart
 /resources/istio-configuration/templates/monitoring @a-thaler @lilitgh @rakesh-garimella @skhalash @chrkl @shorim @lindnerby
 
@@ -115,9 +118,6 @@
 
 # The etcd-tls-setup directory
 components/etcd-tls-setup-job/ @PK85 @piotrmiskiewicz @ksputo @szwedm @voigt @wozniakjan @adamwalach
-
-#API server proxy Component
-/components/apiserver-proxy/ @strekm @werdes72 @Tomasz-Smelcerz-SAP @mjakobczyk @dariusztutaj
 
 # Binding Component
 /components/binding/ @PK85 @piotrmiskiewicz @ksputo @szwedm @voigt @wozniakjan
@@ -189,9 +189,6 @@ components/etcd-tls-setup-job/ @PK85 @piotrmiskiewicz @ksputo @szwedm @voigt @wo
 # api-gateway integration tests
 /tests/integration/api-gateway/ @strekm @werdes72 @Tomasz-Smelcerz-SAP @mjakobczyk @dariusztutaj
 
-# apiserver-proxy tests
-/tests/integration/apiserver-proxy/ @strekm @werdes72 @Tomasz-Smelcerz-SAP @mjakobczyk @dariusztutaj
-
 # Rafter tests
 /tests/rafter/ @m00g3n @pPrecel @dbadura
 
@@ -238,9 +235,6 @@ components/etcd-tls-setup-job/ @PK85 @piotrmiskiewicz @ksputo @szwedm @voigt @wo
 /tests/fast-integration/eventing-test @k15r @lilitgh @marcobebway @nachtmaar @radufa @pxsalehi @mfaizanse @friedrichwilken @vladislavpaskar
 
 # Tools
-
-# The failery directory
-/tools/failery/ @m00g3n @pPrecel @dbadura
 
 # The tools/event-subscriber directory
 /tools/event-subscriber/ @lilitgh @k15r @nachtmaar @marcobebway @radufa @pxsalehi @mfaizanse @friedrichwilken @vladislavpaskar
