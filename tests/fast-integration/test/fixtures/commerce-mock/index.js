@@ -12,7 +12,6 @@ axios.defaults.httpsAgent = httpsAgent;
 const {
   retryPromise,
   convertAxiosError,
-  ignore404,
   sleep,
   k8sApply,
   waitForServiceClass,
