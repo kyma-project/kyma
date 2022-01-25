@@ -963,7 +963,6 @@ function ignore404(e) {
 async function deleteK8sObjects(objects) {
   console.log(`deleting ${objects.length} objects`)
   for (let o of objects) {
-    console.log(`deleting ${path}`)
     await k8sDynamicApi.requestPromise({
       url: `${k8sDynamicApi.basePath}/apis/${o.apiVersion}/namespaces/${o.metadata.namespace}/${o.kind.toLowerCase()}s/${o.metadata.name}`,
       method: "DELETE",
