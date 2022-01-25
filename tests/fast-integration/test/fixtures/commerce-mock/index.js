@@ -12,7 +12,6 @@ axios.defaults.httpsAgent = httpsAgent;
 const {
   retryPromise,
   convertAxiosError,
-  ignore404,
   sleep,
   k8sApply,
   waitForServiceClass,
@@ -700,7 +699,7 @@ async function cleanMockTestFixture(mockNamespace, targetNamespace, wait = true)
       },
     });
   } catch (err) {
-    ignore404(err);
+    // Ignore delete error
   }
 
   debug('Deleting test namespaces');
