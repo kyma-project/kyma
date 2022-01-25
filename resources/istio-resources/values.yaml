@@ -1,0 +1,14 @@
+---
+monitoring:
+  enabled: true
+  dashboards:
+    enabled: true
+  istioServiceMonitor:
+    enabled: true
+    scrapeInterval: ""
+
+global:
+  istio:
+    gateway:
+      name: kyma-gateway
+      namespace: kyma-system

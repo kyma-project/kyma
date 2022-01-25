@@ -34,15 +34,15 @@ global:
       directory: "external/prom"
     node_exporter:
       name: "node-exporter"
-      version: "1.1.2-4c48514d"
+      version: "1.3.1-121599df"
       directory: "tpi"
     kube_state_metrics:
       name: "kube-state-metrics"
-      version: v1.9.7
-      directory: "external/quay.io/coreos"
+      version: v2.3.0
+      directory: "external/k8s.gcr.io/kube-state-metrics"
     grafana:
       name: "grafana"
-      version: "7.5.12-663797e9"
+      version: "7.5.13-eb28d2e0"
       directory: "tpi"
       sha: ""
     busybox:
@@ -52,12 +52,12 @@ global:
       sha: ""
     k8s_sidecar:
       name: "k8s-sidecar"
-      version: "1.14.2-1f7de309"
+      version: "1.15.0-2696e5d5"
       directory: "tpi"
       sha: ""
     oauth2_proxy:
       name: "oauth2-proxy"
-      version: "7.2.0-59f3431d"
+      version: "7.2.1-334ca95f"
       directory: "tpi"
       sha: ""
 
@@ -669,6 +669,13 @@ grafana:
       ## Annotations for Grafana dashboard configmaps
       ##
       annotations: {}
+      multicluster:
+        global:
+          enabled: false
+        etcd:
+          enabled: false
+      provider:
+        allowUiUpdates: false
     datasources:
       enabled: true
       defaultDatasourceEnabled: true
@@ -870,7 +877,7 @@ kubelet:
 
     metricRelabelings:
       - sourceLabels: [__name__]
-        regex: ^(apiserver_client_certificate_expiration_seconds_bucket|go_goroutines|go_memstats_alloc_bytes|go_memstats_heap_alloc_bytes|go_memstats_heap_inuse_bytes|go_memstats_heap_sys_bytes|go_memstats_stack_inuse_bytes|kubelet_cgroup_manager_duration_seconds_bucket|kubelet_cgroup_manager_duration_seconds_count|kubelet_node_name|kubelet_pleg_relist_duration_seconds_bucket|kubelet_pleg_relist_duration_seconds_count|kubelet_pleg_relist_interval_seconds_bucket|kubelet_pod_start_duration_seconds_count|kubelet_pod_worker_duration_seconds_bucket|kubelet_pod_worker_duration_seconds_count|kubelet_running_container_count|kubelet_running_pod_count|kubelet_runtime_operations|kubelet_runtime_operations_total|kubelet_runtime_operations_errors_total|kubelet_volume_stats_available_bytes|kubelet_volume_stats_capacity_bytes|kubelet_volume_stats_inodes|kubernetes_build_info|process_cpu_seconds_total|process_max_fds|process_open_fds|process_resident_memory_bytes|process_start_time_seconds|process_virtual_memory_bytes|rest_client_requests_total)$
+        regex: ^(apiserver_client_certificate_expiration_seconds_bucket|go_goroutines|go_memstats_alloc_bytes|go_memstats_heap_alloc_bytes|go_memstats_heap_inuse_bytes|go_memstats_heap_sys_bytes|go_memstats_stack_inuse_bytes|kubelet_cgroup_manager_duration_seconds_bucket|kubelet_cgroup_manager_duration_seconds_count|kubelet_node_name|kubelet_pleg_relist_duration_seconds_bucket|kubelet_pleg_relist_duration_seconds_count|kubelet_pleg_relist_interval_seconds_bucket|kubelet_pod_start_duration_seconds_count|kubelet_pod_worker_duration_seconds_bucket|kubelet_pod_worker_duration_seconds_count|kubelet_running_container_count|kubelet_running_pod_count|kubelet_runtime_operations|kubelet_runtime_operations_total|kubelet_runtime_operations_errors_total|kubelet_volume_stats_available_bytes|kubelet_volume_stats_capacity_bytes|kubelet_volume_stats_inodes|kubelet_volume_stats_inodes_used|kubernetes_build_info|process_cpu_seconds_total|process_max_fds|process_open_fds|process_resident_memory_bytes|process_start_time_seconds|process_virtual_memory_bytes|rest_client_requests_total)$
         action: keep
 
     # 	relabel configs to apply to samples before ingestion.
@@ -1185,7 +1192,7 @@ kubeStateMetrics:
     ##
     metricRelabelings:
       - sourceLabels: [__name__]
-        regex: ^(kube_daemonset_status_current_number_scheduled|kube_daemonset_status_desired_number_scheduled|kube_daemonset_status_number_misscheduled|kube_daemonset_status_number_ready|kube_deployment_metadata_generation|kube_deployment_spec_replicas|kube_deployment_status_observed_generation|kube_deployment_status_replicas|kube_deployment_status_replicas_available|kube_hpa_spec_max_replicas|kube_hpa_status_current_replicas|kube_hpa_status_desired_replicas|kube_job_spec_completions|kube_job_status_succeeded|kube_namespace_labels|kube_node_status_allocatable|kube_node_status_allocatable_cpu_cores|kube_node_status_allocatable_memory_bytes|kube_node_status_capacity|kube_node_status_condition|kube_persistentvolume_status_phase|kube_pod_container_info|kube_pod_container_resource_limits|kube_pod_container_resource_limits_cpu_cores|kube_pod_container_resource_limits_memory_bytes|kube_pod_container_resource_requests|kube_pod_container_resource_requests_memory_bytes|kube_pod_container_resource_requests_cpu_cores|kube_pod_container_status_restarts_total|kube_pod_container_status_running|kube_pod_container_status_waiting|kube_pod_info|kube_pod_labels|kube_pod_owner|kube_pod_status_phase|kube_replicaset_owner|kube_resourcequota|kube_service_labels|kube_statefulset_metadata_generation|kube_statefulset_replicas|kube_statefulset_status_current_revision|kube_statefulset_status_observed_generation|kube_statefulset_status_replicas|kube_statefulset_status_update_revision|kube_job_complete|kube_job_failed|kube_job_status_completion_time|kube_job_status_start_time|kube_pod_container_status_waiting_reason|kube_pod_container_status_terminated_reason)$
+        regex: ^(kube_daemonset_status_current_number_scheduled|kube_daemonset_status_desired_number_scheduled|kube_daemonset_status_number_misscheduled|kube_daemonset_status_number_ready|kube_deployment_metadata_generation|kube_deployment_spec_replicas|kube_deployment_status_observed_generation|kube_deployment_status_replicas|kube_deployment_status_replicas_available|kube_horizontalpodautoscaler_spec_max_replicas|kube_horizontalpodautoscaler_status_current_replicas|kube_horizontalpodautoscaler_status_desired_replicas|kube_job_spec_completions|kube_job_status_succeeded|kube_namespace_labels|kube_node_status_allocatable|kube_node_status_capacity|kube_node_status_condition|kube_persistentvolume_status_phase|kube_pod_container_info|kube_pod_container_resource_limits|kube_pod_container_resource_requests|kube_pod_container_status_restarts_total|kube_pod_container_status_running|kube_pod_container_status_waiting|kube_pod_info|kube_pod_labels|kube_pod_owner|kube_pod_status_phase|kube_replicaset_owner|kube_resourcequota|kube_service_labels|kube_statefulset_metadata_generation|kube_statefulset_replicas|kube_statefulset_status_current_revision|kube_statefulset_status_observed_generation|kube_statefulset_status_replicas|kube_statefulset_status_update_revision|kube_job_complete|kube_job_failed|kube_job_status_completion_time|kube_job_status_start_time|kube_pod_container_status_waiting_reason|kube_pod_container_status_terminated_reason|kube_namespace_status_phase|kube_node_info)$
         action: keep
 
     # 	relabel configs to apply to samples before ingestion.

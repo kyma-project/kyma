@@ -1,4 +1,4 @@
 module.exports = {
-    ...require('./skr-test'),
-    ...require('./helpers')
-}
+  ...require('./skr-test'),
+  ...require('./helpers'),
+};
