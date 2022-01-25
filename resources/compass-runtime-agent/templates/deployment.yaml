@@ -32,7 +32,7 @@ spec:
           image: {{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.compass_runtime_agent) }}
           imagePullPolicy: {{ .Values.compassRuntimeAgent.image.pullPolicy }}
           args:
-            - "/compass-runtime-agent"
+            - "/app/compass-runtime-agent"
           env:
             - name: APP_AGENT_CONFIGURATION_SECRET
               value: "{{ .Values.compassRuntimeAgent.config.secret.namespace }}/{{ .Values.compassRuntimeAgent.config.secret.name }}"

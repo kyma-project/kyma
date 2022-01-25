@@ -23,4 +23,4 @@ COPY --from=builder /app/licenses /app/licenses
 COPY --from=builder /etc_passwd /etc/passwd
 USER nobody
 
-CMD ["/connectorservice"]
+CMD ["/app/connectorservice"]

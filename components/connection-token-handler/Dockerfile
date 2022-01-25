@@ -22,4 +22,4 @@ COPY --from=builder /app/licenses /app/licenses
 COPY --from=builder /etc_passwd /etc/passwd
 USER nobody
 
-ENTRYPOINT ["/manager"]
+ENTRYPOINT ["/app/manager"]

@@ -30,4 +30,4 @@ COPY --from=builder /app/licenses /app/licenses
 COPY --from=builder /etc_passwd /etc/passwd
 USER nobody
 
-CMD ["/applicationgateway"]
+CMD ["/app/applicationgateway"]

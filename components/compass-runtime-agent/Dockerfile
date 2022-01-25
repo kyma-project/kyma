@@ -26,4 +26,4 @@ COPY --from=builder /app/licenses /app/licenses
 COPY --from=builder /etc_passwd /etc/passwd
 USER nobody
 
-CMD ["/compass-runtime-agent"]
+CMD ["/app/compass-runtime-agent"]
