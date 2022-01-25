@@ -407,6 +407,21 @@ function waitForK8sObject(path, query, checkFn, timeout, timeoutMsg) {
   return result;
 }
 
+function waitForNamespace(name, timeout = 30000) {
+  return waitForK8sObject(
+      `/api/v1/namespaces/${name}`,
+      {},
+      (_type, _apiObj, watchObj) => {
+        return (
+          watchObj.metadata.name === name &&
+            watchObj.status.phase === 'Active'
+        );
+      },
+      timeout,
+      `Waiting for ${name} namespace timeout 3000 ms)`,
+  );
+}
+
 function waitForClusterAddonsConfiguration(name, timeout = 90000) {
   return waitForK8sObject(
       '/apis/addons.kyma-project.io/v1alpha1/clusteraddonsconfigurations',
@@ -1695,6 +1710,7 @@ module.exports = {
   k8sApply,
   k8sDelete,
   waitForK8sObject,
+  waitForNamespace,
   waitForClusterAddonsConfiguration,
   waitForClusterServiceBroker,
   waitForServiceClass,

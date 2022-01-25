@@ -5,31 +5,40 @@ const httpsAgent = new https.Agent({
 });
 axios.defaults.httpsAgent = httpsAgent;
 const {
-  ensureCommerceMockLocalTestFixture,
   checkFunctionResponse,
   sendEventAndCheckResponse,
-  cleanMockTestFixture,
   checkInClusterEventDelivery,
   waitForSubscriptionsTillReady,
-  setEventMeshSourceNamespace,
 } = require('../test/fixtures/commerce-mock');
 const {
+  waitForNamespace,
+} = require('../utils');
+const {
   switchEventingBackend,
-  createEventingBackendK8sSecret,
-  deleteEventingBackendK8sSecret,
   printAllSubscriptions,
   printEventingControllerLogs,
   printEventingPublisherProxyLogs,
 } = require('../utils');
+const {
+  testNamespace,
+  backendK8sSecretName,
+  backendK8sSecretNamespace,
+  DEBUG_MODE,
+  timeoutTime,
+  slowTime,
+  mockNamespace,
+  fatalErrCode,
+} = require('./utils');
+const {cleanupTestingResources} = require('./utils');
 
 describe('Eventing tests', function() {
-  this.timeout(10 * 60 * 1000);
-  this.slow(5000);
-  const testNamespace = 'test';
-  const backendK8sSecretName = process.env.BACKEND_SECRET_NAME || 'eventing-backend';
-  const backendK8sSecretNamespace = process.env.BACKEND_SECRET_NAMESPACE || 'default';
-  const eventMeshSecretFilePath = process.env.EVENTMESH_SECRET_FILE || '';
-  const DEBUG = process.env.DEBUG;
+  this.timeout(timeoutTime);
+  this.slow(slowTime);
+
+  before('Ensure the test namespaces exists', async function() {
+    await waitForNamespace(testNamespace);
+    await waitForNamespace(mockNamespace);
+  });
 
   // eventingE2ETestSuite - Runs Eventing end-to-end tests
   function eventingE2ETestSuite() {
@@ -46,45 +55,15 @@ describe('Eventing tests', function() {
     });
   }
 
-  before(async function() {
-    // runs once before the first test in this block
-
-    // If eventMeshSecretFilePath is specified then create a k8s secret for eventing-backend
-    // else use existing k8s secret as specified in backendK8sSecretName & backendK8sSecretNamespace
-    if (eventMeshSecretFilePath !== '') {
-      console.log('Creating Event Mesh secret');
-      const eventMeshInfo = await createEventingBackendK8sSecret(
-          eventMeshSecretFilePath,
-          backendK8sSecretName,
-          backendK8sSecretNamespace,
-      );
-      setEventMeshSourceNamespace(eventMeshInfo['namespace']);
-    }
-
-    // Deploy Commerce mock application, function and subscriptions for tests
-    console.log('Preparing CommerceMock test fixture');
-    await ensureCommerceMockLocalTestFixture('mocks', testNamespace).catch((err) => {
-      console.dir(err); // first error is logged
-      return ensureCommerceMockLocalTestFixture('mocks', testNamespace);
-    });
-  });
-
-  after(async function() {
-    // runs once after the last test in this block
-    console.log('Cleaning: Test namespaces should be deleted');
-    await cleanMockTestFixture('mocks', testNamespace, true);
-
-    // Delete eventing backend secret if it was created by test
-    if (eventMeshSecretFilePath !== '') {
-      await deleteEventingBackendK8sSecret(backendK8sSecretName, backendK8sSecretNamespace);
-    }
-  });
-
+  // runs after each test in every block
   afterEach(async function() {
-    // runs after each test in every block
+    // if there was a fatal error, perform the cleanup
+    if (this.currentTest.err && this.currentTest.err.code === fatalErrCode) {
+      await cleanupTestingResources();
+    }
 
     // if the test is failed, then printing some debug logs
-    if (this.currentTest.state === 'failed' && DEBUG) {
+    if (this.currentTest.state === 'failed' && DEBUG_MODE) {
       await printAllSubscriptions(testNamespace);
       await printEventingControllerLogs();
       await printEventingPublisherProxyLogs();
@@ -103,7 +82,7 @@ describe('Eventing tests', function() {
       await waitForSubscriptionsTillReady(testNamespace);
 
       // print subscriptions status when debugLogs is enabled
-      if (DEBUG) {
+      if (DEBUG_MODE) {
         await printAllSubscriptions(testNamespace);
       }
     });

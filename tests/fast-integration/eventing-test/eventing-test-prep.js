@@ -15,6 +15,8 @@ const {
   eventMeshSecretFilePath,
   timeoutTime,
   slowTime,
+  fatalErrCode,
+  cleanupTestingResources,
 } = require('./utils');
 const {
   ensureCommerceMockLocalTestFixture,
@@ -109,4 +111,11 @@ describe('Eventing tests preparation', function() {
         testNamespace,
     );
   }
+
+  after(async function() {
+    // if the test preparation failed, perform the cleanup
+    if (this.currentTest.err && this.currentTest.err.code === fatalErrCode) {
+      await cleanupTestingResources();
+    }
+  });
 });
