@@ -22,4 +22,4 @@ COPY --from=builder /go/src/github.com/kyma-project/kyma/components/application-
 COPY --from=builder /etc_passwd /etc/passwd
 USER 1000
 
-CMD ["/appconnectivitycertssetupjob"]
+CMD ["/app/appconnectivitycertssetupjob"]
