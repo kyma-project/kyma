@@ -250,10 +250,15 @@ async function deploy() {
   await waitForPodWithLabel('app', 'service-catalog-catalog-webhook', 'kyma-system');
   await waitForPodWithLabel('app', 'service-broker-proxy-k8s', 'kyma-system');
 
-  await waitForClusterServiceBroker('helm-broker', 5 * 60 * 1000);
-  await waitForClusterServiceBroker('sm-auditlog-api', 5 * 60 * 1000);
-  await waitForClusterServiceBroker('sm-html5-apps-repo', 5 * 60 * 1000);
-  await waitForClusterServiceBroker('sm-auditlog-management', 5 * 60 * 1000);
+  try {
+    await waitForClusterServiceBroker('helm-broker', 5 * 60 * 1000);
+    await waitForClusterServiceBroker('sm-auditlog-api', 5 * 60 * 1000);
+    await waitForClusterServiceBroker('sm-html5-apps-repo', 5 * 60 * 1000);
+    await waitForClusterServiceBroker('sm-auditlog-management', 5 * 60 * 1000);
+  } catch (e) {
+    let csb = await listResources(`/apis/servicecatalog.k8s.io/v1beta1/clusterservicebrokers`);
+    throw new Error(`Cluster service brokers failed to be available in 5 minutes ${JSON.stringify(e)}:\n${JSON.stringify(csb)}`)
+  }
 
   times.push(installRedisExample());
   times.push(installAuditlogExample());
