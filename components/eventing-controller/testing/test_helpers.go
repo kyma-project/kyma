@@ -1,9 +1,10 @@
 package testing
 
 import (
-	"encoding/json"
 	"fmt"
 	"net/http"
+
+	v1 "k8s.io/api/core/v1"
 
 	k8sresource "k8s.io/apimachinery/pkg/api/resource"
 
@@ -68,9 +69,6 @@ const (
            "source":"` + EventSource + `",
            "data":"` + EventData + `"
         }`
-
-	FakeCondition1 = `{ Type: "foo", Status: "foo", Reason: "foo-reason", Message: "foo-message" }`
-	FakeCondition2 = `{ Type: "bar", Status: "bar", Reason: "bar-reason", Message: "bar-message" }`
 )
 
 type APIRuleOption func(rule *apigatewayv1alpha1.APIRule)
@@ -505,9 +503,14 @@ func WithMultipleConditions(s *eventingv1alpha1.Subscription) {
 }
 
 func NewDefaultMultipleConditions() []eventingv1alpha1.Condition {
-	var cond1, cond2 eventingv1alpha1.Condition
-	_ = json.Unmarshal([]byte(FakeCondition1), &cond1)
-	_ = json.Unmarshal([]byte(FakeCondition2), &cond2)
+	cond1 := eventingv1alpha1.MakeCondition(
+		eventingv1alpha1.ConditionSubscriptionActive,
+		eventingv1alpha1.ConditionReasonNATSSubscriptionActive,
+		v1.ConditionTrue, "cond1")
+	cond2 := eventingv1alpha1.MakeCondition(
+		eventingv1alpha1.ConditionSubscriptionActive,
+		eventingv1alpha1.ConditionReasonNATSSubscriptionActive,
+		v1.ConditionTrue, "cond2")
 	return []eventingv1alpha1.Condition{cond1, cond2}
 }
 

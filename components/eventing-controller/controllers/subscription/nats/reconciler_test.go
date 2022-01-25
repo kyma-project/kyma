@@ -289,7 +289,7 @@ func testUpdateSubscriptionStatus(id int, eventTypePrefix, natsSubjectToPublish,
 
 			ensureSubscriptionCreated(ctx, subscription)
 
-			Context("A Subscription with default fake conditions", func() {
+			Context("A Subscription with muktiple conditions of the same type", func() {
 				// the nats subject list to publish to; these are supposed to be equal to the cleanEventTypes
 				natsSubjectsToPublish := []string{
 					fmt.Sprintf("%s0", natsSubjectToPublish),
@@ -312,10 +312,10 @@ func testUpdateSubscriptionStatus(id int, eventTypePrefix, natsSubjectToPublish,
 				By("should have the default condition", func() {
 					getSubscription(ctx, subscription).Should(reconcilertesting.HaveCondition(defaultCondition))
 				})
-				By("should not have the additional fake condition - foo", func() {
+				By("should not have the additional condition - cond1", func() {
 					getSubscription(ctx, subscription).ShouldNot(reconcilertesting.HaveCondition(multipleConditions[0]))
 				})
-				By("should not have the additional fake condition - bar", func() {
+				By("should not have the additional condition - cond2", func() {
 					getSubscription(ctx, subscription).ShouldNot(reconcilertesting.HaveCondition(multipleConditions[1]))
 				})
 				By("should have the default configuration", func() {
