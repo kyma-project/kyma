@@ -64,7 +64,10 @@ The following example shows how to use an OpenID Connect (OIDC) compliant identi
 
 >**NOTE:** The OAuth2 Proxy supports a wide range of other well-known authentication services or OpenID Connect for custom solutions. To find instructions for other authentication services, see the [list of supported providers](https://oauth2-proxy.github.io/oauth2-proxy/docs/configuration/oauth_provider).
 
-1. Create a new OpenID Connect application for your identity provider. Set the callback URL to the `/oauth2/callback` path of your service, for example, `https://kiali.kyma.example.com/oauth2/callback`.
+1. Create a new OpenID Connect application for your identity provider and set the callback URL to the `/oauth2/callback` path of your service.
+   
+   For example, if your Kyma cluster is reachable under `kyma.example.com`, use `https://kiali.kyma.example.com/oauth2/callback`.
+   
    > **TIP:** The subdomain is already exposed by default. Simply change the root domain to your cluster domain.
    
    Your identity provider will return a client ID, a client secret, and a token issuer URL.
