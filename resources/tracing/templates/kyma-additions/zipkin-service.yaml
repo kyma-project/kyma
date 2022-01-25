@@ -7,7 +7,7 @@ metadata:
     app.kubernetes.io/component: zipkin 
 spec:
   ports:
-  - name: jaeger-collector-zipkin
+  - name: tcp-jaeger-collector-zipkin
     port: {{ .Values.jaeger.kyma.zipkinPort }}
     targetPort: {{ .Values.jaeger.kyma.zipkinPort }}
     protocol: TCP
