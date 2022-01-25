@@ -75,11 +75,23 @@ func setupTestEnvironment(t *testing.T, connectionOpts ...pkgnats.BackendConnect
 // TestSendCloudEventsToNats
 func TestSendCloudEventsToNats(t *testing.T) {
 	testCases := []struct {
-		name         string
-		givenRetries int
+		name                               string
+		givenRetries                       int
+		wantHTTPStatusCode                 int
+		wantReconnectAfterConnectionClosed bool
 	}{
-		{name: "1 retry", givenRetries: 1},
-		{name: "10 retries", givenRetries: 10},
+		{
+			name:                               "sending event to NATS works",
+			givenRetries:                       1,
+			wantHTTPStatusCode:                 http.StatusNoContent,
+			wantReconnectAfterConnectionClosed: false,
+		},
+		{
+			name:                               "reconnect to NATS works then connection is closed",
+			givenRetries:                       10,
+			wantHTTPStatusCode:                 http.StatusNoContent,
+			wantReconnectAfterConnectionClosed: true,
+		},
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
@@ -88,6 +100,7 @@ func TestSendCloudEventsToNats(t *testing.T) {
 			///////////////////////////
 
 			testEnv := setupTestEnvironment(t, pkgnats.WithBackendConnectionRetries(tc.givenRetries))
+			// use t.Cleanup instead
 			defer testEnv.natsServer.Shutdown()
 
 			// subscribe to subject
@@ -102,7 +115,7 @@ func TestSendCloudEventsToNats(t *testing.T) {
 
 			// TODO: separate sending and assertions ? basically separate then and when part
 			// then & when
-			sendEventAndAssertHTTPStatusCode(testEnv.context, t, testEnv.natsMessageSender, &ce, http.StatusNoContent)
+			sendEventAndAssertHTTPStatusCode(testEnv.context, t, testEnv.natsMessageSender, &ce, tc.wantHTTPStatusCode)
 
 			// TODO: rewrite using assertion
 			// wait for subscriber to receive the messages
@@ -110,13 +123,16 @@ func TestSendCloudEventsToNats(t *testing.T) {
 				t.Fatalf("Subscriber did not receive the message with error: %v", err)
 			}
 
-			// close connection
-			testEnv.backendConnection.Connection.Close()
-			assert.True(t, testEnv.backendConnection.Connection.IsClosed())
+			if tc.wantReconnectAfterConnectionClosed {
 
-			// then & when
-			// ensure that the reconnect works
-			sendEventAndAssertHTTPStatusCode(testEnv.context, t, testEnv.natsMessageSender, &ce, http.StatusNoContent)
+				// close connection
+				testEnv.backendConnection.Connection.Close()
+				assert.True(t, testEnv.backendConnection.Connection.IsClosed())
+
+				// then & when
+				// ensure that the reconnect works
+				sendEventAndAssertHTTPStatusCode(testEnv.context, t, testEnv.natsMessageSender, &ce, tc.wantHTTPStatusCode)
+			}
 		})
 	}
 }
