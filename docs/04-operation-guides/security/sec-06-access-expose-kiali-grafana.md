@@ -66,7 +66,7 @@ The following example shows how to use an OpenID Connect (OIDC) compliant identi
 
 1. Create a new OpenID Connect application for your identity provider and set the callback URL to the `/oauth2/callback` path of your service.
    
-   For example, if your Kyma cluster is reachable under `kyma.example.com`, use `https://kiali.kyma.example.com/oauth2/callback`.
+   For example, if your Kyma cluster is reachable under `kyma.example.com`, use `https://kiali.kyma.example.com/oauth2/callback` for Kiali.
    
    > **TIP:** The subdomain is already exposed by default. Simply change the root domain to your cluster domain.
    
