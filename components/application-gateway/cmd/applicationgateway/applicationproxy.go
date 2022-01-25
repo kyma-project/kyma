@@ -2,6 +2,7 @@ package main
 
 import (
 	"net/http"
+	"os"
 	"strconv"
 	"sync"
 	"time"
@@ -35,18 +36,19 @@ func main() {
 	log.SetFormatter(formatter)
 
 	log.Info("Starting Application Gateway.")
-
 	options := parseArgs()
 	log.Infof("Options: %s", options)
 
 	k8sConfig, err := restclient.InClusterConfig()
 	if err != nil {
 		log.Fatalf("Error reading in cluster config: %s", err.Error())
+		os.Exit(1)
 	}
 
 	coreClientset, err := kubernetes.NewForConfig(k8sConfig)
 	if err != nil {
 		log.Fatalf("Error creating core clientset: %s", err.Error())
+		os.Exit(2)
 	}
 
 	serviceDefinitionService, err := newServiceDefinitionService(
@@ -57,6 +59,7 @@ func main() {
 	)
 	if err != nil {
 		log.Errorf("Unable to create ServiceDefinitionService: '%s'", err.Error())
+		os.Exit(3)
 	}
 
 	internalHandler := newInternalHandler(coreClientset, serviceDefinitionService, options)
