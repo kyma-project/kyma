@@ -19,6 +19,9 @@ spec:
     spec:
       serviceAccountName: {{ include "operator.serviceAccountName" . }}-controller-manager
       terminationGracePeriodSeconds: {{ .Values.terminationGracePeriodSeconds }}
+      {{- if or .Values.priorityClassName .Values.global.priorityClassName -}}
+      priorityClassName: {{ coalesce .Values.priorityClassName .Values.global.priorityClassName }}
+      {{- end }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
       containers:
@@ -27,6 +30,7 @@ spec:
           args:
             - --leader-elect
             - --cm-name={{ .Release.Name }}-{{ .Values.logProcessor }}-sections
+            - --parser-cm-name={{ .Release.Name }}-{{ .Values.logProcessor }}-parsers
             - --ds-name={{ .Release.Name }}-{{ .Values.logProcessor }}
             - --env-secret={{ .Release.Name }}-{{ .Values.logProcessor }}-env
             - --files-cm={{ .Release.Name }}-{{ .Values.logProcessor }}-files

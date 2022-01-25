@@ -23,7 +23,6 @@ prometheusOperator:
       memory: "128Mi"
     limits:
       cpu: "500m"
-      memory: "1Gi"
 
 alertmanager:
   alertmanagerSpec:

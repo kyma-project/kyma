@@ -2,11 +2,11 @@
 
 ## Overview
 
-The telemetry operator contains a logging controller that generates a Fluent Bit configuration from one or more `LoggingConfiguration` custom resources. The controller ensures that all Fluent Bit pods run the current configuration by deleting pods after the configuration has changed. Find all CRD attributes [here](api/v1alpha1/loggingconfiguration_types.go) and an example [here](config/samples/telemetry_v1alpha1_loggingconfiguration.yaml).
+The telemetry operator contains a logging controller that generates a Fluent Bit configuration from one or more `LogPipeline` custom resources. The controller ensures that all Fluent Bit Pods run the current configuration by deleting Pods after the configuration has changed. See all [CRD attributes](api/v1alpha1/logpipeline_types.go) and an [example](config/samples/telemetry_v1alpha1_logpipeline.yaml).
 
-For now, creating Fluent Bit pods is out of scope of the operator. An existing Fluent Bit DaemonSet is expected.
+For now, creating Fluent Bit Pods is out of scope of the operator. An existing Fluent Bit DaemonSet is expected.
 
-The generated ConfigMap (by default, `logging-fluent-bit-sections` in the `kyma-system` namespace) must be mounted to the Fluent Bit pods and consumed by an `@INCLUDE` statement in an existing [configuration file](https://docs.fluentbit.io/manual/administration/configuring-fluent-bit/configuration-file). File references and environment variables are available in an additional ConfigMap or Secret.
+The generated ConfigMap (by default, `telemetry-fluent-bit-sections` in the `kyma-system` namespace) must be mounted to the Fluent Bit Pods and consumed by an `@INCLUDE` statement in an existing [configuration file](https://docs.fluentbit.io/manual/administration/configuring-fluent-bit/configuration-file). Fluent Bit parsers, file references, and environment variables are available in an additional ConfigMap or Secret.
 
 See the flags that configure all ConfigMaps, Secret and DaemonSet names in [main.go](main.go).
 
@@ -39,13 +39,13 @@ make manifests
 - Install CRDs to cluster in current kubeconfig context
 
 ```bash
-make install
+make install-local
 ```
 
 - Uninstall CRDs to cluster in current kubeconfig context
 
 ```bash
-make uninstall
+make uninstall-local
 ```
 
 - Run the operator locally (uses current kubeconfig context)

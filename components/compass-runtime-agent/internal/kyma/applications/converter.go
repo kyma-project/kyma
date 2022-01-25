@@ -11,7 +11,9 @@ import (
 const defaultDescription = "Description not provided"
 
 const (
-	connectedApp = "connected-app"
+	connectedAppLabelKey = "connected-app"
+	managedByLabelKey    = "applicationconnector.kyma-project.io/managed-by"
+	managedByLabelValue  = "compass-runtime-agent"
 )
 
 //go:generate mockery --name=Converter
@@ -35,9 +37,7 @@ func (c converter) Do(application model.Application) v1alpha1.Application {
 
 	prepareLabels := func(directorLabels model.Labels) map[string]string {
 		labels := make(map[string]string)
-
-		labels[connectedApp] = application.Name
-
+		labels[connectedAppLabelKey] = application.Name
 		return labels
 	}
 
@@ -52,7 +52,8 @@ func (c converter) Do(application model.Application) v1alpha1.Application {
 			APIVersion: "applicationconnector.kyma-project.io/v1alpha1",
 		},
 		ObjectMeta: metav1.ObjectMeta{
-			Name: application.Name,
+			Name:   application.Name,
+			Labels: map[string]string{managedByLabelKey: managedByLabelValue},
 		},
 		Spec: v1alpha1.ApplicationSpec{
 			Description:      description,

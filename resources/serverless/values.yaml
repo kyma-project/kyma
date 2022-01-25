@@ -77,13 +77,13 @@ global:
       directory: "tpi"
     function_controller:
       name: "function-controller"
-      version: "5051e383"
+      version: "PR-13074"
     function_webhook:
       name: "function-webhook"
-      version: "5051e383"
+      version: "PR-13074"
     function_build_init:
       name: "function-build-init"
-      version: "5051e383"
+      version: "PR-13074"
     function_runtime_nodejs12:
       name: "function-runtime-nodejs12"
       version: "5051e383"
@@ -98,11 +98,11 @@ global:
       version: "5051e383"
     kaniko_executor:
       name: "kaniko-executor"
-      version: "1.7.0-a029b8df"
+      version: "1.7.0-6d270da8"
       directory: "tpi"
     registry:
       name: "registry"
-      version: "2.7.1-0646c4cd"
+      version: "2.7.1-ff0c28bf"
       directory: "tpi"
     google_pause:
       name: "pause-amd64"
@@ -111,12 +111,11 @@ global:
   testImages:
     function_controller_test:
       name: "function-controller-test"
-      version: "ceeb73d8"
+      version: "PR-13074"
     git_server:
       name: "gitserver"
       version: "c0aa144a"
-
-
+  highPriorityClassName: "kyma-system-priority"
 
 images:
   function_controller:
@@ -130,7 +129,7 @@ deployment:
   extraProperties: {}
   livenessProbe:
     initialDelaySeconds: 50
-    timeoutSeconds: 1
+    timeoutSeconds: 2
     periodSeconds: 10
   readinessProbe:
     initialDelaySeconds: 10
@@ -166,6 +165,8 @@ containers:
       privileged: false
       allowPrivilegeEscalation: false
       runAsUser: 1000
+    healthz:
+      port: "8090"
     extraProperties: {}
     envs:
       configMapRequeueDuration:
@@ -202,6 +203,8 @@ containers:
         value: "5"
       logLevel:
         value: "info"
+      healthzLivenessTimeout:
+        value: "1s"
 
 services:
   manager:
@@ -239,6 +242,8 @@ clusterMicroFrontend:
 
 grafanaDashboard:
   enabled: true
+  functionMetrics:
+    enabled: false
 
 usageKind:
   name: serverless-function

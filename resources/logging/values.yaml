@@ -26,11 +26,11 @@ global:
   images:
     fluent_bit:
       name: fluent-bit
-      version: 1.8.10-62ff8e56
+      version: 1.8.11-2696e5d5
       directory: tpi
     loki:
       name: loki
-      version: 2.2.1-88dec1f7
+      version: 2.2.1-2696e5d5
       directory: tpi
   kymaRuntime:
     adminGroup: runtimeAdmin
@@ -43,3 +43,4 @@ global:
       namespace: kyma-system
   tracing:
     enabled: true
+  highPriorityClassName: "kyma-system-priority"

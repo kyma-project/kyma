@@ -1,11 +1,9 @@
-{{- /*
-  Taken from https://github.com/kiali/helm-charts/tree/master/kiali-server
-  */ -}}
-{{- if .Values.kiali.spec.deployment.hpa.spec }}
-apiVersion: {{ .Values.kiali.spec.deployment.hpa.api_version }}
+{{- if .Values.deployment.hpa.spec }}
+---
+apiVersion: {{ .Values.deployment.hpa.api_version }}
 kind: HorizontalPodAutoscaler
 metadata:
-  name: {{ include "kiali-server.fullname" . }}-server
+  name: {{ include "kiali-server.fullname" . }}
   namespace: {{ .Release.Namespace }}
   labels:
     {{- include "kiali-server.labels" . | nindent 4 }}
@@ -14,5 +12,6 @@ spec:
     apiVersion: apps/v1
     kind: Deployment
     name: {{ include "kiali-server.fullname" . }}
-  {{- toYaml .Values.kiali.spec.deployment.hpa.spec | nindent 2 }}
+  {{- toYaml .Values.deployment.hpa.spec | nindent 2 }}
+...
 {{- end }}

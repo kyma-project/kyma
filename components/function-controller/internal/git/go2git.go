@@ -64,13 +64,10 @@ func (g *Git2GoClient) LastCommit(options Options) (string, error) {
 
 	//tag
 	commit, err := g.lookupTag(repo, options.Reference)
-	if err == nil {
-		return commit.Id().String(), nil
-	}
-	if !git2go.IsErrorCode(err, git2go.ErrNotFound) {
+	if err != nil {
 		return "", errors.Wrap(err, "while lookup tag")
 	}
-	return "", errors.Errorf("Could't find commit, branch or tag with given ref: %s", options.Reference)
+	return commit.Id().String(), nil
 }
 
 func (g *Git2GoClient) Clone(path string, options Options) (string, error) {
