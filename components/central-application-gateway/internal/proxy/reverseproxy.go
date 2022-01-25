@@ -34,7 +34,6 @@ func newProxy(targetURL string, requestParameters *authorization.RequestParamete
 
 		req.URL.Scheme = target.Scheme
 		req.URL.Host = target.Host
-		req.Host = target.Host
 
 		combinedPath := joinPaths(target.Path, req.URL.Path)
 		req.URL.RawPath = combinedPath
