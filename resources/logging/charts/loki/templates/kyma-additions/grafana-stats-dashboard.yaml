@@ -9,10 +9,10 @@ metadata:
     release: {{ .Release.Name }}
 data:
   loki-stats-dashboard.json: |- 
-        {
-            "annotations": {
+      {
+        "annotations": {
             "list": [
-                {
+              {
                 "builtIn": 1,
                 "datasource": "-- Grafana --",
                 "enable": true,
@@ -20,8 +20,8 @@ data:
                 "iconColor": "rgba(0, 211, 255, 1)",
                 "name": "Annotations & Alerts",
                 "type": "dashboard"
-                },
-                {
+              },
+              {
                 "datasource": "Loki",
                 "enable": true,
                 "expr": "{container=\"kube-diff-logger\"} | json | namespace_extracted=\"$namespace\"",
@@ -30,105 +30,175 @@ data:
                 "name": "deployments",
                 "showIn": 0,
                 "target": {}
-                }
+              }
             ]
-            },
-            "editable": true,
-            "gnetId": null,
-            "graphTooltip": 1,
-            "iteration": 1641933878668,
-            "links": [],
-            "panels": [
+          },
+          "editable": true,
+          "gnetId": null,
+          "graphTooltip": 1,
+          "iteration": 1643106718404,
+          "links": [],
+          "panels": [
             {
-                "datasource": "Loki",
-                "fieldConfig": {
+              "datasource": "Loki",
+              "fieldConfig": {
                 "defaults": {
-                    "color": {
+                  "color": {
                     "mode": "thresholds"
-                    },
-                    "mappings": [],
-                    "thresholds": {
-                    "mode": "absolute",
+                  },
+                  "custom": {
+                    "align": "left",
+                    "displayMode": "lcd-gauge",
+                    "filterable": false
+                  },
+                  "mappings": [],
+                  "noValue": "No data",
+                  "thresholds": {
+                    "mode": "percentage",
                     "steps": [
-                        {
+                      {
                         "color": "light-green",
                         "value": null
-                        },
-                        {
+                      },
+                      {
                         "color": "orange",
                         "value": 80
-                        }
+                      }
                     ]
-                    }
+                  },
+                  "unit": "Bps"
                 },
-                "overrides": []
-                },
-                "gridPos": {
-                "h": 15,
+                "overrides": [
+                  {
+                    "matcher": {
+                      "id": "byName",
+                      "options": "Value #A"
+                    },
+                    "properties": [
+                      {
+                        "id": "custom.displayMode",
+                        "value": "lcd-gauge"
+                      },
+                      {
+                        "id": "displayName",
+                        "value": "Rate"
+                      },
+                      {
+                        "id": "custom.filterable",
+                        "value": true
+                      }
+                    ]
+                  },
+                  {
+                    "matcher": {
+                      "id": "byName",
+                      "options": "pod"
+                    },
+                    "properties": [
+                      {
+                        "id": "displayName",
+                        "value": "Pod"
+                      },
+                      {
+                        "id": "custom.displayMode",
+                        "value": "auto"
+                      },
+                      {
+                        "id": "custom.filterable",
+                        "value": false
+                      }
+                    ]
+                  }
+                ]
+              },
+              "gridPos": {
+                "h": 16,
                 "w": 12,
                 "x": 0,
                 "y": 0
-                },
-                "hideTimeOverride": false,
-                "id": 113,
-                "links": [],
-                "maxDataPoints": 80,
-                "options": {
-                "displayMode": "lcd",
-                "orientation": "horizontal",
-                "reduceOptions": {
-                    "calcs": [
-                    "lastNotNull"
-                    ],
-                    "fields": "",
-                    "values": false
-                },
-                "showUnfilled": true,
-                "text": {
-                    "valueSize": 16
-                }
-                },
-                "pluginVersion": "",
-                "targets": [
+              },
+              "hideTimeOverride": false,
+              "id": 113,
+              "links": [],
+              "maxDataPoints": 80,
+              "options": {
+                "frameIndex": 1,
+                "showHeader": true,
+                "sortBy": [
+                  {
+                    "desc": true,
+                    "displayName": "Value #A"
+                  }
+                ]
+              },
+              "pluginVersion": "",
+              "targets": [
                 {
-                    "expr": "topk(5,sum(count_over_time({namespace!=\"kube-system\"}[1m]))by (pod)) > 20",
-                    "instant": false,
-                    "legendFormat": "{{`{{pod}}`}}",
-                    "range": true,
-                    "refId": "A"
+                  "expr": "topk(15,sum(bytes_rate({namespace=\"$namespace\" ,job=\"fluent-bit\"}[5m]))by (pod)) ",
+                  "instant": true,
+                  "legendFormat": "{{`{{pod}}`}}",
+                  "range": false,
+                  "refId": "A"
                 }
-                ],
-                "timeFrom": null,
-                "timeShift": null,
-                "title": "Logs/minute ",
-                "type": "bargauge"
+              ],
+              "timeFrom": null,
+              "timeShift": null,
+              "title": "Log Rate/Pod",
+              "transformations": [
+                {
+                  "id": "organize",
+                  "options": {
+                    "excludeByName": {
+                      "Time": true
+                    },
+                    "indexByName": {},
+                    "renameByName": {
+                      "Value #A": "Rate",
+                      "pod": ""
+                    }
+                  }
+                },
+                {
+                  "id": "sortBy",
+                  "options": {
+                    "fields": {},
+                    "sort": [
+                      {
+                        "desc": true,
+                        "field": "Rate"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "type": "table"
             },
             {
-                "aliasColors": {},
-                "bars": true,
-                "cacheTimeout": null,
-                "dashLength": 10,
-                "dashes": false,
-                "datasource": "Loki",
-                "decimals": 0,
-                "fieldConfig": {
+              "aliasColors": {},
+              "bars": true,
+              "cacheTimeout": null,
+              "dashLength": 10,
+              "dashes": false,
+              "datasource": "Loki",
+              "decimals": 0,
+              "fieldConfig": {
                 "defaults": {
-                    "links": []
+                  "links": []
                 },
                 "overrides": []
-                },
-                "fill": 1,
-                "fillGradient": 1,
-                "gridPos": {
-                "h": 15,
+              },
+              "fill": 1,
+              "fillGradient": 1,
+              "gridPos": {
+                "h": 16,
                 "w": 12,
                 "x": 12,
                 "y": 0
-                },
-                "hiddenSeries": false,
-                "id": 132,
-                "interval": "1m",
-                "legend": {
+              },
+              "hiddenSeries": false,
+              "id": 132,
+              "interval": "1m",
+              "legend": {
                 "alignAsTable": true,
                 "avg": false,
                 "current": true,
@@ -142,95 +212,95 @@ data:
                 "sortDesc": true,
                 "total": false,
                 "values": true
-                },
-                "lines": false,
-                "linewidth": 3,
-                "links": [],
-                "maxDataPoints": 40,
-                "nullPointMode": "null",
-                "options": {
+              },
+              "lines": false,
+              "linewidth": 3,
+              "links": [],
+              "maxDataPoints": 40,
+              "nullPointMode": "null",
+              "options": {
                 "alertThreshold": true
-                },
-                "percentage": false,
-                "pluginVersion": "",
-                "pointradius": 2,
-                "points": false,
-                "renderer": "flot",
-                "seriesOverrides": [],
-                "spaceLength": 10,
-                "stack": false,
-                "steppedLine": false,
-                "targets": [
+              },
+              "percentage": false,
+              "pluginVersion": "",
+              "pointradius": 2,
+              "points": false,
+              "renderer": "flot",
+              "seriesOverrides": [],
+              "spaceLength": 10,
+              "stack": false,
+              "steppedLine": false,
+              "targets": [
                 {
-                    "expr": "sum(count_over_time(({pod_name!=\"pod\", stream=~\"std.*\"} |~ \"(?i)error\")[$__interval])) by (pod)",
-                    "legendFormat": "{{`{{pod}}`}}",
-                    "maxLines": 0,
-                    "refId": "A"
+                  "expr": "sum(bytes_rate(({namespace=\"$namespace\" ,pod_name!=\"pod\", stream=~\"std.*\"} |~ \"(?i)error\")[5m])) by (pod)",
+                  "legendFormat": "{{`{{pod}}`}}",
+                  "maxLines": 0,
+                  "refId": "A"
                 }
-                ],
-                "thresholds": [],
-                "timeFrom": null,
-                "timeRegions": [],
-                "timeShift": null,
-                "title": "Errors/Pod (historical)",
-                "tooltip": {
+              ],
+              "thresholds": [],
+              "timeFrom": null,
+              "timeRegions": [],
+              "timeShift": null,
+              "title": "Errors/Pod (historical)",
+              "tooltip": {
                 "shared": true,
                 "sort": 2,
                 "value_type": "individual"
-                },
-                "type": "graph",
-                "xaxis": {
+              },
+              "type": "graph",
+              "xaxis": {
                 "buckets": null,
                 "mode": "time",
                 "name": null,
                 "show": true,
                 "values": []
-                },
-                "yaxes": [
+              },
+              "yaxes": [
                 {
-                    "$$hashKey": "object:425",
-                    "decimals": 0,
-                    "format": "short",
-                    "label": "Count",
-                    "logBase": 1,
-                    "max": null,
-                    "min": null,
-                    "show": true
+                  "$$hashKey": "object:425",
+                  "decimals": 0,
+                  "format": "short",
+                  "label": "Count",
+                  "logBase": 1,
+                  "max": null,
+                  "min": null,
+                  "show": true
                 },
                 {
-                    "$$hashKey": "object:426",
-                    "format": "short",
-                    "label": null,
-                    "logBase": 1,
-                    "max": null,
-                    "min": null,
-                    "show": false
+                  "$$hashKey": "object:426",
+                  "format": "short",
+                  "label": null,
+                  "logBase": 1,
+                  "max": null,
+                  "min": null,
+                  "show": false
                 }
-                ],
-                "yaxis": {
+              ],
+              "yaxis": {
                 "align": false,
                 "alignLevel": null
-                }
+              }
             }
-            ],
-            "refresh": "30s",
-            "schemaVersion": 27,
-            "style": "dark",
-            "tags": [
+          ],
+          "refresh": "30s",
+          "schemaVersion": 27,
+          "style": "dark",
+          "tags": [
             "kyma",
             "logging"
-            ],
-            "templating": {
+          ],
+          "templating": {
             "list": [
-                {
+              {
                 "allValue": null,
                 "current": {
-                    "selected": false,
-                    "text": "kyma-system",
-                    "value": "kyma-system"
+                  "selected": true,
+                  "text": "kyma-system",
+                  "value": "kyma-system"
                 },
                 "datasource": "Prometheus",
-                "definition": "label_values(kube_pod_container_info{image=~\".*loki.*\", container!=\"loki-canary\"}, namespace)",
+                "definition": "label_values(kube_pod_container_info, namespace)",
                 "description": null,
                 "error": null,
                 "hide": 0,
@@ -240,8 +310,8 @@ data:
                 "name": "namespace",
                 "options": [],
                 "query": {
-                    "query": "label_values(kube_pod_container_info{image=~\".*loki.*\", container!=\"loki-canary\"}, namespace)",
-                    "refId": "Prometheus-namespace-Variable-Query"
+                  "query": "label_values(kube_pod_container_info, namespace)",
+                  "refId": "StandardVariableQuery"
                 },
                 "refresh": 1,
                 "regex": "",
@@ -252,28 +322,28 @@ data:
                 "tagsQuery": "",
                 "type": "query",
                 "useTags": false
-                }
+              }
             ]
-            },
-            "time": {
-            "from": "now-1h",
+          },
+          "time": {
+            "from": "now-3h",
             "to": "now"
-            },
-            "timepicker": {
+          },
+          "timepicker": {
             "refresh_intervals": [
-                "10s",
-                "30s",
-                "1m",
-                "5m",
-                "15m",
-                "30m",
-                "1h",
-                "2h",
-                "1d"
+              "10s",
+              "30s",
+              "1m",
+              "5m",
+              "15m",
+              "30m",
+              "1h",
+              "2h",
+              "1d"
             ]
-            },
-            "timezone": "",
-            "title": "Kyma / Logging / Logs / Stats",
-            "uid": "lokidashboardstats",
-            "version": 1
+          },
+          "timezone": "",
+          "title": "Kyma / Logging / Stats",
+          "uid": "lokidashboardstats",
+          "version": 1
         }
