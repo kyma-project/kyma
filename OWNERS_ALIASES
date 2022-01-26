@@ -29,3 +29,25 @@ aliases:
     - montaro
     - marcobebway
     - radufa
+
+  eventing-approvers:
+    - lilitgh
+    - k15r
+    - nachtmaar
+    - marcobebway
+    - radufa
+    - pxsalehi
+    - mfaizanse
+    - friedrichwilken
+    - vladislavpaskar
+  eventing-reviewers:
+    - lilitgh
+    - k15r
+    - nachtmaar
+    - marcobebway
+    - radufa
+    - pxsalehi
+    - mfaizanse
+    - friedrichwilken
+    - vladislavpaskar
+    - raypinto
