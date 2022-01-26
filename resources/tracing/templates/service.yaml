@@ -6,7 +6,7 @@ metadata:
 {{ include "jaeger-operator.labels" . | indent 4 }}
 spec:
   ports:
-  - name: tcp-metrics
+  - name: http-jaeger-operator-metrics
     port: 8383
     protocol: TCP
     targetPort: 8383
