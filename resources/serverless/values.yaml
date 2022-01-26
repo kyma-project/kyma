@@ -80,10 +80,10 @@ global:
       version: "PR-12963"
     function_webhook:
       name: "function-webhook"
-      version: "PR-13074"
+      version: "PR-12963"
     function_build_init:
       name: "function-build-init"
-      version: "PR-13074"
+      version: "PR-12963"
     function_runtime_nodejs12:
       name: "function-runtime-nodejs12"
       version: "PR-12963"
