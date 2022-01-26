@@ -317,10 +317,7 @@ func (r *Reconciler) syncInvalidSubscriptions(ctx context.Context) (ctrl.Result,
 		// mark the subscription to be not ready, it will throw a new reconcile call
 		if err := r.syncSubscriptionStatus(ctx, sub, false, false, "invalid subscription"); err != nil {
 			r.namedLogger().Errorw("sync status for invalid subscription failed", "namespace", v.Namespace, "name", v.Name, "error", err)
-			if k8serrors.IsConflict(err) {
-				return ctrl.Result{Requeue: true}, nil
-			}
-			return ctrl.Result{}, err
+			return checkIsConflict(err)
 		}
 	}
 	return ctrl.Result{}, nil
