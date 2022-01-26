@@ -11,7 +11,7 @@ See sample Functions for all available runtimes:
 <div tabs name="available-runtimes" group="available-runtimes">
   <details>
   <summary label="nodejs12">
-  Node.js 12
+  Node.js 12 (Deprecated)
   </summary>
 
 ```yaml
