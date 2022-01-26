@@ -8,12 +8,14 @@ import (
 	"strconv"
 	"time"
 
+	"go.uber.org/atomic"
+
 	"github.com/avast/retry-go/v3"
 	pkgerrors "github.com/pkg/errors"
 )
 
 type Subscriber struct {
-	addr                 string
+	port                 int
 	server               *http.Server
 	StoreEndpoint        string
 	CheckEndpoint        string
@@ -26,9 +28,9 @@ const (
 	maxAttempts = 10
 )
 
-func NewSubscriber(addr string) *Subscriber {
+func NewSubscriber(port int) *Subscriber {
 	return &Subscriber{
-		addr:                 addr,
+		port:                 port,
 		StoreEndpoint:        "/store",
 		CheckEndpoint:        "/check",
 		Return500Endpoint:    "/return500",
@@ -38,7 +40,7 @@ func NewSubscriber(addr string) *Subscriber {
 
 func (s *Subscriber) Start() {
 	store := make(chan string, maxNoOfData)
-	retries := 0
+	retries := atomic.Int32{}
 	mux := http.NewServeMux()
 	mux.HandleFunc("/store", func(w http.ResponseWriter, r *http.Request) {
 		data, err := ioutil.ReadAll(r.Body)
@@ -70,11 +72,11 @@ func (s *Subscriber) Start() {
 		} else {
 			store <- string(data)
 		}
-		retries++
+		retries.Inc()
 		w.WriteHeader(http.StatusInternalServerError)
 	})
 	mux.HandleFunc("/check_retries", func(w http.ResponseWriter, r *http.Request) {
-		_, err := w.Write([]byte(fmt.Sprintf("%d", retries)))
+		_, err := w.Write([]byte(fmt.Sprintf("%d", retries.Load())))
 		if err != nil {
 			log.Printf("check_retries failed: %v", err)
 			w.WriteHeader(http.StatusInternalServerError)
@@ -83,7 +85,7 @@ func (s *Subscriber) Start() {
 	})
 
 	s.server = &http.Server{
-		Addr:    s.addr,
+		Addr:    fmt.Sprintf(":%d", s.port),
 		Handler: mux,
 	}
 
@@ -103,12 +105,20 @@ func (s *Subscriber) Shutdown() {
 	}()
 }
 
-func (s Subscriber) CheckEvent(expectedData, subscriberCheckURL string) error {
+func (s *Subscriber) GetSinkURL() string {
+	return fmt.Sprintf("http://127.0.0.1:%d/store", s.port)
+}
+
+func (s *Subscriber) IsRunning() bool {
+	return s.CheckEvent("") == nil
+}
+
+func (s Subscriber) CheckEvent(expectedData string) error {
 	var body []byte
 	delay := time.Second
 	err := retry.Do(
 		func() error {
-			resp, err := http.Get(subscriberCheckURL) //nolint:gosec
+			resp, err := http.Get(fmt.Sprintf("http://127.0.0.1:%d/check", s.port)) //nolint:gosec
 			if err != nil {
 				return pkgerrors.Wrapf(err, "get HTTP request failed")
 			}
@@ -139,12 +149,12 @@ func (s Subscriber) CheckEvent(expectedData, subscriberCheckURL string) error {
 }
 
 // CheckRetries checks if the number of retries specified by expectedData was done and that the sent data on each retry was correctly received
-func (s Subscriber) CheckRetries(expectedNoOfRetries int, expectedData, subscriberCheckDataURL, subscriberCheckRetriesURL string) error {
+func (s Subscriber) CheckRetries(expectedNoOfRetries int, expectedData string) error {
 	var body []byte
 	delay := time.Second
 	err := retry.Do(
 		func() error {
-			resp, err := http.Get(subscriberCheckRetriesURL) //nolint:gosec
+			resp, err := http.Get(fmt.Sprintf("http://127.0.0.1:%d/check_retries", s.port)) //nolint:gosec
 			if err != nil {
 				return pkgerrors.Wrapf(err, "get HTTP request failed")
 			}
@@ -161,7 +171,7 @@ func (s Subscriber) CheckRetries(expectedNoOfRetries int, expectedData, subscrib
 				return pkgerrors.Wrapf(err, "read data failed")
 			}
 			if actualRetires < expectedNoOfRetries {
-				return fmt.Errorf("total retries not received. ActualRetires=%d, ExpectedRetries=%d", actualRetires, expectedNoOfRetries)
+				return fmt.Errorf("number of retries do not match (actualRetires=%d, expectedRetries=%d)", actualRetires, expectedNoOfRetries)
 			}
 			return nil
 		},
@@ -175,7 +185,7 @@ func (s Subscriber) CheckRetries(expectedNoOfRetries int, expectedData, subscrib
 	}
 	// test if 'expectedData' was received exactly 'expectedNoOfRetries' times
 	for i := 1; i < expectedNoOfRetries; i++ {
-		if err := s.CheckEvent(expectedData, subscriberCheckDataURL); err != nil {
+		if err := s.CheckEvent(expectedData); err != nil {
 			return pkgerrors.Wrapf(err, "check received data after retries failed")
 		}
 	}

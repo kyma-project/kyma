@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"strings"
 	"sync"
 	"testing"
 	"time"
@@ -94,98 +93,42 @@ func TestConvertMsgToCE(t *testing.T) {
 
 func TestSubscription(t *testing.T) {
 	g := NewWithT(t)
-	natsPort := nextPort.get()
-	subscriberPort := nextPort.get()
-	subscriberReceiveURL := fmt.Sprintf("http://127.0.0.1:%d/store", subscriberPort)
-	subscriberCheckURL := fmt.Sprintf("http://127.0.0.1:%d/check", subscriberPort)
-
-	// Start Nats server
-	natsServer := eventingtesting.RunNatsServerOnPort(natsPort)
-	defer eventingtesting.ShutDownNATSServer(natsServer)
-
-	defaultLogger, err := logger.New(string(kymalogger.JSON), string(kymalogger.INFO))
-	if err != nil {
-		t.Fatalf("initialize logger failed: %v", err)
-	}
-
+	natsServer, _ := startNATSServer()
+	defer natsServer.Shutdown()
+	defaultLogger := getLogger(g, kymalogger.INFO)
 	natsConfig := env.NatsConfig{
 		URL:           natsServer.ClientURL(),
 		MaxReconnects: 2,
 		ReconnectWait: time.Second,
 	}
 	defaultMaxInflight := 9
-	natsClient := NewNats(natsConfig, env.DefaultSubscriptionConfig{MaxInFlightMessages: defaultMaxInflight}, nil, defaultLogger)
+	natsBackend := NewNats(natsConfig, env.DefaultSubscriptionConfig{MaxInFlightMessages: defaultMaxInflight}, nil, defaultLogger)
+	g.Expect(natsBackend.Initialize(env.Config{})).Should(Succeed())
 
-	if err := natsClient.Initialize(env.Config{}); err != nil {
-		t.Fatalf("connect to Nats server failed: %v", err)
-	}
-
-	// Create a new subscriber
-	subscriber := eventingtesting.NewSubscriber(fmt.Sprintf(":%d", subscriberPort))
-	subscriber.Start()
-
-	// Shutting down subscriber
+	subscriber, _ := startSubscriber()
 	defer subscriber.Shutdown()
+	g.Expect(subscriber.IsRunning()).To(BeTrue())
 
-	// Check subscriber is running or not by checking the store
-	err = subscriber.CheckEvent("", subscriberCheckURL)
-	if err != nil {
-		t.Fatalf("subscriber did not receive the event: %v", err)
-	}
-
-	// Prepare event-type cleaner
-	application := applicationtest.NewApplication(eventingtesting.ApplicationNameNotClean, nil)
-	applicationLister := fake.NewApplicationListerOrDie(context.Background(), application)
-	cleaner := eventtype.NewCleaner(eventingtesting.EventTypePrefix, applicationLister, defaultLogger)
-
-	// Create a subscription
 	sub := eventingtesting.NewSubscription("sub", "foo", eventingtesting.WithNotCleanEventTypeFilter)
-	sub.Spec.Sink = subscriberReceiveURL
-	_, err = natsClient.SyncSubscription(sub, cleaner)
-	if err != nil {
-		t.Fatalf("sync subscription failed: %v", err)
-	}
+	sub.Spec.Sink = subscriber.GetSinkURL()
+	cleaner := createEventTypeCleaner(eventingtesting.EventTypePrefix, eventingtesting.ApplicationNameNotClean, defaultLogger)
+	_, err := natsBackend.SyncSubscription(sub, cleaner)
+	g.Expect(err).To(BeNil())
 	g.Expect(sub.Status.Config).NotTo(BeNil()) // It should apply the defaults
 	g.Expect(sub.Status.Config.MaxInFlightMessages).To(Equal(defaultMaxInflight))
 
 	data := "sampledata"
-	// Send an event
-	err = SendEventToNATS(natsClient, data)
-	if err != nil {
-		t.Fatalf("publish event failed: %v", err)
-	}
-
+	g.Expect(SendEventToNATS(natsBackend, data)).Should(Succeed())
 	expectedDataInStore := fmt.Sprintf("\"%s\"", data)
-	// Check for the event
-	err = subscriber.CheckEvent(expectedDataInStore, subscriberCheckURL)
-	if err != nil {
-		t.Fatalf("subscriber did not receive the event: %v", err)
-	}
+	g.Expect(subscriber.CheckEvent(expectedDataInStore)).Should(Succeed())
 
-	// Delete subscription
-	err = natsClient.DeleteSubscription(sub)
-	if err != nil {
-		t.Fatalf("delete subscription failed: %v", err)
-	}
+	g.Expect(natsBackend.DeleteSubscription(sub)).Should(Succeed())
 
 	newData := "test-data"
-	// Send an event
-	err = SendEventToNATS(natsClient, newData)
-	if err != nil {
-		t.Fatalf("publish event failed: %v", err)
-	}
-
+	g.Expect(SendEventToNATS(natsBackend, newData)).Should(Succeed())
 	// Check for the event that it did not reach subscriber
-	// Store should never return newdata hence CheckEvent should fail to match newdata
 	notExpectedNewDataInStore := fmt.Sprintf("\"%s\"", newData)
-	err = subscriber.CheckEvent(notExpectedNewDataInStore, subscriberCheckURL)
-	if err != nil && !strings.Contains(err.Error(), "check event after retries failed") {
-		t.Fatalf("check event failed: %v", err)
-	}
-	// newdata was received by the subscriber meaning the subscription was not deleted
-	if err == nil {
-		t.Fatal("subscription still exists in Nats")
-	}
+	g.Expect(subscriber.CheckEvent(notExpectedNewDataInStore)).ShouldNot(Succeed())
 }
 
 // TestNatsSubAfterSync_NoChange tests the SyncSubscription method
@@ -193,36 +136,9 @@ func TestSubscription(t *testing.T) {
 // NATS subjects on nats-server
 func TestNatsSubAfterSync_NoChange(t *testing.T) {
 	g := NewWithT(t)
-
-	//// ######  Setup test assets ######
-	// setup logger
-	defaultLogger, err := logger.New(string(kymalogger.JSON), string(kymalogger.INFO))
-	if err != nil {
-		t.Fatalf("initialize logger failed: %v", err)
-	}
-
-	// create subscribers servers for testing
-	natsPort := nextPort.get()
-	subscriberPort := nextPort.get()
-	subscriberReceiveURL := fmt.Sprintf("http://127.0.0.1:%d/store", subscriberPort)
-	subscriberCheckURL := fmt.Sprintf("http://127.0.0.1:%d/check", subscriberPort)
-
-	// Create a new subscriber
-	subscriber := eventingtesting.NewSubscriber(fmt.Sprintf(":%d", subscriberPort))
-	subscriber.Start()
-	defer subscriber.Shutdown() // defer the shutdown of subscriber
-
-	// check if the subscriber is running or not by checking the store
-	err = subscriber.CheckEvent("", subscriberCheckURL)
-	if err != nil {
-		t.Fatalf("subscriber did not receive the event: %v", err)
-	}
-
-	// Start NATS server
-	natsServer := eventingtesting.RunNatsServerOnPort(natsPort)
-	defer eventingtesting.ShutDownNATSServer(natsServer) // defer the shutdown of nats-server
-
-	// Create NATS backend handler instance
+	natsServer, _ := startNATSServer()
+	defer natsServer.Shutdown()
+	defaultLogger := getLogger(g, kymalogger.INFO)
 	natsConfig := env.NatsConfig{
 		URL:           natsServer.ClientURL(),
 		MaxReconnects: 2,
@@ -230,23 +146,17 @@ func TestNatsSubAfterSync_NoChange(t *testing.T) {
 	}
 	defaultSubsConfig := env.DefaultSubscriptionConfig{MaxInFlightMessages: 5}
 	natsBackend := NewNats(natsConfig, defaultSubsConfig, nil, defaultLogger)
-	if err := natsBackend.Initialize(env.Config{}); err != nil {
-		t.Fatalf("connect to NATS server failed: %v", err)
-	}
+	g.Expect(natsBackend.Initialize(env.Config{})).Should(Succeed())
 
-	// Prepare event-type cleaner
-	application := applicationtest.NewApplication(eventingtesting.ApplicationNameNotClean, nil)
-	applicationLister := fake.NewApplicationListerOrDie(context.Background(), application)
-	cleaner := eventtype.NewCleaner(eventingtesting.EventTypePrefix, applicationLister, defaultLogger)
+	subscriber, _ := startSubscriber()
+	defer subscriber.Shutdown()
+	g.Expect(subscriber.IsRunning()).To(BeTrue())
 
-	//// ###### Test logic ######
-	// Create a subscription
 	sub := eventingtesting.NewSubscription("sub", "foo", eventingtesting.WithNotCleanEventTypeFilter)
-	sub.Spec.Sink = subscriberReceiveURL
-	_, err = natsBackend.SyncSubscription(sub, cleaner)
-	if err != nil {
-		t.Fatalf("sync subscription failed: %v", err)
-	}
+	sub.Spec.Sink = subscriber.GetSinkURL()
+	cleaner := createEventTypeCleaner(eventingtesting.EventTypePrefix, eventingtesting.ApplicationNameNotClean, defaultLogger)
+	_, err := natsBackend.SyncSubscription(sub, cleaner)
+	g.Expect(err).To(BeNil())
 
 	// get cleaned subject
 	subject, err := getCleanSubject(sub.Spec.Filter.Filters[0], cleaner)
@@ -257,15 +167,8 @@ func TestNatsSubAfterSync_NoChange(t *testing.T) {
 	// and checking if it is received by the subscriber
 	data := fmt.Sprintf("data-%s", time.Now().Format(time.RFC850))
 	expectedDataInStore := fmt.Sprintf("\"%s\"", data)
-	err = SendEventToNATS(natsBackend, data)
-	if err != nil {
-		t.Fatalf("publish event failed: %v", err)
-	}
-	err = subscriber.CheckEvent(expectedDataInStore, subscriberCheckURL)
-	if err != nil {
-		t.Fatalf("subscriber did not receive the event: %v", err)
-	}
-
+	g.Expect(SendEventToNATS(natsBackend, data)).Should(Succeed())
+	g.Expect(subscriber.CheckEvent(expectedDataInStore)).Should(Succeed())
 	// set metadata on NATS subscriptions
 	// so that we can later verify if the nats subscriptions are the same (not re-created by Sync)
 	msgLimit, bytesLimit := 2048, 2048
@@ -274,18 +177,12 @@ func TestNatsSubAfterSync_NoChange(t *testing.T) {
 		natsSub := natsBackend.subscriptions[createKey(sub, subject, i)]
 		g.Expect(natsSub).To(Not(BeNil()))
 		g.Expect(natsSub.IsValid()).To(BeTrue())
-
 		// set metadata on nats subscription
-		if err := natsSub.SetPendingLimits(msgLimit, bytesLimit); err != nil {
-			t.Fatalf("set pending limits for nats subscription failed: %v", err)
-		}
+		g.Expect(natsSub.SetPendingLimits(msgLimit, bytesLimit)).Should(Succeed())
 	}
-
 	// Now, sync the subscription
 	_, err = natsBackend.SyncSubscription(sub, cleaner)
-	if err != nil {
-		t.Fatalf("sync subscription failed: %v", err)
-	}
+	g.Expect(err).To(BeNil())
 
 	// check if the NATS subscription are the same (have same metadata)
 	// by comparing the metadata of nats subscription
@@ -307,14 +204,8 @@ func TestNatsSubAfterSync_NoChange(t *testing.T) {
 	// and checking if it is received by the subscriber
 	data = fmt.Sprintf("data-%s", time.Now().Format(time.RFC850))
 	expectedDataInStore = fmt.Sprintf("\"%s\"", data)
-	err = SendEventToNATS(natsBackend, data)
-	if err != nil {
-		t.Fatalf("publish event failed: %v", err)
-	}
-	err = subscriber.CheckEvent(expectedDataInStore, subscriberCheckURL)
-	if err != nil {
-		t.Fatalf("subscriber did not receive the event: %v", err)
-	}
+	g.Expect(SendEventToNATS(natsBackend, data)).Should(Succeed())
+	g.Expect(subscriber.CheckEvent(expectedDataInStore)).Should(Succeed())
 }
 
 // TestNatsSubAfterSync_SinkChange tests the SyncSubscription method
@@ -322,49 +213,9 @@ func TestNatsSubAfterSync_NoChange(t *testing.T) {
 // NATS subjects on nats-server
 func TestNatsSubAfterSync_SinkChange(t *testing.T) {
 	g := NewWithT(t)
-
-	//// ######  Setup test assets ######
-	// Setup logger
-	defaultLogger, err := logger.New(string(kymalogger.JSON), string(kymalogger.INFO))
-	if err != nil {
-		t.Fatalf("initialize logger failed: %v", err)
-	}
-
-	// create two subscribers, as we need two sinks for this test
-	natsPort := nextPort.get()
-	subscriber1Port := nextPort.get()
-	subscriber2Port := nextPort.get()
-
-	subscriber1ReceiveURL := fmt.Sprintf("http://127.0.0.1:%d/store", subscriber1Port)
-	subscriber2ReceiveURL := fmt.Sprintf("http://127.0.0.1:%d/store", subscriber2Port)
-	subscriber1CheckURL := fmt.Sprintf("http://127.0.0.1:%d/check", subscriber1Port)
-	subscriber2CheckURL := fmt.Sprintf("http://127.0.0.1:%d/check", subscriber2Port)
-
-	// create new subscribers
-	subscriber1 := eventingtesting.NewSubscriber(fmt.Sprintf(":%d", subscriber1Port))
-	subscriber2 := eventingtesting.NewSubscriber(fmt.Sprintf(":%d", subscriber2Port))
-	subscriber1.Start()
-	subscriber2.Start()
-
-	// shutting down subscribers
-	defer subscriber1.Shutdown()
-	defer subscriber2.Shutdown()
-
-	// check if subscribers are running or not by checking the stores
-	err = subscriber1.CheckEvent("", subscriber1CheckURL)
-	if err != nil {
-		t.Fatalf("subscriber 1 did not receive the event: %v", err)
-	}
-	err = subscriber2.CheckEvent("", subscriber2CheckURL)
-	if err != nil {
-		t.Fatalf("subscriber 2 did not receive the event: %v", err)
-	}
-
-	// Start NATS server
-	natsServer := eventingtesting.RunNatsServerOnPort(natsPort)
-	defer eventingtesting.ShutDownNATSServer(natsServer)
-
-	// Create NATS backend handler instance
+	natsServer, _ := startNATSServer()
+	defer natsServer.Shutdown()
+	defaultLogger := getLogger(g, kymalogger.INFO)
 	natsConfig := env.NatsConfig{
 		URL:           natsServer.ClientURL(),
 		MaxReconnects: 2,
@@ -372,24 +223,20 @@ func TestNatsSubAfterSync_SinkChange(t *testing.T) {
 	}
 	defaultSubsConfig := env.DefaultSubscriptionConfig{MaxInFlightMessages: 5}
 	natsBackend := NewNats(natsConfig, defaultSubsConfig, nil, defaultLogger)
-	if err := natsBackend.Initialize(env.Config{}); err != nil {
-		t.Fatalf("connect to NATS server failed: %v", err)
-	}
+	g.Expect(natsBackend.Initialize(env.Config{})).Should(Succeed())
 
-	// Prepare event-type cleaner
-	application := applicationtest.NewApplication(eventingtesting.ApplicationNameNotClean, nil)
-	applicationLister := fake.NewApplicationListerOrDie(context.Background(), application)
-	cleaner := eventtype.NewCleaner(eventingtesting.EventTypePrefix, applicationLister, defaultLogger)
+	subscriber1, _ := startSubscriber()
+	defer subscriber1.Shutdown()
+	g.Expect(subscriber1.IsRunning()).To(BeTrue())
+	subscriber2, _ := startSubscriber()
+	defer subscriber2.Shutdown()
+	g.Expect(subscriber2.IsRunning()).To(BeTrue())
 
-	// ##### Test logic ######
-
-	// Create a subscription
 	sub := eventingtesting.NewSubscription("sub", "foo", eventingtesting.WithNotCleanEventTypeFilter)
-	sub.Spec.Sink = subscriber1ReceiveURL
-	_, err = natsBackend.SyncSubscription(sub, cleaner)
-	if err != nil {
-		t.Fatalf("sync subscription failed: %v", err)
-	}
+	sub.Spec.Sink = subscriber1.GetSinkURL()
+	cleaner := createEventTypeCleaner(eventingtesting.EventTypePrefix, eventingtesting.ApplicationNameNotClean, defaultLogger)
+	_, err := natsBackend.SyncSubscription(sub, cleaner)
+	g.Expect(err).To(BeNil())
 
 	// get cleaned subject
 	subject, err := getCleanSubject(sub.Spec.Filter.Filters[0], cleaner)
@@ -400,14 +247,8 @@ func TestNatsSubAfterSync_SinkChange(t *testing.T) {
 	// and checking if it is received by the subscriber
 	data := fmt.Sprintf("data-%s", time.Now().Format(time.RFC850))
 	expectedDataInStore := fmt.Sprintf("\"%s\"", data)
-	err = SendEventToNATS(natsBackend, data)
-	if err != nil {
-		t.Fatalf("publish event failed: %v", err)
-	}
-	err = subscriber1.CheckEvent(expectedDataInStore, subscriber1CheckURL)
-	if err != nil {
-		t.Fatalf("subscriber did not receive the event: %v", err)
-	}
+	g.Expect(SendEventToNATS(natsBackend, data)).Should(Succeed())
+	g.Expect(subscriber1.CheckEvent(expectedDataInStore)).Should(Succeed())
 
 	// set metadata on NATS subscriptions
 	msgLimit, bytesLimit := 2048, 2048
@@ -416,22 +257,14 @@ func TestNatsSubAfterSync_SinkChange(t *testing.T) {
 		natsSub := natsBackend.subscriptions[createKey(sub, subject, i)]
 		g.Expect(natsSub).To(Not(BeNil()))
 		g.Expect(natsSub.IsValid()).To(BeTrue())
-
 		// set metadata on nats subscription
-		if err := natsSub.SetPendingLimits(msgLimit, bytesLimit); err != nil {
-			t.Fatalf("set pending limits for nats subscription failed: %v", err)
-		}
+		g.Expect(natsSub.SetPendingLimits(msgLimit, bytesLimit)).Should(Succeed())
 	}
-
 	// NATS subscription should not be re-created in sync when sink is changed.
 	// change the sink
-	sub.Spec.Sink = subscriber2ReceiveURL
-	// Sync subscription
+	sub.Spec.Sink = subscriber2.GetSinkURL()
 	_, err = natsBackend.SyncSubscription(sub, cleaner)
-	if err != nil {
-		t.Fatalf("sync subscription failed: %v", err)
-	}
-
+	g.Expect(err).To(BeNil())
 	// check if the NATS subscription are the same (have same metadata)
 	// by comparing the metadata of nats subscription
 	g.Expect(len(natsBackend.subscriptions)).To(Equal(defaultSubsConfig.MaxInFlightMessages))
@@ -449,61 +282,21 @@ func TestNatsSubAfterSync_SinkChange(t *testing.T) {
 	}
 
 	// Test if the subscription is working for new sink only
-	// Send an event
 	data = fmt.Sprintf("data-%s", time.Now().Format(time.RFC850))
 	expectedDataInStore = fmt.Sprintf("\"%s\"", data)
-	err = SendEventToNATS(natsBackend, data)
-	if err != nil {
-		t.Fatalf("publish event failed: %v", err)
-	}
-
-	// Old sink should not have received the event
-	err = subscriber1.CheckEvent(expectedDataInStore, subscriber1CheckURL)
-	if err != nil && !strings.Contains(err.Error(), "check event after retries failed") {
-		t.Fatalf("subscriber 1 check event failed: %v", err)
-	}
-
-	// New sink should have received the event
-	err = subscriber2.CheckEvent(expectedDataInStore, subscriber2CheckURL)
-	if err != nil {
-		t.Fatalf("subscriber 2 check event failed: %v", err)
-	}
+	g.Expect(SendEventToNATS(natsBackend, data)).Should(Succeed())
+	// Old sink should not have received the event, the new sink should have
+	g.Expect(subscriber1.CheckEvent(expectedDataInStore)).ShouldNot(Succeed())
+	g.Expect(subscriber2.CheckEvent(expectedDataInStore)).Should(Succeed())
 }
 
 // TestNatsSubAfterSync_SinkChange tests the SyncSubscription method
 // when the filters are changed in subscription
 func TestNatsSubAfterSync_FiltersChange(t *testing.T) {
 	g := NewWithT(t)
-
-	//// ######  Setup test assets ######
-	// setup logger
-	defaultLogger, err := logger.New(string(kymalogger.JSON), string(kymalogger.INFO))
-	if err != nil {
-		t.Fatalf("initialize logger failed: %v", err)
-	}
-
-	// create subscribers servers for testing
-	natsPort := nextPort.get()
-	subscriberPort := nextPort.get()
-	subscriberReceiveURL := fmt.Sprintf("http://127.0.0.1:%d/store", subscriberPort)
-	subscriberCheckURL := fmt.Sprintf("http://127.0.0.1:%d/check", subscriberPort)
-
-	// Create a new subscriber
-	subscriber := eventingtesting.NewSubscriber(fmt.Sprintf(":%d", subscriberPort))
-	subscriber.Start()
-	defer subscriber.Shutdown() // defer the shutdown of subscriber
-
-	// check if the subscriber is running or not by checking the store
-	err = subscriber.CheckEvent("", subscriberCheckURL)
-	if err != nil {
-		t.Fatalf("subscriber did not receive the event: %v", err)
-	}
-
-	// Start NATS server
-	natsServer := eventingtesting.RunNatsServerOnPort(natsPort)
-	defer eventingtesting.ShutDownNATSServer(natsServer) // defer the shutdown of nats-server
-
-	// Create NATS backend handler instance
+	natsServer, _ := startNATSServer()
+	defer natsServer.Shutdown()
+	defaultLogger := getLogger(g, kymalogger.INFO)
 	natsConfig := env.NatsConfig{
 		URL:           natsServer.ClientURL(),
 		MaxReconnects: 2,
@@ -511,23 +304,17 @@ func TestNatsSubAfterSync_FiltersChange(t *testing.T) {
 	}
 	defaultSubsConfig := env.DefaultSubscriptionConfig{MaxInFlightMessages: 5}
 	natsBackend := NewNats(natsConfig, defaultSubsConfig, nil, defaultLogger)
-	if err := natsBackend.Initialize(env.Config{}); err != nil {
-		t.Fatalf("connect to NATS server failed: %v", err)
-	}
+	g.Expect(natsBackend.Initialize(env.Config{})).Should(Succeed())
 
-	// Prepare event-type cleaner
-	application := applicationtest.NewApplication(eventingtesting.ApplicationNameNotClean, nil)
-	applicationLister := fake.NewApplicationListerOrDie(context.Background(), application)
-	cleaner := eventtype.NewCleaner(eventingtesting.EventTypePrefix, applicationLister, defaultLogger)
+	subscriber, _ := startSubscriber()
+	defer subscriber.Shutdown()
+	g.Expect(subscriber.IsRunning()).To(BeTrue())
 
-	//// ###### Test logic ######
-	// Create a subscription
 	sub := eventingtesting.NewSubscription("sub", "foo", eventingtesting.WithNotCleanEventTypeFilter)
-	sub.Spec.Sink = subscriberReceiveURL
-	_, err = natsBackend.SyncSubscription(sub, cleaner)
-	if err != nil {
-		t.Fatalf("sync subscription failed: %v", err)
-	}
+	sub.Spec.Sink = subscriber.GetSinkURL()
+	cleaner := createEventTypeCleaner(eventingtesting.EventTypePrefix, eventingtesting.ApplicationNameNotClean, defaultLogger)
+	_, err := natsBackend.SyncSubscription(sub, cleaner)
+	g.Expect(err).To(BeNil())
 
 	// get cleaned subject
 	subject, err := getCleanSubject(sub.Spec.Filter.Filters[0], cleaner)
@@ -538,14 +325,8 @@ func TestNatsSubAfterSync_FiltersChange(t *testing.T) {
 	// and checking if it is received by the subscriber
 	data := fmt.Sprintf("data-%s", time.Now().Format(time.RFC850))
 	expectedDataInStore := fmt.Sprintf("\"%s\"", data)
-	err = SendEventToNATS(natsBackend, data)
-	if err != nil {
-		t.Fatalf("publish event failed: %v", err)
-	}
-	err = subscriber.CheckEvent(expectedDataInStore, subscriberCheckURL)
-	if err != nil {
-		t.Fatalf("subscriber did not receive the event: %v", err)
-	}
+	g.Expect(SendEventToNATS(natsBackend, data)).Should(Succeed())
+	g.Expect(subscriber.CheckEvent(expectedDataInStore)).Should(Succeed())
 
 	// set metadata on NATS subscriptions
 	// so that we can later verify if the nats subscriptions are the same (not re-created by Sync)
@@ -555,19 +336,14 @@ func TestNatsSubAfterSync_FiltersChange(t *testing.T) {
 		natsSub := natsBackend.subscriptions[createKey(sub, subject, i)]
 		g.Expect(natsSub).To(Not(BeNil()))
 		g.Expect(natsSub.IsValid()).To(BeTrue())
-
 		// set metadata on nats subscription
-		if err := natsSub.SetPendingLimits(msgLimit, bytesLimit); err != nil {
-			t.Fatalf("set pending limits for nats subscription failed: %v", err)
-		}
+		g.Expect(natsSub.SetPendingLimits(msgLimit, bytesLimit)).Should(Succeed())
 	}
 
 	// Now, change the filter in subscription and Sync the subscription
 	sub.Spec.Filter.Filters[0].EventType.Value = fmt.Sprintf("%schanged", eventingtesting.OrderCreatedEventTypeNotClean)
 	_, err = natsBackend.SyncSubscription(sub, cleaner)
-	if err != nil {
-		t.Fatalf("sync subscription failed: %v", err)
-	}
+	g.Expect(err).To(BeNil())
 
 	// get new cleaned subject
 	newSubject, err := getCleanSubject(sub.Spec.Filter.Filters[0], cleaner)
@@ -593,167 +369,86 @@ func TestNatsSubAfterSync_FiltersChange(t *testing.T) {
 	// Test if subscription is working for new subject only
 	data = fmt.Sprintf("data-%s", time.Now().Format(time.RFC850))
 	expectedDataInStore = fmt.Sprintf("\"%s\"", data)
-
 	// Send an event on old subject
-	err = SendEventToNATS(natsBackend, data)
-	if err != nil {
-		t.Fatalf("publish event failed: %v", err)
-	}
+	g.Expect(SendEventToNATS(natsBackend, data)).Should(Succeed())
 	// The sink should not receive any event for old subject
-	err = subscriber.CheckEvent(expectedDataInStore, subscriberCheckURL)
-	if err != nil && !strings.Contains(err.Error(), "check event after retries failed") {
-		t.Fatalf("check event failed: %v", err)
-	}
-
+	g.Expect(subscriber.CheckEvent(expectedDataInStore)).ShouldNot(Succeed())
 	// Now, send an event on new subject
-	err = SendEventToNATSOnEventType(natsBackend, newSubject, data)
-	if err != nil {
-		t.Fatalf("publish event failed: %v", err)
-	}
+	g.Expect(SendEventToNATSOnEventType(natsBackend, newSubject, data)).Should(Succeed())
 	// The sink should receive the event for new subject
-	err = subscriber.CheckEvent(expectedDataInStore, subscriberCheckURL)
-	if err != nil {
-		t.Fatalf("check event failed: %v", err)
-	}
+	g.Expect(subscriber.CheckEvent(expectedDataInStore)).Should(Succeed())
 }
 
 func TestMultipleSubscriptionsToSameEvent(t *testing.T) {
 	g := NewWithT(t)
-	natsPort := nextPort.get()
-	subscriberPort := nextPort.get()
-	subscriberReceiveURL := fmt.Sprintf("http://127.0.0.1:%d/store", subscriberPort)
-	subscriberCheckURL := fmt.Sprintf("http://127.0.0.1:%d/check", subscriberPort)
-
-	// Start Nats server
-	natsServer := eventingtesting.RunNatsServerOnPort(natsPort)
-	defer eventingtesting.ShutDownNATSServer(natsServer)
-
-	defaultLogger, err := logger.New(string(kymalogger.JSON), string(kymalogger.INFO))
-	if err != nil {
-		t.Fatalf("initialize logger failed: %v", err)
-	}
-
+	natsServer, _ := startNATSServer()
+	defer natsServer.Shutdown()
+	defaultLogger := getLogger(g, kymalogger.INFO)
 	natsConfig := env.NatsConfig{
 		URL:           natsServer.ClientURL(),
 		MaxReconnects: 2,
 		ReconnectWait: time.Second,
 	}
 	defaultMaxInflight := 1
-	natsClient := NewNats(natsConfig, env.DefaultSubscriptionConfig{MaxInFlightMessages: defaultMaxInflight}, nil, defaultLogger)
+	natsBackend := NewNats(natsConfig, env.DefaultSubscriptionConfig{MaxInFlightMessages: defaultMaxInflight}, nil, defaultLogger)
+	g.Expect(natsBackend.Initialize(env.Config{})).Should(Succeed())
 
-	if err := natsClient.Initialize(env.Config{}); err != nil {
-		t.Fatalf("connect to Nats server failed: %v", err)
-	}
-
-	// Create a new subscriber
-	subscriber := eventingtesting.NewSubscriber(fmt.Sprintf(":%d", subscriberPort))
-	subscriber.Start()
-
-	// Shutting down subscriber
+	subscriber, _ := startSubscriber()
 	defer subscriber.Shutdown()
+	g.Expect(subscriber.IsRunning()).To(BeTrue())
 
-	// Check if the subscriber is running or not by checking its store
-	err = subscriber.CheckEvent("", subscriberCheckURL)
-	if err != nil {
-		t.Fatalf("subscriber did not receive the event: %v", err)
-	}
-
-	// Prepare event-type cleaner
-	application := applicationtest.NewApplication(eventingtesting.ApplicationNameNotClean, nil)
-	applicationLister := fake.NewApplicationListerOrDie(context.Background(), application)
-	cleaner := eventtype.NewCleaner(eventingtesting.EventTypePrefix, applicationLister, defaultLogger)
+	cleaner := createEventTypeCleaner(eventingtesting.EventTypePrefix, eventingtesting.ApplicationNameNotClean, defaultLogger)
 
 	// Create 3 subscriptions having the same sink and the same event type
 	var subs [3]*eventingv1alpha1.Subscription
 	for i := 0; i < len(subs); i++ {
 		subs[i] = eventingtesting.NewSubscription(fmt.Sprintf("sub-%d", i), "foo", eventingtesting.WithNotCleanEventTypeFilter)
-		subs[i].Spec.Sink = subscriberReceiveURL
-		if _, err = natsClient.SyncSubscription(subs[i], cleaner); err != nil {
-			t.Fatalf("sync subscription %s failed: %v", subs[i].Name, err)
-		}
+		subs[i].Spec.Sink = subscriber.GetSinkURL()
+		_, err := natsBackend.SyncSubscription(subs[i], cleaner)
+		g.Expect(err).To(BeNil())
 		g.Expect(subs[i].Status.Config).NotTo(BeNil()) // It should apply the defaults
 		g.Expect(subs[i].Status.Config.MaxInFlightMessages).To(Equal(defaultMaxInflight))
 	}
 
 	// Send only one event. It should be multiplexed to 3 by NATS, cause 3 subscriptions exist
 	data := "sampledata"
-	err = SendEventToNATS(natsClient, data)
-	if err != nil {
-		t.Fatalf("publish event failed: %v", err)
-	}
-
+	g.Expect(SendEventToNATS(natsBackend, data)).Should(Succeed())
 	// Check for the 3 events that should be received by the subscriber
 	expectedDataInStore := fmt.Sprintf("\"%s\"", data)
 	for i := 0; i < len(subs); i++ {
-		if err = subscriber.CheckEvent(expectedDataInStore, subscriberCheckURL); err != nil {
-			t.Fatalf("subscriber did not receive the event: %v", err)
-		}
+		g.Expect(subscriber.CheckEvent(expectedDataInStore)).Should(Succeed())
 	}
-
 	// Delete all 3 subscription
 	for i := 0; i < len(subs); i++ {
-		if err = natsClient.DeleteSubscription(subs[i]); err != nil {
-			t.Fatalf("delete subscription %s failed: %v", subs[i].Name, err)
-		}
+		g.Expect(natsBackend.DeleteSubscription(subs[i])).Should(Succeed())
 	}
-
 	// Check if all subscriptions are deleted in NATS
 	// Send an event again which should not be delivered to subscriber
 	newData := "test-data"
-	err = SendEventToNATS(natsClient, newData)
-	if err != nil {
-		t.Fatalf("publish event failed: %v", err)
-	}
-
+	g.Expect(SendEventToNATS(natsBackend, newData)).Should(Succeed())
 	// Check for the event that did not reach the subscriber
 	// Store should never return newdata hence CheckEvent should fail to match newdata
 	notExpectedNewDataInStore := fmt.Sprintf("\"%s\"", newData)
-	err = subscriber.CheckEvent(notExpectedNewDataInStore, subscriberCheckURL)
-	if err != nil && !strings.Contains(err.Error(), "check event after retries failed") {
-		t.Fatalf("check event failed: %v", err)
-	}
-	// newdata was received by the subscriber meaning the subscription was not deleted
-	if err == nil {
-		t.Fatal("subscriptions still exists in NATS")
-	}
+	g.Expect(subscriber.CheckEvent(notExpectedNewDataInStore)).ShouldNot(Succeed())
 }
 
 func TestSubscriptionWithDuplicateFilters(t *testing.T) {
 	g := NewWithT(t)
-
-	natsPort := nextPort.get()
-	subscriberPort := nextPort.get()
-	subscriberReceiveURL := fmt.Sprintf("http://127.0.0.1:%d/store", subscriberPort)
-	subscriberCheckURL := fmt.Sprintf("http://127.0.0.1:%d/check", subscriberPort)
-
-	natsServer := eventingtesting.RunNatsServerOnPort(natsPort)
-	defer eventingtesting.ShutDownNATSServer(natsServer)
-
-	defaultLogger, err := logger.New(string(kymalogger.JSON), string(kymalogger.INFO))
-	if err != nil {
-		t.Fatalf("initialize logger failed: %v", err)
-	}
+	natsServer, _ := startNATSServer()
+	defer natsServer.Shutdown()
+	defaultLogger := getLogger(g, kymalogger.INFO)
 
 	natsConfig := env.NatsConfig{
 		URL:           natsServer.ClientURL(),
 		MaxReconnects: 2,
 		ReconnectWait: time.Second,
 	}
-	natsClient := NewNats(natsConfig, env.DefaultSubscriptionConfig{MaxInFlightMessages: 9}, nil, defaultLogger)
+	natsBackend := NewNats(natsConfig, env.DefaultSubscriptionConfig{MaxInFlightMessages: 9}, nil, defaultLogger)
+	g.Expect(natsBackend.Initialize(env.Config{})).Should(Succeed())
 
-	if err := natsClient.Initialize(env.Config{}); err != nil {
-		t.Fatalf("start NATS eventing backend failed: %s", err.Error())
-	}
-
-	// Create a new subscriber
-	subscriber := eventingtesting.NewSubscriber(fmt.Sprintf(":%d", subscriberPort))
-	subscriber.Start()
+	subscriber, _ := startSubscriber()
 	defer subscriber.Shutdown()
-
-	// Check subscriber is running or not by checking the store
-	if err := subscriber.CheckEvent("", subscriberCheckURL); err != nil {
-		t.Fatalf("subscriber did not receive the event: %v", err)
-	}
+	g.Expect(subscriber.IsRunning()).To(BeTrue())
 
 	sub := eventingtesting.NewSubscription("sub", "foo")
 	filter := &eventingv1alpha1.BEBFilter{
@@ -771,44 +466,24 @@ func TestSubscriptionWithDuplicateFilters(t *testing.T) {
 	sub.Spec.Filter = &eventingv1alpha1.BEBFilters{
 		Filters: []*eventingv1alpha1.BEBFilter{filter, filter},
 	}
-	sub.Spec.Sink = subscriberReceiveURL
+	sub.Spec.Sink = subscriber.GetSinkURL()
 	idFunc := func(et string) (string, error) { return et, nil }
-	if _, err := natsClient.SyncSubscription(sub, eventtype.CleanerFunc(idFunc)); err != nil {
-		t.Fatalf("sync subscription failed: %s", err.Error())
-	}
+	_, err := natsBackend.SyncSubscription(sub, eventtype.CleanerFunc(idFunc))
+	g.Expect(err).To(BeNil())
 
 	data := "sampledata"
-	// Send an event
-	if err := SendEventToNATS(natsClient, data); err != nil {
-		t.Fatalf("publish event failed: %v", err)
-	}
-
+	g.Expect(SendEventToNATS(natsBackend, data)).Should(Succeed())
 	expectedDataInStore := fmt.Sprintf("\"%s\"", data)
-	if err := subscriber.CheckEvent(expectedDataInStore, subscriberCheckURL); err != nil {
-		t.Fatalf("subscriber did not receive the event: %v", err)
-	}
-
+	g.Expect(subscriber.CheckEvent(expectedDataInStore)).Should(Succeed())
 	// There should be no more!
-	err = subscriber.CheckEvent(expectedDataInStore, subscriberCheckURL)
-	g.Expect(err).Should(HaveOccurred())
+	g.Expect(subscriber.CheckEvent(expectedDataInStore)).ShouldNot(Succeed())
 }
 
 func TestSubscriptionWithMaxInFlightChange(t *testing.T) {
 	g := NewWithT(t)
-
-	natsPort := nextPort.get()
-	subscriberPort := nextPort.get()
-	subscriberReceiveURL := fmt.Sprintf("http://127.0.0.1:%d/store", subscriberPort)
-
-	// Start NATS server
-	natsServer := eventingtesting.RunNatsServerOnPort(natsPort)
-	defer eventingtesting.ShutDownNATSServer(natsServer)
-
-	defaultLogger, err := logger.New(string(kymalogger.JSON), string(kymalogger.INFO))
-	if err != nil {
-		t.Fatalf("initialize logger failed: %v", err)
-	}
-
+	natsServer, _ := startNATSServer()
+	defer natsServer.Shutdown()
+	defaultLogger := getLogger(g, kymalogger.INFO)
 	natsConfig := env.NatsConfig{
 		URL:           natsServer.ClientURL(),
 		MaxReconnects: 2,
@@ -816,29 +491,20 @@ func TestSubscriptionWithMaxInFlightChange(t *testing.T) {
 	}
 	defaultSubsConfig := env.DefaultSubscriptionConfig{MaxInFlightMessages: 5}
 	natsBackend := NewNats(natsConfig, defaultSubsConfig, nil, defaultLogger)
+	g.Expect(natsBackend.Initialize(env.Config{})).Should(Succeed())
 
-	if err := natsBackend.Initialize(env.Config{}); err != nil {
-		t.Fatalf("connect to NATS server failed: %v", err)
-	}
-
-	// Prepare event-type cleaner
-	application := applicationtest.NewApplication(eventingtesting.ApplicationNameNotClean, nil)
-	applicationLister := fake.NewApplicationListerOrDie(context.Background(), application)
-	cleaner := eventtype.NewCleaner(eventingtesting.EventTypePrefix, applicationLister, defaultLogger)
+	cleaner := createEventTypeCleaner(eventingtesting.EventTypePrefix, eventingtesting.ApplicationNameNotClean, defaultLogger)
 
 	// Create a subscription
 	sub := eventingtesting.NewSubscription("sub", "foo", eventingtesting.WithNotCleanEventTypeFilter)
-	sub.Spec.Sink = subscriberReceiveURL
-	_, err = natsBackend.SyncSubscription(sub, cleaner)
-	if err != nil {
-		t.Fatalf("sync subscription failed: %v", err)
-	}
+	sub.Spec.Sink = fmt.Sprintf("http://127.0.0.1:%d/store", nextPort.get())
+	_, err := natsBackend.SyncSubscription(sub, cleaner)
+	g.Expect(err).To(BeNil())
 
 	filter := sub.Spec.Filter.Filters[0]
 	subject, err := getCleanSubject(filter, cleaner)
 	g.Expect(err).ShouldNot(HaveOccurred())
 	g.Expect(subject).To(Not(BeEmpty()))
-
 	g.Expect(sub.Status.Config).NotTo(BeNil())
 	g.Expect(sub.Status.Config.MaxInFlightMessages).To(Equal(defaultSubsConfig.MaxInFlightMessages))
 
@@ -859,9 +525,7 @@ func TestSubscriptionWithMaxInFlightChange(t *testing.T) {
 
 	sub.Spec.Config = &eventingv1alpha1.SubscriptionConfig{MaxInFlightMessages: 7}
 	_, err = natsBackend.SyncSubscription(sub, cleaner)
-	if err != nil {
-		t.Fatalf("sync subscription failed: %v", err)
-	}
+	g.Expect(err).To(BeNil())
 
 	g.Expect(sub.Status.Config).NotTo(BeNil())
 	g.Expect(sub.Status.Config.MaxInFlightMessages).To(Equal(sub.Spec.Config.MaxInFlightMessages))
@@ -879,47 +543,29 @@ func TestSubscriptionWithMaxInFlightChange(t *testing.T) {
 
 func TestIsValidSubscription(t *testing.T) {
 	g := NewWithT(t)
+	natsServer, _ := startNATSServer()
+	defer natsServer.Shutdown()
+	defaultLogger := getLogger(g, kymalogger.INFO)
 
-	natsPort := nextPort.get()
-	subscriberPort := nextPort.get()
-	subscriberReceiveURL := fmt.Sprintf("http://127.0.0.1:%d/store", subscriberPort)
-
-	// Start NATS server
-	natsServer := eventingtesting.RunNatsServerOnPort(natsPort)
-	defer eventingtesting.ShutDownNATSServer(natsServer)
-
-	defaultLogger, err := logger.New(string(kymalogger.JSON), string(kymalogger.INFO))
-	if err != nil {
-		t.Fatalf("initialize logger failed: %v", err)
-	}
-
-	// Create NATS client
 	natsConfig := env.NatsConfig{
 		URL:           natsServer.ClientURL(),
 		MaxReconnects: 2,
 		ReconnectWait: time.Second,
 	}
 	defaultSubsConfig := env.DefaultSubscriptionConfig{MaxInFlightMessages: 9}
-	natsClient := NewNats(natsConfig, defaultSubsConfig, nil, defaultLogger)
+	natsBackend := NewNats(natsConfig, defaultSubsConfig, nil, defaultLogger)
+	g.Expect(natsBackend.Initialize(env.Config{})).Should(Succeed())
 
-	if err := natsClient.Initialize(env.Config{}); err != nil {
-		t.Fatalf("connect to NATS server failed: %v", err)
-	}
+	subscriber, _ := startSubscriber()
+	defer subscriber.Shutdown()
+	g.Expect(subscriber.IsRunning()).To(BeTrue())
 
-	// Prepare event-type cleaner
-	application := applicationtest.NewApplication(eventingtesting.ApplicationNameNotClean, nil)
-	applicationLister := fake.NewApplicationListerOrDie(context.Background(), application)
-	cleaner := eventtype.NewCleaner(eventingtesting.EventTypePrefix, applicationLister, defaultLogger)
+	cleaner := createEventTypeCleaner(eventingtesting.EventTypePrefix, eventingtesting.ApplicationName, defaultLogger)
+	sub := eventingtesting.NewSubscription("sub", "foo", eventingtesting.WithEventTypeFilter)
+	sub.Spec.Sink = subscriber.GetSinkURL()
+	_, err := natsBackend.SyncSubscription(sub, cleaner)
+	g.Expect(err).To(BeNil())
 
-	// Create a subscription
-	sub := eventingtesting.NewSubscription("sub", "foo", eventingtesting.WithNotCleanEventTypeFilter)
-	sub.Spec.Sink = subscriberReceiveURL
-	_, err = natsClient.SyncSubscription(sub, cleaner)
-	if err != nil {
-		t.Fatalf("sync subscription failed: %v", err)
-	}
-
-	// get filter
 	filter := sub.Spec.Filter.Filters[0]
 	subject, err := getCleanSubject(filter, cleaner)
 	g.Expect(err).ShouldNot(HaveOccurred())
@@ -934,132 +580,74 @@ func TestIsValidSubscription(t *testing.T) {
 	for i := 0; i < sub.Status.Config.MaxInFlightMessages; i++ {
 		key = createKey(sub, subject, i)
 		g.Expect(key).To(Not(BeEmpty()))
-		natsSub = natsClient.subscriptions[key]
+		natsSub = natsBackend.subscriptions[key]
 		g.Expect(natsSub).To(Not(BeNil()))
 	}
 	// check the mapping of Kyma subscription and Nats subscription
 	nsn := createKymaSubscriptionNamespacedName(key, natsSub)
 	g.Expect(nsn.Namespace).To(BeIdenticalTo(sub.Namespace))
 	g.Expect(nsn.Name).To(BeIdenticalTo(sub.Name))
-
 	// the associated Nats subscription should be valid
 	g.Expect(natsSub.IsValid()).To(BeTrue())
-
 	// check that no invalid subscriptions exist
-	invalidNsn := natsClient.GetInvalidSubscriptions()
+	invalidNsn := natsBackend.GetInvalidSubscriptions()
 	g.Expect(len(*invalidNsn)).To(BeZero())
-
-	natsClient.connection.Close()
-
+	natsBackend.connection.Close()
 	// the associated NATS subscription should not be valid anymore
-	err = checkIsNotValid(natsSub, t)
-	g.Expect(err).To(BeNil())
+	g.Expect(checkIsNotValid(natsSub, t)).Should(Succeed())
 
-	// shutdown NATS
 	natsServer.Shutdown()
-
 	// the associated NATS subscription should not be valid anymore
-	err = checkIsNotValid(natsSub, t)
-	g.Expect(err).To(BeNil())
-
+	g.Expect(checkIsNotValid(natsSub, t)).Should(Succeed())
 	// check that only one invalid subscription exist
-	invalidNsn = natsClient.GetInvalidSubscriptions()
+	invalidNsn = natsBackend.GetInvalidSubscriptions()
 	g.Expect(len(*invalidNsn)).To(BeIdenticalTo(sub.Status.Config.MaxInFlightMessages))
-
 	// restart NATS server
-	natsServer = eventingtesting.RunNatsServerOnPort(natsPort)
-	defer natsServer.Shutdown()
-
+	_, _ = startNATSServer()
 	// check that only one invalid subscription still exist, the controller is not running...
-	invalidNsn = natsClient.GetInvalidSubscriptions()
+	invalidNsn = natsBackend.GetInvalidSubscriptions()
 	g.Expect(len(*invalidNsn)).To(BeIdenticalTo(sub.Status.Config.MaxInFlightMessages))
-
 }
 
 func TestSubscriptionUsingCESDK(t *testing.T) {
 	g := NewWithT(t)
-	natsPort := nextPort.get()
-	subscriberPort := nextPort.get()
-	subscriberReceiveURL := fmt.Sprintf("http://127.0.0.1:%d/store", subscriberPort)
-	subscriberCheckURL := fmt.Sprintf("http://127.0.0.1:%d/check", subscriberPort)
-
-	// Start Nats server
-	natsServer := eventingtesting.RunNatsServerOnPort(natsPort)
-	defer eventingtesting.ShutDownNATSServer(natsServer)
-
-	defaultLogger, err := logger.New(string(kymalogger.JSON), string(kymalogger.INFO))
-	g.Expect(err).To(BeNil())
-
+	natsServer, _ := startNATSServer()
+	defer natsServer.Shutdown()
+	defaultLogger := getLogger(g, kymalogger.INFO)
 	natsConfig := env.NatsConfig{
 		URL:           natsServer.ClientURL(),
 		MaxReconnects: 2,
 		ReconnectWait: time.Second,
 	}
 	defaultMaxInflight := 1
-	natsClient := NewNats(natsConfig, env.DefaultSubscriptionConfig{MaxInFlightMessages: defaultMaxInflight}, nil, defaultLogger)
+	natsBackend := NewNats(natsConfig, env.DefaultSubscriptionConfig{MaxInFlightMessages: defaultMaxInflight}, nil, defaultLogger)
+	g.Expect(natsBackend.Initialize(env.Config{})).Should(Succeed())
 
-	err = natsClient.Initialize(env.Config{})
-	g.Expect(err).To(BeNil())
-
-	// Create a new subscriber
-	subscriber := eventingtesting.NewSubscriber(fmt.Sprintf(":%d", subscriberPort))
-	subscriber.Start()
-
-	// Shutting down subscriber
+	subscriber, _ := startSubscriber()
 	defer subscriber.Shutdown()
+	g.Expect(subscriber.IsRunning()).To(BeTrue())
 
-	// Check subscriber is running or not by checking the store
-	err = subscriber.CheckEvent("", subscriberCheckURL)
-	g.Expect(err).To(BeNil())
-
-	// Prepare event-type cleaner
-	application := applicationtest.NewApplication(eventingtesting.ApplicationNameNotClean, nil)
-	applicationLister := fake.NewApplicationListerOrDie(context.Background(), application)
-	cleaner := eventtype.NewCleaner(eventingtesting.EventTypePrefix, applicationLister, defaultLogger)
-
-	// Create a subscription
+	cleaner := createEventTypeCleaner(eventingtesting.EventTypePrefix, eventingtesting.ApplicationName, defaultLogger)
 	sub := eventingtesting.NewSubscription("sub", "foo", eventingtesting.WithEventTypeFilter)
-	sub.Spec.Sink = subscriberReceiveURL
-	_, err = natsClient.SyncSubscription(sub, cleaner)
+	sub.Spec.Sink = subscriber.GetSinkURL()
+	_, err := natsBackend.SyncSubscription(sub, cleaner)
 	g.Expect(err).To(BeNil())
 	g.Expect(sub.Status.Config).NotTo(BeNil()) // It should apply the defaults
 	g.Expect(sub.Status.Config.MaxInFlightMessages).To(Equal(defaultMaxInflight))
 
 	subject := eventingtesting.CloudEventType
-
-	// Send a binary CE
-	err = SendBinaryCloudEventToNATS(natsClient, subject)
-	g.Expect(err).To(BeNil())
-	// Check for the event
-	err = subscriber.CheckEvent(eventingtesting.CloudEventData, subscriberCheckURL)
-	g.Expect(err).To(BeNil())
-
-	//  Send a structured CE
-	err = SendStructuredCloudEventToNATS(natsClient, subject)
-	g.Expect(err).To(BeNil())
-	// Check for the event
-	err = subscriber.CheckEvent("\""+eventingtesting.EventData+"\"", subscriberCheckURL)
-	g.Expect(err).To(BeNil())
-
-	// Delete subscription
-	err = natsClient.DeleteSubscription(sub)
-	g.Expect(err).To(BeNil())
+	g.Expect(SendBinaryCloudEventToNATS(natsBackend, subject, eventingtesting.CloudEventData)).Should(Succeed())
+	g.Expect(subscriber.CheckEvent(eventingtesting.CloudEventData)).Should(Succeed())
+	g.Expect(SendStructuredCloudEventToNATS(natsBackend, subject, eventingtesting.StructuredCloudEvent)).Should(Succeed())
+	g.Expect(subscriber.CheckEvent("\"" + eventingtesting.EventData + "\"")).Should(Succeed())
+	g.Expect(natsBackend.DeleteSubscription(sub)).Should(Succeed())
 }
 
 func TestRetryUsingCESDK(t *testing.T) {
 	g := NewWithT(t)
-	natsPort := nextPort.get()
-	subscriberPort := nextPort.get()
-	subscriberCheckDataURL := fmt.Sprintf("http://127.0.0.1:%d/check", subscriberPort)
-	subscriberCheckRetriesURL := fmt.Sprintf("http://127.0.0.1:%d/check_retries", subscriberPort)
-	subscriberServerErrorURL := fmt.Sprintf("http://127.0.0.1:%d/return500", subscriberPort)
-
-	// Start Nats server
-	natsServer := eventingtesting.RunNatsServerOnPort(natsPort)
-	defer eventingtesting.ShutDownNATSServer(natsServer)
-
-	defaultLogger, err := logger.New(string(kymalogger.JSON), string(kymalogger.INFO))
-	g.Expect(err).To(BeNil())
+	natsServer, _ := startNATSServer()
+	defer natsServer.Shutdown()
+	defaultLogger := getLogger(g, kymalogger.INFO)
 
 	natsConfig := env.NatsConfig{
 		URL:           natsServer.ClientURL(),
@@ -1072,96 +660,72 @@ func TestRetryUsingCESDK(t *testing.T) {
 		DispatcherRetryPeriod: time.Second,
 		DispatcherMaxRetries:  maxRetries,
 	}
-	natsClient := NewNats(natsConfig, defaultSubscriptionConfig, nil, defaultLogger)
+	natsBackend := NewNats(natsConfig, defaultSubscriptionConfig, nil, defaultLogger)
+	g.Expect(natsBackend.Initialize(env.Config{})).Should(Succeed())
 
-	err = natsClient.Initialize(env.Config{})
-	g.Expect(err).To(BeNil())
-
-	// Create a new subscriber
-	subscriber := eventingtesting.NewSubscriber(fmt.Sprintf(":%d", subscriberPort))
-	subscriber.Start()
-
-	// Shutting down subscriber
+	subscriber, subscriberPort := startSubscriber()
 	defer subscriber.Shutdown()
+	g.Expect(subscriber.IsRunning()).To(BeTrue())
 
-	// Check subscriber is running or not by checking the store
-	err = subscriber.CheckEvent("", subscriberCheckDataURL)
-	g.Expect(err).To(BeNil())
-
-	// Prepare event-type cleaner
-	application := applicationtest.NewApplication(eventingtesting.ApplicationName, nil)
-	applicationLister := fake.NewApplicationListerOrDie(context.Background(), application)
-	cleaner := eventtype.NewCleaner(eventingtesting.EventTypePrefix, applicationLister, defaultLogger)
-
-	// Create a subscription
 	sub := eventingtesting.NewSubscription("sub", "foo", eventingtesting.WithEventTypeFilter)
+	subscriberServerErrorURL := fmt.Sprintf("http://127.0.0.1:%d/return500", subscriberPort)
 	sub.Spec.Sink = subscriberServerErrorURL
-	_, err = natsClient.SyncSubscription(sub, cleaner)
+	cleaner := createEventTypeCleaner(eventingtesting.EventTypePrefix, eventingtesting.ApplicationName, defaultLogger)
+	_, err := natsBackend.SyncSubscription(sub, cleaner)
 	g.Expect(err).To(BeNil())
 	g.Expect(sub.Status.Config).NotTo(BeNil()) // It should apply the defaults
 
 	subject := eventingtesting.CloudEventType
-
-	//  Send a structured CE
-	err = SendStructuredCloudEventToNATS(natsClient, subject)
-	g.Expect(err).To(BeNil())
-
+	g.Expect(SendStructuredCloudEventToNATS(natsBackend, subject, eventingtesting.StructuredCloudEvent)).Should(Succeed())
 	// Check that the retries are done and that the sent data was correctly received
-	err = subscriber.CheckRetries(maxRetries, "\""+eventingtesting.EventData+"\"", subscriberCheckDataURL, subscriberCheckRetriesURL)
-	g.Expect(err).To(BeNil())
-
-	// Delete subscription
-	err = natsClient.DeleteSubscription(sub)
-	g.Expect(err).To(BeNil())
+	g.Expect(subscriber.CheckRetries(maxRetries, "\""+eventingtesting.EventData+"\"")).Should(Succeed())
+	g.Expect(natsBackend.DeleteSubscription(sub)).Should(Succeed())
 }
 
 func TestSubscription_NATSServerRestart(t *testing.T) {
 	g := NewWithT(t)
 	natsServer, natsPort := startNATSServer()
 	defer natsServer.Shutdown()
-	defaultLogger := getLogger(t, kymalogger.INFO)
+	defaultLogger := getLogger(g, kymalogger.INFO)
 	// The reconnect configs should be large enough to cover the NATS server restart period
 	natsConfig := env.NatsConfig{
 		URL:           natsServer.ClientURL(),
 		MaxReconnects: 10,
 		ReconnectWait: 3 * time.Second,
 	}
-	natsClient := NewNats(natsConfig, env.DefaultSubscriptionConfig{MaxInFlightMessages: 10}, nil, defaultLogger)
-	g.Expect(natsClient.Initialize(env.Config{})).To(BeNil())
+	natsBackend := NewNats(natsConfig, env.DefaultSubscriptionConfig{MaxInFlightMessages: 10}, nil, defaultLogger)
+	g.Expect(natsBackend.Initialize(env.Config{})).Should(Succeed())
 
-	subscriber, subscriberPort := startSubscriber()
+	subscriber, _ := startSubscriber()
 	defer subscriber.Shutdown()
-	subscriberReceiveURL := fmt.Sprintf("http://127.0.0.1:%d/store", subscriberPort)
-	subscriberCheckURL := fmt.Sprintf("http://127.0.0.1:%d/check", subscriberPort)
-	// Check subscriber is running or not by checking the store
-	g.Expect(subscriber.CheckEvent("", subscriberCheckURL)).To(BeNil())
+	g.Expect(subscriber.IsRunning()).To(BeTrue())
 
 	// Create a subscription
 	sub := eventingtesting.NewSubscription("sub", "foo", eventingtesting.WithNotCleanEventTypeFilter)
-	sub.Spec.Sink = subscriberReceiveURL
+	sub.Spec.Sink = subscriber.GetSinkURL()
 	cleaner := createEventTypeCleaner(eventingtesting.EventTypePrefix, eventingtesting.ApplicationName, defaultLogger)
-	_, err := natsClient.SyncSubscription(sub, cleaner)
+	_, err := natsBackend.SyncSubscription(sub, cleaner)
 	g.Expect(err).To(BeNil())
 
 	ev1data := "sampledata"
-	g.Expect(SendEventToNATS(natsClient, ev1data)).To(Succeed())
+	g.Expect(SendEventToNATS(natsBackend, ev1data)).Should(Succeed())
 	expectedEv1Data := fmt.Sprintf("\"%s\"", ev1data)
-	g.Expect(subscriber.CheckEvent(expectedEv1Data, subscriberCheckURL)).To(Succeed())
+	g.Expect(subscriber.CheckEvent(expectedEv1Data)).Should(Succeed())
 
 	natsServer.Shutdown()
 	g.Eventually(func() bool {
-		return natsClient.connection.IsConnected()
+		return natsBackend.connection.IsConnected()
 	}, 60*time.Second, 2*time.Second).Should(BeFalse())
 	_ = eventingtesting.RunNatsServerOnPort(natsPort)
 	g.Eventually(func() bool {
-		return natsClient.connection.IsConnected()
+		return natsBackend.connection.IsConnected()
 	}, 60*time.Second, 2*time.Second).Should(BeTrue())
 
 	// After reconnect, event delivery should work again
 	ev2data := "newsampledata"
-	g.Expect(SendEventToNATS(natsClient, ev2data)).To(Succeed())
+	g.Expect(SendEventToNATS(natsBackend, ev2data)).Should(Succeed())
 	expectedEv2Data := fmt.Sprintf("\"%s\"", ev2data)
-	g.Expect(subscriber.CheckEvent(expectedEv2Data, subscriberCheckURL)).To(Succeed())
+	g.Expect(subscriber.CheckEvent(expectedEv2Data)).Should(Succeed())
 }
 
 func startNATSServer() (*server.Server, int) {
@@ -1172,22 +736,20 @@ func startNATSServer() (*server.Server, int) {
 
 func startSubscriber() (*eventingtesting.Subscriber, int) {
 	subscriberPort := nextPort.get()
-	subscriber := eventingtesting.NewSubscriber(fmt.Sprintf(":%d", subscriberPort))
+	subscriber := eventingtesting.NewSubscriber(subscriberPort)
 	subscriber.Start()
 	return subscriber, subscriberPort
 }
 
-func createEventTypeCleaner(eventTypePrefix, applicationName string, logger *logger.Logger) eventtype.Cleaner {
+func createEventTypeCleaner(eventTypePrefix, applicationName string, logger *logger.Logger) eventtype.Cleaner { //nolint:unparam
 	application := applicationtest.NewApplication(applicationName, nil)
 	applicationLister := fake.NewApplicationListerOrDie(context.Background(), application)
 	return eventtype.NewCleaner(eventTypePrefix, applicationLister, logger)
 }
 
-func getLogger(t *testing.T, level kymalogger.Level) *logger.Logger {
+func getLogger(g *GomegaWithT, level kymalogger.Level) *logger.Logger { //nolint:unparam
 	l, err := logger.New(string(kymalogger.JSON), string(level))
-	if err != nil {
-		t.Fatalf("initialize logger failed: %v", err)
-	}
+	g.Expect(err).To(BeNil())
 	return l
 }
 
