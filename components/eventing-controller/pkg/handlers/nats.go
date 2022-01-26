@@ -129,9 +129,9 @@ func (n *Nats) SyncSubscription(sub *eventingv1alpha1.Subscription, cleaner even
 
 	subKeyPrefix := createKeyPrefix(sub)
 
-	// check if there is any existing NATS subscription
-	// which is not anymore in the subscription filters
-	// e.g. filters were modified
+	// check if there is any existing NATS subscription in global list
+	// which is not anymore in this subscription filters (i.e. cleanSubjects).
+	// e.g. when filters are modified.
 	for key, s := range n.subscriptions {
 		if strings.HasPrefix(key, subKeyPrefix) && !utils.ContainsString(cleanSubjects, s.Subject) {
 			if err := n.deleteSubscriptionFromNATS(s, key, log); err != nil {
@@ -256,7 +256,7 @@ func (n *Nats) deleteSubscriptionFromNATS(natsSub *nats.Subscription, subKey str
 		}
 	}
 	delete(n.subscriptions, subKey)
-	log.Debugw("unsubscribe from nats succeeded", "subscriptionKey", subKey)
+	log.Debugw("unsubscribe from NATS succeeded", "subscriptionKey", subKey)
 
 	return nil
 }
