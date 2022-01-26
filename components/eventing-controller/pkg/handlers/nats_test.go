@@ -101,7 +101,7 @@ func TestSubscription(t *testing.T) {
 
 	// Start Nats server
 	natsServer := eventingtesting.RunNatsServerOnPort(natsPort)
-	defer natsServer.Shutdown()
+	defer eventingtesting.ShutDownNATSServer(natsServer)
 
 	defaultLogger, err := logger.New(string(kymalogger.JSON), string(kymalogger.INFO))
 	if err != nil {
@@ -1070,7 +1070,7 @@ func TestMultipleSubscriptionsToSameEvent(t *testing.T) {
 
 	// Start Nats server
 	natsServer := eventingtesting.RunNatsServerOnPort(natsPort)
-	defer natsServer.Shutdown()
+	defer eventingtesting.ShutDownNATSServer(natsServer)
 
 	defaultLogger, err := logger.New(string(kymalogger.JSON), string(kymalogger.INFO))
 	if err != nil {
@@ -1171,7 +1171,7 @@ func TestSubscriptionWithDuplicateFilters(t *testing.T) {
 	subscriberCheckURL := fmt.Sprintf("http://127.0.0.1:%d/check", subscriberPort)
 
 	natsServer := eventingtesting.RunNatsServerOnPort(natsPort)
-	defer natsServer.Shutdown()
+	defer eventingtesting.ShutDownNATSServer(natsServer)
 
 	defaultLogger, err := logger.New(string(kymalogger.JSON), string(kymalogger.INFO))
 	if err != nil {
@@ -1330,6 +1330,7 @@ func TestIsValidSubscription(t *testing.T) {
 
 	// Start NATS server
 	natsServer := eventingtesting.RunNatsServerOnPort(natsPort)
+	defer eventingtesting.ShutDownNATSServer(natsServer)
 
 	defaultLogger, err := logger.New(string(kymalogger.JSON), string(kymalogger.INFO))
 	if err != nil {
@@ -1428,7 +1429,7 @@ func TestSubscriptionUsingCESDK(t *testing.T) {
 
 	// Start Nats server
 	natsServer := eventingtesting.RunNatsServerOnPort(natsPort)
-	defer natsServer.Shutdown()
+	defer eventingtesting.ShutDownNATSServer(natsServer)
 
 	defaultLogger, err := logger.New(string(kymalogger.JSON), string(kymalogger.INFO))
 	g.Expect(err).To(BeNil())
@@ -1499,7 +1500,7 @@ func TestRetryUsingCESDK(t *testing.T) {
 
 	// Start Nats server
 	natsServer := eventingtesting.RunNatsServerOnPort(natsPort)
-	defer natsServer.Shutdown()
+	defer eventingtesting.ShutDownNATSServer(natsServer)
 
 	defaultLogger, err := logger.New(string(kymalogger.JSON), string(kymalogger.INFO))
 	g.Expect(err).To(BeNil())

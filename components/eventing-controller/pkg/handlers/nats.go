@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"reflect"
 	"strconv"
 	"strings"
 	"sync"
@@ -101,7 +102,7 @@ func newCloudeventClient(config env.NatsConfig) (cev2.Client, error) {
 }
 
 // SyncSubscription synchronizes the given Kyma subscription to NATS subscription.
-// note: the returned bool should be ignored now. It should act as a marker for changed subscription status.
+// The returned bool acts as a marker for changed subscription status.
 func (n *Nats) SyncSubscription(sub *eventingv1alpha1.Subscription, cleaner eventtype.Cleaner, _ ...interface{}) (bool, error) {
 	var filters []*eventingv1alpha1.BEBFilter
 	if sub.Spec.Filter != nil {
@@ -189,11 +190,18 @@ func (n *Nats) SyncSubscription(sub *eventingv1alpha1.Subscription, cleaner even
 		}
 	}
 
-	// setting the clean event types
-	sub.Status.CleanEventTypes = cleanSubjects
-	sub.Status.Config = subscriptionConfig
+	// Setting the clean event types
+	statusUpdated := false
+	if !reflect.DeepEqual(sub.Status.CleanEventTypes, cleanSubjects) {
+		sub.Status.CleanEventTypes = cleanSubjects
+		statusUpdated = true
+	}
+	if !reflect.DeepEqual(sub.Status.Config, subscriptionConfig) {
+		sub.Status.Config = subscriptionConfig
+		statusUpdated = true
+	}
 
-	return false, nil
+	return statusUpdated, nil
 }
 
 // DeleteSubscription deletes all NATS subscriptions corresponding to a Kyma subscription
@@ -214,7 +222,6 @@ func (n *Nats) DeleteSubscription(sub *eventingv1alpha1.Subscription) error {
 			if err := n.deleteSubscriptionFromNATS(s, key, log); err != nil {
 				return err
 			}
-
 			// delete subscription sink info from storage
 			n.sinks.Delete(subKeyPrefix)
 		}

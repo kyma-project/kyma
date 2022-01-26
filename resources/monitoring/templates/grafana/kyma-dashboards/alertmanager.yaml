@@ -3588,7 +3588,7 @@ data:
               "tags": []
             },
             {
-              "expr": "max(kube_pod_container_resource_limits_cpu_cores{pod=~\"$instance\"}) by (pod)",
+              "expr": "max(kube_pod_container_resource_limits{resource=cpu,pod=~\"$instance\"}) by (pod)",
               "format": "time_series",
               "intervalFactor": 1,
               "legendFormat": "Limit  {{ `{{pod}}` }}",
@@ -3703,7 +3703,7 @@ data:
               "refId": "E"
             },
             {
-              "expr": "max(kube_pod_container_resource_limits_memory_bytes{pod=~\"$instance\"}) by (pod)",
+              "expr": "max(kube_pod_container_resource_limits{resource=memory, pod=~\"$instance\"}) by (pod)",
               "format": "time_series",
               "intervalFactor": 1,
               "legendFormat": "Limit  {{ `{{ pod }}` }}",

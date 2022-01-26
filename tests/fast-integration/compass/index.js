@@ -1,6 +1,5 @@
-module.exports = { 
-    ...require("./client"),
-    ...require("./helpers"),
-    ...require("./fixtures"),
-  };
-  
+module.exports = {
+  ...require('./client'),
+  ...require('./helpers'),
+  ...require('./fixtures'),
+};

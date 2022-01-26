@@ -84,6 +84,9 @@
 # The `istio-configuration` chart
 /resources/istio-configuration/ @strekm @werdes72 @Tomasz-Smelcerz-SAP @mjakobczyk @dariusztutaj @cnvergence @veichtj @piotrkpc
 
+# The `istio-resources` chart
+/resources/istio-resources/ @strekm @werdes72 @Tomasz-Smelcerz-SAP @mjakobczyk @dariusztutaj @cnvergence @veichtj @piotrkpc
+
 # The monitoring of `istio-configuration` chart
 /resources/istio-configuration/templates/monitoring @a-thaler @lilitgh @rakesh-garimella @skhalash @chrkl @shorim @lindnerby
 
@@ -100,7 +103,7 @@
 /resources/api-gateway/ @strekm @werdes72 @Tomasz-Smelcerz-SAP @mjakobczyk @dariusztutaj @cnvergence @veichtj @piotrkpc
 
 # The `compass-runtime-agent` chart
-/resources/compass-runtime-agent/ @PK85 @dbadura @akgalwas @janmedrek @franpog859 @Maladie @koala7659 @ralikio
+/resources/compass-runtime-agent/ @PK85 @akgalwas @janmedrek @franpog859 @Maladie @koala7659 @ralikio
 
 # The `kiali` chart
 /resources/kiali/ @a-thaler @lilitgh @clebs @rakesh-garimella @skhalash @jeremyharisch @chrkl @shorim @lindnerby
@@ -159,7 +162,7 @@ components/etcd-tls-setup-job/ @PK85 @piotrmiskiewicz @ksputo @szwedm @voigt @wo
 /components/function-runtimes/ @m00g3n @pPrecel @dbadura @kwiatekus
 
 # Compass Runtime Agent
-/components/compass-runtime-agent/ @PK85 @dbadura @akgalwas @janmedrek @franpog859 @Maladie @koala7659 @ralikio
+/components/compass-runtime-agent/ @PK85 @akgalwas @janmedrek @franpog859 @Maladie @koala7659 @ralikio
 
 # Event Publisher Proxy
 /components/event-publisher-proxy @k15r @lilitgh @marcobebway @nachtmaar @radufa @pxsalehi @mfaizanse @friedrichwilken @vladislavpaskar
@@ -214,7 +217,7 @@ components/etcd-tls-setup-job/ @PK85 @piotrmiskiewicz @ksputo @szwedm @voigt @wo
 /tests/connection-token-handler-tests/ @akgalwas @janmedrek @franpog859 @Maladie @koala7659 @ralikio
 
 # Compass Runtime Agent Tests
-/tests/compass-runtime-agent/ @PK85 @dbadura @akgalwas @janmedrek @franpog859 @Maladie @koala7659 @ralikio
+/tests/compass-runtime-agent/ @PK85 @akgalwas @janmedrek @franpog859 @Maladie @koala7659 @ralikio
 
 # Fast Integration Tests
 /tests/fast-integration/ @pbochynski @adamwalach @voigt @skhalash @shorim @rakesh-garimella @jeremyharisch @lindnerby @khlifi411 @ruanxin @tobiscr @clebs @Tomasz-Smelcerz-SAP
@@ -232,9 +235,6 @@ components/etcd-tls-setup-job/ @PK85 @piotrmiskiewicz @ksputo @szwedm @voigt @wo
 /tests/fast-integration/eventing-test @k15r @lilitgh @marcobebway @nachtmaar @radufa @pxsalehi @mfaizanse @friedrichwilken @vladislavpaskar
 
 # Tools
-
-# The failery directory
-/tools/failery/ @m00g3n @pPrecel @dbadura
 
 # The tools/event-subscriber directory
 /tools/event-subscriber/ @lilitgh @k15r @nachtmaar @marcobebway @radufa @pxsalehi @mfaizanse @friedrichwilken @vladislavpaskar

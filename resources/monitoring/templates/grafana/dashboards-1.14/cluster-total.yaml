@@ -1,19 +1,18 @@
 {{- /*
   Customization: 
   * Made the dashboard not editable
-  * Unset the timezone
 */ -}}
 {{- /*
-Generated from 'cluster-total' from https://raw.githubusercontent.com/prometheus-operator/kube-prometheus/master/manifests/grafana-dashboardDefinitions.yaml
+Generated from 'cluster-total' from https://raw.githubusercontent.com/prometheus-operator/kube-prometheus/main/manifests/grafana-dashboardDefinitions.yaml
 Do not change in-place! In order to change this file first read following link:
 https://github.com/prometheus-community/helm-charts/tree/main/charts/kube-prometheus-stack/hack
 */ -}}
 {{- $kubeTargetVersion := default .Capabilities.KubeVersion.GitVersion .Values.kubeTargetVersionOverride }}
-{{- if and (semverCompare ">=1.14.0-0" $kubeTargetVersion) (semverCompare "<9.9.9-9" $kubeTargetVersion) .Values.grafana.enabled .Values.grafana.defaultDashboardsEnabled }}
+{{- if and (or .Values.grafana.enabled .Values.grafana.forceDeployDashboards) (semverCompare ">=1.14.0-0" $kubeTargetVersion) (semverCompare "<9.9.9-9" $kubeTargetVersion) .Values.grafana.defaultDashboardsEnabled }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  namespace: {{ template "kube-prometheus-stack.namespace" . }}
+  namespace: {{ template "kube-prometheus-stack-grafana.namespace" . }}
   name: {{ printf "%s-%s" (include "kube-prometheus-stack.fullname" $) "cluster-total" | trunc 63 | trimSuffix "-" }}
   annotations:
 {{ toYaml .Values.grafana.sidecar.dashboards.annotations | indent 4 }}
@@ -84,6 +83,7 @@ data:
                 "dashes": false,
                 "datasource": "$datasource",
                 "fill": 2,
+                "fillGradient": 0,
                 "gridPos": {
                     "h": 9,
                     "w": 12,
@@ -129,7 +129,7 @@ data:
                 "steppedLine": false,
                 "targets": [
                     {
-                        "expr": "sort_desc(sum(irate(container_network_receive_bytes_total{namespace=~\".+\"}[$interval:$resolution])) by (namespace))",
+                        "expr": "sort_desc(sum(irate(container_network_receive_bytes_total{cluster=\"$cluster\",namespace=~\".+\"}[$interval:$resolution])) by (namespace))",
                         "format": "time_series",
                         "intervalFactor": 1,
                         "legendFormat": "{{`{{`}}namespace{{`}}`}}",
@@ -186,6 +186,7 @@ data:
                 "dashes": false,
                 "datasource": "$datasource",
                 "fill": 2,
+                "fillGradient": 0,
                 "gridPos": {
                     "h": 9,
                     "w": 12,
@@ -231,7 +232,7 @@ data:
                 "steppedLine": false,
                 "targets": [
                     {
-                        "expr": "sort_desc(sum(irate(container_network_transmit_bytes_total{namespace=~\".+\"}[$interval:$resolution])) by (namespace))",
+                        "expr": "sort_desc(sum(irate(container_network_transmit_bytes_total{cluster=\"$cluster\",namespace=~\".+\"}[$interval:$resolution])) by (namespace))",
                         "format": "time_series",
                         "intervalFactor": 1,
                         "legendFormat": "{{`{{`}}namespace{{`}}`}}",
@@ -532,7 +533,7 @@ data:
                 ],
                 "targets": [
                     {
-                        "expr": "sort_desc(sum(irate(container_network_receive_bytes_total{namespace=~\".+\"}[$interval:$resolution])) by (namespace))",
+                        "expr": "sort_desc(sum(irate(container_network_receive_bytes_total{cluster=\"$cluster\",namespace=~\".+\"}[$interval:$resolution])) by (namespace))",
                         "format": "table",
                         "instant": true,
                         "intervalFactor": 2,
@@ -541,7 +542,7 @@ data:
                         "step": 10
                     },
                     {
-                        "expr": "sort_desc(sum(irate(container_network_transmit_bytes_total{namespace=~\".+\"}[$interval:$resolution])) by (namespace))",
+                        "expr": "sort_desc(sum(irate(container_network_transmit_bytes_total{cluster=\"$cluster\",namespace=~\".+\"}[$interval:$resolution])) by (namespace))",
                         "format": "table",
                         "instant": true,
                         "intervalFactor": 2,
@@ -550,7 +551,7 @@ data:
                         "step": 10
                     },
                     {
-                        "expr": "sort_desc(avg(irate(container_network_receive_bytes_total{namespace=~\".+\"}[$interval:$resolution])) by (namespace))",
+                        "expr": "sort_desc(avg(irate(container_network_receive_bytes_total{cluster=\"$cluster\",namespace=~\".+\"}[$interval:$resolution])) by (namespace))",
                         "format": "table",
                         "instant": true,
                         "intervalFactor": 2,
@@ -559,7 +560,7 @@ data:
                         "step": 10
                     },
                     {
-                        "expr": "sort_desc(avg(irate(container_network_transmit_bytes_total{namespace=~\".+\"}[$interval:$resolution])) by (namespace))",
+                        "expr": "sort_desc(avg(irate(container_network_transmit_bytes_total{cluster=\"$cluster\",namespace=~\".+\"}[$interval:$resolution])) by (namespace))",
                         "format": "table",
                         "instant": true,
                         "intervalFactor": 2,
@@ -568,7 +569,7 @@ data:
                         "step": 10
                     },
                     {
-                        "expr": "sort_desc(sum(irate(container_network_receive_packets_total{namespace=~\".+\"}[$interval:$resolution])) by (namespace))",
+                        "expr": "sort_desc(sum(irate(container_network_receive_packets_total{cluster=\"$cluster\",namespace=~\".+\"}[$interval:$resolution])) by (namespace))",
                         "format": "table",
                         "instant": true,
                         "intervalFactor": 2,
@@ -577,7 +578,7 @@ data:
                         "step": 10
                     },
                     {
-                        "expr": "sort_desc(sum(irate(container_network_transmit_packets_total{namespace=~\".+\"}[$interval:$resolution])) by (namespace))",
+                        "expr": "sort_desc(sum(irate(container_network_transmit_packets_total{cluster=\"$cluster\",namespace=~\".+\"}[$interval:$resolution])) by (namespace))",
                         "format": "table",
                         "instant": true,
                         "intervalFactor": 2,
@@ -586,7 +587,7 @@ data:
                         "step": 10
                     },
                     {
-                        "expr": "sort_desc(sum(irate(container_network_receive_packets_dropped_total{namespace=~\".+\"}[$interval:$resolution])) by (namespace))",
+                        "expr": "sort_desc(sum(irate(container_network_receive_packets_dropped_total{cluster=\"$cluster\",namespace=~\".+\"}[$interval:$resolution])) by (namespace))",
                         "format": "table",
                         "instant": true,
                         "intervalFactor": 2,
@@ -595,7 +596,7 @@ data:
                         "step": 10
                     },
                     {
-                        "expr": "sort_desc(sum(irate(container_network_transmit_packets_dropped_total{namespace=~\".+\"}[$interval:$resolution])) by (namespace))",
+                        "expr": "sort_desc(sum(irate(container_network_transmit_packets_dropped_total{cluster=\"$cluster\",namespace=~\".+\"}[$interval:$resolution])) by (namespace))",
                         "format": "table",
                         "instant": true,
                         "intervalFactor": 2,
@@ -629,6 +630,7 @@ data:
                         "dashes": false,
                         "datasource": "$datasource",
                         "fill": 2,
+                        "fillGradient": 0,
                         "gridPos": {
                             "h": 9,
                             "w": 12,
@@ -674,7 +676,7 @@ data:
                         "steppedLine": false,
                         "targets": [
                             {
-                                "expr": "sort_desc(avg(irate(container_network_receive_bytes_total{namespace=~\".+\"}[$interval:$resolution])) by (namespace))",
+                                "expr": "sort_desc(avg(irate(container_network_receive_bytes_total{cluster=\"$cluster\",namespace=~\".+\"}[$interval:$resolution])) by (namespace))",
                                 "format": "time_series",
                                 "intervalFactor": 1,
                                 "legendFormat": "{{`{{`}}namespace{{`}}`}}",
@@ -731,6 +733,7 @@ data:
                         "dashes": false,
                         "datasource": "$datasource",
                         "fill": 2,
+                        "fillGradient": 0,
                         "gridPos": {
                             "h": 9,
                             "w": 12,
@@ -776,7 +779,7 @@ data:
                         "steppedLine": false,
                         "targets": [
                             {
-                                "expr": "sort_desc(avg(irate(container_network_transmit_bytes_total{namespace=~\".+\"}[$interval:$resolution])) by (namespace))",
+                                "expr": "sort_desc(avg(irate(container_network_transmit_bytes_total{cluster=\"$cluster\",namespace=~\".+\"}[$interval:$resolution])) by (namespace))",
                                 "format": "time_series",
                                 "intervalFactor": 1,
                                 "legendFormat": "{{`{{`}}namespace{{`}}`}}",
@@ -863,6 +866,7 @@ data:
                 "dashes": false,
                 "datasource": "$datasource",
                 "fill": 2,
+                "fillGradient": 0,
                 "gridPos": {
                     "h": 9,
                     "w": 24,
@@ -906,7 +910,7 @@ data:
                 "steppedLine": false,
                 "targets": [
                     {
-                        "expr": "sort_desc(sum(irate(container_network_receive_bytes_total{namespace=~\".+\"}[$interval:$resolution])) by (namespace))",
+                        "expr": "sort_desc(sum(irate(container_network_receive_bytes_total{cluster=\"$cluster\",namespace=~\".+\"}[$interval:$resolution])) by (namespace))",
                         "format": "time_series",
                         "intervalFactor": 1,
                         "legendFormat": "{{`{{`}}namespace{{`}}`}}",
@@ -963,6 +967,7 @@ data:
                 "dashes": false,
                 "datasource": "$datasource",
                 "fill": 2,
+                "fillGradient": 0,
                 "gridPos": {
                     "h": 9,
                     "w": 24,
@@ -1006,7 +1011,7 @@ data:
                 "steppedLine": false,
                 "targets": [
                     {
-                        "expr": "sort_desc(sum(irate(container_network_transmit_bytes_total{namespace=~\".+\"}[$interval:$resolution])) by (namespace))",
+                        "expr": "sort_desc(sum(irate(container_network_transmit_bytes_total{cluster=\"$cluster\",namespace=~\".+\"}[$interval:$resolution])) by (namespace))",
                         "format": "time_series",
                         "intervalFactor": 1,
                         "legendFormat": "{{`{{`}}namespace{{`}}`}}",
@@ -1074,6 +1079,7 @@ data:
                         "dashes": false,
                         "datasource": "$datasource",
                         "fill": 2,
+                        "fillGradient": 0,
                         "gridPos": {
                             "h": 9,
                             "w": 24,
@@ -1117,7 +1123,7 @@ data:
                         "steppedLine": false,
                         "targets": [
                             {
-                                "expr": "sort_desc(sum(irate(container_network_receive_packets_total{namespace=~\".+\"}[$interval:$resolution])) by (namespace))",
+                                "expr": "sort_desc(sum(irate(container_network_receive_packets_total{cluster=\"$cluster\",namespace=~\".+\"}[$interval:$resolution])) by (namespace))",
                                 "format": "time_series",
                                 "intervalFactor": 1,
                                 "legendFormat": "{{`{{`}}namespace{{`}}`}}",
@@ -1174,6 +1180,7 @@ data:
                         "dashes": false,
                         "datasource": "$datasource",
                         "fill": 2,
+                        "fillGradient": 0,
                         "gridPos": {
                             "h": 9,
                             "w": 24,
@@ -1217,7 +1224,7 @@ data:
                         "steppedLine": false,
                         "targets": [
                             {
-                                "expr": "sort_desc(sum(irate(container_network_transmit_packets_total{namespace=~\".+\"}[$interval:$resolution])) by (namespace))",
+                                "expr": "sort_desc(sum(irate(container_network_transmit_packets_total{cluster=\"$cluster\",namespace=~\".+\"}[$interval:$resolution])) by (namespace))",
                                 "format": "time_series",
                                 "intervalFactor": 1,
                                 "legendFormat": "{{`{{`}}namespace{{`}}`}}",
@@ -1294,6 +1301,7 @@ data:
                         "dashes": false,
                         "datasource": "$datasource",
                         "fill": 2,
+                        "fillGradient": 0,
                         "gridPos": {
                             "h": 9,
                             "w": 24,
@@ -1337,7 +1345,7 @@ data:
                         "steppedLine": false,
                         "targets": [
                             {
-                                "expr": "sort_desc(sum(irate(container_network_receive_packets_dropped_total{namespace=~\".+\"}[$interval:$resolution])) by (namespace))",
+                                "expr": "sort_desc(sum(irate(container_network_receive_packets_dropped_total{cluster=\"$cluster\",namespace=~\".+\"}[$interval:$resolution])) by (namespace))",
                                 "format": "time_series",
                                 "intervalFactor": 1,
                                 "legendFormat": "{{`{{`}}namespace{{`}}`}}",
@@ -1394,6 +1402,7 @@ data:
                         "dashes": false,
                         "datasource": "$datasource",
                         "fill": 2,
+                        "fillGradient": 0,
                         "gridPos": {
                             "h": 9,
                             "w": 24,
@@ -1437,7 +1446,7 @@ data:
                         "steppedLine": false,
                         "targets": [
                             {
-                                "expr": "sort_desc(sum(irate(container_network_transmit_packets_dropped_total{namespace=~\".+\"}[$interval:$resolution])) by (namespace))",
+                                "expr": "sort_desc(sum(irate(container_network_transmit_packets_dropped_total{cluster=\"$cluster\",namespace=~\".+\"}[$interval:$resolution])) by (namespace))",
                                 "format": "time_series",
                                 "intervalFactor": 1,
                                 "legendFormat": "{{`{{`}}namespace{{`}}`}}",
@@ -1494,6 +1503,7 @@ data:
                         "dashes": false,
                         "datasource": "$datasource",
                         "fill": 2,
+                        "fillGradient": 0,
                         "gridPos": {
                             "h": 9,
                             "w": 24,
@@ -1541,7 +1551,7 @@ data:
                         "steppedLine": false,
                         "targets": [
                             {
-                                "expr": "sort_desc(sum(rate(node_netstat_Tcp_RetransSegs[$interval:$resolution]) / rate(node_netstat_Tcp_OutSegs[$interval:$resolution])) by (instance))",
+                                "expr": "sort_desc(sum(rate(node_netstat_Tcp_RetransSegs{cluster=\"$cluster\"}[$interval:$resolution]) / rate(node_netstat_Tcp_OutSegs{cluster=\"$cluster\"}[$interval:$resolution])) by (instance))",
                                 "format": "time_series",
                                 "intervalFactor": 1,
                                 "legendFormat": "{{`{{`}}instance{{`}}`}}",
@@ -1598,6 +1608,7 @@ data:
                         "dashes": false,
                         "datasource": "$datasource",
                         "fill": 2,
+                        "fillGradient": 0,
                         "gridPos": {
                             "h": 9,
                             "w": 24,
@@ -1645,7 +1656,7 @@ data:
                         "steppedLine": false,
                         "targets": [
                             {
-                                "expr": "sort_desc(sum(rate(node_netstat_TcpExt_TCPSynRetrans[$interval:$resolution]) / rate(node_netstat_Tcp_RetransSegs[$interval:$resolution])) by (instance))",
+                                "expr": "sort_desc(sum(rate(node_netstat_TcpExt_TCPSynRetrans{cluster=\"$cluster\"}[$interval:$resolution]) / rate(node_netstat_Tcp_RetransSegs{cluster=\"$cluster\"}[$interval:$resolution])) by (instance))",
                                 "format": "time_series",
                                 "intervalFactor": 1,
                                 "legendFormat": "{{`{{`}}instance{{`}}`}}",
@@ -1800,7 +1811,7 @@ data:
                         "value": "default"
                     },
                     "hide": 0,
-                    "label": null,
+                    "label": "Data Source",
                     "name": "datasource",
                     "options": [
 
@@ -1809,6 +1820,32 @@ data:
                     "refresh": 1,
                     "regex": "",
                     "type": "datasource"
+                },
+                {
+                    "allValue": null,
+                    "current": {
+
+                    },
+                    "datasource": "$datasource",
+                    "hide": {{ if .Values.grafana.sidecar.dashboards.multicluster.global.enabled }}0{{ else }}2{{ end }},
+                    "includeAll": false,
+                    "label": null,
+                    "multi": false,
+                    "name": "cluster",
+                    "options": [
+
+                    ],
+                    "query": "label_values(up{job=\"kubelet\", metrics_path=\"/metrics/cadvisor\"}, cluster)",
+                    "refresh": 2,
+                    "regex": "",
+                    "sort": 0,
+                    "tagValuesQuery": "",
+                    "tags": [
+
+                    ],
+                    "tagsQuery": "",
+                    "type": "query",
+                    "useTags": false
                 }
             ]
         },
@@ -1841,7 +1878,7 @@ data:
                 "30d"
             ]
         },
-        "timezone": "",
+        "timezone": "{{ .Values.grafana.defaultDashboardsTimezone }}",
         "title": "Kubernetes / Networking / Cluster",
         "uid": "ff635a025bcfea7bc3dd4f508990a3e9",
         "version": 0

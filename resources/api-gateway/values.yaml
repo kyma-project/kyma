@@ -109,5 +109,5 @@ global:
   images:
     api_gateway_controller:
       name: "api-gateway-controller"
-      version: "7e555148"
+      version: "ef06a37e"
       directory: "incubator"
