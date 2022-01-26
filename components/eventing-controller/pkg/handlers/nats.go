@@ -133,7 +133,7 @@ func (n *Nats) SyncSubscription(sub *eventingv1alpha1.Subscription, cleaner even
 	// which is not anymore in this subscription filters (i.e. cleanSubjects).
 	// e.g. when filters are modified.
 	for key, s := range n.subscriptions {
-		if strings.HasPrefix(key, subKeyPrefix) && !utils.ContainsString(cleanSubjects, s.Subject) {
+		if isNatsSubAssociatedWithKymaSub(key, s, sub) && !utils.ContainsString(cleanSubjects, s.Subject) {
 			if err := n.deleteSubscriptionFromNATS(s, key, log); err != nil {
 				return false, err
 			}
@@ -210,7 +210,7 @@ func (n *Nats) DeleteSubscription(sub *eventingv1alpha1.Subscription) error {
 			"subject", s.Subject,
 		)
 
-		if strings.HasPrefix(key, subKeyPrefix) {
+		if isNatsSubAssociatedWithKymaSub(key, s, sub) {
 			if err := n.deleteSubscriptionFromNATS(s, key, log); err != nil {
 				return err
 			}
@@ -371,4 +371,12 @@ func createKymaSubscriptionNamespacedName(key string, sub *nats.Subscription) ty
 	nsn.Namespace = nnvalues[0]
 	nsn.Name = strings.TrimSuffix(strings.TrimSuffix(nnvalues[1], sub.Subject), ".")
 	return nsn
+}
+
+// isNatsSubAssociatedWithKymaSub checks if the NATS subscription is associated / related to Kyma subscription or not.
+func isNatsSubAssociatedWithKymaSub(natsSubKey string, natsSub *nats.Subscription, sub *eventingv1alpha1.Subscription) bool {
+	if createKeyPrefix(sub) == createKymaSubscriptionNamespacedName(natsSubKey, natsSub).String() {
+		return true
+	}
+	return false
 }
