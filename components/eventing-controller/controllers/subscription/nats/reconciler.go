@@ -201,10 +201,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 			if err := r.Client.Update(ctx, subscription); err != nil {
 				events.Warn(r.recorder, subscription, events.ReasonUpdateFailed, "Update Subscription failed %s", subscription.Name)
 				log.Errorw("remove finalizer from subscription failed", "error", err)
-				if k8serrors.IsConflict(err) {
-					return ctrl.Result{Requeue: true}, nil
-				}
-				return ctrl.Result{}, err
+				return checkIsConflict(err)
 			}
 			log.Debug("remove finalizer from subscription succeeded")
 		}
@@ -213,16 +210,13 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 	}
 
 	// The object is not being deleted, so if it does not have our finalizer,
-	// then lets add the finalizer and update the object. This is equivalent
+	// then lets add the finalizer and update the object. This is equivalent to
 	// registering our finalizer.
 	if !utils.ContainsString(subscription.ObjectMeta.Finalizers, Finalizer) {
 		subscription.ObjectMeta.Finalizers = append(subscription.ObjectMeta.Finalizers, Finalizer)
 		if err := r.Update(context.Background(), subscription); err != nil {
 			log.Errorw("add finalizer to subscription failed", "error", err)
-			if k8serrors.IsConflict(err) {
-				return ctrl.Result{Requeue: true}, nil
-			}
-			return ctrl.Result{}, err
+			return checkIsConflict(err)
 		}
 		log.Debug("add finalizer to subscription succeeded")
 		return ctrl.Result{Requeue: true}, nil
@@ -232,10 +226,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 	if err := r.sinkValidator(ctx, r, subscription); err != nil {
 		log.Errorw("sink URL validation failed", "error", err)
 		if err := r.syncSubscriptionStatus(ctx, subscription, false, false, err.Error()); err != nil {
-			if k8serrors.IsConflict(err) {
-				return ctrl.Result{Requeue: true}, nil
-			}
-			return ctrl.Result{}, err
+			return checkIsConflict(err)
 		}
 		// No point in reconciling as the sink is invalid
 		return ctrl.Result{}, nil
@@ -246,10 +237,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 	if err != nil {
 		log.Errorw("sync subscription failed", "error", err)
 		if err := r.syncSubscriptionStatus(ctx, subscription, false, false, err.Error()); err != nil {
-			if k8serrors.IsConflict(err) {
-				return ctrl.Result{Requeue: true}, nil
-			}
-			return ctrl.Result{}, err
+			return checkIsConflict(err)
 		}
 		return ctrl.Result{}, err
 	}
@@ -257,11 +245,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 
 	// Update status
 	if err := r.syncSubscriptionStatus(ctx, subscription, true, subscriptionStatusChanged, ""); err != nil {
-		if k8serrors.IsConflict(err) {
-			// Requeue the Pod to try to reconciliate again,
-			return ctrl.Result{Requeue: true}, nil
-		}
-		return ctrl.Result{}, err
+		return checkIsConflict(err)
 	}
 
 	return ctrl.Result{}, nil
@@ -422,8 +406,13 @@ func isValidScheme(sink string) bool {
 
 // equalsConditionsIgnoringTime checks if two conditions are equal, ignoring lastTransitionTime
 func equalsConditionsIgnoringTime(a, b eventingv1alpha1.Condition) bool {
-	if a.Type == b.Type && a.Status == b.Status && a.Reason == b.Reason && a.Message == b.Message {
-		return true
+	return a.Type == b.Type && a.Status == b.Status && a.Reason == b.Reason && a.Message == b.Message
+}
+
+func checkIsConflict(err error) (ctrl.Result, error) {
+	if k8serrors.IsConflict(err) {
+		// Requeue the Request to try to reconcile it again
+		return ctrl.Result{Requeue: true}, nil
 	}
-	return false
+	return ctrl.Result{}, err
 }

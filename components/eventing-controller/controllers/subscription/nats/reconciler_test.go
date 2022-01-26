@@ -289,12 +289,12 @@ func testUpdateSubscriptionStatus(id int, eventTypePrefix, natsSubjectToPublish,
 
 			ensureSubscriptionCreated(ctx, subscription)
 
-			Context("A Subscription with muktiple conditions of the same type", func() {
+			Context("A Subscription with multiple conditions of the same type", func() {
 				// the nats subject list to publish to; these are supposed to be equal to the cleanEventTypes
 				natsSubjectsToPublish := []string{
 					fmt.Sprintf("%s0", natsSubjectToPublish),
 				}
-				// the filter that are getting added to the subscription
+				// the filters that are getting added to the subscription
 				eventTypesToSubscribe := []string{
 					fmt.Sprintf("%s0", eventTypeToSubscribe),
 				}
