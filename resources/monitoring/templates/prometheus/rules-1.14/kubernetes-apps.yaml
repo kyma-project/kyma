@@ -173,7 +173,7 @@ spec:
              !=
             0
           ) or (
-            kube_daemonset_updated_number_scheduled{job="kube-state-metrics", namespace=~"{{ $targetNamespace }}"}
+            kube_daemonset_status_updated_number_scheduled{job="kube-state-metrics", namespace=~"{{ $targetNamespace }}"}
              !=
             kube_daemonset_status_desired_number_scheduled{job="kube-state-metrics", namespace=~"{{ $targetNamespace }}"}
           ) or (
@@ -182,7 +182,7 @@ spec:
             kube_daemonset_status_desired_number_scheduled{job="kube-state-metrics", namespace=~"{{ $targetNamespace }}"}
           )
         ) and (
-          changes(kube_daemonset_updated_number_scheduled{job="kube-state-metrics", namespace=~"{{ $targetNamespace }}"}[5m])
+          changes(kube_daemonset_status_updated_number_scheduled{job="kube-state-metrics", namespace=~"{{ $targetNamespace }}"}[5m])
             ==
           0
         )
@@ -261,11 +261,11 @@ spec:
         runbook_url: {{ .Values.defaultRules.runbookUrl }}alert-name-kubehpareplicasmismatch
         summary: HPA has not matched descired number of replicas.
       expr: |-
-        (kube_hpa_status_desired_replicas{job="kube-state-metrics", namespace=~"{{ $targetNamespace }}"}
+        (kube_horizontalpodautoscaler_status_desired_replicas{job="kube-state-metrics", namespace=~"{{ $targetNamespace }}"}
           !=
-        kube_hpa_status_current_replicas{job="kube-state-metrics", namespace=~"{{ $targetNamespace }}"})
+        kube_horizontalpodautoscaler_status_current_replicas{job="kube-state-metrics", namespace=~"{{ $targetNamespace }}"})
           and
-        changes(kube_hpa_status_current_replicas[15m]) == 0
+        changes(kube_horizontalpodautoscaler_status_current_replicas[15m]) == 0
       for: 15m
       labels:
         severity: warning
@@ -278,9 +278,9 @@ spec:
         runbook_url: {{ .Values.defaultRules.runbookUrl }}alert-name-kubehpamaxedout
         summary: HPA is running at max replicas
       expr: |-
-        kube_hpa_status_current_replicas{job="kube-state-metrics", namespace=~"{{ $targetNamespace }}"}
+        kube_horizontalpodautoscaler_status_current_replicas{job="kube-state-metrics", namespace=~"{{ $targetNamespace }}"}
           ==
-        kube_hpa_spec_max_replicas{job="kube-state-metrics", namespace=~"{{ $targetNamespace }}"}
+        kube_horizontalpodautoscaler_spec_max_replicas{job="kube-state-metrics", namespace=~"{{ $targetNamespace }}"}
       for: 15m
       labels:
         severity: warning

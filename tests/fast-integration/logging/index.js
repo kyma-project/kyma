@@ -1,4 +1,4 @@
 module.exports = {
-    ...require("./helpers"),
-    ...require("./client")
+  ...require('./helpers'),
+  ...require('./client'),
 };

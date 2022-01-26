@@ -196,6 +196,8 @@ config:
       parserFirstline:
       # For new discovered files on start (without a database offset/position), read the content from the head of the file, not tail.
       readFromHead: "Off"
+      # Set to false to use file stat watcher instead of inotify.
+      inotifyWatcher: "true"
       # Specify one or Multiline Parser definition to apply to the content.
       multilineParser: docker, cri
       exclude:
