@@ -382,8 +382,5 @@ func createKymaSubscriptionNamespacedName(key string, sub *nats.Subscription) ty
 
 // isNatsSubAssociatedWithKymaSub checks if the NATS subscription is associated / related to Kyma subscription or not.
 func isNatsSubAssociatedWithKymaSub(natsSubKey string, natsSub *nats.Subscription, sub *eventingv1alpha1.Subscription) bool {
-	if createKeyPrefix(sub) == createKymaSubscriptionNamespacedName(natsSubKey, natsSub).String() {
-		return true
-	}
-	return false
+	return createKeyPrefix(sub) == createKymaSubscriptionNamespacedName(natsSubKey, natsSub).String()
 }
