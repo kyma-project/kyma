@@ -256,8 +256,9 @@ async function deploy() {
     await waitForClusterServiceBroker('sm-html5-apps-repo', 5 * 60 * 1000);
     await waitForClusterServiceBroker('sm-auditlog-management', 5 * 60 * 1000);
   } catch (e) {
-    let csb = await listResources(`/apis/servicecatalog.k8s.io/v1beta1/clusterservicebrokers`);
-    throw new Error(`Cluster service brokers failed to be available in 5 minutes ${JSON.stringify(e)}:\n${JSON.stringify(csb)}`)
+    const csb = await listResources(`/apis/servicecatalog.k8s.io/v1beta1/clusterservicebrokers`);
+    msg = 'Cluster service brokers failed to be available in 5 minutes';
+    throw new Error(`${msg} ${JSON.stringify(e)}:\n${JSON.stringify(csb)}`);
   }
 
   times.push(installRedisExample());

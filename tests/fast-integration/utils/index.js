@@ -961,12 +961,13 @@ function ignore404(e) {
 
 // NOTE: this works only for those where resource == lowercase plural kind
 async function deleteK8sObjects(objects) {
-  console.log(`deleting ${objects.length} objects`)
-  for (let o of objects) {
+  console.log(`deleting ${objects.length} objects`);
+  for (const o of objects) {
+    const path = `${o.apiVersion}/namespaces/${o.metadata.namespace}/${o.kind.toLowerCase()}s/${o.metadata.name}`;
     await k8sDynamicApi.requestPromise({
-      url: `${k8sDynamicApi.basePath}/apis/${o.apiVersion}/namespaces/${o.metadata.namespace}/${o.kind.toLowerCase()}s/${o.metadata.name}`,
-      method: "DELETE",
-    })
+      url: `${k8sDynamicApi.basePath}/apis/${path}`,
+      method: 'DELETE',
+    });
   }
 }
 

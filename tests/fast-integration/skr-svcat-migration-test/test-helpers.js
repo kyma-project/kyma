@@ -312,17 +312,16 @@ async function deleteBTPResources() {
   const version = 'v1alpha1';
   const instances = 'serviceinstances';
   const bindings = 'servicebindings';
-  const keepFinalizers = true;
 
   let needsPoll = [];
   for (let i = 0; i < 90; i++) { // 15 minutes
     needsPoll = [];
-    let k8sBindings = await listResources(`/apis/${group}/${version}/${bindings}`);
+    const k8sBindings = await listResources(`/apis/${group}/${version}/${bindings}`);
     if (k8sBindings.length > 0) {
       needsPoll.push(k8sBindings);
     }
     await deleteK8sObjects(k8sBindings);
-    let k8sInstances = await listResources(`/apis/${group}/${version}/${instances}`);
+    const k8sInstances = await listResources(`/apis/${group}/${version}/${instances}`);
     if (k8sInstances.length > 0) {
       needsPoll.push(k8sInstances);
     }
