@@ -749,20 +749,41 @@ async function checkInClusterEventDeliveryHelper(targetNamespace, encoding) {
   await printStatusOfInClusterEventingInfrastructure(targetNamespace, encoding, 'lastorder');
 
   // send event using function query parameter send=true
-  await retryPromise(() => axios.post(`https://${mockHost}`,
-      {id: eventId},
-      {params: {send: true, encoding: encoding}}),
-  10,
-  1000);
+  await retryPromise(async () => {
+    const response = await axios.post(`https://${mockHost}`, {id: eventId}, {
+      params: {
+        send: true,
+        encoding: encoding,
+      },
+    });
+    debug('Event publishing result:', {
+      status: response.status,
+      statusText: response.statusText,
+      data: response.data,
+    });
+    if (response.data.eventPublishError) {
+      throw convertAxiosError(response.data.statusText);
+    }
+    expect(response.status).to.be.equal(200);
+  }, 10, 1000);
+  debug(`Event ${eventId} was successfully published`);
+
   // verify if event was received using function query parameter inappevent=eventId
   return await retryPromise(async () => {
     debug('Waiting for event: ', eventId);
     const response = await axios.get(`https://${mockHost}`, {params: {inappevent: eventId}});
+    debug('Received Event response: ', {
+      status: response.status,
+      statusText: response.statusText,
+      data: response.data,
+    });
     expect(response.data).to.have.nested.property('event.id', eventId, 'The same event id expected in the result');
     expect(response.data).to.have.nested.property('event.shipped', true, 'Order should have property shipped');
-
     return response;
-  }, 30, 2 * 1000);
+  }, 30, 2 * 1000)
+      .catch((err) => {
+        throw convertAxiosError(err, 'Fetching published event responded with error');
+      });
 }
 
 module.exports = {

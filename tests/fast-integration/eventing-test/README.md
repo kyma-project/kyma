@@ -3,7 +3,10 @@
 
 ## Overview 
 
-This test covers the end-to-end flow for Eventing.
+This test covers the end-to-end flow for Eventing. It is divided in three parts:
+1. `eventing-test-prep.js` - prepares all the resources, mocks and assets required for tests to be executed
+2. `eventing-test.js` - the actual tests
+3. `eventing-test-cleanup.js` - removes the test resources and namespaces from the cluster
 
 ## Usage
 To run Eventing-specific tests locally, follow these steps:
