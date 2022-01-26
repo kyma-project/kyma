@@ -97,7 +97,7 @@ func (s *crSupervisor) InitializeCompassConnection() (*v1alpha1.CompassConnectio
 
 	s.log.Infof("Compass Connection exists with state %s", compassConnectionCR.Status.State)
 
-	if !compassConnectionCR.ShouldAttemptReconnect() {
+	if !compassConnectionCR.Failed() {
 		s.log.Infof("Connection already initialized, skipping ")
 
 		credentials, err := s.credentialsManager.GetClientCredentials()
