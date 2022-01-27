@@ -8,7 +8,7 @@ const {
   listPods,
   deleteK8sPod,
   sleep,
-  deleteAllK8sResources,
+  deleteK8sObjects,
   listResources,
 } = require('../utils');
 
@@ -312,21 +312,20 @@ async function deleteBTPResources() {
   const version = 'v1alpha1';
   const instances = 'serviceinstances';
   const bindings = 'servicebindings';
-  const keepFinalizers = true;
-  await deleteAllK8sResources(`/apis/${group}/${version}/${instances}`, {}, 10, 1000, keepFinalizers);
-  await deleteAllK8sResources(`/apis/${group}/${version}/${bindings}`, {}, 10, 1000, keepFinalizers);
 
   let needsPoll = [];
   for (let i = 0; i < 90; i++) { // 15 minutes
     needsPoll = [];
-    const k8sInstances = listResources(`/apis/${group}/${version}/${instances}`);
-    if (k8sInstances > 1) {
-      needsPoll.push(k8sInstances);
-    }
-    const k8sBindings = listResources(`/apis/${group}/${version}/${bindings}`);
-    if (k8sBindings > 1) {
+    const k8sBindings = await listResources(`/apis/${group}/${version}/${bindings}`);
+    if (k8sBindings.length > 0) {
       needsPoll.push(k8sBindings);
     }
+    await deleteK8sObjects(k8sBindings);
+    const k8sInstances = await listResources(`/apis/${group}/${version}/${instances}`);
+    if (k8sInstances.length > 0) {
+      needsPoll.push(k8sInstances);
+    }
+    await deleteK8sObjects(k8sInstances);
     if (needsPoll.length != 0) {
       await sleep(10000); // 10 seconds
     } else {
