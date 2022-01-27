@@ -943,7 +943,6 @@ func TestNatsSubAfterSync_MultipleSubs(t *testing.T) {
 	}
 
 	// create subscribers servers for testing
-	// create subscribers servers for testing
 	natsPort := nextPort.get()
 	subscriberPort := nextPort.get()
 	subscriberReceiveURL := fmt.Sprintf("http://127.0.0.1:%d/store", subscriberPort)
@@ -953,7 +952,6 @@ func TestNatsSubAfterSync_MultipleSubs(t *testing.T) {
 	subscriber := eventingtesting.NewSubscriber(fmt.Sprintf(":%d", subscriberPort))
 	subscriber.Start()
 	defer subscriber.Shutdown() // defer the shutdown of subscriber
-	defer subscriber.Shutdown()
 
 	// check if the subscriber is running or not by checking the store
 	err = subscriber.CheckEvent("", subscriberCheckURL)
