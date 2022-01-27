@@ -169,6 +169,7 @@ function ensureEventingPodsArePresent(result) {
 
 function runDashboardTestCase(dashboardName, test) {
   return retryPromise(async () => {
+    debug(`Trying out dashboard (${dashboardName}) test: ${test}`)
     await queryPrometheus(test.query).then((result) => {
       debug(dashboardName + ' result: ' + JSON.stringify(result, null, 2));
       test.assert(result);
