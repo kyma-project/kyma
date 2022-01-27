@@ -1,4 +1,4 @@
-FROM golang:1.15-alpine3.12 as builder
+FROM golang:1.17.6-alpine3.15 as builder
 
 ENV BASE_APP_DIR /go/src/github.com/kyma-project/kyma/tests/function-controller
 WORKDIR ${BASE_APP_DIR}
@@ -34,9 +34,8 @@ ENV TEST_DIR /go/src/github.com/kyma-project/kyma/tests/function-controller
 # Install certificates and tools
 #
 
-RUN apk update && apk add ca-certificates && \
-apk add --no-cache curl>=7.76.0-r0 --repository=http://dl-cdn.alpinelinux.org/alpine/edge/main && \
-rm -rf /var/cache/apk/*
+RUN apk add --no-cache ca-certificates && \
+    apk add --no-cache curl>=7.76.0-r0 --repository=http://dl-cdn.alpinelinux.org/alpine/edge/main
 
 #
 # Copy binaries

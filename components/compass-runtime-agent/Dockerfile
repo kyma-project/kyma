@@ -1,4 +1,4 @@
-FROM eu.gcr.io/kyma-project/external/golang:1.17.3-alpine as builder
+FROM eu.gcr.io/kyma-project/external/golang:1.17.6-alpine3.15 as builder
 
 ARG DOCK_PKG_DIR=/compass-runtime-agent
 WORKDIR $DOCK_PKG_DIR
@@ -17,6 +17,8 @@ RUN apk add -U --no-cache ca-certificates
 FROM scratch
 LABEL source=git@github.com:kyma-project/kyma.git
 
+WORKDIR /app
+
 COPY --from=certs /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 COPY --from=builder $DOCK_PKG_DIR/compass-runtime-agent .
 COPY --from=builder /app/licenses /app/licenses
@@ -24,4 +26,4 @@ COPY --from=builder /app/licenses /app/licenses
 COPY --from=builder /etc_passwd /etc/passwd
 USER nobody
 
-CMD ["/compass-runtime-agent"]
+CMD ["/app/compass-runtime-agent"]

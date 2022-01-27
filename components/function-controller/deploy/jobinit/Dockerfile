@@ -1,4 +1,4 @@
-FROM eu.gcr.io/kyma-project/external/golang:1.17.3-alpine as builder
+FROM eu.gcr.io/kyma-project/external/golang:1.17.6-alpine3.15 as builder
 
 ENV BASE_APP_DIR=/workspace/go/src/github.com/kyma-project/kyma/components/function-controller \
     CGO_ENABLED=1 \
@@ -6,7 +6,7 @@ ENV BASE_APP_DIR=/workspace/go/src/github.com/kyma-project/kyma/components/funct
     GOARCH=amd64 \
     LIBGIT2_VERSION=1.1.0-r2
 
-RUN apk add gcc libc-dev
+RUN apk add --no-cache gcc libc-dev
 RUN apk add --no-cache --repository http://dl-cdn.alpinelinux.org/alpine/v3.14/community libgit2-dev=${LIBGIT2_VERSION}
 
 WORKDIR ${BASE_APP_DIR}

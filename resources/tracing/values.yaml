@@ -116,7 +116,7 @@ global:
       directory: "external"
     oauth2_proxy:
       name: "oauth2-proxy"
-      version: "7.2.0-59f3431d"
+      version: "7.2.1-334ca95f"
       directory: "tpi"
 virtualservice:
   enabled: true
@@ -148,7 +148,7 @@ authProxy:
   resources:
     limits:
       cpu: 50m
-      memory: 20Mi
+      memory: 100Mi
     requests:
       cpu: 10m
-      memory: 5Mi
+      memory: 15Mi

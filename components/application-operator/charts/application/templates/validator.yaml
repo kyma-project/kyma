@@ -36,7 +36,7 @@ spec:
           image: {{ .Values.global.applicationConnectivityValidatorImage }}
           imagePullPolicy: {{ .Values.deployment.image.pullPolicy }}
           args:
-            - "/applicationconnectivityvalidator"
+            - "/app/applicationconnectivityvalidator"
             - "--proxyPort={{ .Values.applicationConnectivityValidator.args.proxyPort }}"
             - "--externalAPIPort={{ .Values.applicationConnectivityValidator.args.externalAPIPort }}"
             - "--tenant={{ .Values.global.tenant }}"

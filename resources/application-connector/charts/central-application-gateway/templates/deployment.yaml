@@ -34,7 +34,7 @@ spec:
         image: {{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.central_application_gateway) }}
         imagePullPolicy: {{ .Values.deployment.image.pullPolicy }}
         args:
-          - "/applicationgateway"
+          - "/app/applicationgateway"
           - "--proxyPort={{ .Values.deployment.args.proxyPort }}"
           - "--proxyPortCompass={{ .Values.deployment.args.proxyPortCompass }}"
           - "--externalAPIPort={{ .Values.deployment.args.externalAPIPort }}"

@@ -1,6 +1,7 @@
-const axios = require("axios");
-const https = require("https");
-const { expect } = require("chai");
+/* eslint-disable max-len */
+const axios = require('axios');
+const https = require('https');
+const {expect} = require('chai');
 const httpsAgent = new https.Agent({
   rejectUnauthorized: false, // curl -k
 });
@@ -9,31 +10,31 @@ axios.defaults.httpsAgent = httpsAgent;
 const {
   debug,
   retryPromise,
-} = require("../utils");
+} = require('../utils');
 
-const {queryPrometheus} = require("../monitoring/client")
+const {queryPrometheus} = require('../monitoring/client');
 
 const dashboards = {
   // The delivery dashboard
   delivery_publisherProxy: {
-    title: `Requests to publisher proxy`,
+    title: 'Requests to publisher proxy',
     query: 'sum by (destination_service) (rate(istio_requests_total{destination_service=~"event.*-publisher-proxy.kyma-system.svc.cluster.local", response_code=~"2.*"}[5m]))',
     backends: ['nats', 'beb'],
     // The assert function receives the `data.result` section of the query result:
     // https://prometheus.io/docs/prometheus/latest/querying/api/#instant-queries
-    assert: function (result) {
-      expect(result.length).to.be.greaterThan(0, "No value found in the result");
-      expect(getMetricValue(result[0])).to.be.greaterThan(0);
-    }
+    assert: function(result) {
+      const foundMetric = result.find((res) => res.metric.destination_service.startsWith('eventing-event-publisher-proxy'));
+      expect(foundMetric).to.be.not.undefined;
+    },
   },
   delivery_applicationConnectivityValidator: {
     title: 'Requests to application connectivity validator',
     query: 'sum by(destination_service) (rate(istio_requests_total{destination_service="central-application-connectivity-validator.kyma-system.svc.cluster.local", response_code=~"2.*"}[5m]))',
     backends: ['nats', 'beb'],
-    assert: function (result) {
-      let foundMetric = result.find(res => res.metric.destination_service.startsWith('central-application-connectivity-validator'));
-      expect(foundMetric).to.be.not.undefined
-    }
+    assert: function(result) {
+      const foundMetric = result.find((res) => res.metric.destination_service.startsWith('central-application-connectivity-validator'));
+      expect(foundMetric).to.be.not.undefined;
+    },
   },
   delivery_subscribers: {
     title: 'Requests to subscribers',
@@ -46,10 +47,10 @@ const dashboards = {
             }[5m])
           ) by (le,source_workload_namespace,source_workload,destination_workload_namespace,destination_workload,response_code)`,
     backends: ['nats'],
-    assert: function (result) {
-      let foundMetric = result.find(res => res.metric.destination_workload.startsWith('lastorder'));
-      expect(foundMetric).to.be.not.undefined
-    }
+    assert: function(result) {
+      const foundMetric = result.find((res) => res.metric.destination_workload.startsWith('lastorder'));
+      expect(foundMetric).to.be.not.undefined;
+    },
   },
   // The latency dashboard
   latency_connectivityValidatorToPublisherProxy: {
@@ -67,23 +68,23 @@ const dashboards = {
           ) by (le,source_workload_namespace,source_workload,destination_workload_namespace,destination_workload))
         `,
     backends: ['nats', 'beb'],
-    assert: function (result) {
-      let foundMetric = result.find(res =>
+    assert: function(result) {
+      const foundMetric = result.find((res) =>
         res.metric.source_workload.toLowerCase() === 'central-application-connectivity-validator' &&
         res.metric.destination_workload.toLowerCase() === 'eventing-publisher-proxy');
-      expect(foundMetric).to.be.not.undefined
-    }
+      expect(foundMetric).to.be.not.undefined;
+    },
   },
   latency_eventPublisherToMessagingServer: {
     title: 'Latency of Event Publisher -> Messaging Server',
     query: 'histogram_quantile(0.99999, sum(rate(event_publish_to_messaging_server_latency_bucket{namespace="kyma-system"}[5m])) by (le,pod,namespace,service))',
     backends: ['nats', 'beb'],
-    assert: function (result) {
-      let foundMetric = result.find(res =>
+    assert: function(result) {
+      const foundMetric = result.find((res) =>
         res.metric.namespace.toLowerCase() === 'kyma-system' &&
         res.metric.pod.toLowerCase().startsWith('eventing-publisher-proxy'));
       expect(foundMetric).to.be.not.undefined;
-    }
+    },
   },
   latency_eventDispatcherToSubscribers: {
     title: 'Latency of Event Dispatcher -> Subscribers',
@@ -98,12 +99,12 @@ const dashboards = {
           ) by (le,source_workload_namespace,source_workload,destination_workload_namespace,destination_workload))
         `,
     backends: ['nats'],
-    assert: function (result) {
-      let foundMetric = result.find(res =>
+    assert: function(result) {
+      const foundMetric = result.find((res) =>
         res.metric.source_workload === 'eventing-controller' &&
         res.metric.destination_workload.toLowerCase().startsWith('lastorder'));
       expect(foundMetric).to.be.not.undefined;
-    }
+    },
   },
   // The pods dashboard
   pods_memoryUsage: {
@@ -116,7 +117,7 @@ const dashboards = {
         kube_pod_labels{label_kyma_project_io_dashboard="eventing", namespace="kyma-system"}
       `,
     backends: ['nats', 'beb'],
-    assert: ensureEventingPodsArePresent
+    assert: ensureEventingPodsArePresent,
   },
   pods_cpuUsage: {
     title: 'CPU usage',
@@ -128,7 +129,7 @@ const dashboards = {
         kube_pod_labels{label_kyma_project_io_dashboard="eventing", namespace="kyma-system"}
       `,
     backends: ['nats', 'beb'],
-    assert: ensureEventingPodsArePresent
+    assert: ensureEventingPodsArePresent,
   },
   pods_networkReceive: {
     title: 'Network receive',
@@ -138,7 +139,7 @@ const dashboards = {
         kube_pod_labels{label_kyma_project_io_dashboard="eventing", namespace="kyma-system"}
       `,
     backends: ['nats', 'beb'],
-    assert: ensureEventingPodsArePresent
+    assert: ensureEventingPodsArePresent,
   },
   pods_networkTransmit: {
     title: 'Network transmit',
@@ -148,37 +149,32 @@ const dashboards = {
         kube_pod_labels{label_kyma_project_io_dashboard="eventing", namespace="kyma-system"}
       `,
     backends: ['nats', 'beb'],
-    assert: ensureEventingPodsArePresent
-  }
-}
+    assert: ensureEventingPodsArePresent,
+  },
+};
 
 // A generic assertion for the pod dashboards
-function ensureEventingPodsArePresent (result) {
-  let controllerFound = false, publisherProxyFound = false, natsFound = false;
-  result.forEach(res => {
+function ensureEventingPodsArePresent(result) {
+  let controllerFound = false; let publisherProxyFound = false; let natsFound = false;
+  result.forEach((res) => {
     if (controllerFound && publisherProxyFound && natsFound) return;
     if (res.metric.pod.startsWith('eventing-nats')) natsFound = true;
     if (res.metric.pod.startsWith('eventing-controller')) controllerFound = true;
     if (res.metric.pod.startsWith('eventing-publisher-proxy')) publisherProxyFound = true;
   });
-  expect(controllerFound).to.be.true
-  expect(publisherProxyFound).to.be.true
-  expect(natsFound).to.be.true
-}
-
-// Given a Prometheus metric result, extracts the value of the metric
-function getMetricValue(metric) {
-  return parseFloat(metric.value[1])
+  expect(controllerFound).to.be.true;
+  expect(publisherProxyFound).to.be.true;
+  expect(natsFound).to.be.true;
 }
 
 function runDashboardTestCase(dashboardName, test) {
   return retryPromise(async () => {
-    await queryPrometheus(test.query).then(result => {
+    await queryPrometheus(test.query).then((result) => {
       debug(dashboardName + ' result: ' + JSON.stringify(result, null, 2));
-      test.assert(result)
-    }).catch(reason => {
-      throw new Error(reason)
-    })
+      test.assert(result);
+    }).catch((reason) => {
+      throw new Error(reason);
+    });
   }, 120, 5000);
 }
 
@@ -186,12 +182,12 @@ function eventingMonitoringTest(backend) {
   for (const [dashboardName, test] of Object.entries(dashboards)) {
     if (test.backends.includes(backend)) {
       it('Testing dashboard: ' + test.title, async () => {
-        await runDashboardTestCase(dashboardName, test)
+        await runDashboardTestCase(dashboardName, test);
       });
     }
   }
 }
 
 module.exports = {
-  eventingMonitoringTest
-}
+  eventingMonitoringTest,
+};

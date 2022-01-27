@@ -1,4 +1,4 @@
-FROM golang:1.15-alpine3.12 as builder
+FROM golang:1.17.6-alpine3.15 as builder
 
 ENV BASE_APP_DIR /go/src/github.com/kyma-project/kyma/tests/rafter
 WORKDIR ${BASE_APP_DIR}
@@ -9,8 +9,9 @@ WORKDIR ${BASE_APP_DIR}
 
 COPY ./testsuite/ ${BASE_APP_DIR}/testsuite/
 COPY ./pkg/ ${BASE_APP_DIR}/pkg/
-COPY ./vendor/ ${BASE_APP_DIR}/vendor/
 COPY ./main_test.go ${BASE_APP_DIR}
+COPY ./go.mod ${BASE_APP_DIR}
+COPY ./go.sum ${BASE_APP_DIR}
 COPY ./licenses/ ${BASE_APP_DIR}/licenses/
 
 #
