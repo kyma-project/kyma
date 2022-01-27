@@ -1,14 +1,6 @@
 {{- /*
-  Customization: Some changes are made to the default label set.
-  Added labels recommended by Kubernetes and Helm:
-    helm.sh/chart
-    app.kubernetes.io/managed-by
-    app.kubernetes.io/name
-    app.kubernetes.io/instance
-  Removed labels:
-    heritage
+  Customization: imageurl
 */ -}}
-
 {{/* vim: set filetype=mustache: */}}
 {{/* Expand the name of the chart. This is suffixed with -alertmanager, which means subtract 13 from longest 63 available */}}
 {{- define "kube-prometheus-stack.name" -}}
@@ -57,22 +49,16 @@ The longest name that gets created adds and extra 37 characters, so truncation s
 
 {{/* Generate basic labels */}}
 {{- define "kube-prometheus-stack.labels" }}
+app.kubernetes.io/managed-by: {{ .Release.Service }}
+app.kubernetes.io/instance: {{ .Release.Name }}
+app.kubernetes.io/version: "{{ .Chart.Version }}"
+app.kubernetes.io/part-of: {{ template "kube-prometheus-stack.name" . }}
 chart: {{ template "kube-prometheus-stack.chartref" . }}
 release: {{ $.Release.Name | quote }}
+heritage: {{ $.Release.Service | quote }}
 {{- if .Values.commonLabels}}
 {{ toYaml .Values.commonLabels }}
 {{- end }}
-helm.sh/chart: {{ include "kube-prometheus-stack.chartref" . }}
-{{ include "kube-prometheus-stack.selectorLabels" . }}
-app.kubernetes.io/managed-by: {{ .Release.Service }}
-{{- end }}
-
-{{/*
-Selector labels
-*/}}
-{{- define "kube-prometheus-stack.selectorLabels" -}}
-app.kubernetes.io/name: {{ include "kube-prometheus-stack.name" . }}
-app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
 
 {{/* Create the name of kube-prometheus-stack service account to use */}}
@@ -125,11 +111,103 @@ Use the grafana namespace override for multi-namespace deployments in combined c
 {{- end -}}
 
 {{/*
-Create a URL for container images
+Use the kube-state-metrics namespace override for multi-namespace deployments in combined charts
 */}}
+{{- define "kube-prometheus-stack-kube-state-metrics.namespace" -}}
+  {{- if index .Values "kube-state-metrics" "namespaceOverride" -}}
+    {{- index .Values "kube-state-metrics" "namespaceOverride" -}}
+  {{- else -}}
+    {{- .Release.Namespace -}}
+  {{- end -}}
+{{- end -}}
+
+{{/*
+Use the prometheus-node-exporter namespace override for multi-namespace deployments in combined charts
+*/}}
+{{- define "kube-prometheus-stack-prometheus-node-exporter.namespace" -}}
+  {{- if index .Values "prometheus-node-exporter" "namespaceOverride" -}}
+    {{- index .Values "prometheus-node-exporter" "namespaceOverride" -}}
+  {{- else -}}
+    {{- .Release.Namespace -}}
+  {{- end -}}
+{{- end -}}
+
+{{/* Allow KubeVersion to be overridden. */}}
+{{- define "kube-prometheus-stack.kubeVersion" -}}
+  {{- default .Capabilities.KubeVersion.Version .Values.kubeVersionOverride -}}
+{{- end -}}
+
+{{/* Get Ingress API Version */}}
+{{- define "kube-prometheus-stack.ingress.apiVersion" -}}
+  {{- if and (.Capabilities.APIVersions.Has "networking.k8s.io/v1") (semverCompare ">= 1.19-0" (include "kube-prometheus-stack.kubeVersion" .)) -}}
+      {{- print "networking.k8s.io/v1" -}}
+  {{- else if .Capabilities.APIVersions.Has "networking.k8s.io/v1beta1" -}}
+    {{- print "networking.k8s.io/v1beta1" -}}
+  {{- else -}}
+    {{- print "extensions/v1beta1" -}}
+  {{- end -}}
+{{- end -}}
+
+{{/* Check Ingress stability */}}
+{{- define "kube-prometheus-stack.ingress.isStable" -}}
+  {{- eq (include "kube-prometheus-stack.ingress.apiVersion" .) "networking.k8s.io/v1" -}}
+{{- end -}}
+
+{{/* Check Ingress supports pathType */}}
+{{/* pathType was added to networking.k8s.io/v1beta1 in Kubernetes 1.18 */}}
+{{- define "kube-prometheus-stack.ingress.supportsPathType" -}}
+  {{- or (eq (include "kube-prometheus-stack.ingress.isStable" .) "true") (and (eq (include "kube-prometheus-stack.ingress.apiVersion" .) "networking.k8s.io/v1beta1") (semverCompare ">= 1.18-0" (include "kube-prometheus-stack.kubeVersion" .))) -}}
+{{- end -}}
+
+{{/* Get Policy API Version */}}
+{{- define "kube-prometheus-stack.pdb.apiVersion" -}}
+  {{- if and (.Capabilities.APIVersions.Has "policy/v1") (semverCompare ">= 1.21-0" (include "kube-prometheus-stack.kubeVersion" .)) -}}
+      {{- print "policy/v1" -}}
+  {{- else -}}
+    {{- print "policy/v1beta1" -}}
+  {{- end -}}
+  {{- end -}}
+
+{{/* Get value based on current Kubernetes version */}}
+{{- define "kube-prometheus-stack.kubeVersionDefaultValue" -}}
+  {{- $values := index . 0 -}}
+  {{- $kubeVersion := index . 1 -}}
+  {{- $old := index . 2 -}}
+  {{- $new := index . 3 -}}
+  {{- $default := index . 4 -}}
+  {{- if kindIs "invalid" $default -}}
+    {{- if semverCompare $kubeVersion (include "kube-prometheus-stack.kubeVersion" $values) -}}
+      {{- print $new -}}
+    {{- else -}}
+      {{- print $old -}}
+    {{- end -}}
+  {{- else -}}
+    {{- print $default }}
+  {{- end -}}
+{{- end -}}
+
+{{/* Get value for kube-controller-manager depending on insecure scraping availability */}}
+{{- define "kube-prometheus-stack.kubeControllerManager.insecureScrape" -}}
+  {{- $values := index . 0 -}}
+  {{- $insecure := index . 1 -}}
+  {{- $secure := index . 2 -}}
+  {{- $userValue := index . 3 -}}
+  {{- include "kube-prometheus-stack.kubeVersionDefaultValue" (list $values ">= 1.22-0" $insecure $secure $userValue) -}}
+{{- end -}}
+
+{{/* Get value for kube-scheduler depending on insecure scraping availability */}}
+{{- define "kube-prometheus-stack.kubeScheduler.insecureScrape" -}}
+  {{- $values := index . 0 -}}
+  {{- $insecure := index . 1 -}}
+  {{- $secure := index . 2 -}}
+  {{- $userValue := index . 3 -}}
+  {{- include "kube-prometheus-stack.kubeVersionDefaultValue" (list $values ">= 1.23-0" $insecure $secure $userValue) -}}
+{{- end -}}
+
+{{/* Create a URL for container images */}}
 {{- define "imageurl" -}}
-{{- $registry := default $.reg.path $.img.containerRegistryPath -}}
-{{- $path := ternary (print $registry) (print $registry "/" $.img.directory) (empty $.img.directory) -}}
-{{- $version := ternary (print ":" $.img.version) (print "@sha256:" $.img.sha) (empty $.img.sha) -}}
-{{- print $path "/" $.img.name $version -}}
+  {{- $registry := default $.reg.path $.img.containerRegistryPath -}}
+  {{- $path := ternary (print $registry) (print $registry "/" $.img.directory) (empty $.img.directory) -}}
+  {{- $version := ternary (print ":" $.img.version) (print "@sha256:" $.img.sha) (empty $.img.sha) -}}
+  {{- print $path "/" $.img.name $version -}}
 {{- end -}}

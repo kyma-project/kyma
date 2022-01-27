@@ -1,4 +1,4 @@
-{{- if and .Values.prometheusOperator.admissionWebhooks.enabled .Values.prometheusOperator.admissionWebhooks.patch.enabled }}
+{{- if and .Values.prometheusOperator.enabled .Values.prometheusOperator.admissionWebhooks.enabled .Values.prometheusOperator.admissionWebhooks.patch.enabled (not .Values.prometheusOperator.admissionWebhooks.certManager.enabled) }}
 apiVersion: batch/v1
 kind: Job
 metadata:
@@ -26,8 +26,8 @@ spec:
         app: {{ template "kube-prometheus-stack.name" $ }}-admission-patch
 {{- include "kube-prometheus-stack.labels" $ | indent 8 }}
     spec:
-      {{- if or .Values.prometheusOperator.admissionWebhooks.patch.priorityClassName .Values.global.priorityClassName }}
-      priorityClassName: {{ coalesce .Values.prometheusOperator.admissionWebhooks.patch.priorityClassName .Values.global.priorityClassName }}
+      {{- if .Values.prometheusOperator.admissionWebhooks.patch.priorityClassName }}
+      priorityClassName: {{ .Values.prometheusOperator.admissionWebhooks.patch.priorityClassName }}
       {{- end }}
       containers:
         - name: patch
@@ -59,8 +59,8 @@ spec:
       tolerations:
 {{ toYaml . | indent 8 }}
       {{- end }}
+{{- if .Values.prometheusOperator.admissionWebhooks.patch.securityContext }}
       securityContext:
-        runAsGroup: 2000
-        runAsNonRoot: true
-        runAsUser: 2000
+{{ toYaml .Values.prometheusOperator.admissionWebhooks.patch.securityContext | indent 8 }}
+{{- end }}
 {{- end }}
