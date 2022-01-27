@@ -51,7 +51,7 @@ global:
       version: "PR-13170"
     application_operator:
       name: "application-operator"
-      version: "PR-13170"
+      version: "PR-12963"
     application_registry:
       name: "application-registry"
       version: "PR-13170"
