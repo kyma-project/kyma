@@ -7,7 +7,7 @@ metadata:
     app.kubernetes.io/name: {{ include "jaeger-operator.fullname" . }}-jaeger-metrics
 spec:
   ports:
-  - name: metrics
+  - name: http-jaeger-metrics
     port: 14269
     protocol: TCP
     targetPort: 14269
