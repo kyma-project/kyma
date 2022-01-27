@@ -8,10 +8,10 @@ global:
   images:
     service_catalog_ui:
       name: "service-catalog-ui"
-      version: "c60a3c68"
+      version: "PR-12964"
     service_binding_usage_controller:
       name: "service-binding-usage-controller"
-      version: "9d2a5878"
+      version: "PR-12964"
   istio:
     gateway:
       name: kyma-gateway

@@ -4,7 +4,7 @@ global:
   images:
     service_catalog:
       name: "service-catalog"
-      version: "v0.3.1-12-g880e400-dirty"
+      version: "PR-12964"
       directory: "external/quay.io/kubernetes-service-catalog"
     # k8s_tools:
     #   name: "k8s-tools"
