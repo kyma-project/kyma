@@ -77,13 +77,13 @@ global:
       directory: "tpi"
     function_controller:
       name: "function-controller"
-      version: "5051e383"
+      version: "28fd8592"
     function_webhook:
       name: "function-webhook"
-      version: "5051e383"
+      version: "28fd8592"
     function_build_init:
       name: "function-build-init"
-      version: "5051e383"
+      version: "28fd8592"
     function_runtime_nodejs12:
       name: "function-runtime-nodejs12"
       version: "5051e383"
@@ -102,7 +102,7 @@ global:
       directory: "tpi"
     registry:
       name: "registry"
-      version: "2.7.1-0646c4cd"
+      version: "2.7.1-ff0c28bf"
       directory: "tpi"
     google_pause:
       name: "pause-amd64"
@@ -111,7 +111,7 @@ global:
   testImages:
     function_controller_test:
       name: "function-controller-test"
-      version: "ceeb73d8"
+      version: "28fd8592"
     git_server:
       name: "gitserver"
       version: "c0aa144a"
