@@ -54,7 +54,7 @@ global:
       version: "PR-12257"
     application_registry:
       name: "application-registry"
-      version: "PR-13170"
+      version: "PR-12257"
     central_application_connectivity_validator:
       name: "central-application-connectivity-validator"
       version: "PR-13076"
