@@ -15,7 +15,6 @@ const {
   eventMeshSecretFilePath,
   timeoutTime,
   slowTime,
-  fatalErrCode,
   cleanupTestingResources,
 } = require('./utils');
 const {
@@ -112,9 +111,9 @@ describe('Eventing tests preparation', function() {
     );
   }
 
-  after(async function() {
+  afterEach(async function() {
     // if the test preparation failed, perform the cleanup
-    if (this.currentTest.err && this.currentTest.err.code === fatalErrCode) {
+    if (this.currentTest.state === 'failed') {
       await cleanupTestingResources();
     }
   });
