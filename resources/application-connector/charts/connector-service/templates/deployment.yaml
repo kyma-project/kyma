@@ -48,7 +48,7 @@ spec:
             cpu: {{ .Values.deployment.resources.requests.cpu }}
             memory: {{ .Values.deployment.resources.requests.memory }}
         args:
-          - "/connectorservice"
+          - "/app/connectorservice"
           - "--appName={{ .Chart.Name }}"
           - "--externalAPIPort={{ .Values.deployment.args.externalAPIPort }}"
           - "--internalAPIPort={{ .Values.deployment.args.internalAPIPort }}"
