@@ -18,7 +18,7 @@ RUN CGO_ENABLED=0 GOOS=linux go build -v -o ${BASE_DIR}/app ${BASE_DIR}/fetch-to
 ##
 RUN mkdir /test && mv ${BASE_DIR}/app /test/app && mv ${BASE_DIR}/test.sh /test/test.sh && mv ${BASE_DIR}/licenses /test/licenses
 
-FROM eu.gcr.io/kyma-project/tpi/k8s-tools:20211022-85284bf9
+FROM eu.gcr.io/kyma-project/tpi/k8s-tools:20220127-ec72a890
 LABEL source=git@github.com:kyma-project/kyma.git
 
 COPY --from=builder --chown=nobody:nogroup /test /test
