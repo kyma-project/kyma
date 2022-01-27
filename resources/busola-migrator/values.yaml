@@ -48,7 +48,7 @@ config:
 vsPatch:
   image:
     repository: "eu.gcr.io/kyma-project/tpi/k8s-tools"
-    tag: "20211022-85284bf9"
+    tag: "20220127-ec72a890"
     pullPolicy: IfNotPresent
   suffixToAdd: "-old"
   virtualServices:

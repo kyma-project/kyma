@@ -92,7 +92,7 @@ spec:
           serviceAccountName: volume-snapshotter
           containers:
           - name: job
-            image: eu.gcr.io/kyma-project/tpi/k8s-tools:20211022-85284bf9
+            image: eu.gcr.io/kyma-project/tpi/k8s-tools:20220127-ec72a890
             command:
               - /bin/bash
               - -c
