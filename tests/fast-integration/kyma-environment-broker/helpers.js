@@ -102,11 +102,10 @@ async function ensureOperationSucceeded(keb, kcp, instanceID, operationID, timeo
 
   if (res.state !== 'succeeded') {
     const runtimeStatus = await kcp.getRuntimeStatusOperations(instanceID);
-    throw new Error(`operation didn't succeed in time: ${JSON.stringify(res, null, `\t`)}
-    Runtime status: ${runtimeStatus}`);
+    throw new Error(`operation didn't succeed in time: ${JSON.stringify(res, null, `\t`)}\nRuntime status: ${runtimeStatus}`);
   }
 
-  console.log(`Operation ${res.operation} finished with state ${res.state}`);
+  console.log(`Operation ${operationID} finished with state ${res.state}`);
 
   return res;
 }
