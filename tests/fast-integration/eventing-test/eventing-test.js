@@ -82,17 +82,16 @@ describe('Eventing tests', function() {
 
     it("In-cluster event should have correct tracing spans", async function () {
       await checkInClusterEventTracing(testNamespace);
-      console.log("done with tracing...")
     });
   }
 
   // runs after each test in every block
   afterEach(async function() {
     // if there was a fatal error, perform the cleanup
-    // if (this.currentTest.err && this.currentTest.err.code === fatalErrCode) {
-    //   console.log("Cleaning up test resources...")
-    //   await cleanupTestingResources();
-    // }
+    if (this.currentTest.err && this.currentTest.err.code === fatalErrCode) {
+      console.log("Cleaning up test resources...")
+      await cleanupTestingResources();
+    }
 
     // if the test is failed, then printing some debug logs
     if (this.currentTest.state === 'failed' && DEBUG_MODE) {
