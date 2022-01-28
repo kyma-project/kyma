@@ -2,7 +2,7 @@
 title: Create an inline Function
 ---
 
-This tutorial shows how you can create a simple "Hello World" Function in Node.js 12. The Function's code and dependencies are defined as an inline code in the Function's **spec**.
+This tutorial shows how you can create a simple "Hello World" Function in Node.js 14. The Function's code and dependencies are defined as an inline code in the Function's **spec**.
 
 >**TIP:** Serverless also allows you to store the Function's code and dependencies as sources in a Git repository. To learn more, read how to [Create a Git Function](./svls-02-create-git-function.md).
 
@@ -68,7 +68,7 @@ Follow these steps:
 
     ```bash
     NAME            CONFIGURED   BUILT     RUNNING   RUNTIME    VERSION   AGE
-    test-function   True         True      True      nodejs12   1         96s
+    test-function   True         True      True      nodejs14   1         96s
     ```
 
   </details>
@@ -94,7 +94,7 @@ Follow these steps:
       name: $NAME
       namespace: $NAMESPACE
     spec:
-      runtime: nodejs12
+      runtime: nodejs14
       source: |
         module.exports = {
           main: function(event, context) {
@@ -114,7 +114,7 @@ Follow these steps:
 
     ```bash
     NAME            CONFIGURED   BUILT     RUNNING   RUNTIME    VERSION   AGE
-    test-function   True         True      True      nodejs12   1         96s
+    test-function   True         True      True      nodejs14   1         96s
     ```
 
     </details>
