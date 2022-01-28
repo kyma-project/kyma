@@ -8,40 +8,6 @@ Functions support multiple languages through the use of runtimes. To use a chose
 
 See sample Functions for all available runtimes:
 
-<div tabs name="available-runtimes" group="available-runtimes">
-  <details>
-  <summary label="nodejs12">
-  Node.js 12 (Deprecated)
-  </summary>
-
-```yaml
-cat <<EOF | kubectl apply -f -
-apiVersion: serverless.kyma-project.io/v1alpha1
-kind: Function
-metadata:
-  name: test-function-nodejs12
-spec:
-  runtime: nodejs12
-  source: |
-    const fetch = require("node-fetch");
-
-    module.exports = {
-      main: function (event, context) {
-        return fetch("https://swapi.dev/api/people/1").then(res => res.json())
-      }
-    }
-  deps: |
-    {
-      "name": "test-function-nodejs12",
-      "version": "1.0.0",
-      "dependencies": {
-        "node-fetch": "^2.6.0"
-      }
-    }
-EOF
-```
-  </details>
-
   <details>
   <summary label="nodejs14">
   Node.js 14
