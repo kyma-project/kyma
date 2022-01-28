@@ -7,7 +7,7 @@ Functions support multiple languages through the use of runtimes. To use a chose
 >**TIP:** Read about [Function’s specification](./svls-08-function-specification.md) if you are interested in its signature, `event` and `context` objects, and custom HTTP responses the Function returns.
 
 See sample Functions for all available runtimes:
-
+<div tabs name="available-runtimes" group="available-runtimes">
   <details>
   <summary label="nodejs14">
   Node.js 14
