@@ -168,11 +168,13 @@ Follow these steps:
 
 1. Select a Namespace from the drop-down list in the top navigation panel where you want to provision the Redis service.
 
-2. In the left navigation panel, go to **Configuration** > **Addons** and select **Add New Configuration**.
+2. In the left navigation panel, go to **Configuration** > **Addons** and select **Create Addons Configuration**.
 
-3. Enter `https://github.com/kyma-project/addons/releases/download/0.15.0/index-testing.yaml` in the **Urls** field. The Addon name is automatically generated.
+3. Enter the name of your Addons Configuration and `https://github.com/kyma-project/addons/releases/download/0.15.0/index-testing.yaml` in the **Urls** field.
 
-4. Select **Add** to confirm changes.
+4. Click **+**.
+   
+5. Select **Create** to confirm changes.
 
    You will see that the Addon has the status `Ready`.
 
@@ -188,7 +190,7 @@ Follow these steps:
 
 4. Select **Create** to confirm changes.
 
-   Wait until the status of the instance changes from `PROVISIONING` to `RUNNING`.
+   Wait until the status of the instance changes from `PROVISIONING` to `PROVISIONED SUCCESSFULLY`.
 
 ### Bind the Function to the ServiceInstance
 
