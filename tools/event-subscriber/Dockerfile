@@ -24,4 +24,4 @@ COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 COPY --from=builder $DOCK_PKG_DIR/event-subscriber .
 COPY --from=builder /app/licenses /app/licenses
 
-CMD ["/event-subscriber"]
+CMD ["/app/event-subscriber"]
