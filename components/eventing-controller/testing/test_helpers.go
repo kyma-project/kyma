@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"net/http"
 
+	v1 "k8s.io/api/core/v1"
+
 	k8sresource "k8s.io/apimachinery/pkg/api/resource"
 
 	apigatewayv1alpha1 "github.com/kyma-incubator/api-gateway/api/v1alpha1"
@@ -494,6 +496,22 @@ func WithEventingControllerPod(backend string) *corev1.Pod {
 			},
 		},
 	}
+}
+
+func WithMultipleConditions(s *eventingv1alpha1.Subscription) {
+	s.Status.Conditions = NewDefaultMultipleConditions()
+}
+
+func NewDefaultMultipleConditions() []eventingv1alpha1.Condition {
+	cond1 := eventingv1alpha1.MakeCondition(
+		eventingv1alpha1.ConditionSubscriptionActive,
+		eventingv1alpha1.ConditionReasonNATSSubscriptionActive,
+		v1.ConditionTrue, "cond1")
+	cond2 := eventingv1alpha1.MakeCondition(
+		eventingv1alpha1.ConditionSubscriptionActive,
+		eventingv1alpha1.ConditionReasonNATSSubscriptionActive,
+		v1.ConditionTrue, "cond2")
+	return []eventingv1alpha1.Condition{cond1, cond2}
 }
 
 // ToSubscription converts an unstructured subscription into a typed one

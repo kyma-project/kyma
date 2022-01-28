@@ -64,7 +64,7 @@ func (c *cleaner) Clean(eventType string) (string, error) {
 
 	// clean the event-type segments
 	eventTypeClean = cleanEventType(eventTypeClean)
-	log.Infow("clean event-type", "before", eventType, "after", eventTypeClean)
+	log.Debugw("clean event-type", "before", eventType, "after", eventTypeClean)
 
 	return eventTypeClean, nil
 }
