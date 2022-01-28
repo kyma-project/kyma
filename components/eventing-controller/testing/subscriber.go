@@ -15,7 +15,7 @@ import (
 )
 
 type Subscriber struct {
-	port                 int
+	Port                 int
 	server               *http.Server
 	StoreEndpoint        string
 	CheckEndpoint        string
@@ -30,7 +30,7 @@ const (
 
 func NewSubscriber(port int) *Subscriber {
 	return &Subscriber{
-		port:                 port,
+		Port:                 port,
 		StoreEndpoint:        "/store",
 		CheckEndpoint:        "/check",
 		Return500Endpoint:    "/return500",
@@ -85,7 +85,7 @@ func (s *Subscriber) Start() {
 	})
 
 	s.server = &http.Server{
-		Addr:    fmt.Sprintf(":%d", s.port),
+		Addr:    fmt.Sprintf(":%d", s.Port),
 		Handler: mux,
 	}
 
@@ -106,7 +106,7 @@ func (s *Subscriber) Shutdown() {
 }
 
 func (s *Subscriber) GetSinkURL() string {
-	return fmt.Sprintf("http://127.0.0.1:%d/store", s.port)
+	return fmt.Sprintf("http://127.0.0.1:%d/store", s.Port)
 }
 
 func (s *Subscriber) IsRunning() bool {
@@ -118,7 +118,7 @@ func (s Subscriber) CheckEvent(expectedData string) error {
 	delay := time.Second
 	err := retry.Do(
 		func() error {
-			resp, err := http.Get(fmt.Sprintf("http://127.0.0.1:%d/check", s.port)) //nolint:gosec
+			resp, err := http.Get(fmt.Sprintf("http://127.0.0.1:%d/check", s.Port)) //nolint:gosec
 			if err != nil {
 				return pkgerrors.Wrapf(err, "get HTTP request failed")
 			}
@@ -154,7 +154,7 @@ func (s Subscriber) CheckRetries(expectedNoOfRetries int, expectedData string) e
 	delay := time.Second
 	err := retry.Do(
 		func() error {
-			resp, err := http.Get(fmt.Sprintf("http://127.0.0.1:%d/check_retries", s.port)) //nolint:gosec
+			resp, err := http.Get(fmt.Sprintf("http://127.0.0.1:%d/check_retries", s.Port)) //nolint:gosec
 			if err != nil {
 				return pkgerrors.Wrapf(err, "get HTTP request failed")
 			}

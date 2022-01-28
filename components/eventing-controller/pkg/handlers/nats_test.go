@@ -105,7 +105,7 @@ func TestSubscription(t *testing.T) {
 	natsBackend := NewNats(natsConfig, env.DefaultSubscriptionConfig{MaxInFlightMessages: defaultMaxInflight}, nil, defaultLogger)
 	g.Expect(natsBackend.Initialize(env.Config{})).Should(Succeed())
 
-	subscriber, _ := startSubscriber()
+	subscriber := startSubscriber()
 	defer subscriber.Shutdown()
 	g.Expect(subscriber.IsRunning()).To(BeTrue())
 
@@ -148,7 +148,7 @@ func TestNatsSubAfterSync_NoChange(t *testing.T) {
 	natsBackend := NewNats(natsConfig, defaultSubsConfig, nil, defaultLogger)
 	g.Expect(natsBackend.Initialize(env.Config{})).Should(Succeed())
 
-	subscriber, _ := startSubscriber()
+	subscriber := startSubscriber()
 	defer subscriber.Shutdown()
 	g.Expect(subscriber.IsRunning()).To(BeTrue())
 
@@ -225,10 +225,10 @@ func TestNatsSubAfterSync_SinkChange(t *testing.T) {
 	natsBackend := NewNats(natsConfig, defaultSubsConfig, nil, defaultLogger)
 	g.Expect(natsBackend.Initialize(env.Config{})).Should(Succeed())
 
-	subscriber1, _ := startSubscriber()
+	subscriber1 := startSubscriber()
 	defer subscriber1.Shutdown()
 	g.Expect(subscriber1.IsRunning()).To(BeTrue())
-	subscriber2, _ := startSubscriber()
+	subscriber2 := startSubscriber()
 	defer subscriber2.Shutdown()
 	g.Expect(subscriber2.IsRunning()).To(BeTrue())
 
@@ -306,7 +306,7 @@ func TestNatsSubAfterSync_FiltersChange(t *testing.T) {
 	natsBackend := NewNats(natsConfig, defaultSubsConfig, nil, defaultLogger)
 	g.Expect(natsBackend.Initialize(env.Config{})).Should(Succeed())
 
-	subscriber, _ := startSubscriber()
+	subscriber := startSubscriber()
 	defer subscriber.Shutdown()
 	g.Expect(subscriber.IsRunning()).To(BeTrue())
 
@@ -393,7 +393,7 @@ func TestMultipleSubscriptionsToSameEvent(t *testing.T) {
 	natsBackend := NewNats(natsConfig, env.DefaultSubscriptionConfig{MaxInFlightMessages: defaultMaxInflight}, nil, defaultLogger)
 	g.Expect(natsBackend.Initialize(env.Config{})).Should(Succeed())
 
-	subscriber, _ := startSubscriber()
+	subscriber := startSubscriber()
 	defer subscriber.Shutdown()
 	g.Expect(subscriber.IsRunning()).To(BeTrue())
 
@@ -446,7 +446,7 @@ func TestSubscriptionWithDuplicateFilters(t *testing.T) {
 	natsBackend := NewNats(natsConfig, env.DefaultSubscriptionConfig{MaxInFlightMessages: 9}, nil, defaultLogger)
 	g.Expect(natsBackend.Initialize(env.Config{})).Should(Succeed())
 
-	subscriber, _ := startSubscriber()
+	subscriber := startSubscriber()
 	defer subscriber.Shutdown()
 	g.Expect(subscriber.IsRunning()).To(BeTrue())
 
@@ -556,7 +556,7 @@ func TestIsValidSubscription(t *testing.T) {
 	natsBackend := NewNats(natsConfig, defaultSubsConfig, nil, defaultLogger)
 	g.Expect(natsBackend.Initialize(env.Config{})).Should(Succeed())
 
-	subscriber, _ := startSubscriber()
+	subscriber := startSubscriber()
 	defer subscriber.Shutdown()
 	g.Expect(subscriber.IsRunning()).To(BeTrue())
 
@@ -623,7 +623,7 @@ func TestSubscriptionUsingCESDK(t *testing.T) {
 	natsBackend := NewNats(natsConfig, env.DefaultSubscriptionConfig{MaxInFlightMessages: defaultMaxInflight}, nil, defaultLogger)
 	g.Expect(natsBackend.Initialize(env.Config{})).Should(Succeed())
 
-	subscriber, _ := startSubscriber()
+	subscriber := startSubscriber()
 	defer subscriber.Shutdown()
 	g.Expect(subscriber.IsRunning()).To(BeTrue())
 
@@ -663,12 +663,12 @@ func TestRetryUsingCESDK(t *testing.T) {
 	natsBackend := NewNats(natsConfig, defaultSubscriptionConfig, nil, defaultLogger)
 	g.Expect(natsBackend.Initialize(env.Config{})).Should(Succeed())
 
-	subscriber, subscriberPort := startSubscriber()
+	subscriber := startSubscriber()
 	defer subscriber.Shutdown()
 	g.Expect(subscriber.IsRunning()).To(BeTrue())
 
 	sub := eventingtesting.NewSubscription("sub", "foo", eventingtesting.WithEventTypeFilter)
-	subscriberServerErrorURL := fmt.Sprintf("http://127.0.0.1:%d/return500", subscriberPort)
+	subscriberServerErrorURL := fmt.Sprintf("http://127.0.0.1:%d/return500", subscriber.Port)
 	sub.Spec.Sink = subscriberServerErrorURL
 	cleaner := createEventTypeCleaner(eventingtesting.EventTypePrefix, eventingtesting.ApplicationName, defaultLogger)
 	_, err := natsBackend.SyncSubscription(sub, cleaner)
@@ -696,7 +696,7 @@ func TestSubscription_NATSServerRestart(t *testing.T) {
 	natsBackend := NewNats(natsConfig, env.DefaultSubscriptionConfig{MaxInFlightMessages: 10}, nil, defaultLogger)
 	g.Expect(natsBackend.Initialize(env.Config{})).Should(Succeed())
 
-	subscriber, _ := startSubscriber()
+	subscriber := startSubscriber()
 	defer subscriber.Shutdown()
 	g.Expect(subscriber.IsRunning()).To(BeTrue())
 
@@ -734,11 +734,11 @@ func startNATSServer() (*server.Server, int) {
 	return natsServer, natsPort
 }
 
-func startSubscriber() (*eventingtesting.Subscriber, int) {
+func startSubscriber() *eventingtesting.Subscriber {
 	subscriberPort := nextPort.get()
 	subscriber := eventingtesting.NewSubscriber(subscriberPort)
 	subscriber.Start()
-	return subscriber, subscriberPort
+	return subscriber
 }
 
 func createEventTypeCleaner(eventTypePrefix, applicationName string, logger *logger.Logger) eventtype.Cleaner { //nolint:unparam
