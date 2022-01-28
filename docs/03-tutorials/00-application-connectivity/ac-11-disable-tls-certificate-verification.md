@@ -10,7 +10,7 @@ Follow these steps to disable TLS certificate verification:
 1. Edit the `{APPLICATION_CR_NAME}` Application CR. Run:
 
    ```bash
-   kubectl -n kyma-integration edit application {APPLICATION_CR_NAME}
+   kubectl edit application {APPLICATION_CR_NAME}
    ```
 
 2. Edit the Application by setting the **skipVerify** parameter to `true`.
