@@ -1,37 +1,16 @@
 aliases:
   documentation-reviewers:
     - klaudiagrz
-    - bszwarc
     - mmitoraj
     - majakurcius
     - alexandra-simeonova
   documentation-approvers:
     - klaudiagrz
-    - bszwarc
     - mmitoraj
     - majakurcius
     - alexandra-simeonova
-  serverless-approvers:
-    - rakesh-garimella
-    - lilitgh
-    - k15r
-    - nachtmaar
-    - anishj0shi
-    - montaro
-    - marcobebway
-    - radufa
-  serverless-reviewers:
-    - rakesh-garimella
-    - lilitgh
-    - k15r
-    - nachtmaar
-    - anishj0shi
-    - montaro
-    - marcobebway
-    - radufa
 
   eventing-approvers:
-    - lilitgh
     - k15r
     - nachtmaar
     - marcobebway
@@ -41,7 +20,6 @@ aliases:
     - friedrichwilken
     - vladislavpaskar
   eventing-reviewers:
-    - lilitgh
     - k15r
     - nachtmaar
     - marcobebway
