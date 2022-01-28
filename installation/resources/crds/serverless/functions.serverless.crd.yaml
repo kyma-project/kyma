@@ -280,8 +280,9 @@ spec:
                   enum:
                     - nodejs12
                     - nodejs14
-                    - python39
                     - nodejs10
+                    - python38
+                    - python39
                   type: string
                 source:
                   type: string

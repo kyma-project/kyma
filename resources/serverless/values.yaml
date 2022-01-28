@@ -107,6 +107,7 @@ global:
       directory: "external/gcr.io/google-containers"
   testImages:
     function_controller_test:
+      name: "function-controller-test"
       version: "PR-13214"
     git_server:
       name: "gitserver"

@@ -24,13 +24,14 @@ const (
 
 // RuntimeExtended enumerates runtimes that are either currently supported or
 // no longer supported but there still might be "read-only" Functions using them
-// +kubebuilder:validation:Enum=nodejs12;nodejs14;nodejs10;python39
+// +kubebuilder:validation:Enum=nodejs12;nodejs14;nodejs10;python38;python39
 type RuntimeExtended string
 
 const (
 	RuntimeExtendedNodejs10 RuntimeExtended = "nodejs10"
 	RuntimeExtendedNodejs12 RuntimeExtended = "nodejs12"
 	RuntimeExtendedNodejs14 RuntimeExtended = "nodejs14"
+	RuntimeExtendedPython38 RuntimeExtended = "python38"
 	RuntimeExtendedPython39 RuntimeExtended = "python39"
 )
 

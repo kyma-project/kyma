@@ -281,6 +281,7 @@ spec:
                 - nodejs12
                 - nodejs14
                 - nodejs10
+                - python38
                 - python39
                 type: string
               source:
