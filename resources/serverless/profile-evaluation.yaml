@@ -11,7 +11,6 @@ webhook:
         runtimePresets: |-
           {
             "python39":"M",
-            "python38":"M"
           }
   deployment:
     resources:
