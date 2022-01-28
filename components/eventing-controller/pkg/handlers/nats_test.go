@@ -132,8 +132,8 @@ func TestSubscription(t *testing.T) {
 }
 
 // TestNatsSubAfterSync_NoChange tests the SyncSubscription method
-// when there is no change in subscription then it should not re-create
-// NATS subjects on nats-server
+// when there is no change in the subscription then the method should
+// not re-create NATS subjects on nats-server
 func TestNatsSubAfterSync_NoChange(t *testing.T) {
 	g := NewWithT(t)
 	natsServer, _ := startNATSServer()
@@ -290,7 +290,7 @@ func TestNatsSubAfterSync_SinkChange(t *testing.T) {
 	g.Expect(subscriber2.CheckEvent(expectedDataInStore)).Should(Succeed())
 }
 
-// TestNatsSubAfterSync_SinkChange tests the SyncSubscription method
+// TestNatsSubAfterSync_FiltersChange tests the SyncSubscription method
 // when the filters are changed in subscription
 func TestNatsSubAfterSync_FiltersChange(t *testing.T) {
 	g := NewWithT(t)
@@ -332,16 +332,14 @@ func TestNatsSubAfterSync_FiltersChange(t *testing.T) {
 	// so that we can later verify if the nats subscriptions are the same (not re-created by Sync)
 	msgLimit, bytesLimit := 2048, 2048
 	g.Expect(len(natsBackend.subscriptions)).To(Equal(defaultSubsConfig.MaxInFlightMessages))
-	for i := 0; i < sub.Status.Config.MaxInFlightMessages; i++ {
-		natsSub := natsBackend.subscriptions[createKey(sub, subject, i)]
-		g.Expect(natsSub).To(Not(BeNil()))
-		g.Expect(natsSub.IsValid()).To(BeTrue())
+	for key := range natsBackend.subscriptions {
 		// set metadata on nats subscription
-		g.Expect(natsSub.SetPendingLimits(msgLimit, bytesLimit)).Should(Succeed())
+		g.Expect(natsBackend.subscriptions[key].SetPendingLimits(msgLimit, bytesLimit)).Should(Succeed())
 	}
 
-	// Now, change the filter in subscription and Sync the subscription
+	// Now, change the filter in subscription
 	sub.Spec.Filter.Filters[0].EventType.Value = fmt.Sprintf("%schanged", eventingtesting.OrderCreatedEventTypeNotClean)
+	// Sync the subscription
 	_, err = natsBackend.SyncSubscription(sub, cleaner)
 	g.Expect(err).To(BeNil())
 
@@ -377,6 +375,325 @@ func TestNatsSubAfterSync_FiltersChange(t *testing.T) {
 	g.Expect(SendEventToNATSOnEventType(natsBackend, newSubject, data)).Should(Succeed())
 	// The sink should receive the event for new subject
 	g.Expect(subscriber.CheckEvent(expectedDataInStore)).Should(Succeed())
+}
+
+// TestNatsSubAfterSync_FilterAdded tests the SyncSubscription method
+// when a new filter is added in subscription
+func TestNatsSubAfterSync_FilterAdded(t *testing.T) {
+	g := NewWithT(t)
+	natsServer, _ := startNATSServer()
+	defer natsServer.Shutdown()
+	defaultLogger := getLogger(g, kymalogger.INFO)
+	natsConfig := env.NatsConfig{
+		URL:           natsServer.ClientURL(),
+		MaxReconnects: 2,
+		ReconnectWait: time.Second,
+	}
+	defaultSubsConfig := env.DefaultSubscriptionConfig{MaxInFlightMessages: 5}
+	natsBackend := NewNats(natsConfig, defaultSubsConfig, nil, defaultLogger)
+	g.Expect(natsBackend.Initialize(env.Config{})).Should(Succeed())
+
+	// Create a new subscriber
+	subscriber := startSubscriber()
+	defer subscriber.Shutdown()
+	g.Expect(subscriber.IsRunning()).To(BeTrue())
+
+	//// ###### Test logic ######
+	// Create a subscription with single filter
+	sub := eventingtesting.NewSubscription("sub", "foo", eventingtesting.WithNotCleanEventTypeFilter)
+	sub.Spec.Sink = subscriber.GetSinkURL()
+	cleaner := createEventTypeCleaner(eventingtesting.EventTypePrefix, eventingtesting.ApplicationNameNotClean, defaultLogger)
+	_, err := natsBackend.SyncSubscription(sub, cleaner)
+	g.Expect(err).To(BeNil())
+
+	// get cleaned subject
+	firstSubject, err := getCleanSubject(sub.Spec.Filter.Filters[0], cleaner)
+	g.Expect(err).ShouldNot(HaveOccurred())
+	g.Expect(firstSubject).To(Not(BeEmpty()))
+
+	// set metadata on NATS subscriptions
+	// so that we can later verify if the nats subscriptions are the same (not re-created by Sync)
+	msgLimit, bytesLimit := 2048, 2048
+	g.Expect(len(natsBackend.subscriptions)).To(Equal(defaultSubsConfig.MaxInFlightMessages))
+	for key := range natsBackend.subscriptions {
+		// set metadata on nats subscription
+		g.Expect(natsBackend.subscriptions[key].SetPendingLimits(msgLimit, bytesLimit)).Should(Succeed())
+	}
+
+	// Now, add a new filter to subscription
+	newFilter := sub.Spec.Filter.Filters[0].DeepCopy()
+	newFilter.EventType.Value = fmt.Sprintf("%snew1", eventingtesting.OrderCreatedEventTypeNotClean)
+	sub.Spec.Filter.Filters = append(sub.Spec.Filter.Filters, newFilter)
+
+	// get new cleaned subject
+	secondSubject, err := getCleanSubject(newFilter, cleaner)
+	g.Expect(err).ShouldNot(HaveOccurred())
+	g.Expect(secondSubject).To(Not(BeEmpty()))
+
+	// Sync the subscription
+	_, err = natsBackend.SyncSubscription(sub, cleaner)
+	g.Expect(err).To(BeNil())
+
+	// Check if total existing NATS subscriptions are correct
+	// Because we have two filters (i.e. two subjects)
+	expectedTotalNatsSubs := 2 * defaultSubsConfig.MaxInFlightMessages
+	g.Expect(natsBackend.subscriptions).To(HaveLen(expectedTotalNatsSubs))
+
+	// Verify that the nats subscriptions for first subject was not re-created
+	for i := 0; i < defaultSubsConfig.MaxInFlightMessages; i++ {
+		natsSub := natsBackend.subscriptions[createKey(sub, firstSubject, i)]
+		g.Expect(natsSub).To(Not(BeNil()))
+		g.Expect(natsSub.IsValid()).To(BeTrue())
+
+		// check the metadata, if they are same then it means that nats subscriptions
+		// were not re-created by SyncSubscription method
+		subMsgLimit, subBytesLimit, err := natsSub.PendingLimits()
+		g.Expect(err).ShouldNot(HaveOccurred())
+		g.Expect(subMsgLimit).To(Equal(msgLimit))
+		g.Expect(subBytesLimit).To(Equal(msgLimit))
+	}
+
+	// Test if subscription is working for both subjects
+	// Send an event on first subject
+	data := fmt.Sprintf("data-%s", time.Now().Format(time.RFC850))
+	expectedDataInStore := fmt.Sprintf("\"%s\"", data)
+	g.Expect(SendEventToNATS(natsBackend, data)).Should(Succeed())
+	// The sink should receive event for first subject
+	g.Expect(subscriber.CheckEvent(expectedDataInStore)).Should(Succeed())
+
+	// Now, send an event on second subject
+	data = fmt.Sprintf("data-%s", time.Now().Format(time.RFC850))
+	expectedDataInStore = fmt.Sprintf("\"%s\"", data)
+	g.Expect(SendEventToNATSOnEventType(natsBackend, secondSubject, data)).Should(Succeed())
+	// The sink should receive the event for second subject
+	g.Expect(subscriber.CheckEvent(expectedDataInStore)).Should(Succeed())
+}
+
+// TestNatsSubAfterSync_FilterRemoved tests the SyncSubscription method
+// when a filter is removed from subscription
+func TestNatsSubAfterSync_FilterRemoved(t *testing.T) {
+	g := NewWithT(t)
+	natsServer, _ := startNATSServer()
+	defer natsServer.Shutdown()
+	defaultLogger := getLogger(g, kymalogger.INFO)
+	natsConfig := env.NatsConfig{
+		URL:           natsServer.ClientURL(),
+		MaxReconnects: 2,
+		ReconnectWait: time.Second,
+	}
+	defaultSubsConfig := env.DefaultSubscriptionConfig{MaxInFlightMessages: 5}
+	natsBackend := NewNats(natsConfig, defaultSubsConfig, nil, defaultLogger)
+	g.Expect(natsBackend.Initialize(env.Config{})).Should(Succeed())
+
+	// Create a new subscriber
+	subscriber := startSubscriber()
+	defer subscriber.Shutdown()
+	g.Expect(subscriber.IsRunning()).To(BeTrue())
+
+	cleaner := createEventTypeCleaner(eventingtesting.EventTypePrefix, eventingtesting.ApplicationNameNotClean, defaultLogger)
+
+	//// ###### Test logic ######
+	// Create a subscription with two filters
+	sub := eventingtesting.NewSubscription("sub", "foo", eventingtesting.WithNotCleanEventTypeFilter)
+	sub.Spec.Sink = subscriber.GetSinkURL()
+	// add a second filter
+	newFilter := sub.Spec.Filter.Filters[0].DeepCopy()
+	newFilter.EventType.Value = fmt.Sprintf("%snew1", eventingtesting.OrderCreatedEventTypeNotClean)
+	sub.Spec.Filter.Filters = append(sub.Spec.Filter.Filters, newFilter)
+	_, err := natsBackend.SyncSubscription(sub, cleaner)
+	g.Expect(err).To(BeNil())
+
+	// get cleaned subjects
+	firstSubject, err := getCleanSubject(sub.Spec.Filter.Filters[0], cleaner)
+	g.Expect(err).ShouldNot(HaveOccurred())
+	g.Expect(firstSubject).To(Not(BeEmpty()))
+
+	secondSubject, err := getCleanSubject(sub.Spec.Filter.Filters[1], cleaner)
+	g.Expect(err).ShouldNot(HaveOccurred())
+	g.Expect(secondSubject).To(Not(BeEmpty()))
+
+	// Check if total existing NATS subscriptions are correct
+	// Because we have two filters (i.e. two subjects)
+	expectedTotalNatsSubs := 2 * defaultSubsConfig.MaxInFlightMessages
+	g.Expect(natsBackend.subscriptions).To(HaveLen(expectedTotalNatsSubs))
+
+	// set metadata on NATS subscriptions
+	// so that we can later verify if the nats subscriptions are the same (not re-created by Sync)
+	msgLimit, bytesLimit := 2048, 2048
+	for key := range natsBackend.subscriptions {
+		// set metadata on nats subscription
+		g.Expect(natsBackend.subscriptions[key].SetPendingLimits(msgLimit, bytesLimit)).Should(Succeed())
+	}
+
+	// Now, remove the second filter from subscription
+	sub.Spec.Filter.Filters = sub.Spec.Filter.Filters[:1]
+	// Sync the subscription
+	_, err = natsBackend.SyncSubscription(sub, cleaner)
+	g.Expect(err).To(BeNil())
+
+	// Check if total existing NATS subscriptions are correct
+	g.Expect(len(natsBackend.subscriptions)).To(Equal(defaultSubsConfig.MaxInFlightMessages))
+
+	// Verify that the nats subscriptions for first subject was not re-created
+	for i := 0; i < defaultSubsConfig.MaxInFlightMessages; i++ {
+		natsSub := natsBackend.subscriptions[createKey(sub, firstSubject, i)]
+		g.Expect(natsSub).To(Not(BeNil()))
+		g.Expect(natsSub.IsValid()).To(BeTrue())
+
+		// check the metadata, if they are same then it means that nats subscriptions
+		// were not re-created by SyncSubscription method
+		subMsgLimit, subBytesLimit, err := natsSub.PendingLimits()
+		g.Expect(err).ShouldNot(HaveOccurred())
+		g.Expect(subMsgLimit).To(Equal(msgLimit))
+		g.Expect(subBytesLimit).To(Equal(msgLimit))
+	}
+
+	// Test if subscription is working for first subject only
+	// Send an event on first subject
+	data := fmt.Sprintf("data-%s", time.Now().Format(time.RFC850))
+	expectedDataInStore := fmt.Sprintf("\"%s\"", data)
+	g.Expect(SendEventToNATS(natsBackend, data)).Should(Succeed())
+	// The sink should receive event for first subject
+	g.Expect(subscriber.CheckEvent(expectedDataInStore)).Should(Succeed())
+
+	// Now, send an event on second subject
+	data = fmt.Sprintf("data-%s", time.Now().Format(time.RFC850))
+	expectedDataInStore = fmt.Sprintf("\"%s\"", data)
+	g.Expect(SendEventToNATSOnEventType(natsBackend, secondSubject, data)).Should(Succeed())
+	// The sink should NOT receive the event for second subject
+	g.Expect(subscriber.CheckEvent(expectedDataInStore)).ShouldNot(Succeed())
+}
+
+// TestNatsSubAfterSync_MultipleSubs tests the SyncSubscription method
+// when there are two subscriptions and the filter is changed in one subscription
+// it should not affect the NATS subscriptions of other Kyma subscriptions
+func TestNatsSubAfterSync_MultipleSubs(t *testing.T) {
+	g := NewWithT(t)
+	natsServer, _ := startNATSServer()
+	defer natsServer.Shutdown()
+	defaultLogger := getLogger(g, kymalogger.INFO)
+	natsConfig := env.NatsConfig{
+		URL:           natsServer.ClientURL(),
+		MaxReconnects: 2,
+		ReconnectWait: time.Second,
+	}
+	defaultSubsConfig := env.DefaultSubscriptionConfig{MaxInFlightMessages: 5}
+	natsBackend := NewNats(natsConfig, defaultSubsConfig, nil, defaultLogger)
+	g.Expect(natsBackend.Initialize(env.Config{})).Should(Succeed())
+
+	// Create a new subscriber
+	subscriber := startSubscriber()
+	defer subscriber.Shutdown()
+	g.Expect(subscriber.IsRunning()).To(BeTrue())
+
+	cleaner := createEventTypeCleaner(eventingtesting.EventTypePrefix, eventingtesting.ApplicationNameNotClean, defaultLogger)
+
+	// // ###### Test logic ######
+	// Create two subscriptions with single filter
+	sub := eventingtesting.NewSubscription("sub", "foo", eventingtesting.WithNotCleanEventTypeFilter)
+	sub.Spec.Sink = subscriber.GetSinkURL()
+	_, err := natsBackend.SyncSubscription(sub, cleaner)
+	g.Expect(err).ShouldNot(HaveOccurred())
+
+	sub2 := eventingtesting.NewSubscription("sub2", "foo", eventingtesting.WithNotCleanEventTypeFilter)
+	sub2.Spec.Sink = subscriber.GetSinkURL()
+	_, err = natsBackend.SyncSubscription(sub2, cleaner)
+	g.Expect(err).ShouldNot(HaveOccurred())
+
+	// set metadata on NATS subscriptions
+	// so that we can later verify if the nats subscriptions are the same (not re-created by Sync)
+	msgLimit, bytesLimit := 2048, 2048
+	// check we have correct number of total subscriptions
+	expectedTotalNatsSubs := 2 * defaultSubsConfig.MaxInFlightMessages // Because we have two subscriptions
+	g.Expect(len(natsBackend.subscriptions)).To(Equal(expectedTotalNatsSubs))
+	for key := range natsBackend.subscriptions {
+		// set metadata on nats subscription
+		g.Expect(natsBackend.subscriptions[key].SetPendingLimits(msgLimit, bytesLimit)).Should(Succeed())
+	}
+
+	// Now, change the filter in subscription 1
+	sub.Spec.Filter.Filters[0].EventType.Value = fmt.Sprintf("%schanged", eventingtesting.OrderCreatedEventTypeNotClean)
+	// Sync the subscription
+	_, err = natsBackend.SyncSubscription(sub, cleaner)
+	g.Expect(err).ShouldNot(HaveOccurred())
+
+	// get new cleaned subject from subscription 1
+	newSubject, err := getCleanSubject(sub.Spec.Filter.Filters[0], cleaner)
+	g.Expect(err).ShouldNot(HaveOccurred())
+	g.Expect(newSubject).To(Not(BeEmpty()))
+
+	// check we have correct number of total subscriptions
+	expectedTotalNatsSubs = 2 * defaultSubsConfig.MaxInFlightMessages // Because we have two subscriptions
+	g.Expect(len(natsBackend.subscriptions)).To(Equal(expectedTotalNatsSubs))
+
+	// check if the NATS subscription are NOT the same after sync for subscription 1
+	// because the subscriptions should have being re-created for new subject
+	for i := 0; i < sub.Status.Config.MaxInFlightMessages; i++ {
+		natsSub := natsBackend.subscriptions[createKey(sub, newSubject, i)]
+		g.Expect(natsSub).To(Not(BeNil()))
+		g.Expect(natsSub.IsValid()).To(BeTrue())
+
+		// check the metadata, if they are NOT same then it means that nats subscriptions
+		// were re-created by SyncSubscription method
+		subMsgLimit, subBytesLimit, err := natsSub.PendingLimits()
+		g.Expect(err).ShouldNot(HaveOccurred())
+		g.Expect(subMsgLimit).To(Not(Equal(msgLimit)))
+		g.Expect(subBytesLimit).To(Not(Equal(msgLimit)))
+	}
+
+	// get cleaned subject for subscription 2
+	cleanSubjectSub2, err := getCleanSubject(sub2.Spec.Filter.Filters[0], cleaner)
+	g.Expect(err).ShouldNot(HaveOccurred())
+	g.Expect(cleanSubjectSub2).To(Not(BeEmpty()))
+
+	// check if the NATS subscription are same after sync for subscription 2
+	// because the subscriptions should NOT have being re-created as
+	// subscription 2 was not modified
+	for i := 0; i < sub2.Status.Config.MaxInFlightMessages; i++ {
+		natsSub := natsBackend.subscriptions[createKey(sub2, cleanSubjectSub2, i)]
+		g.Expect(natsSub).To(Not(BeNil()))
+		g.Expect(natsSub.IsValid()).To(BeTrue())
+
+		// check the metadata, if they are same then it means that nats subscriptions
+		// were not re-created by SyncSubscription method
+		subMsgLimit, subBytesLimit, err := natsSub.PendingLimits()
+		g.Expect(err).ShouldNot(HaveOccurred())
+		g.Expect(subMsgLimit).To(Equal(msgLimit))
+		g.Expect(subBytesLimit).To(Equal(msgLimit))
+	}
+}
+
+// Test_isNatsSubAssociatedWithKymaSub tests the isNatsSubAssociatedWithKymaSub method
+func Test_isNatsSubAssociatedWithKymaSub(t *testing.T) {
+	g := NewWithT(t)
+
+	//// ######  Setup test assets ######
+	// create subscription 1 and its nats subscription
+	cleanSubject1 := "subOne"
+	sub1 := eventingtesting.NewSubscription(cleanSubject1, "foo", eventingtesting.WithNotCleanEventTypeFilter)
+	natsSub1Key := createKey(sub1, cleanSubject1, 0)
+	natsSub1 := &nats.Subscription{
+		Subject: cleanSubject1,
+	}
+
+	// create subscription 2 and its nats subscription
+	cleanSubject2 := "subOneTwo"
+	sub2 := eventingtesting.NewSubscription(cleanSubject2, "foo", eventingtesting.WithNotCleanEventTypeFilter)
+	natsSub2Key := createKey(sub2, cleanSubject2, 0)
+	natsSub2 := &nats.Subscription{
+		Subject: cleanSubject2,
+	}
+
+	//// ###### Test logic ######
+	// Should return true because natsSub1 is associated with sub1
+	g.Expect(isNatsSubAssociatedWithKymaSub(natsSub1Key, natsSub1, sub1)).To(Equal(true))
+	// Should return true because natsSub2 is associated with sub2
+	g.Expect(isNatsSubAssociatedWithKymaSub(natsSub2Key, natsSub2, sub2)).To(Equal(true))
+
+	// Should return false because natsSub1 is NOT associated with sub2
+	g.Expect(isNatsSubAssociatedWithKymaSub(natsSub1Key, natsSub1, sub2)).To(Equal(false))
+	// Should return false because natsSub2 is NOT associated with sub1
+	g.Expect(isNatsSubAssociatedWithKymaSub(natsSub2Key, natsSub2, sub1)).To(Equal(false))
 }
 
 func TestMultipleSubscriptionsToSameEvent(t *testing.T) {
