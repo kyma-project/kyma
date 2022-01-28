@@ -89,6 +89,11 @@ ci-test-eventing-tests:
 	npm install
 	npm run eventing-tests
 
+.PHONY: ci-test-eventing-cleanup
+ci-test-eventing-cleanup:
+	npm install
+	npm run eventing-test-cleanup
+
 .PHONY: ci-test-eventing-provision-skr
 ci-test-eventing-provision-skr:
 	npm ci
