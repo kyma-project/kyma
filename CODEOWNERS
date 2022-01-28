@@ -239,7 +239,7 @@ components/etcd-tls-setup-job/ @PK85 @piotrmiskiewicz @ksputo @szwedm @voigt @wo
 /tests/end-to-end/upgrade/pkg/tests/rafter/ @m00g3n @pPrecel @dbadura @tgorgol @rJankowski93
 
 # All .md files
-*.md @kyma-project/documentation
+*.md @kyma-project/technical-writers
 
 # All files and subdirectories in /docs
 /docs/ @kyma-project/documentation
