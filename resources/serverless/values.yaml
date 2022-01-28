@@ -114,7 +114,7 @@ global:
       version: "PR-12963"
     git_server:
       name: "gitserver"
-      version: "c0aa144a"
+      version: "PR-12964"
   highPriorityClassName: "kyma-system-priority"
 
 images:
