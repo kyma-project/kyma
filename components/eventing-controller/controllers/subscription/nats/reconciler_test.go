@@ -35,6 +35,7 @@ import (
 	. "github.com/onsi/gomega"
 
 	kymalogger "github.com/kyma-project/kyma/common/logging/logger"
+
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 	"github.com/kyma-project/kyma/components/eventing-controller/logger"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/application/applicationtest"
@@ -871,9 +872,9 @@ func isSubscriptionDeleted(ctx context.Context, subscription *eventingv1alpha1.S
 	}, smallTimeout, smallPollingInterval)
 }
 
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Test Suite setup ////////////////////////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // These tests use Ginkgo (BDD-style Go controllertesting framework). Refer to
 // http://onsi.github.io/ginkgo/ to learn more about Ginkgo.
@@ -947,7 +948,7 @@ func startReconciler(eventTypePrefix string, sinkValidator sinkValidator, natsUR
 	k8sManager, err := ctrl.NewManager(cfg, ctrl.Options{
 		Scheme:             scheme.Scheme,
 		SyncPeriod:         &syncPeriod,
-		MetricsBindAddress: ":7070",
+		MetricsBindAddress: "localhost:7070",
 	})
 	Expect(err).ToNot(HaveOccurred())
 
