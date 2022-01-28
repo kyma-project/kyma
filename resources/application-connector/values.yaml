@@ -45,10 +45,10 @@ global:
       version: "PR-13076"
     application_connectivity_validator:
       name: "application-connectivity-validator"
-      version: "PR-13076"
+      version: "PR-13203"
     application_gateway:
       name: "application-gateway"
-      version: "PR-13076"
+      version: "PR-13203"
     application_operator:
       name: "application-operator"
       version: "PR-13076"
