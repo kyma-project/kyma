@@ -878,7 +878,7 @@ func TestIsValidSubscription(t *testing.T) {
 	g.Expect(subscriber.IsRunning()).To(BeTrue())
 
 	cleaner := createEventTypeCleaner(eventingtesting.EventTypePrefix, eventingtesting.ApplicationName, defaultLogger)
-	sub := eventingtesting.NewSubscription("sub", "foo", eventingtesting.WithEventTypeFilter)
+	sub := eventingtesting.NewSubscription("sub", "foo", eventingtesting.WithDefaultEventTypeFilter)
 	sub.Spec.Sink = subscriber.GetSinkURL()
 	_, err := natsBackend.SyncSubscription(sub, cleaner)
 	g.Expect(err).To(BeNil())
@@ -945,7 +945,7 @@ func TestSubscriptionUsingCESDK(t *testing.T) {
 	g.Expect(subscriber.IsRunning()).To(BeTrue())
 
 	cleaner := createEventTypeCleaner(eventingtesting.EventTypePrefix, eventingtesting.ApplicationName, defaultLogger)
-	sub := eventingtesting.NewSubscription("sub", "foo", eventingtesting.WithEventTypeFilter)
+	sub := eventingtesting.NewSubscription("sub", "foo", eventingtesting.WithDefaultEventTypeFilter)
 	sub.Spec.Sink = subscriber.GetSinkURL()
 	_, err := natsBackend.SyncSubscription(sub, cleaner)
 	g.Expect(err).To(BeNil())
@@ -984,7 +984,7 @@ func TestRetryUsingCESDK(t *testing.T) {
 	defer subscriber.Shutdown()
 	g.Expect(subscriber.IsRunning()).To(BeTrue())
 
-	sub := eventingtesting.NewSubscription("sub", "foo", eventingtesting.WithEventTypeFilter)
+	sub := eventingtesting.NewSubscription("sub", "foo", eventingtesting.WithDefaultEventTypeFilter)
 	subscriberServerErrorURL := fmt.Sprintf("http://127.0.0.1:%d/return500", subscriber.Port)
 	sub.Spec.Sink = subscriberServerErrorURL
 	cleaner := createEventTypeCleaner(eventingtesting.EventTypePrefix, eventingtesting.ApplicationName, defaultLogger)

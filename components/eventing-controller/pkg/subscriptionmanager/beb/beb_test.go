@@ -32,7 +32,10 @@ func TestCleanup(t *testing.T) {
 
 	// create a Kyma subscription
 	subscription := controllertesting.NewSubscription("test", "test",
-		controllertesting.WithWebhookAuthForBEB, controllertesting.WithFakeSubscriptionStatus, controllertesting.WithEventTypeFilter)
+		controllertesting.WithWebhookAuthForBEB,
+		controllertesting.WithFakeSubscriptionStatus,
+		controllertesting.WithDefaultEventTypeFilter,
+	)
 	subscription.Spec.Sink = "https://bla.test.svc.cluster.local"
 
 	// create an APIRule

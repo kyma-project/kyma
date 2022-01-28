@@ -252,7 +252,8 @@ func WithWebhookAuthForBEB(s *eventingv1alpha1.Subscription) {
 	}
 }
 
-func WithWebhookForNats(s *eventingv1alpha1.Subscription) {
+// WithWebhookForNATS is a SubscriptionOpt for creating a Subscription with a webhook set to the NATS protocol.
+func WithWebhookForNATS(s *eventingv1alpha1.Subscription) {
 	s.Spec.Protocol = "NATS"
 	s.Spec.ProtocolSettings = &eventingv1alpha1.ProtocolSettings{}
 }
@@ -278,8 +279,9 @@ func WithNotCleanEventTypeFilter(s *eventingv1alpha1.Subscription) {
 	}
 }
 
-// WithFilter appends a filter to the existing filters of Subscription
-func WithFilter(eventSource, eventType string) SubscriptionOpt {
+// WithSpecificEventTypeFilter is a SubscriptionOpt for creating a Subscription with a specific event type filter,
+// that itself gets created from the passed eventSource and eventType.
+func WithSpecificEventTypeFilter(eventSource, eventType string) SubscriptionOpt {
 	return func(subscription *eventingv1alpha1.Subscription) {
 		if subscription.Spec.Filter == nil {
 			subscription.Spec.Filter = &eventingv1alpha1.BEBFilters{
@@ -304,13 +306,16 @@ func WithFilter(eventSource, eventType string) SubscriptionOpt {
 	}
 }
 
-func WithEmptyFilter(subscription *eventingv1alpha1.Subscription) {
+// WithEmptyEventTypeFilter is a SubscriptionOpt for creating a subscription with an empty event type filter.
+//  Note that this is different from setting Filter to nil.
+func WithEmptyEventTypeFilter(subscription *eventingv1alpha1.Subscription) {
 	subscription.Spec.Filter = &eventingv1alpha1.BEBFilters{
 		Filters: []*eventingv1alpha1.BEBFilter{},
 	}
 }
 
-func WithEventTypeFilter(s *eventingv1alpha1.Subscription) {
+// WithDefaultEventTypeFilter is a SubscriptionOpt for creating a subscription with the default event type filter.
+func WithDefaultEventTypeFilter(s *eventingv1alpha1.Subscription) {
 	s.Spec.Filter = &eventingv1alpha1.BEBFilters{
 		Filters: []*eventingv1alpha1.BEBFilter{
 			{
@@ -329,11 +334,24 @@ func WithEventTypeFilter(s *eventingv1alpha1.Subscription) {
 	}
 }
 
-func WithValidSink(svcNs, svcName string, s *eventingv1alpha1.Subscription) {
-	s.Spec.Sink = GetValidSink(svcNs, svcName)
+// WithValidSink is a SubscriptionOpt for creating a subscription with a valid sink that itself gets created from
+// the svcNamespace and the svcName.
+func WithValidSink(svcNamespace, svcName string) SubscriptionOpt {
+	return func(s *eventingv1alpha1.Subscription) { s.Spec.Sink = NewValidSink(svcNamespace, svcName) }
 }
 
-func GetValidSink(svcNs, svcName string) string {
+// WithSpecificSink is a SubscriptionOpt for creating a subscription with a specific sink.
+// This is useful for testing against invalid sinks.
+func WithSpecificSink(invalidSink string) SubscriptionOpt {
+	return func(subscription *eventingv1alpha1.Subscription) { subscription.Spec.Sink = invalidSink }
+}
+
+// SetSink sets the subscription's sink to a valid sink created from svcNameSpace and svcName.
+func SetSink(svcNamespace, svcName string, subscription *eventingv1alpha1.Subscription) {
+	subscription.Spec.Sink = NewValidSink(svcNamespace, svcName)
+}
+
+func NewValidSink(svcNs, svcName string) string {
 	return fmt.Sprintf("https://%s.%s.svc.cluster.local", svcName, svcNs)
 }
 
@@ -360,7 +378,7 @@ func NewSubscriberSvc(name, ns string) *corev1.Service {
 	}
 }
 
-func WithBEBMessagingSecret(name, ns string) *corev1.Secret {
+func NewBEBMessagingSecret(name, ns string) *corev1.Secret {
 	messagingValue := `
 				[{
 					"broker": {
@@ -412,7 +430,7 @@ func WithBEBMessagingSecret(name, ns string) *corev1.Secret {
 	}
 }
 
-func WithNamespace(name string) *corev1.Namespace {
+func NewNamespace(name string) *corev1.Namespace {
 	namespace := corev1.Namespace{
 		ObjectMeta: metav1.ObjectMeta{
 			Name: name,
@@ -421,18 +439,18 @@ func WithNamespace(name string) *corev1.Namespace {
 	return &namespace
 }
 
-func WithEventingBackend(name, ns string) *eventingv1alpha1.EventingBackend {
+func NewEventingBackend(name, namespace string) *eventingv1alpha1.EventingBackend {
 	return &eventingv1alpha1.EventingBackend{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      name,
-			Namespace: ns,
+			Namespace: namespace,
 		},
 		Spec:   eventingv1alpha1.EventingBackendSpec{},
 		Status: eventingv1alpha1.EventingBackendStatus{},
 	}
 }
 
-func WithEventingControllerDeployment() *appsv1.Deployment {
+func NewEventingControllerDeployment() *appsv1.Deployment {
 	labels := map[string]string{
 		"app.kubernetes.io/name": "value",
 	}
@@ -463,7 +481,8 @@ func WithEventingControllerDeployment() *appsv1.Deployment {
 		Status: appsv1.DeploymentStatus{},
 	}
 }
-func WithEventingControllerPod(backend string) *corev1.Pod {
+
+func NewEventingControllerPod(backend string) *corev1.Pod {
 	labels := map[string]string{
 		deployment.AppLabelKey: deployment.PublisherName,
 	}
