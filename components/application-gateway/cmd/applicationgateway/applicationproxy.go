@@ -1,11 +1,16 @@
 package main
 
 import (
+	"context"
+	"net"
 	"net/http"
 	"os"
+	"os/signal"
 	"strconv"
-	"sync"
+	"syscall"
 	"time"
+
+	"github.com/oklog/run"
 
 	"github.com/kyma-project/kyma/components/application-gateway/pkg/proxyconfig/provider"
 
@@ -29,25 +34,30 @@ import (
 	restclient "k8s.io/client-go/rest"
 )
 
+const (
+	shutdownTimeout = 2 * time.Second
+)
+
 func main() {
 	formatter := &log.TextFormatter{
 		FullTimestamp: true,
 	}
 	log.SetFormatter(formatter)
-
 	log.Info("Starting Application Gateway.")
 	options := parseArgs()
 	log.Infof("Options: %s", options)
 
+	logs := log.New()
+
 	k8sConfig, err := restclient.InClusterConfig()
 	if err != nil {
-		log.Fatalf("Error reading in cluster config: %s", err.Error())
+		logs.Fatalf("Error reading in cluster config: %s", err.Error())
 		os.Exit(1)
 	}
 
 	coreClientset, err := kubernetes.NewForConfig(k8sConfig)
 	if err != nil {
-		log.Fatalf("Error creating core clientset: %s", err.Error())
+		logs.Fatalf("Error creating core clientset: %s", err.Error())
 		os.Exit(2)
 	}
 
@@ -58,7 +68,7 @@ func main() {
 		options.application,
 	)
 	if err != nil {
-		log.Errorf("Unable to create ServiceDefinitionService: '%s'", err.Error())
+		logs.Errorf("Unable to create ServiceDefinitionService: '%s'", err.Error())
 		os.Exit(3)
 	}
 
@@ -84,18 +94,52 @@ func main() {
 		WriteTimeout: time.Duration(options.requestTimeout) * time.Second,
 	}
 
-	wg := &sync.WaitGroup{}
+	ctx, cancel := context.WithCancel(context.Background())
+	var g run.Group
+	addInterruptSignalToRunGroup(ctx, cancel, logs, &g)
+	addHttpServerToRunGroup(logs, "external-server", &g, externalSrv)
+	addHttpServerToRunGroup(logs, "internal-server", &g, internalSrv)
 
-	wg.Add(1)
-	go func() {
-		log.Info(externalSrv.ListenAndServe())
-	}()
+	err = g.Run()
+	if err != nil && err != http.ErrServerClosed {
+		log.Fatal(err)
+	}
+}
 
-	go func() {
-		log.Info(internalSrv.ListenAndServe())
-	}()
+func addHttpServerToRunGroup(log *log.Logger, name string, g *run.Group, srv *http.Server) {
+	log.Infof("Starting %s HTTP server on %s", name, srv.Addr)
+	ln, err := net.Listen("tcp", srv.Addr)
+	if err != nil {
+		log.Fatalf("Unable to start %s HTTP server: '%s'", name, err.Error())
+	}
+	g.Add(func() error {
+		defer log.Infof("Server %s finished", name)
+		return srv.Serve(ln)
+	}, func(error) {
+		log.Infof("Shutting down %s HTTP server on %s", name, srv.Addr)
 
-	wg.Wait()
+		ctx, cancel := context.WithTimeout(context.Background(), shutdownTimeout)
+		defer cancel()
+		err = srv.Shutdown(ctx)
+		if err != nil && err != http.ErrServerClosed {
+			log.Warnf("HTTP server shutdown %s failed: %s", name, err.Error())
+		}
+	})
+}
+
+func addInterruptSignalToRunGroup(ctx context.Context, cancel context.CancelFunc, log *log.Logger, g *run.Group) {
+	g.Add(func() error {
+		c := make(chan os.Signal, 1)
+		signal.Notify(c, syscall.SIGINT, syscall.SIGTERM)
+		select {
+		case <-ctx.Done():
+		case sig := <-c:
+			log.Infof("received signal %s", sig)
+		}
+		return nil
+	}, func(error) {
+		cancel()
+	})
 }
 
 func newInternalHandler(coreClientset kubernetes.Interface, serviceDefinitionService metadata.ServiceDefinitionService, options *options) http.Handler {

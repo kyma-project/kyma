@@ -1,18 +1,26 @@
 package main
 
 import (
+	"context"
 	"fmt"
+	"net"
 	"net/http"
 	"os"
-	"sync"
+	"os/signal"
+	"syscall"
 	"time"
+
+	"github.com/oklog/run"
 
 	"github.com/kyma-project/kyma/common/logging/logger"
 	"github.com/kyma-project/kyma/common/logging/tracing"
-	"github.com/kyma-project/kyma/components/application-connectivity-validator/internal/controller"
 	"github.com/kyma-project/kyma/components/application-connectivity-validator/internal/externalapi"
 	"github.com/kyma-project/kyma/components/application-connectivity-validator/internal/validationproxy"
 	"github.com/patrickmn/go-cache"
+)
+
+const (
+	shutdownTimeout = 2 * time.Second
 )
 
 func main() {
@@ -83,21 +91,50 @@ func main() {
 		Addr:    fmt.Sprintf(":%d", options.externalAPIPort),
 	}
 
-	wg := &sync.WaitGroup{}
-	wg.Add(1)
+	ctx, cancel := context.WithCancel(context.Background())
+	var g run.Group
+	addInterruptSignalToRunGroup(ctx, cancel, log, &g)
+	addHttpServerToRunGroup(log, "proxy-server", &g, &proxyServer)
+	addHttpServerToRunGroup(log, "external-server", &g, &externalServer)
 
-	go func() {
-		// TODO: go routine should inform other go routines that it initially updated the cache
-		controller.Start(log, options.kubeConfig, options.apiServerURL, options.syncPeriod, options.appName, idCache)
-	}()
+	err = g.Run()
+	if err != nil && err != http.ErrServerClosed {
+		log.WithContext().Fatal(err)
+	}
+}
 
-	go func() {
-		log.WithContext().With("server", "proxy").With("port", options.proxyPort).Error(proxyServer.ListenAndServe())
-	}()
+func addHttpServerToRunGroup(log *logger.Logger, name string, g *run.Group, srv *http.Server) {
+	log.WithContext().Infof("Starting %s HTTP server on %s", name, srv.Addr)
+	ln, err := net.Listen("tcp", srv.Addr)
+	if err != nil {
+		log.WithContext().Fatalf("Unable to start %s HTTP server: '%s'", name, err.Error())
+	}
+	g.Add(func() error {
+		defer log.WithContext().Infof("Server %s finished", name)
+		return srv.Serve(ln)
+	}, func(error) {
+		log.WithContext().Infof("Shutting down %s HTTP server on %s", name, srv.Addr)
 
-	go func() {
-		log.WithContext().With("server", "external").With("port", options.externalAPIPort).Error(externalServer.ListenAndServe())
-	}()
+		ctx, cancel := context.WithTimeout(context.Background(), shutdownTimeout)
+		defer cancel()
+		err = srv.Shutdown(ctx)
+		if err != nil && err != http.ErrServerClosed {
+			log.WithContext().Warnf("HTTP server shutdown %s failed: %s", name, err.Error())
+		}
+	})
+}
 
-	wg.Wait()
+func addInterruptSignalToRunGroup(ctx context.Context, cancel context.CancelFunc, log *logger.Logger, g *run.Group) {
+	g.Add(func() error {
+		c := make(chan os.Signal, 1)
+		signal.Notify(c, syscall.SIGINT, syscall.SIGTERM)
+		select {
+		case <-ctx.Done():
+		case sig := <-c:
+			log.WithContext().Infof("received signal %s", sig)
+		}
+		return nil
+	}, func(error) {
+		cancel()
+	})
 }
