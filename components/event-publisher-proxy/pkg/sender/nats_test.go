@@ -48,6 +48,9 @@ func setupTestEnvironment(t *testing.T, connectionOpts ...pkgnats.BackendConnect
 	// Start Nats server
 	natsServer := testingutils.StartNatsServer()
 	assert.NotNil(t, natsServer)
+	t.Cleanup(func() {
+		natsServer.Shutdown()
+	})
 
 	// connect to nats
 	bc := pkgnats.NewBackendConnection(natsServer.ClientURL(), true, 1, time.Second)
@@ -100,8 +103,6 @@ func TestSendCloudEventsToNats(t *testing.T) {
 			///////////////////////////
 
 			testEnv := setupTestEnvironment(t, pkgnats.WithBackendConnectionRetries(tc.givenRetries))
-			// use t.Cleanup instead
-			defer testEnv.natsServer.Shutdown()
 
 			// subscribe to subject
 			subject := fmt.Sprintf(`"%s"`, testingutils.CloudEventData)
