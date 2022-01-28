@@ -48,8 +48,7 @@ func makeProxy(targetUrl string, requestParameters *authorization.RequestParamet
 			setCustomHeaders(req.Header, requestParameters.Headers)
 		}
 
-		removeForbiddenHeaders(req.Header)
-
+		log.Infof("req.Host: '%s', || target.Host: '%s'", req.Host, target.Host)
 		log.Infof("Modified request url : '%s', schema : '%s', path : '%s'", req.URL.String(), req.URL.Scheme, req.URL.Path)
 	}
 	newProxy := &httputil.ReverseProxy{Director: director}
@@ -92,13 +91,6 @@ func joinPaths(a, b string) string {
 }
 func setCustomQueryParameters(reqURL *url.URL, customQueryParams *map[string][]string) {
 	httptools.SetQueryParameters(reqURL, customQueryParams)
-}
-
-func removeForbiddenHeaders(reqHeaders http.Header) {
-	httptools.RemoveHeader(reqHeaders, httpconsts.HeaderXForwardedProto)
-	httptools.RemoveHeader(reqHeaders, httpconsts.HeaderXForwardedFor)
-	httptools.RemoveHeader(reqHeaders, httpconsts.HeaderXForwardedHost)
-	httptools.RemoveHeader(reqHeaders, httpconsts.HeaderXForwardedClientCert)
 }
 
 func setCustomHeaders(reqHeaders http.Header, customHeaders *map[string][]string) {
