@@ -42,19 +42,19 @@ global:
       version: "c8a2ae16"
     application_connectivity_certs_setup_job:
       name: "application-connectivity-certs-setup-job"
-      version: "PR-13076"
+      version: "PR-13170"
     application_connectivity_validator:
       name: "application-connectivity-validator"
-      version: "PR-13076"
+      version: "PR-13170"
     application_gateway:
       name: "application-gateway"
       version: "PR-13171"
     application_operator:
       name: "application-operator"
-      version: "PR-13076"
+      version: "PR-13170"
     application_registry:
       name: "application-registry"
-      version: "PR-13076"
+      version: "PR-13170"
     central_application_connectivity_validator:
       name: "central-application-connectivity-validator"
       version: "PR-13076"

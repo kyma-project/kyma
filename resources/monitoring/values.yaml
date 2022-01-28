@@ -42,7 +42,7 @@ global:
       directory: "external/k8s.gcr.io/kube-state-metrics"
     grafana:
       name: "grafana"
-      version: "7.5.12-663797e9"
+      version: "7.5.13-eb28d2e0"
       directory: "tpi"
       sha: ""
     busybox:
@@ -57,7 +57,7 @@ global:
       sha: ""
     oauth2_proxy:
       name: "oauth2-proxy"
-      version: "7.2.0-2696e5d5"
+      version: "7.2.1-334ca95f"
       directory: "tpi"
       sha: ""
 
