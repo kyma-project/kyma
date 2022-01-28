@@ -157,12 +157,12 @@ See sample context details:
 
 See the detailed descriptions of these fields:
 
-| Field | Description                                                                               |
-|-------|-------------------------------------------------------------------------------------------|
-| **function-name** | Name of the invoked Function                                                              |
-| **timeout** | Time, in seconds, after which the system cancels the request to invoke the Function       |
+| Field | Description |
+|-------|-------------|
+| **function-name** | Name of the invoked Function |
+| **timeout** | Time, in seconds, after which the system cancels the request to invoke the Function |
 | **runtime** | Environment used to run the Function. You can use `nodejs14` or `python39`. |
-| **memory-limit** | Maximum amount of memory assigned to run a Function                                       |  
+| **memory-limit** | Maximum amount of memory assigned to run a Function |
 
 ## HTTP requests
 
