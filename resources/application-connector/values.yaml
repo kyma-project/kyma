@@ -51,22 +51,22 @@ global:
       version: "PR-13170"
     application_operator:
       name: "application-operator"
-      version: "PR-13170"
+      version: "PR-12963"
     application_registry:
       name: "application-registry"
       version: "PR-13170"
     central_application_connectivity_validator:
       name: "central-application-connectivity-validator"
-      version: "PR-13076"
+      version: "PR-12963"
     central_application_gateway:
       name: "central-application-gateway"
-      version: "PR-13076"
+      version: "PR-12963"
     connection_token_handler:
       name: "connection-token-handler"
-      version: "PR-13076"
+      version: "PR-12963"
     connector_service:
       name: "connector-service"
-      version: "PR-13076"
+      version: "PR-12963"
     busybox:
       name: "busybox"
       version: "1.34.1"

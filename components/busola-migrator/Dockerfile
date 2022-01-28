@@ -2,10 +2,11 @@ FROM eu.gcr.io/kyma-project/external/golang:1.17.6-alpine3.15 as builder
 
 WORKDIR /go/src/github.com/kyma-project/kyma/components/busola-migrator
 
-ADD . .
+COPY . .
 RUN CGO_ENABLED=0 go build -ldflags="-s -w" -o /busola-migrator ./main.go
 
-FROM gcr.io/distroless/static
+# hadolint ignore=DL3007
+FROM gcr.io/distroless/static:latest
 
 USER 1000
 

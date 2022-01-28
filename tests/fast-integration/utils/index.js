@@ -959,6 +959,18 @@ function ignore404(e) {
   throw e;
 }
 
+// NOTE: this works only for those where resource == lowercase plural kind
+async function deleteK8sObjects(objects) {
+  console.log(`deleting ${objects.length} objects`);
+  for (const o of objects) {
+    const path = `${o.apiVersion}/namespaces/${o.metadata.namespace}/${o.kind.toLowerCase()}s/${o.metadata.name}`;
+    await k8sDynamicApi.requestPromise({
+      url: `${k8sDynamicApi.basePath}/apis/${path}`,
+      method: 'DELETE',
+    });
+  }
+}
+
 // NOTE: this no longer works, it relies on kube-api sending `selfLink` but the field has been deprecated
 async function deleteAllK8sResources(
     path,
@@ -1768,6 +1780,7 @@ module.exports = {
   printContainerLogs,
   kubectlExecInPod,
   deleteK8sResource,
+  deleteK8sObjects,
   deleteK8sPod,
   listPods,
   switchEventingBackend,
