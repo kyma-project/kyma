@@ -12,8 +12,6 @@ import (
 	"github.com/cloudevents/sdk-go/v2/binding"
 	cev2http "github.com/cloudevents/sdk-go/v2/protocol/http"
 
-	"github.com/kyma-project/kyma/components/eventing-controller/testing"
-
 	eventingtesting "github.com/kyma-project/kyma/components/eventing-controller/testing"
 )
 
@@ -37,11 +35,10 @@ func NewNatsMessagePayload(data, id, source, eventTime, eventType string) string
 	return jsonCE
 }
 
-func SendBinaryCloudEventToNATS(natsClient *Nats, subject string) error {
+func SendBinaryCloudEventToNATS(natsClient *Nats, subject, eventData string) error {
 	// create a CE binary-mode http request
-	body := testing.CloudEventData
-	headers := testing.GetBinaryMessageHeaders()
-	req, err := http.NewRequest(http.MethodPost, "dummy", bytes.NewBuffer([]byte(body)))
+	headers := eventingtesting.GetBinaryMessageHeaders()
+	req, err := http.NewRequest(http.MethodPost, "dummy", bytes.NewBuffer([]byte(eventData)))
 	if err != nil {
 		return err
 	}
@@ -79,11 +76,10 @@ func SendBinaryCloudEventToNATS(natsClient *Nats, subject string) error {
 	return nil
 }
 
-func SendStructuredCloudEventToNATS(natsClient *Nats, subject string) error {
+func SendStructuredCloudEventToNATS(natsClient *Nats, subject, eventData string) error {
 	// create a CE structured-mode http request
-	body := testing.StructuredCloudEvent
-	headers := testing.GetStructuredMessageHeaders()
-	req, err := http.NewRequest(http.MethodPost, "dummy", bytes.NewBuffer([]byte(body)))
+	headers := eventingtesting.GetStructuredMessageHeaders()
+	req, err := http.NewRequest(http.MethodPost, "dummy", bytes.NewBuffer([]byte(eventData)))
 	if err != nil {
 		return err
 	}
