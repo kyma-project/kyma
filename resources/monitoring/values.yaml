@@ -767,7 +767,7 @@ grafana:
   rbac:
     ## If true, Grafana PSPs will be created
     ##
-    pspEnabled: false
+    pspEnabled: true
 
   ingress:
     ## If true, Grafana Ingress will be created
@@ -1528,7 +1528,7 @@ prometheus-node-exporter:
   rbac:
     ## If true, create PSPs for node-exporter
     ##
-    pspEnabled: false
+    pspEnabled: true
 
 ## Manages Prometheus and Alertmanager components
 ##
