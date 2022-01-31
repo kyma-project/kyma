@@ -15,7 +15,6 @@ const {
   genRandom,
   initializeK8sClient,
   switchDebug,
-  waitForJob,
   printContainerLogs,
   waitForDeployment,
 } = require('../utils');
@@ -119,12 +118,8 @@ describe('SKR SVCAT migration test', function() {
     await waitForDeployment('sap-btp-operator-controller-manager', 'kyma-system', 10 * 60 * 1000); // 10 minutes
   });
 
-  it('Should wait for migration job to finish', async function() {
-    await waitForJob('sap-btp-operator-migration', 'kyma-system', 10 * 60 * 1000); // 10 minutes
-  });
-
-  it('Should print the container logs of the migration job', async function() {
-    await printContainerLogs('job-name=sap-btp-operator-migration', 'migration', 'kyma-system');
+  it('Should check migrated BTP resources', async function() {
+    await t.checkMigratedBTPResources();
   });
 
   it('Should still contain pod presets and the secrets', async function() {
