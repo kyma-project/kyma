@@ -51,7 +51,7 @@ spec:
       nodePort: {{.Values.service.nodePort}}
 {{ end }}
   {{- if .Values.extraExposePorts }}
-  {{- tpl (toYaml .Values.extraExposePorts) . | indent 4 }}
+  {{- tpl .Values.extraExposePorts . | indent 4 }}
   {{- end }}
   selector:
     {{- include "grafana.selectorLabels" . | nindent 4 }}
