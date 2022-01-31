@@ -34,7 +34,7 @@ type TestEnvironment struct {
 	natsMessageSender *NatsMessageSender
 }
 
-// setupTestEnvironment creates the test environment for the integration tests in this file.setupTestEnvironment.
+// setupTestEnvironment creates the test environment for the integration tests in this file.
 // It performs the follow steps:
 // - create logger
 // - create and start NATS server
@@ -98,10 +98,6 @@ func TestSendCloudEventsToNats(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			////////////////////////////
-			// given
-			///////////////////////////
-
 			testEnv := setupTestEnvironment(t, pkgnats.WithBackendConnectionRetries(tc.givenRetries))
 
 			// subscribe to subject
@@ -114,43 +110,40 @@ func TestSendCloudEventsToNats(t *testing.T) {
 			err := json.Unmarshal([]byte(testingutils.StructuredCloudEventPayloadWithCleanEventType), &ce)
 			assert.Nil(t, err)
 
-			// TODO: separate sending and assertions ? basically separate then and when part
-			// then & when
 			sendEventAndAssertHTTPStatusCode(testEnv.context, t, testEnv.natsMessageSender, &ce, tc.wantHTTPStatusCode)
 
-			// TODO: rewrite using assertion
 			// wait for subscriber to receive the messages
-			if err := testingutils.WaitForChannelOrTimeout(done, time.Second*3); err != nil {
-				t.Fatalf("Subscriber did not receive the message with error: %v", err)
-			}
+			err = testingutils.WaitForChannelOrTimeout(done, time.Second*3)
+			assert.NoError(t, err, "Subscriber did not receive the message")
 
 			if tc.wantReconnectAfterConnectionClosed {
 
 				// close connection
 				testEnv.backendConnection.Connection.Close()
+				// ensure connection is closed
+				// this is important because we want to test that the connection gets re-established as soon as we send an event
 				assert.True(t, testEnv.backendConnection.Connection.IsClosed())
 
 				// then & when
-				// ensure that the reconnect works
+				// ensure that the reconnect works by checking the HTTP status code
 				sendEventAndAssertHTTPStatusCode(testEnv.context, t, testEnv.natsMessageSender, &ce, tc.wantHTTPStatusCode)
 			}
 		})
 	}
 }
 
-// sendEventAndAssertHTTPStatusCode sends the event to NATS and esures that a 204 HTTP status code is returned
+// sendEventAndAssertHTTPStatusCode sends the event to NATS and ensures asserts that the expectedStatus is returned from NATS
 func sendEventAndAssertHTTPStatusCode(ctx context.Context, t *testing.T, sender *NatsMessageSender, event *event.Event, expectedStatus int) {
 	status, err := sender.Send(ctx, event)
 	assert.Nil(t, err)
 	assert.Equal(t, expectedStatus, status)
 }
 
-// subscribeToSubject subscribes to the given subject using the given connection.
-// It then ensures that the data received on the subject
+// subscribeToSubject subscribes to the NATS subject using the connection.
+// It then ensures that the data is received on the subject and validated using the natsMessageDataValidator.
 func subscribeToSubject(t *testing.T, connection *pkgnats.BackendConnection, subject string) chan bool {
 	done := make(chan bool, 1)
 	natsMessageDataValidator := testingutils.ValidateNatsMessageDataOrFail(t, subject, done)
-	// TODO: how does validation of message data work ?
 	testingutils.SubscribeToEventOrFail(t, connection.Connection, testingutils.CloudEventType, natsMessageDataValidator)
 	return done
 }
