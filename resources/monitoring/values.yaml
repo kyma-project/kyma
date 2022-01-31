@@ -262,14 +262,6 @@ alertmanager:
      - match:
          alertname: Watchdog
        receiver: 'null'
-     {{- if $isVictorOpsEnabled }}
-     - continue: true
-       match_re:
-        {{- toYaml .Values.global.alertTools.credentials.victorOps.matchExpression | nindent 6 }}
-       routes:
-        {{- toYaml .Values.global.alertTools.credentials.victorOps.routes | nindent 6 }}
-       receiver: "victorOps"
-     {{- end }}
      {{- if $isSlackEnabled }}
      - continue: true
        match_re:
@@ -280,20 +272,6 @@ alertmanager:
      {{- end }}
    receivers:
    - name: 'null'
-   {{- if $isVictorOpsEnabled }}
-   - name: "victorOps"
-     victorops_configs:
-     - api_key: {{ .Values.global.alertTools.credentials.victorOps.apikey | quote }}
-       {{- if .Values.global.alertTools.credentials.victorOps.sendResolved }}
-       send_resolved: true
-       {{- else }}
-       send_resolved: false
-       {{- end }}
-       api_url: https://alert.victorops.com/integrations/generic/20131114/alert/
-       routing_key: {{ .Values.global.alertTools.credentials.victorOps.routingkey | quote }}
-       state_message: 'Alert: {{`{{ .CommonLabels.alertname }}`}}. Summary:{{`{{ .CommonAnnotations.description }}`}}. RawData: {{`{{ .CommonLabels }}`}}'
-       entity_display_name: {{ .Values.global.domainName }}
-   {{- end }}
    {{- if $isSlackEnabled }}
    - name: "slack"
      slack_configs:
