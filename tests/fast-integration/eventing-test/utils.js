@@ -22,7 +22,6 @@ const eventMeshSecretFilePath = process.env.EVENTMESH_SECRET_FILE || '';
 const DEBUG_MODE = process.env.DEBUG;
 const timeoutTime = 10 * 60 * 1000;
 const slowTime = 5000;
-const fatalErrCode = 'ERR_MOCHA_FATAL';
 
 async function cleanupTestingResources() {
   if (isSKR) {
@@ -62,6 +61,5 @@ module.exports = {
   DEBUG_MODE,
   timeoutTime,
   slowTime,
-  fatalErrCode,
   cleanupTestingResources,
 };
