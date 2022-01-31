@@ -714,10 +714,10 @@ alertmanager:
     scheme: https
 
     tlsConfig:
-    caFile: /etc/prometheus/secrets/istio.default/root-cert.pem
-    certFile: /etc/prometheus/secrets/istio.default/cert-chain.pem
-    keyFile: /etc/prometheus/secrets/istio.default/key.pem
-    insecureSkipVerify: true  # Prometheus does not support Istio security naming, thus skip verifying target pod certificate
+      caFile: /etc/prometheus/secrets/istio.default/root-cert.pem
+      certFile: /etc/prometheus/secrets/istio.default/cert-chain.pem
+      keyFile: /etc/prometheus/secrets/istio.default/key.pem
+      insecureSkipVerify: true  # Prometheus does not support Istio security naming, thus skip verifying target pod certificate
 
     ## ForceEnableClusterMode ensures Alertmanager does not deactivate the cluster mode when running with a single replica.
     ## Use case is e.g. spanning an Alertmanager cluster across Kubernetes clusters with a single replica in each.
