@@ -15,33 +15,29 @@ const {
   eventMeshSecretFilePath,
   timeoutTime,
   slowTime,
+  gardener,
+  director,
+  shootName,
   cleanupTestingResources,
 } = require('./utils');
 const {
   ensureCommerceMockLocalTestFixture,
   setEventMeshSourceNamespace,
-  ensureCommerceMockWithCompassTestFixture,
+  ensureCommerceMockWithCompassTestFixture, cleanCompassResourcesSKR,
 } = require('../test/fixtures/commerce-mock');
 const {
   debug,
-  getShootNameFromK8sServerUrl,
   createEventingBackendK8sSecret,
 } = require('../utils');
 const {
-  DirectorClient,
-  DirectorConfig,
   addScenarioInCompass,
   assignRuntimeToScenario,
 } = require('../compass');
-const {GardenerClient, GardenerConfig} = require('../gardener');
 
 
 describe('Eventing tests preparation', function() {
   this.timeout(timeoutTime);
   this.slow(slowTime);
-  let gardener = null;
-  let director = null;
-  let skrInfo = null;
 
   it('Prepare the test assets', async function() {
     // runs once before the first test in this block
@@ -79,21 +75,18 @@ describe('Eventing tests preparation', function() {
   // prepareAssetsForSKRTests - Sets up CommerceMost for the SKR
   async function prepareAssetsForSKRTests() {
     console.log('Preparing for tests on SKR');
-    // create gardener & director clients
-    gardener = new GardenerClient(GardenerConfig.fromEnv());
-    // director client for Compass
-    director = new DirectorClient(DirectorConfig.fromEnv());
 
     // Get shoot info from gardener to get compassID for this shoot
-    const shootName = getShootNameFromK8sServerUrl();
     console.log(`Fetching SKR info for shoot: ${shootName}`);
-    skrInfo = await gardener.getShoot(shootName);
+    const skrInfo = await gardener.getShoot(shootName);
     debug(
         `appName: ${appName},
          scenarioName: ${scenarioName},
          testNamespace: ${testNamespace},
          compassID: ${skrInfo.compassID}`,
     );
+    debug('ensure a compass scenario with the same name does not exists');
+    await cleanCompassResourcesSKR(director, appName, scenarioName, skrInfo.compassID);
 
     console.log('Assigning SKR to scenario in Compass');
     // Create a new scenario (systems/formations) in compass for this test
