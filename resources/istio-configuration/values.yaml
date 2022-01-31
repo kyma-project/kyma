@@ -125,14 +125,15 @@ global:
   images:
     # these definitions aren't used by the chart, but they are required by external tool for list generation
     istio_proxyv2:
+      # eu.gcr.io/kyma-project/external/us-docker.pkg.dev/gloo-mesh/istio-69e5957db6d2/proxyv2
       name: "proxyv2"
-      version: "1.11.4-solo-fips-distroless"
-      directory: "external/gcr.io/istio-enterprise"
+      version: "1.12.2-solo-fips-distroless"
+      directory: "external/us-docker.pkg.dev/gloo-mesh/istio-69e5957db6d2"
       containerRegistryPath: "eu.gcr.io/kyma-project"
     istio_pilot:
       name: "pilot"
-      version: "1.11.4-solo-fips-distroless"
-      directory: "external/gcr.io/istio-enterprise"
+      version: "1.12.2-solo-fips-distroless"
+      directory: "external/us-docker.pkg.dev/gloo-mesh/istio-69e5957db6d2"
       containerRegistryPath: "eu.gcr.io/kyma-project"
   tracing:
     enabled: true
