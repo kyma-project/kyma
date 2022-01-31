@@ -128,11 +128,6 @@ global:
       version: "v2.22.1"
       directory: "external/quay.io/prometheus"
       sha: ""
-    prometheus_istio:
-      name: "prometheus"
-      version: "v2.32.1"
-      directory: "external/quay.io/prometheus"
-      sha: ""
     pushgateway:
       name: "pushgateway"
       version: v1.4.2
