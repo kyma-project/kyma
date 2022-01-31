@@ -197,18 +197,16 @@ global:
         sendResolved: true
         apiurl: ""
         channel: ""
-        matchExpression: |-
+        matchExpression:
           severity: critical
-        routes: |-
+        routes:
       victorOps:
         sendResolved: true
         routingkey: ""
         apikey: ""
-        matchExpression: |-
+        matchExpression:
           severity: critical
-        routes: |-
-
-
+        routes:
 
 ## Configuration for alertmanager
 ## ref: https://prometheus.io/docs/alerting/alertmanager/
@@ -249,7 +247,9 @@ alertmanager:
   ## ref: https://prometheus.io/docs/alerting/configuration/#configuration-file
   ##      https://prometheus.io/webtools/alerting/routing-tree-editor/
   ##
-  config:
+  config: |-
+   {{- $isVictorOpsEnabled := and .Values.global.alertTools.credentials.victorOps .Values.global.alertTools.credentials.victorOps.apikey .Values.global.alertTools.credentials.victorOps.routingkey -}}
+   {{- $isSlackEnabled := and .Values.global.alertTools.credentials.slack .Values.global.alertTools.credentials.slack.channel .Values.global.alertTools.credentials.slack.apiurl -}}
    global:
      resolve_timeout: 5m
    route:
@@ -262,8 +262,53 @@ alertmanager:
      - match:
          alertname: Watchdog
        receiver: 'null'
+     {{- if $isVictorOpsEnabled }}
+     - continue: true
+       match_re:
+        {{- toYaml .Values.global.alertTools.credentials.victorOps.matchExpression | nindent 6 }}
+       routes:
+        {{- toYaml .Values.global.alertTools.credentials.victorOps.routes | nindent 6 }}
+       receiver: "victorOps"
+     {{- end }}
+     {{- if $isSlackEnabled }}
+     - continue: true
+       match_re:
+        {{- toYaml .Values.global.alertTools.credentials.slack.matchExpression | nindent 6 }}
+       routes:
+        {{- toYaml .Values.global.alertTools.credentials.slack.routes | nindent 6 }}
+       receiver: "slack"
+     {{- end }}
    receivers:
    - name: 'null'
+   {{- if $isVictorOpsEnabled }}
+   - name: "victorOps"
+     victorops_configs:
+     - api_key: {{ .Values.global.alertTools.credentials.victorOps.apikey | quote }}
+       {{- if .Values.global.alertTools.credentials.victorOps.sendResolved }}
+       send_resolved: true
+       {{- else }}
+       send_resolved: false
+       {{- end }}
+       api_url: https://alert.victorops.com/integrations/generic/20131114/alert/
+       routing_key: {{ .Values.global.alertTools.credentials.victorOps.routingkey | quote }}
+       state_message: 'Alert: {{`{{ .CommonLabels.alertname }}`}}. Summary:{{`{{ .CommonAnnotations.description }}`}}. RawData: {{`{{ .CommonLabels }}`}}'
+       entity_display_name: {{ .Values.global.domainName }}
+   {{- end }}
+   {{- if $isSlackEnabled }}
+   - name: "slack"
+     slack_configs:
+     - channel: {{ .Values.global.alertTools.credentials.slack.channel | quote }}
+       {{- if .Values.global.alertTools.credentials.slack.sendResolved }}
+       send_resolved: true
+       {{- else }}
+       send_resolved: false
+       {{- end }}
+       api_url: {{ .Values.global.alertTools.credentials.slack.apiurl | quote }}
+       icon_emoji: ":ghost:"
+       title: '{{`{{ template "__subject" . }}`}} ({{ .Values.global.domainName }})'
+       title_link: 'https://console.{{ .Values.global.domainName }}'
+       text: '{{`{{ range .Alerts }}`}}<!channel>{{`{{- "\n" -}}`}}{{`{{ .Annotations.description }}`}}{{`{{- "\n" -}}`}}{{`{{ end }}`}}'
+   {{- end }}
    templates:
    - '/etc/alertmanager/config/*.tmpl'
 
