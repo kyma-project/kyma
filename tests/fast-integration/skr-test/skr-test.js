@@ -76,7 +76,7 @@ function oidcE2ETest() {
       let i;
       for (i of lastObjReconciliationsOperations) {
         const getReconciliationsInfo = await kcp.getReconciliationsInfo(i.schedulingID);
-        console.log(`\nReconciliation info for operation ${i}: ${getReconciliationsInfo}`);
+        console.log(`\nReconciliation info for operation ${i.schedulingID}: ${getReconciliationsInfo}`);
       }
     });
 
