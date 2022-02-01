@@ -107,7 +107,7 @@ class KCPWrapper {
       args = args.concat('--shoot', `${query.shootName}`);
     }
     if (query.schedulingID) {
-      args = args.concat('--scheduling-id', `${query.shootName}`);
+      args = args.concat('--scheduling-id', `${query.schedulingID}`);
     }
     const result = await this.exec(args);
     return JSON.parse(result);
