@@ -233,8 +233,8 @@ func (r *FunctionReconciler) isOnSourceChange(instance *serverlessv1alpha1.Funct
 		r.getConditionStatus(instance.Status.Conditions, serverlessv1alpha1.ConditionConfigurationReady) == corev1.ConditionFalse
 }
 
-func (r *FunctionReconciler) onSourceChange(ctx context.Context, instance *serverlessv1alpha1.Function, repository *serverlessv1alpha1.Repository, commit string) (ctrl.Result, error) {
-	return r.updateStatus(ctx, ctrl.Result{}, instance, serverlessv1alpha1.Condition{
+func (r *FunctionReconciler) onSourceChange(ctx context.Context, instance *serverlessv1alpha1.Function, repository *serverlessv1alpha1.Repository, commit string) error {
+	return r.updateStatus(ctx, instance, serverlessv1alpha1.Condition{
 		Type:               serverlessv1alpha1.ConditionConfigurationReady,
 		Status:             corev1.ConditionTrue,
 		LastTransitionTime: metav1.Now(),
