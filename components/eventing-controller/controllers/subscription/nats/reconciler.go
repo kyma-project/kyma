@@ -230,21 +230,21 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 	// Check for valid sink
 	if err := r.sinkValidator(ctx, r, subscription); err != nil {
 		log.Errorw("sink URL validation failed", "error", err)
-		if err := r.syncSubscriptionStatus(ctx, subscription, false, false, err.Error()); err != nil {
-			return checkIsConflict(err)
+		if syncErr := r.syncSubscriptionStatus(ctx, subscription, false, false, err.Error()); err != nil {
+			return ctrl.Result{}, syncErr
 		}
-		// No point in reconciling as the sink is invalid
-		return ctrl.Result{}, nil
+		// No point in reconciling as the sink is invalid, return latest error to requeue the reconciliation request
+		return ctrl.Result{}, err
 	}
 
 	// Synchronize Kyma subscription to NATS backend
-	subscriptionStatusChanged, err := r.Backend.SyncSubscription(subscription, r.eventTypeCleaner)
-	if err != nil {
-		log.Errorw("sync subscription failed", "error", err)
-		if err := r.syncSubscriptionStatus(ctx, subscription, false, false, err.Error()); err != nil {
-			return checkIsConflict(err)
+	subscriptionStatusChanged, syncErr := r.Backend.SyncSubscription(subscription, r.eventTypeCleaner)
+	if syncErr != nil {
+		log.Errorw("sync subscription failed", "error", syncErr)
+		if err := r.syncSubscriptionStatus(ctx, subscription, false, false, syncErr.Error()); err != nil {
+			return ctrl.Result{}, err
 		}
-		return ctrl.Result{}, err
+		return ctrl.Result{}, syncErr
 	}
 	log.Debug("create NATS subscriptions succeeded")
 

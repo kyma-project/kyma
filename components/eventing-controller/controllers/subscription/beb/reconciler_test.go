@@ -831,7 +831,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 					s := bebtypes.Subscription{
 						Name:                     nameMapper.MapSubscriptionName(givenSubscription),
 						SubscriptionStatus:       bebtypes.SubscriptionStatusActive,
-						LastSuccessfulDelivery:   time.Now().Format(time.RFC3339),                       //"now",
+						LastSuccessfulDelivery:   time.Now().Format(time.RFC3339),                       // "now",
 						LastFailedDelivery:       time.Now().Add(10 * time.Second).Format(time.RFC3339), // "now + 10s"
 						LastFailedDeliveryReason: lastFailedDeliveryReason,
 					}
@@ -1377,7 +1377,7 @@ var _ = BeforeSuite(func(done Done) {
 	k8sManager, err := ctrl.NewManager(cfg, ctrl.Options{
 		Scheme:             scheme.Scheme,
 		SyncPeriod:         &syncPeriod,
-		MetricsBindAddress: ":9090",
+		MetricsBindAddress: "localhost:9090",
 	})
 	Expect(err).ToNot(HaveOccurred())
 	envConf := env.Config{

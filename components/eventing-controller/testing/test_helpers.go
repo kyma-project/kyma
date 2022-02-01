@@ -342,7 +342,7 @@ func WithValidSink(svcNamespace, svcName string) SubscriptionOpt {
 
 // WithSpecificSink is a SubscriptionOpt for creating a subscription with a specific sink.
 // This is useful for testing against invalid sinks.
-func WithSpecificSink(invalidSink string) SubscriptionOpt {
+func WithSinkURL(invalidSink string) SubscriptionOpt {
 	return func(subscription *eventingv1alpha1.Subscription) { subscription.Spec.Sink = invalidSink }
 }
 

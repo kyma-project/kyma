@@ -180,7 +180,7 @@ var _ = BeforeSuite(func(done Done) {
 	k8sManager, err := ctrl.NewManager(cfg, ctrl.Options{
 		Scheme:             scheme.Scheme,
 		SyncPeriod:         &syncPeriod,
-		MetricsBindAddress: ":7071",
+		MetricsBindAddress: "localhost:7071",
 	})
 	Expect(err).To(BeNil())
 
