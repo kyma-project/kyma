@@ -35,7 +35,7 @@ func TestCleanup(t *testing.T) {
 	// Create test subscription
 	testSub := controllertesting.NewSubscription("test", "test",
 		controllertesting.WithFakeSubscriptionStatus,
-		controllertesting.WithEventTypeFilter,
+		controllertesting.WithDefaultEventTypeFilter,
 		controllertesting.WithSinkURL(subscriber.SinkURL),
 	)
 

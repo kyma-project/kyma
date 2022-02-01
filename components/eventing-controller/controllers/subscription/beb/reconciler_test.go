@@ -219,7 +219,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			givenSubscription := reconcilertesting.NewSubscription(subscriptionName, namespaceName,
 				reconcilertesting.WithDefaultEventTypeFilter,
 				reconcilertesting.WithWebhookAuthForBEB,
-				reconcilertesting.WithSpecificSink("invalid"),
+				reconcilertesting.WithSinkURL("invalid"),
 			)
 			ensureSubscriptionCreated(ctx, givenSubscription)
 
@@ -373,7 +373,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			subscription1 := reconcilertesting.NewSubscription(subscription1Name, namespaceName,
 				reconcilertesting.WithWebhookAuthForBEB,
 				reconcilertesting.WithDefaultEventTypeFilter,
-				reconcilertesting.WithSpecificSink(fmt.Sprintf("https://%s.%s.svc.cluster.local%s", subscriberSvc.Name, subscriberSvc.Namespace, subscription1Path)),
+				reconcilertesting.WithSinkURL(fmt.Sprintf("https://%s.%s.svc.cluster.local%s", subscriberSvc.Name, subscriberSvc.Namespace, subscription1Path)),
 			)
 			ensureSubscriptionCreated(ctx, subscription1)
 
@@ -382,7 +382,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			subscription2 := reconcilertesting.NewSubscription(subscription2Name, namespaceName,
 				reconcilertesting.WithWebhookAuthForBEB,
 				reconcilertesting.WithDefaultEventTypeFilter,
-				reconcilertesting.WithSpecificSink(fmt.Sprintf("https://%s.%s.svc.cluster.local%s", subscriberSvc.Name, subscriberSvc.Namespace, subscription2Path)),
+				reconcilertesting.WithSinkURL(fmt.Sprintf("https://%s.%s.svc.cluster.local%s", subscriberSvc.Name, subscriberSvc.Namespace, subscription2Path)),
 			)
 			ensureSubscriptionCreated(ctx, subscription2)
 
@@ -619,7 +619,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			subscription1 := reconcilertesting.NewSubscription(subscriptionName1, namespaceName,
 				reconcilertesting.WithWebhookAuthForBEB,
 				reconcilertesting.WithDefaultEventTypeFilter,
-				reconcilertesting.WithSpecificSink(fmt.Sprintf("https://%s.%s.svc.cluster.local/path1", service1.Name, service1.Namespace)),
+				reconcilertesting.WithSinkURL(fmt.Sprintf("https://%s.%s.svc.cluster.local/path1", service1.Name, service1.Namespace)),
 			)
 			readySubscription1, apiRule1 := createSubscriptionObjectsAndWaitForReadiness(ctx, subscription1, service1)
 
@@ -628,7 +628,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			subscription2 := reconcilertesting.NewSubscription(subscriptionName2, namespaceName,
 				reconcilertesting.WithWebhookAuthForBEB,
 				reconcilertesting.WithDefaultEventTypeFilter,
-				reconcilertesting.WithSpecificSink(fmt.Sprintf("https://%s.%s.svc.cluster.local/path2", service2.Name, service2.Namespace)),
+				reconcilertesting.WithSinkURL(fmt.Sprintf("https://%s.%s.svc.cluster.local/path2", service2.Name, service2.Namespace)),
 			)
 			readySubscription2, apiRule2 := createSubscriptionObjectsAndWaitForReadiness(ctx, subscription2, service2)
 

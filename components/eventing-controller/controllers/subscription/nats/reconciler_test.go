@@ -389,7 +389,7 @@ func testCreateSubscriptionWithValidSink(id int, eventTypePrefix, _, eventTypeTo
 		// create subscription
 		subscription := reconcilertesting.NewSubscription(subscriptionName, namespaceName,
 			reconcilertesting.WithSpecificEventTypeFilter("", eventTypeToSubscribe),
-			reconcilertesting.WithSpecificSink(sink),
+			reconcilertesting.WithSinkURL(sink),
 		)
 		ensureSubscriptionCreated(ctx, subscription)
 
@@ -430,7 +430,7 @@ func testCreateSubscriptionWithInvalidSink(id int, eventTypePrefix, _, eventType
 		givenSubscription := reconcilertesting.NewSubscription(subscriptionName, namespaceName,
 			reconcilertesting.WithSpecificEventTypeFilter(reconcilertesting.EventSource, eventTypeToSubscribe),
 			reconcilertesting.WithWebhookForNATS,
-			reconcilertesting.WithSpecificSink(sink),
+			reconcilertesting.WithSinkURL(sink),
 		)
 		ensureSubscriptionCreated(ctx, givenSubscription)
 

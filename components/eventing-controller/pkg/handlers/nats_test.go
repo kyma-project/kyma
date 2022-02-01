@@ -786,7 +786,7 @@ func TestSubscriptionWithDuplicateFilters(t *testing.T) {
 	g.Expect(subscriber.IsRunning()).To(BeTrue())
 
 	sub := eventingtesting.NewSubscription("sub", "foo",
-		eventingtesting.WithFilter("", eventingtesting.OrderCreatedEventType),
+		eventingtesting.WithSpecificEventTypeFilter("", eventingtesting.OrderCreatedEventType),
 		eventingtesting.WithSinkURL(subscriber.SinkURL),
 	)
 	idFunc := func(et string) (string, error) { return et, nil }
