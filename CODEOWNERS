@@ -25,7 +25,7 @@
 /resources/cluster-essentials/ @PK85 @janmedrek @a-thaler @strekm @dariusztutaj @cnvergence @veichtj @piotrkpc
 
 # The `pod-preset` subchart
-/resources/cluster-essentials/charts/pod-preset/ @PK85 @piotrmiskiewicz @ksputo @szwedm @voigt @wozniakjan @adamwalach
+/resources/cluster-essentials/charts/pod-preset/ @PK85 @piotrmiskiewicz @ksputo @szwedm @voigt @wozniakjan @adamwalach @ralikio
 
 # The `cluster-users` subchart
 /resources/cluster-users/ @strekm @werdes72 @Tomasz-Smelcerz-SAP @mjakobczyk @dariusztutaj @cnvergence @veichtj @piotrkpc
@@ -58,7 +58,7 @@
 /resources/application-connector/charts/central-application-connectivity-validator/ @akgalwas @janmedrek @franpog859 @Maladie @koala7659 @ralikio
 
 # The `helm-broker` subchart
-/resources/helm-broker/ @PK85 @piotrmiskiewicz @ksputo @szwedm @voigt @wozniakjan @adamwalach
+/resources/helm-broker/ @PK85 @piotrmiskiewicz @ksputo @szwedm @voigt @wozniakjan @adamwalach @ralikio
 
 # The `monitoring` subchart
 /resources/monitoring/ @a-thaler @lilitgh @clebs @rakesh-garimella @skhalash @jeremyharisch @chrkl @shorim @lindnerby
@@ -73,13 +73,13 @@
 /resources/eventing/ @lilitgh @k15r @nachtmaar @marcobebway @radufa @pxsalehi @mfaizanse @friedrichwilken @vladislavpaskar
 
 # The `application-broker` subchart
-/resources/application-connector/charts/application-broker/ @PK85 @piotrmiskiewicz @ksputo @szwedm @voigt @wozniakjan @adamwalach @lilitgh
+/resources/application-connector/charts/application-broker/ @PK85 @piotrmiskiewicz @ksputo @szwedm @voigt @wozniakjan @adamwalach @lilitgh @ralikio
 
 # The `service-catalog-addons` subchart
-/resources/service-catalog-addons/ @PK85 @piotrmiskiewicz @ksputo @szwedm @voigt @wozniakjan @adamwalach
+/resources/service-catalog-addons/ @PK85 @piotrmiskiewicz @ksputo @szwedm @voigt @wozniakjan @adamwalach @ralikio
 
 # The `service-catalog-addons` subchart
-/resources/service-manager-proxy/ @PK85 @piotrmiskiewicz @ksputo @szwedm @voigt @wozniakjan
+/resources/service-manager-proxy/ @PK85 @piotrmiskiewicz @ksputo @szwedm @voigt @wozniakjan @ralikio
 
 # The `istio-configuration` chart
 /resources/istio-configuration/ @strekm @werdes72 @Tomasz-Smelcerz-SAP @mjakobczyk @dariusztutaj @cnvergence @veichtj @piotrkpc
@@ -94,7 +94,7 @@
 /resources/tracing/ @a-thaler @lilitgh @clebs @rakesh-garimella @skhalash @jeremyharisch @chrkl @shorim @lindnerby
 
 # The `service-catalog` chart
-/resources/service-catalog/ @PK85 @piotrmiskiewicz @ksputo @szwedm @voigt @wozniakjan @adamwalach
+/resources/service-catalog/ @PK85 @piotrmiskiewicz @ksputo @szwedm @voigt @wozniakjan @adamwalach @ralikio
 
 # The `ory` chart
 /resources/ory/ @strekm @werdes72 @Tomasz-Smelcerz-SAP @mjakobczyk @dariusztutaj @cnvergence @veichtj @piotrkpc
@@ -117,19 +117,19 @@
 # Components
 
 # The etcd-tls-setup directory
-components/etcd-tls-setup-job/ @PK85 @piotrmiskiewicz @ksputo @szwedm @voigt @wozniakjan @adamwalach
+components/etcd-tls-setup-job/ @PK85 @piotrmiskiewicz @ksputo @szwedm @voigt @wozniakjan @adamwalach @ralikio
 
 # Binding Component
-/components/binding/ @PK85 @piotrmiskiewicz @ksputo @szwedm @voigt @wozniakjan
+/components/binding/ @PK85 @piotrmiskiewicz @ksputo @szwedm @voigt @wozniakjan @ralikio
 
 # Binding usage controller Component
-/components/service-binding-usage-controller/ @PK85 @piotrmiskiewicz @ksputo @szwedm @voigt @wozniakjan @adamwalach
+/components/service-binding-usage-controller/ @PK85 @piotrmiskiewicz @ksputo @szwedm @voigt @wozniakjan @adamwalach @ralikio
 
 # Istioctl Installer Component
 /components/istio-installer/ @strekm @werdes72 @Tomasz-Smelcerz-SAP @mjakobczyk @dariusztutaj
 
 # Application broker Component
-/components/application-broker/ @PK85 @piotrmiskiewicz @ksputo @szwedm @voigt @wozniakjan @adamwalach @lilitgh
+/components/application-broker/ @PK85 @piotrmiskiewicz @ksputo @szwedm @voigt @wozniakjan @adamwalach @lilitgh @ralikio
 
 # Connector Service Component
 /components/connector-service/ @akgalwas @janmedrek @franpog859 @Maladie @koala7659 @ralikio
@@ -153,7 +153,7 @@ components/etcd-tls-setup-job/ @PK85 @piotrmiskiewicz @ksputo @szwedm @voigt @wo
 /components/application-connectivity-certs-setup-job/ @akgalwas @janmedrek @franpog859 @Maladie @koala7659 @ralikio
 
 # UAA Component
-/components/uaa-activator/ @ksputo @piotrmiskiewicz @PK85 @szwedm @voigt @wozniakjan
+/components/uaa-activator/ @ksputo @piotrmiskiewicz @PK85 @szwedm @voigt @wozniakjan @ralikio
 
 # Function Controller
 /components/function-controller/ @m00g3n @pPrecel @dbadura @kwiatekus
@@ -184,7 +184,7 @@ components/etcd-tls-setup-job/ @PK85 @piotrmiskiewicz @ksputo @szwedm @voigt @wo
 
 # Tests
 # Service Catalog acceptance tests
-/tests/service-catalog/ @ksputo @piotrmiskiewicz @PK85 @szwedm @voigt @wozniakjan @adamwalach
+/tests/service-catalog/ @ksputo @piotrmiskiewicz @PK85 @szwedm @voigt @wozniakjan @adamwalach @ralikio
 
 # api-gateway integration tests
 /tests/integration/api-gateway/ @strekm @werdes72 @Tomasz-Smelcerz-SAP @mjakobczyk @dariusztutaj
@@ -223,12 +223,12 @@ components/etcd-tls-setup-job/ @PK85 @piotrmiskiewicz @ksputo @szwedm @voigt @wo
 /tests/fast-integration/ @pbochynski @adamwalach @voigt @skhalash @shorim @rakesh-garimella @jeremyharisch @lindnerby @khlifi411 @ruanxin @tobiscr @clebs @Tomasz-Smelcerz-SAP
 
 # Fast Integration Tests maintained by gophers
-/tests/fast-integration/kyma-environment-broker @PK85 @piotrmiskiewicz @ksputo @szwedm @voigt @wozniakjan
-/tests/fast-integration/skr-kyma-to-kyma2-upgrade @PK85 @piotrmiskiewicz @ksputo @szwedm @voigt @wozniakjan
-/tests/fast-integration/skr-svcat-migration-test @PK85 @piotrmiskiewicz @ksputo @szwedm @voigt @wozniakjan
-/tests/fast-integration/skr-test @PK85 @piotrmiskiewicz @ksputo @szwedm @voigt @wozniakjan
-/tests/fast-integration/skr-nightly @PK85 @piotrmiskiewicz @ksputo @szwedm @voigt @wozniakjan
-/tests/fast-integration/kcp @PK85 @piotrmiskiewicz @ksputo @szwedm @voigt @wozniakjan
+/tests/fast-integration/kyma-environment-broker @PK85 @piotrmiskiewicz @ksputo @szwedm @voigt @wozniakjan @ralikio
+/tests/fast-integration/skr-kyma-to-kyma2-upgrade @PK85 @piotrmiskiewicz @ksputo @szwedm @voigt @wozniakjan @ralikio
+/tests/fast-integration/skr-svcat-migration-test @PK85 @piotrmiskiewicz @ksputo @szwedm @voigt @wozniakjan @ralikio
+/tests/fast-integration/skr-test @PK85 @piotrmiskiewicz @ksputo @szwedm @voigt @wozniakjan @ralikio
+/tests/fast-integration/skr-nightly @PK85 @piotrmiskiewicz @ksputo @szwedm @voigt @wozniakjan @ralikio
+/tests/fast-integration/kcp @PK85 @piotrmiskiewicz @ksputo @szwedm @voigt @wozniakjan @ralikio
 
 
 # Fast Integration Eventing Tests
@@ -258,7 +258,7 @@ milv.config.yaml @m00g3n @pPrecel @klaudiagrz @mmitoraj @majakurcius @alexandra-
 /tests/perf/ @a-thaler @lilitgh @clebs @rakesh-garimella
 
 # github actions
-/.github/workflows @PK85 @piotrmiskiewicz @ksputo @szwedm @voigt @wozniakjan @kyma-project/prow
+/.github/workflows @PK85 @piotrmiskiewicz @ksputo @szwedm @voigt @wozniakjan @kyma-project/prow @ralikio
 
 # VERSION file
 VERSION @kyma-project/prow
