@@ -23,7 +23,7 @@ func Test_isInDeletion(t *testing.T) {
 			name: "Deletion timestamp uninitialized",
 			givenSubscription: func() *eventingv1alpha1.Subscription {
 				sub := reconcilertesting.NewSubscription("some-name", "some-namespace",
-					reconcilertesting.WithNotCleanEventTypeFilter())
+					reconcilertesting.WithNotCleanFilter())
 				sub.DeletionTimestamp = nil
 				return sub
 			},
@@ -34,7 +34,7 @@ func Test_isInDeletion(t *testing.T) {
 			givenSubscription: func() *eventingv1alpha1.Subscription {
 				zero := metav1.Time{}
 				sub := reconcilertesting.NewSubscription("some-name", "some-namespace",
-					reconcilertesting.WithNotCleanEventTypeFilter())
+					reconcilertesting.WithNotCleanFilter())
 				sub.DeletionTimestamp = &zero
 				return sub
 			},
@@ -45,7 +45,7 @@ func Test_isInDeletion(t *testing.T) {
 			givenSubscription: func() *eventingv1alpha1.Subscription {
 				newTime := metav1.NewTime(time.Now())
 				sub := reconcilertesting.NewSubscription("some-name", "some-namespace",
-					reconcilertesting.WithNotCleanEventTypeFilter())
+					reconcilertesting.WithNotCleanFilter())
 				sub.DeletionTimestamp = &newTime
 				return sub
 			},
@@ -74,7 +74,7 @@ func Test_replaceStatusCondition(t *testing.T) {
 			name: "Updating a condition marks the status as changed",
 			giveSubscription: func() *eventingv1alpha1.Subscription {
 				subscription := reconcilertesting.NewSubscription("some-name", "some-namespace",
-					reconcilertesting.WithNotCleanEventTypeFilter())
+					reconcilertesting.WithNotCleanFilter())
 				subscription.Status.InitializeConditions()
 				return subscription
 			}(),
@@ -88,7 +88,7 @@ func Test_replaceStatusCondition(t *testing.T) {
 			name: "All conditions true means status is ready",
 			giveSubscription: func() *eventingv1alpha1.Subscription {
 				subscription := reconcilertesting.NewSubscription("some-name", "some-namespace",
-					reconcilertesting.WithNotCleanEventTypeFilter(),
+					reconcilertesting.WithNotCleanFilter(),
 					reconcilertesting.WithWebhookAuthForBEB())
 				subscription.Status.InitializeConditions()
 				subscription.Status.Ready = false

@@ -295,6 +295,7 @@ func WithProtocolSettings(p *eventingv1alpha1.ProtocolSettings) SubscriptionOpt 
 	}
 }
 
+// WithWebhookForNATS is a SubscriptionOpt for creating a Subscription with a webhook set to the NATS protocol.
 func WithWebhookForNats() SubscriptionOpt {
 	return func(s *eventingv1alpha1.Subscription) {
 		s.Spec.Protocol = "NATS"
@@ -302,7 +303,8 @@ func WithWebhookForNats() SubscriptionOpt {
 	}
 }
 
-// WithFilter appends a filter to the existing filters of Subscription
+// WithFilter is a SubscriptionOpt for creating a Subscription with a specific event type filter,
+// that itself gets created from the passed eventSource and eventType.
 func WithFilter(eventSource, eventType string) SubscriptionOpt {
 	return func(subscription *eventingv1alpha1.Subscription) {
 		if subscription.Spec.Filter == nil {
@@ -328,12 +330,14 @@ func WithFilter(eventSource, eventType string) SubscriptionOpt {
 	}
 }
 
-// WithNotCleanEventTypeFilter initializes subscription filter with a not clean event-type
+// WithNotCleanFilter initializes subscription filter with a not clean event-type
 // A not clean event-type means it contains none-alphanumeric characters
-func WithNotCleanEventTypeFilter() SubscriptionOpt {
+func WithNotCleanFilter() SubscriptionOpt {
 	return WithFilter(EventSource, OrderCreatedEventTypeNotClean)
 }
 
+// WithEmptyFilter is a SubscriptionOpt for creating a subscription with an empty event type filter.
+//  Note that this is different from setting Filter to nil.
 func WithEmptyFilter() SubscriptionOpt {
 	return func(subscription *eventingv1alpha1.Subscription) {
 		subscription.Spec.Filter = &eventingv1alpha1.BEBFilters{
@@ -342,34 +346,45 @@ func WithEmptyFilter() SubscriptionOpt {
 	}
 }
 
-func WithEventTypeFilter() SubscriptionOpt {
+func WithOrderCreatedFilter() SubscriptionOpt {
 	return WithFilter(EventSource, OrderCreatedEventType)
 }
 
 func WithInvalidSink() SubscriptionOpt {
 	return WithSinkURL("invalid")
+
 }
 
-// WithSinkURL sets the sinkURL in a new subscription
-func WithSinkURL(sinkURL string) SubscriptionOpt {
-	return func(s *eventingv1alpha1.Subscription) {
-		s.Spec.Sink = sinkURL
-	}
+// WithValidSink is a SubscriptionOpt for creating a subscription with a valid sink that itself gets created from
+// the svcNamespace and the svcName.
+func WithValidSink(svcNamespace, svcName string) SubscriptionOpt {
+	return WithSinkURL(ValidSinkURL(svcNamespace, svcName))
 }
 
 // WithServiceWithPathAsSink sets a kubernetes service as the sink
-func WithServiceWithPathAsSink(svcNamespace, svcName, path string) SubscriptionOpt {
-	return WithSinkURL(fmt.Sprintf("%s%s", GetValidSink(svcNamespace, svcName), path))
+func WithServiceWithPathAsSink(svc *corev1.Service, path string) SubscriptionOpt {
+	return WithSinkURL(fmt.Sprintf("%s%s", ValidSinkURL(svc.Namespace, svc.Name), path))
 }
 
 // WithServiceAsSink sets a kubernetes service as the sink
-func WithServiceAsSink(svcNs, svcName string) SubscriptionOpt {
-	return WithSinkURL(GetValidSink(svcNs, svcName))
+func WithServiceAsSink(svc *corev1.Service) SubscriptionOpt {
+	return WithSinkURL(ValidSinkURL(svc.Namespace, svc.Name))
 }
 
-// GetValidSink converts a namespace and service name to a valid sink url
-func GetValidSink(svcNs, svcName string) string {
-	return fmt.Sprintf("https://%s.%s.svc.cluster.local", svcName, svcNs)
+// ValidSinkURL converts a namespace and service name to a valid sink url
+func ValidSinkURL(namespace, svcName string) string {
+	return fmt.Sprintf("https://%s.%s.svc.cluster.local", svcName, namespace)
+}
+
+// WithSinkURL is a SubscriptionOpt for creating a subscription with a specific sink.
+// This is useful for testing against invalid sinks.
+func WithSinkURL(invalidSink string) SubscriptionOpt {
+	return func(subscription *eventingv1alpha1.Subscription) { subscription.Spec.Sink = invalidSink }
+}
+
+// SetSink sets the subscription's sink to a valid sink created from svcNameSpace and svcName.
+func SetSink(svcNamespace, svcName string, subscription *eventingv1alpha1.Subscription) {
+	subscription.Spec.Sink = ValidSinkURL(svcNamespace, svcName)
 }
 
 func NewSubscriberSvc(name, ns string) *corev1.Service {
@@ -395,7 +410,7 @@ func NewSubscriberSvc(name, ns string) *corev1.Service {
 	}
 }
 
-func BEBMessagingSecret(name, ns string) *corev1.Secret {
+func NewBEBMessagingSecret(name, ns string) *corev1.Secret {
 	messagingValue := `
 				[{
 					"broker": {
@@ -447,7 +462,7 @@ func BEBMessagingSecret(name, ns string) *corev1.Secret {
 	}
 }
 
-func Namespace(name string) *corev1.Namespace {
+func NewNamespace(name string) *corev1.Namespace {
 	namespace := corev1.Namespace{
 		ObjectMeta: metav1.ObjectMeta{
 			Name: name,
@@ -456,18 +471,18 @@ func Namespace(name string) *corev1.Namespace {
 	return &namespace
 }
 
-func EventingBackend(name, ns string) *eventingv1alpha1.EventingBackend {
+func NewEventingBackend(name, namespace string) *eventingv1alpha1.EventingBackend {
 	return &eventingv1alpha1.EventingBackend{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      name,
-			Namespace: ns,
+			Namespace: namespace,
 		},
 		Spec:   eventingv1alpha1.EventingBackendSpec{},
 		Status: eventingv1alpha1.EventingBackendStatus{},
 	}
 }
 
-func EventingControllerDeployment() *appsv1.Deployment {
+func NewEventingControllerDeployment() *appsv1.Deployment {
 	labels := map[string]string{
 		"app.kubernetes.io/name": "value",
 	}
@@ -498,7 +513,8 @@ func EventingControllerDeployment() *appsv1.Deployment {
 		Status: appsv1.DeploymentStatus{},
 	}
 }
-func EventingControllerPod(backend string) *corev1.Pod {
+
+func NewEventingControllerPod(backend string) *corev1.Pod {
 	labels := map[string]string{
 		deployment.AppLabelKey: deployment.PublisherName,
 	}

@@ -34,7 +34,7 @@ func TestCleanup(t *testing.T) {
 	subscription := controllertesting.NewSubscription("test", "test",
 		controllertesting.WithWebhookAuthForBEB(),
 		controllertesting.WithFakeSubscriptionStatus(),
-		controllertesting.WithEventTypeFilter(),
+		controllertesting.WithOrderCreatedFilter(),
 	)
 	subscription.Spec.Sink = "https://bla.test.svc.cluster.local"
 

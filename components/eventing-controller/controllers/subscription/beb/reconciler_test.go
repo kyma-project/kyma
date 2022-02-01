@@ -112,7 +112,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			subscription := reconcilertesting.NewSubscription(subscriptionName, namespaceName,
 				reconcilertesting.WithEmptyFilter(),
 				reconcilertesting.WithWebhookAuthForBEB(),
-				reconcilertesting.WithServiceAsSink(namespaceName, subscriberSvc.Name),
+				reconcilertesting.WithServiceAsSink(subscriberSvc),
 			)
 			ensureSubscriptionCreated(ctx, subscription)
 
@@ -217,7 +217,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			// Create subscription with invalid sink
 			subscriptionName := "sub-create-with-invalid-sink"
 			givenSubscription := reconcilertesting.NewSubscription(subscriptionName, namespaceName,
-				reconcilertesting.WithEventTypeFilter(),
+				reconcilertesting.WithOrderCreatedFilter(),
 				reconcilertesting.WithWebhookAuthForBEB(),
 				reconcilertesting.WithInvalidSink(),
 			)
@@ -299,8 +299,8 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 
 			// Creating subscription with empty protocol, protocolsettings and dialect
 			givenSubscription := reconcilertesting.NewSubscription(subscriptionName, namespaceName,
-				reconcilertesting.WithEventTypeFilter(),
-				reconcilertesting.WithServiceAsSink(namespaceName, subscriberSvc.Name),
+				reconcilertesting.WithOrderCreatedFilter(),
+				reconcilertesting.WithServiceAsSink(subscriberSvc),
 			)
 			ensureSubscriptionCreated(ctx, givenSubscription)
 
@@ -372,8 +372,8 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			subscription1Name := "test-delete-valid-subscription-1"
 			subscription1 := reconcilertesting.NewSubscription(subscription1Name, namespaceName,
 				reconcilertesting.WithWebhookAuthForBEB(),
-				reconcilertesting.WithEventTypeFilter(),
-				reconcilertesting.WithServiceWithPathAsSink(subscriberSvc.Namespace, subscriberSvc.Name, subscription1Path),
+				reconcilertesting.WithOrderCreatedFilter(),
+				reconcilertesting.WithServiceWithPathAsSink(subscriberSvc, subscription1Path),
 			)
 			ensureSubscriptionCreated(ctx, subscription1)
 
@@ -381,8 +381,8 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			subscription2Name := "test-delete-valid-subscription-2"
 			subscription2 := reconcilertesting.NewSubscription(subscription2Name, namespaceName,
 				reconcilertesting.WithWebhookAuthForBEB(),
-				reconcilertesting.WithEventTypeFilter(),
-				reconcilertesting.WithServiceWithPathAsSink(subscriberSvc.Namespace, subscriberSvc.Name, subscription2Path),
+				reconcilertesting.WithOrderCreatedFilter(),
+				reconcilertesting.WithServiceWithPathAsSink(subscriberSvc, subscription2Path),
 			)
 			ensureSubscriptionCreated(ctx, subscription2)
 
@@ -473,9 +473,9 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 
 			givenSubscription := reconcilertesting.NewSubscription(
 				subscriptionName, namespaceName,
-				reconcilertesting.WithEventTypeFilter(),
+				reconcilertesting.WithOrderCreatedFilter(),
 				reconcilertesting.WithWebhookAuthForBEB(),
-				reconcilertesting.WithServiceAsSink(namespaceName, subscriberSvc.Name),
+				reconcilertesting.WithServiceAsSink(subscriberSvc),
 			)
 			ensureSubscriptionCreated(ctx, givenSubscription)
 
@@ -570,8 +570,8 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			serviceOld := reconcilertesting.NewSubscriberSvc("webhook", namespaceName)
 			givenSubscription := reconcilertesting.NewSubscription(subscriptionName, namespaceName,
 				reconcilertesting.WithWebhookAuthForBEB(),
-				reconcilertesting.WithEventTypeFilter(),
-				reconcilertesting.WithServiceAsSink(serviceOld.Namespace, serviceOld.Name),
+				reconcilertesting.WithOrderCreatedFilter(),
+				reconcilertesting.WithServiceAsSink(serviceOld),
 			)
 
 			// create them and wait for Subscription to be ready
@@ -580,7 +580,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			By("Updating the sink")
 			serviceNew := reconcilertesting.NewSubscriberSvc("webhook-new", namespaceName)
 			ensureSubscriberSvcCreated(ctx, serviceNew)
-			reconcilertesting.WithServiceAsSink(serviceNew.Namespace, serviceNew.Name)(readySubscription)
+			reconcilertesting.SetSink(serviceNew.Namespace, serviceNew.Name, readySubscription)
 			updateSubscription(ctx, readySubscription).Should(reconcilertesting.HaveSubscriptionReady())
 			getSubscription(ctx, readySubscription).ShouldNot(reconcilertesting.HaveAPIRuleName(apiRule.Name))
 
@@ -619,16 +619,17 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			service1 := reconcilertesting.NewSubscriberSvc("webhook-1", namespaceName)
 			subscription1 := reconcilertesting.NewSubscription(subscriptionName1, namespaceName,
 				reconcilertesting.WithWebhookAuthForBEB(),
-				reconcilertesting.WithEventTypeFilter(),
-				reconcilertesting.WithServiceWithPathAsSink(service1.Namespace, service1.Name, "/path1"),
+				reconcilertesting.WithOrderCreatedFilter(),
+				reconcilertesting.WithServiceWithPathAsSink(service1, "/path1"),
 			)
 			readySubscription1, apiRule1 := createSubscriptionObjectsAndWaitForReadiness(ctx, subscription1, service1)
+
 			subscriptionName2 := "test-subscription-2"
 			service2 := reconcilertesting.NewSubscriberSvc("webhook-2", namespaceName)
 			subscription2 := reconcilertesting.NewSubscription(subscriptionName2, namespaceName,
 				reconcilertesting.WithWebhookAuthForBEB(),
-				reconcilertesting.WithEventTypeFilter(),
-				reconcilertesting.WithServiceWithPathAsSink(service2.Namespace, service2.Name, "/path2"),
+				reconcilertesting.WithOrderCreatedFilter(),
+				reconcilertesting.WithServiceWithPathAsSink(service2, "/path2"),
 			)
 			readySubscription2, apiRule2 := createSubscriptionObjectsAndWaitForReadiness(ctx, subscription2, service2)
 
@@ -678,8 +679,8 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			// Create subscription
 			givenSubscription := reconcilertesting.NewSubscription(subscriptionName, namespaceName,
 				reconcilertesting.WithWebhookAuthForBEB(),
-				reconcilertesting.WithEventTypeFilter(),
-				reconcilertesting.WithServiceAsSink(subscriberSvc.Namespace, subscriberSvc.Name),
+				reconcilertesting.WithOrderCreatedFilter(),
+				reconcilertesting.WithServiceAsSink(subscriberSvc),
 			)
 			ensureSubscriptionCreated(ctx, givenSubscription)
 
@@ -735,8 +736,8 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 
 			givenSubscription := reconcilertesting.NewSubscription(subscriptionName, namespaceName,
 				reconcilertesting.WithWebhookAuthForBEB(),
-				reconcilertesting.WithEventTypeFilter(),
-				reconcilertesting.WithServiceAsSink(subscriberSvc.Namespace, subscriberSvc.Name),
+				reconcilertesting.WithOrderCreatedFilter(),
+				reconcilertesting.WithServiceAsSink(subscriberSvc),
 			)
 
 			isBEBSubscriptionCreated := false
@@ -814,8 +815,8 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 
 			givenSubscription := reconcilertesting.NewSubscription(subscriptionName, namespaceName,
 				reconcilertesting.WithWebhookAuthForBEB(),
-				reconcilertesting.WithEventTypeFilter(),
-				reconcilertesting.WithServiceAsSink(subscriberSvc.Namespace, subscriberSvc.Name),
+				reconcilertesting.WithOrderCreatedFilter(),
+				reconcilertesting.WithServiceAsSink(subscriberSvc),
 			)
 
 			isBEBSubscriptionCreated := false
@@ -902,8 +903,8 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			subscriptionName := "test-delete-valid-subscription-1"
 			givenSubscription := reconcilertesting.NewSubscription(subscriptionName, namespaceName,
 				reconcilertesting.WithWebhookAuthForBEB(),
-				reconcilertesting.WithEventTypeFilter(),
-				reconcilertesting.WithServiceAsSink(subscriberSvc.Namespace, subscriberSvc.Name),
+				reconcilertesting.WithOrderCreatedFilter(),
+				reconcilertesting.WithServiceAsSink(subscriberSvc),
 			)
 			ensureSubscriptionCreated(ctx, givenSubscription)
 
@@ -968,8 +969,8 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 				By("Creating Kyma Subscription", func() {
 					kymaSubscription = reconcilertesting.NewSubscription(kymaSubscriptionName, namespaceName,
 						reconcilertesting.WithWebhookAuthForBEB(),
-						reconcilertesting.WithEventTypeFilter(),
-						reconcilertesting.WithServiceAsSink(svc.Namespace, svc.Name),
+						reconcilertesting.WithOrderCreatedFilter(),
+						reconcilertesting.WithServiceAsSink(svc),
 					)
 					ensureSubscriptionCreated(ctx, kymaSubscription)
 				})
@@ -1032,9 +1033,9 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			ensureSubscriberSvcCreated(ctx, subscriberSvc)
 
 			subscription := reconcilertesting.NewSubscription(subscriptionName, namespaceName,
-				reconcilertesting.WithEventTypeFilter(),
+				reconcilertesting.WithOrderCreatedFilter(),
 				reconcilertesting.WithWebhookAuthForBEB(),
-				reconcilertesting.WithServiceAsSink(namespaceName, subscriberSvc.Name),
+				reconcilertesting.WithServiceAsSink(subscriberSvc),
 			)
 			ensureSubscriptionCreated(ctx, subscription)
 
