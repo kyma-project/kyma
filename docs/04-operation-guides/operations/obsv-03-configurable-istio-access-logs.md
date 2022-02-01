@@ -48,6 +48,3 @@ spec:
     matchLabels:
       service.istio.io/canonical-name: "your-label"
 ```
-
-
-View your logs using [Kibana](https://pages.github.tools.sap/perfx/cloud-logging-service/consumption/from-sap-cp-kyma/#view-your-logs) interface for the Cloud Logging Service.
