@@ -212,8 +212,7 @@ alertmanager:
 
   ## Annotations for Alertmanager
   ##
-  annotations:
-    sidecar.istio.io/inject: "false"
+  annotations: {}
 
   ## Api that prometheus will use to communicate with alertmanager. Possible values are v1, v2
   ##
@@ -512,7 +511,7 @@ alertmanager:
     ##
     podMetadata:
       annotations:
-        sidecar.istio.io/inject: "true"
+        sidecar.istio.io/inject: "false"
     ## Image of Alertmanager
     ##
     image:
