@@ -200,13 +200,6 @@ global:
         matchExpression:
           severity: critical
         routes:
-      victorOps:
-        sendResolved: true
-        routingkey: ""
-        apikey: ""
-        matchExpression:
-          severity: critical
-        routes:
 
 ## Configuration for alertmanager
 ## ref: https://prometheus.io/docs/alerting/alertmanager/
@@ -249,7 +242,6 @@ alertmanager:
   ##      https://prometheus.io/webtools/alerting/routing-tree-editor/
   ##
   config: |-
-   {{- $isVictorOpsEnabled := and .Values.global.alertTools.credentials.victorOps .Values.global.alertTools.credentials.victorOps.apikey .Values.global.alertTools.credentials.victorOps.routingkey -}}
    {{- $isSlackEnabled := and .Values.global.alertTools.credentials.slack .Values.global.alertTools.credentials.slack.channel .Values.global.alertTools.credentials.slack.apiurl -}}
    global:
      resolve_timeout: 5m
