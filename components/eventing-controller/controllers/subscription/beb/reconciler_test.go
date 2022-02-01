@@ -252,7 +252,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			))
 
 			By("Updating the APIRule status to be Ready")
-			ensureAPIRuleStatusUpdatedWithStatusReady(ctx, &apiRuleUpdated).Should(BeNil())
+			ensureAPIRuleStatusUpdatedWithStatusReady(ctx, &apiRuleUpdated).Should(Succeed())
 
 			By("Setting a Subscription active condition")
 			subscriptionActiveCondition := eventingv1alpha1.MakeCondition(
@@ -1156,7 +1156,6 @@ func ensureAPIRuleStatusUpdatedWithStatusReady(ctx context.Context, apiRule *api
 		if err != nil {
 			return err
 		}
-		log.Printf("apirule is updated: %v", apiRule)
 		return nil
 	}, bigTimeOut, bigPollingInterval)
 }
@@ -1167,27 +1166,20 @@ func ensureSubscriptionCreated(ctx context.Context, subscription *eventingv1alph
 	if subscription.Namespace != "default " {
 		// create testing namespace
 		namespace := fixtureNamespace(subscription.Namespace)
-		if namespace.Name != "default" {
-			err := k8sClient.Create(ctx, namespace)
-			if !k8serrors.IsAlreadyExists(err) {
-				fmt.Println(err)
-				Expect(err).ShouldNot(HaveOccurred())
-			}
+		err := k8sClient.Create(ctx, namespace)
+		if !k8serrors.IsAlreadyExists(err) {
+			Expect(err).ShouldNot(HaveOccurred())
 		}
 	}
 
 	By(fmt.Sprintf("Ensuring the subscription %q is created", subscription.Name))
-	// create subscription
-	err := k8sClient.Create(ctx, subscription)
-	Expect(err).Should(BeNil())
+	Expect(k8sClient.Create(ctx, subscription)).Should(Succeed())
 }
 
 // ensureSubscriptionUpdated conducts an update of a Subscription.
 func ensureSubscriptionUpdated(ctx context.Context, subscription *eventingv1alpha1.Subscription) {
 	By(fmt.Sprintf("Ensuring the subscription %q is updated", subscription.Name))
-	// update subscription
-	err := k8sClient.Update(ctx, subscription)
-	Expect(err).Should(BeNil())
+	Expect(k8sClient.Update(ctx, subscription)).Should(Succeed())
 }
 
 // ensureSubscriberSvcCreated creates a Service in the k8s cluster. If a custom namespace is used, it will be created as well.
@@ -1196,19 +1188,14 @@ func ensureSubscriberSvcCreated(ctx context.Context, svc *v1.Service) {
 	if svc.Namespace != "default " {
 		// create testing namespace
 		namespace := fixtureNamespace(svc.Namespace)
-		if namespace.Name != "default" {
-			err := k8sClient.Create(ctx, namespace)
-			if !k8serrors.IsAlreadyExists(err) {
-				fmt.Println(err)
-				Expect(err).ShouldNot(HaveOccurred())
-			}
+		err := k8sClient.Create(ctx, namespace)
+		if !k8serrors.IsAlreadyExists(err) {
+			Expect(err).ShouldNot(HaveOccurred())
 		}
 	}
 
 	By(fmt.Sprintf("Ensuring the subscriber service %q is created", svc.Name))
-	// create subscription
-	err := k8sClient.Create(ctx, svc)
-	Expect(err).Should(BeNil())
+	Expect(k8sClient.Create(ctx, svc)).Should(Succeed())
 }
 
 // getBEBSubscriptionCreationRequests filters the http requests made against BEB and returns the BEB Subscriptions
@@ -1227,9 +1214,7 @@ func getBEBSubscriptionCreationRequests(bebSubscriptions []bebtypes.Subscription
 func ensureSubscriptionCreationFails(ctx context.Context, subscription *eventingv1alpha1.Subscription) {
 	if subscription.Namespace != "default " {
 		namespace := fixtureNamespace(subscription.Namespace)
-		if namespace.Name != "default" {
-			Expect(k8sClient.Create(ctx, namespace)).Should(BeNil())
-		}
+		Expect(k8sClient.Create(ctx, namespace)).Should(Succeed())
 	}
 	Expect(k8sClient.Create(ctx, subscription)).Should(
 		And(
@@ -1285,7 +1270,6 @@ func getAPIRule(ctx context.Context, apiRule *apigatewayv1alpha1.APIRule) AsyncA
 }
 
 func filterAPIRulesForASvc(apiRules *apigatewayv1alpha1.APIRuleList, svc *corev1.Service) apigatewayv1alpha1.APIRule {
-	log.Printf("apirules got ::: %v", apiRules)
 	if len(apiRules.Items) == 1 && *apiRules.Items[0].Spec.Service.Name == svc.Name {
 		return apiRules.Items[0]
 	}
@@ -1309,7 +1293,6 @@ func getAPIRules(ctx context.Context, svc *corev1.Service) *apigatewayv1alpha1.A
 func getAPIRuleForASvc(ctx context.Context, svc *v1.Service) AsyncAssertion {
 	return Eventually(func() apigatewayv1alpha1.APIRule {
 		apiRules := getAPIRules(ctx, svc)
-		log.Printf("apirules got ::: %v", apiRules)
 		return filterAPIRulesForASvc(apiRules, svc)
 	}, smallTimeOut, smallPollingInterval)
 }
