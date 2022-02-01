@@ -1096,7 +1096,6 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 							reconcilertesting.WithAtLeastOnceQOS()),
 					),
 				)
-				subscription.Spec.ProtocolSettings.WebhookAuth = nil
 				return subscription
 			}()),
 	)
