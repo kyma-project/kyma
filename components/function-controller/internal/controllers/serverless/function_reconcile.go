@@ -169,25 +169,33 @@ func (r *FunctionReconciler) Reconcile(request ctrl.Request) (ctrl.Result, error
 
 	gitOptions, err := r.readGITOptions(ctx, instance)
 	if err != nil {
-		return r.updateStatusWithoutRepository(ctx, ctrl.Result{}, instance, serverlessv1alpha1.Condition{
+		log.Error(err, "Reading git options failed")
+		if _, updateErr := r.updateStatusWithoutRepository(ctx, ctrl.Result{}, instance, serverlessv1alpha1.Condition{
 			Type:               serverlessv1alpha1.ConditionConfigurationReady,
 			Status:             corev1.ConditionFalse,
 			LastTransitionTime: metav1.Now(),
 			Reason:             serverlessv1alpha1.ConditionReasonSourceUpdateFailed,
 			Message:            fmt.Sprintf("Reading git options failed: %v", err),
-		})
+		}); updateErr != nil {
+			return ctrl.Result{}, errors.Wrap(updateErr, "while updating status")
+		}
+		return ctrl.Result{}, err
 	}
 
 	revision, err := r.syncRevision(instance, gitOptions)
 	if err != nil {
-		result, errMsg := NextRequeue(err)
-		return r.updateStatusWithoutRepository(ctx, result, instance, serverlessv1alpha1.Condition{
+		log.Error(err, "Syncing git revision failed")
+		// result, errMsg := NextRequeue(err)
+		if _, updateErr := r.updateStatusWithoutRepository(ctx, ctrl.Result{}, instance, serverlessv1alpha1.Condition{
 			Type:               serverlessv1alpha1.ConditionConfigurationReady,
 			Status:             corev1.ConditionFalse,
 			LastTransitionTime: metav1.Now(),
 			Reason:             serverlessv1alpha1.ConditionReasonSourceUpdateFailed,
-			Message:            errMsg,
-		})
+			Message:            fmt.Sprintf("Syncing git revision failed: %v", err),
+		}); updateErr != nil {
+			return ctrl.Result{}, errors.Wrap(updateErr, "while updating status")
+		}
+		return ctrl.Result{}, err
 	}
 
 	rtmCfg := fnRuntime.GetRuntimeConfig(instance.Spec.Runtime)
