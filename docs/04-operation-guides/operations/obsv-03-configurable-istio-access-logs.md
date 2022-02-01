@@ -1,11 +1,8 @@
 ---
-title: Configure Istio access logs for Cloud Logging Service
+title: Configure Istio access logs
 ---
 
 [Istio access logs](https://istio.io/latest/docs/tasks/observability/logs/access-log/) can be enabled on a selective basis to provide fine-grained details which can help in indicating the golden signals, and troubleshoot anomalies.
-
-Disclaimer:
-{: .label .label-yellow .d-inline-block}
 
 >**Disclaimer:** Enabling access logs may increase logs volume drastically and might fill up your log storage in a very short time. Also, the provided feature makes use of an API in alpha state which may or may not be continued in future releases.
 
