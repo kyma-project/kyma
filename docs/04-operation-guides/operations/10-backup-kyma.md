@@ -8,7 +8,6 @@ The Kyma cluster load consists of Kubernetes [objects](https://kubernetes.io/doc
 
 ### Object backup
 
-test
 Kyma relies on a managed Kubernetes cluster for periodic backups of Kubernetes objects to avoid any manual steps.
 
 >**CAUTION:** Automatic backup doesn't include Kubernetes volumes. Back up your volumes periodically either on demand, or set up a periodic job.
