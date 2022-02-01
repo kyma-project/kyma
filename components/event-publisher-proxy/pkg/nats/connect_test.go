@@ -14,11 +14,11 @@ func TestConnectToNats(t *testing.T) {
 	assert.NotEmpty(t, natsServer.ClientURL())
 	defer natsServer.Shutdown()
 
-	bc := pkgnats.NewBackendConnection2(
-		pkgnats.WithBackendConnectionURL(test.natsURL),
-		pkgnats.WithBackendConnectionRetries(true),
-		pkgnats.WithBackendConnectionReconnects(1),
-		pkgnats.WithBackendConnectionWait(3),
+	bc := NewBackendConnection(
+		WithBackendConnectionURL(natsServer.ClientURL()),
+		WithBackendConnectionRetryOnFailedConnect(true),
+		WithBackendConnectionMaxReconnects(1),
+		WithBackendConnectionReconnectWait(3),
 	)
 	err := bc.Connect()
 	assert.Nil(t, err)

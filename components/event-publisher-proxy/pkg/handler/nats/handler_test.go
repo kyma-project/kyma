@@ -72,9 +72,9 @@ func (test *Test) setupResources(t *testing.T, subscription *eventingv1alpha1.Su
 	// connect to nats
 	bc := pkgnats.NewBackendConnection(
 		pkgnats.WithBackendConnectionURL(test.natsURL),
-		pkgnats.WithBackendConnectionRetries(true),
-		pkgnats.WithBackendConnectionReconnects(3),
-		pkgnats.WithBackendConnectionWait(time.Second),
+		pkgnats.WithBackendConnectionMaxReconnects(3),
+		pkgnats.WithBackendConnectionRetryOnFailedConnect(true),
+		pkgnats.WithBackendConnectionReconnectWait(time.Second),
 	)
 	err := bc.Connect()
 	assert.Nil(t, err)
@@ -163,9 +163,9 @@ func TestNatsHandlerForCloudEvents(t *testing.T) {
 		// connect to nats
 		bc := pkgnats.NewBackendConnection(
 			pkgnats.WithBackendConnectionURL(test.natsURL),
-			pkgnats.WithBackendConnectionRetries(true),
-			pkgnats.WithBackendConnectionReconnects(3),
-			pkgnats.WithBackendConnectionWait(time.Second),
+			pkgnats.WithBackendConnectionMaxReconnects(3),
+			pkgnats.WithBackendConnectionRetryOnFailedConnect(true),
+			pkgnats.WithBackendConnectionReconnectWait(time.Second),
 		)
 		err := bc.Connect()
 		assert.Nil(t, err)
@@ -220,9 +220,9 @@ func TestNatsHandlerForLegacyEvents(t *testing.T) {
 		// connect to nats
 		bc := pkgnats.NewBackendConnection(
 			pkgnats.WithBackendConnectionURL(test.natsURL),
-			pkgnats.WithBackendConnectionRetries(true),
-			pkgnats.WithBackendConnectionReconnects(3),
-			pkgnats.WithBackendConnectionWait(time.Second),
+			pkgnats.WithBackendConnectionMaxReconnects(3),
+			pkgnats.WithBackendConnectionRetryOnFailedConnect(true),
+			pkgnats.WithBackendConnectionReconnectWait(time.Second),
 		)
 		err := bc.Connect()
 		assert.Nil(t, err)

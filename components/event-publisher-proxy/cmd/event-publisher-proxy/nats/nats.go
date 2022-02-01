@@ -64,9 +64,9 @@ func (c *Commander) Start() error {
 	// connect to nats
 	bc := pkgnats.NewBackendConnection(
 		pkgnats.WithBackendConnectionURL(c.envCfg.URL),
-		pkgnats.WithBackendConnectionRetries(c.envCfg.RetryOnFailedConnect),
-		pkgnats.WithBackendConnectionReconnects(c.envCfg.MaxReconnects),
-		pkgnats.WithBackendConnectionWait(envCfg.ReconnectWait),
+		pkgnats.WithBackendConnectionMaxReconnects(c.envCfg.MaxReconnects),
+		pkgnats.WithBackendConnectionRetryOnFailedConnect(c.envCfg.RetryOnFailedConnect),
+		pkgnats.WithBackendConnectionReconnectWait(c.envCfg.ReconnectWait),
 	)
 	if err := bc.Connect(); err != nil {
 		c.logger.Errorf("Failed to connect to NATS server with error: %s", err)
