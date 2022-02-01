@@ -37,7 +37,7 @@ global:
     ## ref: https://cloud.google.com/sql/docs/postgres/sql-proxy
     gce_proxy:
       name: "gce-proxy"
-      version: "v1.27.0-alpine-7c52185c"
+      version: "v1.28.0-alpine-68cd4000"
       directory: "tpi/cloudsql-docker"
     hydra:
       name: "hydra"
