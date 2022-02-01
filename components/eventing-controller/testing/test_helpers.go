@@ -329,6 +329,13 @@ func WithEventTypeFilter(s *eventingv1alpha1.Subscription) {
 	}
 }
 
+// WithSinkURL sets the sinkURL in a new subscription
+func WithSinkURL(sinkURL string) SubscriptionOpt {
+	return func(s *eventingv1alpha1.Subscription) {
+		s.Spec.Sink = sinkURL
+	}
+}
+
 func WithValidSink(svcNs, svcName string, s *eventingv1alpha1.Subscription) {
 	s.Spec.Sink = GetValidSink(svcNs, svcName)
 }
