@@ -6,7 +6,7 @@ ENV BASE_APP_DIR=/workspace/go/src/github.com/kyma-project/kyma/components/funct
     GOARCH=amd64 \
     LIBGIT2_VERSION=1.1.0-r2
 
-RUN apk add gcc libc-dev
+RUN apk add --no-cache gcc libc-dev
 RUN apk add --no-cache --repository http://dl-cdn.alpinelinux.org/alpine/v3.14/community libgit2-dev=${LIBGIT2_VERSION}
 
 WORKDIR ${BASE_APP_DIR}
@@ -22,7 +22,7 @@ RUN go build -ldflags "-s -w" -a -o manager cmd/manager/main.go \
 
 # get latest CA certs
 FROM alpine:3.14.2 as certs
-RUN apk --update add ca-certificates
+RUN apk add --no-cache ca-certificates
 
 # result container
 FROM eu.gcr.io/kyma-project/external/alpine:3.14.2

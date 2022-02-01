@@ -407,6 +407,21 @@ function waitForK8sObject(path, query, checkFn, timeout, timeoutMsg) {
   return result;
 }
 
+function waitForNamespace(name, timeout = 30000) {
+  return waitForK8sObject(
+      `/api/v1/namespaces/${name}`,
+      {},
+      (_type, _apiObj, watchObj) => {
+        return (
+          watchObj.metadata.name === name &&
+            watchObj.status.phase === 'Active'
+        );
+      },
+      timeout,
+      `Waiting for ${name} namespace timeout 3000 ms)`,
+  );
+}
+
 function waitForClusterAddonsConfiguration(name, timeout = 90000) {
   return waitForK8sObject(
       '/apis/addons.kyma-project.io/v1alpha1/clusteraddonsconfigurations',
@@ -942,6 +957,18 @@ function ignore404(e) {
   }
 
   throw e;
+}
+
+// NOTE: this works only for those where resource == lowercase plural kind
+async function deleteK8sObjects(objects) {
+  console.log(`deleting ${objects.length} objects`);
+  for (const o of objects) {
+    const path = `${o.apiVersion}/namespaces/${o.metadata.namespace}/${o.kind.toLowerCase()}s/${o.metadata.name}`;
+    await k8sDynamicApi.requestPromise({
+      url: `${k8sDynamicApi.basePath}/apis/${path}`,
+      method: 'DELETE',
+    });
+  }
 }
 
 // NOTE: this no longer works, it relies on kube-api sending `selfLink` but the field has been deprecated
@@ -1695,6 +1722,7 @@ module.exports = {
   k8sApply,
   k8sDelete,
   waitForK8sObject,
+  waitForNamespace,
   waitForClusterAddonsConfiguration,
   waitForClusterServiceBroker,
   waitForServiceClass,
@@ -1752,6 +1780,7 @@ module.exports = {
   printContainerLogs,
   kubectlExecInPod,
   deleteK8sResource,
+  deleteK8sObjects,
   deleteK8sPod,
   listPods,
   switchEventingBackend,

@@ -24,23 +24,17 @@ func TestCleanup(t *testing.T) {
 	g := gomega.NewWithT(t)
 	data := "sampledata"
 	expectedDataInStore := fmt.Sprintf("\"%s\"", data)
-	subscriberStoreURL, subscriberCheckURL := "", ""
 
 	// When
 	// Create a test subscriber
 	ctx := context.Background()
-	subscriberPort := 8081
-	subscriber := controllertesting.NewSubscriber(fmt.Sprintf(":%d", subscriberPort))
-	subscriber.Start()
+	subscriber := controllertesting.NewSubscriber()
 	// Shutting down subscriber
 	defer subscriber.Shutdown()
 
-	subscriberStoreURL = fmt.Sprintf("http://localhost:%d%s", subscriberPort, subscriber.StoreEndpoint)
-	subscriberCheckURL = fmt.Sprintf("http://localhost:%d%s", subscriberPort, subscriber.CheckEndpoint)
-
 	// Create test subscription
 	testSub := controllertesting.NewSubscription("test", "test", controllertesting.WithFakeSubscriptionStatus, controllertesting.WithEventTypeFilter)
-	testSub.Spec.Sink = subscriberStoreURL
+	testSub.Spec.Sink = subscriber.SinkURL
 
 	// Create NATS Server
 	natsPort := 4222
@@ -75,7 +69,7 @@ func TestCleanup(t *testing.T) {
 	g.Expect(err).To(gomega.BeNil())
 
 	// Make sure subscriber works
-	err = subscriber.CheckEvent("", subscriberCheckURL)
+	err = subscriber.CheckEvent("")
 	if err != nil {
 		t.Fatalf("subscriber did not receive the event: %v", err)
 	}
@@ -86,7 +80,7 @@ func TestCleanup(t *testing.T) {
 	}
 
 	// Check for the event
-	err = subscriber.CheckEvent(expectedDataInStore, subscriberCheckURL)
+	err = subscriber.CheckEvent(expectedDataInStore)
 	if err != nil {
 		t.Fatalf("subscriber did not receive the event: %v", err)
 	}
@@ -109,6 +103,6 @@ func TestCleanup(t *testing.T) {
 	if err != nil {
 		t.Fatalf("publish event failed: %v", err)
 	}
-	err = subscriber.CheckEvent(expectedDataInStore, subscriberCheckURL)
+	err = subscriber.CheckEvent(expectedDataInStore)
 	g.Expect(err).NotTo(gomega.BeNil())
 }
