@@ -261,7 +261,7 @@ func testUpdateSubscriptionStatus(id int, eventTypePrefix, natsSubjectToPublish,
 			defaultConfiguration := &eventingv1alpha1.SubscriptionConfig{
 				MaxInFlightMessages: defaultSubsConfig.MaxInFlightMessages}
 			multipleConditions := reconcilertesting.NewDefaultMultipleConditions()
-			
+
 			// create a context
 			ctx := context.Background()
 			cancel = startReconciler(eventTypePrefix, defaultSinkValidator, natsURL)
