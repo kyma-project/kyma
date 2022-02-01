@@ -168,6 +168,21 @@ class KCPWrapper {
     }
   };
 
+  async getReconciliationsOperations(shootName) {
+    await this.login();
+    const reconciliationsOperations = await this.reconciliations({parameter: 'operations',
+      shootName: shootName, ops: true});
+    return JSON.stringify(reconciliationsOperations, null, '\t');
+  }
+
+  async getReconciliationsInfo(schedulingID) {
+    await this.login();
+    const reconciliationsInfo = await this.reconciliations({parameter: 'info',
+      schedulingID: schedulingID, ops: true});
+
+    return JSON.stringify(reconciliationsInfo, null, '\t');
+  }
+
   async getRuntimeStatusOperations(instanceID) {
     await this.login();
     const runtimeStatus = await this.runtimes({instanceID: instanceID, ops: true});
