@@ -394,14 +394,14 @@ func TestNatsSubAfterSync_FilterAdded(t *testing.T) {
 	g.Expect(natsBackend.Initialize(env.Config{})).Should(Succeed())
 
 	// Create a new subscriber
-	subscriber := startSubscriber()
+	subscriber := eventingtesting.NewSubscriber()
 	defer subscriber.Shutdown()
 	g.Expect(subscriber.IsRunning()).To(BeTrue())
 
-	//// ###### Test logic ######
+	// // ###### Test logic ######
 	// Create a subscription with single filter
 	sub := eventingtesting.NewSubscription("sub", "foo", eventingtesting.WithNotCleanEventTypeFilter)
-	sub.Spec.Sink = subscriber.GetSinkURL()
+	sub.Spec.Sink = subscriber.SinkURL
 	cleaner := createEventTypeCleaner(eventingtesting.EventTypePrefix, eventingtesting.ApplicationNameNotClean, defaultLogger)
 	_, err := natsBackend.SyncSubscription(sub, cleaner)
 	g.Expect(err).To(BeNil())
@@ -486,16 +486,16 @@ func TestNatsSubAfterSync_FilterRemoved(t *testing.T) {
 	g.Expect(natsBackend.Initialize(env.Config{})).Should(Succeed())
 
 	// Create a new subscriber
-	subscriber := startSubscriber()
+	subscriber := eventingtesting.NewSubscriber()
 	defer subscriber.Shutdown()
 	g.Expect(subscriber.IsRunning()).To(BeTrue())
 
 	cleaner := createEventTypeCleaner(eventingtesting.EventTypePrefix, eventingtesting.ApplicationNameNotClean, defaultLogger)
 
-	//// ###### Test logic ######
+	// // ###### Test logic ######
 	// Create a subscription with two filters
 	sub := eventingtesting.NewSubscription("sub", "foo", eventingtesting.WithNotCleanEventTypeFilter)
-	sub.Spec.Sink = subscriber.GetSinkURL()
+	sub.Spec.Sink = subscriber.SinkURL
 	// add a second filter
 	newFilter := sub.Spec.Filter.Filters[0].DeepCopy()
 	newFilter.EventType.Value = fmt.Sprintf("%snew1", eventingtesting.OrderCreatedEventTypeNotClean)
@@ -582,7 +582,7 @@ func TestNatsSubAfterSync_MultipleSubs(t *testing.T) {
 	g.Expect(natsBackend.Initialize(env.Config{})).Should(Succeed())
 
 	// Create a new subscriber
-	subscriber := startSubscriber()
+	subscriber := eventingtesting.NewSubscriber()
 	defer subscriber.Shutdown()
 	g.Expect(subscriber.IsRunning()).To(BeTrue())
 
@@ -591,12 +591,12 @@ func TestNatsSubAfterSync_MultipleSubs(t *testing.T) {
 	// // ###### Test logic ######
 	// Create two subscriptions with single filter
 	sub := eventingtesting.NewSubscription("sub", "foo", eventingtesting.WithNotCleanEventTypeFilter)
-	sub.Spec.Sink = subscriber.GetSinkURL()
+	sub.Spec.Sink = subscriber.SinkURL
 	_, err := natsBackend.SyncSubscription(sub, cleaner)
 	g.Expect(err).ShouldNot(HaveOccurred())
 
 	sub2 := eventingtesting.NewSubscription("sub2", "foo", eventingtesting.WithNotCleanEventTypeFilter)
-	sub2.Spec.Sink = subscriber.GetSinkURL()
+	sub2.Spec.Sink = subscriber.SinkURL
 	_, err = natsBackend.SyncSubscription(sub2, cleaner)
 	g.Expect(err).ShouldNot(HaveOccurred())
 
@@ -667,7 +667,7 @@ func TestNatsSubAfterSync_MultipleSubs(t *testing.T) {
 func Test_isNatsSubAssociatedWithKymaSub(t *testing.T) {
 	g := NewWithT(t)
 
-	//// ######  Setup test assets ######
+	// // ######  Setup test assets ######
 	// create subscription 1 and its nats subscription
 	cleanSubject1 := "subOne"
 	sub1 := eventingtesting.NewSubscription(cleanSubject1, "foo", eventingtesting.WithNotCleanEventTypeFilter)
@@ -684,7 +684,7 @@ func Test_isNatsSubAssociatedWithKymaSub(t *testing.T) {
 		Subject: cleanSubject2,
 	}
 
-	//// ###### Test logic ######
+	// // ###### Test logic ######
 	// Should return true because natsSub1 is associated with sub1
 	g.Expect(isNatsSubAssociatedWithKymaSub(natsSub1Key, natsSub1, sub1)).To(Equal(true))
 	// Should return true because natsSub2 is associated with sub2
