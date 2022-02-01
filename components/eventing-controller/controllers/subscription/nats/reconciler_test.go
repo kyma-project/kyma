@@ -82,7 +82,7 @@ func testNATSUnavailabilityReflectedInSubscriptionStatus(id int, eventTypePrefix
 			natsPort := natsPort + id
 			natsServer, natsURL := startNATS(natsPort)
 			defer reconcilertesting.ShutDownNATSServer(natsServer)
-			cancel = startReconciler(eventTypePrefix, defaultSinkValidator, natsURL)
+			cancel = startReconciler(eventTypePrefix, natsURL)
 			defer cancel()
 
 			// create subscriber svc
@@ -131,7 +131,7 @@ func testCleanEventTypes(id int, eventTypePrefix, natsSubjectToPublish, eventTyp
 
 			// create a context
 			ctx := context.Background()
-			cancel = startReconciler(eventTypePrefix, defaultSinkValidator, natsURL)
+			cancel = startReconciler(eventTypePrefix, natsURL)
 			defer cancel()
 
 			// create a subscriber service
@@ -264,7 +264,7 @@ func testUpdateSubscriptionStatus(id int, eventTypePrefix, natsSubjectToPublish,
 
 			// create a context
 			ctx := context.Background()
-			cancel = startReconciler(eventTypePrefix, defaultSinkValidator, natsURL)
+			cancel = startReconciler(eventTypePrefix, natsURL)
 			defer cancel()
 
 			// create a subscriber service
@@ -330,7 +330,7 @@ func testCreateDeleteSubscription(id int, eventTypePrefix, natsSubjectToPublish,
 	return When("Create/Delete Subscription", func() {
 		It("Should create/delete NATS Subscription", func() {
 			ctx := context.Background()
-			cancel = startReconciler(eventTypePrefix, defaultSinkValidator, natsURL)
+			cancel = startReconciler(eventTypePrefix, natsURL)
 			defer cancel()
 			subscriptionName := fmt.Sprintf(subscriptionNameFormat, id)
 			subscriberName := fmt.Sprintf(subscriberNameFormat, id)
@@ -375,7 +375,7 @@ func testCreateSubscriptionWithValidSink(id int, eventTypePrefix, _, eventTypeTo
 	sink := reconcilertesting.GetValidSink(namespaceName, subscriberName)
 	testCreatingSubscription := func(sink string) {
 		ctx := context.Background()
-		cancel = startReconciler(eventTypePrefix, defaultSinkValidator, natsURL)
+		cancel = startReconciler(eventTypePrefix, natsURL)
 		defer cancel()
 
 		// create subscriber svc
@@ -416,7 +416,7 @@ func testCreateSubscriptionWithValidSink(id int, eventTypePrefix, _, eventTypeTo
 func testCreateSubscriptionWithInvalidSink(id int, eventTypePrefix, _, eventTypeToSubscribe string) bool {
 	invalidSinkMsgCheck := func(sink, subConditionMsg, k8sEventMsg string) {
 		ctx := context.Background()
-		cancel = startReconciler(eventTypePrefix, defaultSinkValidator, natsURL)
+		cancel = startReconciler(eventTypePrefix, natsURL)
 		defer cancel()
 		subscriptionName := fmt.Sprintf(subscriptionNameFormat, id)
 
@@ -495,7 +495,7 @@ func testCreateSubscriptionWithEmptyProtocolProtocolSettingsDialect(id int, even
 	return When("Create Subscription with empty protocol, protocolsettings and dialect", func() {
 		It("Should mark the Subscription as ready", func() {
 			ctx := context.Background()
-			cancel = startReconciler(eventTypePrefix, defaultSinkValidator, natsURL)
+			cancel = startReconciler(eventTypePrefix, natsURL)
 			defer cancel()
 			subscriptionName := fmt.Sprintf(subscriptionNameFormat, id)
 			subscriberName := fmt.Sprintf(subscriberNameFormat, id)
@@ -531,7 +531,7 @@ func testChangeSubscriptionConfiguration(id int, eventTypePrefix, natsSubjectToP
 		It("Should reflect the new config in the subscription status", func() {
 			By("Creating the subscription using the default config")
 			ctx := context.Background()
-			cancel = startReconciler(eventTypePrefix, defaultSinkValidator, natsURL)
+			cancel = startReconciler(eventTypePrefix, natsURL)
 			defer cancel()
 			subscriptionName := fmt.Sprintf(subscriptionNameFormat, id)
 			subscriberName := fmt.Sprintf(subscriberNameFormat, id)
@@ -594,7 +594,7 @@ func testCreateSubscriptionWithEmptyEventType(id int, eventTypePrefix, _, _ stri
 	return When("Create Subscription with empty event type", func() {
 		It("Should mark the subscription as not ready", func() {
 			ctx := context.Background()
-			cancel = startReconciler(eventTypePrefix, defaultSinkValidator, natsURL)
+			cancel = startReconciler(eventTypePrefix, natsURL)
 			defer cancel()
 			subscriptionName := fmt.Sprintf(subscriptionNameFormat, id)
 			subscriberName := fmt.Sprintf(subscriberNameFormat, id)
@@ -797,7 +797,7 @@ func startNATS(port int) (*natsserver.Server, string) {
 	return natsServer, clientURL
 }
 
-func startReconciler(eventTypePrefix string, sinkValidator sinkValidator, natsURL string) context.CancelFunc {
+func startReconciler(eventTypePrefix string, natsURL string) context.CancelFunc {
 	ctx, cancel := context.WithCancel(context.Background())
 	logf.SetLogger(zap.New(zap.UseDevMode(true), zap.WriteTo(GinkgoWriter)))
 
@@ -836,7 +836,6 @@ func startReconciler(eventTypePrefix string, sinkValidator sinkValidator, natsUR
 		envConf,
 		defaultSubsConfig,
 	)
-	reconciler.sinkValidator = sinkValidator
 
 	err = reconciler.SetupUnmanaged(k8sManager)
 	Expect(err).ToNot(HaveOccurred())
