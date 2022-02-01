@@ -178,7 +178,7 @@ class KCPWrapper {
   async getReconciliationsInfo(schedulingID) {
     await this.login();
     const reconciliationsInfo = await this.reconciliations({parameter: 'info',
-      schedulingID: schedulingID, ops: true});
+      schedulingID: schedulingID});
 
     return JSON.stringify(reconciliationsInfo, null, '\t');
   }
