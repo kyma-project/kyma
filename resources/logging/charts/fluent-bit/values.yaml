@@ -226,7 +226,7 @@ config:
       # Include Kubernetes resource labels in the extra metadata.
       labels: "On"
       # Include Kubernetes resource annotations in the extra metadata.
-      annotations: "On"
+      annotations: "Off"
     recordModifier:
       enabled: false
       match: "*"
