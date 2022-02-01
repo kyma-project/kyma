@@ -111,6 +111,24 @@ function oidcE2ETest() {
     it('Should get Runtime Status after updating admins', async function() {
       const runtimeStatus = await kcp.getRuntimeStatusOperations(this.options.instanceID);
       console.log(`\nRuntime status: ${runtimeStatus}`);
+
+      // kcp reconciliations operations -c <shootName> -o json
+      const objRuntimeStatus = JSON.parse(runtimeStatus);
+      const reconciliationsOperations = await kcp.getReconciliationsOperations(objRuntimeStatus.data[0].shootName);
+
+      // kcp reconciliations info -i <scheduling-id> -o json
+      const objReconciliationsOperations = JSON.parse(reconciliationsOperations);
+      console.log(`\nNumber of operations: ${objReconciliationsOperations.length}`);
+
+      // getting last three operations
+      const lastObjReconciliationsOperations = objReconciliationsOperations.slice(objReconciliationsOperations.length-3,
+          objReconciliationsOperations.length);
+
+      let i;
+      for (i of lastObjReconciliationsOperations) {
+        const getReconciliationsInfo = await kcp.getReconciliationsInfo(i.schedulingID);
+        console.log(`\nReconciliation info for operation ${i}: ${getReconciliationsInfo}`);
+      }
     });
 
     it('Assure only new cluster admins are configured', async function() {
