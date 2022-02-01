@@ -39,9 +39,9 @@ spec:
     }
 EOF
 ```
-  </details>
+</details>
 
-  <details>
+<details>
   <summary label="python39">
   Python 3.9
   </summary>
