@@ -15,7 +15,7 @@ require (
 	github.com/mitchellh/hashstructure/v2 v2.0.2
 	github.com/nats-io/nats-server/v2 v2.6.1
 	github.com/nats-io/nats.go v1.12.3
-	github.com/onsi/ginkgo v1.16.4
+	github.com/onsi/ginkgo v1.16.5
 	github.com/onsi/gomega v1.14.0
 	github.com/pkg/errors v0.9.1
 	github.com/stretchr/testify v1.7.0

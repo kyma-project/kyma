@@ -80,7 +80,9 @@ func testNATSUnavailabilityReflectedInSubscriptionStatus(id int, eventTypePrefix
 			natsPort := natsPort + id
 			natsServer, natsURL := startNATS(natsPort)
 			defer reconcilertesting.ShutDownNATSServer(natsServer)
-			cancel = startReconciler(eventTypePrefix, natsURL)
+			cancel = startReconciler(eventTypePrefix, natsURL,
+				withDefaultValidator,
+			)
 			defer cancel()
 
 			// create subscriber svc
@@ -811,7 +813,7 @@ func startNATS(port int) (*natsserver.Server, string) {
 	return natsServer, clientURL
 }
 
-func startReconciler(eventTypePrefix string, natsURL string) context.CancelFunc {
+func startReconciler(eventTypePrefix string, natsURL string, opts ...ReconcilerOpt) context.CancelFunc {
 	ctx, cancel := context.WithCancel(context.Background())
 	logf.SetLogger(zap.New(zap.UseDevMode(true), zap.WriteTo(GinkgoWriter)))
 
@@ -849,6 +851,7 @@ func startReconciler(eventTypePrefix string, natsURL string) context.CancelFunc 
 		k8sManager.GetEventRecorderFor("eventing-controller-nats"),
 		envConf,
 		defaultSubsConfig,
+		opts...,
 	)
 
 	err = reconciler.SetupUnmanaged(k8sManager)
@@ -866,6 +869,11 @@ func startReconciler(eventTypePrefix string, natsURL string) context.CancelFunc 
 	Expect(k8sClient).ToNot(BeNil())
 
 	return cancel
+}
+
+// withDefaultValidator is a ReconcilerOpt to create a reconciler with the default sink validator.
+func withDefaultValidator(reconciler *Reconciler) {
+	reconciler.sinkValidator = defaultSinkValidator
 }
 
 // ensureSubscriberSvcCreated creates a Service in the k8s cluster. If a custom namespace is used, it will be created as well.

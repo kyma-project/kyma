@@ -65,8 +65,10 @@ const (
 	clusterLocalURLSuffix = "svc.cluster.local"
 )
 
+type ReconcilerOpt func(reconciler *Reconciler)
+
 func NewReconciler(ctx context.Context, client client.Client, applicationLister *application.Lister, cache cache.Cache,
-	logger *logger.Logger, recorder record.EventRecorder, cfg env.NatsConfig, subsCfg env.DefaultSubscriptionConfig) *Reconciler {
+	logger *logger.Logger, recorder record.EventRecorder, cfg env.NatsConfig, subsCfg env.DefaultSubscriptionConfig, opts ...ReconcilerOpt) *Reconciler {
 	reconciler := &Reconciler{
 		ctx:                 ctx,
 		Client:              client,
@@ -76,6 +78,9 @@ func NewReconciler(ctx context.Context, client client.Client, applicationLister 
 		eventTypeCleaner:    eventtype.NewCleaner(cfg.EventTypePrefix, applicationLister, logger),
 		sinkValidator:       defaultSinkValidator,
 		customEventsChannel: make(chan event.GenericEvent),
+	}
+	for _, o := range opts {
+		o(reconciler)
 	}
 	natsHandler := handlers.NewNats(cfg, subsCfg, reconciler.handleNatsConnClose, logger)
 	if err := natsHandler.Initialize(env.Config{}); err != nil {
