@@ -6,7 +6,7 @@
 
 The documentation here is for developers only, please follow the installation instructions from [istio.io](https://istio.io/docs/setup/install/istioctl/) for all other use cases.
 
-The Istio Helm chart consists of the `istio-operator.yaml` file with tailored Istio with Kyma-specific changes and configuration options.
+The Istio Helm chart consists of the `istio-operator.yaml` file with tailored Istio including Kyma-specific changes and configuration options.
 
 By default, this chart installs the following Istio components:
 
