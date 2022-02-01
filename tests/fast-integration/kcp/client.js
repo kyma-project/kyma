@@ -101,6 +101,18 @@ class KCPWrapper {
     return JSON.parse(result);
   }
 
+  async reconciliations(query) {
+    let args = ['reconciliations', `${query.parameter}`, '--output', 'json'];
+    if (query.shootName) {
+      args = args.concat('--shoot', `${query.shootName}`);
+    }
+    if (query.shootName) {
+      args = args.concat('--scheduling-id', `${query.shootName}`);
+    }
+    const result = await this.exec(args);
+    return JSON.parse(result);
+  }
+
   async login() {
     const args = ['login', '-u', `${this.username}`, '-p', `${this.password}`];
     return await this.exec(args);
