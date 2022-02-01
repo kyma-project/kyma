@@ -6,10 +6,10 @@
 
 The Istio Resources Helm chart includes Kyma configuration of Istio and consists of:
 
-- Istio monitoring configuration details
-- Istio Ingress Gateway
+- Istio monitoring configuration details providing Grafana dashboards configuration details
+- Istio Ingress Gateway configuring incoming traffic to Kyma
 - Mutual TLS (mTLS) configuration enabling mTLS cluster-wide in the STRICT mode
-- Service Monitor
+- Service Monitor configuring monitoring for the Istio component
 - Istio [VirtualService](https://istio.io/docs/reference/config/networking/virtual-service/) informing whether Istio is up and running
 
 ## Prerequisites
