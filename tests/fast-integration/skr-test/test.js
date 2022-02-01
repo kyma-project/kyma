@@ -44,8 +44,7 @@ describe('Execute SKR test', function() {
       const lastObjReconciliationsOperations = objReconciliationsOperations.slice(objReconciliationsOperations.length-3,
           objReconciliationsOperations.length);
 
-      let i;
-      for (i of lastObjReconciliationsOperations) {
+      for (const i of lastObjReconciliationsOperations) {
         // kcp reconciliations info -i <scheduling-id> -o json
         const getReconciliationsInfo = await kcp.getReconciliationsInfo(i.schedulingID);
         console.log(`\nReconciliation info for operation ${i}: ${getReconciliationsInfo}`);
