@@ -71,7 +71,7 @@ const (
         }`
 )
 
-type APIRuleOption func(rule *apigatewayv1alpha1.APIRule)
+type APIRuleOption func(r *apigatewayv1alpha1.APIRule)
 
 // NewAPIRule returns a valid APIRule
 func NewAPIRule(subscription *eventingv1alpha1.Subscription, opts ...APIRuleOption) *apigatewayv1alpha1.APIRule {
@@ -95,46 +95,65 @@ func NewAPIRule(subscription *eventingv1alpha1.Subscription, opts ...APIRuleOpti
 	return apiRule
 }
 
-func WithService(host, svcName string, apiRule *apigatewayv1alpha1.APIRule) {
-	port := uint32(443)
-	isExternal := true
-	apiRule.Spec.Service = &apigatewayv1alpha1.Service{
-		Name:       &svcName,
-		Port:       &port,
-		Host:       &host,
-		IsExternal: &isExternal,
+func WithService(host, svcName string) APIRuleOption {
+	return func(r *apigatewayv1alpha1.APIRule) {
+		port := uint32(443)
+		isExternal := true
+		r.Spec.Service = &apigatewayv1alpha1.Service{
+			Name:       &svcName,
+			Port:       &port,
+			Host:       &host,
+			IsExternal: &isExternal,
+		}
 	}
 }
 
-func WithPath(apiRule *apigatewayv1alpha1.APIRule) {
-	handlerOAuth := object.OAuthHandlerName
-	handler := apigatewayv1alpha1.Handler{
-		Name: handlerOAuth,
-	}
-	authenticator := &apigatewayv1alpha1.Authenticator{
-		Handler: &handler,
-	}
-	apiRule.Spec.Rules = []apigatewayv1alpha1.Rule{
-		{
-			Path: "/path",
-			Methods: []string{
-				http.MethodPost,
-				http.MethodOptions,
+func WithPath() APIRuleOption {
+	return func(r *apigatewayv1alpha1.APIRule) {
+		handlerOAuth := object.OAuthHandlerName
+		handler := apigatewayv1alpha1.Handler{
+			Name: handlerOAuth,
+		}
+		authenticator := &apigatewayv1alpha1.Authenticator{
+			Handler: &handler,
+		}
+		r.Spec.Rules = []apigatewayv1alpha1.Rule{
+			{
+				Path: "/path",
+				Methods: []string{
+					http.MethodPost,
+					http.MethodOptions,
+				},
+				AccessStrategies: []*apigatewayv1alpha1.Authenticator{
+					authenticator,
+				},
 			},
-			AccessStrategies: []*apigatewayv1alpha1.Authenticator{
-				authenticator,
-			},
-		},
+		}
 	}
 }
 
-func WithStatusReady(apiRule *apigatewayv1alpha1.APIRule) {
+func WithStatusReady() APIRuleOption {
+	return func(r *apigatewayv1alpha1.APIRule) {
+		statusOK := &apigatewayv1alpha1.APIRuleResourceStatus{
+			Code:        apigatewayv1alpha1.StatusOK,
+			Description: "",
+		}
+
+		r.Status = apigatewayv1alpha1.APIRuleStatus{
+			APIRuleStatus:        statusOK,
+			VirtualServiceStatus: statusOK,
+			AccessRuleStatus:     statusOK,
+		}
+	}
+}
+
+func MarkReady(r *apigatewayv1alpha1.APIRule) {
 	statusOK := &apigatewayv1alpha1.APIRuleResourceStatus{
 		Code:        apigatewayv1alpha1.StatusOK,
 		Description: "",
 	}
 
-	apiRule.Status = apigatewayv1alpha1.APIRuleStatus{
+	r.Status = apigatewayv1alpha1.APIRuleStatus{
 		APIRuleStatus:        statusOK,
 		VirtualServiceStatus: statusOK,
 		AccessRuleStatus:     statusOK,
@@ -157,7 +176,7 @@ func NewSubscription(name, namespace string, opts ...SubscriptionOpt) *eventingv
 	return newSub
 }
 
-type protoOpt func(proto *eventingv1alpha1.ProtocolSettings)
+type protoOpt func(p *eventingv1alpha1.ProtocolSettings)
 
 func NewProtocolSettings(opts ...protoOpt) *eventingv1alpha1.ProtocolSettings {
 	protoSettings := &eventingv1alpha1.ProtocolSettings{}
@@ -167,35 +186,43 @@ func NewProtocolSettings(opts ...protoOpt) *eventingv1alpha1.ProtocolSettings {
 	return protoSettings
 }
 
-func WithBinaryContentMode(protoSettings *eventingv1alpha1.ProtocolSettings) {
-	protoSettings.ContentMode = func() *string {
-		contentMode := eventingv1alpha1.ProtocolSettingsContentModeBinary
-		return &contentMode
-	}()
+func WithBinaryContentMode() protoOpt {
+	return func(p *eventingv1alpha1.ProtocolSettings) {
+		p.ContentMode = func() *string {
+			contentMode := eventingv1alpha1.ProtocolSettingsContentModeBinary
+			return &contentMode
+		}()
+	}
 }
 
-func WithExemptHandshake(protoSettings *eventingv1alpha1.ProtocolSettings) {
-	protoSettings.ExemptHandshake = func() *bool {
-		exemptHandshake := true
-		return &exemptHandshake
-	}()
+func WithExemptHandshake() protoOpt {
+	return func(p *eventingv1alpha1.ProtocolSettings) {
+		p.ExemptHandshake = func() *bool {
+			exemptHandshake := true
+			return &exemptHandshake
+		}()
+	}
 }
 
-func WithAtLeastOnceQOS(protoSettings *eventingv1alpha1.ProtocolSettings) {
-	protoSettings.Qos = func() *string {
-		qos := "AT-LEAST_ONCE"
-		return &qos
-	}()
+func WithAtLeastOnceQOS() protoOpt {
+	return func(p *eventingv1alpha1.ProtocolSettings) {
+		p.Qos = func() *string {
+			qos := "AT-LEAST_ONCE"
+			return &qos
+		}()
+	}
 }
 
-func WithDefaultWebhookAuth(protoSettings *eventingv1alpha1.ProtocolSettings) {
-	protoSettings.WebhookAuth = &eventingv1alpha1.WebhookAuth{
-		Type:         "oauth2",
-		GrantType:    "client_credentials",
-		ClientID:     "xxx",
-		ClientSecret: "xxx",
-		TokenURL:     "https://oauth2.xxx.com/oauth2/token",
-		Scope:        []string{"guid-identifier"},
+func WithDefaultWebhookAuth() protoOpt {
+	return func(p *eventingv1alpha1.ProtocolSettings) {
+		p.WebhookAuth = &eventingv1alpha1.WebhookAuth{
+			Type:         "oauth2",
+			GrantType:    "client_credentials",
+			ClientID:     "xxx",
+			ClientSecret: "xxx",
+			TokenURL:     "https://oauth2.xxx.com/oauth2/token",
+			Scope:        []string{"guid-identifier"},
+		}
 	}
 }
 
@@ -221,60 +248,57 @@ func qos(qos string) *string {
 	return &q
 }
 
-func WithFakeSubscriptionStatus(s *eventingv1alpha1.Subscription) {
-	s.Status.Conditions = []eventingv1alpha1.Condition{
-		{
-			Type:    "foo",
-			Status:  "foo",
-			Reason:  "foo-reason",
-			Message: "foo-message",
-		},
-	}
-}
-
-func WithWebhookAuthForBEB(s *eventingv1alpha1.Subscription) {
-	s.Spec.Protocol = "BEB"
-	s.Spec.ProtocolSettings = &eventingv1alpha1.ProtocolSettings{
-		ContentMode: func() *string {
-			contentMode := eventingv1alpha1.ProtocolSettingsContentModeBinary
-			return &contentMode
-		}(),
-		ExemptHandshake: exemptHandshake(true),
-		Qos:             qos("AT_LEAST_ONCE"),
-		WebhookAuth: &eventingv1alpha1.WebhookAuth{
-			Type:         "oauth2",
-			GrantType:    "client_credentials",
-			ClientID:     "xxx",
-			ClientSecret: "xxx",
-			TokenURL:     "https://oauth2.xxx.com/oauth2/token",
-			Scope:        []string{"guid-identifier"},
-		},
-	}
-}
-
-func WithWebhookForNats(s *eventingv1alpha1.Subscription) {
-	s.Spec.Protocol = "NATS"
-	s.Spec.ProtocolSettings = &eventingv1alpha1.ProtocolSettings{}
-}
-
-// WithNotCleanEventTypeFilter initializes subscription filter with a not clean event-type
-// A not clean event-type means it contains none-alphanumeric characters
-func WithNotCleanEventTypeFilter(s *eventingv1alpha1.Subscription) {
-	s.Spec.Filter = &eventingv1alpha1.BEBFilters{
-		Filters: []*eventingv1alpha1.BEBFilter{
+func WithFakeSubscriptionStatus() SubscriptionOpt {
+	return func(s *eventingv1alpha1.Subscription) {
+		s.Status.Conditions = []eventingv1alpha1.Condition{
 			{
-				EventSource: &eventingv1alpha1.Filter{
-					Type:     "exact",
-					Property: "source",
-					Value:    EventSource,
-				},
-				EventType: &eventingv1alpha1.Filter{
-					Type:     "exact",
-					Property: "type",
-					Value:    OrderCreatedEventTypeNotClean,
-				},
+				Type:    "foo",
+				Status:  "foo",
+				Reason:  "foo-reason",
+				Message: "foo-message",
 			},
-		},
+		}
+	}
+}
+
+func WithWebhookAuthForBEB() SubscriptionOpt {
+	return func(s *eventingv1alpha1.Subscription) {
+		s.Spec.Protocol = "BEB"
+		s.Spec.ProtocolSettings = &eventingv1alpha1.ProtocolSettings{
+			ContentMode: func() *string {
+				contentMode := eventingv1alpha1.ProtocolSettingsContentModeBinary
+				return &contentMode
+			}(),
+			ExemptHandshake: exemptHandshake(true),
+			Qos:             qos("AT_LEAST_ONCE"),
+			WebhookAuth: &eventingv1alpha1.WebhookAuth{
+				Type:         "oauth2",
+				GrantType:    "client_credentials",
+				ClientID:     "xxx",
+				ClientSecret: "xxx",
+				TokenURL:     "https://oauth2.xxx.com/oauth2/token",
+				Scope:        []string{"guid-identifier"},
+			},
+		}
+	}
+}
+
+func WithProtocolBEB() SubscriptionOpt {
+	return func(s *eventingv1alpha1.Subscription) {
+		s.Spec.Protocol = "BEB"
+	}
+}
+
+func WithProtocolSettings(p *eventingv1alpha1.ProtocolSettings) SubscriptionOpt {
+	return func(s *eventingv1alpha1.Subscription) {
+		s.Spec.ProtocolSettings = p
+	}
+}
+
+func WithWebhookForNats() SubscriptionOpt {
+	return func(s *eventingv1alpha1.Subscription) {
+		s.Spec.Protocol = "NATS"
+		s.Spec.ProtocolSettings = &eventingv1alpha1.ProtocolSettings{}
 	}
 }
 
@@ -304,29 +328,26 @@ func WithFilter(eventSource, eventType string) SubscriptionOpt {
 	}
 }
 
-func WithEmptyFilter(subscription *eventingv1alpha1.Subscription) {
-	subscription.Spec.Filter = &eventingv1alpha1.BEBFilters{
-		Filters: []*eventingv1alpha1.BEBFilter{},
+// WithNotCleanEventTypeFilter initializes subscription filter with a not clean event-type
+// A not clean event-type means it contains none-alphanumeric characters
+func WithNotCleanEventTypeFilter() SubscriptionOpt {
+	return WithFilter(EventSource, OrderCreatedEventTypeNotClean)
+}
+
+func WithEmptyFilter() SubscriptionOpt {
+	return func(subscription *eventingv1alpha1.Subscription) {
+		subscription.Spec.Filter = &eventingv1alpha1.BEBFilters{
+			Filters: []*eventingv1alpha1.BEBFilter{},
+		}
 	}
 }
 
-func WithEventTypeFilter(s *eventingv1alpha1.Subscription) {
-	s.Spec.Filter = &eventingv1alpha1.BEBFilters{
-		Filters: []*eventingv1alpha1.BEBFilter{
-			{
-				EventSource: &eventingv1alpha1.Filter{
-					Type:     "exact",
-					Property: "source",
-					Value:    EventSource,
-				},
-				EventType: &eventingv1alpha1.Filter{
-					Type:     "exact",
-					Property: "type",
-					Value:    OrderCreatedEventType,
-				},
-			},
-		},
-	}
+func WithEventTypeFilter() SubscriptionOpt {
+	return WithFilter(EventSource, OrderCreatedEventType)
+}
+
+func WithInvalidSink() SubscriptionOpt {
+	return WithSinkURL("invalid")
 }
 
 // WithSinkURL sets the sinkURL in a new subscription
@@ -336,10 +357,17 @@ func WithSinkURL(sinkURL string) SubscriptionOpt {
 	}
 }
 
-func WithValidSink(svcNs, svcName string, s *eventingv1alpha1.Subscription) {
-	s.Spec.Sink = GetValidSink(svcNs, svcName)
+// WithServiceWithPathAsSink sets a kubernetes service as the sink
+func WithServiceWithPathAsSink(svcNamespace, svcName, path string) SubscriptionOpt {
+	return WithSinkURL(fmt.Sprintf("%s%s", GetValidSink(svcNamespace, svcName), path))
 }
 
+// WithServiceAsSink sets a kubernetes service as the sink
+func WithServiceAsSink(svcNs, svcName string) SubscriptionOpt {
+	return WithSinkURL(GetValidSink(svcNs, svcName))
+}
+
+// GetValidSink converts a namespace and service name to a valid sink url
 func GetValidSink(svcNs, svcName string) string {
 	return fmt.Sprintf("https://%s.%s.svc.cluster.local", svcName, svcNs)
 }
@@ -367,7 +395,7 @@ func NewSubscriberSvc(name, ns string) *corev1.Service {
 	}
 }
 
-func WithBEBMessagingSecret(name, ns string) *corev1.Secret {
+func BEBMessagingSecret(name, ns string) *corev1.Secret {
 	messagingValue := `
 				[{
 					"broker": {
@@ -419,7 +447,7 @@ func WithBEBMessagingSecret(name, ns string) *corev1.Secret {
 	}
 }
 
-func WithNamespace(name string) *corev1.Namespace {
+func Namespace(name string) *corev1.Namespace {
 	namespace := corev1.Namespace{
 		ObjectMeta: metav1.ObjectMeta{
 			Name: name,
@@ -428,7 +456,7 @@ func WithNamespace(name string) *corev1.Namespace {
 	return &namespace
 }
 
-func WithEventingBackend(name, ns string) *eventingv1alpha1.EventingBackend {
+func EventingBackend(name, ns string) *eventingv1alpha1.EventingBackend {
 	return &eventingv1alpha1.EventingBackend{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      name,
@@ -439,7 +467,7 @@ func WithEventingBackend(name, ns string) *eventingv1alpha1.EventingBackend {
 	}
 }
 
-func WithEventingControllerDeployment() *appsv1.Deployment {
+func EventingControllerDeployment() *appsv1.Deployment {
 	labels := map[string]string{
 		"app.kubernetes.io/name": "value",
 	}
@@ -470,7 +498,7 @@ func WithEventingControllerDeployment() *appsv1.Deployment {
 		Status: appsv1.DeploymentStatus{},
 	}
 }
-func WithEventingControllerPod(backend string) *corev1.Pod {
+func EventingControllerPod(backend string) *corev1.Pod {
 	labels := map[string]string{
 		deployment.AppLabelKey: deployment.PublisherName,
 	}
@@ -505,8 +533,10 @@ func WithEventingControllerPod(backend string) *corev1.Pod {
 	}
 }
 
-func WithMultipleConditions(s *eventingv1alpha1.Subscription) {
-	s.Status.Conditions = NewDefaultMultipleConditions()
+func WithMultipleConditions() SubscriptionOpt {
+	return func(s *eventingv1alpha1.Subscription) {
+		s.Status.Conditions = NewDefaultMultipleConditions()
+	}
 }
 
 func NewDefaultMultipleConditions() []eventingv1alpha1.Condition {

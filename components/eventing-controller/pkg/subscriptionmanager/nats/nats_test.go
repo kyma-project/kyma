@@ -33,7 +33,10 @@ func TestCleanup(t *testing.T) {
 	defer subscriber.Shutdown()
 
 	// Create test subscription
-	testSub := controllertesting.NewSubscription("test", "test", controllertesting.WithFakeSubscriptionStatus, controllertesting.WithEventTypeFilter)
+	testSub := controllertesting.NewSubscription("test", "test",
+		controllertesting.WithFakeSubscriptionStatus(),
+		controllertesting.WithEventTypeFilter(),
+	)
 	testSub.Spec.Sink = subscriber.SinkURL
 
 	// Create NATS Server

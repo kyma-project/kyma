@@ -54,8 +54,10 @@ func Test_SyncBEBSubscription(t *testing.T) {
 	subscription.Status.Emshash = 0
 	subscription.Status.Ev2hash = 0
 
-	apiRule := controllertesting.NewAPIRule(subscription, controllertesting.WithPath)
-	controllertesting.WithService("foo-host", "foo-svc", apiRule)
+	apiRule := controllertesting.NewAPIRule(subscription,
+		controllertesting.WithPath(),
+		controllertesting.WithService("foo-host", "foo-svc"),
+	)
 
 	// then
 	changed, err := beb.SyncSubscription(subscription, &Cleaner{}, apiRule)

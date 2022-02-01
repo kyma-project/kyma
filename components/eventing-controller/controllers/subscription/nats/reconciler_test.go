@@ -142,10 +142,11 @@ func testCleanEventTypes(id int, eventTypePrefix, natsSubjectToPublish, eventTyp
 
 			// create a Subscription
 			subscriptionName := fmt.Sprintf(subscriptionNameFormat, id)
-			optFilter := reconcilertesting.WithEmptyFilter
-			optWebhook := reconcilertesting.WithWebhookForNats
-			subscription := reconcilertesting.NewSubscription(subscriptionName, namespaceName, optFilter, optWebhook)
-			reconcilertesting.WithValidSink(namespaceName, subscriberSvc.Name, subscription)
+			subscription := reconcilertesting.NewSubscription(subscriptionName, namespaceName,
+				reconcilertesting.WithEmptyFilter(),
+				reconcilertesting.WithWebhookForNats(),
+				reconcilertesting.WithServiceAsSink(namespaceName, subscriberSvc.Name),
+			)
 
 			ensureSubscriptionCreated(ctx, subscription)
 
@@ -275,11 +276,12 @@ func testUpdateSubscriptionStatus(id int, eventTypePrefix, natsSubjectToPublish,
 
 			// create a Subscription
 			subscriptionName := fmt.Sprintf(subscriptionNameFormat, id)
-			optFilter := reconcilertesting.WithEmptyFilter
-			optWebhook := reconcilertesting.WithWebhookForNats
-			optConditions := reconcilertesting.WithMultipleConditions
-			subscription := reconcilertesting.NewSubscription(subscriptionName, namespaceName, optFilter, optWebhook, optConditions)
-			reconcilertesting.WithValidSink(namespaceName, subscriberSvc.Name, subscription)
+			subscription := reconcilertesting.NewSubscription(subscriptionName, namespaceName,
+				reconcilertesting.WithEmptyFilter(),
+				reconcilertesting.WithWebhookForNats(),
+				reconcilertesting.WithMultipleConditions(),
+				reconcilertesting.WithServiceAsSink(namespaceName, subscriberSvc.Name),
+			)
 
 			ensureSubscriptionCreated(ctx, subscription)
 
@@ -340,10 +342,11 @@ func testCreateDeleteSubscription(id int, eventTypePrefix, natsSubjectToPublish,
 			ensureSubscriberSvcCreated(ctx, subscriberSvc)
 
 			// create subscription
-			optFilter := reconcilertesting.WithFilter(reconcilertesting.EventSource, eventTypeToSubscribe)
-			optWebhook := reconcilertesting.WithWebhookForNats
-			subscription := reconcilertesting.NewSubscription(subscriptionName, namespaceName, optFilter, optWebhook)
-			reconcilertesting.WithValidSink(namespaceName, subscriberSvc.Name, subscription)
+			subscription := reconcilertesting.NewSubscription(subscriptionName, namespaceName,
+				reconcilertesting.WithFilter(reconcilertesting.EventSource, eventTypeToSubscribe),
+				reconcilertesting.WithWebhookForNats(),
+				reconcilertesting.WithServiceAsSink(namespaceName, subscriberSvc.Name),
+			)
 			ensureSubscriptionCreated(ctx, subscription)
 
 			getSubscription(ctx, subscription).Should(And(
@@ -421,8 +424,11 @@ func testCreateSubscriptionWithInvalidSink(id int, eventTypePrefix, _, eventType
 		subscriptionName := fmt.Sprintf(subscriptionNameFormat, id)
 
 		// Create subscription
-		givenSubscription := reconcilertesting.NewSubscription(subscriptionName, namespaceName, reconcilertesting.WithFilter(reconcilertesting.EventSource, eventTypeToSubscribe), reconcilertesting.WithWebhookForNats)
-		givenSubscription.Spec.Sink = sink
+		givenSubscription := reconcilertesting.NewSubscription(subscriptionName, namespaceName,
+			reconcilertesting.WithFilter(reconcilertesting.EventSource, eventTypeToSubscribe),
+			reconcilertesting.WithWebhookForNats(),
+			reconcilertesting.WithSinkURL(sink),
+		)
 		ensureSubscriptionCreated(ctx, givenSubscription)
 
 		getSubscription(ctx, givenSubscription).Should(And(
@@ -505,8 +511,10 @@ func testCreateSubscriptionWithEmptyProtocolProtocolSettingsDialect(id int, even
 			ensureSubscriberSvcCreated(ctx, subscriberSvc)
 
 			// create subscription
-			subscription := reconcilertesting.NewSubscription(subscriptionName, namespaceName, reconcilertesting.WithFilter("", eventTypeToSubscribe))
-			reconcilertesting.WithValidSink(namespaceName, subscriberSvc.Name, subscription)
+			subscription := reconcilertesting.NewSubscription(subscriptionName, namespaceName,
+				reconcilertesting.WithFilter("", eventTypeToSubscribe),
+				reconcilertesting.WithServiceAsSink(namespaceName, subscriberSvc.Name),
+			)
 			ensureSubscriptionCreated(ctx, subscription)
 
 			getSubscription(ctx, subscription).Should(And(
@@ -541,8 +549,11 @@ func testChangeSubscriptionConfiguration(id int, eventTypePrefix, natsSubjectToP
 			ensureSubscriberSvcCreated(ctx, subscriberSvc)
 
 			// create subscription
-			subscription := reconcilertesting.NewSubscription(subscriptionName, namespaceName, reconcilertesting.WithFilter(reconcilertesting.EventSource, eventTypeToSubscribe), reconcilertesting.WithWebhookForNats)
-			reconcilertesting.WithValidSink(namespaceName, subscriberSvc.Name, subscription)
+			subscription := reconcilertesting.NewSubscription(subscriptionName, namespaceName,
+				reconcilertesting.WithFilter(reconcilertesting.EventSource, eventTypeToSubscribe),
+				reconcilertesting.WithWebhookForNats(),
+				reconcilertesting.WithServiceAsSink(namespaceName, subscriberSvc.Name),
+			)
 			ensureSubscriptionCreated(ctx, subscription)
 
 			getSubscription(ctx, subscription).Should(And(
@@ -604,8 +615,11 @@ func testCreateSubscriptionWithEmptyEventType(id int, eventTypePrefix, _, _ stri
 			ensureSubscriberSvcCreated(ctx, subscriberSvc)
 
 			// Create subscription
-			givenSubscription := reconcilertesting.NewSubscription(subscriptionName, namespaceName, reconcilertesting.WithFilter(reconcilertesting.EventSource, ""), reconcilertesting.WithWebhookForNats)
-			reconcilertesting.WithValidSink(namespaceName, subscriberName, givenSubscription)
+			givenSubscription := reconcilertesting.NewSubscription(subscriptionName, namespaceName,
+				reconcilertesting.WithFilter(reconcilertesting.EventSource, ""),
+				reconcilertesting.WithWebhookForNats(),
+				reconcilertesting.WithServiceAsSink(namespaceName, subscriberName),
+			)
 			ensureSubscriptionCreated(ctx, givenSubscription)
 
 			getSubscription(ctx, givenSubscription).Should(And(
