@@ -21,7 +21,7 @@ Installation of Istio Resources chart requires Kyma prerequisties, namely [`clus
 To install Istio Resources, run:
 
 ```bash
-kyma deploy --component istio-resources --namespace [NAMESPACE_NAME]
+kyma deploy --component istio-resources
 ```
 
 For more details regarding the installation of Istio itself in Kyma, see the [Istio chart](../istio-configuration/README.md).
