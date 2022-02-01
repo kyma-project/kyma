@@ -176,9 +176,9 @@ func NewSubscription(name, namespace string, opts ...SubscriptionOpt) *eventingv
 	return newSub
 }
 
-type protoOpt func(p *eventingv1alpha1.ProtocolSettings)
+type ProtoOpt func(p *eventingv1alpha1.ProtocolSettings)
 
-func NewProtocolSettings(opts ...protoOpt) *eventingv1alpha1.ProtocolSettings {
+func NewProtocolSettings(opts ...ProtoOpt) *eventingv1alpha1.ProtocolSettings {
 	protoSettings := &eventingv1alpha1.ProtocolSettings{}
 	for _, o := range opts {
 		o(protoSettings)
@@ -186,7 +186,7 @@ func NewProtocolSettings(opts ...protoOpt) *eventingv1alpha1.ProtocolSettings {
 	return protoSettings
 }
 
-func WithBinaryContentMode() protoOpt {
+func WithBinaryContentMode() ProtoOpt {
 	return func(p *eventingv1alpha1.ProtocolSettings) {
 		p.ContentMode = func() *string {
 			contentMode := eventingv1alpha1.ProtocolSettingsContentModeBinary
@@ -195,7 +195,7 @@ func WithBinaryContentMode() protoOpt {
 	}
 }
 
-func WithExemptHandshake() protoOpt {
+func WithExemptHandshake() ProtoOpt {
 	return func(p *eventingv1alpha1.ProtocolSettings) {
 		p.ExemptHandshake = func() *bool {
 			exemptHandshake := true
@@ -204,7 +204,7 @@ func WithExemptHandshake() protoOpt {
 	}
 }
 
-func WithAtLeastOnceQOS() protoOpt {
+func WithAtLeastOnceQOS() ProtoOpt {
 	return func(p *eventingv1alpha1.ProtocolSettings) {
 		p.Qos = func() *string {
 			qos := "AT-LEAST_ONCE"
@@ -213,7 +213,7 @@ func WithAtLeastOnceQOS() protoOpt {
 	}
 }
 
-func WithDefaultWebhookAuth() protoOpt {
+func WithDefaultWebhookAuth() ProtoOpt {
 	return func(p *eventingv1alpha1.ProtocolSettings) {
 		p.WebhookAuth = &eventingv1alpha1.WebhookAuth{
 			Type:         "oauth2",
