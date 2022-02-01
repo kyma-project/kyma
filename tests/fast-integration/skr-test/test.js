@@ -37,7 +37,6 @@ describe('Execute SKR test', function() {
       const objRuntimeStatus = JSON.parse(runtimeStatus);
       const reconciliationsOperations = await kcp.getReconciliationsOperations(objRuntimeStatus.data[0].shootName);
 
-      // kcp reconciliations info -i <scheduling-id> -o json
       const objReconciliationsOperations = JSON.parse(reconciliationsOperations);
       console.log(`\nNumber of operations: ${objReconciliationsOperations.length}`);
 
@@ -47,6 +46,7 @@ describe('Execute SKR test', function() {
 
       let i;
       for (i of lastObjReconciliationsOperations) {
+        // kcp reconciliations info -i <scheduling-id> -o json
         const getReconciliationsInfo = await kcp.getReconciliationsInfo(i.schedulingID);
         console.log(`\nReconciliation info for operation ${i}: ${getReconciliationsInfo}`);
       }
