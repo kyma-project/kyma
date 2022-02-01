@@ -6,7 +6,6 @@ import (
 
 	"github.com/pkg/errors"
 	corev1 "k8s.io/api/core/v1"
-	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/kyma-project/kyma/components/function-controller/internal/git"
@@ -18,20 +17,6 @@ func (r *FunctionReconciler) syncRevision(instance *serverlessv1alpha1.Function,
 		return r.gitOperator.LastCommit(options)
 	}
 	return "", nil
-}
-
-func NextRequeue(err error) (res ctrl.Result, errMsg string) {
-	if git.IsNotRecoverableError(err) {
-		return ctrl.Result{Requeue: false}, fmt.Sprintf("Stop reconciliation, reason: %s", err.Error())
-	}
-
-	errMsg = fmt.Sprintf("Sources update failed, reason: %v", err)
-	if git.IsAuthErr(err) {
-		errMsg = "Authorization to git server failed"
-	}
-
-	// use exponential delay
-	return ctrl.Result{Requeue: true}, errMsg
 }
 
 func (r *FunctionReconciler) readGITOptions(ctx context.Context, instance *serverlessv1alpha1.Function) (git.Options, error) {
