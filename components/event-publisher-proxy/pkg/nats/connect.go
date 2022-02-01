@@ -27,17 +27,43 @@ func WithBackendConnectionRetries(n int) BackendConnectionOpt {
 	}
 }
 
-// NewBackendConnection returns a new NewNatsConnection instance with the given NATS connection data.
-// TODO: make use of option pattern here
-func NewBackendConnection(url string, retry bool, reconnects int, wait time.Duration) *BackendConnection {
-	return &BackendConnection{
-		connectionData: connectionData{
-			url:        url,
-			retry:      retry,
-			reconnects: reconnects,
-			wait:       wait,
-		},
+func WithBackendConnectionURL(url string) BackendConnectionOpt {
+	return func(bc *BackendConnection) {
+		bc.connectionData.url = url
 	}
+}
+
+func WithBackendConnectionRetry(retry bool) BackendConnectionOpt {
+	return func(bc *BackendConnection) {
+		bc.connectionData.retry = retry
+	}
+}
+
+func WithBackendConnectionReconnects(reconnects int) BackendConnectionOpt {
+	return func(bc *BackendConnection) {
+		bc.connectionData.reconnects = reconnects
+	}
+}
+
+func WithBackendConnectionWait(wait time.Duration) BackendConnectionOpt {
+	return func(bc *BackendConnection) {
+		bc.connectionData.wait = wait
+	}
+}
+
+// NewBackendConnection returns a new new Nats connection instance with the given BackendConnectionOpt
+func NewBackendConnection(opts ...*BackendConnectionOpt) *BackendConnection {
+	connData := connectionData{}
+	bc := &BackendConnection{
+		connectionData: connData,
+	}
+
+	// apply options
+	for _, opt := range opts {
+		opt(bc)
+	}
+
+	return bc
 }
 
 // Connect returns a NATS connection that is ready for use, or an error if connection to the NATS server failed.

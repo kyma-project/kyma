@@ -70,7 +70,12 @@ func (test *Test) setupResources(t *testing.T, subscription *eventingv1alpha1.Su
 	assert.NotNil(t, messageReceiver)
 
 	// connect to nats
-	bc := pkgnats.NewBackendConnection(test.natsURL, true, 3, time.Second)
+	bc := pkgnats.NewBackendConnection(
+		pkgnats.WithBackendConnectionURL(test.natsURL),
+		pkgnats.WithBackendConnectionRetries(true),
+		pkgnats.WithBackendConnectionReconnects(3),
+		pkgnats.WithBackendConnectionWait(time.Second),
+	)
 	err := bc.Connect()
 	assert.Nil(t, err)
 	assert.NotNil(t, bc.Connection)
@@ -156,7 +161,12 @@ func TestNatsHandlerForCloudEvents(t *testing.T) {
 		eventTypeToSubscribe := subscription.Spec.Filter.Filters[0].EventType.Value
 
 		// connect to nats
-		bc := pkgnats.NewBackendConnection(test.natsURL, true, 3, time.Second)
+		bc := pkgnats.NewBackendConnection(
+			pkgnats.WithBackendConnectionURL(test.natsURL),
+			pkgnats.WithBackendConnectionRetries(true),
+			pkgnats.WithBackendConnectionReconnects(3),
+			pkgnats.WithBackendConnectionWait(time.Second),
+		)
 		err := bc.Connect()
 		assert.Nil(t, err)
 		assert.NotNil(t, bc.Connection)
@@ -208,7 +218,12 @@ func TestNatsHandlerForLegacyEvents(t *testing.T) {
 		eventTypeToSubscribe := subscription.Spec.Filter.Filters[0].EventType.Value
 
 		// connect to nats
-		bc := pkgnats.NewBackendConnection(test.natsURL, true, 3, time.Second)
+		bc := pkgnats.NewBackendConnection(
+			pkgnats.WithBackendConnectionURL(test.natsURL),
+			pkgnats.WithBackendConnectionRetries(true),
+			pkgnats.WithBackendConnectionReconnects(3),
+			pkgnats.WithBackendConnectionWait(time.Second),
+		)
 		err := bc.Connect()
 		assert.Nil(t, err)
 		assert.NotNil(t, bc.Connection)
