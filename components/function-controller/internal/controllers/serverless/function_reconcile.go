@@ -185,7 +185,6 @@ func (r *FunctionReconciler) Reconcile(request ctrl.Request) (ctrl.Result, error
 	revision, err := r.syncRevision(instance, gitOptions)
 	if err != nil {
 		log.Error(err, "Syncing git revision failed")
-		// result, errMsg := NextRequeue(err)
 		if updateErr := r.updateStatusWithoutRepository(ctx, instance, serverlessv1alpha1.Condition{
 			Type:               serverlessv1alpha1.ConditionConfigurationReady,
 			Status:             corev1.ConditionFalse,
