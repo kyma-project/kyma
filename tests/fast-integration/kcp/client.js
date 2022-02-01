@@ -171,7 +171,7 @@ class KCPWrapper {
   async getReconciliationsOperations(shootName) {
     await this.login();
     const reconciliationsOperations = await this.reconciliations({parameter: 'operations',
-      shootName: shootName, ops: true});
+      shootName: shootName});
     return JSON.stringify(reconciliationsOperations, null, '\t');
   }
 
