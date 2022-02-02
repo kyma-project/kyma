@@ -850,7 +850,6 @@ func startReconciler(eventTypePrefix string, natsURL string) context.CancelFunc 
 		k8sManager.GetEventRecorderFor("eventing-controller-nats"),
 		envConf,
 		defaultSubsConfig,
-		opts...,
 	)
 
 	err = reconciler.SetupUnmanaged(k8sManager)
@@ -868,11 +867,6 @@ func startReconciler(eventTypePrefix string, natsURL string) context.CancelFunc 
 	Expect(k8sClient).ToNot(BeNil())
 
 	return cancel
-}
-
-// withDefaultValidator is a ReconcilerOpt to create a reconciler with the default sink validator.
-func withDefaultValidator(reconciler *Reconciler) {
-	reconciler.sinkValidator = defaultSinkValidator
 }
 
 // ensureSubscriberSvcCreated creates a Service in the k8s cluster. If a custom namespace is used, it will be created as well.
