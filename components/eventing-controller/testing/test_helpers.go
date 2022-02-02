@@ -276,7 +276,7 @@ func WithProtocolSettings(p *eventingv1alpha1.ProtocolSettings) SubscriptionOpt 
 }
 
 // WithWebhookForNATS is a SubscriptionOpt for creating a Subscription with a webhook set to the NATS protocol.
-func WithWebhookForNats() SubscriptionOpt {
+func WithWebhookForNATS() SubscriptionOpt {
 	return func(s *eventingv1alpha1.Subscription) {
 		s.Spec.Protocol = "NATS"
 		s.Spec.ProtocolSettings = &eventingv1alpha1.ProtocolSettings{}

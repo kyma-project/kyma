@@ -133,7 +133,7 @@ func (s Subscriber) CheckEvent(expectedData string) error {
 	return nil
 }
 
-// CheckRetries checks if the number of retries specified by expectedData was done and that the sent data on each retry was correctly received
+// CheckRetries checks if the number of retries specified by expectedData was done and that data sent on each retry was correctly received
 func (s Subscriber) CheckRetries(expectedNoOfRetries int, expectedData string) error {
 	var body []byte
 	delay := time.Second

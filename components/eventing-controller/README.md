@@ -161,7 +161,7 @@ kubebuilder init --domain kyma-project.io
 
 #### Start the controller locally
 
-> Currently running the controller in local developer mode is broken and needs adoptions of the latest changes.
+> Running the controller in local developer mode is currently broken and needs adoption of the latest changes.
 
 1. Setup port-forwarding for the in-cluster NATS instance:
 
@@ -191,6 +191,6 @@ export  NATS_URL=nats://localhost:4222
 make run
 ```
 
-> currently we support a buildtag `local` to avoid setting incorrect OwnerRefs in the PublisherProxy deployment when running the controller on a developer's machine. Essentially the PublisherProxy deployment remains in the cluster although the controller is removed due to no OwnerRef in the PublisherProxy deployment.  
+> we currently support a buildtag `local` to avoid setting incorrect OwnerRefs in the PublisherProxy deployment when running the controller on a developer's machine. Essentially the PublisherProxy deployment remains in the cluster although the controller is removed due to no OwnerRef in the PublisherProxy deployment.  
 
 > to run the controller via your IDE make sure to specify the buildtag `local`
