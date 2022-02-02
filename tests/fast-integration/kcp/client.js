@@ -279,6 +279,26 @@ class KCPWrapper {
     }
   }
 
+  async reconcileInformationLog(runtimeStatus) {
+    const objRuntimeStatus = JSON.parse(runtimeStatus);
+    // kcp reconciliations operations -c <shootName> -o json
+    const reconciliationsOperations = await kcp.getReconciliationsOperations(objRuntimeStatus.data[0].shootName);
+
+    const objReconciliationsOperations = JSON.parse(reconciliationsOperations);
+    console.log(`\nNumber of operations: ${objReconciliationsOperations.length}`);
+
+    // using only last three operations
+    const lastObjReconciliationsOperations = objReconciliationsOperations.slice(objReconciliationsOperations.length - 3,
+        objReconciliationsOperations.length);
+
+    for (const i of lastObjReconciliationsOperations) {
+      // kcp reconciliations info -i <scheduling-id> -o json
+      const getReconciliationsInfo = await kcp.getReconciliationsInfo(i.schedulingID);
+      console.log(`\nReconciliation info ${i.schedulingID}: ${getReconciliationsInfo}`);
+    }
+  }
+
+
   async exec(args) {
     try {
       const defaultArgs = [
