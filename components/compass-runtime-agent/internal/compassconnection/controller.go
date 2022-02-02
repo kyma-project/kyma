@@ -108,6 +108,7 @@ func (r *Reconciler) getConnection(ctx context.Context, log *logrus.Entry, reque
 	err := r.client.Get(ctx, request.NamespacedName, instance)
 	if err != nil {
 		if errors.IsNotFound(err) {
+			log.Info("Compass Connection deleted")
 			return nil, nil
 		}
 
@@ -119,7 +120,7 @@ func (r *Reconciler) getConnection(ctx context.Context, log *logrus.Entry, reque
 }
 
 func (r *Reconciler) initConnection(log *logrus.Entry) (*v1alpha1.CompassConnection, error) {
-	log.Info("Compass Connection deleted. Trying to initialize new connection...")
+	log.Info("Trying to initialize new connection...")
 
 	instance, err := r.supervisor.InitializeCompassConnection()
 	if err != nil {
@@ -161,7 +162,7 @@ func skipConnectionSync(connection *v1alpha1.CompassConnection, log *logrus.Entr
 	timeSinceLastConnAttempt := time.Now().Unix() - connection.Status.ConnectionStatus.LastSync.Unix()
 
 	if timeSinceLastConnAttempt < int64(minimalConfigSyncTime.Seconds()) {
-		log.Infof("Skipping connection initialization. Minimal resync time not passed. Last attempt: %v", connection.Status.ConnectionStatus.LastSync)
+		log.Infof("Skipping connection initialization/maintenance. Minimal resync time not passed. Last attempt: %v", connection.Status.ConnectionStatus.LastSync)
 		return true
 	}
 	return false
