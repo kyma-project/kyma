@@ -4,13 +4,11 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/config"
-	"github.com/kyma-project/kyma/components/eventing-controller/utils"
-
-	. "github.com/onsi/gomega"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-
 	kymalogger "github.com/kyma-project/kyma/common/logging/logger"
+	. "github.com/onsi/gomega"
+
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/config"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/types"
 
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 	"github.com/kyma-project/kyma/components/eventing-controller/logger"
@@ -44,7 +42,7 @@ func Test_SyncBEBSubscription(t *testing.T) {
 		Domain:                   "domain.com",
 		EventTypePrefix:          controllertesting.EventTypePrefix,
 		BEBNamespace:             "/default/ns",
-		Qos:                      "AT_LEAST_ONCE",
+		Qos:                      string(types.QosAtLeastOnce),
 	}
 
 	err = beb.Initialize(envConf)

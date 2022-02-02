@@ -1384,7 +1384,7 @@ var _ = BeforeSuite(func(done Done) {
 		Domain:                   domain,
 		EventTypePrefix:          reconcilertesting.EventTypePrefix,
 		BEBNamespace:             "/default/ns",
-		Qos:                      "AT_LEAST_ONCE",
+		Qos:                      string(bebtypes.QosAtLeastOnce),
 	}
 
 	credentials := &handlers.OAuth2ClientCredentials{
