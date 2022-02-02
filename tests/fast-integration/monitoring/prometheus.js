@@ -87,35 +87,35 @@ async function assertMetricsExist() {
   // Object with exporter, its corressponding metrics followed by labels and resources.
   const metricsList = [
     {'monitoring-kubelet': [
-      {'container_memory_usage_bytes': [['pod', 'container']]},
-      {'kubelet_pod_start_duration_seconds_count': [[]]}]},
+        {'container_memory_usage_bytes': [['pod', 'container']]},
+        {'kubelet_pod_start_duration_seconds_count': [[]]}]},
 
     {'monitoring-apiserver': [
-      {'apiserver_request_total': [[]]},
-      {'etcd_disk_backend_commit_duration_seconds_bucket': [[]]}]},
+        {'apiserver_request_duration_seconds_bucket': [[]]},
+        {'etcd_disk_backend_commit_duration_seconds_bucket': [[]]}]},
 
     {'monitoring-kube-state-metrics': [
-      {'kube_deployment_status_replicas_available': [['deployment', 'namespace']]},
-      {'kube_pod_container_resource_limits': [['pod', 'container'], ['memory']]}]},
+        {'kube_deployment_status_replicas_available': [['deployment', 'namespace']]},
+        {'kube_pod_container_resource_limits': [['pod', 'container'], ['memory']]}]},
 
     {'monitoring-node-exporter': [
-      {'process_cpu_seconds_total': [['pod']]},
-      {'go_memstats_heap_inuse_bytes': [['pod']]}]},
+        {'process_cpu_seconds_total': [['pod']]},
+        {'go_memstats_heap_inuse_bytes': [['pod']]}]},
 
     {'istio-component-monitor': [
-      {'istio_requests_total': [['destination_service', 'source_workload', 'response_code']]}]},
+        {'istio_requests_total': [['destination_service', 'source_workload', 'response_code']]}]},
 
     {'logging-fluent-bit': [
-      {'fluentbit_input_bytes_total': [['name']]},
-      {'fluentbit_input_records_total': [[]]}]},
+        {'fluentbit_input_bytes_total': [['name']]},
+        {'fluentbit_input_records_total': [[]]}]},
 
     {'logging-loki': [
-      {'log_messages_total': [['level']]},
-      {'loki_request_duration_seconds_bucket': [['route']]}]},
+        {'log_messages_total': [['level']]},
+        {'loki_request_duration_seconds_bucket': [['route']]}]},
 
     {'monitoring-grafana': [
-      {'grafana_stat_totals_dashboard': [[]]},
-      {'grafana_api_dataproxy_request_all_milliseconds_sum ': [['pod']]}]},
+        {'grafana_stat_totals_dashboard': [[]]},
+        {'grafana_api_dataproxy_request_all_milliseconds_sum ': [['pod']]}]},
 
   ];
 
@@ -168,12 +168,14 @@ function shouldIgnoreAlert(alert) {
     'Watchdog',
     // Scrape limits can be exceeded on long-running clusters and can be ignored
     'ScrapeLimitForTargetExceeded',
-    // Overcommitting resources is fine for e2e test scenarios
+    // Resource overcommitment is fine for e2e test scenarios
     'KubeCPUOvercommit',
     'KubeMemoryOvercommit',
+    // API server certificates are auto-renewed
+    'K8sCertificateExpirationNotice',
   ];
 
-  return alert.labels.severity == 'critical' || alertNamesToIgnore.includes(alert.labels.alertname);
+  return alert.labels.severity != 'critical' || alertNamesToIgnore.includes(alert.labels.alertname);
 }
 
 async function getServiceMonitors() {
@@ -264,12 +266,12 @@ async function getRegisteredPrometheusRuleNames() {
 
 function removeNamePrefixes(ruleNames) {
   return ruleNames.map((rule) =>
-    rule
-        .replace('monitoring-', '')
-        .replace('kyma-', '')
-        .replace('logging-', '')
-        .replace('fluent-bit-', '')
-        .replace('loki-', ''),
+      rule
+          .replace('monitoring-', '')
+          .replace('kyma-', '')
+          .replace('logging-', '')
+          .replace('fluent-bit-', '')
+          .replace('loki-', ''),
   );
 }
 
