@@ -40,7 +40,7 @@ type TestEnvironment struct {
 // - create and start NATS server
 // - establish a connection to the NATS server `TestEnvironment.backendConnection`
 // - create a sender to publish messsages to NATS
-func setupTestEnvironment(t *testing.T, connectionOpts ...pkgnats.BackendConnectionOpt) TestEnvironment {
+func setupTestEnvironment(t *testing.T, connectionOpts ...pkgnats.Opt) TestEnvironment {
 
 	// Create logger
 	logger := logrus.New()

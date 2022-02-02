@@ -23,28 +23,28 @@ type BackendConnection struct {
 	Connection     *nats.Conn
 }
 
-type BackendConnectionOpt func(*BackendConnection)
+type Opt func(*BackendConnection)
 
-func WithRetryOnFailedConnect(retryOnFailedConnect bool) BackendConnectionOpt {
+func WithRetryOnFailedConnect(retryOnFailedConnect bool) Opt {
 	return func(bc *BackendConnection) {
 		bc.connectionData.retryOnFailedConnect = retryOnFailedConnect
 	}
 }
 
-func WithMaxReconnects(maxReconnects int) BackendConnectionOpt {
+func WithMaxReconnects(maxReconnects int) Opt {
 	return func(bc *BackendConnection) {
 		bc.connectionData.maxReconnects = maxReconnects
 	}
 }
 
-func WithReconnectWait(reconnectWait time.Duration) BackendConnectionOpt {
+func WithReconnectWait(reconnectWait time.Duration) Opt {
 	return func(bc *BackendConnection) {
 		bc.connectionData.reconnectWait = reconnectWait
 	}
 }
 
 // NewBackendConnection returns a new new Nats connection instance with the given BackendConnectionOpt
-func NewBackendConnection(url string, opts ...BackendConnectionOpt) *BackendConnection {
+func NewBackendConnection(url string, opts ...Opt) *BackendConnection {
 
 	connData := connectionData{
 		url: url,
