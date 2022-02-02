@@ -134,16 +134,7 @@ func WithPath() APIRuleOption {
 
 func WithStatusReady() APIRuleOption {
 	return func(r *apigatewayv1alpha1.APIRule) {
-		statusOK := &apigatewayv1alpha1.APIRuleResourceStatus{
-			Code:        apigatewayv1alpha1.StatusOK,
-			Description: "",
-		}
-
-		r.Status = apigatewayv1alpha1.APIRuleStatus{
-			APIRuleStatus:        statusOK,
-			VirtualServiceStatus: statusOK,
-			AccessRuleStatus:     statusOK,
-		}
+		MarkReady(r)
 	}
 }
 
