@@ -9,10 +9,15 @@ const {
   sendEventAndCheckResponse,
   checkInClusterEventDelivery,
   waitForSubscriptionsTillReady,
+  checkInClusterEventTracing,
+  sendLegacyEventAndCheckTracing,
 } = require('../test/fixtures/commerce-mock');
 const {
   waitForNamespace,
 } = require('../utils');
+const {
+  eventingMonitoringTest,
+} = require('./metric-test');
 const {
   switchEventingBackend,
   printAllSubscriptions,
@@ -27,27 +32,31 @@ const {
   timeoutTime,
   slowTime,
   mockNamespace,
-  fatalErrCode,
+  isSKR,
 } = require('./utils');
-const {cleanupTestingResources} = require('./utils');
+const {prometheusPortForward} = require('../monitoring/client');
 
 describe('Eventing tests', function() {
   this.timeout(timeoutTime);
   this.slow(slowTime);
+  let cancelPrometheusPortForward = null;
 
   before('Ensure the test namespaces exists', async function() {
     await waitForNamespace(testNamespace);
     await waitForNamespace(mockNamespace);
+
+    // Set port-forward to prometheus pod
+    cancelPrometheusPortForward = prometheusPortForward();
   });
 
   // eventingE2ETestSuite - Runs Eventing end-to-end tests
   function eventingE2ETestSuite() {
-    it('In-cluster event should be delivered (structured and binary mode)', async function() {
-      await checkInClusterEventDelivery(testNamespace);
-    });
-
     it('lastorder function should be reachable through secured API Rule', async function() {
       await checkFunctionResponse(testNamespace);
+    });
+
+    it('In-cluster event should be delivered (structured and binary mode)', async function() {
+      await checkInClusterEventDelivery(testNamespace);
     });
 
     it('order.created.v1 event from CommerceMock should trigger the lastorder function', async function() {
@@ -55,13 +64,24 @@ describe('Eventing tests', function() {
     });
   }
 
-  // runs after each test in every block
-  afterEach(async function() {
-    // if there was a fatal error, perform the cleanup
-    if (this.currentTest.err && this.currentTest.err.code === fatalErrCode) {
-      await cleanupTestingResources();
+  // eventingTracingTestSuite - Runs Eventing tracing tests
+  function eventingTracingTestSuite() {
+    // Only run tracing tests on OSS
+    if (isSKR) {
+      console.log('Skipping eventing tracing tests on SKR...');
+      return;
     }
 
+    it('order.created.v1 event from CommerceMock should have correct tracing spans', async function() {
+      await sendLegacyEventAndCheckTracing(testNamespace, mockNamespace);
+    });
+    it('In-cluster event should have correct tracing spans', async function() {
+      await checkInClusterEventTracing(testNamespace);
+    });
+  }
+
+  // runs after each test in every block
+  afterEach(async function() {
     // if the test is failed, then printing some debug logs
     if (this.currentTest.state === 'failed' && DEBUG_MODE) {
       await printAllSubscriptions(testNamespace);
@@ -74,6 +94,10 @@ describe('Eventing tests', function() {
   context('with Nats backend', function() {
     // Running Eventing end-to-end tests
     eventingE2ETestSuite();
+    // Running Eventing tracing tests
+    eventingTracingTestSuite();
+    // Running Eventing Monitoring tests
+    eventingMonitoringTest('nats');
   });
 
   context('with BEB backend', function() {
@@ -89,6 +113,8 @@ describe('Eventing tests', function() {
 
     // Running Eventing end-to-end tests
     eventingE2ETestSuite();
+    // Running Eventing Monitoring tests
+    eventingMonitoringTest('beb');
   });
 
   context('with Nats backend switched back from BEB', function() {
@@ -99,5 +125,13 @@ describe('Eventing tests', function() {
 
     // Running Eventing end-to-end tests
     eventingE2ETestSuite();
+    // Running Eventing tracing tests
+    eventingTracingTestSuite();
+    // Running Eventing Monitoring tests
+    eventingMonitoringTest('nats');
+  });
+
+  after(async function() {
+    cancelPrometheusPortForward();
   });
 });

@@ -102,7 +102,7 @@ func newCloudeventClient(config env.NatsConfig) (cev2.Client, error) {
 }
 
 // SyncSubscription synchronizes the given Kyma subscription to NATS subscription.
-// note: the returned bool should be ignored now. It should act as a marker for changed subscription status.
+// The returned bool acts as a marker for changed subscription status.
 func (n *Nats) SyncSubscription(sub *eventingv1alpha1.Subscription, cleaner eventtype.Cleaner, _ ...interface{}) (bool, error) {
 	var filters []*eventingv1alpha1.BEBFilter
 	if sub.Spec.Filter != nil {
@@ -128,29 +128,25 @@ func (n *Nats) SyncSubscription(sub *eventingv1alpha1.Subscription, cleaner even
 		cleanSubjects = append(cleanSubjects, subject)
 	}
 
-	// if subscription filters are modified, then delete subscriptions from NATS
-	// so that new subscriptions are created accordingly
-	if len(sub.Status.CleanEventTypes) != len(cleanSubjects) ||
-		!reflect.DeepEqual(sub.Status.CleanEventTypes, cleanSubjects) {
+	subKeyPrefix := createKeyPrefix(sub)
 
-		if len(sub.Status.CleanEventTypes) != 0 {
-			// Only print log if it is not a new subscription
+	// check if there is any existing NATS subscription in global list
+	// which is not anymore in this subscription filters (i.e. cleanSubjects).
+	// e.g. when filters are modified.
+	for key, s := range n.subscriptions {
+		if isNatsSubAssociatedWithKymaSub(key, s, sub) && !utils.ContainsString(cleanSubjects, s.Subject) {
+			if err := n.deleteSubscriptionFromNATS(s, key, log); err != nil {
+				return false, err
+			}
 			log.Infow(
-				"deleting subscriptions on NATS if exists because subscription filters are modified",
-				"oldSubjects", sub.Status.CleanEventTypes,
-				"newSubjects", cleanSubjects,
+				"deleted NATS subscription because it was deleted from subscription filters",
+				"subscriptionKey", key,
+				"natsSubject", s.Subject,
 			)
-		}
-
-		// deleting subscriptions from NATS
-		if err := n.DeleteSubscription(sub); err != nil {
-			log.Errorw("delete subscriptions on nats failed", "error", err)
-			return false, err
 		}
 	}
 
 	// add/update sink info in map for callbacks
-	subKeyPrefix := createKeyPrefix(sub)
 	if sinkURL, ok := n.sinks.Load(subKeyPrefix); !ok || sinkURL != sub.Spec.Sink {
 		n.sinks.Store(subKeyPrefix, sub.Spec.Sink)
 	}
@@ -170,10 +166,10 @@ func (n *Nats) SyncSubscription(sub *eventingv1alpha1.Subscription, cleaner even
 			queueGroupName := createKeyPrefix(sub) + string(types.Separator) + subject
 			natsSubKey := createKey(sub, subject, i)
 
-			// check if the subscription already exists, and it is valid.
+			// check if the subscription already exists and if it is valid.
 			if existingNatsSub, ok := n.subscriptions[natsSubKey]; ok {
 				if existingNatsSub.Subject != subject {
-					if err := n.deleteSubFromNats(existingNatsSub, natsSubKey, log); err != nil {
+					if err := n.deleteSubscriptionFromNATS(existingNatsSub, natsSubKey, log); err != nil {
 						return false, err
 					}
 				} else if existingNatsSub.IsValid() {
@@ -182,30 +178,37 @@ func (n *Nats) SyncSubscription(sub *eventingv1alpha1.Subscription, cleaner even
 				}
 			}
 
-			// otherwise, create subscription on nats
+			// otherwise, create subscription on NATS
 			natsSub, err := n.connection.QueueSubscribe(subject, queueGroupName, callback)
 			if err != nil {
 				log.Errorw("create NATS subscription failed", "error", err)
 				return false, err
 			}
 
-			// save created nats subscription in storage
+			// save created NATS subscription in storage
 			n.subscriptions[natsSubKey] = natsSub
 		}
 	}
 
 	// Setting the clean event types
-	sub.Status.CleanEventTypes = cleanSubjects
-	sub.Status.Config = subscriptionConfig
+	statusUpdated := false
+	if !reflect.DeepEqual(sub.Status.CleanEventTypes, cleanSubjects) {
+		sub.Status.CleanEventTypes = cleanSubjects
+		statusUpdated = true
+	}
+	if !reflect.DeepEqual(sub.Status.Config, subscriptionConfig) {
+		sub.Status.Config = subscriptionConfig
+		statusUpdated = true
+	}
 
-	return false, nil
+	return statusUpdated, nil
 }
 
 // DeleteSubscription deletes all NATS subscriptions corresponding to a Kyma subscription
 func (n *Nats) DeleteSubscription(sub *eventingv1alpha1.Subscription) error {
 	subKeyPrefix := createKeyPrefix(sub)
 	for key, s := range n.subscriptions {
-		// Format logger
+		// format logger
 		log := n.namedLogger().With(
 			"kind", sub.GetObjectKind().GroupVersionKind().Kind,
 			"name", sub.GetName(),
@@ -215,11 +218,10 @@ func (n *Nats) DeleteSubscription(sub *eventingv1alpha1.Subscription) error {
 			"subject", s.Subject,
 		)
 
-		if strings.HasPrefix(key, subKeyPrefix) {
-			if err := n.deleteSubFromNats(s, key, log); err != nil {
+		if isNatsSubAssociatedWithKymaSub(key, s, sub) {
+			if err := n.deleteSubscriptionFromNATS(s, key, log); err != nil {
 				return err
 			}
-
 			// delete subscription sink info from storage
 			n.sinks.Delete(subKeyPrefix)
 		}
@@ -246,7 +248,7 @@ func (n *Nats) GetAllSubscriptions() map[string]*nats.Subscription {
 }
 
 // deleteSubFromNats deletes subscription from NATS and from in-memory db
-func (n *Nats) deleteSubFromNats(natsSub *nats.Subscription, subKey string, log *zap.SugaredLogger) error {
+func (n *Nats) deleteSubscriptionFromNATS(natsSub *nats.Subscription, subKey string, log *zap.SugaredLogger) error {
 	// Unsubscribe call to NATS is async hence checking the status of the connection is important
 	if n.connection.Status() != nats.CONNECTED {
 		if err := n.Initialize(env.Config{}); err != nil {
@@ -261,7 +263,7 @@ func (n *Nats) deleteSubFromNats(natsSub *nats.Subscription, subKey string, log 
 		}
 	}
 	delete(n.subscriptions, subKey)
-	log.Debugw("unsubscribe succeeded", "subscriptionKey", subKey)
+	log.Debugw("unsubscribe from NATS succeeded", "subscriptionKey", subKey)
 
 	return nil
 }
@@ -376,4 +378,9 @@ func createKymaSubscriptionNamespacedName(key string, sub *nats.Subscription) ty
 	nsn.Namespace = nnvalues[0]
 	nsn.Name = strings.TrimSuffix(strings.TrimSuffix(nnvalues[1], sub.Subject), ".")
 	return nsn
+}
+
+// isNatsSubAssociatedWithKymaSub checks if the NATS subscription is associated / related to Kyma subscription or not.
+func isNatsSubAssociatedWithKymaSub(natsSubKey string, natsSub *nats.Subscription, sub *eventingv1alpha1.Subscription) bool {
+	return createKeyPrefix(sub) == createKymaSubscriptionNamespacedName(natsSubKey, natsSub).String()
 }

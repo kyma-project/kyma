@@ -84,30 +84,39 @@ async function assertAllRulesAreHealthy() {
 }
 
 async function assertMetricsExist() {
-  await assertTimeSeriesExist('kube_deployment_status_replicas_available', [
-    'deployment',
-    'namespace',
-  ]);
-  await assertTimeSeriesExist('istio_requests_total', [
-    'destination_service',
-    'response_code',
-    'source_workload',
-  ]);
-  await assertTimeSeriesExist('container_memory_usage_bytes', [
-    'pod',
-    'container',
-  ]);
-  await assertTimeSeriesExist(
-      'kube_pod_container_resource_limits',
-      ['pod', 'container'],
-      'memory',
-  );
-  await assertTimeSeriesExist('container_cpu_usage_seconds_total', [
-    'container',
-    'pod',
-    'namespace',
-  ]);
-  await assertTimeSeriesExist('kube_service_labels', ['namespace']);
+  // Object with exporter, its corressponding metrics followed by labels and resources.
+  const metricsList = [
+    {'kubelet': [
+      {'container_memory_usage_bytes': [['pod', 'container']]},
+      {'kubelet_volume_stats_available_bytes': [[]]},
+      {'kubelet_pod_start_duration_seconds_count': [[]]}]},
+
+    {'api-server': [
+      {'apiserver_request_total': [[]]},
+      {'apiserver_request_duration_seconds_bucket': [[]]},
+      {'etcd_disk_backend_commit_duration_seconds_bucket': [[]]}]},
+
+    {'kube-state-metrics': [
+      {'kube_deployment_status_replicas_available': [['deployment', 'namespace']]},
+      {'kube_pod_info': [['pod']]},
+      {'kube_pod_container_resource_limits': [['pod', 'container'], ['memory']]}]},
+
+    {'node_exporter': [
+      {'process_open_fds': [[]]},
+      {'process_cpu_seconds_total': [['pod']]},
+      {'go_memstats_heap_inuse_bytes': [['pod']]}]},
+  ];
+
+  for (let index=0; index < metricsList.length; index++ ) {
+    for (const [exporter, object] of Object.entries(metricsList[index])) {
+      for (const [, obj] of Object.entries(object)) {
+        await assertTimeSeriesExist(exporter,
+            Object.keys(obj)[0],
+            obj[Object.keys(obj)[0]][0],
+            obj[Object.keys(obj)[0]][1]);
+      }
+    }
+  }
 }
 
 async function assertRulesAreRegistered() {
@@ -209,7 +218,7 @@ async function buildScrapePoolSet() {
   return scrapePools;
 }
 
-async function assertTimeSeriesExist(metric, labels, resource='') {
+async function assertTimeSeriesExist(exporter, metric, labels, resource='') {
   const resultlessQueries = [];
   let result = '';
   let query = '';
@@ -224,7 +233,7 @@ async function assertTimeSeriesExist(metric, labels, resource='') {
     }
 
     if (result.length == 0) {
-      resultlessQueries.push(query);
+      resultlessQueries.push(query.concat('metric from service monitor:monitoring-'.concat(exporter)));
     }
   }
   assert.isEmpty(resultlessQueries, `Following queries return no results: ${resultlessQueries.join(', ')}`);
