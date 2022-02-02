@@ -282,7 +282,7 @@ class KCPWrapper {
   async reconcileInformationLog(runtimeStatus) {
     const objRuntimeStatus = JSON.parse(runtimeStatus);
     // kcp reconciliations operations -c <shootName> -o json
-    const reconciliationsOperations = await kcp.getReconciliationsOperations(objRuntimeStatus.data[0].shootName);
+    const reconciliationsOperations = await this.getReconciliationsOperations(objRuntimeStatus.data[0].shootName);
 
     const objReconciliationsOperations = JSON.parse(reconciliationsOperations);
     console.log(`\nNumber of operations: ${objReconciliationsOperations.length}`);
@@ -293,8 +293,8 @@ class KCPWrapper {
 
     for (const i of lastObjReconciliationsOperations) {
       // kcp reconciliations info -i <scheduling-id> -o json
-      const getReconciliationsInfo = await kcp.getReconciliationsInfo(i.schedulingID);
-      console.log(`\nReconciliation info ${i.schedulingID}: ${getReconciliationsInfo}`);
+      const getReconciliationsInfo = await this.getReconciliationsInfo(i.schedulingID);
+      console.log(`\nReconciliation info: ${i.schedulingID}: ${getReconciliationsInfo}`);
     }
   }
 
