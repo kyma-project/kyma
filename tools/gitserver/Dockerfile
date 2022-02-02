@@ -1,4 +1,4 @@
-FROM alpine:3.12
+FROM alpine:3.15
 
 RUN apk add --no-cache git-daemon apache2 apache2-utils
 COPY ./etc/git.conf /etc/apache2/conf.d/git.conf
