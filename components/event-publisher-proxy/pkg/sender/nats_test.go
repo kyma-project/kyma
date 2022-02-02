@@ -54,10 +54,10 @@ func setupTestEnvironment(t *testing.T, connectionOpts ...pkgnats.BackendConnect
 
 	// connect to nats
 	bc := pkgnats.NewBackendConnection(
-		pkgnats.WithBackendConnectionURL(natsServer.ClientURL()),
-		pkgnats.WithBackendConnectionMaxReconnects(1),
-		pkgnats.WithBackendConnectionRetryOnFailedConnect(true),
-		pkgnats.WithBackendConnectionReconnectWait(time.Second),
+		pkgnats.WithURL(natsServer.ClientURL()),
+		pkgnats.WithMaxReconnects(1),
+		pkgnats.WithRetryOnFailedConnect(true),
+		pkgnats.WithReconnectWait(time.Second),
 	)
 	for _, opt := range connectionOpts {
 		opt(bc)
@@ -103,7 +103,7 @@ func TestSendCloudEventsToNats(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			testEnv := setupTestEnvironment(t, pkgnats.WithBackendConnectionMaxReconnects(tc.givenRetries))
+			testEnv := setupTestEnvironment(t, pkgnats.WithMaxReconnects(tc.givenRetries))
 
 			// subscribe to subject
 			subject := fmt.Sprintf(`"%s"`, testingutils.CloudEventData)

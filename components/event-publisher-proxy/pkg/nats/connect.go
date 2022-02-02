@@ -7,12 +7,15 @@ import (
 	"github.com/nats-io/nats.go"
 )
 
-// TODO: document me
 type connectionData struct {
-	url                  string
+	// url is URL of the NATS server.
+	url string
+	// retryOnFailedConnect reconnects if the conneciton cannot be established.
 	retryOnFailedConnect bool
-	maxReconnects        int
-	reconnectWait        time.Duration
+	// maxReconnects is used when retryOnFailedConnect is true. It sets the number of reconnect attempts. Negative means try indefinitely.
+	maxReconnects int
+	// reconnectWait is used when retryOnFailedConnect is true. It sets the time to wait until a reconnect is established.
+	reconnectWait time.Duration
 }
 
 type BackendConnection struct {
@@ -22,7 +25,7 @@ type BackendConnection struct {
 
 type BackendConnectionOpt func(*BackendConnection)
 
-func WithBackendConnectionURL(url string) BackendConnectionOpt {
+func WithURL(url string) BackendConnectionOpt {
 	return func(bc *BackendConnection) {
 		bc.connectionData.url = url
 	}
