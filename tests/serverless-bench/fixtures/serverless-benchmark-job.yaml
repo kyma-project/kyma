@@ -33,7 +33,7 @@ spec:
           value: "1m"
         - name: "SPAWN_RATE"
           value: "50"
-        image: eu.gcr.io/kyma-project/tpi/serverless-bench:20220128-762cb93c
+        image: eu.gcr.io/kyma-project/serverless-bench:PR-13236
         imagePullPolicy: Always
         name: serverless-benchmark
         resources: {}
