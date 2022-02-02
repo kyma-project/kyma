@@ -34,7 +34,7 @@ spec:
         image: {{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.central_application_connectivity_validator) }}
         imagePullPolicy: {{ .Values.deployment.image.pullPolicy }}
         args:
-          - "/centralapplicationconnectivityvalidator"
+          - "/app/centralapplicationconnectivityvalidator"
           - "--proxyPort={{ .Values.deployment.args.proxyPort }}"
           - "--externalAPIPort={{ .Values.deployment.args.externalAPIPort }}"
           - "--eventingPathPrefixV1=/%%APP_NAME%%/v1/events"

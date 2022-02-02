@@ -9,11 +9,11 @@ global:
   images:
     minio:
       name: "minio"
-      version: "RELEASE.2020-09-21T22-31-59Z-9397617c"
+      version: "RELEASE.2021-04-22T15-44-28Z-ef93efcf"
       directory: "tpi/minio"
     k8s_tools:
       name: "k8s-tools"
-      version: "20211022-85284bf9"
+      version: "20220127-ec72a890"
       directory: "tpi"
     rafter_controller_manager:
       name: "rafter-controller-manager"

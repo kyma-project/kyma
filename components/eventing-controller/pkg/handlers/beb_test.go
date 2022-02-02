@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/config"
+	"github.com/kyma-project/kyma/components/eventing-controller/utils"
 
 	. "github.com/onsi/gomega"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -54,8 +55,10 @@ func Test_SyncBEBSubscription(t *testing.T) {
 	subscription.Status.Emshash = 0
 	subscription.Status.Ev2hash = 0
 
-	apiRule := controllertesting.NewAPIRule(subscription, controllertesting.WithPath)
-	controllertesting.WithService("foo-host", "foo-svc", apiRule)
+	apiRule := controllertesting.NewAPIRule(subscription,
+		controllertesting.WithPath(),
+		controllertesting.WithService("foo-svc", "foo-host"),
+	)
 
 	// then
 	changed, err := beb.SyncSubscription(subscription, &Cleaner{}, apiRule)
@@ -78,18 +81,9 @@ func fixtureValidSubscription(name, namespace string) *eventingv1alpha1.Subscrip
 			ID:       "id",
 			Protocol: "BEB",
 			ProtocolSettings: &eventingv1alpha1.ProtocolSettings{
-				ContentMode: func() *string {
-					cm := eventingv1alpha1.ProtocolSettingsContentModeBinary
-					return &cm
-				}(),
-				ExemptHandshake: func() *bool {
-					eh := true
-					return &eh
-				}(),
-				Qos: func() *string {
-					qos := "AT-LEAST_ONCE"
-					return &qos
-				}(),
+				ContentMode:     utils.StringPtr(eventingv1alpha1.ProtocolSettingsContentModeBinary),
+				ExemptHandshake: utils.BoolPtr(true),
+				Qos:             utils.StringPtr("AT-LEAST_ONCE"),
 				WebhookAuth: &eventingv1alpha1.WebhookAuth{
 					Type:         "oauth2",
 					GrantType:    "client_credentials",

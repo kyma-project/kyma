@@ -112,7 +112,7 @@ To deploy Kyma with only specific components, run:
   ```yaml
 prerequisites:
   - name: "cluster-essentials"
-  - name: "istio-configuration"
+  - name: "istio"
     namespace: "istio-system"
   - name: "certificates"
     namespace: "istio-system"
@@ -130,10 +130,10 @@ components:
   kyma deploy --component {COMPONENT_NAME@NAMESPACE}
   ```
 
-  If you provide no Namespace, the default Namespace called `kyma-system` is used. For example, to install the `eventing` component in the default Namespace and the `istio-configuration` component in the `istio-system` Namespace, run:
+  If you provide no Namespace, the default Namespace called `kyma-system` is used. For example, to install the `eventing` component in the default Namespace and the `istio` component in the `istio-system` Namespace, run:
   
   ```bash
-  kyma deploy --component eventing --component istio-configuration@istio-system
+  kyma deploy --component eventing --component istio@istio-system
   ```
 
 >**TIP:** To see a complete list of all Kyma components go to the [`components.yaml`](https://github.com/kyma-project/kyma/blob/main/installation/resources/components.yaml) file.

@@ -108,15 +108,15 @@ global:
   images:
     jaeger_operator:
       name: "jaeger-operator"
-      version: "1.29.1-1cae1469"
+      version: "1.30.0-bc31ec4c"
       directory: "tpi"
     jaeger_all_in_one:
       name: "jaegertracing/all-in-one"
-      version: "1.29.0"
+      version: "1.30.0"
       directory: "external"
     oauth2_proxy:
       name: "oauth2-proxy"
-      version: "7.2.0-2696e5d5"
+      version: "7.2.1-334ca95f"
       directory: "tpi"
 virtualservice:
   enabled: true

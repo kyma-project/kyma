@@ -10,8 +10,7 @@ webhook:
         defaultPreset: "XS"
         runtimePresets: |-
           {
-            "python39":"M",
-            "python38":"M"
+            "python39":"M"
           }
   deployment:
     resources:

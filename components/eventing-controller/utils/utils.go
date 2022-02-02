@@ -61,6 +61,10 @@ func Int32Ptr(i int32) *int32 {
 	return &i
 }
 
+func StringPtr(s string) *string {
+	return &s
+}
+
 func BoolPtrEqual(b1, b2 *bool) bool {
 	if b1 == nil && b2 == nil {
 		return true
