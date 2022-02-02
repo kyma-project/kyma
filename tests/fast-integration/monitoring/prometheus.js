@@ -160,7 +160,7 @@ function shouldIgnoreAlert(alert) {
     'KubeCPUOvercommit',
     'KubeMemoryOvercommit',
     // API server certificates are auto-renewed
-    'K8sCertificateExpirationNotice'
+    'K8sCertificateExpirationNotice',
   ];
 
   return alert.labels.severity != 'critical' || alertNamesToIgnore.includes(alert.labels.alertname);
