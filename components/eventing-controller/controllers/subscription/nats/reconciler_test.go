@@ -81,9 +81,7 @@ func testNATSUnavailabilityReflectedInSubscriptionStatus(id int, eventTypePrefix
 			natsPort := natsPort + id
 			natsServer, natsURL := startNATS(natsPort)
 			defer reconcilertesting.ShutDownNATSServer(natsServer)
-			cancel = startReconciler(eventTypePrefix, natsURL,
-				withDefaultValidator,
-			)
+			cancel = startReconciler(eventTypePrefix, natsURL)
 			defer cancel()
 
 			// create subscriber svc
@@ -814,7 +812,7 @@ func startNATS(port int) (*natsserver.Server, string) {
 	return natsServer, clientURL
 }
 
-func startReconciler(eventTypePrefix string, natsURL string, opts ...ReconcilerOpt) context.CancelFunc {
+func startReconciler(eventTypePrefix string, natsURL string) context.CancelFunc {
 	ctx, cancel := context.WithCancel(context.Background())
 	logf.SetLogger(zap.New(zap.UseDevMode(true), zap.WriteTo(GinkgoWriter)))
 
