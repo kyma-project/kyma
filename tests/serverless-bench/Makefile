@@ -6,4 +6,4 @@ IMG_DOCKER_TAG = $(DOCKER_PUSH_REPOSITORY)$(DOCKER_PUSH_DIRECTORY)/$(APP_NAME):$
 
 # Use generic makefile
 COMMON_DIR = $(realpath $(shell pwd)/../..)/common/makefiles
-include $(COMMON_DIR)/generic-make-go.mk
+include $(COMMON_DIR)/docker.mk
