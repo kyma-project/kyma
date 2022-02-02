@@ -53,6 +53,15 @@ function publishCloudEvent(data) {
     });
 }
 
+function resolvedatatype(data){
+    switch(typeof(data)) {
+        case 'object':
+            return 'application/json'
+        case 'string':
+            return 'text/plain'
+    }
+}
+
 function buildResponseCloudEvent(req, id, type, data) {
     return {
         'type': type,
@@ -61,6 +70,7 @@ function buildResponseCloudEvent(req, id, type, data) {
         'specversion': req.get('ce-specversion'),
         'id': id,
         'data': data,
+        'datacontenttype': resolvedatatype(data),
     };
 }
 
