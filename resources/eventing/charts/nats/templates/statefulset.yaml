@@ -130,7 +130,7 @@ spec:
         - name: CLUSTER_ADVERTISE
           value: {{ include "nats.clusterAdvertise" . }}
 
-        {{- if .Values.nats.jetstream.enabled }}
+        {{- if .Values.global.features.enableJetStream }}
         {{- with .Values.nats.jetstream.encryption }}
         {{- with .secret }}
         - name: JS_KEY
