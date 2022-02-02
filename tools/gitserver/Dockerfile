@@ -1,6 +1,9 @@
-FROM alpine:3.15
+FROM alpine:3.16
 
 RUN apk add --no-cache git-daemon apache2 apache2-utils
+RUN apk upgrade --no-cache --repository=http://dl-cdn.alpinelinux.org/alpine/edge/community \
+    expat
+
 COPY ./etc/git.conf /etc/apache2/conf.d/git.conf
 COPY ./etc/httpd.conf /etc/apache2/httpd.conf
 RUN git config --system http.receivepack true &&\
