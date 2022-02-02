@@ -32,24 +32,7 @@ describe('Execute SKR test', function() {
 
       const runtimeStatus = await kcp.getRuntimeStatusOperations(this.options.instanceID);
       console.log(`\nRuntime status after provisioning: ${runtimeStatus}`);
-
-      // kcp reconciliations operations -c <shootName> -o json
-      const objRuntimeStatus = JSON.parse(runtimeStatus);
-      const reconciliationsOperations = await kcp.getReconciliationsOperations(objRuntimeStatus.data[0].shootName);
-
-      const objReconciliationsOperations = JSON.parse(reconciliationsOperations);
-      console.log(`\nNumber of operations: ${objReconciliationsOperations.length}`);
-
-      // getting last three operations
-      const lastObjReconciliationsOperations = objReconciliationsOperations.slice(objReconciliationsOperations.length-3,
-          objReconciliationsOperations.length);
-
-      for (const i of lastObjReconciliationsOperations) {
-        // kcp reconciliations info -i <scheduling-id> -o json
-        const getReconciliationsInfo = await kcp.getReconciliationsInfo(i.schedulingID);
-        console.log(`\nReconciliation info for operation ${i}: ${getReconciliationsInfo}`);
-      }
-
+      await kcp.reconcileInformationLog(runtimeStatus);
       this.shoot = skr.shoot;
       await addScenarioInCompass(director, this.options.scenarioName);
       await assignRuntimeToScenario(director, this.shoot.compassID, this.options.scenarioName);
