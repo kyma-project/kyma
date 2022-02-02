@@ -77,9 +77,9 @@ func (r *Reconciler) Reconcile(ctx context.Context, request reconcile.Request) (
 		return reconcile.Result{}, err
 	}
 
-	// Make sure the minimal time passed since last Compass Connection CRD modification.
+	// Make sure the minimal time passed since last Compass Connection synchronization.
 	// This allows to rate limit Compass calls
-	if skipCompassSync(connection, r.minimalConfigSyncTime) {
+	if skipConnectionSync(connection, log, r.minimalConfigSyncTime) {
 		return reconcile.Result{}, nil
 	}
 
@@ -93,6 +93,12 @@ func (r *Reconciler) Reconcile(ctx context.Context, request reconcile.Request) (
 	}
 
 	log.Info("Trying to connect to Compass and apply Runtime configuration...")
+
+	// Make sure the minimal time passed since last Application synchronization.
+	// This allows to rate limit Compass calls
+	if skipApplicationSync(connection, log, r.minimalConfigSyncTime) {
+		return reconcile.Result{}, nil
+	}
 
 	return reconcile.Result{}, r.synchronizeApplications(connection, log)
 }
@@ -125,9 +131,6 @@ func (r *Reconciler) initConnection(log *logrus.Entry) (*v1alpha1.CompassConnect
 	return instance, nil
 }
 
-func skipCompassSync(connection *v1alpha1.CompassConnection, minimalConfigSyncTime time.Duration) bool {
-	return skipConnectionSync(connection, minimalConfigSyncTime) || skipApplicationSync(connection, minimalConfigSyncTime)
-}
 func (r *Reconciler) synchronizeApplications(connection *v1alpha1.CompassConnection, log *logrus.Entry) error {
 	synchronized, err := r.supervisor.SynchronizeWithCompass(connection)
 	if err != nil {
@@ -151,20 +154,28 @@ func (r *Reconciler) ensureCertificateIsValid(connection *v1alpha1.CompassConnec
 	return nil
 }
 
-func skipConnectionSync(connection *v1alpha1.CompassConnection, minimalConfigSyncTime time.Duration) bool {
+func skipConnectionSync(connection *v1alpha1.CompassConnection, log *logrus.Entry, minimalConfigSyncTime time.Duration) bool {
 	if connection.Spec.ResyncNow || connection.Status.ConnectionStatus == nil {
 		return false
 	}
 	timeSinceLastConnAttempt := time.Now().Unix() - connection.Status.ConnectionStatus.LastSync.Unix()
 
-	return timeSinceLastConnAttempt < int64(minimalConfigSyncTime.Seconds())
+	if timeSinceLastConnAttempt < int64(minimalConfigSyncTime.Seconds()) {
+		log.Infof("Skipping connection initialization. Minimal resync time not passed. Last attempt: %v", connection.Status.ConnectionStatus.LastSync)
+		return true
+	}
+	return false
 }
 
-func skipApplicationSync(connection *v1alpha1.CompassConnection, minimalConfigSyncTime time.Duration) bool {
+func skipApplicationSync(connection *v1alpha1.CompassConnection, log *logrus.Entry, minimalConfigSyncTime time.Duration) bool {
 	if connection.Spec.ResyncNow || connection.Status.SynchronizationStatus == nil {
 		return false
 	}
 	timeSinceLastSyncAttempt := time.Now().Unix() - connection.Status.SynchronizationStatus.LastAttempt.Unix()
 
-	return timeSinceLastSyncAttempt < int64(minimalConfigSyncTime.Seconds())
+	if timeSinceLastSyncAttempt < int64(minimalConfigSyncTime.Seconds()) {
+		log.Infof("Skipping application synchronization. Minimal resync time not passed. Last attempt: %v", connection.Status.SynchronizationStatus.LastAttempt)
+		return true
+	}
+	return false
 }
