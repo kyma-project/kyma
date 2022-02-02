@@ -1,6 +1,8 @@
 package beb
 
 import (
+	"reflect"
+
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 )
 
@@ -39,12 +41,13 @@ func conditionEquals(existing, expected eventingv1alpha1.Condition) bool {
 	return true
 }
 
-// isAPIRuleStatusChanged returns true if any property in the subscription status related to the APIRule is changed, otherwise returns false.
-func isAPIRuleStatusChanged(existing, expected *eventingv1alpha1.Subscription) bool {
-	if existing.Status.APIRuleName != expected.Status.APIRuleName ||
-		existing.Status.ExternalSink != expected.Status.ExternalSink ||
-		existing.Status.GetConditionAPIRuleStatus() != expected.Status.GetConditionAPIRuleStatus() {
-		return true
-	}
-	return false
+func isSubscriptionStatusEqual(oldStatus, newStatus eventingv1alpha1.SubscriptionStatus) bool {
+	oldStatusWithoutCond := oldStatus.DeepCopy()
+	newStatusWithoutCond := newStatus.DeepCopy()
+
+	// remove conditions, so that we don't compare them
+	oldStatusWithoutCond.Conditions = []eventingv1alpha1.Condition{}
+	newStatusWithoutCond.Conditions = []eventingv1alpha1.Condition{}
+
+	return reflect.DeepEqual(oldStatusWithoutCond, newStatusWithoutCond) && conditionsEquals(oldStatus.Conditions, newStatus.Conditions)
 }
