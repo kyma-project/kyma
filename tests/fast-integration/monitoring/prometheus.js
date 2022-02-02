@@ -156,12 +156,14 @@ function shouldIgnoreAlert(alert) {
     'Watchdog',
     // Scrape limits can be exceeded on long-running clusters and can be ignored
     'ScrapeLimitForTargetExceeded',
-    // Overcommitting resources is fine for e2e test scenarios
+    // Resource overcommitment is fine for e2e test scenarios
     'KubeCPUOvercommit',
     'KubeMemoryOvercommit',
+    // API server certificates are auto-renewed
+    'K8sCertificateExpirationNotice'
   ];
 
-  return alert.labels.severity == 'critical' || alertNamesToIgnore.includes(alert.labels.alertname);
+  return alert.labels.severity != 'critical' || alertNamesToIgnore.includes(alert.labels.alertname);
 }
 
 async function getServiceMonitors() {
