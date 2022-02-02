@@ -18,7 +18,7 @@ func StartNatsServer() *server.Server {
 	return test.RunServer(&opts)
 }
 
-// SubscribeToEventOrFail subscribes to the given eventType using the given NATS connection.SubscribeToEventOrFail
+// SubscribeToEventOrFail subscribes to the given eventType using the given NATS connection.
 // The received messages are then validated using the given validator.
 func SubscribeToEventOrFail(t *testing.T, connection *nats.Conn, eventType string, validator nats.MsgHandler) {
 	if _, err := connection.Subscribe(eventType, validator); err != nil {
@@ -37,7 +37,7 @@ func ValidateNatsSubjectOrFail(t *testing.T, subject string, notify ...chan bool
 	}
 }
 
-// ValidateNatsMessageDataOrFail returns a function which can be used to validate a nats.Msg
+// ValidateNatsMessageDataOrFail returns a function which can be used to validate a nats.Msg.
 // It reads the data from nats.Msg and unmarshalls it as a CloudEvent.
 // The data section of the CloudEvent is then checked against the value provided in data.
 func ValidateNatsMessageDataOrFail(t *testing.T, data string, notify ...chan bool) nats.MsgHandler {

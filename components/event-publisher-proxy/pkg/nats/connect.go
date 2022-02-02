@@ -43,7 +43,7 @@ func WithReconnectWait(reconnectWait time.Duration) Opt {
 	}
 }
 
-// NewConnection returns a new new Nats connection instance with the given BackendConnectionOpt
+// NewConnection returns a new Nats connection instance with the given BackendConnectionOpt
 func NewConnection(url string, opts ...Opt) *Connection {
 
 	connData := connectionData{

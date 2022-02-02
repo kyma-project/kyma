@@ -29,7 +29,7 @@ type TestEnvironment struct {
 	// a NATS server
 	natsServer *server.Server
 	// a connection to the NATS server
-	backendConnection *pkgnats.Connection
+	natsConnection *pkgnats.Connection
 	// a sender for publishing events to the NATS server
 	natsMessageSender *NatsMessageSender
 }
@@ -74,7 +74,7 @@ func setupTestEnvironment(t *testing.T, connectionOpts ...pkgnats.Opt) TestEnvir
 	return TestEnvironment{
 		context:           ctx,
 		natsServer:        natsServer,
-		backendConnection: bc,
+		natsConnection:    bc,
 		natsMessageSender: sender,
 		logger:            logger,
 	}
@@ -89,10 +89,9 @@ func TestSendCloudEventsToNats(t *testing.T) {
 		wantReconnectAfterConnectionClosed bool
 	}{
 		{
-			name:                               "sending event to NATS works",
-			givenRetries:                       1,
-			wantHTTPStatusCode:                 http.StatusNoContent,
-			wantReconnectAfterConnectionClosed: false,
+			name:               "sending event to NATS works",
+			givenRetries:       1,
+			wantHTTPStatusCode: http.StatusNoContent,
 		},
 		{
 			name:                               "reconnect to NATS works then connection is closed",
@@ -107,7 +106,7 @@ func TestSendCloudEventsToNats(t *testing.T) {
 
 			// subscribe to subject
 			subject := fmt.Sprintf(`"%s"`, testingutils.CloudEventData)
-			done := subscribeToSubject(t, testEnv.backendConnection, subject)
+			done := subscribeToSubject(t, testEnv.natsConnection, subject)
 
 			// create cloudevent with default data (testing.CloudEventData)
 			ce := cloudevents.NewEvent()
@@ -124,12 +123,11 @@ func TestSendCloudEventsToNats(t *testing.T) {
 			if tc.wantReconnectAfterConnectionClosed {
 
 				// close connection
-				testEnv.backendConnection.Connection.Close()
+				testEnv.natsConnection.Connection.Close()
 				// ensure connection is closed
 				// this is important because we want to test that the connection gets re-established as soon as we send an event
-				assert.True(t, testEnv.backendConnection.Connection.IsClosed())
+				assert.True(t, testEnv.natsConnection.Connection.IsClosed())
 
-				// then & when
 				// ensure that the reconnect works by checking the HTTP status code
 				sendEventAndAssertHTTPStatusCode(testEnv.context, t, testEnv.natsMessageSender, &ce, tc.wantHTTPStatusCode)
 			}
@@ -137,7 +135,7 @@ func TestSendCloudEventsToNats(t *testing.T) {
 	}
 }
 
-// sendEventAndAssertHTTPStatusCode sends the event to NATS and ensures asserts that the expectedStatus is returned from NATS
+// sendEventAndAssertHTTPStatusCode sends the event to NATS and asserts that the expectedStatus is returned from NATS
 func sendEventAndAssertHTTPStatusCode(ctx context.Context, t *testing.T, sender *NatsMessageSender, event *event.Event, expectedStatus int) {
 	status, err := sender.Send(ctx, event)
 	assert.Nil(t, err)
