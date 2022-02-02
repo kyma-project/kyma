@@ -136,7 +136,7 @@ func (r *FunctionReconciler) updateCondition(conditions []serverlessv1alpha1.Con
 	conditionTypes[condition.Type] = nil
 
 	for _, value := range conditions {
-		if _, ok := conditionTypes[value.Type]; ok == false {
+		if _, ok := conditionTypes[value.Type]; !ok {
 			result = append(result, value)
 			conditionTypes[value.Type] = nil
 		}
