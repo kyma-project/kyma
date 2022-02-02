@@ -232,31 +232,7 @@ config:
       match: "*"
       key: "myKey"
       value: "myValue"
-    additional: |
-      [FILTER]
-          Name                  modify
-          Match                 *
-          Copy                  kubernetes kubernetes2
-    
-      [FILTER]
-          Name                   nest
-          Match                  *
-          Operation              lift
-          Nested_under           kubernetes
-          Prefix_with            kubernetes_
-
-      [FILTER]
-          Name                   nest
-          Match                  *
-          Operation              nest
-          Nest_under             kubernetes
-          Remove_prefix          kubernetes_
-          Wildcard               kubernetes_labels
-          
-      [FILTER]
-          Name                  modify
-          Match                 *
-          Remove_wildcard       kubernetes_
+    additional: ""
   outputs:
     loki:
       enabled: true
@@ -269,10 +245,10 @@ config:
       config:
         loglevel: warn
         lineFormat: json
-        removeKeys: stream,kubernetes2
+        removeKeys: kubernetes, stream
         labels: '{job="fluent-bit"}'
         labelMap:
-          kubernetes2:
+          kubernetes:
             namespace_name: namespace
             labels:
               app: app
