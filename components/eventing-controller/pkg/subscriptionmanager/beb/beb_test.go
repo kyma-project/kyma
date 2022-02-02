@@ -41,7 +41,7 @@ func TestCleanup(t *testing.T) {
 	// create an APIRule
 	apiRule := controllertesting.NewAPIRule(subscription,
 		controllertesting.WithPath(),
-		controllertesting.WithService("host-test", "svc-test"),
+		controllertesting.WithService("svc-test", "host-test"),
 	)
 	subscription.Status.APIRuleName = apiRule.Name
 

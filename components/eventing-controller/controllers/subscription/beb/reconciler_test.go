@@ -112,7 +112,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			subscription := reconcilertesting.NewSubscription(subscriptionName, namespaceName,
 				reconcilertesting.WithEmptyFilter(),
 				reconcilertesting.WithWebhookAuthForBEB(),
-				reconcilertesting.WithServiceAsSink(subscriberSvc),
+				reconcilertesting.WithSinkURLFromSvc(subscriberSvc),
 			)
 			ensureSubscriptionCreated(ctx, subscription)
 
@@ -300,7 +300,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			// Creating subscription with empty protocol, protocolsettings and dialect
 			givenSubscription := reconcilertesting.NewSubscription(subscriptionName, namespaceName,
 				reconcilertesting.WithOrderCreatedFilter(),
-				reconcilertesting.WithServiceAsSink(subscriberSvc),
+				reconcilertesting.WithSinkURLFromSvc(subscriberSvc),
 			)
 			ensureSubscriptionCreated(ctx, givenSubscription)
 
@@ -373,7 +373,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			subscription1 := reconcilertesting.NewSubscription(subscription1Name, namespaceName,
 				reconcilertesting.WithWebhookAuthForBEB(),
 				reconcilertesting.WithOrderCreatedFilter(),
-				reconcilertesting.WithServiceWithPathAsSink(subscriberSvc, subscription1Path),
+				reconcilertesting.WithSinkURLFromSvcAndPath(subscriberSvc, subscription1Path),
 			)
 			ensureSubscriptionCreated(ctx, subscription1)
 
@@ -382,7 +382,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			subscription2 := reconcilertesting.NewSubscription(subscription2Name, namespaceName,
 				reconcilertesting.WithWebhookAuthForBEB(),
 				reconcilertesting.WithOrderCreatedFilter(),
-				reconcilertesting.WithServiceWithPathAsSink(subscriberSvc, subscription2Path),
+				reconcilertesting.WithSinkURLFromSvcAndPath(subscriberSvc, subscription2Path),
 			)
 			ensureSubscriptionCreated(ctx, subscription2)
 
@@ -475,7 +475,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 				subscriptionName, namespaceName,
 				reconcilertesting.WithOrderCreatedFilter(),
 				reconcilertesting.WithWebhookAuthForBEB(),
-				reconcilertesting.WithServiceAsSink(subscriberSvc),
+				reconcilertesting.WithSinkURLFromSvc(subscriberSvc),
 			)
 			ensureSubscriptionCreated(ctx, givenSubscription)
 
@@ -571,7 +571,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			givenSubscription := reconcilertesting.NewSubscription(subscriptionName, namespaceName,
 				reconcilertesting.WithWebhookAuthForBEB(),
 				reconcilertesting.WithOrderCreatedFilter(),
-				reconcilertesting.WithServiceAsSink(serviceOld),
+				reconcilertesting.WithSinkURLFromSvc(serviceOld),
 			)
 
 			// create them and wait for Subscription to be ready
@@ -620,7 +620,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			subscription1 := reconcilertesting.NewSubscription(subscriptionName1, namespaceName,
 				reconcilertesting.WithWebhookAuthForBEB(),
 				reconcilertesting.WithOrderCreatedFilter(),
-				reconcilertesting.WithServiceWithPathAsSink(service1, "/path1"),
+				reconcilertesting.WithSinkURLFromSvcAndPath(service1, "/path1"),
 			)
 			readySubscription1, apiRule1 := createSubscriptionObjectsAndWaitForReadiness(ctx, subscription1, service1)
 
@@ -629,7 +629,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			subscription2 := reconcilertesting.NewSubscription(subscriptionName2, namespaceName,
 				reconcilertesting.WithWebhookAuthForBEB(),
 				reconcilertesting.WithOrderCreatedFilter(),
-				reconcilertesting.WithServiceWithPathAsSink(service2, "/path2"),
+				reconcilertesting.WithSinkURLFromSvcAndPath(service2, "/path2"),
 			)
 			readySubscription2, apiRule2 := createSubscriptionObjectsAndWaitForReadiness(ctx, subscription2, service2)
 
@@ -680,7 +680,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			givenSubscription := reconcilertesting.NewSubscription(subscriptionName, namespaceName,
 				reconcilertesting.WithWebhookAuthForBEB(),
 				reconcilertesting.WithOrderCreatedFilter(),
-				reconcilertesting.WithServiceAsSink(subscriberSvc),
+				reconcilertesting.WithSinkURLFromSvc(subscriberSvc),
 			)
 			ensureSubscriptionCreated(ctx, givenSubscription)
 
@@ -737,7 +737,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			givenSubscription := reconcilertesting.NewSubscription(subscriptionName, namespaceName,
 				reconcilertesting.WithWebhookAuthForBEB(),
 				reconcilertesting.WithOrderCreatedFilter(),
-				reconcilertesting.WithServiceAsSink(subscriberSvc),
+				reconcilertesting.WithSinkURLFromSvc(subscriberSvc),
 			)
 
 			isBEBSubscriptionCreated := false
@@ -816,7 +816,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			givenSubscription := reconcilertesting.NewSubscription(subscriptionName, namespaceName,
 				reconcilertesting.WithWebhookAuthForBEB(),
 				reconcilertesting.WithOrderCreatedFilter(),
-				reconcilertesting.WithServiceAsSink(subscriberSvc),
+				reconcilertesting.WithSinkURLFromSvc(subscriberSvc),
 			)
 
 			isBEBSubscriptionCreated := false
@@ -904,7 +904,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			givenSubscription := reconcilertesting.NewSubscription(subscriptionName, namespaceName,
 				reconcilertesting.WithWebhookAuthForBEB(),
 				reconcilertesting.WithOrderCreatedFilter(),
-				reconcilertesting.WithServiceAsSink(subscriberSvc),
+				reconcilertesting.WithSinkURLFromSvc(subscriberSvc),
 			)
 			ensureSubscriptionCreated(ctx, givenSubscription)
 
@@ -970,7 +970,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 					kymaSubscription = reconcilertesting.NewSubscription(kymaSubscriptionName, namespaceName,
 						reconcilertesting.WithWebhookAuthForBEB(),
 						reconcilertesting.WithOrderCreatedFilter(),
-						reconcilertesting.WithServiceAsSink(svc),
+						reconcilertesting.WithSinkURLFromSvc(svc),
 					)
 					ensureSubscriptionCreated(ctx, kymaSubscription)
 				})
@@ -1035,7 +1035,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			subscription := reconcilertesting.NewSubscription(subscriptionName, namespaceName,
 				reconcilertesting.WithOrderCreatedFilter(),
 				reconcilertesting.WithWebhookAuthForBEB(),
-				reconcilertesting.WithServiceAsSink(subscriberSvc),
+				reconcilertesting.WithSinkURLFromSvc(subscriberSvc),
 			)
 			ensureSubscriptionCreated(ctx, subscription)
 

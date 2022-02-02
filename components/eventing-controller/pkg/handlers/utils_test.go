@@ -14,6 +14,7 @@ import (
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/types"
 	eventingtesting "github.com/kyma-project/kyma/components/eventing-controller/testing"
+	"github.com/kyma-project/kyma/components/eventing-controller/utils"
 
 	reconcilertesting "github.com/kyma-project/kyma/components/eventing-controller/testing"
 )
@@ -37,10 +38,7 @@ func TestGetInternalView4Ev2(t *testing.T) {
 			eh := true
 			return &eh
 		}(),
-		Qos: func() *string {
-			qos := "AT_LEAST_ONCE"
-			return &qos
-		}(),
+		Qos: utils.StringPtr("AT_LEAST_ONCE"),
 	}
 
 	defaultWebhookAuth := &types.WebhookAuth{
@@ -96,7 +94,7 @@ func TestGetInternalView4Ev2(t *testing.T) {
 
 		apiRule := reconcilertesting.NewAPIRule(subscription,
 			reconcilertesting.WithPath(),
-			reconcilertesting.WithService(host, svcName),
+			reconcilertesting.WithService(svcName, host),
 		)
 
 		// then
@@ -124,7 +122,7 @@ func TestGetInternalView4Ev2(t *testing.T) {
 
 		apiRule := reconcilertesting.NewAPIRule(subscription,
 			reconcilertesting.WithPath(),
-			reconcilertesting.WithService(host, svcName),
+			reconcilertesting.WithService(svcName, host),
 		)
 
 		// then
@@ -166,7 +164,7 @@ func TestGetInternalView4Ev2(t *testing.T) {
 
 		apiRule := reconcilertesting.NewAPIRule(subWithGivenWebhookAuth,
 			reconcilertesting.WithPath(),
-			reconcilertesting.WithService(host, svcName),
+			reconcilertesting.WithService(svcName, host),
 		)
 
 		// then
@@ -193,7 +191,7 @@ func TestGetInternalView4Ev2(t *testing.T) {
 
 		apiRule = reconcilertesting.NewAPIRule(subscriptionWithoutWebhookAuth,
 			reconcilertesting.WithPath(),
-			reconcilertesting.WithService(host, svcName),
+			reconcilertesting.WithService(svcName, host),
 		)
 
 		// then

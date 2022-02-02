@@ -95,12 +95,12 @@ func NewAPIRule(subscription *eventingv1alpha1.Subscription, opts ...APIRuleOpti
 	return apiRule
 }
 
-func WithService(host, svcName string) APIRuleOption {
+func WithService(name, host string) APIRuleOption {
 	return func(r *apigatewayv1alpha1.APIRule) {
 		port := uint32(443)
 		isExternal := true
 		r.Spec.Service = &apigatewayv1alpha1.Service{
-			Name:       &svcName,
+			Name:       &name,
 			Port:       &port,
 			Host:       &host,
 			IsExternal: &isExternal,
@@ -179,10 +179,7 @@ func NewProtocolSettings(opts ...ProtoOpt) *eventingv1alpha1.ProtocolSettings {
 
 func WithBinaryContentMode() ProtoOpt {
 	return func(p *eventingv1alpha1.ProtocolSettings) {
-		p.ContentMode = func() *string {
-			contentMode := eventingv1alpha1.ProtocolSettingsContentModeBinary
-			return &contentMode
-		}()
+		p.ContentMode = utils.StringPtr(eventingv1alpha1.ProtocolSettingsContentModeBinary)
 	}
 }
 
@@ -197,10 +194,7 @@ func WithExemptHandshake() ProtoOpt {
 
 func WithAtLeastOnceQOS() ProtoOpt {
 	return func(p *eventingv1alpha1.ProtocolSettings) {
-		p.Qos = func() *string {
-			qos := "AT-LEAST_ONCE"
-			return &qos
-		}()
+		p.Qos = utils.StringPtr("AT-LEAST_ONCE")
 	}
 }
 
@@ -261,7 +255,7 @@ func WithWebhookAuthForBEB() SubscriptionOpt {
 				return &contentMode
 			}(),
 			ExemptHandshake: exemptHandshake(true),
-			Qos:             qos("AT_LEAST_ONCE"),
+			Qos:             utils.StringPtr("AT_LEAST_ONCE"),
 			WebhookAuth: &eventingv1alpha1.WebhookAuth{
 				Type:         "oauth2",
 				GrantType:    "client_credentials",
@@ -352,13 +346,13 @@ func WithValidSink(svcNamespace, svcName string) SubscriptionOpt {
 	return WithSinkURL(ValidSinkURL(svcNamespace, svcName))
 }
 
-// WithServiceWithPathAsSink sets a kubernetes service as the sink
-func WithServiceWithPathAsSink(svc *corev1.Service, path string) SubscriptionOpt {
+// WithSinkURLFromSvcAndPath sets a kubernetes service as the sink
+func WithSinkURLFromSvcAndPath(svc *corev1.Service, path string) SubscriptionOpt {
 	return WithSinkURL(fmt.Sprintf("%s%s", ValidSinkURL(svc.Namespace, svc.Name), path))
 }
 
-// WithServiceAsSink sets a kubernetes service as the sink
-func WithServiceAsSink(svc *corev1.Service) SubscriptionOpt {
+// WithSinkURLFromSvc sets a kubernetes service as the sink
+func WithSinkURLFromSvc(svc *corev1.Service) SubscriptionOpt {
 	return WithSinkURL(ValidSinkURL(svc.Namespace, svc.Name))
 }
 
@@ -378,11 +372,11 @@ func SetSink(svcNamespace, svcName string, subscription *eventingv1alpha1.Subscr
 	subscription.Spec.Sink = ValidSinkURL(svcNamespace, svcName)
 }
 
-func NewSubscriberSvc(name, ns string) *corev1.Service {
+func NewSubscriberSvc(name, namespace string) *corev1.Service {
 	return &corev1.Service{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      name,
-			Namespace: ns,
+			Namespace: namespace,
 		},
 		Spec: corev1.ServiceSpec{
 			Ports: []corev1.ServicePort{
@@ -401,7 +395,7 @@ func NewSubscriberSvc(name, ns string) *corev1.Service {
 	}
 }
 
-func NewBEBMessagingSecret(name, ns string) *corev1.Secret {
+func NewBEBMessagingSecret(name, namespace string) *corev1.Secret {
 	messagingValue := `
 				[{
 					"broker": {
@@ -444,7 +438,7 @@ func NewBEBMessagingSecret(name, ns string) *corev1.Secret {
 	return &corev1.Secret{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      name,
-			Namespace: ns,
+			Namespace: namespace,
 		},
 		StringData: map[string]string{
 			"messaging": messagingValue,
