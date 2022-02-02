@@ -54,7 +54,7 @@ func setupTestEnvironment(t *testing.T, connectionOpts ...pkgnats.BackendConnect
 
 	// connect to nats
 	bc := pkgnats.NewBackendConnection(
-		pkgnats.WithURL(natsServer.ClientURL()),
+		natsServer.ClientURL(),
 		pkgnats.WithMaxReconnects(1),
 		pkgnats.WithRetryOnFailedConnect(true),
 		pkgnats.WithReconnectWait(time.Second),

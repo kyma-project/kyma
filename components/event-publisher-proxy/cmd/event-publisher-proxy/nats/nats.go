@@ -63,7 +63,7 @@ func (c *Commander) Start() error {
 
 	// connect to nats
 	bc := pkgnats.NewBackendConnection(
-		pkgnats.WithURL(c.envCfg.URL),
+		c.envCfg.URL,
 		pkgnats.WithMaxReconnects(c.envCfg.MaxReconnects),
 		pkgnats.WithRetryOnFailedConnect(c.envCfg.RetryOnFailedConnect),
 		pkgnats.WithReconnectWait(c.envCfg.ReconnectWait),
