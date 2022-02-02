@@ -73,9 +73,8 @@ defaultRules:
   runbookUrl: "https://runbooks.prometheus-operator.dev/runbooks"
 
   ## Disabled PrometheusRule alerts
-  disabled: {}
-  # KubeAPIDown: true
-  # NodeRAIDDegraded: true
+  disabled:
+    CPUThrottlingHigh: true
 
 ## Deprecated way to provide custom recording or alerting rules to be deployed into the cluster.
 ##
