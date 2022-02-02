@@ -59,16 +59,14 @@ var (
 )
 
 const (
-	NATSFirstInstanceName = "eventing-nats-1" // NATSFirstInstanceName the name of first instance of NATS cluster
-	NATSNamespace         = "kyma-system"     // NATSNamespace namespace of NATS cluster
+	FirstInstanceName     = "eventing-nats-1" // FirstInstanceName the name of first instance of NATS cluster
+	Namespace             = "kyma-system"     // Namespace of NATS cluster
 	reconcilerName        = "nats-subscription-reconciler"
 	clusterLocalURLSuffix = "svc.cluster.local"
 )
 
-type ReconcilerOpt func(reconciler *Reconciler)
-
 func NewReconciler(ctx context.Context, client client.Client, applicationLister *application.Lister, cache cache.Cache,
-	logger *logger.Logger, recorder record.EventRecorder, cfg env.NatsConfig, subsCfg env.DefaultSubscriptionConfig, opts ...ReconcilerOpt) *Reconciler {
+	logger *logger.Logger, recorder record.EventRecorder, cfg env.NatsConfig, subsCfg env.DefaultSubscriptionConfig) *Reconciler {
 	reconciler := &Reconciler{
 		ctx:                 ctx,
 		Client:              client,
@@ -78,9 +76,6 @@ func NewReconciler(ctx context.Context, client client.Client, applicationLister 
 		eventTypeCleaner:    eventtype.NewCleaner(cfg.EventTypePrefix, applicationLister, logger),
 		sinkValidator:       defaultSinkValidator,
 		customEventsChannel: make(chan event.GenericEvent),
-	}
-	for _, o := range opts {
-		o(reconciler)
 	}
 	natsHandler := handlers.NewNats(cfg, subsCfg, reconciler.handleNatsConnClose, logger)
 	if err := natsHandler.Initialize(env.Config{}); err != nil {
@@ -93,8 +88,8 @@ func NewReconciler(ctx context.Context, client client.Client, applicationLister 
 }
 
 // handleNatsConnClose is called by NATS when the connection to the NATS server is closed. When it
-// is called, the reconnect attempts have exceeded the defined value.
-// It force reconciling the subscription to make sure the subscription is marked as not ready, until
+// is called, the reconnect-attempts have exceeded the defined value.
+// It forces reconciling the subscription to make sure the subscription is marked as not ready, until
 // it is possible to connect to the NATS server again.
 // See https://github.com/kyma-project/kyma/issues/12930
 func (r *Reconciler) handleNatsConnClose(_ *nats.Conn) {
@@ -131,13 +126,13 @@ func (r *Reconciler) SetupUnmanaged(mgr ctrl.Manager) error {
 
 	p := predicate.Funcs{
 		CreateFunc: func(e event.CreateEvent) bool {
-			if e.Object.GetName() == NATSFirstInstanceName && e.Object.GetNamespace() == NATSNamespace {
+			if e.Object.GetName() == FirstInstanceName && e.Object.GetNamespace() == Namespace {
 				return true
 			}
 			return false
 		},
 		DeleteFunc: func(e event.DeleteEvent) bool {
-			if e.Object.GetName() == NATSFirstInstanceName && e.Object.GetNamespace() == NATSNamespace {
+			if e.Object.GetName() == FirstInstanceName && e.Object.GetNamespace() == Namespace {
 				return true
 			}
 			return false
@@ -150,7 +145,7 @@ func (r *Reconciler) SetupUnmanaged(mgr ctrl.Manager) error {
 		},
 	}
 	if err := ctru.Watch(&source.Kind{Type: &corev1.Pod{}}, &handler.EnqueueRequestForObject{}, p); err != nil {
-		r.namedLogger().Errorw("setup watch for nats server failed", "pod", NATSFirstInstanceName, "error", err)
+		r.namedLogger().Errorw("setup watch for nats server failed", "pod", FirstInstanceName, "error", err)
 		return err
 	}
 
@@ -170,7 +165,7 @@ func (r *Reconciler) SetupUnmanaged(mgr ctrl.Manager) error {
 }
 
 func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
-	if req.Name == NATSFirstInstanceName && req.Namespace == NATSNamespace {
+	if req.Name == FirstInstanceName && req.Namespace == Namespace {
 		r.namedLogger().Debugw("received watch request", "namespace", req.Namespace, "name", req.Name)
 		return r.syncInvalidSubscriptions(ctx)
 	}

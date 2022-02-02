@@ -157,7 +157,7 @@ func (m *BEBMock) Start() string {
 	return uri
 }
 
-// BEBAuthResponseSuccess writes a oauth2 authentication response to the writer for the happy-path.
+// BEBAuthResponseSuccess writes an oauth2 authentication response to the writer for the happy-path.
 func BEBAuthResponseSuccess(w http.ResponseWriter) {
 	token := oauth2.Token{
 		AccessToken:  "some-token",

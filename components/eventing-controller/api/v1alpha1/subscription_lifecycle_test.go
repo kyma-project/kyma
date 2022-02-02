@@ -22,7 +22,7 @@ func Test_InitializeConditions(t *testing.T) {
 		{
 			name: "Conditions partially initialized",
 			givenConditions: func() []Condition {
-				// on purpose we only set one condition
+				// on purpose, we only set one condition
 				return []Condition{
 					{
 						Type:               ConditionSubscribed,
@@ -45,7 +45,7 @@ func Test_InitializeConditions(t *testing.T) {
 			// then
 			s.InitializeConditions()
 
-			//when
+			// when
 			g.Expect(s.Conditions).To(HaveLen(len(wantConditionTypes)))
 			foundConditionTypes := make([]ConditionType, 0)
 			for _, condition := range s.Conditions {

@@ -98,8 +98,9 @@ func NewReconciler(ctx context.Context, client client.Client, applicationLister 
 // +kubebuilder:rbac:groups=gateway.kyma-project.io,resources=apirules,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:printcolumn:name="Ready",type=bool,JSONPath=`.status.Ready`
 
-// TODO: Optimize number of reconciliation calls in eventing-controller #9766: https://github.com/kyma-project/kyma/issues/9766
+// Reconcile sets up
 func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
+	// TODO: Optimize number of reconciliation calls in eventing-controller #9766: https://github.com/kyma-project/kyma/issues/9766
 	actualSubscription := &eventingv1alpha1.Subscription{}
 
 	result := ctrl.Result{}
@@ -623,7 +624,7 @@ func (r *Reconciler) getAPIRulesForASvc(ctx context.Context, labels map[string]s
 }
 
 func (r *Reconciler) filterAPIRulesOnPort(existingAPIRules []apigatewayv1alpha1.APIRule, port uint32) *apigatewayv1alpha1.APIRule {
-	// Assumption: there will be one APIRule for an svc with the labels injected by the controller hence trusting the first match
+	// Assumption: there will be one APIRule for a svc with the labels injected by the controller hence trusting the first match
 	for _, apiRule := range existingAPIRules {
 		if *apiRule.Spec.Service.Port == port {
 			return &apiRule
@@ -714,7 +715,7 @@ func (r *Reconciler) updateCondition(ctx context.Context, subscription *eventing
 	return nil
 }
 
-// replaceStatusCondition replaces the given condition on the subscription. Also it sets the readiness in the status.
+// replaceStatusCondition replaces the given condition on the subscription. It also sets the readiness in the status.
 // So make sure you always use this method then changing a condition
 func (r *Reconciler) replaceStatusCondition(subscription *eventingv1alpha1.Subscription, condition eventingv1alpha1.Condition) bool {
 	// the subscription is ready if all conditions are fulfilled
