@@ -18,38 +18,38 @@ type connectionData struct {
 	reconnectWait time.Duration
 }
 
-type BackendConnection struct {
+type Connection struct {
 	connectionData connectionData
 	Connection     *nats.Conn
 }
 
-type Opt func(*BackendConnection)
+type Opt func(*Connection)
 
 func WithRetryOnFailedConnect(retryOnFailedConnect bool) Opt {
-	return func(bc *BackendConnection) {
+	return func(bc *Connection) {
 		bc.connectionData.retryOnFailedConnect = retryOnFailedConnect
 	}
 }
 
 func WithMaxReconnects(maxReconnects int) Opt {
-	return func(bc *BackendConnection) {
+	return func(bc *Connection) {
 		bc.connectionData.maxReconnects = maxReconnects
 	}
 }
 
 func WithReconnectWait(reconnectWait time.Duration) Opt {
-	return func(bc *BackendConnection) {
+	return func(bc *Connection) {
 		bc.connectionData.reconnectWait = reconnectWait
 	}
 }
 
-// NewBackendConnection returns a new new Nats connection instance with the given BackendConnectionOpt
-func NewBackendConnection(url string, opts ...Opt) *BackendConnection {
+// NewConnection returns a new new Nats connection instance with the given BackendConnectionOpt
+func NewConnection(url string, opts ...Opt) *Connection {
 
 	connData := connectionData{
 		url: url,
 	}
-	bc := &BackendConnection{
+	bc := &Connection{
 		connectionData: connData,
 	}
 
@@ -63,7 +63,7 @@ func NewBackendConnection(url string, opts ...Opt) *BackendConnection {
 
 // Connect returns a NATS connection that is ready for use, or an error if connection to the NATS server failed.
 // It uses the nats.Connect function which is thread-safe.
-func (bc *BackendConnection) Connect() error {
+func (bc *Connection) Connect() error {
 
 	connection, err := nats.Connect(bc.connectionData.url, nats.RetryOnFailedConnect(bc.connectionData.retryOnFailedConnect),
 		nats.MaxReconnects(bc.connectionData.maxReconnects), nats.ReconnectWait(bc.connectionData.reconnectWait))

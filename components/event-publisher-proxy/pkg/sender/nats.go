@@ -22,11 +22,11 @@ type GenericSender interface {
 type NatsMessageSender struct {
 	ctx               context.Context
 	logger            *logrus.Logger
-	backendConnection *pkgnats.BackendConnection
+	backendConnection *pkgnats.Connection
 }
 
 // NewNatsMessageSender returns a new NewNatsMessageSender instance with the given NATS connection.
-func NewNatsMessageSender(ctx context.Context, bc *pkgnats.BackendConnection, logger *logrus.Logger) *NatsMessageSender {
+func NewNatsMessageSender(ctx context.Context, bc *pkgnats.Connection, logger *logrus.Logger) *NatsMessageSender {
 	return &NatsMessageSender{ctx: ctx, backendConnection: bc, logger: logger}
 }
 

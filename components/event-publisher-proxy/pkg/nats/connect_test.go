@@ -14,7 +14,7 @@ func TestConnectToNats(t *testing.T) {
 	assert.NotEmpty(t, natsServer.ClientURL())
 	defer natsServer.Shutdown()
 
-	bc := NewBackendConnection(
+	bc := NewConnection(
 		natsServer.ClientURL(),
 		WithRetryOnFailedConnect(true),
 		WithMaxReconnects(1),

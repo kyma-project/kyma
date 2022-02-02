@@ -29,7 +29,7 @@ type TestEnvironment struct {
 	// a NATS server
 	natsServer *server.Server
 	// a connection to the NATS server
-	backendConnection *pkgnats.BackendConnection
+	backendConnection *pkgnats.Connection
 	// a sender for publishing events to the NATS server
 	natsMessageSender *NatsMessageSender
 }
@@ -53,7 +53,7 @@ func setupTestEnvironment(t *testing.T, connectionOpts ...pkgnats.Opt) TestEnvir
 	})
 
 	// connect to nats
-	bc := pkgnats.NewBackendConnection(
+	bc := pkgnats.NewConnection(
 		natsServer.ClientURL(),
 		pkgnats.WithMaxReconnects(1),
 		pkgnats.WithRetryOnFailedConnect(true),
@@ -146,7 +146,7 @@ func sendEventAndAssertHTTPStatusCode(ctx context.Context, t *testing.T, sender 
 
 // subscribeToSubject subscribes to the NATS subject using the connection.
 // It then ensures that the data is received on the subject and validated using the natsMessageDataValidator.
-func subscribeToSubject(t *testing.T, connection *pkgnats.BackendConnection, subject string) chan bool {
+func subscribeToSubject(t *testing.T, connection *pkgnats.Connection, subject string) chan bool {
 	done := make(chan bool, 1)
 	natsMessageDataValidator := testingutils.ValidateNatsMessageDataOrFail(t, subject, done)
 	testingutils.SubscribeToEventOrFail(t, connection.Connection, testingutils.CloudEventType, natsMessageDataValidator)

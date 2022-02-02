@@ -62,7 +62,7 @@ func (c *Commander) Start() error {
 	messageReceiver := receiver.NewHTTPMessageReceiver(c.envCfg.Port)
 
 	// connect to nats
-	bc := pkgnats.NewBackendConnection(
+	bc := pkgnats.NewConnection(
 		c.envCfg.URL,
 		pkgnats.WithMaxReconnects(c.envCfg.MaxReconnects),
 		pkgnats.WithRetryOnFailedConnect(c.envCfg.RetryOnFailedConnect),

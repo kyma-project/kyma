@@ -70,7 +70,7 @@ func (test *Test) setupResources(t *testing.T, subscription *eventingv1alpha1.Su
 	assert.NotNil(t, messageReceiver)
 
 	// connect to nats
-	bc := pkgnats.NewBackendConnection(
+	bc := pkgnats.NewConnection(
 		test.natsURL,
 		pkgnats.WithMaxReconnects(3),
 		pkgnats.WithRetryOnFailedConnect(true),
@@ -161,7 +161,7 @@ func TestNatsHandlerForCloudEvents(t *testing.T) {
 		eventTypeToSubscribe := subscription.Spec.Filter.Filters[0].EventType.Value
 
 		// connect to nats
-		bc := pkgnats.NewBackendConnection(
+		bc := pkgnats.NewConnection(
 			test.natsURL,
 			pkgnats.WithMaxReconnects(3),
 			pkgnats.WithRetryOnFailedConnect(true),
@@ -218,7 +218,7 @@ func TestNatsHandlerForLegacyEvents(t *testing.T) {
 		eventTypeToSubscribe := subscription.Spec.Filter.Filters[0].EventType.Value
 
 		// connect to nats
-		bc := pkgnats.NewBackendConnection(
+		bc := pkgnats.NewConnection(
 			test.natsURL,
 			pkgnats.WithMaxReconnects(3),
 			pkgnats.WithRetryOnFailedConnect(true),
