@@ -3,10 +3,11 @@ package compassconnection
 import (
 	"context"
 	"errors"
-	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	"sync"
 	"testing"
 	"time"
+
+	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/compass/cache"
 
