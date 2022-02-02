@@ -226,13 +226,37 @@ config:
       # Include Kubernetes resource labels in the extra metadata.
       labels: "On"
       # Include Kubernetes resource annotations in the extra metadata.
-      annotations: "Off"
+      annotations: "On"
     recordModifier:
       enabled: false
       match: "*"
       key: "myKey"
       value: "myValue"
-    additional: ""
+    additional: |
+      [FILTER]
+          Name                  modify
+          Match                 *
+          Copy                  kubernetes kubernetes2
+    
+      [FILTER]
+          Name                   nest
+          Match                  *
+          Operation              lift
+          Nested_under           kubernetes
+          Prefix_with            kubernetes_
+
+      [FILTER]
+          Name                   nest
+          Match                  *
+          Operation              nest
+          Nest_under             kubernetes
+          Remove_prefix          kubernetes_
+          Wildcard               kubernetes_labels
+          
+      [FILTER]
+          Name                  modify
+          Match                 *
+          Remove_wildcard       kubernetes_
   outputs:
     loki:
       enabled: true
@@ -245,10 +269,10 @@ config:
       config:
         loglevel: warn
         lineFormat: json
-        removeKeys: stream
+        removeKeys: stream,kubernetes2
         labels: '{job="fluent-bit"}'
         labelMap:
-          kubernetes:
+          kubernetes2:
             namespace_name: namespace
             labels:
               app: app
