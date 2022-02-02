@@ -357,9 +357,8 @@ func ValidSinkURL(namespace, svcName string) string {
 }
 
 // WithSinkURL is a SubscriptionOpt for creating a subscription with a specific sink.
-// This is useful for testing against invalid sinks.
-func WithSinkURL(invalidSink string) SubscriptionOpt {
-	return func(subscription *eventingv1alpha1.Subscription) { subscription.Spec.Sink = invalidSink }
+func WithSinkURL(sinkURL string) SubscriptionOpt {
+	return func(subscription *eventingv1alpha1.Subscription) { subscription.Spec.Sink = sinkURL }
 }
 
 // SetSink sets the subscription's sink to a valid sink created from svcNameSpace and svcName.
