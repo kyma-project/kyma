@@ -228,11 +228,6 @@ func exemptHandshake(val bool) *bool {
 	return &exemptHandshake
 }
 
-func qos(qos string) *string {
-	q := qos
-	return &q
-}
-
 func WithFakeSubscriptionStatus() SubscriptionOpt {
 	return func(s *eventingv1alpha1.Subscription) {
 		s.Status.Conditions = []eventingv1alpha1.Condition{
