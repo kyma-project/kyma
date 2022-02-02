@@ -1,7 +1,7 @@
 FROM alpine:3.15
 
-RUN apk add --no-cache git-daemon apache2 apache2-utils
-RUN apk upgrade --no-cache --repository=http://dl-cdn.alpinelinux.org/alpine/edge/community \
+RUN apk add --no-cache git-daemon apache2 apache2-utils && \
+    apk upgrade --no-cache --repository=http://dl-cdn.alpinelinux.org/alpine/edge/community \
     expat
 
 COPY ./etc/git.conf /etc/apache2/conf.d/git.conf
