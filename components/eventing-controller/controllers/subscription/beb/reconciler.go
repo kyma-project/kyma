@@ -111,7 +111,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 
 	// bind fields to logger
 	log := utils.LoggerWithSubscription(r.namedLogger(), subscription)
-	log.Debugw(fmt.Sprintf("received new reconcile request"))
+	log.Debugw("received new reconcile request")
 
 	// instantiate a return object
 	result := ctrl.Result{}
