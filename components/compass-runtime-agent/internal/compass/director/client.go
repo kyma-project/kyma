@@ -7,6 +7,7 @@ import (
 	kymamodel "github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/model"
 	gcli "github.com/machinebox/graphql"
 	"github.com/pkg/errors"
+	"time"
 )
 
 const (
@@ -42,7 +43,11 @@ type directorClient struct {
 }
 
 func (cc *directorClient) FetchConfiguration() ([]kymamodel.Application, graphql.Labels, error) {
-	response := ApplicationsAndLabelsForRuntimeResponse{}
+
+	time.Sleep(15 * time.Second)
+	return nil, nil, errors.Errorf("Unexpected Director timeout!!!!")
+
+	/*response := ApplicationsAndLabelsForRuntimeResponse{}
 
 	appsAndLabelsForRuntimeQuery := cc.queryProvider.applicationsAndLabelsForRuntimeQuery(cc.runtimeConfig.RuntimeId)
 	req := gcli.NewRequest(appsAndLabelsForRuntimeQuery)
@@ -55,7 +60,7 @@ func (cc *directorClient) FetchConfiguration() ([]kymamodel.Application, graphql
 
 	// Nil check is necessary due to GraphQL client not checking response code
 	if response.Runtime == nil || response.ApplicationsPage == nil {
-		return nil, nil, errors.Errorf("Failed fetch Applications or Labels for Runtime from Director: received nil response.")
+		errors.Errorf("Failed fetch Applications or Labels for Runtime from Director: received nil response.")
 	}
 
 	// TODO: After implementation of paging modify the fetching logic
@@ -65,7 +70,7 @@ func (cc *directorClient) FetchConfiguration() ([]kymamodel.Application, graphql
 		applications[i] = app.ToApplication()
 	}
 
-	return applications, response.Runtime.Labels, nil
+	return applications, response.Runtime.Labels, nil*/
 }
 
 func (cc *directorClient) SetURLsLabels(urlsCfg RuntimeURLsConfig, currentLabels graphql.Labels) (graphql.Labels, error) {
