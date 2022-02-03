@@ -11,7 +11,7 @@ The Kyma cluster load consists of Kubernetes [objects](https://kubernetes.io/doc
 Kyma relies on a managed Kubernetes cluster for periodic backups of Kubernetes objects to avoid any manual steps.
 
 >**CAUTION:** Automatic backup doesn't include Kubernetes volumes. Back up your volumes periodically either on demand, or set up a periodic job.
-
+test 
 For example, Gardener uses [etcd](https://etcd.io/) as the Kubernetes backing store for all cluster data. Gardener runs periodic jobs to take major and minor snapshots of the etcd database to include Kubernetes objects in the backup.
 
 The major snapshot that includes all resources is taken on a daily basis, while minor snapshots are taken every five minutes.
