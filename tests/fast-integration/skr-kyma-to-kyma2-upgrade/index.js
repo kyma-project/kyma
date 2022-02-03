@@ -102,6 +102,9 @@ describe('SKR-Upgrade-test', function() {
   process.env.KCP_MOTHERSHIP_API_URL = 'https://mothership-reconciler.cp.dev.kyma.cloud.sap/v1';
   process.env.KCP_KUBECONFIG_API_URL = 'https://kubeconfig-service.cp.dev.kyma.cloud.sap';
 
+  // skip cleanup for debugging
+  process.env.SKIP_CLEANUP = true;
+
   const kcp = new KCPWrapper(KCPConfig.fromEnv());
 
   const kymaVersion = getEnvOrThrow('KYMA_VERSION');
