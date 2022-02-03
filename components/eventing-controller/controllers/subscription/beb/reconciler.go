@@ -113,6 +113,10 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 	log := utils.LoggerWithSubscription(r.namedLogger(), subscription)
 	log.Infow(fmt.Sprintf("new reconcile request for: %s", subscription.Name))
 
+	//if subscription.Name == "test-subscription-1" && subscription.Spec.Sink == "https://webhook-2.test-0.svc.cluster.local/path1" {
+	//	log.Infow("received required sub recconile")
+	//}
+
 	// instantiate a return object
 	result := ctrl.Result{}
 
@@ -127,11 +131,16 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 			return ctrl.Result{}, err
 		}
 
+		// update condition in subscription status
+		condition := eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionSubscribed, eventingv1alpha1.ConditionReasonSubscriptionDeleted, corev1.ConditionFalse, "")
+		r.replaceStatusCondition(subscription, condition)
+
 		// remove finalizers from subscription
 		r.removeFinalizer(subscription)
-		// update the subscription object in k8s
-		if err := r.Update(ctx, subscription); err != nil {
-			return ctrl.Result{}, errors.Wrapf(err, "remove finalizer failed name: %s", Finalizer)
+
+		// update subscription CR with changes
+		if err := r.updateSubscription(ctx, subscription, log); err != nil {
+			return ctrl.Result{}, err
 		}
 
 		result.Requeue = false
@@ -141,6 +150,9 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 	// sync APIRule for the desired subscription
 	apiRule, err := r.syncAPIRule(ctx, subscription, log)
 	if !recerrors.IsSkippable(err) {
+		if err := r.updateSubscription(ctx, subscription, log); err != nil {
+			return ctrl.Result{}, err
+		}
 		return ctrl.Result{}, err
 	}
 
@@ -148,25 +160,60 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 	err = r.syncBEBSubscription(ctx, subscription, &result, log, apiRule)
 	if err != nil {
 		log.Errorw("sync BEB subscription failed", "error", err)
+		if err := r.updateSubscription(ctx, subscription, log); err != nil {
+			return ctrl.Result{}, err
+		}
 		return ctrl.Result{}, err
 	}
 
 	// sync Finalizers
 	// ensure the finalizer is set
 	if err := r.syncFinalizer(ctx, subscription, &result, log); err != nil {
+		if err := r.updateSubscription(ctx, subscription, log); err != nil {
+			return ctrl.Result{}, err
+		}
+
 		return ctrl.Result{}, errors.Wrap(err, "sync finalizer failed")
 	}
-	if result.Requeue {
-		return result, nil
-	}
 
-	// update the status if modified
-	// emit condition events if changed
-	if err := r.syncStatus(ctx, currentSubscription, subscription, log); err != nil {
+	// update the subscription if modified
+	if err := r.updateSubscription(ctx, subscription, log); err != nil {
 		return ctrl.Result{}, err
 	}
 
 	return result, nil
+}
+
+func (r *Reconciler) updateSubscription(ctx context.Context, subscription *eventingv1alpha1.Subscription, logger *zap.SugaredLogger) error {
+	namespacedName := &k8stypes.NamespacedName{
+		Name: subscription.Name,
+		Namespace: subscription.Namespace,
+	}
+
+	// fetch the latest subscription object
+	latestSubscription := &eventingv1alpha1.Subscription{}
+	if err := r.Client.Get(ctx, *namespacedName, latestSubscription); err != nil {
+		return err
+	}
+
+	// copy new changes to latest object
+	newSubscription := latestSubscription.DeepCopy()
+	newSubscription.Status = subscription.Status
+	newSubscription.ObjectMeta.Finalizers = subscription.ObjectMeta.Finalizers
+
+	// sync sub status
+	if err := r.syncStatus(ctx, latestSubscription, newSubscription, logger); err != nil {
+		return err
+	}
+
+	// update the subscription object in k8s
+	if !reflect.DeepEqual(latestSubscription.ObjectMeta.Finalizers, newSubscription.ObjectMeta.Finalizers) {
+		if err := r.Update(ctx, newSubscription); err != nil {
+			return errors.Wrapf(err, "remove finalizer failed name: %s", Finalizer)
+		}
+	}
+
+	return nil
 }
 
 func (r *Reconciler) syncStatus(ctx context.Context, oldSubscription, newSubscription *eventingv1alpha1.Subscription, logger *zap.SugaredLogger) error {
@@ -236,7 +283,7 @@ func (r *Reconciler) syncFinalizer(ctx context.Context, subscription *eventingv1
 	if err := r.addFinalizer(ctx, subscription, logger); err != nil {
 		return err
 	}
-	result.Requeue = true
+	//result.Requeue = true
 	return nil
 }
 
@@ -308,10 +355,6 @@ func (r *Reconciler) deleteBEBSubscription(ctx context.Context, subscription *ev
 	if err := r.Backend.DeleteSubscription(subscription); err != nil {
 		return err
 	}
-
-	// update condition in subscription status
-	condition := eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionSubscribed, eventingv1alpha1.ConditionReasonSubscriptionDeleted, corev1.ConditionFalse, "")
-	r.replaceStatusCondition(subscription, condition)
 
 	return nil
 }
@@ -712,9 +755,10 @@ func (r *Reconciler) syncInitialStatus(subscription *eventingv1alpha1.Subscripti
 		subscription.Status.Ready = currentReadyStatusForSubscription
 	}
 
+	// reset the status for apiRule
 	subscription.Status.APIRuleName = ""
 	subscription.Status.ExternalSink = ""
-	// subscription.Status.SetConditionAPIRuleStatus(false)
+	subscription.Status.SetConditionAPIRuleStatus(false)
 
 	return true
 }
@@ -844,9 +888,9 @@ func setSubscriptionStatusExternalSink(subscription *eventingv1alpha1.Subscripti
 
 func (r *Reconciler) addFinalizer(ctx context.Context, subscription *eventingv1alpha1.Subscription, logger *zap.SugaredLogger) error {
 	subscription.ObjectMeta.Finalizers = append(subscription.ObjectMeta.Finalizers, Finalizer)
-	if err := r.Update(ctx, subscription); err != nil {
-		return errors.Wrapf(err, "add finalizer failed name:%s", Finalizer)
-	}
+	//if err := r.Update(ctx, subscription); err != nil {
+	//	return errors.Wrapf(err, "add finalizer failed name:%s", Finalizer)
+	//}
 	logger.Debug("add finalizer")
 	return nil
 }
