@@ -122,7 +122,7 @@ kind: APIRule
 metadata:
   name: lastorder
 spec:
-  gateway: kyma-gateway.kyma-system.svc.cluster.local
+  gateway: kyma-system/kyma-gateway
   rules:
     - path: /function
       methods: ["GET", "POST"]
