@@ -54,7 +54,7 @@ function publishCloudEvent(data) {
 }
 
 function resolvedatatype(data){
-    switch(typeof(data)) {
+    switch(typeof data) {
         case 'object':
             return 'application/json'
         case 'string':
