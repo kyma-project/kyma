@@ -58,10 +58,8 @@ func setupTestEnvironment(t *testing.T, connectionOpts ...pkgnats.Opt) TestEnvir
 		pkgnats.WithMaxReconnects(1),
 		pkgnats.WithRetryOnFailedConnect(true),
 		pkgnats.WithReconnectWait(time.Second),
+		connectionsOpts...
 	)
-	for _, opt := range connectionOpts {
-		opt(bc)
-	}
 	err := bc.Connect()
 	assert.Nil(t, err)
 	assert.NotNil(t, bc.Connection)
