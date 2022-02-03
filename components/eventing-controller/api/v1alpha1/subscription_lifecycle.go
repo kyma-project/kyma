@@ -76,6 +76,15 @@ func (s SubscriptionStatus) IsReady() bool {
 	return true
 }
 
+func (s SubscriptionStatus) FindCondition(conditionType ConditionType) *Condition {
+	for _, condition := range s.Conditions {
+		if conditionType == condition.Type {
+			return &condition
+		}
+	}
+	return nil
+}
+
 // makeConditions creates an map of all conditions which the Subscription should have
 func makeConditions() []Condition {
 	conditions := []Condition{
@@ -133,7 +142,7 @@ func MakeCondition(conditionType ConditionType, reason ConditionReason, status c
 		Status:             status,
 		LastTransitionTime: metav1.Now(),
 		Reason:             reason,
-		Message: message,
+		Message:            message,
 	}
 }
 
