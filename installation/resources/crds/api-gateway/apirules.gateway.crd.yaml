@@ -4,7 +4,7 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.2.9
+    controller-gen.kubebuilder.io/version: v0.5.0
   creationTimestamp: null
   name: apirules.gateway.kyma-project.io
 spec:
@@ -55,6 +55,7 @@ spec:
                               description: Config configures the handler. Configuration
                                 keys vary per handler.
                               type: object
+                              x-kubernetes-preserve-unknown-fields: true
                             handler:
                               description: Name is the name of a handler
                               type: string
@@ -79,6 +80,7 @@ spec:
                               description: Config configures the handler. Configuration
                                 keys vary per handler.
                               type: object
+                              x-kubernetes-preserve-unknown-fields: true
                             handler:
                               description: Name is the name of a handler
                               type: string
