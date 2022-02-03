@@ -38,7 +38,7 @@ func TestGetInternalView4Ev2(t *testing.T) {
 			eh := true
 			return &eh
 		}(),
-		Qos: utils.StringPtr("AT_LEAST_ONCE"),
+		Qos: utils.StringPtr(string(types.QosAtLeastOnce)),
 	}
 
 	defaultWebhookAuth := &types.WebhookAuth{
