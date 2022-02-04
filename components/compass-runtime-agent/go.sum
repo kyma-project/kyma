@@ -496,6 +496,8 @@ github.com/kisielk/errcheck v1.1.0/go.mod h1:EZBBE59ingxPouuu3KfxchcWSUPOHkagtvW
 github.com/kisielk/errcheck v1.2.0/go.mod h1:/BMXB+zMLi60iA8Vv6Ksmxu/1UDYcXs4uQLJ+jE2L00=
 github.com/kisielk/errcheck v1.5.0/go.mod h1:pFxgyoBC7bSaBwPgfKdkLd5X25qrDl4LWUI2bnpBCr8=
 github.com/kisielk/gotool v1.0.0/go.mod h1:XhKaO+MFFWcvkIS/tQcRk01m1F5IRFswLeQ+oQHNcck=
+github.com/koala7659/kyma/components/application-operator v0.0.0-20211207101924-24d09934d9b6 h1:hSBv1FNfno6sUge0Z3H5BYzUFSH7kQrqiXZE/Idldrg=
+github.com/koala7659/kyma/components/application-operator v0.0.0-20211207101924-24d09934d9b6/go.mod h1:qlU3af/KKSIBe7e+WnrUXztlpj6KATCojtSeB6f2Ptk=
 github.com/kofalt/go-memoize v0.0.0-20200917044458-9b55a8d73e1c h1:iQm590VHHIeY1j9OFi2qBPgIeDqxz+PmHdDK/fUcN7s=
 github.com/kofalt/go-memoize v0.0.0-20200917044458-9b55a8d73e1c/go.mod h1:IvB2BCBCdgZFN9ZSgInoUlL1sAu0Xbvqfd7D+qqzTeo=
 github.com/konsorten/go-windows-terminal-sequences v1.0.1/go.mod h1:T0+1ngSBFLxvqU3pZ+m/2kptfBszLMUkC4ZK/EgS/cQ=
@@ -515,8 +517,6 @@ github.com/kyma-incubator/compass v0.0.0-20200813093525-96b1a733a11b h1:wZ0Y8PKn
 github.com/kyma-incubator/compass v0.0.0-20200813093525-96b1a733a11b/go.mod h1:QzxfnmINIGUzElyHs9KhdeMDsYRJTS8TxYtqMZo0YHc=
 github.com/kyma-incubator/compass/components/director v0.0.0-20200813093525-96b1a733a11b h1:TdXnmnG+AP4viO0ZLds6pCTmR4c6sfd39J90sM9kaiM=
 github.com/kyma-incubator/compass/components/director v0.0.0-20200813093525-96b1a733a11b/go.mod h1:mXQbZvsoQH+zJB8ywkFIqtG2Rp8Lt7bhwIzKPRRnlNA=
-github.com/kyma-project/kyma/components/application-operator v0.0.0-20211110074047-13002528fca2 h1:dDczAb/1RdSsh2jDa1GbeBBnLiBzXHpqsnSPTc6kDfA=
-github.com/kyma-project/kyma/components/application-operator v0.0.0-20211110074047-13002528fca2/go.mod h1:qlU3af/KKSIBe7e+WnrUXztlpj6KATCojtSeB6f2Ptk=
 github.com/kyma-project/rafter v0.0.0-20200626063334-5a8dd27d1976 h1:BLneCpabLbeoafr8GYrGMfilHNCoGagEFlu3s/ON4go=
 github.com/kyma-project/rafter v0.0.0-20200626063334-5a8dd27d1976/go.mod h1:ns2WlAMShwCU3zDQuM+kuGhpnSPmHQpqiWdOJ7s3CR0=
 github.com/lann/builder v0.0.0-20180802200727-47ae307949d0/go.mod h1:dXGbAdH5GtBTC4WfIxhKZfyBF/HBFgRZSWwZ9g/He9o=

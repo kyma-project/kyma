@@ -24,6 +24,7 @@ type Config struct {
 	SkipCompassTLSVerify         bool          `envconfig:"default=false"`
 	GatewayPort                  int           `envconfig:"default=8080"`
 	UploadServiceUrl             string        `envconfig:"default=http://rafter-upload-service.kyma-system.svc.cluster.local:80"`
+	SkipAppsTLSVerify            bool          `envconfig:"default=false"`
 	CentralGatewayServiceUrl     string        `envconfig:"default=http://central-application-gateway.kyma-system.svc.cluster.local:8082"`
 	QueryLogging                 bool          `envconfig:"default=false"`
 	DirectorProxy                director.ProxyConfig
@@ -40,6 +41,7 @@ func (o *Config) String() string {
 		"ControllerSyncPeriod=%s, MinimalCompassSyncTime=%s, "+
 		"CertValidityRenewalThreshold=%f, ClusterCertificatesSecret=%s, CaCertificatesSecret=%s, "+
 		"SkipCompassTLSVerify=%v, GatewayPort=%d, UploadServiceUrl=%s, "+
+		"SkipAppTLSVerify=%v, "+
 		"QueryLogging=%v, MetricsLoggingTimeInterval=%s, "+
 		"RuntimeEventsURL=%s, RuntimeConsoleURL=%s"+
 		"DirectorProxyPort=%v,  DirectorProxyInsecureSkipVerify=%v, HealthPort=%s, IntegrationNamespace=%s, CaCertSecretToMigrate=%s, caCertificateSecretKeysToMigrate=%s"+
@@ -48,6 +50,7 @@ func (o *Config) String() string {
 		o.ControllerSyncPeriod.String(), o.MinimalCompassSyncTime.String(),
 		o.CertValidityRenewalThreshold, o.ClusterCertificatesSecret, o.CaCertificatesSecret,
 		o.SkipCompassTLSVerify, o.GatewayPort, o.UploadServiceUrl,
+		o.SkipAppsTLSVerify,
 		o.QueryLogging, o.MetricsLoggingTimeInterval,
 		o.Runtime.EventsURL, o.Runtime.ConsoleURL,
 		o.DirectorProxy.Port, o.DirectorProxy.InsecureSkipVerify, o.HealthPort, o.IntegrationNamespace, o.CaCertSecretToMigrate, o.CaCertSecretKeysToMigrate,
