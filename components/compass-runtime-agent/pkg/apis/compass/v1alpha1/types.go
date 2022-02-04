@@ -49,7 +49,7 @@ func (in *CompassConnection) SetCertificateStatus(acquired metav1.Time, certific
 	}
 }
 
-func (in CompassConnection) ShouldAttemptReconnect() bool {
+func (in CompassConnection) Failed() bool {
 	return in.Status.State == ConnectionFailed
 }
 
