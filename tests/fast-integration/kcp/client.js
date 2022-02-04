@@ -101,6 +101,18 @@ class KCPWrapper {
     return JSON.parse(result);
   }
 
+  async reconciliations(query) {
+    let args = ['reconciliations', `${query.parameter}`, '--output', 'json'];
+    if (query.shootName) {
+      args = args.concat('--shoot', `${query.shootName}`);
+    }
+    if (query.schedulingID) {
+      args = args.concat('--scheduling-id', `${query.schedulingID}`);
+    }
+    const result = await this.exec(args);
+    return JSON.parse(result);
+  }
+
   async login() {
     const args = ['login', '-u', `${this.username}`, '-p', `${this.password}`];
     return await this.exec(args);
@@ -155,6 +167,21 @@ class KCPWrapper {
       throw new Error('failed during upgradeKyma');
     }
   };
+
+  async getReconciliationsOperations(shootName) {
+    await this.login();
+    const reconciliationsOperations = await this.reconciliations({parameter: 'operations',
+      shootName: shootName});
+    return JSON.stringify(reconciliationsOperations, null, '\t');
+  }
+
+  async getReconciliationsInfo(schedulingID) {
+    await this.login();
+    const reconciliationsInfo = await this.reconciliations({parameter: 'info',
+      schedulingID: schedulingID});
+
+    return JSON.stringify(reconciliationsInfo, null, '\t');
+  }
 
   async getRuntimeStatusOperations(instanceID) {
     await this.login();
@@ -251,6 +278,26 @@ class KCPWrapper {
       throw new Error('failed during ensureOrchestrationSucceeded');
     }
   }
+
+  async reconcileInformationLog(runtimeStatus) {
+    const objRuntimeStatus = JSON.parse(runtimeStatus);
+    // kcp reconciliations operations -c <shootName> -o json
+    const reconciliationsOperations = await this.getReconciliationsOperations(objRuntimeStatus.data[0].shootName);
+
+    const objReconciliationsOperations = JSON.parse(reconciliationsOperations);
+    console.log(`\nNumber of operations: ${objReconciliationsOperations.length}`);
+
+    // using only last three operations
+    const lastObjReconciliationsOperations = objReconciliationsOperations.slice(objReconciliationsOperations.length - 3,
+        objReconciliationsOperations.length);
+
+    for (const i of lastObjReconciliationsOperations) {
+      // kcp reconciliations info -i <scheduling-id> -o json
+      const getReconciliationsInfo = await this.getReconciliationsInfo(i.schedulingID);
+      console.log(`\nReconciliation info: ${i.schedulingID}: ${getReconciliationsInfo}`);
+    }
+  }
+
 
   async exec(args) {
     try {

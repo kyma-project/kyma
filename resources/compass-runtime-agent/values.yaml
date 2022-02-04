@@ -29,6 +29,7 @@ compassRuntimeAgent:
     centralGatewayServiceUrl: http://central-application-gateway.kyma-system.svc.cluster.local:8082
   config:
     insecureConfigurationFetch: true
+    skipAppsTLSVerification: false
     secret:
       name: compass-agent-configuration
       namespace: compass-system

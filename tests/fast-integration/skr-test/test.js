@@ -32,6 +32,7 @@ describe('Execute SKR test', function() {
 
       const runtimeStatus = await kcp.getRuntimeStatusOperations(this.options.instanceID);
       console.log(`\nRuntime status after provisioning: ${runtimeStatus}`);
+      await kcp.reconcileInformationLog(runtimeStatus);
 
       this.shoot = skr.shoot;
       await addScenarioInCompass(director, this.options.scenarioName);

@@ -1,5 +1,5 @@
 ---
-title: Configure Istio access logs
+title: Enable Istio access logs
 ---
 
 You can enable [Istio access logs](https://istio.io/latest/docs/tasks/observability/logs/access-log/) to provide fine-grained details about the workloads. This can help in indicating the four “golden signals” of monitoring (latency, traffic, errors, and saturation), and troubleshooting anomalies.
@@ -7,12 +7,6 @@ You can enable [Istio access logs](https://istio.io/latest/docs/tasks/observabil
 
 >**CAUTION:** Enabling access logs may drastically increase logs volume and might quickly fill up your log storage. Also, the provided feature uses an API in alpha state, which may or may not be continued in future releases.
 
-## Prerequisites
-
-The following resources are needed to observe access logs in you CLS setup:
-
-- A CLS instance to ship the logs to.
-- On the CLS instance, access to the Elasticsearch API enabled.
 
 ## Configuration
 

@@ -24,12 +24,13 @@ type Converter interface {
 type converter struct {
 	nameResolver             k8sconsts.NameResolver
 	centralGatewayServiceUrl string
+	appSkipTLSVerify         bool
 }
 
-func NewConverter(nameResolver k8sconsts.NameResolver, centralGatewayServiceUrl string) Converter {
-	return converter{
-		nameResolver:             nameResolver,
+func NewConverter(nameResolver k8sconsts.NameResolver, centralGatewayServiceUrl string, skipVerify bool) Converter {
+	return converter{nameResolver: nameResolver,
 		centralGatewayServiceUrl: centralGatewayServiceUrl,
+		appSkipTLSVerify:         skipVerify,
 	}
 }
 
@@ -58,6 +59,7 @@ func (c converter) Do(application model.Application) v1alpha1.Application {
 		Spec: v1alpha1.ApplicationSpec{
 			Description:      description,
 			SkipInstallation: false,
+			SkipVerify:       c.appSkipTLSVerify, // Taken from config. Maybe later we use value from labels of the Director's app
 			Labels:           prepareLabels(application.Labels),
 			Services:         c.toServices(application.Name, application.APIPackages),
 			CompassMetadata:  c.toCompassMetadata(application.ID, application.SystemAuthsIDs),

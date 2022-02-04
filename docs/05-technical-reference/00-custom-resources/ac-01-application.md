@@ -40,6 +40,7 @@ This table lists all the possible parameters of a given resource together with t
 |----------|:-------------:|------|
 | **metadata.name** | Yes | Specifies the name of the CR. |
 | **spec.description** | No | Describes the connected Application.  |
+| **spec.skipVerify** | No | Determines whether to skip TLS certificate verification for the Application.  |
 | **spec.labels** | No | Defines the labels of the Application. |
 | **spec.services** | No | Contains all services that the Application provides. |
 | **spec.services.id** | Yes | Identifies the service that the Application provides. |
