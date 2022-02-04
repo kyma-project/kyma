@@ -311,7 +311,7 @@ async function addService() {
     headers: {
       'Content-Type': 'application/json',
     },
-    timeout: 5000,
+    timeout: 25000,
   };
 
   let serviceId;
@@ -342,7 +342,7 @@ async function updateService(serviceId) {
     headers: {
       'Content-Type': 'application/json',
     },
-    timeout: 5000,
+    timeout: 25000,
   };
 
   try {
@@ -360,7 +360,7 @@ async function deleteService(serviceId) {
     headers: {
       'Content-Type': 'application/json',
     },
-    timeout: 5000,
+    timeout: 25000,
   };
 
   try {
