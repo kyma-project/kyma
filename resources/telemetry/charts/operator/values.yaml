@@ -53,14 +53,22 @@ terminationGracePeriodSeconds: 10
 extraLabels:
   control-plane: telemetry-operator-controller-manager
 
+service:
+  type: ClusterIP
+  port: 8080
+  portName: http-metrics
+
 serviceMonitor:
   endpoints:
     path: /metrics
-    port: https
+    port: http-metrics
     scheme: https
     bearerTokenFile: /var/run/secrets/kubernetes.io/serviceaccount/token
     tlsConfig:
       insecureSkipVerify: true
+      caFile: /etc/prometheus/secrets/istio.default/root-cert.pem
+      certFile: /etc/prometheus/secrets/istio.default/cert-chain.pem
+      keyFile: /etc/prometheus/secrets/istio.default/key.pem
 
 logProcessor: fluent-bit
 

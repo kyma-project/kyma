@@ -34,7 +34,7 @@
 /resources/certificates/ @strekm @werdes72 @Tomasz-Smelcerz-SAP @mjakobczyk @dariusztutaj @cnvergence @veichtj @piotrkpc
 
 # The `rafter` chart
-/resources/rafter/ @m00g3n @pPrecel @dbadura @kwiatekus
+/resources/rafter/ @m00g3n @pPrecel @dbadura @kwiatekus @moelsayed @cortey
 
 # The `application-connector` chart
 /resources/application-connector/ @akgalwas @janmedrek @franpog859 @Maladie @koala7659 @ralikio
@@ -109,10 +109,10 @@
 /resources/kiali/ @a-thaler @lilitgh @clebs @rakesh-garimella @skhalash @jeremyharisch @chrkl @shorim @lindnerby
 
 # The `serverless` chart
-/resources/serverless/ @m00g3n @pPrecel @dbadura @kwiatekus
+/resources/serverless/ @m00g3n @pPrecel @dbadura @kwiatekus @moelsayed @cortey
 
 # The `busola-migrator` chart
-/resources/busola-migrator/ @m00g3n @pPrecel @dbadura
+/resources/busola-migrator/ @m00g3n @pPrecel @dbadura @kwiatekus @moelsayed @cortey
 
 # Components
 
@@ -156,10 +156,10 @@ components/etcd-tls-setup-job/ @PK85 @piotrmiskiewicz @ksputo @szwedm @voigt @wo
 /components/uaa-activator/ @ksputo @piotrmiskiewicz @PK85 @szwedm @voigt @wozniakjan
 
 # Function Controller
-/components/function-controller/ @m00g3n @pPrecel @dbadura @kwiatekus
+/components/function-controller/ @m00g3n @pPrecel @dbadura @kwiatekus @moelsayed @cortey
 
 # Function Controller Runtimes
-/components/function-runtimes/ @m00g3n @pPrecel @dbadura @kwiatekus
+/components/function-runtimes/ @m00g3n @pPrecel @dbadura @kwiatekus @moelsayed @cortey
 
 # Compass Runtime Agent
 /components/compass-runtime-agent/ @PK85 @akgalwas @janmedrek @franpog859 @Maladie @koala7659 @ralikio
@@ -171,7 +171,7 @@ components/etcd-tls-setup-job/ @PK85 @piotrmiskiewicz @ksputo @szwedm @voigt @wo
 /components/eventing-controller @k15r @lilitgh @marcobebway @nachtmaar @radufa @pxsalehi @mfaizanse @friedrichwilken @vladislavpaskar
 
 # Busola Migrator Component
-/components/busola-migrator/ @m00g3n @pPrecel @dbadura
+/components/busola-migrator/ @m00g3n @pPrecel @dbadura @kwiatekus @moelsayed @cortey
 
 # Central Application Gateway
 /components/central-application-gateway/ @akgalwas @janmedrek @franpog859 @Maladie @koala7659 @ralikio
@@ -190,10 +190,10 @@ components/etcd-tls-setup-job/ @PK85 @piotrmiskiewicz @ksputo @szwedm @voigt @wo
 /tests/integration/api-gateway/ @strekm @werdes72 @Tomasz-Smelcerz-SAP @mjakobczyk @dariusztutaj
 
 # Rafter tests
-/tests/rafter/ @m00g3n @pPrecel @dbadura
+/tests/rafter/ @m00g3n @pPrecel @dbadura @kwiatekus @moelsayed @cortey
 
 # Function Controller tests
-/tests/function-controller/ @m00g3n @pPrecel @dbadura
+/tests/function-controller/ @m00g3n @pPrecel @dbadura @kwiatekus @moelsayed @cortey
 
 # Connector Service Tests
 /tests/connector-service-tests/ @akgalwas @janmedrek @franpog859 @Maladie @koala7659 @ralikio
@@ -240,7 +240,7 @@ components/etcd-tls-setup-job/ @PK85 @piotrmiskiewicz @ksputo @szwedm @voigt @wo
 /tools/event-subscriber/ @lilitgh @k15r @nachtmaar @marcobebway @radufa @pxsalehi @mfaizanse @friedrichwilken @vladislavpaskar
 
 # The tools/gitserver directory
-/tools/gitserver/ @m00g3n @pPrecel @dbadura
+/tools/gitserver/ @m00g3n @pPrecel @dbadura @kwiatekus @moelsayed @cortey
 
 # All .md files
 *.md @klaudiagrz @mmitoraj @majakurcius @alexandra-simeonova @NHingerl @grego952
@@ -249,10 +249,10 @@ components/etcd-tls-setup-job/ @PK85 @piotrmiskiewicz @ksputo @szwedm @voigt @wo
 /docs/ @klaudiagrz @mmitoraj @majakurcius @alexandra-simeonova @NHingerl @grego952
 
 # Owners of the .kyma-project-io folder
-/.kyma-project-io/ @m00g3n @pPrecel @dbadura
+/.kyma-project-io/ @m00g3n @pPrecel @dbadura @kwiatekus @moelsayed @cortey
 
 # Config file for MILV - milv.config.yaml
-milv.config.yaml @m00g3n @pPrecel @klaudiagrz @mmitoraj @majakurcius @alexandra-simeonova @NHingerl @grego952
+milv.config.yaml @m00g3n @pPrecel @kwiatekus @moelsayed @cortey @klaudiagrz @mmitoraj @majakurcius @alexandra-simeonova @NHingerl @grego952
 
 # performance tests
 /tests/perf/ @a-thaler @lilitgh @clebs @rakesh-garimella

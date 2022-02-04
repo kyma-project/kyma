@@ -4,13 +4,11 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/config"
-	"github.com/kyma-project/kyma/components/eventing-controller/utils"
-
-	. "github.com/onsi/gomega"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-
 	kymalogger "github.com/kyma-project/kyma/common/logging/logger"
+	. "github.com/onsi/gomega"
+
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/config"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/types"
 
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 	"github.com/kyma-project/kyma/components/eventing-controller/logger"
@@ -44,7 +42,7 @@ func Test_SyncBEBSubscription(t *testing.T) {
 		Domain:                   "domain.com",
 		EventTypePrefix:          controllertesting.EventTypePrefix,
 		BEBNamespace:             "/default/ns",
-		Qos:                      "AT_LEAST_ONCE",
+		Qos:                      string(types.QosAtLeastOnce),
 	}
 
 	err = beb.Initialize(envConf)
@@ -68,51 +66,12 @@ func Test_SyncBEBSubscription(t *testing.T) {
 
 // fixtureValidSubscription returns a valid subscription
 func fixtureValidSubscription(name, namespace string) *eventingv1alpha1.Subscription {
-	return &eventingv1alpha1.Subscription{
-		TypeMeta: metav1.TypeMeta{
-			Kind:       "Subscription",
-			APIVersion: "eventing.kyma-project.io/v1alpha1",
-		},
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      name,
-			Namespace: namespace,
-		},
-		Spec: eventingv1alpha1.SubscriptionSpec{
-			ID:       "id",
-			Protocol: "BEB",
-			ProtocolSettings: &eventingv1alpha1.ProtocolSettings{
-				ContentMode:     utils.StringPtr(eventingv1alpha1.ProtocolSettingsContentModeBinary),
-				ExemptHandshake: utils.BoolPtr(true),
-				Qos:             utils.StringPtr("AT-LEAST_ONCE"),
-				WebhookAuth: &eventingv1alpha1.WebhookAuth{
-					Type:         "oauth2",
-					GrantType:    "client_credentials",
-					ClientID:     "xxx",
-					ClientSecret: "xxx",
-					TokenURL:     "https://oauth2.xxx.com/oauth2/token",
-					Scope:        []string{"guid-identifier"},
-				},
-			},
-			Sink: "https://webhook.xxx.com",
-			Filter: &eventingv1alpha1.BEBFilters{
-				Dialect: "beb",
-				Filters: []*eventingv1alpha1.BEBFilter{
-					{
-						EventSource: &eventingv1alpha1.Filter{
-							Type:     "exact",
-							Property: "source",
-							Value:    controllertesting.EventSource,
-						},
-						EventType: &eventingv1alpha1.Filter{
-							Type:     "exact",
-							Property: "type",
-							Value:    controllertesting.OrderCreatedEventTypeNotClean,
-						},
-					},
-				},
-			},
-		},
-	}
+	return controllertesting.NewSubscription(
+		name, namespace,
+		controllertesting.WithSinkURL("https://webhook.xxx.com"),
+		controllertesting.WithFilter(controllertesting.EventSource, controllertesting.OrderCreatedEventTypeNotClean),
+		controllertesting.WithWebhookAuthForBEB(),
+	)
 }
 
 func startBEBMock() *controllertesting.BEBMock {

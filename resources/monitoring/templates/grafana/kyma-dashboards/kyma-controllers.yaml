@@ -1020,7 +1020,7 @@ data:
           },
           "targets": [
             {
-              "expr": "{namespace=\"$namespace\", instance=\"$pod\"}",
+              "expr": "{namespace=\"$namespace\", pod=\"$pod\"}",
               "refId": "A"
             }
           ],

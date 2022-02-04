@@ -86,25 +86,37 @@ async function assertAllRulesAreHealthy() {
 async function assertMetricsExist() {
   // Object with exporter, its corressponding metrics followed by labels and resources.
   const metricsList = [
-    {'kubelet': [
+    {'monitoring-kubelet': [
       {'container_memory_usage_bytes': [['pod', 'container']]},
-      {'kubelet_volume_stats_available_bytes': [[]]},
       {'kubelet_pod_start_duration_seconds_count': [[]]}]},
 
-    {'api-server': [
-      {'apiserver_request_total': [[]]},
+    {'monitoring-apiserver': [
       {'apiserver_request_duration_seconds_bucket': [[]]},
       {'etcd_disk_backend_commit_duration_seconds_bucket': [[]]}]},
 
-    {'kube-state-metrics': [
+    {'monitoring-kube-state-metrics': [
       {'kube_deployment_status_replicas_available': [['deployment', 'namespace']]},
-      {'kube_pod_info': [['pod']]},
       {'kube_pod_container_resource_limits': [['pod', 'container'], ['memory']]}]},
 
-    {'node_exporter': [
-      {'process_open_fds': [[]]},
+    {'monitoring-node-exporter': [
       {'process_cpu_seconds_total': [['pod']]},
       {'go_memstats_heap_inuse_bytes': [['pod']]}]},
+
+    {'istio-component-monitor': [
+      {'istio_requests_total': [['destination_service', 'source_workload', 'response_code']]}]},
+
+    {'logging-fluent-bit': [
+      {'fluentbit_input_bytes_total': [['name']]},
+      {'fluentbit_input_records_total': [[]]}]},
+
+    {'logging-loki': [
+      {'log_messages_total': [['level']]},
+      {'loki_request_duration_seconds_bucket': [['route']]}]},
+
+    {'monitoring-grafana': [
+      {'grafana_stat_totals_dashboard': [[]]},
+      {'grafana_api_dataproxy_request_all_milliseconds_sum ': [['pod']]}]},
+
   ];
 
   for (let index=0; index < metricsList.length; index++ ) {
@@ -235,7 +247,7 @@ async function assertTimeSeriesExist(exporter, metric, labels, resource='') {
     }
 
     if (result.length == 0) {
-      resultlessQueries.push(query.concat('metric from service monitor:monitoring-'.concat(exporter)));
+      resultlessQueries.push(query.concat('metric from service monitor: '.concat(exporter)));
     }
   }
   assert.isEmpty(resultlessQueries, `Following queries return no results: ${resultlessQueries.join(', ')}`);
