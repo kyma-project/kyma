@@ -1,7 +1,17 @@
 package director
 
 import (
+	"testing"
+
+	"github.com/kyma-incubator/compass/components/director/pkg/graphql"
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/config"
+	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/graphql/mocks"
+	kymamodel "github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/model"
+	gcli "github.com/machinebox/graphql"
+	"github.com/pkg/errors"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
+	"github.com/stretchr/testify/require"
 )
 
 const (
@@ -137,7 +147,6 @@ var (
 	}
 )
 
-/*
 func TestConfigClient_FetchConfiguration(t *testing.T) {
 	expectedRequest := gcli.NewRequest(expectedAppsAndLabelsForRuntimeQuery)
 	expectedRequest.Header.Set(TenantHeader, tenant)
@@ -472,4 +481,4 @@ func TestConfigClient_SetURLsLabels(t *testing.T) {
 		assert.Contains(t, err.Error(), "nil response")
 		assert.Nil(t, updatedLabels)
 	})
-}*/
+}
