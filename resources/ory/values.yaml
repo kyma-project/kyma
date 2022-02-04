@@ -90,10 +90,6 @@ hydra:
     admin:
       enabled: false
   deployment:
-    annotations:
-      reconciler.kyma-project.io/managed-by-reconciler-disclaimer: |
-        DO NOT EDIT - This resource is managed by Kyma.
-        Any modifications are discarded and the resource is reverted to the original state.
     strategy:
       type: RollingUpdate
       rollingUpdate:
@@ -112,17 +108,6 @@ hydra:
       maxReplicas: 3
       targetMemoryUtilizationPercentage: 75
       targetCPUUtilizationPercentage: 80
-  service:
-    public:
-      annotations:
-        reconciler.kyma-project.io/managed-by-reconciler-disclaimer: |
-          DO NOT EDIT - This resource is managed by Kyma.
-          Any modifications are discarded and the resource is reverted to the original state.
-    admin:
-      annotations:
-        reconciler.kyma-project.io/managed-by-reconciler-disclaimer: |
-          DO NOT EDIT - This resource is managed by Kyma.
-          Any modifications are discarded and the resource is reverted to the original state.
   hydra:
     # The ORY Hydra configuration. For a full list of available settings, check:
     #   https://github.com/ory/hydra/blob/master/docs/config.yaml
@@ -147,11 +132,6 @@ hydra:
     dangerousAllowInsecureRedirectUrls: false
     existingSecret: "ory-hydra-credentials"
   hydra-maester:
-    deployment:
-      annotations:
-        reconciler.kyma-project.io/managed-by-reconciler-disclaimer: |
-          DO NOT EDIT - This resource is managed by Kyma.
-          Any modifications are discarded and the resource is reverted to the original state.
     globalAccess: true
     config:
       # Must be in-sync with hydra.hydra.config.existingSecret
@@ -159,17 +139,6 @@ hydra:
 
 # Overrides for the Oathkeeper chart
 oathkeeper:
-  service:
-    api:
-      annotations:
-        reconciler.kyma-project.io/managed-by-reconciler-disclaimer: |
-          DO NOT EDIT - This resource is managed by Kyma.
-          Any modifications are discarded and the resource is reverted to the original state.
-    proxy:
-      annotations:
-        reconciler.kyma-project.io/managed-by-reconciler-disclaimer: |
-          DO NOT EDIT - This resource is managed by Kyma.
-          Any modifications are discarded and the resource is reverted to the original state.
   oathkeeper:
     config:
       authenticators:
@@ -258,10 +227,6 @@ oathkeeper:
         api:
           port: 4456
   deployment:
-    annotations:
-      reconciler.kyma-project.io/managed-by-reconciler-disclaimer: |
-        DO NOT EDIT - This resource is managed by Kyma.
-        Any modifications are discarded and the resource is reverted to the original state.
     resources:
       limits:
         cpu: 100m
@@ -278,9 +243,6 @@ oathkeeper:
   oathkeeper-maester:
     deployment:
       annotations:
-        reconciler.kyma-project.io/managed-by-reconciler-disclaimer: |
-          DO NOT EDIT - This resource is managed by Kyma.
-          Any modifications are discarded and the resource is reverted to the original state.
         sidecar.istio.io/inject: "false"
       resources:
         limits:
@@ -300,22 +262,10 @@ postgresql:
       memory: 1024Mi
       cpu: 750m
   master:
-    annotations:
-      reconciler.kyma-project.io/managed-by-reconciler-disclaimer: |
-        DO NOT EDIT - This resource is managed by Kyma.
-        Any modifications are discarded and the resource is reverted to the original state.
     podAnnotations:
       sidecar.istio.io/inject: "false"
-      reconciler.kyma-project.io/managed-by-reconciler-disclaimer: |
-        DO NOT EDIT - This resource is managed by Kyma.
-        Any modifications are discarded and the resource is reverted to the original state.
   # Must be in-sync with hydra.hydra.config.existingSecret
   existingSecret: "ory-hydra-credentials"
-  service:
-    annotations:
-      reconciler.kyma-project.io/managed-by-reconciler-disclaimer: |
-        DO NOT EDIT - This resource is managed by Kyma.
-        Any modifications are discarded and the resource is reverted to the original state.
 
 # Remote persistance settings
 gcloud-sqlproxy:
@@ -326,9 +276,6 @@ gcloud-sqlproxy:
     term_timeout: 30s
   podAnnotations:
     sidecar.istio.io/inject: "false"
-    reconciler.kyma-project.io/managed-by-reconciler-disclaimer: |
-      DO NOT EDIT - This resource is managed by Kyma.
-      Any modifications are discarded and the resource is reverted to the original state.
   # Must be in-sync with hydra.hydra.config.existingSecret
   existingSecret: "ory-hydra-credentials"
   existingSecretKey: "gcp-sa.json"
