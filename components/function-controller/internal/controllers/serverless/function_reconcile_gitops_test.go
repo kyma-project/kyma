@@ -7,6 +7,8 @@ import (
 
 	"github.com/stretchr/testify/mock"
 
+	git2go "github.com/libgit2/git2go/v31"
+
 	"github.com/kyma-project/kyma/components/function-controller/internal/controllers/serverless/automock"
 	"github.com/kyma-project/kyma/components/function-controller/internal/git"
 	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
@@ -385,4 +387,73 @@ func TestGitOps(t *testing.T) {
 			g.Expect(function).To(haveConditionReasonDeploymentReady)
 		})
 	}
+}
+
+func TestGitOps_GitErrorHandling(t *testing.T) {
+	g := gomega.NewGomegaWithT(t)
+	testRepoName := "test-repo"
+	rtm := serverlessv1alpha1.Nodejs12
+	resourceClient, testEnv := setUpTestEnv(g)
+	defer tearDownTestEnv(g, testEnv)
+	testCfg := setUpControllerConfig(g)
+	initializeServerlessResources(g, resourceClient)
+	createDockerfileForRuntime(g, resourceClient, rtm)
+	t.Run("Check if Requeue is set to true in case of recoverable error", func(t *testing.T) {
+		//GIVEN
+		g := gomega.NewGomegaWithT(t)
+		gitRepo := serverlessv1alpha1.GitRepository{
+			ObjectMeta: metav1.ObjectMeta{Name: testRepoName, Namespace: testNamespace},
+			Spec:       serverlessv1alpha1.GitRepositorySpec{},
+		}
+		err := resourceClient.Create(context.TODO(), &gitRepo)
+		g.Expect(err).To(gomega.BeNil())
+
+		function := &serverlessv1alpha1.Function{
+			ObjectMeta: metav1.ObjectMeta{Name: "git-fn", Namespace: testNamespace},
+			Spec: serverlessv1alpha1.FunctionSpec{
+				Source:     testRepoName,
+				Runtime:    rtm,
+				Type:       serverlessv1alpha1.SourceTypeGit,
+				Repository: serverlessv1alpha1.Repository{BaseDir: "dir", Reference: "ref"},
+			},
+		}
+		g.Expect(resourceClient.Create(context.TODO(), function)).To(gomega.Succeed())
+		// We don't use MakeGitError2 function because: https://github.com/libgit2/git2go/issues/873
+		gitErr := &git2go.GitError{Message: "NotFound", Class: 0, Code: git2go.ErrorCodeNotFound}
+		gitOpts := git.Options{URL: "", Reference: "ref"}
+		operator := &automock.GitOperator{}
+		operator.On("LastCommit", gitOpts).Return("", gitErr)
+		defer operator.AssertExpectations(t)
+
+		prometheusCollector := &automock.StatsCollector{}
+		prometheusCollector.On("UpdateReconcileStats", mock.Anything, mock.Anything).Return()
+		request := ctrl.Request{
+			NamespacedName: types.NamespacedName{
+				Namespace: function.GetNamespace(),
+				Name:      function.GetName(),
+			},
+		}
+
+		reconciler := &FunctionReconciler{
+			Log:            log.Log,
+			client:         resourceClient,
+			recorder:       record.NewFakeRecorder(100),
+			config:         testCfg,
+			gitOperator:    operator,
+			statsCollector: prometheusCollector,
+		}
+
+		//WHEN
+		res, err := reconciler.Reconcile(request)
+
+		//THEN
+		g.Expect(err).To(gomega.BeNil())
+		g.Expect(res.Requeue).To(gomega.BeFalse())
+
+		var updatedFn serverlessv1alpha1.Function
+		err = resourceClient.Get(context.TODO(), request.NamespacedName, &updatedFn)
+		g.Expect(err).To(gomega.BeNil())
+		g.Expect(updatedFn.Status.Conditions).To(gomega.HaveLen(1))
+		g.Expect(updatedFn.Status.Conditions[0].Message).To(gomega.Equal("Stop reconciliation, reason: NotFound"))
+	})
 }
