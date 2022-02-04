@@ -180,13 +180,12 @@ func (r *FunctionReconciler) Reconcile(request ctrl.Request) (ctrl.Result, error
 
 	revision, err := r.syncRevision(instance, gitOptions)
 	if err != nil {
-		result, errMsg := NextRequeue(err)
-		return r.updateStatusWithoutRepository(ctx, result, instance, serverlessv1alpha1.Condition{
+		return r.updateStatusWithoutRepository(ctx, ctrl.Result{}, instance, serverlessv1alpha1.Condition{
 			Type:               serverlessv1alpha1.ConditionConfigurationReady,
 			Status:             corev1.ConditionFalse,
 			LastTransitionTime: metav1.Now(),
 			Reason:             serverlessv1alpha1.ConditionReasonSourceUpdateFailed,
-			Message:            errMsg,
+			Message:            fmt.Sprintf("Syncing git revision failed: %v", err),
 		})
 	}
 
