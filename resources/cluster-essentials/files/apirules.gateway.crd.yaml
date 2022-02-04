@@ -38,7 +38,7 @@ spec:
               properties:
                 gateway:
                   description: Gateway to be used
-                  pattern: ^(?:[_a-z0-9](?:[_a-z0-9-]+[a-z0-9])?\.)+(?:[a-z](?:[a-z0-9-]+[a-z0-9])?)?$
+                  pattern: ^[_a-z0-9-]+\/[_a-z0-9-]+$
                   type: string
                 rules:
                   description: Rules represents collection of Rule to apply
