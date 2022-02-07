@@ -26,20 +26,20 @@ type Connection struct {
 type Opt func(*Connection)
 
 func WithRetryOnFailedConnect(retryOnFailedConnect bool) Opt {
-	return func(bc *Connection) {
-		bc.connectionData.retryOnFailedConnect = retryOnFailedConnect
+	return func(c *Connection) {
+		c.connectionData.retryOnFailedConnect = retryOnFailedConnect
 	}
 }
 
 func WithMaxReconnects(maxReconnects int) Opt {
-	return func(bc *Connection) {
-		bc.connectionData.maxReconnects = maxReconnects
+	return func(c *Connection) {
+		c.connectionData.maxReconnects = maxReconnects
 	}
 }
 
 func WithReconnectWait(reconnectWait time.Duration) Opt {
-	return func(bc *Connection) {
-		bc.connectionData.reconnectWait = reconnectWait
+	return func(c *Connection) {
+		c.connectionData.reconnectWait = reconnectWait
 	}
 }
 
@@ -49,24 +49,24 @@ func NewConnection(url string, opts ...Opt) *Connection {
 	connData := connectionData{
 		url: url,
 	}
-	bc := &Connection{
+	c := &Connection{
 		connectionData: connData,
 	}
 
 	// apply options
 	for _, opt := range opts {
-		opt(bc)
+		opt(c)
 	}
 
-	return bc
+	return c
 }
 
 // Connect returns a NATS connection that is ready for use, or an error if connection to the NATS server failed.
 // It uses the nats.Connect function which is thread-safe.
-func (bc *Connection) Connect() error {
+func (c *Connection) Connect() error {
 
-	connection, err := nats.Connect(bc.connectionData.url, nats.RetryOnFailedConnect(bc.connectionData.retryOnFailedConnect),
-		nats.MaxReconnects(bc.connectionData.maxReconnects), nats.ReconnectWait(bc.connectionData.reconnectWait))
+	connection, err := nats.Connect(c.connectionData.url, nats.RetryOnFailedConnect(c.connectionData.retryOnFailedConnect),
+		nats.MaxReconnects(c.connectionData.maxReconnects), nats.ReconnectWait(c.connectionData.reconnectWait))
 	if err != nil {
 		return err
 	}
@@ -74,6 +74,6 @@ func (bc *Connection) Connect() error {
 		return fmt.Errorf("connection status not connected: %v", status)
 	}
 	// OK
-	bc.Connection = connection
+	c.Connection = connection
 	return nil
 }

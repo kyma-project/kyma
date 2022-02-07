@@ -70,18 +70,18 @@ func (test *Test) setupResources(t *testing.T, subscription *eventingv1alpha1.Su
 	assert.NotNil(t, messageReceiver)
 
 	// connect to nats
-	bc := pkgnats.NewConnection(
+	c := pkgnats.NewConnection(
 		test.natsURL,
 		pkgnats.WithMaxReconnects(3),
 		pkgnats.WithRetryOnFailedConnect(true),
 		pkgnats.WithReconnectWait(time.Second),
 	)
-	err := bc.Connect()
+	err := c.Connect()
 	assert.Nil(t, err)
-	assert.NotNil(t, bc.Connection)
+	assert.NotNil(t, c.Connection)
 
 	// create a Nats sender
-	msgSender := sender.NewNatsMessageSender(ctx, bc, test.logger)
+	msgSender := sender.NewNatsMessageSender(ctx, c, test.logger)
 	assert.NotNil(t, msgSender)
 
 	// configure legacyTransformer
@@ -161,19 +161,19 @@ func TestNatsHandlerForCloudEvents(t *testing.T) {
 		eventTypeToSubscribe := subscription.Spec.Filter.Filters[0].EventType.Value
 
 		// connect to nats
-		bc := pkgnats.NewConnection(
+		c := pkgnats.NewConnection(
 			test.natsURL,
 			pkgnats.WithMaxReconnects(3),
 			pkgnats.WithRetryOnFailedConnect(true),
 			pkgnats.WithReconnectWait(time.Second),
 		)
-		err := bc.Connect()
+		err := c.Connect()
 		assert.Nil(t, err)
-		assert.NotNil(t, bc.Connection)
+		assert.NotNil(t, c.Connection)
 
 		// publish a message to NATS and validate it
 		validator := testingutils.ValidateNatsSubjectOrFail(t, expectedNatsSubject)
-		testingutils.SubscribeToEventOrFail(t, bc.Connection, eventTypeToSubscribe, validator)
+		testingutils.SubscribeToEventOrFail(t, c.Connection, eventTypeToSubscribe, validator)
 
 		// nolint:scopelint
 		// run the tests for publishing cloudevents
@@ -218,19 +218,19 @@ func TestNatsHandlerForLegacyEvents(t *testing.T) {
 		eventTypeToSubscribe := subscription.Spec.Filter.Filters[0].EventType.Value
 
 		// connect to nats
-		bc := pkgnats.NewConnection(
+		c := pkgnats.NewConnection(
 			test.natsURL,
 			pkgnats.WithMaxReconnects(3),
 			pkgnats.WithRetryOnFailedConnect(true),
 			pkgnats.WithReconnectWait(time.Second),
 		)
-		err := bc.Connect()
+		err := c.Connect()
 		assert.Nil(t, err)
-		assert.NotNil(t, bc.Connection)
+		assert.NotNil(t, c.Connection)
 
 		// publish a message to NATS and validate it
 		validator := testingutils.ValidateNatsSubjectOrFail(t, expectedNatsSubject)
-		testingutils.SubscribeToEventOrFail(t, bc.Connection, eventTypeToSubscribe, validator)
+		testingutils.SubscribeToEventOrFail(t, c.Connection, eventTypeToSubscribe, validator)
 
 		// nolint:scopelint
 		// run the tests for publishing legacy events

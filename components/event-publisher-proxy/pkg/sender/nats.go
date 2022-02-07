@@ -20,27 +20,27 @@ type GenericSender interface {
 
 // NatsMessageSender is responsible for sending messages over HTTP.
 type NatsMessageSender struct {
-	ctx               context.Context
-	logger            *logrus.Logger
-	backendConnection *pkgnats.Connection
+	ctx        context.Context
+	logger     *logrus.Logger
+	Connection *pkgnats.Connection
 }
 
 // NewNatsMessageSender returns a new NewNatsMessageSender instance with the given NATS connection.
-func NewNatsMessageSender(ctx context.Context, bc *pkgnats.Connection, logger *logrus.Logger) *NatsMessageSender {
-	return &NatsMessageSender{ctx: ctx, backendConnection: bc, logger: logger}
+func NewNatsMessageSender(ctx context.Context, c *pkgnats.Connection, logger *logrus.Logger) *NatsMessageSender {
+	return &NatsMessageSender{ctx: ctx, Connection: c, logger: logger}
 }
 
 // Send dispatches the given Cloud Event to NATS and returns the response details and dispatch time.
 func (h *NatsMessageSender) Send(ctx context.Context, event *cev2event.Event) (int, error) {
-	if h.backendConnection.Connection.IsClosed() {
+	if h.Connection.Connection.IsClosed() {
 		h.logger.Info("Reconnect to NATS server")
-		if err := h.backendConnection.Connect(); err != nil {
+		if err := h.Connection.Connect(); err != nil {
 			h.logger.Errorf("Failed to reconnect to NATS server, %s", err.Error())
 			return http.StatusInternalServerError, err
 		}
 	}
 
-	sender, err := cenats.NewSenderFromConn(h.backendConnection.Connection, event.Type())
+	sender, err := cenats.NewSenderFromConn(h.Connection.Connection, event.Type())
 	if err != nil {
 		h.logger.Errorf("Failed to create NATS sender, %s", err.Error())
 		return http.StatusInternalServerError, err

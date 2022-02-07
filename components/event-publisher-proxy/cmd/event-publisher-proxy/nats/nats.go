@@ -62,20 +62,20 @@ func (c *Commander) Start() error {
 	messageReceiver := receiver.NewHTTPMessageReceiver(c.envCfg.Port)
 
 	// connect to nats
-	bc := pkgnats.NewConnection(
+	natsConn := pkgnats.NewConnection(
 		c.envCfg.URL,
 		pkgnats.WithMaxReconnects(c.envCfg.MaxReconnects),
 		pkgnats.WithRetryOnFailedConnect(c.envCfg.RetryOnFailedConnect),
 		pkgnats.WithReconnectWait(c.envCfg.ReconnectWait),
 	)
-	if err := bc.Connect(); err != nil {
+	if err := natsConn.Connect(); err != nil {
 		c.logger.Errorf("Failed to connect to NATS server with error: %s", err)
 		return err
 	}
-	defer bc.Connection.Close()
+	defer natsConn.Connection.Close()
 
 	// configure message sender
-	messageSenderToNats := sender.NewNatsMessageSender(ctx, bc, c.logger)
+	messageSenderToNats := sender.NewNatsMessageSender(ctx, natsConn, c.logger)
 
 	// cluster config
 	k8sConfig := config.GetConfigOrDie()

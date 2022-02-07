@@ -14,23 +14,23 @@ func TestConnectToNats(t *testing.T) {
 	assert.NotEmpty(t, natsServer.ClientURL())
 	defer natsServer.Shutdown()
 
-	bc := NewConnection(
+	c := NewConnection(
 		natsServer.ClientURL(),
 		WithRetryOnFailedConnect(true),
 		WithMaxReconnects(1),
 		WithReconnectWait(3),
 	)
-	err := bc.Connect()
+	err := c.Connect()
 	assert.Nil(t, err)
-	assert.NotNil(t, bc.Connection)
-	assert.Equal(t, bc.Connection.Status(), nats.CONNECTED)
+	assert.NotNil(t, c.Connection)
+	assert.Equal(t, c.Connection.Status(), nats.CONNECTED)
 
-	bc.Connection.Close()
+	c.Connection.Close()
 
-	err = bc.Connect()
+	err = c.Connect()
 	assert.Nil(t, err)
-	assert.NotNil(t, bc.Connection)
-	assert.Equal(t, bc.Connection.Status(), nats.CONNECTED)
+	assert.NotNil(t, c.Connection)
+	assert.Equal(t, c.Connection.Status(), nats.CONNECTED)
 
-	defer bc.Connection.Close()
+	defer c.Connection.Close()
 }
