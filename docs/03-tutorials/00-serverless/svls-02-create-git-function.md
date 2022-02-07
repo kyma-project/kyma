@@ -8,7 +8,7 @@ This tutorial shows how you can build a Function from code and dependencies stor
 
 ## Steps
 
-Follows these steps:
+Follow these steps:
 
 <div tabs name="steps" group="create-function">
   <details>

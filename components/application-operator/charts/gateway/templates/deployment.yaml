@@ -35,7 +35,7 @@ spec:
         image: {{ .Values.global.applicationGatewayImage }}
         imagePullPolicy: {{ .Values.deployment.image.pullPolicy }}
         args:
-          - "/applicationgateway"
+          - "/app/applicationgateway"
           - "--proxyPort={{ .Values.deployment.args.proxyPort }}"
           - "--externalAPIPort={{ .Values.deployment.args.externalAPIPort }}"
           - "--application={{ .Release.Name }}"

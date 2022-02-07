@@ -1,26 +1,26 @@
-const { assert } = require("chai");
+const {assert} = require('chai');
 
-const { sleep } = require ("../utils");
+const {sleep} = require('../utils');
 const {
-    queryLoki
-} = require("./client");
+  queryLoki,
+} = require('./client');
 
 async function checkLokiLogs(startTimestamp) {
-    const labels = '{app="commerce-mock", container="mock", namespace="mocks"}';
-    let logsFetched = false;
-    let retries = 0;
-    while (retries < 20) {
-        const logs = await queryLoki(labels, startTimestamp);
-        if (logs.streams.length > 0) {
-            logsFetched = true;
-            break;
-        }
-        await sleep(5*1000);
-        retries++;
+  const labels = '{app="commerce-mock", container="mock", namespace="mocks"}';
+  let logsFetched = false;
+  let retries = 0;
+  while (retries < 20) {
+    const logs = await queryLoki(labels, startTimestamp);
+    if (logs.streams.length > 0) {
+      logsFetched = true;
+      break;
     }
-    assert.isTrue(logsFetched, "No logs fetched from Loki");
+    await sleep(5*1000);
+    retries++;
+  }
+  assert.isTrue(logsFetched, 'No logs fetched from Loki');
 }
 
 module.exports = {
-    checkLokiLogs
+  checkLokiLogs,
 };

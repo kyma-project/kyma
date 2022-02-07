@@ -1,30 +1,30 @@
-const { wait, debug } = require("../utils");
-const { expect } = require("chai");
-const fs = require("fs");
-const os = require("os");
+const {wait, debug} = require('../utils');
+const {expect} = require('chai');
+const fs = require('fs');
+const os = require('os');
 
 async function provisionSKR(
-  keb,
-  kcp,
-  gardener,
-  instanceID,
-  name,
-  platformCreds,
-  btpOperatorCreds,
-  customParams,
-  timeout
-) {
-  const resp = await keb.provisionSKR(
-    name,
+    keb,
+    kcp,
+    gardener,
     instanceID,
+    name,
     platformCreds,
     btpOperatorCreds,
-    customParams
+    customParams,
+    timeout,
+) {
+  const resp = await keb.provisionSKR(
+      name,
+      instanceID,
+      platformCreds,
+      btpOperatorCreds,
+      customParams,
   );
-  expect(resp).to.have.property("operation");
+  expect(resp).to.have.property('operation');
 
   const operationID = resp.operation;
-  const shootName = resp.dashboard_url.split(".")[1];
+  const shootName = resp.dashboard_url.split('.')[1];
   debug(`Operation ID ${operationID}`, `Shoot name ${shootName}`);
 
   await ensureOperationSucceeded(keb, kcp, instanceID, operationID, timeout);
@@ -39,20 +39,20 @@ async function provisionSKR(
 }
 
 function ensureValidShootOIDCConfig(shoot, targetOIDCConfig) {
-  expect(shoot).to.have.nested.property("oidcConfig.clientID", targetOIDCConfig.clientID);
-  expect(shoot).to.have.nested.property("oidcConfig.issuerURL", targetOIDCConfig.issuerURL);
-  expect(shoot).to.have.nested.property("oidcConfig.groupsClaim", targetOIDCConfig.groupsClaim);
-  expect(shoot).to.have.nested.property("oidcConfig.usernameClaim", targetOIDCConfig.usernameClaim);
+  expect(shoot).to.have.nested.property('oidcConfig.clientID', targetOIDCConfig.clientID);
+  expect(shoot).to.have.nested.property('oidcConfig.issuerURL', targetOIDCConfig.issuerURL);
+  expect(shoot).to.have.nested.property('oidcConfig.groupsClaim', targetOIDCConfig.groupsClaim);
+  expect(shoot).to.have.nested.property('oidcConfig.usernameClaim', targetOIDCConfig.usernameClaim);
   expect(shoot).to.have.nested.property(
-    "oidcConfig.usernamePrefix",
-    targetOIDCConfig.usernamePrefix
+      'oidcConfig.usernamePrefix',
+      targetOIDCConfig.usernamePrefix,
   );
   expect(shoot.oidcConfig.signingAlgs).to.eql(targetOIDCConfig.signingAlgs);
 }
 
 async function deprovisionSKR(keb, kcp, instanceID, timeout, ensureSuccess=true) {
   const resp = await keb.deprovisionSKR(instanceID);
-  expect(resp).to.have.property("operation");
+  expect(resp).to.have.property('operation');
 
   const operationID = resp.operation;
   console.log(`Deprovision SKR - operation ID ${operationID}`);
@@ -64,9 +64,17 @@ async function deprovisionSKR(keb, kcp, instanceID, timeout, ensureSuccess=true)
   return operationID;
 }
 
-async function updateSKR(keb, kcp, gardener, instanceID, shootName, customParams, timeout, btpOperatorCreds = null, isMigration = false) {
+async function updateSKR(keb,
+    kcp,
+    gardener,
+    instanceID,
+    shootName,
+    customParams,
+    timeout,
+    btpOperatorCreds = null,
+    isMigration = false) {
   const resp = await keb.updateSKR(instanceID, customParams, btpOperatorCreds, isMigration);
-  expect(resp).to.have.property("operation");
+  expect(resp).to.have.property('operation');
 
   const operationID = resp.operation;
   debug(`Operation ID ${operationID}`);
@@ -83,18 +91,19 @@ async function updateSKR(keb, kcp, gardener, instanceID, shootName, customParams
 
 async function ensureOperationSucceeded(keb, kcp, instanceID, operationID, timeout) {
   const res = await wait(
-    () => keb.getOperation(instanceID, operationID),
-    (res) => res && res.state && (res.state === "succeeded" || res.state === "failed"),
-    timeout,
-    1000 * 30 // 30 seconds
+      () => keb.getOperation(instanceID, operationID),
+      (res) => res && res.state && (res.state === 'succeeded' || res.state === 'failed'),
+      timeout,
+      1000 * 30, // 30 seconds
   ).catch(async (err) => {
-    let runtimeStatus = await kcp.getRuntimeStatusOperations(instanceID)
-    throw(`${err}\nRuntime status: ${runtimeStatus}`)
+    const runtimeStatus = await kcp.getRuntimeStatusOperations(instanceID);
+    throw new Error(`${err}\nRuntime status: ${runtimeStatus}`);
   });
 
-  if(res.state !== "succeeded") {
-    let runtimeStatus = await kcp.getRuntimeStatusOperations(instanceID)
-    throw(`operation didn't succeed in time: ${JSON.stringify(res, null, `\t`)}\nRuntime status: ${runtimeStatus}`);
+  if (res.state !== 'succeeded') {
+    const runtimeStatus = await kcp.getRuntimeStatusOperations(instanceID);
+    throw new Error(`operation didn't succeed in time: ${JSON.stringify(res, null, `\t`)}
+    Runtime status: ${runtimeStatus}`);
   }
 
   console.log(`Operation ${res.operation} finished with state ${res.state}`);
@@ -115,10 +124,10 @@ async function ensureValidOIDCConfigInCustomerFacingKubeconfig(keb, instanceID, 
     kubeconfigContent = await keb.downloadKubeconfig(instanceID);
   } catch (err) {}
 
-  var issuerMatchPattern = "\\b" + oidcConfig.issuerURL + "\\b";
-  var clientIDMatchPattern = "\\b" + oidcConfig.clientID + "\\b";
-  expect(kubeconfigContent).to.match(new RegExp(issuerMatchPattern, "g"));
-  expect(kubeconfigContent).to.match(new RegExp(clientIDMatchPattern, "g"));
+  const issuerMatchPattern = '\\b' + oidcConfig.issuerURL + '\\b';
+  const clientIDMatchPattern = '\\b' + oidcConfig.clientID + '\\b';
+  expect(kubeconfigContent).to.match(new RegExp(issuerMatchPattern, 'g'));
+  expect(kubeconfigContent).to.match(new RegExp(clientIDMatchPattern, 'g'));
 }
 
 async function saveKubeconfig(kubeconfig) {

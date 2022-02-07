@@ -47,7 +47,7 @@ spec:
             cpu: {{ .Values.deployment.resources.requests.cpu }}
             memory: {{ .Values.deployment.resources.requests.memory }}
         args:
-          - "/applicationregistry"
+          - "/app/applicationregistry"
           - "--proxyPort={{ .Values.deployment.args.proxyPort }}"
           - "--externalAPIPort={{ .Values.deployment.args.externalAPIPort }}"
           - "--uploadServiceURL={{ .Values.deployment.args.uploadServiceURL }}"
