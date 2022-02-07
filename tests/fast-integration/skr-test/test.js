@@ -30,16 +30,16 @@ describe('Execute SKR test', function() {
           customParams,
           provisioningTimeout);
 
-      const runtimeStatus = await kcp.getRuntimeStatusOperations(this.options.instanceID);
-      console.log(`\nRuntime status after provisioning: ${runtimeStatus}`);
-      await kcp.reconcileInformationLog(runtimeStatus);
-
       this.shoot = skr.shoot;
       await addScenarioInCompass(director, this.options.scenarioName);
       await assignRuntimeToScenario(director, this.shoot.compassID, this.options.scenarioName);
       initializeK8sClient({kubeconfig: this.shoot.kubeconfig});
     } catch (e) {
       throw new Error(`before hook failed: ${e.toString()}`);
+    } finally {
+      const runtimeStatus = await kcp.getRuntimeStatusOperations(this.options.instanceID);
+      console.log(`\nRuntime status after provisioning: ${runtimeStatus}`);
+      await kcp.reconcileInformationLog(runtimeStatus);
     }
   });
 
