@@ -684,68 +684,55 @@ func getSvcNsAndName(url string) (string, string, error) {
 	return parts[1], parts[0], nil
 }
 
-// syncInitialStatus determines the desires initial status and updates it accordingly (if conditions changed)
-func (r *Reconciler) syncInitialStatus(subscription *eventingv1alpha1.Subscription) (statusChanged bool) {
+// syncInitialStatus determines the desired initial status and updates it accordingly (if conditions changed)
+func (r *Reconciler) syncInitialStatus(subscription *eventingv1alpha1.Subscription) {
 	expectedStatus := eventingv1alpha1.SubscriptionStatus{}
 	expectedStatus.InitializeConditions()
 
-	currentReadyStatusForSubscription := subscription.Status.Ready
-	currentReadyStatusFromConditions := subscription.Status.IsReady()
-
-	var updateReadyStatus bool
-	if currentReadyStatusFromConditions && !subscription.Status.Ready {
-		currentReadyStatusForSubscription = true
-		updateReadyStatus = true
-	} else if !currentReadyStatusFromConditions && subscription.Status.Ready {
-		currentReadyStatusForSubscription = false
-		updateReadyStatus = true
-	}
-	// case: conditions are already initialized
-	if eventingv1alpha1.ContainSameConditionTypes(subscription.Status.Conditions, expectedStatus.Conditions) && !updateReadyStatus {
-		return false
+	// case: conditions are already initialized and there is no change in the Ready status
+	if eventingv1alpha1.ContainSameConditionTypes(subscription.Status.Conditions, expectedStatus.Conditions) &&
+		!subscription.Status.ShouldUpdateReadyStatus() {
+		return
 	}
 
-	var currentStatus eventingv1alpha1.SubscriptionStatus
+	var requiredConditions []eventingv1alpha1.Condition
 	if len(subscription.Status.Conditions) > 0 {
-		// determine the intersection between currentConditions and expectedConditions
-		currentConditions := make(map[eventingv1alpha1.ConditionType]eventingv1alpha1.Condition)
-		for _, condition := range subscription.Status.Conditions {
-			currentConditions[condition.Type] = condition
-		}
-		expectedConditions := make(map[eventingv1alpha1.ConditionType]eventingv1alpha1.Condition)
-		for _, condition := range expectedStatus.Conditions {
-			expectedConditions[condition.Type] = condition
-		}
-		// remove from currentConditions all conditions which are not part of expectedConditions
-		for _, condition := range subscription.Status.Conditions {
-			if _, ok := expectedConditions[condition.Type]; !ok {
-				delete(currentConditions, condition.Type)
-			}
-		}
-		// add to currentStatus.Conditions the remained conditions
-		for _, condition := range currentConditions {
-			currentStatus.Conditions = append(currentStatus.Conditions, condition)
-		}
-		// add also to currentStatus.Conditions all new conditions from expectedConditions
-		for _, condition := range expectedStatus.Conditions {
-			if _, ok := currentConditions[condition.Type]; !ok {
-				currentStatus.Conditions = append(currentStatus.Conditions, condition)
-			}
-		}
+		getRequiredConditions(subscription, expectedStatus.Conditions, requiredConditions)
 	}
+
 	if len(subscription.Status.Conditions) == 0 {
 		subscription.Status = expectedStatus
 	} else {
-		subscription.Status.Conditions = currentStatus.Conditions
-		subscription.Status.Ready = currentReadyStatusForSubscription
+		subscription.Status.Conditions = requiredConditions
+		subscription.Status.Ready = !subscription.Status.Ready
 	}
 
 	// reset the status for apiRule
 	subscription.Status.APIRuleName = ""
 	subscription.Status.ExternalSink = ""
 	subscription.Status.SetConditionAPIRuleStatus(false)
+}
 
-	return true
+// getRequiredConditions removes the non-required conditions from the subscription
+// and adds any missing required-conditions
+func getRequiredConditions(subscription *eventingv1alpha1.Subscription, expectedConditions, requiredConditions []eventingv1alpha1.Condition) {
+	expectedConditionsMap := make(map[eventingv1alpha1.ConditionType]eventingv1alpha1.Condition)
+	for _, condition := range expectedConditions {
+		expectedConditionsMap[condition.Type] = condition
+	}
+
+	// add the current subscription's conditions if it exists in the expectedConditions
+	for _, condition := range subscription.Status.Conditions {
+		if _, ok := expectedConditionsMap[condition.Type]; ok {
+			requiredConditions = append(requiredConditions, condition)
+		} else {
+			delete(expectedConditionsMap, condition.Type)
+		}
+	}
+	// add the remaining conditions that weren't present in the subscription
+	for _, condition := range expectedConditionsMap {
+		requiredConditions = append(requiredConditions, condition)
+	}
 }
 
 // replaceStatusCondition replaces the given condition on the subscription. Also it sets the readiness in the status.
