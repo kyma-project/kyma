@@ -10,7 +10,7 @@ import (
 type connectionData struct {
 	// url is URL of the NATS server.
 	url string
-	// retryOnFailedConnect reconnects if the conneciton cannot be established.
+	// retryOnFailedConnect reconnects if the connection cannot be established.
 	retryOnFailedConnect bool
 	// maxReconnects is used when retryOnFailedConnect is true. It sets the number of reconnect attempts. Negative means try indefinitely.
 	maxReconnects int
