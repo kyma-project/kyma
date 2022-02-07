@@ -84,30 +84,51 @@ async function assertAllRulesAreHealthy() {
 }
 
 async function assertMetricsExist() {
-  await assertTimeSeriesExist('kube_deployment_status_replicas_available', [
-    'deployment',
-    'namespace',
-  ]);
-  await assertTimeSeriesExist('istio_requests_total', [
-    'destination_service',
-    'response_code',
-    'source_workload',
-  ]);
-  await assertTimeSeriesExist('container_memory_usage_bytes', [
-    'pod',
-    'container',
-  ]);
-  await assertTimeSeriesExist(
-      'kube_pod_container_resource_limits',
-      ['pod', 'container'],
-      'memory',
-  );
-  await assertTimeSeriesExist('container_cpu_usage_seconds_total', [
-    'container',
-    'pod',
-    'namespace',
-  ]);
-  await assertTimeSeriesExist('kube_service_labels', ['namespace']);
+  // Object with exporter, its corressponding metrics followed by labels and resources.
+  const metricsList = [
+    {'monitoring-kubelet': [
+      {'container_memory_usage_bytes': [['pod', 'container']]},
+      {'kubelet_pod_start_duration_seconds_count': [[]]}]},
+
+    {'monitoring-apiserver': [
+      {'apiserver_request_duration_seconds_bucket': [[]]},
+      {'etcd_disk_backend_commit_duration_seconds_bucket': [[]]}]},
+
+    {'monitoring-kube-state-metrics': [
+      {'kube_deployment_status_replicas_available': [['deployment', 'namespace']]},
+      {'kube_pod_container_resource_limits': [['pod', 'container'], ['memory']]}]},
+
+    {'monitoring-node-exporter': [
+      {'process_cpu_seconds_total': [['pod']]},
+      {'go_memstats_heap_inuse_bytes': [['pod']]}]},
+
+    {'istio-component-monitor': [
+      {'istio_requests_total': [['destination_service', 'source_workload', 'response_code']]}]},
+
+    {'logging-fluent-bit': [
+      {'fluentbit_input_bytes_total': [['name']]},
+      {'fluentbit_input_records_total': [[]]}]},
+
+    {'logging-loki': [
+      {'log_messages_total': [['level']]},
+      {'loki_request_duration_seconds_bucket': [['route']]}]},
+
+    {'monitoring-grafana': [
+      {'grafana_stat_totals_dashboard': [[]]},
+      {'grafana_api_dataproxy_request_all_milliseconds_sum ': [['pod']]}]},
+
+  ];
+
+  for (let index=0; index < metricsList.length; index++ ) {
+    for (const [exporter, object] of Object.entries(metricsList[index])) {
+      for (const [, obj] of Object.entries(object)) {
+        await assertTimeSeriesExist(exporter,
+            Object.keys(obj)[0],
+            obj[Object.keys(obj)[0]][0],
+            obj[Object.keys(obj)[0]][1]);
+      }
+    }
+  }
 }
 
 async function assertRulesAreRegistered() {
@@ -147,12 +168,14 @@ function shouldIgnoreAlert(alert) {
     'Watchdog',
     // Scrape limits can be exceeded on long-running clusters and can be ignored
     'ScrapeLimitForTargetExceeded',
-    // Overcommitting resources is fine for e2e test scenarios
+    // Resource overcommitment is fine for e2e test scenarios
     'KubeCPUOvercommit',
     'KubeMemoryOvercommit',
+    // API server certificates are auto-renewed
+    'K8sCertificateExpirationNotice',
   ];
 
-  return alert.labels.severity == 'critical' || alertNamesToIgnore.includes(alert.labels.alertname);
+  return alert.labels.severity != 'critical' || alertNamesToIgnore.includes(alert.labels.alertname);
 }
 
 async function getServiceMonitors() {
@@ -209,7 +232,7 @@ async function buildScrapePoolSet() {
   return scrapePools;
 }
 
-async function assertTimeSeriesExist(metric, labels, resource='') {
+async function assertTimeSeriesExist(exporter, metric, labels, resource='') {
   const resultlessQueries = [];
   let result = '';
   let query = '';
@@ -224,7 +247,7 @@ async function assertTimeSeriesExist(metric, labels, resource='') {
     }
 
     if (result.length == 0) {
-      resultlessQueries.push(query);
+      resultlessQueries.push(query.concat('metric from service monitor: '.concat(exporter)));
     }
   }
   assert.isEmpty(resultlessQueries, `Following queries return no results: ${resultlessQueries.join(', ')}`);

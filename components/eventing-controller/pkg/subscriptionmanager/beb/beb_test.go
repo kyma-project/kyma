@@ -13,6 +13,7 @@ import (
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 	"github.com/kyma-project/kyma/components/eventing-controller/logger"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/config"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/types"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/subscriptionmanager/mock"
@@ -32,12 +33,17 @@ func TestCleanup(t *testing.T) {
 
 	// create a Kyma subscription
 	subscription := controllertesting.NewSubscription("test", "test",
-		controllertesting.WithWebhookAuthForBEB, controllertesting.WithFakeSubscriptionStatus, controllertesting.WithEventTypeFilter)
+		controllertesting.WithWebhookAuthForBEB(),
+		controllertesting.WithFakeSubscriptionStatus(),
+		controllertesting.WithOrderCreatedFilter(),
+	)
 	subscription.Spec.Sink = "https://bla.test.svc.cluster.local"
 
 	// create an APIRule
-	apiRule := controllertesting.NewAPIRule(subscription, controllertesting.WithPath)
-	controllertesting.WithService("host-test", "svc-test", apiRule)
+	apiRule := controllertesting.NewAPIRule(subscription,
+		controllertesting.WithPath(),
+		controllertesting.WithService("svc-test", "host-test"),
+	)
 	subscription.Status.APIRuleName = apiRule.Name
 
 	// start BEB Mock
@@ -53,7 +59,7 @@ func TestCleanup(t *testing.T) {
 		Domain:                   domain,
 		EventTypePrefix:          controllertesting.EventTypePrefix,
 		BEBNamespace:             "/default/ns",
-		Qos:                      "AT_LEAST_ONCE",
+		Qos:                      string(types.QosAtLeastOnce),
 	}
 	credentials := &handlers.OAuth2ClientCredentials{
 		ClientID:     "webhook_client_id",

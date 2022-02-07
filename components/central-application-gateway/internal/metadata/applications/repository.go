@@ -42,6 +42,7 @@ type ServiceAPI struct {
 	TargetURL                   string
 	Credentials                 *Credentials
 	RequestParametersSecretName string
+	SkipVerify                  bool
 }
 
 type predicateFunc func(service v1alpha1.Service, entry v1alpha1.Entry) bool
@@ -106,7 +107,7 @@ func (r *repository) get(appName string, predicate func(service v1alpha1.Service
 	for _, service := range app.Spec.Services {
 		for _, entry := range service.Entries {
 			if predicate(service, entry) {
-				services = append(services, convert(service, entry))
+				services = append(services, convert(service, entry, app.Spec.SkipVerify))
 				infos = append(infos, fmt.Sprintf("service.ID: '%s', service.DisplayName: '%s', entry.Name: '%s'", service.ID, service.DisplayName, entry.Name))
 			}
 		}
@@ -138,11 +139,12 @@ func (r *repository) getApplication(appName string) (*v1alpha1.Application, appe
 	return app, nil
 }
 
-func convert(service v1alpha1.Service, entry v1alpha1.Entry) Service {
+func convert(service v1alpha1.Service, entry v1alpha1.Entry, skipVerify bool) Service {
 	api := &ServiceAPI{
 		TargetURL:                   entry.TargetUrl,
 		Credentials:                 convertCredentialsFromK8sType(entry.Credentials),
 		RequestParametersSecretName: entry.RequestParametersSecretName,
+		SkipVerify:                  skipVerify,
 	}
 
 	return Service{

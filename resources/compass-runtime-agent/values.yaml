@@ -5,7 +5,7 @@ global:
   images:
     compass_runtime_agent:
       name: "compass-runtime-agent"
-      version: "PR-12963"
+      version: "PR-12913"
   istio:
     gateway:
       name: kyma-gateway
@@ -29,6 +29,7 @@ compassRuntimeAgent:
     centralGatewayServiceUrl: http://central-application-gateway.kyma-system.svc.cluster.local:8082
   config:
     insecureConfigurationFetch: true
+    skipAppsTLSVerification: false
     secret:
       name: compass-agent-configuration
       namespace: compass-system

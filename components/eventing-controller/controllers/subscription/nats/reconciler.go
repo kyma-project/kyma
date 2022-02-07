@@ -65,8 +65,10 @@ const (
 	clusterLocalURLSuffix = "svc.cluster.local"
 )
 
+type ReconcilerOpt func(reconciler *Reconciler)
+
 func NewReconciler(ctx context.Context, client client.Client, applicationLister *application.Lister, cache cache.Cache,
-	logger *logger.Logger, recorder record.EventRecorder, cfg env.NatsConfig, subsCfg env.DefaultSubscriptionConfig) *Reconciler {
+	logger *logger.Logger, recorder record.EventRecorder, cfg env.NatsConfig, subsCfg env.DefaultSubscriptionConfig, opts ...ReconcilerOpt) *Reconciler {
 	reconciler := &Reconciler{
 		ctx:                 ctx,
 		Client:              client,
@@ -76,6 +78,9 @@ func NewReconciler(ctx context.Context, client client.Client, applicationLister 
 		eventTypeCleaner:    eventtype.NewCleaner(cfg.EventTypePrefix, applicationLister, logger),
 		sinkValidator:       defaultSinkValidator,
 		customEventsChannel: make(chan event.GenericEvent),
+	}
+	for _, o := range opts {
+		o(reconciler)
 	}
 	natsHandler := handlers.NewNats(cfg, subsCfg, reconciler.handleNatsConnClose, logger)
 	if err := natsHandler.Initialize(env.Config{}); err != nil {
@@ -225,21 +230,21 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 	// Check for valid sink
 	if err := r.sinkValidator(ctx, r, subscription); err != nil {
 		log.Errorw("sink URL validation failed", "error", err)
-		if err := r.syncSubscriptionStatus(ctx, subscription, false, false, err.Error()); err != nil {
-			return checkIsConflict(err)
+		if syncErr := r.syncSubscriptionStatus(ctx, subscription, false, false, err.Error()); err != nil {
+			return ctrl.Result{}, syncErr
 		}
-		// No point in reconciling as the sink is invalid
-		return ctrl.Result{}, nil
+		// No point in reconciling as the sink is invalid, return latest error to requeue the reconciliation request
+		return ctrl.Result{}, err
 	}
 
 	// Synchronize Kyma subscription to NATS backend
-	subscriptionStatusChanged, err := r.Backend.SyncSubscription(subscription, r.eventTypeCleaner)
-	if err != nil {
-		log.Errorw("sync subscription failed", "error", err)
-		if err := r.syncSubscriptionStatus(ctx, subscription, false, false, err.Error()); err != nil {
-			return checkIsConflict(err)
+	subscriptionStatusChanged, syncErr := r.Backend.SyncSubscription(subscription, r.eventTypeCleaner)
+	if syncErr != nil {
+		log.Errorw("sync subscription failed", "error", syncErr)
+		if err := r.syncSubscriptionStatus(ctx, subscription, false, false, syncErr.Error()); err != nil {
+			return ctrl.Result{}, err
 		}
-		return ctrl.Result{}, err
+		return ctrl.Result{}, syncErr
 	}
 	log.Debug("create NATS subscriptions succeeded")
 

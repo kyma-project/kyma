@@ -28,15 +28,16 @@ func TestCleanup(t *testing.T) {
 	// When
 	// Create a test subscriber
 	ctx := context.Background()
-	subscriberPort := 8081
-	subscriber := controllertesting.NewSubscriber(subscriberPort)
-	subscriber.Start()
+	subscriber := controllertesting.NewSubscriber()
 	// Shutting down subscriber
 	defer subscriber.Shutdown()
 
 	// Create test subscription
-	testSub := controllertesting.NewSubscription("test", "test", controllertesting.WithFakeSubscriptionStatus, controllertesting.WithEventTypeFilter)
-	testSub.Spec.Sink = fmt.Sprintf("http://localhost:%d%s", subscriberPort, subscriber.StoreEndpoint)
+	testSub := controllertesting.NewSubscription("test", "test",
+		controllertesting.WithFakeSubscriptionStatus(),
+		controllertesting.WithOrderCreatedFilter(),
+		controllertesting.WithSinkURL(subscriber.SinkURL),
+	)
 
 	// Create NATS Server
 	natsPort := 4222
