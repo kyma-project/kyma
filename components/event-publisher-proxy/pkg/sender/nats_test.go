@@ -52,6 +52,7 @@ func setupTestEnvironment(t *testing.T, connectionOpts ...pkgnats.Opt) TestEnvir
 	assert.NotNil(t, natsServer)
 	t.Cleanup(func() {
 		natsServer.Shutdown()
+		natsServer.WaitForShutdown()
 	})
 
 	allConnectionOpts := []pkgnats.Opt{
@@ -69,8 +70,11 @@ func setupTestEnvironment(t *testing.T, connectionOpts ...pkgnats.Opt) TestEnvir
 	err := natsSendConnection.Connect()
 	assert.Nil(t, err)
 	assert.NotNil(t, natsSendConnection.Connection)
+	t.Cleanup(func() {
+		natsSendConnection.Connection.Close()
+	})
 
-	// setup natsSendConnection
+	// setup natsRecvConnection
 	natsRecvConnection := pkgnats.NewConnection(
 		natsServer.ClientURL(),
 		allConnectionOpts...,
@@ -78,6 +82,10 @@ func setupTestEnvironment(t *testing.T, connectionOpts ...pkgnats.Opt) TestEnvir
 	err = natsRecvConnection.Connect()
 	assert.NotNil(t, natsRecvConnection)
 	assert.Nil(t, err)
+
+	t.Cleanup(func() {
+		natsRecvConnection.Connection.Close()
+	})
 
 	// create message natsMessageSender
 	ctx := context.Background()
