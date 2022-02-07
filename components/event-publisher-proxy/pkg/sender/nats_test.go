@@ -12,7 +12,6 @@ import (
 	"time"
 
 	cloudevents "github.com/cloudevents/sdk-go/v2"
-	"github.com/cloudevents/sdk-go/v2/event"
 	"github.com/nats-io/nats-server/v2/server"
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
@@ -146,20 +145,17 @@ func TestSendCloudEventsToNats(t *testing.T) {
 				// this is important because we want to test that the connection gets re-established as soon as we send an event
 				assert.True(t, testEnv.natsSendConnection.Connection.IsClosed())
 			}
-			sendEventAndAssertHTTPStatusCode(testEnv.context, t, testEnv.natsMessageSender, &ce, tc.wantHTTPStatusCode)
+
+			// send the event to NATS and asserts that the expectedStatus is returned from NATS
+			status, err := testEnv.natsMessageSender.Send(testEnv.context, &ce)
+			assert.Nil(t, err)
+			assert.Equal(t, tc.wantHTTPStatusCode, status)
 
 			// wait for subscriber to receive the messages
 			err = testingutils.WaitForChannelOrTimeout(done, time.Second*3)
 			assert.NoError(t, err, "Subscriber did not receive the message")
 		})
 	}
-}
-
-// sendEventAndAssertHTTPStatusCode sends the event to NATS and asserts that the expectedStatus is returned from NATS
-func sendEventAndAssertHTTPStatusCode(ctx context.Context, t *testing.T, sender *NatsMessageSender, event *event.Event, expectedStatus int) {
-	status, err := sender.Send(ctx, event)
-	assert.Nil(t, err)
-	assert.Equal(t, expectedStatus, status)
 }
 
 // subscribeToSubject subscribes to the NATS subject using the connection.
