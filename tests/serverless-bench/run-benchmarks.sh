@@ -11,7 +11,7 @@ export TEST_DURATION="${DURATION:-1m}"
 export TEST_SPAWN_RATE="${SPAWN_RATE:-50}"
 
 
-# running benshmarks
+# running benchmarks
 for FUNCTION in ${ALL_FUNCTIONS[@]}; do 
     echo "--------------------------------------------------------------------------------"
     echo "Benchmarking function ${FUNCTION} at URL: http://${FUNCTION}.${TEST_NAMESPACE}.svc.cluster.local"
