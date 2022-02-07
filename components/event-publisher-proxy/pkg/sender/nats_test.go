@@ -52,13 +52,17 @@ func setupTestEnvironment(t *testing.T, connectionOpts ...pkgnats.Opt) TestEnvir
 		natsServer.Shutdown()
 	})
 
-	// connect to nats
-	bc := pkgnats.NewConnection(
-		natsServer.ClientURL(),
+	allConnectionOpts := []pkgnats.Opt{
 		pkgnats.WithMaxReconnects(1),
 		pkgnats.WithRetryOnFailedConnect(true),
 		pkgnats.WithReconnectWait(time.Second),
-		connectionsOpts...
+	}
+	allConnectionOpts = append(allConnectionOpts, connectionOpts...)
+
+	// connect to nats
+	bc := pkgnats.NewConnection(
+		natsServer.ClientURL(),
+		allConnectionOpts...,
 	)
 	err := bc.Connect()
 	assert.Nil(t, err)
