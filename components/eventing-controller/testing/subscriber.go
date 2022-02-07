@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"net/http/httptest"
 	"strconv"
 	"time"
 
@@ -15,34 +16,28 @@ import (
 )
 
 type Subscriber struct {
-	Port                 int
-	server               *http.Server
-	StoreEndpoint        string
-	CheckEndpoint        string
-	Return500Endpoint    string
-	CheckRetriesEndpoint string
+	server           *httptest.Server
+	SinkURL          string
+	checkURL         string
+	InternalErrorURL string
+	checkRetriesURL  string
 }
 
 const (
-	maxNoOfData = 10
-	maxAttempts = 10
+	maxNoOfData           = 10
+	maxAttempts           = 10
+	storeEndpoint         = "/store"
+	checkEndpoint         = "/check"
+	internalErrorEndpoint = "/return500"
+	checkRetriesEndpoint  = "/check_retries"
 )
 
-func NewSubscriber(port int) *Subscriber {
-	return &Subscriber{
-		Port:                 port,
-		StoreEndpoint:        "/store",
-		CheckEndpoint:        "/check",
-		Return500Endpoint:    "/return500",
-		CheckRetriesEndpoint: "/check_retries",
-	}
-}
-
-func (s *Subscriber) Start() {
+func NewSubscriber() *Subscriber {
 	store := make(chan string, maxNoOfData)
 	retries := atomic.Int32{}
 	mux := http.NewServeMux()
-	mux.HandleFunc("/store", func(w http.ResponseWriter, r *http.Request) {
+
+	mux.HandleFunc(storeEndpoint, func(w http.ResponseWriter, r *http.Request) {
 		data, err := ioutil.ReadAll(r.Body)
 		if err != nil {
 			log.Printf("read data failed: %v", err)
@@ -51,7 +46,7 @@ func (s *Subscriber) Start() {
 		}
 		store <- string(data)
 	})
-	mux.HandleFunc("/check", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc(checkEndpoint, func(w http.ResponseWriter, r *http.Request) {
 		var msg string
 		select {
 		case m := <-store:
@@ -66,7 +61,7 @@ func (s *Subscriber) Start() {
 			return
 		}
 	})
-	mux.HandleFunc("/return500", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc(internalErrorEndpoint, func(w http.ResponseWriter, r *http.Request) {
 		if data, err := ioutil.ReadAll(r.Body); err != nil {
 			log.Printf("read data failed: %v", err)
 		} else {
@@ -75,7 +70,7 @@ func (s *Subscriber) Start() {
 		retries.Inc()
 		w.WriteHeader(http.StatusInternalServerError)
 	})
-	mux.HandleFunc("/check_retries", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc(checkRetriesEndpoint, func(w http.ResponseWriter, r *http.Request) {
 		_, err := w.Write([]byte(fmt.Sprintf("%d", retries.Load())))
 		if err != nil {
 			log.Printf("check_retries failed: %v", err)
@@ -84,29 +79,19 @@ func (s *Subscriber) Start() {
 		}
 	})
 
-	s.server = &http.Server{
-		Addr:    fmt.Sprintf(":%d", s.Port),
-		Handler: mux,
-	}
+	server := httptest.NewServer(mux)
 
-	go func() {
-		log.Printf("start subscriber %v", s.server.Addr)
-		if err := s.server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-			log.Fatalf("start subscriber failed: %v", err)
-		}
-	}()
+	return &Subscriber{
+		server:           server,
+		SinkURL:          fmt.Sprintf("%s%s", server.URL, storeEndpoint),
+		checkURL:         fmt.Sprintf("%s%s", server.URL, checkEndpoint),
+		InternalErrorURL: fmt.Sprintf("%s%s", server.URL, internalErrorEndpoint),
+		checkRetriesURL:  fmt.Sprintf("%s%s", server.URL, checkRetriesEndpoint),
+	}
 }
 
 func (s *Subscriber) Shutdown() {
-	go func() {
-		if err := s.server.Close(); err != nil {
-			log.Printf("shutdown subscriber failed: %v", err)
-		}
-	}()
-}
-
-func (s *Subscriber) GetSinkURL() string {
-	return fmt.Sprintf("http://127.0.0.1:%d/store", s.Port)
+	s.server.Close()
 }
 
 func (s *Subscriber) IsRunning() bool {
@@ -118,7 +103,7 @@ func (s Subscriber) CheckEvent(expectedData string) error {
 	delay := time.Second
 	err := retry.Do(
 		func() error {
-			resp, err := http.Get(fmt.Sprintf("http://127.0.0.1:%d/check", s.Port)) //nolint:gosec
+			resp, err := http.Get(s.checkURL)
 			if err != nil {
 				return pkgerrors.Wrapf(err, "get HTTP request failed")
 			}
@@ -154,7 +139,7 @@ func (s Subscriber) CheckRetries(expectedNoOfRetries int, expectedData string) e
 	delay := time.Second
 	err := retry.Do(
 		func() error {
-			resp, err := http.Get(fmt.Sprintf("http://127.0.0.1:%d/check_retries", s.Port)) //nolint:gosec
+			resp, err := http.Get(s.checkRetriesURL)
 			if err != nil {
 				return pkgerrors.Wrapf(err, "get HTTP request failed")
 			}

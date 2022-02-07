@@ -195,6 +195,7 @@ func (r *Reconciler) updateSubscription(ctx context.Context, subscription *event
 		if err := r.Update(ctx, newSubscription); err != nil {
 			return errors.Wrapf(err, "remove finalizer failed name: %s", Finalizer)
 		}
+		logger.Debugw("update subscription meta for finalizers", "oldFinalizers", latestSubscription.ObjectMeta.Finalizers, "newFinalizers", newSubscription.ObjectMeta.Finalizers)
 	}
 
 	return nil
@@ -225,6 +226,7 @@ func (r *Reconciler) updateStatus(ctx context.Context, oldSubscription, newSubsc
 		logger.Errorw("update subscription status failed", "error", err)
 		return err
 	}
+	logger.Debugw("updated subscription status", "oldStatus", oldSubscription.Status, "newStatus", newSubscription.Status)
 
 	return nil
 }
@@ -235,11 +237,8 @@ func (r *Reconciler) syncFinalizer(subscription *eventingv1alpha1.Subscription, 
 	if r.isFinalizerSet(subscription) {
 		return nil
 	}
-	if err := r.addFinalizer(subscription, logger); err != nil {
-		return err
-	}
 
-	return nil
+	return r.addFinalizer(subscription, logger)
 }
 
 func (r *Reconciler) handleDeleteSubscription(ctx context.Context, subscription *eventingv1alpha1.Subscription, logger *zap.SugaredLogger) (ctrl.Result, error) {
@@ -367,6 +366,7 @@ func (r *Reconciler) syncAPIRule(ctx context.Context, subscription *eventingv1al
 
 	// check if the apiRule is ready
 	apiRuleReady := computeAPIRuleReadyStatus(apiRule)
+
 	// sync the condition: ConditionAPIRuleStatus
 	subscription.Status.SetConditionAPIRuleStatus(apiRuleReady)
 	// set subscription sink only if the APIRule is ready
