@@ -7,16 +7,6 @@ application-broker:
       requests:
         memory: 28Mi
         cpu: 20m
-application-operator:
-  controller:
-    resources:
-      profile: "evaluation"
-      limits:
-        cpu: 50m
-        memory: 256Mi
-      requests:
-        cpu: 25m
-        memory: 40Mi
 connector-service:
   deployment:
     resources:
