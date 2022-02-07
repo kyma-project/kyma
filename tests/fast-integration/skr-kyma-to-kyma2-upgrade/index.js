@@ -219,6 +219,7 @@ describe('SKR-Upgrade-test', function() {
   it('Should get Runtime Status after upgrade', async function() {
     const runtimeStatus = await kcp.getRuntimeStatusOperations(instanceID);
     console.log(`\nRuntime status: ${runtimeStatus}`);
+    await kcp.reconcileInformationLog(runtimeStatus);
   });
 
   // Perform Tests after Upgrade
