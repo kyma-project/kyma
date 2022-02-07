@@ -41,6 +41,7 @@ type CRManager interface {
 type Supervisor interface {
 	InitializeCompassConnection() (*v1alpha1.CompassConnection, error)
 	SynchronizeWithCompass(connection *v1alpha1.CompassConnection) (*v1alpha1.CompassConnection, error)
+	MaintainCompassConnection(connection *v1alpha1.CompassConnection) error
 }
 
 func NewSupervisor(
@@ -96,7 +97,7 @@ func (s *crSupervisor) InitializeCompassConnection() (*v1alpha1.CompassConnectio
 
 	s.log.Infof("Compass Connection exists with state %s", compassConnectionCR.Status.State)
 
-	if !compassConnectionCR.ShouldAttemptReconnect() {
+	if !compassConnectionCR.Failed() {
 		s.log.Infof("Connection already initialized, skipping ")
 
 		credentials, err := s.credentialsManager.GetClientCredentials()
@@ -118,7 +119,7 @@ func (s *crSupervisor) InitializeCompassConnection() (*v1alpha1.CompassConnectio
 	return s.updateCompassConnection(compassConnectionCR)
 }
 
-func (s *crSupervisor) SynchronizeWithCompass(connection *v1alpha1.CompassConnection) (*v1alpha1.CompassConnection, error) {
+func (s *crSupervisor) MaintainCompassConnection(connection *v1alpha1.CompassConnection) error {
 	s.log = s.log.WithField("CompassConnection", connection.Name)
 
 	s.log.Infof("Trying to maintain connection to Connector with %s url...", connection.Spec.ManagementInfo.ConnectorURL)
@@ -126,8 +127,17 @@ func (s *crSupervisor) SynchronizeWithCompass(connection *v1alpha1.CompassConnec
 	if err != nil {
 		errorMsg := fmt.Sprintf("Error while trying to maintain connection: %s", err.Error())
 		s.setConnectionMaintenanceFailedStatus(connection, metav1.Now(), errorMsg) // save in ConnectionStatus.LastSync
-		return s.updateCompassConnection(connection)
+		_, updateErr := s.updateCompassConnection(connection)
+
+		if updateErr != nil {
+			return updateErr
+		}
 	}
+	return err
+}
+
+func (s *crSupervisor) SynchronizeWithCompass(connection *v1alpha1.CompassConnection) (*v1alpha1.CompassConnection, error) {
+	s.log = s.log.WithField("CompassConnection", connection.Name)
 
 	s.log.Infof("Reading configuration required to fetch Runtime configuration...")
 	runtimeConfig, err := s.configProvider.GetRuntimeConfig()
@@ -237,6 +247,7 @@ func (s *crSupervisor) maintainCompassConnection(compassConnection *v1alpha1.Com
 
 	compassConnection.Status.ConnectionStatus.LastSync = connectionTime
 	compassConnection.Status.ConnectionStatus.LastSuccess = connectionTime
+	// for alternative flow compassConnection.Status.State = v1alpha1.Connected
 
 	return nil
 }
