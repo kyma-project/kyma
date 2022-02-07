@@ -3,7 +3,7 @@ from locust import HttpUser, task, constant, events
 
 expected_string = "Hello Serverless"
 
-class Python38Test(HttpUser):
+class StressTest(HttpUser):
     wait_time = constant(1)
 
     @task
