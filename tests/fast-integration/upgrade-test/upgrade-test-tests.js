@@ -10,12 +10,26 @@ const {
 const {
   checkServiceInstanceExistence,
 } = require('./fixtures/helm-broker');
+const {
+  checkLokiLogs,
+  lokiPortForward,
+} = require('../logging');
 
 describe('Upgrade test tests', function() {
   this.timeout(10 * 60 * 1000);
   this.slow(5000);
   let initialRestarts = null;
   const testNamespace = 'test';
+  const testStartTimestamp = new Date().toISOString();
+  let cancelPortForward = null;
+
+  before(() => {
+    cancelPortForward = lokiPortForward();
+  });
+
+  after(() => {
+    cancelPortForward();
+  });
 
   it('Listing all pods in cluster', async function() {
     initialRestarts = await getContainerRestartsForAllNamespaces();
@@ -40,5 +54,9 @@ describe('Upgrade test tests', function() {
   it('Should print report of restarted containers, skipped if no crashes happened', async function() {
     const afterTestRestarts = await getContainerRestartsForAllNamespaces();
     printRestartReport(initialRestarts, afterTestRestarts);
+  });
+
+  it('Logs from commerce mock pod should be retrieved through Loki', async function() {
+    await checkLokiLogs(testStartTimestamp);
   });
 });
