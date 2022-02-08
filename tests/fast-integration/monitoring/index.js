@@ -1,7 +1,7 @@
-const prometheus = require('../monitoring/prometheus');
-const grafana = require('../monitoring/grafana');
+const prometheus = require('./prometheus');
+const grafana = require('./grafana');
 
-const {prometheusPortForward} = require('../monitoring/client');
+const {prometheusPortForward} = require('./client');
 
 function monitoringTests() {
   describe('Prometheus Tests:', function() {
