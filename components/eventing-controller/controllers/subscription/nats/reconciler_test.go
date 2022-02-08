@@ -86,12 +86,12 @@ func testNATSUnavailabilityReflectedInSubscriptionStatus(id int, eventTypePrefix
 			cancel = startReconciler(eventTypePrefix, natsURL)
 			defer cancel()
 
-			// Create a subscriber svc.
+			// Create a subscriber service
 			subscriberName := fmt.Sprintf(subscriberNameFormat, id) + "-valid"
 			subscriberSvc := reconcilertesting.NewSubscriberSvc(subscriberName, namespaceName)
 			ensureSubscriberSvcCreated(ctx, subscriberSvc)
 
-			// Create a subscription.
+			// Create a subscription
 			subscriptionName := fmt.Sprintf(subscriptionNameFormat, id) + "-valid"
 			subscription := reconcilertesting.NewSubscription(subscriptionName, subscriberSvc.Namespace,
 				reconcilertesting.WithFilter("", eventTypeToSubscribe),
@@ -100,12 +100,13 @@ func testNATSUnavailabilityReflectedInSubscriptionStatus(id int, eventTypePrefix
 			ensureSubscriptionCreated(ctx, subscription)
 
 			Context("testing against an available NATS server", func() {
+				expectedConditions := eventingv1alpha1.MakeCondition(
+					eventingv1alpha1.ConditionSubscriptionActive,
+					eventingv1alpha1.ConditionReasonNATSSubscriptionActive,
+					v1.ConditionTrue, "")
 				getSubscription(ctx, subscription).Should(And(
 					reconcilertesting.HaveSubscriptionName(subscriptionName),
-					reconcilertesting.HaveCondition(eventingv1alpha1.MakeCondition(
-						eventingv1alpha1.ConditionSubscriptionActive,
-						eventingv1alpha1.ConditionReasonNATSSubscriptionActive,
-						v1.ConditionTrue, "")),
+					reconcilertesting.HaveCondition(expectedConditions),
 				))
 			})
 
@@ -138,7 +139,7 @@ func testNATSUnavailabilityReflectedInSubscriptionStatus(id int, eventTypePrefix
 func testCleanEventTypes(id int, eventTypePrefix, natsSubjectToPublish, eventTypeToSubscribe string) bool {
 	return When("changing the filters of a Subscription", func() {
 		It("it should have the correct corresponding clean event types", func() {
-			// Set the expectations that are common to all test steps.
+			// Set the expectations that are common to all test steps
 			expectedCondition := eventingv1alpha1.MakeCondition(
 				eventingv1alpha1.ConditionSubscriptionActive,
 				eventingv1alpha1.ConditionReasonNATSSubscriptionActive,
@@ -150,12 +151,12 @@ func testCleanEventTypes(id int, eventTypePrefix, natsSubjectToPublish, eventTyp
 			cancel = startReconciler(eventTypePrefix, natsURL)
 			defer cancel()
 
-			// Create a subscriber service.
+			// Create a subscriber service
 			subscriberName := fmt.Sprintf(subscriberNameFormat, id)
 			subscriberSvc := reconcilertesting.NewSubscriberSvc(subscriberName, namespaceName)
 			ensureSubscriberSvcCreated(ctx, subscriberSvc)
 
-			// Create a Subscription.
+			// Create a Subscription
 			subscriptionName := fmt.Sprintf(subscriptionNameFormat, id)
 			subscription := reconcilertesting.NewSubscription(subscriptionName, namespaceName,
 				reconcilertesting.WithEmptyFilter(),
@@ -182,7 +183,7 @@ func testCleanEventTypes(id int, eventTypePrefix, natsSubjectToPublish, eventTyp
 					fmt.Sprintf("%s1", natsSubjectToPublish),
 				}
 
-				// Adding Filters to subscription
+				By("adding filters to a subscription")
 				eventTypes := []string{
 					fmt.Sprintf("%s0", eventTypeToSubscribe),
 					fmt.Sprintf("%s1", eventTypeToSubscribe),
@@ -267,12 +268,12 @@ func testUpdateSubscriptionStatus(id int, eventTypePrefix, natsSubjectToPublish,
 			cancel = startReconciler(eventTypePrefix, natsURL)
 			defer cancel()
 
-			// Create a subscriber service.
+			// Create a subscriber service
 			subscriberName := fmt.Sprintf(subscriberNameFormat, id)
 			subscriberSvc := reconcilertesting.NewSubscriberSvc(subscriberName, namespaceName)
 			ensureSubscriberSvcCreated(ctx, subscriberSvc)
 
-			// Create a Subscription.
+			// Create a subscription
 			subscriptionName := fmt.Sprintf(subscriptionNameFormat, id)
 			subscription := reconcilertesting.NewSubscription(subscriptionName, namespaceName,
 				reconcilertesting.WithEmptyFilter(),
@@ -310,10 +311,8 @@ func testUpdateSubscriptionStatus(id int, eventTypePrefix, natsSubjectToPublish,
 					reconcilertesting.HaveCleanEventTypes(expectedCleanEventType),
 				))
 
-				By("ensuring, that the subscription does not have the additional condition - cond1")
+				By("ensuring, that the subscription does not have additional conditions")
 				getSubscription(ctx, subscription).ShouldNot(reconcilertesting.HaveCondition(multipleConditions[0]))
-
-				By("ensuring, that the subscription does not have the additional condition - cond2")
 				getSubscription(ctx, subscription).ShouldNot(reconcilertesting.HaveCondition(multipleConditions[1]))
 			})
 		})
@@ -329,12 +328,12 @@ func testCreateDeleteSubscription(id int, eventTypePrefix, natsSubjectToPublish,
 			cancel = startReconciler(eventTypePrefix, natsURL)
 			defer cancel()
 
-			// Create a subscriber svc.
+			// Create a subscriber svc
 			subscriberName := fmt.Sprintf(subscriberNameFormat, id)
 			subscriberSvc := reconcilertesting.NewSubscriberSvc(subscriberName, namespaceName)
 			ensureSubscriberSvcCreated(ctx, subscriberSvc)
 
-			// Create a subscription.
+			// Create a subscription
 			subscriptionName := fmt.Sprintf(subscriptionNameFormat, id)
 			subscription := reconcilertesting.NewSubscription(subscriptionName, namespaceName,
 				reconcilertesting.WithFilter(reconcilertesting.EventSource, eventTypeToSubscribe),
@@ -343,22 +342,22 @@ func testCreateDeleteSubscription(id int, eventTypePrefix, natsSubjectToPublish,
 			)
 			ensureSubscriptionCreated(ctx, subscription)
 
-			// Setting expectations.
+			By("checking that the subscription was created properly")
 			expectedCondition := eventingv1alpha1.MakeCondition(
 				eventingv1alpha1.ConditionSubscriptionActive,
 				eventingv1alpha1.ConditionReasonNATSSubscriptionActive,
 				v1.ConditionTrue, "")
+
 			expectedConfiguration := &eventingv1alpha1.SubscriptionConfig{
 				MaxInFlightMessages: defaultSubsConfig.MaxInFlightMessages}
 
-			By("checking, if the subscription was created properly")
 			getSubscription(ctx, subscription).Should(And(
 				reconcilertesting.HaveSubscriptionName(subscriptionName),
 				reconcilertesting.HaveCondition(expectedCondition),
 				reconcilertesting.HaveSubsConfiguration(expectedConfiguration),
 			))
 
-			By("checking, that the subscription was created at the NATS backend")
+			By("checking that the subscription was created at the NATS backend")
 			backendSubscription := getSubscriptionFromNats(natsBackend.GetAllSubscriptions(), subscriptionName)
 			Expect(backendSubscription).NotTo(BeNil())
 			Expect(backendSubscription.IsValid()).To(BeTrue())
@@ -382,22 +381,22 @@ func testCreateSubscriptionWithValidSink(id int, eventTypePrefix, _, eventTypeTo
 		cancel = startReconciler(eventTypePrefix, natsURL)
 		defer cancel()
 
-		// Create a subscriber svc.
+		// Create a subscriber service
 		subscriberSvc := reconcilertesting.NewSubscriberSvc(subscriberName, namespaceName)
 		ensureSubscriberSvcCreated(ctx, subscriberSvc)
 
-		// Create a subscription.
+		// Create a subscription
 		subscription := reconcilertesting.NewSubscription(subscriptionName, namespaceName,
 			reconcilertesting.WithFilter("", eventTypeToSubscribe),
 			reconcilertesting.WithSinkURL(sink),
 		)
 		ensureSubscriptionCreated(ctx, subscription)
 
+		// Validate the subscription
 		expectedConditions := eventingv1alpha1.MakeCondition(
 			eventingv1alpha1.ConditionSubscriptionActive,
 			eventingv1alpha1.ConditionReasonNATSSubscriptionActive,
 			v1.ConditionTrue, "")
-
 		getSubscription(ctx, subscription).Should(And(
 			reconcilertesting.HaveSubscriptionName(subscriptionName),
 			reconcilertesting.HaveCondition(expectedConditions),
@@ -440,7 +439,7 @@ func testCreateSubscriptionWithInvalidSink(id int, eventTypePrefix, _, eventType
 		)
 		ensureSubscriptionCreated(ctx, subscription)
 
-
+		// Validate the subscription
 		expectedCondition := eventingv1alpha1.MakeCondition(
 			eventingv1alpha1.ConditionSubscriptionActive,
 			eventingv1alpha1.ConditionReasonNATSSubscriptionActive,
@@ -477,6 +476,7 @@ func testCreateSubscriptionWithInvalidSink(id int, eventTypePrefix, _, eventType
 				"Not able to parse Sink URL with error: parse \"http://127.0.0. 1\": invalid character \" \" in host name",
 			)
 		})
+
 		It("Should mark the Subscription as not ready if sink does not contain suffix 'svc.cluster.local'", func() {
 			invalidSinkMsgCheck(
 				"http://127.0.0.1",
@@ -484,6 +484,7 @@ func testCreateSubscriptionWithInvalidSink(id int, eventTypePrefix, _, eventType
 				"Sink does not contain suffix: svc.cluster.local",
 			)
 		})
+
 		It("Should mark the Subscription as not ready if sink does not contain 5 sub-domains", func() {
 			invalidSinkMsgCheck(
 				fmt.Sprintf("https://%s.%s.%s.svc.cluster.local", "testapp", "testsub", "test"),
@@ -491,6 +492,7 @@ func testCreateSubscriptionWithInvalidSink(id int, eventTypePrefix, _, eventType
 				"Sink should contain 5 sub-domains: testapp.testsub.test.svc.cluster.local",
 			)
 		})
+
 		It("Should mark the Subscription as not ready if sink points to different namespace", func() {
 			invalidSinkMsgCheck(
 				fmt.Sprintf("https://%s.%s.svc.cluster.local", "testapp", "test-ns"),
@@ -498,6 +500,7 @@ func testCreateSubscriptionWithInvalidSink(id int, eventTypePrefix, _, eventType
 				"Namespace of subscription: test and the subscriber: test-ns are different",
 			)
 		})
+
 		It("Should mark the Subscription as not ready if sink is not a valid cluster local service", func() {
 			invalidSinkMsgCheck(
 				reconcilertesting.ValidSinkURL(namespaceName, "testapp"),
@@ -518,7 +521,7 @@ func testCreateSubscriptionWithEmptyProtocolProtocolSettingsDialect(id int, even
 			subscriptionName := fmt.Sprintf(subscriptionNameFormat, id)
 			subscriberName := fmt.Sprintf(subscriberNameFormat, id)
 
-			// Create a subscriber svc
+			// Create a subscriber service
 			subscriberSvc := reconcilertesting.NewSubscriberSvc(subscriberName, namespaceName)
 			ensureSubscriberSvcCreated(ctx, subscriberSvc)
 
@@ -539,7 +542,7 @@ func testCreateSubscriptionWithEmptyProtocolProtocolSettingsDialect(id int, even
 				reconcilertesting.HaveCondition(expectedCondition),
 			))
 
-			// Check for subscription at NATS
+			// Check that the subscription was created at the NATS backend
 			backendSubscription := getSubscriptionFromNats(natsBackend.GetAllSubscriptions(), subscriptionName)
 			Expect(backendSubscription).NotTo(BeNil())
 			Expect(backendSubscription.IsValid()).To(BeTrue())
@@ -560,7 +563,7 @@ func testChangeSubscriptionConfiguration(id int, eventTypePrefix, natsSubjectToP
 			subscriptionName := fmt.Sprintf(subscriptionNameFormat, id)
 			subscriberName := fmt.Sprintf(subscriberNameFormat, id)
 
-			// Create a subscriber svc
+			// Create a subscriber service
 			subscriberSvc := reconcilertesting.NewSubscriberSvc(subscriberName, namespaceName)
 			ensureSubscriberSvcCreated(ctx, subscriberSvc)
 
@@ -576,7 +579,8 @@ func testChangeSubscriptionConfiguration(id int, eventTypePrefix, natsSubjectToP
 			expectedConditions := eventingv1alpha1.MakeCondition(
 				eventingv1alpha1.ConditionSubscriptionActive,
 				eventingv1alpha1.ConditionReasonNATSSubscriptionActive,
-				v1.ConditionTrue, "")
+				v1.ConditionTrue, "",
+			)
 			expectedConfiguration := &eventingv1alpha1.SubscriptionConfig{
 				MaxInFlightMessages: defaultSubsConfig.MaxInFlightMessages,
 			}
@@ -604,12 +608,13 @@ func testChangeSubscriptionConfiguration(id int, eventTypePrefix, natsSubjectToP
 				reconcilertesting.HaveSubsConfiguration(expectedUpgradedConfiguration),
 			))
 
-			// Check if the subscription was resolved correctly at the NATS backend as well.
+			// Check that the subscription was created at the NATS backend
 			backendSubscription := getSubscriptionFromNats(natsBackend.GetAllSubscriptions(), subscriptionName)
 			Expect(backendSubscription).NotTo(BeNil())
 			Expect(backendSubscription.IsValid()).To(BeTrue())
 			Expect(backendSubscription.Subject).Should(Equal(natsSubjectToPublish))
 
+			// Clean everything up
 			Expect(k8sClient.Delete(ctx, subscription)).Should(BeNil())
 			isSubscriptionDeleted(ctx, subscription).Should(reconcilertesting.HaveNotFoundSubscription(true))
 		})
@@ -627,11 +632,11 @@ func testCreateSubscriptionWithEmptyEventType(id int, eventTypePrefix, _, _ stri
 			subscriptionName := fmt.Sprintf(subscriptionNameFormat, id)
 			subscriberName := fmt.Sprintf(subscriberNameFormat, id)
 
-			// Create a subscriber svc.
+			// Create a subscriber service
 			subscriberSvc := reconcilertesting.NewSubscriberSvc(subscriberName, namespaceName)
 			ensureSubscriberSvcCreated(ctx, subscriberSvc)
 
-			// Create a subscription.
+			// Create a subscription
 			givenSubscription := reconcilertesting.NewSubscription(subscriptionName, namespaceName,
 				reconcilertesting.WithFilter(reconcilertesting.EventSource, ""),
 				reconcilertesting.WithWebhookForNats(),
@@ -639,11 +644,12 @@ func testCreateSubscriptionWithEmptyEventType(id int, eventTypePrefix, _, _ stri
 			)
 			ensureSubscriptionCreated(ctx, givenSubscription)
 
-			// Checking the subscription.
+			// Validate the subscription
 			expectedConditions := eventingv1alpha1.MakeCondition(
 				eventingv1alpha1.ConditionSubscriptionActive,
 				eventingv1alpha1.ConditionReasonNATSSubscriptionActive,
-				v1.ConditionFalse, nats.ErrBadSubject.Error())
+				v1.ConditionFalse, nats.ErrBadSubject.Error(),
+			)
 			getSubscription(ctx, givenSubscription).Should(And(
 				reconcilertesting.HaveSubscriptionName(subscriptionName),
 				reconcilertesting.HaveCondition(expectedConditions),
