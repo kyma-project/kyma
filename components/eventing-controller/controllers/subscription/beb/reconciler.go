@@ -63,12 +63,13 @@ var (
 )
 
 const (
-	suffixLength          = 10
-	externalHostPrefix    = "web"
-	externalSinkScheme    = "https"
-	apiRuleNamePrefix     = "webhook-"
-	clusterLocalURLSuffix = "svc.cluster.local"
-	reconcilerName        = "beb-subscription-reconciler"
+	suffixLength                = 10
+	externalHostPrefix          = "web"
+	externalSinkScheme          = "https"
+	apiRuleNamePrefix           = "webhook-"
+	clusterLocalURLSuffix       = "svc.cluster.local"
+	reconcilerName              = "beb-subscription-reconciler"
+	timeoutRetryActiveEmsStatus = time.Second * 30
 )
 
 func NewReconciler(ctx context.Context, client client.Client, applicationLister *application.Lister, cache cache.Cache, logger *logger.Logger, recorder record.EventRecorder, cfg env.Config, credential *handlers.OAuth2ClientCredentials, mapper handlers.NameMapper) *Reconciler {
@@ -881,8 +882,6 @@ func (r *Reconciler) isFinalizerSet(subscription *eventingv1alpha1.Subscription)
 func isInDeletion(subscription *eventingv1alpha1.Subscription) bool {
 	return !subscription.DeletionTimestamp.IsZero()
 }
-
-const timeoutRetryActiveEmsStatus = time.Second * 30
 
 // checkStatusActive checks if the subscription is active and if not, sets a timer for retry
 func (r *Reconciler) checkStatusActive(subscription *eventingv1alpha1.Subscription) (active bool, err error) {

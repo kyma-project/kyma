@@ -1,7 +1,9 @@
 package v1alpha1
 
 import (
+	"reflect"
 	"testing"
+	"time"
 
 	. "github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
@@ -124,6 +126,50 @@ func Test_IsReady(t *testing.T) {
 			status.Conditions = tc.givenConditions
 			if gotReadyStatus := status.IsReady(); tc.wantReadyStatus != gotReadyStatus {
 				t.Errorf("Subscription status is not valid, want: %v but got: %v", tc.wantReadyStatus, gotReadyStatus)
+			}
+		})
+	}
+}
+
+func Test_FindCondition(t *testing.T) {
+	currentTime := metav1.NewTime(time.Now())
+
+	testCases := []struct {
+		name              string
+		givenConditions   []Condition
+		findConditionType ConditionType
+		wantCondition     *Condition
+	}{
+		{
+			name: "should be able to find the present condition",
+			givenConditions: []Condition{
+				{Type: ConditionSubscribed, Status: corev1.ConditionTrue, LastTransitionTime: currentTime},
+				{Type: ConditionSubscriptionActive, Status: corev1.ConditionTrue, LastTransitionTime: currentTime},
+				{Type: ConditionAPIRuleStatus, Status: corev1.ConditionTrue, LastTransitionTime: currentTime},
+				{Type: ConditionWebhookCallStatus, Status: corev1.ConditionTrue, LastTransitionTime: currentTime},
+			},
+			findConditionType: ConditionSubscriptionActive,
+			wantCondition:     &Condition{Type: ConditionSubscriptionActive, Status: corev1.ConditionTrue, LastTransitionTime: currentTime},
+		},
+		{
+			name: "should not be able to find the non-present condition",
+			givenConditions: []Condition{
+				{Type: ConditionSubscribed, Status: corev1.ConditionTrue, LastTransitionTime: currentTime},
+				{Type: ConditionAPIRuleStatus, Status: corev1.ConditionTrue, LastTransitionTime: currentTime},
+				{Type: ConditionWebhookCallStatus, Status: corev1.ConditionTrue, LastTransitionTime: currentTime},
+			},
+			findConditionType: ConditionSubscriptionActive,
+			wantCondition:     nil,
+		},
+	}
+
+	status := SubscriptionStatus{}
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			status.Conditions = tc.givenConditions
+
+			if gotCondition := status.FindCondition(tc.findConditionType); !reflect.DeepEqual(tc.wantCondition, gotCondition) {
+				t.Errorf("Subscription FindCondition failed, want: %v but got: %v", tc.wantCondition, gotCondition)
 			}
 		})
 	}
