@@ -62,6 +62,7 @@ func Test_SyncBEBSubscription(t *testing.T) {
 	changed, err := beb.SyncSubscription(subscription, &Cleaner{}, apiRule)
 	g.Expect(err).To(BeNil())
 	g.Expect(changed).To(BeTrue())
+	bebMock.Server.Close()
 }
 
 // fixtureValidSubscription returns a valid subscription

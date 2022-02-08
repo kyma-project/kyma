@@ -41,14 +41,16 @@ type BEBMock struct {
 	ListResponse   response
 	CreateResponse response
 	DeleteResponse response
+	Server         *httptest.Server
 }
 
 func NewBEBMock(bebConfig *config.Config) *BEBMock {
 	logger := logf.Log.WithName("beb mock")
 	return &BEBMock{
-		NewSafeRequests(), NewSafeSubscriptions(), "", "", bebConfig,
-		logger,
-		nil, nil, nil, nil, nil,
+		Requests:      NewSafeRequests(),
+		Subscriptions: NewSafeSubscriptions(),
+		BEBConfig:     bebConfig,
+		log:           logger,
 	}
 }
 
@@ -154,6 +156,7 @@ func (m *BEBMock) Start() string {
 		}
 	}))
 	uri := ts.URL
+	m.Server = ts
 	return uri
 }
 

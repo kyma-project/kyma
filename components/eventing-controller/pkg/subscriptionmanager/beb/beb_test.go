@@ -132,6 +132,7 @@ func TestCleanup(t *testing.T) {
 	unstructuredAPIRuleAfterCleanup, err := bebSubMgr.Client.Resource(handlers.APIRuleGroupVersionResource()).Namespace("test").Get(ctx, apiRule.Name, metav1.GetOptions{})
 	g.Expect(err).ToNot(gomega.BeNil())
 	g.Expect(unstructuredAPIRuleAfterCleanup).To(gomega.BeNil())
+	bebMock.Server.Close()
 
 }
 

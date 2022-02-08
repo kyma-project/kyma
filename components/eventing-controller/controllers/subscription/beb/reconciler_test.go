@@ -1327,6 +1327,7 @@ var (
 	testEnv    *envtest.Environment
 	beb        *reconcilertesting.BEBMock
 	nameMapper handlers.NameMapper
+	mock       *reconcilertesting.BEBMock
 )
 
 func TestAPIs(t *testing.T) {
@@ -1364,7 +1365,7 @@ var _ = BeforeSuite(func(done Done) {
 	Expect(err).NotTo(HaveOccurred())
 	// +kubebuilder:scaffold:scheme
 
-	mock := startBEBMock()
+	mock = startBEBMock()
 	// client, err := client.New()
 	// Source: https://book.kubebuilder.io/cronjob-tutorial/writing-tests.html
 	syncPeriod := time.Second * 2
@@ -1420,6 +1421,7 @@ var _ = BeforeSuite(func(done Done) {
 var _ = AfterSuite(func() {
 	By("tearing down the test environment")
 	err := testEnv.Stop()
+	mock.Server.Close()
 	Expect(err).ToNot(HaveOccurred())
 })
 
