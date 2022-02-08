@@ -666,7 +666,7 @@ func (r *Reconciler) getAPIRulesForASvc(ctx context.Context, labels map[string]s
 }
 
 func (r *Reconciler) filterAPIRulesOnPort(existingAPIRules []apigatewayv1alpha1.APIRule, port uint32) *apigatewayv1alpha1.APIRule {
-	// Assumption: there will be one APIRule for an svc with the labels injected by the controller hence trusting the first match
+	// Assumption: there will be one APIRule for a svc with the labels injected by the controller hence trusting the first match
 	for _, apiRule := range existingAPIRules {
 		if *apiRule.Spec.Service.Port == port {
 			return &apiRule
@@ -697,7 +697,7 @@ func (r *Reconciler) syncInitialStatus(subscription *eventingv1alpha1.Subscripti
 
 	var requiredConditions []eventingv1alpha1.Condition
 	if len(subscription.Status.Conditions) > 0 {
-		getRequiredConditions(subscription, expectedStatus.Conditions, requiredConditions)
+		requiredConditions = getRequiredConditions(subscription, expectedStatus.Conditions)
 	}
 
 	if len(subscription.Status.Conditions) == 0 {
@@ -713,9 +713,9 @@ func (r *Reconciler) syncInitialStatus(subscription *eventingv1alpha1.Subscripti
 	subscription.Status.SetConditionAPIRuleStatus(false)
 }
 
-// getRequiredConditions removes the non-required conditions from the subscription
-// and adds any missing required-conditions
-func getRequiredConditions(subscription *eventingv1alpha1.Subscription, expectedConditions, requiredConditions []eventingv1alpha1.Condition) {
+// getRequiredConditions removes the non-required conditions from the subscription  and adds any missing required-conditions
+func getRequiredConditions(subscription *eventingv1alpha1.Subscription, expectedConditions []eventingv1alpha1.Condition) []eventingv1alpha1.Condition {
+	var requiredConditions []eventingv1alpha1.Condition
 	expectedConditionsMap := make(map[eventingv1alpha1.ConditionType]eventingv1alpha1.Condition)
 	for _, condition := range expectedConditions {
 		expectedConditionsMap[condition.Type] = condition
@@ -733,6 +733,8 @@ func getRequiredConditions(subscription *eventingv1alpha1.Subscription, expected
 	for _, condition := range expectedConditionsMap {
 		requiredConditions = append(requiredConditions, condition)
 	}
+
+	return requiredConditions
 }
 
 // replaceStatusCondition replaces the given condition on the subscription. Also it sets the readiness in the status.
