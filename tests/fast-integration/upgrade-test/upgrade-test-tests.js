@@ -15,6 +15,10 @@ const {
   lokiPortForward,
 } = require('../logging');
 
+const {
+  monitoringTests
+} = require('../monitoring');
+
 describe('Upgrade test tests', function() {
   this.timeout(10 * 60 * 1000);
   this.slow(5000);
@@ -59,4 +63,6 @@ describe('Upgrade test tests', function() {
   it('Logs from commerce mock pod should be retrieved through Loki', async function() {
     await checkLokiLogs(testStartTimestamp);
   });
+
+  monitoringTests();
 });
