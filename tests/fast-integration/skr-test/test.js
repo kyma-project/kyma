@@ -47,7 +47,12 @@ describe('Execute SKR test', function() {
   commerceMockTest();
 
   after('Deprovision SKR', async function() {
-    await deprovisionSKR(keb, kcp, this.options.instanceID, deprovisioningTimeout);
+    try {
+      await deprovisionSKR(keb, kcp, this.options.instanceID, deprovisioningTimeout);
+    } finally {
+      const runtimeStatus = await kcp.getRuntimeStatusOperations(this.options.instanceID);
+      await kcp.reconcileInformationLog(runtimeStatus);
+    }
     await unregisterKymaFromCompass(director, this.options.scenarioName);
   });
 });
