@@ -8,6 +8,7 @@ readonly NAMESPACE='{{ .Release.Namespace }}'
 readonly TARGET_SECRET_NAME='{{ include "ory.fullname" . }}-hydra-credentials'
 readonly LOCAL_SECRETS_DIR="/etc/secrets"
 readonly DSN_OPTS="sslmode=disable&max_conn_lifetime=10s"
+readonly IN_MEMORY_DSN="sqlite://file::memory:?cache=shared&busy_timeout=5000&_fk=true"
 
 function get_from_file () {
   cat "${LOCAL_SECRETS_DIR}/${1}" 2> /dev/null || { >&2 echo "File ${1} not found. This value will be generated unless it is required!" && return 1; }
@@ -57,7 +58,7 @@ fi
   {{- end }}
 DSN=${DB_TYPE}://${DB_USER}:${PASSWORD}@${DB_URL}/${DB_NAME}?${DSN_OPTS}
 {{- else }}
-DSN=memory
+DSN=${IN_MEMORY_DSN}
 {{- end }}
 
 {{- if .Values.global.ory.hydra.persistence.gcloud.enabled }}
