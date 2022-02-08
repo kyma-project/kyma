@@ -55,15 +55,15 @@ const (
 
 //var (
 //	reconcilerTestCases = []testCase{
-		//testCreateDeleteSubscription,
-		//testCreateSubscriptionWithValidSink,
-		//testCreateSubscriptionWithInvalidSink,
-		//testCreateSubscriptionWithEmptyProtocolProtocolSettingsDialect,
-		//testChangeSubscriptionConfiguration,
-		//testCreateSubscriptionWithEmptyEventType,
-		/*		testCleanEventTypes,
-				testUpdateSubscriptionStatus,
-				testNATSUnavailabilityReflectedInSubscriptionStatus,*/
+//testCreateDeleteSubscription,
+//testCreateSubscriptionWithValidSink,
+//testCreateSubscriptionWithInvalidSink,
+//testCreateSubscriptionWithEmptyProtocolProtocolSettingsDialect,
+//testChangeSubscriptionConfiguration,
+//testCreateSubscriptionWithEmptyEventType,
+/*		testCleanEventTypes,
+		testUpdateSubscriptionStatus,
+		testNATSUnavailabilityReflectedInSubscriptionStatus,*/
 //	}
 //)
 
@@ -606,40 +606,42 @@ func testChangeSubscriptionConfiguration(id int, eventTypePrefix, natsSubjectToP
 //		testExecutor(reconcilertesting.EventTypePrefix,
 //			reconcilertesting.OrderCreatedEventType,
 //			reconcilertesting.OrderCreatedEventTypeNotClean))
-	//_ = Describe("NATS Subscription reconciler tests with empty eventTypePrefix",
-	//	testExecutor(reconcilertesting.EventTypePrefixEmpty,
-	//		reconcilertesting.OrderCreatedEventTypePrefixEmpty,
-	//		reconcilertesting.OrderCreatedEventTypeNotCleanPrefixEmpty))
+//_ = Describe("NATS Subscription reconciler tests with empty eventTypePrefix",
+//	testExecutor(reconcilertesting.EventTypePrefixEmpty,
+//		reconcilertesting.OrderCreatedEventTypePrefixEmpty,
+//		reconcilertesting.OrderCreatedEventTypeNotCleanPrefixEmpty))
 //)
 
-var _ = When("Create Subscription with empty event type", func() {
-	id := testID + 1 //todo
-	It("Should mark the subscription as not ready", func() {
-		ctx := context.Background()
-		cancel = startReconciler(reconcilertesting.EventTypePrefix, natsURL)
-		defer cancel()
-		subscriptionName := fmt.Sprintf(subscriptionNameFormat, id)
-		subscriberName := fmt.Sprintf(subscriberNameFormat, id)
+var _ = Describe("this", func() { //todo
+	When("Create Subscription with empty event type", func() {
+		id := testID + 1 //todo
+		It("Should mark the subscription as not ready", func() {
+			ctx := context.Background()
+			//cancel = startReconciler(reconcilertesting.EventTypePrefix, natsURL)
+			//defer cancel()
+			subscriptionName := fmt.Sprintf(subscriptionNameFormat, id)
+			subscriberName := fmt.Sprintf(subscriberNameFormat, id)
 
-		// create subscriber svc
-		subscriberSvc := reconcilertesting.NewSubscriberSvc(subscriberName, namespaceName)
-		ensureSubscriberSvcCreated(ctx, subscriberSvc)
+			// create subscriber svc
+			subscriberSvc := reconcilertesting.NewSubscriberSvc(subscriberName, namespaceName)
+			ensureSubscriberSvcCreated(ctx, subscriberSvc)
 
-		// Create subscription
-		givenSubscription := reconcilertesting.NewSubscription(subscriptionName, namespaceName,
-			reconcilertesting.WithFilter(reconcilertesting.EventSource, ""),
-			reconcilertesting.WithWebhookForNats(),
-			reconcilertesting.WithSinkURLFromSvc(subscriberSvc),
-		)
-		ensureSubscriptionCreated(ctx, givenSubscription)
+			// Create subscription
+			givenSubscription := reconcilertesting.NewSubscription(subscriptionName, namespaceName,
+				reconcilertesting.WithFilter(reconcilertesting.EventSource, ""),
+				reconcilertesting.WithWebhookForNats(),
+				reconcilertesting.WithSinkURLFromSvc(subscriberSvc),
+			)
+			ensureSubscriptionCreated(ctx, givenSubscription)
 
-		getSubscription(ctx, givenSubscription).Should(And(
-			reconcilertesting.HaveSubscriptionName(subscriptionName),
-			reconcilertesting.HaveCondition(eventingv1alpha1.MakeCondition(
-				eventingv1alpha1.ConditionSubscriptionActive,
-				eventingv1alpha1.ConditionReasonNATSSubscriptionActive,
-				v1.ConditionFalse, nats.ErrBadSubject.Error())),
-		))
+			getSubscription(ctx, givenSubscription).Should(And(
+				reconcilertesting.HaveSubscriptionName(subscriptionName),
+				reconcilertesting.HaveCondition(eventingv1alpha1.MakeCondition(
+					eventingv1alpha1.ConditionSubscriptionActive,
+					eventingv1alpha1.ConditionReasonNATSSubscriptionActive,
+					v1.ConditionFalse, nats.ErrBadSubject.Error())),
+			))
+		})
 	})
 })
 
@@ -799,6 +801,9 @@ var _ = BeforeSuite(func(done Done) {
 	Expect(err).ToNot(HaveOccurred())
 	Expect(cfg).ToNot(BeNil())
 
+	cancel = startReconciler(reconcilertesting.EventTypePrefix, natsURL)
+	//todo defer
+
 	close(done)
 }, 60)
 
@@ -817,7 +822,7 @@ func startNATS(port int) (*natsserver.Server, string) {
 }
 
 func startReconciler(eventTypePrefix string, natsURL string) context.CancelFunc {
-	ctx, cancel := context.WithCancel(context.Background())
+	ctx, cancel := context.WithCancel(context.Background()) //todo where to cancel
 	logf.SetLogger(zap.New(zap.UseDevMode(true), zap.WriteTo(GinkgoWriter)))
 
 	err := eventingv1alpha1.AddToScheme(scheme.Scheme)
