@@ -71,7 +71,6 @@ func newServiceDefinitionService(opt *options, nameResolver k8sconsts.NameResolv
 	sei := coreClientset.CoreV1().Secrets(opt.namespace)
 	secretsRepository := secrets.NewRepository(sei)
 
-	accessServiceManager := newAccessServiceManager(coreClientset, opt.namespace, opt.proxyPort)
 	credentialsSecretsService := newSecretsService(secretsRepository, nameResolver)
 	requestParametersSecretsService := secrets.NewRequestParametersService(secretsRepository, nameResolver)
 
@@ -83,7 +82,7 @@ func newServiceDefinitionService(opt *options, nameResolver k8sconsts.NameResolv
 		return uuidInstance.String(), nil
 	})
 
-	serviceAPIService := serviceapi.NewService(nameResolver, accessServiceManager, credentialsSecretsService, requestParametersSecretsService)
+	serviceAPIService := serviceapi.NewService(nameResolver, credentialsSecretsService, requestParametersSecretsService)
 
 	return metadata.NewServiceDefinitionService(uuidGenerator, serviceAPIService, applicationServiceRepository, specificationService, applicationManager), nil
 }

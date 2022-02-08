@@ -3,7 +3,6 @@ package serviceapi
 import (
 	"github.com/kyma-project/kyma/components/application-registry/internal/apperrors"
 	"github.com/kyma-project/kyma/components/application-registry/internal/k8sconsts"
-	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/accessservice"
 	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/applications"
 	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/model"
 	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/secrets"
@@ -24,20 +23,17 @@ type Service interface {
 
 type defaultService struct {
 	nameResolver                    k8sconsts.NameResolver
-	accessServiceManager            accessservice.AccessServiceManager
 	secretsService                  secrets.Service
 	requestParametersSecretsService secrets.RequestParametersService
 }
 
 func NewService(
 	nameResolver k8sconsts.NameResolver,
-	accessServiceManager accessservice.AccessServiceManager,
 	secretsService secrets.Service,
 	requestParametersSecretsService secrets.RequestParametersService) Service {
 
 	return defaultService{
 		nameResolver:                    nameResolver,
-		accessServiceManager:            accessServiceManager,
 		secretsService:                  secretsService,
 		requestParametersSecretsService: requestParametersSecretsService,
 	}
@@ -55,11 +51,6 @@ func (sas defaultService) New(application string, appUID types.UID, id, displayN
 	serviceAPI.GatewayURL = gatewayUrl
 	serviceAPI.CentralGatewayURL = centralGatewayUrl
 	serviceAPI.AccessLabel = resourceName
-
-	err := sas.accessServiceManager.Create(application, appUID, id, resourceName)
-	if err != nil {
-		return nil, apperrors.Internal("Creating access service failed, %s", err.Error())
-	}
 
 	if api.Credentials != nil {
 		credentials, err := sas.secretsService.Create(application, appUID, id, api.Credentials)
@@ -110,13 +101,7 @@ func (sas defaultService) Read(application string, applicationAPI *applications.
 
 func (sas defaultService) Delete(application, id string) apperrors.AppError {
 	resourceName := sas.nameResolver.GetResourceName(application, id)
-
-	err := sas.accessServiceManager.Delete(resourceName)
-	if err != nil {
-		return apperrors.Internal("Deleting access service failed, %s", err.Error())
-	}
-
-	err = sas.secretsService.Delete(resourceName)
+	err := sas.secretsService.Delete(resourceName)
 	if err != nil {
 		return apperrors.Internal("Deleting credentials secret failed, %s", err.Error())
 	}
@@ -141,11 +126,6 @@ func (sas defaultService) Update(application string, appUID types.UID, id, displ
 	serviceAPI.GatewayURL = gatewayUrl
 	serviceAPI.CentralGatewayURL = centralGatewayUrl
 	serviceAPI.AccessLabel = resourceName
-
-	err := sas.accessServiceManager.Upsert(application, appUID, id, resourceName)
-	if err != nil {
-		return nil, apperrors.Internal("Creating access service failed, %s", err.Error())
-	}
 
 	if api.Credentials != nil {
 		credentials, err := sas.secretsService.Upsert(application, appUID, id, api.Credentials)

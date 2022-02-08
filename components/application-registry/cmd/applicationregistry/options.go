@@ -7,7 +7,6 @@ import (
 
 type options struct {
 	externalAPIPort       int
-	proxyPort             int
 	minioURL              string
 	namespace             string
 	requestTimeout        int
@@ -23,7 +22,6 @@ type options struct {
 
 func parseArgs() *options {
 	externalAPIPort := flag.Int("externalAPIPort", 8081, "External API port.")
-	proxyPort := flag.Int("proxyPort", 8080, "Proxy port.")
 	namespace := flag.String("namespace", "kyma-integration", "Namespace used by Application Registry")
 	requestTimeout := flag.Int("requestTimeout", 1, "Timeout for services.")
 	requestLogging := flag.Bool("requestLogging", false, "Flag for logging incoming requests.")
@@ -39,7 +37,6 @@ func parseArgs() *options {
 
 	return &options{
 		externalAPIPort:       *externalAPIPort,
-		proxyPort:             *proxyPort,
 		namespace:             *namespace,
 		requestTimeout:        *requestTimeout,
 		requestLogging:        *requestLogging,
@@ -54,9 +51,9 @@ func parseArgs() *options {
 }
 
 func (o *options) String() string {
-	return fmt.Sprintf("--externalAPIPort=%d --proxyPort=%d --uploadServiceURL=%s --centralGatewayUrl=%s "+
+	return fmt.Sprintf("--externalAPIPort=%d --uploadServiceURL=%s --centralGatewayUrl=%s "+
 		"--namespace=%s --requestTimeout=%d  --requestLogging=%t --specRequestTimeout=%d "+
 		"--rafterRequestTimeout=%d --detailedErrorResponse=%t --insecureAssetDownload=%t --insecureSpecDownload=%t",
-		o.externalAPIPort, o.proxyPort, o.uploadServiceURL, o.centralGatewayUrl,
-		o.namespace, o.requestTimeout, o.requestLogging, o.specRequestTimeout, o.rafterRequestTimeout, o.detailedErrorResponse, o.insecureAssetDownload, o.insecureSpecDownload)
+		o.externalAPIPort, o.uploadServiceURL, o.centralGatewayUrl, o.namespace, o.requestTimeout, o.requestLogging,
+		o.specRequestTimeout, o.rafterRequestTimeout, o.detailedErrorResponse, o.insecureAssetDownload, o.insecureSpecDownload)
 }

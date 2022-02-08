@@ -7,7 +7,6 @@ import (
 
 	"github.com/kyma-project/kyma/components/application-registry/internal/apperrors"
 	k8smocks "github.com/kyma-project/kyma/components/application-registry/internal/k8sconsts/mocks"
-	asmocks "github.com/kyma-project/kyma/components/application-registry/internal/metadata/accessservice/mocks"
 	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/applications"
 	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/model"
 	secretsmocks "github.com/kyma-project/kyma/components/application-registry/internal/metadata/secrets/mocks"
@@ -51,9 +50,6 @@ func TestNewService(t *testing.T) {
 		nameResolver.On("GetGatewayUrl", appName, serviceId).Return(gatewayUrl)
 		nameResolver.On("GetCentralGatewayUrl", appName, serviceDisplayName).Return(centralGatewayUrl)
 
-		accessServiceManager := new(asmocks.AccessServiceManager)
-		accessServiceManager.On("Create", appName, appUID, serviceId, resourceName).Return(nil)
-
 		secretsService := new(secretsmocks.Service)
 		secretsService.On(
 			"Create",
@@ -63,7 +59,7 @@ func TestNewService(t *testing.T) {
 			api.Credentials,
 		).Return(applicationCredentials, nil)
 
-		service := NewService(nameResolver, accessServiceManager, secretsService, nil)
+		service := NewService(nameResolver, secretsService, nil)
 
 		// when
 		applicationServiceAPI, err := service.New(appName, appUID, serviceId, serviceDisplayName, api)
@@ -78,7 +74,6 @@ func TestNewService(t *testing.T) {
 		assert.Equal(t, "OAuth", applicationServiceAPI.Credentials.Type)
 		assert.Equal(t, resourceName, applicationServiceAPI.Credentials.SecretName)
 
-		accessServiceManager.AssertExpectations(t)
 		secretsService.AssertExpectations(t)
 	})
 
@@ -104,9 +99,6 @@ func TestNewService(t *testing.T) {
 		nameResolver.On("GetGatewayUrl", appName, serviceId).Return(gatewayUrl)
 		nameResolver.On("GetCentralGatewayUrl", appName, serviceDisplayName).Return(centralGatewayUrl)
 
-		accessServiceManager := new(asmocks.AccessServiceManager)
-		accessServiceManager.On("Create", appName, appUID, serviceId, resourceName).Return(nil)
-
 		secretsService := new(secretsmocks.Service)
 		secretsService.On(
 			"Create",
@@ -116,7 +108,7 @@ func TestNewService(t *testing.T) {
 			api.Credentials,
 		).Return(applicationCredentials, nil)
 
-		service := NewService(nameResolver, accessServiceManager, secretsService, nil)
+		service := NewService(nameResolver, secretsService, nil)
 
 		// when
 		applicationServiceAPI, err := service.New(appName, appUID, serviceId, serviceDisplayName, api)
@@ -130,7 +122,6 @@ func TestNewService(t *testing.T) {
 		assert.Equal(t, "Basic", applicationServiceAPI.Credentials.Type)
 		assert.Equal(t, resourceName, applicationServiceAPI.Credentials.SecretName)
 
-		accessServiceManager.AssertExpectations(t)
 		secretsService.AssertExpectations(t)
 	})
 
@@ -145,10 +136,7 @@ func TestNewService(t *testing.T) {
 		nameResolver.On("GetGatewayUrl", appName, serviceId).Return(gatewayUrl)
 		nameResolver.On("GetCentralGatewayUrl", appName, serviceDisplayName).Return(centralGatewayUrl)
 
-		accessServiceManager := new(asmocks.AccessServiceManager)
-		accessServiceManager.On("Create", appName, appUID, serviceId, resourceName).Return(nil)
-
-		service := NewService(nameResolver, accessServiceManager, nil, nil)
+		service := NewService(nameResolver, nil, nil)
 
 		// when
 		applicationServiceAPI, err := service.New(appName, appUID, serviceId, serviceDisplayName, api)
@@ -161,42 +149,6 @@ func TestNewService(t *testing.T) {
 		assert.Equal(t, api.TargetUrl, applicationServiceAPI.TargetUrl)
 		assert.Equal(t, "", applicationServiceAPI.Credentials.AuthenticationUrl)
 		assert.Equal(t, "", applicationServiceAPI.Credentials.SecretName)
-
-		accessServiceManager.AssertExpectations(t)
-	})
-
-	t.Run("should return error when creating access service fails", func(t *testing.T) {
-		// given
-		api := &model.API{
-			TargetUrl: "http://target.com",
-			Credentials: &model.CredentialsWithCSRF{
-				Oauth: &model.Oauth{
-					URL:          "http://oauth.com",
-					ClientID:     "clientId",
-					ClientSecret: "clientSecret",
-				},
-			},
-		}
-
-		nameResolver := new(k8smocks.NameResolver)
-		nameResolver.On("GetResourceName", appName, serviceId).Return(resourceName)
-		nameResolver.On("GetGatewayUrl", appName, serviceId).Return(gatewayUrl)
-		nameResolver.On("GetCentralGatewayUrl", appName, serviceDisplayName).Return(centralGatewayUrl)
-
-		accessServiceManager := new(asmocks.AccessServiceManager)
-		accessServiceManager.On("Create", appName, appUID, serviceId, resourceName).Return(apperrors.Internal("some error"))
-
-		service := NewService(nameResolver, accessServiceManager, nil, nil)
-
-		// when
-		result, err := service.New(appName, appUID, serviceId, serviceDisplayName, api)
-
-		// then
-		assert.Nil(t, result)
-		assert.Error(t, err)
-		assert.Contains(t, err.Error(), "some error")
-
-		accessServiceManager.AssertExpectations(t)
 	})
 
 	t.Run("should return error when creating OAuth secret fails", func(t *testing.T) {
@@ -217,9 +169,6 @@ func TestNewService(t *testing.T) {
 		nameResolver.On("GetGatewayUrl", appName, serviceId).Return(gatewayUrl)
 		nameResolver.On("GetCentralGatewayUrl", appName, serviceDisplayName).Return(centralGatewayUrl)
 
-		accessServiceManager := new(asmocks.AccessServiceManager)
-		accessServiceManager.On("Create", appName, appUID, serviceId, resourceName).Return(nil)
-
 		secretsService := new(secretsmocks.Service)
 		secretsService.On(
 			"Create",
@@ -229,7 +178,7 @@ func TestNewService(t *testing.T) {
 			api.Credentials,
 		).Return(applications.Credentials{}, apperrors.Internal("some error"))
 
-		service := NewService(nameResolver, accessServiceManager, secretsService, nil)
+		service := NewService(nameResolver, secretsService, nil)
 
 		// when
 		result, err := service.New(appName, appUID, serviceId, serviceDisplayName, api)
@@ -239,7 +188,6 @@ func TestNewService(t *testing.T) {
 		assert.Error(t, err)
 		assert.Contains(t, err.Error(), "some error")
 
-		accessServiceManager.AssertExpectations(t)
 		secretsService.AssertExpectations(t)
 	})
 
@@ -260,9 +208,6 @@ func TestNewService(t *testing.T) {
 		nameResolver.On("GetGatewayUrl", appName, serviceId).Return(gatewayUrl)
 		nameResolver.On("GetCentralGatewayUrl", appName, serviceDisplayName).Return(centralGatewayUrl)
 
-		accessServiceManager := new(asmocks.AccessServiceManager)
-		accessServiceManager.On("Create", appName, appUID, serviceId, resourceName).Return(nil)
-
 		secretsService := new(secretsmocks.Service)
 		secretsService.On(
 			"Create",
@@ -272,7 +217,7 @@ func TestNewService(t *testing.T) {
 			api.Credentials,
 		).Return(applications.Credentials{}, apperrors.Internal("some error"))
 
-		service := NewService(nameResolver, accessServiceManager, secretsService, nil)
+		service := NewService(nameResolver, secretsService, nil)
 
 		// when
 		result, err := service.New(appName, appUID, serviceId, serviceDisplayName, api)
@@ -282,7 +227,6 @@ func TestNewService(t *testing.T) {
 		assert.Error(t, err)
 		assert.Contains(t, err.Error(), "some error")
 
-		accessServiceManager.AssertExpectations(t)
 		secretsService.AssertExpectations(t)
 	})
 
@@ -309,15 +253,12 @@ func TestNewService(t *testing.T) {
 		nameResolver.On("GetGatewayUrl", appName, serviceId).Return(gatewayUrl)
 		nameResolver.On("GetCentralGatewayUrl", appName, serviceDisplayName).Return(centralGatewayUrl)
 
-		accessServiceManager := new(asmocks.AccessServiceManager)
-		accessServiceManager.On("Create", appName, appUID, serviceId, resourceName).Return(nil)
-
 		secretsService := new(secretsmocks.Service)
 
 		requestParamsService := new(secretsmocks.RequestParametersService)
 		requestParamsService.On("Create", appName, appUID, serviceId, requestParams).Return(requestParamsSecretName, nil)
 
-		service := NewService(nameResolver, accessServiceManager, secretsService, requestParamsService)
+		service := NewService(nameResolver, secretsService, requestParamsService)
 
 		// when
 		applicationServiceAPI, err := service.New(appName, appUID, serviceId, serviceDisplayName, api)
@@ -330,7 +271,6 @@ func TestNewService(t *testing.T) {
 		assert.Equal(t, api.TargetUrl, applicationServiceAPI.TargetUrl)
 		assert.Equal(t, requestParamsSecretName, applicationServiceAPI.RequestParametersSecretName)
 
-		accessServiceManager.AssertExpectations(t)
 		secretsService.AssertExpectations(t)
 	})
 }
@@ -358,7 +298,7 @@ func TestDefaultService_Read(t *testing.T) {
 		secretsService := new(secretsmocks.Service)
 		secretsService.On("Get", appName, applicationServiceAPi.Credentials).Return(credentials, nil)
 
-		service := NewService(nil, nil, secretsService, nil)
+		service := NewService(nil, secretsService, nil)
 
 		// when
 		api, err := service.Read(appName, applicationServiceAPi)
@@ -394,7 +334,7 @@ func TestDefaultService_Read(t *testing.T) {
 		secretsService := new(secretsmocks.Service)
 		secretsService.On("Get", appName, applicationServiceAPi.Credentials).Return(credentials, nil)
 
-		service := NewService(nil, nil, secretsService, nil)
+		service := NewService(nil, secretsService, nil)
 
 		// when
 		api, err := service.Read(appName, applicationServiceAPi)
@@ -415,7 +355,7 @@ func TestDefaultService_Read(t *testing.T) {
 			TargetUrl: "http://target.com",
 		}
 
-		service := NewService(nil, nil, nil, nil)
+		service := NewService(nil, nil, nil)
 
 		// when
 		api, err := service.Read(appName, applicationServiceAPi)
@@ -442,7 +382,7 @@ func TestDefaultService_Read(t *testing.T) {
 		secretsService.On("Get", appName, applicationServiceAPi.Credentials).
 			Return(model.CredentialsWithCSRF{}, apperrors.Internal("secret error"))
 
-		service := NewService(nil, nil, secretsService, nil)
+		service := NewService(nil, secretsService, nil)
 
 		// when
 		api, err := service.Read(appName, applicationServiceAPi)
@@ -470,7 +410,7 @@ func TestDefaultService_Read(t *testing.T) {
 		secretsService.On("Get", appName, applicationServiceAPi.Credentials).
 			Return(model.CredentialsWithCSRF{}, apperrors.Internal("secret error"))
 
-		service := NewService(nil, nil, secretsService, nil)
+		service := NewService(nil, secretsService, nil)
 
 		// when
 		api, err := service.Read(appName, applicationServiceAPi)
@@ -506,7 +446,7 @@ func TestDefaultService_Read(t *testing.T) {
 		requestParamsService := new(secretsmocks.RequestParametersService)
 		requestParamsService.On("Get", requestParamsSecretName).Return(requestParams, nil)
 
-		service := NewService(nil, nil, secretsService, requestParamsService)
+		service := NewService(nil, secretsService, requestParamsService)
 
 		// when
 		api, err := service.Read(appName, applicationServiceAPi)
@@ -528,16 +468,13 @@ func TestDefaultService_Delete(t *testing.T) {
 		nameResolver := new(k8smocks.NameResolver)
 		nameResolver.On("GetResourceName", appName, serviceId).Return(resourceName)
 
-		accessServiceManager := new(asmocks.AccessServiceManager)
-		accessServiceManager.On("Delete", resourceName).Return(nil)
-
 		secretsService := new(secretsmocks.Service)
 		secretsService.On("Delete", resourceName).Return(nil)
 
 		requestParamsService := new(secretsmocks.RequestParametersService)
 		requestParamsService.On("Delete", appName, serviceId).Return(nil)
 
-		service := NewService(nameResolver, accessServiceManager, secretsService, requestParamsService)
+		service := NewService(nameResolver, secretsService, requestParamsService)
 
 		// when
 		err := service.Delete(appName, serviceId)
@@ -546,31 +483,8 @@ func TestDefaultService_Delete(t *testing.T) {
 		assert.NoError(t, err)
 
 		nameResolver.AssertExpectations(t)
-		accessServiceManager.AssertExpectations(t)
 		secretsService.AssertExpectations(t)
 		requestParamsService.AssertExpectations(t)
-	})
-
-	t.Run("should return an error if accessService deletion fails", func(t *testing.T) {
-		// given
-		nameResolver := new(k8smocks.NameResolver)
-		nameResolver.On("GetResourceName", appName, serviceId).Return(resourceName)
-
-		accessServiceManager := new(asmocks.AccessServiceManager)
-		accessServiceManager.On("Delete", resourceName).Return(apperrors.Internal("an error"))
-
-		service := NewService(nameResolver, accessServiceManager, nil, nil)
-
-		// when
-		err := service.Delete(appName, serviceId)
-
-		// then
-		assert.Error(t, err)
-		assert.Equal(t, apperrors.CodeInternal, err.Code())
-		assert.NotEmpty(t, err.Error())
-
-		nameResolver.AssertExpectations(t)
-		accessServiceManager.AssertExpectations(t)
 	})
 
 	t.Run("should return an error if secret deletion fails", func(t *testing.T) {
@@ -578,13 +492,10 @@ func TestDefaultService_Delete(t *testing.T) {
 		nameResolver := new(k8smocks.NameResolver)
 		nameResolver.On("GetResourceName", appName, serviceId).Return(resourceName)
 
-		accessServiceManager := new(asmocks.AccessServiceManager)
-		accessServiceManager.On("Delete", resourceName).Return(nil)
-
 		secretsService := new(secretsmocks.Service)
 		secretsService.On("Delete", resourceName).Return(apperrors.Internal("an error"))
 
-		service := NewService(nameResolver, accessServiceManager, secretsService, nil)
+		service := NewService(nameResolver, secretsService, nil)
 
 		// when
 		err := service.Delete(appName, serviceId)
@@ -595,7 +506,6 @@ func TestDefaultService_Delete(t *testing.T) {
 		assert.NotEmpty(t, err.Error())
 
 		nameResolver.AssertExpectations(t)
-		accessServiceManager.AssertExpectations(t)
 		secretsService.AssertExpectations(t)
 	})
 
@@ -604,16 +514,13 @@ func TestDefaultService_Delete(t *testing.T) {
 		nameResolver := new(k8smocks.NameResolver)
 		nameResolver.On("GetResourceName", appName, serviceId).Return(resourceName)
 
-		accessServiceManager := new(asmocks.AccessServiceManager)
-		accessServiceManager.On("Delete", resourceName).Return(nil)
-
 		secretsService := new(secretsmocks.Service)
 		secretsService.On("Delete", resourceName).Return(nil)
 
 		requestParamsService := &secretsmocks.RequestParametersService{}
 		requestParamsService.On("Delete", appName, serviceId).Return(apperrors.Internal("error"))
 
-		service := NewService(nameResolver, accessServiceManager, secretsService, requestParamsService)
+		service := NewService(nameResolver, secretsService, requestParamsService)
 
 		// when
 		err := service.Delete(appName, serviceId)
@@ -624,7 +531,6 @@ func TestDefaultService_Delete(t *testing.T) {
 		assert.NotEmpty(t, err.Error())
 
 		nameResolver.AssertExpectations(t)
-		accessServiceManager.AssertExpectations(t)
 		secretsService.AssertExpectations(t)
 		requestParamsService.AssertExpectations(t)
 	})
@@ -656,16 +562,13 @@ func TestDefaultService_Update(t *testing.T) {
 		nameResolver.On("GetGatewayUrl", appName, serviceId).Return(gatewayUrl)
 		nameResolver.On("GetCentralGatewayUrl", appName, serviceDisplayName).Return(centralGatewayUrl)
 
-		accessServiceManager := new(asmocks.AccessServiceManager)
-		accessServiceManager.On("Upsert", appName, appUID, serviceId, resourceName).Return(nil)
-
 		secretsService := new(secretsmocks.Service)
 		secretsService.On("Upsert", appName, appUID, serviceId, api.Credentials).Return(applicationCredentials, nil)
 
 		requestParamsService := &secretsmocks.RequestParametersService{}
 		requestParamsService.On("Delete", appName, serviceId).Return(nil)
 
-		service := NewService(nameResolver, accessServiceManager, secretsService, requestParamsService)
+		service := NewService(nameResolver, secretsService, requestParamsService)
 
 		// when
 		applicationServiceAPI, err := service.Update(appName, appUID, serviceId, serviceDisplayName, api)
@@ -681,7 +584,6 @@ func TestDefaultService_Update(t *testing.T) {
 		assert.Equal(t, resourceName, applicationServiceAPI.Credentials.SecretName)
 
 		nameResolver.AssertExpectations(t)
-		accessServiceManager.AssertExpectations(t)
 		secretsService.AssertExpectations(t)
 	})
 
@@ -707,16 +609,13 @@ func TestDefaultService_Update(t *testing.T) {
 		nameResolver.On("GetGatewayUrl", appName, serviceId).Return(gatewayUrl)
 		nameResolver.On("GetCentralGatewayUrl", appName, serviceDisplayName).Return(centralGatewayUrl)
 
-		accessServiceManager := new(asmocks.AccessServiceManager)
-		accessServiceManager.On("Upsert", appName, appUID, serviceId, resourceName).Return(nil)
-
 		secretsService := new(secretsmocks.Service)
 		secretsService.On("Upsert", appName, appUID, serviceId, api.Credentials).Return(applicationCredentials, nil)
 
 		requestParamsService := &secretsmocks.RequestParametersService{}
 		requestParamsService.On("Delete", appName, serviceId).Return(nil)
 
-		service := NewService(nameResolver, accessServiceManager, secretsService, requestParamsService)
+		service := NewService(nameResolver, secretsService, requestParamsService)
 
 		// when
 		applicationServiceAPI, err := service.Update(appName, appUID, serviceId, serviceDisplayName, api)
@@ -731,7 +630,6 @@ func TestDefaultService_Update(t *testing.T) {
 		assert.Equal(t, resourceName, applicationServiceAPI.Credentials.SecretName)
 
 		nameResolver.AssertExpectations(t)
-		accessServiceManager.AssertExpectations(t)
 		secretsService.AssertExpectations(t)
 	})
 
@@ -747,16 +645,13 @@ func TestDefaultService_Update(t *testing.T) {
 		nameResolver.On("GetGatewayUrl", appName, serviceId).Return(gatewayUrl)
 		nameResolver.On("GetCentralGatewayUrl", appName, serviceDisplayName).Return(centralGatewayUrl)
 
-		accessServiceManager := new(asmocks.AccessServiceManager)
-		accessServiceManager.On("Upsert", appName, appUID, serviceId, resourceName).Return(nil)
-
 		secretsService := new(secretsmocks.Service)
 		secretsService.On("Delete", resourceName).Return(nil)
 
 		requestParamsService := &secretsmocks.RequestParametersService{}
 		requestParamsService.On("Delete", appName, serviceId).Return(nil)
 
-		service := NewService(nameResolver, accessServiceManager, secretsService, requestParamsService)
+		service := NewService(nameResolver, secretsService, requestParamsService)
 
 		// when
 		applicationServiceAPI, err := service.Update(appName, appUID, serviceId, serviceDisplayName, api)
@@ -771,45 +666,7 @@ func TestDefaultService_Update(t *testing.T) {
 		assert.Equal(t, "", applicationServiceAPI.Credentials.SecretName)
 
 		nameResolver.AssertExpectations(t)
-		accessServiceManager.AssertExpectations(t)
 		secretsService.AssertExpectations(t)
-	})
-
-	t.Run("should return error when updating access service fails", func(t *testing.T) {
-		// given
-		api := &model.API{
-			TargetUrl: "http://target.com",
-			Credentials: &model.CredentialsWithCSRF{
-				Oauth: &model.Oauth{
-					URL:          "http://oauth.com",
-					ClientID:     "clientId",
-					ClientSecret: "clientSecret",
-				},
-			},
-		}
-
-		nameResolver := new(k8smocks.NameResolver)
-		nameResolver.On("GetResourceName", appName, serviceId).Return(resourceName)
-		nameResolver.On("GetGatewayUrl", appName, serviceId).Return(gatewayUrl)
-		nameResolver.On("GetCentralGatewayUrl", appName, serviceDisplayName).Return(centralGatewayUrl)
-
-		accessServiceManager := new(asmocks.AccessServiceManager)
-		accessServiceManager.On("Upsert", appName, appUID, serviceId, resourceName).
-			Return(apperrors.Internal("some error"))
-
-		service := NewService(nameResolver, accessServiceManager, nil, nil)
-
-		// when
-		result, err := service.Update(appName, appUID, serviceId, serviceDisplayName, api)
-
-		// then
-		assert.Nil(t, result)
-		assert.Error(t, err)
-		assert.Equal(t, apperrors.CodeInternal, err.Code())
-		assert.Contains(t, err.Error(), "some error")
-
-		nameResolver.AssertExpectations(t)
-		accessServiceManager.AssertExpectations(t)
 	})
 
 	t.Run("should return error when updating OAuth secret fails", func(t *testing.T) {
@@ -830,13 +687,10 @@ func TestDefaultService_Update(t *testing.T) {
 		nameResolver.On("GetGatewayUrl", appName, serviceId).Return(gatewayUrl)
 		nameResolver.On("GetCentralGatewayUrl", appName, serviceDisplayName).Return(centralGatewayUrl)
 
-		accessServiceManager := new(asmocks.AccessServiceManager)
-		accessServiceManager.On("Upsert", appName, appUID, serviceId, resourceName).Return(nil)
-
 		secretsService := new(secretsmocks.Service)
 		secretsService.On("Upsert", appName, appUID, serviceId, api.Credentials).Return(applications.Credentials{}, apperrors.Internal("some error"))
 
-		service := NewService(nameResolver, accessServiceManager, secretsService, nil)
+		service := NewService(nameResolver, secretsService, nil)
 
 		// when
 		result, err := service.Update(appName, appUID, serviceId, serviceDisplayName, api)
@@ -848,7 +702,6 @@ func TestDefaultService_Update(t *testing.T) {
 		assert.Contains(t, err.Error(), "some error")
 
 		nameResolver.AssertExpectations(t)
-		accessServiceManager.AssertExpectations(t)
 		secretsService.AssertExpectations(t)
 	})
 
@@ -869,13 +722,10 @@ func TestDefaultService_Update(t *testing.T) {
 		nameResolver.On("GetGatewayUrl", appName, serviceId).Return(gatewayUrl)
 		nameResolver.On("GetCentralGatewayUrl", appName, serviceDisplayName).Return(centralGatewayUrl)
 
-		accessServiceManager := new(asmocks.AccessServiceManager)
-		accessServiceManager.On("Upsert", appName, appUID, serviceId, resourceName).Return(nil)
-
 		secretsService := new(secretsmocks.Service)
 		secretsService.On("Upsert", appName, appUID, serviceId, api.Credentials).Return(applications.Credentials{}, apperrors.Internal("some error"))
 
-		service := NewService(nameResolver, accessServiceManager, secretsService, nil)
+		service := NewService(nameResolver, secretsService, nil)
 
 		// when
 		result, err := service.Update(appName, appUID, serviceId, serviceDisplayName, api)
@@ -887,7 +737,6 @@ func TestDefaultService_Update(t *testing.T) {
 		assert.Contains(t, err.Error(), "some error")
 
 		nameResolver.AssertExpectations(t)
-		accessServiceManager.AssertExpectations(t)
 		secretsService.AssertExpectations(t)
 	})
 
@@ -903,13 +752,10 @@ func TestDefaultService_Update(t *testing.T) {
 		nameResolver.On("GetGatewayUrl", appName, serviceId).Return(gatewayUrl)
 		nameResolver.On("GetCentralGatewayUrl", appName, serviceDisplayName).Return(centralGatewayUrl)
 
-		accessServiceManager := new(asmocks.AccessServiceManager)
-		accessServiceManager.On("Upsert", appName, appUID, serviceId, resourceName).Return(nil)
-
 		secretsService := new(secretsmocks.Service)
 		secretsService.On("Delete", resourceName).Return(apperrors.Internal("some error"))
 
-		service := NewService(nameResolver, accessServiceManager, secretsService, nil)
+		service := NewService(nameResolver, secretsService, nil)
 
 		// when
 		result, err := service.Update(appName, appUID, serviceId, serviceDisplayName, api)
@@ -921,7 +767,6 @@ func TestDefaultService_Update(t *testing.T) {
 		assert.Contains(t, err.Error(), "some error")
 
 		nameResolver.AssertExpectations(t)
-		accessServiceManager.AssertExpectations(t)
 		secretsService.AssertExpectations(t)
 	})
 
@@ -948,16 +793,13 @@ func TestDefaultService_Update(t *testing.T) {
 		nameResolver.On("GetGatewayUrl", appName, serviceId).Return(gatewayUrl)
 		nameResolver.On("GetCentralGatewayUrl", appName, serviceDisplayName).Return(centralGatewayUrl)
 
-		accessServiceManager := new(asmocks.AccessServiceManager)
-		accessServiceManager.On("Upsert", appName, appUID, serviceId, resourceName).Return(nil)
-
 		secretsService := new(secretsmocks.Service)
 		secretsService.On("Delete", resourceName).Return(nil)
 
 		requestParamsService := &secretsmocks.RequestParametersService{}
 		requestParamsService.On("Upsert", appName, appUID, serviceId, requestParams).Return(requestParamsSecretName, nil)
 
-		service := NewService(nameResolver, accessServiceManager, secretsService, requestParamsService)
+		service := NewService(nameResolver, secretsService, requestParamsService)
 
 		// when
 		applicationServiceAPI, err := service.Update(appName, appUID, serviceId, serviceDisplayName, api)
@@ -970,7 +812,6 @@ func TestDefaultService_Update(t *testing.T) {
 		assert.Equal(t, requestParamsSecretName, applicationServiceAPI.RequestParametersSecretName)
 
 		nameResolver.AssertExpectations(t)
-		accessServiceManager.AssertExpectations(t)
 		secretsService.AssertExpectations(t)
 	})
 }
