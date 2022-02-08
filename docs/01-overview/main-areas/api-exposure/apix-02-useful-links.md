@@ -9,10 +9,11 @@ If you're interested in learning more about API Exposure in Kyma, follow these l
   - [Expose a service](../../../03-tutorials/00-api-exposure/apix-02-expose-service-apigateway.md)
   - [Expose and secure a service](../../../03-tutorials/00-api-exposure/apix-03-expose-and-secure-service.md)
   
-
 - Troubleshoot API Exposure-related issues when:
 
   - You [cannot connect to a service exposed by an API Rule](../../../04-operation-guides/troubleshooting/apix-01-apigateway-connect-api-rule.md)
+  - You get the [401 Unauthorized or 403 Forbidden](./apix-02-401-unauthorized-403-forbidden.md) status code once you try to connect to a service exposed by an API Rule
+  - You get the [404 Not Found](./apix-03-404-not-found.md) status code once you try to connect to a service exposed by an API Rule
   - [Connection refused](../../../04-operation-guides/troubleshooting/apix-02-dns-mgt-connection-refused.md) errors occur when you want to use your custom domain
   - You receive the [`could not resolve host`](../../../04-operation-guides/troubleshooting/apix-03-dns-mgt-could-not-resolve-host.md) error when you want to use your custom domain
   - A [resource is ignored by the controller](../../../04-operation-guides/troubleshooting/apix-04-dns-mgt-resource-ignored.md)
