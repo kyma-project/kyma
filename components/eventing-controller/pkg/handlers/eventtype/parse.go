@@ -6,10 +6,10 @@ import (
 )
 
 // parse splits the event-type using the given prefix and returns the application name, event and version
-// or an error if the event-type format is invalid
-// a valid even-type format should be: prefix.application.event.version
-// where event should consist of at least two segments separated by "." (e.g. businessObject.operation)
-// constraint: the application segment in the input event-type should not contain "."
+// or an error if the event-type format is invalid.
+// A valid even-type format should be: prefix.application.event.version
+// where event should consist of at least two segments separated by "." (e.g. businessObject.operation).
+// Constraint: the application segment in the input event-type should not contain ".".
 func parse(eventType, prefix string) (string, string, string, error) {
 	if !strings.HasPrefix(eventType, prefix) {
 		return "", "", "", fmt.Errorf("parse event-type [%s] failed, prefix [%s] not found", eventType, prefix)
