@@ -19,7 +19,6 @@ import (
 	"github.com/kyma-project/kyma/components/application-registry/internal/externalapi"
 	"github.com/kyma-project/kyma/components/application-registry/internal/k8sconsts"
 	"github.com/kyma-project/kyma/components/application-registry/internal/metadata"
-	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/accessservice"
 	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/applications"
 	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/secrets"
 	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/serviceapi"
@@ -109,16 +108,6 @@ func newApplicationManager(config *restclient.Config) (v1alpha12.ApplicationInte
 	}
 
 	return applicationEnvironmentClientset.ApplicationconnectorV1alpha1().Applications(), nil
-}
-
-func newAccessServiceManager(coreClientset *kubernetes.Clientset, namespace string, proxyPort int) accessservice.AccessServiceManager {
-	si := coreClientset.CoreV1().Services(namespace)
-
-	config := accessservice.AccessServiceManagerConfig{
-		TargetPort: int32(proxyPort),
-	}
-
-	return accessservice.NewAccessServiceManager(si, config)
 }
 
 func newSecretsService(repository secrets.Repository, nameResolver k8sconsts.NameResolver) secrets.Service {
