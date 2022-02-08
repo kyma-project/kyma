@@ -26,7 +26,7 @@ function loadCR(filepath) {
 
 function checkMockserverWasCalled(wasCalled) {
   const args = wasCalled ? [1] : [0, 0];
-  const not = wasCalled ? 'not' : '';
+  const not = wasCalled ? 'not ' : '';
   return mockServerClient('localhost', mockServerPort)
       .verify(
           {
@@ -37,7 +37,8 @@ function checkMockserverWasCalled(wasCalled) {
       .then(
           function() {},
           function(error) {
-            assert.fail(`"The HTTP endpoint was ${not} called`);
+            console.log(error);
+            assert.fail(`"The HTTP endpoint was ${not}called`);
           },
       );
 }
@@ -68,6 +69,7 @@ describe('Telemetry Operator tests', function() {
       await waitForDeployment('mockserver', mockNamespace);
       const {body} = await k8sCoreV1Api.listNamespacedPod(mockNamespace);
       const mockPod = body.items[0].metadata.name;
+      await sleep(5000);
       cancelPortForward = kubectlPortForward(
           mockNamespace,
           mockPod,
@@ -75,19 +77,18 @@ describe('Telemetry Operator tests', function() {
       );
     });
 
-    it('Should not receive HTTP traffic', function() {
-      return checkMockserverWasCalled(false);
-    }).timeout(15000);
+    it('Should not receive HTTP traffic', async function() {
+      await checkMockserverWasCalled(false);
+    });
 
     it('Apply HTTP output plugin to fluent-bit', async function() {
       await k8sApply(logPipelineCR, telemetryNamespace);
-      await sleep(10000); // wait for controller to reconcile
-      await waitForDaemonSet(fluentBitName, telemetryNamespace);
+      await waitForDaemonSet(fluentBitName, telemetryNamespace, 10000);
     });
 
-    it('Should receive HTTP traffic from fluent-bit', function() {
-      return checkMockserverWasCalled(true);
-    }).timeout(15000);
+    it('Should receive HTTP traffic from fluent-bit', async function() {
+      await checkMockserverWasCalled(true);
+    });
 
     after(async function() {
       cancelPortForward();
