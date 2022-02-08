@@ -205,37 +205,35 @@ func (r *FunctionReconciler) Reconcile(request ctrl.Request) (ctrl.Result, error
 	switch {
 	case instance.Spec.Type == serverlessv1alpha1.SourceTypeGit &&
 		r.isOnSourceChange(instance, revision):
-		err = r.onSourceChange(ctx, instance, &serverlessv1alpha1.Repository{
+		return result, r.onSourceChange(ctx, instance, &serverlessv1alpha1.Repository{
 			Reference: instance.Spec.Reference,
 			BaseDir:   instance.Spec.Repository.BaseDir,
 		}, revision)
 
 	case instance.Spec.Type != serverlessv1alpha1.SourceTypeGit &&
 		r.isOnConfigMapChange(instance, rtm, configMaps.Items, deployments.Items, dockerConfig):
-		err = r.onConfigMapChange(ctx, log, instance, rtm, configMaps.Items)
+		return result, r.onConfigMapChange(ctx, log, instance, rtm, configMaps.Items)
 
 	case instance.Spec.Type == serverlessv1alpha1.SourceTypeGit &&
 		r.isOnJobChange(instance, rtmCfg, jobs.Items, deployments.Items, gitOptions, dockerConfig):
-		result, err = r.onGitJobChange(ctx, log, instance, rtmCfg, jobs.Items, gitOptions, dockerConfig)
+		return r.onGitJobChange(ctx, log, instance, rtmCfg, jobs.Items, gitOptions, dockerConfig)
 
 	case instance.Spec.Type != serverlessv1alpha1.SourceTypeGit &&
 		r.isOnJobChange(instance, rtmCfg, jobs.Items, deployments.Items, git.Options{}, dockerConfig):
 		return r.onJobChange(ctx, log, instance, rtmCfg, configMaps.Items[0].GetName(), jobs.Items, dockerConfig)
 
 	case r.isOnDeploymentChange(instance, rtmCfg, deployments.Items, dockerConfig):
-		result, err = r.onDeploymentChange(ctx, log, instance, rtmCfg, deployments.Items, dockerConfig)
+		return r.onDeploymentChange(ctx, log, instance, rtmCfg, deployments.Items, dockerConfig)
 
 	case r.isOnServiceChange(instance, services.Items):
-		err = r.onServiceChange(ctx, log, instance, services.Items)
+		return result, r.onServiceChange(ctx, log, instance, services.Items)
 
 	case r.isOnHorizontalPodAutoscalerChange(instance, hpas.Items, deployments.Items):
-		err = r.onHorizontalPodAutoscalerChange(ctx, log, instance, hpas.Items, deployments.Items[0].GetName())
+		return result, r.onHorizontalPodAutoscalerChange(ctx, log, instance, hpas.Items, deployments.Items[0].GetName())
 
 	default:
-		result, err = r.updateDeploymentStatus(ctx, log, instance, deployments.Items, corev1.ConditionTrue)
+		return r.updateDeploymentStatus(ctx, log, instance, deployments.Items, corev1.ConditionTrue)
 	}
-
-	return result, err
 }
 
 func (r *FunctionReconciler) isOnSourceChange(instance *serverlessv1alpha1.Function, commit string) bool {
