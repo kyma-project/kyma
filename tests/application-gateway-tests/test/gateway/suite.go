@@ -10,7 +10,7 @@ import (
 
 	serviceCatalogApi "github.com/kubernetes-sigs/service-catalog/pkg/apis/servicecatalog/v1beta1"
 
-	proxyconfig2 "github.com/kyma-project/kyma/components/application-gateway/pkg/proxyconfig"
+	proxyconfig2 "github.com/kyma-project/kyma/components/central-application-gateway/pkg/proxyconfig"
 
 	"github.com/kyma-project/kyma/tests/application-gateway-tests/test/gateway/testkit/proxyconfig"
 

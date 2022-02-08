@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/kyma-project/kyma/components/application-gateway/pkg/proxyconfig"
+	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/proxyconfig"
 )
 
 // ApplicationName is a Application name

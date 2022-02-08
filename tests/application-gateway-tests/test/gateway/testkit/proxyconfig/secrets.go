@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/kyma-project/kyma/components/application-gateway/pkg/proxyconfig"
+	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/proxyconfig"
 	v12 "k8s.io/api/core/v1"
 	k8sMeta "k8s.io/apimachinery/pkg/apis/meta/v1"
 	v1 "k8s.io/client-go/kubernetes/typed/core/v1"

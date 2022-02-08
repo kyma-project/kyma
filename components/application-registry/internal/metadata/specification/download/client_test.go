@@ -5,8 +5,8 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/kyma-project/kyma/components/application-gateway/pkg/apperrors"
-	"github.com/kyma-project/kyma/components/application-gateway/pkg/authorization"
+	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/apperrors"
+	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/authorization"
 	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/model"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"

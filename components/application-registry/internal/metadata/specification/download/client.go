@@ -5,8 +5,8 @@ import (
 	"net/http"
 	"net/url"
 
-	"github.com/kyma-project/kyma/components/application-gateway/pkg/authorization"
-	"github.com/kyma-project/kyma/components/application-gateway/pkg/httpconsts"
+	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/authorization"
+	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/httpconsts"
 	"github.com/kyma-project/kyma/components/application-registry/internal/apperrors"
 	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/model"
 )
