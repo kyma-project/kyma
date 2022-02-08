@@ -53,7 +53,6 @@ const (
 	subscriberNameFormat   = "subscriber-%d"
 )
 
-type testCase func(id int, eventTypePrefix, natsSubjectToPublish, eventTypeToSubscribe string) bool
 
 var (
 	reconcilerTestCases = []testCase{
@@ -632,9 +631,17 @@ func testCreateSubscriptionWithEmptyEventType(id int, eventTypePrefix, _, _ stri
 	})
 }
 
+type testCase func(id int, eventTypePrefix, natsSubjectToPublish, eventTypeToSubscribe string) bool
+
 var (
-	_ = Describe("NATS Subscription reconciler tests with non-empty eventTypePrefix", testExecutor(reconcilertesting.EventTypePrefix, reconcilertesting.OrderCreatedEventType, reconcilertesting.OrderCreatedEventTypeNotClean))
-	_ = Describe("NATS Subscription reconciler tests with empty eventTypePrefix", testExecutor(reconcilertesting.EventTypePrefixEmpty, reconcilertesting.OrderCreatedEventTypePrefixEmpty, reconcilertesting.OrderCreatedEventTypeNotCleanPrefixEmpty))
+	_ = Describe("NATS Subscription reconciler tests with non-empty eventTypePrefix",
+		testExecutor(reconcilertesting.EventTypePrefix,
+			reconcilertesting.OrderCreatedEventType,
+			reconcilertesting.OrderCreatedEventTypeNotClean))
+	//_ = Describe("NATS Subscription reconciler tests with empty eventTypePrefix",
+	//	testExecutor(reconcilertesting.EventTypePrefixEmpty,
+	//		reconcilertesting.OrderCreatedEventTypePrefixEmpty,
+	//		reconcilertesting.OrderCreatedEventTypeNotCleanPrefixEmpty))
 )
 
 func testExecutor(eventTypePrefix, natsSubjectToPublish, eventTypeToSubscribe string) func() {
