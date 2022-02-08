@@ -13,10 +13,6 @@ const {
 const mockServerClient = require('mockserver-client').mockServerClient;
 const mockServerPort = 1080;
 
-function sleep(ms) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
-
 function loadCR(filepath) {
   const _logPipelineYaml = fs.readFileSync(path.join(__dirname, filepath), {
     encoding: 'utf8',
@@ -69,7 +65,6 @@ describe('Telemetry Operator tests', function() {
       await waitForDeployment('mockserver', mockNamespace);
       const {body} = await k8sCoreV1Api.listNamespacedPod(mockNamespace);
       const mockPod = body.items[0].metadata.name;
-      await sleep(5000);
       cancelPortForward = kubectlPortForward(
           mockNamespace,
           mockPod,
@@ -77,8 +72,8 @@ describe('Telemetry Operator tests', function() {
       );
     });
 
-    it('Should not receive HTTP traffic', async function() {
-      await checkMockserverWasCalled(false);
+    it('Should not receive HTTP traffic', () => {
+      return checkMockserverWasCalled(false);
     });
 
     it('Apply HTTP output plugin to fluent-bit', async function() {
@@ -86,8 +81,8 @@ describe('Telemetry Operator tests', function() {
       await waitForDaemonSet(fluentBitName, telemetryNamespace, 10000);
     });
 
-    it('Should receive HTTP traffic from fluent-bit', async function() {
-      await checkMockserverWasCalled(true);
+    it('Should receive HTTP traffic from fluent-bit', () => {
+      return checkMockserverWasCalled(true);
     });
 
     after(async function() {
