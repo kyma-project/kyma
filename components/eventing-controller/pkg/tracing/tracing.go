@@ -31,33 +31,33 @@ func AddTracingHeadersToContext(ctx context.Context, ce *cev2.Event) context.Con
 	traceHeader := http.Header{}
 	if traceParent, ok := ce.Extensions()[traceParentCEExtensionsKey]; ok {
 		traceHeader.Add(traceParentKey, fmt.Sprintf("%v", traceParent))
-		// CE extension, "traceparent" was added in publisher proxy to continue the trace from here. Hence it needs to be deleted here.
+		// CE extension, "traceparent" was added in publisher proxy to continue the trace from here. Hence, it needs to be deleted here.
 		removeCEExtension(ce, traceParentKey)
 	}
 
 	if b3TraceID, ok := ce.Extensions()[b3TraceIDCEExtensionsKey]; ok {
 		traceHeader.Add(b3TraceIDKey, fmt.Sprintf("%v", b3TraceID))
-		// CE extensions were added in publisher proxy to continue the trace from here. Hence it needs to be deleted here.
+		// CE extensions were added in publisher proxy to continue the trace from here. Hence, it needs to be deleted here.
 		removeCEExtension(ce, b3TraceIDCEExtensionsKey)
 	}
 	if b3ParentSpanID, ok := ce.Extensions()[b3ParentSpanIDCEExtensionsKey]; ok {
 		traceHeader.Add(b3ParentSpanIDKey, fmt.Sprintf("%v", b3ParentSpanID))
-		// CE extensions were added in publisher proxy to continue the trace from here. Hence it needs to be deleted here.
+		// CE extensions were added in publisher proxy to continue the trace from here. Hence, it needs to be deleted here.
 		removeCEExtension(ce, b3ParentSpanIDCEExtensionsKey)
 	}
 	if b3SpanID, ok := ce.Extensions()[b3SpanIDCEExtensionsKey]; ok {
 		traceHeader.Add(b3SpanIDKey, fmt.Sprintf("%v", b3SpanID))
-		// CE extensions were added in publisher proxy to continue the trace from here. Hence it needs to be deleted here.
+		// CE extensions were added in publisher proxy to continue the trace from here. Hence, it needs to be deleted here.
 		removeCEExtension(ce, b3SpanIDCEExtensionsKey)
 	}
 	if b3Sampled, ok := ce.Extensions()[b3SampledCEExtensionsKey]; ok {
 		traceHeader.Add(b3SampledKey, fmt.Sprintf("%v", b3Sampled))
-		// CE extensions were added in publisher proxy to continue the trace from here. Hence it needs to be deleted here.
+		// CE extensions were added in publisher proxy to continue the trace from here. Hence, it needs to be deleted here.
 		removeCEExtension(ce, b3SampledCEExtensionsKey)
 	}
 	if b3Flags, ok := ce.Extensions()[b3FlagsCEExtensionsKey]; ok {
 		traceHeader.Add(b3FlagsKey, fmt.Sprintf("%v", b3Flags))
-		// CE extensions were added in publisher proxy to continue the trace from here. Hence it needs to be deleted here.
+		// CE extensions were added in publisher proxy to continue the trace from here. Hence, it needs to be deleted here.
 		removeCEExtension(ce, b3FlagsCEExtensionsKey)
 	}
 	if len(traceHeader) > 0 {
