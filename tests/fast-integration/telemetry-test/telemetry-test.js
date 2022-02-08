@@ -77,7 +77,7 @@ describe('Telemetry Operator tests', function() {
 
     it('Should not receive HTTP traffic', function() {
       return checkMockserverWasCalled(false);
-    }).timeout(10000).catch(done);
+    }).timeout(15000);
 
     it('Apply HTTP output plugin to fluent-bit', async function() {
       await k8sApply(logPipelineCR, telemetryNamespace);
@@ -87,7 +87,7 @@ describe('Telemetry Operator tests', function() {
 
     it('Should receive HTTP traffic from fluent-bit', function() {
       return checkMockserverWasCalled(true);
-    }).timeout(10000).catch(done);
+    }).timeout(15000);
 
     after(async function() {
       cancelPortForward();
