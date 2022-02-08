@@ -98,8 +98,6 @@ Follow these steps to set up your custom domain and prepare a certificate requir
 
    ```bash
    export EMAIL={YOUR_EMAIL_ADDRESS}
-   export DOMAIN={CLUSTER_DOMAIN} #e.g. mydomain.com
-   export SUBDOMAIN={YOUR_SUBDOMAIN} #e.g. api.mydomain.com
    export WILDCARD={WILDCARD_SUBDOMAIN} #e.g. *.api.mydomain.com
    ```
 
@@ -122,8 +120,6 @@ Follow these steps to set up your custom domain and prepare a certificate requir
          namespace: default
        domains:
          include:
-           - $DOMAIN
-           - $SUBDOMAIN
            - "$WILDCARD"
          # Optionally, restrict domain ranges for which certificates can be requested
    #     exclude:
@@ -157,7 +153,6 @@ Follow these steps to set up your custom domain and prepare a certificate requir
        namespace: default
      dnsNames:
        - "$WILDCARD"
-       - $SUBDOMAIN
    EOF
    ```
 
