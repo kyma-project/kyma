@@ -726,20 +726,6 @@ func fixtureNamespace(name string) *v1.Namespace {
 	return &namespace
 }
 
-func subscriptionGetter(ctx context.Context, name, namespace string) func() (*eventingv1alpha1.Subscription, error) {
-	return func() (*eventingv1alpha1.Subscription, error) {
-		lookupKey := types.NamespacedName{
-			Namespace: namespace,
-			Name:      name,
-		}
-		subscription := &eventingv1alpha1.Subscription{}
-		if err := k8sClient.Get(ctx, lookupKey, subscription); err != nil {
-			return &eventingv1alpha1.Subscription{}, err
-		}
-		return subscription, nil
-	}
-}
-
 // getSubscription fetches a subscription using the lookupKey and allows making assertions on it
 func getSubscription(ctx context.Context, subscription *eventingv1alpha1.Subscription, intervals ...interface{}) AsyncAssertion {
 	if len(intervals) == 0 {
