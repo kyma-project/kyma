@@ -42,7 +42,7 @@ function checkMockserverWasCalled(wasCalled) {
       );
 }
 
-describe('Telemetry operator', function() {
+describe('Telemetry Operator tests', function() {
   const telemetryNamespace = 'kyma-system'; // operator flag 'fluent-bit-ns' is set to kyma-system
   const mockNamespace = 'mockserver';
   let cancelPortForward = null;
@@ -77,7 +77,7 @@ describe('Telemetry operator', function() {
 
     it('Should not receive HTTP traffic', function() {
       return checkMockserverWasCalled(false);
-    }).timeout(5000);
+    }).timeout(10000).catch(done);
 
     it('Apply HTTP output plugin to fluent-bit', async function() {
       await k8sApply(logPipelineCR, telemetryNamespace);
@@ -87,7 +87,7 @@ describe('Telemetry operator', function() {
 
     it('Should receive HTTP traffic from fluent-bit', function() {
       return checkMockserverWasCalled(true);
-    }).timeout(5000);
+    }).timeout(10000).catch(done);
 
     after(async function() {
       cancelPortForward();
