@@ -283,31 +283,34 @@ func WithWebhookForNats() SubscriptionOpt {
 	}
 }
 
+// AddFilter creates a new Filter from eventSource and eventType and adds it to the subscription.
+func AddFilter(eventSource, eventType string, subscription *eventingv1alpha1.Subscription) {
+	if subscription.Spec.Filter == nil {
+		subscription.Spec.Filter = &eventingv1alpha1.BEBFilters{
+			Filters: []*eventingv1alpha1.BEBFilter{},
+		}
+	}
+
+	filter := &eventingv1alpha1.BEBFilter{
+		EventSource: &eventingv1alpha1.Filter{
+			Type:     "exact",
+			Property: "source",
+			Value:    eventSource,
+		},
+		EventType: &eventingv1alpha1.Filter{
+			Type:     "exact",
+			Property: "type",
+			Value:    eventType,
+		},
+	}
+
+	subscription.Spec.Filter.Filters = append(subscription.Spec.Filter.Filters, filter)
+}
+
 // WithFilter is a SubscriptionOpt for creating a Subscription with a specific event type filter,
 // that itself gets created from the passed eventSource and eventType.
 func WithFilter(eventSource, eventType string) SubscriptionOpt {
-	return func(subscription *eventingv1alpha1.Subscription) {
-		if subscription.Spec.Filter == nil {
-			subscription.Spec.Filter = &eventingv1alpha1.BEBFilters{
-				Filters: []*eventingv1alpha1.BEBFilter{},
-			}
-		}
-
-		filter := &eventingv1alpha1.BEBFilter{
-			EventSource: &eventingv1alpha1.Filter{
-				Type:     "exact",
-				Property: "source",
-				Value:    eventSource,
-			},
-			EventType: &eventingv1alpha1.Filter{
-				Type:     "exact",
-				Property: "type",
-				Value:    eventType,
-			},
-		}
-
-		subscription.Spec.Filter.Filters = append(subscription.Spec.Filter.Filters, filter)
-	}
+	return func(subscription *eventingv1alpha1.Subscription) { AddFilter(eventSource, eventType, subscription) }
 }
 
 // WithNotCleanFilter initializes subscription filter with a not clean event-type
