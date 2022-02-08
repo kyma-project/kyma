@@ -485,7 +485,7 @@ func testCreateSubscriptionWithInvalidSink(id int, eventTypePrefix, _, eventType
 			invalidSinkMsgCheck(
 				fmt.Sprintf("https://%s.%s.svc.cluster.local", "testapp", "test-ns"),
 				"namespace of subscription: test and the namespace of subscriber: test-ns are different",
-				"Namespace of subscription: test and the subscriber: test-ns are different",
+				"natsNamespace of subscription: test and the subscriber: test-ns are different",
 			)
 		})
 		It("Should mark the Subscription as not ready if sink is not a valid cluster local service", func() {
@@ -692,7 +692,7 @@ func ensureSubscriptionUpdated(ctx context.Context, subscription *eventingv1alph
 func fixtureNamespace(name string) *v1.Namespace {
 	namespace := v1.Namespace{
 		TypeMeta: metav1.TypeMeta{
-			Kind:       "Namespace",
+			Kind:       "natsNamespace",
 			APIVersion: "v1",
 		},
 		ObjectMeta: metav1.ObjectMeta{

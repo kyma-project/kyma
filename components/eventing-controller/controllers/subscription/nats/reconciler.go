@@ -59,8 +59,8 @@ var (
 )
 
 const (
-	FirstInstanceName     = "eventing-nats-1" // FirstInstanceName the name of first instance of NATS cluster
-	Namespace             = "kyma-system"     // Namespace of NATS cluster
+	natsFirstInstanceName = "eventing-nats-1" // natsFirstInstanceName the name of first instance of NATS cluster
+	natsNamespace         = "kyma-system"     // natsNamespace of NATS cluster
 	reconcilerName        = "nats-subscription-reconciler"
 	clusterLocalURLSuffix = "svc.cluster.local"
 )
@@ -126,13 +126,13 @@ func (r *Reconciler) SetupUnmanaged(mgr ctrl.Manager) error {
 
 	p := predicate.Funcs{
 		CreateFunc: func(e event.CreateEvent) bool {
-			if e.Object.GetName() == FirstInstanceName && e.Object.GetNamespace() == Namespace {
+			if e.Object.GetName() == natsFirstInstanceName && e.Object.GetNamespace() == natsNamespace {
 				return true
 			}
 			return false
 		},
 		DeleteFunc: func(e event.DeleteEvent) bool {
-			if e.Object.GetName() == FirstInstanceName && e.Object.GetNamespace() == Namespace {
+			if e.Object.GetName() == natsFirstInstanceName && e.Object.GetNamespace() == natsNamespace {
 				return true
 			}
 			return false
@@ -145,7 +145,7 @@ func (r *Reconciler) SetupUnmanaged(mgr ctrl.Manager) error {
 		},
 	}
 	if err := ctru.Watch(&source.Kind{Type: &corev1.Pod{}}, &handler.EnqueueRequestForObject{}, p); err != nil {
-		r.namedLogger().Errorw("setup watch for nats server failed", "pod", FirstInstanceName, "error", err)
+		r.namedLogger().Errorw("setup watch for nats server failed", "pod", natsFirstInstanceName, "error", err)
 		return err
 	}
 
@@ -165,7 +165,7 @@ func (r *Reconciler) SetupUnmanaged(mgr ctrl.Manager) error {
 }
 
 func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
-	if req.Name == FirstInstanceName && req.Namespace == Namespace {
+	if req.Name == natsFirstInstanceName && req.Namespace == natsNamespace {
 		r.namedLogger().Debugw("received watch request", "namespace", req.Namespace, "name", req.Name)
 		return r.syncInvalidSubscriptions(ctx)
 	}
@@ -377,7 +377,7 @@ func defaultSinkValidator(ctx context.Context, r *Reconciler, subscription *even
 	// Assumption: Subscription CR and Subscriber should be deployed in the same namespace
 	svcNs := subDomains[1]
 	if subscription.Namespace != svcNs {
-		events.Warn(r.recorder, subscription, events.ReasonValidationFailed, "Namespace of subscription: %s and the subscriber: %s are different", subscription.Namespace, svcNs)
+		events.Warn(r.recorder, subscription, events.ReasonValidationFailed, "natsNamespace of subscription: %s and the subscriber: %s are different", subscription.Namespace, svcNs)
 		return fmt.Errorf("namespace of subscription: %s and the namespace of subscriber: %s are different", subscription.Namespace, svcNs)
 	}
 
