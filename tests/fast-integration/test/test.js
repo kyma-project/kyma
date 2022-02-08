@@ -1,8 +1,11 @@
 const {
   commerceMockTests,
   gettingStartedGuideTests,
-  monitoringTests,
 } = require('./');
+
+const {
+  monitoringTests
+} = require('../monitoring');
 
 describe('Executing Standard Testsuite:', function() {
   commerceMockTests();
