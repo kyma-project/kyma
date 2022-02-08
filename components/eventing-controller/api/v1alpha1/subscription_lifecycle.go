@@ -94,7 +94,7 @@ func (s SubscriptionStatus) ShouldUpdateReadyStatus() bool {
 	return false
 }
 
-// makeConditions creates an map of all conditions which the Subscription should have
+// makeConditions creates a map of all conditions which the Subscription should have.
 func makeConditions() []Condition {
 	conditions := []Condition{
 		{

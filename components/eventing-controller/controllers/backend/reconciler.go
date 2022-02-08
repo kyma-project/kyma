@@ -126,7 +126,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, _ ctrl.Request) (ctrl.Result
 		}
 		desiredBackend := currentBackend.DeepCopy()
 		desiredBackend.Status = getDefaultBackendStatus()
-		// Do not change the value of backend type if cannot change it
+		// Do not change the value of backend type if it cannot be changed
 		desiredBackend.Status.Backend = currentBackend.Status.Backend
 		desiredBackend.Status.EventingReady = utils.BoolPtr(false)
 		if object.Semantic.DeepEqual(&desiredBackend.Status, &currentBackend.Status) {
