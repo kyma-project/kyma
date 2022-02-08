@@ -194,7 +194,7 @@ func WithExemptHandshake() ProtoOpt {
 
 func WithAtLeastOnceQOS() ProtoOpt {
 	return func(p *eventingv1alpha1.ProtocolSettings) {
-		p.Qos = utils.StringPtr("AT-LEAST_ONCE")
+		p.Qos = utils.StringPtr(string(types.QosAtLeastOnce))
 	}
 }
 
@@ -250,7 +250,7 @@ func WithWebhookAuthForBEB() SubscriptionOpt {
 				return &contentMode
 			}(),
 			ExemptHandshake: exemptHandshake(true),
-			Qos:             utils.StringPtr("AT_LEAST_ONCE"),
+			Qos:             utils.StringPtr(string(types.QosAtLeastOnce)),
 			WebhookAuth: &eventingv1alpha1.WebhookAuth{
 				Type:         "oauth2",
 				GrantType:    "client_credentials",
@@ -276,7 +276,7 @@ func WithProtocolSettings(p *eventingv1alpha1.ProtocolSettings) SubscriptionOpt 
 }
 
 // WithWebhookForNATS is a SubscriptionOpt for creating a Subscription with a webhook set to the NATS protocol.
-func WithWebhookForNats() SubscriptionOpt {
+func WithWebhookForNATS() SubscriptionOpt {
 	return func(s *eventingv1alpha1.Subscription) {
 		s.Spec.Protocol = "NATS"
 		s.Spec.ProtocolSettings = &eventingv1alpha1.ProtocolSettings{}
@@ -357,9 +357,8 @@ func ValidSinkURL(namespace, svcName string) string {
 }
 
 // WithSinkURL is a SubscriptionOpt for creating a subscription with a specific sink.
-// This is useful for testing against invalid sinks.
-func WithSinkURL(invalidSink string) SubscriptionOpt {
-	return func(subscription *eventingv1alpha1.Subscription) { subscription.Spec.Sink = invalidSink }
+func WithSinkURL(sinkURL string) SubscriptionOpt {
+	return func(subscription *eventingv1alpha1.Subscription) { subscription.Spec.Sink = sinkURL }
 }
 
 // SetSink sets the subscription's sink to a valid sink created from svcNameSpace and svcName.

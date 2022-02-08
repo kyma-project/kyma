@@ -7,6 +7,10 @@ metadata:
   labels:
     app: {{ template "kube-prometheus-stack.name" . }}-alertmanager
 {{ include "kube-prometheus-stack.labels" . | indent 4 }}
+{{- if .Values.alertmanager.annotations }}
+  annotations:
+{{ toYaml .Values.alertmanager.annotations | indent 4 }}
+{{- end }}
 spec:
 {{- if .Values.global.images.alertmanager }}
   image: {{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.alertmanager) }}
@@ -19,9 +23,9 @@ spec:
   listenLocal: {{ .Values.alertmanager.alertmanagerSpec.listenLocal }}
   serviceAccountName: {{ template "kube-prometheus-stack.alertmanager.serviceAccountName" . }}
 {{- if .Values.alertmanager.alertmanagerSpec.externalUrl }}
-  externalUrl: "{{ .Values.alertmanager.alertmanagerSpec.externalUrl }}"
+  externalUrl: "{{ tpl .Values.alertmanager.alertmanagerSpec.externalUrl . }}"
 {{- else if and .Values.alertmanager.ingress.enabled .Values.alertmanager.ingress.hosts }}
-  externalUrl: "http://{{ index .Values.alertmanager.ingress.hosts 0 }}{{ .Values.alertmanager.alertmanagerSpec.routePrefix }}"
+  externalUrl: "http://{{ tpl (index .Values.alertmanager.ingress.hosts 0) . }}{{ .Values.alertmanager.alertmanagerSpec.routePrefix }}"
 {{- else }}
   externalUrl: http://{{ template "kube-prometheus-stack.fullname" . }}-alertmanager.{{ template "kube-prometheus-stack.namespace" . }}:{{ .Values.alertmanager.service.port }}
 {{- end }}
@@ -44,6 +48,18 @@ spec:
   configMaps:
 {{ toYaml .Values.alertmanager.alertmanagerSpec.configMaps | indent 4 }}
 {{- end }}
+{{- if .Values.alertmanager.alertmanagerSpec.alertmanagerConfigSelector }}
+  alertmanagerConfigSelector:
+{{ toYaml .Values.alertmanager.alertmanagerSpec.alertmanagerConfigSelector | indent 4}}
+{{ else }}
+  alertmanagerConfigSelector: {}
+{{- end }}
+{{- if .Values.alertmanager.alertmanagerSpec.alertmanagerConfigNamespaceSelector }}
+  alertmanagerConfigNamespaceSelector:
+{{ toYaml .Values.alertmanager.alertmanagerSpec.alertmanagerConfigNamespaceSelector | indent 4}}
+{{ else }}
+  alertmanagerConfigNamespaceSelector: {}
+{{- end }}
 {{- if .Values.alertmanager.alertmanagerSpec.resources }}
   resources:
 {{ toYaml .Values.alertmanager.alertmanagerSpec.resources | indent 4 }}
@@ -65,6 +81,7 @@ spec:
 {{- end }}
 {{- if or .Values.alertmanager.alertmanagerSpec.podAntiAffinity .Values.alertmanager.alertmanagerSpec.affinity }}
   affinity:
+{{- end }}
 {{- if .Values.alertmanager.alertmanagerSpec.affinity }}
 {{ toYaml .Values.alertmanager.alertmanagerSpec.affinity | indent 4 }}
 {{- end }}
@@ -73,9 +90,9 @@ spec:
       requiredDuringSchedulingIgnoredDuringExecution:
       - topologyKey: {{ .Values.alertmanager.alertmanagerSpec.podAntiAffinityTopologyKey }}
         labelSelector:
-          matchLabels:
-            app: alertmanager
-            alertmanager: {{ template "kube-prometheus-stack.fullname" . }}-alertmanager
+          matchExpressions:
+            - {key: app.kubernetes.io/name, operator: In, values: [alertmanager]}
+            - {key: alertmanager, operator: In, values: [{{ template "kube-prometheus-stack.fullname" . }}-alertmanager]}
 {{- else if eq .Values.alertmanager.alertmanagerSpec.podAntiAffinity "soft" }}
     podAntiAffinity:
       preferredDuringSchedulingIgnoredDuringExecution:
@@ -83,14 +100,17 @@ spec:
         podAffinityTerm:
           topologyKey: {{ .Values.alertmanager.alertmanagerSpec.podAntiAffinityTopologyKey }}
           labelSelector:
-            matchLabels:
-              app: alertmanager
-              alertmanager: {{ template "kube-prometheus-stack.fullname" . }}-alertmanager
-{{- end }}
+            matchExpressions:
+              - {key: app.kubernetes.io/name, operator: In, values: [alertmanager]}
+              - {key: alertmanager, operator: In, values: [{{ template "kube-prometheus-stack.fullname" . }}-alertmanager]}
 {{- end }}
 {{- if .Values.alertmanager.alertmanagerSpec.tolerations }}
   tolerations:
 {{ toYaml .Values.alertmanager.alertmanagerSpec.tolerations | indent 4 }}
+{{- end }}
+{{- if .Values.alertmanager.alertmanagerSpec.topologySpreadConstraints }}
+  topologySpreadConstraints:
+{{ toYaml .Values.alertmanager.alertmanagerSpec.topologySpreadConstraints | indent 4 }}
 {{- end }}
 {{- if .Values.global.imagePullSecrets }}
   imagePullSecrets:
@@ -100,21 +120,30 @@ spec:
   containers:
 {{ toYaml .Values.alertmanager.alertmanagerSpec.containers | indent 4 }}
 {{- end }}
-{{- if or .Values.alertmanager.alertmanagerSpec.priorityClassName .Values.global.priorityClassName }}
-  priorityClassName: {{ coalesce .Values.alertmanager.alertmanagerSpec.priorityClassName .Values.global.priorityClassName }}
+{{- if .Values.alertmanager.alertmanagerSpec.initContainers }}
+  initContainers:
+{{ toYaml .Values.alertmanager.alertmanagerSpec.initContainers | indent 4 }}
+{{- end }}
+{{- if .Values.alertmanager.alertmanagerSpec.priorityClassName }}
+  priorityClassName: {{.Values.alertmanager.alertmanagerSpec.priorityClassName }}
 {{- end }}
 {{- if .Values.alertmanager.alertmanagerSpec.additionalPeers }}
   additionalPeers:
 {{ toYaml .Values.alertmanager.alertmanagerSpec.additionalPeers | indent 4 }}
 {{- end }}
 {{- if .Values.alertmanager.alertmanagerSpec.volumes }}
-  volumes: {{.Values.alertmanager.alertmanagerSpec.volumes }}
+  volumes:
+{{ toYaml .Values.alertmanager.alertmanagerSpec.volumes | indent 4 }}
 {{- end }}
 {{- if .Values.alertmanager.alertmanagerSpec.volumeMounts }}
-  volumeMounts: {{.Values.alertmanager.alertmanagerSpec.volumeMounts }}
+  volumeMounts:
+{{ toYaml .Values.alertmanager.alertmanagerSpec.volumeMounts | indent 4 }}
 {{- end }}
   portName: {{ .Values.alertmanager.alertmanagerSpec.portName }}
-{{- end }}
 {{- if .Values.alertmanager.alertmanagerSpec.clusterAdvertiseAddress }}
   clusterAdvertiseAddress: {{ .Values.alertmanager.alertmanagerSpec.clusterAdvertiseAddress }}
+{{- end }}
+{{- if .Values.alertmanager.alertmanagerSpec.forceEnableClusterMode }}
+  forceEnableClusterMode: {{ .Values.alertmanager.alertmanagerSpec.forceEnableClusterMode }}
+{{- end }}
 {{- end }}

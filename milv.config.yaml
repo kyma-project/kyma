@@ -4,9 +4,6 @@ files-to-ignore: [ "/vendor/", "/testdata/" ]
 timeout: 60
 request-repeats: 5
 files:
-  - path: "./kyma/docs/04-operation-guides/operations/10-backup-kyma.md"
-    config:
-      external-links-to-ignore: [ "https://velero.io/docs/" ]
   - path: "./kyma/docs/kyma/04-10-upgrade.md"
     config:
       external-links-to-ignore: [ "https://raw.githubusercontent.com/kyma-project/kyma/{NEW_KYMA_VERSION}/installation/resources/tiller.yaml" ]

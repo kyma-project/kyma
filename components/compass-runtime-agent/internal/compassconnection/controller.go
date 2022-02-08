@@ -64,101 +64,119 @@ func newReconciler(client Client, supervisior Supervisor, minimalConfigSyncTime 
 	}
 }
 
-// Reconcile reads that state of the cluster for a CompassConnection object and makes changes based on the state read
 func (r *Reconciler) Reconcile(ctx context.Context, request reconcile.Request) (reconcile.Result, error) {
 	log := r.log.WithField("CompassConnection", request.Name)
 
-	// Fetch the CompassConnection instance
-	instance := &v1alpha1.CompassConnection{}
-	err := r.client.Get(ctx, request.NamespacedName, instance)
+	connection, err := r.getConnection(ctx, log, request)
 	if err != nil {
-		if errors.IsNotFound(err) {
-			log.Info("Compass Connection deleted. Trying to initialize new connection...")
-
-			// Try to establish new connection
-			instance, err := r.supervisor.InitializeCompassConnection()
-			if err != nil {
-				log.Errorf("Failed to initialize Compass Connection: %s", err.Error())
-				return reconcile.Result{}, err
-			}
-
-			log.Infof("Attempt to initialize Compass Connection ended with status: %s", instance.Status)
-			return reconcile.Result{}, nil
-		}
-
-		// SynchronizationFailed reading the object - requeue the request.
-		log.Info("Failed to read Compass Connection.")
 		return reconcile.Result{}, err
 	}
 
-	log.Infof("Processing Compass Connection, current status: %s", instance.Status)
+	if connection == nil {
+		_, err := r.initConnection(log)
+		return reconcile.Result{}, err
+	}
 
-	// If connection is not established read Config Map and try to fetch Certificate
-	if instance.ShouldAttemptReconnect() {
-		log.Infof("Attempting to initialize connection with Compass...")
-
-		//If minimalConfigSyncTime did not pass from connection.Status.ConnectionStatus.LastSync, skip connection
-		if !shouldReconnect(instance, r.minimalConfigSyncTime) {
-			log.Infof("Skipping connection initialization. Minimal resync time not passed. Last attempt: %v", instance.Status.ConnectionStatus.LastSync)
-			return reconcile.Result{}, nil
-		}
-
-		instance, err := r.supervisor.InitializeCompassConnection()
-		if err != nil {
-			log.Errorf("Failed to initialize Compass Connection: %s", err.Error())
-			return reconcile.Result{}, err
-		}
-
-		log.Infof("Attempt to initialize Compass Connection ended with status: %s", instance.Status)
+	// Make sure the minimal time passed since last Compass Connection synchronization.
+	// This allows to rate limit Compass calls
+	if skipConnectionSync(connection, log, r.minimalConfigSyncTime) {
 		return reconcile.Result{}, nil
 	}
 
-	// If minimalConfigSyncTime did not pass from SynchronizationStatus.LastAttempt, skip synchronization
-	if !shouldResyncConfig(instance, r.minimalConfigSyncTime) {
-		log.Infof("Skipping config synchronization. Minimal resync time not passed. Last attempt: %v", instance.Status.SynchronizationStatus.LastAttempt)
-		return reconcile.Result{}, nil
+	if connection.Failed() {
+		_, err := r.initConnection(log)
+		return reconcile.Result{}, err
+	}
+
+	if err := r.ensureCertificateIsValid(connection, log); err != nil {
+		return reconcile.Result{}, err
 	}
 
 	log.Info("Trying to connect to Compass and apply Runtime configuration...")
 
-	// Fetch and apply configuration
-	synchronized, err := r.supervisor.SynchronizeWithCompass(instance)
+	// Make sure the minimal time passed since last Application synchronization.
+	// This allows to rate limit Compass calls
+	if skipApplicationSync(connection, log, r.minimalConfigSyncTime) {
+		return reconcile.Result{}, nil
+	}
+
+	return reconcile.Result{}, r.synchronizeApplications(connection, log)
+}
+
+func (r *Reconciler) getConnection(ctx context.Context, log *logrus.Entry, request reconcile.Request) (*v1alpha1.CompassConnection, error) {
+	instance := &v1alpha1.CompassConnection{}
+	err := r.client.Get(ctx, request.NamespacedName, instance)
+	if err != nil {
+		if errors.IsNotFound(err) {
+			log.Info("Compass Connection deleted")
+			return nil, nil
+		}
+
+		log.Info("Failed to read Compass Connection.")
+		return nil, err
+	}
+
+	return instance, nil
+}
+
+func (r *Reconciler) initConnection(log *logrus.Entry) (*v1alpha1.CompassConnection, error) {
+	log.Info("Trying to initialize new connection...")
+
+	instance, err := r.supervisor.InitializeCompassConnection()
+	if err != nil {
+		log.Errorf("Failed to initialize Compass Connection: %s", err.Error())
+		return nil, err
+	}
+
+	log.Infof("Attempt to initialize Compass Connection ended with status: %s", instance.Status)
+	return instance, nil
+}
+
+func (r *Reconciler) synchronizeApplications(connection *v1alpha1.CompassConnection, log *logrus.Entry) error {
+	synchronized, err := r.supervisor.SynchronizeWithCompass(connection)
 	if err != nil {
 		log.Errorf("Failed to synchronize with Compass: %s", err.Error())
-		return reconcile.Result{}, err
+		return err
 	}
 
 	log.Infof("Synchronization finished. Compass Connection status: %s", synchronized.Status)
-
-	return reconcile.Result{}, nil
+	return nil
 }
 
-// Configuration resync is performed not more frequent that minimalConfigSyncTime,
-// unless deliberately requested by spec.ResyncNow set to true
-func shouldResyncConfig(connection *v1alpha1.CompassConnection, minimalConfigSyncTime time.Duration) bool {
-	if connection.Spec.ResyncNow {
-		return true
+func (r *Reconciler) ensureCertificateIsValid(connection *v1alpha1.CompassConnection, log *logrus.Entry) error {
+	log.Infof("Attempting to maintain connection with Compass...")
+	err := r.supervisor.MaintainCompassConnection(connection)
+
+	if err != nil {
+		log.Errorf("Failed to maintain connection with Compass: %s", err.Error())
+		return err
 	}
 
-	if connection.Status.SynchronizationStatus == nil {
-		return true
-	}
-
-	timeSinceLastSyncAttempt := time.Now().Unix() - connection.Status.SynchronizationStatus.LastAttempt.Unix()
-
-	return timeSinceLastSyncAttempt >= int64(minimalConfigSyncTime.Seconds())
+	return nil
 }
 
-func shouldReconnect(connection *v1alpha1.CompassConnection, minimalConfigSyncTime time.Duration) bool {
-	if connection.Spec.ResyncNow {
-		return true
+func skipConnectionSync(connection *v1alpha1.CompassConnection, log *logrus.Entry, minimalConfigSyncTime time.Duration) bool {
+	if connection.Spec.ResyncNow || connection.Status.ConnectionStatus == nil {
+		return false
 	}
-
-	if connection.Status.ConnectionStatus == nil {
-		return true
-	}
-
 	timeSinceLastConnAttempt := time.Now().Unix() - connection.Status.ConnectionStatus.LastSync.Unix()
 
-	return timeSinceLastConnAttempt >= int64(minimalConfigSyncTime.Seconds())
+	if timeSinceLastConnAttempt < int64(minimalConfigSyncTime.Seconds()) {
+		log.Infof("Skipping connection initialization/maintenance. Minimal resync time not passed. Last attempt: %v", connection.Status.ConnectionStatus.LastSync)
+		return true
+	}
+	return false
+}
+
+func skipApplicationSync(connection *v1alpha1.CompassConnection, log *logrus.Entry, minimalConfigSyncTime time.Duration) bool {
+	if connection.Spec.ResyncNow || connection.Status.SynchronizationStatus == nil {
+		return false
+	}
+	timeSinceLastSyncAttempt := time.Now().Unix() - connection.Status.SynchronizationStatus.LastAttempt.Unix()
+
+	if timeSinceLastSyncAttempt < int64(minimalConfigSyncTime.Seconds()) {
+		log.Infof("Skipping application synchronization. Minimal resync time not passed. Last attempt: %v", connection.Status.SynchronizationStatus.LastAttempt)
+		return true
+	}
+	return false
 }

@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "operator.fullname" . }}-metrics
+  labels:
+    {{- include "operator.selectorLabels" . | nindent 4 }}
+    {{- toYaml .Values.extraLabels | nindent 4 }}
+spec:
+  type: {{ .Values.service.type }}
+  ports:
+    - port: {{ .Values.service.port }}
+      targetPort: {{ .Values.service.port }}
+      protocol: TCP
+      name: {{ .Values.service.portName }}
+  selector:
+    {{- include "operator.selectorLabels" . | nindent 6 }}
+    {{- toYaml .Values.extraLabels | nindent 6 }}

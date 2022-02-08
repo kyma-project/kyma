@@ -14,7 +14,7 @@ type Manager struct {
 	Backend handlers.MessagingBackend
 }
 
-func (c *Manager) Init(mgr manager.Manager) error {
+func (c *Manager) Init(_ manager.Manager) error {
 	return nil
 }
 
