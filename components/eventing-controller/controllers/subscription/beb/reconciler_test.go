@@ -1401,7 +1401,7 @@ var _ = BeforeSuite(func(done Done) {
 
 	nameMapper = handlers.NewBEBSubscriptionNameMapper(domain, handlers.MaxBEBSubscriptionNameLength)
 
-	err = NewReconciler(context.Background(), k8sManager.GetClient(), applicationLister, k8sManager.GetCache(), defaultLogger,
+	err = NewReconciler(context.Background(), k8sManager.GetClient(), applicationLister, defaultLogger,
 		k8sManager.GetEventRecorderFor("eventing-controller"), envConf, credentials, nameMapper).SetupUnmanaged(k8sManager)
 	Expect(err).ToNot(HaveOccurred())
 

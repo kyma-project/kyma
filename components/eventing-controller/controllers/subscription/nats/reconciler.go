@@ -21,7 +21,6 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/client-go/tools/record"
 	ctrl "sigs.k8s.io/controller-runtime"
-	"sigs.k8s.io/controller-runtime/pkg/cache"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"sigs.k8s.io/controller-runtime/pkg/event"
@@ -44,7 +43,6 @@ type sinkValidator func(ctx context.Context, r *Reconciler, subscription *eventi
 type Reconciler struct {
 	ctx context.Context
 	client.Client
-	cache.Cache
 	Backend          handlers.MessagingBackend
 	logger           *logger.Logger
 	recorder         record.EventRecorder
@@ -65,12 +63,11 @@ const (
 	clusterLocalURLSuffix = "svc.cluster.local"
 )
 
-func NewReconciler(ctx context.Context, client client.Client, applicationLister *application.Lister, cache cache.Cache,
+func NewReconciler(ctx context.Context, client client.Client, applicationLister *application.Lister,
 	logger *logger.Logger, recorder record.EventRecorder, cfg env.NatsConfig, subsCfg env.DefaultSubscriptionConfig) *Reconciler {
 	reconciler := &Reconciler{
 		ctx:                 ctx,
 		Client:              client,
-		Cache:               cache,
 		logger:              logger,
 		recorder:            recorder,
 		eventTypeCleaner:    eventtype.NewCleaner(cfg.EventTypePrefix, applicationLister, logger),
@@ -188,38 +185,16 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 
 	if !subscription.ObjectMeta.DeletionTimestamp.IsZero() {
 		// The object is being deleted
-		if utils.ContainsString(subscription.ObjectMeta.Finalizers, Finalizer) {
-			if err := r.Backend.DeleteSubscription(subscription); err != nil {
-				log.Errorw("delete subscription failed", "error", err)
-				// if failed to delete the external dependency here, return with error
-				// so that it can be retried
-				return ctrl.Result{}, err
-			}
-
-			// remove our finalizer from the list and update it.
-			subscription.ObjectMeta.Finalizers = utils.RemoveString(subscription.ObjectMeta.Finalizers, Finalizer)
-			if err := r.Client.Update(ctx, subscription); err != nil {
-				events.Warn(r.recorder, subscription, events.ReasonUpdateFailed, "Update Subscription failed %s", subscription.Name)
-				log.Errorw("remove finalizer from subscription failed", "error", err)
-				return checkIsConflict(err)
-			}
-			log.Debug("remove finalizer from subscription succeeded")
-		}
-		// Stop reconciliation as the object is being deleted
-		return ctrl.Result{}, nil
+		err := r.handleSubscriptionDeletion(ctx, subscription, log)
+		return ctrl.Result{}, err
 	}
 
 	// The object is not being deleted, so if it does not have our finalizer,
 	// then lets add the finalizer and update the object. This is equivalent to
 	// registering our finalizer.
 	if !utils.ContainsString(subscription.ObjectMeta.Finalizers, Finalizer) {
-		subscription.ObjectMeta.Finalizers = append(subscription.ObjectMeta.Finalizers, Finalizer)
-		if err := r.Update(context.Background(), subscription); err != nil {
-			log.Errorw("add finalizer to subscription failed", "error", err)
-			return checkIsConflict(err)
-		}
-		log.Debug("add finalizer to subscription succeeded")
-		return ctrl.Result{Requeue: true}, nil
+		err := r.addFinalizerToSubscription(subscription, log)
+		return ctrl.Result{}, err
 	}
 
 	// Check for valid sink
@@ -251,17 +226,50 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 	return ctrl.Result{}, nil
 }
 
+// handleSubscriptionDeletion deletes the NATS subscription and removes its finalizer if it is set.
+func (r *Reconciler) handleSubscriptionDeletion(ctx context.Context, subscription *eventingv1alpha1.Subscription, log *zap.SugaredLogger) error {
+	if utils.ContainsString(subscription.ObjectMeta.Finalizers, Finalizer) {
+		if err := r.Backend.DeleteSubscription(subscription); err != nil {
+			log.Errorw("delete NATS subscription failed", "error", err)
+			// if failed to delete the external dependency here, return with error
+			// so that it can be retried
+			return err
+		}
+
+		// remove our finalizer from the list and update it.
+		subscription.ObjectMeta.Finalizers = utils.RemoveString(subscription.ObjectMeta.Finalizers, Finalizer)
+		if err := r.Client.Update(ctx, subscription); err != nil {
+			events.Warn(r.recorder, subscription, events.ReasonUpdateFailed, "Update Subscription failed %s", subscription.Name)
+			log.Errorw("remove finalizer from subscription failed", "error", err)
+			return err
+		}
+		log.Debug("remove finalizer from subscription succeeded")
+	}
+	return nil
+}
+
+// addFinalizerToSubscription appends the eventing finalizer to the subscription.
+func (r *Reconciler) addFinalizerToSubscription(subscription *eventingv1alpha1.Subscription, log *zap.SugaredLogger) error {
+	subscription.ObjectMeta.Finalizers = append(subscription.ObjectMeta.Finalizers, Finalizer)
+	if err := r.Update(context.Background(), subscription); err != nil {
+		log.Errorw("add finalizer to subscription failed", "error", err)
+		return err
+	}
+	log.Debug("add finalizer to subscription succeeded")
+	return nil
+}
+
 // syncSubscriptionStatus syncs Subscription status
 func (r *Reconciler) syncSubscriptionStatus(ctx context.Context, sub *eventingv1alpha1.Subscription, isNatsSubReady bool, forceUpdateStatus bool, message string) error {
 	desiredConditions := make([]eventingv1alpha1.Condition, 0)
 	conditionContained := false
 	conditionsUpdated := false
-	condition := eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionSubscriptionActive,
-		eventingv1alpha1.ConditionReasonNATSSubscriptionActive, corev1.ConditionFalse, message)
+	conditionStatus := corev1.ConditionFalse
 	if isNatsSubReady {
-		condition = eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionSubscriptionActive,
-			eventingv1alpha1.ConditionReasonNATSSubscriptionActive, corev1.ConditionTrue, message)
+		conditionStatus = corev1.ConditionTrue
 	}
+	condition := eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionSubscriptionActive,
+		eventingv1alpha1.ConditionReasonNATSSubscriptionActive, conditionStatus, message)
 	for _, c := range sub.Status.Conditions {
 		var chosenCondition eventingv1alpha1.Condition
 		if c.Type == condition.Type {
@@ -306,8 +314,8 @@ func (r *Reconciler) syncSubscriptionStatus(ctx context.Context, sub *eventingv1
 
 func (r *Reconciler) syncInvalidSubscriptions(ctx context.Context) (ctrl.Result, error) {
 	natsHandler, _ := r.Backend.(*handlers.Nats)
-	namespacedName := natsHandler.GetInvalidSubscriptions()
-	for _, v := range *namespacedName {
+	invalidSubs := natsHandler.GetInvalidSubscriptions()
+	for _, v := range *invalidSubs {
 		r.namedLogger().Debugw("found invalid subscription", "namespace", v.Namespace, "name", v.Name)
 		sub := &eventingv1alpha1.Subscription{}
 		if err := r.Client.Get(ctx, v, sub); err != nil {

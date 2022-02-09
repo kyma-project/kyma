@@ -845,7 +845,6 @@ func startReconciler(eventTypePrefix string, natsURL string) context.CancelFunc 
 		ctx,
 		k8sManager.GetClient(),
 		applicationLister,
-		k8sManager.GetCache(),
 		defaultLogger,
 		k8sManager.GetEventRecorderFor("eventing-controller-nats"),
 		envConf,
