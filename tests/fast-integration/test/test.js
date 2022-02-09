@@ -4,7 +4,7 @@ const {
 } = require('./');
 
 const {
-  monitoringTests
+  monitoringTests,
 } = require('../monitoring');
 
 describe('Executing Standard Testsuite:', function() {
