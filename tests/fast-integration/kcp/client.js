@@ -331,7 +331,7 @@ class KCPWrapper {
       if (err.stderr === undefined) {
         throw new Error(`failed to process kcp binary output: ${err.toString()}`);
       }
-      throw new Error(`kcp command failed: ${err.stderr.toString()}`);
+      throw new Error(`kcp command failed: args: ${args} ,${err.stderr.toString()}`);
     }
   }
 }
