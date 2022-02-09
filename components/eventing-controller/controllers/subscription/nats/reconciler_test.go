@@ -279,6 +279,7 @@ func testUpdateSubscriptionStatus(id int, eventTypePrefix, natsSubjectToPublish,
 				reconcilertesting.WithMultipleConditions(),
 				reconcilertesting.WithSinkURLFromSvc(subscriberSvc),
 			)
+			multipleConditions := subscription.Status.Conditions
 			ensureSubscriptionCreated(ctx, subscription)
 
 			Context("Checking the subscription got created properly", func() {
@@ -293,7 +294,6 @@ func testUpdateSubscriptionStatus(id int, eventTypePrefix, natsSubjectToPublish,
 
 			Context("Changing an existing subscription and checking, that it got updated properly", func() {
 				By("adding a filter")
-				multipleConditions := reconcilertesting.NewDefaultMultipleConditions()
 				expectedCleanEventType := []string{fmt.Sprintf("%stest", natsSubjectToPublish)}
 
 				eventType := fmt.Sprintf("%stest", eventTypeToSubscribe)
@@ -310,8 +310,10 @@ func testUpdateSubscriptionStatus(id int, eventTypePrefix, natsSubjectToPublish,
 				))
 
 				By("ensuring, that the subscription does not have additional conditions")
-				getSubscription(ctx, subscription).ShouldNot(reconcilertesting.HaveCondition(multipleConditions[0]))
-				getSubscription(ctx, subscription).ShouldNot(reconcilertesting.HaveCondition(multipleConditions[1]))
+				getSubscription(ctx, subscription).ShouldNot(And(
+					reconcilertesting.HaveCondition(multipleConditions[0]),
+					reconcilertesting.HaveCondition(multipleConditions[1]),
+				))
 			})
 		})
 	})
