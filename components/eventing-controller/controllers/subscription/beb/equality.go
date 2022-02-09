@@ -30,11 +30,12 @@ func conditionsEquals(existing, expected []eventingv1alpha1.Condition) bool {
 
 // conditionsEquals checks if two conditions are equal.
 func conditionEquals(existing, expected eventingv1alpha1.Condition) bool {
+	isTypeEqual := existing.Type == expected.Type
 	isStatusEqual := existing.Status == expected.Status
 	isReasonEqual := existing.Reason == expected.Reason
 	isMessageEqual := existing.Message == expected.Message
 
-	if !isStatusEqual || !isReasonEqual || !isMessageEqual {
+	if !isStatusEqual || !isReasonEqual || !isMessageEqual || !isTypeEqual {
 		return false
 	}
 
