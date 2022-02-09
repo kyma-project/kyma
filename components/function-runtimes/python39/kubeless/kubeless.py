@@ -237,7 +237,7 @@ if __name__ == '__main__':
         port=func_port,
         # Set this flag to True to auto-reload the server after any source files change
         reloader=os.getenv('CHERRYPY_RELOADED', False),
-        # Number of requests that can be handled in parallel (default = 10).
-        numthreads=int(os.getenv('CHERRYPY_NUMTHREADS', 10)),
+        # Number of requests that can be handled in parallel (default = 50).
+        numthreads=int(os.getenv('CHERRYPY_NUMTHREADS', 50)),
         quiet='KYMA_BOTTLE_QUIET_OPTION_DISABLED' not in os.environ,
     )
