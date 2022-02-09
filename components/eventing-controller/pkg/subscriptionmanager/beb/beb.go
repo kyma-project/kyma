@@ -101,7 +101,6 @@ func (c *SubscriptionManager) Start(_ env.DefaultSubscriptionConfig, params subs
 		ctx,
 		c.mgr.GetClient(),
 		applicationLister,
-		c.mgr.GetCache(),
 		c.logger,
 		c.mgr.GetEventRecorderFor("eventing-controller-beb"),
 		c.envCfg,

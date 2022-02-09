@@ -22,7 +22,6 @@ import (
 	k8stypes "k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/tools/record"
 	ctrl "sigs.k8s.io/controller-runtime"
-	"sigs.k8s.io/controller-runtime/pkg/cache"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"sigs.k8s.io/controller-runtime/pkg/handler"
@@ -47,7 +46,6 @@ import (
 type Reconciler struct {
 	ctx context.Context
 	client.Client
-	cache.Cache
 	logger            *logger.Logger
 	recorder          record.EventRecorder
 	Backend           handlers.MessagingBackend
@@ -72,7 +70,7 @@ const (
 	timeoutRetryActiveEmsStatus = time.Second * 30
 )
 
-func NewReconciler(ctx context.Context, client client.Client, applicationLister *application.Lister, cache cache.Cache, logger *logger.Logger, recorder record.EventRecorder, cfg env.Config, credential *handlers.OAuth2ClientCredentials, mapper handlers.NameMapper) *Reconciler {
+func NewReconciler(ctx context.Context, client client.Client, applicationLister *application.Lister, logger *logger.Logger, recorder record.EventRecorder, cfg env.Config, credential *handlers.OAuth2ClientCredentials, mapper handlers.NameMapper) *Reconciler {
 	bebHandler := handlers.NewBEB(credential, mapper, logger)
 	if err := bebHandler.Initialize(cfg); err != nil {
 		logger.WithContext().Errorw("start reconciler failed", "name", reconcilerName, "error", err)
@@ -82,7 +80,6 @@ func NewReconciler(ctx context.Context, client client.Client, applicationLister 
 	return &Reconciler{
 		ctx:               ctx,
 		Client:            client,
-		Cache:             cache,
 		logger:            logger,
 		recorder:          recorder,
 		Backend:           bebHandler,
@@ -667,7 +664,7 @@ func (r *Reconciler) getAPIRulesForASvc(ctx context.Context, labels map[string]s
 }
 
 func (r *Reconciler) filterAPIRulesOnPort(existingAPIRules []apigatewayv1alpha1.APIRule, port uint32) *apigatewayv1alpha1.APIRule {
-	// Assumption: there will be one APIRule for a svc with the labels injected by the controller hence trusting the first match
+	// Assumption: there will be one APIRule for an svc with the labels injected by the controller hence trusting the first match
 	for _, apiRule := range existingAPIRules {
 		if *apiRule.Spec.Service.Port == port {
 			return &apiRule
