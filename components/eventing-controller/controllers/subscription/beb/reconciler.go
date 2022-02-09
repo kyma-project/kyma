@@ -21,7 +21,6 @@ import (
 	k8stypes "k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/tools/record"
 	ctrl "sigs.k8s.io/controller-runtime"
-	"sigs.k8s.io/controller-runtime/pkg/cache"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"sigs.k8s.io/controller-runtime/pkg/handler"
@@ -46,7 +45,6 @@ import (
 type Reconciler struct {
 	ctx context.Context
 	client.Client
-	cache.Cache
 	logger            *logger.Logger
 	recorder          record.EventRecorder
 	Backend           handlers.MessagingBackend
@@ -70,7 +68,7 @@ const (
 	reconcilerName        = "beb-subscription-reconciler"
 )
 
-func NewReconciler(ctx context.Context, client client.Client, applicationLister *application.Lister, cache cache.Cache, logger *logger.Logger, recorder record.EventRecorder, cfg env.Config, credential *handlers.OAuth2ClientCredentials, mapper handlers.NameMapper) *Reconciler {
+func NewReconciler(ctx context.Context, client client.Client, applicationLister *application.Lister, logger *logger.Logger, recorder record.EventRecorder, cfg env.Config, credential *handlers.OAuth2ClientCredentials, mapper handlers.NameMapper) *Reconciler {
 	bebHandler := handlers.NewBEB(credential, mapper, logger)
 	if err := bebHandler.Initialize(cfg); err != nil {
 		logger.WithContext().Errorw("start reconciler failed", "name", reconcilerName, "error", err)
@@ -80,7 +78,6 @@ func NewReconciler(ctx context.Context, client client.Client, applicationLister 
 	return &Reconciler{
 		ctx:               ctx,
 		Client:            client,
-		Cache:             cache,
 		logger:            logger,
 		recorder:          recorder,
 		Backend:           bebHandler,
@@ -98,8 +95,8 @@ func NewReconciler(ctx context.Context, client client.Client, applicationLister 
 // +kubebuilder:rbac:groups=gateway.kyma-project.io,resources=apirules,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:printcolumn:name="Ready",type=bool,JSONPath=`.status.Ready`
 
+// TODO: Optimize number of reconciliation calls in eventing-controller #9766: https://github.com/kyma-project/kyma/issues/9766
 func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
-	// TODO: Optimize number of reconciliation calls in eventing-controller #9766: https://github.com/kyma-project/kyma/issues/9766
 	actualSubscription := &eventingv1alpha1.Subscription{}
 
 	result := ctrl.Result{}
@@ -623,7 +620,7 @@ func (r *Reconciler) getAPIRulesForASvc(ctx context.Context, labels map[string]s
 }
 
 func (r *Reconciler) filterAPIRulesOnPort(existingAPIRules []apigatewayv1alpha1.APIRule, port uint32) *apigatewayv1alpha1.APIRule {
-	// Assumption: there will be one APIRule for a svc with the labels injected by the controller hence trusting the first match
+	// Assumption: there will be one APIRule for an svc with the labels injected by the controller hence trusting the first match
 	for _, apiRule := range existingAPIRules {
 		if *apiRule.Spec.Service.Port == port {
 			return &apiRule
@@ -714,7 +711,7 @@ func (r *Reconciler) updateCondition(ctx context.Context, subscription *eventing
 	return nil
 }
 
-// replaceStatusCondition replaces the given condition on the subscription. It also sets the readiness in the status.
+// replaceStatusCondition replaces the given condition on the subscription. Also it sets the readiness in the status.
 // So make sure you always use this method then changing a condition
 func (r *Reconciler) replaceStatusCondition(subscription *eventingv1alpha1.Subscription, condition eventingv1alpha1.Condition) bool {
 	// the subscription is ready if all conditions are fulfilled

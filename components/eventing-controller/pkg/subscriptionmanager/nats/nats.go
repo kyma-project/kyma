@@ -83,7 +83,6 @@ func (c *SubscriptionManager) Start(defaultSubsConfig env.DefaultSubscriptionCon
 		ctx,
 		c.mgr.GetClient(),
 		applicationLister,
-		c.mgr.GetCache(),
 		c.logger,
 		c.mgr.GetEventRecorderFor("eventing-controller-nats"),
 		c.envCfg,
