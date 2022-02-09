@@ -1,6 +1,8 @@
 FROM python:alpine3.15
 WORKDIR /home/locust
+
 RUN apk update && apk add bash curl jq miller git build-base linux-headers c-ares coreutils
+RUN apk add --no-cache --update --repository=http://dl-cdn.alpinelinux.org/alpine/edge/main openssl
 
 ADD requirements.txt /home/locust/
 RUN pip3 install -r requirements.txt
