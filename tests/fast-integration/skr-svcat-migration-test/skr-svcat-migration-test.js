@@ -22,8 +22,6 @@ const {
 const t = require('./test-helpers');
 const sampleResources = require('./deploy-sample-resources');
 const {KCPWrapper, KCPConfig} = require('../kcp/client');
-const {keb, director} = require("../skr-test");
-const {unregisterKymaFromCompass} = require("../compass");
 
 const kcp = new KCPWrapper(KCPConfig.fromEnv());
 
