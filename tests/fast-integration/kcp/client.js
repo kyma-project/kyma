@@ -280,21 +280,36 @@ class KCPWrapper {
   }
 
   async reconcileInformationLog(runtimeStatus) {
-    const objRuntimeStatus = JSON.parse(runtimeStatus);
-    // kcp reconciliations operations -c <shootName> -o json
-    const reconciliationsOperations = await this.getReconciliationsOperations(objRuntimeStatus.data[0].shootName);
+    if (runtimeStatus) {
+      const objRuntimeStatus = JSON.parse(runtimeStatus);
 
-    const objReconciliationsOperations = JSON.parse(reconciliationsOperations);
-    console.log(`\nNumber of operations: ${objReconciliationsOperations.length}`);
+      // kcp reconciliations operations -c <shootName> -o json
+      const reconciliationsOperations = await this.getReconciliationsOperations(objRuntimeStatus.data[0].shootName);
 
-    // using only last three operations
-    const lastObjReconciliationsOperations = objReconciliationsOperations.slice(objReconciliationsOperations.length - 3,
-        objReconciliationsOperations.length);
+      const objReconciliationsOperations = JSON.parse(reconciliationsOperations);
 
-    for (const i of lastObjReconciliationsOperations) {
-      // kcp reconciliations info -i <scheduling-id> -o json
-      const getReconciliationsInfo = await this.getReconciliationsInfo(i.schedulingID);
-      console.log(`\nReconciliation info: ${i.schedulingID}: ${getReconciliationsInfo}`);
+      const objReconciliationsOperationsLength = objReconciliationsOperations.length;
+
+      if (objReconciliationsOperationsLength === 0) {
+        console.log(`\nNo reconciliation operations found`);
+        return;
+      }
+      console.log(`\nNumber of reconciliations operations: ${objReconciliationsOperationsLength}`);
+
+      // using only last three operations
+      const lastObjReconciliationsOperations = objReconciliationsOperations.slice(objReconciliationsOperations.length - 3, objReconciliationsOperations.length);
+
+      for (const i of lastObjReconciliationsOperations) {
+        console.log(`\nReconciliation operation status: ${i.status}`);
+
+        if (i.schedulingID) {
+          // kcp reconciliations info -i <scheduling-id> -o json
+          const getReconciliationsInfo = await this.getReconciliationsInfo(i.schedulingID);
+          console.log(`\nReconciliation info: ${i.schedulingID}: ${getReconciliationsInfo}`);
+        }
+      }
+    } else {
+      console.log(`\nNo runtimeStatus provided to reconcileInformationLog`);
     }
   }
 

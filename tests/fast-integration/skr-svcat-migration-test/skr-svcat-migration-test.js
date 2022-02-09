@@ -22,10 +22,12 @@ const {
 const t = require('./test-helpers');
 const sampleResources = require('./deploy-sample-resources');
 const {KCPWrapper, KCPConfig} = require('../kcp/client');
+const {keb, director} = require("../skr-test");
+const {unregisterKymaFromCompass} = require("../compass");
 
 const kcp = new KCPWrapper(KCPConfig.fromEnv());
 
-describe('SKR SVCAT migration test', function() {
+describe('SKR SVCAT migration test', function () {
   const keb = new KEBClient(KEBConfig.fromEnv());
   const gardener = new GardenerClient(GardenerConfig.fromEnv());
   const smAdminCreds = t.SMCreds.fromEnv();
@@ -148,7 +150,12 @@ describe('SKR SVCAT migration test', function() {
   });
 
   it('Should deprovision SKR', async function() {
-    await deprovisionSKR(keb, kcp, instanceID, deprovisioningTimeout);
+    try {
+      await deprovisionSKR(keb, kcp, instanceID, deprovisioningTimeout);
+    } finally {
+      const runtimeStatus = await kcp.getRuntimeStatusOperations(instanceID);
+      await kcp.reconcileInformationLog(runtimeStatus);
+    }
   });
 
   it('Should cleanup platform --cascade, operator instances and bindings', async function() {

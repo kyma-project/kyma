@@ -262,6 +262,7 @@ describe('SKR-Upgrade-test', function() {
     });
 
     it('Deprovision SKR', async function() {
+      //TODO: Add logging
       await deprovisionSKR(keb, kcp, instanceID, deprovisioningTimeout);
     });
   }
