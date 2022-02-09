@@ -51,7 +51,6 @@ func newProxy(targetURL string, requestParameters *authorization.RequestParamete
 			setCustomHeaders(req.Header, requestParameters.Headers)
 		}
 
-		log.Infof("req.Host: '%s', || target.Host: '%s'", req.Host, target.Host)
 		log.Infof("Modified request url : '%s', schema : '%s', path : '%s'", req.URL.String(), req.URL.Scheme, req.URL.Path)
 	}
 	return &httputil.ReverseProxy{Director: director, Transport: transport}, nil
