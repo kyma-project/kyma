@@ -25,7 +25,7 @@
 /resources/cluster-essentials/ @PK85 @janmedrek @a-thaler @strekm @dariusztutaj @cnvergence @veichtj @piotrkpc
 
 # The `pod-preset` subchart
-/resources/cluster-essentials/charts/pod-preset/ @PK85 @piotrmiskiewicz @ksputo @szwedm @voigt @wozniakjan @adamwalach
+/resources/cluster-essentials/charts/pod-preset/ @PK85 @piotrmiskiewicz @ksputo @szwedm @voigt @wozniakjan @adamwalach @ralikio
 
 # The `cluster-users` subchart
 /resources/cluster-users/ @strekm @werdes72 @Tomasz-Smelcerz-SAP @mjakobczyk @dariusztutaj @cnvergence @veichtj @piotrkpc
@@ -37,28 +37,28 @@
 /resources/rafter/ @m00g3n @pPrecel @dbadura @kwiatekus @moelsayed @cortey
 
 # The `application-connector` chart
-/resources/application-connector/ @akgalwas @janmedrek @franpog859 @Maladie @koala7659 @ralikio
+/resources/application-connector/ @akgalwas @janmedrek @franpog859 @Maladie @koala7659
 
 # The `connector-service` subchart
-/resources/application-connector/charts/connector-service/ @akgalwas @janmedrek @franpog859 @Maladie @koala7659 @ralikio
+/resources/application-connector/charts/connector-service/ @akgalwas @janmedrek @franpog859 @Maladie @koala7659
 
 # The `connection-token-handler` subchart
-/resources/application-connector/charts/connection-token-handler/ @akgalwas @janmedrek @franpog859 @Maladie @koala7659 @ralikio
+/resources/application-connector/charts/connection-token-handler/ @akgalwas @janmedrek @franpog859 @Maladie @koala7659
 
 # The `application-registry` subchart
-/resources/application-connector/charts/application-registry/ @akgalwas @janmedrek @franpog859 @Maladie @koala7659 @ralikio
+/resources/application-connector/charts/application-registry/ @akgalwas @janmedrek @franpog859 @Maladie @koala7659
 
 # The `application-operator` subchart
-/resources/application-connector/charts/application-operator/ @akgalwas @janmedrek @franpog859 @Maladie @koala7659 @ralikio
+/resources/application-connector/charts/application-operator/ @akgalwas @janmedrek @franpog859 @Maladie @koala7659
 
 # The `central-application-gateway` subchart
-/resources/application-connector/charts/central-application-gateway/ @akgalwas @janmedrek @franpog859 @Maladie @koala7659 @ralikio
+/resources/application-connector/charts/central-application-gateway/ @akgalwas @janmedrek @franpog859 @Maladie @koala7659
 
 # The `central-application-connectivity-validator` subchart
-/resources/application-connector/charts/central-application-connectivity-validator/ @akgalwas @janmedrek @franpog859 @Maladie @koala7659 @ralikio
+/resources/application-connector/charts/central-application-connectivity-validator/ @akgalwas @janmedrek @franpog859 @Maladie @koala7659 
 
 # The `helm-broker` subchart
-/resources/helm-broker/ @PK85 @piotrmiskiewicz @ksputo @szwedm @voigt @wozniakjan @adamwalach
+/resources/helm-broker/ @PK85 @piotrmiskiewicz @ksputo @szwedm @voigt @wozniakjan @adamwalach @ralikio
 
 # The `monitoring` subchart
 /resources/monitoring/ @a-thaler @lilitgh @clebs @rakesh-garimella @skhalash @jeremyharisch @chrkl @shorim @lindnerby
@@ -73,13 +73,13 @@
 /resources/eventing/ @lilitgh @k15r @nachtmaar @marcobebway @radufa @pxsalehi @mfaizanse @friedrichwilken @vladislavpaskar
 
 # The `application-broker` subchart
-/resources/application-connector/charts/application-broker/ @PK85 @piotrmiskiewicz @ksputo @szwedm @voigt @wozniakjan @adamwalach @lilitgh
+/resources/application-connector/charts/application-broker/ @PK85 @piotrmiskiewicz @ksputo @szwedm @voigt @wozniakjan @adamwalach @lilitgh @ralikio
 
 # The `service-catalog-addons` subchart
-/resources/service-catalog-addons/ @PK85 @piotrmiskiewicz @ksputo @szwedm @voigt @wozniakjan @adamwalach
+/resources/service-catalog-addons/ @PK85 @piotrmiskiewicz @ksputo @szwedm @voigt @wozniakjan @adamwalach @ralikio
 
 # The `service-catalog-addons` subchart
-/resources/service-manager-proxy/ @PK85 @piotrmiskiewicz @ksputo @szwedm @voigt @wozniakjan
+/resources/service-manager-proxy/ @PK85 @piotrmiskiewicz @ksputo @szwedm @voigt @wozniakjan @ralikio
 
 # The `istio-configuration` chart
 /resources/istio-configuration/ @strekm @werdes72 @Tomasz-Smelcerz-SAP @mjakobczyk @dariusztutaj @cnvergence @veichtj @piotrkpc
@@ -94,7 +94,7 @@
 /resources/tracing/ @a-thaler @lilitgh @clebs @rakesh-garimella @skhalash @jeremyharisch @chrkl @shorim @lindnerby
 
 # The `service-catalog` chart
-/resources/service-catalog/ @PK85 @piotrmiskiewicz @ksputo @szwedm @voigt @wozniakjan @adamwalach
+/resources/service-catalog/ @PK85 @piotrmiskiewicz @ksputo @szwedm @voigt @wozniakjan @adamwalach @ralikio
 
 # The `ory` chart
 /resources/ory/ @strekm @werdes72 @Tomasz-Smelcerz-SAP @mjakobczyk @dariusztutaj @cnvergence @veichtj @piotrkpc
@@ -103,7 +103,7 @@
 /resources/api-gateway/ @strekm @werdes72 @Tomasz-Smelcerz-SAP @mjakobczyk @dariusztutaj @cnvergence @veichtj @piotrkpc
 
 # The `compass-runtime-agent` chart
-/resources/compass-runtime-agent/ @PK85 @akgalwas @janmedrek @franpog859 @Maladie @koala7659 @ralikio
+/resources/compass-runtime-agent/ @PK85 @akgalwas @janmedrek @franpog859 @Maladie @koala7659 
 
 # The `kiali` chart
 /resources/kiali/ @a-thaler @lilitgh @clebs @rakesh-garimella @skhalash @jeremyharisch @chrkl @shorim @lindnerby
@@ -117,43 +117,43 @@
 # Components
 
 # The etcd-tls-setup directory
-components/etcd-tls-setup-job/ @PK85 @piotrmiskiewicz @ksputo @szwedm @voigt @wozniakjan @adamwalach
+components/etcd-tls-setup-job/ @PK85 @piotrmiskiewicz @ksputo @szwedm @voigt @wozniakjan @adamwalach @ralikio
 
 # Binding Component
-/components/binding/ @PK85 @piotrmiskiewicz @ksputo @szwedm @voigt @wozniakjan
+/components/binding/ @PK85 @piotrmiskiewicz @ksputo @szwedm @voigt @wozniakjan @ralikio
 
 # Binding usage controller Component
-/components/service-binding-usage-controller/ @PK85 @piotrmiskiewicz @ksputo @szwedm @voigt @wozniakjan @adamwalach
+/components/service-binding-usage-controller/ @PK85 @piotrmiskiewicz @ksputo @szwedm @voigt @wozniakjan @adamwalach @ralikio
 
 # Istioctl Installer Component
 /components/istio-installer/ @strekm @werdes72 @Tomasz-Smelcerz-SAP @mjakobczyk @dariusztutaj
 
 # Application broker Component
-/components/application-broker/ @PK85 @piotrmiskiewicz @ksputo @szwedm @voigt @wozniakjan @adamwalach @lilitgh
+/components/application-broker/ @PK85 @piotrmiskiewicz @ksputo @szwedm @voigt @wozniakjan @adamwalach @lilitgh @ralikio
 
 # Connector Service Component
-/components/connector-service/ @akgalwas @janmedrek @franpog859 @Maladie @koala7659 @ralikio
+/components/connector-service/ @akgalwas @janmedrek @franpog859 @Maladie @koala7659
 
 # Connection Token Handler Component
-/components/connection-token-handler/ @akgalwas @janmedrek @franpog859 @Maladie @koala7659 @ralikio
+/components/connection-token-handler/ @akgalwas @janmedrek @franpog859 @Maladie @koala7659
 
 # Application Registry Component
-/components/application-registry/ @akgalwas @janmedrek @franpog859 @Maladie @koala7659 @ralikio
+/components/application-registry/ @akgalwas @janmedrek @franpog859 @Maladie @koala7659
 
 # Application Operator Component
-/components/application-operator/ @akgalwas @janmedrek @franpog859 @Maladie @koala7659 @ralikio
+/components/application-operator/ @akgalwas @janmedrek @franpog859 @Maladie @koala7659
 
 # Application Gateway Component
-/components/application-gateway/ @akgalwas @janmedrek @franpog859 @Maladie @koala7659 @ralikio
+/components/application-gateway/ @akgalwas @janmedrek @franpog859 @Maladie @koala7659
 
 # Application Connectivity Validator Component
-/components/application-connectivity-validator/ @akgalwas @janmedrek @franpog859 @Maladie @koala7659 @ralikio
+/components/application-connectivity-validator/ @akgalwas @janmedrek @franpog859 @Maladie @koala7659
 
 # Application Connectivity Certs Setup Job Component
-/components/application-connectivity-certs-setup-job/ @akgalwas @janmedrek @franpog859 @Maladie @koala7659 @ralikio
+/components/application-connectivity-certs-setup-job/ @akgalwas @janmedrek @franpog859 @Maladie @koala7659
 
 # UAA Component
-/components/uaa-activator/ @ksputo @piotrmiskiewicz @PK85 @szwedm @voigt @wozniakjan
+/components/uaa-activator/ @ksputo @piotrmiskiewicz @PK85 @szwedm @voigt @wozniakjan @ralikio
 
 # Function Controller
 /components/function-controller/ @m00g3n @pPrecel @dbadura @kwiatekus @moelsayed @cortey
@@ -162,7 +162,7 @@ components/etcd-tls-setup-job/ @PK85 @piotrmiskiewicz @ksputo @szwedm @voigt @wo
 /components/function-runtimes/ @m00g3n @pPrecel @dbadura @kwiatekus @moelsayed @cortey
 
 # Compass Runtime Agent
-/components/compass-runtime-agent/ @PK85 @akgalwas @janmedrek @franpog859 @Maladie @koala7659 @ralikio
+/components/compass-runtime-agent/ @PK85 @akgalwas @janmedrek @franpog859 @Maladie @koala7659
 
 # Event Publisher Proxy
 /components/event-publisher-proxy @k15r @lilitgh @marcobebway @nachtmaar @radufa @pxsalehi @mfaizanse @friedrichwilken @vladislavpaskar
@@ -174,17 +174,17 @@ components/etcd-tls-setup-job/ @PK85 @piotrmiskiewicz @ksputo @szwedm @voigt @wo
 /components/busola-migrator/ @m00g3n @pPrecel @dbadura @kwiatekus @moelsayed @cortey
 
 # Central Application Gateway
-/components/central-application-gateway/ @akgalwas @janmedrek @franpog859 @Maladie @koala7659 @ralikio
+/components/central-application-gateway/ @akgalwas @janmedrek @franpog859 @Maladie @koala7659
 
 # Central Connectivity Validator
-/components/central-application-connectivity-validator/ @akgalwas @janmedrek @franpog859 @Maladie @koala7659 @ralikio
+/components/central-application-connectivity-validator/ @akgalwas @janmedrek @franpog859 @Maladie @koala7659
 
 # Telemetry Operator
 /components/telemetry-operator @a-thaler @lilitgh @clebs @rakesh-garimella @skhalash @jeremyharisch @chrkl @shorim @lindnerby
 
 # Tests
 # Service Catalog acceptance tests
-/tests/service-catalog/ @ksputo @piotrmiskiewicz @PK85 @szwedm @voigt @wozniakjan @adamwalach
+/tests/service-catalog/ @ksputo @piotrmiskiewicz @PK85 @szwedm @voigt @wozniakjan @adamwalach @ralikio
 
 # api-gateway integration tests
 /tests/integration/api-gateway/ @strekm @werdes72 @Tomasz-Smelcerz-SAP @mjakobczyk @dariusztutaj
@@ -199,39 +199,39 @@ components/etcd-tls-setup-job/ @PK85 @piotrmiskiewicz @ksputo @szwedm @voigt @wo
 /tests/serverless-bench/ @m00g3n @pPrecel @dbadura @moelsayed @Cortey
 
 # Connector Service Tests
-/tests/connector-service-tests/ @akgalwas @janmedrek @franpog859 @Maladie @koala7659 @ralikio
+/tests/connector-service-tests/ @akgalwas @janmedrek @franpog859 @Maladie @koala7659
 
 # Application Registry Tests
-/tests/application-registry-tests/ @akgalwas @janmedrek @franpog859 @Maladie @koala7659 @ralikio
+/tests/application-registry-tests/ @akgalwas @janmedrek @franpog859 @Maladie @koala7659
 
 # Application Gateway Tests
-/tests/application-gateway-tests/ @akgalwas @janmedrek @franpog859 @Maladie @koala7659 @ralikio
+/tests/application-gateway-tests/ @akgalwas @janmedrek @franpog859 @Maladie @koala7659
 
 # Application Gateway Legacy Tests
-/tests/application-gateway-legacy-tests/ @akgalwas @janmedrek @franpog859 @Maladie @koala7659 @ralikio
+/tests/application-gateway-legacy-tests/ @akgalwas @janmedrek @franpog859 @Maladie @koala7659
 
 # Application Operator Tests
-/tests/application-operator-tests/ @akgalwas @janmedrek @franpog859 @Maladie @koala7659 @ralikio
+/tests/application-operator-tests/ @akgalwas @janmedrek @franpog859 @Maladie @koala7659
 
 # Application Connector Tests
-/tests/application-connector-tests/ @akgalwas @janmedrek @franpog859 @Maladie @koala7659 @ralikio
+/tests/application-connector-tests/ @akgalwas @janmedrek @franpog859 @Maladie @koala7659
 
 # Connection Token Handler Tests
-/tests/connection-token-handler-tests/ @akgalwas @janmedrek @franpog859 @Maladie @koala7659 @ralikio
+/tests/connection-token-handler-tests/ @akgalwas @janmedrek @franpog859 @Maladie @koala7659
 
 # Compass Runtime Agent Tests
-/tests/compass-runtime-agent/ @PK85 @akgalwas @janmedrek @franpog859 @Maladie @koala7659 @ralikio
+/tests/compass-runtime-agent/ @PK85 @akgalwas @janmedrek @franpog859 @Maladie @koala7659
 
 # Fast Integration Tests
 /tests/fast-integration/ @pbochynski @adamwalach @voigt @skhalash @shorim @rakesh-garimella @jeremyharisch @lindnerby @khlifi411 @ruanxin @tobiscr @clebs @Tomasz-Smelcerz-SAP
 
 # Fast Integration Tests maintained by gophers
-/tests/fast-integration/kyma-environment-broker @PK85 @piotrmiskiewicz @ksputo @szwedm @voigt @wozniakjan
-/tests/fast-integration/skr-kyma-to-kyma2-upgrade @PK85 @piotrmiskiewicz @ksputo @szwedm @voigt @wozniakjan
-/tests/fast-integration/skr-svcat-migration-test @PK85 @piotrmiskiewicz @ksputo @szwedm @voigt @wozniakjan
-/tests/fast-integration/skr-test @PK85 @piotrmiskiewicz @ksputo @szwedm @voigt @wozniakjan
-/tests/fast-integration/skr-nightly @PK85 @piotrmiskiewicz @ksputo @szwedm @voigt @wozniakjan
-/tests/fast-integration/kcp @PK85 @piotrmiskiewicz @ksputo @szwedm @voigt @wozniakjan
+/tests/fast-integration/kyma-environment-broker @PK85 @piotrmiskiewicz @ksputo @szwedm @voigt @wozniakjan @ralikio
+/tests/fast-integration/skr-kyma-to-kyma2-upgrade @PK85 @piotrmiskiewicz @ksputo @szwedm @voigt @wozniakjan @ralikio
+/tests/fast-integration/skr-svcat-migration-test @PK85 @piotrmiskiewicz @ksputo @szwedm @voigt @wozniakjan @ralikio
+/tests/fast-integration/skr-test @PK85 @piotrmiskiewicz @ksputo @szwedm @voigt @wozniakjan @ralikio
+/tests/fast-integration/skr-nightly @PK85 @piotrmiskiewicz @ksputo @szwedm @voigt @wozniakjan @ralikio
+/tests/fast-integration/kcp @PK85 @piotrmiskiewicz @ksputo @szwedm @voigt @wozniakjan @ralikio
 
 
 # Fast Integration Eventing Tests
@@ -261,7 +261,7 @@ milv.config.yaml @m00g3n @pPrecel @kwiatekus @moelsayed @cortey @klaudiagrz @mmi
 /tests/perf/ @a-thaler @lilitgh @clebs @rakesh-garimella
 
 # github actions
-/.github/workflows @PK85 @piotrmiskiewicz @ksputo @szwedm @voigt @wozniakjan @kyma-project/prow
+/.github/workflows @PK85 @piotrmiskiewicz @ksputo @szwedm @voigt @wozniakjan @kyma-project/prow @ralikio
 
 # VERSION file
 VERSION @kyma-project/prow
