@@ -9,10 +9,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/authorization"
 	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/specification/download"
 	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/specification/rafter"
 	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/specification/rafter/clusterassetgroup"
+	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/authorization"
 
 	"github.com/go-openapi/spec"
 	"github.com/kyma-project/kyma/components/application-registry/internal/apperrors"
