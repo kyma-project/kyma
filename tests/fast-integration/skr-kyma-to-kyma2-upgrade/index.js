@@ -42,7 +42,6 @@ const {
 const {
   saveKubeconfig,
 } = require('../skr-svcat-migration-test/test-helpers');
-const {keb} = require("../skr-test");
 
 describe('SKR-Upgrade-test', function() {
   switchDebug(on = true);
