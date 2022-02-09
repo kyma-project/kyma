@@ -1,13 +1,14 @@
 package download
 
 import (
+	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/authorization/clientcert"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 
+	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/model"
 	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/apperrors"
 	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/authorization"
-	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/model"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -122,7 +123,7 @@ func (af authFactoryStub) Create(credentials *authorization.Credentials) authori
 
 func (as authStrategyStub) Invalidate() {}
 
-func (as authStrategyStub) AddAuthorization(r *http.Request, setter authorization.TransportSetter) apperrors.AppError {
+func (as authStrategyStub) AddAuthorization(r *http.Request, setter clientcert.SetClientCertificateFunc) apperrors.AppError {
 	r.Header.Set(authHeader, authValue)
 	return nil
 }

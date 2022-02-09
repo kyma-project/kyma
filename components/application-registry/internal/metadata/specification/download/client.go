@@ -5,10 +5,10 @@ import (
 	"net/http"
 	"net/url"
 
-	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/authorization"
-	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/httpconsts"
 	"github.com/kyma-project/kyma/components/application-registry/internal/apperrors"
 	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/model"
+	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/authorization"
+	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/httpconsts"
 )
 
 const timeout = 5
@@ -76,16 +76,9 @@ func (d downloader) requestAPISpec(specUrl string, credentials *authorization.Cr
 }
 
 func (d downloader) addAuthorization(r *http.Request, credentials *authorization.Credentials) apperrors.AppError {
-
-	ts := func(transport *http.Transport) {
-		d.client.Transport = transport
-	}
-
-	strategy := d.authorizationFactory.Create(credentials)
-
-	err := strategy.AddAuthorization(r, ts)
-
-	if err != nil {
+	// The setter is nil, because there is no option to create the CertificateGenStrategy.
+	// See the https://github.com/kyma-project/kyma/blob/1.24.9/components/application-registry/internal/metadata/specification/service.go#L136
+	if err := d.authorizationFactory.Create(credentials).AddAuthorization(r, nil); err != nil {
 		return apperrors.Internal(err.Error())
 	}
 
