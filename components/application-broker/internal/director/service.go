@@ -8,8 +8,8 @@ import (
 	"github.com/kyma-project/kyma/components/application-broker/internal"
 
 	schema "github.com/kyma-incubator/compass/components/director/pkg/graphql"
-	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/authorization"
-	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/proxyconfig"
+	"github.com/kyma-project/kyma/components/application-gateway/pkg/authorization"
+	"github.com/kyma-project/kyma/components/application-gateway/pkg/proxyconfig"
 	"github.com/pkg/errors"
 	"k8s.io/apimachinery/pkg/util/wait"
 )

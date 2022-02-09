@@ -83,5 +83,3 @@ require (
 	sigs.k8s.io/structured-merge-diff/v4 v4.1.2 // indirect
 	sigs.k8s.io/yaml v1.2.0 // indirect
 )
-
-replace github.com/kyma-project/kyma/components/application-operator => github.com/franpog859/kyma/components/application-operator 12845-remove-app-operator

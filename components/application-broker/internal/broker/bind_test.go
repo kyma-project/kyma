@@ -11,8 +11,8 @@ import (
 	"github.com/kyma-project/kyma/components/application-broker/internal/broker/automock"
 
 	osb "github.com/kubernetes-sigs/go-open-service-broker-client/v2"
-	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/authorization"
-	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/proxyconfig"
+	"github.com/kyma-project/kyma/components/application-gateway/pkg/authorization"
+	"github.com/kyma-project/kyma/components/application-gateway/pkg/proxyconfig"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

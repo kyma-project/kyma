@@ -1,8 +1,8 @@
 package proxyconfig
 
 import (
-	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/authorization"
-	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/proxyconfig"
+	"github.com/kyma-project/kyma/components/application-gateway/pkg/authorization"
+	"github.com/kyma-project/kyma/components/application-gateway/pkg/proxyconfig"
 )
 
 type ConfigBuilder struct {
