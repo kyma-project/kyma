@@ -595,22 +595,22 @@ data:
               "step": 15
             },
             {
-              "expr": "kube_pod_container_resource_requests_memory_bytes{pod=~\"rafter-asyncapi-svc-.*\"}",
+              "expr": "kube_pod_container_resource_requests{pod=~\"rafter-asyncapi-svc-.*\", resource=\"memory\"}",
               "format": "time_series",
               "interval": "10s",
               "intervalFactor": 2,
               "legendFormat": "Requested: {{`{{container}}`}}",
-              "metric": "kube_pod_container_resource_requests_memory_bytes",
+              "metric": "kube_pod_container_resource_requests",
               "refId": "B",
               "step": 20
             },
             {
-              "expr": "kube_pod_container_resource_limits_memory_bytes{pod=~\"rafter-asyncapi-svc-.*\"}",
+              "expr": "kube_pod_container_resource_limits{pod=~\"rafter-asyncapi-svc-.*\", resource=\"memory\"}",
               "format": "time_series",
               "interval": "10s",
               "intervalFactor": 2,
               "legendFormat": "Limit: {{`{{container}}`}}",
-              "metric": "kube_pod_container_resource_limits_memory_bytes",
+              "metric": "kube_pod_container_resource_limits",
               "refId": "C",
               "step": 20
             }
@@ -708,22 +708,22 @@ data:
               "step": 30
             },
             {
-              "expr": "kube_pod_container_resource_requests_cpu_cores{pod=~\"rafter-asyncapi-svc-.*\"}",
+              "expr": "kube_pod_container_resource_requests{pod=~\"rafter-asyncapi-svc-.*\", resource=\"cpu\"}",
               "format": "time_series",
               "interval": "10s",
               "intervalFactor": 2,
               "legendFormat": "Requested: {{`{{container}}`}}",
-              "metric": "kube_pod_container_resource_requests_cpu_cores",
+              "metric": "kube_pod_container_resource_requests",
               "refId": "B",
               "step": 20
             },
             {
-              "expr": "kube_pod_container_resource_limits_cpu_cores{pod=~\"rafter-asyncapi-svc-.*\"}",
+              "expr": "kube_pod_container_resource_limits{pod=~\"rafter-asyncapi-svc-.*\", resource=\"cpu\"}",
               "format": "time_series",
               "interval": "10s",
               "intervalFactor": 2,
               "legendFormat": "Limit: {{`{{container}}`}}",
-              "metric": "kube_pod_container_resource_limits_memory_bytes",
+              "metric": "kube_pod_container_resource_limits",
               "refId": "C",
               "step": 20
             }

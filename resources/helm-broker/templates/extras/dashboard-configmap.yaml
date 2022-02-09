@@ -777,7 +777,7 @@ data:
               "refId": "A"
             },
             {
-              "expr": "kube_pod_container_resource_requests_cpu_cores{pod=~\"helm-broker.*\"}",
+              "expr": "kube_pod_container_resource_requests{pod=~\"helm-broker.*\", resource=\"cpu\"}",
               "format": "time_series",
               "interval": "10s",
               "intervalFactor": 2,
@@ -785,7 +785,7 @@ data:
               "refId": "B"
             },
             {
-              "expr": "kube_pod_container_resource_limits_cpu_cores{pod=~\"helm-broker.*\"}",
+              "expr": "kube_pod_container_resource_limits{pod=~\"helm-broker.*\", resource=\"cpu\"}",
               "format": "time_series",
               "interval": "10s",
               "intervalFactor": 2,
@@ -883,7 +883,7 @@ data:
               "refId": "A"
             },
             {
-              "expr": "kube_pod_container_resource_requests_memory_bytes{pod=~\"helm-broker.*\"}",
+              "expr": "kube_pod_container_resource_requests{pod=~\"helm-broker.*\", resource=\"memory\"}",
               "format": "time_series",
               "interval": "10s",
               "intervalFactor": 2,
@@ -891,7 +891,7 @@ data:
               "refId": "B"
             },
             {
-              "expr": "kube_pod_container_resource_limits_memory_bytes{pod=~\"helm-broker.*\"}",
+              "expr": "kube_pod_container_resource_limits{pod=~\"helm-broker.*\", resource=\"memory\"}",
               "format": "time_series",
               "interval": "10s",
               "intervalFactor": 2,

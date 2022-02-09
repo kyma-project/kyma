@@ -144,7 +144,7 @@ func testCleanEventTypes(id int, eventTypePrefix, natsSubjectToPublish, eventTyp
 			subscriptionName := fmt.Sprintf(subscriptionNameFormat, id)
 			subscription := reconcilertesting.NewSubscription(subscriptionName, namespaceName,
 				reconcilertesting.WithEmptyFilter(),
-				reconcilertesting.WithWebhookForNats(),
+				reconcilertesting.WithWebhookForNATS(),
 				reconcilertesting.WithSinkURLFromSvc(subscriberSvc),
 			)
 			ensureSubscriptionCreated(ctx, subscription)
@@ -277,7 +277,7 @@ func testUpdateSubscriptionStatus(id int, eventTypePrefix, natsSubjectToPublish,
 			subscriptionName := fmt.Sprintf(subscriptionNameFormat, id)
 			subscription := reconcilertesting.NewSubscription(subscriptionName, namespaceName,
 				reconcilertesting.WithEmptyFilter(),
-				reconcilertesting.WithWebhookForNats(),
+				reconcilertesting.WithWebhookForNATS(),
 				reconcilertesting.WithMultipleConditions(),
 				reconcilertesting.WithSinkURLFromSvc(subscriberSvc),
 			)
@@ -343,7 +343,7 @@ func testCreateDeleteSubscription(id int, eventTypePrefix, natsSubjectToPublish,
 			// create subscription
 			subscription := reconcilertesting.NewSubscription(subscriptionName, namespaceName,
 				reconcilertesting.WithFilter(reconcilertesting.EventSource, eventTypeToSubscribe),
-				reconcilertesting.WithWebhookForNats(),
+				reconcilertesting.WithWebhookForNATS(),
 				reconcilertesting.WithSinkURLFromSvc(subscriberSvc),
 			)
 			ensureSubscriptionCreated(ctx, subscription)
@@ -427,7 +427,7 @@ func testCreateSubscriptionWithInvalidSink(id int, eventTypePrefix, _, eventType
 		// Create subscription
 		givenSubscription := reconcilertesting.NewSubscription(subscriptionName, namespaceName,
 			reconcilertesting.WithFilter(reconcilertesting.EventSource, eventTypeToSubscribe),
-			reconcilertesting.WithWebhookForNats(),
+			reconcilertesting.WithWebhookForNATS(),
 			reconcilertesting.WithSinkURL(sink),
 		)
 		ensureSubscriptionCreated(ctx, givenSubscription)
@@ -485,7 +485,7 @@ func testCreateSubscriptionWithInvalidSink(id int, eventTypePrefix, _, eventType
 			invalidSinkMsgCheck(
 				fmt.Sprintf("https://%s.%s.svc.cluster.local", "testapp", "test-ns"),
 				"namespace of subscription: test and the namespace of subscriber: test-ns are different",
-				"Namespace of subscription: test and the subscriber: test-ns are different",
+				"natsNamespace of subscription: test and the subscriber: test-ns are different",
 			)
 		})
 		It("Should mark the Subscription as not ready if sink is not a valid cluster local service", func() {
@@ -552,7 +552,7 @@ func testChangeSubscriptionConfiguration(id int, eventTypePrefix, natsSubjectToP
 			// create subscription
 			subscription := reconcilertesting.NewSubscription(subscriptionName, namespaceName,
 				reconcilertesting.WithFilter(reconcilertesting.EventSource, eventTypeToSubscribe),
-				reconcilertesting.WithWebhookForNats(),
+				reconcilertesting.WithWebhookForNATS(),
 				reconcilertesting.WithSinkURLFromSvc(subscriberSvc),
 			)
 			ensureSubscriptionCreated(ctx, subscription)
@@ -618,7 +618,7 @@ func testCreateSubscriptionWithEmptyEventType(id int, eventTypePrefix, _, _ stri
 			// Create subscription
 			givenSubscription := reconcilertesting.NewSubscription(subscriptionName, namespaceName,
 				reconcilertesting.WithFilter(reconcilertesting.EventSource, ""),
-				reconcilertesting.WithWebhookForNats(),
+				reconcilertesting.WithWebhookForNATS(),
 				reconcilertesting.WithSinkURLFromSvc(subscriberSvc),
 			)
 			ensureSubscriptionCreated(ctx, givenSubscription)
@@ -692,7 +692,7 @@ func ensureSubscriptionUpdated(ctx context.Context, subscription *eventingv1alph
 func fixtureNamespace(name string) *v1.Namespace {
 	namespace := v1.Namespace{
 		TypeMeta: metav1.TypeMeta{
-			Kind:       "Namespace",
+			Kind:       "natsNamespace",
 			APIVersion: "v1",
 		},
 		ObjectMeta: metav1.ObjectMeta{
