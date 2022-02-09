@@ -280,37 +280,33 @@ class KCPWrapper {
   }
 
   async reconcileInformationLog(runtimeStatus) {
-    if (runtimeStatus) {
-      const objRuntimeStatus = JSON.parse(runtimeStatus);
+    const objRuntimeStatus = JSON.parse(runtimeStatus);
 
-      // kcp reconciliations operations -c <shootName> -o json
-      const reconciliationsOperations = await this.getReconciliationsOperations(objRuntimeStatus.data[0].shootName);
+    // kcp reconciliations operations -c <shootName> -o json
+    const reconciliationsOperations = await this.getReconciliationsOperations(objRuntimeStatus.data[0].shootName);
 
-      const objReconciliationsOperations = JSON.parse(reconciliationsOperations);
+    const objReconciliationsOperations = JSON.parse(reconciliationsOperations);
 
-      const objReconciliationsOperationsLength = objReconciliationsOperations.length;
+    const objReconciliationsOperationsLength = objReconciliationsOperations.length;
 
-      if (objReconciliationsOperationsLength === 0) {
-        console.log(`\nNo reconciliation operations found`);
-        return;
+    if (objReconciliationsOperationsLength === 0) {
+      console.log(`\nNo reconciliation operations found`);
+      return;
+    }
+    console.log(`\nNumber of reconciliations operations: ${objReconciliationsOperationsLength}`);
+
+    // using only last three operations
+    const lastObjReconciliationsOperations = objReconciliationsOperations
+        .slice(objReconciliationsOperations.length - 3, objReconciliationsOperations.length);
+
+    for (const i of lastObjReconciliationsOperations) {
+      console.log(`\nReconciliation operation status: ${i.status}`);
+
+      if (i.schedulingID) {
+        // kcp reconciliations info -i <scheduling-id> -o json
+        const getReconciliationsInfo = await this.getReconciliationsInfo(i.schedulingID);
+        console.log(`\nReconciliation info: ${i.schedulingID}: ${getReconciliationsInfo}`);
       }
-      console.log(`\nNumber of reconciliations operations: ${objReconciliationsOperationsLength}`);
-
-      // using only last three operations
-      const lastObjReconciliationsOperations = objReconciliationsOperations
-          .slice(objReconciliationsOperations.length - 3, objReconciliationsOperations.length);
-
-      for (const i of lastObjReconciliationsOperations) {
-        console.log(`\nReconciliation operation status: ${i.status}`);
-
-        if (i.schedulingID) {
-          // kcp reconciliations info -i <scheduling-id> -o json
-          const getReconciliationsInfo = await this.getReconciliationsInfo(i.schedulingID);
-          console.log(`\nReconciliation info: ${i.schedulingID}: ${getReconciliationsInfo}`);
-        }
-      }
-    } else {
-      console.log(`\nNo runtimeStatus provided to reconcileInformationLog`);
     }
   }
 
