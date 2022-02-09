@@ -1,11 +1,10 @@
+// This file contains unit tests for the NATS subscription reconciler.
+// It uses the testing.T and gomega testing libraries to perform the assertions.
+// TestEnvironment struct mocks the required resources.
 package nats
 
 import (
 	"context"
-	"path/filepath"
-	"strings"
-	"testing"
-
 	kymalogger "github.com/kyma-project/kyma/common/logging/logger"
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 	"github.com/kyma-project/kyma/components/eventing-controller/logger"
@@ -15,9 +14,12 @@ import (
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes/scheme"
 	"k8s.io/client-go/tools/record"
+	"path/filepath"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
 	"sigs.k8s.io/controller-runtime/pkg/envtest"
+	"strings"
+	"testing"
 
 	"k8s.io/apimachinery/pkg/types"
 )
@@ -27,43 +29,65 @@ func TestHandleSubscriptionDeletion(t *testing.T) {
 	testEnvironment := setupTestEnvironment(t)
 	ctx, r, mockedBackend := testEnvironment.Context, testEnvironment.Reconciler, testEnvironment.Backend
 
-	subscription := &eventingv1alpha1.Subscription{
-		ObjectMeta: v1.ObjectMeta{
-			Name:       "test",
-			Namespace:  namespaceName,
-			Finalizers: []string{}, // empty finalizers
+	testCases := []struct {
+		name               string
+		givenFinalizers    []string
+		expectedDeleteCall bool
+		expectedFinalizers []string
+	}{
+		{
+			name:               "With no finalizers the NATS subscription should not be deleted",
+			givenFinalizers:    []string{},
+			expectedDeleteCall: false,
+			expectedFinalizers: []string{},
+		},
+		{
+			name:               "With eventing finalizer the NATS subscription should be deleted and the finalizer should be cleared",
+			givenFinalizers:    []string{Finalizer},
+			expectedDeleteCall: true,
+			expectedFinalizers: []string{},
+		},
+		{
+			name:               "With wrong finalizer the NATS subscription should not be deleted",
+			givenFinalizers:    []string{"eventing2.kyma-project.io"},
+			expectedDeleteCall: false,
+			expectedFinalizers: []string{"eventing2.kyma-project.io"},
 		},
 	}
 
-	err := testEnvironment.Reconciler.Client.Create(testEnvironment.Context, subscription)
-	g.Expect(err).Should(BeNil())
+	for _, tC := range testCases {
+		testCase := tC
+		t.Run(testCase.name, func(t *testing.T) {
+			// given
+			subscription := NewSubscription(WithFinalizers(testCase.givenFinalizers))
+			err := r.Client.Create(testEnvironment.Context, subscription)
+			g.Expect(err).Should(BeNil())
 
-	err = r.handleSubscriptionDeletion(ctx, subscription, r.namedLogger())
-	g.Expect(err).Should(BeNil())
+			mockedBackend.On("DeleteSubscription", subscription).Return(nil)
 
-	// the subscription has no kyma eventing finalizers and hence should not be processed in the function
-	mockedBackend.AssertNotCalled(t, "DeleteSubscription", subscription)
-	g.Expect(subscription.ObjectMeta.Finalizers).Should(BeEmpty())
-	g.Expect(err).Should(BeNil())
+			// when
+			err = r.handleSubscriptionDeletion(ctx, subscription, r.namedLogger())
+			g.Expect(err).Should(BeNil())
 
-	// add the eventing finalizer to test the function's branches
-	subscription.ObjectMeta.Finalizers = []string{"eventing.kyma-project.io"}
-	mockedBackend.On("DeleteSubscription", subscription).Return(nil)
-	err = r.handleSubscriptionDeletion(ctx, subscription, r.namedLogger())
-	g.Expect(err).Should(BeNil())
+			// then
+			if testCase.expectedDeleteCall {
+				mockedBackend.AssertCalled(t, "DeleteSubscription", subscription)
+			} else {
+				mockedBackend.AssertNotCalled(t, "DeleteSubscription", subscription)
+			}
 
-	// the function should have cleared the finalizers
-	mockedBackend.AssertCalled(t, "DeleteSubscription", subscription)
-	g.Expect(subscription.ObjectMeta.Finalizers).Should(BeEmpty())
+			ensureFinalizerMatch(g, subscription, testCase.expectedFinalizers)
 
-	// check the changes were made on the kubernetes server
-	var fetchedSub eventingv1alpha1.Subscription
-	err = r.Client.Get(ctx, types.NamespacedName{
-		Name:      "test",
-		Namespace: namespaceName,
-	}, &fetchedSub)
-	g.Expect(err).Should(BeNil())
-	g.Expect(fetchedSub.ObjectMeta.Finalizers).Should(BeEmpty())
+			// check the changes were made on the kubernetes server
+			fetchedSub, err := fetchTestSubscription(ctx, r)
+			g.Expect(err).Should(BeNil())
+			ensureFinalizerMatch(g, &fetchedSub, testCase.expectedFinalizers)
+
+			// clean up
+			err = r.Client.Delete(ctx, subscription)
+			g.Expect(err).Should(BeNil())
+		})
+	}
 }
 
 func TestSyncSubscriptionStatus(t *testing.T) {
@@ -71,12 +95,13 @@ func TestSyncSubscriptionStatus(t *testing.T) {
 	testEnvironment := setupTestEnvironment(t)
 	ctx, r := testEnvironment.Context, testEnvironment.Reconciler
 
+	message := "message is not required for tests"
 	falseNatsSubActiveCondition := eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionSubscriptionActive,
 		eventingv1alpha1.ConditionReasonNATSSubscriptionActive,
-		corev1.ConditionFalse, "")
+		corev1.ConditionFalse, message)
 	trueNatsSubActiveCondition := eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionSubscriptionActive,
 		eventingv1alpha1.ConditionReasonNATSSubscriptionActive,
-		corev1.ConditionTrue, "")
+		corev1.ConditionTrue, message)
 
 	testCases := []struct {
 		name               string
@@ -87,62 +112,91 @@ func TestSyncSubscriptionStatus(t *testing.T) {
 		expectedStatus     bool
 	}{
 		{
-			name:               "Test subscription with no conditions should stay not ready with false condition",
-			givenSub:           getSubscriptionWithConditionsAndStatus([]eventingv1alpha1.Condition{}, true, ""),
+			name: "Subscription with no conditions should stay not ready with false condition",
+			givenSub: NewSubscription(
+				WithConditions([]eventingv1alpha1.Condition{}),
+				WithStatus(true),
+			),
 			givenNatsSubReady:  false,
 			givenForceStatus:   false,
 			expectedConditions: []eventingv1alpha1.Condition{falseNatsSubActiveCondition},
 			expectedStatus:     false,
 		},
 		{
-			name:               "Test subscription with false ready condition should stay not ready with false condition",
-			givenSub:           getSubscriptionWithConditionsAndStatus([]eventingv1alpha1.Condition{falseNatsSubActiveCondition}, false, ""),
+			name: "Subscription with false ready condition should stay not ready with false condition",
+			givenSub: NewSubscription(
+				WithConditions([]eventingv1alpha1.Condition{falseNatsSubActiveCondition}),
+				WithStatus(false),
+			),
 			givenNatsSubReady:  false,
 			givenForceStatus:   false,
 			expectedConditions: []eventingv1alpha1.Condition{falseNatsSubActiveCondition},
 			expectedStatus:     false,
 		},
 		{
-			name:               "Test subscription should become ready because of isNatsSubReady flag",
-			givenSub:           getSubscriptionWithConditionsAndStatus([]eventingv1alpha1.Condition{falseNatsSubActiveCondition}, false, ""),
+			name: "Subscription should become ready because of isNatsSubReady flag",
+			givenSub: NewSubscription(
+				WithConditions([]eventingv1alpha1.Condition{falseNatsSubActiveCondition}),
+				WithStatus(false),
+			),
+			givenNatsSubReady:  true, // isNatsSubReady
+			givenForceStatus:   false,
+			expectedConditions: []eventingv1alpha1.Condition{trueNatsSubActiveCondition},
+			expectedStatus:     true,
+		},
+		{
+			name: "Subscription should stay with ready condition and status",
+			givenSub: NewSubscription(
+				WithConditions([]eventingv1alpha1.Condition{trueNatsSubActiveCondition}),
+				WithStatus(true),
+			),
 			givenNatsSubReady:  true,
 			givenForceStatus:   false,
 			expectedConditions: []eventingv1alpha1.Condition{trueNatsSubActiveCondition},
 			expectedStatus:     true,
 		},
 		{
-			name:               "Test subscription should stay with ready condition and status",
-			givenSub:           getSubscriptionWithConditionsAndStatus([]eventingv1alpha1.Condition{trueNatsSubActiveCondition}, true, ""),
-			givenNatsSubReady:  true,
-			givenForceStatus:   false,
-			expectedConditions: []eventingv1alpha1.Condition{trueNatsSubActiveCondition},
-			expectedStatus:     true,
-		},
-		{
-			name:               "Test subscription should become not ready because of false isNatsSubReady flag",
-			givenSub:           getSubscriptionWithConditionsAndStatus([]eventingv1alpha1.Condition{trueNatsSubActiveCondition}, true, ""),
-			givenNatsSubReady:  false,
+			name: "Subscription should become not ready because of false isNatsSubReady flag",
+			givenSub: NewSubscription(
+				WithConditions([]eventingv1alpha1.Condition{trueNatsSubActiveCondition}),
+				WithStatus(true),
+			),
+			givenNatsSubReady:  false, // isNatsSubReady
 			givenForceStatus:   false,
 			expectedConditions: []eventingv1alpha1.Condition{falseNatsSubActiveCondition},
 			expectedStatus:     false,
+		},
+		{
+			name: "Subscription should stay with the same condition, but still updated because of the forceUpdateStatus flag",
+			givenSub: NewSubscription(
+				WithConditions([]eventingv1alpha1.Condition{trueNatsSubActiveCondition}),
+				WithStatus(true),
+			),
+			givenNatsSubReady:  true,
+			givenForceStatus:   true,
+			expectedConditions: []eventingv1alpha1.Condition{trueNatsSubActiveCondition},
+			expectedStatus:     true,
 		},
 	}
 	for _, tC := range testCases {
 		testCase := tC
 		t.Run(testCase.name, func(t *testing.T) {
+			// given
 			sub := testCase.givenSub
 			err := r.Client.Create(ctx, sub)
 			g.Expect(err).Should(BeNil())
 
-			err = r.syncSubscriptionStatus(ctx, sub, testCase.givenNatsSubReady, testCase.givenForceStatus, "")
+			// when
+			err = r.syncSubscriptionStatus(ctx, sub, testCase.givenNatsSubReady, testCase.givenForceStatus, message)
 			g.Expect(err).To(BeNil())
 
-			g.Expect(len(testCase.expectedConditions)).Should(Equal(len(sub.Status.Conditions)))
-			for i := range testCase.expectedConditions {
-				comparisonResult := equalsConditionsIgnoringTime(testCase.expectedConditions[i], sub.Status.Conditions[i])
-				g.Expect(comparisonResult).To(BeTrue())
-			}
-			g.Expect(testCase.expectedStatus).Should(Equal(sub.Status.Ready))
+			// then
+			ensureSubscriptionMatchesConditionsAndStatus(g, *sub, testCase.expectedConditions, testCase.expectedStatus)
+
+			// fetch the sub also from k8s server in order to check whether changes were done both in-memory and on k8s server
+			fetchedSub, err := fetchTestSubscription(ctx, r)
+			g.Expect(err).Should(BeNil())
+			ensureSubscriptionMatchesConditionsAndStatus(g, fetchedSub, testCase.expectedConditions, testCase.expectedStatus)
 
 			// clean up
 			err = r.Client.Delete(ctx, sub)
@@ -159,67 +213,72 @@ func TestDefaultSinkValidator(t *testing.T) {
 	testCases := []struct {
 		name                  string
 		givenSubscriptionSink string
-		svcNameToCreate       string
+		givenSvcNameToCreate  string
 		expectedErrString     string
 	}{
 		{
-			name:                  "test with invalid scheme",
+			name:                  "With invalid scheme",
 			givenSubscriptionSink: "invalid Sink",
 			expectedErrString:     "sink URL scheme should be 'http' or 'https'",
 		},
 		{
-			name:                  "test with invalid URL",
+			name:                  "With invalid URL",
 			givenSubscriptionSink: "http://invalid Sink",
 			expectedErrString:     "not able to parse sink url with error",
 		},
 		{
-			name:                  "test with invalid suffix",
+			name:                  "With invalid suffix",
 			givenSubscriptionSink: "https://svc2.test.local",
 			expectedErrString:     "sink does not contain suffix",
 		},
 		{
-			name:                  "test with invalid suffix and port",
+			name:                  "With invalid suffix and port",
 			givenSubscriptionSink: "https://svc2.test.local:8080",
 			expectedErrString:     "sink does not contain suffix",
 		},
 		{
-			name:                  "test with invalid number of subdomains",
-			givenSubscriptionSink: "https://svc.cluster.local:8080", // right suffix but 4 subdomains
-			expectedErrString:     "sink should contain 5 sub-domains:",
+			name:                  "With invalid number of subdomains",
+			givenSubscriptionSink: "https://svc.cluster.local:8080", // right suffix but 3 subdomains
+			expectedErrString:     "sink should contain 5 sub-domains",
 		},
 		{
-			name:                  "test with different namespaces in subscription and sink name",
+			name:                  "With different namespaces in subscription and sink name",
 			givenSubscriptionSink: "https://eventing-nats.kyma-system.svc.cluster.local:8080", // sub is in test ns
 			expectedErrString:     "namespace of subscription: test and the namespace of subscriber: kyma-system are different",
 		},
 		{
-			name:                  "test with no existing svc in the cluster",
+			name:                  "With no existing svc in the cluster",
 			givenSubscriptionSink: "https://eventing-nats.test.svc.cluster.local:8080",
 			expectedErrString:     "sink is not valid cluster local svc, failed with error",
 		},
 		{
-			name:                  "test with no existing svc in the cluster, service has the wrong name",
+			name:                  "With no existing svc in the cluster, service has the wrong name",
 			givenSubscriptionSink: "https://eventing-nats.test.svc.cluster.local:8080",
-			svcNameToCreate:       "test", // wrong name
+			givenSvcNameToCreate:  "test", // wrong name
 			expectedErrString:     "sink is not valid cluster local svc, failed with error",
 		},
 		{
-			name:                  "test with no existing svc in the cluster, service has the wrong name",
+			name:                  "With no existing svc in the cluster, service has the wrong name",
 			givenSubscriptionSink: "https://eventing-nats.test.svc.cluster.local:8080",
-			svcNameToCreate:       "eventing-nats",
+			givenSvcNameToCreate:  "eventing-nats",
 			expectedErrString:     "",
 		},
 	}
 	for _, tC := range testCases {
 		testCase := tC
 		t.Run(testCase.name, func(t *testing.T) {
-			sub := getSubscriptionWithConditionsAndStatus([]eventingv1alpha1.Condition{}, true, testCase.givenSubscriptionSink)
+			// given
+			sub := NewSubscription(
+				WithConditions([]eventingv1alpha1.Condition{}),
+				WithStatus(true),
+				WithSink(testCase.givenSubscriptionSink),
+			)
 
 			// create the service if required for test
-			if testCase.svcNameToCreate != "" {
+			if testCase.givenSvcNameToCreate != "" {
 				svc := &corev1.Service{
 					ObjectMeta: v1.ObjectMeta{
-						Name:      testCase.svcNameToCreate,
+						Name:      testCase.givenSvcNameToCreate,
 						Namespace: namespaceName,
 					},
 				}
@@ -228,10 +287,12 @@ func TestDefaultSinkValidator(t *testing.T) {
 				g.Expect(err).To(BeNil())
 			}
 
+			// when
 			// call the defaultSinkValidator function
 			err := r.sinkValidator(ctx, r, sub)
 			log.WithContext().Infof("Result of defaultSinkValidatorCall: %+v", err)
 
+			// then
 			// given error should match expected error
 			if testCase.expectedErrString == "" {
 				g.Expect(err).To(BeNil())
@@ -243,20 +304,25 @@ func TestDefaultSinkValidator(t *testing.T) {
 	}
 }
 
-// mocking the required resources for tests
+// helper function and structs
+
+// TestEnvironment provides mocked resources for tests.
 type TestEnvironment struct {
 	Context    context.Context
 	Client     *client.WithWatch
 	Backend    *mocks.MessagingBackend
 	Reconciler *Reconciler
 	Logger     *logger.Logger
+	Recorder   *record.FakeRecorder
 }
 
+// setupTestEnvironment is a TestEnvironment constructor
 func setupTestEnvironment(t *testing.T) *TestEnvironment {
 	g := NewGomegaWithT(t)
 	mockedBackend := &mocks.MessagingBackend{}
 	ctx := context.Background()
 	fakeClient := createFakeClient(g)
+	recorder := &record.FakeRecorder{}
 
 	defaultLogger, err := logger.New(string(kymalogger.JSON), string(kymalogger.INFO))
 	if err != nil {
@@ -267,7 +333,7 @@ func setupTestEnvironment(t *testing.T) *TestEnvironment {
 		Backend:       mockedBackend,
 		Client:        fakeClient,
 		logger:        defaultLogger,
-		recorder:      &record.FakeRecorder{},
+		recorder:      recorder,
 		sinkValidator: defaultSinkValidator,
 	}
 
@@ -277,6 +343,7 @@ func setupTestEnvironment(t *testing.T) *TestEnvironment {
 		Backend:    mockedBackend,
 		Reconciler: &r,
 		Logger:     defaultLogger,
+		Recorder:   recorder,
 	}
 }
 
@@ -292,18 +359,61 @@ func createFakeClient(g *GomegaWithT) client.WithWatch {
 	return fake.NewClientBuilder().WithScheme(scheme.Scheme).Build()
 }
 
-func getSubscriptionWithConditionsAndStatus(conditions []eventingv1alpha1.Condition, status bool, sink string) *eventingv1alpha1.Subscription {
-	return &eventingv1alpha1.Subscription{
+func NewSubscription(options ...func(subscription *eventingv1alpha1.Subscription)) *eventingv1alpha1.Subscription {
+	sub := &eventingv1alpha1.Subscription{
 		ObjectMeta: v1.ObjectMeta{
 			Name:      "test",
 			Namespace: namespaceName,
 		},
-		Spec: eventingv1alpha1.SubscriptionSpec{
-			Sink: sink,
-		},
-		Status: eventingv1alpha1.SubscriptionStatus{
-			Conditions: conditions,
-			Ready:      status,
-		},
 	}
+	for _, o := range options {
+		o(sub)
+	}
+	return sub
+}
+func WithSink(sink string) func(subscription *eventingv1alpha1.Subscription) {
+	return func(sub *eventingv1alpha1.Subscription) {
+		sub.Spec.Sink = sink
+	}
+}
+func WithConditions(conditions []eventingv1alpha1.Condition) func(subscription *eventingv1alpha1.Subscription) {
+	return func(sub *eventingv1alpha1.Subscription) {
+		sub.Status.Conditions = conditions
+	}
+}
+func WithStatus(status bool) func(subscription *eventingv1alpha1.Subscription) {
+	return func(sub *eventingv1alpha1.Subscription) {
+		sub.Status.Ready = status
+	}
+}
+func WithFinalizers(finalizers []string) func(subscription *eventingv1alpha1.Subscription) {
+	return func(sub *eventingv1alpha1.Subscription) {
+		sub.ObjectMeta.Finalizers = finalizers
+	}
+}
+
+func fetchTestSubscription(ctx context.Context, r *Reconciler) (eventingv1alpha1.Subscription, error) {
+	var fetchedSub eventingv1alpha1.Subscription
+	err := r.Client.Get(ctx, types.NamespacedName{
+		Name:      "test",
+		Namespace: namespaceName,
+	}, &fetchedSub)
+	return fetchedSub, err
+}
+
+func ensureFinalizerMatch(g *GomegaWithT, subscription *eventingv1alpha1.Subscription, expectedFinalizers []string) {
+	if len(expectedFinalizers) == 0 {
+		g.Expect(subscription.ObjectMeta.Finalizers).Should(BeEmpty())
+	} else {
+		g.Expect(subscription.ObjectMeta.Finalizers).Should(Equal(expectedFinalizers))
+	}
+}
+
+func ensureSubscriptionMatchesConditionsAndStatus(g *GomegaWithT, subscription eventingv1alpha1.Subscription, expectedConditions []eventingv1alpha1.Condition, expectedStatus bool) {
+	g.Expect(len(expectedConditions)).Should(Equal(len(subscription.Status.Conditions)))
+	for i := range expectedConditions {
+		comparisonResult := equalsConditionsIgnoringTime(expectedConditions[i], subscription.Status.Conditions[i])
+		g.Expect(comparisonResult).To(BeTrue())
+	}
+	g.Expect(expectedStatus).Should(Equal(subscription.Status.Ready))
 }

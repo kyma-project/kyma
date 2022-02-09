@@ -226,11 +226,11 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 	return ctrl.Result{}, nil
 }
 
-// handleSubscriptionDeletion deletes the subscription and removes the finalizer
+// handleSubscriptionDeletion deletes the NATS subscription and removes its finalizer if it is set.
 func (r *Reconciler) handleSubscriptionDeletion(ctx context.Context, subscription *eventingv1alpha1.Subscription, log *zap.SugaredLogger) error {
 	if utils.ContainsString(subscription.ObjectMeta.Finalizers, Finalizer) {
 		if err := r.Backend.DeleteSubscription(subscription); err != nil {
-			log.Errorw("delete subscription failed", "error", err)
+			log.Errorw("delete NATS subscription failed", "error", err)
 			// if failed to delete the external dependency here, return with error
 			// so that it can be retried
 			return err
@@ -248,6 +248,7 @@ func (r *Reconciler) handleSubscriptionDeletion(ctx context.Context, subscriptio
 	return nil
 }
 
+// addFinalizerToSubscription appends the eventing finalizer to the subscription.
 func (r *Reconciler) addFinalizerToSubscription(subscription *eventingv1alpha1.Subscription, log *zap.SugaredLogger) error {
 	subscription.ObjectMeta.Finalizers = append(subscription.ObjectMeta.Finalizers, Finalizer)
 	if err := r.Update(context.Background(), subscription); err != nil {
