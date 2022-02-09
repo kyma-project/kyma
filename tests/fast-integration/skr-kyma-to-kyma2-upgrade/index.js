@@ -42,6 +42,7 @@ const {
 const {
   saveKubeconfig,
 } = require('../skr-svcat-migration-test/test-helpers');
+const {keb} = require("../skr-test");
 
 describe('SKR-Upgrade-test', function() {
   switchDebug(on = true);
@@ -262,8 +263,12 @@ describe('SKR-Upgrade-test', function() {
     });
 
     it('Deprovision SKR', async function() {
-      //TODO: Add logging
-      await deprovisionSKR(keb, kcp, instanceID, deprovisioningTimeout);
+      try {
+        await deprovisionSKR(keb, kcp, instanceID, deprovisioningTimeout);
+      } finally {
+        const runtimeStatus = await kcp.getRuntimeStatusOperations(instanceID);
+        await kcp.reconcileInformationLog(runtimeStatus);
+      }
     });
   }
 });
