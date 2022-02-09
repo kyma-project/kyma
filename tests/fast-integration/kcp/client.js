@@ -280,8 +280,17 @@ class KCPWrapper {
   }
 
   async reconcileInformationLog(runtimeStatus) {
+    console.log('DEBUG: reconcileInformationLog executing');
     const objRuntimeStatus = JSON.parse(runtimeStatus);
 
+    try {
+      if (!objRuntimeStatus.data[0].shootName) {}
+    } catch (e) {
+      console.log('skipping reconciliations logging: no shootName provided by runtimeStatus');
+      return;
+    }
+
+    console.log('DEBUG: getReconciliationsOperations executing');
     // kcp reconciliations operations -c <shootName> -o json
     const reconciliationsOperations = await this.getReconciliationsOperations(objRuntimeStatus.data[0].shootName);
 
@@ -302,11 +311,9 @@ class KCPWrapper {
     for (const i of lastObjReconciliationsOperations) {
       console.log(`\nReconciliation operation status: ${i.status}`);
 
-      if (i.schedulingID) {
-        // kcp reconciliations info -i <scheduling-id> -o json
-        const getReconciliationsInfo = await this.getReconciliationsInfo(i.schedulingID);
-        console.log(`\nReconciliation info: ${i.schedulingID}: ${getReconciliationsInfo}`);
-      }
+      // kcp reconciliations info -i <scheduling-id> -o json
+      // const getReconciliationsInfo = await this.getReconciliationsInfo(i.schedulingID);
+      console.log(`\nReconciliation info: ${i.schedulingID}: ${getReconciliationsInfo}`);
     }
   }
 
