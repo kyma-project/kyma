@@ -297,7 +297,8 @@ class KCPWrapper {
       console.log(`\nNumber of reconciliations operations: ${objReconciliationsOperationsLength}`);
 
       // using only last three operations
-      const lastObjReconciliationsOperations = objReconciliationsOperations.slice(objReconciliationsOperations.length - 3, objReconciliationsOperations.length);
+      const lastObjReconciliationsOperations = objReconciliationsOperations
+          .slice(objReconciliationsOperations.length - 3, objReconciliationsOperations.length);
 
       for (const i of lastObjReconciliationsOperations) {
         console.log(`\nReconciliation operation status: ${i.status}`);
