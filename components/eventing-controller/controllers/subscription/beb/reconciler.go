@@ -879,7 +879,7 @@ func isInDeletion(subscription *eventingv1alpha1.Subscription) bool {
 
 // checkStatusActive checks if the subscription is active and if not, sets a timer for retry
 func (r *Reconciler) checkStatusActive(subscription *eventingv1alpha1.Subscription) (active bool, err error) {
-	// check if the EMS subscription status us active
+	// check if the EMS subscription status is active
 	if subscription.Status.EmsSubscriptionStatus.SubscriptionStatus == string(types.SubscriptionStatusActive) {
 		if len(subscription.Status.FailedActivation) > 0 {
 			subscription.Status.FailedActivation = ""
@@ -904,7 +904,7 @@ func (r *Reconciler) checkStatusActive(subscription *eventingv1alpha1.Subscripti
 	return false, err
 }
 
-// checkLastFailedDelivery checks if LastFailedDelivery exists and if happened after LastSuccessfulDelivery
+// checkLastFailedDelivery checks if LastFailedDelivery exists and if it happened after LastSuccessfulDelivery
 func (r *Reconciler) checkLastFailedDelivery(subscription *eventingv1alpha1.Subscription) (bool, error) {
 	if len(subscription.Status.EmsSubscriptionStatus.LastFailedDelivery) > 0 {
 		var lastFailedDeliveryTime, LastSuccessfulDeliveryTime time.Time
