@@ -16,7 +16,7 @@ const {
 } = require('../logging');
 
 const {
-  monitoringTests
+  monitoringTests,
 } = require('../monitoring');
 
 describe('Upgrade test tests', function() {
