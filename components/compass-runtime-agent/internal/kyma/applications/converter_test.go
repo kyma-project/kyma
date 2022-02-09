@@ -3,12 +3,12 @@ package applications
 import (
 	"testing"
 
-	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/k8sconsts"
-
 	"github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
-	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/model"
 	"github.com/stretchr/testify/assert"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
+	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/k8sconsts"
+	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/model"
 )
 
 const (
@@ -16,8 +16,7 @@ const (
 )
 
 func TestConverter(t *testing.T) {
-
-	t.Run("should convert application without API packages", func(t *testing.T) {
+	t.Run("should convert application without API bundles", func(t *testing.T) {
 		// given
 		converter := NewConverter(k8sconsts.NewNameResolver(), centralGatewayServiceUrl, false)
 
@@ -28,7 +27,7 @@ func TestConverter(t *testing.T) {
 				"keySlice": []string{"value1", "value2"},
 				"key":      "value",
 			},
-			APIPackages:    []model.APIPackage{},
+			ApiBundles:     []model.APIBundle{},
 			SystemAuthsIDs: []string{"auth1", "auth2"},
 		}
 
@@ -59,7 +58,7 @@ func TestConverter(t *testing.T) {
 		assert.Equal(t, expected, application)
 	})
 
-	t.Run("should convert application containing API Packages with API Definitions", func(t *testing.T) {
+	t.Run("should convert application containing API Bundles with API Definitions", func(t *testing.T) {
 		// given
 		converter := NewConverter(k8sconsts.NewNameResolver(), centralGatewayServiceUrl, false)
 		instanceAuthRequestInputSchema := "{}"
@@ -72,7 +71,7 @@ func TestConverter(t *testing.T) {
 			Description:         "Description",
 			ProviderDisplayName: "provider",
 			Labels:              nil,
-			APIPackages: []model.APIPackage{
+			ApiBundles: []model.APIBundle{
 				{
 					ID:                             "package1",
 					Name:                           "packageName1",
@@ -246,7 +245,7 @@ func TestConverter(t *testing.T) {
 			Description:         "Description",
 			ProviderDisplayName: "provider",
 			Labels:              nil,
-			APIPackages: []model.APIPackage{
+			ApiBundles: []model.APIBundle{
 				{
 					ID:   "package1",
 					Name: "packageName1",

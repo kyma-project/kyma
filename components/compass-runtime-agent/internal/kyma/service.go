@@ -4,16 +4,17 @@ import (
 	"fmt"
 
 	"github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
+	log "github.com/sirupsen/logrus"
+	k8serrors "k8s.io/apimachinery/pkg/api/errors"
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/types"
+
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/apperrors"
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/apiresources/rafter"
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/apiresources/rafter/clusterassetgroup"
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/applications"
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/model"
 	appsecrets "github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/secrets"
-	log "github.com/sirupsen/logrus"
-	k8serrors "k8s.io/apimachinery/pkg/api/errors"
-	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/types"
 )
 
 type service struct {
@@ -167,8 +168,8 @@ func (s *service) createApplication(directorApplication model.Application, runti
 func (s *service) upsertAPIResources(directorApplication model.Application) apperrors.AppError {
 	var appendedErr apperrors.AppError
 
-	for _, apiPackage := range directorApplication.APIPackages {
-		err := s.upsertAPIResourcesForPackage(apiPackage)
+	for _, apiBundle := range directorApplication.ApiBundles {
+		err := s.upsertAPIResourcesForBundle(apiBundle)
 		if err != nil {
 			appendedErr = apperrors.AppendError(appendedErr, err)
 		}
@@ -181,9 +182,9 @@ func (s *service) upsertCredentialsSecrets(directorApplication model.Application
 	var appendedErr apperrors.AppError
 
 	getApplicationUIDFunc := cachingGetApplicationUIDFunc(s.getApplicationUID)
-	for _, apiPackage := range directorApplication.APIPackages {
-		if apiPackage.DefaultInstanceAuth != nil && apiPackage.DefaultInstanceAuth.Credentials != nil {
-			credentials := apiPackage.DefaultInstanceAuth.Credentials
+	for _, apiBundle := range directorApplication.ApiBundles {
+		if apiBundle.DefaultInstanceAuth != nil && apiBundle.DefaultInstanceAuth.Credentials != nil {
+			credentials := apiBundle.DefaultInstanceAuth.Credentials
 			if credentials.Basic == nil && credentials.Oauth == nil {
 				continue
 			}
@@ -191,7 +192,7 @@ func (s *service) upsertCredentialsSecrets(directorApplication model.Application
 			if r.AppError != nil {
 				return r.AppError
 			}
-			_, err := s.credentialsService.Upsert(directorApplication.Name, r.AppUID, apiPackage.ID, credentials)
+			_, err := s.credentialsService.Upsert(directorApplication.Name, r.AppUID, apiBundle.ID, credentials)
 			if err != nil {
 				appendedErr = apperrors.AppendError(appendedErr, err)
 			}
@@ -204,15 +205,15 @@ func (s *service) upsertRequestParametersSecrets(directorApplication model.Appli
 	var appendedErr apperrors.AppError
 
 	getApplicationUIDFunc := cachingGetApplicationUIDFunc(s.getApplicationUID)
-	for _, apiPackage := range directorApplication.APIPackages {
-		if apiPackage.DefaultInstanceAuth != nil && apiPackage.DefaultInstanceAuth.RequestParameters != nil && !apiPackage.DefaultInstanceAuth.RequestParameters.IsEmpty() {
+	for _, apiBundle := range directorApplication.ApiBundles {
+		if apiBundle.DefaultInstanceAuth != nil && apiBundle.DefaultInstanceAuth.RequestParameters != nil && !apiBundle.DefaultInstanceAuth.RequestParameters.IsEmpty() {
 			r, _ := getApplicationUIDFunc(directorApplication.Name)
 			if r.AppError != nil {
 				return r.AppError
 			}
-			requestParameters := apiPackage.DefaultInstanceAuth.RequestParameters
+			requestParameters := apiBundle.DefaultInstanceAuth.RequestParameters
 			if requestParameters != nil && !requestParameters.IsEmpty() {
-				_, err := s.requestParametersService.Upsert(directorApplication.Name, r.AppUID, apiPackage.ID, requestParameters)
+				_, err := s.requestParametersService.Upsert(directorApplication.Name, r.AppUID, apiBundle.ID, requestParameters)
 				if err != nil {
 					appendedErr = apperrors.AppendError(appendedErr, err)
 				}
@@ -222,27 +223,27 @@ func (s *service) upsertRequestParametersSecrets(directorApplication model.Appli
 	return appendedErr
 }
 
-func (s *service) upsertAPIResourcesForPackage(apiPackage model.APIPackage) apperrors.AppError {
-	if !model.PackageContainsAnySpecs(apiPackage) {
+func (s *service) upsertAPIResourcesForBundle(apiBundle model.APIBundle) apperrors.AppError {
+	if !model.BundleContainsAnySpecs(apiBundle) {
 		return nil
 	}
 
-	assetsCount := len(apiPackage.APIDefinitions) + len(apiPackage.EventDefinitions)
+	assetsCount := len(apiBundle.APIDefinitions) + len(apiBundle.EventDefinitions)
 	assets := make([]clusterassetgroup.Asset, 0, assetsCount)
 
-	for _, apiDefinition := range apiPackage.APIDefinitions {
+	for _, apiDefinition := range apiBundle.APIDefinitions {
 		if apiDefinition.APISpec != nil {
 			assets = append(assets, createAssetFromAPIDefinition(apiDefinition))
 		}
 	}
 
-	for _, eventAPIDefinition := range apiPackage.EventDefinitions {
+	for _, eventAPIDefinition := range apiBundle.EventDefinitions {
 		if eventAPIDefinition.EventAPISpec != nil {
 			assets = append(assets, createAssetFromEventAPIDefinition(eventAPIDefinition))
 		}
 	}
 
-	return s.rafter.Put(apiPackage.ID, assets)
+	return s.rafter.Put(apiBundle.ID, assets)
 }
 
 func (s *service) deleteApplications(directorApplications []model.Application, runtimeApplications []v1alpha1.Application) []Result {
@@ -267,7 +268,6 @@ func (s *service) deleteApplications(directorApplications []model.Application, r
 }
 
 func (s *service) deleteApplication(runtimeApplication v1alpha1.Application, applicationID string) Result {
-
 	log.Infof("Deleting request parameters secrets for application '%s'.", runtimeApplication.Name)
 	if err := s.deleteRequestParametersSecrets(runtimeApplication); err != nil {
 		log.Warningf("Failed to delete request parameters secrets secrets for application '%s': %s.", runtimeApplication.Name, err)
@@ -404,12 +404,11 @@ func (s *service) updateApplication(directorApplication model.Application, exist
 }
 
 func (s *service) updateAPIResources(directorApplication model.Application, existentRuntimeApplication v1alpha1.Application, newRuntimeApplication v1alpha1.Application) apperrors.AppError {
-
 	appendedErr := s.upsertAPIResources(directorApplication)
 
 	for _, service := range existentRuntimeApplication.Spec.Services {
-		apiPackage, apiPackageExists := model.APIPackageExists(service.ID, directorApplication)
-		deleteSpecs := (apiPackageExists && !model.PackageContainsAnySpecs(apiPackage)) || !apiPackageExists
+		apiPackage, apiPackageExists := model.APIBundleExists(service.ID, directorApplication)
+		deleteSpecs := (apiPackageExists && !model.BundleContainsAnySpecs(apiPackage)) || !apiPackageExists
 
 		if deleteSpecs {
 			log.Infof("Deleting resources for API '%s' and application '%s'", service.ID, directorApplication.Name)

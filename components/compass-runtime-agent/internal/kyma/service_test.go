@@ -4,22 +4,19 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 
-	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/applications"
-
-	"github.com/stretchr/testify/require"
-
-	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/apiresources/rafter/clusterassetgroup"
-
-	"github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/apperrors"
+	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/apiresources/rafter/clusterassetgroup"
 	rafterMocks "github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/apiresources/rafter/mocks"
+	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/applications"
 	appMocks "github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/applications/mocks"
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/model"
 	appSecrets "github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/secrets/mocks"
-	"github.com/stretchr/testify/assert"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 func TestKymaUpsertCredentialsSecrets(t *testing.T) {
@@ -33,12 +30,11 @@ func TestKymaUpsertCredentialsSecrets(t *testing.T) {
 		application model.Application
 		upserts     []upsert
 	}{
-
 		{
 			name: "DefaultInstanceAuth is null",
 			application: model.Application{
 				Name: "",
-				APIPackages: []model.APIPackage{
+				ApiBundles: []model.APIBundle{
 					{
 						DefaultInstanceAuth: nil,
 					},
@@ -48,7 +44,7 @@ func TestKymaUpsertCredentialsSecrets(t *testing.T) {
 		{
 			name: "Credentials are nil",
 			application: model.Application{
-				APIPackages: []model.APIPackage{
+				ApiBundles: []model.APIBundle{
 					{
 						DefaultInstanceAuth: &model.Auth{
 							Credentials: nil,
@@ -60,7 +56,7 @@ func TestKymaUpsertCredentialsSecrets(t *testing.T) {
 		{
 			name: "Basic auth",
 			application: model.Application{
-				APIPackages: []model.APIPackage{
+				ApiBundles: []model.APIBundle{
 					{
 						ID:                  "package-1",
 						DefaultInstanceAuth: fixAuthBasic(),
@@ -75,7 +71,7 @@ func TestKymaUpsertCredentialsSecrets(t *testing.T) {
 		{
 			name: "Oauths",
 			application: model.Application{
-				APIPackages: []model.APIPackage{
+				ApiBundles: []model.APIBundle{
 					{
 						ID:                  "package-1",
 						DefaultInstanceAuth: fixAuthOauth(),
@@ -143,8 +139,8 @@ func TestKymaUpsertCredentialsSecrets(t *testing.T) {
 
 func TestKymaRequestParametersSecrets(t *testing.T) {
 	type upsert struct {
-		packageID        string
-		requestParamters *model.RequestParameters
+		packageID         string
+		requestParameters *model.RequestParameters
 	}
 
 	tests := []struct {
@@ -152,12 +148,11 @@ func TestKymaRequestParametersSecrets(t *testing.T) {
 		application model.Application
 		upserts     []upsert
 	}{
-
 		{
 			name: "DefaultInstanceAuth is null",
 			application: model.Application{
 				Name: "",
-				APIPackages: []model.APIPackage{
+				ApiBundles: []model.APIBundle{
 					{
 						DefaultInstanceAuth: nil,
 					},
@@ -167,7 +162,7 @@ func TestKymaRequestParametersSecrets(t *testing.T) {
 		{
 			name: "Credentials are nil",
 			application: model.Application{
-				APIPackages: []model.APIPackage{
+				ApiBundles: []model.APIBundle{
 					{
 						DefaultInstanceAuth: &model.Auth{
 							Credentials: nil,
@@ -179,7 +174,7 @@ func TestKymaRequestParametersSecrets(t *testing.T) {
 		{
 			name: "Request params are empty",
 			application: model.Application{
-				APIPackages: []model.APIPackage{
+				ApiBundles: []model.APIBundle{
 					{
 						DefaultInstanceAuth: &model.Auth{
 							Credentials: &model.Credentials{
@@ -197,7 +192,7 @@ func TestKymaRequestParametersSecrets(t *testing.T) {
 		{
 			name: "Request params once",
 			application: model.Application{
-				APIPackages: []model.APIPackage{
+				ApiBundles: []model.APIBundle{
 					{
 						ID:                  "package-1",
 						DefaultInstanceAuth: fixAuthBasic(),
@@ -206,15 +201,15 @@ func TestKymaRequestParametersSecrets(t *testing.T) {
 			},
 			upserts: []upsert{
 				{
-					packageID:        "package-1",
-					requestParamters: fixAuthBasic().RequestParameters,
+					packageID:         "package-1",
+					requestParameters: fixAuthBasic().RequestParameters,
 				},
 			},
 		},
 		{
 			name: "Request params twice",
 			application: model.Application{
-				APIPackages: []model.APIPackage{
+				ApiBundles: []model.APIBundle{
 					{
 						ID:                  "package-1",
 						DefaultInstanceAuth: fixAuthBasic(),
@@ -227,12 +222,12 @@ func TestKymaRequestParametersSecrets(t *testing.T) {
 			},
 			upserts: []upsert{
 				{
-					packageID:        "package-1",
-					requestParamters: fixAuthBasic().RequestParameters,
+					packageID:         "package-1",
+					requestParameters: fixAuthBasic().RequestParameters,
 				},
 				{
-					packageID:        "package-2",
-					requestParamters: fixAuthOauth().RequestParameters,
+					packageID:         "package-2",
+					requestParameters: fixAuthOauth().RequestParameters,
 				},
 			},
 		},
@@ -250,7 +245,7 @@ func TestKymaRequestParametersSecrets(t *testing.T) {
 			}, nil)
 			requestParametersServiceMock := &appSecrets.RequestParametersService{}
 			for _, upsert := range tc.upserts {
-				requestParametersServiceMock.On("Upsert", tc.application.Name, types.UID(UID), upsert.packageID, upsert.requestParamters).
+				requestParametersServiceMock.On("Upsert", tc.application.Name, types.UID(UID), upsert.packageID, upsert.requestParameters).
 					Return("", nil).Once()
 			}
 
@@ -267,7 +262,6 @@ func TestKymaRequestParametersSecrets(t *testing.T) {
 }
 
 func TestKymaService(t *testing.T) {
-
 	t.Run("should return error in case failed to determine differences between current and desired runtime state", func(t *testing.T) {
 		// given
 		applicationsManagerMock := &appMocks.Repository{}
@@ -292,7 +286,6 @@ func TestKymaService(t *testing.T) {
 		converterMock.AssertExpectations(t)
 		applicationsManagerMock.AssertExpectations(t)
 		rafterServiceMock.AssertExpectations(t)
-
 	})
 
 	t.Run("should apply Create operation", func(t *testing.T) {
@@ -881,16 +874,16 @@ func fixDirectorEventAPIDefinition(id, name, description string, spec *model.Eve
 	}
 }
 
-func fixDirectorApplication(id, name string, apiPackages ...model.APIPackage) model.Application {
+func fixDirectorApplication(id, name string, apiPackages ...model.APIBundle) model.Application {
 	return model.Application{
-		ID:          id,
-		Name:        name,
-		APIPackages: apiPackages,
+		ID:         id,
+		Name:       name,
+		ApiBundles: apiPackages,
 	}
 }
 
-func fixAPIPackage(id string, apiDefinitions []model.APIDefinition, eventAPIDefinitions []model.EventAPIDefinition, defaultInstanceAuth *model.Auth) model.APIPackage {
-	return model.APIPackage{
+func fixAPIPackage(id string, apiDefinitions []model.APIDefinition, eventAPIDefinitions []model.EventAPIDefinition, defaultInstanceAuth *model.Auth) model.APIBundle {
+	return model.APIBundle{
 		ID:                  id,
 		APIDefinitions:      apiDefinitions,
 		EventDefinitions:    eventAPIDefinitions,

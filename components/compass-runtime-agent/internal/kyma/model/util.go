@@ -1,18 +1,16 @@
 package model
 
-func APIPackageExists(id string, application Application) (APIPackage, bool) {
-
-	for _, apiPackage := range application.APIPackages {
-		if apiPackage.ID == id {
-			return apiPackage, true
+func APIBundleExists(id string, application Application) (APIBundle, bool) {
+	for _, apiBundle := range application.ApiBundles {
+		if apiBundle.ID == id {
+			return apiBundle, true
 		}
 	}
 
-	return APIPackage{}, false
+	return APIBundle{}, false
 }
 
-func PackageContainsAnySpecs(p APIPackage) bool {
-
+func BundleContainsAnySpecs(p APIBundle) bool {
 	for _, apiDefinition := range p.APIDefinitions {
 		if apiDefinition.APISpec != nil {
 			return true
