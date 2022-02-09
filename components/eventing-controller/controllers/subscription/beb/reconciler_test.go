@@ -1421,7 +1421,7 @@ var _ = BeforeSuite(func(done Done) {
 var _ = AfterSuite(func() {
 	By("tearing down the test environment")
 	err := testEnv.Stop()
-	mock.Server.Close()
+	mock.Stop()
 	Expect(err).ToNot(HaveOccurred())
 })
 

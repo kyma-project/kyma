@@ -41,7 +41,7 @@ type BEBMock struct {
 	ListResponse   response
 	CreateResponse response
 	DeleteResponse response
-	Server         *httptest.Server
+	server         *httptest.Server
 }
 
 func NewBEBMock(bebConfig *config.Config) *BEBMock {
@@ -156,8 +156,12 @@ func (m *BEBMock) Start() string {
 		}
 	}))
 	uri := ts.URL
-	m.Server = ts
+	m.server = ts
 	return uri
+}
+
+func (m *BEBMock) Stop() {
+	m.server.Close()
 }
 
 // BEBAuthResponseSuccess writes a oauth2 authentication response to the writer for the happy-path.
