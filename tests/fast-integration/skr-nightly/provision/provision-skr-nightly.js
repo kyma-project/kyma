@@ -89,7 +89,6 @@ describe('SKR nightly', function() {
       throw new Error(`before hook failed: ${e.toString()}`);
     } finally {
       const runtimeStatus = await kcp.getRuntimeStatusOperations(this.options.instanceID);
-      console.log(`\nRuntime status after provisioning: ${runtimeStatus}`);
       await kcp.reconcileInformationLog(runtimeStatus);
     }
   });
