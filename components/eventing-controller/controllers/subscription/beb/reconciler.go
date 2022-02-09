@@ -696,14 +696,10 @@ func (r *Reconciler) syncInitialStatus(subscription *eventingv1alpha1.Subscripti
 		return
 	}
 
-	var requiredConditions []eventingv1alpha1.Condition
-	if len(subscription.Status.Conditions) > 0 {
-		requiredConditions = getRequiredConditions(subscription, expectedStatus.Conditions)
-	}
-
 	if len(subscription.Status.Conditions) == 0 {
 		subscription.Status = expectedStatus
 	} else {
+		requiredConditions := getRequiredConditions(subscription.Status.Conditions, expectedStatus.Conditions)
 		subscription.Status.Conditions = requiredConditions
 		subscription.Status.Ready = !subscription.Status.Ready
 	}
@@ -715,7 +711,7 @@ func (r *Reconciler) syncInitialStatus(subscription *eventingv1alpha1.Subscripti
 }
 
 // getRequiredConditions removes the non-required conditions from the subscription  and adds any missing required-conditions
-func getRequiredConditions(subscription *eventingv1alpha1.Subscription, expectedConditions []eventingv1alpha1.Condition) []eventingv1alpha1.Condition {
+func getRequiredConditions(subscriptionConditions, expectedConditions []eventingv1alpha1.Condition) []eventingv1alpha1.Condition {
 	var requiredConditions []eventingv1alpha1.Condition
 	expectedConditionsMap := make(map[eventingv1alpha1.ConditionType]eventingv1alpha1.Condition)
 	for _, condition := range expectedConditions {
@@ -723,10 +719,9 @@ func getRequiredConditions(subscription *eventingv1alpha1.Subscription, expected
 	}
 
 	// add the current subscription's conditions if it exists in the expectedConditions
-	for _, condition := range subscription.Status.Conditions {
+	for _, condition := range subscriptionConditions {
 		if _, ok := expectedConditionsMap[condition.Type]; ok {
 			requiredConditions = append(requiredConditions, condition)
-		} else {
 			delete(expectedConditionsMap, condition.Type)
 		}
 	}
