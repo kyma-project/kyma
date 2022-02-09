@@ -14,7 +14,7 @@ import (
 )
 
 func Test_isInDeletion(t *testing.T) {
-	var tests = []struct {
+	var testCases = []struct {
 		name              string
 		givenSubscription func() *eventingv1alpha1.Subscription
 		isInDeletion      bool
@@ -54,7 +54,7 @@ func Test_isInDeletion(t *testing.T) {
 	}
 	g := NewGomegaWithT(t)
 
-	for _, tt := range tests {
+	for _, tt := range testCases {
 		t.Run(tt.name, func(t *testing.T) {
 			givenSubscription := tt.givenSubscription()
 			g.Expect(isInDeletion(givenSubscription)).To(Equal(tt.isInDeletion))
@@ -62,7 +62,7 @@ func Test_isInDeletion(t *testing.T) {
 	}
 }
 func Test_replaceStatusCondition(t *testing.T) {
-	var tests = []struct {
+	var testCases = []struct {
 		name              string
 		giveSubscription  *eventingv1alpha1.Subscription
 		giveCondition     eventingv1alpha1.Condition
@@ -119,7 +119,7 @@ func Test_replaceStatusCondition(t *testing.T) {
 	g := NewGomegaWithT(t)
 	r := Reconciler{}
 
-	for _, tt := range tests {
+	for _, tt := range testCases {
 		t.Run(tt.name, func(t *testing.T) {
 			subscription := tt.giveSubscription
 			condition := tt.giveCondition
@@ -127,6 +127,76 @@ func Test_replaceStatusCondition(t *testing.T) {
 			g.Expect(statusChanged).To(BeEquivalentTo(tt.wantStatusChanged))
 			g.Expect(subscription.Status.Conditions).To(ContainElement(condition))
 			g.Expect(subscription.Status.Ready).To(BeEquivalentTo(tt.wantReady))
+		})
+	}
+}
+
+func Test_getRequiredConditions(t *testing.T) {
+	var emptySubscriptionStatus eventingv1alpha1.SubscriptionStatus
+	emptySubscriptionStatus.InitializeConditions()
+	expectedConditions := emptySubscriptionStatus.Conditions
+
+	testCases := []struct {
+		name                   string
+		subscriptionConditions []eventingv1alpha1.Condition
+		wantConditions         []eventingv1alpha1.Condition
+	}{
+		{
+			name:                   "should get expected conditions if the subscription has no conditions",
+			subscriptionConditions: []eventingv1alpha1.Condition{},
+			wantConditions:         expectedConditions,
+		},
+		{
+			name: "should get subscription conditions if the all the expected conditions are present",
+			subscriptionConditions: []eventingv1alpha1.Condition{
+				{Type: eventingv1alpha1.ConditionSubscribed, Status: corev1.ConditionTrue},
+				{Type: eventingv1alpha1.ConditionSubscriptionActive, Status: corev1.ConditionFalse},
+				{Type: eventingv1alpha1.ConditionAPIRuleStatus, Status: corev1.ConditionUnknown},
+				{Type: eventingv1alpha1.ConditionWebhookCallStatus, Status: corev1.ConditionFalse},
+			},
+			wantConditions: []eventingv1alpha1.Condition{
+				{Type: eventingv1alpha1.ConditionSubscribed, Status: corev1.ConditionTrue},
+				{Type: eventingv1alpha1.ConditionSubscriptionActive, Status: corev1.ConditionFalse},
+				{Type: eventingv1alpha1.ConditionAPIRuleStatus, Status: corev1.ConditionUnknown},
+				{Type: eventingv1alpha1.ConditionWebhookCallStatus, Status: corev1.ConditionFalse},
+			},
+		},
+		{
+			name: "should get latest conditions Status compared to the expected condition status",
+			subscriptionConditions: []eventingv1alpha1.Condition{
+				{Type: eventingv1alpha1.ConditionSubscribed, Status: corev1.ConditionFalse},
+				{Type: eventingv1alpha1.ConditionSubscriptionActive, Status: corev1.ConditionFalse},
+			},
+			wantConditions: []eventingv1alpha1.Condition{
+				{Type: eventingv1alpha1.ConditionSubscribed, Status: corev1.ConditionFalse},
+				{Type: eventingv1alpha1.ConditionSubscriptionActive, Status: corev1.ConditionFalse},
+				{Type: eventingv1alpha1.ConditionAPIRuleStatus, Status: corev1.ConditionUnknown},
+				{Type: eventingv1alpha1.ConditionWebhookCallStatus, Status: corev1.ConditionUnknown},
+			},
+		},
+		{
+			name: "should get rid of unwanted conditions in the subscription, if present",
+			subscriptionConditions: []eventingv1alpha1.Condition{
+				{Type: "Fake Condition Type", Status: corev1.ConditionUnknown},
+				{Type: eventingv1alpha1.ConditionSubscriptionActive, Status: corev1.ConditionFalse},
+			},
+			wantConditions: []eventingv1alpha1.Condition{
+				{Type: eventingv1alpha1.ConditionSubscribed, Status: corev1.ConditionUnknown},
+				{Type: eventingv1alpha1.ConditionSubscriptionActive, Status: corev1.ConditionFalse},
+				{Type: eventingv1alpha1.ConditionAPIRuleStatus, Status: corev1.ConditionUnknown},
+				{Type: eventingv1alpha1.ConditionWebhookCallStatus, Status: corev1.ConditionUnknown},
+			},
+		},
+	}
+
+	g := NewGomegaWithT(t)
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			gotConditions := getRequiredConditions(tc.subscriptionConditions, expectedConditions)
+			if !conditionsEquals(gotConditions, tc.wantConditions) {
+				t.Errorf("ShouldUpdateReadyStatus is not valid, want: %v but got: %v", tc.wantConditions, gotConditions)
+			}
+			g.Expect(len(gotConditions)).To(BeEquivalentTo(len(expectedConditions)))
 		})
 	}
 }
