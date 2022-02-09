@@ -72,7 +72,8 @@ describe('SKR SVCAT migration test', function() {
 
   it('Should get Runtime Status after provisioning', async function() {
     const runtimeStatus = await kcp.getRuntimeStatusOperations(instanceID);
-    console.log(`\nRuntime status: ${runtimeStatus}`);
+    console.log(`\nRuntime status after provisioning: ${runtimeStatus}`);
+    await kcp.reconcileInformationLog(runtimeStatus);
   });
 
   it('Should save kubeconfig for the SKR to ~/.kube/config', async function() {
@@ -147,7 +148,12 @@ describe('SKR SVCAT migration test', function() {
   });
 
   it('Should deprovision SKR', async function() {
-    await deprovisionSKR(keb, kcp, instanceID, deprovisioningTimeout);
+    try {
+      await deprovisionSKR(keb, kcp, instanceID, deprovisioningTimeout);
+    } finally {
+      const runtimeStatus = await kcp.getRuntimeStatusOperations(instanceID);
+      await kcp.reconcileInformationLog(runtimeStatus);
+    }
   });
 
   it('Should cleanup platform --cascade, operator instances and bindings', async function() {
