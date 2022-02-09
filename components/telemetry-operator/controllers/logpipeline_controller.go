@@ -21,7 +21,6 @@ import (
 	"context"
 	"strings"
 
-	"github.com/go-logr/logr"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -108,12 +107,12 @@ func (r *LogPipelineReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 	if updatedSectionsCm || updatedParsersCm || updatedFilesCm || updatedEnv {
 		log.Info("Updated fluent bit configuration")
 		if err := r.Update(ctx, &logPipeline); err != nil {
-			log.Error(err, "Cannot update LogPipeline")
+			log.Error(err, "Failed updating LogPipeline")
 			return ctrl.Result{}, err
 		}
 
-		if err := r.deleteFluentBitPods(ctx, log); err != nil {
-			log.Error(err, "Cannot delete fluent bit pods")
+		if err := r.deleteFluentBitPods(ctx); err != nil {
+			log.Error(err, "Failed deleting fluent bit pods")
 			return ctrl.Result{}, err
 		}
 	}
@@ -315,7 +314,7 @@ func (r *LogPipelineReconciler) syncSecretRefs(ctx context.Context, logPipeline 
 	for _, secretRef := range logPipeline.Spec.SecretRefs {
 		var referencedSecret corev1.Secret
 		if err := r.Get(ctx, types.NamespacedName{Name: secretRef.Name, Namespace: secretRef.Namespace}, &referencedSecret); err != nil {
-			log.Error(err, "Cannot read secret %s from namespace %s", secretRef.Name, secretRef.Namespace)
+			log.Error(err, "Failed reading secret %s from namespace %s", secretRef.Name, secretRef.Namespace)
 			continue
 		}
 		for k, v := range referencedSecret.Data {
@@ -357,22 +356,23 @@ func (r *LogPipelineReconciler) syncSecretRefs(ctx context.Context, logPipeline 
 }
 
 // Delete all Fluent Bit pods to apply new configuration.
-func (r *LogPipelineReconciler) deleteFluentBitPods(ctx context.Context, log logr.Logger) error {
+func (r *LogPipelineReconciler) deleteFluentBitPods(ctx context.Context) error {
+	log := log.FromContext(ctx)
 	var fluentBitDs appsv1.DaemonSet
 	if err := r.Get(ctx, r.FluentBitDaemonSet, &fluentBitDs); err != nil {
-		log.Error(err, "Cannot get Fluent Bit DaemonSet")
+		log.Error(err, "Failed getting fluent bit DaemonSet")
 	}
 
 	var fluentBitPods corev1.PodList
 	if err := r.List(ctx, &fluentBitPods, client.InNamespace(r.FluentBitDaemonSet.Namespace), client.MatchingLabels(fluentBitDs.Spec.Template.Labels)); err != nil {
-		log.Error(err, "Cannot list fluent bit pods")
+		log.Error(err, "Failed listing fluent bit pods")
 		return err
 	}
 
 	log.Info("Restarting Fluent Bit pods")
 	for i := range fluentBitPods.Items {
 		if err := r.Delete(ctx, &fluentBitPods.Items[i]); err != nil {
-			log.Error(err, "Cannot delete pod "+fluentBitPods.Items[i].Name)
+			log.Error(err, "Failed deleting pod "+fluentBitPods.Items[i].Name)
 		}
 	}
 	return nil

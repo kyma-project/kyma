@@ -14,3 +14,6 @@ global:
       version: "1.34.1"
       directory: "external"
   highPriorityClassName: "kyma-system-priority"
+  log:
+    format: "json"
+    level: "info"
