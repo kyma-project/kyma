@@ -132,11 +132,16 @@ func TestCleanup(t *testing.T) {
 	unstructuredAPIRuleAfterCleanup, err := bebSubMgr.Client.Resource(handlers.APIRuleGroupVersionResource()).Namespace("test").Get(ctx, apiRule.Name, metav1.GetOptions{})
 	g.Expect(err).ToNot(gomega.BeNil())
 	g.Expect(unstructuredAPIRuleAfterCleanup).To(gomega.BeNil())
+	bebMock.Stop()
 
 }
 
 func startBEBMock() *controllertesting.BEBMock {
-	bebConfig := &config.Config{}
+	// TODO(k15r): FIX THIS HACK
+	// this is a very evil hack for the time being, until we refactored the config properly
+	// it sets the URLs to relative paths, that can easily be used in the mux.
+	bebConfig := config.GetDefaultConfig("")
+
 	beb := controllertesting.NewBEBMock(bebConfig)
 	bebURI := beb.Start()
 	tokenURL := fmt.Sprintf("%s%s", bebURI, controllertesting.TokenURLPath)
