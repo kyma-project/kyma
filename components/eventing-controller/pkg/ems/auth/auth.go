@@ -5,14 +5,9 @@ import (
 
 	"golang.org/x/oauth2"
 
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/httpclient"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/signals"
 )
-
-type Authenticator struct {
-	client *httpclient.Client
-}
 
 func NewAuthenticatedClient(cfg env.Config) *http.Client {
 	ctx := signals.NewReusableContext()
@@ -25,5 +20,4 @@ func NewAuthenticatedClient(cfg env.Config) *http.Client {
 
 	// TODO: Support tracing in eventing-controller #9767: https://github.com/kyma-project/kyma/issues/9767
 	return client
-
 }
