@@ -296,6 +296,11 @@ class KCPWrapper {
 
     const objReconciliationsOperations = JSON.parse(reconciliationsOperations);
 
+    if ( objReconciliationsOperations == null ) {
+      console.log('skipping reconciliations logging: objReconciliationsOperations is null,' +
+          ' most likely no operations were returned by kcp');
+    }
+
     const objReconciliationsOperationsLength = objReconciliationsOperations.length;
 
     if (objReconciliationsOperationsLength === 0) {
