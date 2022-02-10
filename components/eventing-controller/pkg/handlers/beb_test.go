@@ -1,13 +1,11 @@
 package handlers
 
 import (
-	"fmt"
 	"testing"
 
 	kymalogger "github.com/kyma-project/kyma/common/logging/logger"
 	. "github.com/onsi/gomega"
 
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/config"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/types"
 
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
@@ -76,19 +74,8 @@ func fixtureValidSubscription(name, namespace string) *eventingv1alpha1.Subscrip
 }
 
 func startBEBMock() *controllertesting.BEBMock {
-	// TODO(k15r): FIX THIS HACK
-	// this is a very evil hack for the time being, until we refactored the config properly
-	// it sets the URLs to relative paths, that can easily be used in the mux.
-	bebConfig := config.GetDefaultConfig("")
-
-	beb := controllertesting.NewBEBMock(bebConfig)
-	bebURI := beb.Start()
-	tokenURL := fmt.Sprintf("%s%s", bebURI, controllertesting.TokenURLPath)
-	messagingURL := fmt.Sprintf("%s%s", bebURI, controllertesting.MessagingURLPath)
-	beb.TokenURL = tokenURL
-	beb.MessagingURL = messagingURL
-	bebConfig = config.GetDefaultConfig(messagingURL)
-	beb.BEBConfig = bebConfig
+	beb := controllertesting.NewBEBMock()
+	beb.Start()
 	return beb
 }
 

@@ -19,7 +19,7 @@ import (
 	// gcp auth etc.
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/config"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/client"
 	bebtypes "github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/types"
 )
 
@@ -34,7 +34,6 @@ type BEBMock struct {
 	Subscriptions  *SafeSubscriptions
 	TokenURL       string
 	MessagingURL   string
-	BEBConfig      *config.Config
 	log            logr.Logger
 	AuthResponse   Response
 	GetResponse    ResponseWithName
@@ -44,12 +43,11 @@ type BEBMock struct {
 	server         *httptest.Server
 }
 
-func NewBEBMock(bebConfig *config.Config) *BEBMock {
+func NewBEBMock() *BEBMock {
 	logger := logf.Log.WithName("beb mock")
 	return &BEBMock{
 		Requests:      NewSafeRequests(),
 		Subscriptions: NewSafeSubscriptions(),
-		BEBConfig:     bebConfig,
 		log:           logger,
 	}
 }
@@ -82,7 +80,7 @@ func (m *BEBMock) Start() string {
 		}
 	})
 
-	mux.HandleFunc(strings.TrimPrefix(m.BEBConfig.ListURL, m.BEBConfig.BaseURL), func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc(client.ListURL, func(w http.ResponseWriter, r *http.Request) {
 		if r.Method == http.MethodGet {
 			m.ListResponse(w)
 		}
@@ -109,6 +107,10 @@ func (m *BEBMock) Start() string {
 		}
 	})
 
+	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		m.log.V(1).Info(r.RequestURI)
+	})
+
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		defer GinkgoRecover()
 
@@ -131,6 +133,8 @@ func (m *BEBMock) Start() string {
 	}))
 	uri := ts.URL
 	m.server = ts
+	m.MessagingURL = m.server.URL + MessagingURLPath
+	m.TokenURL = m.server.URL + TokenURLPath
 	return uri
 }
 
@@ -207,8 +211,8 @@ func BEBDeleteResponseSuccess(w http.ResponseWriter) {
 }
 
 // IsBEBSubscriptionCreate determines if the http request is creating a BEB subscription.
-func IsBEBSubscriptionCreate(r *http.Request, bebConfig config.Config) bool {
-	return r.Method == http.MethodPost && strings.Contains(bebConfig.CreateURL, r.RequestURI)
+func IsBEBSubscriptionCreate(r *http.Request) bool {
+	return r.Method == http.MethodPost && strings.Contains(r.RequestURI, client.CreateURL)
 }
 
 // IsBEBSubscriptionDelete determines if the http request is deleting a BEB subscription.
