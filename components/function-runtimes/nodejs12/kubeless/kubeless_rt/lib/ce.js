@@ -8,7 +8,7 @@ module.exports = {
     buildEvent
 };
 
-function buildEvent(req, res) {
+function buildEvent(req, res, tracer) {
     let data = req.body;
     if (!req.is('multipart/*') && req.body.length > 0) {
         if (req.is('application/json')) {
@@ -20,6 +20,7 @@ function buildEvent(req, res) {
 
     return Object.assign( 
         buildCeHeaders(req), {
+        tracer,
         data,
         'extensions': { request: req, response: res },
         setResponseHeader: (key, value) => setResponseHeader(res, key, value),

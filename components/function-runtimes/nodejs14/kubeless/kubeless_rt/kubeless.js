@@ -13,7 +13,24 @@ const morgan = require('morgan');
 
 const bodySizeLimit = Number(process.env.REQ_MB_LIMIT || '1');
 
+// Open telemetry metrics
+const api = require('@opentelemetry/api');
+
 const app = express();
+
+// Tracing Imports
+const podName = process.env.HOSTNAME
+const serviceNamespace = process.env.SERVICE_NAMESPACE
+
+// remove generated pods suffix ( two last sections )
+let serviceName = podName.substring(0, podName.lastIndexOf("-"));
+serviceName = serviceName.substring(0, serviceName.lastIndexOf("-"))
+
+const jaegerServiceEndpoint = process.env.JAEGER_SERVICE_ENDPOINT
+const tracer = require('./lib/tracer')(
+    [serviceName, serviceNamespace].join('.'),
+    jaegerServiceEndpoint,
+);
 
 if (process.env["KYMA_INTERNAL_LOGGER_ENABLED"]) {
     app.use(morgan("combined"));
@@ -81,7 +98,7 @@ function modExecute(handler, req, res, end) {
         throw new Error(`Unable to load ${handler}`);
 
     try {
-        let event = ce.buildEvent(req, res);
+        let event = ce.buildEvent(req, res, tracer);
         Promise.resolve(func(event, context))
         // Finalize
             .then(rval => modFinalize(rval, res, end))
@@ -142,7 +159,9 @@ app.all('*', (req, res) => {
         });
 
         try {
-            script.runInNewContext(sandbox, { timeout : timeout * 1000 });
+            api.context.with(api.propagation.extract(api.ROOT_CONTEXT, req.headers), () => {
+                script.runInNewContext(sandbox, { timeout : timeout * 1000 });
+            });
         } catch (err) {
             if (err.toString().match('Error: Script execution timed out')) {
                 res.status(408).send(err);
