@@ -11,6 +11,7 @@ const {
   waitForDaemonSet,
   waitForDeployment,
   waitForNamespace,
+  sleep,
 } = require('../utils');
 const {mockServerClient} = require('mockserver-client');
 
@@ -18,34 +19,30 @@ const mockServerPort = 1080;
 const telemetryNamespace = 'kyma-system';
 const mockNamespace = 'mockserver';
 const fluentBitName = 'telemetry-fluent-bit';
-const logPipelineCR = (() => {
-  const yaml = fs.readFileSync(path.join(__dirname, './log-pipeline.yaml'), {
-    encoding: 'utf8',
-  });
-  return k8s.loadAllYaml(yaml);
-})();
-const mockserverResources = (() => {
-  const yaml = fs.readFileSync(path.join(__dirname, './mockserver/resources.yaml'), {
-    encoding: 'utf8',
-  });
-  return k8s.loadAllYaml(yaml);
-})();
 
-function checkMockserverWasCalled(wasCalled) {
-  const args = wasCalled ? [1] : [0, 0];
-  const not = wasCalled ? 'not ' : '';
+function loadResourceFromFile(file) {
+  const yaml = fs.readFileSync(path.join(__dirname, file), {
+    encoding: 'utf8',
+  });
+  return k8s.loadAllYaml(yaml);
+}
+
+const logPipelineCR = loadResourceFromFile('./log-pipeline.yaml');
+const mockserverResources = loadResourceFromFile('./mockserver-resources.yaml');
+
+function assertMockserverWasCalled() {
   return mockServerClient('localhost', mockServerPort)
       .verify(
           {
             path: '/',
           },
-          ...args,
+          1,
       )
       .then(
           function() {},
           function(error) {
             console.log(error);
-            assert.fail(`"The HTTP endpoint was ${not}called`);
+            assert.fail('The HTTP endpoint was not called');
           },
       );
 }
@@ -54,15 +51,10 @@ describe('Telemetry Operator tests', function() {
   let cancelPortForward;
 
   before(async function() {
-    console.log('Creating namespace');
     await k8sApply([namespaceObj(mockNamespace)]);
-    console.log('Waiting for namespace');
     await waitForNamespace(mockNamespace);
-    console.log('Apply mockserver resources');
     await k8sApply(mockserverResources, mockNamespace);
-    console.log('Waiting for mockserver resources');
     await waitForDeployment('mockserver', mockNamespace);
-    console.log('List all mockserver resources');
     const {body} = await k8sCoreV1Api.listNamespacedPod(mockNamespace);
     const mockPod = body.items[0].metadata.name;
     cancelPortForward = kubectlPortForward(
@@ -85,22 +77,19 @@ describe('Telemetry Operator tests', function() {
     assert.equal(podList.length, 1);
   });
 
-  // it('Should not receive HTTP traffic', () => {
-  //   return checkMockserverWasCalled(false);
-  // });
-
   it('Apply HTTP output plugin to fluent-bit', async () => {
     await k8sApply(logPipelineCR, telemetryNamespace);
-    await waitForDaemonSet(fluentBitName, telemetryNamespace, 10000);
+    await waitForDaemonSet(fluentBitName, telemetryNamespace, 30000);
   });
 
-  it('Should receive HTTP traffic from fluent-bit', () => {
-    return checkMockserverWasCalled(true);
+  it('Should receive HTTP traffic from fluent-bit', async () => {
+    await sleep(30000);
+    await assertMockserverWasCalled(true);
   });
 
   after(async function() {
     cancelPortForward();
     await k8sDelete(logPipelineCR, telemetryNamespace);
-    // await k8sCoreV1Api.deleteNamespace(mockNamespace);
+    await k8sCoreV1Api.deleteNamespace(mockNamespace);
   });
 });
