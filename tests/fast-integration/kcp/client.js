@@ -313,7 +313,7 @@ class KCPWrapper {
 
       // using only last three operations
       const lastObjReconciliationsOperations = objReconciliationsOperations.
-      slice(Math.max(0, objReconciliationsOperations.length - 3), objReconciliationsOperations.length);
+          slice(Math.max(0, objReconciliationsOperations.length - 3), objReconciliationsOperations.length);
 
       for (const i of lastObjReconciliationsOperations) {
         console.log(`reconciliation operation status: ${i.status}`);
@@ -322,7 +322,6 @@ class KCPWrapper {
         const getReconciliationsInfo = await this.getReconciliationsInfo(i.schedulingID);
         console.log(`reconciliation info: ${i.schedulingID}: ${getReconciliationsInfo}`);
       }
-
     } catch {
       console.log('skipping reconciliations logging: error in reconcileInformationLog');
     }
