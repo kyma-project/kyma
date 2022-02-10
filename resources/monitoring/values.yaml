@@ -40,6 +40,8 @@ defaultRules:
     k8s: true
     kubeApiserver: true
     kubeApiserverAvailability: true
+    kubeApiserverBurnrate: false
+    kubeApiserverHistogram: false
     kubeApiserverSlos: true
     kubelet: true
     kubeProxy: true
