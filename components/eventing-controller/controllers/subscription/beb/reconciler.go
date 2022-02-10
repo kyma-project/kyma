@@ -21,7 +21,6 @@ import (
 	k8stypes "k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/tools/record"
 	ctrl "sigs.k8s.io/controller-runtime"
-	"sigs.k8s.io/controller-runtime/pkg/cache"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"sigs.k8s.io/controller-runtime/pkg/handler"
@@ -46,7 +45,6 @@ import (
 type Reconciler struct {
 	ctx context.Context
 	client.Client
-	cache.Cache
 	logger            *logger.Logger
 	recorder          record.EventRecorder
 	Backend           handlers.MessagingBackend
@@ -70,7 +68,7 @@ const (
 	reconcilerName        = "beb-subscription-reconciler"
 )
 
-func NewReconciler(ctx context.Context, client client.Client, applicationLister *application.Lister, cache cache.Cache, logger *logger.Logger, recorder record.EventRecorder, cfg env.Config, credential *handlers.OAuth2ClientCredentials, mapper handlers.NameMapper) *Reconciler {
+func NewReconciler(ctx context.Context, client client.Client, applicationLister *application.Lister, logger *logger.Logger, recorder record.EventRecorder, cfg env.Config, credential *handlers.OAuth2ClientCredentials, mapper handlers.NameMapper) *Reconciler {
 	bebHandler := handlers.NewBEB(credential, mapper, logger)
 	if err := bebHandler.Initialize(cfg); err != nil {
 		logger.WithContext().Errorw("start reconciler failed", "name", reconcilerName, "error", err)
@@ -80,7 +78,6 @@ func NewReconciler(ctx context.Context, client client.Client, applicationLister 
 	return &Reconciler{
 		ctx:               ctx,
 		Client:            client,
-		Cache:             cache,
 		logger:            logger,
 		recorder:          recorder,
 		Backend:           bebHandler,

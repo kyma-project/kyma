@@ -4,9 +4,10 @@ import (
 	"os"
 	"testing"
 
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
 	. "github.com/onsi/gomega"
 	v1 "k8s.io/api/core/v1"
+
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
 )
 
 func Test_GetBEBEnvVars(t *testing.T) {
@@ -65,8 +66,8 @@ func Test_GetNATSEnvVars(t *testing.T) {
 	g.Expect(requestTimeoutEnv.Value).Should(Equal(envs["PUBLISHER_REQUEST_TIMEOUT"]))
 }
 
-// findEnvVar returns the env variable which has name == envVar.Name,
-// or nil if there is no such env variable.
+// findEnvVar returns the env variable which has `name == envVar.Name`,
+// or `nil` if there is no such env variable.
 func findEnvVar(envVars []v1.EnvVar, name string) *v1.EnvVar {
 	for _, n := range envVars {
 		if name == n.Name {

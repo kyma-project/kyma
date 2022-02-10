@@ -1108,7 +1108,7 @@ func updateAPIRuleStatus(ctx context.Context, apiRule *apigatewayv1alpha1.APIRul
 	}, bigTimeOut, bigPollingInterval)
 }
 
-// getSubscription fetches a subscription using the lookupKey and allows to make assertions on it
+// getSubscription fetches a subscription using the lookupKey and allows making assertions on it
 func getSubscription(ctx context.Context, subscription *eventingv1alpha1.Subscription) AsyncAssertion {
 	return Eventually(func() *eventingv1alpha1.Subscription {
 		lookupKey := types.NamespacedName{
@@ -1211,7 +1211,7 @@ func getBEBSubscriptionCreationRequests(bebSubscriptions []bebtypes.Subscription
 	}, bigTimeOut, bigPollingInterval)
 }
 
-// ensureSubscriptionCreationFails creates a Subscription in the k8s cluster and ensures that it is reject because of invalid schema
+// ensureSubscriptionCreationFails creates a Subscription in the k8s cluster and ensures that it is rejected because of invalid schema
 func ensureSubscriptionCreationFails(ctx context.Context, subscription *eventingv1alpha1.Subscription) {
 	if subscription.Namespace != "default " {
 		namespace := fixtureNamespace(subscription.Namespace)
@@ -1401,7 +1401,7 @@ var _ = BeforeSuite(func(done Done) {
 
 	nameMapper = handlers.NewBEBSubscriptionNameMapper(domain, handlers.MaxBEBSubscriptionNameLength)
 
-	err = NewReconciler(context.Background(), k8sManager.GetClient(), applicationLister, k8sManager.GetCache(), defaultLogger,
+	err = NewReconciler(context.Background(), k8sManager.GetClient(), applicationLister, defaultLogger,
 		k8sManager.GetEventRecorderFor("eventing-controller"), envConf, credentials, nameMapper).SetupUnmanaged(k8sManager)
 	Expect(err).ToNot(HaveOccurred())
 

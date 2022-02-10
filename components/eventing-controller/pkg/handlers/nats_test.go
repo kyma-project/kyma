@@ -196,7 +196,7 @@ func TestNatsSubAfterSync_NoChange(t *testing.T) {
 		g.Expect(natsSub).To(Not(BeNil()))
 		g.Expect(natsSub.IsValid()).To(BeTrue())
 
-		// check the metadata, if they are now same then it means that nats subscription
+		// check the metadata, if they are now same then it means that NATS subscription
 		// were not re-created by SyncSubscription method
 		subMsgLimit, subBytesLimit, err := natsSub.PendingLimits()
 		g.Expect(err).ShouldNot(HaveOccurred())
@@ -279,7 +279,7 @@ func TestNatsSubAfterSync_SinkChange(t *testing.T) {
 		g.Expect(natsSub).To(Not(BeNil()))
 		g.Expect(natsSub.IsValid()).To(BeTrue())
 
-		// check the metadata, if they are now same then it means that nats subscription
+		// check the metadata, if they are now same then it means that NATS subscription
 		// were not re-created by SyncSubscription method
 		subMsgLimit, subBytesLimit, err := natsSub.PendingLimits()
 		g.Expect(err).ShouldNot(HaveOccurred())
@@ -911,7 +911,7 @@ func TestIsValidSubscription(t *testing.T) {
 	nsn := createKymaSubscriptionNamespacedName(key, natsSub)
 	g.Expect(nsn.Namespace).To(BeIdenticalTo(sub.Namespace))
 	g.Expect(nsn.Name).To(BeIdenticalTo(sub.Name))
-	// the associated Nats subscription should be valid
+	// the associated NATS subscription should be valid
 	g.Expect(natsSub.IsValid()).To(BeTrue())
 	// check that no invalid subscriptions exist
 	invalidNsn := natsBackend.GetInvalidSubscriptions()
@@ -1004,7 +1004,7 @@ func TestRetryUsingCESDK(t *testing.T) {
 
 	subject := eventingtesting.CloudEventType
 	g.Expect(SendStructuredCloudEventToNATS(natsBackend, subject, eventingtesting.StructuredCloudEvent)).Should(Succeed())
-	// Check that the retries are done and that the sent data was correctly received
+	// Check that the retries are done and that the published data was correctly received
 	g.Expect(subscriber.CheckRetries(maxRetries, "\""+eventingtesting.EventData+"\"")).Should(Succeed())
 	g.Expect(natsBackend.DeleteSubscription(sub)).Should(Succeed())
 }
@@ -1014,7 +1014,7 @@ func TestSubscription_NATSServerRestart(t *testing.T) {
 	natsServer, natsPort := startNATSServer()
 	defer natsServer.Shutdown()
 	defaultLogger := getLogger(g, kymalogger.INFO)
-	// The reconnect configs should be large enough to cover the NATS server restart period
+	// The `reconnects` configs should be large enough to cover the NATS server restart period
 	natsConfig := env.NatsConfig{
 		URL:           natsServer.ClientURL(),
 		MaxReconnects: 10,
