@@ -108,7 +108,7 @@ func (s Subscriber) CheckEvent(expectedData string) error {
 				return pkgerrors.Wrapf(err, "get HTTP request failed")
 			}
 			if !is2XXStatusCode(resp.StatusCode) {
-				return fmt.Errorf("response code is not 2xx, received response code is: %d", resp.StatusCode)
+				return fmt.Errorf("Response code is not 2xx, received Response code is: %d", resp.StatusCode)
 			}
 			defer func() { _ = resp.Body.Close() }()
 			body, err = ioutil.ReadAll(resp.Body)
@@ -144,7 +144,7 @@ func (s Subscriber) CheckRetries(expectedNoOfRetries int, expectedData string) e
 				return pkgerrors.Wrapf(err, "get HTTP request failed")
 			}
 			if !is2XXStatusCode(resp.StatusCode) {
-				return fmt.Errorf("response code is not 2xx, received response code is: %d", resp.StatusCode)
+				return fmt.Errorf("Response code is not 2xx, received Response code is: %d", resp.StatusCode)
 			}
 			defer func() { _ = resp.Body.Close() }()
 			body, err = ioutil.ReadAll(resp.Body)

@@ -62,6 +62,7 @@ func Test_SyncBEBSubscription(t *testing.T) {
 	changed, err := beb.SyncSubscription(subscription, &Cleaner{}, apiRule)
 	g.Expect(err).To(BeNil())
 	g.Expect(changed).To(BeTrue())
+	bebMock.Stop()
 }
 
 // fixtureValidSubscription returns a valid subscription
@@ -75,7 +76,11 @@ func fixtureValidSubscription(name, namespace string) *eventingv1alpha1.Subscrip
 }
 
 func startBEBMock() *controllertesting.BEBMock {
-	bebConfig := &config.Config{}
+	// TODO(k15r): FIX THIS HACK
+	// this is a very evil hack for the time being, until we refactored the config properly
+	// it sets the URLs to relative paths, that can easily be used in the mux.
+	bebConfig := config.GetDefaultConfig("")
+
 	beb := controllertesting.NewBEBMock(bebConfig)
 	bebURI := beb.Start()
 	tokenURL := fmt.Sprintf("%s%s", bebURI, controllertesting.TokenURLPath)
