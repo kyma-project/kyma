@@ -43,7 +43,6 @@ import (
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/application/applicationtest"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/application/fake"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/constants"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/config"
 	bebtypes "github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/types"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers"
@@ -1203,7 +1202,7 @@ func ensureSubscriberSvcCreated(ctx context.Context, svc *v1.Service) {
 func getBEBSubscriptionCreationRequests(bebSubscriptions []bebtypes.Subscription) AsyncAssertion {
 	return Eventually(func() []bebtypes.Subscription {
 		for req, sub := range beb.Requests.GetSubscriptions() {
-			if reconcilertesting.IsBEBSubscriptionCreate(req, *beb.BEBConfig) {
+			if reconcilertesting.IsBEBSubscriptionCreate(req) {
 				bebSubscriptions = append(bebSubscriptions, sub)
 			}
 		}
@@ -1428,21 +1427,8 @@ var _ = AfterSuite(func() {
 // startBEBMock starts the beb mock and configures the controller process to use it
 func startBEBMock() *reconcilertesting.BEBMock {
 	By("Preparing BEB Mock")
-
-	// TODO(k15r): FIX THIS HACK
-	// this is a very evil hack for the time being, until we refactored the config properly
-	// it sets the URLs to relative paths, that can easily be used in the mux.
-
-	bebConfig := config.GetDefaultConfig("")
-	beb = reconcilertesting.NewBEBMock(bebConfig)
-	bebURI := beb.Start()
-	logf.Log.Info("beb mock listening at", "address", bebURI)
-	tokenURL := fmt.Sprintf("%s%s", bebURI, reconcilertesting.TokenURLPath)
-	messagingURL := fmt.Sprintf("%s%s", bebURI, reconcilertesting.MessagingURLPath)
-	beb.TokenURL = tokenURL
-	beb.MessagingURL = messagingURL
-	bebConfig = config.GetDefaultConfig(messagingURL)
-	beb.BEBConfig = bebConfig
+	beb = reconcilertesting.NewBEBMock()
+	beb.Start()
 	return beb
 }
 
@@ -1504,7 +1490,7 @@ func countBEBRequests(subscriptionName string) (countGet, countPost, countDelete
 func wasSubscriptionCreated(givenSubscription *eventingv1alpha1.Subscription) func() bool {
 	return func() bool {
 		for request, name := range beb.Requests.GetSubscriptionNames() {
-			if reconcilertesting.IsBEBSubscriptionCreate(request, *beb.BEBConfig) {
+			if reconcilertesting.IsBEBSubscriptionCreate(request) {
 				return nameMapper.MapSubscriptionName(givenSubscription) == name
 			}
 		}

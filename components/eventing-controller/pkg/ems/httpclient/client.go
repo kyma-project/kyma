@@ -7,8 +7,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
-
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/signals"
+	"strings"
 )
 
 // compile time check
@@ -25,8 +24,12 @@ type Client struct {
 }
 
 func NewHTTPClient(baseURL string, client *http.Client) (*Client, error) {
-	ctx := signals.NewReusableContext()
 	url, err := url.Parse(baseURL)
+
+	// add trailing '/' to the url path, so that we can combine the url with other paths according to standards
+	if !strings.HasSuffix(url.Path, "/") {
+		url.Path = url.Path + "/"
+	}
 	if err != nil {
 		return nil, err
 	}
@@ -53,7 +56,7 @@ func (c Client) NewRequest(method, path string, body interface{}) (*http.Request
 	if err != nil {
 		return nil, NewError(err)
 	}
-	u := c.baseURL.ResolveReference(pu)
+	u := resolveReferenceAsRelative(c.baseURL, pu)
 	req, err := http.NewRequest(method, u.String(), jsonBody)
 	if err != nil {
 		return nil, NewError(err)
@@ -65,6 +68,10 @@ func (c Client) NewRequest(method, path string, body interface{}) (*http.Request
 	}
 
 	return req, nil
+}
+
+func resolveReferenceAsRelative(base, ref *url.URL) *url.URL {
+	return base.ResolveReference(&url.URL{Path: strings.TrimPrefix(ref.Path, "/")})
 }
 
 func (c Client) Do(req *http.Request, result interface{}) (*http.Response, *[]byte, *Error) {

@@ -6,13 +6,22 @@ import (
 
 	cloudevents "github.com/cloudevents/sdk-go/v2"
 
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/config"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/types"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/httpclient"
 )
 
 // compile time check
 var _ PublisherManager = Client{}
+
+const (
+	PublishURL           = "/events"
+	CreateURL            = "/events/subscriptions"
+	ListURL              = "/events/subscriptions"
+	GetURLFormat         = "/events/subscriptions/%s"
+	DeleteURLFormat      = "/events/subscriptions/%s"
+	HandshakeURLFormat   = "/events/subscriptions/%s/handshake"
+	UpdateStateURLFormat = "/events/subscriptions/%s/state"
+)
 
 type EventPublisher interface {
 	Publish(cloudEvent cloudevents.Event, qos types.Qos) (*types.PublishResponse, error)
@@ -33,23 +42,21 @@ type PublisherManager interface {
 }
 
 type Client struct {
-	config     *config.Config
-	httpClient httpclient.BaseURLAwareClient
+	client httpclient.BaseURLAwareClient
 }
 
-func NewClient(config *config.Config, client httpclient.BaseURLAwareClient) *Client {
+func NewClient(client httpclient.BaseURLAwareClient) *Client {
 	return &Client{
-		config:     config,
-		httpClient: client,
+		client: client,
 	}
 }
 
 func (c Client) GetHTTPClient() httpclient.BaseURLAwareClient {
-	return c.httpClient
+	return c.client
 }
 
 func (c Client) Publish(event cloudevents.Event, qos types.Qos) (*types.PublishResponse, error) {
-	req, err := c.httpClient.NewRequest(http.MethodPost, c.config.PublishURL, event)
+	req, err := c.client.NewRequest(http.MethodPost, PublishURL, event)
 	if err != nil {
 		return nil, err
 	}
@@ -58,7 +65,7 @@ func (c Client) Publish(event cloudevents.Event, qos types.Qos) (*types.PublishR
 	req.Header.Set("qos", string(qos))
 
 	var response types.PublishResponse
-	resp, responseBody, err := c.httpClient.Do(req, &response)
+	resp, responseBody, err := c.client.Do(req, &response)
 	if err != nil {
 		return nil, err
 	}
@@ -73,13 +80,13 @@ func (c Client) Publish(event cloudevents.Event, qos types.Qos) (*types.PublishR
 }
 
 func (c Client) Create(subscription *types.Subscription) (*types.CreateResponse, error) {
-	req, err := c.httpClient.NewRequest(http.MethodPost, c.config.CreateURL, subscription)
+	req, err := c.client.NewRequest(http.MethodPost, CreateURL, subscription)
 	if err != nil {
 		return nil, err
 	}
 
 	var response *types.CreateResponse
-	resp, responseBody, err := c.httpClient.Do(req, &response)
+	resp, responseBody, err := c.client.Do(req, &response)
 	if err != nil {
 		return nil, err
 	}
@@ -100,14 +107,14 @@ func (c Client) Create(subscription *types.Subscription) (*types.CreateResponse,
 }
 
 func (c Client) List() (*types.Subscriptions, *types.Response, error) {
-	req, err := c.httpClient.NewRequest(http.MethodGet, c.config.ListURL, nil)
+	req, err := c.client.NewRequest(http.MethodGet, ListURL, nil)
 	if err != nil {
 		return nil, nil, err
 	}
 
 	var subscriptions *types.Subscriptions
 	var response types.Response
-	resp, responseBody, err := c.httpClient.Do(req, &subscriptions)
+	resp, responseBody, err := c.client.Do(req, &subscriptions)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -125,14 +132,14 @@ func (c Client) List() (*types.Subscriptions, *types.Response, error) {
 }
 
 func (c Client) Get(name string) (*types.Subscription, *types.Response, error) {
-	req, err := c.httpClient.NewRequest(http.MethodGet, fmt.Sprintf(c.config.GetURLFormat, name), nil)
+	req, err := c.client.NewRequest(http.MethodGet, fmt.Sprintf(GetURLFormat, name), nil)
 	if err != nil {
 		return nil, nil, err
 	}
 
 	var subscription *types.Subscription
 	var response types.Response
-	resp, responseBody, err := c.httpClient.Do(req, &subscription)
+	resp, responseBody, err := c.client.Do(req, &subscription)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -150,13 +157,13 @@ func (c Client) Get(name string) (*types.Subscription, *types.Response, error) {
 }
 
 func (c Client) Delete(name string) (*types.DeleteResponse, error) {
-	req, err := c.httpClient.NewRequest(http.MethodDelete, fmt.Sprintf(c.config.DeleteURLFormat, name), nil)
+	req, err := c.client.NewRequest(http.MethodDelete, fmt.Sprintf(DeleteURLFormat, name), nil)
 	if err != nil {
 		return nil, err
 	}
 
 	var response types.DeleteResponse
-	resp, responseBody, err := c.httpClient.Do(req, &response)
+	resp, responseBody, err := c.client.Do(req, &response)
 	if err != nil {
 		return nil, err
 	}
@@ -171,13 +178,13 @@ func (c Client) Delete(name string) (*types.DeleteResponse, error) {
 }
 
 func (c Client) TriggerHandshake(name string) (*types.TriggerHandshake, error) {
-	req, err := c.httpClient.NewRequest(http.MethodPost, fmt.Sprintf(c.config.HandshakeURLFormat, name), nil)
+	req, err := c.client.NewRequest(http.MethodPost, fmt.Sprintf(HandshakeURLFormat, name), nil)
 	if err != nil {
 		return nil, err
 	}
 
 	var response types.TriggerHandshake
-	resp, responseBody, err := c.httpClient.Do(req, &response)
+	resp, responseBody, err := c.client.Do(req, &response)
 	if err != nil {
 		return nil, err
 	}
@@ -191,13 +198,13 @@ func (c Client) TriggerHandshake(name string) (*types.TriggerHandshake, error) {
 }
 
 func (c Client) UpdateState(name string, state types.State) (*types.UpdateStateResponse, error) {
-	req, err := c.httpClient.NewRequest(http.MethodPut, fmt.Sprintf(c.config.UpdateStateURLFormat, name), state)
+	req, err := c.client.NewRequest(http.MethodPut, fmt.Sprintf(UpdateStateURLFormat, name), state)
 	if err != nil {
 		return nil, err
 	}
 
 	var response types.UpdateStateResponse
-	resp, responseBody, err := c.httpClient.Do(req, &response)
+	resp, responseBody, err := c.client.Do(req, &response)
 	if err != nil {
 		return nil, err
 	}

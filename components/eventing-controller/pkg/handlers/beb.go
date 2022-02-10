@@ -13,7 +13,6 @@ import (
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 	"github.com/kyma-project/kyma/components/eventing-controller/logger"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/client"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/config"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/types"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/auth"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/httpclient"
@@ -63,8 +62,11 @@ type BEBResponse struct {
 func (b *BEB) Initialize(cfg env.Config) error {
 	if b.Client == nil {
 		authenticatedClient := auth.NewAuthenticatedClient(cfg)
-		baclient := httpclient.NewHTTPClient(cfg.BEBAPIURL, authenticatedClient)
-		b.Client = client.NewClient(config.GetDefaultConfig(cfg.BEBAPIURL), authenticator)
+		httpClient, err := httpclient.NewHTTPClient(cfg.BEBAPIURL, authenticatedClient)
+		if err != nil {
+			return err
+		}
+		b.Client = client.NewClient(httpClient)
 		b.WebhookAuth = getWebHookAuth(cfg, b.OAth2credentials)
 		b.ProtocolSettings = &eventingv1alpha1.ProtocolSettings{
 			ContentMode:     &cfg.ContentMode,
