@@ -36,11 +36,11 @@ type BEBMock struct {
 	MessagingURL   string
 	BEBConfig      *config.Config
 	log            logr.Logger
-	AuthResponse   response
-	GetResponse    responseWithName
-	ListResponse   response
-	CreateResponse response
-	DeleteResponse response
+	AuthResponse   Response
+	GetResponse    ResponseWithName
+	ListResponse   Response
+	CreateResponse Response
+	DeleteResponse Response
 	server         *httptest.Server
 }
 
@@ -54,8 +54,8 @@ func NewBEBMock(bebConfig *config.Config) *BEBMock {
 	}
 }
 
-type responseWithName func(w http.ResponseWriter, subscriptionName string)
-type response func(w http.ResponseWriter)
+type ResponseWithName func(w http.ResponseWriter, subscriptionName string)
+type Response func(w http.ResponseWriter)
 
 func (m *BEBMock) Reset() {
 	m.log.Info("Initializing requests")
@@ -104,12 +104,9 @@ func (m *BEBMock) Start() string {
 		case http.MethodGet:
 			key := r.URL.Path
 			m.GetResponse(w, key)
-			return
 		default:
 			w.WriteHeader(http.StatusNotImplemented)
 		}
-		return
-
 	})
 
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -142,7 +139,7 @@ func (m *BEBMock) Stop() {
 }
 
 // GetSubscriptionResponse checks if a subscription exists in the mock
-func GetSubscriptionResponse(m *BEBMock) responseWithName {
+func GetSubscriptionResponse(m *BEBMock) ResponseWithName {
 	return func(w http.ResponseWriter, key string) {
 		subscriptionSaved := m.Subscriptions.GetSubscription(key)
 		if subscriptionSaved != nil {
@@ -156,7 +153,7 @@ func GetSubscriptionResponse(m *BEBMock) responseWithName {
 	}
 }
 
-// BEBAuthResponseSuccess writes a oauth2 authentication response to the writer for the happy-path.
+// BEBAuthResponseSuccess writes a oauth2 authentication Response to the writer for the happy-path.
 func BEBAuthResponseSuccess(w http.ResponseWriter) {
 	token := oauth2.Token{
 		AccessToken:  "some-token",
@@ -168,7 +165,7 @@ func BEBAuthResponseSuccess(w http.ResponseWriter) {
 	Expect(err).ShouldNot(HaveOccurred())
 }
 
-// BEBCreateSuccess writes a response to the writer for the happy-path of creating a BEB subscription.
+// BEBCreateSuccess writes a Response to the writer for the happy-path of creating a BEB subscription.
 func BEBCreateSuccess(w http.ResponseWriter) {
 	w.WriteHeader(http.StatusAccepted)
 	response := bebtypes.CreateResponse{
@@ -182,7 +179,7 @@ func BEBCreateSuccess(w http.ResponseWriter) {
 	Expect(err).ShouldNot(HaveOccurred())
 }
 
-// BEBGetSuccess writes a response to the writer for the happy-path of getting a BEB subscription.
+// BEBGetSuccess writes a Response to the writer for the happy-path of getting a BEB subscription.
 func BEBGetSuccess(w http.ResponseWriter, name string) {
 	w.WriteHeader(http.StatusOK)
 	s := bebtypes.Subscription{
@@ -193,7 +190,7 @@ func BEBGetSuccess(w http.ResponseWriter, name string) {
 	Expect(err).ShouldNot(HaveOccurred())
 }
 
-// BEBListSuccess writes a response to the writer for the happy-path of listing a BEB subscription.
+// BEBListSuccess writes a Response to the writer for the happy-path of listing a BEB subscription.
 func BEBListSuccess(w http.ResponseWriter) {
 	w.WriteHeader(http.StatusAccepted)
 	response := bebtypes.Response{
@@ -204,7 +201,7 @@ func BEBListSuccess(w http.ResponseWriter) {
 	Expect(err).ShouldNot(HaveOccurred())
 }
 
-// BEBDeleteResponseSuccess writes a response to the writer for the happy-path of deleting a BEB subscription.
+// BEBDeleteResponseSuccess writes a Response to the writer for the happy-path of deleting a BEB subscription.
 func BEBDeleteResponseSuccess(w http.ResponseWriter) {
 	w.WriteHeader(http.StatusNoContent)
 }
