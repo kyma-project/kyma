@@ -121,9 +121,16 @@ global:
   containerRegistry:
     path: eu.gcr.io/kyma-project
   images:
-    istio:
-      name: "istio"
+    # these definitions aren't used by the chart, but they are required by external tool for list generation
+    istio_proxyv2:
+      name: "proxyv2"
       version: "1.11.4-distroless"
-      directory: "external"
+      directory: "external/istio"
+      containerRegistryPath: "eu.gcr.io/kyma-project"
+    istio_pilot:
+      name: "pilot"
+      version: "1.11.4-distroless"
+      directory: "external/istio"
+      containerRegistryPath: "eu.gcr.io/kyma-project"
   tracing:
     enabled: true
