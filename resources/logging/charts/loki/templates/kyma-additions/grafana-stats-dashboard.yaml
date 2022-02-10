@@ -236,7 +236,7 @@ data:
             "steppedLine": false,
             "targets": [
               {
-                "expr": "sum(count_over_time(({namespace=\"$namespace\" ,pod=\"$pod\", stream=~\"std.*\"} |~ \"(?i)error\")[5m])) by (pod)",
+                "expr": "avg(count_over_time(({namespace=\"$namespace\" ,pod=\"$pod\", stream=~\"std.*\"} |~ \"(?i)error\")[5m])) by (pod)",
                 "instant": false,
                 "legendFormat": "{{`{{pod}}`}}",
                 "maxLines": 0,
@@ -248,7 +248,7 @@ data:
             "timeFrom": null,
             "timeRegions": [],
             "timeShift": null,
-            "title": "Errors/Pod (selected)",
+            "title": "Average Error Rate (selected Pod)",
             "tooltip": {
               "shared": true,
               "sort": 2,
@@ -267,7 +267,7 @@ data:
                 "$$hashKey": "object:425",
                 "decimals": 0,
                 "format": "short",
-                "label": "Count",
+                "label": "",
                 "logBase": 1,
                 "max": null,
                 "min": null,
