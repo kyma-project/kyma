@@ -212,7 +212,7 @@ func BEBDeleteResponseSuccess(w http.ResponseWriter) {
 
 // IsBEBSubscriptionCreate determines if the http request is creating a BEB subscription.
 func IsBEBSubscriptionCreate(r *http.Request) bool {
-	return r.Method == http.MethodPost && strings.Contains(client.CreateURL, r.RequestURI)
+	return r.Method == http.MethodPost && strings.Contains(r.RequestURI, client.CreateURL)
 }
 
 // IsBEBSubscriptionDelete determines if the http request is deleting a BEB subscription.
