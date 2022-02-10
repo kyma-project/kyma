@@ -1428,7 +1428,12 @@ var _ = AfterSuite(func() {
 // startBEBMock starts the beb mock and configures the controller process to use it
 func startBEBMock() *reconcilertesting.BEBMock {
 	By("Preparing BEB Mock")
-	bebConfig := &config.Config{}
+
+	// TODO(k15r): FIX THIS HACK
+	// this is a very evil hack for the time being, until we refactored the config properly
+	// it sets the URLs to relative paths, that can easily be used in the mux.
+
+	bebConfig := config.GetDefaultConfig("")
 	beb = reconcilertesting.NewBEBMock(bebConfig)
 	bebURI := beb.Start()
 	logf.Log.Info("beb mock listening at", "address", bebURI)

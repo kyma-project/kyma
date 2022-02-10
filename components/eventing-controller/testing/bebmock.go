@@ -61,17 +61,57 @@ func (m *BEBMock) Reset() {
 	m.log.Info("Initializing requests")
 	m.Requests = NewSafeRequests()
 	m.Subscriptions = NewSafeSubscriptions()
-	m.AuthResponse = nil
-	m.GetResponse = nil
-	m.ListResponse = nil
-	m.CreateResponse = nil
-	m.DeleteResponse = nil
+	m.AuthResponse = BEBAuthResponseSuccess
+	m.GetResponse = GetSubscriptionResponse(m)
+	m.ListResponse = BEBListSuccess
+	m.CreateResponse = BEBCreateSuccess
+	m.DeleteResponse = BEBDeleteResponseSuccess
 }
 
 func (m *BEBMock) Start() string {
 	m.Reset()
 
 	// implementation based on https://pages.github.tools.sap/KernelServices/APIDefinitions/?urls.primaryName=Business%20Event%20Bus%20-%20CloudEvents
+	mux := http.NewServeMux()
+
+	// oauth2 request
+	mux.HandleFunc(TokenURLPath, func(w http.ResponseWriter, r *http.Request) {
+		// TODO(k15r): method not allowed/implementd handling
+		if r.Method == http.MethodPost {
+			m.AuthResponse(w)
+		}
+	})
+
+	mux.HandleFunc(strings.TrimPrefix(m.BEBConfig.ListURL, m.BEBConfig.BaseURL), func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == http.MethodGet {
+			m.ListResponse(w)
+		}
+	})
+
+	mux.HandleFunc(MessagingURLPath+"/", func(w http.ResponseWriter, r *http.Request) {
+		switch r.Method {
+		case http.MethodDelete:
+			key := r.URL.Path
+			m.Subscriptions.DeleteSubscription(key)
+			m.DeleteResponse(w)
+		case http.MethodPost:
+			var subscription bebtypes.Subscription
+			_ = json.NewDecoder(r.Body).Decode(&subscription)
+			m.Requests.PutSubscription(r, subscription)
+			key := r.URL.Path + "/" + subscription.Name
+			m.Subscriptions.PutSubscription(key, &subscription)
+			m.CreateResponse(w)
+		case http.MethodGet:
+			key := r.URL.Path
+			m.GetResponse(w, key)
+			return
+		default:
+			w.WriteHeader(http.StatusNotImplemented)
+		}
+		return
+
+	})
+
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		defer GinkgoRecover()
 
@@ -90,70 +130,7 @@ func (m *BEBMock) Start() string {
 		)
 
 		w.Header().Set("Content-Type", "application/json")
-
-		// oauth2 request
-		if r.Method == http.MethodPost && strings.HasPrefix(r.RequestURI, TokenURLPath) {
-			if m.AuthResponse != nil {
-				m.AuthResponse(w)
-			} else {
-				BEBAuthResponseSuccess(w)
-			}
-			return
-		}
-
-		// messaging API request
-		if strings.HasPrefix(r.RequestURI, MessagingURLPath) {
-			switch r.Method {
-			case http.MethodDelete:
-				key := r.URL.Path
-				m.Subscriptions.DeleteSubscription(key)
-				if m.DeleteResponse != nil {
-					m.DeleteResponse(w)
-				} else {
-					BEBDeleteResponseSuccess(w)
-				}
-			case http.MethodPost:
-				var subscription bebtypes.Subscription
-				_ = json.NewDecoder(r.Body).Decode(&subscription)
-				m.Requests.PutSubscription(r, subscription)
-				key := r.URL.Path + "/" + subscription.Name
-				m.Subscriptions.PutSubscription(key, &subscription)
-				if m.CreateResponse != nil {
-					m.CreateResponse(w)
-				} else {
-					BEBCreateSuccess(w)
-				}
-			case http.MethodGet:
-				switch r.RequestURI {
-				case m.BEBConfig.ListURL:
-					if m.ListResponse != nil {
-						m.ListResponse(w)
-					} else {
-						BEBListSuccess(w)
-					}
-				// get on a single subscription
-				default:
-					key := r.URL.Path
-					if m.GetResponse != nil {
-						m.GetResponse(w, key)
-					} else {
-						subscriptionSaved := m.Subscriptions.GetSubscription(key)
-						if subscriptionSaved != nil {
-							subscriptionSaved.SubscriptionStatus = bebtypes.SubscriptionStatusActive
-							w.WriteHeader(http.StatusOK)
-							err := json.NewEncoder(w).Encode(*subscriptionSaved)
-							Expect(err).ShouldNot(HaveOccurred())
-						} else {
-							w.WriteHeader(http.StatusNotFound)
-						}
-					}
-				}
-				return
-			default:
-				w.WriteHeader(http.StatusNotImplemented)
-			}
-			return
-		}
+		mux.ServeHTTP(w, r)
 	}))
 	uri := ts.URL
 	m.server = ts
@@ -165,6 +142,21 @@ func (m *BEBMock) Stop() {
 }
 
 // BEBAuthResponseSuccess writes an oauth2 authentication response to the writer for the happy-path.
+func GetSubscriptionResponse(m *BEBMock) responseWithName {
+	return func(w http.ResponseWriter, key string) {
+		subscriptionSaved := m.Subscriptions.GetSubscription(key)
+		if subscriptionSaved != nil {
+			subscriptionSaved.SubscriptionStatus = bebtypes.SubscriptionStatusActive
+			w.WriteHeader(http.StatusOK)
+			err := json.NewEncoder(w).Encode(*subscriptionSaved)
+			Expect(err).ShouldNot(HaveOccurred())
+		} else {
+			w.WriteHeader(http.StatusNotFound)
+		}
+	}
+}
+
+// BEBAuthResponseSuccess writes a oauth2 authentication response to the writer for the happy-path.
 func BEBAuthResponseSuccess(w http.ResponseWriter) {
 	token := oauth2.Token{
 		AccessToken:  "some-token",
