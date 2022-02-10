@@ -30,16 +30,15 @@ describe('Execute SKR test', function() {
           customParams,
           provisioningTimeout);
 
-      const runtimeStatus = await kcp.getRuntimeStatusOperations(this.options.instanceID);
-      console.log(`\nRuntime status after provisioning: ${runtimeStatus}`);
-      await kcp.reconcileInformationLog(runtimeStatus);
-
       this.shoot = skr.shoot;
       await addScenarioInCompass(director, this.options.scenarioName);
       await assignRuntimeToScenario(director, this.shoot.compassID, this.options.scenarioName);
       initializeK8sClient({kubeconfig: this.shoot.kubeconfig});
     } catch (e) {
       throw new Error(`before hook failed: ${e.toString()}`);
+    } finally {
+      const runtimeStatus = await kcp.getRuntimeStatusOperations(this.options.instanceID);
+      await kcp.reconcileInformationLog(runtimeStatus);
     }
   });
 
@@ -47,7 +46,12 @@ describe('Execute SKR test', function() {
   commerceMockTest();
 
   after('Deprovision SKR', async function() {
-    await deprovisionSKR(keb, kcp, this.options.instanceID, deprovisioningTimeout);
+    try {
+      await deprovisionSKR(keb, kcp, this.options.instanceID, deprovisioningTimeout);
+    } finally {
+      const runtimeStatus = await kcp.getRuntimeStatusOperations(this.options.instanceID);
+      await kcp.reconcileInformationLog(runtimeStatus);
+    }
     await unregisterKymaFromCompass(director, this.options.scenarioName);
   });
 });
