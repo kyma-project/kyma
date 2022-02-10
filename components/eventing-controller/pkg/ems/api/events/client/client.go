@@ -8,15 +8,17 @@ import (
 
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/config"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/types"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/auth"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/httpclient"
 )
 
 // compile time check
-var _ Interface = Client{}
+var _ PublisherManager = Client{}
 
-type Interface interface {
+type EventPublisher interface {
 	Publish(cloudEvent cloudevents.Event, qos types.Qos) (*types.PublishResponse, error)
+}
+
+type SubscriptionManager interface {
 	Create(subscription *types.Subscription) (*types.CreateResponse, error)
 	List() (*types.Subscriptions, *types.Response, error)
 	Get(name string) (*types.Subscription, *types.Response, error)
@@ -25,19 +27,24 @@ type Interface interface {
 	UpdateState(name string, state types.State) (*types.UpdateStateResponse, error)
 }
 
-type Client struct {
-	config     *config.Config
-	httpClient *httpclient.Client
+type PublisherManager interface {
+	EventPublisher
+	SubscriptionManager
 }
 
-func NewClient(config *config.Config, authenticator *auth.Authenticator) *Client {
+type Client struct {
+	config     *config.Config
+	httpClient httpclient.BaseURLAwareClient
+}
+
+func NewClient(config *config.Config, client httpclient.BaseURLAwareClient) *Client {
 	return &Client{
 		config:     config,
-		httpClient: authenticator.GetClient(),
+		httpClient: client,
 	}
 }
 
-func (c Client) GetHTTPClient() *httpclient.Client {
+func (c Client) GetHTTPClient() httpclient.BaseURLAwareClient {
 	return c.httpClient
 }
 

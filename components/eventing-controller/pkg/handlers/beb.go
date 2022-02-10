@@ -16,6 +16,7 @@ import (
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/config"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/types"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/auth"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/httpclient"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/eventtype"
 	"github.com/kyma-project/kyma/components/eventing-controller/utils"
@@ -45,7 +46,7 @@ func NewBEB(credentials *OAuth2ClientCredentials, mapper NameMapper, logger *log
 }
 
 type BEB struct {
-	Client           *client.Client
+	Client           client.PublisherManager
 	WebhookAuth      *types.WebhookAuth
 	ProtocolSettings *eventingv1alpha1.ProtocolSettings
 	Namespace        string
@@ -61,7 +62,8 @@ type BEBResponse struct {
 
 func (b *BEB) Initialize(cfg env.Config) error {
 	if b.Client == nil {
-		authenticator := auth.NewAuthenticator(cfg)
+		authenticatedClient := auth.NewAuthenticatedClient(cfg)
+		baclient := httpclient.NewHTTPClient(cfg.BEBAPIURL, authenticatedClient)
 		b.Client = client.NewClient(config.GetDefaultConfig(cfg.BEBAPIURL), authenticator)
 		b.WebhookAuth = getWebHookAuth(cfg, b.OAth2credentials)
 		b.ProtocolSettings = &eventingv1alpha1.ProtocolSettings{

@@ -28,7 +28,7 @@ func TestAuthenticator(t *testing.T) {
 	}
 	cfg := env.Config{}
 	// authenticate
-	authenticator := NewAuthenticator(cfg)
+	authenticator := NewAuthenticatedClient(cfg)
 
 	httpClient := authenticator.GetClient().GetHTTPClient()
 

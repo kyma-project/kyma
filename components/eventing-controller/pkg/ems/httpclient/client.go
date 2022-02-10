@@ -2,45 +2,45 @@ package httpclient
 
 import (
 	"bytes"
-	"context"
 	"encoding/json"
 	"io"
 	"io/ioutil"
 	"net/http"
+	"net/url"
 
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/signals"
-
-	"golang.org/x/oauth2"
-	"golang.org/x/oauth2/clientcredentials"
 )
 
+// compile time check
+var _ BaseURLAwareClient = Client{}
+
+type BaseURLAwareClient interface {
+	NewRequest(method, path string, body interface{}) (*http.Request, *Error)
+	Do(req *http.Request, result interface{}) (*http.Response, *[]byte, *Error)
+}
+
 type Client struct {
+	baseURL    *url.URL
 	httpClient *http.Client
 }
 
-func NewHTTPClient(cfg clientcredentials.Config) *Client {
+func NewHTTPClient(baseURL string, client *http.Client) (*Client, error) {
 	ctx := signals.NewReusableContext()
-	httpClient := newOauth2Client(ctx, cfg)
-	return &Client{httpClient: httpClient}
-}
-
-// NewClient returns a new HTTP client which have nested transports for handling oauth2 security, HTTP connection pooling, and tracing.
-func newOauth2Client(ctx context.Context, cfg clientcredentials.Config) *http.Client {
-	// create and configure oauth2 client
-	client := cfg.Client(ctx)
-
-	var base = http.DefaultTransport.(*http.Transport).Clone()
-	client.Transport.(*oauth2.Transport).Base = base
-
-	// TODO: Support tracing in eventing-controller #9767: https://github.com/kyma-project/kyma/issues/9767
-	return client
+	url, err := url.Parse(baseURL)
+	if err != nil {
+		return nil, err
+	}
+	return &Client{
+		httpClient: client,
+		baseURL:    url,
+	}, nil
 }
 
 func (c *Client) GetHTTPClient() *http.Client {
 	return c.httpClient
 }
 
-func (c Client) NewRequest(method, url string, body interface{}) (*http.Request, *Error) {
+func (c Client) NewRequest(method, path string, body interface{}) (*http.Request, *Error) {
 	var jsonBody io.ReadWriter
 	if body != nil {
 		jsonBody = new(bytes.Buffer)
@@ -49,7 +49,12 @@ func (c Client) NewRequest(method, url string, body interface{}) (*http.Request,
 		}
 	}
 
-	req, err := http.NewRequest(method, url, jsonBody)
+	pu, err := url.Parse(path)
+	if err != nil {
+		return nil, NewError(err)
+	}
+	u := c.baseURL.ResolveReference(pu)
+	req, err := http.NewRequest(method, u.String(), jsonBody)
 	if err != nil {
 		return nil, NewError(err)
 	}
