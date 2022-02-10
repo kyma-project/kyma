@@ -141,7 +141,7 @@ func (m *BEBMock) Stop() {
 	m.server.Close()
 }
 
-// BEBAuthResponseSuccess writes an oauth2 authentication response to the writer for the happy-path.
+// GetSubscriptionResponse checks if a subscription exists in the mock
 func GetSubscriptionResponse(m *BEBMock) responseWithName {
 	return func(w http.ResponseWriter, key string) {
 		subscriptionSaved := m.Subscriptions.GetSubscription(key)
