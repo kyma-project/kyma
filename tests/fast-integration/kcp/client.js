@@ -312,7 +312,7 @@ class KCPWrapper {
       console.log(`reconciliation operation status: ${i.status}`);
 
       // kcp reconciliations info -i <scheduling-id> -o json
-      // const getReconciliationsInfo = await this.getReconciliationsInfo(i.schedulingID);
+      const getReconciliationsInfo = await this.getReconciliationsInfo(i.schedulingID);
       console.log(`reconciliation info: ${i.schedulingID}: ${getReconciliationsInfo}`);
     }
   }
