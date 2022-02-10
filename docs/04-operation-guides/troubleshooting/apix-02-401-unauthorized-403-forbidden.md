@@ -4,11 +4,11 @@ title: Cannot connect to a service exposed by an API Rule - 401 Unauthorized or 
 
 ## Symptom
 
-You reach your service and get `401 Unauthorized` or `403 Forbidden` in response.
+When you try to reach your service, you get `401 Unauthorized` or `403 Forbidden` in response.
 
 ## Remedy
 
-In such case, make sure that:
+Make sure that the following conditions are met:
 
 - You are using an access token with proper scopes and it is active:
 
@@ -25,7 +25,7 @@ In such case, make sure that:
       export ENCODED_CREDENTIALS=$(echo -n "$CLIENT_ID:$CLIENT_SECRET" | base64)
       ```
 
-  3. Check access token status:
+  3. Check the access token status:
 
       ```bash
       curl -X POST "https://oauth2.{DOMAIN}/oauth2/introspect" -H "Authorization: Basic $ENCODED_CREDENTIALS" -F "token={ACCESS_TOKEN}"
@@ -33,9 +33,9 @@ In such case, make sure that:
 
   4. Generate a [new access token](../../03-tutorials/00-api-exposure/apix-03-expose-and-secure-service.md#register-an-oauth2-client-and-get-tokens) if needed.
 
-- Your client from OAuth2Client resource is registered properly in Hydra OAuth2 and OpenID Connect server. You need to call the Hydra administrative endpoint `/client` from inside of the cluster. Follow this steps:
+- Your client from the OAuth2Client resource is registered properly in Hydra OAuth2 and the OpenID Connect server. You need to call the Hydra administrative endpoint `/client` from inside of the cluster. Follow these steps:
 
-  1. Fetch the Client ID from Secret specified in the OAuth2Client resource:
+  1. Fetch the Client ID from the Secret specified in the OAuth2Client resource:
 
       ```bash
       kubectl get secrets {SECRET_NAME} -n {SECRET_NAMESPACE} -o jsonpath='{ .data.client_id }' | base64 --decode
@@ -43,8 +43,8 @@ In such case, make sure that:
 
   2. Create a simple curl Pod:
 
-      ```yaml
-      ---
+```bash
+      cat <<EOF | kubectl apply -f -
       apiVersion: v1
       kind: Pod
       metadata:
@@ -63,6 +63,7 @@ In such case, make sure that:
             - |
               apk add curl jq
               curl ory-hydra-admin.kyma-system.svc.cluster.local:4445/clients | jq '.'
+      EOF
       ```
 
   3. Check logs from the `ory-curl` Pod:
@@ -84,7 +85,7 @@ In such case, make sure that:
   2020-05-04T12:19:04.673Z  INFO  controller-runtime.controller Starting workers  {"controller": "oauth2client", "worker count": 1}
   2020-05-04T12:26:30.819Z  INFO  controllers.OAuth2Client  using default client
   2020-05-04T12:26:30.835Z  INFO  controllers.OAuth2Client  using default client
-  # This log informs that a client has been created, and should be visible within hydra
+  # This log entry informs that a client has been created, and should be visible within hydra
   2020-05-04T12:26:31.468Z  DEBUG controller-runtime.controller Successfully Reconciled {"controller": "oauth2client", "request": "test-ns/test-client"}
 
   # Check logs from the Hydra application

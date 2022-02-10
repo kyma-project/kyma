@@ -4,11 +4,11 @@ title: Cannot connect to a service exposed by an API Rule - 404 Not Found
 
 ## Symptom
 
-You reach your service and get `404 Not Found` in response.
+When you try to reach your service, you get `404 Not Found` in response.
 
 ## Remedy
 
-In such case, make sure that:
+Make sure that the following conditions are met:
 
 - Proper Oathkeeper Rule has been created:
 
@@ -26,7 +26,7 @@ In such case, make sure that:
 
   >**TIP:** Name of the VirtualService consists of the name of the API Rule and a random suffix.
 
-Sometimes Oathkeeper Maester controller stops reconciling Rules on long-living clusters. This can result in random `404 Not Found` responses, because Oathkeeper does not contain Rules reflecting the actual state of the cluster. A simple restart of the Pod resolves the issue, but you might want to verify if that is the issue you have encountered. To do so:
+Sometimes Oathkeeper Maester controller stops reconciling Rules on long-living clusters. This can result in random `404 Not Found` responses, because Oathkeeper does not contain Rules reflecting the actual state of the cluster. A simple restart of the Pod resolves the issue, but you might want to verify if that is the issue you have encountered. To do so, follow these steps:
 
 1. Fetch all Oathkeeper Pods' names:
 
@@ -46,6 +46,6 @@ Sometimes Oathkeeper Maester controller stops reconciling Rules on long-living c
    jd -set {FIRST_FILE} {SECOND_FILE} 
    ```
 
-    Oathkeeper Pods are out of sync if there are any differences between the files other than the order of Rules.
+    The files are considered different by jd if there are any differences between the files other than the order of Rules.
    
-4. Compare the Rules in the files with Rules present on the cluster. If there are any differences, Oathkeeper Pods are out of sync.
+4. Compare the Rules in the files with Rules present on the cluster. If the files are different, Oathkeeper Pods are out of sync.
