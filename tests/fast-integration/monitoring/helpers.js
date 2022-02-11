@@ -40,7 +40,7 @@ function shouldIgnoreAlert(alert) {
     "KubeMemoryOvercommit",
   ]
 
-  return alert.labels.severity == "critical" || alertNamesToIgnore.includes(alert.labels.alertname)
+  return alert.labels.severity != "critical" || alertNamesToIgnore.includes(alert.labels.alertname)
 }
 
 async function getServiceMonitors() {
