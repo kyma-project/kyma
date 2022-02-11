@@ -176,6 +176,7 @@ func (r *FunctionReconciler) Reconcile(request ctrl.Request) (ctrl.Result, error
 			Reason:             serverlessv1alpha1.ConditionReasonSourceUpdateFailed,
 			Message:            fmt.Sprintf("Reading git options failed: %v", err),
 		}); updateErr != nil {
+			log.Error(err, "Reading git options failed")
 			return ctrl.Result{}, errors.Wrap(updateErr, "while updating status")
 		}
 		return ctrl.Result{}, err
