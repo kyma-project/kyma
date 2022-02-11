@@ -11,7 +11,7 @@ import (
 func TestIsNotRecoverableError(t *testing.T) {
 	t.Run("Error is unrecoverable", func(t *testing.T) {
 		//GIVEN
-		err := git2go.MakeGitError2(int(git2go.ErrorCodeNotFound))
+		err := git2go.MakeGitError2(int(git2go.ErrorCodeInvalidSpec))
 		err = errors.Wrap(err, "first")
 		err = errors.Wrap(err, "second")
 		err = errors.Wrap(err, "third")
