@@ -28,11 +28,9 @@ func TestAuthenticator(t *testing.T) {
 	}
 	cfg := env.Config{}
 	// authenticate
-	authenticator := NewAuthenticator(cfg)
+	client := NewAuthenticatedClient(cfg)
 
-	httpClient := authenticator.GetClient().GetHTTPClient()
-
-	secTransport, ok := httpClient.Transport.(*oauth2.Transport)
+	secTransport, ok := client.Transport.(*oauth2.Transport)
 	if !ok {
 		t.Errorf("convert to oauth2 transport failed")
 	}
