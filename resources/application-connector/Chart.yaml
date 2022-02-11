@@ -6,7 +6,6 @@ home: https://kyma-project.io
 icon: https://github.com/kyma-project/kyma/blob/main/logo.png?raw=true
 dependencies:
   - name: application-broker
-  - name: application-operator
   - name: application-registry
   - name: central-application-connectivity-validator
     condition: global.centralApplicationConnectivityValidatorEnabled
