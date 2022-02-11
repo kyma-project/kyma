@@ -48,7 +48,6 @@ spec:
             memory: {{ .Values.deployment.resources.requests.memory }}
         args:
           - "/app/applicationregistry"
-          - "--proxyPort={{ .Values.deployment.args.proxyPort }}"
           - "--externalAPIPort={{ .Values.deployment.args.externalAPIPort }}"
           - "--uploadServiceURL={{ .Values.deployment.args.uploadServiceURL }}"
           - "--centralGatewayUrl={{ .Values.deployment.args.centralGatewayUrl }}"
