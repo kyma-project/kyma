@@ -200,7 +200,7 @@ func TestNextRequeue(t *testing.T) {
 	}{
 		{
 			name:           "Git unrecoverable error",
-			inputErr:       git2go.MakeGitError2(int(git2go.ErrorCodeNotFound)),
+			inputErr:       git2go.MakeGitError2(int(git2go.ErrorCodeInvalidSpec)),
 			expectedErrMsg: "Stop reconciliation, reason:",
 			expectedResult: ctrl.Result{Requeue: false},
 		},
