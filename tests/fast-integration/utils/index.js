@@ -606,23 +606,6 @@ function waitForServiceBindingUsage(
   );
 }
 
-function waitForReplicaSet(name, namespace = 'default', timeout = 90000) {
-  return waitForK8sObject(
-      `/apis/apps/v1/namespaces/${namespace}/replicasets`,
-      {},
-      (_type, _apiObj, watchObj) => {
-        return (
-          watchObj.object.metadata.name === name &&
-        watchObj.object.status &&
-        watchObj.object.status.readyReplicas > 0 &&
-        watchObj.object.status.availableReplicas > 0
-        );
-      },
-      timeout,
-      `Waiting for replica set ${name} timeout (${timeout} ms)`,
-  );
-}
-
 function waitForDaemonSet(name, namespace = 'default', timeout = 90000) {
   return waitForK8sObject(
       `/apis/apps/v1/watch/namespaces/${namespace}/daemonsets/${name}`,

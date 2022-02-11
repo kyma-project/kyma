@@ -461,12 +461,7 @@ async function connectCommerceMock(mockHost, tokenData) {
   }
 }
 
-async function ensureCommerceMockWithCompassTestFixture(client,
-    appName,
-    scenarioName,
-    mockNamespace,
-    targetNamespace) {
-
+async function ensureCommerceMockWithCompassTestFixture(client, appName, scenarioName, mockNamespace, targetNamespace) {
   const lastOrderFunction = prepareFunction('compass', `mp-${appName}`);
 
   const mockHost = await provisionCommerceMockResources(
