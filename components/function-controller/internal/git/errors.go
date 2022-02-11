@@ -8,9 +8,7 @@ import (
 
 //Unrecoverable means that something is wrong with configuration of git function CR
 //and cannot be fixed without changing the function cr. For example, branch doesn't exist.
-var notRecoverableErrors = []git2go.ErrorCode{
-	git2go.ErrorCodeNotFound, git2go.ErrorCodeInvalidSpec,
-}
+var notRecoverableErrors = []git2go.ErrorCode{git2go.ErrorCodeInvalidSpec}
 
 func IsNotRecoverableError(err error) bool {
 	gitErr := getGitErr(err)
