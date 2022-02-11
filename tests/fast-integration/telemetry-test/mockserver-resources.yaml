@@ -69,7 +69,7 @@ spec:
           value: INFO
         - name: SERVER_PORT
           value: "1080"
-        image: mockserver/mockserver:mockserver-5.11.2
+        image: eu.gcr.io/kyma-project/external/mockserver/mockserver:mockserver-5.11.2
         livenessProbe:
           failureThreshold: 10
           initialDelaySeconds: 10
