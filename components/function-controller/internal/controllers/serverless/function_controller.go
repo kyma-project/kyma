@@ -10,6 +10,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
+	"github.com/pkg/errors"
 )
 
 const (
@@ -108,7 +109,7 @@ func (r *FunctionReconciler) updateStatus(ctx context.Context, instance *serverl
 
 	if !r.equalFunctionStatus(service.Status, instance.Status) {
 		if err := r.client.Status().Update(ctx, service); err != nil {
-			return err
+			return errors.Wrap(err, "while updating function status")
 		}
 
 		r.statsCollector.UpdateReconcileStats(instance, condition)

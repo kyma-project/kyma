@@ -169,7 +169,6 @@ func (r *FunctionReconciler) Reconcile(request ctrl.Request) (ctrl.Result, error
 
 	gitOptions, err := r.readGITOptions(ctx, instance)
 	if err != nil {
-		log.Error(err, "Reading git options failed")
 		if updateErr := r.updateStatusWithoutRepository(ctx, instance, serverlessv1alpha1.Condition{
 			Type:               serverlessv1alpha1.ConditionConfigurationReady,
 			Status:             corev1.ConditionFalse,
