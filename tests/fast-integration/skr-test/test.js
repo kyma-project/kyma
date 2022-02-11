@@ -30,6 +30,9 @@ describe('Execute SKR test', function() {
           customParams,
           provisioningTimeout);
 
+      const runtimeStatus = await kcp.getRuntimeStatusOperations(this.options.instanceID);
+      console.log(`\nRuntime status after provisioning: ${runtimeStatus}`);
+
       this.shoot = skr.shoot;
       await addScenarioInCompass(director, this.options.scenarioName);
       await assignRuntimeToScenario(director, this.shoot.compassID, this.options.scenarioName);
@@ -48,8 +51,11 @@ describe('Execute SKR test', function() {
   after('Deprovision SKR', async function() {
     try {
       await deprovisionSKR(keb, kcp, this.options.instanceID, deprovisioningTimeout);
+    } catch (e) {
+      throw new Error(`before hook failed: ${e.toString()}`);
     } finally {
       const runtimeStatus = await kcp.getRuntimeStatusOperations(this.options.instanceID);
+      console.log(`\nRuntime status after deprovisioning: ${runtimeStatus}`);
       await kcp.reconcileInformationLog(runtimeStatus);
     }
     await unregisterKymaFromCompass(director, this.options.scenarioName);
