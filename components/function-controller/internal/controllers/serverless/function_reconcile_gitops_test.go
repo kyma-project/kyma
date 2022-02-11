@@ -392,7 +392,7 @@ func TestGitOps(t *testing.T) {
 func TestGitOps_GitErrorHandling(t *testing.T) {
 	g := gomega.NewGomegaWithT(t)
 	testRepoName := "test-repo"
-	rtm := serverlessv1alpha1.Nodejs12
+	rtm := serverlessv1alpha1.Nodejs14
 	resourceClient, testEnv := setUpTestEnv(g)
 	defer tearDownTestEnv(g, testEnv)
 	testCfg := setUpControllerConfig(g)
@@ -455,5 +455,56 @@ func TestGitOps_GitErrorHandling(t *testing.T) {
 		g.Expect(err).To(gomega.BeNil())
 		g.Expect(updatedFn.Status.Conditions).To(gomega.HaveLen(1))
 		g.Expect(updatedFn.Status.Conditions[0].Message).To(gomega.Equal("Stop reconciliation, reason: NotFound"))
+	})
+}
+
+func Test_ReadGITOptions(t *testing.T) {
+	g := gomega.NewGomegaWithT(t)
+	testRepoName := "non-existing-repo"
+	rtm := serverlessv1alpha1.Nodejs14
+	resourceClient, testEnv := setUpTestEnv(g)
+	defer tearDownTestEnv(g, testEnv)
+	testCfg := setUpControllerConfig(g)
+	initializeServerlessResources(g, resourceClient)
+	createDockerfileForRuntime(g, resourceClient, rtm)
+	t.Run("Check if requeue in-case of non-existing git-repo-cr", func(t *testing.T) {
+		//GIVEN
+		g := gomega.NewGomegaWithT(t)
+
+		function := &serverlessv1alpha1.Function{
+			ObjectMeta: metav1.ObjectMeta{Name: "git-fn", Namespace: testNamespace},
+			Spec: serverlessv1alpha1.FunctionSpec{
+				Source:     testRepoName,
+				Runtime:    rtm,
+				Type:       serverlessv1alpha1.SourceTypeGit,
+				Repository: serverlessv1alpha1.Repository{BaseDir: "dir", Reference: "ref"},
+			},
+		}
+		g.Expect(resourceClient.Create(context.TODO(), function)).To(gomega.Succeed())
+
+		prometheusCollector := &automock.StatsCollector{}
+		prometheusCollector.On("UpdateReconcileStats", mock.Anything, mock.Anything).Return()
+		request := ctrl.Request{
+			NamespacedName: types.NamespacedName{
+				Namespace: function.GetNamespace(),
+				Name:      function.GetName(),
+			},
+		}
+
+		reconciler := &FunctionReconciler{
+			Log:            log.Log,
+			client:         resourceClient,
+			recorder:       record.NewFakeRecorder(100),
+			config:         testCfg,
+			statsCollector: prometheusCollector,
+		}
+
+		//WHEN
+		res, err := reconciler.Reconcile(request)
+
+		//THEN
+		g.Expect(err).ToNot(gomega.BeNil())
+		// this is expected to be false, because returning an error is enough to requeue
+		g.Expect(res.Requeue).To(gomega.BeFalse())
 	})
 }
