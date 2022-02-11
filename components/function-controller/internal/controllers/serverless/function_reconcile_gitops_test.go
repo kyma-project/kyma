@@ -398,7 +398,7 @@ func TestGitOps_GitErrorHandling(t *testing.T) {
 	testCfg := setUpControllerConfig(g)
 	initializeServerlessResources(g, resourceClient)
 	createDockerfileForRuntime(g, resourceClient, rtm)
-	t.Run("Check if requeue in-case of error", func(t *testing.T) {
+	t.Run("Check if Requeue is set to true in case of recoverable error", func(t *testing.T) {
 		//GIVEN
 		g := gomega.NewGomegaWithT(t)
 		gitRepo := serverlessv1alpha1.GitRepository{
@@ -447,7 +447,7 @@ func TestGitOps_GitErrorHandling(t *testing.T) {
 		res, err := reconciler.Reconcile(request)
 
 		//THEN
-		g.Expect(err).ToNot(gomega.BeNil())
+		g.Expect(err).To(gomega.BeNil())
 		g.Expect(res.Requeue).To(gomega.BeFalse())
 
 		var updatedFn serverlessv1alpha1.Function
