@@ -31,11 +31,11 @@ To apply values ​​from a given preset, use the **serverless.kyma-project.io/
 
 | Preset | Request CPU | Request memory | Limit CPU | Limit memory |
 | - | - | - | - | - |
-| `XS` | `10m` | `16Mi` | `25m` | `32Mi` |
-| `S` | `25m` | `32Mi` | `50m` | `64Mi` |
-| `M` | `50m` | `64Mi` | `100m` | `128Mi` |
-| `L` | `100m` | `128Mi` | `200m` | `256Mi` |
-| `XL` | `200m` | `256Mi` | `400m` | `512Mi` |
+| `XS` | `50m` | `64Mi` | `100m` | `128Mi` |
+| `S` | `100m` | `128Mi` | `200m` | `256Mi` |
+| `M` | `200m` | `256Mi` | `400m` | `512Mi` |
+| `L` | `400m` | `512Mi` | `800m` | `1024Mi` |
+| `XL` | `800m` | `1024Mi` | `1600m` | `2048Mi` |
 
 To apply values ​​from a given preset, use the **serverless.kyma-project.io/function-resources-preset: {PRESET}** label in the Function CR.
 

@@ -19,7 +19,7 @@ curl -sfL https://install.goreleaser.com/github.com/golangci/golangci-lint.sh | 
 ### Installation
 
 - To deploy the controllers inside a cluster, make sure you have `ko` installed and configured according to the [instructions](https://github.com/google/ko#setup). Then run:
-> Make sure the environment variables are set. The make target `set-up-local-env` uses default values. Change them as per your needs.
+> Make sure the environment variables are set. The make target `set-up-local-env` uses default values. Change them as per your needs. If you intend to push your images to dockerhub, set the env variable `KO_DOCKER_REPO` to `index.docker.io/<docker_id>`
 
 > Existing deployment for eventing-controller should be deleted from the Kyma cluster which can interfere with reconciliation process.
 
@@ -37,53 +37,53 @@ make DOMAIN=custom-domain.com deploy-dry-run
 
 This section explains how to use the Eventing Controller. It expects the following environment variables:
 
-| Environment Variable          | Description                                                                         |
-| ----------------------------- | ----------------------------------------------------------------------------------- |
-| **For both**                  |                                                                                     |
-| `APP_LOG_FORMAT`              | The format of the Application logs.                                                 |
-| `APP_LOG_LEVEL`               | The level of the Application logs.                                                  |
-| `BACKEND_CR_NAMESPACE`        | The namespace of the Backend Resource (CR).                                         |
-| `BACKEND_CR_NAME`             | The name of the Backend Resource (CR).                                              |
-| `PUBLISHER_IMAGE`             | The image of the Event Publisher Proxy.                                             |
-| `PUBLISHER_IMAGE_PULL_POLICY` | The pull-policy of the Event Publisher Proxy.                                       |
-| `PUBLISHER_PORT_NUM`          | The port number of the Event Publisher Proxy itself.                                |
-| `PUBLISHER_METRICS_PORT_NUM`  | The port number of the Event Publisher Proxy metrics.                               |
-| `PUBLISHER_SERVICE_ACCOUNT`   | The service account of the Event Publisher Proxy.                                   |
-| `PUBLISHER_REPLICAS`          | The number of replicas of the Event Publisher Proxy.                                |
-| `PUBLISHER_REQUESTS_CPU`      | The CPU requests of the Event Publisher Proxy.                                      |
-| `PUBLISHER_REQUESTS_MEMORY`   | The memory requests of the Event Publish Proxy.                                     |
-| `PUBLISHER_LIMITS_CPU`        | The CPU limits of the Event Publisher Proxy.                                        |
-| `PUBLISHER_LIMITS_MEMORY`     | The memory limits of the Event Publisher Proxy.                                     |
-| **For NATS**                  |                                                                                     |
-| `NATS_URL`                    | The URL for the NATS server.                                                        |
-| `EVENT_TYPE_PREFIX`           | The Event Type Prefix for the NATS backend.                                         |
-| `MAX_IDLE_CONNS`              | The maximum number of idle connections for the HTTP transport of the NATS backend.  |
-| `MAX_CONNS_PER_HOST`          | The maximum connections per host for the HTTP transport of the NATS backend.        |
-| `MAX_IDLE_CONNS_PER_HOST`     | The maximum idle connections per host for the HTTP transport of the NATS backend.   |
-| `IDLE_CONN_TIMEOUT`           | The idle timeout duration for the HTTP transport of the NATS backend.               |
-| `DEFAULT_MAX_IN_FLIGHT_MESSAGES` | The maximum idle "in-flight messages" sent by NATS to the sink without waiting for a response. |
-| `DEFAULT_DISPATCHER_RETRY_PERIOD`| The retry period for resending an event to a sink, if the sink doesn't return 2XX. |
-| `DEFAULT_DISPATCHER_MAX_RETRIES` | The maximum number of retries to send an event to a sink in case of errors.      |
-| **For BEB**                   |                                                                                     |
-| `TOKEN_ENDPOINT`              | The Authentication Server Endpoint to provide Access Tokens.                        |
-| `WEBHOOK_ACTIVATION_TIMEOUT`  | The timeout duration used for webhook activation to acquire Access Tokens for Kyma. |
-| `WEBHOOK_TOKEN_ENDPOINT`      | The Kyma public endpoint to provide Access Tokens.                                  |
-| `EXEMPT_HANDSHAKE`            | The exemption handshake switch of the subscription protocol settings.               |
-| `QOS`                         | The quality of service setting of the subscription protocol settings.               |
-| `CONTENT_MODE`                | The content mode of the subscription protocol settings.                             |
-| `DOMAIN`                      | The Kyma cluster public domain.                                                     |
+| Environment Variable              | Description                                                                                    |
+|-----------------------------------|------------------------------------------------------------------------------------------------|
+| **For both**                      |                                                                                                |
+| `APP_LOG_FORMAT`                  | The format of the Application logs.                                                            |
+| `APP_LOG_LEVEL`                   | The level of the Application logs.                                                             |
+| `BACKEND_CR_NAMESPACE`            | The namespace of the Backend Resource (CR).                                                    |
+| `BACKEND_CR_NAME`                 | The name of the Backend Resource (CR).                                                         |
+| `PUBLISHER_IMAGE`                 | The image of the Event Publisher Proxy.                                                        |
+| `PUBLISHER_IMAGE_PULL_POLICY`     | The pull-policy of the Event Publisher Proxy.                                                  |
+| `PUBLISHER_PORT_NUM`              | The port number of the Event Publisher Proxy itself.                                           |
+| `PUBLISHER_METRICS_PORT_NUM`      | The port number of the Event Publisher Proxy metrics.                                          |
+| `PUBLISHER_SERVICE_ACCOUNT`       | The service account of the Event Publisher Proxy.                                              |
+| `PUBLISHER_REPLICAS`              | The number of replicas of the Event Publisher Proxy.                                           |
+| `PUBLISHER_REQUESTS_CPU`          | The CPU requests of the Event Publisher Proxy.                                                 |
+| `PUBLISHER_REQUESTS_MEMORY`       | The memory requests of the Event Publish Proxy.                                                |
+| `PUBLISHER_LIMITS_CPU`            | The CPU limits of the Event Publisher Proxy.                                                   |
+| `PUBLISHER_LIMITS_MEMORY`         | The memory limits of the Event Publisher Proxy.                                                |
+| **For NATS**                      |                                                                                                |
+| `NATS_URL`                        | The URL for the NATS server.                                                                   |
+| `EVENT_TYPE_PREFIX`               | The Event Type Prefix for the NATS backend.                                                    |
+| `MAX_IDLE_CONNS`                  | The maximum number of idle connections for the HTTP transport of the NATS backend.             |
+| `MAX_CONNS_PER_HOST`              | The maximum connections per host for the HTTP transport of the NATS backend.                   |
+| `MAX_IDLE_CONNS_PER_HOST`         | The maximum idle connections per host for the HTTP transport of the NATS backend.              |
+| `IDLE_CONN_TIMEOUT`               | The idle timeout duration for the HTTP transport of the NATS backend.                          |
+| `DEFAULT_MAX_IN_FLIGHT_MESSAGES`  | The maximum idle "in-flight messages" sent by NATS to the sink without waiting for a response. |
+| `DEFAULT_DISPATCHER_RETRY_PERIOD` | The retry period for resending an event to a sink, if the sink doesn't return 2XX.             |
+| `DEFAULT_DISPATCHER_MAX_RETRIES`  | The maximum number of retries to send an event to a sink in case of errors.                    |
+| **For BEB**                       |                                                                                                |
+| `TOKEN_ENDPOINT`                  | The Authentication Server Endpoint to provide Access Tokens.                                   |
+| `WEBHOOK_ACTIVATION_TIMEOUT`      | The timeout duration used for webhook activation to acquire Access Tokens for Kyma.            |
+| `WEBHOOK_TOKEN_ENDPOINT`          | The Kyma public endpoint to provide Access Tokens.                                             |
+| `EXEMPT_HANDSHAKE`                | The exemption handshake switch of the subscription protocol settings.                          |
+| `QOS`                             | The quality of service setting of the subscription protocol settings.                          |
+| `CONTENT_MODE`                    | The content mode of the subscription protocol settings.                                        |
+| `DOMAIN`                          | The Kyma cluster public domain.                                                                |
 
 The additional command line arguments are:
 
-| Flag                     | Description                                                                   | Default Value | Backend |
-| ------------------------ | ----------------------------------------------------------------------------- | ------------- | ------- |
-| `metrics-addr`           | The TCP address that the controller binds to for serving Prometheus metrics.  | `:8080`       | Both    |
-| `health-probe-bind-addr` | The TCP address that the controller binds to for serving health probes.       | `:8080`       | Both    |
-| `ready-check-endpoint`   | The endpoint of the readiness probe.                                          | `readyz`      | Both    |
-| `health-check-endpoint`  | The endpoint of the health probe.                                             | `healthz`     | Both    |
-| `reconcile-period`       | The period between triggering of reconciling calls (BEB).                     | 10 minutes    | BEB     |
-| `max-reconnects`         | The maximum number of reconnection attempts (NATS).                           | 10            | NATS    |
-| `reconnect-wait`         | Wait time between reconnection attempts (NATS).                               | 1 second      | NATS    |
+| Flag                     | Description                                                                  | Default Value | Backend |
+|--------------------------|------------------------------------------------------------------------------|---------------|---------|
+| `metrics-addr`           | The TCP address that the controller binds to for serving Prometheus metrics. | `:8080`       | Both    |
+| `health-probe-bind-addr` | The TCP address that the controller binds to for serving health probes.      | `:8080`       | Both    |
+| `ready-check-endpoint`   | The endpoint of the readiness probe.                                         | `readyz`      | Both    |
+| `health-check-endpoint`  | The endpoint of the health probe.                                            | `healthz`     | Both    |
+| `reconcile-period`       | The period between triggering of reconciling calls (BEB).                    | 10 minutes    | BEB     |
+| `max-reconnects`         | The maximum number of reconnection attempts (NATS).                          | 10            | NATS    |
+| `reconnect-wait`         | Wait time between reconnection attempts (NATS).                              | 1 second      | NATS    |
 
 - To install the custom resource definitions in a cluster, run:
 
@@ -113,7 +113,7 @@ make uninstall-samples
 
 - check code quality before a commit:
 ```bash
-$ make code-check
+$ make check-code
 ```
 
 ### Project setup
@@ -151,7 +151,7 @@ make copy-crds
 
 - Add the necessary changes manually in the sample CustomResources after updating fields for an existing custom resource definition inside the folder `config/samples/`. For example, for subscriptions, update the fields manually in `config/samples/eventing_v1alpha1_subscriptioncomponents/eventing-controller/config/crd/bases/eventing.kyma-project.io_subscriptions.yaml.yaml`
 
-- The kubebuilder bootstrapped files have been reduced to the bare minimum. If at a later point one of theses files are required (e.g. for a webhook), get them either from [this PR](https://github.com/kyma-project/kyma/pull/9510/commits/6ce5b914c5ef175dea45c27ccca826becb1b5818) or create a sample kubebuilder project and copy all required files from there:
+- The kubebuilder bootstrapped files have been reduced to the bare minimum. If at a later point one of these files are required (e.g. for a webhook), get them either from [this PR](https://github.com/kyma-project/kyma/pull/9510/commits/6ce5b914c5ef175dea45c27ccca826becb1b5818) or create a sample kubebuilder project and copy all required files from there:
 
 ```sh
 kubebuilder init --domain kyma-project.io
@@ -161,7 +161,7 @@ kubebuilder init --domain kyma-project.io
 
 #### Start the controller locally
 
-> Currently running the controller in local developer mode is broken and needs adoptions of the latest changes.
+> Running the controller in local developer mode is currently broken and needs adoption of the latest changes.
 
 1. Setup port-forwarding for the in-cluster NATS instance:
 
@@ -171,13 +171,13 @@ kubectl port-forward -n kyma-system svc/eventing-nats 4222
 
 2. Export the following environment variables:
 
-| ENV VAR                  | Description                                                            | Optional | Default Value                |
-| ------------------------ | ---------------------------------------------------------------------- | -------- | ----------------------       |
-| `KUBECONFIG`             | Path to a local kubeconfig file.                                       | yes      | ~/.kube/config               |
-| `NATS_URL`               | URL of the NATS server.                                                | no       | nats.nats.svc.cluster.local  |
-| `EVENT_TYPE_PREFIX`      | Path to a local kubeconfig file.                                       | yes      | sap.kyma.custom              |
-| `WEBHOOK_TOKEN_ENDPOINT` | The Kyma public endpoint to provide Access Tokens.                     | yes      | WEBHOOK_TOKEN_ENDPOINT       |
-| `DOMAIN`                 | Domain.                                                                | yes      | example.com                  |
+| ENV VAR                  | Description                                        | Optional | Default Value               |
+|--------------------------|----------------------------------------------------|----------|-----------------------------|
+| `KUBECONFIG`             | Path to a local kubeconfig file.                   | yes      | ~/.kube/config              |
+| `NATS_URL`               | URL of the NATS server.                            | no       | nats.nats.svc.cluster.local |
+| `EVENT_TYPE_PREFIX`      | Path to a local kubeconfig file.                   | yes      | sap.kyma.custom             |
+| `WEBHOOK_TOKEN_ENDPOINT` | The Kyma public endpoint to provide Access Tokens. | yes      | WEBHOOK_TOKEN_ENDPOINT      |
+| `DOMAIN`                 | Domain.                                            | yes      | example.com                 |
 
 
 ```sh
@@ -191,6 +191,6 @@ export  NATS_URL=nats://localhost:4222
 make run
 ```
 
-> currently we support a buildtag `local` to avoid setting incorrect OwnerRefs in the PublisherProxy deployment when running the controller on a developer's machine. Essentially the PublisherProxy deployment remains in the cluster although the controller is removed due to no OwnerRef in the PublisherProxy deployment.  
+> we currently support a buildtag `local` to avoid setting incorrect OwnerRefs in the PublisherProxy deployment when running the controller on a developer's machine. Essentially the PublisherProxy deployment remains in the cluster although the controller is removed due to no OwnerRef in the PublisherProxy deployment.  
 
 > to run the controller via your IDE make sure to specify the buildtag `local`

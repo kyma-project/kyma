@@ -19,7 +19,7 @@ data:
     http: 8222
     server_name: $POD_NAME
 
-    {{- if .Values.nats.jetstream.enabled }}
+    {{- if .Values.global.features.enableJetStream }}
     ###################################
     #                                 #
     # NATS JetStream                  #
@@ -64,7 +64,7 @@ data:
     cluster {
       port: 6222
 
-      {{- if .Values.nats.jetstream.enabled }}
+      {{- if .Values.global.features.enableJetStream }}
       {{- if .Values.cluster.name }}
       name: {{ .Values.cluster.name }}
       {{- else }}

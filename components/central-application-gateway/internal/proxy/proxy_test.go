@@ -127,21 +127,6 @@ func TestProxyRequest(t *testing.T) {
 			},
 		},
 		{
-			name: "should proxy and remove headers",
-			request: request{
-				url: "/orders/123",
-				header: map[string][]string{
-					httpconsts.HeaderXForwardedClientCert: {"C=US;O=Example Organisation;CN=Test User 1"},
-					httpconsts.HeaderXForwardedFor:        {"client"},
-					httpconsts.HeaderXForwardedProto:      {"http"},
-					httpconsts.HeaderXForwardedHost:       {"demo.example.com"},
-				},
-			},
-			expectedProxyRequest: expectedProxyRequest{
-				targetUrl: "/orders/123",
-			},
-		},
-		{
 			name: "should proxy BasicAuth auth calls",
 			request: request{
 				url: "/orders/123",
