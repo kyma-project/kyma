@@ -1271,88 +1271,6 @@ async function ensureApplicationMapping(name, ns) {
   });
 }
 
-async function patchApplicationGateway(name, ns) {
-  const deployment = await retryPromise(
-      async () => {
-        return k8sAppsApi.readNamespacedDeployment(name, ns);
-      },
-      12,
-      5000,
-  ).catch(() => {
-    throw new Error(`Timeout: ${name} is not ready`);
-  });
-  if (
-    deployment.body.spec.template.spec.containers[0].args.includes(
-        '--skipVerify=true',
-    )
-  ) {
-    debug('Application Gateway already patched');
-    return deployment;
-  }
-
-  const skipVerifyIndex =
-    deployment.body.spec.template.spec.containers[0].args.findIndex((arg) =>
-      arg.toString().includes('--skipVerify'),
-    );
-  expect(skipVerifyIndex).to.not.equal(-1);
-
-  let replicaSets = await k8sAppsApi.listNamespacedReplicaSet(ns);
-  const appGatewayRSsNames = replicaSets.body.items
-      .filter((rs) => rs.metadata.labels['app'] === name)
-      .map((r) => r.metadata.name);
-  expect(appGatewayRSsNames.length).to.not.equal(0);
-
-  const patch = [
-    {
-      op: 'replace',
-      path: `/spec/template/spec/containers/0/args/${skipVerifyIndex}`,
-      value: '--skipVerify=true',
-    },
-  ];
-  const options = {
-    headers: {'Content-type': k8s.PatchUtils.PATCH_FORMAT_JSON_PATCH},
-  };
-  await k8sAppsApi.patchNamespacedDeployment(
-      name,
-      ns,
-      patch,
-      undefined,
-      undefined,
-      undefined,
-      undefined,
-      options,
-  );
-
-  const patchedDeployment = await k8sAppsApi.readNamespacedDeployment(name, ns);
-  expect(
-      patchedDeployment.body.spec.template.spec.containers[0].args.findIndex(
-          (arg) => arg.toString().includes('--skipVerify=true'),
-      ),
-  ).to.not.equal(-1);
-
-  // We have to wait for the deployment to redeploy the actual pod.
-  await sleep(1000);
-  await waitForDeployment(name, ns);
-
-  // Check if the new, patched pods are being created.
-  // It's currently no k8s-js-native way to check if the new pods of
-  // the deployment are running and the old ones are being terminated.
-  replicaSets = await k8sAppsApi.listNamespacedReplicaSet(ns);
-  const patchedAppGatewayRSs = replicaSets.body.items.filter(
-      (rs) =>
-        rs.metadata.labels['app'] === name &&
-      !appGatewayRSsNames.includes(rs.metadata.name),
-  );
-  expect(patchedAppGatewayRSs.length).to.not.equal(0);
-  await waitForReplicaSet(
-      patchedAppGatewayRSs[0].metadata.name,
-      ns,
-      120 * 1000,
-  );
-
-  return patchedDeployment;
-}
-
 /**
  * Creates eventing subscription object that can be passed to the k8s API server
  * @param {string} eventType - full event type, e.g. sap.kyma.custom.commerce.order.created.v1
@@ -1769,7 +1687,6 @@ module.exports = {
   getEnvOrThrow,
   wait,
   ensureApplicationMapping,
-  patchApplicationGateway,
   eventingSubscription,
   getVirtualService,
   patchDeployment,

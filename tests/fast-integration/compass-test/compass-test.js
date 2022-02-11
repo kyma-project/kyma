@@ -16,8 +16,6 @@ const {
 
 describe('Kyma with Compass test', async function() {
   const director = new DirectorClient(DirectorConfig.fromEnv());
-  const withCentralAppConnectivity = (process.env.WITH_CENTRAL_APP_CONNECTIVITY === 'true');
-
   const suffix = genRandom(4);
   const appName = `app-${suffix}`;
   const runtimeName = `kyma-${suffix}`;
@@ -37,8 +35,7 @@ describe('Kyma with Compass test', async function() {
         appName,
         scenarioName,
         'mocks',
-        testNS,
-        withCentralAppConnectivity);
+        testNS);
   });
 
   it('function should be reachable through secured API Rule', async function() {
