@@ -413,78 +413,107 @@ data:
             "type": "gauge"
           },
           {
+            "aliasColors": {},
+            "bars": false,
             "cacheTimeout": null,
-            "datasource": "Loki",
+            "dashLength": 10,
+            "dashes": false,
+            "datasource": null,
             "description": "",
             "fieldConfig": {
               "defaults": {
-                "color": {
-                  "mode": "thresholds"
-                },
-                "mappings": [
-                  {
-                    "$$hashKey": "object:68",
-                    "id": 0,
-                    "op": "=",
-                    "text": "0",
-                    "type": 1,
-                    "value": "null"
-                  }
-                ],
-                "thresholds": {
-                  "mode": "percentage",
-                  "steps": [
-                    {
-                      "color": "rgb(31, 255, 7)",
-                      "value": null
-                    }
-                  ]
-                },
-                "unit": "Bps"
+                "unit": "bytes"
               },
               "overrides": []
             },
+            "fill": 1,
+            "fillGradient": 0,
             "gridPos": {
               "h": 5,
               "w": 4,
               "x": 20,
               "y": 1
             },
+            "hiddenSeries": false,
             "id": 121,
             "interval": null,
-            "links": [],
-            "maxDataPoints": 1,
-            "options": {
-              "colorMode": "value",
-              "graphMode": "area",
-              "justifyMode": "auto",
-              "orientation": "horizontal",
-              "reduceOptions": {
-                "calcs": [
-                  "sum"
-                ],
-                "fields": "",
-                "values": false
-              },
-              "text": {
-                "titleSize": 40
-              },
-              "textMode": "auto"
+            "legend": {
+              "avg": false,
+              "current": false,
+              "max": false,
+              "min": false,
+              "show": false,
+              "total": false,
+              "values": false
             },
+            "lines": true,
+            "linewidth": 1,
+            "links": [],
+            "maxDataPoints": null,
+            "nullPointMode": "null",
+            "options": {
+              "alertThreshold": false
+            },
+            "percentage": false,
             "pluginVersion": "",
+            "pointradius": 2,
+            "points": false,
+            "renderer": "flot",
+            "seriesOverrides": [],
+            "spaceLength": 10,
+            "stack": false,
+            "steppedLine": false,
             "targets": [
               {
-                "expr": "sum(bytes_rate(({job=\"fluent-bit\"})[1m]))",
-                "hide": false,
-                "instant": true,
-                "range": false,
+                "exemplar": true,
+                "expr": "(\n  sum without(instance, node) (topk(1, (kubelet_volume_stats_capacity_bytes{cluster=\"\", job=\"kubelet\", metrics_path=\"/metrics\", namespace=\"$namespace\", persistentvolumeclaim=~\"storage-logging-loki.*\"})))\n  -\n  sum without(instance, node) (topk(1, (kubelet_volume_stats_available_bytes{cluster=\"\", job=\"kubelet\", metrics_path=\"/metrics\", namespace=\"$namespace\", persistentvolumeclaim=~\"storage-logging-loki.*\"})))\n)",
+                "interval": "",
+                "legendFormat": "storage-logging-loki-0",
                 "refId": "A"
               }
             ],
+            "thresholds": [],
             "timeFrom": null,
+            "timeRegions": [],
             "timeShift": null,
-            "title": "Log Rate",
-            "type": "stat"
+            "title": "Volume Usage",
+            "tooltip": {
+              "shared": true,
+              "sort": 0,
+              "value_type": "individual"
+            },
+            "type": "graph",
+            "xaxis": {
+              "buckets": null,
+              "mode": "time",
+              "name": null,
+              "show": true,
+              "values": []
+            },
+            "yaxes": [
+              {
+                "$$hashKey": "object:284",
+                "format": "bytes",
+                "label": null,
+                "logBase": 1,
+                "max": null,
+                "min": null,
+                "show": true
+              },
+              {
+                "$$hashKey": "object:285",
+                "format": "short",
+                "label": null,
+                "logBase": 1,
+                "max": null,
+                "min": null,
+                "show": false
+              }
+            ],
+            "yaxis": {
+              "align": false,
+              "alignLevel": null
+            }
           },
           {
             "collapsed": false,
