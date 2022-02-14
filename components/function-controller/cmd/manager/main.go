@@ -7,14 +7,7 @@ import (
 	"time"
 
 	"github.com/go-logr/zapr"
-	k8s "github.com/kyma-project/kyma/components/function-controller/internal/controllers/kubernetes"
-	"github.com/kyma-project/kyma/components/function-controller/internal/controllers/serverless"
-	"github.com/kyma-project/kyma/components/function-controller/internal/git"
-	internalresource "github.com/kyma-project/kyma/components/function-controller/internal/resource"
-	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
-	"github.com/vrischmann/envconfig"
 
-	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 
 	"go.uber.org/zap"
@@ -33,6 +26,7 @@ import (
 
 	k8s "github.com/kyma-project/kyma/components/function-controller/internal/controllers/kubernetes"
 	"github.com/kyma-project/kyma/components/function-controller/internal/controllers/serverless"
+	"github.com/kyma-project/kyma/components/function-controller/internal/git"
 	internalresource "github.com/kyma-project/kyma/components/function-controller/internal/resource"
 	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
 	// +kubebuilder:scaffold:imports
