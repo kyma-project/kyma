@@ -77,13 +77,13 @@ global:
       directory: "tpi"
     function_controller:
       name: "function-controller"
-      version: "PR-12767"
+      version: "28fd8592"
     function_webhook:
       name: "function-webhook"
-      version: "PR-12767"
+      version: "28fd8592"
     function_build_init:
       name: "function-build-init"
-      version: "PR-12767"
+      version: "28fd8592"
     function_runtime_nodejs12:
       name: "function-runtime-nodejs12"
       version: "5051e383"
@@ -129,7 +129,7 @@ deployment:
   extraProperties: {}
   livenessProbe:
     initialDelaySeconds: 50
-    timeoutSeconds: 2
+    timeoutSeconds: 1
     periodSeconds: 10
   readinessProbe:
     initialDelaySeconds: 10
@@ -165,8 +165,6 @@ containers:
       privileged: false
       allowPrivilegeEscalation: false
       runAsUser: 1000
-    healthz:
-      port: "8090"
     extraProperties: {}
     envs:
       configMapRequeueDuration:
@@ -203,8 +201,6 @@ containers:
         value: "5"
       logLevel:
         value: "info"
-      healthzLivenessTimeout:
-        value: "1s"
 
 services:
   manager:
