@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/url"
 	"os"
+	"reflect"
 	"strings"
 
 	"github.com/nats-io/nats.go"
@@ -197,10 +198,12 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 		return ctrl.Result{}, err
 	}
 
+	statusChanged := r.syncInitialStatus(subscription)
+
 	// Check for valid sink
 	if err := r.sinkValidator(ctx, r, subscription); err != nil {
 		log.Errorw("sink URL validation failed", "error", err)
-		if syncErr := r.syncSubscriptionStatus(ctx, subscription, false, false, err.Error()); err != nil {
+		if syncErr := r.syncSubscriptionStatus(ctx, subscription, false, statusChanged, err.Error()); err != nil {
 			return ctrl.Result{}, syncErr
 		}
 		// No point in reconciling as the sink is invalid, return latest error to requeue the reconciliation request
@@ -211,7 +214,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 	subscriptionStatusChanged, syncErr := r.Backend.SyncSubscription(subscription, r.eventTypeCleaner)
 	if syncErr != nil {
 		log.Errorw("sync subscription failed", "error", syncErr)
-		if err := r.syncSubscriptionStatus(ctx, subscription, false, false, syncErr.Error()); err != nil {
+		if err := r.syncSubscriptionStatus(ctx, subscription, false, statusChanged, syncErr.Error()); err != nil {
 			return ctrl.Result{}, err
 		}
 		return ctrl.Result{}, syncErr
@@ -219,11 +222,30 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 	log.Debug("create NATS subscriptions succeeded")
 
 	// Update status
-	if err := r.syncSubscriptionStatus(ctx, subscription, true, subscriptionStatusChanged, ""); err != nil {
+	if err := r.syncSubscriptionStatus(ctx, subscription, true, subscriptionStatusChanged || statusChanged, ""); err != nil {
 		return checkIsConflict(err)
 	}
 
 	return ctrl.Result{}, nil
+}
+
+// syncInitialStatus keeps the latest cleanEventTypes and Config in place
+func (r *Reconciler) syncInitialStatus(subscription *eventingv1alpha1.Subscription) bool {
+	statusChanged := false
+	cleanEventTypes, err := handlers.GetCleanSubjects(subscription, r.eventTypeCleaner)
+	if err != nil {
+		subscription.Status.CleanEventTypes = []string{}
+		statusChanged = true
+	}
+	if !reflect.DeepEqual(subscription.Status.CleanEventTypes, cleanEventTypes) {
+		subscription.Status.CleanEventTypes = cleanEventTypes
+		statusChanged = true
+	}
+	if !reflect.DeepEqual(subscription.Status.Config, eventingv1alpha1.SubscriptionConfig{}) {
+		subscription.Status.Config = eventingv1alpha1.MergeSubsConfigs(subscription.Status.Config, &env.DefaultSubscriptionConfig{MaxInFlightMessages: 10}) // TODO: figure out how to get the cfg value
+		statusChanged = true
+	}
+	return statusChanged
 }
 
 // handleSubscriptionDeletion deletes the NATS subscription and removes its finalizer if it is set.
