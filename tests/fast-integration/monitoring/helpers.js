@@ -38,9 +38,11 @@ function shouldIgnoreAlert(alert) {
     // It's fine in an e2e test scenario since the clusters are usually deliberately created small to save money
     "KubeCPUOvercommit",
     "KubeMemoryOvercommit",
+    // API server certificates are auto-renewed
+    "K8sCertificateExpirationNotice",
   ]
 
-  return alert.labels.severity == "critical" || alertNamesToIgnore.includes(alert.labels.alertname)
+  return alert.labels.severity != "critical" || alertNamesToIgnore.includes(alert.labels.alertname)
 }
 
 async function getServiceMonitors() {
