@@ -42,29 +42,29 @@ global:
   application_broker_eventing_migration:
     version: "a8a6bca9"
   application_connectivity_certs_setup_job:
-    version: "1683d7cf"
+    version: "PR-13378"
   application_connectivity_validator:
-    version: "d2dc1a2b"
+    version: "PR-13378"
   application_operator:
-    version: "14604d09"
+    version: "PR-13378"
   application_operator_tests:
     version: "d2dc1a2b"
   application_gateway:
-    version: "d2dc1a2b"
+    version: "PR-13378"
   application_gateway_tests:
     version: "68baa911"
   application_gateway_legacy_tests:
     version: "68baa911"
   application_registry:
-    version: "d2dc1a2b"
+    version: "PR-13378"
   application_registry_tests:
     version: "d2dc1a2b"
   connection_token_handler:
-    version: "d2dc1a2b"
+    version: "PR-13378"
   connection_token_handler_tests:
     version: "9776cb81"
   connector_service:
-    version: "1683d7cf"
+    version: "PR-13378"
   connector_service_tests:
     version: "9776cb81"
   event_service:
@@ -72,9 +72,9 @@ global:
   event_service_integration_tests:
     version: "d6bbc47a"
   central_application_connectivity_validator:
-    version: "d2dc1a2b"
+    version: "PR-13378"
   central_application_gateway:
-    version: "d2dc1a2b"
+    version: "PR-13378"
 
 application_connectivity_certs_setup_job:
   secrets:
