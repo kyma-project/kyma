@@ -11,6 +11,7 @@ replace (
 
 require (
 	github.com/go-logr/logr v0.1.0
+	github.com/go-logr/zapr v0.1.0
 	github.com/imdario/mergo v0.3.12 // indirect
 	github.com/libgit2/git2go/v31 v31.4.14
 	github.com/onsi/ginkgo v1.14.0
