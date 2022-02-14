@@ -287,11 +287,13 @@ func (r *Reconciler) syncSubscriptionStatus(ctx context.Context, sub *eventingv1
 	conditionContained := false
 	conditionsUpdated := false
 	conditionStatus := corev1.ConditionFalse
+	conditionReason := eventingv1alpha1.ConditionReasonNATSSubscriptionNotActive
 	if isNatsSubReady {
 		conditionStatus = corev1.ConditionTrue
+		conditionReason = eventingv1alpha1.ConditionReasonNATSSubscriptionActive
 	}
 	condition := eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionSubscriptionActive,
-		eventingv1alpha1.ConditionReasonNATSSubscriptionActive, conditionStatus, message)
+		conditionReason, conditionStatus, message)
 	for _, c := range sub.Status.Conditions {
 		var chosenCondition eventingv1alpha1.Condition
 		if c.Type == condition.Type {

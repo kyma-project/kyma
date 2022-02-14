@@ -98,7 +98,7 @@ func TestSyncSubscriptionStatus(t *testing.T) {
 
 	message := "message is not required for tests"
 	falseNatsSubActiveCondition := eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionSubscriptionActive,
-		eventingv1alpha1.ConditionReasonNATSSubscriptionActive,
+		eventingv1alpha1.ConditionReasonNATSSubscriptionNotActive,
 		corev1.ConditionFalse, message)
 	trueNatsSubActiveCondition := eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionSubscriptionActive,
 		eventingv1alpha1.ConditionReasonNATSSubscriptionActive,
