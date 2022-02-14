@@ -73,17 +73,17 @@ global:
   images:
     k8s_tools:
       name: "k8s-tools"
-      version: "20220127-ec72a890"
+      version: "20211022-85284bf9"
       directory: "tpi"
     function_controller:
       name: "function-controller"
-      version: "28fd8592"
+      version: "PR-13374"
     function_webhook:
       name: "function-webhook"
-      version: "28fd8592"
+      version: "PR-13374"
     function_build_init:
       name: "function-build-init"
-      version: "28fd8592"
+      version: "PR-13374"
     function_runtime_nodejs12:
       name: "function-runtime-nodejs12"
       version: "5051e383"
@@ -102,7 +102,7 @@ global:
       directory: "tpi"
     registry:
       name: "registry"
-      version: "2.7.1-ff0c28bf"
+      version: "2.7.1-0646c4cd"
       directory: "tpi"
     google_pause:
       name: "pause-amd64"
@@ -111,11 +111,12 @@ global:
   testImages:
     function_controller_test:
       name: "function-controller-test"
-      version: "28fd8592"
+      version: "ceeb73d8"
     git_server:
       name: "gitserver"
       version: "c0aa144a"
-  highPriorityClassName: "kyma-system-priority"
+
+
 
 images:
   function_controller:
@@ -129,7 +130,7 @@ deployment:
   extraProperties: {}
   livenessProbe:
     initialDelaySeconds: 50
-    timeoutSeconds: 1
+    timeoutSeconds: 2
     periodSeconds: 10
   readinessProbe:
     initialDelaySeconds: 10
@@ -165,6 +166,8 @@ containers:
       privileged: false
       allowPrivilegeEscalation: false
       runAsUser: 1000
+    healthz:
+      port: "8090"
     extraProperties: {}
     envs:
       configMapRequeueDuration:
@@ -201,6 +204,8 @@ containers:
         value: "5"
       logLevel:
         value: "info"
+      healthzLivenessTimeout:
+        value: "1s"
 
 services:
   manager:
