@@ -127,8 +127,6 @@ func GetCleanSubjects(sub *eventingv1alpha1.Subscription, cleaner eventtype.Clea
 func (n *Nats) SyncSubscription(sub *eventingv1alpha1.Subscription, cleaner eventtype.Cleaner, _ ...interface{}) (bool, error) {
 	// Format logger
 	log := utils.LoggerWithSubscription(n.namedLogger(), sub)
-
-	subscriptionConfig := eventingv1alpha1.MergeSubsConfigs(sub.Spec.Config, &n.defaultSubsConfig)
 	subKeyPrefix := createKeyPrefix(sub)
 	cleanSubjects, err := GetCleanSubjects(sub, cleaner)
 	if err != nil {
@@ -167,7 +165,7 @@ func (n *Nats) SyncSubscription(sub *eventingv1alpha1.Subscription, cleaner even
 			}
 		}
 
-		for i := 0; i < subscriptionConfig.MaxInFlightMessages; i++ {
+		for i := 0; i < sub.Status.Config.MaxInFlightMessages; i++ {
 			// queueGroupName must be unique for each subscription and subject
 			queueGroupName := createKeyPrefix(sub) + string(types.Separator) + subject
 			natsSubKey := createKey(sub, subject, i)
@@ -200,10 +198,6 @@ func (n *Nats) SyncSubscription(sub *eventingv1alpha1.Subscription, cleaner even
 	statusUpdated := false
 	if !reflect.DeepEqual(sub.Status.CleanEventTypes, cleanSubjects) {
 		sub.Status.CleanEventTypes = cleanSubjects
-		statusUpdated = true
-	}
-	if !reflect.DeepEqual(sub.Status.Config, subscriptionConfig) {
-		sub.Status.Config = subscriptionConfig
 		statusUpdated = true
 	}
 

@@ -47,6 +47,7 @@ type Reconciler struct {
 	Backend          handlers.MessagingBackend
 	logger           *logger.Logger
 	recorder         record.EventRecorder
+	subsConfig       env.DefaultSubscriptionConfig
 	eventTypeCleaner eventtype.Cleaner
 	sinkValidator
 	// This channel is used to enqueue a reconciliation request for a subscription
@@ -71,6 +72,7 @@ func NewReconciler(ctx context.Context, client client.Client, applicationLister 
 		Client:              client,
 		logger:              logger,
 		recorder:            recorder,
+		subsConfig:          subsCfg,
 		eventTypeCleaner:    eventtype.NewCleaner(cfg.EventTypePrefix, applicationLister, logger),
 		sinkValidator:       defaultSinkValidator,
 		customEventsChannel: make(chan event.GenericEvent),
@@ -229,7 +231,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 	return ctrl.Result{}, nil
 }
 
-// syncInitialStatus keeps the latest cleanEventTypes and Config in place
+// syncInitialStatus keeps the latest cleanEventTypes and Config in the subscription
 func (r *Reconciler) syncInitialStatus(subscription *eventingv1alpha1.Subscription) bool {
 	statusChanged := false
 	cleanEventTypes, err := handlers.GetCleanSubjects(subscription, r.eventTypeCleaner)
@@ -241,8 +243,8 @@ func (r *Reconciler) syncInitialStatus(subscription *eventingv1alpha1.Subscripti
 		subscription.Status.CleanEventTypes = cleanEventTypes
 		statusChanged = true
 	}
-	if !reflect.DeepEqual(subscription.Status.Config, eventingv1alpha1.SubscriptionConfig{}) {
-		subscription.Status.Config = eventingv1alpha1.MergeSubsConfigs(subscription.Status.Config, &env.DefaultSubscriptionConfig{MaxInFlightMessages: 10}) // TODO: figure out how to get the cfg value
+	if subscription.Status.Config == nil || !reflect.DeepEqual(subscription.Spec.Config, subscription.Status.Config) {
+		subscription.Status.Config = eventingv1alpha1.MergeSubsConfigs(subscription.Spec.Config, &r.subsConfig)
 		statusChanged = true
 	}
 	return statusChanged

@@ -32,13 +32,6 @@ func TestCleanup(t *testing.T) {
 	// Shutting down subscriber
 	defer subscriber.Shutdown()
 
-	// Create test subscription
-	testSub := controllertesting.NewSubscription("test", "test",
-		controllertesting.WithFakeSubscriptionStatus(),
-		controllertesting.WithOrderCreatedFilter(),
-		controllertesting.WithSinkURL(subscriber.SinkURL),
-	)
-
 	// Create NATS Server
 	natsPort := 4222
 	natsServer := controllertesting.RunNatsServerOnPort(natsPort)
@@ -59,6 +52,14 @@ func TestCleanup(t *testing.T) {
 	natsSubMgr.Backend = natsBackend
 	err = natsSubMgr.Backend.Initialize(env.Config{})
 	g.Expect(err).To(gomega.BeNil())
+
+	// Create test subscription
+	testSub := controllertesting.NewSubscription("test", "test",
+		controllertesting.WithFakeSubscriptionStatus(),
+		controllertesting.WithOrderCreatedFilter(),
+		controllertesting.WithSinkURL(subscriber.SinkURL),
+		controllertesting.WithStatusConfig(subsConfig),
+	)
 
 	// Create fake Dynamic clients
 	fakeClient, err := controllertesting.NewFakeSubscriptionClient(testSub)
