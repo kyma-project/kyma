@@ -19,7 +19,6 @@ package v1beta1
 import (
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"time"
 )
 
 // EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
@@ -33,9 +32,9 @@ const (
 )
 
 type Source struct {
-	CRD    *Crd    `json:"crd"`
-	Http   *Http   `json:"http"`
-	Inline *Inline `json:"inline"`
+	Artifact *Artifact `json:"artifact"`
+	CRD      *Crd      `json:"crd"`
+	Inline   *Inline   `json:"inline"`
 }
 
 type Inline struct {
@@ -44,20 +43,23 @@ type Inline struct {
 }
 
 type Crd struct {
-	Api     string `json:"api"`
-	Version string `json:"version"`
-	Kind    string `json:"kind"`
-	Path    string `json:"path"`
+	Api        string `json:"api"`
+	Version    string `json:"version"`
+	Kind       string `json:"kind"`
+	Name       string `json:"name"`
+	Namespaces string `json:"namespaces"`
+	Path       string `json:"path"`
 }
 
-type Http struct {
+type Artifact struct {
+	//TODO: maybe it's worth do distinguish between local and external, as we know the internal URL
 	URL     string `json:"url"`
 	BaseDir string `json:"baseDir"`
 	// +optional
 	Credentials *Credentials `json:"credentials"`
 
 	//+optional
-	RetryInterval *time.Duration `json:"retryInterval"`
+	//RetryInterval *time.Duration `json:"retryInterval"`
 }
 
 type AuthType string
@@ -67,6 +69,7 @@ const (
 	Basic AuthType = "basic"
 )
 
+//TODO: To discuss
 type Credentials struct {
 	Type AuthType `json:"type"`
 	//valueFrom:
@@ -77,9 +80,14 @@ type Credentials struct {
 	OAuthURL string                `json:"OAuthURL"`
 	User     *v1.SecretKeySelector `json:"user"`
 	Password *v1.SecretKeySelector `json:"password"`
-	Token    *v1.Secret            `json:"token"`
+	Token    *v1.SecretKeySelector `json:"token"`
 	//TODO: Cert authentication?
 	//ValueFrom *v1.SecretKeySelector `json:"valueFrom"`
+}
+
+type Template struct {
+	Labels      map[string]string `json:"labels,omitempty"`
+	Annotations map[string]string `json:"annotations"`
 }
 
 // FunctionSpec defines the desired state of Function
@@ -94,10 +102,15 @@ type FunctionSpec struct {
 	// Env defines an array of key value pairs need to be used as env variable for a function
 	Env []v1.EnvVar `json:"env,omitempty"`
 
+	//TODO: maybe runtime profile
+	// +optional
 	Profile string `json:"profile"`
 
 	// +optional
 	Resources v1.ResourceRequirements `json:"resources,omitempty"`
+
+	// +optional
+	BuildProfile string `json:"buildProfile"`
 
 	// +optional
 	BuildResources v1.ResourceRequirements `json:"buildResources,omitempty"`
@@ -109,7 +122,7 @@ type FunctionSpec struct {
 	MaxReplicas *int32 `json:"maxReplicas,omitempty"`
 
 	// +optional
-	Labels map[string]string `json:"labels,omitempty"`
+	Template Template `json:"template"`
 }
 
 // FunctionStatus defines the observed state of Function
