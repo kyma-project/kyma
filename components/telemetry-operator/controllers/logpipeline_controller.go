@@ -21,6 +21,10 @@ import (
 	"context"
 	"strings"
 
+	"github.com/prometheus/client_golang/prometheus"
+
+	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/api/v1alpha1"
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/fluentbit"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -31,9 +35,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"sigs.k8s.io/controller-runtime/pkg/log"
-
-	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/api/v1alpha1"
-	"github.com/kyma-project/kyma/components/telemetry-operator/internal/fluentbit"
+	"sigs.k8s.io/controller-runtime/pkg/metrics"
 )
 
 const (
@@ -47,12 +49,52 @@ const (
 // LogPipelineReconciler reconciles a LogPipeline object
 type LogPipelineReconciler struct {
 	client.Client
-	Scheme                     *runtime.Scheme
+	Scheme *runtime.Scheme
+
 	FluentBitSectionsConfigMap types.NamespacedName
 	FluentBitParsersConfigMap  types.NamespacedName
 	FluentBitDaemonSet         types.NamespacedName
 	FluentBitEnvSecret         types.NamespacedName
 	FluentBitFilesConfigMap    types.NamespacedName
+
+	FluentBitRestartsCount prometheus.Counter
+}
+
+// NewLogPipelineReconciler returns a new LogPipelineReconciler using the given FluentBit config arguments
+func NewLogPipelineReconciler(client client.Client, scheme *runtime.Scheme, namespace string, sectionsCm string, parsersCm string, daemonSet string, envSecret string, filesCm string) *LogPipelineReconciler {
+	var result LogPipelineReconciler
+
+	result.Client = client
+	result.Scheme = scheme
+
+	result.FluentBitSectionsConfigMap = types.NamespacedName{
+		Name:      sectionsCm,
+		Namespace: namespace,
+	}
+	result.FluentBitParsersConfigMap = types.NamespacedName{
+		Name:      parsersCm,
+		Namespace: namespace,
+	}
+	result.FluentBitFilesConfigMap = types.NamespacedName{
+		Name:      filesCm,
+		Namespace: namespace,
+	}
+	result.FluentBitDaemonSet = types.NamespacedName{
+		Name:      daemonSet,
+		Namespace: namespace,
+	}
+	result.FluentBitEnvSecret = types.NamespacedName{
+		Name:      envSecret,
+		Namespace: namespace,
+	}
+
+	result.FluentBitRestartsCount = prometheus.NewCounter(prometheus.CounterOpts{
+		Name: "telemetry_operator_fluentbit_restarts_total",
+		Help: "Number of FluentBit restarts",
+	})
+	metrics.Registry.MustRegister(result.FluentBitRestartsCount)
+
+	return &result
 }
 
 //+kubebuilder:rbac:groups=telemetry.kyma-project.io,resources=logpipelines,verbs=get;list;watch;create;update;patch;delete
@@ -375,6 +417,8 @@ func (r *LogPipelineReconciler) deleteFluentBitPods(ctx context.Context) error {
 			log.Error(err, "Failed deleting pod "+fluentBitPods.Items[i].Name)
 		}
 	}
+
+	r.FluentBitRestartsCount.Inc()
 	return nil
 }
 
