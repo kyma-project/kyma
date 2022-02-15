@@ -227,6 +227,7 @@ config:
       labels: "On"
       # Include Kubernetes resource annotations in the extra metadata.
       annotations: "On"
+
     recordModifier:
       enabled: false
       match: "*"
@@ -238,27 +239,29 @@ config:
       enabled: true
       alias: "loki-output"
       match: "loki.*"
-      serviceName: "logging-loki"
-      servicePort: 3100
-      serviceScheme: http
-      servicePath: /loki/api/v1/push
-      config:
-        loglevel: warn
-        lineFormat: json
-        removeKeys: kubernetes, stream
-        labels: '{job="fluent-bit"}'
-        labelMap:
-          kubernetes:
-            namespace_name: namespace
-            labels:
-              app: app
-              "app.kubernetes.io/component": component
-              "app.kubernetes.io/name": app
-              "serverless.kyma-project.io/function-name": function
-            host: node
-            container_name: container
-            pod_name: pod
-          stream: stream
+      # Loki hostname or IP address
+      host: "logging-loki.kyma-system.svc.cluster.local"
+      # Loki TCP port
+      port: 3100
+      # Set HTTP basic authentication user name
+      httpUser:
+      # Set HTTP basic authentication password
+      httpPasswd:
+      # Tenant ID used by default to push logs to Loki. If omitted or empty it assumes Loki is running in single-tenant mode and no X-Scope-OrgID header is sent.
+      tenantId:
+      # Stream labels for API request. It can be multiple comma separated of strings specifying  key=value pairs. In addition to fixed parameters, it also allows to add custom record keys (similar to label_keys property).
+      labels: "job=fluent-bit,stream=$stream,namespace=$kubernetes['namespace_name'],node=$kubernetes['host'],pod=$kubernetes['pod_name'],container=$kubernetes['container_name'],function=$kubernetes['labels']['serverless.kyma-project.io/function-name'],app=$kubernetes['labels']['app'],app=$kubernetes['labels']['app.kubernetes.io/name'],component=$kubernetes['labels']['app.kubernetes.io/component']"
+      # Optional list of record keys that will be placed as stream labels. This configuration property is for records key only. 
+      labelKeys:
+      # Format to use when flattening the record to a log line. Valid values are json or key_value. If set to json,  the log line sent to Loki will be the Fluent Bit record dumped as JSON. If set to key_value, the log line will be each item in the record concatenated together (separated by a single space) in the format.
+      lineFormat: json
+      # If set to true, it will add all Kubernetes labels to the Stream labels
+      autoKubernetesLabels: "off"
+      # Optional list of keys to remove
+      removeKeys:
+      # If set to true and after extracting labels only a single key remains, the log line sent to Loki will be the value of that key in line_format.
+      dropSingleKey: "on"
+
     es:
       enabled: false
       alias:
