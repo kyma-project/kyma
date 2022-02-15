@@ -1,0 +1,16 @@
+domain: serverless.kyma-project.io
+layout:
+- go.kubebuilder.io/v3
+projectName: serverless
+repo: serverless.kyma-project.io
+resources:
+- api:
+    crdVersion: v1
+    namespaced: true
+  controller: true
+  domain: serverless.kyma-project.io
+  group: serverless
+  kind: Function
+  path: serverless.kyma-project.io/api/v1beta1
+  version: v1beta1
+version: "3"

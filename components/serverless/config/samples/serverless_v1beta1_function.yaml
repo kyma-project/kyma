@@ -1,0 +1,6 @@
+apiVersion: serverless.serverless.kyma-project.io/v1beta1
+kind: Function
+metadata:
+  name: function-sample
+spec:
+  # TODO(user): Add fields here
