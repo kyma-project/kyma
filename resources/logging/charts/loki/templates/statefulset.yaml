@@ -92,6 +92,27 @@ spec:
             - name: JAEGER_AGENT_HOST
               value: "{{ .Values.tracing.jaegerAgentHost }}"
             {{- end }}
+        {{- if .Values.chunkCleaner.enabled }}
+        - name: chunk-cleaner
+          image: {{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.alpine) }}
+          resources: {{- toYaml .Values.chunkCleaner.resources | nindent 12 }}
+          command:
+            - /bin/sh
+            - -c
+            - |
+{{ tpl (.Files.Get "files/chunkCleaner.sh" | printf "%s" | indent 14) . }}
+          env:
+            - name: VOLUME_SIZE
+              value: "{{ .Values.persistence.size }}"
+            - name: TARGET_SIZE_PCT
+              value: "{{ .Values.chunkCleaner.targetSizePercentage }}"
+            - name: SLEEP
+              value: "{{ .Values.chunkCleaner.pauseDuration }}"
+          volumeMounts:
+            - name: storage
+              mountPath: "/data"
+              subPath: {{ .Values.persistence.subPath }}
+        {{- end }}
 {{- if .Values.extraContainers }}
 {{ toYaml .Values.extraContainers | indent 8}}
 {{- end }}

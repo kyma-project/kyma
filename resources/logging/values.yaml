@@ -32,6 +32,10 @@ global:
       name: loki
       version: 2.2.1-2696e5d5
       directory: tpi
+    alpine:
+      name: "alpine"
+      version: "3.15.0"
+      directory: "external"
   kymaRuntime:
     adminGroup: runtimeAdmin
     operatorGroup: runtimeOperator
