@@ -43,7 +43,7 @@ Make sure that the following conditions are met:
 
   2. Create a simple curl Pod:
 
-```bash
+      ```bash
       cat <<EOF | kubectl apply -f -
       apiVersion: v1
       kind: Pod
@@ -72,22 +72,22 @@ Make sure that the following conditions are met:
       kubectl logs -n {SECRET_NAMESPACE} ory-curl curl
       ```
 
-  4. If the Client ID from step 1 is not available on the clients list, make sure Hydra has access to the database and/or restart the Hydra Measter Pod.
-  You can check the logs using the following commands:
+  4. If the Client ID from step 1 is not available on the client list, make sure Hydra has access to the database and/or restart the Hydra Measter Pod. You can check the logs using the following commands:
 
-  ```bash
-  # Check logs from the Hydra-Maester controller application
-  kubectl logs -n kyma-system -l "app.kubernetes.io/name=hydra-maester" -c hydra-maester
-  # Example output
-  2020-05-04T12:19:04.472Z  INFO  controller-runtime.controller Starting EventSource  {"controller": "oauth2client", "source": "kind source: /, Kind="}
-  2020-05-04T12:19:04.472Z  INFO  setup starting manager
-  2020-05-04T12:19:04.573Z  INFO  controller-runtime.controller Starting Controller {"controller": "oauth2client"}
-  2020-05-04T12:19:04.673Z  INFO  controller-runtime.controller Starting workers  {"controller": "oauth2client", "worker count": 1}
-  2020-05-04T12:26:30.819Z  INFO  controllers.OAuth2Client  using default client
-  2020-05-04T12:26:30.835Z  INFO  controllers.OAuth2Client  using default client
-  # This log entry informs that a client has been created, and should be visible within hydra
-  2020-05-04T12:26:31.468Z  DEBUG controller-runtime.controller Successfully Reconciled {"controller": "oauth2client", "request": "test-ns/test-client"}
+     ```bash
+      # Check logs from the Hydra-Maester controller application
+      kubectl logs -n kyma-system -l "app.kubernetes.io/name=hydra-maester" -c hydra-maester
+      # Example output
+      2020-05-04T12:19:04.472Z  INFO  controller-runtime.controller Starting EventSource  {"controller": "oauth2client", "source": "kind source: /, Kind="}2020-05-04T12:19:04.472Z  INFO  setup starting manager
+      2020-05-04T12:19:04.573Z  INFO  controller-runtime.controller Starting Controller {"controller": "oauth2client"}
+      2020-05-04T12:19:04.673Z  INFO  controller-runtime.controller Starting workers  {"controller": "oauth2client", "worker count": 1}
+      2020-05-04T12:26:30.819Z  INFO  controllers.OAuth2Client  using default client
+      2020-05-04T12:26:30.835Z  INFO  controllers.OAuth2Client  using default client
+      # This log entry informs that a client has been created, and should be visible within hydra
+      2020-05-04T12:26:31.468Z  DEBUG controller-runtime.controller Successfully Reconciled {"controller": "oauth2client", "request": "test-ns/test-client"}
+      ```
 
-  # Check logs from the Hydra application
-  kubectl logs -n kyma-system -l "app.kubernetes.io/name=hydra" -c hydra
-  ```
+      ```bash
+      # Check logs from the Hydra application
+      kubectl logs -n kyma-system -l "app.kubernetes.io/name=hydra" -c hydra
+      ```
