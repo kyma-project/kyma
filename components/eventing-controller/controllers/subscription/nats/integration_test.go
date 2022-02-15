@@ -56,31 +56,39 @@ const (
 	attachControlPlaneOutput = false
 )
 
+type testEnsemble struct {
+	testID                    int
+	cfg                       *rest.Config
+	k8sClient                 client.Client
+	testEnv                   *envtest.Environment
+	natsServer                *natsserver.Server
+	reconciler                *natsreconciler.Reconciler
+	natsBackend               *handlers.Nats
+	defaultSubscriptionConfig env.DefaultSubscriptionConfig
+	subscriberSvc             *v1.Service
+	cancel                    context.CancelFunc
+}
 
-
-var (
-	testID      int
-	natsURL     string
-	cfg         *rest.Config
-	k8sClient   client.Client
-	testEnv     *envtest.Environment
-	natsServer  *natsserver.Server
-	reconciler  *natsreconciler.Reconciler
-	natsBackend *handlers.Nats
-	cancel      context.CancelFunc
-
-	defaultSubsConfig = env.DefaultSubscriptionConfig{MaxInFlightMessages: 1, DispatcherRetryPeriod: time.Second, DispatcherMaxRetries: 1}
-)
+//var (
+//	testID      int
+//	natsURL     string
+//	cfg         *rest.Config
+//	k8sClient   client.Client
+//	testEnv     *envtest.Environment
+//	natsServer  *natsserver.Server
+//	reconciler  *natsreconciler.Reconciler
+//	natsBackend *handlers.Nats
+//	cancel      context.CancelFunc
+//
+//	defaultSubsConfig = env.DefaultSubscriptionConfig{MaxInFlightMessages: 1, DispatcherRetryPeriod: time.Second, DispatcherMaxRetries: 1}
+//)
 
 func TestCreateSubscription(t *testing.T) {
 	ctx := context.Background()
-	var id int //todo move to env struct
-	g:=gomega.NewGomegaWithT(t)
+	g := gomega.NewGomegaWithT(t)
 
-	cancel = setupTestEnvironment(reconcilertesting.EventTypePrefix, t)
-	defer cancel()
-
-	subscriberSvc := newSubscriberSvc(ctx, t)
+	ens := setupTestEnsemble(ctx, reconcilertesting.EventTypePrefix, g)
+	defer ens.cancel()
 
 	var testCase = []struct {
 		name                   string
@@ -95,7 +103,7 @@ func TestCreateSubscription(t *testing.T) {
 			subscriptionOpts: []reconcilertesting.SubscriptionOpt{
 				reconcilertesting.WithFilter(reconcilertesting.EventSource, ""),
 				reconcilertesting.WithWebhookForNATS(),
-				reconcilertesting.WithSinkURLFromSvc(subscriberSvc),
+				reconcilertesting.WithSinkURLFromSvc(ens.subscriberSvc),
 			},
 			wantedK8sSubscription: []gomegatypes.GomegaMatcher{
 				reconcilertesting.HaveCondition(
@@ -130,7 +138,7 @@ func TestCreateSubscription(t *testing.T) {
 			name: "empty protocol, protocol setting, dialect",
 			subscriptionOpts: []reconcilertesting.SubscriptionOpt{
 				reconcilertesting.WithFilter("", reconcilertesting.OrderCreatedEventTypeNotClean),
-				reconcilertesting.WithSinkURLFromSvc(subscriberSvc),
+				reconcilertesting.WithSinkURLFromSvc(ens.subscriberSvc),
 			},
 			wantedK8sSubscription: []gomegatypes.GomegaMatcher{
 				reconcilertesting.HaveCondition(conditionValidSubscription("")),
@@ -146,48 +154,47 @@ func TestCreateSubscription(t *testing.T) {
 	}
 
 	for _, tc := range testCase {
-		id++ //todo
+		ens.testID++ //todo
 		//todo log name of test
 
 		//create subscription
 		//todo create a function that does the following lines
-		subscriptionName := fmt.Sprintf(subscriptionNameFormat, id)
-		subscription := reconcilertesting.NewSubscription(subscriptionName, subscriberSvc.Namespace, tc.subscriptionOpts...)
-		createSubscriptionInK8s(ctx, subscription, t)
+		subscriptionName := fmt.Sprintf(subscriptionNameFormat, ens.testID)
+		subscription := reconcilertesting.NewSubscription(subscriptionName, ens.subscriberSvc.Namespace, tc.subscriptionOpts...)
+		createSubscriptionInK8s(ctx, ens, subscription, t)
 
 		//test subscription against expectations on k8s cluster
 		//todo replace with a function that does both of the following lines
 		subExpectations := append(tc.wantedK8sSubscription, reconcilertesting.HaveSubscriptionName(subscriptionName))
-		getSubscriptionOnK8S(ctx, subscription, t).Should(gomega.And(subExpectations...))
+		getSubscriptionOnK8S(ctx, ens, subscription, t).Should(gomega.And(subExpectations...))
 
 		//events
 		//todo put in single func
 		for _, event := range tc.wantedEvents { //todo replace with gomega.And(events)
-			getK8sEvents(ctx, t, subscriberSvc.Namespace).Should(reconcilertesting.HaveEvent(event))
+			getK8sEvents(ctx, ens, t).Should(reconcilertesting.HaveEvent(event))
 		}
 
 		//todo put in function
-		getSubscriptionFromNATS(natsBackend, subscriptionName, t).Should(gomega.And(tc.wantedNATSSubscription...))
+		getSubscriptionFromNATS(ens.natsBackend, subscriptionName, t).Should(gomega.And(tc.wantedNATSSubscription...))
 
 		//todo put in function
 		if tc.shouldTestDeletion {
-			g.Expect(k8sClient.Delete(ctx, subscription)).Should(gomega.BeNil())
-			isSubscriptionDeleted(ctx, subscription, t).Should(reconcilertesting.HaveNotFoundSubscription(true))
+			g.Expect(ens.k8sClient.Delete(ctx, subscription)).Should(gomega.BeNil())
+			isSubscriptionDeleted(ctx, ens, subscription, t).Should(reconcilertesting.HaveNotFoundSubscription(true))
 		}
 	}
 }
 
-
 // isSubscriptionDeleted checks a subscription is deleted and allows making assertions on it
-func isSubscriptionDeleted(ctx context.Context, subscription *eventingv1alpha1.Subscription, t *testing.T) gomega.AsyncAssertion {
-	g:=gomega.NewGomegaWithT(t)
+func isSubscriptionDeleted(ctx context.Context, ens *testEnsemble, subscription *eventingv1alpha1.Subscription, t *testing.T) gomega.AsyncAssertion {
+	g := gomega.NewGomegaWithT(t)
 
 	return g.Eventually(func() bool {
 		lookupKey := types.NamespacedName{
 			Namespace: subscription.Namespace,
 			Name:      subscription.Name,
 		}
-		if err := k8sClient.Get(ctx, lookupKey, subscription); err != nil {
+		if err := ens.k8sClient.Get(ctx, lookupKey, subscription); err != nil {
 			return k8serrors.IsNotFound(err)
 		}
 		return false
@@ -216,52 +223,56 @@ func eventInvalidSink(msg string) v1.Event { // todo should this be in reonciler
 	}
 }
 
-func setupTestEnvironment(eventTypePrefix string, t *testing.T) context.CancelFunc {
-	natsServer, natsURL = startNATS(natsPort)
-	testEnv = startTestEnv(t)
-	cancel := startReconciler(eventTypePrefix, natsURL, t)
-	return cancel
-}
-
-func startTestEnv(t *testing.T) *envtest.Environment {
-	g := gomega.NewGomegaWithT(t)
-
+func setupTestEnsemble(ctx context.Context, eventTypePrefix string, g *gomega.GomegaWithT) *testEnsemble {
 	useExistingCluster := useExistingCluster
-	testEnv := &envtest.Environment{
-		CRDDirectoryPaths: []string{
-			filepath.Join("../../../", "config", "crd", "bases"),
-			filepath.Join("../../../", "config", "crd", "external"),
+	ens := &testEnsemble{
+		defaultSubscriptionConfig: env.DefaultSubscriptionConfig{
+			MaxInFlightMessages:   1,
+			DispatcherRetryPeriod: time.Second,
+			DispatcherMaxRetries:  1,
 		},
-		AttachControlPlaneOutput: attachControlPlaneOutput,
-		UseExistingCluster:       &useExistingCluster,
+		natsServer: startNATS(natsPort),
+		testEnv: &envtest.Environment{
+			CRDDirectoryPaths: []string{
+				filepath.Join("../../../", "config", "crd", "bases"),
+				filepath.Join("../../../", "config", "crd", "external"),
+			},
+			AttachControlPlaneOutput: attachControlPlaneOutput,
+			UseExistingCluster:       &useExistingCluster,
+		},
 	}
 
-	var err error
-	cfg, err = testEnv.Start()
-	g.Expect(err).ToNot(gomega.HaveOccurred())
-	g.Expect(cfg).ToNot(gomega.BeNil())
-
-	return testEnv
+	startTestEnv(ens, g)
+	startReconciler(eventTypePrefix, ens, g)
+	startSubscriberSvc(ctx, ens, g)
+	return ens
 }
 
-func startNATS(port int) (*natsserver.Server, string) {
+func startTestEnv(ens *testEnsemble, g *gomega.GomegaWithT) {
+	k8sCfg, err := ens.testEnv.Start()
+	g.Expect(err).ToNot(gomega.HaveOccurred())
+	g.Expect(k8sCfg).ToNot(gomega.BeNil())
+	ens.cfg = k8sCfg
+}
+
+func startNATS(port int) *natsserver.Server {
 	//todo any tests/ error handling needed here?
 	natsServer := reconcilertesting.RunNatsServerOnPort(port)
-	clientURL := natsServer.ClientURL()
-	log.Printf("NATS server started %v", clientURL)
-	return natsServer, clientURL
+	//clientURL := natsServer.ClientURL()
+	log.Printf("NATS server started %v", natsServer.ClientURL())
+	return natsServer
 }
 
-func startReconciler(eventTypePrefix string, natsURL string, t *testing.T) context.CancelFunc {
-	g := gomega.NewGomegaWithT(t)
+func startReconciler(eventTypePrefix string, ens *testEnsemble, g *gomega.GomegaWithT) *testEnsemble {
 	ctx, cancel := context.WithCancel(context.Background())
-	//logf.SetLogger(zap.New(zap.UseDevMode(true), zap.WriteTo(GinkgoWriter)))
+	ens.cancel = cancel
+	//logf.SetLogger(zap.New(zap.UseDevMode(true), zap.WriteTo(GinkgoWriter))) //todo
 
 	err := eventingv1alpha1.AddToScheme(scheme.Scheme)
 	g.Expect(err).NotTo(gomega.HaveOccurred())
 
 	syncPeriod := time.Second * 2
-	k8sManager, err := ctrl.NewManager(cfg, ctrl.Options{
+	k8sManager, err := ctrl.NewManager(ens.cfg, ctrl.Options{
 		Scheme:             scheme.Scheme,
 		SyncPeriod:         &syncPeriod,
 		MetricsBindAddress: "localhost:7070",
@@ -269,7 +280,7 @@ func startReconciler(eventTypePrefix string, natsURL string, t *testing.T) conte
 	g.Expect(err).ToNot(gomega.HaveOccurred())
 
 	envConf := env.NatsConfig{
-		URL:             natsURL,
+		URL:             ens.natsServer.ClientURL(),
 		MaxReconnects:   10,
 		ReconnectWait:   time.Second,
 		EventTypePrefix: eventTypePrefix,
@@ -282,46 +293,62 @@ func startReconciler(eventTypePrefix string, natsURL string, t *testing.T) conte
 	defaultLogger, err := logger.New(string(kymalogger.JSON), string(kymalogger.INFO))
 	g.Expect(err).To(gomega.BeNil())
 
-	reconciler = natsreconciler.NewReconciler(
+	ens.reconciler = natsreconciler.NewReconciler(
 		ctx,
 		k8sManager.GetClient(),
 		applicationLister,
 		defaultLogger,
 		k8sManager.GetEventRecorderFor("eventing-controller-nats"),
 		envConf,
-		defaultSubsConfig,
+		ens.defaultSubscriptionConfig,
 	)
 
-	err = reconciler.SetupUnmanaged(k8sManager)
+	err = ens.reconciler.SetupUnmanaged(k8sManager)
 	g.Expect(err).ToNot(gomega.HaveOccurred())
 
-	natsBackend = reconciler.Backend.(*handlers.Nats)
+	ens.natsBackend = ens.reconciler.Backend.(*handlers.Nats)
 
-	go func() { //todo is this func needed any longer
+	go func() { //todo is this func needed any longer?
 		err = k8sManager.Start(ctx)
 		g.Expect(err).ToNot(gomega.HaveOccurred())
 	}()
 
-	k8sClient = k8sManager.GetClient()
-	g.Expect(k8sClient).ToNot(gomega.BeNil())
+	ens.k8sClient = k8sManager.GetClient()
+	g.Expect(ens.k8sClient).ToNot(gomega.BeNil())
 
-	return cancel
+	return ens
 }
 
-func newSubscriberSvc(ctx context.Context, t *testing.T) *v1.Service {
-	subscriberSvc := reconcilertesting.NewSubscriberSvc("test-subscriber", "test")
-	createSubscriberSvcInK8s(ctx, subscriberSvc, t)
-	return subscriberSvc
+func startSubscriberSvc(ctx context.Context, ens *testEnsemble, g *gomega.GomegaWithT) {
+	ens.subscriberSvc = reconcilertesting.NewSubscriberSvc("test-subscriber", "test")
+	createSubscriberSvcInK8s(ctx, ens, g)
 }
 
-func createSubscriptionInK8s(ctx context.Context, subscription *eventingv1alpha1.Subscription, t *testing.T) {
+func createSubscriberSvcInK8s(ctx context.Context, ens *testEnsemble, g *gomega.GomegaWithT) {
+	//if the namespace is not "default" create it on the cluster
+	if ens.subscriberSvc.Namespace != "default " {
+		namespace := fixtureNamespace(ens.subscriberSvc.Namespace)
+		if namespace.Name != "default" {
+			err := ens.k8sClient.Create(ctx, namespace)
+			if !k8serrors.IsAlreadyExists(err) {
+				fmt.Println(err)
+				g.Expect(err).ShouldNot(gomega.HaveOccurred())
+			}
+		}
+	}
+
+	err := ens.k8sClient.Create(ctx, ens.subscriberSvc)
+	g.Expect(err).Should(gomega.BeNil())
+}
+
+func createSubscriptionInK8s(ctx context.Context, ens *testEnsemble, subscription *eventingv1alpha1.Subscription, t *testing.T) {
 	g := gomega.NewGomegaWithT(t)
 
 	if subscription.Namespace != "default " {
 		// create testing namespace
 		namespace := fixtureNamespace(subscription.Namespace)
 		if namespace.Name != "default" {
-			err := k8sClient.Create(ctx, namespace)
+			err := ens.k8sClient.Create(ctx, namespace)
 			if !k8serrors.IsAlreadyExists(err) {
 				fmt.Println(err)
 				g.Expect(err).ShouldNot(gomega.HaveOccurred())
@@ -330,28 +357,8 @@ func createSubscriptionInK8s(ctx context.Context, subscription *eventingv1alpha1
 	}
 
 	// create subscription
-	err := k8sClient.Create(ctx, subscription)
+	err := ens.k8sClient.Create(ctx, subscription)
 	g.Expect(err).Should(gomega.BeNil())
-}
-
-func createSubscriberSvcInK8s(ctx context.Context, svc *v1.Service, t *testing.T) *v1.Service {
-	g := gomega.NewGomegaWithT(t)
-
-	//if the namespace is not "default" create it on the cluster
-	if svc.Namespace != "default " {
-		namespace := fixtureNamespace(svc.Namespace)
-		if namespace.Name != "default" {
-			err := k8sClient.Create(ctx, namespace)
-			if !k8serrors.IsAlreadyExists(err) {
-				fmt.Println(err)
-				g.Expect(err).ShouldNot(gomega.HaveOccurred())
-			}
-		}
-	}
-
-	err := k8sClient.Create(ctx, svc)
-	g.Expect(err).Should(gomega.BeNil())
-	return svc
 }
 
 func fixtureNamespace(name string) *v1.Namespace {
@@ -368,7 +375,7 @@ func fixtureNamespace(name string) *v1.Namespace {
 }
 
 // getSubscription fetches a subscription using the lookupKey and allows making assertions on it
-func getSubscriptionOnK8S(ctx context.Context, subscription *eventingv1alpha1.Subscription, t *testing.T, intervals ...interface{}) gomega.AsyncAssertion {
+func getSubscriptionOnK8S(ctx context.Context, ens *testEnsemble, subscription *eventingv1alpha1.Subscription, t *testing.T, intervals ...interface{}) gomega.AsyncAssertion {
 	g := gomega.NewGomegaWithT(t) //todo can i just pass g from caller?
 
 	if len(intervals) == 0 {
@@ -379,7 +386,7 @@ func getSubscriptionOnK8S(ctx context.Context, subscription *eventingv1alpha1.Su
 			Namespace: subscription.Namespace,
 			Name:      subscription.Name,
 		}
-		if err := k8sClient.Get(ctx, lookupKey, subscription); err != nil {
+		if err := ens.k8sClient.Get(ctx, lookupKey, subscription); err != nil {
 			return &eventingv1alpha1.Subscription{}
 		}
 		return subscription
@@ -388,12 +395,12 @@ func getSubscriptionOnK8S(ctx context.Context, subscription *eventingv1alpha1.Su
 
 // getK8sEvents returns all kubernetes events for the given namespace.
 // The result can be used in a gomega assertion.
-func getK8sEvents(ctx context.Context, t *testing.T, namespace string) gomega.AsyncAssertion {
+func getK8sEvents(ctx context.Context, ens *testEnsemble, t *testing.T) gomega.AsyncAssertion {
 	g := gomega.NewGomegaWithT(t)
 
 	eventList := v1.EventList{}
 	return g.Eventually(func() v1.EventList {
-		err := k8sClient.List(ctx, &eventList, client.InNamespace(namespace))
+		err := ens.k8sClient.List(ctx, &eventList, client.InNamespace(ens.subscriberSvc.Namespace))
 		if err != nil {
 			return v1.EventList{}
 		}
@@ -413,5 +420,5 @@ func getSubscriptionFromNATS(natsBackend *handlers.Nats, subscriptionName string
 			}
 		}
 		return nil
-	}()) // todo do we need func()*nats.Subscription{}()? can we remove func
+	}()) // todo do we need func()*nats.Subscription{}()? can we remove func?
 }
