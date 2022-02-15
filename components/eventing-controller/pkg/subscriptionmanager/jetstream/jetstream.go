@@ -5,6 +5,10 @@ import (
 	"fmt"
 	"time"
 
+	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
+	"k8s.io/apimachinery/pkg/runtime"
+	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
+
 	"k8s.io/client-go/rest"
 
 	"github.com/kyma-project/kyma/components/eventing-controller/controllers/subscription/jetstream"
@@ -19,6 +23,17 @@ import (
 const (
 	subscriptionManagerName = "jetstream-subscription-manager"
 )
+
+// AddToScheme adds all types of clientset and eventing into the given scheme.
+func AddToScheme(scheme *runtime.Scheme) error {
+	if err := clientgoscheme.AddToScheme(scheme); err != nil {
+		return err
+	}
+	if err := eventingv1alpha1.AddToScheme(scheme); err != nil {
+		return err
+	}
+	return nil
+}
 
 type SubscriptionManager struct {
 	cancel      context.CancelFunc
@@ -60,7 +75,7 @@ func (sm *SubscriptionManager) Start(_ env.DefaultSubscriptionConfig, _ subscrip
 		sm.mgr.GetEventRecorderFor("eventing-controller-jetstream"),
 		sm.envCfg,
 	)
-	// TODO(PS): this could be refactored (also in other backends), so that the backend is created here and passed to
+	// TODO: this could be refactored (also in other backends), so that the backend is created here and passed to
 	//  the reconciler, not the other way around.
 	sm.backend = jetStreamReconciler.Backend
 	if err := jetStreamReconciler.SetupUnmanaged(sm.mgr); err != nil {
