@@ -200,7 +200,14 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 		return ctrl.Result{}, err
 	}
 
-	statusChanged := r.syncInitialStatus(subscription)
+	statusChanged, err := r.syncInitialStatus(subscription, log)
+	if err != nil {
+		log.Errorw("sync initial status failed", "error", err)
+		if syncErr := r.syncSubscriptionStatus(ctx, subscription, false, statusChanged, err.Error()); err != nil {
+			return ctrl.Result{}, syncErr
+		}
+		return ctrl.Result{}, err
+	}
 
 	// Check for valid sink
 	if err := r.sinkValidator(ctx, r, subscription); err != nil {
@@ -232,12 +239,12 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 }
 
 // syncInitialStatus keeps the latest cleanEventTypes and Config in the subscription
-func (r *Reconciler) syncInitialStatus(subscription *eventingv1alpha1.Subscription) bool {
+func (r *Reconciler) syncInitialStatus(subscription *eventingv1alpha1.Subscription, log *zap.SugaredLogger) (bool, error) {
 	statusChanged := false
 	cleanEventTypes, err := handlers.GetCleanSubjects(subscription, r.eventTypeCleaner)
 	if err != nil {
-		subscription.Status.CleanEventTypes = []string{}
-		statusChanged = true
+		log.Errorw("get clean subject failed", "error", err)
+		return false, err
 	}
 	if !reflect.DeepEqual(subscription.Status.CleanEventTypes, cleanEventTypes) {
 		subscription.Status.CleanEventTypes = cleanEventTypes
@@ -247,7 +254,7 @@ func (r *Reconciler) syncInitialStatus(subscription *eventingv1alpha1.Subscripti
 		subscription.Status.Config = eventingv1alpha1.MergeSubsConfigs(subscription.Spec.Config, &r.subsConfig)
 		statusChanged = true
 	}
-	return statusChanged
+	return statusChanged, nil
 }
 
 // handleSubscriptionDeletion deletes the NATS subscription and removes its finalizer if it is set.
