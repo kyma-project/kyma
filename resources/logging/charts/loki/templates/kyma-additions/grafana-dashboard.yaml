@@ -265,11 +265,11 @@ data:
             "targets": [
               {
                 "exemplar": true,
-                "expr": "round(max by (pod)(max_over_time(container_memory_usage_bytes{namespace=\"$namespace\",pod=~\"logging-loki.*\" }[5m]))/ on (pod) (max by (pod) (kube_pod_container_resource_limits)) * 100,0.01)\n",
+                "expr": "sum(container_memory_working_set_bytes{namespace=\"kyma-system\",pod=~\"logging-loki.*\", container=\"loki\"}) *100 / sum(kube_pod_container_resource_limits{namespace=\"kyma-system\",pod=~\"logging-loki.*\", container=\"loki\", resource=\"memory\"})",
                 "instant": false,
                 "interval": "",
                 "intervalFactor": 3,
-                "legendFormat": "{{`{{pod}}`}}",
+                "legendFormat": "",
                 "refId": "A"
               }
             ],
@@ -332,10 +332,10 @@ data:
             "targets": [
               {
                 "exemplar": true,
-                "expr": "(sum(rate(container_cpu_usage_seconds_total{namespace=\"$namespace\", pod=~\"logging-loki.*\"}[5m])) / sum(kube_pod_container_resource_limits{namespace=\"$namespace\", pod=~\"logging-loki.*\", resource=\"cpu\"})) * 100\n",
+                "expr": "sum(node_namespace_pod_container:container_cpu_usage_seconds_total:sum_irate{namespace=\"$namespace\", pod=~\"logging-loki.*\",container=\"loki\"})*100 / sum(kube_pod_container_resource_limits{namespace=\"$namespace\", pod=~\"logging-loki.*\", container=\"loki\", resource=\"cpu\"})",
                 "interval": "",
                 "intervalFactor": 3,
-                "legendFormat": "{{`{{pod}}`}}-{{`{{container}}`}}",
+                "legendFormat": "",
                 "refId": "A"
               }
             ],
@@ -2458,7 +2458,7 @@ data:
                 "targets": [
                   {
                     "exemplar": true,
-                    "expr": "topk(10,sum by (tenant) (loki_ingester_memory_streams))",
+                    "expr": "sum(loki_ingester_memory_streams)",
                     "interval": "",
                     "legendFormat": "{{`{{tenant}}`}}",
                     "refId": "A"
@@ -2558,9 +2558,9 @@ data:
                 "targets": [
                   {
                     "exemplar": true,
-                    "expr": "topk(10, sum by (tenant) (rate(loki_ingester_streams_created_total[1m]) >  0))",
+                    "expr": "topk(10,sum by (tenant) (loki_ingester_memory_streams))",
                     "interval": "",
-                    "legendFormat": "{{`{{tenant}}`}}",
+                    "legendFormat": "",
                     "refId": "A"
                   }
                 ],
