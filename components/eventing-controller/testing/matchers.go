@@ -4,6 +4,7 @@ import (
 	"reflect"
 
 	apigatewayv1alpha1 "github.com/kyma-incubator/api-gateway/api/v1alpha1"
+	"github.com/nats-io/nats.go"
 	. "github.com/onsi/gomega"         // nolint
 	. "github.com/onsi/gomega/gstruct" // nolint
 	gomegatypes "github.com/onsi/gomega/types"
@@ -235,5 +236,27 @@ func HaveValidBEBNamespace(bebNamespaceKey, namespace string) gomegatypes.Gomega
 			return string(secret.Data[bebNamespaceKey]) == namespace
 		}
 		return false
+	}, BeTrue())
+}
+
+//
+// NATS subscriptions
+//
+
+func BeValid() gomegatypes.GomegaMatcher {
+	return WithTransform(func(subscription *nats.Subscription) bool {
+		return subscription.IsValid()
+	}, BeTrue())
+}
+
+func HaveSubject(subject string) gomegatypes.GomegaMatcher {
+	return WithTransform(func(subscription *nats.Subscription) bool {
+		return subscription.Subject == subject
+	}, BeTrue())
+}
+
+func BeNotNil() gomegatypes.GomegaMatcher{
+	return WithTransform(func(subscription *nats.Subscription) bool {
+		return subscription != nil
 	}, BeTrue())
 }

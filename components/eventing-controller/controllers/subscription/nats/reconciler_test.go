@@ -54,21 +54,7 @@ const (
 	subscriberNameFormat   = "subscriber-%d"
 )
 
-type testCase func(id int, eventTypePrefix, natsSubjectToPublish, eventTypeToSubscribe string) bool
 
-var (
-	reconcilerTestCases = []testCase{
-		testCreateDeleteSubscription,
-		testCreateSubscriptionWithValidSink,
-		testCreateSubscriptionWithInvalidSink,
-		testCreateSubscriptionWithEmptyProtocolProtocolSettingsDialect,
-		testChangeSubscriptionConfiguration,
-		testCreateSubscriptionWithEmptyEventType,
-		testCleanEventTypes,
-		testUpdateSubscriptionStatus,
-		testNATSUnavailabilityReflectedInSubscriptionStatus,
-	}
-)
 
 // testNATSUnavailabilityReflectedInSubscriptionStatus tests if the reconciler can correctly resolve a Subscription in
 // the case of a NATS server that becomes unavailable.
@@ -545,8 +531,15 @@ func testCreateSubscriptionWithEmptyProtocolProtocolSettingsDialect(id int, even
 			// Check that the subscription was created at the NATS backend
 			backendSubscription := getSubscriptionFromNats(natsBackend.GetAllSubscriptions(), subscriptionName)
 			Expect(backendSubscription).NotTo(BeNil())
-			Expect(backendSubscription.IsValid()).To(BeTrue())
+			Expect(backendSubscription).To(reconcilertesting.BeValid())
 			Expect(backendSubscription.Subject).Should(Equal(natsSubjectToPublish))
+
+			Expect(backendSubscription).To(And(
+				reconcilertesting.BeNotNil(),
+				reconcilertesting.BeValid(),
+				reconcilertesting.HaveSubject(natsSubjectToPublish),
+			))
+
 		})
 	})
 }
@@ -658,6 +651,21 @@ func testCreateSubscriptionWithEmptyEventType(id int, eventTypePrefix, _, _ stri
 	})
 }
 
+type testCase func(id int, eventTypePrefix, natsSubjectToPublish, eventTypeToSubscribe string) bool
+
+var (
+	reconcilerTestCases = []testCase{
+		testCreateDeleteSubscription,
+		testCreateSubscriptionWithValidSink,
+		testCreateSubscriptionWithInvalidSink,
+		testCreateSubscriptionWithEmptyProtocolProtocolSettingsDialect,
+		testChangeSubscriptionConfiguration,
+		testCreateSubscriptionWithEmptyEventType,
+		testCleanEventTypes,
+		testUpdateSubscriptionStatus,
+		testNATSUnavailabilityReflectedInSubscriptionStatus,
+	}
+)
 var (
 	_ = Describe("NATS subscription reconciler tests with non-empty eventTypePrefix", testExecutor(reconcilertesting.EventTypePrefix, reconcilertesting.OrderCreatedEventType, reconcilertesting.OrderCreatedEventTypeNotClean))
 	_ = Describe("NATS subscription reconciler tests with empty eventTypePrefix", testExecutor(reconcilertesting.EventTypePrefixEmpty, reconcilertesting.OrderCreatedEventTypePrefixEmpty, reconcilertesting.OrderCreatedEventTypeNotCleanPrefixEmpty))

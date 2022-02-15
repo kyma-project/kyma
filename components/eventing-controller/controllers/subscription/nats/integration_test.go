@@ -5,11 +5,13 @@ import (
 	"fmt"
 	"log"
 	"path/filepath"
+	"strings"
 	"testing"
 	"time"
 
 	kymalogger "github.com/kyma-project/kyma/common/logging/logger"
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
+	"github.com/kyma-project/kyma/components/eventing-controller/controllers/events"
 	"github.com/kyma-project/kyma/components/eventing-controller/logger"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/application/applicationtest"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/application/fake"
@@ -70,7 +72,7 @@ var (
 
 func TestCreateSubscription(t *testing.T) {
 	ctx := context.Background()
-	var id int
+	var id int //todo move to env struct
 
 	cancel = setupTestEnvironment(reconcilertesting.EventTypePrefix, t)
 	defer cancel()
@@ -78,9 +80,11 @@ func TestCreateSubscription(t *testing.T) {
 	subscriberSvc := newSubscriberSvc(ctx, t)
 
 	var testCase = []struct {
-		name                     string
-		subscriptionOpts         []reconcilertesting.SubscriptionOpt
-		subscriptionExpectations []gomegatypes.GomegaMatcher
+		name                   string
+		subscriptionOpts       []reconcilertesting.SubscriptionOpt
+		wantedK8sSubscription  []gomegatypes.GomegaMatcher
+		wantedEvents           []v1.Event
+		wantedNATSSubscription []gomegatypes.GomegaMatcher
 	}{
 		{
 			name: "empty event type",
@@ -89,7 +93,7 @@ func TestCreateSubscription(t *testing.T) {
 				reconcilertesting.WithWebhookForNATS(),
 				reconcilertesting.WithSinkURLFromSvc(subscriberSvc),
 			},
-			subscriptionExpectations: []gomegatypes.GomegaMatcher{
+			wantedK8sSubscription: []gomegatypes.GomegaMatcher{
 				reconcilertesting.HaveCondition(
 					eventingv1alpha1.MakeCondition(
 						eventingv1alpha1.ConditionSubscriptionActive,
@@ -98,22 +102,89 @@ func TestCreateSubscription(t *testing.T) {
 					),
 				),
 			},
+			wantedEvents:           nil,
+			wantedNATSSubscription: nil,
+		},
+
+		{
+			name: "invalid sink; misses 'http' and 'https'",
+			subscriptionOpts: []reconcilertesting.SubscriptionOpt{
+				reconcilertesting.WithFilter(reconcilertesting.EventSource, reconcilertesting.OrderCreatedEventTypeNotClean),
+				reconcilertesting.WithWebhookForNATS(),
+				reconcilertesting.WithSinkURL("invalid"),
+			},
+			wantedK8sSubscription: []gomegatypes.GomegaMatcher{
+				reconcilertesting.HaveCondition(conditionInvalidSink("sink URL scheme should be 'http' or 'https'")),
+			},
+			wantedEvents: []v1.Event{
+				eventInvalidSink("Sink URL scheme should be HTTP or HTTPS: invalid"),
+			},
+			wantedNATSSubscription: nil,
+		},
+
+		{
+			name: "empty protocol, protocol setting, dialect",
+			subscriptionOpts: []reconcilertesting.SubscriptionOpt{
+				reconcilertesting.WithFilter("", reconcilertesting.OrderCreatedEventTypeNotClean),
+				reconcilertesting.WithSinkURLFromSvc(subscriberSvc),
+			},
+			wantedK8sSubscription: []gomegatypes.GomegaMatcher{
+				reconcilertesting.HaveCondition(conditionValidSubscription()),
+			},
+			wantedEvents: nil,
+			wantedNATSSubscription: []gomegatypes.GomegaMatcher{
+				reconcilertesting.BeNotNil(),
+				reconcilertesting.BeValid(),
+				reconcilertesting.HaveSubject(reconcilertesting.OrderCreatedEventType),
+			},
 		},
 	}
 
 	for _, tc := range testCase {
+		//todo log name of test
+
 		//create subscription
 		//todo create a function that does the following lines
 		subscriptionName := fmt.Sprintf(subscriptionNameFormat, id)
 		subscription := reconcilertesting.NewSubscription(subscriptionName, subscriberSvc.Namespace, tc.subscriptionOpts...)
 		createSubscriptionInK8s(ctx, subscription, t)
 
-		//test subscription against expectations
+		//test subscription against expectations on k8s cluster
 		//todo replace with a function that does both of the following lines
-		subExpectations := append(tc.subscriptionExpectations, reconcilertesting.HaveSubscriptionName(subscriptionName))
-		getSubscription(ctx, subscription).Should(gomega.And(subExpectations...))
+		subExpectations := append(tc.wantedK8sSubscription, reconcilertesting.HaveSubscriptionName(subscriptionName))
+		getSubscriptionOnK8S(ctx, subscription, t).Should(gomega.And(subExpectations...))
 
-		id++
+		//events
+		//todo put in single func
+		for _, event := range tc.wantedEvents { //todo replace with gomega.And(events)
+			getK8sEvents(ctx, t, subscriberSvc.Namespace).Should(reconcilertesting.HaveEvent(event))
+		}
+
+		//todo put in function
+		getSubscriptionFromNATS(natsBackend, subscriptionName, t).Should(gomega.And(tc.wantedNATSSubscription...))
+		id++ //todo
+	}
+}
+
+func conditionValidSubscription() eventingv1alpha1.Condition {
+	return eventingv1alpha1.MakeCondition(
+		eventingv1alpha1.ConditionSubscriptionActive,
+		eventingv1alpha1.ConditionReasonNATSSubscriptionActive,
+		v1.ConditionTrue, "")
+}
+
+func conditionInvalidSink(msg string) eventingv1alpha1.Condition { //todo should this be reconcilertesting
+	return eventingv1alpha1.MakeCondition(
+		eventingv1alpha1.ConditionSubscriptionActive,
+		eventingv1alpha1.ConditionReasonNATSSubscriptionActive,
+		v1.ConditionFalse, msg)
+}
+
+func eventInvalidSink(msg string) v1.Event { // todo should this be in reoncilertesting
+	return v1.Event{
+		Reason:  string(events.ReasonValidationFailed),
+		Message: msg,
+		Type:    v1.EventTypeWarning,
 	}
 }
 
@@ -269,11 +340,13 @@ func fixtureNamespace(name string) *v1.Namespace {
 }
 
 // getSubscription fetches a subscription using the lookupKey and allows making assertions on it
-func getSubscription(ctx context.Context, subscription *eventingv1alpha1.Subscription, intervals ...interface{}) gomega.AsyncAssertion {
+func getSubscriptionOnK8S(ctx context.Context, subscription *eventingv1alpha1.Subscription, t *testing.T, intervals ...interface{}) gomega.AsyncAssertion {
+	g := gomega.NewGomegaWithT(t) //todo can i just pass g from caller?
+
 	if len(intervals) == 0 {
 		intervals = []interface{}{smallTimeout, smallPollingInterval}
 	}
-	return gomega.Eventually(func() *eventingv1alpha1.Subscription {
+	return g.Eventually(func() *eventingv1alpha1.Subscription {
 		lookupKey := types.NamespacedName{
 			Namespace: subscription.Namespace,
 			Name:      subscription.Name,
@@ -283,4 +356,34 @@ func getSubscription(ctx context.Context, subscription *eventingv1alpha1.Subscri
 		}
 		return subscription
 	}, intervals...)
+}
+
+// getK8sEvents returns all kubernetes events for the given namespace.
+// The result can be used in a gomega assertion.
+func getK8sEvents(ctx context.Context, t *testing.T, namespace string) gomega.AsyncAssertion {
+	g := gomega.NewGomegaWithT(t)
+
+	eventList := v1.EventList{}
+	return g.Eventually(func() v1.EventList {
+		err := k8sClient.List(ctx, &eventList, client.InNamespace(namespace))
+		if err != nil {
+			return v1.EventList{}
+		}
+		return eventList
+	}, smallTimeout, smallPollingInterval)
+}
+
+func getSubscriptionFromNATS(natsBackend *handlers.Nats, subscriptionName string, t *testing.T) gomega.Assertion {
+	g := gomega.NewGomegaWithT(t)
+
+	return g.Expect(func() *nats.Subscription {
+		subscriptions := natsBackend.GetAllSubscriptions()
+		for key, subscription := range subscriptions {
+			//the key does NOT ONLY contain the subscription name
+			if strings.Contains(key, subscriptionName) {
+				return subscription
+			}
+		}
+		return nil
+	}()) // todo do we need func()*nats.Subscription{}()? can we remove func at all
 }
