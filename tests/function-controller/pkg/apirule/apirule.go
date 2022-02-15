@@ -49,7 +49,7 @@ func (a *APIRule) GetName() string {
 }
 
 func (a *APIRule) Create(serviceName, host string, port uint32) (string, error) {
-	gateway := "kyma-system/kyma-gateway"
+	gateway := "kyma-gateway.kyma-system.svc.cluster.local"
 
 	apirule := unstructured.Unstructured{
 		Object: map[string]interface{}{

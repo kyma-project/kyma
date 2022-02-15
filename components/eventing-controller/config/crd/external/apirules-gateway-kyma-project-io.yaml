@@ -37,7 +37,7 @@ spec:
               properties:
                 gateway:
                   description: Gateway to be used
-                  pattern: ^[0-9a-z-_]+((\/|\.)[0-9a-z-_]+)*$
+                  pattern: ^[0-9a-z-_]+(\/[0-9a-z-_]+|(\.[0-9a-z-_]+)*)$
                   type: string
                 rules:
                   description: Rules represents collection of Rule to apply
