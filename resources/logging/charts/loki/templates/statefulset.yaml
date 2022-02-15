@@ -102,12 +102,12 @@ spec:
             - |
 {{ tpl (.Files.Get "files/chunkCleaner.sh" | printf "%s" | indent 14) . }}
           env:
-            - name: VOLUME_SIZE
-              value: "{{ .Values.persistence.size }}"
             - name: TARGET_SIZE_PCT
               value: "{{ .Values.chunkCleaner.targetSizePercentage }}"
             - name: SLEEP
               value: "{{ .Values.chunkCleaner.pauseDuration }}"
+            - name: BATCH_SIZE
+              value: "{{ .Values.chunkCleaner.batchSize }}"
           volumeMounts:
             - name: storage
               mountPath: "/data"

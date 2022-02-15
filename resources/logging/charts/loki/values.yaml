@@ -285,6 +285,7 @@ chunkCleaner:
   enabled: true
   targetSizePercentage: 5
   pauseDuration: 10s
+  batchSize: 10
   resources:
     limits:
       cpu: 300m
