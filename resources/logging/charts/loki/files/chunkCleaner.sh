@@ -2,7 +2,7 @@
 set -e
 
 function updateCurrentSize() {
-    CURRENT_SIZE_KB=$(du -s /data/loki | awk '{print $1}')
+    CURRENT_SIZE_KB=$(df /data | tail -n 1 | awk '{print $3}')
 }
 
 trap 'EXIT=true' SIGTERM SIGINT
