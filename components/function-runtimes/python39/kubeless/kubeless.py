@@ -116,12 +116,11 @@ class Event:
             headers = {"Content-Type": "application/cloudevents+json"}
             )
     
-    def resolvedatatype(event_data):
-        match type(event_data)
-            case 'dict':
-                return 'application/json'
-            case 'str':
-                return 'text/plain'
+    def resolveDataType(event_data):
+        if type(event_data) is dict:
+            return 'application/json'
+        elif type(event_data) is str:
+            return 'text/plain'
 
     def buildResponseCloudEvent(self, event_id, event_type, event_data):
         return {
@@ -130,8 +129,8 @@ class Event:
             'eventtypeversion': self.ceHeaders['ce-eventtypeversion'],
             'specversion': self.ceHeaders['ce-specversion'],
             'id': event_id,
-            'data': event_data
-            'datacontenttype': resolvedatatype(data),
+            'data': event_data,
+            'datacontenttype': self.resolveDataType(event_data)
         }
 
 
