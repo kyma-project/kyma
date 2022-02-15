@@ -7,6 +7,7 @@ metadata:
     app.kubernetes.io/instance: {{ .Release.Name }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}
     helm.sh/chart: {{ include "rafterAsyncAPIService.chart" . }}
+    kyma-project.io/component: backend
   {{- if .Values.deployment.labels }}
     {{ include "rafterAsyncAPIService.tplValue" ( dict "value" .Values.deployment.labels "context" . ) | nindent 4 }}
   {{- end }}
@@ -31,6 +32,7 @@ spec:
         app.kubernetes.io/instance: {{ .Release.Name }}
         app.kubernetes.io/managed-by: {{ .Release.Service }}
         helm.sh/chart: {{ include "rafterAsyncAPIService.chart" . }}
+        kyma-project.io/component: backend
       {{- if .Values.pod.labels }}
         {{ include "rafterAsyncAPIService.tplValue" ( dict "value" .Values.pod.labels "context" . ) | nindent 8 }}
       {{- end }}

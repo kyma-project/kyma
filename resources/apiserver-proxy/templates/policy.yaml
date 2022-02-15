@@ -1,24 +1,13 @@
----
-apiVersion: authentication.istio.io/v1alpha1
-kind: Policy
+apiVersion: security.istio.io/v1beta1
+kind: PeerAuthentication
 metadata:
   name: {{ template "name" . }}-ssl
-  namespace: {{ .Release.Namespace }}
 spec:
-  peers:
-    - mtls:
-        mode: PERMISSIVE
-  targets:
-    - name: {{ template "name" . }}-ssl
----
-# Disable MTLS for the metrics service
-apiVersion: authentication.istio.io/v1alpha1
-kind: Policy
-metadata:
-  name: {{ template "name" . }}-metrics
-spec:
-  peers:
-  - mtls:
+  selector:
+    matchLabels:
+      app: {{ template "name" . }}
+  portLevelMtls:
+    {{ .Values.port.secure }}:
       mode: PERMISSIVE
-  targets:
-  - name: {{ template "name" . }}-metrics
+    {{ .Values.port.metrics }}:
+      mode: PERMISSIVE

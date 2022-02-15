@@ -1,6 +1,7 @@
 package application
 
 import (
+	"context"
 	"encoding/json"
 
 	"github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
@@ -18,8 +19,8 @@ const (
 
 //go:generate mockery -name ApplicationClient
 type ApplicationClient interface {
-	List(opts v1.ListOptions) (*v1alpha1.ApplicationList, error)
-	Update(*v1alpha1.Application) (*v1alpha1.Application, error)
+	List(context context.Context, opts v1.ListOptions) (*v1alpha1.ApplicationList, error)
+	Update(context context.Context, app *v1alpha1.Application, opts v1.UpdateOptions) (*v1alpha1.Application, error)
 }
 
 //go:generate mockery -name ApplicationReleaseManager
@@ -61,7 +62,7 @@ func (r *releaseManager) InstallChart(application *v1alpha1.Application) (hapi_4
 }
 
 func (r *releaseManager) UpgradeApplicationReleases() error {
-	appList, err := r.appClient.List(v1.ListOptions{})
+	appList, err := r.appClient.List(context.Background(), v1.ListOptions{})
 	if err != nil {
 		return errors.Wrapf(err, "Error fetching application list")
 	}
@@ -182,7 +183,7 @@ func (r *releaseManager) CheckReleaseStatus(name string) (hapi_4.Status, string,
 
 func (r *releaseManager) updateApplication(application *v1alpha1.Application) error {
 	return retry.RetryOnConflict(retry.DefaultBackoff, func() error {
-		_, err := r.appClient.Update(application)
+		_, err := r.appClient.Update(context.Background(), application, v1.UpdateOptions{})
 		return err
 	})
 }

@@ -10,13 +10,13 @@ cluster:
   runtimeAdminGroupName: runtimeAdmin
   scope: audience:server:client_id:kyma-client audience:server:client_id:console openid
     profile email groups
-  systemNamespaces: istio-system knative-eventing knative-serving kube-public kube-system
+  systemNamespaces: istio-system knative-eventing kube-public kube-system
     kyma-installer kyma-integration kyma-system natss compass-system kube-node-lease
     kubernetes-dashboard
 console:
   image:
     pullPolicy: IfNotPresent
-    tag: deabc685
+    tag: "1784b537"
   service:
     externalPort: 80
     internalPort: 8080
@@ -25,7 +25,7 @@ console:
 core_ui:
   image:
     pullPolicy: IfNotPresent
-    tag: 885abb11
+    tag: "2169ffb0"
   service:
     externalPort: 80
     internalPort: 80
@@ -36,7 +36,10 @@ replicaCount: 1
 resources: {}
 test:
   acceptance:
-    enabled: false
+    labels:
+      integration: true
+      after-upgrade: true
+    enabled: true
     ui:
       # tests uses chromium that require more memory
       limits:
@@ -47,7 +50,7 @@ test:
         memory: 900Mi
       service_catalog:
         enabled: true
-      logging:
-        enabled: false
       functions:
+        enabled: true
+      rafter:
         enabled: true

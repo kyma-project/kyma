@@ -3,6 +3,7 @@
 package v1alpha1
 
 import (
+	"context"
 	"time"
 
 	v1alpha1 "github.com/kyma-project/kyma/components/compass-runtime-agent/pkg/apis/compass/v1alpha1"
@@ -21,15 +22,15 @@ type CompassConnectionsGetter interface {
 
 // CompassConnectionInterface has methods to work with CompassConnection resources.
 type CompassConnectionInterface interface {
-	Create(*v1alpha1.CompassConnection) (*v1alpha1.CompassConnection, error)
-	Update(*v1alpha1.CompassConnection) (*v1alpha1.CompassConnection, error)
-	UpdateStatus(*v1alpha1.CompassConnection) (*v1alpha1.CompassConnection, error)
-	Delete(name string, options *v1.DeleteOptions) error
-	DeleteCollection(options *v1.DeleteOptions, listOptions v1.ListOptions) error
-	Get(name string, options v1.GetOptions) (*v1alpha1.CompassConnection, error)
-	List(opts v1.ListOptions) (*v1alpha1.CompassConnectionList, error)
-	Watch(opts v1.ListOptions) (watch.Interface, error)
-	Patch(name string, pt types.PatchType, data []byte, subresources ...string) (result *v1alpha1.CompassConnection, err error)
+	Create(ctx context.Context, compassConnection *v1alpha1.CompassConnection, opts v1.CreateOptions) (*v1alpha1.CompassConnection, error)
+	Update(ctx context.Context, compassConnection *v1alpha1.CompassConnection, opts v1.UpdateOptions) (*v1alpha1.CompassConnection, error)
+	UpdateStatus(ctx context.Context, compassConnection *v1alpha1.CompassConnection, opts v1.UpdateOptions) (*v1alpha1.CompassConnection, error)
+	Delete(ctx context.Context, name string, opts v1.DeleteOptions) error
+	DeleteCollection(ctx context.Context, opts v1.DeleteOptions, listOpts v1.ListOptions) error
+	Get(ctx context.Context, name string, opts v1.GetOptions) (*v1alpha1.CompassConnection, error)
+	List(ctx context.Context, opts v1.ListOptions) (*v1alpha1.CompassConnectionList, error)
+	Watch(ctx context.Context, opts v1.ListOptions) (watch.Interface, error)
+	Patch(ctx context.Context, name string, pt types.PatchType, data []byte, opts v1.PatchOptions, subresources ...string) (result *v1alpha1.CompassConnection, err error)
 	CompassConnectionExpansion
 }
 
@@ -46,19 +47,19 @@ func newCompassConnections(c *CompassV1alpha1Client) *compassConnections {
 }
 
 // Get takes name of the compassConnection, and returns the corresponding compassConnection object, and an error if there is any.
-func (c *compassConnections) Get(name string, options v1.GetOptions) (result *v1alpha1.CompassConnection, err error) {
+func (c *compassConnections) Get(ctx context.Context, name string, options v1.GetOptions) (result *v1alpha1.CompassConnection, err error) {
 	result = &v1alpha1.CompassConnection{}
 	err = c.client.Get().
 		Resource("compassconnections").
 		Name(name).
 		VersionedParams(&options, scheme.ParameterCodec).
-		Do().
+		Do(ctx).
 		Into(result)
 	return
 }
 
 // List takes label and field selectors, and returns the list of CompassConnections that match those selectors.
-func (c *compassConnections) List(opts v1.ListOptions) (result *v1alpha1.CompassConnectionList, err error) {
+func (c *compassConnections) List(ctx context.Context, opts v1.ListOptions) (result *v1alpha1.CompassConnectionList, err error) {
 	var timeout time.Duration
 	if opts.TimeoutSeconds != nil {
 		timeout = time.Duration(*opts.TimeoutSeconds) * time.Second
@@ -68,13 +69,13 @@ func (c *compassConnections) List(opts v1.ListOptions) (result *v1alpha1.Compass
 		Resource("compassconnections").
 		VersionedParams(&opts, scheme.ParameterCodec).
 		Timeout(timeout).
-		Do().
+		Do(ctx).
 		Into(result)
 	return
 }
 
 // Watch returns a watch.Interface that watches the requested compassConnections.
-func (c *compassConnections) Watch(opts v1.ListOptions) (watch.Interface, error) {
+func (c *compassConnections) Watch(ctx context.Context, opts v1.ListOptions) (watch.Interface, error) {
 	var timeout time.Duration
 	if opts.TimeoutSeconds != nil {
 		timeout = time.Duration(*opts.TimeoutSeconds) * time.Second
@@ -84,81 +85,84 @@ func (c *compassConnections) Watch(opts v1.ListOptions) (watch.Interface, error)
 		Resource("compassconnections").
 		VersionedParams(&opts, scheme.ParameterCodec).
 		Timeout(timeout).
-		Watch()
+		Watch(ctx)
 }
 
 // Create takes the representation of a compassConnection and creates it.  Returns the server's representation of the compassConnection, and an error, if there is any.
-func (c *compassConnections) Create(compassConnection *v1alpha1.CompassConnection) (result *v1alpha1.CompassConnection, err error) {
+func (c *compassConnections) Create(ctx context.Context, compassConnection *v1alpha1.CompassConnection, opts v1.CreateOptions) (result *v1alpha1.CompassConnection, err error) {
 	result = &v1alpha1.CompassConnection{}
 	err = c.client.Post().
 		Resource("compassconnections").
+		VersionedParams(&opts, scheme.ParameterCodec).
 		Body(compassConnection).
-		Do().
+		Do(ctx).
 		Into(result)
 	return
 }
 
 // Update takes the representation of a compassConnection and updates it. Returns the server's representation of the compassConnection, and an error, if there is any.
-func (c *compassConnections) Update(compassConnection *v1alpha1.CompassConnection) (result *v1alpha1.CompassConnection, err error) {
+func (c *compassConnections) Update(ctx context.Context, compassConnection *v1alpha1.CompassConnection, opts v1.UpdateOptions) (result *v1alpha1.CompassConnection, err error) {
 	result = &v1alpha1.CompassConnection{}
 	err = c.client.Put().
 		Resource("compassconnections").
 		Name(compassConnection.Name).
+		VersionedParams(&opts, scheme.ParameterCodec).
 		Body(compassConnection).
-		Do().
+		Do(ctx).
 		Into(result)
 	return
 }
 
 // UpdateStatus was generated because the type contains a Status member.
 // Add a +genclient:noStatus comment above the type to avoid generating UpdateStatus().
-
-func (c *compassConnections) UpdateStatus(compassConnection *v1alpha1.CompassConnection) (result *v1alpha1.CompassConnection, err error) {
+func (c *compassConnections) UpdateStatus(ctx context.Context, compassConnection *v1alpha1.CompassConnection, opts v1.UpdateOptions) (result *v1alpha1.CompassConnection, err error) {
 	result = &v1alpha1.CompassConnection{}
 	err = c.client.Put().
 		Resource("compassconnections").
 		Name(compassConnection.Name).
 		SubResource("status").
+		VersionedParams(&opts, scheme.ParameterCodec).
 		Body(compassConnection).
-		Do().
+		Do(ctx).
 		Into(result)
 	return
 }
 
 // Delete takes name of the compassConnection and deletes it. Returns an error if one occurs.
-func (c *compassConnections) Delete(name string, options *v1.DeleteOptions) error {
+func (c *compassConnections) Delete(ctx context.Context, name string, opts v1.DeleteOptions) error {
 	return c.client.Delete().
 		Resource("compassconnections").
 		Name(name).
-		Body(options).
-		Do().
+		Body(&opts).
+		Do(ctx).
 		Error()
 }
 
 // DeleteCollection deletes a collection of objects.
-func (c *compassConnections) DeleteCollection(options *v1.DeleteOptions, listOptions v1.ListOptions) error {
+func (c *compassConnections) DeleteCollection(ctx context.Context, opts v1.DeleteOptions, listOpts v1.ListOptions) error {
 	var timeout time.Duration
-	if listOptions.TimeoutSeconds != nil {
-		timeout = time.Duration(*listOptions.TimeoutSeconds) * time.Second
+	if listOpts.TimeoutSeconds != nil {
+		timeout = time.Duration(*listOpts.TimeoutSeconds) * time.Second
 	}
 	return c.client.Delete().
 		Resource("compassconnections").
-		VersionedParams(&listOptions, scheme.ParameterCodec).
+		VersionedParams(&listOpts, scheme.ParameterCodec).
 		Timeout(timeout).
-		Body(options).
-		Do().
+		Body(&opts).
+		Do(ctx).
 		Error()
 }
 
 // Patch applies the patch and returns the patched compassConnection.
-func (c *compassConnections) Patch(name string, pt types.PatchType, data []byte, subresources ...string) (result *v1alpha1.CompassConnection, err error) {
+func (c *compassConnections) Patch(ctx context.Context, name string, pt types.PatchType, data []byte, opts v1.PatchOptions, subresources ...string) (result *v1alpha1.CompassConnection, err error) {
 	result = &v1alpha1.CompassConnection{}
 	err = c.client.Patch(pt).
 		Resource("compassconnections").
-		SubResource(subresources...).
 		Name(name).
+		SubResource(subresources...).
+		VersionedParams(&opts, scheme.ParameterCodec).
 		Body(data).
-		Do().
+		Do(ctx).
 		Into(result)
 	return
 }

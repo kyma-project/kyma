@@ -23,8 +23,9 @@ func newFixFunction(namespace, name string, minReplicas, maxReplicas int) *serve
 			Namespace: namespace,
 		},
 		Spec: serverlessv1alpha1.FunctionSpec{
-			Source: "module.exports = {main: function(event, context) {return 'Hello World.'}}",
-			Deps:   "   ",
+			Source:  "module.exports = {main: function(event, context) {return 'Hello World.'}}",
+			Deps:    "   ",
+			Runtime: serverlessv1alpha1.Nodejs12,
 			Env: []corev1.EnvVar{
 				{
 					Name:  "TEST_1",
@@ -258,6 +259,26 @@ func TestFunctionReconciler_envsEqual(t *testing.T) {
 		},
 	}
 
+	envVarSrc2 := &corev1.EnvVarSource{
+		ConfigMapKeyRef: &corev1.ConfigMapKeySelector{
+			LocalObjectReference: corev1.LocalObjectReference{
+				Name: "some-name",
+			},
+			Key:      "some-key",
+			Optional: nil,
+		},
+	}
+
+	differentEnvVarSrc := &corev1.EnvVarSource{
+		ConfigMapKeyRef: &corev1.ConfigMapKeySelector{
+			LocalObjectReference: corev1.LocalObjectReference{
+				Name: "some-name",
+			},
+			Key:      "some-key-that-is-different",
+			Optional: nil,
+		},
+	}
+
 	type args struct {
 		existing []corev1.EnvVar
 		expected []corev1.EnvVar
@@ -300,12 +321,28 @@ func TestFunctionReconciler_envsEqual(t *testing.T) {
 			want: false,
 		},
 		{
-			name: "same valueFrom in one env",
+			name: "same valueFrom in one env - same reference",
 			args: args{
-				existing: []corev1.EnvVar{{Name: "env1", Value: "val1"}, {Name: "env2", ValueFrom: envVarSrc}}, // pointer equality by ==
+				existing: []corev1.EnvVar{{Name: "env1", Value: "val1"}, {Name: "env2", ValueFrom: envVarSrc}},
 				expected: []corev1.EnvVar{{Name: "env1", Value: "val1"}, {Name: "env2", ValueFrom: envVarSrc}},
 			},
 			want: true,
+		},
+		{
+			name: "same valueFrom in one env - same object, different reference",
+			args: args{
+				existing: []corev1.EnvVar{{Name: "env1", Value: "val1"}, {Name: "env2", ValueFrom: envVarSrc}},
+				expected: []corev1.EnvVar{{Name: "env1", Value: "val1"}, {Name: "env2", ValueFrom: envVarSrc2}},
+			},
+			want: true,
+		},
+		{
+			name: "different valueFrom in one env",
+			args: args{
+				existing: []corev1.EnvVar{{Name: "env1", Value: "val1"}, {Name: "env2", ValueFrom: envVarSrc}},
+				expected: []corev1.EnvVar{{Name: "env1", Value: "val1"}, {Name: "env2", ValueFrom: differentEnvVarSrc}},
+			},
+			want: false,
 		},
 	}
 	for _, tt := range tests {

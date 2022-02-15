@@ -1251,9 +1251,9 @@ metadata:
 ---
 apiVersion: v1
 data:
-  enable: {{ quote .Values.tracing.enable }}
-  zipkin-endpoint: {{ quote .Values.tracing.collectorUrl }}
-  sample-rate: {{ quote .Values.tracing.sampleRate }}
+  enable: {{ quote .Values.global.tracing.enabled }}
+  zipkin-endpoint: {{ print "http://" .Values.global.tracing.zipkinAddress "/api/v2/spans" }}
+  sample-rate: {{ quote .Values.global.tracing.sampleRate }}
   _example: |
     ################################
     #                              #

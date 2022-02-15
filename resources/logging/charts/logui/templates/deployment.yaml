@@ -3,6 +3,7 @@ kind: Deployment
 metadata:
   name: {{ template "logui.fullname" . }}
   labels:
+    kyma-project.io/component: frontend
     {{- include "logui.labels" . | nindent 4 }}
 spec:
   selector:
@@ -15,6 +16,7 @@ spec:
       labels:
         app: {{ template "logui.name" . }}
         release: {{ .Release.Name }}
+        kyma-project.io/component: frontend
       annotations:
         sidecar.istio.io/inject: "false"
     spec:

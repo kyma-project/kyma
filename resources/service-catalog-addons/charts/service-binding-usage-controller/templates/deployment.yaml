@@ -7,6 +7,7 @@ metadata:
     chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
+    kyma-project.io/component: controller
 spec:
   replicas: {{ .Values.replicaCount }}
   selector:
@@ -17,12 +18,10 @@ spec:
     metadata:
       annotations:
         sidecar.istio.io/inject: "true"
-        #For pods running sidecars w/o service there's a problem with envoy readiness probe.
-        #Details https://github.com/istio/istio/issues/9504#issuecomment-439432130
-        status.sidecar.istio.io/port: "0"
       labels:
         app: {{ template "fullname" . }}
         release: {{ .Release.Name }}
+        kyma-project.io/component: controller
     spec:
       serviceAccountName: {{ template "fullname" . }}
       {{- with .Values.securityContext }}

@@ -25,78 +25,18 @@ For more details, read about the [technical aspects](https://github.com/kyma-pro
 
 Follow these steps:
 
-1. Check which version you're currently running. Run this command:
+1. Kyma CLI should be in the same version of the release you would like to upgrade to. To check which version you're currently running, run this command:
+
+  ```bash
+  kyma version
   ```
-  kubectl -n kyma-installer get deploy kyma-installer -o jsonpath='{.spec.template.spec.containers[].image}'
-  ```
+
 2. Perform the required actions described in the migration guide published with the release you want to upgrade to. Migration guides are linked in the [release notes](https://kyma-project.io/blog/) and are available on the respective [release branches](https://github.com/kyma-project/kyma/branches) in the `docs/migration-guides` directory.
   >**NOTE:** Not all releases require you to perform additional migration steps. If your target release doesn't come with a migration guide, proceed to the next step.
-3. Delete the existing `kyma-installer` deployment.
-   ```bash
-   kubectl delete deployment kyma-installer -n kyma-installer
 
-   ``` 
-4. Trigger the upgrade:
+3. Trigger the upgrade:
+  >**CAUTION:** Do not forget to supply the same overrides using the `-o` flag and the same component list using the `-c` flag if you provided any of them during the installation. There might be new components on the version that you would like to upgrade to. It is important to add them also to your custom component list.
 
-    <div tabs name="trigger-the-upgrade" group="upgrade-kyma">
-      <details>
-      <summary label="local-deployment">
-      Local deployment
-      </summary>
-
-      - Download the `kyma-config-local.yaml` artifact. Run this command to apply the overrides required by the new release to your Minikube cluster:
-      ```
-      kubectl apply -f {KYMA-CONFIG-LOCAL-FILE}
-      ```
-
-      >**NOTE:** If you customized your deployment and its overrides, download the `kyma-config-local.yaml` artifact and compare your changes to the overrides of the target release. Merge your changes if necessary.
-
-      - Download the `kyma-installer-local.yaml` artifact and apply it to the cluster to upgrade Kyma. Run:
-      ```
-      kubectl apply -f {KYMA-INSTALLER-LOCAL-FILE}
-      ```
-
-      </details>
-      <details>
-      <summary label="cluster-deployment">
-      Cluster deployment
-      </summary>
-
-      >**NOTE:** Before you upgrade a cluster deployment, check if the overrides changed names in the version you're upgrading to.
-
-      Download the `kyma-installer-cluster.yaml` artifact and apply it to the cluster to upgrade Kyma. Run:
-
-      ```
-      kubectl apply -f {KYMA-INSTALLER-CLUSTER-FILE}
-      ```
-
-      </details>
-    </div>
-
-6. Applying the release artifacts to the cluster triggers the installation of the desired Kyma version. To watch the installation status, run:
-
-    <div tabs name="installation-status" group="upgrade-kyma">
-      <details>
-      <summary label="local-deployment">
-      Local deployment
-      </summary>
-
-      ```
-      ./installation/scripts/is-installed.sh
-      ```
-
-      </details>
-      <details>
-      <summary label="cluster-deployment">
-      Cluster deployment
-      </summary>
-
-      ```
-      while true; do \
-      kubectl -n default get installation/kyma-installation -o jsonpath="{'Status: '}{.status.state}{', description: '}{.status.description}"; echo; \
-      sleep 5; \
-      done
-      ```
-
-      </details>
-    </div>
+  ```bash
+  kyma upgrade -s {VERSION}
+  ```

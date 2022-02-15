@@ -6,5 +6,3 @@ dependencies:
   condition: connection_token_handler.enabled
 - name: connector-service
   condition: connector_service.enabled
-- name: connectivity-certs-controller
-  condition: connectivity_certs_controller.enabled

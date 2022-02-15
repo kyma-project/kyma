@@ -4,7 +4,6 @@ import (
 	"time"
 
 	appclient "github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned"
-	istioclient "github.com/kyma-project/kyma/components/application-registry/pkg/client/clientset/versioned"
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/apperrors"
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma"
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/apiresources/rafter"
@@ -21,7 +20,6 @@ import (
 
 type k8sResourceClientSets struct {
 	core        *kubernetes.Clientset
-	istio       *istioclient.Clientset
 	application *appclient.Clientset
 	dynamic     dynamic.Interface
 }

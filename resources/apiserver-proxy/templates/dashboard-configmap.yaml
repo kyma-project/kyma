@@ -371,14 +371,14 @@ data:
               "refId": "B"
             },
             {
-              "expr": "container_memory_usage_bytes{container_name=~\"auth-proxy|istio-proxy\", pod_name=~\"apiserver-proxy.*\"}",
+              "expr": "container_memory_usage_bytes{container=~\"auth-proxy|istio-proxy\", pod=~\"apiserver-proxy.*\"}",
               "format": "time_series",
               "intervalFactor": 2,
-              "legendFormat": "{{ container_name }} (k8s)",
+              "legendFormat": "{{ container }} (k8s)",
               "refId": "C"
             },
             {
-              "expr": "sum(container_memory_usage_bytes{container_name=~\"auth-proxy|istio-proxy\", pod_name=~\"apiserver-proxy.*\"})",
+              "expr": "sum(container_memory_usage_bytes{container=~\"auth-proxy|istio-proxy\", pod=~\"apiserver-proxy.*\"})",
               "format": "time_series",
               "intervalFactor": 2,
               "legendFormat": "Total",
@@ -664,7 +664,7 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "sum by (code) (rate(http_requests_total{service=\"apiserver-proxy.*\"}[5m]))",
+              "expr": "sum by (code) (rate(http_requests_total{service=~\"apiserver-proxy.*\"}[5m]))",
               "format": "time_series",
               "intervalFactor": 2,
               "legendFormat": "{{ code }}",
@@ -755,10 +755,10 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "sort_desc(sum by (pod_name) (rate(container_network_receive_bytes_total{pod_name=~\"apiserver-proxy.*\"}[1m])))",
+              "expr": "sort_desc(sum by (pod) (rate(container_network_receive_bytes_total{pod=~\"apiserver-proxy.*\"}[1m])))",
               "format": "time_series",
               "intervalFactor": 2,
-              "legendFormat": "{{ pod_name }}",
+              "legendFormat": "{{ pod }}",
               "refId": "A"
             }
           ],
@@ -1382,9 +1382,10 @@ data:
         "list": []
       },
       "time": {
-        "from": "now-6h",
+        "from": "now-1h",
         "to": "now"
       },
+      "refresh": "10s",
       "timepicker": {
         "refresh_intervals": [
           "5s",
@@ -1411,7 +1412,7 @@ data:
         ]
       },
       "timezone": "",
-      "title": "Kyma / Core / API Server Proxy",
+      "title": "Kyma / API Server Proxy",
       "uid": "sdfsdfsdf",
       "version": 2
     }`}}

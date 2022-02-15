@@ -93,7 +93,7 @@ spec:
       restartPolicy: Never
       containers:
       - name: kiali-pre-delete-job
-        image: eu.gcr.io/kyma-project/test-infra/alpine-kubectl:v20200617-32c1f3ff
+        image: eu.gcr.io/kyma-project/incubator/develop/k8s-tools:20201023-5de446cf
         command: ["/scripts/kiali-delete.sh"]
         volumeMounts:
             - name: kiali-delete

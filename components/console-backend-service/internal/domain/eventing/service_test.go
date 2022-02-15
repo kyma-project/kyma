@@ -2,30 +2,31 @@ package eventing
 
 import (
 	"context"
+	"fmt"
 	"testing"
 
-	"github.com/knative/eventing/pkg/apis/eventing/v1alpha1"
-	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
-	"github.com/stretchr/testify/assert"
 	"knative.dev/pkg/apis"
+
+	"github.com/stretchr/testify/assert"
+	"knative.dev/eventing/pkg/apis/eventing/v1alpha1"
 	duckv1 "knative.dev/pkg/apis/duck/v1"
 
-	resourceFake "github.com/kyma-project/kyma/components/console-backend-service/internal/resource/fake"
+	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
+
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
+	resourceFake "github.com/kyma-project/kyma/components/console-backend-service/internal/resource/fake"
 
 	"github.com/stretchr/testify/require"
 )
 
 func TestTriggersService_List(t *testing.T) {
-	t.Run("Should filter by namespace", func(t *testing.T) {
-		defaultSubscriber := duckv1.Destination{
-			Ref: nil,
-			URI: nil,
-		}
+	t.Run("Should filter by namespace and name", func(t *testing.T) {
 		const namespace = "default"
+		const serviceName = "serviceName"
 
-		trigger1 := createMockTrigger("trigger 1", namespace, defaultSubscriber)
-		trigger2 := createMockTrigger("trigger 2", "other-namespace", defaultSubscriber)
+		trigger1 := createMockTrigger("trigger 1", namespace, serviceName)
+		trigger2 := createMockTrigger("trigger 2", "other-namespace", "other-service")
 
 		serviceFactory, err := resourceFake.NewFakeGenericServiceFactory(v1alpha1.AddToScheme, trigger1, trigger2)
 		require.NoError(t, err)
@@ -36,7 +37,7 @@ func TestTriggersService_List(t *testing.T) {
 
 		serviceFactory.InformerFactory.WaitForCacheSync(make(chan struct{}))
 
-		result, err := service.TriggersQuery(context.Background(), namespace, nil)
+		result, err := service.TriggersQuery(context.Background(), namespace, serviceName)
 
 		require.NoError(t, err)
 
@@ -44,30 +45,30 @@ func TestTriggersService_List(t *testing.T) {
 		assert.Equal(t, trigger1.Namespace, result[0].Namespace)
 	})
 
-	t.Run("Should filter by subscriber ref", func(t *testing.T) {
-		subscriber1 := duckv1.Destination{
+	t.Run("Should filter triggers with either Ref and URI", func(t *testing.T) {
+		const namespace = "default"
+		const serviceName = "serviceName"
+
+		refTrigger := createMockTriggerWithDestination("refTrigger", namespace, duckv1.Destination{
 			Ref: &duckv1.KReference{
-				Kind:       "er",
-				Namespace:  "s",
-				Name:       "space",
-				APIVersion: "ing",
+				Kind:       "Service",
+				Namespace:  namespace,
+				Name:       serviceName,
+				APIVersion: "",
 			},
 			URI: nil,
-		}
-		subscriber2 := duckv1.Destination{
-			Ref: &duckv1.KReference{
-				Kind:       "other",
-				Namespace:  "another",
-				Name:       "space",
-				APIVersion: "ing",
-			},
-			URI: nil,
-		}
+		})
 
-		trigger1 := createMockTrigger("trigger 1", "default", subscriber1)
-		trigger2 := createMockTrigger("trigger 2", "default", subscriber2)
+		urlString := fmt.Sprintf("https://%s.%s.svc.cluster.local:80", serviceName, namespace)
+		url, err := apis.ParseURL(urlString)
 
-		serviceFactory, err := resourceFake.NewFakeGenericServiceFactory(v1alpha1.AddToScheme, trigger1, trigger2)
+		require.NoError(t, err)
+		uriTrigger := createMockTriggerWithDestination("uriTrigger", namespace, duckv1.Destination{
+			Ref: nil,
+			URI: url,
+		})
+
+		serviceFactory, err := resourceFake.NewFakeGenericServiceFactory(v1alpha1.AddToScheme, refTrigger, uriTrigger)
 		require.NoError(t, err)
 
 		service := New(serviceFactory)
@@ -76,53 +77,17 @@ func TestTriggersService_List(t *testing.T) {
 
 		serviceFactory.InformerFactory.WaitForCacheSync(make(chan struct{}))
 
-		result, err := service.TriggersQuery(context.Background(), "default", &subscriber1)
+		result, err := service.TriggersQuery(context.Background(), namespace, serviceName)
 
 		require.NoError(t, err)
-
-		assert.Equal(t, 1, len(result))
-		assert.Equal(t, trigger1.Spec.Subscriber.Ref, result[0].Spec.Subscriber.Ref)
-	})
-
-	t.Run("Should filter by subscriber uri", func(t *testing.T) {
-		subscriber1 := duckv1.Destination{
-			Ref: nil,
-			URI: &apis.URL{
-				Scheme: "wss",
-				Host:   "test",
-			},
-		}
-		subscriber2 := duckv1.Destination{
-			Ref: nil,
-			URI: &apis.URL{
-				Scheme: "wss",
-				Host:   "other",
-			},
-		}
-
-		trigger1 := createMockTrigger("trigger 1", "default", subscriber1)
-		trigger2 := createMockTrigger("trigger 2", "default", subscriber2)
-
-		serviceFactory, err := resourceFake.NewFakeGenericServiceFactory(v1alpha1.AddToScheme, trigger1, trigger2)
-		require.NoError(t, err)
-
-		service := New(serviceFactory)
-		err = service.Enable()
-		require.NoError(t, err)
-
-		serviceFactory.InformerFactory.WaitForCacheSync(make(chan struct{}))
-
-		result, err := service.TriggersQuery(context.Background(), "default", &subscriber1)
-
-		require.NoError(t, err)
-
-		assert.Equal(t, 1, len(result))
-		assert.Equal(t, trigger1.Spec.Subscriber.Ref, result[0].Spec.Subscriber.Ref)
+		assert.Equal(t, 2, len(result))
 	})
 }
 
 func TestTriggersService_Create(t *testing.T) {
 	const namespace = "default"
+	const serviceName = "service-name"
+
 	t.Run("Should create", func(t *testing.T) {
 		serviceFactory, err := resourceFake.NewFakeGenericServiceFactory(v1alpha1.AddToScheme)
 		require.NoError(t, err)
@@ -133,26 +98,16 @@ func TestTriggersService_Create(t *testing.T) {
 		serviceFactory.InformerFactory.WaitForCacheSync(make(chan struct{}))
 
 		var name = "trigger"
-		trigger, err := service.CreateTrigger(context.Background(), namespace, gqlschema.TriggerCreateInput{
-			Name:             &name,
-			Broker:           "default",
-			FilterAttributes: nil,
-			Subscriber: &duckv1.Destination{
-				Ref: nil,
-				URI: nil,
-			},
-		}, nil)
+		trigger, err := service.CreateTrigger(context.Background(), namespace, createMockTriggerInput(name, namespace, serviceName), nil)
 
 		require.NoError(t, err)
 		assert.Equal(t, trigger.Name, name)
 		assert.Equal(t, trigger.Namespace, namespace)
 	})
 
-	t.Run("Should throw if trigger already exists", func(t *testing.T) {
-		existingTrigger := createMockTrigger("trigger 1", namespace, duckv1.Destination{
-			Ref: nil,
-			URI: nil,
-		})
+	t.Run("Should return error if trigger already exists", func(t *testing.T) {
+		const name = "trigger 1"
+		existingTrigger := createMockTrigger(name, namespace, serviceName)
 		serviceFactory, err := resourceFake.NewFakeGenericServiceFactory(v1alpha1.AddToScheme, existingTrigger)
 		require.NoError(t, err)
 		service := New(serviceFactory)
@@ -161,16 +116,7 @@ func TestTriggersService_Create(t *testing.T) {
 
 		serviceFactory.InformerFactory.WaitForCacheSync(make(chan struct{}))
 
-		var name = "trigger 1"
-		_, err = service.CreateTrigger(context.Background(), namespace, gqlschema.TriggerCreateInput{
-			Name:             &name,
-			Broker:           "default",
-			FilterAttributes: nil,
-			Subscriber: &duckv1.Destination{
-				Ref: nil,
-				URI: nil,
-			},
-		}, nil)
+		_, err = service.CreateTrigger(context.Background(), namespace, createMockTriggerInput(name, namespace, serviceName), nil)
 
 		require.Error(t, err)
 	})
@@ -184,9 +130,9 @@ func TestTriggersService_Create(t *testing.T) {
 
 		serviceFactory.InformerFactory.WaitForCacheSync(make(chan struct{}))
 
-		input1 := createMockTriggerInput("trigger 1")
-		input2 := createMockTriggerInput("trigger 2")
-		inputs := []*gqlschema.TriggerCreateInput{input1, input2}
+		input1 := createMockTriggerInput("trigger 1", namespace, serviceName)
+		input2 := createMockTriggerInput("trigger 2", namespace, serviceName)
+		inputs := []*gqlschema.TriggerCreateInput{&input1, &input2}
 
 		triggers, err := service.CreateTriggers(context.Background(), "default", inputs, nil)
 
@@ -196,15 +142,12 @@ func TestTriggersService_Create(t *testing.T) {
 }
 
 func TestTriggersService_Delete(t *testing.T) {
-	defaultSubscriber := duckv1.Destination{
-		Ref: nil,
-		URI: nil,
-	}
+	const serviceName = "service-name"
 	const namespace = "default"
 
 	t.Run("Should delete", func(t *testing.T) {
-		trigger1 := createMockTrigger("trigger 1", namespace, defaultSubscriber)
-		trigger2 := createMockTrigger("trigger 2", "other-namespace", defaultSubscriber)
+		trigger1 := createMockTrigger("trigger 1", namespace, serviceName)
+		trigger2 := createMockTrigger("trigger 2", "other-namespace", serviceName)
 
 		serviceFactory, err := resourceFake.NewFakeGenericServiceFactory(v1alpha1.AddToScheme, trigger1, trigger2)
 		require.NoError(t, err)
@@ -221,9 +164,9 @@ func TestTriggersService_Delete(t *testing.T) {
 		assert.Equal(t, trigger1.Name, deletedTrigger.Name)
 	})
 
-	t.Run("Should throw if trigger does not exist", func(t *testing.T) {
-		trigger1 := createMockTrigger("trigger 1", namespace, defaultSubscriber)
-		trigger2 := createMockTrigger("trigger 2", "other-namespace", defaultSubscriber)
+	t.Run("Should return error if trigger does not exist", func(t *testing.T) {
+		trigger1 := createMockTrigger("trigger 1", namespace, serviceName)
+		trigger2 := createMockTrigger("trigger 2", "other-namespace", serviceName)
 
 		serviceFactory, err := resourceFake.NewFakeGenericServiceFactory(v1alpha1.AddToScheme, trigger1, trigger2)
 		require.NoError(t, err)
@@ -240,8 +183,8 @@ func TestTriggersService_Delete(t *testing.T) {
 	})
 
 	t.Run("Should delete many", func(t *testing.T) {
-		trigger1 := createMockTrigger("trigger 1", namespace, defaultSubscriber)
-		trigger2 := createMockTrigger("trigger 2", namespace, defaultSubscriber)
+		trigger1 := createMockTrigger("trigger 1", namespace, serviceName)
+		trigger2 := createMockTrigger("trigger 2", namespace, serviceName)
 
 		serviceFactory, err := resourceFake.NewFakeGenericServiceFactory(v1alpha1.AddToScheme, trigger1, trigger2)
 		require.NoError(t, err)
@@ -259,9 +202,9 @@ func TestTriggersService_Delete(t *testing.T) {
 		assert.Equal(t, 2, len(deletedTriggers))
 	})
 
-	t.Run("Should throw if some triggers are not found", func(t *testing.T) {
-		trigger1 := createMockTrigger("trigger 1", namespace, defaultSubscriber)
-		trigger2 := createMockTrigger("trigger 2", "other-namespace", defaultSubscriber)
+	t.Run("Should return error if some triggers are not found", func(t *testing.T) {
+		trigger1 := createMockTrigger("trigger 1", namespace, serviceName)
+		trigger2 := createMockTrigger("trigger 2", "other-namespace", serviceName)
 
 		serviceFactory, err := resourceFake.NewFakeGenericServiceFactory(v1alpha1.AddToScheme, trigger1, trigger2)
 		require.NoError(t, err)
@@ -279,7 +222,34 @@ func TestTriggersService_Delete(t *testing.T) {
 	})
 }
 
-func createMockTrigger(name, namespace string, subscriber duckv1.Destination) *v1alpha1.Trigger {
+func createMockTrigger(name, namespace, serviceName string) *v1alpha1.Trigger {
+	return &v1alpha1.Trigger{
+		TypeMeta: v1.TypeMeta{
+			APIVersion: "eventing.knative.dev/v1alpha1",
+			Kind:       "Trigger",
+		},
+		ObjectMeta: v1.ObjectMeta{
+			Name:      name,
+			Namespace: namespace,
+		},
+		Spec: v1alpha1.TriggerSpec{
+			Broker: "default",
+			Filter: nil,
+			Subscriber: duckv1.Destination{
+				Ref: &duckv1.KReference{
+					Kind:       "Service",
+					Namespace:  namespace,
+					Name:       serviceName,
+					APIVersion: "",
+				},
+				URI: nil,
+			},
+		},
+		Status: v1alpha1.TriggerStatus{},
+	}
+}
+
+func createMockTriggerWithDestination(name, namespace string, subscriber duckv1.Destination) *v1alpha1.Trigger {
 	return &v1alpha1.Trigger{
 		TypeMeta: v1.TypeMeta{
 			APIVersion: "eventing.knative.dev/v1alpha1",
@@ -298,14 +268,20 @@ func createMockTrigger(name, namespace string, subscriber duckv1.Destination) *v
 	}
 }
 
-func createMockTriggerInput(name string) *gqlschema.TriggerCreateInput {
-	return &gqlschema.TriggerCreateInput{
+func createMockTriggerInput(name, namespace, serviceName string) gqlschema.TriggerCreateInput {
+	return gqlschema.TriggerCreateInput{
 		Name:             &name,
 		Broker:           "default",
 		FilterAttributes: nil,
-		Subscriber: &duckv1.Destination{
-			Ref: nil,
-			URI: nil,
+		Subscriber: &gqlschema.SubscriberInput{
+			Ref: &duckv1.KReference{
+				Kind:       "Service",
+				Namespace:  namespace,
+				Name:       serviceName,
+				APIVersion: "",
+			},
+			Port: nil,
+			Path: nil,
 		},
 	}
 }

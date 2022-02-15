@@ -1,0 +1,63 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: event-publisher-proxy
+  name: event-publisher-proxy
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: event-publisher-proxy
+  strategy:
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: event-publisher-proxy
+    spec:
+      containers:
+        - env:
+            - name: CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: event-publisher-proxy
+                  key: client-id
+            - name: CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: event-publisher-proxy
+                  key: client-secret
+            - name: TOKEN_ENDPOINT
+              valueFrom:
+                secretKeyRef:
+                  name: event-publisher-proxy
+                  key: token-endpoint
+            - name: EMS_PUBLISH_URL
+              valueFrom:
+                secretKeyRef:
+                  name: event-publisher-proxy
+                  key: ems-publish-url
+          image: github.com/kyma-project/kyma/components/event-publisher-proxy/cmd/event-publisher-proxy
+          imagePullPolicy: IfNotPresent
+          name: event-publisher-proxy
+          ports:
+            - containerPort: 8080
+              name: http
+              protocol: TCP
+          livenessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /healthz
+              port: 8080
+              scheme: HTTP
+            initialDelaySeconds: 5
+            periodSeconds: 2
+            successThreshold: 1
+            timeoutSeconds: 1
+          readinessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /readyz
+              port: 8080
+              scheme: HTTP

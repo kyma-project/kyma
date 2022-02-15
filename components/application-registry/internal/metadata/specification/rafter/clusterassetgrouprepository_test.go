@@ -1,6 +1,7 @@
 package rafter
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"reflect"
@@ -28,10 +29,10 @@ func TestUpsertClusterAssetGroup(t *testing.T) {
 
 		clusterAssetGroupEntry := createTestClusterAssetGroupEntry()
 
-		resourceInterfaceMock.On("Get", "id1", metav1.GetOptions{}).
+		resourceInterfaceMock.On("Get", context.Background(), "id1", metav1.GetOptions{}).
 			Return(&unstructured.Unstructured{}, k8serrors.NewNotFound(schema.GroupResource{}, ""))
 
-		resourceInterfaceMock.On("Create", mock.MatchedBy(createMatcherFunction(clusterAssetGroupEntry, "")), metav1.CreateOptions{}).
+		resourceInterfaceMock.On("Create", context.Background(), mock.MatchedBy(createMatcherFunction(clusterAssetGroupEntry, "")), metav1.CreateOptions{}).
 			Return(&unstructured.Unstructured{}, nil)
 
 		// when
@@ -52,14 +53,14 @@ func TestUpsertClusterAssetGroup(t *testing.T) {
 		object, err := runtime.DefaultUnstructuredConverter.ToUnstructured(&dt)
 		require.NoError(t, err)
 
-		resourceInterfaceMock.On("Get", "id1", metav1.GetOptions{}).
+		resourceInterfaceMock.On("Get", context.Background(), "id1", metav1.GetOptions{}).
 			Return(&unstructured.Unstructured{Object: object}, nil)
 
-		resourceInterfaceMock.On("Get", "id1", metav1.GetOptions{}).
+		resourceInterfaceMock.On("Get", context.Background(), "id1", metav1.GetOptions{}).
 			Return(&unstructured.Unstructured{Object: object}, nil)
 
 		clusterAssetGroupEntry := createTestClusterAssetGroupEntry()
-		resourceInterfaceMock.On("Update", mock.MatchedBy(createMatcherFunction(clusterAssetGroupEntry, "1")), metav1.UpdateOptions{}).Return(&unstructured.Unstructured{}, nil)
+		resourceInterfaceMock.On("Update", context.Background(), mock.MatchedBy(createMatcherFunction(clusterAssetGroupEntry, "1")), metav1.UpdateOptions{}).Return(&unstructured.Unstructured{}, nil)
 
 		// when
 		err = repository.Upsert(clusterAssetGroupEntry)
@@ -75,7 +76,7 @@ func TestUpsertClusterAssetGroup(t *testing.T) {
 		resourceInterfaceMock := &mocks.ResourceInterface{}
 		repository := NewClusterAssetGroupRepository(resourceInterfaceMock)
 
-		resourceInterfaceMock.On("Get", mock.Anything, metav1.GetOptions{}).
+		resourceInterfaceMock.On("Get", context.Background(), mock.Anything, metav1.GetOptions{}).
 			Return(&unstructured.Unstructured{}, errors.New("some error"))
 
 		// when
@@ -91,9 +92,9 @@ func TestUpsertClusterAssetGroup(t *testing.T) {
 		resourceInterfaceMock := &mocks.ResourceInterface{}
 		repository := NewClusterAssetGroupRepository(resourceInterfaceMock)
 
-		resourceInterfaceMock.On("Get", "id1", metav1.GetOptions{}).
+		resourceInterfaceMock.On("Get", context.Background(), "id1", metav1.GetOptions{}).
 			Return(&unstructured.Unstructured{}, k8serrors.NewNotFound(schema.GroupResource{}, ""))
-		resourceInterfaceMock.On("Create", mock.Anything, metav1.CreateOptions{}).
+		resourceInterfaceMock.On("Create", context.Background(), mock.Anything, metav1.CreateOptions{}).
 			Return(&unstructured.Unstructured{}, errors.New("some error"))
 
 		// when
@@ -113,13 +114,13 @@ func TestUpsertClusterAssetGroup(t *testing.T) {
 		object, err := runtime.DefaultUnstructuredConverter.ToUnstructured(&dt)
 		require.NoError(t, err)
 
-		resourceInterfaceMock.On("Get", "id1", metav1.GetOptions{}).
+		resourceInterfaceMock.On("Get", context.Background(), "id1", metav1.GetOptions{}).
 			Return(&unstructured.Unstructured{Object: object}, nil)
 
-		resourceInterfaceMock.On("Get", "id1", metav1.GetOptions{}).
+		resourceInterfaceMock.On("Get", context.Background(), "id1", metav1.GetOptions{}).
 			Return(&unstructured.Unstructured{Object: object}, nil)
 
-		resourceInterfaceMock.On("Update", mock.Anything, metav1.UpdateOptions{}).Return(&unstructured.Unstructured{}, errors.New("some error"))
+		resourceInterfaceMock.On("Update", context.Background(), mock.Anything, metav1.UpdateOptions{}).Return(&unstructured.Unstructured{}, errors.New("some error"))
 
 		// when
 		err = repository.Upsert(createTestClusterAssetGroupEntry())
@@ -143,7 +144,7 @@ func TestGetClusterAssetGroup(t *testing.T) {
 			object, err := runtime.DefaultUnstructuredConverter.ToUnstructured(&dt)
 			require.NoError(t, err)
 
-			resourceInterfaceMock.On("Get", "id1", metav1.GetOptions{}).
+			resourceInterfaceMock.On("Get", context.Background(), "id1", metav1.GetOptions{}).
 				Return(&unstructured.Unstructured{Object: object}, nil)
 		}
 
@@ -166,7 +167,7 @@ func TestGetClusterAssetGroup(t *testing.T) {
 		resourceInterfaceMock := &mocks.ResourceInterface{}
 		repository := NewClusterAssetGroupRepository(resourceInterfaceMock)
 
-		resourceInterfaceMock.On("Get", mock.Anything, metav1.GetOptions{}).
+		resourceInterfaceMock.On("Get", context.Background(), mock.Anything, metav1.GetOptions{}).
 			Return(&unstructured.Unstructured{}, k8serrors.NewNotFound(schema.GroupResource{}, ""))
 
 		// when
@@ -209,7 +210,7 @@ func TestDeleteClusterAssetGroup(t *testing.T) {
 		resourceInterfaceMock := &mocks.ResourceInterface{}
 		repository := NewClusterAssetGroupRepository(resourceInterfaceMock)
 
-		resourceInterfaceMock.On("Delete", "id1", &metav1.DeleteOptions{}).Return(nil)
+		resourceInterfaceMock.On("Delete", context.Background(), "id1", metav1.DeleteOptions{}).Return(nil)
 
 		// when
 		err := repository.Delete("id1")
@@ -224,7 +225,7 @@ func TestDeleteClusterAssetGroup(t *testing.T) {
 		resourceInterfaceMock := &mocks.ResourceInterface{}
 		repository := NewClusterAssetGroupRepository(resourceInterfaceMock)
 
-		resourceInterfaceMock.On("Delete", "id1", &metav1.DeleteOptions{}).Return(errors.New("some error"))
+		resourceInterfaceMock.On("Delete", context.Background(), "id1", metav1.DeleteOptions{}).Return(errors.New("some error"))
 
 		// when
 		err := repository.Delete("id1")
@@ -239,7 +240,7 @@ func TestDeleteClusterAssetGroup(t *testing.T) {
 		resourceInterfaceMock := &mocks.ResourceInterface{}
 		repository := NewClusterAssetGroupRepository(resourceInterfaceMock)
 
-		resourceInterfaceMock.On("Delete", "id1", &metav1.DeleteOptions{}).Return(k8serrors.NewNotFound(schema.GroupResource{}, ""))
+		resourceInterfaceMock.On("Delete", context.Background(), "id1", metav1.DeleteOptions{}).Return(k8serrors.NewNotFound(schema.GroupResource{}, ""))
 
 		// when
 		err := repository.Delete("id1")

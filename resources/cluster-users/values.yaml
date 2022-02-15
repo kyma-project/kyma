@@ -1,8 +1,11 @@
 tests:
+  labels:
+    integration: true
+    after-upgrade: true
   enabled: true
   image:
-    name: eu.gcr.io/kyma-project/test-infra/alpine-kubectl
-    version: v20200617-32c1f3ff
+    name: eu.gcr.io/kyma-project/incubator/develop/k8s-tools
+    version: 20201023-5de446cf
   env:
     namespace: default
 
@@ -32,12 +35,12 @@ clusterRoles:
       - "authentication.istio.io"
       - "config.istio.io"
       - "networking.istio.io"
+      - "security.istio.io"
     kyma:
       - "applicationconnector.kyma-project.io"
       - "authentication.kyma-project.io"
       - "gateway.kyma-project.io"
       - "servicecatalog.kyma-project.io"
-      - "ui.kyma-project.io"
       - "kyma.cx"
       - "ui.kyma.cx"
       - "testing.kyma-project.io"
@@ -54,16 +57,15 @@ clusterRoles:
       - "hydra.ory.sh"
     rafter:
       - "rafter.kyma-project.io"
-    knativeServing:
-      - "networking.internal.knative.dev"
-      - "caching.internal.knative.dev"
-      - "autoscaling.internal.knative.dev"
-      - "serving.knative.dev"
     kymaEventing:
       - "knativekafka.kyma-project.io"
       - "sources.kyma-project.io"
       - "messaging.knative.dev"
       - "eventing.knative.dev"
+    svcat:
+      - "settings.svcat.k8s.io"
+    ui:
+      - "ui.kyma-project.io"
   verbs:
     edit:
       - "create"

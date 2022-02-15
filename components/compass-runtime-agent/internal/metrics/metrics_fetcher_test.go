@@ -1,6 +1,7 @@
 package metrics
 
 import (
+	"context"
 	"fmt"
 	"testing"
 	"time"
@@ -23,7 +24,7 @@ func Test_FetchNodeMetrics(t *testing.T) {
 		nodeMetrics := &mocks.NodeMetricsInterface{}
 		metricsClientset.On("MetricsV1beta1").Return(metricsV1beta1)
 		metricsV1beta1.On("NodeMetricses").Return(nodeMetrics)
-		nodeMetrics.On("List", v1.ListOptions{}).Return(&v1beta1.NodeMetricsList{
+		nodeMetrics.On("List", context.Background(), v1.ListOptions{}).Return(&v1beta1.NodeMetricsList{
 			Items: []v1beta1.NodeMetrics{{
 				ObjectMeta: v1.ObjectMeta{
 					Name: "somename",
@@ -61,7 +62,7 @@ func Test_FetchNodeMetrics(t *testing.T) {
 		nodeMetrics := &mocks.NodeMetricsInterface{}
 		metricsClientset.On("MetricsV1beta1").Return(metricsV1beta1)
 		metricsV1beta1.On("NodeMetricses").Return(nodeMetrics)
-		nodeMetrics.On("List", v1.ListOptions{}).Return(&v1beta1.NodeMetricsList{}, nil)
+		nodeMetrics.On("List", context.Background(), v1.ListOptions{}).Return(&v1beta1.NodeMetricsList{}, nil)
 
 		metricsFetcher := newMetricsFetcher(metricsClientset)
 
@@ -80,7 +81,7 @@ func Test_FetchNodeMetrics(t *testing.T) {
 		nodeMetrics := &mocks.NodeMetricsInterface{}
 		metricsClientset.On("MetricsV1beta1").Return(metricsV1beta1)
 		metricsV1beta1.On("NodeMetricses").Return(nodeMetrics)
-		nodeMetrics.On("List", v1.ListOptions{}).Return(nil, fmt.Errorf("someerror"))
+		nodeMetrics.On("List", context.Background(), v1.ListOptions{}).Return(nil, fmt.Errorf("someerror"))
 
 		metricsFetcher := newMetricsFetcher(metricsClientset)
 

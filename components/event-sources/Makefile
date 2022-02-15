@@ -1,17 +1,3 @@
-# Copyright 2019 The Kyma Authors.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-
 APP_NAME = event-sources
 APP_PATH = components/event-sources
 BUILDPACK = eu.gcr.io/kyma-project/test-infra/buildpack-golang-toolbox:v20200423-1d9d6590
@@ -61,7 +47,7 @@ build-local: $(cmds) test-local ;
 # Example:
 #   make controller-manager
 GOBUILD_FLAGS := -v
-$(cmds): %: resolve-local $(patched_trace)
+$(cmds): %: resolve-local istio-injection $(patched_trace)
 	@echo "+ Building $*"
 	@CGO_ENABLED=0 go build -o $* \
 		$(GOBUILD_FLAGS) \
@@ -75,7 +61,7 @@ $(patched_trace): hack/set-span-id.patch vendor
 	cp $< $@
 
 
-test-local: $(patched_trace)
+test-local: istio-injection $(patched_trace)
 
 .PHONY: $(cmds_images) $(cmds_images_push)
 
@@ -113,7 +99,7 @@ API_GROUPS := sources/v1alpha1
 api-import-paths := $(foreach group,$(API_GROUPS),$(PKG)/apis/$(group))
 
 # e.g. "authentication/v1alpha1 networking/v1alpha3"
-ISTIO_API_GROUPS := "authentication/v1alpha1"
+ISTIO_API_GROUPS := "security/v1beta1"
 # generates e.g. "ISTIO_CLIENT_GO_PKG/apis/sources/v1alpha1 ISTIO_CLIENT_GO_PKG/apis/sources/v1alpha2"
 istio-api-import-paths := $(foreach group,$(ISTIO_API_GROUPS),$(ISTIO_CLIENT_GO_PKG)/apis/$(group))
 

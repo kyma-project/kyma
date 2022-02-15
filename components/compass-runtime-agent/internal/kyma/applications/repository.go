@@ -1,6 +1,8 @@
 package applications
 
 import (
+	"context"
+
 	"github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
 	v1alpha12 "github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1"
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/apperrors"
@@ -12,7 +14,7 @@ type manager struct {
 	applicationsInterface v1alpha12.ApplicationInterface
 }
 
-//go:generate mockery -name=Repository
+//go:generate mockery --name=Repository
 // Repository contains operations for managing Application CRD
 type Repository interface {
 	Create(*v1alpha1.Application) (*v1alpha1.Application, apperrors.AppError)
@@ -30,7 +32,7 @@ func NewRepository(applicationsInterface v1alpha12.ApplicationInterface) Reposit
 
 func (m manager) Create(application *v1alpha1.Application) (*v1alpha1.Application, apperrors.AppError) {
 
-	app, err := m.applicationsInterface.Create(application)
+	app, err := m.applicationsInterface.Create(context.Background(), application, metav1.CreateOptions{})
 	if err != nil {
 		return nil, apperrors.Internal("Failed to create application: %s", err)
 	}
@@ -39,7 +41,7 @@ func (m manager) Create(application *v1alpha1.Application) (*v1alpha1.Applicatio
 }
 
 func (m manager) Update(application *v1alpha1.Application) (*v1alpha1.Application, apperrors.AppError) {
-	currentApp, err := m.applicationsInterface.Get(application.Name, metav1.GetOptions{})
+	currentApp, err := m.applicationsInterface.Get(context.Background(), application.Name, metav1.GetOptions{})
 	if err != nil {
 		if k8serrors.IsNotFound(err) {
 			return nil, apperrors.NotFound("Failed to update application: %s", err)
@@ -51,7 +53,7 @@ func (m manager) Update(application *v1alpha1.Application) (*v1alpha1.Applicatio
 	currentApp.Spec.Services = application.Spec.Services
 	currentApp.Spec.CompassMetadata = application.Spec.CompassMetadata
 
-	newApp, err := m.applicationsInterface.Update(currentApp)
+	newApp, err := m.applicationsInterface.Update(context.Background(), currentApp, metav1.UpdateOptions{})
 	if err != nil {
 		return nil, apperrors.Internal("Failed to update application: %s", err)
 	}
@@ -60,7 +62,10 @@ func (m manager) Update(application *v1alpha1.Application) (*v1alpha1.Applicatio
 }
 
 func (m manager) Delete(name string, options *metav1.DeleteOptions) apperrors.AppError {
-	err := m.applicationsInterface.Delete(name, options)
+	if options == nil {
+		options = &metav1.DeleteOptions{}
+	}
+	err := m.applicationsInterface.Delete(context.Background(), name, *options)
 	if err != nil {
 		return apperrors.Internal("Failed to delete application: %s", err)
 	}
@@ -69,7 +74,7 @@ func (m manager) Delete(name string, options *metav1.DeleteOptions) apperrors.Ap
 }
 
 func (m manager) Get(name string, options metav1.GetOptions) (*v1alpha1.Application, apperrors.AppError) {
-	app, err := m.applicationsInterface.Get(name, options)
+	app, err := m.applicationsInterface.Get(context.Background(), name, options)
 	if err != nil {
 		return nil, apperrors.Internal("Failed to get application: %s", err)
 	}
@@ -78,7 +83,7 @@ func (m manager) Get(name string, options metav1.GetOptions) (*v1alpha1.Applicat
 }
 
 func (m manager) List(opts metav1.ListOptions) (*v1alpha1.ApplicationList, apperrors.AppError) {
-	apps, err := m.applicationsInterface.List(opts)
+	apps, err := m.applicationsInterface.List(context.Background(), opts)
 	if err != nil {
 		return nil, apperrors.Internal("Failed to list applications: %s", err)
 	}

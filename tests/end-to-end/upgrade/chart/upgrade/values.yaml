@@ -3,11 +3,11 @@ containerRegistry:
 
 subscriberimage:
   dir:
-  version: PR-8483
+  version: 9913ea21
 
 image:
   dir:
-  version: PR-9206
+  version: 9b08e575
   pullPolicy: "IfNotPresent"
 
 dex:
@@ -22,3 +22,19 @@ authorizationPolicy:
   consoleBackendService:
     namespace: kyma-system
     serviceAccount: console-backend
+
+tests:
+  HelmBrokerUpgradeTest: true
+  HelmBrokerConflictUpgradeTest: true
+  ApplicationBrokerUpgradeTest: true
+  GrafanaUpgradeTest: true
+  TargetsAndRulesUpgradeTest: true
+  MetricsUpgradeTest: true
+  MicrofrontendUpgradeTest: true
+  ClusterMicrofrontendUpgradeTest: true
+  ApiGatewayUpgradeTest: true
+  ApplicationOperatorUpgradeTest: true
+  RafterUpgradeTest: true
+  EventMeshUpgradeTest: true
+  ServerlessUpgradeTest: true
+  LoggingUpgradeTest: true

@@ -6,18 +6,22 @@ fullnameOverride: "serverless"
 
 injectCerts:
   image:
-    repository: 'eu.gcr.io/kyma-project/test-infra/alpine-kubectl'
-    tag: 'v20200617-32c1f3ff'
+    repository: "eu.gcr.io/kyma-project/incubator/develop/k8s-tools"
+    tag: "20201023-5de446cf"
     pullPolicy: IfNotPresent
 
-knativeMigration:
+migration:
   image:
-    repository: 'eu.gcr.io/kyma-project/test-infra/alpine-kubectl'
-    tag: 'v20200617-32c1f3ff'
+    repository: "eu.gcr.io/kyma-project/incubator/develop/k8s-tools"
+    tag: "20201023-5de446cf"
     pullPolicy: IfNotPresent
 
 tests:
   enabled: true
+  labels:
+    integration: true
+    after-upgrade: true
+
   long:
     initTimeout: 120s
     resources:
@@ -28,15 +32,15 @@ tests:
         memory: 256Mi
         cpu: 200m
     image:
-      repository: "eu.gcr.io/kyma-project/test-infra/alpine-kubectl"
-      tag: "v20200617-32c1f3ff"
+      repository: "eu.gcr.io/kyma-project/incubator/develop/k8s-tools"
+      tag: "20201023-5de446cf"
       pullPolicy: IfNotPresent
     namespace: "long-running-function-test"
     name: longrun
 
   image:
     repository: "eu.gcr.io/kyma-project/function-controller-test"
-    tag: "cdf1bd64"
+    tag: "63266748"
     pullPolicy: IfNotPresent
   disableConcurrency: false
   restartPolicy: Never
@@ -50,17 +54,21 @@ tests:
   envs:
     waitTimeout: 15m
     verifySSL: "false"
-    verbose: "true"
+    verbose: "false"
+    gitServer:
+      image: "eu.gcr.io/kyma-project/gitserver"
+      tag: "c0aa144a"
+      repoName: "function"
 
 global:
   commonLabels:
-    app: "{{ template \"name\" . }}"
+    app: '{{ template "name" . }}'
     version: "{{ .Values.images.manager.tag }}"
-    app.kubernetes.io/name: "{{ template \"name\" . }}"
+    app.kubernetes.io/name: '{{ template "name" . }}'
     app.kubernetes.io/instance: "{{ .Release.Name }}"
     app.kubernetes.io/managed-by: "{{ .Release.Service }}"
     app.kubernetes.io/version: "{{ .Values.images.manager.tag }}"
-    helm.sh/chart: "{{ include \"chart\" . }}"
+    helm.sh/chart: '{{ include "chart" . }}'
   dockerServicePort: 5000
   ingress:
     domainName:
@@ -68,18 +76,18 @@ global:
 images:
   manager:
     repository: "eu.gcr.io/kyma-project/function-controller"
-    tag: "e2e41336"
+    tag: "55e5b31a"
     pullPolicy: IfNotPresent
   runtimes:
     nodejs12:
       repository: "eu.gcr.io/kyma-project/function-runtime-nodejs12"
-      tag: "1cc47db6"
+      tag: "12225f37"
     nodejs10:
       repository: "eu.gcr.io/kyma-project/function-runtime-nodejs10"
-      tag: "tba"
-    python37:
-      repository: "eu.gcr.io/kyma-project/function-runtime-python37"
-      tag: "tba"
+      tag: "12225f37"
+    python38:
+      repository: "eu.gcr.io/kyma-project/function-runtime-python38"
+      tag: "12225f37"
 
 deployment:
   replicas: 1
@@ -105,16 +113,6 @@ containers:
         memory: 32Mi
     extraProperties: {}
     envs:
-      runtimeConfigMapName:
-        value: dockerfile-nodejs-12
-      buildRequestsCPU:
-        value: 700m
-      buildRequestsMemory:
-        value: 700Mi
-      buildLimitsCPU:
-        value: 1100m
-      buildLimitsMemory:
-        value: 1100Mi
       configMapRequeueDuration:
         value: 5m
       secretRequeueDuration:
@@ -122,11 +120,11 @@ containers:
       serviceAccountRequeueDuration:
         value: 5m
       namespaceExcludedNames:
-        value: "istio-system,knative-eventing,knative-serving,kube-node-lease,kube-public,kube-system,kyma-installer,kyma-integration,kyma-system,natss,compass-system"
+        value: "istio-system,knative-eventing,kube-node-lease,kube-public,kube-system,kyma-installer,kyma-integration,kyma-system,natss,compass-system"
       imageRegistryDockerConfigSecretName:
-        value: "{{ template \"fullname\" . }}-image-pull-secret"
+        value: '{{ template "fullname" . }}-image-pull-secret'
       imagePullAccountName:
-        value: "{{ template \"fullname\" . }}"
+        value: '{{ template "fullname" . }}'
       targetCPUUtilizationPercentage:
         value: "50"
       kserviceRequeueDuration:
@@ -137,6 +135,8 @@ containers:
         value: "--insecure,--skip-tls-verify,--skip-unused-stages,--log-format=text,--cache=true"
       functionBuildExecutorImage:
         value: gcr.io/kaniko-project/executor:v0.22.0
+      functionBuildRepoFetcherImage:
+        value: eu.gcr.io/kyma-project/function-build-init:a8a6bca9
 
 services:
   manager:
@@ -154,7 +154,6 @@ metrics:
       protocol: TCP
   serviceMonitor:
     create: true
-    scrapeInterval: 30s
     labels: {}
     annotations: {}
   pod:
@@ -180,7 +179,7 @@ dockerRegistry:
   enableInternal: true
   username: "{{ randAlphaNum 20 | b64enc }}" # for gcr "_json_key"
   password: "{{ randAlphaNum 40 | b64enc }}" # for gcr data from json key
-  internalServerAddress: "{{ template \"registry-fullname\" . }}.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.global.dockerServicePort }}"
+  internalServerAddress: '{{ template "registry-fullname" . }}.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.global.dockerServicePort }}'
   serverAddress: "registry.{{ .Values.global.ingress.domainName -}}"
   registryAddress: "registry.{{ .Values.global.ingress.domainName -}}"
 
@@ -207,3 +206,6 @@ docker-registry:
 webhook:
   enabled: true
   fullnameOverride: "serverless-webhook"
+  image:
+    repository: "eu.gcr.io/kyma-project/function-webhook"
+    tag: "858bc2c2"

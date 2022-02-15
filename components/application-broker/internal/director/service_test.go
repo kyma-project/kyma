@@ -1,12 +1,26 @@
 package director
 
 import (
+	"context"
 	"testing"
 
 	schema "github.com/kyma-incubator/compass/components/director/pkg/graphql"
+	"github.com/kyma-project/kyma/components/application-broker/third_party/machinebox/graphql"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
+
+func TestService_EnsureAPIPackageCredentialsDeletedIfApplicationNotExists(t *testing.T) {
+	// given
+	cli := NewQGLClient(&emptyGQLClient{})
+	svc := NewService(cli, ServiceConfig{})
+
+	// when
+	err := svc.EnsureAPIPackageCredentialsDeleted(context.Background(), "aid0", "pid0", "iid0")
+
+	// then
+	require.NoError(t, err)
+}
 
 func TestMapPackageInstanceAuthToModelOauth(t *testing.T) {
 	// given
@@ -79,4 +93,11 @@ func fixPackageInstanceAuth(creds schema.CredentialData) schema.PackageInstanceA
 			},
 		},
 	}
+}
+
+type emptyGQLClient struct {
+}
+
+func (c *emptyGQLClient) Run(ctx context.Context, req *graphql.Request, resp interface{}) error {
+	return nil
 }

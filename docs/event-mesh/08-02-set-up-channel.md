@@ -3,7 +3,7 @@ title: Set up a default Channel
 type: Tutorials
 ---
 
-In the Event Mesh, Channels define an event forwarding and persistence layer. They receive incoming events and dispatch them to resources such as Brokers or other Channels. By default, Kyma comes with [NatssChannel](https://github.com/knative/eventing-contrib/tree/master/natss/config), but you can change it to a different implementation or even use multiple Channels simultaneously. This tutorial shows how to set up Kafka Channel as the default one.
+In the Event Mesh, Channels define an event forwarding and persistence layer. They receive incoming events and dispatch them to resources such as Brokers or other Channels. By default, Kyma comes with [NatssChannel](https://github.com/knative-sandbox/eventing-natss/tree/master/config), but you can change it to a different implementation or even use multiple Channels simultaneously. This tutorial shows how to set up Kafka Channel as the default one.
 
 
 ## Steps

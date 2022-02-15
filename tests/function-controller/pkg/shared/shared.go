@@ -5,12 +5,9 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/sirupsen/logrus"
 	"k8s.io/client-go/dynamic"
 )
-
-type Logger interface {
-	Logf(format string, args ...interface{})
-}
 
 var (
 	ErrInvalidDataType = errors.New("invalid data type")
@@ -21,20 +18,24 @@ type Container struct {
 	Namespace   string
 	WaitTimeout time.Duration
 	Verbose     bool
-	Log         Logger
+	Log         *logrus.Entry
 }
 
-func LogReadiness(ready, verbose bool, name string, log Logger, resource interface{}) {
+func (c Container) WithLogger(l *logrus.Entry) Container {
+	c.Log = l
+	return c
+}
+
+func LogReadiness(ready, verbose bool, name string, log *logrus.Entry, resource interface{}) {
 	typeName := fmt.Sprintf("%T", resource)
 
 	if ready {
-		log.Logf("%s %s is ready", typeName, name)
-
+		log.Infof("%s %s is ready", typeName, name)
 	} else {
-		log.Logf("%s %s is not ready", typeName, name)
+		log.Infof("%s %s is not ready", typeName, name)
 	}
 
 	if verbose {
-		log.Logf("%+v", resource)
+		log.Infof("%+v", resource)
 	}
 }

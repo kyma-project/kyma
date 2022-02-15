@@ -1,13 +1,15 @@
-type Trigger @goModel(model: "github.com/knative/eventing/pkg/apis/eventing/v1alpha1.Trigger"){
+type Trigger @goModel(model: "knative.dev/eventing/pkg/apis/eventing/v1alpha1.Trigger"){
     name: String!
     namespace: String!
     spec: TriggerSpec!
     status: TriggerStatus!
 }
 
-type TriggerSpec @goModel(model: "github.com/knative/eventing/pkg/apis/eventing/v1alpha1.TriggerSpec"){
+type TriggerSpec @goModel(model: "knative.dev/eventing/pkg/apis/eventing/v1alpha1.TriggerSpec"){
     broker: String!
     filter: JSON
+    port: Port!
+    path: String!
     subscriber: Subscriber!
 }
 
@@ -23,7 +25,6 @@ enum TriggerStatusType {
 }
 
 type Subscriber @goModel(model: "knative.dev/pkg/apis/duck/v1.Destination"){
-    uri: URI
     ref: SubscriberRef
 }
 
@@ -34,9 +35,10 @@ type SubscriberRef @goModel(model: "knative.dev/pkg/apis/duck/v1.KReference"){
     namespace: String!
 }
 
-input SubscriberInput @goModel(model: "knative.dev/pkg/apis/duck/v1.Destination"){
-    uri: URI
-    ref: SubscriberRefInput
+input SubscriberInput {
+    ref: SubscriberRefInput!
+    port: Port
+    path: String
 }
 
 input SubscriberRefInput @goModel(model: "knative.dev/pkg/apis/duck/v1.KReference"){
@@ -68,7 +70,7 @@ type TriggerEvent {
 }
 
 extend type Query {
-    triggers(namespace: String!, subscriber: SubscriberInput): [Trigger!] @HasAccess(attributes: {resource: "triggers", verb: "list", apiGroup: "eventing.knative.dev", apiVersion: "v1alpha1", namespaceArg: "namespace"})
+    triggers(namespace: String!, serviceName: String!): [Trigger!] @HasAccess(attributes: {resource: "triggers", verb: "list", apiGroup: "eventing.knative.dev", apiVersion: "v1alpha1", namespaceArg: "namespace"})
 }
 
 extend type Mutation {
@@ -79,5 +81,5 @@ extend type Mutation {
 }
 
 extend type Subscription {
-    triggerEvent(namespace: String!, subscriber: SubscriberInput): TriggerEvent! @HasAccess(attributes: {resource: "triggers", verb: "watch", apiGroup: "eventing.knative.dev", apiVersion: "v1alpha1", namespaceArg: "namespace"})
+    triggerEvent(namespace: String!, serviceName: String!): TriggerEvent! @HasAccess(attributes: {resource: "triggers", verb: "watch", apiGroup: "eventing.knative.dev", apiVersion: "v1alpha1", namespaceArg: "namespace"})
 }

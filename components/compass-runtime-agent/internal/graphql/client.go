@@ -16,7 +16,7 @@ const (
 
 type ClientConstructor func(httpClient *http.Client, graphqlEndpoint string, enableLogging bool) (Client, error)
 
-//go:generate mockery -name=Client
+//go:generate mockery --name=Client
 type Client interface {
 	Do(req *graphql.Request, res interface{}) error
 }

@@ -10,6 +10,10 @@ import (
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
 )
 
+func (r *aPIRuleResolver) JSON(ctx context.Context, obj *v1alpha1.APIRule) (gqlschema.JSON, error) {
+	return r.ag.JsonField(ctx, obj)
+}
+
 func (r *mutationResolver) CreateAPIRule(ctx context.Context, name string, namespace string, params v1alpha1.APIRuleSpec) (*v1alpha1.APIRule, error) {
 	return r.ag.CreateAPIRule(ctx, name, namespace, params)
 }
@@ -33,3 +37,8 @@ func (r *queryResolver) APIRule(ctx context.Context, name string, namespace stri
 func (r *subscriptionResolver) APIRuleEvent(ctx context.Context, namespace string, serviceName *string) (<-chan *gqlschema.APIRuleEvent, error) {
 	return r.ag.APIRuleEventSubscription(ctx, namespace, serviceName)
 }
+
+// APIRule returns gqlschema.APIRuleResolver implementation.
+func (r *Resolver) APIRule() gqlschema.APIRuleResolver { return &aPIRuleResolver{r} }
+
+type aPIRuleResolver struct{ *Resolver }

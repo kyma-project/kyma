@@ -1,11 +1,13 @@
 ---
-# Destination rule to disable (m)TLS when talking to helm tiller, as it doesn't have a sidecar.
-apiVersion: networking.istio.io/v1alpha3
+# Destination rule to disable (m)TLS when talking to apiserver, as it doesn't have a sidecar.
+apiVersion: networking.istio.io/v1beta1
 kind: DestinationRule
 metadata:
-  name: tiller-deploy
+  name: api-server
+  namespace: istio-system
 spec:
-  host: tiller-deploy.kube-system.svc.cluster.local
+  host: "kubernetes.default.svc.cluster.local"
   trafficPolicy:
-    tls:
-      mode: DISABLE
+    connectionPool:
+      tcp:
+        connectTimeout: "30s"

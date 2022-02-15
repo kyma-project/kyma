@@ -1,6 +1,7 @@
 package applications_test
 
 import (
+	"context"
 	"testing"
 
 	"github.com/kyma-project/kyma/components/application-gateway/internal/metadata/applications"
@@ -18,7 +19,7 @@ func TestGetServices(t *testing.T) {
 		// given
 		app := createApplication("production")
 		managerMock := &mocks.Manager{}
-		managerMock.On("Get", "production", metav1.GetOptions{}).
+		managerMock.On("Get", context.Background(), "production", metav1.GetOptions{}).
 			Return(app, nil)
 
 		repository := applications.NewServiceRepository("production", managerMock)
@@ -50,7 +51,7 @@ func TestGetServices(t *testing.T) {
 		// given
 		app := createApplication("production")
 		reManagerMock := &mocks.Manager{}
-		reManagerMock.On("Get", "production", metav1.GetOptions{}).
+		reManagerMock.On("Get", context.Background(), "production", metav1.GetOptions{}).
 			Return(app, nil)
 
 		repository := applications.NewServiceRepository("production", reManagerMock)

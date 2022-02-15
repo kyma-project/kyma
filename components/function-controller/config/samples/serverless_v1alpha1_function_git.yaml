@@ -1,0 +1,19 @@
+apiVersion: serverless.kyma-project.io/v1alpha1
+kind: Function
+metadata:
+  name: demo-git
+spec:
+  type: git
+  runtime: nodejs12
+  source: sample
+  reference: master
+  baseDir: js-handler
+
+---
+
+apiVersion: serverless.kyma-project.io/v1alpha1
+kind: GitRepository
+metadata:
+  name: sample
+spec:
+  url: "https://github.com/pPrecel/public-gitops"

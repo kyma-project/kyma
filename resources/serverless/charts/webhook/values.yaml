@@ -4,15 +4,14 @@
 
 nameOverride:
 fullnameOverride:
-
 image:
   repository: "eu.gcr.io/kyma-project/function-webhook"
-  tag: "30e97752"
+  tag: "68f2c44e"
   pullPolicy: IfNotPresent
 
 commonLabels:
-  app: "{{ template \"webhook.fullname\" . }}"
-  app.kubernetes.io/name: "{{ template \"webhook.fullname\" . }}"
+  app: '{{ template "webhook.fullname" . }}'
+  app.kubernetes.io/name: '{{ template "webhook.fullname" . }}'
   app.kubernetes.io/instance: "{{ .Release.Name }}"
   app.kubernetes.io/managed-by: "{{ .Release.Service }}"
   role: webhook
@@ -49,30 +48,106 @@ container:
     metricsDomain:
       value: "kyma-project.io/serverless"
     configObservabilityName:
-      value: "{{ template \"webhook.fullname\" . }}-config-observability"
+      value: '{{ template "webhook.fullname" . }}-config-observability'
     webhookServiceName:
-      value: "{{ template \"webhook.fullname\" . }}"
+      value: '{{ template "webhook.fullname" . }}'
     webhookSecretName:
-      value: "{{ template \"webhook.fullname\" . }}"
+      value: '{{ template "webhook.fullname" . }}'
     webhookPort:
       value: "{{ .Values.service.ports.httpsWebhook.targetPort }}"
-    minRequestCpu:
-      value: "10m"
-    minRequestMemory:
-      value: "16Mi"
-    minReplicasValue:
-      value: "1"
-    reservedEnvs:
-      value: "FUNC_RUNTIME,FUNC_HANDLER,FUNC_PORT,MOD_NAME,NODE_PATH" # https://github.com/kubeless/runtimes/blob/master/stable/nodejs/kubeless.js
-    requestCpu:
-      value: "50m"
-    requestMemory:
-      value: "64Mi"
-    limitsCpu:
-      value: "100m"
-    limitsMemory:
-      value: "128Mi"
-    minReplicas:
-      value: "1"
-    maxReplicas:
-      value: "1"
+
+values:
+  reservedEnvs:
+    value: "FUNC_RUNTIME,FUNC_HANDLER,FUNC_PORT,MOD_NAME,NODE_PATH,PYTHONPATH" # https://github.com/kubeless/runtimes/blob/master/stable/nodejs/kubeless.js;https://github.com/kubeless/runtimes/tree/master/stable/python
+  function:
+    replicas:
+      minValue: "1"
+      defaultPreset: "S"
+      presets: |-
+        {
+          "S": {
+            "min": 1,
+            "max": 1
+          },
+          "M": {
+            "min": 1,
+            "max": 2
+          },
+          "L": {
+            "min": 1,
+            "max": 5
+          },
+          "XL": {
+            "min": 1,
+            "max": 10
+          }
+        }
+    resources:
+      minRequestCpu: "10m"
+      minRequestMemory: "16Mi"
+      defaultPreset: "M"
+      presets: |-
+        {
+          "XS": {
+            "requestCpu": "10m",
+            "requestMemory": "16Mi",
+            "limitCpu": "25m",
+            "limitMemory": "32Mi"
+          },
+          "S": {
+            "requestCpu": "25m",
+            "requestMemory": "32Mi",
+            "limitCpu": "50m",
+            "limitMemory": "64Mi"
+          },
+          "M": {
+            "requestCpu": "50m",
+            "requestMemory": "64Mi",
+            "limitCpu": "100m",
+            "limitMemory": "128Mi"
+          },
+          "L": {
+            "requestCpu": "100m",
+            "requestMemory": "128Mi",
+            "limitCpu": "200m",
+            "limitMemory": "256Mi"
+          },
+          "XL": {
+            "requestCpu": "200m",
+            "requestMemory": "256Mi",
+            "limitCpu": "400m",
+            "limitMemory": "512Mi"
+          }
+        }
+  buildJob:
+    resources:
+      minRequestCpu: "200m"
+      minRequestMemory: "200Mi"
+      defaultPreset: "normal"
+      presets: |-
+        {
+          "local-dev": {
+            "requestCpu": "200m",
+            "requestMemory": "200Mi",
+            "limitCpu": "400m",
+            "limitMemory": "400Mi"
+          },
+          "slow": {
+            "requestCpu": "200m",
+            "requestMemory": "200Mi",
+            "limitCpu": "700m",
+            "limitMemory": "700Mi"
+          },
+          "normal": {
+            "requestCpu": "700m",
+            "requestMemory": "700Mi",
+            "limitCpu": "1100m",
+            "limitMemory": "1100Mi"
+          },
+          "fast": {
+            "requestCpu": "1100m",
+            "requestMemory": "1100Mi",
+            "limitCpu": "1700m",
+            "limitMemory": "1700Mi"
+          }
+        }

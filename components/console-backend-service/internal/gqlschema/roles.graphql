@@ -1,0 +1,87 @@
+enum SubjectKind { User Group }
+
+enum RoleKind {  Role ClusterRole }
+
+type Role @goModel(model: "k8s.io/api/rbac/v1.Role") {
+    name: String!
+    namespace: String!
+    rules: [PolicyRule!]
+}
+
+type ClusterRole @goModel(model: "k8s.io/api/rbac/v1.ClusterRole") {
+    name: String!
+    rules: [PolicyRule!]
+}
+
+type PolicyRule @goModel(model: "k8s.io/api/rbac/v1.PolicyRule") {
+    apiGroups: [String!]!
+    resources: [String!]!
+    verbs: [String!]!
+}
+
+type RoleRef @goModel(model: "k8s.io/api/rbac/v1.RoleRef") {
+    name: String!
+    kind: String!
+}
+
+type RoleBinding @goModel(model: "k8s.io/api/rbac/v1.RoleBinding") {
+    name: String!
+    namespace: String!
+    roleRef: RoleRef!
+}
+
+type ClusterRoleBinding @goModel(model: "k8s.io/api/rbac/v1.ClusterRoleBinding") {
+    name: String!
+    roleRef: RoleRef!
+}
+
+input RoleBindingSubject {
+    name: String!
+    kind: SubjectKind!
+}
+
+input RoleBindingInput {
+    roleName: String!
+    roleKind: RoleKind!
+    subjects: [RoleBindingSubject!]!
+}
+
+input ClusterRoleBindingInput {
+    roleName: String!
+    subjects: [RoleBindingSubject!]!
+}
+
+type ClusterRoleBindingEvent {
+    type: SubscriptionEventType!
+    clusterRoleBinding: ClusterRoleBinding!
+}
+
+type RoleBindingEvent {
+    type: SubscriptionEventType!
+    roleBinding: RoleBinding!
+}
+
+extend type Query {
+    roles(namespace: String!): [Role!]! @HasAccess(attributes: {resource: "roles", verb: "list", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace"})
+    role(namespace: String!, name: String!): Role! @HasAccess(attributes: {resource: "roles", verb: "get", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace"})
+
+    clusterRoles: [ClusterRole!]! @HasAccess(attributes: {resource: "clusterRoles", verb: "list", apiGroup: "", apiVersion: "v1"})
+    clusterRole(name: String!): ClusterRole! @HasAccess(attributes: {resource: "clusterRoles", verb: "get", apiGroup: "", apiVersion: "v1"})
+
+    roleBindings(namespace: String!): [RoleBinding!]! @HasAccess(attributes: {resource: "roleBindings", verb: "list", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace"})
+
+    clusterRoleBindings: [ClusterRoleBinding!]! @HasAccess(attributes: {resource: "clusterRoleBindings", verb: "list", apiGroup: "", apiVersion: "v1"})
+}
+
+extend type Mutation {
+    createRoleBinding(name: String!, namespace: String!, params: RoleBindingInput!): RoleBinding!@HasAccess(attributes: {resource: "roleBindings", verb: "create", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace"})
+    deleteRoleBinding(namespace: String!, name: String!): RoleBinding!@HasAccess(attributes: {resource: "roleBindings", verb: "delete", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace"})
+
+    createClusterRoleBinding(name: String!, params: ClusterRoleBindingInput!): ClusterRoleBinding!@HasAccess(attributes: {resource: "clusterRoleBindings", verb: "create", apiGroup: "", apiVersion: "v1"})
+    deleteClusterRoleBinding(name: String!): ClusterRoleBinding!@HasAccess(attributes: {resource: "clusterRoleBindings", verb: "delete", apiGroup: "", apiVersion: "v1"})
+}
+
+extend type Subscription {
+    roleBindingEvent(namespace: String!): RoleBindingEvent! @HasAccess(attributes: {resource: "roleBindings", verb: "watch", apiGroup: "", apiVersion: "v1alpha", namespaceArg: "namespace"})
+    clusterRoleBindingEvent: ClusterRoleBindingEvent! @HasAccess(attributes: {resource: "clusterRoleBindings", verb: "watch", apiGroup: "", apiVersion: "v1alpha"})
+}

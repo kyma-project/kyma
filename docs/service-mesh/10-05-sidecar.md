@@ -25,16 +25,5 @@ If a Pod doesn't have a sidecar and you did not disable sidecar injection on pur
    
    Sidecar injection is disabled if the output contains the `sidecar.istio.io/inject:false` line. Delete the label and restart the Pod to enable sidecar injection for the Deployment.
    
-3. Make sure that the Istio sidecar injector is running: 
-    
-    ```bash
-    kubectl describe pod -n istio-system -l app=sidecarInjectorWebhook
-    ```
-
-4. Make sure that the Istio sidecar injector can communicate with the Kubernetes API server. Search logs for any connectivity issues. Run this command to get the logs:
-
-    ```bash
-    kubectl logs -n istio-system -l app=sidecarInjectorWebhook
-    ```
 
 For more information, read [this document](#details-sidecar-proxy-injection) or follow the [Istio documentation](https://istio.io/docs/ops/common-problems/injection/).

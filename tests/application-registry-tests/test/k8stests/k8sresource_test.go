@@ -111,27 +111,6 @@ func TestK8sResources(t *testing.T) {
 			testkit.CheckK8sParamsSecret(t, k8sSecret, paramsSecretName, expectedLabels, "headerKey", "headerValue", "queryParameterKey", "queryParameterValue")
 		})
 
-		t.Run("should create istio denier", func(t *testing.T) {
-			denier, err := k8sResourcesClient.GetHandler(resourceName, v1.GetOptions{})
-			require.NoError(t, err)
-
-			testkit.CheckK8sIstioHandler(t, denier, resourceName, expectedLabels, 7, "Not allowed")
-		})
-
-		t.Run("should create istio rule", func(t *testing.T) {
-			rule, err := k8sResourcesClient.GetRule(resourceName, v1.GetOptions{})
-			require.NoError(t, err)
-
-			testkit.CheckK8sIstioRule(t, rule, resourceName, config.Namespace, expectedLabels)
-		})
-
-		t.Run("should create istio checknothing", func(t *testing.T) {
-			checknothing, err := k8sResourcesClient.GetInstance(resourceName, v1.GetOptions{})
-			require.NoError(t, err)
-
-			testkit.CheckK8sIstioInstance(t, checknothing, resourceName, expectedLabels)
-		})
-
 		t.Run("should add service to application custom resource", func(t *testing.T) {
 			application, err := k8sResourcesClient.GetApplicationServices(dummyApp.Name, v1.GetOptions{})
 			require.NoError(t, err)
@@ -248,27 +227,6 @@ func TestK8sResources(t *testing.T) {
 			testkit.CheckK8sParamsSecret(t, k8sSecret, paramsSecretName, expectedLabels, "headerKey", "headerValue", "queryParameterKey", "queryParameterValue")
 		})
 
-		t.Run("should create istio denier", func(t *testing.T) {
-			denier, err := k8sResourcesClient.GetHandler(resourceName, v1.GetOptions{})
-			require.NoError(t, err)
-
-			testkit.CheckK8sIstioHandler(t, denier, resourceName, expectedLabels, 7, "Not allowed")
-		})
-
-		t.Run("should create istio rule", func(t *testing.T) {
-			rule, err := k8sResourcesClient.GetRule(resourceName, v1.GetOptions{})
-			require.NoError(t, err)
-
-			testkit.CheckK8sIstioRule(t, rule, resourceName, config.Namespace, expectedLabels)
-		})
-
-		t.Run("should create istio checknothing", func(t *testing.T) {
-			checknothing, err := k8sResourcesClient.GetInstance(resourceName, v1.GetOptions{})
-			require.NoError(t, err)
-
-			testkit.CheckK8sIstioInstance(t, checknothing, resourceName, expectedLabels)
-		})
-
 		t.Run("should add service to application custom resource", func(t *testing.T) {
 			application, err := k8sResourcesClient.GetApplicationServices(dummyApp.Name, v1.GetOptions{})
 			require.NoError(t, err)
@@ -374,27 +332,6 @@ func TestK8sResources(t *testing.T) {
 			testkit.CheckK8sParamsSecret(t, k8sSecret, paramsSecretName, expectedLabels, "headerKey", "headerValue", "queryParameterKey", "queryParameterValue")
 		})
 
-		t.Run("should create istio denier", func(t *testing.T) {
-			denier, err := k8sResourcesClient.GetHandler(resourceName, v1.GetOptions{})
-			require.NoError(t, err)
-
-			testkit.CheckK8sIstioHandler(t, denier, resourceName, expectedLabels, 7, "Not allowed")
-		})
-
-		t.Run("should create istio rule", func(t *testing.T) {
-			rule, err := k8sResourcesClient.GetRule(resourceName, v1.GetOptions{})
-			require.NoError(t, err)
-
-			testkit.CheckK8sIstioRule(t, rule, resourceName, config.Namespace, expectedLabels)
-		})
-
-		t.Run("should create istio checknothing", func(t *testing.T) {
-			checknothing, err := k8sResourcesClient.GetInstance(resourceName, v1.GetOptions{})
-			require.NoError(t, err)
-
-			testkit.CheckK8sIstioInstance(t, checknothing, resourceName, expectedLabels)
-		})
-
 		t.Run("should add service to application custom resource", func(t *testing.T) {
 			application, err := k8sResourcesClient.GetApplicationServices(dummyApp.Name, v1.GetOptions{})
 			require.NoError(t, err)
@@ -476,24 +413,6 @@ func TestK8sResources(t *testing.T) {
 
 		t.Run("should not create k8s secret with client credentials", func(t *testing.T) {
 			_, err := k8sResourcesClient.GetSecret(resourceName, v1.GetOptions{})
-			require.Error(t, err)
-			require.True(t, k8serrors.IsNotFound(err))
-		})
-
-		t.Run("should not create istio denier", func(t *testing.T) {
-			_, err := k8sResourcesClient.GetHandler(resourceName, v1.GetOptions{})
-			require.Error(t, err)
-			require.True(t, k8serrors.IsNotFound(err))
-		})
-
-		t.Run("should not create istio rule", func(t *testing.T) {
-			_, err := k8sResourcesClient.GetRule(resourceName, v1.GetOptions{})
-			require.Error(t, err)
-			require.True(t, k8serrors.IsNotFound(err))
-		})
-
-		t.Run("should not create istio checknothing", func(t *testing.T) {
-			_, err := k8sResourcesClient.GetInstance(resourceName, v1.GetOptions{})
 			require.Error(t, err)
 			require.True(t, k8serrors.IsNotFound(err))
 		})
@@ -587,27 +506,6 @@ func TestK8sResources(t *testing.T) {
 			testkit.CheckK8sOAuthSecret(t, k8sSecret, resourceName, expectedLabels, "updated-clientId", "updated-clientSecret")
 		})
 
-		t.Run("should preserve istio denier", func(t *testing.T) {
-			denier, err := k8sResourcesClient.GetHandler(resourceName, v1.GetOptions{})
-			require.NoError(t, err)
-
-			testkit.CheckK8sIstioHandler(t, denier, resourceName, expectedLabels, 7, "Not allowed")
-		})
-
-		t.Run("should preserve istio rule", func(t *testing.T) {
-			rule, err := k8sResourcesClient.GetRule(resourceName, v1.GetOptions{})
-			require.NoError(t, err)
-
-			testkit.CheckK8sIstioRule(t, rule, resourceName, config.Namespace, expectedLabels)
-		})
-
-		t.Run("should preserve istio checknothing", func(t *testing.T) {
-			checknothing, err := k8sResourcesClient.GetInstance(resourceName, v1.GetOptions{})
-			require.NoError(t, err)
-
-			testkit.CheckK8sIstioInstance(t, checknothing, resourceName, expectedLabels)
-		})
-
 		t.Run("should update service inside application custom resource", func(t *testing.T) {
 			application, err := k8sResourcesClient.GetApplicationServices(dummyApp.Name, v1.GetOptions{})
 			require.NoError(t, err)
@@ -682,24 +580,6 @@ func TestK8sResources(t *testing.T) {
 
 		t.Run("should remove k8s secret with client credentials", func(t *testing.T) {
 			_, err := k8sResourcesClient.GetSecret(resourceName, v1.GetOptions{})
-			require.Error(t, err)
-			require.True(t, k8serrors.IsNotFound(err))
-		})
-
-		t.Run("should remove istio denier", func(t *testing.T) {
-			_, err := k8sResourcesClient.GetHandler(resourceName, v1.GetOptions{})
-			require.Error(t, err)
-			require.True(t, k8serrors.IsNotFound(err))
-		})
-
-		t.Run("should remove istio rule", func(t *testing.T) {
-			_, err := k8sResourcesClient.GetRule(resourceName, v1.GetOptions{})
-			require.Error(t, err)
-			require.True(t, k8serrors.IsNotFound(err))
-		})
-
-		t.Run("should remove istio checknothing", func(t *testing.T) {
-			_, err := k8sResourcesClient.GetInstance(resourceName, v1.GetOptions{})
 			require.Error(t, err)
 			require.True(t, k8serrors.IsNotFound(err))
 		})
@@ -780,27 +660,6 @@ func TestK8sResources(t *testing.T) {
 			require.NoError(t, err)
 
 			testkit.CheckK8sOAuthSecret(t, k8sSecret, resourceName, expectedLabels, "clientId", "clientSecret")
-		})
-
-		t.Run("should create istio denier", func(t *testing.T) {
-			denier, err := k8sResourcesClient.GetHandler(resourceName, v1.GetOptions{})
-			require.NoError(t, err)
-
-			testkit.CheckK8sIstioHandler(t, denier, resourceName, expectedLabels, 7, "Not allowed")
-		})
-
-		t.Run("should create istio rule", func(t *testing.T) {
-			rule, err := k8sResourcesClient.GetRule(resourceName, v1.GetOptions{})
-			require.NoError(t, err)
-
-			testkit.CheckK8sIstioRule(t, rule, resourceName, config.Namespace, expectedLabels)
-		})
-
-		t.Run("should create istio checknothing", func(t *testing.T) {
-			checknothing, err := k8sResourcesClient.GetInstance(resourceName, v1.GetOptions{})
-			require.NoError(t, err)
-
-			testkit.CheckK8sIstioInstance(t, checknothing, resourceName, expectedLabels)
 		})
 
 		t.Run("should update service inside application custom resource", func(t *testing.T) {
@@ -884,27 +743,6 @@ func TestK8sResources(t *testing.T) {
 			testkit.CheckK8sBasicAuthSecret(t, k8sSecret, resourceName, expectedLabels, "username", "password")
 		})
 
-		t.Run("should create istio denier", func(t *testing.T) {
-			denier, err := k8sResourcesClient.GetHandler(resourceName, v1.GetOptions{})
-			require.NoError(t, err)
-
-			testkit.CheckK8sIstioHandler(t, denier, resourceName, expectedLabels, 7, "Not allowed")
-		})
-
-		t.Run("should create istio rule", func(t *testing.T) {
-			rule, err := k8sResourcesClient.GetRule(resourceName, v1.GetOptions{})
-			require.NoError(t, err)
-
-			testkit.CheckK8sIstioRule(t, rule, resourceName, config.Namespace, expectedLabels)
-		})
-
-		t.Run("should create istio checknothing", func(t *testing.T) {
-			checknothing, err := k8sResourcesClient.GetInstance(resourceName, v1.GetOptions{})
-			require.NoError(t, err)
-
-			testkit.CheckK8sIstioInstance(t, checknothing, resourceName, expectedLabels)
-		})
-
 		t.Run("should update service inside application custom resource", func(t *testing.T) {
 			application, err := k8sResourcesClient.GetApplicationServices(dummyApp.Name, v1.GetOptions{})
 			require.NoError(t, err)
@@ -983,27 +821,6 @@ func TestK8sResources(t *testing.T) {
 			require.NoError(t, err)
 
 			testkit.CheckK8sCertificateGenSecret(t, k8sSecret, resourceName, expectedLabels, "commonName")
-		})
-
-		t.Run("should create istio denier", func(t *testing.T) {
-			denier, err := k8sResourcesClient.GetHandler(resourceName, v1.GetOptions{})
-			require.NoError(t, err)
-
-			testkit.CheckK8sIstioHandler(t, denier, resourceName, expectedLabels, 7, "Not allowed")
-		})
-
-		t.Run("should create istio rule", func(t *testing.T) {
-			rule, err := k8sResourcesClient.GetRule(resourceName, v1.GetOptions{})
-			require.NoError(t, err)
-
-			testkit.CheckK8sIstioRule(t, rule, resourceName, config.Namespace, expectedLabels)
-		})
-
-		t.Run("should create istio checknothing", func(t *testing.T) {
-			checknothing, err := k8sResourcesClient.GetInstance(resourceName, v1.GetOptions{})
-			require.NoError(t, err)
-
-			testkit.CheckK8sIstioInstance(t, checknothing, resourceName, expectedLabels)
 		})
 
 		t.Run("should update service inside application custom resource", func(t *testing.T) {
@@ -1104,27 +921,6 @@ func TestK8sResources(t *testing.T) {
 			testkit.CheckK8sService(t, k8sService, resourceName, expectedLabels, v1core.ProtocolTCP, 80, 8080)
 		})
 
-		t.Run("should create istio denier", func(t *testing.T) {
-			denier, err := k8sResourcesClient.GetHandler(resourceName, v1.GetOptions{})
-			require.NoError(t, err)
-
-			testkit.CheckK8sIstioHandler(t, denier, resourceName, expectedLabels, 7, "Not allowed")
-		})
-
-		t.Run("should create istio rule", func(t *testing.T) {
-			rule, err := k8sResourcesClient.GetRule(resourceName, v1.GetOptions{})
-			require.NoError(t, err)
-
-			testkit.CheckK8sIstioRule(t, rule, resourceName, config.Namespace, expectedLabels)
-		})
-
-		t.Run("should create istio checknothing", func(t *testing.T) {
-			checknothing, err := k8sResourcesClient.GetInstance(resourceName, v1.GetOptions{})
-			require.NoError(t, err)
-
-			testkit.CheckK8sIstioInstance(t, checknothing, resourceName, expectedLabels)
-		})
-
 		t.Run("should update service inside application custom resource", func(t *testing.T) {
 			application, err := k8sResourcesClient.GetApplicationServices(dummyApp.Name, v1.GetOptions{})
 			require.NoError(t, err)
@@ -1191,24 +987,6 @@ func TestK8sResources(t *testing.T) {
 
 		t.Run("should remove k8s secret with client credentials", func(t *testing.T) {
 			_, err := k8sResourcesClient.GetSecret(resourceName, v1.GetOptions{})
-			require.Error(t, err)
-			require.True(t, k8serrors.IsNotFound(err))
-		})
-
-		t.Run("should remove istio denier", func(t *testing.T) {
-			_, err := k8sResourcesClient.GetHandler(resourceName, v1.GetOptions{})
-			require.Error(t, err)
-			require.True(t, k8serrors.IsNotFound(err))
-		})
-
-		t.Run("should remove istio rule", func(t *testing.T) {
-			_, err := k8sResourcesClient.GetRule(resourceName, v1.GetOptions{})
-			require.Error(t, err)
-			require.True(t, k8serrors.IsNotFound(err))
-		})
-
-		t.Run("should remove istio checknothing", func(t *testing.T) {
-			_, err := k8sResourcesClient.GetInstance(resourceName, v1.GetOptions{})
 			require.Error(t, err)
 			require.True(t, k8serrors.IsNotFound(err))
 		})
@@ -1293,24 +1071,6 @@ func TestK8sApplicationDeletion(t *testing.T) {
 
 		t.Run("should remove k8s secret with request parameters", func(t *testing.T) {
 			_, err := k8sResourcesClient.GetSecret(paramsSecretName, v1.GetOptions{})
-			require.Error(t, err)
-			require.True(t, k8serrors.IsNotFound(err))
-		})
-
-		t.Run("should remove istio denier", func(t *testing.T) {
-			_, err := k8sResourcesClient.GetHandler(resourceName, v1.GetOptions{})
-			require.Error(t, err)
-			require.True(t, k8serrors.IsNotFound(err))
-		})
-
-		t.Run("should remove istio rule", func(t *testing.T) {
-			_, err := k8sResourcesClient.GetRule(resourceName, v1.GetOptions{})
-			require.Error(t, err)
-			require.True(t, k8serrors.IsNotFound(err))
-		})
-
-		t.Run("should remove istio checknothing", func(t *testing.T) {
-			_, err := k8sResourcesClient.GetInstance(resourceName, v1.GetOptions{})
 			require.Error(t, err)
 			require.True(t, k8serrors.IsNotFound(err))
 		})

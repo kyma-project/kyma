@@ -2,6 +2,7 @@ package validationproxy
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -228,7 +229,7 @@ func TestProxyHandler_ProxyAppConnectorRequests(t *testing.T) {
 		for _, testCase := range testCases {
 			// given
 			applicationGetter := &mocks.ApplicationGetter{}
-			applicationGetter.On("Get", applicationName, metav1.GetOptions{}).Return(testCase.application, nil)
+			applicationGetter.On("Get", context.Background(), applicationName, metav1.GetOptions{}).Return(testCase.application, nil)
 
 			idCache := cache.New(time.Minute, time.Minute)
 
@@ -374,7 +375,7 @@ func TestProxyHandler_ProxyAppConnectorRequests(t *testing.T) {
 		for _, testCase := range testCases {
 			// given
 			applicationGetter := &mocks.ApplicationGetter{}
-			applicationGetter.On("Get", applicationName, metav1.GetOptions{}).Return(testCase.application, nil)
+			applicationGetter.On("Get", context.Background(), applicationName, metav1.GetOptions{}).Return(testCase.application, nil)
 
 			idCache := cache.New(time.Minute, time.Minute)
 			if testCase.application.Spec.CompassMetadata != nil {
@@ -420,7 +421,7 @@ func TestProxyHandler_ProxyAppConnectorRequests(t *testing.T) {
 		for _, testCase := range testCases {
 			// given
 			applicationGetter := &mocks.ApplicationGetter{}
-			applicationGetter.On("Get", applicationName, metav1.GetOptions{}).Return(nil, fmt.Errorf("some error"))
+			applicationGetter.On("Get", context.Background(), applicationName, metav1.GetOptions{}).Return(nil, fmt.Errorf("some error"))
 
 			idCache := cache.New(time.Minute, time.Minute)
 
@@ -457,7 +458,7 @@ func TestProxyHandler_ProxyAppConnectorRequests(t *testing.T) {
 			`Hash=f4cf22fb633d4df500e371daf703d4b4d14a0ea9d69cd631f95f9e6ba840f8ad;Subject="CN=test-application,OU=OrgUnit,O=Organization,L=Waldorf,ST=Waldorf,C=DE";URI=`
 
 		applicationGetter := &mocks.ApplicationGetter{}
-		applicationGetter.On("Get", applicationName, metav1.GetOptions{}).Return(applicationManagedByCompass, nil)
+		applicationGetter.On("Get", context.Background(), applicationName, metav1.GetOptions{}).Return(applicationManagedByCompass, nil)
 
 		idCache := cache.New(time.Minute, time.Minute)
 
@@ -495,7 +496,7 @@ func TestProxyHandler_ProxyAppConnectorRequests(t *testing.T) {
 				`URI=spiffe://cluster.local/ns/istio-system/sa/istio-ingressgateway-service-account`
 
 		applicationGetter := &mocks.ApplicationGetter{}
-		applicationGetter.On("Get", applicationName, metav1.GetOptions{}).Return(applicationManagedByCompass, nil)
+		applicationGetter.On("Get", context.Background(), applicationName, metav1.GetOptions{}).Return(applicationManagedByCompass, nil)
 
 		idCache := cache.New(time.Minute, time.Minute)
 

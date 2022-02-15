@@ -122,8 +122,8 @@ func (r *Resource) Delete(name string, timeout time.Duration, callbacks ...func(
 		return true, nil
 	}
 	_, err = watchtools.Until(ctx, initialResourceVersion, r.ResCli, condition)
-	if err != nil {
-		return err
+	if err == nil || err.Error() == watchtools.ErrWatchClosed.Error() {
+		return nil
 	}
-	return nil
+	return err
 }

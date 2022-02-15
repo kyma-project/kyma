@@ -15,7 +15,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-//go:generate mockery -name=ProxyConfigurator
+//go:generate mockery --name=ProxyConfigurator
 type ProxyConfigurator interface {
 	SetURLAndCerts(data cache.ConnectionData) error
 }

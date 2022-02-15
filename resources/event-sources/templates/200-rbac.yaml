@@ -9,6 +9,27 @@ kind: ClusterRole
 metadata:
   name: {{ template "controller-manager.fullname" . }}
 rules:
+  - apiGroups:
+      - ""
+    resources:
+      - services
+    verbs:
+      - get
+      - list
+      - create
+      - update
+      - watch
+  - apiGroups:
+      - apps
+    resources:
+      - deployments
+    verbs:
+      - get
+      - list
+      - create
+      - update
+      - watch
+
   # Metrics/logging configs
   - apiGroups:
       - ""
@@ -32,16 +53,6 @@ rules:
       - httpsources/status
     verbs:
       - update
-  # Knative Services
-  - apiGroups:
-      - serving.knative.dev
-    resources:
-      - services
-    verbs:
-      - list
-      - watch
-      - create
-      - update
   # Channels
   - apiGroups:
       - messaging.knative.dev
@@ -62,9 +73,9 @@ rules:
       - patch
       - update
   - apiGroups:
-      - "authentication.istio.io"
+      - "security.istio.io"
     resources:
-      - policies
+      - peerauthentications
     verbs:
       - create
       - patch

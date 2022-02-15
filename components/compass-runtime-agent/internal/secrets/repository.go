@@ -1,6 +1,7 @@
 package secrets
 
 import (
+	"context"
 	"fmt"
 
 	"k8s.io/apimachinery/pkg/types"
@@ -14,16 +15,16 @@ import (
 // ManagerConstructor creates Secret Manager for specified namespace
 type ManagerConstructor func(namespace string) Manager
 
-//go:generate mockery -name=Manager
+//go:generate mockery --name=Manager
 // Manager contains operations for managing k8s secrets
 type Manager interface {
-	Get(name string, options metav1.GetOptions) (*v1.Secret, error)
-	Create(secret *v1.Secret) (*v1.Secret, error)
-	Update(secret *v1.Secret) (*v1.Secret, error)
-	Delete(name string, options *metav1.DeleteOptions) error
+	Get(ctx context.Context, name string, options metav1.GetOptions) (*v1.Secret, error)
+	Create(ctx context.Context, secret *v1.Secret, options metav1.CreateOptions) (*v1.Secret, error)
+	Update(ctx context.Context, secret *v1.Secret, options metav1.UpdateOptions) (*v1.Secret, error)
+	Delete(ctx context.Context, name string, options metav1.DeleteOptions) error
 }
 
-//go:generate mockery -name=Repository
+//go:generate mockery --name=Repository
 // Repository contains operations for managing client credentials
 type Repository interface {
 	Get(name types.NamespacedName) (map[string][]byte, error)
@@ -49,7 +50,7 @@ func (r *repository) UpsertWithReplace(name types.NamespacedName, data map[strin
 
 	secret := makeSecret(name, data)
 
-	_, err := secretManager.Create(secret)
+	_, err := secretManager.Create(context.Background(), secret, metav1.CreateOptions{})
 	if err != nil {
 		if k8serrors.IsAlreadyExists(err) {
 			return r.replace(secretManager, secret)
@@ -62,12 +63,12 @@ func (r *repository) UpsertWithReplace(name types.NamespacedName, data map[strin
 }
 
 func (r *repository) replace(secretManager Manager, secret *v1.Secret) error {
-	err := secretManager.Delete(secret.Name, &metav1.DeleteOptions{})
+	err := secretManager.Delete(context.Background(), secret.Name, metav1.DeleteOptions{})
 	if err != nil {
 		return errors.Wrap(err, fmt.Sprintf("Deleting %s secret failed", secret.Name))
 	}
 
-	_, err = secretManager.Create(secret)
+	_, err = secretManager.Create(context.Background(), secret, metav1.CreateOptions{})
 	if err != nil {
 		return err
 	}
@@ -79,7 +80,7 @@ func (r *repository) replace(secretManager Manager, secret *v1.Secret) error {
 func (r *repository) Get(name types.NamespacedName) (map[string][]byte, error) {
 	secretManager := r.secretsManagerConstructor(name.Namespace)
 
-	secret, err := secretManager.Get(name.Name, metav1.GetOptions{})
+	secret, err := secretManager.Get(context.Background(), name.Name, metav1.GetOptions{})
 	if err != nil {
 		return nil, err
 	}
@@ -108,10 +109,10 @@ func (r *repository) upsert(name types.NamespacedName, data map[string][]byte) e
 
 	secret := makeSecret(name, data)
 
-	_, err := secretManager.Update(secret)
+	_, err := secretManager.Update(context.Background(), secret, metav1.UpdateOptions{})
 	if err != nil {
 		if k8serrors.IsNotFound(err) {
-			_, err = secretManager.Create(secret)
+			_, err = secretManager.Create(context.Background(), secret, metav1.CreateOptions{})
 			return err
 		}
 		return errors.Wrapf(err, fmt.Sprintf("Updating %s secret failed while upserting", name))

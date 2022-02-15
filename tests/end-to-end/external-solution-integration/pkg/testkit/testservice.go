@@ -7,6 +7,8 @@ import (
 	"net/http"
 	"strconv"
 
+	cloudevents "github.com/cloudevents/sdk-go"
+
 	"k8s.io/apimachinery/pkg/runtime"
 
 	"k8s.io/client-go/dynamic"
@@ -101,6 +103,68 @@ func (ts *TestService) checkValue() (int, error) {
 	}
 
 	return response.Counter, nil
+}
+
+// DumpAllReceivedEvents returns an error containing all the received CloudEvents
+func (ts *TestService) DumpAllReceivedEvents() error {
+
+	url := ts.GetTestServiceURL()
+	endpoint := url + "/ce"
+
+	resp, err := ts.HttpClient.Get(endpoint)
+
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		body, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			return err
+		}
+		return errors.Errorf("error response: %s", body)
+	}
+
+	var response []cloudevents.Event
+
+	err = json.NewDecoder(resp.Body).Decode(&response)
+	if err != nil {
+		return err
+	}
+
+	var receivedCEs []string
+
+	for _, event := range response {
+		s := fmt.Sprintf("Event %s: %+v \n", event.Context.GetID(), event)
+		receivedCEs = append(receivedCEs, s)
+	}
+
+	return errors.Errorf("received cloudevents: %s", receivedCEs)
+}
+
+func (ts *TestService) CheckEventId(eventId string) error {
+
+	url := ts.GetTestServiceURL()
+	endpoint := url + "/ce/by-uuid/" + eventId
+
+	resp, err := ts.HttpClient.Get(endpoint)
+
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		body, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			return err
+		}
+
+		return errors.Errorf("error response: %s", body)
+	}
+
+	return nil
 }
 
 func (ts *TestService) IsReady() error {

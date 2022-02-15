@@ -61,8 +61,8 @@ hpa:
 # Maintenance options
 maintenance:
   image:
-    name: eu.gcr.io/kyma-project/test-infra/alpine-kubectl
-    tag: "v20200617-32c1f3ff"
+    name: eu.gcr.io/kyma-project/incubator/develop/k8s-tools
+    tag: "20201023-5de446cf"
 
 # Overrides for the Hydra chart
 hydra:
@@ -114,7 +114,7 @@ hydra:
 # Overrides for the Oathkeeper chart
 oathkeeper:
   kubectlJob:
-    image: eu.gcr.io/kyma-project/test-infra/alpine-kubectl:v20200617-32c1f3ff
+    image: eu.gcr.io/kyma-project/incubator/develop/k8s-tools:20201023-5de446cf
   oathkeeper:
     config:
       authenticators:

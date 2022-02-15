@@ -1,0 +1,138 @@
+scalar LimitType @goModel(model: "k8s.io/api/core/v1.LimitType")
+
+type ResourceLimits {
+  memory: String
+  cpu: String
+}
+
+# LIMIT RANGE
+type LimitRangeItem @goModel(model: "k8s.io/api/core/v1.LimitRangeItem") {
+  type: LimitType!
+  max: ResourceLimits!
+  default: ResourceLimits!
+  defaultRequest: ResourceLimits!
+}
+
+type LimitRangeSpec @goModel(model: "k8s.io/api/core/v1.LimitRangeSpec") {
+  limits: [LimitRangeItem!]!
+}
+type LimitRange @goModel(model: "k8s.io/api/core/v1.LimitRange") {
+  name: String!
+  spec: LimitRangeSpec!
+  json: JSON!
+}
+
+# RESOURCE QUOTA
+
+type ResourceQuotaHard {
+  limits: ResourceLimits!
+  requests: ResourceLimits!
+  pods: String!
+}
+
+type ResourceQuotaSpec @goModel(model: "k8s.io/api/core/v1.ResourceQuotaSpec") {
+  hard: ResourceQuotaHard!
+}
+type ResourceQuota @goModel(model: "k8s.io/api/core/v1.ResourceQuota") {
+  name: String!
+  spec: ResourceQuotaSpec!
+  json: JSON!
+}
+
+extend type Query {
+  limitRanges(namespace: String!): [LimitRange!]!
+  @HasAccess(
+    attributes: {
+      resource: "limitRange"
+      verb: "list"
+      apiGroup: ""
+      apiVersion: "v1"
+      namespaceArg: "namespace"
+    }
+  )
+
+  resourceQuotas(namespace: String!): [ResourceQuota!]!
+  @HasAccess(
+    attributes: {
+      resource: "resourcequotas"
+      verb: "list"
+      apiGroup: ""
+      apiVersion: "v1"
+      namespaceArg: "namespace"
+    }
+  )
+
+  # resourceQuotasStatus(namespace: String!): ResourceQuotasStatus!
+  # @HasAccess(
+  #   attributes: {
+  #     resource: "resourcequotas"
+  #     verb: "list"
+  #     apiGroup: ""
+  #     apiVersion: "v1"
+  #     namespaceArg: "namespace"
+  #   }
+  # )
+}
+
+enum LimitRangeType {
+  Container
+  Pod
+}
+
+input ResourceQuotaInput {
+  limits: ResourceValuesInput!
+  requests: ResourceValuesInput!
+}
+
+input LimitRangeInput {
+  default: ResourceValuesInput!
+  defaultRequest: ResourceValuesInput!
+  max: ResourceValuesInput!
+  type: LimitRangeType!
+}
+
+extend type Mutation {
+  createLimitRange(namespace: String!, name: String!, limitRange: LimitRangeInput!): LimitRange
+  @HasAccess(
+    attributes: {
+      resource: "limitrange"
+      verb: "create"
+      apiGroup: ""
+      apiVersion: "v1"
+      namespaceArg: "namespace"
+    }
+  )
+
+  updateLimitRange(namespace: String!, name: String!, json: JSON!): LimitRange
+  @HasAccess(
+    attributes: {
+      resource: "limitrange"
+      verb: "update"
+      apiGroup: ""
+      apiVersion: "v1"
+      namespaceArg: "namespace"
+    }
+  )
+
+  createResourceQuota(namespace: String!, name: String!, resourceQuota: ResourceQuotaInput!): ResourceQuota
+  @HasAccess(
+    attributes: {
+      resource: "resourcequotas"
+      verb: "create"
+      apiGroup: ""
+      apiVersion: "v1"
+      namespaceArg: "namespace"
+    }
+  )
+
+  updateResourceQuota(namespace: String!, name: String!, json: JSON!): ResourceQuota
+  @HasAccess(
+    attributes: {
+      resource: "resourcequotas"
+      verb: "update"
+      apiGroup: ""
+      apiVersion: "v1"
+      namespaceArg: "namespace"
+    }
+  )
+}

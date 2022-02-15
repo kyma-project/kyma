@@ -10,11 +10,12 @@ import (
 	appbrokerclientset "github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned"
 	appconnectorclientset "github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned"
 
+	sourcesv1alpha1 "github.com/kyma-project/kyma/components/event-sources/client/generated/clientset/internalclientset/typed/sources/v1alpha1"
+
 	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/internal/runner"
 
 	eventingv1alpha1clientset "knative.dev/eventing/pkg/client/clientset/versioned/typed/eventing/v1alpha1"
 	messagingv1alpha1clientset "knative.dev/eventing/pkg/client/clientset/versioned/typed/messaging/v1alpha1"
-	servingclientset "knative.dev/serving/pkg/client/clientset/versioned"
 )
 
 type EventMeshUpgradeTest struct {
@@ -22,7 +23,7 @@ type EventMeshUpgradeTest struct {
 
 	appConnectorInterface appconnectorclientset.Interface
 	messagingClient       messagingv1alpha1clientset.MessagingV1alpha1Interface
-	servingClient         servingclientset.Interface
+	sourcesClient         sourcesv1alpha1.SourcesV1alpha1Interface
 	appBrokerCli          appbrokerclientset.Interface
 	scCli                 scclientset.Interface
 	eventingCli           eventingv1alpha1clientset.EventingV1alpha1Interface
@@ -36,7 +37,7 @@ func NewEventMeshUpgradeTest(
 	appConnectorCli appconnectorclientset.Interface,
 	k8sCli kubernetes.Interface,
 	messagingCli messagingv1alpha1clientset.MessagingV1alpha1Interface,
-	servingCli servingclientset.Interface,
+	sourcesCli sourcesv1alpha1.SourcesV1alpha1Interface,
 	appBrokerCli appbrokerclientset.Interface,
 	scCli scclientset.Interface,
 	eventingCli eventingv1alpha1clientset.EventingV1alpha1Interface,
@@ -45,7 +46,7 @@ func NewEventMeshUpgradeTest(
 		k8sInterface:          k8sCli,
 		messagingClient:       messagingCli,
 		appConnectorInterface: appConnectorCli,
-		servingClient:         servingCli,
+		sourcesClient:         sourcesCli,
 		appBrokerCli:          appBrokerCli,
 		scCli:                 scCli,
 		eventingCli:           eventingCli,

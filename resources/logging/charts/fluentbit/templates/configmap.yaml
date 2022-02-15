@@ -1,4 +1,4 @@
-{{- if .Values.enabled }}
+{{- if and .Values.enabled (not .Values.existingConfigMap) }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -42,6 +42,9 @@ data:
 {{- end }}
 {{- if .Values.conf.Output.forward.enabled }}
     @INCLUDE output-forward.conf
+{{- end }}
+{{- if .Values.conf.Output.http.enabled }}
+    @INCLUDE output-http.conf
 {{- end }}
 {{- if .Values.conf.Output.stdout.enabled }}
     @INCLUDE output-stdout.conf
@@ -112,7 +115,9 @@ data:
         Kube_URL            https://kubernetes.default.svc:443
         Merge_Log           {{ .Values.conf.Filter.Kubernetes.Merge_Log }}
         Keep_Log            {{ .Values.conf.Filter.Kubernetes.Keep_Log }}
+{{- if .Values.conf.Filter.Kubernetes.Merge_Log_Key }}
         Merge_Log_Key       {{ .Values.conf.Filter.Kubernetes.Merge_Log_Key }}
+{{- end }}
         K8S-Logging.Parser  On
         K8S-Logging.Exclude On
 {{- if .Values.conf.Filter.custom_parser.enabled }}
@@ -207,6 +212,46 @@ data:
 {{- if and (.Values.backend.forward.tls.cert) (.Values.backend.forward.tls.key) }}
         tls.crt_file /secure/forward-tls.crt
         tls.key_file /secure/forward-tls.key
+{{- end }}
+{{- end }}
+{{- end }}
+
+{{- if .Values.conf.Output.http.enabled }}
+  output-http.conf: |
+    [OUTPUT]
+        Name  http
+        Match {{ .Values.conf.Output.http.Match }}
+        Host  {{ .Values.backend.http.host }}
+        Port  {{ .Values.backend.http.port }}
+        URI  {{ .Values.backend.http.uri }}
+{{- if .Values.backend.http.compress }}
+        compress {{ .Values.backend.http.compress }}
+{{- end }}
+{{- if .Values.backend.http.json_date_key }}
+        json_date_key {{ .Values.backend.http.json_date_key }}
+{{- end }}
+{{- if .Values.backend.http.json_date_format }}
+        json_date_format {{ .Values.backend.http.json_date_format }}
+{{- end }}
+{{- if .Values.backend.http.format }}
+        Format {{ .Values.backend.http.format }}
+{{- end }}
+{{- if .Values.backend.http.http_user }}
+        HTTP_User {{ .Values.backend.http.http_user }}
+        HTTP_Passwd {{ .Values.backend.http.http_passwd }}
+{{- end }}
+{{- if (.Values.backend.http.tls)  }}
+        tls   {{ .Values.backend.http.tls }}
+        tls.verify {{ .Values.backend.http.tls_verify }}
+{{- if (.Values.backend.http.tls_ca)  }}
+        tls.ca_file /secure/http-tls-ca.crt
+{{- end }}
+{{- if (.Values.backend.http.tls_debug)  }}
+        tls.debug {{ .Values.backend.http.tls_debug }}
+{{- end }}
+{{- if and (.Values.backend.http.tls_cert) (.Values.backend.http.tls_key) }}
+        tls.crt_file /secure/http-tls.crt
+        tls.key_file /secure/http-tls.key
 {{- end }}
 {{- end }}
 {{- end }}

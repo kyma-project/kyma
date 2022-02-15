@@ -1,0 +1,41 @@
+type GitRepository @goModel(model: "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1.GitRepository") {
+    name: String!
+    namespace: String!
+    spec: GitRepositorySpec!
+}
+
+type GitRepositorySpec @goModel(model: "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1.GitRepositorySpec") {
+    url: String!
+    auth: RepositoryAuth
+}
+
+input GitRepositorySpecInput @goModel(model: "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1.GitRepositorySpec") {
+    url: String!
+    auth: RepositoryAuthInput
+}
+
+type RepositoryAuth @goModel(model: "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1.RepositoryAuth") {
+    type: RepositoryAuthType!
+    secretName: String!
+}
+
+input RepositoryAuthInput @goModel(model: "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1.RepositoryAuth") {
+    type: RepositoryAuthType!
+    secretName: String!
+}
+
+enum RepositoryAuthType @goModel(model: "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1.RepositoryAuthType") {
+    BASIC
+    KEY
+}
+
+extend type Query {
+    gitRepositories(namespace: String!): [GitRepository!] @HasAccess(attributes: {resource: "gitrepositories", verb: "list", apiGroup: "serverless.kyma-project.io", apiVersion: "v1alpha1", namespaceArg: "namespace"})
+    gitRepository(namespace: String!, name: String!): GitRepository @HasAccess(attributes: {resource: "gitrepositories", verb: "list", apiGroup: "serverless.kyma-project.io", apiVersion: "v1alpha1", namespaceArg: "namespace"})
+}
+
+extend type Mutation {
+    createGitRepository(namespace: String!, name: String!, spec: GitRepositorySpecInput!): GitRepository @HasAccess(attributes: {resource: "gitrepositories", verb: "create", apiGroup: "serverless.kyma-project.io", apiVersion: "v1alpha1", namespaceArg: "namespace"})
+    updateGitRepository(namespace: String!, name: String!, spec: GitRepositorySpecInput!): GitRepository @HasAccess(attributes: {resource: "gitrepositories", verb: "update", apiGroup: "serverless.kyma-project.io", apiVersion: "v1alpha1", namespaceArg: "namespace"})
+    deleteGitRepository(namespace: String!, name: String!): GitRepository @HasAccess(attributes: {resource: "gitrepositories", verb: "delete", apiGroup: "serverless.kyma-project.io", apiVersion: "v1alpha1", namespaceArg: "namespace"})
+}

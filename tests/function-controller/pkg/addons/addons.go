@@ -4,7 +4,10 @@ import (
 	"context"
 	"time"
 
+	"github.com/kyma-project/kyma/tests/function-controller/pkg/helpers"
+
 	"github.com/kyma-project/helm-broker/pkg/apis/addons/v1alpha1"
+	"github.com/sirupsen/logrus"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/watch"
@@ -22,7 +25,7 @@ type AddonConfiguration struct {
 	name        string
 	namespace   string
 	waitTimeout time.Duration
-	log         shared.Logger
+	log         *logrus.Entry
 	verbose     bool
 }
 
@@ -74,7 +77,7 @@ func (a *AddonConfiguration) Delete() error {
 	return nil
 }
 
-func (a *AddonConfiguration) get() (*v1alpha1.AddonsConfiguration, error) {
+func (a *AddonConfiguration) Get() (*v1alpha1.AddonsConfiguration, error) {
 	u, err := a.resCli.Get(a.name)
 	if err != nil {
 		return &v1alpha1.AddonsConfiguration{}, errors.Wrapf(err, "while getting AddonsConfiguration %s in namespace %s", a.name, a.namespace)
@@ -88,8 +91,23 @@ func (a *AddonConfiguration) get() (*v1alpha1.AddonsConfiguration, error) {
 	return &ac, nil
 }
 
+func (a AddonConfiguration) LogResource() error {
+	ad, err := a.Get()
+	if err != nil {
+		return err
+	}
+
+	out, err := helpers.PrettyMarshall(ad)
+	if err != nil {
+		return err
+	}
+
+	a.log.Infof("Addon Configuration Resource: %s", out)
+	return nil
+}
+
 func (a *AddonConfiguration) WaitForStatusRunning() error {
-	ac, err := a.get()
+	ac, err := a.Get()
 	if err != nil {
 		return err
 	}
@@ -127,15 +145,17 @@ func (a *AddonConfiguration) isAddonConfigurationReady() func(event watch.Event)
 			return false, err
 		}
 
+		if ac.Status.Phase == v1alpha1.AddonsConfigurationFailed {
+			return false, errors.New("Addon configuration is in failed state")
+		}
+
 		return a.isReadyPhase(ac), nil
 	}
 }
 
 func (a AddonConfiguration) isReadyPhase(addonsConfig v1alpha1.AddonsConfiguration) bool {
 	ready := addonsConfig.Status.CommonAddonsConfigurationStatus.Phase == v1alpha1.AddonsConfigurationReady
-
 	shared.LogReadiness(ready, a.verbose, a.name, a.log, addonsConfig)
-
 	return ready
 }
 

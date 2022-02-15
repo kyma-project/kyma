@@ -4,7 +4,7 @@
 
 This project contains end-to-end upgrade tests run for the Kyma [upgrade plan](https://github.com/kyma-project/test-infra/blob/master/prow/scripts/cluster-integration/kyma-gke-upgrade.sh) on CI. The tests are written in Go. The framework allows you to define two actions:
 
-- Preparing the data
+- Preparing the data 
 - Running tests against the prepared data
 
 ## Prerequisites
@@ -20,10 +20,10 @@ To set up the project, use these tools:
 Run end-to-end upgrade tests for the Kyma [upgrade plan](https://github.com/kyma-project/test-infra/blob/master/prow/scripts/cluster-integration/kyma-gke-upgrade.sh) on Prow. The continuous integration flow looks as follows:
 
 1. Install Kyma from the [latest](https://github.com/kyma-project/kyma/releases/latest) release.
-2. Create data for end-to-end upgrade tests. The **CreateResources** method is executed for all registered tests.
-3. Upgrade Kyma cluster.
-4. Run the [`testing.sh`](../../../installation/scripts/testing.sh) script.
-5. Run end-to-end upgrade tests. The **TestResources** method is executed for all registered tests.
+2. Install the upgrade-test [helm chart](chart/upgrade). 
+3. Execute all TestDefinitions with the label `kyma-project.io/test.before-upgrade`.
+4. Upgrade the Kyma cluster.
+5. Execute all TestDefinitions with the label `kyma-project.io/test.after-upgrade`.
 
 ### Use environment variables
 
@@ -46,6 +46,7 @@ Use the following flags to configure the application:
 |-----|:---------:|------------|
 | **action** | YES | Defines what kind of action to execute. The possible values are `prepareData` and `executeTests`. |
 | **verbose** | NO | Prints logs for all tests. |
+| **testName** | NO | Limit test execution to the given test. If not specified, all tests will be executed. |
 
 See the example:
 
@@ -54,6 +55,9 @@ go run main.go --action prepareData --verbose
 ```
 
 ## Development
+
+>**NOTE:** The following approach for adding new tests to the upgrade scenario is not needed anymore. To prepare data during the preparation phase, create a new TestDefinition that executes your preparation code and add the label `kyma-project.io/before-upgrade=true`. To execute evaluation code during the evaluation phase, create a new TestDefinition with the label `kyma-project.io/after-upgrade=true` 
+
 
 This section presents how to add and run a new test. It also describes how to verify the code and ensure that your test is correct.
 
@@ -100,13 +104,13 @@ Run the application without building a binary file. To do so:
 
    ```bash
    kubectl create configmap tests-info -n kyma-system
-   env APP_WORKING_NAMESPACE=kyma-system APP_TESTS_INFO_CONFIG_MAP_NAME=tests-info APP_KUBECONFIG_PATH=/Users/$USER/.kube/config APP_LOGGER_LEVEL=debug APP_TESTING_ADDONS_URL="https://github.com/kyma-project/addons/releases/download/0.8.0/index-testing.yaml" go run main.go --action prepareData
+   env APP_WORKING_NAMESPACE=kyma-system APP_TESTS_INFO_CONFIG_MAP_NAME=tests-info APP_KUBECONFIG_PATH=/Users/$USER/.kube/config APP_LOGGER_LEVEL=debug APP_TESTING_ADDONS_URL="https://github.com/kyma-project/addons/releases/download/0.8.0/index-testing.yaml" go run main.go --action prepareData --testName $YOURTESTNAME
    ```
 
 2. Run tests:
 
    ```bash
-   env APP_WORKING_NAMESPACE=kyma-system APP_TESTS_INFO_CONFIG_MAP_NAME=tests-info APP_KUBECONFIG_PATH=/Users/$USER/.kube/config APP_LOGGER_LEVEL=debug APP_TESTING_ADDONS_URL="https://github.com/kyma-project/addons/releases/download/0.8.0/index-testing.yaml" go run main.go --action executeTests
+   env APP_WORKING_NAMESPACE=kyma-system APP_TESTS_INFO_CONFIG_MAP_NAME=tests-info APP_KUBECONFIG_PATH=/Users/$USER/.kube/config APP_LOGGER_LEVEL=debug APP_TESTING_ADDONS_URL="https://github.com/kyma-project/addons/releases/download/0.8.0/index-testing.yaml" go run main.go --action executeTests --testName $YOURTESTNAME
    ```
 
 For the description of the available environment variables, see [this](#use-environment-variables) section.
@@ -121,10 +125,16 @@ Run the application using Helm:
     helm install --name e2e-test-upgrade --namespace {namespace} ./chart/upgrade/ --wait --tls
     ```
 
-2. Run tests:
+2. Run preparation phase:
 
     ```bash
-    helm test e2e-test-upgrade --tls
+    kyma test run -l kyma-project.io/before-upgrade=true
+    ```
+
+3. Run evaluation phase:
+
+    ```bash
+    kyma test run -l kyma-project.io/after-upgrade=true
     ```
 
 ### Run tests using Telepresence
@@ -135,7 +145,7 @@ Run the application using Helm:
 2. Run tests:
 
    ```bash
-   env APP_KUBECONFIG_PATH=/Users/$USER/.kube/config APP_LOGGER_LEVEL=debug APP_TESTING_ADDONS_URL="https://github.com/kyma-project/addons/releases/download/0.8.0/index-testing.yaml" telepresence --run go run main.go  --action executeTests --verbose
+   env APP_KUBECONFIG_PATH=/Users/$USER/.kube/config APP_LOGGER_LEVEL=debug APP_TESTING_ADDONS_URL="https://github.com/kyma-project/addons/releases/download/0.8.0/index-testing.yaml" telepresence --run go run main.go  --action executeTests --testName $YOURTESTNAME --verbose
    ```
 
 ### Verify the code

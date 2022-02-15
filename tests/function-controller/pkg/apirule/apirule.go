@@ -4,6 +4,9 @@ import (
 	"context"
 	"time"
 
+	"github.com/kyma-project/kyma/tests/function-controller/pkg/helpers"
+
+	"github.com/sirupsen/logrus"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/watch"
@@ -22,7 +25,7 @@ type APIRule struct {
 	name        string
 	namespace   string
 	waitTimeout time.Duration
-	log         shared.Logger
+	log         *logrus.Entry
 	verbose     bool
 }
 
@@ -37,7 +40,7 @@ func New(name string, c shared.Container) *APIRule {
 	}
 }
 
-func (a *APIRule) Create(name, host string, port uint32) (string, error) {
+func (a *APIRule) Create(serviceName, host string, port uint32) (string, error) {
 	gateway := "kyma-gateway.kyma-system.svc.cluster.local"
 
 	rule := &apiruleTypes.APIRule{
@@ -65,7 +68,7 @@ func (a *APIRule) Create(name, host string, port uint32) (string, error) {
 				},
 			},
 			Service: &apiruleTypes.Service{
-				Name: &name,
+				Name: &serviceName,
 				Port: &port,
 				Host: &host,
 			},
@@ -88,7 +91,7 @@ func (a *APIRule) Delete() error {
 	return nil
 }
 
-func (a *APIRule) get() (*apiruleTypes.APIRule, error) {
+func (a *APIRule) Get() (*apiruleTypes.APIRule, error) {
 	u, err := a.resCli.Get(a.name)
 	if err != nil {
 		return &apiruleTypes.APIRule{}, errors.Wrapf(err, "while getting ApiRule %s in namespace %s", a.name, a.namespace)
@@ -103,7 +106,7 @@ func (a *APIRule) get() (*apiruleTypes.APIRule, error) {
 }
 
 func (a *APIRule) WaitForStatusRunning() error {
-	apirule, err := a.get()
+	apirule, err := a.Get()
 	if err != nil {
 		return err
 	}
@@ -123,6 +126,21 @@ func (a *APIRule) WaitForStatusRunning() error {
 	return nil
 }
 
+func (a *APIRule) LogResource() error {
+	apiRule, err := a.Get()
+	if err != nil {
+		return err
+	}
+
+	out, err := helpers.PrettyMarshall(apiRule)
+	if err != nil {
+		return err
+	}
+
+	a.log.Infof("%s", out)
+	return nil
+}
+
 func (a *APIRule) isApiRuleReady(name string) func(event watch.Event) (bool, error) {
 	return func(event watch.Event) (bool, error) {
 		u, ok := event.Object.(*unstructured.Unstructured)
@@ -130,7 +148,7 @@ func (a *APIRule) isApiRuleReady(name string) func(event watch.Event) (bool, err
 			return false, shared.ErrInvalidDataType
 		}
 		if u.GetName() != name {
-			a.log.Logf("names mismatch, object's name %s, supplied %s", u.GetName(), name)
+			a.log.Infof("names mismatch, object's name %s, supplied %s", u.GetName(), name)
 			return false, nil
 		}
 

@@ -11,21 +11,14 @@ import (
 	"go.opencensus.io/stats/view"
 	"go.uber.org/zap"
 	"knative.dev/eventing/pkg/adapter"
-	"knative.dev/eventing/pkg/kncloudevents"
-	"knative.dev/eventing/pkg/tracing"
 	"knative.dev/pkg/logging"
 	"knative.dev/pkg/metrics"
 	"knative.dev/pkg/profiling"
 	"knative.dev/pkg/signals"
 	"knative.dev/pkg/source"
-	tracingconfig "knative.dev/pkg/tracing/config"
 
 	eshttp "github.com/kyma-project/kyma/components/event-sources/adapter/http"
 )
-
-var DisabledTracingConfig = &tracingconfig.Config{
-	Backend: tracingconfig.None,
-}
 
 func main() {
 	setupAdapter("http-source", eshttp.NewEnvConfig, eshttp.NewAdapter)
@@ -97,27 +90,14 @@ func setupAdapter(component string, ector adapter.EnvConfigConstructor, ctor ada
 		logger.Error("error building statsreporter", zap.Error(err))
 	}
 
-	tracingCfg := DisabledTracingConfig
-
-	switch v := interface{}(ector).(type) {
-	case eshttp.AdapterEnvConfigAccessor:
-		if v.IsTracingEnabled() {
-			tracingCfg = tracing.OnePercentSampling
-		}
-	}
-	if err = tracing.SetupStaticPublishing(logger, "", tracingCfg); err != nil {
-		// If tracing doesn't work, we will log an error, but allow the adapter
-		// to continue to start.
-		logger.Error("Error setting up trace publishing", zap.Error(err))
-	}
-
-	eventsClient, err := kncloudevents.NewDefaultClient(env.GetSinkURI())
+	v := env.(eshttp.AdapterEnvConfigAccessor)
+	ceClient, err := eshttp.NewCloudEventsClient(v.GetPort())
 	if err != nil {
-		logger.Fatal("error building cloud event client", zap.Error(err))
+		logger.Fatal("Could not create cloudevents client", zap.Error(err))
 	}
 
 	// Configuring the adapter
-	adptr := ctor(ctx, env, eventsClient, reporter)
+	adptr := ctor(ctx, env, ceClient, reporter)
 
 	logger.Info("Starting Receive Adapter", zap.Any("adapter", adptr))
 

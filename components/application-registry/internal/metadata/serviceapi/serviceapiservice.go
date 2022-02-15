@@ -5,7 +5,6 @@ import (
 	"github.com/kyma-project/kyma/components/application-registry/internal/k8sconsts"
 	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/accessservice"
 	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/applications"
-	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/istio"
 	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/model"
 	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/secrets"
 	"k8s.io/apimachinery/pkg/types"
@@ -28,22 +27,19 @@ type defaultService struct {
 	accessServiceManager            accessservice.AccessServiceManager
 	secretsService                  secrets.Service
 	requestParametersSecretsService secrets.RequestParametersService
-	istioService                    istio.Service
 }
 
 func NewService(
 	nameResolver k8sconsts.NameResolver,
 	accessServiceManager accessservice.AccessServiceManager,
 	secretsService secrets.Service,
-	requestParametersSecretsService secrets.RequestParametersService,
-	istioService istio.Service) Service {
+	requestParametersSecretsService secrets.RequestParametersService) Service {
 
 	return defaultService{
 		nameResolver:                    nameResolver,
 		accessServiceManager:            accessServiceManager,
 		secretsService:                  secretsService,
 		requestParametersSecretsService: requestParametersSecretsService,
-		istioService:                    istioService,
 	}
 }
 
@@ -78,11 +74,6 @@ func (sas defaultService) New(application string, appUID types.UID, id string, a
 		}
 
 		serviceAPI.RequestParametersSecretName = requestParametersSecretName
-	}
-
-	err = sas.istioService.Create(application, appUID, id, resourceName)
-	if err != nil {
-		return nil, apperrors.Internal("Creating Istio resources failed, %s", err.Error())
 	}
 
 	return serviceAPI, nil
@@ -133,11 +124,6 @@ func (sas defaultService) Delete(application, id string) apperrors.AppError {
 		return apperrors.Internal("Deleting request parameters secret failed, %s", err.Error())
 	}
 
-	err = sas.istioService.Delete(resourceName)
-	if err != nil {
-		return apperrors.Internal("Deleting Istio resources failed, %s", err.Error())
-	}
-
 	return nil
 }
 
@@ -183,11 +169,6 @@ func (sas defaultService) Update(application string, appUID types.UID, id string
 		if err != nil {
 			return nil, err
 		}
-	}
-
-	err = sas.istioService.Upsert(application, appUID, id, resourceName)
-	if err != nil {
-		return nil, apperrors.Internal("Updating Istio resources failed, %s", err.Error())
 	}
 
 	return serviceAPI, nil

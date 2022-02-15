@@ -1,6 +1,7 @@
 package proxyconfig
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"strings"
@@ -40,7 +41,7 @@ func (sc *SecretsCreator) NewSecret(secretName, apiName string, proxyConfig prox
 		},
 	}
 
-	_, err = sc.secretsClient.Create(secret)
+	_, err = sc.secretsClient.Create(context.Background(), secret, k8sMeta.CreateOptions{})
 	if err != nil {
 		return fmt.Errorf("failed to create secret: %s", err.Error())
 	}

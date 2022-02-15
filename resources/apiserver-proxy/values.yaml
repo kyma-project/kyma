@@ -29,6 +29,9 @@ hpa:
 
 tests:
   enabled: true
+  labels:
+    integration: true
+    after-upgrade: true
 global:
   apiserver_proxy:
     dir:
@@ -43,4 +46,4 @@ global:
     path: eu.gcr.io/kyma-project
   xip_patch:
     dir:
-    version: d022112f
+    version: 6fd499b9

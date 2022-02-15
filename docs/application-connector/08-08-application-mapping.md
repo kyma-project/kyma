@@ -32,5 +32,5 @@ This guide shows you how to bind an Application to a Namespace in Kyma. To execu
 3. Check if the operation succeeded. List all Namespaces to which your Application is bound.
 
   ```bash
-  kubectl get em --all-namespaces -o jsonpath='{range .items[?(@.metadata.name=="{NAME_OF_YOUR_APP}")]}{@.metadata.namespace}{""}{end}'
+  kubectl get am --all-namespaces -o jsonpath='{range .items[?(@.metadata.name=="{NAME_OF_YOUR_APP}")]}{@.metadata.namespace}{""}{end}'
   ```

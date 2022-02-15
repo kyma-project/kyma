@@ -1,6 +1,8 @@
 package metrics
 
 import (
+	"context"
+
 	"github.com/pkg/errors"
 	meta "k8s.io/apimachinery/pkg/apis/meta/v1"
 	clientset "k8s.io/metrics/pkg/client/clientset/versioned"
@@ -22,7 +24,7 @@ func newMetricsFetcher(c clientset.Interface) MetricsFetcher {
 }
 
 func (m *metricsFetcher) FetchNodeMetrics() ([]NodeMetrics, error) {
-	metricList, err := m.metricsClientSet.List(meta.ListOptions{})
+	metricList, err := m.metricsClientSet.List(context.Background(), meta.ListOptions{})
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to list metrics")
 	}

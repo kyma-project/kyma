@@ -146,6 +146,13 @@ spec:
             - name: {{ $key }}
               value: {{ $val | quote }}
             {{- end}}
+          # CHANGES
+          {{- if .Release.IsUpgrade }}
+          envFrom:
+            - secretRef:
+                name: {{ .Values.patchCredentials.secretName }}
+          {{- end }}
+          # --CHANGES
           livenessProbe:
             httpGet:
               path: /minio/health/live

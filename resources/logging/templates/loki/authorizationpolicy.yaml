@@ -1,0 +1,51 @@
+{{- if .Values.loki.enabled }}
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  labels:
+    app: {{ template "loki.name" . }}
+    chart: {{ template "loki.chart" . }}
+    release: {{ .Release.Name }}
+  name: {{ template "loki.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+spec:
+  action: ALLOW
+  selector:
+    matchLabels:
+      app: {{ template "loki.name" . }}
+  rules:
+   # log-ui requests having a JWT token can query deprecated API
+   - from:
+     - source:
+         requestPrincipals: ["*"]
+     to:
+     - operation:
+         paths: ["/api/prom/query","/api/prom/label/*","/api/prom/tail"]
+         methods: ["GET", "OPTIONS"]
+   # Grafana having SA can query v1 API
+   - from:
+     - source:
+         principals:
+         - "cluster.local/ns/kyma-system/sa/monitoring-grafana"
+     to:
+     - operation:
+         paths: ["/loki/api/v1/*"]
+         methods: ["GET"]
+   # fluent-bit with SA can push to v1 API
+   - from:
+     - source:
+         principals:
+         - "cluster.local/ns/kyma-system/sa/logging-fluent-bit"
+     to:
+     - operation:
+         paths: ["/loki/api/v1/push"]
+         methods: ["POST"]
+   # prometheus (no istio-sidecar) having a User-Agent header can query metrics
+   - to:
+     - operation:
+         paths: ["/metrics"]
+         methods: ["GET"]
+     when:
+     - key: "request.headers[User-Agent]"
+       values: ["Prometheus/*"]
+{{- end }}

@@ -18,4 +18,4 @@ global:
     path: eu.gcr.io/kyma-project
   iam_kubeconfig_service:
     dir:
-    version: 1af8f7a8
+    version: "1c48e0a0"

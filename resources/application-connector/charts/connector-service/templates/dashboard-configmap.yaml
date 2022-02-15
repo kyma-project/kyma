@@ -3,6 +3,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: connector-service-dashboard
+  namespace: kyma-system
   labels:
     grafana_dashboard: "1"
     app: monitoring-grafana
@@ -109,7 +110,7 @@ data:
           "tableColumn": "",
           "targets": [
             {
-              "expr": "sum(rate(container_cpu_usage_seconds_total{namespace=\"kyma-integration\",pod_name=~\"connector-service.*\"}[3m]))",
+              "expr": "sum(rate(container_cpu_usage_seconds_total{namespace=\"kyma-integration\",pod=~\"connector-service.*\"}[3m]))",
               "format": "time_series",
               "intervalFactor": 2,
               "refId": "A",
@@ -191,7 +192,7 @@ data:
           "tableColumn": "",
           "targets": [
             {
-              "expr": "sum(container_memory_usage_bytes{namespace=\"kyma-integration\",pod_name=~\"connector-service.*\"}) / 1024^3",
+              "expr": "sum(container_memory_usage_bytes{namespace=\"kyma-integration\",pod=~\"connector-service.*\"}) / 1024^3",
               "format": "time_series",
               "intervalFactor": 2,
               "refId": "A",
@@ -273,7 +274,7 @@ data:
           "tableColumn": "",
           "targets": [
             {
-              "expr": "sum(rate(container_network_transmit_bytes_total{namespace=\"kyma-integration\",pod_name=~\"connector-service.*\"}[3m])) + sum(rate(container_network_receive_bytes_total{namespace=\"kyma-integration\",pod_name=~\"connector-service.*\"}[3m]))",
+              "expr": "sum(rate(container_network_transmit_bytes_total{namespace=\"kyma-integration\",pod=~\"connector-service.*\"}[3m])) + sum(rate(container_network_receive_bytes_total{namespace=\"kyma-integration\",pod=~\"connector-service.*\"}[3m]))",
               "format": "time_series",
               "intervalFactor": 2,
               "refId": "A",
@@ -628,7 +629,8 @@ data:
       "schemaVersion": 16,
       "style": "dark",
       "tags": [
-        "kyma"
+        "kyma",
+        "connectivity"
       ],
       "templating": {
         "list": [
@@ -661,7 +663,7 @@ data:
         ]
       },
       "time": {
-        "from": "now-15m",
+        "from": "now-1h",
         "to": "now"
       },
       "timepicker": {

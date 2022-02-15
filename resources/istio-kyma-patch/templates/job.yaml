@@ -2,9 +2,9 @@ apiVersion: batch/v1
 kind: Job
 metadata:
   name: istio-kyma-patch
-  annotations: 
+  annotations:
     helm.sh/hook: post-install,post-upgrade
-    helm.sh/hook-delete-policy: "before-hook-creation, hook-succeeded"
+    helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded
 spec:
   backoffLimit: 1
   template:
@@ -17,17 +17,15 @@ spec:
       restartPolicy: Never
       containers:
       - name: istio-kyma-patch
-        image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.istio_kyma_patch.dir }}istio-kyma-patch:{{ .Values.global.istio_kyma_patch.version }}
-        volumeMounts:
-        - name: config-volume
-          mountPath: /etc/config
+        image: {{ .Values.istio_kyma_patch.image }}:{{ .Values.istio_kyma_patch.tag }}
+        command:
+          - /bin/bash
+          - -c
+          - |
+{{.Files.Get "files/check.sh" | printf "%s" | indent 16}}
         env:
         - name: CONFIG_DIR
           value: /etc/config
         - name: REQUIRED_ISTIO_VERSION
-          value: {{ .Values.global.required_istio_version }}
+          value: {{ .Values.required_istio_version }}
         terminationMessagePolicy: "FallbackToLogsOnError"
-      volumes:
-      - name: config-volume
-        configMap:
-          name: istio-kyma-patch-config

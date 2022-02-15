@@ -8,6 +8,10 @@ import (
 	"math/rand"
 	"time"
 
+	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/roles"
+
+	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/oauth"
+
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/eventing"
 
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/apigateway"
@@ -21,28 +25,33 @@ import (
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/ui"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/experimental"
 
+	"github.com/pkg/errors"
+	"k8s.io/client-go/rest"
+
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/application"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/k8s"
+	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/k8sNew"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/rafter"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/servicecatalog"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/resource"
-	"github.com/pkg/errors"
-	"k8s.io/client-go/rest"
 )
 
 //go:generate go run github.com/99designs/gqlgen
 
 type Resolver struct {
-	ui  *ui.Resolver
-	k8s *k8s.Resolver
-
-	sc         *servicecatalog.PluggableContainer
-	sca        *servicecatalogaddons.PluggableContainer
-	app        *application.PluggableContainer
-	rafter     *rafter.PluggableContainer
-	ag         *apigateway.Resolver
-	serverless *serverless.PluggableContainer
-	eventing   *eventing.Resolver
+	ui            *ui.Resolver
+	k8s           *k8s.Resolver
+	k8sNew        *k8sNew.Resolver
+	sc            *servicecatalog.PluggableContainer
+	sca           *servicecatalogaddons.PluggableContainer
+	app           *application.PluggableContainer
+	rafter        *rafter.PluggableContainer
+	ag            *apigateway.Resolver
+	serverless    *serverless.PluggableContainer
+	newServerless *serverless.NewResolver
+	eventing      *eventing.Resolver
+	oauth         *oauth.Resolver
+	roles         *roles.Resolver
 }
 
 func GetRandomNumber() time.Duration {
@@ -95,6 +104,14 @@ func New(restConfig *rest.Config, appCfg application.Config, rafterCfg rafter.Co
 		return nil, errors.Wrap(err, "while initializing K8S resolver")
 	}
 
+	k8sNewResolver := k8sNew.New(genericServiceFactory)
+	makePluggable(k8sNewResolver)
+
+	err = k8sNewResolver.Enable() // enable manually
+	if err != nil {
+		return nil, errors.Wrap(err, "while initializing k8sNew resolver")
+	}
+
 	agResolver := apigateway.New(genericServiceFactory)
 	makePluggable(agResolver)
 
@@ -104,19 +121,36 @@ func New(restConfig *rest.Config, appCfg application.Config, rafterCfg rafter.Co
 	}
 	makePluggable(serverlessResolver)
 
+	newServerlessResolver := serverless.NewR(genericServiceFactory)
+	makePluggable(newServerlessResolver)
+
 	eventingResolver := eventing.New(genericServiceFactory)
 	makePluggable(eventingResolver)
 
+	oAuthResolver := oauth.New(genericServiceFactory)
+	makePluggable(oAuthResolver)
+
+	rolesResolver := roles.New(genericServiceFactory)
+	makePluggable(rolesResolver)
+	err = rolesResolver.Enable() // enable manually
+	if err != nil {
+		return nil, errors.Wrap(err, "while initializing roles resolver")
+	}
+
 	return &Resolver{
-		k8s:        k8sResolver,
-		ui:         uiContainer.Resolver,
-		sc:         scContainer,
-		sca:        scaContainer,
-		app:        appContainer,
-		rafter:     rafterContainer,
-		ag:         agResolver,
-		serverless: serverlessResolver,
-		eventing:   eventingResolver,
+		k8s:           k8sResolver,
+		k8sNew:        k8sNewResolver,
+		ui:            uiContainer.Resolver,
+		sc:            scContainer,
+		sca:           scaContainer,
+		app:           appContainer,
+		rafter:        rafterContainer,
+		ag:            agResolver,
+		serverless:    serverlessResolver,
+		newServerless: newServerlessResolver,
+		eventing:      eventingResolver,
+		oauth:         oAuthResolver,
+		roles:         rolesResolver,
 	}, nil
 }
 
@@ -134,4 +168,7 @@ func (r *Resolver) WaitForCacheSync(stopCh <-chan struct{}) {
 	r.ag.StopCacheSyncOnClose(stopCh)
 	r.eventing.StopCacheSyncOnClose(stopCh)
 	r.serverless.StopCacheSyncOnClose(stopCh)
+	r.newServerless.StopCacheSyncOnClose(stopCh)
+	r.oauth.StopCacheSyncOnClose(stopCh)
+	r.roles.StopCacheSyncOnClose(stopCh)
 }

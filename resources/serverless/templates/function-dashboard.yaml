@@ -197,7 +197,7 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "histogram_quantile(0.95, sum(rate(istio_request_duration_seconds_bucket{destination_service_namespace=\"$namespace\", destination_service_name=\"$function_name\"}[2m])) by (destination_service_name, le))",
+              "expr": "histogram_quantile(0.95, sum(rate(istio_request_duration_milliseconds_bucket{destination_service_namespace=\"$namespace\", destination_service_name=\"$function_name\"}[2m])) by (destination_service_name, le))",
               "interval": "",
               "legendFormat": "Request Duration",
               "refId": "A"
@@ -698,26 +698,26 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "histogram_quantile(0.50, sum(rate(istio_request_duration_seconds_bucket{destination_service_namespace=\"$namespace\", destination_service_name=\"$function_name\"}[2m])) by (destination_service_name, le))",
+              "expr": "histogram_quantile(0.50, sum(rate(istio_request_duration_milliseconds_bucket{destination_service_namespace=\"$namespace\", destination_service_name=\"$function_name\"}[2m])) by (destination_service_name, le))",
               "instant": false,
               "interval": "",
               "legendFormat": "p50",
               "refId": "A"
             },
             {
-              "expr": "histogram_quantile(0.90, sum(rate(istio_request_duration_seconds_bucket{destination_service_namespace=\"$namespace\", destination_service_name=\"$function_name\"}[2m])) by (destination_service_name, le))",
+              "expr": "histogram_quantile(0.90, sum(rate(istio_request_duration_milliseconds_bucket{destination_service_namespace=\"$namespace\", destination_service_name=\"$function_name\"}[2m])) by (destination_service_name, le))",
               "interval": "",
               "legendFormat": "p90",
               "refId": "B"
             },
             {
-              "expr": "histogram_quantile(0.95, sum(rate(istio_request_duration_seconds_bucket{destination_service_namespace=\"$namespace\", destination_service_name=\"$function_name\"}[2m])) by (destination_service_name, le))",
+              "expr": "histogram_quantile(0.95, sum(rate(istio_request_duration_milliseconds_bucket{destination_service_namespace=\"$namespace\", destination_service_name=\"$function_name\"}[2m])) by (destination_service_name, le))",
               "interval": "",
               "legendFormat": "p95",
               "refId": "C"
             },
             {
-              "expr": "histogram_quantile(0.99, sum(rate(istio_request_duration_seconds_bucket{destination_service_namespace=\"$namespace\", destination_service_name=\"$function_name\"}[2m])) by (destination_service_name, le))",
+              "expr": "histogram_quantile(0.99, sum(rate(istio_request_duration_milliseconds_bucket{destination_service_namespace=\"$namespace\", destination_service_name=\"$function_name\"}[2m])) by (destination_service_name, le))",
               "interval": "",
               "legendFormat": "p99",
               "refId": "D"
@@ -1085,7 +1085,7 @@ data:
       "schemaVersion": 25,
       "style": "dark",
       "tags": [
-        "kyma"
+        "kyma", "serverless"
       ],
       "templating": {
         "list": [
@@ -1144,8 +1144,8 @@ data:
           {
             "current": {
               "selected": true,
-              "text": "lambda",
-              "value": "lambda"
+              "text": "function",
+              "value": "function"
             },
             "hide": 2,
             "label": null,
@@ -1153,11 +1153,11 @@ data:
             "options": [
               {
                 "selected": true,
-                "text": "lambda",
-                "value": "lambda"
+                "text": "function",
+                "value": "function"
               }
             ],
-            "query": "lambda",
+            "query": "function",
             "skipUrlSync": false,
             "type": "constant"
           }
@@ -1169,6 +1169,7 @@ data:
       },
       "timepicker": {
         "refresh_intervals": [
+          "5s",
           "10s",
           "30s",
           "1m",

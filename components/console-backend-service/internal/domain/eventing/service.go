@@ -2,16 +2,15 @@ package eventing
 
 import (
 	"fmt"
+	"net"
 
-	"knative.dev/pkg/apis"
-
-	"github.com/knative/eventing/pkg/apis/eventing/v1alpha1"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/resource"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/client-go/tools/cache"
-	v1 "knative.dev/pkg/apis/duck/v1"
+	"knative.dev/eventing/pkg/apis/eventing/v1alpha1"
+	"knative.dev/pkg/apis"
 )
 
 var triggersKind = "Trigger"
@@ -22,29 +21,16 @@ var triggersGroupVersionResource = schema.GroupVersionResource{
 	Resource: "triggers",
 }
 
-var triggersSubscriberRefIndex = "subscriberRef"
+var triggerIndexKey = "ref"
 
-func createTriggersSubscriberRefIndexKey(namespace string, subscriberRef *v1.KReference) string {
-	if subscriberRef == nil {
-		return ""
-	}
-	return fmt.Sprintf("%s/%s/%s/%s/%s",
-		namespace,
-		subscriberRef.APIVersion,
-		subscriberRef.Kind,
-		subscriberRef.Name,
-		subscriberRef.Namespace)
+func createTriggerIndexKey(namespace, serviceName string) string {
+	return fmt.Sprintf("%s.%s.svc.cluster.local", serviceName, namespace)
 }
 
-var triggersSubscriberURIIndex = "subscriberURI"
-
-func createTriggersSubscriberRefURIKey(namespace string, uri *apis.URL) string {
-	return fmt.Sprintf("%s/%s",
-		namespace,
-		uri.String())
+func createTriggerUriIndexKey(uri apis.URL) string {
+	host, _, _ := net.SplitHostPort(uri.Host)
+	return host
 }
-
-var triggersSubscriberRefUriIndex = "subscriberRefURI"
 
 type Service struct {
 	*resource.Service
@@ -53,21 +39,17 @@ type Service struct {
 func NewService(serviceFactory *resource.GenericServiceFactory) (*resource.GenericService, error) {
 	service := serviceFactory.ForResource(triggersGroupVersionResource)
 	err := service.AddIndexers(cache.Indexers{
-		triggersSubscriberRefIndex: func(obj interface{}) ([]string, error) {
+		triggerIndexKey: func(obj interface{}) ([]string, error) {
 			trigger := &v1alpha1.Trigger{}
 			err := resource.FromUnstructured(obj.(*unstructured.Unstructured), trigger)
 			if err != nil {
 				return nil, err
 			}
-			return []string{createTriggersSubscriberRefIndexKey(trigger.Namespace, trigger.Spec.Subscriber.Ref)}, nil
-		},
-		triggersSubscriberURIIndex: func(obj interface{}) ([]string, error) {
-			trigger := &v1alpha1.Trigger{}
-			err := resource.FromUnstructured(obj.(*unstructured.Unstructured), trigger)
-			if err != nil {
-				return nil, err
+			if trigger.Spec.Subscriber.Ref != nil {
+				return []string{createTriggerIndexKey(trigger.Namespace, trigger.Spec.Subscriber.Ref.Name)}, nil
+			} else {
+				return []string{createTriggerUriIndexKey(*trigger.Spec.Subscriber.URI)}, nil
 			}
-			return []string{createTriggersSubscriberRefURIKey(trigger.Namespace, trigger.Spec.Subscriber.URI)}, nil
 		},
 	})
 	return service, err

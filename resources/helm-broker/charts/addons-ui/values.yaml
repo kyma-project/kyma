@@ -3,7 +3,7 @@ replicaCount: 1
 image:
   name: add-ons-ui
   pullPolicy: IfNotPresent
-  version: 199b2fcb
+  version: 35127fee
 service:
   internalPort: 80
   externalPort: 80

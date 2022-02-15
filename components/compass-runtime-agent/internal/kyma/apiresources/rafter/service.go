@@ -24,7 +24,7 @@ const (
 	emptyHash                   = ""
 )
 
-//go:generate mockery -name=Service
+//go:generate mockery --name=Service
 type Service interface {
 	Put(id string, assets []clusterassetgroup.Asset) apperrors.AppError
 	Delete(id string) apperrors.AppError

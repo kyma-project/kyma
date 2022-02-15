@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/go-logr/logr"
+	"github.com/kyma-project/kyma/components/function-controller/internal/controllers/serverless/runtime"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -14,8 +15,8 @@ import (
 	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
 )
 
-func (r *FunctionReconciler) createConfigMap(ctx context.Context, log logr.Logger, instance *serverlessv1alpha1.Function) (ctrl.Result, error) {
-	configMap := r.buildConfigMap(instance)
+func (r *FunctionReconciler) createConfigMap(ctx context.Context, log logr.Logger, instance *serverlessv1alpha1.Function, rtm runtime.Runtime) (ctrl.Result, error) {
+	configMap := r.buildConfigMap(instance, rtm)
 
 	log.Info("CreateWithReference ConfigMap")
 	if err := r.client.CreateWithReference(ctx, instance, &configMap); err != nil {
@@ -33,9 +34,9 @@ func (r *FunctionReconciler) createConfigMap(ctx context.Context, log logr.Logge
 	})
 }
 
-func (r *FunctionReconciler) updateConfigMap(ctx context.Context, log logr.Logger, instance *serverlessv1alpha1.Function, configMap corev1.ConfigMap) (ctrl.Result, error) {
+func (r *FunctionReconciler) updateConfigMap(ctx context.Context, log logr.Logger, instance *serverlessv1alpha1.Function, rtm runtime.Runtime, configMap corev1.ConfigMap) (ctrl.Result, error) {
 	newConfigMap := configMap.DeepCopy()
-	expectedConfigMap := r.buildConfigMap(instance)
+	expectedConfigMap := r.buildConfigMap(instance, rtm)
 
 	newConfigMap.Data = expectedConfigMap.Data
 	newConfigMap.Labels = expectedConfigMap.Labels
@@ -56,7 +57,7 @@ func (r *FunctionReconciler) updateConfigMap(ctx context.Context, log logr.Logge
 	})
 }
 
-func (r *FunctionReconciler) isOnConfigMapChange(instance *serverlessv1alpha1.Function, configMaps []corev1.ConfigMap, deployments []appsv1.Deployment) bool {
+func (r *FunctionReconciler) isOnConfigMapChange(instance *serverlessv1alpha1.Function, rtm runtime.Runtime, configMaps []corev1.ConfigMap, deployments []appsv1.Deployment) bool {
 	image := r.buildImageAddress(instance)
 	configurationStatus := r.getConditionStatus(instance.Status.Conditions, serverlessv1alpha1.ConditionConfigurationReady)
 
@@ -69,21 +70,20 @@ func (r *FunctionReconciler) isOnConfigMapChange(instance *serverlessv1alpha1.Fu
 	}
 
 	return !(len(configMaps) == 1 &&
-		instance.Spec.Source == configMaps[0].Data[configMapFunction] &&
-		r.sanitizeDependencies(instance.Spec.Deps) == configMaps[0].Data[configMapDeps] &&
-		configMaps[0].Data[configMapHandler] == configMapHandler &&
+		instance.Spec.Source == configMaps[0].Data[FunctionSourceKey] &&
+		rtm.SanitizeDependencies(instance.Spec.Deps) == configMaps[0].Data[FunctionDepsKey] &&
 		configurationStatus == corev1.ConditionTrue &&
 		r.mapsEqual(configMaps[0].Labels, r.functionLabels(instance)))
 }
 
-func (r *FunctionReconciler) onConfigMapChange(ctx context.Context, log logr.Logger, instance *serverlessv1alpha1.Function, configMaps []corev1.ConfigMap) (ctrl.Result, error) {
+func (r *FunctionReconciler) onConfigMapChange(ctx context.Context, log logr.Logger, instance *serverlessv1alpha1.Function, rtm runtime.Runtime, configMaps []corev1.ConfigMap) (ctrl.Result, error) {
 	configMapsLen := len(configMaps)
 
 	switch configMapsLen {
 	case 0:
-		return r.createConfigMap(ctx, log, instance)
+		return r.createConfigMap(ctx, log, instance, rtm)
 	case 1:
-		return r.updateConfigMap(ctx, log, instance, configMaps[0])
+		return r.updateConfigMap(ctx, log, instance, rtm, configMaps[0])
 	default:
 		return r.deleteAllConfigMaps(ctx, instance, log)
 	}

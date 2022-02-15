@@ -10,8 +10,6 @@ Serverless relies heavily on Kubernetes resources. It uses [Deployments](https:/
 
 1. Create a Function either through the UI or by applying a Function custom resource (CR). This CR contains the Function definition (business logic that you want to execute) and information on the environment on which it should run.
 
-   > **NOTE:** Function Controller sets the Node.js 12 runtime by default.
-
 2. Before the Function can be saved or modified, it is first updated and then verified by the [defaulting and validation webhooks](#details-supported-webhooks) respectively.
 
 3. Function Controller (FC) detects the new, validated Function CR.
@@ -21,8 +19,6 @@ Serverless relies heavily on Kubernetes resources. It uses [Deployments](https:/
 5. Based on the ConfigMap, FC creates a Kubernetes Job that triggers the creation of a Function image.
 
 6. The Job creates a Pod which builds the production Docker image based on the Function's definition. The Job then pushes this image to a Docker registry.
-
-    > **NOTE:** Serverless offers a built-in internal Docker registry that is suitable for local development. For production purposes, switch to an [external Docker registry](#tutorials-set-an-external-docker-registry).
 
 7. FC monitors the Job status. When the image creation finishes successfully, FC creates a Deployment that uses the newly built image.
 

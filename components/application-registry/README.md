@@ -119,12 +119,20 @@ telepresence --namespace kyma-system --swap-deployment kyma-core-application-bro
 
 ### Generate mocks
 
-To generate a mock, follow these steps:
+Prerequisites:
 
-1. Go to the directory where the interface is located.
-2. Run this command:
+ - [Mockery](https://github.com/vektra/mockery) 2.0 or higher
+
+To generate mocks, run:
+
 ```sh
-mockery -name=Sender
+go generate ./...
+```
+
+When adding a new interface to be mocked or when a mock of an existing interface is not being generated, add the following line directly above the interface declaration:
+
+```
+//go:generate mockery --name {INTERFACE_NAME}
 ```
 
 ## Tests

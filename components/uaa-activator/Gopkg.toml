@@ -30,6 +30,10 @@
   name = "k8s.io/apiextensions-apiserver"
   version = "kubernetes-1.16.4"
 
+[[override]]
+  name = "golang.org/x/text"
+  version = "v0.3.3"
+
 [prune]
   non-go = true
   go-tests = true

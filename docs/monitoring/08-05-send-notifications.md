@@ -57,10 +57,10 @@ Follow these steps to configure notifications for Slack every time Alertmanager 
 
 5. Proceed with Kyma installation.
 
-   >**NOTE**: If you add the overrides in the runtime, trigger the update process using this command:
-   >```bash
-   >kubectl -n default label installation/kyma-installation action=install
-   >```
+   >**NOTE**: If you add the overrides in the runtime, trigger the update process using Kyma CLI. Provide the same version of the installed Kyma:
+   ```bash
+   kyma upgrade -s {VERSION}
+   ```
    >**NOTE**: If the rule you created is removed during the update, re-apply it following the [**Define alerting rules**](#tutorials-define-alerting-rules) tutorial.
 
 6. Verify if your Slack channel receives alert notifications about firing and resolved alerts. See the example:

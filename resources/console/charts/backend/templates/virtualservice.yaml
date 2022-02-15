@@ -36,8 +36,8 @@ spec:
           number: {{ $servicePort }}
         host: {{ $serviceName }}
     corsPolicy:
-      allowOrigin:
-      - "*"
+      allowOrigins:
+      - regex: ".*"
       allowHeaders:
       - "authorization"
       - "content-type"

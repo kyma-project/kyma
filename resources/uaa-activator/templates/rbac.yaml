@@ -13,7 +13,7 @@ rules:
     verbs: ["get"]
   - apiGroups: ["servicecatalog.k8s.io"]
     resources: ["serviceinstances", "servicebindings"]
-    verbs: ["get", "create", "update" ]
+    verbs: ["get", "create", "update", "delete" ]
   - apiGroups: ["apps"]
     resources: ["replicasets"]
     verbs: ["list"]

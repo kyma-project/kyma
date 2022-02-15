@@ -25,15 +25,19 @@ RUN mv ./console-backend-service /app/main
 
 COPY ./licenses/ /app/licenses
 
-FROM alpine:3.11
+# Install certificates
+FROM alpine:latest as certs
+RUN apk --update add ca-certificates
+
+FROM scratch
+
 LABEL source = git@github.com:kyma-project/kyma.git
 WORKDIR /app
 
-# Install certificates
-RUN apk update && apk add ca-certificates && rm -rf /var/cache/apk/*
-
 # Copy binary
 COPY --from=builder /app /app
-
+COPY --from=certs /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
 # Run app
-CMD ["/app/main"]
+
+# -logtostderr=true is required, as glog is stupid and tries to log to /tmp, which crashes the pod
+CMD ["/app/main", "-logtostderr=true"]

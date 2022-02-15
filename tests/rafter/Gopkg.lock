@@ -113,7 +113,7 @@
   version = "1.0.1"
 
 [[projects]]
-  digest = "1:7e57cd10c5424b2abf91f29354796a2468720396419585fef5a2d346c5a0f24d"
+  digest = "1:3816c86215b9f91b1281eb11ddb26f4d8a20fd178f9466721d0ace012618842e"
   name = "github.com/onsi/gomega"
   packages = [
     ".",
@@ -130,16 +130,16 @@
     "types",
   ]
   pruneopts = "UT"
-  revision = "f9a52764bd5a0fd2d201bcca584351d03b72f8da"
-  version = "v1.7.1"
+  revision = "904ac6ab26e9a888bdff3467eea03b6122a1c027"
+  version = "v1.10.1"
 
 [[projects]]
-  digest = "1:cf31692c14422fa27c83a05292eb5cbe0fb2775972e8f1f8446a71549bd8980b"
+  digest = "1:9e1d37b58d17113ec3cb5608ac0382313c5b59470b94ed97d0976e69c7022314"
   name = "github.com/pkg/errors"
   packages = ["."]
   pruneopts = "UT"
-  revision = "ba968bfe8b2f7e042a574c888954fccecfa385b4"
-  version = "v0.8.1"
+  revision = "614d223910a179a466c1767a985424175c39b465"
+  version = "v0.9.1"
 
 [[projects]]
   digest = "1:524b71991fc7d9246cc7dc2d9e0886ccb97648091c63e30eef619e6862c955dd"
@@ -150,12 +150,12 @@
   version = "v1.0.5"
 
 [[projects]]
-  digest = "1:bb32a7e267540d9f2d26753426d5e360c5bd858b9b78e26b9f0c99219024d8f5"
+  digest = "1:611f8f89ee700dd6ebb89e60a9fc0dc692a18c7a4db4c96c52999ed2f36076e2"
   name = "github.com/vrischmann/envconfig"
   packages = ["."]
   pruneopts = "UT"
-  revision = "cf601e2565a0a7c7418ed014d28a507be6cb1e45"
-  version = "v1.2.0"
+  revision = "dc3c7430650f57272ff74d7ee39ddaffd1cdcdd6"
+  version = "v1.3.0"
 
 [[projects]]
   branch = "master"
@@ -272,6 +272,17 @@
   revision = "22774f7dae43231ae3ff025ca3f8f2c37bdff19b"
 
 [[projects]]
+  branch = "master"
+  digest = "1:918a46e4a2fb83df33f668f5a6bd51b2996775d073fce1800d3ec01b0a5ddd2b"
+  name = "golang.org/x/xerrors"
+  packages = [
+    ".",
+    "internal",
+  ]
+  pruneopts = "UT"
+  revision = "5ec99f83aff198f5fbd629d6c8d8eb38a04218ca"
+
+[[projects]]
   digest = "1:e0a1881f9e0564bebdeac98c75e59f07acdde6ed3a5396e0e613eaad31194866"
   name = "google.golang.org/appengine"
   packages = [
@@ -304,7 +315,7 @@
   version = "v2.2.7"
 
 [[projects]]
-  digest = "1:274e6b4fd11a6a01212ee6af5ba488c7623f5eaa7339d3bb5642220d96ee8744"
+  digest = "1:cd7322a2669aba7fe506383dc31ece3881fc3e39ccac5334360c50f946a8ade4"
   name = "k8s.io/api"
   packages = [
     "admissionregistration/v1",
@@ -328,8 +339,10 @@
     "coordination/v1beta1",
     "core/v1",
     "discovery/v1alpha1",
+    "discovery/v1beta1",
     "events/v1beta1",
     "extensions/v1beta1",
+    "flowcontrol/v1alpha1",
     "networking/v1",
     "networking/v1beta1",
     "node/v1alpha1",
@@ -347,11 +360,11 @@
     "storage/v1beta1",
   ]
   pruneopts = "UT"
-  revision = "35e20aa79eb876d1014e0383c7fcda49e52c5d76"
-  version = "kubernetes-1.16.1"
+  revision = "de21aa00e146b167b18012339b328c5f420df4c2"
+  version = "kubernetes-1.17.11"
 
 [[projects]]
-  digest = "1:40568936e14513283f92b23bfeefbf0e8901bf845ed84265f7baf03fd25480e3"
+  digest = "1:aff3223a8435723eedf9134d6f84b617dfe78e6588234d086b1a1689370ebcbe"
   name = "k8s.io/apimachinery"
   packages = [
     "pkg/api/errors",
@@ -395,11 +408,11 @@
     "third_party/forked/golang/reflect",
   ]
   pruneopts = "UT"
-  revision = "27d36303b6556f377b4f34e64705fa9024a12b0c"
-  version = "kubernetes-1.16.1"
+  revision = "0d585d148f6f45f69f02bec1c301a698884c23d5"
+  version = "kubernetes-1.17.11"
 
 [[projects]]
-  digest = "1:1578e0fb2c0167a5cad8c92a4b666f8ed49f625cc9dc523aacace34d5988cfd8"
+  digest = "1:f8d121f7e1ac09ecbce79ebf7ec3338a3ff83e070f7b92b2a7238fa2a2a59d18"
   name = "k8s.io/client-go"
   packages = [
     "dynamic",
@@ -431,8 +444,8 @@
     "util/retry",
   ]
   pruneopts = "UT"
-  revision = "f68efa97b39e67ee47d4b4683d0037d721f077be"
-  version = "kubernetes-1.16.1"
+  revision = "96bd268c6b324d25b324554d869dad067ab8f2d1"
+  version = "kubernetes-1.17.11"
 
 [[projects]]
   digest = "1:93e82f25d75aba18436ad1ac042cb49493f096011f2541075721ed6f9e05c044"

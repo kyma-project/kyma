@@ -184,5 +184,5 @@ To create a simple Function and trigger it with an event, you must first registe
 8. Check the logs of the Function to see if it was triggered. Every time an event successfully triggers the Function, this message appears in the logs: `Response acquired successfully! Uuid: {RECEIVED_UUID}`.
 
    ```bash
-   kubectl -n $NAMESPACE logs "$(kubectl -n $NAMESPACE get po -l app=my-events-function -o jsonpath='{.items[0].metadata.name}')" -c lambda | grep -E "Response acquired successfully! Uuid: [a-f0-9-]+"
+   kubectl -n $NAMESPACE logs "$(kubectl -n $NAMESPACE get po -l app!=my-events-function,serverless.kyma-project.io/function-name=my-events-function -o jsonpath='{.items[0].metadata.name}')" -c function | grep -E "Response acquired successfully! Uuid: [a-f0-9-]+"
    ```

@@ -1,0 +1,11 @@
+apiVersion: bindings.kyma-project.io/v1alpha1
+kind: Binding
+metadata:
+  name: binding-sample
+spec:
+  source:
+    kind: secret
+    name: redis-instance-credential
+  target:
+    kind: deployment
+    name: sandbox

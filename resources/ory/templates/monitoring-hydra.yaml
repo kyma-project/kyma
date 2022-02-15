@@ -1,4 +1,4 @@
-{{ if and (.Capabilities.APIVersions.Has "monitoring.coreos.com/v1") (.Capabilities.APIVersions.Has "authentication.istio.io/v1alpha1") }}
+{{ if and (.Capabilities.APIVersions.Has "monitoring.coreos.com/v1") (.Capabilities.APIVersions.Has "security.istio.io/v1beta1") }}
 ---
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
@@ -25,16 +25,16 @@ spec:
       app.kubernetes.io/instance: {{ .Release.Name }}
       app.kubernetes.io/name: hydra-maester
 ---
-apiVersion: authentication.istio.io/v1alpha1
-kind: Policy
+apiVersion: security.istio.io/v1beta1
+kind: PeerAuthentication
 metadata:
   name: {{ include "ory.fullname" . }}-hydra-maester-metrics
 spec:
-  peers:
-  - mtls:
+  selector:
+    matchLabels:
+      app.kubernetes.io/instance: {{ .Release.Name }}
+      app.kubernetes.io/name: hydra-maester
+  portLevelMtls:
+    {{ index .Values "hydra" "hydra-maester" "port" "metrics" }}:
       mode: PERMISSIVE
-  targets:
-  - name: {{ include "ory.name" . }}-hydra-maester-metrics
-    ports:
-      - name: metrics
 {{- end }}

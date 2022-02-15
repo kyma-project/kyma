@@ -27,15 +27,15 @@ The table shows the parameters of each profile and their values:
 
  Parameter  | Description | Default profile| Production profile | Local profile|
 |-----------|-------------|----------------|--------------------|--------------|
-| **retentionSize** | Maximum number of bytes that storage blocks can use. The oldest data will be removed first. | `2GB` | `15GB` | `500MB` | 
-| **retention** | Time period for which Prometheus stores metrics in an in-memory database. Prometheus stores the recent data for the specified amount of time to avoid reading all data from the disk. This parameter only applies to in-memory storage.|`1d`| `30d` | `2h`|
-| **prometheusSpec.volumeClaimTemplate.spec.resources.requests.storage** | Amount of storage requested by the Prometheus Pod. |`10Gi`| `20Gi` | `1Gi` |
-| **prometheusSpec.resources.limits.cpu** | Maximum number of CPUs available for the Prometheus Pod to use. | `600m`| `600m` | `150m`|
-| **prometheusSpec.resources.limits.memory** | Maximum amount of memory available for the Prometheus Pod to use. |`1500Mi` | `2Gi` |`800Mi`|
-| **prometheusSpec.resources.requests.cpu** |  Number of CPUs requested by the Prometheus Pod to operate.| `300m`| `300m` | `100m` |
-| **prometheusSpec.resources.requests.memory** | Amount of memory requested by the Prometheus Pod to operate. | `1000Mi`| `1Gi` | `200Mi` |
+| **prometheus.prometheusSpec.retentionSize** | Maximum number of bytes that storage blocks can use. The oldest data will be removed first. | `2GB` | `15GB` | `256MB` |
+| **prometheus.prometheusSpec.retention** | Time period for which Prometheus stores the metrics. |`1d`| `30d` | `2h`|
+| **prometheus.prometheusSpec.storageSpec.volumeClaimTemplate.spec.resources.requests.storage** | Amount of storage requested by the Prometheus Pod. |`10Gi`| `20Gi` | `1Gi` |
+| **prometheus.prometheusSpec.resources.limits.cpu** | Maximum number of CPUs available for the Prometheus Pod to use. | `600m`| `1` | `150m`|
+| **prometheus.prometheusSpec.resources.limits.memory** | Maximum amount of memory available for the Prometheus Pod to use. |`2Gi` | `3Gi` |`800Mi`|
+| **prometheus.prometheusSpec.resources.requests.cpu** |  Number of CPUs requested by the Prometheus Pod to operate.| `200m`| `300m` | `100m` |
+| **prometheus.prometheusSpec.resources.requests.memory** | Amount of memory requested by the Prometheus Pod to operate. | `600Mi`| `1Gi` | `200Mi` |
 | **alertmanager.alertmanagerSpec.retention** | Time period for which Alertmanager retains data.| `120h` | `240h` | `1h` |
-| **grafana.persistence.enabled**| Storing grafana database on a PersistentVolume?|`true`|`true`|`false`|
+| **grafana.persistence.enabled**| Parameter that enables storing Grafana database on a PersistentVolume |`true`|`true`|`false`|
 
 ## Use profiles
 
@@ -112,5 +112,4 @@ You can deploy a Kyma cluster with Monitoring configured to use the production p
   2. Run the [cluster update process](/root/kyma/#installation-update-kyma).
   </details>
 </div>
-
 

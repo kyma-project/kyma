@@ -96,39 +96,4 @@ spec:
   selector:
     matchLabels:
       app: {{ .Release.Name }}-event-service
----
-apiVersion: security.istio.io/v1beta1
-kind: AuthorizationPolicy
-metadata:
-  labels:
-    app: {{ .Release.Name }}
-    release: {{ .Release.Name }}
-    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
-    app.kubernetes.io/name: {{ template "name" . }}
-    app.kubernetes.io/managed-by: {{ .Release.Service }}
-    app.kubernetes.io/instance: {{ .Release.Name }}
-  name: {{ .Release.Name }}-http-source
-  namespace: {{ .Release.Namespace }}
-spec:
-  rules:
-    - from:
-      - source:
-          principals:
-          - cluster.local/ns/knative-serving/sa/controller
-      to:
-        - operation:
-            methods:
-              - POST
-              - GET
-            paths:
-              - /*
-    - to:
-        - operation:
-            methods:
-              - GET
-            paths:
-              - /metrics
-  selector:
-    matchLabels:
-      serving.knative.dev/service: {{ .Release.Name }}
 {{- end }}

@@ -54,8 +54,8 @@ rules:
 - apiGroups: ["applicationconnector.kyma-project.io"]
   resources: ["applications", "applicationmappings","eventactivations"]
   verbs: ["create", "delete", "list", "get"]
-- apiGroups: ["serving.knative.dev"]
-  resources: ["services", "services/status"]
+- apiGroups: ["sources.kyma-project.io"]
+  resources: ["httpsources", "httpsources/status"]
   verbs: ["get","list"]
 - apiGroups: [""]
   resources: ["pods", "pods/log", "pods/status", "secrets", "configmaps"]
@@ -114,6 +114,9 @@ rules:
 # Monitoring
 - apiGroups: [""]
   resources: ["nodes"]
+  verbs: ["list"]
+- apiGroups: ["monitoring.coreos.com"]
+  resources: ["servicemonitors", "podmonitors"]
   verbs: ["list"]
 
 # Serverless

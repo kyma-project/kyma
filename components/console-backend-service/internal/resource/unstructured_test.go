@@ -5,11 +5,12 @@ import (
 
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/resource"
 
-	testingUtils "github.com/kyma-project/kyma/components/console-backend-service/internal/testing"
 	"github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
+	testingUtils "github.com/kyma-project/kyma/components/console-backend-service/internal/testing"
 )
 
 func TestFromUnstructured(t *testing.T) {
@@ -60,8 +61,9 @@ func TestToUnstructured(t *testing.T) {
 				"creationTimestamp": nil,
 			},
 			map[string]interface{}{
-				"source":    "",
-				"resources": map[string]interface{}{},
+				"source":         "",
+				"resources":      map[string]interface{}{},
+				"buildResources": map[string]interface{}{},
 			},
 			map[string]interface{}{},
 		)

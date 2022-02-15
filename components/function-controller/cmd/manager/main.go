@@ -4,7 +4,6 @@ import (
 	"os"
 
 	"github.com/vrischmann/envconfig"
-	"k8s.io/apimachinery/pkg/api/resource"
 	"k8s.io/apimachinery/pkg/runtime"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
@@ -113,11 +112,6 @@ func loadConfig(prefix string) (config, error) {
 	if err != nil {
 		return cfg, err
 	}
-
-	cfg.Function.Build.LimitsCPUValue = resource.MustParse(cfg.Function.Build.LimitsCPU)
-	cfg.Function.Build.LimitsMemoryValue = resource.MustParse(cfg.Function.Build.LimitsMemory)
-	cfg.Function.Build.RequestsCPUValue = resource.MustParse(cfg.Function.Build.RequestsCPU)
-	cfg.Function.Build.RequestsMemoryValue = resource.MustParse(cfg.Function.Build.RequestsMemory)
 
 	return cfg, nil
 }

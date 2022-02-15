@@ -7,11 +7,12 @@ import (
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/module"
 
 	"github.com/golang/glog"
+	"github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
+	"github.com/pkg/errors"
+
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/serverless/pretty"
 	scaPretty "github.com/kyma-project/kyma/components/console-backend-service/internal/domain/servicecatalogaddons/pretty"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlerror"
-	"github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
-	"github.com/pkg/errors"
 
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
 )

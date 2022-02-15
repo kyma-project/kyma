@@ -101,12 +101,31 @@ global:
     gateway:
       name: kyma-gateway
       namespace: kyma-system
+  kymaRuntime:
+    adminGroup: runtimeAdmin
+    operatorGroup: runtimeOperator
+    developerGroup: runtimeDeveloper
+    namespaceAdminGroup: runtimeNamespaceAdmin
+  tracing:
+    enabled: true
 
 kcproxy:
   replicaCount: 1
   inPort: 10001
-  clientId: jaeger
-  clientSecret: oiEWUWOIEwedfgg
+  config:
+    clientId: "jaeger"
+    clientSecret: "oiEWUWOIEwedfgg"
+    tlsVerify: false
+    resources:
+      uri: "/*"
+      methods: "GET,POST,PUT,DELETE"
+      useKymaGroups: false
+      groups: ""
+      roles: ""
+    scopes: "groups"
+    headers: ""
+    matchClaims: ""
+    addClaims: ""
   nodeSelector: {}
   image:
     repository: eu.gcr.io/kyma-project/external/bitnami/keycloak-gatekeeper

@@ -3,6 +3,7 @@ kind: Deployment
 metadata:
   name: {{ include "namespace-permission-controller.fullname" . }}
   labels:
+    kyma-project.io/component: controller
 {{ include "namespace-permission-controller.labels" . | indent 4 }}
 spec:
   replicas: {{ .Values.deployment.replicaCount }}
@@ -18,6 +19,7 @@ spec:
       labels:
         app: {{ include "namespace-permission-controller.name" . }}
         release: {{ .Release.Name }}
+        kyma-project.io/component: controller
     spec:
       containers:
         - name: {{ .Chart.Name }}

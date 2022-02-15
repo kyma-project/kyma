@@ -76,6 +76,7 @@ rules:
   - daemonsets
   - deployments
   - deployments/finalizers
+  - deployments/scale
   - ingresses
   - replicasets
   - statefulsets

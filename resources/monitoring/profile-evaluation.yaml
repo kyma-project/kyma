@@ -1,0 +1,15 @@
+prometheus:
+  prometheusSpec:
+    resources:
+      limits:
+        cpu: 600m
+        memory: 1500Mi
+      requests:
+        cpu: 150m
+        memory: 1000Mi
+    retention: 6h
+    retentionSize: 1GB
+
+grafana:
+  persistence:
+    enabled: "false"

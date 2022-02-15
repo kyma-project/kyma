@@ -961,18 +961,18 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "sum by(container_name) (container_memory_usage_bytes{pod=~\"rafter-controller-manager-.*\", container_name!=\"POD\"})",
+              "expr": "sum by(container) (container_memory_usage_bytes{pod=~\"rafter-ctrl-mngr-.*\", container!=\"POD\"})",
               "format": "time_series",
               "instant": false,
               "interval": "10s",
               "intervalFactor": 1,
-              "legendFormat": "Current: {{`{{container_name}}`}}",
+              "legendFormat": "Current: {{`{{container}}`}}",
               "metric": "container_memory_usage_bytes",
               "refId": "A",
               "step": 15
             },
             {
-              "expr": "kube_pod_container_resource_requests_memory_bytes{pod=~\"rafter-controller-manager-.*\"}",
+              "expr": "kube_pod_container_resource_requests_memory_bytes{pod=~\"rafter-ctrl-mngr-.*\"}",
               "format": "time_series",
               "interval": "10s",
               "intervalFactor": 2,
@@ -982,7 +982,7 @@ data:
               "step": 20
             },
             {
-              "expr": "kube_pod_container_resource_limits_memory_bytes{pod=~\"rafter-controller-manager-.*\"}",
+              "expr": "kube_pod_container_resource_limits_memory_bytes{pod=~\"rafter-ctrl-mngr-.*\"}",
               "format": "time_series",
               "interval": "10s",
               "intervalFactor": 2,
@@ -1077,15 +1077,15 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "sum by (container_name)(rate(container_cpu_usage_seconds_total{image!=\"\",container_name!=\"POD\",pod=~\"rafter-controller-manager-.*\"}[1m]))",
+              "expr": "sum by (container)(rate(container_cpu_usage_seconds_total{image!=\"\",container!=\"POD\",pod=~\"rafter-controller-manager-.*\"}[1m]))",
               "format": "time_series",
               "intervalFactor": 2,
-              "legendFormat": "{{`{{container_name}}`}}",
+              "legendFormat": "{{`{{container}}`}}",
               "refId": "A",
               "step": 30
             },
             {
-              "expr": "kube_pod_container_resource_requests_cpu_cores{pod=~\"rafter-controller-manager-.*\"}",
+              "expr": "kube_pod_container_resource_requests_cpu_cores{pod=~\"rafter-ctrl-mngr-.*\"}",
               "format": "time_series",
               "interval": "10s",
               "intervalFactor": 2,
@@ -1095,7 +1095,7 @@ data:
               "step": 20
             },
             {
-              "expr": "kube_pod_container_resource_limits_cpu_cores{pod=~\"rafter-controller-manager-.*\"}",
+              "expr": "kube_pod_container_resource_limits_cpu_cores{pod=~\"rafter-ctrl-mngr-.*\"}",
               "format": "time_series",
               "interval": "10s",
               "intervalFactor": 2,
@@ -1190,7 +1190,7 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "sort_desc(sum by (pod) (rate(container_network_receive_bytes_total{pod=~\"rafter-controller-manager-.*\"}[1m])))",
+              "expr": "sort_desc(sum by (pod) (rate(container_network_receive_bytes_total{pod=~\"rafter-ctrl-mngr-.*\"}[1m])))",
               "format": "time_series",
               "interval": "",
               "intervalFactor": 2,
@@ -1236,7 +1236,7 @@ data:
           }
         }
       ],
-      "refresh": "5s",
+      "refresh": "10s",
       "schemaVersion": 18,
       "style": "dark",
       "tags": [
@@ -1328,7 +1328,7 @@ data:
         ]
       },
       "time": {
-        "from": "now-30m",
+        "from": "now-1h",
         "to": "now"
       },
       "timepicker": {

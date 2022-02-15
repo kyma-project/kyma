@@ -1,6 +1,8 @@
 package metrics
 
 import (
+	"context"
+
 	"github.com/pkg/errors"
 	v1 "k8s.io/api/core/v1"
 	meta "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -23,7 +25,7 @@ func newVolumesFetcher(clientset kubernetes.Interface) VolumesFetcher {
 }
 
 func (v *volumesFetcher) FetchPersistentVolumesCapacity() ([]PersistentVolumes, error) {
-	persistentVolumes, err := v.persistentVolumesInterface.List(meta.ListOptions{})
+	persistentVolumes, err := v.persistentVolumesInterface.List(context.Background(), meta.ListOptions{})
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to list persistent volumes")
 	}

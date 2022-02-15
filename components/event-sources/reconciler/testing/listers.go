@@ -1,51 +1,36 @@
-/*
-Copyright 2019 The Kyma Authors.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
-
 package testing
 
 import (
 	pkgerrors "github.com/pkg/errors"
-
-	authv1alpha1 "istio.io/client-go/pkg/apis/authentication/v1alpha1"
 	fakeistioclientset "istio.io/client-go/pkg/clientset/versioned/fake"
-	authenticationlistersv1alpha1 "istio.io/client-go/pkg/listers/authentication/v1alpha1"
+	appsv1 "k8s.io/api/apps/v1"
+	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime"
+	fakekubeclientset "k8s.io/client-go/kubernetes/fake"
+	appslistersv1 "k8s.io/client-go/listers/apps/v1"
+	corelistersv1 "k8s.io/client-go/listers/core/v1"
 	"k8s.io/client-go/tools/cache"
 	messagingv1alpha1 "knative.dev/eventing/pkg/apis/messaging/v1alpha1"
 	fakeeventingclientset "knative.dev/eventing/pkg/client/clientset/versioned/fake"
 	messaginglistersv1alpha1 "knative.dev/eventing/pkg/client/listers/messaging/v1alpha1"
 	fakelegacyclientset "knative.dev/eventing/pkg/legacyclient/clientset/versioned/fake"
+	_ "knative.dev/pkg/client/injection/ducks/duck/v1/addressable/fake"
 	rt "knative.dev/pkg/reconciler/testing"
-	servingv1alpha1 "knative.dev/serving/pkg/apis/serving/v1alpha1"
-	fakeservingclientset "knative.dev/serving/pkg/client/clientset/versioned/fake"
-	servinglistersv1alpha1 "knative.dev/serving/pkg/client/listers/serving/v1alpha1"
+
+	securityv1beta1 "istio.io/client-go/pkg/apis/security/v1beta1"
+	securitylistersv1alpha1 "istio.io/client-go/pkg/listers/security/v1beta1"
 
 	sourcesv1alpha1 "github.com/kyma-project/kyma/components/event-sources/apis/sources/v1alpha1"
 	fakesourcesclientset "github.com/kyma-project/kyma/components/event-sources/client/generated/clientset/internalclientset/fake"
 	sourceslistersv1alpha1 "github.com/kyma-project/kyma/components/event-sources/client/generated/lister/sources/v1alpha1"
-
-	_ "knative.dev/pkg/client/injection/ducks/duck/v1/addressable/fake"
 )
 
 var clientSetSchemes = []func(*runtime.Scheme) error{
-	fakeservingclientset.AddToScheme,
 	fakesourcesclientset.AddToScheme,
 	fakeeventingclientset.AddToScheme,
 	fakelegacyclientset.AddToScheme,
 	fakeistioclientset.AddToScheme,
+	fakekubeclientset.AddToScheme,
 }
 
 type Listers struct {
@@ -82,12 +67,16 @@ func (l *Listers) GetSourcesObjects() []runtime.Object {
 	return l.sorter.ObjectsForSchemeFunc(fakesourcesclientset.AddToScheme)
 }
 
-func (l *Listers) GetLegacyObjects() []runtime.Object {
-	return l.sorter.ObjectsForSchemeFunc(fakelegacyclientset.AddToScheme)
+func (l *Listers) GetCoreObjects() []runtime.Object {
+	return l.sorter.ObjectsForSchemeFunc(corev1.AddToScheme)
 }
 
-func (l *Listers) GetServingObjects() []runtime.Object {
-	return l.sorter.ObjectsForSchemeFunc(fakeservingclientset.AddToScheme)
+func (l *Listers) GetAppsObjects() []runtime.Object {
+	return l.sorter.ObjectsForSchemeFunc(appsv1.AddToScheme)
+}
+
+func (l *Listers) GetLegacyObjects() []runtime.Object {
+	return l.sorter.ObjectsForSchemeFunc(fakelegacyclientset.AddToScheme)
 }
 
 func (l *Listers) GetEventingObjects() []runtime.Object {
@@ -102,14 +91,18 @@ func (l *Listers) GetHTTPSourceLister() sourceslistersv1alpha1.HTTPSourceLister 
 	return sourceslistersv1alpha1.NewHTTPSourceLister(l.IndexerFor(&sourcesv1alpha1.HTTPSource{}))
 }
 
-func (l *Listers) GetServiceLister() servinglistersv1alpha1.ServiceLister {
-	return servinglistersv1alpha1.NewServiceLister(l.IndexerFor(&servingv1alpha1.Service{}))
+func (l *Listers) GetDeploymentLister() appslistersv1.DeploymentLister {
+	return appslistersv1.NewDeploymentLister(l.IndexerFor(&appsv1.Deployment{}))
 }
 
 func (l *Listers) GetChannelLister() messaginglistersv1alpha1.ChannelLister {
 	return messaginglistersv1alpha1.NewChannelLister(l.IndexerFor(&messagingv1alpha1.Channel{}))
 }
 
-func (l *Listers) GetPolicyLister() authenticationlistersv1alpha1.PolicyLister {
-	return authenticationlistersv1alpha1.NewPolicyLister(l.IndexerFor(&authv1alpha1.Policy{}))
+func (l *Listers) GetPeerAuthenticationLister() securitylistersv1alpha1.PeerAuthenticationLister {
+	return securitylistersv1alpha1.NewPeerAuthenticationLister(l.IndexerFor(&securityv1beta1.PeerAuthentication{}))
+}
+
+func (l *Listers) GetServiceLister() corelistersv1.ServiceLister {
+	return corelistersv1.NewServiceLister(l.IndexerFor(&corev1.Service{}))
 }

@@ -18,9 +18,6 @@ rules:
 - apiGroups: ["*"]
   resources: ["secrets"]
   verbs: ["create", "get", "update", "delete"]
-- apiGroups: ["config.istio.io"]
-  resources: ["rules", "handlers", "instances"]
-  verbs: ["get", "update", "list", "create", "delete"]
 ---
 kind: RoleBinding
 apiVersion: rbac.authorization.k8s.io/v1

@@ -11,6 +11,7 @@ metadata:
     app.kubernetes.io/name: {{ template "name" . }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}
     app.kubernetes.io/instance: {{ .Release.Name }}
+    kyma-project.io/component: controller
 spec:
   selector:
     matchLabels:
@@ -29,11 +30,12 @@ spec:
         app.kubernetes.io/name: {{ template "name" . }}
         app.kubernetes.io/managed-by: {{ .Release.Service }}
         app.kubernetes.io/instance: {{ .Release.Name }}
+        kyma-project.io/component: controller
     spec:
       serviceAccountName: {{ .Chart.Name }}
       initContainers:
         - name: helm-release-migrator
-          image: eu.gcr.io/kyma-project/test-infra/alpine-kubectl:v20200617-32c1f3ff
+          image: eu.gcr.io/kyma-project/incubator/develop/k8s-tools:20201023-5de446cf
           command:
             - /bin/bash
             - -c
@@ -51,7 +53,7 @@ spec:
         - "--namespace={{ .Values.global.namespace }}"
         - "--helmDriver={{ .Values.controller.args.helmDriver }}"
         - "--applicationGatewayImage={{ .Values.global.containerRegistry.path }}/application-gateway:{{ .Values.global.application_gateway.version }}"
-        - "--applicationGatewayTestsImage={{ .Values.global.containerRegistry.path }}/application-gateway-tests:c608dbf3" # Use hardcoded value of tests image as this is the last version that operate without API packages. The approach with API packages was changed and tests are no longer deployed with the Gateway. TODO: should be removed after full transition to API packages
+        - "--applicationGatewayTestsImage={{ .Values.global.containerRegistry.path }}/application-gateway-legacy-tests:{{ .Values.global.application_gateway_legacy_tests.version }}"
         - "--eventServiceImage={{ .Values.global.containerRegistry.path }}/event-service:{{ .Values.global.event_service.version }}"
         - "--eventServiceTestsImage={{ .Values.global.containerRegistry.path }}/event-service-integration-tests:{{ .Values.global.event_service_integration_tests.version }}"
         - "--applicationConnectivityValidatorImage={{ .Values.global.containerRegistry.path }}/application-connectivity-validator:{{ .Values.global.application_connectivity_validator.version }}"

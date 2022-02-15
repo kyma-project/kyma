@@ -10,7 +10,6 @@ spec:
   endpoints:
     - path: /metrics
       port: {{ .Values.metrics.manager.port.name }}
-      interval: "{{ .Values.metrics.serviceMonitor.scrapeInterval }}"
   selector:
     matchLabels:
       app: {{ template "name" . }}

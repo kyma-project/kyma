@@ -39,16 +39,6 @@ The chart deploys pods that consume minimum resources as specified in the resour
 
 ## Installing the Chart
 
-1. If a service account has not already been installed for Tiller, install one:
-    ```
-    $ kubectl apply -f install/kubernetes/helm/helm-service-account.yaml
-    ```
-
-1. Install Tiller on your cluster with the service account:
-    ```
-    $ helm init --service-account tiller
-    ```
-
 1. Set and create the namespace where Istio was installed:
     ```
     $ NAMESPACE=istio-system

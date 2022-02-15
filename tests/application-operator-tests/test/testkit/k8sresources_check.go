@@ -1,6 +1,7 @@
 package testkit
 
 import (
+	"context"
 	"fmt"
 	"testing"
 	"time"
@@ -31,13 +32,15 @@ const (
 )
 
 type k8sResource struct {
+	context     context.Context
 	name        string
 	kind        string
-	getFunction func(string, v1.GetOptions) (interface{}, error)
+	getFunction func(context.Context, string, v1.GetOptions) (interface{}, error)
 }
 
-func newResource(name string, kind string, getFunc func(string, v1.GetOptions) (interface{}, error)) k8sResource {
+func newResource(ctx context.Context, name string, kind string, getFunc func(context.Context, string, v1.GetOptions) (interface{}, error)) k8sResource {
 	return k8sResource{
+		context:     ctx,
 		name:        name,
 		kind:        kind,
 		getFunction: getFunc,
@@ -52,11 +55,11 @@ type K8sResourceChecker struct {
 
 func NewServiceInstanceK8SChecker(client K8sResourcesClient, releaseName string) *K8sResourceChecker {
 	resources := []k8sResource{
-		newResource(releaseName, "deployment", client.GetDeployment),
-		newResource(releaseName, "role", client.GetRole),
-		newResource(releaseName, "rolebinding", client.GetRoleBinding),
-		newResource(releaseName, "serviceaccount", client.GetServiceAccount),
-		newResource(releaseName, "service", client.GetService),
+		newResource(context.Background(), releaseName, "deployment", client.GetDeployment),
+		newResource(context.Background(), releaseName, "role", client.GetRole),
+		newResource(context.Background(), releaseName, "rolebinding", client.GetRoleBinding),
+		newResource(context.Background(), releaseName, "serviceaccount", client.GetServiceAccount),
+		newResource(context.Background(), releaseName, "service", client.GetService),
 	}
 
 	return &K8sResourceChecker{
@@ -67,23 +70,25 @@ func NewServiceInstanceK8SChecker(client K8sResourcesClient, releaseName string)
 }
 
 func NewAppK8sChecker(client K8sResourcesClient, appName string, checkGateway bool) *K8sResourceChecker {
+	ctxBackground := context.Background()
+
 	resources := []k8sResource{
-		newResource(fmt.Sprintf(virtualSvcNameFormat, appName), "virtualservice", client.GetVirtualService),
-		newResource(fmt.Sprintf(eventServiceDeploymentFormat, appName), "deployment", client.GetDeployment),
-		newResource(fmt.Sprintf(eventServiceSvcFormat, appName), "service", client.GetService),
-		newResource(fmt.Sprintf(connectivityValidatorDeploymentFormat, appName), "deployment", client.GetDeployment),
-		newResource(fmt.Sprintf(connectivityValidatorSvcFormat, appName), "service", client.GetService),
+		newResource(ctxBackground, fmt.Sprintf(virtualSvcNameFormat, appName), "virtualservice", client.GetVirtualService),
+		newResource(ctxBackground, fmt.Sprintf(eventServiceDeploymentFormat, appName), "deployment", client.GetDeployment),
+		newResource(ctxBackground, fmt.Sprintf(eventServiceSvcFormat, appName), "service", client.GetService),
+		newResource(ctxBackground, fmt.Sprintf(connectivityValidatorDeploymentFormat, appName), "deployment", client.GetDeployment),
+		newResource(ctxBackground, fmt.Sprintf(connectivityValidatorSvcFormat, appName), "service", client.GetService),
 	}
 
 	if checkGateway {
 		resources = append(resources,
-			newResource(fmt.Sprintf(applicationGatewayDeploymentFormat, appName), "deployment", client.GetDeployment),
-			newResource(fmt.Sprintf(applicationGatewaySvcFormat, appName), "service", client.GetService),
-			newResource(fmt.Sprintf(applicationGatewayRoleFormat, appName), "role", client.GetRole),
-			newResource(fmt.Sprintf(applicationGatewayRoleBindingFormat, appName), "rolebinding", client.GetRoleBinding),
-			newResource(fmt.Sprintf(applicationGatewayClusterRoleFormat, appName), "clusterrole", client.GetClusterRole),
-			newResource(fmt.Sprintf(applicationGatewayClusterRoleBindingFormat, appName), "clusterrolebinding", client.GetClusterRoleBinding),
-			newResource(fmt.Sprintf(applicationGatewayServiceAccountFormat, appName), "serviceaccount", client.GetServiceAccount))
+			newResource(ctxBackground, fmt.Sprintf(applicationGatewayDeploymentFormat, appName), "deployment", client.GetDeployment),
+			newResource(ctxBackground, fmt.Sprintf(applicationGatewaySvcFormat, appName), "service", client.GetService),
+			newResource(ctxBackground, fmt.Sprintf(applicationGatewayRoleFormat, appName), "role", client.GetRole),
+			newResource(ctxBackground, fmt.Sprintf(applicationGatewayRoleBindingFormat, appName), "rolebinding", client.GetRoleBinding),
+			newResource(ctxBackground, fmt.Sprintf(applicationGatewayClusterRoleFormat, appName), "clusterrole", client.GetClusterRole),
+			newResource(ctxBackground, fmt.Sprintf(applicationGatewayClusterRoleBindingFormat, appName), "clusterrolebinding", client.GetClusterRoleBinding),
+			newResource(ctxBackground, fmt.Sprintf(applicationGatewayServiceAccountFormat, appName), "serviceaccount", client.GetServiceAccount))
 	}
 
 	return &K8sResourceChecker{
@@ -108,7 +113,7 @@ func (c *K8sResourceChecker) checkK8sResources(t *testing.T, checkFunc func(reso
 		failMessage := fmt.Sprintf("%s resource %s not handled properly", r.kind, r.name)
 
 		err := WaitForFunction(resourceCheckInterval, resourceCheckTimeout, func() bool {
-			resource, err := r.getFunction(r.name, v1.GetOptions{})
+			resource, err := r.getFunction(context.Background(), r.name, v1.GetOptions{})
 			return checkFunc(resource, err)
 		})
 

@@ -1,0 +1,52 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: {{ template "fullname" . }}-webhook
+  namespace: {{ .Release.Namespace }}
+spec:
+  selector:
+    app: {{ template "fullname" . }}-controller
+  ports:
+    - protocol: TCP
+      port: 443
+      targetPort: {{ .Values.config.bindingController.port }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ template "fullname" . }}-controller
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: {{ template "fullname" . }}-controller
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ template "fullname" . }}-controller
+  template:
+    metadata:
+      labels:
+        app: {{ template "fullname" . }}-controller
+      annotations:
+        sidecar.istio.io/inject: "false"
+    spec:
+      serviceAccountName: {{ template "fullname" . }}-sa
+      containers:
+        - name: manager
+          image: "{{ .Values.images.containerRegistry.path }}/binding:{{ .Values.images.bindingController.version }}"
+          ports:
+            - containerPort: {{ .Values.config.bindingController.port }}
+          imagePullPolicy: Always
+          volumeMounts:
+          - name: webhook-cert
+            mountPath: /var/run/webhook
+            readOnly: true
+          env:
+          - name: APP_PORT
+            value: "{{ .Values.config.bindingController.port }}"
+          - name: APP_DEBUG_MODE
+            value: "{{ .Values.config.bindingController.debugMode }}"
+      volumes:
+      - name: webhook-cert
+        secret:
+          secretName: {{ template "fullname" . }}-webhook-cert

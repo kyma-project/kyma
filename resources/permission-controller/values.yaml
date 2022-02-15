@@ -1,6 +1,6 @@
 image:
   repository: eu.gcr.io/kyma-project/permission-controller
-  tag: PR-7459
+  tag: "a8a6bca9"
   pullPolicy: IfNotPresent
 
 deployment:
@@ -25,7 +25,6 @@ config:
   namespaceBlacklist:
     - istio-system
     - knative-eventing
-    - knative-serving
     - kube-node-lease
     - kube-public
     - kube-system

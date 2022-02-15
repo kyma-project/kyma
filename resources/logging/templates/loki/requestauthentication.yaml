@@ -1,0 +1,18 @@
+{{- if .Values.loki.enabled }}
+apiVersion: security.istio.io/v1beta1
+kind: RequestAuthentication
+metadata:
+  labels:
+    app: {{ template "loki.name" . }}
+    chart: {{ template "loki.chart" . }}
+    release: {{ .Release.Name }}
+  name: {{ template "loki.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+spec:
+  selector:
+    matchLabels:
+      app: {{ template "loki.name" . }}
+  jwtRules:
+  - issuer: https://dex.{{ .Values.global.ingress.domainName }}
+    jwksUri: http://dex-service.kyma-system.svc.cluster.local:5556/keys
+{{- end }}

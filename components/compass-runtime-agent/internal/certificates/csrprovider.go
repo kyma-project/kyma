@@ -15,7 +15,7 @@ const (
 	rsaKeySize = 4096
 )
 
-//go:generate mockery -name=CSRProvider
+//go:generate mockery --name=CSRProvider
 type CSRProvider interface {
 	CreateCSR(subject pkix.Name) (string, *rsa.PrivateKey, error)
 }

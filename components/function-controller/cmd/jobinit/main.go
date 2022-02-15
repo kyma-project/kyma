@@ -28,7 +28,7 @@ func main() {
 	}
 	operator := git.New()
 
-	log.Println("Check for auth config...")
+	log.Println("Get auth config...")
 	gitOptions := cfg.getOptions()
 
 	log.Printf("Clone repo from url: %s and commit: %s...\n", cfg.RepositoryUrl, cfg.RepositoryCommit)

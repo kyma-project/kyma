@@ -17,6 +17,7 @@ rules:
   - pods
   - serviceaccounts
   - services
+  - services/finalizers
   verbs:
   - create
   - delete
@@ -188,6 +189,9 @@ rules:
   - replicationcontrollers
   - services
   verbs:
+{{- if not .Values.kiali.spec.deployment.view_only_mode }}
+  - patch
+{{- end }}
   - get
   - list
   - watch
@@ -197,6 +201,9 @@ rules:
   - replicasets
   - statefulsets
   verbs:
+{{- if not .Values.kiali.spec.deployment.view_only_mode }}
+  - patch
+{{- end }}
   - get
   - list
   - watch
@@ -212,6 +219,9 @@ rules:
   - cronjobs
   - jobs
   verbs:
+{{- if not .Values.kiali.spec.deployment.view_only_mode }}
+  - patch
+{{- end }}
   - get
   - list
   - watch
@@ -259,6 +269,9 @@ rules:
   resources:
   - deploymentconfigs
   verbs:
+{{- if not .Values.kiali.spec.deployment.view_only_mode }}
+  - patch
+{{- end }}
   - get
   - list
   - watch

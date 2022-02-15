@@ -3,7 +3,7 @@ replicaCount: 1
 
 image:
   # ORY Hydra image
-  repository: oryd/hydra
+  repository: eu.gcr.io/kyma-project/external/oryd/hydra
   # ORY Hydra version
   tag: v1.4.6
   # Image pull policy
@@ -131,5 +131,5 @@ maester:
   enabled: true
 
 busybox:
-  repository: busybox
-  tag: 1.32
+  repository: eu.gcr.io/kyma-project/external/busybox
+  tag: 1.32.0

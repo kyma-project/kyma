@@ -34,11 +34,31 @@ spec:
         command: ["/keycloak-gatekeeper"]
         args:
         - --discovery-url=https://dex.{{ .Values.global.ingress.domainName }}
-        - --skip-openid-provider-tls-verify=true
-        - --client-id={{ .Values.kcproxy.clientId }}
-        - --client-secret={{ .Values.kcproxy.clientSecret }}
-        - --resources=uri=/*|methods=GET,POST,PUT,DELETE
+        - --skip-openid-provider-tls-verify={{ not .Values.kcproxy.config.tlsVerify }}
+        - --client-id=$(CLIENT_ID)
+        - --client-secret=$(CLIENT_SECRET)
+        - --resources=uri={{ .Values.kcproxy.config.resources.uri }}{{ template "jaeger-operator.kcproxy.methods" . }}{{ template "jaeger-operator.kcproxy.groups" . }}{{ template "jaeger-operator.kcproxy.roles" . }}
         - --redirection-url=https://jaeger.{{ .Values.global.ingress.domainName }}
+        {{- if .Values.kcproxy.config.scopes }}
+        {{- range $i, $scope := (splitList "," .Values.kcproxy.config.scopes) }}
+        - --scopes={{ $scope }}
+        {{- end }}
+        {{- end }}
+        {{- if .Values.kcproxy.config.addClaims }}
+        {{- range $i, $claim := (splitList "," .Values.kcproxy.config.addClaims) }}
+        - --add-claims={{ $claim }}
+        {{- end }}
+        {{- end }}
+        {{- if .Values.kcproxy.config.matchClaims }}
+        {{- range $i, $claim := (splitList "," .Values.kcproxy.config.matchClaims) }}
+        - --match-claims={{ $claim }}
+        {{- end }}
+        {{- end }}
+        {{- if .Values.kcproxy.config.headers }}
+        {{- range $i, $header := (splitList "," .Values.kcproxy.config.headers) }}
+        - --headers={{ $header }}
+        {{- end }}
+        {{- end }}
         - --verbose=false
         - --listen=0.0.0.0:{{ .Values.kcproxy.inPort }}
         - --upstream-url=http://{{ template "jaeger-operator.fullname" . }}-jaeger-query:{{ .Values.jaeger.kyma.uiPort }}
@@ -46,19 +66,34 @@ spec:
         - --enable-json-logging=true
         - --secure-cookie=true
         - --enable-authorization-cookies=false
+        - --enable-authorization-header=false
         - --enable-token-header=false
         - --enable-encrypted-token=true
         - --enable-security-filter=true
         - --filter-browser-xss=true
         - --filter-content-nosniff=true
         - --filter-frame-deny=true
-        - --encryption-key={{ randAlphaNum 32 }}
+        - --encryption-key=$(ENCRYPTION_KEY)
         - --http-only-cookie=true
         - --upstream-keepalives=true
         - --upstream-keepalive-timeout=60s
         - --cookie-domain=https://jaeger.{{ .Values.global.ingress.domainName }}
         - --cookie-access-name=KYMA_JAEGER_TOKEN
+        envFrom:
+        - secretRef:
+            name: {{ include "jaeger-operator.fullname" . }}-kcproxy
+            optional: false
         ports:
-        - containerPort: {{ .Values.kcproxy.inPort }}
+        - name: http
+          containerPort: {{ .Values.kcproxy.inPort }}
+          protocol: TCP
+        livenessProbe:
+          httpGet:
+            path: /oauth/health
+            port: http
+        readinessProbe:
+          httpGet:
+            path: /oauth/health
+            port: http
         resources:
 {{ toYaml .Values.kcproxy.resources | indent 10 }}

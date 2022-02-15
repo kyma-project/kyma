@@ -6,7 +6,7 @@
 # $1 - namespace
 # $2 - pod's label name
 # $3 - pod's label value
-# Sample: bash isready.sh kube-system tiller
+# Sample: bash isready.sh kyma-installer kyma-installer
 #
 ################################################################################
 

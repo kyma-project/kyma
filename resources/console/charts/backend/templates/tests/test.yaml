@@ -9,12 +9,20 @@ metadata:
     app.kubernetes.io/managed-by: {{ .Release.Service }}
     app.kubernetes.io/instance: {{ .Release.Name }}
     helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    {{- range $key, $val := .Values.tests.labels }}
+    kyma-project.io/test.{{ $key }}: {{ $val | quote }}
+    {{- end }}
+
 spec:
   disableConcurrency: true
   template:
+    labels:
+      app: {{ .Chart.Name }}-tests
     metadata:
       annotations:
         sidecar.istio.io/inject: "true"
+      labels:
+        app: console-{{ .Chart.Name }}-tests
     spec:
       {{ if .Values.global.isLocalEnv }}
       hostAliases:
@@ -29,7 +37,7 @@ spec:
           image: {{ .Values.global.containerRegistry.path }}/console-backend-service-test:{{ .Values.global.console_backend_service_test.version }}
           env:
             - name: MOCKICE_IMAGE
-              value: hudymi/mockice:0.1.1
+              value: eu.gcr.io/kyma-project/external/hudymi/mockice:0.1.3
             - name: DOMAIN
               value: "{{ .Values.global.ingress.domainName }}"
             - name: GRAPHQL_ENDPOINT

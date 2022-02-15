@@ -13,7 +13,7 @@ minio:
   accessKey: ""
   secretKey: ""
   podAnnotations:
-    persistence: "true"
+    persistence: "on"
 
 image:
   repository: eu.gcr.io/kyma-project/rafter-upload-service
@@ -66,7 +66,6 @@ rbac:
 serviceMonitor:
   create: false
   name:
-  scrapeInterval: 30s
   labels: {}
   annotations: {}
 
@@ -115,8 +114,8 @@ envs:
 migrator:
   images:
     alpineKubectl:
-      repository: eu.gcr.io/kyma-project/test-infra/alpine-kubectl
-      tag: 'v20200617-32c1f3ff'
+      repository: eu.gcr.io/kyma-project/incubator/develop/k8s-tools
+      tag: '20201023-5de446cf'
       pullPolicy: IfNotPresent
     minioClient:
       repository: 'minio/mc'

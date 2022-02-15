@@ -2,11 +2,13 @@ package uaa
 
 import (
 	"context"
+	"time"
 
 	"github.com/kyma-project/kyma/components/uaa-activator/internal/repeat"
 
 	"github.com/kubernetes-sigs/service-catalog/pkg/apis/servicecatalog/v1beta1"
 	"github.com/pkg/errors"
+	v1 "k8s.io/api/core/v1"
 	apiErrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/util/retry"
@@ -31,6 +33,19 @@ func NewCreator(cli client.Client, config Config) *Creator {
 // Additionally, wait until ServiceInstance is in a ready state.
 func (p *Creator) EnsureUAAInstance(ctx context.Context) error {
 	instance := p.uaaServiceInstance()
+
+	// remove not ready ServiceInstance before create new one
+	if err := p.instanceIsReady(ctx); err != nil {
+		err := p.removeUAAInstance(ctx, instance)
+		if err != nil {
+			return errors.Wrap(err, "while removing ServiceInstance in not ready state")
+		}
+		// there is a problem with communication with the UAA. If an instance after deletion is created
+		// in too short a period of time, the UAA provider will return information that the instance with
+		// the given 'xsappname' is in the deleting process and the new instance will not be triggered to create it
+		// so there is a delay before a request for a new instance is sent
+		time.Sleep(p.config.NewInstanceCreateDelay)
+	}
 
 	err := p.cli.Create(ctx, &instance)
 	switch {
@@ -96,6 +111,11 @@ func (p *Creator) EnsureUAABinding(ctx context.Context) error {
 		return errors.Wrapf(err, "while waiting for %s", p.config.ServiceBinding.String())
 	}
 
+	err = repeat.UntilSuccess(ctx, p.secretExist(ctx))
+	if err != nil {
+		return errors.Wrapf(err, "while waiting for Secret %s", p.config.ServiceBinding.String())
+	}
+
 	return nil
 }
 
@@ -133,6 +153,24 @@ func (p *Creator) uaaServiceBinding() v1beta1.ServiceBinding {
 	}
 }
 
+func (p *Creator) removeUAAInstance(ctx context.Context, instance v1beta1.ServiceInstance) error {
+	err := p.cli.Delete(ctx, &instance)
+	switch {
+	case err == nil:
+	case apiErrors.IsNotFound(err):
+		return nil
+	case err != nil:
+		return errors.Wrap(err, "while deleting UAA ServiceInstance")
+	}
+
+	err = repeat.UntilSuccess(ctx, p.instanceWasRemoved(ctx))
+	if err != nil {
+		return errors.Wrapf(err, "while waiting for removing %s", p.config.ServiceInstance.String())
+	}
+
+	return nil
+}
+
 func (p *Creator) instanceIsReady(ctx context.Context) func() error {
 	return func() error {
 		instance := v1beta1.ServiceInstance{}
@@ -151,6 +189,22 @@ func (p *Creator) instanceIsReady(ctx context.Context) func() error {
 	}
 }
 
+func (p *Creator) instanceWasRemoved(ctx context.Context) func() error {
+	return func() error {
+		instance := v1beta1.ServiceInstance{}
+		err := p.cli.Get(ctx, p.config.ServiceInstance, &instance)
+
+		if apiErrors.IsNotFound(err) {
+			return nil
+		}
+		if err != nil {
+			return errors.Wrap(err, "while checking if ServiceInstance was removed")
+		}
+
+		return errors.Errorf("ServiceInstance exist, status: %v", instance.Status)
+	}
+}
+
 func (p *Creator) bindingIsReady(ctx context.Context) func() error {
 	return func() error {
 		binding := v1beta1.ServiceBinding{}
@@ -166,5 +220,17 @@ func (p *Creator) bindingIsReady(ctx context.Context) func() error {
 		}
 
 		return errors.Errorf("ServiceBinding is not ready, status: %v", binding.Status)
+	}
+}
+
+func (p *Creator) secretExist(ctx context.Context) func() error {
+	return func() error {
+		secret := v1.Secret{}
+		err := p.cli.Get(ctx, p.config.ServiceBinding, &secret)
+		if err != nil {
+			return errors.Wrapf(err, "while fetching Secret %s", p.config.ServiceBinding.Name)
+		}
+
+		return nil
 	}
 }

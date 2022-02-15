@@ -18,6 +18,9 @@ spec:
   - JSONPath: .status.conditions[?(@.type=='Running')].status
     name: Running
     type: string
+  - JSONPath: .status.runtime
+    name: Runtime
+    type: string
   - JSONPath: .metadata.generation
     name: Version
     type: integer
@@ -53,6 +56,24 @@ spec:
           properties:
             baseDir:
               type: string
+            buildResources:
+              description: ResourceRequirements describes the compute resource requirements.
+              properties:
+                limits:
+                  additionalProperties:
+                    type: string
+                  description: 'Limits describes the maximum amount of compute resources
+                    allowed. More info: https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/'
+                  type: object
+                requests:
+                  additionalProperties:
+                    type: string
+                  description: 'Requests describes the minimum amount of compute resources
+                    required. If Requests is omitted for a container, it defaults
+                    to Limits if that is explicitly specified, otherwise to an implementation-defined
+                    value. More info: https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/'
+                  type: object
+              type: object
             deps:
               description: Deps defines the dependencies for a function
               type: string
@@ -190,7 +211,9 @@ spec:
               type: object
             runtime:
               enum:
-              - nodejs-12
+              - nodejs12
+              - nodejs10
+              - python38
               type: string
             source:
               description: Source defines the source code of a function
@@ -231,7 +254,9 @@ spec:
               type: string
             runtime:
               enum:
-              - nodejs-12
+              - nodejs12
+              - nodejs10
+              - python38
               type: string
             source:
               type: string

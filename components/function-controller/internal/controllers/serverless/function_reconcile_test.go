@@ -39,7 +39,7 @@ var _ = ginkgo.Describe("Function", func() {
 	)
 
 	ginkgo.BeforeEach(func() {
-		function := newFixFunction("tutaj", "ah-tak-przeciez", 1, 2)
+		function := newFixFunction(testNamespace, "ah-tak-przeciez", 1, 2)
 		request = ctrl.Request{NamespacedName: types.NamespacedName{Namespace: function.GetNamespace(), Name: function.GetName()}}
 		gomega.Expect(resourceClient.Create(context.TODO(), function)).To(gomega.Succeed())
 
@@ -67,9 +67,8 @@ var _ = ginkgo.Describe("Function", func() {
 		err = reconciler.client.ListByLabel(context.TODO(), function.GetNamespace(), fnLabels, configMapList)
 		gomega.Expect(err).To(gomega.BeNil())
 		gomega.Expect(configMapList.Items).To(gomega.HaveLen(1))
-		gomega.Expect(configMapList.Items[0].Data[configMapFunction]).To(gomega.Equal(function.Spec.Source))
-		gomega.Expect(configMapList.Items[0].Data[configMapHandler]).To(gomega.Equal("handler.main"))
-		gomega.Expect(configMapList.Items[0].Data[configMapDeps]).To(gomega.Equal("{}"))
+		gomega.Expect(configMapList.Items[0].Data[FunctionSourceKey]).To(gomega.Equal(function.Spec.Source))
+		gomega.Expect(configMapList.Items[0].Data[FunctionDepsKey]).To(gomega.Equal("{}"))
 
 		ginkgo.By("creating the Job")
 		result, err = reconciler.Reconcile(request)
@@ -904,4 +903,23 @@ var _ = ginkgo.Describe("Function", func() {
 		gomega.Expect(result.Requeue).To(gomega.BeFalse())
 		gomega.Expect(result.RequeueAfter).To(gomega.Equal(time.Second * 0))
 	})
+
+	ginkgo.It("should return error when desired dockerfile runtime configmap not found", func() {
+		testNamespace := "test-namespace"
+		fnName := "function"
+		function := newFixFunction(testNamespace, fnName, 1, 2)
+		request = ctrl.Request{NamespacedName: types.NamespacedName{Namespace: function.GetNamespace(), Name: function.GetName()}}
+		gomega.Expect(resourceClient.Create(context.TODO(), function)).To(gomega.Succeed())
+		defer deleteFunction(context.TODO(), function)
+
+		_, err := reconciler.Reconcile(request)
+		gomega.Expect(err).To(gomega.HaveOccurred())
+		gomega.Expect(err.Error()).To(gomega.ContainSubstring("Expected one config map, found 0"))
+
+	})
 })
+
+func deleteFunction(ctx context.Context, function *serverlessv1alpha1.Function) {
+	err := resourceClient.Delete(ctx, function)
+	gomega.Expect(err).To(gomega.BeNil())
+}

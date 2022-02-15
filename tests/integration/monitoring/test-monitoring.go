@@ -11,14 +11,14 @@ import (
 	"strings"
 	"time"
 
+	monitoringv1 "github.com/coreos/prometheus-operator/pkg/client/versioned/typed/monitoring/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
+	"github.com/kyma-project/kyma/tests/integration/monitoring/prom"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
-
-	"github.com/kyma-project/kyma/tests/integration/monitoring/prom"
 )
 
 const prometheusURL = "http://monitoring-prometheus.kyma-system:9090"
@@ -31,15 +31,18 @@ const expectedGrafanaInstance = 1
 
 var kubeConfig *rest.Config
 var k8sClient *kubernetes.Clientset
+var monitoringClient *monitoringv1.MonitoringV1Client
 var httpClient *http.Client
 
 func main() {
 	kubeConfig = loadKubeConfigOrDie()
 	k8sClient = kubernetes.NewForConfigOrDie(kubeConfig)
+	monitoringClient = monitoringv1.NewForConfigOrDie(kubeConfig)
 	httpClient = getHttpClient()
 
 	testPodsAreReady()
-	testTargetsAreHealthy()
+	// testTargetsAreHealthy()
+	checkScrapePools()
 	testRulesAreHealthy()
 	testGrafanaIsReady()
 	checkLambdaUIDashboard()
@@ -137,7 +140,7 @@ func testTargetsAreHealthy() {
 			log.Fatal(timeoutMessage)
 		case <-tick.C:
 			var resp prom.TargetsResponse
-			url := fmt.Sprintf("%s/api/v1/targets", prometheusURL)
+			url := fmt.Sprintf("%s/api/v1/targets?state=active", prometheusURL)
 			respBody, statusCode := doGet(url)
 			if err := json.Unmarshal([]byte(respBody), &resp); err != nil {
 				log.Fatalf("Error unmarshalling response: %v.\nResponse body: %s", err, respBody)
@@ -171,14 +174,144 @@ func testTargetsAreHealthy() {
 }
 
 func shouldIgnoreTarget(target prom.Labels) bool {
-	var jobsToBeIgnored = []string{
+	jobsToBeIgnored := []string{
 		// Note: These targets will be tested here: https://github.com/kyma-project/kyma/issues/6457
 		"knative-eventing/knative-eventing-event-mesh-dashboard-broker",
 		"knative-eventing/knative-eventing-event-mesh-dashboard-httpsource",
 	}
 
+	podsToBeIgnored := []string{
+		// Ignore the pods that are created during tests.
+		"-testsuite-",
+		"test",
+		"nodejs12-",
+		"nodejs10-",
+		"upgrade",
+		// Ignore the pods created by jobs which are executed after installation of control-plane.
+		"compass-migration",
+		"compass-director-tenant-loader-default",
+		"compass-agent-configuration",
+	}
+
+	namespacesToBeIgnored := []string{"test", "e2e"} // Since some namespaces are named -e2e and some are e2e-
+
+	for _, p := range podsToBeIgnored {
+		if strings.Contains(target["pod"], p) {
+			return true
+		}
+	}
+
 	for _, j := range jobsToBeIgnored {
 		if target["job"] == j {
+			return true
+		}
+	}
+
+	for _, n := range namespacesToBeIgnored {
+		if strings.Contains(target["namespace"], n) {
+			return true
+		}
+	}
+
+	return false
+}
+
+func checkScrapePools() {
+	scrapePools := make(map[string]struct{})
+	timeout := time.After(3 * time.Minute)
+	tick := time.NewTicker(5 * time.Second)
+	for {
+		select {
+		case <-timeout:
+			tick.Stop()
+			timeoutMessage := "Unable to scrape targets in the following scrape pool(s):\n"
+			for scrapePool := range scrapePools {
+				timeoutMessage += fmt.Sprintf("- %s\n", scrapePool)
+			}
+			log.Fatal(timeoutMessage)
+		case <-tick.C:
+			scrapePools = buildScrapePoolSet()
+			var resp prom.TargetsResponse
+			url := fmt.Sprintf("%s/api/v1/targets?state=active", prometheusURL)
+			respBody, statusCode := doGet(url)
+			if err := json.Unmarshal([]byte(respBody), &resp); err != nil {
+				log.Fatalf("Error unmarshalling response: %v.\nResponse body: %s", err, respBody)
+			}
+			if statusCode != 200 || resp.Status != "success" {
+				log.Fatalf("Error in response status with ErrorType: %s.\nError: %s", resp.ErrorType, resp.Error)
+			}
+			activeTargets := resp.Data.ActiveTargets
+			for _, target := range activeTargets {
+				delete(scrapePools, target.ScrapePool)
+			}
+			if len(scrapePools) == 0 {
+				log.Println("All scrape pools have active targets")
+				return
+			}
+		}
+	}
+
+}
+
+func buildScrapePoolSet() map[string]struct{} {
+	scrapePools := make(map[string]struct{})
+
+	serviceMonitors, err := monitoringClient.ServiceMonitors("").List(metav1.ListOptions{})
+	if err != nil {
+		log.Fatalf("Error while listing service monitors: %v", err)
+	}
+	for _, serviceMonitor := range serviceMonitors.Items {
+		if shouldIgnoreServiceMonitor(serviceMonitor.Name) {
+			continue
+		}
+		for i := range serviceMonitor.Spec.Endpoints {
+			scrapePool := fmt.Sprintf("%s/%s/%d", serviceMonitor.ObjectMeta.Namespace, serviceMonitor.Name, i)
+			scrapePools[scrapePool] = struct{}{}
+		}
+	}
+
+	podMonitors, err := monitoringClient.PodMonitors("").List(metav1.ListOptions{})
+	if err != nil {
+		log.Fatalf("Error while listing pod monitors: %v", err)
+	}
+	for _, podMonitor := range podMonitors.Items {
+		if shouldIgnorePodMonitor(podMonitor.Name) {
+			continue
+		}
+		for i := range podMonitor.Spec.PodMetricsEndpoints {
+			scrapePool := fmt.Sprintf("%s/%s/%d", podMonitor.ObjectMeta.Namespace, podMonitor.Name, i)
+			scrapePools[scrapePool] = struct{}{}
+		}
+	}
+
+	return scrapePools
+}
+
+func shouldIgnoreServiceMonitor(serviceMonitorName string) bool {
+	var serviceMonitorsToBeIgnored = []string{
+		// kiali-operator-metrics is created automatically by kiali operator and can't be disabled
+		"kiali-operator-metrics",
+		// tracing-metrics is created automatically by jaeger operator and can't be disabled
+		"tracing-metrics",
+	}
+
+	for _, sm := range serviceMonitorsToBeIgnored {
+		if sm == serviceMonitorName {
+			return true
+		}
+	}
+	return false
+}
+
+func shouldIgnorePodMonitor(podMonitorName string) bool {
+	var podMonitorsToBeIgnored = []string{
+		// The targets scraped by these podmonitors will be tested here: https://github.com/kyma-project/kyma/issues/6457
+		"knative-eventing-event-mesh-dashboard-broker",
+		"knative-eventing-event-mesh-dashboard-httpsource",
+	}
+
+	for _, pm := range podMonitorsToBeIgnored {
+		if pm == podMonitorName {
 			return true
 		}
 	}

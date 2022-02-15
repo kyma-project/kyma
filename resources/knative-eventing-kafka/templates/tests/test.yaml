@@ -8,10 +8,15 @@ metadata:
   labels:
 {{ include "knative-kafka.labels" . | indent 4 }}
     kyma-project.io/test: {{ .Release.Name }}
+    {{- range $label, $value := .Values.test.labels }}
+    kyma-project.io/test.{{ $label }}: {{ $value | quote }}
+    {{- end }}
 spec:
   disableConcurrency: false
   template:
     metadata:
+      labels:
+{{ include "knative-kafka.labels" . | indent 8 }}
       annotations:
         sidecar.istio.io/inject: "false"
     spec:

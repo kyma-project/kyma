@@ -1,6 +1,7 @@
 package gateway
 
 import (
+	"context"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -15,8 +16,8 @@ import (
 
 	"github.com/google/uuid"
 
-	serviceCatalogClient "github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset/typed/servicecatalog/v1beta1"
 	"github.com/kubernetes-sigs/service-catalog/pkg/apis/servicecatalog/v1beta1"
+	serviceCatalogClient "github.com/kubernetes-sigs/service-catalog/pkg/client/clientset_generated/clientset/typed/servicecatalog/v1beta1"
 	"github.com/kyma-project/kyma/tests/application-gateway-tests/test/gateway/mock"
 	"github.com/kyma-project/kyma/tests/application-gateway-tests/test/tools"
 	"github.com/stretchr/testify/assert"
@@ -102,10 +103,10 @@ func (ts *TestSuite) Cleanup(t *testing.T) {
 	err := ts.appMockServer.Kill()
 	assert.NoError(t, err)
 
-	err = ts.serviceInstanceClient.Delete(ts.serviceInstanceName, &metav1.DeleteOptions{})
+	err = ts.serviceInstanceClient.Delete(context.Background(), ts.serviceInstanceName, metav1.DeleteOptions{})
 	assert.NoError(t, err)
 
-	err = ts.namespaceClient.Delete(ts.config.GatewayNamespace, &metav1.DeleteOptions{})
+	err = ts.namespaceClient.Delete(context.Background(), ts.config.GatewayNamespace, metav1.DeleteOptions{})
 	assert.NoError(t, err)
 }
 
@@ -116,7 +117,7 @@ func (ts *TestSuite) createNamespace() error {
 		},
 	}
 
-	_, err := ts.namespaceClient.Create(namespace)
+	_, err := ts.namespaceClient.Create(context.Background(), namespace, metav1.CreateOptions{})
 	return err
 }
 
@@ -131,7 +132,7 @@ func (ts *TestSuite) createServiceInstance() error {
 		},
 	}
 
-	_, err := ts.serviceInstanceClient.Create(serviceInstance)
+	_, err := ts.serviceInstanceClient.Create(context.Background(), serviceInstance, metav1.CreateOptions{})
 	return err
 }
 
@@ -186,7 +187,7 @@ func (ts *TestSuite) CreateSecret(t *testing.T, apiName string, proxyConfig prox
 }
 
 func (ts *TestSuite) DeleteSecret(t *testing.T, secretName string) {
-	err := ts.secretClient.Delete(secretName, &metav1.DeleteOptions{})
+	err := ts.secretClient.Delete(context.Background(), secretName, metav1.DeleteOptions{})
 	assert.NoError(t, err)
 }
 

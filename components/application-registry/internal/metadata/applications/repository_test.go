@@ -1,6 +1,7 @@
 package applications_test
 
 import (
+	"context"
 	"errors"
 	"testing"
 
@@ -20,8 +21,8 @@ func TestGetServices(t *testing.T) {
 	t.Run("should get all services", func(t *testing.T) {
 		// given
 		application := createApplication("production")
-		appManagerMock := &mocks.ApplicationManager{}
-		appManagerMock.On("Get", "production", metav1.GetOptions{}).
+		appManagerMock := &mocks.AppManager{}
+		appManagerMock.On("Get", context.Background(), "production", metav1.GetOptions{}).
 			Return(application, nil)
 
 		repository := applications.NewServiceRepository(appManagerMock)
@@ -68,8 +69,8 @@ func TestGetServices(t *testing.T) {
 
 	t.Run("should fail if unable to read App", func(t *testing.T) {
 		// given
-		appManagerMock := &mocks.ApplicationManager{}
-		appManagerMock.On("Get", "app", metav1.GetOptions{}).
+		appManagerMock := &mocks.AppManager{}
+		appManagerMock.On("Get", context.Background(), "app", metav1.GetOptions{}).
 			Return(nil, errors.New("failed to get App"))
 
 		repository := applications.NewServiceRepository(appManagerMock)
@@ -85,8 +86,8 @@ func TestGetServices(t *testing.T) {
 
 	t.Run("should fail if App doesn't exist", func(t *testing.T) {
 		// given
-		appManagerMock := &mocks.ApplicationManager{}
-		appManagerMock.On("Get", "not_existent", metav1.GetOptions{}).
+		appManagerMock := &mocks.AppManager{}
+		appManagerMock.On("Get", context.Background(), "not_existent", metav1.GetOptions{}).
 			Return(nil, k8serrors.NewNotFound(schema.GroupResource{}, ""))
 
 		repository := applications.NewServiceRepository(appManagerMock)
@@ -111,8 +112,8 @@ func TestGetServices(t *testing.T) {
 	t.Run("should get service by id", func(t *testing.T) {
 		// given
 		application := createApplication("production")
-		appManagerMock := &mocks.ApplicationManager{}
-		appManagerMock.On("Get", "production", metav1.GetOptions{}).
+		appManagerMock := &mocks.AppManager{}
+		appManagerMock.On("Get", context.Background(), "production", metav1.GetOptions{}).
 			Return(application, nil)
 
 		repository := applications.NewServiceRepository(appManagerMock)
@@ -142,8 +143,8 @@ func TestGetServices(t *testing.T) {
 	t.Run("should return not found error if service doesn't exist", func(t *testing.T) {
 		// given
 		application := createApplication("production")
-		appManagerMock := &mocks.ApplicationManager{}
-		appManagerMock.On("Get", "production", metav1.GetOptions{}).
+		appManagerMock := &mocks.AppManager{}
+		appManagerMock.On("Get", context.Background(), "production", metav1.GetOptions{}).
 			Return(application, nil)
 
 		repository := applications.NewServiceRepository(appManagerMock)
@@ -163,8 +164,8 @@ func TestCreateServices(t *testing.T) {
 		// given
 		application := createApplication("production")
 
-		appManagerMock := &mocks.ApplicationManager{}
-		appManagerMock.On("Get", "production", metav1.GetOptions{}).
+		appManagerMock := &mocks.AppManager{}
+		appManagerMock.On("Get", context.Background(), "production", metav1.GetOptions{}).
 			Return(application, nil)
 
 		service1 := createK8sService()
@@ -172,7 +173,7 @@ func TestCreateServices(t *testing.T) {
 		newApp := application.DeepCopy()
 
 		newApp.Spec.Services = newServices
-		appManagerMock.On("Update", newApp).Return(newApp, nil)
+		appManagerMock.On("Update", context.Background(), newApp, metav1.UpdateOptions{}).Return(newApp, nil)
 
 		repository := applications.NewServiceRepository(appManagerMock)
 		require.NotNil(t, repository)
@@ -190,11 +191,11 @@ func TestCreateServices(t *testing.T) {
 	t.Run("should fail if failed to update App", func(t *testing.T) {
 		// given
 		application := createApplication("production")
-		appManagerMock := &mocks.ApplicationManager{}
-		appManagerMock.On("Get", "production", metav1.GetOptions{}).
+		appManagerMock := &mocks.AppManager{}
+		appManagerMock.On("Get", context.Background(), "production", metav1.GetOptions{}).
 			Return(application, nil)
 
-		appManagerMock.On("Update", mock.AnythingOfType("*v1alpha1.Application")).Return(nil, errors.New("failed to update Application"))
+		appManagerMock.On("Update", context.Background(), mock.AnythingOfType("*v1alpha1.Application"), metav1.UpdateOptions{}).Return(nil, errors.New("failed to update Application"))
 
 		repository := applications.NewServiceRepository(appManagerMock)
 		require.NotNil(t, repository)
@@ -213,8 +214,8 @@ func TestCreateServices(t *testing.T) {
 	t.Run("should not allow to create service if service with the same id already exists", func(t *testing.T) {
 		// given
 		application := createApplication("production")
-		appManagerMock := &mocks.ApplicationManager{}
-		appManagerMock.On("Get", "production", metav1.GetOptions{}).
+		appManagerMock := &mocks.AppManager{}
+		appManagerMock.On("Get", context.Background(), "production", metav1.GetOptions{}).
 			Return(application, nil)
 
 		repository := applications.NewServiceRepository(appManagerMock)
@@ -237,8 +238,8 @@ func TestCreateServices(t *testing.T) {
 
 	t.Run("should fail if App doesn't exist", func(t *testing.T) {
 		// given
-		appManagerMock := &mocks.ApplicationManager{}
-		appManagerMock.On("Get", "production", metav1.GetOptions{}).
+		appManagerMock := &mocks.AppManager{}
+		appManagerMock.On("Get", context.Background(), "production", metav1.GetOptions{}).
 			Return(nil, k8serrors.NewNotFound(schema.GroupResource{}, ""))
 
 		repository := applications.NewServiceRepository(appManagerMock)
@@ -264,14 +265,14 @@ func TestDeleteServices(t *testing.T) {
 	t.Run("should delete service", func(t *testing.T) {
 		// given
 		application := createApplication("production")
-		appManagerMock := &mocks.ApplicationManager{}
-		appManagerMock.On("Get", "production", metav1.GetOptions{}).
+		appManagerMock := &mocks.AppManager{}
+		appManagerMock.On("Get", context.Background(), "production", metav1.GetOptions{}).
 			Return(application, nil)
 
 		newApp := application.DeepCopy()
 
 		newApp.Spec.Services = application.Spec.Services[1:]
-		appManagerMock.On("Update", newApp).Return(newApp, nil)
+		appManagerMock.On("Update", context.Background(), newApp, metav1.UpdateOptions{}).Return(newApp, nil)
 
 		repository := applications.NewServiceRepository(appManagerMock)
 		require.NotNil(t, repository)
@@ -287,10 +288,10 @@ func TestDeleteServices(t *testing.T) {
 	t.Run("should ignore not found error if service doesn't exist", func(t *testing.T) {
 		// given
 		application := createApplication("production")
-		appManagerMock := &mocks.ApplicationManager{}
-		appManagerMock.On("Get", "production", metav1.GetOptions{}).
+		appManagerMock := &mocks.AppManager{}
+		appManagerMock.On("Get", context.Background(), "production", metav1.GetOptions{}).
 			Return(application, nil)
-		appManagerMock.On("Update", mock.AnythingOfType("*v1alpha1.Application")).
+		appManagerMock.On("Update", context.Background(), mock.AnythingOfType("*v1alpha1.Application"), metav1.UpdateOptions{}).
 			Return(application, nil)
 
 		repository := applications.NewServiceRepository(appManagerMock)
@@ -307,10 +308,10 @@ func TestDeleteServices(t *testing.T) {
 	t.Run("should fail if failed to update App", func(t *testing.T) {
 		// given
 		application := createApplication("production")
-		appManagerMock := &mocks.ApplicationManager{}
-		appManagerMock.On("Get", "production", metav1.GetOptions{}).
+		appManagerMock := &mocks.AppManager{}
+		appManagerMock.On("Get", context.Background(), "production", metav1.GetOptions{}).
 			Return(application, nil)
-		appManagerMock.On("Update", mock.AnythingOfType("*v1alpha1.Application")).Return(nil, errors.New("failed to update App"))
+		appManagerMock.On("Update", context.Background(), mock.AnythingOfType("*v1alpha1.Application"), metav1.UpdateOptions{}).Return(nil, errors.New("failed to update App"))
 
 		repository := applications.NewServiceRepository(appManagerMock)
 		require.NotNil(t, repository)
@@ -326,8 +327,8 @@ func TestDeleteServices(t *testing.T) {
 
 	t.Run("should return not found error if App doesn't exist", func(t *testing.T) {
 		// given
-		appManagerMock := &mocks.ApplicationManager{}
-		appManagerMock.On("Get", "production", metav1.GetOptions{}).
+		appManagerMock := &mocks.AppManager{}
+		appManagerMock.On("Get", context.Background(), "production", metav1.GetOptions{}).
 			Return(nil, k8serrors.NewNotFound(schema.GroupResource{}, ""))
 
 		repository := applications.NewServiceRepository(appManagerMock)
@@ -345,8 +346,8 @@ func TestUpdateServices(t *testing.T) {
 	t.Run("should update service", func(t *testing.T) {
 		// given
 		application := createApplication("production")
-		appManagerMock := &mocks.ApplicationManager{}
-		appManagerMock.On("Get", "production", metav1.GetOptions{}).
+		appManagerMock := &mocks.AppManager{}
+		appManagerMock.On("Get", context.Background(), "production", metav1.GetOptions{}).
 			Return(application, nil)
 
 		reEntry1 := v1alpha1.Entry{
@@ -372,7 +373,7 @@ func TestUpdateServices(t *testing.T) {
 		newApp.Spec.Services[0].Tags = []string{"promotions"}
 		newApp.Spec.Services[0].Entries = []v1alpha1.Entry{reEntry1, reEntry2}
 
-		appManagerMock.On("Update", newApp).Return(newApp, nil)
+		appManagerMock.On("Update", context.Background(), newApp, metav1.UpdateOptions{}).Return(newApp, nil)
 
 		repository := applications.NewServiceRepository(appManagerMock)
 		require.NotNil(t, repository)
@@ -407,8 +408,8 @@ func TestUpdateServices(t *testing.T) {
 	t.Run("should return not found error if App doesn't exist", func(t *testing.T) {
 		// given
 		application := createApplication("production")
-		appManagerMock := &mocks.ApplicationManager{}
-		appManagerMock.On("Get", "production", metav1.GetOptions{}).
+		appManagerMock := &mocks.AppManager{}
+		appManagerMock.On("Get", context.Background(), "production", metav1.GetOptions{}).
 			Return(application, nil)
 
 		repository := applications.NewServiceRepository(appManagerMock)

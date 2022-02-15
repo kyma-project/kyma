@@ -18,7 +18,7 @@ const (
 	caCertificateSecretKey = "cacert"
 )
 
-//go:generate mockery -name=Manager
+//go:generate mockery --name=Manager
 type Manager interface {
 	GetClientCredentials() (ClientCredentials, error)
 	PreserveCredentials(Credentials) error

@@ -9,13 +9,22 @@ data:
   WEBHOOK_SERVICE_NAME: {{ include "tplValue" ( dict "value" .Values.container.envs.webhookServiceName.value "context" . ) | quote }}
   WEBHOOK_SECRET_NAME: {{ include "tplValue" ( dict "value" .Values.container.envs.webhookSecretName.value "context" . ) | quote }}
   WEBHOOK_PORT: {{ include "tplValue" ( dict "value" .Values.container.envs.webhookPort.value "context" . ) | quote }}
-  WEBHOOK_VALIDATION_MIN_REQUEST_CPU: {{ include "tplValue" ( dict "value" .Values.container.envs.minRequestCpu.value "context" . ) | quote }}
-  WEBHOOK_VALIDATION_MIN_REQUEST_MEMORY: {{ include "tplValue" ( dict "value" .Values.container.envs.minRequestMemory.value "context" . ) | quote }}
-  WEBHOOK_VALIDATION_MIN_REPLICAS_VALUE: {{ include "tplValue" ( dict "value" .Values.container.envs.minReplicasValue.value "context" . ) | quote }}
-  WEBHOOK_VALIDATION_RESERVED_ENVS: {{ include "tplValue" ( dict "value" .Values.container.envs.reservedEnvs.value "context" . ) | quote }}
-  WEBHOOK_DEFAULTING_REQUEST_CPU: {{ include "tplValue" ( dict "value" .Values.container.envs.requestCpu.value "context" . ) | quote }}
-  WEBHOOK_DEFAULTING_REQUEST_MEMORY: {{ include "tplValue" ( dict "value" .Values.container.envs.requestMemory.value "context" . ) | quote }}
-  WEBHOOK_DEFAULTING_LIMITS_CPU: {{ include "tplValue" ( dict "value" .Values.container.envs.limitsCpu.value "context" . ) | quote }}
-  WEBHOOK_DEFAULTING_LIMITS_MEMORY: {{ include "tplValue" ( dict "value" .Values.container.envs.limitsMemory.value "context" . ) | quote }}
-  WEBHOOK_DEFAULTING_MINREPLICAS: {{ include "tplValue" ( dict "value" .Values.container.envs.minReplicas.value "context" . ) | quote }}
-  WEBHOOK_DEFAULTING_MAXREPLICAS: {{ include "tplValue" ( dict "value" .Values.container.envs.maxReplicas.value "context" . ) | quote }}
+
+  WEBHOOK_VALIDATION_RESERVED_ENVS: {{ include "tplValue" ( dict "value" .Values.values.reservedEnvs.value "context" . ) | quote }}
+
+  WEBHOOK_VALIDATION_FUNCTION_REPLICAS_MIN_VALUE: {{ include "tplValue" ( dict "value" .Values.values.function.replicas.minValue "context" . ) | quote }}
+  WEBHOOK_DEFAULTING_FUNCTION_REPLICAS_DEFAULT_PRESET: {{ .Values.values.function.replicas.defaultPreset | quote }}
+  WEBHOOK_DEFAULTING_FUNCTION_REPLICAS_PRESETS_MAP: |-
+{{ include "tplValue" ( dict "value" .Values.values.function.replicas.presets "context" . ) | nindent 4 }}
+
+  WEBHOOK_VALIDATION_FUNCTION_RESOURCES_MIN_REQUEST_CPU: {{ include "tplValue" ( dict "value" .Values.values.function.resources.minRequestCpu "context" . ) | quote }}
+  WEBHOOK_VALIDATION_FUNCTION_RESOURCES_MIN_REQUEST_MEMORY: {{ include "tplValue" ( dict "value" .Values.values.function.resources.minRequestMemory "context" . ) | quote }}
+  WEBHOOK_DEFAULTING_FUNCTION_RESOURCES_DEFAULT_PRESET: {{ .Values.values.function.resources.defaultPreset | quote }}
+  WEBHOOK_DEFAULTING_FUNCTION_RESOURCES_PRESETS_MAP: |-
+{{ include "tplValue" ( dict "value" .Values.values.function.resources.presets "context" . ) | nindent 4 }}
+
+  WEBHOOK_VALIDATION_BUILD_JOB_RESOURCES_MIN_REQUEST_CPU: {{ include "tplValue" ( dict "value" .Values.values.buildJob.resources.minRequestCpu "context" . ) | quote }}
+  WEBHOOK_VALIDATION_BUILD_JOB_RESOURCES_MIN_REQUEST_MEMORY: {{ include "tplValue" ( dict "value" .Values.values.buildJob.resources.minRequestMemory "context" . ) | quote }}
+  WEBHOOK_DEFAULTING_BUILD_JOB_RESOURCES_DEFAULT_PRESET: {{ .Values.values.buildJob.resources.defaultPreset | quote }}
+  WEBHOOK_DEFAULTING_BUILD_JOB_RESOURCES_PRESETS_MAP: |-
+{{ include "tplValue" ( dict "value" .Values.values.buildJob.resources.presets "context" . ) | nindent 4 }}

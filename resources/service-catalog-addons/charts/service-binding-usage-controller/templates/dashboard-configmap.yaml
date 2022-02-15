@@ -872,12 +872,12 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "sum by(container_name) (container_memory_usage_bytes{pod_name=~\"service-catalog-addons-service-binding-usage-controller.*\", container_name!=\"POD\"})",
+              "expr": "sum by(container) (container_memory_usage_bytes{pod=~\"service-catalog-addons-service-binding-usage-controller.*\", container!=\"POD\"})",
               "format": "time_series",
               "instant": false,
               "interval": "10s",
               "intervalFactor": 1,
-              "legendFormat": "Current: {{`{{container_name}}`}}",
+              "legendFormat": "Current: {{`{{container}}`}}",
               "metric": "container_memory_usage_bytes",
               "refId": "A",
               "step": 15
@@ -988,10 +988,10 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "sum by (container_name)(rate(container_cpu_usage_seconds_total{image!=\"\",container_name!=\"POD\",pod_name=~\"service-catalog-addons-service-binding-usage-controller.*\"}[1m]))",
+              "expr": "sum by (container)(rate(container_cpu_usage_seconds_total{image!=\"\",container!=\"POD\",pod=~\"service-catalog-addons-service-binding-usage-controller.*\"}[1m]))",
               "format": "time_series",
               "intervalFactor": 2,
-              "legendFormat": "{{`{{container_name}}`}}",
+              "legendFormat": "{{`{{container}}`}}",
               "refId": "A",
               "step": 30
             },
@@ -1101,11 +1101,11 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "sort_desc(sum by (pod_name) (rate(container_network_receive_bytes_total{pod_name=~\"service-catalog-addons-service-binding-usage-controller.*\"}[1m])))",
+              "expr": "sort_desc(sum by (pod) (rate(container_network_receive_bytes_total{pod=~\"service-catalog-addons-service-binding-usage-controller.*\"}[1m])))",
               "format": "time_series",
               "interval": "",
               "intervalFactor": 2,
-              "legendFormat": "{{`{{pod_name}}`}}",
+              "legendFormat": "{{`{{pod}}`}}",
               "refId": "A",
               "step": 30
             }
@@ -1147,7 +1147,7 @@ data:
           }
         }
       ],
-      "refresh": false,
+      "refresh": "10s",
       "schemaVersion": 18,
       "style": "dark",
       "tags": [
@@ -1239,7 +1239,7 @@ data:
         ]
       },
       "time": {
-        "from": "now-30m",
+        "from": "now-1h",
         "to": "now"
       },
       "timepicker": {

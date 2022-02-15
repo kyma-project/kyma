@@ -1,0 +1,16 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ template "kiali.name" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "kiali.labels" . | nindent 4 }}
+spec:
+  selector:
+    matchLabels:
+      app: {{ template "kiali.name" . }}
+  namespaceSelector:
+    matchNames:
+      - {{ .Release.Namespace | quote }}
+  endpoints:
+  - port: http-metrics

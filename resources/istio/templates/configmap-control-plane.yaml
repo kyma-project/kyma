@@ -2,16 +2,25 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   namespace: {{ .Release.Namespace }}
-  name: kyma-istio-control-plane-config
+  name: kyma-istio-operator-config
 data:
+{{- if hasKey .Values.global "minikubeIP" }}
   config.yaml: |-
-{{ if .Values.global.isLocalEnv }}
-{{tpl (.Files.Get "files/kyma_minikube_istio_control_plane.yaml" | printf "%s" | indent 4) .}}
-{{ else }}
-{{tpl (.Files.Get "files/kyma_cluster_istio_control_plane.yaml" | printf "%s" | indent 4) .}}
-{{ end }}
-{{ if .Values.kyma_istio_control_plane }}
+{{ tpl (.Files.Get "files/kyma_minikube_istio_operator.yaml" | printf "%s" | indent 4) . }}
+  operator-1-7.yaml: |-
+{{ tpl (.Files.Get "files/istio-operator-1-7-minikube.yaml" | printf "%s" | indent 4) . }}
+  operator-1-6.yaml: |-
+{{ tpl (.Files.Get "files/istio-operator-1-6-minikube.yaml" | printf "%s" | indent 4) . }}  
+{{- else }}
+  config.yaml: |-
+{{ tpl (.Files.Get "files/kyma_cluster_istio_operator.yaml" | printf "%s" | indent 4) . }}
+  operator-1-7.yaml: |-
+{{ tpl (.Files.Get "files/istio-operator-1-7-cluster.yaml" | printf "%s" | indent 4) . }}
+  operator-1-6.yaml: |-
+{{ tpl (.Files.Get "files/istio-operator-1-6-cluster.yaml" | printf "%s" | indent 4) . }}  
+{{- end }}
+{{ if .Values.kyma_istio_operator }}
   #This additional user-provided definition is merged with the default one
   overrides.yaml: |-
-{{ .Values.kyma_istio_control_plane | printf "%s" | indent 4 }}
+{{ .Values.kyma_istio_operator | printf "%s" | indent 4 }}
 {{ end }}

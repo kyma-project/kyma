@@ -1,4 +1,4 @@
-{{- if .Values.global.monitoring_integration_tests.tests.enabled }}
+{{- if .Values.global.monitoring_integration_tests.enabled }}
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
@@ -10,6 +10,9 @@ rules:
 - apiGroups: [""]
   resources: ["pods", "nodes"]
   verbs: ["list", "get"]
+- apiGroups: ["monitoring.coreos.com"]
+  resources: ["servicemonitors", "podmonitors"]
+  verbs: ["list"]
 ---
 apiVersion: v1
 kind: ServiceAccount

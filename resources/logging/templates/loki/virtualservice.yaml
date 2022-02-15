@@ -25,8 +25,8 @@ spec:
       allowMethods:
       - GET
       - OPTIONS
-      allowOrigin:
-      - "*"
+      allowOrigins:
+      - regex: ".*"
       allowHeaders:
       - access-control-allow-origin
       - authorization

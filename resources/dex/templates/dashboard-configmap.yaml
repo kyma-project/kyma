@@ -867,9 +867,10 @@ data:
             ]
           },
           "time":{
-            "from":"now-6h",
+            "from":"now-1h",
             "to":"now"
           },
+          "refresh": "10s",
           "timepicker":{
             "refresh_intervals":[
               "5s",

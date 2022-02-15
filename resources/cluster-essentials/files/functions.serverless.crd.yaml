@@ -3,7 +3,7 @@ kind: CustomResourceDefinition
 metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.2.4
-    "helm.sh/resource-policy": keep
+    helm.sh/resource-policy: keep
   creationTimestamp: null
   name: functions.serverless.kyma-project.io
 spec:
@@ -16,6 +16,9 @@ spec:
     type: string
   - JSONPath: .status.conditions[?(@.type=='Running')].status
     name: Running
+    type: string
+  - JSONPath: .status.runtime
+    name: Runtime
     type: string
   - JSONPath: .metadata.generation
     name: Version
@@ -50,6 +53,26 @@ spec:
         spec:
           description: FunctionSpec defines the desired state of Function
           properties:
+            baseDir:
+              type: string
+            buildResources:
+              description: ResourceRequirements describes the compute resource requirements.
+              properties:
+                limits:
+                  additionalProperties:
+                    type: string
+                  description: 'Limits describes the maximum amount of compute resources
+                    allowed. More info: https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/'
+                  type: object
+                requests:
+                  additionalProperties:
+                    type: string
+                  description: 'Requests describes the minimum amount of compute resources
+                    required. If Requests is omitted for a container, it defaults
+                    to Limits if that is explicitly specified, otherwise to an implementation-defined
+                    value. More info: https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/'
+                  type: object
+              type: object
             deps:
               description: Deps defines the dependencies for a function
               type: string
@@ -165,6 +188,8 @@ spec:
               format: int32
               minimum: 1
               type: integer
+            reference:
+              type: string
             resources:
               description: ResourceRequirements describes the compute resource requirements.
               properties:
@@ -183,8 +208,16 @@ spec:
                     value. More info: https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/'
                   type: object
               type: object
+            runtime:
+              enum:
+              - nodejs12
+              - nodejs10
+              - python38
+              type: string
             source:
               description: Source defines the source code of a function
+              type: string
+            type:
               type: string
           required:
           - source
@@ -193,6 +226,10 @@ spec:
           description: 'FunctionStatus defines the observed state of FuncSONPath:
             .status.phase'
           properties:
+            baseDir:
+              type: string
+            commit:
+              type: string
             conditions:
               items:
                 properties:
@@ -212,6 +249,16 @@ spec:
                 - status
                 type: object
               type: array
+            reference:
+              type: string
+            runtime:
+              enum:
+              - nodejs12
+              - nodejs10
+              - python38
+              type: string
+            source:
+              type: string
           type: object
       type: object
   version: v1alpha1

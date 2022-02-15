@@ -1,0 +1,116 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: istio-proxy-reset
+  namespace: {{ .Release.Namespace }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: istio-proxy-reset
+rules:
+  - apiGroups: [""]
+    resources: ["pods"]
+    verbs: ["get", "list", "delete"]
+  - apiGroups: [""]
+    resources: ["namespaces"]
+    verbs: ["get", "list"]
+  - apiGroups: ["apps", "extensions"]
+    resources: ["deployments", "daemonsets", "statefulsets"]
+    verbs: ["get", "patch"]
+  - apiGroups: ["apps", "extensions"]
+    resources: ["replicasets"]
+    verbs: ["get", "patch", "delete"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: istio-proxy-reset
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: istio-proxy-reset
+subjects:
+  - kind: ServiceAccount
+    name: istio-proxy-reset
+    namespace: {{ .Release.Namespace }}
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: istio-proxy-reset
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded
+    helm.sh/hook: post-upgrade
+    helm.sh/hook-weight: "50"
+spec:
+  backoffLimit: 1
+  template:
+    metadata:
+      annotations:
+        sidecar.istio.io/inject: "false"
+    spec:
+      serviceAccountName: istio-proxy-reset
+      restartPolicy: Never
+      containers:
+        - name: proxy-reset
+          image: eu.gcr.io/kyma-project/incubator/develop/k8s-tools:20201023-5de446cf
+          command:
+            - /bin/bash
+            - -c
+            - |
+              for NS in $(kubectl get ns -l kyma-project.io/created-by=e2e-upgrade-test-runner -o name | cut -d '/' -f2); do
+                kubectl delete rs -n $NS --all
+              done
+
+              declare -A objectsToRestart
+
+              pods=$(kubectl get po -A -o json | jq -rc '.items | .[] | select(.spec.containers | .[].image == "docker.io/istio/proxyv2:1.4.10-distroless") | "\(.metadata.name)/\(.metadata.namespace)"' )
+              podArray=($(echo $pods | tr " " "\n"))
+
+              echo "NUMBER OF PODS MATCHED: ${#podArray[@]}"
+
+              for i in "${podArray[@]}"
+              do
+                namespacedName=($(echo $i | tr "/" "\n"))
+
+                podName="${namespacedName[0]}"
+                namespace="${namespacedName[1]}"
+
+                podJson=$(kubectl get pod "${podName}" -n "${namespace}" -o json)
+
+                parentObjectKind=$(jq -r '.metadata.ownerReferences[0].kind' <<< "${podJson}" | tr '[:upper:]' '[:lower:]')
+                parentObjectName=$(jq -r '.metadata.ownerReferences[0].name' <<< "${podJson}")
+
+                case "${parentObjectKind}" in
+                ("")
+                  echo "Pod ${podName} in namespace ${namespace} has no parent object. Skipping..."
+                  continue
+                  ;;
+                ("replicaset")
+                  parentDeploymentName=$(kubectl get "${parentObjectKind}" "${parentObjectName}" -n "${namespace}" -o jsonpath='{.metadata.ownerReferences[0].name}')
+                  echo "deployment ${parentDeploymentName} in namespace ${namespace} eligible for restart"
+                  objectsToRestart["deployment/${namespace}/${parentDeploymentName}"]=""
+                  ;;
+                (*)
+                  echo "${parentObjectKind} ${parentObjectName} in namespace ${namespace} eligible for restart"
+                  objectsToRestart["${parentObjectKind}/${namespace}/${parentObjectName}"]=""
+                  ;;
+                esac
+              done
+
+              echo "NUMBER OF OBJECTS TO RESTART: ${#objectsToRestart[@]}"
+
+              for key in "${!objectsToRestart[@]}"
+              do
+
+                attributes=($(echo "${key}" | tr "/" "\n"))
+
+                kind="${attributes[0]}"
+                namespace="${attributes[1]}"
+                name="${attributes[2]}"
+
+                kubectl rollout restart "${kind}" "${name}" -n "${namespace}"
+
+              done

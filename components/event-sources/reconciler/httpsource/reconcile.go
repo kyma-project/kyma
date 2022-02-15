@@ -1,36 +1,17 @@
-/*
-Copyright 2019 The Kyma Authors.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
-
 package httpsource
 
 import (
 	"context"
-	"fmt"
 	"reflect"
 	"strconv"
 
 	pkgerrors "github.com/pkg/errors"
-
+	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
+	appslistersv1 "k8s.io/client-go/listers/apps/v1"
+	v1 "k8s.io/client-go/listers/core/v1"
 	"k8s.io/client-go/tools/cache"
-
-	authenticationv1alpha1 "istio.io/client-go/pkg/apis/authentication/v1alpha1"
-	authenticationclientv1alpha1 "istio.io/client-go/pkg/clientset/versioned/typed/authentication/v1alpha1"
-	authenticationlistersv1alpha1 "istio.io/client-go/pkg/listers/authentication/v1alpha1"
 	messagingv1alpha1 "knative.dev/eventing/pkg/apis/messaging/v1alpha1"
 	messagingclientv1alpha1 "knative.dev/eventing/pkg/client/clientset/versioned/typed/messaging/v1alpha1"
 	messaginglistersv1alpha1 "knative.dev/eventing/pkg/client/listers/messaging/v1alpha1"
@@ -38,10 +19,10 @@ import (
 	apisv1beta1 "knative.dev/pkg/apis/duck/v1beta1"
 	"knative.dev/pkg/controller"
 	"knative.dev/pkg/resolver"
-	servingv1alpha1 "knative.dev/serving/pkg/apis/serving/v1alpha1"
-	servingclientv1alpha1 "knative.dev/serving/pkg/client/clientset/versioned/typed/serving/v1alpha1"
-	servinglistersv1alpha1 "knative.dev/serving/pkg/client/listers/serving/v1alpha1"
-	routeconfig "knative.dev/serving/pkg/reconciler/route/config"
+
+	securityv1beta1 "istio.io/client-go/pkg/apis/security/v1beta1"
+	securityclientv1beta1 "istio.io/client-go/pkg/clientset/versioned/typed/security/v1beta1"
+	securitylistersv1beta1 "istio.io/client-go/pkg/listers/security/v1beta1"
 
 	sourcesv1alpha1 "github.com/kyma-project/kyma/components/event-sources/apis/sources/v1alpha1"
 	sourcesclientv1alpha1 "github.com/kyma-project/kyma/components/event-sources/client/generated/clientset/internalclientset/typed/sources/v1alpha1"
@@ -61,16 +42,16 @@ type Reconciler struct {
 	adapterLoggingCfg string
 
 	// listers index properties about resources
-	httpsourceLister sourceslistersv1alpha1.HTTPSourceLister
-	ksvcLister       servinglistersv1alpha1.ServiceLister
-	chLister         messaginglistersv1alpha1.ChannelLister
-	policyLister     authenticationlistersv1alpha1.PolicyLister
+	httpsourceLister         sourceslistersv1alpha1.HTTPSourceLister
+	deploymentLister         appslistersv1.DeploymentLister
+	chLister                 messaginglistersv1alpha1.ChannelLister
+	serviceLister            v1.ServiceLister
+	peerAuthenticationLister securitylistersv1beta1.PeerAuthenticationLister
 
 	// clients allow interactions with API objects
 	sourcesClient   sourcesclientv1alpha1.SourcesV1alpha1Interface
-	servingClient   servingclientv1alpha1.ServingV1alpha1Interface
 	messagingClient messagingclientv1alpha1.MessagingV1alpha1Interface
-	authClient      authenticationclientv1alpha1.AuthenticationV1alpha1Interface
+	securityClient  securityclientv1beta1.SecurityV1beta1Interface
 
 	// URI resolver for sink destinations
 	sinkResolver *resolver.URIResolver
@@ -80,22 +61,28 @@ type Reconciler struct {
 const (
 	// Common
 	// see https://github.com/knative/eventing/blob/release-0.10/pkg/adapter/config.go
-	sinkURIEnvVar       = "SINK_URI"
-	namespaceEnvVar     = "NAMESPACE"
-	metricsConfigEnvVar = "K_METRICS_CONFIG"
-	loggingConfigEnvVar = "K_LOGGING_CONFIG"
-	tracingEnvVar       = "TRACING_ENABLED"
+	sinkURIEnvVar        = "SINK_URI"
+	namespaceEnvVar      = "NAMESPACE"
+	metricsConfigEnvVar  = "K_METRICS_CONFIG"
+	loggingConfigEnvVar  = "K_LOGGING_CONFIG"
+	adapterPortEnvVar    = "PORT"
+	adapterContainerName = "source"
+	portName             = "http-cloudevent"
+	externalPort         = 80
+	metricsPort          = 9092
+	metricsPortName      = "http-usermetric"
 
 	// HTTP adapter specific
 	eventSourceEnvVar = "EVENT_SOURCE"
-
-	// Private svc suffix of an Ksvc
-	privateSvcSuffix = "-private"
 )
 
 const adapterHealthEndpoint = "/healthz"
+const adapterPort = 8080
 
-const applicationNameLabelKey = "application-name"
+const (
+	applicationNameLabelKey = "application-name"
+	applicationLabelKey     = "app"
+)
 
 // Reconcile compares the actual state of a HTTPSource object referenced by key
 // with its desired state, and attempts to converge the two.
@@ -110,17 +97,22 @@ func (r *Reconciler) Reconcile(ctx context.Context, key string) error {
 		return err
 	}
 
-	ksvc, err := r.reconcileAdapter(src, ch)
+	deployment, err := r.reconcileAdapter(src, ch)
 	if err != nil {
 		return err
 	}
 
-	policy, err := r.reconcilePolicy(src, ksvc)
+	service, err := r.reconcileService(src, deployment)
 	if err != nil {
 		return err
 	}
 
-	return r.syncStatus(src, ch, ksvc, policy)
+	peerAuthentication, err := r.reconcilePeerAuthentication(src, deployment)
+	if err != nil {
+		return err
+	}
+
+	return r.syncStatus(src, ch, deployment, peerAuthentication, service)
 }
 
 // httpSourceByKey retrieves a HTTPSource object from a lister by ns/name key.
@@ -160,36 +152,58 @@ func (r *Reconciler) reconcileSink(src *sourcesv1alpha1.HTTPSource) (*messagingv
 	return currentCh, nil
 }
 
-// reconcilePolicy reconciles the state of the Policy.
-func (r *Reconciler) reconcilePolicy(src *sourcesv1alpha1.HTTPSource, ksvc *servingv1alpha1.Service) (*authenticationv1alpha1.Policy, error) {
-	if ksvc == nil {
-		r.Logger.Info("Skipping creation of Istio Policy as there is no ksvc yet")
+// reconcileService reconciles the state of the kubernetes Service.
+func (r *Reconciler) reconcileService(src *sourcesv1alpha1.HTTPSource, deployment *appsv1.Deployment) (*corev1.Service, error) {
+	if deployment == nil {
+		r.Logger.Info("Skipping creation of Service as there is no deployment yet")
 		return nil, nil
 	}
-
-	if ksvc.Status.ConfigurationStatusFields.LatestCreatedRevisionName == "" {
-		r.Logger.Info("Skipping creation of Istio Policy as there is no revision yet")
-		return nil, nil
-	}
-	desiredPolicy := r.makePolicy(src, ksvc)
-	currentPolicy, err := r.getOrCreatePolicy(src, desiredPolicy)
+	desiredService := r.makeService(src)
+	currentService, err := r.getOrCreateService(src, desiredService)
 	if err != nil {
 		return nil, err
 	}
 
-	object.ApplyExistingPolicyAttributes(currentPolicy, desiredPolicy)
+	object.ApplyExistingServiceAttributes(currentService, desiredService)
 
-	currentPolicy, err = r.syncPolicy(src, currentPolicy, desiredPolicy)
+	_, err = r.syncService(src, currentService, desiredService)
 	if err != nil {
-		return nil, pkgerrors.Wrap(err, "failed to synchronize Istio Policy")
+		return nil, pkgerrors.Wrap(err, "failed to synchronize Service")
 	}
 
-	return desiredPolicy, nil
+	return desiredService, nil
+}
+
+// reconcilePeerAuthentication reconciles the state of the PeerAuthentication.
+func (r *Reconciler) reconcilePeerAuthentication(src *sourcesv1alpha1.HTTPSource, deployment *appsv1.Deployment) (*securityv1beta1.PeerAuthentication, error) {
+	if deployment == nil {
+		r.Logger.Info("Skipping creation of Istio PeerAuthentication as there is no deployment yet")
+		return nil, nil
+	}
+
+	if deployment.Status.AvailableReplicas == 0 {
+		r.Logger.Info("Skipping creation of Istio PeerAuthentication as there is no revision yet")
+		return nil, nil
+	}
+	desiredPeerAuthentication := r.makePeerAuthentication(src, deployment)
+
+	currentPeerAuthentication, err := r.getOrCreatePeerAuthentication(src, desiredPeerAuthentication)
+	if err != nil {
+		return nil, err
+	}
+	object.ApplyExistingPeerAuthenticationAttributes(currentPeerAuthentication, desiredPeerAuthentication)
+
+	_, err = r.syncPeerAuthentication(src, currentPeerAuthentication, desiredPeerAuthentication)
+	if err != nil {
+		return nil, pkgerrors.Wrap(err, "failed to synchronize Istio PeerAuthentication")
+	}
+
+	return desiredPeerAuthentication, nil
 }
 
 // reconcileAdapter reconciles the state of the HTTP adapter.
 func (r *Reconciler) reconcileAdapter(src *sourcesv1alpha1.HTTPSource,
-	sink *messagingv1alpha1.Channel) (*servingv1alpha1.Service, error) {
+	sink *messagingv1alpha1.Channel) (*appsv1.Deployment, error) {
 
 	sinkURI, err := getSinkURI(sink, r.sinkResolver, src)
 	if err != nil {
@@ -197,43 +211,43 @@ func (r *Reconciler) reconcileAdapter(src *sourcesv1alpha1.HTTPSource,
 		return nil, nil
 	}
 
-	desiredKsvc := r.makeKnService(src, sinkURI, r.adapterLoggingCfg, r.adapterMetricsCfg)
+	desiredDeployment := r.makeDeployment(src, sinkURI, r.adapterLoggingCfg, r.adapterMetricsCfg)
 
-	currentKsvc, err := r.getOrCreateKnService(src, desiredKsvc)
+	currentDeployment, err := r.getOrCreateDeployment(src, desiredDeployment)
 	if err != nil {
 		return nil, err
 	}
 
-	object.ApplyExistingServiceAttributes(currentKsvc, desiredKsvc)
+	object.ApplyExistingDeploymentAttributes(currentDeployment, desiredDeployment)
 
-	currentKsvc, err = r.syncKnService(src, currentKsvc, desiredKsvc)
+	currentDeployment, err = r.syncDeployment(src, currentDeployment, desiredDeployment)
 	if err != nil {
-		return nil, pkgerrors.Wrap(err, "failed to synchronize Knative Service")
+		return nil, pkgerrors.Wrap(err, "failed to synchronize Deployment")
 	}
 
-	return currentKsvc, nil
+	return currentDeployment, nil
 }
 
-// getOrCreateKnService returns the existing Knative Service for a given
+// getOrCreateDeployment returns the existing Deployment for a given
 // HTTPSource, or creates it if it is missing.
-func (r *Reconciler) getOrCreateKnService(src *sourcesv1alpha1.HTTPSource,
-	desiredKsvc *servingv1alpha1.Service) (*servingv1alpha1.Service, error) {
+func (r *Reconciler) getOrCreateDeployment(src *sourcesv1alpha1.HTTPSource,
+	desiredDeployment *appsv1.Deployment) (*appsv1.Deployment, error) {
 
-	ksvc, err := r.ksvcLister.Services(src.Namespace).Get(src.Name)
+	deployment, err := r.deploymentLister.Deployments(src.Namespace).Get(src.Name)
 	switch {
 	case apierrors.IsNotFound(err):
-		ksvc, err = r.servingClient.Services(src.Namespace).Create(desiredKsvc)
+		deployment, err = r.KubeClientSet.AppsV1().Deployments(src.Namespace).Create(desiredDeployment)
 		if err != nil {
-			r.eventWarn(src, failedCreateReason, "Creation failed for Knative Service %q", desiredKsvc.Name)
-			return nil, pkgerrors.Wrap(err, "failed to create Knative Service")
+			r.eventWarn(src, failedCreateReason, "Creation failed for Deployment %q", desiredDeployment.Name)
+			return nil, pkgerrors.Wrap(err, "failed to create Deployment")
 		}
-		r.event(src, createReason, "Created Knative Service %q", ksvc.Name)
+		r.event(src, createReason, "Created Deployment %q", deployment.Name)
 
 	case err != nil:
-		return nil, pkgerrors.Wrap(err, "failed to get Knative Service from cache")
+		return nil, pkgerrors.Wrap(err, "failed to get Deployment from cache")
 	}
 
-	return ksvc, nil
+	return deployment, nil
 }
 
 // getOrCreateChannel returns the existing Channel for a given HTTPSource, or
@@ -258,48 +272,74 @@ func (r *Reconciler) getOrCreateChannel(src *sourcesv1alpha1.HTTPSource,
 	return ch, nil
 }
 
-// getOrCreatePolicy returns the existing Policy for a Revision of a KnativeService, or
+// getOrCreateService returns the existing Service for a Deployment, or
 // creates it if it is missing.
-func (r *Reconciler) getOrCreatePolicy(src *sourcesv1alpha1.HTTPSource,
-	desiredPolicy *authenticationv1alpha1.Policy) (*authenticationv1alpha1.Policy, error) {
-	policy, err := r.policyLister.Policies(src.Namespace).Get(desiredPolicy.Name)
+func (r *Reconciler) getOrCreateService(src *sourcesv1alpha1.HTTPSource,
+	desiredService *corev1.Service) (*corev1.Service, error) {
+	service, err := r.serviceLister.Services(src.Namespace).Get(desiredService.Name)
 	switch {
 	case apierrors.IsNotFound(err):
-		policy, err = r.authClient.Policies(src.Namespace).Create(desiredPolicy)
+		service, err = r.KubeClientSet.CoreV1().Services(src.Namespace).Create(desiredService)
 		if err != nil {
-			r.eventWarn(src, failedCreateReason, "Creation failed for Istio Policy %q", desiredPolicy.Name)
-			return nil, pkgerrors.Wrap(err, "failed to create Istio Policy")
+			r.eventWarn(src, failedCreateReason, "Creation failed for Service %q", desiredService.Name)
+			return nil, pkgerrors.Wrap(err, "failed to create Service")
 		}
-		r.event(src, createReason, "Created Istio Policy %q", policy.Name)
+		r.event(src, createReason, "Created Service %q", service.Name)
 
 	case err != nil:
-		return nil, pkgerrors.Wrap(err, "failed to get Istio Policy from cache")
+		return nil, pkgerrors.Wrap(err, "failed to get Service from cache")
 	}
 
-	return policy, nil
+	return service, nil
 }
 
-// makeKnService returns the desired Knative Service object for a given
-// HTTPSource. An optional Knative Service can be passed as parameter, in which
-// case some of its attributes are used to generate the desired state.
-func (r *Reconciler) makeKnService(src *sourcesv1alpha1.HTTPSource,
-	sinkURI, loggingCfg, metricsCfg string) *servingv1alpha1.Service {
+// getOrCreatePeerAuthentication returns the existing PeerAuthentication for a Replica of a Deployment, or
+// creates it if it is missing.
+func (r *Reconciler) getOrCreatePeerAuthentication(src *sourcesv1alpha1.HTTPSource,
+	desiredPeerAuthentication *securityv1beta1.PeerAuthentication) (*securityv1beta1.PeerAuthentication, error) {
+	peerAuthentication, err := r.peerAuthenticationLister.PeerAuthentications(src.Namespace).Get(desiredPeerAuthentication.Name)
+	switch {
+	case apierrors.IsNotFound(err):
+		peerAuthentication, err = r.securityClient.PeerAuthentications(src.Namespace).Create(desiredPeerAuthentication)
+		if err != nil {
+			r.eventWarn(src, failedCreateReason, "Creation failed for Istio PeerAuthentication %q", desiredPeerAuthentication.Name)
+			return nil, pkgerrors.Wrap(err, "failed to create Istio PeerAuthentication")
+		}
+		r.event(src, createReason, "Created Istio PeerAuthentication %q", peerAuthentication.Name)
 
-	return object.NewService(src.Namespace, src.Name,
+	case err != nil:
+		return nil, pkgerrors.Wrap(err, "failed to get Istio PeerAuthentication from cache")
+	}
+
+	return peerAuthentication, nil
+}
+
+// makeDeployment returns the desired Deployment object for a given
+// HTTPSource. An optional Deployment can be passed as parameter, in which
+// case some of its attributes are used to generate the desired state.
+func (r *Reconciler) makeDeployment(src *sourcesv1alpha1.HTTPSource,
+	sinkURI, loggingCfg, metricsCfg string) *appsv1.Deployment {
+
+	return object.NewDeployment(src.Namespace, src.Name,
+		object.WithReplicas(1),
+		object.WithName(adapterContainerName),
 		object.WithImage(r.adapterEnvCfg.Image),
-		object.WithPort(r.adapterEnvCfg.Port),
-		object.WithMinScale(1),
+		object.WithPort(r.adapterEnvCfg.Port, portName),
+		object.WithPort(metricsPort, metricsPortName),
 		object.WithEnvVar(eventSourceEnvVar, src.Spec.Source),
 		object.WithEnvVar(sinkURIEnvVar, sinkURI),
 		object.WithEnvVar(namespaceEnvVar, src.Namespace),
 		object.WithEnvVar(metricsConfigEnvVar, metricsCfg),
 		object.WithEnvVar(loggingConfigEnvVar, loggingCfg),
-		object.WithEnvVar(tracingEnvVar, strconv.FormatBool(r.adapterEnvCfg.TracingEnabled)),
-		object.WithProbe(adapterHealthEndpoint),
+		object.WithEnvVar(adapterPortEnvVar, strconv.Itoa(adapterPort)),
+		object.WithProbe(adapterHealthEndpoint, adapterPort),
 		object.WithControllerRef(src.ToOwner()),
-		object.WithLabel(routeconfig.VisibilityLabelKey, routeconfig.VisibilityClusterLocal),
 		object.WithLabel(applicationNameLabelKey, src.Name),
+		object.WithMatchLabelsSelector(applicationNameLabelKey, src.Name),
+		object.WithPodLabel(applicationNameLabelKey, src.Name),
+		object.WithPodLabel(applicationLabelKey, src.Name),
 		object.WithPodLabel(dashboardLabelKey, dashboardLabelValue),
+		object.WithPodLabel(eventSourceLabelKey, eventSourceLabelValue),
 	)
 }
 
@@ -311,35 +351,47 @@ func (r *Reconciler) makeChannel(src *sourcesv1alpha1.HTTPSource) *messagingv1al
 	)
 }
 
-// makePolicy returns the desired Policy object for a given Ksvc per HTTPSource.
-func (r *Reconciler) makePolicy(src *sourcesv1alpha1.HTTPSource, ksvc *servingv1alpha1.Service) *authenticationv1alpha1.Policy {
-	// Using the private k8s svc of a ksvc which has the metrics ports
-	name := fmt.Sprintf("%s%s", ksvc.Status.ConfigurationStatusFields.LatestCreatedRevisionName, privateSvcSuffix)
-	return object.NewPolicy(src.Namespace, name,
+// makeService returns the desired Service object for a given HTTPSource.
+func (r *Reconciler) makeService(src *sourcesv1alpha1.HTTPSource) *corev1.Service {
+
+	return object.NewService(src.Namespace, src.Name,
 		object.WithControllerRef(src.ToOwner()),
+		object.WithSelector(applicationNameLabelKey, src.Name),
+		object.WithServicePort(portName, externalPort, int(r.adapterEnvCfg.Port)),
+		object.WithServicePort(metricsPortName, metricsPort, metricsPort),
 		object.WithLabel(applicationNameLabelKey, src.Name),
-		object.WithTarget(name),
-		object.WithPermissiveMode(),
+		object.WithLabel(dashboardLabelKey, dashboardLabelValue),
 	)
 }
 
-// syncKnService synchronizes the desired state of a Knative Service against
-// its current state in the running cluster.
-func (r *Reconciler) syncKnService(src *sourcesv1alpha1.HTTPSource,
-	currentKsvc, desiredKsvc *servingv1alpha1.Service) (*servingv1alpha1.Service, error) {
+// makePeerAuthentication returns the desired PeerAuthentication object for a given Deployment per HTTPSource.
+func (r *Reconciler) makePeerAuthentication(src *sourcesv1alpha1.HTTPSource, deployment *appsv1.Deployment) *securityv1beta1.PeerAuthentication {
+	// Using the private k8s svc of a deployment which has the metrics ports
+	return object.NewPeerAuthentication(src.Namespace, deployment.Name,
+		object.WithControllerRef(src.ToOwner()),
+		object.WithLabel(applicationNameLabelKey, src.Name),
+		object.WithSelectorSpec(map[string]string{applicationLabelKey: src.Name}),
+		object.WithPermissiveMode(metricsPort),
+	)
+}
 
-	if object.Semantic.DeepEqual(currentKsvc, desiredKsvc) {
-		return currentKsvc, nil
+// syncDeployment synchronizes the desired state of a Deployment against
+// its current state in the running cluster.
+func (r *Reconciler) syncDeployment(src *sourcesv1alpha1.HTTPSource,
+	currentDeployment, desiredDeployment *appsv1.Deployment) (*appsv1.Deployment, error) {
+
+	if object.Semantic.DeepEqual(currentDeployment, desiredDeployment) {
+		return currentDeployment, nil
 	}
 
-	ksvc, err := r.servingClient.Services(currentKsvc.Namespace).Update(desiredKsvc)
+	deployment, err := r.KubeClientSet.AppsV1().Deployments(currentDeployment.Namespace).Update(desiredDeployment)
 	if err != nil {
-		r.eventWarn(src, failedUpdateReason, "Update failed for Knative Service %q", desiredKsvc.Name)
+		r.eventWarn(src, failedUpdateReason, "Update failed for Deployment %q", desiredDeployment.Name)
 		return nil, err
 	}
-	r.event(src, updateReason, "Updated Knative Service %q", ksvc.Name)
+	r.event(src, updateReason, "Updated Deployment %q", deployment.Name)
 
-	return ksvc, nil
+	return deployment, nil
 }
 
 // syncChannel synchronizes the desired state of a Channel against its current
@@ -361,31 +413,49 @@ func (r *Reconciler) syncChannel(src *sourcesv1alpha1.HTTPSource,
 	return ch, nil
 }
 
-// syncPolicy synchronizes the desired state of a Policy against its current
+// syncService synchronizes the desired state of a Service against its current
 // state in the running cluster.
-func (r *Reconciler) syncPolicy(src *sourcesv1alpha1.HTTPSource,
-	currentPolicy, desiredPolicy *authenticationv1alpha1.Policy) (*authenticationv1alpha1.Policy, error) {
+func (r *Reconciler) syncService(src *sourcesv1alpha1.HTTPSource,
+	currentSvc, desiredSvc *corev1.Service) (*corev1.Service, error) {
 
-	if object.Semantic.DeepEqual(currentPolicy, desiredPolicy) {
-		return currentPolicy, nil
+	if object.Semantic.DeepEqual(currentSvc, desiredSvc) {
+		return currentSvc, nil
 	}
 
-	policy, err := r.authClient.Policies(currentPolicy.Namespace).Update(desiredPolicy)
+	svc, err := r.KubeClientSet.CoreV1().Services(currentSvc.Namespace).Update(desiredSvc)
 	if err != nil {
-		r.eventWarn(src, failedUpdateReason, "Update failed for Istio Policy %q", desiredPolicy.Name)
+		r.eventWarn(src, failedUpdateReason, "Update failed for Service %q", desiredSvc.Name)
 		return nil, err
 	}
-	r.event(src, updateReason, "Updated Istio Policy %q", policy.Name)
+	r.event(src, updateReason, "Updated Service %q", svc.Name)
 
-	return policy, nil
+	return svc, nil
+}
+
+// syncPeerAuthentication synchronizes the desired state of a PeerAuthentication against its current
+// state in the running cluster.
+func (r *Reconciler) syncPeerAuthentication(src *sourcesv1alpha1.HTTPSource, currentPeerAuthentication, desiredPeerAuthentication *securityv1beta1.PeerAuthentication) (*securityv1beta1.PeerAuthentication, error) {
+
+	if object.Semantic.DeepEqual(currentPeerAuthentication, desiredPeerAuthentication) {
+		return currentPeerAuthentication, nil
+	}
+
+	peerAuthentication, err := r.securityClient.PeerAuthentications(currentPeerAuthentication.Namespace).Update(desiredPeerAuthentication)
+	if err != nil {
+		r.eventWarn(src, failedUpdateReason, "Update failed for Istio PeerAuthentication %q", desiredPeerAuthentication.Name)
+		return nil, err
+	}
+	r.event(src, updateReason, "Updated Istio PeerAuthentication %q", peerAuthentication.Name)
+
+	return peerAuthentication, nil
 }
 
 // syncStatus ensures the status of a given HTTPSource is up-to-date.
 func (r *Reconciler) syncStatus(src *sourcesv1alpha1.HTTPSource,
-	ch *messagingv1alpha1.Channel, ksvc *servingv1alpha1.Service, policy *authenticationv1alpha1.Policy) error {
+	ch *messagingv1alpha1.Channel, deployment *appsv1.Deployment, peerAuthentication *securityv1beta1.PeerAuthentication, service *corev1.Service) error {
 
 	currentStatus := &src.Status
-	expectedStatus := r.computeStatus(src, ch, ksvc, policy)
+	expectedStatus := r.computeStatus(src, ch, deployment, peerAuthentication, service)
 
 	if reflect.DeepEqual(currentStatus, expectedStatus) {
 		return nil
@@ -406,7 +476,7 @@ func (r *Reconciler) syncStatus(src *sourcesv1alpha1.HTTPSource,
 
 // computeStatus returns the expected status of a given HTTPSource.
 func (r *Reconciler) computeStatus(src *sourcesv1alpha1.HTTPSource, ch *messagingv1alpha1.Channel,
-	ksvc *servingv1alpha1.Service, policy *authenticationv1alpha1.Policy) *sourcesv1alpha1.HTTPSourceStatus {
+	deployment *appsv1.Deployment, peerAuthentication *securityv1beta1.PeerAuthentication, service *corev1.Service) *sourcesv1alpha1.HTTPSourceStatus {
 
 	status := src.Status.DeepCopy()
 	status.InitializeConditions()
@@ -417,10 +487,11 @@ func (r *Reconciler) computeStatus(src *sourcesv1alpha1.HTTPSource, ch *messagin
 		return status
 	}
 	status.MarkSink(sinkURI)
-	status.MarkPolicyCreated(policy)
+	status.MarkPeerAuthenticationCreated(peerAuthentication)
+	status.MarkServiceCreated(service)
 
-	if ksvc != nil {
-		status.PropagateServiceReady(ksvc)
+	if deployment != nil {
+		status.PropagateDeploymentReady(deployment)
 	}
 
 	return status

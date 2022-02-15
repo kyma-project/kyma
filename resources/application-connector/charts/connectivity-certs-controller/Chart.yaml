@@ -1,4 +1,0 @@
-apiVersion: v1
-description: Connectivity Certs Controller deployment chart.
-name: connectivity-certs-controller
-version: 0.0.1

@@ -1,5 +1,5 @@
-apiVersion: rbac.istio.io/v1alpha1
-kind: ServiceRole
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
 metadata:
   name: {{ template "fullname" . }}
   labels:
@@ -10,25 +10,11 @@ metadata:
     app.kubernetes.io/managed-by: {{ .Release.Service }}
     app.kubernetes.io/instance: {{ .Release.Name }}
 spec:
+  selector:
+    matchLabels:
+      app: {{ .Chart.Name }}
+  action: ALLOW
   rules:
-  - services: ["application-broker.kyma-integration.svc.cluster.local"]
-    methods: ["*"]
-    paths: ["*"]
----
-apiVersion: rbac.istio.io/v1alpha1
-kind: ServiceRoleBinding
-metadata:
-  name: {{ template "fullname" . }}
-  labels:
-    app: {{ template "name" . }}
-    release: {{ .Release.Name }}
-    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
-    app.kubernetes.io/name: {{ template "name" . }}
-    app.kubernetes.io/managed-by: {{ .Release.Service }}
-    app.kubernetes.io/instance: {{ .Release.Name }}
-spec:
-  subjects:
-  - user: "cluster.local/ns/kyma-system/sa/service-catalog-controller-manager"
-  roleRef:
-    kind: ServiceRole
-    name: {{ template "fullname" . }}
+  - from:
+    - source:
+        principals: ["cluster.local/ns/kyma-system/sa/service-catalog-controller-manager"]

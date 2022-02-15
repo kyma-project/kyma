@@ -2,8 +2,8 @@ replicaCount: 1
 
 jobs:
   image:
-    repository: eu.gcr.io/kyma-project/test-infra/alpine-kubectl
-    tag: "v20200617-32c1f3ff"
+    repository: eu.gcr.io/kyma-project/incubator/develop/k8s-tools
+    tag: "20201023-5de446cf"
 
 config:
   # SyncPeriod determines the minimum frequency at which watched resources are
@@ -18,7 +18,7 @@ globalAccess: false
 enabledNamespaces: []
 
 image:
-  repository: oryd/hydra-maester
+  repository: eu.gcr.io/kyma-project/external/oryd/hydra-maester
   tag: v0.0.15
   # Image pull policy
   pullPolicy: IfNotPresent

@@ -36,8 +36,8 @@ webhook:
       # Available port in allowable range (e.g. 30000 - 32767 on minikube)
       # The TLS-enabled endpoint will be exposed here
       securePort: 31443
-  # Log level; valid values are in the range 0 - 10
-  verbosity: "10"
+  # Log level; valid values are in the range 0 - 10 (do not set higher than 6, see CVE-2019-11250)
+  verbosity: "6"
   serviceAccount: service-catalog-webhook
   # Webhook resource requests and limits
   # Ref: http://kubernetes.io/docs/user-guide/compute-resources/
@@ -64,8 +64,8 @@ controllerManager:
   # healthcheck configures the readiness and liveliness probes for the controllerManager pod.
   healthcheck:
     enabled: false # in Kyma we are using svc-cat together with istio and default healtcheck is not supported
-  # Log level; valid values are in the range 0 - 10
-  verbosity: "10"
+  # Log level; valid values are in the range 0 - 10 (do not set higher than 6, see CVE-2019-11250)
+  verbosity: "6"
   # Resync interval; format is a duration (`20m`, `1h`, etc)
   resyncInterval: 5m
   # Broker relist interval; format is a duration (`20m`, `1h`, etc)
@@ -128,4 +128,4 @@ securityContext: {}
 
 ## images for migration process
 migration:
-  alpineKcImage: eu.gcr.io/kyma-project/test-infra/alpine-kubectl:v20200617-32c1f3ff
+  alpineKcImage: eu.gcr.io/kyma-project/incubator/develop/k8s-tools:20201023-5de446cf

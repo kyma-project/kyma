@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/kyma-project/kyma/components/function-controller/internal/controllers/serverless/runtime"
+
 	"github.com/go-logr/logr"
 	"github.com/pkg/errors"
 	"gopkg.in/yaml.v2"
@@ -28,15 +30,15 @@ const (
 	MinimumReplicasAvailable = "MinimumReplicasAvailable"
 )
 
-func (r *FunctionReconciler) isOnDeploymentChange(instance *serverlessv1alpha1.Function, deployments []appsv1.Deployment) bool {
-	expectedDeployment := r.buildDeployment(instance)
+func (r *FunctionReconciler) isOnDeploymentChange(instance *serverlessv1alpha1.Function, rtmConfig runtime.Config, deployments []appsv1.Deployment) bool {
+	expectedDeployment := r.buildDeployment(instance, rtmConfig)
 	resourceOk := len(deployments) == 1 && r.equalDeployments(deployments[0], expectedDeployment)
 
 	return !resourceOk
 }
 
-func (r *FunctionReconciler) onDeploymentChange(ctx context.Context, log logr.Logger, instance *serverlessv1alpha1.Function, deployments []appsv1.Deployment) (ctrl.Result, error) {
-	newDeployment := r.buildDeployment(instance)
+func (r *FunctionReconciler) onDeploymentChange(ctx context.Context, log logr.Logger, instance *serverlessv1alpha1.Function, rtmConfig runtime.Config, deployments []appsv1.Deployment) (ctrl.Result, error) {
+	newDeployment := r.buildDeployment(instance, rtmConfig)
 
 	switch {
 	case len(deployments) == 0:

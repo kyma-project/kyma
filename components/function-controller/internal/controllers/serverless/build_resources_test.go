@@ -3,6 +3,8 @@ package serverless
 import (
 	"testing"
 
+	"github.com/kyma-project/kyma/components/function-controller/internal/controllers/serverless/runtime"
+
 	"github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -37,9 +39,8 @@ func TestFunctionReconciler_buildConfigMap(t *testing.T) {
 					},
 				},
 				Data: map[string]string{
-					"handler.main": "handler.main",
-					"handler.js":   "fn-source",
-					"package.json": "{}",
+					"source":       "fn-source",
+					"dependencies": "{}",
 				},
 			},
 		},
@@ -48,7 +49,7 @@ func TestFunctionReconciler_buildConfigMap(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			g := gomega.NewGomegaWithT(t)
 			r := &FunctionReconciler{}
-			got := r.buildConfigMap(tt.fn)
+			got := r.buildConfigMap(tt.fn, runtime.GetRuntime(serverlessv1alpha1.Nodejs10))
 			g.Expect(got).To(gomega.Equal(tt.want))
 		})
 	}
@@ -58,6 +59,8 @@ func TestFunctionReconciler_buildDeployment(t *testing.T) {
 	type args struct {
 		instance *serverlessv1alpha1.Function
 	}
+	rtmCfg := runtime.GetRuntimeConfig(serverlessv1alpha1.Python38)
+
 	tests := []struct {
 		name string
 		args args
@@ -71,10 +74,12 @@ func TestFunctionReconciler_buildDeployment(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			g := gomega.NewGomegaWithT(t)
 			r := &FunctionReconciler{}
-			got := r.buildDeployment(tt.args.instance)
+			got := r.buildDeployment(tt.args.instance, rtmCfg)
 
 			for key, value := range got.Spec.Selector.MatchLabels {
 				g.Expect(got.Spec.Template.Labels[key]).To(gomega.Equal(value))
+				g.Expect(got.Spec.Template.Spec.Containers).To(gomega.HaveLen(1))
+				g.Expect(got.Spec.Template.Spec.Containers[0].Env).To(gomega.ContainElements(rtmCfg.RuntimeEnvs))
 			}
 		})
 	}
@@ -159,43 +164,6 @@ func TestFunctionReconciler_buildHorizontalPodAutoscaler(t *testing.T) {
 
 			g.Expect(*got.Spec.MinReplicas).To(gomega.Equal(tt.wants.minReplicas))
 			g.Expect(got.Spec.MaxReplicas).To(gomega.Equal(tt.wants.maxReplicas))
-		})
-	}
-}
-
-func TestFunctionReconciler_sanitizeDependencies(t *testing.T) {
-	tests := []struct {
-		name string
-		deps string
-		want string
-	}{
-		{
-			name: "Should not touch empty deps - {}",
-			deps: "{}",
-			want: "{}",
-		},
-		{
-			name: "Should not touch empty deps",
-			deps: "",
-			want: "{}",
-		},
-		{
-			name: "Should not touch empty deps - empty string",
-			deps: "random-string",
-			want: "random-string",
-		},
-		{
-			name: "Should not touch empty deps - empty string",
-			deps: "     ",
-			want: "{}",
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			g := gomega.NewGomegaWithT(t)
-			r := &FunctionReconciler{}
-			got := r.sanitizeDependencies(tt.deps)
-			g.Expect(got).To(gomega.Equal(tt.want))
 		})
 	}
 }
@@ -413,5 +381,61 @@ func TestFunctionReconciler_functionLabels(t *testing.T) {
 			got := r.functionLabels(tt.args.instance)
 			g.Expect(got).To(gomega.Equal(tt.want))
 		})
+	}
+}
+
+func TestFunctionReconciler_buildJob(t *testing.T) {
+	g := gomega.NewWithT(t)
+	fnName := "my-function"
+	cmName := "test-configmap"
+	rtmCfg := runtime.Config{
+		Runtime:                 "my-runtime",
+		DependencyFile:          "deps.txt",
+		FunctionFile:            "function.abap",
+		DockerfileConfigMapName: "dockerfile-runtime-abap",
+		RuntimeEnvs:             nil,
+	}
+
+	expectedVolumeMounts := []corev1.VolumeMount{
+		{Name: "sources", MountPath: "/workspace/src/deps.txt", SubPath: FunctionDepsKey, ReadOnly: true},
+		{Name: "sources", MountPath: "/workspace/src/function.abap", SubPath: FunctionSourceKey, ReadOnly: true},
+		{Name: "runtime", MountPath: "/workspace/Dockerfile", SubPath: "Dockerfile", ReadOnly: true},
+		{Name: "credentials", MountPath: "/docker", ReadOnly: true}}
+	expectedVolumes := []expectedVolume{
+		{name: "sources", localObjectReference: cmName},
+		{name: "runtime", localObjectReference: rtmCfg.DockerfileConfigMapName}}
+
+	instance := serverlessv1alpha1.Function{
+		ObjectMeta: metav1.ObjectMeta{Name: fnName},
+		Spec:       serverlessv1alpha1.FunctionSpec{},
+	}
+
+	r := FunctionReconciler{}
+	//when
+	job := r.buildJob(&instance, rtmCfg, cmName)
+
+	//then
+	g.Expect(job.ObjectMeta.GenerateName).To(gomega.Equal("my-function-build-"))
+	assertVolumes(g, job.Spec.Template.Spec.Volumes, expectedVolumes)
+
+	g.Expect(job.Spec.Template.Spec.Containers).To(gomega.HaveLen(1))
+	g.Expect(job.Spec.Template.Spec.Containers[0].VolumeMounts).To(gomega.HaveLen(4))
+	g.Expect(job.Spec.Template.Spec.Containers[0].VolumeMounts).To(gomega.Equal(expectedVolumeMounts))
+}
+
+type expectedVolume struct {
+	name                 string
+	localObjectReference string
+}
+
+func assertVolumes(g *gomega.WithT, actual []corev1.Volume, expected []expectedVolume) {
+	for _, expVol := range expected {
+		found := false
+		for _, actualVol := range actual {
+			if actualVol.Name == expVol.name {
+				found = true
+			}
+		}
+		g.Expect(found).To(gomega.BeTrue(), "Volume with name: %s, not found", expVol.name)
 	}
 }

@@ -9,6 +9,9 @@ import (
 	"k8s.io/apimachinery/pkg/watch"
 	watchtools "k8s.io/client-go/tools/watch"
 
+	"github.com/sirupsen/logrus"
+
+	"github.com/kyma-project/kyma/tests/function-controller/pkg/helpers"
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/resource"
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/servicebindingusage/types/v1alpha1"
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/shared"
@@ -22,7 +25,7 @@ type ServiceBindingUsage struct {
 	name        string
 	namespace   string
 	waitTimeout time.Duration
-	log         shared.Logger
+	log         *logrus.Entry
 	verbose     bool
 	usageKind   string
 }
@@ -79,27 +82,42 @@ func (sbu *ServiceBindingUsage) Delete() error {
 	return nil
 }
 
-func (sbu *ServiceBindingUsage) get() (*v1alpha1.ServiceBindingUsage, error) {
+func (sbu *ServiceBindingUsage) Get() (*v1alpha1.ServiceBindingUsage, error) {
 	u, err := sbu.resCli.Get(sbu.name)
 	if err != nil {
 		return &v1alpha1.ServiceBindingUsage{}, errors.Wrapf(err, "while getting ServiceBindingUsage %s in namespace %s", sbu.name, sbu.namespace)
 	}
 
-	servicebindingusage, err := convertFromUnstructuredToServiceBindingUsage(u)
+	serviceBindingUsage, err := convertFromUnstructuredToServiceBindingUsage(u)
 	if err != nil {
 		return &v1alpha1.ServiceBindingUsage{}, err
 	}
 
-	return &servicebindingusage, nil
+	return &serviceBindingUsage, nil
 }
 
-func (sbu *ServiceBindingUsage) WaitForStatusRunning() error {
-	servicebinding, err := sbu.get()
+func (sbu *ServiceBindingUsage) LogResource() error {
+	serviceBindingUsage, err := sbu.Get()
 	if err != nil {
 		return err
 	}
 
-	// we need to ensure that status is ready first, because otherwise we would not get any events in watchtools.Until
+	out, err := helpers.PrettyMarshall(serviceBindingUsage)
+	if err != nil {
+		return err
+	}
+
+	sbu.log.Infof("Service Binding Usage resource: %s", out)
+	return nil
+}
+
+func (sbu *ServiceBindingUsage) WaitForStatusRunning() error {
+	servicebinding, err := sbu.Get()
+	if err != nil {
+		return err
+	}
+
+	// we need to ensure that status is ready first, because otherwise we would not Get any events in watchtools.Until
 	if sbu.isReadyPhase(*servicebinding) {
 		return nil
 	}

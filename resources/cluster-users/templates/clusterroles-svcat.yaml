@@ -1,0 +1,19 @@
+---
+# Admin access to svcat resources
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: kyma-svcat-admin
+  labels:
+    app: kyma
+    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+    rbac.authorization.kyma-project.io/aggregate-to-kyma-svcat-admin: "true"
+  annotations:
+    helm.sh/hook-weight: "0"
+rules:
+- apiGroups:
+{{ toYaml .Values.clusterRoles.apiGroups.svcat | indent 4 }}
+  resources:
+    - "*"
+  verbs:
+    - "*"

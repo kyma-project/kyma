@@ -4,18 +4,19 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: {{ include "rafterUploadService.fullname" . }}-migrator
+  namespace: {{ .Release.Namespace }}
   labels:
     app.kubernetes.io/name: {{ include "rafterUploadService.name" . }}
     app.kubernetes.io/instance: {{ .Release.Name }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}
     helm.sh/chart: {{ include "rafterUploadService.chart" . }}
   annotations:
-    helm.sh/hook: pre-upgrade,post-upgrade
+    helm.sh/hook: "pre-upgrade, post-upgrade"
     helm.sh/hook-weight: "-1"
     helm.sh/hook-delete-policy: "before-hook-creation, hook-succeeded"
 data:
   initialize: |-
-  {{ include (print $.Template.BasePath "/_helper_migrate_buckets.txt") . | indent 4 }}
+{{ include (print $.Template.BasePath "/_helper_migrate_buckets.txt") . | indent 4 }}
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
@@ -40,6 +41,11 @@ kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: {{ include "rafterUploadService.fullname" . }}-migrator
+  labels:
+    app.kubernetes.io/name: {{ include "rafterUploadService.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    helm.sh/chart: {{ include "rafterUploadService.chart" . }}
   annotations:
     helm.sh/hook: pre-upgrade
     helm.sh/hook-delete-policy: "before-hook-creation, hook-succeeded"
@@ -57,6 +63,11 @@ kind: ClusterRole
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: {{ include "rafterUploadService.fullname" . }}-migrator
+  labels:
+    app.kubernetes.io/name: {{ include "rafterUploadService.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    helm.sh/chart: {{ include "rafterUploadService.chart" . }}
   annotations:
     helm.sh/hook: pre-upgrade
     helm.sh/hook-delete-policy: "before-hook-creation, hook-succeeded"
@@ -71,6 +82,11 @@ kind: ServiceAccount
 metadata:
   name: {{ include "rafterUploadService.fullname" . }}-migrator
   namespace: {{ .Release.Namespace }}
+  labels:
+    app.kubernetes.io/name: {{ include "rafterUploadService.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    helm.sh/chart: {{ include "rafterUploadService.chart" . }}
   annotations:
     helm.sh/hook: pre-upgrade
     helm.sh/hook-delete-policy: "before-hook-creation, hook-succeeded"
@@ -80,6 +96,7 @@ apiVersion: batch/v1
 kind: Job
 metadata:
   name: {{ include "rafterUploadService.fullname" . }}-migrator-pre
+  namespace: {{ .Release.Namespace }}
   labels:
     app.kubernetes.io/name: {{ include "rafterUploadService.name" . }}
     app.kubernetes.io/instance: {{ .Release.Name }}
@@ -106,58 +123,59 @@ spec:
         - name: minio-configuration
           projected:
             sources:
-              - configMap:
-                  name: {{ include "rafterUploadService.fullname" . }}-migrator
+            - configMap:
+                name: {{ include "rafterUploadService.fullname" . }}-migrator
             - secret:
-            name: {{ include "rafterUploadService.preUpgradeMinioSecretRefName" . }}
+                name: {{ include "rafterUploadService.preUpgradeMinioSecretRefName" . }}
         - name: export
           persistentVolumeClaim:
             claimName: {{ include "rafterUploadService.fullname" . }}-migrator
       initContainers:
-        - name: mode-checker
-          image: "{{ .Values.migrator.images.alpineKubectl.repository }}:{{ .Values.migrator.images.alpineKubectl.tag }}"
-          imagePullPolicy: {{ .Values.migrator.images.alpineKubectl.pullPolicy }}
-          command:
-            - bash
-            - -c
-            - "kubectl -n {{ .Release.Namespace }} get deployment {{ include "rafterUploadService.preUpgradeMinioDeploymentRefName" . }} -o jsonpath=\"{.spec.template.metadata.annotations.persistence}\" > /export/persistence.enabled"
-          volumeMounts:
-            - name: export
-              mountPath: /export
+      - name: mode-checker
+        image: "{{ .Values.migrator.images.alpineKubectl.repository }}:{{ .Values.migrator.images.alpineKubectl.tag }}"
+        imagePullPolicy: {{ .Values.migrator.images.alpineKubectl.pullPolicy }}
+        command:
+        - bash
+        - -c
+        - "kubectl -n {{ .Release.Namespace }} get deployment {{ include "rafterUploadService.preUpgradeMinioDeploymentRefName" . }} -o jsonpath=\"{.spec.template.metadata.annotations.persistence}\" > /export/persistence.enabled"
+        volumeMounts:
+        - name: export
+          mountPath: /export
       containers:
-        - name: migrator
-          image: "{{ .Values.migrator.images.minioClient.repository }}:{{ .Values.migrator.images.minioClient.tag }}"
-          imagePullPolicy: {{ .Values.migrator.images.minioClient.pullPolicy }}
-          command:
-            - /bin/sh
-            - /config/initialize
-          env:
-            {{ include "rafterUploadService.createEnv" ( dict "name" "MINIO_ENDPOINT" "value" .Values.envs.upload.endpoint "context" . ) | nindent 10 }}
-              {{ include "rafterUploadService.createEnv" ( dict "name" "MINIO_PORT" "value" .Values.envs.upload.port "context" . ) | nindent 10 }}
-              - name: PRIVATE_BUCKET
-                valueFrom:
-                  configMapKeyRef:
-                    name: {{ include "rafterUploadService.tplValue" ( dict "value" .Values.envs.configMap.name.value "context" . ) }}
-                    key: private
-              - name: PUBLIC_BUCKET
-                valueFrom:
-                  configMapKeyRef:
-                    name: {{ include "rafterUploadService.tplValue" ( dict "value" .Values.envs.configMap.name.value "context" . ) }}
-                    key: public
-              - name: LOCAL_STORAGE
-                value: /export
-              - name: MODE
-                value: pre
-          volumeMounts:
-            - name: minio-configuration
-              mountPath: /config
-            - name: export
-              mountPath: /export
+      - name: migrator
+        image: "{{ .Values.migrator.images.minioClient.repository }}:{{ .Values.migrator.images.minioClient.tag }}"
+        imagePullPolicy: {{ .Values.migrator.images.minioClient.pullPolicy }}
+        command:
+        - /bin/sh
+        - /config/initialize
+        env:
+          {{ include "rafterUploadService.createEnv" ( dict "name" "MINIO_ENDPOINT" "value" .Values.envs.upload.endpoint "context" . ) | nindent 10 }}
+          {{ include "rafterUploadService.createEnv" ( dict "name" "MINIO_PORT" "value" .Values.envs.upload.port "context" . ) | nindent 10 }}
+          - name: PRIVATE_BUCKET
+            valueFrom:
+              configMapKeyRef:
+                name: {{ include "rafterUploadService.tplValue" ( dict "value" .Values.envs.configMap.name.value "context" . ) }}
+                key: private
+          - name: PUBLIC_BUCKET
+            valueFrom:
+              configMapKeyRef:
+                name: {{ include "rafterUploadService.tplValue" ( dict "value" .Values.envs.configMap.name.value "context" . ) }}
+                key: public
+          - name: LOCAL_STORAGE
+            value: /export
+          - name: MODE
+            value: pre
+        volumeMounts:
+          - name: minio-configuration
+            mountPath: /config
+          - name: export
+            mountPath: /export
 ---
 apiVersion: batch/v1
 kind: Job
 metadata:
   name: {{ include "rafterUploadService.fullname" . }}-migrator-post
+  namespace: {{ .Release.Namespace }}
   labels:
     app.kubernetes.io/name: {{ include "rafterUploadService.name" . }}
     app.kubernetes.io/instance: {{ .Release.Name }}
@@ -183,43 +201,48 @@ spec:
         - name: minio-configuration
           projected:
             sources:
-              - configMap:
-                  name: {{ include "rafterUploadService.fullname" . }}-migrator
+            - configMap:
+                name: {{ include "rafterUploadService.fullname" . }}-migrator
             - secret:
-            name: {{ include "rafterUploadService.postUpgradeMinioSecretRefName" . }}
+                name: {{ include "rafterUploadService.postUpgradeMinioSecretRefName" . }}
         - name: export
           persistentVolumeClaim:
             claimName: {{ include "rafterUploadService.fullname" . }}-migrator
       containers:
-        - name: migrator
-          image: "{{ .Values.migrator.images.minioClient.repository }}:{{ .Values.migrator.images.minioClient.tag }}"
-          imagePullPolicy: {{ .Values.migrator.images.minioClient.pullPolicy }}
-          command: ["/bin/sh", "/config/initialize"]
-          env:
-            {{ include "rafterUploadService.createEnv" ( dict "name" "MINIO_ENDPOINT" "value" .Values.envs.upload.endpoint "context" . ) | nindent 10 }}
-              {{ include "rafterUploadService.createEnv" ( dict "name" "MINIO_PORT" "value" .Values.envs.upload.port "context" . ) | nindent 10 }}
-              - name: PRIVATE_BUCKET
-                valueFrom:
-                  configMapKeyRef:
-                    name: {{ include "rafterUploadService.tplValue" ( dict "value" .Values.envs.configMap.name.value "context" . ) }}
-                    key: private
-              - name: PUBLIC_BUCKET
-                valueFrom:
-                  configMapKeyRef:
-                    name: {{ include "rafterUploadService.tplValue" ( dict "value" .Values.envs.configMap.name.value "context" . ) }}
-                    key: public
-              - name: LOCAL_STORAGE
-                value: /export
-          volumeMounts:
-            - name: minio-configuration
-              mountPath: /config
-            - name: export
-              mountPath: /export
+      - name: migrator
+        image: "{{ .Values.migrator.images.minioClient.repository }}:{{ .Values.migrator.images.minioClient.tag }}"
+        imagePullPolicy: {{ .Values.migrator.images.minioClient.pullPolicy }}
+        command: ["/bin/sh", "/config/initialize"]
+        env:
+          {{ include "rafterUploadService.createEnv" ( dict "name" "MINIO_ENDPOINT" "value" .Values.envs.upload.endpoint "context" . ) | nindent 10 }}
+          {{ include "rafterUploadService.createEnv" ( dict "name" "MINIO_PORT" "value" .Values.envs.upload.port "context" . ) | nindent 10 }}
+          - name: PRIVATE_BUCKET
+            valueFrom:
+              configMapKeyRef:
+                name: {{ include "rafterUploadService.tplValue" ( dict "value" .Values.envs.configMap.name.value "context" . ) }}
+                key: private
+          - name: PUBLIC_BUCKET
+            valueFrom:
+              configMapKeyRef:
+                name: {{ include "rafterUploadService.tplValue" ( dict "value" .Values.envs.configMap.name.value "context" . ) }}
+                key: public
+          - name: LOCAL_STORAGE
+            value: /export
+        volumeMounts:
+          - name: minio-configuration
+            mountPath: /config
+          - name: export
+            mountPath: /export
 ---
 kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: {{ include "rafterUploadService.fullname" . }}-migrator-delete-pvc
+  labels:
+    app.kubernetes.io/name: {{ include "rafterUploadService.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    helm.sh/chart: {{ include "rafterUploadService.chart" . }}
   annotations:
     helm.sh/hook: post-upgrade
     helm.sh/hook-delete-policy: "before-hook-creation, hook-succeeded"
@@ -237,6 +260,11 @@ kind: ClusterRole
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: {{ include "rafterUploadService.fullname" . }}-migrator-delete-pvc
+  labels:
+    app.kubernetes.io/name: {{ include "rafterUploadService.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    helm.sh/chart: {{ include "rafterUploadService.chart" . }}
   annotations:
     helm.sh/hook: post-upgrade
     helm.sh/hook-delete-policy: "before-hook-creation, hook-succeeded"
@@ -251,6 +279,11 @@ kind: ServiceAccount
 metadata:
   name: {{ include "rafterUploadService.fullname" . }}-migrator-delete-pvc
   namespace: {{ .Release.Namespace }}
+  labels:
+    app.kubernetes.io/name: {{ include "rafterUploadService.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    helm.sh/chart: {{ include "rafterUploadService.chart" . }}
   annotations:
     helm.sh/hook: post-upgrade
     helm.sh/hook-delete-policy: "before-hook-creation, hook-succeeded"
@@ -260,6 +293,7 @@ apiVersion: batch/v1
 kind: Job
 metadata:
   name: {{ include "rafterUploadService.fullname" . }}-migrator-delete-pvc
+  namespace: {{ .Release.Namespace }}
   labels:
     app.kubernetes.io/name: {{ include "rafterUploadService.name" . }}
     app.kubernetes.io/instance: {{ .Release.Name }}
@@ -290,4 +324,4 @@ spec:
             - bash
             - -c
             - "kubectl -n {{ .Release.Namespace }} delete pvc {{ include "rafterUploadService.fullname" . }}-migrator"
-  {{- end }}
+{{- end }}

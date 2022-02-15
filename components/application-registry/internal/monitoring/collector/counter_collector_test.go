@@ -34,15 +34,4 @@ func TestNewCounterCollector(t *testing.T) {
 		assert.Nil(t, collector)
 	})
 
-	t.Run("should return error if help not specified", func(t *testing.T) {
-		// given
-		opts := prometheus.CounterOpts{
-			Name: "name",
-		}
-		// when
-		collector, err := NewCounterCollector(opts, []string{"label"})
-		//then
-		require.Error(t, err)
-		assert.Nil(t, collector)
-	})
 }

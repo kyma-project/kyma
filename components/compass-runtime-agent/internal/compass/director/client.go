@@ -21,7 +21,7 @@ type RuntimeURLsConfig struct {
 	ConsoleURL string `envconfig:"default=https://console.kyma.local"`
 }
 
-//go:generate mockery -name=DirectorClient
+//go:generate mockery --name=DirectorClient
 type DirectorClient interface {
 	FetchConfiguration() ([]kymamodel.Application, error)
 	SetURLsLabels(urlsCfg RuntimeURLsConfig) (graphql.Labels, error)

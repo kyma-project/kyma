@@ -3,6 +3,7 @@
 package v1alpha1
 
 import (
+	"context"
 	time "time"
 
 	compassv1alpha1 "github.com/kyma-project/kyma/components/compass-runtime-agent/pkg/apis/compass/v1alpha1"
@@ -44,13 +45,13 @@ func NewFilteredCompassConnectionInformer(client versioned.Interface, resyncPeri
 				if tweakListOptions != nil {
 					tweakListOptions(&options)
 				}
-				return client.CompassV1alpha1().CompassConnections().List(options)
+				return client.CompassV1alpha1().CompassConnections().List(context.TODO(), options)
 			},
 			WatchFunc: func(options v1.ListOptions) (watch.Interface, error) {
 				if tweakListOptions != nil {
 					tweakListOptions(&options)
 				}
-				return client.CompassV1alpha1().CompassConnections().Watch(options)
+				return client.CompassV1alpha1().CompassConnections().Watch(context.TODO(), options)
 			},
 		},
 		&compassv1alpha1.CompassConnection{},

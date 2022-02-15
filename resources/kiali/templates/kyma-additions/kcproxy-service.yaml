@@ -7,7 +7,7 @@ metadata:
 spec:
   ports:
     - port: {{ .Values.kiali.spec.server.port }}
-      targetPort: {{ .Values.kcproxy.inPort }}
+      targetPort: http
       protocol: TCP
       name: http
   selector:

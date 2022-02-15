@@ -80,3 +80,23 @@ Selector labels
 app.kubernetes.io/name: {{ include "grafana.name" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end -}}
+
+{{- define "grafana.kyma.authProxy.groups" -}}
+{{- if .Values.kyma.authProxy.config.resources.useKymaGroups }}
+{{- printf "|groups=%s,%s,%s,%s" .Values.global.kymaRuntime.adminGroup .Values.global.kymaRuntime.operatorGroup .Values.global.kymaRuntime.developerGroup .Values.global.kymaRuntime.namespaceAdminGroup -}}
+{{- else if .Values.kyma.authProxy.config.resources.groups }}
+{{- printf "|groups=%s" .Values.kyma.authProxy.config.resources.groups }}
+{{- end }}
+{{- end -}}
+
+{{- define "grafana.kyma.authProxy.methods" -}}
+{{- if .Values.kyma.authProxy.config.resources.methods }}
+{{- printf "|methods=%s" .Values.kyma.authProxy.config.resources.methods }}
+{{- end }}
+{{- end -}}
+
+{{- define "grafana.kyma.authProxy.roles" -}}
+{{- if .Values.kyma.authProxy.config.resources.roles }}
+{{- printf "|roles=%s" .Values.kyma.authProxy.config.resources.roles }}
+{{- end }}
+{{- end -}}
