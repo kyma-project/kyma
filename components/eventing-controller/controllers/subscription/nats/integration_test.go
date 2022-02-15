@@ -69,24 +69,9 @@ type testEnsemble struct {
 	cancel                    context.CancelFunc
 }
 
-//var (
-//	testID      int
-//	natsURL     string
-//	cfg         *rest.Config
-//	k8sClient   client.Client
-//	testEnv     *envtest.Environment
-//	natsServer  *natsserver.Server
-//	reconciler  *natsreconciler.Reconciler
-//	natsBackend *handlers.Nats
-//	cancel      context.CancelFunc
-//
-//	defaultSubsConfig = env.DefaultSubscriptionConfig{MaxInFlightMessages: 1, DispatcherRetryPeriod: time.Second, DispatcherMaxRetries: 1}
-//)
-
 func TestCreateSubscription(t *testing.T) {
 	ctx := context.Background()
 	g := gomega.NewGomegaWithT(t)
-
 	ens := setupTestEnsemble(ctx, reconcilertesting.EventTypePrefix, g)
 	defer ens.cancel()
 
@@ -154,41 +139,46 @@ func TestCreateSubscription(t *testing.T) {
 	}
 
 	for _, tc := range testCase {
-		ens.testID++ //todo
-		//todo log name of test
+		subscription, subscriptionName := createSubscription(ctx, ens, g, tc.subscriptionOpts...)
+		testSubscriptionOnK8s(ctx, ens, g, subscriptionName, subscription, tc.wantedK8sSubscription...)
+		testEventsOnK8s(ctx, ens, g, tc.wantedEvents...)
+		testSubscriptionOnNATS(ens, subscriptionName, g, tc.wantedNATSSubscription...)
+		testDeletionOnK8s(ctx, ens, subscription, g, tc.shouldTestDeletion)
+	}
+}
 
-		//create subscription
-		//todo create a function that does the following lines
-		subscriptionName := fmt.Sprintf(subscriptionNameFormat, ens.testID)
-		subscription := reconcilertesting.NewSubscription(subscriptionName, ens.subscriberSvc.Namespace, tc.subscriptionOpts...)
-		createSubscriptionInK8s(ctx, ens, subscription, t)
+func createSubscription(ctx context.Context, ens *testEnsemble, g *gomega.GomegaWithT, subscriptionOpts ...reconcilertesting.SubscriptionOpt) (*eventingv1alpha1.Subscription, string) {
+	subscriptionName := fmt.Sprintf(subscriptionNameFormat, ens.testID)
+	ens.testID++
+	subscription := reconcilertesting.NewSubscription(subscriptionName, ens.subscriberSvc.Namespace, subscriptionOpts...)
+	subscription = createSubscriptionInK8s(ctx, ens, subscription, g)
+	return subscription, subscriptionName
+}
 
-		//test subscription against expectations on k8s cluster
-		//todo replace with a function that does both of the following lines
-		subExpectations := append(tc.wantedK8sSubscription, reconcilertesting.HaveSubscriptionName(subscriptionName))
-		getSubscriptionOnK8S(ctx, ens, subscription, t).Should(gomega.And(subExpectations...))
+func testSubscriptionOnK8s(ctx context.Context, ens *testEnsemble, g *gomega.GomegaWithT, subscriptionName string, subscription *eventingv1alpha1.Subscription, expectations ...gomegatypes.GomegaMatcher) {
+	subExpectations := append(expectations, reconcilertesting.HaveSubscriptionName(subscriptionName))
+	getSubscriptionOnK8S(ctx, ens, subscription, g).Should(gomega.And(subExpectations...))
+}
 
-		//events
-		//todo put in single func
-		for _, event := range tc.wantedEvents { //todo replace with gomega.And(events)
-			getK8sEvents(ctx, ens, t).Should(reconcilertesting.HaveEvent(event))
-		}
+func testEventsOnK8s(ctx context.Context, ens *testEnsemble, g *gomega.GomegaWithT, expectations ...v1.Event) {
+	for _, event := range expectations { //todo replace with gomega.And(events)
+		getK8sEvents(ctx, ens, g).Should(reconcilertesting.HaveEvent(event))
+	}
+}
 
-		//todo put in function
-		getSubscriptionFromNATS(ens.natsBackend, subscriptionName, t).Should(gomega.And(tc.wantedNATSSubscription...))
+func testSubscriptionOnNATS(ens *testEnsemble, subscriptionName string, g *gomega.GomegaWithT, expectations ...gomegatypes.GomegaMatcher) {
+	getSubscriptionFromNATS(ens.natsBackend, subscriptionName, g).Should(gomega.And(expectations...))
+}
 
-		//todo put in function
-		if tc.shouldTestDeletion {
-			g.Expect(ens.k8sClient.Delete(ctx, subscription)).Should(gomega.BeNil())
-			isSubscriptionDeleted(ctx, ens, subscription, t).Should(reconcilertesting.HaveNotFoundSubscription(true))
-		}
+func testDeletionOnK8s(ctx context.Context, ens *testEnsemble, subscription *eventingv1alpha1.Subscription, g *gomega.GomegaWithT, shouldTest bool) {
+	if shouldTest {
+		g.Expect(ens.k8sClient.Delete(ctx, subscription)).Should(gomega.BeNil())
+		isSubscriptionDeleted(ctx, ens, subscription, g).Should(reconcilertesting.HaveNotFoundSubscription(true))
 	}
 }
 
 // isSubscriptionDeleted checks a subscription is deleted and allows making assertions on it
-func isSubscriptionDeleted(ctx context.Context, ens *testEnsemble, subscription *eventingv1alpha1.Subscription, t *testing.T) gomega.AsyncAssertion {
-	g := gomega.NewGomegaWithT(t)
-
+func isSubscriptionDeleted(ctx context.Context, ens *testEnsemble, subscription *eventingv1alpha1.Subscription, g *gomega.GomegaWithT) gomega.AsyncAssertion {
 	return g.Eventually(func() bool {
 		lookupKey := types.NamespacedName{
 			Namespace: subscription.Namespace,
@@ -256,9 +246,7 @@ func startTestEnv(ens *testEnsemble, g *gomega.GomegaWithT) {
 }
 
 func startNATS(port int) *natsserver.Server {
-	//todo any tests/ error handling needed here?
 	natsServer := reconcilertesting.RunNatsServerOnPort(port)
-	//clientURL := natsServer.ClientURL()
 	log.Printf("NATS server started %v", natsServer.ClientURL())
 	return natsServer
 }
@@ -337,13 +325,12 @@ func createSubscriberSvcInK8s(ctx context.Context, ens *testEnsemble, g *gomega.
 		}
 	}
 
+	// create subscriber svc on cluster
 	err := ens.k8sClient.Create(ctx, ens.subscriberSvc)
 	g.Expect(err).Should(gomega.BeNil())
 }
 
-func createSubscriptionInK8s(ctx context.Context, ens *testEnsemble, subscription *eventingv1alpha1.Subscription, t *testing.T) {
-	g := gomega.NewGomegaWithT(t)
-
+func createSubscriptionInK8s(ctx context.Context, ens *testEnsemble, subscription *eventingv1alpha1.Subscription, g *gomega.GomegaWithT) *eventingv1alpha1.Subscription {
 	if subscription.Namespace != "default " {
 		// create testing namespace
 		namespace := fixtureNamespace(subscription.Namespace)
@@ -356,9 +343,10 @@ func createSubscriptionInK8s(ctx context.Context, ens *testEnsemble, subscriptio
 		}
 	}
 
-	// create subscription
+	// create subscription on cluster
 	err := ens.k8sClient.Create(ctx, subscription)
 	g.Expect(err).Should(gomega.BeNil())
+	return subscription
 }
 
 func fixtureNamespace(name string) *v1.Namespace {
@@ -375,9 +363,7 @@ func fixtureNamespace(name string) *v1.Namespace {
 }
 
 // getSubscription fetches a subscription using the lookupKey and allows making assertions on it
-func getSubscriptionOnK8S(ctx context.Context, ens *testEnsemble, subscription *eventingv1alpha1.Subscription, t *testing.T, intervals ...interface{}) gomega.AsyncAssertion {
-	g := gomega.NewGomegaWithT(t) //todo can i just pass g from caller?
-
+func getSubscriptionOnK8S(ctx context.Context, ens *testEnsemble, subscription *eventingv1alpha1.Subscription, g *gomega.GomegaWithT, intervals ...interface{}) gomega.AsyncAssertion {
 	if len(intervals) == 0 {
 		intervals = []interface{}{smallTimeout, smallPollingInterval}
 	}
@@ -395,9 +381,7 @@ func getSubscriptionOnK8S(ctx context.Context, ens *testEnsemble, subscription *
 
 // getK8sEvents returns all kubernetes events for the given namespace.
 // The result can be used in a gomega assertion.
-func getK8sEvents(ctx context.Context, ens *testEnsemble, t *testing.T) gomega.AsyncAssertion {
-	g := gomega.NewGomegaWithT(t)
-
+func getK8sEvents(ctx context.Context, ens *testEnsemble, g *gomega.GomegaWithT) gomega.AsyncAssertion {
 	eventList := v1.EventList{}
 	return g.Eventually(func() v1.EventList {
 		err := ens.k8sClient.List(ctx, &eventList, client.InNamespace(ens.subscriberSvc.Namespace))
@@ -408,9 +392,7 @@ func getK8sEvents(ctx context.Context, ens *testEnsemble, t *testing.T) gomega.A
 	}, smallTimeout, smallPollingInterval)
 }
 
-func getSubscriptionFromNATS(natsBackend *handlers.Nats, subscriptionName string, t *testing.T) gomega.Assertion {
-	g := gomega.NewGomegaWithT(t)
-
+func getSubscriptionFromNATS(natsBackend *handlers.Nats, subscriptionName string, g *gomega.GomegaWithT) gomega.Assertion {
 	return g.Expect(func() *nats.Subscription {
 		subscriptions := natsBackend.GetAllSubscriptions()
 		for key, subscription := range subscriptions {
