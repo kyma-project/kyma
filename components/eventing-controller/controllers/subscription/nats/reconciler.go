@@ -200,6 +200,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 		return ctrl.Result{}, err
 	}
 
+	// update the cleanEventTypes and config values in the subscription, if changed
 	statusChanged, err := r.syncInitialStatus(subscription, log)
 	if err != nil {
 		log.Errorw("sync initial status failed", "error", err)
@@ -250,8 +251,9 @@ func (r *Reconciler) syncInitialStatus(subscription *eventingv1alpha1.Subscripti
 		subscription.Status.CleanEventTypes = cleanEventTypes
 		statusChanged = true
 	}
-	if subscription.Status.Config == nil || !reflect.DeepEqual(subscription.Spec.Config, subscription.Status.Config) {
-		subscription.Status.Config = eventingv1alpha1.MergeSubsConfigs(subscription.Spec.Config, &r.subsConfig)
+	subscriptionConfig := eventingv1alpha1.MergeSubsConfigs(subscription.Spec.Config, &r.subsConfig)
+	if subscription.Status.Config == nil || !reflect.DeepEqual(subscriptionConfig, subscription.Status.Config) {
+		subscription.Status.Config = subscriptionConfig
 		statusChanged = true
 	}
 	return statusChanged, nil

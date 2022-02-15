@@ -233,6 +233,18 @@ func WithStatusConfig(defaultConfig env.DefaultSubscriptionConfig) SubscriptionO
 	}
 }
 
+func WithSpecConfig(defaultConfig env.DefaultSubscriptionConfig) SubscriptionOpt {
+	return func(s *eventingv1alpha1.Subscription) {
+		s.Spec.Config = eventingv1alpha1.MergeSubsConfigs(nil, &defaultConfig)
+	}
+}
+
+func WithStatusCleanEventTypes(cleanEventTypes []string) SubscriptionOpt {
+	return func(sub *eventingv1alpha1.Subscription) {
+		sub.Status.CleanEventTypes = cleanEventTypes
+	}
+}
+
 func WithWebhookAuthForBEB() SubscriptionOpt {
 	return func(s *eventingv1alpha1.Subscription) {
 		s.Spec.Protocol = "BEB"
