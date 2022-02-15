@@ -56,6 +56,8 @@ const (
 	attachControlPlaneOutput = false
 )
 
+
+
 var (
 	testID      int
 	natsURL     string
@@ -73,6 +75,7 @@ var (
 func TestCreateSubscription(t *testing.T) {
 	ctx := context.Background()
 	var id int //todo move to env struct
+	g:=gomega.NewGomegaWithT(t)
 
 	cancel = setupTestEnvironment(reconcilertesting.EventTypePrefix, t)
 	defer cancel()
@@ -85,6 +88,7 @@ func TestCreateSubscription(t *testing.T) {
 		wantedK8sSubscription  []gomegatypes.GomegaMatcher
 		wantedEvents           []v1.Event
 		wantedNATSSubscription []gomegatypes.GomegaMatcher
+		shouldTestDeletion     bool // a bool in golang is false by default
 	}{
 		{
 			name: "empty event type",
@@ -129,7 +133,7 @@ func TestCreateSubscription(t *testing.T) {
 				reconcilertesting.WithSinkURLFromSvc(subscriberSvc),
 			},
 			wantedK8sSubscription: []gomegatypes.GomegaMatcher{
-				reconcilertesting.HaveCondition(conditionValidSubscription()),
+				reconcilertesting.HaveCondition(conditionValidSubscription("")),
 			},
 			wantedEvents: nil,
 			wantedNATSSubscription: []gomegatypes.GomegaMatcher{
@@ -137,10 +141,12 @@ func TestCreateSubscription(t *testing.T) {
 				reconcilertesting.BeValid(),
 				reconcilertesting.HaveSubject(reconcilertesting.OrderCreatedEventType),
 			},
+			shouldTestDeletion: true,
 		},
 	}
 
 	for _, tc := range testCase {
+		id++ //todo
 		//todo log name of test
 
 		//create subscription
@@ -162,15 +168,37 @@ func TestCreateSubscription(t *testing.T) {
 
 		//todo put in function
 		getSubscriptionFromNATS(natsBackend, subscriptionName, t).Should(gomega.And(tc.wantedNATSSubscription...))
-		id++ //todo
+
+		//todo put in function
+		if tc.shouldTestDeletion {
+			g.Expect(k8sClient.Delete(ctx, subscription)).Should(gomega.BeNil())
+			isSubscriptionDeleted(ctx, subscription, t).Should(reconcilertesting.HaveNotFoundSubscription(true))
+		}
 	}
 }
 
-func conditionValidSubscription() eventingv1alpha1.Condition {
+
+// isSubscriptionDeleted checks a subscription is deleted and allows making assertions on it
+func isSubscriptionDeleted(ctx context.Context, subscription *eventingv1alpha1.Subscription, t *testing.T) gomega.AsyncAssertion {
+	g:=gomega.NewGomegaWithT(t)
+
+	return g.Eventually(func() bool {
+		lookupKey := types.NamespacedName{
+			Namespace: subscription.Namespace,
+			Name:      subscription.Name,
+		}
+		if err := k8sClient.Get(ctx, lookupKey, subscription); err != nil {
+			return k8serrors.IsNotFound(err)
+		}
+		return false
+	}, smallTimeout, smallPollingInterval)
+}
+
+func conditionValidSubscription(msg string) eventingv1alpha1.Condition {
 	return eventingv1alpha1.MakeCondition(
 		eventingv1alpha1.ConditionSubscriptionActive,
 		eventingv1alpha1.ConditionReasonNATSSubscriptionActive,
-		v1.ConditionTrue, "")
+		v1.ConditionTrue, msg)
 }
 
 func conditionInvalidSink(msg string) eventingv1alpha1.Condition { //todo should this be reconcilertesting
@@ -385,5 +413,5 @@ func getSubscriptionFromNATS(natsBackend *handlers.Nats, subscriptionName string
 			}
 		}
 		return nil
-	}()) // todo do we need func()*nats.Subscription{}()? can we remove func at all
+	}()) // todo do we need func()*nats.Subscription{}()? can we remove func
 }
