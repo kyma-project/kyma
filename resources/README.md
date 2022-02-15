@@ -1,4 +1,4 @@
-# Resources                                                                                  
+# Resources
 
 ## Overview
 
@@ -26,9 +26,9 @@ The version of the actual component image is located under the **global.{name_of
 
 ### Add monitoring to components
 
-Include configuration files for Service Monitors, alert rules, and dashboards under your component's chart to ensure proper health check monitoring of your component. 
+Include configuration files for Service Monitors, alert rules, and dashboards under your component's chart to ensure proper health check monitoring of your component.
 
-For an example of such a component, see [Service Catalog](https://github.com/kyma-project/kyma/blob/master/resources/service-catalog/charts/catalog/templates) that contains the [ServiceMonitor](https://github.com/kyma-project/kyma/blob/master/resources/service-catalog/charts/catalog/templates/controller-manager-service-monitor.yaml) and [dashboard](https://github.com/kyma-project/kyma/blob/master/resources/service-catalog/charts/catalog/templates/dashboard-configmap.yaml) configurations.
+For an example of such a component, see [Service Catalog](https://github.com/kyma-project/kyma/blob/main/resources/service-catalog/charts/catalog/templates) that contains the [ServiceMonitor](https://github.com/kyma-project/kyma/blob/main/resources/service-catalog/charts/catalog/templates/controller-manager-service-monitor.yaml) and [dashboard](https://github.com/kyma-project/kyma/blob/main/resources/service-catalog/charts/catalog/templates/dashboard-configmap.yaml) configurations.
 
 
 When creating a ServiceMonitor resource, follow this naming convention:
@@ -42,4 +42,4 @@ When creating a ServiceMonitor resource, follow this naming convention:
 | Dashboard |`dashboard-configmap.yaml`|`dashboard-configmap.yaml`|Name of the file which contains the dashboard's specification.|
 | Dashboard| `{chart_name}-dashboard` for the main chart dashboard,`{chart_name}-{sub_chart_name}-dashboard` for the sub-chart | `backup-dashboard`, `rafter-asyncapi-service-dashboard` |  Name of the resource in the **metadata** section of the file.|
 
-For details on observing metrics, creating dashboards, and setting alerting rules, see [these](https://kyma-project.io/docs/components/monitoring/#tutorials-tutorials) tutorials.
+For details on observing metrics, creating dashboards, and setting alerting rules, see [these](https://kyma-project.io/docs/kyma/latest/03-tutorials/00-observability/) tutorials.

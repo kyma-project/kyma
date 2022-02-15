@@ -1,107 +1,31 @@
 aliases:
   documentation-reviewers:
-    - kazydek
     - klaudiagrz
-    - bszwarc
     - mmitoraj
     - majakurcius
     - alexandra-simeonova
   documentation-approvers:
-    - kazydek
     - klaudiagrz
-    - bszwarc
     - mmitoraj
     - majakurcius
     - alexandra-simeonova
-  console-reviewers:
-    - parostatkiem
-    - Wawrzyn321
-    - kwiatekus
-    - dariadomagala
-    - akucharska
-  console-approvers:
-    - parostatkiem
-    - Wawrzyn321
-    - kwiatekus
-    - dariadomagala
-    - akucharska
-  knative-eventing-kafka-approvers:
-    - rakesh-garimella
-    - lilitgh
+
+  eventing-approvers:
     - k15r
     - nachtmaar
-    - anishj0shi
-    - montaro
     - marcobebway
     - radufa
-    - sayanh
-  knative-eventing-kafka-reviewers:
-    - rakesh-garimella
-    - lilitgh
+    - pxsalehi
+    - mfaizanse
+    - friedrichwilken
+    - vladislavpaskar
+  eventing-reviewers:
     - k15r
     - nachtmaar
-    - anishj0shi
-    - montaro
     - marcobebway
     - radufa
-    - sayanh
-  event-bus-approvers:
-    - rakesh-garimella
-    - lilitgh
-    - k15r
-    - nachtmaar
-    - anishj0shi
-    - montaro
-    - marcobebway
-    - radufa
-    - sayanh
-  event-bus-reviewers:
-    - rakesh-garimella
-    - lilitgh
-    - k15r
-    - nachtmaar
-    - anishj0shi
-    - montaro
-    - marcobebway
-    - radufa
-    - sayanh
-  event-sources-approvers:
-    - rakesh-garimella
-    - lilitgh
-    - k15r
-    - nachtmaar
-    - anishj0shi
-    - montaro
-    - marcobebway
-    - radufa
-    - sayanh
-  event-sources-reviewers:
-    - rakesh-garimella
-    - lilitgh
-    - k15r
-    - nachtmaar
-    - anishj0shi
-    - montaro
-    - marcobebway
-    - radufa
-    - sayanh
-  serverless-approvers:
-    - rakesh-garimella
-    - lilitgh
-    - k15r
-    - nachtmaar
-    - anishj0shi
-    - montaro
-    - marcobebway
-    - radufa
-    - sayanh
-  serverless-reviewers:
-    - rakesh-garimella
-    - lilitgh
-    - k15r
-    - nachtmaar
-    - anishj0shi
-    - montaro
-    - marcobebway
-    - radufa
-    - sayanh
+    - pxsalehi
+    - mfaizanse
+    - friedrichwilken
+    - vladislavpaskar
+    - raypinto

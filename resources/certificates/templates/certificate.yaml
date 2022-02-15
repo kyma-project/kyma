@@ -1,0 +1,36 @@
+{{- if  and (.Values.global.tlsCrt) (.Values.global.tlsKey) -}}
+---
+# User-provided TLS always take precedence
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {{ .Values.certificates.kyma.name }}
+  namespace: {{ .Values.certificates.kyma.namespace }}
+type: Opaque
+data:
+  tls.crt: {{ .Values.global.tlsCrt }}
+  tls.key: {{ .Values.global.tlsKey }}
+{{- else if not (.Values.global.domainName) -}}
+---
+# No user-provided TLS data and no domain name. Fallback to default static certificate
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {{ .Values.certificates.kyma.name }}
+  namespace: {{ .Values.certificates.kyma.namespace }}
+type: Opaque
+data:
+  tls.crt: {{ .Values.certificates.kyma.default.tlsCrt }}
+  tls.key: {{ .Values.certificates.kyma.default.tlsKey }}
+{{- else -}}
+---
+# Domain is given, but not TLS data. Generate the `Certificate` object
+apiVersion: cert.gardener.cloud/v1alpha1
+kind: Certificate
+metadata:
+  name: kyma-tls-cert
+  namespace: {{ .Values.certificates.kyma.namespace }}
+spec:
+  commonName: "*.{{ .Values.global.domainName }}"
+  secretName: {{ .Values.certificates.kyma.name }}
+{{- end -}}

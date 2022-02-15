@@ -6,7 +6,6 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/onsi/ginkgo"
 	"github.com/onsi/gomega"
 	"github.com/stretchr/testify/mock"
 	corev1 "k8s.io/api/core/v1"
@@ -106,12 +105,11 @@ func Test_serviceAccountService_shiftSecretTokens(t *testing.T) {
 	}
 }
 
-var _ = ginkgo.Describe("updateServiceAccount method", func() {
-	var (
-		ctx = context.TODO()
-	)
+func TestServiceAccountService_updateServiceAccount(t *testing.T) {
+	ctx := context.TODO()
 
-	ginkgo.It("should update serviceAccount merging two svcAcc together", func() {
+	t.Run("should update serviceAccount merging two svcAcc together", func(t *testing.T) {
+		g := gomega.NewWithT(t)
 		client := new(automock.Client)
 
 		var obj resource.Object
@@ -119,7 +117,7 @@ var _ = ginkgo.Describe("updateServiceAccount method", func() {
 		client.On("Update", mock.Anything, mock.Anything).Return(nil).Once().Run(func(args mock.Arguments) {
 			obj = args.Get(1).(resource.Object)
 		})
-		defer client.AssertExpectations(ginkgo.GinkgoT())
+		defer client.AssertExpectations(t)
 
 		r := &serviceAccountService{client: client}
 
@@ -160,26 +158,27 @@ var _ = ginkgo.Describe("updateServiceAccount method", func() {
 		}
 
 		err := r.updateServiceAccount(ctx, log.Log, instance, base)
-		gomega.Expect(err).To(gomega.Succeed())
+		g.Expect(err).To(gomega.Succeed())
 
-		gomega.Expect(obj).NotTo(gomega.BeNil())
+		g.Expect(obj).NotTo(gomega.BeNil())
 
 		updatedServiceAcc := obj.(*corev1.ServiceAccount)
 
 		// inherited from instance
-		gomega.Expect(updatedServiceAcc.Name).To(gomega.Equal(instance.GetName()))
+		g.Expect(updatedServiceAcc.Name).To(gomega.Equal(instance.GetName()))
 
 		// inherited from base
-		gomega.Expect(updatedServiceAcc.Annotations).To(gomega.And(gomega.Equal(base.GetAnnotations()), gomega.Not(gomega.BeNil())))
-		gomega.Expect(updatedServiceAcc.Labels).To(gomega.And(gomega.Equal(base.GetLabels()), gomega.Not(gomega.BeNil())))
-		gomega.Expect(updatedServiceAcc.ImagePullSecrets).To(gomega.And(gomega.Equal(base.ImagePullSecrets), gomega.Not(gomega.BeNil())))
-		gomega.Expect(updatedServiceAcc.AutomountServiceAccountToken).To(gomega.And(gomega.Equal(base.AutomountServiceAccountToken), gomega.Not(gomega.BeNil())))
-		gomega.Expect(updatedServiceAcc.Secrets).To(gomega.And(gomega.Equal(base.Secrets), gomega.Not(gomega.BeNil())))
-		gomega.Expect(updatedServiceAcc.Secrets).NotTo(gomega.Equal(instance.Secrets))
+		g.Expect(updatedServiceAcc.Annotations).To(gomega.And(gomega.Equal(base.GetAnnotations()), gomega.Not(gomega.BeNil())))
+		g.Expect(updatedServiceAcc.Labels).To(gomega.And(gomega.Equal(base.GetLabels()), gomega.Not(gomega.BeNil())))
+		g.Expect(updatedServiceAcc.ImagePullSecrets).To(gomega.And(gomega.Equal(base.ImagePullSecrets), gomega.Not(gomega.BeNil())))
+		g.Expect(updatedServiceAcc.AutomountServiceAccountToken).To(gomega.And(gomega.Equal(base.AutomountServiceAccountToken), gomega.Not(gomega.BeNil())))
+		g.Expect(updatedServiceAcc.Secrets).To(gomega.And(gomega.Equal(base.Secrets), gomega.Not(gomega.BeNil())))
+		g.Expect(updatedServiceAcc.Secrets).NotTo(gomega.Equal(instance.Secrets))
 
-		gomega.Expect(updatedServiceAcc.AutomountServiceAccountToken).NotTo(gomega.Equal(instance.AutomountServiceAccountToken))
+		g.Expect(updatedServiceAcc.AutomountServiceAccountToken).NotTo(gomega.Equal(instance.AutomountServiceAccountToken))
 	})
-	ginkgo.It("should correctly extract token and normal secrets", func() {
+	t.Run("should correctly extract token and normal secrets", func(t *testing.T) {
+		g := gomega.NewWithT(t)
 		client := new(automock.Client)
 
 		var obj resource.Object
@@ -188,7 +187,7 @@ var _ = ginkgo.Describe("updateServiceAccount method", func() {
 			obj = args.Get(1).(resource.Object)
 		})
 
-		defer client.AssertExpectations(ginkgo.GinkgoT())
+		defer client.AssertExpectations(t)
 
 		r := &serviceAccountService{client: client}
 
@@ -203,21 +202,22 @@ var _ = ginkgo.Describe("updateServiceAccount method", func() {
 		}
 
 		err := r.updateServiceAccount(ctx, log.Log, instance, base)
-		gomega.Expect(err).To(gomega.Succeed())
+		g.Expect(err).To(gomega.Succeed())
 
-		gomega.Expect(obj).NotTo(gomega.BeNil())
+		g.Expect(obj).NotTo(gomega.BeNil())
 
 		updatedServiceAcc := obj.(*corev1.ServiceAccount)
 
-		gomega.Expect(updatedServiceAcc.Name).To(gomega.Equal(instance.GetName()))
-		gomega.Expect(updatedServiceAcc.Secrets).To(gomega.Equal([]corev1.ObjectReference{
+		g.Expect(updatedServiceAcc.Name).To(gomega.Equal(instance.GetName()))
+		g.Expect(updatedServiceAcc.Secrets).To(gomega.Equal([]corev1.ObjectReference{
 			{Name: "base-secret-1"},
 			{Name: "base-secret-2"},
 			{Name: "instance-token-1"},
 			{Name: "instance-token-2"},
 		}))
 	})
-	ginkgo.It("should return error on update error", func() {
+	t.Run("should return error on update error", func(t *testing.T) {
+		g := gomega.NewWithT(t)
 		client := new(automock.Client)
 
 		client.On("Update", mock.Anything, mock.Anything).Return(errors.New("update err")).Once()
@@ -235,9 +235,9 @@ var _ = ginkgo.Describe("updateServiceAccount method", func() {
 		}
 
 		err := r.updateServiceAccount(ctx, log.Log, instance, base)
-		gomega.Expect(err).To(gomega.HaveOccurred())
+		g.Expect(err).To(gomega.HaveOccurred())
 	})
-})
+}
 
 func Test_serviceAccountService_IsBase(t *testing.T) {
 	baseNs := "base-ns"
@@ -306,12 +306,10 @@ func Test_serviceAccountService_IsBase(t *testing.T) {
 	}
 }
 
-var _ = ginkgo.Describe("createServiceAccount method", func() {
-	var (
-		ctx = context.TODO()
-	)
-
-	ginkgo.It("should create configmap correctly", func() {
+func TestServiceAccountService_createServiceAccount(t *testing.T) {
+	ctx := context.TODO()
+	t.Run("should create configmap correctly", func(t *testing.T) {
+		g := gomega.NewWithT(t)
 		client := new(automock.Client)
 
 		var obj resource.Object
@@ -319,7 +317,7 @@ var _ = ginkgo.Describe("createServiceAccount method", func() {
 		client.On("Create", mock.Anything, mock.Anything).Return(nil).Once().Run(func(args mock.Arguments) {
 			obj = args.Get(1).(resource.Object)
 		})
-		defer client.AssertExpectations(ginkgo.GinkgoT())
+		defer client.AssertExpectations(t)
 
 		r := &serviceAccountService{client: client}
 
@@ -345,24 +343,25 @@ var _ = ginkgo.Describe("createServiceAccount method", func() {
 		namespace := "some-ns"
 
 		err := r.createServiceAccount(ctx, log.Log, namespace, base)
-		gomega.Expect(err).To(gomega.Succeed())
+		g.Expect(err).To(gomega.Succeed())
 
-		gomega.Expect(obj).NotTo(gomega.BeNil())
+		g.Expect(obj).NotTo(gomega.BeNil())
 
 		createdServiceAcc := obj.(*corev1.ServiceAccount)
 
-		gomega.Expect(createdServiceAcc.Name).To(gomega.Equal(base.GetName()))
-		gomega.Expect(createdServiceAcc.Namespace).To(gomega.Equal(namespace))
-		gomega.Expect(createdServiceAcc.Namespace).NotTo(gomega.Equal(base.Namespace))
-		gomega.Expect(createdServiceAcc.Annotations).To(gomega.And(gomega.Equal(base.GetAnnotations()), gomega.Not(gomega.BeNil())))
-		gomega.Expect(createdServiceAcc.Labels).To(gomega.And(gomega.Equal(base.GetLabels()), gomega.Not(gomega.BeNil())))
-		gomega.Expect(createdServiceAcc.ImagePullSecrets).To(gomega.And(gomega.Equal(base.ImagePullSecrets), gomega.Not(gomega.BeNil())))
-		gomega.Expect(createdServiceAcc.AutomountServiceAccountToken).To(gomega.And(gomega.Equal(base.AutomountServiceAccountToken), gomega.Not(gomega.BeNil())))
-		gomega.Expect(createdServiceAcc.Secrets).NotTo(gomega.BeNil())
-		gomega.Expect(createdServiceAcc.Secrets).NotTo(gomega.Equal(base.Secrets), "there should be not tokens here, as they are autogenerated by k8s")
-		gomega.Expect(createdServiceAcc.Secrets).To(gomega.Equal([]corev1.ObjectReference{{Name: "base-secret-1"}, {Name: "base-secret-1"}}))
+		g.Expect(createdServiceAcc.Name).To(gomega.Equal(base.GetName()))
+		g.Expect(createdServiceAcc.Namespace).To(gomega.Equal(namespace))
+		g.Expect(createdServiceAcc.Namespace).NotTo(gomega.Equal(base.Namespace))
+		g.Expect(createdServiceAcc.Annotations).To(gomega.And(gomega.Equal(base.GetAnnotations()), gomega.Not(gomega.BeNil())))
+		g.Expect(createdServiceAcc.Labels).To(gomega.And(gomega.Equal(base.GetLabels()), gomega.Not(gomega.BeNil())))
+		g.Expect(createdServiceAcc.ImagePullSecrets).To(gomega.And(gomega.Equal(base.ImagePullSecrets), gomega.Not(gomega.BeNil())))
+		g.Expect(createdServiceAcc.AutomountServiceAccountToken).To(gomega.And(gomega.Equal(base.AutomountServiceAccountToken), gomega.Not(gomega.BeNil())))
+		g.Expect(createdServiceAcc.Secrets).NotTo(gomega.BeNil())
+		g.Expect(createdServiceAcc.Secrets).NotTo(gomega.Equal(base.Secrets), "there should be not tokens here, as they are autogenerated by k8s")
+		g.Expect(createdServiceAcc.Secrets).To(gomega.Equal([]corev1.ObjectReference{{Name: "base-secret-1"}, {Name: "base-secret-1"}}))
 	})
-	ginkgo.It("should return error on update error", func() {
+	t.Run("should return error on update error", func(t *testing.T) {
+		g := gomega.NewWithT(t)
 		client := new(automock.Client)
 
 		client.On("Create", mock.Anything, mock.Anything).Return(errors.New("update err")).Once()
@@ -375,6 +374,6 @@ var _ = ginkgo.Describe("createServiceAccount method", func() {
 		}
 
 		err := r.createServiceAccount(ctx, log.Log, "random-ns", base)
-		gomega.Expect(err).To(gomega.HaveOccurred())
+		g.Expect(err).To(gomega.HaveOccurred())
 	})
-})
+}

@@ -1,0 +1,6 @@
+apiVersion: v2
+description: Kyma component 'certificates'
+name: certificates
+version: 1.0.0
+home: https://kyma-project.io
+icon: https://github.com/kyma-project/kyma/blob/main/logo.png?raw=true

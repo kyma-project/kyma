@@ -3,13 +3,11 @@ package serverless
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/go-logr/logr"
-	"github.com/kyma-project/kyma/components/function-controller/internal/controllers/kubernetes"
-	fnRuntime "github.com/kyma-project/kyma/components/function-controller/internal/controllers/serverless/runtime"
-	"github.com/kyma-project/kyma/components/function-controller/internal/git"
-	"github.com/kyma-project/kyma/components/function-controller/internal/resource"
-	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
+	"github.com/pkg/errors"
+	"golang.org/x/time/rate"
 	appsv1 "k8s.io/api/apps/v1"
 	autoscalingv1 "k8s.io/api/autoscaling/v1"
 	batchv1 "k8s.io/api/batch/v1"
@@ -17,36 +15,52 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/tools/record"
+	"k8s.io/client-go/util/workqueue"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/controller"
+
+	"github.com/kyma-project/kyma/components/function-controller/internal/controllers/kubernetes"
+	fnRuntime "github.com/kyma-project/kyma/components/function-controller/internal/controllers/serverless/runtime"
+	"github.com/kyma-project/kyma/components/function-controller/internal/git"
+	"github.com/kyma-project/kyma/components/function-controller/internal/resource"
+	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
 )
 
 //go:generate mockery -name=GitOperator -output=automock -outpkg=automock -case=underscore
 type GitOperator interface {
 	LastCommit(options git.Options) (string, error)
-	Clone(path string, options git.Options) (string, error)
+}
+
+//go:generate mockery -name=StatsCollector -output=automock -outpkg=automock -case=underscore
+type StatsCollector interface {
+	UpdateReconcileStats(f *serverlessv1alpha1.Function, cond serverlessv1alpha1.Condition)
 }
 
 type FunctionReconciler struct {
-	Log         logr.Logger
-	client      resource.Client
-	recorder    record.EventRecorder
-	config      FunctionConfig
-	scheme      *runtime.Scheme
-	gitOperator GitOperator
+	Log            logr.Logger
+	client         resource.Client
+	recorder       record.EventRecorder
+	config         FunctionConfig
+	scheme         *runtime.Scheme
+	gitOperator    GitOperator
+	statsCollector StatsCollector
+	healthCh       chan bool
 }
 
-func NewFunction(client resource.Client, log logr.Logger, config FunctionConfig, recorder record.EventRecorder) *FunctionReconciler {
+func NewFunction(client resource.Client, log logr.Logger, config FunctionConfig, gitOperator GitOperator, recorder record.EventRecorder, statsCollector StatsCollector, healthCh chan bool) *FunctionReconciler {
 	return &FunctionReconciler{
-		client:      client,
-		Log:         log.WithName("controllers").WithName("function"),
-		config:      config,
-		recorder:    recorder,
-		gitOperator: git.New(),
+		Log:            log.WithName("controllers").WithName("function"),
+		client:         client,
+		recorder:       recorder,
+		config:         config,
+		gitOperator:    gitOperator,
+		healthCh:       healthCh,
+		statsCollector: statsCollector,
 	}
 }
 
-func (r *FunctionReconciler) SetupWithManager(mgr ctrl.Manager) error {
+func (r *FunctionReconciler) SetupWithManager(mgr ctrl.Manager) (controller.Controller, error) {
 	return ctrl.NewControllerManagedBy(mgr).
 		Named("function-controller").
 		For(&serverlessv1alpha1.Function{}).
@@ -55,7 +69,15 @@ func (r *FunctionReconciler) SetupWithManager(mgr ctrl.Manager) error {
 		Owns(&appsv1.Deployment{}).
 		Owns(&corev1.Service{}).
 		Owns(&autoscalingv1.HorizontalPodAutoscaler{}).
-		Complete(r)
+		WithOptions(controller.Options{
+			RateLimiter: workqueue.NewMaxOfRateLimiter(
+				workqueue.NewItemExponentialFailureRateLimiter(r.config.GitFetchRequeueDuration, 300*time.Second),
+				// 10 qps, 100 bucket size.  This is only for retry speed and its only the overall factor (not per item)
+				&workqueue.BucketRateLimiter{Limiter: rate.NewLimiter(rate.Limit(10), 100)},
+			),
+			MaxConcurrentReconciles: 1, // Build job scheduling mechanism requires this parameter to be set to 1. The mechanism is based on getting active and stateless jobs, concurrent reconciles makes it non deterministic . Value 1 removes data races while fetching list of jobs. https://github.com/kyma-project/kyma/issues/10037
+		}).
+		Build(r)
 }
 
 // Reconcile reads that state of the cluster for a Function object and makes changes based on the state read and what is in the Function.Spec
@@ -76,6 +98,10 @@ func (r *FunctionReconciler) Reconcile(request ctrl.Request) (ctrl.Result, error
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
+	if IsHealthCheckRequest(request) {
+		r.healthCh <- true
+		return ctrl.Result{}, nil
+	}
 	instance := &serverlessv1alpha1.Function{}
 	err := r.client.Get(ctx, request.NamespacedName, instance)
 	if err != nil {
@@ -131,55 +157,77 @@ func (r *FunctionReconciler) Reconcile(request ctrl.Request) (ctrl.Result, error
 
 	var hpas autoscalingv1.HorizontalPodAutoscalerList
 	if err := r.client.ListByLabel(ctx, instance.GetNamespace(), r.internalFunctionLabels(instance), &hpas); err != nil {
-		log.Error(err, "Cannot list HorizotalPodAutoscalers")
+		log.Error(err, "Cannot list HorizontalPodAutoscalers")
+		return ctrl.Result{}, err
+	}
+
+	dockerConfig, err := r.readDockerConfig(ctx, instance)
+	if err != nil {
+		log.Error(err, "Cannot read Docker registry configuration")
 		return ctrl.Result{}, err
 	}
 
 	gitOptions, err := r.readGITOptions(ctx, instance)
 	if err != nil {
-		return r.updateStatusWithoutRepository(ctx, ctrl.Result{}, instance, serverlessv1alpha1.Condition{
+		if updateErr := r.updateStatusWithoutRepository(ctx, instance, serverlessv1alpha1.Condition{
 			Type:               serverlessv1alpha1.ConditionConfigurationReady,
 			Status:             corev1.ConditionFalse,
 			LastTransitionTime: metav1.Now(),
 			Reason:             serverlessv1alpha1.ConditionReasonSourceUpdateFailed,
-			Message:            fmt.Sprintf("Sources update failed: %v", err),
-		})
+			Message:            fmt.Sprintf("Reading git options failed: %v", err),
+		}); updateErr != nil {
+			log.Error(err, "Reading git options failed")
+			return ctrl.Result{}, errors.Wrap(updateErr, "while updating status")
+		}
+		return ctrl.Result{}, err
 	}
 
 	revision, err := r.syncRevision(instance, gitOptions)
 	if err != nil {
-		return r.updateStatusWithoutRepository(ctx, ctrl.Result{
-			RequeueAfter: r.config.GitFetchRequeueDuration,
-		}, instance, serverlessv1alpha1.Condition{
+		result, errMsg := NextRequeue(err)
+		// TODO: This return masks the error from r.syncRevision() and doesn't pass it to the controller. This should be fixed in a follow up PR.
+		return result, r.updateStatusWithoutRepository(ctx, instance, serverlessv1alpha1.Condition{
 			Type:               serverlessv1alpha1.ConditionConfigurationReady,
 			Status:             corev1.ConditionFalse,
 			LastTransitionTime: metav1.Now(),
 			Reason:             serverlessv1alpha1.ConditionReasonSourceUpdateFailed,
-			Message:            fmt.Sprintf("Sources update failed: %v", err),
+			Message:            errMsg,
 		})
 	}
 
 	rtmCfg := fnRuntime.GetRuntimeConfig(instance.Spec.Runtime)
 	rtm := fnRuntime.GetRuntime(instance.Spec.Runtime)
+	var result ctrl.Result
 
 	switch {
-	case instance.Spec.Type == serverlessv1alpha1.SourceTypeGit && r.isOnSourceChange(instance, revision):
-		return r.onSourceChange(ctx, instance, &serverlessv1alpha1.Repository{
+	case instance.Spec.Type == serverlessv1alpha1.SourceTypeGit &&
+		r.isOnSourceChange(instance, revision):
+		return result, r.onSourceChange(ctx, instance, &serverlessv1alpha1.Repository{
 			Reference: instance.Spec.Reference,
 			BaseDir:   instance.Spec.Repository.BaseDir,
 		}, revision)
-	case instance.Spec.Type != serverlessv1alpha1.SourceTypeGit && r.isOnConfigMapChange(instance, rtm, configMaps.Items, deployments.Items):
-		return r.onConfigMapChange(ctx, log, instance, rtm, configMaps.Items)
-	case instance.Spec.Type == serverlessv1alpha1.SourceTypeGit && r.isOnJobChange(instance, rtmCfg, jobs.Items, deployments.Items, gitOptions):
-		return r.onGitJobChange(ctx, log, instance, rtmCfg, jobs.Items, gitOptions)
-	case instance.Spec.Type != serverlessv1alpha1.SourceTypeGit && r.isOnJobChange(instance, rtmCfg, jobs.Items, deployments.Items, git.Options{}):
-		return r.onJobChange(ctx, log, instance, rtmCfg, configMaps.Items[0].GetName(), jobs.Items)
-	case r.isOnDeploymentChange(instance, rtmCfg, deployments.Items):
-		return r.onDeploymentChange(ctx, log, instance, rtmCfg, deployments.Items)
+
+	case instance.Spec.Type != serverlessv1alpha1.SourceTypeGit &&
+		r.isOnConfigMapChange(instance, rtm, configMaps.Items, deployments.Items, dockerConfig):
+		return result, r.onConfigMapChange(ctx, log, instance, rtm, configMaps.Items)
+
+	case instance.Spec.Type == serverlessv1alpha1.SourceTypeGit &&
+		r.isOnJobChange(instance, rtmCfg, jobs.Items, deployments.Items, gitOptions, dockerConfig):
+		return r.onGitJobChange(ctx, log, instance, rtmCfg, jobs.Items, gitOptions, dockerConfig)
+
+	case instance.Spec.Type != serverlessv1alpha1.SourceTypeGit &&
+		r.isOnJobChange(instance, rtmCfg, jobs.Items, deployments.Items, git.Options{}, dockerConfig):
+		return r.onJobChange(ctx, log, instance, rtmCfg, configMaps.Items[0].GetName(), jobs.Items, dockerConfig)
+
+	case r.isOnDeploymentChange(instance, rtmCfg, deployments.Items, dockerConfig):
+		return r.onDeploymentChange(ctx, log, instance, rtmCfg, deployments.Items, dockerConfig)
+
 	case r.isOnServiceChange(instance, services.Items):
-		return r.onServiceChange(ctx, log, instance, services.Items)
+		return result, r.onServiceChange(ctx, log, instance, services.Items)
+
 	case r.isOnHorizontalPodAutoscalerChange(instance, hpas.Items, deployments.Items):
-		return r.onHorizontalPodAutoscalerChange(ctx, log, instance, hpas.Items, deployments.Items[0].GetName())
+		return result, r.onHorizontalPodAutoscalerChange(ctx, log, instance, hpas.Items, deployments.Items[0].GetName())
+
 	default:
 		return r.updateDeploymentStatus(ctx, log, instance, deployments.Items, corev1.ConditionTrue)
 	}
@@ -189,13 +237,13 @@ func (r *FunctionReconciler) isOnSourceChange(instance *serverlessv1alpha1.Funct
 	return instance.Status.Commit == "" ||
 		commit != instance.Status.Commit ||
 		instance.Spec.Reference != instance.Status.Reference ||
-		instance.Spec.Runtime != instance.Status.Runtime ||
+		serverlessv1alpha1.RuntimeExtended(instance.Spec.Runtime) != instance.Status.Runtime ||
 		instance.Spec.BaseDir != instance.Status.BaseDir ||
 		r.getConditionStatus(instance.Status.Conditions, serverlessv1alpha1.ConditionConfigurationReady) == corev1.ConditionFalse
 }
 
-func (r *FunctionReconciler) onSourceChange(ctx context.Context, instance *serverlessv1alpha1.Function, repository *serverlessv1alpha1.Repository, commit string) (ctrl.Result, error) {
-	return r.updateStatus(ctx, ctrl.Result{}, instance, serverlessv1alpha1.Condition{
+func (r *FunctionReconciler) onSourceChange(ctx context.Context, instance *serverlessv1alpha1.Function, repository *serverlessv1alpha1.Repository, commit string) error {
+	return r.updateStatus(ctx, instance, serverlessv1alpha1.Condition{
 		Type:               serverlessv1alpha1.ConditionConfigurationReady,
 		Status:             corev1.ConditionTrue,
 		LastTransitionTime: metav1.Now(),
@@ -204,45 +252,37 @@ func (r *FunctionReconciler) onSourceChange(ctx context.Context, instance *serve
 	}, repository, commit)
 }
 
-func (r *FunctionReconciler) syncRevision(instance *serverlessv1alpha1.Function, options git.Options) (string, error) {
-	if instance.Spec.Type == serverlessv1alpha1.SourceTypeGit {
-		return r.gitOperator.LastCommit(options)
-	}
-	return "", nil
-}
-
-func (r *FunctionReconciler) readGITOptions(ctx context.Context, instance *serverlessv1alpha1.Function) (git.Options, error) {
-	if instance.Spec.Type != serverlessv1alpha1.SourceTypeGit {
-		return git.Options{}, nil
-	}
-
-	var gitRepository serverlessv1alpha1.GitRepository
-	if err := r.client.Get(ctx, client.ObjectKey{Namespace: instance.Namespace, Name: instance.Spec.Source}, &gitRepository); err != nil {
-		return git.Options{}, err
+func (r *FunctionReconciler) readDockerConfig(ctx context.Context, instance *serverlessv1alpha1.Function) (DockerConfig, error) {
+	var secret corev1.Secret
+	// try reading user config
+	if err := r.client.Get(ctx, client.ObjectKey{Namespace: instance.Namespace, Name: r.config.ImageRegistryExternalDockerConfigSecretName}, &secret); err == nil {
+		data := r.readSecretData(secret.Data)
+		return DockerConfig{
+			ActiveRegistryConfigSecretName: r.config.ImageRegistryExternalDockerConfigSecretName,
+			PushAddress:                    data["registryAddress"],
+			PullAddress:                    data["registryAddress"],
+		}, nil
 	}
 
-	var auth *git.AuthOptions
-	if gitRepository.Spec.Auth != nil {
-		var secret corev1.Secret
-		if err := r.client.Get(ctx, client.ObjectKey{Namespace: instance.Namespace, Name: gitRepository.Spec.Auth.SecretName}, &secret); err != nil {
-			return git.Options{}, err
+	// try reading default config
+	if err := r.client.Get(ctx, client.ObjectKey{Namespace: instance.Namespace, Name: r.config.ImageRegistryDefaultDockerConfigSecretName}, &secret); err == nil {
+		data := r.readSecretData(secret.Data)
+		if data["isInternal"] == "true" {
+			return DockerConfig{
+				ActiveRegistryConfigSecretName: r.config.ImageRegistryDefaultDockerConfigSecretName,
+				PushAddress:                    data["registryAddress"],
+				PullAddress:                    data["serverAddress"],
+			}, nil
+		} else {
+			return DockerConfig{
+				ActiveRegistryConfigSecretName: r.config.ImageRegistryDefaultDockerConfigSecretName,
+				PushAddress:                    data["registryAddress"],
+				PullAddress:                    data["registryAddress"],
+			}, nil
 		}
-		auth = &git.AuthOptions{
-			Type:        git.RepositoryAuthType(gitRepository.Spec.Auth.Type),
-			Credentials: r.readSecretData(secret.Data),
-			SecretName:  gitRepository.Spec.Auth.SecretName,
-		}
 	}
 
-	if instance.Spec.Reference == "" {
-		return git.Options{}, fmt.Errorf("reference has to specified")
-	}
-
-	return git.Options{
-		URL:       gitRepository.Spec.URL,
-		Reference: instance.Spec.Reference,
-		Auth:      auth,
-	}, nil
+	return DockerConfig{}, errors.Errorf("Docker registry configuration not found, none of configuration secrets (%s, %s) found in function namespace", r.config.ImageRegistryDefaultDockerConfigSecretName, r.config.ImageRegistryExternalDockerConfigSecretName)
 }
 
 func (r *FunctionReconciler) readSecretData(data map[string][]byte) map[string]string {

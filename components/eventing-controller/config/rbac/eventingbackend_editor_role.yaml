@@ -1,0 +1,24 @@
+# permissions for end users to edit eventingbackends.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: eventingbackend-editor-role
+rules:
+- apiGroups:
+  - kyma-project.io
+  resources:
+  - eventingbackends
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - kyma-project.io
+  resources:
+  - eventingbackends/status
+  verbs:
+  - get

@@ -5,6 +5,8 @@ import (
 	"os"
 	"testing"
 
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
+
 	"golang.org/x/oauth2"
 )
 
@@ -24,19 +26,17 @@ func TestAuthenticator(t *testing.T) {
 	if err := os.Setenv("TOKEN_ENDPOINT", "foo"); err != nil {
 		t.Errorf("error while setting env var TOKEN_ENDPOINT")
 	}
-
+	cfg := env.Config{}
 	// authenticate
-	authenticator := NewAuthenticator()
+	client := NewAuthenticatedClient(cfg)
 
-	httpClient := authenticator.GetClient().GetHttpClient()
-
-	secTransport, ok := httpClient.Transport.(*oauth2.Transport)
+	secTransport, ok := client.Transport.(*oauth2.Transport)
 	if !ok {
-		t.Errorf("Failed to convert to oauth2 transport")
+		t.Errorf("convert to oauth2 transport failed")
 	}
 	httpTransport, ok := secTransport.Base.(*http.Transport)
 	if !ok {
-		t.Errorf("Failed to convert to HTTP transport")
+		t.Errorf("convert to HTTP transport failed")
 	}
 
 	if httpTransport.MaxIdleConns != maxIdleConns {

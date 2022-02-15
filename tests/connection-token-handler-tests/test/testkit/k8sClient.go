@@ -13,7 +13,7 @@ const namespace = "default"
 
 type K8sResourcesClient interface {
 	GetTokenRequest(name string, options v1.GetOptions) (*v1alpha1.TokenRequest, error)
-	CreateTokenRequest(name, group, tenant string) (*v1alpha1.TokenRequest, error)
+	CreateTokenRequest(name string) (*v1alpha1.TokenRequest, error)
 	DeleteTokenRequest(name string, options *v1.DeleteOptions) error
 }
 
@@ -39,11 +39,11 @@ func initClient(k8sConfig *restclient.Config) (K8sResourcesClient, error) {
 	}, nil
 }
 
-func (c *k8sResourcesClient) CreateTokenRequest(name, group, tenant string) (*v1alpha1.TokenRequest, error) {
+func (c *k8sResourcesClient) CreateTokenRequest(name string) (*v1alpha1.TokenRequest, error) {
 	tokenRequest := &v1alpha1.TokenRequest{
 		TypeMeta:   v1.TypeMeta{Kind: "TokenRequest", APIVersion: v1alpha1.SchemeGroupVersion.String()},
 		ObjectMeta: v1.ObjectMeta{Name: name},
-		Context:    v1alpha1.ClusterContext{Group: group, Tenant: tenant},
+		Context:    v1alpha1.ClusterContext{},
 		//TODO CR should be created without passing status
 		Status: v1alpha1.TokenRequestStatus{ExpireAfter: v1.Date(2999, time.December, 12, 12, 12, 12, 12, time.Local)},
 	}

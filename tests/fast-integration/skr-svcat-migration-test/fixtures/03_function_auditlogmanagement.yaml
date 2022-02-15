@@ -1,0 +1,13 @@
+---
+apiVersion: serverless.kyma-project.io/v1alpha1
+kind: Function
+metadata:
+  name: svcat-auditlog-management-1
+spec:
+  runtime: nodejs12
+  source: |
+    module.exports = {
+      main: function(event, context) {
+        return 'Hello World!'
+      }
+    }

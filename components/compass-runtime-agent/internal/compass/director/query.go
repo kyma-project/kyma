@@ -4,29 +4,36 @@ import "fmt"
 
 type queryProvider struct{}
 
-func (qp queryProvider) applicationsForRuntimeQuery(runtimeID string) string {
+func (qp queryProvider) applicationsAndLabelsForRuntimeQuery(runtimeID string) string {
 	return fmt.Sprintf(`query {
-	result: applicationsForRuntime(runtimeID: "%s") {
-		%s
-	}
-}`, runtimeID, applicationsQueryData(runtimeID))
+		runtime(id: "%s") {
+			%s
+		}
+		applicationsForRuntime(runtimeID: "%s") {
+			%s
+		}
+	}`, runtimeID, labels(), runtimeID, applicationsQueryData())
 }
 
 func (qp queryProvider) setRuntimeLabelMutation(runtimeId, key, value string) string {
 	return fmt.Sprintf(`mutation {
-		result: setRuntimeLabel(runtimeID: "%s", key: "%s", value: "%s") {
+		setRuntimeLabel(runtimeID: "%s", key: "%s", value: "%s") {
 			%s
 		}
 	}`, runtimeId, key, value, labelData())
 }
 
+func labels() string {
+	return `labels`
+}
+
+func applicationsQueryData() string {
+	return pageData(applicationData())
+}
+
 func labelData() string {
 	return `key
 			value`
-}
-
-func applicationsQueryData(runtimeID string) string {
-	return pageData(applicationData(runtimeID))
 }
 
 func pageData(item string) string {
@@ -44,7 +51,7 @@ func pageInfoData() string {
 		hasNextPage`
 }
 
-func applicationData(runtimeID string) string {
+func applicationData() string {
 	return fmt.Sprintf(`id
 		name
 		providerName
@@ -67,7 +74,8 @@ func packagesData() string {
 		apiDefinitions {%s}
 		eventDefinitions {%s}
 		documents {%s}
-		`, pageData(packageApiDefinitions()), pageData(eventAPIData()), pageData(documentData()))
+		defaultInstanceAuth {%s}
+		`, pageData(packageApiDefinitions()), pageData(eventAPIData()), pageData(documentData()), authData())
 }
 
 func packageApiDefinitions() string {
@@ -119,4 +127,47 @@ func documentData() string {
 		format
 		kind
 		data`)
+}
+
+func authData() string {
+	return fmt.Sprintf(`
+		credential {%s}
+		additionalHeaders
+		additionalQueryParams
+		requestAuth {%s}
+		`, credentialData(), requestAuthData())
+}
+
+func credentialData() string {
+	return fmt.Sprintf(`
+		... on BasicCredentialData {%s}
+		... on OAuthCredentialData {%s}
+	`, basicCredentialData(), oauthCredentialData())
+}
+
+func basicCredentialData() string {
+	return fmt.Sprintf(`
+		username
+		password
+	`)
+}
+
+func oauthCredentialData() string {
+	return fmt.Sprintf(`
+		clientId
+		clientSecret
+		url
+	`)
+}
+
+func requestAuthData() string {
+	return fmt.Sprintf(`
+		csrf {%s}
+		`, csrfData())
+}
+
+func csrfData() string {
+	return fmt.Sprintf(`
+		tokenEndpointURL
+		`)
 }

@@ -26,8 +26,10 @@ spec:
       serviceAccountName: {{ template "pod-preset.fullname" . }}-webhook
       containers:
       - name: {{ .Chart.Name }}-webhook
-        image: "{{ .Values.webhook.image.repository }}:{{ .Values.webhook.image.tag }}"
+        image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.podpreset_webhook) }}"
         imagePullPolicy: {{ .Values.webhook.image.pullPolicy }}
+        resources:
+{{ toYaml .Values.webhook.resources | indent 10 }}
         args:
         - -tls-cert-file=/keys/webhook.crt
         - -tls-private-key-file=/keys/webhook.key
@@ -41,10 +43,8 @@ spec:
         - name: webhook-cert
           mountPath: /keys
           readOnly: true
-      {{- with .Values.webhook.securityContext }}
-      securityContext:
-{{ toYaml . | indent 8 }}
-      {{- end }}
+        securityContext:
+{{ toYaml .Values.securityContext | indent 10 }}
       volumes:
       - name: webhook-cert
         secret:
@@ -54,6 +54,9 @@ spec:
             path: webhook.crt
           - key: tls.key
             path: webhook.key
+    {{- if .Values.global.priorityClassName }}
+      priorityClassName: {{ .Values.global.priorityClassName }}
+    {{- end }}
 {{- if .Values.webhook.pdb.enabled }}
 ---
 apiVersion: policy/v1beta1
@@ -61,7 +64,7 @@ kind: PodDisruptionBudget
 metadata:
   name: {{ template "pod-preset.fullname" . }}-pdb
 spec:
-  minAvailable: 1
+  minAvailable: {{ .Values.webhook.pdb.minAvailable }}
   selector:
     matchLabels:
       app: {{ template "pod-preset.name" . }}-webhook

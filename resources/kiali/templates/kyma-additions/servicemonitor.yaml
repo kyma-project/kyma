@@ -1,16 +1,22 @@
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
-  name: {{ template "kiali.name" . }}
+  name: {{ template "kiali-server.name" . }}
   namespace: {{ .Release.Namespace }}
   labels:
-    {{- include "kiali.labels" . | nindent 4 }}
+    {{- include "kiali-server.labels" . | nindent 4 }}
 spec:
   selector:
     matchLabels:
-      app: {{ template "kiali.name" . }}
+      {{- include "kiali-server.selectorLabels" . | nindent 6 }}
   namespaceSelector:
     matchNames:
       - {{ .Release.Namespace | quote }}
   endpoints:
   - port: http-metrics
+    scheme: https
+    tlsConfig:
+      caFile: /etc/prometheus/secrets/istio.default/root-cert.pem
+      certFile: /etc/prometheus/secrets/istio.default/cert-chain.pem
+      keyFile: /etc/prometheus/secrets/istio.default/key.pem
+      insecureSkipVerify: true

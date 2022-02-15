@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Values.global.configMap.name }}
+  labels: {{ include "eventing.labels" . | nindent 4 }}
+data:
+  {{ .Values.global.configMap.keys.eventTypePrefix }}: {{ .Values.global.eventTypePrefix | quote }}
+---

@@ -27,18 +27,21 @@ spec:
     spec:
       containers:
         - name: {{ .Chart.Name }}
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.api_gateway_controller) }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           command:
             - /manager
           args:
             - --metrics-addr=0.0.0.0:{{ .Values.config.ports.metrics }}
+            - --health-probe-addr=0.0.0.0:{{ .Values.config.ports.healthProbe }}
             - --oathkeeper-svc-address={{ .Values.config.oathkeeper.service }}
             - --oathkeeper-svc-port={{ .Values.config.oathkeeper.port }}
             - --jwks-uri={{ .Values.config.jwksURI }}
-            - --service-blacklist={{ include "api-gateway.serviceBlackList" . | trimAll "," }}
+            - --service-blocklist={{ include "api-gateway.serviceBlockList" . | trimAll "," }}
             - --generated-objects-labels={{ .Values.config.generatedObjects.labels }}
-            - --domain-whitelist={{ include "api-gateway.domainWhiteList" . }}
+            {{- if .Values.config.enableDomainAllowList }}
+            - --domain-allowlist={{ include "api-gateway.domainAllowList" . }}
+            {{- end }}
             - --default-domain-name={{ include "api-gateway.defaultDomain" . }}
             - --cors-allow-origins={{ include "api-gateway.cors.allowOrigins" . | trimAll "," }}
             {{- with .Values.config.cors.allowMethods }}
@@ -49,11 +52,24 @@ spec:
             {{- end }}
           resources:
             {{- toYaml .Values.deployment.resources | nindent 12 }}
+          securityContext:
+            {{- toYaml .Values.deployment.securityContext | nindent 12 }}
           terminationMessagePath: /dev/termination-log
           terminationMessagePolicy: File
           ports:
           - containerPort: {{ .Values.config.ports.metrics }}
             name: metrics
+          ports:
+          - containerPort: {{ .Values.config.ports.healthProbe }}
+            name: health           
+          livenessProbe:
+            httpGet:
+              port: health
+              path: "/healthz"
+          readinessProbe:
+            httpGet:
+              port: health
+              path: "/readyz"
       serviceAccountName: {{ include "api-gateway.name" . }}-account
       nodeSelector:
       {{- with .Values.config.nodeSelector }}
@@ -66,4 +82,7 @@ spec:
     {{- with .Values.deployment.tolerations }}
       tolerations:
         {{- toYaml . | nindent 8 }}
+    {{- end }}
+    {{- if .Values.global.priorityClassName }}
+      priorityClassName: {{ .Values.global.priorityClassName }}
     {{- end }}

@@ -1,6 +1,16 @@
 # DSN is always in the form DSN=DB_TYPE://DB_USER:PASSWORD@DB_URL/DB_NAME?sslmode=disable
-# Extract DB_URL by cutting between @ and first /
-DB_URL_PORT=$(echo $DSN | cut -d '@' -f2 | cut -d '/' -f 1 )
+# But DSN for mysql is in the form DSN=DB_TYPE://DB_USER:PASSWORD@tcp(DB_URL)/DB_NAME?parseTime=true
+
+# Extract DB_TYPE to check if the DB_TYPE is mysql
+DB_TYPE_VALUE=$(echo $DSN | awk -F '://' '{print $1}')
+
+if [ $DB_TYPE_VALUE == "mysql" ]; then
+  # Extract DB_URL by cutting between @ and first / and extracting the string between brackets
+  DB_URL_PORT=$(echo $DSN | cut -d '@' -f2 | cut -d '/' -f 1 | cut -d "(" -f2 | cut -d ")" -f1)
+else
+  # Extract DB_URL by cutting between @ and first /
+  DB_URL_PORT=$(echo $DSN | cut -d '@' -f2 | cut -d '/' -f 1 )
+fi
 
 # DB_URL is expected to be mydb.mynamespace.svc.cluster.local:1234, but the port can be optional
 # Check if it given by looking for :

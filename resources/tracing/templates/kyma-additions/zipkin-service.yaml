@@ -7,15 +7,11 @@ metadata:
     app.kubernetes.io/component: zipkin 
 spec:
   ports:
-  - name: jaeger-collector-zipkin
+  - name: http-jaeger-collector-zipkin
     port: {{ .Values.jaeger.kyma.zipkinPort }}
     targetPort: {{ .Values.jaeger.kyma.zipkinPort }}
     protocol: TCP
   clusterIP: None
   selector:
-{{- if eq .Values.jaeger.spec.strategy "production" }}
-    app.kubernetes.io/name: {{ template "jaeger-operator.fullname" . }}-jaeger-collector
-{{- else }}
     app.kubernetes.io/name: {{ template "jaeger-operator.fullname" . }}-jaeger
-{{- end }}
-    app.kubernetes.io/instance: {{ template "jaeger-operator.fullname" . }}-jaeger 
+    app.kubernetes.io/instance: {{ template "jaeger-operator.fullname" . }}-jaeger

@@ -1,0 +1,378 @@
+# Default values for fluent-bit.
+
+# kind -- DaemonSet or Deployment
+kind: DaemonSet
+
+# replicaCount -- Only applicable if kind=Deployment
+replicaCount: 1
+
+image:
+  pullPolicy: IfNotPresent
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+serviceAccount:
+  create: true
+  annotations: {}
+  name:
+
+rbac:
+  create: true
+
+podSecurityPolicy:
+  create: true
+
+podSecurityContext:
+  {}
+  # fsGroup: 2000
+dnsConfig:
+  {}
+  # nameservers:
+  #   - 1.2.3.4
+  # searches:
+  #   - ns1.svc.cluster-domain.example
+  #   - my.dns.search.suffix
+  # options:
+  #   - name: ndots
+#     value: "2"
+#   - name: edns0
+securityContext:
+  allowPrivilegeEscalation: false
+  privileged: false
+  capabilities:
+    drop:
+      - ALL
+    add:
+      - FOWNER
+  readOnlyRootFilesystem: true
+  # runAsNonRoot: true
+  # runAsUser: 1000
+
+service:
+  type: ClusterIP
+  port: 2020
+  labels:
+    {}
+  annotations:
+    {}
+    # prometheus.io/path: "/api/v1/metrics/prometheus"
+    # prometheus.io/port: "2020"
+    # prometheus.io/scrape: "true"
+
+serviceMonitor:
+  enabled: true
+  # namespace: monitoring
+  # interval: 10s
+  # scrapeTimeout: 10s
+  # selector:
+  #  prometheus: my-prometheus
+
+livenessProbe:
+  httpGet:
+    path: /
+    port: http
+
+readinessProbe:
+  httpGet:
+    path: /
+    port: http
+
+resources:
+  limits:
+    cpu: 400m
+    memory: 256Mi
+  requests:
+    cpu: 20m
+    memory: 50Mi
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+podAnnotations: {}
+
+podLabels: {}
+
+priorityClassName: ""
+
+env: []
+
+envFrom: []
+
+extraPorts: []
+#   - port: 5170
+#     containerPort: 5170
+#     protocol: TCP
+#     name: tcp
+
+volumes:
+  mountMachineIdFile: false
+
+extraVolumes: ""
+# extraVolumes: |
+#   - name: volume
+#     configMap:
+#       name: config
+
+extraVolumeMounts: ""
+# extraVolumeMounts: |
+#   - name: volume
+#     mountPath: /var/tmp
+
+updateStrategy:
+ type: RollingUpdate
+ rollingUpdate:
+   maxUnavailable: 33%
+
+# Make use of a pre-defined configmap instead of the one templated here
+existingConfigMap: ""
+
+## Custom configuration for Kyma alerting rules
+prometheusRules:
+  ## Adds the specified filter to NoOutputBytesProcessed alert for Fluent Bit
+  fluentBitAlertFilter: "name='loki-output'"
+
+# Fluentbit configuration section
+# https://docs.fluentbit.io/manual/administration/configuring-fluent-bit/configuration-file
+config:
+  # Secret values that will be included in a Secret mounted to the Fluent Bit Pods.
+  secrets:
+    #MY_ES_PASSWD: "1234"
+  service:
+    flush: 1
+    grace: 5
+    daemon: "off"
+    logFile:
+    logLevel: "warn"
+    http:
+      server: "On"
+      listen: 0.0.0.0
+      port: 2020
+  inputs:
+    tail:
+      enabled: true
+      alias:
+      tag: loki.*
+      tagRegex:
+      path: /var/log/containers/*.log
+      # If enabled, it appends the name of the monitored file as part of the record. The value assigned becomes the key in the map.
+      pathKey:
+      excludePath:
+      #	Set the initial buffer size to read files data. This value is used too to increase buffer size. The value must be according to the Unit Size specification. Default: 32k
+      bufferChunkSize:
+      # Set the limit of the buffer size per monitored file. When a buffer needs to be increased (e.g: very long lines), this value is used to restrict how much the memory buffer can grow. If reading a file exceed this limit, the file is removed from the monitored file list. The value must be according to the Unit Size specification. Default: Buffer_Chunk_Size
+      bufferMaxSize:
+      # The interval of refreshing the list of watched files. Default is 60 seconds.
+      refreshInterval: 10
+      # Specify the number of extra time in seconds to monitor a file once is rotated in case some pending data is flushed.
+      rotateWait: 5
+      # Ignores records which are older than this time in seconds. Supports m,h,d (minutes, hours, days) syntax. Default behavior is to read all records from specified files. Only available when a Parser is specificied and it can parse the time of a record.
+      ignoreOlder:
+      # When a monitored file reach it buffer capacity due to a very long line (Buffer_Max_Size), the default behavior is to stop monitoring that file. Skip_Long_Lines alter that behavior and instruct Fluent Bit to skip long lines and continue processing other lines that fits into the buffer size. Default: Off
+      skipLongLines: "On"
+      # Specify the database file to keep track of monitored files and offsets.
+      db: /data/flb_kube_loki.db
+      # Set a default synchronization (I/O) method. Values: Extra, Full, Normal, Off. This flag affects how the internal SQLite engine do synchronization to disk, for more details about each option please refer to this section.  Most of workload scenarios will be fine with normal mode, but if you really need full synchronization after every write operation you should set full mode. Note that full has a high I/O performance cost.
+      dbSync: normal
+      # Set a limit of memory that Tail plugin can use when appending data to the Engine. If the limit is reach, it will be paused; when the data is flushed it resumes.
+      memBufLimit: 5MB
+      # Exit Fluent Bit when reaching EOF of the monitored files.
+      exitOnEof: "false"
+      parser:
+      # If enabled, the plugin will recombine split Docker log lines before passing them to any parser as configured above. This mode cannot be used at the same time as Multiline.
+      dockerMode: "Off"
+      # Wait period time in seconds to flush queued unfinished split lines.
+      dockerModeFlush: 4
+      # When a message is unstructured (no parser applied), it's appended as a string under the key name log. This option allows to define an alternative name for that key.
+      key: log
+      # If enabled, the plugin will try to discover multiline messages and use the proper parsers to compose the outgoing messages. Note that when this option is enabled the Parser option is not used.
+      multiline: "Off"
+      # Wait period time in seconds to process queued multiline messages
+      multilineFlush: 4
+      # Name of the parser that matchs the beginning of a multiline message.
+      parserFirstline:
+      # For new discovered files on start (without a database offset/position), read the content from the head of the file, not tail.
+      readFromHead: "Off"
+      # Set to false to use file stat watcher instead of inotify.
+      inotifyWatcher: "true"
+      # Specify one or Multiline Parser definition to apply to the content.
+      multilineParser: docker, cri
+      exclude:
+        namespaces:
+    additional: ""
+  filters:
+    kubernetes:
+      enabled: true
+      # When enabled, it checks if the log field content is a JSON string map, if so, it append the map fields as part of the log structure.
+      mergeLog: "On"
+      keepLog: "On"
+      match: "*"
+      # When Merge_Log is enabled, the filter tries to assume the log field from the incoming message is a JSON string message and make a structured representation of it at the same level of the log field in the map. Now if Merge_Log_Key is set (a string name), all the new structured fields taken from the original log content are inserted under the new key.
+      mergeLogKey: ""
+      # When Merge_Log is enabled, trim (remove possible \n or \r) field values.
+      mergeLogTrim: "On"
+      parser: "On"
+      exclude: "On"
+      # Set the buffer size for HTTP client when reading responses from Kubernetes API server.
+      bufferSize: "1MB"
+      kubeUrl: "https://kubernetes.default.svc:443"
+      # When the source records comes from Tail input plugin, this option allows to specify what's the prefix used in Tail configuration.
+      kubeTagPrefix: "kube.var.log.containers."
+      # When enabled, the filter reads logs coming in Journald format.
+      useJournal: "Off"
+      # Include Kubernetes resource labels in the extra metadata.
+      labels: "On"
+      # Include Kubernetes resource annotations in the extra metadata.
+      annotations: "On"
+    recordModifier:
+      enabled: false
+      match: "*"
+      key: "myKey"
+      value: "myValue"
+    additional: ""
+  outputs:
+    loki:
+      enabled: true
+      alias: "loki-output"
+      match: "loki.*"
+      serviceName: "logging-loki"
+      servicePort: 3100
+      serviceScheme: http
+      servicePath: /loki/api/v1/push
+      config:
+        loglevel: warn
+        lineFormat: json
+        removeKeys: kubernetes, stream
+        labels: '{job="fluent-bit"}'
+        labelMap:
+          kubernetes:
+            namespace_name: namespace
+            labels:
+              app: app
+              "app.kubernetes.io/component": component
+              "app.kubernetes.io/name": app
+              "serverless.kyma-project.io/function-name": function
+            host: node
+            container_name: container
+            pod_name: pod
+          stream: stream
+    es:
+      enabled: false
+      alias:
+      match: "*"
+      host: elasticsearch
+      port: 443
+      bufferSize: "False"
+      # Newer versions of Elasticsearch allows to setup filters called pipelines. This option allows to define which pipeline the database should use. For performance reasons is strongly suggested to do parsing and filtering on Fluent Bit side, avoid pipelines.
+      pipeline:
+      # Optional credentials for Elastic X-Pack access
+      httpUser:
+      httpPasswd:
+      index: flb_logs_write
+      type: flb_type
+      logstashFormat: "On"
+      logstashPrefix: flb
+      # default timeKey: @timestamp
+      timeKey:
+      retryLimit: "False"
+      # When enabled, generate _id for outgoing records. This prevents duplicate records when retrying ES.
+      generateID: "On"
+      # When enabled, replace field name dots with underscore, required by Elasticsearch 2.0-2.3.
+      replaceDots: "On"
+      # Optional TLS encryption to ElasticSeaarch instance
+      tls:
+        enabled: true
+        verify: "On"
+        # TLS certificate for the Elastic (in base64 PEM format). Use if tls=on and tls_verify=on.
+        ca: ""
+        cert: ""
+        key: ""
+        # optional password for tls.key_file file
+        keyPasswd: ""
+        # TLS debugging levels = 1-5
+        debug: 1
+    forward:
+      enabled: false
+      alias:
+      match: "*"
+      host: log-forwarder
+      port: 24224
+      retryLimit: "False"
+      tls:
+        enabled: false
+        verify: Off
+        # TLS certificate for the Elastic (in base64 PEM format). Use if tls=on and tls_verify=on.
+        ca: ""
+        cert: ""
+        key: ""
+        # TLS debugging levels = 1-5
+        debug: 1
+    http:
+      enabled: false
+      alias:
+      match: "*"
+      host: "127.0.0.1"
+      port: 80
+      proxy:
+      uri: "/"
+      httpUser: ""
+      httpPasswd: ""
+      tls:
+        enabled: false
+        verify: "On"
+        ca: ""
+        cert: ""
+        key: ""
+        debug: 1
+      ## Specify the data format to be used in the HTTP request body
+      ## Can be either 'msgpack' or 'json'
+      format: msgpack
+      # Set payload compression mechanism. Option available is 'gzip'
+      compress: ""
+      # Specify if duplicated headers are allowed. If a duplicated header is found, the latest key/value set is preserved.
+      allowDuplicatedHeaders: "true"
+      # Specify an optional HTTP header field for the original message tag.
+      headerTag:
+      # Add a HTTP header key/value pair.
+      header:
+      # Specify the name of the time key in the output record. To disable the time key just set the value to false.
+      jsonDateKey: ""
+      # Specify the format of the date. Supported formats are double, epoch and iso8601.
+      jsonDateFormat: ""
+      headers: []
+    additional: ""
+
+  ## https://docs.fluentbit.io/manual/pipeline/parsers
+  parsers:
+    additional: ""
+
+  # extra can be used to pass extra configuration to Fluent Bit. Find below a sample configuration.
+  extra: #|
+  #  [FILTER]
+  #      Name              test
+  #      Match             *
+  #  [OUTPUT]
+  #      Name              test
+  #      Match             *
+
+  script: #|
+  # myScript() {}
+# Defines an entry to add an external service to the service mesh
+# By default, the fluent-bit daemon will be part of the service-mesh (having istio sidecar injection enabled). In some cases the sidecar doesn't allow access to external services through https using none standard ports (not 443 or 8443)
+# A typical error message will look like 'routines:ssl3_get_record:wrong version number'. In such cases, add an entry for the external service like below
+#externalServiceEntry:
+#  hosts:
+#  - my.example.host.dns
+#  ports:
+#    - number: 8081
+#      name: https
+#      protocol: TLS
+#  resolution: DNS
+
+istio:
+# Allows you to loosen strict mTLS for exposed HTTP endpoint (basically, the /metrics endpoint)
+# If omitted or set to false the mesh-wide policy is applied which sets mTLS mode to strict
+  permissiveMtls: false

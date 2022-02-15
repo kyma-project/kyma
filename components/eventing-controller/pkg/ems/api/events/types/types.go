@@ -10,7 +10,7 @@ type Events []Event
 type Subscription struct {
 	Name                     string             `json:"name,omitempty"`
 	Events                   Events             `json:"events,omitempty"`
-	WebhookUrl               string             `json:"webhookUrl,omitempty"`
+	WebhookURL               string             `json:"webhookUrl,omitempty"`
 	WebhookAuth              *WebhookAuth       `json:"webhookAuth,omitempty"`
 	Qos                      Qos                `json:"qos,omitempty"`
 	ExemptHandshake          bool               `json:"exemptHandshake,omitempty"`

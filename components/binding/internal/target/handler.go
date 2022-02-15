@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	"github.com/google/uuid"
-	bindErr "github.com/kyma-project/kyma/components/binding/internal/error"
+	bindErr "github.com/kyma-project/kyma/components/binding/internal/errors"
 	"github.com/kyma-project/kyma/components/binding/internal/storage"
 	"github.com/kyma-project/kyma/components/binding/internal/worker"
 	"github.com/kyma-project/kyma/components/binding/pkg/apis/v1alpha1"
@@ -92,10 +92,6 @@ func (h *Handler) RemoveOldAddNewLabel(b *v1alpha1.Binding) error {
 				return errors.Wrap(err, "while ensuring labels are applied")
 			}
 		}
-	}
-	labelsToApply := map[string]string{h.labelKey(b): uuid.New().String()}
-	if err := h.ensureLabelsAreApplied(resource, labelsToApply, resourceData.LabelFields); err != nil {
-		return errors.Wrap(err, "while ensuring labels are applied")
 	}
 
 	err = h.updateResource(resource, resourceData)

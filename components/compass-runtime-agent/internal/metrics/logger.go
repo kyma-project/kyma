@@ -1,6 +1,7 @@
 package metrics
 
 import (
+	"context"
 	"time"
 
 	"github.com/pkg/errors"
@@ -10,7 +11,7 @@ import (
 )
 
 type Logger interface {
-	Start(quitChannel <-chan struct{}) error
+	Start(ctx context.Context) error
 }
 
 type logger struct {
@@ -33,12 +34,12 @@ func NewMetricsLogger(
 	}
 }
 
-func (l *logger) Start(quitChannel <-chan struct{}) error {
+func (l *logger) Start(ctx context.Context) error {
 	for {
 		select {
 		case <-time.Tick(l.loggingTimeInterval):
 			l.log()
-		case <-quitChannel:
+		case <-ctx.Done():
 			log.Info("Logging stopped.")
 			return nil
 		}

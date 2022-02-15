@@ -1,28 +1,32 @@
 global:
+  domainName: "kyma.example.com"
   istio:
     gateway:
       name: kyma-gateway
       namespace: kyma-system
-
-tests:
-  enabled: true
-  labels:
-    integration: true
-    after-upgrade: true
-
-  image:
-    repository: "eu.gcr.io/kyma-project/rafter-test"
-    tag: "23554405"
-    pullPolicy: IfNotPresent
-  disableConcurrency: true
-  restartPolicy: Never
-  resources:
-    limits:
-      memory: 128Mi
-  envs:
-    mockiceImage: eu.gcr.io/kyma-project/external/hudymi/mockice:0.1.3
-    waitTimeout: 10m
-    verifySSL: "false"
+  containerRegistry:
+    path: eu.gcr.io/kyma-project
+  images:
+    minio:
+      name: "minio"
+      version: "RELEASE.2021-04-22T15-44-28Z-ef93efcf"
+      directory: "tpi/minio"
+    k8s_tools:
+      name: "k8s-tools"
+      version: "20220127-ec72a890"
+      directory: "tpi"
+    rafter_controller_manager:
+      name: "rafter-controller-manager"
+      version: "f8031ac4"
+    rafter_upload_service:
+      name: "rafter-upload-service"
+      version: "f8031ac4"
+    rafter_front_matter_service:
+      name: "rafter-front-matter-service"
+      version: "f8031ac4"
+    rafter_asyncapi_service:
+      name: "rafter-asyncapi-service"
+      version: "f8031ac4"
 
 controller-manager:
   enabled: true
@@ -30,8 +34,6 @@ controller-manager:
   fullnameOverride: "rafter-controller-manager"
 
   image:
-    repository: eu.gcr.io/kyma-project/rafter-controller-manager
-    tag: d999a403
     pullPolicy: IfNotPresent
 
   deployment:
@@ -40,7 +42,6 @@ controller-manager:
   pod:
     annotations:
       sidecar.istio.io/inject: "false"
-      recreate: "{{ now }}"
     resources:
       limits:
         cpu: 150m
@@ -55,7 +56,13 @@ controller-manager:
       - mountPath: /tmp
         name: tmp-empty-dir
     extraProperties:
-      terminationGracePeriodSeconds: 10
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+    extraContainerProperties:
+      securityContext:
+        privileged: false
+        allowPrivilegeEscalation: false
 
   webhooksConfigMap:
     create: true
@@ -195,16 +202,22 @@ controller-manager:
     enabled: true
 
     # Values for patches old credentials in minio release. More info: https://github.com/minio/minio/tree/master/docs/config#rotating-encryption-with-new-credentials
-    patchCredentials:
+    ensureSecret:
       secretName: "rafter-minio-old-credentials"
       image:
-        repository: "eu.gcr.io/kyma-project/incubator/develop/k8s-tools"
-        tag: "20201023-5de446cf"
         pullPolicy: IfNotPresent
 
-    image:
-      tag: RELEASE.2020-09-21T22-31-59Z-1d81f948
-      repository: eu.gcr.io/kyma-project/incubator/develop/minio/minio
+    pod:
+      extraProperties:
+        securityContext:
+          runAsNonRoot: true
+          runAsUser: 1000
+          fsGroup: 1000
+          runAsGroup: 1000
+      extraContainerProperties:
+        securityContext:
+          privileged: false
+          allowPrivilegeEscalation: false
 
     persistence:
       enabled: true
@@ -218,8 +231,7 @@ controller-manager:
       persistence: "on"
 
     service:
-      annotations:
-        auth.istio.io/9000: NONE
+      annotations: {}
 
     environment:
       MINIO_BROWSER: "off"
@@ -233,7 +245,7 @@ controller-manager:
         memory: 32Mi
         cpu: 10m
       limits:
-        memory: 256Mi
+        memory: 320Mi
         cpu: 250m
 
     gcsgateway:
@@ -258,8 +270,6 @@ upload-service:
       size: 10Gi
 
   image:
-    repository: eu.gcr.io/kyma-project/rafter-upload-service
-    tag: a9c94fb7
     pullPolicy: IfNotPresent
 
   deployment:
@@ -273,11 +283,9 @@ upload-service:
   pod:
     annotations:
       sidecar.istio.io/inject: "false"
-      recreate: "{{ now }}"
 
   service:
-    annotations:
-      auth.istio.io/80: NONE
+    annotations: {}
 
   serviceMonitor:
     create: true
@@ -346,12 +354,8 @@ upload-service:
   migrator:
     images:
       alpineKubectl:
-        repository: eu.gcr.io/kyma-project/incubator/develop/k8s-tools
-        tag: '20201023-5de446cf'
         pullPolicy: IfNotPresent
       minioClient:
-        repository: eu.gcr.io/kyma-project/incubator/develop/minio/mc
-        tag: RELEASE.2019-04-03T17-59-57Z-a67baaa0
         pullPolicy: IfNotPresent
     pre:
       minioDeploymentRefName:
@@ -365,8 +369,6 @@ front-matter-service:
   fullnameOverride: "rafter-front-matter-service"
 
   image:
-    repository: eu.gcr.io/kyma-project/rafter-front-matter-service
-    tag: d999a403
     pullPolicy: IfNotPresent
 
   deployment:
@@ -382,8 +384,7 @@ front-matter-service:
       sidecar.istio.io/inject: "false"
 
   service:
-    annotations:
-      auth.istio.io/80: NONE
+    annotations: {}
 
   serviceMonitor:
     create: true
@@ -402,8 +403,6 @@ asyncapi-service:
   fullnameOverride: "rafter-asyncapi-service"
 
   image:
-    repository: eu.gcr.io/kyma-project/rafter-asyncapi-service
-    tag: d999a403
     pullPolicy: IfNotPresent
 
   deployment:
@@ -419,8 +418,7 @@ asyncapi-service:
       sidecar.istio.io/inject: "false"
 
   service:
-    annotations:
-      auth.istio.io/80: NONE
+    annotations: {}
 
   serviceMonitor:
     create: true

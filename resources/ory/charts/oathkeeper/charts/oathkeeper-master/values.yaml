@@ -1,3 +1,5 @@
+# Mode for oathkeeper controller
+# Two possible modes are: controller or sidecar
 global:
   ory:
     oathkeeper:
@@ -6,6 +8,8 @@ global:
 
 replicaCount: 1
 
+# oathkeeperFullnameOverride: oathkeeper
+
 # rulesConfigmapNamespace: some-namespace
 # rulesFileName: access-rules.json
 
@@ -13,7 +17,7 @@ image:
   # ORY Oathkeeper Rule Controller image
   repository: oryd/oathkeeper-maester
   # ORY Oathkeeper Rule Controller version
-  tag: v0.0.6
+  tag: "v0.1.0"
   # Image pull policy
   pullPolicy: IfNotPresent
 
@@ -43,6 +47,8 @@ deployment:
 
   # Configure node tolerations.
   tolerations: []
+
+  # Configure annotations.
   annotations: {}
 
   envs: {}

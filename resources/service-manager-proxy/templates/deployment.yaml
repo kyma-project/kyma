@@ -38,8 +38,10 @@ spec:
       {{- end }}
       containers:
       - name: {{ .Chart.Name }}
-        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.sb_proxy_k8s) }}"
         imagePullPolicy: {{ .Values.image.pullPolicy }}
+        resources:
+{{ toYaml .Values.resources | indent 10 }}
         volumeMounts:
         - name: config-volume
           mountPath: {{ .Values.file.location }}
@@ -59,6 +61,8 @@ spec:
             secretKeyRef:
               name: {{ template "service-broker-proxy.fullname" . }}-regsecret
               key: password
+        - name: APP_BROKER_CREDENTIALS_ENABLED
+          value: '{{ .Values.config.app.broker_credentials_enabled }}'
         - name: APP_URL
           {{- if .Values.config.app.url }}
           value: {{ .Values.config.app.url }}
@@ -79,3 +83,18 @@ spec:
           - "--file.location={{ .Values.file.location }}"
           - "--file.name={{ .Values.file.name }}"
           - "--file.format={{ .Values.file.format }}"
+      initContainers:
+      - name: init-service-catalog
+        image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.alpine) }}"
+        command:
+          - "bin/sh"
+          - "-c"
+          - |
+            apk --no-cache add --update curl --repository=http://dl-cdn.alpinelinux.org/alpine/v3.14/main;
+            while [ `curl -Lk --write-out "%{http_code}\n" --silent --output /dev/null "service-catalog-catalog-webhook.{{ .Release.Namespace }}.svc.cluster.local:8081/healthz/ready"` -ne 200 ]; do
+              echo "Waiting for service catalog webhook server availability..."
+              sleep 2;
+            done
+    {{- if .Values.global.priorityClassName }}
+      priorityClassName: {{ .Values.global.priorityClassName }}
+    {{- end }}

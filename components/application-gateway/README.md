@@ -84,17 +84,6 @@ See an example in `pkg/apis/istio/v1alpha2`.
 
 3. Go to the project root directory and run `./hack/update-codegen.sh`. The script generates a new client in `pkg/apis/client/clientset`.
 
-
-### Contract between the Application Gateway and the Console Backend Service
-
-The Console Backend Service must check the status of the Application Gateway instance that represents the Application.
-In the current solution, the Console Backend Service iterates through services to find those which match the criteria, and then uses the health endpoint to determine the status.
-The Console Backend Service has the following obligatory requirements:
-- The Kubernetes service uses the `application` key, with the value as the name of the Application.
-- The Kubernetes service contains one port with the `http-api-port` name. The system uses this port for the status check.
-- Find the Kubernetes service in the `kyma-integration` Namespace. You can change its location in the `console-backend` chart configuration.
-- The `/v1/health` endpoint returns a status of `HTTP 200`. Any other status code indicates the service is not healthy.
-
 ### Contribution
 
 To learn how you can contribute to this project, see the [Contributing](/CONTRIBUTING.md) document.

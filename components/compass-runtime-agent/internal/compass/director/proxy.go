@@ -94,7 +94,7 @@ func (p *Proxy) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 
 // Start fulfills the controller manager Runnable interface.
 // It starts the HTTP server on given port and support graceful shutdown.
-func (p *Proxy) Start(stop <-chan struct{}) error {
+func (p *Proxy) Start(ctx context.Context) error {
 	srv := http.Server{
 		Addr:    fmt.Sprintf(":%d", p.port),
 		Handler: p,
@@ -103,7 +103,7 @@ func (p *Proxy) Start(stop <-chan struct{}) error {
 	idleConnsClosed := make(chan struct{})
 	var shutdownErr error
 	go func() {
-		<-stop
+		<-ctx.Done()
 		// we received an stop signal, shut down.
 		shutdownErr = srv.Shutdown(context.Background())
 		close(idleConnsClosed)

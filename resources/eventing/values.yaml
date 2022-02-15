@@ -1,5 +1,59 @@
 # globally shared values among Helm subcharts
 global:
-  image:
-    # repository is the container registry where the image for event-publisher-proxy is located in
-    repository: "eu.gcr.io/kyma-project"
+  containerRegistry:
+    path: eu.gcr.io/kyma-project
+  images:
+    eventing_controller:
+      name: eventing-controller
+      version: PR-13352
+      pullPolicy: "IfNotPresent"
+    publisher_proxy:
+      name: event-publisher-proxy
+      version: PR-13002
+    nats:
+      name: nats
+      version: 2.6.5-alpine
+      directory: external
+  features:
+    enableJetStream: false
+
+  # secretName defines optionally another name than the default secret name
+  secretName: ""
+
+  # domainName is the global domain used in Kyma
+  domainName: "kyma.example.com"
+
+  istio:
+    proxy:
+      statusPort: 15020
+      portName: http-status
+
+  securityContext:
+    allowPrivilegeEscalation: false
+    privileged: false
+
+  # eventTypePrefix is an optional prefix for the eventType
+  # note that the eventType format is: eventTypePrefix.applicationName.eventName.eventVersion
+  # for example: sap.kyma.custom.myapp.order.created.v1 (where the eventName is order.created)
+  eventTypePrefix: "sap.kyma.custom"
+
+  log:
+    format: "json"
+    level: "info"
+
+  configMap:
+    name: eventing
+    keys:
+      eventTypePrefix: "eventTypePrefix"
+
+authentication:
+  # oauthClientId is the Oauth2 client id used in order to get an Oauth2 token from BEB
+  oauthClientId: ""
+  # oauthClientSecret is the Oauth2 secret used in order to get an Oauth2 token from BEB
+  oauthClientSecret: ""
+  # oauthTokenEndpoint is the Oauth2 endpoint from BEB from where Oauth2 tokens can be retrieved
+  oauthTokenEndpoint: ""
+  # publishUrl is the URL for publishing events to BEB
+  publishUrl: ""
+  # bebNamespace is the name of the namespace BEB is provisioned with
+  bebNamespace: ""

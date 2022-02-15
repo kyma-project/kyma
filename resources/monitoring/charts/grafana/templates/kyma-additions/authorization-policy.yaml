@@ -1,0 +1,32 @@
+{{ if .Values.kyma.authProxy.enabled }}
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  labels:
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/name: auth-proxy
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    helm.sh/chart: {{ include "grafana.chart" . }}
+  name: {{ template "grafana.name" . }}
+  namespace: {{ template "grafana.namespace" . }}
+spec:
+  action: ALLOW
+  rules:
+  - from:
+    - source:
+        principals:
+        - cluster.local/ns/{{ template "grafana.namespace" . }}/sa/{{ .Release.Name }}-auth-proxy-{{ template "grafana.name" . }}
+  - from:
+    - source:
+        principals:
+          - cluster.local/ns/{{ .Release.Namespace }}/sa/monitoring-prometheus
+    to:
+    - operation:
+        methods:
+        - GET
+        paths:
+        - /metrics
+  selector:
+    matchLabels:
+      app: grafana
+{{ end }}

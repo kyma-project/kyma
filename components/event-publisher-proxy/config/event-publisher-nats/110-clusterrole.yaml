@@ -1,0 +1,23 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: eventing-event-publisher-nats
+  labels:
+    app.kubernetes.io/instance: eventing
+rules:
+  - apiGroups:
+      - eventing.kyma-project.io
+    resources:
+      - subscriptions
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - applicationconnector.kyma-project.io
+    resources:
+      - applications
+    verbs:
+      - get
+      - list
+      - watch

@@ -3,11 +3,14 @@ package k8sconsts
 import (
 	"fmt"
 	"strings"
+
+	"github.com/kyma-project/kyma/components/application-operator/pkg/normalization"
 )
 
 const (
-	resourceNamePrefixFormat = "%s-"
-	metadataUrlFormat        = "http://%s.%s.svc.cluster.local"
+	resourceNamePrefixFormat        = "%s-"
+	metadataUrlFormat               = "http://%s.%s.svc.cluster.local"
+	centralApplicationGatewayFormat = "%s/%s/%s"
 
 	maxResourceNameLength = 63 // Kubernetes limit for services
 	uuidLength            = 36 // UUID has 36 characters
@@ -19,18 +22,22 @@ type NameResolver interface {
 	GetResourceName(application, id string) string
 	// GetGatewayUrl return gateway url with given ID
 	GetGatewayUrl(application, id string) string
+	// GetCentralGatewayUrl return central gateway url
+	GetCentralGatewayUrl(applicationName, serviceDisplayName string) string
 	// ExtractServiceId extracts service ID from given host
 	ExtractServiceId(applicaton, host string) string
 }
 
 type nameResolver struct {
-	namespace string
+	namespace         string
+	centralGatewayUrl string
 }
 
 // NewNameResolver creates NameResolver that uses application name and namespace.
-func NewNameResolver(namespace string) NameResolver {
+func NewNameResolver(namespace, centralGatewayUrl string) NameResolver {
 	return nameResolver{
-		namespace: namespace,
+		namespace:         namespace,
+		centralGatewayUrl: centralGatewayUrl,
 	}
 }
 
@@ -42,6 +49,13 @@ func (resolver nameResolver) GetResourceName(application, id string) string {
 // GetGatewayUrl return gateway url with given ID
 func (resolver nameResolver) GetGatewayUrl(application, id string) string {
 	return fmt.Sprintf(metadataUrlFormat, resolver.GetResourceName(application, id), resolver.namespace)
+}
+
+func (resolver nameResolver) GetCentralGatewayUrl(applicationName, serviceDisplayName string) string {
+	return fmt.Sprintf(centralApplicationGatewayFormat,
+		resolver.centralGatewayUrl,
+		applicationName,
+		normalization.NormalizeName(serviceDisplayName))
 }
 
 // ExtractServiceId extracts service ID from given host

@@ -79,6 +79,7 @@ func (r *ServiceBrokerSync) SyncBroker(namespace string) error {
 	brokerClient := r.serviceBrokerGetter.ServiceBrokers(namespace)
 	name := nsbroker.NamespacedBrokerName
 
+	r.log.Infof("Syncing ServiceBroker in %s namespace", namespace)
 	for i := 0; i < maxSyncRetries; i++ {
 		broker, err := brokerClient.Get(name, v1.GetOptions{})
 		if err != nil {

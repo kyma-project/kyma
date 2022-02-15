@@ -93,49 +93,6 @@ func TestManagementInfoHandler_GetManagementInfo(t *testing.T) {
 		assert.Equal(t, expectedKeyAlgorithm, certificateInfo.KeyAlgorithm)
 	})
 
-	t.Run("should successfully get management info response for runtime", func(t *testing.T) {
-		//given
-		clusterContext := &clientcontext.ClusterContext{
-			Tenant: tenant,
-			Group:  group,
-		}
-
-		connectorClientExtractor := func(ctx context.Context) (clientcontext.ClientCertContextService, apperrors.AppError) {
-			return dummyClientCertCtx{clusterContext}, nil
-		}
-
-		req, err := http.NewRequest(http.MethodGet, "/v1/runtimes/management/info", nil)
-		require.NoError(t, err)
-
-		infoHandler := NewManagementInfoHandler(connectorClientExtractor, protectedBaseURL)
-
-		rr := httptest.NewRecorder()
-
-		//when
-		infoHandler.GetManagementInfo(rr, req)
-
-		//then
-		responseBody, err := ioutil.ReadAll(rr.Body)
-		require.NoError(t, err)
-
-		var infoResponse mgmtInfoReponse
-		err = json.Unmarshal(responseBody, &infoResponse)
-		require.NoError(t, err)
-		assert.Equal(t, http.StatusOK, rr.Code)
-
-		urls := infoResponse.URLs
-		receivedContext := infoResponse.ClientIdentity.(map[string]interface{})
-		certificateInfo := infoResponse.CertificateInfo
-
-		assert.Equal(t, expectedRevocationURL, urls.RevokeCertURL)
-		assert.Equal(t, expectedRenewalsURL, urls.RenewCertURL)
-		assert.Equal(t, group, receivedContext[groupKey])
-		assert.Equal(t, tenant, receivedContext[tenantKey])
-		assert.Equal(t, strSubject, certificateInfo.Subject)
-		assert.Equal(t, expectedExtensions, certificateInfo.Extensions)
-		assert.Equal(t, expectedKeyAlgorithm, certificateInfo.KeyAlgorithm)
-	})
-
 	t.Run("should return 500 when failed to extract context", func(t *testing.T) {
 		//given
 		clientContextService := func(ctx context.Context) (clientcontext.ClientCertContextService, apperrors.AppError) {
@@ -156,8 +113,8 @@ func TestManagementInfoHandler_GetManagementInfo(t *testing.T) {
 		responseBody, err := ioutil.ReadAll(rr.Body)
 		require.NoError(t, err)
 
-		var errorResposne httperrors.ErrorResponse
-		err = json.Unmarshal(responseBody, &errorResposne)
+		var errorResponse httperrors.ErrorResponse
+		err = json.Unmarshal(responseBody, &errorResponse)
 		require.NoError(t, err)
 		assert.Equal(t, http.StatusInternalServerError, rr.Code)
 	})

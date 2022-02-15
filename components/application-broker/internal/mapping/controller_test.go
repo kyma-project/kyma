@@ -22,7 +22,6 @@ import (
 	"github.com/stretchr/testify/mock"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/types"
 	v1 "k8s.io/client-go/informers/core/v1"
 	k8sfake "k8s.io/client-go/kubernetes/fake"
 	"k8s.io/client-go/tools/cache"
@@ -36,35 +35,16 @@ const (
 func TestControllerRunSuccess(t *testing.T) {
 	// given
 	fixEM := fixApplicationMappingCR(fixAPPName, fixNSName)
-	fixApp := fixApplication(fixAPPName)
-	fixNS := fixNamespace(fixNSName)
 	fixLivenessCheckStatus := broker.LivenessCheckStatus{Succeeded: false}
 
 	expectations := &sync.WaitGroup{}
-	expectations.Add(4)
+	expectations.Add(2)
 	fulfillExpectation := func(mock.Arguments) {
 		expectations.Done()
 	}
 
-	expectedPatchNS := fmt.Sprintf(`{"metadata":{"labels":{"accessLabel":"%s"}}}`, fixApp.AccessLabel)
-
 	emInformer := newEmInformerFromFakeClientset(fixEM)
-	nsInformer := newNsInformerFromFakeClientset(fixNS)
 	instInformer := newInstanceInformerFromFakeClientset()
-
-	nsClientMock := &automock.NsPatcher{}
-	defer nsClientMock.AssertExpectations(t)
-	nsClientMock.On("Patch", fixNSName, types.StrategicMergePatchType, []byte(expectedPatchNS)).
-		Return(&corev1.Namespace{}, nil).
-		Run(fulfillExpectation).
-		Once()
-
-	appGetterMock := &automock.AppGetter{}
-	defer appGetterMock.AssertExpectations(t)
-	appGetterMock.On("Get", internal.ApplicationName(fixAPPName)).
-		Return(&fixApp, nil).
-		Run(fulfillExpectation).
-		Once()
 
 	brokerFacade := &automock.NsBrokerFacade{}
 	defer brokerFacade.AssertExpectations(t)
@@ -73,9 +53,8 @@ func TestControllerRunSuccess(t *testing.T) {
 	brokerFacade.On("Create", fixNSName).Return(nil).
 		Run(fulfillExpectation)
 
-	svc := mapping.New(emInformer, nsInformer, instInformer, nsClientMock, appGetterMock, brokerFacade, nil, fakeInstanceChecker(false), spy.NewLogDummy(), &fixLivenessCheckStatus, false)
+	svc := mapping.New(emInformer, instInformer, brokerFacade, nil, fakeInstanceChecker(false), spy.NewLogDummy(), &fixLivenessCheckStatus)
 	awaitInformerStartAtMost(t, time.Second, emInformer)
-	awaitInformerStartAtMost(t, time.Second, nsInformer)
 
 	ctx, cancel := context.WithCancel(context.Background())
 
@@ -87,74 +66,6 @@ func TestControllerRunSuccess(t *testing.T) {
 
 	// clean-up - release controller
 	cancel()
-}
-
-func TestControllerRunSuccessLabelRemove(t *testing.T) {
-	// given
-	fixEM := fixApplicationMappingCR(fixAPPName, fixNSName)
-	fixNS := fixNamespaceWithAccessLabel(fixNSName)
-	fixExpectedNS := fixNamespace(fixNSName)
-	fixLivenessCheckStatus := broker.LivenessCheckStatus{Succeeded: false}
-
-	emInformer := newEmInformerFromFakeClientset(fixEM)
-	instInformer := newInstanceInformerFromFakeClientset()
-	nsClientMock := &automock.NsPatcher{}
-	defer nsClientMock.AssertExpectations(t)
-	deletedLabelNS := `{"metadata":{"labels":null}}`
-	nsClientMock.On("Patch", fixNSName, types.StrategicMergePatchType, []byte(deletedLabelNS)).
-		Return(fixExpectedNS, nil).
-		Once()
-	svc := mapping.New(emInformer, nil, instInformer, nsClientMock, nil, nil, nil, fakeInstanceChecker(false), spy.NewLogDummy(), &fixLivenessCheckStatus, false)
-	awaitInformerStartAtMost(t, time.Second, emInformer)
-	// when
-	err := svc.DeleteAccessLabelFromNamespace(fixNS, fixAPPName)
-	// then
-	assert.NoError(t, err)
-}
-
-func TestControllerRunFailure(t *testing.T) {
-	// given
-	fixEM := fixApplicationMappingCR(fixAPPName, fixNSName)
-	fixNS := fixNamespace(fixNSName)
-	fixErr := errors.New("fix get err")
-	fixPatchErr := errors.New("fix patch err")
-	fixLivenessCheckStatus := broker.LivenessCheckStatus{Succeeded: false}
-
-	emInformer := newEmInformerFromFakeClientset(fixEM)
-	instInformer := newInstanceInformerFromFakeClientset()
-
-	expectations := &sync.WaitGroup{}
-	expectations.Add(2)
-	fulfillExpectation := func(mock.Arguments) {
-		expectations.Done()
-	}
-
-	nsClientMock := &automock.NsPatcher{}
-	defer nsClientMock.AssertExpectations(t)
-	nsClientMock.On("Patch", fixNSName, types.StrategicMergePatchType, []byte("{}")).
-		Return(nil, fixPatchErr).
-		Run(fulfillExpectation).
-		Once()
-
-	appGetter := &automock.AppGetter{}
-	defer appGetter.AssertExpectations(t)
-	appGetter.On("Get", internal.ApplicationName(fixAPPName)).
-		Return(nil, fixErr).
-		Run(fulfillExpectation).
-		Once()
-
-	svc := mapping.New(emInformer, nil, instInformer, nsClientMock, appGetter, nil, nil, fakeInstanceChecker(false), spy.NewLogDummy(), &fixLivenessCheckStatus, false)
-
-	awaitInformerStartAtMost(t, time.Second, emInformer)
-
-	// when
-	err2 := svc.DeleteAccessLabelFromNamespace(fixNS, fixAPPName)
-	_, err3 := svc.GetAccessLabelFromApp(fixAPPName)
-
-	// then
-	awaitForSyncGroupAtMost(t, expectations, time.Second)
-	assert.EqualError(t, err2, fmt.Sprintf("failed to delete AccessLabel from the namespace: %q, failed to patch namespace: %q: %v", fixNSName, fixNSName, fixPatchErr.Error()))
-	assert.EqualError(t, err3, fmt.Sprintf("while getting application with name: %q: %v", fixAPPName, fixErr.Error()))
 }
 
 type tcNsBrokersEnabled struct {
@@ -221,29 +132,12 @@ func TestControllerProcessItemOnEMCreationWhenNsBrokersEnabled(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			// GIVEN
 			fixEM := fixApplicationMappingCR(fixAPPName, fixNSName)
-			fixRE := fixApplication(fixAPPName)
-			fixNS := fixNamespace(fixNSName)
 			fixLivenessCheckStatus := broker.LivenessCheckStatus{Succeeded: false}
 
 			emInformer := newEmInformerFromFakeClientset(fixEM)
-			nsInformer := newNsInformerFromFakeClientset(fixNS)
 			instInformer := newInstanceInformerFromFakeClientset()
 
 			awaitInformerStartAtMost(t, time.Second, emInformer)
-			awaitInformerStartAtMost(t, time.Second, nsInformer)
-
-			nsClientMock := &automock.NsPatcher{}
-			defer nsClientMock.AssertExpectations(t)
-
-			nsClientMock.On("Patch", fixNSName, mock.Anything, mock.Anything).
-				Return(&corev1.Namespace{}, nil).
-				Once()
-
-			appGetterMock := &automock.AppGetter{}
-			defer appGetterMock.AssertExpectations(t)
-			appGetterMock.On("Get", internal.ApplicationName(fixAPPName)).
-				Return(&fixRE, nil).
-				Once()
 
 			nsBrokerFacade := tc.prepareNsBrokerFacade()
 			defer nsBrokerFacade.AssertExpectations(t)
@@ -251,7 +145,7 @@ func TestControllerProcessItemOnEMCreationWhenNsBrokersEnabled(t *testing.T) {
 			nsBrokerSyncer := tc.prepareNsBrokerSyncer()
 			defer nsBrokerSyncer.AssertExpectations(t)
 
-			svc := mapping.New(emInformer, nsInformer, instInformer, nsClientMock, appGetterMock, nsBrokerFacade, nsBrokerSyncer, fakeInstanceChecker(false), spy.NewLogDummy(), &fixLivenessCheckStatus, false)
+			svc := mapping.New(emInformer, instInformer, nsBrokerFacade, nsBrokerSyncer, fakeInstanceChecker(false), spy.NewLogDummy(), &fixLivenessCheckStatus)
 
 			err := svc.ProcessItem(fmt.Sprintf("%s/%s", fixNSName, fixAPPName))
 			if tc.errorMsg == "" {
@@ -373,22 +267,12 @@ func TestControllerProcessItemOnEMDeletionWhenNsBrokersEnabled(t *testing.T) {
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			// GIVEN
-			fixNS := fixNamespace(fixNSName)
 			fixLivenessCheckStatus := broker.LivenessCheckStatus{Succeeded: false}
 
 			emInformer := newEmInformerFromFakeClientset(nil)
-			nsInformer := newNsInformerFromFakeClientset(fixNS)
 			instInformer := newInstanceInformerFromFakeClientset()
 
 			awaitInformerStartAtMost(t, time.Second, emInformer)
-			awaitInformerStartAtMost(t, time.Second, nsInformer)
-
-			nsClientMock := &automock.NsPatcher{}
-			defer nsClientMock.AssertExpectations(t)
-
-			nsClientMock.On("Patch", fixNSName, mock.Anything, mock.Anything).
-				Return(&corev1.Namespace{}, nil).
-				Once()
 
 			nsBrokerFacade := tc.prepareNsBrokerFacade()
 			defer nsBrokerFacade.AssertExpectations(t)
@@ -399,7 +283,7 @@ func TestControllerProcessItemOnEMDeletionWhenNsBrokersEnabled(t *testing.T) {
 			nsBrokerSyncer := tc.prepareNsBrokerSyncer()
 			defer nsBrokerSyncer.AssertExpectations(t)
 
-			svc := mapping.New(emInformer, nsInformer, instInformer, nsClientMock, nil, nsBrokerFacade, nsBrokerSyncer, fakeInstanceChecker(false), spy.NewLogDummy(), &fixLivenessCheckStatus, false).
+			svc := mapping.New(emInformer, instInformer, nsBrokerFacade, nsBrokerSyncer, fakeInstanceChecker(false), spy.NewLogDummy(), &fixLivenessCheckStatus).
 				WithMappingLister(mappingSvc)
 			// WHEN
 			err := svc.ProcessItem(fmt.Sprintf("%s/%s", fixNSName, fixAPPName))

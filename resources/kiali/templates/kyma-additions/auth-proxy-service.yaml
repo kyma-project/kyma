@@ -1,0 +1,16 @@
+{{if .Values.authProxy.enabled}}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ template "kiali-server.name" . }}-secured
+  labels:
+      {{- include "kiali-server.labels" . | nindent 4 }}
+spec:
+  ports:
+    - port: {{ .Values.server.port }}
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+      app: {{ template "kiali-server.name" . }}-auth-proxy
+{{end}}

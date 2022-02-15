@@ -1,0 +1,33 @@
+apiVersion: security.istio.io/v1beta1
+kind: PeerAuthentication
+metadata:
+  name: {{ template "jaeger-operator.fullname" . }}-jaeger-operator-metrics
+  labels:
+{{ include "jaeger-operator.labels" . | indent 4 }}
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "jaeger-operator.fullname" . }}-jaeger-operator
+  mtls:
+    mode: STRICT
+
+{{- if eq .Values.jaeger.spec.strategy "allInOne" }}
+---
+apiVersion: security.istio.io/v1beta1
+kind: PeerAuthentication
+metadata:
+  name: {{ template "jaeger-operator.fullname" . }}-jaeger-metrics
+  labels:
+{{ include "jaeger-operator.labels" . | indent 4 }}
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "jaeger-operator.fullname" . }}-jaeger
+  mtls:
+    mode: PERMISSIVE
+  portLevelMtls: #keep metrics and query port strict
+    14269:
+      mode: STRICT
+    16686:
+      mode: STRICT
+{{- end }}

@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "{{ include "central-application-gateway.fullname" . }}-test-connection"
+  labels:
+    {{- include "central-application-gateway.labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/hook": test-success
+spec:
+  containers:
+    - name: wget
+      image: {{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.busybox) }}
+      command: ['wget']
+      args: ['{{ include "central-application-gateway.fullname" . }}:{{ .Values.service.port }}']
+  restartPolicy: Never

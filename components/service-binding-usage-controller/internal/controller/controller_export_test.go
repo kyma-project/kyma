@@ -4,8 +4,3 @@ func (c *ServiceBindingUsageController) WithTestHookOnAsyncOpDone(h func()) *Ser
 	c.testHookAsyncOpDone = h
 	return c
 }
-
-func (c *ServiceBindingUsageController) WithoutRetries() *ServiceBindingUsageController {
-	c.maxRetires = 0
-	return c
-}

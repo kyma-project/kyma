@@ -1,6 +1,8 @@
 package secrets
 
 import (
+	"context"
+
 	"github.com/kyma-project/kyma/components/connector-service/internal/apperrors"
 	v1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
@@ -11,11 +13,11 @@ import (
 type ManagerConstructor func(namespace string) Manager
 
 type Manager interface {
-	Get(name string, options metav1.GetOptions) (*v1.Secret, error)
+	Get(ctx context.Context, name string, options metav1.GetOptions) (*v1.Secret, error)
 }
 
 type Repository interface {
-	Get(name types.NamespacedName) (secretData map[string][]byte, appError apperrors.AppError)
+	Get(context.Context, types.NamespacedName) (secretData map[string][]byte, appError apperrors.AppError)
 }
 
 type repository struct {
@@ -29,9 +31,9 @@ func NewRepository(secretsManagerConstructor ManagerConstructor) Repository {
 	}
 }
 
-func (r *repository) Get(name types.NamespacedName) (secretData map[string][]byte, appError apperrors.AppError) {
+func (r *repository) Get(ctx context.Context, name types.NamespacedName) (secretData map[string][]byte, appError apperrors.AppError) {
 	secretsManager := r.secretsManagerConstructor(name.Namespace)
-	secret, err := secretsManager.Get(name.Name, metav1.GetOptions{})
+	secret, err := secretsManager.Get(ctx, name.Name, metav1.GetOptions{})
 	if err != nil {
 		if k8serrors.IsNotFound(err) {
 			return nil, apperrors.NotFound("secret %s not found", name)

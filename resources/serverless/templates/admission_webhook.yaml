@@ -1,0 +1,51 @@
+{{- $cn := printf "%s-controller-manager" (include "fullname" .) }}
+{{- $ca := genCA (printf "%s-%s" $cn "ca") 3650 }}
+{{- $altName1 := printf "%s.%s" $cn .Release.Namespace }}
+{{- $altName2 := printf "%s.%s.svc" $cn .Release.Namespace }}
+{{- $cert := genSignedCert $cn nil (list $altName1 $altName2) 3650 $ca }}
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {{ template "fullname" . }}-k8s-webhook-cert
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: {{ template "fullname" . }}
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    release: "{{ .Release.Name }}"
+    heritage: "{{ .Release.Service }}"
+type: Opaque
+data:
+  tls.crt: {{ b64enc $cert.Cert }}
+  tls.key: {{ b64enc $cert.Key }}
+---
+apiVersion: admissionregistration.k8s.io/v1
+kind: MutatingWebhookConfiguration
+metadata:
+  name: mutating.secrets 
+webhooks:
+- clientConfig:
+    caBundle: {{ b64enc $ca.Cert }}
+    service:
+      name: {{ template "fullname" . }}-controller-manager
+      namespace: {{ .Release.Namespace }}
+      path: /mutate-v1-secret
+      port: {{ .Values.services.manager.https.port }}
+  failurePolicy: Fail
+  matchPolicy: Exact
+  timeoutSeconds: 30
+  sideEffects: None
+  admissionReviewVersions: ["v1beta1", "v1"]
+  name: mutating.secret.serverless.k8s.io
+  objectSelector:
+    matchLabels:
+      serverless.kyma-project.io/remote-registry: config
+  rules:
+  - apiGroups:
+    - ""
+    apiVersions:
+    - v1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - secrets

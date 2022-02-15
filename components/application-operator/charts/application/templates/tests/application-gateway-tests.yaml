@@ -28,5 +28,7 @@ spec:
           value: {{.Release.Name }}-application-gateway-tests
         - name: MOCK_SERVICE_PORT
           value: "8080"
+      securityContext:
+        runAsUser: {{ .Values.podSecurityPolicy.runAsUser }}
   restartPolicy: Never
 {{- end }}

@@ -22,8 +22,8 @@ spec:
       initContainers:
         - name: inject-certs
           securityContext:
-            runAsUser: 0
-          image: "{{ .Values.injectCerts.image.repository }}:{{ .Values.injectCerts.image.tag }}"
+{{- include "tplValue" ( dict "value" .Values.containers.daemonset.initContainerSecurityContext "context" . ) | nindent 12 }}
+          image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.k8s_tools) }}"
           resources:
             requests:
               cpu: 70m
@@ -49,7 +49,9 @@ spec:
           name: scripts
       containers:
         - name: pause
-          image: gcr.io/google-containers/pause-amd64:3.2
+          image: {{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.google_pause) }}
+          securityContext:
+{{- include "tplValue" ( dict "value" .Values.containers.daemonset.containerSecurityContext "context" . ) | nindent 12 }}
           resources:
             requests:
               cpu: 20m
@@ -58,4 +60,7 @@ spec:
               cpu: 30m
               memory: 30Mi
       terminationGracePeriodSeconds: 30
+    {{- if or .Values.priorityClassName .Values.global.highPriorityClassName }}
+      priorityClassName: {{ coalesce .Values.priorityClassName .Values.global.highPriorityClassName }}
+    {{- end }}
 {{- end }}

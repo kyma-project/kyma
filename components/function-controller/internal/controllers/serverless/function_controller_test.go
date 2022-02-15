@@ -1,52 +1,12 @@
 package serverless
 
 import (
-	"fmt"
-	"math/rand"
 	"testing"
 
+	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
 	"github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-
-	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
 )
-
-func newFixFunction(namespace, name string, minReplicas, maxReplicas int) *serverlessv1alpha1.Function {
-	one := int32(minReplicas)
-	two := int32(maxReplicas)
-	suffix := rand.Int()
-
-	return &serverlessv1alpha1.Function{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      fmt.Sprintf("%s-%d", name, suffix),
-			Namespace: namespace,
-		},
-		Spec: serverlessv1alpha1.FunctionSpec{
-			Source:  "module.exports = {main: function(event, context) {return 'Hello World.'}}",
-			Deps:    "   ",
-			Runtime: serverlessv1alpha1.Nodejs12,
-			Env: []corev1.EnvVar{
-				{
-					Name:  "TEST_1",
-					Value: "VAL_1",
-				},
-				{
-					Name:  "TEST_2",
-					Value: "VAL_2",
-				},
-			},
-			Resources:   corev1.ResourceRequirements{},
-			MinReplicas: &one,
-			MaxReplicas: &two,
-			Labels: map[string]string{
-				testBindingLabel1: "foobar",
-				testBindingLabel2: testBindingLabelValue,
-				"foo":             "bar",
-			},
-		},
-	}
-}
 
 func TestFunctionReconciler_getConditionStatus(t *testing.T) {
 	type args struct {

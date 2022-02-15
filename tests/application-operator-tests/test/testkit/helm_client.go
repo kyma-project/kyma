@@ -15,6 +15,7 @@ type HelmClient interface {
 	CheckReleaseExistence(rlsName string, namespace string) (bool, error)
 	IsInstalled(rlsName string, namespace string) bool
 	TestRelease(rlsName string, namespace string) (*release.Release, error)
+	GetRelease(rlsName string, namespace string) (*release.Release, error)
 }
 
 type helmClient struct {
@@ -131,4 +132,16 @@ func (hc *helmClient) actionConfigInit(namespace string) (*action.Configuration,
 	}
 
 	return actionConfig, nil
+}
+
+func (hc *helmClient) GetRelease(rlsName string, namespace string) (*release.Release, error) {
+	actionConfig, err := hc.actionConfigInit(namespace)
+	if err != nil {
+		return nil, err
+	}
+
+	releaseGet := action.NewGet(actionConfig)
+	releaseGet.Version = 0
+
+	return releaseGet.Run(rlsName)
 }

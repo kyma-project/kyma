@@ -9,4 +9,4 @@ The Service Catalog consists of the following sub-charts:
 
 ## Details
 
-To learn more about the Service Catalog operations and usage, see the [Overview](https://kyma-project.io/docs/components/service-catalog/#overview-overview) document.
+To learn more about the Service Catalog operations and usage, see the [Overview](https://kyma-project-old.netlify.app/docs/components/service-catalog) document.

@@ -2,45 +2,52 @@ package httpclient
 
 import (
 	"bytes"
-	"context"
 	"encoding/json"
-
-	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/signals"
-	"golang.org/x/oauth2"
-	"golang.org/x/oauth2/clientcredentials"
-
 	"io"
 	"io/ioutil"
 	"net/http"
+	"net/url"
+	"strings"
 )
 
+// compile time check
+var _ BaseURLAwareClient = Client{}
+
+// BaseURLAwareClient is a http client that can build requests not from a full URL, but from a path relative to a configured base url
+// this is useful for REST-APIs that always connect to the same host, but on different paths
+type BaseURLAwareClient interface {
+	NewRequest(method, path string, body interface{}) (*http.Request, *Error)
+	Do(req *http.Request, result interface{}) (*http.Response, *[]byte, *Error)
+}
+
 type Client struct {
+	baseURL    *url.URL
 	httpClient *http.Client
 }
 
-func NewHttpClient(cfg *clientcredentials.Config) *Client {
-	ctx := signals.NewContext()
-	httpClient := newOauth2Client(ctx, cfg)
-	return &Client{httpClient: httpClient}
+// BaseURLAwareClient creates a new client and ensures that the given baseURL ends with a trailing '/'.
+// The trailing '/' is required later for constructing the full URL using a relative path.
+func NewHTTPClient(baseURL string, client *http.Client) (*Client, error) {
+	url, err := url.Parse(baseURL)
+
+	// add trailing '/' to the url path, so that we can combine the url with other paths according to standards
+	if !strings.HasSuffix(url.Path, "/") {
+		url.Path = url.Path + "/"
+	}
+	if err != nil {
+		return nil, err
+	}
+	return &Client{
+		httpClient: client,
+		baseURL:    url,
+	}, nil
 }
 
-// NewClient returns a new HTTP client which have nested transports for handling oauth2 security, HTTP connection pooling, and tracing.
-func newOauth2Client(ctx context.Context, cfg *clientcredentials.Config) *http.Client {
-	// create and configure oauth2 client
-	client := cfg.Client(ctx)
-
-	var base = http.DefaultTransport.(*http.Transport).Clone()
-	client.Transport.(*oauth2.Transport).Base = base
-
-	// TODO: Support tracing in eventing-controller #9767: https://github.com/kyma-project/kyma/issues/9767
-	return client
-}
-
-func (c *Client) GetHttpClient() *http.Client {
+func (c *Client) GetHTTPClient() *http.Client {
 	return c.httpClient
 }
 
-func (c Client) NewRequest(method, url string, body interface{}) (*http.Request, *Error) {
+func (c Client) NewRequest(method, path string, body interface{}) (*http.Request, *Error) {
 	var jsonBody io.ReadWriter
 	if body != nil {
 		jsonBody = new(bytes.Buffer)
@@ -49,7 +56,12 @@ func (c Client) NewRequest(method, url string, body interface{}) (*http.Request,
 		}
 	}
 
-	req, err := http.NewRequest(method, url, jsonBody)
+	pu, err := url.Parse(path)
+	if err != nil {
+		return nil, NewError(err)
+	}
+	u := resolveReferenceAsRelative(c.baseURL, pu)
+	req, err := http.NewRequest(method, u.String(), jsonBody)
 	if err != nil {
 		return nil, NewError(err)
 	}
@@ -60,6 +72,10 @@ func (c Client) NewRequest(method, url string, body interface{}) (*http.Request,
 	}
 
 	return req, nil
+}
+
+func resolveReferenceAsRelative(base, ref *url.URL) *url.URL {
+	return base.ResolveReference(&url.URL{Path: strings.TrimPrefix(ref.Path, "/")})
 }
 
 func (c Client) Do(req *http.Request, result interface{}) (*http.Response, *[]byte, *Error) {

@@ -2,7 +2,6 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
     name: {{ .Chart.Name }}
-    namespace: {{ .Release.Namespace }}
     labels:
         app: {{ .Chart.Name }}
         release: {{ .Release.Name }}
@@ -26,12 +25,16 @@ rules:
     - apiGroups: ["metrics.k8s.io"]
       resources: ["nodes"]
       verbs: ["get", "list"]
+    - apiGroups: ['policy']
+      resources: ['podsecuritypolicies']
+      verbs:     ['use']
+      resourceNames:
+      - "compass-runtime-agent"
 ---
 kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
     name: {{ .Chart.Name }}
-    namespace: {{ .Release.Namespace }}
     labels:
         app: {{ .Chart.Name }}
         release: {{ .Chart.Name }}

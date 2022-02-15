@@ -44,7 +44,7 @@ data:
     fi
 
     echo "Certificate is self-signed, patching Docker..."
-    DIR="/kube-etc/docker/certs.d/registry.{{ .Values.global.ingress.domainName }}"
+    DIR="/kube-etc/docker/certs.d/registry.{{ .Values.global.domainName }}"
     if [ ! -d "${DIR}" ]; then
       mkdir -p "${DIR}"
     fi

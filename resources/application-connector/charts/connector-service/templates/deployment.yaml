@@ -3,7 +3,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ .Chart.Name }}
-  namespace: {{ .Values.global.namespace }}
+  namespace: {{ .Values.global.integrationNamespace }}
   labels:
     app: {{ .Chart.Name }}
     release: {{ .Release.Name }}
@@ -38,25 +38,31 @@ spec:
       serviceAccountName: {{ .Chart.Name }}
       containers:
       - name: {{ .Chart.Name }}
-        image: {{ .Values.global.containerRegistry.path }}/connector-service:{{ .Values.global.connector_service.version }}
+        image: {{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.connector_service) }}
         imagePullPolicy: {{ .Values.deployment.image.pullPolicy }}
+        resources:
+          limits:
+            cpu: {{ .Values.deployment.resources.limits.cpu }}
+            memory: {{ .Values.deployment.resources.limits.memory }}
+          requests:
+            cpu: {{ .Values.deployment.resources.requests.cpu }}
+            memory: {{ .Values.deployment.resources.requests.memory }}
         args:
-          - "/connectorservice"
+          - "/app/connectorservice"
           - "--appName={{ .Chart.Name }}"
           - "--externalAPIPort={{ .Values.deployment.args.externalAPIPort }}"
           - "--internalAPIPort={{ .Values.deployment.args.internalAPIPort }}"
-          - "--namespace={{ .Values.global.namespace }}"
+          - "--namespace={{ .Values.global.integrationNamespace }}"
           - "--tokenLength={{ .Values.deployment.args.tokenLength }}"
           - "--appTokenExpirationMinutes={{ .Values.deployment.args.appTokenExpirationMinutes }}"
           - "--runtimeTokenExpirationMinutes={{ .Values.deployment.args.runtimeTokenExpirationMinutes }}"
           - "--caSecretName={{ .Values.deployment.args.caSecretNamespace }}/{{ .Values.deployment.args.caSecretName }}"
           - "--rootCACertificateSecretName={{ .Values.deployment.args.rootCACertificateSecretNamespace }}/{{ .Values.deployment.args.rootCACertificateSecretName }}"
           - "--requestLogging={{ .Values.deployment.args.requestLogging }}"
-          - "--connectorServiceHost=connector-service.{{ .Values.global.ingress.domainName }}"
-          - "--gatewayBaseURL=https://gateway.{{ .Values.global.ingress.domainName }}"
-          - "--certificateProtectedHost=gateway.{{ .Values.global.ingress.domainName }}"
+          - "--connectorServiceHost=connector-service.{{ .Values.global.domainName }}"
+          - "--gatewayBaseURL=https://gateway.{{ .Values.global.domainName }}"
+          - "--certificateProtectedHost=gateway.{{ .Values.global.domainName }}"
           - "--appsInfoURL={{ tpl .Values.deployment.args.appsInfoURL . }}"
-          - "--runtimesInfoURL={{ tpl .Values.deployment.args.runtimesInfoURL . }}"
           - "--appCertificateValidityTime={{ .Values.deployment.args.appValidityTime }}"
           - "--runtimeCertificateValidityTime={{ .Values.deployment.args.runtimeValidityTime }}"
           - "--central={{ .Values.deployment.args.central }}"
@@ -87,12 +93,17 @@ spec:
           - containerPort: 9090
             name: http-metrics
         securityContext:
-          runAsUser: {{ .Values.deployment.runAsUser }}
+          runAsUser: {{ .Values.global.podSecurityPolicy.runAsUser }}
+          privileged: {{ .Values.global.podSecurityPolicy.privileged }}
+          allowPrivilegeEscalation: {{ .Values.global.podSecurityPolicy.allowPrivilegeEscalation }}
       {{- if .Values.deployment.externalClusterLookup.enabled }}
       volumes:
       - name: {{ .Values.deployment.externalClusterLookup.lookupConfigMapName }}
         configMap:
           name: {{ .Values.deployment.externalClusterLookup.lookupConfigMapName }}
       {{- end }}
+    {{- if .Values.global.priorityClassName }}
+      priorityClassName: {{ .Values.global.priorityClassName }}
+    {{- end }}
 
 {{- end }}

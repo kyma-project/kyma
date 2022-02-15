@@ -10,8 +10,6 @@ updateStrategy:
   #   maxUnavailable: 0
 
 image:
-  repository: eu.gcr.io/kyma-project/incubator/develop/registry
-  tag: 2.7.1-a67baaa0
   pullPolicy: IfNotPresent
 # imagePullSecrets:
     # - name: docker
@@ -122,6 +120,8 @@ securityContext:
   enabled: true
   runAsUser: 1000
   fsGroup: 1000
+  privileged: false
+  allowPrivilegeEscalation: false
 
 priorityClassName: ""
 
@@ -139,3 +139,9 @@ extraVolumes: []
 
 nameOverride:
 fullnameOverride:
+
+destinationRule:
+  enabled: true
+
+rollme: ""
+registryHTTPSecret: ""

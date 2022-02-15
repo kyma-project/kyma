@@ -44,10 +44,18 @@ spec:
       {{- if .Values.pod.extraProperties }}
       {{ include "rafterAsyncAPIService.tplValue" ( dict "value" .Values.pod.extraProperties "context" . ) | nindent 6 }}
       {{- end }}
+      serviceAccountName: {{ include "rafterAsyncAPIService.fullname" . }}
       containers:
         - name: {{ include "rafterAsyncAPIService.name" . }}
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.rafter_asyncapi_service) }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+          resources:
+            requests:
+              memory: "{{ .Values.pod.resources.requests.memory }}"
+              cpu: "{{ .Values.pod.resources.requests.cpu }}"
+            limits:
+              memory: "{{ .Values.pod.resources.limits.memory }}"
+              cpu: "{{ .Values.pod.resources.limits.cpu }}"
           {{- if .Values.pod.extraContainerProperties }}
           {{ include "rafterAsyncAPIService.tplValue" ( dict "value" .Values.pod.extraContainerProperties "context" . ) | nindent 10 }}
           {{- end }}
@@ -57,3 +65,6 @@ spec:
             - name: APP_SERVICE_HOST
               value: "0.0.0.0"
             {{ include "rafterAsyncAPIService.createEnv" ( dict "name" "APP_VERBOSE" "value" .Values.envs.verbose "context" . ) | nindent 12 }}
+    {{- if .Values.global.priorityClassName }}
+      priorityClassName: {{ .Values.global.priorityClassName }}
+    {{- end }}

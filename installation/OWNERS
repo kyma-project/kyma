@@ -3,7 +3,6 @@ filters:
     approvers:
       - Tomasz-Smelcerz-SAP
       - strekm
-      - jakkab
       - piotrmsc
       - kubadz
       - Demonsthere
@@ -23,7 +22,6 @@ filters:
     reviewers:
       - Tomasz-Smelcerz-SAP
       - strekm
-      - jakkab
       - piotrmsc
       - kubadz
       - Demonsthere

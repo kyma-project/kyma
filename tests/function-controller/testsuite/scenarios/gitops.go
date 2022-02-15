@@ -2,9 +2,11 @@ package scenarios
 
 import (
 	"fmt"
+	"math/rand"
 	"time"
 
 	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
+
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/poller"
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/shared"
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/step"
@@ -22,7 +24,7 @@ import (
 
 func GitopsSteps(restConfig *rest.Config, cfg testsuite.Config, logf *logrus.Entry) (step.Step, error) {
 	currentDate := time.Now()
-	cfg.Namespace = fmt.Sprintf("%s-%dh-%dm-%ds", "test-parallel", currentDate.Hour(), currentDate.Minute(), currentDate.Second())
+	cfg.Namespace = fmt.Sprintf("%s-%dh-%dm-%d", "test-serverless-gitops", currentDate.Hour(), currentDate.Minute(), rand.Int())
 
 	dynamicCli, err := dynamic.NewForConfig(restConfig)
 	if err != nil {
@@ -60,9 +62,9 @@ func GitopsSteps(restConfig *rest.Config, cfg testsuite.Config, logf *logrus.Ent
 	}
 	return step.NewSerialTestRunner(logf, "create git func",
 		teststep.NewNamespaceStep("Create test namespace", coreCli, genericContainer),
-		teststep.NewGitServer(gitCfg, "Start in-cluster Git Server", appsCli.Deployments(genericContainer.Namespace), coreCli.Services(genericContainer.Namespace)),
+		teststep.NewGitServer(gitCfg, "Start in-cluster Git Server", appsCli.Deployments(genericContainer.Namespace), coreCli.Services(genericContainer.Namespace), cfg.IstioEnabled),
 		teststep.NewCreateGitRepository(genericContainer.Log, gitCfg.Repo, "Create GitRepository", gitops.NoAuthRepositorySpec(gitCfg.GetGitServerInClusterURL())),
-		teststep.CreateFunction(genericContainer.Log, gitCfg.Fn, "Create Git Function", gitops.GitopsFunction(gitCfg.RepoName, serverlessv1alpha1.Nodejs12)),
+		teststep.CreateFunction(genericContainer.Log, gitCfg.Fn, "Create Git Function", gitops.GitopsFunction(gitCfg.RepoName, "/", "master", serverlessv1alpha1.Nodejs12)),
 		teststep.NewDefaultedFunctionCheck("Check if Git Function has correct default values", gitCfg.Fn),
 		teststep.NewHTTPCheck(genericContainer.Log, "Git Function pre update simple check through gateway", gitCfg.InClusterURL, poll, "GITOPS 1"),
 		teststep.NewCommitChanges(genericContainer.Log, "Commit changes to Git Function", gitCfg.GetGitServerInClusterURL()),

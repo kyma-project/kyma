@@ -8,6 +8,8 @@ import (
 	"reflect"
 	"time"
 
+	"golang.org/x/time/rate"
+
 	scTypes "github.com/kubernetes-sigs/service-catalog/pkg/apis/servicecatalog/v1beta1"
 	scInformer "github.com/kubernetes-sigs/service-catalog/pkg/client/informers_generated/externalversions/servicecatalog/v1beta1"
 	scLister "github.com/kubernetes-sigs/service-catalog/pkg/client/listers_generated/servicecatalog/v1beta1"
@@ -102,7 +104,6 @@ type ServiceBindingUsageController struct {
 	labelsFetcher            bindingLabelsFetcher
 	kindsSupervisors         kindsSupervisors
 	podPresetModifier        podPresetModifier
-	maxRetires               int
 	guard                    sbuGuard
 	log                      logrus.FieldLogger
 	queue                    workqueue.RateLimitingInterface
@@ -127,6 +128,13 @@ func NewServiceBindingUsage(
 	sbuGuard sbuGuard,
 	log logrus.FieldLogger,
 	cbm businessMetric) *ServiceBindingUsageController {
+
+	queue := workqueue.NewMaxOfRateLimiter(
+		workqueue.NewItemExponentialFailureRateLimiter(200*time.Millisecond, 120*time.Second),
+		// 10 qps, 100 bucket size.  This is only for retry speed and its only the overall factor (not per item)
+		&workqueue.BucketRateLimiter{Limiter: rate.NewLimiter(rate.Limit(10), 100)},
+	)
+
 	c := &ServiceBindingUsageController{
 		appliedSpecStorage:       appliedSpecStorage,
 		bindingUsageClient:       bindingUsageClient,
@@ -138,9 +146,8 @@ func NewServiceBindingUsage(
 		podPresetModifier:        podPresetModifier,
 		labelsFetcher:            labelsFetcher,
 		guard:                    sbuGuard,
-		maxRetires:               defaultMaxRetries,
 		log:                      log.WithField("service", "controller:service-binding-usage"),
-		queue:                    workqueue.NewNamedRateLimitingQueue(workqueue.DefaultControllerRateLimiter(), "ServiceBindingUsage"),
+		queue:                    workqueue.NewNamedRateLimitingQueue(queue, "ServiceBindingUsage"),
 		prefixGetter:             &envPrefixGetter{},
 		metric:                   cbm,
 	}
@@ -312,18 +319,11 @@ func (c *ServiceBindingUsageController) processNextWorkItem() bool {
 
 	retry := c.queue.NumRequeues(key)
 	usageStatus, err := c.syncServiceBindingUsage(namespace, name)
-	switch {
-	case err == nil:
-		c.queue.Forget(key)
-		c.metric.DecrementQueueLength(metric.SbuController)
-
-	case retry < c.maxRetires:
-		c.log.Debugf("Error processing %q (will retry - it's %d of %d): %v", key, retry, c.maxRetires, err)
+	if err != nil {
+		c.log.Errorf("while processing %q: %v", key, err)
 		c.queue.AddRateLimited(key)
-
-	default: // err != nil and too many retries
-		c.log.Errorf("Error processing %q (giving up - to many retires): %v", key, err)
 		c.metric.RecordError(metric.SbuController)
+	} else {
 		c.queue.Forget(key)
 		c.metric.DecrementQueueLength(metric.SbuController)
 	}
@@ -331,7 +331,7 @@ func (c *ServiceBindingUsageController) processNextWorkItem() bool {
 	// set ServiceBindingUsage status if ServiceBindingUsage and his status exist
 	if usageStatus != nil {
 		c.log.Debug("Starting process of updating ServiceBindingUsageCondition")
-		usageStatus.wrapMessageForFailed(fmt.Sprintf("Process error during %d attempts from %d", retry, c.maxRetires))
+		usageStatus.wrapMessageForFailed(fmt.Sprintf("Process error during %d attempt", retry))
 
 		bindingUsage, err := c.bindingUsageLister.ServiceBindingUsages(namespace).Get(name)
 		if err != nil {

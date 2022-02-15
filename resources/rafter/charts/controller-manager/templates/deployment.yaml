@@ -57,17 +57,9 @@ spec:
       {{- if .Values.pod.extraProperties }}
       {{ include "rafter.tplValue" ( dict "value" .Values.pod.extraProperties "context" . ) | nindent 6 }}
       {{- end }}
-      # MODIFIED: Block - START
-      {{ if .Values.global.isLocalEnv }}
-      hostAliases:
-        - ip: {{ .Values.global.minikubeIP }}
-          hostnames:
-            - "storage.{{ .Values.global.ingress.domainName }}"
-      {{ end }}
-      # MODIFIED: Block - END
       containers:
         - name: {{ include "rafter.name" . }}
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.rafter_controller_manager) }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           {{- $replicas := int (toString (.Values.deployment.replicas)) -}}
           {{- if or .Values.metrics.enabled (gt $replicas 1) }}
@@ -138,3 +130,8 @@ spec:
               value: {{ include "rafter.webhooksConfigMapName" . }}
             - name: APP_WEBHOOK_CONFIG_MAP_CFG_MAP_NAMESPACE
               value: {{ include "rafter.tplValue" ( dict "value" .Values.webhooksConfigMap.namespace "context" . ) }}
+            - name: APP_LOG_LEVEL
+              value: {{ .Values.envs.loglevel }}
+    {{- if .Values.global.priorityClassName }}
+      priorityClassName: {{ .Values.global.priorityClassName }}
+    {{- end }}

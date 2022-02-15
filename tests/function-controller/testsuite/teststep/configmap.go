@@ -29,7 +29,7 @@ func (c ConfigMaps) Name() string {
 }
 
 func (c ConfigMaps) Run() error {
-	return errors.Wrap(c.configMap.Create(c.data), "while checking if configmap is ready")
+	return errors.Wrap(c.configMap.Create(c.data), "while creating configmap")
 }
 
 func (c ConfigMaps) Cleanup() error {

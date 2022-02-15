@@ -1,9 +1,0 @@
-apiVersion: networking.istio.io/v1beta1
-kind: DestinationRule
-metadata:
-  name: knative-eventing
-spec:
-  host: "*.knative-eventing.svc.cluster.local"
-  trafficPolicy:
-    tls:
-      mode: DISABLE

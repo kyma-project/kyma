@@ -4,10 +4,10 @@ import (
 	"context"
 	"fmt"
 
+	osb "github.com/kubernetes-sigs/go-open-service-broker-client/v2"
 	"github.com/kyma-project/kyma/components/application-broker/internal"
 	"github.com/kyma-project/kyma/components/application-broker/internal/access"
 	"github.com/pkg/errors"
-	osb "github.com/pmorie/go-open-service-broker-client/v2"
 )
 
 //go:generate mockery -name=converter -output=automock -outpkg=automock -case=underscore

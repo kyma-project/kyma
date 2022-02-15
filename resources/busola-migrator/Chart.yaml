@@ -1,0 +1,4 @@
+apiVersion: v2
+name: busola-migrator
+description: Kyma component 'busola-migrator'
+version: 1.0.0

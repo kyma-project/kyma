@@ -23,7 +23,7 @@ BUILDPACK = {BUILDPACK IMAGE}
 SCRIPTS_DIR = {GENERIC MAKEFILE PATH}
 include $(SCRIPTS_DIR)/generic-make-go.mk
 ```
-Find the list of available buildpack images [here](https://github.com/kyma-project/test-infra/blob/master/templates/config.yaml).
+Find the list of available buildpack images [here](https://github.com/kyma-project/test-infra/blob/main/templates/config.yaml).
 
 ## Usage
 This is the basic syntax used in Makefiles:

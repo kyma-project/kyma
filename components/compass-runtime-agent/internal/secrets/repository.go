@@ -27,9 +27,11 @@ type Manager interface {
 //go:generate mockery --name=Repository
 // Repository contains operations for managing client credentials
 type Repository interface {
+	Exists(name types.NamespacedName) (bool, error)
 	Get(name types.NamespacedName) (map[string][]byte, error)
 	UpsertWithReplace(name types.NamespacedName, data map[string][]byte) error
 	UpsertWithMerge(name types.NamespacedName, data map[string][]byte) error
+	Delete(secretName types.NamespacedName) error
 }
 
 type repository struct {
@@ -42,6 +44,20 @@ func NewRepository(secretsManagerConstructor ManagerConstructor) Repository {
 	return &repository{
 		secretsManagerConstructor: secretsManagerConstructor,
 	}
+}
+
+func (r *repository) Exists(name types.NamespacedName) (bool, error) {
+	secretManager := r.secretsManagerConstructor(name.Namespace)
+
+	_, err := secretManager.Get(context.Background(), name.Name, metav1.GetOptions{})
+	if err != nil {
+		if k8serrors.IsNotFound(err) {
+			return false, nil
+		}
+		return false, err
+	}
+
+	return true, nil
 }
 
 // UpsertWithReplace creates a new Kubernetes secret, if secret with specified name already exists overrides it
@@ -102,6 +118,11 @@ func (r *repository) UpsertWithMerge(name types.NamespacedName, data map[string]
 
 	mergedData := mergeSecretData(existingData, data)
 	return r.upsert(name, mergedData)
+}
+
+func (r *repository) Delete(name types.NamespacedName) error {
+	secretManager := r.secretsManagerConstructor(name.Namespace)
+	return secretManager.Delete(context.Background(), name.Name, metav1.DeleteOptions{})
 }
 
 func (r *repository) upsert(name types.NamespacedName, data map[string][]byte) error {

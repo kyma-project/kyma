@@ -35,6 +35,7 @@ Create chart name and version as used by the chart label.
 Common labels
 */}}
 {{- define "oathkeeper.labels" -}}
+app: {{ include "oathkeeper.name" . }}
 app.kubernetes.io/name: {{ include "oathkeeper.name" . }}
 helm.sh/chart: {{ include "oathkeeper.chart" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
@@ -42,6 +43,19 @@ app.kubernetes.io/instance: {{ .Release.Name }}
 app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 {{- end }}
 app.kubernetes.io/managed-by: {{ .Release.Service }}
+{{- end -}}
+
+{{/*
+Check overrides consistency
+*/}}
+{{- define "oathkeeper.check.override.consistency" -}}
+{{- if and (index .Values "oathkeeper-maester" "enabled") .Values.fullnameOverride -}}
+{{- if not (index .Values "oathkeeper-maester" "oathkeeperFullnameOverride") -}}
+{{ fail "oathkeeper fullname has been overridden, but the new value has not been provided to maester. Set maester.oathkeeperFullnameOverride" }}
+{{- else if not (eq (index .Values "oathkeeper-maester" "oathkeeperFullnameOverride") .Values.fullnameOverride) -}}
+{{ fail (tpl "oathkeeper fullname has been overridden, but a different value was provided to maester. {{ (index .Values 'oathkeeper-maester' 'oathkeeperFullnameOverride') }} different of {{ .Values.fullnameOverride }}" . ) }}
+{{- end -}}
+{{- end -}}
 {{- end -}}
 
 {{/*

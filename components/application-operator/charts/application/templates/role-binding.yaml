@@ -28,6 +28,13 @@ rules:
 - apiGroups: ["*"]
   resources: ["secrets"]
   verbs: ["get"]
+{{- if .Values.global.podSecurityPolicyEnabled }}
+- apiGroups: ["extensions","policy"]
+  resources: ["podsecuritypolicies"]
+  verbs: ["use"]
+  resourceNames:  
+  - application-gateway
+{{- end }}
 ---
 kind: RoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
@@ -51,7 +58,7 @@ roleRef:
   apiGroup: rbac.authorization.k8s.io
 ---
 kind: ClusterRole
-apiVersion: rbac.authorization.k8s.io/v1beta1
+apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: {{ .Release.Name }}-application-gateway
   namespace: {{ .Release.Namespace }}
@@ -66,12 +73,18 @@ rules:
   - apiGroups: ["applicationconnector.kyma-project.io"]
     resources: ["applications"]
     verbs: ["get", "list"]
+{{- if .Values.global.podSecurityPolicyEnabled }}
+  - apiGroups: ["extensions","policy"]
+    resources: ["podsecuritypolicies"]
+    verbs: ["use"]
+    resourceNames:
+    - application-gateway
+{{- end }}
 ---
 kind: ClusterRoleBinding
-apiVersion: rbac.authorization.k8s.io/v1beta1
+apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: {{ .Release.Name }}-application-gateway
-  namespace: {{ .Release.Namespace }}
   labels:
     app: {{ .Release.Name }}-application-gateway
     release: {{ .Release.Name }}
@@ -88,64 +101,11 @@ roleRef:
   kind: ClusterRole
   name: {{ .Release.Name }}-application-gateway
 {{- end }}
+{{- if not .Values.global.centralApplicationConnectivityValidatorEnabled }}
 ---
-apiVersion: v1
-kind: ServiceAccount
-metadata:
-  name: {{.Release.Name }}-event-service
-  namespace: {{ .Release.Namespace }}
-  labels:
-    app: {{.Release.Name }}-event-service
-    release: {{ .Release.Name }}
-    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
-    app.kubernetes.io/name: {{ template "name" . }}
-    app.kubernetes.io/managed-by: {{ .Release.Service }}
-    app.kubernetes.io/instance: {{ .Release.Name }}
----
-kind: ClusterRole
-apiVersion: rbac.authorization.k8s.io/v1beta1
-metadata:
-  name: {{ .Release.Name }}-event-service
-  namespace: {{ .Release.Namespace }}
-  labels:
-    app: {{ .Release.Name }}-application-gateway
-    release: {{ .Release.Name }}
-    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
-    app.kubernetes.io/name: {{ template "name" . }}
-    app.kubernetes.io/managed-by: {{ .Release.Service }}
-    app.kubernetes.io/instance: {{ .Release.Name }}
-rules:
-- apiGroups: [""]
-  resources: ["namespaces"]
-  verbs: ["get", "list", "watch"]
-- apiGroups: ["eventing.knative.dev"]
-  resources: ["triggers"]
-  verbs: ["get", "list", "watch"]
 
----
-kind: ClusterRoleBinding
-apiVersion: rbac.authorization.k8s.io/v1beta1
-metadata:
-  name: {{ .Release.Name }}-event-service
-  namespace: {{ .Release.Namespace }}
-  labels:
-    app: {{ .Release.Name }}-application-gateway
-    release: {{ .Release.Name }}
-    helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
-    app.kubernetes.io/name: {{ template "name" . }}
-    app.kubernetes.io/managed-by: {{ .Release.Service }}
-    app.kubernetes.io/instance: {{ .Release.Name }}
-subjects:
-- kind: User
-  name: system:serviceaccount:{{ .Release.Namespace }}:{{ .Release.Name }}-event-service
-  apiGroup: rbac.authorization.k8s.io
-roleRef:
-  apiGroup: rbac.authorization.k8s.io
-  kind: ClusterRole
-  name: {{ .Release.Name }}-event-service
----
 kind: ClusterRole
-apiVersion: rbac.authorization.k8s.io/v1beta1
+apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: {{ .Release.Name }}-connectivity-validator
   namespace: {{ .Release.Namespace }}
@@ -159,13 +119,19 @@ metadata:
 rules:
   - apiGroups: ["applicationconnector.kyma-project.io"]
     resources: ["applications"]
-    verbs: ["get", "list"]
+    verbs: ["get", "list", "watch"]
+{{- if .Values.global.podSecurityPolicyEnabled }}
+  - apiGroups: ["extensions","policy"]
+    resources: ["podsecuritypolicies"]
+    verbs: ["use"]
+    resourceNames:  
+    - connectivity-validator
+{{- end }}
 ---
 kind: ClusterRoleBinding
-apiVersion: rbac.authorization.k8s.io/v1beta1
+apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: {{ .Release.Name }}-connectivity-validator
-  namespace: {{ .Release.Namespace }}
   labels:
     app: {{ .Release.Name }}-connectivity-validator
     release: {{ .Release.Name }}
@@ -181,3 +147,4 @@ roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
   name: {{ .Release.Name }}-connectivity-validator
+{{- end }}

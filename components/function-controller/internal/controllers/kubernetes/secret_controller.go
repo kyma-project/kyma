@@ -59,7 +59,11 @@ func (r *SecretReconciler) predicate() predicate.Predicate {
 			return r.svc.IsBase(runtime)
 		},
 		DeleteFunc: func(e event.DeleteEvent) bool {
-			return false
+			runtime, ok := e.Object.(*corev1.Secret)
+			if !ok {
+				return false
+			}
+			return r.svc.IsBase(runtime)
 		},
 	}
 }
@@ -82,6 +86,13 @@ func (r *SecretReconciler) Reconcile(request ctrl.Request) (ctrl.Result, error) 
 	namespaces, err := getNamespaces(ctx, r.client, r.config.BaseNamespace, r.config.ExcludedNamespaces)
 	if err != nil {
 		return ctrl.Result{}, err
+	}
+
+	if err := r.svc.HandleFinalizer(ctx, logger, instance, namespaces); err != nil {
+		return ctrl.Result{}, err
+	}
+	if !instance.ObjectMeta.DeletionTimestamp.IsZero() {
+		return ctrl.Result{}, nil
 	}
 
 	for _, namespace := range namespaces {

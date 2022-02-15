@@ -1,0 +1,46 @@
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  name: usagekinds.servicecatalog.kyma-project.io
+  annotations:
+    "helm.sh/resource-policy": keep
+spec:
+  group: servicecatalog.kyma-project.io
+  versions:
+    - name: v1alpha1
+      served: true
+      storage: true
+  scope: Cluster
+  names:
+    plural: usagekinds
+    singular: usagekind
+    kind: UsageKind
+    shortNames:
+    - uk
+  validation:
+    openAPIV3Schema:
+      properties:
+        spec:
+          type: object
+          required:
+            - displayName
+            - labelsPath
+            - resource
+          properties:
+            displayName:
+              type: string
+            labelsPath:
+              type: string
+            resource:
+              type: object
+              required:
+                - group
+                - version
+                - kind
+              properties:
+                kind:
+                  type: string
+                version:
+                  type: string
+                group:
+                  type: string

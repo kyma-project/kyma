@@ -1,6 +1,7 @@
 package externalapi
 
 import (
+	"context"
 	"errors"
 	"net/http"
 	"net/http/httptest"
@@ -17,6 +18,7 @@ import (
 
 func TestRevocationHandler(t *testing.T) {
 
+	testContext := context.Background()
 	urlRevocation := "/v1/applications/certificates/revocations"
 	hash := "f4cf22fb633d4df500e371daf703d4b4d14a0ea9d69cd631f95f9e6ba840f8ad"
 	certInfo := certificates.CertInfo{Hash: hash, Subject: ""}
@@ -29,7 +31,7 @@ func TestRevocationHandler(t *testing.T) {
 	t.Run("should revoke certificate and return http code 201", func(t *testing.T) {
 		//given
 		revocationListRepository := &mocks.RevocationListRepository{}
-		revocationListRepository.On("Insert", hash).Return(nil)
+		revocationListRepository.On("Insert", testContext, hash).Return(nil)
 
 		handler := NewRevocationHandler(revocationListRepository, headerParser)
 
@@ -50,7 +52,7 @@ func TestRevocationHandler(t *testing.T) {
 	t.Run("should return http code 201 when certificate already revoked", func(t *testing.T) {
 		//given
 		revocationListRepository := &mocks.RevocationListRepository{}
-		revocationListRepository.On("Insert", hash).Return(nil)
+		revocationListRepository.On("Insert", testContext, hash).Return(nil)
 
 		handler := NewRevocationHandler(revocationListRepository, headerParser)
 
@@ -95,13 +97,13 @@ func TestRevocationHandler(t *testing.T) {
 
 		//then
 		assert.Equal(t, http.StatusBadRequest, rr.Code)
-		revocationListRepository.AssertNotCalled(t, "Insert", mock.AnythingOfType("string"))
+		revocationListRepository.AssertNotCalled(t, "Insert", mock.AnythingOfType("context.Context"), mock.AnythingOfType("string"))
 	})
 
 	t.Run("should return http code 500 when certificate revocation not persisted", func(t *testing.T) {
 		//given
 		revocationListRepository := &mocks.RevocationListRepository{}
-		revocationListRepository.On("Insert", hash).Return(errors.New("Error"))
+		revocationListRepository.On("Insert", testContext, hash).Return(errors.New("Error"))
 
 		handler := NewRevocationHandler(revocationListRepository, headerParser)
 

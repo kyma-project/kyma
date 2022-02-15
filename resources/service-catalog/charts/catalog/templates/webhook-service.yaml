@@ -17,6 +17,10 @@ spec:
   selector:
     app: {{ template "fullname" . }}-webhook
   ports:
+  - name: healthz
+    port: 8081
+    protocol: TCP
+    targetPort: 8081
   - name: https-secure
     protocol: TCP
     port: {{ .Values.webhook.service.port }}

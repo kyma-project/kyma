@@ -33,7 +33,6 @@ type options struct {
 	gatewayBaseURL                 string
 	certificateProtectedHost       string
 	appsInfoURL                    string
-	runtimesInfoURL                string
 	appCertificateValidityTime     time.Duration
 	runtimeCertificateValidityTime time.Duration
 	central                        bool
@@ -65,7 +64,6 @@ func parseArgs() *options {
 	gatewayBaseURL := flag.String("gatewayBaseURL", "https://gateway.wormhole.cluster.kyma.cx", "Base URL of the gateway service.")
 	certificateProtectedHost := flag.String("certificateProtectedHost", "gateway.wormhole.cluster.kyma.cx", "Host secured with client certificate, used for certificate renewal.")
 	appsInfoURL := flag.String("appsInfoURL", "", "URL at which management information is available.")
-	runtimesInfoURL := flag.String("runtimesInfoURL", "", "URL at which management information is available.")
 	appCertificateValidityTime := flag.String("appCertificateValidityTime", "90d", "Validity time of certificates issued for apps by this service.")
 	runtimeCertificateValidityTime := flag.String("runtimeCertificateValidityTime", "90d", "Validity time of certificates issued for runtimes by this service.")
 	central := flag.Bool("central", false, "Determines whether connector works as the central")
@@ -101,7 +99,6 @@ func parseArgs() *options {
 		certificateProtectedHost:       *certificateProtectedHost,
 		central:                        *central,
 		appsInfoURL:                    *appsInfoURL,
-		runtimesInfoURL:                *runtimesInfoURL,
 		appCertificateValidityTime:     appValidityTime,
 		runtimeCertificateValidityTime: runtimeValidityTime,
 		revocationConfigMapName:        *revocationConfigMapName,
@@ -114,12 +111,12 @@ func (o *options) String() string {
 	return fmt.Sprintf("--appName=%s --externalAPIPort=%d --internalAPIPort=%d --namespace=%s --tokenLength=%d "+
 		"--appTokenExpirationMinutes=%d --runtimeTokenExpirationMinutes=%d --caSecretName=%s --rootCACertificateSecretName=%s --requestLogging=%t "+
 		"--connectorServiceHost=%s --certificateProtectedHost=%s --gatewayBaseURL=%s "+
-		"--appsInfoURL=%s --runtimesInfoURL=%s --central=%t --appCertificateValidityTime=%s --runtimeCertificateValidityTime=%s "+
+		"--appsInfoURL=%s --central=%t --appCertificateValidityTime=%s --runtimeCertificateValidityTime=%s "+
 		"--revocationConfigMapName=%s --lookupEnabled=%t --lookupConfigMapPath=%s",
 		o.appName, o.externalAPIPort, o.internalAPIPort, o.namespace, o.tokenLength,
 		o.appTokenExpirationMinutes, o.runtimeTokenExpirationMinutes, o.caSecretName, o.rootCACertificateSecretName, o.requestLogging,
 		o.connectorServiceHost, o.certificateProtectedHost, o.gatewayBaseURL,
-		o.appsInfoURL, o.runtimesInfoURL, o.central, o.appCertificateValidityTime, o.runtimeCertificateValidityTime,
+		o.appsInfoURL, o.central, o.appCertificateValidityTime, o.runtimeCertificateValidityTime,
 		o.revocationConfigMapName, o.lookupEnabled, o.lookupConfigMapPath)
 }
 

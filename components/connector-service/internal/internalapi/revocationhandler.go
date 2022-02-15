@@ -1,6 +1,7 @@
 package internalapi
 
 import (
+	"context"
 	"encoding/json"
 	"io/ioutil"
 	"net/http"
@@ -16,11 +17,13 @@ type revocationBody struct {
 }
 
 type revocationHandler struct {
+	ctx            context.Context
 	revocationList revocation.RevocationListRepository
 }
 
-func NewRevocationHandler(revocationListRepository revocation.RevocationListRepository) *revocationHandler {
+func NewRevocationHandler(ctx context.Context, revocationListRepository revocation.RevocationListRepository) *revocationHandler {
 	return &revocationHandler{
+		ctx:            ctx,
 		revocationList: revocationListRepository,
 	}
 }
@@ -63,7 +66,7 @@ func (handler revocationHandler) readBody(request *http.Request) (*revocationBod
 }
 
 func (handler revocationHandler) addToRevocationList(hash string) apperrors.AppError {
-	err := handler.revocationList.Insert(hash)
+	err := handler.revocationList.Insert(handler.ctx, hash)
 
 	logrus.Warningf("Adding certificate with hash: %s to revocation list.", hash)
 	if err != nil {

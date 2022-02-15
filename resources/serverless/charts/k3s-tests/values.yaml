@@ -1,0 +1,22 @@
+tests:
+  image:
+    repository: "overridden-during-installation"
+    tag: "overridden-during-installation"
+
+testSuite: "serverless-integration"
+jobName: k3s-serverless-test # overridden in serverless-integration-k3s.sh in test-infra
+
+
+gitAuth:
+  azure:
+    url: "https://kyma-wookiee@dev.azure.com/kyma-wookiee/kyma-function/_git/kyma-function"
+    baseDir: "/code"
+    reference: "main"
+    username: ""
+    password: ""
+
+  github:
+    url: "git@github.com:kyma-project/private-fn-for-e2e-serverless-tests.git"
+    baseDir: "/"
+    reference: "main"
+    key: ""

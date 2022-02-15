@@ -2,10 +2,12 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 image:
-  repository: eu.gcr.io/kyma-project/incubator/develop/jaeger-operator
-  tag: 1.18.1-ff002438
   pullPolicy: IfNotPresent
   imagePullSecrets: []
+
+securityContext:
+  allowPrivilegeEscalation: false
+  privileged: false
 
 resources:
   limits:
@@ -18,7 +20,7 @@ resources:
 nodeSelector: {}
 
 crd:
-  install: true
+  install: false
 
 jaeger:
   # Specifies whether Jaeger instance should be created
@@ -29,46 +31,33 @@ jaeger:
     badgerPvc:
       enabled: false
       accessModes:
-      - ReadWriteOnce
+        - ReadWriteOnce
       size: 1Gi
       storageClassName: ""
   spec:
-    strategy: allInOne #allInOne | production
+    strategy: allInOne
     allInOne:
-      image: eu.gcr.io/kyma-project/external/jaegertracing/all-in-one:1.18.1
+      image: '{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.jaeger_all_in_one) }}'
       options:
         log-level: info
     storage:
-      type: memory #memory | badger | elasticsearch | cassandra
+      type: memory
       options:
-        badger:
-          ephemeral: false
-          truncate: true
-          span-store-ttl: 24h
-          directory-key: "/badger/key"
-          directory-value: "/badger/data"
         memory:
           max-traces: 10000
-        es:
-          # Note: This assumes elasticsearch is running in the "default" namespace.
-          server-urls: http://elasticsearch-client.default.svc:9200
-        cassandra:
-          # Note: This assumes cassandra is running in the "default" namespace.
-          servers: cassandra.default.svc
-          keyspace: jaeger_v1_datacenter3
     ui:
       options:
         dependencies:
           menuEnabled: true
         menu:
-        - label: "About Jaeger"
-          items:
-          - label: "Documentation"
-            url: "https://www.jaegertracing.io/docs/latest"
-        - label: "About Kyma"
-          items:
-          - label: "Documentation"
-            url: "https://kyma-project.io/docs/components/tracing/"
+          - label: "About Jaeger"
+            items:
+              - label: "Documentation"
+                url: "https://www.jaegertracing.io/docs/latest"
+          - label: "About Kyma"
+            items:
+              - label: "Documentation"
+                url: "https://kyma-project.io/docs/kyma/latest/01-overview/main-areas/observability"
     ingress:
       enabled: false
     annotations:
@@ -81,6 +70,12 @@ jaeger:
       requests:
         cpu: 10m
         memory: 40Mi
+    securityContext:
+      runAsUser: 1000
+      runAsGroup: 1000
+      fsGroup: 1000
+      allowPrivilegeEscalation: false
+      privileged: false
 
 rbac:
   # Specifies whether RBAC resources should be created
@@ -96,7 +91,7 @@ serviceAccount:
   name:
 
 global:
-  isLocalEnv: false
+  domainName: "kyma.example.com"
   istio:
     gateway:
       name: kyma-gateway
@@ -108,33 +103,52 @@ global:
     namespaceAdminGroup: runtimeNamespaceAdmin
   tracing:
     enabled: true
-
-kcproxy:
+  containerRegistry:
+    path: eu.gcr.io/kyma-project
+  images:
+    jaeger_operator:
+      name: "jaeger-operator"
+      version: "1.30.0-bc31ec4c"
+      directory: "tpi"
+    jaeger_all_in_one:
+      name: "jaegertracing/all-in-one"
+      version: "1.30.0"
+      directory: "external"
+    oauth2_proxy:
+      name: "oauth2-proxy"
+      version: "7.2.1-334ca95f"
+      directory: "tpi"
+virtualservice:
+  enabled: true
+authProxy:
+  enabled: true
   replicaCount: 1
   inPort: 10001
+  configDocsLink: "https://kyma-project.io/docs/kyma/latest/04-operation-guides/security/sec-06-access-expose-kiali-grafana"
   config:
-    clientId: "jaeger"
-    clientSecret: "oiEWUWOIEwedfgg"
-    tlsVerify: false
-    resources:
-      uri: "/*"
-      methods: "GET,POST,PUT,DELETE"
-      useKymaGroups: false
-      groups: ""
-      roles: ""
+    clientId: "dummy"
+    clientSecret: "dummy"
+    tlsVerify: true
+    emailDomains: "*"
+    groups: ""
+    useKymaGroups: false
     scopes: "groups"
-    headers: ""
-    matchClaims: ""
-    addClaims: ""
+    authLogging: true
+    requestLogging: false
+    passHostHeader: false
+  env: {}
   nodeSelector: {}
+  podSecurityContext: {}
+  securityContext:
+    allowPrivilegeEscalation: false
+    privileged: false
+    runAsNonRoot: true
   image:
-    repository: eu.gcr.io/kyma-project/external/bitnami/keycloak-gatekeeper
-    tag: 10.0.0
     pullPolicy: IfNotPresent
   resources:
     limits:
       cpu: 50m
-      memory: 20Mi
+      memory: 100Mi
     requests:
       cpu: 10m
-      memory: 5Mi
+      memory: 15Mi

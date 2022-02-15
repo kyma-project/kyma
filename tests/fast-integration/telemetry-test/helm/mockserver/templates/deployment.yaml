@@ -1,0 +1,108 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ template "chart.name" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: {{ template "chart.name" . }}
+    chart: {{ template "chart.name_version" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ template "chart.name" . }}
+      release: {{ .Release.Name }}
+  template:
+    metadata:
+{{- if .Values.podAnnotations }}
+      # Allows custom annotations to be specified
+      annotations:
+{{ toYaml .Values.podAnnotations | indent 8 }}
+{{- end }}
+      name: {{ template "chart.name" . }}
+      labels:
+        app: {{ template "chart.name" . }}
+        release: {{ .Release.Name }}
+    spec:
+      containers:
+        - name: {{ template "chart.name" . }}
+          image: {{ .Values.image.repository }}/mockserver:mockserver-{{- if .Values.image.snapshot }}snapshot{{- else }}{{ .Chart.Version }}{{- end }}
+{{- if .Values.image.snapshot }}
+          imagePullPolicy: Always
+{{- else }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+{{- end }}
+          securityContext:
+            runAsUser: 65534 # nonroot
+            readOnlyRootFilesystem: {{ .Values.app.readOnlyRootFilesystem }}
+          ports:
+            - name: serviceport
+              containerPort: {{ .Values.app.serverPort }}
+              protocol: TCP
+          readinessProbe:
+            tcpSocket:
+              port: serviceport
+            initialDelaySeconds: 2
+            periodSeconds: 2
+            successThreshold: 1
+            failureThreshold: 10
+          livenessProbe:
+            tcpSocket:
+              port: serviceport
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            successThreshold: 1
+            failureThreshold: 10
+          env:
+            - name: LOG_LEVEL
+              value: {{ .Values.app.logLevel | quote }}
+            - name: SERVER_PORT
+              value: {{ .Values.app.serverPort | quote }}
+{{- if .Values.app.proxyRemoteHost }}
+            - name: PROXY_REMOTE_HOST
+              value: {{ .Values.app.proxyRemoteHost | quote }}
+{{- end }}
+{{- if .Values.app.proxyRemotePort }}
+            - name: PROXY_REMOTE_PORT
+              value: {{ .Values.app.proxyRemotePort | quote }}
+{{- end }}
+{{- if .Values.app.jvmOptions }}
+            - name: JVM_OPTIONS
+              value: {{ .Values.app.jvmOptions | quote }}
+{{- end }}
+{{- if .Values.app.mountConfigMap }}
+            - name: MOCKSERVER_PROPERTY_FILE
+              value: /config/{{ .Values.app.propertiesFileName }}
+{{- end }}
+          volumeMounts:
+            - name: config-volume
+              mountPath: /config
+            - name: libs-volume
+              mountPath: /libs
+{{- if .Values.app.resources }}
+          resources:
+{{ toYaml .Values.resources | indent 12 }}
+{{- end }}
+      volumes:
+        - name: config-volume
+          configMap:
+            name: {{ .Values.app.mountedConfigMapName }}
+            optional: true
+        - name: libs-volume
+          configMap:
+            name: {{ .Values.app.mountedLibsConfigMapName }}
+            optional: true
+{{- with .Values.nodeSelector }}
+      nodeSelector:
+{{ toYaml . | indent 8 }}
+{{- end }}
+{{- with .Values.affinity }}
+      affinity:
+{{ toYaml . | indent 8 }}
+{{- end }}
+{{- with .Values.tolerations }}
+      tolerations:
+{{ toYaml . | indent 8 }}
+{{- end }}

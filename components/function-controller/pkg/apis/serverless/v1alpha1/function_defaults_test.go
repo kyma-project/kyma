@@ -4,6 +4,8 @@ import (
 	"context"
 	"testing"
 
+	"github.com/stretchr/testify/require"
+
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/vrischmann/envconfig"
@@ -18,6 +20,12 @@ func TestSetDefaults(t *testing.T) {
 	zero := int32(0)
 	one := int32(1)
 	two := int32(2)
+
+	functionProfiles := `
+{
+	"python39": "L"
+}
+`
 	functionReplicas := `
 {
 "S":{"min": 1,"max": 1},
@@ -29,16 +37,50 @@ func TestSetDefaults(t *testing.T) {
 {
 "S":{"requestCpu": "25m","requestMemory": "32Mi","limitCpu": "50m","limitMemory": "64Mi"},
 "M":{"requestCpu": "50m","requestMemory": "64Mi","limitCpu": "100m","limitMemory": "128Mi"},
-"L":{"limitCpu": "200m","limitMemory": "256Mi"}
+"L":{"requestCpu": "100m","requestMemory": "128Mi","limitCpu": "200m","limitMemory": "256Mi"}
 }
 `
+
+	LRuntimeResources := corev1.ResourceRequirements{
+		Requests: corev1.ResourceList{
+			corev1.ResourceCPU:    resource.MustParse("100m"),
+			corev1.ResourceMemory: resource.MustParse("128Mi"),
+		},
+		Limits: corev1.ResourceList{
+			corev1.ResourceCPU:    resource.MustParse("200m"),
+			corev1.ResourceMemory: resource.MustParse("256Mi"),
+		},
+	}
+
 	buildResources := `
 {
 "slow":{"requestCpu": "350m","requestMemory": "350Mi","limitCpu": "700m","limitMemory": "700Mi"},
 "normal":{"requestCpu": "700m","requestMemory": "700Mi","limitCpu": "1100m","limitMemory": "1100Mi"},
-"fast":{"limitCpu": "1800m","limitMemory": "1800Mi"}
+"fast":{"requestCpu": "1100m","requestMemory": "1100Mi", "limitCpu": "1800m","limitMemory": "1800Mi"}
 }
 `
+
+	normalBuildResources := corev1.ResourceRequirements{
+		Limits: corev1.ResourceList{
+			corev1.ResourceCPU:    resource.MustParse("1100m"),
+			corev1.ResourceMemory: resource.MustParse("1100Mi"),
+		},
+		Requests: corev1.ResourceList{
+			corev1.ResourceCPU:    resource.MustParse("700m"),
+			corev1.ResourceMemory: resource.MustParse("700Mi"),
+		},
+	}
+
+	fastBuildResources := corev1.ResourceRequirements{
+		Limits: corev1.ResourceList{
+			corev1.ResourceCPU:    resource.MustParse("1800m"),
+			corev1.ResourceMemory: resource.MustParse("1800Mi"),
+		},
+		Requests: corev1.ResourceList{
+			corev1.ResourceCPU:    resource.MustParse("1100m"),
+			corev1.ResourceMemory: resource.MustParse("1100Mi"),
+		},
+	}
 
 	for testName, testData := range map[string]struct {
 		givenFunc    Function
@@ -47,7 +89,7 @@ func TestSetDefaults(t *testing.T) {
 		"Should do nothing": {
 			givenFunc: Function{
 				Spec: FunctionSpec{
-					Runtime: Nodejs12,
+					Runtime: Nodejs14,
 					Resources: corev1.ResourceRequirements{
 						Limits: corev1.ResourceList{
 							corev1.ResourceCPU:    resource.MustParse("150m"),
@@ -73,7 +115,7 @@ func TestSetDefaults(t *testing.T) {
 				},
 			},
 			expectedFunc: Function{Spec: FunctionSpec{
-				Runtime: Nodejs12,
+				Runtime: Nodejs14,
 				Resources: corev1.ResourceRequirements{
 					Limits: corev1.ResourceList{
 						corev1.ResourceCPU:    resource.MustParse("150m"),
@@ -102,7 +144,7 @@ func TestSetDefaults(t *testing.T) {
 		"Should not change runtime type": {
 			givenFunc: Function{
 				Spec: FunctionSpec{
-					Runtime: Python38,
+					Runtime: Python39,
 					Resources: corev1.ResourceRequirements{
 						Limits: corev1.ResourceList{
 							corev1.ResourceCPU:    resource.MustParse("150m"),
@@ -129,7 +171,7 @@ func TestSetDefaults(t *testing.T) {
 			},
 			expectedFunc: Function{
 				Spec: FunctionSpec{
-					Runtime: Python38,
+					Runtime: Python39,
 					Resources: corev1.ResourceRequirements{
 						Limits: corev1.ResourceList{
 							corev1.ResourceCPU:    resource.MustParse("150m"),
@@ -155,7 +197,7 @@ func TestSetDefaults(t *testing.T) {
 				},
 			},
 		},
-		"Should change empty runtime type to default nodejs12": {
+		"Should change empty runtime type to default Nodejs14": {
 			givenFunc: Function{
 				Spec: FunctionSpec{
 					Resources: corev1.ResourceRequirements{
@@ -184,7 +226,7 @@ func TestSetDefaults(t *testing.T) {
 			},
 			expectedFunc: Function{
 				Spec: FunctionSpec{
-					Runtime: Nodejs12,
+					Runtime: Nodejs14,
 					Resources: corev1.ResourceRequirements{
 						Limits: corev1.ResourceList{
 							corev1.ResourceCPU:    resource.MustParse("150m"),
@@ -213,7 +255,7 @@ func TestSetDefaults(t *testing.T) {
 			givenFunc: Function{},
 			expectedFunc: Function{
 				Spec: FunctionSpec{
-					Runtime: Nodejs12,
+					Runtime: Nodejs14,
 					Resources: corev1.ResourceRequirements{
 						Limits: corev1.ResourceList{
 							corev1.ResourceCPU:    resource.MustParse("100m"),
@@ -259,7 +301,7 @@ func TestSetDefaults(t *testing.T) {
 			},
 			expectedFunc: Function{
 				Spec: FunctionSpec{
-					Runtime: Nodejs12,
+					Runtime: Nodejs14,
 					Resources: corev1.ResourceRequirements{
 						Requests: corev1.ResourceList{
 							corev1.ResourceCPU:    resource.MustParse("150m"),
@@ -305,7 +347,7 @@ func TestSetDefaults(t *testing.T) {
 			},
 			expectedFunc: Function{
 				Spec: FunctionSpec{
-					Runtime: Nodejs12,
+					Runtime: Nodejs14,
 					Resources: corev1.ResourceRequirements{
 						Limits: corev1.ResourceList{
 							corev1.ResourceCPU:    resource.MustParse("15m"),
@@ -361,7 +403,7 @@ func TestSetDefaults(t *testing.T) {
 		})
 	}
 
-	for testName, testData := range map[string]struct {
+	testCases := map[string]struct {
 		givenFunc    Function
 		expectedFunc Function
 	}{
@@ -375,7 +417,7 @@ func TestSetDefaults(t *testing.T) {
 					},
 				},
 				Spec: FunctionSpec{
-					Runtime: Nodejs12,
+					Runtime: Nodejs14,
 					Resources: corev1.ResourceRequirements{
 						Requests: corev1.ResourceList{
 							corev1.ResourceCPU:    resource.MustParse("15m"),
@@ -398,7 +440,7 @@ func TestSetDefaults(t *testing.T) {
 					BuildResourcesPresetLabel:    "slow",
 				},
 			}, Spec: FunctionSpec{
-				Runtime: Nodejs12,
+				Runtime: Nodejs14,
 				Resources: corev1.ResourceRequirements{
 					Limits: corev1.ResourceList{
 						corev1.ResourceCPU:    resource.MustParse("50m"),
@@ -434,7 +476,7 @@ func TestSetDefaults(t *testing.T) {
 					},
 				},
 				Spec: FunctionSpec{
-					Runtime: Nodejs12,
+					Runtime: Nodejs14,
 				},
 			},
 			expectedFunc: Function{ObjectMeta: v1.ObjectMeta{
@@ -444,33 +486,38 @@ func TestSetDefaults(t *testing.T) {
 					BuildResourcesPresetLabel:    "fast",
 				},
 			}, Spec: FunctionSpec{
-				Runtime: Nodejs12,
-				Resources: corev1.ResourceRequirements{
-					Limits: corev1.ResourceList{
-						corev1.ResourceCPU:    resource.MustParse("200m"),
-						corev1.ResourceMemory: resource.MustParse("256Mi"),
-					},
-					Requests: corev1.ResourceList{
-						corev1.ResourceCPU:    resource.MustParse("50m"),
-						corev1.ResourceMemory: resource.MustParse("64Mi"),
-					},
-				},
-				BuildResources: corev1.ResourceRequirements{
-					Limits: corev1.ResourceList{
-						corev1.ResourceCPU:    resource.MustParse("1800m"),
-						corev1.ResourceMemory: resource.MustParse("1800Mi"),
-					},
-					Requests: corev1.ResourceList{
-						corev1.ResourceCPU:    resource.MustParse("700m"),
-						corev1.ResourceMemory: resource.MustParse("700Mi"),
-					},
-				},
-				MinReplicas: &two,
-				MaxReplicas: &two,
+				Runtime:        Nodejs14,
+				Resources:      LRuntimeResources,
+				BuildResources: fastBuildResources,
+				MinReplicas:    &two,
+				MaxReplicas:    &two,
 			},
 			},
 		},
-	} {
+		"Should function profile be set to function presets L instead of default value": {
+			givenFunc: Function{
+				ObjectMeta: v1.ObjectMeta{
+					Labels: map[string]string{},
+				},
+				Spec: FunctionSpec{
+					Runtime: Python39,
+				},
+			},
+			expectedFunc: Function{ObjectMeta: v1.ObjectMeta{
+				Labels: map[string]string{
+					//FunctionResourcesPresetLabel: "L",
+				},
+			}, Spec: FunctionSpec{
+				Runtime:        Python39,
+				Resources:      LRuntimeResources,
+				BuildResources: normalBuildResources,
+				MinReplicas:    &one,
+				MaxReplicas:    &one,
+			}},
+		},
+	}
+
+	for testName, testData := range testCases {
 		t.Run(testName, func(t *testing.T) {
 			// given
 			g := gomega.NewWithT(t)
@@ -490,13 +537,18 @@ func TestSetDefaults(t *testing.T) {
 			g.Expect(err).To(gomega.BeNil())
 			config.BuildJob.Resources.Presets = buildResourcesPresets
 
+			functionProfile, err := ParseRuntimePresets(functionProfiles)
+			g.Expect(err).To(gomega.BeNil())
+			config.Function.Resources.RuntimePresets = functionProfile
+
 			ctx := context.WithValue(context.Background(), DefaultingConfigKey, *config)
 
 			// when
 			testData.givenFunc.SetDefaults(ctx)
 
 			// then
-			g.Expect(testData.givenFunc).To(gomega.Equal(testData.expectedFunc))
+			//g.Expect(testData.givenFunc).To(gomega.Equal(testData.expectedFunc))
+			require.EqualValues(t, testData.givenFunc, testData.expectedFunc)
 		})
 	}
 }

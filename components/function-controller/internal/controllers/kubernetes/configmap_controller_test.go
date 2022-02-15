@@ -4,7 +4,8 @@ import (
 	"context"
 	"testing"
 
-	"github.com/onsi/ginkgo"
+	"k8s.io/client-go/kubernetes/scheme"
+
 	"github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -18,74 +19,74 @@ import (
 	"github.com/kyma-project/kyma/components/function-controller/internal/resource/automock"
 )
 
-var _ = ginkgo.Describe("ConfigMap", func() {
-	var (
-		reconciler    *ConfigMapReconciler
-		request       ctrl.Request
-		baseConfigMap *corev1.ConfigMap
-		namespace     string
-	)
+func TestConfigMapReconciler_Reconcile(t *testing.T) {
+	//GIVEN
+	g := gomega.NewGomegaWithT(t)
+	k8sClient, testEnv := setUpTestEnv(g)
+	defer tearDownTestEnv(g, testEnv)
+	resourceClient := resource.New(k8sClient, scheme.Scheme)
+	testCfg := setUpControllerConfig(g)
+	configMapSvc := NewConfigMapService(resourceClient, testCfg)
 
-	ginkgo.BeforeEach(func() {
-		userNamespace := newFixNamespace("tam")
-		gomega.Expect(resourceClient.Create(context.TODO(), userNamespace)).To(gomega.Succeed())
+	baseNamespace := newFixNamespace(testCfg.BaseNamespace)
+	g.Expect(k8sClient.Create(context.TODO(), baseNamespace)).To(gomega.Succeed())
 
-		baseConfigMap = newFixBaseConfigMap(config.BaseNamespace, "ah-tak-przeciez")
-		gomega.Expect(resourceClient.Create(context.TODO(), baseConfigMap)).To(gomega.Succeed())
+	userNamespace := newFixNamespace("tam")
+	g.Expect(k8sClient.Create(context.TODO(), userNamespace)).To(gomega.Succeed())
 
-		request = ctrl.Request{NamespacedName: types.NamespacedName{Namespace: baseConfigMap.GetNamespace(), Name: baseConfigMap.GetName()}}
-		reconciler = NewConfigMap(k8sClient, log.Log, config, configMapSvc)
-		namespace = userNamespace.GetName()
-	})
+	baseConfigMap := newFixBaseConfigMap(testCfg.BaseNamespace, "ah-tak-przeciez")
+	g.Expect(k8sClient.Create(context.TODO(), baseConfigMap)).To(gomega.Succeed())
 
-	ginkgo.It("should successfully propagate base ConfigMap to user namespace", func() {
-		ginkgo.By("reconciling ConfigMap that doesn't exist")
-		_, err := reconciler.Reconcile(ctrl.Request{NamespacedName: types.NamespacedName{Namespace: baseConfigMap.GetNamespace(), Name: "not-existing-cm"}})
-		gomega.Expect(err).To(gomega.BeNil(), "should not throw error on non existing configmap")
+	request := ctrl.Request{NamespacedName: types.NamespacedName{Namespace: baseConfigMap.GetNamespace(), Name: baseConfigMap.GetName()}}
+	reconciler := NewConfigMap(k8sClient, log.Log, testCfg, configMapSvc)
+	namespace := userNamespace.GetName()
 
-		ginkgo.By("reconciling the ConfigMap")
-		result, err := reconciler.Reconcile(request)
-		gomega.Expect(err).To(gomega.BeNil())
-		gomega.Expect(result.Requeue).To(gomega.BeFalse())
-		gomega.Expect(result.RequeueAfter).To(gomega.Equal(config.ConfigMapRequeueDuration))
+	//WHEN
+	t.Log("reconciling ConfigMap that doesn't exist")
+	_, err := reconciler.Reconcile(ctrl.Request{NamespacedName: types.NamespacedName{Namespace: baseConfigMap.GetNamespace(), Name: "not-existing-cm"}})
+	g.Expect(err).To(gomega.BeNil(), "should not throw error on non existing configmap")
 
-		configMap := &corev1.ConfigMap{}
-		gomega.Expect(k8sClient.Get(context.TODO(), types.NamespacedName{Namespace: namespace, Name: baseConfigMap.GetName()}, configMap)).To(gomega.Succeed())
-		compareConfigMaps(configMap, baseConfigMap)
+	t.Log("reconciling the ConfigMap")
+	result, err := reconciler.Reconcile(request)
+	g.Expect(err).To(gomega.BeNil())
+	g.Expect(result.Requeue).To(gomega.BeFalse())
+	g.Expect(result.RequeueAfter).To(gomega.Equal(testCfg.ConfigMapRequeueDuration))
 
-		ginkgo.By("updating the base ConfigMap")
-		copy := baseConfigMap.DeepCopy()
-		copy.Labels["test"] = "value"
-		copy.Data["test123"] = "321tset"
-		gomega.Expect(k8sClient.Update(context.TODO(), copy)).To(gomega.Succeed())
+	configMap := &corev1.ConfigMap{}
+	g.Expect(k8sClient.Get(context.TODO(), types.NamespacedName{Namespace: namespace, Name: baseConfigMap.GetName()}, configMap)).To(gomega.Succeed())
+	compareConfigMaps(g, configMap, baseConfigMap)
 
-		result, err = reconciler.Reconcile(request)
-		gomega.Expect(err).To(gomega.BeNil())
-		gomega.Expect(result.Requeue).To(gomega.BeFalse())
-		gomega.Expect(result.RequeueAfter).To(gomega.Equal(config.ConfigMapRequeueDuration))
+	t.Log("updating the base ConfigMap")
+	cmCopy := baseConfigMap.DeepCopy()
+	cmCopy.Labels["test"] = "value"
+	cmCopy.Data["test123"] = "321tset"
+	g.Expect(k8sClient.Update(context.TODO(), cmCopy)).To(gomega.Succeed())
 
-		configMap = &corev1.ConfigMap{}
-		gomega.Expect(k8sClient.Get(context.TODO(), types.NamespacedName{Namespace: namespace, Name: baseConfigMap.GetName()}, configMap)).To(gomega.Succeed())
-		compareConfigMaps(configMap, copy)
+	result, err = reconciler.Reconcile(request)
+	g.Expect(err).To(gomega.BeNil())
+	g.Expect(result.Requeue).To(gomega.BeFalse())
+	g.Expect(result.RequeueAfter).To(gomega.Equal(testCfg.ConfigMapRequeueDuration))
 
-		ginkgo.By("updating the modified ConfigMap in user namespace")
-		userCopy := configMap.DeepCopy()
-		userCopy.Data["4213"] = "142343"
-		gomega.Expect(k8sClient.Update(context.TODO(), userCopy)).To(gomega.Succeed())
+	configMap = &corev1.ConfigMap{}
+	g.Expect(k8sClient.Get(context.TODO(), types.NamespacedName{Namespace: namespace, Name: baseConfigMap.GetName()}, configMap)).To(gomega.Succeed())
+	compareConfigMaps(g, configMap, cmCopy)
 
-		result, err = reconciler.Reconcile(request)
-		gomega.Expect(err).To(gomega.BeNil())
-		gomega.Expect(result.Requeue).To(gomega.BeFalse())
-		gomega.Expect(result.RequeueAfter).To(gomega.Equal(config.ConfigMapRequeueDuration))
+	t.Log("updating the modified ConfigMap in user namespace")
+	userCopy := configMap.DeepCopy()
+	userCopy.Data["4213"] = "142343"
+	g.Expect(k8sClient.Update(context.TODO(), userCopy)).To(gomega.Succeed())
 
-		configMap = &corev1.ConfigMap{}
-		gomega.Expect(k8sClient.Get(context.TODO(), types.NamespacedName{Namespace: namespace, Name: baseConfigMap.GetName()}, configMap)).To(gomega.Succeed())
-		compareConfigMaps(configMap, copy)
-	})
-})
+	result, err = reconciler.Reconcile(request)
+	g.Expect(err).To(gomega.BeNil())
+	g.Expect(result.Requeue).To(gomega.BeFalse())
+	g.Expect(result.RequeueAfter).To(gomega.Equal(testCfg.ConfigMapRequeueDuration))
+
+	configMap = &corev1.ConfigMap{}
+	g.Expect(k8sClient.Get(context.TODO(), types.NamespacedName{Namespace: namespace, Name: baseConfigMap.GetName()}, configMap)).To(gomega.Succeed())
+	compareConfigMaps(g, configMap, cmCopy)
+}
 
 func TestConfigMapReconciler_predicate(t *testing.T) {
-	gm := gomega.NewGomegaWithT(t)
 	baseNs := "base_ns"
 
 	r := &ConfigMapReconciler{svc: NewConfigMapService(resource.New(&automock.K8sClient{}, runtime.NewScheme()), Config{BaseNamespace: baseNs})}
@@ -101,46 +102,50 @@ func TestConfigMapReconciler_predicate(t *testing.T) {
 	unlabelledConfigMap := &corev1.ConfigMap{}
 
 	t.Run("deleteFunc", func(t *testing.T) {
+		g := gomega.NewWithT(t)
 		deleteEventPod := event.DeleteEvent{Meta: pod.GetObjectMeta(), Object: pod}
 		deleteEventLabelledSrvAcc := event.DeleteEvent{Meta: labelledConfigmap.GetObjectMeta(), Object: labelledConfigmap}
 		deleteEventUnlabelledSrvAcc := event.DeleteEvent{Meta: unlabelledConfigMap.GetObjectMeta(), Object: unlabelledConfigMap}
 
-		gm.Expect(preds.Delete(deleteEventPod)).To(gomega.BeFalse())
-		gm.Expect(preds.Delete(deleteEventLabelledSrvAcc)).To(gomega.BeFalse())
-		gm.Expect(preds.Delete(deleteEventUnlabelledSrvAcc)).To(gomega.BeFalse())
-		gm.Expect(preds.Delete(event.DeleteEvent{})).To(gomega.BeFalse())
+		g.Expect(preds.Delete(deleteEventPod)).To(gomega.BeFalse())
+		g.Expect(preds.Delete(deleteEventLabelledSrvAcc)).To(gomega.BeFalse())
+		g.Expect(preds.Delete(deleteEventUnlabelledSrvAcc)).To(gomega.BeFalse())
+		g.Expect(preds.Delete(event.DeleteEvent{})).To(gomega.BeFalse())
 	})
 
 	t.Run("createFunc", func(t *testing.T) {
+		g := gomega.NewWithT(t)
 		createEventPod := event.CreateEvent{Meta: pod.GetObjectMeta(), Object: pod}
 		createEventLabelledSrvAcc := event.CreateEvent{Meta: labelledConfigmap.GetObjectMeta(), Object: labelledConfigmap}
 		createEventUnlabelledSrvAcc := event.CreateEvent{Meta: unlabelledConfigMap.GetObjectMeta(), Object: unlabelledConfigMap}
 
-		gm.Expect(preds.Create(createEventPod)).To(gomega.BeFalse())
-		gm.Expect(preds.Create(createEventLabelledSrvAcc)).To(gomega.BeTrue())
-		gm.Expect(preds.Create(createEventUnlabelledSrvAcc)).To(gomega.BeFalse())
-		gm.Expect(preds.Create(event.CreateEvent{})).To(gomega.BeFalse())
+		g.Expect(preds.Create(createEventPod)).To(gomega.BeFalse())
+		g.Expect(preds.Create(createEventLabelledSrvAcc)).To(gomega.BeTrue())
+		g.Expect(preds.Create(createEventUnlabelledSrvAcc)).To(gomega.BeFalse())
+		g.Expect(preds.Create(event.CreateEvent{})).To(gomega.BeFalse())
 	})
 
 	t.Run("genericFunc", func(t *testing.T) {
+		g := gomega.NewWithT(t)
 		genericEventPod := event.GenericEvent{Meta: pod.GetObjectMeta(), Object: pod}
 		genericEventLabelledSrvAcc := event.GenericEvent{Meta: labelledConfigmap.GetObjectMeta(), Object: labelledConfigmap}
 		genericEventUnlabelledSrvAcc := event.GenericEvent{Meta: unlabelledConfigMap.GetObjectMeta(), Object: unlabelledConfigMap}
 
-		gm.Expect(preds.Generic(genericEventPod)).To(gomega.BeFalse())
-		gm.Expect(preds.Generic(genericEventLabelledSrvAcc)).To(gomega.BeTrue())
-		gm.Expect(preds.Generic(genericEventUnlabelledSrvAcc)).To(gomega.BeFalse())
-		gm.Expect(preds.Generic(event.GenericEvent{})).To(gomega.BeFalse())
+		g.Expect(preds.Generic(genericEventPod)).To(gomega.BeFalse())
+		g.Expect(preds.Generic(genericEventLabelledSrvAcc)).To(gomega.BeTrue())
+		g.Expect(preds.Generic(genericEventUnlabelledSrvAcc)).To(gomega.BeFalse())
+		g.Expect(preds.Generic(event.GenericEvent{})).To(gomega.BeFalse())
 	})
 
 	t.Run("updateFunc", func(t *testing.T) {
+		g := gomega.NewWithT(t)
 		updateEventPod := event.UpdateEvent{MetaNew: pod.GetObjectMeta(), ObjectNew: pod}
 		updateEventLabelledSrvAcc := event.UpdateEvent{MetaNew: labelledConfigmap.GetObjectMeta(), ObjectNew: labelledConfigmap}
 		updateEventUnlabelledSrvAcc := event.UpdateEvent{MetaNew: unlabelledConfigMap.GetObjectMeta(), ObjectNew: unlabelledConfigMap}
 
-		gm.Expect(preds.Update(updateEventPod)).To(gomega.BeFalse())
-		gm.Expect(preds.Update(updateEventUnlabelledSrvAcc)).To(gomega.BeFalse())
-		gm.Expect(preds.Update(updateEventLabelledSrvAcc)).To(gomega.BeTrue())
-		gm.Expect(preds.Update(event.UpdateEvent{})).To(gomega.BeFalse())
+		g.Expect(preds.Update(updateEventPod)).To(gomega.BeFalse())
+		g.Expect(preds.Update(updateEventUnlabelledSrvAcc)).To(gomega.BeFalse())
+		g.Expect(preds.Update(updateEventLabelledSrvAcc)).To(gomega.BeTrue())
+		g.Expect(preds.Update(event.UpdateEvent{})).To(gomega.BeFalse())
 	})
 }

@@ -13,7 +13,6 @@ const (
 	externalAPIUrlEnvName = "EXTERNAL_API_URL"
 	gatewayUrlEnvName     = "GATEWAY_URL"
 	skipVerifyEnvName     = "SKIP_SSL_VERIFY"
-	centralEnvName        = "CENTRAL"
 )
 
 type TestConfig struct {
@@ -46,18 +45,11 @@ func ReadConfig() (TestConfig, error) {
 		skipVerify, _ = strconv.ParseBool(sv)
 	}
 
-	central := false
-	c, found := os.LookupEnv(centralEnvName)
-	if found {
-		central, _ = strconv.ParseBool(c)
-	}
-
 	config := TestConfig{
 		InternalAPIUrl: internalAPIUrl,
 		ExternalAPIUrl: externalAPIUrl,
 		GatewayUrl:     gatewayUrl,
 		SkipSslVerify:  skipVerify,
-		Central:        central,
 	}
 
 	log.Printf("Read configuration: %+v", config)

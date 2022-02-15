@@ -1,88 +1,88 @@
 package handlers
 
 import (
-	"os"
 	"testing"
 
+	kymalogger "github.com/kyma-project/kyma/common/logging/logger"
 	. "github.com/onsi/gomega"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	ctrl "sigs.k8s.io/controller-runtime"
+
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/types"
 
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
+	"github.com/kyma-project/kyma/components/eventing-controller/logger"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
+	controllertesting "github.com/kyma-project/kyma/components/eventing-controller/testing"
 )
 
-func Test_SyncBebSubscription(t *testing.T) {
-	g := NewGomegaWithT(t)
+func Test_SyncBEBSubscription(t *testing.T) {
+	g := NewWithT(t)
 
-	// given
-	beb := Beb{
-		Log: ctrl.Log,
+	credentials := &OAuth2ClientCredentials{
+		ClientID:     "foo-client-id",
+		ClientSecret: "foo-client-secret",
 	}
-	err := os.Setenv("CLIENT_ID", "foo")
-	g.Expect(err).ShouldNot(HaveOccurred())
-	err = os.Setenv("CLIENT_SECRET", "foo")
-	g.Expect(err).ShouldNot(HaveOccurred())
-	err = os.Setenv("TOKEN_ENDPOINT", "foo")
-	g.Expect(err).ShouldNot(HaveOccurred())
+	// given
+	defaultLogger, err := logger.New(string(kymalogger.JSON), string(kymalogger.INFO))
+	g.Expect(err).To(BeNil())
 
-	beb.Initialize()
+	nameMapper := NewBEBSubscriptionNameMapper("mydomain.com", MaxBEBSubscriptionNameLength)
+	beb := NewBEB(credentials, nameMapper, defaultLogger)
+
+	// start BEB Mock
+	bebMock := startBEBMock()
+	envConf := env.Config{
+		BEBAPIURL:                bebMock.MessagingURL,
+		ClientID:                 "client-id",
+		ClientSecret:             "client-secret",
+		TokenEndpoint:            bebMock.TokenURL,
+		WebhookActivationTimeout: 0,
+		WebhookTokenEndpoint:     "webhook-token-endpoint",
+		Domain:                   "domain.com",
+		EventTypePrefix:          controllertesting.EventTypePrefix,
+		BEBNamespace:             "/default/ns",
+		Qos:                      string(types.QosAtLeastOnce),
+	}
+
+	err = beb.Initialize(envConf)
+	g.Expect(err).To(BeNil())
 
 	// when
 	subscription := fixtureValidSubscription("some-name", "some-namespace")
 	subscription.Status.Emshash = 0
 	subscription.Status.Ev2hash = 0
 
+	apiRule := controllertesting.NewAPIRule(subscription,
+		controllertesting.WithPath(),
+		controllertesting.WithService("foo-svc", "foo-host"),
+	)
+
 	// then
-	changed, err := beb.SyncBebSubscription(subscription)
-	g.Expect(err).To(Not(BeNil()))
-	g.Expect(changed).To(BeFalse())
+	changed, err := beb.SyncSubscription(subscription, &Cleaner{}, apiRule)
+	g.Expect(err).To(BeNil())
+	g.Expect(changed).To(BeTrue())
+	bebMock.Stop()
 }
 
 // fixtureValidSubscription returns a valid subscription
 func fixtureValidSubscription(name, namespace string) *eventingv1alpha1.Subscription {
-	return &eventingv1alpha1.Subscription{
-		TypeMeta: metav1.TypeMeta{
-			Kind:       "Subscription",
-			APIVersion: "eventing.kyma-project.io/v1alpha1",
-		},
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      name,
-			Namespace: namespace,
-		},
-		Spec: eventingv1alpha1.SubscriptionSpec{
-			ID:       "id",
-			Protocol: "BEB",
-			ProtocolSettings: &eventingv1alpha1.ProtocolSettings{
-				ContentMode:     eventingv1alpha1.ProtocolSettingsContentModeBinary,
-				ExemptHandshake: true,
-				Qos:             "AT-LEAST_ONCE",
-				WebhookAuth: &eventingv1alpha1.WebhookAuth{
-					Type:         "oauth2",
-					GrantType:    "client_credentials",
-					ClientId:     "xxx",
-					ClientSecret: "xxx",
-					TokenUrl:     "https://oauth2.xxx.com/oauth2/token",
-					Scope:        []string{"guid-identifier"},
-				},
-			},
-			Sink: "https://webhook.xxx.com",
-			Filter: &eventingv1alpha1.BebFilters{
-				Dialect: "beb",
-				Filters: []*eventingv1alpha1.BebFilter{
-					{
-						EventSource: &eventingv1alpha1.Filter{
-							Type:     "exact",
-							Property: "source",
-							Value:    "/default/kyma/myinstance",
-						},
-						EventType: &eventingv1alpha1.Filter{
-							Type:     "exact",
-							Property: "type",
-							Value:    "kyma.ev2.poc.event1.v1",
-						},
-					},
-				},
-			},
-		},
-	}
+	return controllertesting.NewSubscription(
+		name, namespace,
+		controllertesting.WithSinkURL("https://webhook.xxx.com"),
+		controllertesting.WithFilter(controllertesting.EventSource, controllertesting.OrderCreatedEventTypeNotClean),
+		controllertesting.WithWebhookAuthForBEB(),
+	)
+}
+
+func startBEBMock() *controllertesting.BEBMock {
+	beb := controllertesting.NewBEBMock()
+	beb.Start()
+	return beb
+}
+
+type Cleaner struct {
+}
+
+func (c *Cleaner) Clean(eventType string) (string, error) {
+	// Cleaning is not needed in this test
+	return eventType, nil
 }

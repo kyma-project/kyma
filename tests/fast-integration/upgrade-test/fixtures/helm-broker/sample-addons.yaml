@@ -1,0 +1,8 @@
+apiVersion: addons.kyma-project.io/v1alpha1
+kind: AddonsConfiguration
+metadata:
+  name: testing-addon
+  namespace: test
+spec:
+  repositories:
+    - url: "https://github.com/kyma-project/addons/releases/download/0.15.0/index-testing.yaml"

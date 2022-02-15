@@ -7,13 +7,13 @@ import (
 	"github.com/kyma-project/kyma/components/binding/internal/storage"
 	"github.com/kyma-project/kyma/components/binding/internal/webhook"
 	"github.com/kyma-project/kyma/components/binding/pkg/apis/v1alpha1"
+	log "github.com/sirupsen/logrus"
 	admissionTypes "k8s.io/api/admission/v1beta1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/dynamic"
 	"net/http"
-
-	log "github.com/sirupsen/logrus"
+	"reflect"
 	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
 )
 
@@ -52,17 +52,21 @@ func (h *MutationHandler) Handle(ctx context.Context, req admission.Request) adm
 	}
 	h.log = h.log.WithField("binding", fmt.Sprintf("%s/%s", binding.Name, binding.Namespace))
 
+	b := binding.DeepCopy()
 	switch req.Operation {
 	case admissionTypes.Create:
-		h.mutateOnCreate(ctx, binding)
+		h.mutateOnCreate(ctx, b)
 	case admissionTypes.Update:
-		h.mutateOnUpdate(ctx, binding)
+		h.mutateOnUpdate(ctx, b)
 	default:
 		log.Infof("Binding mutation webhook does not support action %q", req.Operation)
 		return admission.Allowed("action not taken")
 	}
+	if reflect.DeepEqual(b, binding) {
+		return admission.Allowed("action not taken")
+	}
 
-	rawBinding, err := json.Marshal(binding)
+	rawBinding, err := json.Marshal(b)
 	if err != nil {
 		h.log.Errorf("cannot marshal mutated binding: %s", err)
 		return admission.Errored(http.StatusInternalServerError, err)

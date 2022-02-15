@@ -1,72 +1,190 @@
 {{/* vim: set filetype=mustache: */}}
+
 {{/*
-Expand the name of the chart.
+Short name used by kyma additions, compatible with old versions of the chart.
 */}}
-{{- define "kiali.name" -}}
-{{- default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" -}}
+{{- define "kiali-server.name" -}}
+{{- .Chart.Name | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 
 {{/*
-Create a default fully qualified app name.
+Create a default fully qualified instance name.
 We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
-If release name contains chart name it will be used as a full name.
+To simulate the way the operator works, use deployment.instance_name rather than the old fullnameOverride.
+For backwards compatibility, if fullnameOverride is not kiali but deployment.instance_name is kiali,
+use fullnameOverride, otherwise use deployment.instance_name.
 */}}
-{{- define "kiali.fullname" -}}
-{{- if .Values.fullnameOverride -}}
-{{- .Values.fullnameOverride | trunc 63 | trimSuffix "-" -}}
+{{- define "kiali-server.fullname" -}}
+{{- if (and (eq .Values.deployment.instance_name "kiali") (ne .Values.fullnameOverride "kiali")) }}
+  {{- .Values.fullnameOverride | trunc 63 }}
+{{- else }}
+  {{- .Values.deployment.instance_name | trunc 63 }}
+{{- end }}
+{{- end }}
+
+{{/*
+Create chart name and version as used by the chart label.
+*/}}
+{{- define "kiali-server.chart" -}}
+{{- printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" }}
+{{- end }}
+
+{{/*
+Identifies the log_level with the old verbose_mode and the new log_level considered.
+*/}}
+{{- define "kiali-server.logLevel" -}}
+{{- if .Values.deployment.verbose_mode -}}
+{{- .Values.deployment.verbose_mode -}}
 {{- else -}}
-{{- $name := default .Chart.Name .Values.nameOverride -}}
-{{- if contains $name .Release.Name -}}
-{{- .Release.Name | trunc 63 | trimSuffix "-" -}}
-{{- else -}}
-{{- printf "%s-%s" .Release.Name $name | trunc 63 | trimSuffix "-" -}}
+{{- .Values.deployment.logger.log_level -}}
 {{- end -}}
-{{- end -}}
-{{- end -}}
+{{- end }}
 
 {{/*
 Common labels
 */}}
-{{- define "kiali.labels" -}}
-helm.sh/chart: {{ include "kiali.chart" . }}
-{{ include "kiali.selectorLabels" . }}
-{{- if .Chart.AppVersion }}
-app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
-{{- end }}
+{{- define "kiali-server.labels" -}}
+helm.sh/chart: {{ include "kiali-server.chart" . }}
+app: kiali
+{{ include "kiali-server.selectorLabels" . }}
+version: {{ .Values.deployment.version_label | default .Chart.AppVersion | quote }}
+app.kubernetes.io/version: {{ .Values.deployment.version_label | default .Chart.AppVersion | quote }}
 app.kubernetes.io/managed-by: {{ .Release.Service }}
+app.kubernetes.io/part-of: "kiali"
 {{- end }}
 
 {{/*
 Selector labels
 */}}
-{{- define "kiali.selectorLabels" -}}
-app.kubernetes.io/name: {{ include "kiali.name" . }}
+{{- define "kiali-server.selectorLabels" -}}
+app.kubernetes.io/name: kiali
 app.kubernetes.io/instance: {{ .Release.Name }}
-{{- end -}}
+{{- end }}
 
 {{/*
-Create chart name and version as used by the chart label.
+Determine the default login token signing key.
 */}}
-{{- define "kiali.chart" -}}
-{{- .Chart.Name | trunc 63 | trimSuffix "-" -}}
-{{- end -}}
-
-{{- define "kiali.kcproxy.groups" -}}
-{{- if .Values.kcproxy.config.resources.useKymaGroups }}
-{{- printf "|groups=%s,%s,%s,%s" .Values.global.kymaRuntime.adminGroup .Values.global.kymaRuntime.operatorGroup .Values.global.kymaRuntime.developerGroup .Values.global.kymaRuntime.namespaceAdminGroup -}}
-{{- else if .Values.kcproxy.config.resources.groups }}
-{{- printf "|groups=%s" .Values.kcproxy.config.resources.groups }}
+{{- define "kiali-server.login_token.signing_key" -}}
+{{- if .Values.login_token.signing_key }}
+  {{- .Values.login_token.signing_key }}
+{{- else }}
+  {{- randAlphaNum 16 }}
 {{- end }}
-{{- end -}}
-
-{{- define "kiali.kcproxy.methods" -}}
-{{- if .Values.kcproxy.config.resources.methods }}
-{{- printf "|methods=%s" .Values.kcproxy.config.resources.methods }}
 {{- end }}
-{{- end -}}
 
-{{- define "kiali.kcproxy.roles" -}}
-{{- if .Values.kcproxy.config.resources.roles }}
-{{- printf "|roles=%s" .Values.kcproxy.config.resources.roles }}
+{{/*
+Determine the default web root.
+*/}}
+{{- define "kiali-server.server.web_root" -}}
+{{- if .Values.server.web_root  }}
+  {{- if (eq .Values.server.web_root "/") }}
+    {{- .Values.server.web_root }}
+  {{- else }}
+    {{- .Values.server.web_root | trimSuffix "/" }}
+  {{- end }}
+{{- else }}
+  {{- if .Capabilities.APIVersions.Has "route.openshift.io/v1" }}
+    {{- "/" }}
+  {{- else }}
+    {{- "/kiali" }}
+  {{- end }}
 {{- end }}
+{{- end }}
+
+{{/*
+Determine the default identity cert file. There is no default if on k8s; only on OpenShift.
+*/}}
+{{- define "kiali-server.identity.cert_file" -}}
+{{- if hasKey .Values.identity "cert_file" }}
+  {{- .Values.identity.cert_file }}
+{{- else }}
+  {{- if .Capabilities.APIVersions.Has "route.openshift.io/v1" }}
+    {{- "/kiali-cert/tls.crt" }}
+  {{- else }}
+    {{- "" }}
+  {{- end }}
+{{- end }}
+{{- end }}
+
+{{/*
+Determine the default identity private key file. There is no default if on k8s; only on OpenShift.
+*/}}
+{{- define "kiali-server.identity.private_key_file" -}}
+{{- if hasKey .Values.identity "private_key_file" }}
+  {{- .Values.identity.private_key_file }}
+{{- else }}
+  {{- if .Capabilities.APIVersions.Has "route.openshift.io/v1" }}
+    {{- "/kiali-cert/tls.key" }}
+  {{- else }}
+    {{- "" }}
+  {{- end }}
+{{- end }}
+{{- end }}
+
+{{/*
+Determine the default deployment.ingress.enabled. Disable it on k8s; enable it on OpenShift.
+*/}}
+{{- define "kiali-server.deployment.ingress.enabled" -}}
+{{- if hasKey .Values.deployment.ingress "enabled" }}
+  {{- .Values.deployment.ingress.enabled }}
+{{- else }}
+  {{- if .Capabilities.APIVersions.Has "route.openshift.io/v1" }}
+    {{- true }}
+  {{- else }}
+    {{- false }}
+  {{- end }}
+{{- end }}
+{{- end }}
+
+{{/*
+Determine the istio namespace - default is where Kiali is installed.
+*/}}
+{{- define "kiali-server.istio_namespace" -}}
+{{- if .Values.istio_namespace }}
+  {{- .Values.istio_namespace }}
+{{- else }}
+  {{- .Release.Namespace }}
+{{- end }}
+{{- end }}
+
+{{/*
+Determine the auth strategy to use - default is "token" on Kubernetes and "openshift" on OpenShift.
+*/}}
+{{- define "kiali-server.auth.strategy" -}}
+{{- if .Values.auth.strategy }}
+  {{- if (and (eq .Values.auth.strategy "openshift") (not .Values.kiali_route_url)) }}
+    {{- fail "You did not define what the Kiali Route URL will be (--set kiali_route_url=...). Without this set, the openshift auth strategy will not work. Either set that or use a different auth strategy via the --set auth.strategy=... option." }}
+  {{- end }}
+  {{- .Values.auth.strategy }}
+{{- else }}
+  {{- if .Capabilities.APIVersions.Has "route.openshift.io/v1" }}
+    {{- if not .Values.kiali_route_url }}
+      {{- fail "You did not define what the Kiali Route URL will be (--set kiali_route_url=...). Without this set, the openshift auth strategy will not work. Either set that or explicitly indicate another auth strategy you want via the --set auth.strategy=... option." }}
+    {{- end }}
+    {{- "openshift" }}
+  {{- else }}
+    {{- "token" }}
+  {{- end }}
+{{- end }}
+{{- end }}
+
+{{/*
+Determine the root namespace - default is where Kiali is installed.
+*/}}
+{{- define "kiali-server.external_services.istio.root_namespace" -}}
+{{- if .Values.external_services.istio.root_namespace }}
+  {{- .Values.external_services.istio.root_namespace }}
+{{- else }}
+  {{- .Release.Namespace }}
+{{- end }}
+{{- end }}
+
+{{/*
+Create a URL for container images
+*/}}
+{{- define "imageurl" -}}
+{{- $registry := default $.reg.path $.img.containerRegistryPath -}}
+{{- $path := ternary (print $registry) (print $registry "/" $.img.directory) (empty $.img.directory) -}}
+{{- $version := ternary (print ":" $.img.version) (print "@sha256:" $.img.sha) (empty $.img.sha) -}}
+{{- print $path "/" $.img.name $version -}}
 {{- end -}}

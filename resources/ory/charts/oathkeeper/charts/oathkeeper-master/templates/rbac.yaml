@@ -6,10 +6,9 @@ metadata:
   namespace:  {{ .Release.Namespace }}
 ---
 kind: ClusterRole
-apiVersion: rbac.authorization.k8s.io/v1beta1
+apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: {{ include "oathkeeper-maester.name" . }}-role
-  # namespace:  {{ .Release.Namespace }}
 rules:
   - apiGroups: ["oathkeeper.ory.sh"]
     resources: ["rules"]
@@ -24,10 +23,9 @@ rules:
     #   - {{ .Values.configMapName | default "ory-oathkeeper-rules" }}
 ---
 kind: ClusterRoleBinding
-apiVersion: rbac.authorization.k8s.io/v1beta1
+apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: {{ include "oathkeeper-maester.name" . }}-role-binding
-  namespace:  {{ .Release.Namespace }}
 subjects:
   - kind: ServiceAccount
     name: {{ include "oathkeeper-maester.name" . }}-account # Service account assigned to the controller pod.

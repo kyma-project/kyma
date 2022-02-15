@@ -21,8 +21,6 @@ const (
 	applicationGatewayClusterRoleBindingFormat = "%s-application-gateway"
 	applicationGatewaySvcFormat                = "%s-application-gateway"
 	applicationGatewayServiceAccountFormat     = "%s-application-gateway"
-	eventServiceDeploymentFormat               = "%s-event-service"
-	eventServiceSvcFormat                      = "%s-event-service"
 	connectivityValidatorDeploymentFormat      = "%s-connectivity-validator"
 	connectivityValidatorSvcFormat             = "%s-validator"
 
@@ -69,15 +67,15 @@ func NewServiceInstanceK8SChecker(client K8sResourcesClient, releaseName string)
 	}
 }
 
-func NewAppK8sChecker(client K8sResourcesClient, appName string, checkGateway bool) *K8sResourceChecker {
+func NewAppK8sChecker(client K8sResourcesClient, appName string, checkGateway bool, checkValidator bool) *K8sResourceChecker {
 	ctxBackground := context.Background()
 
-	resources := []k8sResource{
-		newResource(ctxBackground, fmt.Sprintf(virtualSvcNameFormat, appName), "virtualservice", client.GetVirtualService),
-		newResource(ctxBackground, fmt.Sprintf(eventServiceDeploymentFormat, appName), "deployment", client.GetDeployment),
-		newResource(ctxBackground, fmt.Sprintf(eventServiceSvcFormat, appName), "service", client.GetService),
-		newResource(ctxBackground, fmt.Sprintf(connectivityValidatorDeploymentFormat, appName), "deployment", client.GetDeployment),
-		newResource(ctxBackground, fmt.Sprintf(connectivityValidatorSvcFormat, appName), "service", client.GetService),
+	resources := []k8sResource{}
+	if checkValidator {
+		resources = append(resources,
+			newResource(ctxBackground, fmt.Sprintf(virtualSvcNameFormat, appName), "virtualservice", client.GetVirtualService),
+			newResource(ctxBackground, fmt.Sprintf(connectivityValidatorDeploymentFormat, appName), "deployment", client.GetDeployment),
+			newResource(ctxBackground, fmt.Sprintf(connectivityValidatorSvcFormat, appName), "service", client.GetService))
 	}
 
 	if checkGateway {

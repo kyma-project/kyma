@@ -43,12 +43,12 @@ The Kyma k6 executor has a pre-defined environment variable and tags that provid
 
 These are the available environment variables:
 - **CLUSTER_DOMAIN_NAME** is the domain name of the target Kyma load test cluster.
-- **REVISION** is the SHA ID of the tested `master` branch.
+- **REVISION** is the SHA ID of the tested `main` branch.
 
 These are the pre-defined test execution tags:
 - **testName** is the name of a test scenario that every test should provide in the test script implementation.
 - **component** is the tested component or area. Provide this tag also with the test script implementation.
-- **revision** is the SHA ID of the `master` branch used for tests. It is provided with the Kyma performance test runner. The test script should use the **REVISION** variable as a value.
+- **revision** is the SHA ID of the `main` branch used for tests. It is provided with the Kyma performance test runner. The test script should use the **REVISION** variable as a value.
 
 The tags allow you to distinguish test results in [Grafana](https://grafana.perf.kyma-project.io/d/ReuNR5Aik/kyma-performance-test-results?orgId=1).
 

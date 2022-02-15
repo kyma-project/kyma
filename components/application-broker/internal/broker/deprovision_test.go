@@ -14,7 +14,6 @@ import (
 	"github.com/kyma-project/kyma/components/application-broker/internal"
 	"github.com/kyma-project/kyma/components/application-broker/internal/broker/automock"
 	bt "github.com/kyma-project/kyma/components/application-broker/internal/broker/testing"
-	"github.com/kyma-project/kyma/components/application-broker/internal/knative"
 	eaFake "github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned/fake"
 	"github.com/kyma-project/kyma/components/application-broker/platform/logger/spy"
 )
@@ -57,7 +56,6 @@ func TestDeprovisionDeletingResourcesSuccess(t *testing.T) {
 		ts.mockOperationStorage,
 		ts.OpIDProviderFake,
 		ts.mockAppFinder,
-		ts.knClient,
 		ts.eaClient.ApplicationconnectorV1alpha1(),
 		spy.NewLogDummy(),
 		&IDSelector{false},
@@ -97,7 +95,6 @@ func TestErrorInstanceNotFound(t *testing.T) {
 		sut := NewDeprovisioner(ts.mockInstanceStorage,
 			ts.mockInstanceStateGetter,
 			ts.mockOperationStorage,
-			nil,
 			nil,
 			nil,
 			nil,
@@ -150,7 +147,6 @@ func TestErrorInstanceNotFound(t *testing.T) {
 			ts.mockOperationStorage,
 			ts.OpIDProviderFake,
 			ts.mockAppFinder,
-			ts.knClient,
 			ts.eaClient.ApplicationconnectorV1alpha1(),
 			spy.NewLogDummy(),
 			&IDSelector{false},
@@ -213,7 +209,6 @@ func TestGenericErrorOnRemovingInstance(t *testing.T) {
 		ts.mockOperationStorage,
 		ts.OpIDProviderFake,
 		ts.mockAppFinder,
-		ts.knClient,
 		ts.eaClient.ApplicationconnectorV1alpha1(),
 		spy.NewLogDummy(),
 		&IDSelector{false},
@@ -254,7 +249,6 @@ func TestErrorOnIsDeprovisionedInstance(t *testing.T) {
 		nil,
 		nil,
 		nil,
-		nil,
 		spy.NewLogDummy(),
 		nil,
 		nil,
@@ -283,7 +277,6 @@ func TestErrorOnDeprovisioningInProgressInstance(t *testing.T) {
 		nil,
 		nil,
 		nil,
-		nil,
 		spy.NewLogDummy(),
 		nil,
 		nil,
@@ -302,7 +295,6 @@ func TestDoDeprovision(t *testing.T) {
 		iID      = fixInstanceID()
 		opID     = fixOperationID()
 		appNs    = fixNs()
-		appName  = fixAppName()
 		appSvcID = internal.ApplicationServiceID("123")
 	)
 
@@ -319,13 +311,10 @@ func TestDoDeprovision(t *testing.T) {
 		// TODO(nachtmaar): Deprovision broker: https://github.com/kyma-project/kyma/issues/6342
 		"Everything gets deprovisioned": {
 			initialObjs: []runtime.Object{
-				bt.NewAppNamespace(string(appNs), true),
-				bt.NewDefaultBroker(string(appNs)),
-				bt.NewAppSubscription(string(appNs), string(appName), string(appSvcID), bt.WithNameSuffix(bt.FakeSubscriptionName)),
+				bt.NewAppNamespace(string(appNs)),
 				bt.NewEventActivation(string(appNs), string(iID)),
 			},
 			expectK8sDeletes: []string{
-				fmt.Sprintf("%s/%s-%s", integrationNamespace, knSubscriptionNamePrefix, bt.FakeSubscriptionName), // subscription
 				fmt.Sprintf("%s/%s", appNs, appSvcID), // event activation
 			},
 		},
@@ -352,7 +341,7 @@ func TestDoDeprovision(t *testing.T) {
 			only to create istio policy in case of provisioning in order to enable Prometheus scraping which is required
 			even in case of deprovisioning
 			*/
-			knCli, k8sCli, _, eaClient := bt.NewFakeClients(tc.initialObjs...)
+			_, eaClient := bt.NewFakeClients(tc.initialObjs...)
 
 			dpr := NewDeprovisioner(mockInstanceStorage,
 				nil,
@@ -360,7 +349,6 @@ func TestDoDeprovision(t *testing.T) {
 				mockOpUpdater,
 				nil,
 				nil,
-				knative.NewClient(knCli, k8sCli),
 				eaClient.ApplicationconnectorV1alpha1(),
 				spy.NewLogDummy(),
 				nil,
@@ -371,7 +359,7 @@ func TestDoDeprovision(t *testing.T) {
 			dpr.do(instance, opID, appSvcID)
 
 			//THEN
-			actionsAsserter := bt.NewActionsAsserter(t, knCli, k8sCli, eaClient)
+			actionsAsserter := bt.NewActionsAsserter(t, eaClient)
 			actionsAsserter.AssertDeletes(t, tc.expectK8sDeletes)
 			mockOpUpdater.AssertExpectations(t)
 			mockInstanceStorage.AssertExpectations(t)
@@ -381,7 +369,7 @@ func TestDoDeprovision(t *testing.T) {
 }
 
 func newDeprovisionServiceTestSuite(t *testing.T) *deprovisionServiceTestSuite {
-	knCli, k8sCli, _, eaCli := bt.NewFakeClients()
+	_, eaCli := bt.NewFakeClients()
 
 	return &deprovisionServiceTestSuite{
 		t:                         t,
@@ -390,7 +378,6 @@ func newDeprovisionServiceTestSuite(t *testing.T) *deprovisionServiceTestSuite {
 		mockOperationStorage:      &automock.OperationStorage{},
 		mockAppFinder:             &automock.AppFinder{},
 		mockAPIapiPkgCredsRemover: &automock.APIPackageCredentialsRemover{},
-		knClient:                  knative.NewClient(knCli, k8sCli),
 		eaClient:                  eaCli,
 	}
 }
@@ -403,7 +390,6 @@ type deprovisionServiceTestSuite struct {
 	mockAPIapiPkgCredsRemover *automock.APIPackageCredentialsRemover
 	OpIDProviderFake          func() (internal.OperationID, error)
 	mockAppFinder             *automock.AppFinder
-	knClient                  knative.Client
 	eaClient                  *eaFake.Clientset
 }
 

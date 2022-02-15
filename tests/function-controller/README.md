@@ -18,7 +18,7 @@ Use the following tools to set up the project:
 
 To run integration tests, follow these instructions:
 
-1. [Install](https://kyma-project.io/docs/master/root/kyma/#installation-install-kyma-locally) Kyma.
+1. [Install](https://kyma-project-old.netlify.app/docs/#installation-install-kyma-locally) Kyma.
 2. Build the test image directly on the Docker engine of the Minikube node without pushing it to a registry. Run:
 
    ```bash
@@ -37,7 +37,7 @@ To run integration tests, follow these instructions:
 4. Run the integration test. The command creates a test suite with a name in a form of `test-{ID}`. Run:
 
    ```bash
-   kyma test run function-controller
+   kyma test run serverless
    ```
 
 5. Get the test result using this command:
@@ -63,25 +63,19 @@ Use the following environment variables to configure the application:
 | **APP_TEST_WAIT_TIMEOUT**               | No       | `5m`                        | The period of time for which the application waits for the resources to meet defined conditions                                                       |
 | **APP_TEST_NAMESPACE_BASE_NAME**        | No       | `serverless`                | The name of the Namespace used during integration tests                                                                                               |
 | **APP_TEST_FUNCTION_NAME**              | No       | `test-function`             | The name of the Function created and deleted during integration tests                                                                                 |
-| **APP_TEST_APIRULE_NAME**               | No       | `test-apirule`              | The name of the APIRule created and deleted during integration tests                                                                                 |
+| **APP_TEST_APIRULE_NAME**               | No       | `test-apirule`              | The name of the API Rule created and deleted during integration tests                                                                                 |
 | **APP_TEST_TRIGGER_NAME**               | No       | `test-trigger`              | The name of the Trigger created and deleted during integration tests                                                                                 |
 | **APP_TEST_ADDON_NAME**                 | No       | `test-addon`                | The name of the AddonsConfiguration created and deleted during integration tests                                                                                 |
 | **APP_TEST_SERVICE_INSTANCE_NAME**      | No       | `test-service-instance`     | The name of the ServiceInstance created and deleted during integration tests                                                                                 |
 | **APP_TEST_SERVICE_BINDING_NAME**       | No       | `test-service-binding`      | The name of the ServiceBinding created and deleted during integration tests                                                                                 |
 | **APP_TEST_SERVICE_BINDING_USAGE_NAME** | No       | `test-service-binding-usage`| The name of the ServiceBindingUsage created and deleted during integration tests                                                                                 |
 | **APP_TEST_USAGE_KIND_NAME**            | No       | `function`                  | The name of the UsageKind used during integration tests                                                                                 |
-| **APP_TEST_DOMAIN_NAME**                | No       | `test-function`             | The domain name used in the APIRule CR                                                                                                                |
+| **APP_TEST_DOMAIN_NAME**                | No       | `test-function`             | The domain name used in the API Rule CR                                                                                                                |
 | **APP_TEST_INGRESS_HOST**               | No       | `kyma.local`                | The Ingress host address                                                                                                                              |
 | **APP_TEST_DOMAIN_PORT**                | No       | `80`                        | The port of the Service exposed by the API Rule in a given domain                                                                                     |
 | **APP_TEST_INSECURE_SKIP_VERIFY**       | No       | `true`                      | The flag that controls whether tests use verification of the server's certificate and the host name to reach the Function                                       |
-| **APP_TEST_VERBOSE**                    | No       | `true`                      | The value that controls whether tests log resources that are subject to change | 
-| **APP_TEST_MAX_POLLING_TIME**           | No       | `5m`                        | The maximum period of time in which the Function must reconfigure after an update  | 
-
-Those can be supplied to [this](../../resources/serverless/templates/tests/test.yaml) file before installing Kyma. After you install Kyma, you can also edit the TestDefinition CR using this command:
-
-```bash
-kubectl edit testdefinitions.testing.kyma-project.io -n kyma-system function-controller
-```
+| **APP_TEST_VERBOSE**                    | No       | `true`                      | The value that controls whether tests log resources that are subject to change |
+| **APP_TEST_MAX_POLLING_TIME**           | No       | `5m`                        | The maximum period of time in which the Function must reconfigure after an update  |
 
 ## Development
 

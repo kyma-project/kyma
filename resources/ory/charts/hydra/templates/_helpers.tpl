@@ -67,6 +67,17 @@ memory
 {{- end -}}
 
 {{/*
+Get the name of the secret resource containing secrets
+*/}}
+{{- define "hydra.secretname" -}}
+{{- if .Values.hydra.existingSecret }}
+    {{- printf "%s" .Values.hydra.existingSecret -}}
+{{- else -}}
+    {{- printf "%s" (include "hydra.fullname" .) -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
 Generate the secrets.system value
 */}}
 {{- define "hydra.secrets.system" -}}
@@ -89,17 +100,6 @@ Generate the secrets.cookie value
 {{- end -}}
 
 {{/*
-Get the password secret.
-*/}}
-{{- define "hydra.secretName" -}}
-{{- if .Values.hydra.existingSecret }}
-    {{- printf "%s" .Values.hydra.existingSecret -}}
-{{- else -}}
-    {{- printf "%s" (include "hydra.fullname" .) -}}
-{{- end -}}
-{{- end -}}
-
-{{/*
 Return true if a secret object should be created
 */}}
 {{- define "hydra.createSecret" -}}
@@ -107,6 +107,17 @@ Return true if a secret object should be created
 {{- else -}}
     {{- true -}}
 {{- end -}}
+{{- end -}}
+
+{{/*
+Generate the configmap data, redacting secrets
+*/}}
+{{- define "hydra.configmap" -}}
+{{- $configCopy := .Values.hydra.config | mustDeepCopy -}}
+{{- $result := unset $configCopy "dsn" -}}
+{{- $result := unset $result "secrets" -}}
+{{- $result := unset $result "secretAnnotations" -}}
+{{- toYaml $result -}}
 {{- end -}}
 
 {{/*
@@ -120,6 +131,19 @@ Generate the urls.issuer value
 http{{ if $.Values.ingress.public.tls }}s{{ end }}://{{ $host.host }}
 {{- else if contains "ClusterIP" .Values.service.public.type -}}
 http://127.0.0.1:{{ .Values.service.public.port }}/
+{{- end -}}
+{{- end -}}
+
+{{/*
+Check overrides consistency
+*/}}
+{{- define "hydra.check.override.consistency" -}}
+{{- if and .Values.maester.enabled .Values.fullnameOverride -}}
+{{- if not .Values.maester.hydraFullnameOverride -}}
+{{ fail "hydra fullname has been overridden, but the new value has not been provided to maester. Set maester.hydraFullnameOverride" }}
+{{- else if not (eq .Values.maester.hydraFullnameOverride .Values.fullnameOverride) -}}
+{{ fail (tpl "hydra fullname has been overridden, but a different value was provided to maester. {{ .Values.maester.hydraFullnameOverride }} different of {{ .Values.fullnameOverride }}" . ) }}
+{{- end -}}
 {{- end -}}
 {{- end -}}
 

@@ -5,17 +5,25 @@ import (
 	"os"
 	"time"
 
+	"github.com/go-logr/zapr"
+	"go.uber.org/zap"
+
 	"github.com/kyma-project/kyma/components/connection-token-handler/pkg/apis"
 	"github.com/kyma-project/kyma/components/connection-token-handler/pkg/controller/tokenrequest"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 	"sigs.k8s.io/controller-runtime/pkg/client/config"
+	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
-	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
-	"sigs.k8s.io/controller-runtime/pkg/runtime/signals"
+	"sigs.k8s.io/controller-runtime/pkg/manager/signals"
 )
 
 func main() {
-	logf.SetLogger(logf.ZapLogger(false))
+	zapLog, err := zap.NewProduction()
+	if err != nil {
+		panic(fmt.Sprintf("Error while logger setup: %s", err))
+	}
+	logf.SetLogger(zapr.NewLogger(zapLog))
+
 	log := logf.Log.WithName("entrypoint")
 	log.Info("Starting ConnectionTokenHandler Controller.")
 

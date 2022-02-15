@@ -27,7 +27,7 @@ about: Suggest an improvement or report a bug in the documentation
 
 **Assignees**
 
-@technical-writers
+@kyma-project/technical-writers
 
 **Attachments**
 

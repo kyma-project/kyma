@@ -40,13 +40,21 @@ spec:
         {{ include "rafterFrontMatterService.tplValue" ( dict "value" .Values.pod.annotations "context" . ) | nindent 8 }}
       {{- end }}
     spec:
+      serviceAccountName: {{ include "rafterFrontMatterService.fullname" . }}
       {{- if .Values.pod.extraProperties }}
       {{ include "rafterFrontMatterService.tplValue" ( dict "value" .Values.pod.extraProperties "context" . ) | nindent 6 }}
       {{- end }}
       containers:
         - name: {{ include "rafterFrontMatterService.name" . }}
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.rafter_front_matter_service) }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+          resources:
+            requests:
+              memory: "{{ .Values.pod.resources.requests.memory }}"
+              cpu: "{{ .Values.pod.resources.requests.cpu }}"
+            limits:
+              memory: "{{ .Values.pod.resources.limits.memory }}"
+              cpu: "{{ .Values.pod.resources.limits.cpu }}"
           {{- if .Values.pod.extraContainerProperties }}
           {{ include "rafterFrontMatterService.tplValue" ( dict "value" .Values.pod.extraContainerProperties "context" . ) | nindent 10 }}
           {{- end }}
@@ -58,3 +66,6 @@ spec:
             {{ include "rafterFrontMatterService.createEnv" ( dict "name" "APP_VERBOSE" "value" .Values.envs.verbose "context" . ) | nindent 12 }}
             {{ include "rafterFrontMatterService.createEnv" ( dict "name" "APP_PROCESS_TIMEOUT" "value" .Values.envs.timeout "context" . ) | nindent 12 }}
             {{ include "rafterFrontMatterService.createEnv" ( dict "name" "APP_MAX_WORKERS" "value" .Values.envs.workers "context" . ) | nindent 12 }}
+    {{- if .Values.global.priorityClassName }}
+      priorityClassName: {{ .Values.global.priorityClassName }}
+    {{- end }}

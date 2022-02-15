@@ -9,18 +9,20 @@ import (
 )
 
 const (
-	namespaceEnvName               = "NAMESPACE"
-	helmDriverEnvName              = "HELM_DRIVER"
-	gatewayOncePerNamespaceEnvName = "GATEWAY_DEPLOYED_PER_NAMESPACE"
-	installationTimeoutEnvName     = "INSTALLATION_TIMEOUT_SECONDS"
-	defaultInstallationTimeout     = 180
+	namespaceEnvName                               = "NAMESPACE"
+	helmDriverEnvName                              = "HELM_DRIVER"
+	gatewayOncePerNamespaceEnvName                 = "GATEWAY_DEPLOYED_PER_NAMESPACE"
+	installationTimeoutEnvName                     = "INSTALLATION_TIMEOUT_SECONDS"
+	defaultInstallationTimeout                     = 180
+	centralApplicationConnectivityValidatorEnvName = "CENTRAL_APPLICATION_CONNECTIVITY_VALIDATOR"
 )
 
 type TestConfig struct {
-	Namespace                  string
-	HelmDriver                 string
-	InstallationTimeoutSeconds int
-	GatewayOncePerNamespace    bool
+	Namespace                               string
+	HelmDriver                              string
+	InstallationTimeoutSeconds              int
+	GatewayOncePerNamespace                 bool
+	CentralApplicationConnectivityValidator bool
 }
 
 func ReadConfig() (TestConfig, error) {
@@ -40,6 +42,12 @@ func ReadConfig() (TestConfig, error) {
 		gatewayOncePerNamespace, _ = strconv.ParseBool(sv)
 	}
 
+	centralApplicationConnectivityValidator := true
+	sv, found = os.LookupEnv(centralApplicationConnectivityValidatorEnvName)
+	if found {
+		centralApplicationConnectivityValidator, _ = strconv.ParseBool(sv)
+	}
+
 	var timeoutValue int
 	var err error
 	installationTimeout, found := os.LookupEnv(installationTimeoutEnvName)
@@ -53,10 +61,11 @@ func ReadConfig() (TestConfig, error) {
 	}
 
 	config := TestConfig{
-		Namespace:                  namespace,
-		HelmDriver:                 helmDriver,
-		InstallationTimeoutSeconds: timeoutValue,
-		GatewayOncePerNamespace:    gatewayOncePerNamespace,
+		Namespace:                               namespace,
+		HelmDriver:                              helmDriver,
+		InstallationTimeoutSeconds:              timeoutValue,
+		GatewayOncePerNamespace:                 gatewayOncePerNamespace,
+		CentralApplicationConnectivityValidator: centralApplicationConnectivityValidator,
 	}
 
 	log.Printf("Read configuration: %+v", config)

@@ -35,17 +35,33 @@ spec:
       serviceAccountName: {{ template "webhook.fullname" . }}
       containers:
         - name: webhook
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.function_webhook) }}"
           imagePullPolicy: "{{ .Values.image.pullPolicy }}"
+          livenessProbe:
+            httpGet:
+              port: {{ .Values.service.ports.httpMetrics.targetPort }}
+              path: "/metrics"
+            initialDelaySeconds: {{ .Values.deployment.livenessProbe.initialDelaySeconds }}
+            timeoutSeconds: {{ .Values.deployment.livenessProbe.timeoutSeconds }}
+            periodSeconds: {{.Values.deployment.livenessProbe.periodSeconds }}
+          readinessProbe:
+            httpGet:
+              port: {{ .Values.service.ports.httpMetrics.targetPort }}
+              path: "/metrics"
+            initialDelaySeconds: {{ .Values.deployment.readinessProbe.initialDelaySeconds }}
+            timeoutSeconds: {{ .Values.deployment.readinessProbe.timeoutSeconds }}
+            periodSeconds: {{.Values.deployment.readinessProbe.periodSeconds }}
           resources:
             requests:
-              cpu: 30m
-              memory: 50Mi
+              cpu: {{ .Values.deployment.resources.requests.cpu }}
+              memory: {{ .Values.deployment.resources.requests.memory }}
             limits:
-              cpu: 300m
-              memory: 300Mi
+              cpu: {{ .Values.deployment.resources.limits.cpu }}
+              memory: {{ .Values.deployment.resources.limits.memory }}
           securityContext:
+            privileged:  {{ .Values.container.privileged }}
             allowPrivilegeEscalation: {{ .Values.container.allowPrivilegeEscalation }}
+            runAsUser: {{ .Values.container.runAsUser }}
           ports:
             - name: {{ .Values.service.ports.httpMetrics.name }}
               containerPort: {{ .Values.service.ports.httpMetrics.targetPort }}
@@ -67,5 +83,8 @@ spec:
               {{ include "tplValue" ( dict "value" .Values.container.envs.metricsDomain "context" . ) | nindent 14 }}
             - name: CONFIG_OBSERVABILITY_NAME
               {{ include "tplValue" ( dict "value" .Values.container.envs.configObservabilityName "context" . ) | nindent 14 }}
-
-            
+            - name: KUBERNETES_MIN_VERSION # TODO: Delete this env after all CI pipelines are using k8s >1.17.0
+              value: "1.16.0"
+    {{- if .Values.global.highPriorityClassName }}
+      priorityClassName: {{ .Values.global.highPriorityClassName }}
+    {{- end }}

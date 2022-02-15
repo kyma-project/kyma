@@ -3,7 +3,7 @@ apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
 metadata:
   name: {{ .Chart.Name }}-mtls
-  namespace: {{ .Values.global.namespace }}
+  namespace: {{ .Values.global.integrationNamespace }}
   labels:
     app: {{ template "name" . }}
     release: {{ .Release.Name }}
@@ -13,7 +13,7 @@ metadata:
     app.kubernetes.io/instance: {{ .Release.Name }}
 spec:
   hosts:
-  - gateway.{{ .Values.global.ingress.domainName }}
+  - gateway.{{ .Values.global.domainName }}
   gateways:
   - {{ .Values.global.istio.gateway.namespace }}/{{ .Values.global.istio.gateway.nameMtls }}
   http:
@@ -24,12 +24,6 @@ spec:
         exact: /v1/applications/certificates/renewals
     - uri:
         exact: /v1/applications/certificates/revocations
-    - uri:
-        exact: /v1/runtimes/management/info
-    - uri:
-        exact: /v1/runtimes/certificates/renewals
-    - uri:
-        exact: /v1/runtimes/certificates/revocations
     route:
     - destination:
         port:

@@ -14,9 +14,10 @@ import (
 type ConditionFunc func() (err error)
 
 // UntilSuccess repeats given condition as long as it returns an error.
+// wait function should be run with delay because the change of status (SI, SB) is not immediate
 func UntilSuccess(ctx context.Context, condition ConditionFunc) error {
 	var lastErr error
-	err := wait.PollImmediate(config.Interval, config.Timeout, func() (done bool, err error) {
+	err := wait.Poll(config.Interval, config.Timeout, func() (done bool, err error) {
 		if ctxutil.ShouldExit(ctx) {
 			return false, ctx.Err()
 		}

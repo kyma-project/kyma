@@ -41,7 +41,7 @@ The Binding Usage Controller takes the value of the **spec.usedBy.kind** field o
 
 ## Security
 
-The administrator who adds UsageKind must take care of RBAC settings. BUC and console-backend-service must be allowed to perform needed operations on resources with the kind defined in the UsageKind resource.
+The administrator who adds UsageKind must take care of RBAC settings. BUC must be allowed to perform needed operations on resources with the kind defined in the UsageKind resource.
 
 ## Example
 

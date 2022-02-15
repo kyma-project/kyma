@@ -59,9 +59,10 @@ func TestServiceDefinitionService_Create(t *testing.T) {
 			Documentation: []byte("documentation"),
 		}
 		applicationServiceAPI := &applications.ServiceAPI{
-			TargetUrl:   "http://target.com",
-			AccessLabel: "access-label",
-			GatewayURL:  "gateway-url",
+			TargetUrl:         "http://target.com",
+			AccessLabel:       "access-label",
+			GatewayURL:        "gateway-url",
+			CentralGatewayURL: "http://central-application-gateway.kyma-system:8080/app/some-service",
 			Credentials: applications.Credentials{
 				AuthenticationUrl: "http://oauth.com/token",
 				SecretName:        "secret-name",
@@ -83,12 +84,12 @@ func TestServiceDefinitionService_Create(t *testing.T) {
 		uuidGenerator := new(uuidmocks.Generator)
 		uuidGenerator.On("NewUUID").Return("uuid-1", nil)
 		serviceAPIService := new(serviceapimocks.Service)
-		serviceAPIService.On("New", "app", types.UID("appUID"), "uuid-1", serviceAPI).Return(applicationServiceAPI, nil)
+		serviceAPIService.On("New", "app", types.UID("appUID"), "uuid-1", "Some service", serviceAPI).Return(applicationServiceAPI, nil)
 		serviceRepository := new(applicationsmocks.ServiceRepository)
 		serviceRepository.On("Create", "app", applicationService).Return(nil)
 		serviceRepository.On("GetAll", "app").Return(nil, nil)
 		specService := new(specmocks.Service)
-		specService.On("PutSpec", &serviceDefinition, "gateway-url").Return(nil)
+		specService.On("PutSpec", &serviceDefinition, "http://central-application-gateway.kyma-system:8080/app/some-service").Return(nil)
 		applicationGetter := new(mocks.ApplicationGetter)
 		applicationGetter.On("Get", context.Background(), "app", v1.GetOptions{}).Return(&applicationWithUID, nil)
 
@@ -402,7 +403,7 @@ func TestServiceDefinitionService_Create(t *testing.T) {
 		uuidGenerator := new(uuidmocks.Generator)
 		uuidGenerator.On("NewUUID").Return("uuid-1", nil)
 		serviceAPIService := new(serviceapimocks.Service)
-		serviceAPIService.On("New", "app", types.UID("appUID"), "uuid-1", serviceAPI).Return(nil, apperrors.Internal("some error"))
+		serviceAPIService.On("New", "app", types.UID("appUID"), "uuid-1", "Some service", serviceAPI).Return(nil, apperrors.Internal("some error"))
 		applicationGetter := new(mocks.ApplicationGetter)
 		applicationGetter.On("Get", context.Background(), "app", v1.GetOptions{}).Return(&applicationWithUID, nil)
 
@@ -463,9 +464,10 @@ func TestServiceDefinitionService_Create(t *testing.T) {
 			Api:         serviceAPI,
 		}
 		applicationServiceAPI := &applications.ServiceAPI{
-			TargetUrl:   "http://target.com",
-			AccessLabel: "access-label",
-			GatewayURL:  "gateway-url",
+			TargetUrl:         "http://target.com",
+			AccessLabel:       "access-label",
+			GatewayURL:        "gateway-url",
+			CentralGatewayURL: "http://central-application-gateway.kyma-system:8080/app/some-service",
 			Credentials: applications.Credentials{
 				AuthenticationUrl: "",
 				SecretName:        "",
@@ -486,11 +488,11 @@ func TestServiceDefinitionService_Create(t *testing.T) {
 		uuidGenerator := new(uuidmocks.Generator)
 		uuidGenerator.On("NewUUID").Return("uuid-1", nil)
 		serviceAPIService := new(serviceapimocks.Service)
-		serviceAPIService.On("New", "app", types.UID("appUID"), "uuid-1", serviceAPI).Return(applicationServiceAPI, nil)
+		serviceAPIService.On("New", "app", types.UID("appUID"), "uuid-1", "Some service", serviceAPI).Return(applicationServiceAPI, nil)
 		serviceRepository := new(applicationsmocks.ServiceRepository)
 		serviceRepository.On("Create", "app", applicationService).Return(apperrors.Internal("some error"))
 		specService := new(specmocks.Service)
-		specService.On("PutSpec", &serviceDefinition, "gateway-url").Return(nil)
+		specService.On("PutSpec", &serviceDefinition, "http://central-application-gateway.kyma-system:8080/app/some-service").Return(nil)
 		applicationGetter := new(mocks.ApplicationGetter)
 		applicationGetter.On("Get", context.Background(), "app", v1.GetOptions{}).Return(&applicationWithUID, nil)
 
@@ -523,9 +525,10 @@ func TestServiceDefinitionService_Create(t *testing.T) {
 			Api:         serviceAPI,
 		}
 		applicationServiceAPI := &applications.ServiceAPI{
-			TargetUrl:   "http://target.com",
-			AccessLabel: "access-label",
-			GatewayURL:  "gateway-url",
+			TargetUrl:         "http://target.com",
+			AccessLabel:       "access-label",
+			GatewayURL:        "gateway-url",
+			CentralGatewayURL: "http://central-application-gateway.kyma-system:8080/app/some-service",
 			Credentials: applications.Credentials{
 				AuthenticationUrl: "",
 				SecretName:        "",
@@ -545,11 +548,11 @@ func TestServiceDefinitionService_Create(t *testing.T) {
 		uuidGenerator := new(uuidmocks.Generator)
 		uuidGenerator.On("NewUUID").Return("uuid-1", nil)
 		serviceAPIService := new(serviceapimocks.Service)
-		serviceAPIService.On("New", "app", types.UID("appUID"), "uuid-1", serviceAPI).Return(applicationServiceAPI, nil)
+		serviceAPIService.On("New", "app", types.UID("appUID"), "uuid-1", "Some service", serviceAPI).Return(applicationServiceAPI, nil)
 		serviceRepository := new(applicationsmocks.ServiceRepository)
 		serviceRepository.On("Create", "app", applicationService).Return(apperrors.NotFound("some error"))
 		specService := new(specmocks.Service)
-		specService.On("PutSpec", &serviceDefinition, "gateway-url").Return(nil)
+		specService.On("PutSpec", &serviceDefinition, "http://central-application-gateway.kyma-system:8080/app/some-service").Return(nil)
 		applicationGetter := new(mocks.ApplicationGetter)
 		applicationGetter.On("Get", context.Background(), "app", v1.GetOptions{}).Return(&applicationWithUID, nil)
 
@@ -663,12 +666,12 @@ func TestServiceDefinitionService_Create(t *testing.T) {
 		uuidGenerator := new(uuidmocks.Generator)
 		uuidGenerator.On("NewUUID").Return("uuid-1", nil)
 		serviceAPIService := new(serviceapimocks.Service)
-		serviceAPIService.On("New", "app", types.UID("appUID"), "uuid-1", serviceAPI).Return(applicationServiceAPI, nil)
+		serviceAPIService.On("New", "app", types.UID("appUID"), "uuid-1", "Some service", serviceAPI).Return(applicationServiceAPI, nil)
 		serviceRepository := new(applicationsmocks.ServiceRepository)
 		serviceRepository.On("Create", "app", applicationService).Return(nil)
 		serviceRepository.On("GetAll", "app").Return(nil, nil)
 		specService := new(specmocks.Service)
-		specService.On("PutSpec", &serviceDefinition, "gateway-url").Return(nil)
+		specService.On("PutSpec", &serviceDefinition, "http://central-application-gateway.kyma-system:8080/app/some-service").Return(nil)
 		applicationGetter := new(mocks.ApplicationGetter)
 		applicationGetter.On("Get", context.Background(), "app", v1.GetOptions{}).Return(nil, fmt.Errorf("Getting Application failed"))
 
@@ -796,9 +799,10 @@ func TestServiceDefinitionService_GetById(t *testing.T) {
 		}
 
 		applicationServiceAPI := &applications.ServiceAPI{
-			TargetUrl:   "http://target.com",
-			AccessLabel: "access-label",
-			GatewayURL:  "gateway-url",
+			TargetUrl:         "http://target.com",
+			AccessLabel:       "access-label",
+			GatewayURL:        "gateway-url",
+			CentralGatewayURL: "http://central-application-gateway.kyma-system:8080/app/some-service",
 			Credentials: applications.Credentials{
 				AuthenticationUrl: "http://oauth.com/token",
 				SecretName:        "secret-name",
@@ -885,9 +889,10 @@ func TestServiceDefinitionService_GetById(t *testing.T) {
 	t.Run("should return error when reading API fails", func(t *testing.T) {
 		// given
 		applicationServiceAPI := &applications.ServiceAPI{
-			TargetUrl:   "http://target.com",
-			AccessLabel: "access-label",
-			GatewayURL:  "gateway-url",
+			TargetUrl:         "http://target.com",
+			AccessLabel:       "access-label",
+			GatewayURL:        "gateway-url",
+			CentralGatewayURL: "http://central-application-gateway.kyma-system:8080/app/some-service",
 			Credentials: applications.Credentials{
 				AuthenticationUrl: "http://oauth.com/token",
 				SecretName:        "secret-name",
@@ -986,10 +991,10 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 		}
 
 		applicationServiceAPI := &applications.ServiceAPI{
-			TargetUrl:   "http://target.com",
-			AccessLabel: "access-label",
-			GatewayURL:  "gateway-url",
-
+			TargetUrl:         "http://target.com",
+			AccessLabel:       "access-label",
+			GatewayURL:        "gateway-url",
+			CentralGatewayURL: "http://central-application-gateway.kyma-system:8080/app/some-service",
 			Credentials: applications.Credentials{
 				SecretName: "secret-name",
 			},
@@ -1009,7 +1014,7 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 		}
 
 		serviceAPIService := new(serviceapimocks.Service)
-		serviceAPIService.On("Update", "app", types.UID("appUID"), "uuid-1", serviceAPI).Return(applicationServiceAPI, nil)
+		serviceAPIService.On("Update", "app", types.UID("appUID"), "uuid-1", "Some service", serviceAPI).Return(applicationServiceAPI, nil)
 		serviceAPIService.On("Read", "app", applicationServiceAPI).Return(serviceAPI, nil)
 
 		serviceRepository := new(applicationsmocks.ServiceRepository)
@@ -1017,7 +1022,7 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 		serviceRepository.On("Update", "app", applicationService).Return(nil)
 
 		specService := new(specmocks.Service)
-		specService.On("PutSpec", &serviceDefinition, "gateway-url").Return(nil)
+		specService.On("PutSpec", &serviceDefinition, "http://central-application-gateway.kyma-system:8080/app/some-service").Return(nil)
 		specService.On("GetSpec", "uuid-1").Return(nil, nil, nil, nil)
 		applicationGetter := new(mocks.ApplicationGetter)
 		applicationGetter.On("Get", context.Background(), "app", v1.GetOptions{}).Return(&applicationWithUID, nil)
@@ -1059,9 +1064,10 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 		}
 
 		applicationServiceAPI := &applications.ServiceAPI{
-			TargetUrl:   "http://target.com",
-			AccessLabel: "access-label",
-			GatewayURL:  "gateway-url",
+			TargetUrl:         "http://target.com",
+			AccessLabel:       "access-label",
+			GatewayURL:        "gateway-url",
+			CentralGatewayURL: "http://central-application-gateway.kyma-system:8080/app/some-service",
 			Credentials: applications.Credentials{
 				AuthenticationUrl: "http://oauth.com/token",
 				SecretName:        "secret-name",
@@ -1069,7 +1075,7 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 		}
 
 		serviceAPIService := new(serviceapimocks.Service)
-		serviceAPIService.On("Update", "app", types.UID("appUID"), "uuid-1", serviceAPI).Return(applicationServiceAPI, nil)
+		serviceAPIService.On("Update", "app", types.UID("appUID"), "uuid-1", "Some service", serviceAPI).Return(applicationServiceAPI, nil)
 		serviceAPIService.On("Read", "app", applicationServiceAPI).Return(serviceAPI, nil)
 
 		serviceRepository := new(applicationsmocks.ServiceRepository)
@@ -1239,7 +1245,7 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 		}
 
 		serviceAPIService := new(serviceapimocks.Service)
-		serviceAPIService.On("Update", "app", types.UID("appUID"), "uuid-1", serviceAPI).Return(&applications.ServiceAPI{}, apperrors.Internal("an error"))
+		serviceAPIService.On("Update", "app", types.UID("appUID"), "uuid-1", "Some service", serviceAPI).Return(&applications.ServiceAPI{}, apperrors.Internal("an error"))
 
 		serviceRepository := new(applicationsmocks.ServiceRepository)
 		serviceRepository.On("Get", "app", "uuid-1").Return(applicationService, nil)
@@ -1303,7 +1309,7 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 		}
 
 		serviceAPIService := new(serviceapimocks.Service)
-		serviceAPIService.On("Update", "app", types.UID("appUID"), "uuid-1", serviceAPI).Return(&applications.ServiceAPI{}, apperrors.Internal("an error"))
+		serviceAPIService.On("Update", "app", types.UID("appUID"), "uuid-1", "Some service", serviceAPI).Return(&applications.ServiceAPI{}, apperrors.Internal("an error"))
 
 		serviceRepository := new(applicationsmocks.ServiceRepository)
 		serviceRepository.On("Get", "app", "uuid-1").Return(applicationService, nil)
@@ -1367,7 +1373,7 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 		}
 
 		serviceAPIService := new(serviceapimocks.Service)
-		serviceAPIService.On("Update", "app", types.UID("appUID"), "uuid-1", serviceAPI).Return(&applications.ServiceAPI{}, nil)
+		serviceAPIService.On("Update", "app", types.UID("appUID"), "uuid-1", "Some service", serviceAPI).Return(&applications.ServiceAPI{}, nil)
 
 		serviceRepository := new(applicationsmocks.ServiceRepository)
 		serviceRepository.On("Get", "app", "uuid-1").Return(applicationService, nil)
@@ -1420,9 +1426,10 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 		}
 
 		applicationServiceAPI := &applications.ServiceAPI{
-			TargetUrl:   "http://target.com",
-			AccessLabel: "access-label",
-			GatewayURL:  "gateway-url",
+			TargetUrl:         "http://target.com",
+			AccessLabel:       "access-label",
+			GatewayURL:        "gateway-url",
+			CentralGatewayURL: "http://central-application-gateway.kyma-system:8080/app/some-service",
 			Credentials: applications.Credentials{
 				AuthenticationUrl: "http://oauth.com/token",
 				SecretName:        "secret-name",
@@ -1443,7 +1450,7 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 		}
 
 		serviceAPIService := new(serviceapimocks.Service)
-		serviceAPIService.On("Update", "app", types.UID("appUID"), "uuid-1", serviceAPI).Return(applicationServiceAPI, nil)
+		serviceAPIService.On("Update", "app", types.UID("appUID"), "uuid-1", "Some service", serviceAPI).Return(applicationServiceAPI, nil)
 		serviceAPIService.On("Read", "app", applicationServiceAPI).Return(serviceAPI, nil)
 
 		serviceRepository := new(applicationsmocks.ServiceRepository)
@@ -1452,7 +1459,7 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 
 		specService := new(specmocks.Service)
 		specService.On("GetSpec", "uuid-1").Return(nil, nil, nil, nil)
-		specService.On("PutSpec", &serviceDefinition, "gateway-url").Return(nil)
+		specService.On("PutSpec", &serviceDefinition, "http://central-application-gateway.kyma-system:8080/app/some-service").Return(nil)
 		applicationGetter := new(mocks.ApplicationGetter)
 		applicationGetter.On("Get", context.Background(), "app", v1.GetOptions{}).Return(&applicationWithUID, nil)
 
@@ -1499,10 +1506,10 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 		}
 
 		applicationServiceAPI := &applications.ServiceAPI{
-			TargetUrl:   "http://target.com",
-			AccessLabel: "access-label",
-			GatewayURL:  "gateway-url",
-
+			TargetUrl:         "http://target.com",
+			AccessLabel:       "access-label",
+			GatewayURL:        "gateway-url",
+			CentralGatewayURL: "http://central-application-gateway.kyma-system:8080/app/some-service",
 			Credentials: applications.Credentials{
 				SecretName: "secret-name",
 			},
@@ -1522,7 +1529,7 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 		}
 
 		serviceAPIService := new(serviceapimocks.Service)
-		serviceAPIService.On("Update", "app", types.UID("appUID"), "uuid-1", serviceAPI).Return(applicationServiceAPI, nil)
+		serviceAPIService.On("Update", "app", types.UID("appUID"), "uuid-1", "Some service", serviceAPI).Return(applicationServiceAPI, nil)
 		serviceAPIService.On("Read", "app", applicationServiceAPI).Return(serviceAPI, nil)
 
 		serviceRepository := new(applicationsmocks.ServiceRepository)
@@ -1530,7 +1537,7 @@ func TestServiceDefinitionService_Update(t *testing.T) {
 		serviceRepository.On("Update", "app", applicationService).Return(nil)
 
 		specService := new(specmocks.Service)
-		specService.On("PutSpec", &serviceDefinition, "gateway-url").Return(nil)
+		specService.On("PutSpec", &serviceDefinition, "http://central-application-gateway.kyma-system:8080/app/some-service").Return(nil)
 		specService.On("GetSpec", "uuid-1").Return(nil, nil, nil, nil)
 		applicationGetter := new(mocks.ApplicationGetter)
 		applicationGetter.On("Get", context.Background(), "app", v1.GetOptions{}).Return(nil, fmt.Errorf("Getting Application failed"))

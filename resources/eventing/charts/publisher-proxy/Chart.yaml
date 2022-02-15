@@ -1,0 +1,6 @@
+apiVersion: v2
+name: publisher-proxy
+description: Helm chart for eventing-publisher-proxy which contains resources used by eventing-publisher-proxy deployments
+type: application
+version: 0.1.0
+appVersion: 0.1.0

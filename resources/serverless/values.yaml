@@ -6,14 +6,10 @@ fullnameOverride: "serverless"
 
 injectCerts:
   image:
-    repository: "eu.gcr.io/kyma-project/incubator/develop/k8s-tools"
-    tag: "20201023-5de446cf"
     pullPolicy: IfNotPresent
 
 migration:
   image:
-    repository: "eu.gcr.io/kyma-project/incubator/develop/k8s-tools"
-    tag: "20201023-5de446cf"
     pullPolicy: IfNotPresent
 
 tests:
@@ -21,9 +17,10 @@ tests:
   labels:
     integration: true
     after-upgrade: true
+    e2e-skr: true
 
   long:
-    initTimeout: 120s
+    waitTimeout: 180s
     resources:
       requests:
         memory: 128Mi
@@ -32,15 +29,11 @@ tests:
         memory: 256Mi
         cpu: 200m
     image:
-      repository: "eu.gcr.io/kyma-project/incubator/develop/k8s-tools"
-      tag: "20201023-5de446cf"
       pullPolicy: IfNotPresent
     namespace: "long-running-function-test"
     name: longrun
 
   image:
-    repository: "eu.gcr.io/kyma-project/function-controller-test"
-    tag: "63266748"
     pullPolicy: IfNotPresent
   disableConcurrency: false
   restartPolicy: Never
@@ -56,44 +49,89 @@ tests:
     verifySSL: "false"
     verbose: "false"
     gitServer:
-      image: "eu.gcr.io/kyma-project/gitserver"
-      tag: "c0aa144a"
       repoName: "function"
+    pkgRegistryConfig:
+      secretName: "serverless-package-registry-config"
+      URLNode: "https://pkgs.dev.azure.com/kyma-wookiee/public-packages/_packaging/public-packages%40Release/npm/registry/"
+      URLPython: "https://pkgs.dev.azure.com/kyma-wookiee/public-packages/_packaging/public-packages%40Release/pypi/simple/"
 
 global:
+  domainName: "kyma.example.com"
   commonLabels:
     app: '{{ template "name" . }}'
-    version: "{{ .Values.images.manager.tag }}"
+    version: "{{ .Values.global.images.function_controller.version }}"
     app.kubernetes.io/name: '{{ template "name" . }}'
     app.kubernetes.io/instance: "{{ .Release.Name }}"
     app.kubernetes.io/managed-by: "{{ .Release.Service }}"
-    app.kubernetes.io/version: "{{ .Values.images.manager.tag }}"
+    app.kubernetes.io/version: "{{ .Values.global.images.function_controller.version }}"
     helm.sh/chart: '{{ include "chart" . }}'
   dockerServicePort: 5000
   ingress:
     domainName:
+  containerRegistry:
+    path: eu.gcr.io/kyma-project
+  images:
+    k8s_tools:
+      name: "k8s-tools"
+      version: "20220127-ec72a890"
+      directory: "tpi"
+    function_controller:
+      name: "function-controller"
+      version: "PR-13358"
+    function_webhook:
+      name: "function-webhook"
+      version: "PR-13358"
+    function_build_init:
+      name: "function-build-init"
+      version: "PR-13358"
+    function_runtime_nodejs12:
+      name: "function-runtime-nodejs12"
+      version: "PR-13398"
+    function_runtime_nodejs14:
+      name: "function-runtime-nodejs14"
+      version: "PR-13398"
+    function_runtime_python39:
+      name: "function-runtime-python39"
+      version: "PR-13398"
+    kaniko_executor:
+      name: "kaniko-executor"
+      version: "1.7.0-6d270da8"
+      directory: "tpi"
+    registry:
+      name: "registry"
+      version: "2.7.1-ff0c28bf"
+      directory: "tpi"
+    google_pause:
+      name: "pause-amd64"
+      version: "3.2"
+      directory: "external/gcr.io/google-containers"
+  testImages:
+    function_controller_test:
+      name: "function-controller-test"
+      version: "PR-13214"
+    git_server:
+      name: "gitserver"
+      version: "PR-13313"
+  highPriorityClassName: "kyma-system-priority"
 
 images:
-  manager:
-    repository: "eu.gcr.io/kyma-project/function-controller"
-    tag: "55e5b31a"
+  function_controller:
     pullPolicy: IfNotPresent
-  runtimes:
-    nodejs12:
-      repository: "eu.gcr.io/kyma-project/function-runtime-nodejs12"
-      tag: "12225f37"
-    nodejs10:
-      repository: "eu.gcr.io/kyma-project/function-runtime-nodejs10"
-      tag: "12225f37"
-    python38:
-      repository: "eu.gcr.io/kyma-project/function-runtime-python38"
-      tag: "12225f37"
+
 
 deployment:
   replicas: 1
   labels: {}
   annotations: {}
   extraProperties: {}
+  livenessProbe:
+    initialDelaySeconds: 50
+    timeoutSeconds: 2
+    periodSeconds: 10
+  readinessProbe:
+    initialDelaySeconds: 10
+    timeoutSeconds: 1
+    periodSeconds: 2
 
 pod:
   labels: {}
@@ -103,14 +141,29 @@ pod:
     terminationGracePeriodSeconds: 10
 
 containers:
+  daemonset:
+    initContainerSecurityContext:
+      privileged: false
+      allowPrivilegeEscalation: false
+      runAsUser: 0
+    containerSecurityContext:
+      privileged: false
+      allowPrivilegeEscalation: false
+      runAsUser: 1000
   manager:
     resources:
       limits:
         cpu: 100m
-        memory: 126Mi #This is temporary. helm3 is using secrets as storage by default. I talked already with michalhudy to exclude secrets with helm labels from watching.
+        memory: 160Mi #This is temporary. helm3 is using secrets as storage by default. I talked already with michalhudy to exclude secrets with helm labels from watching.
       requests:
         cpu: 10m
         memory: 32Mi
+    containerSecurityContext:
+      privileged: false
+      allowPrivilegeEscalation: false
+      runAsUser: 1000
+    healthz:
+      port: "8090"
     extraProperties: {}
     envs:
       configMapRequeueDuration:
@@ -119,30 +172,45 @@ containers:
         value: 5m
       serviceAccountRequeueDuration:
         value: 5m
+      roleRequeueDuration:
+        value: 5m
+      roleBindingRequeueDuration:
+        value: 5m
       namespaceExcludedNames:
-        value: "istio-system,knative-eventing,kube-node-lease,kube-public,kube-system,kyma-installer,kyma-integration,kyma-system,natss,compass-system"
-      imageRegistryDockerConfigSecretName:
-        value: '{{ template "fullname" . }}-image-pull-secret'
+        value: "istio-system,kube-node-lease,kube-public,kube-system,kyma-installer,kyma-integration,kyma-system,natss,compass-system"
+      imageRegistryExternalDockerConfigSecretName:
+        value: '{{ template "fullname" . }}-registry-config'
+      imageRegistryDefaultDockerConfigSecretName:
+        value: '{{ template "fullname" . }}-registry-config-default'
+      packageRegistryConfigSecretName:
+        value: '{{ template "fullname" . }}-package-registry-config'
       imagePullAccountName:
-        value: '{{ template "fullname" . }}'
+        value: '{{ template "fullname" . }}-function'
+      buildServiceAccountName:
+        value: '{{ template "fullname" . }}-build'
       targetCPUUtilizationPercentage:
         value: "50"
-      kserviceRequeueDuration:
-        value: 5m
+      functionPublisherProxyAddress:
+        value: "http://eventing-publisher-proxy.kyma-system.svc.cluster.local/publish"
       functionRequeueDuration:
         value: 5m
       functionBuildExecutorArgs:
         value: "--insecure,--skip-tls-verify,--skip-unused-stages,--log-format=text,--cache=true"
-      functionBuildExecutorImage:
-        value: gcr.io/kaniko-project/executor:v0.22.0
-      functionBuildRepoFetcherImage:
-        value: eu.gcr.io/kyma-project/function-build-init:a8a6bca9
+      functionBuildMaxSimultaneousJobs:
+        value: "5"
+      logLevel:
+        value: "info"
+      healthzLivenessTimeout:
+        value: "1s"
 
 services:
   manager:
     type: ClusterIP
     labels: {}
     annotations: {}
+    https:
+      port: 443
+      targetPort: 8443
 
 metrics:
   enabled: true
@@ -171,6 +239,8 @@ clusterMicroFrontend:
 
 grafanaDashboard:
   enabled: true
+  functionMetrics:
+    enabled: false
 
 usageKind:
   name: serverless-function
@@ -180,11 +250,13 @@ dockerRegistry:
   username: "{{ randAlphaNum 20 | b64enc }}" # for gcr "_json_key"
   password: "{{ randAlphaNum 40 | b64enc }}" # for gcr data from json key
   internalServerAddress: '{{ template "registry-fullname" . }}.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.global.dockerServicePort }}'
-  serverAddress: "registry.{{ .Values.global.ingress.domainName -}}"
-  registryAddress: "registry.{{ .Values.global.ingress.domainName -}}"
+  serverAddress: "registry.{{ .Values.global.domainName -}}"
+  registryAddress: "registry.{{ .Values.global.domainName -}}"
 
 docker-registry:
   fullnameOverride: "serverless-docker-registry"
+  destinationRule:
+    enabled: true
   secrets:
     haSharedSecret: "secret"
     htpasswd: "generated-in-init-container"
@@ -194,7 +266,7 @@ docker-registry:
   extraVolumes:
     - name: registry-credentials
       secret:
-        secretName: serverless-registry-credentials
+        secretName: serverless-registry-config-default
         items:
           - key: username
             path: username.txt
@@ -202,10 +274,12 @@ docker-registry:
             path: password.txt
     - name: htpasswd-data
       emptyDir: {}
+  rollme: "{{ randAlphaNum 5}}"
+  registryHTTPSecret: "{{ randAlphaNum 16 | b64enc }}"
 
 webhook:
   enabled: true
   fullnameOverride: "serverless-webhook"
-  image:
-    repository: "eu.gcr.io/kyma-project/function-webhook"
-    tag: "858bc2c2"
+
+k3s-tests:
+  enabled: false # this chart is installed manually, do not flip this value

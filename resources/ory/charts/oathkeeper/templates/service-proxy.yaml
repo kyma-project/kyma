@@ -8,6 +8,13 @@ metadata:
   {{- end }}
   labels:
 {{ include "oathkeeper.labels" . | indent 4 }}
+    {{- with .Values.service.proxy.labels }}
+      {{- toYaml . | nindent 4 }}
+    {{- end }}
+  {{- with .Values.service.proxy.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
 spec:
   type: {{ .Values.service.proxy.type }}
   ports:

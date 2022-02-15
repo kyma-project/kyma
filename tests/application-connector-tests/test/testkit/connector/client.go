@@ -69,16 +69,22 @@ func (c *Client) EstablishApplicationConnection(infoURL string) (ApplicationConn
 func (c *Client) requestManagementInfo(key *rsa.PrivateKey, certs []*x509.Certificate, managementInfoURL string) (ManagementInfoResponse, error) {
 	mtlsClient := testkit.NewMTLSClient(key, certs, c.skipVerify)
 
-	req, err := http.NewRequest(http.MethodGet, managementInfoURL, nil)
-	if err != nil {
-		return ManagementInfoResponse{}, err
-	}
+	var response *http.Response
 
-	response, err := mtlsClient.Do(req)
-	if err != nil {
-		return ManagementInfoResponse{}, errors.Wrap(err, "Failed to fetch Management Info")
-	}
-	defer response.Body.Close()
+	err := testkit.Retry(testkit.DefaultRetryConfig, func() (bool, error) {
+		req, err := http.NewRequest(http.MethodGet, managementInfoURL, nil)
+		if err != nil {
+			return true, nil
+		}
+
+		response, err = mtlsClient.Do(req)
+		if err != nil {
+			return true, nil
+		}
+
+		return false, nil
+	})
+	defer closeResponseBody(response)
 
 	if response.StatusCode != http.StatusOK {
 		responseError := errors.New(fmt.Sprintf("Failed to fetch Management Info. Received status: %s", response.Status))
@@ -119,16 +125,22 @@ func (c *Client) generateCertificates(csrInfo CSRInfoResponse) (*rsa.PrivateKey,
 }
 
 func (c *Client) requestSigningRequestInfo(signingRequestInfoURL string) (CSRInfoResponse, error) {
-	req, err := http.NewRequest(http.MethodGet, signingRequestInfoURL, nil)
-	if err != nil {
-		return CSRInfoResponse{}, err
-	}
+	var response *http.Response
 
-	response, err := c.httpClient.Do(req)
-	if err != nil {
-		return CSRInfoResponse{}, errors.Wrap(err, "Failed to fetch CSR Info Response")
-	}
-	defer response.Body.Close()
+	err := testkit.Retry(testkit.DefaultRetryConfig, func() (bool, error) {
+		req, err := http.NewRequest(http.MethodGet, signingRequestInfoURL, nil)
+		if err != nil {
+			return true, nil
+		}
+
+		response, err = c.httpClient.Do(req)
+		if err != nil {
+			return true, nil
+		}
+
+		return false, nil
+	})
+	defer closeResponseBody(response)
 
 	if response.StatusCode != http.StatusOK {
 		responseError := errors.New(fmt.Sprintf("Failed to fetch fetch CSR Info Response. Received status: %s", response.Status))
@@ -151,19 +163,26 @@ func (c *Client) requestCertificate(certificatesURL string, csr []byte) (CrtResp
 		return CrtResponse{}, err
 	}
 
-	req, err := http.NewRequest(http.MethodPost, certificatesURL, bytes.NewBuffer(payload))
-	if err != nil {
-		return CrtResponse{}, err
-	}
+	var response *http.Response
 
-	response, err := c.httpClient.Do(req)
-	if err != nil {
-		return CrtResponse{}, err
-	}
-	defer response.Body.Close()
+	err = testkit.Retry(testkit.DefaultRetryConfig, func() (bool, error) {
+		req, err := http.NewRequest(http.MethodPost, certificatesURL, bytes.NewBuffer(payload))
+		if err != nil {
+			return true, nil
+		}
+
+		response, err = c.httpClient.Do(req)
+		if err != nil {
+			return true, nil
+		}
+
+		return false, nil
+	})
+
+	defer closeResponseBody(response)
 
 	if response.StatusCode != http.StatusCreated {
-		responseError := errors.New(fmt.Sprintf("Failed to fetch fetch Certificates. Received status: %s", response.Status))
+		responseError := errors.New(fmt.Sprintf("Failed to fetch Certificates. Received status: %s", response.Status))
 		return CrtResponse{}, dumpErrorResponse(responseError, response)
 	}
 
@@ -216,6 +235,12 @@ func createCSR(strSubject string, keys *rsa.PrivateKey) ([]byte, error) {
 	})
 
 	return csr, nil
+}
+
+func closeResponseBody(response *http.Response) {
+	if response != nil {
+		response.Body.Close()
+	}
 }
 
 func ParseSubject(subject string) pkix.Name {

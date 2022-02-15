@@ -1,6 +1,7 @@
 package middlewares
 
 import (
+	"context"
 	"errors"
 	"net/http"
 	"net/http/httptest"
@@ -16,6 +17,8 @@ import (
 )
 
 func TestRevocationCheckMiddleware(t *testing.T) {
+
+	testContext := context.Background()
 
 	hash := "f4cf22fb633d4df500e371daf703d4b4d14a0ea9d69cd631f95f9e6ba840f8ad"
 
@@ -39,7 +42,7 @@ func TestRevocationCheckMiddleware(t *testing.T) {
 		rr := httptest.NewRecorder()
 
 		repository := &mocks.RevocationListRepository{}
-		repository.On("Contains", hash).Return(true, nil)
+		repository.On("Contains", testContext, hash).Return(true, nil)
 
 		headerParser.On("ParseCertificateHeader", *req).Return(certInfo, nil)
 
@@ -66,7 +69,7 @@ func TestRevocationCheckMiddleware(t *testing.T) {
 		rr := httptest.NewRecorder()
 
 		repository := &mocks.RevocationListRepository{}
-		repository.On("Contains", hash).Return(false, nil)
+		repository.On("Contains", testContext, hash).Return(false, nil)
 		headerParser.On("ParseCertificateHeader", *req).Return(certInfo, nil)
 
 		middleware := NewRevocationCheckMiddleware(repository, headerParser)
@@ -92,7 +95,7 @@ func TestRevocationCheckMiddleware(t *testing.T) {
 		rr := httptest.NewRecorder()
 
 		repository := &mocks.RevocationListRepository{}
-		repository.On("Contains", hash).Return(false, errors.New("Some error"))
+		repository.On("Contains", testContext, hash).Return(false, errors.New("Some error"))
 		headerParser.On("ParseCertificateHeader", *req).Return(certInfo, nil)
 
 		middleware := NewRevocationCheckMiddleware(repository, headerParser)

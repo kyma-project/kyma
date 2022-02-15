@@ -73,11 +73,14 @@ func (b *BindingWorker) Process(binding *v1alpha1.Binding, log log.FieldLogger) 
 		return binding, nil
 	}
 	if _, ok := binding.Labels[v1alpha1.BindingValidatedLabelKey]; !ok {
+		if binding.Status.IsFailed() {
+			return binding, errors.New(internal.BindingValidationFailed)
+		}
 		errStatus := binding.Status.Failed()
 		if errStatus != nil {
 			return binding, errors.Wrapf(errStatus, "while set Binding phase to %s", v1alpha1.BindingFailed)
 		}
-		binding.Status.Message = fmt.Sprintf(internal.BindingValidationFailed, v1alpha1.BindingValidatedLabelKey)
+		binding.Status.Message = internal.BindingValidationFailed
 		return binding, nil
 	}
 

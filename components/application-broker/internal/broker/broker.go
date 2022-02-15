@@ -6,18 +6,18 @@ import (
 	"github.com/kyma-project/kyma/components/application-broker/internal"
 	"github.com/kyma-project/kyma/components/application-broker/internal/access"
 	"github.com/kyma-project/kyma/components/application-broker/internal/director"
-	"github.com/kyma-project/kyma/components/application-broker/internal/knative"
 	"github.com/kyma-project/kyma/components/application-broker/internal/servicecatalog"
 	mappingCli "github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned"
 	"github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1"
 	listers "github.com/kyma-project/kyma/components/application-broker/pkg/client/listers/applicationconnector/v1alpha1"
 	"github.com/kyma-project/kyma/components/application-broker/platform/idprovider"
 
-	gcli "github.com/kyma-project/kyma/components/application-broker/third_party/machinebox/graphql"
-	osb "github.com/pmorie/go-open-service-broker-client/v2"
+	osb "github.com/kubernetes-sigs/go-open-service-broker-client/v2"
 	"github.com/sirupsen/logrus"
 	securityclientv1beta1 "istio.io/client-go/pkg/clientset/versioned/typed/security/v1beta1"
 	"k8s.io/client-go/tools/cache"
+
+	gcli "github.com/kyma-project/kyma/components/application-broker/third_party/machinebox/graphql"
 )
 
 //go:generate mockery -name=instanceStorage -output=automock -outpkg=automock -case=underscore
@@ -140,7 +140,6 @@ func New(applicationFinder appFinder,
 	emLister listers.ApplicationMappingLister,
 	brokerService *NsBrokerService,
 	mClient *mappingCli.Interface,
-	knClient knative.Client,
 	istioClient *securityclientv1beta1.SecurityV1beta1Interface,
 	log *logrus.Entry,
 	livenessCheckStatus *LivenessCheckStatus,
@@ -171,9 +170,9 @@ func New(applicationFinder appFinder,
 			appEnabledChecker: enabledChecker,
 		},
 		provisioner: NewProvisioner(instStorage, stateService, opStorage, opStorage, accessChecker, applicationFinder,
-			eaClient, knClient, *istioClient, instStorage, idp, log, idSelector, directorSvc, validateProvisionReq),
+			eaClient, *istioClient, instStorage, idp, log, idSelector, directorSvc, validateProvisionReq),
 		deprovisioner: NewDeprovisioner(instStorage, stateService, opStorage, opStorage, idp, applicationFinder,
-			knClient, eaClient, log, idSelector, directorSvc),
+			eaClient, log, idSelector, directorSvc),
 		binder: &bindService{
 			appSvcFinder:     applicationFinder,
 			appSvcIDSelector: idSelector,

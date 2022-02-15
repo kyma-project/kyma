@@ -21,6 +21,9 @@ spec:
         control-plane: controller-manager
         app.kubernetes.io/name: {{ include "hydra-maester.name" . }}
         app.kubernetes.io/instance: {{ .Release.Name }}
+        {{- with .Values.deployment.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
       {{- with .Values.annotations }}
       annotations:
         {{- toYaml . | nindent 8 }}
@@ -28,24 +31,59 @@ spec:
     spec:
       containers:
         - name: {{ .Chart.Name }}
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.hydra_maester) }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           command:
             - /manager
           args:
             - --metrics-addr=0.0.0.0:{{ .Values.port.metrics }}
             - --hydra-url=http://{{ include "hydra-maester.adminService" . }}
-            - --hydra-port=4445
+            - --hydra-port={{ .Values.adminService.port | default 4445 }}
             - --sync-period={{ .Values.config.syncPeriod }}
+            {{- if .Values.forwardedProto }}
+            - --forwarded-proto={{ .Values.forwardedProto }}
+            {{- end }}
           resources:
             {{- toYaml .Values.deployment.resources | nindent 12 }}
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+              - ALL
+            privileged: false
+            runAsGroup: 1000
+            runAsNonRoot: true
+            runAsUser: 1000
           terminationMessagePath: /dev/termination-log
           terminationMessagePolicy: File
           ports:
             - containerPort: {{ .Values.port.metrics }}
               name: metrics
+          livenessProbe:
+            httpGet:
+              port: {{ .Values.port.metrics }}
+              path: "/metrics"
+            initialDelaySeconds: {{ .Values.deployment.livenessProbe.initialDelaySeconds }}
+            timeoutSeconds: {{ .Values.deployment.livenessProbe.timeoutSeconds }}
+            periodSeconds: {{.Values.deployment.livenessProbe.periodSeconds }}
+          readinessProbe:
+            httpGet:
+              port: {{ .Values.port.metrics }}
+              path: "/metrics"
+            initialDelaySeconds: {{ .Values.deployment.readinessProbe.initialDelaySeconds }}
+            timeoutSeconds: {{ .Values.deployment.readinessProbe.timeoutSeconds }}
+            periodSeconds: {{.Values.deployment.readinessProbe.periodSeconds }}
         - name: watcher
-          image: "{{ .Values.jobs.image.repository }}:{{ .Values.jobs.image.tag }}"
+          image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.k8s_tools) }}"
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+              - ALL
+            privileged: false
+            runAsGroup: 65534
+            runAsNonRoot: true
+            runAsUser: 65534
           volumeMounts:
             - name: hydra-dsn
               mountPath: /etc/secrets
@@ -56,6 +94,9 @@ spec:
             - |
 {{ tpl (.Files.Get "files/watcher.sh" | printf "%s" | indent 14) . }}
       serviceAccountName: {{ include "hydra-maester.name" . }}-account
+      {{- if .Values.global.priorityClassName }}
+      priorityClassName: {{ .Values.global.priorityClassName }}
+      {{- end }}
       nodeSelector:
       {{- with .Values.deployment.nodeSelector }}
         {{- toYaml . | nindent 8 }}
@@ -72,3 +113,4 @@ spec:
         - name: hydra-dsn
           secret:
             secretName: {{ include "hydra-maester.hydraSecret" . }}
+

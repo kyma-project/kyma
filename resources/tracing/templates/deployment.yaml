@@ -1,4 +1,3 @@
-{{- template "kyma.checkRequirements" . -}}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -19,9 +18,9 @@ spec:
       {{- if .Values.serviceAccount.create }}
       serviceAccountName: {{ include "jaeger-operator.serviceAccountName" . }}
       {{- end }}
-      {{- with .Values.securityContext }}
+      {{- if .Values.podSecurityContext }}
       securityContext:
-{{ toYaml . | indent 8 }}
+{{ toYaml .Values.podSecurityContext | indent 8 }}
       {{- end }}
       {{- if and .Values.image.imagePullSecrets (not .Values.serviceAccount.create ) }}
       imagePullSecrets:
@@ -31,12 +30,13 @@ spec:
       {{- end }}
       containers:
         - name: {{ include "jaeger-operator.fullname" . }}
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.jaeger_operator) }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
           - containerPort: 8383
             name: metrics
-          args: ["start"]
+          args:
+          - start
           env:
             - name: WATCH_NAMESPACE
               {{- if .Values.rbac.clusterRole }}
@@ -58,9 +58,16 @@ spec:
               value: {{ include "jaeger-operator.fullname" . | quote }}
           resources:
 {{ toYaml .Values.resources | indent 12 }}
+          {{- if .Values.securityContext }}
+          securityContext:
+{{ toYaml .Values.securityContext | indent 12 }}
+          {{- end }}
     {{- with .Values.nodeSelector }}
       nodeSelector:
 {{ toYaml . | indent 8 }}
+    {{- end }}
+    {{- if .Values.global.priorityClassName }}
+      priorityClassName: {{ .Values.global.priorityClassName }}
     {{- end }}
     {{- with .Values.affinity }}
       affinity:

@@ -1,0 +1,32 @@
+deployment:
+  image:
+    pullPolicy: IfNotPresent
+  args:
+    proxyPort: &proxyPort 8080
+    proxyPortCompass: &proxyPortCompass 8082
+    externalAPIPort: &externalAPIPort 8081
+    requestTimeout: 10
+    skipVerify: false
+    proxyTimeout: 10
+    proxyCacheTTL: 120
+    requestLogging: false
+  resources:
+    limits:
+      cpu: 100m
+      memory: 128Mi
+    requests:
+      cpu: 50m
+      memory: 64Mi
+
+service:
+  externalapi:
+    port: *externalAPIPort
+  proxy:
+    port: *proxyPort
+    portCompass: *proxyPortCompass
+
+autoscaling:
+  enable: true
+  minReplicas: 1
+  maxReplicas: 10
+  cpuUsagePercent: 40

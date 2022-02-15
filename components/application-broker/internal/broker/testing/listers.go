@@ -1,26 +1,22 @@
 package testing
 
 import (
-	"github.com/pkg/errors"
-
 	eaFake "github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned/fake"
+	"github.com/pkg/errors"
 	fakeistioclientset "istio.io/client-go/pkg/clientset/versioned/fake"
 	"k8s.io/apimachinery/pkg/runtime"
 	fakekubeclientset "k8s.io/client-go/kubernetes/fake"
 	"k8s.io/client-go/tools/cache"
-	fakeeventingclientset "knative.dev/eventing/pkg/client/clientset/versioned/fake"
-	"knative.dev/pkg/reconciler/testing"
 )
 
 var clientSetSchemes = []func(*runtime.Scheme) error{
 	fakekubeclientset.AddToScheme,
-	fakeeventingclientset.AddToScheme,
 	fakeistioclientset.AddToScheme,
 	eaFake.AddToScheme,
 }
 
 type Listers struct {
-	sorter testing.ObjectSorter
+	sorter ObjectSorter
 }
 
 func NewScheme() *runtime.Scheme {
@@ -38,7 +34,7 @@ func NewListers(objs []runtime.Object) Listers {
 	scheme := NewScheme()
 
 	ls := Listers{
-		sorter: testing.NewObjectSorter(scheme),
+		sorter: NewObjectSorter(scheme),
 	}
 
 	ls.sorter.AddObjects(objs...)
@@ -52,10 +48,6 @@ func (l *Listers) indexerFor(obj runtime.Object) cache.Indexer {
 
 func (l *Listers) GetKubeObjects() []runtime.Object {
 	return l.sorter.ObjectsForSchemeFunc(fakekubeclientset.AddToScheme)
-}
-
-func (l *Listers) GetEventingObjects() []runtime.Object {
-	return l.sorter.ObjectsForSchemeFunc(fakeeventingclientset.AddToScheme)
 }
 
 func (l *Listers) GetIstioObjects() []runtime.Object {

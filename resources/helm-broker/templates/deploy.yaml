@@ -29,7 +29,7 @@ spec:
       serviceAccountName: {{ template "fullname" . }}
       containers:
       - name: broker
-        image: "{{ .Values.global.containerRegistry.path }}/{{ .Values.global.helm_broker.dir }}helm-broker:{{ .Values.global.helm_broker.version }}"
+        image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.helm_broker) }}"
         imagePullPolicy: {{ .Values.global.image.pullPolicy }}
         env:
           - name: APP_PORT
@@ -48,6 +48,9 @@ spec:
             value: "{{ .Values.broker.tillerTLSEnabled }}"
         resources:
 {{ toYaml .Values.broker.resources | indent 10 }}
+        securityContext:
+          privileged: false
+          allowPrivilegeEscalation: false
         volumeMounts:
         - mountPath: /tmp
           name: tmp-empty-dir
@@ -76,7 +79,7 @@ spec:
           timeoutSeconds: 2
 
       - name: ctrl
-        image: "{{ .Values.global.containerRegistry.path }}/{{ .Values.global.helm_controller.dir }}helm-controller:{{ .Values.global.helm_controller.version }}"
+        image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.helm_controller) }}"
         imagePullPolicy: {{ .Values.global.image.pullPolicy }}
         resources:
 {{ toYaml .Values.ctrl.resources | indent 10 }}
@@ -99,6 +102,9 @@ spec:
             value: "{{ .Values.ctrl.documentationEnabled }}"
           - name: APP_UPLOAD_SERVICE_URL
             value: "{{ .Values.ctrl.uploadServiceURL }}"
+        securityContext:
+          privileged: false
+          allowPrivilegeEscalation: false
         volumeMounts:
         - mountPath: /tmp
           name: tmp-empty-dir
@@ -149,3 +155,6 @@ spec:
           - key: tls.key
             path: tls.key
 {{ end }}
+    {{- if .Values.global.priorityClassName }}
+      priorityClassName: {{ .Values.global.priorityClassName }}
+    {{- end }}

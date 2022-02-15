@@ -11,7 +11,6 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/watch"
-	watchtools "k8s.io/client-go/tools/watch"
 
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/resource"
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/shared"
@@ -69,7 +68,7 @@ func (a *AddonConfiguration) Create(url string) error {
 }
 
 func (a *AddonConfiguration) Delete() error {
-	err := a.resCli.Delete(a.name, a.waitTimeout)
+	err := a.resCli.Delete(a.name)
 	if err != nil {
 		return errors.Wrapf(err, "while deleting AddonsConfiguration %s in namespace %s", a.name, a.namespace)
 	}
@@ -120,11 +119,7 @@ func (a *AddonConfiguration) WaitForStatusRunning() error {
 	ctx, cancel := context.WithTimeout(context.Background(), a.waitTimeout)
 	defer cancel()
 	condition := a.isAddonConfigurationReady()
-	_, err = watchtools.Until(ctx, ac.GetResourceVersion(), a.resCli.ResCli, condition)
-	if err != nil {
-		return err
-	}
-	return nil
+	return resource.WaitUntilConditionSatisfied(ctx, a.resCli.ResCli, condition)
 }
 
 func (a *AddonConfiguration) isAddonConfigurationReady() func(event watch.Event) (bool, error) {

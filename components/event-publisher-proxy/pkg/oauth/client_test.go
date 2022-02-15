@@ -22,7 +22,7 @@ func TestNewClient(t *testing.T) {
 		maxIdleConnsPerHost = 200
 	)
 
-	client := NewClient(context.Background(), &env.Config{MaxIdleConns: maxIdleConns, MaxIdleConnsPerHost: maxIdleConnsPerHost})
+	client := NewClient(context.Background(), &env.BebConfig{MaxIdleConns: maxIdleConns, MaxIdleConnsPerHost: maxIdleConnsPerHost})
 	defer client.CloseIdleConnections()
 
 	ocTransport, ok := client.Transport.(*ochttp.Transport)
@@ -52,8 +52,9 @@ func TestGetToken(t *testing.T) {
 	t.Parallel()
 
 	const (
-		tokenEndpoint  = "/token"
-		eventsEndpoint = "/events"
+		tokenEndpoint         = "/token"
+		eventsEndpoint        = "/events"
+		eventsHTTP400Endpoint = "/events400"
 	)
 
 	testCases := []struct {
@@ -79,12 +80,13 @@ func TestGetToken(t *testing.T) {
 		},
 	}
 
+	// nolint:scopelint
 	for _, test := range testCases {
 		t.Run(test.name, func(t *testing.T) {
 			t.Parallel()
 
 			mockServer := testingutils.NewMockServer(testingutils.WithExpiresIn(test.givenExpiresInSec))
-			mockServer.Start(t, tokenEndpoint, eventsEndpoint)
+			mockServer.Start(t, tokenEndpoint, eventsEndpoint, eventsHTTP400Endpoint)
 			defer mockServer.Close()
 
 			emsCEURL := fmt.Sprintf("%s%s", mockServer.URL(), eventsEndpoint)

@@ -16,8 +16,6 @@ minio:
     persistence: "on"
 
 image:
-  repository: eu.gcr.io/kyma-project/rafter-upload-service
-  tag: 3778b2ec
   pullPolicy: IfNotPresent
 
 deployment:
@@ -30,8 +28,26 @@ deployment:
 pod:
   labels: {}
   annotations: {}
-  extraProperties: {}
-  extraContainerProperties: {}
+  extraProperties:
+    securityContext:
+      runAsNonRoot: true
+      runAsUser: 1000
+  extraPropertiesWithFsGroup:
+    securityContext:
+      runAsNonRoot: true
+      runAsUser: 1000
+      fsGroup: 1000
+  extraContainerProperties:
+    securityContext:
+      privileged: false
+      allowPrivilegeEscalation: false
+  resources:
+    requests:
+      memory: 64Mi
+      cpu: 50m
+    limits:
+      memory: 128Mi
+      cpu: 500m
 
 service:
   name:
@@ -114,12 +130,8 @@ envs:
 migrator:
   images:
     alpineKubectl:
-      repository: eu.gcr.io/kyma-project/incubator/develop/k8s-tools
-      tag: '20201023-5de446cf'
       pullPolicy: IfNotPresent
     minioClient:
-      repository: 'minio/mc'
-      tag: 'RELEASE.2019-04-03T17-59-57Z'
       pullPolicy: IfNotPresent
   pre:
     minioDeploymentRefName:

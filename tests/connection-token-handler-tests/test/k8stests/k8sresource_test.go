@@ -13,54 +13,26 @@ import (
 )
 
 const (
-	waitTime    = 5 * time.Second
-	retries     = 5
-	emptyTenant = ""
-	emptyGroup  = ""
+	waitTime = 5 * time.Second
+	retries  = 5
 )
 
 func TestTokenRequests(t *testing.T) {
-
-	config, e := testkit.ReadConfig()
-
-	require.NoError(t, e)
-
 	appName := "test-name"
 
 	client, err := testkit.NewK8sResourcesClient()
 
 	require.NoError(t, err)
 
-	headersRequired := config.Central
-
-	if !headersRequired {
-		t.Run("should create token request CR with token", func(t *testing.T) {
-			//when
-			tokenRequest, e := client.CreateTokenRequest(addSuffix(appName), emptyGroup, emptyTenant)
-			require.NoError(t, e)
-
-			//then
-			tokenRequest = waitForToken(t, client, tokenRequest)
-
-			assert.NotEmpty(t, tokenRequest.Status.Token)
-		})
-	}
-
-	t.Run("should create token request CR with token when tenant and group provided", func(t *testing.T) {
-		//given
-		tenant := "test-tenant"
-		group := "test-group"
-
+	t.Run("should create token request CR with token", func(t *testing.T) {
 		//when
-		tokenRequest, e := client.CreateTokenRequest(addSuffix(appName), group, tenant)
+		tokenRequest, e := client.CreateTokenRequest(addSuffix(appName))
 		require.NoError(t, e)
 
 		//then
 		tokenRequest = waitForToken(t, client, tokenRequest)
 
 		assert.NotEmpty(t, tokenRequest.Status.Token)
-		assert.Equal(t, tenant, tokenRequest.Context.Tenant)
-		assert.Equal(t, group, tokenRequest.Context.Group)
 	})
 }
 

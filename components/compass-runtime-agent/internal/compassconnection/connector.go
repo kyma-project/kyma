@@ -4,14 +4,13 @@ import (
 	"crypto/x509/pkix"
 	"strings"
 
-	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/compass"
-
+	"github.com/google/uuid"
 	gqlschema "github.com/kyma-incubator/compass/components/connector/pkg/graphql/externalschema"
-	"github.com/kyma-project/kyma/components/compass-runtime-agent/pkg/apis/compass/v1alpha1"
-
-	"github.com/pkg/errors"
-
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/certificates"
+	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/compass"
+	"github.com/kyma-project/kyma/components/compass-runtime-agent/pkg/apis/compass/v1alpha1"
+	"github.com/pkg/errors"
+	"github.com/sirupsen/logrus"
 )
 
 type EstablishedConnection struct {
@@ -21,12 +20,13 @@ type EstablishedConnection struct {
 
 const (
 	ConnectorTokenHeader = "Connector-Token"
+	RequestIDHeader      = "x-request-id"
 )
 
 //go:generate mockery --name=Connector
 type Connector interface {
 	EstablishConnection(connectorURL, token string) (EstablishedConnection, error)
-	MaintainConnection(renewCert bool) (*certificates.Credentials, v1alpha1.ManagementInfo, error)
+	MaintainConnection(renewCert bool, credentialsExist bool) (*certificates.Credentials, v1alpha1.ManagementInfo, error)
 }
 
 func NewCompassConnector(
@@ -45,6 +45,14 @@ type compassConnector struct {
 }
 
 func (cc *compassConnector) EstablishConnection(connectorURL, token string) (EstablishedConnection, error) {
+	requestID := uuid.New().String()
+	connection, err := cc.establishConnection(connectorURL, token, requestID)
+	return connection, errors.Wrapf(err, "x-request-id: %s failed", requestID)
+}
+
+func (cc *compassConnector) establishConnection(connectorURL, token, requestID string) (EstablishedConnection, error) {
+	logger := logrus.WithFields(logrus.Fields{"x-request-id": requestID})
+
 	if connectorURL == "" {
 		return EstablishedConnection{}, errors.New("Failed to establish connection. Connector URL is empty")
 	}
@@ -54,7 +62,8 @@ func (cc *compassConnector) EstablishConnection(connectorURL, token string) (Est
 		return EstablishedConnection{}, errors.Wrap(err, "Failed to prepare Connector Token-secured client")
 	}
 
-	configuration, err := tokenSecuredConnectorClient.Configuration(connectorTokenHeader(token))
+	logger.Infof("Fetching configuration")
+	configuration, err := tokenSecuredConnectorClient.Configuration(connectorTokenHeader(token, requestID))
 	if err != nil {
 		return EstablishedConnection{}, errors.Wrap(err, "Failed to fetch configuration")
 	}
@@ -65,7 +74,8 @@ func (cc *compassConnector) EstablishConnection(connectorURL, token string) (Est
 		return EstablishedConnection{}, errors.Wrap(err, "Failed to generate CSR")
 	}
 
-	certResponse, err := tokenSecuredConnectorClient.SignCSR(csr, connectorTokenHeader(configuration.Token.Token))
+	logger.Infof("Signing CSR")
+	certResponse, err := tokenSecuredConnectorClient.SignCSR(csr, connectorTokenHeader(configuration.Token.Token, requestID))
 	if err != nil {
 		return EstablishedConnection{}, errors.Wrap(err, "Failed to sign CSR")
 	}
@@ -81,7 +91,7 @@ func (cc *compassConnector) EstablishConnection(connectorURL, token string) (Est
 	}, nil
 }
 
-func (cc *compassConnector) MaintainConnection(renewCert bool) (*certificates.Credentials, v1alpha1.ManagementInfo, error) {
+func (cc *compassConnector) MaintainConnection(renewCert bool, credentialsExist bool) (*certificates.Credentials, v1alpha1.ManagementInfo, error) {
 	certSecuredClient, err := cc.clientsProvider.GetConnectorCertSecuredClient()
 	if err != nil {
 		return nil, v1alpha1.ManagementInfo{}, errors.Wrap(err, "Failed to prepare Certificate-secured Connector client while checking connection")
@@ -97,7 +107,7 @@ func (cc *compassConnector) MaintainConnection(renewCert bool) (*certificates.Cr
 		return nil, v1alpha1.ManagementInfo{}, err
 	}
 
-	if !renewCert {
+	if !renewCert && credentialsExist {
 		return nil, toManagementInfo(configuration.ManagementPlaneInfo), nil
 	}
 
@@ -152,9 +162,10 @@ func toManagementInfo(configInfo *gqlschema.ManagementPlaneInfo) v1alpha1.Manage
 	}
 }
 
-func connectorTokenHeader(token string) map[string]string {
+func connectorTokenHeader(token string, requestID string) map[string]string {
 	return map[string]string{
 		ConnectorTokenHeader: token,
+		RequestIDHeader:      requestID,
 	}
 }
 

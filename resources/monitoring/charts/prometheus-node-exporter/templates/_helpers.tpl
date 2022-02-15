@@ -1,3 +1,14 @@
+{{- /*
+  Customization: Some changes are made to the default label set.
+  Added labels recommended by Kubernetes and Helm:
+    helm.sh/chart
+    app.kubernetes.io/managed-by
+    app.kubernetes.io/name
+    app.kubernetes.io/instance
+  Removed labels:
+    heritage
+*/ -}}
+
 {{/* vim: set filetype=mustache: */}}
 {{/*
 Expand the name of the chart.
@@ -38,6 +49,14 @@ chart: {{ template "prometheus-node-exporter.chart" . }}
 {{- end }}
 
 {{/*
+Selector labels
+*/}}
+{{- define "prometheus-node-exporter.selectorLabels" -}}
+app.kubernetes.io/name: {{ include "prometheus-node-exporter.name" . }}
+app.kubernetes.io/instance: {{ .Release.Name }}
+{{- end -}}
+
+{{/*
 Create chart name and version as used by the chart label.
 */}}
 {{- define "prometheus-node-exporter.chart" -}}
@@ -57,6 +76,13 @@ Create the name of the service account to use
 {{- end -}}
 
 {{/*
+The image to use
+*/}}
+{{- define "prometheus-node-exporter.image" -}}
+{{- printf "%s:%s" .Values.image.repository (default (printf "v%s" .Chart.AppVersion) .Values.image.tag) }}
+{{- end }}
+
+{{/*
 Allow the release namespace to be overridden for multi-namespace deployments in combined charts
 */}}
 {{- define "prometheus-node-exporter.namespace" -}}
@@ -68,9 +94,16 @@ Allow the release namespace to be overridden for multi-namespace deployments in 
 {{- end -}}
 
 {{/*
-Selector labels
+Create the namespace name of the service monitor
 */}}
-{{- define "prometheus-node-exporter.selectorLabels" -}}
-app.kubernetes.io/name: {{ include "prometheus-node-exporter.name" . }}
-app.kubernetes.io/instance: {{ .Release.Name }}
+{{- define "prometheus-node-exporter.monitor-namespace" -}}
+  {{- if .Values.namespaceOverride -}}
+    {{- .Values.namespaceOverride -}}
+  {{- else -}}
+    {{- if .Values.prometheus.monitor.namespace -}}
+      {{- .Values.prometheus.monitor.namespace -}}
+    {{- else -}}
+      {{- .Release.Namespace -}}
+    {{- end -}}
+  {{- end -}}
 {{- end -}}

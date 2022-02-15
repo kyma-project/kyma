@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: {{ .Chart.Name }}
-  namespace: {{ .Values.global.namespace }}
+  namespace: {{ .Values.global.integrationNamespace }}
   labels:
     control-plane: {{ .Chart.Name }}
     controller-tools.k8s.io: "1.0"
@@ -33,42 +33,61 @@ spec:
         kyma-project.io/component: controller
     spec:
       serviceAccountName: {{ .Chart.Name }}
-      initContainers:
-        - name: helm-release-migrator
-          image: eu.gcr.io/kyma-project/incubator/develop/k8s-tools:20201023-5de446cf
-          command:
-            - /bin/bash
-            - -c
-            - |
-{{ .Files.Get "files/helm-release-migration.sh" | indent 14 }}
       containers:
       - name: {{ .Chart.Name }}
         ports:
-          - containerPort: 8090
+          - containerPort: {{ .Values.controller.args.healthPort }}
             name: http-health
+        livenessProbe:
+          httpGet:
+            port: {{ .Values.controller.args.healthPort }}
+            path: "/healthz"
+          initialDelaySeconds: {{ .Values.controller.livenessProbe.initialDelaySeconds }}
+          timeoutSeconds: {{ .Values.controller.livenessProbe.timeoutSeconds }}
+          periodSeconds: {{ .Values.controller.livenessProbe.periodSeconds }}
+        readinessProbe:
+          httpGet:
+            port: {{ .Values.controller.args.healthPort }}
+            path: "/healthz"
+          initialDelaySeconds: {{ .Values.controller.readinessProbe.initialDelaySeconds }}
+          timeoutSeconds: {{ .Values.controller.readinessProbe.timeoutSeconds }}
+          periodSeconds: {{ .Values.controller.readinessProbe.periodSeconds }}
         args:
-        - "/manager"
+        - "/app/manager"
         - "--appName={{ .Values.controller.args.appName }}"
-        - "--domainName={{ .Values.global.ingress.domainName }}"
-        - "--namespace={{ .Values.global.namespace }}"
+        - "--domainName={{ .Values.global.domainName }}"
+        - "--namespace={{ .Values.global.integrationNamespace }}"
         - "--helmDriver={{ .Values.controller.args.helmDriver }}"
-        - "--applicationGatewayImage={{ .Values.global.containerRegistry.path }}/application-gateway:{{ .Values.global.application_gateway.version }}"
-        - "--applicationGatewayTestsImage={{ .Values.global.containerRegistry.path }}/application-gateway-legacy-tests:{{ .Values.global.application_gateway_legacy_tests.version }}"
-        - "--eventServiceImage={{ .Values.global.containerRegistry.path }}/event-service:{{ .Values.global.event_service.version }}"
-        - "--eventServiceTestsImage={{ .Values.global.containerRegistry.path }}/event-service-integration-tests:{{ .Values.global.event_service_integration_tests.version }}"
-        - "--applicationConnectivityValidatorImage={{ .Values.global.containerRegistry.path }}/application-connectivity-validator:{{ .Values.global.application_connectivity_validator.version }}"
+        - "--applicationGatewayImage={{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.application_gateway) }}"
+        - "--applicationGatewayTestsImage={{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.testImages.application_gateway_legacy_tests) }}"
+        - "--applicationConnectivityValidatorImage={{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.application_connectivity_validator) }}"
         - "--syncPeriod={{ .Values.controller.args.syncPeriod }}"
         - "--installationTimeout={{ .Values.controller.args.installationTimeout }}"
         - "--gatewayOncePerNamespace={{ .Values.global.disableLegacyConnectivity }}"
         - "--strictMode={{ .Values.global.strictMode }}"
         - "--healthPort={{ .Values.controller.args.healthPort }}"
-        image: {{ .Values.global.containerRegistry.path }}/application-operator:{{ .Values.global.application_operator.version }}
+        - "--profile={{ .Values.controller.resources.profile }}"
+        - "--podSecurityPolicyEnabled={{ .Values.global.podSecurityPolicy.enabled }}"
+        - "--centralApplicationConnectivityValidatorEnabled={{ .Values.global.centralApplicationConnectivityValidatorEnabled }}"
+        env:
+          - name: APP_LOG_FORMAT
+            value: {{ .Values.global.log.format | quote }}
+          - name: APP_LOG_LEVEL
+            value: {{ .Values.global.log.level | quote }}
+        image: {{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.application_operator) }}
         imagePullPolicy: {{ .Values.controller.image.pullPolicy | quote }}
         resources:
           limits:
-            cpu: 100m
-            memory: 256Mi
+            cpu: {{ .Values.controller.resources.limits.cpu }}
+            memory: {{ .Values.controller.resources.limits.memory }}
           requests:
-            cpu: 100m
-            memory: 128Mi
+            cpu: {{ .Values.controller.resources.requests.cpu }}
+            memory: {{ .Values.controller.resources.requests.memory }}
+        securityContext:
+          runAsUser: {{ .Values.global.podSecurityPolicy.runAsUser }}
+          privileged: {{ .Values.global.podSecurityPolicy.privileged }}
+          allowPrivilegeEscalation: {{ .Values.global.podSecurityPolicy.allowPrivilegeEscalation }}
       terminationGracePeriodSeconds: 10
+    {{- if .Values.global.priorityClassName }}
+      priorityClassName: {{ .Values.global.priorityClassName }}
+    {{- end }}

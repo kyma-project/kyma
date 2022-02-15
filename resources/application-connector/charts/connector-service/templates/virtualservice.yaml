@@ -3,7 +3,7 @@ apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
 metadata:
   name: {{ .Chart.Name }}
-  namespace: {{ .Values.global.namespace }}
+  namespace: {{ .Values.global.integrationNamespace }}
   labels:
     app: {{ template "name" . }}
     release: {{ .Release.Name }}
@@ -13,7 +13,7 @@ metadata:
     app.kubernetes.io/instance: {{ .Release.Name }}
 spec:
   hosts:
-    - connector-service.{{ .Values.global.ingress.domainName }}
+    - connector-service.{{ .Values.global.domainName }}
   gateways:
     - {{ .Values.global.istio.gateway.namespace }}/{{ .Values.global.istio.gateway.name }}
   http:
@@ -23,9 +23,7 @@ spec:
       - uri:
           exact: /v1/applications/certificates
       - uri:
-          exact: /v1/runtimes/signingRequests/info
-      - uri:
-          exact: /v1/runtimes/certificates
+          exact: /v1/api.yaml
       route:
         - destination:
             port:

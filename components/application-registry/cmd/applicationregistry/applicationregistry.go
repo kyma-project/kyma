@@ -25,7 +25,7 @@ func main() {
 	options := parseArgs()
 	log.Infof("Options: %s", options)
 
-	nameResolver := k8sconsts.NewNameResolver(options.namespace)
+	nameResolver := k8sconsts.NewNameResolver(options.namespace, options.centralGatewayUrl)
 
 	serviceDefinitionService, err := newServiceDefinitionService(
 		options,

@@ -1,6 +1,7 @@
 package secrets
 
 import (
+	"context"
 	"testing"
 
 	"github.com/kyma-project/kyma/components/connector-service/internal/apperrors"
@@ -19,6 +20,8 @@ const (
 )
 
 var (
+	testContext = context.Background()
+
 	namespacedName = types.NamespacedName{
 		Name:      appName,
 		Namespace: namespace,
@@ -37,12 +40,12 @@ func TestRepository_Get(t *testing.T) {
 		secretMap["ca.key"] = expectedCaKey
 
 		secretsManager := &mocks.Manager{}
-		secretsManager.On("Get", appName, metav1.GetOptions{}).Return(&v1.Secret{Data: secretMap}, nil)
+		secretsManager.On("Get", testContext, appName, metav1.GetOptions{}).Return(&v1.Secret{Data: secretMap}, nil)
 
 		repository := NewRepository(prepareManagerConstructor(secretsManager))
 
 		// when
-		secretData, err := repository.Get(namespacedName)
+		secretData, err := repository.Get(testContext, namespacedName)
 
 		// then
 		require.NoError(t, err)
@@ -57,12 +60,12 @@ func TestRepository_Get(t *testing.T) {
 			ErrStatus: metav1.Status{Reason: metav1.StatusReasonNotFound},
 		}
 		secretsManager := &mocks.Manager{}
-		secretsManager.On("Get", appName, metav1.GetOptions{}).Return(nil, k8sNotFoundError)
+		secretsManager.On("Get", testContext, appName, metav1.GetOptions{}).Return(nil, k8sNotFoundError)
 
 		repository := NewRepository(prepareManagerConstructor(secretsManager))
 
 		// when
-		secretData, err := repository.Get(namespacedName)
+		secretData, err := repository.Get(testContext, namespacedName)
 
 		// then
 		require.Error(t, err)
@@ -73,12 +76,12 @@ func TestRepository_Get(t *testing.T) {
 	t.Run("should fail if couldn't get secret", func(t *testing.T) {
 		// given
 		secretsManager := &mocks.Manager{}
-		secretsManager.On("Get", appName, metav1.GetOptions{}).Return(nil, &k8serrors.StatusError{})
+		secretsManager.On("Get", testContext, appName, metav1.GetOptions{}).Return(nil, &k8serrors.StatusError{})
 
 		repository := NewRepository(prepareManagerConstructor(secretsManager))
 
 		// when
-		secretData, err := repository.Get(namespacedName)
+		secretData, err := repository.Get(testContext, namespacedName)
 
 		// then
 		require.Error(t, err)

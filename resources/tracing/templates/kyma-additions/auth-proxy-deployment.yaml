@@ -1,0 +1,79 @@
+{{if .Values.authProxy.enabled}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "jaeger-operator.fullname" . }}-auth-proxy
+  labels:
+{{ include "jaeger-operator.labels" . | indent 4 }}
+  annotations:
+    reconciler.kyma-project.io/ignore-pod-state: "true"
+spec:
+  replicas: {{ .Values.authProxy.replicaCount }}
+  selector:
+    matchLabels:
+        app.kubernetes.io/name: {{ template "jaeger-operator.fullname" . }}
+        app.kubernetes.io/component: auth-proxy
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ template "jaeger-operator.fullname" . }}
+        app.kubernetes.io/component: auth-proxy
+      annotations:
+        checksum/config: {{ tpl (toYaml .Values.authProxy) . | sha256sum }}
+    spec:
+      {{- if .Values.authProxy.nodeSelector }}
+      nodeSelector:
+{{ toYaml .Values.authProxy.nodeSelector | indent 8 }}
+      {{- end }}
+      volumes:
+        - name: templates-cm
+          configMap:
+            name: {{ .Release.Name }}-auth-proxy-{{ template "jaeger-operator.fullname" . }}-templates
+      serviceAccountName: {{ include "jaeger-operator.fullname" . }}-auth-proxy
+      {{- if .Values.global.priorityClassName }}
+      priorityClassName: {{ .Values.global.priorityClassName }}
+      {{- end }}
+      containers:
+      - image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.oauth2_proxy) }}"
+        imagePullPolicy: {{ .Values.authProxy.image.pullPolicy }}
+        name: auth-proxy
+        args:
+        - --http-address=0.0.0.0:{{ .Values.authProxy.inPort }}
+        - --upstream=http://{{ template "jaeger-operator.fullname" . }}-jaeger-query:{{ .Values.jaeger.kyma.uiPort }}
+        - --cookie-secure=true
+        - --cookie-domain=jaeger.{{ .Values.global.domainName }}
+        - --cookie-name=KYMA_JAEGER_OAUTH2_PROXY_TOKEN
+        - --silence-ping-logging=true
+        - --reverse-proxy=true
+        - --auth-logging={{ .Values.authProxy.config.authLogging }}
+        - --request-logging={{ .Values.authProxy.config.requestLogging }}
+        - --pass-host-header={{ .Values.authProxy.config.passHostHeader }}
+        envFrom:
+        - secretRef:
+            name: {{ include "jaeger-operator.fullname" . }}-auth-proxy-default
+            optional: false
+        - secretRef:
+            name: {{ include "jaeger-operator.fullname" . }}-auth-proxy-user
+            optional: true
+        ports:
+        - name: http
+          containerPort: {{ .Values.authProxy.inPort }}
+          protocol: TCP
+        livenessProbe:
+          httpGet:
+            path: /ping
+            port: http
+        readinessProbe:
+          httpGet:
+            path: /ping
+            port: http
+        {{- if .Values.authProxy.securityContext }}
+        securityContext:
+{{ toYaml .Values.authProxy.securityContext | nindent 10 }}
+        {{- end }}
+        resources:
+{{ toYaml .Values.authProxy.resources | indent 10 }}
+        volumeMounts:
+          - name: templates-cm
+            mountPath: /templates
+{{end}}

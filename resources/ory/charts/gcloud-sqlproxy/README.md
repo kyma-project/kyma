@@ -1,7 +1,7 @@
 
 # GCP SQL Proxy
 
-[sql-proxy](https://cloud.google.com/sql/docs/postgres/sql-proxy) The Cloud SQL Proxy provides secure access to your Cloud SQL Postgres/MySQL instances without having to whitelist IP addresses or configure SSL.
+[sql-proxy](https://cloud.google.com/sql/docs/postgres/sql-proxy) The Cloud SQL Proxy provides secure access to your Cloud SQL Postgres/MySQL instances without having to allow IP addresses or configure SSL.
 
 Accessing your Cloud SQL instance using the Cloud SQL Proxy offers these advantages:
 

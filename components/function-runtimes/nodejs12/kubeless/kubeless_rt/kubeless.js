@@ -8,12 +8,17 @@ const bodyParser = require('body-parser');
 const client = require('prom-client');
 const express = require('express');
 const helper = require('./lib/helper');
+const ce = require('./lib/ce');
 const morgan = require('morgan');
 
 const bodySizeLimit = Number(process.env.REQ_MB_LIMIT || '1');
 
 const app = express();
-app.use(morgan('combined'));
+
+if (process.env["KYMA_INTERNAL_LOGGER_ENABLED"]) {
+    app.use(morgan("combined"));
+}
+
 const bodParserOptions = {
     type: req => !req.is('multipart/*'),
     limit: `${bodySizeLimit}mb`,
@@ -76,24 +81,7 @@ function modExecute(handler, req, res, end) {
         throw new Error(`Unable to load ${handler}`);
 
     try {
-        let data = req.body;
-        if (!req.is('multipart/*') && req.body.length > 0) {
-            if (req.is('application/json')) {
-                data = JSON.parse(req.body.toString('utf-8'))
-            } else {
-                data = req.body.toString('utf-8')
-            }
-        }
-        const event = {
-            'ce-type': req.get('ce-type'),
-            'ce-source': req.get('ce-source'),
-            'ce-eventtypeversion': req.get('ce-eventtypeversion'),
-            'ce-specversion': req.get('ce-specversion'),
-            'ce-id': req.get('ce-id'),
-            'ce-time': req.get('ce-time'),
-            data,
-            'extensions': { request: req, response: res },
-        };
+        const event = ce.buildEvent(req, res);
         Promise.resolve(func(event, context))
         // Finalize
             .then(rval => modFinalize(rval, res, end))

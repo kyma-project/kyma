@@ -59,6 +59,8 @@ type ApplicationSpec struct {
 	ProviderDisplayName string   `json:"providerDisplayName"`
 	LongDescription     string   `json:"longDescription"`
 
+	SkipVerify bool `json:"skipVerify"`
+
 	// Deprecated
 	AccessLabel string `json:"accessLabel,omitempty"`
 }
@@ -84,6 +86,8 @@ type Entry struct {
 	// New fields used by V2 version
 	Name string `json:"name"`
 	ID   string `json:"id"`
+
+	CentralGatewayUrl string `json:"centralGatewayUrl"`
 
 	// Deprecated
 	AccessLabel string `json:"accessLabel,omitempty"`

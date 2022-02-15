@@ -59,10 +59,7 @@ func (o *Overrider) EnsureDexConfigMapOverride(ctx context.Context) error {
 		// if already created then ensure is updated
 		err := retry.RetryOnConflict(retry.DefaultRetry, func() error {
 			old := v1.ConfigMap{}
-			key, err := client.ObjectKeyFromObject(&cm)
-			if err != nil {
-				return err
-			}
+			key := client.ObjectKeyFromObject(&cm)
 
 			if err := o.cli.Get(ctx, key, &old); err != nil {
 				return err

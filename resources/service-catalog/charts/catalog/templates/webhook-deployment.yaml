@@ -9,8 +9,7 @@ metadata:
     heritage: "{{ .Release.Service }}"
 spec:
   replicas: 1
-  strategy:
-    type: {{ toYaml .Values.webhook.strategy | nindent 4 }}
+  strategy: {{ toYaml .Values.webhook.strategy | nindent 4 }}
   minReadySeconds: {{ .Values.webhook.minReadySeconds }}
   selector:
     matchLabels:
@@ -28,12 +27,16 @@ spec:
 {{ toYaml .Values.webhook.annotations | indent 8 }}
       {{- end }}
     spec:
+{{- with .Values.securityContext }}
+      securityContext:
+{{ toYaml . | indent 8 }}
+{{- end }}
       serviceAccountName: "{{ .Values.webhook.serviceAccount }}"
       imagePullSecrets:
 {{ toYaml .Values.imagePullSecrets | indent 8 }}
       containers:
       - name: svr
-        image: {{ .Values.image }}
+        image: {{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.service_catalog) }}
         imagePullPolicy: {{ .Values.imagePullPolicy }}
         resources:
 {{ toYaml .Values.webhook.resources | indent 10 }}
@@ -55,6 +58,9 @@ spec:
         {{- end }}
         ports:
         - containerPort: 8443
+        securityContext:
+          privileged: false
+          allowPrivilegeEscalation: false
         volumeMounts:
         - name: service-catalog-webhook-cert
           mountPath: /var/run/service-catalog-webhook
@@ -94,3 +100,6 @@ spec:
             path: tls.crt
           - key: tls.key
             path: tls.key
+    {{- if .Values.global.priorityClassName }}
+      priorityClassName: {{ .Values.global.priorityClassName }}
+    {{- end }}

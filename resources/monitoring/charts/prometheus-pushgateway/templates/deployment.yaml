@@ -3,10 +3,7 @@ kind: Deployment
 metadata:
   name: {{ template "prometheus-pushgateway.fullname" . }}
   labels:
-    {{ include "prometheus-pushgateway.labels" . | nindent 4}}
-    {{- if .Values.serviceAccountLabels }}
-    {{ toYaml .Values.serviceAccountLabels | indent 4 }}
-    {{- end }}
+{{ template "prometheus-pushgateway.defaultLabels" merge (dict "extraLabels" .Values.podLabels) .  }}
 spec:
   replicas: {{ .Values.replicaCount }}
   {{- if .Values.strategy }}
@@ -15,21 +12,25 @@ spec:
   {{- end }}
   selector:
     matchLabels:
-      app: {{ template "prometheus-pushgateway.name" . }}
-      release: {{ .Release.Name }}
+      {{- include "prometheus-pushgateway.selectorLabels" . | nindent 6 }}
   template:
     metadata:
       labels:
-        {{- include "prometheus-pushgateway.labels" . | nindent 8 }}
-        app: {{ template "prometheus-pushgateway.name" . }}
-        release: {{ .Release.Name }}
+        {{- include "prometheus-pushgateway.selectorLabels" . | nindent 8 }}
       annotations:
 {{ toYaml .Values.podAnnotations | indent 8 }}
     spec:
       serviceAccountName: {{ template "prometheus-pushgateway.serviceAccountName" . }}
+      {{- if .Values.priorityClassName }}
+      priorityClassName: {{ .Values.priorityClassName | quote }}
+      {{- end }}
+    {{- if .Values.imagePullSecrets }}
+      imagePullSecrets:
+{{ toYaml .Values.imagePullSecrets | indent 8 }}
+    {{- end }}
       containers:
         - name: pushgateway
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.pushgateway) }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
         {{- if .Values.extraVars }}
           env:
@@ -57,11 +58,16 @@ spec:
             timeoutSeconds: 10
           resources:
 {{ toYaml .Values.resources | indent 12 }}
-          {{- if .Values.persistentVolume.enabled }}
+          {{- if .Values.containerSecurityContext }}
+          securityContext:
+{{ toYaml .Values.containerSecurityContext | indent 12 }}
+          {{- end }}
           volumeMounts:
             - name: storage-volume
               mountPath: "{{ .Values.persistentVolume.mountPath }}"
               subPath: "{{ .Values.persistentVolume.subPath }}"
+          {{- if .Values.extraVolumeMounts }}
+{{ toYaml .Values.extraVolumeMounts | indent 12 }}
           {{- end }}
     {{- if .Values.nodeSelector }}
       nodeSelector:
@@ -75,13 +81,18 @@ spec:
       affinity:
 {{ toYaml .Values.affinity | indent 8 }}
     {{- end }}
-      {{- if .Values.persistentVolume.enabled }}
-    {{- if .Values.securityContext }}
+    {{- if .Values.podSecurityContext }}
       securityContext:
-{{ toYaml .Values.securityContext | indent 8 }}
+{{ toYaml .Values.podSecurityContext | indent 8 }}
     {{- end }}
       volumes:
         - name: storage-volume
+      {{- if .Values.persistentVolume.enabled }}
           persistentVolumeClaim:
             claimName: {{ if .Values.persistentVolume.existingClaim }}{{ .Values.persistentVolume.existingClaim }}{{- else }}{{ template "prometheus-pushgateway.fullname" . }}{{- end }}
+      {{- else}}
+          emptyDir: {}
       {{- end -}}
+      {{- if .Values.extraVolumes }}
+{{ toYaml .Values.extraVolumes | indent 8 }}
+      {{- end }}

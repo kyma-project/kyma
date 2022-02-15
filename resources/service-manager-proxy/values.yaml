@@ -2,6 +2,7 @@ config:
   app:
     legacy_url: null
     url: null
+    broker_credentials_enabled: true
   authn:
     client_id: null
     password: admin
@@ -24,20 +25,42 @@ config:
     request_timeout: 2m
     skip_ssl_validation: false
     url: http://service-manager.dev.cfdev.sh
+
 file:
   format: yml
   location: /etc/config
   name: application
-image:
-  pullPolicy: IfNotPresent
-  pullsecret: null
-  repository: eu.gcr.io/kyma-project/external/quay.io/service-manager/sb-proxy-k8s
-  tag: v0.8.8
-replicaCount: 1
-securityContext: {}
-service:
-  port: 80
-  type: ClusterIP
+
 sm:
   password: admin
   user: admin
+
+image:
+  pullPolicy: IfNotPresent
+  pullsecret: null
+replicaCount: 1
+securityContext: { }
+service:
+  port: 80
+  type: ClusterIP
+
+resources:
+  limits:
+    memory: 96Mi
+    cpu: 100m
+  requests:
+    memory: 32Mi
+    cpu: 30m
+
+global:
+  containerRegistry:
+    path: eu.gcr.io/kyma-project
+  images:
+    sb_proxy_k8s:
+      name: "sb-proxy-k8s"
+      version: "v0.9.1"
+      directory: "external/quay.io/service-manager"
+    alpine:
+      name: "alpine"
+      version: "3.15.0"
+      directory: "external"

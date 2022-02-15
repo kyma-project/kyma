@@ -1,0 +1,25 @@
+# permissions for end users to edit logpipelines.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: logpipeline-editor-role
+  namespace: {{ .Release.Namespace }}
+rules:
+- apiGroups:
+  - telemetry.kyma-project.io
+  resources:
+  - logpipelines
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - telemetry.kyma-project.io
+  resources:
+  - logpipelines/status
+  verbs:
+  - get

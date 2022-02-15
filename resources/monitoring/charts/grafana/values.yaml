@@ -1,5 +1,11 @@
+# Customization:
+# Added .Values.sidecar.datasources.watchMethod 
+# Added .Values.sidecar.dashboards.watchMethod
+
 rbac:
   create: true
+  ## Use an existing ClusterRole/Role (depending on rbac.namespaced false/true)
+  # useExistingRole: name-of-some-(cluster)role
   pspEnabled: true
   pspUseAppArmor: true
   namespaced: false
@@ -16,8 +22,25 @@ serviceAccount:
   name:
   nameTest:
 #  annotations:
+#    eks.amazonaws.com/role-arn: arn:aws:iam::123456789000:role/iam-role-name-here
 
 replicas: 1
+
+## Create HorizontalPodAutoscaler object for deployment type
+#
+autoscaling:
+  enabled: false
+#   minReplicas: 1
+#   maxReplicas: 10
+#   metrics:
+#   - type: Resource
+#     resource:
+#       name: cpu
+#       targetAverageUtilization: 60
+#   - type: Resource
+#     resource:
+#       name: memory
+#       targetAverageUtilization: 60
 
 ## See `kubectl explain poddisruptionbudget.spec` for more
 ## ref: https://kubernetes.io/docs/tasks/run-application/configure-pdb/
@@ -52,8 +75,6 @@ livenessProbe:
 # schedulerName: "default-scheduler"
 
 image:
-  repository: eu.gcr.io/kyma-project/external/grafana/grafana
-  tag: 7.0.6
   pullPolicy: IfNotPresent
 
   ## Optionally specify an array of imagePullSecrets.
@@ -63,36 +84,52 @@ image:
   # pullSecrets:
   #   - myRegistrKeySecretName
 
-securityContext:
+testFramework:
+  enabled: false
+  image: "bats/bats"
+  tag: "v1.1.0"
+  imagePullPolicy: IfNotPresent
+  securityContext: {}
+
+podSecurityContext:
   runAsUser: 472
   runAsGroup: 472
   fsGroup: 472
 
-
-extraConfigmapMounts: []
+containerSecurityContext:
+  allowPrivilegeEscalation: false
+  privileged: false
+extraConfigmapMounts:
+  []
   # - name: certs-configmap
   #   mountPath: /etc/grafana/ssl/
   #   subPath: certificates.crt # (optional)
   #   configMap: certs-configmap
   #   readOnly: true
 
-
-extraEmptyDirMounts: []
+extraEmptyDirMounts:
+  []
   # - name: provisioning-notifiers
   #   mountPath: /etc/grafana/provisioning/notifiers
 
-
+# Apply extra labels to common labels.
+extraLabels: {}
 ## Assign a PriorityClassName to pods if set
 # priorityClassName:
 
 downloadDashboardsImage:
-  repository: curlimages/curl
-  tag: 7.70.0
+  repository: curlimages/curl # This image is not activated in Kyma. This is kept here to keep parity with upstream charts
+  tag: 7.73.0
+  sha: ""
   pullPolicy: IfNotPresent
 
 downloadDashboards:
   env: {}
+  envFromSecret: ""
   resources: {}
+  securityContext:
+    allowPrivilegeEscalation: false
+    privileged: false
 
 ## Pod Annotations
 # podAnnotations: {}
@@ -111,28 +148,64 @@ podPortName: grafana
 ## ref: http://kubernetes.io/docs/user-guide/services/
 ##
 service:
+  enabled: true
   type: ClusterIP
   port: 80
-  targetPort: 3000
+  targetPort:
+    3000
     # targetPort: 4181 To be used with a proxy extraContainer
   annotations: {}
   labels: {}
   portName: http-service
 
+serviceMonitor:
+  ## If true, a ServiceMonitor CRD is created for a prometheus operator
+  ## https://github.com/coreos/prometheus-operator
+  ##
+  enabled: false
+  path: /metrics
+  #  namespace: monitoring  (defaults to use the namespace this chart is deployed to)
+  labels: {}
+  interval: 1m
+  scheme: https
+  tlsConfig:
+    caFile: /etc/prometheus/secrets/istio.default/root-cert.pem
+    certFile: /etc/prometheus/secrets/istio.default/cert-chain.pem
+    keyFile: /etc/prometheus/secrets/istio.default/key.pem
+    insecureSkipVerify: true
+  scrapeTimeout: 30s
+  relabelings: []
+
+# Customization: due to kyma-installer limitations, this override has to be a multi-line string and not a list
 extraExposePorts:
- # - name: keycloak
- #   port: 8080
- #   targetPort: 8080
- #   type: ClusterIP
+  {}
+  # - name: keycloak
+  #   port: 8080
+  #   targetPort: 8080
+  #   type: ClusterIP
+
+# overrides pod.spec.hostAliases in the grafana deployment's pods
+hostAliases:
+  []
+  # - ip: "1.2.3.4"
+  #   hostnames:
+  #     - "my.host.com"
 
 ingress:
   enabled: false
+  # For Kubernetes >= 1.18 you should specify the ingress-controller via the field ingressClassName
+  # See https://kubernetes.io/blog/2020/04/02/improvements-to-the-ingress-api-in-kubernetes-1.18/#specifying-the-class-of-an-ingress
+  # ingressClassName: nginx
   # Values can be templated
-  annotations: {}
+  annotations:
+    {}
     # kubernetes.io/ingress.class: nginx
     # kubernetes.io/tls-acme: "true"
   labels: {}
   path: /
+
+  # pathType is only for k8s > 1.19
+  pathType: Prefix
   hosts:
     - chart-example.local
   ## Extra paths to prepend to every host configuration. This is useful when working with annotation based services.
@@ -141,6 +214,15 @@ ingress:
   #   backend:
   #     serviceName: ssl-redirect
   #     servicePort: use-annotation
+  ## Or for k8s > 1.19
+  # - path: /*
+  #   pathType: Prefix
+  #   backend:
+  #     service:
+  #       name: ssl-redirect
+  #       port:
+  #         name: service
+
   tls: []
   #  - secretName: chart-example-tls
   #    hosts:
@@ -148,10 +230,10 @@ ingress:
 
 resources:
   limits:
-#    cpu: 100m
+    #    cpu: 100m
     memory: 200Mi
   requests:
-#    cpu: 100m
+    #    cpu: 100m
     memory: 200Mi
 
 ## Node labels for pod assignment
@@ -211,7 +293,16 @@ persistence:
     - kubernetes.io/pvc-protection
   # subPath: ""
   # existingClaim:
-
+  ## If persistence is not enabled, this allows to mount the
+  ## local storage in-memory to improve performance
+  ##
+  # inMemory:
+  #   enabled: false
+  ## The maximum usage on memory medium EmptyDir would be
+  ## the minimum value between the SizeLimit specified
+  ## here and the sum of memory limits of all containers in a pod
+  ##
+  # sizeLimit: 300M
 initChownData:
   ## If false, data ownership will not be reset at startup
   ## This allows the prometheus-server to be run with an arbitrary user
@@ -221,8 +312,6 @@ initChownData:
   ## initChownData container image
   ##
   image:
-    repository: eu.gcr.io/kyma-project/external/busybox
-    tag: "1.32.0"
     pullPolicy: IfNotPresent
 
   ## initChownData resource requests and limits
@@ -236,6 +325,11 @@ initChownData:
   #    cpu: 100m
   #    memory: 128Mi
 
+  securityContext:
+    runAsNonRoot: false
+    runAsUser: 0
+    allowPrivilegeEscalation: false
+    privileged: false
 
 # Administrator credentials when not using an existing secret (see below)
 adminUser: admin
@@ -269,8 +363,9 @@ env:
   GF_USERS_DEFAULT_THEME: "dark"
   GF_USERS_VIEWERS_CAN_EDIT: "true"
   # https://grafana.com/docs/grafana/latest/auth/overview/
-  GF_AUTH_ANONYMOUS_ENABLED: "false"
+  GF_AUTH_ANONYMOUS_ENABLED: "true"
   GF_AUTH_ANONYMOUS_ORG_ROLE: "Editor"
+  GF_AUTH_ANONYMOUS_HIDE_VERSION: "true"
   GF_AUTH_OAUTH_AUTO_LOGIN: "true"
   GF_AUTH_DISABLE_LOGIN_FORM: "true"
   GF_AUTH_PROXY_ENABLED: "false"
@@ -281,9 +376,9 @@ env:
   # https://grafana.com/docs/grafana/latest/auth/generic-oauth/
   GF_AUTH_GENERIC_OAUTH_CLIENT_ID: "grafana"
   GF_AUTH_GENERIC_OAUTH_CLIENT_SECRET: "apie4eeX6hiC9ainieli"
-  GF_AUTH_GENERIC_OAUTH_ENABLED: "true"
+  GF_AUTH_GENERIC_OAUTH_ENABLED: "false"
   GF_AUTH_GENERIC_OAUTH_SCOPES: "openid email groups"
-  GF_AUTH_GENERIC_OAUTH_TOKEN_URL: "http://dex-service:5556/token"
+  GF_AUTH_GENERIC_OAUTH_TOKEN_URL: ""
   GF_AUTH_GENERIC_OAUTH_AUTH_URL: ""
   GF_AUTH_GENERIC_OAUTH_API_URL: ""
   GF_AUTH_GENERIC_OAUTH_ALLOWED_DOMAINS: ""
@@ -316,16 +411,42 @@ envRenderSecret: {}
 
 ## Additional grafana server secret mounts
 # Defines additional mounts with secrets. Secrets must be manually created in the namespace.
-extraSecretMounts: []
+extraSecretMounts:
+  []
   # - name: secret-files
   #   mountPath: /etc/secrets
   #   secretName: grafana-secret-files
   #   readOnly: true
   #   subPath: ""
+  #
+  # for AWS EKS (cloudwatch) use the following (see also instruction in env: above)
+  # - name: aws-iam-token
+  #   mountPath: /var/run/secrets/eks.amazonaws.com/serviceaccount
+  #   readOnly: true
+  #   projected:
+  #     defaultMode: 420
+  #     sources:
+  #       - serviceAccountToken:
+  #           audience: sts.amazonaws.com
+  #           expirationSeconds: 86400
+  #           path: token
+  #
+  # for CSI e.g. Azure Key Vault use the following
+  # - name: secrets-store-inline
+  #  mountPath: /run/secrets
+  #  readOnly: true
+  #  csi:
+  #    driver: secrets-store.csi.k8s.io
+  #    readOnly: true
+  #    volumeAttributes:
+  #      secretProviderClass: "akv-grafana-spc"
+  #    nodePublishSecretRef:                       # Only required when using service principal mode
+  #       name: grafana-akv-creds                  # Only required when using service principal mode
 
 ## Additional grafana server volume mounts
 # Defines additional volume mounts.
-extraVolumeMounts: []
+extraVolumeMounts:
+  []
   # - name: extra-volume
   #   mountPath: /mnt/volume
   #   readOnly: true
@@ -333,7 +454,8 @@ extraVolumeMounts: []
 
 ## Pass the plugins you want installed as a list.
 ##
-plugins: []
+plugins:
+  []
   # - digrich-bubblechart-panel
   # - grafana-clock-panel
 
@@ -349,6 +471,14 @@ datasources: {}
 #      url: http://prometheus-prometheus-server
 #      access: proxy
 #      isDefault: true
+#    - name: CloudWatch
+#        type: cloudwatch
+#        access: proxy
+#        uid: cloudwatch
+#        editable: false
+#        jsonData:
+#          authType: credentials
+#          defaultRegion: us-east-1
 
 ## Configure notifiers
 ## ref: http://docs.grafana.org/administration/provisioning/#alert-notification-channels
@@ -392,7 +522,8 @@ dashboardProviders: {}
 ##
 ## dashboards per provider, use provider name as key.
 ##
-dashboards: {}
+dashboards:
+  {}
   # default:
   #   some-dashboard:
   #     json: |
@@ -409,7 +540,7 @@ dashboards: {}
   #     url: https://example.com/repository/test-b64.json
   #     b64content: true
 
-## Reference to external ConfigMap per provider. Use provider name as key and ConfiMap name as value.
+## Reference to external ConfigMap per provider. Use provider name as key and ConfigMap name as value.
 ## A provider dashboards must be defined either by external ConfigMaps or in values.yaml, not in both.
 ## ConfigMap data example:
 ##
@@ -437,27 +568,27 @@ grafana.ini:
   grafana_net:
     url: https://grafana.net
 ## grafana Authentication can be enabled with the following values on grafana.ini
- # server:
-      # The full public facing url you use in browser, used for redirects and emails
- #    root_url:
- # https://grafana.com/docs/grafana/latest/auth/github/#enable-github-in-grafana
- # auth.github:
- #    enabled: false
- #    allow_sign_up: false
- #    scopes: user:email,read:org
- #    auth_url: https://github.com/login/oauth/authorize
- #    token_url: https://github.com/login/oauth/access_token
- #    api_url: https://github.com/user
- #    team_ids:
- #    allowed_organizations:
- #    client_id:
- #    client_secret:
+# server:
+# The full public facing url you use in browser, used for redirects and emails
+#    root_url:
+# https://grafana.com/docs/grafana/latest/auth/github/#enable-github-in-grafana
+# auth.github:
+#    enabled: false
+#    allow_sign_up: false
+#    scopes: user:email,read:org
+#    auth_url: https://github.com/login/oauth/authorize
+#    token_url: https://github.com/login/oauth/access_token
+#    api_url: https://api.github.com/user
+#    team_ids:
+#    allowed_organizations:
+#    client_id:
+#    client_secret:
 ## LDAP Authentication can be enabled with the following values on grafana.ini
 ## NOTE: Grafana will fail to start if the value for ldap.toml is invalid
-  # auth.ldap:
-  #   enabled: true
-  #   allow_sign_up: true
-  #   config_file: /etc/grafana/ldap.toml
+# auth.ldap:
+#   enabled: true
+#   allow_sign_up: true
+#   config_file: /etc/grafana/ldap.toml
 
 ## Grafana's LDAP configuration
 ## Templated by the template in _helpers.tpl
@@ -495,24 +626,27 @@ smtp:
 ## Sidecars that collect the configmaps with specified label and stores the included files them into the respective folders
 ## Requires at least Grafana 5 to work and can't be used together with parameters dashboardProviders, datasources and dashboards
 sidecar:
-  image:
-    repository: eu.gcr.io/kyma-project/incubator/develop/k8s-sidecar
-    tag: 0.1.178-d89491d2
   imagePullPolicy: IfNotPresent
-  resources: {}
-#   limits:
-#     cpu: 100m
-#     memory: 100Mi
-#   requests:
-#     cpu: 50m
-#     memory: 50Mi
+  resources:
+    limits:
+      cpu: 100m
+      memory: 100Mi
+    requests:
+      cpu: 50m
+      memory: 50Mi
+  securityContext:
+    allowPrivilegeEscalation: false
+    privileged: false
   # skipTlsVerify Set to true to skip tls verification for kube api calls
   # skipTlsVerify: true
+  enableUniqueFilenames: false
   dashboards:
     enabled: false
     SCProvider: true
     # label that the configmaps with dashboards are marked with
     label: grafana_dashboard
+    # value of label that the configmaps with dashboards are set to
+    labelValue: null
     # folder in the pod that should hold the collected dashboards (unless `defaultFolderName` is set)
     folder: /tmp/dashboards
     # The default folder name, it will create a subfolder under the `folder` and put dashboards in there instead
@@ -521,6 +655,13 @@ sidecar:
     # Otherwise the namespace in which the sidecar is running will be used.
     # It's also possible to specify ALL to search in all namespaces
     searchNamespace: null
+    # search in configmap, secret or both
+    resource: both
+    # If specified, the sidecar will look for annotation with this name to create folder and put graph here.
+    # You can use this parameter together with `provider.foldersFromFilesStructure`to annotate configmaps and create folder structure.
+    folderAnnotation: null
+    # Method used by Kiwigrid K8s sidecar. If not specified default watch method will be used.
+    watchMethod: ""
     # provider configuration that lets grafana manage the dashboards
     provider:
       # name of the provider, should be unique
@@ -528,25 +669,100 @@ sidecar:
       # orgid as configured in grafana
       orgid: 1
       # folder in which the dashboards should be imported in grafana
-      folder: ''
+      folder: ""
       # type of the provider
       type: file
       # disableDelete to activate a import-only behaviour
       disableDelete: false
       # allow updating provisioned dashboards from the UI
       allowUiUpdates: false
+      # allow Grafana to replicate dashboard structure from filesystem
+      foldersFromFilesStructure: false
   datasources:
     enabled: false
     # label that the configmaps with datasources are marked with
-    label: grafana_datasource
+    label: grafana_datasource # value of label that the configmaps with datasources are set to
+    labelValue: null
     # If specified, the sidecar will search for datasource config-maps inside this namespace.
     # Otherwise the namespace in which the sidecar is running will be used.
     # It's also possible to specify ALL to search in all namespaces
     searchNamespace: null
+    # search in configmap, secret or both
+    resource: both
+    # Method used by Kiwigrid K8s sidecar. If not specified default watch method will be used.
+    watchMethod: ""
+  notifiers:
+    enabled: false
+    # label that the configmaps with notifiers are marked with
+    label: grafana_notifier
+    # If specified, the sidecar will search for notifier config-maps inside this namespace.
+    # Otherwise the namespace in which the sidecar is running will be used.
+    # It's also possible to specify ALL to search in all namespaces
+    searchNamespace: null
+    # search in configmap, secret or both
+    resource: both
 
 ## Override the deployment namespace
 ##
 namespaceOverride: ""
+
+## Number of old ReplicaSets to retain
+##
+revisionHistoryLimit: 10
+
+## Add a seperate remote image renderer deployment/service
+imageRenderer:
+  # Enable the image-renderer deployment & service
+  enabled: false
+  replicas: 1
+  image:
+    # image-renderer Image repository
+    repository: grafana/grafana-image-renderer # This image is not activated in Kyma. This is kept here to keep parity with upstream charts
+    # image-renderer Image tag
+    tag: latest
+    # image-renderer Image sha (optional)
+    sha: ""
+    # image-renderer ImagePullPolicy
+    pullPolicy: Always
+  # extra environment variables
+  env:
+    {}
+    # RENDERING_ARGS: --disable-gpu,--window-size=1280x758
+    # RENDERING_MODE: clustered
+  # image-renderer deployment serviceAccount
+  serviceAccountName: ""
+  # image-renderer deployment securityContext
+  securityContext: {}
+  # image-renderer deployment Host Aliases
+  hostAliases: []
+  # image-renderer deployment priority class
+  priorityClassName: ""
+  service:
+    # Enable the image-renderer service
+    enabled: true
+    # image-renderer service port name
+    portName: "http"
+    # image-renderer service port used by both service and deployment
+    port: 8081
+    targetPort: 8081
+  # In case a sub_path is used this needs to be added to the image renderer callback
+  grafanaSubPath: ""
+  # name of the image-renderer port on the pod
+  podPortName: http
+  # number of image-renderer replica sets to keep
+  revisionHistoryLimit: 10
+  networkPolicy:
+    # Enable a NetworkPolicy to limit inbound traffic to only the created grafana pods
+    limitIngress: true
+    # Enable a NetworkPolicy to limit outbound traffic to only the created grafana pods
+    limitEgress: false
+  resources: {}
+#   limits:
+#     cpu: 100m
+#     memory: 100Mi
+#   requests:
+#     cpu: 50m
+#     memory: 50Mi
 
 virtualservice:
   ## If true, Grafana VirtualService will be created
@@ -560,37 +776,38 @@ virtualservice:
 kyma:
   console:
     ## If true, a console backendmodule gets deployed which activates the linking to grafana in the console
-    enabled: true
-  authProxy:
     enabled: false
+  authProxy:
+    enabled: true
     replicaCount: 1
+    configDocsLink: "https://kyma-project.io/docs/kyma/latest/04-operation-guides/security/sec-06-access-expose-kiali-grafana"
     config:
-      clientId: "grafana"
-      clientSecret: "apie4eeX6hiC9ainieli"
-      tlsVerify: false
-      resources:
-        uri: "/*"
-        methods: "GET,POST,PUT,DELETE"
-        useKymaGroups: false
-        groups: ""
-        roles: ""
+      clientId: "dummy"
+      clientSecret: "dummy"
+      tlsVerify: true
+      emailDomains: "*"
+      groups: ""
+      useKymaGroups: false
       scopes: "groups"
-      headers: ""
-      matchClaims: ""
-      addClaims: ""
+      authLogging: true
+      requestLogging: false
+      passHostHeader: false
+    env: {}
     nodeSelector: {}
+    securityContext:
+      allowPrivilegeEscalation: false
+      privileged: false
+      runAsNonRoot: true
     port: 3000
     image:
-      repository: eu.gcr.io/kyma-project/external/bitnami/keycloak-gatekeeper
-      tag: 10.0.0
       pullPolicy: IfNotPresent
     resources:
       limits:
         cpu: 50m
-        memory: 20Mi
+        memory: 100Mi
       requests:
         cpu: 10m
-        memory: 5Mi
+        memory: 15Mi
 
 global:
   kymaRuntime:

@@ -6,7 +6,7 @@ import (
 	"github.com/kyma-project/kyma/components/application-broker/internal"
 	"github.com/pkg/errors"
 
-	osb "github.com/pmorie/go-open-service-broker-client/v2"
+	osb "github.com/kubernetes-sigs/go-open-service-broker-client/v2"
 )
 
 type getLastOperationService struct {

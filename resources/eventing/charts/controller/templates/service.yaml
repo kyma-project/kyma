@@ -1,0 +1,27 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "controller.fullname" . }}{{ .Values.metrics.service.nameSuffix }}
+  labels: {{- include "controller.labels" . | nindent 4 }}
+spec:
+  type: ClusterIP
+  selector: {{- include "controller.selectorLabels" . | nindent 4 }}
+  ports:
+    - name: {{ .Values.metrics.config.portName }}
+      protocol: TCP
+      port: 80
+      targetPort: {{ .Values.metrics.config.portName }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "controller.fullname" . }}-health
+  labels: {{- include "controller.labels" . | nindent 4 }}
+spec:
+  type: ClusterIP
+  selector: {{- include "controller.selectorLabels" . | nindent 4 }}
+  ports:
+    - name: {{ .Values.global.istio.proxy.portName }}
+      protocol: TCP
+      port: {{ .Values.global.istio.proxy.statusPort }}
+      targetPort: {{ .Values.global.istio.proxy.statusPort }}

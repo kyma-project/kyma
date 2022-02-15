@@ -16,7 +16,7 @@ spec:
       accessStrategies:
         - handler: jwt
           config:
-            trusted_issuers: ["https://dex.{{ .Domain }}"]
+            trusted_issuers: ["https://oauth2.{{ .Domain }}/"]
         - handler: oauth2_introspection
           config:
             required_scope: ["read"]

@@ -1,0 +1,31 @@
+webhook:
+  values:
+    buildJob:
+      resources:
+        defaultPreset: "slow"
+    function:
+      replicas:
+        defaultPreset: "S"
+      resources:
+        defaultPreset: "XS"
+        runtimePresets: |-
+          {
+            "python39":"M"
+          }
+  deployment:
+    resources:
+      requests:
+        cpu: 10m
+
+docker-registry:
+  resources:
+    requests:
+      cpu: 10m
+
+containers:
+  manager:
+    envs:
+      functionBuildMaxSimultaneousJobs:
+        value: "1"
+      logLevel:
+        value: "warn"

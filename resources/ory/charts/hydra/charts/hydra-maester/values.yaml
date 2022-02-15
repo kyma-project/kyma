@@ -1,10 +1,5 @@
 replicaCount: 1
 
-jobs:
-  image:
-    repository: eu.gcr.io/kyma-project/incubator/develop/k8s-tools
-    tag: "20201023-5de446cf"
-
 config:
   # SyncPeriod determines the minimum frequency at which watched resources are
   # reconciled. A lower period will correct entropy more quickly, but reduce
@@ -14,14 +9,19 @@ config:
   # hydraSecret: secret
 
 globalAccess: false
+
 #The Controller have CREATE and READ access to all Secrets in the namespaces listed below.
 enabledNamespaces: []
 
 image:
-  repository: eu.gcr.io/kyma-project/external/oryd/hydra-maester
-  tag: v0.0.15
   # Image pull policy
   pullPolicy: IfNotPresent
+
+adminService:
+  name:
+  port:
+
+forwardedProto:
 
 port:
   metrics: 8080
@@ -29,7 +29,8 @@ port:
 deployment:
   strategy: {} # Read more: https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#strategy
 
-  resources: {}
+  resources:
+    {}
     #  We usually recommend not to specify default resources and to leave this as a conscious
     #  choice for the user. This also increases chances charts run on environments with little
     #  resources, such as Minikube. If you do want to specify resources, uncomment the following
@@ -50,6 +51,17 @@ deployment:
   # Configure node tolerations.
   tolerations: []
   annotations: {}
+  podLabels: {}
+
+  livenessProbe:
+    initialDelaySeconds: 50
+    timeoutSeconds: 1
+    periodSeconds: 10
+
+  readinessProbe:
+    initialDelaySeconds: 10
+    timeoutSeconds: 1
+    periodSeconds: 2
 
 # Configure node affinity
 affinity: {}

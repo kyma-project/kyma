@@ -1,6 +1,7 @@
 package job
 
 import (
+	"context"
 	"time"
 
 	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
@@ -37,7 +38,7 @@ func New(parentFunctionName string, batchCli batchv1typed.BatchV1Interface, c sh
 func (j Job) List() (*batchv1.JobList, error) {
 	labelSelector := labels.SelectorFromSet(map[string]string{serverlessv1alpha1.FunctionNameLabel: j.parentFunctionName}).String()
 
-	jobList, err := j.client.List(metav1.ListOptions{
+	jobList, err := j.client.List(context.Background(), metav1.ListOptions{
 		LabelSelector: labelSelector,
 	})
 	if err != nil {

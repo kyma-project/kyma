@@ -4,7 +4,8 @@ import (
 	"context"
 	"testing"
 
-	"github.com/onsi/ginkgo"
+	"k8s.io/client-go/kubernetes/scheme"
+
 	"github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -18,80 +19,83 @@ import (
 	"github.com/kyma-project/kyma/components/function-controller/internal/resource/automock"
 )
 
-var _ = ginkgo.Describe("ServiceAccount", func() {
-	var (
-		reconciler         *ServiceAccountReconciler
-		request            ctrl.Request
-		baseServiceAccount *corev1.ServiceAccount
-		namespace          string
-	)
+func TestServiceAccountReconciler_Reconcile(t *testing.T) {
+	g := gomega.NewGomegaWithT(t)
 
-	ginkgo.BeforeEach(func() {
-		userNamespace := newFixNamespace("tam")
-		gomega.Expect(resourceClient.Create(context.TODO(), userNamespace)).To(gomega.Succeed())
+	k8sClient, testEnv := setUpTestEnv(g)
+	defer tearDownTestEnv(g, testEnv)
+	resourceClient := resource.New(k8sClient, scheme.Scheme)
+	testCfg := setUpControllerConfig(g)
+	serviceAccountSvc := NewServiceAccountService(resourceClient, testCfg)
 
-		baseServiceAccount = newFixBaseServiceAccount(config.BaseNamespace, "ah-tak-przeciez")
-		gomega.Expect(resourceClient.Create(context.TODO(), baseServiceAccount)).To(gomega.Succeed())
+	baseNamespace := newFixNamespace(testCfg.BaseNamespace)
+	g.Expect(k8sClient.Create(context.TODO(), baseNamespace)).To(gomega.Succeed())
 
-		request = ctrl.Request{NamespacedName: types.NamespacedName{Namespace: baseServiceAccount.GetNamespace(), Name: baseServiceAccount.GetName()}}
-		reconciler = NewServiceAccount(k8sClient, log.Log, config, serviceAccountSvc)
-		namespace = userNamespace.GetName()
-	})
+	userNamespace := newFixNamespace("tam")
+	g.Expect(resourceClient.Create(context.TODO(), userNamespace)).To(gomega.Succeed())
 
-	ginkgo.It("should successfully propagate base ServiceAccount to user namespace", func() {
-		ginkgo.By("reconciling the non existing Service Account")
+	baseServiceAccount := newFixBaseServiceAccount(testCfg.BaseNamespace, "ah-tak-przeciez")
+	g.Expect(resourceClient.Create(context.TODO(), baseServiceAccount)).To(gomega.Succeed())
+
+	request := ctrl.Request{NamespacedName: types.NamespacedName{Namespace: baseServiceAccount.GetNamespace(), Name: baseServiceAccount.GetName()}}
+	reconciler := NewServiceAccount(k8sClient, log.Log, testCfg, serviceAccountSvc)
+	namespace := userNamespace.GetName()
+
+	t.Run("should successfully propagate base ServiceAccount to user namespace", func(t *testing.T) {
+		g := gomega.NewGomegaWithT(t)
+
+		t.Log("reconciling the non existing Service Account")
 		_, err := reconciler.Reconcile(ctrl.Request{
 			NamespacedName: types.NamespacedName{
 				Namespace: baseServiceAccount.GetNamespace(),
 				Name:      "non-existing-svc-acc",
 			},
 		})
-		gomega.Expect(err).To(gomega.BeNil())
+		g.Expect(err).To(gomega.BeNil())
 
-		ginkgo.By("reconciling the Service Account")
+		t.Log("reconciling the Service Account")
 		result, err := reconciler.Reconcile(request)
-		gomega.Expect(err).To(gomega.BeNil())
-		gomega.Expect(result.Requeue).To(gomega.BeFalse())
-		gomega.Expect(result.RequeueAfter).To(gomega.Equal(config.ServiceAccountRequeueDuration))
+		g.Expect(err).To(gomega.BeNil())
+		g.Expect(result.Requeue).To(gomega.BeFalse())
+		g.Expect(result.RequeueAfter).To(gomega.Equal(testCfg.ServiceAccountRequeueDuration))
 
 		serviceAccount := &corev1.ServiceAccount{}
-		gomega.Expect(k8sClient.Get(context.TODO(), types.NamespacedName{Namespace: namespace, Name: baseServiceAccount.GetName()}, serviceAccount)).To(gomega.Succeed())
-		compareServiceAccounts(serviceAccount, baseServiceAccount)
+		g.Expect(k8sClient.Get(context.TODO(), types.NamespacedName{Namespace: namespace, Name: baseServiceAccount.GetName()}, serviceAccount)).To(gomega.Succeed())
+		compareServiceAccounts(g, serviceAccount, baseServiceAccount)
 
-		ginkgo.By("updating the base ServiceAccount")
-		copy := baseServiceAccount.DeepCopy()
-		copy.Labels["test"] = "value"
-		copy.AutomountServiceAccountToken = nil
-		gomega.Expect(k8sClient.Update(context.TODO(), copy)).To(gomega.Succeed())
+		t.Log("updating the base ServiceAccount")
+		baseServiceAccountCopy := baseServiceAccount.DeepCopy()
+		baseServiceAccountCopy.Labels["test"] = "value"
+		baseServiceAccountCopy.AutomountServiceAccountToken = nil
+		g.Expect(k8sClient.Update(context.TODO(), baseServiceAccountCopy)).To(gomega.Succeed())
 
 		result, err = reconciler.Reconcile(request)
-		gomega.Expect(err).To(gomega.BeNil())
-		gomega.Expect(result.Requeue).To(gomega.BeFalse())
-		gomega.Expect(result.RequeueAfter).To(gomega.Equal(config.ServiceAccountRequeueDuration))
+		g.Expect(err).To(gomega.BeNil())
+		g.Expect(result.Requeue).To(gomega.BeFalse())
+		g.Expect(result.RequeueAfter).To(gomega.Equal(testCfg.ServiceAccountRequeueDuration))
 
 		serviceAccount = &corev1.ServiceAccount{}
-		gomega.Expect(k8sClient.Get(context.TODO(), types.NamespacedName{Namespace: namespace, Name: baseServiceAccount.GetName()}, serviceAccount)).To(gomega.Succeed())
-		compareServiceAccounts(serviceAccount, copy)
+		g.Expect(k8sClient.Get(context.TODO(), types.NamespacedName{Namespace: namespace, Name: baseServiceAccount.GetName()}, serviceAccount)).To(gomega.Succeed())
+		compareServiceAccounts(g, serviceAccount, baseServiceAccountCopy)
 
-		ginkgo.By("updating the modified ServiceAccount in user namespace")
+		t.Log("updating the modified ServiceAccount in user namespace")
 		userCopy := serviceAccount.DeepCopy()
 		trueValue := true
 		userCopy.AutomountServiceAccountToken = &trueValue
-		gomega.Expect(k8sClient.Update(context.TODO(), userCopy)).To(gomega.Succeed())
+		g.Expect(k8sClient.Update(context.TODO(), userCopy)).To(gomega.Succeed())
 
 		result, err = reconciler.Reconcile(request)
-		gomega.Expect(err).To(gomega.BeNil())
-		gomega.Expect(result.Requeue).To(gomega.BeFalse())
-		gomega.Expect(result.RequeueAfter).To(gomega.Equal(config.ServiceAccountRequeueDuration))
+		g.Expect(err).To(gomega.BeNil())
+		g.Expect(result.Requeue).To(gomega.BeFalse())
+		g.Expect(result.RequeueAfter).To(gomega.Equal(testCfg.ServiceAccountRequeueDuration))
 
 		serviceAccount = &corev1.ServiceAccount{}
-		gomega.Expect(k8sClient.Get(context.TODO(), types.NamespacedName{Namespace: namespace, Name: baseServiceAccount.GetName()}, serviceAccount)).To(gomega.Succeed())
-		compareServiceAccounts(serviceAccount, copy)
+		g.Expect(k8sClient.Get(context.TODO(), types.NamespacedName{Namespace: namespace, Name: baseServiceAccount.GetName()}, serviceAccount)).To(gomega.Succeed())
+		compareServiceAccounts(g, serviceAccount, baseServiceAccountCopy)
 	})
-})
+}
 
 func TestServiceAccountReconciler_getPredicates(t *testing.T) {
-	gm := gomega.NewGomegaWithT(t)
 	baseNs := "base_ns"
 
 	r := &ServiceAccountReconciler{svc: NewServiceAccountService(resource.New(&automock.K8sClient{}, runtime.NewScheme()), Config{BaseNamespace: baseNs})}
@@ -107,46 +111,50 @@ func TestServiceAccountReconciler_getPredicates(t *testing.T) {
 	unlabelledSrvAcc := &corev1.ServiceAccount{}
 
 	t.Run("deleteFunc", func(t *testing.T) {
+		g := gomega.NewGomegaWithT(t)
 		deleteEventPod := event.DeleteEvent{Meta: pod.GetObjectMeta(), Object: pod}
 		deleteEventLabelledSrvAcc := event.DeleteEvent{Meta: labelledSrvAcc.GetObjectMeta(), Object: labelledSrvAcc}
 		deleteEventUnlabelledSrvAcc := event.DeleteEvent{Meta: unlabelledSrvAcc.GetObjectMeta(), Object: unlabelledSrvAcc}
 
-		gm.Expect(preds.Delete(deleteEventPod)).To(gomega.BeFalse())
-		gm.Expect(preds.Delete(deleteEventLabelledSrvAcc)).To(gomega.BeFalse())
-		gm.Expect(preds.Delete(deleteEventUnlabelledSrvAcc)).To(gomega.BeFalse())
-		gm.Expect(preds.Delete(event.DeleteEvent{})).To(gomega.BeFalse())
+		g.Expect(preds.Delete(deleteEventPod)).To(gomega.BeFalse())
+		g.Expect(preds.Delete(deleteEventLabelledSrvAcc)).To(gomega.BeFalse())
+		g.Expect(preds.Delete(deleteEventUnlabelledSrvAcc)).To(gomega.BeFalse())
+		g.Expect(preds.Delete(event.DeleteEvent{})).To(gomega.BeFalse())
 	})
 
 	t.Run("createFunc", func(t *testing.T) {
+		g := gomega.NewGomegaWithT(t)
 		createEventPod := event.CreateEvent{Meta: pod.GetObjectMeta(), Object: pod}
 		createEventLabelledSrvAcc := event.CreateEvent{Meta: labelledSrvAcc.GetObjectMeta(), Object: labelledSrvAcc}
 		createEventUnlabelledSrvAcc := event.CreateEvent{Meta: unlabelledSrvAcc.GetObjectMeta(), Object: unlabelledSrvAcc}
 
-		gm.Expect(preds.Create(createEventPod)).To(gomega.BeFalse())
-		gm.Expect(preds.Create(createEventLabelledSrvAcc)).To(gomega.BeTrue())
-		gm.Expect(preds.Create(createEventUnlabelledSrvAcc)).To(gomega.BeFalse())
-		gm.Expect(preds.Create(event.CreateEvent{})).To(gomega.BeFalse())
+		g.Expect(preds.Create(createEventPod)).To(gomega.BeFalse())
+		g.Expect(preds.Create(createEventLabelledSrvAcc)).To(gomega.BeTrue())
+		g.Expect(preds.Create(createEventUnlabelledSrvAcc)).To(gomega.BeFalse())
+		g.Expect(preds.Create(event.CreateEvent{})).To(gomega.BeFalse())
 	})
 
 	t.Run("genericFunc", func(t *testing.T) {
+		g := gomega.NewGomegaWithT(t)
 		genericEventPod := event.GenericEvent{Meta: pod.GetObjectMeta(), Object: pod}
 		genericEventLabelledSrvAcc := event.GenericEvent{Meta: labelledSrvAcc.GetObjectMeta(), Object: labelledSrvAcc}
 		genericEventUnlabelledSrvAcc := event.GenericEvent{Meta: unlabelledSrvAcc.GetObjectMeta(), Object: unlabelledSrvAcc}
 
-		gm.Expect(preds.Generic(genericEventPod)).To(gomega.BeFalse())
-		gm.Expect(preds.Generic(genericEventLabelledSrvAcc)).To(gomega.BeTrue())
-		gm.Expect(preds.Generic(genericEventUnlabelledSrvAcc)).To(gomega.BeFalse())
-		gm.Expect(preds.Generic(event.GenericEvent{})).To(gomega.BeFalse())
+		g.Expect(preds.Generic(genericEventPod)).To(gomega.BeFalse())
+		g.Expect(preds.Generic(genericEventLabelledSrvAcc)).To(gomega.BeTrue())
+		g.Expect(preds.Generic(genericEventUnlabelledSrvAcc)).To(gomega.BeFalse())
+		g.Expect(preds.Generic(event.GenericEvent{})).To(gomega.BeFalse())
 	})
 
 	t.Run("updateFunc", func(t *testing.T) {
+		g := gomega.NewGomegaWithT(t)
 		updateEventPod := event.UpdateEvent{MetaNew: pod.GetObjectMeta(), ObjectNew: pod}
 		updateEventLabelledSrvAcc := event.UpdateEvent{MetaNew: labelledSrvAcc.GetObjectMeta(), ObjectNew: labelledSrvAcc}
 		updateEventUnlabelledSrvAcc := event.UpdateEvent{MetaNew: unlabelledSrvAcc.GetObjectMeta(), ObjectNew: unlabelledSrvAcc}
 
-		gm.Expect(preds.Update(updateEventPod)).To(gomega.BeFalse())
-		gm.Expect(preds.Update(updateEventUnlabelledSrvAcc)).To(gomega.BeFalse())
-		gm.Expect(preds.Update(updateEventLabelledSrvAcc)).To(gomega.BeTrue())
-		gm.Expect(preds.Update(event.UpdateEvent{})).To(gomega.BeFalse())
+		g.Expect(preds.Update(updateEventPod)).To(gomega.BeFalse())
+		g.Expect(preds.Update(updateEventUnlabelledSrvAcc)).To(gomega.BeFalse())
+		g.Expect(preds.Update(updateEventLabelledSrvAcc)).To(gomega.BeTrue())
+		g.Expect(preds.Update(event.UpdateEvent{})).To(gomega.BeFalse())
 	})
 }

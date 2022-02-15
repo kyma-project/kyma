@@ -29,8 +29,13 @@ spec:
       terminationGracePeriodSeconds: 10
       containers:
       - name: {{ .Chart.Name }}-controller
-        image: "{{ .Values.controller.image.repository }}:{{ .Values.controller.image.tag }}"
+        image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.podpreset_controller) }}"
         imagePullPolicy: {{ .Values.controller.image.pullPolicy }}
         command:
         - /root/manager
+        securityContext:
+{{ toYaml .Values.securityContext | indent 10 }}
+    {{- if .Values.global.priorityClassName }}
+      priorityClassName: {{ .Values.global.priorityClassName }}
+    {{- end }}
 {{- end -}}

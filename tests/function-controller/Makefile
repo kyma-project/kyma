@@ -8,6 +8,7 @@ TAG := $(DOCKER_TAG)
 
 include $(SCRIPTS_DIR)/generic-make-go.mk
 
+ENTRYPOINT := ./cmd/main.go
 VERIFY_IGNORE := /vendor\|/mocks
 
 test-local:
@@ -22,3 +23,4 @@ ensure-local:
 
 dep-status-local:
 	@echo "Go modules present in component - omitting."
+

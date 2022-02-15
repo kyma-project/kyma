@@ -14,7 +14,7 @@ defaults:
 jobs:
   post-master-binding-k3s:
     env:
-      COMMIT_HASH: $GITHUB_SHA
+      COMMIT_HASH: ${GITHUB_SHA::8}
       PROJECT_ID: "sap-se-cx-gopher"
     runs-on: ubuntu-latest
     timeout-minutes: 15

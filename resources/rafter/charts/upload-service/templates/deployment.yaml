@@ -46,8 +46,15 @@ spec:
       {{- end }}
       containers:
         - name: {{ include "rafterUploadService.name" . }}
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.rafter_upload_service) }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+          resources:
+            requests:
+              memory: "{{ .Values.pod.resources.requests.memory }}"
+              cpu: "{{ .Values.pod.resources.requests.cpu }}"
+            limits:
+              memory: "{{ .Values.pod.resources.limits.memory }}"
+              cpu: "{{ .Values.pod.resources.limits.cpu }}"
           {{- if .Values.pod.extraContainerProperties }}
           {{ include "rafterUploadService.tplValue" ( dict "value" .Values.pod.extraContainerProperties "context" . ) | nindent 10 }}
           {{- end }}
@@ -75,3 +82,6 @@ spec:
             {{ include "rafterUploadService.createEnv" ( dict "name" "APP_CONFIG_MAP_ENABLED" "value" .Values.envs.configMap.enabled "context" . ) | nindent 12 }}
             {{ include "rafterUploadService.createEnv" ( dict "name" "APP_CONFIG_MAP_NAME" "value" .Values.envs.configMap.name "context" . ) | nindent 12 }}
             {{ include "rafterUploadService.createEnv" ( dict "name" "APP_CONFIG_MAP_NAMESPACE" "value" .Values.envs.configMap.namespace "context" . ) | nindent 12 }}
+    {{- if .Values.global.priorityClassName }}
+      priorityClassName: {{ .Values.global.priorityClassName }}
+    {{- end }}

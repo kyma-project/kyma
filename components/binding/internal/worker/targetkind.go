@@ -1,8 +1,7 @@
 package worker
 
 import (
-	"fmt"
-
+	bindErr "github.com/kyma-project/kyma/components/binding/internal/errors"
 	"github.com/kyma-project/kyma/components/binding/internal/storage"
 	"github.com/kyma-project/kyma/components/binding/pkg/apis/v1alpha1"
 	"github.com/pkg/errors"
@@ -24,7 +23,8 @@ type TargetKindWorker struct {
 }
 
 func NewTargetKindWorker(storage TargetKindStorage, dynamicClient dynamic.Interface) *TargetKindWorker {
-	return &TargetKindWorker{storage: storage,
+	return &TargetKindWorker{
+		storage:       storage,
 		dynamicClient: dynamicClient,
 	}
 }
@@ -32,52 +32,38 @@ func NewTargetKindWorker(storage TargetKindStorage, dynamicClient dynamic.Interf
 func (w *TargetKindWorker) Process(targetKind *v1alpha1.TargetKind, log log.FieldLogger) (*v1alpha1.TargetKind, error) {
 	log.Info("start TargetKind process")
 
-	if targetKind.Status.IsRegistered() {
-		log.Infof("TargetKind %s was already registered", targetKind.Name)
-		if !w.storage.Exist(*targetKind) {
-			err := w.storage.Register(*targetKind)
+	registered, err := w.storage.Get(targetKind.Spec.Resource.Kind)
+	switch {
+	case bindErr.IsNotFound(err):
+	case err == nil:
+		if targetKind.Status.IsRegistered() {
+			log.Infof("TargetKind %s was already registered", targetKind.Name)
+			hasChanged, err := w.isDifferentThanRegistered(targetKind, registered)
 			if err != nil {
-				return targetKind, fmt.Errorf("while registering TargetKind %q", targetKind.Name)
+				return targetKind, errors.Wrap(err, "while comparing processed TargetKind with registered one")
 			}
-			err = targetKind.Status.Registered()
+			if !hasChanged {
+				log.Infof("TargetKind %s is not different than existing one", targetKind.Name)
+				return targetKind, nil
+			}
+			targetKind.Status.Message = "Failed because a TargetKind with the same kind and different properties exists"
+			err = w.register(targetKind, v1alpha1.TargetKindFailed, log)
 			if err != nil {
-				return targetKind, errors.Wrapf(err, "while set TargetKind phase to %s", v1alpha1.TargetKindRegistered)
+				return targetKind, err
 			}
+		}
+		if !targetKind.Status.IsEmpty() {
 			return targetKind, nil
 		}
-
-		hasChanged, err := w.isDifferentThanRegistered(targetKind)
-		if err != nil {
-			return targetKind, errors.Wrap(err, "while comparing processed TargetKind with registered one")
-		}
-		if !hasChanged {
-			log.Infof("TargetKind %s is not different than existing one", targetKind.Name)
-			return targetKind, nil
-		}
-
-		err = w.storage.Register(*targetKind)
-		if err != nil {
-			return targetKind, fmt.Errorf("while registering TargetKind %q", targetKind.Name)
-		}
-		err = targetKind.Status.Registered()
-		if err != nil {
-			return targetKind, errors.Wrapf(err, "while set TargetKind phase to %s", v1alpha1.TargetKindRegistered)
-		}
-
-		//TODO: mark old existing TargetKind CR as 'invalid'
-		return targetKind, nil
-
+	default:
+		return targetKind, errors.Wrap(err, "while getting target kind")
 	}
-	// TargetKind was not registered before
-	err := w.storage.Register(*targetKind)
+
+	err = w.register(targetKind, v1alpha1.TargetKindRegistered, log)
 	if err != nil {
-		return targetKind, errors.New(fmt.Sprintf("while registering TargetKind %q", targetKind.Name))
+		return targetKind, err
 	}
-	err = targetKind.Status.Registered()
-	if err != nil {
-		return targetKind, errors.Wrapf(err, "while set TargetKind phase to %s", v1alpha1.TargetKindRegistered)
-	}
-	log.Infof("TargetKind %q registered", targetKind.Name)
+
 	return targetKind, nil
 }
 
@@ -87,7 +73,28 @@ func (w *TargetKindWorker) RemoveProcess(targetKind *v1alpha1.TargetKind, log lo
 	return w.storage.Unregister(*targetKind)
 }
 
-func (w *TargetKindWorker) isDifferentThanRegistered(targetKind *v1alpha1.TargetKind) (bool, error) {
+func (w *TargetKindWorker) register(targetKind *v1alpha1.TargetKind, status string, log log.FieldLogger) error {
+	err := w.storage.Register(*targetKind)
+	if err != nil {
+		return errors.Wrapf(err, "while registering TargetKind %q", targetKind.Name)
+	}
+	switch status {
+	case v1alpha1.TargetKindRegistered:
+		err = targetKind.Status.Registered()
+		if err != nil {
+			return errors.Wrapf(err, "while set TargetKind phase to %s", status)
+		}
+	case v1alpha1.TargetKindFailed:
+		err = targetKind.Status.Failed()
+		if err != nil {
+			return errors.Wrapf(err, "while set TargetKind phase to %s", status)
+		}
+	}
+	log.Info(status)
+	return nil
+}
+
+func (w *TargetKindWorker) isDifferentThanRegistered(targetKind *v1alpha1.TargetKind, registered *storage.ResourceData) (bool, error) {
 	registered, err := w.storage.Get(targetKind.Spec.Resource.Kind)
 	if err != nil {
 		return false, errors.Wrap(err, "while getting ResourceData")

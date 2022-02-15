@@ -1,0 +1,44 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "kiali-server.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "kiali-server.labels" . | nindent 4 }}
+  annotations:
+    {{- if .Capabilities.APIVersions.Has "route.openshift.io/v1" }}
+    service.beta.openshift.io/serving-cert-secret-name: {{ include "kiali-server.fullname" . }}-cert-secret
+    {{- end }}
+    {{- if and (not (empty .Values.server.web_fqdn)) (not (empty .Values.server.web_schema)) }}
+    {{- if empty .Values.server.web_port }}
+    kiali.io/external-url: {{ .Values.server.web_schema }}://{{ .Values.server.web_fqdn }}{{ include "kiali-server.server.web_root" . }}
+    {{- else }}
+    kiali.io/external-url: {{ .Values.server.web_schema }}://{{ .Values.server.web_fqdn }}:{{ .Values.server.web_port }}{{ include "kiali-server.server.web_root" . }}
+    {{- end }}
+    {{- end }}
+    {{- if .Values.deployment.service_annotations }}
+    {{- toYaml .Values.deployment.service_annotations | nindent 4  }}
+    {{- end }}
+spec:
+  {{- if .Values.deployment.service_type }}
+  type: {{ .Values.deployment.service_type }}
+  {{- end }}
+  ports:
+  {{- if (include "kiali-server.identity.cert_file" .) }}
+  - name: tcp
+  {{- else }}
+  - name: http
+  {{- end }}
+    protocol: TCP
+    port: {{ .Values.server.port }}
+  {{- if .Values.server.metrics_enabled }}
+  - name: http-metrics
+    protocol: TCP
+    port: {{ .Values.server.metrics_port }}
+  {{- end }}
+  selector:
+    {{- include "kiali-server.selectorLabels" . | nindent 4 }}
+  {{- if .Values.deployment.additional_service_yaml }}
+  {{- toYaml .Values.deployment.additional_service_yaml | nindent 2  }}
+  {{- end }}

@@ -1,3 +1,4 @@
+{{ if .Values.global.installCRDs }}
 {{ $files := .Files.Glob "files/**.yaml" }}
 {{ $fileLen := len $files }}
 {{ $configMapLen := int (add1 (div $fileLen .Values.jobs.crdsInConfigMap)) }}
@@ -14,7 +15,7 @@ metadata:
     "helm.sh/hook": "pre-install, pre-upgrade"
     "helm.sh/hook-weight": "10"
 spec:
-  activeDeadlineSeconds: 180
+  activeDeadlineSeconds: 300
   template:
     metadata:
       annotations:
@@ -24,12 +25,13 @@ spec:
       restartPolicy: OnFailure
       containers:
       - name: {{ .Release.Name }}-install-crds
-        image: "{{ .Values.jobs.image.repository }}:{{ .Values.jobs.image.tag }}"
+        image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.k8s_tools) }}"
         command:
         - /bin/sh
         - -c
         args:
         - |
+            set -e
             {{ range $idx, $_ := until $configMapLen }}
             kubectl apply -f /etc/crd-{{ $idx }}
             {{ end }}
@@ -40,6 +42,8 @@ spec:
           limits:
             memory: 256Mi
             cpu: 200m
+        securityContext:
+{{ toYaml .Values.securityContext | indent 10 }}
         volumeMounts:
         {{ range $idx, $_ := until $configMapLen }}
         - name: crd-{{ $idx }}
@@ -54,3 +58,7 @@ spec:
           name: {{ .Release.Name }}-crd-{{ $idx }}
       {{- end }}
       {{ end }}
+    {{- if .Values.global.priorityClassName }}
+      priorityClassName: {{ .Values.global.priorityClassName }}
+    {{- end }}
+{{ end }}

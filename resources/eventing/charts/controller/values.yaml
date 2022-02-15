@@ -1,0 +1,75 @@
+# override name to avoid collision with knative eventing resources
+nameOverride:
+replicaCount: 1
+serviceAccount:
+  # name defines optionally another name than the default name for the service account
+  name: ""
+  annotations: ""
+
+
+clusterRole:
+  # name defines optionally another name than the default name for the cluster role
+  name: ""
+
+podSecurityContext:
+
+bebSecret:
+  nameSuffix: "-beb-oauth2"
+
+resources:
+  limits:
+    cpu: 300m
+    memory: 100Mi
+  requests:
+    cpu: 100m
+    memory: 20Mi
+
+publisherProxy:
+  image:
+    pullPolicy: IfNotPresent
+  requestTimeout: 10s
+  replicas: 1
+  resources:
+    limits:
+      cpu: 100m
+      memory: 128Mi
+    requests:
+      cpu: 32m
+      memory: 64Mi
+
+metrics:
+  service:
+    nameSuffix: "-metrics"
+  config:
+    port: 8080
+    portName: http-metrics
+    nameSuffix: "-metrics"
+    interval: 30s
+
+clusterRoleBindingSuffix: ""
+
+eventingBackend:
+  name: eventing-backend
+  defaultMaxInflightMessages: 10
+  defaultDispatcherRetryPeriod: 5m
+  defaultDispatcherMaxRetries: 10
+
+healthProbe:
+  port: 8081
+  scheme: HTTP
+  liveness:
+    service:
+      path: "/healthz"
+    failureThreshold: 3
+    initialDelaySeconds: 5
+    periodSeconds: 10
+    successThreshold: 1
+    timeoutSeconds: 2
+  readiness:
+    service:
+      path: "/readyz"
+    failureThreshold: 3
+    initialDelaySeconds: 10
+    periodSeconds: 3
+    successThreshold: 1
+    timeoutSeconds: 2

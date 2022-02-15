@@ -1,0 +1,42 @@
+{{- $cn := printf "%s-webhook" (include "fullname" .) }}
+{{- $ca := genCA (printf "%s-%s" $cn "ca") 3650 }}
+{{- $altName1 := printf "%s.%s" $cn .Release.Namespace }}
+{{- $altName2 := printf "%s.%s.svc" $cn .Release.Namespace }}
+{{- $cert := genSignedCert $cn nil (list $altName1 $altName2) 3650 $ca }}
+
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {{ template "fullname" . }}-webhook-cert
+  namespace: {{ .Release.Namespace }}
+type: Opaque
+data:
+  tls.crt: {{ b64enc $cert.Cert }}
+  tls.key: {{ b64enc $cert.Key }}
+---
+apiVersion: admissionregistration.k8s.io/v1
+kind: MutatingWebhookConfiguration
+metadata:
+  name: {{ template "fullname" . }}-mutating-webhook
+webhooks:
+  - name: mutating.helm-broker.kyma-project.io
+    rules:
+      - apiGroups: [""]
+        apiVersions: ["v1"]
+        operations: ["CREATE", "UPDATE"]
+        resources: ["pods"]
+        scope: "Namespaced"
+    objectSelector:
+      matchLabels:
+        chart: azure-service-broker-0.0.1
+    failurePolicy: Fail
+    clientConfig:
+      caBundle: {{ b64enc $ca.Cert }}
+      service:
+        name: {{ template "fullname" . }}-webhook
+        namespace: {{ .Release.Namespace }}
+        path: /hb-pod-mutating
+        port: {{ .Values.webhook.service.port }}
+    admissionReviewVersions: ["v1beta1", "v1"]
+    sideEffects: None
+    timeoutSeconds: 30

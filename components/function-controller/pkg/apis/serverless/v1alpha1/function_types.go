@@ -7,18 +7,32 @@ import (
 
 type SourceType string
 
-// +kubebuilder:validation:Enum=nodejs12;nodejs10;python38
-
-type Runtime string
-
 const (
 	SourceTypeGit SourceType = "git"
 )
 
+// Runtime enumerates runtimes that are currently supported by Function Controller
+// It is a subset of RuntimeExtended
+// +kubebuilder:validation:Enum=nodejs12;nodejs14;python39
+type Runtime string
+
 const (
 	Nodejs12 Runtime = "nodejs12"
-	Nodejs10 Runtime = "nodejs10"
-	Python38 Runtime = "python38"
+	Nodejs14 Runtime = "nodejs14"
+	Python39 Runtime = "python39"
+)
+
+// RuntimeExtended enumerates runtimes that are either currently supported or
+// no longer supported but there still might be "read-only" Functions using them
+// +kubebuilder:validation:Enum=nodejs12;nodejs14;nodejs10;python38;python39
+type RuntimeExtended string
+
+const (
+	RuntimeExtendedNodejs10 RuntimeExtended = "nodejs10"
+	RuntimeExtendedNodejs12 RuntimeExtended = "nodejs12"
+	RuntimeExtendedNodejs14 RuntimeExtended = "nodejs14"
+	RuntimeExtendedPython38 RuntimeExtended = "python38"
+	RuntimeExtendedPython39 RuntimeExtended = "python39"
 )
 
 const (
@@ -65,9 +79,11 @@ type FunctionSpec struct {
 const (
 	FunctionNameLabel                    = "serverless.kyma-project.io/function-name"
 	FunctionManagedByLabel               = "serverless.kyma-project.io/managed-by"
+	FunctionControllerValue              = "function-controller"
 	FunctionUUIDLabel                    = "serverless.kyma-project.io/uuid"
 	FunctionResourceLabel                = "serverless.kyma-project.io/resource"
 	FunctionResourceLabelDeploymentValue = "deployment"
+	FunctionResourceLabelUserValue       = "user"
 )
 
 // ConditionType defines condition of function.
@@ -86,6 +102,7 @@ const (
 	ConditionReasonConfigMapUpdated               ConditionReason = "ConfigMapUpdated"
 	ConditionReasonSourceUpdated                  ConditionReason = "SourceUpdated"
 	ConditionReasonSourceUpdateFailed             ConditionReason = "SourceUpdateFailed"
+	ConditionReasonGitAuthorizationFailed         ConditionReason = "GitAuthorizationFailed"
 	ConditionReasonJobFailed                      ConditionReason = "JobFailed"
 	ConditionReasonJobCreated                     ConditionReason = "JobCreated"
 	ConditionReasonJobUpdated                     ConditionReason = "JobUpdated"
@@ -101,6 +118,7 @@ const (
 	ConditionReasonServiceUpdated                 ConditionReason = "ServiceUpdated"
 	ConditionReasonHorizontalPodAutoscalerCreated ConditionReason = "HorizontalPodAutoscalerCreated"
 	ConditionReasonHorizontalPodAutoscalerUpdated ConditionReason = "HorizontalPodAutoscalerUpdated"
+	ConditionReasonMinReplicasNotAvailable        ConditionReason = "MinReplicasNotAvailable"
 )
 
 type Condition struct {
@@ -111,13 +129,13 @@ type Condition struct {
 	Message            string                 `json:"message,omitempty"`
 }
 
-// FunctionStatus defines the observed state of FuncSONPath: .status.phase
+// FunctionStatus defines the observed state of Function
 type FunctionStatus struct {
 	Conditions []Condition `json:"conditions,omitempty"`
 	Repository `json:",inline,omitempty"`
-	Commit     string  `json:"commit,omitempty"`
-	Source     string  `json:"source,omitempty"`
-	Runtime    Runtime `json:"runtime,omitempty"`
+	Commit     string          `json:"commit,omitempty"`
+	Source     string          `json:"source,omitempty"`
+	Runtime    RuntimeExtended `json:"runtime,omitempty"`
 }
 
 type Repository struct {

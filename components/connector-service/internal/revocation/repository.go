@@ -1,19 +1,21 @@
 package revocation
 
 import (
+	"context"
+
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/util/retry"
 )
 
 type Manager interface {
-	Get(name string, options metav1.GetOptions) (*v1.ConfigMap, error)
-	Update(configmap *v1.ConfigMap) (*v1.ConfigMap, error)
+	Get(ctx context.Context, name string, options metav1.GetOptions) (*v1.ConfigMap, error)
+	Update(ctx context.Context, configmap *v1.ConfigMap, options metav1.UpdateOptions) (*v1.ConfigMap, error)
 }
 
 type RevocationListRepository interface {
-	Insert(hash string) error
-	Contains(hash string) (bool, error)
+	Insert(ctx context.Context, hash string) error
+	Contains(ctx context.Context, hash string) (bool, error)
 }
 
 type revocationListRepository struct {
@@ -28,8 +30,8 @@ func NewRepository(configListManager Manager, configMapName string) RevocationLi
 	}
 }
 
-func (r *revocationListRepository) Insert(hash string) error {
-	configMap, err := r.configListManager.Get(r.configMapName, metav1.GetOptions{})
+func (r *revocationListRepository) Insert(ctx context.Context, hash string) error {
+	configMap, err := r.configListManager.Get(ctx, r.configMapName, metav1.GetOptions{})
 	if err != nil {
 		return err
 	}
@@ -44,15 +46,15 @@ func (r *revocationListRepository) Insert(hash string) error {
 	updatedConfigMap.Data = revokedCerts
 
 	err = retry.RetryOnConflict(retry.DefaultBackoff, func() error {
-		_, err = r.configListManager.Update(updatedConfigMap)
+		_, err = r.configListManager.Update(ctx, updatedConfigMap, metav1.UpdateOptions{})
 		return err
 	})
 
 	return err
 }
 
-func (r *revocationListRepository) Contains(hash string) (bool, error) {
-	configMap, err := r.configListManager.Get(r.configMapName, metav1.GetOptions{})
+func (r *revocationListRepository) Contains(ctx context.Context, hash string) (bool, error) {
+	configMap, err := r.configListManager.Get(ctx, r.configMapName, metav1.GetOptions{})
 	if err != nil {
 		return false, err
 	}

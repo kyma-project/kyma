@@ -67,3 +67,6 @@ installation/versions-overrides.env
 
 # Changelog temporary directory
 .changelog/
+
+# direnv files
+.envrc

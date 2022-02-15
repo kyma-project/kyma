@@ -1,15 +1,15 @@
 package serverless
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/kyma-project/kyma/components/function-controller/internal/controllers/serverless/runtime"
-
+	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
 	"github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-
-	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
+	"k8s.io/apimachinery/pkg/util/validation"
 )
 
 func TestFunctionReconciler_buildConfigMap(t *testing.T) {
@@ -33,7 +33,7 @@ func TestFunctionReconciler_buildConfigMap(t *testing.T) {
 					Namespace:    "fn-ns",
 					GenerateName: "function-name-",
 					Labels: map[string]string{
-						serverlessv1alpha1.FunctionManagedByLabel: "function-controller",
+						serverlessv1alpha1.FunctionManagedByLabel: serverlessv1alpha1.FunctionControllerValue,
 						serverlessv1alpha1.FunctionNameLabel:      "function-name",
 						serverlessv1alpha1.FunctionUUIDLabel:      "fn-uuid",
 					},
@@ -49,7 +49,7 @@ func TestFunctionReconciler_buildConfigMap(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			g := gomega.NewGomegaWithT(t)
 			r := &FunctionReconciler{}
-			got := r.buildConfigMap(tt.fn, runtime.GetRuntime(serverlessv1alpha1.Nodejs10))
+			got := r.buildConfigMap(tt.fn, runtime.GetRuntime(serverlessv1alpha1.Nodejs14))
 			g.Expect(got).To(gomega.Equal(tt.want))
 		})
 	}
@@ -59,7 +59,7 @@ func TestFunctionReconciler_buildDeployment(t *testing.T) {
 	type args struct {
 		instance *serverlessv1alpha1.Function
 	}
-	rtmCfg := runtime.GetRuntimeConfig(serverlessv1alpha1.Python38)
+	rtmCfg := runtime.GetRuntimeConfig(serverlessv1alpha1.Python39)
 
 	tests := []struct {
 		name string
@@ -74,12 +74,21 @@ func TestFunctionReconciler_buildDeployment(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			g := gomega.NewGomegaWithT(t)
 			r := &FunctionReconciler{}
-			got := r.buildDeployment(tt.args.instance, rtmCfg)
+			got := r.buildDeployment(tt.args.instance, rtmCfg, DockerConfig{})
 
 			for key, value := range got.Spec.Selector.MatchLabels {
 				g.Expect(got.Spec.Template.Labels[key]).To(gomega.Equal(value))
 				g.Expect(got.Spec.Template.Spec.Containers).To(gomega.HaveLen(1))
 				g.Expect(got.Spec.Template.Spec.Containers[0].Env).To(gomega.ContainElements(rtmCfg.RuntimeEnvs))
+
+				g.Expect(got.Spec.Template.Spec.Volumes).To(gomega.HaveLen(1))
+				g.Expect(got.Spec.Template.Spec.Containers[0].VolumeMounts).To(gomega.HaveLen(1))
+
+				g.Expect(got.Spec.Template.Spec.Volumes[0].Name).To(gomega.Equal(got.Spec.Template.Spec.Containers[0].VolumeMounts[0].Name))
+				errs := validation.IsDNS1123Subdomain(got.Spec.Template.Spec.Volumes[0].Name)
+				g.Expect(errs).To(gomega.HaveLen(0))
+
+				g.Expect(got.Spec.Template.Spec.Containers[0].StartupProbe.SuccessThreshold).To(gomega.BeEquivalentTo(1), "documentation states that this value has to be set to 1")
 			}
 		})
 	}
@@ -223,7 +232,7 @@ func TestFunctionReconciler_internalFunctionLabels(t *testing.T) {
 				UID:  "fn-uuid",
 			}}},
 			want: map[string]string{
-				serverlessv1alpha1.FunctionManagedByLabel: "function-controller",
+				serverlessv1alpha1.FunctionManagedByLabel: serverlessv1alpha1.FunctionControllerValue,
 				serverlessv1alpha1.FunctionNameLabel:      "fn-name",
 				serverlessv1alpha1.FunctionUUIDLabel:      "fn-uuid",
 			},
@@ -257,7 +266,7 @@ func TestFunctionReconciler_servicePodLabels(t *testing.T) {
 			}}},
 			want: map[string]string{
 				serverlessv1alpha1.FunctionUUIDLabel:      "fn-uuid",
-				serverlessv1alpha1.FunctionManagedByLabel: "function-controller",
+				serverlessv1alpha1.FunctionManagedByLabel: serverlessv1alpha1.FunctionControllerValue,
 				serverlessv1alpha1.FunctionNameLabel:      "fn-name",
 				serverlessv1alpha1.FunctionResourceLabel:  serverlessv1alpha1.FunctionResourceLabelDeploymentValue,
 			},
@@ -275,7 +284,7 @@ func TestFunctionReconciler_servicePodLabels(t *testing.T) {
 				}}},
 			want: map[string]string{
 				serverlessv1alpha1.FunctionUUIDLabel:      "fn-uuid",
-				serverlessv1alpha1.FunctionManagedByLabel: "function-controller",
+				serverlessv1alpha1.FunctionManagedByLabel: serverlessv1alpha1.FunctionControllerValue,
 				serverlessv1alpha1.FunctionNameLabel:      "fn-name",
 				serverlessv1alpha1.FunctionResourceLabel:  serverlessv1alpha1.FunctionResourceLabelDeploymentValue,
 				"test-some":                               "test-label",
@@ -296,7 +305,7 @@ func TestFunctionReconciler_servicePodLabels(t *testing.T) {
 				}}},
 			want: map[string]string{
 				serverlessv1alpha1.FunctionUUIDLabel:      "fn-uuid",
-				serverlessv1alpha1.FunctionManagedByLabel: "function-controller",
+				serverlessv1alpha1.FunctionManagedByLabel: serverlessv1alpha1.FunctionControllerValue,
 				serverlessv1alpha1.FunctionNameLabel:      "fn-name",
 				serverlessv1alpha1.FunctionResourceLabel:  serverlessv1alpha1.FunctionResourceLabelDeploymentValue,
 				"test-some":                               "test-label",
@@ -335,7 +344,7 @@ func TestFunctionReconciler_functionLabels(t *testing.T) {
 				},
 			},
 			want: map[string]string{
-				serverlessv1alpha1.FunctionManagedByLabel: "function-controller",
+				serverlessv1alpha1.FunctionManagedByLabel: serverlessv1alpha1.FunctionControllerValue,
 				serverlessv1alpha1.FunctionNameLabel:      "fn-name",
 				serverlessv1alpha1.FunctionUUIDLabel:      "fn-uuid",
 				"some-key":                                "whatever-value",
@@ -350,7 +359,7 @@ func TestFunctionReconciler_functionLabels(t *testing.T) {
 					},
 				}},
 			want: map[string]string{
-				serverlessv1alpha1.FunctionManagedByLabel: "function-controller",
+				serverlessv1alpha1.FunctionManagedByLabel: serverlessv1alpha1.FunctionControllerValue,
 				serverlessv1alpha1.FunctionNameLabel:      "fn-name",
 				serverlessv1alpha1.FunctionUUIDLabel:      "fn-uuid",
 			},
@@ -368,7 +377,7 @@ func TestFunctionReconciler_functionLabels(t *testing.T) {
 				},
 			},
 			want: map[string]string{
-				serverlessv1alpha1.FunctionManagedByLabel: "function-controller",
+				serverlessv1alpha1.FunctionManagedByLabel: serverlessv1alpha1.FunctionControllerValue,
 				serverlessv1alpha1.FunctionNameLabel:      "fn-name",
 				serverlessv1alpha1.FunctionUUIDLabel:      "fn-uuid",
 			},
@@ -386,41 +395,113 @@ func TestFunctionReconciler_functionLabels(t *testing.T) {
 
 func TestFunctionReconciler_buildJob(t *testing.T) {
 	g := gomega.NewWithT(t)
+
+	// GIVEN
 	fnName := "my-function"
 	cmName := "test-configmap"
 	rtmCfg := runtime.Config{
-		Runtime:                 "my-runtime",
 		DependencyFile:          "deps.txt",
 		FunctionFile:            "function.abap",
 		DockerfileConfigMapName: "dockerfile-runtime-abap",
 		RuntimeEnvs:             nil,
 	}
-
-	expectedVolumeMounts := []corev1.VolumeMount{
-		{Name: "sources", MountPath: "/workspace/src/deps.txt", SubPath: FunctionDepsKey, ReadOnly: true},
-		{Name: "sources", MountPath: "/workspace/src/function.abap", SubPath: FunctionSourceKey, ReadOnly: true},
-		{Name: "runtime", MountPath: "/workspace/Dockerfile", SubPath: "Dockerfile", ReadOnly: true},
-		{Name: "credentials", MountPath: "/docker", ReadOnly: true}}
-	expectedVolumes := []expectedVolume{
-		{name: "sources", localObjectReference: cmName},
-		{name: "runtime", localObjectReference: rtmCfg.DockerfileConfigMapName}}
-
+	dockerCfg := DockerConfig{
+		ActiveRegistryConfigSecretName: "docker-secret-name",
+	}
 	instance := serverlessv1alpha1.Function{
 		ObjectMeta: metav1.ObjectMeta{Name: fnName},
 		Spec:       serverlessv1alpha1.FunctionSpec{},
 	}
+	r := FunctionReconciler{
+		config: FunctionConfig{
+			PackageRegistryConfigSecretName: "pkg-config-secret",
+		},
+	}
 
-	r := FunctionReconciler{}
-	//when
-	job := r.buildJob(&instance, rtmCfg, cmName)
+	testCases := []struct {
+		Name                 string
+		Runtime              serverlessv1alpha1.Runtime
+		ExpectedVolumesLen   int
+		ExpectedVolumes      []expectedVolume
+		ExpectedMountsLen    int
+		ExpectedVolumeMounts []corev1.VolumeMount
+	}{
+		{
+			Name:               "Success Node12",
+			Runtime:            serverlessv1alpha1.Nodejs12,
+			ExpectedVolumesLen: 4,
+			ExpectedVolumes: []expectedVolume{
+				{name: "sources", localObjectReference: cmName},
+				{name: "runtime", localObjectReference: rtmCfg.DockerfileConfigMapName},
+				{name: "credentials", localObjectReference: dockerCfg.ActiveRegistryConfigSecretName},
+				{name: "registry-config", localObjectReference: r.config.PackageRegistryConfigSecretName},
+			},
+			ExpectedMountsLen: 5,
+			ExpectedVolumeMounts: []corev1.VolumeMount{
+				{Name: "sources", MountPath: "/workspace/src/deps.txt", SubPath: FunctionDepsKey, ReadOnly: true},
+				{Name: "sources", MountPath: "/workspace/src/function.abap", SubPath: FunctionSourceKey, ReadOnly: true},
+				{Name: "runtime", MountPath: "/workspace/Dockerfile", SubPath: "Dockerfile", ReadOnly: true},
+				{Name: "credentials", MountPath: "/docker", ReadOnly: true},
+				{Name: "registry-config", MountPath: "/workspace/registry-config/.npmrc", SubPath: ".npmrc", ReadOnly: true},
+			},
+		},
+		{
+			Name:               "Success Node14",
+			Runtime:            serverlessv1alpha1.Nodejs14,
+			ExpectedVolumesLen: 4,
+			ExpectedVolumes: []expectedVolume{
+				{name: "sources", localObjectReference: cmName},
+				{name: "runtime", localObjectReference: rtmCfg.DockerfileConfigMapName},
+				{name: "credentials", localObjectReference: dockerCfg.ActiveRegistryConfigSecretName},
+				{name: "registry-config", localObjectReference: r.config.PackageRegistryConfigSecretName},
+			},
+			ExpectedMountsLen: 5,
+			ExpectedVolumeMounts: []corev1.VolumeMount{
+				{Name: "sources", MountPath: "/workspace/src/deps.txt", SubPath: FunctionDepsKey, ReadOnly: true},
+				{Name: "sources", MountPath: "/workspace/src/function.abap", SubPath: FunctionSourceKey, ReadOnly: true},
+				{Name: "runtime", MountPath: "/workspace/Dockerfile", SubPath: "Dockerfile", ReadOnly: true},
+				{Name: "credentials", MountPath: "/docker", ReadOnly: true},
+				{Name: "registry-config", MountPath: "/workspace/registry-config/.npmrc", SubPath: ".npmrc", ReadOnly: true},
+			},
+		},
+		{
+			Name:               "Success Python39",
+			Runtime:            serverlessv1alpha1.Python39,
+			ExpectedVolumesLen: 4,
+			ExpectedVolumes: []expectedVolume{
+				{name: "sources", localObjectReference: cmName},
+				{name: "runtime", localObjectReference: rtmCfg.DockerfileConfigMapName},
+				{name: "credentials", localObjectReference: dockerCfg.ActiveRegistryConfigSecretName},
+				{name: "registry-config", localObjectReference: r.config.PackageRegistryConfigSecretName},
+			},
+			ExpectedMountsLen: 5,
+			ExpectedVolumeMounts: []corev1.VolumeMount{
+				{Name: "sources", MountPath: "/workspace/src/deps.txt", SubPath: FunctionDepsKey, ReadOnly: true},
+				{Name: "sources", MountPath: "/workspace/src/function.abap", SubPath: FunctionSourceKey, ReadOnly: true},
+				{Name: "runtime", MountPath: "/workspace/Dockerfile", SubPath: "Dockerfile", ReadOnly: true},
+				{Name: "credentials", MountPath: "/docker", ReadOnly: true},
+				{Name: "registry-config", MountPath: "/workspace/registry-config/pip.conf", SubPath: "pip.conf", ReadOnly: true},
+			},
+		},
+	}
 
-	//then
-	g.Expect(job.ObjectMeta.GenerateName).To(gomega.Equal("my-function-build-"))
-	assertVolumes(g, job.Spec.Template.Spec.Volumes, expectedVolumes)
+	for _, testCase := range testCases {
+		t.Run(testCase.Name, func(t *testing.T) {
+			rtmCfg.Runtime = testCase.Runtime
 
-	g.Expect(job.Spec.Template.Spec.Containers).To(gomega.HaveLen(1))
-	g.Expect(job.Spec.Template.Spec.Containers[0].VolumeMounts).To(gomega.HaveLen(4))
-	g.Expect(job.Spec.Template.Spec.Containers[0].VolumeMounts).To(gomega.Equal(expectedVolumeMounts))
+			// when
+			job := r.buildJob(&instance, rtmCfg, cmName, dockerCfg)
+
+			// then
+			g.Expect(job.ObjectMeta.GenerateName).To(gomega.Equal(fmt.Sprintf("%s-build-", fnName)))
+			g.Expect(job.Spec.Template.Spec.Volumes).To(gomega.HaveLen(testCase.ExpectedVolumesLen))
+			assertVolumes(g, job.Spec.Template.Spec.Volumes, testCase.ExpectedVolumes)
+
+			g.Expect(job.Spec.Template.Spec.Containers).To(gomega.HaveLen(1))
+			g.Expect(job.Spec.Template.Spec.Containers[0].VolumeMounts).To(gomega.HaveLen(testCase.ExpectedMountsLen))
+			g.Expect(job.Spec.Template.Spec.Containers[0].VolumeMounts).To(gomega.Equal(testCase.ExpectedVolumeMounts))
+		})
+	}
 }
 
 type expectedVolume struct {
@@ -432,10 +513,12 @@ func assertVolumes(g *gomega.WithT, actual []corev1.Volume, expected []expectedV
 	for _, expVol := range expected {
 		found := false
 		for _, actualVol := range actual {
-			if actualVol.Name == expVol.name {
+			if actualVol.Name == expVol.name &&
+				(actualVol.Secret != nil && actualVol.Secret.SecretName == expVol.localObjectReference) ||
+				(actualVol.ConfigMap != nil && actualVol.ConfigMap.LocalObjectReference.Name == expVol.localObjectReference) {
 				found = true
 			}
 		}
-		g.Expect(found).To(gomega.BeTrue(), "Volume with name: %s, not found", expVol.name)
+		g.Expect(found).To(gomega.BeTrue(), "Volume with name: %s, referencing object: %s not found", expVol.name, expVol.localObjectReference)
 	}
 }

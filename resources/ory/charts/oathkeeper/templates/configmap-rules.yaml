@@ -10,4 +10,4 @@ metadata:
 {{ include "oathkeeper.labels" . | indent 4 }}
 data:
   "access-rules.json": |
-    {{ .Values.oathkeeper.accessRules | default "[]" }}
+{{ .Values.oathkeeper.accessRules | default "[]" | indent 4 }}

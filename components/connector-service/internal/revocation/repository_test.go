@@ -1,6 +1,7 @@
 package revocation
 
 import (
+	"context"
 	"errors"
 	"testing"
 
@@ -10,6 +11,8 @@ import (
 	"github.com/stretchr/testify/require"
 	v1 "k8s.io/api/core/v1"
 )
+
+var testContext = context.Background()
 
 func TestRevocationListRepository(t *testing.T) {
 
@@ -21,7 +24,7 @@ func TestRevocationListRepository(t *testing.T) {
 		configListManagerMock := &k8sclientMocks.Manager{}
 		configMapName := "revokedCertificates"
 
-		configListManagerMock.On("Get", configMapName, mock.AnythingOfType("v1.GetOptions")).Return(
+		configListManagerMock.On("Get", testContext, configMapName, mock.AnythingOfType("v1.GetOptions")).Return(
 			&v1.ConfigMap{
 				Data: nil,
 			}, nil)
@@ -29,7 +32,7 @@ func TestRevocationListRepository(t *testing.T) {
 		repository := NewRepository(configListManagerMock, configMapName)
 
 		// when
-		isPresent, err := repository.Contains(someHash)
+		isPresent, err := repository.Contains(testContext, someHash)
 		require.NoError(t, err)
 
 		// then
@@ -42,15 +45,15 @@ func TestRevocationListRepository(t *testing.T) {
 		someHash := "someHash"
 		configListManagerMock := &k8sclientMocks.Manager{}
 
-		configListManagerMock.On("Get", configMapName, mock.AnythingOfType("v1.GetOptions")).Return(
+		configListManagerMock.On("Get", testContext, configMapName, mock.AnythingOfType("v1.GetOptions")).Return(
 			&v1.ConfigMap{
 				Data: nil,
 			}, nil)
 
-		configListManagerMock.On("Update", &v1.ConfigMap{
+		configListManagerMock.On("Update", testContext, &v1.ConfigMap{
 			Data: map[string]string{
 				someHash: someHash,
-			}}).Return(&v1.ConfigMap{
+			}}, mock.AnythingOfType("v1.UpdateOptions")).Return(&v1.ConfigMap{
 			Data: map[string]string{
 				someHash: someHash,
 			}}, nil)
@@ -58,7 +61,7 @@ func TestRevocationListRepository(t *testing.T) {
 		repository := NewRepository(configListManagerMock, configMapName)
 
 		// when
-		err := repository.Insert(someHash)
+		err := repository.Insert(context.Background(), someHash)
 		require.NoError(t, err)
 
 		// then
@@ -70,15 +73,15 @@ func TestRevocationListRepository(t *testing.T) {
 		someHash := "someHash"
 		configListManagerMock := &k8sclientMocks.Manager{}
 
-		configListManagerMock.On("Get", configMapName, mock.AnythingOfType("v1.GetOptions")).Return(nil, errors.New("some error"))
+		configListManagerMock.On("Get", testContext, configMapName, mock.AnythingOfType("v1.GetOptions")).Return(nil, errors.New("some error"))
 
 		repository := NewRepository(configListManagerMock, configMapName)
 
 		// when
-		err := repository.Insert(someHash)
+		err := repository.Insert(testContext, someHash)
 		require.Error(t, err)
 
-		_, err = repository.Contains(someHash)
+		_, err = repository.Contains(testContext, someHash)
 		require.Error(t, err)
 
 		// then
@@ -90,20 +93,20 @@ func TestRevocationListRepository(t *testing.T) {
 		someHash := "someHash"
 		configListManagerMock := &k8sclientMocks.Manager{}
 
-		configListManagerMock.On("Get", configMapName, mock.AnythingOfType("v1.GetOptions")).Return(
+		configListManagerMock.On("Get", testContext, configMapName, mock.AnythingOfType("v1.GetOptions")).Return(
 			&v1.ConfigMap{
 				Data: nil,
 			}, nil)
 
-		configListManagerMock.On("Update", &v1.ConfigMap{
+		configListManagerMock.On("Update", testContext, &v1.ConfigMap{
 			Data: map[string]string{
 				someHash: someHash,
-			}}).Return(nil, errors.New("some error"))
+			}}, mock.AnythingOfType("v1.UpdateOptions")).Return(nil, errors.New("some error"))
 
 		repository := NewRepository(configListManagerMock, configMapName)
 
 		// when
-		err := repository.Insert(someHash)
+		err := repository.Insert(testContext, someHash)
 		require.Error(t, err)
 
 		// then

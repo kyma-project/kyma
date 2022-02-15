@@ -1,21 +1,27 @@
 {{- /*
-Generated from 'etcd' from https://raw.githubusercontent.com/etcd-io/etcd/master/Documentation/op-guide/grafana.json
+  Customization: 
+  * Made the dashboard not editable
+*/ -}}
+{{- /*
+Generated from 'etcd' from https://raw.githubusercontent.com/etcd-io/website/master/content/en/docs/v3.4/op-guide/grafana.json
 Do not change in-place! In order to change this file first read following link:
-https://github.com/helm/charts/tree/master/stable/prometheus-operator/hack
+https://github.com/prometheus-community/helm-charts/tree/main/charts/kube-prometheus-stack/hack
 */ -}}
 {{- $kubeTargetVersion := default .Capabilities.KubeVersion.GitVersion .Values.kubeTargetVersionOverride }}
-{{- if and (semverCompare ">=1.14.0-0" $kubeTargetVersion) (semverCompare "<9.9.9-9" $kubeTargetVersion) .Values.grafana.enabled .Values.grafana.defaultDashboardsEnabled .Values.kubeEtcd.enabled }}
+{{- if and (or .Values.grafana.enabled .Values.grafana.forceDeployDashboards) (semverCompare ">=1.14.0-0" $kubeTargetVersion) (semverCompare "<9.9.9-9" $kubeTargetVersion) .Values.grafana.defaultDashboardsEnabled .Values.kubeEtcd.enabled }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  namespace: {{ $.Release.Namespace }}
-  name: {{ printf "%s-%s" (include "prometheus-operator.fullname" $) "etcd" | trunc 63 | trimSuffix "-" }}
+  namespace: {{ template "kube-prometheus-stack-grafana.namespace" . }}
+  name: {{ printf "%s-%s" (include "kube-prometheus-stack.fullname" $) "etcd" | trunc 63 | trimSuffix "-" }}
+  annotations:
+{{ toYaml .Values.grafana.sidecar.dashboards.annotations | indent 4 }}
   labels:
     {{- if $.Values.grafana.sidecar.dashboards.label }}
     {{ $.Values.grafana.sidecar.dashboards.label }}: "1"
     {{- end }}
-    app: {{ template "prometheus-operator.name" $ }}-grafana
-{{ include "prometheus-operator.labels" $ | indent 4 }}
+    app: {{ template "kube-prometheus-stack.name" $ }}-grafana
+{{ include "kube-prometheus-stack.labels" $ | indent 4 }}
 data:
   etcd.json: |-
     {
@@ -1035,9 +1041,7 @@ data:
         "schemaVersion": 13,
         "sharedCrosshair": false,
         "style": "dark",
-        "tags": [
-            "kubernetes-mixin"
-        ],
+        "tags": [],
         "templating": {
             "list": [
                 {
@@ -1061,7 +1065,7 @@ data:
                         "value": "prod"
                     },
                     "datasource": "$datasource",
-                    "hide": 0,
+                    "hide": {{ if (or .Values.grafana.sidecar.dashboards.multicluster.global.enabled .Values.grafana.sidecar.dashboards.multicluster.etcd.enabled) }}0{{ else }}2{{ end }},
                     "includeAll": false,
                     "label": "cluster",
                     "multi": false,
@@ -1109,8 +1113,8 @@ data:
                 "30d"
             ]
         },
-        "timezone": "",
-        "title": "Kubernetes / etcd",
+        "timezone": "{{ .Values.grafana.defaultDashboardsTimezone }}",
+        "title": "etcd",
         "version": 215
     }
 {{- end }}

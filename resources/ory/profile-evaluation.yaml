@@ -1,0 +1,28 @@
+---
+global:
+  ory:
+    hydra:
+      persistence:
+        enabled: false
+        postgresql:
+          enabled: false
+        gcloud:
+          enabled: false
+hydra:
+  replicaCount: 1
+  hydra:
+    autoMigrate: false
+  deployment:
+    autoscaling:
+      enabled: false
+    resources:
+      requests:
+        cpu: "10m"
+oathkeeper:
+  replicaCount: 1
+  deployment:
+    resources:
+      requests:
+        cpu: "10m"
+    autoscaling:
+      enabled: false

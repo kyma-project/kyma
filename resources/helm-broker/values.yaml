@@ -36,7 +36,33 @@ broker:
   statusPort: 8071
   metricsPort: 8072
 
-defaultAddonsRepository: "https://github.com/kyma-project/addons/releases/download/0.14.0/index.yaml"
+webhook:
+  imagePullPolicy: IfNotPresent
+  securityContext: { runAsUser: 1001 }
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+  minReadySeconds: 1
+  annotations:
+    sidecar.istio.io/inject: "false"
+  healthcheck:
+    enabled: false
+  # Attributes of the webhook's service resource
+  service:
+    port: 8443
+    targetPort: 8443
+  # Webhook resource requests and limits
+  # Ref: http://kubernetes.io/docs/user-guide/compute-resources/
+  resources:
+    requests:
+      cpu: 100m
+      memory: 20Mi
+    limits:
+      cpu: 100m
+      memory: 30Mi
+
+defaultAddonsRepository: "https://github.com/kyma-project/addons/releases/download/0.15.0/index.yaml" # switch to 0.15 after testing PR
 
 # A map of additional addons repositories to configure. The key is used as the name of the created ClusterAddonsConfiguration.
 # additionalAddonsRepositories:
@@ -44,21 +70,18 @@ defaultAddonsRepository: "https://github.com/kyma-project/addons/releases/downlo
 #   myRepo2: "https://github.com/myOrg/myRepo/releases/download/0.x.0/index.yaml"
 additionalAddonsRepositories: {}
 
+addons-ui:
+  enabled: false
+
 global:
+  domainName: "kyma.example.com"
   containerRegistry:
     path: eu.gcr.io/kyma-project
   # develop mode allows use insecure (http) url for addons configuration
   isDevelopMode: false
   # image pull policy for helm broker broker/controller containers
   image:
-    pullPolicy: IfNotPresent
-  # paths to docker images
-  helm_broker:
-    dir: "develop/"
-    version: "4fdf7649"
-  helm_controller:
-    dir: "develop/"
-    version: "a3cdf624"
+    pullPolicy: Always
   # etcd port uses by helm broker
   etcdClientPort: 2379
 
@@ -83,3 +106,20 @@ global:
     tls:
       crt: "TBD"
       key: "TBD"
+  images:
+    helm_broker_webhook:
+      name: "helm-broker-webhook"
+      version: "49c6b00e"
+    helm_broker:
+      name: "helm-broker"
+      version: "49c6b00e"
+    helm_controller:
+      name: "helm-controller"
+      version: "7c8d1e85"
+    etcd:
+      name: "etcd"
+      version: "v3.3.25-699b7008"
+      directory: "tpi/quay.io/coreos"
+    add_ons_ui:
+      name: "add-ons-ui"
+      version: "c60a3c68"

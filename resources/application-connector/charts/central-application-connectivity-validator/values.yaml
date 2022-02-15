@@ -1,0 +1,41 @@
+deployment:
+  image:
+    pullPolicy: IfNotPresent
+  args:
+    proxyPort: &proxyPort 8080
+    externalAPIPort: &externalAPIPort 8081
+    appRegistryHost: application-registry-external-api.kyma-integration:8081
+    cacheExpirationSeconds: 90
+    cacheCleanupIntervalSeconds: 15
+  resources:
+    limits:
+      cpu: 100m
+      memory: 128Mi
+    requests:
+      cpu: 50m
+      memory: 64Mi
+
+service:
+  externalapi:
+    port: *externalAPIPort
+  proxy:
+    port: *proxyPort
+
+autoscaling:
+  enable: true
+  minReplicas: 1
+  maxReplicas: 10
+  cpuUsagePercent: 40
+
+eventPublisherProxy:
+  publishCEEndpoint: publish
+  service:
+    ## The name refers to the svc of event-publisher-proxy(https://github.com/kyma-project/kyma/blob/main/resources/eventing/charts/event-publisher-proxy/templates/service.yaml)
+    name: eventing-event-publisher-proxy
+    namespace: kyma-system
+
+istio:
+  gateway:
+    name: kyma-gateway
+    nameMtls: kyma-gateway-application-connector
+    namespace: kyma-system

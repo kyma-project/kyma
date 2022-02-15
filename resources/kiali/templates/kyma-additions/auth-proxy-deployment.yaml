@@ -1,0 +1,78 @@
+{{if .Values.authProxy.enabled}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ template "kiali-server.name" . }}-auth-proxy
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "kiali-server.labels" . | nindent 4 }}
+  annotations:
+    reconciler.kyma-project.io/ignore-pod-state: "true"
+spec:
+  replicas: {{ .Values.authProxy.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ template "kiali-server.name" . }}-auth-proxy
+  template:
+    metadata:
+      labels:
+        app: {{ template "kiali-server.name" . }}-auth-proxy
+      annotations:
+        checksum/config: {{ tpl (toYaml .Values.authProxy) . | sha256sum }}
+    spec:
+      {{- if .Values.authProxy.nodeSelector }}
+      nodeSelector:
+{{ toYaml .Values.authProxy.nodeSelector | indent 8 }}
+      {{- end }}
+      volumes:
+        - name: templates-cm
+          configMap:
+            name: {{ template "kiali-server.name" . }}-auth-proxy
+      serviceAccountName: {{ template "kiali-server.name" . }}-auth-proxy
+      {{- if or .Values.authProxy.priorityClassName .Values.global.highPriorityClassName }}
+      priorityClassName: {{ coalesce .Values.authProxy.priorityClassName .Values.global.highPriorityClassName }}
+      {{- end }}
+      containers:
+      - image: {{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.oauth2_proxy) }}
+        imagePullPolicy: {{ .Values.authProxy.image.pullPolicy }}
+        name: auth-proxy
+        args:
+        - --http-address=0.0.0.0:{{ .Values.authProxy.port }}
+        - --upstream=http://{{ template "kiali-server.fullname" . }}:{{ .Values.server.port }}
+        - --cookie-secure=true
+        - --cookie-domain=kiali.{{ .Values.global.domainName }}
+        - --cookie-name=KYMA_KIALI_OAUTH2_PROXY_TOKEN
+        - --silence-ping-logging=true
+        - --reverse-proxy=true
+        - --auth-logging={{ .Values.authProxy.config.authLogging }}
+        - --request-logging={{ .Values.authProxy.config.requestLogging }}
+        - --pass-host-header={{ .Values.authProxy.config.passHostHeader }}
+        envFrom:
+        - secretRef:
+            name: {{ template "kiali-server.name" . }}-auth-proxy-default
+            optional: false
+        - secretRef:
+            name: {{ template "kiali-server.name" . }}-auth-proxy-user
+            optional: true
+        ports:
+        - name: http
+          containerPort: {{ .Values.authProxy.port }}
+          protocol: TCP
+        livenessProbe:
+          httpGet:
+            path: /ping
+            port: http
+        readinessProbe:
+          httpGet:
+            path: /ping
+            port: http
+        {{- if .Values.authProxy.securityContext }}
+        securityContext:
+{{ toYaml .Values.authProxy.securityContext | nindent 10 }}
+        {{- end }}
+        resources:
+{{ toYaml .Values.authProxy.resources | indent 10 }}
+        volumeMounts:
+          - name: templates-cm
+            mountPath: /templates
+{{end}}

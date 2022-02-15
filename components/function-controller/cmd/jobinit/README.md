@@ -1,6 +1,6 @@
 # JobInit
 
-JobInit is used as the init container for injecting a Git repository to the [Job that builds a Function](https://kyma-project.io/docs/components/serverless/#details-function-processing-built).
+JobInit is used as the init container for injecting a Git repository to the [Job that builds a Function](https://kyma-project.io/docs/kyma/latest/05-technical-reference/svls-02-function-processing-stages/).
 
 ### Environment variables
 

@@ -9,5 +9,5 @@ data:
   APP_UPLOAD_ENDPOINT_WITH_PORT: '{{ template "minio.fullname" . }}.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.service.port }}'
   APP_BUCKET_REGION: us-east-1
   APP_INTERNAL_ENDPOINT: 'http://{{ template "minio.fullname" . }}.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.service.port }}'
-  APP_EXTERNAL_ENDPOINT: {{ if .Values.global.minioExternalEndpoint }}{{ .Values.global.minioExternalEndpoint }}{{ else }}'https://storage.{{ .Values.global.ingress.domainName }}'{{ end }}
+  APP_EXTERNAL_ENDPOINT: {{ if .Values.global.minioExternalEndpoint }}{{ .Values.global.minioExternalEndpoint }}{{ else }}'https://storage.{{ .Values.global.domainName }}'{{ end }}
   APP_VERBOSE: 'true'

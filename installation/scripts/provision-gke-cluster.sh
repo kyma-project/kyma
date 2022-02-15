@@ -10,7 +10,7 @@
 # - GCLOUD_COMPUTE_ZONE - zone in which the new cluster will be provisioned
 #
 # OPTIONAL:
-# - CLUSTER_VERSION - the k8s version to use for the master and nodes
+# - CLUSTER_VERSION - the k8s version to use for the main and nodes
 # - MACHINE_TYPE - the type of machine to use for nodes
 # - NUM_NODES - the number of nodes to be created
 #

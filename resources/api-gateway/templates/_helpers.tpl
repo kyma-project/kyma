@@ -45,10 +45,10 @@ app.kubernetes.io/managed-by: {{ .Release.Service }}
 {{- end -}}
 
 {{/*
-Create a list of namespaced services to blacklist
+Create a list of namespaced services to blocklist
 */}}
-{{- define "api-gateway.serviceBlackList" -}}
-{{- range $i, $e := .Values.config.serviceBlackList -}}
+{{- define "api-gateway.serviceBlockList" -}}
+{{- range $i, $e := .Values.config.serviceBlockList -}}
 {{- range $e -}}
 {{ printf "%s.%s," . $i -}}
 {{- end }}
@@ -56,13 +56,13 @@ Create a list of namespaced services to blacklist
 {{- end -}}
 
 {{/*
-Create a list of domains to whitelist
+Create a list of domains to allowlist
 */}}
-{{- define "api-gateway.domainWhiteList" -}}
-{{- range $domain := .Values.config.domainWhiteList -}}
+{{- define "api-gateway.domainAllowList" -}}
+{{- range $domain := .Values.config.domainAllowList -}}
 {{ printf "%s," $domain -}}
 {{- end }}
-{{- with .Values.global.ingress.domainName }}
+{{- with .Values.global.domainName }}
 {{- printf "%s" . -}}
 {{- end }}
 {{- end -}}
@@ -74,7 +74,7 @@ Get a default domain from values if set or use the default domain name for Kyma
 {{ if .Values.config.defaultDomain }}
 {{- printf "%s" .Values.config.defaultDomain -}}
 {{ else }}
-{{- printf "%s" .Values.global.ingress.domainName -}}
+{{- printf "%s" .Values.global.domainName -}}
 {{- end }}
 {{- end -}}
 
@@ -84,4 +84,16 @@ Get a default domain from values if set or use the default domain name for Kyma
 {{ printf "%s:%s," $i . -}}
 {{- end }}
 {{- end }}
+{{- end -}}
+
+{{/*
+Create a URL for container images
+*/}}
+{{- define "imageurl" -}}
+{{- $registry := default $.reg.path $.img.containerRegistryPath -}}
+{{- if hasKey $.img "directory" -}}
+{{- printf "%s/%s/%s:%s" $registry $.img.directory $.img.name $.img.version -}}
+{{- else -}}
+{{- printf "%s/%s:%s" $registry $.img.name $.img.version -}}
+{{- end -}}
 {{- end -}}

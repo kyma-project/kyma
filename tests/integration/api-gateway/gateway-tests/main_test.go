@@ -14,7 +14,6 @@ import (
 
 	"github.com/kyma-project/kyma/tests/integration/api-gateway/gateway-tests/pkg/client"
 	"github.com/kyma-project/kyma/tests/integration/api-gateway/gateway-tests/pkg/resource"
-
 	"github.com/stretchr/testify/require"
 
 	"github.com/kyma-project/kyma/common/ingressgateway"
@@ -56,8 +55,8 @@ var (
 
 type Config struct {
 	HydraAddr        string        `envconfig:"TEST_HYDRA_ADDRESS"`
-	User             string        `envconfig:"TEST_USER_EMAIL"`
-	Pwd              string        `envconfig:"TEST_USER_PASSWORD"`
+	User             string        `envconfig:"TEST_USER_EMAIL,default=admin@kyma.cx"`
+	Pwd              string        `envconfig:"TEST_USER_PASSWORD,default=1234"`
 	ReqTimeout       uint          `envconfig:"TEST_REQUEST_TIMEOUT,default=180"`
 	ReqDelay         uint          `envconfig:"TEST_REQUEST_DELAY,default=5"`
 	Domain           string        `envconfig:"TEST_DOMAIN"`
@@ -109,7 +108,7 @@ func TestApiGatewayIntegration(t *testing.T) {
 		AuthStyle:    oauth2.AuthStyleInHeader,
 	}
 
-	jwtConfig, err := jwt.LoadConfig()
+	jwtConfig, err := jwt.LoadConfig(oauthClientID)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -172,6 +171,16 @@ func TestApiGatewayIntegration(t *testing.T) {
 	batch.CreateResources(k8sClient, hydraClientResource...)
 	// Let's wait a bit to register client in hydra
 	time.Sleep(time.Duration(conf.ReqDelay) * time.Second)
+	// Get HydraClient Status
+	hydraClientResourceSchema, ns, name := resource.GetResourceSchemaAndNamespace(hydraClientResource[0])
+	clientStatus, err := resourceManager.GetStatus(k8sClient, hydraClientResourceSchema, ns, name)
+	errorStatus, ok := clientStatus["reconciliationError"].(map[string]interface{})
+	if err != nil || !ok {
+		t.Fatalf("Error retrieving Oauth2Client status: %+v | %+v", err, ok)
+	}
+	if len(errorStatus) != 0 {
+		t.Fatalf("Invalid status in Oauth2Client resource: %+v", errorStatus)
+	}
 	// defer deleting namespace (it will also delete all remaining resources in that namespace)
 	defer func() {
 		time.Sleep(time.Second * 3)
@@ -295,7 +304,7 @@ func TestApiGatewayIntegration(t *testing.T) {
 			require.NoError(err)
 			require.NotNil(tokenOAUTH)
 
-			tokenJWT, err := jwt.Authenticate(jwtConfig.IdProviderConfig)
+			tokenJWT, err := jwt.Authenticate(oauthClientID, jwtConfig.OidcHydraConfig)
 			if err != nil {
 				t.Fatalf("failed to fetch and id_token. %s", err.Error())
 			}
@@ -345,7 +354,7 @@ func TestApiGatewayIntegration(t *testing.T) {
 			require.NoError(err)
 			require.NotNil(tokenOAUTH)
 
-			tokenJWT, err := jwt.Authenticate(jwtConfig.IdProviderConfig)
+			tokenJWT, err := jwt.Authenticate(oauthClientID, jwtConfig.OidcHydraConfig)
 			if err != nil {
 				t.Fatalf("failed to fetch and id_token. %s", err.Error())
 			}
@@ -538,7 +547,7 @@ func TestApiGatewayIntegration(t *testing.T) {
 			require.NoError(err)
 			require.NotNil(oauth)
 
-			tokenJWT, err := jwt.Authenticate(jwtConfig.IdProviderConfig)
+			tokenJWT, err := jwt.Authenticate(oauthClientID, jwtConfig.OidcHydraConfig)
 			if err != nil {
 				t.Fatalf("failed to fetch and id_token. %s", err.Error())
 			}

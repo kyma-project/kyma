@@ -1,0 +1,42 @@
+replicaCount: 1
+
+app:
+  logLevel: "INFO"
+  serverPort: "1080"
+  mountedConfigMapName: "mockserver-config"
+  mountedLibsConfigMapName: "mockserver-config"
+  propertiesFileName: "mockserver.properties"
+  readOnlyRootFilesystem: false
+
+
+image:
+  repository: mockserver
+  snapshot: false
+  pullPolicy: IfNotPresent
+
+service:
+  annotations: {}
+  clusterIP: ""
+  externalIPs: []
+  loadBalancerIP: ""
+  loadBalancerSourceRanges: []
+  type: NodePort
+  port: 1080
+  nodePort: ""
+
+ingress:
+  enabled: false
+  annotations: {}
+  path: /
+  hosts:
+    - mockserver.local
+
+podAnnotations: {}
+
+resources: {}
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}

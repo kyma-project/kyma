@@ -1,0 +1,9 @@
+service-binding-usage-controller:
+  resources:
+    limits:
+      memory: 96Mi
+      cpu: 100m
+    requests:
+      memory: 48Mi
+      cpu: 50m
+      

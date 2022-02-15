@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ .Chart.Name }}
-  namespace: {{ .Values.global.namespace }}
+  namespace: {{ .Values.global.integrationNamespace }}
   labels:
     app: {{ .Chart.Name }}
     release: {{ .Release.Name }}
@@ -37,15 +37,10 @@ spec:
       serviceAccountName: {{ .Chart.Name }}
       containers:
       - name: ctrl
-        image: "{{ .Values.global.containerRegistry.path }}/application-broker:{{ .Values.global.application_broker.version }}"
+        image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.application_broker) }}"
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         resources:
-          limits:
-            memory: 76Mi
-            cpu: 100m
-          requests:
-            memory: 24Mi
-            cpu: 80m
+{{ toYaml .Values.ctrl.resources | indent 10 }}
         env:
           - name: APP_PORT
             value: {{ .Values.service.internalPort | quote }}
@@ -75,6 +70,9 @@ spec:
           - name: APP_GATEWAY_BASE_URL_FORMAT
             value: {{ .Values.gatewayBaseURLFormat | quote }}
           {{ end }}
+        securityContext:
+          privileged: false
+          allowPrivilegeEscalation: false
         volumeMounts:
         - mountPath: /etc/config/re-broker
           name: config-volume
@@ -101,3 +99,6 @@ spec:
       - name: config-volume
         configMap:
           name: app-broker-config-map
+    {{- if .Values.global.priorityClassName }}
+      priorityClassName: {{ .Values.global.priorityClassName }}
+    {{- end }}

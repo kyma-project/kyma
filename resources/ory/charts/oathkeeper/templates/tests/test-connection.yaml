@@ -12,11 +12,11 @@ metadata:
 spec:
   containers:
     - name: liveness-probe
-      image: "{{ .Values.busybox.repository }}:{{ .Values.busybox.tag }}"
+      image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.busybox) }}"
       command: ['wget']
       args:  ['http://{{ include "oathkeeper.fullname" . }}-api:{{ .Values.service.api.port }}/health/alive']
     - name: readiness-probe
-      image: "{{ .Values.busybox.repository }}:{{ .Values.busybox.tag }}"
+      image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.busybox) }}"
       command: ['wget']
       args:  ['http://{{ include "oathkeeper.fullname" . }}-api:{{ .Values.service.api.port }}/health/ready']
   restartPolicy: Never

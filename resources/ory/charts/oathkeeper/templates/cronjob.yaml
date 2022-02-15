@@ -49,18 +49,27 @@ spec:
         spec:
           initContainers:
             - name: keys-generator
-              image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+              image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.oathkeeper) }}"
               command:
                 - /bin/sh
                 - -c
                 - |
                   oathkeeper credentials generate --alg RS256 > /etc/secrets/jwks.json
+              securityContext:
+                allowPrivilegeEscalation: false
+                capabilities:
+                  drop:
+                  - ALL
+                privileged: false
+                runAsGroup: 101
+                runAsNonRoot: true
+                runAsUser: 100
               volumeMounts:
                 - name: {{ include "oathkeeper.name" . }}-keys-volume
                   mountPath: /etc/secrets
           containers:
           - name: keys-supplier
-            image: {{ .Values.kubectlJob.image }}
+            image: {{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.k8s_tools) }}
             command:
             - /bin/bash
             - -c
@@ -69,6 +78,15 @@ spec:
               kubectl create secret generic {{ include "oathkeeper.fullname" . }}-jwks-secret \
                 --from-file=/etc/secrets/jwks.json \
                 -n kyma-system -o yaml --dry-run | kubectl apply -f -
+            securityContext:
+              allowPrivilegeEscalation: false
+              capabilities:
+                drop:
+                - ALL
+              privileged: false
+              runAsGroup: 65534
+              runAsNonRoot: true
+              runAsUser: 65534
             volumeMounts:
             - name: {{ include "oathkeeper.name" . }}-keys-volume
               mountPath: /etc/secrets

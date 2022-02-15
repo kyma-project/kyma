@@ -1,0 +1,11 @@
+---
+apiVersion: servicecatalog.kyma-project.io/v1alpha1
+kind: ServiceBindingUsage
+metadata:
+  name: func-sbu-svcat-auditlog-api-1
+spec:
+  serviceBindingRef:
+    name: func-sb-svcat-auditlog-api-1
+  usedBy:
+    kind: serverless-function
+    name: svcat-auditlog-api-1

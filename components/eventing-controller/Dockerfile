@@ -1,21 +1,25 @@
 # Build the controller binary
-FROM eu.gcr.io/kyma-project/test-infra/buildpack-golang-kubebuilder2:v20200831-e46c648b as builder
+FROM eu.gcr.io/kyma-project/test-infra/buildpack-golang:v20211223-df98b255 as builder
 ARG DOCK_PKG_DIR=/go/src/github.com/kyma-project/kyma/components/eventing-controller
 WORKDIR $DOCK_PKG_DIR
 
 COPY go.mod go.mod
 COPY go.sum go.sum
 
-COPY main.go main.go
 COPY api/ api/
-COPY controllers/ controllers/
+COPY cmd/ cmd/
+COPY logger/ logger/
+COPY options/ options/
 COPY pkg/ pkg/
+COPY controllers/ controllers/
+COPY testing/ testing/
+COPY utils/ utils/
 
 # Build
 RUN GOOS=linux GO111MODULE=on go mod vendor && \
-    CGO_ENABLED=0 GOOS=linux GO111MODULE=on go build -a -o eventing-controller main.go
+    CGO_ENABLED=0 GOOS=linux GO111MODULE=on go build -a -o eventing-controller ./cmd/eventing-controller
 
-FROM scratch
+FROM gcr.io/distroless/static:nonroot
 LABEL source = git@github.com:kyma-project/kyma.git
 
 WORKDIR /

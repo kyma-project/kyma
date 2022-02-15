@@ -3,54 +3,46 @@
 This Helm chart contains all components required for eventing in Kyma:
 
 Components:
-- event-publisher-proxy
+- publisher-proxy
+- controller
+- nats-server
 
-## Event Publisher Proxy
+## Publisher Proxy
 
-This component receives Cloud Event publishing requests from the cluster workloads (microservice or Serverless functions) and redirects them to the Enterprise Messaging Service Cloud Event Gateway. Click [here](https://github.com/kyma-project/kyma/tree/master/components/event-publisher-proxy) for more details.
+This component receives legacy and Cloud Event publishing requests from the cluster workloads (microservice or Serverless functions) and redirects them to the Enterprise Messaging Service Cloud Event Gateway. It also fetches a list of subscriptions for a connected application. Click [here](../../components/event-publisher-proxy) for more details.
 
-## Install
+## Controller
 
-You can install this Helm chart using either Helm or Kyma CLI. In both cases, the secret details for BEB have to be configured using the `beb` prefixed variables:
+This component manages the internal infrastructure in order to receive an event for all subscriptions handled by NATS or Business Event Bus (BEB)(based on the configuration).
+
+## NATS Server
+
+This component manages NATS server which serves as an eventing platform for Kyma eventing.
+
+## Installation
+
+You can install this Helm chart using either Helm or Kyma CLI.
 
 ### Using Helm 3:
 
+
 ```bash
-$ cat << EOF > helm-values.yaml
-event-publisher-proxy:
-  upstreamAuthentication:
-    oauthClientId: "$bebOauthClientId"
-    oauthClientSecret: "$bebOauthClientSecret"
-    oauthTokenEndpoint: "$bebOauthTokenEndpoint"
-    publishUrl: "$bebPublishUrl"
-EOF
+# Install subscriptions.eventing.kyma-project.io CRD
+kubectl apply -f installation/resources/crds/eventing/subscriptions.eventing.kyma-project.io.crd.yaml
+kubectl apply -f installation/resources/crds/eventing/eventingbackends.eventing.kyma-project.io.crd.yaml
 
 $ helm install \
     -n kyma-system \
-    -f helm-values.yaml \
-     eventing . \
+     eventing .
 ```
 
 ### Using Kyma CLI:
 
 ```bash
-cat << EOF > installation-overrides-epp.yaml
-apiVersion: v1
-kind: Secret
-type: Opaque
-metadata:
-  name: eventing-epp-overrides
-  namespace: kyma-installer
-  labels:
-    installer: overrides
-    component: eventing
-    kyma-project.io/installation: ""
-stringData:
-    event-publisher-proxy.upstreamAuthentication.oauthClientId: "$bebOauthClientId"
-    event-publisher-proxy.upstreamAuthentication.oauthClientSecret: "$bebOauthClientSecret"
-    event-publisher-proxy.upstreamAuthentication.oauthTokenEndpoint: "$bebOauthTokenEndpoint"
-    event-publisher-proxy.upstreamAuthentication.publishUrl: "$bebPublishUrl"
-EOF
+kyma deploy --source=local --workspace <KYMA_DIR_PATH> --component=eventing
+```
 
-$ kyma install -s <source-image> -o installation-overrides-epp.yaml
+To install Eventing with NATS JetStream enabled, run:
+```bash
+kyma deploy --source=local --value eventing.nats.nats.jetstream.enabled=true --workspace <KYMA_DIR_PATH> --component=eventing
 ```

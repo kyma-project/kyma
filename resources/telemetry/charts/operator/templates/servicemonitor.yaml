@@ -1,0 +1,18 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  labels:
+    {{- toYaml .Values.extraLabels | nindent 4 }}
+  name: {{ include "operator.fullname" . }}-controller-manager-metrics-monitor
+  namespace: {{ .Release.Namespace }}
+spec:
+  endpoints:
+    - path: {{ .Values.serviceMonitor.endpoints.path }}
+      port: {{ .Values.serviceMonitor.endpoints.port }}
+      scheme: {{ .Values.serviceMonitor.endpoints.scheme }}
+      bearerTokenFile: {{ .Values.serviceMonitor.endpoints.bearerTokenFile }}
+      tlsConfig:
+        {{- toYaml .Values.serviceMonitor.endpoints.tlsConfig | nindent 8 }}
+  selector:
+    matchLabels:
+      {{- toYaml .Values.extraLabels | nindent 6 }}

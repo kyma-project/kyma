@@ -223,7 +223,7 @@ data:
           },
           "yaxes": [
             {
-              "format": "s",
+              "format": "ms",
               "label": null,
               "logBase": 1,
               "max": null,
@@ -300,7 +300,7 @@ data:
           "pluginVersion": "7.0.1",
           "targets": [
             {
-              "expr": "(max(container_memory_usage_bytes{namespace=\"$namespace\", pod=~\"$function_name.*\", pod!~\"$function_name-build.*\", container=\"$function_container\"}) / max (kube_pod_container_resource_limits_memory_bytes{namespace=\"$namespace\", pod=~\"$function_name.*\", pod!~\"$function_name-build.*\", container=\"$function_container\"})) * 100",
+              "expr": "(max(container_memory_usage_bytes{namespace=\"$namespace\", pod=~\"$function_name.*\", pod!~\"$function_name-build.*\", container=\"$function_container\"}) / max (kube_pod_container_resource_limits{namespace=\"$namespace\", pod=~\"$function_name.*\", pod!~\"$function_name-build.*\", container=\"$function_container\", resource=\"memory\"})) * 100",
               "interval": "",
               "legendFormat": "memory",
               "refId": "A"
@@ -743,7 +743,7 @@ data:
           },
           "yaxes": [
             {
-              "format": "s",
+              "format": "ms",
               "label": null,
               "logBase": 1,
               "max": null,

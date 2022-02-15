@@ -1,0 +1,4 @@
+apiVersion: v2
+name: operator
+description: A Helm chart for 'telemetry-operator'
+version: 0.2.0

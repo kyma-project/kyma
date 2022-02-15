@@ -7,7 +7,6 @@ import (
 
 	"github.com/kubernetes-sigs/service-catalog/pkg/apis/servicecatalog/v1beta1"
 	"github.com/pkg/errors"
-	"k8s.io/apimachinery/pkg/runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
@@ -24,7 +23,7 @@ func NewWaiter(cli client.Client, cfg Config) *Waiter {
 
 // WaitForUAAClassAndPlan waits for UAA class and plan
 func (w *Waiter) WaitForUAAClassAndPlan(ctx context.Context) error {
-	for objName, obj := range map[string]runtime.Object{
+	for objName, obj := range map[string]client.Object{
 		w.cfg.ClusterServiceClassName: &v1beta1.ClusterServiceClass{},
 		w.cfg.ClusterServicePlanName:  &v1beta1.ClusterServicePlan{},
 	} {
@@ -36,7 +35,7 @@ func (w *Waiter) WaitForUAAClassAndPlan(ctx context.Context) error {
 	return nil
 }
 
-func (w *Waiter) wait(ctx context.Context, objName string, obj runtime.Object) error {
+func (w *Waiter) wait(ctx context.Context, objName string, obj client.Object) error {
 	key := client.ObjectKey{
 		Name: objName,
 	}

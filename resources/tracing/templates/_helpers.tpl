@@ -36,51 +36,24 @@ Create the name of the service account to use
 {{- end -}}
 
 {{/*
-Common labels
-*/}}
-{{- define "jaeger-operator.labels" -}}
-helm.sh/chart: {{ include "jaeger-operator.chart" . }}
-{{ include "jaeger-operator.selectorLabels" . }}
-app.kubernetes.io/managed-by: {{ .Release.Service }}
-{{- end }}
-
-{{/*
-Selector labels
-*/}}
-{{- define "jaeger-operator.selectorLabels" -}}
-app.kubernetes.io/name: {{ include "jaeger-operator.fullname" . }}-jaeger-operator
-app.kubernetes.io/instance: {{ .Release.Name }}
-{{- end -}}
-
-{{/*
 Create chart name and version as used by the chart label.
 */}}
 {{- define "jaeger-operator.chart" -}}
 {{- printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 
-{{- define "jaeger-operator.kcproxy.groups" -}}
-{{- if .Values.kcproxy.config.resources.useKymaGroups }}
-{{- printf "|groups=%s,%s,%s,%s" .Values.global.kymaRuntime.adminGroup .Values.global.kymaRuntime.operatorGroup .Values.global.kymaRuntime.developerGroup .Values.global.kymaRuntime.namespaceAdminGroup -}}
-{{- else if .Values.kcproxy.config.resources.groups }}
-{{- printf "|groups=%s" .Values.kcproxy.config.resources.groups }}
+{{/* Generate basic labels */}}
+{{- define "jaeger-operator.labels" }}
+app.kubernetes.io/name: {{ include "jaeger-operator.name" . }}
+app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
-{{- end -}}
 
-{{- define "jaeger-operator.kcproxy.methods" -}}
-{{- if .Values.kcproxy.config.resources.methods }}
-{{- printf "|methods=%s" .Values.kcproxy.config.resources.methods }}
-{{- end }}
-{{- end -}}
-
-{{- define "jaeger-operator.kcproxy.roles" -}}
-{{- if .Values.kcproxy.config.resources.roles }}
-{{- printf "|roles=%s" .Values.kcproxy.config.resources.roles }}
-{{- end }}
-{{- end -}}
-
-{{- define "kyma.checkRequirements" }}
-{{- if not .Values.global.tracing.enabled }}
-{{- fail (print "Tracing is not enabled across all the components. Set global.tracing.enabled to enable tracing while installing Kyma") }}
-{{- end }}
+{{/*
+Create a URL for container images
+*/}}
+{{- define "imageurl" -}}
+{{- $registry := default $.reg.path $.img.containerRegistryPath -}}
+{{- $path := ternary (print $registry) (print $registry "/" $.img.directory) (empty $.img.directory) -}}
+{{- $version := ternary (print ":" $.img.version) (print "@sha256:" $.img.sha) (empty $.img.sha) -}}
+{{- print $path "/" $.img.name $version -}}
 {{- end -}}

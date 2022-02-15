@@ -25,7 +25,7 @@ Run:
 
 ### How the controller works
 
-The protection controller listens on Application events. In case of an update, checks if must be performed any change on the object. If the object is just created - the controller adds the finalizer. If the object is being deleted (`metadata.deletionTimestamp` is set) - the controller checks, if the object can be deleted. If yes, it removes the finalizer. The k8s resource update is safe because an optimistick lock failure will occur. It can be handled by `IsConflict` from `k8s.io/apimachinery/pkg/api/errors` package. You can find more about optimistic lock in [Resource Operation section k8s api doc](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#resource-operations). 
+The protection controller listens on Application events. In case of an update, checks if must be performed any change on the object. If the object is just created - the controller adds the finalizer. If the object is being deleted (`metadata.deletionTimestamp` is set) - the controller checks, if the object can be deleted. If yes, it removes the finalizer. The k8s resource update is safe because an optimistick lock failure will occur. It can be handled by `IsConflict` from `k8s.io/apimachinery/pkg/api/errors` package. You can find more about optimistic lock in [Resource Operation section k8s api doc](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.21/#resource-operations). 
 
 ### Demo
 

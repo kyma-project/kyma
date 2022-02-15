@@ -7,3 +7,11 @@ service:
 
 securityContext:
   runAsUser: 2000
+
+resources:
+  limits:
+    memory: 76Mi
+    cpu: 100m
+  requests:
+    memory: 32Mi
+    cpu: 30m

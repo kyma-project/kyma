@@ -3,17 +3,23 @@ package applications
 import (
 	"testing"
 
+	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/k8sconsts"
+
 	"github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/model"
 	"github.com/stretchr/testify/assert"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
+const (
+	centralGatewayServiceUrl = "http://central-application-gateway.kyma-system.svc.cluster.local:8082"
+)
+
 func TestConverter(t *testing.T) {
 
 	t.Run("should convert application without API packages", func(t *testing.T) {
 		// given
-		converter := NewConverter()
+		converter := NewConverter(k8sconsts.NewNameResolver(), centralGatewayServiceUrl, false)
 
 		directorApp := model.Application{
 			ID:   "App1",
@@ -32,14 +38,15 @@ func TestConverter(t *testing.T) {
 				APIVersion: "applicationconnector.kyma-project.io/v1alpha1",
 			},
 			ObjectMeta: metav1.ObjectMeta{
-				Name: "Appname1",
+				Name:   "Appname1",
+				Labels: map[string]string{managedByLabelKey: managedByLabelValue},
 			},
 			Spec: v1alpha1.ApplicationSpec{
 				Description:      "Description not provided",
 				SkipInstallation: false,
 				Services:         []v1alpha1.Service{},
 				Labels: map[string]string{
-					connectedApp: "Appname1",
+					connectedAppLabelKey: "Appname1",
 				},
 				CompassMetadata: &v1alpha1.CompassMetadata{ApplicationID: "App1", Authentication: v1alpha1.Authentication{ClientIds: []string{"auth1", "auth2"}}},
 			},
@@ -54,7 +61,7 @@ func TestConverter(t *testing.T) {
 
 	t.Run("should convert application containing API Packages with API Definitions", func(t *testing.T) {
 		// given
-		converter := NewConverter()
+		converter := NewConverter(k8sconsts.NewNameResolver(), centralGatewayServiceUrl, false)
 		instanceAuthRequestInputSchema := "{}"
 
 		emptyDescription := ""
@@ -84,6 +91,18 @@ func TestConverter(t *testing.T) {
 							TargetUrl:   "www.example.com/2",
 						},
 					},
+					DefaultInstanceAuth: &model.Auth{
+						Credentials: &model.Credentials{
+							Oauth: &model.Oauth{
+								URL:          "https://oauth.example.com",
+								ClientID:     "test-client",
+								ClientSecret: "test-secret",
+							},
+							CSRFInfo: &model.CSRFInfo{
+								TokenEndpointURL: "https://tokern.example.com",
+							},
+						},
+					},
 				},
 				{
 					ID:          "package2",
@@ -95,6 +114,18 @@ func TestConverter(t *testing.T) {
 							Name:        "serviceName3",
 							Description: "",
 							TargetUrl:   "www.example.com/3",
+						},
+					},
+					DefaultInstanceAuth: &model.Auth{
+						Credentials: &model.Credentials{
+							Basic: &model.Basic{
+								Username: "my-username",
+								Password: "my-password",
+							},
+						},
+						RequestParameters: &model.RequestParameters{
+							Headers:         &map[string][]string{"header": {"header-value"}},
+							QueryParameters: &map[string][]string{"query-param": {"query-param-value"}},
 						},
 					},
 				},
@@ -114,13 +145,14 @@ func TestConverter(t *testing.T) {
 				APIVersion: "applicationconnector.kyma-project.io/v1alpha1",
 			},
 			ObjectMeta: metav1.ObjectMeta{
-				Name: "Appname1",
+				Name:   "Appname1",
+				Labels: map[string]string{managedByLabelKey: managedByLabelValue},
 			},
 			Spec: v1alpha1.ApplicationSpec{
 				Description:      "Description",
 				SkipInstallation: false,
 				Labels: map[string]string{
-					connectedApp: "Appname1",
+					connectedAppLabelKey: "Appname1",
 				},
 				CompassMetadata: &v1alpha1.CompassMetadata{ApplicationID: "App1", Authentication: v1alpha1.Authentication{ClientIds: []string{"auth1", "auth2"}}},
 				Services: []v1alpha1.Service{
@@ -133,16 +165,34 @@ func TestConverter(t *testing.T) {
 						AuthCreateParameterSchema: &instanceAuthRequestInputSchema,
 						Entries: []v1alpha1.Entry{
 							{
-								ID:        "serviceId1",
-								Name:      "serviceName1",
-								Type:      SpecAPIType,
-								TargetUrl: "www.example.com/1",
+								ID:                "serviceId1",
+								Name:              "serviceName1",
+								Type:              SpecAPIType,
+								TargetUrl:         "www.example.com/1",
+								CentralGatewayUrl: "http://central-application-gateway.kyma-system.svc.cluster.local:8082/Appname1/packagename1/servicename1",
+								Credentials: v1alpha1.Credentials{
+									Type:              "OAuth",
+									SecretName:        "Appname1-package1",
+									AuthenticationUrl: "https://oauth.example.com",
+									CSRFInfo: &v1alpha1.CSRFInfo{
+										TokenEndpointURL: "https://tokern.example.com",
+									},
+								},
 							},
 							{
-								ID:        "serviceId2",
-								Name:      "serviceName2",
-								Type:      SpecAPIType,
-								TargetUrl: "www.example.com/2",
+								ID:                "serviceId2",
+								Name:              "serviceName2",
+								Type:              SpecAPIType,
+								TargetUrl:         "www.example.com/2",
+								CentralGatewayUrl: "http://central-application-gateway.kyma-system.svc.cluster.local:8082/Appname1/packagename1/servicename2",
+								Credentials: v1alpha1.Credentials{
+									Type:              "OAuth",
+									SecretName:        "Appname1-package1",
+									AuthenticationUrl: "https://oauth.example.com",
+									CSRFInfo: &v1alpha1.CSRFInfo{
+										TokenEndpointURL: "https://tokern.example.com",
+									},
+								},
 							},
 						},
 					},
@@ -154,10 +204,16 @@ func TestConverter(t *testing.T) {
 						Description: "description",
 						Entries: []v1alpha1.Entry{
 							{
-								ID:        "serviceId3",
-								Name:      "serviceName3",
-								Type:      SpecAPIType,
-								TargetUrl: "www.example.com/3",
+								ID:                "serviceId3",
+								Name:              "serviceName3",
+								Type:              SpecAPIType,
+								TargetUrl:         "www.example.com/3",
+								CentralGatewayUrl: "http://central-application-gateway.kyma-system.svc.cluster.local:8082/Appname1/packagename2/servicename3",
+								Credentials: v1alpha1.Credentials{
+									Type:       "Basic",
+									SecretName: "Appname1-package2",
+								},
+								RequestParametersSecretName: "params-Appname1-package2",
 							},
 						},
 					},
@@ -182,7 +238,7 @@ func TestConverter(t *testing.T) {
 
 	t.Run("should convert application with services containing events and API, and no System Auths", func(t *testing.T) {
 		// given
-		converter := NewConverter()
+		converter := NewConverter(k8sconsts.NewNameResolver(), centralGatewayServiceUrl, false)
 
 		directorApp := model.Application{
 			ID:                  "App1",
@@ -203,7 +259,6 @@ func TestConverter(t *testing.T) {
 							APISpec: &model.APISpec{
 								Type: model.APISpecTypeOpenAPI,
 							},
-							RequestParameters: model.RequestParameters{},
 						},
 					},
 					EventDefinitions: []model.EventAPIDefinition{
@@ -223,13 +278,14 @@ func TestConverter(t *testing.T) {
 				APIVersion: "applicationconnector.kyma-project.io/v1alpha1",
 			},
 			ObjectMeta: metav1.ObjectMeta{
-				Name: "Appname1",
+				Name:   "Appname1",
+				Labels: map[string]string{managedByLabelKey: managedByLabelValue},
 			},
 			Spec: v1alpha1.ApplicationSpec{
 				Description:      "Description",
 				SkipInstallation: false,
 				Labels: map[string]string{
-					connectedApp: "Appname1",
+					connectedAppLabelKey: "Appname1",
 				},
 				CompassMetadata: &v1alpha1.CompassMetadata{ApplicationID: "App1", Authentication: v1alpha1.Authentication{ClientIds: nil}},
 				Services: []v1alpha1.Service{
@@ -241,11 +297,12 @@ func TestConverter(t *testing.T) {
 						Description: "Description not provided",
 						Entries: []v1alpha1.Entry{
 							{
-								ID:        "serviceId1",
-								Name:      "veryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryverylongserviceName1",
-								Type:      SpecAPIType,
-								TargetUrl: "www.example.com/1",
-								ApiType:   string(model.APISpecTypeOpenAPI),
+								ID:                "serviceId1",
+								Name:              "veryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryverylongserviceName1",
+								Type:              SpecAPIType,
+								TargetUrl:         "www.example.com/1",
+								CentralGatewayUrl: "http://central-application-gateway.kyma-system.svc.cluster.local:8082/Appname1/packagename1/veryveryveryveryveryveryveryveryveryveryveryveryveryveryv",
+								ApiType:           string(model.APISpecTypeOpenAPI),
 							},
 							{
 								ID:   "serviceId2",

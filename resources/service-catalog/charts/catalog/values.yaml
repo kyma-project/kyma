@@ -1,6 +1,6 @@
 # Default values for Service Catalog
 # service-catalog image to use
-image: eu.gcr.io/kyma-project/external/quay.io/kubernetes-service-catalog/service-catalog:v0.3.0-6-g8e85904-dirty
+# image: eu.gcr.io/kyma-project/external/quay.io/kubernetes-service-catalog/service-catalog:v0.3.1-12-g880e400-dirty
 # imagePullSecrets pre-existing secrets to use to pull images from a private registry
 imagePullSecrets: []
 # imagePullPolicy for the service-catalog; valid values are "IfNotPresent",
@@ -18,12 +18,13 @@ webhook:
       maxUnavailable: 0
   minReadySeconds: 1
   # annotations is a collection of annotations to add to the webhook pods.
-  annotations: {}
+  annotations:
+    sidecar.istio.io/inject: "false"
   # nodeSelector to apply to the webhook pods
   nodeSelector:
   # healthcheck configures the readiness and liveliness probes for the webhook pod.
   healthcheck:
-    enabled: false # in Kyma we are using svc-cat together with istio and default healtcheck is not supported
+    enabled: true # when using svc-cat together with istio the healthcheck is not supported
   # Attributes of the webhook's service resource
   service:
     port: 443
@@ -123,9 +124,5 @@ servicePlanDefaultsEnabled: false
 cascadingDeletionEnabled: true
 ## Security context give the opportunity to run container as nonroot by setting a securityContext
 ## by example :
-## securityContext: { runAsUser: 1001 }
-securityContext: {}
+securityContext: { runAsUser: 1001 }
 
-## images for migration process
-migration:
-  alpineKcImage: eu.gcr.io/kyma-project/incubator/develop/k8s-tools:20201023-5de446cf

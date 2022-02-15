@@ -1,21 +1,23 @@
 package auth
 
 import (
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/httpclient"
+	"net/http"
+
+	"golang.org/x/oauth2"
+
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/signals"
 )
 
-type Authenticator struct {
-	client *httpclient.Client
-}
+func NewAuthenticatedClient(cfg env.Config) *http.Client {
+	ctx := signals.NewReusableContext()
+	config := getDefaultOauth2Config(cfg)
+	// create and configure oauth2 client
+	client := config.Client(ctx)
 
-func NewAuthenticator() *Authenticator {
-	authenticator := &Authenticator{}
-	config := getDefaultOauth2Config(env.GetConfig())
-	authenticator.client = httpclient.NewHttpClient(config)
-	return authenticator
-}
+	var base = http.DefaultTransport.(*http.Transport).Clone()
+	client.Transport.(*oauth2.Transport).Base = base
 
-func (a *Authenticator) GetClient() *httpclient.Client {
-	return a.client
+	// TODO: Support tracing in eventing-controller #9767: https://github.com/kyma-project/kyma/issues/9767
+	return client
 }

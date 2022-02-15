@@ -1,0 +1,11 @@
+[
+  {
+    "httpRequest": {
+      "path": "/"
+    },
+    "httpResponse": {
+      "statusCode": 201,
+      "body": "some response"
+    }
+  }
+]

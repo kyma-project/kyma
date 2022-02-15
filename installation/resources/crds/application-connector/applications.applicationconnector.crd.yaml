@@ -1,0 +1,180 @@
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    "helm.sh/resource-policy": keep
+  name: applications.applicationconnector.kyma-project.io
+spec:
+  group: applicationconnector.kyma-project.io
+  preserveUnknownFields: false
+  versions:
+    - name: v1alpha1
+      served: true
+      storage: true
+      schema:
+        openAPIV3Schema:
+          type: object
+          properties:
+            spec:
+              properties:
+                compassMetadata:
+                  type: object
+                  required:
+                  - "authentication"
+                  properties:
+                    applicationId:
+                      type: string
+                    authentication:
+                      type: object
+                      required:
+                      - "clientIds"
+                      properties:
+                        clientIds:
+                          type: array
+                          items:
+                            type: string
+                accessLabel:
+                  type: string
+                  maxLength: 63
+                  pattern: '^([A-Za-z0-9][-A-Za-z0-9_.]*)?[A-Za-z0-9]$'
+                description:
+                  type: string
+                skipInstallation:
+                  type: boolean
+                skipVerify:
+                  type: boolean
+                labels:
+                  nullable: true
+                  additionalProperties:
+                    type: string
+                  type: object
+                tenant:
+                  type: string
+                group:
+                  type: string
+                tags:
+                  nullable: true
+                  description: New fields used by V2 version
+                  items:
+                    type: string
+                  type: array
+                displayName:
+                  type: string
+                providerDisplayName:
+                  type: string
+                longDescription:
+                  type: string
+                services:
+                  type: array
+                  items:
+                    type: object
+                    required:
+                    - "id"
+                    - "name"
+                    - "displayName"
+                    - "providerDisplayName"
+                    - "description"
+                    - "entries"
+                    properties:
+                      id:
+                        type: string
+                      name:
+                        type: string
+                      identifier:
+                        type: string
+                      labels:
+                        nullable: true
+                        additionalProperties:
+                          type: string
+                        description: Deprecated
+                        type: object
+                      displayName:
+                        type: string
+                      description:
+                        type: string
+                      longDescription:
+                        type: string
+                      providerDisplayName:
+                        type: string
+                      authCreateParameterSchema:
+                        description: New fields used by V2 version
+                        type: string
+                      entries:
+                        type: array
+                        items:
+                          type: object
+                          required:
+                          - "type"
+                          properties:
+                            apiType:
+                              type: string
+                            type:
+                              type: string
+                              enum:
+                              - "API"
+                              - "Events"
+                            gatewayUrl:
+                              type: string
+                            centralGatewayUrl:
+                              type: string
+                            accessLabel:
+                              type: string
+                              maxLength: 63
+                              pattern: '^([A-Za-z0-9][-A-Za-z0-9_.]*)?[A-Za-z0-9]$'
+                            targetUrl:
+                              type: string
+                            id:
+                              type: string
+                            name:
+                              description: New fields used by V2 version
+                              type: string
+                            requestParametersSecretName:
+                              type: string
+                            specificationUrl:
+                              type: string
+                            credentials:
+                              type: object
+                              required:
+                              - "type"
+                              - "secretName"
+                              properties:
+                                type:
+                                  type: string
+                                secretName:
+                                  type: string
+                                authenticationUrl:
+                                  type: string
+                                csrfInfo:
+                                  type: object
+                                  required:
+                                  - "tokenEndpointURL"
+                                  properties:
+                                    tokenEndpointURL:
+                                      type: string
+                      tags:
+                        type: array
+                        items:
+                          type: string
+              type: object
+            status:
+              properties:
+                installationStatus:
+                  description: Represents the status of Application release installation
+                  properties:
+                    description:
+                      type: string
+                    status:
+                      type: string
+                  required:
+                  - status
+                  type: object
+              required:
+              - installationStatus
+              type: object
+  scope: Cluster
+  names:
+    plural: applications
+    singular: application
+    kind: Application
+    shortNames:
+    - app
