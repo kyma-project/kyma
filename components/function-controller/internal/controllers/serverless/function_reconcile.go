@@ -3,6 +3,14 @@ package serverless
 import (
 	"context"
 	"fmt"
+	k8sErrors "k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/apimachinery/pkg/fields"
+	"k8s.io/apimachinery/pkg/types"
+	"sigs.k8s.io/controller-runtime/pkg/builder"
+	"sigs.k8s.io/controller-runtime/pkg/handler"
+	"sigs.k8s.io/controller-runtime/pkg/predicate"
+	"sigs.k8s.io/controller-runtime/pkg/reconcile"
+	"sigs.k8s.io/controller-runtime/pkg/source"
 	"time"
 
 	"github.com/go-logr/logr"
@@ -25,6 +33,8 @@ import (
 	"github.com/kyma-project/kyma/components/function-controller/internal/git"
 	"github.com/kyma-project/kyma/components/function-controller/internal/resource"
 	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
+
+	fluxv1Beta "github.com/fluxcd/source-controller/api/v1beta1"
 )
 
 //go:generate mockery -name=GitOperator -output=automock -outpkg=automock -case=underscore
@@ -40,6 +50,7 @@ type StatsCollector interface {
 type FunctionReconciler struct {
 	Log            logr.Logger
 	client         resource.Client
+	k8sClient      client.Client
 	recorder       record.EventRecorder
 	config         FunctionConfig
 	scheme         *runtime.Scheme
@@ -47,6 +58,8 @@ type FunctionReconciler struct {
 	statsCollector StatsCollector
 	healthCh       chan bool
 }
+
+const GitFunctionRefPath = ".spec.repository"
 
 func NewFunction(client resource.Client, log logr.Logger, config FunctionConfig, gitOperator GitOperator, recorder record.EventRecorder, statsCollector StatsCollector, healthCh chan bool) *FunctionReconciler {
 	return &FunctionReconciler{
@@ -77,7 +90,34 @@ func (r *FunctionReconciler) SetupWithManager(mgr ctrl.Manager) (controller.Cont
 			),
 			MaxConcurrentReconciles: 1, // Build job scheduling mechanism requires this parameter to be set to 1. The mechanism is based on getting active and stateless jobs, concurrent reconciles makes it non deterministic . Value 1 removes data races while fetching list of jobs. https://github.com/kyma-project/kyma/issues/10037
 		}).
+		Watches(&source.Kind{Type: &fluxv1Beta.GitRepository{}},
+			handler.EnqueueRequestsFromMapFunc(r.getGitFunctions),
+			builder.WithPredicates(predicate.ResourceVersionChangedPredicate{})).
 		Build(r)
+}
+func (r *FunctionReconciler) getGitFunctions(gitRepo client.Object) []reconcile.Request {
+	listOpts := &client.ListOptions{
+		FieldSelector: fields.OneTermEqualSelector(GitFunctionRefPath, gitRepo.GetName()),
+		Namespace:     gitRepo.GetNamespace(),
+	}
+
+	functions := serverlessv1alpha1.FunctionList{}
+	err := r.k8sClient.List(context.TODO(), &functions, listOpts)
+	if err != nil {
+		r.Log.Error(err, "while listing function with reference to git repository")
+		return []reconcile.Request{}
+	}
+
+	requests := make([]reconcile.Request, len(functions.Items))
+	for i, fn := range functions.Items {
+		requests[i] = reconcile.Request{
+			NamespacedName: types.NamespacedName{
+				Namespace: fn.Namespace,
+				Name:      fn.Name,
+			},
+		}
+	}
+	return requests
 }
 
 // Reconcile reads that state of the cluster for a Function object and makes changes based on the state read and what is in the Function.Spec
@@ -97,6 +137,19 @@ func (r *FunctionReconciler) SetupWithManager(mgr ctrl.Manager) (controller.Cont
 func (r *FunctionReconciler) Reconcile(request ctrl.Request) (ctrl.Result, error) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
+
+	r.Log.Info("Start Reconciliation")
+	gitRepo := fluxv1Beta.GitRepository{}
+	err := r.client.Get(context.TODO(), types.NamespacedName{Name: "test-repo", Namespace: "default"}, &gitRepo)
+	if err != nil {
+		if k8sErrors.IsNotFound(err) {
+			r.Log.Info("Git Repo not found")
+			return ctrl.Result{Requeue: true}, nil
+		}
+		return ctrl.Result{}, err
+	}
+
+	r.Log.Info("Set watch")
 
 	if IsHealthCheckRequest(request) {
 		r.healthCh <- true

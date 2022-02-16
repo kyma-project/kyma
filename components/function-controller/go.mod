@@ -7,9 +7,13 @@ replace (
 	golang.org/x/text => golang.org/x/text v0.3.5
 	gopkg.in/yaml.v2 => gopkg.in/yaml.v2 v2.3.0
 	k8s.io/client-go => k8s.io/client-go v0.18.18
+	k8s.io/api => k8s.io/api v0.18.18
+	sigs.k8s.io/controller-runtime => 	sigs.k8s.io/controller-runtime v0.6.5
+	github.com/fluxcd/source-controller/api => github.com/fluxcd/source-controller/api 22d0880e4ddc
 )
 
 require (
+	github.com/fluxcd/source-controller/api v0.19.3-0.20211220134744-22d0880e4ddc // indirect
 	github.com/go-logr/logr v0.1.0
 	github.com/go-logr/zapr v0.1.0
 	github.com/imdario/mergo v0.3.12 // indirect

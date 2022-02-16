@@ -1,9 +1,11 @@
 package main
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"os"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 	"time"
 
 	"github.com/kyma-project/kyma/components/function-controller/internal/controllers/serverless/metrics"
@@ -97,6 +99,15 @@ func main() {
 	if err != nil {
 		setupLog.Error(err, "Unable to initialize controller manager")
 		os.Exit(1)
+	}
+
+	setupLog.Info("Setup watcher")
+	err = mgr.GetFieldIndexer().IndexField(context.Background(), &serverlessv1alpha1.Function{}, serverless.GitFunctionRefPath, func(object client.Object) []string {
+		return []string{"test-repo"}
+	})
+	if err != nil {
+		setupLog.Error(err, "while setting up watcher")
+		os.Exit(3)
 	}
 
 	resourceClient := internalresource.New(mgr.GetClient(), scheme)
