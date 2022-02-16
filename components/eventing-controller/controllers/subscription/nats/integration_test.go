@@ -64,7 +64,7 @@ type expect struct {
 	natsSubscription []gomegatypes.GomegaMatcher
 }
 
-//TestUnavailableNATSServer tests if a subscription is reconciled properly if the NATS backend is unavailable.
+//TestUnavailableNATSServer tests if a subscription is reconciled properly when the NATS backend is unavailable.
 func TestUnavailableNATSServer(t *testing.T) {
 	natsPort := 4220
 	ctx := context.Background()
@@ -72,12 +72,13 @@ func TestUnavailableNATSServer(t *testing.T) {
 	ens := setupTestEnsemble(ctx, reconcilertesting.EventTypePrefix, g, natsPort, 7070)
 
 	subscription, subscriptionName := createSubscription(ctx, g, ens,
-		reconcilertesting.WithFilter("", cleanEventType("")),
+		reconcilertesting.WithFilter("", uncleanEventType("")),
 		reconcilertesting.WithSinkURLFromSvc(ens.subscriberSvc),
 	)
 	testSubscriptionOnK8s(ctx, g, ens, subscription, subscriptionName,
 		reconcilertesting.HaveCondition(conditionValidSubscription("")),
 		reconcilertesting.HaveSubscriptionReady(),
+		reconcilertesting.HaveCleanEventTypes([]string{cleanEventType("")}),
 	)
 
 	ens.natsServer.Shutdown()
@@ -489,6 +490,34 @@ func TestChangeSubscription(t *testing.T) {
 			testDeletionOnK8s(ctx, g, ens, subscription, tc.shouldTestDeletion)
 		})
 	}
+}
+
+//TestUnavailableNATSServer tests if a subscription is reconciled properly if the NATS backend is unavailable.
+func TestEmptyEventTypePrefix(t *testing.T) {
+	natsPort := 4224
+	ctx := context.Background()
+	g := gomega.NewGomegaWithT(t)
+	ens := setupTestEnsemble(ctx, reconcilertesting.EventTypePrefixEmpty, g, natsPort, 7074)
+
+	subscription, subscriptionName := createSubscription(ctx, g, ens,
+		reconcilertesting.WithFilter("", reconcilertesting.OrderCreatedEventTypeNotCleanPrefixEmpty),
+		reconcilertesting.WithSinkURLFromSvc(ens.subscriberSvc),
+	)
+
+	testSubscriptionOnK8s(ctx, g, ens, subscription, subscriptionName,
+		reconcilertesting.HaveCleanEventTypes([]string{reconcilertesting.OrderCreatedEventTypePrefixEmpty}),
+		reconcilertesting.HaveCondition(conditionValidSubscription("")),
+		reconcilertesting.HaveSubsConfiguration(configDefault(ens.defaultSubscriptionConfig.MaxInFlightMessages)),
+		reconcilertesting.HaveSubscriptionReady(),
+	)
+
+	testSubscriptionOnNATS(g, ens, subscriptionName,
+		reconcilertesting.BeNotNil(),
+		reconcilertesting.BeValid(),
+		reconcilertesting.HaveSubject(reconcilertesting.OrderCreatedEventTypePrefixEmpty),
+	)
+
+	testDeletionOnK8s(ctx, g, ens, subscription, true)
 }
 
 func updateSubscriptionOnK8s(ctx context.Context, g *gomega.GomegaWithT, ens *testEnsemble, subscription *eventingv1alpha1.Subscription) {
