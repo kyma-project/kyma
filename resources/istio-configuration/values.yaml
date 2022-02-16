@@ -42,6 +42,8 @@ meshConfig:
   trustDomain: cluster.local
   defaultConfig:
     holdApplicationUntilProxyStarts: true
+    gatewayTopology:
+      forwardClientCertDetails: APPEND_FORWARD
     tracing:
       sampling: 1
       zipkin:
