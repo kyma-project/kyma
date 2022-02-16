@@ -12,44 +12,32 @@ import (
 	kymalogger "github.com/kyma-project/kyma/common/logging/logger"
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 	"github.com/kyma-project/kyma/components/eventing-controller/controllers/events"
+	natsreconciler "github.com/kyma-project/kyma/components/eventing-controller/controllers/subscription/nats"
 	"github.com/kyma-project/kyma/components/eventing-controller/logger"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/application/applicationtest"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/application/fake"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers"
 	reconcilertesting "github.com/kyma-project/kyma/components/eventing-controller/testing"
+	natsserver "github.com/nats-io/nats-server/v2/server"
 	"github.com/nats-io/nats.go"
 	"github.com/onsi/gomega"
 	gomegatypes "github.com/onsi/gomega/types"
+	v1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
-	ctrl "sigs.k8s.io/controller-runtime"
-	//logf "sigs.k8s.io/controller-runtime/pkg/log"
-	//"sigs.k8s.io/controller-runtime/pkg/log/zap"
 	"k8s.io/client-go/kubernetes/scheme"
-
-	natsreconciler "github.com/kyma-project/kyma/components/eventing-controller/controllers/subscription/nats"
-	natsserver "github.com/nats-io/nats-server/v2/server"
-	v1 "k8s.io/api/core/v1"
 	"k8s.io/client-go/rest"
+	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/envtest"
 )
 
 const (
-	natsPort = 4221
-
 	smallTimeout         = 10 * time.Second
 	smallPollingInterval = 1 * time.Second
-
-	//todo can this be deleted?
-	timeout         = 60 * time.Second
-	pollingInterval = 5 * time.Second
-
-	namespaceName          = "test"
 	subscriptionNameFormat = "nats-sub-%d"
-	subscriberNameFormat   = "subscriber-%d"
 )
 
 const (
@@ -58,8 +46,6 @@ const (
 )
 
 type testEnsemble struct {
-	//todo order,
-	//todo explain components
 	testID                    int
 	cfg                       *rest.Config
 	k8sClient                 client.Client
@@ -78,20 +64,18 @@ type expect struct {
 	natsSubscription []gomegatypes.GomegaMatcher
 }
 
-type changeFunc func(subscription eventingv1alpha1.Subscription)
-
 //todo description
 func TestCreateSubscription(t *testing.T) {
 	ctx := context.Background()
 	g := gomega.NewGomegaWithT(t)
-	ens := setupTestEnsemble(ctx, reconcilertesting.EventTypePrefix, g)
+	ens := setupTestEnsemble(ctx, reconcilertesting.EventTypePrefix, g, 4221)
 	defer ens.cancel()
 
 	var testCases = []struct {
 		name               string
 		subscriptionOpts   []reconcilertesting.SubscriptionOpt
 		expect             expect
-		shouldTestDeletion bool // a bool in golang is false by default
+		shouldTestDeletion bool // false by default
 	}{
 		{
 			name: "create and delete",
@@ -316,7 +300,7 @@ func TestCreateSubscription(t *testing.T) {
 func TestChangeSubscription(t *testing.T) {
 	ctx := context.Background()
 	g := gomega.NewGomegaWithT(t)
-	ens := setupTestEnsemble(ctx, reconcilertesting.EventTypePrefix, g)
+	ens := setupTestEnsemble(ctx, reconcilertesting.EventTypePrefix, g, 4222)
 	defer ens.cancel()
 
 	var testCases = []struct {
@@ -468,7 +452,7 @@ func testSubscriptionOnK8s(ctx context.Context, g *gomega.GomegaWithT, ens *test
 }
 
 func testEventsOnK8s(ctx context.Context, g *gomega.GomegaWithT, ens *testEnsemble, expectations ...v1.Event) {
-	for _, event := range expectations { //todo replace with gomega.And(events)
+	for _, event := range expectations {
 		getK8sEvents(ctx, ens, g).Should(reconcilertesting.HaveEvent(event))
 	}
 }
@@ -541,7 +525,7 @@ func eventInvalidSink(msg string) v1.Event { // todo should this be in reonciler
 	}
 }
 
-func setupTestEnsemble(ctx context.Context, eventTypePrefix string, g *gomega.GomegaWithT) *testEnsemble {
+func setupTestEnsemble(ctx context.Context, eventTypePrefix string, g *gomega.GomegaWithT, natsPort int) *testEnsemble {
 	useExistingCluster := useExistingCluster
 	ens := &testEnsemble{
 		defaultSubscriptionConfig: env.DefaultSubscriptionConfig{
@@ -732,5 +716,5 @@ func getSubscriptionFromNATS(natsHandler *handlers.Nats, subscriptionName string
 			}
 		}
 		return nil
-	}()) // todo do we need func()*nats.Subscription{}()? can we remove func?
+	}())
 }
