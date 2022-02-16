@@ -78,7 +78,7 @@ type expect struct {
 	NATSSubscription []gomegatypes.GomegaMatcher
 }
 
-type changeFunc func(subscription eventingv1alpha1.Subscription) eventingv1alpha1.Subscription
+type changeFunc func(subscription eventingv1alpha1.Subscription)
 
 //todo description
 func TestCreateSubscription(t *testing.T) {
@@ -209,8 +209,8 @@ func TestChangeSubscription(t *testing.T) {
 			},
 			changeSubscription: func(subscription *eventingv1alpha1.Subscription) {
 				eventTypes := []string{
-					fmt.Sprintf("%s0", reconcilertesting.OrderCreatedEventTypeNotClean),
-					fmt.Sprintf("%s1", reconcilertesting.OrderCreatedEventTypeNotClean),
+					uncleanEventType("0"),
+					uncleanEventType("1"),
 				}
 				for _, eventType := range eventTypes {
 					reconcilertesting.AddFilter(reconcilertesting.EventSource, eventType, subscription)
@@ -221,8 +221,44 @@ func TestChangeSubscription(t *testing.T) {
 					reconcilertesting.HaveCondition(conditionValidSubscription("")),
 					reconcilertesting.HaveSubsConfiguration(configDefault(ens)),
 					reconcilertesting.HaveCleanEventTypes([]string{
-						fmt.Sprintf("%s0", reconcilertesting.OrderCreatedEventType),
-						fmt.Sprintf("%s1", reconcilertesting.OrderCreatedEventType),
+						cleanEventType("0"),
+						cleanEventType("1"),
+					}),
+				},
+			},
+		},
+
+		{
+			name: "clean event types; change filters",
+			subscriptionOpts: []reconcilertesting.SubscriptionOpt{
+				reconcilertesting.WithFilter(reconcilertesting.EventSource, uncleanEventType("0")),
+				reconcilertesting.WithFilter(reconcilertesting.EventSource, uncleanEventType("1")),
+				reconcilertesting.WithWebhookForNATS(),
+				reconcilertesting.WithSinkURLFromSvc(ens.subscriberSvc),
+			},
+			expectBefore: expect{
+				K8sSubscription: []gomegatypes.GomegaMatcher{
+					reconcilertesting.HaveCondition(conditionValidSubscription("")),
+					reconcilertesting.HaveSubsConfiguration(configDefault(ens)),
+					reconcilertesting.HaveCleanEventTypes([]string{
+						cleanEventType("0"),
+						cleanEventType("1"),
+					}),
+				},
+			},
+			changeSubscription: func(subscription *eventingv1alpha1.Subscription) {
+				//change all the filters by adding "alpha" to the event type
+				for _, f := range subscription.Spec.Filter.Filters {
+					f.EventType.Value = fmt.Sprintf("%salpha", f.EventType.Value)
+				}
+			},
+			expectAfter: expect{
+				K8sSubscription: []gomegatypes.GomegaMatcher{
+					reconcilertesting.HaveCondition(conditionValidSubscription("")),
+					reconcilertesting.HaveSubsConfiguration(configDefault(ens)),
+					reconcilertesting.HaveCleanEventTypes([]string{
+						cleanEventType("0alpha"),
+						cleanEventType("1alpha"),
 					}),
 				},
 			},
@@ -280,6 +316,14 @@ func testDeletionOnK8s(ctx context.Context, ens *testEnsemble, subscription *eve
 		g.Expect(ens.k8sClient.Delete(ctx, subscription)).Should(gomega.BeNil())
 		isSubscriptionDeleted(ctx, ens, subscription, g).Should(reconcilertesting.HaveNotFoundSubscription(true))
 	}
+}
+
+func uncleanEventType(suffix string) string {
+	return fmt.Sprintf("%s%s", reconcilertesting.OrderCreatedEventTypeNotClean, suffix)
+}
+
+func cleanEventType(suffix string) string {
+	return fmt.Sprintf("%s%s", reconcilertesting.OrderCreatedEventType, suffix)
 }
 
 // isSubscriptionDeleted checks a subscription is deleted and allows making assertions on it
