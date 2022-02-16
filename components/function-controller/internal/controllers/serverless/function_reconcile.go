@@ -58,7 +58,7 @@ type FunctionReconciler struct {
 	healthCh       chan bool
 }
 
-const GitFunctionRefPath = ".spec.repository"
+const GitFunctionRefPath = ".spec.source"
 
 const GitRepoName = "kyma-demo"
 
@@ -100,9 +100,10 @@ func (r *FunctionReconciler) SetupWithManager(mgr ctrl.Manager) (controller.Cont
 func (r *FunctionReconciler) Map(gitRepo handler.MapObject) []reconcile.Request {
 	listOpts := &client.ListOptions{
 		FieldSelector: fields.OneTermEqualSelector(GitFunctionRefPath, gitRepo.Meta.GetName()),
-		Namespace:     gitRepo.Meta.GetNamespace(),
+		Namespace:     "default",
 	}
 
+	r.Log.Info("Getting list of function to reconcile!")
 	functions := serverlessv1alpha1.FunctionList{}
 	err := r.k8sClient.List(context.TODO(), &functions, listOpts)
 	if err != nil {
@@ -112,6 +113,7 @@ func (r *FunctionReconciler) Map(gitRepo handler.MapObject) []reconcile.Request 
 
 	requests := make([]reconcile.Request, len(functions.Items))
 	for i, fn := range functions.Items {
+		r.Log.Info(fmt.Sprintf("Function need to be reconciled, name: %s, namespace: %s", fn.Name, fn.Namespace))
 		requests[i] = reconcile.Request{
 			NamespacedName: types.NamespacedName{
 				Namespace: fn.Namespace,
