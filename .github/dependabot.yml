@@ -23,6 +23,5 @@ updates:
     schedule:
       interval: "daily"
     commit-message:
-      prefix: "eventing-controller"
+      prefix: "docker"
       include: "scope"
-

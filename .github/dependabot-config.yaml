@@ -15,6 +15,7 @@ templates:
           dailyDockerEcosystem:
             packageEcosystem: "docker"
             scheduleInterval: "daily"
+            commitMsgPrefix: "docker"
             commitIncludeScope: "true"
             labels:
               - "docker"
@@ -29,7 +30,6 @@ templates:
                     - "dailyGoEcosystem"
               - jobConfig:
                   directory: "/components/eventing-controller"
-                  commitMsgPrefix: "eventing-controller"
                 inheritedConfigs:
                   local:
                     - "dailyDockerEcosystem"
