@@ -17,6 +17,7 @@ import (
 	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
 	"github.com/vrischmann/envconfig"
 
+	fluxv1Beta "github.com/fluxcd/source-controller/api/v1beta1"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -28,7 +29,6 @@ import (
 	ctrlzap "sigs.k8s.io/controller-runtime/pkg/log/zap"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 	"sigs.k8s.io/controller-runtime/pkg/source"
-	"sigs.k8s.io/controller-runtime/pkg/webhook"
 	// +kubebuilder:scaffold:imports
 )
 
@@ -45,7 +45,7 @@ func init() {
 }
 
 type config struct {
-	MetricsAddress            string `envconfig:"default=:8080"`
+	MetricsAddress            string `envconfig:"default=:8082"`
 	Healthz                   healthzConfig
 	LeaderElectionEnabled     bool   `envconfig:"default=false"`
 	LeaderElectionID          string `envconfig:"default=serverless-controller-leader-election-helper"`
@@ -87,6 +87,9 @@ func main() {
 	prometheusCollector.Register()
 
 	setupLog.Info("Initializing controller manager")
+
+	fluxv1Beta.AddToScheme(scheme)
+
 	mgr, err := manager.New(restConfig, manager.Options{
 		Scheme:                 scheme,
 		MetricsBindAddress:     config.MetricsAddress,
@@ -100,7 +103,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	setupLog.Info("Setup watcher")
+	setupLog.Info("Setup indexer for repository")
 	err = mgr.GetFieldIndexer().IndexField(context.Background(), &serverlessv1alpha1.Function{}, serverless.GitFunctionRefPath, func(object runtime.Object) []string {
 		return []string{serverless.GitRepoName}
 	})
@@ -116,12 +119,12 @@ func main() {
 	roleSvc := k8s.NewRoleService(resourceClient, config.Kubernetes)
 	roleBindingSvc := k8s.NewRoleBindingService(resourceClient, config.Kubernetes)
 
-	mgr.GetWebhookServer().Register(
-		"/mutate-v1-secret",
-		&webhook.Admission{
-			Handler: k8s.NewRegistryWatcher(mgr.GetClient()),
-		},
-	)
+	//mgr.GetWebhookServer().Register(
+	//	"/mutate-v1-secret",
+	//	&webhook.Admission{
+	//		Handler: k8s.NewRegistryWatcher(mgr.GetClient()),
+	//	},
+	//)
 
 	events := make(chan event.GenericEvent)
 	healthCh := make(chan bool)
@@ -131,7 +134,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	fnRecon := serverless.NewFunction(resourceClient, ctrl.Log, config.Function, git.NewGit2Go(), mgr.GetEventRecorderFor(serverlessv1alpha1.FunctionControllerValue), prometheusCollector, healthCh)
+	fnRecon := serverless.NewFunction(resourceClient, mgr.GetClient(), ctrl.Log, config.Function, git.NewGit2Go(), mgr.GetEventRecorderFor(serverlessv1alpha1.FunctionControllerValue), prometheusCollector, healthCh)
 	fnCtrl, err := fnRecon.SetupWithManager(mgr)
 	if err != nil {
 		setupLog.Error(err, "unable to create Function controller")

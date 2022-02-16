@@ -307,7 +307,7 @@ func (r *FunctionReconciler) buildGitJob(instance *serverlessv1alpha1.Function, 
 							Name:            "repo-fetcher",
 							Image:           r.config.Build.RepoFetcherImage,
 							Env:             buildRepoFetcherEnvVars(instance, gitOptions),
-							ImagePullPolicy: corev1.PullAlways,
+							ImagePullPolicy: corev1.PullIfNotPresent,
 							VolumeMounts: []corev1.VolumeMount{
 								{
 									Name:      "workspace",

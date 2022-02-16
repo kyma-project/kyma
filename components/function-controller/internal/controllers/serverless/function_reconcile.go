@@ -3,7 +3,6 @@ package serverless
 import (
 	"context"
 	"fmt"
-	k8sErrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/fields"
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/builder"
@@ -63,9 +62,10 @@ const GitFunctionRefPath = ".spec.repository"
 
 const GitRepoName = "kyma-demo"
 
-func NewFunction(client resource.Client, log logr.Logger, config FunctionConfig, gitOperator GitOperator, recorder record.EventRecorder, statsCollector StatsCollector, healthCh chan bool) *FunctionReconciler {
+func NewFunction(client resource.Client, k8sClient client.Client, log logr.Logger, config FunctionConfig, gitOperator GitOperator, recorder record.EventRecorder, statsCollector StatsCollector, healthCh chan bool) *FunctionReconciler {
 	return &FunctionReconciler{
 		Log:            log.WithName("controllers").WithName("function"),
+		k8sClient:      k8sClient,
 		client:         client,
 		recorder:       recorder,
 		config:         config,
@@ -94,7 +94,6 @@ func (r *FunctionReconciler) SetupWithManager(mgr ctrl.Manager) (controller.Cont
 		}).
 		Watches(&source.Kind{Type: &fluxv1Beta.GitRepository{}},
 			&handler.EnqueueRequestsFromMapFunc{ToRequests: r},
-			//handler.EnqueueRequestsFromMapFunc(r.getGitFunctions),
 			builder.WithPredicates(predicate.ResourceVersionChangedPredicate{})).
 		Build(r)
 }
@@ -140,26 +139,14 @@ func (r *FunctionReconciler) Map(gitRepo handler.MapObject) []reconcile.Request 
 func (r *FunctionReconciler) Reconcile(request ctrl.Request) (ctrl.Result, error) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
-
 	r.Log.Info("Start Reconciliation")
-	gitRepo := fluxv1Beta.GitRepository{}
-	err := r.client.Get(context.TODO(), types.NamespacedName{Name: GitRepoName, Namespace: "flux-system"}, &gitRepo)
-	if err != nil {
-		if k8sErrors.IsNotFound(err) {
-			r.Log.Info("Git Repo not found")
-			return ctrl.Result{Requeue: true}, nil
-		}
-		return ctrl.Result{}, err
-	}
-
-	r.Log.Info("Set watch")
 
 	if IsHealthCheckRequest(request) {
 		r.healthCh <- true
 		return ctrl.Result{}, nil
 	}
 	instance := &serverlessv1alpha1.Function{}
-	err = r.client.Get(ctx, request.NamespacedName, instance)
+	err := r.client.Get(ctx, request.NamespacedName, instance)
 	if err != nil {
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
@@ -238,18 +225,20 @@ func (r *FunctionReconciler) Reconcile(request ctrl.Request) (ctrl.Result, error
 		return ctrl.Result{}, err
 	}
 
-	revision, err := r.syncRevision(instance, gitOptions)
-	if err != nil {
-		result, errMsg := NextRequeue(err)
-		// TODO: This return masks the error from r.syncRevision() and doesn't pass it to the controller. This should be fixed in a follow up PR.
-		return result, r.updateStatusWithoutRepository(ctx, instance, serverlessv1alpha1.Condition{
-			Type:               serverlessv1alpha1.ConditionConfigurationReady,
-			Status:             corev1.ConditionFalse,
-			LastTransitionTime: metav1.Now(),
-			Reason:             serverlessv1alpha1.ConditionReasonSourceUpdateFailed,
-			Message:            errMsg,
-		})
-	}
+	r.Log.Info(gitOptions.URL)
+	revision := gitOptions.URL
+	//revision, err := r.syncRevision(instance, gitOptions)
+	//if err != nil {
+	//	result, errMsg := NextRequeue(err)
+	//	// TODO: This return masks the error from r.syncRevision() and doesn't pass it to the controller. This should be fixed in a follow up PR.
+	//	return result, r.updateStatusWithoutRepository(ctx, instance, serverlessv1alpha1.Condition{
+	//		Type:               serverlessv1alpha1.ConditionConfigurationReady,
+	//		Status:             corev1.ConditionFalse,
+	//		LastTransitionTime: metav1.Now(),
+	//		Reason:             serverlessv1alpha1.ConditionReasonSourceUpdateFailed,
+	//		Message:            errMsg,
+	//	})
+	//}
 
 	rtmCfg := fnRuntime.GetRuntimeConfig(instance.Spec.Runtime)
 	rtm := fnRuntime.GetRuntime(instance.Spec.Runtime)

@@ -21,7 +21,7 @@ type FunctionConfig struct {
 type BuildConfig struct {
 	ExecutorArgs        []string `envconfig:"default=--insecure;--skip-tls-verify;--skip-unused-stages;--log-format=text;--cache=true"`
 	ExecutorImage       string   `envconfig:"default=gcr.io/kaniko-project/executor:v0.22.0"`
-	RepoFetcherImage    string   `envconfig:"default=eu.gcr.io/kyma-project/function-build-init:305bee60"`
+	RepoFetcherImage    string   `envconfig:"default=fetcher:stable"`
 	MaxSimultaneousJobs int      `envconfig:"default=5"`
 }
 
