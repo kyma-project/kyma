@@ -597,14 +597,14 @@ func conditionValidSubscription() eventingv1alpha1.Condition {
 		v1.ConditionTrue, "")
 }
 
-func conditionInvalidSink(msg string) eventingv1alpha1.Condition { //todo should this be reconcilertesting
+func conditionInvalidSink(msg string) eventingv1alpha1.Condition {
 	return eventingv1alpha1.MakeCondition(
 		eventingv1alpha1.ConditionSubscriptionActive,
 		eventingv1alpha1.ConditionReasonNATSSubscriptionActive,
 		v1.ConditionFalse, msg)
 }
 
-func eventInvalidSink(msg string) v1.Event { // todo should this be in reoncilertesting
+func eventInvalidSink(msg string) v1.Event {
 	return v1.Event{
 		Reason:  string(events.ReasonValidationFailed),
 		Message: msg,
