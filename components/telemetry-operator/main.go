@@ -23,8 +23,6 @@ import (
 
 	"github.com/go-logr/zapr"
 
-	"k8s.io/apimachinery/pkg/types"
-
 	// Import all Kubernetes client auth plugins (e.g. Azure, GCP, OIDC, etc.)
 	// to ensure that exec-entrypoint and run can make use of them.
 	_ "k8s.io/client-go/plugin/pkg/client/auth"
@@ -116,30 +114,16 @@ func main() {
 		os.Exit(1)
 	}
 
-	if err = (&controllers.LogPipelineReconciler{
-		Client: mgr.GetClient(),
-		Scheme: mgr.GetScheme(),
-		FluentBitSectionsConfigMap: types.NamespacedName{
-			Name:      fluentBitSectionsConfigMap,
-			Namespace: fluentBitNs,
-		},
-		FluentBitParsersConfigMap: types.NamespacedName{
-			Name:      fluentBitParsersConfigMap,
-			Namespace: fluentBitNs,
-		},
-		FluentBitDaemonSet: types.NamespacedName{
-			Name:      fluentBitDaemonSet,
-			Namespace: fluentBitNs,
-		},
-		FluentBitEnvSecret: types.NamespacedName{
-			Name:      fluentBitEnvSecret,
-			Namespace: fluentBitNs,
-		},
-		FluentBitFilesConfigMap: types.NamespacedName{
-			Name:      fluentBitFilesConfigMap,
-			Namespace: fluentBitNs,
-		},
-	}).SetupWithManager(mgr); err != nil {
+	reconciler := controllers.NewLogPipelineReconciler(
+		mgr.GetClient(),
+		mgr.GetScheme(),
+		fluentBitNs,
+		fluentBitSectionsConfigMap,
+		fluentBitParsersConfigMap,
+		fluentBitDaemonSet,
+		fluentBitEnvSecret,
+		fluentBitFilesConfigMap)
+	if err = reconciler.SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "Failed to create controller", "controller", "LogPipeline")
 		os.Exit(1)
 	}
