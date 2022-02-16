@@ -102,7 +102,7 @@ func main() {
 
 	setupLog.Info("Setup watcher")
 	err = mgr.GetFieldIndexer().IndexField(context.Background(), &serverlessv1alpha1.Function{}, serverless.GitFunctionRefPath, func(object runtime.Object) []string {
-		return []string{"test-repo"}
+		return []string{serverless.GitRepoName}
 	})
 	if err != nil {
 		setupLog.Error(err, "while setting up watcher")

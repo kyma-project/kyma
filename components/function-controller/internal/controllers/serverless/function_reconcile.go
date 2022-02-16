@@ -61,6 +61,8 @@ type FunctionReconciler struct {
 
 const GitFunctionRefPath = ".spec.repository"
 
+const GitRepoName = "kyma-demo"
+
 func NewFunction(client resource.Client, log logr.Logger, config FunctionConfig, gitOperator GitOperator, recorder record.EventRecorder, statsCollector StatsCollector, healthCh chan bool) *FunctionReconciler {
 	return &FunctionReconciler{
 		Log:            log.WithName("controllers").WithName("function"),
@@ -91,15 +93,15 @@ func (r *FunctionReconciler) SetupWithManager(mgr ctrl.Manager) (controller.Cont
 			MaxConcurrentReconciles: 1, // Build job scheduling mechanism requires this parameter to be set to 1. The mechanism is based on getting active and stateless jobs, concurrent reconciles makes it non deterministic . Value 1 removes data races while fetching list of jobs. https://github.com/kyma-project/kyma/issues/10037
 		}).
 		Watches(&source.Kind{Type: &fluxv1Beta.GitRepository{}},
-		handler.EnqueueRequestForObject{}
-			handler.EnqueueRequestsFromMapFunc(r.getGitFunctions),
+			&handler.EnqueueRequestsFromMapFunc{ToRequests: r},
+			//handler.EnqueueRequestsFromMapFunc(r.getGitFunctions),
 			builder.WithPredicates(predicate.ResourceVersionChangedPredicate{})).
 		Build(r)
 }
-func (r *FunctionReconciler) getGitFunctions(gitRepo handler.MapObject) []reconcile.Request {
+func (r *FunctionReconciler) Map(gitRepo handler.MapObject) []reconcile.Request {
 	listOpts := &client.ListOptions{
-		FieldSelector: fields.OneTermEqualSelector(GitFunctionRefPath, gitRepo.GetName()),
-		Namespace:     gitRepo.GetNamespace(),
+		FieldSelector: fields.OneTermEqualSelector(GitFunctionRefPath, gitRepo.Meta.GetName()),
+		Namespace:     gitRepo.Meta.GetNamespace(),
 	}
 
 	functions := serverlessv1alpha1.FunctionList{}
@@ -141,7 +143,7 @@ func (r *FunctionReconciler) Reconcile(request ctrl.Request) (ctrl.Result, error
 
 	r.Log.Info("Start Reconciliation")
 	gitRepo := fluxv1Beta.GitRepository{}
-	err := r.client.Get(context.TODO(), types.NamespacedName{Name: "test-repo", Namespace: "default"}, &gitRepo)
+	err := r.client.Get(context.TODO(), types.NamespacedName{Name: GitRepoName, Namespace: "flux-system"}, &gitRepo)
 	if err != nil {
 		if k8sErrors.IsNotFound(err) {
 			r.Log.Info("Git Repo not found")
@@ -157,7 +159,7 @@ func (r *FunctionReconciler) Reconcile(request ctrl.Request) (ctrl.Result, error
 		return ctrl.Result{}, nil
 	}
 	instance := &serverlessv1alpha1.Function{}
-	err := r.client.Get(ctx, request.NamespacedName, instance)
+	err = r.client.Get(ctx, request.NamespacedName, instance)
 	if err != nil {
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
