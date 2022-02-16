@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"os"
-	"sigs.k8s.io/controller-runtime/pkg/client"
 	"time"
 
 	"github.com/kyma-project/kyma/components/function-controller/internal/controllers/serverless/metrics"
@@ -102,7 +101,7 @@ func main() {
 	}
 
 	setupLog.Info("Setup watcher")
-	err = mgr.GetFieldIndexer().IndexField(context.Background(), &serverlessv1alpha1.Function{}, serverless.GitFunctionRefPath, func(object client.Object) []string {
+	err = mgr.GetFieldIndexer().IndexField(context.Background(), &serverlessv1alpha1.Function{}, serverless.GitFunctionRefPath, func(object runtime.Object) []string {
 		return []string{"test-repo"}
 	})
 	if err != nil {

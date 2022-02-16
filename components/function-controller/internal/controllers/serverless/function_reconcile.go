@@ -91,11 +91,12 @@ func (r *FunctionReconciler) SetupWithManager(mgr ctrl.Manager) (controller.Cont
 			MaxConcurrentReconciles: 1, // Build job scheduling mechanism requires this parameter to be set to 1. The mechanism is based on getting active and stateless jobs, concurrent reconciles makes it non deterministic . Value 1 removes data races while fetching list of jobs. https://github.com/kyma-project/kyma/issues/10037
 		}).
 		Watches(&source.Kind{Type: &fluxv1Beta.GitRepository{}},
+		handler.EnqueueRequestForObject{}
 			handler.EnqueueRequestsFromMapFunc(r.getGitFunctions),
 			builder.WithPredicates(predicate.ResourceVersionChangedPredicate{})).
 		Build(r)
 }
-func (r *FunctionReconciler) getGitFunctions(gitRepo client.Object) []reconcile.Request {
+func (r *FunctionReconciler) getGitFunctions(gitRepo handler.MapObject) []reconcile.Request {
 	listOpts := &client.ListOptions{
 		FieldSelector: fields.OneTermEqualSelector(GitFunctionRefPath, gitRepo.GetName()),
 		Namespace:     gitRepo.GetNamespace(),
