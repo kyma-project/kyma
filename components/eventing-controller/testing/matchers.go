@@ -255,7 +255,7 @@ func HaveSubject(subject string) gomegatypes.GomegaMatcher {
 	}, BeTrue())
 }
 
-func BeNotNil() gomegatypes.GomegaMatcher{
+func BeNotNil() gomegatypes.GomegaMatcher {
 	return WithTransform(func(subscription *nats.Subscription) bool {
 		return subscription != nil
 	}, BeTrue())

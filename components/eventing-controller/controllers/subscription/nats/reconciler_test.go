@@ -54,8 +54,6 @@ const (
 	subscriberNameFormat   = "subscriber-%d"
 )
 
-
-
 // testNATSUnavailabilityReflectedInSubscriptionStatus tests if the reconciler can correctly resolve a Subscription in
 // the case of a NATS server that becomes unavailable.
 // The test is conducted in the following steps:
@@ -672,7 +670,7 @@ var (
 		reconcilertesting.EventTypePrefixEmpty,
 		reconcilertesting.OrderCreatedEventTypePrefixEmpty,
 		reconcilertesting.OrderCreatedEventTypeNotCleanPrefixEmpty,
-		),
+	),
 	)
 )
 
