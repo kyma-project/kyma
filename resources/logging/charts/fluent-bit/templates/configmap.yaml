@@ -134,11 +134,18 @@ data:
         tenant_id          {{ .Values.config.outputs.loki.tenantId }}
         {{- end }}
         labels             {{ .Values.config.outputs.loki.labels }}
+        {{- if .Values.config.outputs.loki.labelKeys }}
         label_keys         {{ .Values.config.outputs.loki.labelKeys }}
+        {{- end }}
         line_format        {{ .Values.config.outputs.loki.lineFormat }}
         auto_kubernetes_labels {{ .Values.config.outputs.loki.autoKubernetesLabels }}
+        {{- if .Values.config.outputs.loki.removeKeys }}
         remove_keys        {{ .Values.config.outputs.loki.removeKeys }}
+        {{- end }}
         drop_single_key    {{ .Values.config.outputs.loki.dropSingleKey }}
+        {{- if .Values.config.outputs.loki.workers }}
+        Workers            {{ .Values.config.outputs.loki.workers }}
+        {{- end }}
 {{- end }}
 
 {{- if .Values.config.outputs.es.enabled }}
@@ -172,6 +179,9 @@ data:
         HTTP_User       {{ .Values.config.outputs.es.httpUser }}
         HTTP_Passwd     {{ .Values.config.outputs.es.httpPasswd }}
         {{- end }}
+        {{- if .Values.config.outputs.es.workers }}
+        Workers         {{ .Values.config.outputs.es.workers }}
+        {{- end }}
         {{- if .Values.config.outputs.es.tls.enabled }}
         tls             On
         tls.verify      {{ .Values.config.outputs.es.tls.verify }}
@@ -199,6 +209,9 @@ data:
         Host            {{ .Values.config.outputs.forward.host }}
         Port            {{ .Values.config.outputs.forward.port }}
         Retry_Limit     {{ .Values.config.outputs.forward.retryLimit }}
+        {{- if .Values.config.outputs.forward.workers  }}
+        Workers           {{ .Values.config.outputs.forward.workers }}
+        {{- end }}
         {{- if .Values.config.outputs.forward.tls.enabled  }}
         tls             On
         tls.verify      {{ .Values.config.outputs.forward.tls.verify }}
@@ -250,6 +263,9 @@ data:
         {{- if .Values.config.outputs.http.httpUser }}
         HTTP_User                   {{ .Values.config.outputs.http.httpUser }}
         HTTP_Passwd                 {{ .Values.config.outputs.http.httpPasswd }}
+        {{- end }}
+        {{- if .Values.config.outputs.http.workers }}
+        Workers                     {{ .Values.config.outputs.http.workers }}
         {{- end }}
         {{- if .Values.config.outputs.http.tls.enabled  }}
         tls                         On

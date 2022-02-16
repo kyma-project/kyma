@@ -226,7 +226,7 @@ config:
       # Include Kubernetes resource labels in the extra metadata.
       labels: "On"
       # Include Kubernetes resource annotations in the extra metadata.
-      annotations: "On"
+      annotations: "Off"
 
     recordModifier:
       enabled: false
@@ -260,7 +260,9 @@ config:
       # Optional list of keys to remove
       removeKeys:
       # If set to true and after extracting labels only a single key remains, the log line sent to Loki will be the value of that key in line_format.
-      dropSingleKey: "on"
+      dropSingleKey: "off"
+      # Output will run in multi thread mode using specified number of threads
+      workers: 1
 
     es:
       enabled: false
@@ -285,6 +287,8 @@ config:
       generateID: "On"
       # When enabled, replace field name dots with underscore, required by Elasticsearch 2.0-2.3.
       replaceDots: "On"
+      # Output will run in multi thread mode using specified number of threads
+      workers: 1
       # Optional TLS encryption to ElasticSeaarch instance
       tls:
         enabled: true
@@ -304,6 +308,8 @@ config:
       host: log-forwarder
       port: 24224
       retryLimit: "False"
+      # Output will run in multi thread mode using specified number of threads
+      workers: 1
       tls:
         enabled: false
         verify: Off
@@ -323,6 +329,8 @@ config:
       uri: "/"
       httpUser: ""
       httpPasswd: ""
+      # Output will run in multi thread mode using specified number of threads
+      workers: 1
       tls:
         enabled: false
         verify: "On"
