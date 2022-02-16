@@ -90,7 +90,7 @@ func NewLogPipelineReconciler(client client.Client, scheme *runtime.Scheme, name
 
 	result.FluentBitRestartsCount = prometheus.NewCounter(prometheus.CounterOpts{
 		Name: "telemetry_operator_fluentbit_restarts_total",
-		Help: "Number of FluentBit restarts",
+		Help: "Number of triggered FluentBit restarts",
 	})
 	metrics.Registry.MustRegister(result.FluentBitRestartsCount)
 
