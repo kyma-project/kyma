@@ -7,7 +7,7 @@ require (
 	github.com/kyma-project/kyma/common/logging v0.0.0-20220208093900-75da62ce99a9
 	github.com/onsi/ginkgo v1.16.4
 	github.com/onsi/gomega v1.13.0
-	github.com/prometheus/client_golang v1.11.0
+	github.com/prometheus/client_golang v1.11.1
 	k8s.io/api v0.21.3
 	k8s.io/apimachinery v0.21.3
 	k8s.io/client-go v0.21.2
