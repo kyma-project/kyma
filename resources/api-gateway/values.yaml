@@ -59,6 +59,7 @@ config:
       - "POST"
       - "PUT"
       - "DELETE"
+      - "PATCH"
     allowHeaders: # "*" is not yet supported by all browsers
       - "Authorization"
       - "Content-Type"
