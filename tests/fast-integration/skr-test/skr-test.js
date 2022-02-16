@@ -58,9 +58,13 @@ function oidcE2ETest() {
     });
 
     it('Should get Runtime Status after updating OIDC config', async function() {
-      const runtimeStatus = await kcp.getRuntimeStatusOperations(this.options.instanceID);
-      console.log(`\nRuntime status: ${runtimeStatus}`);
-      await kcp.reconcileInformationLog(runtimeStatus);
+      try {
+        const runtimeStatus = await kcp.getRuntimeStatusOperations(this.options.instanceID);
+        console.log(`\nRuntime status: ${runtimeStatus}`);
+        await kcp.reconcileInformationLog(runtimeStatus);
+      } catch (e) {
+        console.log(`before hook failed: ${e.toString()}`);
+      }
     });
 
     it('Assure updated OIDC config is applied on shoot cluster', async function() {
