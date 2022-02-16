@@ -78,6 +78,8 @@ type expect struct {
 	NATSSubscription []gomegatypes.GomegaMatcher
 }
 
+type changeFunc func(subscription eventingv1alpha1.Subscription) eventingv1alpha1.Subscription
+
 //todo description
 func TestCreateSubscription(t *testing.T) {
 	ctx := context.Background()
@@ -85,7 +87,7 @@ func TestCreateSubscription(t *testing.T) {
 	ens := setupTestEnsemble(ctx, reconcilertesting.EventTypePrefix, g)
 	defer ens.cancel()
 
-	var testCase = []struct {
+	var testCases = []struct {
 		name               string
 		subscriptionOpts   []reconcilertesting.SubscriptionOpt
 		expect             expect
@@ -167,7 +169,7 @@ func TestCreateSubscription(t *testing.T) {
 		},
 	}
 
-	for _, tc := range testCase {
+	for _, tc := range testCases {
 		subscription, subscriptionName := createSubscription(ctx, ens, g, tc.subscriptionOpts...)
 
 		testSubscriptionOnK8s(ctx, ens, g, subscriptionName, subscription, tc.expect.K8sSubscription...)
@@ -177,6 +179,77 @@ func TestCreateSubscription(t *testing.T) {
 	}
 }
 
+//todo description
+func TestChangeSubscription(t *testing.T) {
+	ctx := context.Background()
+	g := gomega.NewGomegaWithT(t)
+	ens := setupTestEnsemble(ctx, reconcilertesting.EventTypePrefix, g)
+	defer ens.cancel()
+
+	var testCases = []struct {
+		name               string
+		subscriptionOpts   []reconcilertesting.SubscriptionOpt
+		expectBefore       expect
+		changeSubscription func(subscription *eventingv1alpha1.Subscription)
+		expectAfter        expect
+		shouldTestDeletion bool
+	}{
+		{
+			name: "clean event types; add filters to subscription without filters",
+			subscriptionOpts: []reconcilertesting.SubscriptionOpt{
+				reconcilertesting.WithEmptyFilter(),
+				reconcilertesting.WithWebhookForNATS(),
+				reconcilertesting.WithSinkURLFromSvc(ens.subscriberSvc),
+			},
+			expectBefore: expect{
+				K8sSubscription: []gomegatypes.GomegaMatcher{
+					reconcilertesting.HaveCondition(conditionValidSubscription("")),
+					reconcilertesting.HaveSubsConfiguration(configDefault(ens)),
+				},
+			},
+			changeSubscription: func(subscription *eventingv1alpha1.Subscription) {
+				eventTypes := []string{
+					fmt.Sprintf("%s0", reconcilertesting.OrderCreatedEventTypeNotClean),
+					fmt.Sprintf("%s1", reconcilertesting.OrderCreatedEventTypeNotClean),
+				}
+				for _, eventType := range eventTypes {
+					reconcilertesting.AddFilter(reconcilertesting.EventSource, eventType, subscription)
+				}
+			},
+			expectAfter: expect{
+				K8sSubscription: []gomegatypes.GomegaMatcher{
+					reconcilertesting.HaveCondition(conditionValidSubscription("")),
+					reconcilertesting.HaveSubsConfiguration(configDefault(ens)),
+					reconcilertesting.HaveCleanEventTypes([]string{
+						fmt.Sprintf("%s0", reconcilertesting.OrderCreatedEventType),
+						fmt.Sprintf("%s1", reconcilertesting.OrderCreatedEventType),
+					}),
+				},
+			},
+		},
+	}
+
+	for _, tc := range testCases {
+		subscription, subscriptionName := createSubscription(ctx, ens, g, tc.subscriptionOpts...)
+
+		testSubscriptionOnK8s(ctx, ens, g, subscriptionName, subscription, tc.expectBefore.K8sSubscription...)
+		testEventsOnK8s(ctx, ens, g, tc.expectBefore.K8sEvents...)
+		testSubscriptionOnNATS(ens, subscriptionName, g, tc.expectBefore.NATSSubscription...)
+
+		tc.changeSubscription(subscription)
+		updateSubscriptionOnK8s(ctx, ens, subscription, g)
+
+		testSubscriptionOnK8s(ctx, ens, g, subscriptionName, subscription, tc.expectAfter.K8sSubscription...)
+		testEventsOnK8s(ctx, ens, g, tc.expectAfter.K8sEvents...)
+		testSubscriptionOnNATS(ens, subscriptionName, g, tc.expectAfter.NATSSubscription...)
+		testDeletionOnK8s(ctx, ens, subscription, g, tc.shouldTestDeletion)
+	}
+}
+
+func updateSubscriptionOnK8s(ctx context.Context, ens *testEnsemble, subscription *eventingv1alpha1.Subscription, g *gomega.GomegaWithT) {
+	err := ens.k8sClient.Update(ctx, subscription)
+	g.Expect(err).Should(gomega.BeNil())
+}
 
 func createSubscription(ctx context.Context, ens *testEnsemble, g *gomega.GomegaWithT,
 	subscriptionOpts ...reconcilertesting.SubscriptionOpt) (*eventingv1alpha1.Subscription, string) {
