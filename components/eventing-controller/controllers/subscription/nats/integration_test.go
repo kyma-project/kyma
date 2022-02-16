@@ -73,9 +73,9 @@ type testEnsemble struct {
 }
 
 type expect struct {
-	K8sSubscription  []gomegatypes.GomegaMatcher
-	K8sEvents        []v1.Event
-	NATSSubscription []gomegatypes.GomegaMatcher
+	k8sSubscription  []gomegatypes.GomegaMatcher
+	k8sEvents        []v1.Event
+	natsSubscription []gomegatypes.GomegaMatcher
 }
 
 type changeFunc func(subscription eventingv1alpha1.Subscription)
@@ -101,11 +101,11 @@ func TestCreateSubscription(t *testing.T) {
 				reconcilertesting.WithSinkURLFromSvc(ens.subscriberSvc),
 			},
 			expect: expect{
-				K8sSubscription: []gomegatypes.GomegaMatcher{
+				k8sSubscription: []gomegatypes.GomegaMatcher{
 					reconcilertesting.HaveCondition(conditionValidSubscription("")),
 					reconcilertesting.HaveSubsConfiguration(configDefault(ens)),
 				},
-				NATSSubscription: []gomegatypes.GomegaMatcher{
+				natsSubscription: []gomegatypes.GomegaMatcher{
 					reconcilertesting.BeNotNil(),
 					reconcilertesting.BeValid(),
 					reconcilertesting.HaveSubject(reconcilertesting.OrderCreatedEventType),
@@ -122,7 +122,7 @@ func TestCreateSubscription(t *testing.T) {
 				reconcilertesting.WithSinkURLFromSvc(ens.subscriberSvc),
 			},
 			expect: expect{
-				K8sSubscription: []gomegatypes.GomegaMatcher{
+				k8sSubscription: []gomegatypes.GomegaMatcher{
 					reconcilertesting.HaveCondition(
 						eventingv1alpha1.MakeCondition(
 							eventingv1alpha1.ConditionSubscriptionActive,
@@ -142,11 +142,142 @@ func TestCreateSubscription(t *testing.T) {
 				reconcilertesting.WithSinkURL("invalid"),
 			},
 			expect: expect{
-				K8sSubscription: []gomegatypes.GomegaMatcher{
+				k8sSubscription: []gomegatypes.GomegaMatcher{
 					reconcilertesting.HaveCondition(conditionInvalidSink("sink URL scheme should be 'http' or 'https'")),
 				},
-				K8sEvents: []v1.Event{eventInvalidSink("Sink URL scheme should be HTTP or HTTPS: invalid")},
+				k8sEvents: []v1.Event{eventInvalidSink("Sink URL scheme should be HTTP or HTTPS: invalid")},
 			},
+		},
+
+		{
+			name: "invalid sink; invalid character",
+			subscriptionOpts: []reconcilertesting.SubscriptionOpt{
+				reconcilertesting.WithFilter(reconcilertesting.EventSource, reconcilertesting.OrderCreatedEventTypeNotClean),
+				reconcilertesting.WithWebhookForNATS(),
+				reconcilertesting.WithSinkURL("http://127.0.0. 1"),
+			},
+			expect: expect{
+				k8sSubscription: []gomegatypes.GomegaMatcher{
+					reconcilertesting.HaveCondition(
+						conditionInvalidSink("not able to parse sink url with error: parse \"http://127.0.0. 1\": invalid character \" \" in host name")),
+				},
+				k8sEvents: []v1.Event{
+					eventInvalidSink("Not able to parse Sink URL with error: parse \"http://127.0.0. 1\": invalid character \" \" in host name")},
+			},
+		},
+
+		{
+			name: "invalid sink; missing suffix 'svc.cluster.local'",
+			subscriptionOpts: []reconcilertesting.SubscriptionOpt{
+				reconcilertesting.WithFilter(reconcilertesting.EventSource, reconcilertesting.OrderCreatedEventTypeNotClean),
+				reconcilertesting.WithWebhookForNATS(),
+				reconcilertesting.WithSinkURL("http://127.0.0.1"),
+			},
+			expect: expect{
+				k8sSubscription: []gomegatypes.GomegaMatcher{
+					reconcilertesting.HaveCondition(
+						conditionInvalidSink("sink does not contain suffix: svc.cluster.local in the URL")),
+				},
+				k8sEvents: []v1.Event{
+					eventInvalidSink("Sink does not contain suffix: svc.cluster.local")},
+			},
+		},
+
+		{
+			name: "invalid sink; too many sub domains",
+			subscriptionOpts: []reconcilertesting.SubscriptionOpt{
+				reconcilertesting.WithFilter(reconcilertesting.EventSource, reconcilertesting.OrderCreatedEventTypeNotClean),
+				reconcilertesting.WithWebhookForNATS(),
+				reconcilertesting.WithSinkURL(fmt.Sprintf("https://%s.%s.%s.svc.cluster.local", "testapp", "testsub", "test")),
+			},
+			expect: expect{
+				k8sSubscription: []gomegatypes.GomegaMatcher{
+					reconcilertesting.HaveCondition(
+						conditionInvalidSink("sink should contain 5 sub-domains: testapp.testsub.test.svc.cluster.local")),
+				},
+				k8sEvents: []v1.Event{
+					eventInvalidSink("Sink should contain 5 sub-domains: testapp.testsub.test.svc.cluster.local")},
+			},
+		},
+
+		{
+			name: "invalid sink; wrong namespace",
+			subscriptionOpts: []reconcilertesting.SubscriptionOpt{
+				reconcilertesting.WithFilter(reconcilertesting.EventSource, reconcilertesting.OrderCreatedEventTypeNotClean),
+				reconcilertesting.WithWebhookForNATS(),
+				reconcilertesting.WithSinkURL(fmt.Sprintf("https://%s.%s.svc.cluster.local", "testapp", "wrong-ns")),
+			},
+			expect: expect{
+				k8sSubscription: []gomegatypes.GomegaMatcher{
+					reconcilertesting.HaveCondition(
+						conditionInvalidSink("namespace of subscription: test and the namespace of subscriber: wrong-ns are different")),
+				},
+				k8sEvents: []v1.Event{
+					eventInvalidSink("natsNamespace of subscription: test and the subscriber: wrong-ns are different")},
+			},
+		},
+
+		{
+			name: "invalid sink; not a valid cluster local service",
+			subscriptionOpts: []reconcilertesting.SubscriptionOpt{
+				reconcilertesting.WithFilter(reconcilertesting.EventSource, reconcilertesting.OrderCreatedEventTypeNotClean),
+				reconcilertesting.WithWebhookForNATS(),
+				reconcilertesting.WithSinkURL(
+					reconcilertesting.ValidSinkURL(ens.subscriberSvc.Namespace, "testapp")),
+			},
+			expect: expect{
+				k8sSubscription: []gomegatypes.GomegaMatcher{
+					reconcilertesting.HaveCondition(
+						conditionInvalidSink("sink is not valid cluster local svc, failed with error: Service \"testapp\" not found")),
+				},
+				k8sEvents: []v1.Event{
+					eventInvalidSink("Sink does not correspond to a valid cluster local svc")},
+			},
+		},
+
+		{
+			name: "valid sink",
+			subscriptionOpts: []reconcilertesting.SubscriptionOpt{
+				reconcilertesting.WithFilter("", reconcilertesting.OrderCreatedEventTypeNotClean),
+				reconcilertesting.WithSinkURL(validSinkURL(ens)),
+			},
+			expect: expect{
+				k8sSubscription: []gomegatypes.GomegaMatcher{
+					reconcilertesting.HaveCondition(conditionValidSubscription("")),
+					reconcilertesting.HaveSubscriptionReady(),
+				},
+			},
+			shouldTestDeletion: true,
+		},
+
+		{
+			name: "valid sink; with port",
+			subscriptionOpts: []reconcilertesting.SubscriptionOpt{
+				reconcilertesting.WithFilter("", reconcilertesting.OrderCreatedEventTypeNotClean),
+				reconcilertesting.WithSinkURL(validSinkURL(ens, ":8080")),
+			},
+			expect: expect{
+				k8sSubscription: []gomegatypes.GomegaMatcher{
+					reconcilertesting.HaveCondition(conditionValidSubscription("")),
+					reconcilertesting.HaveSubscriptionReady(),
+				},
+			},
+			shouldTestDeletion: true,
+		},
+
+		{
+			name: "valid sink; with port and endpoint",
+			subscriptionOpts: []reconcilertesting.SubscriptionOpt{
+				reconcilertesting.WithFilter("", reconcilertesting.OrderCreatedEventTypeNotClean),
+				reconcilertesting.WithSinkURL(validSinkURL(ens, ":8080", "/myEndpoint")),
+			},
+			expect: expect{
+				k8sSubscription: []gomegatypes.GomegaMatcher{
+					reconcilertesting.HaveCondition(conditionValidSubscription("")),
+					reconcilertesting.HaveSubscriptionReady(),
+				},
+			},
+			shouldTestDeletion: true,
 		},
 
 		{
@@ -156,10 +287,10 @@ func TestCreateSubscription(t *testing.T) {
 				reconcilertesting.WithSinkURLFromSvc(ens.subscriberSvc),
 			},
 			expect: expect{
-				K8sSubscription: []gomegatypes.GomegaMatcher{
+				k8sSubscription: []gomegatypes.GomegaMatcher{
 					reconcilertesting.HaveCondition(conditionValidSubscription("")),
 				},
-				NATSSubscription: []gomegatypes.GomegaMatcher{
+				natsSubscription: []gomegatypes.GomegaMatcher{
 					reconcilertesting.BeNotNil(),
 					reconcilertesting.BeValid(),
 					reconcilertesting.HaveSubject(reconcilertesting.OrderCreatedEventType),
@@ -170,12 +301,14 @@ func TestCreateSubscription(t *testing.T) {
 	}
 
 	for _, tc := range testCases {
-		subscription, subscriptionName := createSubscription(ctx, ens, g, tc.subscriptionOpts...)
+		t.Run(tc.name, func(t *testing.T) {
+			subscription, subscriptionName := createSubscription(ctx, g, ens, tc.subscriptionOpts...)
 
-		testSubscriptionOnK8s(ctx, ens, g, subscriptionName, subscription, tc.expect.K8sSubscription...)
-		testEventsOnK8s(ctx, ens, g, tc.expect.K8sEvents...)
-		testSubscriptionOnNATS(ens, subscriptionName, g, tc.expect.NATSSubscription...)
-		testDeletionOnK8s(ctx, ens, subscription, g, tc.shouldTestDeletion)
+			testSubscriptionOnK8s(ctx, g, ens, subscription, subscriptionName, tc.expect.k8sSubscription...)
+			testEventsOnK8s(ctx, g, ens, tc.expect.k8sEvents...)
+			testSubscriptionOnNATS(g, ens, subscriptionName, tc.expect.natsSubscription...)
+			testDeletionOnK8s(ctx, g, ens, subscription, tc.shouldTestDeletion)
+		})
 	}
 }
 
@@ -202,7 +335,7 @@ func TestChangeSubscription(t *testing.T) {
 				reconcilertesting.WithSinkURLFromSvc(ens.subscriberSvc),
 			},
 			expectBefore: expect{
-				K8sSubscription: []gomegatypes.GomegaMatcher{
+				k8sSubscription: []gomegatypes.GomegaMatcher{
 					reconcilertesting.HaveCondition(conditionValidSubscription("")),
 					reconcilertesting.HaveSubsConfiguration(configDefault(ens)),
 				},
@@ -217,7 +350,7 @@ func TestChangeSubscription(t *testing.T) {
 				}
 			},
 			expectAfter: expect{
-				K8sSubscription: []gomegatypes.GomegaMatcher{
+				k8sSubscription: []gomegatypes.GomegaMatcher{
 					reconcilertesting.HaveCondition(conditionValidSubscription("")),
 					reconcilertesting.HaveSubsConfiguration(configDefault(ens)),
 					reconcilertesting.HaveCleanEventTypes([]string{
@@ -237,7 +370,7 @@ func TestChangeSubscription(t *testing.T) {
 				reconcilertesting.WithSinkURLFromSvc(ens.subscriberSvc),
 			},
 			expectBefore: expect{
-				K8sSubscription: []gomegatypes.GomegaMatcher{
+				k8sSubscription: []gomegatypes.GomegaMatcher{
 					reconcilertesting.HaveCondition(conditionValidSubscription("")),
 					reconcilertesting.HaveSubsConfiguration(configDefault(ens)),
 					reconcilertesting.HaveCleanEventTypes([]string{
@@ -253,7 +386,7 @@ func TestChangeSubscription(t *testing.T) {
 				}
 			},
 			expectAfter: expect{
-				K8sSubscription: []gomegatypes.GomegaMatcher{
+				k8sSubscription: []gomegatypes.GomegaMatcher{
 					reconcilertesting.HaveCondition(conditionValidSubscription("")),
 					reconcilertesting.HaveSubsConfiguration(configDefault(ens)),
 					reconcilertesting.HaveCleanEventTypes([]string{
@@ -263,32 +396,65 @@ func TestChangeSubscription(t *testing.T) {
 				},
 			},
 		},
+
+		{
+			name: "clean event types; delete a filter",
+			subscriptionOpts: []reconcilertesting.SubscriptionOpt{
+				reconcilertesting.WithFilter(reconcilertesting.EventSource, uncleanEventType("0")),
+				reconcilertesting.WithFilter(reconcilertesting.EventSource, uncleanEventType("1")),
+				reconcilertesting.WithWebhookForNATS(),
+				reconcilertesting.WithSinkURLFromSvc(ens.subscriberSvc),
+			},
+			expectBefore: expect{
+				k8sSubscription: []gomegatypes.GomegaMatcher{
+					reconcilertesting.HaveCondition(conditionValidSubscription("")),
+					reconcilertesting.HaveSubsConfiguration(configDefault(ens)),
+					reconcilertesting.HaveCleanEventTypes([]string{
+						cleanEventType("0"),
+						cleanEventType("1"),
+					}),
+				},
+			},
+			changeSubscription: func(subscription *eventingv1alpha1.Subscription) {
+				subscription.Spec.Filter.Filters = subscription.Spec.Filter.Filters[:1]
+			},
+			expectAfter: expect{
+				k8sSubscription: []gomegatypes.GomegaMatcher{
+					reconcilertesting.HaveCondition(conditionValidSubscription("")),
+					reconcilertesting.HaveSubsConfiguration(configDefault(ens)),
+					reconcilertesting.HaveCleanEventTypes([]string{
+						cleanEventType("0"),
+					}),
+				},
+			},
+		},
 	}
 
 	for _, tc := range testCases {
-		subscription, subscriptionName := createSubscription(ctx, ens, g, tc.subscriptionOpts...)
+		t.Run(tc.name, func(t *testing.T) {
+			subscription, subscriptionName := createSubscription(ctx, g, ens, tc.subscriptionOpts...)
 
-		testSubscriptionOnK8s(ctx, ens, g, subscriptionName, subscription, tc.expectBefore.K8sSubscription...)
-		testEventsOnK8s(ctx, ens, g, tc.expectBefore.K8sEvents...)
-		testSubscriptionOnNATS(ens, subscriptionName, g, tc.expectBefore.NATSSubscription...)
+			testSubscriptionOnK8s(ctx, g, ens, subscription, subscriptionName, tc.expectBefore.k8sSubscription...)
+			testEventsOnK8s(ctx, g, ens, tc.expectBefore.k8sEvents...)
+			testSubscriptionOnNATS(g, ens, subscriptionName, tc.expectBefore.natsSubscription...)
 
-		tc.changeSubscription(subscription)
-		updateSubscriptionOnK8s(ctx, ens, subscription, g)
+			tc.changeSubscription(subscription)
+			updateSubscriptionOnK8s(ctx, g, ens, subscription)
 
-		testSubscriptionOnK8s(ctx, ens, g, subscriptionName, subscription, tc.expectAfter.K8sSubscription...)
-		testEventsOnK8s(ctx, ens, g, tc.expectAfter.K8sEvents...)
-		testSubscriptionOnNATS(ens, subscriptionName, g, tc.expectAfter.NATSSubscription...)
-		testDeletionOnK8s(ctx, ens, subscription, g, tc.shouldTestDeletion)
+			testSubscriptionOnK8s(ctx, g, ens, subscription, subscriptionName, tc.expectAfter.k8sSubscription...)
+			testEventsOnK8s(ctx, g, ens, tc.expectAfter.k8sEvents...)
+			testSubscriptionOnNATS(g, ens, subscriptionName, tc.expectAfter.natsSubscription...)
+			testDeletionOnK8s(ctx, g, ens, subscription, tc.shouldTestDeletion)
+		})
 	}
 }
 
-func updateSubscriptionOnK8s(ctx context.Context, ens *testEnsemble, subscription *eventingv1alpha1.Subscription, g *gomega.GomegaWithT) {
+func updateSubscriptionOnK8s(ctx context.Context, g *gomega.GomegaWithT, ens *testEnsemble, subscription *eventingv1alpha1.Subscription) {
 	err := ens.k8sClient.Update(ctx, subscription)
 	g.Expect(err).Should(gomega.BeNil())
 }
 
-func createSubscription(ctx context.Context, ens *testEnsemble, g *gomega.GomegaWithT,
-	subscriptionOpts ...reconcilertesting.SubscriptionOpt) (*eventingv1alpha1.Subscription, string) {
+func createSubscription(ctx context.Context, g *gomega.GomegaWithT, ens *testEnsemble, subscriptionOpts ...reconcilertesting.SubscriptionOpt) (*eventingv1alpha1.Subscription, string) {
 	subscriptionName := fmt.Sprintf(subscriptionNameFormat, ens.testID)
 	ens.testID++
 	subscription := reconcilertesting.NewSubscription(subscriptionName, ens.subscriberSvc.Namespace, subscriptionOpts...)
@@ -296,26 +462,34 @@ func createSubscription(ctx context.Context, ens *testEnsemble, g *gomega.Gomega
 	return subscription, subscriptionName
 }
 
-func testSubscriptionOnK8s(ctx context.Context, ens *testEnsemble, g *gomega.GomegaWithT, subscriptionName string, subscription *eventingv1alpha1.Subscription, expectations ...gomegatypes.GomegaMatcher) {
+func testSubscriptionOnK8s(ctx context.Context, g *gomega.GomegaWithT, ens *testEnsemble, subscription *eventingv1alpha1.Subscription, subscriptionName string, expectations ...gomegatypes.GomegaMatcher) {
 	subExpectations := append(expectations, reconcilertesting.HaveSubscriptionName(subscriptionName))
 	getSubscriptionOnK8S(ctx, ens, subscription, g).Should(gomega.And(subExpectations...))
 }
 
-func testEventsOnK8s(ctx context.Context, ens *testEnsemble, g *gomega.GomegaWithT, expectations ...v1.Event) {
+func testEventsOnK8s(ctx context.Context, g *gomega.GomegaWithT, ens *testEnsemble, expectations ...v1.Event) {
 	for _, event := range expectations { //todo replace with gomega.And(events)
 		getK8sEvents(ctx, ens, g).Should(reconcilertesting.HaveEvent(event))
 	}
 }
 
-func testSubscriptionOnNATS(ens *testEnsemble, subscriptionName string, g *gomega.GomegaWithT, expectations ...gomegatypes.GomegaMatcher) {
+func testSubscriptionOnNATS(g *gomega.GomegaWithT, ens *testEnsemble, subscriptionName string, expectations ...gomegatypes.GomegaMatcher) {
 	getSubscriptionFromNATS(ens.natsBackend, subscriptionName, g).Should(gomega.And(expectations...))
 }
 
-func testDeletionOnK8s(ctx context.Context, ens *testEnsemble, subscription *eventingv1alpha1.Subscription, g *gomega.GomegaWithT, shouldTest bool) {
+func testDeletionOnK8s(ctx context.Context, g *gomega.GomegaWithT, ens *testEnsemble, subscription *eventingv1alpha1.Subscription, shouldTest bool) {
 	if shouldTest {
 		g.Expect(ens.k8sClient.Delete(ctx, subscription)).Should(gomega.BeNil())
 		isSubscriptionDeleted(ctx, ens, subscription, g).Should(reconcilertesting.HaveNotFoundSubscription(true))
 	}
+}
+
+func validSinkURL(ens *testEnsemble, additions ...string) string {
+	url := reconcilertesting.ValidSinkURL(ens.subscriberSvc.Namespace, ens.subscriberSvc.Name)
+	for _, a := range additions {
+		url = fmt.Sprintf("%s%s", url, a)
+	}
+	return url
 }
 
 func uncleanEventType(suffix string) string {
