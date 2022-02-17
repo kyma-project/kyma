@@ -63,6 +63,7 @@ func (cc *compassConnector) establishConnection(connectorURL, token, requestID s
 	}
 
 	logger.Infof("Fetching configuration")
+	logger.Infof("test line")
 	configuration, err := tokenSecuredConnectorClient.Configuration(connectorTokenHeader(token, requestID))
 	if err != nil {
 		return EstablishedConnection{}, errors.Wrap(err, "Failed to fetch configuration")
@@ -75,6 +76,7 @@ func (cc *compassConnector) establishConnection(connectorURL, token, requestID s
 	}
 
 	logger.Infof("Signing CSR")
+	logger.Infof("test line")
 	certResponse, err := tokenSecuredConnectorClient.SignCSR(csr, connectorTokenHeader(configuration.Token.Token, requestID))
 	if err != nil {
 		return EstablishedConnection{}, errors.Wrap(err, "Failed to sign CSR")

@@ -41,6 +41,7 @@ func (l *logger) Start(ctx context.Context) error {
 			l.log()
 		case <-ctx.Done():
 			log.Info("Logging stopped.")
+			log.Info("Test line")
 			return nil
 		}
 	}
@@ -49,7 +50,7 @@ func (l *logger) Start(ctx context.Context) error {
 func (l *logger) log() {
 	clusterInfo, err := l.fetchClusterInfo()
 	if err != nil {
-		log.Error(errors.Wrap(err, "failed to fetch cluster info"))
+		log.Error(errors.Wrap(err, "failed to fetch cluster info test test test"))
 		return
 	}
 

@@ -27,6 +27,7 @@ import (
 
 func main() {
 	log.Infoln("Starting Runtime Agent")
+	log.Info("test line")
 
 	var options Config
 	err := envconfig.InitWithPrefix(&options, "APP")
@@ -40,6 +41,7 @@ func main() {
 	exitOnError(err, "Failed to set up client config")
 
 	log.Info("Migrating certificate if needed")
+	log.Info("test line")
 	k8sResourceClientSets, err := k8sResourceClients(cfg)
 	exitOnError(err, "Failed to initialize K8s resource clients")
 
@@ -80,6 +82,7 @@ func main() {
 	connectionDataCache.AddSubscriber(clientsProvider.UpdateConnectionData)
 
 	log.Infoln("Setting up Director Proxy Service")
+	log.Info("test line")
 	directorProxy := director.NewProxy(options.DirectorProxy)
 	err = mgr.Add(directorProxy)
 	exitOnError(err, "Failed to create director proxy")
@@ -132,6 +135,7 @@ func migrateSecret(secretRepo secrets.Repository, sourceSecret, targetSecret typ
 	keys, err := unmarshallKeysList(keysToInclude)
 	if err != nil {
 		log.Errorf("Failed to read secret keys to be migrated")
+		log.Info("test line")
 		return err
 	}
 
@@ -177,6 +181,7 @@ func createSynchronisationService(k8sResourceClients *k8sResourceClientSets, opt
 }
 
 func exitOnError(err error, context string) {
+	log.Info("test line")
 	if err != nil {
 		log.Fatal(errors.Wrap(err, context))
 	}

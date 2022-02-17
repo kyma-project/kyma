@@ -323,6 +323,7 @@ func (s *crSupervisor) setConnectionFailedStatus(connectionCR *v1alpha1.CompassC
 
 func (s *crSupervisor) setConnectionSynchronizedStatus(connectionCR *v1alpha1.CompassConnection, attemptTime metav1.Time) {
 	s.log.Infof("Setting Compass Connection to Synchronized state")
+	s.log.Infof("Test line")
 	connectionCR.Status.State = v1alpha1.Synchronized
 	connectionCR.Status.SynchronizationStatus = &v1alpha1.SynchronizationStatus{
 		LastAttempt:               attemptTime,
