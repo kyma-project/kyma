@@ -43,7 +43,6 @@ import (
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/application/applicationtest"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/application/fake"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/constants"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/config"
 	bebtypes "github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/types"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers"
@@ -1203,7 +1202,7 @@ func ensureSubscriberSvcCreated(ctx context.Context, svc *v1.Service) {
 func getBEBSubscriptionCreationRequests(bebSubscriptions []bebtypes.Subscription) AsyncAssertion {
 	return Eventually(func() []bebtypes.Subscription {
 		for req, sub := range beb.Requests.GetSubscriptions() {
-			if reconcilertesting.IsBEBSubscriptionCreate(req, *beb.BEBConfig) {
+			if reconcilertesting.IsBEBSubscriptionCreate(req) {
 				bebSubscriptions = append(bebSubscriptions, sub)
 			}
 		}
@@ -1327,6 +1326,7 @@ var (
 	testEnv    *envtest.Environment
 	beb        *reconcilertesting.BEBMock
 	nameMapper handlers.NameMapper
+	mock       *reconcilertesting.BEBMock
 )
 
 func TestAPIs(t *testing.T) {
@@ -1364,7 +1364,7 @@ var _ = BeforeSuite(func(done Done) {
 	Expect(err).NotTo(HaveOccurred())
 	// +kubebuilder:scaffold:scheme
 
-	mock := startBEBMock()
+	mock = startBEBMock()
 	// client, err := client.New()
 	// Source: https://book.kubebuilder.io/cronjob-tutorial/writing-tests.html
 	syncPeriod := time.Second * 2
@@ -1401,7 +1401,7 @@ var _ = BeforeSuite(func(done Done) {
 
 	nameMapper = handlers.NewBEBSubscriptionNameMapper(domain, handlers.MaxBEBSubscriptionNameLength)
 
-	err = NewReconciler(context.Background(), k8sManager.GetClient(), applicationLister, k8sManager.GetCache(), defaultLogger,
+	err = NewReconciler(context.Background(), k8sManager.GetClient(), applicationLister, defaultLogger,
 		k8sManager.GetEventRecorderFor("eventing-controller"), envConf, credentials, nameMapper).SetupUnmanaged(k8sManager)
 	Expect(err).ToNot(HaveOccurred())
 
@@ -1420,22 +1420,15 @@ var _ = BeforeSuite(func(done Done) {
 var _ = AfterSuite(func() {
 	By("tearing down the test environment")
 	err := testEnv.Stop()
+	mock.Stop()
 	Expect(err).ToNot(HaveOccurred())
 })
 
 // startBEBMock starts the beb mock and configures the controller process to use it
 func startBEBMock() *reconcilertesting.BEBMock {
 	By("Preparing BEB Mock")
-	bebConfig := &config.Config{}
-	beb = reconcilertesting.NewBEBMock(bebConfig)
-	bebURI := beb.Start()
-	logf.Log.Info("beb mock listening at", "address", bebURI)
-	tokenURL := fmt.Sprintf("%s%s", bebURI, reconcilertesting.TokenURLPath)
-	messagingURL := fmt.Sprintf("%s%s", bebURI, reconcilertesting.MessagingURLPath)
-	beb.TokenURL = tokenURL
-	beb.MessagingURL = messagingURL
-	bebConfig = config.GetDefaultConfig(messagingURL)
-	beb.BEBConfig = bebConfig
+	beb = reconcilertesting.NewBEBMock()
+	beb.Start()
 	return beb
 }
 
@@ -1497,7 +1490,7 @@ func countBEBRequests(subscriptionName string) (countGet, countPost, countDelete
 func wasSubscriptionCreated(givenSubscription *eventingv1alpha1.Subscription) func() bool {
 	return func() bool {
 		for request, name := range beb.Requests.GetSubscriptionNames() {
-			if reconcilertesting.IsBEBSubscriptionCreate(request, *beb.BEBConfig) {
+			if reconcilertesting.IsBEBSubscriptionCreate(request) {
 				return nameMapper.MapSubscriptionName(givenSubscription) == name
 			}
 		}

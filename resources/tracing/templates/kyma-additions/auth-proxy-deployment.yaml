@@ -5,6 +5,8 @@ metadata:
   name: {{ include "jaeger-operator.fullname" . }}-auth-proxy
   labels:
 {{ include "jaeger-operator.labels" . | indent 4 }}
+  annotations:
+    reconciler.kyma-project.io/ignore-pod-state: "true"
 spec:
   replicas: {{ .Values.authProxy.replicaCount }}
   selector:

@@ -313,6 +313,7 @@ func getNATSEnvVars(publisherConfig env.PublisherConfig) []v1.EnvVar {
 				},
 			},
 		},
+		{Name: "ENABLE_JETSTREAM_BACKEND", Value: strconv.FormatBool(publisherConfig.EnableJetStreamBackend)},
 	}
 }
 

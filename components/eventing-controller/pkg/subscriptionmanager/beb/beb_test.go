@@ -12,7 +12,7 @@ import (
 
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 	"github.com/kyma-project/kyma/components/eventing-controller/logger"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/config"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/client"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/types"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers"
@@ -94,7 +94,8 @@ func TestCleanup(t *testing.T) {
 	g.Expect(err).To(gomega.BeNil())
 
 	//  check that the susbcription exist in bebMock
-	getSubscriptionURL := fmt.Sprintf(bebMock.BEBConfig.GetURLFormat, nameMapper.MapSubscriptionName(subscription))
+	getSubscriptionURL := fmt.Sprintf(client.GetURLFormat, nameMapper.MapSubscriptionName(subscription))
+	getSubscriptionURL = bebMock.MessagingURL + getSubscriptionURL
 	resp, err := http.Get(getSubscriptionURL) //nolint:gosec
 	g.Expect(err).To(gomega.BeNil())
 	g.Expect(resp.StatusCode).Should(gomega.Equal(http.StatusOK))
@@ -132,18 +133,15 @@ func TestCleanup(t *testing.T) {
 	unstructuredAPIRuleAfterCleanup, err := bebSubMgr.Client.Resource(handlers.APIRuleGroupVersionResource()).Namespace("test").Get(ctx, apiRule.Name, metav1.GetOptions{})
 	g.Expect(err).ToNot(gomega.BeNil())
 	g.Expect(unstructuredAPIRuleAfterCleanup).To(gomega.BeNil())
+	bebMock.Stop()
 
 }
 
 func startBEBMock() *controllertesting.BEBMock {
-	bebConfig := &config.Config{}
-	beb := controllertesting.NewBEBMock(bebConfig)
-	bebURI := beb.Start()
-	tokenURL := fmt.Sprintf("%s%s", bebURI, controllertesting.TokenURLPath)
-	messagingURL := fmt.Sprintf("%s%s", bebURI, controllertesting.MessagingURLPath)
-	beb.TokenURL = tokenURL
-	beb.MessagingURL = messagingURL
-	bebConfig = config.GetDefaultConfig(messagingURL)
-	beb.BEBConfig = bebConfig
+	// TODO(k15r): FIX THIS HACK
+	// this is a very evil hack for the time being, until we refactored the config properly
+	// it sets the URLs to relative paths, that can easily be used in the mux.
+	beb := controllertesting.NewBEBMock()
+	beb.Start()
 	return beb
 }

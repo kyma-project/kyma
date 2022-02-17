@@ -1,8 +1,13 @@
 {{- /*
+    Customization: Since there is no option to disable one single dashboard, rendering is disabled for this dashboard manually.
+  */ -}}
+{{- /*
 Generated from 'apiserver' from https://raw.githubusercontent.com/prometheus-operator/kube-prometheus/main/manifests/grafana-dashboardDefinitions.yaml
 Do not change in-place! In order to change this file first read following link:
 https://github.com/prometheus-community/helm-charts/tree/main/charts/kube-prometheus-stack/hack
 */ -}}
+{{- $disable := "true" }}
+{{- if eq $disable "false" }}
 {{- $kubeTargetVersion := default .Capabilities.KubeVersion.GitVersion .Values.kubeTargetVersionOverride }}
 {{- if and (or .Values.grafana.enabled .Values.grafana.forceDeployDashboards) (semverCompare ">=1.14.0-0" $kubeTargetVersion) (semverCompare "<9.9.9-9" $kubeTargetVersion) .Values.grafana.defaultDashboardsEnabled .Values.kubeApiServer.enabled }}
 apiVersion: v1
@@ -1769,4 +1774,5 @@ data:
         "uid": "09ec8aa1e996d6ffcd6817bbaff4db1b",
         "version": 0
     }
+{{- end }}
 {{- end }}

@@ -46,3 +46,8 @@ spec:
             {{- toYaml .Values.readinessProbe | nindent 12 }}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
+          env:
+            - name: APP_LOG_FORMAT
+              value: {{ .Values.global.log.format | quote }}
+            - name: APP_LOG_LEVEL
+              value: {{ .Values.global.log.level | quote }}

@@ -1,13 +1,11 @@
 package handlers
 
 import (
-	"fmt"
 	"testing"
 
 	kymalogger "github.com/kyma-project/kyma/common/logging/logger"
 	. "github.com/onsi/gomega"
 
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/config"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/types"
 
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
@@ -62,6 +60,7 @@ func Test_SyncBEBSubscription(t *testing.T) {
 	changed, err := beb.SyncSubscription(subscription, &Cleaner{}, apiRule)
 	g.Expect(err).To(BeNil())
 	g.Expect(changed).To(BeTrue())
+	bebMock.Stop()
 }
 
 // fixtureValidSubscription returns a valid subscription
@@ -75,15 +74,8 @@ func fixtureValidSubscription(name, namespace string) *eventingv1alpha1.Subscrip
 }
 
 func startBEBMock() *controllertesting.BEBMock {
-	bebConfig := &config.Config{}
-	beb := controllertesting.NewBEBMock(bebConfig)
-	bebURI := beb.Start()
-	tokenURL := fmt.Sprintf("%s%s", bebURI, controllertesting.TokenURLPath)
-	messagingURL := fmt.Sprintf("%s%s", bebURI, controllertesting.MessagingURLPath)
-	beb.TokenURL = tokenURL
-	beb.MessagingURL = messagingURL
-	bebConfig = config.GetDefaultConfig(messagingURL)
-	beb.BEBConfig = bebConfig
+	beb := controllertesting.NewBEBMock()
+	beb.Start()
 	return beb
 }
 

@@ -71,6 +71,8 @@ spec:
             value: "json"
           - name: APP_LOG_LEVEL
             value: "debug"
+          - name: ENABLE_JETSTREAM_BACKEND
+            value: "false"
         resources:
           limits:
             cpu: 500m
