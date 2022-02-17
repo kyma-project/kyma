@@ -14,12 +14,12 @@ Make sure that the following conditions are met:
 
   1. Export the credentials of your OAuth2Client as environment variables:
 
+      > **NOTE:** Export the **CLIENT_NAMESPACE** and **CLIENT_NAME** variables before you proceed with step 1.
+      
       ```bash
       export CLIENT_ID="$(kubectl get secret -n $CLIENT_NAMESPACE $CLIENT_NAME -o jsonpath='{.data.client_id}' | base64 --decode)"
       export CLIENT_SECRET="$(kubectl get secret -n $CLIENT_NAMESPACE $CLIENT_NAME -o jsonpath='{.data.client_secret}' | base64 --decode)"
       ```
-
-      > **NOTE:** Export the **CLIENT_NAMESPACE** and **CLIENT_NAME** variables before you proceed with step 1.
 
   2. Encode your client credentials and export them as an environment variable:
 
