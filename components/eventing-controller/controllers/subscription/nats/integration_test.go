@@ -70,6 +70,7 @@ func TestUnavailableNATSServer(t *testing.T) {
 	ctx := context.Background()
 	g := gomega.NewGomegaWithT(t)
 	ens := setupTestEnsemble(ctx, reconcilertesting.EventTypePrefix, g, natsPort, 7070)
+	defer ens.cancel()
 
 	subscription, subscriptionName := createSubscription(ctx, g, ens,
 		reconcilertesting.WithFilter("", uncleanEventType("")),
@@ -92,7 +93,7 @@ func TestUnavailableNATSServer(t *testing.T) {
 func TestCreateSubscription(t *testing.T) {
 	ctx := context.Background()
 	g := gomega.NewGomegaWithT(t)
-	ens := setupTestEnsemble(ctx, reconcilertesting.EventTypePrefix, g, 4221, 7071)
+	ens := setupTestEnsemble(ctx, reconcilertesting.EventTypePrefix, g, 4225, 7075)
 	defer ens.cancel()
 
 	var testCases = []struct {
@@ -123,7 +124,7 @@ func TestCreateSubscription(t *testing.T) {
 		},
 
 		{
-			name: "empty event type",
+			name: "filter with empty event type",
 			subscriptionOpts: []reconcilertesting.SubscriptionOpt{
 				reconcilertesting.WithFilter(reconcilertesting.EventSource, ""),
 				reconcilertesting.WithWebhookForNATS(),
@@ -134,7 +135,7 @@ func TestCreateSubscription(t *testing.T) {
 					reconcilertesting.HaveCondition(
 						eventingv1alpha1.MakeCondition(
 							eventingv1alpha1.ConditionSubscriptionActive,
-							eventingv1alpha1.ConditionReasonNATSSubscriptionActive,
+							eventingv1alpha1.ConditionReasonNATSSubscriptionNotActive,
 							v1.ConditionFalse, nats.ErrBadSubject.Error(),
 						),
 					),
@@ -319,11 +320,11 @@ func TestCreateSubscription(t *testing.T) {
 	}
 }
 
-//TestCreateSubscription tests if existing subscriptions are reconciled properly after getting changed.
+//TestChangeSubscription tests if existing subscriptions are reconciled properly after getting changed.
 func TestChangeSubscription(t *testing.T) {
 	ctx := context.Background()
 	g := gomega.NewGomegaWithT(t)
-	ens := setupTestEnsemble(ctx, reconcilertesting.EventTypePrefix, g, 4222, 7072)
+	ens := setupTestEnsemble(ctx, reconcilertesting.EventTypePrefix, g, 4224, 7074)
 	defer ens.cancel()
 
 	var testCases = []struct {
@@ -526,12 +527,13 @@ func TestChangeSubscription(t *testing.T) {
 	}
 }
 
-//TestUnavailableNATSServer tests if a subscription is reconciled properly if the NATS backend is unavailable.
+// TestEmptyEventTypePrefix tests if a subscription is reconciled properly if the NATS backend is unavailable.
 func TestEmptyEventTypePrefix(t *testing.T) {
-	natsPort := 4224
+	natsPort := 4223
 	ctx := context.Background()
 	g := gomega.NewGomegaWithT(t)
-	ens := setupTestEnsemble(ctx, reconcilertesting.EventTypePrefixEmpty, g, natsPort, 7074)
+	ens := setupTestEnsemble(ctx, reconcilertesting.EventTypePrefixEmpty, g, natsPort, 7073)
+	defer ens.cancel()
 
 	subscription, subscriptionName := createSubscription(ctx, g, ens,
 		reconcilertesting.WithFilter("", reconcilertesting.OrderCreatedEventTypeNotCleanPrefixEmpty),
@@ -627,7 +629,7 @@ func configDefault(maxInFlightMsg int) *eventingv1alpha1.SubscriptionConfig {
 func conditionInvalidSink(msg string) eventingv1alpha1.Condition {
 	return eventingv1alpha1.MakeCondition(
 		eventingv1alpha1.ConditionSubscriptionActive,
-		eventingv1alpha1.ConditionReasonNATSSubscriptionActive,
+		eventingv1alpha1.ConditionReasonNATSSubscriptionNotActive,
 		v1.ConditionFalse, msg)
 }
 

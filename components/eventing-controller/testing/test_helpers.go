@@ -2,6 +2,7 @@ package testing
 
 import (
 	"fmt"
+	"net"
 	"net/http"
 
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
@@ -64,6 +65,18 @@ const (
 )
 
 type APIRuleOption func(r *apigatewayv1alpha1.APIRule)
+
+func GetFreePort() (port int, err error) {
+	var a *net.TCPAddr
+	if a, err = net.ResolveTCPAddr("tcp", "localhost:0"); err == nil {
+		var l *net.TCPListener
+		if l, err = net.ListenTCP("tcp", a); err == nil {
+			defer l.Close()
+			return l.Addr().(*net.TCPAddr).Port, nil
+		}
+	}
+	return
+}
 
 // NewAPIRule returns a valid APIRule
 func NewAPIRule(subscription *eventingv1alpha1.Subscription, opts ...APIRuleOption) *apigatewayv1alpha1.APIRule {
