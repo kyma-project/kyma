@@ -19,6 +19,8 @@ Make sure that the following conditions are met:
       export CLIENT_SECRET="$(kubectl get secret -n $CLIENT_NAMESPACE $CLIENT_NAME -o jsonpath='{.data.client_secret}' | base64 --decode)"
       ```
 
+      > **NOTE:** Export the **CLIENT_NAMESPACE** and **CLIENT_NAME** variables before you proceed with step 1.
+
   2. Encode your client credentials and export them as an environment variable:
 
       ```bash
@@ -28,7 +30,7 @@ Make sure that the following conditions are met:
   3. Check the access token status:
 
       ```bash
-      curl -X POST "https://oauth2.{DOMAIN}/oauth2/introspect" -H "Authorization: Basic $ENCODED_CREDENTIALS" -F "token={ACCESS_TOKEN}"
+      curl -X POST "https://oauth2.{CLUSTER_DOMAIN}/oauth2/introspect" -H "Authorization: Basic $ENCODED_CREDENTIALS" -F "token={ACCESS_TOKEN}"
       ```
 
   4. Generate a [new access token](../../03-tutorials/00-api-exposure/apix-03-expose-and-secure-service.md#register-an-oauth2-client-and-get-tokens) if needed.
@@ -83,7 +85,7 @@ Make sure that the following conditions are met:
       2020-05-04T12:19:04.673Z  INFO  controller-runtime.controller Starting workers  {"controller": "oauth2client", "worker count": 1}
       2020-05-04T12:26:30.819Z  INFO  controllers.OAuth2Client  using default client
       2020-05-04T12:26:30.835Z  INFO  controllers.OAuth2Client  using default client
-      # This log entry informs that a client has been created, and should be visible within hydra
+      # This log entry informs us that a client has been created, and should be visible within Hydra
       2020-05-04T12:26:31.468Z  DEBUG controller-runtime.controller Successfully Reconciled {"controller": "oauth2client", "request": "test-ns/test-client"}
       ```
 
