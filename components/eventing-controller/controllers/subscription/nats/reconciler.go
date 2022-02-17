@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/url"
 	"os"
+	"reflect"
 	"strings"
 
 	"github.com/nats-io/nats.go"
@@ -46,6 +47,7 @@ type Reconciler struct {
 	Backend          handlers.MessagingBackend
 	logger           *logger.Logger
 	recorder         record.EventRecorder
+	subsConfig       env.DefaultSubscriptionConfig
 	eventTypeCleaner eventtype.Cleaner
 	sinkValidator
 	// This channel is used to enqueue a reconciliation request for a subscription
@@ -70,6 +72,7 @@ func NewReconciler(ctx context.Context, client client.Client, applicationLister 
 		Client:              client,
 		logger:              logger,
 		recorder:            recorder,
+		subsConfig:          subsCfg,
 		eventTypeCleaner:    eventtype.NewCleaner(cfg.EventTypePrefix, applicationLister, logger),
 		sinkValidator:       defaultSinkValidator,
 		customEventsChannel: make(chan event.GenericEvent),
@@ -197,10 +200,20 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 		return ctrl.Result{}, err
 	}
 
+	// update the cleanEventTypes and config values in the subscription, if changed
+	statusChanged, err := r.syncInitialStatus(subscription, log)
+	if err != nil {
+		log.Errorw("sync initial status failed", "error", err)
+		if syncErr := r.syncSubscriptionStatus(ctx, subscription, false, statusChanged, err.Error()); err != nil {
+			return ctrl.Result{}, syncErr
+		}
+		return ctrl.Result{}, err
+	}
+
 	// Check for valid sink
 	if err := r.sinkValidator(ctx, r, subscription); err != nil {
 		log.Errorw("sink URL validation failed", "error", err)
-		if syncErr := r.syncSubscriptionStatus(ctx, subscription, false, false, err.Error()); err != nil {
+		if syncErr := r.syncSubscriptionStatus(ctx, subscription, false, statusChanged, err.Error()); err != nil {
 			return ctrl.Result{}, syncErr
 		}
 		// No point in reconciling as the sink is invalid, return latest error to requeue the reconciliation request
@@ -208,10 +221,10 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 	}
 
 	// Synchronize Kyma subscription to NATS backend
-	subscriptionStatusChanged, syncErr := r.Backend.SyncSubscription(subscription, r.eventTypeCleaner)
+	_, syncErr := r.Backend.SyncSubscription(subscription, r.eventTypeCleaner)
 	if syncErr != nil {
 		log.Errorw("sync subscription failed", "error", syncErr)
-		if err := r.syncSubscriptionStatus(ctx, subscription, false, false, syncErr.Error()); err != nil {
+		if err := r.syncSubscriptionStatus(ctx, subscription, false, statusChanged, syncErr.Error()); err != nil {
 			return ctrl.Result{}, err
 		}
 		return ctrl.Result{}, syncErr
@@ -219,11 +232,31 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 	log.Debug("create NATS subscriptions succeeded")
 
 	// Update status
-	if err := r.syncSubscriptionStatus(ctx, subscription, true, subscriptionStatusChanged, ""); err != nil {
+	if err := r.syncSubscriptionStatus(ctx, subscription, true, statusChanged, ""); err != nil {
 		return checkIsConflict(err)
 	}
 
 	return ctrl.Result{}, nil
+}
+
+// syncInitialStatus keeps the latest cleanEventTypes and Config in the subscription
+func (r *Reconciler) syncInitialStatus(subscription *eventingv1alpha1.Subscription, log *zap.SugaredLogger) (bool, error) {
+	statusChanged := false
+	cleanEventTypes, err := handlers.GetCleanSubjects(subscription, r.eventTypeCleaner)
+	if err != nil {
+		log.Errorw("get clean subject failed", "error", err)
+		return false, err
+	}
+	if !reflect.DeepEqual(subscription.Status.CleanEventTypes, cleanEventTypes) {
+		subscription.Status.CleanEventTypes = cleanEventTypes
+		statusChanged = true
+	}
+	subscriptionConfig := eventingv1alpha1.MergeSubsConfigs(subscription.Spec.Config, &r.subsConfig)
+	if subscription.Status.Config == nil || !reflect.DeepEqual(subscriptionConfig, subscription.Status.Config) {
+		subscription.Status.Config = subscriptionConfig
+		statusChanged = true
+	}
+	return statusChanged, nil
 }
 
 // handleSubscriptionDeletion deletes the NATS subscription and removes its finalizer if it is set.
@@ -265,11 +298,13 @@ func (r *Reconciler) syncSubscriptionStatus(ctx context.Context, sub *eventingv1
 	conditionContained := false
 	conditionsUpdated := false
 	conditionStatus := corev1.ConditionFalse
+	conditionReason := eventingv1alpha1.ConditionReasonNATSSubscriptionNotActive
 	if isNatsSubReady {
 		conditionStatus = corev1.ConditionTrue
+		conditionReason = eventingv1alpha1.ConditionReasonNATSSubscriptionActive
 	}
 	condition := eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionSubscriptionActive,
-		eventingv1alpha1.ConditionReasonNATSSubscriptionActive, conditionStatus, message)
+		conditionReason, conditionStatus, message)
 	for _, c := range sub.Status.Conditions {
 		var chosenCondition eventingv1alpha1.Condition
 		if c.Type == condition.Type {
