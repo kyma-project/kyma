@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
+
 	v1 "k8s.io/api/core/v1"
 
 	k8sresource "k8s.io/apimachinery/pkg/api/resource"
@@ -34,9 +36,7 @@ const (
 	EventTypePrefix                          = "prefix"
 	EventTypePrefixEmpty                     = ""
 	OrderCreatedV1Event                      = "order.created.v1"
-	OrderUpdatedV1Event                      = "order.updated.v1"
 	OrderCreatedEventType                    = EventTypePrefix + "." + ApplicationName + "." + OrderCreatedV1Event
-	OrderUpdatedEventType                    = EventTypePrefix + "." + ApplicationName + "." + OrderUpdatedV1Event
 	OrderCreatedEventTypeNotClean            = EventTypePrefix + "." + ApplicationNameNotClean + "." + OrderCreatedV1Event
 	OrderCreatedEventTypePrefixEmpty         = ApplicationName + "." + OrderCreatedV1Event
 	OrderCreatedEventTypeNotCleanPrefixEmpty = ApplicationNameNotClean + "." + OrderCreatedV1Event
@@ -57,14 +57,6 @@ const (
 	StructuredCloudEvent = `{
            "id":"` + EventID + `",
            "type":"` + OrderCreatedEventType + `",
-           "specversion":"` + EventSpecVersion + `",
-           "source":"` + EventSource + `",
-           "data":"` + EventData + `"
-        }`
-
-	StructuredCloudEventUpdated = `{
-           "id":"` + EventID + `",
-           "type":"` + OrderUpdatedEventType + `",
            "specversion":"` + EventSpecVersion + `",
            "source":"` + EventSource + `",
            "data":"` + EventData + `"
@@ -129,12 +121,6 @@ func WithPath() APIRuleOption {
 				},
 			},
 		}
-	}
-}
-
-func WithStatusReady() APIRuleOption {
-	return func(r *apigatewayv1alpha1.APIRule) {
-		MarkReady(r)
 	}
 }
 
@@ -238,6 +224,24 @@ func WithFakeSubscriptionStatus() SubscriptionOpt {
 				Message: "foo-message",
 			},
 		}
+	}
+}
+
+func WithStatusConfig(defaultConfig env.DefaultSubscriptionConfig) SubscriptionOpt {
+	return func(s *eventingv1alpha1.Subscription) {
+		s.Status.Config = eventingv1alpha1.MergeSubsConfigs(nil, &defaultConfig)
+	}
+}
+
+func WithSpecConfig(defaultConfig env.DefaultSubscriptionConfig) SubscriptionOpt {
+	return func(s *eventingv1alpha1.Subscription) {
+		s.Spec.Config = eventingv1alpha1.MergeSubsConfigs(nil, &defaultConfig)
+	}
+}
+
+func WithStatusCleanEventTypes(cleanEventTypes []string) SubscriptionOpt {
+	return func(sub *eventingv1alpha1.Subscription) {
+		sub.Status.CleanEventTypes = cleanEventTypes
 	}
 }
 
