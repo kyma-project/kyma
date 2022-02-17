@@ -33,13 +33,19 @@ const (
 
 type Source struct {
 	Artifact *Artifact `json:"artifact"`
-	CRD      *Crd      `json:"crd"`
-	Inline   *Inline   `json:"inline"`
+	//CRD           *Crd      `json:"crd"`
+	GitRepository *GitRepository `json:"gitRepository"`
+	Inline        *Inline        `json:"inline"`
 }
 
 type Inline struct {
 	Source       string `json:"source"`
 	Dependencies string `json:"dependencies"`
+}
+
+type GitRepository struct {
+	Name      string `json:"name"`
+	Namespace string `json:"namespace"`
 }
 
 type Crd struct {
@@ -60,6 +66,11 @@ type Artifact struct {
 
 	//+optional
 	//RetryInterval *time.Duration `json:"retryInterval"`
+}
+
+type ConfigMapSelector struct {
+	Name      string `json:"name"`
+	Namespace string `json:"namespace"`
 }
 
 type AuthType string
@@ -96,8 +107,12 @@ type FunctionSpec struct {
 	// Important: Run "make" to regenerate code after modifying this file
 
 	// Foo is an example field of Function. Edit function_types.go to remove/update
-	Runtime `json:"runtime"`
-	Source  `json:"source"`
+	Runtime string `json:"runtime"`
+
+	//+optional
+	CustomRuntimeConfiguration *ConfigMapSelector `json:"customRuntimeConfiguration"`
+
+	Source `json:"source"`
 
 	// Env defines an array of key value pairs need to be used as env variable for a function
 	Env []v1.EnvVar `json:"env,omitempty"`
