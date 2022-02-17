@@ -542,7 +542,7 @@ func MultipleDefaultConditions() []eventingv1alpha1.Condition {
 	return []eventingv1alpha1.Condition{DefaultCondition("One"), DefaultCondition("Two")}
 }
 
-func DefaultCondition(msg string) eventingv1alpha1.Condition{
+func DefaultCondition(msg string) eventingv1alpha1.Condition {
 	return eventingv1alpha1.MakeCondition(
 		eventingv1alpha1.ConditionSubscriptionActive,
 		eventingv1alpha1.ConditionReasonNATSSubscriptionActive,

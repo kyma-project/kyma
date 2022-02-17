@@ -25,7 +25,7 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 )
 
-const namespaceName          = "test"
+const namespaceName = "test"
 
 var testEnv *envtest.Environment
 
