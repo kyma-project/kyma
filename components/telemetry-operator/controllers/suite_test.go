@@ -20,7 +20,6 @@ import (
 	"path/filepath"
 	"testing"
 
-	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
 
 	. "github.com/onsi/ginkgo"
@@ -91,30 +90,16 @@ var _ = BeforeSuite(func() {
 	})
 	Expect(err).ToNot(HaveOccurred())
 
-	err = (&LogPipelineReconciler{
-		Client: k8sManager.GetClient(),
-		Scheme: k8sManager.GetScheme(),
-		FluentBitSectionsConfigMap: types.NamespacedName{
-			Name:      FluentBitSectionsConfigMap,
-			Namespace: ControllerNamespace,
-		},
-		FluentBitParsersConfigMap: types.NamespacedName{
-			Name:      FluentBitParsersConfigMap,
-			Namespace: ControllerNamespace,
-		},
-		FluentBitDaemonSet: types.NamespacedName{
-			Name:      FluentBitDaemonSet,
-			Namespace: ControllerNamespace,
-		},
-		FluentBitEnvSecret: types.NamespacedName{
-			Name:      FluentBitEnvSecret,
-			Namespace: ControllerNamespace,
-		},
-		FluentBitFilesConfigMap: types.NamespacedName{
-			Name:      FluentBitFilesConfigMap,
-			Namespace: ControllerNamespace,
-		},
-	}).SetupWithManager(k8sManager)
+	reconciler := NewLogPipelineReconciler(
+		k8sManager.GetClient(),
+		k8sManager.GetScheme(),
+		ControllerNamespace,
+		FluentBitSectionsConfigMap,
+		FluentBitParsersConfigMap,
+		FluentBitDaemonSet,
+		FluentBitEnvSecret,
+		FluentBitFilesConfigMap)
+	err = reconciler.SetupWithManager(k8sManager)
 	Expect(err).ToNot(HaveOccurred())
 
 	go func() {
