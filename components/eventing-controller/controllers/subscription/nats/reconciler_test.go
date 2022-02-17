@@ -1,43 +1,43 @@
 package nats
 
 import (
-	"context"
-	"fmt"
-	"log"
-	"path/filepath"
-	"strings"
-	"testing"
-	"time"
+"context"
+"fmt"
+"log"
+"path/filepath"
+"strings"
+"testing"
+"time"
 
-	"github.com/kyma-project/kyma/components/eventing-controller/controllers/events"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers"
+"github.com/kyma-project/kyma/components/eventing-controller/controllers/events"
+"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers"
 
-	natsserver "github.com/nats-io/nats-server/v2/server"
-	"github.com/nats-io/nats.go"
-	v1 "k8s.io/api/core/v1"
-	k8serrors "k8s.io/apimachinery/pkg/api/errors"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/types"
-	"k8s.io/client-go/kubernetes/scheme"
-	"k8s.io/client-go/rest"
-	ctrl "sigs.k8s.io/controller-runtime"
-	"sigs.k8s.io/controller-runtime/pkg/client"
-	"sigs.k8s.io/controller-runtime/pkg/envtest"
-	"sigs.k8s.io/controller-runtime/pkg/envtest/printer"
-	logf "sigs.k8s.io/controller-runtime/pkg/log"
-	"sigs.k8s.io/controller-runtime/pkg/log/zap"
+natsserver "github.com/nats-io/nats-server/v2/server"
+"github.com/nats-io/nats.go"
+v1 "k8s.io/api/core/v1"
+k8serrors "k8s.io/apimachinery/pkg/api/errors"
+metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+"k8s.io/apimachinery/pkg/types"
+"k8s.io/client-go/kubernetes/scheme"
+"k8s.io/client-go/rest"
+ctrl "sigs.k8s.io/controller-runtime"
+"sigs.k8s.io/controller-runtime/pkg/client"
+"sigs.k8s.io/controller-runtime/pkg/envtest"
+"sigs.k8s.io/controller-runtime/pkg/envtest/printer"
+logf "sigs.k8s.io/controller-runtime/pkg/log"
+"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
-	. "github.com/onsi/ginkgo"
-	. "github.com/onsi/gomega"
+. "github.com/onsi/ginkgo"
+. "github.com/onsi/gomega"
 
-	kymalogger "github.com/kyma-project/kyma/common/logging/logger"
+kymalogger "github.com/kyma-project/kyma/common/logging/logger"
 
-	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
-	"github.com/kyma-project/kyma/components/eventing-controller/logger"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/application/applicationtest"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/application/fake"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
-	reconcilertesting "github.com/kyma-project/kyma/components/eventing-controller/testing"
+eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
+"github.com/kyma-project/kyma/components/eventing-controller/logger"
+"github.com/kyma-project/kyma/components/eventing-controller/pkg/application/applicationtest"
+"github.com/kyma-project/kyma/components/eventing-controller/pkg/application/fake"
+"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
+reconcilertesting "github.com/kyma-project/kyma/components/eventing-controller/testing"
 )
 
 const (
@@ -49,7 +49,6 @@ const (
 	timeout         = 60 * time.Second
 	pollingInterval = 5 * time.Second
 
-	namespaceName          = "test"
 	subscriptionNameFormat = "nats-sub-%d"
 	subscriberNameFormat   = "subscriber-%d"
 )
@@ -263,7 +262,6 @@ func testUpdateSubscriptionStatus(id int, eventTypePrefix, natsSubjectToPublish,
 				reconcilertesting.WithMultipleConditions(),
 				reconcilertesting.WithSinkURLFromSvc(subscriberSvc),
 			)
-			multipleConditions := subscription.Status.Conditions
 			ensureSubscriptionCreated(ctx, subscription)
 
 			Context("Checking the subscription got created properly", func() {
@@ -295,8 +293,8 @@ func testUpdateSubscriptionStatus(id int, eventTypePrefix, natsSubjectToPublish,
 
 				By("ensuring, that the subscription does not have additional conditions")
 				getSubscription(ctx, subscription).ShouldNot(And(
-					reconcilertesting.HaveCondition(multipleConditions[0]),
-					reconcilertesting.HaveCondition(multipleConditions[1]),
+					reconcilertesting.HaveCondition(reconcilertesting.MultipleDefaultConditions()[0]),
+					reconcilertesting.HaveCondition(reconcilertesting.MultipleDefaultConditions()[1]),
 				))
 			})
 		})
@@ -785,7 +783,6 @@ var testID int
 var natsURL string
 var cfg *rest.Config
 var k8sClient client.Client
-var testEnv *envtest.Environment
 var natsServer *natsserver.Server
 var defaultSubsConfig = env.DefaultSubscriptionConfig{MaxInFlightMessages: 1, DispatcherRetryPeriod: time.Second, DispatcherMaxRetries: 1}
 var reconciler *Reconciler

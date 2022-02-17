@@ -531,22 +531,22 @@ func NewEventingControllerPod(backend string) *corev1.Pod {
 	}
 }
 
+//
 func WithMultipleConditions() SubscriptionOpt {
 	return func(s *eventingv1alpha1.Subscription) {
-		s.Status.Conditions = NewDefaultMultipleConditions()
+		s.Status.Conditions = MultipleDefaultConditions()
 	}
 }
 
-func NewDefaultMultipleConditions() []eventingv1alpha1.Condition {
-	cond1 := eventingv1alpha1.MakeCondition(
+func MultipleDefaultConditions() []eventingv1alpha1.Condition {
+	return []eventingv1alpha1.Condition{DefaultCondition("One"), DefaultCondition("Two")}
+}
+
+func DefaultCondition(msg string) eventingv1alpha1.Condition{
+	return eventingv1alpha1.MakeCondition(
 		eventingv1alpha1.ConditionSubscriptionActive,
 		eventingv1alpha1.ConditionReasonNATSSubscriptionActive,
-		v1.ConditionTrue, "cond1")
-	cond2 := eventingv1alpha1.MakeCondition(
-		eventingv1alpha1.ConditionSubscriptionActive,
-		eventingv1alpha1.ConditionReasonNATSSubscriptionActive,
-		v1.ConditionTrue, "cond2")
-	return []eventingv1alpha1.Condition{cond1, cond2}
+		v1.ConditionTrue, msg)
 }
 
 // ToSubscription converts an unstructured subscription into a typed one

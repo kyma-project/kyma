@@ -25,6 +25,10 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 )
 
+const namespaceName          = "test"
+
+var testEnv *envtest.Environment
+
 func TestHandleSubscriptionDeletion(t *testing.T) {
 	g := NewGomegaWithT(t)
 	testEnvironment := setupTestEnvironment(t)
