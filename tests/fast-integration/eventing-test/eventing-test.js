@@ -92,6 +92,9 @@ describe('Eventing tests', function() {
 
   // Tests
   context('with Nats backend', function() {
+    it('Wait until subscriptions are ready', async function() {
+      await waitForSubscriptionsTillReady(testNamespace);
+    });
     // Running Eventing end-to-end tests
     eventingE2ETestSuite();
     // Running Eventing tracing tests
