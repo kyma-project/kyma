@@ -398,7 +398,6 @@ func Test_syncInitialStatus(t *testing.T) {
 			g.Expect(sub.Status.Config).To(Equal(testCase.expectedSubStatus.Config))
 			g.Expect(sub.Status.Ready).To(Equal(testCase.expectedSubStatus.Ready))
 			g.Expect(gotStatus).To(Equal(testCase.wantStatus))
-
 		})
 	}
 }
