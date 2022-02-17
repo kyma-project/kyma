@@ -28,6 +28,8 @@ import (
 func main() {
 	log.Infoln("Starting Runtime Agent")
 
+	log.Infoln("Some test line")
+
 	var options Config
 	err := envconfig.InitWithPrefix(&options, "APP")
 	exitOnError(err, "Failed to process environment variables")
@@ -66,6 +68,8 @@ func main() {
 
 	log.Info("Registering Components.")
 
+	log.Infoln("Some test line")
+
 	certManager := certificates.NewCredentialsManager(clusterCertSecret, caCertSecret, secretsRepository)
 
 	syncService, err := createSynchronisationService(k8sResourceClientSets, options)
@@ -79,13 +83,13 @@ func main() {
 	clientsProvider := compass.NewClientsProvider(graphql.New, options.SkipCompassTLSVerify, options.QueryLogging)
 	connectionDataCache.AddSubscriber(clientsProvider.UpdateConnectionData)
 
-	log.Infoln("Setting up Director Proxy Service")
+	log.Infoln("Some test line")
 	directorProxy := director.NewProxy(options.DirectorProxy)
 	err = mgr.Add(directorProxy)
 	exitOnError(err, "Failed to create director proxy")
 	connectionDataCache.AddSubscriber(directorProxy.SetURLAndCerts)
 
-	log.Infoln("Setting up Controller")
+	log.Infoln("Some test line")
 	controllerDependencies := compassconnection.DependencyConfig{
 		K8sConfig:                    cfg,
 		ControllerManager:            mgr,
@@ -164,6 +168,8 @@ func getMigrator(secretRepo secrets.Repository, keysToInclude []string) certific
 
 func createSynchronisationService(k8sResourceClients *k8sResourceClientSets, options Config) (kyma.Service, error) {
 
+	log.Infoln("Some test line")
+
 	var syncService kyma.Service
 	var err error
 
@@ -177,6 +183,7 @@ func createSynchronisationService(k8sResourceClients *k8sResourceClientSets, opt
 }
 
 func exitOnError(err error, context string) {
+	log.Infoln("Some test line")
 	if err != nil {
 		log.Fatal(errors.Wrap(err, context))
 	}
