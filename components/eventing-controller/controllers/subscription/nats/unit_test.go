@@ -33,7 +33,7 @@ const namespaceName = "test"
 
 var (
 	defaultSubsConfig = env.DefaultSubscriptionConfig{MaxInFlightMessages: 1, DispatcherRetryPeriod: time.Second, DispatcherMaxRetries: 1}
-	testEnv *envtest.Environment
+	testEnv           *envtest.Environment
 )
 
 func Test_handleSubscriptionDeletion(t *testing.T) {
