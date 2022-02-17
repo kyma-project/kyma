@@ -32,40 +32,45 @@ const (
 )
 
 type Source struct {
-	Artifact *Artifact `json:"artifact"`
-	//CRD           *Crd      `json:"crd"`
-	GitRepository *GitRepository `json:"gitRepository"`
-	Inline        *Inline        `json:"inline"`
+	// +optional
+	ArtifactSource *ArtifactSource `json:"artifactSource"`
+	//TODO: we should check if it is possible
+	// +optional
+	CRDSource *CRDSource `json:"crdSource"`
+	// +optional
+	GitRepositorySource *GitRepositorySource `json:"gitRepositorySource"`
+	// +optional
+	InlineSource *InlineSource `json:"inlineSource"`
 }
 
-type Inline struct {
+type InlineSource struct {
 	Source       string `json:"source"`
 	Dependencies string `json:"dependencies"`
 }
 
-type GitRepository struct {
+type GitRepositorySource struct {
 	Name      string `json:"name"`
 	Namespace string `json:"namespace"`
 }
 
-type Crd struct {
+type CRDSource struct {
 	Api        string `json:"api"`
 	Version    string `json:"version"`
 	Kind       string `json:"kind"`
 	Name       string `json:"name"`
 	Namespaces string `json:"namespaces"`
 	Path       string `json:"path"`
+	BaseDir    string `json:"baseDir"`
+	// +optional
+	Credentials *Credentials `json:"credentials"`
 }
 
-type Artifact struct {
+type ArtifactSource struct {
 	//TODO: maybe it's worth do distinguish between local and external, as we know the internal URL
 	URL     string `json:"url"`
 	BaseDir string `json:"baseDir"`
 	// +optional
 	Credentials *Credentials `json:"credentials"`
-
-	//+optional
-	//RetryInterval *time.Duration `json:"retryInterval"`
 }
 
 type ConfigMapSelector struct {
@@ -73,31 +78,34 @@ type ConfigMapSelector struct {
 	Namespace string `json:"namespace"`
 }
 
-type AuthType string
-
-const (
-	OAuth AuthType = "oauth"
-	Basic AuthType = "basic"
-)
-
-//TODO: To discuss
+//TODO: To discuss auth options
 type Credentials struct {
-	Type AuthType `json:"type"`
-	//valueFrom:
-	//secretKeyRef:
-	//name: {{ template "docker-registry.fullname" . }}-secret
-	//key: azureAccountName
-	//*v1.SecretEnvSource
-	OAuthURL string                `json:"OAuthURL"`
-	User     *v1.SecretKeySelector `json:"user"`
-	Password *v1.SecretKeySelector `json:"password"`
-	Token    *v1.SecretKeySelector `json:"token"`
-	//TODO: Cert authentication?
-	//ValueFrom *v1.SecretKeySelector `json:"valueFrom"`
+	// +optional
+	BasicAuth *BasicAuth `json:"basicAuth"`
+	// +optional
+	Oauth *Oauth `json:"oauth"`
+	// +optional
+	JWTToken *v1.SecretKeySelector `json:"token"`
+	// +optional
+	PersonalAccessToekn *v1.SecretKeySelector `json:"personalAccessToekn"`
+}
+
+//TODO: should we enforce using secret or give the ability to use configmaps or plain values
+type BasicAuth struct {
+	User     v1.SecretKeySelector `json:"user"`
+	Password v1.SecretKeySelector `json:"password"`
+}
+
+type Oauth struct {
+	OauthURL string               `json:"oatuhURL"`
+	User     v1.SecretKeySelector `json:"user"`
+	Password v1.SecretKeySelector `json:"password"`
 }
 
 type Template struct {
-	Labels      map[string]string `json:"labels,omitempty"`
+	// +optional
+	Labels map[string]string `json:"labels,omitempty"`
+	// +optional
 	Annotations map[string]string `json:"annotations"`
 }
 
@@ -112,23 +120,22 @@ type FunctionSpec struct {
 	//+optional
 	CustomRuntimeConfiguration *ConfigMapSelector `json:"customRuntimeConfiguration"`
 
-	Source `json:"source"`
+	Source Source `json:"source"`
 
 	// Env defines an array of key value pairs need to be used as env variable for a function
 	Env []v1.EnvVar `json:"env,omitempty"`
 
-	//TODO: maybe runtime profile
 	// +optional
-	Profile string `json:"profile"`
+	RuntimeProfile *string `json:"runtimeProfile"`
 
 	// +optional
-	Resources v1.ResourceRequirements `json:"resources,omitempty"`
+	Resources *v1.ResourceRequirements `json:"resources,omitempty"`
 
 	// +optional
-	BuildProfile string `json:"buildProfile"`
+	BuildProfile *string `json:"buildProfile"`
 
 	// +optional
-	BuildResources v1.ResourceRequirements `json:"buildResources,omitempty"`
+	BuildResources *v1.ResourceRequirements `json:"buildResources,omitempty"`
 
 	// +kubebuilder:validation:Minimum:=1
 	MinReplicas *int32 `json:"minReplicas,omitempty"`
@@ -137,17 +144,44 @@ type FunctionSpec struct {
 	MaxReplicas *int32 `json:"maxReplicas,omitempty"`
 
 	// +optional
-	Template Template `json:"template"`
+	Template *Template `json:"template"`
+}
+
+//TODO: Status related things needs to be developed.
+type ConditionType string
+
+const (
+	ConditionRunning            ConditionType = "Running"
+	ConditionConfigurationReady ConditionType = "ConfigurationReady"
+	ConditionBuildReady         ConditionType = "BuildReady"
+)
+
+type ConditionReason string
+
+type Condition struct {
+	Type               ConditionType      `json:"type,omitempty"`
+	Status             v1.ConditionStatus `json:"status" description:"status of the condition, one of True, False, Unknown"`
+	LastTransitionTime metav1.Time        `json:"lastTransitionTime,omitempty"`
+	Reason             ConditionReason    `json:"reason,omitempty"`
+	Message            string             `json:"message,omitempty"`
 }
 
 // FunctionStatus defines the observed state of Function
 type FunctionStatus struct {
 	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
+	Runtime string `json:"runtime,omitempty"`
 }
 
 //+kubebuilder:object:root=true
 //+kubebuilder:subresource:status
+// +kubebuilder:printcolumn:name="Configured",type="string",JSONPath=".status.conditions[?(@.type=='ConfigurationReady')].status"
+// +kubebuilder:printcolumn:name="Built",type="string",JSONPath=".status.conditions[?(@.type=='BuildReady')].status"
+// +kubebuilder:printcolumn:name="Running",type="string",JSONPath=".status.conditions[?(@.type=='Running')].status"
+// +kubebuilder:printcolumn:name="Runtime",type="string",JSONPath=".spec.runtime"
+// +kubebuilder:printcolumn:name="Source",type="string",JSONPath=".spec.source"
+// +kubebuilder:printcolumn:name="Version",type="integer",JSONPath=".metadata.generation"
+// +kubebuilder:printcolumn:name="Age",type="date",JSONPath=".metadata.creationTimestamp"
 
 // Function is the Schema for the functions API
 type Function struct {
