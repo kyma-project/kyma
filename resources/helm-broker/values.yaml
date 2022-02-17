@@ -118,7 +118,7 @@ global:
       version: "f2f2f3d9"
     etcd:
       name: "etcd"
-      version: "v3.3.25-699b7008"
+      version: "v3.3.25-b582f7ea"
       directory: "tpi/quay.io/coreos"
     add_ons_ui:
       name: "add-ons-ui"
