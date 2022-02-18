@@ -116,7 +116,7 @@ class Event:
             headers = {"Content-Type": "application/cloudevents+json"}
             )
     
-    def resolveDataType(event_data):
+    def resolveDataType(self, event_data):
         if type(event_data) is dict:
             return 'application/json'
         elif type(event_data) is str:
