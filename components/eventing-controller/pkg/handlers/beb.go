@@ -91,11 +91,17 @@ func getWebHookAuth(cfg env.Config, credentials *OAuth2ClientCredentials) *types
 }
 
 // SyncSubscription synchronize the EV2 subscription with the EMS subscription. It returns true, if the EV2 subscription status was changed
-func (b *BEB) SyncSubscription(subscription *eventingv1alpha1.Subscription, cleaner eventtype.Cleaner, params ...interface{}) (bool, error) {
+func (b *BEB) SyncSubscription(subscription *eventingv1alpha1.Subscription, params ...interface{}) (bool, error) {
 	// Format logger
 	log := utils.LoggerWithSubscription(b.namedLogger(), subscription)
 
-	apiRule, ok := params[0].(*apigatewayv1alpha1.APIRule)
+	cleaner, ok := params[0].(eventtype.Cleaner)
+	if !ok {
+		err := fmt.Errorf("get cleaner from params[0] failed: %v", params[0])
+		log.Errorw("wrong parameter for subscription", ErrorLogKey, err)
+	}
+
+	apiRule, ok := params[1].(*apigatewayv1alpha1.APIRule)
 	if !ok {
 		err := fmt.Errorf("get ApiRule from params[0] failed: %v", params[0])
 		log.Errorw("wrong parameter for subscription", ErrorLogKey, err)

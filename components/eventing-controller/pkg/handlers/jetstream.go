@@ -4,7 +4,6 @@ import (
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 	"github.com/kyma-project/kyma/components/eventing-controller/logger"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/eventtype"
 )
 
 var _ MessagingBackend = &JetStream{}
@@ -26,7 +25,7 @@ func (js *JetStream) Initialize(_ env.Config) error {
 	return nil
 }
 
-func (js *JetStream) SyncSubscription(_ *eventingv1alpha1.Subscription, _ eventtype.Cleaner, _ ...interface{}) (bool, error) {
+func (js *JetStream) SyncSubscription(_ *eventingv1alpha1.Subscription, _ ...interface{}) (bool, error) {
 	panic("implement me")
 }
 
