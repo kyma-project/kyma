@@ -158,7 +158,7 @@ func TestConverter(t *testing.T) {
 					{
 						ID:                        "bundle1",
 						Identifier:                "",
-						Name:                      "bundlename1-8996f",
+						Name:                      "bundlename1-43857",
 						DisplayName:               "bundleName1",
 						Description:               "Description not provided",
 						AuthCreateParameterSchema: &instanceAuthRequestInputSchema,
@@ -198,7 +198,7 @@ func TestConverter(t *testing.T) {
 					{
 						ID:          "bundle2",
 						Identifier:  "",
-						Name:        "bundlename2-60248",
+						Name:        "bundlename2-4b91a",
 						DisplayName: "bundleName2",
 						Description: "description",
 						Entries: []v1alpha1.Entry{
@@ -219,7 +219,7 @@ func TestConverter(t *testing.T) {
 					{
 						ID:          "bundle3",
 						Identifier:  "",
-						Name:        "bundlename3-cf906",
+						Name:        "bundlename3-16aa4",
 						DisplayName: "bundleName3",
 						Description: "Description not provided",
 						Entries:     []v1alpha1.Entry{},
@@ -291,7 +291,7 @@ func TestConverter(t *testing.T) {
 					{
 						ID:          "bundle1",
 						Identifier:  "",
-						Name:        "bundlename1-8996f",
+						Name:        "bundlename1-43857",
 						DisplayName: "bundleName1",
 						Description: "Description not provided",
 						Entries: []v1alpha1.Entry{
