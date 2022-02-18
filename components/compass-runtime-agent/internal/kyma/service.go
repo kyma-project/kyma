@@ -407,8 +407,8 @@ func (s *service) updateAPIResources(directorApplication model.Application, exis
 	appendedErr := s.upsertAPIResources(directorApplication)
 
 	for _, service := range existentRuntimeApplication.Spec.Services {
-		apiPackage, apiPackageExists := model.APIBundleExists(service.ID, directorApplication)
-		deleteSpecs := (apiPackageExists && !model.BundleContainsAnySpecs(apiPackage)) || !apiPackageExists
+		apiBundle, apiBundleExists := model.APIBundleExists(service.ID, directorApplication)
+		deleteSpecs := (apiBundleExists && !model.BundleContainsAnySpecs(apiBundle)) || !apiBundleExists
 
 		if deleteSpecs {
 			log.Infof("Deleting resources for API '%s' and application '%s'", service.ID, directorApplication.Name)

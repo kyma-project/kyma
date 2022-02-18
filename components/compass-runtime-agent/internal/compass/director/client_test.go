@@ -31,7 +31,7 @@ const (
 		description
 		labels
 		auths {id}
-		packages {data {
+		bundles {data {
 		id
 		name
 		description

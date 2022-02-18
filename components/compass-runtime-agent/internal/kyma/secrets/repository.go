@@ -4,24 +4,24 @@ package appsecrets
 import (
 	"context"
 
-	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/secrets"
-
-	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/apperrors"
-	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/k8sconsts"
-	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/secrets/strategy"
 	v1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
+
+	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/apperrors"
+	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/k8sconsts"
+	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/secrets/strategy"
+	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/secrets"
 )
 
 // Repository contains operations for managing client credentials
 //go:generate mockery --name Repository
 type Repository interface {
-	Create(application string, appUID types.UID, name, packageID string, data strategy.SecretData) apperrors.AppError
+	Create(application string, appUID types.UID, name, bundleID string, data strategy.SecretData) apperrors.AppError
 	Get(name string) (strategy.SecretData, apperrors.AppError)
 	Delete(name string) apperrors.AppError
-	Upsert(application string, appUID types.UID, name, packageID string, data strategy.SecretData) apperrors.AppError
+	Upsert(application string, appUID types.UID, name, bundleID string, data strategy.SecretData) apperrors.AppError
 }
 
 type repository struct {
@@ -36,8 +36,8 @@ func NewRepository(secretsManager secrets.Manager) Repository {
 }
 
 // Create adds a new secret with one entry containing specified clientId and clientSecret
-func (r *repository) Create(application string, appUID types.UID, name, packageID string, data strategy.SecretData) apperrors.AppError {
-	secret := makeSecret(name, packageID, application, appUID, data)
+func (r *repository) Create(application string, appUID types.UID, name, bundleID string, data strategy.SecretData) apperrors.AppError {
+	secret := makeSecret(name, bundleID, application, appUID, data)
 	return r.create(secret, name)
 }
 
@@ -61,8 +61,8 @@ func (r *repository) Delete(name string) apperrors.AppError {
 	return nil
 }
 
-func (r *repository) Upsert(application string, appUID types.UID, name, packageID string, data strategy.SecretData) apperrors.AppError {
-	secret := makeSecret(name, packageID, application, appUID, data)
+func (r *repository) Upsert(application string, appUID types.UID, name, bundleID string, data strategy.SecretData) apperrors.AppError {
+	secret := makeSecret(name, bundleID, application, appUID, data)
 
 	_, err := r.secretsManager.Update(context.Background(), secret, metav1.UpdateOptions{})
 	if err != nil {
@@ -85,13 +85,13 @@ func (r *repository) create(secret *v1.Secret, name string) apperrors.AppError {
 	return nil
 }
 
-func makeSecret(name, packageID, application string, appUID types.UID, data strategy.SecretData) *v1.Secret {
+func makeSecret(name, bundleID, application string, appUID types.UID, data strategy.SecretData) *v1.Secret {
 	return &v1.Secret{
 		ObjectMeta: metav1.ObjectMeta{
 			Name: name,
 			Labels: map[string]string{
 				k8sconsts.LabelApplication: application,
-				k8sconsts.LabelPackageId:   packageID,
+				k8sconsts.LabelPackageId:   bundleID,
 			},
 			OwnerReferences: k8sconsts.CreateOwnerReferenceForApplication(application, appUID),
 		},
