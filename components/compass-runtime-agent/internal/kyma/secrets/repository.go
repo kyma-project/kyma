@@ -91,7 +91,7 @@ func makeSecret(name, bundleID, application string, appUID types.UID, data strat
 			Name: name,
 			Labels: map[string]string{
 				k8sconsts.LabelApplication: application,
-				k8sconsts.LabelPackageId:   bundleID,
+				k8sconsts.LabelBundleId:    bundleID,
 			},
 			OwnerReferences: k8sconsts.CreateOwnerReferenceForApplication(application, appUID),
 		},
