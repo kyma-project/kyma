@@ -5,7 +5,10 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"sync"
 	"time"
+
+	"github.com/nats-io/nats-server/v2/server"
 
 	cev2nats "github.com/cloudevents/sdk-go/protocol/nats/v2"
 	cev2 "github.com/cloudevents/sdk-go/v2"
@@ -115,4 +118,26 @@ func SendStructuredCloudEventToNATS(natsClient *Nats, subject, eventData string)
 		return err
 	}
 	return nil
+}
+
+var nextNATSPort = &portGenerator{port: 5223}
+
+type portGenerator struct {
+	lock sync.Mutex
+	port int
+}
+
+func (pg *portGenerator) get() int {
+	pg.lock.Lock()
+	defer pg.lock.Unlock()
+	p := pg.port
+	pg.port++
+	return p
+}
+
+func startNATSServer(serverOpts ...eventingtesting.NatsServerOpt) (*server.Server, int) {
+	natsPort := nextNATSPort.get()
+	serverOpts = append(serverOpts, eventingtesting.WithPort(natsPort))
+	natsServer := eventingtesting.RunNatsServerOnPort(serverOpts...)
+	return natsServer, natsPort
 }
