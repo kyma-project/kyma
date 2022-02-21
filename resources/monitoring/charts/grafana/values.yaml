@@ -626,7 +626,7 @@ smtp:
 sidecar:
   image:
     repository: eu.gcr.io/kyma-project/tpi/k8s-sidecar
-    tag: 1.14.2-1f7de309
+    tag: 1.15.5-a22d1d22
   imagePullPolicy: IfNotPresent
   resources:
     limits:
