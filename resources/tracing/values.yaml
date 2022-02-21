@@ -136,6 +136,8 @@ authProxy:
     authLogging: true
     requestLogging: false
     passHostHeader: false
+    cookieExpire: 24h
+    cookieRefresh: 1h
   env: {}
   nodeSelector: {}
   podSecurityContext: {}
