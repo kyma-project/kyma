@@ -52,7 +52,7 @@ global:
       sha: ""
     k8s_sidecar:
       name: "k8s-sidecar"
-      version: "1.14.2-1f7de309"
+      version: "1.15.5-a22d1d22"
       directory: "tpi"
       sha: ""
     oauth2_proxy:
