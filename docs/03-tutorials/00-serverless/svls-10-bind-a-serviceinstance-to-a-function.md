@@ -190,7 +190,7 @@ Follow these steps:
 
 4. Select **Create** to confirm changes.
 
-   Wait until the status of the instance changes from `PROVISIONING` to `PROVISIONED SUCCESSFULLY`.
+   Wait until the status of the instance changes from `PROVISIONING` to `PROVISIONED`.
 
 ### Bind the Function to the Service Instance
 
