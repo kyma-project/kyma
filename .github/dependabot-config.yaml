@@ -24,7 +24,7 @@ templates:
           - repoName: "github.com/kyma-project/kyma"
             jobs:
               - jobConfig:
-                  directory: "/components/event-publisher-proxy"
+                  directory: "/components/event-publisher-proxy/cmd/event-publisher-proxy"
                 inheritedConfigs:
                   local:
                     - "dailyDockerEcosystem"
