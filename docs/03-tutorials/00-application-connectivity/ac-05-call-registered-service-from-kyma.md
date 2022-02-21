@@ -107,7 +107,7 @@ This guide shows how to call a registered external service from Kyma using a sim
      labels:
        function: my-function
    spec:
-     gateway: kyma-gateway.kyma-system.svc.cluster.local
+     gateway: kyma-system/kyma-gateway
      rules:
      - path: /.*
        accessStrategies:
