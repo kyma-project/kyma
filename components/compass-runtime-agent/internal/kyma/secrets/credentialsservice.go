@@ -106,6 +106,6 @@ func (s *credentialsService) upsertSecret(modStrategy strategy.ModificationStrat
 	return nil
 }
 
-func (s *credentialsService) createSecret(_ strategy.ModificationStrategy, application string, appUID types.UID, name, packageID string, newData strategy.SecretData) apperrors.AppError {
-	return s.repository.Create(application, appUID, name, packageID, newData)
+func (s *credentialsService) createSecret(_ strategy.ModificationStrategy, application string, appUID types.UID, name, bundleID string, newData strategy.SecretData) apperrors.AppError {
+	return s.repository.Create(application, appUID, name, bundleID, newData)
 }

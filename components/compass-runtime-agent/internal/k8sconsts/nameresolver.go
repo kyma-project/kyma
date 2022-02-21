@@ -14,10 +14,10 @@ const (
 //go:generate mockery --name NameResolver
 type NameResolver interface {
 	// GetCredentialsSecretName returns credential secret name
-	GetCredentialsSecretName(application, packageID string) string
+	GetCredentialsSecretName(application, bundleID string) string
 
 	// GetRequestParametersSecretName returns request parameters secret name
-	GetRequestParametersSecretName(application, packageID string) string
+	GetRequestParametersSecretName(application, bundleID string) string
 }
 
 type nameResolver struct{}

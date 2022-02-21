@@ -75,10 +75,10 @@ func (s *requestParametersService) upsertSecret(application string, appUID types
 	return s.repository.Upsert(application, appUID, name, bundleID, newData)
 }
 
-func (s *requestParametersService) createSecret(application string, appUID types.UID, name, packageID string, newData map[string][]byte) apperrors.AppError {
-	return s.repository.Create(application, appUID, name, packageID, newData)
+func (s *requestParametersService) createSecret(application string, appUID types.UID, name, bundleID string, newData map[string][]byte) apperrors.AppError {
+	return s.repository.Create(application, appUID, name, bundleID, newData)
 }
 
-func (s *requestParametersService) createSecretName(application, packageID string) string {
-	return s.nameResolver.GetRequestParametersSecretName(application, packageID)
+func (s *requestParametersService) createSecretName(application, bundleID string) string {
+	return s.nameResolver.GetRequestParametersSecretName(application, bundleID)
 }
