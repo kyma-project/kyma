@@ -33,14 +33,14 @@ const (
 
 type Source struct {
 	// +optional
-	ArtifactSource *ArtifactSource `json:"artifactSource"`
+	Artifact *ArtifactSource `json:"artifact,omitempty"`
 	//TODO: we should check if it is possible
 	// +optional
-	CRDSource *CRDSource `json:"crdSource"`
+	CRD *CRDSourceRef `json:"crd,omitempty"`
 	// +optional
-	GitRepositorySource *GitRepositorySource `json:"gitRepositorySource"`
+	GitRepository *GitRepositorySource `json:"gitRepository,omitempty"`
 	// +optional
-	InlineSource *InlineSource `json:"inlineSource"`
+	Inline *InlineSource `json:"inline,omitempty"`
 }
 
 type InlineSource struct {
@@ -53,7 +53,7 @@ type GitRepositorySource struct {
 	Namespace string `json:"namespace"`
 }
 
-type CRDSource struct {
+type CRDSourceRef struct {
 	Api        string `json:"api"`
 	Version    string `json:"version"`
 	Kind       string `json:"kind"`
@@ -62,7 +62,7 @@ type CRDSource struct {
 	Path       string `json:"path"`
 	BaseDir    string `json:"baseDir"`
 	// +optional
-	Credentials *Credentials `json:"credentials"`
+	Credentials *Credentials `json:"credentials,omitempty"`
 }
 
 type ArtifactSource struct {
@@ -70,10 +70,10 @@ type ArtifactSource struct {
 	URL     string `json:"url"`
 	BaseDir string `json:"baseDir"`
 	// +optional
-	Credentials *Credentials `json:"credentials"`
+	Credentials *Credentials `json:"credentials,omitempty"`
 }
 
-type ConfigMapSelector struct {
+type ConfigMapRef struct {
 	Name      string `json:"name"`
 	Namespace string `json:"namespace"`
 }
@@ -81,13 +81,13 @@ type ConfigMapSelector struct {
 //TODO: To discuss auth options
 type Credentials struct {
 	// +optional
-	BasicAuth *BasicAuth `json:"basicAuth"`
+	BasicAuth *BasicAuth `json:"basicAuth,omitempty"`
 	// +optional
-	Oauth *Oauth `json:"oauth"`
+	Oauth *Oauth `json:"oauth,omitempty"`
 	// +optional
-	JWTToken *v1.SecretKeySelector `json:"token"`
+	JWTToken *v1.SecretKeySelector `json:"token,omitempty"`
 	// +optional
-	PersonalAccessToekn *v1.SecretKeySelector `json:"personalAccessToekn"`
+	PersonalAccessToken *v1.SecretKeySelector `json:"personalAccessToken,omitempty"`
 }
 
 //TODO: should we enforce using secret or give the ability to use configmaps or plain values
@@ -118,7 +118,7 @@ type FunctionSpec struct {
 	Runtime string `json:"runtime"`
 
 	//+optional
-	CustomRuntimeConfiguration *ConfigMapSelector `json:"customRuntimeConfiguration"`
+	CustomRuntimeConfiguration *ConfigMapRef `json:"customRuntimeConfiguration,omitempty"`
 
 	Source Source `json:"source"`
 
@@ -126,13 +126,13 @@ type FunctionSpec struct {
 	Env []v1.EnvVar `json:"env,omitempty"`
 
 	// +optional
-	RuntimeProfile *string `json:"runtimeProfile"`
+	RuntimeProfile *string `json:"runtimeProfile,omitempty"`
 
 	// +optional
-	Resources *v1.ResourceRequirements `json:"resources,omitempty"`
+	Resources *v1.ResourceRequirements `json:"resources,omitempty,omitempty"`
 
 	// +optional
-	BuildProfile *string `json:"buildProfile"`
+	BuildProfile *string `json:"buildProfile,omitempty"`
 
 	// +optional
 	BuildResources *v1.ResourceRequirements `json:"buildResources,omitempty"`
@@ -144,7 +144,7 @@ type FunctionSpec struct {
 	MaxReplicas *int32 `json:"maxReplicas,omitempty"`
 
 	// +optional
-	Template *Template `json:"template"`
+	Template *Template `json:"template,omitempty"`
 }
 
 //TODO: Status related things needs to be developed.
