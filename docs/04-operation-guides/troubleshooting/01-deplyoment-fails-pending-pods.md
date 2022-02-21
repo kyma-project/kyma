@@ -1,5 +1,5 @@
 ---
-title: Kyma deployment fails with pending Pods
+title: Local Kyma deployment fails with pending Pods
 ---
 
 ## Symptom
