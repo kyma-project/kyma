@@ -5,7 +5,7 @@ title: Kyma deployment fails with pending Pods
 ## Symptom
 
 Local Kyma deployment with K3D fails with one or more Pods in pending state.
-Describing the pod reveals a error message like `0/2 nodes are available: 2 node(s) had taint {[node.kubernetes.io/disk-pressure](http://node.kubernetes.io/disk-pressure): }, that the pod didn't tolerate.`
+Describing the pod reveals a error message like `0/2 nodes are available: 2 node(s) had taint {node.kubernetes.io/disk-pressure: }, that the pod didn't tolerate.`
 
 ## Cause
 
