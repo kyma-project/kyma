@@ -3,8 +3,8 @@ module github.com/kyma-project/kyma/components/event-publisher-proxy
 go 1.17
 
 require (
-	github.com/cloudevents/sdk-go/protocol/nats/v2 v2.5.0
-	github.com/cloudevents/sdk-go/v2 v2.5.0
+	github.com/cloudevents/sdk-go/protocol/nats/v2 v2.8.0
+	github.com/cloudevents/sdk-go/v2 v2.8.0
 	github.com/google/uuid v1.3.0
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/kyma-project/kyma/components/application-operator v0.0.0-20211006112227-6d16a34ea468
