@@ -16,7 +16,7 @@ This tutorial describes how you can deploy a simple SAP BTP audit log service in
 
 >**NOTE:** For the BTP service operator to work, you must [disable Istio sidecar proxy injection](https://kyma-project.io/docs/kyma/latest/04-operation-guides/operations/smsh-01-istio-disable-sidecar-injection#documentation-content) which is enabled on the Kyma clusters by default. The commands in this tutorial already mark the created Namespaces with the **istio-injection=disabled** flag, so you don't have to do this manually.  
 
-1. Create a Namespace and install cert-manager on it. Cert-manager is an obligatory tool that will manage certificates  To do so, run this command:
+1. Create a Namespace and install cert-manager on it. Cert-manager is an obligatory tool that will manage certificates in your cluster. Run:
 
     ```
     kubectl create ns cert-manager
