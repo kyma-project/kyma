@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"reflect"
 	"strconv"
 	"strings"
 	"sync"
@@ -101,40 +100,40 @@ func newCloudeventClient(config env.NatsConfig) (cev2.Client, error) {
 	return cev2.NewClientHTTP(cev2.WithRoundTripper(transport))
 }
 
-// SyncSubscription synchronizes the given Kyma subscription to NATS subscription.
-// The returned bool acts as a marker for changed subscription status.
-func (n *Nats) SyncSubscription(sub *eventingv1alpha1.Subscription, cleaner eventtype.Cleaner, _ ...interface{}) (bool, error) {
+// GetCleanSubjects returns a list of clean eventTypes from the unique filters in the subscription.
+func GetCleanSubjects(sub *eventingv1alpha1.Subscription, cleaner eventtype.Cleaner) ([]string, error) {
 	var filters []*eventingv1alpha1.BEBFilter
 	if sub.Spec.Filter != nil {
 		uniqueFilters, err := sub.Spec.Filter.Deduplicate()
 		if err != nil {
-			return false, errors.Wrap(err, "deduplicate subscription filters failed")
+			return []string{}, errors.Wrap(err, "deduplicate subscription filters failed")
 		}
 		filters = uniqueFilters.Filters
 	}
-
-	// Format logger
-	log := utils.LoggerWithSubscription(n.namedLogger(), sub)
-
-	subscriptionConfig := eventingv1alpha1.MergeSubsConfigs(sub.Spec.Config, &n.defaultSubsConfig)
 
 	var cleanSubjects []string
 	for _, filter := range filters {
 		subject, err := getCleanSubject(filter, cleaner)
 		if err != nil {
-			log.Errorw("get clean subject failed", "error", err)
-			return false, err
+			return []string{}, err
 		}
 		cleanSubjects = append(cleanSubjects, subject)
 	}
+	return cleanSubjects, nil
+}
 
+// SyncSubscription synchronizes the given Kyma subscription to NATS subscription.
+// The returned bool acts as a marker for changed subscription status.
+func (n *Nats) SyncSubscription(sub *eventingv1alpha1.Subscription, _ ...interface{}) (bool, error) {
+	// Format logger
+	log := utils.LoggerWithSubscription(n.namedLogger(), sub)
 	subKeyPrefix := createKeyPrefix(sub)
 
 	// check if there is any existing NATS subscription in global list
 	// which is not anymore in this subscription filters (i.e. cleanSubjects).
 	// e.g. when filters are modified.
 	for key, s := range n.subscriptions {
-		if isNatsSubAssociatedWithKymaSub(key, s, sub) && !utils.ContainsString(cleanSubjects, s.Subject) {
+		if isNatsSubAssociatedWithKymaSub(key, s, sub) && !utils.ContainsString(sub.Status.CleanEventTypes, s.Subject) {
 			if err := n.deleteSubscriptionFromNATS(s, key, log); err != nil {
 				return false, err
 			}
@@ -151,7 +150,7 @@ func (n *Nats) SyncSubscription(sub *eventingv1alpha1.Subscription, cleaner even
 		n.sinks.Store(subKeyPrefix, sub.Spec.Sink)
 	}
 
-	for _, subject := range cleanSubjects {
+	for _, subject := range sub.Status.CleanEventTypes {
 		callback := n.getCallback(subKeyPrefix)
 
 		if n.connection.Status() != nats.CONNECTED {
@@ -161,7 +160,7 @@ func (n *Nats) SyncSubscription(sub *eventingv1alpha1.Subscription, cleaner even
 			}
 		}
 
-		for i := 0; i < subscriptionConfig.MaxInFlightMessages; i++ {
+		for i := 0; i < sub.Status.Config.MaxInFlightMessages; i++ {
 			// queueGroupName must be unique for each subscription and subject
 			queueGroupName := createKeyPrefix(sub) + string(types.Separator) + subject
 			natsSubKey := createKey(sub, subject, i)
@@ -190,18 +189,7 @@ func (n *Nats) SyncSubscription(sub *eventingv1alpha1.Subscription, cleaner even
 		}
 	}
 
-	// Setting the clean event types
-	statusUpdated := false
-	if !reflect.DeepEqual(sub.Status.CleanEventTypes, cleanSubjects) {
-		sub.Status.CleanEventTypes = cleanSubjects
-		statusUpdated = true
-	}
-	if !reflect.DeepEqual(sub.Status.Config, subscriptionConfig) {
-		sub.Status.Config = subscriptionConfig
-		statusUpdated = true
-	}
-
-	return statusUpdated, nil
+	return false, nil
 }
 
 // DeleteSubscription deletes all NATS subscriptions corresponding to a Kyma subscription

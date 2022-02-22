@@ -442,7 +442,7 @@ func testCreateSubscriptionWithInvalidSink(id int, eventTypePrefix, _, eventType
 		// Validate the subscription
 		expectedCondition := eventingv1alpha1.MakeCondition(
 			eventingv1alpha1.ConditionSubscriptionActive,
-			eventingv1alpha1.ConditionReasonNATSSubscriptionActive,
+			eventingv1alpha1.ConditionReasonNATSSubscriptionNotActive,
 			v1.ConditionFalse, subConditionMsg)
 		getSubscription(ctx, subscription).Should(And(
 			reconcilertesting.HaveSubscriptionName(subscriptionName),
@@ -647,7 +647,7 @@ func testCreateSubscriptionWithEmptyEventType(id int, eventTypePrefix, _, _ stri
 			// Validate the subscription
 			expectedConditions := eventingv1alpha1.MakeCondition(
 				eventingv1alpha1.ConditionSubscriptionActive,
-				eventingv1alpha1.ConditionReasonNATSSubscriptionActive,
+				eventingv1alpha1.ConditionReasonNATSSubscriptionNotActive,
 				v1.ConditionFalse, nats.ErrBadSubject.Error(),
 			)
 			getSubscription(ctx, givenSubscription).Should(And(
