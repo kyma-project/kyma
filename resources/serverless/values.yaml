@@ -82,7 +82,7 @@ global:
       name: "function-webhook"
       version: "PR-13361"
     function_build_init:
-      name: "function-13361-init"
+      name: "function-build-init"
       version: "PR-13214"
     function_runtime_nodejs12:
       name: "function-runtime-nodejs12"
