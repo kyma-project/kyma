@@ -59,6 +59,7 @@ const {
   OAuthToken,
   OAuthCredentials,
 } = require('../../../lib/oauth');
+const {bebBackend, eventMeshNamespace} = require('../../../eventing-test/utils');
 
 const commerceMockYaml = fs.readFileSync(
     path.join(__dirname, './commerce-mock.yaml'),
@@ -153,33 +154,19 @@ async function checkFunctionResponse(functionNamespace, mockNamespace = 'mocks')
   expect(errorOccurred).to.be.equal(true);
 }
 
-async function sendEventAndCheckResponse(mockNamespace = 'mocks') {
+async function sendEventAndCheckResponse(eventType, body, params, mockNamespace = 'mocks') {
   const vs = await waitForVirtualService(mockNamespace, 'commerce-mock');
   const mockHost = vs.spec.hosts[0];
   const host = mockHost.split('.').slice(1).join('.');
+  const url = `https://${mockHost}/events`;
 
   return await retryPromise(
       async () => {
         await axios
-            .post(
-                `https://${mockHost}/events`,
-                {
-                  'event-type': 'order.created',
-                  'event-type-version': 'v1',
-                  'event-time': '2020-09-28T14:47:16.491Z',
-                  'data': {'orderCode': '567'},
-                  'event-tracing': true,
-                },
-                {
-                  headers: {
-                    'content-type': 'application/json',
-                  },
-                },
-            )
+            .post(url, body, params)
             .catch((e) => {
-              console.log('Cannot send event, the response from event gateway:');
-              console.dir(e.response.data);
-              throw convertAxiosError(e, 'Cannot send event, the response from event gateway');
+              console.log('Cannot send %s, the response from event gateway: %s', eventType, e.response.data);
+              throw convertAxiosError(e, 'Cannot send %s, the response from event gateway', eventType);
             });
 
         await sleep(500);
@@ -206,9 +193,70 @@ async function sendEventAndCheckResponse(mockNamespace = 'mocks') {
   );
 }
 
-async function sendLegacyEventAndCheckTracing(targetNamespace = 'test', mockNamespace = 'mocks') {
-  // Send an event and get it back from the lastorder function
-  const res = await sendEventAndCheckResponse(mockNamespace);
+async function sendLegacyEventAndCheckResponse(mockNamespace = 'mocks') {
+  const body = {
+    'event-type': 'order.created',
+    'event-type-version': 'v1',
+    'event-time': '2020-09-28T14:47:16.491Z',
+    'data': {'orderCode': '567'},
+    'event-tracing': true,
+  };
+  const params = {
+    headers: {
+      'content-type': 'application/json',
+    },
+  };
+
+  return await sendEventAndCheckResponse('legacy event', body, params, mockNamespace);
+}
+
+async function sendCloudEventStructuredModeAndCheckResponse(backendType ='nats', mockNamespace = 'mocks') {
+  let source = 'commerce';
+  if (backendType === bebBackend) {
+    source = eventMeshNamespace;
+  }
+  const body = {
+    'specversion': '1.0',
+    'source': source,
+    'type': 'sap.kyma.custom.noapp.order.created.v1',
+    'eventtypeversion': 'v1',
+    'id': 'A234-1234-1234',
+    'data': {'orderCode': '567'},
+    'datacontenttype': 'application/json',
+    'eventtracing': true,
+  };
+  const params = {
+    headers: {
+      'content-type': 'application/cloudevents+json',
+    },
+  };
+
+  return await sendEventAndCheckResponse('cloud event', body, params, mockNamespace);
+}
+
+async function sendCloudEventBinaryModeAndCheckResponse(backendType = 'nats', mockNamespace = 'mocks') {
+  let source = 'commerce';
+  if (backendType === bebBackend) {
+    source = eventMeshNamespace;
+  }
+  const body = {
+    'data': {'orderCode': '567'},
+    'eventtracing': true,
+  };
+  const params = {
+    headers: {
+      'content-type': 'application/json',
+      'ce-specversion': '1.0',
+      'ce-type': 'sap.kyma.custom.noapp.order.created.v1',
+      'ce-source': source,
+      'ce-id': 'A234-1234-1234',
+    },
+  };
+
+  return await sendEventAndCheckResponse('cloud event binary', body, params, mockNamespace);
+}
+
+async function checkEventTracing(targetNamespace = 'test', res) {
   expect(res.data).to.have.nested.property('event.headers.x-b3-traceid');
   expect(res.data).to.have.nested.property('podName');
 
@@ -229,6 +277,30 @@ async function sendLegacyEventAndCheckTracing(targetNamespace = 'test', mockName
   // wait sometime for jaeger to complete tracing data
   await sleep(10 * 1000);
   await checkTrace(traceId, correctTraceSpansLength, correctTraceProcessSequence);
+}
+
+async function sendLegacyEventAndCheckTracing(targetNamespace = 'test', mockNamespace = 'mocks') {
+  // Send an event and get it back from the lastorder function
+  const res = await sendLegacyEventAndCheckResponse(mockNamespace);
+
+  // Check the correct event tracing
+  await checkEventTracing(targetNamespace, res);
+}
+
+async function sendCloudEventStructuredModeAndCheckTracing(targetNamespace = 'test', mockNamespace = 'mocks') {
+  // Send an event and get it back from the lastorder function
+  const res = await sendCloudEventStructuredModeAndCheckResponse(mockNamespace);
+
+  // Check the correct event tracing
+  await checkEventTracing(targetNamespace, res);
+}
+
+async function sendCloudEventBinaryModeAndCheckTracing(targetNamespace = 'test', mockNamespace = 'mocks') {
+  // Send an event and get it back from the lastorder function
+  const res = await sendCloudEventBinaryModeAndCheckResponse(mockNamespace);
+
+  // Check the correct event tracing
+  await checkEventTracing(targetNamespace, res);
 }
 
 async function checkInClusterEventTracing(targetNamespace) {
@@ -787,8 +859,12 @@ async function checkInClusterEventDeliveryHelper(targetNamespace, encoding) {
 module.exports = {
   ensureCommerceMockLocalTestFixture,
   ensureCommerceMockWithCompassTestFixture,
-  sendEventAndCheckResponse,
+  sendLegacyEventAndCheckResponse,
+  sendCloudEventStructuredModeAndCheckResponse,
+  sendCloudEventBinaryModeAndCheckResponse,
   sendLegacyEventAndCheckTracing,
+  sendCloudEventStructuredModeAndCheckTracing,
+  sendCloudEventBinaryModeAndCheckTracing,
   addService,
   updateService,
   deleteService,
