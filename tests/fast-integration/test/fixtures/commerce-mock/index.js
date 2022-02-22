@@ -199,6 +199,8 @@ async function sendLegacyEventAndCheckResponse(mockNamespace = 'mocks') {
     'event-type-version': 'v1',
     'event-time': '2020-09-28T14:47:16.491Z',
     'data': {'orderCode': '567'},
+    // this parameter sets the x-b3-sampled header on the commerce-mock side,
+    // which configures istio-proxies to collect the traces no matter what sampling rate is configured
     'event-tracing': true,
   };
   const params = {
