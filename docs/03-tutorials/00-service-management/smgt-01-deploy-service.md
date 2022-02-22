@@ -26,7 +26,7 @@ This tutorial describes how you can deploy a simple SAP BTP audit log service in
     sleep 120
     ```
 
-2. Obtain the access credentials for the SAP BTP service operator as described in step 2 of [SAP BTP Operator setup](https://github.com/SAP/sap-btp-service-operator#setup) documentation. Then, save the obtained credentials to the `creds.json` file.
+2. Obtain the access credentials for the SAP BTP service operator as described in step 2 of [SAP BTP Operator setup](https://github.com/SAP/sap-btp-service-operator#setup) document. Then, save the obtained credentials to the `creds.json` file.
 
 3. Create a Namespace and install [SAP BTP service operator](https://github.com/SAP/sap-btp-service-operator) on it:
 
