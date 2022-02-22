@@ -2,7 +2,7 @@
 {{- $serviceName := include "docker-registry.fullname" . -}}
 {{- $servicePort := .Values.service.port -}}
 {{- $path := .Values.ingress.path -}}
-apiVersion: extensions/v1beta1
+apiVersion: extensions/v1
 kind: Ingress
 metadata:
   name: {{ template "docker-registry.fullname" . }}

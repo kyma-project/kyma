@@ -33,7 +33,7 @@ webhooks:
         name: {{ template "fullname" . }}-webhook
         namespace: {{ .Release.Namespace }}
         path: "/pod-mutating"
-    admissionReviewVersions: ["v1beta1"]
+    admissionReviewVersions: ["v1"]
     sideEffects: None
     timeoutSeconds: 5
   - name: "mutating.bindings.kyma-project.io"
@@ -50,12 +50,12 @@ webhooks:
         name: {{ template "fullname" . }}-webhook
         namespace: {{ .Release.Namespace }}
         path: "/binding-mutating"
-    admissionReviewVersions: ["v1beta1"]
+    admissionReviewVersions: ["v1"]
     sideEffects: None
     timeoutSeconds: 5
 
 ---
-apiVersion: admissionregistration.k8s.io/v1beta1
+apiVersion: admissionregistration.k8s.io/v1
 kind: ValidatingWebhookConfiguration
 metadata:
   name: {{ template "fullname" . }}-validating-webhook
