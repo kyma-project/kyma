@@ -95,7 +95,7 @@ global:
       version: "PR-13435"
     kaniko_executor:
       name: "kaniko-executor"
-      version: "PR-192"
+      version: "1.7.0-6d270da8"
       directory: "tpi"
     registry:
       name: "registry"
