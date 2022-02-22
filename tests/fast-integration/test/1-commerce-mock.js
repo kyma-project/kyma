@@ -10,9 +10,11 @@ const {
   addService,
   updateService,
   deleteService,
-  sendEventAndCheckResponse,
+  sendLegacyEventAndCheckResponse,
+  sendCloudEventStructuredModeAndCheckResponse,
   cleanMockTestFixture,
   checkInClusterEventDelivery,
+  sendCloudEventBinaryModeAndCheckResponse,
 } = require('./fixtures/commerce-mock');
 const {
   printRestartReport,
@@ -61,7 +63,16 @@ function commerceMockTests() {
     });
 
     it('order.created.v1 event should trigger the lastorder function', async function() {
-      await sendEventAndCheckResponse();
+      await sendLegacyEventAndCheckResponse();
+    });
+
+
+    it('order.created.v1 cloud event in structured mode should trigger the lastorder function', async function() {
+      await sendCloudEventStructuredModeAndCheckResponse();
+    });
+
+    it('order.created.v1 cloud event in binary mode should trigger the lastorder function', async function() {
+      await sendCloudEventBinaryModeAndCheckResponse();
     });
 
     it('should add, update and delete a service', async function() {

@@ -15,6 +15,8 @@ let k8sServerUrl;
 let watch;
 let forward;
 
+const eventingBackendName = 'eventing-backend';
+
 function initializeK8sClient(opts) {
   opts = opts || {};
   try {
@@ -481,6 +483,22 @@ async function getAllSubscriptions(namespace = 'default') {
       throw e;
     }
   }
+}
+
+// gets the active eventing backend
+async function getEventingBackend(namespace = 'kyma-system') {
+  const path = '/apis/eventing.kyma-project.io/v1alpha1/eventingbackends/';
+  const response = await k8sDynamicApi.requestPromise({
+    url: k8sDynamicApi.basePath + path,
+  });
+  const body = JSON.parse(response.body);
+  for (let i = 0; i < body.items.length; i++) {
+    const item = body.items[i];
+    if (item?.metadata?.name === eventingBackendName) {
+      return item?.status?.backendType;
+    }
+  }
+  return '';
 }
 
 function waitForSubscription(name, namespace = 'default', timeout = 180000) {
@@ -1749,6 +1767,7 @@ module.exports = {
   ensureKymaAdminBindingExistsForUser,
   ensureKymaAdminBindingDoesNotExistsForUser,
   getSecret,
+  getEventingBackend,
   getSecrets,
   getConfigMap,
   getPodPresets,
