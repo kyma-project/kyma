@@ -6,6 +6,8 @@ metadata:
   namespace: {{ .Release.Namespace }}
   labels:
     {{- include "kiali-server.labels" . | nindent 4 }}
+  annotations:
+    reconciler.kyma-project.io/ignore-pod-state: "true"
 spec:
   replicas: {{ .Values.authProxy.replicaCount }}
   selector:

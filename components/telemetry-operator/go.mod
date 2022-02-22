@@ -3,9 +3,11 @@ module github.com/kyma-project/kyma/components/telemetry-operator
 go 1.17
 
 require (
-	github.com/go-logr/logr v0.4.0
+	github.com/go-logr/zapr v0.4.0
+	github.com/kyma-project/kyma/common/logging v0.0.0-20220208093900-75da62ce99a9
 	github.com/onsi/ginkgo v1.16.4
 	github.com/onsi/gomega v1.13.0
+	github.com/prometheus/client_golang v1.11.1
 	k8s.io/api v0.21.3
 	k8s.io/apimachinery v0.21.3
 	k8s.io/client-go v0.21.2
@@ -26,7 +28,7 @@ require (
 	github.com/evanphx/json-patch v4.11.0+incompatible // indirect
 	github.com/form3tech-oss/jwt-go v3.2.2+incompatible // indirect
 	github.com/fsnotify/fsnotify v1.4.9 // indirect
-	github.com/go-logr/zapr v0.4.0 // indirect
+	github.com/go-logr/logr v0.4.0 // indirect
 	github.com/gogo/protobuf v1.3.2 // indirect
 	github.com/golang/groupcache v0.0.0-20200121045136-8c9f03a8e57e // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
@@ -42,7 +44,6 @@ require (
 	github.com/modern-go/reflect2 v1.0.1 // indirect
 	github.com/nxadm/tail v1.4.8 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
-	github.com/prometheus/client_golang v1.11.0 // indirect
 	github.com/prometheus/client_model v0.2.0 // indirect
 	github.com/prometheus/common v0.26.0 // indirect
 	github.com/prometheus/procfs v0.6.0 // indirect

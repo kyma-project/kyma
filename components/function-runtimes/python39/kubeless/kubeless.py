@@ -116,6 +116,12 @@ class Event:
             headers = {"Content-Type": "application/cloudevents+json"}
             )
     
+    def resolveDataType(self, event_data):
+        if type(event_data) is dict:
+            return 'application/json'
+        elif type(event_data) is str:
+            return 'text/plain'
+
     def buildResponseCloudEvent(self, event_id, event_type, event_data):
         return {
             'type': event_type,
@@ -123,7 +129,8 @@ class Event:
             'eventtypeversion': self.ceHeaders['ce-eventtypeversion'],
             'specversion': self.ceHeaders['ce-specversion'],
             'id': event_id,
-            'data': event_data
+            'data': event_data,
+            'datacontenttype': self.resolveDataType(event_data)
         }
 
 
@@ -237,7 +244,7 @@ if __name__ == '__main__':
         port=func_port,
         # Set this flag to True to auto-reload the server after any source files change
         reloader=os.getenv('CHERRYPY_RELOADED', False),
-        # Number of requests that can be handled in parallel (default = 10).
-        numthreads=int(os.getenv('CHERRYPY_NUMTHREADS', 10)),
+        # Number of requests that can be handled in parallel (default = 50).
+        numthreads=int(os.getenv('CHERRYPY_NUMTHREADS', 50)),
         quiet='KYMA_BOTTLE_QUIET_OPTION_DISABLED' not in os.environ,
     )

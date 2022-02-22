@@ -21,7 +21,10 @@ import (
 	"context"
 	"strings"
 
-	"github.com/go-logr/logr"
+	"github.com/prometheus/client_golang/prometheus"
+
+	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/api/v1alpha1"
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/fluentbit"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -32,9 +35,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"sigs.k8s.io/controller-runtime/pkg/log"
-
-	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/api/v1alpha1"
-	"github.com/kyma-project/kyma/components/telemetry-operator/internal/fluentbit"
+	"sigs.k8s.io/controller-runtime/pkg/metrics"
 )
 
 const (
@@ -48,12 +49,52 @@ const (
 // LogPipelineReconciler reconciles a LogPipeline object
 type LogPipelineReconciler struct {
 	client.Client
-	Scheme                     *runtime.Scheme
+	Scheme *runtime.Scheme
+
 	FluentBitSectionsConfigMap types.NamespacedName
 	FluentBitParsersConfigMap  types.NamespacedName
 	FluentBitDaemonSet         types.NamespacedName
 	FluentBitEnvSecret         types.NamespacedName
 	FluentBitFilesConfigMap    types.NamespacedName
+
+	FluentBitRestartsCount prometheus.Counter
+}
+
+// NewLogPipelineReconciler returns a new LogPipelineReconciler using the given FluentBit config arguments
+func NewLogPipelineReconciler(client client.Client, scheme *runtime.Scheme, namespace string, sectionsCm string, parsersCm string, daemonSet string, envSecret string, filesCm string) *LogPipelineReconciler {
+	var result LogPipelineReconciler
+
+	result.Client = client
+	result.Scheme = scheme
+
+	result.FluentBitSectionsConfigMap = types.NamespacedName{
+		Name:      sectionsCm,
+		Namespace: namespace,
+	}
+	result.FluentBitParsersConfigMap = types.NamespacedName{
+		Name:      parsersCm,
+		Namespace: namespace,
+	}
+	result.FluentBitFilesConfigMap = types.NamespacedName{
+		Name:      filesCm,
+		Namespace: namespace,
+	}
+	result.FluentBitDaemonSet = types.NamespacedName{
+		Name:      daemonSet,
+		Namespace: namespace,
+	}
+	result.FluentBitEnvSecret = types.NamespacedName{
+		Name:      envSecret,
+		Namespace: namespace,
+	}
+
+	result.FluentBitRestartsCount = prometheus.NewCounter(prometheus.CounterOpts{
+		Name: "telemetry_operator_fluentbit_restarts_total",
+		Help: "Number of triggered FluentBit restarts",
+	})
+	metrics.Registry.MustRegister(result.FluentBitRestartsCount)
+
+	return &result
 }
 
 //+kubebuilder:rbac:groups=telemetry.kyma-project.io,resources=logpipelines,verbs=get;list;watch;create;update;patch;delete
@@ -108,12 +149,12 @@ func (r *LogPipelineReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 	if updatedSectionsCm || updatedParsersCm || updatedFilesCm || updatedEnv {
 		log.Info("Updated fluent bit configuration")
 		if err := r.Update(ctx, &logPipeline); err != nil {
-			log.Error(err, "Cannot update LogPipeline")
+			log.Error(err, "Failed updating LogPipeline")
 			return ctrl.Result{}, err
 		}
 
-		if err := r.deleteFluentBitPods(ctx, log); err != nil {
-			log.Error(err, "Cannot delete fluent bit pods")
+		if err := r.deleteFluentBitPods(ctx); err != nil {
+			log.Error(err, "Failed deleting fluent bit pods")
 			return ctrl.Result{}, err
 		}
 	}
@@ -315,7 +356,7 @@ func (r *LogPipelineReconciler) syncSecretRefs(ctx context.Context, logPipeline 
 	for _, secretRef := range logPipeline.Spec.SecretRefs {
 		var referencedSecret corev1.Secret
 		if err := r.Get(ctx, types.NamespacedName{Name: secretRef.Name, Namespace: secretRef.Namespace}, &referencedSecret); err != nil {
-			log.Error(err, "Cannot read secret %s from namespace %s", secretRef.Name, secretRef.Namespace)
+			log.Error(err, "Failed reading secret %s from namespace %s", secretRef.Name, secretRef.Namespace)
 			continue
 		}
 		for k, v := range referencedSecret.Data {
@@ -357,24 +398,27 @@ func (r *LogPipelineReconciler) syncSecretRefs(ctx context.Context, logPipeline 
 }
 
 // Delete all Fluent Bit pods to apply new configuration.
-func (r *LogPipelineReconciler) deleteFluentBitPods(ctx context.Context, log logr.Logger) error {
+func (r *LogPipelineReconciler) deleteFluentBitPods(ctx context.Context) error {
+	log := log.FromContext(ctx)
 	var fluentBitDs appsv1.DaemonSet
 	if err := r.Get(ctx, r.FluentBitDaemonSet, &fluentBitDs); err != nil {
-		log.Error(err, "Cannot get Fluent Bit DaemonSet")
+		log.Error(err, "Failed getting fluent bit DaemonSet")
 	}
 
 	var fluentBitPods corev1.PodList
 	if err := r.List(ctx, &fluentBitPods, client.InNamespace(r.FluentBitDaemonSet.Namespace), client.MatchingLabels(fluentBitDs.Spec.Template.Labels)); err != nil {
-		log.Error(err, "Cannot list fluent bit pods")
+		log.Error(err, "Failed listing fluent bit pods")
 		return err
 	}
 
 	log.Info("Restarting Fluent Bit pods")
 	for i := range fluentBitPods.Items {
 		if err := r.Delete(ctx, &fluentBitPods.Items[i]); err != nil {
-			log.Error(err, "Cannot delete pod "+fluentBitPods.Items[i].Name)
+			log.Error(err, "Failed deleting pod "+fluentBitPods.Items[i].Name)
 		}
 	}
+
+	r.FluentBitRestartsCount.Inc()
 	return nil
 }
 

@@ -53,7 +53,7 @@ cat <<EOF | kubectl apply -f -
     name: lastorder
     namespace: default
   spec:
-    gateway: kyma-gateway.kyma-system.svc.cluster.local
+    gateway: kyma-system/kyma-gateway
     rules:
       - path: /.*
         methods: ["GET", "POST"]

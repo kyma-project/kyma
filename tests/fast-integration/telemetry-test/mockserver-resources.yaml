@@ -1,0 +1,109 @@
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: mockserver
+  name: mockserver
+  namespace: mockserver
+spec:
+  ports:
+  - name: serviceport
+    port: 1080
+    targetPort: serviceport
+  selector:
+    app: mockserver
+  type: ClusterIP
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  labels:
+    app: mockserver-config
+  name: mockserver-config
+  namespace: mockserver
+data:
+  initializerJson.json: |
+    [
+      {
+        "httpRequest": {
+          "path": "/"
+        },
+        "httpResponse": {
+          "statusCode": 201,
+          "body": "some response"
+        }
+      }
+    ]
+  mockserver.properties: |
+    mockserver.maxSocketTimeout=120000
+    mockserver.dynamicallyCreateCertificateAuthorityCertificate=true
+    mockserver.directoryToSaveDynamicSSLCertificate=.
+    mockserver.sslCertificateDomainName=localhost
+    mockserver.sslSubjectAlternativeNameDomains=www.example.com,www.another.com
+    mockserver.sslSubjectAlternativeNameIps=127.0.0.1
+    mockserver.enableCORSForAPI=true
+    mockserver.enableCORSForAllResponses=true
+    mockserver.initializationJsonPath=/config/initializerJson.json
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: mockserver
+  name: mockserver
+  namespace: mockserver
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mockserver
+  template:
+    metadata:
+      labels:
+        app: mockserver
+      name: mockserver
+    spec:
+      containers:
+      - env:
+        - name: LOG_LEVEL
+          value: INFO
+        - name: SERVER_PORT
+          value: "1080"
+        image: eu.gcr.io/kyma-project/external/mockserver/mockserver:mockserver-5.11.2
+        livenessProbe:
+          failureThreshold: 10
+          initialDelaySeconds: 10
+          periodSeconds: 5
+          successThreshold: 1
+          tcpSocket:
+            port: serviceport
+          timeoutSeconds: 1
+        name: mockserver
+        ports:
+        - containerPort: 1080
+          name: serviceport
+          protocol: TCP
+        readinessProbe:
+          failureThreshold: 10
+          initialDelaySeconds: 2
+          periodSeconds: 2
+          successThreshold: 1
+          tcpSocket:
+            port: serviceport
+          timeoutSeconds: 1
+        resources: {}
+        securityContext:
+          readOnlyRootFilesystem: false
+          runAsUser: 65534
+        volumeMounts:
+        - mountPath: /config
+          name: config-volume
+        - mountPath: /libs
+          name: libs-volume
+      volumes:
+      - configMap:
+          name: mockserver-config
+        name: config-volume
+      - configMap:
+          name: mockserver-config
+        name: libs-volume

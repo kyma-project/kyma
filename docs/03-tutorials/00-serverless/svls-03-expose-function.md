@@ -107,7 +107,7 @@ Follow these steps:
       name: $NAME
       namespace: $NAMESPACE
     spec:
-      gateway: kyma-gateway.kyma-system.svc.cluster.local
+      gateway: kyma-system/kyma-gateway
       rules:
       - path: /.*
         accessStrategies:

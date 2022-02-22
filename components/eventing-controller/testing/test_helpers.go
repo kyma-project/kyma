@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
+
 	v1 "k8s.io/api/core/v1"
 
 	k8sresource "k8s.io/apimachinery/pkg/api/resource"
@@ -34,9 +36,7 @@ const (
 	EventTypePrefix                          = "prefix"
 	EventTypePrefixEmpty                     = ""
 	OrderCreatedV1Event                      = "order.created.v1"
-	OrderUpdatedV1Event                      = "order.updated.v1"
 	OrderCreatedEventType                    = EventTypePrefix + "." + ApplicationName + "." + OrderCreatedV1Event
-	OrderUpdatedEventType                    = EventTypePrefix + "." + ApplicationName + "." + OrderUpdatedV1Event
 	OrderCreatedEventTypeNotClean            = EventTypePrefix + "." + ApplicationNameNotClean + "." + OrderCreatedV1Event
 	OrderCreatedEventTypePrefixEmpty         = ApplicationName + "." + OrderCreatedV1Event
 	OrderCreatedEventTypeNotCleanPrefixEmpty = ApplicationNameNotClean + "." + OrderCreatedV1Event
@@ -57,14 +57,6 @@ const (
 	StructuredCloudEvent = `{
            "id":"` + EventID + `",
            "type":"` + OrderCreatedEventType + `",
-           "specversion":"` + EventSpecVersion + `",
-           "source":"` + EventSource + `",
-           "data":"` + EventData + `"
-        }`
-
-	StructuredCloudEventUpdated = `{
-           "id":"` + EventID + `",
-           "type":"` + OrderUpdatedEventType + `",
            "specversion":"` + EventSpecVersion + `",
            "source":"` + EventSource + `",
            "data":"` + EventData + `"
@@ -129,12 +121,6 @@ func WithPath() APIRuleOption {
 				},
 			},
 		}
-	}
-}
-
-func WithStatusReady() APIRuleOption {
-	return func(r *apigatewayv1alpha1.APIRule) {
-		MarkReady(r)
 	}
 }
 
@@ -241,6 +227,24 @@ func WithFakeSubscriptionStatus() SubscriptionOpt {
 	}
 }
 
+func WithStatusConfig(defaultConfig env.DefaultSubscriptionConfig) SubscriptionOpt {
+	return func(s *eventingv1alpha1.Subscription) {
+		s.Status.Config = eventingv1alpha1.MergeSubsConfigs(nil, &defaultConfig)
+	}
+}
+
+func WithSpecConfig(defaultConfig env.DefaultSubscriptionConfig) SubscriptionOpt {
+	return func(s *eventingv1alpha1.Subscription) {
+		s.Spec.Config = eventingv1alpha1.MergeSubsConfigs(nil, &defaultConfig)
+	}
+}
+
+func WithStatusCleanEventTypes(cleanEventTypes []string) SubscriptionOpt {
+	return func(sub *eventingv1alpha1.Subscription) {
+		sub.Status.CleanEventTypes = cleanEventTypes
+	}
+}
+
 func WithWebhookAuthForBEB() SubscriptionOpt {
 	return func(s *eventingv1alpha1.Subscription) {
 		s.Spec.Protocol = "BEB"
@@ -276,38 +280,41 @@ func WithProtocolSettings(p *eventingv1alpha1.ProtocolSettings) SubscriptionOpt 
 }
 
 // WithWebhookForNATS is a SubscriptionOpt for creating a Subscription with a webhook set to the NATS protocol.
-func WithWebhookForNats() SubscriptionOpt {
+func WithWebhookForNATS() SubscriptionOpt {
 	return func(s *eventingv1alpha1.Subscription) {
 		s.Spec.Protocol = "NATS"
 		s.Spec.ProtocolSettings = &eventingv1alpha1.ProtocolSettings{}
 	}
 }
 
+// AddFilter creates a new Filter from eventSource and eventType and adds it to the subscription.
+func AddFilter(eventSource, eventType string, subscription *eventingv1alpha1.Subscription) {
+	if subscription.Spec.Filter == nil {
+		subscription.Spec.Filter = &eventingv1alpha1.BEBFilters{
+			Filters: []*eventingv1alpha1.BEBFilter{},
+		}
+	}
+
+	filter := &eventingv1alpha1.BEBFilter{
+		EventSource: &eventingv1alpha1.Filter{
+			Type:     "exact",
+			Property: "source",
+			Value:    eventSource,
+		},
+		EventType: &eventingv1alpha1.Filter{
+			Type:     "exact",
+			Property: "type",
+			Value:    eventType,
+		},
+	}
+
+	subscription.Spec.Filter.Filters = append(subscription.Spec.Filter.Filters, filter)
+}
+
 // WithFilter is a SubscriptionOpt for creating a Subscription with a specific event type filter,
 // that itself gets created from the passed eventSource and eventType.
 func WithFilter(eventSource, eventType string) SubscriptionOpt {
-	return func(subscription *eventingv1alpha1.Subscription) {
-		if subscription.Spec.Filter == nil {
-			subscription.Spec.Filter = &eventingv1alpha1.BEBFilters{
-				Filters: []*eventingv1alpha1.BEBFilter{},
-			}
-		}
-
-		filter := &eventingv1alpha1.BEBFilter{
-			EventSource: &eventingv1alpha1.Filter{
-				Type:     "exact",
-				Property: "source",
-				Value:    eventSource,
-			},
-			EventType: &eventingv1alpha1.Filter{
-				Type:     "exact",
-				Property: "type",
-				Value:    eventType,
-			},
-		}
-
-		subscription.Spec.Filter.Filters = append(subscription.Spec.Filter.Filters, filter)
-	}
+	return func(subscription *eventingv1alpha1.Subscription) { AddFilter(eventSource, eventType, subscription) }
 }
 
 // WithNotCleanFilter initializes subscription filter with a not clean event-type

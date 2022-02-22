@@ -17,7 +17,9 @@ limitations under the License.
 package controllers
 
 import (
+	"bufio"
 	"context"
+	"net/http"
 	"strings"
 	"time"
 
@@ -256,6 +258,23 @@ var _ = Describe("LogPipeline controller", func() {
 				}
 				return len(fluentBitPods.Items)
 			}, timeout, interval).Should(Equal(0))
+
+			// Custom metrics should be exported
+			Eventually(func() bool {
+				resp, err := http.Get("http://localhost:8080/metrics")
+				if err != nil {
+					return false
+				}
+				defer resp.Body.Close()
+				scanner := bufio.NewScanner(resp.Body)
+				for scanner.Scan() {
+					line := scanner.Text()
+					if strings.Contains(line, "telemetry_operator_fluentbit_restarts_total") {
+						return true
+					}
+				}
+				return false
+			}, timeout, interval).Should(Equal(true))
 		})
 	})
 })
