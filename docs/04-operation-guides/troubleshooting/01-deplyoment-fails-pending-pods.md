@@ -20,7 +20,7 @@ Verify the cause:
 
 1. Find out which Pods are pending.
 2. For the pending Pods, verify which error message you get by _describing_ the related deployment:
-   Run `kubectl -n istio-system describe deployment istiod` and `kubectl -n istio-system describe pod istiod-{POD_NAME}`.
+   For example, if the Istiod Pod is pending, run `kubectl -n istio-system describe deployment istiod` and `kubectl -n istio-system describe pod istiod-{POD_NAME}`.
 
 Fix the issue:
 

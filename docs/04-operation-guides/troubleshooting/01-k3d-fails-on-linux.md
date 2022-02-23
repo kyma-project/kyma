@@ -14,6 +14,6 @@ On Linux, the port is reserved.
 ## Remedy
 
 Use a custom port for the load balancer, for example, port 8080.
-To do this, run `kyma provision k3d -p 8080:8080@loadbalancer `.
+To do this, run `kyma provision k3d -p 8080:8080@loadbalancer -p 8443:8443@loadbalancer`.
 
 Alternatively, execute the `kyma provision` command with sudo privileges.
