@@ -1,5 +1,6 @@
 'use strict';
 
+const axios = require('axios');
 const opentelemetry = require('@opentelemetry/api');
 const { registerInstrumentations } = require('@opentelemetry/instrumentation');
 const { NodeTracerProvider } = require('@opentelemetry/node');
@@ -8,7 +9,22 @@ const { JaegerExporter } = require('@opentelemetry/exporter-jaeger');
 const { HttpInstrumentation } = require('@opentelemetry/instrumentation-http');
 const { B3Propagator,B3InjectEncoding } = require("@opentelemetry/propagator-b3");
 
+function is_jaeger_available(endpoint) {
+  let res = await axios(endpoint);
+
+  // 405 is the right status code for the GET method if jaeger service exists
+  if (res.status == 405) {
+    return true;
+  }
+  return false;
+}
+
 module.exports = (serviceName, endpoint) => {
+  if (is_jaeger_available(endpoint) == false) {
+    return null;
+  }
+
+
   const provider = new NodeTracerProvider();
 
   registerInstrumentations({

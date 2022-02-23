@@ -6,7 +6,7 @@ import sys
 import threading
 import bottle
 from ce import Event
-from tracing import get_tracer, set_req_context
+from tracing import get_tracer, set_req_context, is_jaeger_available
 import prometheus_client as prom
 import queue
 
@@ -48,6 +48,8 @@ function_context = {
 # all configuration should be provided only once 
 # and tracer declaration is moved to the `if __name__ == '__main__'` below
 tracer = None
+if __name__ == '__main__' and is_jaeger_available():
+    tracer = get_tracer()
 
 def func_with_context(e, function_context):
     ex = e.ceHeaders["extensions"]
@@ -80,8 +82,12 @@ def handler():
     func_calls.labels(method).inc()
     with func_errors.labels(method).count_exceptions():
         with func_hist.labels(method).time():
+            lambda_func = func
+            if tracer != None:
+                lambda_func = func_with_context
+
             que = queue.Queue()
-            t = threading.Thread(target=lambda q, e: q.put(func_with_context(e,function_context)), args=(que,event))
+            t = threading.Thread(target=lambda q, e: q.put(lambda_func(e,function_context)), args=(que,event))
             t.start()
             try:
                 res = que.get(block=True, timeout=timeout)
@@ -102,8 +108,6 @@ if __name__ == '__main__':
     import requestlogger
 
     mp_context = os.getenv('MP_CONTEXT', 'forkserver')
-
-    tracer = get_tracer()
 
     if mp_context == "fork":
         raise ValueError(

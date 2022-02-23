@@ -1,4 +1,5 @@
 import os
+import requests
 from opentelemetry import trace
 from opentelemetry.trace import context_api
 from opentelemetry.exporter.jaeger.thrift import JaegerExporter
@@ -17,6 +18,15 @@ from typing import Iterator
 podName = os.getenv('HOSTNAME')
 serviceNamespace = os.getenv('SERVICE_NAMESPACE')
 jaegerEndpoint = os.getenv('JAEGER_SERVICE_ENDPOINT')
+
+def is_jaeger_available() -> bool:
+    res = requests.get(jaegerEndpoint)
+    
+    # 405 is the right status code for the GET method if jaeger service exists 
+    if res.status_code == 405:
+        return True
+    
+    return False
 
 def get_tracer() -> trace.Tracer:
     set_global_textmap(B3MultiFormat())
