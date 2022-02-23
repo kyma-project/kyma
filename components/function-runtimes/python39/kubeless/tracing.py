@@ -20,13 +20,18 @@ serviceNamespace = os.getenv('SERVICE_NAMESPACE')
 jaegerEndpoint = os.getenv('JAEGER_SERVICE_ENDPOINT')
 
 def is_jaeger_available() -> bool:
-    res = requests.get(jaegerEndpoint)
+    exists = False
+    try:
+        res = requests.get(jaegerEndpoint)
+        res.raise_for_status()
+
+        # 405 is the right status code for the GET method if jaeger service exists 
+        if res.status_code == 405:
+            exists = True
+    except:
+        pass
     
-    # 405 is the right status code for the GET method if jaeger service exists 
-    if res.status_code == 405:
-        return True
-    
-    return False
+    return exists
 
 def get_tracer() -> trace.Tracer:
     set_global_textmap(B3MultiFormat())

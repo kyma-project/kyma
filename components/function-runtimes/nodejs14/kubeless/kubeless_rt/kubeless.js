@@ -3,6 +3,7 @@
 const vm = require('vm');
 const path = require('path');
 const Module = require('module');
+const axios = require('axios');
 
 const bodyParser = require('body-parser');
 const client = require('prom-client');
@@ -27,10 +28,17 @@ let serviceName = podName.substring(0, podName.lastIndexOf("-"));
 serviceName = serviceName.substring(0, serviceName.lastIndexOf("-"))
 
 const jaegerServiceEndpoint = process.env.JAEGER_SERVICE_ENDPOINT
-const tracer = require('./lib/tracer')(
-    [serviceName, serviceNamespace].join('.'),
-    jaegerServiceEndpoint,
-);
+const tracer = null;
+axios(jaegerServiceEndpoint)
+    .then((res) => {
+        // 405 is the right status code for the GET method if jaeger service exists
+        if (res.status == 405) {
+            tracer = require('./lib/tracer')(
+                [serviceName, serviceNamespace].join('.'),
+                jaegerServiceEndpoint,
+            );
+        }
+    });
 
 if (process.env["KYMA_INTERNAL_LOGGER_ENABLED"]) {
     app.use(morgan("combined"));
