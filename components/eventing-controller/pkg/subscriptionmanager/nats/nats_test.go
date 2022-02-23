@@ -34,7 +34,7 @@ func TestCleanup(t *testing.T) {
 
 	// Create NATS Server
 	natsPort := 4222
-	natsServer := controllertesting.RunNatsServerOnPort(natsPort)
+	natsServer := controllertesting.RunNatsServerOnPort(controllertesting.WithPort(natsPort))
 	natsURL := natsServer.ClientURL()
 	defer controllertesting.ShutDownNATSServer(natsServer)
 

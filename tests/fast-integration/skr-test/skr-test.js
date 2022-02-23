@@ -6,7 +6,7 @@ const {
 const {
   ensureCommerceMockWithCompassTestFixture,
   checkFunctionResponse,
-  sendEventAndCheckResponse,
+  sendLegacyEventAndCheckResponse,
   deleteMockTestFixture,
 } = require('../test/fixtures/commerce-mock');
 const {
@@ -135,8 +135,8 @@ function commerceMockTest() {
       await checkFunctionResponse(this.options.testNS);
     });
 
-    it('order.created.v1 event should trigger the lastorder function', async function() {
-      await sendEventAndCheckResponse();
+    it('order.created.v1 legacy event should trigger the lastorder function', async function() {
+      await sendLegacyEventAndCheckResponse();
     });
 
     it('Deletes the resources that have been created', async function() {

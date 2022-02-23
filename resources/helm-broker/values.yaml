@@ -112,7 +112,7 @@ global:
       version: "f2f2f3d9"
     helm_broker:
       name: "helm-broker"
-      version: "f2f2f3d9"
+      version: "bf0bcbb3"
     helm_controller:
       name: "helm-controller"
       version: "f2f2f3d9"

@@ -816,7 +816,7 @@ var _ = AfterSuite(func() {
 }, 60)
 
 func startNATS(port int) (*natsserver.Server, string) {
-	natsServer := reconcilertesting.RunNatsServerOnPort(port)
+	natsServer := reconcilertesting.RunNatsServerOnPort(reconcilertesting.WithPort(port))
 	clientURL := natsServer.ClientURL()
 	log.Printf("NATS server started %v", clientURL)
 	return natsServer, clientURL
