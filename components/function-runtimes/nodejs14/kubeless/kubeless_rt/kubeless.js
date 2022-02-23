@@ -28,19 +28,17 @@ let serviceName = podName.substring(0, podName.lastIndexOf("-"));
 serviceName = serviceName.substring(0, serviceName.lastIndexOf("-"))
 
 const jaegerServiceEndpoint = process.env.JAEGER_SERVICE_ENDPOINT
-const tracer = null;
+let tracer = null;
 axios(jaegerServiceEndpoint)
-    .then((res) => {
+    .catch((err) => {
         // 405 is the right status code for the GET method if jaeger service exists
-        if (res.status == 405) {
+        if (err.response && err.response.status == 405) {
             tracer = require('./lib/tracer')(
                 [serviceName, serviceNamespace].join('.'),
                 jaegerServiceEndpoint,
             );
         }
-    })
-    // Unhandled promise rejections are deprecated
-    .catch(() => {});
+    });
 
 if (process.env["KYMA_INTERNAL_LOGGER_ENABLED"]) {
     app.use(morgan("combined"));
