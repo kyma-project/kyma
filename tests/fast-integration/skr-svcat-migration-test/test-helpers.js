@@ -244,7 +244,8 @@ async function markForMigration(creds, svcatPlatform, btpOperatorInstanceId) {
     // usage: smctl curl -X PUT -d '{"sourcePlatformID": ":platformID"}' /v1/migrate/service_operator/:instanceID
     const data = {sourcePlatformID: svcatPlatform};
     args = ['curl', '-X', 'PUT', '-d', JSON.stringify(data), '/v1/migrate/service_operator/' + btpOperatorInstanceId];
-    await execa('smctl', args);
+    console.log(args);
+    //await execa('smctl', args);
   } catch (error) {
     errors = errors.concat([`failed "smctl ${args.join(' ')}": ${error.stderr}\n`]);
   }

@@ -148,7 +148,8 @@ class KEBClient {
 
     const endpoint = `service_instances/${instanceID}?accepts_incomplete=true`;
     try {
-      return await this.callKEB(payload, endpoint, 'patch');
+      console.log(`${JSON.stringify(payload)}`)
+      //return await this.callKEB(payload, endpoint, 'patch');
     } catch (err) {
       throw new Error(`error while updating SKR: ${err.toString()}`);
     }

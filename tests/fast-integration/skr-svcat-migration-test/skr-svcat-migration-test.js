@@ -104,13 +104,13 @@ describe('SKR SVCAT migration test', function() {
   });
 
   it('Should mark the platform for migration in Service Manager', async function() {
-    console.log("skip");
-    //await t.markForMigration(smAdminCreds, platformCreds.clusterId, btpOperatorCreds.instanceId);
+    console.log("skip but print");
+    await t.markForMigration(smAdminCreds, platformCreds.clusterId, btpOperatorCreds.instanceId);
   });
 
   it('Should update SKR with BTP Operator Credentials', async function() {
-    console.log("skip");
-    //await updateSKR(keb, kcp, gardener, instanceID, skr.shoot.name, null, updateTimeout, btpOperatorCreds, true);
+    console.log("skip but print");
+    await updateSKR(keb, kcp, gardener, instanceID, skr.shoot.name, null, updateTimeout, btpOperatorCreds, true);
   });
 
   it('Should wait for btp-operator deployment availability', async function() {
