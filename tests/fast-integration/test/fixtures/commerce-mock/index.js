@@ -878,4 +878,5 @@ module.exports = {
   waitForSubscriptionsTillReady,
   setEventMeshSourceNamespace,
   cleanCompassResourcesSKR,
+  sendEventAndCheckResponse,
 };
