@@ -57,6 +57,8 @@ class KEBClient {
       headers: headers,
       data: payload,
     };
+    console.log(`${verb} ${url}`)
+    console.log(`${JSON.stringify(payload)}`)
     return request;
   }
 

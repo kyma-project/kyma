@@ -116,7 +116,7 @@ describe('SKR SVCAT migration test', function() {
   });
 
   it('Should wait for migration job to finish', async function() {
-    await waitForJob('sap-btp-operator-migration', 'kyma-system', 10 * 60 * 1000); // 10 minutes
+    await waitForJob('sap-btp-operator-migration', 'kyma-system', 100 * 60 * 1000); // 100 minutes
   });
 
   it('Should print the container logs of the migration job', async function() {
