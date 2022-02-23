@@ -4,11 +4,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"sync"
 	"testing"
 	"time"
-
-	"github.com/nats-io/nats-server/v2/server"
 
 	"github.com/avast/retry-go/v3"
 	cev2event "github.com/cloudevents/sdk-go/v2/event"
@@ -26,7 +23,7 @@ import (
 )
 
 var (
-	nextPort = &portGenerator{port: 5223}
+	nextSinkPort = &portGenerator{port: 8088}
 )
 
 func TestConvertMsgToCE(t *testing.T) {
@@ -845,7 +842,7 @@ func TestSubscriptionWithMaxInFlightChange(t *testing.T) {
 		eventingtesting.WithNotCleanFilter(),
 		eventingtesting.WithStatusConfig(defaultSubsConfig),
 	)
-	sub.Spec.Sink = fmt.Sprintf("http://127.0.0.1:%d/store", nextPort.get())
+	sub.Spec.Sink = fmt.Sprintf("http://127.0.0.1:%d/store", nextSinkPort.get())
 	addCleanEventTypesToStatus(sub, cleaner)
 	_, err := natsBackend.SyncSubscription(sub, cleaner)
 	g.Expect(err).To(BeNil())
@@ -1073,7 +1070,7 @@ func TestSubscription_NATSServerRestart(t *testing.T) {
 	g.Eventually(func() bool {
 		return natsBackend.connection.IsConnected()
 	}, 60*time.Second, 2*time.Second).Should(BeFalse())
-	_ = eventingtesting.RunNatsServerOnPort(natsPort)
+	_ = eventingtesting.RunNatsServerOnPort(eventingtesting.WithPort(natsPort))
 	g.Eventually(func() bool {
 		return natsBackend.connection.IsConnected()
 	}, 60*time.Second, 2*time.Second).Should(BeTrue())
@@ -1083,12 +1080,6 @@ func TestSubscription_NATSServerRestart(t *testing.T) {
 	g.Expect(SendEventToNATS(natsBackend, ev2data)).Should(Succeed())
 	expectedEv2Data := fmt.Sprintf("\"%s\"", ev2data)
 	g.Expect(subscriber.CheckEvent(expectedEv2Data)).Should(Succeed())
-}
-
-func startNATSServer() (*server.Server, int) {
-	natsPort := nextPort.get()
-	natsServer := eventingtesting.RunNatsServerOnPort(natsPort)
-	return natsServer, natsPort
 }
 
 func addCleanEventTypesToStatus(sub *eventingv1alpha1.Subscription, cleaner eventtype.Cleaner) {
@@ -1130,17 +1121,4 @@ func checkValidity(sub *nats.Subscription, toCheckIsValid bool, t *testing.T) er
 		retry.OnRetry(func(n uint, err error) { t.Logf("[%v] try failed: %s", n, err) }),
 	)
 	return err
-}
-
-type portGenerator struct {
-	lock sync.Mutex
-	port int
-}
-
-func (pg *portGenerator) get() int {
-	pg.lock.Lock()
-	defer pg.lock.Unlock()
-	p := pg.port
-	pg.port++
-	return p
 }
