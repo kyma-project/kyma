@@ -1,4 +1,4 @@
-FROM eu.gcr.io/kyma-project/tpi/k8s-tools:20220127-ec72a890
+FROM eu.gcr.io/kyma-project/tpi/k8s-tools:20220222-0161f9f8
 
 LABEL source=git@github.com:kyma-project/kyma.git
 
