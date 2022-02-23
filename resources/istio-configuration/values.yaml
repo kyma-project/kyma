@@ -127,12 +127,12 @@ global:
     istio_proxyv2:
       # eu.gcr.io/kyma-project/external/us-docker.pkg.dev/gloo-mesh/istio-69e5957db6d2/proxyv2
       name: "proxyv2"
-      version: "1.12.2-solo-fips-distroless"
+      version: "1.12.3-solo-fips-distroless"
       directory: "external/us-docker.pkg.dev/gloo-mesh/istio-69e5957db6d2"
       containerRegistryPath: "eu.gcr.io/kyma-project"
     istio_pilot:
       name: "pilot"
-      version: "1.12.2-solo-fips-distroless"
+      version: "1.12.3-solo-fips-distroless"
       directory: "external/us-docker.pkg.dev/gloo-mesh/istio-69e5957db6d2"
       containerRegistryPath: "eu.gcr.io/kyma-project"
   tracing:
