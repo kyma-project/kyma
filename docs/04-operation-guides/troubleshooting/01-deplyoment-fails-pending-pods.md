@@ -26,4 +26,4 @@ Fix the issue:
 
 1. In the preference settings of your Docker UI, adjust the Docker resource assignment.
 2. Check whether there are sufficient resources (memory/cpu/disk) on the device.
-3. Adjust the resources as needed.
+3. Adjust the resources as needed. If you're not sure, use the default values you find in `profile-evaluation.yaml` in the [`resources`](https://github.com/kyma-project/kyma/tree/main/resources) directory.
