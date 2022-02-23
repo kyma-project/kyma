@@ -38,7 +38,9 @@ axios(jaegerServiceEndpoint)
                 jaegerServiceEndpoint,
             );
         }
-    });
+    })
+    // Unhandled promise rejections are deprecated
+    .catch(() => {});
 
 if (process.env["KYMA_INTERNAL_LOGGER_ENABLED"]) {
     app.use(morgan("combined"));
