@@ -5,11 +5,13 @@ const {
 
 const {
   debug,
-  deleteEventingBackendK8sSecret, getShootNameFromK8sServerUrl,
+  deleteEventingBackendK8sSecret,
+  getShootNameFromK8sServerUrl,
 } = require('../utils');
 
 const {DirectorClient, DirectorConfig} = require('../compass');
 const {GardenerClient, GardenerConfig} = require('../gardener');
+const fs = require('fs');
 const suffix = 'evnt';
 const appName = `app-${suffix}`;
 const scenarioName = `test-${suffix}`;
@@ -22,6 +24,19 @@ const eventMeshSecretFilePath = process.env.EVENTMESH_SECRET_FILE || '';
 const DEBUG_MODE = process.env.DEBUG;
 const timeoutTime = 10 * 60 * 1000;
 const slowTime = 5000;
+const natsBackend = 'nats';
+const bebBackend = 'beb';
+const eventMeshNamespace = getEventMeshNamespace();
+
+// reads the EventMesh namespace from the credentials file
+function getEventMeshNamespace() {
+  try {
+    const eventMeshSecret = JSON.parse(fs.readFileSync(eventMeshSecretFilePath, {encoding: 'utf8'}));
+    return '/' + eventMeshSecret['namespace'];
+  } catch (e) {
+    return undefined;
+  }
+}
 
 async function cleanupTestingResources() {
   if (isSKR) {
@@ -62,4 +77,7 @@ module.exports = {
   timeoutTime,
   slowTime,
   cleanupTestingResources,
+  natsBackend,
+  bebBackend,
+  eventMeshNamespace,
 };

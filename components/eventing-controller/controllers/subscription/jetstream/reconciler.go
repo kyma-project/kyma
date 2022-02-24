@@ -4,6 +4,8 @@ import (
 	"context"
 	"os"
 
+	"github.com/nats-io/nats.go"
+
 	"github.com/kyma-project/kyma/components/eventing-controller/controllers/events"
 	"github.com/kyma-project/kyma/components/eventing-controller/utils"
 	"github.com/pkg/errors"
@@ -42,7 +44,7 @@ func NewReconciler(ctx context.Context, client client.Client, logger *logger.Log
 		recorder: recorder,
 		logger:   logger,
 	}
-	jsHandler := handlers.NewJetStream(cfg, logger)
+	jsHandler := handlers.NewJetStream(cfg, reconciler.handleNatsConnClose, logger)
 	if err := jsHandler.Initialize(env.Config{}); err != nil {
 		logger.WithContext().Errorw("start reconciler failed", "name", reconcilerName, "error", err)
 		panic(err)
@@ -95,6 +97,14 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 
 	log.Error("cannot reconcile JetStream subscription (not implemented)")
 	return ctrl.Result{}, nil
+}
+
+// handleNatsConnClose is called by NATS when the connection to the NATS server is closed. When it
+// is called, the reconnect-attempts have exceeded the defined value.
+// It forces reconciling the subscription to make sure the subscription is marked as not ready, until
+// it is possible to connect to the NATS server again.
+func (r *Reconciler) handleNatsConnClose(_ *nats.Conn) {
+	// TODO: implement me!
 }
 
 func (r *Reconciler) syncSubscriptionStatus(ctx context.Context, sub *eventingv1alpha1.Subscription) error {

@@ -11,7 +11,9 @@ const {
   ensureCommerceMockWithCompassTestFixture,
   cleanMockTestFixture,
   checkFunctionResponse,
-  sendEventAndCheckResponse,
+  sendLegacyEventAndCheckResponse,
+  sendCloudEventStructuredModeAndCheckResponse,
+  sendCloudEventBinaryModeAndCheckResponse,
 } = require('../test/fixtures/commerce-mock');
 
 describe('Kyma with Compass test', async function() {
@@ -45,8 +47,15 @@ describe('Kyma with Compass test', async function() {
     await checkFunctionResponse(testNS);
   });
 
-  it('order.created.v1 event should trigger the lastorder function', async function() {
-    await sendEventAndCheckResponse();
+  it('order.created.v1 legacy event should trigger the lastorder function', async function() {
+    await sendLegacyEventAndCheckResponse();
+  });
+  it('order.created.v1 cloud event in structured mode should trigger the lastorder function', async function() {
+    await sendCloudEventStructuredModeAndCheckResponse();
+  });
+
+  it('order.created.v1 cloud event in binary mode should trigger the lastorder function', async function() {
+    await sendCloudEventBinaryModeAndCheckResponse();
   });
 
   it('Unregister Kyma resources from Compass', async function() {

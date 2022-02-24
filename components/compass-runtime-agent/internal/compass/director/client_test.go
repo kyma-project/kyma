@@ -4,14 +4,15 @@ import (
 	"testing"
 
 	"github.com/kyma-incubator/compass/components/director/pkg/graphql"
-	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/config"
-	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/graphql/mocks"
-	kymamodel "github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/model"
 	gcli "github.com/machinebox/graphql"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
+
+	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/config"
+	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/graphql/mocks"
+	kymamodel "github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/model"
 )
 
 const (
@@ -30,7 +31,7 @@ const (
 		description
 		labels
 		auths {id}
-		packages {data {
+		bundles {data {
 		id
 		name
 		description
@@ -140,12 +141,10 @@ const (
 	}`
 )
 
-var (
-	runtimeConfig = config.RuntimeConfig{
-		RuntimeId: runtimeId,
-		Tenant:    tenant,
-	}
-)
+var runtimeConfig = config.RuntimeConfig{
+	RuntimeId: runtimeId,
+	Tenant:    tenant,
+}
 
 func TestConfigClient_FetchConfiguration(t *testing.T) {
 	expectedRequest := gcli.NewRequest(expectedAppsAndLabelsForRuntimeQuery)
@@ -177,7 +176,7 @@ func TestConfigClient_FetchConfiguration(t *testing.T) {
 				{
 					ID:    "asda-oqiu",
 					Name:  "App3",
-					Auths: []*graphql.SystemAuth{&graphql.SystemAuth{"asd", nil}},
+					Auths: []*graphql.AppSystemAuth{{"asd", nil}},
 				},
 			},
 			PageInfo:   &graphql.PageInfo{},
