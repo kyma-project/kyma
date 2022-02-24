@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/eventtype"
+
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -80,14 +82,14 @@ func (c *SubscriptionManager) Start(defaultSubsConfig env.DefaultSubscriptionCon
 	dynamicClient := dynamic.NewForConfigOrDie(c.restCfg)
 	applicationLister := application.NewLister(ctx, dynamicClient)
 	natsHandler := handlers.NewNats(c.envCfg, defaultSubsConfig, c.logger)
+	cleaner := eventtype.NewCleaner(c.envCfg.EventTypePrefix, applicationLister, c.logger)
 	natsReconciler := subscription.NewReconciler(
 		ctx,
 		c.mgr.GetClient(),
 		natsHandler,
-		applicationLister,
+		cleaner,
 		c.logger,
 		c.mgr.GetEventRecorderFor("eventing-controller-nats"),
-		c.envCfg,
 		defaultSubsConfig,
 	)
 	c.backend = natsReconciler.Backend

@@ -9,6 +9,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/eventtype"
+
 	"github.com/kyma-project/kyma/components/eventing-controller/controllers/events"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers"
 
@@ -852,14 +854,14 @@ func startReconciler(eventTypePrefix string, natsURL string) context.CancelFunc 
 	Expect(err).To(BeNil())
 
 	natsHandler := handlers.NewNats(envConf, defaultSubsConfig, defaultLogger)
+	cleaner := eventtype.NewCleaner(envConf.EventTypePrefix, applicationLister, defaultLogger)
 	reconciler = NewReconciler(
 		ctx,
 		k8sManager.GetClient(),
 		natsHandler,
-		applicationLister,
+		cleaner,
 		defaultLogger,
 		k8sManager.GetEventRecorderFor("eventing-controller-nats"),
-		envConf,
 		defaultSubsConfig,
 	)
 
