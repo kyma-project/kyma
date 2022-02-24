@@ -4,7 +4,7 @@ title: Local Kyma deployment fails with pending Pods
 
 ## Symptom
 
-Local Kyma deployment with k3d fails with one or more Pods in pending state.
+Local Kyma deployment with k3d fails with one or more Pods in state `Pending`.
 Describing the Pod reveals such an error message:
 
 ```bash
