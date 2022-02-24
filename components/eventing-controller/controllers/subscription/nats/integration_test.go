@@ -66,10 +66,12 @@ type expect struct {
 
 //TestUnavailableNATSServer tests if a subscription is reconciled properly when the NATS backend is unavailable.
 func TestUnavailableNATSServer(t *testing.T) {
-	natsPort := 4220
 	ctx := context.Background()
 	g := gomega.NewGomegaWithT(t)
-	ens := setupTestEnsemble(ctx, reconcilertesting.EventTypePrefix, g, natsPort, 7070)
+
+	natsPort, err := reconcilertesting.GetFreePort()
+	g.Expect(err).ToNot(gomega.HaveOccurred())
+	ens := setupTestEnsemble(ctx, reconcilertesting.EventTypePrefix, g, natsPort)
 	defer ens.cancel()
 
 	subscription, subscriptionName := createSubscription(ctx, g, ens,
@@ -93,7 +95,11 @@ func TestUnavailableNATSServer(t *testing.T) {
 func TestCreateSubscription(t *testing.T) {
 	ctx := context.Background()
 	g := gomega.NewGomegaWithT(t)
-	ens := setupTestEnsemble(ctx, reconcilertesting.EventTypePrefix, g, 4225, 7075)
+
+	natsPort, err := reconcilertesting.GetFreePort()
+	g.Expect(err).ToNot(gomega.HaveOccurred())
+
+	ens := setupTestEnsemble(ctx, reconcilertesting.EventTypePrefix, g, natsPort)
 	defer ens.cancel()
 
 	var testCases = []struct {
@@ -324,7 +330,10 @@ func TestCreateSubscription(t *testing.T) {
 func TestChangeSubscription(t *testing.T) {
 	ctx := context.Background()
 	g := gomega.NewGomegaWithT(t)
-	ens := setupTestEnsemble(ctx, reconcilertesting.EventTypePrefix, g, 4224, 7074)
+
+	natsPort, err := reconcilertesting.GetFreePort()
+	g.Expect(err).ToNot(gomega.HaveOccurred())
+	ens := setupTestEnsemble(ctx, reconcilertesting.EventTypePrefix, g, natsPort)
 	defer ens.cancel()
 
 	var testCases = []struct {
@@ -529,10 +538,12 @@ func TestChangeSubscription(t *testing.T) {
 
 // TestEmptyEventTypePrefix tests if a subscription is reconciled properly if the NATS backend is unavailable.
 func TestEmptyEventTypePrefix(t *testing.T) {
-	natsPort := 4223
 	ctx := context.Background()
 	g := gomega.NewGomegaWithT(t)
-	ens := setupTestEnsemble(ctx, reconcilertesting.EventTypePrefixEmpty, g, natsPort, 7073)
+
+	natsPort, err := reconcilertesting.GetFreePort()
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+	ens := setupTestEnsemble(ctx, reconcilertesting.EventTypePrefixEmpty, g, natsPort)
 	defer ens.cancel()
 
 	subscription, subscriptionName := createSubscription(ctx, g, ens,
@@ -641,7 +652,7 @@ func eventInvalidSink(msg string) v1.Event {
 	}
 }
 
-func setupTestEnsemble(ctx context.Context, eventTypePrefix string, g *gomega.GomegaWithT, natsPort, metricsPort int) *testEnsemble {
+func setupTestEnsemble(ctx context.Context, eventTypePrefix string, g *gomega.GomegaWithT, natsPort int) *testEnsemble {
 	useExistingCluster := useExistingCluster
 	ens := &testEnsemble{
 		defaultSubscriptionConfig: env.DefaultSubscriptionConfig{
@@ -661,7 +672,7 @@ func setupTestEnsemble(ctx context.Context, eventTypePrefix string, g *gomega.Go
 	}
 
 	startTestEnv(ens, g)
-	startReconciler(eventTypePrefix, ens, g, metricsPort)
+	startReconciler(eventTypePrefix, ens, g)
 	startSubscriberSvc(ctx, ens, g)
 	return ens
 }
@@ -681,11 +692,15 @@ func startNATS(port int) *natsserver.Server {
 	return natsServer
 }
 
-func startReconciler(eventTypePrefix string, ens *testEnsemble, g *gomega.GomegaWithT, metricsPort int) *testEnsemble {
+func startReconciler(eventTypePrefix string, ens *testEnsemble, g *gomega.GomegaWithT) *testEnsemble {
 	ctx, cancel := context.WithCancel(context.Background())
 	ens.cancel = cancel
 
 	err := eventingv1alpha1.AddToScheme(scheme.Scheme)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+
+	var metricsPort int
+	metricsPort, err = reconcilertesting.GetFreePort()
 	g.Expect(err).NotTo(gomega.HaveOccurred())
 
 	syncPeriod := time.Second * 2

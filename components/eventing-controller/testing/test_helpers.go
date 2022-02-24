@@ -66,6 +66,7 @@ const (
 
 type APIRuleOption func(r *apigatewayv1alpha1.APIRule)
 
+// GetFreePort returns a port, that is not in use.
 func GetFreePort() (port int, err error) {
 	var a *net.TCPAddr
 	if a, err = net.ResolveTCPAddr("tcp", "localhost:0"); err == nil {
