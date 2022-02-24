@@ -72,7 +72,6 @@ func TestUnavailableNATSServer(t *testing.T) {
 	natsPort, err := reconcilertesting.GetFreePort()
 	g.Expect(err).ToNot(gomega.HaveOccurred())
 	ens := setupTestEnsemble(ctx, reconcilertesting.EventTypePrefix, g, natsPort)
-	defer ens.cancel()
 
 	subscription, subscriptionName := createSubscription(ctx, g, ens,
 		reconcilertesting.WithFilter("", uncleanEventType("")),
@@ -89,6 +88,8 @@ func TestUnavailableNATSServer(t *testing.T) {
 
 	ens.natsServer = startNATS(natsPort)
 	testSubscriptionOnK8s(ctx, g, ens, subscription, subscriptionName, reconcilertesting.HaveSubscriptionReady())
+
+	t.Cleanup(ens.cancel)
 }
 
 //TestCreateSubscription tests if subscriptions get created properly by the reconciler.
@@ -100,7 +101,6 @@ func TestCreateSubscription(t *testing.T) {
 	g.Expect(err).ToNot(gomega.HaveOccurred())
 
 	ens := setupTestEnsemble(ctx, reconcilertesting.EventTypePrefix, g, natsPort)
-	defer ens.cancel()
 
 	var testCases = []struct {
 		name               string
@@ -324,6 +324,7 @@ func TestCreateSubscription(t *testing.T) {
 			testDeletionOnK8s(ctx, g, ens, subscription, tc.shouldTestDeletion)
 		})
 	}
+	t.Cleanup(ens.cancel)
 }
 
 //TestChangeSubscription tests if existing subscriptions are reconciled properly after getting changed.
@@ -334,7 +335,6 @@ func TestChangeSubscription(t *testing.T) {
 	natsPort, err := reconcilertesting.GetFreePort()
 	g.Expect(err).ToNot(gomega.HaveOccurred())
 	ens := setupTestEnsemble(ctx, reconcilertesting.EventTypePrefix, g, natsPort)
-	defer ens.cancel()
 
 	var testCases = []struct {
 		name               string
@@ -534,6 +534,8 @@ func TestChangeSubscription(t *testing.T) {
 			testDeletionOnK8s(ctx, g, ens, subscription, tc.shouldTestDeletion)
 		})
 	}
+
+	t.Cleanup(ens.cancel)
 }
 
 // TestEmptyEventTypePrefix tests if a subscription is reconciled properly if the NATS backend is unavailable.
@@ -544,7 +546,6 @@ func TestEmptyEventTypePrefix(t *testing.T) {
 	natsPort, err := reconcilertesting.GetFreePort()
 	g.Expect(err).NotTo(gomega.HaveOccurred())
 	ens := setupTestEnsemble(ctx, reconcilertesting.EventTypePrefixEmpty, g, natsPort)
-	defer ens.cancel()
 
 	subscription, subscriptionName := createSubscription(ctx, g, ens,
 		reconcilertesting.WithFilter("", reconcilertesting.OrderCreatedEventTypeNotCleanPrefixEmpty),
@@ -565,6 +566,8 @@ func TestEmptyEventTypePrefix(t *testing.T) {
 	)
 
 	testDeletionOnK8s(ctx, g, ens, subscription, true)
+
+	t.Cleanup(ens.cancel)
 }
 
 func updateSubscriptionOnK8s(ctx context.Context, g *gomega.GomegaWithT, ens *testEnsemble, subscription *eventingv1alpha1.Subscription) {
@@ -674,6 +677,7 @@ func setupTestEnsemble(ctx context.Context, eventTypePrefix string, g *gomega.Go
 	startTestEnv(ens, g)
 	startReconciler(eventTypePrefix, ens, g)
 	startSubscriberSvc(ctx, ens, g)
+
 	return ens
 }
 
