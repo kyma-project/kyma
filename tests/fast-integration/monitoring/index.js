@@ -1,13 +1,12 @@
 const prometheus = require('./prometheus');
 const grafana = require('./grafana');
-const {getEnvOrThrow} = require('../utils');
+const {getEnvOrDefault} = require('../utils');
 
 const {prometheusPortForward} = require('./client');
 
 function monitoringTests() {
-  const kymaVersion = getEnvOrThrow('KYMA_VERSION');
-
-  if (kymaVersion.startsWith('1')) {
+  if (getEnvOrDefault('KYMA_MAJOR_VERSION', '') === '1') {
+    console.log('Skipping monitoring tests for Kyma 1 version');
     return;
   }
 
