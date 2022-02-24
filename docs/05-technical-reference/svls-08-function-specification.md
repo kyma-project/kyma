@@ -66,6 +66,7 @@ Functions in Kyma accept [CloudEvents](https://cloudevents.io/) (**ce**) with th
     "ce-id": "abc123",
     "ce-time": "2020-12-20T13:37:33.647Z",
     "data": {BUFFER},
+    "tracer": {OPENTELEMETRY_TRACER},
     "extensions": {
         "request": {INCOMING_MESSAGE},
         "response": {SERVER_RESPONSE},
@@ -86,7 +87,8 @@ Python
     "ce-specversion": "1.0",
     "ce-id": "abc123",
     "ce-time": "2020-12-20T13:37:33.647Z",
-    "data": b"",
+    "data": "",
+    "tracer": {OPENTELEMETRY_TRACER},
     "extensions": {
         "request": {PICKLABLE_BOTTLE_REQUEST},
     }
@@ -108,6 +110,8 @@ See the detailed descriptions of these fields:
 | **ce-time** | Time at which the event was sent |
 | **data** | Either JSON or a string, depending on the request type. Read more about [Buffer](https://nodejs.org/api/buffer.html) in Node.js and [bytes literals](https://docs.python.org/3/reference/lexical_analysis.html#string-and-bytes-literals) in Python. |
 | **extensions** | JSON object that can contain event payload, a Function's incoming request, or an outgoing response |
+
+> Note: all runtimes contains the `tracer` object which is the fully configured OpenTelemetry [Tracer](https://opentelemetry.io/docs/reference/specification/trace/api/#tracer) object that allows to communicate with the Jaeger service to share tracing informations. For more informations how to use the tracer object go [here](../03-tutorials/00-serverless/svls-12-use-opentelemetry-client.md).
 
 ### Event object SDK
 
