@@ -23,7 +23,7 @@ spec:
         app.kubernetes.io/instance: {{ .Release.Name }}
         app.kubernetes.io/name: auth-proxy
       annotations:
-        checksum/config: {{ tpl (toYaml .Values.authProxy) . | sha256sum }}
+        checksum/config: {{ tpl (toYaml .Values.kyma.authProxy) . | sha256sum }}
     spec:
       {{- if .Values.kyma.authProxy.nodeSelector }}
       nodeSelector:
