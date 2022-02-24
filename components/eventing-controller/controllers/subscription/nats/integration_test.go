@@ -138,13 +138,7 @@ func TestCreateSubscription(t *testing.T) {
 			},
 			expect: expect{
 				k8sSubscription: []gomegatypes.GomegaMatcher{
-					reconcilertesting.HaveCondition(
-						eventingv1alpha1.MakeCondition(
-							eventingv1alpha1.ConditionSubscriptionActive,
-							eventingv1alpha1.ConditionReasonNATSSubscriptionNotActive,
-							v1.ConditionFalse, nats.ErrBadSubject.Error(),
-						),
-					),
+					reconcilertesting.HaveConditionBadSubject(),
 				},
 			},
 		},

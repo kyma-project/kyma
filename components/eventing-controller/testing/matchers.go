@@ -166,6 +166,15 @@ func HaveCondition(condition eventingv1alpha1.Condition) gomegatypes.GomegaMatch
 	})))
 }
 
+func HaveConditionBadSubject() gomegatypes.GomegaMatcher {
+	condition := eventingv1alpha1.MakeCondition(
+		eventingv1alpha1.ConditionSubscriptionActive,
+		eventingv1alpha1.ConditionReasonNATSSubscriptionNotActive,
+		corev1.ConditionFalse, nats.ErrBadSubject.Error(),
+	)
+	return HaveCondition(condition)
+}
+
 func HaveCleanEventTypes(cleanEventTypes []string) gomegatypes.GomegaMatcher {
 	return WithTransform(
 		func(s *eventingv1alpha1.Subscription) []string {
