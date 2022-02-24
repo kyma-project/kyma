@@ -6,6 +6,11 @@ import (
 	"testing"
 	"time"
 
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/subscriptionmanager"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/subscriptionmanager/mock"
+	"k8s.io/client-go/dynamic"
+	"sigs.k8s.io/controller-runtime/pkg/manager"
+
 	"github.com/onsi/gomega"
 
 	kymalogger "github.com/kyma-project/kyma/common/logging/logger"
@@ -15,12 +20,28 @@ import (
 	"github.com/kyma-project/kyma/components/eventing-controller/logger"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/subscriptionmanager/mock"
 	controllertesting "github.com/kyma-project/kyma/components/eventing-controller/testing"
 )
 
+type natsSubMgrMock struct {
+	Client  dynamic.Interface
+	Backend handlers.NatsBackend
+}
+
+func (c *natsSubMgrMock) Init(_ manager.Manager) error {
+	return nil
+}
+
+func (c *natsSubMgrMock) Start(_ env.DefaultSubscriptionConfig, _ subscriptionmanager.Params) error {
+	return nil
+}
+
+func (c *natsSubMgrMock) Stop(_ bool) error {
+	return nil
+}
+
 func TestCleanup(t *testing.T) {
-	natsSubMgr := mock.Manager{}
+	natsSubMgr := natsSubMgrMock{}
 	g := gomega.NewWithT(t)
 	data := "sampledata"
 	expectedDataInStore := fmt.Sprintf("\"%s\"", data)
@@ -48,9 +69,9 @@ func TestCleanup(t *testing.T) {
 		EventTypePrefix: controllertesting.EventTypePrefix,
 	}
 	subsConfig := env.DefaultSubscriptionConfig{MaxInFlightMessages: 9}
-	natsBackend := handlers.NewNats(envConf, subsConfig, nil, defaultLogger)
+	natsBackend := handlers.NewNats(envConf, subsConfig, defaultLogger)
 	natsSubMgr.Backend = natsBackend
-	err = natsSubMgr.Backend.Initialize(env.Config{})
+	err = natsSubMgr.Backend.Initialize(nil)
 	g.Expect(err).To(gomega.BeNil())
 
 	// Create test subscription

@@ -48,7 +48,7 @@ type SubscriptionManager struct {
 	restCfg     *rest.Config
 	metricsAddr string
 	mgr         manager.Manager
-	backend     handlers.MessagingBackend
+	backend     handlers.NatsBackend
 	logger      *logger.Logger
 }
 
@@ -79,9 +79,11 @@ func (c *SubscriptionManager) Start(defaultSubsConfig env.DefaultSubscriptionCon
 	c.cancel = cancel
 	dynamicClient := dynamic.NewForConfigOrDie(c.restCfg)
 	applicationLister := application.NewLister(ctx, dynamicClient)
+	natsHandler := handlers.NewNats(c.envCfg, defaultSubsConfig, c.logger)
 	natsReconciler := subscription.NewReconciler(
 		ctx,
 		c.mgr.GetClient(),
+		natsHandler,
 		applicationLister,
 		c.logger,
 		c.mgr.GetEventRecorderFor("eventing-controller-nats"),
@@ -107,7 +109,7 @@ func (c *SubscriptionManager) Stop(runCleanup bool) error {
 }
 
 // clean removes all NATS artifacts.
-func cleanup(backend handlers.MessagingBackend, dynamicClient dynamic.Interface, logger *zap.SugaredLogger) error {
+func cleanup(backend handlers.NatsBackend, dynamicClient dynamic.Interface, logger *zap.SugaredLogger) error {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 

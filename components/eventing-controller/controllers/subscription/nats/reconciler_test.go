@@ -851,9 +851,11 @@ func startReconciler(eventTypePrefix string, natsURL string) context.CancelFunc 
 	defaultLogger, err := logger.New(string(kymalogger.JSON), string(kymalogger.INFO))
 	Expect(err).To(BeNil())
 
+	natsHandler := handlers.NewNats(envConf, defaultSubsConfig, defaultLogger)
 	reconciler = NewReconciler(
 		ctx,
 		k8sManager.GetClient(),
+		natsHandler,
 		applicationLister,
 		defaultLogger,
 		k8sManager.GetEventRecorderFor("eventing-controller-nats"),

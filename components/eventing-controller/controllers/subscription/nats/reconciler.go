@@ -42,14 +42,15 @@ type sinkValidator func(ctx context.Context, r *Reconciler, subscription *eventi
 
 // Reconciler reconciles a Subscription object
 type Reconciler struct {
-	ctx context.Context
 	client.Client
-	Backend          handlers.MessagingBackend
+	sinkValidator
+
+	ctx              context.Context
+	Backend          handlers.NatsBackend
 	logger           *logger.Logger
 	recorder         record.EventRecorder
 	subsConfig       env.DefaultSubscriptionConfig
 	eventTypeCleaner eventtype.Cleaner
-	sinkValidator
 	// This channel is used to enqueue a reconciliation request for a subscription
 	customEventsChannel chan event.GenericEvent
 }
@@ -65,7 +66,7 @@ const (
 	clusterLocalURLSuffix = "svc.cluster.local"
 )
 
-func NewReconciler(ctx context.Context, client client.Client, applicationLister *application.Lister,
+func NewReconciler(ctx context.Context, client client.Client, natsHandler handlers.NatsBackend, applicationLister *application.Lister,
 	logger *logger.Logger, recorder record.EventRecorder, cfg env.NatsConfig, subsCfg env.DefaultSubscriptionConfig) *Reconciler {
 	reconciler := &Reconciler{
 		ctx:                 ctx,
@@ -77,8 +78,7 @@ func NewReconciler(ctx context.Context, client client.Client, applicationLister 
 		sinkValidator:       defaultSinkValidator,
 		customEventsChannel: make(chan event.GenericEvent),
 	}
-	natsHandler := handlers.NewNats(cfg, subsCfg, reconciler.handleNatsConnClose, logger)
-	if err := natsHandler.Initialize(env.Config{}); err != nil {
+	if err := natsHandler.Initialize(reconciler.handleNatsConnClose); err != nil {
 		logger.WithContext().Errorw("start reconciler failed", "name", reconcilerName, "error", err)
 		panic(err)
 	}
