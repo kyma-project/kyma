@@ -1,7 +1,16 @@
 package handlers
 
 import (
+	"context"
 	"fmt"
+	cev2 "github.com/cloudevents/sdk-go/v2"
+	cev2protocol "github.com/cloudevents/sdk-go/v2/protocol"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/tracing"
+	"github.com/kyma-project/kyma/components/eventing-controller/utils"
+	"k8s.io/apimachinery/pkg/types"
+	"net/http"
+	"sync"
+	"time"
 
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 	"github.com/kyma-project/kyma/components/eventing-controller/logger"
@@ -11,30 +20,61 @@ import (
 	"go.uber.org/zap"
 )
 
-var _ MessagingBackend = &JetStream{}
+var _ JetStreamBackend = &JetStream{}
 
 const (
 	jsHandlerName = "js-handler"
 )
 
+type JetStreamBackend interface {
+	// Initialize should initialize the communication layer with the messaging backend system
+	Initialize(connCloseHandler ConnClosedHandler) error
+
+	// SyncSubscription should synchronize the Kyma eventing subscription with the subscriber infrastructure of Jetstream.
+	SyncSubscription(subscription *eventingv1alpha1.Subscription) error
+
+	// DeleteSubscription should delete the corresponding subscriber data of messaging backend
+	DeleteSubscription(subscription *eventingv1alpha1.Subscription) error
+}
+
 type JetStream struct {
 	config env.NatsConfig
 	conn   *nats.Conn
 	jsCtx  nats.JetStreamContext
+	client cev2.Client
+	sinks  sync.Map
 	// connClosedHandler gets called by the NATS server when conn is closed and retry attempts are exhausted.
 	connClosedHandler ConnClosedHandler
 	logger            *logger.Logger
 }
 
-func NewJetStream(config env.NatsConfig, closeHandler ConnClosedHandler, logger *logger.Logger) *JetStream {
+func NewJetStream(config env.NatsConfig, logger *logger.Logger) *JetStream {
 	return &JetStream{
-		config:            config,
-		connClosedHandler: closeHandler,
-		logger:            logger,
+		config: config,
+		logger: logger,
 	}
 }
 
-func (js *JetStream) Initialize(_ env.Config) error {
+func (js *JetStream) initCloudEventClient(config env.NatsConfig) error {
+	if js.client != nil {
+		return nil
+	}
+	transport := &http.Transport{
+		MaxIdleConns:        config.MaxIdleConns,
+		MaxConnsPerHost:     config.MaxConnsPerHost,
+		MaxIdleConnsPerHost: config.MaxIdleConnsPerHost,
+		IdleConnTimeout:     config.IdleConnTimeout,
+	}
+
+	client, err := cev2.NewClientHTTP(cev2.WithRoundTripper(transport))
+	if err != nil {
+		return err
+	}
+	js.client = client
+	return nil
+}
+
+func (js *JetStream) Initialize(connCloseHandler ConnClosedHandler) error {
 	if err := js.validateConfig(); err != nil {
 		return err
 	}
@@ -44,11 +84,62 @@ func (js *JetStream) Initialize(_ env.Config) error {
 	if err := js.initJSContext(); err != nil {
 		return err
 	}
+	if err := js.initCloudEventClient(js.config); err != nil {
+		return err
+	}
+	js.initJSConnCloseHandler(connCloseHandler)
 	return js.ensureStreamExists()
 }
 
-func (js *JetStream) SyncSubscription(_ *eventingv1alpha1.Subscription, _ ...interface{}) (bool, error) {
-	panic("implement me")
+func (js *JetStream) SyncSubscription(subscription *eventingv1alpha1.Subscription) error {
+	log := utils.LoggerWithSubscription(js.namedLogger(), subscription)
+	subKeyPrefix := createKeyPrefix(subscription)
+
+	// add/update sink info in map for callbacks
+	if sinkURL, ok := js.sinks.Load(subKeyPrefix); !ok || sinkURL != subscription.Spec.Sink {
+		js.sinks.Store(subKeyPrefix, subscription.Spec.Sink)
+	}
+
+	callback := js.getCallback(subKeyPrefix)
+
+	for _, subject := range subscription.Status.CleanEventTypes {
+		uniqueConsumer := subKeyPrefix + string(types.Separator) + subject
+		consumerHash := generateHashForString(uniqueConsumer)
+		log.Infow("Unique Consumer and Subject", "consumer", uniqueConsumer, "subject", subject)
+		if js.conn.Status() != nats.CONNECTED {
+			if err := js.Initialize(js.connClosedHandler); err != nil {
+				log.Errorw("reset NATS connection failed", "status", js.conn.Stats(), "error", err)
+				return err
+			}
+		}
+
+		_, err := js.jsCtx.Subscribe(
+			fmt.Sprintf("%s", subject),
+			callback,
+			js.getDefaultSubscriptionOptions(consumerHash)...,
+		)
+		if err != nil {
+			log.Errorw("Subscription error", "err", err)
+			return err
+		}
+	}
+	return nil
+}
+
+type DefaultSubOpts []nats.SubOpt
+
+func (js *JetStream) getDefaultSubscriptionOptions(consumer string) DefaultSubOpts {
+	defaultOpts := DefaultSubOpts{
+		nats.Durable(consumer),
+		nats.ManualAck(),
+		nats.AckExplicit(),
+		nats.IdleHeartbeat(30 * time.Second),
+		nats.EnableFlowControl(),
+		nats.MaxAckPending(250),
+		nats.MaxDeliver(3),
+	}
+	return defaultOpts
+
 }
 
 func (js *JetStream) DeleteSubscription(_ *eventingv1alpha1.Subscription) error {
@@ -93,10 +184,18 @@ func (js *JetStream) initJSContext() error {
 	return nil
 }
 
+func (js *JetStream) initJSConnCloseHandler(connCloseHandler ConnClosedHandler) {
+	js.connClosedHandler = connCloseHandler
+	if js.connClosedHandler != nil {
+		js.conn.SetClosedHandler(nats.ConnHandler(js.connClosedHandler))
+	}
+}
+
 func (js *JetStream) ensureStreamExists() error {
 	if info, err := js.jsCtx.StreamInfo(js.config.JSStreamName); err == nil {
 		// TODO: in case the stream exists, should we make sure all of its configs matches the stream config in the chart?
-		js.namedLogger().Infow("reusing existing Stream", "streamName", info.Config.Name)
+		// TODO: Handle if info is nil
+		js.namedLogger().Infow("reusing existing Stream", "stream-info", info)
 		return nil
 	} else if err != nats.ErrStreamNotFound {
 		return err
@@ -115,9 +214,52 @@ func (js *JetStream) ensureStreamExists() error {
 		// use the stream name as a prefix. This prefix is handled only on the JetStream level (i.e. JetStream handler
 		// and EPP) and should not be exposed in the Kyma subscription. Any Kyma event type gets appended with the
 		// configured stream name.
-		Subjects: []string{fmt.Sprintf("%s.>", js.config.JSStreamName)},
+		// TODO: Discuss on the prefix
+		Subjects: []string{fmt.Sprintf("%s.>", "sap")},
 	})
 	return err
+}
+
+func (js *JetStream) getCallback(subKeyPrefix string) nats.MsgHandler {
+	return func(msg *nats.Msg) {
+		// fetch sink info from storage
+		sinkValue, ok := js.sinks.Load(subKeyPrefix)
+		if !ok {
+			js.namedLogger().Errorw("cannot find sink url in storage", "keyPrefix", subKeyPrefix)
+			return
+		}
+		// convert interface type to string
+		sink, ok := sinkValue.(string)
+		if !ok {
+			js.namedLogger().Errorw("failed to convert sink value to string", "sinkValue", sinkValue)
+			return
+		}
+
+		ce, err := convertMsgToCE(msg)
+		if err != nil {
+			js.namedLogger().Errorw("convert Jetstream message to CE failed", "error", err)
+			return
+		}
+
+		ctxWithCancel, cancel := context.WithCancel(context.Background())
+		defer cancel()
+		ctxWithCE := cev2.ContextWithTarget(ctxWithCancel, sink)
+		traceCtxWithCE := tracing.AddTracingHeadersToContext(ctxWithCE, ce)
+
+		js.namedLogger().Infow("Sending the cloud event", "id", ce.ID(), "source", ce.Source(), "type", ce.Type(), "sink", sink)
+		result := js.client.Send(traceCtxWithCE, *ce)
+		if !cev2protocol.IsACK(result) {
+			if err := msg.Nak(); err != nil {
+				js.namedLogger().Errorw("Event dispatch failed and also failed to NAK")
+			}
+			js.namedLogger().Errorw("Event dispatch failed")
+			return
+		}
+		if err := msg.Ack(); err != nil {
+			js.namedLogger().Errorw("Message Acknowledgement failed")
+		}
+		js.namedLogger().Infow("event dispatched", "id", ce.ID(), "source", ce.Source(), "type", ce.Type(), "sink", sink)
+	}
 }
 
 func (js *JetStream) namedLogger() *zap.SugaredLogger {

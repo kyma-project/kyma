@@ -25,7 +25,7 @@ type NatsConfig struct {
 	IdleConnTimeout     time.Duration `envconfig:"IDLE_CONN_TIMEOUT" default:"10s"`
 
 	// JetStream-specific configs
-	JSStreamName        string `envconfig:"JS_STREAM_NAME" default:"kyma-eventing"`
+	JSStreamName        string `envconfig:"JS_STREAM_NAME" default:"kyma"`
 	JSStreamStorageType string `envconfig:"JS_STREAM_STORAGE_TYPE" default:"memory"`
 }
 

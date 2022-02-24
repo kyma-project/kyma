@@ -76,6 +76,10 @@ func hashSubscriptionFullName(domainName, namespace, name string) string {
 	return fmt.Sprintf("%x", hash)
 }
 
+func generateHashForString(value string) string {
+	return fmt.Sprintf("%x", sha1.Sum([]byte(value)))
+}
+
 // produces a name+hash which is not longer than maxLength. If necessary, shortens name, not the hash.
 // Requires maxLength >= len(hash)
 func shortenNameAndAppendHash(name string, hash string, maxLength int) string {
