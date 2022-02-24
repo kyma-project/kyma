@@ -2,11 +2,12 @@ package nats_test
 
 import (
 	"context"
-	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/handler/health"
-	"github.com/stretchr/testify/assert"
 	"net/http"
 	"net/http/httptest"
 	"testing"
+
+	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/handler/health"
+	"github.com/stretchr/testify/assert"
 
 	"github.com/stretchr/testify/require"
 

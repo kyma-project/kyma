@@ -1,8 +1,9 @@
 package nats
 
 import (
-	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/handler/health"
 	"net/http"
+
+	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/handler/health"
 
 	"github.com/nats-io/nats.go"
 )

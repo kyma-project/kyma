@@ -2,8 +2,9 @@ package sender
 
 import (
 	"context"
-	"github.com/nats-io/nats.go"
 	"net/http"
+
+	"github.com/nats-io/nats.go"
 
 	cenats "github.com/cloudevents/sdk-go/protocol/nats/v2"
 	cev2 "github.com/cloudevents/sdk-go/v2"
