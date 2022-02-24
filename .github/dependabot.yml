@@ -4,6 +4,27 @@
 
 version: 2
 updates:
+  - package-ecosystem: "docker"
+    directory: "/components/event-publisher-proxy/cmd/event-publisher-proxy"
+    labels:
+      - "docker"
+      - "area/dependency"
+    schedule:
+      interval: "daily"
+    commit-message:
+      prefix: "docker"
+      include: "scope"
+  - package-ecosystem: "gomod"
+    directory: "/components/event-publisher-proxy"
+    labels:
+      - "go"
+      - "skip-review"
+      - "area/dependency"
+    schedule:
+      interval: "daily"
+    commit-message:
+      prefix: "gomod"
+      include: "scope"
   - package-ecosystem: "gomod"
     directory: "/components/eventing-controller"
     labels:
@@ -25,3 +46,4 @@ updates:
     commit-message:
       prefix: "docker"
       include: "scope"
+

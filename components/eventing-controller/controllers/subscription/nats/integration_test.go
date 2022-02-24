@@ -89,7 +89,7 @@ func TestUnavailableNATSServer(t *testing.T) {
 	testSubscriptionOnK8s(ctx, g, ens, subscription, subscriptionName, reconcilertesting.HaveSubscriptionReady())
 }
 
-//TestCreateSubscription tests if subscriptions get created properly.
+//TestCreateSubscription tests if subscriptions get created properly by the reconciler.
 func TestCreateSubscription(t *testing.T) {
 	ctx := context.Background()
 	g := gomega.NewGomegaWithT(t)
@@ -674,7 +674,9 @@ func startTestEnv(ens *testEnsemble, g *gomega.GomegaWithT) {
 }
 
 func startNATS(port int) *natsserver.Server {
-	natsServer := reconcilertesting.RunNatsServerOnPort(port)
+	natsServer := reconcilertesting.RunNatsServerOnPort(
+		reconcilertesting.WithPort(port),
+	)
 	log.Printf("NATS server started %v", natsServer.ClientURL())
 	return natsServer
 }

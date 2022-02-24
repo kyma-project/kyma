@@ -150,7 +150,7 @@ Follow the instructions in the tabs to deploy an instance of the HttpBin service
    EOF
    ```
 
-4. Expose the service and secure it by creating an API Rule CR in your Namespace. If you don't want to use your custom domain but a Kyma domain, use the following Kyma Gateway: `kyma-gateway.kyma-system.svc.cluster.local`. Run:
+4. Expose the service and secure it by creating an API Rule CR in your Namespace. If you don't want to use your custom domain but a Kyma domain, use the following Kyma Gateway: `kyma-system/kyma-gateway`. Run:
 
   ```shell
   cat <<EOF | kubectl apply -f -
@@ -160,7 +160,7 @@ Follow the instructions in the tabs to deploy an instance of the HttpBin service
     name: httpbin
     namespace: $NAMESPACE
   spec:
-    gateway: httpbin-gateway.namespace-name.svc.cluster.local #The value corresponds to the Gateway CR you created. 
+    gateway: namespace-name/httpbin-gateway #The value corresponds to the Gateway CR you created. 
     service:
       name: httpbin
       port: 8000
@@ -232,7 +232,7 @@ The exposed service requires tokens with "read" scope for `GET` requests in the 
    EOF
    ```
 
-4. Expose the service and secure it by creating an API Rule CR in your Namespace. If you don't want to use your custom domain but a Kyma domain, use the following Kyma Gateway: `kyma-gateway.kyma-system.svc.cluster.local`. Run:
+4. Expose the service and secure it by creating an API Rule CR in your Namespace. If you don't want to use your custom domain but a Kyma domain, use the following Kyma Gateway: `kyma-system/kyma-gateway`. Run:
 
   ```shell
   cat <<EOF | kubectl apply -f -
@@ -242,7 +242,7 @@ The exposed service requires tokens with "read" scope for `GET` requests in the 
     name: function
     namespace: $NAMESPACE
   spec:
-    gateway: httpbin-gateway.namespace-name.svc.cluster.local #The value corresponds to the Gateway CR you created. 
+    gateway: namespace-name/httpbin-gateway #The value corresponds to the Gateway CR you created. 
     service:
       name: function
       port: 80

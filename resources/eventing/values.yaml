@@ -5,11 +5,11 @@ global:
   images:
     eventing_controller:
       name: eventing-controller
-      version: PR-13390
+      version: PR-13478
       pullPolicy: "IfNotPresent"
     publisher_proxy:
       name: event-publisher-proxy
-      version: PR-13002
+      version: PR-13469
     nats:
       name: nats
       version: 2.6.5-alpine
@@ -57,3 +57,6 @@ authentication:
   publishUrl: ""
   # bebNamespace is the name of the namespace BEB is provisioned with
   bebNamespace: ""
+
+jetStream:
+  streamName: kyma-eventing

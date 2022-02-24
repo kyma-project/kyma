@@ -1,7 +1,7 @@
 const {
   checkInClusterEventDelivery,
   checkFunctionResponse,
-  sendEventAndCheckResponse,
+  sendLegacyEventAndCheckResponse,
 } = require('../test/fixtures/commerce-mock');
 const {
   printRestartReport,
@@ -29,8 +29,8 @@ describe('Upgrade test tests', function() {
     await checkFunctionResponse(testNamespace);
   });
 
-  it('order.created.v1 event should trigger the lastorder function', async function() {
-    await sendEventAndCheckResponse();
+  it('order.created.v1 legacy event should trigger the lastorder function', async function() {
+    await sendLegacyEventAndCheckResponse();
   });
 
   it('service instance provisioned by helm broker should be reachable', async function() {
