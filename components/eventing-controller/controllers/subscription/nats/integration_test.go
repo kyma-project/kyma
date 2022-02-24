@@ -57,6 +57,8 @@ type testEnsemble struct {
 	defaultSubscriptionConfig env.DefaultSubscriptionConfig
 	subscriberSvc             *v1.Service
 	cancel                    context.CancelFunc
+	ctx                       context.Context
+	g                         *gomega.GomegaWithT
 }
 
 type expect struct {
@@ -74,23 +76,23 @@ func TestUnavailableNATSServer(t *testing.T) {
 	g.Expect(err).ToNot(gomega.HaveOccurred())
 	ens := setupTestEnsemble(ctx, reconcilertesting.EventTypePrefix, g, natsPort)
 
-	subscription := createSubscription(ctx, g, ens,
+	subscription := createSubscription(ens,
 		reconcilertesting.WithFilter("", uncleanEventType("")),
 		reconcilertesting.WithSinkURLFromSvc(ens.subscriberSvc),
 	)
-	testSubscriptionOnK8s(ctx, g, ens, subscription,
+	testSubscriptionOnK8s(ens, subscription,
 		reconcilertesting.HaveCondition(reconcilertesting.DefaultReadyCondition("")),
 		reconcilertesting.HaveSubscriptionReady(),
 		reconcilertesting.HaveCleanEventTypes([]string{cleanEventType("")}),
 	)
 
 	ens.natsServer.Shutdown()
-	testSubscriptionOnK8s(ctx, g, ens, subscription,
+	testSubscriptionOnK8s(ens, subscription,
 		reconcilertesting.HaveSubscriptionNotReady(),
 	)
 
 	ens.natsServer = startNATS(natsPort)
-	testSubscriptionOnK8s(ctx, g, ens, subscription, reconcilertesting.HaveSubscriptionReady())
+	testSubscriptionOnK8s(ens, subscription, reconcilertesting.HaveSubscriptionReady())
 
 	t.Cleanup(ens.cancel)
 }
@@ -106,10 +108,9 @@ func TestCreateSubscription(t *testing.T) {
 	ens := setupTestEnsemble(ctx, reconcilertesting.EventTypePrefix, g, natsPort)
 
 	var testCases = []struct {
-		name               string
-		subscriptionOpts   []reconcilertesting.SubscriptionOpt
-		expect             expect
-		shouldTestDeletion bool
+		name             string
+		subscriptionOpts []reconcilertesting.SubscriptionOpt
+		expect           expect
 	}{
 		{
 			name: "create and delete",
@@ -129,7 +130,6 @@ func TestCreateSubscription(t *testing.T) {
 					natstesting.BeSubscriptionWithSubject(reconcilertesting.OrderCreatedEventType),
 				},
 			},
-			shouldTestDeletion: true,
 		},
 
 		{
@@ -259,7 +259,6 @@ func TestCreateSubscription(t *testing.T) {
 					reconcilertesting.HaveSubscriptionReady(),
 				},
 			},
-			shouldTestDeletion: true,
 		},
 
 		{
@@ -273,7 +272,6 @@ func TestCreateSubscription(t *testing.T) {
 					reconcilertesting.HaveCondition(reconcilertesting.DefaultReadyCondition("")),
 				},
 			},
-			shouldTestDeletion: true,
 		},
 
 		{
@@ -288,7 +286,6 @@ func TestCreateSubscription(t *testing.T) {
 					reconcilertesting.HaveSubscriptionReady(),
 				},
 			},
-			shouldTestDeletion: true,
 		},
 
 		{
@@ -307,17 +304,16 @@ func TestCreateSubscription(t *testing.T) {
 					natstesting.BeSubscriptionWithSubject(reconcilertesting.OrderCreatedEventType),
 				},
 			},
-			shouldTestDeletion: true,
 		},
 	}
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			subscription := createSubscription(ctx, g, ens, tc.subscriptionOpts...)
-			testSubscriptionOnK8s(ctx, g, ens, subscription, tc.expect.k8sSubscription...)
-			testEventsOnK8s(ctx, g, ens, tc.expect.k8sEvents...)
-			testSubscriptionOnNATS(g, ens, subscription.Name, tc.expect.natsSubscription...)
-			testDeletion(ctx, g, ens, subscription, tc.shouldTestDeletion)
+			subscription := createSubscription(ens, tc.subscriptionOpts...)
+			testSubscriptionOnK8s(ens, subscription, tc.expect.k8sSubscription...)
+			testEventsOnK8s(ens, tc.expect.k8sEvents...)
+			testSubscriptionOnNATS(ens, subscription.Name, tc.expect.natsSubscription...)
+			testDeletion(ens, subscription)
 		})
 	}
 	t.Cleanup(ens.cancel)
@@ -338,7 +334,6 @@ func TestChangeSubscription(t *testing.T) {
 		expectBefore       expect
 		changeSubscription func(subscription *eventingv1alpha1.Subscription)
 		expectAfter        expect
-		shouldTestDeletion bool
 	}{
 		{
 			name: "clean event types; add filters to subscription without filters",
@@ -475,7 +470,6 @@ func TestChangeSubscription(t *testing.T) {
 					natstesting.BeSubscriptionWithSubject(cleanEventType("")),
 				},
 			},
-			shouldTestDeletion: true,
 		},
 
 		{
@@ -515,22 +509,21 @@ func TestChangeSubscription(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			subscription := createSubscription(ctx, g, ens, tc.subscriptionOpts...)
+			subscription := createSubscription(ens, tc.subscriptionOpts...)
 
-			testSubscriptionOnK8s(ctx, g, ens, subscription, tc.expectBefore.k8sSubscription...)
-			testEventsOnK8s(ctx, g, ens, tc.expectBefore.k8sEvents...)
-			testSubscriptionOnNATS(g, ens, subscription.Name, tc.expectBefore.natsSubscription...)
+			testSubscriptionOnK8s(ens, subscription, tc.expectBefore.k8sSubscription...)
+			testEventsOnK8s(ens, tc.expectBefore.k8sEvents...)
+			testSubscriptionOnNATS(ens, subscription.Name, tc.expectBefore.natsSubscription...)
 
 			tc.changeSubscription(subscription)
-			updateSubscriptionOnK8s(ctx, g, ens, subscription)
+			updateSubscriptionOnK8s(ens, subscription)
 
-			testSubscriptionOnK8s(ctx, g, ens, subscription, tc.expectAfter.k8sSubscription...)
-			testEventsOnK8s(ctx, g, ens, tc.expectAfter.k8sEvents...)
-			testSubscriptionOnNATS(g, ens, subscription.Name, tc.expectAfter.natsSubscription...)
-			testDeletion(ctx, g, ens, subscription, tc.shouldTestDeletion)
+			testSubscriptionOnK8s(ens, subscription, tc.expectAfter.k8sSubscription...)
+			testEventsOnK8s(ens, tc.expectAfter.k8sEvents...)
+			testSubscriptionOnNATS(ens, subscription.Name, tc.expectAfter.natsSubscription...)
+			testDeletion(ens, subscription)
 		})
 	}
-
 	t.Cleanup(ens.cancel)
 }
 
@@ -543,63 +536,61 @@ func TestEmptyEventTypePrefix(t *testing.T) {
 	g.Expect(err).NotTo(gomega.HaveOccurred())
 	ens := setupTestEnsemble(ctx, reconcilertesting.EventTypePrefixEmpty, g, natsPort)
 
-	subscription := createSubscription(ctx, g, ens,
+	subscription := createSubscription(ens,
 		reconcilertesting.WithFilter("", reconcilertesting.OrderCreatedEventTypeNotCleanPrefixEmpty),
 		reconcilertesting.WithSinkURLFromSvc(ens.subscriberSvc),
 	)
 
-	testSubscriptionOnK8s(ctx, g, ens, subscription,
+	testSubscriptionOnK8s(ens, subscription,
 		reconcilertesting.HaveCleanEventTypes([]string{reconcilertesting.OrderCreatedEventTypePrefixEmpty}),
 		reconcilertesting.HaveCondition(reconcilertesting.DefaultReadyCondition("")),
 		reconcilertesting.HaveSubsConfiguration(configDefault(ens.defaultSubscriptionConfig.MaxInFlightMessages)),
 		reconcilertesting.HaveSubscriptionReady(),
 	)
 
-	testSubscriptionOnNATS(g, ens, subscription.Name,
+	testSubscriptionOnNATS(ens, subscription.Name,
 		natstesting.BeExistingSubscription(),
 		natstesting.BeValidSubscription(),
 		natstesting.BeSubscriptionWithSubject(reconcilertesting.OrderCreatedEventTypePrefixEmpty),
 	)
 
-	testDeletion(ctx, g, ens, subscription, true)
+	testDeletion(ens, subscription)
 
 	t.Cleanup(ens.cancel)
 }
 
-func updateSubscriptionOnK8s(ctx context.Context, g *gomega.GomegaWithT, ens *testEnsemble, subscription *eventingv1alpha1.Subscription) {
-	err := ens.k8sClient.Update(ctx, subscription)
-	g.Expect(err).Should(gomega.BeNil())
+func updateSubscriptionOnK8s(ens *testEnsemble, subscription *eventingv1alpha1.Subscription) {
+	err := ens.k8sClient.Update(ens.ctx, subscription)
+	ens.g.Expect(err).Should(gomega.BeNil())
 }
 
-func createSubscription(ctx context.Context, g *gomega.GomegaWithT, ens *testEnsemble, subscriptionOpts ...reconcilertesting.SubscriptionOpt) *eventingv1alpha1.Subscription {
+func createSubscription(ens *testEnsemble, subscriptionOpts ...reconcilertesting.SubscriptionOpt) *eventingv1alpha1.Subscription {
 	subscriptionName := fmt.Sprintf(subscriptionNameFormat, ens.testID)
 	ens.testID++
 	subscription := reconcilertesting.NewSubscription(subscriptionName, ens.subscriberSvc.Namespace, subscriptionOpts...)
-	subscription = createSubscriptionInK8s(ctx, ens, subscription, g)
+	subscription = createSubscriptionInK8s(ens.ctx, ens, subscription, ens.g)
 	return subscription
 }
 
-func testSubscriptionOnK8s(ctx context.Context, g *gomega.GomegaWithT, ens *testEnsemble, subscription *eventingv1alpha1.Subscription, expectations ...gomegatypes.GomegaMatcher) {
+func testSubscriptionOnK8s(ens *testEnsemble, subscription *eventingv1alpha1.Subscription, expectations ...gomegatypes.GomegaMatcher) {
 	subExpectations := append(expectations, reconcilertesting.HaveSubscriptionName(subscription.Name))
-	getSubscriptionOnK8S(ctx, ens, subscription, g).Should(gomega.And(subExpectations...))
+	getSubscriptionOnK8S(ens, subscription).Should(gomega.And(subExpectations...))
 }
 
-func testEventsOnK8s(ctx context.Context, g *gomega.GomegaWithT, ens *testEnsemble, expectations ...v1.Event) {
+func testEventsOnK8s(ens *testEnsemble, expectations ...v1.Event) {
 	for _, event := range expectations {
-		getK8sEvents(ctx, ens, g).Should(reconcilertesting.HaveEvent(event))
+		getK8sEvents(ens).Should(reconcilertesting.HaveEvent(event))
 	}
 }
 
-func testSubscriptionOnNATS(g *gomega.GomegaWithT, ens *testEnsemble, subscriptionName string, expectations ...gomegatypes.GomegaMatcher) {
-	getSubscriptionFromNATS(ens.natsBackend, subscriptionName, g).Should(gomega.And(expectations...))
+func testSubscriptionOnNATS(ens *testEnsemble, subscriptionName string, expectations ...gomegatypes.GomegaMatcher) {
+	getSubscriptionFromNATS(ens, subscriptionName).Should(gomega.And(expectations...))
 }
 
-func testDeletion(ctx context.Context, g *gomega.GomegaWithT, ens *testEnsemble, subscription *eventingv1alpha1.Subscription, shouldTest bool) {
-	if shouldTest {
-		g.Expect(ens.k8sClient.Delete(ctx, subscription)).Should(gomega.BeNil())
-		isSubscriptionDeletedOnK8s(ctx, ens, subscription, g).Should(reconcilertesting.HaveNotFoundSubscription())
-		getSubscriptionFromNATS(ens.natsBackend, subscription.Name, g).ShouldNot(natstesting.BeExistingSubscription())
-	}
+func testDeletion(ens *testEnsemble, subscription *eventingv1alpha1.Subscription) {
+	ens.g.Expect(ens.k8sClient.Delete(ens.ctx, subscription)).Should(gomega.BeNil())
+	isSubscriptionDeletedOnK8s(ens, subscription).Should(reconcilertesting.HaveNotFoundSubscription())
+	getSubscriptionFromNATS(ens, subscription.Name).ShouldNot(natstesting.BeExistingSubscription())
 }
 
 func validSinkURL(ens *testEnsemble, additions ...string) string {
@@ -619,13 +610,13 @@ func cleanEventType(ending string) string {
 }
 
 // isSubscriptionDeletedOnK8s checks a subscription is deleted and allows making assertions on it
-func isSubscriptionDeletedOnK8s(ctx context.Context, ens *testEnsemble, subscription *eventingv1alpha1.Subscription, g *gomega.GomegaWithT) gomega.AsyncAssertion {
-	return g.Eventually(func() bool {
+func isSubscriptionDeletedOnK8s(ens *testEnsemble, subscription *eventingv1alpha1.Subscription) gomega.AsyncAssertion {
+	return ens.g.Eventually(func() bool {
 		lookupKey := types.NamespacedName{
 			Namespace: subscription.Namespace,
 			Name:      subscription.Name,
 		}
-		if err := ens.k8sClient.Get(ctx, lookupKey, subscription); err != nil {
+		if err := ens.k8sClient.Get(ens.ctx, lookupKey, subscription); err != nil {
 			return k8serrors.IsNotFound(err)
 		}
 		return false
@@ -654,6 +645,8 @@ func eventInvalidSink(msg string) v1.Event {
 func setupTestEnsemble(ctx context.Context, eventTypePrefix string, g *gomega.GomegaWithT, natsPort int) *testEnsemble {
 	useExistingCluster := useExistingCluster
 	ens := &testEnsemble{
+		ctx: ctx,
+		g:   g,
 		defaultSubscriptionConfig: env.DefaultSubscriptionConfig{
 			MaxInFlightMessages:   1,
 			DispatcherRetryPeriod: time.Second,
@@ -670,17 +663,17 @@ func setupTestEnsemble(ctx context.Context, eventTypePrefix string, g *gomega.Go
 		},
 	}
 
-	startTestEnv(ens, g)
-	startReconciler(eventTypePrefix, ens, g)
-	startSubscriberSvc(ctx, ens, g)
+	startTestEnv(ens)
+	startReconciler(eventTypePrefix, ens)
+	startSubscriberSvc(ens)
 
 	return ens
 }
 
-func startTestEnv(ens *testEnsemble, g *gomega.GomegaWithT) {
+func startTestEnv(ens *testEnsemble) {
 	k8sCfg, err := ens.testEnv.Start()
-	g.Expect(err).ToNot(gomega.HaveOccurred())
-	g.Expect(k8sCfg).ToNot(gomega.BeNil())
+	ens.g.Expect(err).ToNot(gomega.HaveOccurred())
+	ens.g.Expect(k8sCfg).ToNot(gomega.BeNil())
 	ens.cfg = k8sCfg
 }
 
@@ -692,16 +685,16 @@ func startNATS(port int) *natsserver.Server {
 	return natsServer
 }
 
-func startReconciler(eventTypePrefix string, ens *testEnsemble, g *gomega.GomegaWithT) *testEnsemble {
+func startReconciler(eventTypePrefix string, ens *testEnsemble) *testEnsemble {
 	ctx, cancel := context.WithCancel(context.Background())
 	ens.cancel = cancel
 
 	err := eventingv1alpha1.AddToScheme(scheme.Scheme)
-	g.Expect(err).NotTo(gomega.HaveOccurred())
+	ens.g.Expect(err).NotTo(gomega.HaveOccurred())
 
 	var metricsPort int
 	metricsPort, err = reconcilertesting.GetFreePort()
-	g.Expect(err).NotTo(gomega.HaveOccurred())
+	ens.g.Expect(err).NotTo(gomega.HaveOccurred())
 
 	syncPeriod := time.Second * 2
 	k8sManager, err := ctrl.NewManager(ens.cfg, ctrl.Options{
@@ -709,7 +702,7 @@ func startReconciler(eventTypePrefix string, ens *testEnsemble, g *gomega.Gomega
 		SyncPeriod:         &syncPeriod,
 		MetricsBindAddress: fmt.Sprintf("localhost:%v", metricsPort),
 	})
-	g.Expect(err).ToNot(gomega.HaveOccurred())
+	ens.g.Expect(err).ToNot(gomega.HaveOccurred())
 
 	envConf := env.NatsConfig{
 		URL:             ens.natsServer.ClientURL(),
@@ -723,7 +716,7 @@ func startReconciler(eventTypePrefix string, ens *testEnsemble, g *gomega.Gomega
 	applicationLister := fake.NewApplicationListerOrDie(context.Background(), app)
 
 	defaultLogger, err := logger.New(string(kymalogger.JSON), string(kymalogger.INFO))
-	g.Expect(err).To(gomega.BeNil())
+	ens.g.Expect(err).To(gomega.BeNil())
 
 	ens.reconciler = natsreconciler.NewReconciler(
 		ctx,
@@ -736,42 +729,42 @@ func startReconciler(eventTypePrefix string, ens *testEnsemble, g *gomega.Gomega
 	)
 
 	err = ens.reconciler.SetupUnmanaged(k8sManager)
-	g.Expect(err).ToNot(gomega.HaveOccurred())
+	ens.g.Expect(err).ToNot(gomega.HaveOccurred())
 
 	ens.natsBackend = ens.reconciler.Backend.(*handlers.Nats)
 
 	go func() {
 		err = k8sManager.Start(ctx)
-		g.Expect(err).ToNot(gomega.HaveOccurred())
+		ens.g.Expect(err).ToNot(gomega.HaveOccurred())
 	}()
 
 	ens.k8sClient = k8sManager.GetClient()
-	g.Expect(ens.k8sClient).ToNot(gomega.BeNil())
+	ens.g.Expect(ens.k8sClient).ToNot(gomega.BeNil())
 
 	return ens
 }
 
-func startSubscriberSvc(ctx context.Context, ens *testEnsemble, g *gomega.GomegaWithT) {
+func startSubscriberSvc(ens *testEnsemble) {
 	ens.subscriberSvc = reconcilertesting.NewSubscriberSvc("test-subscriber", "test")
-	createSubscriberSvcInK8s(ctx, ens, g)
+	createSubscriberSvcInK8s(ens)
 }
 
-func createSubscriberSvcInK8s(ctx context.Context, ens *testEnsemble, g *gomega.GomegaWithT) {
+func createSubscriberSvcInK8s(ens *testEnsemble) {
 	//if the namespace is not "default" create it on the cluster
 	if ens.subscriberSvc.Namespace != "default " {
 		namespace := fixtureNamespace(ens.subscriberSvc.Namespace)
 		if namespace.Name != "default" {
-			err := ens.k8sClient.Create(ctx, namespace)
+			err := ens.k8sClient.Create(ens.ctx, namespace)
 			if !k8serrors.IsAlreadyExists(err) {
 				fmt.Println(err)
-				g.Expect(err).ShouldNot(gomega.HaveOccurred())
+				ens.g.Expect(err).ShouldNot(gomega.HaveOccurred())
 			}
 		}
 	}
 
 	// create subscriber svc on cluster
-	err := ens.k8sClient.Create(ctx, ens.subscriberSvc)
-	g.Expect(err).Should(gomega.BeNil())
+	err := ens.k8sClient.Create(ens.ctx, ens.subscriberSvc)
+	ens.g.Expect(err).Should(gomega.BeNil())
 }
 
 // createSubscriptionInK8s creates a Subscription on the K8s client of the testEnsemble. All the reconciliation
@@ -810,17 +803,16 @@ func fixtureNamespace(name string) *v1.Namespace {
 }
 
 // getSubscription fetches a subscription using the lookupKey and allows making assertions on it
-func getSubscriptionOnK8S(ctx context.Context, ens *testEnsemble, subscription *eventingv1alpha1.Subscription,
-	g *gomega.GomegaWithT, intervals ...interface{}) gomega.AsyncAssertion {
+func getSubscriptionOnK8S(ens *testEnsemble, subscription *eventingv1alpha1.Subscription, intervals ...interface{}) gomega.AsyncAssertion {
 	if len(intervals) == 0 {
 		intervals = []interface{}{smallTimeout, smallPollingInterval}
 	}
-	return g.Eventually(func() *eventingv1alpha1.Subscription {
+	return ens.g.Eventually(func() *eventingv1alpha1.Subscription {
 		lookupKey := types.NamespacedName{
 			Namespace: subscription.Namespace,
 			Name:      subscription.Name,
 		}
-		if err := ens.k8sClient.Get(ctx, lookupKey, subscription); err != nil {
+		if err := ens.k8sClient.Get(ens.ctx, lookupKey, subscription); err != nil {
 			return &eventingv1alpha1.Subscription{}
 		}
 		return subscription
@@ -829,10 +821,10 @@ func getSubscriptionOnK8S(ctx context.Context, ens *testEnsemble, subscription *
 
 // getK8sEvents returns all kubernetes events for the given namespace.
 // The result can be used in a gomega assertion.
-func getK8sEvents(ctx context.Context, ens *testEnsemble, g *gomega.GomegaWithT) gomega.AsyncAssertion {
+func getK8sEvents(ens *testEnsemble) gomega.AsyncAssertion {
 	eventList := v1.EventList{}
-	return g.Eventually(func() v1.EventList {
-		err := ens.k8sClient.List(ctx, &eventList, client.InNamespace(ens.subscriberSvc.Namespace))
+	return ens.g.Eventually(func() v1.EventList {
+		err := ens.k8sClient.List(ens.ctx, &eventList, client.InNamespace(ens.subscriberSvc.Namespace))
 		if err != nil {
 			return v1.EventList{}
 		}
@@ -840,9 +832,9 @@ func getK8sEvents(ctx context.Context, ens *testEnsemble, g *gomega.GomegaWithT)
 	}, smallTimeout, smallPollingInterval)
 }
 
-func getSubscriptionFromNATS(natsHandler *handlers.Nats, subscriptionName string, g *gomega.GomegaWithT) gomega.Assertion {
-	return g.Expect(func() *nats.Subscription {
-		subscriptions := natsHandler.GetAllSubscriptions()
+func getSubscriptionFromNATS(ens *testEnsemble, subscriptionName string) gomega.Assertion {
+	return ens.g.Expect(func() *nats.Subscription {
+		subscriptions := ens.natsBackend.GetAllSubscriptions()
 		for key, subscription := range subscriptions {
 			//the key does NOT ONLY contain the subscription name
 			if strings.Contains(key, subscriptionName) {
