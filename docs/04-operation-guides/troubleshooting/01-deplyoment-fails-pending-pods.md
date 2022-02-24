@@ -20,9 +20,14 @@ Thus, k3d marked all Kubernetes nodes with a taint `disk-pressure`.
 
 Verify the cause:
 
-1. Find out which Pods are pending.
-2. For the pending Pods, verify which error message you get by _describing_ the related deployment:
-   For example, if the Istiod Pod is pending, run `kubectl -n istio-system describe deployment istiod` and `kubectl -n istio-system describe pod istiod-{POD_NAME}`.
+1. Find out which Pods are pending:
+   ```bash
+   kubectl --all-namespaces get pods
+   ```
+2. For the pending Pods, verify which error message you get:
+   ```bash
+   kubectl -n {POD_NAMESPACE} describe pod {POD_NAME}
+   ```
 
 Fix the issue:
 
