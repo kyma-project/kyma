@@ -33,4 +33,4 @@ Fix the issue:
 
 1. In the preference settings of your Docker UI, adjust the Docker resource assignment.
 2. Check whether there are sufficient resources (memory/cpu/disk) on the device.
-3. Adjust the resources as needed. If you're not sure, try 8 GB for the evaluation profile, for example.
+3. Adjust the resources as needed. If you're not sure, try 8 GB for the evaluation profile.
