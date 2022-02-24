@@ -32,3 +32,4 @@ These configuration changes are applied to customize Istio for use with Kyma:
 - The `istio-sidecar-injector` Mutating Webhook Configuration is patched to exclude Gardener resources in the `kube-system` Namespace and the timeout is set to 10 seconds.
 - The use of HTTP 1.0 is enabled in the outbound HTTP listeners by `PILOT_HTTP10` flag set in Istiod component environment variables.
 - IstioOperator configuration file is modified. [Change Kyma settings](../../../04-operation-guides/operations/03-change-kyma-config-values.md) to customize the configuration.
+- Forwarding X-Forwarded-Client-Cert header is enabled by `APPEND_FORWARD` setting. This means that when the client connection is mTLS, the client certificate information will be added to the request’s XFCC header. [Istio Gateway settings](https://istio.io/latest/docs/ops/configuration/traffic-management/network-topologies/#configuring-x-forwarded-client-cert-headers)
