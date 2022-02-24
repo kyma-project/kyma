@@ -243,19 +243,19 @@ func HaveValidBEBNamespace(bebNamespaceKey, namespace string) gomegatypes.Gomega
 // NATS subscriptions
 //
 
-func BeValid() gomegatypes.GomegaMatcher {
+func BeValidNATSSubscription() gomegatypes.GomegaMatcher {
 	return WithTransform(func(subscription *nats.Subscription) bool {
 		return subscription.IsValid()
 	}, BeTrue())
 }
 
-func HaveSubject(subject string) gomegatypes.GomegaMatcher {
+func BeNATSSubscriptionWithSubject(subject string) gomegatypes.GomegaMatcher {
 	return WithTransform(func(subscription *nats.Subscription) bool {
 		return subscription.Subject == subject
 	}, BeTrue())
 }
 
-func BeNotNil() gomegatypes.GomegaMatcher {
+func BeNATSSubscriptionNotNil() gomegatypes.GomegaMatcher {
 	return WithTransform(func(subscription *nats.Subscription) bool {
 		return subscription != nil
 	}, BeTrue())

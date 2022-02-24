@@ -121,9 +121,9 @@ func TestCreateSubscription(t *testing.T) {
 					reconcilertesting.HaveSubsConfiguration(configDefault(ens.defaultSubscriptionConfig.MaxInFlightMessages)),
 				},
 				natsSubscription: []gomegatypes.GomegaMatcher{
-					reconcilertesting.BeNotNil(),
-					reconcilertesting.BeValid(),
-					reconcilertesting.HaveSubject(reconcilertesting.OrderCreatedEventType),
+					reconcilertesting.BeNATSSubscriptionNotNil(),
+					reconcilertesting.BeValidNATSSubscription(),
+					reconcilertesting.BeNATSSubscriptionWithSubject(reconcilertesting.OrderCreatedEventType),
 				},
 			},
 			shouldTestDeletion: true,
@@ -306,9 +306,9 @@ func TestCreateSubscription(t *testing.T) {
 					reconcilertesting.HaveCondition(reconcilertesting.DefaultCondition("")),
 				},
 				natsSubscription: []gomegatypes.GomegaMatcher{
-					reconcilertesting.BeNotNil(),
-					reconcilertesting.BeValid(),
-					reconcilertesting.HaveSubject(reconcilertesting.OrderCreatedEventType),
+					reconcilertesting.BeNATSSubscriptionNotNil(),
+					reconcilertesting.BeValidNATSSubscription(),
+					reconcilertesting.BeNATSSubscriptionWithSubject(reconcilertesting.OrderCreatedEventType),
 				},
 			},
 			shouldTestDeletion: true,
@@ -474,9 +474,9 @@ func TestChangeSubscription(t *testing.T) {
 					),
 				},
 				natsSubscription: []gomegatypes.GomegaMatcher{
-					reconcilertesting.BeNotNil(),
-					reconcilertesting.HaveSubject(cleanEventType("")),
-					reconcilertesting.BeValid(),
+					reconcilertesting.BeNATSSubscriptionNotNil(),
+					reconcilertesting.BeNATSSubscriptionWithSubject(cleanEventType("")),
+					reconcilertesting.BeValidNATSSubscription(),
 				},
 			},
 			shouldTestDeletion: true,
@@ -559,9 +559,9 @@ func TestEmptyEventTypePrefix(t *testing.T) {
 	)
 
 	testSubscriptionOnNATS(g, ens, subscriptionName,
-		reconcilertesting.BeNotNil(),
-		reconcilertesting.BeValid(),
-		reconcilertesting.HaveSubject(reconcilertesting.OrderCreatedEventTypePrefixEmpty),
+		reconcilertesting.BeNATSSubscriptionNotNil(),
+		reconcilertesting.BeValidNATSSubscription(),
+		reconcilertesting.BeNATSSubscriptionWithSubject(reconcilertesting.OrderCreatedEventTypePrefixEmpty),
 	)
 
 	testDeletionOnK8s(ctx, g, ens, subscription, true)
