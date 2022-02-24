@@ -37,8 +37,8 @@ func HaveSubscriptionLabels(labels map[string]string) gomegatypes.GomegaMatcher 
 	return WithTransform(func(s *eventingv1alpha1.Subscription) map[string]string { return s.Labels }, Equal(labels))
 }
 
-func HaveNotFoundSubscription(isReallyDeleted bool) gomegatypes.GomegaMatcher {
-	return WithTransform(func(isDeleted bool) bool { return isDeleted }, Equal(isReallyDeleted))
+func HaveNotFoundSubscription() gomegatypes.GomegaMatcher {
+	return WithTransform(func(isDeleted bool) bool { return isDeleted }, BeTrue())
 }
 
 func HaveSubsConfiguration(subsConf *eventingv1alpha1.SubscriptionConfig) gomegatypes.GomegaMatcher {
@@ -245,27 +245,5 @@ func HaveValidBEBNamespace(bebNamespaceKey, namespace string) gomegatypes.Gomega
 			return string(secret.Data[bebNamespaceKey]) == namespace
 		}
 		return false
-	}, BeTrue())
-}
-
-//
-// NATS subscriptions
-//
-
-func BeValidNATSSubscription() gomegatypes.GomegaMatcher {
-	return WithTransform(func(subscription *nats.Subscription) bool {
-		return subscription.IsValid()
-	}, BeTrue())
-}
-
-func BeNATSSubscriptionWithSubject(subject string) gomegatypes.GomegaMatcher {
-	return WithTransform(func(subscription *nats.Subscription) bool {
-		return subscription.Subject == subject
-	}, BeTrue())
-}
-
-func BeNATSSubscriptionNotNil() gomegatypes.GomegaMatcher {
-	return WithTransform(func(subscription *nats.Subscription) bool {
-		return subscription != nil
 	}, BeTrue())
 }
