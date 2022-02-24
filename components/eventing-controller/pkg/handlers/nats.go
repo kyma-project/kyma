@@ -46,7 +46,7 @@ type NatsBackend interface {
 	// SyncSubscription synchronizes the Kyma Subscription on the NATS backend.
 	// It returns true if Kyma Subscription status was changed during this synchronization process.
 	// It sets subscription.status.config with configurations that were applied on the messaging backend when creating the subscription.
-	SyncSubscription(subscription *eventingv1alpha1.Subscription, params ...interface{}) (bool, error)
+	SyncSubscription(subscription *eventingv1alpha1.Subscription) (bool, error)
 
 	// DeleteSubscription deletes the corresponding subscription on the NATS backend
 	DeleteSubscription(subscription *eventingv1alpha1.Subscription) error
@@ -139,7 +139,7 @@ func GetCleanSubjects(sub *eventingv1alpha1.Subscription, cleaner eventtype.Clea
 
 // SyncSubscription synchronizes the given Kyma subscription to NATS subscription.
 // The returned bool acts as a marker for changed subscription status.
-func (n *Nats) SyncSubscription(sub *eventingv1alpha1.Subscription, _ ...interface{}) (bool, error) {
+func (n *Nats) SyncSubscription(sub *eventingv1alpha1.Subscription) (bool, error) {
 	// Format logger
 	log := utils.LoggerWithSubscription(n.namedLogger(), sub)
 	subKeyPrefix := createKeyPrefix(sub)

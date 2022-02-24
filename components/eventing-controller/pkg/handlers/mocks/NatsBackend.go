@@ -42,23 +42,20 @@ func (_m *NatsBackend) Initialize(connCloseHandler handlers.ConnClosedHandler) e
 	return r0
 }
 
-// SyncSubscription provides a mock function with given fields: subscription, params
-func (_m *NatsBackend) SyncSubscription(subscription *v1alpha1.Subscription, params ...interface{}) (bool, error) {
-	var _ca []interface{}
-	_ca = append(_ca, subscription)
-	_ca = append(_ca, params...)
-	ret := _m.Called(_ca...)
+// SyncSubscription provides a mock function with given fields: subscription
+func (_m *NatsBackend) SyncSubscription(subscription *v1alpha1.Subscription) (bool, error) {
+	ret := _m.Called(subscription)
 
 	var r0 bool
-	if rf, ok := ret.Get(0).(func(*v1alpha1.Subscription, ...interface{}) bool); ok {
-		r0 = rf(subscription, params...)
+	if rf, ok := ret.Get(0).(func(*v1alpha1.Subscription) bool); ok {
+		r0 = rf(subscription)
 	} else {
 		r0 = ret.Get(0).(bool)
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(*v1alpha1.Subscription, ...interface{}) error); ok {
-		r1 = rf(subscription, params...)
+	if rf, ok := ret.Get(1).(func(*v1alpha1.Subscription) error); ok {
+		r1 = rf(subscription)
 	} else {
 		r1 = ret.Error(1)
 	}

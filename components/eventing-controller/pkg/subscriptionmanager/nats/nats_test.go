@@ -91,7 +91,7 @@ func TestCleanup(t *testing.T) {
 	testSub.Status.CleanEventTypes, _ = handlers.GetCleanSubjects(testSub, &fakeCleaner)
 
 	// Create NATS subscription
-	_, err = natsSubMgr.Backend.SyncSubscription(testSub, &fakeCleaner)
+	_, err = natsSubMgr.Backend.SyncSubscription(testSub)
 	g.Expect(err).To(gomega.BeNil())
 
 	// Make sure subscriber works
