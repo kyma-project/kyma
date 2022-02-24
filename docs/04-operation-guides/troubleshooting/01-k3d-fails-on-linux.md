@@ -8,12 +8,12 @@ You're on a Linux machine and provisioning k3d fails with a message like `Cannot
 
 ## Cause
 
-By default, provisioning tries to use ports 80 and 433.
+By default, provisioning tries to use ports `80` and `433`.
 On Linux, the ports are reserved to be used by a privileged user.
 
 ## Remedy
 
-Use a custom port for the load balancer, for example, port 8080.
+Use a custom port for the load balancer. For example, use the port `8080`:
 To do this, run `kyma provision k3d -p 8080:8080@loadbalancer -p 8443:8443@loadbalancer`.
 
-Alternatively, execute the `kyma provision` command with sudo privileges.
+Alternatively, execute the `kyma provision k3d` command with sudo privileges.

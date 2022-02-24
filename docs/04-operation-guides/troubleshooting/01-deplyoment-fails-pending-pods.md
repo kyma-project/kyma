@@ -5,14 +5,16 @@ title: Local Kyma deployment fails with pending Pods
 ## Symptom
 
 Local Kyma deployment with k3d fails with one or more Pods in pending state.
-Describing the pod reveals an error message like:
+Describing the Pod reveals such an error message:
 
-`0/2 nodes are available: 2 node(s) had taint {node.kubernetes.io/disk-pressure: }, that the pod didn't tolerate.`
+```bash
+0/2 nodes are available: 2 node(s) had taint {node.kubernetes.io/disk-pressure: }, that the pod didn't tolerate.
+```
 
 ## Cause
 
-The underlying Docker environment ran out of resources (memory/cpu/disk). 
-Thus, k3d marked all Kubernetes nodes with a taint "disk-pressure".
+The underlying Docker environment ran out of resources (memory/CPU/disk). 
+Thus, k3d marked all Kubernetes nodes with a taint `disk-pressure`.
 
 ## Remedy
 
@@ -26,4 +28,4 @@ Fix the issue:
 
 1. In the preference settings of your Docker UI, adjust the Docker resource assignment.
 2. Check whether there are sufficient resources (memory/cpu/disk) on the device.
-3. Adjust the resources as needed. If you're not sure, try 8 Gb for the evaluation profile, for example.
+3. Adjust the resources as needed. If you're not sure, try 8 GB for the evaluation profile, for example.
