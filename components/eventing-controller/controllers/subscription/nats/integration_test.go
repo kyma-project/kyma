@@ -73,21 +73,21 @@ func TestUnavailableNATSServer(t *testing.T) {
 	g.Expect(err).ToNot(gomega.HaveOccurred())
 	ens := setupTestEnsemble(ctx, reconcilertesting.EventTypePrefix, g, natsPort)
 
-	subscription, subscriptionName := createSubscription(ctx, g, ens,
+	subscription := createSubscription(ctx, g, ens,
 		reconcilertesting.WithFilter("", uncleanEventType("")),
 		reconcilertesting.WithSinkURLFromSvc(ens.subscriberSvc),
 	)
-	testSubscriptionOnK8s(ctx, g, ens, subscription, subscriptionName,
-		reconcilertesting.HaveCondition(reconcilertesting.DefaultCondition("")),
+	testSubscriptionOnK8s(ctx, g, ens, subscription,
+		reconcilertesting.HaveCondition(reconcilertesting.DefaultReadyCondition("")),
 		reconcilertesting.HaveSubscriptionReady(),
 		reconcilertesting.HaveCleanEventTypes([]string{cleanEventType("")}),
 	)
 
 	ens.natsServer.Shutdown()
-	testSubscriptionOnK8s(ctx, g, ens, subscription, subscriptionName, reconcilertesting.HaveSubscriptionNotReady())
+	testSubscriptionOnK8s(ctx, g, ens, subscription, reconcilertesting.HaveSubscriptionNotReady())
 
 	ens.natsServer = startNATS(natsPort)
-	testSubscriptionOnK8s(ctx, g, ens, subscription, subscriptionName, reconcilertesting.HaveSubscriptionReady())
+	testSubscriptionOnK8s(ctx, g, ens, subscription,  reconcilertesting.HaveSubscriptionReady())
 
 	t.Cleanup(ens.cancel)
 }
@@ -117,7 +117,7 @@ func TestCreateSubscription(t *testing.T) {
 			},
 			expect: expect{
 				k8sSubscription: []gomegatypes.GomegaMatcher{
-					reconcilertesting.HaveCondition(reconcilertesting.DefaultCondition("")),
+					reconcilertesting.HaveCondition(reconcilertesting.DefaultReadyCondition("")),
 					reconcilertesting.HaveSubsConfiguration(configDefault(ens.defaultSubscriptionConfig.MaxInFlightMessages)),
 				},
 				natsSubscription: []gomegatypes.GomegaMatcher{
@@ -252,7 +252,7 @@ func TestCreateSubscription(t *testing.T) {
 			},
 			expect: expect{
 				k8sSubscription: []gomegatypes.GomegaMatcher{
-					reconcilertesting.HaveCondition(reconcilertesting.DefaultCondition("")),
+					reconcilertesting.HaveCondition(reconcilertesting.DefaultReadyCondition("")),
 					reconcilertesting.HaveSubscriptionReady(),
 				},
 			},
@@ -267,8 +267,7 @@ func TestCreateSubscription(t *testing.T) {
 			},
 			expect: expect{
 				k8sSubscription: []gomegatypes.GomegaMatcher{
-					reconcilertesting.HaveCondition(reconcilertesting.DefaultCondition("")),
-					reconcilertesting.HaveSubscriptionReady(),
+					reconcilertesting.HaveCondition(reconcilertesting.DefaultReadyCondition("")),
 				},
 			},
 			shouldTestDeletion: true,
@@ -282,7 +281,7 @@ func TestCreateSubscription(t *testing.T) {
 			},
 			expect: expect{
 				k8sSubscription: []gomegatypes.GomegaMatcher{
-					reconcilertesting.HaveCondition(reconcilertesting.DefaultCondition("")),
+					reconcilertesting.HaveCondition(reconcilertesting.DefaultReadyCondition("")),
 					reconcilertesting.HaveSubscriptionReady(),
 				},
 			},
@@ -297,7 +296,7 @@ func TestCreateSubscription(t *testing.T) {
 			},
 			expect: expect{
 				k8sSubscription: []gomegatypes.GomegaMatcher{
-					reconcilertesting.HaveCondition(reconcilertesting.DefaultCondition("")),
+					reconcilertesting.HaveCondition(reconcilertesting.DefaultReadyCondition("")),
 				},
 				natsSubscription: []gomegatypes.GomegaMatcher{
 					reconcilertesting.BeNATSSubscriptionNotNil(),
@@ -311,10 +310,10 @@ func TestCreateSubscription(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			subscription, subscriptionName := createSubscription(ctx, g, ens, tc.subscriptionOpts...)
-			testSubscriptionOnK8s(ctx, g, ens, subscription, subscriptionName, tc.expect.k8sSubscription...)
+			subscription := createSubscription(ctx, g, ens, tc.subscriptionOpts...)
+			testSubscriptionOnK8s(ctx, g, ens, subscription,  tc.expect.k8sSubscription...)
 			testEventsOnK8s(ctx, g, ens, tc.expect.k8sEvents...)
-			testSubscriptionOnNATS(g, ens, subscriptionName, tc.expect.natsSubscription...)
+			testSubscriptionOnNATS(g, ens, subscription.Name, tc.expect.natsSubscription...)
 			testDeletionOnK8s(ctx, g, ens, subscription, tc.shouldTestDeletion)
 		})
 	}
@@ -347,7 +346,7 @@ func TestChangeSubscription(t *testing.T) {
 			},
 			expectBefore: expect{
 				k8sSubscription: []gomegatypes.GomegaMatcher{
-					reconcilertesting.HaveCondition(reconcilertesting.DefaultCondition("")),
+					reconcilertesting.HaveCondition(reconcilertesting.DefaultReadyCondition("")),
 					reconcilertesting.HaveSubsConfiguration(configDefault(ens.defaultSubscriptionConfig.MaxInFlightMessages)),
 				},
 			},
@@ -362,7 +361,7 @@ func TestChangeSubscription(t *testing.T) {
 			},
 			expectAfter: expect{
 				k8sSubscription: []gomegatypes.GomegaMatcher{
-					reconcilertesting.HaveCondition(reconcilertesting.DefaultCondition("")),
+					reconcilertesting.HaveCondition(reconcilertesting.DefaultReadyCondition("")),
 					reconcilertesting.HaveSubsConfiguration(configDefault(ens.defaultSubscriptionConfig.MaxInFlightMessages)),
 					reconcilertesting.HaveCleanEventTypes([]string{
 						cleanEventType("0"),
@@ -382,7 +381,7 @@ func TestChangeSubscription(t *testing.T) {
 			},
 			expectBefore: expect{
 				k8sSubscription: []gomegatypes.GomegaMatcher{
-					reconcilertesting.HaveCondition(reconcilertesting.DefaultCondition("")),
+					reconcilertesting.HaveCondition(reconcilertesting.DefaultReadyCondition("")),
 					reconcilertesting.HaveSubsConfiguration(configDefault(ens.defaultSubscriptionConfig.MaxInFlightMessages)),
 					reconcilertesting.HaveCleanEventTypes([]string{
 						cleanEventType("0"),
@@ -398,7 +397,7 @@ func TestChangeSubscription(t *testing.T) {
 			},
 			expectAfter: expect{
 				k8sSubscription: []gomegatypes.GomegaMatcher{
-					reconcilertesting.HaveCondition(reconcilertesting.DefaultCondition("")),
+					reconcilertesting.HaveCondition(reconcilertesting.DefaultReadyCondition("")),
 					reconcilertesting.HaveSubsConfiguration(configDefault(ens.defaultSubscriptionConfig.MaxInFlightMessages)),
 					reconcilertesting.HaveCleanEventTypes([]string{
 						cleanEventType("0alpha"),
@@ -418,7 +417,7 @@ func TestChangeSubscription(t *testing.T) {
 			},
 			expectBefore: expect{
 				k8sSubscription: []gomegatypes.GomegaMatcher{
-					reconcilertesting.HaveCondition(reconcilertesting.DefaultCondition("")),
+					reconcilertesting.HaveCondition(reconcilertesting.DefaultReadyCondition("")),
 					reconcilertesting.HaveSubsConfiguration(configDefault(ens.defaultSubscriptionConfig.MaxInFlightMessages)),
 					reconcilertesting.HaveCleanEventTypes([]string{
 						cleanEventType("0"),
@@ -431,7 +430,7 @@ func TestChangeSubscription(t *testing.T) {
 			},
 			expectAfter: expect{
 				k8sSubscription: []gomegatypes.GomegaMatcher{
-					reconcilertesting.HaveCondition(reconcilertesting.DefaultCondition("")),
+					reconcilertesting.HaveCondition(reconcilertesting.DefaultReadyCondition("")),
 					reconcilertesting.HaveSubsConfiguration(configDefault(ens.defaultSubscriptionConfig.MaxInFlightMessages)),
 					reconcilertesting.HaveCleanEventTypes([]string{
 						cleanEventType("0"),
@@ -449,7 +448,7 @@ func TestChangeSubscription(t *testing.T) {
 			},
 			expectBefore: expect{
 				k8sSubscription: []gomegatypes.GomegaMatcher{
-					reconcilertesting.HaveCondition(reconcilertesting.DefaultCondition("")),
+					reconcilertesting.HaveCondition(reconcilertesting.DefaultReadyCondition("")),
 					reconcilertesting.HaveSubsConfiguration(configDefault(ens.defaultSubscriptionConfig.MaxInFlightMessages)),
 				},
 			},
@@ -460,7 +459,7 @@ func TestChangeSubscription(t *testing.T) {
 			},
 			expectAfter: expect{
 				k8sSubscription: []gomegatypes.GomegaMatcher{
-					reconcilertesting.HaveCondition(reconcilertesting.DefaultCondition("")),
+					reconcilertesting.HaveCondition(reconcilertesting.DefaultReadyCondition("")),
 					reconcilertesting.HaveSubsConfiguration(
 						&eventingv1alpha1.SubscriptionConfig{
 							MaxInFlightMessages: 101,
@@ -487,7 +486,7 @@ func TestChangeSubscription(t *testing.T) {
 			expectBefore: expect{
 				k8sSubscription: []gomegatypes.GomegaMatcher{
 					reconcilertesting.HaveCleanEventTypes(nil),
-					reconcilertesting.HaveCondition(reconcilertesting.DefaultCondition("")),
+					reconcilertesting.HaveCondition(reconcilertesting.DefaultReadyCondition("")),
 					reconcilertesting.HaveSubsConfiguration(configDefault(ens.defaultSubscriptionConfig.MaxInFlightMessages)),
 					reconcilertesting.HaveSubscriptionReady(),
 				},
@@ -500,7 +499,7 @@ func TestChangeSubscription(t *testing.T) {
 			},
 			expectAfter: expect{
 				k8sSubscription: []gomegatypes.GomegaMatcher{
-					reconcilertesting.HaveCondition(reconcilertesting.DefaultCondition("")),
+					reconcilertesting.HaveCondition(reconcilertesting.DefaultReadyCondition("")),
 					reconcilertesting.HaveSubsConfiguration(configDefault(ens.defaultSubscriptionConfig.MaxInFlightMessages)),
 					reconcilertesting.HaveSubscriptionReady(),
 					reconcilertesting.HaveCleanEventTypes([]string{reconcilertesting.OrderCreatedEventType}),
@@ -513,18 +512,18 @@ func TestChangeSubscription(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			subscription, subscriptionName := createSubscription(ctx, g, ens, tc.subscriptionOpts...)
+			subscription := createSubscription(ctx, g, ens, tc.subscriptionOpts...)
 
-			testSubscriptionOnK8s(ctx, g, ens, subscription, subscriptionName, tc.expectBefore.k8sSubscription...)
+			testSubscriptionOnK8s(ctx, g, ens, subscription,  tc.expectBefore.k8sSubscription...)
 			testEventsOnK8s(ctx, g, ens, tc.expectBefore.k8sEvents...)
-			testSubscriptionOnNATS(g, ens, subscriptionName, tc.expectBefore.natsSubscription...)
+			testSubscriptionOnNATS(g, ens,  subscription.Name, tc.expectBefore.natsSubscription...)
 
 			tc.changeSubscription(subscription)
 			updateSubscriptionOnK8s(ctx, g, ens, subscription)
 
-			testSubscriptionOnK8s(ctx, g, ens, subscription, subscriptionName, tc.expectAfter.k8sSubscription...)
+			testSubscriptionOnK8s(ctx, g, ens, subscription,  tc.expectAfter.k8sSubscription...)
 			testEventsOnK8s(ctx, g, ens, tc.expectAfter.k8sEvents...)
-			testSubscriptionOnNATS(g, ens, subscriptionName, tc.expectAfter.natsSubscription...)
+			testSubscriptionOnNATS(g, ens, subscription.Name, tc.expectAfter.natsSubscription...)
 			testDeletionOnK8s(ctx, g, ens, subscription, tc.shouldTestDeletion)
 		})
 	}
@@ -541,19 +540,19 @@ func TestEmptyEventTypePrefix(t *testing.T) {
 	g.Expect(err).NotTo(gomega.HaveOccurred())
 	ens := setupTestEnsemble(ctx, reconcilertesting.EventTypePrefixEmpty, g, natsPort)
 
-	subscription, subscriptionName := createSubscription(ctx, g, ens,
+	subscription := createSubscription(ctx, g, ens,
 		reconcilertesting.WithFilter("", reconcilertesting.OrderCreatedEventTypeNotCleanPrefixEmpty),
 		reconcilertesting.WithSinkURLFromSvc(ens.subscriberSvc),
 	)
 
-	testSubscriptionOnK8s(ctx, g, ens, subscription, subscriptionName,
+	testSubscriptionOnK8s(ctx, g, ens, subscription,
 		reconcilertesting.HaveCleanEventTypes([]string{reconcilertesting.OrderCreatedEventTypePrefixEmpty}),
-		reconcilertesting.HaveCondition(reconcilertesting.DefaultCondition("")),
+		reconcilertesting.HaveCondition(reconcilertesting.DefaultReadyCondition("")),
 		reconcilertesting.HaveSubsConfiguration(configDefault(ens.defaultSubscriptionConfig.MaxInFlightMessages)),
 		reconcilertesting.HaveSubscriptionReady(),
 	)
 
-	testSubscriptionOnNATS(g, ens, subscriptionName,
+	testSubscriptionOnNATS(g, ens, subscription.Name,
 		reconcilertesting.BeNATSSubscriptionNotNil(),
 		reconcilertesting.BeValidNATSSubscription(),
 		reconcilertesting.BeNATSSubscriptionWithSubject(reconcilertesting.OrderCreatedEventTypePrefixEmpty),
@@ -569,16 +568,16 @@ func updateSubscriptionOnK8s(ctx context.Context, g *gomega.GomegaWithT, ens *te
 	g.Expect(err).Should(gomega.BeNil())
 }
 
-func createSubscription(ctx context.Context, g *gomega.GomegaWithT, ens *testEnsemble, subscriptionOpts ...reconcilertesting.SubscriptionOpt) (*eventingv1alpha1.Subscription, string) {
+func createSubscription(ctx context.Context, g *gomega.GomegaWithT, ens *testEnsemble, subscriptionOpts ...reconcilertesting.SubscriptionOpt) *eventingv1alpha1.Subscription {
 	subscriptionName := fmt.Sprintf(subscriptionNameFormat, ens.testID)
 	ens.testID++
 	subscription := reconcilertesting.NewSubscription(subscriptionName, ens.subscriberSvc.Namespace, subscriptionOpts...)
 	subscription = createSubscriptionInK8s(ctx, ens, subscription, g)
-	return subscription, subscriptionName
+	return subscription
 }
 
-func testSubscriptionOnK8s(ctx context.Context, g *gomega.GomegaWithT, ens *testEnsemble, subscription *eventingv1alpha1.Subscription, subscriptionName string, expectations ...gomegatypes.GomegaMatcher) {
-	subExpectations := append(expectations, reconcilertesting.HaveSubscriptionName(subscriptionName))
+func testSubscriptionOnK8s(ctx context.Context, g *gomega.GomegaWithT, ens *testEnsemble, subscription *eventingv1alpha1.Subscription, expectations ...gomegatypes.GomegaMatcher) {
+	subExpectations := append(expectations, reconcilertesting.HaveSubscriptionName(subscription.Name))
 	getSubscriptionOnK8S(ctx, ens, subscription, g).Should(gomega.And(subExpectations...))
 }
 

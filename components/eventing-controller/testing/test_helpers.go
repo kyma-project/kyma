@@ -558,10 +558,10 @@ func WithMultipleConditions() SubscriptionOpt {
 }
 
 func MultipleDefaultConditions() []eventingv1alpha1.Condition {
-	return []eventingv1alpha1.Condition{DefaultCondition("One"), DefaultCondition("Two")}
+	return []eventingv1alpha1.Condition{DefaultReadyCondition("One"), DefaultReadyCondition("Two")}
 }
 
-func DefaultCondition(msg string) eventingv1alpha1.Condition {
+func DefaultReadyCondition(msg string) eventingv1alpha1.Condition {
 	return eventingv1alpha1.MakeCondition(
 		eventingv1alpha1.ConditionSubscriptionActive,
 		eventingv1alpha1.ConditionReasonNATSSubscriptionActive,
