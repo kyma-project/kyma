@@ -1,9 +1,16 @@
 const prometheus = require('./prometheus');
 const grafana = require('./grafana');
+const {getEnvOrThrow} = require('../utils');
 
 const {prometheusPortForward} = require('./client');
 
 function monitoringTests() {
+  const kymaVersion = getEnvOrThrow('KYMA_VERSION');
+
+  if (kymaVersion.startsWith('1')) {
+    return;
+  }
+
   describe('Prometheus Tests:', function() {
     this.timeout(5 * 60 * 1000); // 5 min
     this.slow(5 * 1000);
