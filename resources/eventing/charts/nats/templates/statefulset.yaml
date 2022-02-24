@@ -131,6 +131,10 @@ spec:
           value: {{ include "nats.clusterAdvertise" . }}
 
         {{- if .Values.global.features.enableJetStream }}
+        - name: JS_ENABLED
+          value: "true"
+        {{- end }}
+        {{- if .Values.global.features.enableJetStream }}
         {{- with .Values.nats.jetstream.encryption }}
         {{- with .secret }}
         - name: JS_KEY
