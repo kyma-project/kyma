@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/eventtype"
+
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -48,7 +50,7 @@ type SubscriptionManager struct {
 	restCfg     *rest.Config
 	metricsAddr string
 	mgr         manager.Manager
-	backend     handlers.MessagingBackend
+	backend     handlers.NatsBackend
 	logger      *logger.Logger
 }
 
@@ -79,13 +81,15 @@ func (c *SubscriptionManager) Start(defaultSubsConfig env.DefaultSubscriptionCon
 	c.cancel = cancel
 	dynamicClient := dynamic.NewForConfigOrDie(c.restCfg)
 	applicationLister := application.NewLister(ctx, dynamicClient)
+	natsHandler := handlers.NewNats(c.envCfg, defaultSubsConfig, c.logger)
+	cleaner := eventtype.NewCleaner(c.envCfg.EventTypePrefix, applicationLister, c.logger)
 	natsReconciler := subscription.NewReconciler(
 		ctx,
 		c.mgr.GetClient(),
-		applicationLister,
+		natsHandler,
+		cleaner,
 		c.logger,
 		c.mgr.GetEventRecorderFor("eventing-controller-nats"),
-		c.envCfg,
 		defaultSubsConfig,
 	)
 	c.backend = natsReconciler.Backend
@@ -107,7 +111,7 @@ func (c *SubscriptionManager) Stop(runCleanup bool) error {
 }
 
 // clean removes all NATS artifacts.
-func cleanup(backend handlers.MessagingBackend, dynamicClient dynamic.Interface, logger *zap.SugaredLogger) error {
+func cleanup(backend handlers.NatsBackend, dynamicClient dynamic.Interface, logger *zap.SugaredLogger) error {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 

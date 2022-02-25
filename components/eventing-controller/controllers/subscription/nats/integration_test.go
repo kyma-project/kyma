@@ -18,6 +18,7 @@ import (
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/application/fake"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/eventtype"
 	reconcilertesting "github.com/kyma-project/kyma/components/eventing-controller/testing"
 	natstesting "github.com/kyma-project/kyma/components/eventing-controller/testing/nats"
 	natsserver "github.com/nats-io/nats-server/v2/server"
@@ -715,13 +716,16 @@ func startReconciler(eventTypePrefix string, ens *testEnsemble) *testEnsemble {
 	defaultLogger, err := logger.New(string(kymalogger.JSON), string(kymalogger.INFO))
 	g.Expect(err).To(gomega.BeNil())
 
+	natsHandler := handlers.NewNats(envConf, ens.defaultSubscriptionConfig, defaultLogger)
+	cleaner := eventtype.NewCleaner(envConf.EventTypePrefix, applicationLister, defaultLogger)
+
 	ens.reconciler = natsreconciler.NewReconciler(
 		ctx,
 		k8sManager.GetClient(),
-		applicationLister,
+		natsHandler,
+		cleaner,
 		defaultLogger,
 		k8sManager.GetEventRecorderFor("eventing-controller-nats"),
-		envConf,
 		ens.defaultSubscriptionConfig,
 	)
 
