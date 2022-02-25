@@ -551,7 +551,7 @@ func NewEventingControllerPod(backend string) *corev1.Pod {
 	}
 }
 
-//
+// WithMultipleConditions is a SubscriptionOpt for creating Subscriptions with multiple conditions.
 func WithMultipleConditions() SubscriptionOpt {
 	return func(s *eventingv1alpha1.Subscription) {
 		s.Status.Conditions = MultipleDefaultConditions()
