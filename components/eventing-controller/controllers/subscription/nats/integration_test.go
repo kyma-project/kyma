@@ -42,6 +42,7 @@ const (
 
 	useExistingCluster       = false
 	attachControlPlaneOutput = false
+	emptyEventSource         = ""
 )
 
 type testEnsemble struct {
@@ -65,7 +66,7 @@ type want struct {
 	natsSubscription []gomegatypes.GomegaMatcher
 }
 
-//TestUnavailableNATSServer tests if a subscription is reconciled properly when the NATS backend is unavailable.
+// TestUnavailableNATSServer tests if a subscription is reconciled properly when the NATS backend is unavailable.
 func TestUnavailableNATSServer(t *testing.T) {
 	ctx := context.Background()
 	g := gomega.NewGomegaWithT(t)
@@ -75,11 +76,11 @@ func TestUnavailableNATSServer(t *testing.T) {
 	ens := setupTestEnsemble(ctx, reconcilertesting.EventTypePrefix, g, natsPort)
 
 	subscription := createSubscription(ens,
-		reconcilertesting.WithFilter("", newUncleanEventType("")),
+		reconcilertesting.WithFilter(emptyEventSource, newUncleanEventType("")),
 		reconcilertesting.WithSinkURLFromSvc(ens.subscriberSvc),
 	)
 	testSubscriptionOnK8s(ens, subscription,
-		reconcilertesting.HaveCondition(reconcilertesting.DefaultReadyCondition("")),
+		reconcilertesting.HaveCondition(reconcilertesting.DefaultReadyCondition()),
 		reconcilertesting.HaveSubscriptionReady(),
 		reconcilertesting.HaveCleanEventTypes([]string{newCleanEventType("")}),
 	)
@@ -95,7 +96,7 @@ func TestUnavailableNATSServer(t *testing.T) {
 	t.Cleanup(ens.cancel)
 }
 
-//TestCreateSubscription tests if subscriptions get created properly by the reconciler.
+// TestCreateSubscription tests if subscriptions get created properly by the reconciler.
 func TestCreateSubscription(t *testing.T) {
 	ctx := context.Background()
 	g := gomega.NewGomegaWithT(t)
@@ -106,20 +107,20 @@ func TestCreateSubscription(t *testing.T) {
 	ens := setupTestEnsemble(ctx, reconcilertesting.EventTypePrefix, g, natsPort)
 
 	var testCases = []struct {
-		name             string
-		subscriptionOpts []reconcilertesting.SubscriptionOpt
-		want             want
+		name                  string
+		givenSubscriptionOpts []reconcilertesting.SubscriptionOpt
+		want                  want
 	}{
 		{
 			name: "create and delete",
-			subscriptionOpts: []reconcilertesting.SubscriptionOpt{
+			givenSubscriptionOpts: []reconcilertesting.SubscriptionOpt{
 				reconcilertesting.WithFilter(reconcilertesting.EventSource, reconcilertesting.OrderCreatedEventTypeNotClean),
 				reconcilertesting.WithWebhookForNATS(),
 				reconcilertesting.WithSinkURLFromSvc(ens.subscriberSvc),
 			},
 			want: want{
 				k8sSubscription: []gomegatypes.GomegaMatcher{
-					reconcilertesting.HaveCondition(reconcilertesting.DefaultReadyCondition("")),
+					reconcilertesting.HaveCondition(reconcilertesting.DefaultReadyCondition()),
 					reconcilertesting.HaveSubsConfiguration(configDefault(ens.defaultSubscriptionConfig.MaxInFlightMessages)),
 				},
 				natsSubscription: []gomegatypes.GomegaMatcher{
@@ -131,7 +132,7 @@ func TestCreateSubscription(t *testing.T) {
 		},
 		{
 			name: "filter with empty event type",
-			subscriptionOpts: []reconcilertesting.SubscriptionOpt{
+			givenSubscriptionOpts: []reconcilertesting.SubscriptionOpt{
 				reconcilertesting.WithFilter(reconcilertesting.EventSource, ""),
 				reconcilertesting.WithWebhookForNATS(),
 				reconcilertesting.WithSinkURLFromSvc(ens.subscriberSvc),
@@ -144,7 +145,7 @@ func TestCreateSubscription(t *testing.T) {
 		},
 		{
 			name: "invalid sink; misses 'http' and 'https'",
-			subscriptionOpts: []reconcilertesting.SubscriptionOpt{
+			givenSubscriptionOpts: []reconcilertesting.SubscriptionOpt{
 				reconcilertesting.WithFilter(reconcilertesting.EventSource, reconcilertesting.OrderCreatedEventTypeNotClean),
 				reconcilertesting.WithWebhookForNATS(),
 				reconcilertesting.WithSinkURL("invalid"),
@@ -158,7 +159,7 @@ func TestCreateSubscription(t *testing.T) {
 		},
 		{
 			name: "invalid sink; invalid character",
-			subscriptionOpts: []reconcilertesting.SubscriptionOpt{
+			givenSubscriptionOpts: []reconcilertesting.SubscriptionOpt{
 				reconcilertesting.WithFilter(reconcilertesting.EventSource, reconcilertesting.OrderCreatedEventTypeNotClean),
 				reconcilertesting.WithWebhookForNATS(),
 				reconcilertesting.WithSinkURL("http://127.0.0. 1"),
@@ -174,7 +175,7 @@ func TestCreateSubscription(t *testing.T) {
 		},
 		{
 			name: "invalid sink; missing suffix 'svc.cluster.local'",
-			subscriptionOpts: []reconcilertesting.SubscriptionOpt{
+			givenSubscriptionOpts: []reconcilertesting.SubscriptionOpt{
 				reconcilertesting.WithFilter(reconcilertesting.EventSource, reconcilertesting.OrderCreatedEventTypeNotClean),
 				reconcilertesting.WithWebhookForNATS(),
 				reconcilertesting.WithSinkURL("http://127.0.0.1"),
@@ -190,7 +191,7 @@ func TestCreateSubscription(t *testing.T) {
 		},
 		{
 			name: "invalid sink; too many sub domains",
-			subscriptionOpts: []reconcilertesting.SubscriptionOpt{
+			givenSubscriptionOpts: []reconcilertesting.SubscriptionOpt{
 				reconcilertesting.WithFilter(reconcilertesting.EventSource, reconcilertesting.OrderCreatedEventTypeNotClean),
 				reconcilertesting.WithWebhookForNATS(),
 				reconcilertesting.WithSinkURL(fmt.Sprintf("https://%s.%s.%s.svc.cluster.local", "testapp", "testsub", "test")),
@@ -206,7 +207,7 @@ func TestCreateSubscription(t *testing.T) {
 		},
 		{
 			name: "invalid sink; wrong namespace",
-			subscriptionOpts: []reconcilertesting.SubscriptionOpt{
+			givenSubscriptionOpts: []reconcilertesting.SubscriptionOpt{
 				reconcilertesting.WithFilter(reconcilertesting.EventSource, reconcilertesting.OrderCreatedEventTypeNotClean),
 				reconcilertesting.WithWebhookForNATS(),
 				reconcilertesting.WithSinkURL(fmt.Sprintf("https://%s.%s.svc.cluster.local", "testapp", "wrong-ns")),
@@ -222,7 +223,7 @@ func TestCreateSubscription(t *testing.T) {
 		},
 		{
 			name: "invalid sink; not a valid cluster local service",
-			subscriptionOpts: []reconcilertesting.SubscriptionOpt{
+			givenSubscriptionOpts: []reconcilertesting.SubscriptionOpt{
 				reconcilertesting.WithFilter(reconcilertesting.EventSource, reconcilertesting.OrderCreatedEventTypeNotClean),
 				reconcilertesting.WithWebhookForNATS(),
 				reconcilertesting.WithSinkURL(
@@ -239,51 +240,51 @@ func TestCreateSubscription(t *testing.T) {
 		},
 		{
 			name: "valid sink",
-			subscriptionOpts: []reconcilertesting.SubscriptionOpt{
-				reconcilertesting.WithFilter("", reconcilertesting.OrderCreatedEventTypeNotClean),
+			givenSubscriptionOpts: []reconcilertesting.SubscriptionOpt{
+				reconcilertesting.WithFilter(emptyEventSource, reconcilertesting.OrderCreatedEventTypeNotClean),
 				reconcilertesting.WithSinkURL(validSinkURL(ens)),
 			},
 			want: want{
 				k8sSubscription: []gomegatypes.GomegaMatcher{
-					reconcilertesting.HaveCondition(reconcilertesting.DefaultReadyCondition("")),
+					reconcilertesting.HaveCondition(reconcilertesting.DefaultReadyCondition()),
 					reconcilertesting.HaveSubscriptionReady(),
 				},
 			},
 		},
 		{
 			name: "valid sink; with port",
-			subscriptionOpts: []reconcilertesting.SubscriptionOpt{
-				reconcilertesting.WithFilter("", reconcilertesting.OrderCreatedEventTypeNotClean),
+			givenSubscriptionOpts: []reconcilertesting.SubscriptionOpt{
+				reconcilertesting.WithFilter(emptyEventSource, reconcilertesting.OrderCreatedEventTypeNotClean),
 				reconcilertesting.WithSinkURL(validSinkURL(ens, ":8080")),
 			},
 			want: want{
 				k8sSubscription: []gomegatypes.GomegaMatcher{
-					reconcilertesting.HaveCondition(reconcilertesting.DefaultReadyCondition("")),
+					reconcilertesting.HaveCondition(reconcilertesting.DefaultReadyCondition()),
 				},
 			},
 		},
 		{
 			name: "valid sink; with port and endpoint",
-			subscriptionOpts: []reconcilertesting.SubscriptionOpt{
-				reconcilertesting.WithFilter("", reconcilertesting.OrderCreatedEventTypeNotClean),
+			givenSubscriptionOpts: []reconcilertesting.SubscriptionOpt{
+				reconcilertesting.WithFilter(emptyEventSource, reconcilertesting.OrderCreatedEventTypeNotClean),
 				reconcilertesting.WithSinkURL(validSinkURL(ens, ":8080", "/myEndpoint")),
 			},
 			want: want{
 				k8sSubscription: []gomegatypes.GomegaMatcher{
-					reconcilertesting.HaveCondition(reconcilertesting.DefaultReadyCondition("")),
+					reconcilertesting.HaveCondition(reconcilertesting.DefaultReadyCondition()),
 					reconcilertesting.HaveSubscriptionReady(),
 				},
 			},
 		},
 		{
 			name: "empty protocol, protocol setting and dialect",
-			subscriptionOpts: []reconcilertesting.SubscriptionOpt{
-				reconcilertesting.WithFilter("", reconcilertesting.OrderCreatedEventTypeNotClean),
+			givenSubscriptionOpts: []reconcilertesting.SubscriptionOpt{
+				reconcilertesting.WithFilter(emptyEventSource, reconcilertesting.OrderCreatedEventTypeNotClean),
 				reconcilertesting.WithSinkURLFromSvc(ens.subscriberSvc),
 			},
 			want: want{
 				k8sSubscription: []gomegatypes.GomegaMatcher{
-					reconcilertesting.HaveCondition(reconcilertesting.DefaultReadyCondition("")),
+					reconcilertesting.HaveCondition(reconcilertesting.DefaultReadyCondition()),
 				},
 				natsSubscription: []gomegatypes.GomegaMatcher{
 					natstesting.BeExistingSubscription(),
@@ -296,7 +297,7 @@ func TestCreateSubscription(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			subscription := createSubscription(ens, tc.subscriptionOpts...)
+			subscription := createSubscription(ens, tc.givenSubscriptionOpts...)
 			testSubscriptionOnK8s(ens, subscription, tc.want.k8sSubscription...)
 			testEventsOnK8s(ens, tc.want.k8sEvents...)
 			testSubscriptionOnNATS(ens, subscription.Name, tc.want.natsSubscription...)
@@ -306,7 +307,7 @@ func TestCreateSubscription(t *testing.T) {
 	t.Cleanup(ens.cancel)
 }
 
-//TestChangeSubscription tests if existing subscriptions are reconciled properly after getting changed.
+// TestChangeSubscription tests if existing subscriptions are reconciled properly after getting changed.
 func TestChangeSubscription(t *testing.T) {
 	ctx := context.Background()
 	g := gomega.NewGomegaWithT(t)
@@ -316,22 +317,22 @@ func TestChangeSubscription(t *testing.T) {
 	ens := setupTestEnsemble(ctx, reconcilertesting.EventTypePrefix, g, natsPort)
 
 	var testCases = []struct {
-		name               string
-		subscriptionOpts   []reconcilertesting.SubscriptionOpt
-		wantBefore         want
-		changeSubscription func(subscription *eventingv1alpha1.Subscription)
-		wantAfter          want
+		name                  string
+		givenSubscriptionOpts []reconcilertesting.SubscriptionOpt
+		wantBefore            want
+		changeSubscription    func(subscription *eventingv1alpha1.Subscription)
+		wantAfter             want
 	}{
 		{
 			name: "CleanEventTypes; add filters to subscription without filters",
-			subscriptionOpts: []reconcilertesting.SubscriptionOpt{
+			givenSubscriptionOpts: []reconcilertesting.SubscriptionOpt{
 				reconcilertesting.WithEmptyFilter(),
 				reconcilertesting.WithWebhookForNATS(),
 				reconcilertesting.WithSinkURLFromSvc(ens.subscriberSvc),
 			},
 			wantBefore: want{
 				k8sSubscription: []gomegatypes.GomegaMatcher{
-					reconcilertesting.HaveCondition(reconcilertesting.DefaultReadyCondition("")),
+					reconcilertesting.HaveCondition(reconcilertesting.DefaultReadyCondition()),
 					reconcilertesting.HaveSubsConfiguration(configDefault(ens.defaultSubscriptionConfig.MaxInFlightMessages)),
 				},
 			},
@@ -346,7 +347,7 @@ func TestChangeSubscription(t *testing.T) {
 			},
 			wantAfter: want{
 				k8sSubscription: []gomegatypes.GomegaMatcher{
-					reconcilertesting.HaveCondition(reconcilertesting.DefaultReadyCondition("")),
+					reconcilertesting.HaveCondition(reconcilertesting.DefaultReadyCondition()),
 					reconcilertesting.HaveSubsConfiguration(configDefault(ens.defaultSubscriptionConfig.MaxInFlightMessages)),
 					reconcilertesting.HaveCleanEventTypes([]string{
 						newCleanEventType("0"),
@@ -357,7 +358,7 @@ func TestChangeSubscription(t *testing.T) {
 		},
 		{
 			name: "CleanEventTypes; change filters",
-			subscriptionOpts: []reconcilertesting.SubscriptionOpt{
+			givenSubscriptionOpts: []reconcilertesting.SubscriptionOpt{
 				reconcilertesting.WithFilter(reconcilertesting.EventSource, newUncleanEventType("0")),
 				reconcilertesting.WithFilter(reconcilertesting.EventSource, newUncleanEventType("1")),
 				reconcilertesting.WithWebhookForNATS(),
@@ -365,7 +366,7 @@ func TestChangeSubscription(t *testing.T) {
 			},
 			wantBefore: want{
 				k8sSubscription: []gomegatypes.GomegaMatcher{
-					reconcilertesting.HaveCondition(reconcilertesting.DefaultReadyCondition("")),
+					reconcilertesting.HaveCondition(reconcilertesting.DefaultReadyCondition()),
 					reconcilertesting.HaveSubsConfiguration(configDefault(ens.defaultSubscriptionConfig.MaxInFlightMessages)),
 					reconcilertesting.HaveCleanEventTypes([]string{
 						newCleanEventType("0"),
@@ -374,14 +375,14 @@ func TestChangeSubscription(t *testing.T) {
 				},
 			},
 			changeSubscription: func(subscription *eventingv1alpha1.Subscription) {
-				//change all the filters by adding "alpha" to the event type
+				// change all the filters by adding "alpha" to the event type
 				for _, f := range subscription.Spec.Filter.Filters {
 					f.EventType.Value = fmt.Sprintf("%salpha", f.EventType.Value)
 				}
 			},
 			wantAfter: want{
 				k8sSubscription: []gomegatypes.GomegaMatcher{
-					reconcilertesting.HaveCondition(reconcilertesting.DefaultReadyCondition("")),
+					reconcilertesting.HaveCondition(reconcilertesting.DefaultReadyCondition()),
 					reconcilertesting.HaveSubsConfiguration(configDefault(ens.defaultSubscriptionConfig.MaxInFlightMessages)),
 					reconcilertesting.HaveCleanEventTypes([]string{
 						newCleanEventType("0alpha"),
@@ -392,7 +393,7 @@ func TestChangeSubscription(t *testing.T) {
 		},
 		{
 			name: "CleanEventTypes; delete a filter",
-			subscriptionOpts: []reconcilertesting.SubscriptionOpt{
+			givenSubscriptionOpts: []reconcilertesting.SubscriptionOpt{
 				reconcilertesting.WithFilter(reconcilertesting.EventSource, newUncleanEventType("0")),
 				reconcilertesting.WithFilter(reconcilertesting.EventSource, newUncleanEventType("1")),
 				reconcilertesting.WithWebhookForNATS(),
@@ -400,7 +401,7 @@ func TestChangeSubscription(t *testing.T) {
 			},
 			wantBefore: want{
 				k8sSubscription: []gomegatypes.GomegaMatcher{
-					reconcilertesting.HaveCondition(reconcilertesting.DefaultReadyCondition("")),
+					reconcilertesting.HaveCondition(reconcilertesting.DefaultReadyCondition()),
 					reconcilertesting.HaveSubsConfiguration(configDefault(ens.defaultSubscriptionConfig.MaxInFlightMessages)),
 					reconcilertesting.HaveCleanEventTypes([]string{
 						newCleanEventType("0"),
@@ -413,7 +414,7 @@ func TestChangeSubscription(t *testing.T) {
 			},
 			wantAfter: want{
 				k8sSubscription: []gomegatypes.GomegaMatcher{
-					reconcilertesting.HaveCondition(reconcilertesting.DefaultReadyCondition("")),
+					reconcilertesting.HaveCondition(reconcilertesting.DefaultReadyCondition()),
 					reconcilertesting.HaveSubsConfiguration(configDefault(ens.defaultSubscriptionConfig.MaxInFlightMessages)),
 					reconcilertesting.HaveCleanEventTypes([]string{
 						newCleanEventType("0"),
@@ -423,14 +424,14 @@ func TestChangeSubscription(t *testing.T) {
 		},
 		{
 			name: "change configuration",
-			subscriptionOpts: []reconcilertesting.SubscriptionOpt{
+			givenSubscriptionOpts: []reconcilertesting.SubscriptionOpt{
 				reconcilertesting.WithFilter(reconcilertesting.EventSource, newUncleanEventType("")),
 				reconcilertesting.WithWebhookForNATS(),
 				reconcilertesting.WithSinkURLFromSvc(ens.subscriberSvc),
 			},
 			wantBefore: want{
 				k8sSubscription: []gomegatypes.GomegaMatcher{
-					reconcilertesting.HaveCondition(reconcilertesting.DefaultReadyCondition("")),
+					reconcilertesting.HaveCondition(reconcilertesting.DefaultReadyCondition()),
 					reconcilertesting.HaveSubsConfiguration(configDefault(ens.defaultSubscriptionConfig.MaxInFlightMessages)),
 				},
 			},
@@ -441,7 +442,7 @@ func TestChangeSubscription(t *testing.T) {
 			},
 			wantAfter: want{
 				k8sSubscription: []gomegatypes.GomegaMatcher{
-					reconcilertesting.HaveCondition(reconcilertesting.DefaultReadyCondition("")),
+					reconcilertesting.HaveCondition(reconcilertesting.DefaultReadyCondition()),
 					reconcilertesting.HaveSubsConfiguration(
 						&eventingv1alpha1.SubscriptionConfig{
 							MaxInFlightMessages: 101,
@@ -457,7 +458,7 @@ func TestChangeSubscription(t *testing.T) {
 		},
 		{
 			name: "resolve multiple conditions",
-			subscriptionOpts: []reconcilertesting.SubscriptionOpt{
+			givenSubscriptionOpts: []reconcilertesting.SubscriptionOpt{
 				reconcilertesting.WithEmptyFilter(),
 				reconcilertesting.WithWebhookForNATS(),
 				reconcilertesting.WithMultipleConditions(),
@@ -466,7 +467,7 @@ func TestChangeSubscription(t *testing.T) {
 			wantBefore: want{
 				k8sSubscription: []gomegatypes.GomegaMatcher{
 					reconcilertesting.HaveCleanEventTypes(nil),
-					reconcilertesting.HaveCondition(reconcilertesting.DefaultReadyCondition("")),
+					reconcilertesting.HaveCondition(reconcilertesting.DefaultReadyCondition()),
 					reconcilertesting.HaveSubsConfiguration(configDefault(ens.defaultSubscriptionConfig.MaxInFlightMessages)),
 					reconcilertesting.HaveSubscriptionReady(),
 				},
@@ -479,7 +480,7 @@ func TestChangeSubscription(t *testing.T) {
 			},
 			wantAfter: want{
 				k8sSubscription: []gomegatypes.GomegaMatcher{
-					reconcilertesting.HaveCondition(reconcilertesting.DefaultReadyCondition("")),
+					reconcilertesting.HaveCondition(reconcilertesting.DefaultReadyCondition()),
 					reconcilertesting.HaveSubsConfiguration(configDefault(ens.defaultSubscriptionConfig.MaxInFlightMessages)),
 					reconcilertesting.HaveSubscriptionReady(),
 					reconcilertesting.HaveCleanEventTypes([]string{reconcilertesting.OrderCreatedEventType}),
@@ -492,18 +493,18 @@ func TestChangeSubscription(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			//given
-			subscription := createSubscription(ens, tc.subscriptionOpts...)
+			// given
+			subscription := createSubscription(ens, tc.givenSubscriptionOpts...)
 
 			testSubscriptionOnK8s(ens, subscription, tc.wantBefore.k8sSubscription...)
 			testEventsOnK8s(ens, tc.wantBefore.k8sEvents...)
 			testSubscriptionOnNATS(ens, subscription.Name, tc.wantBefore.natsSubscription...)
 
-			//when
+			// when
 			tc.changeSubscription(subscription)
 			updateSubscriptionOnK8s(ens, subscription)
 
-			//then
+			// then
 			testSubscriptionOnK8s(ens, subscription, tc.wantAfter.k8sSubscription...)
 			testEventsOnK8s(ens, tc.wantAfter.k8sEvents...)
 			testSubscriptionOnNATS(ens, subscription.Name, tc.wantAfter.natsSubscription...)
@@ -523,13 +524,13 @@ func TestEmptyEventTypePrefix(t *testing.T) {
 	ens := setupTestEnsemble(ctx, reconcilertesting.EventTypePrefixEmpty, g, natsPort)
 
 	subscription := createSubscription(ens,
-		reconcilertesting.WithFilter("", reconcilertesting.OrderCreatedEventTypeNotCleanPrefixEmpty),
+		reconcilertesting.WithFilter(emptyEventSource, reconcilertesting.OrderCreatedEventTypeNotCleanPrefixEmpty),
 		reconcilertesting.WithSinkURLFromSvc(ens.subscriberSvc),
 	)
 
 	testSubscriptionOnK8s(ens, subscription,
 		reconcilertesting.HaveCleanEventTypes([]string{reconcilertesting.OrderCreatedEventTypePrefixEmpty}),
-		reconcilertesting.HaveCondition(reconcilertesting.DefaultReadyCondition("")),
+		reconcilertesting.HaveCondition(reconcilertesting.DefaultReadyCondition()),
 		reconcilertesting.HaveSubsConfiguration(configDefault(ens.defaultSubscriptionConfig.MaxInFlightMessages)),
 		reconcilertesting.HaveSubscriptionReady(),
 	)
@@ -748,7 +749,7 @@ func startSubscriberSvc(ens *testEnsemble) {
 func createSubscriberSvcInK8s(ens *testEnsemble) {
 	g := ens.g
 
-	//if the namespace is not "default" create it on the cluster
+	// if the namespace is not "default" create it on the cluster
 	if ens.subscriberSvc.Namespace != "default " {
 		namespace := fixtureNamespace(ens.subscriberSvc.Namespace)
 		if namespace.Name != "default" {
@@ -841,7 +842,7 @@ func getSubscriptionFromNATS(ens *testEnsemble, subscriptionName string) gomega.
 	return g.Expect(func() *nats.Subscription {
 		subscriptions := ens.natsBackend.GetAllSubscriptions()
 		for key, subscription := range subscriptions {
-			//the key does NOT ONLY contain the subscription name
+			// the key does NOT ONLY contain the subscription name
 			if strings.Contains(key, subscriptionName) {
 				return subscription
 			}

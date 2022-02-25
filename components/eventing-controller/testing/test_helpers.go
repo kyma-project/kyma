@@ -73,8 +73,9 @@ func GetFreePort() (port int, err error) {
 	if a, err = net.ResolveTCPAddr("tcp", "localhost:0"); err == nil {
 		var l *net.TCPListener
 		if l, err = net.ListenTCP("tcp", a); err == nil {
-			defer l.Close()
-			return l.Addr().(*net.TCPAddr).Port, nil
+			port := l.Addr().(*net.TCPAddr).Port
+			err = l.Close()
+			return port, err
 		}
 	}
 	return
@@ -558,14 +559,21 @@ func WithMultipleConditions() SubscriptionOpt {
 }
 
 func MultipleDefaultConditions() []eventingv1alpha1.Condition {
-	return []eventingv1alpha1.Condition{DefaultReadyCondition("One"), DefaultReadyCondition("Two")}
+	return []eventingv1alpha1.Condition{CustomReadyCondition("One"), CustomReadyCondition("Two")}
 }
 
-func DefaultReadyCondition(msg string) eventingv1alpha1.Condition {
+func CustomReadyCondition(msg string) eventingv1alpha1.Condition {
 	return eventingv1alpha1.MakeCondition(
 		eventingv1alpha1.ConditionSubscriptionActive,
 		eventingv1alpha1.ConditionReasonNATSSubscriptionActive,
 		v1.ConditionTrue, msg)
+}
+
+func DefaultReadyCondition() eventingv1alpha1.Condition {
+	return eventingv1alpha1.MakeCondition(
+		eventingv1alpha1.ConditionSubscriptionActive,
+		eventingv1alpha1.ConditionReasonNATSSubscriptionActive,
+		v1.ConditionTrue, "")
 }
 
 // ToSubscription converts an unstructured subscription into a typed one
