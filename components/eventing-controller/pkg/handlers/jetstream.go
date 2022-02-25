@@ -38,11 +38,12 @@ type JetStreamBackend interface {
 }
 
 type JetStream struct {
-	config env.NatsConfig
-	conn   *nats.Conn
-	jsCtx  nats.JetStreamContext
-	client cev2.Client
-	sinks  sync.Map
+	config        env.NatsConfig
+	conn          *nats.Conn
+	jsCtx         nats.JetStreamContext
+	client        cev2.Client
+	subscriptions map[string]*nats.Subscription
+	sinks         sync.Map
 	// connClosedHandler gets called by the NATS server when conn is closed and retry attempts are exhausted.
 	connClosedHandler ConnClosedHandler
 	logger            *logger.Logger
@@ -50,8 +51,9 @@ type JetStream struct {
 
 func NewJetStream(config env.NatsConfig, logger *logger.Logger) *JetStream {
 	return &JetStream{
-		config: config,
-		logger: logger,
+		config:        config,
+		logger:        logger,
+		subscriptions: make(map[string]*nats.Subscription),
 	}
 }
 
@@ -113,7 +115,16 @@ func (js *JetStream) SyncSubscription(subscription *eventingv1alpha1.Subscriptio
 			}
 		}
 
-		_, err := js.jsCtx.Subscribe(
+		// check if the subscription already exists and if it is valid.
+		if existingNatsSub, ok := js.subscriptions[consumerHash]; ok {
+			// TODO: Compare if the subjects are the same
+			if existingNatsSub.IsValid() {
+				log.Debugw("skipping creating subscription on JetStream because it already exists", "subject", subject)
+				continue
+			}
+		}
+
+		jsSubscription, err := js.jsCtx.Subscribe(
 			fmt.Sprintf("%s", subject),
 			callback,
 			js.getDefaultSubscriptionOptions(consumerHash)...,
@@ -122,6 +133,8 @@ func (js *JetStream) SyncSubscription(subscription *eventingv1alpha1.Subscriptio
 			log.Errorw("Subscription error", "err", err)
 			return err
 		}
+		// save created JetStream subscription in storage
+		js.subscriptions[consumerHash] = jsSubscription
 	}
 	return nil
 }
@@ -139,7 +152,6 @@ func (js *JetStream) getDefaultSubscriptionOptions(consumer string) DefaultSubOp
 		nats.MaxDeliver(3),
 	}
 	return defaultOpts
-
 }
 
 func (js *JetStream) DeleteSubscription(_ *eventingv1alpha1.Subscription) error {

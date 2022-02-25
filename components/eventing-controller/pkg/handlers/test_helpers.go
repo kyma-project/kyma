@@ -141,3 +141,12 @@ func startNATSServer(serverOpts ...eventingtesting.NatsServerOpt) (*server.Serve
 	natsServer := eventingtesting.RunNatsServerOnPort(serverOpts...)
 	return natsServer, natsPort
 }
+
+func SendEventToJetStream(jsClient *JetStream, data string) error {
+	// assumption: the event-type used for publishing is already cleaned from none-alphanumeric characters
+	// because the publisher-application should have cleaned it already before publishing
+	eventType := eventingtesting.OrderCreatedEventType
+	eventTime := time.Now().Format(time.RFC3339)
+	sampleEvent := NewNatsMessagePayload(data, "id", eventingtesting.EventSource, eventTime, eventType)
+	return jsClient.conn.Publish(eventType, []byte(sampleEvent))
+}
