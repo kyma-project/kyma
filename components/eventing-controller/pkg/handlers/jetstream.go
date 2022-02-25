@@ -7,7 +7,9 @@ import (
 	cev2protocol "github.com/cloudevents/sdk-go/v2/protocol"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/tracing"
 	"github.com/kyma-project/kyma/components/eventing-controller/utils"
+	"k8s.io/apimachinery/pkg/types"
 	"net/http"
+	"strings"
 	"sync"
 	"time"
 
@@ -96,13 +98,36 @@ func (js *JetStream) SyncSubscription(subscription *eventingv1alpha1.Subscriptio
 	log := utils.LoggerWithSubscription(js.namedLogger(), subscription)
 	subKeyPrefix := createKeyPrefix(subscription)
 
+	// check if there is any existing JetStream subscription in global list
+	// which is not anymore in this subscription filters (i.e. cleanSubjects).
+	// e.g. when filters are modified.
+	for key, jsSub := range js.subscriptions {
+		// TODO: optimize this call of ConsumerInfo
+		info, err := jsSub.ConsumerInfo()
+		if err != nil {
+			if err == nats.ErrConsumerNotFound {
+				continue
+			}
+			return err
+		}
+		if js.isJsSubAssociatedWithKymaSub(key, subscription) && !utils.ContainsString(subscription.Status.CleanEventTypes, info.Config.FilterSubject) {
+			if err := js.deleteSubscriptionFromJS(jsSub, key, log); err != nil {
+				return err
+			}
+			log.Infow(
+				"deleted JetStream subscription because it was deleted from subscription filters",
+				"subscriptionKey", key,
+				"jetStreamSubject", jsSub.Subject,
+			)
+		}
+	}
+
 	// add/update sink info in map for callbacks
 	if sinkURL, ok := js.sinks.Load(subKeyPrefix); !ok || sinkURL != subscription.Spec.Sink {
 		js.sinks.Store(subKeyPrefix, subscription.Spec.Sink)
 	}
 
 	callback := js.getCallback(subKeyPrefix)
-
 	for _, subject := range subscription.Status.CleanEventTypes {
 		consumerHash := js.generateConsumerHash(subject, subscription)
 		log.Infow("Unique Consumer and Subject", "consumerHash", consumerHash, "subject", subject)
@@ -299,12 +324,7 @@ func (js *JetStream) getCallback(subKeyPrefix string) nats.MsgHandler {
 
 // isNatsSubAssociatedWithKymaSub checks if the JetStream subscription is associated / related to Kyma subscription or not.
 func (js *JetStream) isJsSubAssociatedWithKymaSub(jsSubKey string, subscription *eventingv1alpha1.Subscription) bool {
-	for _, subject := range subscription.Status.CleanEventTypes {
-		if js.generateConsumerHash(subject, subscription) == jsSubKey {
-			return true
-		}
-	}
-	return false
+	return createKeyPrefix(subscription) == createJSSubscriptionNamespacedName(jsSubKey).String()
 }
 
 func (js *JetStream) namedLogger() *zap.SugaredLogger {
@@ -355,5 +375,15 @@ func (js *JetStream) deleteConsumerFromJS(name string, log *zap.SugaredLogger) e
 
 // generateConsumerHash generates a hash for consumer
 func (js *JetStream) generateConsumerHash(subject string, subscription *eventingv1alpha1.Subscription) string {
-	return generateHashForString(fmt.Sprintf("%s/%s", createKeyPrefix(subscription), subject))
+	return encodeString(fmt.Sprintf("%s/%s", createKeyPrefix(subscription), subject))
+}
+
+func createJSSubscriptionNamespacedName(jsSubKey string) types.NamespacedName {
+	// TODO: handle error
+	consumer, _ := decodeString(jsSubKey)
+	nsn := types.NamespacedName{}
+	nnvalues := strings.Split(consumer, string(types.Separator))
+	nsn.Namespace = nnvalues[0]
+	nsn.Name = nnvalues[1]
+	return nsn
 }
