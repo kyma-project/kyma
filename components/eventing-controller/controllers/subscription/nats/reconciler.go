@@ -69,6 +69,7 @@ func NewReconciler(ctx context.Context, client client.Client, natsHandler handle
 	logger *logger.Logger, recorder record.EventRecorder, subsCfg env.DefaultSubscriptionConfig) *Reconciler {
 	reconciler := &Reconciler{
 		ctx:                 ctx,
+		Backend:             natsHandler,
 		Client:              client,
 		logger:              logger,
 		recorder:            recorder,
@@ -81,7 +82,6 @@ func NewReconciler(ctx context.Context, client client.Client, natsHandler handle
 		logger.WithContext().Errorw("start reconciler failed", "name", reconcilerName, "error", err)
 		panic(err)
 	}
-	reconciler.Backend = natsHandler
 
 	return reconciler
 }
