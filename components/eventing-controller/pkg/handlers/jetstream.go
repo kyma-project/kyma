@@ -7,7 +7,6 @@ import (
 	cev2protocol "github.com/cloudevents/sdk-go/v2/protocol"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/tracing"
 	"github.com/kyma-project/kyma/components/eventing-controller/utils"
-	"k8s.io/apimachinery/pkg/types"
 	"net/http"
 	"sync"
 	"time"
@@ -105,9 +104,9 @@ func (js *JetStream) SyncSubscription(subscription *eventingv1alpha1.Subscriptio
 	callback := js.getCallback(subKeyPrefix)
 
 	for _, subject := range subscription.Status.CleanEventTypes {
-		uniqueConsumer := subKeyPrefix + string(types.Separator) + subject
-		consumerHash := generateHashForString(uniqueConsumer)
-		log.Infow("Unique Consumer and Subject", "consumer", uniqueConsumer, "subject", subject)
+		consumerHash := js.generateConsumerHash(subject, subscription)
+		log.Infow("Unique Consumer and Subject", "consumerHash", consumerHash, "subject", subject)
+
 		if js.conn.Status() != nats.CONNECTED {
 			if err := js.Initialize(js.connClosedHandler); err != nil {
 				log.Errorw("reset NATS connection failed", "status", js.conn.Stats(), "error", err)
@@ -154,8 +153,32 @@ func (js *JetStream) getDefaultSubscriptionOptions(consumer string) DefaultSubOp
 	return defaultOpts
 }
 
-func (js *JetStream) DeleteSubscription(_ *eventingv1alpha1.Subscription) error {
-	panic("implement me")
+func (js *JetStream) DeleteSubscription(subscription *eventingv1alpha1.Subscription) error {
+	log := utils.LoggerWithSubscription(js.namedLogger(), subscription)
+
+	// loop over the global list of subscriptions
+	// and delete any related JetStream subscription
+	for key, jsSub := range js.subscriptions {
+		if js.isJsSubAssociatedWithKymaSub(key, subscription) {
+			if err := js.deleteSubscriptionFromJS(jsSub, key, log); err != nil {
+				return err
+			}
+		}
+	}
+
+	// cleanup consumers on nats-server
+	// in-case data in js.subscriptions[] was lost due to handler restart
+	for _, subject := range subscription.Status.CleanEventTypes {
+		consumerHash := js.generateConsumerHash(subject, subscription)
+		if err := js.deleteConsumerFromJS(consumerHash, log); err != nil {
+			return err
+		}
+	}
+
+	// delete subscription sink info from storage
+	js.sinks.Delete(createKeyPrefix(subscription))
+
+	return nil
 }
 
 func (js *JetStream) validateConfig() error {
@@ -274,6 +297,63 @@ func (js *JetStream) getCallback(subKeyPrefix string) nats.MsgHandler {
 	}
 }
 
+// isNatsSubAssociatedWithKymaSub checks if the JetStream subscription is associated / related to Kyma subscription or not.
+func (js *JetStream) isJsSubAssociatedWithKymaSub(jsSubKey string, subscription *eventingv1alpha1.Subscription) bool {
+	for _, subject := range subscription.Status.CleanEventTypes {
+		if js.generateConsumerHash(subject, subscription) == jsSubKey {
+			return true
+		}
+	}
+	return false
+}
+
 func (js *JetStream) namedLogger() *zap.SugaredLogger {
 	return js.logger.WithContext().Named(jsHandlerName)
+}
+
+// deleteSubscriptionFromJS deletes subscription from JetStream and from in-memory db
+func (js *JetStream) deleteSubscriptionFromJS(jsSub *nats.Subscription, subKey string, log *zap.SugaredLogger) error {
+	// Unsubscribe call to NATS is async hence checking the status of the connection is important
+	if js.conn.Status() != nats.CONNECTED {
+		if err := js.Initialize(js.connClosedHandler); err != nil {
+			log.Errorw("connect to JetStream failed", "status", js.conn.Status(), "error", err)
+			return errors.Wrapf(err, "connect to JetStream failed")
+		}
+	}
+
+	if jsSub.IsValid() {
+		if err := jsSub.Unsubscribe(); err != nil {
+			log.Errorw("unsubscribe from JetStream failed", "error", err, "jsSub", jsSub)
+			return errors.Wrapf(err, "unsubscribe failed")
+		}
+	}
+
+	delete(js.subscriptions, subKey)
+	log.Debugw("unsubscribe from JetStream succeeded", "subscriptionKey", subKey)
+
+	return nil
+}
+
+// deleteConsumerFromJS deletes consumer from JetStream
+func (js *JetStream) deleteConsumerFromJS(name string, log *zap.SugaredLogger) error {
+	// checking the status of the connection is important
+	if js.conn.Status() != nats.CONNECTED {
+		if err := js.Initialize(js.connClosedHandler); err != nil {
+			log.Errorw("connect to JetStream failed", "status", js.conn.Status(), "error", err)
+			return errors.Wrapf(err, "connect to JetStream failed")
+		}
+	}
+
+	if err := js.jsCtx.DeleteConsumer(js.config.JSStreamName, name); err != nil && err != nats.ErrConsumerNotFound {
+		// if it is not a Not Found error, then return error
+		log.Errorw("failed to delete consumer from JetStream", "error", err, "consumer", name)
+		return err
+	}
+
+	return nil
+}
+
+// generateConsumerHash generates a hash for consumer
+func (js *JetStream) generateConsumerHash(subject string, subscription *eventingv1alpha1.Subscription) string {
+	return generateHashForString(fmt.Sprintf("%s/%s", createKeyPrefix(subscription), subject))
 }
