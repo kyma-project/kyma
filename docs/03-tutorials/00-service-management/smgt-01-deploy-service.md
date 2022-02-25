@@ -11,6 +11,7 @@ This tutorial describes how you can deploy a simple SAP BTP audit log service in
 - [kubectl](https://kubernetes.io/docs/tasks/tools/) v1.17 or higher
 - [helm](https://helm.sh/) v3.0 or higher
 - [jq](https://stedolan.github.io/jq/download/)
+<!-->Should we list it here?<--->
 
 ## Steps
 
@@ -27,6 +28,7 @@ This tutorial describes how you can deploy a simple SAP BTP audit log service in
     ```
 
 2. Obtain the access credentials for the SAP BTP service operator as described in step 2 of [SAP BTP Operator setup](https://github.com/SAP/sap-btp-service-operator#setup) document. Then, save the obtained credentials to the `creds.json` file.
+<!-->Should we link to btp docs or just provide instructions here?<--->
 
 3. Create a Namespace and install [SAP BTP service operator](https://github.com/SAP/sap-btp-service-operator) on it:
 
