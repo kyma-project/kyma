@@ -103,6 +103,10 @@ describe('SKR SVCAT migration test', function() {
     await t.checkPodPresetEnvInjected();
   });
 
+  it('Should print the container logs of the sm proxy', async function() {
+    await printContainerLogs('app=service-broker-proxy-k8s', 'service-broker-proxy-k8s', 'kyma-system');
+  });
+
   it('Should mark the platform for migration in Service Manager', async function() {
     await t.markForMigration(smAdminCreds, platformCreds.clusterId, btpOperatorCreds.instanceId);
   });
@@ -134,10 +138,9 @@ describe('SKR SVCAT migration test', function() {
     await t.restartFunctionsPods();
   });
 
-  it('Should check if pod presets injected secrets in functions containers are present after migration',
-      async function() {
-        await t.checkPodPresetEnvInjected();
-      });
+  it('Should check if presets injected secrets in func containers are present after migration', async function() {
+    await t.checkPodPresetEnvInjected();
+  });
 
   it('Should destroy sample service catalog resources', async function() {
     await sampleResources.destroy();
