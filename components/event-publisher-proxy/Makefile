@@ -2,9 +2,10 @@ APP_NAME = event-publisher-proxy
 APP_PATH = components/$(APP_NAME)
 SCRIPTS_DIR = $(realpath $(shell pwd)/../..)/common/makefiles
 
+override ENTRYPOINT = cmd/main.go
 # fail on lint issues
 override IGNORE_LINTING_ISSUES =
-override ENTRYPOINT = cmd/main.go
+override ADDITIONAL_LINTERS="gocognit testpackage"
 
 include $(SCRIPTS_DIR)/generic-make-go.mk
 
