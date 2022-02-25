@@ -19,7 +19,7 @@
 /installation/ @Tomasz-Smelcerz-SAP @strekm @werdes72 @adamwalach @mjakobczyk @m00g3n @pPrecel @dariusztutaj
 
 # The eventing crds
-/installation/resources/crds/eventing/ @k15r @lilitgh @marcobebway @pxsalehi @mfaizanse @friedrichwilken @vladislavpaskar @radufa
+/installation/resources/crds/eventing/ @k15r @lilitgh @marcobebway @pxsalehi @mfaizanse @friedrichwilken @vladislavpaskar @radufa @raypinto
 
 # The `cluster-essentials` chart
 /resources/cluster-essentials/ @PK85 @janmedrek @a-thaler @strekm @dariusztutaj @cnvergence @veichtj @piotrkpc
@@ -70,7 +70,7 @@
 /resources/telemetry @a-thaler @lilitgh @clebs @rakesh-garimella @skhalash @jeremyharisch @chrkl @lindnerby @shorim @lindnerby
 
 # The `eventing` chart
-/resources/eventing/ @lilitgh @k15r @nachtmaar @marcobebway @radufa @pxsalehi @mfaizanse @friedrichwilken @vladislavpaskar
+/resources/eventing/ @lilitgh @k15r @nachtmaar @marcobebway @radufa @pxsalehi @mfaizanse @friedrichwilken @vladislavpaskar @raypinto
 
 # The `application-broker` subchart
 /resources/application-connector/charts/application-broker/ @PK85 @piotrmiskiewicz @ksputo @szwedm @voigt @wozniakjan @hanngos @tillknuesting @ralikio
@@ -165,10 +165,10 @@ components/etcd-tls-setup-job/ @PK85 @piotrmiskiewicz @ksputo @szwedm @voigt @wo
 /components/compass-runtime-agent/ @PK85 @akgalwas @janmedrek @franpog859 @Maladie @koala7659
 
 # Event Publisher Proxy
-/components/event-publisher-proxy @k15r @lilitgh @marcobebway @nachtmaar @radufa @pxsalehi @mfaizanse @friedrichwilken @vladislavpaskar
+/components/event-publisher-proxy @k15r @lilitgh @marcobebway @nachtmaar @radufa @pxsalehi @mfaizanse @friedrichwilken @vladislavpaskar @raypinto
 
 # Eventing Controller
-/components/eventing-controller @k15r @lilitgh @marcobebway @nachtmaar @radufa @pxsalehi @mfaizanse @friedrichwilken @vladislavpaskar
+/components/eventing-controller @k15r @lilitgh @marcobebway @nachtmaar @radufa @pxsalehi @mfaizanse @friedrichwilken @vladislavpaskar @raypinto
 
 # Busola Migrator Component
 /components/busola-migrator/ @m00g3n @pPrecel @dbadura @kwiatekus @moelsayed @cortey
@@ -235,12 +235,12 @@ components/etcd-tls-setup-job/ @PK85 @piotrmiskiewicz @ksputo @szwedm @voigt @wo
 
 
 # Fast Integration Eventing Tests
-/tests/fast-integration/eventing-test @k15r @lilitgh @marcobebway @nachtmaar @radufa @pxsalehi @mfaizanse @friedrichwilken @vladislavpaskar
+/tests/fast-integration/eventing-test @k15r @lilitgh @marcobebway @nachtmaar @radufa @pxsalehi @mfaizanse @friedrichwilken @vladislavpaskar @raypinto
 
 # Tools
 
 # The tools/event-subscriber directory
-/tools/event-subscriber/ @lilitgh @k15r @nachtmaar @marcobebway @radufa @pxsalehi @mfaizanse @friedrichwilken @vladislavpaskar
+/tools/event-subscriber/ @lilitgh @k15r @nachtmaar @marcobebway @radufa @pxsalehi @mfaizanse @friedrichwilken @vladislavpaskar @raypinto
 
 # The tools/gitserver directory
 /tools/gitserver/ @m00g3n @pPrecel @dbadura @kwiatekus @moelsayed @cortey
