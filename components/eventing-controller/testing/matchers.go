@@ -4,6 +4,7 @@ import (
 	"reflect"
 
 	apigatewayv1alpha1 "github.com/kyma-incubator/api-gateway/api/v1alpha1"
+	"github.com/nats-io/nats.go"
 	. "github.com/onsi/gomega"         // nolint
 	. "github.com/onsi/gomega/gstruct" // nolint
 	gomegatypes "github.com/onsi/gomega/types"
@@ -36,8 +37,8 @@ func HaveSubscriptionLabels(labels map[string]string) gomegatypes.GomegaMatcher 
 	return WithTransform(func(s *eventingv1alpha1.Subscription) map[string]string { return s.Labels }, Equal(labels))
 }
 
-func HaveNotFoundSubscription(isReallyDeleted bool) gomegatypes.GomegaMatcher {
-	return WithTransform(func(isDeleted bool) bool { return isDeleted }, Equal(isReallyDeleted))
+func HaveNotFoundSubscription() gomegatypes.GomegaMatcher {
+	return WithTransform(func(isDeleted bool) bool { return isDeleted }, BeTrue())
 }
 
 func HaveSubsConfiguration(subsConf *eventingv1alpha1.SubscriptionConfig) gomegatypes.GomegaMatcher {
@@ -163,6 +164,15 @@ func HaveCondition(condition eventingv1alpha1.Condition) gomegatypes.GomegaMatch
 		"Message": Equal(condition.Message),
 		"Status":  Equal(condition.Status),
 	})))
+}
+
+func HaveConditionBadSubject() gomegatypes.GomegaMatcher {
+	condition := eventingv1alpha1.MakeCondition(
+		eventingv1alpha1.ConditionSubscriptionActive,
+		eventingv1alpha1.ConditionReasonNATSSubscriptionNotActive,
+		corev1.ConditionFalse, nats.ErrBadSubject.Error(),
+	)
+	return HaveCondition(condition)
 }
 
 func HaveCleanEventTypes(cleanEventTypes []string) gomegatypes.GomegaMatcher {

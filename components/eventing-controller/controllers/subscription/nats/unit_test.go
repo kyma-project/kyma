@@ -8,13 +8,13 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
-
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/eventtype"
+	"time"
 
 	kymalogger "github.com/kyma-project/kyma/common/logging/logger"
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 	"github.com/kyma-project/kyma/components/eventing-controller/logger"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/eventtype"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/mocks"
 	controllertesting "github.com/kyma-project/kyma/components/eventing-controller/testing"
 	. "github.com/onsi/gomega"
@@ -27,6 +27,13 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/envtest"
 
 	"k8s.io/apimachinery/pkg/types"
+)
+
+const namespaceName = "test"
+
+var (
+	defaultSubsConfig = env.DefaultSubscriptionConfig{MaxInFlightMessages: 1, DispatcherRetryPeriod: time.Second, DispatcherMaxRetries: 1}
+	testEnv           *envtest.Environment
 )
 
 func Test_handleSubscriptionDeletion(t *testing.T) {
