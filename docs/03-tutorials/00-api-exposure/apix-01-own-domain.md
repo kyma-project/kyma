@@ -142,4 +142,10 @@ Follow these steps to set up your custom domain and prepare a certificate requir
 
 ## Next tutorial
 
-Proceed with [deploying a service](./apix-02-deploy-service.md).
+Proceed with the [Deploy a service](./apix-02-deploy-service.md)tutorial to deploy an instance of the HttpBin service or a sample Function.
+
+Once you have your service deployed, you can continue by choosing one of the following tutorials to:
+
+- [Expose a service](../../../03-tutorials/00-api-exposure/apix-02-expose-service-apigateway.md)
+- [Expose and secure a service with OAuth2](../../../03-tutorials/00-api-exposure/apix-03-expose-and-secure-service-oauth2.md)
+- [Expose and secure a service with JTW](../../../03-tutorials/00-api-exposure/apix-04-expose-and-secure-service-jwt.md)

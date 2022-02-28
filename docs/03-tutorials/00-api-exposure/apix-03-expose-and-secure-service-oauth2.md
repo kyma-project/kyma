@@ -1,10 +1,14 @@
 ---
-title: Expose and secure a service
+title: Expose and secure a service with OAuth2
 ---
 
 This tutorial shows how to expose and secure services or Functions using API Gateway Controller. The controller reacts to an instance of the API Rule custom resource (CR) and creates an Istio Virtual Service and [Oathkeeper Access Rules](https://www.ory.sh/docs/oathkeeper/api-access-rules) according to the details specified in the CR. To interact with the secured services, the tutorial uses an OAuth2 client registered through the Hydra Maester controller.
 
-The tutorial comes with a sample HttpBin service deployment and a sample Function. It may be a follow-up to the [Use a custom domain to expose a service](./apix-01-own-domain.md) tutorial.
+It may be a follow-up to the [Use a custom domain to expose a service](./apix-01-own-domain.md) tutorial.
+
+## Prerequisites
+
+This tutorial is based on a sample HttpBin service deployment and a sample Function. To deploy or create one of those, follow the [Deploy a service](./apix-02-deploy-service.md) tutorial.
 
 ## Register an OAuth2 client and get tokens
 
@@ -99,9 +103,9 @@ The tutorial comes with a sample HttpBin service deployment and a sample Functio
       </details>
    </div>
 
-## Deploy, expose, and secure the sample resources
+## Expose, and secure the sample resources
 
-Follow the instructions in the tabs to deploy an instance of the HttpBin service or a sample Function, expose them, and secure them with Oauth2 scopes.
+Follow the instructions in the tabs to expose an instance of the HttpBin service or a sample Function, and secure them with Oauth2 scopes.
 
 <div tabs>
 
@@ -110,47 +114,7 @@ Follow the instructions in the tabs to deploy an instance of the HttpBin service
   HttpBin - secure endpoints of a service
   </summary>
 
-1. Deploy an instance of the HttpBin service in your Namespace:
-
-  ```bash
-  kubectl -n ${NAMESPACE_NAME} create -f https://raw.githubusercontent.com/istio/istio/master/samples/httpbin/httpbin.yaml
-  ```
-
-2. Export these values as environment variables:
-
-  ```bash
-  export NAMESPACE={NAMESPACE_NAME} #If you don't have a Namspeace yet, create one.
-  export TLS_SECRET={SECRET_NAME} #e.g. use the TLS_SECRET from your Certificate CR i.e. httpbin-tls-credentials.
-  export WILDCARD={WILDCRAD_SUBDOMAIN} #e.g. *.api.mydomain.com
-  export DOMAIN={CLUSTER_DOMAIN} #This is a Kyma domain or your custom subdomain e.g. api.mydomain.com.
-  ```
-
-3. Create a Gateway CR. Skip this step if you use a Kyma domain instead of your custom domain. Run:
-
-   ```bash
-   cat <<EOF | kubectl apply -f -
-   apiVersion: networking.istio.io/v1alpha3
-   kind: Gateway
-   metadata:
-     name: httpbin-gateway
-     namespace: $NAMESPACE
-   spec:
-     selector:
-       istio: ingressgateway # Use Istio Ingress Gateway as default
-     servers:
-       - port:
-           number: 443
-           name: https
-           protocol: HTTPS
-         tls:
-           mode: SIMPLE
-           credentialName: $TLS_SECRET
-         hosts:
-           - "$WILDCARD"
-   EOF
-   ```
-
-4. Expose the service and secure it by creating an API Rule CR in your Namespace. If you don't want to use your custom domain but a Kyma domain, use the following Kyma Gateway: `kyma-system/kyma-gateway`. Run:
+1. Expose the service and secure it by creating an API Rule CR in your Namespace. If you don't want to use your custom domain but a Kyma domain, use the following Kyma Gateway: `kyma-system/kyma-gateway`. Run:
 
   ```shell
   cat <<EOF | kubectl apply -f -
@@ -192,47 +156,7 @@ The exposed service requires tokens with "read" scope for `GET` requests in the 
   Secure a Function
   </summary>
 
-1. Create a Function in your Namespace using the [supplied code](./assets/function.yaml):
-
-  ```shell
-  kubectl -n ${NAMESPACE_NAME} apply -f https://raw.githubusercontent.com/kyma-project/kyma/main/docs/03-tutorials/assets/function.yaml
-  ```
-
-2. Export these values as environment variables:
-
-  ```bash
-  export NAMESPACE={NAMESPACE_NAME} #If you don't have a Namspeace yet, create one.
-  export TLS_SECRET={SECRET_NAME} #e.g. use the TLS_SECRET from your Certificate CR i.e. httpbin-tls-credentials.
-  export WILDCARD={WILDCRAD_SUBDOMAIN} #e.g. *.api.mydomain.com
-  export DOMAIN={CLUSTER_DOMAIN} #This is a Kyma domain or your custom subdomain e.g. api.mydomain.com.
-  ```
-
-3. Create a Gateway CR. Skip this step if you use a Kyma domain instead of your custom domain. Run:
-
-   ```bash
-   cat <<EOF | kubectl apply -f -
-   apiVersion: networking.istio.io/v1alpha3
-   kind: Gateway
-   metadata:
-     name: httpbin-gateway
-     namespace: $NAMESPACE
-   spec:
-     selector:
-       istio: ingressgateway # Use Istio Ingress Gateway as default
-     servers:
-       - port:
-           number: 443
-           name: https
-           protocol: HTTPS
-         tls:
-           mode: SIMPLE
-           credentialName: $TLS_SECRET
-         hosts:
-           - "$WILDCARD"
-   EOF
-   ```
-
-4. Expose the service and secure it by creating an API Rule CR in your Namespace. If you don't want to use your custom domain but a Kyma domain, use the following Kyma Gateway: `kyma-system/kyma-gateway`. Run:
+1. Expose the service and secure it by creating an API Rule CR in your Namespace. If you don't want to use your custom domain but a Kyma domain, use the following Kyma Gateway: `kyma-system/kyma-gateway`. Run:
 
   ```shell
   cat <<EOF | kubectl apply -f -

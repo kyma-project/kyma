@@ -8,7 +8,7 @@ This tutorial shows how to expose service endpoints and configure different allo
 
 This tutorial is based on a sample HttpBin service deployment and a sample Function. To deploy or create one of those, follow the [Deploy a service](./apix-02-deploy-service.md) tutorial.
 
-## Expose a service and access the exposed resources
+## Expose and access the resources
 
 Follow the instruction to expose and access your unsecured instance of the HttpBin service or unsecured sample Function.
 

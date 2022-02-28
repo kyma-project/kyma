@@ -10,7 +10,7 @@ It may be a follow-up to the [Use a custom domain to expose a service](./apix-01
 
 This tutorial is based on a sample HttpBin service deployment and a sample Function. To deploy or create one of those, follow the [Deploy a service](./apix-02-deploy-service.md) tutorial.
 
-## Expose, secure, and the sample resources
+## Expose, secure, and access your resources
 
 1. Expose the service and secure it by creating an API Rule CR in your Namespace. If you don't want to use your custom domain but a Kyma domain, use the following Kyma Gateway: `kyma-system/kyma-gateway`. Run:
 
@@ -40,7 +40,7 @@ spec:
 
 >**NOTE:** If you are running Kyma on k3d, add `httpbin.kyma.local` to the entry with k3d IP in your system's `/etc/hosts` file.
 
-2. Call the secured service using the JTW access token:
+2. Call the secured service using a JTW access token:
 
 ```bash
 curl -ik https://mst.dt-test.goatz.shoot.canary.k8s-hana.ondemand.com/headers -H "Authorization: Bearer $ACCESS_TOKEN"
