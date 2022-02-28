@@ -142,4 +142,4 @@ Follow these steps to set up your custom domain and prepare a certificate requir
 
 ## Next tutorial
 
-Proceed with [this](./apix-02-expose-service-apigateway.md) tutorial to expose a service using your custom domain.
+Proceed with [deploying a service](./apix-02-deploy-service.md).

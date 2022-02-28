@@ -4,53 +4,22 @@ title: Expose a service
 
 This tutorial shows how to expose service endpoints and configure different allowed HTTP methods for them using API Gateway Controller.
 
-The tutorial comes with a sample HttpBin service deployment and is a follow-up to the [Use a custom domain to expose a service](./apix-01-own-domain.md) tutorial.
+## Prerequisites
 
-## Deploy and expose a service
+This tutorial is based on a sample HttpBin service deployment and a sample Function. To deploy or create one of those, follow the [Deploy a service](./apix-02-deploy-service.md) tutorial.
 
-Follow the instruction to deploy an unsecured instance of the HttpBin service and expose it.
+## Expose a service and access the exposed resources
 
-1. Deploy an instance of the HttpBin service in your Namespace:
+Follow the instruction to expose and access your unsecured instance of the HttpBin service or unsecured sample Function.
 
-  ```bash
-  kubectl -n ${NAMESPACE_NAME} create -f https://raw.githubusercontent.com/istio/istio/master/samples/httpbin/httpbin.yaml
-  ```
+<div tabs>
 
-2. Export these values as environment variables:
+  <details>
+  <summary>
+  HttpBin
+  </summary>
 
-  ```bash
-  export NAMESPACE={NAMESPACE_NAME} #If you don't have a Namspeace yet, create one.
-  export TLS_SECRET={SECRET_NAME} #e.g. use the TLS_SECRET from your Certificate CR i.e. httpbin-tls-credentials.
-  export WILDCARD={WILDCRAD_SUBDOMAIN} #e.g. *.api.mydomain.com
-  export DOMAIN={DOMAIN_NAME} #This is a Kyma domain or your custom subdomain e.g. mydomain.com.
-  ```
-
-3. Create a Gateway CR. Skip this step if you use a Kyma domain instead of your custom domain. Run:
-
-   ```bash
-   cat <<EOF | kubectl apply -f -
-   apiVersion: networking.istio.io/v1alpha3
-   kind: Gateway
-   metadata:
-     name: httpbin-gateway
-     namespace: $NAMESPACE
-   spec:
-     selector:
-       istio: ingressgateway # Use Istio Ingress Gateway as default
-     servers:
-       - port:
-           number: 443
-           name: https
-           protocol: HTTPS
-         tls:
-           mode: SIMPLE
-           credentialName: $TLS_SECRET
-         hosts:
-           - "$WILDCARD"
-   EOF
-   ```
-
-4. Expose the service by creating an API Rule CR in your Namespace. If you don't want to use your custom domain but a Kyma domain, use the following Kyma Gateway: `kyma-system/kyma-gateway`. Run:
+1. Expose the instance of the HttpBin service by creating an API Rule CR in your Namespace. If you don't want to use your custom domain but a Kyma domain, use the following Kyma Gateway: `kyma-system/kyma-gateway`. Run:
 
   ```bash
   cat <<EOF | kubectl apply -f -
@@ -83,18 +52,59 @@ Follow the instruction to deploy an unsecured instance of the HttpBin service an
 
   >**NOTE:** If you are running Kyma on k3d, add `httpbin.kyma.local` to the entry with k3d IP in your system's `/etc/hosts` file.
 
-## Access the exposed resources
-
-1. Call the endpoint by sending a `GET` request to the HttpBin service:
+2. Call the endpoint by sending a `GET` request to the HttpBin service:
 
   ```bash
   curl -ik -X GET https://httpbin.$DOMAIN/ip
   ```
 
-2. Send a `POST` request to the HttpBin's `/post` endpoint:
+3. Send a `POST` request to the HttpBin's `/post` endpoint:
 
   ```bash
   curl -ik -X POST https://httpbin.$DOMAIN/post -d "test data"
   ```
 
 These calls return the code `200` response.
+
+  </details>
+
+  <details>
+  <summary>
+  Function
+  </summary>
+
+1. Expose the sample Function by creating an API Rule CR in your Namespace. If you don't want to use your custom domain but a Kyma domain, use the following Kyma Gateway: `kyma-system/kyma-gateway`. Run:
+
+  ```shell
+  cat <<EOF | kubectl apply -f -
+  apiVersion: gateway.kyma-project.io/v1alpha1
+  kind: APIRule
+  metadata:
+    name: function
+    namespace: $NAMESPACE
+  spec:
+    gateway: namespace-name/httpbin-gateway #The value corresponds to the Gateway CR you created. 
+    service:
+      name: function
+      port: 80
+      host: function-example.$DOMAIN
+    rules:
+      - path: /function
+        methods: ["GET"]
+        accessStrategies:
+          - handler: noop
+  EOF
+  ```
+
+>**NOTE:** If you are running Kyma on k3d, add `httpbin.kyma.local` to the entry with k3d IP in your system's `/etc/hosts` file.
+
+2. Send a `GET` request to the Function:
+
+  ```shell
+  curl -ik https://function-example.$DOMAIN/function
+  ```
+
+This call returns the code `200` response.
+
+  </details>
+</div>
