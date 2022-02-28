@@ -4,11 +4,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"sync"
 	"testing"
 	"time"
-
-	"github.com/nats-io/nats-server/v2/server"
 
 	"github.com/avast/retry-go/v3"
 	cev2event "github.com/cloudevents/sdk-go/v2/event"
@@ -26,7 +23,7 @@ import (
 )
 
 var (
-	nextPort = &portGenerator{port: 5223}
+	nextSinkPort = &portGenerator{port: 8088}
 )
 
 func TestConvertMsgToCE(t *testing.T) {
@@ -103,8 +100,8 @@ func TestSubscription(t *testing.T) {
 	}
 	defaultMaxInflight := 9
 	defaultSubsConfig := env.DefaultSubscriptionConfig{MaxInFlightMessages: defaultMaxInflight}
-	natsBackend := NewNats(natsConfig, defaultSubsConfig, nil, defaultLogger)
-	g.Expect(natsBackend.Initialize(env.Config{})).Should(Succeed())
+	natsBackend := NewNats(natsConfig, defaultSubsConfig, defaultLogger)
+	g.Expect(natsBackend.Initialize(nil)).Should(Succeed())
 
 	subscriber := eventingtesting.NewSubscriber()
 	defer subscriber.Shutdown()
@@ -117,7 +114,7 @@ func TestSubscription(t *testing.T) {
 	)
 	cleaner := createEventTypeCleaner(eventingtesting.EventTypePrefix, eventingtesting.ApplicationNameNotClean, defaultLogger)
 	addCleanEventTypesToStatus(sub, cleaner)
-	_, err := natsBackend.SyncSubscription(sub, cleaner)
+	_, err := natsBackend.SyncSubscription(sub)
 	g.Expect(err).To(BeNil())
 
 	data := "sampledata"
@@ -148,8 +145,8 @@ func TestNatsSubAfterSync_NoChange(t *testing.T) {
 		ReconnectWait: time.Second,
 	}
 	defaultSubsConfig := env.DefaultSubscriptionConfig{MaxInFlightMessages: 5}
-	natsBackend := NewNats(natsConfig, defaultSubsConfig, nil, defaultLogger)
-	g.Expect(natsBackend.Initialize(env.Config{})).Should(Succeed())
+	natsBackend := NewNats(natsConfig, defaultSubsConfig, defaultLogger)
+	g.Expect(natsBackend.Initialize(nil)).Should(Succeed())
 
 	subscriber := eventingtesting.NewSubscriber()
 	defer subscriber.Shutdown()
@@ -162,7 +159,7 @@ func TestNatsSubAfterSync_NoChange(t *testing.T) {
 	)
 	cleaner := createEventTypeCleaner(eventingtesting.EventTypePrefix, eventingtesting.ApplicationNameNotClean, defaultLogger)
 	addCleanEventTypesToStatus(sub, cleaner)
-	_, err := natsBackend.SyncSubscription(sub, cleaner)
+	_, err := natsBackend.SyncSubscription(sub)
 	g.Expect(err).To(BeNil())
 
 	// get cleaned subject
@@ -188,7 +185,7 @@ func TestNatsSubAfterSync_NoChange(t *testing.T) {
 		g.Expect(natsSub.SetPendingLimits(msgLimit, bytesLimit)).Should(Succeed())
 	}
 	// Now, sync the subscription
-	_, err = natsBackend.SyncSubscription(sub, cleaner)
+	_, err = natsBackend.SyncSubscription(sub)
 	g.Expect(err).To(BeNil())
 
 	// check if the NATS subscription are the same (have same metadata)
@@ -229,8 +226,8 @@ func TestNatsSubAfterSync_SinkChange(t *testing.T) {
 		ReconnectWait: time.Second,
 	}
 	defaultSubsConfig := env.DefaultSubscriptionConfig{MaxInFlightMessages: 5}
-	natsBackend := NewNats(natsConfig, defaultSubsConfig, nil, defaultLogger)
-	g.Expect(natsBackend.Initialize(env.Config{})).Should(Succeed())
+	natsBackend := NewNats(natsConfig, defaultSubsConfig, defaultLogger)
+	g.Expect(natsBackend.Initialize(nil)).Should(Succeed())
 
 	subscriber1 := eventingtesting.NewSubscriber()
 	defer subscriber1.Shutdown()
@@ -246,7 +243,7 @@ func TestNatsSubAfterSync_SinkChange(t *testing.T) {
 	)
 	cleaner := createEventTypeCleaner(eventingtesting.EventTypePrefix, eventingtesting.ApplicationNameNotClean, defaultLogger)
 	addCleanEventTypesToStatus(sub, cleaner)
-	_, err := natsBackend.SyncSubscription(sub, cleaner)
+	_, err := natsBackend.SyncSubscription(sub)
 	g.Expect(err).To(BeNil())
 
 	// get cleaned subject
@@ -274,7 +271,7 @@ func TestNatsSubAfterSync_SinkChange(t *testing.T) {
 	// NATS subscription should not be re-created in sync when sink is changed.
 	// change the sink
 	sub.Spec.Sink = subscriber2.SinkURL
-	_, err = natsBackend.SyncSubscription(sub, cleaner)
+	_, err = natsBackend.SyncSubscription(sub)
 	g.Expect(err).To(BeNil())
 	// check if the NATS subscription are the same (have same metadata)
 	// by comparing the metadata of nats subscription
@@ -314,8 +311,8 @@ func TestNatsSubAfterSync_FiltersChange(t *testing.T) {
 		ReconnectWait: time.Second,
 	}
 	defaultSubsConfig := env.DefaultSubscriptionConfig{MaxInFlightMessages: 5}
-	natsBackend := NewNats(natsConfig, defaultSubsConfig, nil, defaultLogger)
-	g.Expect(natsBackend.Initialize(env.Config{})).Should(Succeed())
+	natsBackend := NewNats(natsConfig, defaultSubsConfig, defaultLogger)
+	g.Expect(natsBackend.Initialize(nil)).Should(Succeed())
 
 	subscriber := eventingtesting.NewSubscriber()
 	defer subscriber.Shutdown()
@@ -328,7 +325,7 @@ func TestNatsSubAfterSync_FiltersChange(t *testing.T) {
 	)
 	cleaner := createEventTypeCleaner(eventingtesting.EventTypePrefix, eventingtesting.ApplicationNameNotClean, defaultLogger)
 	addCleanEventTypesToStatus(sub, cleaner)
-	_, err := natsBackend.SyncSubscription(sub, cleaner)
+	_, err := natsBackend.SyncSubscription(sub)
 	g.Expect(err).To(BeNil())
 
 	// get cleaned subject
@@ -356,7 +353,7 @@ func TestNatsSubAfterSync_FiltersChange(t *testing.T) {
 	sub.Spec.Filter.Filters[0].EventType.Value = fmt.Sprintf("%schanged", eventingtesting.OrderCreatedEventTypeNotClean)
 	// Sync the subscription
 	addCleanEventTypesToStatus(sub, cleaner)
-	_, err = natsBackend.SyncSubscription(sub, cleaner)
+	_, err = natsBackend.SyncSubscription(sub)
 	g.Expect(err).To(BeNil())
 
 	// get new cleaned subject
@@ -406,8 +403,8 @@ func TestNatsSubAfterSync_FilterAdded(t *testing.T) {
 		ReconnectWait: time.Second,
 	}
 	defaultSubsConfig := env.DefaultSubscriptionConfig{MaxInFlightMessages: 5}
-	natsBackend := NewNats(natsConfig, defaultSubsConfig, nil, defaultLogger)
-	g.Expect(natsBackend.Initialize(env.Config{})).Should(Succeed())
+	natsBackend := NewNats(natsConfig, defaultSubsConfig, defaultLogger)
+	g.Expect(natsBackend.Initialize(nil)).Should(Succeed())
 
 	// Create a new subscriber
 	subscriber := eventingtesting.NewSubscriber()
@@ -423,7 +420,7 @@ func TestNatsSubAfterSync_FilterAdded(t *testing.T) {
 	)
 	cleaner := createEventTypeCleaner(eventingtesting.EventTypePrefix, eventingtesting.ApplicationNameNotClean, defaultLogger)
 	addCleanEventTypesToStatus(sub, cleaner)
-	_, err := natsBackend.SyncSubscription(sub, cleaner)
+	_, err := natsBackend.SyncSubscription(sub)
 	g.Expect(err).To(BeNil())
 
 	// get cleaned subject
@@ -452,7 +449,7 @@ func TestNatsSubAfterSync_FilterAdded(t *testing.T) {
 
 	addCleanEventTypesToStatus(sub, cleaner)
 	// Sync the subscription
-	_, err = natsBackend.SyncSubscription(sub, cleaner)
+	_, err = natsBackend.SyncSubscription(sub)
 	g.Expect(err).To(BeNil())
 
 	// Check if total existing NATS subscriptions are correct
@@ -503,8 +500,8 @@ func TestNatsSubAfterSync_FilterRemoved(t *testing.T) {
 		ReconnectWait: time.Second,
 	}
 	defaultSubsConfig := env.DefaultSubscriptionConfig{MaxInFlightMessages: 5}
-	natsBackend := NewNats(natsConfig, defaultSubsConfig, nil, defaultLogger)
-	g.Expect(natsBackend.Initialize(env.Config{})).Should(Succeed())
+	natsBackend := NewNats(natsConfig, defaultSubsConfig, defaultLogger)
+	g.Expect(natsBackend.Initialize(nil)).Should(Succeed())
 
 	// Create a new subscriber
 	subscriber := eventingtesting.NewSubscriber()
@@ -525,7 +522,7 @@ func TestNatsSubAfterSync_FilterRemoved(t *testing.T) {
 	newFilter.EventType.Value = fmt.Sprintf("%snew1", eventingtesting.OrderCreatedEventTypeNotClean)
 	sub.Spec.Filter.Filters = append(sub.Spec.Filter.Filters, newFilter)
 	addCleanEventTypesToStatus(sub, cleaner)
-	_, err := natsBackend.SyncSubscription(sub, cleaner)
+	_, err := natsBackend.SyncSubscription(sub)
 	g.Expect(err).To(BeNil())
 
 	// get cleaned subjects
@@ -554,7 +551,7 @@ func TestNatsSubAfterSync_FilterRemoved(t *testing.T) {
 	sub.Spec.Filter.Filters = sub.Spec.Filter.Filters[:1]
 	addCleanEventTypesToStatus(sub, cleaner)
 	// Sync the subscription
-	_, err = natsBackend.SyncSubscription(sub, cleaner)
+	_, err = natsBackend.SyncSubscription(sub)
 	g.Expect(err).To(BeNil())
 
 	// Check if total existing NATS subscriptions are correct
@@ -604,8 +601,8 @@ func TestNatsSubAfterSync_MultipleSubs(t *testing.T) {
 		ReconnectWait: time.Second,
 	}
 	defaultSubsConfig := env.DefaultSubscriptionConfig{MaxInFlightMessages: 5}
-	natsBackend := NewNats(natsConfig, defaultSubsConfig, nil, defaultLogger)
-	g.Expect(natsBackend.Initialize(env.Config{})).Should(Succeed())
+	natsBackend := NewNats(natsConfig, defaultSubsConfig, defaultLogger)
+	g.Expect(natsBackend.Initialize(nil)).Should(Succeed())
 
 	// Create a new subscriber
 	subscriber := eventingtesting.NewSubscriber()
@@ -622,7 +619,7 @@ func TestNatsSubAfterSync_MultipleSubs(t *testing.T) {
 		eventingtesting.WithStatusConfig(defaultSubsConfig),
 	)
 	addCleanEventTypesToStatus(sub, cleaner)
-	_, err := natsBackend.SyncSubscription(sub, cleaner)
+	_, err := natsBackend.SyncSubscription(sub)
 	g.Expect(err).ShouldNot(HaveOccurred())
 
 	sub2 := eventingtesting.NewSubscription("sub2", "foo",
@@ -631,7 +628,7 @@ func TestNatsSubAfterSync_MultipleSubs(t *testing.T) {
 		eventingtesting.WithStatusConfig(defaultSubsConfig),
 	)
 	addCleanEventTypesToStatus(sub2, cleaner)
-	_, err = natsBackend.SyncSubscription(sub2, cleaner)
+	_, err = natsBackend.SyncSubscription(sub2)
 	g.Expect(err).ShouldNot(HaveOccurred())
 
 	// set metadata on NATS subscriptions
@@ -649,7 +646,7 @@ func TestNatsSubAfterSync_MultipleSubs(t *testing.T) {
 	sub.Spec.Filter.Filters[0].EventType.Value = fmt.Sprintf("%schanged", eventingtesting.OrderCreatedEventTypeNotClean)
 	addCleanEventTypesToStatus(sub, cleaner)
 	// Sync the subscription
-	_, err = natsBackend.SyncSubscription(sub, cleaner)
+	_, err = natsBackend.SyncSubscription(sub)
 	g.Expect(err).ShouldNot(HaveOccurred())
 
 	// get new cleaned subject from subscription 1
@@ -743,8 +740,8 @@ func TestMultipleSubscriptionsToSameEvent(t *testing.T) {
 	}
 	defaultMaxInflight := 1
 	defaultSubsConfig := env.DefaultSubscriptionConfig{MaxInFlightMessages: defaultMaxInflight}
-	natsBackend := NewNats(natsConfig, defaultSubsConfig, nil, defaultLogger)
-	g.Expect(natsBackend.Initialize(env.Config{})).Should(Succeed())
+	natsBackend := NewNats(natsConfig, defaultSubsConfig, defaultLogger)
+	g.Expect(natsBackend.Initialize(nil)).Should(Succeed())
 
 	subscriber := eventingtesting.NewSubscriber()
 	defer subscriber.Shutdown()
@@ -761,7 +758,7 @@ func TestMultipleSubscriptionsToSameEvent(t *testing.T) {
 			eventingtesting.WithStatusConfig(defaultSubsConfig),
 		)
 		addCleanEventTypesToStatus(subs[i], cleaner)
-		_, err := natsBackend.SyncSubscription(subs[i], cleaner)
+		_, err := natsBackend.SyncSubscription(subs[i])
 		g.Expect(err).To(BeNil())
 	}
 
@@ -799,8 +796,8 @@ func TestSubscriptionWithDuplicateFilters(t *testing.T) {
 		ReconnectWait: time.Second,
 	}
 	defaultSubsConfig := env.DefaultSubscriptionConfig{MaxInFlightMessages: 9}
-	natsBackend := NewNats(natsConfig, env.DefaultSubscriptionConfig{MaxInFlightMessages: 9}, nil, defaultLogger)
-	g.Expect(natsBackend.Initialize(env.Config{})).Should(Succeed())
+	natsBackend := NewNats(natsConfig, env.DefaultSubscriptionConfig{MaxInFlightMessages: 9}, defaultLogger)
+	g.Expect(natsBackend.Initialize(nil)).Should(Succeed())
 
 	subscriber := eventingtesting.NewSubscriber()
 	defer subscriber.Shutdown()
@@ -813,7 +810,7 @@ func TestSubscriptionWithDuplicateFilters(t *testing.T) {
 	)
 	idFunc := func(et string) (string, error) { return et, nil }
 	addCleanEventTypesToStatus(sub, eventtype.CleanerFunc(idFunc))
-	_, err := natsBackend.SyncSubscription(sub, eventtype.CleanerFunc(idFunc))
+	_, err := natsBackend.SyncSubscription(sub)
 	g.Expect(err).To(BeNil())
 
 	data := "sampledata"
@@ -835,8 +832,8 @@ func TestSubscriptionWithMaxInFlightChange(t *testing.T) {
 		ReconnectWait: time.Second,
 	}
 	defaultSubsConfig := env.DefaultSubscriptionConfig{MaxInFlightMessages: 5}
-	natsBackend := NewNats(natsConfig, defaultSubsConfig, nil, defaultLogger)
-	g.Expect(natsBackend.Initialize(env.Config{})).Should(Succeed())
+	natsBackend := NewNats(natsConfig, defaultSubsConfig, defaultLogger)
+	g.Expect(natsBackend.Initialize(nil)).Should(Succeed())
 
 	cleaner := createEventTypeCleaner(eventingtesting.EventTypePrefix, eventingtesting.ApplicationNameNotClean, defaultLogger)
 
@@ -845,9 +842,9 @@ func TestSubscriptionWithMaxInFlightChange(t *testing.T) {
 		eventingtesting.WithNotCleanFilter(),
 		eventingtesting.WithStatusConfig(defaultSubsConfig),
 	)
-	sub.Spec.Sink = fmt.Sprintf("http://127.0.0.1:%d/store", nextPort.get())
+	sub.Spec.Sink = fmt.Sprintf("http://127.0.0.1:%d/store", nextSinkPort.get())
 	addCleanEventTypesToStatus(sub, cleaner)
-	_, err := natsBackend.SyncSubscription(sub, cleaner)
+	_, err := natsBackend.SyncSubscription(sub)
 	g.Expect(err).To(BeNil())
 
 	filter := sub.Spec.Filter.Filters[0]
@@ -872,7 +869,7 @@ func TestSubscriptionWithMaxInFlightChange(t *testing.T) {
 
 	addCleanEventTypesToStatus(sub, cleaner)
 	sub.Status.Config = &eventingv1alpha1.SubscriptionConfig{MaxInFlightMessages: 7}
-	_, err = natsBackend.SyncSubscription(sub, cleaner)
+	_, err = natsBackend.SyncSubscription(sub)
 	g.Expect(err).To(BeNil())
 
 	for i := 0; i < sub.Status.Config.MaxInFlightMessages; i++ {
@@ -899,8 +896,8 @@ func TestIsValidSubscription(t *testing.T) {
 		ReconnectWait: time.Second,
 	}
 	defaultSubsConfig := env.DefaultSubscriptionConfig{MaxInFlightMessages: 9}
-	natsBackend := NewNats(natsConfig, defaultSubsConfig, nil, defaultLogger)
-	g.Expect(natsBackend.Initialize(env.Config{})).Should(Succeed())
+	natsBackend := NewNats(natsConfig, defaultSubsConfig, defaultLogger)
+	g.Expect(natsBackend.Initialize(nil)).Should(Succeed())
 
 	subscriber := eventingtesting.NewSubscriber()
 	defer subscriber.Shutdown()
@@ -913,7 +910,7 @@ func TestIsValidSubscription(t *testing.T) {
 		eventingtesting.WithStatusConfig(defaultSubsConfig),
 	)
 	addCleanEventTypesToStatus(sub, cleaner)
-	_, err := natsBackend.SyncSubscription(sub, cleaner)
+	_, err := natsBackend.SyncSubscription(sub)
 	g.Expect(err).To(BeNil())
 
 	filter := sub.Spec.Filter.Filters[0]
@@ -968,8 +965,8 @@ func TestSubscriptionUsingCESDK(t *testing.T) {
 	}
 	defaultMaxInflight := 1
 	defaultSubsConfig := env.DefaultSubscriptionConfig{MaxInFlightMessages: defaultMaxInflight}
-	natsBackend := NewNats(natsConfig, env.DefaultSubscriptionConfig{MaxInFlightMessages: defaultMaxInflight}, nil, defaultLogger)
-	g.Expect(natsBackend.Initialize(env.Config{})).Should(Succeed())
+	natsBackend := NewNats(natsConfig, env.DefaultSubscriptionConfig{MaxInFlightMessages: defaultMaxInflight}, defaultLogger)
+	g.Expect(natsBackend.Initialize(nil)).Should(Succeed())
 
 	subscriber := eventingtesting.NewSubscriber()
 	defer subscriber.Shutdown()
@@ -982,7 +979,7 @@ func TestSubscriptionUsingCESDK(t *testing.T) {
 		eventingtesting.WithStatusConfig(defaultSubsConfig),
 	)
 	addCleanEventTypesToStatus(sub, cleaner)
-	_, err := natsBackend.SyncSubscription(sub, cleaner)
+	_, err := natsBackend.SyncSubscription(sub)
 	g.Expect(err).To(BeNil())
 
 	subject := eventingtesting.CloudEventType
@@ -1010,8 +1007,8 @@ func TestRetryUsingCESDK(t *testing.T) {
 		DispatcherRetryPeriod: time.Second,
 		DispatcherMaxRetries:  maxRetries,
 	}
-	natsBackend := NewNats(natsConfig, defaultSubsConfig, nil, defaultLogger)
-	g.Expect(natsBackend.Initialize(env.Config{})).Should(Succeed())
+	natsBackend := NewNats(natsConfig, defaultSubsConfig, defaultLogger)
+	g.Expect(natsBackend.Initialize(nil)).Should(Succeed())
 
 	subscriber := eventingtesting.NewSubscriber()
 	defer subscriber.Shutdown()
@@ -1024,7 +1021,7 @@ func TestRetryUsingCESDK(t *testing.T) {
 	)
 	cleaner := createEventTypeCleaner(eventingtesting.EventTypePrefix, eventingtesting.ApplicationName, defaultLogger)
 	addCleanEventTypesToStatus(sub, cleaner)
-	_, err := natsBackend.SyncSubscription(sub, cleaner)
+	_, err := natsBackend.SyncSubscription(sub)
 	g.Expect(err).To(BeNil())
 
 	subject := eventingtesting.CloudEventType
@@ -1046,8 +1043,8 @@ func TestSubscription_NATSServerRestart(t *testing.T) {
 		ReconnectWait: 3 * time.Second,
 	}
 	defaultSubsConfig := env.DefaultSubscriptionConfig{MaxInFlightMessages: 10}
-	natsBackend := NewNats(natsConfig, defaultSubsConfig, nil, defaultLogger)
-	g.Expect(natsBackend.Initialize(env.Config{})).Should(Succeed())
+	natsBackend := NewNats(natsConfig, defaultSubsConfig, defaultLogger)
+	g.Expect(natsBackend.Initialize(nil)).Should(Succeed())
 
 	subscriber := eventingtesting.NewSubscriber()
 	defer subscriber.Shutdown()
@@ -1061,7 +1058,7 @@ func TestSubscription_NATSServerRestart(t *testing.T) {
 	)
 	cleaner := createEventTypeCleaner(eventingtesting.EventTypePrefix, eventingtesting.ApplicationName, defaultLogger)
 	addCleanEventTypesToStatus(sub, cleaner)
-	_, err := natsBackend.SyncSubscription(sub, cleaner)
+	_, err := natsBackend.SyncSubscription(sub)
 	g.Expect(err).To(BeNil())
 
 	ev1data := "sampledata"
@@ -1073,7 +1070,7 @@ func TestSubscription_NATSServerRestart(t *testing.T) {
 	g.Eventually(func() bool {
 		return natsBackend.connection.IsConnected()
 	}, 60*time.Second, 2*time.Second).Should(BeFalse())
-	_ = eventingtesting.RunNatsServerOnPort(natsPort)
+	_ = eventingtesting.RunNatsServerOnPort(eventingtesting.WithPort(natsPort))
 	g.Eventually(func() bool {
 		return natsBackend.connection.IsConnected()
 	}, 60*time.Second, 2*time.Second).Should(BeTrue())
@@ -1083,12 +1080,6 @@ func TestSubscription_NATSServerRestart(t *testing.T) {
 	g.Expect(SendEventToNATS(natsBackend, ev2data)).Should(Succeed())
 	expectedEv2Data := fmt.Sprintf("\"%s\"", ev2data)
 	g.Expect(subscriber.CheckEvent(expectedEv2Data)).Should(Succeed())
-}
-
-func startNATSServer() (*server.Server, int) {
-	natsPort := nextPort.get()
-	natsServer := eventingtesting.RunNatsServerOnPort(natsPort)
-	return natsServer, natsPort
 }
 
 func addCleanEventTypesToStatus(sub *eventingv1alpha1.Subscription, cleaner eventtype.Cleaner) {
@@ -1130,17 +1121,4 @@ func checkValidity(sub *nats.Subscription, toCheckIsValid bool, t *testing.T) er
 		retry.OnRetry(func(n uint, err error) { t.Logf("[%v] try failed: %s", n, err) }),
 	)
 	return err
-}
-
-type portGenerator struct {
-	lock sync.Mutex
-	port int
-}
-
-func (pg *portGenerator) get() int {
-	pg.lock.Lock()
-	defer pg.lock.Unlock()
-	p := pg.port
-	pg.port++
-	return p
 }

@@ -31,7 +31,6 @@ import (
 
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 	"github.com/kyma-project/kyma/components/eventing-controller/logger"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/application"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/eventtype"
@@ -42,14 +41,15 @@ type sinkValidator func(ctx context.Context, r *Reconciler, subscription *eventi
 
 // Reconciler reconciles a Subscription object
 type Reconciler struct {
-	ctx context.Context
 	client.Client
-	Backend          handlers.MessagingBackend
+	sinkValidator
+
+	ctx              context.Context
+	Backend          handlers.NatsBackend
 	logger           *logger.Logger
 	recorder         record.EventRecorder
 	subsConfig       env.DefaultSubscriptionConfig
 	eventTypeCleaner eventtype.Cleaner
-	sinkValidator
 	// This channel is used to enqueue a reconciliation request for a subscription
 	customEventsChannel chan event.GenericEvent
 }
@@ -65,24 +65,23 @@ const (
 	clusterLocalURLSuffix = "svc.cluster.local"
 )
 
-func NewReconciler(ctx context.Context, client client.Client, applicationLister *application.Lister,
-	logger *logger.Logger, recorder record.EventRecorder, cfg env.NatsConfig, subsCfg env.DefaultSubscriptionConfig) *Reconciler {
+func NewReconciler(ctx context.Context, client client.Client, natsHandler handlers.NatsBackend, cleaner eventtype.Cleaner,
+	logger *logger.Logger, recorder record.EventRecorder, subsCfg env.DefaultSubscriptionConfig) *Reconciler {
 	reconciler := &Reconciler{
 		ctx:                 ctx,
+		Backend:             natsHandler,
 		Client:              client,
 		logger:              logger,
 		recorder:            recorder,
 		subsConfig:          subsCfg,
-		eventTypeCleaner:    eventtype.NewCleaner(cfg.EventTypePrefix, applicationLister, logger),
+		eventTypeCleaner:    cleaner,
 		sinkValidator:       defaultSinkValidator,
 		customEventsChannel: make(chan event.GenericEvent),
 	}
-	natsHandler := handlers.NewNats(cfg, subsCfg, reconciler.handleNatsConnClose, logger)
-	if err := natsHandler.Initialize(env.Config{}); err != nil {
+	if err := natsHandler.Initialize(reconciler.handleNatsConnClose); err != nil {
 		logger.WithContext().Errorw("start reconciler failed", "name", reconcilerName, "error", err)
 		panic(err)
 	}
-	reconciler.Backend = natsHandler
 
 	return reconciler
 }
@@ -221,7 +220,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 	}
 
 	// Synchronize Kyma subscription to NATS backend
-	_, syncErr := r.Backend.SyncSubscription(subscription, r.eventTypeCleaner)
+	_, syncErr := r.Backend.SyncSubscription(subscription)
 	if syncErr != nil {
 		log.Errorw("sync subscription failed", "error", syncErr)
 		if err := r.syncSubscriptionStatus(ctx, subscription, false, statusChanged, syncErr.Error()); err != nil {

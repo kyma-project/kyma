@@ -2,6 +2,7 @@ package testing
 
 import (
 	"fmt"
+	"net"
 	"net/http"
 
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
@@ -64,6 +65,21 @@ const (
 )
 
 type APIRuleOption func(r *apigatewayv1alpha1.APIRule)
+
+// GetFreePort determines a free port on the host. It does so by delegating the job to net.ListenTCP.
+// Then providing a port of 0 to net.ListenTCP, it will automatically choose a port for us.
+func GetFreePort() (port int, err error) {
+	var a *net.TCPAddr
+	if a, err = net.ResolveTCPAddr("tcp", "localhost:0"); err == nil {
+		var l *net.TCPListener
+		if l, err = net.ListenTCP("tcp", a); err == nil {
+			port := l.Addr().(*net.TCPAddr).Port
+			err = l.Close()
+			return port, err
+		}
+	}
+	return
+}
 
 // NewAPIRule returns a valid APIRule
 func NewAPIRule(subscription *eventingv1alpha1.Subscription, opts ...APIRuleOption) *apigatewayv1alpha1.APIRule {
@@ -535,22 +551,29 @@ func NewEventingControllerPod(backend string) *corev1.Pod {
 	}
 }
 
+//
 func WithMultipleConditions() SubscriptionOpt {
 	return func(s *eventingv1alpha1.Subscription) {
-		s.Status.Conditions = NewDefaultMultipleConditions()
+		s.Status.Conditions = MultipleDefaultConditions()
 	}
 }
 
-func NewDefaultMultipleConditions() []eventingv1alpha1.Condition {
-	cond1 := eventingv1alpha1.MakeCondition(
+func MultipleDefaultConditions() []eventingv1alpha1.Condition {
+	return []eventingv1alpha1.Condition{CustomReadyCondition("One"), CustomReadyCondition("Two")}
+}
+
+func CustomReadyCondition(msg string) eventingv1alpha1.Condition {
+	return eventingv1alpha1.MakeCondition(
 		eventingv1alpha1.ConditionSubscriptionActive,
 		eventingv1alpha1.ConditionReasonNATSSubscriptionActive,
-		v1.ConditionTrue, "cond1")
-	cond2 := eventingv1alpha1.MakeCondition(
+		v1.ConditionTrue, msg)
+}
+
+func DefaultReadyCondition() eventingv1alpha1.Condition {
+	return eventingv1alpha1.MakeCondition(
 		eventingv1alpha1.ConditionSubscriptionActive,
 		eventingv1alpha1.ConditionReasonNATSSubscriptionActive,
-		v1.ConditionTrue, "cond2")
-	return []eventingv1alpha1.Condition{cond1, cond2}
+		v1.ConditionTrue, "")
 }
 
 // ToSubscription converts an unstructured subscription into a typed one

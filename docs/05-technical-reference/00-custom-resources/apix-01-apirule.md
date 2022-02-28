@@ -18,7 +18,7 @@ kind: APIRule
 metadata:
   name: service-secured
 spec:
-  gateway: kyma-gateway.kyma-system.svc.cluster.local
+  gateway: kyma-system/kyma-gateway
   service:
     name: foo-service
     port: 8080

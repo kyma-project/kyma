@@ -4,27 +4,24 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 
-	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/applications"
-
-	"github.com/stretchr/testify/require"
-
-	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/apiresources/rafter/clusterassetgroup"
-
-	"github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/apperrors"
+	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/apiresources/rafter/clusterassetgroup"
 	rafterMocks "github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/apiresources/rafter/mocks"
+	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/applications"
 	appMocks "github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/applications/mocks"
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/model"
 	appSecrets "github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/secrets/mocks"
-	"github.com/stretchr/testify/assert"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 func TestKymaUpsertCredentialsSecrets(t *testing.T) {
 	type upsert struct {
-		packageID   string
+		bundleID    string
 		credentials *model.Credentials
 	}
 
@@ -33,12 +30,11 @@ func TestKymaUpsertCredentialsSecrets(t *testing.T) {
 		application model.Application
 		upserts     []upsert
 	}{
-
 		{
 			name: "DefaultInstanceAuth is null",
 			application: model.Application{
 				Name: "",
-				APIPackages: []model.APIPackage{
+				ApiBundles: []model.APIBundle{
 					{
 						DefaultInstanceAuth: nil,
 					},
@@ -48,7 +44,7 @@ func TestKymaUpsertCredentialsSecrets(t *testing.T) {
 		{
 			name: "Credentials are nil",
 			application: model.Application{
-				APIPackages: []model.APIPackage{
+				ApiBundles: []model.APIBundle{
 					{
 						DefaultInstanceAuth: &model.Auth{
 							Credentials: nil,
@@ -60,28 +56,28 @@ func TestKymaUpsertCredentialsSecrets(t *testing.T) {
 		{
 			name: "Basic auth",
 			application: model.Application{
-				APIPackages: []model.APIPackage{
+				ApiBundles: []model.APIBundle{
 					{
-						ID:                  "package-1",
+						ID:                  "bundle-1",
 						DefaultInstanceAuth: fixAuthBasic(),
 					},
 				},
 			},
 			upserts: []upsert{{
-				packageID:   "package-1",
+				bundleID:    "bundle-1",
 				credentials: fixAuthBasic().Credentials,
 			}},
 		},
 		{
 			name: "Oauths",
 			application: model.Application{
-				APIPackages: []model.APIPackage{
+				ApiBundles: []model.APIBundle{
 					{
-						ID:                  "package-1",
+						ID:                  "bundle-1",
 						DefaultInstanceAuth: fixAuthOauth(),
 					},
 					{
-						ID: "package-2",
+						ID: "bundle-2",
 						DefaultInstanceAuth: &model.Auth{
 							Credentials: &model.Credentials{
 								Oauth: &model.Oauth{
@@ -96,11 +92,11 @@ func TestKymaUpsertCredentialsSecrets(t *testing.T) {
 			},
 			upserts: []upsert{
 				{
-					packageID:   "package-1",
+					bundleID:    "bundle-1",
 					credentials: fixAuthOauth().Credentials,
 				},
 				{
-					packageID: "package-2",
+					bundleID: "bundle-2",
 					credentials: &model.Credentials{
 						Oauth: &model.Oauth{
 							URL:          "https://auth.expamle.com",
@@ -125,7 +121,7 @@ func TestKymaUpsertCredentialsSecrets(t *testing.T) {
 			}, nil)
 			credentialsServiceMock := &appSecrets.CredentialsService{}
 			for _, upsert := range tc.upserts {
-				credentialsServiceMock.On("Upsert", tc.application.Name, types.UID(UID), upsert.packageID, upsert.credentials).
+				credentialsServiceMock.On("Upsert", tc.application.Name, types.UID(UID), upsert.bundleID, upsert.credentials).
 					Return(applications.Credentials{}, nil).Once()
 			}
 
@@ -143,8 +139,8 @@ func TestKymaUpsertCredentialsSecrets(t *testing.T) {
 
 func TestKymaRequestParametersSecrets(t *testing.T) {
 	type upsert struct {
-		packageID        string
-		requestParamters *model.RequestParameters
+		bundleID          string
+		requestParameters *model.RequestParameters
 	}
 
 	tests := []struct {
@@ -152,12 +148,11 @@ func TestKymaRequestParametersSecrets(t *testing.T) {
 		application model.Application
 		upserts     []upsert
 	}{
-
 		{
 			name: "DefaultInstanceAuth is null",
 			application: model.Application{
 				Name: "",
-				APIPackages: []model.APIPackage{
+				ApiBundles: []model.APIBundle{
 					{
 						DefaultInstanceAuth: nil,
 					},
@@ -167,7 +162,7 @@ func TestKymaRequestParametersSecrets(t *testing.T) {
 		{
 			name: "Credentials are nil",
 			application: model.Application{
-				APIPackages: []model.APIPackage{
+				ApiBundles: []model.APIBundle{
 					{
 						DefaultInstanceAuth: &model.Auth{
 							Credentials: nil,
@@ -179,7 +174,7 @@ func TestKymaRequestParametersSecrets(t *testing.T) {
 		{
 			name: "Request params are empty",
 			application: model.Application{
-				APIPackages: []model.APIPackage{
+				ApiBundles: []model.APIBundle{
 					{
 						DefaultInstanceAuth: &model.Auth{
 							Credentials: &model.Credentials{
@@ -197,42 +192,42 @@ func TestKymaRequestParametersSecrets(t *testing.T) {
 		{
 			name: "Request params once",
 			application: model.Application{
-				APIPackages: []model.APIPackage{
+				ApiBundles: []model.APIBundle{
 					{
-						ID:                  "package-1",
+						ID:                  "bundle-1",
 						DefaultInstanceAuth: fixAuthBasic(),
 					},
 				},
 			},
 			upserts: []upsert{
 				{
-					packageID:        "package-1",
-					requestParamters: fixAuthBasic().RequestParameters,
+					bundleID:          "bundle-1",
+					requestParameters: fixAuthBasic().RequestParameters,
 				},
 			},
 		},
 		{
 			name: "Request params twice",
 			application: model.Application{
-				APIPackages: []model.APIPackage{
+				ApiBundles: []model.APIBundle{
 					{
-						ID:                  "package-1",
+						ID:                  "bundle-1",
 						DefaultInstanceAuth: fixAuthBasic(),
 					},
 					{
-						ID:                  "package-2",
+						ID:                  "bundle-2",
 						DefaultInstanceAuth: fixAuthOauth(),
 					},
 				},
 			},
 			upserts: []upsert{
 				{
-					packageID:        "package-1",
-					requestParamters: fixAuthBasic().RequestParameters,
+					bundleID:          "bundle-1",
+					requestParameters: fixAuthBasic().RequestParameters,
 				},
 				{
-					packageID:        "package-2",
-					requestParamters: fixAuthOauth().RequestParameters,
+					bundleID:          "bundle-2",
+					requestParameters: fixAuthOauth().RequestParameters,
 				},
 			},
 		},
@@ -250,7 +245,7 @@ func TestKymaRequestParametersSecrets(t *testing.T) {
 			}, nil)
 			requestParametersServiceMock := &appSecrets.RequestParametersService{}
 			for _, upsert := range tc.upserts {
-				requestParametersServiceMock.On("Upsert", tc.application.Name, types.UID(UID), upsert.packageID, upsert.requestParamters).
+				requestParametersServiceMock.On("Upsert", tc.application.Name, types.UID(UID), upsert.bundleID, upsert.requestParameters).
 					Return("", nil).Once()
 			}
 
@@ -267,7 +262,6 @@ func TestKymaRequestParametersSecrets(t *testing.T) {
 }
 
 func TestKymaService(t *testing.T) {
-
 	t.Run("should return error in case failed to determine differences between current and desired runtime state", func(t *testing.T) {
 		// given
 		applicationsManagerMock := &appMocks.Repository{}
@@ -292,7 +286,6 @@ func TestKymaService(t *testing.T) {
 		converterMock.AssertExpectations(t)
 		applicationsManagerMock.AssertExpectations(t)
 		rafterServiceMock.AssertExpectations(t)
-
 	})
 
 	t.Run("should apply Create operation", func(t *testing.T) {
@@ -306,17 +299,17 @@ func TestKymaService(t *testing.T) {
 		api := fixDirectorAPiDefinition("API1", "name", "API description", fixAPISpec())
 		eventAPI := fixDirectorEventAPIDefinition("EventAPI1", "name", "Event API 1 description", fixEventAPISpec())
 
-		apiPackage1 := fixAPIPackage("package1", []model.APIDefinition{api}, nil, nil)
-		apiPackage2 := fixAPIPackage("package2", nil, []model.EventAPIDefinition{eventAPI}, nil)
-		apiPackage3 := fixAPIPackage("package3", []model.APIDefinition{api}, []model.EventAPIDefinition{eventAPI}, nil)
-		directorApplication := fixDirectorApplication("id1", "name1", apiPackage1, apiPackage2, apiPackage3)
+		apiBundle1 := fixAPIBundle("bundle1", []model.APIDefinition{api}, nil, nil)
+		apiBundle2 := fixAPIBundle("bundle2", nil, []model.EventAPIDefinition{eventAPI}, nil)
+		apiBundle3 := fixAPIBundle("bundle3", []model.APIDefinition{api}, []model.EventAPIDefinition{eventAPI}, nil)
+		directorApplication := fixDirectorApplication("id1", "name1", apiBundle1, apiBundle2, apiBundle3)
 
 		entry1 := fixAPIEntry("API1", "api1")
 		entry2 := fixEventAPIEntry("EventAPI1", "eventapi1")
 
-		newRuntimeService1 := fixService("package1", entry1)
-		newRuntimeService2 := fixService("package2", entry2)
-		newRuntimeService3 := fixService("package3", entry1, entry2)
+		newRuntimeService1 := fixService("bundle1", entry1)
+		newRuntimeService2 := fixService("bundle2", entry2)
+		newRuntimeService3 := fixService("bundle3", entry1, entry2)
 
 		newRuntimeApplication := getTestApplication("name1", "id1", []v1alpha1.Service{newRuntimeService1, newRuntimeService2, newRuntimeService3})
 
@@ -339,9 +332,9 @@ func TestKymaService(t *testing.T) {
 		expectedApiAssets2 := []clusterassetgroup.Asset{asset2}
 		expectedApiAssets3 := []clusterassetgroup.Asset{asset1, asset2}
 
-		rafterServiceMock.On("Put", "package1", expectedApiAssets1).Return(nil)
-		rafterServiceMock.On("Put", "package2", expectedApiAssets2).Return(nil)
-		rafterServiceMock.On("Put", "package3", expectedApiAssets3).Return(nil)
+		rafterServiceMock.On("Put", "bundle1", expectedApiAssets1).Return(nil)
+		rafterServiceMock.On("Put", "bundle2", expectedApiAssets2).Return(nil)
+		rafterServiceMock.On("Put", "bundle3", expectedApiAssets3).Return(nil)
 
 		expectedResult := []Result{
 			{
@@ -375,24 +368,24 @@ func TestKymaService(t *testing.T) {
 		api := fixDirectorAPiDefinition("API1", "name", "API description", fixAPISpec())
 		eventAPI := fixDirectorEventAPIDefinition("EventAPI1", "name", "Event API 1 description", fixEventAPISpec())
 
-		authPackage1 := fixAuthOauth()
-		authPackage1.RequestParameters = nil
-		authPackage2 := fixAuthBasic()
-		authPackage4 := fixAuthRequestParameters()
+		authBundle1 := fixAuthOauth()
+		authBundle1.RequestParameters = nil
+		authBundle2 := fixAuthBasic()
+		authBundle4 := fixAuthRequestParameters()
 
-		apiPackage1 := fixAPIPackage("package1", []model.APIDefinition{api}, nil, authPackage1)
-		apiPackage2 := fixAPIPackage("package2", nil, []model.EventAPIDefinition{eventAPI}, authPackage2)
-		apiPackage3 := fixAPIPackage("package3", []model.APIDefinition{api}, []model.EventAPIDefinition{eventAPI}, nil)
-		apiPackage4 := fixAPIPackage("package4", []model.APIDefinition{api}, nil, authPackage4)
-		directorApplication := fixDirectorApplication("id1", "name1", apiPackage1, apiPackage2, apiPackage3, apiPackage4)
+		apiBundle1 := fixAPIBundle("bundle1", []model.APIDefinition{api}, nil, authBundle1)
+		apiBundle2 := fixAPIBundle("bundle2", nil, []model.EventAPIDefinition{eventAPI}, authBundle2)
+		apiBundle3 := fixAPIBundle("bundle3", []model.APIDefinition{api}, []model.EventAPIDefinition{eventAPI}, nil)
+		apiBundle4 := fixAPIBundle("bundle4", []model.APIDefinition{api}, nil, authBundle4)
+		directorApplication := fixDirectorApplication("id1", "name1", apiBundle1, apiBundle2, apiBundle3, apiBundle4)
 
 		entry1 := fixAPIEntry("API1", "api1")
 		entry2 := fixEventAPIEntry("EventAPI1", "eventapi1")
 
-		newRuntimeService1 := fixService("package1", entry1)
-		newRuntimeService2 := fixService("package2", entry2)
-		newRuntimeService3 := fixService("package3", entry1, entry2)
-		newRuntimeService4 := fixService("package4", entry1)
+		newRuntimeService1 := fixService("bundle1", entry1)
+		newRuntimeService2 := fixService("bundle2", entry2)
+		newRuntimeService3 := fixService("bundle3", entry1, entry2)
+		newRuntimeService4 := fixService("bundle4", entry1)
 
 		newRuntimeApplication := getTestApplication("name1", "id1", []v1alpha1.Service{newRuntimeService1, newRuntimeService2, newRuntimeService3, newRuntimeService4})
 
@@ -417,15 +410,15 @@ func TestKymaService(t *testing.T) {
 		expectedApiAssets3 := []clusterassetgroup.Asset{asset1, asset2}
 		expectedApiAssets4 := []clusterassetgroup.Asset{asset1}
 
-		rafterServiceMock.On("Put", "package1", expectedApiAssets1).Return(nil)
-		rafterServiceMock.On("Put", "package2", expectedApiAssets2).Return(nil)
-		rafterServiceMock.On("Put", "package3", expectedApiAssets3).Return(nil)
-		rafterServiceMock.On("Put", "package4", expectedApiAssets4).Return(nil)
+		rafterServiceMock.On("Put", "bundle1", expectedApiAssets1).Return(nil)
+		rafterServiceMock.On("Put", "bundle2", expectedApiAssets2).Return(nil)
+		rafterServiceMock.On("Put", "bundle3", expectedApiAssets3).Return(nil)
+		rafterServiceMock.On("Put", "bundle4", expectedApiAssets4).Return(nil)
 
-		credentialsServiceMock.On("Upsert", "name1", newRuntimeApplication.UID, "package1", authPackage1.Credentials).Return(applications.Credentials{}, nil)
-		credentialsServiceMock.On("Upsert", "name1", newRuntimeApplication.UID, "package2", authPackage2.Credentials).Return(applications.Credentials{}, nil)
-		requestParametersServiceMock.On("Upsert", "name1", newRuntimeApplication.UID, "package2", authPackage2.RequestParameters).Return("", nil)
-		requestParametersServiceMock.On("Upsert", "name1", newRuntimeApplication.UID, "package4", authPackage4.RequestParameters).Return("", nil)
+		credentialsServiceMock.On("Upsert", "name1", newRuntimeApplication.UID, "bundle1", authBundle1.Credentials).Return(applications.Credentials{}, nil)
+		credentialsServiceMock.On("Upsert", "name1", newRuntimeApplication.UID, "bundle2", authBundle2.Credentials).Return(applications.Credentials{}, nil)
+		requestParametersServiceMock.On("Upsert", "name1", newRuntimeApplication.UID, "bundle2", authBundle2.RequestParameters).Return("", nil)
+		requestParametersServiceMock.On("Upsert", "name1", newRuntimeApplication.UID, "bundle4", authBundle4.RequestParameters).Return("", nil)
 
 		expectedResult := []Result{
 			{
@@ -458,22 +451,22 @@ func TestKymaService(t *testing.T) {
 
 		api1 := fixDirectorAPiDefinition("API1", "Name", "API 1 description", fixAPISpec())
 		eventAPI1 := fixDirectorEventAPIDefinition("EventAPI1", "Name", "Event API 1 description", fixEventAPISpec())
-		apiPackage1 := fixAPIPackage("package1", []model.APIDefinition{api1}, []model.EventAPIDefinition{eventAPI1}, nil)
+		apiBundle1 := fixAPIBundle("bundle1", []model.APIDefinition{api1}, []model.EventAPIDefinition{eventAPI1}, nil)
 
 		api2 := fixDirectorAPiDefinition("API2", "Name", "API 2 description", fixAPISpec())
 		eventAPI2 := fixDirectorEventAPIDefinition("EventAPI2", "Name", "Event API 2 description", fixEventAPISpec())
-		apiPackage2 := fixAPIPackage("package2", []model.APIDefinition{api2}, []model.EventAPIDefinition{eventAPI2}, nil)
+		apiBundle2 := fixAPIBundle("bundle2", []model.APIDefinition{api2}, []model.EventAPIDefinition{eventAPI2}, nil)
 
 		api3 := fixDirectorAPiDefinition("API3", "Name", "API 3 description", nil)
 		eventAPI3 := fixDirectorEventAPIDefinition("EventAPI2", "Name", "Event API 3 description", nil)
-		apiPackage3 := fixAPIPackage("package3", []model.APIDefinition{api3}, []model.EventAPIDefinition{eventAPI3}, nil)
+		apiBundle3 := fixAPIBundle("bundle3", []model.APIDefinition{api3}, []model.EventAPIDefinition{eventAPI3}, nil)
 
-		directorApplication := fixDirectorApplication("id1", "name1", apiPackage1, apiPackage2, apiPackage3)
+		directorApplication := fixDirectorApplication("id1", "name1", apiBundle1, apiBundle2, apiBundle3)
 
-		runtimeServiceToCreate := fixService("package1", fixServiceAPIEntry("API1"), fixEventAPIEntry("EventAPI1", "EventAPI1Name"))
-		runtimeServiceToUpdate1 := fixService("package2", fixServiceAPIEntry("API2"), fixEventAPIEntry("EventAPI2", "EventAPI2Name"))
-		runtimeServiceToUpdate2 := fixService("package3", fixServiceAPIEntry("API3"), fixEventAPIEntry("EventAPI3", "EventAPI3Name"))
-		runtimeServiceToDelete := fixService("package4", fixServiceAPIEntry("API4"), fixEventAPIEntry("EventAPI4", "EventAPI4Name"))
+		runtimeServiceToCreate := fixService("bundle1", fixServiceAPIEntry("API1"), fixEventAPIEntry("EventAPI1", "EventAPI1Name"))
+		runtimeServiceToUpdate1 := fixService("bundle2", fixServiceAPIEntry("API2"), fixEventAPIEntry("EventAPI2", "EventAPI2Name"))
+		runtimeServiceToUpdate2 := fixService("bundle3", fixServiceAPIEntry("API3"), fixEventAPIEntry("EventAPI3", "EventAPI3Name"))
+		runtimeServiceToDelete := fixService("bundle4", fixServiceAPIEntry("API4"), fixEventAPIEntry("EventAPI4", "EventAPI4Name"))
 
 		newRuntimeApplication := getTestApplication("name1", "id1", []v1alpha1.Service{runtimeServiceToCreate, runtimeServiceToUpdate1, runtimeServiceToUpdate2})
 
@@ -500,10 +493,10 @@ func TestKymaService(t *testing.T) {
 		applicationsManagerMock.On("Update", &newRuntimeApplication).Return(&newRuntimeApplication, nil)
 		applicationsManagerMock.On("List", metav1.ListOptions{}).Return(&existingRuntimeApplications, nil)
 
-		rafterServiceMock.On("Put", "package1", apiAssets1).Return(nil)
-		rafterServiceMock.On("Put", "package2", apiAssets2).Return(nil)
-		rafterServiceMock.On("Delete", "package3").Return(nil)
-		rafterServiceMock.On("Delete", "package4").Return(nil)
+		rafterServiceMock.On("Put", "bundle1", apiAssets1).Return(nil)
+		rafterServiceMock.On("Put", "bundle2", apiAssets2).Return(nil)
+		rafterServiceMock.On("Delete", "bundle3").Return(nil)
+		rafterServiceMock.On("Delete", "bundle4").Return(nil)
 
 		expectedResult := []Result{
 			{
@@ -534,30 +527,30 @@ func TestKymaService(t *testing.T) {
 		credentialsServiceMock := &appSecrets.CredentialsService{}
 		requestParametersServiceMock := &appSecrets.RequestParametersService{}
 
-		authPackage1 := fixAuthOauth()
-		authPackage3 := fixAuthBasic()
+		authBundle1 := fixAuthOauth()
+		authBundle3 := fixAuthBasic()
 
 		api1 := fixDirectorAPiDefinition("API1", "Name", "API 1 description", fixAPISpec())
 		eventAPI1 := fixDirectorEventAPIDefinition("EventAPI1", "Name", "Event API 1 description", fixEventAPISpec())
-		apiPackage1 := fixAPIPackage("package1", []model.APIDefinition{api1}, []model.EventAPIDefinition{eventAPI1}, authPackage1)
+		apiBundle1 := fixAPIBundle("bundle1", []model.APIDefinition{api1}, []model.EventAPIDefinition{eventAPI1}, authBundle1)
 
 		api2 := fixDirectorAPiDefinition("API2", "Name", "API 2 description", fixAPISpec())
 		eventAPI2 := fixDirectorEventAPIDefinition("EventAPI2", "Name", "Event API 2 description", fixEventAPISpec())
-		apiPackage2 := fixAPIPackage("package2", []model.APIDefinition{api2}, []model.EventAPIDefinition{eventAPI2}, nil)
+		apiBundle2 := fixAPIBundle("bundle2", []model.APIDefinition{api2}, []model.EventAPIDefinition{eventAPI2}, nil)
 
 		api3 := fixDirectorAPiDefinition("API3", "Name", "API 3 description", nil)
 		eventAPI3 := fixDirectorEventAPIDefinition("EventAPI2", "Name", "Event API 3 description", nil)
-		apiPackage3 := fixAPIPackage("package3", []model.APIDefinition{api3}, []model.EventAPIDefinition{eventAPI3}, authPackage3)
+		apiBundle3 := fixAPIBundle("bundle3", []model.APIDefinition{api3}, []model.EventAPIDefinition{eventAPI3}, authBundle3)
 
-		directorApplication := fixDirectorApplication("id1", "name1", apiPackage1, apiPackage2, apiPackage3)
+		directorApplication := fixDirectorApplication("id1", "name1", apiBundle1, apiBundle2, apiBundle3)
 
-		runtimeServiceToCreate := fixService("package1", fixServiceAPIEntryWithOauth("API1", "package1"), fixEventAPIEntry("EventAPI1", "EventAPI1Name"))
-		existingServiceToUpdate1 := fixService("package2", fixServiceAPIEntryWithOauth("API2", "package2"), fixEventAPIEntry("EventAPI2", "EventAPI2Name"))
-		runtimeServiceToUpdate1 := fixService("package2", fixServiceAPIEntry("API2"), fixEventAPIEntry("EventAPI2", "EventAPI2Name"))
-		existingServiceToUpdate2 := fixService("package3", fixServiceAPIEntry("API2"), fixEventAPIEntry("EventAPI3", "EventAPI3Name"))
-		runtimeServiceToUpdate2 := fixService("package3", fixServiceAPIEntryWithBasic("API3", "package3"), fixEventAPIEntry("EventAPI3", "EventAPI3Name"))
-		runtimeServiceToDelete1 := fixService("package4", fixServiceAPIEntry("API4"), fixEventAPIEntry("EventAPI4", "EventAPI4Name"))
-		runtimeServiceToDelete2 := fixService("package5", fixServiceAPIEntryWithBasic("API5", "package5"), fixEventAPIEntry("EventAPI5", "EventAPI5Name"))
+		runtimeServiceToCreate := fixService("bundle1", fixServiceAPIEntryWithOauth("API1", "bundle1"), fixEventAPIEntry("EventAPI1", "EventAPI1Name"))
+		existingServiceToUpdate1 := fixService("bundle2", fixServiceAPIEntryWithOauth("API2", "bundle2"), fixEventAPIEntry("EventAPI2", "EventAPI2Name"))
+		runtimeServiceToUpdate1 := fixService("bundle2", fixServiceAPIEntry("API2"), fixEventAPIEntry("EventAPI2", "EventAPI2Name"))
+		existingServiceToUpdate2 := fixService("bundle3", fixServiceAPIEntry("API2"), fixEventAPIEntry("EventAPI3", "EventAPI3Name"))
+		runtimeServiceToUpdate2 := fixService("bundle3", fixServiceAPIEntryWithBasic("API3", "bundle3"), fixEventAPIEntry("EventAPI3", "EventAPI3Name"))
+		runtimeServiceToDelete1 := fixService("bundle4", fixServiceAPIEntry("API4"), fixEventAPIEntry("EventAPI4", "EventAPI4Name"))
+		runtimeServiceToDelete2 := fixService("bundle5", fixServiceAPIEntryWithBasic("API5", "bundle5"), fixEventAPIEntry("EventAPI5", "EventAPI5Name"))
 
 		newRuntimeApplication := getTestApplication("name1", "id1", []v1alpha1.Service{runtimeServiceToCreate, runtimeServiceToUpdate1, runtimeServiceToUpdate2})
 
@@ -585,21 +578,21 @@ func TestKymaService(t *testing.T) {
 		applicationsManagerMock.On("List", metav1.ListOptions{}).Return(&existingRuntimeApplications, nil)
 		applicationsManagerMock.On("Get", "name1", metav1.GetOptions{}).Return(&existingRuntimeApplication, nil)
 
-		rafterServiceMock.On("Put", "package1", apiAssets1).Return(nil)
-		rafterServiceMock.On("Put", "package2", apiAssets2).Return(nil)
-		rafterServiceMock.On("Delete", "package3").Return(nil)
-		rafterServiceMock.On("Delete", "package4").Return(nil)
-		rafterServiceMock.On("Delete", "package5").Return(nil)
+		rafterServiceMock.On("Put", "bundle1", apiAssets1).Return(nil)
+		rafterServiceMock.On("Put", "bundle2", apiAssets2).Return(nil)
+		rafterServiceMock.On("Delete", "bundle3").Return(nil)
+		rafterServiceMock.On("Delete", "bundle4").Return(nil)
+		rafterServiceMock.On("Delete", "bundle5").Return(nil)
 
-		credentialsServiceMock.On("Upsert", "name1", newRuntimeApplication.UID, "package1", authPackage1.Credentials).Return(applications.Credentials{}, nil)
-		credentialsServiceMock.On("Delete", "name1-package2").Return(nil)
-		credentialsServiceMock.On("Upsert", "name1", newRuntimeApplication.UID, "package3", authPackage3.Credentials).Return(applications.Credentials{}, nil)
-		credentialsServiceMock.On("Delete", "name1-package5").Return(nil)
+		credentialsServiceMock.On("Upsert", "name1", newRuntimeApplication.UID, "bundle1", authBundle1.Credentials).Return(applications.Credentials{}, nil)
+		credentialsServiceMock.On("Delete", "name1-bundle2").Return(nil)
+		credentialsServiceMock.On("Upsert", "name1", newRuntimeApplication.UID, "bundle3", authBundle3.Credentials).Return(applications.Credentials{}, nil)
+		credentialsServiceMock.On("Delete", "name1-bundle5").Return(nil)
 
-		requestParametersServiceMock.On("Upsert", "name1", newRuntimeApplication.UID, "package1", authPackage1.RequestParameters).Return("", nil)
-		requestParametersServiceMock.On("Delete", "params-name1-package2").Return(nil)
-		requestParametersServiceMock.On("Upsert", "name1", newRuntimeApplication.UID, "package3", authPackage3.RequestParameters).Return("", nil)
-		requestParametersServiceMock.On("Delete", "params-name1-package5").Return(nil)
+		requestParametersServiceMock.On("Upsert", "name1", newRuntimeApplication.UID, "bundle1", authBundle1.RequestParameters).Return("", nil)
+		requestParametersServiceMock.On("Delete", "params-name1-bundle2").Return(nil)
+		requestParametersServiceMock.On("Upsert", "name1", newRuntimeApplication.UID, "bundle3", authBundle3.RequestParameters).Return("", nil)
+		requestParametersServiceMock.On("Delete", "params-name1-bundle5").Return(nil)
 
 		expectedResult := []Result{
 			{
@@ -630,7 +623,7 @@ func TestKymaService(t *testing.T) {
 		credentialsServiceMock := &appSecrets.CredentialsService{}
 		requestParametersServiceMock := &appSecrets.RequestParametersService{}
 
-		runtimeServiceToDelete := fixService("package1", fixServiceAPIEntry("API1"), fixEventAPIEntry("EventAPI1", "EventAPI1Name"))
+		runtimeServiceToDelete := fixService("bundle1", fixServiceAPIEntry("API1"), fixEventAPIEntry("EventAPI1", "EventAPI1Name"))
 		runtimeApplicationToDelete := getTestApplication("name1", "id1", []v1alpha1.Service{runtimeServiceToDelete})
 
 		existingRuntimeApplications := v1alpha1.ApplicationList{
@@ -641,7 +634,7 @@ func TestKymaService(t *testing.T) {
 
 		applicationsManagerMock.On("Delete", runtimeApplicationToDelete.Name, &metav1.DeleteOptions{}).Return(nil)
 		applicationsManagerMock.On("List", metav1.ListOptions{}).Return(&existingRuntimeApplications, nil)
-		rafterServiceMock.On("Delete", "package1").Return(nil)
+		rafterServiceMock.On("Delete", "bundle1").Return(nil)
 
 		expectedResult := []Result{
 			{
@@ -672,7 +665,7 @@ func TestKymaService(t *testing.T) {
 		credentialsServiceMock := &appSecrets.CredentialsService{}
 		requestParametersServiceMock := &appSecrets.RequestParametersService{}
 
-		runtimeServiceToDelete := fixService("package1", fixServiceAPIEntryWithBasic("API1", "package1"), fixEventAPIEntry("EventAPI1", "EventAPI1Name"))
+		runtimeServiceToDelete := fixService("bundle1", fixServiceAPIEntryWithBasic("API1", "bundle1"), fixEventAPIEntry("EventAPI1", "EventAPI1Name"))
 		runtimeApplicationToDelete := getTestApplication("name1", "id1", []v1alpha1.Service{runtimeServiceToDelete})
 
 		existingRuntimeApplications := v1alpha1.ApplicationList{
@@ -683,9 +676,9 @@ func TestKymaService(t *testing.T) {
 
 		applicationsManagerMock.On("Delete", runtimeApplicationToDelete.Name, &metav1.DeleteOptions{}).Return(nil)
 		applicationsManagerMock.On("List", metav1.ListOptions{}).Return(&existingRuntimeApplications, nil)
-		rafterServiceMock.On("Delete", "package1").Return(nil)
-		credentialsServiceMock.On("Delete", "name1-package1").Return(nil)
-		requestParametersServiceMock.On("Delete", "params-name1-package1").Return(nil)
+		rafterServiceMock.On("Delete", "bundle1").Return(nil)
+		credentialsServiceMock.On("Delete", "name1-bundle1").Return(nil)
+		requestParametersServiceMock.On("Delete", "params-name1-bundle1").Return(nil)
 
 		expectedResult := []Result{
 			{
@@ -716,8 +709,8 @@ func TestKymaService(t *testing.T) {
 		credentialsServiceMock := &appSecrets.CredentialsService{}
 		requestParametersServiceMock := &appSecrets.RequestParametersService{}
 
-		runtimeServiceToDelete := fixService("package1", fixServiceAPIEntry("API1"), fixEventAPIEntry("EventAPI1", "EventAPI1Name"))
-		notManagedRuntimeService := fixService("package2", fixServiceAPIEntry("API2"), fixEventAPIEntry("EventAPI2", "EventAPI2Name"))
+		runtimeServiceToDelete := fixService("bundle1", fixServiceAPIEntry("API1"), fixEventAPIEntry("EventAPI1", "EventAPI1Name"))
+		notManagedRuntimeService := fixService("bundle2", fixServiceAPIEntry("API2"), fixEventAPIEntry("EventAPI2", "EventAPI2Name"))
 
 		runtimeApplicationToDelete := getTestApplication("name1", "id1", []v1alpha1.Service{runtimeServiceToDelete})
 		notManagedRuntimeApplication := getTestApplicationNotManagedByCompass("id2", []v1alpha1.Service{notManagedRuntimeService})
@@ -731,7 +724,7 @@ func TestKymaService(t *testing.T) {
 
 		applicationsManagerMock.On("Delete", runtimeApplicationToDelete.Name, &metav1.DeleteOptions{}).Return(nil)
 		applicationsManagerMock.On("List", metav1.ListOptions{}).Return(&existingRuntimeApplications, nil)
-		rafterServiceMock.On("Delete", "package1").Return(nil)
+		rafterServiceMock.On("Delete", "bundle1").Return(nil)
 
 		expectedResult := []Result{
 			{
@@ -762,14 +755,14 @@ func TestKymaService(t *testing.T) {
 		credentialsServiceMock := &appSecrets.CredentialsService{}
 		requestParametersServiceMock := &appSecrets.RequestParametersService{}
 
-		newRuntimeService1 := fixService("package1", fixServiceAPIEntry("API1"), fixEventAPIEntry("EventAPI1", "EventAPI1Name"))
-		newRuntimeService2 := fixService("package2", fixServiceAPIEntry("API2"), fixEventAPIEntry("EventAPI2", "EventAPI2Name"))
+		newRuntimeService1 := fixService("bundle1", fixServiceAPIEntry("API1"), fixEventAPIEntry("EventAPI1", "EventAPI1Name"))
+		newRuntimeService2 := fixService("bundle2", fixServiceAPIEntry("API2"), fixEventAPIEntry("EventAPI2", "EventAPI2Name"))
 
-		existingRuntimeService1 := fixService("package3", fixServiceAPIEntry("API3"), fixEventAPIEntry("EventAPI3", "EventAPI1Name"))
-		existingRuntimeService2 := fixService("package4", fixServiceAPIEntry("API4"), fixEventAPIEntry("EventAPI4", "EventAPI2Name"))
+		existingRuntimeService1 := fixService("bundle3", fixServiceAPIEntry("API3"), fixEventAPIEntry("EventAPI3", "EventAPI1Name"))
+		existingRuntimeService2 := fixService("bundle4", fixServiceAPIEntry("API4"), fixEventAPIEntry("EventAPI4", "EventAPI2Name"))
 
 		runtimeServiceToBeDeleted1 := v1alpha1.Service{
-			ID: "package5",
+			ID: "bundle5",
 			Entries: []v1alpha1.Entry{
 				fixServiceAPIEntry("API1"),
 				fixServiceEventAPIEntry("EventAPI1"),
@@ -779,15 +772,15 @@ func TestKymaService(t *testing.T) {
 		api := fixDirectorAPiDefinition("API1", "name", "API description", fixAPISpec())
 		eventAPI := fixDirectorEventAPIDefinition("EventAPI1", "name", "Event API 1 description", fixEventAPISpec())
 
-		apiPackage1 := fixAPIPackage("package1", []model.APIDefinition{api}, nil, nil)
-		apiPackage2 := fixAPIPackage("package2", nil, []model.EventAPIDefinition{eventAPI}, nil)
-		newDirectorApplication := fixDirectorApplication("id1", "name1", apiPackage1, apiPackage2)
+		apiBundle1 := fixAPIBundle("bundle1", []model.APIDefinition{api}, nil, nil)
+		apiBundle2 := fixAPIBundle("bundle2", nil, []model.EventAPIDefinition{eventAPI}, nil)
+		newDirectorApplication := fixDirectorApplication("id1", "name1", apiBundle1, apiBundle2)
 
 		newRuntimeApplication1 := getTestApplication("name1", "id1", []v1alpha1.Service{newRuntimeService1, newRuntimeService2})
 
-		apiPackage3 := fixAPIPackage("package3", []model.APIDefinition{api}, []model.EventAPIDefinition{eventAPI}, nil)
+		apiBundle3 := fixAPIBundle("bundle3", []model.APIDefinition{api}, []model.EventAPIDefinition{eventAPI}, nil)
 
-		existingDirectorApplication := fixDirectorApplication("id2", "name2", apiPackage3)
+		existingDirectorApplication := fixDirectorApplication("id2", "name2", apiBundle3)
 		newRuntimeApplication2 := getTestApplication("name2", "id2", []v1alpha1.Service{newRuntimeService1, newRuntimeService2, existingRuntimeService1, existingRuntimeService2})
 
 		runtimeApplicationToBeDeleted := getTestApplication("name3", "id3", []v1alpha1.Service{runtimeServiceToBeDeleted1})
@@ -813,7 +806,7 @@ func TestKymaService(t *testing.T) {
 		applicationsManagerMock.On("Delete", runtimeApplicationToBeDeleted.Name, &metav1.DeleteOptions{}).Return(apperrors.Internal("some error"))
 		applicationsManagerMock.On("List", metav1.ListOptions{}).Return(&existingRuntimeApplications, nil)
 
-		rafterServiceMock.On("Delete", "package5").Return(apperrors.Internal("some error"))
+		rafterServiceMock.On("Delete", "bundle5").Return(apperrors.Internal("some error"))
 
 		// when
 		kymaService := NewService(applicationsManagerMock, converterMock, rafterServiceMock, credentialsServiceMock, requestParametersServiceMock)
@@ -881,16 +874,16 @@ func fixDirectorEventAPIDefinition(id, name, description string, spec *model.Eve
 	}
 }
 
-func fixDirectorApplication(id, name string, apiPackages ...model.APIPackage) model.Application {
+func fixDirectorApplication(id, name string, apiBundles ...model.APIBundle) model.Application {
 	return model.Application{
-		ID:          id,
-		Name:        name,
-		APIPackages: apiPackages,
+		ID:         id,
+		Name:       name,
+		ApiBundles: apiBundles,
 	}
 }
 
-func fixAPIPackage(id string, apiDefinitions []model.APIDefinition, eventAPIDefinitions []model.EventAPIDefinition, defaultInstanceAuth *model.Auth) model.APIPackage {
-	return model.APIPackage{
+func fixAPIBundle(id string, apiDefinitions []model.APIDefinition, eventAPIDefinitions []model.EventAPIDefinition, defaultInstanceAuth *model.Auth) model.APIBundle {
+	return model.APIBundle{
 		ID:                  id,
 		APIDefinitions:      apiDefinitions,
 		EventDefinitions:    eventAPIDefinitions,
@@ -940,7 +933,7 @@ func fixServiceAPIEntry(id string) v1alpha1.Entry {
 	}
 }
 
-func fixServiceAPIEntryWithOauth(id, packageID string) v1alpha1.Entry {
+func fixServiceAPIEntryWithOauth(id, bundleID string) v1alpha1.Entry {
 	application := "name1"
 	return v1alpha1.Entry{
 		ID:        id,
@@ -949,15 +942,15 @@ func fixServiceAPIEntryWithOauth(id, packageID string) v1alpha1.Entry {
 		TargetUrl: "www.example.com/1",
 		Credentials: v1alpha1.Credentials{
 			Type:              "OAuth",
-			SecretName:        fmt.Sprintf("%s-%s", application, packageID),
+			SecretName:        fmt.Sprintf("%s-%s", application, bundleID),
 			AuthenticationUrl: "https://dev-name.eu.auth0.com/oauth/token",
 			CSRFInfo:          nil,
 		},
-		RequestParametersSecretName: fmt.Sprintf("params-%s-%s", application, packageID),
+		RequestParametersSecretName: fmt.Sprintf("params-%s-%s", application, bundleID),
 	}
 }
 
-func fixServiceAPIEntryWithBasic(id, packageID string) v1alpha1.Entry {
+func fixServiceAPIEntryWithBasic(id, bundleID string) v1alpha1.Entry {
 	application := "name1"
 	return v1alpha1.Entry{
 		ID:        id,
@@ -966,9 +959,9 @@ func fixServiceAPIEntryWithBasic(id, packageID string) v1alpha1.Entry {
 		TargetUrl: "www.example.com/1",
 		Credentials: v1alpha1.Credentials{
 			Type:       "Basic",
-			SecretName: fmt.Sprintf("%s-%s", application, packageID),
+			SecretName: fmt.Sprintf("%s-%s", application, bundleID),
 		},
-		RequestParametersSecretName: fmt.Sprintf("params-%s-%s", application, packageID),
+		RequestParametersSecretName: fmt.Sprintf("params-%s-%s", application, bundleID),
 	}
 }
 

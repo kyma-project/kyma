@@ -7,7 +7,6 @@ metadata:
     app.kubernetes.io/instance: {{ .Release.Name }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}
     helm.sh/chart: {{ include "rafterFrontMatterService.chart" . }}
-    kyma-project.io/component: backend
   {{- if .Values.deployment.labels }}
     {{ include "rafterFrontMatterService.tplValue" ( dict "value" .Values.deployment.labels "context" . ) | nindent 4 }}
   {{- end }}
@@ -31,7 +30,6 @@ spec:
         app.kubernetes.io/instance: {{ .Release.Name }}
         app.kubernetes.io/managed-by: {{ .Release.Service }}
         helm.sh/chart: {{ include "rafterFrontMatterService.chart" . }}
-        kyma-project.io/component: backend
       {{- if .Values.pod.labels }}
         {{ include "rafterFrontMatterService.tplValue" ( dict "value" .Values.pod.labels "context" . ) | nindent 8 }}
       {{- end }}
