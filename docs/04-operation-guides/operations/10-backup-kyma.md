@@ -37,38 +37,6 @@ If you want to provision a new volume or restore the existing one, create on-dem
 
 <div tabs name="backup-providers">
   <details>
-  <summary label="AKS">
-  AKS
-  </summary>
-
-### Prerequisites
-
-  The minimum supported Kubernetes version is 1.17.
-
-### Steps
-
-  1. [Install the CSI driver](https://github.com/kubernetes-sigs/azuredisk-csi-driver/blob/master/docs/install-csi-driver-master.md).
-  2. [Create a volume snapshot](https://github.com/kubernetes-sigs/azuredisk-csi-driver/tree/master/deploy/example/snapshot).
-
-  </details>
-  
-  <details>
-  <summary label="GKE">
-  GKE
-  </summary>
-
-### Prerequisites
-
-  The minimum supported Kubernetes version is 1.14.
-
-### Steps
-
-  1. [Enable the required feature gate on the cluster](https://cloud.google.com/kubernetes-engine/docs/how-to/gce-pd-csi-driver).
-  2. Check out [the repository for the Google Compute Engine Persistent Disk (GCE PD) CSI driver](https://github.com/kubernetes-sigs/gcp-compute-persistent-disk-csi-driver) for details on how to use volume snapshots on GKE.
-
-  </details>
-
-  <details>
   <summary label="Gardener GCP">
   Gardener
   </summary>
@@ -133,6 +101,37 @@ If you want to provision a new volume or restore the existing one, create on-dem
       kind: VolumeSnapshot
       apiGroup: snapshot.storage.k8s.io
   ```
+
+  </details>
+  <details>
+  <summary label="AKS">
+  AKS
+  </summary>
+
+### Prerequisites
+
+  The minimum supported Kubernetes version is 1.17.
+
+### Steps
+
+  1. [Install the CSI driver](https://github.com/kubernetes-sigs/azuredisk-csi-driver/blob/master/docs/install-csi-driver-master.md).
+  2. [Create a volume snapshot](https://github.com/kubernetes-sigs/azuredisk-csi-driver/tree/master/deploy/example/snapshot).
+
+  </details>
+  
+  <details>
+  <summary label="GKE">
+  GKE
+  </summary>
+
+### Prerequisites
+
+  The minimum supported Kubernetes version is 1.14.
+
+### Steps
+
+  1. [Enable the required feature gate on the cluster](https://cloud.google.com/kubernetes-engine/docs/how-to/gce-pd-csi-driver).
+  2. Check out [the repository for the Google Compute Engine Persistent Disk (GCE PD) CSI driver](https://github.com/kubernetes-sigs/gcp-compute-persistent-disk-csi-driver) for details on how to use volume snapshots on GKE.
 
   </details>
  </div>
