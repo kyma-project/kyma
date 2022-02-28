@@ -2,8 +2,9 @@ package jetstream
 
 import (
 	"context"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/eventtype"
 	"os"
+
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/eventtype"
 
 	"github.com/nats-io/nats.go"
 
@@ -89,7 +90,8 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 	log := utils.LoggerWithSubscription(r.namedLogger(), desiredSubscription)
 
 	// TODO: Do this as part of sync initial status
-	desiredSubscription.Status.CleanEventTypes, _ = handlers.GetCleanSubjects(desiredSubscription, r.eventTypeCleaner)
+	cleanedSubjects, _ := handlers.GetCleanSubjects(desiredSubscription, r.eventTypeCleaner)
+	desiredSubscription.Status.CleanEventTypes = r.Backend.GetJetStreamSubjects(cleanedSubjects)
 	r.Backend.SyncSubscription(desiredSubscription)
 
 	// Mark subscription as not ready, since we have not implemented the reconciliation logic.

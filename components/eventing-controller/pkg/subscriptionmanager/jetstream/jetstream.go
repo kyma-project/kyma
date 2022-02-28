@@ -3,10 +3,11 @@ package jetstream
 import (
 	"context"
 	"fmt"
+	"time"
+
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/application"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/eventtype"
 	"k8s.io/client-go/dynamic"
-	"time"
 
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 	"k8s.io/apimachinery/pkg/runtime"

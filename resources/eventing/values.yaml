@@ -59,4 +59,4 @@ authentication:
   bebNamespace: ""
 
 jetStream:
-  streamName: kyma-eventing
+  streamName: sap

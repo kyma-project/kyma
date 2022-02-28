@@ -3,6 +3,9 @@ package handlers
 import (
 	"errors"
 	"fmt"
+	"testing"
+	"time"
+
 	kymalogger "github.com/kyma-project/kyma/common/logging/logger"
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 	"github.com/kyma-project/kyma/components/eventing-controller/logger"
@@ -12,9 +15,6 @@ import (
 	"github.com/nats-io/nats-server/v2/server"
 	"github.com/nats-io/nats.go"
 	"github.com/stretchr/testify/assert"
-	"k8s.io/apimachinery/pkg/types"
-	"testing"
-	"time"
 )
 
 const (
@@ -72,7 +72,91 @@ func TestJetStream_Initialize_StreamExists(t *testing.T) {
 	assert.Equal(t, reusedStreamInfo.Created, createdStreamInfo.Created)
 }
 
-// TODO: Add test TestNatsSubAfterSync_NoChange
+// TestJetStreamSubAfterSync_NoChange tests the SyncSubscription method
+// when there is no change in the subscription then the method should
+// not re-create NATS subjects on nats-server
+func TestJetStreamSubAfterSync_NoChange(t *testing.T) {
+	// given
+	testEnvironment := setupTestEnvironment(t)
+	defer testEnvironment.natsServer.Shutdown()
+	defer testEnvironment.jsClient.natsConn.Close()
+	initErr := testEnvironment.jsBackend.Initialize(nil)
+	assert.NoError(t, initErr)
+
+	// create New Subscribers
+	subscriber1 := evtesting.NewSubscriber()
+	defer subscriber1.Shutdown()
+	assert.True(t, subscriber1.IsRunning())
+
+	defaultMaxInflight := 9
+	defaultSubsConfig := env.DefaultSubscriptionConfig{MaxInFlightMessages: defaultMaxInflight}
+	// create a new Subscription
+	sub := evtesting.NewSubscription("sub", "foo",
+		evtesting.WithNotCleanFilter(),
+		evtesting.WithSinkURL(subscriber1.SinkURL),
+		evtesting.WithStatusConfig(defaultSubsConfig),
+	)
+	addJSCleanEventTypesToStatus(sub, testEnvironment.cleaner, testEnvironment.jsBackend)
+
+	// when
+	err := testEnvironment.jsBackend.SyncSubscription(sub)
+
+	// then
+	assert.NoError(t, err)
+	testStreamsAndConsumers(t, testEnvironment, sub)
+
+	// get cleaned subject
+	subject, err := getCleanSubject(sub.Spec.Filter.Filters[0], testEnvironment.cleaner)
+	assert.NoError(t, err)
+	assert.NotEmpty(t, subject)
+
+	// test if subscription is working properly by sending an event
+	// and checking if it is received by the subscriber
+	data := fmt.Sprintf("data-%s", time.Now().Format(time.RFC850))
+	expectedDataInStore := fmt.Sprintf("\"%s\"", data)
+	assert.NoError(t, SendEventToJetStream(testEnvironment.jsBackend, data))
+	assert.NoError(t, subscriber1.CheckEvent(expectedDataInStore))
+
+	// set metadata on NATS subscriptions
+	msgLimit, bytesLimit := 2048, 2048
+	assert.Len(t, testEnvironment.jsBackend.subscriptions, 1)
+	for _, jsSub := range testEnvironment.jsBackend.subscriptions {
+		assert.True(t, jsSub.IsValid())
+		assert.NoError(t, jsSub.SetPendingLimits(msgLimit, bytesLimit))
+	}
+
+	// given
+	// no change in subscription
+
+	// when
+	err = testEnvironment.jsBackend.SyncSubscription(sub)
+
+	// then
+	assert.NoError(t, err)
+	testStreamsAndConsumers(t, testEnvironment, sub)
+
+	// check if the NATS subscription are the same (have same metadata)
+	// by comparing the metadata of nats subscription
+	assert.Len(t, testEnvironment.jsBackend.subscriptions, 1)
+	jsSubject := testEnvironment.jsBackend.GetJsSubjectToSubscribe(subject)
+	jsSubKey := testEnvironment.jsBackend.generateJsSubKey(jsSubject, sub)
+	jsSub := testEnvironment.jsBackend.subscriptions[jsSubKey]
+	assert.NotNil(t, jsSub)
+	assert.True(t, jsSub.IsValid())
+	// check the metadata, if they are now same then it means that NATS subscription
+	// were not re-created by SyncSubscription method
+	subMsgLimit, subBytesLimit, err := jsSub.PendingLimits()
+	assert.NoError(t, err)
+	assert.Equal(t, subMsgLimit, msgLimit)
+	assert.Equal(t, subBytesLimit, bytesLimit)
+
+	// test if subscription is working properly by sending an event
+	// and checking if it is received by the subscriber
+	data = fmt.Sprintf("data-%s", time.Now().Format(time.RFC850))
+	expectedDataInStore = fmt.Sprintf("\"%s\"", data)
+	assert.NoError(t, SendEventToJetStream(testEnvironment.jsBackend, data))
+	assert.NoError(t, subscriber1.CheckEvent(expectedDataInStore))
+}
 
 func TestJetStream_Subscription(t *testing.T) {
 	// given
@@ -87,12 +171,15 @@ func TestJetStream_Subscription(t *testing.T) {
 	defer subscriber.Shutdown()
 	assert.True(t, subscriber.IsRunning())
 
+	defaultMaxInflight := 9
+	defaultSubsConfig := env.DefaultSubscriptionConfig{MaxInFlightMessages: defaultMaxInflight}
 	// create a new Subscription
 	sub := evtesting.NewSubscription("sub", "foo",
 		evtesting.WithNotCleanFilter(),
 		evtesting.WithSinkURL(subscriber.SinkURL),
+		evtesting.WithStatusConfig(defaultSubsConfig),
 	)
-	addCleanEventTypesToStatus(sub, testEnvironment.cleaner)
+	addJSCleanEventTypesToStatus(sub, testEnvironment.cleaner, testEnvironment.jsBackend)
 
 	// when
 	err := testEnvironment.jsBackend.SyncSubscription(sub)
@@ -136,12 +223,15 @@ func TestJetStreamSubAfterSync_SinkChange(t *testing.T) {
 	defer subscriber2.Shutdown()
 	assert.True(t, subscriber2.IsRunning())
 
+	defaultMaxInflight := 9
+	defaultSubsConfig := env.DefaultSubscriptionConfig{MaxInFlightMessages: defaultMaxInflight}
 	// create a new Subscription
 	sub := evtesting.NewSubscription("sub", "foo",
 		evtesting.WithNotCleanFilter(),
 		evtesting.WithSinkURL(subscriber1.SinkURL),
+		evtesting.WithStatusConfig(defaultSubsConfig),
 	)
-	addCleanEventTypesToStatus(sub, testEnvironment.cleaner)
+	addJSCleanEventTypesToStatus(sub, testEnvironment.cleaner, testEnvironment.jsBackend)
 
 	// when
 	err := testEnvironment.jsBackend.SyncSubscription(sub)
@@ -162,16 +252,13 @@ func TestJetStreamSubAfterSync_SinkChange(t *testing.T) {
 	assert.NoError(t, SendEventToJetStream(testEnvironment.jsBackend, data))
 	assert.NoError(t, subscriber1.CheckEvent(expectedDataInStore))
 
-	//// set metadata on NATS subscriptions
-	//msgLimit, bytesLimit := 2048, 2048
-	//g.Expect(len(natsBackend.subscriptions)).To(Equal(defaultSubsConfig.MaxInFlightMessages))
-	//for i := 0; i < defaultSubsConfig.MaxInFlightMessages; i++ {
-	//	natsSub := natsBackend.subscriptions[createKey(sub, subject, i)]
-	//	g.Expect(natsSub).To(Not(BeNil()))
-	//	g.Expect(natsSub.IsValid()).To(BeTrue())
-	//	// set metadata on nats subscription
-	//	g.Expect(natsSub.SetPendingLimits(msgLimit, bytesLimit)).Should(Succeed())
-	//}
+	// set metadata on NATS subscriptions
+	msgLimit, bytesLimit := 2048, 2048
+	assert.Len(t, testEnvironment.jsBackend.subscriptions, 1)
+	for _, jsSub := range testEnvironment.jsBackend.subscriptions {
+		assert.True(t, jsSub.IsValid())
+		assert.NoError(t, jsSub.SetPendingLimits(msgLimit, bytesLimit))
+	}
 
 	// given
 	// NATS subscription should not be re-created in sync when sink is changed.
@@ -187,19 +274,18 @@ func TestJetStreamSubAfterSync_SinkChange(t *testing.T) {
 
 	// check if the NATS subscription are the same (have same metadata)
 	// by comparing the metadata of nats subscription
-	//g.Expect(len(natsBackend.subscriptions)).To(Equal(defaultSubsConfig.MaxInFlightMessages))
-	//for i := 0; i < defaultSubsConfig.MaxInFlightMessages; i++ {
-	//	natsSub := natsBackend.subscriptions[createKey(sub, subject, i)]
-	//	g.Expect(natsSub).To(Not(BeNil()))
-	//	g.Expect(natsSub.IsValid()).To(BeTrue())
-	//
-	//	// check the metadata, if they are now same then it means that NATS subscription
-	//	// were not re-created by SyncSubscription method
-	//	subMsgLimit, subBytesLimit, err := natsSub.PendingLimits()
-	//	g.Expect(err).ShouldNot(HaveOccurred())
-	//	g.Expect(subMsgLimit).To(Equal(msgLimit))
-	//	g.Expect(subBytesLimit).To(Equal(msgLimit))
-	//}
+	assert.Len(t, testEnvironment.jsBackend.subscriptions, 1)
+	jsSubject := testEnvironment.jsBackend.GetJsSubjectToSubscribe(subject)
+	jsSubKey := testEnvironment.jsBackend.generateJsSubKey(jsSubject, sub)
+	jsSub := testEnvironment.jsBackend.subscriptions[jsSubKey]
+	assert.NotNil(t, jsSub)
+	assert.True(t, jsSub.IsValid())
+	// check the metadata, if they are now same then it means that NATS subscription
+	// were not re-created by SyncSubscription method
+	subMsgLimit, subBytesLimit, err := jsSub.PendingLimits()
+	assert.NoError(t, err)
+	assert.Equal(t, subMsgLimit, msgLimit)
+	assert.Equal(t, subBytesLimit, bytesLimit)
 
 	// Test if the subscription is working for new sink only
 	data = fmt.Sprintf("data-%s", time.Now().Format(time.RFC850))
@@ -224,11 +310,14 @@ func TestJetStreamSubAfterSync_FiltersChange(t *testing.T) {
 	defer subscriber.Shutdown()
 	assert.True(t, subscriber.IsRunning())
 
+	defaultMaxInflight := 9
+	defaultSubsConfig := env.DefaultSubscriptionConfig{MaxInFlightMessages: defaultMaxInflight}
 	sub := evtesting.NewSubscription("sub", "foo",
 		evtesting.WithNotCleanFilter(),
 		evtesting.WithSinkURL(subscriber.SinkURL),
+		evtesting.WithStatusConfig(defaultSubsConfig),
 	)
-	addCleanEventTypesToStatus(sub, testEnvironment.cleaner)
+	addJSCleanEventTypesToStatus(sub, testEnvironment.cleaner, testEnvironment.jsBackend)
 
 	// when
 	err := testEnvironment.jsBackend.SyncSubscription(sub)
@@ -252,17 +341,17 @@ func TestJetStreamSubAfterSync_FiltersChange(t *testing.T) {
 	// set metadata on NATS subscriptions
 	// so that we can later verify if the nats subscriptions are the same (not re-created by Sync)
 	msgLimit, bytesLimit := 2048, 2048
-	//g.Expect(len(natsBackend.subscriptions)).To(Equal(defaultSubsConfig.MaxInFlightMessages))
-	for key := range testEnvironment.jsBackend.subscriptions {
-		// set metadata on nats subscription
-		assert.NoError(t, testEnvironment.jsBackend.subscriptions[key].SetPendingLimits(msgLimit, bytesLimit))
+	assert.Len(t, testEnvironment.jsBackend.subscriptions, 1)
+	for _, jsSub := range testEnvironment.jsBackend.subscriptions {
+		assert.True(t, jsSub.IsValid())
+		assert.NoError(t, jsSub.SetPendingLimits(msgLimit, bytesLimit))
 	}
 
 	// given
 	// Now, change the filter in subscription
 	sub.Spec.Filter.Filters[0].EventType.Value = fmt.Sprintf("%schanged", evtesting.OrderCreatedEventTypeNotClean)
 	// Sync the subscription
-	addCleanEventTypesToStatus(sub, testEnvironment.cleaner)
+	addJSCleanEventTypesToStatus(sub, testEnvironment.cleaner, testEnvironment.jsBackend)
 
 	// when
 	err = testEnvironment.jsBackend.SyncSubscription(sub)
@@ -276,21 +365,22 @@ func TestJetStreamSubAfterSync_FiltersChange(t *testing.T) {
 	newSubject, err := getCleanSubject(sub.Spec.Filter.Filters[0], testEnvironment.cleaner)
 	assert.NoError(t, err)
 	assert.NotEmpty(t, newSubject)
+
 	// check if the NATS subscription are NOT the same after sync
 	// because the subscriptions should have being re-created for new subject
-	// g.Expect(len(testEnvironment.jsBackend.subscriptions)).To(Equal(defaultSubsConfig.MaxInFlightMessages))
-	//for i := 0; i < defaultSubsConfig.MaxInFlightMessages; i++ {
-	//	natsSub := natsBackend.subscriptions[createKey(sub, newSubject, i)]
-	//	g.Expect(natsSub).To(Not(BeNil()))
-	//	g.Expect(natsSub.IsValid()).To(BeTrue())
-	//
-	//	// check the metadata, if they are NOT same then it means that nats subscriptions
-	//	// were re-created by SyncSubscription method
-	//	subMsgLimit, subBytesLimit, err := natsSub.PendingLimits()
-	//	g.Expect(err).ShouldNot(HaveOccurred())
-	//	g.Expect(subMsgLimit).To(Not(Equal(msgLimit)))
-	//	g.Expect(subBytesLimit).To(Not(Equal(msgLimit)))
-	//}
+	assert.Len(t, testEnvironment.jsBackend.subscriptions, 1)
+	jsSubject := testEnvironment.jsBackend.GetJsSubjectToSubscribe(newSubject)
+	jsSubKey := testEnvironment.jsBackend.generateJsSubKey(jsSubject, sub)
+
+	jsSub := testEnvironment.jsBackend.subscriptions[jsSubKey]
+	assert.NotNil(t, jsSub)
+	assert.True(t, jsSub.IsValid())
+	// check the metadata, if they are NOT same then it means that NATS subscription
+	// were re-created by SyncSubscription method
+	subMsgLimit, subBytesLimit, err := jsSub.PendingLimits()
+	assert.NoError(t, err)
+	assert.NotEqual(t, subMsgLimit, msgLimit)
+	assert.NotEqual(t, subBytesLimit, bytesLimit)
 
 	// Test if subscription is working for new subject only
 	data = fmt.Sprintf("data-%s", time.Now().Format(time.RFC850))
@@ -320,12 +410,15 @@ func TestJetStreamSubAfterSync_FilterAdded(t *testing.T) {
 	defer subscriber.Shutdown()
 	assert.True(t, subscriber.IsRunning())
 
+	defaultMaxInflight := 9
+	defaultSubsConfig := env.DefaultSubscriptionConfig{MaxInFlightMessages: defaultMaxInflight}
 	// Create a subscription with single filter
 	sub := evtesting.NewSubscription("sub", "foo",
 		evtesting.WithNotCleanFilter(),
 		evtesting.WithSinkURL(subscriber.SinkURL),
+		evtesting.WithStatusConfig(defaultSubsConfig),
 	)
-	addCleanEventTypesToStatus(sub, testEnvironment.cleaner)
+	addJSCleanEventTypesToStatus(sub, testEnvironment.cleaner, testEnvironment.jsBackend)
 
 	// when
 	err := testEnvironment.jsBackend.SyncSubscription(sub)
@@ -342,10 +435,10 @@ func TestJetStreamSubAfterSync_FilterAdded(t *testing.T) {
 	// set metadata on NATS subscriptions
 	// so that we can later verify if the nats subscriptions are the same (not re-created by Sync)
 	msgLimit, bytesLimit := 2048, 2048
-	// assert.Equal(t, len(testEnvironment.jsBackend.subscriptions), defaultSubsConfig.MaxInFlightMessages)
-	for key := range testEnvironment.jsBackend.subscriptions {
-		// set metadata on nats subscription
-		assert.NoError(t, testEnvironment.jsBackend.subscriptions[key].SetPendingLimits(msgLimit, bytesLimit))
+	assert.Len(t, testEnvironment.jsBackend.subscriptions, 1)
+	for _, jsSub := range testEnvironment.jsBackend.subscriptions {
+		assert.True(t, jsSub.IsValid())
+		assert.NoError(t, jsSub.SetPendingLimits(msgLimit, bytesLimit))
 	}
 
 	// Now, add a new filter to subscription
@@ -357,7 +450,7 @@ func TestJetStreamSubAfterSync_FilterAdded(t *testing.T) {
 	secondSubject, err := getCleanSubject(newFilter, testEnvironment.cleaner)
 	assert.NoError(t, err)
 	assert.NotEmpty(t, secondSubject)
-	addCleanEventTypesToStatus(sub, testEnvironment.cleaner)
+	addJSCleanEventTypesToStatus(sub, testEnvironment.cleaner, testEnvironment.jsBackend)
 
 	// when
 	err = testEnvironment.jsBackend.SyncSubscription(sub)
@@ -368,22 +461,20 @@ func TestJetStreamSubAfterSync_FilterAdded(t *testing.T) {
 
 	// Check if total existing NATS subscriptions are correct
 	// Because we have two filters (i.e. two subjects)
-	//expectedTotalNatsSubs := 2 * defaultSubsConfig.MaxInFlightMessages
-	//g.Expect(natsBackend.subscriptions).To(HaveLen(expectedTotalNatsSubs))
-
+	assert.Len(t, testEnvironment.jsBackend.subscriptions, 2)
 	// Verify that the nats subscriptions for first subject was not re-created
-	//for i := 0; i < defaultSubsConfig.MaxInFlightMessages; i++ {
-	//	natsSub := natsBackend.subscriptions[createKey(sub, firstSubject, i)]
-	//	g.Expect(natsSub).To(Not(BeNil()))
-	//	g.Expect(natsSub.IsValid()).To(BeTrue())
-	//
-	//	// check the metadata, if they are same then it means that nats subscriptions
-	//	// were not re-created by SyncSubscription method
-	//	subMsgLimit, subBytesLimit, err := natsSub.PendingLimits()
-	//	g.Expect(err).ShouldNot(HaveOccurred())
-	//	g.Expect(subMsgLimit).To(Equal(msgLimit))
-	//	g.Expect(subBytesLimit).To(Equal(msgLimit))
-	//}
+	jsSubject := testEnvironment.jsBackend.GetJsSubjectToSubscribe(firstSubject)
+	jsSubKey := testEnvironment.jsBackend.generateJsSubKey(jsSubject, sub)
+
+	jsSub := testEnvironment.jsBackend.subscriptions[jsSubKey]
+	assert.NotNil(t, jsSub)
+	assert.True(t, jsSub.IsValid())
+	// check the metadata, if they are now same then it means that NATS subscription
+	// were not re-created by SyncSubscription method
+	subMsgLimit, subBytesLimit, err := jsSub.PendingLimits()
+	assert.NoError(t, err)
+	assert.Equal(t, subMsgLimit, msgLimit)
+	assert.Equal(t, subBytesLimit, bytesLimit)
 
 	// Test if subscription is working for both subjects
 	// Send an event on first subject
@@ -416,16 +507,19 @@ func TestJetStreamSubAfterSync_FilterRemoved(t *testing.T) {
 	defer subscriber.Shutdown()
 	assert.True(t, subscriber.IsRunning())
 
+	defaultMaxInflight := 9
+	defaultSubsConfig := env.DefaultSubscriptionConfig{MaxInFlightMessages: defaultMaxInflight}
 	// Create a subscription with two filters
 	sub := evtesting.NewSubscription("sub", "foo",
 		evtesting.WithNotCleanFilter(),
 		evtesting.WithSinkURL(subscriber.SinkURL),
+		evtesting.WithStatusConfig(defaultSubsConfig),
 	)
 	// add a second filter
 	newFilter := sub.Spec.Filter.Filters[0].DeepCopy()
 	newFilter.EventType.Value = fmt.Sprintf("%snew1", evtesting.OrderCreatedEventTypeNotClean)
 	sub.Spec.Filter.Filters = append(sub.Spec.Filter.Filters, newFilter)
-	addCleanEventTypesToStatus(sub, testEnvironment.cleaner)
+	addJSCleanEventTypesToStatus(sub, testEnvironment.cleaner, testEnvironment.jsBackend)
 
 	// when
 	err := testEnvironment.jsBackend.SyncSubscription(sub)
@@ -445,21 +539,20 @@ func TestJetStreamSubAfterSync_FilterRemoved(t *testing.T) {
 
 	// Check if total existing NATS subscriptions are correct
 	// Because we have two filters (i.e. two subjects)
-	// expectedTotalNatsSubs := 2 * defaultSubsConfig.MaxInFlightMessages
-	// g.Expect(natsBackend.subscriptions).To(HaveLen(expectedTotalNatsSubs))
+	assert.Len(t, testEnvironment.jsBackend.subscriptions, 2)
 
 	// set metadata on NATS subscriptions
 	// so that we can later verify if the nats subscriptions are the same (not re-created by Sync)
 	msgLimit, bytesLimit := 2048, 2048
-	for key := range testEnvironment.jsBackend.subscriptions {
-		// set metadata on nats subscription
-		assert.NoError(t, testEnvironment.jsBackend.subscriptions[key].SetPendingLimits(msgLimit, bytesLimit))
+	for _, jsSub := range testEnvironment.jsBackend.subscriptions {
+		assert.True(t, jsSub.IsValid())
+		assert.NoError(t, jsSub.SetPendingLimits(msgLimit, bytesLimit))
 	}
 
 	// given
 	// Now, remove the second filter from subscription
 	sub.Spec.Filter.Filters = sub.Spec.Filter.Filters[:1]
-	addCleanEventTypesToStatus(sub, testEnvironment.cleaner)
+	addJSCleanEventTypesToStatus(sub, testEnvironment.cleaner, testEnvironment.jsBackend)
 
 	// when
 	err = testEnvironment.jsBackend.SyncSubscription(sub)
@@ -469,20 +562,20 @@ func TestJetStreamSubAfterSync_FilterRemoved(t *testing.T) {
 	testStreamsAndConsumers(t, testEnvironment, sub)
 
 	// Check if total existing NATS subscriptions are correct
-	// assert.Equal(t, len(testEnvironment.jsBackend.subscriptions), defaultSubsConfig.MaxInFlightMessages)
+	assert.Len(t, testEnvironment.jsBackend.subscriptions, 1)
 	// Verify that the nats subscriptions for first subject was not re-created
-	//for i := 0; i < defaultSubsConfig.MaxInFlightMessages; i++ {
-	//	natsSub := natsBackend.subscriptions[createKey(sub, firstSubject, i)]
-	//	g.Expect(natsSub).To(Not(BeNil()))
-	//	g.Expect(natsSub.IsValid()).To(BeTrue())
-	//
-	//	// check the metadata, if they are same then it means that nats subscriptions
-	//	// were not re-created by SyncSubscription method
-	//	subMsgLimit, subBytesLimit, err := natsSub.PendingLimits()
-	//	g.Expect(err).ShouldNot(HaveOccurred())
-	//	g.Expect(subMsgLimit).To(Equal(msgLimit))
-	//	g.Expect(subBytesLimit).To(Equal(msgLimit))
-	//}
+	jsSubject := testEnvironment.jsBackend.GetJsSubjectToSubscribe(firstSubject)
+	jsSubKey := testEnvironment.jsBackend.generateJsSubKey(jsSubject, sub)
+
+	jsSub := testEnvironment.jsBackend.subscriptions[jsSubKey]
+	assert.NotNil(t, jsSub)
+	assert.True(t, jsSub.IsValid())
+	// check the metadata, if they are now same then it means that NATS subscription
+	// were not re-created by SyncSubscription method
+	subMsgLimit, subBytesLimit, err := jsSub.PendingLimits()
+	assert.NoError(t, err)
+	assert.Equal(t, subMsgLimit, msgLimit)
+	assert.Equal(t, subBytesLimit, bytesLimit)
 
 	// Test if subscription is working for first subject only
 	// Send an event on first subject
@@ -500,13 +593,167 @@ func TestJetStreamSubAfterSync_FilterRemoved(t *testing.T) {
 	assert.Error(t, subscriber.CheckEvent(expectedDataInStore))
 }
 
+// TestJetStreamSubAfterSync_MultipleSubs tests the SyncSubscription method
+// when there are two subscriptions and the filter is changed in one subscription
+// it should not affect the NATS subscriptions of other Kyma subscriptions
+func TestJetStreamSubAfterSync_MultipleSubs(t *testing.T) {
+	// given
+	testEnvironment := setupTestEnvironment(t)
+	defer testEnvironment.natsServer.Shutdown()
+	defer testEnvironment.jsClient.natsConn.Close()
+	initErr := testEnvironment.jsBackend.Initialize(nil)
+	assert.NoError(t, initErr)
+
+	// Create a new subscriber
+	subscriber := evtesting.NewSubscriber()
+	defer subscriber.Shutdown()
+	assert.True(t, subscriber.IsRunning())
+
+	defaultMaxInflight := 9
+	defaultSubsConfig := env.DefaultSubscriptionConfig{MaxInFlightMessages: defaultMaxInflight}
+
+	// Create two subscriptions with single filter
+	sub := evtesting.NewSubscription("sub", "foo",
+		evtesting.WithNotCleanFilter(),
+		evtesting.WithSinkURL(subscriber.SinkURL),
+		evtesting.WithStatusConfig(defaultSubsConfig),
+	)
+	addJSCleanEventTypesToStatus(sub, testEnvironment.cleaner, testEnvironment.jsBackend)
+	assert.NoError(t, testEnvironment.jsBackend.SyncSubscription(sub))
+
+	sub2 := evtesting.NewSubscription("sub2", "foo",
+		evtesting.WithNotCleanFilter(),
+		evtesting.WithSinkURL(subscriber.SinkURL),
+		evtesting.WithStatusConfig(defaultSubsConfig),
+	)
+	addJSCleanEventTypesToStatus(sub2, testEnvironment.cleaner, testEnvironment.jsBackend)
+	assert.NoError(t, testEnvironment.jsBackend.SyncSubscription(sub2))
+
+	// Check if total existing NATS subscriptions are correct
+	// Because we have two subscriptions
+	assert.Len(t, testEnvironment.jsBackend.subscriptions, 2)
+
+	// set metadata on NATS subscriptions
+	// so that we can later verify if the nats subscriptions are the same (not re-created by Sync)
+	msgLimit, bytesLimit := 2048, 2048
+	for _, jsSub := range testEnvironment.jsBackend.subscriptions {
+		assert.True(t, jsSub.IsValid())
+		assert.NoError(t, jsSub.SetPendingLimits(msgLimit, bytesLimit))
+	}
+
+	// Now, change the filter in subscription 1
+	sub.Spec.Filter.Filters[0].EventType.Value = fmt.Sprintf("%schanged", evtesting.OrderCreatedEventTypeNotClean)
+	addJSCleanEventTypesToStatus(sub, testEnvironment.cleaner, testEnvironment.jsBackend)
+
+	// when
+	err := testEnvironment.jsBackend.SyncSubscription(sub)
+
+	// then
+	assert.NoError(t, err)
+
+	// get new cleaned subject from subscription 1
+	newSubject, err := getCleanSubject(sub.Spec.Filter.Filters[0], testEnvironment.cleaner)
+	assert.NoError(t, err)
+	assert.NotEmpty(t, newSubject)
+
+	// Check if total existing NATS subscriptions are correct
+	// Because we have two subscriptions
+	assert.Len(t, testEnvironment.jsBackend.subscriptions, 2)
+
+	// check if the NATS subscription are NOT the same after sync for subscription 1
+	// because the subscriptions should have being re-created for new subject
+	jsSubject := testEnvironment.jsBackend.GetJsSubjectToSubscribe(newSubject)
+	jsSubKey := testEnvironment.jsBackend.generateJsSubKey(jsSubject, sub)
+
+	jsSub := testEnvironment.jsBackend.subscriptions[jsSubKey]
+	assert.NotNil(t, jsSub)
+	assert.True(t, jsSub.IsValid())
+	// check the metadata, if they are now same then it means that NATS subscription
+	// were not re-created by SyncSubscription method
+	subMsgLimit, subBytesLimit, err := jsSub.PendingLimits()
+	assert.NoError(t, err)
+	assert.NotEqual(t, subMsgLimit, msgLimit)
+	assert.NotEqual(t, subBytesLimit, bytesLimit)
+
+	// get cleaned subject for subscription 2
+	cleanSubjectSub2, err := getCleanSubject(sub2.Spec.Filter.Filters[0], testEnvironment.cleaner)
+	assert.NoError(t, err)
+	assert.NotEmpty(t, cleanSubjectSub2)
+
+	// check if the NATS subscription are same after sync for subscription 2
+	// because the subscriptions should NOT have being re-created as
+	// subscription 2 was not modified
+	jsSubject = testEnvironment.jsBackend.GetJsSubjectToSubscribe(cleanSubjectSub2)
+	jsSubKey = testEnvironment.jsBackend.generateJsSubKey(jsSubject, sub2)
+
+	jsSub = testEnvironment.jsBackend.subscriptions[jsSubKey]
+	assert.NotNil(t, jsSub)
+	assert.True(t, jsSub.IsValid())
+	// check the metadata, if they are now same then it means that NATS subscription
+	// were not re-created by SyncSubscription method
+	subMsgLimit, subBytesLimit, err = jsSub.PendingLimits()
+	assert.NoError(t, err)
+	assert.Equal(t, subMsgLimit, msgLimit)
+	assert.Equal(t, subBytesLimit, bytesLimit)
+}
+
+// TestJetStream_isNatsSubAssociatedWithKymaSub tests the isJsSubAssociatedWithKymaSub method
+func TestJetStream_isNatsSubAssociatedWithKymaSub(t *testing.T) {
+	// given
+	testEnvironment := setupTestEnvironment(t)
+	defer testEnvironment.natsServer.Shutdown()
+	defer testEnvironment.jsClient.natsConn.Close()
+	initErr := testEnvironment.jsBackend.Initialize(nil)
+	assert.NoError(t, initErr)
+
+	// // ######  Setup test assets ######
+	// create subscription 1 and its nats subscription
+	cleanSubject1 := "subOne"
+	sub1 := evtesting.NewSubscription(cleanSubject1, "foo", evtesting.WithNotCleanFilter())
+	natsSub1Key := testEnvironment.jsBackend.generateJsSubKey(
+		testEnvironment.jsBackend.GetJsSubjectToSubscribe(cleanSubject1),
+		sub1)
+
+	// create subscription 2 and its nats subscription
+	cleanSubject2 := "subOneTwo"
+	sub2 := evtesting.NewSubscription(cleanSubject2, "foo", evtesting.WithNotCleanFilter())
+	natsSub2Key := testEnvironment.jsBackend.generateJsSubKey(
+		testEnvironment.jsBackend.GetJsSubjectToSubscribe(cleanSubject2),
+		sub2)
+
+	// when
+	// Should return true because natsSub1 is associated with sub1
+	result, err := testEnvironment.jsBackend.isJsSubAssociatedWithKymaSub(natsSub1Key, sub1)
+	assert.NoError(t, err)
+	assert.True(t, result)
+
+	// Should return true because natsSub2 is associated with sub2
+	result, err = testEnvironment.jsBackend.isJsSubAssociatedWithKymaSub(natsSub2Key, sub2)
+	assert.NoError(t, err)
+	assert.True(t, result)
+
+	// Should return false because natsSub1 is NOT associated with sub2
+	result, err = testEnvironment.jsBackend.isJsSubAssociatedWithKymaSub(natsSub1Key, sub2)
+	assert.NoError(t, err)
+	assert.False(t, result)
+
+	// Should return false because natsSub2 is NOT associated with sub1
+	result, err = testEnvironment.jsBackend.isJsSubAssociatedWithKymaSub(natsSub2Key, sub1)
+	assert.NoError(t, err)
+	assert.False(t, result)
+}
+
 func testStreamsAndConsumers(t *testing.T, testEnvironment *TestEnvironment, sub *eventingv1alpha1.Subscription) {
 	streamInfo, err := testEnvironment.jsClient.StreamInfo(testEnvironment.natsConfig.JSStreamName)
 	assert.NoError(t, err)
 	assert.NotNil(t, streamInfo)
 	// TODO: Check the consumer length comparison in another function
 	// assert.Equal(t, streamInfo.State.Consumers, 1)
-	consumerName := encodeString(createKeyPrefix(sub) + string(types.Separator) + evtesting.OrderCreatedEventType)
+	// consumerName := encodeString(createKeyPrefix(sub) + string(types.Separator) + evtesting.OrderCreatedEventType)
+	consumerName := testEnvironment.jsBackend.generateJsSubKey(
+		testEnvironment.jsBackend.GetJsSubjectToSubscribe(evtesting.OrderCreatedEventType),
+		sub)
+
 	info, err := testEnvironment.jsClient.ConsumerInfo(testEnvironment.natsConfig.JSStreamName, consumerName)
 	assert.NotNil(t, info)
 	assert.NoError(t, err)
@@ -535,6 +782,11 @@ func getJetStreamClient(t *testing.T, serverURL string) *jetStreamClient {
 		JetStreamContext: jsCtx,
 		natsConn:         conn,
 	}
+}
+
+func addJSCleanEventTypesToStatus(sub *eventingv1alpha1.Subscription, cleaner eventtype.Cleaner, jsBackend *JetStream) {
+	cleanedSubjects, _ := GetCleanSubjects(sub, cleaner)
+	sub.Status.CleanEventTypes = jsBackend.GetJetStreamSubjects(cleanedSubjects)
 }
 
 // TestEnvironment provides mocked resources for tests.
