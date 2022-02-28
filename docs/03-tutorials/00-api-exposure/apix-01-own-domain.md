@@ -142,7 +142,7 @@ Follow these steps to set up your custom domain and prepare a certificate requir
 
 ## Next steps
 
-Proceed with the [Deploy a service](./apix-02-deploy-service.md)tutorial to deploy an instance of the HttpBin service or a sample Function.
+Proceed with the [Deploy a service](./apix-02-deploy-service.md) tutorial to deploy an instance of the HttpBin service or a sample Function.
 
 Once you have your service deployed, you can continue by choosing one of the following tutorials to:
 

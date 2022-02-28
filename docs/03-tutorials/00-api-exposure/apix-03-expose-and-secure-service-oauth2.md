@@ -12,24 +12,10 @@ This tutorial is based on a sample HttpBin service deployment and a sample Funct
 
 ## Register an OAuth2 client and get tokens
 
-1. Export these values as environment variables:
-
-- The name of your client and the Secret which stores the client credentials:
+1. Export your client as an environment variable:
 
   ```shell
   export CLIENT_NAME={YOUR_CLIENT_NAME}
-  ```
-
-- The Namespace in which you want to create the client and the Secret that stores its credentials:
-
-  ```shell
-  export CLIENT_NAMESPACE={YOUR_CLIENT_NAMESPACE}
-  ```
-
-- The domain of your cluster:
-
-  ```shell
-  export DOMAIN={CLUSTER_DOMAIN}
   ```
 
 2. Create an OAuth2 client with `read` and `write` scopes. Run:
@@ -40,7 +26,7 @@ This tutorial is based on a sample HttpBin service deployment and a sample Funct
   kind: OAuth2Client
   metadata:
     name: $CLIENT_NAME
-    namespace: $CLIENT_NAMESPACE
+    namespace: $NAMESPACE
   spec:
     grantTypes:
       - "client_credentials"
