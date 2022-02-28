@@ -2,7 +2,9 @@
 title: Use the OpenTelemetry runtime client
 ---
 
-This tutorial shows how to use the build-in OpenTelemetry client to send tracing informations to the Jaeger service.
+This tutorial shows how to use the build-in OpenTelemetry client to send trace data to the Jaeger service.
+
+Function runtimes are configured to handle traced requests, propagate right headers to the function contexts, and automatically decorate outgoing requests by right headers. The [event](../../05-technical-reference/svls-08-function-specification.md#event-object) object contains necessary tools with allow to pass additional information about trace by creating custom [spans](https://opentelemetry.io/docs/reference/specification/trace/api/#span) and adding data to them like events. This tutorial shows how to do this.
 
 ## Steps
 

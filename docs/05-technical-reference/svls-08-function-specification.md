@@ -109,7 +109,7 @@ See the detailed descriptions of these fields:
 | **ce-id** | Unique identifier of the event |
 | **ce-time** | Time at which the event was sent |
 | **data** | Either JSON or a string, depending on the request type. Read more about [Buffer](https://nodejs.org/api/buffer.html) in Node.js and [bytes literals](https://docs.python.org/3/reference/lexical_analysis.html#string-and-bytes-literals) in Python. |
-| **tracer** | Fully configured OpenTelemetry [Tracer](https://opentelemetry.io/docs/reference/specification/trace/api/#tracer) object that allows to communicate with the Jaeger service to share tracing informations. For more informations how to use the tracer object look [here](../03-tutorials/00-serverless/svls-12-use-opentelemetry-client.md) |
+| **tracer** | Fully configured OpenTelemetry [Tracer](https://opentelemetry.io/docs/reference/specification/trace/api/#tracer) object that allows to communicate with the Jaeger service to share tracing data. For more informations how to use the tracer object look [here](../03-tutorials/00-serverless/svls-12-use-opentelemetry-client.md) |
 | **extensions** | JSON object that can contain event payload, a Function's incoming request, or an outgoing response |
 
 ### Event object SDK
