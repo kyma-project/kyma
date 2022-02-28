@@ -68,7 +68,8 @@ The tutorial comes with a sample HttpBin service deployment and a sample Functio
            - "$WILDCARD"
    EOF
    ```
-## Next tutorial
+
+## Next steps
 
 Once you have your service deployed, you can continue by choosing one of the following tutorials to:
 
