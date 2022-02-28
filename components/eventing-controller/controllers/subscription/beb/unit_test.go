@@ -8,7 +8,7 @@ import (
 	"github.com/pkg/errors"
 
 	kymalogger "github.com/kyma-project/kyma/common/logging/logger"
-	"github.com/kyma-project/kyma/components/eventing-controller/logger"
+	eventinglogger "github.com/kyma-project/kyma/components/eventing-controller/logger"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers"
 	"github.com/kyma-project/kyma/components/eventing-controller/utils"
 
@@ -375,7 +375,7 @@ func Test_syncConditionSubscriptionActive(t *testing.T) {
 
 	g := NewGomegaWithT(t)
 
-	logger, err := logger.New(string(kymalogger.JSON), string(kymalogger.INFO))
+	logger, err := eventinglogger.New(string(kymalogger.JSON), string(kymalogger.INFO))
 	if err != nil {
 		t.Fatalf(`failed to initiate logger, %v`, err)
 	}
@@ -527,7 +527,7 @@ func Test_syncConditionWebhookCallStatus(t *testing.T) {
 	}
 
 	g := NewGomegaWithT(t)
-	logger, err := logger.New(string(kymalogger.JSON), string(kymalogger.INFO))
+	logger, err := eventinglogger.New(string(kymalogger.JSON), string(kymalogger.INFO))
 	if err != nil {
 		t.Fatalf(`failed to initiate logger, %v`, err)
 	}
@@ -730,7 +730,7 @@ func Test_checkLastFailedDelivery(t *testing.T) {
 	}
 
 	g := NewGomegaWithT(t)
-	logger, err := logger.New(string(kymalogger.JSON), string(kymalogger.INFO))
+	logger, err := eventinglogger.New(string(kymalogger.JSON), string(kymalogger.INFO))
 	if err != nil {
 		t.Fatalf(`failed to initiate logger, %v`, err)
 	}
