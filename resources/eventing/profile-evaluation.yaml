@@ -1,4 +1,10 @@
 controller:
+  jetStream:
+    # Configs for the stream used for storing events
+    retentionPolicy: interest #when all known observables have acknowledged a message it can be removed.
+    maxMessages: -1 # no limit
+    maxBytes: -1
+    storage: memory
   resources:
     limits:
       cpu: 20m
@@ -23,7 +29,6 @@ nats:
     enabled: false
   nats:
     jetstream:
-      enabled: false
       memStorage:
         enabled: true
         size: 1Gi

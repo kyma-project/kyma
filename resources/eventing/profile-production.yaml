@@ -1,4 +1,10 @@
 controller:
+  jetStream:
+    # Configs for the stream used for storing events
+    retentionPolicy: limits # messages are retained until any given limit is reached.
+    maxMessages: -1 # no limit
+    maxBytes: -1
+    storage: file # requires a PV
   resources:
     limits:
       cpu: 500m
@@ -24,12 +30,11 @@ nats:
     enabled: false
   nats:
     jetstream:
-      enabled: false
       memStorage:
         enabled: true
         size: 1Gi
       fileStorage:
-        enabled: false
+        enabled: true
         size: 1Gi
     resources:
       limits:
