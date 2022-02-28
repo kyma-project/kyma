@@ -1,0 +1,6 @@
+---
+title: Migration Guide 2.0.4-2.1
+---
+
+Due to an upgrade of the monitoring stack some obsolete resources need to be deleted and some need to be patched.
+When you upgrade from Kyma 2.0.4 to 2.1, either run the script `2.0.4-2.1-fix-upgraded-resources.sh` found in `/assets`, or perform the required steps from that script manually.
