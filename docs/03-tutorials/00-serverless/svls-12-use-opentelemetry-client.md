@@ -21,11 +21,11 @@ Follows these steps:
    ```javascript
    module.exports = {
       main: function (event, context) {
-         span = event.tracer.startSpan('foo', {});
+         span = event.tracer.startSpan('foo');
          span.addEvent('bar');
          span.end();
          
-         return "Hello OpenTelemetry"
+         return "hello OpenTelemetry"
       }
    }
    ```
@@ -50,8 +50,11 @@ Python
 
    ```python
    def main(event, context):
-      with event.tracer.start_as_current_span("fir-span"):
-         return "hello world" 
+      span = event.tracer.start_span("foo")
+      span.add_event("bar")
+      span.end()
+
+      return "hello OpenTelemetry"
    ```
 
 2. [Expose function](./svls-03-expose-function.md) and access the Function's external address.
