@@ -1,8 +1,7 @@
 controller:
   jetStream:
-    # Configs for the stream used for storing events
-    retentionPolicy: interest #when all known observables have acknowledged a message it can be removed.
-    maxMessages: -1 # no limit
+    retentionPolicy: interest
+    maxMessages: -1
     maxBytes: -1
     storage: memory
   resources:

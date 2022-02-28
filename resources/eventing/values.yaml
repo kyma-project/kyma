@@ -57,6 +57,3 @@ authentication:
   publishUrl: ""
   # bebNamespace is the name of the namespace BEB is provisioned with
   bebNamespace: ""
-
-jetStream:
-  streamName: kyma-eventing
