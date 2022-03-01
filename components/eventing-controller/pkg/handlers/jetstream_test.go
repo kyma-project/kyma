@@ -850,7 +850,55 @@ func TestJSSubscriptionWithDuplicateFilters(t *testing.T) {
 	assert.Error(t, subscriber.CheckEvent(expectedDataInStore))
 }
 
-// TODO: TestSubscriptionWithMaxInFlightChange to be implemented
+func TestJSSubscriptionWithMaxInFlightChange(t *testing.T) {
+	// given
+	testEnvironment := setupTestEnvironment(t)
+	defer testEnvironment.natsServer.Shutdown()
+	defer testEnvironment.jsClient.natsConn.Close()
+	initErr := testEnvironment.jsBackend.Initialize(nil)
+	assert.NoError(t, initErr)
+
+	// create New Subscriber
+	subscriber := evtesting.NewSubscriber()
+	subscriber.Shutdown() // shutdown the subscriber intentionally here
+	assert.False(t, subscriber.IsRunning())
+
+	defaultMaxInflight := 16
+	defaultSubsConfig := env.DefaultSubscriptionConfig{MaxInFlightMessages: defaultMaxInflight}
+	// create a new Subscription
+	sub := evtesting.NewSubscription("sub", "foo",
+		evtesting.WithNotCleanFilter(),
+		evtesting.WithSinkURL(subscriber.SinkURL),
+		evtesting.WithStatusConfig(defaultSubsConfig),
+	)
+	addJSCleanEventTypesToStatus(sub, testEnvironment.cleaner, testEnvironment.jsBackend)
+
+	// when
+	err := testEnvironment.jsBackend.SyncSubscription(sub)
+
+	// then
+	assert.NoError(t, err)
+
+	// when
+	// send 2 * defaultMaxInflight number of events
+	for i := 0; i < 2*defaultMaxInflight; i++ {
+		data := fmt.Sprintf("sampledata%d", i)
+		assert.NoError(t, SendEventToJetStream(testEnvironment.jsBackend, data))
+	}
+
+	// then
+	assert.Eventually(t, func() bool {
+		consumerName := testEnvironment.jsBackend.generateJsSubKey(sub.Status.CleanEventTypes[0], sub)
+		// fetch consumer info from JetStream
+		consumerInfo, err := testEnvironment.jsBackend.jsCtx.ConsumerInfo(testEnvironment.jsBackend.config.JSStreamName, consumerName)
+		assert.NoError(t, err)
+
+		// since our subscriber is not in running state,
+		// so these events will be pending for receiving an ACK from dispatchers
+		// check consumer current maxAckPending
+		return consumerInfo.NumAckPending == defaultMaxInflight
+	}, 10*time.Second, 200*time.Millisecond)
+}
 
 func TestJSSubscriptionUsingCESDK(t *testing.T) {
 	// given
