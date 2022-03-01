@@ -109,6 +109,22 @@ type Template struct {
 	Annotations map[string]string `json:"annotations"`
 }
 
+type ResourceRequirements struct {
+	// +optional
+	Profile *string `json:"profile,omitempty"`
+
+	// +optional
+	Resources *v1.ResourceRequirements `json:"resources,omitempty"`
+}
+
+type ResourceConfiguration struct {
+	// +optional
+	Build ResourceRequirements `json:"build"`
+
+	// +optional
+	Function ResourceRequirements `json:"function"`
+}
+
 // FunctionSpec defines the desired state of Function
 type FunctionSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
@@ -126,16 +142,7 @@ type FunctionSpec struct {
 	Env []v1.EnvVar `json:"env,omitempty"`
 
 	// +optional
-	RuntimeProfile *string `json:"runtimeProfile,omitempty"`
-
-	// +optional
-	Resources *v1.ResourceRequirements `json:"resources,omitempty,omitempty"`
-
-	// +optional
-	BuildProfile *string `json:"buildProfile,omitempty"`
-
-	// +optional
-	BuildResources *v1.ResourceRequirements `json:"buildResources,omitempty"`
+	ResourceConfiguration ResourceConfiguration `json:"resourceConfiguration,omitempty"`
 
 	// +kubebuilder:validation:Minimum:=1
 	MinReplicas *int32 `json:"minReplicas,omitempty"`
