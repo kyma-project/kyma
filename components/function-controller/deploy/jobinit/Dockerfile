@@ -27,7 +27,7 @@ ENV LIBGIT2_VERSION=1.1.0-r2
 LABEL source = git@github.com:kyma-project/kyma.git
 
 RUN apk add --no-cache ca-certificates
-RUN apk add --no-cache --update --repository=http://dl-cdn.alpinelinux.org/alpine/edge/main openssh-client
+RUN apk add --no-cache --update --repository=http://dl-cdn.alpinelinux.org/alpine/edge/main openssh-client openssl
 RUN apk add --no-cache --repository http://dl-cdn.alpinelinux.org/alpine/v3.14/community libgit2=${LIBGIT2_VERSION}
 
 COPY --from=builder /app /app

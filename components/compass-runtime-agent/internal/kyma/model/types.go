@@ -37,10 +37,10 @@ type Application struct {
 	Description         string
 	Labels              Labels
 	SystemAuthsIDs      []string
-	APIPackages         []APIPackage
+	ApiBundles          []APIBundle
 }
 
-type APIPackage struct {
+type APIBundle struct {
 	ID                             string
 	Name                           string
 	Description                    *string

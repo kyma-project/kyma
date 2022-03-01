@@ -6,24 +6,27 @@ const httpsAgent = new https.Agent({
 axios.defaults.httpsAgent = httpsAgent;
 const {
   checkFunctionResponse,
-  sendEventAndCheckResponse,
+  sendLegacyEventAndCheckResponse,
+  sendCloudEventStructuredModeAndCheckResponse,
+  sendCloudEventBinaryModeAndCheckResponse,
+  sendLegacyEventAndCheckTracing,
+  sendCloudEventStructuredModeAndCheckTracing,
+  sendCloudEventBinaryModeAndCheckTracing,
   checkInClusterEventDelivery,
   waitForSubscriptionsTillReady,
   checkInClusterEventTracing,
-  sendLegacyEventAndCheckTracing,
 } = require('../test/fixtures/commerce-mock');
 const {
+  getEventingBackend,
   waitForNamespace,
-} = require('../utils');
-const {
-  eventingMonitoringTest,
-} = require('./metric-test');
-const {
   switchEventingBackend,
   printAllSubscriptions,
   printEventingControllerLogs,
   printEventingPublisherProxyLogs,
 } = require('../utils');
+const {
+  eventingMonitoringTest,
+} = require('./metric-test');
 const {
   testNamespace,
   backendK8sSecretName,
@@ -32,7 +35,10 @@ const {
   timeoutTime,
   slowTime,
   mockNamespace,
+  natsBackend,
+  bebBackend,
   isSKR,
+  eventMeshNamespace,
 } = require('./utils');
 const {prometheusPortForward} = require('../monitoring/client');
 
@@ -41,7 +47,7 @@ describe('Eventing tests', function() {
   this.slow(slowTime);
   let cancelPrometheusPortForward = null;
 
-  before('Ensure the test namespaces exists', async function() {
+  before('Ensure the test and mock namespaces exist', async function() {
     await waitForNamespace(testNamespace);
     await waitForNamespace(mockNamespace);
 
@@ -50,17 +56,25 @@ describe('Eventing tests', function() {
   });
 
   // eventingE2ETestSuite - Runs Eventing end-to-end tests
-  function eventingE2ETestSuite() {
+  function eventingE2ETestSuite(backend) {
     it('lastorder function should be reachable through secured API Rule', async function() {
-      await checkFunctionResponse(testNamespace);
+      await checkFunctionResponse(testNamespace, mockNamespace);
     });
 
     it('In-cluster event should be delivered (structured and binary mode)', async function() {
       await checkInClusterEventDelivery(testNamespace);
     });
 
-    it('order.created.v1 event from CommerceMock should trigger the lastorder function', async function() {
-      await sendEventAndCheckResponse();
+    it('order.created.v1 legacy event from CommerceMock should trigger the lastorder function', async function() {
+      await sendLegacyEventAndCheckResponse(mockNamespace);
+    });
+
+    it('order.created.v1 cloud event from CommerceMock should trigger the lastorder function', async function() {
+      await sendCloudEventStructuredModeAndCheckResponse(backend, mockNamespace);
+    });
+
+    it('order.created.v1 binary cloud event from CommerceMock should trigger the lastorder function', async function() {
+      await sendCloudEventBinaryModeAndCheckResponse(backend, mockNamespace);
     });
   }
 
@@ -74,6 +88,12 @@ describe('Eventing tests', function() {
 
     it('order.created.v1 event from CommerceMock should have correct tracing spans', async function() {
       await sendLegacyEventAndCheckTracing(testNamespace, mockNamespace);
+    });
+    it('order.created.v1 structured cloud event from CommerceMock should have correct tracing spans', async function() {
+      await sendCloudEventStructuredModeAndCheckTracing(testNamespace, mockNamespace);
+    });
+    it('order.created.v1 binary cloud event from CommerceMock should have correct tracing spans', async function() {
+      await sendCloudEventBinaryModeAndCheckTracing(testNamespace, mockNamespace);
     });
     it('In-cluster event should have correct tracing spans', async function() {
       await checkInClusterEventTracing(testNamespace);
@@ -92,43 +112,66 @@ describe('Eventing tests', function() {
 
   // Tests
   context('with Nats backend', function() {
+    it('Switch Eventing Backend to Nats', async function() {
+      const currentBackend = await getEventingBackend();
+      if (currentBackend && currentBackend.toLowerCase() === natsBackend) {
+        this.skip();
+      }
+      await switchEventingBackend(backendK8sSecretName, backendK8sSecretNamespace, natsBackend);
+    });
+    it('Wait until subscriptions are ready', async function() {
+      await waitForSubscriptionsTillReady(testNamespace);
+    });
     // Running Eventing end-to-end tests
-    eventingE2ETestSuite();
+    eventingE2ETestSuite(natsBackend);
     // Running Eventing tracing tests
     eventingTracingTestSuite();
     // Running Eventing Monitoring tests
-    eventingMonitoringTest('nats');
+    eventingMonitoringTest(natsBackend);
   });
 
   context('with BEB backend', function() {
+    // skip publishing cloud events for beb backend when event mesh credentials file is missing
+    if (eventMeshNamespace === undefined) {
+      console.log('Skipping E2E eventing tests for BEB backend due to missing EVENTMESH_SECRET_FILE');
+      return;
+    }
     it('Switch Eventing Backend to BEB', async function() {
-      await switchEventingBackend(backendK8sSecretName, backendK8sSecretNamespace, 'beb');
-      await waitForSubscriptionsTillReady(testNamespace);
-
-      // print subscriptions status when debugLogs is enabled
+      const currentBackend = await getEventingBackend();
+      if (currentBackend && currentBackend.toLowerCase() === bebBackend) {
+        this.skip();
+      }
+      await switchEventingBackend(backendK8sSecretName, backendK8sSecretNamespace, bebBackend);
+    });
+    it('Wait until subscriptions are ready', async function() {
+      await waitForSubscriptionsTillReady(testNamespace); // print subscriptions status when debugLogs is enabled
       if (DEBUG_MODE) {
         await printAllSubscriptions(testNamespace);
       }
     });
-
     // Running Eventing end-to-end tests
-    eventingE2ETestSuite();
+    eventingE2ETestSuite(bebBackend);
     // Running Eventing Monitoring tests
-    eventingMonitoringTest('beb');
+    eventingMonitoringTest(bebBackend);
   });
 
-  context('with Nats backend switched back from BEB', function() {
+  context('with Nats backend switched back from BEB', async function() {
     it('Switch Eventing Backend to Nats', async function() {
-      await switchEventingBackend(backendK8sSecretName, backendK8sSecretNamespace, 'nats');
+      const currentBackend = await getEventingBackend();
+      if (currentBackend && currentBackend.toLowerCase() === natsBackend) {
+        this.skip();
+      }
+      await switchEventingBackend(backendK8sSecretName, backendK8sSecretNamespace, natsBackend);
+    });
+    it('Wait until subscriptions are ready', async function() {
       await waitForSubscriptionsTillReady(testNamespace);
     });
-
     // Running Eventing end-to-end tests
     eventingE2ETestSuite();
     // Running Eventing tracing tests
     eventingTracingTestSuite();
     // Running Eventing Monitoring tests
-    eventingMonitoringTest('nats');
+    eventingMonitoringTest(natsBackend);
   });
 
   after(async function() {

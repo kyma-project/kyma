@@ -281,24 +281,22 @@ class KCPWrapper {
 
   async reconcileInformationLog(runtimeStatus) {
     try {
-      console.log('executing reconcileInformationLog ');
       const objRuntimeStatus = JSON.parse(runtimeStatus);
 
       try {
         if (!objRuntimeStatus.data[0].shootName) {}
       } catch (e) {
-        console.log('skipping reconciliations logging: no shootName provided by runtimeStatus');
+        console.log('skipping reconciliation logging: no shootName provided by runtimeStatus');
         return;
       }
 
-      console.log('executing getReconciliationsOperations');
       // kcp reconciliations operations -c <shootName> -o json
       const reconciliationsOperations = await this.getReconciliationsOperations(objRuntimeStatus.data[0].shootName);
 
       const objReconciliationsOperations = JSON.parse(reconciliationsOperations);
 
       if ( objReconciliationsOperations == null ) {
-        console.log(`skipping reconciliations logging: kcp rc operations -c ${objRuntimeStatus.data[0].shootName}
+        console.log(`skipping reconciliation logging: kcp rc operations -c ${objRuntimeStatus.data[0].shootName}
          -o json returned null`);
         return;
       }
@@ -309,7 +307,7 @@ class KCPWrapper {
         console.log(`no reconciliation operations found`);
         return;
       }
-      console.log(`number of reconciliations operations: ${objReconciliationsOperationsLength}`);
+      console.log(`number of reconciliation operations: ${objReconciliationsOperationsLength}`);
 
       // using only last three operations
       const lastObjReconciliationsOperations = objReconciliationsOperations.
@@ -323,7 +321,7 @@ class KCPWrapper {
         console.log(`reconciliation info: ${i.schedulingID}: ${getReconciliationsInfo}`);
       }
     } catch {
-      console.log('skipping reconciliations logging: error in reconcileInformationLog');
+      console.log('skipping reconciliation logging: error in reconcileInformationLog');
     }
   }
 

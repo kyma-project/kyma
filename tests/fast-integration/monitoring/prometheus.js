@@ -58,7 +58,7 @@ async function assertScrapePoolTargetsExist() {
     const activeTargets = await getPrometheusActiveTargets();
 
     for (const target of activeTargets) {
-      scrapePools.delete(target.scrapePool);
+      scrapePools.delete(target.scrapePool.replace('serviceMonitor/', '').replace('podMonitor/', ''));
     }
     return Array.from(scrapePools);
   });
@@ -218,14 +218,14 @@ async function buildScrapePoolSet() {
   for (const monitor of serviceMonitors) {
     const endpoints = monitor.spec.endpoints;
     for (let i = 0; i < endpoints.length; i++) {
-      const scrapePool = `serviceMonitor/${monitor.metadata.namespace}/${monitor.metadata.name}/${i}`;
+      const scrapePool = `${monitor.metadata.namespace}/${monitor.metadata.name}/${i}`;
       scrapePools.add(scrapePool);
     }
   }
   for (const monitor of podMonitors) {
     const endpoints = monitor.spec.podmetricsendpoints;
     for (let i = 0; i < endpoints.length; i++) {
-      const scrapePool = `podMonitor/${monitor.metadata.namespace}/${monitor.metadata.name}/${i}`;
+      const scrapePool = `${monitor.metadata.namespace}/${monitor.metadata.name}/${i}`;
       scrapePools.add(scrapePool);
     }
   }

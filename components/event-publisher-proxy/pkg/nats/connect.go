@@ -31,21 +31,21 @@ func NewBackendConnection(url string, retry bool, reconnects int, wait time.Dura
 	}
 }
 
-// Connect returns a nats connection that is ready for use, or error if connection to the nats server failed
-func (bc *BackendConnection) Connect() error {
-	connection, err := nats.Connect(bc.connectionData.url, nats.RetryOnFailedConnect(bc.connectionData.retry),
-		nats.MaxReconnects(bc.connectionData.reconnects), nats.ReconnectWait(bc.connectionData.wait))
+// Connect returns a NATS connection that is ready for use, or an error if connection to the NATS server failed.
+// It uses the nats.Connect function which is thread-safe.
+func (bc *BackendConnection) Connect() (err error) {
+	bc.Connection, err = nats.Connect(bc.connectionData.url,
+		nats.RetryOnFailedConnect(bc.connectionData.retry),
+		nats.MaxReconnects(bc.connectionData.reconnects),
+		nats.ReconnectWait(bc.connectionData.wait),
+	)
 	if err != nil {
 		return err
 	}
-	if status := connection.Status(); status != nats.CONNECTED {
-		return fmt.Errorf("connection status not connected: %v", status)
-	}
-	// OK
-	bc.Connection = connection
-	return nil
-}
 
-func (bc *BackendConnection) Reconnect() error {
-	return bc.Connect()
+	if status := bc.Connection.Status(); status != nats.CONNECTED {
+		return fmt.Errorf("cannot connect to NATS server, status: %v", status)
+	}
+
+	return nil
 }

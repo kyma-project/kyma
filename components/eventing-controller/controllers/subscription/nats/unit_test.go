@@ -8,11 +8,15 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+	"time"
 
 	kymalogger "github.com/kyma-project/kyma/common/logging/logger"
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 	"github.com/kyma-project/kyma/components/eventing-controller/logger"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/eventtype"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/mocks"
+	controllertesting "github.com/kyma-project/kyma/components/eventing-controller/testing"
 	. "github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -25,7 +29,14 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 )
 
-func TestHandleSubscriptionDeletion(t *testing.T) {
+const namespaceName = "test"
+
+var (
+	defaultSubsConfig = env.DefaultSubscriptionConfig{MaxInFlightMessages: 1, DispatcherRetryPeriod: time.Second, DispatcherMaxRetries: 1}
+	testEnv           *envtest.Environment
+)
+
+func Test_handleSubscriptionDeletion(t *testing.T) {
 	g := NewGomegaWithT(t)
 	testEnvironment := setupTestEnvironment(t)
 	ctx, r, mockedBackend := testEnvironment.Context, testEnvironment.Reconciler, testEnvironment.Backend
@@ -91,14 +102,14 @@ func TestHandleSubscriptionDeletion(t *testing.T) {
 	}
 }
 
-func TestSyncSubscriptionStatus(t *testing.T) {
+func Test_syncSubscriptionStatus(t *testing.T) {
 	g := NewGomegaWithT(t)
 	testEnvironment := setupTestEnvironment(t)
 	ctx, r := testEnvironment.Context, testEnvironment.Reconciler
 
 	message := "message is not required for tests"
 	falseNatsSubActiveCondition := eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionSubscriptionActive,
-		eventingv1alpha1.ConditionReasonNATSSubscriptionActive,
+		eventingv1alpha1.ConditionReasonNATSSubscriptionNotActive,
 		corev1.ConditionFalse, message)
 	trueNatsSubActiveCondition := eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionSubscriptionActive,
 		eventingv1alpha1.ConditionReasonNATSSubscriptionActive,
@@ -206,7 +217,7 @@ func TestSyncSubscriptionStatus(t *testing.T) {
 	}
 }
 
-func TestDefaultSinkValidator(t *testing.T) {
+func Test_defaultSinkValidator(t *testing.T) {
 	g := NewGomegaWithT(t)
 	testEnvironment := setupTestEnvironment(t)
 	ctx, r, log := testEnvironment.Context, testEnvironment.Reconciler, testEnvironment.Logger
@@ -305,13 +316,106 @@ func TestDefaultSinkValidator(t *testing.T) {
 	}
 }
 
+func Test_syncInitialStatus(t *testing.T) {
+	g := NewGomegaWithT(t)
+	testEnvironment := setupTestEnvironment(t)
+	r := testEnvironment.Reconciler
+
+	expectedSubConfig := eventingv1alpha1.MergeSubsConfigs(nil, &defaultSubsConfig)
+	newSubsConfig := env.DefaultSubscriptionConfig{MaxInFlightMessages: 5}
+	updatedSubConfig := eventingv1alpha1.MergeSubsConfigs(nil, &newSubsConfig)
+
+	testCases := []struct {
+		name              string
+		givenSub          *eventingv1alpha1.Subscription
+		expectedSubStatus eventingv1alpha1.SubscriptionStatus
+		wantStatus        bool
+	}{
+		{
+			name: "A new Subscription must be updated with cleanEventTypes and config and return true",
+			givenSub: NewSubscription(
+				WithStatus(false),
+				controllertesting.WithFilter("", controllertesting.OrderCreatedEventType),
+			),
+			expectedSubStatus: eventingv1alpha1.SubscriptionStatus{
+				Ready:           false,
+				CleanEventTypes: []string{controllertesting.OrderCreatedEventType},
+				Config:          expectedSubConfig,
+			},
+			wantStatus: true,
+		},
+		{
+			name: "A subscription with the same cleanEventTypes and config must return false",
+			givenSub: NewSubscription(
+				WithStatus(true),
+				controllertesting.WithFilter("", controllertesting.OrderCreatedEventType),
+				controllertesting.WithStatusCleanEventTypes([]string{controllertesting.OrderCreatedEventType}),
+				controllertesting.WithStatusConfig(defaultSubsConfig),
+			),
+			expectedSubStatus: eventingv1alpha1.SubscriptionStatus{
+				Ready:           true,
+				CleanEventTypes: []string{controllertesting.OrderCreatedEventType},
+				Config:          expectedSubConfig,
+			},
+			wantStatus: false,
+		},
+		{
+			name: "A subscription with the same cleanEventTypes and new config must return true",
+			givenSub: NewSubscription(
+				WithStatus(true),
+				controllertesting.WithFilter("", controllertesting.OrderCreatedEventType),
+				controllertesting.WithStatusCleanEventTypes([]string{controllertesting.OrderCreatedEventType}),
+				controllertesting.WithSpecConfig(newSubsConfig),
+			),
+			expectedSubStatus: eventingv1alpha1.SubscriptionStatus{
+				Ready:           true,
+				CleanEventTypes: []string{controllertesting.OrderCreatedEventType},
+				Config:          updatedSubConfig,
+			},
+			wantStatus: true,
+		},
+		{
+			name: "A subscription with changed cleanEventTypes and the same config must return true",
+			givenSub: NewSubscription(
+				WithStatus(true),
+				controllertesting.WithFilter("", controllertesting.OrderCreatedEventTypeNotClean),
+				controllertesting.WithStatusCleanEventTypes([]string{controllertesting.OrderCreatedEventType}),
+				controllertesting.WithStatusConfig(defaultSubsConfig),
+			),
+			expectedSubStatus: eventingv1alpha1.SubscriptionStatus{
+				Ready:           true,
+				CleanEventTypes: []string{controllertesting.OrderCreatedEventTypeNotClean},
+				Config:          expectedSubConfig,
+			},
+			wantStatus: true,
+		},
+	}
+	for _, tC := range testCases {
+		testCase := tC
+		t.Run(testCase.name, func(t *testing.T) {
+			// given
+			sub := testCase.givenSub
+
+			// when
+			gotStatus, err := r.syncInitialStatus(sub, r.namedLogger())
+			g.Expect(err).To(BeNil())
+
+			// then
+			g.Expect(sub.Status.CleanEventTypes).To(Equal(testCase.expectedSubStatus.CleanEventTypes))
+			g.Expect(sub.Status.Config).To(Equal(testCase.expectedSubStatus.Config))
+			g.Expect(sub.Status.Ready).To(Equal(testCase.expectedSubStatus.Ready))
+			g.Expect(gotStatus).To(Equal(testCase.wantStatus))
+		})
+	}
+}
+
 // helper function and structs
 
 // TestEnvironment provides mocked resources for tests.
 type TestEnvironment struct {
 	Context    context.Context
 	Client     *client.WithWatch
-	Backend    *mocks.MessagingBackend
+	Backend    *mocks.NatsBackend
 	Reconciler *Reconciler
 	Logger     *logger.Logger
 	Recorder   *record.FakeRecorder
@@ -320,7 +424,7 @@ type TestEnvironment struct {
 // setupTestEnvironment is a TestEnvironment constructor
 func setupTestEnvironment(t *testing.T) *TestEnvironment {
 	g := NewGomegaWithT(t)
-	mockedBackend := &mocks.MessagingBackend{}
+	mockedBackend := &mocks.NatsBackend{}
 	ctx := context.Background()
 	fakeClient := createFakeClient(g)
 	recorder := &record.FakeRecorder{}
@@ -329,13 +433,18 @@ func setupTestEnvironment(t *testing.T) *TestEnvironment {
 	if err != nil {
 		t.Fatalf("initialize logger failed: %v", err)
 	}
+	cleaner := func(et string) (string, error) {
+		return et, nil
+	}
 
 	r := Reconciler{
-		Backend:       mockedBackend,
-		Client:        fakeClient,
-		logger:        defaultLogger,
-		recorder:      recorder,
-		sinkValidator: defaultSinkValidator,
+		Backend:          mockedBackend,
+		Client:           fakeClient,
+		logger:           defaultLogger,
+		subsConfig:       defaultSubsConfig,
+		recorder:         recorder,
+		sinkValidator:    defaultSinkValidator,
+		eventTypeCleaner: eventtype.CleanerFunc(cleaner),
 	}
 
 	return &TestEnvironment{
@@ -372,22 +481,25 @@ func NewSubscription(options ...func(subscription *eventingv1alpha1.Subscription
 	}
 	return sub
 }
-func WithSink(sink string) func(subscription *eventingv1alpha1.Subscription) {
+
+type SubscriptionOpt func(subscription *eventingv1alpha1.Subscription)
+
+func WithSink(sink string) SubscriptionOpt {
 	return func(sub *eventingv1alpha1.Subscription) {
 		sub.Spec.Sink = sink
 	}
 }
-func WithConditions(conditions []eventingv1alpha1.Condition) func(subscription *eventingv1alpha1.Subscription) {
+func WithConditions(conditions []eventingv1alpha1.Condition) SubscriptionOpt {
 	return func(sub *eventingv1alpha1.Subscription) {
 		sub.Status.Conditions = conditions
 	}
 }
-func WithStatus(status bool) func(subscription *eventingv1alpha1.Subscription) {
+func WithStatus(status bool) SubscriptionOpt {
 	return func(sub *eventingv1alpha1.Subscription) {
 		sub.Status.Ready = status
 	}
 }
-func WithFinalizers(finalizers []string) func(subscription *eventingv1alpha1.Subscription) {
+func WithFinalizers(finalizers []string) SubscriptionOpt {
 	return func(sub *eventingv1alpha1.Subscription) {
 		sub.ObjectMeta.Finalizers = finalizers
 	}

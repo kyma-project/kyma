@@ -42,19 +42,32 @@ func main() {
 	// Set controller core logger.
 	ctrl.SetLogger(zapr.NewLogger(ctrLogger.WithContext().Desugar()))
 
-	// Add schemes.
+	// Instantiate and initialize all the subscription managers.
+	restCfg := ctrl.GetConfigOrDie()
 	scheme := runtime.NewScheme()
-	if err := beb.AddToScheme(scheme); err != nil {
-		setupLogger.Error(err, "start manager failed")
-		os.Exit(1)
+
+	var natsSubMgr subscriptionmanager.Manager
+	if opts.EnableJetStreamBackend {
+		natsSubMgr = jetstream.NewSubscriptionManager(restCfg, opts.MetricsAddr, opts.MaxReconnects, opts.ReconnectWait, ctrLogger)
+		if err := jetstream.AddToScheme(scheme); err != nil {
+			setupLogger.Error(err, "start manager failed")
+			os.Exit(1)
+		}
+	} else {
+		natsSubMgr = nats.NewSubscriptionManager(restCfg, opts.MetricsAddr, opts.MaxReconnects, opts.ReconnectWait, ctrLogger)
+		if err := nats.AddToScheme(scheme); err != nil {
+			setupLogger.Error(err, "start manager failed")
+			os.Exit(1)
+		}
 	}
-	if err := nats.AddToScheme(scheme); err != nil {
+
+	bebSubMgr := beb.NewSubscriptionManager(restCfg, opts.MetricsAddr, opts.ReconcilePeriod, ctrLogger)
+	if err := beb.AddToScheme(scheme); err != nil {
 		setupLogger.Error(err, "start manager failed")
 		os.Exit(1)
 	}
 
 	// Init the manager.
-	restCfg := ctrl.GetConfigOrDie()
 	mgr, err := ctrl.NewManager(restCfg, ctrl.Options{
 		Scheme:                 scheme,
 		MetricsBindAddress:     opts.MetricsAddr,
@@ -67,19 +80,11 @@ func main() {
 		os.Exit(1)
 	}
 
-	// Instantiate and initialize all the subscription managers.
-	var natsSubMgr subscriptionmanager.Manager
-	if opts.EnableJetStreamBackend {
-		natsSubMgr = jetstream.NewSubscriptionManager(restCfg, opts.MetricsAddr, opts.MaxReconnects, opts.ReconnectWait, ctrLogger)
-	} else {
-		natsSubMgr = nats.NewSubscriptionManager(restCfg, opts.MetricsAddr, opts.MaxReconnects, opts.ReconnectWait, ctrLogger)
-	}
 	if err := natsSubMgr.Init(mgr); err != nil {
 		setupLogger.Error(err, "initialize NATS subscription manager failed")
 		os.Exit(1)
 	}
 
-	bebSubMgr := beb.NewSubscriptionManager(restCfg, opts.MetricsAddr, opts.ReconcilePeriod, ctrLogger)
 	if err := bebSubMgr.Init(mgr); err != nil {
 		setupLogger.Error(err, "initialize BEB subscription manager failed")
 		os.Exit(1)
@@ -97,7 +102,7 @@ func main() {
 	// Start the backend manager.
 	ctx := context.Background()
 	recorder := mgr.GetEventRecorderFor("backend-controller")
-	backendReconciler := backend.NewReconciler(ctx, natsSubMgr, bebSubMgr, mgr.GetClient(), mgr.GetCache(), ctrLogger, recorder)
+	backendReconciler := backend.NewReconciler(ctx, natsSubMgr, bebSubMgr, mgr.GetClient(), ctrLogger, recorder)
 	if err := backendReconciler.SetupWithManager(mgr); err != nil {
 		setupLogger.Error(err, "start backend controller failed")
 		os.Exit(1)

@@ -52,6 +52,7 @@ config:
       - "POST"
       - "PUT"
       - "DELETE"
+      - "PATCH"
     allowHeaders: # "*" is not yet supported by all browsers
       - "Authorization"
       - "Content-Type"
@@ -109,5 +110,5 @@ global:
   images:
     api_gateway_controller:
       name: "api-gateway-controller"
-      version: "ef06a37e"
+      version: "02f6a089"
       directory: "incubator"
