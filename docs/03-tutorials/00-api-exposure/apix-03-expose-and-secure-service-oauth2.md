@@ -102,38 +102,38 @@ Follow the instructions in the tabs to expose an instance of the HttpBin service
 
 1. Expose the service and secure it by creating an API Rule CR in your Namespace. If you don't want to use your custom domain but a Kyma domain, use the following Kyma Gateway: `kyma-system/kyma-gateway`. Run:
 
-  ```shell
-  cat <<EOF | kubectl apply -f -
-  apiVersion: gateway.kyma-project.io/v1alpha1
-  kind: APIRule
-  metadata:
-    name: httpbin
-    namespace: $NAMESPACE
-  spec:
-    gateway: namespace-name/httpbin-gateway #The value corresponds to the Gateway CR you created. 
-    service:
-      name: httpbin
-      port: 8000
-      host: httpbin.$DOMAIN
-    rules:
-      - path: /.*
-        methods: ["GET"]
-        accessStrategies:
-          - handler: oauth2_introspection
-            config:
-              required_scope: ["read"]
-      - path: /post
-        methods: ["POST"]
-        accessStrategies:
-          - handler: oauth2_introspection
-            config:
-              required_scope: ["write"]
-  EOF
-  ```
+   ```shell
+   cat <<EOF | kubectl apply -f -
+   apiVersion: gateway.kyma-project.io/v1alpha1
+   kind: APIRule
+   metadata:
+     name: httpbin
+     namespace: $NAMESPACE
+   spec:
+     gateway: namespace-name/httpbin-gateway #The value corresponds to the Gateway CR you created. 
+     service:
+       name: httpbin
+       port: 8000
+       host: httpbin.$DOMAIN
+     rules:
+       - path: /.*
+         methods: ["GET"]
+         accessStrategies:
+           - handler: oauth2_introspection
+             config:
+               required_scope: ["read"]
+       - path: /post
+         methods: ["POST"]
+         accessStrategies:
+           - handler: oauth2_introspection
+             config:
+               required_scope: ["write"]
+   EOF
+   ```
 
->**NOTE:** If you are running Kyma on k3d, add `httpbin.kyma.local` to the entry with k3d IP in your system's `/etc/hosts` file.
+   >**NOTE:** If you are running Kyma on k3d, add `httpbin.kyma.local` to the entry with k3d IP in your system's `/etc/hosts` file.
 
-The exposed service requires tokens with "read" scope for `GET` requests in the entire service and tokens with "write" scope for `POST` requests to the `/post` endpoint of the service.
+   The exposed service requires tokens with "read" scope for `GET` requests in the entire service and tokens with "write" scope for `POST` requests to the `/post` endpoint of the service.
 
   </details>
 
@@ -144,32 +144,32 @@ The exposed service requires tokens with "read" scope for `GET` requests in the 
 
 1. Expose the Function and secure it by creating an API Rule CR in your Namespace. If you don't want to use your custom domain but a Kyma domain, use the following Kyma Gateway: `kyma-system/kyma-gateway`. Run:
 
-  ```shell
-  cat <<EOF | kubectl apply -f -
-  apiVersion: gateway.kyma-project.io/v1alpha1
-  kind: APIRule
-  metadata:
-    name: function
-    namespace: $NAMESPACE
-  spec:
-    gateway: namespace-name/httpbin-gateway #The value corresponds to the Gateway CR you created. 
-    service:
-      name: function
-      port: 80
-      host: function-example.$DOMAIN
-    rules:
-      - path: /function
-        methods: ["GET"]
-        accessStrategies:
-          - handler: oauth2_introspection
-            config:
-              required_scope: ["read"]
-  EOF
-  ```
+   ```shell
+   cat <<EOF | kubectl apply -f -
+   apiVersion: gateway.kyma-project.io/v1alpha1
+   kind: APIRule
+   metadata:
+     name: function
+     namespace: $NAMESPACE
+   spec:
+     gateway: namespace-name/httpbin-gateway #The value corresponds to the Gateway CR you created. 
+     service:
+       name: function
+       port: 80
+       host: function-example.$DOMAIN
+     rules:
+       - path: /function
+         methods: ["GET"]
+         accessStrategies:
+           - handler: oauth2_introspection
+             config:
+               required_scope: ["read"]
+   EOF
+   ```
 
->**NOTE:** If you are running Kyma on k3d, add `httpbin.kyma.local` to the entry with k3d IP in your system's `/etc/hosts` file.
+   >**NOTE:** If you are running Kyma on k3d, add `httpbin.kyma.local` to the entry with k3d IP in your system's `/etc/hosts` file.
 
-The exposed Function requires all `GET` requests to have a valid token with the "read" scope.
+   The exposed Function requires all `GET` requests to have a valid token with the "read" scope.
 
   </details>
 </div>

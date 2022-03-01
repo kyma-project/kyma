@@ -53,32 +53,31 @@ curl -X POST "$TOKEN_ENDPOINT" -d "grant_type=client_credentials" -d "client_id=
 
 1. Expose the service and secure it by creating an API Rule CR in your Namespace. If you don't want to use your custom domain but a Kyma domain, use the following Kyma Gateway: `kyma-system/kyma-gateway`. Run:
 
-```bash
-cat <<EOF | kubectl apply -f -
-apiVersion: gateway.kyma-project.io/v1alpha1
-kind: APIRule
-metadata:
-  name: httpbin
-  namespace: $NAMESPACE
-spec:
-  gateway: kyma-gateway.kyma-system.svc.cluster.local
-  rules:
-    - accessStrategies:
-        - config:
-            jwks_urls:
-            - $JWKS_URI
-          handler: jwt
-      methods:
-        - GET
-      path: /.*
-  service:
-    name: httpbin
-    port: 8000
-    host: httpbin.$DOMAIN
-```
+   ```bash
+   cat <<EOF | kubectl apply -f -
+   apiVersion: gateway.kyma-project.io/v1alpha1
+   kind: APIRule
+   metadata:
+     name: httpbin
+     namespace: $NAMESPACE
+   spec:
+     gateway: kyma-gateway.kyma-system.svc.cluster.local
+     rules:
+       - accessStrategies:
+           - config:
+               jwks_urls:
+               - $JWKS_URI
+             handler: jwt
+         methods:
+           - GET
+         path: /.*
+     service:
+       name: httpbin
+       port: 8000
+       host: httpbin.$DOMAIN
+   ```
 
->**NOTE:** If you are running Kyma on k3d, add `httpbin.kyma.local` to the entry with k3d IP in your system's `/etc/hosts` file.
-
+   >**NOTE:** If you are running Kyma on k3d, add `httpbin.kyma.local` to the entry with k3d IP in your system's `/etc/hosts` file.
 
   </details>
 
@@ -89,36 +88,36 @@ spec:
 
 1. Expose the Function and secure it by creating an API Rule CR in your Namespace. If you don't want to use your custom domain but a Kyma domain, use the following Kyma Gateway: `kyma-system/kyma-gateway`. Run:
 
-    ```bash
-  cat <<EOF | kubectl apply -f -
-  apiVersion: gateway.kyma-project.io/v1alpha1
-  kind: APIRule
-  metadata:
-    name: function
-    namespace: $NAMESPACE
-  spec:
-    gateway: namespace-name/httpbin-gateway #The value corresponds to the Gateway CR you created.
-    service:
-      name: function
-      port: 80
-      host: function-example.$DOMAIN
-    rules:
-    - accessStrategies:
-        - config:
-            jwks_urls:
-            - $JWKS_URI
-          handler: jwt
-      methods:
-        - GET
-      path: /.*
-  EOF
-  ```
+   ```bash
+   cat <<EOF | kubectl apply -f -
+   apiVersion: gateway.kyma-project.io/v1alpha1
+   kind: APIRule
+   metadata:
+     name: function
+     namespace: $NAMESPACE
+   spec:
+     gateway: namespace-name/httpbin-gateway #The value corresponds to the Gateway CR you created.
+     service:
+       name: function
+       port: 80
+       host: function-example.$DOMAIN
+     rules:
+     - accessStrategies:
+         - config:
+             jwks_urls:
+             - $JWKS_URI
+           handler: jwt
+       methods:
+         - GET
+       path: /.*
+   EOF
+   ```
 
   </details>
 </div>
 
-2. To access the secured service, call it using a JWT access token:
+   2. To access the secured service, call it using a JWT access token:
 
-```bash
-curl -ik https://mst.dt-test.goatz.shoot.canary.k8s-hana.ondemand.com/headers -H "Authorization: Bearer $ACCESS_TOKEN"
-```
+   ```bash
+   curl -ik https://mst.dt-test.goatz.shoot.canary.k8s-hana.ondemand.com/headers -H "Authorization: Bearer $ACCESS_TOKEN"
+   ```
