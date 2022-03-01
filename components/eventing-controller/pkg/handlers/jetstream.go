@@ -62,6 +62,9 @@ func (js *JetStream) validateConfig() error {
 	if _, err := toJetStreamStorageType(js.config.JSStreamStorageType); err != nil {
 		return err
 	}
+	if _, err := toJetStreamRetentionPolicy(js.config.JSStreamRetentionPolicy); err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -101,23 +104,39 @@ func (js *JetStream) ensureStreamExists() error {
 	} else if err != nats.ErrStreamNotFound {
 		return err
 	}
-	storage, err := toJetStreamStorageType(js.config.JSStreamStorageType)
+	streamConfig, err := getStreamConfig(js.config)
 	if err != nil {
 		return err
 	}
 	js.namedLogger().Infow("Stream not found, creating a new Stream",
-		"streamName", js.config.JSStreamName, "streamStorageType", storage.String())
-	_, err = js.jsCtx.AddStream(&nats.StreamConfig{
-		Name:    js.config.JSStreamName,
-		Storage: storage,
+		"streamName", js.config.JSStreamName, "streamStorageType", streamConfig.Storage)
+	_, err = js.jsCtx.AddStream(streamConfig)
+	return err
+}
+
+func getStreamConfig(natsConfig env.NatsConfig) (*nats.StreamConfig, error) {
+	storage, err := toJetStreamStorageType(natsConfig.JSStreamStorageType)
+	if err != nil {
+		return nil, err
+	}
+	retentionPolicy, err := toJetStreamRetentionPolicy(natsConfig.JSStreamRetentionPolicy)
+	if err != nil {
+		return nil, err
+	}
+	streamConfig := &nats.StreamConfig{
+		Name:      natsConfig.JSStreamName,
+		Storage:   storage,
+		Retention: retentionPolicy,
+		MaxMsgs:   natsConfig.JSStreamMaxMessages,
+		MaxBytes:  natsConfig.JSStreamMaxBytes,
 		// Since one stream is used to store events of all types, the stream has to match all event types, and therefore
 		// we use the wildcard char >. However, to avoid matching internal JetStream and non-Kyma-related subjects, we
 		// use the stream name as a prefix. This prefix is handled only on the JetStream level (i.e. JetStream handler
 		// and EPP) and should not be exposed in the Kyma subscription. Any Kyma event type gets appended with the
 		// configured stream name.
-		Subjects: []string{fmt.Sprintf("%s.>", js.config.JSStreamName)},
-	})
-	return err
+		Subjects: []string{fmt.Sprintf("%s.>", natsConfig.JSStreamName)},
+	}
+	return streamConfig, nil
 }
 
 func (js *JetStream) namedLogger() *zap.SugaredLogger {

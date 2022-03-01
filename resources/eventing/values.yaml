@@ -9,7 +9,7 @@ global:
       pullPolicy: "IfNotPresent"
     publisher_proxy:
       name: event-publisher-proxy
-      version: PR-13469
+      version: PR-13120
     nats:
       name: nats
       version: 2.6.5-alpine
@@ -57,6 +57,3 @@ authentication:
   publishUrl: ""
   # bebNamespace is the name of the namespace BEB is provisioned with
   bebNamespace: ""
-
-jetStream:
-  streamName: kyma-eventing
