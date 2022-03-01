@@ -92,7 +92,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 	// TODO: Do this as part of sync initial status
 	cleanedSubjects, _ := handlers.GetCleanSubjects(desiredSubscription, r.eventTypeCleaner)
 	desiredSubscription.Status.CleanEventTypes = r.Backend.GetJetStreamSubjects(cleanedSubjects)
-	r.Backend.SyncSubscription(desiredSubscription)
+	_ = r.Backend.SyncSubscription(desiredSubscription)
 
 	// Mark subscription as not ready, since we have not implemented the reconciliation logic.
 	desiredSubscription.Status = eventingv1alpha1.SubscriptionStatus{}
