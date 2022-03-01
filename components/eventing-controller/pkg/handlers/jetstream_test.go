@@ -989,9 +989,10 @@ func TestJSSubscriptionUsingCESDK(t *testing.T) {
 
 func defaultNatsConfig(url string) env.NatsConfig {
 	return env.NatsConfig{
-		URL:                 url,
-		JSStreamName:        defaultStreamName,
-		JSStreamStorageType: JetStreamMemoryStorageType,
+		URL:                     url,
+		JSStreamName:            defaultStreamName,
+		JSStreamStorageType:     JetStreamStorageTypeMemory,
+		JSStreamRetentionPolicy: JetStreamRetentionPolicyInterest,
 	}
 }
 

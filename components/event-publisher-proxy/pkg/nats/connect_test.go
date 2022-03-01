@@ -19,13 +19,4 @@ func TestConnectToNats(t *testing.T) {
 	assert.Nil(t, err)
 	assert.NotNil(t, bc.Connection)
 	assert.Equal(t, bc.Connection.Status(), nats.CONNECTED)
-
-	bc.Connection.Close()
-
-	err = bc.Reconnect()
-	assert.Nil(t, err)
-	assert.NotNil(t, bc.Connection)
-	assert.Equal(t, bc.Connection.Status(), nats.CONNECTED)
-
-	defer bc.Connection.Close()
 }

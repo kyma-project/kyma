@@ -16,99 +16,60 @@ import (
 	testingutils "github.com/kyma-project/kyma/components/event-publisher-proxy/testing"
 )
 
-func TestSendCloudEvent(t *testing.T) {
-	logger := logrus.New()
-	logger.Info("TestNatsSender started")
-
-	// Start Nats server
-	natsServer := testingutils.StartNatsServer()
-	assert.NotNil(t, natsServer)
-	defer natsServer.Shutdown()
-
-	// connect to nats
-	bc := pkgnats.NewBackendConnection(natsServer.ClientURL(), true, 1, time.Second)
-	err := bc.Connect()
-	assert.Nil(t, err)
-	assert.NotNil(t, bc.Connection)
-
-	// create message sender
-	ctx := context.Background()
-	sender := NewNatsMessageSender(ctx, bc, logger)
-
-	// subscribe to subject
-	done := make(chan bool, 1)
-	validator := testingutils.ValidateNatsMessageDataOrFail(t, fmt.Sprintf(`"%s"`, testingutils.CloudEventData), done)
-	testingutils.SubscribeToEventOrFail(t, bc.Connection, testingutils.CloudEventType, validator)
-
-	// create cloudevent
-	ce := testingutils.StructuredCloudEventPayloadWithCleanEventType
-	event := cloudevents.NewEvent()
-	event.SetType(testingutils.CloudEventType)
-	err = json.Unmarshal([]byte(ce), &event)
-	assert.Nil(t, err)
-
-	// send cloudevent
-	status, err := sender.Send(ctx, &event)
-	assert.Nil(t, err)
-	assert.Equal(t, status, http.StatusNoContent)
-
-	// wait for subscriber to receive the messages
-	if err := testingutils.WaitForChannelOrTimeout(done, time.Second*3); err != nil {
-		t.Fatalf("Subscriber did not receive the message with error: %v", err)
+func TestNatsMessageSender(t *testing.T) {
+	testCases := []struct {
+		name                    string
+		givenNatsServerShutdown bool
+		wantError               bool
+		wantStatusCode          int
+	}{
+		{
+			name:                    "Send should succeed if NATS connection is open",
+			givenNatsServerShutdown: false,
+			wantError:               false,
+			wantStatusCode:          http.StatusNoContent,
+		},
+		{
+			name:                    "Send should fail if NATS connection is not open",
+			givenNatsServerShutdown: true,
+			wantError:               true,
+			wantStatusCode:          http.StatusBadGateway,
+		},
 	}
-}
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			natsServer := testingutils.StartNatsServer()
+			assert.NotNil(t, natsServer)
+			defer natsServer.Shutdown()
 
-func TestSendCloudEventWithReconnect(t *testing.T) {
-	logger := logrus.New()
-	logger.Info("TestNatsSender started")
+			bc := pkgnats.NewBackendConnection(natsServer.ClientURL(), true, 1, time.Second)
+			err := bc.Connect()
+			assert.NoError(t, err)
+			assert.NotNil(t, bc.Connection)
 
-	// Start Nats server
-	natsServer := testingutils.StartNatsServer()
-	assert.NotNil(t, natsServer)
-	defer natsServer.Shutdown()
+			if tc.givenNatsServerShutdown {
+				natsServer.Shutdown()
+			}
 
-	// connect to nats
-	bc := pkgnats.NewBackendConnection(natsServer.ClientURL(), true, 10, time.Second)
-	err := bc.Connect()
-	assert.Nil(t, err)
-	assert.NotNil(t, bc.Connection)
+			receive := make(chan bool, 1)
+			validator := testingutils.ValidateNatsMessageDataOrFail(t, fmt.Sprintf(`"%s"`, testingutils.CloudEventData), receive)
+			testingutils.SubscribeToEventOrFail(t, bc.Connection, testingutils.CloudEventType, validator)
 
-	// create message sender
-	ctx := context.Background()
-	sender := NewNatsMessageSender(ctx, bc, logger)
+			ce := testingutils.StructuredCloudEventPayloadWithCleanEventType
+			event := cloudevents.NewEvent()
+			event.SetType(testingutils.CloudEventType)
+			err = json.Unmarshal([]byte(ce), &event)
+			assert.NoError(t, err)
 
-	// subscribe to subject
-	done := make(chan bool, 1)
-	validator := testingutils.ValidateNatsMessageDataOrFail(t, fmt.Sprintf(`"%s"`, testingutils.CloudEventData), done)
-	testingutils.SubscribeToEventOrFail(t, bc.Connection, testingutils.CloudEventType, validator)
+			ctx := context.Background()
+			sender := NewNatsMessageSender(context.Background(), bc, logrus.New())
 
-	// create cloudevent
-	ce := testingutils.StructuredCloudEventPayloadWithCleanEventType
-	event := cloudevents.NewEvent()
-	event.SetType(testingutils.CloudEventType)
-	err = json.Unmarshal([]byte(ce), &event)
-	assert.Nil(t, err)
+			status, err := sender.Send(ctx, &event)
+			assert.Equal(t, tc.wantError, err != nil)
+			assert.Equal(t, status, tc.wantStatusCode)
 
-	// send cloudevent
-	status, err := sender.Send(ctx, &event)
-	assert.Nil(t, err)
-	assert.Equal(t, status, http.StatusNoContent)
-
-	// wait for subscriber to receive the messages
-	if err := testingutils.WaitForChannelOrTimeout(done, time.Second*3); err != nil {
-		t.Fatalf("Subscriber did not receive the message with error: %v", err)
+			err = testingutils.WaitForChannelOrTimeout(receive, time.Second*3)
+			assert.Equal(t, tc.wantError, err != nil)
+		})
 	}
-
-	// close connection
-	bc.Connection.Close()
-
-	// send the cloudevent again, the message is not delivered cause the connection was closed
-	status, err = sender.Send(ctx, &event)
-	assert.NotNil(t, err)
-	assert.Equal(t, status, http.StatusBadGateway)
-
-	// send the cloudevent again, the reconnection should work
-	status, err = sender.Send(ctx, &event)
-	assert.Nil(t, err)
-	assert.Equal(t, status, http.StatusNoContent)
 }
