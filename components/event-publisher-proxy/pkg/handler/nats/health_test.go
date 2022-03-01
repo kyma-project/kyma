@@ -6,16 +6,17 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/handler/health"
 	"github.com/stretchr/testify/assert"
-
 	"github.com/stretchr/testify/require"
 
+	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/handler/health"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/handler/nats"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/handler/nats/mock"
 )
 
 func TestReadinessCheck(t *testing.T) {
+	t.Parallel()
+
 	testCases := []struct {
 		name                   string
 		givenHandlerEndpoint   string
@@ -35,6 +36,8 @@ func TestReadinessCheck(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+
 			defer func() {
 				r := recover()
 				if !assert.Equal(t, tc.wantPanicForNilHandler, r != nil) {
