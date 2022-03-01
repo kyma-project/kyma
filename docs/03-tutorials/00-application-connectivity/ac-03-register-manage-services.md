@@ -187,7 +187,7 @@ This is an example of the **api** section of the request body for an API with a 
                 "username": "{USERNAME}",
                 "password": "{PASSWORD}"
             }
-        }  
+        } 
     }
 ```
 

@@ -160,6 +160,29 @@ func WaitForHandlerToStart(t *testing.T, healthEndpoint string) {
 	}
 }
 
+// WaitForEndpointStatusCodeOrFail waits for endpoint status code or timeout.
+func WaitForEndpointStatusCodeOrFail(endpoint string, statusCode int) {
+	timeout := time.After(time.Second * 30)
+	ticker := time.NewTicker(time.Second * 1)
+
+	for {
+		select {
+		case <-timeout:
+			{
+				log.Fatalf("Endpoint:%s did not respond with the expected status-code:%d", endpoint, statusCode)
+			}
+		case <-ticker.C:
+			{
+				if resp, err := http.Get(endpoint); err != nil { //nolint:gosec
+					continue
+				} else if resp.StatusCode == statusCode {
+					return
+				}
+			}
+		}
+	}
+}
+
 // GeneratePortOrDie generates a random 5 digit port or fail
 func GeneratePortOrDie() int {
 	tick := time.NewTicker(time.Second / 2)

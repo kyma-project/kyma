@@ -16,7 +16,7 @@ import (
 	cloudevents "github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/cloudevents"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/ems"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/handler"
-	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/health"
+	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/handler/health"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/legacy-events"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/metrics"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/options"
@@ -80,10 +80,11 @@ func NewHandler(receiver *receiver.HTTPMessageReceiver, sender *sender.BebMessag
 
 // Start starts the Handler with the given context.
 func (h *Handler) Start(ctx context.Context) error {
-	return h.Receiver.StartListen(ctx, health.CheckHealth(h))
+	healthChecker := health.NewChecker()
+	return h.Receiver.StartListen(ctx, healthChecker.Check(h))
 }
 
-// ServeHTTP serves an HTTP request and returns back an HTTP response.
+// ServeHTTP serves an HTTP request and returns an HTTP response.
 // It ensures that the incoming request is a valid Cloud Event, then dispatches it
 // to the EMS gateway and writes back the HTTP response.
 func (h *Handler) ServeHTTP(writer http.ResponseWriter, request *http.Request) {

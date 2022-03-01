@@ -1,4 +1,4 @@
-package beb
+package beb_test
 
 import (
 	"context"
@@ -10,6 +10,8 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	bebreconciler "github.com/kyma-project/kyma/components/eventing-controller/controllers/subscription/beb"
 
 	corev1 "k8s.io/api/core/v1"
 	v1 "k8s.io/api/core/v1"
@@ -320,7 +322,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			By("Setting a finalizer")
 			getSubscription(ctx, givenSubscription).Should(And(
 				reconcilertesting.HaveSubscriptionName(subscriptionName),
-				reconcilertesting.HaveSubscriptionFinalizer(Finalizer),
+				reconcilertesting.HaveSubscriptionFinalizer(bebreconciler.Finalizer),
 			))
 
 			By("Setting a subscribed condition")
@@ -495,7 +497,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			By("Setting a finalizer")
 			getSubscription(ctx, givenSubscription).Should(And(
 				reconcilertesting.HaveSubscriptionName(subscriptionName),
-				reconcilertesting.HaveSubscriptionFinalizer(Finalizer),
+				reconcilertesting.HaveSubscriptionFinalizer(bebreconciler.Finalizer),
 			))
 
 			By("Setting a subscribed condition")
@@ -717,7 +719,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 
 			By("Deleting the object to not provoke more reconciliation requests")
 			Expect(k8sClient.Delete(ctx, givenSubscription)).Should(BeNil())
-			getSubscription(ctx, givenSubscription).ShouldNot(reconcilertesting.HaveSubscriptionFinalizer(Finalizer))
+			getSubscription(ctx, givenSubscription).ShouldNot(reconcilertesting.HaveSubscriptionFinalizer(bebreconciler.Finalizer))
 
 			By("Sending at least one creation request for the Subscription")
 			_, creationRequests, _ := countBEBRequests(nameMapper.MapSubscriptionName(givenSubscription))
@@ -795,7 +797,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 
 			By("Deleting the object to not provoke more reconciliation requests")
 			Expect(k8sClient.Delete(ctx, givenSubscription)).Should(BeNil())
-			getSubscription(ctx, givenSubscription).ShouldNot(reconcilertesting.HaveSubscriptionFinalizer(Finalizer))
+			getSubscription(ctx, givenSubscription).ShouldNot(reconcilertesting.HaveSubscriptionFinalizer(bebreconciler.Finalizer))
 
 			By("Sending at least one creation request for the Subscription")
 			_, creationRequests, _ := countBEBRequests(nameMapper.MapSubscriptionName(givenSubscription))
@@ -883,7 +885,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 
 			By("Deleting the object to not provoke more reconciliation requests")
 			Expect(k8sClient.Delete(ctx, givenSubscription)).Should(BeNil())
-			getSubscription(ctx, givenSubscription).ShouldNot(reconcilertesting.HaveSubscriptionFinalizer(Finalizer))
+			getSubscription(ctx, givenSubscription).ShouldNot(reconcilertesting.HaveSubscriptionFinalizer(bebreconciler.Finalizer))
 
 			By("Sending at least one creation request for the Subscription")
 			_, creationRequests, _ := countBEBRequests(nameMapper.MapSubscriptionName(givenSubscription))
@@ -1401,7 +1403,7 @@ var _ = BeforeSuite(func(done Done) {
 
 	nameMapper = handlers.NewBEBSubscriptionNameMapper(domain, handlers.MaxBEBSubscriptionNameLength)
 
-	err = NewReconciler(context.Background(), k8sManager.GetClient(), applicationLister, defaultLogger,
+	err = bebreconciler.NewReconciler(context.Background(), k8sManager.GetClient(), applicationLister, defaultLogger,
 		k8sManager.GetEventRecorderFor("eventing-controller"), envConf, credentials, nameMapper).SetupUnmanaged(k8sManager)
 	Expect(err).ToNot(HaveOccurred())
 
