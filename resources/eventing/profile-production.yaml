@@ -1,4 +1,9 @@
 controller:
+  jetStream:
+    retentionPolicy: limits
+    maxMessages: -1
+    maxBytes: -1
+    storage: file # requires a PV
   resources:
     limits:
       cpu: 500m
@@ -15,7 +20,6 @@ controller:
         cpu: 400m
         memory: 256Mi
 
-
 nats:
   cluster:
     enabled: true
@@ -24,12 +28,11 @@ nats:
     enabled: false
   nats:
     jetstream:
-      enabled: false
       memStorage:
         enabled: true
         size: 1Gi
       fileStorage:
-        enabled: false
+        enabled: true
         size: 1Gi
     resources:
       limits:
