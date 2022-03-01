@@ -73,6 +73,6 @@ The tutorial comes with a sample HttpBin service deployment and a sample Functio
 
 Once you have your service deployed, you can continue by choosing one of the following tutorials to:
 
-- [Expose a service](../../../03-tutorials/00-api-exposure/apix-02-expose-service-apigateway.md)
-- [Expose and secure a service with OAuth2](../../../03-tutorials/00-api-exposure/apix-03-expose-and-secure-service-oauth2.md)
-- [Expose and secure a service with JTW](../../../03-tutorials/00-api-exposure/apix-04-expose-and-secure-service-jwt.md)
+- [Expose a service](./apix-02-expose-service-apigateway.md)
+- [Expose and secure a service with OAuth2](./apix-03-expose-and-secure-service-oauth2.md)
+- [Expose and secure a service with JTW](./apix-04-expose-and-secure-service-jwt.md)
