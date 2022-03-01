@@ -89,7 +89,7 @@ This tutorial is based on a sample HttpBin service deployment and a sample Funct
       </details>
    </div>
 
-## Expose, and secure the sample resources
+## Expose and secure the resources
 
 Follow the instructions in the tabs to expose an instance of the HttpBin service or a sample Function, and secure them with Oauth2 scopes.
 

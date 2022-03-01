@@ -14,35 +14,41 @@ This tutorial is based on a sample HttpBin service deployment and a sample Funct
 
 1. In your OpenID Connect (OIDC) compliant identity provider, create an application to get your client credentials such as Client ID and Client Secret. Export your client credentials as environment variables. Run:
 
-```bash
-export CLIENT_ID={YOUR_CLIENT_ID}
-export CLIENT_SECRET={YOUR_CLIENT_SECRET}
-```
+   ```bash
+   export CLIENT_ID={YOUR_CLIENT_ID}
+   export CLIENT_SECRET={YOUR_CLIENT_SECRET}
+   ```
 
->**TIP:** For testing purposes, you can use the client credentials from `https://demo.c2id.com/oidc-client/`. We **don't** recommend the solution for production environments.
+   >**TIP:** For testing purposes, you can use the client credentials from `[https://demo.c2id.com/oidc-client/](https://demo.c2id.com/oidc-client/)`. We **don't** recommend the solution for production environments.
 
 2. Encode your client credentials and export them as an environment variable:
 
-```bash
-export ENCODED_CREDENTIALS=$(echo -n "$CLIENT_ID:$CLIENT_SECRET" | base64)
-```
+   ```bash
+   export ENCODED_CREDENTIALS=$(echo -n "$CLIENT_ID:$CLIENT_SECRET" | base64)
+   ```
 
 3. In your browser, go to `https://{YOUR_OIDC_COMPLIENT_IDENTITY_PROVIDER_INSTANCE}/.well-known/openid-configuration`, save values of the **token_endpoint** and **jwks_uri** parameters, and export them as environment variables:
 
-```bash
-export TOKEN_ENDPOINT={YOUR_TOKEN_ENDPOINT}
-export JWKS_URI={YOUR_JWKS_URI}
-```
+   ```bash
+   export TOKEN_ENDPOINT={YOUR_TOKEN_ENDPOINT}
+   export JWKS_URI={YOUR_JWKS_URI}
+   ```
 
->**TIP:** For testing purposes, you can use values of the **token_endpoint** and **jwks_uri** from `https://accounts.google.com/.well-known/openid-configuration`. We **don't** recommend the solution for production environments.
+   >**TIP:** For testing purposes, you can use values of the **token_endpoint** and **jwks_uri** from `[https://accounts.google.com/.well-known/openid-configuration](https://accounts.google.com/.well-known/openid-configuration)`. We **don't** recommend the solution for production environments.
 
 4. Get the JWT access token:
 
-```bash
-curl -X POST "$TOKEN_ENDPOINT" -d "grant_type=client_credentials" -d "client_id=$CLIENT_ID" -H "Content-Type: application/x-www-form-urlencoded" -H "Authorization: Basic $ENCODED_CREDENTIALS"
-```
+   ```bash
+   curl -X POST "$TOKEN_ENDPOINT" -d "grant_type=client_credentials" -d "client_id=$CLIENT_ID" -H "Content-Type: application/x-www-form-urlencoded" -H "Authorization: Basic $ENCODED_CREDENTIALS"
+   ```
 
-## Expose, secure, and access your resources
+5. Save the result, and export it as an environment variable:
+
+   ```bash
+   export ACCESS_TOKEN={YOUR_ACCESSS_TOKEN}
+   ```
+
+## Expose, secure, and access the resources
 
 <div tabs>
 
@@ -88,7 +94,7 @@ curl -X POST "$TOKEN_ENDPOINT" -d "grant_type=client_credentials" -d "client_id=
 
 1. Expose the Function and secure it by creating an API Rule CR in your Namespace. If you don't want to use your custom domain but a Kyma domain, use the following Kyma Gateway: `kyma-system/kyma-gateway`. Run:
 
-   ```bash
+   ```shell
    cat <<EOF | kubectl apply -f -
    apiVersion: gateway.kyma-project.io/v1alpha1
    kind: APIRule
@@ -96,27 +102,27 @@ curl -X POST "$TOKEN_ENDPOINT" -d "grant_type=client_credentials" -d "client_id=
      name: function
      namespace: $NAMESPACE
    spec:
-     gateway: namespace-name/httpbin-gateway #The value corresponds to the Gateway CR you created.
+     gateway: namespace-name/httpbin-gateway #The value corresponds to the Gateway CR you created. 
      service:
        name: function
        port: 80
        host: function-example.$DOMAIN
      rules:
-     - accessStrategies:
-         - config:
-             jwks_urls:
-             - $JWKS_URI
-           handler: jwt
-       methods:
-         - GET
-       path: /.*
+       - accessStrategies:
+           - config:
+               jwks_urls:
+               - $JWKS_URI
+             handler: jwt
+         methods:
+           - GET
+         path: /.*
    EOF
    ```
 
   </details>
 </div>
 
-   2. To access the secured service, call it using a JWT access token:
+   2. To access the secured service or Function, call it using the JWT access token:
 
    ```bash
    curl -ik https://mst.dt-test.goatz.shoot.canary.k8s-hana.ondemand.com/headers -H "Authorization: Bearer $ACCESS_TOKEN"
