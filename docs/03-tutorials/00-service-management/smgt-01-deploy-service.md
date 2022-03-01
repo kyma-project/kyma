@@ -27,6 +27,8 @@ This tutorial describes how you can deploy a simple SAP BTP audit log service in
     sleep 120
     ```
 
+    >**CAUTION:** There's a known issue with the [webhook connection](https://cert-manager.io/docs/concepts/webhook/#webhook-connection-problems-shortly-after-cert-manager-installation) shortly after cert-manager installation, and with the BTP operator webhook. If you see the `failed calling webhook` error after running this and/or the next command, wait a moment and repeat the operation. 
+
 2. Obtain the access credentials for the SAP BTP service operator as described in step 2 of the [SAP BTP operator setup](https://github.com/SAP/sap-btp-service-operator#setup). Then, save the credentials to the `creds.json` file.
 
 3. Create a Namespace and install the SAP BTP service operator in it:
