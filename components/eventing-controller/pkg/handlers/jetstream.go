@@ -151,9 +151,6 @@ func (js *JetStream) SyncSubscription(subscription *eventingv1alpha1.Subscriptio
 
 		// check if the subscription already exists and if it is valid.
 		if existingNatsSub, ok := js.subscriptions[jsSubKey]; ok {
-			// TODO: Should we also compare if the subjects are the same
-			// note: remember that natsSub.subject is not correct one,
-			// so we need consumer info to compare subjects
 			if existingNatsSub.IsValid() {
 				log.Debugw("skipping creating subscription on JetStream because it already exists", "subject", subject)
 				continue
@@ -180,21 +177,6 @@ func (js *JetStream) SyncSubscription(subscription *eventingv1alpha1.Subscriptio
 		log.Debugw("created subscription on JetStream", "subject", subject)
 	}
 	return nil
-}
-
-type DefaultSubOpts []nats.SubOpt
-
-func (js *JetStream) getDefaultSubscriptionOptions(consumerName string, subConfig *eventingv1alpha1.SubscriptionConfig) DefaultSubOpts {
-	defaultOpts := DefaultSubOpts{
-		nats.Durable(consumerName),
-		nats.ManualAck(),
-		nats.AckExplicit(),
-		nats.IdleHeartbeat(30 * time.Second),
-		nats.EnableFlowControl(),
-		nats.MaxAckPending(250),
-		nats.MaxDeliver(subConfig.MaxInFlightMessages), // @TODO: is it the correct place, or should if be MaxAckPending
-	}
-	return defaultOpts
 }
 
 func (js *JetStream) DeleteSubscription(subscription *eventingv1alpha1.Subscription) error {
@@ -225,6 +207,14 @@ func (js *JetStream) DeleteSubscription(subscription *eventingv1alpha1.Subscript
 	js.sinks.Delete(createKeyPrefix(subscription))
 
 	return nil
+}
+
+// GetJsSubjectToSubscribe appends stream name to subject if needed
+func (js *JetStream) GetJsSubjectToSubscribe(subject string) string {
+	if strings.HasPrefix(subject, js.config.JSStreamName) {
+		return subject
+	}
+	return fmt.Sprintf("%s.%s", js.config.JSStreamName, subject)
 }
 
 func (js *JetStream) validateConfig() error {
@@ -275,7 +265,6 @@ func (js *JetStream) initJSConnCloseHandler(connCloseHandler ConnClosedHandler) 
 func (js *JetStream) ensureStreamExists() error {
 	if info, err := js.jsCtx.StreamInfo(js.config.JSStreamName); err == nil {
 		// TODO: in case the stream exists, should we make sure all of its configs matches the stream config in the chart?
-		// TODO: Handle if info is nil
 		js.namedLogger().Infow("reusing existing Stream", "stream-info", info)
 		return nil
 	} else if err != nats.ErrStreamNotFound {
@@ -298,6 +287,21 @@ func (js *JetStream) ensureStreamExists() error {
 		Subjects: []string{fmt.Sprintf("%s.>", js.config.JSStreamName)},
 	})
 	return err
+}
+
+type DefaultSubOpts []nats.SubOpt
+
+func (js *JetStream) getDefaultSubscriptionOptions(consumerName string, subConfig *eventingv1alpha1.SubscriptionConfig) DefaultSubOpts {
+	defaultOpts := DefaultSubOpts{
+		nats.Durable(consumerName),
+		nats.ManualAck(),
+		nats.AckExplicit(),
+		nats.IdleHeartbeat(1 * time.Minute),
+		nats.EnableFlowControl(),
+		nats.DeliverNew(),
+		nats.MaxAckPending(subConfig.MaxInFlightMessages),
+	}
+	return defaultOpts
 }
 
 func (js *JetStream) getCallback(subKeyPrefix string) nats.MsgHandler {
@@ -345,7 +349,7 @@ func (js *JetStream) getCallback(subKeyPrefix string) nats.MsgHandler {
 	}
 }
 
-// isNatsSubAssociatedWithKymaSub checks if the JetStream subscription is associated / related to Kyma subscription or not.
+// isJsSubAssociatedWithKymaSub checks if the JetStream subscription is associated / related to Kyma subscription or not.
 func (js *JetStream) isJsSubAssociatedWithKymaSub(jsSubKey string, subscription *eventingv1alpha1.Subscription) (bool, error) {
 	// extract out namespacedName of subscription from key
 	namespacedName, err := createJSSubscriptionNamespacedName(jsSubKey)
@@ -354,10 +358,6 @@ func (js *JetStream) isJsSubAssociatedWithKymaSub(jsSubKey string, subscription 
 	}
 	// check if the namespacedName matches the target subscription
 	return createKeyPrefix(subscription) == namespacedName.String(), nil
-}
-
-func (js *JetStream) namedLogger() *zap.SugaredLogger {
-	return js.logger.WithContext().Named(jsHandlerName)
 }
 
 // deleteSubscriptionFromJS deletes subscription from JetStream and from in-memory db
@@ -413,14 +413,6 @@ func (js *JetStream) generateJsSubKey(subject string, subscription *eventingv1al
 	return encodeString(fmt.Sprintf("%s/%s", createKeyPrefix(subscription), subject))
 }
 
-// GetJsSubjectToSubscribe appends stream name to subject if needed
-func (js *JetStream) GetJsSubjectToSubscribe(subject string) string {
-	if strings.HasPrefix(subject, js.config.JSStreamName) {
-		return subject
-	}
-	return fmt.Sprintf("%s.%s", js.config.JSStreamName, subject)
-}
-
 // GetJetStreamSubjects returns a list of subjects appended with prefix if needed
 func (js *JetStream) GetJetStreamSubjects(subjects []string) []string {
 	var result []string
@@ -440,4 +432,8 @@ func createJSSubscriptionNamespacedName(jsSubKey string) (types.NamespacedName, 
 	nsn.Namespace = nnValues[0]
 	nsn.Name = nnValues[1]
 	return nsn, nil
+}
+
+func (js *JetStream) namedLogger() *zap.SugaredLogger {
+	return js.logger.WithContext().Named(jsHandlerName)
 }

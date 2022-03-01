@@ -110,6 +110,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 // it is possible to connect to the NATS server again.
 func (r *Reconciler) handleNatsConnClose(_ *nats.Conn) {
 	// TODO: implement me!
+	// TODO: Enable TestSubscription_JetStreamServerRestart once implemented
 }
 
 func (r *Reconciler) syncSubscriptionStatus(ctx context.Context, sub *eventingv1alpha1.Subscription) error {

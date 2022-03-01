@@ -79,6 +79,47 @@ func SendBinaryCloudEventToNATS(natsClient *Nats, subject, eventData string) err
 	return nil
 }
 
+func SendBinaryCloudEventToJetStream(jetStreamClient *JetStream, subject, eventData string) error {
+	// create a CE binary-mode http request
+	headers := eventingtesting.GetBinaryMessageHeaders()
+	req, err := http.NewRequest(http.MethodPost, "dummy", bytes.NewBuffer([]byte(eventData)))
+	if err != nil {
+		return err
+	}
+	for k, v := range headers {
+		req.Header[k] = v
+	}
+	// convert  to the CE Event
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	message := cev2http.NewMessageFromHttpRequest(req)
+	defer func() { _ = message.Finish(nil) }()
+	event, err := binding.ToEvent(ctx, message)
+	if err != nil {
+		return err
+	}
+	if err := event.Validate(); err != nil {
+		return err
+	}
+	// get a CE sender for the embedded NATS using CE-SDK
+	natsOpts := cev2nats.NatsOptions()
+	url := jetStreamClient.config.URL
+	sender, err := cev2nats.NewSender(url, subject, natsOpts)
+	if err != nil {
+		return nil
+	}
+	client, err := cev2.NewClient(sender)
+	if err != nil {
+		return err
+	}
+	// force binary binding and send the event to NATS using CE-SDK
+	ctx = binding.WithForceBinary(ctx)
+	if err := client.Send(ctx, *event); err != nil {
+		return err
+	}
+	return nil
+}
+
 func SendStructuredCloudEventToNATS(natsClient *Nats, subject, eventData string) error {
 	// create a CE structured-mode http request
 	headers := eventingtesting.GetStructuredMessageHeaders()
@@ -104,6 +145,47 @@ func SendStructuredCloudEventToNATS(natsClient *Nats, subject, eventData string)
 	// get a CE sender for the embedded NATS
 	natsOpts := cev2nats.NatsOptions()
 	url := natsClient.config.URL
+	sender, err := cev2nats.NewSender(url, subject, natsOpts)
+	if err != nil {
+		return nil
+	}
+	client, err := cev2.NewClient(sender)
+	if err != nil {
+		return err
+	}
+	// force structured binding and send the event to NATS
+	ctx = binding.WithForceStructured(ctx)
+	if err := client.Send(ctx, *event); err != nil {
+		return err
+	}
+	return nil
+}
+
+func SendStructuredCloudEventToJetStream(jetStreamClient *JetStream, subject, eventData string) error {
+	// create a CE structured-mode http request
+	headers := eventingtesting.GetStructuredMessageHeaders()
+	req, err := http.NewRequest(http.MethodPost, "dummy", bytes.NewBuffer([]byte(eventData)))
+	if err != nil {
+		return err
+	}
+	for k, v := range headers {
+		req.Header[k] = v
+	}
+	// convert to CE Event
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	message := cev2http.NewMessageFromHttpRequest(req)
+	defer func() { _ = message.Finish(nil) }()
+	event, err := binding.ToEvent(ctx, message)
+	if err != nil {
+		return err
+	}
+	if err := event.Validate(); err != nil {
+		return err
+	}
+	// get a CE sender for the embedded NATS
+	natsOpts := cev2nats.NatsOptions()
+	url := jetStreamClient.config.URL
 	sender, err := cev2nats.NewSender(url, subject, natsOpts)
 	if err != nil {
 		return nil

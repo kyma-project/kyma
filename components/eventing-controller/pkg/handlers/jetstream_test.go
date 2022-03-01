@@ -72,6 +72,51 @@ func TestJetStream_Initialize_StreamExists(t *testing.T) {
 	assert.Equal(t, reusedStreamInfo.Created, createdStreamInfo.Created)
 }
 
+func TestJetStream_Subscription(t *testing.T) {
+	// given
+	testEnvironment := setupTestEnvironment(t)
+	defer testEnvironment.natsServer.Shutdown()
+	defer testEnvironment.jsClient.natsConn.Close()
+	initErr := testEnvironment.jsBackend.Initialize(nil)
+	assert.NoError(t, initErr)
+
+	// create New Subscriber
+	subscriber := evtesting.NewSubscriber()
+	defer subscriber.Shutdown()
+	assert.True(t, subscriber.IsRunning())
+
+	defaultMaxInflight := 9
+	defaultSubsConfig := env.DefaultSubscriptionConfig{MaxInFlightMessages: defaultMaxInflight}
+	// create a new Subscription
+	sub := evtesting.NewSubscription("sub", "foo",
+		evtesting.WithNotCleanFilter(),
+		evtesting.WithSinkURL(subscriber.SinkURL),
+		evtesting.WithStatusConfig(defaultSubsConfig),
+	)
+	addJSCleanEventTypesToStatus(sub, testEnvironment.cleaner, testEnvironment.jsBackend)
+
+	// when
+	err := testEnvironment.jsBackend.SyncSubscription(sub)
+
+	// then
+	assert.NoError(t, err)
+
+	data := "sampledata"
+	assert.NoError(t, SendEventToJetStream(testEnvironment.jsBackend, data))
+	expectedDataInStore := fmt.Sprintf("\"%s\"", data)
+	assert.NoError(t, subscriber.CheckEvent(expectedDataInStore))
+
+	// when
+	assert.NoError(t, testEnvironment.jsBackend.DeleteSubscription(sub))
+
+	// then
+	newData := "test-data"
+	assert.NoError(t, SendEventToJetStream(testEnvironment.jsBackend, newData))
+	// Check for the event that it did not reach subscriber
+	notExpectedNewDataInStore := fmt.Sprintf("\"%s\"", newData)
+	assert.Error(t, subscriber.CheckEvent(notExpectedNewDataInStore))
+}
+
 // TestJetStreamSubAfterSync_NoChange tests the SyncSubscription method
 // when there is no change in the subscription then the method should
 // not re-create NATS subjects on nats-server
@@ -103,7 +148,6 @@ func TestJetStreamSubAfterSync_NoChange(t *testing.T) {
 
 	// then
 	assert.NoError(t, err)
-	testStreamsAndConsumers(t, testEnvironment, sub)
 
 	// get cleaned subject
 	subject, err := getCleanSubject(sub.Spec.Filter.Filters[0], testEnvironment.cleaner)
@@ -133,7 +177,6 @@ func TestJetStreamSubAfterSync_NoChange(t *testing.T) {
 
 	// then
 	assert.NoError(t, err)
-	testStreamsAndConsumers(t, testEnvironment, sub)
 
 	// check if the NATS subscription are the same (have same metadata)
 	// by comparing the metadata of nats subscription
@@ -156,52 +199,6 @@ func TestJetStreamSubAfterSync_NoChange(t *testing.T) {
 	expectedDataInStore = fmt.Sprintf("\"%s\"", data)
 	assert.NoError(t, SendEventToJetStream(testEnvironment.jsBackend, data))
 	assert.NoError(t, subscriber1.CheckEvent(expectedDataInStore))
-}
-
-func TestJetStream_Subscription(t *testing.T) {
-	// given
-	testEnvironment := setupTestEnvironment(t)
-	defer testEnvironment.natsServer.Shutdown()
-	defer testEnvironment.jsClient.natsConn.Close()
-	initErr := testEnvironment.jsBackend.Initialize(nil)
-	assert.NoError(t, initErr)
-
-	// create New Subscriber
-	subscriber := evtesting.NewSubscriber()
-	defer subscriber.Shutdown()
-	assert.True(t, subscriber.IsRunning())
-
-	defaultMaxInflight := 9
-	defaultSubsConfig := env.DefaultSubscriptionConfig{MaxInFlightMessages: defaultMaxInflight}
-	// create a new Subscription
-	sub := evtesting.NewSubscription("sub", "foo",
-		evtesting.WithNotCleanFilter(),
-		evtesting.WithSinkURL(subscriber.SinkURL),
-		evtesting.WithStatusConfig(defaultSubsConfig),
-	)
-	addJSCleanEventTypesToStatus(sub, testEnvironment.cleaner, testEnvironment.jsBackend)
-
-	// when
-	err := testEnvironment.jsBackend.SyncSubscription(sub)
-
-	// then
-	assert.NoError(t, err)
-	testStreamsAndConsumers(t, testEnvironment, sub)
-
-	data := "sampledata"
-	assert.NoError(t, SendEventToJetStream(testEnvironment.jsBackend, data))
-	expectedDataInStore := fmt.Sprintf("\"%s\"", data)
-	assert.NoError(t, subscriber.CheckEvent(expectedDataInStore))
-
-	// when
-	assert.NoError(t, testEnvironment.jsBackend.DeleteSubscription(sub))
-
-	// then
-	newData := "test-data"
-	assert.NoError(t, SendEventToJetStream(testEnvironment.jsBackend, newData))
-	// Check for the event that it did not reach subscriber
-	notExpectedNewDataInStore := fmt.Sprintf("\"%s\"", newData)
-	assert.Error(t, subscriber.CheckEvent(notExpectedNewDataInStore))
 }
 
 // TestJetStreamSubAfterSync_SinkChange tests the SyncSubscription method
@@ -238,7 +235,6 @@ func TestJetStreamSubAfterSync_SinkChange(t *testing.T) {
 
 	// then
 	assert.NoError(t, err)
-	testStreamsAndConsumers(t, testEnvironment, sub)
 
 	// get cleaned subject
 	subject, err := getCleanSubject(sub.Spec.Filter.Filters[0], testEnvironment.cleaner)
@@ -270,7 +266,6 @@ func TestJetStreamSubAfterSync_SinkChange(t *testing.T) {
 
 	// then
 	assert.NoError(t, err)
-	testStreamsAndConsumers(t, testEnvironment, sub)
 
 	// check if the NATS subscription are the same (have same metadata)
 	// by comparing the metadata of nats subscription
@@ -324,7 +319,6 @@ func TestJetStreamSubAfterSync_FiltersChange(t *testing.T) {
 
 	// then
 	assert.NoError(t, err)
-	testStreamsAndConsumers(t, testEnvironment, sub)
 
 	// get cleaned subject
 	subject, err := getCleanSubject(sub.Spec.Filter.Filters[0], testEnvironment.cleaner)
@@ -350,7 +344,7 @@ func TestJetStreamSubAfterSync_FiltersChange(t *testing.T) {
 	// given
 	// Now, change the filter in subscription
 	sub.Spec.Filter.Filters[0].EventType.Value = fmt.Sprintf("%schanged", evtesting.OrderCreatedEventTypeNotClean)
-	// Sync the subscription
+	// Sync the subscription status
 	addJSCleanEventTypesToStatus(sub, testEnvironment.cleaner, testEnvironment.jsBackend)
 
 	// when
@@ -358,8 +352,6 @@ func TestJetStreamSubAfterSync_FiltersChange(t *testing.T) {
 
 	// then
 	assert.NoError(t, err)
-	// TODO: Check why is this erroring out
-	// testStreamsAndConsumers(t, testEnvironment, sub)
 
 	// get new cleaned subject
 	newSubject, err := getCleanSubject(sub.Spec.Filter.Filters[0], testEnvironment.cleaner)
@@ -425,7 +417,6 @@ func TestJetStreamSubAfterSync_FilterAdded(t *testing.T) {
 
 	// then
 	assert.NoError(t, err)
-	testStreamsAndConsumers(t, testEnvironment, sub)
 
 	// get cleaned subject
 	firstSubject, err := getCleanSubject(sub.Spec.Filter.Filters[0], testEnvironment.cleaner)
@@ -457,7 +448,6 @@ func TestJetStreamSubAfterSync_FilterAdded(t *testing.T) {
 
 	// then
 	assert.NoError(t, err)
-	testStreamsAndConsumers(t, testEnvironment, sub)
 
 	// Check if total existing NATS subscriptions are correct
 	// Because we have two filters (i.e. two subjects)
@@ -526,7 +516,6 @@ func TestJetStreamSubAfterSync_FilterRemoved(t *testing.T) {
 
 	// then
 	assert.NoError(t, err)
-	testStreamsAndConsumers(t, testEnvironment, sub)
 
 	// get cleaned subjects
 	firstSubject, err := getCleanSubject(sub.Spec.Filter.Filters[0], testEnvironment.cleaner)
@@ -559,7 +548,6 @@ func TestJetStreamSubAfterSync_FilterRemoved(t *testing.T) {
 
 	// then
 	assert.NoError(t, err)
-	testStreamsAndConsumers(t, testEnvironment, sub)
 
 	// Check if total existing NATS subscriptions are correct
 	assert.Len(t, testEnvironment.jsBackend.subscriptions, 1)
@@ -619,15 +607,26 @@ func TestJetStreamSubAfterSync_MultipleSubs(t *testing.T) {
 		evtesting.WithStatusConfig(defaultSubsConfig),
 	)
 	addJSCleanEventTypesToStatus(sub, testEnvironment.cleaner, testEnvironment.jsBackend)
-	assert.NoError(t, testEnvironment.jsBackend.SyncSubscription(sub))
 
+	// when
+	err := testEnvironment.jsBackend.SyncSubscription(sub)
+
+	// then
+	assert.NoError(t, err)
+
+	// given
 	sub2 := evtesting.NewSubscription("sub2", "foo",
 		evtesting.WithNotCleanFilter(),
 		evtesting.WithSinkURL(subscriber.SinkURL),
 		evtesting.WithStatusConfig(defaultSubsConfig),
 	)
 	addJSCleanEventTypesToStatus(sub2, testEnvironment.cleaner, testEnvironment.jsBackend)
-	assert.NoError(t, testEnvironment.jsBackend.SyncSubscription(sub2))
+
+	// when
+	err = testEnvironment.jsBackend.SyncSubscription(sub2)
+
+	// then
+	assert.NoError(t, err)
 
 	// Check if total existing NATS subscriptions are correct
 	// Because we have two subscriptions
@@ -646,7 +645,7 @@ func TestJetStreamSubAfterSync_MultipleSubs(t *testing.T) {
 	addJSCleanEventTypesToStatus(sub, testEnvironment.cleaner, testEnvironment.jsBackend)
 
 	// when
-	err := testEnvironment.jsBackend.SyncSubscription(sub)
+	err = testEnvironment.jsBackend.SyncSubscription(sub)
 
 	// then
 	assert.NoError(t, err)
@@ -697,8 +696,8 @@ func TestJetStreamSubAfterSync_MultipleSubs(t *testing.T) {
 	assert.Equal(t, subBytesLimit, bytesLimit)
 }
 
-// TestJetStream_isNatsSubAssociatedWithKymaSub tests the isJsSubAssociatedWithKymaSub method
-func TestJetStream_isNatsSubAssociatedWithKymaSub(t *testing.T) {
+// TestJetStream_isJsSubAssociatedWithKymaSub tests the isJsSubAssociatedWithKymaSub method
+func TestJetStream_isJsSubAssociatedWithKymaSub(t *testing.T) {
 	// given
 	testEnvironment := setupTestEnvironment(t)
 	defer testEnvironment.natsServer.Shutdown()
@@ -706,7 +705,6 @@ func TestJetStream_isNatsSubAssociatedWithKymaSub(t *testing.T) {
 	initErr := testEnvironment.jsBackend.Initialize(nil)
 	assert.NoError(t, initErr)
 
-	// // ######  Setup test assets ######
 	// create subscription 1 and its nats subscription
 	cleanSubject1 := "subOne"
 	sub1 := evtesting.NewSubscription(cleanSubject1, "foo", evtesting.WithNotCleanFilter())
@@ -721,43 +719,225 @@ func TestJetStream_isNatsSubAssociatedWithKymaSub(t *testing.T) {
 		testEnvironment.jsBackend.GetJsSubjectToSubscribe(cleanSubject2),
 		sub2)
 
+	testCases := []struct {
+		name            string
+		givenNatsSubKey string
+		givenKymaSubKey *eventingv1alpha1.Subscription
+		wantResult      bool
+	}{
+		{
+			name:            "",
+			givenNatsSubKey: natsSub1Key,
+			givenKymaSubKey: sub1,
+			wantResult:      true,
+		},
+		{
+			name:            "",
+			givenNatsSubKey: natsSub2Key,
+			givenKymaSubKey: sub2,
+			wantResult:      true,
+		},
+		{
+			name:            "",
+			givenNatsSubKey: natsSub1Key,
+			givenKymaSubKey: sub2,
+			wantResult:      false,
+		},
+		{
+			name:            "",
+			givenNatsSubKey: natsSub2Key,
+			givenKymaSubKey: sub1,
+			wantResult:      false,
+		},
+	}
+
+	for _, tC := range testCases {
+		testCase := tC
+		t.Run(testCase.name, func(t *testing.T) {
+			gotResult, err := testEnvironment.jsBackend.isJsSubAssociatedWithKymaSub(
+				tC.givenNatsSubKey,
+				tC.givenKymaSubKey)
+			assert.Equal(t, gotResult, tC.wantResult)
+			assert.NoError(t, err)
+		})
+	}
+}
+
+func TestMultipleJSSubscriptionsToSameEvent(t *testing.T) {
+	// given
+	testEnvironment := setupTestEnvironment(t)
+	defer testEnvironment.natsServer.Shutdown()
+	defer testEnvironment.jsClient.natsConn.Close()
+	initErr := testEnvironment.jsBackend.Initialize(nil)
+	assert.NoError(t, initErr)
+
+	defaultMaxInflight := 1
+	defaultSubsConfig := env.DefaultSubscriptionConfig{MaxInFlightMessages: defaultMaxInflight}
+
+	subscriber := evtesting.NewSubscriber()
+	defer subscriber.Shutdown()
+	assert.True(t, subscriber.IsRunning())
+
+	// Create 3 subscriptions having the same sink and the same event type
+	var subs [3]*eventingv1alpha1.Subscription
+	for i := 0; i < len(subs); i++ {
+		subs[i] = evtesting.NewSubscription(fmt.Sprintf("sub-%d", i), "foo",
+			evtesting.WithNotCleanFilter(),
+			evtesting.WithSinkURL(subscriber.SinkURL),
+			evtesting.WithStatusConfig(defaultSubsConfig),
+		)
+		addJSCleanEventTypesToStatus(subs[i], testEnvironment.cleaner, testEnvironment.jsBackend)
+		// when
+		err := testEnvironment.jsBackend.SyncSubscription(subs[i])
+		// then
+		assert.NoError(t, err)
+	}
+
+	// Send only one event. It should be multiplexed to 3 by NATS, cause 3 subscriptions exist
+	data := "sampledata"
+	assert.NoError(t, SendEventToJetStream(testEnvironment.jsBackend, data))
+	// Check for the 3 events that should be received by the subscriber
+	expectedDataInStore := fmt.Sprintf("\"%s\"", data)
+	for i := 0; i < len(subs); i++ {
+		assert.NoError(t, subscriber.CheckEvent(expectedDataInStore))
+	}
+	// Delete all 3 subscription
+	for i := 0; i < len(subs); i++ {
+		assert.NoError(t, testEnvironment.jsBackend.DeleteSubscription((subs[i])))
+	}
+	// Check if all subscriptions are deleted in NATS
+	// Send an event again which should not be delivered to subscriber
+	newData := "test-data"
+	assert.NoError(t, SendEventToJetStream(testEnvironment.jsBackend, newData))
+	// Check for the event that did not reach the subscriber
+	// Store should never return newdata hence CheckEvent should fail to match newdata
+	notExpectedNewDataInStore := fmt.Sprintf("\"%s\"", newData)
+	assert.Error(t, subscriber.CheckEvent(notExpectedNewDataInStore))
+}
+
+func TestJSSubscriptionWithDuplicateFilters(t *testing.T) {
+	// given
+	testEnvironment := setupTestEnvironment(t)
+	defer testEnvironment.natsServer.Shutdown()
+	defer testEnvironment.jsClient.natsConn.Close()
+	initErr := testEnvironment.jsBackend.Initialize(nil)
+	assert.NoError(t, initErr)
+	defaultSubsConfig := env.DefaultSubscriptionConfig{MaxInFlightMessages: 9}
+
+	subscriber := evtesting.NewSubscriber()
+	defer subscriber.Shutdown()
+	assert.True(t, subscriber.IsRunning())
+
+	sub := evtesting.NewSubscription("sub", "foo",
+		evtesting.WithFilter("", evtesting.OrderCreatedEventType),
+		evtesting.WithFilter("", evtesting.OrderCreatedEventType),
+		evtesting.WithSinkURL(subscriber.SinkURL),
+		evtesting.WithStatusConfig(defaultSubsConfig),
+	)
+	addJSCleanEventTypesToStatus(sub, testEnvironment.cleaner, testEnvironment.jsBackend)
+
 	// when
-	// Should return true because natsSub1 is associated with sub1
-	result, err := testEnvironment.jsBackend.isJsSubAssociatedWithKymaSub(natsSub1Key, sub1)
-	assert.NoError(t, err)
-	assert.True(t, result)
+	err := testEnvironment.jsBackend.SyncSubscription(sub)
 
-	// Should return true because natsSub2 is associated with sub2
-	result, err = testEnvironment.jsBackend.isJsSubAssociatedWithKymaSub(natsSub2Key, sub2)
+	// then
 	assert.NoError(t, err)
-	assert.True(t, result)
 
-	// Should return false because natsSub1 is NOT associated with sub2
-	result, err = testEnvironment.jsBackend.isJsSubAssociatedWithKymaSub(natsSub1Key, sub2)
-	assert.NoError(t, err)
-	assert.False(t, result)
-
-	// Should return false because natsSub2 is NOT associated with sub1
-	result, err = testEnvironment.jsBackend.isJsSubAssociatedWithKymaSub(natsSub2Key, sub1)
-	assert.NoError(t, err)
-	assert.False(t, result)
+	data := "sampledata"
+	assert.NoError(t, SendEventToJetStream(testEnvironment.jsBackend, data))
+	expectedDataInStore := fmt.Sprintf("\"%s\"", data)
+	assert.NoError(t, subscriber.CheckEvent(expectedDataInStore))
+	// There should be no more!
+	assert.Error(t, subscriber.CheckEvent(expectedDataInStore))
 }
 
-func testStreamsAndConsumers(t *testing.T, testEnvironment *TestEnvironment, sub *eventingv1alpha1.Subscription) {
-	streamInfo, err := testEnvironment.jsClient.StreamInfo(testEnvironment.natsConfig.JSStreamName)
-	assert.NoError(t, err)
-	assert.NotNil(t, streamInfo)
-	// TODO: Check the consumer length comparison in another function
-	// assert.Equal(t, streamInfo.State.Consumers, 1)
-	// consumerName := encodeString(createKeyPrefix(sub) + string(types.Separator) + evtesting.OrderCreatedEventType)
-	consumerName := testEnvironment.jsBackend.generateJsSubKey(
-		testEnvironment.jsBackend.GetJsSubjectToSubscribe(evtesting.OrderCreatedEventType),
-		sub)
+// TODO: TestSubscriptionWithMaxInFlightChange to be implemented
 
-	info, err := testEnvironment.jsClient.ConsumerInfo(testEnvironment.natsConfig.JSStreamName, consumerName)
-	assert.NotNil(t, info)
+func TestJSSubscriptionUsingCESDK(t *testing.T) {
+	// given
+	testEnvironment := setupTestEnvironment(t)
+	defer testEnvironment.natsServer.Shutdown()
+	defer testEnvironment.jsClient.natsConn.Close()
+	initErr := testEnvironment.jsBackend.Initialize(nil)
+	assert.NoError(t, initErr)
+	defaultSubsConfig := env.DefaultSubscriptionConfig{MaxInFlightMessages: 1}
+
+	subscriber := evtesting.NewSubscriber()
+	defer subscriber.Shutdown()
+	assert.True(t, subscriber.IsRunning())
+
+	sub := evtesting.NewSubscription("sub", "foo",
+		evtesting.WithOrderCreatedFilter(),
+		evtesting.WithSinkURL(subscriber.SinkURL),
+		evtesting.WithStatusConfig(defaultSubsConfig),
+	)
+	addJSCleanEventTypesToStatus(sub, testEnvironment.cleaner, testEnvironment.jsBackend)
+
+	// when
+	err := testEnvironment.jsBackend.SyncSubscription(sub)
+
+	// then
 	assert.NoError(t, err)
+
+	subject := evtesting.CloudEventType
+	assert.NoError(t, SendBinaryCloudEventToJetStream(testEnvironment.jsBackend, testEnvironment.jsBackend.GetJsSubjectToSubscribe(subject), evtesting.CloudEventData))
+	assert.NoError(t, subscriber.CheckEvent(evtesting.CloudEventData))
+	assert.NoError(t, SendStructuredCloudEventToJetStream(testEnvironment.jsBackend, testEnvironment.jsBackend.GetJsSubjectToSubscribe(subject), evtesting.StructuredCloudEvent))
+	assert.NoError(t, subscriber.CheckEvent("\""+evtesting.EventData+"\""))
+	assert.NoError(t, testEnvironment.jsBackend.DeleteSubscription(sub))
 }
+
+// TODO: Enable this test once the ConnCloseHandler is implemented
+/*func TestSubscription_JetStreamServerRestart(t *testing.T) {
+	// given
+	testEnvironment := setupTestEnvironment(t)
+	defer testEnvironment.natsServer.Shutdown()
+	defer testEnvironment.jsClient.natsConn.Close()
+	initErr := testEnvironment.jsBackend.Initialize(nil)
+	assert.NoError(t, initErr)
+	defaultSubsConfig := env.DefaultSubscriptionConfig{MaxInFlightMessages: 10}
+
+	subscriber := evtesting.NewSubscriber()
+	defer subscriber.Shutdown()
+	assert.True(t, subscriber.IsRunning())
+
+	// Create a subscription
+	sub := evtesting.NewSubscription("sub", "foo",
+		evtesting.WithNotCleanFilter(),
+		evtesting.WithSinkURL(subscriber.SinkURL),
+		evtesting.WithStatusConfig(defaultSubsConfig),
+	)
+	addJSCleanEventTypesToStatus(sub, testEnvironment.cleaner, testEnvironment.jsBackend)
+
+	// when
+	err := testEnvironment.jsBackend.SyncSubscription(sub)
+
+	// then
+	assert.NoError(t, err)
+
+	ev1data := "sampledata"
+	assert.NoError(t, SendEventToJetStream(testEnvironment.jsBackend, ev1data))
+	expectedEv1Data := fmt.Sprintf("\"%s\"", ev1data)
+	assert.NoError(t, subscriber.CheckEvent(expectedEv1Data))
+
+	testEnvironment.natsServer.Shutdown()
+	assert.Eventually(t, func() bool {
+		return !testEnvironment.jsBackend.conn.IsConnected()
+	}, 30*time.Second, 2*time.Second)
+
+	_ = evtesting.RunNatsServerOnPort(
+		evtesting.WithPort(testEnvironment.natsPort),
+		evtesting.WithJetStreamEnabled())
+
+	assert.Eventually(t, func() bool {
+		return testEnvironment.jsBackend.conn.IsConnected()
+	}, 60*time.Second, 2*time.Second)
+
+	// After reconnect, event delivery should work again
+	ev2data := "newsampledata"
+	assert.NoError(t, SendEventToJetStream(testEnvironment.jsBackend, ev2data))
+	expectedEv2Data := fmt.Sprintf("\"%s\"", ev2data)
+	assert.NoError(t, subscriber.CheckEvent(expectedEv2Data))
+}*/
 
 func defaultNatsConfig(url string) env.NatsConfig {
 	return env.NatsConfig{
@@ -797,11 +977,12 @@ type TestEnvironment struct {
 	jsClient   *jetStreamClient
 	natsConfig env.NatsConfig
 	cleaner    eventtype.Cleaner
+	natsPort   int
 }
 
 // setupTestEnvironment is a TestEnvironment constructor
 func setupTestEnvironment(t *testing.T) *TestEnvironment {
-	natsServer, _ := startNATSServer(evtesting.WithJetStreamEnabled())
+	natsServer, natsPort := startNATSServer(evtesting.WithJetStreamEnabled())
 	natsConfig := defaultNatsConfig(natsServer.ClientURL())
 	defaultLogger, err := logger.New(string(kymalogger.JSON), string(kymalogger.INFO))
 	assert.NoError(t, err)
@@ -817,5 +998,6 @@ func setupTestEnvironment(t *testing.T) *TestEnvironment {
 		jsClient:   jsClient,
 		natsConfig: natsConfig,
 		cleaner:    cleaner,
+		natsPort:   natsPort,
 	}
 }
