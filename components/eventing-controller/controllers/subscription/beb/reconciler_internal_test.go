@@ -21,6 +21,10 @@ import (
 	reconcilertesting "github.com/kyma-project/kyma/components/eventing-controller/testing"
 )
 
+const (
+	domain = "domain.com"
+)
+
 func Test_isInDeletion(t *testing.T) {
 	var testCases = []struct {
 		name              string
