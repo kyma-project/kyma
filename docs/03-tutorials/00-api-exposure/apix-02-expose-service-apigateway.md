@@ -4,6 +4,8 @@ title: Expose a service
 
 This tutorial shows how to expose service endpoints and configure different allowed HTTP methods for them using API Gateway Controller.
 
+The tutorial may be a follow-up to the [Use a custom domain to expose a service](./apix-01-own-domain.md) tutorial.
+
 ## Prerequisites
 
 This tutorial is based on a sample HttpBin service deployment and a sample Function. To deploy or create one of those, follow the [Deploy a service](./apix-02-deploy-service.md) tutorial.

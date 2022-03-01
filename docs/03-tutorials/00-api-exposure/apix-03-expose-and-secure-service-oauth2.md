@@ -4,7 +4,7 @@ title: Expose and secure a service with OAuth2
 
 This tutorial shows how to expose and secure services or Functions using API Gateway Controller. The controller reacts to an instance of the API Rule custom resource (CR) and creates an Istio Virtual Service and [Oathkeeper Access Rules](https://www.ory.sh/docs/oathkeeper/api-access-rules) according to the details specified in the CR. To interact with the secured services, the tutorial uses an OAuth2 client registered through the Hydra Maester controller.
 
-It may be a follow-up to the [Use a custom domain to expose a service](./apix-01-own-domain.md) tutorial.
+The tutorial may be a follow-up to the [Use a custom domain to expose a service](./apix-01-own-domain.md) tutorial.
 
 ## Prerequisites
 
@@ -97,7 +97,7 @@ Follow the instructions in the tabs to expose an instance of the HttpBin service
 
   <details>
   <summary>
-  HttpBin - secure endpoints of a service
+  HttpBin
   </summary>
 
 1. Expose the service and secure it by creating an API Rule CR in your Namespace. If you don't want to use your custom domain but a Kyma domain, use the following Kyma Gateway: `kyma-system/kyma-gateway`. Run:
@@ -139,10 +139,10 @@ The exposed service requires tokens with "read" scope for `GET` requests in the 
 
   <details>
   <summary>
-  Secure a Function
+  Function
   </summary>
 
-1. Expose the service and secure it by creating an API Rule CR in your Namespace. If you don't want to use your custom domain but a Kyma domain, use the following Kyma Gateway: `kyma-system/kyma-gateway`. Run:
+1. Expose the Function and secure it by creating an API Rule CR in your Namespace. If you don't want to use your custom domain but a Kyma domain, use the following Kyma Gateway: `kyma-system/kyma-gateway`. Run:
 
   ```shell
   cat <<EOF | kubectl apply -f -
