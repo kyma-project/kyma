@@ -29,7 +29,7 @@ This tutorial describes how you can deploy a simple SAP BTP audit log service in
 
 2. Obtain the access credentials for the SAP BTP service operator as described in step 2 of the [SAP BTP operator setup](https://github.com/SAP/sap-btp-service-operator#setup). Then, save the credentials to the `creds.json` file.
 
-3. Create a Namespace and install [SAP BTP service operator](https://github.com/SAP/sap-btp-service-operator) on it:
+3. Create a Namespace and install the SAP BTP service operator in it:
 
     ```bash
     kubectl create ns sap-btp-operator
