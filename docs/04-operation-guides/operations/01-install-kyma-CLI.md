@@ -44,6 +44,9 @@ curl -Lo kyma.tar.gz "https://github.com/kyma-project/cli/releases/download/$(cu
 && mkdir kyma-release && tar -C kyma-release -zxvf kyma.tar.gz && chmod +x kyma-release/kyma && sudo mv kyma-release/kyma /usr/local/bin \
 && rm -rf kyma-release kyma.tar.gz
 ```
+
+If provisioning k3d fails with a message like `Cannot bind to reserved port 80`, follow the [troubleshooting guide](../troubleshooting/01-k3d-fails-on-linux.md).
+
   </details>
   <details>
   <summary label="Windows">
