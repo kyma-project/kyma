@@ -80,7 +80,7 @@ This tutorial is based on a sample HttpBin service deployment and a sample Funct
      service:
        name: httpbin
        port: 8000
-       host: httpbin.$DOMAIN
+       host: httpbin.$DOMAIN_TO_EXPOSE_SERVICES
    ```
 
    >**NOTE:** If you are running Kyma on k3d, add `httpbin.kyma.local` to the entry with k3d IP in your system's `/etc/hosts` file.
@@ -88,7 +88,7 @@ This tutorial is based on a sample HttpBin service deployment and a sample Funct
 2. To access the secured service, call it using the JWT access token:
 
    ```bash
-   curl -ik https://httpbin.$DOMAIN/headers -H “Authorization: Bearer $ACCESS_TOKEN”
+   curl -ik https://httpbin.$DOMAIN_TO_EXPOSE_SERVICES/headers -H “Authorization: Bearer $ACCESS_TOKEN”
    ```
 
   </details>
@@ -112,7 +112,7 @@ This tutorial is based on a sample HttpBin service deployment and a sample Funct
      service:
        name: function
        port: 80
-       host: function-example.$DOMAIN
+       host: function-example.$DOMAIN_TO_EXPOSE_SERVICES
      rules:
        - accessStrategies:
            - config:
@@ -129,7 +129,7 @@ This tutorial is based on a sample HttpBin service deployment and a sample Funct
 2. To access the secured service or Function, call it using the JWT access token:
 
    ```bash
-   curl -ik https://function-example.$DOMAIN/function -H “Authorization: Bearer $ACCESS_TOKEN” 
+   curl -ik https://function-example.$DOMAIN_TO_EXPOSE_SERVICES/function -H “Authorization: Bearer $ACCESS_TOKEN” 
    ```
 
   </details>

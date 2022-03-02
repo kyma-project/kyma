@@ -40,7 +40,7 @@ Follow these steps to set up your custom domain and prepare a certificate requir
    export NAMESPACE={NAMESPACE_NAME}
    export SPEC_TYPE={PROVIDER_TYPE}
    export SECRET={SECRET_NAME}
-   export DOMAIN={DOMAIN_NAME} # The domain that you own, e.g. mydomain.com.
+   export DOMAIN_TO_EXPOSE_SERVICE={DOMAIN_NAME} # The domain that you own, e.g. mydomain.com.
    ```
 
     ```bash

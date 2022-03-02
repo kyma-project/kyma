@@ -24,7 +24,7 @@ Follow the instruction to expose and access your unsecured instance of the HttpB
 1. Export the following value as an environment variable:
 
    ```bash
-   export DOMAIN={CLUSTER_DOMAIN} #This is a Kyma domain or your custom subdomain e.g. api.mydomain.com.
+   export DOMAIN_TO_EXPOSE_SERVICES={DOMAIN_NAME} #This is a Kyma domain or your custom subdomain e.g. api.mydomain.com.
    ```
 
 2. Expose the instance of the HttpBin service by creating an API Rule CR in your Namespace. If you don't want to use your custom domain but a Kyma domain, use the following Kyma Gateway: `kyma-system/kyma-gateway`. Run:
@@ -38,7 +38,7 @@ Follow the instruction to expose and access your unsecured instance of the HttpB
      namespace: $NAMESPACE
    spec:
      service:
-       host: httpbin.$DOMAIN
+       host: httpbin.$DOMAIN_TO_EXPOSE_SERVICES
        name: httpbin
        port: 8000
      gateway: $NAMESPACE/httpbin-gateway #The value corresponds to the Gateway CR you created.
@@ -63,13 +63,13 @@ Follow the instruction to expose and access your unsecured instance of the HttpB
 3. Call the endpoint by sending a `GET` request to the HttpBin service:
 
    ```bash
-   curl -ik -X GET https://httpbin.$DOMAIN/ip
+   curl -ik -X GET https://httpbin.$DOMAIN_TO_EXPOSE_SERVICES/ip
    ```
 
 4. Send a `POST` request to the HttpBin's `/post` endpoint:
 
    ```bash
-   curl -ik -X POST https://httpbin.$DOMAIN/post -d "test data"
+   curl -ik -X POST https://httpbin.$DOMAIN_TO_EXPOSE_SERVICES/post -d "test data"
    ```
 
    These calls return the code `200` response.
@@ -84,7 +84,7 @@ Follow the instruction to expose and access your unsecured instance of the HttpB
 1. Export the following value as an environment variable:
 
    ```bash
-   export DOMAIN={CLUSTER_DOMAIN} #This is a Kyma domain or your custom subdomain e.g. api.mydomain.com.
+   export DOMAIN_TO_EXPOSE_SERVICES={DOMAIN_NAME} #This is a Kyma domain or your custom subdomain e.g. api.mydomain.com.
    ```
 
 2. Expose the sample Function by creating an API Rule CR in your Namespace. If you don't want to use your custom domain but a Kyma domain, use the following Kyma Gateway: `kyma-system/kyma-gateway`. Run:
@@ -101,7 +101,7 @@ Follow the instruction to expose and access your unsecured instance of the HttpB
      service:
        name: function
        port: 80
-       host: function-example.$DOMAIN
+       host: function-example.$DOMAIN_TO_EXPOSE_SERVICES
      rules:
        - path: /function
          methods: ["GET"]
@@ -115,7 +115,7 @@ Follow the instruction to expose and access your unsecured instance of the HttpB
 3. Send a `GET` request to the Function:
 
    ```shell
-   curl -ik https://function-example.$DOMAIN/function
+   curl -ik https://function-example.$DOMAIN_TO_EXPOSE_SERVICES/function
    ```
 
    This call returns the code `200` response.

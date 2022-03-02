@@ -11,11 +11,8 @@ The tutorial may be a follow-up to the [Use a custom domain to expose a service]
 1. Create a Namespace and export its value as an environment variable. Skip the step if you already have a Namespace. Run:
 
    ```bash
-   kubectl create ns {NAMESPACE_NAME}
-   ```
-
-   ```bash
    export NAMESPACE={NAMESPACE_NAME}
+   kubectl create ns ${NAMESPACE}
    ```
 
 <div tabs>

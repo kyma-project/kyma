@@ -56,13 +56,19 @@ This tutorial is based on a sample HttpBin service deployment and a sample Funct
      Token with "read" scope
      </summary>
 
-     1. Get the token:
+     1. Export the following value as an environment variable:
+
+     ```shell
+     export KYMA_DOMAIN={KYMA_DOMAIN_NAME}
+     ```  
+
+     2. Get the token:
 
          ```shell
-         curl -ik -X POST "https://oauth2.$DOMAIN/oauth2/token" -H "Authorization: Basic $ENCODED_CREDENTIALS" -F "grant_type=client_credentials" -F "scope=read"
+         curl -ik -X POST "https://oauth2.$KYMA_DOMAIN/oauth2/token" -H "Authorization: Basic $ENCODED_CREDENTIALS" -F "grant_type=client_credentials" -F "scope=read"
          ```
 
-     2. Export the issued token as an environment variable:
+     3. Export the issued token as an environment variable:
 
          ```shell
          export ACCESS_TOKEN_READ={ISSUED_READ_TOKEN}
@@ -74,13 +80,19 @@ This tutorial is based on a sample HttpBin service deployment and a sample Funct
      Token with "write" scope
      </summary>
 
-     1. Get the token:
+     1. Export the following value as an environment variable:
+
+     ```shell
+     export KYMA_DOMAIN={KYMA_DOMAIN_NAME}
+     ```  
+
+     2. Get the token:
 
          ```shell
-         curl -ik -X POST "https://oauth2.$DOMAIN/oauth2/token" -H "Authorization: Basic $ENCODED_CREDENTIALS" -F "grant_type=client_credentials" -F "scope=write"
+         curl -ik -X POST "https://oauth2.$KYMA_DOMAIN/oauth2/token" -H "Authorization: Basic $ENCODED_CREDENTIALS" -F "grant_type=client_credentials" -F "scope=write"
          ```
 
-     2. Export the issued token as an environment variable:
+     3. Export the issued token as an environment variable:
 
          ```shell
          export ACCESS_TOKEN_WRITE={ISSUED_WRITE_TOKEN}
