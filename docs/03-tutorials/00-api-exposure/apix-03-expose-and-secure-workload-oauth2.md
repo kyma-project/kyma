@@ -1,14 +1,14 @@
 ---
-title: Expose and secure a service with OAuth2
+title: Expose and secure a workload with OAuth2
 ---
 
 This tutorial shows how to expose and secure services or Functions using API Gateway Controller. The controller reacts to an instance of the API Rule custom resource (CR) and creates an Istio Virtual Service and [Oathkeeper Access Rules](https://www.ory.sh/docs/oathkeeper/api-access-rules) according to the details specified in the CR. To interact with the secured services, the tutorial uses an OAuth2 client registered through the Hydra Maester controller.
 
-The tutorial may be a follow-up to the [Use a custom domain to expose a service](./apix-01-own-domain.md) tutorial.
+The tutorial may be a follow-up to the [Use a custom domain to expose a workload](./apix-01-own-domain.md) tutorial.
 
 ## Prerequisites
 
-This tutorial is based on a sample HttpBin service deployment and a sample Function. To deploy or create one of those, follow the [Deploy a service](./apix-02-deploy-service.md) tutorial.
+This tutorial is based on a sample HttpBin service deployment and a sample Function. To deploy or create one of those, follow the [Create a workload](./apix-02-create-workload.md) tutorial.
 
 ## Register an OAuth2 client and get tokens
 
@@ -126,7 +126,7 @@ Follow the instructions in the tabs to expose an instance of the HttpBin service
      service:
        name: httpbin
        port: 8000
-       host: httpbin.$DOMAIN
+       host: httpbin.$DOMAIN_TO_EXPOSE_WORKLOADS
      rules:
        - path: /.*
          methods: ["GET"]
@@ -168,7 +168,7 @@ Follow the instructions in the tabs to expose an instance of the HttpBin service
      service:
        name: function
        port: 80
-       host: function-example.$DOMAIN
+       host: function-example.$DOMAIN_TO_EXPOSE_WORKLOADS
      rules:
        - path: /function
          methods: ["GET"]
@@ -202,13 +202,13 @@ Follow the instructions in the tabs to call the secured service or Functions usi
 1. Send a `GET` request with a token that has the "read" scope to the HttpBin service:
 
   ```shell
-  curl -ik -X GET https://httpbin.$DOMAIN/headers -H "Authorization: Bearer $ACCESS_TOKEN_READ"
+  curl -ik -X GET https://httpbin.$DOMAIN_TO_EXPOSE_WORKLOADS/headers -H "Authorization: Bearer $ACCESS_TOKEN_READ"
   ```
 
 2. Send a `POST` request with a token that has the "write" scope to the HttpBin's `/post` endpoint:
 
   ```shell
-  curl -ik -X POST https://httpbin.$DOMAIN/post -d "test data" -H "Authorization: bearer $ACCESS_TOKEN_WRITE"
+  curl -ik -X POST https://httpbin.$DOMAIN_TO_EXPOSE_WORKLOADS/post -d "test data" -H "Authorization: bearer $ACCESS_TOKEN_WRITE"
   ```
 
 These calls return the code `200` response. If you call the service without a token, you get the code `401` response. If you call the service or its secured endpoint with a token with the wrong scope, you get the code `403` response.
@@ -223,7 +223,7 @@ These calls return the code `200` response. If you call the service without a to
 Send a `GET` request with a token that has the "read" scope to the Function:
 
   ```shell
-  curl -ik https://function-example.$DOMAIN/function -H "Authorization: bearer $ACCESS_TOKEN_READ"
+  curl -ik https://function-example.$DOMAIN_TO_EXPOSE_WORKLOADS/function -H "Authorization: bearer $ACCESS_TOKEN_READ"
   ```
 
 This call returns the code `200` response. If you call the Function without a token, you get the code `401` response. If you call the Function with a token with the wrong scope, you get the code `403` response.

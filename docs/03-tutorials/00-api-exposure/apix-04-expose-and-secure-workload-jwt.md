@@ -1,5 +1,5 @@
 ---
-title: Expose and secure a service with JWT
+title: Expose and secure a workload with JWT
 ---
 
 This tutorial shows how to expose and secure services or Functions using API Gateway Controller. The controller reacts to an instance of the API Rule custom resource (CR) and creates an Istio Virtual Service and [Oathkeeper Access Rules](https://www.ory.sh/docs/oathkeeper/api-access-rules) according to the details specified in the CR. To interact with the secured services, the tutorial uses a JWT token.
@@ -8,7 +8,7 @@ The tutorial may be a follow-up to the [Use a custom domain to expose a service]
 
 ## Prerequisites
 
-This tutorial is based on a sample HttpBin service deployment and a sample Function. To deploy or create one of those, follow the [Deploy a service](./apix-02-deploy-service.md) tutorial.
+This tutorial is based on a sample HttpBin service deployment and a sample Function. To deploy or create one of those, follow the [Create a workload](./apix-02-create-workload.md) tutorial.
 
 ## Get a JWT access token
 
@@ -67,7 +67,7 @@ This tutorial is based on a sample HttpBin service deployment and a sample Funct
      name: httpbin
      namespace: $NAMESPACE
    spec:
-     gateway: kyma-gateway.kyma-system.svc.cluster.local
+     gateway: $NAMESPACE/httpbin-gateway #The value corresponds to the Gateway CR you created.
      rules:
        - accessStrategies:
            - config:
@@ -80,7 +80,8 @@ This tutorial is based on a sample HttpBin service deployment and a sample Funct
      service:
        name: httpbin
        port: 8000
-       host: httpbin.$DOMAIN_TO_EXPOSE_SERVICES
+       host: httpbin.$DOMAIN_TO_EXPOSE_WORKLOADS
+   EOF      
    ```
 
    >**NOTE:** If you are running Kyma on k3d, add `httpbin.kyma.local` to the entry with k3d IP in your system's `/etc/hosts` file.
@@ -88,8 +89,10 @@ This tutorial is based on a sample HttpBin service deployment and a sample Funct
 2. To access the secured service, call it using the JWT access token:
 
    ```bash
-   curl -ik https://httpbin.$DOMAIN_TO_EXPOSE_SERVICES/headers -H “Authorization: Bearer $ACCESS_TOKEN”
+   curl -ik https://httpbin.$DOMAIN_TO_EXPOSE_WORKLOADS/headers -H “Authorization: Bearer $ACCESS_TOKEN”
    ```
+
+   This call returns the code `200` response.
 
   </details>
 
@@ -108,11 +111,11 @@ This tutorial is based on a sample HttpBin service deployment and a sample Funct
      name: function
      namespace: $NAMESPACE
    spec:
-     gateway: namespace-name/httpbin-gateway #The value corresponds to the Gateway CR you created. 
+     gateway: $NAMESPACE/httpbin-gateway #The value corresponds to the Gateway CR you created. 
      service:
        name: function
        port: 80
-       host: function-example.$DOMAIN_TO_EXPOSE_SERVICES
+       host: function-example.$SERVICES
      rules:
        - accessStrategies:
            - config:
@@ -125,12 +128,13 @@ This tutorial is based on a sample HttpBin service deployment and a sample Funct
    EOF
    ```
 
-
-2. To access the secured service or Function, call it using the JWT access token:
+2. To access the secured Function, call it using the JWT access token:
 
    ```bash
-   curl -ik https://function-example.$DOMAIN_TO_EXPOSE_SERVICES/function -H “Authorization: Bearer $ACCESS_TOKEN” 
+   curl -ik https://function-example.$SERVICES/function -H “Authorization: Bearer $ACCESS_TOKEN” 
    ```
+
+   This call returns the code `200` response.
 
   </details>
 </div>

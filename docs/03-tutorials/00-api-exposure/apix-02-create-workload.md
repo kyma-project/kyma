@@ -1,5 +1,5 @@
 ---
-title: Deploy a service
+title: Create a workload
 ---
 
 Follow these steps to deploy an instance of the HttpBin service or a sample Function.
@@ -12,7 +12,7 @@ The tutorial may be a follow-up to the [Use a custom domain to expose a service]
 
    ```bash
    export NAMESPACE={NAMESPACE_NAME}
-   kubectl create ns ${NAMESPACE}
+   kubectl create ns $NAMESPACE
    ```
 
 <div tabs>
@@ -73,6 +73,6 @@ The tutorial may be a follow-up to the [Use a custom domain to expose a service]
 
 Once you have your service deployed, you can continue by choosing one of the following tutorials to:
 
-- [Expose a service](./apix-02-expose-service-apigateway.md)
-- [Expose and secure a service with OAuth2](./apix-03-expose-and-secure-service-oauth2.md)
-- [Expose and secure a service with JTW](./apix-04-expose-and-secure-service-jwt.md)
+- [Expose a workload](./apix-02-expose-workload-apigateway.md)
+- [Expose and secure a workload with OAuth2](./apix-03-expose-and-secure-workload-oauth2.md)
+- [Expose and secure a workload with JTW](./apix-04-expose-and-secure-workload-jwt.md)
