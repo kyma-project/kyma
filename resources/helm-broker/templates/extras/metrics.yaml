@@ -83,7 +83,7 @@ spec:
         regex: 'rest_client_request_latency_seconds_bucket;(0.002|0.008|0.032|0.128|0.512)' # drop buckets to reduce metric footprint
         action: drop
       - action: keep
-        regex: ^rest_client_request_latency_seconds_bucket;https://.+(/api/v1.*|/apis/(apps|batch|addons.kyma-project.io).+)$ # allow metrics from core, apps, batch and addons API group
+        regex: ^rest_client_request_latency_seconds_bucket;https://.+(/api/v1.*|/apis/(apps|addons.kyma-project.io).+)$ # allow metrics from core, apps and addons API group
         sourceLabels: [__name__,url]
   namespaceSelector:
     matchNames:

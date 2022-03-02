@@ -21,7 +21,7 @@ spec:
       regex: 'rest_client_request_latency_seconds_bucket;(0.002|0.008|0.032|0.128|0.512)' # drop buckets to reduce metric footprint
       action: drop
     - action: keep
-      regex: ^rest_client_request_latency_seconds_bucket;https://.+(/api/v1.*|/apis/(apps|batch|hydra.ory.sh).+)$ # allow metrics from core, apps, batch and hydra API group
+      regex: ^rest_client_request_latency_seconds_bucket;https://.+(/api/v1.*|/apis/(apps|hydra.ory.sh).+)$ # allow metrics from core, apps and hydra API group
       sourceLabels: [__name__,url]
   namespaceSelector:
     matchNames:

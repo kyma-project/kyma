@@ -22,7 +22,7 @@ spec:
       regex: ^rest_client_request_latency_seconds_bucket;(0.002|0.008|0.032|0.128|0.512)$ # drop buckets to reduce metric footprint
       sourceLabels: [__name__,le]
     - action: keep
-      regex: ^rest_client_request_latency_seconds_bucket;https://.+(/api/v1.*|/apis/(apps|batch|jaegertracing.io).+)$ # allow metrics from core, apps, batch and jaeger API group 
+      regex: ^rest_client_request_latency_seconds_bucket;https://.+(/api/v1.*|/apis/(apps|jaegertracing.io).+)$ # allow metrics from core, apps and jaeger API group 
       sourceLabels: [__name__,url]
   selector:
     matchLabels:
@@ -54,7 +54,7 @@ spec:
       regex: ^rest_client_request_latency_seconds_bucket;(0.002|0.008|0.032|0.128|0.512)$ # drop buckets to reduce metric footprint
       sourceLabels: [__name__,le]
     - action: keep
-      regex: ^rest_client_request_latency_seconds_bucket;https://.+(/api/v1.*|/apis/(apps|batch|jaegertracing.io).+)$ # allow metrics from core, apps, batch and jaeger API group 
+      regex: ^rest_client_request_latency_seconds_bucket;https://.+(/api/v1.*|/apis/(apps|jaegertracing.io).+)$ # allow metrics from core, apps and jaeger API group 
       sourceLabels: [__name__,url]
   selector:
     matchLabels:
