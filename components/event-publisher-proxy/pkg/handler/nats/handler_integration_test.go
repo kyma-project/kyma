@@ -101,13 +101,9 @@ func TestNatsHandlerForCloudEvents(t *testing.T) {
 				t.Run(testCase.Name, func(t *testing.T) {
 					body, headers := testCase.ProvideMessage()
 					resp, err := testingutils.SendEvent(publishEndpoint, body, headers)
-					if err != nil {
-						t.Errorf("Failed to send event with error: %v", err)
-					}
+					assert.NoError(t, err)
 					_ = resp.Body.Close()
-					if testCase.WantStatusCode != resp.StatusCode {
-						t.Errorf("Test failed, want status code:%d but got:%d", testCase.WantStatusCode, resp.StatusCode)
-					}
+					assert.Equal(t, testCase.WantStatusCode, resp.StatusCode)
 					if testingutils.Is2XX(resp.StatusCode) {
 						metricstest.EnsureMetricLatency(t, handlerMock.GetMetricsCollector())
 					}
