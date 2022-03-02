@@ -6,7 +6,7 @@ Follow these steps to deploy an instance of the HttpBin service or a sample Func
 
 The tutorial comes with a sample HttpBin service deployment and a sample Function.
 
-The tutorial may be a follow-up to the [Use a custom domain to expose a service](./apix-01-own-domain.md) tutorial.
+The tutorial may be a follow-up to the [Use a custom domain to expose a workload](./apix-01-own-domain.md) tutorial.
 
 1. Create a Namespace and export its value as an environment variable. Skip the step if you already have a Namespace. Run:
 
@@ -71,7 +71,7 @@ The tutorial may be a follow-up to the [Use a custom domain to expose a service]
 
 ## Next steps
 
-Once you have your service deployed, you can continue by choosing one of the following tutorials to:
+Once you have your workload deployed, you can continue by choosing one of the following tutorials to:
 
 - [Expose a workload](./apix-02-expose-workload-apigateway.md)
 - [Expose and secure a workload with OAuth2](./apix-03-expose-and-secure-workload-oauth2.md)

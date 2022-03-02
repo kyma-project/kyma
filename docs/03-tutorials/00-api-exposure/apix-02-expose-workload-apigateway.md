@@ -10,7 +10,7 @@ The tutorial may be a follow-up to the [Use a custom domain to expose a workload
 
 This tutorial is based on a sample HttpBin service deployment and a sample Function. To deploy or create one of those, follow the [Create a workload](./apix-02-create-workload.md) tutorial.
 
-## Expose and access the resources
+## Expose and access your workload
 
 Follow the instruction to expose and access your unsecured instance of the HttpBin service or unsecured sample Function.
 

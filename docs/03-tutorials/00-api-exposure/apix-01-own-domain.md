@@ -14,10 +14,11 @@ If you use a cluster not managed by Gardener, install the [External DNS Manageme
 
 Follow these steps to set up your custom domain and prepare a certificate required to expose a workload.
 
-1. Create a Namespace. Run:
+1. Create a Namespace and export it as an environment variable. Run:
 
-  ```bash
-   kubectl create ns {NAMESPACE_NAME}
+   ```bash
+   export NAMESPACE={NAMESPACE_NAME}
+   kubectl create ns $NAMESPACE
    ```
 
 2. Create a Secret containing credentials for your DNS cloud service provider account in your Namespace.
@@ -35,7 +36,6 @@ Follow these steps to set up your custom domain and prepare a certificate requir
    As the **SPEC_TYPE**, use the relevant provider type. See the [official Gardener examples](https://github.com/gardener/external-dns-management/tree/master/examples) of the DNS Provider CR.
 
    ```bash
-   export NAMESPACE={NAMESPACE_NAME}
    export SPEC_TYPE={PROVIDER_TYPE}
    export SECRET={SECRET_NAME}
    export DOMAIN_TO_EXPOSE_WORKLOADS={DOMAIN_NAME} # The domain that you own, e.g. mydomain.com.
@@ -132,7 +132,7 @@ Follow these steps to set up your custom domain and prepare a certificate requir
      namespace: istio-system
    spec:  
      secretName: $TLS_SECRET
-     commonName: $DOMAIN
+     commonName: $DOMAIN_TO_EXPOSE_WORKLOADS
      issuerRef:
        name: $ISSUER
        namespace: default
@@ -143,7 +143,7 @@ Follow these steps to set up your custom domain and prepare a certificate requir
 
 Proceed with the [Create a workload](./apix-02-create-workload.md) tutorial to deploy an instance of the HttpBin service or a sample Function.
 
-Once you have your service deployed, you can continue by choosing one of the following tutorials to:
+Once you have your workload deployed, you can continue by choosing one of the following tutorials to:
 
 - [Expose a workload](./apix-02-expose-workload-apigateway.md)
 - [Expose and secure a workload with OAuth2](./apix-03-expose-and-secure-workload-oauth2.md)

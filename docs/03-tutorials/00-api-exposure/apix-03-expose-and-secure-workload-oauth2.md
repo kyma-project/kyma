@@ -101,7 +101,7 @@ This tutorial is based on a sample HttpBin service deployment and a sample Funct
       </details>
    </div>
 
-## Expose and secure the resources
+## Expose and secure your workload
 
 Follow the instructions in the tabs to expose an instance of the HttpBin service or a sample Function, and secure them with Oauth2 scopes.
 
@@ -186,7 +186,7 @@ Follow the instructions in the tabs to expose an instance of the HttpBin service
   </details>
 </div>
 
->**CAUTION:** When you secure a service, don't create overlapping Access Rules for paths. Doing so can cause unexpected behavior and reduce the security of your implementation.
+>**CAUTION:** When you secure a workload, don't create overlapping Access Rules for paths. Doing so can cause unexpected behavior and reduce the security of your implementation.
 
 ## Access the secured resources
 

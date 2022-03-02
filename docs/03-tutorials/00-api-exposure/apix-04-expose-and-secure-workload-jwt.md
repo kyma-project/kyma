@@ -2,9 +2,9 @@
 title: Expose and secure a workload with JWT
 ---
 
-This tutorial shows how to expose and secure services or Functions using API Gateway Controller. The controller reacts to an instance of the API Rule custom resource (CR) and creates an Istio Virtual Service and [Oathkeeper Access Rules](https://www.ory.sh/docs/oathkeeper/api-access-rules) according to the details specified in the CR. To interact with the secured services, the tutorial uses a JWT token.
+This tutorial shows how to expose and secure services or Functions using API Gateway Controller. The controller reacts to an instance of the API Rule custom resource (CR) and creates an Istio Virtual Service and [Oathkeeper Access Rules](https://www.ory.sh/docs/oathkeeper/api-access-rules) according to the details specified in the CR. To interact with the secured workloads, the tutorial uses a JWT token.
 
-The tutorial may be a follow-up to the [Use a custom domain to expose a service](./apix-01-own-domain.md) tutorial.
+The tutorial may be a follow-up to the [Use a custom domain to expose a workload](./apix-01-own-domain.md) tutorial.
 
 ## Prerequisites
 
@@ -48,7 +48,7 @@ This tutorial is based on a sample HttpBin service deployment and a sample Funct
    export ACCESS_TOKEN={YOUR_ACCESSS_TOKEN}
    ```
 
-## Expose, secure, and access the resources
+## Expose, secure, and access your workload
 
 <div tabs>
 
@@ -115,7 +115,7 @@ This tutorial is based on a sample HttpBin service deployment and a sample Funct
      service:
        name: function
        port: 80
-       host: function-example.$SERVICES
+       host: function-example.$$DOMAIN_TO_EXPOSE_WORKLOADS
      rules:
        - accessStrategies:
            - config:
@@ -131,7 +131,7 @@ This tutorial is based on a sample HttpBin service deployment and a sample Funct
 2. To access the secured Function, call it using the JWT access token:
 
    ```bash
-   curl -ik https://function-example.$SERVICES/function -H “Authorization: Bearer $ACCESS_TOKEN” 
+   curl -ik https://function-example.$DOMAIN_TO_EXPOSE_WORKLOADS/function -H “Authorization: Bearer $ACCESS_TOKEN” 
    ```
 
    This call returns the code `200` response.
