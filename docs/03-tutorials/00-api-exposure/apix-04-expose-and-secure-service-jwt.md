@@ -2,7 +2,7 @@
 title: Expose and secure a service with JWT
 ---
 
-This tutorial shows how to expose and secure services or Functions using API Gateway Controller. The controller reacts to an instance of the API Rule custom resource (CR) and creates an Istio Virtual Service and [Oathkeeper Access Rules](https://www.ory.sh/docs/oathkeeper/api-access-rules) according to the details specified in the CR. To interact with the secured services, the tutorial uses a JWT client.
+This tutorial shows how to expose and secure services or Functions using API Gateway Controller. The controller reacts to an instance of the API Rule custom resource (CR) and creates an Istio Virtual Service and [Oathkeeper Access Rules](https://www.ory.sh/docs/oathkeeper/api-access-rules) according to the details specified in the CR. To interact with the secured services, the tutorial uses a JWT token.
 
 The tutorial may be a follow-up to the [Use a custom domain to expose a service](./apix-01-own-domain.md) tutorial.
 
@@ -19,7 +19,7 @@ This tutorial is based on a sample HttpBin service deployment and a sample Funct
    export CLIENT_SECRET={YOUR_CLIENT_SECRET}
    ```
 
-   >**TIP:** For testing purposes, you can use the client credentials from `[https://demo.c2id.com/oidc-client/](https://demo.c2id.com/oidc-client/)`. We **don't** recommend the solution for production environments.
+   >**TIP:** For testing purposes, you can use the client credentials from `https://demo.c2id.com/oidc-client/`. We **don't** recommend the solution for production environments.
 
 2. Encode your client credentials and export them as an environment variable:
 
@@ -34,7 +34,7 @@ This tutorial is based on a sample HttpBin service deployment and a sample Funct
    export JWKS_URI={YOUR_JWKS_URI}
    ```
 
-   >**TIP:** For testing purposes, you can use values of the **token_endpoint** and **jwks_uri** from `[https://accounts.google.com/.well-known/openid-configuration](https://accounts.google.com/.well-known/openid-configuration)`. We **don't** recommend the solution for production environments.
+   >**TIP:** For testing purposes, you can use values of the **token_endpoint** and **jwks_uri** from `https://accounts.google.com/.well-known/openid-configuration`. We **don't** recommend the solution for production environments.
 
 4. Get the JWT access token:
 
@@ -85,6 +85,12 @@ This tutorial is based on a sample HttpBin service deployment and a sample Funct
 
    >**NOTE:** If you are running Kyma on k3d, add `httpbin.kyma.local` to the entry with k3d IP in your system's `/etc/hosts` file.
 
+2. To access the secured service, call it using the JWT access token:
+
+   ```bash
+   curl -ik https://httpbin.$DOMAIN/headers -H “Authorization: Bearer $ACCESS_TOKEN”
+   ```
+
   </details>
 
   <details>
@@ -119,11 +125,12 @@ This tutorial is based on a sample HttpBin service deployment and a sample Funct
    EOF
    ```
 
-  </details>
-</div>
 
-   2. To access the secured service or Function, call it using the JWT access token:
+2. To access the secured service or Function, call it using the JWT access token:
 
    ```bash
-   curl -ik https://mst.dt-test.goatz.shoot.canary.k8s-hana.ondemand.com/headers -H "Authorization: Bearer $ACCESS_TOKEN"
+   curl -ik https://function-example.$DOMAIN/function -H “Authorization: Bearer $ACCESS_TOKEN” 
    ```
+
+  </details>
+</div>

@@ -21,7 +21,13 @@ Follow the instruction to expose and access your unsecured instance of the HttpB
   HttpBin
   </summary>
 
-1. Expose the instance of the HttpBin service by creating an API Rule CR in your Namespace. If you don't want to use your custom domain but a Kyma domain, use the following Kyma Gateway: `kyma-system/kyma-gateway`. Run:
+1. Export the following value as an environment variable:
+
+   ```bash
+   export DOMAIN={CLUSTER_DOMAIN} #This is a Kyma domain or your custom subdomain e.g. api.mydomain.com.
+   ```
+
+2. Expose the instance of the HttpBin service by creating an API Rule CR in your Namespace. If you don't want to use your custom domain but a Kyma domain, use the following Kyma Gateway: `kyma-system/kyma-gateway`. Run:
 
    ```bash
    cat <<EOF | kubectl apply -f -
@@ -35,7 +41,7 @@ Follow the instruction to expose and access your unsecured instance of the HttpB
        host: httpbin.$DOMAIN
        name: httpbin
        port: 8000
-     gateway: namespace-name/httpbin-gateway #The value corresponds to the Gateway CR you created.
+     gateway: $NAMESPACE/httpbin-gateway #The value corresponds to the Gateway CR you created.
      rules:
        - path: /.*
          methods: ["GET"]
@@ -54,13 +60,13 @@ Follow the instruction to expose and access your unsecured instance of the HttpB
 
    >**NOTE:** If you are running Kyma on k3d, add `httpbin.kyma.local` to the entry with k3d IP in your system's `/etc/hosts` file.
 
-2. Call the endpoint by sending a `GET` request to the HttpBin service:
+3. Call the endpoint by sending a `GET` request to the HttpBin service:
 
    ```bash
    curl -ik -X GET https://httpbin.$DOMAIN/ip
    ```
 
-3. Send a `POST` request to the HttpBin's `/post` endpoint:
+4. Send a `POST` request to the HttpBin's `/post` endpoint:
 
    ```bash
    curl -ik -X POST https://httpbin.$DOMAIN/post -d "test data"
@@ -75,7 +81,13 @@ Follow the instruction to expose and access your unsecured instance of the HttpB
   Function
   </summary>
 
-1. Expose the sample Function by creating an API Rule CR in your Namespace. If you don't want to use your custom domain but a Kyma domain, use the following Kyma Gateway: `kyma-system/kyma-gateway`. Run:
+1. Export the following value as an environment variable:
+
+   ```bash
+   export DOMAIN={CLUSTER_DOMAIN} #This is a Kyma domain or your custom subdomain e.g. api.mydomain.com.
+   ```
+
+2. Expose the sample Function by creating an API Rule CR in your Namespace. If you don't want to use your custom domain but a Kyma domain, use the following Kyma Gateway: `kyma-system/kyma-gateway`. Run:
 
    ```shell
    cat <<EOF | kubectl apply -f -
@@ -100,7 +112,7 @@ Follow the instruction to expose and access your unsecured instance of the HttpB
 
    >**NOTE:** If you are running Kyma on k3d, add `httpbin.kyma.local` to the entry with k3d IP in your system's `/etc/hosts` file.
 
-2. Send a `GET` request to the Function:
+3. Send a `GET` request to the Function:
 
    ```shell
    curl -ik https://function-example.$DOMAIN/function

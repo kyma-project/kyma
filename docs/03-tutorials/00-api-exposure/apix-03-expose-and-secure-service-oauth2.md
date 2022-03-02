@@ -38,8 +38,8 @@ This tutorial is based on a sample HttpBin service deployment and a sample Funct
 3. Export the credentials of the created client as environment variables. Run:
 
   ```shell
-  export CLIENT_ID="$(kubectl get secret -n $CLIENT_NAMESPACE $CLIENT_NAME -o jsonpath='{.data.client_id}' | base64 --decode)"
-  export CLIENT_SECRET="$(kubectl get secret -n $CLIENT_NAMESPACE $CLIENT_NAME -o jsonpath='{.data.client_secret}' | base64 --decode)"
+  export CLIENT_ID="$(kubectl get secret -n $NAMESPACE $CLIENT_NAME -o jsonpath='{.data.client_id}' | base64 --decode)"
+  export CLIENT_SECRET="$(kubectl get secret -n $NAMESPACE $CLIENT_NAME -o jsonpath='{.data.client_secret}' | base64 --decode)"
   ```
 
 4. Encode your client credentials and export them as an environment variable:

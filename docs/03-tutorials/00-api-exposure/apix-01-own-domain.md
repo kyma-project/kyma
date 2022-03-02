@@ -111,6 +111,7 @@ Follow these steps to set up your custom domain and prepare a certificate requir
          namespace: $NAMESPACE
        domains:
          include:
+           - $DOMAIN
            - "$WILDCARD"
    EOF
    ```
@@ -120,7 +121,7 @@ Follow these steps to set up your custom domain and prepare a certificate requir
   Export the following values as environment variables and run the command provided.
 
    ```bash
-   export TLS_SECRET={SECRET_NAME} #e.g. httpbin-tls-credentials
+   export TLS_SECRET={TLS_SECRET_NAME} # The name of the TLS Secret that will be created in this step, e.g. httpbin-tls-credentials
    export ISSUER={ISSUER_NAME} # The name of the Issuer CR, e.g.letsencrypt-staging.
    ```
 
