@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
-	"reflect"
 	"testing"
 	"time"
 
@@ -181,13 +180,8 @@ func TestNatsHandlerForLegacyEvents(t *testing.T) {
 				t.Run(testCase.Name, func(t *testing.T) {
 					body, headers := testCase.ProvideMessage()
 					resp, err := testingutils.SendEvent(publishLegacyEndpoint, body, headers)
-					if err != nil {
-						t.Fatalf("Failed to send event with error: %v", err)
-					}
-
-					if testCase.WantStatusCode != resp.StatusCode {
-						t.Fatalf("Test failed, want status code:%d but got:%d", testCase.WantStatusCode, resp.StatusCode)
-					}
+					require.NoError(t, err)
+					require.Equal(t, testCase.WantStatusCode, resp.StatusCode)
 
 					if testCase.WantStatusCode == http.StatusOK {
 						handlertest.ValidateOkResponse(t, *resp, &testCase.WantResponse)
@@ -228,12 +222,8 @@ func TestNatsHandlerForSubscribedEndpoint(t *testing.T) {
 
 			// setup test environment
 			scheme := runtime.NewScheme()
-			if err := corev1.AddToScheme(scheme); err != nil {
-				require.NoError(t, err)
-			}
-			if err := eventingv1alpha1.AddToScheme(scheme); err != nil {
-				require.NoError(t, err)
-			}
+			require.NoError(t, corev1.AddToScheme(scheme))
+			require.NoError(t, eventingv1alpha1.AddToScheme(scheme))
 
 			subscribedEndpointFormat := "http://localhost:%d/%s/v1/events/subscribed"
 			subscription := testingutils.NewSubscription(
@@ -251,26 +241,17 @@ func TestNatsHandlerForSubscribedEndpoint(t *testing.T) {
 				t.Run(testCase.Name, func(t *testing.T) {
 					subscribedURL := fmt.Sprintf(subscribedEndpointFormat, handlerMock.GetNatsConfig().Port, testCase.AppName)
 					resp, err := testingutils.QuerySubscribedEndpoint(subscribedURL)
-					if err != nil {
-						t.Fatalf("failed to send event with error: %v", err)
-					}
-
-					if testCase.WantStatusCode != resp.StatusCode {
-						t.Fatalf("test failed, want status code:%d but got:%d", testCase.WantStatusCode, resp.StatusCode)
-					}
+					require.NoError(t, err)
+					require.Equal(t, testCase.WantStatusCode, resp.StatusCode)
 					defer func() { _ = resp.Body.Close() }()
+
 					respBodyBytes, err := ioutil.ReadAll(resp.Body)
-					if err != nil {
-						t.Errorf("failed to convert body to bytes: %v", err)
-					}
+					require.NoError(t, err)
+
 					gotEventsResponse := subscribed.Events{}
 					err = json.Unmarshal(respBodyBytes, &gotEventsResponse)
-					if err != nil {
-						t.Errorf("failed to unmarshal body bytes to events response: %v", err)
-					}
-					if !reflect.DeepEqual(testCase.WantResponse, gotEventsResponse) {
-						t.Errorf("incorrect response, wanted: %v, got: %v", testCase.WantResponse, gotEventsResponse)
-					}
+					require.NoError(t, err)
+					require.Equal(t, testCase.WantResponse, gotEventsResponse)
 				})
 			}
 		})
