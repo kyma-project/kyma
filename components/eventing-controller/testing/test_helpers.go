@@ -34,7 +34,7 @@ const (
 	ApplicationNameNotClean = "test-app_1-0+2=3"
 
 	EventSource                              = "/default/kyma/id"
-	EventTypePrefix                          = "sap"
+	EventTypePrefix                          = "prefix"
 	EventTypePrefixEmpty                     = ""
 	OrderCreatedV1Event                      = "order.created.v1"
 	OrderCreatedEventType                    = EventTypePrefix + "." + ApplicationName + "." + OrderCreatedV1Event
