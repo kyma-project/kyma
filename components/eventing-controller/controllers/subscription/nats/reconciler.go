@@ -220,7 +220,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 	}
 
 	// Synchronize Kyma subscription to NATS backend
-	_, syncErr := r.Backend.SyncSubscription(subscription)
+	syncErr := r.Backend.SyncSubscription(subscription)
 	if syncErr != nil {
 		log.Errorw("sync subscription failed", "error", syncErr)
 		if err := r.syncSubscriptionStatus(ctx, subscription, false, statusChanged, syncErr.Error()); err != nil {
