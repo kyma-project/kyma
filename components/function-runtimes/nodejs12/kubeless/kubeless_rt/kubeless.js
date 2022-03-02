@@ -31,7 +31,9 @@ const jaegerServiceEndpoint = process.env.JAEGER_SERVICE_ENDPOINT
 let tracer = null;
 axios(jaegerServiceEndpoint)
     .catch((err) => {
-        // 405 is the right status code for the GET method if jaeger service exists
+        // 405 is the right status code for the GET method if jaeger service exists 
+        // because the only allowed method is POST and usage of other methods are not allowe
+        // https://github.com/jaegertracing/jaeger/blob/7872d1b07439c3f2d316065b1fd53e885b26a66f/cmd/collector/app/handler/http_handler.go#L60
         if (err.response && err.response.status == 405) {
             tracer = require('./lib/tracer')(
                 [serviceName, serviceNamespace].join('.'),

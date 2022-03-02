@@ -21,9 +21,11 @@ jaegerEndpoint = os.getenv('JAEGER_SERVICE_ENDPOINT')
 
 def is_jaeger_available() -> bool:
     try:
-        res = requests.get(jaegerEndpoint)
+        res = requests.get(jaegerEndpoint, timeout=2)
     
         # 405 is the right status code for the GET method if jaeger service exists 
+        # because the only allowed method is POST and usage of other methods are not allowe
+        # https://github.com/jaegertracing/jaeger/blob/7872d1b07439c3f2d316065b1fd53e885b26a66f/cmd/collector/app/handler/http_handler.go#L60
         if res.status_code == 405:
             return True
     except:

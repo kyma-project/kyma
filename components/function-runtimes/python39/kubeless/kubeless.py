@@ -54,8 +54,11 @@ if __name__ == '__main__' and is_jaeger_available():
 def func_with_context(e, function_context):
     ex = e.ceHeaders["extensions"]
 
-    with set_req_context(ex["request"]):
-        func(e, function_context)
+    if tracer != None:
+        with set_req_context(ex["request"]):
+            func(e, function_context)
+    else:
+        func(e, function_context) 
 
 
 @app.get('/healthz')
@@ -82,12 +85,8 @@ def handler():
     func_calls.labels(method).inc()
     with func_errors.labels(method).count_exceptions():
         with func_hist.labels(method).time():
-            lambda_func = func
-            if tracer != None:
-                lambda_func = func_with_context
-
             que = queue.Queue()
-            t = threading.Thread(target=lambda q, e: q.put(lambda_func(e,function_context)), args=(que,event))
+            t = threading.Thread(target=lambda q, e: q.put(func_with_context(e,function_context)), args=(que,event))
             t.start()
             try:
                 res = que.get(block=True, timeout=timeout)
