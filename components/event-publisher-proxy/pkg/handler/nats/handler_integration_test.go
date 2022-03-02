@@ -26,8 +26,6 @@ import (
 )
 
 func TestNatsHandlerForCloudEvents(t *testing.T) {
-	t.Parallel()
-
 	testCases := []struct {
 		name                 string
 		givenEventTypePrefix string
@@ -66,8 +64,6 @@ func TestNatsHandlerForCloudEvents(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			t.Parallel()
-
 			ctx, cancel := context.WithCancel(context.Background())
 			defer cancel()
 
@@ -115,8 +111,6 @@ func TestNatsHandlerForCloudEvents(t *testing.T) {
 }
 
 func TestNatsHandlerForLegacyEvents(t *testing.T) {
-	t.Parallel()
-
 	testCases := []struct {
 		name                 string
 		givenEventTypePrefix string
@@ -155,8 +149,6 @@ func TestNatsHandlerForLegacyEvents(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			t.Parallel()
-
 			ctx, cancel := context.WithCancel(context.Background())
 			defer cancel()
 
@@ -213,8 +205,6 @@ func TestNatsHandlerForLegacyEvents(t *testing.T) {
 }
 
 func TestNatsHandlerForSubscribedEndpoint(t *testing.T) {
-	t.Parallel()
-
 	testCases := []struct {
 		name                 string
 		givenEventTypePrefix string
@@ -233,8 +223,6 @@ func TestNatsHandlerForSubscribedEndpoint(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			t.Parallel()
-
 			ctx, cancel := context.WithCancel(context.Background())
 			defer cancel()
 
