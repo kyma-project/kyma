@@ -4,6 +4,7 @@ go 1.16
 
 replace (
 	github.com/aws/aws-sdk-go => github.com/aws/aws-sdk-go v1.42.52
+	github.com/prometheus/client_golang => github.com/prometheus/client_golang v1.11.1
 	go.etcd.io/etcd => go.etcd.io/etcd v3.3.25+incompatible
 	golang.org/x/crypto => golang.org/x/crypto v0.0.0-20220213190939-1e6e3497d506
 	golang.org/x/net => golang.org/x/net v0.0.0-20220127200216-cd36cc0744dd
