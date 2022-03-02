@@ -92,11 +92,6 @@ func StartOrDie(ctx context.Context, t *testing.T, opts ...NatsHandlerMockOpt) *
 	return mock
 }
 
-// ShutdownNatsServer shuts down the NATS server used by the NatsHandlerMock.
-func (m *NatsHandlerMock) ShutdownNatsServer() {
-	m.natsServer.Shutdown()
-}
-
 // ShutdownNatsServerAndWait shuts down the NATS server used by the NatsHandlerMock and waits for the shutdown.
 func (m *NatsHandlerMock) ShutdownNatsServerAndWait() {
 	m.natsServer.Shutdown()

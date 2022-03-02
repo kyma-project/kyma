@@ -74,6 +74,7 @@ func TestNatsHandlerForCloudEvents(t *testing.T) {
 			handlerMock := mock.StartOrDie(ctx, t,
 				mock.WithApplication(tc.givenApplicationName),
 			)
+			defer handlerMock.ShutdownNatsServerAndWait()
 
 			// setup test environment
 			publishEndpoint := fmt.Sprintf("http://localhost:%d/publish", handlerMock.GetNatsConfig().Port)
@@ -162,6 +163,7 @@ func TestNatsHandlerForLegacyEvents(t *testing.T) {
 			handlerMock := mock.StartOrDie(ctx, t,
 				mock.WithApplication(tc.givenApplicationName),
 			)
+			defer handlerMock.ShutdownNatsServerAndWait()
 
 			// setup test environment
 			publishLegacyEndpoint := fmt.Sprintf("http://localhost:%d/%s/v1/events", handlerMock.GetNatsConfig().Port, tc.givenApplicationName)
@@ -253,6 +255,7 @@ func TestNatsHandlerForSubscribedEndpoint(t *testing.T) {
 				mock.WithSubscription(scheme, subscription, tc.givenEventTypePrefix),
 				mock.WithApplication(testingutils.ApplicationName),
 			)
+			defer handlerMock.ShutdownNatsServerAndWait()
 
 			// nolint:scopelint
 			// run the tests for subscribed endpoint

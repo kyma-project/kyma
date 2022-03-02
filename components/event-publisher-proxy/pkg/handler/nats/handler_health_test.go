@@ -36,7 +36,7 @@ func TestHandlerHealth(t *testing.T) {
 			t.Parallel()
 
 			handlerMock := mock.StartOrDie(context.TODO(), t)
-			defer handlerMock.ShutdownNatsServer()
+			defer handlerMock.ShutdownNatsServerAndWait()
 
 			if tc.givenNatsServerShutdown {
 				handlerMock.ShutdownNatsServerAndWait()
