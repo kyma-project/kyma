@@ -20,6 +20,9 @@ spec:
     - sourceLabels: [__name__,le]
       regex: 'rest_client_request_latency_seconds_bucket;(0.002|0.008|0.032|0.128|0.512)' # drop buckets to reduce metric footprint
       action: drop
+    - sourceLabels: [__name__,url]
+      regex: ^rest_client_request_latency_seconds_bucket;(https://api\..+/api/v1.*|https://api\..+/apis/(apps|batch|oathkeeper.ory.sh).+)$ # allow metrics from core, apps, batch and oathkeeper API group 
+      action: keep
   namespaceSelector:
     matchNames:
       - "{{ .Release.Namespace }}"
