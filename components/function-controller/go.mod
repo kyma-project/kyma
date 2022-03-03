@@ -12,10 +12,10 @@ replace (
 	golang.org/x/text => golang.org/x/text v0.3.8-0.20220124021120-d1c84af989ab
 	gopkg.in/yaml.v2 => gopkg.in/yaml.v2 v2.3.0
 	k8s.io/api => k8s.io/api v0.22.7
+	k8s.io/apiextensions-apiserver => k8s.io/apiextensions-apiserver v0.22.7
 	k8s.io/apimachinery => k8s.io/apimachinery v0.22.7
 	k8s.io/client-go => k8s.io/client-go v0.22.7
 	k8s.io/component-base => k8s.io/component-base v0.22.7
-// knative.dev/pkg => knative.dev/pkg v0.0.0-20220223143938-f45298bd989f
 )
 
 require (
