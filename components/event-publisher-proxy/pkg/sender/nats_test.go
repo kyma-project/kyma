@@ -17,43 +17,42 @@ import (
 )
 
 func TestNatsMessageSender(t *testing.T) {
+	t.Parallel()
+
 	testCases := []struct {
-		name                    string
-		givenNatsServerShutdown bool
-		wantError               bool
-		wantStatusCode          int
+		name                      string
+		givenNatsConnectionClosed bool
+		wantError                 bool
+		wantStatusCode            int
 	}{
 		{
-			name:                    "Send should succeed if NATS connection is open",
-			givenNatsServerShutdown: false,
-			wantError:               false,
-			wantStatusCode:          http.StatusNoContent,
+			name:                      "send should succeed if NATS connection is open",
+			givenNatsConnectionClosed: false,
+			wantError:                 false,
+			wantStatusCode:            http.StatusNoContent,
 		},
 		{
-			name:                    "Send should fail if NATS connection is not open",
-			givenNatsServerShutdown: true,
-			wantError:               true,
-			wantStatusCode:          http.StatusBadGateway,
+			name:                      "send should fail if NATS connection is not open",
+			givenNatsConnectionClosed: true,
+			wantError:                 true,
+			wantStatusCode:            http.StatusBadGateway,
 		},
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+
 			natsServer := testingutils.StartNatsServer()
 			assert.NotNil(t, natsServer)
 			defer natsServer.Shutdown()
 
-			bc := pkgnats.NewBackendConnection(natsServer.ClientURL(), true, 1, time.Second)
-			err := bc.Connect()
+			connection, err := pkgnats.Connect(natsServer.ClientURL(), true, 1, time.Second)
 			assert.NoError(t, err)
-			assert.NotNil(t, bc.Connection)
-
-			if tc.givenNatsServerShutdown {
-				natsServer.Shutdown()
-			}
+			assert.NotNil(t, connection)
 
 			receive := make(chan bool, 1)
 			validator := testingutils.ValidateNatsMessageDataOrFail(t, fmt.Sprintf(`"%s"`, testingutils.CloudEventData), receive)
-			testingutils.SubscribeToEventOrFail(t, bc.Connection, testingutils.CloudEventType, validator)
+			testingutils.SubscribeToEventOrFail(t, connection, testingutils.CloudEventType, validator)
 
 			ce := testingutils.StructuredCloudEventPayloadWithCleanEventType
 			event := cloudevents.NewEvent()
@@ -62,13 +61,17 @@ func TestNatsMessageSender(t *testing.T) {
 			assert.NoError(t, err)
 
 			ctx := context.Background()
-			sender := NewNatsMessageSender(context.Background(), bc, logrus.New())
+			sender := NewNatsMessageSender(context.Background(), connection, logrus.New())
+
+			if tc.givenNatsConnectionClosed {
+				connection.Close()
+			}
 
 			status, err := sender.Send(ctx, &event)
 			assert.Equal(t, tc.wantError, err != nil)
-			assert.Equal(t, status, tc.wantStatusCode)
+			assert.Equal(t, tc.wantStatusCode, status)
 
-			err = testingutils.WaitForChannelOrTimeout(receive, time.Second*3)
+			err = testingutils.WaitForChannelOrTimeout(receive, time.Millisecond*5)
 			assert.Equal(t, tc.wantError, err != nil)
 		})
 	}

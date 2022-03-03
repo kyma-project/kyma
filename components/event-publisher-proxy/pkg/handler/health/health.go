@@ -64,6 +64,7 @@ func DefaultCheck(w http.ResponseWriter, _ *http.Request) {
 }
 
 // WithLivenessCheck returns CheckerOpt which sets the liveness check for the given http.HandlerFunc.
+// It panics if the given http.HandlerFunc is nil.
 func WithLivenessCheck(h http.HandlerFunc) CheckerOpt {
 	if h == nil {
 		panic("liveness handler is nil")
@@ -75,6 +76,7 @@ func WithLivenessCheck(h http.HandlerFunc) CheckerOpt {
 }
 
 // WithReadinessCheck returns CheckerOpt which sets the readiness check for the given http.HandlerFunc.
+// It panics if the given http.HandlerFunc is nil.
 func WithReadinessCheck(h http.HandlerFunc) CheckerOpt {
 	if h == nil {
 		panic("readiness handler is nil")

@@ -10,8 +10,6 @@ import (
 	"github.com/cloudevents/sdk-go/v2/event"
 	"github.com/nats-io/nats.go"
 	"github.com/sirupsen/logrus"
-
-	pkgnats "github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/nats"
 )
 
 // compile time check
@@ -23,19 +21,19 @@ type GenericSender interface {
 
 // NatsMessageSender is responsible for sending messages over HTTP.
 type NatsMessageSender struct {
-	ctx               context.Context
-	logger            *logrus.Logger
-	backendConnection *pkgnats.BackendConnection
+	ctx        context.Context
+	logger     *logrus.Logger
+	connection *nats.Conn
 }
 
 // NewNatsMessageSender returns a new NewNatsMessageSender instance with the given nats connection.
-func NewNatsMessageSender(ctx context.Context, bc *pkgnats.BackendConnection, logger *logrus.Logger) *NatsMessageSender {
-	return &NatsMessageSender{ctx: ctx, backendConnection: bc, logger: logger}
+func NewNatsMessageSender(ctx context.Context, connection *nats.Conn, logger *logrus.Logger) *NatsMessageSender {
+	return &NatsMessageSender{ctx: ctx, connection: connection, logger: logger}
 }
 
 // ConnectionStatus returns nats.Status for the NATS connection used by the NatsMessageSender.
 func (s *NatsMessageSender) ConnectionStatus() nats.Status {
-	return s.backendConnection.Connection.Status()
+	return s.connection.Status()
 }
 
 // Send dispatches the event.Event to NATS server.
@@ -45,7 +43,7 @@ func (s *NatsMessageSender) Send(ctx context.Context, event *event.Event) (int, 
 		return http.StatusBadGateway, errors.New("connection status: no connection to NATS server")
 	}
 
-	sender, err := cenats.NewSenderFromConn(s.backendConnection.Connection, event.Type())
+	sender, err := cenats.NewSenderFromConn(s.connection, event.Type())
 	if err != nil {
 		return http.StatusInternalServerError, err
 	}

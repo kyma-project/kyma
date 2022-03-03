@@ -3,9 +3,9 @@ package nats
 import (
 	"net/http"
 
-	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/handler/health"
-
 	"github.com/nats-io/nats.go"
+
+	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/handler/health"
 )
 
 // ReadinessCheck returns an instance of http.HandlerFunc that checks the readiness of the given NATS Handler.

@@ -32,10 +32,10 @@ func TestHandlerHealth(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			handlerMock := mock.StartOrDie(context.TODO(), t)
-			defer handlerMock.ShutdownNatsServer()
+			defer handlerMock.ShutdownNatsServerAndWait()
 
 			if tc.givenNatsServerShutdown {
-				handlerMock.ShutdownNatsServer()
+				handlerMock.ShutdownNatsServerAndWait()
 			}
 
 			testingutils.WaitForEndpointStatusCodeOrFail(handlerMock.GetLivenessEndpoint(), tc.wantLivenessStatusCode)
