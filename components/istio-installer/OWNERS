@@ -1,9 +1,7 @@
+reviewers:
+  - service-mesh-reviewers
 approvers:
-  - Tomasz-Smelcerz-SAP
-  - strekm
-  - piotrmsc
-  - kubadz
-  - Demonsthere
+  - service-mesh-approvers
 
 labels:
 - area/service-mesh

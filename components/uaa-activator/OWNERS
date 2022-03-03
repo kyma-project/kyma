@@ -1,0 +1,7 @@
+reviewers:
+  - uaa-activator-reviewers
+approvers:
+  - uaa-activator-approvers
+
+labels:
+  - area/uaa-activator
