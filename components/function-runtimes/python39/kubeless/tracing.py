@@ -9,7 +9,6 @@ from opentelemetry.sdk.trace import TracerProvider, _Span
 from opentelemetry.sdk.trace.export import BatchSpanProcessor
 from opentelemetry.propagate import set_global_textmap
 from opentelemetry.propagators.b3 import B3MultiFormat
-from opentelemetry.util import types
 from contextlib import contextmanager
 from opentelemetry.propagate import extract
 from opentelemetry.trace.propagation import _SPAN_KEY
@@ -59,6 +58,12 @@ def get_tracer() -> trace.Tracer:
 
 @contextmanager  # type: ignore
 def set_req_context(req) -> Iterator[trace.Span]:
+    '''Propagates incoming span from the request to the current context
+
+    This method allows to set up a context in any thread based on the incoming request.
+    By design, span context can't be moved between threads and because we run every function 
+    in the separated thread we have to propagate the context manually.
+    '''
     span = _Span(
         "request-span", 
         trace.get_current_span(
