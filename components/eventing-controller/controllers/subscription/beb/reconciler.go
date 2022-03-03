@@ -32,7 +32,6 @@ import (
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 	recerrors "github.com/kyma-project/kyma/components/eventing-controller/controllers/errors"
 	"github.com/kyma-project/kyma/components/eventing-controller/logger"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/application"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/constants"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/types"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
@@ -48,7 +47,7 @@ type Reconciler struct {
 	client.Client
 	logger            *logger.Logger
 	recorder          record.EventRecorder
-	Backend           handlers.MessagingBackend
+	Backend           handlers.BEBBackend
 	Domain            string
 	eventTypeCleaner  eventtype.Cleaner
 	oauth2credentials *handlers.OAuth2ClientCredentials
@@ -70,21 +69,20 @@ const (
 	timeoutRetryActiveEmsStatus = time.Second * 30
 )
 
-func NewReconciler(ctx context.Context, client client.Client, applicationLister *application.Lister, logger *logger.Logger, recorder record.EventRecorder, cfg env.Config, credential *handlers.OAuth2ClientCredentials, mapper handlers.NameMapper) *Reconciler {
-	bebHandler := handlers.NewBEB(credential, mapper, logger)
-	if err := bebHandler.Initialize(cfg); err != nil {
+func NewReconciler(ctx context.Context, client client.Client, logger *logger.Logger, recorder record.EventRecorder, cfg env.Config,
+	cleaner eventtype.Cleaner, bebBackend handlers.BEBBackend, credential *handlers.OAuth2ClientCredentials, mapper handlers.NameMapper) *Reconciler {
+	if err := bebBackend.Initialize(cfg); err != nil {
 		logger.WithContext().Errorw("start reconciler failed", "name", reconcilerName, "error", err)
 		panic(err)
 	}
-
 	return &Reconciler{
 		ctx:               ctx,
 		Client:            client,
 		logger:            logger,
 		recorder:          recorder,
-		Backend:           bebHandler,
+		Backend:           bebBackend,
 		Domain:            cfg.Domain,
-		eventTypeCleaner:  eventtype.NewCleaner(cfg.EventTypePrefix, applicationLister, logger),
+		eventTypeCleaner:  cleaner,
 		oauth2credentials: credential,
 		nameMapper:        mapper,
 	}

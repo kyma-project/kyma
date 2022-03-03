@@ -11,6 +11,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/eventtype"
+
 	bebreconciler "github.com/kyma-project/kyma/components/eventing-controller/controllers/subscription/beb"
 
 	corev1 "k8s.io/api/core/v1"
@@ -1397,14 +1399,14 @@ var _ = BeforeSuite(func(done Done) {
 	// prepare application-lister
 	app := applicationtest.NewApplication(reconcilertesting.ApplicationName, nil)
 	applicationLister := fake.NewApplicationListerOrDie(context.Background(), app)
-
 	defaultLogger, err := logger.New(string(kymalogger.JSON), string(kymalogger.INFO))
 	Expect(err).To(BeNil())
-
+	cleaner := eventtype.NewCleaner(envConf.EventTypePrefix, applicationLister, defaultLogger)
 	nameMapper = handlers.NewBEBSubscriptionNameMapper(domain, handlers.MaxBEBSubscriptionNameLength)
+	bebHandler := handlers.NewBEB(credentials, nameMapper, defaultLogger)
 
-	err = bebreconciler.NewReconciler(context.Background(), k8sManager.GetClient(), applicationLister, defaultLogger,
-		k8sManager.GetEventRecorderFor("eventing-controller"), envConf, credentials, nameMapper).SetupUnmanaged(k8sManager)
+	err = bebreconciler.NewReconciler(context.Background(), k8sManager.GetClient(), defaultLogger,
+		k8sManager.GetEventRecorderFor("eventing-controller"), envConf, cleaner, bebHandler, credentials, nameMapper).SetupUnmanaged(k8sManager)
 	Expect(err).ToNot(HaveOccurred())
 
 	go func() {
