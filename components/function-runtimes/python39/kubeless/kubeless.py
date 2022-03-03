@@ -56,9 +56,9 @@ def func_with_context(e, function_context):
 
     if tracer != None:
         with set_req_context(ex["request"]):
-            func(e, function_context)
+            return func(e, function_context)
     else:
-        func(e, function_context) 
+        return func(e, function_context) 
 
 
 @app.get('/healthz')
