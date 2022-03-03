@@ -77,7 +77,7 @@ healthProbe:
 jetStream:
   # Configs for the stream used for storing events
   # Name of the JetStream stream where all events are stored.
-  streamName: kyma-eventing
+  streamName: sap
   # Storage type of the stream, memory or file.
   storage: memory
   # When should events be deleted from the stream:
