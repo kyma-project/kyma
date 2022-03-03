@@ -14,39 +14,39 @@ This tutorial is based on a sample HttpBin service deployment and a sample Funct
 
 1. Export your client as an environment variable:
 
-  ```shell
-  export CLIENT_NAME={YOUR_CLIENT_NAME}
-  ```
+   ```shell
+   export CLIENT_NAME={YOUR_CLIENT_NAME}
+   ```
 
 2. Create an OAuth2 client with `read` and `write` scopes. Run:
 
-  ```shell
-  cat <<EOF | kubectl apply -f -
-  apiVersion: hydra.ory.sh/v1alpha1
-  kind: OAuth2Client
-  metadata:
-    name: $CLIENT_NAME
-    namespace: $NAMESPACE
-  spec:
-    grantTypes:
-      - "client_credentials"
-    scope: "read write"
-    secretName: $CLIENT_NAME
-  EOF
-  ```
+   ```shell
+   cat <<EOF | kubectl apply -f -
+   apiVersion: hydra.ory.sh/v1alpha1
+   kind: OAuth2Client
+   metadata:
+     name: $CLIENT_NAME
+     namespace: $NAMESPACE
+   spec:
+     grantTypes:
+       - "client_credentials"
+     scope: "read write"
+     secretName: $CLIENT_NAME
+   EOF
+   ```
 
 3. Export the credentials of the created client as environment variables. Run:
 
-  ```shell
-  export CLIENT_ID="$(kubectl get secret -n $NAMESPACE $CLIENT_NAME -o jsonpath='{.data.client_id}' | base64 --decode)"
-  export CLIENT_SECRET="$(kubectl get secret -n $NAMESPACE $CLIENT_NAME -o jsonpath='{.data.client_secret}' | base64 --decode)"
-  ```
+   ```shell
+   export CLIENT_ID="$(kubectl get secret -n $NAMESPACE $CLIENT_NAME -o jsonpath='{.data.client_id}' | base64 --decode)"
+   export CLIENT_SECRET="$(kubectl get secret -n $NAMESPACE $CLIENT_NAME -o jsonpath='{.data.client_secret}' | base64 --decode)"
+   ```
 
 4. Encode your client credentials and export them as an environment variable:
 
-  ```shell
-  export ENCODED_CREDENTIALS=$(echo -n "$CLIENT_ID:$CLIENT_SECRET" | base64)
-  ```
+   ```shell
+   export ENCODED_CREDENTIALS=$(echo -n "$CLIENT_ID:$CLIENT_SECRET" | base64)
+   ```
 
 5. Get tokens to interact with secured resources using client credentials flow:
 
@@ -58,9 +58,9 @@ This tutorial is based on a sample HttpBin service deployment and a sample Funct
 
      1. Export the following value as an environment variable:
 
-     ```shell
-     export KYMA_DOMAIN={KYMA_DOMAIN_NAME}
-     ```  
+        ```shell
+        export KYMA_DOMAIN={KYMA_DOMAIN_NAME}
+        ```  
 
      2. Get the token:
 
@@ -82,9 +82,9 @@ This tutorial is based on a sample HttpBin service deployment and a sample Funct
 
      1. Export the following value as an environment variable:
 
-     ```shell
-     export KYMA_DOMAIN={KYMA_DOMAIN_NAME}
-     ```  
+        ```shell
+        export KYMA_DOMAIN={KYMA_DOMAIN_NAME}
+        ```  
 
      2. Get the token:
 
@@ -213,15 +213,15 @@ Follow the instructions in the tabs to call the secured service or Functions usi
 
 1. Send a `GET` request with a token that has the "read" scope to the HttpBin service:
 
-  ```shell
-  curl -ik -X GET https://httpbin.$DOMAIN_TO_EXPOSE_WORKLOADS/headers -H "Authorization: Bearer $ACCESS_TOKEN_READ"
-  ```
+   ```shell
+   curl -ik -X GET https://httpbin.$DOMAIN_TO_EXPOSE_WORKLOADS/headers -H "Authorization: Bearer $ACCESS_TOKEN_READ"
+   ```
 
 2. Send a `POST` request with a token that has the "write" scope to the HttpBin's `/post` endpoint:
 
-  ```shell
-  curl -ik -X POST https://httpbin.$DOMAIN_TO_EXPOSE_WORKLOADS/post -d "test data" -H "Authorization: bearer $ACCESS_TOKEN_WRITE"
-  ```
+   ```shell
+   curl -ik -X POST https://httpbin.$DOMAIN_TO_EXPOSE_WORKLOADS/post -d "test data" -H "Authorization: bearer $ACCESS_TOKEN_WRITE"
+   ```
 
 These calls return the code `200` response. If you call the service without a token, you get the code `401` response. If you call the service or its secured endpoint with a token with the wrong scope, you get the code `403` response.
 
@@ -234,9 +234,9 @@ These calls return the code `200` response. If you call the service without a to
 
 Send a `GET` request with a token that has the "read" scope to the Function:
 
-  ```shell
-  curl -ik https://function-example.$DOMAIN_TO_EXPOSE_WORKLOADS/function -H "Authorization: bearer $ACCESS_TOKEN_READ"
-  ```
+   ```shell
+   curl -ik https://function-example.$DOMAIN_TO_EXPOSE_WORKLOADS/function -H "Authorization: bearer $ACCESS_TOKEN_READ"
+   ```
 
 This call returns the code `200` response. If you call the Function without a token, you get the code `401` response. If you call the Function with a token with the wrong scope, you get the code `403` response.
 
