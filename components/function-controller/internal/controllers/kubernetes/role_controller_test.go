@@ -44,15 +44,18 @@ func TestRoleReconciler_Reconcile(t *testing.T) {
 
 	request := ctrl.Request{NamespacedName: types.NamespacedName{Namespace: baseRole.GetNamespace(), Name: baseRole.GetName()}}
 
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
 	//WHEN
 	t.Run("should successfully propagate base Role to user namespace", func(t *testing.T) {
 		g := gomega.NewGomegaWithT(t)
 		t.Log("reconciling Role that doesn't exist")
-		_, err := reconciler.Reconcile(ctrl.Request{NamespacedName: types.NamespacedName{Namespace: baseRole.GetNamespace(), Name: "not-existing-role"}})
+		_, err := reconciler.Reconcile(ctx, ctrl.Request{NamespacedName: types.NamespacedName{Namespace: baseRole.GetNamespace(), Name: "not-existing-role"}})
 		g.Expect(err).To(gomega.BeNil(), "should not throw error on non existing Role")
 
 		t.Log("reconciling the Role")
-		result, err := reconciler.Reconcile(request)
+		result, err := reconciler.Reconcile(ctx, request)
 		g.Expect(err).To(gomega.BeNil())
 		g.Expect(result.Requeue).To(gomega.BeFalse())
 		g.Expect(result.RequeueAfter).To(gomega.Equal(testCfg.RoleRequeueDuration))
@@ -74,7 +77,7 @@ func TestRoleReconciler_Reconcile(t *testing.T) {
 		}
 		g.Expect(k8sClient.Update(context.TODO(), baseRoleCopy)).To(gomega.Succeed())
 
-		result, err = reconciler.Reconcile(request)
+		result, err = reconciler.Reconcile(ctx, request)
 		g.Expect(err).To(gomega.BeNil())
 		g.Expect(result.Requeue).To(gomega.BeFalse())
 		g.Expect(result.RequeueAfter).To(gomega.Equal(testCfg.RoleRequeueDuration))
@@ -95,7 +98,7 @@ func TestRoleReconciler_Reconcile(t *testing.T) {
 		}
 		g.Expect(k8sClient.Update(context.TODO(), userCopy)).To(gomega.Succeed())
 
-		result, err = reconciler.Reconcile(request)
+		result, err = reconciler.Reconcile(ctx, request)
 		g.Expect(err).To(gomega.BeNil())
 		g.Expect(result.Requeue).To(gomega.BeFalse())
 		g.Expect(result.RequeueAfter).To(gomega.Equal(testCfg.RoleRequeueDuration))

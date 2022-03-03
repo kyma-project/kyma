@@ -98,7 +98,7 @@ func main() {
 		setupLog.Error(err, "Unable to initialize controller manager")
 		os.Exit(1)
 	}
-
+	mgr.GetClient()
 	resourceClient := internalresource.New(mgr.GetClient(), scheme)
 	configMapSvc := k8s.NewConfigMapService(resourceClient, config.Kubernetes)
 	secretSvc := k8s.NewSecretService(resourceClient, config.Kubernetes)

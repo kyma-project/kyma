@@ -34,7 +34,8 @@ func NewHealthChecker(checkCh chan event.GenericEvent, returnCh chan bool, timeo
 func (h HealthChecker) Checker(req *http.Request) error {
 	h.logger.Debug("Liveness handler triggered")
 
-	checkEvent := event.GenericEvent{Meta: &ctrl.ObjectMeta{Name: HealthEvent}}
+	checkEvent := event.GenericEvent{}
+	checkEvent.Object.SetName(HealthEvent)
 	select {
 	case h.checkCh <- checkEvent:
 	case <-time.After(h.timeout):

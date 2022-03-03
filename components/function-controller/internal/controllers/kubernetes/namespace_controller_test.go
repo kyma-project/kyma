@@ -58,13 +58,16 @@ func TestNamespaceReconciler_Reconcile(t *testing.T) {
 	reconciler := NewNamespace(k8sClient, log.Log, testCfg, configMapSvc, secretSvc, serviceAccountSvc, roleSvc, roleBindingSvc)
 	namespace := userNamespace.GetName()
 
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
 	//WHEN
 	t.Log("reconciling Namespace that doesn't exist")
-	_, err := reconciler.Reconcile(ctrl.Request{NamespacedName: types.NamespacedName{Name: "not-existing-ns"}})
+	_, err := reconciler.Reconcile(ctx, ctrl.Request{NamespacedName: types.NamespacedName{Name: "not-existing-ns"}})
 	g.Expect(err).To(gomega.BeNil(), "should not throw error on non existing namespace")
 
 	t.Log("reconciling the Namespace")
-	result, err := reconciler.Reconcile(request)
+	result, err := reconciler.Reconcile(ctx, request)
 	g.Expect(err).To(gomega.BeNil())
 	g.Expect(result.Requeue).To(gomega.BeFalse())
 	g.Expect(result.RequeueAfter).To(gomega.Equal(0 * time.Second))
@@ -90,7 +93,7 @@ func TestNamespaceReconciler_Reconcile(t *testing.T) {
 	compareRoleBinding(g, roleBinding, baseRoleBinding)
 
 	t.Log("one more time reconciling the Namespace")
-	result, err = reconciler.Reconcile(request)
+	result, err = reconciler.Reconcile(ctx, request)
 	g.Expect(err).To(gomega.BeNil())
 	g.Expect(result.Requeue).To(gomega.BeFalse())
 	g.Expect(result.RequeueAfter).To(gomega.Equal(0 * time.Second))

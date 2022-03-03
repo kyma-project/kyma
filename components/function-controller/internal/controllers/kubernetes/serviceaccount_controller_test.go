@@ -40,12 +40,14 @@ func TestServiceAccountReconciler_Reconcile(t *testing.T) {
 	request := ctrl.Request{NamespacedName: types.NamespacedName{Namespace: baseServiceAccount.GetNamespace(), Name: baseServiceAccount.GetName()}}
 	reconciler := NewServiceAccount(k8sClient, log.Log, testCfg, serviceAccountSvc)
 	namespace := userNamespace.GetName()
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
 
 	t.Run("should successfully propagate base ServiceAccount to user namespace", func(t *testing.T) {
 		g := gomega.NewGomegaWithT(t)
 
 		t.Log("reconciling the non existing Service Account")
-		_, err := reconciler.Reconcile(ctrl.Request{
+		_, err := reconciler.Reconcile(ctx, ctrl.Request{
 			NamespacedName: types.NamespacedName{
 				Namespace: baseServiceAccount.GetNamespace(),
 				Name:      "non-existing-svc-acc",
@@ -54,7 +56,7 @@ func TestServiceAccountReconciler_Reconcile(t *testing.T) {
 		g.Expect(err).To(gomega.BeNil())
 
 		t.Log("reconciling the Service Account")
-		result, err := reconciler.Reconcile(request)
+		result, err := reconciler.Reconcile(ctx, request)
 		g.Expect(err).To(gomega.BeNil())
 		g.Expect(result.Requeue).To(gomega.BeFalse())
 		g.Expect(result.RequeueAfter).To(gomega.Equal(testCfg.ServiceAccountRequeueDuration))
@@ -69,7 +71,7 @@ func TestServiceAccountReconciler_Reconcile(t *testing.T) {
 		baseServiceAccountCopy.AutomountServiceAccountToken = nil
 		g.Expect(k8sClient.Update(context.TODO(), baseServiceAccountCopy)).To(gomega.Succeed())
 
-		result, err = reconciler.Reconcile(request)
+		result, err = reconciler.Reconcile(ctx, request)
 		g.Expect(err).To(gomega.BeNil())
 		g.Expect(result.Requeue).To(gomega.BeFalse())
 		g.Expect(result.RequeueAfter).To(gomega.Equal(testCfg.ServiceAccountRequeueDuration))
@@ -84,7 +86,7 @@ func TestServiceAccountReconciler_Reconcile(t *testing.T) {
 		userCopy.AutomountServiceAccountToken = &trueValue
 		g.Expect(k8sClient.Update(context.TODO(), userCopy)).To(gomega.Succeed())
 
-		result, err = reconciler.Reconcile(request)
+		result, err = reconciler.Reconcile(ctx, request)
 		g.Expect(err).To(gomega.BeNil())
 		g.Expect(result.Requeue).To(gomega.BeFalse())
 		g.Expect(result.RequeueAfter).To(gomega.Equal(testCfg.ServiceAccountRequeueDuration))

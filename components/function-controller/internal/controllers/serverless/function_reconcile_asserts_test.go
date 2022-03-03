@@ -30,9 +30,11 @@ func assertSuccessfulFunctionBuild(t *testing.T, resourceClient resource.Client,
 		initialDeploymentCondition = corev1.ConditionTrue
 		initialConditionsCount = 3
 	}
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
 
 	t.Log("creating the Job")
-	result, err := reconciler.Reconcile(request)
+	result, err := reconciler.Reconcile(ctx, request)
 	g.Expect(err).To(gomega.BeNil())
 	g.Expect(result.Requeue).To(gomega.BeFalse())
 	g.Expect(result.RequeueAfter).To(gomega.Equal(time.Second * 0))
@@ -50,7 +52,7 @@ func assertSuccessfulFunctionBuild(t *testing.T, resourceClient resource.Client,
 	g.Expect(jobList.Items).To(gomega.HaveLen(1))
 
 	t.Log("build in progress")
-	result, err = reconciler.Reconcile(request)
+	result, err = reconciler.Reconcile(ctx, request)
 	g.Expect(err).To(gomega.BeNil())
 	g.Expect(result.Requeue).To(gomega.BeFalse())
 	g.Expect(result.RequeueAfter).To(gomega.Equal(time.Second * 0))
@@ -73,7 +75,7 @@ func assertSuccessfulFunctionBuild(t *testing.T, resourceClient resource.Client,
 	job.Status.CompletionTime = &now
 	g.Expect(resourceClient.Status().Update(context.TODO(), job)).To(gomega.Succeed())
 
-	result, err = reconciler.Reconcile(request)
+	result, err = reconciler.Reconcile(ctx, request)
 	g.Expect(err).To(gomega.BeNil())
 	g.Expect(result.Requeue).To(gomega.BeFalse())
 	g.Expect(result.RequeueAfter).To(gomega.Equal(time.Second * 0))
@@ -90,9 +92,11 @@ func assertSuccessfulFunctionBuild(t *testing.T, resourceClient resource.Client,
 
 func assertSuccessfulFunctionDeployment(t *testing.T, resourceClient resource.Client, reconciler *FunctionReconciler, request ctrl.Request, fnLabels map[string]string, registryAddress string, redeployment bool) {
 	g := gomega.NewGomegaWithT(t)
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
 
 	t.Log("deploy started")
-	result, err := reconciler.Reconcile(request)
+	result, err := reconciler.Reconcile(ctx, request)
 	g.Expect(err).To(gomega.BeNil())
 	g.Expect(result.Requeue).To(gomega.BeFalse())
 	g.Expect(result.RequeueAfter).To(gomega.Equal(time.Second * 0))
@@ -122,7 +126,7 @@ func assertSuccessfulFunctionDeployment(t *testing.T, resourceClient resource.Cl
 
 	if !redeployment {
 		t.Log("service creation")
-		result, err = reconciler.Reconcile(request)
+		result, err = reconciler.Reconcile(ctx, request)
 		g.Expect(err).To(gomega.BeNil())
 		g.Expect(result.Requeue).To(gomega.BeFalse())
 		g.Expect(result.RequeueAfter).To(gomega.Equal(time.Duration(0)))
@@ -159,7 +163,7 @@ func assertSuccessfulFunctionDeployment(t *testing.T, resourceClient resource.Cl
 
 	if !redeployment {
 		t.Log("hpa creation")
-		result, err = reconciler.Reconcile(request)
+		result, err = reconciler.Reconcile(ctx, request)
 		g.Expect(err).To(gomega.BeNil())
 		g.Expect(result.Requeue).To(gomega.BeFalse())
 		g.Expect(result.RequeueAfter).To(gomega.Equal(time.Duration(0)))
@@ -194,7 +198,7 @@ func assertSuccessfulFunctionDeployment(t *testing.T, resourceClient resource.Cl
 	}
 	g.Expect(resourceClient.Status().Update(context.TODO(), deployment)).To(gomega.Succeed())
 
-	result, err = reconciler.Reconcile(request)
+	result, err = reconciler.Reconcile(ctx, request)
 	g.Expect(err).To(gomega.BeNil())
 	g.Expect(result.Requeue).To(gomega.BeFalse())
 	g.Expect(result.RequeueAfter).To(gomega.Equal(time.Minute * 5))
@@ -208,7 +212,7 @@ func assertSuccessfulFunctionDeployment(t *testing.T, resourceClient resource.Cl
 	g.Expect(reconciler.getConditionReason(function.Status.Conditions, serverlessv1alpha1.ConditionRunning)).To(gomega.Equal(serverlessv1alpha1.ConditionReasonDeploymentReady))
 
 	t.Log("should not change state on reconcile")
-	result, err = reconciler.Reconcile(request)
+	result, err = reconciler.Reconcile(ctx, request)
 	g.Expect(err).To(gomega.BeNil())
 	g.Expect(result.Requeue).To(gomega.BeFalse())
 	g.Expect(result.RequeueAfter).To(gomega.Equal(time.Minute * 5))

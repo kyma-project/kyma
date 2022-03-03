@@ -41,14 +41,16 @@ func TestRoleBindingReconciler_Reconcile(t *testing.T) {
 	request := ctrl.Request{NamespacedName: types.NamespacedName{Namespace: baseRoleBinding.GetNamespace(), Name: baseRoleBinding.GetName()}}
 	reconciler := NewRoleBinding(k8sClient, log.Log, testCfg, roleBindingSvc)
 	namespace := userNamespace.GetName()
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
 
 	//WHEN
 	t.Log("reconciling RoleBinding that doesn't exist")
-	_, err := reconciler.Reconcile(ctrl.Request{NamespacedName: types.NamespacedName{Namespace: baseRoleBinding.GetNamespace(), Name: "not-existing-rolebinding"}})
+	_, err := reconciler.Reconcile(ctx, ctrl.Request{NamespacedName: types.NamespacedName{Namespace: baseRoleBinding.GetNamespace(), Name: "not-existing-rolebinding"}})
 	g.Expect(err).To(gomega.BeNil(), "should not throw error on non existing RoleBinding")
 
 	t.Log("reconciling the RoleBinding")
-	result, err := reconciler.Reconcile(request)
+	result, err := reconciler.Reconcile(ctx, request)
 	g.Expect(err).To(gomega.BeNil())
 	g.Expect(result.Requeue).To(gomega.BeFalse())
 	g.Expect(result.RequeueAfter).To(gomega.Equal(testCfg.RoleBindingRequeueDuration))
@@ -69,7 +71,7 @@ func TestRoleBindingReconciler_Reconcile(t *testing.T) {
 	}
 	g.Expect(k8sClient.Update(context.TODO(), roleBindingCopy)).To(gomega.Succeed())
 
-	result, err = reconciler.Reconcile(request)
+	result, err = reconciler.Reconcile(ctx, request)
 	g.Expect(err).To(gomega.BeNil())
 	g.Expect(result.Requeue).To(gomega.BeFalse())
 	g.Expect(result.RequeueAfter).To(gomega.Equal(testCfg.RoleBindingRequeueDuration))
@@ -89,7 +91,7 @@ func TestRoleBindingReconciler_Reconcile(t *testing.T) {
 	}
 	g.Expect(k8sClient.Update(context.TODO(), userCopy)).To(gomega.Succeed())
 
-	result, err = reconciler.Reconcile(request)
+	result, err = reconciler.Reconcile(ctx, request)
 	g.Expect(err).To(gomega.BeNil())
 	g.Expect(result.Requeue).To(gomega.BeFalse())
 	g.Expect(result.RequeueAfter).To(gomega.Equal(testCfg.RoleBindingRequeueDuration))

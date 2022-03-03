@@ -41,13 +41,16 @@ func TestConfigMapReconciler_Reconcile(t *testing.T) {
 	reconciler := NewConfigMap(k8sClient, log.Log, testCfg, configMapSvc)
 	namespace := userNamespace.GetName()
 
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
 	//WHEN
 	t.Log("reconciling ConfigMap that doesn't exist")
-	_, err := reconciler.Reconcile(ctrl.Request{NamespacedName: types.NamespacedName{Namespace: baseConfigMap.GetNamespace(), Name: "not-existing-cm"}})
+	_, err := reconciler.Reconcile(ctx, ctrl.Request{NamespacedName: types.NamespacedName{Namespace: baseConfigMap.GetNamespace(), Name: "not-existing-cm"}})
 	g.Expect(err).To(gomega.BeNil(), "should not throw error on non existing configmap")
 
 	t.Log("reconciling the ConfigMap")
-	result, err := reconciler.Reconcile(request)
+	result, err := reconciler.Reconcile(ctx, request)
 	g.Expect(err).To(gomega.BeNil())
 	g.Expect(result.Requeue).To(gomega.BeFalse())
 	g.Expect(result.RequeueAfter).To(gomega.Equal(testCfg.ConfigMapRequeueDuration))
@@ -62,7 +65,7 @@ func TestConfigMapReconciler_Reconcile(t *testing.T) {
 	cmCopy.Data["test123"] = "321tset"
 	g.Expect(k8sClient.Update(context.TODO(), cmCopy)).To(gomega.Succeed())
 
-	result, err = reconciler.Reconcile(request)
+	result, err = reconciler.Reconcile(ctx, request)
 	g.Expect(err).To(gomega.BeNil())
 	g.Expect(result.Requeue).To(gomega.BeFalse())
 	g.Expect(result.RequeueAfter).To(gomega.Equal(testCfg.ConfigMapRequeueDuration))
@@ -76,7 +79,7 @@ func TestConfigMapReconciler_Reconcile(t *testing.T) {
 	userCopy.Data["4213"] = "142343"
 	g.Expect(k8sClient.Update(context.TODO(), userCopy)).To(gomega.Succeed())
 
-	result, err = reconciler.Reconcile(request)
+	result, err = reconciler.Reconcile(ctx, request)
 	g.Expect(err).To(gomega.BeNil())
 	g.Expect(result.Requeue).To(gomega.BeFalse())
 	g.Expect(result.RequeueAfter).To(gomega.Equal(testCfg.ConfigMapRequeueDuration))

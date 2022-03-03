@@ -34,6 +34,8 @@ func TestSecretReconciler_Reconcile(t *testing.T) {
 	reconciler := NewSecret(k8sClient, log.Log, testCfg, secretSvc)
 
 	namespace := userNamespace.GetName()
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
 
 	t.Run("should successfully propagate base Secret to user namespace", func(t *testing.T) {
 		//GIVEN
@@ -42,7 +44,7 @@ func TestSecretReconciler_Reconcile(t *testing.T) {
 		baseSecret := newFixBaseSecret(testCfg.BaseNamespace, "successful-propagation")
 		createSecret(g, resourceClient, baseSecret)
 		defer deleteSecret(g, k8sClient, baseSecret)
-		_, err := reconciler.Reconcile(ctrl.Request{
+		_, err := reconciler.Reconcile(ctx, ctrl.Request{
 			NamespacedName: types.NamespacedName{
 				Namespace: baseSecret.GetNamespace(),
 				Name:      "not-existing-secret",
@@ -53,7 +55,7 @@ func TestSecretReconciler_Reconcile(t *testing.T) {
 
 		//WHEN
 		t.Log("reconciling the Secret")
-		result, err := reconciler.Reconcile(request)
+		result, err := reconciler.Reconcile(ctx, request)
 		g.Expect(err).To(gomega.BeNil())
 		g.Expect(result.Requeue).To(gomega.BeFalse())
 		g.Expect(result.RequeueAfter).To(gomega.Equal(testCfg.SecretRequeueDuration))
@@ -71,7 +73,7 @@ func TestSecretReconciler_Reconcile(t *testing.T) {
 		updateBaseSecretCopy.Data["test123"] = []byte("321tset")
 		g.Expect(k8sClient.Update(context.TODO(), updateBaseSecretCopy)).To(gomega.Succeed())
 
-		result, err = reconciler.Reconcile(request)
+		result, err = reconciler.Reconcile(ctx, request)
 		g.Expect(err).To(gomega.BeNil())
 		g.Expect(result.Requeue).To(gomega.BeFalse())
 		g.Expect(result.RequeueAfter).To(gomega.Equal(testCfg.SecretRequeueDuration))
@@ -85,7 +87,7 @@ func TestSecretReconciler_Reconcile(t *testing.T) {
 		userCopy.Data["test123"] = []byte("321tset")
 		g.Expect(k8sClient.Update(context.TODO(), userCopy)).To(gomega.Succeed())
 
-		result, err = reconciler.Reconcile(request)
+		result, err = reconciler.Reconcile(ctx, request)
 		g.Expect(err).To(gomega.BeNil())
 		g.Expect(result.Requeue).To(gomega.BeFalse())
 		g.Expect(result.RequeueAfter).To(gomega.Equal(testCfg.SecretRequeueDuration))
@@ -107,7 +109,7 @@ func TestSecretReconciler_Reconcile(t *testing.T) {
 		baseSecret := newFixBaseSecret(testCfg.BaseNamespace, "unsuccessful-propagation")
 		createSecret(g, resourceClient, baseSecret)
 		defer deleteSecret(g, k8sClient, baseSecret)
-		_, err := reconciler.Reconcile(ctrl.Request{
+		_, err := reconciler.Reconcile(ctx, ctrl.Request{
 			NamespacedName: types.NamespacedName{
 				Namespace: baseSecretWithManagedLabel.GetNamespace(),
 				Name:      "not-existing-secret",
@@ -116,7 +118,7 @@ func TestSecretReconciler_Reconcile(t *testing.T) {
 		g.Expect(err).To(gomega.BeNil())
 
 		t.Log("reconciling the Secret")
-		result, err := reconciler.Reconcile(requestForSecretWithManagedLabel)
+		result, err := reconciler.Reconcile(ctx, requestForSecretWithManagedLabel)
 		g.Expect(err).To(gomega.BeNil())
 		g.Expect(result.Requeue).To(gomega.BeFalse())
 		g.Expect(result.RequeueAfter).To(gomega.Equal(testCfg.SecretRequeueDuration))
@@ -132,7 +134,7 @@ func TestSecretReconciler_Reconcile(t *testing.T) {
 		updateBaseSecretCopy.Data["test123"] = []byte("321tset")
 		g.Expect(k8sClient.Update(context.TODO(), updateBaseSecretCopy)).To(gomega.Succeed())
 
-		result, err = reconciler.Reconcile(requestForSecretWithManagedLabel)
+		result, err = reconciler.Reconcile(ctx, requestForSecretWithManagedLabel)
 		g.Expect(err).To(gomega.BeNil())
 		g.Expect(result.Requeue).To(gomega.BeFalse())
 		g.Expect(result.RequeueAfter).To(gomega.Equal(testCfg.SecretRequeueDuration))
@@ -152,7 +154,7 @@ func TestSecretReconciler_Reconcile(t *testing.T) {
 		request := ctrl.Request{NamespacedName: types.NamespacedName{Namespace: testCfg.BaseNamespace, Name: baseSecret.GetName()}}
 
 		//WHEN
-		result, err := reconciler.Reconcile(request)
+		result, err := reconciler.Reconcile(ctx, request)
 		g.Expect(err).To(gomega.BeNil())
 		g.Expect(result.Requeue).To(gomega.BeFalse())
 		g.Expect(result.RequeueAfter).To(gomega.Equal(testCfg.SecretRequeueDuration))
@@ -166,7 +168,7 @@ func TestSecretReconciler_Reconcile(t *testing.T) {
 
 		t.Log("deleting base Secret")
 		g.Expect(k8sClient.Delete(context.TODO(), updatedBase)).To(gomega.Succeed())
-		result, err = reconciler.Reconcile(request)
+		result, err = reconciler.Reconcile(ctx, request)
 		g.Expect(err).To(gomega.BeNil())
 		g.Expect(result.Requeue).To(gomega.BeFalse())
 		g.Expect(result.RequeueAfter).To(gomega.BeZero())
@@ -185,7 +187,7 @@ func TestSecretReconciler_Reconcile(t *testing.T) {
 		g.Expect(resourceClient.Create(context.TODO(), baseSecretWithManagedLabel)).To(gomega.Succeed())
 		requestForSecretWithManagedLabel := ctrl.Request{NamespacedName: types.NamespacedName{Namespace: baseSecretWithManagedLabel.GetNamespace(), Name: baseSecretWithManagedLabel.GetName()}}
 
-		result, err := reconciler.Reconcile(requestForSecretWithManagedLabel)
+		result, err := reconciler.Reconcile(ctx, requestForSecretWithManagedLabel)
 		g.Expect(err).To(gomega.BeNil())
 		g.Expect(result.Requeue).To(gomega.BeFalse())
 		g.Expect(result.RequeueAfter).To(gomega.Equal(testCfg.SecretRequeueDuration))
@@ -198,7 +200,7 @@ func TestSecretReconciler_Reconcile(t *testing.T) {
 
 		t.Log("deleting base Secret")
 		g.Expect(k8sClient.Delete(context.TODO(), updatedBase)).To(gomega.Succeed())
-		result, err = reconciler.Reconcile(requestForSecretWithManagedLabel)
+		result, err = reconciler.Reconcile(ctx, requestForSecretWithManagedLabel)
 		g.Expect(err).To(gomega.BeNil())
 		g.Expect(result.Requeue).To(gomega.BeFalse())
 		g.Expect(result.RequeueAfter).To(gomega.BeZero())
