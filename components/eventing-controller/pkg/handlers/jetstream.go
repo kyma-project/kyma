@@ -25,7 +25,8 @@ import (
 var _ JetStreamBackend = &JetStream{}
 
 const (
-	jsHandlerName = "js-handler"
+	jsHandlerName         = "js-handler"
+	idleHeartBeatDuration = 1 * time.Minute
 )
 
 type JetStreamBackend interface {
@@ -315,7 +316,7 @@ func (js *JetStream) getDefaultSubscriptionOptions(consumerName string, subConfi
 		nats.Durable(consumerName),
 		nats.ManualAck(),
 		nats.AckExplicit(),
-		nats.IdleHeartbeat(1 * time.Minute),
+		nats.IdleHeartbeat(idleHeartBeatDuration),
 		nats.EnableFlowControl(),
 		nats.DeliverNew(),
 		nats.MaxAckPending(subConfig.MaxInFlightMessages),
