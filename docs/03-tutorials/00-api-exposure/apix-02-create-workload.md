@@ -2,11 +2,13 @@
 title: Create a workload
 ---
 
-Follow these steps to deploy an instance of the HttpBin service or a sample Function.
-
 The tutorial comes with a sample HttpBin service deployment and a sample Function.
 
 The tutorial may be a follow-up to the [Use a custom domain to expose a workload](./apix-01-own-domain.md) tutorial.
+
+## Steps
+
+Follow these steps to deploy an instance of the HttpBin service or a sample Function.
 
 1. Create a Namespace and export its value as an environment variable. Skip the step if you already have a Namespace. Run:
 

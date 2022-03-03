@@ -107,5 +107,5 @@ files:
       external-links-to-ignore: [ "https://dashboard.kyma-project.io/" ]
   - path: "./kyma/docs//03-tutorials/00-api-exposure/apix-04-expose-and-secure-service-jwt.md"
     config:
-      external-links-to-ignore: [ "https://{YOUR_OIDC_COMPLIENT_IDENTITY_PROVIDER_INSTANCE}/.well-known/openid-configuration" ]
+      external-links-to-ignore: [ "https://YOUR_OIDC_COMPLIENT_IDENTITY_PROVIDER_INSTANCE/.well-known/openid-configuration" ]
 
