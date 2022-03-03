@@ -15,9 +15,9 @@ The operator has been bootstrapped with [Kubebuilder](https://github.com/kuberne
 ## Development
 
 ### Prerequisites
-- Install [kubebuilder 3.1.0](https://github.com/kubernetes-sigs/kubebuilder) which is the base framework for this controller
+- Install [kubebuilder 3.2.0](https://github.com/kubernetes-sigs/kubebuilder) which is the base framework for this controller
 - Install [kustomize](https://github.com/kubernetes-sigs/kustomize) which lets you customize raw, template-free `yaml` files during local development
-- Install [Golang 1.16](https://golang.org/dl/) or newer (for local execution)
+- Install [Golang 1.17](https://golang.org/dl/) or newer (for local execution)
 - Install [Docker](https://www.docker.com/get-started)
 
 ### Available Commands
