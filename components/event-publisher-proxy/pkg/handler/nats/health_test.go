@@ -6,11 +6,10 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/handler/health"
 	"github.com/stretchr/testify/assert"
-
 	"github.com/stretchr/testify/require"
 
+	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/handler/health"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/handler/nats"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/handler/nats/mock"
 )
@@ -43,7 +42,7 @@ func TestReadinessCheck(t *testing.T) {
 			}()
 
 			handlerMock := mock.StartOrDie(context.TODO(), t)
-			defer handlerMock.ShutdownNatsServer()
+			defer handlerMock.ShutdownNatsServerAndWait()
 
 			var handler http.HandlerFunc
 			if tc.wantPanicForNilHandler {

@@ -4,6 +4,7 @@ package handlers
 import (
 	"context"
 	"crypto/sha1"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"math/rand"
@@ -74,6 +75,18 @@ func (m *bebSubscriptionNameMapper) MapSubscriptionName(sub *eventingv1alpha1.Su
 func hashSubscriptionFullName(domainName, namespace, name string) string {
 	hash := sha1.Sum([]byte(domainName + namespace + name))
 	return fmt.Sprintf("%x", hash)
+}
+
+func encodeString(value string) string {
+	return base64.StdEncoding.EncodeToString([]byte(value))
+}
+
+func decodeString(value string) (string, error) {
+	data, err := base64.StdEncoding.DecodeString(value)
+	if err != nil {
+		return "", err
+	}
+	return string(data), nil
 }
 
 // produces a name+hash which is not longer than maxLength. If necessary, shortens name, not the hash.

@@ -5,6 +5,10 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/application"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/eventtype"
+	"k8s.io/client-go/dynamic"
+
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 	"k8s.io/apimachinery/pkg/runtime"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
@@ -41,7 +45,7 @@ type SubscriptionManager struct {
 	restCfg     *rest.Config
 	metricsAddr string
 	mgr         manager.Manager
-	backend     handlers.MessagingBackend
+	backend     handlers.JetStreamBackend
 	logger      *logger.Logger
 }
 
@@ -68,12 +72,18 @@ func (sm *SubscriptionManager) Init(mgr manager.Manager) error {
 func (sm *SubscriptionManager) Start(_ env.DefaultSubscriptionConfig, _ subscriptionmanager.Params) error {
 	ctx, cancel := context.WithCancel(context.Background())
 	sm.cancel = cancel
+	jetStreamHandler := handlers.NewJetStream(sm.envCfg, sm.logger)
+	dynamicClient := dynamic.NewForConfigOrDie(sm.restCfg)
+	applicationLister := application.NewLister(ctx, dynamicClient)
+	cleaner := eventtype.NewCleaner(sm.envCfg.EventTypePrefix, applicationLister, sm.logger)
+
 	jetStreamReconciler := jetstream.NewReconciler(
 		ctx,
 		sm.mgr.GetClient(),
+		jetStreamHandler,
 		sm.logger,
 		sm.mgr.GetEventRecorderFor("eventing-controller-jetstream"),
-		sm.envCfg,
+		cleaner,
 	)
 	// TODO: this could be refactored (also in other backends), so that the backend is created here and passed to
 	//  the reconciler, not the other way around.
