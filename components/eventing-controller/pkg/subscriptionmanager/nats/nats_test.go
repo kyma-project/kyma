@@ -3,9 +3,10 @@ package nats
 import (
 	"context"
 	"fmt"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/eventtype"
 	"testing"
 	"time"
+
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/eventtype"
 
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/subscriptionmanager"
 	"k8s.io/client-go/dynamic"

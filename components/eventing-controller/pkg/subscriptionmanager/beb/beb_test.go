@@ -3,12 +3,13 @@ package beb
 import (
 	"context"
 	"fmt"
+	"net/http"
+	"testing"
+
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/eventtype"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/subscriptionmanager"
 	"k8s.io/client-go/dynamic"
-	"net/http"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
-	"testing"
 
 	kymalogger "github.com/kyma-project/kyma/common/logging/logger"
 	"github.com/onsi/gomega"

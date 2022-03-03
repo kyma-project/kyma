@@ -3,9 +3,10 @@ package beb
 import (
 	"context"
 	"fmt"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/eventtype"
 	"strings"
 	"time"
+
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/eventtype"
 
 	"github.com/pkg/errors"
 	"go.uber.org/zap"

@@ -25,24 +25,7 @@ import (
 
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/types"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
 )
-
-// MessagingBackend exposes a common handler interface for different messaging backend systems
-type MessagingBackend interface {
-	// Initialize should initialize the communication layer with the messaging backend system
-	Initialize(cfg env.Config) error
-
-	// SyncSubscription should synchronize the Kyma eventing subscription with the subscriber infrastructure of messaging backend system.
-	// It should return true if Kyma eventing subscription status was changed during this synchronization process.
-	// It sets subscription.status.config with configurations that were applied on the messaging backend when creating the subscription.
-	// TODO: Give up the usage of variadic parameters in the favor of using only subscription as input parameter.
-	// TODO: This should contain all the infos necessary for the handler to do its job.
-	SyncSubscription(subscription *eventingv1alpha1.Subscription, params ...interface{}) (bool, error)
-
-	// DeleteSubscription should delete the corresponding subscriber data of messaging backend
-	DeleteSubscription(subscription *eventingv1alpha1.Subscription) error
-}
 
 const charset = "abcdefghijklmnopqrstuvwxyz0123456789"
 
