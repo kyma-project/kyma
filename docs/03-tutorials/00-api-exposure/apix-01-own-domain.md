@@ -2,7 +2,7 @@
 title: Use a custom domain to expose a workload
 ---
 
-This tutorial shows how to set up your custom domain and prepare a certificate for exposing a workload. The tutorial uses Gardener [External DNS Management](https://github.com/gardener/external-dns-management) and [Certificate Management](https://github.com/gardener/cert-management) components.
+This tutorial shows how to set up your custom domain and prepare a certificate for exposing a workload. It uses Gardener [External DNS Management](https://github.com/gardener/external-dns-management) and [Certificate Management](https://github.com/gardener/cert-management) components.
 
 ## Prerequisites
 
