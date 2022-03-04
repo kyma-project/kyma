@@ -2,7 +2,7 @@
 title: Use a custom domain to expose a workload
 ---
 
-This tutorial shows how to set up your custom domain and prepare a certificate for exposing a workload. The components used are Gardener [External DNS Management](https://github.com/gardener/external-dns-management) and [Certificate Management](https://github.com/gardener/cert-management).
+This tutorial shows how to set up your custom domain and prepare a certificate for exposing a workload. The tutorial uses Gardener [External DNS Management](https://github.com/gardener/external-dns-management) and [Certificate Management](https://github.com/gardener/cert-management) components.
 
 ## Prerequisites
 
@@ -143,7 +143,7 @@ Follow these steps to set up your custom domain and prepare a certificate requir
 
 Proceed with the [Create a workload](./apix-02-create-workload.md) tutorial to deploy an instance of the HttpBin service or a sample Function.
 
-Once you have your workload deployed, you can continue by choosing one of the following tutorials to:
+Once you have your workload deployed, you can continue by choosing one of the following tutorials:
 
 - [Expose a workload](./apix-02-expose-workload-apigateway.md)
 - [Expose and secure a workload with OAuth2](./apix-03-expose-and-secure-workload-oauth2.md)
