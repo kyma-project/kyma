@@ -6,7 +6,8 @@ import (
 	"time"
 
 	"go.uber.org/zap"
-
+	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/event"
 	"sigs.k8s.io/controller-runtime/pkg/healthz"
@@ -34,8 +35,13 @@ func NewHealthChecker(checkCh chan event.GenericEvent, returnCh chan bool, timeo
 func (h HealthChecker) Checker(req *http.Request) error {
 	h.logger.Debug("Liveness handler triggered")
 
-	checkEvent := event.GenericEvent{}
-	checkEvent.Object.SetName(HealthEvent)
+	checkEvent := event.GenericEvent{
+		Object: &corev1.Event{
+			ObjectMeta: metav1.ObjectMeta{
+				Name: HealthEvent,
+			},
+		},
+	}
 	select {
 	case h.checkCh <- checkEvent:
 	case <-time.After(h.timeout):

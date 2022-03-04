@@ -5,6 +5,8 @@ import (
 	"time"
 
 	"go.uber.org/zap"
+	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/kyma-project/kyma/components/function-controller/internal/controllers/serverless"
 	"github.com/stretchr/testify/require"
@@ -56,8 +58,14 @@ func TestHealthChecker_Checker(t *testing.T) {
 		inCh := make(chan event.GenericEvent, 1)
 		outCh := make(chan bool, 1)
 		checker := serverless.NewHealthChecker(inCh, outCh, timeout, logger)
-		e := event.GenericEvent{}
-		e.Object.SetName("")
+
+		e := event.GenericEvent{
+			Object: &corev1.Event{
+				ObjectMeta: metav1.ObjectMeta{
+					Name: "",
+				},
+			},
+		}
 		inCh <- e
 		//WHEN
 		err := checker.Checker(nil)
