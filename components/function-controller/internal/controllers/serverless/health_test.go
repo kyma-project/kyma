@@ -8,7 +8,6 @@ import (
 
 	"github.com/kyma-project/kyma/components/function-controller/internal/controllers/serverless"
 	"github.com/stretchr/testify/require"
-	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/event"
 )
 
@@ -24,7 +23,7 @@ func TestHealthChecker_Checker(t *testing.T) {
 		//WHEN
 		go func() {
 			check := <-inCh
-			require.Equal(t, check.Meta.GetName(), serverless.HealthEvent)
+			require.Equal(t, check.Object.GetName(), serverless.HealthEvent)
 			outCh <- true
 		}()
 		err := checker.Checker(nil)
@@ -43,7 +42,7 @@ func TestHealthChecker_Checker(t *testing.T) {
 		//WHEN
 		go func() {
 			check := <-inCh
-			require.Equal(t, check.Meta.GetName(), serverless.HealthEvent)
+			require.Equal(t, check.Object.GetName(), serverless.HealthEvent)
 		}()
 		err := checker.Checker(nil)
 
@@ -57,7 +56,9 @@ func TestHealthChecker_Checker(t *testing.T) {
 		inCh := make(chan event.GenericEvent, 1)
 		outCh := make(chan bool, 1)
 		checker := serverless.NewHealthChecker(inCh, outCh, timeout, logger)
-		inCh <- event.GenericEvent{Meta: &ctrl.ObjectMeta{Name: ""}}
+		e := event.GenericEvent{}
+		e.Object.SetName("")
+		inCh <- e
 		//WHEN
 		err := checker.Checker(nil)
 

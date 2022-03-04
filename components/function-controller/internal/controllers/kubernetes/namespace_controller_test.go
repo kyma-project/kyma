@@ -133,10 +133,10 @@ func TestNamespaceReconciler_predicate(t *testing.T) {
 
 	t.Run("deleteFunc", func(t *testing.T) {
 		g := gomega.NewGomegaWithT(t)
-		podEvent := event.DeleteEvent{Meta: pod.GetObjectMeta(), Object: pod}
-		eventBaseNs := event.DeleteEvent{Meta: baseNs.GetObjectMeta(), Object: baseNs}
-		eventExcludedNs := event.DeleteEvent{Meta: excludedNs.GetObjectMeta(), Object: excludedNs}
-		normalNsEvent := event.DeleteEvent{Meta: normalNs.GetObjectMeta(), Object: normalNs}
+		podEvent := event.DeleteEvent{Object: pod}
+		eventBaseNs := event.DeleteEvent{Object: baseNs}
+		eventExcludedNs := event.DeleteEvent{Object: excludedNs}
+		normalNsEvent := event.DeleteEvent{Object: normalNs}
 
 		g.Expect(preds.Delete(podEvent)).To(gomega.BeFalse())
 		g.Expect(preds.Delete(eventBaseNs)).To(gomega.BeFalse())
@@ -147,10 +147,10 @@ func TestNamespaceReconciler_predicate(t *testing.T) {
 
 	t.Run("createFunc", func(t *testing.T) {
 		g := gomega.NewGomegaWithT(t)
-		podEvent := event.CreateEvent{Meta: pod.GetObjectMeta(), Object: pod}
-		eventBaseNs := event.CreateEvent{Meta: baseNs.GetObjectMeta(), Object: baseNs}
-		eventExcludedNs := event.CreateEvent{Meta: excludedNs.GetObjectMeta(), Object: excludedNs}
-		normalNsEvent := event.CreateEvent{Meta: normalNs.GetObjectMeta(), Object: normalNs}
+		podEvent := event.CreateEvent{Object: pod}
+		eventBaseNs := event.CreateEvent{Object: baseNs}
+		eventExcludedNs := event.CreateEvent{Object: excludedNs}
+		normalNsEvent := event.CreateEvent{Object: normalNs}
 
 		g.Expect(preds.Create(podEvent)).To(gomega.BeFalse())
 		g.Expect(preds.Create(eventBaseNs)).To(gomega.BeFalse())
@@ -162,10 +162,10 @@ func TestNamespaceReconciler_predicate(t *testing.T) {
 
 	t.Run("genericFunc", func(t *testing.T) {
 		g := gomega.NewGomegaWithT(t)
-		podEvent := event.GenericEvent{Meta: pod.GetObjectMeta(), Object: pod}
-		eventBaseNs := event.GenericEvent{Meta: baseNs.GetObjectMeta(), Object: baseNs}
-		eventExcludedNs := event.GenericEvent{Meta: excludedNs.GetObjectMeta(), Object: excludedNs}
-		normalNsEvent := event.GenericEvent{Meta: normalNs.GetObjectMeta(), Object: normalNs}
+		podEvent := event.GenericEvent{Object: pod}
+		eventBaseNs := event.GenericEvent{Object: baseNs}
+		eventExcludedNs := event.GenericEvent{Object: excludedNs}
+		normalNsEvent := event.GenericEvent{Object: normalNs}
 
 		g.Expect(preds.Generic(podEvent)).To(gomega.BeFalse())
 		g.Expect(preds.Generic(eventBaseNs)).To(gomega.BeFalse())
@@ -176,10 +176,10 @@ func TestNamespaceReconciler_predicate(t *testing.T) {
 
 	t.Run("updateFunc", func(t *testing.T) {
 		g := gomega.NewGomegaWithT(t)
-		podEvent := event.UpdateEvent{MetaNew: pod.GetObjectMeta(), ObjectNew: pod}
-		eventBaseNs := event.UpdateEvent{MetaNew: baseNs.GetObjectMeta(), ObjectNew: baseNs}
-		eventExcludedNs := event.UpdateEvent{MetaNew: excludedNs.GetObjectMeta(), ObjectNew: excludedNs}
-		normalNsEvent := event.UpdateEvent{MetaNew: normalNs.GetObjectMeta(), ObjectNew: normalNs}
+		podEvent := event.UpdateEvent{ObjectNew: pod}
+		eventBaseNs := event.UpdateEvent{ObjectNew: baseNs}
+		eventExcludedNs := event.UpdateEvent{ObjectNew: excludedNs}
+		normalNsEvent := event.UpdateEvent{ObjectNew: normalNs}
 
 		g.Expect(preds.Update(podEvent)).To(gomega.BeFalse())
 		g.Expect(preds.Update(eventBaseNs)).To(gomega.BeFalse())

@@ -223,9 +223,9 @@ func TestSecretReconciler_predicate(t *testing.T) {
 
 	t.Run("deleteFunc", func(t *testing.T) {
 		g := gomega.NewGomegaWithT(t)
-		podEvent := event.DeleteEvent{Meta: pod.GetObjectMeta(), Object: pod}
-		eventBaseSecret := event.DeleteEvent{Meta: baseSecret.GetObjectMeta(), Object: baseSecret}
-		eventNonBaseSecret := event.DeleteEvent{Meta: nonBaseSecret.GetObjectMeta(), Object: nonBaseSecret}
+		podEvent := event.DeleteEvent{Object: pod}
+		eventBaseSecret := event.DeleteEvent{Object: baseSecret}
+		eventNonBaseSecret := event.DeleteEvent{Object: nonBaseSecret}
 
 		g.Expect(preds.Delete(podEvent)).To(gomega.BeFalse())
 		g.Expect(preds.Delete(eventBaseSecret)).To(gomega.BeTrue(), "should be true for base secret")
@@ -235,9 +235,9 @@ func TestSecretReconciler_predicate(t *testing.T) {
 
 	t.Run("createFunc", func(t *testing.T) {
 		g := gomega.NewGomegaWithT(t)
-		podEvent := event.CreateEvent{Meta: pod.GetObjectMeta(), Object: pod}
-		eventBaseSecret := event.CreateEvent{Meta: baseSecret.GetObjectMeta(), Object: baseSecret}
-		eventNonBaseSecret := event.CreateEvent{Meta: nonBaseSecret.GetObjectMeta(), Object: nonBaseSecret}
+		podEvent := event.CreateEvent{Object: pod}
+		eventBaseSecret := event.CreateEvent{Object: baseSecret}
+		eventNonBaseSecret := event.CreateEvent{Object: nonBaseSecret}
 
 		g.Expect(preds.Create(podEvent)).To(gomega.BeFalse())
 		g.Expect(preds.Create(eventNonBaseSecret)).To(gomega.BeFalse())
@@ -248,9 +248,9 @@ func TestSecretReconciler_predicate(t *testing.T) {
 
 	t.Run("genericFunc", func(t *testing.T) {
 		g := gomega.NewGomegaWithT(t)
-		podEvent := event.GenericEvent{Meta: pod.GetObjectMeta(), Object: pod}
-		eventBaseSecret := event.GenericEvent{Meta: baseSecret.GetObjectMeta(), Object: baseSecret}
-		eventNonBaseSecret := event.GenericEvent{Meta: nonBaseSecret.GetObjectMeta(), Object: nonBaseSecret}
+		podEvent := event.GenericEvent{Object: pod}
+		eventBaseSecret := event.GenericEvent{Object: baseSecret}
+		eventNonBaseSecret := event.GenericEvent{Object: nonBaseSecret}
 
 		g.Expect(preds.Generic(podEvent)).To(gomega.BeFalse())
 		g.Expect(preds.Generic(eventNonBaseSecret)).To(gomega.BeFalse())
@@ -261,9 +261,9 @@ func TestSecretReconciler_predicate(t *testing.T) {
 
 	t.Run("updateFunc", func(t *testing.T) {
 		g := gomega.NewGomegaWithT(t)
-		podEvent := event.UpdateEvent{MetaNew: pod.GetObjectMeta(), ObjectNew: pod}
-		eventBaseSecret := event.UpdateEvent{MetaNew: baseSecret.GetObjectMeta(), ObjectNew: baseSecret}
-		eventNonBaseSecret := event.UpdateEvent{MetaNew: nonBaseSecret.GetObjectMeta(), ObjectNew: nonBaseSecret}
+		podEvent := event.UpdateEvent{ObjectNew: pod}
+		eventBaseSecret := event.UpdateEvent{ObjectNew: baseSecret}
+		eventNonBaseSecret := event.UpdateEvent{ObjectNew: nonBaseSecret}
 
 		g.Expect(preds.Update(podEvent)).To(gomega.BeFalse())
 		g.Expect(preds.Update(eventNonBaseSecret)).To(gomega.BeFalse())

@@ -106,9 +106,10 @@ func TestConfigMapReconciler_predicate(t *testing.T) {
 
 	t.Run("deleteFunc", func(t *testing.T) {
 		g := gomega.NewWithT(t)
-		deleteEventPod := event.DeleteEvent{Meta: pod.GetObjectMeta(), Object: pod}
-		deleteEventLabelledSrvAcc := event.DeleteEvent{Meta: labelledConfigmap.GetObjectMeta(), Object: labelledConfigmap}
-		deleteEventUnlabelledSrvAcc := event.DeleteEvent{Meta: unlabelledConfigMap.GetObjectMeta(), Object: unlabelledConfigMap}
+		deleteEventPod := event.DeleteEvent{Object: pod}
+		deleteEventPod.Object = pod
+		deleteEventLabelledSrvAcc := event.DeleteEvent{Object: labelledConfigmap}
+		deleteEventUnlabelledSrvAcc := event.DeleteEvent{Object: unlabelledConfigMap}
 
 		g.Expect(preds.Delete(deleteEventPod)).To(gomega.BeFalse())
 		g.Expect(preds.Delete(deleteEventLabelledSrvAcc)).To(gomega.BeFalse())
@@ -118,9 +119,9 @@ func TestConfigMapReconciler_predicate(t *testing.T) {
 
 	t.Run("createFunc", func(t *testing.T) {
 		g := gomega.NewWithT(t)
-		createEventPod := event.CreateEvent{Meta: pod.GetObjectMeta(), Object: pod}
-		createEventLabelledSrvAcc := event.CreateEvent{Meta: labelledConfigmap.GetObjectMeta(), Object: labelledConfigmap}
-		createEventUnlabelledSrvAcc := event.CreateEvent{Meta: unlabelledConfigMap.GetObjectMeta(), Object: unlabelledConfigMap}
+		createEventPod := event.CreateEvent{Object: pod}
+		createEventLabelledSrvAcc := event.CreateEvent{Object: labelledConfigmap}
+		createEventUnlabelledSrvAcc := event.CreateEvent{Object: unlabelledConfigMap}
 
 		g.Expect(preds.Create(createEventPod)).To(gomega.BeFalse())
 		g.Expect(preds.Create(createEventLabelledSrvAcc)).To(gomega.BeTrue())
@@ -130,9 +131,9 @@ func TestConfigMapReconciler_predicate(t *testing.T) {
 
 	t.Run("genericFunc", func(t *testing.T) {
 		g := gomega.NewWithT(t)
-		genericEventPod := event.GenericEvent{Meta: pod.GetObjectMeta(), Object: pod}
-		genericEventLabelledSrvAcc := event.GenericEvent{Meta: labelledConfigmap.GetObjectMeta(), Object: labelledConfigmap}
-		genericEventUnlabelledSrvAcc := event.GenericEvent{Meta: unlabelledConfigMap.GetObjectMeta(), Object: unlabelledConfigMap}
+		genericEventPod := event.GenericEvent{Object: pod}
+		genericEventLabelledSrvAcc := event.GenericEvent{Object: labelledConfigmap}
+		genericEventUnlabelledSrvAcc := event.GenericEvent{Object: unlabelledConfigMap}
 
 		g.Expect(preds.Generic(genericEventPod)).To(gomega.BeFalse())
 		g.Expect(preds.Generic(genericEventLabelledSrvAcc)).To(gomega.BeTrue())
@@ -142,9 +143,9 @@ func TestConfigMapReconciler_predicate(t *testing.T) {
 
 	t.Run("updateFunc", func(t *testing.T) {
 		g := gomega.NewWithT(t)
-		updateEventPod := event.UpdateEvent{MetaNew: pod.GetObjectMeta(), ObjectNew: pod}
-		updateEventLabelledSrvAcc := event.UpdateEvent{MetaNew: labelledConfigmap.GetObjectMeta(), ObjectNew: labelledConfigmap}
-		updateEventUnlabelledSrvAcc := event.UpdateEvent{MetaNew: unlabelledConfigMap.GetObjectMeta(), ObjectNew: unlabelledConfigMap}
+		updateEventPod := event.UpdateEvent{ObjectNew: pod}
+		updateEventLabelledSrvAcc := event.UpdateEvent{ObjectNew: labelledConfigmap}
+		updateEventUnlabelledSrvAcc := event.UpdateEvent{ObjectNew: unlabelledConfigMap}
 
 		g.Expect(preds.Update(updateEventPod)).To(gomega.BeFalse())
 		g.Expect(preds.Update(updateEventUnlabelledSrvAcc)).To(gomega.BeFalse())

@@ -18,7 +18,6 @@ import (
 	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/apimachinery/pkg/util/intstr"
 	"k8s.io/client-go/tools/record"
@@ -334,7 +333,7 @@ func TestGitOps(t *testing.T) {
 			g.Expect(svc.Spec.Ports[0].Name).To(gomega.Equal("http"))
 			g.Expect(svc.Spec.Ports[0].TargetPort).To(gomega.Equal(intstr.FromInt(8080)))
 
-			g.Expect(labels.AreLabelsInWhiteList(svc.Spec.Selector, job.Spec.Template.Labels)).
+			g.Expect(isSubset(svc.Spec.Selector, job.Spec.Template.Labels)).
 				To(gomega.BeFalse(), "svc selector should not catch job pods")
 
 			g.Expect(svc.Spec.Selector).To(gomega.Equal(deployment.Spec.Selector.MatchLabels))
@@ -518,4 +517,17 @@ func Test_ReadGITOptions(t *testing.T) {
 		// this is expected to be false, because returning an error is enough to requeue
 		g.Expect(res.Requeue).To(gomega.BeFalse())
 	})
+}
+
+func isSubset(subSet, superSet map[string]string) bool {
+	if len(superSet) == 0 {
+		return true
+	}
+	for k, v := range subSet {
+		value, ok := superSet[k]
+		if !ok || value != v {
+			return false
+		}
+	}
+	return true
 }

@@ -1099,7 +1099,7 @@ func TestFunctionReconciler_Reconcile(t *testing.T) {
 
 		//WHEN
 		t.Log("succesfully deploying a function")
-		_, err := reconciler.Reconcile(request)
+		_, err := reconciler.Reconcile(ctx, request)
 		g.Expect(err).To(gomega.BeNil())
 		assertSuccessfulFunctionBuild(t, resourceClient, reconciler, request, fnLabels, false)
 		assertSuccessfulFunctionDeployment(t, resourceClient, reconciler, request, fnLabels, "registry.kyma.local", false)
