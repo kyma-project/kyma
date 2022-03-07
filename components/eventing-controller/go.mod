@@ -14,7 +14,7 @@ require (
 	github.com/kyma-project/kyma/components/application-operator v0.0.0-20211006112227-6d16a34ea468
 	github.com/mitchellh/hashstructure/v2 v2.0.2
 	github.com/nats-io/nats-server/v2 v2.6.1
-	github.com/nats-io/nats.go v1.12.3
+	github.com/nats-io/nats.go v1.13.0
 	github.com/onsi/ginkgo v1.16.5
 	github.com/onsi/gomega v1.17.0
 	github.com/pkg/errors v0.9.1
