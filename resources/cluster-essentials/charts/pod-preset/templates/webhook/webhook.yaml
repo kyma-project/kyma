@@ -24,6 +24,9 @@ webhooks:
       namespace: "{{ .Release.Namespace }}"
       path: /mutating-pods
   failurePolicy: Ignore
+  admissionReviewVersions:
+  - v1beta1
+  sideEffects: None
   name: podpresets.settings.svcat.k8s.io
   rules:
   - apiGroups:

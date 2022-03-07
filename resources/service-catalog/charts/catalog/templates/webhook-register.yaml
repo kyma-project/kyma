@@ -16,6 +16,9 @@ webhooks:
       namespace: "{{ .Release.Namespace }}"
       path: "/mutating-clusterservicebrokers"
   failurePolicy: Fail
+  admissionReviewVersions:
+  - v1beta1
+  sideEffects: None
   rules:
   - operations: [ "CREATE", "UPDATE" ]
     apiGroups: ["servicecatalog.k8s.io"]
@@ -29,6 +32,9 @@ webhooks:
       namespace: "{{ .Release.Namespace }}"
       path: "/mutating-clusterserviceclasses"
   failurePolicy: Fail
+  admissionReviewVersions:
+  - v1beta1
+  sideEffects: None
   rules:
   - operations: [ "CREATE", "UPDATE" ]
     apiGroups: ["servicecatalog.k8s.io"]
@@ -42,6 +48,9 @@ webhooks:
       namespace: "{{ .Release.Namespace }}"
       path: "/mutating-serviceclasses"
   failurePolicy: Fail
+  admissionReviewVersions:
+  - v1beta1
+  sideEffects: None
   rules:
   - operations: [ "CREATE", "UPDATE" ]
     apiGroups: ["servicecatalog.k8s.io"]
@@ -55,6 +64,9 @@ webhooks:
       namespace: "{{ .Release.Namespace }}"
       path: "/mutating-clusterserviceplans"
   failurePolicy: Fail
+  admissionReviewVersions:
+  - v1beta1
+  sideEffects: None
   rules:
   - operations: [ "CREATE", "UPDATE" ]
     apiGroups: ["servicecatalog.k8s.io"]
@@ -68,6 +80,9 @@ webhooks:
       namespace: "{{ .Release.Namespace }}"
       path: "/mutating-serviceplans"
   failurePolicy: Fail
+  admissionReviewVersions:
+  - v1beta1
+  sideEffects: None
   rules:
   - operations: [ "CREATE", "UPDATE" ]
     apiGroups: ["servicecatalog.k8s.io"]
@@ -81,6 +96,9 @@ webhooks:
       namespace: "{{ .Release.Namespace }}"
       path: "/mutating-servicebindings"
   failurePolicy: Fail
+  admissionReviewVersions:
+  - v1beta1
+  sideEffects: None
   rules:
   - operations: [ "CREATE", "UPDATE" ]
     apiGroups: ["servicecatalog.k8s.io"]
@@ -94,6 +112,9 @@ webhooks:
       namespace: "{{ .Release.Namespace }}"
       path: "/mutating-servicebrokers"
   failurePolicy: Fail
+  admissionReviewVersions:
+  - v1beta1
+  sideEffects: None
   rules:
   - operations: [ "CREATE", "UPDATE" ]
     apiGroups: ["servicecatalog.k8s.io"]
@@ -107,6 +128,9 @@ webhooks:
       namespace: "{{ .Release.Namespace }}"
       path: "/mutating-serviceinstances"
   failurePolicy: Fail
+  admissionReviewVersions:
+  - v1beta1
+  sideEffects: None
   rules:
   - operations: [ "CREATE", "UPDATE" ]
     apiGroups: ["servicecatalog.k8s.io"]
@@ -126,6 +150,9 @@ webhooks:
       namespace: "{{ .Release.Namespace }}"
       path: "/validating-servicebindings/status"
   failurePolicy: Fail
+  admissionReviewVersions:
+  - v1beta1
+  sideEffects: None
   rules:
   - operations: [ "UPDATE" ]
     apiGroups: ["servicecatalog.k8s.io"]
@@ -139,6 +166,9 @@ webhooks:
       namespace: "{{ .Release.Namespace }}"
       path: "/validating-servicebrokers/status"
   failurePolicy: Fail
+  admissionReviewVersions:
+  - v1beta1
+  sideEffects: None
   rules:
   - operations: [ "UPDATE" ]
     apiGroups: ["servicecatalog.k8s.io"]
@@ -152,6 +182,9 @@ webhooks:
       namespace: "{{ .Release.Namespace }}"
       path: "/validating-clusterservicebrokers/status"
   failurePolicy: Fail
+  admissionReviewVersions:
+  - v1beta1
+  sideEffects: None
   rules:
   - operations: [ "UPDATE" ]
     apiGroups: ["servicecatalog.k8s.io"]
@@ -165,6 +198,9 @@ webhooks:
       namespace: "{{ .Release.Namespace }}"
       path: "/validating-serviceinstances"
   failurePolicy: Fail
+  admissionReviewVersions:
+  - v1beta1
+  sideEffects: None
   rules:
   - operations: [ "CREATE", "UPDATE" ]
     apiGroups: ["servicecatalog.k8s.io"]
@@ -178,6 +214,9 @@ webhooks:
       namespace: "{{ .Release.Namespace }}"
       path: "/validating-clusterservicebrokers"
   failurePolicy: Fail
+  admissionReviewVersions:
+  - v1beta1
+  sideEffects: None
   rules:
   - operations: [ "CREATE", "UPDATE" ]
     apiGroups: ["servicecatalog.k8s.io"]
@@ -191,6 +230,9 @@ webhooks:
       namespace: "{{ .Release.Namespace }}"
       path: "/validating-servicebindings"
   failurePolicy: Fail
+  admissionReviewVersions:
+  - v1beta1
+  sideEffects: None
   rules:
   - operations: [ "CREATE", "UPDATE" ]
     apiGroups: ["servicecatalog.k8s.io"]
@@ -204,6 +246,9 @@ webhooks:
       namespace: "{{ .Release.Namespace }}"
       path: "/validating-servicebrokers"
   failurePolicy: Fail
+  admissionReviewVersions:
+  - v1beta1
+  sideEffects: None
   rules:
   - operations: [ "CREATE", "UPDATE" ]
     apiGroups: ["servicecatalog.k8s.io"]
@@ -217,6 +262,9 @@ webhooks:
       namespace: "{{ .Release.Namespace }}"
       path: "/validating-serviceclasses"
   failurePolicy: Fail
+  admissionReviewVersions:
+  - v1beta1
+  sideEffects: None
   rules:
   - operations: [ "CREATE", "UPDATE" ]
     apiGroups: ["servicecatalog.k8s.io"]
@@ -230,6 +278,9 @@ webhooks:
       namespace: "{{ .Release.Namespace }}"
       path: "/validating-clusterserviceclasses"
   failurePolicy: Fail
+  admissionReviewVersions:
+  - v1beta1
+  sideEffects: None
   rules:
   - operations: [ "CREATE", "UPDATE" ]
     apiGroups: ["servicecatalog.k8s.io"]
@@ -243,6 +294,9 @@ webhooks:
       namespace: "{{ .Release.Namespace }}"
       path: "/validating-serviceplans"
   failurePolicy: Fail
+  admissionReviewVersions:
+  - v1beta1
+  sideEffects: None
   rules:
   - operations: [ "CREATE", "UPDATE" ]
     apiGroups: ["servicecatalog.k8s.io"]
@@ -256,6 +310,9 @@ webhooks:
       namespace: "{{ .Release.Namespace }}"
       path: "/validating-clusterserviceplans"
   failurePolicy: Fail
+  admissionReviewVersions:
+  - v1beta1
+  sideEffects: None
   rules:
   - operations: [ "CREATE", "UPDATE" ]
     apiGroups: ["servicecatalog.k8s.io"]
