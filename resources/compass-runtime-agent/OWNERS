@@ -1,10 +1,6 @@
-approvers:
-  - akgalwas
-  - janmedrek
-  - franpog859
-  - Maladie
-  - crabtree
-  - koala7659
-
 reviewers:
   - PK85
+approvers:
+  - application-connector-approvers
+labels:
+  - area/application-connector
