@@ -7,6 +7,12 @@ This tutorial shows how to use the build-in OpenTelemetry tracer object to send 
 Kyma Functions are instrumented to handle trace headers. This means that every time you call your Function, the executed logic is traceable using a dedicated span visible in the Jaeger service (i.e. start time and duration).
 Additionally, you can extend the default trace context and create your own custom spans whenever you feel it is helpful (i.e. when calling a remote service in your distributed application) or add additional information to the tracing context by introducing events and tags. This tutorial shows you how to do it using tracer client that is available as part of the [event](../../05-technical-reference/svls-08-function-specification.md#event-object) object.
 
+## Prerequisites
+
+Before you start, make sure you have these tools installed:
+
+- Kyma installed on a cluster
+
 ## Steps
 
 Follows these steps:
@@ -50,8 +56,7 @@ Follows these steps:
    </div>
 
 2. [Expose your Function](./svls-03-expose-function.md) and access the Function's external address.
-3. [Expose Jaeger securely](../../04-operation-guides/security/sec-06-access-expose-kiali-grafana.md).
-4. Open the following Jaeger's address in your browser:
+3. [Expose Jaeger securely](../../04-operation-guides/security/sec-06-access-expose-kiali-grafana.md) and open the following Jaeger's address in your browser:
 
    ```text
    http://localhost:16686
@@ -59,4 +64,4 @@ Follows these steps:
 
    > **NOTE:** by default, only 1% of the requests are sent to Jaeger for trace recording. To increase this number see [Jaeger doesn't show the traces you want to see](../../04-operation-guides/troubleshooting/obsv-02-troubleshoot-jaeger-shows-few-traces.md) article.
 
-5. Find and select the Deployment's name in the `Service` list and click `Find Traces`.
+4. Find and select the Deployment's name in the `Service` list and click `Find Traces`
