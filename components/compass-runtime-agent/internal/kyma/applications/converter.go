@@ -3,9 +3,10 @@ package applications
 import (
 	"github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
 	"github.com/kyma-project/kyma/components/application-operator/pkg/normalization"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/k8sconsts"
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/model"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 const defaultDescription = "Description not provided"
@@ -35,7 +36,6 @@ func NewConverter(nameResolver k8sconsts.NameResolver, centralGatewayServiceUrl 
 }
 
 func (c converter) Do(application model.Application) v1alpha1.Application {
-
 	prepareLabels := func(directorLabels model.Labels) map[string]string {
 		labels := make(map[string]string)
 		labels[connectedAppLabelKey] = application.Name
@@ -61,56 +61,54 @@ func (c converter) Do(application model.Application) v1alpha1.Application {
 			SkipInstallation: false,
 			SkipVerify:       c.appSkipTLSVerify, // Taken from config. Maybe later we use value from labels of the Director's app
 			Labels:           prepareLabels(application.Labels),
-			Services:         c.toServices(application.Name, application.APIPackages),
+			Services:         c.toServices(application.Name, application.ApiBundles),
 			CompassMetadata:  c.toCompassMetadata(application.ID, application.SystemAuthsIDs),
 		},
 	}
 }
 
-func (c converter) toServices(applicationName string, packages []model.APIPackage) []v1alpha1.Service {
-	services := make([]v1alpha1.Service, 0, len(packages))
+func (c converter) toServices(applicationName string, bundles []model.APIBundle) []v1alpha1.Service {
+	services := make([]v1alpha1.Service, 0, len(bundles))
 
-	for _, p := range packages {
+	for _, p := range bundles {
 		services = append(services, c.toService(applicationName, p))
 	}
 
 	return services
 }
 
-func (c converter) toService(applicationName string, apiPackage model.APIPackage) v1alpha1.Service {
-
+func (c converter) toService(applicationName string, apiBundle model.APIBundle) v1alpha1.Service {
 	description := defaultDescription
-	if apiPackage.Description != nil && *apiPackage.Description != "" {
-		description = *apiPackage.Description
+	if apiBundle.Description != nil && *apiBundle.Description != "" {
+		description = *apiBundle.Description
 	}
 
 	return v1alpha1.Service{
-		ID:                        apiPackage.ID,
+		ID:                        apiBundle.ID,
 		Identifier:                "", // not available in the Director's API
-		Name:                      normalization.NormalizeServiceNameWithId(apiPackage.Name, apiPackage.ID),
-		AuthCreateParameterSchema: apiPackage.InstanceAuthRequestInputSchema,
-		DisplayName:               apiPackage.Name,
+		Name:                      normalization.NormalizeServiceNameWithId(apiBundle.Name, apiBundle.ID),
+		AuthCreateParameterSchema: apiBundle.InstanceAuthRequestInputSchema,
+		DisplayName:               apiBundle.Name,
 		Description:               description,
-		Entries:                   c.toServiceEntries(applicationName, apiPackage),
+		Entries:                   c.toServiceEntries(applicationName, apiBundle),
 	}
 }
 
-func (c converter) toServiceEntries(applicationName string, apiPackage model.APIPackage) []v1alpha1.Entry {
-	entries := make([]v1alpha1.Entry, 0, len(apiPackage.APIDefinitions)+len(apiPackage.EventDefinitions))
+func (c converter) toServiceEntries(applicationName string, apiBundle model.APIBundle) []v1alpha1.Entry {
+	entries := make([]v1alpha1.Entry, 0, len(apiBundle.APIDefinitions)+len(apiBundle.EventDefinitions))
 
-	for _, apiDefinition := range apiPackage.APIDefinitions {
-		entries = append(entries, c.toAPIEntry(applicationName, apiPackage, apiDefinition))
+	for _, apiDefinition := range apiBundle.APIDefinitions {
+		entries = append(entries, c.toAPIEntry(applicationName, apiBundle, apiDefinition))
 	}
 
-	for _, eventAPIDefinition := range apiPackage.EventDefinitions {
+	for _, eventAPIDefinition := range apiBundle.EventDefinitions {
 		entries = append(entries, c.toEventServiceEntry(eventAPIDefinition))
 	}
 
 	return entries
 }
 
-func (c converter) toAPIEntry(applicationName string, apiPackage model.APIPackage, apiDefinition model.APIDefinition) v1alpha1.Entry {
-
+func (c converter) toAPIEntry(applicationName string, apiBundle model.APIBundle, apiDefinition model.APIDefinition) v1alpha1.Entry {
 	getApiType := func() string {
 		if apiDefinition.APISpec != nil {
 			return string(apiDefinition.APISpec.Type)
@@ -125,51 +123,50 @@ func (c converter) toAPIEntry(applicationName string, apiPackage model.APIPackag
 		Type:                        SpecAPIType,
 		ApiType:                     getApiType(),
 		TargetUrl:                   apiDefinition.TargetUrl,
-		CentralGatewayUrl:           c.toCentralGatewayURL(applicationName, apiPackage.Name, apiDefinition.Name),
+		CentralGatewayUrl:           c.toCentralGatewayURL(applicationName, apiBundle.Name, apiDefinition.Name),
 		SpecificationUrl:            "", // Director returns BLOB here
-		Credentials:                 c.toCredential(applicationName, apiPackage),
-		RequestParametersSecretName: c.toRequestParametersSecretName(applicationName, apiPackage),
+		Credentials:                 c.toCredential(applicationName, apiBundle),
+		RequestParametersSecretName: c.toRequestParametersSecretName(applicationName, apiBundle),
 	}
 
 	return entry
 }
 
-func (c converter) toRequestParametersSecretName(applicationName string, apiPackage model.APIPackage) string {
-	if apiPackage.DefaultInstanceAuth != nil && apiPackage.DefaultInstanceAuth.RequestParameters != nil && !apiPackage.DefaultInstanceAuth.RequestParameters.IsEmpty() {
-		return c.nameResolver.GetRequestParametersSecretName(applicationName, apiPackage.ID)
+func (c converter) toRequestParametersSecretName(applicationName string, apiBundle model.APIBundle) string {
+	if apiBundle.DefaultInstanceAuth != nil && apiBundle.DefaultInstanceAuth.RequestParameters != nil && !apiBundle.DefaultInstanceAuth.RequestParameters.IsEmpty() {
+		return c.nameResolver.GetRequestParametersSecretName(applicationName, apiBundle.ID)
 	}
 	return ""
 }
 
-func (c converter) toCentralGatewayURL(applicationName string, apiPackageName string, apiDefinitionName string) string {
-
+func (c converter) toCentralGatewayURL(applicationName string, apiBundleName string, apiDefinitionName string) string {
 	return c.centralGatewayServiceUrl + "/" + applicationName +
-		"/" + normalization.NormalizeName(apiPackageName) +
+		"/" + normalization.NormalizeName(apiBundleName) +
 		"/" + normalization.NormalizeName(apiDefinitionName)
 }
 
-func (c converter) toCredential(applicationName string, apiPackage model.APIPackage) v1alpha1.Credentials {
+func (c converter) toCredential(applicationName string, apiBundle model.APIBundle) v1alpha1.Credentials {
 	result := v1alpha1.Credentials{}
 
-	if apiPackage.DefaultInstanceAuth != nil && apiPackage.DefaultInstanceAuth.Credentials != nil {
+	if apiBundle.DefaultInstanceAuth != nil && apiBundle.DefaultInstanceAuth.Credentials != nil {
 		csrfInfo := func(csrfInfo *model.CSRFInfo) *v1alpha1.CSRFInfo {
 			if csrfInfo != nil {
 				return &v1alpha1.CSRFInfo{TokenEndpointURL: csrfInfo.TokenEndpointURL}
 			}
 			return nil
 		}
-		if apiPackage.DefaultInstanceAuth.Credentials.Oauth != nil {
+		if apiBundle.DefaultInstanceAuth.Credentials.Oauth != nil {
 			return v1alpha1.Credentials{
 				Type:              CredentialsOAuthType,
-				SecretName:        c.nameResolver.GetCredentialsSecretName(applicationName, apiPackage.ID),
-				AuthenticationUrl: apiPackage.DefaultInstanceAuth.Credentials.Oauth.URL,
-				CSRFInfo:          csrfInfo(apiPackage.DefaultInstanceAuth.Credentials.CSRFInfo),
+				SecretName:        c.nameResolver.GetCredentialsSecretName(applicationName, apiBundle.ID),
+				AuthenticationUrl: apiBundle.DefaultInstanceAuth.Credentials.Oauth.URL,
+				CSRFInfo:          csrfInfo(apiBundle.DefaultInstanceAuth.Credentials.CSRFInfo),
 			}
-		} else if apiPackage.DefaultInstanceAuth.Credentials.Basic != nil {
+		} else if apiBundle.DefaultInstanceAuth.Credentials.Basic != nil {
 			return v1alpha1.Credentials{
 				Type:       CredentialsBasicType,
-				SecretName: c.nameResolver.GetCredentialsSecretName(applicationName, apiPackage.ID),
-				CSRFInfo:   csrfInfo(apiPackage.DefaultInstanceAuth.Credentials.CSRFInfo),
+				SecretName: c.nameResolver.GetCredentialsSecretName(applicationName, apiBundle.ID),
+				CSRFInfo:   csrfInfo(apiBundle.DefaultInstanceAuth.Credentials.CSRFInfo),
 			}
 		}
 	}

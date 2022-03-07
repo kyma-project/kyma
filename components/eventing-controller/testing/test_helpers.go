@@ -2,7 +2,10 @@ package testing
 
 import (
 	"fmt"
+	"net"
 	"net/http"
+
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
 
 	v1 "k8s.io/api/core/v1"
 
@@ -34,9 +37,7 @@ const (
 	EventTypePrefix                          = "prefix"
 	EventTypePrefixEmpty                     = ""
 	OrderCreatedV1Event                      = "order.created.v1"
-	OrderUpdatedV1Event                      = "order.updated.v1"
 	OrderCreatedEventType                    = EventTypePrefix + "." + ApplicationName + "." + OrderCreatedV1Event
-	OrderUpdatedEventType                    = EventTypePrefix + "." + ApplicationName + "." + OrderUpdatedV1Event
 	OrderCreatedEventTypeNotClean            = EventTypePrefix + "." + ApplicationNameNotClean + "." + OrderCreatedV1Event
 	OrderCreatedEventTypePrefixEmpty         = ApplicationName + "." + OrderCreatedV1Event
 	OrderCreatedEventTypeNotCleanPrefixEmpty = ApplicationNameNotClean + "." + OrderCreatedV1Event
@@ -61,17 +62,24 @@ const (
            "source":"` + EventSource + `",
            "data":"` + EventData + `"
         }`
-
-	StructuredCloudEventUpdated = `{
-           "id":"` + EventID + `",
-           "type":"` + OrderUpdatedEventType + `",
-           "specversion":"` + EventSpecVersion + `",
-           "source":"` + EventSource + `",
-           "data":"` + EventData + `"
-        }`
 )
 
 type APIRuleOption func(r *apigatewayv1alpha1.APIRule)
+
+// GetFreePort determines a free port on the host. It does so by delegating the job to net.ListenTCP.
+// Then providing a port of 0 to net.ListenTCP, it will automatically choose a port for us.
+func GetFreePort() (port int, err error) {
+	var a *net.TCPAddr
+	if a, err = net.ResolveTCPAddr("tcp", "localhost:0"); err == nil {
+		var l *net.TCPListener
+		if l, err = net.ListenTCP("tcp", a); err == nil {
+			port := l.Addr().(*net.TCPAddr).Port
+			err = l.Close()
+			return port, err
+		}
+	}
+	return
+}
 
 // NewAPIRule returns a valid APIRule
 func NewAPIRule(subscription *eventingv1alpha1.Subscription, opts ...APIRuleOption) *apigatewayv1alpha1.APIRule {
@@ -129,12 +137,6 @@ func WithPath() APIRuleOption {
 				},
 			},
 		}
-	}
-}
-
-func WithStatusReady() APIRuleOption {
-	return func(r *apigatewayv1alpha1.APIRule) {
-		MarkReady(r)
 	}
 }
 
@@ -241,6 +243,24 @@ func WithFakeSubscriptionStatus() SubscriptionOpt {
 	}
 }
 
+func WithStatusConfig(defaultConfig env.DefaultSubscriptionConfig) SubscriptionOpt {
+	return func(s *eventingv1alpha1.Subscription) {
+		s.Status.Config = eventingv1alpha1.MergeSubsConfigs(nil, &defaultConfig)
+	}
+}
+
+func WithSpecConfig(defaultConfig env.DefaultSubscriptionConfig) SubscriptionOpt {
+	return func(s *eventingv1alpha1.Subscription) {
+		s.Spec.Config = eventingv1alpha1.MergeSubsConfigs(nil, &defaultConfig)
+	}
+}
+
+func WithStatusCleanEventTypes(cleanEventTypes []string) SubscriptionOpt {
+	return func(sub *eventingv1alpha1.Subscription) {
+		sub.Status.CleanEventTypes = cleanEventTypes
+	}
+}
+
 func WithWebhookAuthForBEB() SubscriptionOpt {
 	return func(s *eventingv1alpha1.Subscription) {
 		s.Spec.Protocol = "BEB"
@@ -283,31 +303,34 @@ func WithWebhookForNATS() SubscriptionOpt {
 	}
 }
 
+// AddFilter creates a new Filter from eventSource and eventType and adds it to the subscription.
+func AddFilter(eventSource, eventType string, subscription *eventingv1alpha1.Subscription) {
+	if subscription.Spec.Filter == nil {
+		subscription.Spec.Filter = &eventingv1alpha1.BEBFilters{
+			Filters: []*eventingv1alpha1.BEBFilter{},
+		}
+	}
+
+	filter := &eventingv1alpha1.BEBFilter{
+		EventSource: &eventingv1alpha1.Filter{
+			Type:     "exact",
+			Property: "source",
+			Value:    eventSource,
+		},
+		EventType: &eventingv1alpha1.Filter{
+			Type:     "exact",
+			Property: "type",
+			Value:    eventType,
+		},
+	}
+
+	subscription.Spec.Filter.Filters = append(subscription.Spec.Filter.Filters, filter)
+}
+
 // WithFilter is a SubscriptionOpt for creating a Subscription with a specific event type filter,
 // that itself gets created from the passed eventSource and eventType.
 func WithFilter(eventSource, eventType string) SubscriptionOpt {
-	return func(subscription *eventingv1alpha1.Subscription) {
-		if subscription.Spec.Filter == nil {
-			subscription.Spec.Filter = &eventingv1alpha1.BEBFilters{
-				Filters: []*eventingv1alpha1.BEBFilter{},
-			}
-		}
-
-		filter := &eventingv1alpha1.BEBFilter{
-			EventSource: &eventingv1alpha1.Filter{
-				Type:     "exact",
-				Property: "source",
-				Value:    eventSource,
-			},
-			EventType: &eventingv1alpha1.Filter{
-				Type:     "exact",
-				Property: "type",
-				Value:    eventType,
-			},
-		}
-
-		subscription.Spec.Filter.Filters = append(subscription.Spec.Filter.Filters, filter)
-	}
+	return func(subscription *eventingv1alpha1.Subscription) { AddFilter(eventSource, eventType, subscription) }
 }
 
 // WithNotCleanFilter initializes subscription filter with a not clean event-type
@@ -528,22 +551,29 @@ func NewEventingControllerPod(backend string) *corev1.Pod {
 	}
 }
 
+// WithMultipleConditions is a SubscriptionOpt for creating Subscriptions with multiple conditions.
 func WithMultipleConditions() SubscriptionOpt {
 	return func(s *eventingv1alpha1.Subscription) {
-		s.Status.Conditions = NewDefaultMultipleConditions()
+		s.Status.Conditions = MultipleDefaultConditions()
 	}
 }
 
-func NewDefaultMultipleConditions() []eventingv1alpha1.Condition {
-	cond1 := eventingv1alpha1.MakeCondition(
+func MultipleDefaultConditions() []eventingv1alpha1.Condition {
+	return []eventingv1alpha1.Condition{CustomReadyCondition("One"), CustomReadyCondition("Two")}
+}
+
+func CustomReadyCondition(msg string) eventingv1alpha1.Condition {
+	return eventingv1alpha1.MakeCondition(
 		eventingv1alpha1.ConditionSubscriptionActive,
 		eventingv1alpha1.ConditionReasonNATSSubscriptionActive,
-		v1.ConditionTrue, "cond1")
-	cond2 := eventingv1alpha1.MakeCondition(
+		v1.ConditionTrue, msg)
+}
+
+func DefaultReadyCondition() eventingv1alpha1.Condition {
+	return eventingv1alpha1.MakeCondition(
 		eventingv1alpha1.ConditionSubscriptionActive,
 		eventingv1alpha1.ConditionReasonNATSSubscriptionActive,
-		v1.ConditionTrue, "cond2")
-	return []eventingv1alpha1.Condition{cond1, cond2}
+		v1.ConditionTrue, "")
 }
 
 // ToSubscription converts an unstructured subscription into a typed one

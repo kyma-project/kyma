@@ -180,7 +180,7 @@ func getSecurityContext() *v1.SecurityContext {
 
 func getReadinessProbe() *v1.Probe {
 	return &v1.Probe{
-		Handler: v1.Handler{
+		ProbeHandler: v1.ProbeHandler{
 			HTTPGet: &v1.HTTPGetAction{
 				Path:   "/readyz",
 				Port:   intstr.FromInt(8080),
@@ -193,7 +193,7 @@ func getReadinessProbe() *v1.Probe {
 
 func getLivenessProbe() *v1.Probe {
 	return &v1.Probe{
-		Handler: v1.Handler{
+		ProbeHandler: v1.ProbeHandler{
 			HTTPGet: &v1.HTTPGetAction{
 				Path:   "/healthz",
 				Port:   intstr.FromInt(8080),
@@ -313,6 +313,7 @@ func getNATSEnvVars(publisherConfig env.PublisherConfig) []v1.EnvVar {
 				},
 			},
 		},
+		{Name: "ENABLE_JETSTREAM_BACKEND", Value: strconv.FormatBool(publisherConfig.EnableJetStreamBackend)},
 	}
 }
 

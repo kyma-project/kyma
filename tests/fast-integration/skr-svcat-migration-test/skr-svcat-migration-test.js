@@ -72,7 +72,8 @@ describe('SKR SVCAT migration test', function() {
 
   it('Should get Runtime Status after provisioning', async function() {
     const runtimeStatus = await kcp.getRuntimeStatusOperations(instanceID);
-    console.log(`\nRuntime status: ${runtimeStatus}`);
+    console.log(`\nRuntime status after provisioning: ${runtimeStatus}`);
+    await kcp.reconcileInformationLog(runtimeStatus);
   });
 
   it('Should save kubeconfig for the SKR to ~/.kube/config', async function() {
@@ -100,6 +101,10 @@ describe('SKR SVCAT migration test', function() {
 
   it('Should check if pod presets injected secrets to functions containers', async function() {
     await t.checkPodPresetEnvInjected();
+  });
+
+  it('Should print the container logs of the sm proxy', async function() {
+    await printContainerLogs('app=service-broker-proxy-k8s', 'service-broker-proxy-k8s', 'kyma-system');
   });
 
   it('Should mark the platform for migration in Service Manager', async function() {
@@ -133,10 +138,9 @@ describe('SKR SVCAT migration test', function() {
     await t.restartFunctionsPods();
   });
 
-  it('Should check if pod presets injected secrets in functions containers are present after migration',
-      async function() {
-        await t.checkPodPresetEnvInjected();
-      });
+  it('Should check if presets injected secrets in func containers are present after migration', async function() {
+    await t.checkPodPresetEnvInjected();
+  });
 
   it('Should destroy sample service catalog resources', async function() {
     await sampleResources.destroy();
@@ -147,7 +151,12 @@ describe('SKR SVCAT migration test', function() {
   });
 
   it('Should deprovision SKR', async function() {
-    await deprovisionSKR(keb, kcp, instanceID, deprovisioningTimeout);
+    try {
+      await deprovisionSKR(keb, kcp, instanceID, deprovisioningTimeout);
+    } finally {
+      const runtimeStatus = await kcp.getRuntimeStatusOperations(instanceID);
+      await kcp.reconcileInformationLog(runtimeStatus);
+    }
   });
 
   it('Should cleanup platform --cascade, operator instances and bindings', async function() {

@@ -81,7 +81,7 @@ nats:
   #  name:
 
   jetstream:
-    enabled: false
+    #enabled: JetStream can be enabled via .Values.global.features.enableJetStream
 
     # Jetstream Domain
     domain:

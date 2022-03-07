@@ -189,7 +189,6 @@ var _ = BeforeSuite(func(done Done) {
 		natsSubMgr,
 		bebSubMgr,
 		k8sManager.GetClient(),
-		k8sManager.GetCache(),
 		defaultLogger,
 		k8sManager.GetEventRecorderFor("backend-controller"),
 	).SetupWithManager(k8sManager)

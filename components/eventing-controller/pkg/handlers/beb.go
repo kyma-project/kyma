@@ -13,9 +13,9 @@ import (
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 	"github.com/kyma-project/kyma/components/eventing-controller/logger"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/client"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/config"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/types"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/auth"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/httpclient"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/eventtype"
 	"github.com/kyma-project/kyma/components/eventing-controller/utils"
@@ -45,7 +45,7 @@ func NewBEB(credentials *OAuth2ClientCredentials, mapper NameMapper, logger *log
 }
 
 type BEB struct {
-	Client           *client.Client
+	Client           client.PublisherManager
 	WebhookAuth      *types.WebhookAuth
 	ProtocolSettings *eventingv1alpha1.ProtocolSettings
 	Namespace        string
@@ -61,8 +61,12 @@ type BEBResponse struct {
 
 func (b *BEB) Initialize(cfg env.Config) error {
 	if b.Client == nil {
-		authenticator := auth.NewAuthenticator(cfg)
-		b.Client = client.NewClient(config.GetDefaultConfig(cfg.BEBAPIURL), authenticator)
+		authenticatedClient := auth.NewAuthenticatedClient(cfg)
+		httpClient, err := httpclient.NewHTTPClient(cfg.BEBAPIURL, authenticatedClient)
+		if err != nil {
+			return err
+		}
+		b.Client = client.NewClient(httpClient)
 		b.WebhookAuth = getWebHookAuth(cfg, b.OAth2credentials)
 		b.ProtocolSettings = &eventingv1alpha1.ProtocolSettings{
 			ContentMode:     &cfg.ContentMode,
@@ -87,11 +91,17 @@ func getWebHookAuth(cfg env.Config, credentials *OAuth2ClientCredentials) *types
 }
 
 // SyncSubscription synchronize the EV2 subscription with the EMS subscription. It returns true, if the EV2 subscription status was changed
-func (b *BEB) SyncSubscription(subscription *eventingv1alpha1.Subscription, cleaner eventtype.Cleaner, params ...interface{}) (bool, error) {
+func (b *BEB) SyncSubscription(subscription *eventingv1alpha1.Subscription, params ...interface{}) (bool, error) {
 	// Format logger
 	log := utils.LoggerWithSubscription(b.namedLogger(), subscription)
 
-	apiRule, ok := params[0].(*apigatewayv1alpha1.APIRule)
+	cleaner, ok := params[0].(eventtype.Cleaner)
+	if !ok {
+		err := fmt.Errorf("get cleaner from params[0] failed: %v", params[0])
+		log.Errorw("wrong parameter for subscription", ErrorLogKey, err)
+	}
+
+	apiRule, ok := params[1].(*apigatewayv1alpha1.APIRule)
 	if !ok {
 		err := fmt.Errorf("get ApiRule from params[0] failed: %v", params[0])
 		log.Errorw("wrong parameter for subscription", ErrorLogKey, err)

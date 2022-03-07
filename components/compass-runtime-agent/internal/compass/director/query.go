@@ -58,15 +58,15 @@ func applicationData() string {
 		description
 		labels
 		auths {%s}
-		packages {%s}
-	`, systemAuthData(), pageData(packagesData()))
+		bundles {%s}
+	`, systemAuthData(), pageData(bundlesData()))
 }
 
 func systemAuthData() string {
 	return fmt.Sprintf(`id`)
 }
 
-func packagesData() string {
+func bundlesData() string {
 	return fmt.Sprintf(`id
 		name
 		description
@@ -75,10 +75,10 @@ func packagesData() string {
 		eventDefinitions {%s}
 		documents {%s}
 		defaultInstanceAuth {%s}
-		`, pageData(packageApiDefinitions()), pageData(eventAPIData()), pageData(documentData()), authData())
+		`, pageData(bundleApiDefinitions()), pageData(eventAPIData()), pageData(documentData()), authData())
 }
 
-func packageApiDefinitions() string {
+func bundleApiDefinitions() string {
 	return fmt.Sprintf(`		id
 		name
 		description

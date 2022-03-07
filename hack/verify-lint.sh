@@ -10,6 +10,8 @@ readonly ROOT_PATH="${1:-$( cd "${CURRENT_DIR}/.." && pwd )}" # first argument o
 readonly TMP_DIR=$(mktemp -d)
 readonly GOLANGCI_LINT_VERSION="v1.38.0"
 
+ADDITIONAL_LINTERS=${ADDITIONAL_LINTERS:-}
+
 source "${CURRENT_DIR}/utilities.sh" || { echo 'Cannot load CI utilities.'; exit 1; }
 
 cleanup() {
@@ -55,6 +57,7 @@ golangci::run_checks() {
     structcheck typecheck unused varcheck \
     # additional lints
     golint gofmt misspell gochecknoinits unparam scopelint gosec
+    ${ADDITIONAL_LINTERS}
   )
 
   echo "Checks: ${LINTS[*]}"
