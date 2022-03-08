@@ -1,6 +1,3 @@
-// Tests in this file are integration tests.
-// They do use a real NATS server using github.com/nats-io/nats-server/v2/server.
-// Messages are sent using NatsMessageSender interface.
 package sender
 
 import (
