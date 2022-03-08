@@ -91,7 +91,7 @@ func (c *SubscriptionManager) Start(_ env.DefaultSubscriptionConfig, params subs
 		return errors.Wrap(err, "get oauth2client credentials failed")
 	}
 
-	// Need to read env so as to read BEB related secrets
+	// Need to read env to read BEB related secrets
 	c.envCfg = env.GetConfig()
 	nameMapper := handlers.NewBEBSubscriptionNameMapper(strings.TrimSpace(c.envCfg.Domain), handlers.MaxBEBSubscriptionNameLength)
 	ctrl.Log.WithName("BEB-subscription-manager").Info("using BEB name mapper",
@@ -101,7 +101,6 @@ func (c *SubscriptionManager) Start(_ env.DefaultSubscriptionConfig, params subs
 		ctx,
 		c.mgr.GetClient(),
 		applicationLister,
-		c.mgr.GetCache(),
 		c.logger,
 		c.mgr.GetEventRecorderFor("eventing-controller-beb"),
 		c.envCfg,

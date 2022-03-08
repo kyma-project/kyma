@@ -33,7 +33,7 @@ func GetPortNumberFromURL(u url.URL) (uint32, error) {
 	return port, nil
 }
 
-// Helper functions to check and remove string from a slice of strings.
+// ContainsString checks if a string is contained in a slice of strings.
 func ContainsString(slice []string, s string) bool {
 	for _, item := range slice {
 		if item == s {
@@ -59,6 +59,10 @@ func BoolPtr(b bool) *bool {
 
 func Int32Ptr(i int32) *int32 {
 	return &i
+}
+
+func StringPtr(s string) *string {
+	return &s
 }
 
 func BoolPtrEqual(b1, b2 *bool) bool {

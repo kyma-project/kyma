@@ -40,18 +40,6 @@ func GetRuntimeConfig(r serverlessv1alpha1.Runtime) Config {
 				{Name: "FUNC_RUNTIME", Value: "nodejs14"},
 			},
 		}
-	case serverlessv1alpha1.Python38:
-		return Config{
-			Runtime:                 serverlessv1alpha1.Python38,
-			DependencyFile:          "requirements.txt",
-			FunctionFile:            "handler.py",
-			DockerfileConfigMapName: "dockerfile-python-38",
-			RuntimeEnvs: []corev1.EnvVar{
-				// https://github.com/kubeless/runtimes/blob/master/stable/python/python.jsonnet#L45
-				{Name: "PYTHONPATH", Value: "$(KUBELESS_INSTALL_VOLUME)/lib.python3.8/site-packages:$(KUBELESS_INSTALL_VOLUME)"},
-				{Name: "FUNC_RUNTIME", Value: "python38"},
-				{Name: "PYTHONUNBUFFERED", Value: "TRUE"}},
-		}
 	case serverlessv1alpha1.Python39:
 		return Config{
 			Runtime:                 serverlessv1alpha1.Python39,
@@ -82,7 +70,7 @@ func GetRuntime(r serverlessv1alpha1.Runtime) Runtime {
 	switch r {
 	case serverlessv1alpha1.Nodejs12, serverlessv1alpha1.Nodejs14:
 		return nodejs{}
-	case serverlessv1alpha1.Python38, serverlessv1alpha1.Python39:
+	case serverlessv1alpha1.Python39:
 		return python{}
 	default:
 		return nodejs{}

@@ -41,6 +41,8 @@ spec:
                   type: string
                 skipInstallation:
                   type: boolean
+                skipVerify:
+                  type: boolean
                 labels:
                   nullable: true
                   additionalProperties:

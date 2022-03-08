@@ -180,7 +180,7 @@ var _ = BeforeSuite(func(done Done) {
 	k8sManager, err := ctrl.NewManager(cfg, ctrl.Options{
 		Scheme:             scheme.Scheme,
 		SyncPeriod:         &syncPeriod,
-		MetricsBindAddress: ":7071",
+		MetricsBindAddress: "localhost:7071",
 	})
 	Expect(err).To(BeNil())
 
@@ -189,7 +189,6 @@ var _ = BeforeSuite(func(done Done) {
 		natsSubMgr,
 		bebSubMgr,
 		k8sManager.GetClient(),
-		k8sManager.GetCache(),
 		defaultLogger,
 		k8sManager.GetEventRecorderFor("backend-controller"),
 	).SetupWithManager(k8sManager)
@@ -377,7 +376,7 @@ var _ = Describe("Backend Reconciliation Tests", func() {
 		It("Should restore eventing status", func() {
 			ctx := context.Background()
 			By("Deleting the second secret with the BEB label")
-			bebSecret2 := reconcilertesting.WithBEBMessagingSecret(bebSecret2name, kymaSystemNamespace)
+			bebSecret2 := reconcilertesting.NewBEBMessagingSecret(bebSecret2name, kymaSystemNamespace)
 			Expect(k8sClient.Delete(ctx, bebSecret2)).Should(BeNil())
 			By("Checking EventingReady status is set to true")
 			Eventually(eventingBackendStatusGetter(ctx, eventingBackendName, kymaSystemNamespace), timeout, pollingInterval).
@@ -397,7 +396,7 @@ var _ = Describe("Backend Reconciliation Tests", func() {
 			ctx := context.Background()
 			natsSubMgr.startErr = errors.New("I don't want to start")
 			By("Un-label the BEB secret to switch to NATS")
-			bebSecret := reconcilertesting.WithBEBMessagingSecret(bebSecret1name, kymaSystemNamespace)
+			bebSecret := reconcilertesting.NewBEBMessagingSecret(bebSecret1name, kymaSystemNamespace)
 			bebSecret.Labels = map[string]string{}
 			Expect(k8sClient.Update(ctx, bebSecret)).Should(BeNil())
 			By("Checking EventingReady status is set to false")
@@ -454,7 +453,7 @@ var _ = Describe("Backend Reconciliation Tests", func() {
 			ctx := context.Background()
 			natsSubMgr.stopErr = errors.New("I can't stop")
 			By("Label the secret to switch to BEB")
-			bebSecret := reconcilertesting.WithBEBMessagingSecret(bebSecret1name, kymaSystemNamespace)
+			bebSecret := reconcilertesting.NewBEBMessagingSecret(bebSecret1name, kymaSystemNamespace)
 			bebSecret.Labels = map[string]string{
 				BEBBackendSecretLabelKey: BEBBackendSecretLabelValue,
 			}
@@ -553,7 +552,7 @@ func newMapFrom(ms ...map[string]string) map[string]string {
 
 func ensureNamespaceCreated(ctx context.Context, namespace string) {
 	By(fmt.Sprintf("Ensuring the namespace %q is created", namespace))
-	ns := reconcilertesting.WithNamespace(namespace)
+	ns := reconcilertesting.NewNamespace(namespace)
 	err := k8sClient.Create(ctx, ns)
 	if !k8serrors.IsAlreadyExists(err) {
 		Expect(err).ShouldNot(HaveOccurred())
@@ -562,7 +561,7 @@ func ensureNamespaceCreated(ctx context.Context, namespace string) {
 
 func ensureEventingBackendCreated(ctx context.Context, name, namespace string) {
 	By(fmt.Sprintf("Ensuring an Eventing Backend %q/%q is created", name, namespace))
-	backend := reconcilertesting.WithEventingBackend(name, namespace)
+	backend := reconcilertesting.NewEventingBackend(name, namespace)
 	err := k8sClient.Create(ctx, backend)
 	if !k8serrors.IsAlreadyExists(err) {
 		Expect(err).Should(BeNil())
@@ -571,7 +570,7 @@ func ensureEventingBackendCreated(ctx context.Context, name, namespace string) {
 
 func ensureControllerDeploymentCreated(ctx context.Context) *[]metav1.OwnerReference {
 	By("Ensuring an Eventing-Controller Deployment is created")
-	deploy := reconcilertesting.WithEventingControllerDeployment()
+	deploy := reconcilertesting.NewEventingControllerDeployment()
 
 	err := k8sClient.Create(ctx, deploy)
 	if !k8serrors.IsAlreadyExists(err) {
@@ -648,7 +647,7 @@ func ensurePublisherProxyPodIsCreated(ctx context.Context) corev1.Pod {
 	if bebSecretExists(ctx) {
 		backendType = fmt.Sprint(eventingv1alpha1.BEBBackendType)
 	}
-	pod := reconcilertesting.WithEventingControllerPod(backendType)
+	pod := reconcilertesting.NewEventingControllerPod(backendType)
 	var pods corev1.PodList
 	if err := k8sClient.List(ctx, &pods, client.MatchingLabels{
 		deployment.AppLabelKey: deployment.PublisherName,
@@ -730,7 +729,7 @@ func removeOAuth2Secret(ctx context.Context) {
 }
 
 func ensureBEBSecretCreated(ctx context.Context, name, ns string) {
-	bebSecret := reconcilertesting.WithBEBMessagingSecret(name, ns)
+	bebSecret := reconcilertesting.NewBEBMessagingSecret(name, ns)
 	bebSecret.Labels = map[string]string{
 		BEBBackendSecretLabelKey: BEBBackendSecretLabelValue,
 	}

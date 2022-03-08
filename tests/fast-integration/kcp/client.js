@@ -101,6 +101,18 @@ class KCPWrapper {
     return JSON.parse(result);
   }
 
+  async reconciliations(query) {
+    let args = ['reconciliations', `${query.parameter}`, '--output', 'json'];
+    if (query.shootName) {
+      args = args.concat('--shoot', `${query.shootName}`);
+    }
+    if (query.schedulingID) {
+      args = args.concat('--scheduling-id', `${query.schedulingID}`);
+    }
+    const result = await this.exec(args);
+    return JSON.parse(result);
+  }
+
   async login() {
     const args = ['login', '-u', `${this.username}`, '-p', `${this.password}`];
     return await this.exec(args);
@@ -155,6 +167,21 @@ class KCPWrapper {
       throw new Error('failed during upgradeKyma');
     }
   };
+
+  async getReconciliationsOperations(shootName) {
+    await this.login();
+    const reconciliationsOperations = await this.reconciliations({parameter: 'operations',
+      shootName: shootName});
+    return JSON.stringify(reconciliationsOperations, null, '\t');
+  }
+
+  async getReconciliationsInfo(schedulingID) {
+    await this.login();
+    const reconciliationsInfo = await this.reconciliations({parameter: 'info',
+      schedulingID: schedulingID});
+
+    return JSON.stringify(reconciliationsInfo, null, '\t');
+  }
 
   async getRuntimeStatusOperations(instanceID) {
     await this.login();
@@ -252,6 +279,53 @@ class KCPWrapper {
     }
   }
 
+  async reconcileInformationLog(runtimeStatus) {
+    try {
+      const objRuntimeStatus = JSON.parse(runtimeStatus);
+
+      try {
+        if (!objRuntimeStatus.data[0].shootName) {}
+      } catch (e) {
+        console.log('skipping reconciliation logging: no shootName provided by runtimeStatus');
+        return;
+      }
+
+      // kcp reconciliations operations -c <shootName> -o json
+      const reconciliationsOperations = await this.getReconciliationsOperations(objRuntimeStatus.data[0].shootName);
+
+      const objReconciliationsOperations = JSON.parse(reconciliationsOperations);
+
+      if ( objReconciliationsOperations == null ) {
+        console.log(`skipping reconciliation logging: kcp rc operations -c ${objRuntimeStatus.data[0].shootName}
+         -o json returned null`);
+        return;
+      }
+
+      const objReconciliationsOperationsLength = objReconciliationsOperations.length;
+
+      if (objReconciliationsOperationsLength === 0) {
+        console.log(`no reconciliation operations found`);
+        return;
+      }
+      console.log(`number of reconciliation operations: ${objReconciliationsOperationsLength}`);
+
+      // using only last three operations
+      const lastObjReconciliationsOperations = objReconciliationsOperations.
+          slice(Math.max(0, objReconciliationsOperations.length - 3), objReconciliationsOperations.length);
+
+      for (const i of lastObjReconciliationsOperations) {
+        console.log(`reconciliation operation status: ${i.status}`);
+
+        // kcp reconciliations info -i <scheduling-id> -o json
+        const getReconciliationsInfo = await this.getReconciliationsInfo(i.schedulingID);
+        console.log(`reconciliation info: ${i.schedulingID}: ${getReconciliationsInfo}`);
+      }
+    } catch {
+      console.log('skipping reconciliation logging: error in reconcileInformationLog');
+    }
+  }
+
+
   async exec(args) {
     try {
       const defaultArgs = [
@@ -265,7 +339,7 @@ class KCPWrapper {
       if (err.stderr === undefined) {
         throw new Error(`failed to process kcp binary output: ${err.toString()}`);
       }
-      throw new Error(`kcp command failed: ${err.stderr.toString()}`);
+      throw new Error(`kcp command failed: args: ${args} ,${err.stderr.toString()}`);
     }
   }
 }

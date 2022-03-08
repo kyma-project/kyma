@@ -28,7 +28,7 @@ func (r *SafeRequests) StoreRequest(request *http.Request) {
 	r.requests[request] = nil
 }
 
-// PutSubscription sets a the subscription of a request.
+// PutSubscription sets the subscription of a request.
 func (r *SafeRequests) PutSubscription(request *http.Request, subscription types.Subscription) {
 	r.Lock()
 	defer r.Unlock()

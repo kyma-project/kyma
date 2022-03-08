@@ -5,6 +5,8 @@ import (
 	"os"
 
 	"github.com/go-logr/zapr"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/subscriptionmanager"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/subscriptionmanager/jetstream"
 	"k8s.io/apimachinery/pkg/runtime"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -66,7 +68,12 @@ func main() {
 	}
 
 	// Instantiate and initialize all the subscription managers.
-	natsSubMgr := nats.NewSubscriptionManager(restCfg, opts.MetricsAddr, opts.MaxReconnects, opts.ReconnectWait, ctrLogger)
+	var natsSubMgr subscriptionmanager.Manager
+	if opts.EnableJetStreamBackend {
+		natsSubMgr = jetstream.NewSubscriptionManager(restCfg, opts.MetricsAddr, opts.MaxReconnects, opts.ReconnectWait, ctrLogger)
+	} else {
+		natsSubMgr = nats.NewSubscriptionManager(restCfg, opts.MetricsAddr, opts.MaxReconnects, opts.ReconnectWait, ctrLogger)
+	}
 	if err := natsSubMgr.Init(mgr); err != nil {
 		setupLogger.Error(err, "initialize NATS subscription manager failed")
 		os.Exit(1)
@@ -90,7 +97,7 @@ func main() {
 	// Start the backend manager.
 	ctx := context.Background()
 	recorder := mgr.GetEventRecorderFor("backend-controller")
-	backendReconciler := backend.NewReconciler(ctx, natsSubMgr, bebSubMgr, mgr.GetClient(), mgr.GetCache(), ctrLogger, recorder)
+	backendReconciler := backend.NewReconciler(ctx, natsSubMgr, bebSubMgr, mgr.GetClient(), ctrLogger, recorder)
 	if err := backendReconciler.SetupWithManager(mgr); err != nil {
 		setupLogger.Error(err, "start backend controller failed")
 		os.Exit(1)

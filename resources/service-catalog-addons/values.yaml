@@ -6,12 +6,9 @@ global:
   containerRegistry:
     path: eu.gcr.io/kyma-project
   images:
-    service_catalog_ui:
-      name: "service-catalog-ui"
-      version: "c60a3c68"
     service_binding_usage_controller:
       name: "service-binding-usage-controller"
-      version: "9d2a5878"
+      version: "75da62ce"
   istio:
     gateway:
       name: kyma-gateway

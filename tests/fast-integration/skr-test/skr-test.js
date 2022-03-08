@@ -60,6 +60,7 @@ function oidcE2ETest() {
     it('Should get Runtime Status after updating OIDC config', async function() {
       const runtimeStatus = await kcp.getRuntimeStatusOperations(this.options.instanceID);
       console.log(`\nRuntime status: ${runtimeStatus}`);
+      await kcp.reconcileInformationLog(runtimeStatus);
     });
 
     it('Assure updated OIDC config is applied on shoot cluster', async function() {
@@ -93,6 +94,7 @@ function oidcE2ETest() {
     it('Should get Runtime Status after updating admins', async function() {
       const runtimeStatus = await kcp.getRuntimeStatusOperations(this.options.instanceID);
       console.log(`\nRuntime status: ${runtimeStatus}`);
+      await kcp.reconcileInformationLog(runtimeStatus);
     });
 
     it('Assure only new cluster admins are configured', async function() {

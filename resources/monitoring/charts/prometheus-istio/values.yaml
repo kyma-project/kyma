@@ -47,8 +47,8 @@ alertmanager:
   ## alertmanager container image
   ##
   image:
-    repository: prom/alertmanager # This image is not activated in Kyma. This is kept here to keep parity with upstream charts
-    tag: v0.21.0
+    repository: quay.io/prometheus/alertmanager # This image is not activated in Kyma. This is kept here to keep parity with upstream charts
+    tag: v0.23.0
     pullPolicy: IfNotPresent
 
   ## alertmanager priorityClassName
@@ -107,6 +107,10 @@ alertmanager:
     ##
     enabled: false
 
+    # For Kubernetes >= 1.18 you should specify the ingress-controller via the field ingressClassName
+    # See https://kubernetes.io/blog/2020/04/02/improvements-to-the-ingress-api-in-kubernetes-1.18/#specifying-the-class-of-an-ingress
+    # ingressClassName: nginx
+
     ## alertmanager Ingress annotations
     ##
     annotations: {}
@@ -123,6 +127,11 @@ alertmanager:
     hosts: []
     #   - alertmanager.domain.com
     #   - domain.com/alertmanager
+
+    path: /
+
+    # pathType is only for k8s >= 1.18
+    pathType: Prefix
 
     ## Extra paths to prepend to every host configuration. This is useful when working with annotation based services.
     extraPaths: []
@@ -224,6 +233,21 @@ alertmanager:
     ##
     subPath: ""
 
+    ## Persistent Volume Claim Selector
+    ## Useful if Persistent Volumes have been provisioned in advance
+    ## Ref: https://kubernetes.io/docs/concepts/storage/persistent-volumes/#selector
+    ##
+    # selector:
+    #  matchLabels:
+    #    release: "stable"
+    #  matchExpressions:
+    #    - { key: environment, operator: In, values: [ dev ] }
+
+  emptyDir:
+    ## alertmanager emptyDir volume size limit
+    ##
+    sizeLimit: ""
+
   ## Annotations to be added to alertmanager pods
   ##
   podAnnotations: {}
@@ -292,6 +316,18 @@ alertmanager:
     #   cpu: 10m
     #   memory: 32Mi
 
+  # Custom DNS configuration to be added to alertmanager pods
+  dnsConfig: {}
+    # nameservers:
+    #   - 1.2.3.4
+    # searches:
+    #   - ns1.svc.cluster-domain.example
+    #   - my.dns.search.suffix
+    # options:
+    #   - name: ndots
+    #     value: "2"
+  #   - name: edns0
+
   ## Security context to be added to alertmanager pods
   ##
   securityContext:
@@ -321,6 +357,10 @@ alertmanager:
     sessionAffinity: None
     type: ClusterIP
 
+  ## List of initial peers
+  ## Ref: https://github.com/prometheus/alertmanager/blob/main/README.md#high-availability
+  clusterPeers: []
+
 ## Monitors ConfigMap changes and POSTs to a URL
 ## Ref: https://github.com/jimmidyson/configmap-reload
 ##
@@ -337,6 +377,8 @@ configmapReload:
     ## configmap-reload container image
     ##
     image:
+      repository: jimmidyson/configmap-reload # This image is not activated in Kyma. This is kept here to keep parity with upstream charts
+      tag: v0.5.0
       pullPolicy: IfNotPresent
 
     ## Additional configmap-reload container arguments
@@ -415,7 +457,7 @@ kubeStateMetrics:
   enabled: false
 
 ## kube-state-metrics sub-chart configurable values
-## Please see https://github.com/helm/charts/tree/master/stable/kube-state-metrics
+## Please see https://github.com/prometheus-community/helm-charts/tree/main/charts/kube-state-metrics
 ##
 # kube-state-metrics:
 
@@ -432,6 +474,10 @@ nodeExporter:
   ##
   hostPID: true
 
+  ## If true, node-exporter pods mounts host / at /host/root
+  ##
+  hostRootfs: true
+
   ## node-exporter container name
   ##
   name: node-exporter
@@ -439,6 +485,8 @@ nodeExporter:
   ## node-exporter container image
   ##
   image:
+    repository: quay.io/prometheus/node-exporter # This image is not activated in Kyma. This is kept here to keep parity with upstream charts
+    tag: v1.3.0
     pullPolicy: IfNotPresent
 
   ## Specify if a Pod Security Policy for node-exporter must be created
@@ -528,10 +576,25 @@ nodeExporter:
     #   cpu: 100m
     #   memory: 30Mi
 
+  # Custom DNS configuration to be added to node-exporter pods
+  dnsConfig: {}
+    # nameservers:
+    #   - 1.2.3.4
+    # searches:
+    #   - ns1.svc.cluster-domain.example
+    #   - my.dns.search.suffix
+    # options:
+    #   - name: ndots
+    #     value: "2"
+  #   - name: edns0
+
   ## Security context to be added to node-exporter pods
   ##
-  securityContext: {}
-    # runAsUser: 0
+  securityContext:
+    fsGroup: 65534
+    runAsGroup: 65534
+    runAsNonRoot: true
+    runAsUser: 65534
 
   service:
     annotations:
@@ -572,12 +635,33 @@ server:
   # namespaces:
   #   - yournamespace
 
-  name: "server"
-  sidecarContainers:
+  name: server
+
+  # sidecarContainers - add more containers to prometheus server
+  # Key/Value where Key is the sidecar `- name: <Key>`
+  # Example:
+  #   sidecarContainers:
+  #      webserver:
+  #        image: nginx
+  sidecarContainers: []
+
+  # sidecarTemplateValues - context to be used in template for sidecarContainers
+  # Example:
+  #   sidecarTemplateValues: *your-custom-globals
+  #   sidecarContainers:
+  #     webserver: |-
+  #       {{ include "webserver-container-template" . }}
+  # Template for `webserver-container-template` might looks like this:
+  #   image: "{{ .Values.server.sidecarTemplateValues.repository }}:{{ .Values.server.sidecarTemplateValues.tag }}"
+  #   ...
+  #
+  sidecarTemplateValues: {}
 
   ## Prometheus server container image
   ##
   image:
+    repository: quay.io/prometheus/prometheus # This image is not activated in Kyma. This is kept here to keep parity with upstream charts
+    tag: v2.31.1
     pullPolicy: IfNotPresent
 
   ## prometheus server priorityClassName
@@ -595,7 +679,7 @@ server:
   ## (Optional)
   prefixURL: ""
 
-  ## External URL which can access alertmanager
+  ## External URL which can access prometheus
   ## Maybe same with Ingress host name
   baseURL: ""
 
@@ -631,6 +715,10 @@ server:
   ## Path to a configuration file on prometheus server container FS
   configPath: /etc/config/prometheus.yml
 
+  ### The data directory used by prometheus to set --storage.tsdb.path
+  ### When empty server.persistentVolume.mountPath is used instead
+  storagePath: ""
+
   global:
     ## How frequently to scrape targets by default
     ##
@@ -647,6 +735,11 @@ server:
   ## https://prometheus.io/docs/prometheus/latest/configuration/configuration/#remote_read
   ##
   remoteRead: []
+
+  ## Custom HTTP headers for Liveness/Readiness/Startup Probe
+  ##
+  ## Useful for providing HTTP Basic Auth to healthchecks
+  probeHeaders: []
 
   ## Additional Prometheus server container arguments
   ##
@@ -700,6 +793,10 @@ server:
     ##
     enabled: false
 
+    # For Kubernetes >= 1.18 you should specify the ingress-controller via the field ingressClassName
+    # See https://kubernetes.io/blog/2020/04/02/improvements-to-the-ingress-api-in-kubernetes-1.18/#specifying-the-class-of-an-ingress
+    # ingressClassName: nginx
+
     ## Prometheus server Ingress annotations
     ##
     annotations: {}
@@ -716,6 +813,11 @@ server:
     hosts: []
     #   - prometheus.domain.com
     #   - domain.com/prometheus
+
+    path: /
+
+    # pathType is only for k8s >= 1.18
+    pathType: Prefix
 
     ## Extra paths to prepend to every host configuration. This is useful when working with annotation based services.
     extraPaths: []
@@ -823,13 +925,25 @@ server:
     ##
     subPath: ""
 
+    ## Persistent Volume Claim Selector
+    ## Useful if Persistent Volumes have been provisioned in advance
+    ## Ref: https://kubernetes.io/docs/concepts/storage/persistent-volumes/#selector
+    ##
+    # selector:
+    #  matchLabels:
+    #    release: "stable"
+    #  matchExpressions:
+    #    - { key: environment, operator: In, values: [ dev ] }
+
   emptyDir:
+    ## Prometheus server emptyDir volume size limit
+    ##
     sizeLimit: ""
 
   ## Annotations to be added to Prometheus server pods
   ##
   podAnnotations:
-    sidecar.istio.io/inject: "false"
+     sidecar.istio.io/inject: "false"
     # iam.amazonaws.com/role: prometheus
 
   ## Labels to be added to Prometheus server pods
@@ -887,6 +1001,8 @@ server:
   ## Prometheus server readiness and liveness probe initial delay and timeout
   ## Ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/
   ##
+  tcpSocketProbeEnabled: false
+  probeScheme: HTTP
   readinessProbeInitialDelay: 30
   readinessProbePeriodSeconds: 5
   readinessProbeTimeout: 30
@@ -897,6 +1013,11 @@ server:
   livenessProbeTimeout: 30
   livenessProbeFailureThreshold: 3
   livenessProbeSuccessThreshold: 1
+  startupProbe:
+    enabled: false
+    periodSeconds: 5
+    failureThreshold: 30
+    timeoutSeconds: 10
 
   ## Prometheus server resource requests and limits
   ## Ref: http://kubernetes.io/docs/user-guide/compute-resources/
@@ -909,6 +1030,14 @@ server:
       cpu: 40m
       memory: 200Mi
 
+  # Required for use in managed kubernetes clusters (such as AWS EKS) with custom CNI (such as calico),
+  # because control-plane managed by AWS cannot communicate with pods' IP CIDR and admission webhooks are not working
+  ##
+  hostNetwork: false
+
+  # When hostNetwork is enabled, you probably want to set this to ClusterFirstWithHostNet
+  dnsPolicy: ClusterFirst
+
   ## Vertical Pod Autoscaler config
   ## Ref: https://github.com/kubernetes/autoscaler/tree/master/vertical-pod-autoscaler
   verticalAutoscaler:
@@ -918,6 +1047,17 @@ server:
     # containerPolicies:
     # - containerName: 'prometheus-server'
 
+  # Custom DNS configuration to be added to prometheus server pods
+  dnsConfig: {}
+    # nameservers:
+    #   - 1.2.3.4
+    # searches:
+    #   - ns1.svc.cluster-domain.example
+    #   - my.dns.search.suffix
+    # options:
+    #   - name: ndots
+    #     value: "2"
+  #   - name: edns0
   ## Security context to be added to server pods
   ##
   podSecurityContext:
@@ -983,6 +1123,8 @@ pushgateway:
   ## pushgateway container image
   ##
   image:
+    repository: prom/pushgateway  # This image is not activated in Kyma. This is kept here to keep parity with upstream charts
+    tag: v1.4.2
     pullPolicy: IfNotPresent
 
   ## pushgateway priorityClassName
@@ -1003,6 +1145,10 @@ pushgateway:
     ##
     enabled: false
 
+    # For Kubernetes >= 1.18 you should specify the ingress-controller via the field ingressClassName
+    # See https://kubernetes.io/blog/2020/04/02/improvements-to-the-ingress-api-in-kubernetes-1.18/#specifying-the-class-of-an-ingress
+    # ingressClassName: nginx
+
     ## pushgateway Ingress annotations
     ##
     annotations: {}
@@ -1015,6 +1161,11 @@ pushgateway:
     hosts: []
     #   - pushgateway.domain.com
     #   - domain.com/pushgateway
+
+    path: /
+
+    # pathType is only for k8s >= 1.18
+    pathType: Prefix
 
     ## Extra paths to prepend to every host configuration. This is useful when working with annotation based services.
     extraPaths: []
@@ -1091,6 +1242,27 @@ pushgateway:
     #   cpu: 10m
     #   memory: 32Mi
 
+  ## Vertical Pod Autoscaler config
+  ## Ref: https://github.com/kubernetes/autoscaler/tree/master/vertical-pod-autoscaler
+  verticalAutoscaler:
+    ## If true a VPA object will be created for the controller
+    enabled: false
+    # updateMode: "Auto"
+    # containerPolicies:
+    # - containerName: 'prometheus-pushgateway'
+
+  # Custom DNS configuration to be added to push-gateway pods
+  dnsConfig: {}
+    # nameservers:
+    #   - 1.2.3.4
+    # searches:
+    #   - ns1.svc.cluster-domain.example
+    #   - my.dns.search.suffix
+    # options:
+    #   - name: ndots
+    #     value: "2"
+  #   - name: edns0
+
   ## Security context to be added to push-gateway pods
   ##
   securityContext:
@@ -1119,7 +1291,6 @@ pushgateway:
 
   persistentVolume:
     ## If true, pushgateway will create/use a Persistent Volume Claim
-    ## If false, use emptyDir
     ##
     enabled: false
 
@@ -1255,6 +1426,7 @@ serverFiles:
         static_configs:
           - targets:
             - localhost:9090
+
 
 # adds additional scrape configs to prometheus.yml
 # must be a string so you have to add a | after extraScrapeConfigs:

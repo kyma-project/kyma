@@ -176,7 +176,7 @@ func containerEqual(c1, c2 *corev1.Container) bool {
 	return probeEqual(c1.ReadinessProbe, c2.ReadinessProbe)
 }
 
-// envEqual asserts the queality of two core environment slices. It's used
+// envEqual asserts the equality of two core environment slices. It's used
 // by containerEqual.
 func envEqual(e1, e2 []corev1.EnvVar) bool {
 	if len(e1) != len(e2) {
@@ -257,7 +257,7 @@ func realProto(pr corev1.Protocol) corev1.Protocol {
 	return pr
 }
 
-// eventingBackendStatusEqual asserts the equality of of EventingBackendStatus objects.
+// eventingBackendStatusEqual asserts the equality of EventingBackendStatus objects.
 func eventingBackendStatusEqual(s1, s2 *eventingv1alpha1.EventingBackendStatus) bool {
 	if s1 == nil || s2 == nil {
 		return false

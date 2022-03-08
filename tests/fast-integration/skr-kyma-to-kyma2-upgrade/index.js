@@ -145,6 +145,7 @@ describe('SKR-Upgrade-test', function() {
   it(`Should get Runtime Status after provisioning`, async function() {
     const runtimeStatus = await kcp.getRuntimeStatusOperations(instanceID);
     console.log(`\nRuntime status: ${runtimeStatus}`);
+    await kcp.reconcileInformationLog(runtimeStatus);
   });
 
   it(`Should save kubeconfig for the SKR to ~/.kube/config`, async function() {
@@ -218,6 +219,7 @@ describe('SKR-Upgrade-test', function() {
   it('Should get Runtime Status after upgrade', async function() {
     const runtimeStatus = await kcp.getRuntimeStatusOperations(instanceID);
     console.log(`\nRuntime status: ${runtimeStatus}`);
+    await kcp.reconcileInformationLog(runtimeStatus);
   });
 
   // Perform Tests after Upgrade
@@ -259,12 +261,13 @@ describe('SKR-Upgrade-test', function() {
       await cleanMockTestFixture('mocks', testNS, true);
     });
 
-    it('Unregister SKR resources from Compass', async function() {
-      await unregisterKymaFromCompass(director, scenarioName);
-    });
-
     it('Deprovision SKR', async function() {
-      await deprovisionSKR(keb, kcp, instanceID, deprovisioningTimeout);
+      try {
+        await deprovisionSKR(keb, kcp, instanceID, deprovisioningTimeout);
+      } finally {
+        const runtimeStatus = await kcp.getRuntimeStatusOperations(instanceID);
+        await kcp.reconcileInformationLog(runtimeStatus);
+      }
     });
   }
 });

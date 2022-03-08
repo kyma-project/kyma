@@ -430,7 +430,7 @@ data:
                 "tableColumn": "",
                 "targets": [
                     {
-                    "expr": "1 - sum(:node_memory_MemAvailable_bytes:sum) / sum(kube_node_status_allocatable_memory_bytes)",
+                    "expr": "1 - sum(:node_memory_MemAvailable_bytes:sum) / sum(kube_node_status_allocatable{resource=\"memory\"})",
                     "instant": false,
                     "refId": "A"
                     }
@@ -515,7 +515,7 @@ data:
                 "tableColumn": "",
                 "targets": [
                     {
-                    "expr": "sum(kube_pod_container_resource_requests_cpu_cores) / sum(kube_node_status_allocatable_cpu_cores)",
+                    "expr": "sum(kube_pod_container_resource_requests{resource=\"cpu\"}) / sum(kube_node_status_allocatable{resource=\"cpu\"})",
                     "instant": false,
                     "refId": "A"
                     }
@@ -600,7 +600,7 @@ data:
                 "tableColumn": "",
                 "targets": [
                     {
-                    "expr": "sum(kube_pod_container_resource_requests_memory_bytes) / sum(kube_node_status_allocatable_memory_bytes)",
+                    "expr": "sum(kube_pod_container_resource_requests{resource=\"memory\"}) / sum(kube_node_status_allocatable{resource=\"memory\"})",
                     "instant": false,
                     "refId": "A"
                     }
@@ -685,7 +685,7 @@ data:
                 "tableColumn": "",
                 "targets": [
                     {
-                    "expr": "sum(kube_pod_container_resource_limits_cpu_cores) / sum(kube_node_status_allocatable_cpu_cores)",
+                    "expr": "sum(kube_pod_container_resource_limits{resource=\"cpu\"}) / sum(kube_node_status_allocatable{resource=\"cpu\"})",
                     "instant": false,
                     "refId": "A"
                     }
@@ -770,7 +770,7 @@ data:
                 "tableColumn": "",
                 "targets": [
                     {
-                    "expr": "sum(kube_pod_container_resource_limits_memory_bytes) / sum(kube_node_status_allocatable_memory_bytes)",
+                    "expr": "sum(kube_pod_container_resource_limits{resource=\"memory\"}) / sum(kube_node_status_allocatable{resource=\"memory\"})",
                     "instant": false,
                     "refId": "A"
                     }

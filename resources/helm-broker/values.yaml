@@ -115,10 +115,10 @@ global:
       version: "49c6b00e"
     helm_controller:
       name: "helm-controller"
-      version: "49c6b00e"
+      version: "7c8d1e85"
     etcd:
       name: "etcd"
-      version: "v3.3.25-e5110645"
+      version: "v3.3.25-699b7008"
       directory: "tpi/quay.io/coreos"
     add_ons_ui:
       name: "add-ons-ui"
