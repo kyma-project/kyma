@@ -1,8 +1,8 @@
 reviewers:
-  - service-catalog-reviewers
+  - service-management-reviewers
 approvers:
-  - service-catalog-approvers
+  - service-management-approvers
 
 labels:
-  - area/service-catalog
+  - area/service-management
   - area/application-connector

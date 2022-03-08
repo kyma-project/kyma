@@ -4,4 +4,4 @@ approvers:
   - uaa-activator-approvers
 
 labels:
-  - area/uaa-activator
+  - area/service-management

@@ -49,7 +49,15 @@ aliases:
     - vladislavpaskar
     - raypinto
 
-  service-catalog-reviewers: # area/service-catalog
+  service-management-reviewers: # area/service-management
+    - wozniakjan
+    - voigt
+    - piotrmiskiewicz
+    - szwedm
+    - ralikio
+    - hanngos
+    - tillknuesting
+  service-management-approvers: # area/service-management
     - wozniakjan
     - voigt
     - PK85
@@ -58,10 +66,15 @@ aliases:
     - ralikio
     - hanngos
     - tillknuesting
-  service-catalog-approvers: # area/service-catalog
-    - PK85
+  binding-reviewers: # area/service-management
+    - wozniakjan
+    - voigt
     - piotrmiskiewicz
-  binding-reviewers: # area/binding
+    - szwedm
+    - ralikio
+    - hanngos
+    - tillknuesting
+  binding-approvers: # area/service-management
     - wozniakjan
     - voigt
     - PK85
@@ -70,10 +83,15 @@ aliases:
     - ralikio
     - hanngos
     - tillknuesting
-  binding-approvers: # area/binding
-    - PK85
+  uaa-activator-reviewers: # area/service-management
+    - wozniakjan
+    - voigt
     - piotrmiskiewicz
-  uaa-activator-reviewers: # area/uaa-activator
+    - szwedm
+    - ralikio
+    - hanngos
+    - tillknuesting
+  uaa-activator-approvers: # area/service-management
     - wozniakjan
     - voigt
     - PK85
@@ -82,9 +100,6 @@ aliases:
     - ralikio
     - hanngos
     - tillknuesting
-  uaa-activator-approvers: # area/uaa-activator
-    - PK85
-    - piotrmiskiewicz
 
   application-connector-reviewers: # area/application-connector
     - VOID404

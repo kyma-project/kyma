@@ -4,4 +4,4 @@ approvers:
   - binding-approvers
 
 labels:
-  - area/binding
+  - area/service-management
