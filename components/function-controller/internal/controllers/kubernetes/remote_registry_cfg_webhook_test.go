@@ -4,7 +4,7 @@ import (
 	"context"
 	"testing"
 
-	"k8s.io/api/admission/v1beta1"
+	v1 "k8s.io/api/admission/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
 )
@@ -33,7 +33,7 @@ func Test_registryWatcher_Handle(t *testing.T) {
 			args: args{
 				ctx: context.Background(),
 				req: admission.Request{
-					AdmissionRequest: v1beta1.AdmissionRequest{
+					AdmissionRequest: v1.AdmissionRequest{
 						Object: runtime.RawExtension{
 							Raw: []byte("err"),
 						},
@@ -48,7 +48,7 @@ func Test_registryWatcher_Handle(t *testing.T) {
 			args: args{
 				ctx: context.Background(),
 				req: admission.Request{
-					AdmissionRequest: v1beta1.AdmissionRequest{
+					AdmissionRequest: v1.AdmissionRequest{
 						Object: runtime.RawExtension{
 							Raw: []byte(`{
 								"apiVersion": "v1",
@@ -86,7 +86,7 @@ func Test_registryWatcher_Handle(t *testing.T) {
 			args: args{
 				ctx: context.Background(),
 				req: admission.Request{
-					AdmissionRequest: v1beta1.AdmissionRequest{
+					AdmissionRequest: v1.AdmissionRequest{
 						Object: runtime.RawExtension{
 							Raw: []byte(`{
 								"apiVersion": "v1",
