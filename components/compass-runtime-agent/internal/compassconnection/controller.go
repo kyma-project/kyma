@@ -4,6 +4,11 @@ import (
 	"context"
 	"time"
 
+	"github.com/kyma-incubator/compass/components/director/pkg/correlation"
+	"github.com/kyma-incubator/compass/components/director/pkg/str"
+
+	"github.com/google/uuid"
+
 	"github.com/sirupsen/logrus"
 
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/pkg/apis/compass/v1alpha1"
@@ -33,15 +38,17 @@ type Reconciler struct {
 
 	minimalConfigSyncTime time.Duration
 
-	log *logrus.Entry
+	log       *logrus.Entry
+	runtimeID string
 }
 
 func InitCompassConnectionController(
 	mgr manager.Manager,
 	supervisior Supervisor,
-	minimalConfigSyncTime time.Duration) error {
+	minimalConfigSyncTime time.Duration,
+	runtimeID string) error {
 
-	reconciler := newReconciler(mgr.GetClient(), supervisior, minimalConfigSyncTime)
+	reconciler := newReconciler(mgr.GetClient(), supervisior, minimalConfigSyncTime, runtimeID)
 
 	return startController(mgr, reconciler)
 }
@@ -55,17 +62,24 @@ func startController(mgr manager.Manager, reconciler reconcile.Reconciler) error
 	return c.Watch(&source.Kind{Type: &v1alpha1.CompassConnection{}}, &handler.EnqueueRequestForObject{})
 }
 
-func newReconciler(client Client, supervisior Supervisor, minimalConfigSyncTime time.Duration) reconcile.Reconciler {
+func newReconciler(client Client, supervisior Supervisor, minimalConfigSyncTime time.Duration, runtimeID string) reconcile.Reconciler {
 	return &Reconciler{
 		client:                client,
 		supervisor:            supervisior,
 		minimalConfigSyncTime: minimalConfigSyncTime,
 		log:                   logrus.WithField("Controller", "CompassConnection"),
+		runtimeID:             runtimeID,
 	}
 }
 
 func (r *Reconciler) Reconcile(ctx context.Context, request reconcile.Request) (reconcile.Result, error) {
-	log := r.log.WithField("CompassConnection", request.Name)
+	correlationID := r.runtimeID + "_" + uuid.New().String()
+	logFields := logrus.Fields{
+		"CompassConnection": request.Name,
+		RequestIDHeader:     correlationID,
+	}
+	log := r.log.WithFields(logFields)
+	ctx = correlation.SaveCorrelationIDHeaderToContext(context.Background(), str.Ptr(RequestIDHeader), str.Ptr(correlationID))
 
 	connection, err := r.getConnection(ctx, log, request)
 	if err != nil {
@@ -73,7 +87,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, request reconcile.Request) (
 	}
 
 	if connection == nil {
-		_, err := r.initConnection(log)
+		_, err := r.initConnection(ctx, log)
 		return reconcile.Result{}, err
 	}
 
@@ -84,11 +98,11 @@ func (r *Reconciler) Reconcile(ctx context.Context, request reconcile.Request) (
 	}
 
 	if connection.Failed() {
-		_, err := r.initConnection(log)
+		_, err := r.initConnection(ctx, log)
 		return reconcile.Result{}, err
 	}
 
-	if err := r.ensureCertificateIsValid(connection, log); err != nil {
+	if err := r.ensureCertificateIsValid(ctx, connection, log); err != nil {
 		return reconcile.Result{}, err
 	}
 
@@ -100,7 +114,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, request reconcile.Request) (
 		return reconcile.Result{}, nil
 	}
 
-	return reconcile.Result{}, r.synchronizeApplications(connection, log)
+	return reconcile.Result{}, r.synchronizeApplications(ctx, connection, log)
 }
 
 func (r *Reconciler) getConnection(ctx context.Context, log *logrus.Entry, request reconcile.Request) (*v1alpha1.CompassConnection, error) {
@@ -119,10 +133,10 @@ func (r *Reconciler) getConnection(ctx context.Context, log *logrus.Entry, reque
 	return instance, nil
 }
 
-func (r *Reconciler) initConnection(log *logrus.Entry) (*v1alpha1.CompassConnection, error) {
+func (r *Reconciler) initConnection(ctx context.Context, log *logrus.Entry) (*v1alpha1.CompassConnection, error) {
 	log.Info("Trying to initialize new connection...")
 
-	instance, err := r.supervisor.InitializeCompassConnection()
+	instance, err := r.supervisor.InitializeCompassConnection(ctx)
 	if err != nil {
 		log.Errorf("Failed to initialize Compass Connection: %s", err.Error())
 		return nil, err
@@ -132,8 +146,8 @@ func (r *Reconciler) initConnection(log *logrus.Entry) (*v1alpha1.CompassConnect
 	return instance, nil
 }
 
-func (r *Reconciler) synchronizeApplications(connection *v1alpha1.CompassConnection, log *logrus.Entry) error {
-	synchronized, err := r.supervisor.SynchronizeWithCompass(connection)
+func (r *Reconciler) synchronizeApplications(ctx context.Context, connection *v1alpha1.CompassConnection, log *logrus.Entry) error {
+	synchronized, err := r.supervisor.SynchronizeWithCompass(ctx, connection)
 	if err != nil {
 		log.Errorf("Failed to synchronize with Compass: %s", err.Error())
 		return err
@@ -143,9 +157,9 @@ func (r *Reconciler) synchronizeApplications(connection *v1alpha1.CompassConnect
 	return nil
 }
 
-func (r *Reconciler) ensureCertificateIsValid(connection *v1alpha1.CompassConnection, log *logrus.Entry) error {
+func (r *Reconciler) ensureCertificateIsValid(ctx context.Context, connection *v1alpha1.CompassConnection, log *logrus.Entry) error {
 	log.Infof("Attempting to maintain connection with Compass...")
-	err := r.supervisor.MaintainCompassConnection(connection)
+	err := r.supervisor.MaintainCompassConnection(ctx, connection)
 
 	if err != nil {
 		log.Errorf("Failed to maintain connection with Compass: %s", err.Error())
