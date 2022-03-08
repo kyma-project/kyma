@@ -83,7 +83,11 @@ func TestNatsHandlerForCloudEvents(t *testing.T) {
 			eventTypeToSubscribe := subscription.Spec.Filter.Filters[0].EventType.Value
 
 			// connect to nats
-			connection, err := pkgnats.Connect(handlerMock.GetNatsURL(), true, 3, time.Second)
+			connection, err := pkgnats.Connect(handlerMock.GetNatsURL(),
+				pkgnats.WithRetryOnFailedConnect(true),
+				pkgnats.WithMaxReconnects(3),
+				pkgnats.WithReconnectWait(time.Second),
+			)
 			assert.Nil(t, err)
 			assert.NotNil(t, connection)
 
@@ -166,7 +170,11 @@ func TestNatsHandlerForLegacyEvents(t *testing.T) {
 			eventTypeToSubscribe := subscription.Spec.Filter.Filters[0].EventType.Value
 
 			// connect to nats
-			connection, err := pkgnats.Connect(handlerMock.GetNatsURL(), true, 3, time.Second)
+			connection, err := pkgnats.Connect(handlerMock.GetNatsURL(),
+				pkgnats.WithRetryOnFailedConnect(true),
+				pkgnats.WithMaxReconnects(3),
+				pkgnats.WithReconnectWait(time.Second),
+			)
 			assert.Nil(t, err)
 			assert.NotNil(t, connection)
 

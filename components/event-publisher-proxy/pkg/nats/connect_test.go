@@ -42,7 +42,11 @@ func TestConnect(t *testing.T) {
 			assert.NotEmpty(t, clientURL)
 
 			// when
-			connection, err := pkgnats.Connect(clientURL, tc.givenRetryOnFailedConnect, tc.givenMaxReconnect, tc.givenReconnectWait)
+			connection, err := pkgnats.Connect(clientURL,
+				pkgnats.WithRetryOnFailedConnect(tc.givenRetryOnFailedConnect),
+				pkgnats.WithMaxReconnects(tc.givenMaxReconnect),
+				pkgnats.WithReconnectWait(tc.givenReconnectWait),
+			)
 			assert.Nil(t, err)
 			assert.NotNil(t, connection)
 
