@@ -4,6 +4,7 @@ go 1.16
 
 replace (
 	github.com/aws/aws-sdk-go => github.com/aws/aws-sdk-go v1.42.52
+	github.com/prometheus/client_golang => github.com/prometheus/client_golang v1.11.1
 	go.etcd.io/etcd => go.etcd.io/etcd v3.3.25+incompatible
 	golang.org/x/crypto => golang.org/x/crypto v0.0.0-20220213190939-1e6e3497d506
 	golang.org/x/net => golang.org/x/net v0.0.0-20220127200216-cd36cc0744dd
@@ -19,7 +20,7 @@ require (
 	github.com/libgit2/git2go/v31 v31.4.14
 	github.com/onsi/gomega v1.10.1
 	github.com/pkg/errors v0.9.1
-	github.com/prometheus/client_golang v1.11.0
+	github.com/prometheus/client_golang v1.11.1
 	github.com/stretchr/testify v1.7.0
 	github.com/vrischmann/envconfig v1.3.0
 	go.uber.org/zap v1.16.0

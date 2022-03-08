@@ -149,6 +149,9 @@ RUN set -ex; \
 
 LABEL source = git@github.com:kyma-project/kyma.git
 
+# build-base and linux-headers are needed to install all requirements
+RUN apk add --no-cache --virtual .build-deps build-base linux-headers 
+
 COPY kubeless/requirements.txt /kubeless/requirements.txt
 RUN pip install --no-cache-dir -r /kubeless/requirements.txt
 

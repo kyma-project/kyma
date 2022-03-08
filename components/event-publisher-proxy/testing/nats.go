@@ -57,12 +57,12 @@ func ValidateNatsMessageDataOrFail(t *testing.T, data string, notify ...chan boo
 	}
 }
 
-func WaitForChannelOrTimeout(done chan bool, timeout time.Duration) error {
+func WaitForChannelOrTimeout(ch chan bool, timeout time.Duration) error {
 	timer := time.NewTimer(timeout)
 	defer timer.Stop()
 
 	select {
-	case <-done:
+	case <-ch:
 		return nil
 	case <-timer.C:
 		return fmt.Errorf("timeout is reached %v", timeout)

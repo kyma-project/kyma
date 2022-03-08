@@ -13,6 +13,8 @@ spec:
       bearerTokenFile: {{ .Values.serviceMonitor.endpoints.bearerTokenFile }}
       tlsConfig:
         {{- toYaml .Values.serviceMonitor.endpoints.tlsConfig | nindent 8 }}
+      metricRelabelings:
+        {{- toYaml .Values.serviceMonitor.endpoints.metricRelabelings | nindent 8 }}
   selector:
     matchLabels:
       {{- toYaml .Values.extraLabels | nindent 6 }}

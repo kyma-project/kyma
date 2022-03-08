@@ -351,7 +351,17 @@ func (r *FunctionReconciler) getGitBuildJobVolumeMounts(instance *serverlessv1al
 	// add package registry config volume mount depending on the used runtime
 	volumeMounts = append(volumeMounts, r.getPackageConfigVolumeMountsForRuntime(rtmConfig.Runtime)...)
 	return volumeMounts
+}
 
+func (r *FunctionReconciler) buildDeploymentEnvs(namespace string) []corev1.EnvVar {
+	return []corev1.EnvVar{
+		{Name: "SERVICE_NAMESPACE", Value: namespace},
+		{Name: "JAEGER_SERVICE_ENDPOINT", Value: r.config.JaegerServiceEndpoint},
+		{Name: "PUBLISHER_PROXY_ADDRESS", Value: r.config.PublisherProxyAddress},
+		{Name: "FUNC_HANDLER", Value: "main"},
+		{Name: "MOD_NAME", Value: "handler"},
+		{Name: "FUNC_PORT", Value: "8080"},
+	}
 }
 
 func (r *FunctionReconciler) buildDeployment(instance *serverlessv1alpha1.Function, rtmConfig runtime.Config, dockerConfig DockerConfig) appsv1.Deployment {
@@ -364,10 +374,7 @@ func (r *FunctionReconciler) buildDeployment(instance *serverlessv1alpha1.Functi
 	emptyDirVolumeSize := resource.MustParse("100Mi")
 
 	envs := append(instance.Spec.Env, rtmConfig.RuntimeEnvs...)
-	envs = append(envs, envVarsForDeployment...)
-	envs = append(envs, []corev1.EnvVar{
-		{Name: "PUBLISHER_PROXY_ADDRESS", Value: r.config.PublisherProxyAddress},
-	}...)
+	envs = append(envs, r.buildDeploymentEnvs(instance.Namespace)...)
 
 	return appsv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{

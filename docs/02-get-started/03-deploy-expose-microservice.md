@@ -163,7 +163,7 @@ The operation was successful if ... .
 
 We have created the Service. Let's now expose it outside the cluster.
 
-> **CAUTION:** Exposing a workload to the outside world is always a potential security vulnerability, so tread carefully. In a production environment, always [secure the workload](../03-tutorials/00-api-exposure/apix-03-expose-and-secure-service.md) you expose.
+> **CAUTION:** Exposing a workload to the outside world is always a potential security vulnerability, so tread carefully. In a production environment, always [secure the workload](../03-tutorials/00-api-exposure/apix-03-expose-and-secure-workload-oauth2.md) you expose.
 
 To expose our microservice, we must create an [API Rule](../05-technical-reference/00-custom-resources/apix-01-apirule.md) CR for it, just like when we [exposed our Function](02-deploy-expose-function.md#expose-the-function).
 
@@ -190,7 +190,7 @@ spec:
     host: orders-service.$CLUSTER_DOMAIN
     name: orders-service
     port: 80
-  gateway: kyma-gateway.kyma-system.svc.cluster.local
+  gateway: kyma-system/kyma-gateway
   rules:
     - path: /.*
       methods: ["GET","POST"]

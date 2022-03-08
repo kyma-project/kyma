@@ -60,6 +60,16 @@ spec:
             value: {{ .Values.global.log.level | quote }}
           - name: ENABLE_JETSTREAM_BACKEND
             value: {{ .Values.global.features.enableJetStream | quote }}
+          - name: JS_STREAM_NAME
+            value: {{ .Values.jetStream.streamName | quote }}
+          - name: JS_STREAM_STORAGE_TYPE
+            value: {{ .Values.jetStream.storage | quote }}
+          - name: JS_STREAM_RETENTION_POLICY
+            value: {{ .Values.jetStream.retentionPolicy | quote }}
+          - name: JS_STREAM_MAX_MSGS
+            value: {{ .Values.jetStream.maxMessages | quote }}
+          - name: JS_STREAM_MAX_BYTES
+            value: {{ .Values.jetStream.maxBytes | quote }}
           resources:
             requests:
               cpu: {{ .Values.resources.requests.cpu }}

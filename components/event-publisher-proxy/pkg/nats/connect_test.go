@@ -1,36 +1,56 @@
-package nats
+package nats_test
 
 import (
 	"testing"
+	"time"
 
-	publishertesting "github.com/kyma-project/kyma/components/event-publisher-proxy/testing"
 	"github.com/nats-io/nats.go"
 	"github.com/stretchr/testify/assert"
+
+	pkgnats "github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/nats"
+	publishertesting "github.com/kyma-project/kyma/components/event-publisher-proxy/testing"
 )
 
-func TestConnectToNats(t *testing.T) {
-	natsServer := publishertesting.StartNatsServer()
-	assert.NotNil(t, natsServer)
-	assert.NotEmpty(t, natsServer.ClientURL())
-	defer natsServer.Shutdown()
+func TestConnect(t *testing.T) {
+	testCases := []struct {
+		name                     string
+		// TODO(nils): these are actually givens
+		wantRetryOnFailedConnect bool
+		wantMaxReconnect         int
+		wantReconnectWait        time.Duration
+	}{
+		{
+			name:                     "do not retry failed connections",
+			wantRetryOnFailedConnect: false,
+			wantMaxReconnect:         0,
+			wantReconnectWait:        time.Millisecond,
+		},
+		{
+			name:                     "keep retrying failed connections",
+			wantRetryOnFailedConnect: true,
+			wantMaxReconnect:         -1,
+			wantReconnectWait:        time.Millisecond,
+		},
+	}
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			// TODO(nils): apply GWT pattern
+			natsServer := publishertesting.StartNatsServer()
+			assert.NotNil(t, natsServer)
+			defer natsServer.Shutdown()
 
-	c := NewConnection(
-		natsServer.ClientURL(),
-		WithRetryOnFailedConnect(true),
-		WithMaxReconnects(1),
-		WithReconnectWait(3),
-	)
-	err := c.Connect()
-	assert.Nil(t, err)
-	assert.NotNil(t, c.Connection)
-	assert.Equal(t, c.Connection.Status(), nats.CONNECTED)
+			clientURL := natsServer.ClientURL()
+			assert.NotEmpty(t, clientURL)
 
-	c.Connection.Close()
+			connection, err := pkgnats.Connect(clientURL, tc.wantRetryOnFailedConnect, tc.wantMaxReconnect, tc.wantReconnectWait)
+			assert.Nil(t, err)
+			assert.NotNil(t, connection)
 
-	err = c.Connect()
-	assert.Nil(t, err)
-	assert.NotNil(t, c.Connection)
-	assert.Equal(t, c.Connection.Status(), nats.CONNECTED)
-
-	defer c.Connection.Close()
+			assert.Equal(t, connection.Status(), nats.CONNECTED)
+			assert.Equal(t, clientURL, connection.Opts.Servers[0])
+			assert.Equal(t, tc.wantRetryOnFailedConnect, connection.Opts.RetryOnFailedConnect)
+			assert.Equal(t, tc.wantMaxReconnect, connection.Opts.MaxReconnect)
+			assert.Equal(t, tc.wantReconnectWait, connection.Opts.ReconnectWait)
+		})
+	}
 }

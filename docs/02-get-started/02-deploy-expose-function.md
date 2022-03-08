@@ -70,7 +70,7 @@ The operation was successful if the Function **Status** changed to `RUNNING`.
 
 After we've got our `hello-world` Function deployed, we might want to expose it outside our cluster so that it's available for other external services.
 
-> **CAUTION:** Exposing a workload to the outside world is always a potential security vulnerability, so tread carefully. In a production environment, always [secure the workload](../03-tutorials/00-api-exposure/apix-03-expose-and-secure-service.md) you expose.
+> **CAUTION:** Exposing a workload to the outside world is always a potential security vulnerability, so tread carefully. In a production environment, always [secure the workload](../03-tutorials/00-api-exposure/apix-03-expose-and-secure-workload-oauth2.md) you expose.
 
 First, let's create an [API Rule](../05-technical-reference/00-custom-resources/apix-01-apirule.md) for the Function.
 
@@ -90,7 +90,7 @@ cat <<EOF | kubectl apply -f -
     name: hello-world
     namespace: default
   spec:
-    gateway: kyma-gateway.kyma-system.svc.cluster.local
+    gateway: kyma-system/kyma-gateway
     rules:
       - accessStrategies:
         - config: {}

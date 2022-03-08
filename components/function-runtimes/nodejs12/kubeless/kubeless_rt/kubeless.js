@@ -3,6 +3,7 @@
 const vm = require('vm');
 const path = require('path');
 const Module = require('module');
+const axios = require('axios');
 
 const bodyParser = require('body-parser');
 const client = require('prom-client');
@@ -13,7 +14,33 @@ const morgan = require('morgan');
 
 const bodySizeLimit = Number(process.env.REQ_MB_LIMIT || '1');
 
+// Open telemetry metrics
+const api = require('@opentelemetry/api');
+
 const app = express();
+
+// Tracing Imports
+const podName = process.env.HOSTNAME
+const serviceNamespace = process.env.SERVICE_NAMESPACE
+
+// remove generated pods suffix ( two last sections )
+let serviceName = podName.substring(0, podName.lastIndexOf("-"));
+serviceName = serviceName.substring(0, serviceName.lastIndexOf("-"))
+
+const jaegerServiceEndpoint = process.env.JAEGER_SERVICE_ENDPOINT
+let tracer = null;
+axios(jaegerServiceEndpoint)
+    .catch((err) => {
+        // 405 is the right status code for the GET method if jaeger service exists 
+        // because the only allowed method is POST and usage of other methods are not allowe
+        // https://github.com/jaegertracing/jaeger/blob/7872d1b07439c3f2d316065b1fd53e885b26a66f/cmd/collector/app/handler/http_handler.go#L60
+        if (err.response && err.response.status == 405) {
+            tracer = require('./lib/tracer')(
+                [serviceName, serviceNamespace].join('.'),
+                jaegerServiceEndpoint,
+            );
+        }
+    });
 
 if (process.env["KYMA_INTERNAL_LOGGER_ENABLED"]) {
     app.use(morgan("combined"));
@@ -81,7 +108,7 @@ function modExecute(handler, req, res, end) {
         throw new Error(`Unable to load ${handler}`);
 
     try {
-        const event = ce.buildEvent(req, res);
+        let event = ce.buildEvent(req, res, tracer);
         Promise.resolve(func(event, context))
         // Finalize
             .then(rval => modFinalize(rval, res, end))
@@ -142,7 +169,9 @@ app.all('*', (req, res) => {
         });
 
         try {
-            script.runInNewContext(sandbox, { timeout : timeout * 1000 });
+            api.context.with(api.propagation.extract(api.ROOT_CONTEXT, req.headers), () => {
+                script.runInNewContext(sandbox, { timeout : timeout * 1000 });
+            });
         } catch (err) {
             if (err.toString().match('Error: Script execution timed out')) {
                 res.status(408).send(err);

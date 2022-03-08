@@ -42,7 +42,7 @@ defaultRules:
     kubeApiserverAvailability: true
     kubeApiserverBurnrate: false
     kubeApiserverHistogram: false
-    kubeApiserverSlos: true
+    kubeApiserverSlos: false
     kubelet: true
     kubeProxy: true
     kubePrometheusGeneral: true
@@ -153,7 +153,7 @@ global:
       sha: ""
     k8s_sidecar:
       name: "k8s-sidecar"
-      version: "1.15.0-2696e5d5"
+      version: "1.15.5-a22d1d22"
       directory: "tpi"
       sha: ""
     oauth2_proxy:
@@ -185,7 +185,7 @@ global:
   ## Reference to one or more secrets to be used when pulling images
   ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
   ##
- 
+
   imagePullSecrets: []
   # - name: "image-pull-secret"
 
@@ -926,6 +926,9 @@ kubeApiServer:
     ## ref: https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/api.md#relabelconfig
     ##
     metricRelabelings:
+      - action: keep
+        regex: 'apiserver_request_duration_seconds_bucket;(0.1|0.5|1|5|30\+Inf)' # only keep 0.1, 0.5, 1, 5, 30 and +Inf buckets
+        sourceLabels: [__name__,le]
       - action: keep
         regex: ^(apiserver_audit_event_total|apiserver_audit_level_total|apiserver_audit_requests_rejected_total|apiserver_client_certificate_expiration_seconds_bucket|apiserver_registered_watchers|apiserver_request_total|apiserver_request_duration_seconds_bucket|apiserver_request_latencies_bucket|etcd_helper_cache_entry_total|etcd_helper_cache_hit_total|etcd_helper_cache_miss_total|etcd_request_cache_add_duration_seconds_bucket|etcd_request_cache_get_duration_seconds_bucket|go_goroutines|go_memstats_alloc_bytes|go_memstats_heap_alloc_bytes|go_memstats_heap_inuse_bytes|go_memstats_heap_sys_bytes|go_memstats_stack_inuse_bytes|kubernetes_build_info|process_cpu_seconds_total|process_max_fds|process_open_fds|process_resident_memory_bytes|process_start_time_seconds|process_virtual_memory_bytes|rest_client_request_latency_seconds_bucket|rest_client_requests_total|workqueue_adds_total|workqueue_depth|workqueue_queue_duration_seconds_bucket)$
         sourceLabels: [__name__]
@@ -1776,7 +1779,7 @@ prometheusOperator:
     tag: v0.53.1
     sha: ""
     pullPolicy: IfNotPresent
-  
+
   ## Prometheus image to use for prometheuses managed by the operator
   ##
   # prometheusDefaultBaseImage: quay.io/prometheus/prometheus
@@ -1784,7 +1787,7 @@ prometheusOperator:
   ## Alertmanager image to use for alertmanagers managed by the operator
   ##
   # alertmanagerDefaultBaseImage: quay.io/prometheus/alertmanager
-  
+
   ## Liveness and readiness probes are missing in the upstrem chart
   ##
   livenessProbe:

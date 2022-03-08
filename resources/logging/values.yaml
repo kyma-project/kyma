@@ -26,12 +26,16 @@ global:
   images:
     fluent_bit:
       name: fluent-bit
-      version: 1.8.12-780c4842
+      version: 1.8.13-bdc43fc8
       directory: tpi
     loki:
       name: loki
       version: 2.2.1-2696e5d5
       directory: tpi
+    alpine:
+      name: "alpine"
+      version: "3.15.0"
+      directory: "external"
   kymaRuntime:
     adminGroup: runtimeAdmin
     operatorGroup: runtimeOperator

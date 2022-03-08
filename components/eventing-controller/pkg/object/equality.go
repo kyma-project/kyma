@@ -218,12 +218,12 @@ func probeEqual(p1, p2 *corev1.Probe) bool {
 		return false
 	}
 
-	return handlerEqual(&p1.Handler, &p2.Handler)
+	return handlerEqual(&p1.ProbeHandler, &p2.ProbeHandler)
 }
 
 // handlerEqual asserts the equality of two Handler objects. It's used
 // by probeEqual.
-func handlerEqual(h1, h2 *corev1.Handler) bool {
+func handlerEqual(h1, h2 *corev1.ProbeHandler) bool {
 	if h1 == h2 {
 		return true
 	}

@@ -1,7 +1,7 @@
 const {
   checkInClusterEventDelivery,
   checkFunctionResponse,
-  sendEventAndCheckResponse,
+  sendLegacyEventAndCheckResponse,
 } = require('../test/fixtures/commerce-mock');
 const {
   printRestartReport,
@@ -10,12 +10,30 @@ const {
 const {
   checkServiceInstanceExistence,
 } = require('./fixtures/helm-broker');
+const {
+  checkLokiLogs,
+  lokiPortForward,
+} = require('../logging');
+
+const {
+  monitoringTests,
+} = require('../monitoring');
 
 describe('Upgrade test tests', function() {
   this.timeout(10 * 60 * 1000);
   this.slow(5000);
   let initialRestarts = null;
   const testNamespace = 'test';
+  const testStartTimestamp = new Date().toISOString();
+  let cancelPortForward = null;
+
+  before(() => {
+    cancelPortForward = lokiPortForward();
+  });
+
+  after(() => {
+    cancelPortForward();
+  });
 
   it('Listing all pods in cluster', async function() {
     initialRestarts = await getContainerRestartsForAllNamespaces();
@@ -29,8 +47,8 @@ describe('Upgrade test tests', function() {
     await checkFunctionResponse(testNamespace);
   });
 
-  it('order.created.v1 event should trigger the lastorder function', async function() {
-    await sendEventAndCheckResponse();
+  it('order.created.v1 legacy event should trigger the lastorder function', async function() {
+    await sendLegacyEventAndCheckResponse();
   });
 
   it('service instance provisioned by helm broker should be reachable', async function() {
@@ -41,4 +59,10 @@ describe('Upgrade test tests', function() {
     const afterTestRestarts = await getContainerRestartsForAllNamespaces();
     printRestartReport(initialRestarts, afterTestRestarts);
   });
+
+  it('Logs from commerce mock pod should be retrieved through Loki', async function() {
+    await checkLokiLogs(testStartTimestamp);
+  });
+
+  monitoringTests();
 });
