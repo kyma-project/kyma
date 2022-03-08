@@ -1,6 +1,6 @@
 const prometheus = require('./prometheus');
 const grafana = require('./grafana');
-const {getEnvOrDefault} = require('../utils');
+const {getEnvOrDefault, getEnv} = require('../utils');
 
 const {prometheusPortForward} = require('./client');
 
@@ -9,6 +9,8 @@ function monitoringTests() {
     console.log('Skipping monitoring tests for Kyma 1 to Kyma 2 upgrade scenario');
     return;
   }
+
+  console.log(getEnv('KYMA_MAJOR_UPGRADE'));
 
   describe('Prometheus Tests:', function() {
     this.timeout(5 * 60 * 1000); // 5 min
