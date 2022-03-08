@@ -17,7 +17,7 @@ Before you start, make sure you have these tools installed:
 
 Follows these steps:
 
-1. [Create inline Function](./svls-01-create-inline-function.md) with the following body:
+1. [Create an inline Function](./svls-01-create-inline-function.md) with the following body:
 
    <div tabs name="code" group="functions-code">
    <details>
@@ -55,13 +55,13 @@ Follows these steps:
    </details>
    </div>
 
-2. [Expose your Function](./svls-03-expose-function.md) and access the Function's external address.
+2. [Expose your Function](./svls-03-expose-function.md).
 3. [Expose Jaeger securely](../../04-operation-guides/security/sec-06-access-expose-kiali-grafana.md) and open the following Jaeger's address in your browser:
 
    ```text
    http://localhost:16686
    ```
 
-   > **NOTE:** by default, only 1% of the requests are sent to Jaeger for trace recording. To increase this number see [Jaeger doesn't show the traces you want to see](../../04-operation-guides/troubleshooting/obsv-02-troubleshoot-jaeger-shows-few-traces.md) article.
+   > **NOTE:** By default, only 1% of the requests are sent to Jaeger for the trace recording. To increase this number see the [Jaeger doesn't show the traces you want to see](../../04-operation-guides/troubleshooting/obsv-02-troubleshoot-jaeger-shows-few-traces.md) page.
 
-4. Find and select the Deployment's name in the `Service` list and click `Find Traces`
+4. Choose your Deployment's name from the **Service** list and click **Find Traces**
