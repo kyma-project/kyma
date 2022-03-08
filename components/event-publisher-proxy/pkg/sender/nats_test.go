@@ -42,7 +42,7 @@ func TestNatsMessageSender(t *testing.T) {
 		},
 	}
 	for _, tc := range testCases {
-		// TODO(nils): prevent goroutine loop bug
+		tc := tc
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
 
@@ -50,12 +50,7 @@ func TestNatsMessageSender(t *testing.T) {
 			assert.NotNil(t, natsServer)
 			defer natsServer.Shutdown()
 
-			// TODO(nils): was named NewConnection in my PR
-			connection, err := pkgnats.Connect(natsServer.ClientURL(),
-				pkgnats.WithMaxReconnects(1),
-				pkgnats.WithRetryOnFailedConnect(true),
-				pkgnats.WithReconnectWait(time.Second),
-			)
+			connection, err := pkgnats.Connect(natsServer.ClientURL(), true, 1, time.Second)
 			assert.NoError(t, err)
 			assert.NotNil(t, connection)
 
