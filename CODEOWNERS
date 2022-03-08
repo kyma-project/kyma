@@ -81,6 +81,9 @@
 # The `service-catalog-addons` subchart
 /resources/service-manager-proxy/ @PK85 @piotrmiskiewicz @ksputo @szwedm @voigt @wozniakjan @hanngos @tillknuesting @ralikio
 
+# The `istio-configuration` chart
+/resources/istio-configuration/ @strekm @werdes72 @Tomasz-Smelcerz-SAP @mjakobczyk @dariusztutaj @cnvergence @veichtj @piotrkpc
+
 # The `istio` chart
 /resources/istio/ @strekm @werdes72 @Tomasz-Smelcerz-SAP @mjakobczyk @dariusztutaj @cnvergence @veichtj @piotrkpc
 
@@ -88,7 +91,7 @@
 /resources/istio-resources/ @strekm @werdes72 @Tomasz-Smelcerz-SAP @mjakobczyk @dariusztutaj @cnvergence @veichtj @piotrkpc
 
 # The monitoring of `istio-configuration` chart
-/resources/istio/templates/monitoring @a-thaler @lilitgh @rakesh-garimella @skhalash @chrkl @shorim @lindnerby @dennis-ge
+/resources/istio-configuration/templates/monitoring @a-thaler @lilitgh @rakesh-garimella @skhalash @chrkl @shorim @lindnerby @dennis-ge
 
 # The `tracing` chart
 /resources/tracing/ @a-thaler @lilitgh @clebs @rakesh-garimella @skhalash @jeremyharisch @chrkl @shorim @lindnerby @dennis-ge

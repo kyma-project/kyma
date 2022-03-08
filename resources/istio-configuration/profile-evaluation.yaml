@@ -1,0 +1,68 @@
+---
+meshConfig:
+  accessLogFile: ""
+  defaultConfig:
+    tracing:
+      sampling: 100
+
+helmValues:
+  global:
+    defaultPodDisruptionBudget:
+      enabled: false
+    logging:
+      level: all:warn
+    proxy:
+      resources:
+        requests:
+          cpu: 25m
+          memory: 32Mi
+        limits:
+          cpu: 250m
+          memory: 254Mi
+    proxy_init:
+      resources:
+        limits:
+          cpu: 100m
+          memory: 50Mi
+        requests:
+          cpu: 10m
+          memory: 10Mi
+  pilot:
+    autoscaleEnabled: false
+  gateways:
+    istio-ingressgateway:
+      autoscaleEnabled: false
+
+components:
+  ingressGateways:
+    enabled: true
+    config:
+      resources:
+        limits:
+          cpu: 500m
+          memory: 128Mi
+        requests:
+          cpu: 25m
+          memory: 32Mi
+
+  pilot:
+    enabled: true
+    config:
+      hpaSpec:
+        maxReplicas: 1
+        minReplicas: 1
+      resources:
+          limits:
+            cpu: 250m
+            memory: 384Mi
+          requests:
+            cpu: 75m
+            memory: 128Mi
+
+monitoring:
+  enabled: false
+  dashboards:
+    enabled: false
+  istioServiceMonitor:
+    enabled: false
+    scrapeInterval: ""
