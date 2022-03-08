@@ -33,7 +33,7 @@ func TestConnect(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			// TODO(nils): apply GWT pattern
+			// given
 			natsServer := publishertesting.StartNatsServer()
 			assert.NotNil(t, natsServer)
 			defer natsServer.Shutdown()
@@ -41,10 +41,12 @@ func TestConnect(t *testing.T) {
 			clientURL := natsServer.ClientURL()
 			assert.NotEmpty(t, clientURL)
 
+			// when
 			connection, err := pkgnats.Connect(clientURL, tc.givenRetryOnFailedConnect, tc.givenMaxReconnect, tc.givenReconnectWait)
 			assert.Nil(t, err)
 			assert.NotNil(t, connection)
 
+			// then
 			assert.Equal(t, connection.Status(), nats.CONNECTED)
 			assert.Equal(t, clientURL, connection.Opts.Servers[0])
 			assert.Equal(t, tc.givenRetryOnFailedConnect, connection.Opts.RetryOnFailedConnect)
