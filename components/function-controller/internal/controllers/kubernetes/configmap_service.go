@@ -34,8 +34,8 @@ func NewConfigMapService(client resource.Client, config Config) ConfigMapService
 }
 
 func (r *configMapService) ListBase(ctx context.Context) ([]corev1.ConfigMap, error) {
-	configMaps := &corev1.ConfigMapList{}
-	if err := r.client.ListByLabel(ctx, r.config.BaseNamespace, map[string]string{ConfigLabel: RuntimeLabelValue}, configMaps); err != nil {
+	configMaps := corev1.ConfigMapList{}
+	if err := r.client.ListByLabel(ctx, r.config.BaseNamespace, map[string]string{ConfigLabel: RuntimeLabelValue}, &configMaps); err != nil {
 		return nil, err
 	}
 
