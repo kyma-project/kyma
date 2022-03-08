@@ -1,4 +1,14 @@
 aliases:
+  ci-reviewers:
+    - Ressetkk
+    - ammarlakis
+    - dekiel
+    - Halamix2
+    - kasiakepka
+  ci-approvers:
+    - Ressetkk
+    - dekiel
+    - Halamix2
   documentation-reviewers:
     - klaudiagrz
     - mmitoraj

@@ -1,8 +1,6 @@
+reviewers:
+  - service-catalog-reviewers
 approvers:
-  - mszostok
-  - polskikiel
-  - piotrmiskiewicz
-  - PK85
-  - jasiu001
-  - adamwalach
-  - ksputo
+  - service-catalog-approvers
+labels:
+  - area/service-catalog
