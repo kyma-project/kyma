@@ -31,9 +31,10 @@ Follow these steps:
 
       ```bash
       export DOMAIN={DOMAIN_NAME}
-      export NAME={APIRULE_NAME}
+      export NAME={FUNCTION_NAME}
+      export NAMESPACE={NAMESPACE_NAME}
       ```
-
+   >**NOTE:** Function takes the name from the Function CR name. The API Rule CR can have a different name but for the purpose of this tutorial, all related resources share a common name defined under the **NAME** variable.
 2. Download the latest configuration of the Function from the cluster. This way you will update the local `config.yaml` file with the Function's code.
 
   ```bash
@@ -44,9 +45,9 @@ Follow these steps:
 
   ```yaml
   apiRules:
-      - name: {APIRULE_NAME}
+      - name: {FUNCTION_NAME}
         service:
-          host: {APIRULE_NAME}.{DOMAIN_NAME}
+          host: {FUNCTION_NAME}.{DOMAIN_NAME}
         rules:
           - methods:
               - GET
@@ -149,7 +150,7 @@ Follow these steps:
 
 2. In the left navigation panel, go to **Workloads** > **Functions** and select the Function you want to expose.
 
-3. Switch to the **Configuration** tab and select **Expose Function** in the API Rules section.
+3. Switch to the **Configuration** tab and select **Create API Rule** in the API Rules section.
 
 4. In the **General settings** section of the dialog box, enter the following information:
 
@@ -159,7 +160,7 @@ Follow these steps:
 
     - **Subdomain** to determine the host on which you want to expose your Function.
 
-5. In the **Access strategies** section, select the `noop` handler from the drop-down list and leave the default settings with the `GET`, `POST`, `PUT`, `PATCH`, `DELETE`, and `HEAD` methods.
+5. In the **Rules** section, select the `noop` handler from the drop-down list and mark all the methods i.e. `GET`, `POST`, `PUT`, `PATCH`, `DELETE`, and `HEAD`.
 
 6. Select **Create** to confirm changes. The dialog box with the form will close.
 
