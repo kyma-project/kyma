@@ -15,6 +15,9 @@ const {
   eventMeshSecretFilePath,
   timeoutTime,
   slowTime,
+  gardener,
+  director,
+  shootName,
   cleanupTestingResources,
 } = require('./utils');
 const {
@@ -24,24 +27,18 @@ const {
 } = require('../test/fixtures/commerce-mock');
 const {
   debug,
-  getShootNameFromK8sServerUrl,
   createEventingBackendK8sSecret,
 } = require('../utils');
 const {
-  DirectorClient,
-  DirectorConfig,
   addScenarioInCompass,
   assignRuntimeToScenario,
+  scenarioExistsInCompass,
 } = require('../compass');
-const {GardenerClient, GardenerConfig} = require('../gardener');
 
 
 describe('Eventing tests preparation', function() {
   this.timeout(timeoutTime);
   this.slow(slowTime);
-  let gardener = null;
-  let director = null;
-  let skrInfo = null;
 
   it('Prepare the test assets', async function() {
     // runs once before the first test in this block
@@ -79,15 +76,31 @@ describe('Eventing tests preparation', function() {
   // prepareAssetsForSKRTests - Sets up CommerceMost for the SKR
   async function prepareAssetsForSKRTests() {
     console.log('Preparing for tests on SKR');
-    // create gardener & director clients
-    gardener = new GardenerClient(GardenerConfig.fromEnv());
-    // director client for Compass
-    director = new DirectorClient(DirectorConfig.fromEnv());
 
+    const compassScenarioAlreadyExist = await scenarioExistsInCompass(director, scenarioName);
+    if (compassScenarioAlreadyExist) {
+      console.log(`Compass scenario with the name ${scenarioName} already exist, do not register it again`);
+    } else {
+      await setupCompassScenario();
+    }
+
+    await ensureCommerceMockWithCompassTestFixture(
+        director,
+        appName,
+        scenarioName,
+        mockNamespace,
+        testNamespace,
+        false,
+        compassScenarioAlreadyExist,
+    );
+  }
+
+  // setupCompassScenario adds a compass scenario and assigns a runtime to it
+  async function setupCompassScenario() {
     // Get shoot info from gardener to get compassID for this shoot
-    const shootName = getShootNameFromK8sServerUrl();
     console.log(`Fetching SKR info for shoot: ${shootName}`);
-    skrInfo = await gardener.getShoot(shootName);
+
+    const skrInfo = await gardener.getShoot(shootName);
     debug(
         `appName: ${appName},
          scenarioName: ${scenarioName},
@@ -100,15 +113,6 @@ describe('Eventing tests preparation', function() {
     await addScenarioInCompass(director, scenarioName);
     // map scenario to target SKR
     await assignRuntimeToScenario(director, skrInfo.compassID, scenarioName);
-
-    console.log('Preparing CommerceMock test fixture on Kyma SKR');
-    await ensureCommerceMockWithCompassTestFixture(
-        director,
-        appName,
-        scenarioName,
-        mockNamespace,
-        testNamespace,
-    );
   }
 
   afterEach(async function() {

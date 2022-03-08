@@ -21,6 +21,11 @@ async function addScenarioInCompass(client, scenarioName) {
   await client.updateLabelDefinition(SCENARIOS_DEFINITION_NAME, scenariosDefinition.schema);
 }
 
+async function scenarioExistsInCompass(client, scenarioName) {
+  const scenariosDefinition = await client.queryLabelDefinition(SCENARIOS_DEFINITION_NAME);
+  return !!scenariosDefinition.schema.items.enum.includes(scenarioName);
+}
+
 async function queryRuntimesForScenario(client, scenarioName) {
   const filter = {
     key: SCENARIOS_DEFINITION_NAME,
@@ -120,6 +125,7 @@ async function removeApplicationFromScenario(client, appID, scenarioName) {
 module.exports = {
   removeScenarioFromCompass,
   addScenarioInCompass,
+  scenarioExistsInCompass,
   queryRuntimesForScenario,
   queryApplicationsForScenario,
   getApplicationByName,

@@ -5,6 +5,7 @@ const {
 
 const {
   debug,
+  getEnvOrThrow,
   deleteEventingBackendK8sSecret,
   getShootNameFromK8sServerUrl,
 } = require('../utils');
@@ -12,12 +13,12 @@ const {
 const {DirectorClient, DirectorConfig} = require('../compass');
 const {GardenerClient, GardenerConfig} = require('../gardener');
 const fs = require('fs');
-const suffix = 'evnt';
+const isSKR = process.env.KYMA_TYPE === 'SKR';
+const suffix = getSuffix(isSKR);
 const appName = `app-${suffix}`;
 const scenarioName = `test-${suffix}`;
 const testNamespace = `test-${suffix}`;
 const mockNamespace = process.env.MOCK_NAMESPACE || 'mocks';
-const isSKR = process.env.KYMA_TYPE === 'SKR';
 const backendK8sSecretName = process.env.BACKEND_SECRET_NAME || 'eventing-backend';
 const backendK8sSecretNamespace = process.env.BACKEND_SECRET_NAMESPACE || 'default';
 const eventMeshSecretFilePath = process.env.EVENTMESH_SECRET_FILE || '';
@@ -27,6 +28,16 @@ const slowTime = 5000;
 const natsBackend = 'nats';
 const bebBackend = 'beb';
 const eventMeshNamespace = getEventMeshNamespace();
+
+// SKR related constants
+let gardener = null;
+let director = null;
+let shootName = null;
+if (isSKR) {
+  gardener = new GardenerClient(GardenerConfig.fromEnv()); // create gardener client
+  director = new DirectorClient(DirectorConfig.fromEnv()); // director client for Compass
+  shootName = getShootNameFromK8sServerUrl();
+}
 
 // reads the EventMesh namespace from the credentials file
 function getEventMeshNamespace() {
@@ -38,18 +49,11 @@ function getEventMeshNamespace() {
   }
 }
 
+// cleans up all the test resources including the compass scenario
 async function cleanupTestingResources() {
   if (isSKR) {
-    debug('Cleaning SKR...');
-
-    // director client for Compass
-    const director = new DirectorClient(DirectorConfig.fromEnv());
-
-    // create gardener clients
-    const gardener = new GardenerClient(GardenerConfig.fromEnv());
-
+    debug('Cleaning compass resources');
     // Get shoot info from gardener to get compassID for this shoot
-    const shootName = getShootNameFromK8sServerUrl();
     const skrInfo = await gardener.getShoot(shootName);
     await cleanCompassResourcesSKR(director, appName, scenarioName, skrInfo.compassID);
   }
@@ -64,6 +68,17 @@ async function cleanupTestingResources() {
   await cleanMockTestFixture(mockNamespace, testNamespace, true);
 }
 
+// gets the suffix depending on kyma type
+function getSuffix(isSKR) {
+  let suffix;
+  if (isSKR) {
+    suffix = getEnvOrThrow('TEST_SUFFIX');
+  } else {
+    suffix = 'evnt';
+  }
+  return suffix;
+}
+
 module.exports = {
   appName,
   scenarioName,
@@ -76,6 +91,10 @@ module.exports = {
   DEBUG_MODE,
   timeoutTime,
   slowTime,
+  director,
+  gardener,
+  shootName,
+  suffix,
   cleanupTestingResources,
   natsBackend,
   bebBackend,
