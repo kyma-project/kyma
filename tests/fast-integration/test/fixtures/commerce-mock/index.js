@@ -554,8 +554,8 @@ async function ensureCommerceMockWithCompassTestFixture(client,
       mockNamespace,
       targetNamespace,
       lastOrderFunction);
-  await retryPromise(() => connectMockCompass(client, appName, scenarioName, mockHost, targetNamespace), 10, 3000);
-  await retryPromise(() => registerAllApis(mockHost), 10, 3000);
+  await retryPromise(() => connectMockCompass(client, appName, scenarioName, mockHost, targetNamespace), 10, 30000);
+  await retryPromise(() => registerAllApis(mockHost), 10, 30000);
 
   const commerceSC = await waitForServiceClass(appName, targetNamespace, 300 * 1000);
   await waitForServicePlanByServiceClass(commerceSC.metadata.name, targetNamespace, 300 * 1000);
@@ -646,8 +646,8 @@ async function ensureCommerceMockLocalTestFixture(mockNamespace,
       mockNamespace,
       targetNamespace,
     withCentralApplicationConnectivity ? prepareFunction('central-app-gateway') : prepareFunction());
-  await retryPromise(() => connectMockLocal(mockHost, targetNamespace), 10, 3000);
-  await retryPromise(() => registerAllApis(mockHost), 10, 3000);
+  await retryPromise(() => connectMockLocal(mockHost, targetNamespace), 10, 30000);
+  await retryPromise(() => registerAllApis(mockHost), 10, 30000);
 
   if (withCentralApplicationConnectivity) {
     await waitForDeployment('central-application-gateway', 'kyma-system');
