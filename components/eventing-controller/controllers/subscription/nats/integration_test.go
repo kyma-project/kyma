@@ -9,6 +9,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/sink"
+
 	kymalogger "github.com/kyma-project/kyma/common/logging/logger"
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 	"github.com/kyma-project/kyma/components/eventing-controller/controllers/events"
@@ -719,14 +721,18 @@ func startReconciler(eventTypePrefix string, ens *testEnsemble) *testEnsemble {
 	natsHandler := handlers.NewNats(envConf, ens.defaultSubscriptionConfig, defaultLogger)
 	cleaner := eventtype.NewCleaner(envConf.EventTypePrefix, applicationLister, defaultLogger)
 
+	k8sClient := k8sManager.GetClient()
+	recorder := k8sManager.GetEventRecorderFor("eventing-controller-nats")
+
 	ens.reconciler = natsreconciler.NewReconciler(
 		ctx,
-		k8sManager.GetClient(),
+		k8sClient,
 		natsHandler,
 		cleaner,
 		defaultLogger,
-		k8sManager.GetEventRecorderFor("eventing-controller-nats"),
+		recorder,
 		ens.defaultSubscriptionConfig,
+		sink.NewSinkValidator(ctx, k8sClient, recorder, defaultLogger),
 	)
 
 	err = ens.reconciler.SetupUnmanaged(k8sManager)

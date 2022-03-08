@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/sink"
+
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/eventtype"
 
 	corev1 "k8s.io/api/core/v1"
@@ -79,18 +81,21 @@ func (c *SubscriptionManager) Start(defaultSubsConfig env.DefaultSubscriptionCon
 	ctx, cancel := context.WithCancel(context.Background())
 
 	c.cancel = cancel
+	client := c.mgr.GetClient()
+	recorder := c.mgr.GetEventRecorderFor("eventing-controller-nats")
 	dynamicClient := dynamic.NewForConfigOrDie(c.restCfg)
 	applicationLister := application.NewLister(ctx, dynamicClient)
 	natsHandler := handlers.NewNats(c.envCfg, defaultSubsConfig, c.logger)
 	cleaner := eventtype.NewCleaner(c.envCfg.EventTypePrefix, applicationLister, c.logger)
 	natsReconciler := subscription.NewReconciler(
 		ctx,
-		c.mgr.GetClient(),
+		client,
 		natsHandler,
 		cleaner,
 		c.logger,
-		c.mgr.GetEventRecorderFor("eventing-controller-nats"),
+		recorder,
 		defaultSubsConfig,
+		sink.NewSinkValidator(ctx, client, recorder, c.logger),
 	)
 	c.backend = natsReconciler.Backend
 	if err := natsReconciler.SetupUnmanaged(c.mgr); err != nil {
