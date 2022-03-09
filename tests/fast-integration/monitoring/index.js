@@ -5,7 +5,7 @@ const {getEnvOrDefault, getEnv} = require('../utils');
 const {prometheusPortForward} = require('./client');
 
 function monitoringTests() {
-  if (getEnvOrDefault('KYMA_MAJOR_UPGRADE', 'false') === true) {
+  if (getEnvOrDefault('KYMA_MAJOR_UPGRADE', 'false') === 'true') {
     console.log('Skipping monitoring tests for Kyma 1 to Kyma 2 upgrade scenario');
     return;
   }
