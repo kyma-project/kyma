@@ -187,9 +187,13 @@ aliases:
     - moelsayed
     - clebs
     - Tomasz-Smelcerz-SAP
+    - adityabhatia
   reconciler-approvers:
     - khlifi411
+    - jakobmoellersap
     - clebs
     - jeremyharisch
     - ruanxin
     - Tomasz-Smelcerz-SAP
+    - tobiscr
+    - adityabhatia
