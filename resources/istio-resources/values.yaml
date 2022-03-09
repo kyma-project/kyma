@@ -18,7 +18,7 @@ global:
 #  - removing `__inputs` and `__requires` fields
 #  - adding tags: `"tags": ["service-mesh", "kyma"],`
 dashboards:
-  istio_mesh_dashboard: '{
+  istio_mesh: '{
   "annotations": {
     "list": [
       {
@@ -1763,7 +1763,7 @@ dashboards:
   "uid": "G8wLrJIZk",
   "version": 5
 }'
-  istio_performance_dashboard: '{
+  istio_performance: '{
   "annotations": {
     "list": [
       {
@@ -3078,7 +3078,7 @@ dashboards:
   "uid": "vu8e0VWZk",
   "version": 22
 }'
-  istio_service_dashboard: '{
+  istio_service: '{
   "annotations": {
     "list": [
       {
@@ -6069,7 +6069,7 @@ dashboards:
   "uid": "LJ_uJAvmk",
   "version": 1
 }'
-  istio_workload_dashboard: '{
+  istio_workload: '{
   "annotations": {
     "list": [
       {
@@ -8742,7 +8742,7 @@ dashboards:
   "uid": "UbsSZTDik",
   "version": 1
 }'
-  istio_control_plane_dashboard: '{
+  istio_control_plane: '{
   "annotations": {
     "list": [
       {
