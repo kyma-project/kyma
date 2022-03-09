@@ -296,7 +296,8 @@ func TestCreateSubscription(t *testing.T) {
 		},
 	}
 
-	for _, tc := range testCases {
+	for _, testCase := range testCases {
+		tc := testCase
 		t.Run(tc.name, func(t *testing.T) {
 			subscription := createSubscription(ens, tc.givenSubscriptionOpts...)
 			testSubscriptionOnK8s(ens, subscription, tc.want.k8sSubscription...)
@@ -492,7 +493,8 @@ func TestChangeSubscription(t *testing.T) {
 		},
 	}
 
-	for _, tc := range testCases {
+	for _, testCase := range testCases {
+		tc := testCase
 		t.Run(tc.name, func(t *testing.T) {
 			// given
 			subscription := createSubscription(ens, tc.givenSubscriptionOpts...)
