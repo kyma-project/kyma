@@ -190,9 +190,9 @@ func TestNatsHandlerForLegacyEvents(t *testing.T) {
 					require.Equal(t, testCase.WantStatusCode, resp.StatusCode)
 
 					if testCase.WantStatusCode == http.StatusOK {
-						handlertest.ValidateOkResponse(t, *resp, &testCase.WantResponse)
+						handlertest.ValidateLegacyOkResponse(t, *resp, &testCase.WantResponse)
 					} else {
-						handlertest.ValidateErrorResponse(t, *resp, &testCase.WantResponse)
+						handlertest.ValidateLegacyErrorResponse(t, *resp, &testCase.WantResponse)
 					}
 
 					if testingutils.Is2XX(resp.StatusCode) {

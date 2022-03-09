@@ -168,9 +168,9 @@ func TestHandlerForLegacyEvents(t *testing.T) {
 					require.NoError(t, err)
 					require.Equal(t, testCase.WantStatusCode, resp.StatusCode)
 					if testCase.WantStatusCode == http.StatusOK {
-						handlertest.ValidateOkResponse(t, *resp, &testCase.WantResponse)
+						handlertest.ValidateLegacyOkResponse(t, *resp, &testCase.WantResponse)
 					} else {
-						handlertest.ValidateErrorResponse(t, *resp, &testCase.WantResponse)
+						handlertest.ValidateLegacyErrorResponse(t, *resp, &testCase.WantResponse)
 					}
 					if testingutils.Is2XX(resp.StatusCode) {
 						metricstest.EnsureMetricLatency(t, handlerMock.GetMetricsCollector())
@@ -254,7 +254,7 @@ func TestHandlerForBEBFailures(t *testing.T) {
 					require.NoError(t, err)
 					require.Equal(t, testCase.wantStatusCode, resp.StatusCode)
 					if testCase.givenEndpoint == publishLegacyEndpoint {
-						handlertest.ValidateErrorResponse(t, *resp, &testCase.wantResponse)
+						handlertest.ValidateLegacyErrorResponse(t, *resp, &testCase.wantResponse)
 					}
 					if testingutils.Is2XX(resp.StatusCode) {
 						metricstest.EnsureMetricLatency(t, handlerMock.GetMetricsCollector())
