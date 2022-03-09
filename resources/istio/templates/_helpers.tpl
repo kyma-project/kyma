@@ -2,7 +2,7 @@
 {{/*
 Expand the name of the chart.
 */}}
-{{- define "istio-configuration.name" -}}
+{{- define "istio.name" -}}
 {{- default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 
@@ -11,7 +11,7 @@ Create a default fully qualified app name.
 We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
 If release name contains chart name it will be used as a full name.
 */}}
-{{- define "istio-configuration.fullname" -}}
+{{- define "istio.fullname" -}}
 {{- if .Values.fullnameOverride -}}
 {{- .Values.fullnameOverride | trunc 63 | trimSuffix "-" -}}
 {{- else -}}
@@ -27,20 +27,20 @@ If release name contains chart name it will be used as a full name.
 {{/*
 Create chart name and version as used by the chart label.
 */}}
-{{- define "istio-configuration.chart" -}}
+{{- define "istio.chart" -}}
 {{- .Chart.Name | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 
 {{/*
 Create a fully qualified configmap name.
 */}}
-{{- define "istio-configuration.configmap.fullname" -}}
+{{- define "istio.configmap.fullname" -}}
 {{- printf "%s-%s" .Release.Name "istio-mesh-config" | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 
 {{/*
 Configmap checksum.
 */}}
-{{- define "istio-configuration.configmap.checksum" -}}
+{{- define "istio.configmap.checksum" -}}
 {{- print $.Template.BasePath "/configmap.yaml" | sha256sum -}}
 {{- end -}}
