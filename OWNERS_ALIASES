@@ -51,7 +51,6 @@ aliases:
 
   service-management-reviewers: # area/service-management
     - wozniakjan
-    - voigt
     - piotrmiskiewicz
     - szwedm
     - ralikio
@@ -59,7 +58,6 @@ aliases:
     - tillknuesting
   service-management-approvers: # area/service-management
     - wozniakjan
-    - voigt
     - PK85
     - piotrmiskiewicz
     - szwedm
@@ -68,7 +66,6 @@ aliases:
     - tillknuesting
   binding-reviewers: # area/service-management
     - wozniakjan
-    - voigt
     - piotrmiskiewicz
     - szwedm
     - ralikio
@@ -76,7 +73,6 @@ aliases:
     - tillknuesting
   binding-approvers: # area/service-management
     - wozniakjan
-    - voigt
     - PK85
     - piotrmiskiewicz
     - szwedm
@@ -85,7 +81,6 @@ aliases:
     - tillknuesting
   uaa-activator-reviewers: # area/service-management
     - wozniakjan
-    - voigt
     - piotrmiskiewicz
     - szwedm
     - ralikio
@@ -93,7 +88,6 @@ aliases:
     - tillknuesting
   uaa-activator-approvers: # area/service-management
     - wozniakjan
-    - voigt
     - PK85
     - piotrmiskiewicz
     - szwedm
