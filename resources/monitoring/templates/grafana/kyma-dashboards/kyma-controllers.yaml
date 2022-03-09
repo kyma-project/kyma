@@ -1440,7 +1440,7 @@ data:
       "refresh": "10s",
       "schemaVersion": 27,
       "style": "dark",
-      "tags": [],
+      "tags": ["kyma"],
       "templating": {
         "list": [
           {
