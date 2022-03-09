@@ -28,7 +28,7 @@ kyma deploy --components istio@istio-system
 
 The installation of Istio ships with a default configuration. There may be circumstances in which you want to change the defaults.
 
-Istio offers an Istio Control Plane CR, which is used to configure the installation. See the list of the currently exposed parameters of the Istio component that you can override. To learn more, go to [`istio-operator.yaml`](https://github.com/kyma-project/kyma/blob/main/resources/istio-configuration/templates/istio-operator.yaml).
+Istio offers an Istio Control Plane CR, which is used to configure the installation. See the list of the currently exposed parameters of the Istio component that you can override. To learn more, go to [`istio-operator.yaml`](https://github.com/kyma-project/kyma/blob/main/resources/istio/templates/istio-operator.yaml).
 
 - **mesh.Config**
 - **values.global**
