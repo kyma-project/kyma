@@ -22,6 +22,8 @@ import (
 	"os"
 
 	"github.com/go-logr/zapr"
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/webhook"
+	k8sWebhook "sigs.k8s.io/controller-runtime/pkg/webhook"
 
 	// Import all Kubernetes client auth plugins (e.g. Azure, GCP, OIDC, etc.)
 	// to ensure that exec-entrypoint and run can make use of them.
@@ -77,7 +79,7 @@ func main() {
 	flag.BoolVar(&enableLeaderElection, "leader-elect", false,
 		"Enable leader election for controller manager. Enabling this will ensure there is only one active controller manager.")
 	flag.StringVar(&fluentBitConfigMap, "cm-name", "", "ConfigMap name of Fluent Bit")
-	flag.StringVar(&fluentBitSectionsConfigMap, "sections-cm-name", "", "ConfigMap name of Fluent Bit sections to be written by Fluent Bit controller")
+	flag.StringVar(&fluentBitSectionsConfigMap, "sections-cm-name", "", "ConfigMap name of Fluent Bit Sections to be written by Fluent Bit controller")
 	flag.StringVar(&fluentBitParsersConfigMap, "parser-cm-name", "", "ConfigMap name of Fluent Bit Parsers to be written by Fluent Bit controller")
 	flag.StringVar(&fluentBitDaemonSet, "ds-name", "", "DaemonSet name to be managed by Fluent Bit controller")
 	flag.StringVar(&fluentBitEnvSecret, "env-secret", "", "Secret for environment variables")
@@ -116,12 +118,15 @@ func main() {
 		setupLog.Error(err, "Failed to start manager")
 		os.Exit(1)
 	}
+	logPipelineValidator := webhook.NewLogPipeLineValidator(mgr.GetClient(), fluentBitConfigMap, fluentBitNs)
+	mgr.GetWebhookServer().Register(
+		"/validate-telemetry-kyma-project-io-v1alpha1-logpipeline",
+		&k8sWebhook.Admission{Handler: logPipelineValidator})
 
 	reconciler := controllers.NewLogPipelineReconciler(
 		mgr.GetClient(),
 		mgr.GetScheme(),
 		fluentBitNs,
-		fluentBitConfigMap,
 		fluentBitSectionsConfigMap,
 		fluentBitParsersConfigMap,
 		fluentBitDaemonSet,
@@ -131,10 +136,7 @@ func main() {
 		setupLog.Error(err, "Failed to create controller", "controller", "LogPipeline")
 		os.Exit(1)
 	}
-	if err = (&telemetryv1alpha1.LogPipeline{}).SetupWebhookWithManager(mgr); err != nil {
-		setupLog.Error(err, "unable to create webhook", "webhook", "LogPipeline")
-		os.Exit(1)
-	}
+
 	//+kubebuilder:scaffold:builder
 
 	if err := mgr.AddHealthzCheck("healthz", healthz.Ping); err != nil {
