@@ -19,8 +19,6 @@ package controllers
 import (
 	"bytes"
 	"context"
-	"strings"
-
 	"github.com/prometheus/client_golang/prometheus"
 
 	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/api/v1alpha1"
@@ -61,7 +59,7 @@ type LogPipelineReconciler struct {
 }
 
 // NewLogPipelineReconciler returns a new LogPipelineReconciler using the given FluentBit config arguments
-func NewLogPipelineReconciler(client client.Client, scheme *runtime.Scheme, namespace string, sectionsCm string, parsersCm string, daemonSet string, envSecret string, filesCm string) *LogPipelineReconciler {
+func NewLogPipelineReconciler(client client.Client, scheme *runtime.Scheme, namespace string, fluenbitCm string, sectionsCm string, parsersCm string, daemonSet string, envSecret string, filesCm string) *LogPipelineReconciler {
 	var result LogPipelineReconciler
 
 	result.Client = client
@@ -200,7 +198,7 @@ func (r *LogPipelineReconciler) syncSectionsConfigMap(ctx context.Context, logPi
 			controllerutil.RemoveFinalizer(logPipeline, sectionsConfigMapFinalizer)
 		}
 	} else {
-		fluentBitConfig := mergeFluentBitConfig(logPipeline)
+		fluentBitConfig := fluentbit.MergeFluentBitConfig(logPipeline)
 		if cm.Data == nil {
 			data := make(map[string]string)
 			data[cmKey] = fluentBitConfig
@@ -244,7 +242,7 @@ func (r *LogPipelineReconciler) syncParsersConfigMap(ctx context.Context, logPip
 			if err != nil {
 				return false, err
 			}
-			fluentBitParsersConfig := mergeFluentBitParsersConfig(&logPipelines)
+			fluentBitParsersConfig := fluentbit.MergeFluentBitParsersConfig(&logPipelines)
 			if fluentBitParsersConfig == "" {
 				cm.Data = nil
 			} else {
@@ -260,7 +258,7 @@ func (r *LogPipelineReconciler) syncParsersConfigMap(ctx context.Context, logPip
 			return false, err
 		}
 
-		fluentBitParsersConfig := mergeFluentBitParsersConfig(&logPipelines)
+		fluentBitParsersConfig := fluentbit.MergeFluentBitParsersConfig(&logPipelines)
 		if fluentBitParsersConfig == "" {
 			cm.Data = nil
 		} else if cm.Data == nil {
@@ -420,34 +418,6 @@ func (r *LogPipelineReconciler) deleteFluentBitPods(ctx context.Context) error {
 
 	r.FluentBitRestartsCount.Inc()
 	return nil
-}
-
-// Merge FluentBit filters and outputs to single FluentBit configuration.
-func mergeFluentBitConfig(logPipeline *telemetryv1alpha1.LogPipeline) string {
-	var sb strings.Builder
-	for _, filter := range logPipeline.Spec.Filters {
-		sb.WriteString(fluentbit.BuildConfigSection(fluentbit.FilterConfigHeader, filter.Content))
-	}
-	for _, output := range logPipeline.Spec.Outputs {
-		sb.WriteString(fluentbit.BuildConfigSection(fluentbit.OutputConfigHeader, output.Content))
-	}
-	return sb.String()
-}
-
-// Merge FluentBit parsers and multiLine parsers to single FluentBit configuration.
-func mergeFluentBitParsersConfig(logPipelines *telemetryv1alpha1.LogPipelineList) string {
-	var sb strings.Builder
-	for _, logPipeline := range logPipelines.Items {
-		if logPipeline.DeletionTimestamp == nil {
-			for _, parser := range logPipeline.Spec.Parsers {
-				sb.WriteString(fluentbit.BuildConfigSection(fluentbit.ParserConfigHeader, parser.Content))
-			}
-			for _, multiLineParser := range logPipeline.Spec.MultiLineParsers {
-				sb.WriteString(fluentbit.BuildConfigSection(fluentbit.MultiLineParserConfigHeader, multiLineParser.Content))
-			}
-		}
-	}
-	return sb.String()
 }
 
 // SetupWithManager sets up the controller with the Manager.

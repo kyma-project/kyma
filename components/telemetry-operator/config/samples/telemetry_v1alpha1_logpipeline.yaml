@@ -33,6 +33,6 @@ spec:
   outputs:
     - content: |
         Name               stdout
-        Match              *
+            Match              *
   files: [ ]
   secretRefs: [ ]

@@ -27,20 +27,22 @@ import (
 	// to ensure that exec-entrypoint and run can make use of them.
 	_ "k8s.io/client-go/plugin/pkg/client/auth"
 
-	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/api/v1alpha1"
-	"github.com/kyma-project/kyma/components/telemetry-operator/controllers"
-	"github.com/kyma-project/kyma/components/telemetry-operator/internal/logger"
 	"k8s.io/apimachinery/pkg/runtime"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/healthz"
+
+	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/api/v1alpha1"
+	"github.com/kyma-project/kyma/components/telemetry-operator/controllers"
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/logger"
 	//+kubebuilder:scaffold:imports
 )
 
 var (
 	scheme                     = runtime.NewScheme()
 	setupLog                   = ctrl.Log.WithName("setup")
+	fluentBitConfigMap         string
 	fluentBitSectionsConfigMap string
 	fluentBitParsersConfigMap  string
 	fluentBitDaemonSet         string
@@ -74,9 +76,10 @@ func main() {
 	flag.StringVar(&probeAddr, "health-probe-bind-address", ":8081", "The address the probe endpoint binds to.")
 	flag.BoolVar(&enableLeaderElection, "leader-elect", false,
 		"Enable leader election for controller manager. Enabling this will ensure there is only one active controller manager.")
-	flag.StringVar(&fluentBitSectionsConfigMap, "cm-name", "", "ConfigMap name to be written by Fluent Bit controller")
-	flag.StringVar(&fluentBitParsersConfigMap, "parser-cm-name", "", "ConfigMap name of Fluent bit Parsers to be written by Fluent Bit controller")
-	flag.StringVar(&fluentBitDaemonSet, "ds-name", "", "DaemonSet name to be managed by FluentBit controller")
+	flag.StringVar(&fluentBitConfigMap, "cm-name", "", "ConfigMap name of Fluent Bit")
+	flag.StringVar(&fluentBitSectionsConfigMap, "sections-cm-name", "", "ConfigMap name of Fluent Bit sections to be written by Fluent Bit controller")
+	flag.StringVar(&fluentBitParsersConfigMap, "parser-cm-name", "", "ConfigMap name of Fluent Bit Parsers to be written by Fluent Bit controller")
+	flag.StringVar(&fluentBitDaemonSet, "ds-name", "", "DaemonSet name to be managed by Fluent Bit controller")
 	flag.StringVar(&fluentBitEnvSecret, "env-secret", "", "Secret for environment variables")
 	flag.StringVar(&fluentBitFilesConfigMap, "files-cm", "", "ConfigMap for referenced files")
 	flag.StringVar(&fluentBitNs, "fluent-bit-ns", "", "Fluent Bit namespace")
@@ -118,6 +121,7 @@ func main() {
 		mgr.GetClient(),
 		mgr.GetScheme(),
 		fluentBitNs,
+		fluentBitConfigMap,
 		fluentBitSectionsConfigMap,
 		fluentBitParsersConfigMap,
 		fluentBitDaemonSet,
@@ -125,6 +129,10 @@ func main() {
 		fluentBitFilesConfigMap)
 	if err = reconciler.SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "Failed to create controller", "controller", "LogPipeline")
+		os.Exit(1)
+	}
+	if err = (&telemetryv1alpha1.LogPipeline{}).SetupWebhookWithManager(mgr); err != nil {
+		setupLog.Error(err, "unable to create webhook", "webhook", "LogPipeline")
 		os.Exit(1)
 	}
 	//+kubebuilder:scaffold:builder
@@ -146,8 +154,11 @@ func main() {
 }
 
 func validateFlags() error {
-	if fluentBitSectionsConfigMap == "" {
+	if fluentBitConfigMap == "" {
 		return errors.New("--cm-name flag is required")
+	}
+	if fluentBitSectionsConfigMap == "" {
+		return errors.New("--sections-cm-name flag is required")
 	}
 	if fluentBitParsersConfigMap == "" {
 		return errors.New("--parser-cm-name flag is required")
