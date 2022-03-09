@@ -74,7 +74,10 @@ func TestFilterEventTypeVersions(t *testing.T) {
 	}
 
 	for _, tc := range testCases {
+		tc := tc
 		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+
 			gotEvents := FilterEventTypeVersions(tc.eventTypePrefix, tc.bebNs, tc.appName, tc.filters)
 			if !reflect.DeepEqual(tc.expectedEvents, gotEvents) {
 				t.Errorf("Received incorrect events, Wanted: %v, Got: %v", tc.expectedEvents, gotEvents)
@@ -106,7 +109,10 @@ func TestConvertEventsMapToSlice(t *testing.T) {
 		},
 	}
 	for _, tc := range testCases {
+		tc := tc
 		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+
 			gotEvents := ConvertEventsMapToSlice(tc.inputMap)
 			for _, event := range gotEvents {
 				found := false
@@ -175,7 +181,10 @@ func TestAddUniqueEventsToResult(t *testing.T) {
 		},
 	}
 	for _, tc := range testCases {
+		tc := tc
 		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+
 			gotUniqEvents := AddUniqueEventsToResult(tc.eventsSubSet, tc.givenUniqEventsAlready)
 			if !reflect.DeepEqual(tc.wantedUniqEvents, gotUniqEvents) {
 				t.Errorf("incorrect unique events, wanted: %v, got: %v", tc.wantedUniqEvents, gotUniqEvents)

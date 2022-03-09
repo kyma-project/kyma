@@ -184,7 +184,7 @@ Follow these steps:
 
 2. Select **Add** to provision the Redis Service Class and create its instance in your Namespace.
 
-3. Change the **Name** to match the Function, select `micro` from the **Plan** drop-down list, and set **Image pull policy** to `Always`.
+3. Change the **Name** to match the Function, select `Micro` from the **Plan** drop-down list, and set **Image pull policy** to `Always`.
 
    > **NOTE:** The Service Instance, Service Binding, and Service Binding Usage can have different names than the Function, but it is recommended that all related resources share a common name.
 
