@@ -1,6 +1,13 @@
 presubmits:
   - name: pre-inrepo-test
-    run_if_changed: ".prow.yaml$"
+    annotations:
+      testgrid-create-test-group: "false"
+      labels:
+        prow.k8s.io/pubsub.project: "sap-kyma-prow"
+        prow.k8s.io/pubsub.runID: "pre-inrepo-test"
+        prow.k8s.io/pubsub.topic: "prowjobs"
+        preset-gardener-neighbors: "true"
+    run_if_changed: "CODEOWNERS"
     decorate: true
     cluster: untrusted-workload
     spec:
@@ -12,7 +19,14 @@ presubmits:
 
 postsubmits:
   - name: post-inrepo-test
-    run_if_changed: ".prow.yaml$"
+    annotations:
+      testgrid-create-test-group: "false"
+      labels:
+        prow.k8s.io/pubsub.project: "sap-kyma-prow"
+        prow.k8s.io/pubsub.runID: "post-inrepo-test"
+        prow.k8s.io/pubsub.topic: "prowjobs"
+        preset-gardener-neighbors: "true"
+    run_if_changed: "CODEOWNERS"
     decorate: true
     cluster: untrusted-workload
     spec:
