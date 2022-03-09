@@ -85,7 +85,10 @@ func TestTransformLegacyRequestsToCE(t *testing.T) {
 	}
 
 	for _, tc := range testCases {
+		tc := tc
 		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+
 			ctx, cancel := context.WithCancel(context.Background())
 			defer cancel()
 			app := applicationtest.NewApplication(tc.appName, applicationTypeLabel(tc.typeLabel))
@@ -214,7 +217,10 @@ func TestCombineEventTypeSegments(t *testing.T) {
 	}
 
 	for _, tc := range testCases {
+		tc := tc
 		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+
 			if gotEventType := combineEventNameSegments(tc.givenEventType); tc.wantEventType != gotEventType {
 				t.Fatalf("invalid event-type want: %s, got: %s", tc.wantEventType, gotEventType)
 			}
@@ -250,7 +256,10 @@ func TestRemoveNonAlphanumeric(t *testing.T) {
 		},
 	}
 	for _, tc := range testCases {
+		tc := tc
 		t.Run(fmt.Sprintf("%s eventType", tc.name), func(t *testing.T) {
+			t.Parallel()
+
 			actual := removeNonAlphanumeric(tc.givenEventType)
 			if actual != tc.expectedEventType {
 				t.Errorf("invalid eventType; expected: %s, got %s", tc.expectedEventType, actual)
