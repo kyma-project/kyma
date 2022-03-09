@@ -13,10 +13,10 @@
 /common/logging @franpog859 @dbadura @janmedrek
 
 # developer tools: linting
-/hack @clebs @adamwalach
+/hack @clebs
 
 # The `installation` directory and subdirectories
-/installation/ @Tomasz-Smelcerz-SAP @strekm @werdes72 @adamwalach @mjakobczyk @m00g3n @pPrecel @dariusztutaj
+/installation/ @Tomasz-Smelcerz-SAP @strekm @werdes72 @mjakobczyk @m00g3n @pPrecel @dariusztutaj
 
 # The eventing crds
 /installation/resources/crds/eventing/ @k15r @lilitgh @marcobebway @pxsalehi @mfaizanse @friedrichwilken @vladislavpaskar @radufa @raypinto
@@ -223,7 +223,7 @@ components/etcd-tls-setup-job/ @PK85 @piotrmiskiewicz @ksputo @szwedm @voigt @wo
 /tests/compass-runtime-agent/ @PK85 @akgalwas @janmedrek @franpog859 @Maladie @koala7659
 
 # Fast Integration Tests
-/tests/fast-integration/ @pbochynski @adamwalach @voigt @skhalash @shorim @rakesh-garimella @jeremyharisch @lindnerby @khlifi411 @ruanxin @tobiscr @clebs @Tomasz-Smelcerz-SAP @dennis-ge
+/tests/fast-integration/ @pbochynski @voigt @skhalash @shorim @rakesh-garimella @jeremyharisch @lindnerby @khlifi411 @ruanxin @tobiscr @clebs @Tomasz-Smelcerz-SAP @dennis-ge
 
 # Fast Integration Tests maintained by gophers
 /tests/fast-integration/kyma-environment-broker @PK85 @piotrmiskiewicz @ksputo @szwedm @voigt @wozniakjan @hanngos @tillknuesting @ralikio
