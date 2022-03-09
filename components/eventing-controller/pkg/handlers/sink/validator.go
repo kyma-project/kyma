@@ -18,7 +18,7 @@ import (
 
 const clusterLocalURLSuffix = "svc.cluster.local"
 
-type SinkValidator interface {
+type Validator interface {
 	Validate(subscription *v1alpha1.Subscription) error
 }
 
@@ -30,9 +30,9 @@ type defaultSinkValidator struct {
 }
 
 // compile-time check
-var _ SinkValidator = &defaultSinkValidator{}
+var _ Validator = &defaultSinkValidator{}
 
-func NewSinkValidator(ctx context.Context, client client.Client, recorder record.EventRecorder, logger *logger.Logger) SinkValidator {
+func NewSinkValidator(ctx context.Context, client client.Client, recorder record.EventRecorder, logger *logger.Logger) Validator {
 	return &defaultSinkValidator{ctx: ctx, client: client, recorder: recorder, logger: logger}
 }
 

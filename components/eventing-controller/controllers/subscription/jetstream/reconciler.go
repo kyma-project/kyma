@@ -5,6 +5,9 @@ import (
 	"os"
 	"reflect"
 
+	equality "github.com/kyma-project/kyma/components/eventing-controller/controllers/subscription"
+	"sigs.k8s.io/controller-runtime/pkg/event"
+
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/eventtype"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/sink"
@@ -37,26 +40,28 @@ var Finalizer = eventingv1alpha1.GroupVersion.Group
 
 type Reconciler struct {
 	client.Client
-	ctx              context.Context
-	Backend          handlers.JetStreamBackend
-	recorder         record.EventRecorder
-	logger           *logger.Logger
-	eventTypeCleaner eventtype.Cleaner
-	subsConfig       env.DefaultSubscriptionConfig
-	sinkValidator    sink.SinkValidator
+	ctx                 context.Context
+	Backend             handlers.JetStreamBackend
+	recorder            record.EventRecorder
+	logger              *logger.Logger
+	eventTypeCleaner    eventtype.Cleaner
+	subsConfig          env.DefaultSubscriptionConfig
+	sinkValidator       sink.Validator
+	customEventsChannel chan event.GenericEvent
 }
 
 func NewReconciler(ctx context.Context, client client.Client, jsHandler handlers.JetStreamBackend, logger *logger.Logger,
-	recorder record.EventRecorder, cleaner eventtype.Cleaner, subsCfg env.DefaultSubscriptionConfig, defaultSinkValidator sink.SinkValidator) *Reconciler {
+	recorder record.EventRecorder, cleaner eventtype.Cleaner, subsCfg env.DefaultSubscriptionConfig, defaultSinkValidator sink.Validator) *Reconciler {
 	reconciler := &Reconciler{
-		Client:           client,
-		ctx:              ctx,
-		Backend:          jsHandler,
-		recorder:         recorder,
-		logger:           logger,
-		eventTypeCleaner: cleaner,
-		subsConfig:       subsCfg,
-		sinkValidator:    defaultSinkValidator,
+		Client:              client,
+		ctx:                 ctx,
+		Backend:             jsHandler,
+		recorder:            recorder,
+		logger:              logger,
+		eventTypeCleaner:    cleaner,
+		subsConfig:          subsCfg,
+		sinkValidator:       defaultSinkValidator,
+		customEventsChannel: make(chan event.GenericEvent),
 	}
 	if err := jsHandler.Initialize(reconciler.handleNatsConnClose); err != nil {
 		logger.WithContext().Errorw("start reconciler failed", "name", reconcilerName, "error", err)
@@ -74,6 +79,11 @@ func (r *Reconciler) SetupUnmanaged(mgr ctrl.Manager) error {
 
 	if err := ctru.Watch(&source.Kind{Type: &eventingv1alpha1.Subscription{}}, &handler.EnqueueRequestForObject{}); err != nil {
 		r.namedLogger().Errorw("setup watch for subscriptions failed", "error", err)
+		return err
+	}
+
+	if err := ctru.Watch(&source.Channel{Source: r.customEventsChannel}, &handler.EnqueueRequestForObject{}); err != nil {
+		r.namedLogger().Errorw("setup watch for custom channel failed", "error", err)
 		return err
 	}
 
@@ -122,7 +132,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 	// Check for valid sink
 	if err := r.sinkValidator.Validate(desiredSubscription); err != nil {
 		log.Errorw("sink URL validation failed", "error", err)
-		if syncErr := r.syncSubscriptionStatus(ctx, desiredSubscription, statusChanged, err.Error()); err != nil {
+		if syncErr := r.syncSubscriptionStatus(ctx, desiredSubscription, statusChanged, err); err != nil {
 			return ctrl.Result{}, syncErr
 		}
 		// No point in reconciling as the sink is invalid, return latest error to requeue the reconciliation request
@@ -132,13 +142,13 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 	syncErr := r.Backend.SyncSubscription(desiredSubscription)
 	if syncErr != nil {
 		log.Errorw("sync subscription failed", "error", syncErr)
-		if err := r.syncSubscriptionStatus(ctx, desiredSubscription, statusChanged, syncErr.Error()); err != nil {
+		if err := r.syncSubscriptionStatus(ctx, desiredSubscription, statusChanged, syncErr); err != nil {
 			return ctrl.Result{}, err
 		}
 		return ctrl.Result{}, syncErr
 	}
 
-	if err := r.syncSubscriptionStatus(ctx, desiredSubscription, true, ""); err != nil {
+	if err := r.syncSubscriptionStatus(ctx, desiredSubscription, statusChanged, nil); err != nil {
 		return ctrl.Result{}, err
 	}
 	return ctrl.Result{}, nil
@@ -149,18 +159,29 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 // It forces reconciling the subscription to make sure the subscription is marked as not ready, until
 // it is possible to connect to the NATS server again.
 func (r *Reconciler) handleNatsConnClose(_ *nats.Conn) {
-	// TODO: implement me!
 	// TODO: Enable TestSubscription_JetStreamServerRestart once implemented
+	r.namedLogger().Info("JetStream connection is closed and reconnect attempts are exceeded!")
+	var subs eventingv1alpha1.SubscriptionList
+	if err := r.Client.List(context.Background(), &subs); err != nil {
+		// NATS reconnect attempts are exceeded, and we cannot reconcile subscriptions! If we ignore this,
+		// there will be no future chance to retry connecting to NATS!
+		panic(err)
+	}
+	r.enqueueReconciliationForSubscriptions(subs.Items)
 }
 
-func (r *Reconciler) syncSubscriptionStatus(ctx context.Context, sub *eventingv1alpha1.Subscription, updateStatus bool, errorMessage string) error {
+func (r *Reconciler) syncSubscriptionStatus(ctx context.Context, sub *eventingv1alpha1.Subscription, updateStatus bool, error error) error {
+	isNatsReady := error == nil
+	readyStatusChanged := setSubReadyStatus(&sub.Status, isNatsReady)
+
 	desiredConditions := initializeDesiredConditions()
-	setConditionSubscriptionActive(desiredConditions, errorMessage)
-	if !reflect.DeepEqual(sub.Status.Conditions, desiredConditions) {
+	setConditionSubscriptionActive(desiredConditions, error)
+	if !equality.ConditionsEquals(sub.Status.Conditions, desiredConditions) {
+		sub.Status.Conditions = desiredConditions
 		updateStatus = true
 	}
 
-	if updateStatus {
+	if updateStatus || readyStatusChanged {
 		err := r.Client.Status().Update(ctx, sub, &client.UpdateOptions{})
 		if err != nil {
 			events.Warn(r.recorder, sub, events.ReasonUpdateFailed, "Update Subscription status failed %s", sub.Name)
@@ -225,6 +246,13 @@ func (r *Reconciler) syncInitialStatus(subscription *eventingv1alpha1.Subscripti
 	return statusChanged, nil
 }
 
+func (r *Reconciler) enqueueReconciliationForSubscriptions(subs []eventingv1alpha1.Subscription) {
+	r.namedLogger().Debug("enqueuing reconciliation request for all subscriptions")
+	for i := range subs {
+		r.customEventsChannel <- event.GenericEvent{Object: &subs[i]}
+	}
+}
+
 func initializeDesiredConditions() []eventingv1alpha1.Condition {
 	desiredConditions := make([]eventingv1alpha1.Condition, 0)
 	condition := eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionSubscriptionActive,
@@ -233,17 +261,25 @@ func initializeDesiredConditions() []eventingv1alpha1.Condition {
 	return desiredConditions
 }
 
-func setConditionSubscriptionActive(desiredConditions []eventingv1alpha1.Condition, errorMessage string) {
-	for _, c := range desiredConditions {
+func setConditionSubscriptionActive(desiredConditions []eventingv1alpha1.Condition, error error) {
+	for key, c := range desiredConditions {
 		if c.Type == eventingv1alpha1.ConditionSubscriptionActive {
-			if len(errorMessage) == 0 {
-				c.Status = corev1.ConditionTrue
-				c.Reason = eventingv1alpha1.ConditionReasonNATSSubscriptionActive
+			if error == nil {
+				desiredConditions[key].Status = corev1.ConditionTrue
+				desiredConditions[key].Reason = eventingv1alpha1.ConditionReasonNATSSubscriptionActive
 			} else {
-				c.Message = errorMessage
+				desiredConditions[key].Message = error.Error()
 			}
 		}
 	}
+}
+
+func setSubReadyStatus(desiredSubscriptionStatus *eventingv1alpha1.SubscriptionStatus, isReady bool) bool {
+	if desiredSubscriptionStatus.Ready != isReady {
+		desiredSubscriptionStatus.Ready = isReady
+		return true
+	}
+	return false
 }
 
 func isInDeletion(subscription *eventingv1alpha1.Subscription) bool {

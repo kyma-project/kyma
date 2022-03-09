@@ -43,7 +43,7 @@ type Reconciler struct {
 	recorder         record.EventRecorder
 	subsConfig       env.DefaultSubscriptionConfig
 	eventTypeCleaner eventtype.Cleaner
-	sinkValidator    sink.SinkValidator
+	sinkValidator    sink.Validator
 	// This channel is used to enqueue a reconciliation request for a subscription
 	customEventsChannel chan event.GenericEvent
 }
@@ -59,7 +59,7 @@ const (
 )
 
 func NewReconciler(ctx context.Context, client client.Client, natsHandler handlers.NatsBackend, cleaner eventtype.Cleaner,
-	logger *logger.Logger, recorder record.EventRecorder, subsCfg env.DefaultSubscriptionConfig, defaultSinkValidator sink.SinkValidator) *Reconciler {
+	logger *logger.Logger, recorder record.EventRecorder, subsCfg env.DefaultSubscriptionConfig, defaultSinkValidator sink.Validator) *Reconciler {
 	reconciler := &Reconciler{
 		ctx:                 ctx,
 		Backend:             natsHandler,
