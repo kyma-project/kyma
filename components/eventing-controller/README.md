@@ -64,6 +64,12 @@ This section explains how to use the Eventing Controller. It expects the followi
 | `DEFAULT_MAX_IN_FLIGHT_MESSAGES`  | The maximum idle "in-flight messages" sent by NATS to the sink without waiting for a response. |
 | `DEFAULT_DISPATCHER_RETRY_PERIOD` | The retry period for resending an event to a sink, if the sink doesn't return 2XX.             |
 | `DEFAULT_DISPATCHER_MAX_RETRIES`  | The maximum number of retries to send an event to a sink in case of errors.                    |
+| **For NATS JetStream**            |                                                                                                |
+|  `JS_STREAM_NAME`                 | Name of the stream where all events are stored.                                                |
+|  `JS_STREAM_STORAGE_TYPE`         | Storage type of the stream: memory or file.                                                    |
+|  `JS_STREAM_RETENTION_POLICY`     | Retention policy specifies when should events be deleted from the stream: limits or interest. (see https://docs.nats.io/using-nats/developer/develop_jetstream/model_deep_dive#stream-limits-retention-and-policy) |
+|  `JS_STREAM_MAX_MSGS`             | The maximum number of messages in the stream. Used only when storage policy is set to `limits`. |
+|  `JS_STREAM_MAX_BYTES`            | The maximum size of the stream in bytes. Used only when storage policy is set to `limits`.     |
 | **For BEB**                       |                                                                                                |
 | `TOKEN_ENDPOINT`                  | The Authentication Server Endpoint to provide Access Tokens.                                   |
 | `WEBHOOK_ACTIVATION_TIMEOUT`      | The timeout duration used for webhook activation to acquire Access Tokens for Kyma.            |
