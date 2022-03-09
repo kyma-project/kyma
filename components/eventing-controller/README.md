@@ -67,7 +67,7 @@ This section explains how to use the Eventing Controller. It expects the followi
 | **For NATS JetStream**            |                                                                                                |
 |  `JS_STREAM_NAME`                 | Name of the stream where all events are stored.                                                |
 |  `JS_STREAM_STORAGE_TYPE`         | Storage type of the stream: memory or file.                                                    |
-|  `JS_STREAM_RETENTION_POLICY`     | Retention policy specifies when should events be deleted from the stream: limits or interest. (see https://docs.nats.io/using-nats/developer/develop_jetstream/model_deep_dive#stream-limits-retention-and-policy) |
+|  `JS_STREAM_RETENTION_POLICY`     | Retention policy specifies when should events be deleted from the stream: limits or interest. (see https://docs.nats.io/using-nats/developer/develop_jetstream/model_deep_dive#stream-limits-retention-and-policy). |
 |  `JS_STREAM_MAX_MSGS`             | The maximum number of messages in the stream. Used only when storage policy is set to `limits`. |
 |  `JS_STREAM_MAX_BYTES`            | The maximum size of the stream in bytes. Used only when storage policy is set to `limits`.     |
 | **For BEB**                       |                                                                                                |
