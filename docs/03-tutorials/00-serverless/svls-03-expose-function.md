@@ -34,7 +34,7 @@ Follow these steps:
       export NAME={FUNCTION_NAME}
       export NAMESPACE={NAMESPACE_NAME}
       ```
-   >**NOTE:** Function takes the name from the Function CR name. The API Rule CR can have a different name but for the purpose of this tutorial, all related resources share a common name defined under the **NAME** variable.
+   >**NOTE:** The Function takes the name from the Function CR name. The API Rule CR can have a different name but for the purpose of this tutorial, all related resources share a common name defined under the **NAME** variable.
 2. Download the latest configuration of the Function from the cluster. This way you will update the local `config.yaml` file with the Function's code.
 
   ```bash
@@ -152,7 +152,7 @@ Follow these steps:
 
 3. Switch to the **Configuration** tab and select **Create API Rule** in the API Rules section.
 
-4. In the **General settings** section of the dialog box, enter the following information:
+4. Under **General settings**, enter the following information:
 
     - The API Rule's **Name** matching the Function's name.
 
@@ -160,9 +160,9 @@ Follow these steps:
 
     - **Subdomain** to determine the host on which you want to expose your Function.
 
-5. In the **Rules** section, select the `noop` handler from the drop-down list and mark all the methods i.e. `GET`, `POST`, `PUT`, `PATCH`, `DELETE`, and `HEAD`.
+5. In the **Rules** section, select the `noop` handler and mark **all** the methods.
 
-6. Select **Create** to confirm changes. The dialog box with the form will close.
+6. Select **Create** to confirm your changes.
 
 7. Check if you can access the Function by selecting the HTTPS link under the **Host** column for the newly created API Rule.
 
