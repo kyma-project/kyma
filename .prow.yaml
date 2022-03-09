@@ -2,6 +2,7 @@ presubmits:
   - name: pre-inrepo-test
     run_if_changed: ".prow.yaml$"
     decorate: true
+    cluster: untrusted-workload
     spec:
       containers:
         - image: "eu.gcr.io/kyma-project/test-infra/kyma-integration:v20220105-baf0471a"
@@ -13,6 +14,7 @@ postsubmits:
   - name: post-inrepo-test
     run_if_changed: ".prow.yaml$"
     decorate: true
+    cluster: untrusted-workload
     spec:
       containers:
         - image: "eu.gcr.io/kyma-project/test-infra/kyma-integration:v20220105-baf0471a"
