@@ -188,6 +188,7 @@ aliases:
     - clebs
     - Tomasz-Smelcerz-SAP
     - adityabhatia
+    - jakobmoellersap
   reconciler-approvers:
     - khlifi411
     - jakobmoellersap
