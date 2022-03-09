@@ -126,6 +126,9 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 	statusChanged, err := r.syncInitialStatus(desiredSubscription, log)
 	if err != nil {
 		log.Errorw("sync initial status failed", "error", err)
+		if syncErr := r.syncSubscriptionStatus(ctx, desiredSubscription, statusChanged, err); err != nil {
+			return ctrl.Result{}, syncErr
+		}
 		return ctrl.Result{}, err
 	}
 

@@ -141,7 +141,7 @@ func (js *JetStream) SyncSubscription(subscription *eventingv1alpha1.Subscriptio
 
 	callback := js.getCallback(subKeyPrefix)
 	for _, subject := range subscription.Status.CleanEventTypes {
-		jsSubKey := js.generateJsSubKey(subject, subscription)
+		jsSubKey := js.GenerateJsSubKey(subject, subscription)
 
 		if js.conn.Status() != nats.CONNECTED {
 			if err := js.Initialize(js.connClosedHandler); err != nil {
@@ -198,7 +198,7 @@ func (js *JetStream) DeleteSubscription(subscription *eventingv1alpha1.Subscript
 	// cleanup consumers on nats-server
 	// in-case data in js.subscriptions[] was lost due to handler restart
 	for _, subject := range subscription.Status.CleanEventTypes {
-		jsSubKey := js.generateJsSubKey(subject, subscription)
+		jsSubKey := js.GenerateJsSubKey(subject, subscription)
 		if err := js.deleteConsumerFromJetStream(jsSubKey, log); err != nil {
 			return err
 		}
@@ -428,8 +428,8 @@ func (js *JetStream) deleteConsumerFromJetStream(name string, log *zap.SugaredLo
 	return nil
 }
 
-// generateJsSubKey generates an encoded unique key for JetStream subscription
-func (js *JetStream) generateJsSubKey(subject string, subscription *eventingv1alpha1.Subscription) string {
+// GenerateJsSubKey generates an encoded unique key for JetStream subscription
+func (js *JetStream) GenerateJsSubKey(subject string, subscription *eventingv1alpha1.Subscription) string {
 	return encodeString(fmt.Sprintf("%s/%s", createKeyPrefix(subscription), subject))
 }
 
@@ -452,6 +452,12 @@ func createJSSubscriptionNamespacedName(jsSubKey string) (types.NamespacedName, 
 	nsn.Namespace = nnValues[0]
 	nsn.Name = nnValues[1]
 	return nsn, nil
+}
+
+// GetAllSubscriptions returns the map which contains all details of subscription
+// Use this only for testing purposes
+func (js *JetStream) GetAllSubscriptions() map[string]*nats.Subscription {
+	return js.subscriptions
 }
 
 func (js *JetStream) namedLogger() *zap.SugaredLogger {

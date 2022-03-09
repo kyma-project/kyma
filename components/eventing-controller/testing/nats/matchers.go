@@ -18,6 +18,16 @@ func BeSubscriptionWithSubject(subject string) gomegatypes.GomegaMatcher {
 	}, gomega.BeTrue())
 }
 
+func BeJetStreamSubscriptionWithSubject(subject string) gomegatypes.GomegaMatcher {
+	return gomega.WithTransform(func(subscription *nats.Subscription) bool {
+		info, err := subscription.ConsumerInfo()
+		if err != nil {
+			return false
+		}
+		return info.Config.FilterSubject == subject
+	}, gomega.BeTrue())
+}
+
 func BeExistingSubscription() gomegatypes.GomegaMatcher {
 	return gomega.WithTransform(func(subscription *nats.Subscription) bool {
 		return subscription != nil
