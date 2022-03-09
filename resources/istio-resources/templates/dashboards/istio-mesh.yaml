@@ -8,5 +8,5 @@ metadata:
     grafana_dashboard: "1"
     app: monitoring-grafana
 data:
-  istio-mesh-dashboard.json: {{ .Values.dashboards.istio_mesh | toJson }}
+  istio-mesh-dashboard.json: {{ .Files.Get "files/dashboards/mesh.json" | toJson }}
 {{- end }}
