@@ -6,7 +6,7 @@ require (
 	github.com/avast/retry-go/v3 v3.1.1
 	github.com/cloudevents/sdk-go/protocol/nats/v2 v2.8.0
 	github.com/cloudevents/sdk-go/v2 v2.8.0
-	github.com/go-logr/logr v1.2.0
+	github.com/go-logr/logr v1.2.2
 	github.com/go-logr/zapr v1.2.0
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/kyma-incubator/api-gateway v0.0.0-20210909101151-ac45e9ce3553
