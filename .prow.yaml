@@ -7,7 +7,7 @@ presubmits:
         prow.k8s.io/pubsub.runID: "pre-inrepo-test"
         prow.k8s.io/pubsub.topic: "prowjobs"
         preset-gardener-neighbors: "true"
-    run_if_changed: ".prow.yaml$"
+    run_if_changed: "CODEOWNERS"
     decorate: true
     cluster: untrusted-workload
     spec:
@@ -26,7 +26,7 @@ postsubmits:
         prow.k8s.io/pubsub.runID: "post-inrepo-test"
         prow.k8s.io/pubsub.topic: "prowjobs"
         preset-gardener-neighbors: "true"
-    run_if_changed: ".prow.yaml$"
+    run_if_changed: "CODEOWNERS"
     decorate: true
     cluster: untrusted-workload
     spec:
