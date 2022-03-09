@@ -74,6 +74,7 @@ func TestHandlerForCloudEvents(t *testing.T) {
 		},
 	}
 	for _, tc := range testCases {
+		tc := tc
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
 
@@ -90,8 +91,8 @@ func TestHandlerForCloudEvents(t *testing.T) {
 			defer handlerMock.Close()
 			publishEndpoint := fmt.Sprintf(publishEndpointFormat, handlerMock.GetPort())
 
-			// nolint:scopelint
 			for _, testCase := range handlertest.TestCasesForCloudEvents {
+				testCase := testCase
 				t.Run(testCase.Name, func(t *testing.T) {
 					body, headers := testCase.ProvideMessage()
 					resp, err := testingutils.SendEvent(publishEndpoint, body, headers)
@@ -142,6 +143,7 @@ func TestHandlerForLegacyEvents(t *testing.T) {
 		},
 	}
 	for _, tc := range testCases {
+		tc := tc
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
 
@@ -158,8 +160,8 @@ func TestHandlerForLegacyEvents(t *testing.T) {
 			defer handlerMock.Close()
 			publishLegacyEndpoint := fmt.Sprintf(publishLegacyEndpointFormat, handlerMock.GetPort(), tc.givenApplicationNameToCreate)
 
-			// nolint:scopelint
 			for _, testCase := range handlertest.TestCasesForLegacyEvents {
+				testCase := testCase
 				t.Run(testCase.Name, func(t *testing.T) {
 					body, headers := testCase.ProvideMessage()
 					resp, err := testingutils.SendEvent(publishLegacyEndpoint, body, headers)
@@ -196,6 +198,7 @@ func TestHandlerForBEBFailures(t *testing.T) {
 		},
 	}
 	for _, tc := range testCases {
+		tc := tc
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
 
@@ -243,8 +246,8 @@ func TestHandlerForBEBFailures(t *testing.T) {
 					wantStatusCode: http.StatusBadRequest,
 				},
 			}
-			// nolint:scopelint
 			for _, testCase := range innerTestCases {
+				testCase := testCase
 				t.Run(testCase.name, func(t *testing.T) {
 					body, headers := testCase.provideMessage()
 					resp, err := testingutils.SendEvent(publishLegacyEndpoint, body, headers)
@@ -279,6 +282,7 @@ func TestHandlerForHugeRequests(t *testing.T) {
 		},
 	}
 	for _, tc := range testCases {
+		tc := tc
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
 
@@ -319,8 +323,8 @@ func TestHandlerForHugeRequests(t *testing.T) {
 					wantStatusCode: http.StatusBadRequest,
 				},
 			}
-			// nolint:scopelint
 			for _, testCase := range innerTestCases {
+				testCase := testCase
 				t.Run(testCase.name, func(t *testing.T) {
 					body, headers := testCase.provideMessage()
 					resp, err := testingutils.SendEvent(publishLegacyEndpoint, body, headers)
@@ -355,6 +359,7 @@ func TestHandlerForSubscribedEndpoint(t *testing.T) {
 		},
 	}
 	for _, tc := range testCases {
+		tc := tc
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
 
@@ -376,8 +381,8 @@ func TestHandlerForSubscribedEndpoint(t *testing.T) {
 			)
 			defer handlerMock.Close()
 
-			// nolint:scopelint
 			for _, testCase := range handlertest.TestCasesForSubscribedEndpoint {
+				testCase := testCase
 				t.Run(testCase.Name, func(t *testing.T) {
 					subscribedURL := fmt.Sprintf(subscribedEndpointFormat, handlerMock.GetPort(), testCase.AppName)
 					resp, err := testingutils.QuerySubscribedEndpoint(subscribedURL)
@@ -413,6 +418,7 @@ func TestHandlerTimeout(t *testing.T) {
 		},
 	}
 	for _, tc := range testCases {
+		tc := tc
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
 
@@ -494,6 +500,7 @@ func TestIsARequestWithLegacyEvent(t *testing.T) {
 		},
 	}
 	for _, tc := range testCases {
+		tc := tc
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
 			assert.Equal(t, tc.wantedResult, handler.IsARequestWithLegacyEvent(tc.givenURI))

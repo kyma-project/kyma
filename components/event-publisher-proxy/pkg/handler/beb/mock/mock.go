@@ -86,7 +86,7 @@ func (m *BebHandlerMock) GetReadinessEndpoint() string {
 
 // StartOrDie starts a new BebHandlerMock instance or die if a precondition fails.
 // Preconditions: 1) beb.Handler started without errors.
-func StartOrDie(ctx context.Context, t *testing.T, requestSize int, eventTypePrefix, eventsEndpoint string, // nolint:unparam
+func StartOrDie(ctx context.Context, t *testing.T, requestSize int, eventTypePrefix, eventsEndpoint string,
 	requestTimeout, serverResponseTime time.Duration, opts ...BebHandlerMockOpt) *BebHandlerMock {
 	mockServer := testingutils.NewMockServer(testingutils.WithResponseTime(serverResponseTime))
 	mockServer.Start(t, defaultTokenEndpoint, defaultEventsEndpoint, defaultEventsHTTP400Endpoint)
