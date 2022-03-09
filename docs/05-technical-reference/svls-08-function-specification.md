@@ -66,6 +66,7 @@ Functions in Kyma accept [CloudEvents](https://cloudevents.io/) (**ce**) with th
     "ce-id": "abc123",
     "ce-time": "2020-12-20T13:37:33.647Z",
     "data": {BUFFER},
+    "tracer": {OPENTELEMETRY_TRACER},
     "extensions": {
         "request": {INCOMING_MESSAGE},
         "response": {SERVER_RESPONSE},
@@ -86,7 +87,8 @@ Python
     "ce-specversion": "1.0",
     "ce-id": "abc123",
     "ce-time": "2020-12-20T13:37:33.647Z",
-    "data": b"",
+    "data": "",
+    "tracer": {OPENTELEMETRY_TRACER},
     "extensions": {
         "request": {PICKLABLE_BOTTLE_REQUEST},
     }
@@ -107,6 +109,7 @@ See the detailed descriptions of these fields:
 | **ce-id** | Unique identifier of the event |
 | **ce-time** | Time at which the event was sent |
 | **data** | Either JSON or a string, depending on the request type. Read more about [Buffer](https://nodejs.org/api/buffer.html) in Node.js and [bytes literals](https://docs.python.org/3/reference/lexical_analysis.html#string-and-bytes-literals) in Python. |
+| **tracer** | Fully configured OpenTelemetry [tracer](https://opentelemetry.io/docs/reference/specification/trace/api/#tracer) object that allows you to communicate with the Jaeger service to share tracing data. For more information on how to use the tracer object see [Use the OpenTelemetry standard](../03-tutorials/00-serverless/svls-12-use-opentelemetry-client.md) |
 | **extensions** | JSON object that can contain event payload, a Function's incoming request, or an outgoing response |
 
 ### Event object SDK

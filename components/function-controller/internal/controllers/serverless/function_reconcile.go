@@ -94,10 +94,7 @@ func (r *FunctionReconciler) SetupWithManager(mgr ctrl.Manager) (controller.Cont
 // +kubebuilder:rbac:groups="autoscaling",resources=horizontalpodautoscalers,verbs=get;list;watch;create;update;deletecollection
 // +kubebuilder:rbac:groups="",resources=events,verbs=create;patch
 
-func (r *FunctionReconciler) Reconcile(request ctrl.Request) (ctrl.Result, error) {
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
-
+func (r *FunctionReconciler) Reconcile(ctx context.Context, request ctrl.Request) (ctrl.Result, error) {
 	if IsHealthCheckRequest(request) {
 		r.healthCh <- true
 		return ctrl.Result{}, nil
