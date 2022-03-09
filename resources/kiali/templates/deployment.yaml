@@ -25,11 +25,7 @@ spec:
         {{- toYaml .Values.deployment.pod_labels | nindent 8 }}
         {{- end }}
       annotations:
-        {{- if .Values.login_token.signing_key }}
-        checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
-        {{- else }}
         checksum/config: {{ tpl (toYaml (print .Values.deployment .Values.auth .Values.istio_namespace .Values.kiali_feature_flags .Values.server .Values.identity)) . | sha256sum }}
-        {{- end }}
         {{- if .Values.server.metrics_enabled }}
         prometheus.io/scrape: "true"
         prometheus.io/port: {{ .Values.server.metrics_port | quote }}
