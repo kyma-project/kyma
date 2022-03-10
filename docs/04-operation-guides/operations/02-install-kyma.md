@@ -16,6 +16,8 @@ Meet the prerequisites, provision a k3d cluster, and use the `deploy` command to
 
 ## Provision and install
 
+> **NOTE:** Installation with k3d cluster does not work on Apple M1 SoC.
+
 You can either use an out-of-the-box k3d cluster or choose any other cluster provider. To quickly provision a k3d cluster, run:
 
   ```bash
