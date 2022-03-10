@@ -25,8 +25,14 @@ type NatsConfig struct {
 	IdleConnTimeout     time.Duration `envconfig:"IDLE_CONN_TIMEOUT" default:"10s"`
 
 	// JetStream-specific configs
-	JSStreamName            string `envconfig:"JS_STREAM_NAME" default:"kyma"`
-	JSStreamStorageType     string `envconfig:"JS_STREAM_STORAGE_TYPE" default:"memory"`
+	// Name of the JetStream stream where all events are stored.
+	JSStreamName string `envconfig:"JS_STREAM_NAME" default:"kyma"`
+	// Storage type of the stream, memory or file.
+	JSStreamStorageType string `envconfig:"JS_STREAM_STORAGE_TYPE" default:"memory"`
+	// Retention policy specifies when to delete events from the stream.
+	//  interest: when all known observables have acknowledged a message, it can be removed.
+	//  limits: messages are retained until any given limit is reached.
+	//  configured via JSStreamMaxMessages and JSStreamMaxBytes.
 	JSStreamRetentionPolicy string `envconfig:"JS_STREAM_RETENTION_POLICY" default:"interest"`
 	JSStreamMaxMessages     int64  `envconfig:"JS_STREAM_MAX_MSGS" default:"-1"`
 	JSStreamMaxBytes        int64  `envconfig:"JS_STREAM_MAX_BYTES" default:"-1"`
