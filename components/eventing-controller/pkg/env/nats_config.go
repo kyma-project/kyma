@@ -29,7 +29,7 @@ type NatsConfig struct {
 	JSStreamName string `envconfig:"JS_STREAM_NAME" default:"kyma"`
 	// Storage type of the stream, memory or file.
 	JSStreamStorageType string `envconfig:"JS_STREAM_STORAGE_TYPE" default:"memory"`
-	// Retention policy specifies when should events be deleted from the stream.
+	// Retention policy specifies when to delete events from the stream.
 	//  interest: when all known observables have acknowledged a message, it can be removed.
 	//  limits: messages are retained until any given limit is reached.
 	//  configured via JSStreamMaxMessages and JSStreamMaxBytes.
