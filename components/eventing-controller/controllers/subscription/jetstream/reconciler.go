@@ -4,13 +4,13 @@ import (
 	"context"
 	"os"
 
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/eventtype"
+
 	"github.com/nats-io/nats.go"
 
 	"github.com/kyma-project/kyma/components/eventing-controller/controllers/events"
 	"github.com/kyma-project/kyma/components/eventing-controller/utils"
 	"github.com/pkg/errors"
-
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
 
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers"
@@ -31,26 +31,26 @@ const (
 
 type Reconciler struct {
 	client.Client
-	ctx      context.Context
-	Backend  handlers.MessagingBackend
-	recorder record.EventRecorder
-	logger   *logger.Logger
+	ctx              context.Context
+	Backend          handlers.JetStreamBackend
+	recorder         record.EventRecorder
+	logger           *logger.Logger
+	eventTypeCleaner eventtype.Cleaner
 }
 
-func NewReconciler(ctx context.Context, client client.Client, logger *logger.Logger, recorder record.EventRecorder, cfg env.NatsConfig) *Reconciler {
+func NewReconciler(ctx context.Context, client client.Client, jsHandler handlers.JetStreamBackend, logger *logger.Logger, recorder record.EventRecorder, cleaner eventtype.Cleaner) *Reconciler {
 	reconciler := &Reconciler{
-		Client:   client,
-		ctx:      ctx,
-		recorder: recorder,
-		logger:   logger,
+		Client:           client,
+		ctx:              ctx,
+		Backend:          jsHandler,
+		recorder:         recorder,
+		logger:           logger,
+		eventTypeCleaner: cleaner,
 	}
-	jsHandler := handlers.NewJetStream(cfg, reconciler.handleNatsConnClose, logger)
-	if err := jsHandler.Initialize(env.Config{}); err != nil {
+	if err := jsHandler.Initialize(reconciler.handleNatsConnClose); err != nil {
 		logger.WithContext().Errorw("start reconciler failed", "name", reconcilerName, "error", err)
 		panic(err)
 	}
-	reconciler.Backend = jsHandler
-
 	return reconciler
 }
 
@@ -89,6 +89,14 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 	desiredSubscription := actualSubscription.DeepCopy()
 	log := utils.LoggerWithSubscription(r.namedLogger(), desiredSubscription)
 
+	// TODO: Do this as part of sync initial status
+	cleanedSubjects, _ := handlers.GetCleanSubjects(desiredSubscription, r.eventTypeCleaner)
+	desiredSubscription.Status.CleanEventTypes = r.Backend.GetJetStreamSubjects(cleanedSubjects)
+	desiredSubscription.Status.Config = &eventingv1alpha1.SubscriptionConfig{
+		MaxInFlightMessages: 10,
+	}
+	_ = r.Backend.SyncSubscription(desiredSubscription)
+
 	// Mark subscription as not ready, since we have not implemented the reconciliation logic.
 	desiredSubscription.Status = eventingv1alpha1.SubscriptionStatus{}
 	if err := r.syncSubscriptionStatus(ctx, desiredSubscription); err != nil {
@@ -105,6 +113,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 // it is possible to connect to the NATS server again.
 func (r *Reconciler) handleNatsConnClose(_ *nats.Conn) {
 	// TODO: implement me!
+	// TODO: Enable TestSubscription_JetStreamServerRestart once implemented
 }
 
 func (r *Reconciler) syncSubscriptionStatus(ctx context.Context, sub *eventingv1alpha1.Subscription) error {

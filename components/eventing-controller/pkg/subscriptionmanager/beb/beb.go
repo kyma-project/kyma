@@ -6,6 +6,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/eventtype"
+
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
 
@@ -55,7 +57,7 @@ type SubscriptionManager struct {
 	metricsAddr  string
 	resyncPeriod time.Duration
 	mgr          manager.Manager
-	backend      handlers.MessagingBackend
+	backend      handlers.BEBBackend
 	logger       *logger.Logger
 }
 
@@ -86,6 +88,8 @@ func (c *SubscriptionManager) Start(_ env.DefaultSubscriptionConfig, params subs
 	c.cancel = cancel
 	dynamicClient := dynamic.NewForConfigOrDie(c.restCfg)
 	applicationLister := application.NewLister(ctx, dynamicClient)
+	cleaner := eventtype.NewCleaner(c.envCfg.EventTypePrefix, applicationLister, c.logger)
+
 	oauth2credential, err := getOAuth2ClientCredentials(params)
 	if err != nil {
 		return errors.Wrap(err, "get oauth2client credentials failed")
@@ -97,19 +101,21 @@ func (c *SubscriptionManager) Start(_ env.DefaultSubscriptionConfig, params subs
 	ctrl.Log.WithName("BEB-subscription-manager").Info("using BEB name mapper",
 		"domainName", c.envCfg.Domain,
 		"maxNameLength", handlers.MaxBEBSubscriptionNameLength)
-	reconciler := beb.NewReconciler(
+	bebHandler := handlers.NewBEB(oauth2credential, nameMapper, c.logger)
+
+	bebReconciler := beb.NewReconciler(
 		ctx,
 		c.mgr.GetClient(),
-		applicationLister,
 		c.logger,
 		c.mgr.GetEventRecorderFor("eventing-controller-beb"),
 		c.envCfg,
+		cleaner,
+		bebHandler,
 		oauth2credential,
 		nameMapper,
 	)
-
-	c.backend = reconciler.Backend
-	if err := reconciler.SetupUnmanaged(c.mgr); err != nil {
+	c.backend = bebReconciler.Backend
+	if err := bebReconciler.SetupUnmanaged(c.mgr); err != nil {
 		return fmt.Errorf("setup BEB subscription controller failed: %v", err)
 	}
 	return nil
@@ -159,7 +165,7 @@ func markAllSubscriptionsAsNotReady(dynamicClient dynamic.Interface, logger *zap
 }
 
 // cleanup removes all created BEB artifacts.
-func cleanup(backend handlers.MessagingBackend, dynamicClient dynamic.Interface, logger *zap.SugaredLogger) error {
+func cleanup(backend handlers.BEBBackend, dynamicClient dynamic.Interface, logger *zap.SugaredLogger) error {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 

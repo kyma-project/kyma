@@ -6,8 +6,9 @@ import (
 	"testing"
 	"time"
 
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/eventtype"
+
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/subscriptionmanager"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/subscriptionmanager/mock"
 	"k8s.io/client-go/dynamic"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 
@@ -87,11 +88,13 @@ func TestCleanup(t *testing.T) {
 	g.Expect(err).To(gomega.BeNil())
 	natsSubMgr.Client = fakeClient
 
-	fakeCleaner := mock.Cleaner{}
-	testSub.Status.CleanEventTypes, _ = handlers.GetCleanSubjects(testSub, &fakeCleaner)
+	cleaner := func(et string) (string, error) {
+		return et, nil
+	}
+	testSub.Status.CleanEventTypes, _ = handlers.GetCleanSubjects(testSub, eventtype.CleanerFunc(cleaner))
 
 	// Create NATS subscription
-	_, err = natsSubMgr.Backend.SyncSubscription(testSub)
+	err = natsSubMgr.Backend.SyncSubscription(testSub)
 	g.Expect(err).To(gomega.BeNil())
 
 	// Make sure subscriber works

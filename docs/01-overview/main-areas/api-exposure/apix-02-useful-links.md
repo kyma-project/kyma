@@ -6,8 +6,9 @@ If you're interested in learning more about API Exposure in Kyma, follow these l
 
 - Perform some simple and more advanced tasks:
   - [Use a custom domain to expose a service](../../../03-tutorials/00-api-exposure/apix-01-own-domain.md)
-  - [Expose a service](../../../03-tutorials/00-api-exposure/apix-02-expose-service-apigateway.md)
-  - [Expose and secure a service](../../../03-tutorials/00-api-exposure/apix-03-expose-and-secure-service.md)
+  - [Create a workload](../../../03-tutorials/00-api-exposure/apix-02-create-workload.md)
+  - [Expose a workload](../../../03-tutorials/00-api-exposure/apix-02-expose-workload-apigateway.md)
+  - [Expose and secure a workload with OAuth2](../../../03-tutorials/00-api-exposure/apix-03-expose-and-secure-workload-oauth2.md)
   
 - Troubleshoot API Exposure-related issues when:
 

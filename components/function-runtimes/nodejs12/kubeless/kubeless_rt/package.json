@@ -9,6 +9,13 @@
   },
   "homepage": "https://github.com/serverless/serverless-kubeless#readme",
   "dependencies": {
+    "@opentelemetry/api": "^0.18.0",
+    "@opentelemetry/exporter-jaeger": "^0.18.0",
+    "@opentelemetry/instrumentation": "^0.18.0",
+    "@opentelemetry/instrumentation-http": "^0.18.2",
+    "@opentelemetry/node": "^0.18.0",
+    "@opentelemetry/propagator-b3": "^0.19.0",
+    "@opentelemetry/tracing": "^0.18.0",
     "body-parser": "^1.17.2",
     "express": "^4.15.3",
     "morgan": "^1.8.2",

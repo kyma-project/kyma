@@ -27,6 +27,7 @@ spec:
     - source:
         principals:
         - "cluster.local/ns/kyma-system/sa/logging-fluent-bit"
+        - "cluster.local/ns/kyma-system/sa/telemetry-fluent-bit"
     to:
     - operation:
         paths: ["/loki/api/v1/push"]

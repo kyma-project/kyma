@@ -44,9 +44,7 @@ type NatsBackend interface {
 	Initialize(connCloseHandler ConnClosedHandler) error
 
 	// SyncSubscription synchronizes the Kyma Subscription on the NATS backend.
-	// It returns true if Kyma Subscription status was changed during this synchronization process.
-	// It sets subscription.status.config with configurations that were applied on the messaging backend when creating the subscription.
-	SyncSubscription(subscription *eventingv1alpha1.Subscription) (bool, error)
+	SyncSubscription(subscription *eventingv1alpha1.Subscription) error
 
 	// DeleteSubscription deletes the corresponding subscription on the NATS backend
 	DeleteSubscription(subscription *eventingv1alpha1.Subscription) error
@@ -138,8 +136,7 @@ func GetCleanSubjects(sub *eventingv1alpha1.Subscription, cleaner eventtype.Clea
 }
 
 // SyncSubscription synchronizes the given Kyma subscription to NATS subscription.
-// The returned bool acts as a marker for changed subscription status.
-func (n *Nats) SyncSubscription(sub *eventingv1alpha1.Subscription) (bool, error) {
+func (n *Nats) SyncSubscription(sub *eventingv1alpha1.Subscription) error {
 	// Format logger
 	log := utils.LoggerWithSubscription(n.namedLogger(), sub)
 	subKeyPrefix := createKeyPrefix(sub)
@@ -150,7 +147,7 @@ func (n *Nats) SyncSubscription(sub *eventingv1alpha1.Subscription) (bool, error
 	for key, s := range n.subscriptions {
 		if isNatsSubAssociatedWithKymaSub(key, s, sub) && !utils.ContainsString(sub.Status.CleanEventTypes, s.Subject) {
 			if err := n.deleteSubscriptionFromNATS(s, key, log); err != nil {
-				return false, err
+				return err
 			}
 			log.Infow(
 				"deleted NATS subscription because it was deleted from subscription filters",
@@ -171,7 +168,7 @@ func (n *Nats) SyncSubscription(sub *eventingv1alpha1.Subscription) (bool, error
 		if n.connection.Status() != nats.CONNECTED {
 			if err := n.Initialize(n.connClosedHandler); err != nil {
 				log.Errorw("reset NATS connection failed", "status", n.connection.Stats(), "error", err)
-				return false, err
+				return err
 			}
 		}
 
@@ -184,7 +181,7 @@ func (n *Nats) SyncSubscription(sub *eventingv1alpha1.Subscription) (bool, error
 			if existingNatsSub, ok := n.subscriptions[natsSubKey]; ok {
 				if existingNatsSub.Subject != subject {
 					if err := n.deleteSubscriptionFromNATS(existingNatsSub, natsSubKey, log); err != nil {
-						return false, err
+						return err
 					}
 				} else if existingNatsSub.IsValid() {
 					log.Debugw("skipping creating subscription on NATS because it already exists", "subject", subject)
@@ -196,7 +193,7 @@ func (n *Nats) SyncSubscription(sub *eventingv1alpha1.Subscription) (bool, error
 			natsSub, err := n.connection.QueueSubscribe(subject, queueGroupName, callback)
 			if err != nil {
 				log.Errorw("create NATS subscription failed", "error", err)
-				return false, err
+				return err
 			}
 
 			// save created NATS subscription in storage
@@ -204,7 +201,7 @@ func (n *Nats) SyncSubscription(sub *eventingv1alpha1.Subscription) (bool, error
 		}
 	}
 
-	return false, nil
+	return nil
 }
 
 // DeleteSubscription deletes all NATS subscriptions corresponding to a Kyma subscription

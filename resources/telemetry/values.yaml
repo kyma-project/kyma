@@ -4,10 +4,10 @@ global:
   images:
     telemetry_operator:
       name: "telemetry-operator"
-      version: "PR-13331"
+      version: "PR-13550"
     fluent_bit:
       name: "fluent-bit"
-      version: "1.8.12-780c4842"
+      version: "1.8.13-bdc43fc8"
       directory: "tpi"
     busybox:
       name: "busybox"
