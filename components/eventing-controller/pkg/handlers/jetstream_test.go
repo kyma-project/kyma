@@ -962,58 +962,58 @@ func TestJSSubscriptionUsingCESDK(t *testing.T) {
 }
 
 // TODO: Enable this test once the ConnCloseHandler is implemented
-//func TestSubscription_JetStreamServerRestart(t *testing.T) {
-//	// given
-//	testEnvironment := setupTestEnvironment(t)
-//	jsBackend := testEnvironment.jsBackend
-//	defer testEnvironment.natsServer.Shutdown()
-//	defer testEnvironment.jsClient.natsConn.Close()
-//	initErr := jsBackend.Initialize(nil)
-//	require.NoError(t, initErr)
-//	defaultSubsConfig := env.DefaultSubscriptionConfig{MaxInFlightMessages: 10}
-//
-//	subscriber := evtesting.NewSubscriber()
-//	defer subscriber.Shutdown()
-//	require.True(t, subscriber.IsRunning())
-//
-//	// Create a subscription
-//	sub := evtesting.NewSubscription("sub", "foo",
-//		evtesting.WithNotCleanFilter(),
-//		evtesting.WithSinkURL(subscriber.SinkURL),
-//		evtesting.WithStatusConfig(defaultSubsConfig),
-//	)
-//	addJSCleanEventTypesToStatus(sub, testEnvironment.cleaner, jsBackend)
-//
-//	// when
-//	err := jsBackend.SyncSubscription(sub)
-//
-//	// then
-//	require.NoError(t, err)
-//
-//	ev1data := "sampledata"
-//	require.NoError(t, SendEventToJetStream(jsBackend, ev1data))
-//	expectedEv1Data := fmt.Sprintf("\"%s\"", ev1data)
-//	require.NoError(t, subscriber.CheckEvent(expectedEv1Data))
-//
-//	testEnvironment.natsServer.Shutdown()
-//	require.Eventually(t, func() bool {
-//		return !jsBackend.conn.IsConnected()
-//	}, 30*time.Second, 2*time.Second)
-//
-//	_ = evtesting.RunNatsServerOnPort(
-//		evtesting.WithPort(testEnvironment.natsPort),
-//		evtesting.WithJetStreamEnabled())
-//
-//	require.Eventually(t, func() bool {
-//		return jsBackend.conn.IsConnected()
-//	}, 60*time.Second, 2*time.Second)
-//
-//	// After reconnect, event delivery should work again
-//	ev2data := "newsampledata"
-//	require.NoError(t, SendEventToJetStream(jsBackend, ev2data))
-//	expectedEv2Data := fmt.Sprintf("\"%s\"", ev2data)
-//	require.NoError(t, subscriber.CheckEvent(expectedEv2Data))
-//}
+/*func TestSubscription_JetStreamServerRestart(t *testing.T) {
+	// given
+	testEnvironment := setupTestEnvironment(t)
+	jsBackend := testEnvironment.jsBackend
+	defer testEnvironment.natsServer.Shutdown()
+	defer testEnvironment.jsClient.natsConn.Close()
+	initErr := jsBackend.Initialize(nil)
+	require.NoError(t, initErr)
+	defaultSubsConfig := env.DefaultSubscriptionConfig{MaxInFlightMessages: 10}
+
+	subscriber := evtesting.NewSubscriber()
+	defer subscriber.Shutdown()
+	require.True(t, subscriber.IsRunning())
+
+	// Create a subscription
+	sub := evtesting.NewSubscription("sub", "foo",
+		evtesting.WithNotCleanFilter(),
+		evtesting.WithSinkURL(subscriber.SinkURL),
+		evtesting.WithStatusConfig(defaultSubsConfig),
+	)
+	addJSCleanEventTypesToStatus(sub, testEnvironment.cleaner, jsBackend)
+
+	// when
+	err := jsBackend.SyncSubscription(sub)
+
+	// then
+	require.NoError(t, err)
+
+	ev1data := "sampledata"
+	require.NoError(t, SendEventToJetStream(jsBackend, ev1data))
+	expectedEv1Data := fmt.Sprintf("\"%s\"", ev1data)
+	require.NoError(t, subscriber.CheckEvent(expectedEv1Data))
+
+	testEnvironment.natsServer.Shutdown()
+	require.Eventually(t, func() bool {
+		return !jsBackend.conn.IsConnected()
+	}, 30*time.Second, 2*time.Second)
+
+	_ = evtesting.RunNatsServerOnPort(
+		evtesting.WithPort(testEnvironment.natsPort),
+		evtesting.WithJetStreamEnabled())
+
+	require.Eventually(t, func() bool {
+		return jsBackend.conn.IsConnected()
+	}, 60*time.Second, 2*time.Second)
+
+	// After reconnect, event delivery should work again
+	ev2data := "newsampledata"
+	require.NoError(t, SendEventToJetStream(jsBackend, ev2data))
+	expectedEv2Data := fmt.Sprintf("\"%s\"", ev2data)
+	require.NoError(t, subscriber.CheckEvent(expectedEv2Data))
+}*/
 
 func defaultNatsConfig(url string) env.NatsConfig {
 	return env.NatsConfig{

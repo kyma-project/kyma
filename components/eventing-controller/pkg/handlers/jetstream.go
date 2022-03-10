@@ -86,7 +86,7 @@ func (js *JetStream) Initialize(connCloseHandler ConnClosedHandler) error {
 	if err := js.validateConfig(); err != nil {
 		return err
 	}
-	if err := js.initNATSConn(); err != nil {
+	if err := js.initNATSConn(connCloseHandler); err != nil {
 		return err
 	}
 	if err := js.initJSContext(); err != nil {
@@ -95,7 +95,6 @@ func (js *JetStream) Initialize(connCloseHandler ConnClosedHandler) error {
 	if err := js.initCloudEventClient(js.config); err != nil {
 		return err
 	}
-	js.initJSConnCloseHandler(connCloseHandler)
 	return js.ensureStreamExists()
 }
 
@@ -231,7 +230,7 @@ func (js *JetStream) validateConfig() error {
 	return nil
 }
 
-func (js *JetStream) initNATSConn() error {
+func (js *JetStream) initNATSConn(connCloseHandler ConnClosedHandler) error {
 	if js.conn == nil || js.conn.Status() != nats.CONNECTED {
 		jsOptions := []nats.Option{
 			nats.RetryOnFailedConnect(true),
@@ -243,6 +242,7 @@ func (js *JetStream) initNATSConn() error {
 			return errors.Wrapf(err, "failed to connect to NATS JetStream")
 		}
 		js.conn = conn
+		js.connClosedHandler = connCloseHandler
 		if js.connClosedHandler != nil {
 			js.conn.SetClosedHandler(nats.ConnHandler(js.connClosedHandler))
 		}
@@ -257,13 +257,6 @@ func (js *JetStream) initJSContext() error {
 	}
 	js.jsCtx = jsCtx
 	return nil
-}
-
-func (js *JetStream) initJSConnCloseHandler(connCloseHandler ConnClosedHandler) {
-	js.connClosedHandler = connCloseHandler
-	if js.connClosedHandler != nil {
-		js.conn.SetClosedHandler(nats.ConnHandler(js.connClosedHandler))
-	}
 }
 
 func (js *JetStream) ensureStreamExists() error {
@@ -454,7 +447,7 @@ func createJSSubscriptionNamespacedName(jsSubKey string) (types.NamespacedName, 
 	return nsn, nil
 }
 
-// GetAllSubscriptions returns the map which contains all details of subscription
+// GetAllSubscriptions returns the map which contains details of all subscriptions and consumers
 // Use this only for testing purposes
 func (js *JetStream) GetAllSubscriptions() map[string]*nats.Subscription {
 	return js.subscriptions

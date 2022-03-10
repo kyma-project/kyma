@@ -70,6 +70,7 @@ func NewReconciler(ctx context.Context, client client.Client, jsHandler handlers
 	return reconciler
 }
 
+// SetupUnmanaged creates a controller under the client control
 func (r *Reconciler) SetupUnmanaged(mgr ctrl.Manager) error {
 	ctru, err := controller.NewUnmanaged(reconcilerName, mgr, controller.Options{Reconciler: r})
 	if err != nil {
@@ -107,6 +108,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
 
+	// Handle only the new subscription
 	desiredSubscription := actualSubscription.DeepCopy()
 	// Bind fields to logger
 	log := utils.LoggerWithSubscription(r.namedLogger(), desiredSubscription)
@@ -117,6 +119,8 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 		return ctrl.Result{}, err
 	}
 
+	// The object is not being deleted, so if it does not have our finalizer,
+	// then lets add the finalizer and update the object.
 	if !containsFinalizer(desiredSubscription) {
 		err := r.addFinalizerToSubscription(desiredSubscription, log)
 		return ctrl.Result{}, err
@@ -142,6 +146,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 		return ctrl.Result{}, err
 	}
 
+	// Synchronize Kyma subscription to JetStream backend
 	syncErr := r.Backend.SyncSubscription(desiredSubscription)
 	if syncErr != nil {
 		log.Errorw("sync subscription failed", "error", syncErr)
@@ -151,6 +156,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 		return ctrl.Result{}, syncErr
 	}
 
+	// Update Subscription status
 	if err := r.syncSubscriptionStatus(ctx, desiredSubscription, statusChanged, nil); err != nil {
 		return ctrl.Result{}, err
 	}
@@ -162,7 +168,6 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 // It forces reconciling the subscription to make sure the subscription is marked as not ready, until
 // it is possible to connect to the NATS server again.
 func (r *Reconciler) handleNatsConnClose(_ *nats.Conn) {
-	// TODO: Enable TestSubscription_JetStreamServerRestart once implemented
 	r.namedLogger().Info("JetStream connection is closed and reconnect attempts are exceeded!")
 	var subs eventingv1alpha1.SubscriptionList
 	if err := r.Client.List(context.Background(), &subs); err != nil {
@@ -173,17 +178,20 @@ func (r *Reconciler) handleNatsConnClose(_ *nats.Conn) {
 	r.enqueueReconciliationForSubscriptions(subs.Items)
 }
 
+// syncSubscriptionStatus syncs Subscription status and keeps the status up to date
 func (r *Reconciler) syncSubscriptionStatus(ctx context.Context, sub *eventingv1alpha1.Subscription, updateStatus bool, error error) error {
 	isNatsReady := error == nil
 	readyStatusChanged := setSubReadyStatus(&sub.Status, isNatsReady)
 
 	desiredConditions := initializeDesiredConditions()
 	setConditionSubscriptionActive(desiredConditions, error)
+	// check if the conditions are missing or changed
 	if !equality.ConditionsEquals(sub.Status.Conditions, desiredConditions) {
 		sub.Status.Conditions = desiredConditions
 		updateStatus = true
 	}
 
+	// Update the status only if something needs to be updated
 	if updateStatus || readyStatusChanged {
 		err := r.Client.Status().Update(ctx, sub, &client.UpdateOptions{})
 		if err != nil {
@@ -256,6 +264,7 @@ func (r *Reconciler) enqueueReconciliationForSubscriptions(subs []eventingv1alph
 	}
 }
 
+// initializeDesiredConditions initializes the required conditions for the subscription status
 func initializeDesiredConditions() []eventingv1alpha1.Condition {
 	desiredConditions := make([]eventingv1alpha1.Condition, 0)
 	condition := eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionSubscriptionActive,
@@ -264,6 +273,7 @@ func initializeDesiredConditions() []eventingv1alpha1.Condition {
 	return desiredConditions
 }
 
+// setConditionSubscriptionActive updates the ConditionSubscriptionActive condition if the error is nil
 func setConditionSubscriptionActive(desiredConditions []eventingv1alpha1.Condition, error error) {
 	for key, c := range desiredConditions {
 		if c.Type == eventingv1alpha1.ConditionSubscriptionActive {
@@ -277,6 +287,7 @@ func setConditionSubscriptionActive(desiredConditions []eventingv1alpha1.Conditi
 	}
 }
 
+// setSubReadyStatus returns true if the subscription ready status has changed
 func setSubReadyStatus(desiredSubscriptionStatus *eventingv1alpha1.SubscriptionStatus, isReady bool) bool {
 	if desiredSubscriptionStatus.Ready != isReady {
 		desiredSubscriptionStatus.Ready = isReady
@@ -285,10 +296,12 @@ func setSubReadyStatus(desiredSubscriptionStatus *eventingv1alpha1.SubscriptionS
 	return false
 }
 
+// isInDeletion checks if the subscription needs to be deleted
 func isInDeletion(subscription *eventingv1alpha1.Subscription) bool {
 	return !subscription.ObjectMeta.DeletionTimestamp.IsZero()
 }
 
+// containsFinalizer checks if the subscription contains our Finalizer
 func containsFinalizer(subscription *eventingv1alpha1.Subscription) bool {
 	return utils.ContainsString(subscription.ObjectMeta.Finalizers, Finalizer)
 }
