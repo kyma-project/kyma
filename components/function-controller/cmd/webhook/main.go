@@ -3,12 +3,15 @@ package main
 import (
 	"context"
 
+	"github.com/go-logr/zapr"
 	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
 	"github.com/pkg/errors"
-	"github.com/sirupsen/logrus"
 	"github.com/vrischmann/envconfig"
+	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
+	ctrlzap "sigs.k8s.io/controller-runtime/pkg/log/zap"
 )
 
 type config struct {
@@ -28,13 +31,15 @@ func init() {
 }
 
 func main() {
-	logrus.Infof("here we go agaaaaaain")
 	cfg := &config{}
 	if err := envconfig.Init(cfg); err != nil {
 		panic(errors.Wrap(err, "while reading env variables"))
 	}
 
-	var log = ctrl.Log.WithName("serverless-controller-manage")
+	atomicLevel := zap.NewAtomicLevelAt(zapcore.DebugLevel)
+	zapLogger := ctrlzap.NewRaw(ctrlzap.UseDevMode(true), ctrlzap.Level(&atomicLevel))
+	ctrl.SetLogger(zapr.NewLogger(zapLogger))
+
 	mgr, err := ctrl.NewManager(ctrl.GetConfigOrDie(), ctrl.Options{
 		Scheme: scheme,
 		Port:   cfg.WebhookPort,
@@ -51,8 +56,9 @@ func main() {
 		Complete(); err != nil {
 		panic(err)
 	}
-
-	log.Info("starting server")
+	whs := mgr.GetWebhookServer()
+	whs.CertName = "server-cert.pem"
+	whs.KeyName = "server-key.pem"
 	err = mgr.Start(ctrl.SetupSignalHandler())
 	if err != nil {
 		// handle error
