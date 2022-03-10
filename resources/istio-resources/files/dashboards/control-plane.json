@@ -1745,7 +1745,10 @@
   },
   "timezone": "browser",
   "title": "Istio Control Plane Dashboard",
-  "tags": ["service-mesh", "kyma"],
+  "tags": [
+    "service-mesh",
+    "kyma"
+  ],
   "uid": "3--MLVZZk",
   "version": 11
 }
