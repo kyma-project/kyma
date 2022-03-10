@@ -12,6 +12,7 @@ approvers:
   - clebs
   - Tomasz-Smelcerz-SAP
   - dennis-ge
+  - jakobmoellersap
 reviewers:
   - pbochynski 
   - voigt
@@ -26,3 +27,4 @@ reviewers:
   - clebs
   - Tomasz-Smelcerz-SAP
   - dennis-ge
+  - jakobmoellersap
