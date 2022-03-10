@@ -33,8 +33,15 @@ spec:
         {{- include "tplValue" ( dict "value" .Values.commonLabels "context" . ) | nindent 8 }}
     spec:
       serviceAccountName: {{ template "webhook.fullname" . }}
+      volumes:
+        - name: serverless-k8s-webhook-cert
+          secret:
+            secretName: serverless-k8s-webhook-cert
       containers:
         - name: webhook
+          volumeMounts:
+            - name: serverless-k8s-webhook-cert
+              mountPath: /tmp/k8s-webhook-server/serving-certs
           image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.function_webhook) }}"
           imagePullPolicy: "{{ .Values.image.pullPolicy }}"
           livenessProbe:
