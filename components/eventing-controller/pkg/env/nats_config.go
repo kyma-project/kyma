@@ -31,7 +31,7 @@ type NatsConfig struct {
 	JSStreamStorageType string `envconfig:"JS_STREAM_STORAGE_TYPE" default:"memory"`
 	// Retention policy specifies when should events be deleted from the stream.
 	//  interest: when all known observables have acknowledged a message, it can be removed.
-	//  limits: messages are retained until any given limit is reached. This can be
+	//  limits: messages are retained until any given limit is reached.
 	//  configured via JSStreamMaxMessages and JSStreamMaxBytes.
 	JSStreamRetentionPolicy string `envconfig:"JS_STREAM_RETENTION_POLICY" default:"interest"`
 	JSStreamMaxMessages     int64  `envconfig:"JS_STREAM_MAX_MSGS" default:"-1"`
