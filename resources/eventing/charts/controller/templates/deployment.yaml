@@ -48,6 +48,10 @@ spec:
             value: "{{ .Values.publisherProxy.replicas }}"
           - name: PUBLISHER_REQUEST_TIMEOUT
             value: "{{ .Values.publisherProxy.requestTimeout }}"
+          {{- if .Values.global.priorityClassName }}
+          - name: PUBLISHER_PRIORITY_CLASS_NAME
+            value: "{{ .Values.global.priorityClassName }}"
+          {{- end }}
           - name: DEFAULT_MAX_IN_FLIGHT_MESSAGES
             value: "{{ .Values.eventingBackend.defaultMaxInflightMessages }}"
           - name: DEFAULT_DISPATCHER_RETRY_PERIOD
