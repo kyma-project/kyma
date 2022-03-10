@@ -113,6 +113,7 @@ func main() {
 		HealthProbeBindAddress: probeAddr,
 		LeaderElection:         enableLeaderElection,
 		LeaderElectionID:       "cdd7ef0b.kyma-project.io",
+		CertDir:                "/var/run/telemetry-webhook",
 	})
 	if err != nil {
 		setupLog.Error(err, "Failed to start manager")
