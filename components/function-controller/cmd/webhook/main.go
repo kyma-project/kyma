@@ -49,10 +49,12 @@ func main() {
 	}
 
 	funcDefaulter := NewFunctionDefaulter(readDefaultingConfig())
+	funcValidator := NewFunctionValidator(readValidationConfig())
 
 	if err = ctrl.NewWebhookManagedBy(mgr).
 		For(&serverlessv1alpha1.Function{}).
 		WithDefaulter(funcDefaulter).
+		WithValidator(funcValidator).
 		Complete(); err != nil {
 		panic(err)
 	}
@@ -66,25 +68,51 @@ func main() {
 	}
 }
 
-type functionDefaultConfig struct {
+type functionDefaulter struct {
 	defaultingConfig *serverlessv1alpha1.DefaultingConfig
 }
 
+type functionValidator struct {
+	validationConfig *serverlessv1alpha1.ValidationConfig
+}
 type FunctionDefaulter interface {
 	Default(ctx context.Context, obj runtime.Object) error
 }
 
-func (fd *functionDefaultConfig) Default(ctx context.Context, obj runtime.Object) error {
+type FunctionValidator interface {
+	ValidateCreate(ctx context.Context, obj runtime.Object) error
+	ValidateUpdate(ctx context.Context, oldObj, newObj runtime.Object) error
+	ValidateDelete(ctx context.Context, obj runtime.Object) error
+}
+
+func (fd *functionDefaulter) Default(ctx context.Context, obj runtime.Object) error {
 	f, ok := obj.(*serverlessv1alpha1.Function)
 	if !ok {
 		return errors.New("obj is not a serverless function object")
 	}
-	f.Default(ctx, *fd.defaultingConfig)
+	f.Default(*fd.defaultingConfig)
+	return nil
+}
+
+func NewFunctionValidator(cfg *serverlessv1alpha1.ValidationConfig) FunctionValidator {
+	return &functionValidator{
+		validationConfig: cfg,
+	}
+}
+func (fv *functionValidator) ValidateCreate(ctx context.Context, obj runtime.Object) error {
+	return nil
+}
+
+func (fv *functionValidator) ValidateUpdate(ctx context.Context, oldObj, newObj runtime.Object) error {
+	return nil
+}
+
+func (fv *functionValidator) ValidateDelete(ctx context.Context, obj runtime.Object) error {
 	return nil
 }
 
 func NewFunctionDefaulter(cfg *serverlessv1alpha1.DefaultingConfig) FunctionDefaulter {
-	return &functionDefaultConfig{
+	return &functionDefaulter{
 		defaultingConfig: cfg,
 	}
 }

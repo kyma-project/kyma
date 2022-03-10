@@ -70,7 +70,7 @@ func (fn *Function) SetDefaults(ctx context.Context) {
 	fn.Spec.defaultRuntime(config)
 }
 
-func (fn *Function) Default(ctx context.Context, config DefaultingConfig) {
+func (fn *Function) Default(config DefaultingConfig) {
 	fn.Spec.defaultReplicas(config, fn)
 	fn.Spec.defaultFunctionResources(config, fn)
 	fn.Spec.defaultBuildResources(config, fn)
