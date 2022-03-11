@@ -1,6 +1,9 @@
 package fileutils
 
-import "github.com/spf13/afero"
+import (
+	"fmt"
+	"github.com/spf13/afero"
+)
 
 func Write(path string, name string, data []byte) error {
 	appfs := afero.NewOsFs()
@@ -8,7 +11,11 @@ func Write(path string, name string, data []byte) error {
 	if err != nil {
 		return err
 	}
-	file, err := appfs.Create(name)
+	file, err := appfs.Create(fmt.Sprintf("%s/%s", path, name))
+
+	if err != nil {
+		return err
+	}
 
 	_, err = file.Write(data)
 	if err != nil {

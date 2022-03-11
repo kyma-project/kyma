@@ -2,12 +2,12 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: webhook-service
-  namespace: system
+  name: telemetry-webhook
+  namespace: kyma-system
 spec:
   ports:
     - port: 443
       protocol: TCP
       targetPort: 9443
   selector:
-    control-plane: controller-manager
+    app: telemetry-webhook

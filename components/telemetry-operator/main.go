@@ -19,9 +19,9 @@ package main
 import (
 	"errors"
 	"flag"
+	"github.com/go-logr/zapr"
 	"os"
 
-	"github.com/go-logr/zapr"
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/webhook"
 	k8sWebhook "sigs.k8s.io/controller-runtime/pkg/webhook"
 
@@ -89,12 +89,14 @@ func main() {
 	flag.StringVar(&logLevel, "log-level", getEnvOrDefault("APP_LOG_LEVEL", "debug"), "Log level (debug, info, warn, error, fatal)")
 	flag.Parse()
 
+	ctrLogger, err := logger.New(logFormat, logLevel)
+	ctrl.SetLogger(zapr.NewLogger(ctrLogger.WithContext().Desugar()))
+
 	if err := validateFlags(); err != nil {
 		setupLog.Error(err, "Invalid flag provided")
 		os.Exit(1)
 	}
 
-	ctrLogger, err := logger.New(logFormat, logLevel)
 	if err != nil {
 		setupLog.Error(err, "Failed to initialize logger")
 		os.Exit(1)
@@ -104,7 +106,6 @@ func main() {
 			setupLog.Error(err, "Failed to flush logger")
 		}
 	}()
-	ctrl.SetLogger(zapr.NewLogger(ctrLogger.WithContext().Desugar()))
 
 	mgr, err := ctrl.NewManager(ctrl.GetConfigOrDie(), ctrl.Options{
 		Scheme:                 scheme,
@@ -149,7 +150,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	setupLog.Info("Starting manager")
+	setupLog.Info("Starting manager!!!!!!")
 	if err := mgr.Start(ctrl.SetupSignalHandler()); err != nil {
 		setupLog.Error(err, "Failed to run manager")
 		os.Exit(1)

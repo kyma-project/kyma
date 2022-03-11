@@ -51,6 +51,7 @@ func NewLogPipeLineValidator(client client.Client, fluentBitConfigMap string, na
 
 func (v *logPipelineValidator) Handle(ctx context.Context, req admission.Request) admission.Response {
 	log := log.FromContext(ctx)
+	log.Info("HANDLING !!")
 
 	logPipeline := &v1alpha1.LogPipeline{}
 	if err := v.decoder.Decode(req, logPipeline); err != nil {
@@ -67,8 +68,13 @@ func (v *logPipelineValidator) Handle(ctx context.Context, req admission.Request
 }
 
 func (v *logPipelineValidator) validateLogPipeline(ctx context.Context, logPipeline *v1alpha1.LogPipeline) error {
+	log := log.FromContext(ctx)
+
+	log.Info("Validating !!!")
+
 	// Create or update existing fluentbit config
 	var generalConfig corev1.ConfigMap
+	fmt.Printf("fluentBitConfigMap: %s", v.fluentBitConfigMap)
 	if err := v.Get(ctx, v.fluentBitConfigMap, &generalConfig); err != nil {
 		return err
 	}
@@ -84,7 +90,8 @@ func (v *logPipelineValidator) validateLogPipeline(ctx context.Context, logPipel
 	//filesConfig := logPipeline.Spec.Files  // TODO
 
 	// write the fluentbit config file
-	baseDirectory := "dry-run/"
+
+	baseDirectory := "/tmp/dry-run/"
 	// 	base/fluent-bit.conf and base/custom_parsers.conf
 	for key, data := range generalConfig.Data {
 		err := fileutils.Write(baseDirectory, key, []byte(data))
@@ -103,12 +110,10 @@ func (v *logPipelineValidator) validateLogPipeline(ctx context.Context, logPipel
 		return err
 	}
 
-	//	base/parsers.conf
-
-	// Write to the filesystem
-	// write parses.conf
-	// write to dynamic/
-
+	err = fluentbit.Validate(fmt.Sprintf("%s/fluent-bit.conf", baseDirectory))
+	if err != nil {
+		return err
+	}
 	// Validate it with dry run
 
 	// Delete the fluentbit config file
