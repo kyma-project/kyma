@@ -49,6 +49,9 @@ spec:
 {{- end }}
       # Common volumes for the containers.
       volumes:
+      # Local volume shared with the nats config-reloader.
+      - name: pid
+        emptyDir: {}
       - name: config-volume
         {{ if .Values.nats.customConfigSecret }}
         secret:
@@ -80,6 +83,25 @@ spec:
       #################
       terminationGracePeriodSeconds: {{ .Values.nats.terminationGracePeriodSeconds }}
       containers:
+      #################################
+      #                               #
+      #  NATS Configuration Reloader  #
+      #                               #
+      #################################
+      - name: reloader
+        image: natsio/nats-server-config-reloader:0.6.2
+        imagePullPolicy: Always
+        command:
+          - "nats-server-config-reloader"
+          - "-pid"
+          - "/var/run/nats/nats.pid"
+          - "-config"
+          - "/etc/nats-config/nats.conf"
+        volumeMounts:
+          - name: config-volume
+            mountPath: /etc/nats-config
+          - name: pid
+            mountPath: /var/run/nats
       - name: nats
         image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.nats) }}"
         imagePullPolicy: {{ .Values.nats.pullPolicy }}
