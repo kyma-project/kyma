@@ -961,8 +961,7 @@ func TestJSSubscriptionUsingCESDK(t *testing.T) {
 	require.NoError(t, jsBackend.DeleteSubscription(sub))
 }
 
-// TODO: Enable this test once the ConnCloseHandler is implemented
-/*func TestSubscription_JetStreamServerRestart(t *testing.T) {
+func TestSubscription_JetStreamServerRestart(t *testing.T) {
 	// given
 	testEnvironment := setupTestEnvironment(t)
 	jsBackend := testEnvironment.jsBackend
@@ -1008,16 +1007,19 @@ func TestJSSubscriptionUsingCESDK(t *testing.T) {
 		return jsBackend.conn.IsConnected()
 	}, 60*time.Second, 2*time.Second)
 
-	// After reconnect, event delivery should work again
-	ev2data := "newsampledata"
-	require.NoError(t, SendEventToJetStream(jsBackend, ev2data))
-	expectedEv2Data := fmt.Sprintf("\"%s\"", ev2data)
-	require.NoError(t, subscriber.CheckEvent(expectedEv2Data))
-}*/
+	// TODO: After reconnect, event delivery should work again
+	// https://github.com/kyma-project/kyma/issues/13609
+	//ev2data := "newsampledata"
+	//require.NoError(t, SendEventToJetStream(jsBackend, ev2data))
+	//expectedEv2Data := fmt.Sprintf("\"%s\"", ev2data)
+	//require.NoError(t, subscriber.CheckEvent(expectedEv2Data))
+}
 
 func defaultNatsConfig(url string) env.NatsConfig {
 	return env.NatsConfig{
 		URL:                     url,
+		MaxReconnects:           10,
+		ReconnectWait:           3 * time.Second,
 		JSStreamName:            defaultStreamName,
 		JSStreamStorageType:     JetStreamStorageTypeMemory,
 		JSStreamRetentionPolicy: JetStreamRetentionPolicyInterest,
