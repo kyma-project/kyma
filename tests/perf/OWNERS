@@ -1,9 +1,4 @@
 approvers:
- - clebs
- - lilitgh
- - a-thaler
+  - observability-approvers
 reviwers:
- - a-thaler
- - lilitgh
- - clebs
- - rakesh-garimella
+  - observability-approvers
