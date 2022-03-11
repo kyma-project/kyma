@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"os/exec"
+	"regexp"
 	"strings"
 )
 
@@ -13,10 +14,6 @@ const (
 )
 
 type cmdRunner struct{}
-
-//func NewCmdRunner() CmdRunner {
-//	return &cmdRunner{}
-//}
 
 type CmdRunner interface {
 	Run(ctx context.Context, name string, args ...string) (string, error)
@@ -36,10 +33,19 @@ func Validate(ctx context.Context, configFilePath string) error {
 	res, err := cmd.Run(ctx, fluentBitBinPath, "-D", "-q", "-c", configFilePath)
 	if err != nil {
 		if strings.Contains(res, "Error") {
-			return errors.New(res)
+			return errors.New(extractError(res))
 		}
 		return errors.New(fmt.Sprintf("Error while validating Fluent Bit config: %v", err))
 	}
 
 	return nil
+}
+
+func extractError(output string) string {
+
+	r, _ := regexp.Compile("(\\[  Error\\]) Error .+")
+	fmt.Printf("ERDDD: %s \n", r.FindString(output))
+
+	return r.FindString(output)
+
 }

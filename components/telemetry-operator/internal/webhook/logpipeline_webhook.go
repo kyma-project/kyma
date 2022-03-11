@@ -19,12 +19,14 @@ package webhook
 import (
 	"context"
 	"fmt"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"net/http"
 
 	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/api/v1alpha1"
 
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/fluentbit"
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/fs"
+	admissionv1 "k8s.io/api/admission/v1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -67,10 +69,24 @@ func (v *LogPipelineValidator) Handle(ctx context.Context, req admission.Request
 		log.Error(err, "Failed to decode LogPipeline")
 		return admission.Errored(http.StatusBadRequest, err)
 	}
+	//
+	//if err := v.validateLogPipeline(ctx, logPipeline); err != nil {
+	//	log.Error(err, "LogPipeline rejected")
+	//	return admission.Denied(err.Error())
+	//}
 
 	if err := v.validateLogPipeline(ctx, logPipeline); err != nil {
 		log.Error(err, "LogPipeline rejected")
-		return admission.Denied(err.Error())
+		return admission.Response{
+			AdmissionResponse: admissionv1.AdmissionResponse{
+				Allowed: false,
+				Result: &metav1.Status{
+					Code:    int32(http.StatusForbidden),
+					Reason:  "ConfigurationError",
+					Message: err.Error(),
+				},
+			},
+		}
 	}
 
 	return admission.Allowed("LogPipeline validation successful")
