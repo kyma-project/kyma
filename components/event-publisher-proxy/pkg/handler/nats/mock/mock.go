@@ -70,7 +70,11 @@ func StartOrDie(ctx context.Context, t *testing.T, opts ...NatsHandlerMockOpt) *
 
 	msgReceiver := receiver.NewHTTPMessageReceiver(mock.natsConfig.Port)
 
-	connection, err := pkgnats.Connect(mock.GetNatsURL(), true, 3, time.Second)
+	connection, err := pkgnats.Connect(mock.GetNatsURL(),
+		pkgnats.WithRetryOnFailedConnect(true),
+		pkgnats.WithMaxReconnects(3),
+		pkgnats.WithReconnectWait(time.Second),
+	)
 	require.NoError(t, err)
 
 	msgSender := sender.NewNatsMessageSender(ctx, connection, mock.logger)

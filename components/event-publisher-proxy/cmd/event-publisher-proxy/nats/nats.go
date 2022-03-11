@@ -64,7 +64,11 @@ func (c *Commander) Start() error {
 	messageReceiver := receiver.NewHTTPMessageReceiver(c.envCfg.Port)
 
 	// connect to nats
-	connection, err := pkgnats.Connect(c.envCfg.URL, c.envCfg.RetryOnFailedConnect, c.envCfg.MaxReconnects, c.envCfg.ReconnectWait)
+	connection, err := pkgnats.Connect(c.envCfg.URL,
+		pkgnats.WithRetryOnFailedConnect(c.envCfg.RetryOnFailedConnect),
+		pkgnats.WithMaxReconnects(c.envCfg.MaxReconnects),
+		pkgnats.WithReconnectWait(c.envCfg.ReconnectWait),
+	)
 	if err != nil {
 		c.logger.Errorf("Failed to connect to NATS server with error: %s", err)
 		return err
