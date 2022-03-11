@@ -11,6 +11,7 @@ import (
 	"go.uber.org/zap/zapcore"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
+
 	ctrlzap "sigs.k8s.io/controller-runtime/pkg/log/zap"
 )
 
@@ -36,13 +37,14 @@ func main() {
 		panic(errors.Wrap(err, "while reading env variables"))
 	}
 
-	atomicLevel := zap.NewAtomicLevelAt(zapcore.DebugLevel)
+	atomicLevel := zap.NewAtomicLevelAt(zapcore.InfoLevel)
 	zapLogger := ctrlzap.NewRaw(ctrlzap.UseDevMode(true), ctrlzap.Level(&atomicLevel))
 	ctrl.SetLogger(zapr.NewLogger(zapLogger))
 
 	mgr, err := ctrl.NewManager(ctrl.GetConfigOrDie(), ctrl.Options{
-		Scheme: scheme,
-		Port:   cfg.WebhookPort,
+		Scheme:             scheme,
+		Port:               cfg.WebhookPort,
+		MetricsBindAddress: ":9090",
 	})
 	if err != nil {
 		panic(err)
@@ -61,6 +63,7 @@ func main() {
 	whs := mgr.GetWebhookServer()
 	whs.CertName = "server-cert.pem"
 	whs.KeyName = "server-key.pem"
+
 	err = mgr.Start(ctrl.SetupSignalHandler())
 	if err != nil {
 		// handle error
@@ -90,7 +93,7 @@ func (fd *functionDefaulter) Default(ctx context.Context, obj runtime.Object) er
 	if !ok {
 		return errors.New("obj is not a serverless function object")
 	}
-	f.Default(*fd.defaultingConfig)
+	f.Default(fd.defaultingConfig)
 	return nil
 }
 
@@ -100,14 +103,21 @@ func NewFunctionValidator(cfg *serverlessv1alpha1.ValidationConfig) FunctionVali
 	}
 }
 func (fv *functionValidator) ValidateCreate(ctx context.Context, obj runtime.Object) error {
-	return nil
+	f, ok := obj.(*serverlessv1alpha1.Function)
+	if !ok {
+		return errors.New("obj is not a serverless function object")
+	}
+	return f.Validate(fv.validationConfig)
+
 }
 
-func (fv *functionValidator) ValidateUpdate(ctx context.Context, oldObj, newObj runtime.Object) error {
-	return nil
+func (fv *functionValidator) ValidateUpdate(ctx context.Context, _, newObj runtime.Object) error {
+	// we don't have any update specific validation logic
+	return fv.ValidateCreate(ctx, newObj)
 }
 
 func (fv *functionValidator) ValidateDelete(ctx context.Context, obj runtime.Object) error {
+	// We don't do delete validation
 	return nil
 }
 

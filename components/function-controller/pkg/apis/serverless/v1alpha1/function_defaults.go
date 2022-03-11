@@ -1,16 +1,12 @@
 package v1alpha1
 
 import (
-	"context"
 	"encoding/json"
 
 	"github.com/pkg/errors"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
-	"knative.dev/pkg/webhook/resourcesemantics"
 )
-
-var _ resourcesemantics.GenericCRD = (*Function)(nil)
 
 const DefaultingConfigKey = "defaulting-config"
 
@@ -61,23 +57,14 @@ type DefaultingConfig struct {
 	Runtime  Runtime `envconfig:"default=nodejs14"`
 }
 
-func (fn *Function) SetDefaults(ctx context.Context) {
-	config := ctx.Value(DefaultingConfigKey).(DefaultingConfig)
-
-	// fn.Spec.defaultReplicas(ctx, fn)
-	// fn.Spec.defaultFunctionResources(ctx, fn)
-	// fn.Spec.defaultBuildResources(ctx, fn)
-	fn.Spec.defaultRuntime(config)
-}
-
-func (fn *Function) Default(config DefaultingConfig) {
+func (fn *Function) Default(config *DefaultingConfig) {
 	fn.Spec.defaultReplicas(config, fn)
 	fn.Spec.defaultFunctionResources(config, fn)
 	fn.Spec.defaultBuildResources(config, fn)
 	fn.Spec.defaultRuntime(config)
 }
 
-func (spec *FunctionSpec) defaultReplicas(config DefaultingConfig, fn *Function) {
+func (spec *FunctionSpec) defaultReplicas(config *DefaultingConfig, fn *Function) {
 	defaultingConfig := config.Function.Replicas
 	replicasPreset := mergeReplicasPreset(fn, defaultingConfig.Presets, defaultingConfig.DefaultPreset)
 
@@ -99,7 +86,7 @@ func (spec *FunctionSpec) defaultReplicas(config DefaultingConfig, fn *Function)
 	}
 }
 
-func (spec *FunctionSpec) defaultFunctionResources(config DefaultingConfig, fn *Function) {
+func (spec *FunctionSpec) defaultFunctionResources(config *DefaultingConfig, fn *Function) {
 	resources := spec.Resources
 	defaultingConfig := config.Function.Resources
 	resourcesPreset := mergeResourcesPreset(fn, FunctionResourcesPresetLabel, defaultingConfig.Presets, defaultingConfig.DefaultPreset, defaultingConfig.RuntimePresets)
@@ -107,7 +94,7 @@ func (spec *FunctionSpec) defaultFunctionResources(config DefaultingConfig, fn *
 	spec.Resources = defaultResources(resources, resourcesPreset.RequestMemory, resourcesPreset.RequestCpu, resourcesPreset.LimitMemory, resourcesPreset.LimitCpu)
 }
 
-func (spec *FunctionSpec) defaultBuildResources(config DefaultingConfig, fn *Function) {
+func (spec *FunctionSpec) defaultBuildResources(config *DefaultingConfig, fn *Function) {
 	resources := spec.BuildResources
 	defaultingConfig := config.BuildJob.Resources
 	resourcesPreset := mergeResourcesPreset(fn, BuildResourcesPresetLabel, defaultingConfig.Presets, defaultingConfig.DefaultPreset, nil)
@@ -115,7 +102,7 @@ func (spec *FunctionSpec) defaultBuildResources(config DefaultingConfig, fn *Fun
 	spec.BuildResources = defaultResources(resources, resourcesPreset.RequestMemory, resourcesPreset.RequestCpu, resourcesPreset.LimitMemory, resourcesPreset.LimitCpu)
 }
 
-func (spec *FunctionSpec) defaultRuntime(config DefaultingConfig) {
+func (spec *FunctionSpec) defaultRuntime(config *DefaultingConfig) {
 	if spec.Runtime == "" {
 		spec.Runtime = config.Runtime
 	}

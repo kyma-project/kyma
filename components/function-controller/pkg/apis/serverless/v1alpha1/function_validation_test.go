@@ -1,7 +1,6 @@
 package v1alpha1
 
 import (
-	"context"
 	"os"
 	"testing"
 
@@ -397,10 +396,8 @@ func TestFunctionSpec_validateResources(t *testing.T) {
 			err := envconfig.Init(config)
 			g.Expect(err).ShouldNot(gomega.HaveOccurred())
 
-			ctx := context.WithValue(context.Background(), ValidationConfigKey, *config)
-
 			// when
-			errs := testData.givenFunc.Validate(ctx)
+			errs := testData.givenFunc.Validate(config)
 
 			// then
 			g.Expect(errs).To(testData.expectedError)
