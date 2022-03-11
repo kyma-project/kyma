@@ -2,4 +2,4 @@
 Istio Dashboards in Kyma are based on the official [Istio dashboards](https://istio.io/latest/docs/ops/integrations/grafana/#configuration) with minor modifications:
  - Removed `DS_PROMETHEUS` Grafana variable
  - removing `__inputs` and `__requires` fields
- - adding tags: `"tags": ["service-mesh", "kyma"],`
+ - Added tags: **"tags": ["service-mesh", "kyma"],**
