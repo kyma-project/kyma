@@ -62,7 +62,10 @@ func TestNatsHandlerForCloudEvents(t *testing.T) {
 		},
 	}
 	for _, tc := range testCases {
+		tc := tc
 		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+
 			ctx, cancel := context.WithCancel(context.Background())
 			defer cancel()
 
@@ -83,7 +86,11 @@ func TestNatsHandlerForCloudEvents(t *testing.T) {
 			eventTypeToSubscribe := subscription.Spec.Filter.Filters[0].EventType.Value
 
 			// connect to nats
-			connection, err := pkgnats.Connect(handlerMock.GetNatsURL(), true, 3, time.Second)
+			connection, err := pkgnats.Connect(handlerMock.GetNatsURL(),
+				pkgnats.WithRetryOnFailedConnect(true),
+				pkgnats.WithMaxReconnects(3),
+				pkgnats.WithReconnectWait(time.Second),
+			)
 			assert.Nil(t, err)
 			assert.NotNil(t, connection)
 
@@ -91,9 +98,9 @@ func TestNatsHandlerForCloudEvents(t *testing.T) {
 			validator := testingutils.ValidateNatsSubjectOrFail(t, tc.wantNatsSubject)
 			testingutils.SubscribeToEventOrFail(t, connection, eventTypeToSubscribe, validator)
 
-			// nolint:scopelint
 			// run the tests for publishing cloudevents
 			for _, testCase := range handlertest.TestCasesForCloudEvents {
+				testCase := testCase
 				t.Run(testCase.Name, func(t *testing.T) {
 					body, headers := testCase.ProvideMessage()
 					resp, err := testingutils.SendEvent(publishEndpoint, body, headers)
@@ -147,7 +154,10 @@ func TestNatsHandlerForLegacyEvents(t *testing.T) {
 		},
 	}
 	for _, tc := range testCases {
+		tc := tc
 		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+
 			ctx, cancel := context.WithCancel(context.Background())
 			defer cancel()
 
@@ -166,7 +176,11 @@ func TestNatsHandlerForLegacyEvents(t *testing.T) {
 			eventTypeToSubscribe := subscription.Spec.Filter.Filters[0].EventType.Value
 
 			// connect to nats
-			connection, err := pkgnats.Connect(handlerMock.GetNatsURL(), true, 3, time.Second)
+			connection, err := pkgnats.Connect(handlerMock.GetNatsURL(),
+				pkgnats.WithRetryOnFailedConnect(true),
+				pkgnats.WithMaxReconnects(3),
+				pkgnats.WithReconnectWait(time.Second),
+			)
 			assert.Nil(t, err)
 			assert.NotNil(t, connection)
 
@@ -174,9 +188,9 @@ func TestNatsHandlerForLegacyEvents(t *testing.T) {
 			validator := testingutils.ValidateNatsSubjectOrFail(t, tc.wantNatsSubject)
 			testingutils.SubscribeToEventOrFail(t, connection, eventTypeToSubscribe, validator)
 
-			// nolint:scopelint
 			// run the tests for publishing legacy events
 			for _, testCase := range handlertest.TestCasesForLegacyEvents {
+				testCase := testCase
 				t.Run(testCase.Name, func(t *testing.T) {
 					body, headers := testCase.ProvideMessage()
 					resp, err := testingutils.SendEvent(publishLegacyEndpoint, body, headers)
@@ -184,9 +198,9 @@ func TestNatsHandlerForLegacyEvents(t *testing.T) {
 					require.Equal(t, testCase.WantStatusCode, resp.StatusCode)
 
 					if testCase.WantStatusCode == http.StatusOK {
-						handlertest.ValidateOkResponse(t, *resp, &testCase.WantResponse)
+						handlertest.ValidateLegacyOkResponse(t, *resp, &testCase.WantResponse)
 					} else {
-						handlertest.ValidateErrorResponse(t, *resp, &testCase.WantResponse)
+						handlertest.ValidateLegacyErrorResponse(t, *resp, &testCase.WantResponse)
 					}
 
 					if testingutils.Is2XX(resp.StatusCode) {
@@ -216,7 +230,10 @@ func TestNatsHandlerForSubscribedEndpoint(t *testing.T) {
 		},
 	}
 	for _, tc := range testCases {
+		tc := tc
 		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+
 			ctx, cancel := context.WithCancel(context.Background())
 			defer cancel()
 
@@ -235,9 +252,9 @@ func TestNatsHandlerForSubscribedEndpoint(t *testing.T) {
 			)
 			defer handlerMock.ShutdownNatsServerAndWait()
 
-			// nolint:scopelint
 			// run the tests for subscribed endpoint
 			for _, testCase := range handlertest.TestCasesForSubscribedEndpoint {
+				testCase := testCase
 				t.Run(testCase.Name, func(t *testing.T) {
 					subscribedURL := fmt.Sprintf(subscribedEndpointFormat, handlerMock.GetNatsConfig().Port, testCase.AppName)
 					resp, err := testingutils.QuerySubscribedEndpoint(subscribedURL)

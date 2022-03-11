@@ -21,7 +21,10 @@ func TestParseApplicationNameFromPath(t *testing.T) {
 		},
 	}
 	for _, tc := range testCases {
+		tc := tc
 		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+
 			gotAppName := ParseApplicationNameFromPath(tc.inputPath)
 			if tc.wantedAppName != gotAppName {
 				t.Errorf("incorrect parsing, wanted: %s, got: %s", tc.wantedAppName, gotAppName)

@@ -1,0 +1,57 @@
+---
+apiVersion: install.istio.io/v1alpha1
+kind: IstioOperator
+metadata:
+  namespace: {{ .Release.Namespace }}
+  name: default-operator
+spec:
+  hub: {{ .Values.global.images.istio_pilot.containerRegistryPath }}/{{ .Values.global.images.istio_pilot.directory}}
+  tag: {{ .Values.global.images.istio_pilot.version }}
+  profile: default
+  components:
+    egressGateways:
+    - enabled: {{ .Values.components.egressGateways.enabled }}
+      k8s:
+{{- toYaml .Values.components.egressGateways.config | nindent 8}}
+      name: istio-egressgateway
+    ingressGateways:
+    - enabled: {{ .Values.components.ingressGateways.enabled }}
+      k8s:
+{{- toYaml .Values.components.ingressGateways.config | nindent 8}}
+      name: istio-ingressgateway
+    pilot:
+      enabled: {{ .Values.components.pilot.enabled }}
+      k8s:
+        podAnnotations:
+          reconciler.kyma-project.io/managed-by-reconciler-disclaimer: |
+            DO NOT EDIT - This resource is managed by Kyma.
+            Any modifications are discarded and the resource is reverted to the original state.
+        serviceAnnotations:
+          reconciler.kyma-project.io/managed-by-reconciler-disclaimer: |
+            DO NOT EDIT - This resource is managed by Kyma.
+            Any modifications are discarded and the resource is reverted to the original state.
+{{- toYaml .Values.components.pilot.config | nindent 8}}
+  meshConfig:
+{{- tpl (toYaml .Values.meshConfig | nindent 4) . | replace "'true'" "true" | replace "'false'" "false" }}
+
+  values:
+    global:
+{{- toYaml .Values.helmValues.global | nindent 8 }}
+    pilot:
+{{- toYaml .Values.helmValues.pilot | nindent 8 }}
+    sidecarInjectorWebhook:
+{{- toYaml .Values.helmValues.sidecarInjectorWebhook | nindent 8 }}
+    gateways:
+      istio-ingressgateway:
+        name: istio-ingressgateway
+        autoscaleEnabled: {{ index .Values "helmValues" "gateways" "istio-ingressgateway" "autoscaleEnabled" }}
+        podAnnotations:
+          reconciler.kyma-project.io/managed-by-reconciler-disclaimer: |
+            DO NOT EDIT - This resource is managed by Kyma.
+            Any modifications are discarded and the resource is reverted to the original state.
+        serviceAnnotations:
+          dns.gardener.cloud/class: garden
+          dns.gardener.cloud/dnsnames: "*.{{ .Values.global.domainName }}"
+          reconciler.kyma-project.io/managed-by-reconciler-disclaimer: |
+            DO NOT EDIT - This resource is managed by Kyma.
+            Any modifications are discarded and the resource is reverted to the original state.
