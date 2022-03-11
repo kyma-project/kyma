@@ -3,8 +3,13 @@ package fluentbit
 import (
 	"context"
 	"errors"
+	"fmt"
 	"os/exec"
 	"strings"
+)
+
+const (
+	fluentBitBinPath = "/bin/fluent-bit"
 )
 
 type cmdRunner struct{}
@@ -25,18 +30,15 @@ func (e *cmdRunner) Run(ctx context.Context, name string, args ...string) (strin
 	return out, err
 }
 
-func Validate(path string) error {
-	binPath := "/bin/fluent-bit"
-	flags := []string{"-D", "-q", "-c", path}
+func Validate(ctx context.Context, configFilePath string) error {
 
 	cmd := cmdRunner{}
-	res, err := cmd.Run(context.TODO(), binPath, flags...)
+	res, err := cmd.Run(ctx, fluentBitBinPath, "-D", "-q", "-c", configFilePath)
 	if err != nil {
-		return err
-	}
-	if strings.Contains(res, "Error") {
-		err := errors.New(res)
-		return err
+		if strings.Contains(res, "Error") {
+			return errors.New(res)
+		}
+		return errors.New(fmt.Sprintf("Error while validating Fluent Bit config: %v", err))
 	}
 
 	return nil

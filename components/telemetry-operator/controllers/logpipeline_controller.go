@@ -33,11 +33,12 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
-	"sigs.k8s.io/controller-runtime/pkg/log"
+	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/metrics"
 )
 
 const (
+	ParsersConfigMapKey        = "parsers.conf"
 	sectionsConfigMapFinalizer = "FLUENT_BIT_SECTIONS_CONFIG_MAP"
 	parserConfigMapFinalizer   = "FLUENT_BIT_PARSERS_CONFIG_MAP"
 	//nolint:gosec
@@ -96,6 +97,13 @@ func NewLogPipelineReconciler(client client.Client, scheme *runtime.Scheme, name
 	return &result
 }
 
+// SetupWithManager sets up the controller with the Manager.
+func (r *LogPipelineReconciler) SetupWithManager(mgr ctrl.Manager) error {
+	return ctrl.NewControllerManagedBy(mgr).
+		For(&telemetryv1alpha1.LogPipeline{}).
+		Complete(r)
+}
+
 //+kubebuilder:rbac:groups=telemetry.kyma-project.io,resources=logpipelines,verbs=get;list;watch;create;update;patch;delete
 //+kubebuilder:rbac:groups=telemetry.kyma-project.io,resources=logpipelines/status,verbs=get;update;patch
 //+kubebuilder:rbac:groups=telemetry.kyma-project.io,resources=logpipelines/finalizers,verbs=update
@@ -110,7 +118,7 @@ func NewLogPipelineReconciler(client client.Client, scheme *runtime.Scheme, name
 // For more details, check Reconcile and its Result here:
 // - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.10.0/pkg/reconcile
 func (r *LogPipelineReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
-	log := log.FromContext(ctx)
+	log := logf.FromContext(ctx)
 
 	var logPipeline telemetryv1alpha1.LogPipeline
 	if err := r.Get(ctx, req.NamespacedName, &logPipeline); err != nil {
@@ -184,7 +192,7 @@ func (r *LogPipelineReconciler) getOrCreateConfigMap(ctx context.Context, name t
 
 // Synchronize LogPipeline with ConfigMap of FluentBit sections (Input, Filter and Output).
 func (r *LogPipelineReconciler) syncSectionsConfigMap(ctx context.Context, logPipeline *telemetryv1alpha1.LogPipeline) (bool, error) {
-	log := log.FromContext(ctx)
+	log := logf.FromContext(ctx)
 	cm, err := r.getOrCreateConfigMap(ctx, r.FluentBitSectionsConfigMap)
 	if err != nil {
 		return false, err
@@ -224,18 +232,17 @@ func (r *LogPipelineReconciler) syncSectionsConfigMap(ctx context.Context, logPi
 
 // Synchronize LogPipeline with ConfigMap of FluentBit parsers (Parser and MultiLineParser).
 func (r *LogPipelineReconciler) syncParsersConfigMap(ctx context.Context, logPipeline *telemetryv1alpha1.LogPipeline) (bool, error) {
-	log := log.FromContext(ctx)
+	log := logf.FromContext(ctx)
 	cm, err := r.getOrCreateConfigMap(ctx, r.FluentBitParsersConfigMap)
 	if err != nil {
 		return false, err
 	}
-	cmKey := "parsers.conf"
 
 	// Add or remove Fluent Bit configuration parsers
 	if logPipeline.DeletionTimestamp != nil {
 		if cm.Data != nil && controllerutil.ContainsFinalizer(logPipeline, parserConfigMapFinalizer) {
 			log.Info("Deleting fluent bit parsers config")
-			delete(cm.Data, cmKey)
+			delete(cm.Data, ParsersConfigMapKey)
 			controllerutil.RemoveFinalizer(logPipeline, parserConfigMapFinalizer)
 
 			var logPipelines telemetryv1alpha1.LogPipelineList
@@ -248,7 +255,7 @@ func (r *LogPipelineReconciler) syncParsersConfigMap(ctx context.Context, logPip
 				cm.Data = nil
 			} else {
 				data := make(map[string]string)
-				data[cmKey] = fluentBitParsersConfig
+				data[ParsersConfigMapKey] = fluentBitParsersConfig
 				cm.Data = data
 			}
 		}
@@ -264,14 +271,14 @@ func (r *LogPipelineReconciler) syncParsersConfigMap(ctx context.Context, logPip
 			cm.Data = nil
 		} else if cm.Data == nil {
 			data := make(map[string]string)
-			data[cmKey] = fluentBitParsersConfig
+			data[ParsersConfigMapKey] = fluentBitParsersConfig
 			cm.Data = data
 		} else {
-			if oldConfig, hasKey := cm.Data[cmKey]; hasKey && oldConfig == fluentBitParsersConfig {
+			if oldConfig, hasKey := cm.Data[ParsersConfigMapKey]; hasKey && oldConfig == fluentBitParsersConfig {
 				// Nothing changed
 				return false, nil
 			}
-			cm.Data[cmKey] = fluentBitParsersConfig
+			cm.Data[ParsersConfigMapKey] = fluentBitParsersConfig
 		}
 		controllerutil.AddFinalizer(logPipeline, parserConfigMapFinalizer)
 	}
@@ -329,7 +336,7 @@ func (r *LogPipelineReconciler) syncFilesConfigMap(ctx context.Context, logPipel
 
 // Copy referenced secrets to global Fluent Bit environment secret.
 func (r *LogPipelineReconciler) syncSecretRefs(ctx context.Context, logPipeline *telemetryv1alpha1.LogPipeline) (bool, error) {
-	log := log.FromContext(ctx)
+	log := logf.FromContext(ctx)
 	var secret corev1.Secret
 	changed := false
 
@@ -398,7 +405,7 @@ func (r *LogPipelineReconciler) syncSecretRefs(ctx context.Context, logPipeline 
 
 // Delete all Fluent Bit pods to apply new configuration.
 func (r *LogPipelineReconciler) deleteFluentBitPods(ctx context.Context) error {
-	log := log.FromContext(ctx)
+	log := logf.FromContext(ctx)
 	var fluentBitDs appsv1.DaemonSet
 	if err := r.Get(ctx, r.FluentBitDaemonSet, &fluentBitDs); err != nil {
 		log.Error(err, "Failed getting fluent bit DaemonSet")
@@ -419,11 +426,4 @@ func (r *LogPipelineReconciler) deleteFluentBitPods(ctx context.Context) error {
 
 	r.FluentBitRestartsCount.Inc()
 	return nil
-}
-
-// SetupWithManager sets up the controller with the Manager.
-func (r *LogPipelineReconciler) SetupWithManager(mgr ctrl.Manager) error {
-	return ctrl.NewControllerManagedBy(mgr).
-		For(&telemetryv1alpha1.LogPipeline{}).
-		Complete(r)
 }

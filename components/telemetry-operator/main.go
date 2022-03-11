@@ -19,8 +19,9 @@ package main
 import (
 	"errors"
 	"flag"
-	"github.com/go-logr/zapr"
 	"os"
+
+	"github.com/go-logr/zapr"
 
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/webhook"
 	k8sWebhook "sigs.k8s.io/controller-runtime/pkg/webhook"
@@ -91,12 +92,6 @@ func main() {
 
 	ctrLogger, err := logger.New(logFormat, logLevel)
 	ctrl.SetLogger(zapr.NewLogger(ctrLogger.WithContext().Desugar()))
-
-	if err := validateFlags(); err != nil {
-		setupLog.Error(err, "Invalid flag provided")
-		os.Exit(1)
-	}
-
 	if err != nil {
 		setupLog.Error(err, "Failed to initialize logger")
 		os.Exit(1)
@@ -106,6 +101,11 @@ func main() {
 			setupLog.Error(err, "Failed to flush logger")
 		}
 	}()
+
+	if err := validateFlags(); err != nil {
+		setupLog.Error(err, "Invalid flag provided")
+		os.Exit(1)
+	}
 
 	mgr, err := ctrl.NewManager(ctrl.GetConfigOrDie(), ctrl.Options{
 		Scheme:                 scheme,
@@ -120,10 +120,10 @@ func main() {
 		setupLog.Error(err, "Failed to start manager")
 		os.Exit(1)
 	}
-	logPipelineValidator := webhook.NewLogPipeLineValidator(mgr.GetClient(), fluentBitConfigMap, fluentBitNs)
+
 	mgr.GetWebhookServer().Register(
-		"/validate-telemetry-kyma-project-io-v1alpha1-logpipeline",
-		&k8sWebhook.Admission{Handler: logPipelineValidator})
+		"/validate-logpipeline",
+		&k8sWebhook.Admission{Handler: webhook.NewLogPipeLineValidator(mgr.GetClient(), fluentBitConfigMap, fluentBitNs)})
 
 	reconciler := controllers.NewLogPipelineReconciler(
 		mgr.GetClient(),
@@ -150,7 +150,6 @@ func main() {
 		os.Exit(1)
 	}
 
-	setupLog.Info("Starting manager!!!!!!")
 	if err := mgr.Start(ctrl.SetupSignalHandler()); err != nil {
 		setupLog.Error(err, "Failed to run manager")
 		os.Exit(1)

@@ -27,7 +27,7 @@ func BuildConfigSection(header ConfigHeader, content string) string {
 	return sb.String()
 }
 
-// Merge FluentBit filters and outputs to single FluentBit configuration.
+// MergeFluentBitConfig merges Fluent Bit filters and outputs to a single Fluent Bit configuration.
 func MergeFluentBitConfig(logPipeline *telemetryv1alpha1.LogPipeline) string {
 	var sb strings.Builder
 	for _, filter := range logPipeline.Spec.Filters {
@@ -39,7 +39,7 @@ func MergeFluentBitConfig(logPipeline *telemetryv1alpha1.LogPipeline) string {
 	return sb.String()
 }
 
-// Merge FluentBit parsers and multiLine parsers to single FluentBit configuration.
+// MergeFluentBitParsersConfig merges Fluent Bit parsers and multiLine parsers to a single Fluent Bit configuration.
 func MergeFluentBitParsersConfig(logPipelines *telemetryv1alpha1.LogPipelineList) string {
 	var sb strings.Builder
 	for _, logPipeline := range logPipelines.Items {

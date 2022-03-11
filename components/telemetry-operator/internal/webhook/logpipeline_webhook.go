@@ -21,26 +21,36 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/kyma-project/kyma/components/telemetry-operator/api/v1alpha1"
-	"github.com/kyma-project/kyma/components/telemetry-operator/internal/fileutils"
+	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/api/v1alpha1"
+
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/fluentbit"
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/fs"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
-	"sigs.k8s.io/controller-runtime/pkg/log"
+	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
 )
 
+const (
+	fluentBitConfigDirectory         = "/tmp/dry-run"
+	fluentBitSectionsConfigDirectory = fluentBitConfigDirectory + "/dynamic"
+	fluentBitParsersConfigDirectory  = fluentBitConfigDirectory + "/dynamic-parsers"
+	fluentBitParsersConfigMapKey     = "parsers.conf"
+)
+
 // TODO(user): change verbs to "verbs=create;update;delete" if you want to enable deletion validation.
-//+kubebuilder:webhook:path=/validate-telemetry-kyma-project-io-v1alpha1-logpipeline,mutating=false,failurePolicy=fail,sideEffects=None,groups=telemetry.kyma-project.io,resources=logpipelines,verbs=create;update,versions=v1alpha1,name=vlogpipeline.kb.io,admissionReviewVersions=v1
-type logPipelineValidator struct {
+//+kubebuilder:webhook:path=/validate-logpipeline,mutating=false,failurePolicy=fail,sideEffects=None,groups=telemetry.kyma-project.io,resources=logpipelines,verbs=create;update,versions=v1alpha1,name=vlogpipeline.kb.io,admissionReviewVersions=v1
+type LogPipelineValidator struct {
 	client.Client
+
 	fluentBitConfigMap types.NamespacedName
-	decoder            *admission.Decoder
+
+	decoder *admission.Decoder
 }
 
-func NewLogPipeLineValidator(client client.Client, fluentBitConfigMap string, namespace string) *logPipelineValidator {
-	return &logPipelineValidator{
+func NewLogPipeLineValidator(client client.Client, fluentBitConfigMap string, namespace string) *LogPipelineValidator {
+	return &LogPipelineValidator{
 		Client: client,
 		fluentBitConfigMap: types.NamespacedName{
 			Name:      fluentBitConfigMap,
@@ -49,78 +59,90 @@ func NewLogPipeLineValidator(client client.Client, fluentBitConfigMap string, na
 	}
 }
 
-func (v *logPipelineValidator) Handle(ctx context.Context, req admission.Request) admission.Response {
-	log := log.FromContext(ctx)
-	log.Info("HANDLING !!")
+func (v *LogPipelineValidator) Handle(ctx context.Context, req admission.Request) admission.Response {
+	log := logf.FromContext(ctx)
 
-	logPipeline := &v1alpha1.LogPipeline{}
+	logPipeline := &telemetryv1alpha1.LogPipeline{}
 	if err := v.decoder.Decode(req, logPipeline); err != nil {
-		// TODO log
-		log.Error(err, "Failed to decode log pipeline")
+		log.Error(err, "Failed to decode LogPipeline")
 		return admission.Errored(http.StatusBadRequest, err)
 	}
 
 	if err := v.validateLogPipeline(ctx, logPipeline); err != nil {
+		log.Error(err, "LogPipeline rejected")
 		return admission.Denied(err.Error())
 	}
 
 	return admission.Allowed("LogPipeline validation successful")
 }
 
-func (v *logPipelineValidator) validateLogPipeline(ctx context.Context, logPipeline *v1alpha1.LogPipeline) error {
-	log := log.FromContext(ctx)
+func (v *LogPipelineValidator) validateLogPipeline(ctx context.Context, logPipeline *telemetryv1alpha1.LogPipeline) error {
+	log := logf.FromContext(ctx)
 
-	log.Info("Validating !!!")
+	//defer func() {
+	//	if err := fs.RemoveDirectory(fluentBitConfigDirectory); err != nil {
+	//		log.Error(err, "Failed to remove fluent-bit config directory")
+	//	}
+	//}()
 
-	// Create or update existing fluentbit config
-	var generalConfig corev1.ConfigMap
-	fmt.Printf("fluentBitConfigMap: %s", v.fluentBitConfigMap)
-	if err := v.Get(ctx, v.fluentBitConfigMap, &generalConfig); err != nil {
+	configFiles, err := v.getFluentBitConfig(ctx, logPipeline)
+	if err != nil {
 		return err
 	}
 
-	sectionsConfig := fluentbit.MergeFluentBitConfig(logPipeline)
-
-	var logPipelines v1alpha1.LogPipelineList
-	if err := v.List(ctx, &logPipelines); err != nil {
-		return err
-	}
-	parsersConfig := fluentbit.MergeFluentBitParsersConfig(&logPipelines)
-
-	//filesConfig := logPipeline.Spec.Files  // TODO
-
-	// write the fluentbit config file
-
-	baseDirectory := "/tmp/dry-run/"
-	// 	base/fluent-bit.conf and base/custom_parsers.conf
-	for key, data := range generalConfig.Data {
-		err := fileutils.Write(baseDirectory, key, []byte(data))
-		if err != nil {
+	log.Info("Fluent Bit config files count", "count", len(configFiles))
+	for _, configFile := range configFiles {
+		if err := fs.CreateAndWrite(configFile); err != nil {
+			log.Error(err, "Failed to write Fluent Bit config file", "filename", configFile.Name, "path", configFile.Path)
 			return err
 		}
 	}
-	//	base/dynamic/dynamic.conf
-	err := fileutils.Write(fmt.Sprintf("%s/dynamic", baseDirectory), fmt.Sprintf("%s.conf", logPipeline.Name), []byte(sectionsConfig))
-	if err != nil {
-		return err
-	}
-	//	base/dynamic-parsers/parsers.conf
-	err = fileutils.Write(fmt.Sprintf("%s/dynamic-parsers", baseDirectory), "parsers.conf", []byte(parsersConfig))
-	if err != nil {
+
+	if err = fluentbit.Validate(ctx, fmt.Sprintf("%s/fluent-bit.conf", fluentBitConfigDirectory)); err != nil {
+		log.Error(err, "Failed to validate Fluent Bit config")
 		return err
 	}
 
-	err = fluentbit.Validate(fmt.Sprintf("%s/fluent-bit.conf", baseDirectory))
-	if err != nil {
-		return err
-	}
-	// Validate it with dry run
-
-	// Delete the fluentbit config file
 	return nil
 }
 
-func (v *logPipelineValidator) InjectDecoder(d *admission.Decoder) error {
+func (v *LogPipelineValidator) InjectDecoder(d *admission.Decoder) error {
 	v.decoder = d
 	return nil
+}
+
+func (v *LogPipelineValidator) getFluentBitConfig(ctx context.Context, logPipeline *telemetryv1alpha1.LogPipeline) ([]fs.File, error) {
+	var configFiles []fs.File
+
+	var generalCm corev1.ConfigMap
+	if err := v.Get(ctx, v.fluentBitConfigMap, &generalCm); err != nil {
+		return nil, err
+	}
+	for key, data := range generalCm.Data {
+		configFiles = append(configFiles, fs.File{
+			Path: fluentBitConfigDirectory,
+			Name: key,
+			Data: data,
+		})
+	}
+
+	sectionsConfig := fluentbit.MergeFluentBitConfig(logPipeline)
+	configFiles = append(configFiles, fs.File{
+		Path: fluentBitSectionsConfigDirectory,
+		Name: logPipeline.Name + ".conf",
+		Data: sectionsConfig,
+	})
+
+	var logPipelines telemetryv1alpha1.LogPipelineList
+	if err := v.List(ctx, &logPipelines); err != nil {
+		return nil, err
+	}
+	parsersConfig := fluentbit.MergeFluentBitParsersConfig(&logPipelines)
+	configFiles = append(configFiles, fs.File{
+		Path: fluentBitParsersConfigDirectory,
+		Name: fluentBitParsersConfigMapKey,
+		Data: parsersConfig,
+	})
+
+	return configFiles, nil
 }
