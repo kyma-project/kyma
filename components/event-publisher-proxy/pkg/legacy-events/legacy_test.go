@@ -10,6 +10,9 @@ import (
 	"testing"
 	"time"
 
+	"github.com/stretchr/testify/assert"
+
+	"github.com/kyma-project/kyma/components/event-publisher-proxy/internal"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/application/applicationtest"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/application/fake"
 	legacyapi "github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/legacy-events/api"
@@ -21,12 +24,12 @@ const (
 	eventTypeMultiSegmentCombined = "Segment1Segment2Segment3Segment4.Segment5"
 )
 
-// TestTransformLegacyRequestsToCE ensures that TransformLegacyRequestsToCE transforms a http reuqest containing
+// TestTransformLegacyRequestsToCE ensures that TransformLegacyRequestsToCE transforms a http request containing
 // a legacy request to a valid cloud event by creating mock http requests
 func TestTransformLegacyRequestsToCE(t *testing.T) {
 	testCases := []struct {
 		name string
-		// the event type has the strurcture
+		// the event type has the structure
 		// <PREFIX>.<APPNAME>.<EVENTNAME>.<VERSION>
 		// or, more specific
 		// <PREFIX-1>.<PREFIX-2>.<PREFIX-3>.<APPNAME>.<EVENTNAME-1>.<EVENTNAME-2>.<VERSION>
@@ -36,7 +39,7 @@ func TestTransformLegacyRequestsToCE(t *testing.T) {
 		// "ordertest.created" ts the <EVENTNAME> (or <EVENTNAME-1>.<EVENTNAME-2>)
 		// and "v2" is the <VERSION>
 		//
-		// derrived from that a legacy event path (a.k.a. endpoint) has the structure
+		// derived from that a legacy event path (a.k.a. endpoint) has the structure
 		// http://<HOST>:<PORT>/<APPNAME>/<VERSION>/events
 		// e.g. http://localhost:8081/varkestest/v1/events
 		prefix       string
@@ -92,7 +95,7 @@ func TestTransformLegacyRequestsToCE(t *testing.T) {
 			ctx, cancel := context.WithCancel(context.Background())
 			defer cancel()
 			app := applicationtest.NewApplication(tc.appName, applicationTypeLabel(tc.typeLabel))
-			appLister := fake.NewListerOrDie(ctx, app)
+			appLister := fake.NewApplicationListerOrDie(ctx, app)
 
 			request, err := mockLegacyRequest(tc.version, tc.appName, tc.eventName)
 			if err != nil {
@@ -102,7 +105,9 @@ func TestTransformLegacyRequestsToCE(t *testing.T) {
 			writer := httptest.NewRecorder()
 
 			transformer := NewTransformer("test", tc.prefix, appLister)
-			actualEvent := transformer.TransformLegacyRequestsToCE(writer, request)
+			actualEvent, eventType := transformer.TransformLegacyRequestsToCE(writer, request)
+			wantEventType := formatEventType(tc.prefix, tc.appName, tc.eventName, tc.version)
+			assert.Equal(t, wantEventType, eventType)
 
 			errorString := func(caseName, subject, actual, expected string) string {
 				return fmt.Sprintf("Unexpected %s in case %s\nwas:\n\t%s\nexpected:\n\t%s", subject, caseName, actual, expected)
@@ -119,8 +124,8 @@ func TestTransformLegacyRequestsToCE(t *testing.T) {
 			}
 
 			// check HTTP ContentType set properly
-			if actualContentType := actualEvent.Context.GetDataContentType(); actualContentType != ContentTypeApplicationJSON {
-				t.Errorf(errorString(tc.name, "HTTP Content Type", actualContentType, ContentTypeApplicationJSON))
+			if actualContentType := actualEvent.Context.GetDataContentType(); actualContentType != internal.ContentTypeApplicationJSON {
+				t.Errorf(errorString(tc.name, "HTTP Content Type", actualContentType, internal.ContentTypeApplicationJSON))
 			}
 		})
 	}
@@ -154,10 +159,10 @@ func TestConvertPublishRequestToCloudEvent(t *testing.T) {
 	legacyTransformer := NewTransformer(bebNs, eventTypePrefix, nil)
 	eventID := EventID
 	appName := ApplicationName
-	legacyEventVersion := LegacyEventTypeVersion
-	data := LegacyEventData
+	legacyEventVersion := EventVersion
+	data := EventData
 	timeNow := time.Now()
-	expectedEventType := formatEventType4BEB(eventTypePrefix, appName, eventTypeMultiSegmentCombined, legacyEventVersion)
+	wantEventType := formatEventType(eventTypePrefix, appName, eventTypeMultiSegmentCombined, legacyEventVersion)
 	timeNowStr := timeNow.Format(time.RFC3339)
 	timeNowFormatted, _ := time.Parse(time.RFC3339, timeNowStr)
 	publishReqParams := &legacyapi.PublishEventParametersV1{
@@ -177,8 +182,8 @@ func TestConvertPublishRequestToCloudEvent(t *testing.T) {
 	if gotEvent.Context.GetID() != eventID {
 		t.Errorf("incorrect id, want: %s, got: %s", eventID, gotEvent.Context.GetDataContentType())
 	}
-	if gotEvent.Context.GetType() != expectedEventType {
-		t.Errorf("incorrect eventType, want: %s, got: %s", expectedEventType, gotEvent.Context.GetType())
+	if gotEvent.Context.GetType() != wantEventType {
+		t.Errorf("incorrect eventType, want: %s, got: %s", wantEventType, gotEvent.Context.GetType())
 	}
 	if gotEvent.Context.GetTime() != timeNowFormatted {
 		t.Errorf("incorrect eventTime, want: %s, got: %s", timeNowFormatted, gotEvent.Context.GetTime())
@@ -186,8 +191,8 @@ func TestConvertPublishRequestToCloudEvent(t *testing.T) {
 	if gotEvent.Context.GetSource() != bebNs {
 		t.Errorf("incorrect source want: %s, got: %s", bebNs, gotEvent.Context.GetDataContentType())
 	}
-	if gotEvent.Context.GetDataContentType() != ContentTypeApplicationJSON {
-		t.Errorf("incorrect content-type, want: %s, got: %s", ContentTypeApplicationJSON, gotEvent.Context.GetDataContentType())
+	if gotEvent.Context.GetDataContentType() != internal.ContentTypeApplicationJSON {
+		t.Errorf("incorrect content-type, want: %s, got: %s", internal.ContentTypeApplicationJSON, gotEvent.Context.GetDataContentType())
 	}
 	gotExtension, err := gotEvent.Context.GetExtension(eventTypeVersionExtensionKey)
 	if err != nil {
@@ -206,8 +211,8 @@ func TestCombineEventTypeSegments(t *testing.T) {
 	}{
 		{
 			name:           "event-type with two segments",
-			givenEventType: LegacyEventType,
-			wantEventType:  LegacyEventType,
+			givenEventType: EventName,
+			wantEventType:  EventName,
 		},
 		{
 			name:           "event-type with more than two segments",

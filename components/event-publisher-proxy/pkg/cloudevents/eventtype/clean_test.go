@@ -4,13 +4,12 @@ import (
 	"context"
 	"testing"
 
+	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/require"
 
-	kymalogger "github.com/kyma-project/kyma/common/logging/logger"
-	"github.com/kyma-project/kyma/components/eventing-controller/logger"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/application"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/application/applicationtest"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/application/fake"
+	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/application"
+	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/application/applicationtest"
+	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/application/fake"
 )
 
 func TestCleaner(t *testing.T) {
@@ -158,10 +157,7 @@ func TestCleaner(t *testing.T) {
 		},
 	}
 
-	defaultLogger, err := logger.New(string(kymalogger.JSON), string(kymalogger.INFO))
-	if err != nil {
-		t.Fatalf("initialize logger failed: %v", err)
-	}
+	logger := logrus.New()
 
 	for _, tc := range testCases {
 		tc := tc
@@ -169,7 +165,7 @@ func TestCleaner(t *testing.T) {
 			t.Parallel()
 			app := applicationtest.NewApplication(tc.givenApplicationName, tc.givenApplicationLabels)
 			appLister := fake.NewApplicationListerOrDie(context.Background(), app)
-			cleaner := NewCleaner(tc.givenEventTypePrefix, appLister, defaultLogger)
+			cleaner := NewCleaner(tc.givenEventTypePrefix, appLister, logger)
 			eventType, err := cleaner.Clean(tc.givenEventType)
 			require.Equal(t, tc.wantError, err != nil)
 			if !tc.wantError {
