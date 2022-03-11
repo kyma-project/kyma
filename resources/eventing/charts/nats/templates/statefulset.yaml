@@ -49,9 +49,6 @@ spec:
 {{- end }}
       # Common volumes for the containers.
       volumes:
-      # Local volume shared with the nats config-reloader.
-      - name: pid
-        emptyDir: {}
       - name: config-volume
         {{ if .Values.nats.customConfigSecret }}
         secret:
