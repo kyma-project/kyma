@@ -2,11 +2,11 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: istio-performance-grafana-dashboard
+  name: istio-control-plane-grafana-dashboard
   namespace: kyma-system
   labels:
     grafana_dashboard: "1"
     app: monitoring-grafana
 data:
-  istio-performance-dashboard.json: {{ .Files.Get "files/dashboards/performance.json" | toJson }}
+  istio-workload-dashboard.json: {{ .Files.Get "files/dashboards/control-plane.json" | toJson }}
 {{- end }}
