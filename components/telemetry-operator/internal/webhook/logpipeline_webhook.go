@@ -19,8 +19,10 @@ package webhook
 import (
 	"context"
 	"fmt"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"net/http"
+
+	"github.com/google/uuid"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/api/v1alpha1"
 
@@ -35,10 +37,9 @@ import (
 )
 
 const (
-	fluentBitConfigDirectory         = "/tmp/dry-run"
-	fluentBitSectionsConfigDirectory = fluentBitConfigDirectory + "/dynamic"
-	fluentBitParsersConfigDirectory  = fluentBitConfigDirectory + "/dynamic-parsers"
-	fluentBitParsersConfigMapKey     = "parsers.conf"
+	fluentBitConfigDirectory       = "/tmp/dry-run"
+	StatusReasonConfigurationError = "ConfigurationError"
+	fluentBitParsersConfigMapKey   = "parsers.conf"
 )
 
 // TODO(user): change verbs to "verbs=create;update;delete" if you want to enable deletion validation.
@@ -47,17 +48,19 @@ type LogPipelineValidator struct {
 	client.Client
 
 	fluentBitConfigMap types.NamespacedName
+	cmd          fluentbit.CmdRunner
 
 	decoder *admission.Decoder
 }
 
-func NewLogPipeLineValidator(client client.Client, fluentBitConfigMap string, namespace string) *LogPipelineValidator {
+func NewLogPipeLineValidator(client client.Client, fluentBitConfigMap string, namespace string, cmdRunner fluentbit.CmdRunner) *LogPipelineValidator {
 	return &LogPipelineValidator{
 		Client: client,
 		fluentBitConfigMap: types.NamespacedName{
 			Name:      fluentBitConfigMap,
 			Namespace: namespace,
 		},
+		cmd: cmdRunner,
 	}
 }
 
@@ -69,20 +72,17 @@ func (v *LogPipelineValidator) Handle(ctx context.Context, req admission.Request
 		log.Error(err, "Failed to decode LogPipeline")
 		return admission.Errored(http.StatusBadRequest, err)
 	}
-	//
-	//if err := v.validateLogPipeline(ctx, logPipeline); err != nil {
-	//	log.Error(err, "LogPipeline rejected")
-	//	return admission.Denied(err.Error())
-	//}
 
-	if err := v.validateLogPipeline(ctx, logPipeline); err != nil {
+	currentBaseDirectory := fluentBitConfigDirectory + uuid.New().String()
+
+	if err := v.validateLogPipeline(ctx, currentBaseDirectory, logPipeline); err != nil {
 		log.Error(err, "LogPipeline rejected")
 		return admission.Response{
 			AdmissionResponse: admissionv1.AdmissionResponse{
 				Allowed: false,
 				Result: &metav1.Status{
 					Code:    int32(http.StatusForbidden),
-					Reason:  "ConfigurationError",
+					Reason:  StatusReasonConfigurationError,
 					Message: err.Error(),
 				},
 			},
@@ -92,16 +92,16 @@ func (v *LogPipelineValidator) Handle(ctx context.Context, req admission.Request
 	return admission.Allowed("LogPipeline validation successful")
 }
 
-func (v *LogPipelineValidator) validateLogPipeline(ctx context.Context, logPipeline *telemetryv1alpha1.LogPipeline) error {
+func (v *LogPipelineValidator) validateLogPipeline(ctx context.Context, currentBaseDirectory string, logPipeline *telemetryv1alpha1.LogPipeline) error {
 	log := logf.FromContext(ctx)
 
 	//defer func() {
-	//	if err := fs.RemoveDirectory(fluentBitConfigDirectory); err != nil {
-	//		log.Error(err, "Failed to remove fluent-bit config directory")
+	//	if err := fs.RemoveDirectory(currentBaseDirectory); err != nil {
+	//		log.Error(err, "Failed to remove Fluent Bit config directory")
 	//	}
 	//}()
 
-	configFiles, err := v.getFluentBitConfig(ctx, logPipeline)
+	configFiles, err := v.getFluentBitConfig(ctx, currentBaseDirectory, logPipeline)
 	if err != nil {
 		return err
 	}
@@ -114,7 +114,7 @@ func (v *LogPipelineValidator) validateLogPipeline(ctx context.Context, logPipel
 		}
 	}
 
-	if err = fluentbit.Validate(ctx, fmt.Sprintf("%s/fluent-bit.conf", fluentBitConfigDirectory)); err != nil {
+	if err = fluentbit.Validate(ctx, v.cmd, fmt.Sprintf("%s/fluent-bit.conf", currentBaseDirectory)); err != nil {
 		log.Error(err, "Failed to validate Fluent Bit config")
 		return err
 	}
@@ -122,13 +122,10 @@ func (v *LogPipelineValidator) validateLogPipeline(ctx context.Context, logPipel
 	return nil
 }
 
-func (v *LogPipelineValidator) InjectDecoder(d *admission.Decoder) error {
-	v.decoder = d
-	return nil
-}
-
-func (v *LogPipelineValidator) getFluentBitConfig(ctx context.Context, logPipeline *telemetryv1alpha1.LogPipeline) ([]fs.File, error) {
+func (v *LogPipelineValidator) getFluentBitConfig(ctx context.Context, currentBaseDirectory string, logPipeline *telemetryv1alpha1.LogPipeline) ([]fs.File, error) {
 	var configFiles []fs.File
+	fluentBitSectionsConfigDirectory := currentBaseDirectory + "/dynamic"
+	fluentBitParsersConfigDirectory := currentBaseDirectory + "/dynamic-parsers"
 
 	var generalCm corev1.ConfigMap
 	if err := v.Get(ctx, v.fluentBitConfigMap, &generalCm); err != nil {
@@ -136,7 +133,7 @@ func (v *LogPipelineValidator) getFluentBitConfig(ctx context.Context, logPipeli
 	}
 	for key, data := range generalCm.Data {
 		configFiles = append(configFiles, fs.File{
-			Path: fluentBitConfigDirectory,
+			Path: currentBaseDirectory,
 			Name: key,
 			Data: data,
 		})
@@ -161,4 +158,9 @@ func (v *LogPipelineValidator) getFluentBitConfig(ctx context.Context, logPipeli
 	})
 
 	return configFiles, nil
+}
+
+func (v *LogPipelineValidator) InjectDecoder(d *admission.Decoder) error {
+	v.decoder = d
+	return nil
 }
