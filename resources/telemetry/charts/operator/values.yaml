@@ -51,12 +51,18 @@ resources:
 terminationGracePeriodSeconds: 10
 
 extraLabels:
-  control-plane: telemetry-operator-controller-manager
+  control-plane: telemetry-operator
 
 service:
   type: ClusterIP
   port: 8080
   portName: http-metrics
+
+webhook:
+  service:
+    port: 443
+    protocol: TCP
+    targetPort: 9443
 
 serviceMonitor:
   endpoints:
