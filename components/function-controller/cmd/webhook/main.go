@@ -1,9 +1,9 @@
 package main
 
 import (
-	"context"
-
 	"github.com/go-logr/zapr"
+	"github.com/kyma-project/kyma/components/function-controller/internal/webhook/functionwebhook"
+	"github.com/kyma-project/kyma/components/function-controller/internal/webhook/gitrepowebhook"
 	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
 	"github.com/pkg/errors"
 	"github.com/vrischmann/envconfig"
@@ -50,8 +50,10 @@ func main() {
 		panic(err)
 	}
 
-	funcDefaulter := NewFunctionDefaulter(readDefaultingConfig())
-	funcValidator := NewFunctionValidator(readValidationConfig())
+	funcDefaulter := functionwebhook.NewFunctionDefaulter(readDefaultingConfig())
+	funcValidator := functionwebhook.NewFunctionValidator(readValidationConfig())
+
+	repoValidator := gitrepowebhook.NewGitRepoValidator(readValidationConfig())
 
 	if err = ctrl.NewWebhookManagedBy(mgr).
 		For(&serverlessv1alpha1.Function{}).
@@ -60,6 +62,14 @@ func main() {
 		Complete(); err != nil {
 		panic(err)
 	}
+
+	if err = ctrl.NewWebhookManagedBy(mgr).
+		For(&serverlessv1alpha1.GitRepository{}).
+		WithValidator(repoValidator).
+		Complete(); err != nil {
+		panic(err)
+	}
+
 	whs := mgr.GetWebhookServer()
 	whs.CertName = "server-cert.pem"
 	whs.KeyName = "server-key.pem"
@@ -68,62 +78,6 @@ func main() {
 	if err != nil {
 		// handle error
 		panic(err)
-	}
-}
-
-type functionDefaulter struct {
-	defaultingConfig *serverlessv1alpha1.DefaultingConfig
-}
-
-type functionValidator struct {
-	validationConfig *serverlessv1alpha1.ValidationConfig
-}
-type FunctionDefaulter interface {
-	Default(ctx context.Context, obj runtime.Object) error
-}
-
-type FunctionValidator interface {
-	ValidateCreate(ctx context.Context, obj runtime.Object) error
-	ValidateUpdate(ctx context.Context, oldObj, newObj runtime.Object) error
-	ValidateDelete(ctx context.Context, obj runtime.Object) error
-}
-
-func (fd *functionDefaulter) Default(ctx context.Context, obj runtime.Object) error {
-	f, ok := obj.(*serverlessv1alpha1.Function)
-	if !ok {
-		return errors.New("obj is not a serverless function object")
-	}
-	f.Default(fd.defaultingConfig)
-	return nil
-}
-
-func NewFunctionValidator(cfg *serverlessv1alpha1.ValidationConfig) FunctionValidator {
-	return &functionValidator{
-		validationConfig: cfg,
-	}
-}
-func (fv *functionValidator) ValidateCreate(ctx context.Context, obj runtime.Object) error {
-	f, ok := obj.(*serverlessv1alpha1.Function)
-	if !ok {
-		return errors.New("obj is not a serverless function object")
-	}
-	return f.Validate(fv.validationConfig)
-
-}
-
-func (fv *functionValidator) ValidateUpdate(ctx context.Context, _, newObj runtime.Object) error {
-	// we don't have any update specific validation logic
-	return fv.ValidateCreate(ctx, newObj)
-}
-
-func (fv *functionValidator) ValidateDelete(ctx context.Context, obj runtime.Object) error {
-	// We don't do delete validation
-	return nil
-}
-
-func NewFunctionDefaulter(cfg *serverlessv1alpha1.DefaultingConfig) FunctionDefaulter {
-	return &functionDefaulter{
-		defaultingConfig: cfg,
 	}
 }
 

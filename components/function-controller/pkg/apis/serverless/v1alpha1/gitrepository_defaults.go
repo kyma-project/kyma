@@ -1,6 +1,11 @@
 package v1alpha1
 
-import "context"
+import (
+	"context"
 
-func (in *GitRepository) SetDefaults(context.Context) {
+	runtime "k8s.io/apimachinery/pkg/runtime"
+)
+
+func (in *GitRepository) Default(_ context.Context, _ runtime.Object) error {
+	return nil
 }
