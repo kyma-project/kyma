@@ -2,18 +2,23 @@ package nats
 
 import (
 	"fmt"
-	"time"
 
 	"github.com/nats-io/nats.go"
 )
 
+type Opt = nats.Option
+
+var (
+	WithRetryOnFailedConnect = nats.RetryOnFailedConnect
+	WithMaxReconnects        = nats.MaxReconnects
+	WithReconnectWait        = nats.ReconnectWait
+)
+
 // Connect returns a NATS connection that is ready for use, or an error if connection to the NATS server failed.
 // It uses the nats.Connect function which is thread-safe.
-func Connect(url string, retry bool, reconnects int, wait time.Duration) (*nats.Conn, error) {
+func Connect(url string, opts ...Opt) (*nats.Conn, error) {
 	connection, err := nats.Connect(url,
-		nats.RetryOnFailedConnect(retry),
-		nats.MaxReconnects(reconnects),
-		nats.ReconnectWait(wait),
+		opts...,
 	)
 	if err != nil {
 		return nil, err

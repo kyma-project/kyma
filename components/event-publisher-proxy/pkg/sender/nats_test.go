@@ -39,6 +39,7 @@ func TestNatsMessageSender(t *testing.T) {
 		},
 	}
 	for _, tc := range testCases {
+		tc := tc
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
 
@@ -46,7 +47,11 @@ func TestNatsMessageSender(t *testing.T) {
 			assert.NotNil(t, natsServer)
 			defer natsServer.Shutdown()
 
-			connection, err := pkgnats.Connect(natsServer.ClientURL(), true, 1, time.Second)
+			connection, err := pkgnats.Connect(natsServer.ClientURL(),
+				pkgnats.WithRetryOnFailedConnect(true),
+				pkgnats.WithMaxReconnects(1),
+				pkgnats.WithReconnectWait(time.Second),
+			)
 			assert.NoError(t, err)
 			assert.NotNil(t, connection)
 

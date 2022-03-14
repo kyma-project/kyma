@@ -1,0 +1,7 @@
+approvers:
+  - Tomasz-Smelcerz-SAP
+  - strekm
+
+labels:
+- area/service-mesh
+- area/security

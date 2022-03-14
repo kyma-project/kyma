@@ -57,7 +57,10 @@ func TestAddTracingContextToCEExtensions(t *testing.T) {
 	}
 
 	for _, tc := range testCases {
+		tc := tc
 		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+
 			event := cev2event.New()
 			AddTracingContextToCEExtensions(tc.headers, &event)
 			g.Expect(event.Extensions()).To(Equal(tc.expectedExtensions))

@@ -5,17 +5,17 @@ global:
   images:
     eventing_controller:
       name: eventing-controller
-      version: PR-13534
+      version: PR-13605
       pullPolicy: "IfNotPresent"
     publisher_proxy:
       name: event-publisher-proxy
-      version: PR-13523
+      version: PR-13247
     nats:
       name: nats
       version: 2.6.5-alpine
       directory: external
   features:
-    enableJetStream: false
+    enableJetstream: false
 
   # secretName defines optionally another name than the default secret name
   secretName: ""

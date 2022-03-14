@@ -1,5 +1,5 @@
 controller:
-  jetStream:
+  jetstream:
     retentionPolicy: limits
     maxMessages: -1
     maxBytes: -1

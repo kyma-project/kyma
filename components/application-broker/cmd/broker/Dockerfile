@@ -1,4 +1,4 @@
-FROM eu.gcr.io/kyma-project/external/golang:1.17.6-alpine3.15 as builder
+FROM eu.gcr.io/kyma-project/external/golang:1.17.7-alpine3.15 as builder
 
 ENV SRC_DIR=/go/src/github.com/kyma-project/kyma/components/application-broker
 COPY . $SRC_DIR

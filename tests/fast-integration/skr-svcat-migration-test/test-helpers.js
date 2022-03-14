@@ -305,6 +305,51 @@ async function cleanupInstanceBinding(creds, svcatPlatform, btpOperatorInstance,
   }
 }
 
+async function checkMigratedBTPResources() {
+  const btpGroup = 'services.cloud.sap.com';
+  const btpVersion = 'v1alpha1';
+  const scGroup = 'servicecatalog.k8s.io';
+  const scVersion = 'v1beta1';
+  const instances = 'serviceinstances';
+  const bindings = 'servicebindings';
+
+  let errors = [];
+  // the test shouldn't wait here too long, it's just elementary re-try to reduce flakiness
+  // the reconciler is supposed to keep the update operation in pending for the time of migrating and cleanup
+  for (let i = 0; i < 3; i++) {
+    errors = [];
+    const btpBindings = await listResources(`/apis/${btpGroup}/${btpVersion}/${bindings}`);
+    const bindingsReady = btpBindings.reduce((ready, binding) => ready && binding.status.ready === 'True', true);
+    if (btpBindings.length != 3 || !bindingsReady) {
+      const bs = JSON.stringify(btpBindings, null, 2);
+      errors.push(`Expected 3 BTP bindings ready but found ${btpBindings.length}:\n${bs}`);
+    }
+    const btpInstances = await listResources(`/apis/${btpGroup}/${btpVersion}/${instances}`);
+    const instancesReady = btpInstances.reduce((ready, instance) => ready && instance.status.ready === 'True', true);
+    if (btpInstances.length != 3 || !instancesReady) {
+      const is = JSON.stringify(btpInstances, null, 2);
+      errors.push(`Expected 3 BTP instances ready but found ${btpInstances.length}:\n${is}`);
+    }
+    const scBindings = await listResources(`/apis/${scGroup}/${scVersion}/${bindings}`);
+    if (scBindings.length != 3) {
+      errors.push(`Expected 3 Service Catalog bindings but found ${scBindings.length}`);
+    }
+    const scInstances = await listResources(`/apis/${scGroup}/${scVersion}/${instances}`);
+    if (scInstances.length != 3) {
+      errors.push(`Expected 3 Service Catalog instances but found ${scInstances.length}`);
+    }
+    if (errors.length != 0) {
+      await sleep(1000);
+    } else {
+      break;
+    }
+  }
+  if (errors.length != 0) {
+    const info = JSON.stringify(errors, null, 2);
+    throw new Error(`Failed to observe migrated ServiceInstances and ServiceBindings.\n${info}`);
+  }
+}
+
 async function deleteBTPResources() {
   const group = 'services.cloud.sap.com';
   const version = 'v1alpha1';
@@ -347,4 +392,5 @@ module.exports = {
   checkPodPresetEnvInjected,
   restartFunctionsPods,
   deleteBTPResources,
+  checkMigratedBTPResources,
 };

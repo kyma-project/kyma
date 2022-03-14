@@ -9,7 +9,6 @@ import (
 	"net"
 	"net/http"
 	"strconv"
-	"testing"
 	"time"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -133,29 +132,6 @@ func SubscriptionWithFilter(eventSource, eventType string) SubscriptionOpt {
 					},
 				},
 			},
-		}
-	}
-}
-
-// WaitForHandlerToStart is waits for the test handler to start before testing could start
-func WaitForHandlerToStart(t *testing.T, healthEndpoint string) {
-	timeout := time.After(time.Second * 30)
-	ticker := time.NewTicker(time.Second * 1)
-
-	for {
-		select {
-		case <-timeout:
-			{
-				t.Fatal("Failed to start handler")
-			}
-		case <-ticker.C:
-			{
-				if resp, err := http.Get(healthEndpoint); err != nil { //nolint:gosec
-					continue
-				} else if resp.StatusCode == http.StatusOK {
-					return
-				}
-			}
 		}
 	}
 }

@@ -416,7 +416,7 @@ func defaultSinkValidator(ctx context.Context, r *Reconciler, subscription *even
 		return fmt.Errorf("sink should contain 5 sub-domains: %s", trimmedHost)
 	}
 
-	// Assumption: Subscription CR and Subscriber should be deployed in the same namespace
+	// Assumption: Subscription CR and Subscriber should be deployed in the same namespace.
 	svcNs := subDomains[1]
 	if subscription.Namespace != svcNs {
 		events.Warn(r.recorder, subscription, events.ReasonValidationFailed, "natsNamespace of subscription: %s and the subscriber: %s are different", subscription.Namespace, svcNs)

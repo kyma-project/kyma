@@ -7,71 +7,45 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
-	"reflect"
-	"regexp"
 	"testing"
+
+	"github.com/stretchr/testify/require"
 
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/application"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/application/applicationtest"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/application/fake"
-	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/legacy-events"
 	legacyapi "github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/legacy-events/api"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/subscribed"
 	testingutils "github.com/kyma-project/kyma/components/event-publisher-proxy/testing"
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 )
 
-// isValidEventID checks whether EventID is valid or not
-func isValidEventID(id string) bool {
-	return regexp.MustCompile(legacy.AllowedEventIDChars).MatchString(id)
-}
-
-// validateErrorResponse validates Error Response
-func ValidateErrorResponse(t *testing.T, resp http.Response, tcWantResponse *legacyapi.PublishEventResponses) {
+// ValidateLegacyErrorResponse validates error responses for the legacy events endpoint.
+func ValidateLegacyErrorResponse(t *testing.T, resp http.Response, wantResponse *legacyapi.PublishEventResponses) {
 	legacyResponse := legacyapi.PublishEventResponses{}
-	legacyError := legacyapi.Error{}
+	legacyErrorResponse := legacyapi.Error{}
 	bodyBytes, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		t.Fatalf("failed to read response body: %v", err)
-	}
-	if err = json.Unmarshal(bodyBytes, &legacyError); err != nil {
-		t.Fatalf("failed to unmarshal response body: %v", err)
-	}
-	legacyResponse.Error = &legacyError
-	if !reflect.DeepEqual(tcWantResponse.Error, legacyResponse.Error) {
-		t.Fatalf("Invalid error, want: %v, got: %v", tcWantResponse.Error, legacyResponse.Error)
-	}
+	require.NoError(t, err)
+	err = json.Unmarshal(bodyBytes, &legacyErrorResponse)
+	require.NoError(t, err)
+	legacyResponse.Error = &legacyErrorResponse
+	require.Equal(t, wantResponse.Error, legacyResponse.Error)
+	err = resp.Body.Close()
+	require.NoError(t, err)
 }
 
-// validateOkResponse validates Ok Response
-func ValidateOkResponse(t *testing.T, resp http.Response, tcWantResponse *legacyapi.PublishEventResponses) {
+// ValidateLegacyOkResponse validates ok responses for the legacy events endpoint.
+func ValidateLegacyOkResponse(t *testing.T, resp http.Response, wantResponse *legacyapi.PublishEventResponses) {
+	legacyResponse := legacyapi.PublishEventResponses{}
 	legacyOkResponse := legacyapi.PublishResponse{}
-	legacyResponse := legacyapi.PublishEventResponses{}
 	bodyBytes, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		t.Fatalf("failed to read response body: %v", err)
-	}
-	if err = json.Unmarshal(bodyBytes, &legacyOkResponse); err != nil {
-		t.Fatalf("failed to unmarshal response body: %v", err)
-	}
+	require.NoError(t, err)
+	err = json.Unmarshal(bodyBytes, &legacyOkResponse)
+	require.NoError(t, err)
 	legacyResponse.Ok = &legacyOkResponse
-	if err = resp.Body.Close(); err != nil {
-		t.Fatalf("failed to close body: %v", err)
-	}
-
-	if tcWantResponse.Ok.EventID != "" && tcWantResponse.Ok.EventID != legacyResponse.Ok.EventID {
-		t.Errorf("invalid event-id, want: %v, got: %v", tcWantResponse.Ok.EventID, legacyResponse.Ok.EventID)
-	}
-
-	if tcWantResponse.Ok.EventID == "" && !isValidEventID(legacyResponse.Ok.EventID) {
-		t.Errorf("should match regex: [%s] Not a valid event-id: %v ", legacy.AllowedEventIDChars, legacyResponse.Ok.EventID)
-	}
-	if tcWantResponse.Ok.Reason != legacyResponse.Ok.Reason {
-		t.Errorf("invalid reason, want: %v, got: %v", tcWantResponse.Ok.Reason, legacyResponse.Ok.Reason)
-	}
-	if tcWantResponse.Ok.Status != legacyResponse.Ok.Status {
-		t.Errorf("invalid status, want: %v, got: %v", tcWantResponse.Ok.Status, legacyResponse.Ok.Status)
-	}
+	require.Equal(t, wantResponse.Error, legacyResponse.Error)
+	err = resp.Body.Close()
+	require.NoError(t, err)
 }
 
 // getMissingFieldValidationError generates an Error message for a missing field
