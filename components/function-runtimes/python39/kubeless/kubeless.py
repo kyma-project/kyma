@@ -2,13 +2,23 @@
 
 import importlib
 import os
-import sys
-import threading
-import bottle
-from ce import Event
-from tracing import get_tracer, set_req_context, is_jaeger_available
-import prometheus_client as prom
 import queue
+import threading
+
+import bottle
+import prometheus_client as prom
+import sys
+
+import tracing
+from ce import Event
+from tracing import set_req_context
+
+
+def create_service_name(pod_name: str, service_namespace: str) -> str:
+    # remove generated pods suffix ( two last sections )
+    deployment_name = '-'.join(pod_name.split('-')[0:pod_name.count('-') - 1])
+    return '.'.join([deployment_name, service_namespace])
+
 
 # The reason this file has an underscore prefix in its name is to avoid a
 # name collision with the user-defined module.
@@ -45,20 +55,17 @@ function_context = {
     'memory-limit': os.getenv('FUNC_MEMORY_LIMIT'),
 }
 
-# all configuration should be provided only once 
-# and tracer declaration is moved to the `if __name__ == '__main__'` below
-tracer = None
-if __name__ == '__main__' and is_jaeger_available():
-    tracer = get_tracer()
+jaeger_endpoint = os.getenv('JAEGER_SERVICE_ENDPOINT')
+pod_name = os.getenv('HOSTNAME')
+service_namespace = os.getenv('SERVICE_NAMESPACE')
+service_name = create_service_name(pod_name, service_namespace)
+tracer_provider = tracing.ServerlessTracerProvider(jaeger_endpoint, service_name)
+
 
 def func_with_context(e, function_context):
     ex = e.ceHeaders["extensions"]
-
-    if tracer != None:
-        with set_req_context(ex["request"]):
-            return func(e, function_context)
-    else:
-        return func(e, function_context) 
+    with set_req_context(ex["request"]):
+        return func(e, function_context)
 
 
 @app.get('/healthz')
@@ -80,13 +87,15 @@ def exception_handler():
 @app.route('/<:re:.*>', method=['GET', 'POST', 'PATCH', 'DELETE'])
 def handler():
     req = bottle.request
+    tracer = tracer_provider.get_tracer(req)
     event = Event(req, tracer)
+
     method = req.method
     func_calls.labels(method).inc()
     with func_errors.labels(method).count_exceptions():
         with func_hist.labels(method).time():
             que = queue.Queue()
-            t = threading.Thread(target=lambda q, e: q.put(func_with_context(e,function_context)), args=(que,event))
+            t = threading.Thread(target=lambda q, e: q.put(func_with_context(e, function_context)), args=(que, event))
             t.start()
             try:
                 res = que.get(block=True, timeout=timeout)
@@ -95,6 +104,7 @@ def handler():
             else:
                 t.join()
                 return res
+
 
 def preload():
     """This is a no-op function used to start the forkserver."""
