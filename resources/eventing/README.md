@@ -49,7 +49,7 @@ kyma deploy --source=local --value global.features.enableJetstream=true --worksp
 
 ### Configuring NATS JetStream persistence
 
-The persistence used for the stream used in the JetStream Backend is configurable via the Eventing controller Helm chart. By default, the Evaluation profile uses storage type `memory` and the Productionn profile uses the `file` storage type. This can be further customized by passing different values to the `kyma deploy` command. For example, to install the Production profile with `memory` storage type of `2Gi`:
+The persistence used for the stream in the JetStream backend is configurable using the Eventing Helm chart. By default, you can use the `memory` storage type in the evaluation profile and `file` in the production profile. You can customize it further by passing different values to the `kyma deploy` command. For example, to install the production profile with the `memory` storage type of `2Gi` use:
 
 ```bash
 kyma deploy --profile production \
