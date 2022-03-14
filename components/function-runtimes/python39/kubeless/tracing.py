@@ -14,6 +14,8 @@ from opentelemetry.sdk.trace.export import BatchSpanProcessor
 from opentelemetry.trace import context_api
 from opentelemetry.trace.propagation import _SPAN_KEY
 
+_TRACING_SAMPLE_HEADER = "x-b3-sampled"
+
 
 class ServerlessTracerProvider:
     def __init__(self, jaeger_endpoint: str, service_name: str):
@@ -21,16 +23,12 @@ class ServerlessTracerProvider:
         if _is_jaeger_available(jaeger_endpoint):
             self.tracer = _get_tracer(jaeger_endpoint, service_name)
         else:
-            print("jeager is not available")
+            print("jaeger is not available")
             self.tracer = trace.NoOpTracer()
 
-    def __noop_tracer(self):
-        trace.NoOpTracer()
-
     def get_tracer(self, req):
-        val = req.get_header("x-b3-sampled");
+        val = req.get_header(_TRACING_SAMPLE_HEADER)
         if val is not None and val == "1":
-            print("tracing enabled and sampled")
             return self.tracer
 
         return self.noop_tracer
@@ -70,6 +68,7 @@ def _is_jaeger_available(jaegerEndpoint) -> bool:
         pass
 
     return False
+
 
 @contextmanager  # type: ignore
 def set_req_context(req) -> Iterator[trace.Span]:
