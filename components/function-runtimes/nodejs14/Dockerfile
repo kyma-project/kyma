@@ -26,9 +26,9 @@
 # We use this code to manually use newest alpine and nodejs.
 # Use official build when it will be available.
 
-FROM alpine:3.14.2
+FROM alpine:3.15.0
 
-ENV NODE_VERSION 14.17.6
+ENV NODE_VERSION 14.19.0
 
 SHELL ["/bin/ash", "-o", "pipefail", "-c"]
 
@@ -44,7 +44,7 @@ RUN addgroup -g 1000 node \
       && case "${alpineArch##*-}" in \
         x86_64) \
           ARCH='x64' \
-          CHECKSUM="d9292c9fa9b4439f0d681110802d03750d34cc95a8b37a06314e5a228de827e7" \
+          CHECKSUM="8d5e638d88b62de2f147dee812a5d74e4860a20468eb7ff32c41a02b58e2aebf" \
           ;; \
         *) ;; \
       esac \
