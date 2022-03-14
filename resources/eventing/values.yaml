@@ -15,7 +15,7 @@ global:
       version: 2.6.5-alpine
       directory: external
   features:
-    enableJetStream: false
+    enableJetstream: false
 
   # secretName defines optionally another name than the default secret name
   secretName: ""

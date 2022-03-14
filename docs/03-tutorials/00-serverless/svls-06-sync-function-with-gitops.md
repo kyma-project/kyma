@@ -14,6 +14,7 @@ All you need before you start is to have the following:
 - Git repository
 - [Homebrew](https://docs.brew.sh/Installation)
 - Kyma CLI
+- Kubeconfig file to your Kyma cluster
 
 ## Steps
 
@@ -177,8 +178,9 @@ In this section, you will create a sample inline Function.
 1. Back in the terminal, clone this GitHub repository to your current workspace location:
 
   ```bash
-  git clone git@github.com:${GH_USER}/${GH_REPO}.git
+  git clone https://github.com/${GH_USER}/${GH_REPO}.git
   ```
+  >**NOTE:** You can also clone the repository using SSH. To do that, you need to [generate a new SSH key and add it to the ssh-agent](https://docs.github.com/en/authentication/connecting-to-github-with-ssh/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent).
 
 2. Go to the repository folder:
 

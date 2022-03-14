@@ -321,22 +321,22 @@ async function checkMigratedBTPResources() {
     const btpBindings = await listResources(`/apis/${btpGroup}/${btpVersion}/${bindings}`);
     const bindingsReady = btpBindings.reduce((ready, binding) => ready && binding.status.ready === 'True', true);
     if (btpBindings.length != 3 || !bindingsReady) {
-      const bs = JSON.stringify(btpBindings);
-      errors.push(`Expected 3 BTP bindings ready but found ${btpBindings.length} in states: ${bs}`);
+      const bs = JSON.stringify(btpBindings, null, 2);
+      errors.push(`Expected 3 BTP bindings ready but found ${btpBindings.length}:\n${bs}`);
     }
     const btpInstances = await listResources(`/apis/${btpGroup}/${btpVersion}/${instances}`);
     const instancesReady = btpInstances.reduce((ready, instance) => ready && instance.status.ready === 'True', true);
     if (btpInstances.length != 3 || !instancesReady) {
-      const is = JSON.stringify(btpInstances);
-      errors.push(`Expected 3 BTP instances ready but found ${btpInstances.length} in states ${is}`);
+      const is = JSON.stringify(btpInstances, null, 2);
+      errors.push(`Expected 3 BTP instances ready but found ${btpInstances.length}:\n${is}`);
     }
     const scBindings = await listResources(`/apis/${scGroup}/${scVersion}/${bindings}`);
-    if (scBindings.length != 0) {
-      errors.push(`Expected no Service Catalog bindings but found ${JSON.stringify(scBindings)}`);
+    if (scBindings.length != 3) {
+      errors.push(`Expected 3 Service Catalog bindings but found ${scBindings.length}`);
     }
     const scInstances = await listResources(`/apis/${scGroup}/${scVersion}/${instances}`);
-    if (scInstances.length != 0) {
-      errors.push(`Expected no Service Catalog instances but found ${JSON.stringify(scInstances)}`);
+    if (scInstances.length != 3) {
+      errors.push(`Expected 3 Service Catalog instances but found ${scInstances.length}`);
     }
     if (errors.length != 0) {
       await sleep(1000);

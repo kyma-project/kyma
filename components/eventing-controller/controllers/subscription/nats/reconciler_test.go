@@ -9,7 +9,7 @@ import (
 	"testing"
 	"time"
 
-	utils "github.com/kyma-project/kyma/components/eventing-controller/controllers/subscription"
+	utils "github.com/kyma-project/kyma/components/eventing-controller/controllers/subscription/testing"
 
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/sink"
 

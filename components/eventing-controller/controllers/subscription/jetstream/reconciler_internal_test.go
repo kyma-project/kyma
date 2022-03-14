@@ -115,7 +115,7 @@ func Test_syncSubscriptionStatus(t *testing.T) {
 		givenSub          *eventingv1alpha1.Subscription
 		givenNatsSubReady bool
 		givenUpdateStatus bool
-		error             error
+		givenError        error
 		wantConditions    []eventingv1alpha1.Condition
 		wantStatus        bool
 	}{
@@ -127,7 +127,7 @@ func Test_syncSubscriptionStatus(t *testing.T) {
 			),
 			givenNatsSubReady: false,
 			givenUpdateStatus: false,
-			error:             jetStreamError,
+			givenError:        jetStreamError,
 			wantConditions:    []eventingv1alpha1.Condition{falseNatsSubActiveCondition},
 			wantStatus:        false,
 		},
@@ -139,7 +139,7 @@ func Test_syncSubscriptionStatus(t *testing.T) {
 			),
 			givenNatsSubReady: false,
 			givenUpdateStatus: false,
-			error:             jetStreamError,
+			givenError:        jetStreamError,
 			wantConditions:    []eventingv1alpha1.Condition{falseNatsSubActiveCondition},
 			wantStatus:        false,
 		},
@@ -151,7 +151,7 @@ func Test_syncSubscriptionStatus(t *testing.T) {
 			),
 			givenNatsSubReady: true, // isNatsSubReady
 			givenUpdateStatus: false,
-			error:             nil,
+			givenError:        nil,
 			wantConditions:    []eventingv1alpha1.Condition{trueNatsSubActiveCondition},
 			wantStatus:        true,
 		},
@@ -163,7 +163,7 @@ func Test_syncSubscriptionStatus(t *testing.T) {
 			),
 			givenNatsSubReady: true,
 			givenUpdateStatus: false,
-			error:             nil,
+			givenError:        nil,
 			wantConditions:    []eventingv1alpha1.Condition{trueNatsSubActiveCondition},
 			wantStatus:        true,
 		},
@@ -175,7 +175,7 @@ func Test_syncSubscriptionStatus(t *testing.T) {
 			),
 			givenNatsSubReady: false, // isNatsSubReady
 			givenUpdateStatus: false,
-			error:             jetStreamError,
+			givenError:        jetStreamError,
 			wantConditions:    []eventingv1alpha1.Condition{falseNatsSubActiveCondition},
 			wantStatus:        false,
 		},
@@ -187,7 +187,7 @@ func Test_syncSubscriptionStatus(t *testing.T) {
 			),
 			givenNatsSubReady: true,
 			givenUpdateStatus: true,
-			error:             nil,
+			givenError:        nil,
 			wantConditions:    []eventingv1alpha1.Condition{trueNatsSubActiveCondition},
 			wantStatus:        true,
 		},
@@ -201,7 +201,7 @@ func Test_syncSubscriptionStatus(t *testing.T) {
 			require.NoError(t, err)
 
 			// when
-			err = r.syncSubscriptionStatus(ctx, sub, testCase.givenUpdateStatus, testCase.error)
+			err = r.syncSubscriptionStatus(ctx, sub, testCase.givenUpdateStatus, testCase.givenError)
 			require.NoError(t, err)
 
 			// then

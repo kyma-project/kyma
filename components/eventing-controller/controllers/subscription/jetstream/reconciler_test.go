@@ -9,7 +9,7 @@ import (
 	"testing"
 	"time"
 
-	utils "github.com/kyma-project/kyma/components/eventing-controller/controllers/subscription"
+	utils "github.com/kyma-project/kyma/components/eventing-controller/controllers/subscription/testing"
 
 	natstesting "github.com/kyma-project/kyma/components/eventing-controller/testing/nats"
 	"github.com/nats-io/nats.go"
@@ -496,7 +496,8 @@ func TestChangeSubscription(t *testing.T) {
 	t.Cleanup(ens.Cancel)
 }
 
-// TODO: TestEmptyEventTypePrefix to be implemented
+// TODO: TestEmptyEventTypePrefix to be implemented once
+// https://github.com/kyma-project/kyma/issues/13544 is resolved
 
 func testSubscriptionOnNATS(ens *jetStreamTestEnsemble, subscription *eventingv1alpha1.Subscription, subject string, expectations ...gomegatypes.GomegaMatcher) {
 	getSubscriptionFromJetStream(ens, subscription, subject).Should(gomega.And(expectations...))
