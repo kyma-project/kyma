@@ -85,9 +85,9 @@ spec:
       #  NATS Configuration Reloader  #
       #                               #
       #################################
-      - name: reloader
-        image: natsio/nats-server-config-reloader:0.6.2
-        imagePullPolicy: Always
+      - name: config-reloader
+        image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.nats_config_reloader) }}"
+        imagePullPolicy: {{ .Values.nats.pullPolicy }}
         command:
           - "nats-server-config-reloader"
           - "-pid"
