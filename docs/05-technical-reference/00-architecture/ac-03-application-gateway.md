@@ -17,18 +17,4 @@ which are either unsecured or secured with various security mechanisms and prote
 4. Application Gateway gets a CSRF token from the endpoint exposed by the upstream service. This step is optional and is valid only for the API which was registered with a CSRF token turned on.
 5. Application Gateway calls the target API.
 
-## Caching
-
-To ensure optimal performance, Application Gateway caches the OAuth tokens and CSRF tokens it obtains. If the service doesn't find valid tokens for the call it makes, it gets new tokens from the OAuth server and the CSRF token endpoint.
-Additionally, the service caches ReverseProxy objects used to proxy the requests to the underlying URL.
-
-## Handling of headers
-
-Application Gateway proxies the following headers while making calls to the registered Applications:
-
-- `X-Forwarded-Proto`
-- `X-Forwarded-For`
-- `X-Forwarded-Host`
-- `X-Forwarded-Client-Cert`
-
-In addition, the `User-Agent` header is set to an empty value not specified in the call, which prevents setting the default value.
+To learn more, read about the [Application Gateway details](../ac-01-application-gateway-details.md). 
