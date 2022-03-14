@@ -109,7 +109,7 @@ func main() {
 
 	rtmConfig, err := configProvider.GetRuntimeConfig()
 	correlationID := rtmConfig.RuntimeId + "_" + uuid.New().String()
-	ctx := correlation.SaveCorrelationIDHeaderToContext(context.Background(), str.Ptr(compassconnection.RequestIDHeader), str.Ptr(correlationID))
+	ctx := correlation.SaveCorrelationIDHeaderToContext(context.Background(), str.Ptr(correlation.RequestIDHeaderKey), str.Ptr(correlationID))
 
 	log.Infoln("Initializing Compass Connection CR")
 	_, err = compassConnectionSupervisor.InitializeCompassConnection(ctx)

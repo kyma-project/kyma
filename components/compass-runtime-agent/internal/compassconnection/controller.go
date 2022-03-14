@@ -75,11 +75,11 @@ func newReconciler(client Client, supervisior Supervisor, minimalConfigSyncTime 
 func (r *Reconciler) Reconcile(ctx context.Context, request reconcile.Request) (reconcile.Result, error) {
 	correlationID := r.runtimeID + "_" + uuid.New().String()
 	logFields := logrus.Fields{
-		"CompassConnection": request.Name,
-		RequestIDHeader:     correlationID,
+		"CompassConnection":            request.Name,
+		correlation.RequestIDHeaderKey: correlationID,
 	}
 	log := r.log.WithFields(logFields)
-	ctx = correlation.SaveCorrelationIDHeaderToContext(context.Background(), str.Ptr(RequestIDHeader), str.Ptr(correlationID))
+	ctx = correlation.SaveCorrelationIDHeaderToContext(context.Background(), str.Ptr(correlation.RequestIDHeaderKey), str.Ptr(correlationID))
 
 	connection, err := r.getConnection(ctx, log, request)
 	if err != nil {

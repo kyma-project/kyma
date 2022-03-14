@@ -22,7 +22,6 @@ type EstablishedConnection struct {
 
 const (
 	ConnectorTokenHeader = "Connector-Token"
-	RequestIDHeader      = "x-request-id"
 )
 
 //go:generate mockery --name=Connector

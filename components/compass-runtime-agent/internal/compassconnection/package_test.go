@@ -67,7 +67,7 @@ var (
 	}
 	connectorTokenHeadersFunc = mock.MatchedBy(func(input map[string]string) bool {
 		for k, v := range connectorTokenHeaders {
-			if k != RequestIDHeader && input[k] != v {
+			if k != correlation.RequestIDHeaderKey && input[k] != v {
 				return false
 			}
 		}
