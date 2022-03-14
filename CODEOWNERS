@@ -128,9 +128,6 @@ components/etcd-tls-setup-job/ @PK85 @piotrmiskiewicz @szwedm @wozniakjan @hanng
 # Binding usage controller Component
 /components/service-binding-usage-controller/ @PK85 @piotrmiskiewicz @szwedm @wozniakjan @hanngos @tillknuesting @ralikio
 
-# Istioctl Installer Component
-/components/istio-installer/ @strekm @werdes72 @Tomasz-Smelcerz-SAP @mjakobczyk @dariusztutaj
-
 # Application broker Component
 /components/application-broker/ @PK85 @piotrmiskiewicz @szwedm @wozniakjan @hanngos @tillknuesting @ralikio
 
