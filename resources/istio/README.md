@@ -36,8 +36,11 @@ Istio offers an Istio Control Plane CR, which is used to configure the installat
 Istio offers an Istio Control Plane CR, which is used to configure the installation. See the list of the currently exposed parameters of the Istio component that you can override. To learn more, go to `istio-operator.yaml`.
 >>>>>>> 410e4f03c (Remove docs)
 
+<<<<<<< HEAD
 >>>>>>> ded9494a0 (Remove Istio-configuration chart)
 
+=======
+>>>>>>> 0e523339b (Remove docs)
 - **mesh.Config**
 - **values.global**
 - **values.pilot**
