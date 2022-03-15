@@ -83,7 +83,7 @@ var _ = Describe("LogPipeline webhook", func() {
 		})
 
 		It("Should accept valid LogPipeline", func() {
-			fsWrapperMock.On("CreateAndWrite", mock.AnythingOfType("fs.File")).Return(nil).Times(3)
+			fsWrapperMock.On("CreateAndWrite", mock.AnythingOfType("fs.File")).Return(nil).Times(4)
 			configValidatorMock.On("Validate", mock.Anything, mock.AnythingOfType("string")).Return(nil).Times(1)
 			fsWrapperMock.On("RemoveDirectory", mock.AnythingOfType("string")).Return(nil).Times(1)
 			logPipeline := getLogPipeline()
@@ -93,7 +93,7 @@ var _ = Describe("LogPipeline webhook", func() {
 		})
 
 		It("Should reject invalid LogPipeline", func() {
-			fsWrapperMock.On("CreateAndWrite", mock.AnythingOfType("fs.File")).Return(nil).Times(3)
+			fsWrapperMock.On("CreateAndWrite", mock.AnythingOfType("fs.File")).Return(nil).Times(4)
 			configErr := errors.New("Error in line 4: Invalid indentation level")
 			configValidatorMock.On("Validate", mock.Anything, mock.AnythingOfType("string")).Return(configErr).Times(1)
 			fsWrapperMock.On("RemoveDirectory", mock.AnythingOfType("string")).Return(nil).Times(1)

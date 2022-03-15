@@ -126,6 +126,7 @@ func (v *LogPipelineValidator) getFluentBitConfig(ctx context.Context, currentBa
 	var configFiles []fs.File
 	fluentBitSectionsConfigDirectory := currentBaseDirectory + "/dynamic"
 	fluentBitParsersConfigDirectory := currentBaseDirectory + "/dynamic-parsers"
+	fluentBitFilesDirectory := currentBaseDirectory + "/files"
 
 	var generalCm corev1.ConfigMap
 	if err := v.Get(ctx, v.fluentBitConfigMap, &generalCm); err != nil {
@@ -136,6 +137,14 @@ func (v *LogPipelineValidator) getFluentBitConfig(ctx context.Context, currentBa
 			Path: currentBaseDirectory,
 			Name: key,
 			Data: data,
+		})
+	}
+
+	for _, file := range logPipeline.Spec.Files {
+		configFiles = append(configFiles, fs.File{
+			Path: fluentBitFilesDirectory,
+			Name: file.Name,
+			Data: file.Content,
 		})
 	}
 
