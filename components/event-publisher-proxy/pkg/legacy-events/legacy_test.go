@@ -11,8 +11,10 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/internal"
+	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/application"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/application/applicationtest"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/application/fake"
 	legacyapi "github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/legacy-events/api"
@@ -42,48 +44,48 @@ func TestTransformLegacyRequestsToCE(t *testing.T) {
 		// derived from that a legacy event path (a.k.a. endpoint) has the structure
 		// http://<HOST>:<PORT>/<APPNAME>/<VERSION>/events
 		// e.g. http://localhost:8081/varkestest/v1/events
-		prefix       string
-		appName      string
-		typeLabel    string
-		eventName    string
-		version      string
-		expectedType string
+		givenPrefix      string
+		givenApplication string
+		givenTypeLabel   string
+		givenEventName   string
+		wantVersion      string
+		wantType         string
 	}{
 		{
-			name:         "clean",
-			prefix:       "pre1.pre2.pre3",
-			appName:      "app",
-			typeLabel:    "",
-			eventName:    "object.do",
-			version:      "v1",
-			expectedType: "pre1.pre2.pre3.app.object.do.v1",
+			name:             "clean",
+			givenPrefix:      "pre1.pre2.pre3",
+			givenApplication: "app",
+			givenTypeLabel:   "",
+			givenEventName:   "object.do",
+			wantVersion:      "v1",
+			wantType:         "pre1.pre2.pre3.app.object.do.v1",
 		},
 		{
-			name:         "unclean",
-			prefix:       "p!r@e&1.p,r:e2.p|r+e3",
-			appName:      "m(i_s+h*a}p",
-			typeLabel:    "",
-			eventName:    "o{b?j>e$c't.d;o",
-			version:      "v1",
-			expectedType: "pre1.pre2.pre3.mishap.object.do.v1",
+			name:             "unclean",
+			givenPrefix:      "p!r@e&1.p,r:e2.p|r+e3",
+			givenApplication: "m(i_s+h*a}p",
+			givenTypeLabel:   "",
+			givenEventName:   "o{b?j>e$c't.d;o",
+			wantVersion:      "v1",
+			wantType:         "pre1.pre2.pre3.mishap.object.do.v1",
 		},
 		{
-			name:         "event name too many segments",
-			prefix:       "pre1.pre2.pre3",
-			appName:      "app",
-			typeLabel:    "",
-			eventName:    "too.many.dots.object.do",
-			version:      "v1",
-			expectedType: "pre1.pre2.pre3.app.toomanydotsobject.do.v1",
+			name:             "event name too many segments",
+			givenPrefix:      "pre1.pre2.pre3",
+			givenApplication: "app",
+			givenTypeLabel:   "",
+			givenEventName:   "too.many.dots.object.do",
+			wantVersion:      "v1",
+			wantType:         "pre1.pre2.pre3.app.toomanydotsobject.do.v1",
 		},
 		{
-			name:         "with event type label",
-			prefix:       "pre1.pre2.pre3",
-			appName:      "app",
-			typeLabel:    "different",
-			eventName:    "object.do",
-			version:      "v1",
-			expectedType: "pre1.pre2.pre3.different.object.do.v1",
+			name:             "with event type label",
+			givenPrefix:      "pre1.pre2.pre3",
+			givenApplication: "app",
+			givenTypeLabel:   "different",
+			givenEventName:   "object.do",
+			wantVersion:      "v1",
+			wantType:         "pre1.pre2.pre3.different.object.do.v1",
 		},
 	}
 
@@ -94,46 +96,37 @@ func TestTransformLegacyRequestsToCE(t *testing.T) {
 
 			ctx, cancel := context.WithCancel(context.Background())
 			defer cancel()
-			app := applicationtest.NewApplication(tc.appName, applicationTypeLabel(tc.typeLabel))
-			appLister := fake.NewApplicationListerOrDie(ctx, app)
 
-			request, err := mockLegacyRequest(tc.version, tc.appName, tc.eventName)
-			if err != nil {
-				t.Errorf("error while creating mock legacy request in case %s:\n%s", tc.name, err.Error())
-			}
+			request, err := mockLegacyRequest(tc.wantVersion, tc.givenApplication, tc.givenEventName)
+			assert.NoError(t, err)
 
 			writer := httptest.NewRecorder()
-
-			transformer := NewTransformer("test", tc.prefix, appLister)
-			actualEvent, eventType := transformer.TransformLegacyRequestsToCE(writer, request)
-			wantEventType := formatEventType(tc.prefix, tc.appName, tc.eventName, tc.version)
-			assert.Equal(t, wantEventType, eventType)
-
-			errorString := func(caseName, subject, actual, expected string) string {
-				return fmt.Sprintf("Unexpected %s in case %s\nwas:\n\t%s\nexpected:\n\t%s", subject, caseName, actual, expected)
-			}
+			app := applicationtest.NewApplication(tc.givenApplication, applicationTypeLabel(tc.givenTypeLabel))
+			appLister := fake.NewApplicationListerOrDie(ctx, app)
+			transformer := NewTransformer("test", tc.givenPrefix, appLister)
+			gotEvent, gotEventType := transformer.TransformLegacyRequestsToCE(writer, request)
+			wantEventType := formatEventType(tc.givenPrefix, tc.givenApplication, tc.givenEventName, tc.wantVersion)
+			assert.Equal(t, wantEventType, gotEventType)
 
 			//check eventType
-			if actual := actualEvent.Context.GetType(); tc.expectedType != actual {
-				t.Errorf(errorString(tc.name, "event type", actual, tc.expectedType))
-			}
+			gotType := gotEvent.Context.GetType()
+			assert.Equal(t, tc.wantType, gotType)
 
 			// check extensions 'eventtypeversion'
-			if actual := actualEvent.Extensions()["eventtypeversion"].(string); actual != tc.version {
-				t.Errorf(errorString(tc.name, "event type", actual, tc.expectedType))
-			}
+			gotVersion, ok := gotEvent.Extensions()["eventtypeversion"].(string)
+			assert.True(t, ok)
+			assert.Equal(t, tc.wantVersion, gotVersion)
 
 			// check HTTP ContentType set properly
-			if actualContentType := actualEvent.Context.GetDataContentType(); actualContentType != internal.ContentTypeApplicationJSON {
-				t.Errorf(errorString(tc.name, "HTTP Content Type", actualContentType, internal.ContentTypeApplicationJSON))
-			}
+			gotContentType := gotEvent.Context.GetDataContentType()
+			assert.Equal(t, internal.ContentTypeApplicationJSON, gotContentType)
 		})
 	}
 }
 
 func applicationTypeLabel(label string) map[string]string {
 	if label != "" {
-		return map[string]string{"application-type": label}
+		return map[string]string{application.TypeLabel: label}
 	}
 	return nil
 }
@@ -154,53 +147,40 @@ func mockLegacyRequest(version, appname, eventType string) (*http.Request, error
 }
 
 func TestConvertPublishRequestToCloudEvent(t *testing.T) {
-	bebNs := MessagingNamespace
-	eventTypePrefix := MessagingEventTypePrefix
-	legacyTransformer := NewTransformer(bebNs, eventTypePrefix, nil)
-	eventID := EventID
-	appName := ApplicationName
-	legacyEventVersion := EventVersion
-	data := EventData
-	timeNow := time.Now()
-	wantEventType := formatEventType(eventTypePrefix, appName, eventTypeMultiSegmentCombined, legacyEventVersion)
-	timeNowStr := timeNow.Format(time.RFC3339)
-	timeNowFormatted, _ := time.Parse(time.RFC3339, timeNowStr)
-	publishReqParams := &legacyapi.PublishEventParametersV1{
+	givenEventID := EventID
+	givenApplicationName := ApplicationName
+	givenEventTypePrefix := MessagingEventTypePrefix
+	givenTimeNow := time.Now().Format(time.RFC3339)
+	givenLegacyEventVersion := EventVersion
+	givenPublishReqParams := &legacyapi.PublishEventParametersV1{
 		PublishrequestV1: legacyapi.PublishRequestV1{
-			EventID:          eventID,
+			EventID:          givenEventID,
 			EventType:        eventTypeMultiSegment,
-			EventTime:        timeNowStr,
-			EventTypeVersion: legacyEventVersion,
-			Data:             data,
+			EventTime:        givenTimeNow,
+			EventTypeVersion: givenLegacyEventVersion,
+			Data:             EventData,
 		},
 	}
 
-	gotEvent, err := legacyTransformer.convertPublishRequestToCloudEvent(appName, publishReqParams)
-	if err != nil {
-		t.Fatal("failed to convert publish request to CE", err)
-	}
-	if gotEvent.Context.GetID() != eventID {
-		t.Errorf("incorrect id, want: %s, got: %s", eventID, gotEvent.Context.GetDataContentType())
-	}
-	if gotEvent.Context.GetType() != wantEventType {
-		t.Errorf("incorrect eventType, want: %s, got: %s", wantEventType, gotEvent.Context.GetType())
-	}
-	if gotEvent.Context.GetTime() != timeNowFormatted {
-		t.Errorf("incorrect eventTime, want: %s, got: %s", timeNowFormatted, gotEvent.Context.GetTime())
-	}
-	if gotEvent.Context.GetSource() != bebNs {
-		t.Errorf("incorrect source want: %s, got: %s", bebNs, gotEvent.Context.GetDataContentType())
-	}
-	if gotEvent.Context.GetDataContentType() != internal.ContentTypeApplicationJSON {
-		t.Errorf("incorrect content-type, want: %s, got: %s", internal.ContentTypeApplicationJSON, gotEvent.Context.GetDataContentType())
-	}
+	wantBebNs := MessagingNamespace
+	wantEventID := givenEventID
+	wantEventType := formatEventType(givenEventTypePrefix, givenApplicationName, eventTypeMultiSegmentCombined, givenLegacyEventVersion)
+	wantTimeNowFormatted, _ := time.Parse(time.RFC3339, givenTimeNow)
+	wantDataContentType := internal.ContentTypeApplicationJSON
+
+	legacyTransformer := NewTransformer(wantBebNs, givenEventTypePrefix, nil)
+	gotEvent, err := legacyTransformer.convertPublishRequestToCloudEvent(givenApplicationName, givenPublishReqParams)
+	require.NoError(t, err)
+	assert.Equal(t, wantBebNs, gotEvent.Context.GetSource())
+	assert.Equal(t, wantEventID, gotEvent.Context.GetID())
+	assert.Equal(t, wantEventType, gotEvent.Context.GetType())
+	assert.Equal(t, wantTimeNowFormatted, gotEvent.Context.GetTime())
+	assert.Equal(t, wantDataContentType, gotEvent.Context.GetDataContentType())
+
+	wantLegacyEventVersion := givenLegacyEventVersion
 	gotExtension, err := gotEvent.Context.GetExtension(eventTypeVersionExtensionKey)
-	if err != nil {
-		t.Errorf("eventtype extension is missing: %v", err)
-	}
-	if gotExtension != legacyEventVersion {
-		t.Errorf("incorrect eventtype extension, want: %s, got: %s", legacyEventVersion, gotExtension)
-	}
+	assert.NoError(t, err)
+	assert.Equal(t, wantLegacyEventVersion, gotExtension)
 }
 
 func TestCombineEventTypeSegments(t *testing.T) {
@@ -235,29 +215,29 @@ func TestCombineEventTypeSegments(t *testing.T) {
 
 func TestRemoveNonAlphanumeric(t *testing.T) {
 	testCases := []struct {
-		name              string
-		givenEventType    string
-		expectedEventType string
+		name           string
+		givenEventType string
+		wantEventType  string
 	}{
 		{
-			name:              "unclean",
-			givenEventType:    "1-2+3=4.t&h$i#s.t!h@a%t.t;o/m$f*o{o]lery",
-			expectedEventType: "1234.this.that.tomfoolery",
+			name:           "unclean",
+			givenEventType: "1-2+3=4.t&h$i#s.t!h@a%t.t;o/m$f*o{o]lery",
+			wantEventType:  "1234.this.that.tomfoolery",
 		},
 		{
-			name:              "clean",
-			givenEventType:    "1234.this.that",
-			expectedEventType: "1234.this.that",
+			name:           "clean",
+			givenEventType: "1234.this.that",
+			wantEventType:  "1234.this.that",
 		},
 		{
-			name:              "single unclean segment",
-			givenEventType:    "t_o_m_f_o_o_l_e_r_y",
-			expectedEventType: "tomfoolery",
+			name:           "single unclean segment",
+			givenEventType: "t_o_m_f_o_o_l_e_r_y",
+			wantEventType:  "tomfoolery",
 		},
 		{
-			name:              "empty",
-			givenEventType:    "",
-			expectedEventType: "",
+			name:           "empty",
+			givenEventType: "",
+			wantEventType:  "",
 		},
 	}
 	for _, tc := range testCases {
@@ -265,10 +245,8 @@ func TestRemoveNonAlphanumeric(t *testing.T) {
 		t.Run(fmt.Sprintf("%s eventType", tc.name), func(t *testing.T) {
 			t.Parallel()
 
-			actual := removeNonAlphanumeric(tc.givenEventType)
-			if actual != tc.expectedEventType {
-				t.Errorf("invalid eventType; expected: %s, got %s", tc.expectedEventType, actual)
-			}
+			gotEventType := removeNonAlphanumeric(tc.givenEventType)
+			assert.Equal(t, tc.wantEventType, gotEventType)
 		})
 	}
 }
