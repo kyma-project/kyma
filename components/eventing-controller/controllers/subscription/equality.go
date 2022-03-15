@@ -1,4 +1,4 @@
-package beb
+package subscription
 
 import (
 	"reflect"
@@ -6,8 +6,8 @@ import (
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 )
 
-// conditionsEquals checks if two list of conditions are equal.
-func conditionsEquals(existing, expected []eventingv1alpha1.Condition) bool {
+// ConditionsEquals checks if two list of conditions are equal.
+func ConditionsEquals(existing, expected []eventingv1alpha1.Condition) bool {
 	// not equal if length is different
 	if len(existing) != len(expected) {
 		return false
@@ -20,7 +20,7 @@ func conditionsEquals(existing, expected []eventingv1alpha1.Condition) bool {
 	}
 
 	for _, value := range expected {
-		if !conditionEquals(existingMap[value.Type], value) {
+		if !ConditionEquals(existingMap[value.Type], value) {
 			return false
 		}
 	}
@@ -28,8 +28,8 @@ func conditionsEquals(existing, expected []eventingv1alpha1.Condition) bool {
 	return true
 }
 
-// conditionsEquals checks if two conditions are equal.
-func conditionEquals(existing, expected eventingv1alpha1.Condition) bool {
+// ConditionsEquals checks if two conditions are equal.
+func ConditionEquals(existing, expected eventingv1alpha1.Condition) bool {
 	isTypeEqual := existing.Type == expected.Type
 	isStatusEqual := existing.Status == expected.Status
 	isReasonEqual := existing.Reason == expected.Reason
@@ -42,7 +42,7 @@ func conditionEquals(existing, expected eventingv1alpha1.Condition) bool {
 	return true
 }
 
-func isSubscriptionStatusEqual(oldStatus, newStatus eventingv1alpha1.SubscriptionStatus) bool {
+func IsSubscriptionStatusEqual(oldStatus, newStatus eventingv1alpha1.SubscriptionStatus) bool {
 	oldStatusWithoutCond := oldStatus.DeepCopy()
 	newStatusWithoutCond := newStatus.DeepCopy()
 
@@ -50,5 +50,5 @@ func isSubscriptionStatusEqual(oldStatus, newStatus eventingv1alpha1.Subscriptio
 	oldStatusWithoutCond.Conditions = []eventingv1alpha1.Condition{}
 	newStatusWithoutCond.Conditions = []eventingv1alpha1.Condition{}
 
-	return reflect.DeepEqual(oldStatusWithoutCond, newStatusWithoutCond) && conditionsEquals(oldStatus.Conditions, newStatus.Conditions)
+	return reflect.DeepEqual(oldStatusWithoutCond, newStatusWithoutCond) && ConditionsEquals(oldStatus.Conditions, newStatus.Conditions)
 }

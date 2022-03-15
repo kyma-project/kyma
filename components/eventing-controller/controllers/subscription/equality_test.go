@@ -1,4 +1,4 @@
-package beb
+package subscription
 
 import (
 	"testing"
@@ -71,7 +71,7 @@ func Test_conditionsEquals(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			if gotEqualStatus := conditionsEquals(tc.conditionsSet1, tc.conditionsSet2); tc.wantEqualStatus != gotEqualStatus {
+			if gotEqualStatus := ConditionsEquals(tc.conditionsSet1, tc.conditionsSet2); tc.wantEqualStatus != gotEqualStatus {
 				t.Errorf("The list of conditions are not equal, want: %v but got: %v", tc.wantEqualStatus, gotEqualStatus)
 			}
 		})
@@ -148,7 +148,7 @@ func Test_conditionEquals(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			if gotEqualStatus := conditionEquals(tc.condition1, tc.condition2); tc.wantEqualStatus != gotEqualStatus {
+			if gotEqualStatus := ConditionEquals(tc.condition1, tc.condition2); tc.wantEqualStatus != gotEqualStatus {
 				t.Errorf("The conditions are not equal, want: %v but got: %v", tc.wantEqualStatus, gotEqualStatus)
 			}
 		})
@@ -215,7 +215,7 @@ func Test_isSubscriptionStatusEqual(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			if gotEqualStatus := isSubscriptionStatusEqual(tc.subscriptionStatus1, tc.subscriptionStatus2); tc.wantEqualStatus != gotEqualStatus {
+			if gotEqualStatus := IsSubscriptionStatusEqual(tc.subscriptionStatus1, tc.subscriptionStatus2); tc.wantEqualStatus != gotEqualStatus {
 				t.Errorf("The Subsciption Status are not equal, want: %v but got: %v", tc.wantEqualStatus, gotEqualStatus)
 			}
 		})

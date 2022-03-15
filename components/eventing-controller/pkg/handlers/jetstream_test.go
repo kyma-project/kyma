@@ -192,7 +192,7 @@ func TestJetStreamSubAfterSync_NoChange(t *testing.T) {
 	// by comparing the metadata of nats subscription
 	require.Len(t, jsBackend.subscriptions, 1)
 	jsSubject := jsBackend.GetJsSubjectToSubscribe(subject)
-	jsSubKey := jsBackend.generateJsSubKey(jsSubject, sub)
+	jsSubKey := jsBackend.GenerateJsSubKey(jsSubject, sub)
 	jsSub := jsBackend.subscriptions[jsSubKey]
 	require.NotNil(t, jsSub)
 	require.True(t, jsSub.IsValid())
@@ -282,7 +282,7 @@ func TestJetStreamSubAfterSync_SinkChange(t *testing.T) {
 	// by comparing the metadata of nats subscription
 	require.Len(t, jsBackend.subscriptions, 1)
 	jsSubject := jsBackend.GetJsSubjectToSubscribe(subject)
-	jsSubKey := jsBackend.generateJsSubKey(jsSubject, sub)
+	jsSubKey := jsBackend.GenerateJsSubKey(jsSubject, sub)
 	jsSub := jsBackend.subscriptions[jsSubKey]
 	require.NotNil(t, jsSub)
 	require.True(t, jsSub.IsValid())
@@ -374,7 +374,7 @@ func TestJetStreamSubAfterSync_FiltersChange(t *testing.T) {
 	// because the subscriptions should have being re-created for new subject
 	require.Len(t, jsBackend.subscriptions, 1)
 	jsSubject := jsBackend.GetJsSubjectToSubscribe(newSubject)
-	jsSubKey := jsBackend.generateJsSubKey(jsSubject, sub)
+	jsSubKey := jsBackend.GenerateJsSubKey(jsSubject, sub)
 
 	jsSub := jsBackend.subscriptions[jsSubKey]
 	require.NotNil(t, jsSub)
@@ -467,7 +467,7 @@ func TestJetStreamSubAfterSync_FilterAdded(t *testing.T) {
 	require.Len(t, jsBackend.subscriptions, 2)
 	// Verify that the nats subscriptions for first subject was not re-created
 	jsSubject := jsBackend.GetJsSubjectToSubscribe(firstSubject)
-	jsSubKey := jsBackend.generateJsSubKey(jsSubject, sub)
+	jsSubKey := jsBackend.GenerateJsSubKey(jsSubject, sub)
 
 	jsSub := jsBackend.subscriptions[jsSubKey]
 	require.NotNil(t, jsSub)
@@ -567,7 +567,7 @@ func TestJetStreamSubAfterSync_FilterRemoved(t *testing.T) {
 	require.Len(t, jsBackend.subscriptions, 1)
 	// Verify that the nats subscriptions for first subject was not re-created
 	jsSubject := jsBackend.GetJsSubjectToSubscribe(firstSubject)
-	jsSubKey := jsBackend.generateJsSubKey(jsSubject, sub)
+	jsSubKey := jsBackend.GenerateJsSubKey(jsSubject, sub)
 
 	jsSub := jsBackend.subscriptions[jsSubKey]
 	require.NotNil(t, jsSub)
@@ -677,7 +677,7 @@ func TestJetStreamSubAfterSync_MultipleSubs(t *testing.T) {
 	// check if the NATS subscription are NOT the same after sync for subscription 1
 	// because the subscriptions should have being re-created for new subject
 	jsSubject := jsBackend.GetJsSubjectToSubscribe(newSubject)
-	jsSubKey := jsBackend.generateJsSubKey(jsSubject, sub)
+	jsSubKey := jsBackend.GenerateJsSubKey(jsSubject, sub)
 
 	jsSub := jsBackend.subscriptions[jsSubKey]
 	require.NotNil(t, jsSub)
@@ -698,7 +698,7 @@ func TestJetStreamSubAfterSync_MultipleSubs(t *testing.T) {
 	// because the subscriptions should NOT have being re-created as
 	// subscription 2 was not modified
 	jsSubject = jsBackend.GetJsSubjectToSubscribe(cleanSubjectSub2)
-	jsSubKey = jsBackend.generateJsSubKey(jsSubject, sub2)
+	jsSubKey = jsBackend.GenerateJsSubKey(jsSubject, sub2)
 
 	jsSub = jsBackend.subscriptions[jsSubKey]
 	require.NotNil(t, jsSub)
@@ -724,14 +724,14 @@ func TestJetStream_isJsSubAssociatedWithKymaSub(t *testing.T) {
 	// create subscription 1 and its JetStream subscription
 	cleanSubject1 := "subOne"
 	sub1 := evtesting.NewSubscription(cleanSubject1, "foo", evtesting.WithNotCleanFilter())
-	jsSub1Key := jsBackend.generateJsSubKey(
+	jsSub1Key := jsBackend.GenerateJsSubKey(
 		jsBackend.GetJsSubjectToSubscribe(cleanSubject1),
 		sub1)
 
 	// create subscription 2 and its JetStream subscription
 	cleanSubject2 := "subOneTwo"
 	sub2 := evtesting.NewSubscription(cleanSubject2, "foo", evtesting.WithNotCleanFilter())
-	jsSub2Key := jsBackend.generateJsSubKey(
+	jsSub2Key := jsBackend.GenerateJsSubKey(
 		jsBackend.GetJsSubjectToSubscribe(cleanSubject2),
 		sub2)
 
@@ -913,7 +913,7 @@ func TestJSSubscriptionWithMaxInFlightChange(t *testing.T) {
 
 	// then
 	require.Eventually(t, func() bool {
-		consumerName := jsBackend.generateJsSubKey(sub.Status.CleanEventTypes[0], sub)
+		consumerName := jsBackend.GenerateJsSubKey(sub.Status.CleanEventTypes[0], sub)
 		// fetch consumer info from JetStream
 		consumerInfo, err := jsBackend.jsCtx.ConsumerInfo(jsBackend.config.JSStreamName, consumerName)
 		require.NoError(t, err)
@@ -961,8 +961,7 @@ func TestJSSubscriptionUsingCESDK(t *testing.T) {
 	require.NoError(t, jsBackend.DeleteSubscription(sub))
 }
 
-// TODO: Enable this test once the ConnCloseHandler is implemented
-/*func TestSubscription_JetStreamServerRestart(t *testing.T) {
+func TestSubscription_JetStreamServerRestart(t *testing.T) {
 	// given
 	testEnvironment := setupTestEnvironment(t)
 	jsBackend := testEnvironment.jsBackend
@@ -1008,16 +1007,19 @@ func TestJSSubscriptionUsingCESDK(t *testing.T) {
 		return jsBackend.conn.IsConnected()
 	}, 60*time.Second, 2*time.Second)
 
-	// After reconnect, event delivery should work again
-	ev2data := "newsampledata"
-	require.NoError(t, SendEventToJetStream(jsBackend, ev2data))
-	expectedEv2Data := fmt.Sprintf("\"%s\"", ev2data)
-	require.NoError(t, subscriber.CheckEvent(expectedEv2Data))
-}*/
+	// TODO: After reconnect, event delivery should work again
+	// https://github.com/kyma-project/kyma/issues/13609
+	//ev2data := "newsampledata"
+	//require.NoError(t, SendEventToJetStream(jsBackend, ev2data))
+	//expectedEv2Data := fmt.Sprintf("\"%s\"", ev2data)
+	//require.NoError(t, subscriber.CheckEvent(expectedEv2Data))
+}
 
 func defaultNatsConfig(url string) env.NatsConfig {
 	return env.NatsConfig{
 		URL:                     url,
+		MaxReconnects:           10,
+		ReconnectWait:           3 * time.Second,
 		JSStreamName:            defaultStreamName,
 		JSStreamStorageType:     JetStreamStorageTypeMemory,
 		JSStreamRetentionPolicy: JetStreamRetentionPolicyInterest,

@@ -86,7 +86,7 @@ func (js *JetStream) Initialize(connCloseHandler ConnClosedHandler) error {
 	if err := js.validateConfig(); err != nil {
 		return err
 	}
-	if err := js.initNATSConn(); err != nil {
+	if err := js.initNATSConn(connCloseHandler); err != nil {
 		return err
 	}
 	if err := js.initJSContext(); err != nil {
@@ -95,7 +95,6 @@ func (js *JetStream) Initialize(connCloseHandler ConnClosedHandler) error {
 	if err := js.initCloudEventClient(js.config); err != nil {
 		return err
 	}
-	js.initJSConnCloseHandler(connCloseHandler)
 	return js.ensureStreamExists()
 }
 
@@ -141,7 +140,7 @@ func (js *JetStream) SyncSubscription(subscription *eventingv1alpha1.Subscriptio
 
 	callback := js.getCallback(subKeyPrefix)
 	for _, subject := range subscription.Status.CleanEventTypes {
-		jsSubKey := js.generateJsSubKey(subject, subscription)
+		jsSubKey := js.GenerateJsSubKey(subject, subscription)
 
 		if js.conn.Status() != nats.CONNECTED {
 			if err := js.Initialize(js.connClosedHandler); err != nil {
@@ -198,7 +197,7 @@ func (js *JetStream) DeleteSubscription(subscription *eventingv1alpha1.Subscript
 	// cleanup consumers on nats-server
 	// in-case data in js.subscriptions[] was lost due to handler restart
 	for _, subject := range subscription.Status.CleanEventTypes {
-		jsSubKey := js.generateJsSubKey(subject, subscription)
+		jsSubKey := js.GenerateJsSubKey(subject, subscription)
 		if err := js.deleteConsumerFromJetStream(jsSubKey, log); err != nil {
 			return err
 		}
@@ -231,7 +230,7 @@ func (js *JetStream) validateConfig() error {
 	return nil
 }
 
-func (js *JetStream) initNATSConn() error {
+func (js *JetStream) initNATSConn(connCloseHandler ConnClosedHandler) error {
 	if js.conn == nil || js.conn.Status() != nats.CONNECTED {
 		jsOptions := []nats.Option{
 			nats.RetryOnFailedConnect(true),
@@ -243,6 +242,7 @@ func (js *JetStream) initNATSConn() error {
 			return errors.Wrapf(err, "failed to connect to NATS JetStream")
 		}
 		js.conn = conn
+		js.connClosedHandler = connCloseHandler
 		if js.connClosedHandler != nil {
 			js.conn.SetClosedHandler(nats.ConnHandler(js.connClosedHandler))
 		}
@@ -257,13 +257,6 @@ func (js *JetStream) initJSContext() error {
 	}
 	js.jsCtx = jsCtx
 	return nil
-}
-
-func (js *JetStream) initJSConnCloseHandler(connCloseHandler ConnClosedHandler) {
-	js.connClosedHandler = connCloseHandler
-	if js.connClosedHandler != nil {
-		js.conn.SetClosedHandler(nats.ConnHandler(js.connClosedHandler))
-	}
 }
 
 func (js *JetStream) ensureStreamExists() error {
@@ -428,8 +421,8 @@ func (js *JetStream) deleteConsumerFromJetStream(name string, log *zap.SugaredLo
 	return nil
 }
 
-// generateJsSubKey generates an encoded unique key for JetStream subscription
-func (js *JetStream) generateJsSubKey(subject string, subscription *eventingv1alpha1.Subscription) string {
+// GenerateJsSubKey generates an encoded unique key for JetStream subscription
+func (js *JetStream) GenerateJsSubKey(subject string, subscription *eventingv1alpha1.Subscription) string {
 	return encodeString(fmt.Sprintf("%s/%s", createKeyPrefix(subscription), subject))
 }
 
@@ -452,6 +445,12 @@ func createJSSubscriptionNamespacedName(jsSubKey string) (types.NamespacedName, 
 	nsn.Namespace = nnValues[0]
 	nsn.Name = nnValues[1]
 	return nsn, nil
+}
+
+// GetAllSubscriptions returns the map which contains details of all subscriptions and consumers
+// Use this only for testing purposes
+func (js *JetStream) GetAllSubscriptions() map[string]*nats.Subscription {
+	return js.subscriptions
 }
 
 func (js *JetStream) namedLogger() *zap.SugaredLogger {

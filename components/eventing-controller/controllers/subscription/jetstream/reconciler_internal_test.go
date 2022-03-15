@@ -1,24 +1,21 @@
-// This file contains unit tests for the NATS subscription reconciler.
-// It uses the testing.T and stretchr/testify libraries to perform assertions.
-// TestEnvironment struct mocks the required resources.
-package nats
+package jetstream
 
 import (
 	"context"
 	"testing"
 	"time"
 
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/sink"
-
-	"github.com/stretchr/testify/require"
-
 	kymalogger "github.com/kyma-project/kyma/common/logging/logger"
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
+	equality "github.com/kyma-project/kyma/components/eventing-controller/controllers/subscription"
 	"github.com/kyma-project/kyma/components/eventing-controller/logger"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/eventtype"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/mocks"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/sink"
 	controllertesting "github.com/kyma-project/kyma/components/eventing-controller/testing"
+	"github.com/pkg/errors"
+	"github.com/stretchr/testify/require"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/kubernetes/scheme"
@@ -68,7 +65,7 @@ func Test_handleSubscriptionDeletion(t *testing.T) {
 		testCase := tC
 		t.Run(testCase.name, func(t *testing.T) {
 			// given
-			subscription := NewTestSubscription(
+			subscription := controllertesting.NewSubscription(subscriptionName, namespaceName,
 				controllertesting.WithFinalizers(testCase.givenFinalizers),
 			)
 			err := r.Client.Create(testEnvironment.Context, subscription)
@@ -105,85 +102,92 @@ func Test_syncSubscriptionStatus(t *testing.T) {
 	testEnvironment := setupTestEnvironment(t)
 	ctx, r := testEnvironment.Context, testEnvironment.Reconciler
 
-	message := "message is not required for tests"
+	jetStreamError := errors.New("Jetstream is not ready")
 	falseNatsSubActiveCondition := eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionSubscriptionActive,
 		eventingv1alpha1.ConditionReasonNATSSubscriptionNotActive,
-		corev1.ConditionFalse, message)
+		corev1.ConditionFalse, jetStreamError.Error())
 	trueNatsSubActiveCondition := eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionSubscriptionActive,
 		eventingv1alpha1.ConditionReasonNATSSubscriptionActive,
-		corev1.ConditionTrue, message)
+		corev1.ConditionTrue, "")
 
 	testCases := []struct {
 		name              string
 		givenSub          *eventingv1alpha1.Subscription
 		givenNatsSubReady bool
-		givenForceStatus  bool
+		givenUpdateStatus bool
+		givenError        error
 		wantConditions    []eventingv1alpha1.Condition
 		wantStatus        bool
 	}{
 		{
 			name: "Subscription with no conditions should stay not ready with false condition",
-			givenSub: NewTestSubscription(
+			givenSub: controllertesting.NewSubscription(subscriptionName, namespaceName,
 				controllertesting.WithConditions([]eventingv1alpha1.Condition{}),
 				controllertesting.WithStatus(true),
 			),
 			givenNatsSubReady: false,
-			givenForceStatus:  false,
+			givenUpdateStatus: false,
+			givenError:        jetStreamError,
 			wantConditions:    []eventingv1alpha1.Condition{falseNatsSubActiveCondition},
 			wantStatus:        false,
 		},
 		{
 			name: "Subscription with false ready condition should stay not ready with false condition",
-			givenSub: NewTestSubscription(
+			givenSub: controllertesting.NewSubscription(subscriptionName, namespaceName,
 				controllertesting.WithConditions([]eventingv1alpha1.Condition{falseNatsSubActiveCondition}),
 				controllertesting.WithStatus(false),
 			),
 			givenNatsSubReady: false,
-			givenForceStatus:  false,
+			givenUpdateStatus: false,
+			givenError:        jetStreamError,
 			wantConditions:    []eventingv1alpha1.Condition{falseNatsSubActiveCondition},
 			wantStatus:        false,
 		},
 		{
 			name: "Subscription should become ready because of isNatsSubReady flag",
-			givenSub: NewTestSubscription(
+			givenSub: controllertesting.NewSubscription(subscriptionName, namespaceName,
 				controllertesting.WithConditions([]eventingv1alpha1.Condition{falseNatsSubActiveCondition}),
 				controllertesting.WithStatus(false),
 			),
 			givenNatsSubReady: true, // isNatsSubReady
-			givenForceStatus:  false,
+			givenUpdateStatus: false,
+			givenError:        nil,
 			wantConditions:    []eventingv1alpha1.Condition{trueNatsSubActiveCondition},
 			wantStatus:        true,
 		},
 		{
 			name: "Subscription should stay with ready condition and status",
-			givenSub: NewTestSubscription(
+			givenSub: controllertesting.NewSubscription(subscriptionName, namespaceName,
 				controllertesting.WithConditions([]eventingv1alpha1.Condition{trueNatsSubActiveCondition}),
 				controllertesting.WithStatus(true),
 			),
 			givenNatsSubReady: true,
-			givenForceStatus:  false,
+			givenUpdateStatus: false,
+			givenError:        nil,
 			wantConditions:    []eventingv1alpha1.Condition{trueNatsSubActiveCondition},
 			wantStatus:        true,
 		},
 		{
 			name: "Subscription should become not ready because of false isNatsSubReady flag",
-			givenSub: NewTestSubscription(
+			givenSub: controllertesting.NewSubscription(subscriptionName, namespaceName,
 				controllertesting.WithConditions([]eventingv1alpha1.Condition{trueNatsSubActiveCondition}),
 				controllertesting.WithStatus(true),
 			),
 			givenNatsSubReady: false, // isNatsSubReady
-			givenForceStatus:  false,
+			givenUpdateStatus: false,
+			givenError:        jetStreamError,
 			wantConditions:    []eventingv1alpha1.Condition{falseNatsSubActiveCondition},
 			wantStatus:        false,
 		},
 		{
 			name: "Subscription should stay with the same condition, but still updated because of the forceUpdateStatus flag",
-			givenSub: NewTestSubscription(
+			givenSub: controllertesting.NewSubscription(subscriptionName, namespaceName,
 				controllertesting.WithConditions([]eventingv1alpha1.Condition{trueNatsSubActiveCondition}),
 				controllertesting.WithStatus(true),
 			),
 			givenNatsSubReady: true,
-			givenForceStatus:  true,
+			givenUpdateStatus: true,
+			givenError:        nil,
 			wantConditions:    []eventingv1alpha1.Condition{trueNatsSubActiveCondition},
 			wantStatus:        true,
 		},
@@ -197,7 +201,7 @@ func Test_syncSubscriptionStatus(t *testing.T) {
 			require.NoError(t, err)
 
 			// when
-			err = r.syncSubscriptionStatus(ctx, sub, testCase.givenNatsSubReady, testCase.givenForceStatus, message)
+			err = r.syncSubscriptionStatus(ctx, sub, testCase.givenUpdateStatus, testCase.givenError)
 			require.NoError(t, err)
 
 			// then
@@ -219,6 +223,11 @@ func Test_syncInitialStatus(t *testing.T) {
 	testEnvironment := setupTestEnvironment(t)
 	r := testEnvironment.Reconciler
 
+	cleanSubjects := []string{controllertesting.OrderCreatedEventType}
+	newSubjects := []string{controllertesting.OrderCreatedEventTypeNotClean}
+	testEnvironment.Backend.On("GetJetStreamSubjects", cleanSubjects).Return(cleanSubjects)
+	testEnvironment.Backend.On("GetJetStreamSubjects", newSubjects).Return(newSubjects)
+
 	wantSubConfig := eventingv1alpha1.MergeSubsConfigs(nil, &defaultSubsConfig)
 	newSubsConfig := env.DefaultSubscriptionConfig{MaxInFlightMessages: 5}
 	updatedSubConfig := eventingv1alpha1.MergeSubsConfigs(nil, &newSubsConfig)
@@ -231,20 +240,20 @@ func Test_syncInitialStatus(t *testing.T) {
 	}{
 		{
 			name: "A new Subscription must be updated with cleanEventTypes and config and return true",
-			givenSub: NewTestSubscription(
+			givenSub: controllertesting.NewSubscription(subscriptionName, namespaceName,
 				controllertesting.WithStatus(false),
 				controllertesting.WithFilter("", controllertesting.OrderCreatedEventType),
 			),
 			wantSubStatus: eventingv1alpha1.SubscriptionStatus{
 				Ready:           false,
-				CleanEventTypes: []string{controllertesting.OrderCreatedEventType},
+				CleanEventTypes: cleanSubjects,
 				Config:          wantSubConfig,
 			},
 			wantStatus: true,
 		},
 		{
 			name: "A subscription with the same cleanEventTypes and config must return false",
-			givenSub: NewTestSubscription(
+			givenSub: controllertesting.NewSubscription(subscriptionName, namespaceName,
 				controllertesting.WithStatus(true),
 				controllertesting.WithFilter("", controllertesting.OrderCreatedEventType),
 				controllertesting.WithStatusCleanEventTypes([]string{controllertesting.OrderCreatedEventType}),
@@ -252,14 +261,14 @@ func Test_syncInitialStatus(t *testing.T) {
 			),
 			wantSubStatus: eventingv1alpha1.SubscriptionStatus{
 				Ready:           true,
-				CleanEventTypes: []string{controllertesting.OrderCreatedEventType},
+				CleanEventTypes: cleanSubjects,
 				Config:          wantSubConfig,
 			},
 			wantStatus: false,
 		},
 		{
 			name: "A subscription with the same cleanEventTypes and new config must return true",
-			givenSub: NewTestSubscription(
+			givenSub: controllertesting.NewSubscription(subscriptionName, namespaceName,
 				controllertesting.WithStatus(true),
 				controllertesting.WithFilter("", controllertesting.OrderCreatedEventType),
 				controllertesting.WithStatusCleanEventTypes([]string{controllertesting.OrderCreatedEventType}),
@@ -267,22 +276,22 @@ func Test_syncInitialStatus(t *testing.T) {
 			),
 			wantSubStatus: eventingv1alpha1.SubscriptionStatus{
 				Ready:           true,
-				CleanEventTypes: []string{controllertesting.OrderCreatedEventType},
+				CleanEventTypes: cleanSubjects,
 				Config:          updatedSubConfig,
 			},
 			wantStatus: true,
 		},
 		{
 			name: "A subscription with changed cleanEventTypes and the same config must return true",
-			givenSub: NewTestSubscription(
+			givenSub: controllertesting.NewSubscription(subscriptionName, namespaceName,
 				controllertesting.WithStatus(true),
 				controllertesting.WithFilter("", controllertesting.OrderCreatedEventTypeNotClean),
-				controllertesting.WithStatusCleanEventTypes([]string{controllertesting.OrderCreatedEventType}),
+				controllertesting.WithStatusCleanEventTypes(cleanSubjects),
 				controllertesting.WithStatusConfig(defaultSubsConfig),
 			),
 			wantSubStatus: eventingv1alpha1.SubscriptionStatus{
 				Ready:           true,
-				CleanEventTypes: []string{controllertesting.OrderCreatedEventTypeNotClean},
+				CleanEventTypes: newSubjects,
 				Config:          wantSubConfig,
 			},
 			wantStatus: true,
@@ -313,7 +322,7 @@ func Test_syncInitialStatus(t *testing.T) {
 type TestEnvironment struct {
 	Context    context.Context
 	Client     *client.WithWatch
-	Backend    *mocks.NatsBackend
+	Backend    *mocks.JetStreamBackend
 	Reconciler *Reconciler
 	Logger     *logger.Logger
 	Recorder   *record.FakeRecorder
@@ -321,7 +330,7 @@ type TestEnvironment struct {
 
 // setupTestEnvironment is a TestEnvironment constructor
 func setupTestEnvironment(t *testing.T) *TestEnvironment {
-	mockedBackend := &mocks.NatsBackend{}
+	mockedBackend := &mocks.JetStreamBackend{}
 	ctx := context.Background()
 	fakeClient := createFakeClient(t)
 	recorder := &record.FakeRecorder{}
@@ -361,9 +370,11 @@ func createFakeClient(t *testing.T) client.WithWatch {
 	return fake.NewClientBuilder().WithScheme(scheme.Scheme).Build()
 }
 
-// NewTestSubscription creates a test subscription
-func NewTestSubscription(opts ...controllertesting.SubscriptionOpt) *eventingv1alpha1.Subscription {
-	return controllertesting.NewSubscription(subscriptionName, namespaceName, opts...)
+func ensureSubscriptionMatchesConditionsAndStatus(t *testing.T, subscription eventingv1alpha1.Subscription, wantConditions []eventingv1alpha1.Condition, wantStatus bool) {
+	require.Equal(t, len(wantConditions), len(subscription.Status.Conditions))
+	comparisonResult := equality.ConditionsEquals(wantConditions, subscription.Status.Conditions)
+	require.True(t, comparisonResult)
+	require.Equal(t, wantStatus, subscription.Status.Ready)
 }
 
 func fetchTestSubscription(ctx context.Context, r *Reconciler) (eventingv1alpha1.Subscription, error) {
@@ -381,13 +392,4 @@ func ensureFinalizerMatch(t *testing.T, subscription *eventingv1alpha1.Subscript
 	} else {
 		require.Equal(t, wantFinalizers, subscription.ObjectMeta.Finalizers)
 	}
-}
-
-func ensureSubscriptionMatchesConditionsAndStatus(t *testing.T, subscription eventingv1alpha1.Subscription, wantConditions []eventingv1alpha1.Condition, wantStatus bool) {
-	require.Equal(t, len(wantConditions), len(subscription.Status.Conditions))
-	for i := range wantConditions {
-		comparisonResult := equalsConditionsIgnoringTime(wantConditions[i], subscription.Status.Conditions[i])
-		require.True(t, comparisonResult)
-	}
-	require.Equal(t, wantStatus, subscription.Status.Ready)
 }
