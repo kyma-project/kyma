@@ -22,9 +22,8 @@ import (
 	"net/http"
 
 	"github.com/google/uuid"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-
 	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/api/v1alpha1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/fluentbit"
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/fs"
@@ -42,25 +41,26 @@ const (
 	fluentBitParsersConfigMapKey   = "parsers.conf"
 )
 
-// TODO(user): change verbs to "verbs=create;update;delete" if you want to enable deletion validation.
 //+kubebuilder:webhook:path=/validate-logpipeline,mutating=false,failurePolicy=fail,sideEffects=None,groups=telemetry.kyma-project.io,resources=logpipelines,verbs=create;update,versions=v1alpha1,name=vlogpipeline.kb.io,admissionReviewVersions=v1
 type LogPipelineValidator struct {
 	client.Client
 
 	fluentBitConfigMap types.NamespacedName
-	cmd          fluentbit.CmdRunner
+	cfg                fluentbit.ConfigValidator
+	fsWrapper          fs.Wrapper
 
 	decoder *admission.Decoder
 }
 
-func NewLogPipeLineValidator(client client.Client, fluentBitConfigMap string, namespace string, cmdRunner fluentbit.CmdRunner) *LogPipelineValidator {
+func NewLogPipeLineValidator(client client.Client, fluentBitConfigMap string, namespace string, cfg fluentbit.ConfigValidator, fsWrapper fs.Wrapper) *LogPipelineValidator {
 	return &LogPipelineValidator{
 		Client: client,
 		fluentBitConfigMap: types.NamespacedName{
 			Name:      fluentBitConfigMap,
 			Namespace: namespace,
 		},
-		cmd: cmdRunner,
+		cfg:       cfg,
+		fsWrapper: fsWrapper,
 	}
 }
 
@@ -95,11 +95,11 @@ func (v *LogPipelineValidator) Handle(ctx context.Context, req admission.Request
 func (v *LogPipelineValidator) validateLogPipeline(ctx context.Context, currentBaseDirectory string, logPipeline *telemetryv1alpha1.LogPipeline) error {
 	log := logf.FromContext(ctx)
 
-	//defer func() {
-	//	if err := fs.RemoveDirectory(currentBaseDirectory); err != nil {
-	//		log.Error(err, "Failed to remove Fluent Bit config directory")
-	//	}
-	//}()
+	defer func() {
+		if err := v.fsWrapper.RemoveDirectory(currentBaseDirectory); err != nil {
+			log.Error(err, "Failed to remove Fluent Bit config directory")
+		}
+	}()
 
 	configFiles, err := v.getFluentBitConfig(ctx, currentBaseDirectory, logPipeline)
 	if err != nil {
@@ -108,13 +108,13 @@ func (v *LogPipelineValidator) validateLogPipeline(ctx context.Context, currentB
 
 	log.Info("Fluent Bit config files count", "count", len(configFiles))
 	for _, configFile := range configFiles {
-		if err := fs.CreateAndWrite(configFile); err != nil {
+		if err := v.fsWrapper.CreateAndWrite(configFile); err != nil {
 			log.Error(err, "Failed to write Fluent Bit config file", "filename", configFile.Name, "path", configFile.Path)
 			return err
 		}
 	}
 
-	if err = fluentbit.Validate(ctx, v.cmd, fmt.Sprintf("%s/fluent-bit.conf", currentBaseDirectory)); err != nil {
+	if err = v.cfg.Validate(ctx, fmt.Sprintf("%s/fluent-bit.conf", currentBaseDirectory)); err != nil {
 		log.Error(err, "Failed to validate Fluent Bit config")
 		return err
 	}

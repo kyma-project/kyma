@@ -13,17 +13,19 @@ const (
 	fluentBitBinPath = "fluent-bit/bin/fluent-bit"
 )
 
-type CmdRunner interface {
-	Run(ctx context.Context, name string, args ...string) (string, error)
+//go:generate mockery --name ConfigValidator --filename config_validator.go
+type ConfigValidator interface {
+	RunCmd(ctx context.Context, name string, args ...string) (string, error)
+	Validate(ctx context.Context, configFilePath string) error
 }
 
-func NewCmdRunner() CmdRunner {
-	return &cmdRunner{}
+type configValidator struct{}
+
+func NewConfigValidator() ConfigValidator {
+	return &configValidator{}
 }
 
-type cmdRunner struct{}
-
-func (e *cmdRunner) Run(ctx context.Context, name string, args ...string) (string, error) {
+func (v *configValidator) RunCmd(ctx context.Context, name string, args ...string) (string, error) {
 	cmd := exec.CommandContext(ctx, name, args...)
 
 	outBytes, err := cmd.CombinedOutput()
@@ -31,8 +33,8 @@ func (e *cmdRunner) Run(ctx context.Context, name string, args ...string) (strin
 	return out, err
 }
 
-func Validate(ctx context.Context, cmd CmdRunner, configFilePath string) error {
-	res, err := cmd.Run(ctx, fluentBitBinPath, "--dry-run", "--quiet", "--config", configFilePath)
+func (v *configValidator) Validate(ctx context.Context, configFilePath string) error {
+	res, err := v.RunCmd(ctx, fluentBitBinPath, "--dry-run", "--quiet", "--config", configFilePath)
 	if err != nil {
 		if strings.Contains(res, "Error") {
 			return errors.New(extractError(res))
@@ -45,20 +47,20 @@ func Validate(ctx context.Context, cmd CmdRunner, configFilePath string) error {
 
 // extractError extracts the error message from the output of fluent-bit
 // Thereby, it supports the following error patterns:
-// 1. Error: <msg>. Aborting
-// 2. Error <msg>\nError: Configuration file contains errors. Aborting
+// 1. Error <msg>\nError: Configuration file contains errors. Aborting
+// 2. Error: <msg>. Aborting
 // 3. [<time>] [  Error] File <filename>\n[<time>] [  Error] Error in line 4: <msg>
 func extractError(output string) string {
-	r1 := regexp.MustCompile(`(?P<label>Error: )(?P<description>.+\.)`)
+	r1 := regexp.MustCompile(`(?P<description>Error.+)\n(?P<label>Error:.+)`)
 
 	if r1Matches := r1.FindStringSubmatch(output); r1Matches != nil {
-		return r1Matches[2] // 0: complete output, 1: label, 2: description
+		return r1Matches[1] // 0: complete output, 1: description, 2: label
 	}
 
-	r2 := regexp.MustCompile(`(?P<description>Error.+)\n(?P<label>Error:.+)`)
+	r2 := regexp.MustCompile(`(?P<label>Error: )(?P<description>.+\.)`)
 
 	if r2Matches := r2.FindStringSubmatch(output); r2Matches != nil {
-		return r2Matches[1] // 0: complete output, 1: description, 2: label
+		return r2Matches[2] // 0: complete output, 1: label, 2: description
 	}
 
 	r3 := regexp.MustCompile(`Error\s.+`)

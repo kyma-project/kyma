@@ -15,11 +15,11 @@ spec:
   filters:
     - content: |
         Name                  multiline
-               Match                 *
+        Match                 *
         Multiline.key_content log
         Multiline.parser      go, multiline-custom-regex
     - content: |
-        Name    grepaaa
+        Name    grep
         Match   *
         Regex   $kubernetes['labels']['app'] my-deployment
     - content: |

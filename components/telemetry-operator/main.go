@@ -23,6 +23,7 @@ import (
 
 	"github.com/go-logr/zapr"
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/fluentbit"
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/fs"
 
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/webhook"
 	k8sWebhook "sigs.k8s.io/controller-runtime/pkg/webhook"
@@ -122,9 +123,15 @@ func main() {
 		os.Exit(1)
 	}
 
+	logPipelineValidator := webhook.NewLogPipeLineValidator(mgr.GetClient(),
+		fluentBitConfigMap,
+		fluentBitNs,
+		fluentbit.NewConfigValidator(),
+		fs.NewWrapper(),
+	)
 	mgr.GetWebhookServer().Register(
 		"/validate-logpipeline",
-		&k8sWebhook.Admission{Handler: webhook.NewLogPipeLineValidator(mgr.GetClient(), fluentBitConfigMap, fluentBitNs, fluentbit.NewCmdRunner())})
+		&k8sWebhook.Admission{Handler: logPipelineValidator})
 
 	reconciler := controllers.NewLogPipelineReconciler(
 		mgr.GetClient(),
