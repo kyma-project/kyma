@@ -11,9 +11,8 @@ const {
 } = require('../logging');
 
 describe('Executing Standard Testsuite:', function() {
-  const testStartTimestamp = new Date().toISOString();
   commerceMockTests();
   gettingStartedGuideTests();
   monitoringTests();
-  loggingTests(testStartTimestamp);
+  loggingTests();
 });

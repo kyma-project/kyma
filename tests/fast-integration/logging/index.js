@@ -1,7 +1,7 @@
 const logging = require('./helpers');
 const {lokiPortForward} = require('./client');
 
-function loggingTests(startTimestamp) {
+function loggingTests() {
   describe('Logging Tests:', function() {
     this.timeout(5 * 60 * 1000); // 5 min
     this.slow(5 * 1000);
@@ -14,10 +14,6 @@ function loggingTests(startTimestamp) {
 
     after(async () => {
       cancelPortForward();
-    });
-
-    it('Logs should be retrievabe through Loki', async () => {
-      await logging.checkLokiLogs(startTimestamp);
     });
 
     it('Retention Period and Max look-back Period should be 120h', async () => {

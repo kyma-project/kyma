@@ -23,7 +23,6 @@ describe('Upgrade test tests', function() {
   this.slow(5000);
   let initialRestarts = null;
   const testNamespace = 'test';
-  const testStartTimestamp = new Date().toISOString();
 
   it('Listing all pods in cluster', async function() {
     initialRestarts = await getContainerRestartsForAllNamespaces();
@@ -50,7 +49,7 @@ describe('Upgrade test tests', function() {
     printRestartReport(initialRestarts, afterTestRestarts);
   });
 
-  loggingTests(testStartTimestamp);
+  loggingTests();
 
   monitoringTests();
 });
