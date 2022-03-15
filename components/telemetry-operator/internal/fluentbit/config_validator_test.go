@@ -17,9 +17,10 @@ func TestExtractError(t *testing.T) {
 			name:          "No error present",
 			output:        "configuration test is successful",
 			expectedError: "",
-		}, {
+		},
+		{
 			name:          "Single line error present",
-			output:        "Error: Invalid flush value. Aborting",
+			output:        "\u001b[1m\u001B[91mError\u001B[0m: Invalid flush value. Aborting",
 			expectedError: "Invalid flush value.",
 		},
 		{
