@@ -10,7 +10,7 @@ import (
 )
 
 const (
-	fluentBitBinPath = "/bin/fluent-bit"
+	fluentBitBinPath = "fluent-bit/bin/fluent-bit"
 )
 
 type CmdRunner interface {
