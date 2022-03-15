@@ -16,7 +16,7 @@
 /hack @clebs
 
 # The `installation` directory and subdirectories
-/installation/ @Tomasz-Smelcerz-SAP @strekm @werdes72 @mjakobczyk @m00g3n @pPrecel @dariusztutaj
+/installation/ @khlifi411 @jeremyharisch @ruanxin @tobiscr @moelsayed @clebs @Tomasz-Smelcerz-SAP @jakobmoellersap @adityabhatia
 
 # The eventing crds
 /installation/resources/crds/eventing/ @k15r @lilitgh @marcobebway @pxsalehi @mfaizanse @friedrichwilken @vladislavpaskar @radufa @raypinto
