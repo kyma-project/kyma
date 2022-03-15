@@ -4,7 +4,7 @@ kind: ValidatingWebhookConfiguration
 metadata:
   labels:
     app.kubernetes.io/name: telemetry-operator-webhook
-    app.kubernetes.io/instance: { { .Release.Name } }
+    app.kubernetes.io/instance: telemetry
     kyma-project.io/component: controller
     control-plane: telemetry-operator
   name: validation.webhook.telemetry.kyma-project.io
