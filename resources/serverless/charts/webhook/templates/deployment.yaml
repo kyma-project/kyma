@@ -34,13 +34,13 @@ spec:
     spec:
       serviceAccountName: {{ template "webhook.fullname" . }}
       volumes:
-        - name: serverless-k8s-webhook-cert
+        - name: serverless-webhook
           secret:
-            secretName: serverless-k8s-webhook-cert
+            secretName: serverless-webhook
       containers:
         - name: webhook
           volumeMounts:
-            - name: serverless-k8s-webhook-cert
+            - name: serverless-webhook
               mountPath: /tmp/k8s-webhook-server/serving-certs
           image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.function_webhook) }}"
           imagePullPolicy: "{{ .Values.image.pullPolicy }}"
