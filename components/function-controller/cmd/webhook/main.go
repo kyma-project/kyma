@@ -2,12 +2,15 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"net/http"
 	"path"
 	"strings"
 
 	"github.com/go-logr/zapr"
+	v1 "k8s.io/api/admission/v1"
 	admissionregistrationv1 "k8s.io/api/admissionregistration/v1"
 
 	"github.com/kyma-project/kyma/components/function-controller/internal/webhook"
@@ -28,6 +31,8 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/log"
 	ctrlzap "sigs.k8s.io/controller-runtime/pkg/log/zap"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
+	ctrlwebhook "sigs.k8s.io/controller-runtime/pkg/webhook"
+	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
 )
 
 type config struct {
@@ -67,19 +72,122 @@ func main() {
 		panic(err)
 	}
 
-	if err := setupWebhooks(mgr); err != nil {
-		panic(err)
-	}
+	// if err := setupWebhooks(mgr); err != nil {
+	// 	panic(err)
+	// }
 	// configure the webhook server
 	whs := mgr.GetWebhookServer()
 	whs.CertName = "server-cert.pem"
 	whs.KeyName = "server-key.pem"
+
+	whs.Register("/defaulting",
+		&ctrlwebhook.Admission{
+			Handler: &defaultingWebHook{
+				config: webhook.ReadDefaultingConfig(),
+				client: mgr.GetClient(),
+			},
+		},
+	)
+	whs.Register("/validation",
+		&ctrlwebhook.Admission{
+			Handler: &validatingWebHook{
+				config: webhook.ReadValidationConfig(),
+				client: mgr.GetClient(),
+			},
+		},
+	)
 
 	err = mgr.Start(ctrl.SetupSignalHandler())
 	if err != nil {
 		// handle error
 		panic(err)
 	}
+}
+
+type defaultingWebHook struct {
+	config  *serverlessv1alpha1.DefaultingConfig
+	client  ctrlclient.Client
+	decoder *admission.Decoder
+}
+
+type validatingWebHook struct {
+	config  *serverlessv1alpha1.ValidationConfig
+	client  ctrlclient.Client
+	decoder *admission.Decoder
+}
+
+func (w *defaultingWebHook) Handle(ctx context.Context, req admission.Request) admission.Response {
+	if req.RequestKind.Kind == "Function" {
+		return w.handleFunctionDefaulting(ctx, req)
+	}
+	if req.RequestKind.Kind == "GitRepository" {
+		return w.handleGitRepoDefaulting(ctx, req)
+	}
+	return admission.Errored(http.StatusBadRequest, fmt.Errorf("invalid kind"))
+}
+
+func (w *defaultingWebHook) InjectDecoder(decoder *admission.Decoder) error {
+	w.decoder = decoder
+	return nil
+}
+func (w *defaultingWebHook) handleFunctionDefaulting(ctx context.Context, req admission.Request) admission.Response {
+	f := &serverlessv1alpha1.Function{}
+	if err := w.decoder.Decode(req, f); err != nil {
+		return admission.Errored(http.StatusBadRequest, err)
+	}
+	// apply defaults
+	f.Default(w.config)
+
+	fBytes, err := json.Marshal(f)
+	if err != nil {
+		return admission.Errored(http.StatusInternalServerError, err)
+	}
+	return admission.PatchResponseFromRaw(req.Object.Raw, fBytes)
+}
+
+func (w *defaultingWebHook) handleGitRepoDefaulting(ctx context.Context, req admission.Request) admission.Response {
+	return admission.Allowed("")
+}
+
+func (w *validatingWebHook) Handle(ctx context.Context, req admission.Request) admission.Response {
+	// We don't currently have any delete validation logic
+	if req.Operation == v1.Delete {
+		return admission.Allowed("")
+	}
+	if req.RequestKind.Kind == "Function" {
+		return w.handleFunctionValidation(ctx, req)
+	}
+	if req.RequestKind.Kind == "GitRepository" {
+		return w.handleGitRepoValidation(ctx, req)
+	}
+	return admission.Errored(http.StatusBadRequest, fmt.Errorf("invalid kind"))
+}
+
+func (w *validatingWebHook) InjectDecoder(decoder *admission.Decoder) error {
+	w.decoder = decoder
+	return nil
+}
+
+func (w *validatingWebHook) handleFunctionValidation(ctx context.Context, req admission.Request) admission.Response {
+	f := &serverlessv1alpha1.Function{}
+	if err := w.decoder.Decode(req, f); err != nil {
+		return admission.Errored(http.StatusBadRequest, err)
+	}
+	if err := f.Validate(w.config); err != nil {
+		return admission.Denied(fmt.Sprintf("validation failed: %s", err.Error()))
+	}
+	return admission.Allowed("")
+}
+
+func (w *validatingWebHook) handleGitRepoValidation(ctx context.Context, req admission.Request) admission.Response {
+	g := &serverlessv1alpha1.GitRepository{}
+	if err := w.decoder.Decode(req, g); err != nil {
+		return admission.Errored(http.StatusBadRequest, err)
+	}
+	if err := g.Validate(); err != nil {
+		return admission.Denied(fmt.Sprintf("validation failed: %s", err.Error()))
+	}
+	return admission.Allowed("")
 }
 
 func setupControllerLogger() {
@@ -138,7 +246,7 @@ func setupWebhookConfigurationControllers(mgr ctrl.Manager, c config) error {
 
 	if err := ctrl.NewControllerManagedBy(mgr).
 		For(&admissionregistrationv1.ValidatingWebhookConfiguration{}).
-		Complete(NewValidatingHookConfig(resources.WebhookConfig{}), mgr.GetClient()); err != nil {
+		Complete(NewValidatingHookConfig(resources.WebhookConfig{}, mgr.GetClient())); err != nil {
 		return err
 	}
 	return nil

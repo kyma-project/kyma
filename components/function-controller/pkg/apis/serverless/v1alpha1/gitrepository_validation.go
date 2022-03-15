@@ -1,7 +1,6 @@
 package v1alpha1
 
 import (
-	"context"
 	"fmt"
 	"regexp"
 
@@ -10,7 +9,7 @@ import (
 	"knative.dev/pkg/apis"
 )
 
-func (in *GitRepository) Validate(_ context.Context) error {
+func (in *GitRepository) Validate() error {
 	return in.Spec.validate("spec")
 }
 

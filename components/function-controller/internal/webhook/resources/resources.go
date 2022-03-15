@@ -96,58 +96,58 @@ func createMutatingWebhookConfiguration(config WebhookConfig) *admissionregistra
 	}
 }
 
-func createValidatingWebhookConfiguration(config WebhookConfig) *admissionregistrationv1.ValidatingWebhookConfiguration {
-	failurePolicy := admissionregistrationv1.Fail
-	matchPolicy := admissionregistrationv1.Exact
-	reinvocationPolicy := admissionregistrationv1.NeverReinvocationPolicy
-	scope := admissionregistrationv1.AllScopes
-	sideEffects := admissionregistrationv1.SideEffectClassNone
-	name := fmt.Sprintf("%s-defaulting.webhook.serverless.kyma-project.io", config.Prefix)
+// func createValidatingWebhookConfiguration(config WebhookConfig) *admissionregistrationv1.ValidatingWebhookConfiguration {
+// 	failurePolicy := admissionregistrationv1.Fail
+// 	matchPolicy := admissionregistrationv1.Exact
+// 	reinvocationPolicy := admissionregistrationv1.NeverReinvocationPolicy
+// 	scope := admissionregistrationv1.AllScopes
+// 	sideEffects := admissionregistrationv1.SideEffectClassNone
+// 	name := fmt.Sprintf("%s-defaulting.webhook.serverless.kyma-project.io", config.Prefix)
 
-	return &admissionregistrationv1.ValidatingWebhookConfiguration{
-		ObjectMeta: metav1.ObjectMeta{
-			Name: name,
-		},
-		Webhooks: []admissionregistrationv1.ValidatingWebhook{
-			{
-				Name: name,
-				AdmissionReviewVersions: []string{
-					"v1beta1",
-					"v1",
-				},
-				ClientConfig: admissionregistrationv1.WebhookClientConfig{
-					CABundle: config.CABundel,
-					Service: &admissionregistrationv1.ServiceReference{
-						Namespace: config.ServiceNamespace,
-						Name:      config.ServiceName,
-						Path:      &config.Path,
-						Port:      &config.Port,
-					},
-				},
-				FailurePolicy:      &failurePolicy,
-				MatchPolicy:        &matchPolicy,
-				ReinvocationPolicy: &reinvocationPolicy,
-				Rules: []admissionregistrationv1.RuleWithOperations{
-					{
-						Rule: admissionregistrationv1.Rule{
-							APIGroups: []string{
-								serverlessAPIGroup,
-							},
-							APIVersions: []string{
-								serverlessAPIVersion,
-							},
-							Resources: config.Resources,
-							Scope:     &scope,
-						},
-						Operations: []admissionregistrationv1.OperationType{
-							admissionregistrationv1.Create,
-							admissionregistrationv1.Update,
-						},
-					},
-				},
-				SideEffects:    &sideEffects,
-				TimeoutSeconds: pointer.Int32(30),
-			},
-		},
-	}
-}
+// 	return &admissionregistrationv1.ValidatingWebhookConfiguration{
+// 		ObjectMeta: metav1.ObjectMeta{
+// 			Name: name,
+// 		},
+// 		Webhooks: []admissionregistrationv1.ValidatingWebhook{
+// 			{
+// 				Name: name,
+// 				AdmissionReviewVersions: []string{
+// 					"v1beta1",
+// 					"v1",
+// 				},
+// 				ClientConfig: admissionregistrationv1.WebhookClientConfig{
+// 					CABundle: config.CABundel,
+// 					Service: &admissionregistrationv1.ServiceReference{
+// 						Namespace: config.ServiceNamespace,
+// 						Name:      config.ServiceName,
+// 						Path:      &config.Path,
+// 						Port:      &config.Port,
+// 					},
+// 				},
+// 				FailurePolicy:      &failurePolicy,
+// 				MatchPolicy:        &matchPolicy,
+// 				ReinvocationPolicy: &reinvocationPolicy,
+// 				Rules: []admissionregistrationv1.RuleWithOperations{
+// 					{
+// 						Rule: admissionregistrationv1.Rule{
+// 							APIGroups: []string{
+// 								serverlessAPIGroup,
+// 							},
+// 							APIVersions: []string{
+// 								serverlessAPIVersion,
+// 							},
+// 							Resources: config.Resources,
+// 							Scope:     &scope,
+// 						},
+// 						Operations: []admissionregistrationv1.OperationType{
+// 							admissionregistrationv1.Create,
+// 							admissionregistrationv1.Update,
+// 						},
+// 					},
+// 				},
+// 				SideEffects:    &sideEffects,
+// 				TimeoutSeconds: pointer.Int32(30),
+// 			},
+// 		},
+// 	}
+// }
