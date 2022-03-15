@@ -30,7 +30,7 @@ func parse(eventType, prefix string) (string, string, string, error) {
 	// parse the event-type segments
 	applicationName := parts[0]
 	businessObject := strings.Join(parts[1:len(parts)-2], "") // combine segments
-	operation := strings.Join(parts[len(parts)-2:len(parts)-1], "")
+	operation := parts[len(parts)-2]
 	version := parts[len(parts)-1]
 	event := fmt.Sprintf("%s.%s", businessObject, operation)
 
