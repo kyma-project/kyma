@@ -2,37 +2,28 @@ package main
 
 import (
 	"context"
-	"encoding/json"
-	"fmt"
 	"io/ioutil"
-	"net/http"
 	"path"
-	"strings"
 
 	"github.com/go-logr/zapr"
-	v1 "k8s.io/api/admission/v1"
 	admissionregistrationv1 "k8s.io/api/admissionregistration/v1"
 
 	"github.com/kyma-project/kyma/components/function-controller/internal/webhook"
-	"github.com/kyma-project/kyma/components/function-controller/internal/webhook/functionwebhook"
-	"github.com/kyma-project/kyma/components/function-controller/internal/webhook/gitrepowebhook"
 	"github.com/kyma-project/kyma/components/function-controller/internal/webhook/resources"
 	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
 	"github.com/pkg/errors"
 	"github.com/vrischmann/envconfig"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
-	apiErrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/apimachinery/pkg/runtime/schema"
 	ctrl "sigs.k8s.io/controller-runtime"
 	ctrlclient "sigs.k8s.io/controller-runtime/pkg/client"
-	"sigs.k8s.io/controller-runtime/pkg/client/apiutil"
-	"sigs.k8s.io/controller-runtime/pkg/log"
+	"sigs.k8s.io/controller-runtime/pkg/controller"
+	"sigs.k8s.io/controller-runtime/pkg/handler"
 	ctrlzap "sigs.k8s.io/controller-runtime/pkg/log/zap"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
+	"sigs.k8s.io/controller-runtime/pkg/source"
 	ctrlwebhook "sigs.k8s.io/controller-runtime/pkg/webhook"
-	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
 )
 
 type config struct {
@@ -52,6 +43,7 @@ var (
 
 func init() {
 	_ = serverlessv1alpha1.AddToScheme(scheme)
+	_ = admissionregistrationv1.AddToScheme(scheme)
 	// +kubebuilder:scaffold:scheme
 
 	setupControllerLogger()
@@ -62,7 +54,7 @@ func main() {
 	if err := envconfig.Init(cfg); err != nil {
 		panic(errors.Wrap(err, "while reading env variables"))
 	}
-
+	// manager setup
 	mgr, err := ctrl.NewManager(ctrl.GetConfigOrDie(), ctrl.Options{
 		Scheme:             scheme,
 		Port:               cfg.WebhookPort,
@@ -71,123 +63,29 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-
-	// if err := setupWebhooks(mgr); err != nil {
-	// 	panic(err)
-	// }
-	// configure the webhook server
+	// webhook server setup
 	whs := mgr.GetWebhookServer()
 	whs.CertName = "server-cert.pem"
 	whs.KeyName = "server-key.pem"
-
 	whs.Register("/defaulting",
 		&ctrlwebhook.Admission{
-			Handler: &defaultingWebHook{
-				config: webhook.ReadDefaultingConfig(),
-				client: mgr.GetClient(),
-			},
+			Handler: webhook.NewDefaultingWebhook(webhook.ReadDefaultingConfig(), mgr.GetClient()),
 		},
 	)
 	whs.Register("/validation",
 		&ctrlwebhook.Admission{
-			Handler: &validatingWebHook{
-				config: webhook.ReadValidationConfig(),
-				client: mgr.GetClient(),
-			},
+			Handler: webhook.NewValidatingHook(webhook.ReadValidationConfig(), mgr.GetClient()),
 		},
 	)
-
-	err = mgr.Start(ctrl.SetupSignalHandler())
-	if err != nil {
-		// handle error
+	// apply and monitor configuration
+	if err := setupWebhookConfigurations(context.Background(), mgr, *cfg); err != nil {
 		panic(err)
 	}
-}
-
-type defaultingWebHook struct {
-	config  *serverlessv1alpha1.DefaultingConfig
-	client  ctrlclient.Client
-	decoder *admission.Decoder
-}
-
-type validatingWebHook struct {
-	config  *serverlessv1alpha1.ValidationConfig
-	client  ctrlclient.Client
-	decoder *admission.Decoder
-}
-
-func (w *defaultingWebHook) Handle(ctx context.Context, req admission.Request) admission.Response {
-	if req.RequestKind.Kind == "Function" {
-		return w.handleFunctionDefaulting(ctx, req)
-	}
-	if req.RequestKind.Kind == "GitRepository" {
-		return w.handleGitRepoDefaulting(ctx, req)
-	}
-	return admission.Errored(http.StatusBadRequest, fmt.Errorf("invalid kind"))
-}
-
-func (w *defaultingWebHook) InjectDecoder(decoder *admission.Decoder) error {
-	w.decoder = decoder
-	return nil
-}
-func (w *defaultingWebHook) handleFunctionDefaulting(ctx context.Context, req admission.Request) admission.Response {
-	f := &serverlessv1alpha1.Function{}
-	if err := w.decoder.Decode(req, f); err != nil {
-		return admission.Errored(http.StatusBadRequest, err)
-	}
-	// apply defaults
-	f.Default(w.config)
-
-	fBytes, err := json.Marshal(f)
+	// start the server manager:q
+	err = mgr.Start(ctrl.SetupSignalHandler())
 	if err != nil {
-		return admission.Errored(http.StatusInternalServerError, err)
+		panic(err)
 	}
-	return admission.PatchResponseFromRaw(req.Object.Raw, fBytes)
-}
-
-func (w *defaultingWebHook) handleGitRepoDefaulting(ctx context.Context, req admission.Request) admission.Response {
-	return admission.Allowed("")
-}
-
-func (w *validatingWebHook) Handle(ctx context.Context, req admission.Request) admission.Response {
-	// We don't currently have any delete validation logic
-	if req.Operation == v1.Delete {
-		return admission.Allowed("")
-	}
-	if req.RequestKind.Kind == "Function" {
-		return w.handleFunctionValidation(ctx, req)
-	}
-	if req.RequestKind.Kind == "GitRepository" {
-		return w.handleGitRepoValidation(ctx, req)
-	}
-	return admission.Errored(http.StatusBadRequest, fmt.Errorf("invalid kind"))
-}
-
-func (w *validatingWebHook) InjectDecoder(decoder *admission.Decoder) error {
-	w.decoder = decoder
-	return nil
-}
-
-func (w *validatingWebHook) handleFunctionValidation(ctx context.Context, req admission.Request) admission.Response {
-	f := &serverlessv1alpha1.Function{}
-	if err := w.decoder.Decode(req, f); err != nil {
-		return admission.Errored(http.StatusBadRequest, err)
-	}
-	if err := f.Validate(w.config); err != nil {
-		return admission.Denied(fmt.Sprintf("validation failed: %s", err.Error()))
-	}
-	return admission.Allowed("")
-}
-
-func (w *validatingWebHook) handleGitRepoValidation(ctx context.Context, req admission.Request) admission.Response {
-	g := &serverlessv1alpha1.GitRepository{}
-	if err := w.decoder.Decode(req, g); err != nil {
-		return admission.Errored(http.StatusBadRequest, err)
-	}
-	if err := g.Validate(); err != nil {
-		return admission.Denied(fmt.Sprintf("validation failed: %s", err.Error()))
-	}
-	return admission.Allowed("")
 }
 
 func setupControllerLogger() {
@@ -196,115 +94,85 @@ func setupControllerLogger() {
 	ctrl.SetLogger(zapr.NewLogger(zapLogger))
 }
 
-func setupWebhooks(mgr ctrl.Manager) error {
-	funcDefaulter := functionwebhook.NewFunctionDefaulter(webhook.ReadDefaultingConfig())
-	funcValidator := functionwebhook.NewFunctionValidator(webhook.ReadValidationConfig())
-	repoValidator := gitrepowebhook.NewGitRepoValidator(webhook.ReadValidationConfig())
-
-	if err := ctrl.NewWebhookManagedBy(mgr).
-		For(&serverlessv1alpha1.Function{}).
-		WithDefaulter(funcDefaulter).
-		WithValidator(funcValidator).
-		Complete(); err != nil {
-		return err
-	}
-
-	if err := ctrl.NewWebhookManagedBy(mgr).
-		For(&serverlessv1alpha1.GitRepository{}).
-		WithValidator(repoValidator).
-		Complete(); err != nil {
-		return err
-	}
-	return nil
-}
-
-func setupWebhookConfigurationControllers(mgr ctrl.Manager, c config) error {
+func setupWebhookConfigurations(ctx context.Context, mgr ctrl.Manager, cfg config) error {
 	caPath := path.Join(mgr.GetWebhookServer().CertDir, caBundleFile)
 	caBundle, err := ioutil.ReadFile(caPath)
 	if err != nil {
 		return errors.Wrapf(err, "failed to read caBundel file: %s", caBundle)
 	}
-	functionGVK, err := apiutil.GVKForObject(&serverlessv1alpha1.Function{}, mgr.GetScheme())
-	if err != nil {
-		return err
-	}
-	functionConfig := resources.WebhookConfig{
-		Prefix:           "function",
+
+	webhookConfig := resources.WebhookConfig{
 		Type:             resources.MutatingWebhook,
 		CABundel:         caBundle,
-		ServiceName:      c.WebhookServiceName,
-		ServiceNamespace: c.SystemNamespace,
-		Port:             int32(c.WebhookPort),
-		Path:             generateMutatePath(functionGVK),
-		Resources:        []string{"functions", "functions/status"},
+		ServiceName:      cfg.WebhookServiceName,
+		ServiceNamespace: cfg.SystemNamespace,
+		Port:             int32(cfg.WebhookPort),
 	}
-	if err := ctrl.NewControllerManagedBy(mgr).
-		For(&admissionregistrationv1.MutatingWebhookConfiguration{}).
-		Complete(NewMutatingHookConfig(functionConfig, mgr.GetClient())); err != nil {
-		return err
+	// initial webhook configuration
+
+	// We are going to talk to the API server _before_ we start the manager.
+	// Since the default manager client reads from cache, we will get an error.
+	// So, we create a "serverClient" that would read from the API directly.
+	// We only use it here, this only runs at start up, so it shouldn't bee to much for the API
+	serverClient, err := ctrlclient.New(ctrl.GetConfigOrDie(), ctrlclient.Options{})
+	if err != nil {
+		return errors.Wrap(err, "failed to create a server client")
+	}
+	if err := resources.EnsureWebhookConfigurationFor(ctx, serverClient, webhookConfig, resources.MutatingWebhook); err != nil {
+		return errors.Wrap(err, "failed to ensure defaulting webhook configuration")
+	}
+	if err := resources.EnsureWebhookConfigurationFor(ctx, serverClient, webhookConfig, resources.ValidatingWebHook); err != nil {
+		return errors.Wrap(err, "failed to ensure validating webhook configuration")
+	}
+	// watch over the configuration
+	c, err := controller.New("webhook-config-controller", mgr, controller.Options{
+		Reconciler: NewWebhookConfig(webhookConfig, mgr.GetClient()),
+	})
+	if err != nil {
+		return errors.Wrap(err, "failed to create webhook-config-controller")
 	}
 
-	if err := ctrl.NewControllerManagedBy(mgr).
-		For(&admissionregistrationv1.ValidatingWebhookConfiguration{}).
-		Complete(NewValidatingHookConfig(resources.WebhookConfig{}, mgr.GetClient())); err != nil {
-		return err
+	if err := c.Watch(&source.Kind{
+		Type: &admissionregistrationv1.ValidatingWebhookConfiguration{}},
+		&handler.EnqueueRequestForObject{},
+	); err != nil {
+		return errors.Wrap(err, "failed to watch ValidatingWebhookConfiguration")
+	}
+
+	if err := c.Watch(&source.Kind{
+		Type: &admissionregistrationv1.MutatingWebhookConfiguration{}},
+		&handler.EnqueueRequestForObject{},
+	); err != nil {
+		return errors.Wrap(err, "failed to watch MutatingWebhookConfiguration")
 	}
 	return nil
 }
 
-type WebHookConfig interface {
-	Reconcile(ctx context.Context, request reconcile.Request) (reconcile.Result, error)
-}
-
-type mutatingConfig struct {
-	config resources.WebhookConfig
-	client ctrlclient.Client
-}
-type validatingConfig struct {
+type WebhookConfig struct {
 	config resources.WebhookConfig
 	client ctrlclient.Client
 }
 
-func NewMutatingHookConfig(config resources.WebhookConfig, client ctrlclient.Client) WebHookConfig {
-	return &mutatingConfig{
+func NewWebhookConfig(config resources.WebhookConfig, client ctrlclient.Client) *WebhookConfig {
+	return &WebhookConfig{
 		config: config,
 		client: client,
 	}
 }
 
-func NewValidatingHookConfig(config resources.WebhookConfig, client ctrlclient.Client) WebHookConfig {
-	return &validatingConfig{
-		config: config,
-		client: client,
-	}
-}
+func (r *WebhookConfig) Reconcile(ctx context.Context, request reconcile.Request) (reconcile.Result, error) {
+	if request.Name != resources.DefaultingWebhookName &&
+		request.Name != resources.ValidationWebhookName {
+		return reconcile.Result{}, nil
 
-func (r *mutatingConfig) Reconcile(ctx context.Context, request reconcile.Request) (reconcile.Result, error) {
-	log := log.FromContext(ctx)
-	mc := &admissionregistrationv1.MutatingWebhookConfiguration{}
-	if err := r.client.Get(ctx, request.NamespacedName, mc); err != nil {
-		if apiErrors.IsNotFound(err) {
-			log.Info(fmt.Sprintf("Could not find MutatingWebhookConfiguration: %v", request.Name))
-			return reconcile.Result{}, nil
-		}
-		return reconcile.Result{}, errors.Wrap(err, "failed to get MutatingWebhookConfiguration")
 	}
-	if err := resources.EnsureWebhookConfigurationFor(ctx, r.client, r.config); err != nil {
-		return reconcile.Result{}, errors.Wrap(err, "failed to ensure MutatingWebhookConfiguration")
+
+	if request.Name == resources.DefaultingWebhookName {
+		return reconcile.Result{}, resources.EnsureWebhookConfigurationFor(ctx, r.client, r.config, resources.MutatingWebhook)
 	}
+	if request.Name == resources.ValidationWebhookName {
+		return reconcile.Result{}, resources.EnsureWebhookConfigurationFor(ctx, r.client, r.config, resources.ValidatingWebHook)
+	}
+
 	return reconcile.Result{}, nil
-}
-
-func (r *validatingConfig) Reconcile(ctx context.Context, request reconcile.Request) (reconcile.Result, error) {
-	return reconcile.Result{}, nil
-}
-
-func generateMutatePath(gvk schema.GroupVersionKind) string {
-	return "/mutate-" + strings.ReplaceAll(gvk.Group, ".", "-") + "-" +
-		gvk.Version + "-" + strings.ToLower(gvk.Kind)
-}
-
-func generateValidatePath(gvk schema.GroupVersionKind) string {
-	return "/validate-" + strings.ReplaceAll(gvk.Group, ".", "-") + "-" +
-		gvk.Version + "-" + strings.ToLower(gvk.Kind)
 }

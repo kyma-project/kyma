@@ -1,7 +1,6 @@
 package v1alpha1
 
 import (
-	"context"
 	"testing"
 
 	"github.com/onsi/gomega"
@@ -118,7 +117,7 @@ func TestGitRepositoryValidation(t *testing.T) {
 			g := gomega.NewGomegaWithT(t)
 
 			// when
-			err := testData.givenFunc.Validate(context.Background())
+			err := testData.givenFunc.Validate()
 			g.Expect(err).To(testData.expectedError)
 			if testData.specifiedExpectedError != nil {
 				g.Expect(err.Error()).To(testData.specifiedExpectedError)
