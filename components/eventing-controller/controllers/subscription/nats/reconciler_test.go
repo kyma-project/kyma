@@ -629,7 +629,7 @@ func startReconciler(eventTypePrefix string, ens *natsTestEnsemble) *natsTestEns
 		defaultLogger,
 		recorder,
 		ens.DefaultSubscriptionConfig,
-		sink.NewSinkValidator(ctx, k8sClient, recorder, defaultLogger),
+		sink.NewValidator(ctx, k8sClient, recorder, defaultLogger),
 	)
 
 	err = ens.reconciler.SetupUnmanaged(k8sManager)

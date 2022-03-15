@@ -32,7 +32,7 @@ type defaultSinkValidator struct {
 // compile-time check
 var _ Validator = &defaultSinkValidator{}
 
-func NewSinkValidator(ctx context.Context, client client.Client, recorder record.EventRecorder, logger *logger.Logger) Validator {
+func NewValidator(ctx context.Context, client client.Client, recorder record.EventRecorder, logger *logger.Logger) Validator {
 	return &defaultSinkValidator{ctx: ctx, client: client, recorder: recorder, logger: logger}
 }
 

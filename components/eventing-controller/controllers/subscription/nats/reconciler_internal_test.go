@@ -333,7 +333,7 @@ func setupTestEnvironment(t *testing.T) *TestEnvironment {
 	cleaner := func(et string) (string, error) {
 		return et, nil
 	}
-	defaultSinkValidator := sink.NewSinkValidator(ctx, fakeClient, recorder, defaultLogger)
+	defaultSinkValidator := sink.NewValidator(ctx, fakeClient, recorder, defaultLogger)
 
 	r := Reconciler{
 		Backend:          mockedBackend,

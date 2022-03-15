@@ -90,7 +90,7 @@ func (sm *SubscriptionManager) Start(defaultSubsConfig env.DefaultSubscriptionCo
 		recorder,
 		cleaner,
 		defaultSubsConfig,
-		sink.NewSinkValidator(ctx, client, recorder, sm.logger),
+		sink.NewValidator(ctx, client, recorder, sm.logger),
 	)
 	// TODO: this could be refactored (also in other backends), so that the backend is created here and passed to
 	//  the reconciler, not the other way around.

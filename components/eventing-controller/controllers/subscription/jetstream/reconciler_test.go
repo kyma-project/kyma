@@ -603,7 +603,7 @@ func startReconciler(eventTypePrefix string, ens *jetStreamTestEnsemble) *jetStr
 		recorder,
 		cleaner,
 		ens.DefaultSubscriptionConfig,
-		sink.NewSinkValidator(ctx, k8sClient, recorder, defaultLogger),
+		sink.NewValidator(ctx, k8sClient, recorder, defaultLogger),
 	)
 
 	err = ens.reconciler.SetupUnmanaged(k8sManager)

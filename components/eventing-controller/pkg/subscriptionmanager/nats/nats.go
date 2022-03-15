@@ -95,7 +95,7 @@ func (c *SubscriptionManager) Start(defaultSubsConfig env.DefaultSubscriptionCon
 		c.logger,
 		recorder,
 		defaultSubsConfig,
-		sink.NewSinkValidator(ctx, client, recorder, c.logger),
+		sink.NewValidator(ctx, client, recorder, c.logger),
 	)
 	c.backend = natsReconciler.Backend
 	if err := natsReconciler.SetupUnmanaged(c.mgr); err != nil {

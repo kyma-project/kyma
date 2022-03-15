@@ -25,7 +25,7 @@ func TestSinkValidator(t *testing.T) {
 	recorder := &record.FakeRecorder{}
 	defaultLogger, err := logger.New(string(kymalogger.JSON), string(kymalogger.INFO))
 	require.NoError(t, err)
-	sinkValidator := NewSinkValidator(ctx, fakeClient, recorder, defaultLogger)
+	sinkValidator := NewValidator(ctx, fakeClient, recorder, defaultLogger)
 
 	testCases := []struct {
 		name                  string
