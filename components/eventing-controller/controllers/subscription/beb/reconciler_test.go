@@ -59,6 +59,7 @@ const (
 	bigTimeOut                  = 40 * time.Second
 	smallTimeOut                = 5 * time.Second
 	smallPollingInterval        = 1 * time.Second
+
 	domain                      = "domain.com"
 )
 
