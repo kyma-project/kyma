@@ -35,9 +35,8 @@ spec:
       serviceAccountName: {{ template "webhook.fullname" . }}
       volumes:
         - name: serverless-webhook
-          emptyDir: {}
-      securityContext:
-        fsGroup: {{ .Values.container.fsGroup }}
+          secret:
+            secretName: {{ .Values.container.envs.webhookSecretName.value }}
       containers:
         - name: webhook
           volumeMounts:
