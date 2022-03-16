@@ -83,10 +83,14 @@ func runValidations(vFuns []validationFunction, vc *ValidationConfig) error {
 	if vFuns == nil {
 		return nil
 	}
+	allErrs := []string{}
 	for _, vFun := range vFuns {
 		if err := vFun(vc); err != nil {
-			return err
+			allErrs = append(allErrs, err.Error())
 		}
+	}
+	if len(allErrs) > 0 {
+		return errors.Errorf("validation failed: %v", allErrs)
 	}
 	return nil
 }
@@ -102,14 +106,14 @@ func (fn *Function) validateObjectMeta(_ *ValidationConfig) error {
 
 func (spec *FunctionSpec) validateSource(_ *ValidationConfig) error {
 	if strings.TrimSpace(spec.Source) == "" {
-		return errors.New("spec.Source is required")
+		return errors.New("spec.source is required")
 	}
 	return nil
 }
 
 func (spec *FunctionSpec) validateDeps(_ *ValidationConfig) error {
 	if err := ValidateDependencies(spec.Runtime, spec.Deps); err != nil {
-		return errors.Wrap(err, "invalid spec.Deps value")
+		return errors.Wrap(err, "invalid spec.deps value")
 	}
 	return nil
 }
@@ -132,7 +136,7 @@ func (spec *FunctionSpec) validateEnv(vc *ValidationConfig) error {
 		}
 	}
 	if len(allErrs) > 0 {
-		return fmt.Errorf("invalid spec.Env keys/values: %v", allErrs)
+		return fmt.Errorf("invalid spec.env keys/values: %v", allErrs)
 	}
 	return nil
 }
@@ -141,46 +145,47 @@ func (spec *FunctionSpec) validateFunctionResources(vc *ValidationConfig) error 
 	minMemory := resource.MustParse(vc.Function.Resources.MinRequestMemory)
 	minCpu := resource.MustParse(vc.Function.Resources.MinRequestCpu)
 
-	return validateResources(spec.Resources, minMemory, minCpu)
+	return validateResources(spec.Resources, minMemory, minCpu, "spec.resources")
 }
 
 func (spec *FunctionSpec) validateBuildResources(vc *ValidationConfig) error {
 	minMemory := resource.MustParse(vc.BuildJob.Resources.MinRequestMemory)
 	minCpu := resource.MustParse(vc.BuildJob.Resources.MinRequestCpu)
 
-	return validateResources(spec.BuildResources, minMemory, minCpu)
+	return validateResources(spec.BuildResources, minMemory, minCpu, "spec.buildResources")
 }
 
-func validateResources(resources corev1.ResourceRequirements, minMemory, minCpu resource.Quantity) error {
+func validateResources(resources corev1.ResourceRequirements, minMemory, minCpu resource.Quantity, parent string) error {
 	limits := resources.Limits
 	requests := resources.Requests
-
+	allErrs := []string{}
 	if requests.Cpu().Cmp(minCpu) == -1 {
-		return fmt.Errorf("requests cpu(%s) should be higher than minimal value (%s)",
-			requests.Cpu().String(), minCpu.String())
+		allErrs = append(allErrs, fmt.Sprintf("%s.requests.cpu(%s) should be higher than minimal value (%s)",
+			parent, requests.Cpu().String(), minCpu.String()))
 	}
 	if requests.Memory().Cmp(minMemory) == -1 {
-		return fmt.Errorf("requests memory(%s) should be higher than minimal value (%s)",
-			requests.Memory().String(), minMemory.String())
+		allErrs = append(allErrs, fmt.Sprintf("%s.requests.memory(%s) should be higher than minimal value (%s)",
+			parent, requests.Memory().String(), minMemory.String()))
 	}
 	if limits.Cpu().Cmp(minCpu) == -1 {
-		return fmt.Errorf("limits cpu(%s) should be higher than minimal value (%s)",
-			limits.Cpu().String(), minCpu.String())
+		allErrs = append(allErrs, fmt.Sprintf("%s.limits.cpu(%s) should be higher than minimal value (%s)",
+			parent, limits.Cpu().String(), minCpu.String()))
 	}
 	if limits.Memory().Cmp(minMemory) == -1 {
-		return fmt.Errorf("limits memory(%s) should be higher than minimal value (%s)",
-			limits.Memory().String(), minMemory.String())
+		allErrs = append(allErrs, fmt.Sprintf("%s.limits.memory(%s) should be higher than minimal value (%s)",
+			parent, limits.Memory().String(), minMemory.String()))
 	}
-
 	if requests.Cpu().Cmp(*limits.Cpu()) == 1 {
-		return fmt.Errorf("limits cpu(%s) should be higher than requests cpu(%s)",
-			limits.Cpu().String(), requests.Cpu().String())
+		allErrs = append(allErrs, fmt.Sprintf("%s.limits.cpu(%s) should be higher than %s.requests.cpu(%s)",
+			parent, limits.Cpu().String(), parent, requests.Cpu().String()))
 	}
 	if requests.Memory().Cmp(*limits.Memory()) == 1 {
-		return fmt.Errorf("limits memory(%s) should be higher than requests memory(%s)",
-			limits.Memory().String(), requests.Memory().String())
+		allErrs = append(allErrs, fmt.Sprintf("%s.limits.memory(%s) should be higher than %s.requests.memory(%s)",
+			parent, limits.Memory().String(), parent, requests.Memory().String()))
 	}
-
+	if len(allErrs) > 0 {
+		return errors.Errorf("invalid function resources: %v", allErrs)
+	}
 	return nil
 }
 
@@ -188,20 +193,22 @@ func (spec *FunctionSpec) validateReplicas(vc *ValidationConfig) error {
 	minValue := vc.Function.Replicas.MinValue
 	maxReplicas := spec.MaxReplicas
 	minReplicas := spec.MinReplicas
-
+	allErrs := []string{}
 	if maxReplicas != nil && minReplicas != nil && *minReplicas > *maxReplicas {
-		return fmt.Errorf("maxReplicas(%d) is less than minReplicas(%d)",
-			*maxReplicas, *minReplicas)
+		allErrs = append(allErrs, fmt.Sprintf("spec.maxReplicas(%d) is less than spec.minReplicas(%d)",
+			*maxReplicas, *minReplicas))
 	}
 	if minReplicas != nil && *minReplicas < minValue {
-		return fmt.Errorf("minReplicas(%d) is less than the smallest allowed value(%d)",
-			*minReplicas, minValue)
+		allErrs = append(allErrs, fmt.Sprintf("spec.minReplicas(%d) is less than the smallest allowed value(%d)",
+			*minReplicas, minValue))
 	}
 	if maxReplicas != nil && *maxReplicas < minValue {
-		return fmt.Errorf("maxReplicas(%d) is less than the smallest allowed value(%d)",
-			*maxReplicas, minValue)
+		allErrs = append(allErrs, fmt.Sprintf("spec.maxReplicas(%d) is less than the smallest allowed value(%d)",
+			*maxReplicas, minValue))
 	}
-
+	if len(allErrs) > 0 {
+		return errors.Errorf("invalid values: %v", allErrs)
+	}
 	return nil
 }
 
