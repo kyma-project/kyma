@@ -3,10 +3,9 @@ package eventtype
 import (
 	"regexp"
 
-	"go.uber.org/zap"
+	"github.com/sirupsen/logrus"
 
-	"github.com/kyma-project/kyma/components/eventing-controller/logger"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/application"
+	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/application"
 )
 
 var (
@@ -22,22 +21,16 @@ type Cleaner interface {
 	Clean(eventType string) (string, error)
 }
 
-type CleanerFunc func(et string) (string, error)
-
-func (cf CleanerFunc) Clean(et string) (string, error) {
-	return cf(et)
-}
-
 type cleaner struct {
 	eventTypePrefix   string
 	applicationLister *application.Lister
-	logger            *logger.Logger
+	logger            *logrus.Logger
 }
 
 // compile-time check
 var _ Cleaner = &cleaner{}
 
-func NewCleaner(eventTypePrefix string, applicationLister *application.Lister, logger *logger.Logger) Cleaner {
+func NewCleaner(eventTypePrefix string, applicationLister *application.Lister, logger *logrus.Logger) Cleaner {
 	return &cleaner{eventTypePrefix: eventTypePrefix, applicationLister: applicationLister, logger: logger}
 }
 
@@ -45,21 +38,21 @@ func NewCleaner(eventTypePrefix string, applicationLister *application.Lister, l
 // or returns an error if the event-type parsing failed.
 func (c *cleaner) Clean(eventType string) (string, error) {
 	// format logger
-	log := c.namedLogger().With(
-		"prefix", c.eventTypePrefix,
-		"type", eventType,
-	)
+	log := c.namedLogger().WithFields(logrus.Fields{
+		"prefix": c.eventTypePrefix,
+		"type":   eventType,
+	})
 
 	appName, event, version, err := parse(eventType, c.eventTypePrefix)
 	if err != nil {
-		log.Errorw("parse event-type failed", "error", err)
+		log.WithField("error", err).Error("parse event-type failed")
 		return "", err
 	}
 
 	// clean the application name
 	var eventTypeClean string
 	if appObj, err := c.applicationLister.Get(appName); err != nil {
-		log.Debugw("cannot find application", "application", appName)
+		log.WithField("application", appName).Debug("cannot find application")
 		eventTypeClean = build(c.eventTypePrefix, application.GetCleanName(appName), event, version)
 	} else {
 		eventTypeClean = build(c.eventTypePrefix, application.GetCleanTypeOrName(appObj), event, version)
@@ -67,16 +60,18 @@ func (c *cleaner) Clean(eventType string) (string, error) {
 
 	// clean the event-type segments
 	eventTypeClean = cleanEventType(eventTypeClean)
-	log.Debugw("clean event-type",
-		"before", eventType,
-		"after", eventTypeClean,
-	)
+	log.WithFields(
+		logrus.Fields{
+			"before": eventType,
+			"after":  eventTypeClean,
+		},
+	).Debug("clean event-type")
 
 	return eventTypeClean, nil
 }
 
-func (c *cleaner) namedLogger() *zap.SugaredLogger {
-	return c.logger.WithContext().Named(cleanerName)
+func (c *cleaner) namedLogger() *logrus.Logger {
+	return c.logger.WithField("name", cleanerName).Logger
 }
 
 func cleanEventType(eventType string) string {

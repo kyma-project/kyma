@@ -9,8 +9,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/handler/health"
-
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/dynamic/dynamicinformer"
@@ -22,9 +20,12 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/require"
 
+	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/cloudevents/eventtype"
+	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/cloudevents/eventtype/eventtypetest"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/env"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/handler/beb"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/handler/handlertest"
+	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/handler/health"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/informers"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/legacy-events"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/metrics"
@@ -54,6 +55,7 @@ type BebHandlerMock struct {
 	legacyTransformer   *legacy.Transformer
 	subscribedProcessor *subscribed.Processor
 	mockServer          *testingutils.MockServer
+	eventTypeCleaner    eventtype.Cleaner
 }
 
 // BebHandlerMockOpt represents a BebHandlerMock option.
@@ -110,6 +112,7 @@ func StartOrDie(ctx context.Context, t *testing.T, requestSize int, eventTypePre
 		legacyTransformer:   &legacy.Transformer{},
 		subscribedProcessor: &subscribed.Processor{},
 		mockServer:          mockServer,
+		eventTypeCleaner:    eventtypetest.CleanerFunc(eventtypetest.DefaultCleaner),
 	}
 
 	for _, opt := range opts {
@@ -122,7 +125,17 @@ func StartOrDie(ctx context.Context, t *testing.T, requestSize int, eventTypePre
 	msgReceiver := receiver.NewHTTPMessageReceiver(mock.cfg.Port)
 	msgSender := sender.NewBebMessageSender(mock.cfg.EmsPublishURL, client)
 	msgHandlerOpts := &options.Options{MaxRequestSize: int64(requestSize)}
-	msgHandler := beb.NewHandler(msgReceiver, msgSender, mock.cfg.RequestTimeout, mock.legacyTransformer, msgHandlerOpts, mock.subscribedProcessor, mock.logger, mock.collector)
+	msgHandler := beb.NewHandler(
+		msgReceiver,
+		msgSender,
+		mock.cfg.RequestTimeout,
+		mock.legacyTransformer,
+		msgHandlerOpts,
+		mock.subscribedProcessor,
+		mock.logger,
+		mock.collector,
+		mock.eventTypeCleaner,
+	)
 
 	go func() { require.NoError(t, msgHandler.Start(ctx)) }()
 	testingutils.WaitForEndpointStatusCodeOrFail(mock.livenessEndpoint, health.StatusCodeHealthy)
@@ -166,6 +179,13 @@ func extractEventTypeFromRequest(r *http.Request) (string, error) {
 	return eventType, nil
 }
 
+// WithEventTypePrefix returns BebHandlerMockOpt which sets the eventTypePrefix for the given BebHandlerMock.
+func WithEventTypePrefix(eventTypePrefix string) BebHandlerMockOpt {
+	return func(m *BebHandlerMock) {
+		m.cfg.EventTypePrefix = eventTypePrefix
+	}
+}
+
 // WithApplication returns BebHandlerMockOpt which sets the subscribed.Processor for the given BebHandlerMock.
 func WithApplication(applicationNameToCreate, applicationNameToValidate string) BebHandlerMockOpt {
 	return func(m *BebHandlerMock) {
@@ -173,6 +193,7 @@ func WithApplication(applicationNameToCreate, applicationNameToValidate string) 
 		m.legacyTransformer = legacy.NewTransformer(m.cfg.BEBNamespace, m.cfg.EventTypePrefix, applicationLister)
 		validator := validateEventTypeContainsApplicationName(applicationNameToValidate)
 		testingutils.WithValidator(validator)(m.mockServer)
+		m.eventTypeCleaner = eventtype.NewCleaner(m.cfg.EventTypePrefix, applicationLister, m.logger)
 	}
 }
 

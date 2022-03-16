@@ -4,7 +4,6 @@ package handlertest
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"net/http"
 	"testing"
@@ -84,94 +83,120 @@ func getInvalidValidationError(field string) *legacyapi.Error {
 
 func NewApplicationListerOrDie(ctx context.Context, appName string) *application.Lister {
 	app := applicationtest.NewApplication(appName, nil)
-	appLister := fake.NewListerOrDie(ctx, app)
+	appLister := fake.NewApplicationListerOrDie(ctx, app)
 	return appLister
 }
 
-// common test-cases for the HTTP handler and NATS handler
 var (
 	TestCasesForCloudEvents = []struct {
 		Name           string
-		ProvideMessage func() (string, http.Header)
+		ProvideMessage func(string) (string, http.Header)
 		WantStatusCode int
 	}{
 		// structured cloudevents
 		{
 			Name: "Structured CloudEvent without id",
-			ProvideMessage: func() (string, http.Header) {
-				return testingutils.StructuredCloudEventPayloadWithoutID, testingutils.GetStructuredMessageHeaders()
+			ProvideMessage: func(eventType string) (string, http.Header) {
+				builder := testingutils.NewCloudEventBuilder(
+					testingutils.WithCloudEventType(eventType),
+					testingutils.WithCloudEventID(""),
+				)
+				return builder.BuildStructured()
 			},
 			WantStatusCode: http.StatusBadRequest,
 		},
 		{
 			Name: "Structured CloudEvent without type",
-			ProvideMessage: func() (string, http.Header) {
-				return testingutils.StructuredCloudEventPayloadWithoutType, testingutils.GetStructuredMessageHeaders()
+			ProvideMessage: func(eventType string) (string, http.Header) {
+				builder := testingutils.NewCloudEventBuilder(
+					testingutils.WithCloudEventType(""),
+				)
+				return builder.BuildStructured()
 			},
 			WantStatusCode: http.StatusBadRequest,
 		},
 		{
 			Name: "Structured CloudEvent without specversion",
-			ProvideMessage: func() (string, http.Header) {
-				return testingutils.StructuredCloudEventPayloadWithoutSpecVersion, testingutils.GetStructuredMessageHeaders()
+			ProvideMessage: func(eventType string) (string, http.Header) {
+				builder := testingutils.NewCloudEventBuilder(
+					testingutils.WithCloudEventType(eventType),
+					testingutils.WithCloudEventSpecVersion(""),
+				)
+				return builder.BuildStructured()
 			},
 			WantStatusCode: http.StatusBadRequest,
 		},
 		{
 			Name: "Structured CloudEvent without source",
-			ProvideMessage: func() (string, http.Header) {
-				return testingutils.StructuredCloudEventPayloadWithoutSource, testingutils.GetStructuredMessageHeaders()
+			ProvideMessage: func(eventType string) (string, http.Header) {
+				builder := testingutils.NewCloudEventBuilder(
+					testingutils.WithCloudEventType(eventType),
+					testingutils.WithCloudEventSource(""),
+				)
+				return builder.BuildStructured()
 			},
 			WantStatusCode: http.StatusBadRequest,
 		},
 		{
 			Name: "Structured CloudEvent is valid",
-			ProvideMessage: func() (string, http.Header) {
-				return testingutils.StructuredCloudEventPayload, testingutils.GetStructuredMessageHeaders()
+			ProvideMessage: func(eventType string) (string, http.Header) {
+				builder := testingutils.NewCloudEventBuilder(
+					testingutils.WithCloudEventType(eventType),
+				)
+				return builder.BuildStructured()
 			},
 			WantStatusCode: http.StatusNoContent,
 		},
 		// binary cloudevents
 		{
 			Name: "Binary CloudEvent without CE-ID header",
-			ProvideMessage: func() (string, http.Header) {
-				headers := testingutils.GetBinaryMessageHeaders()
-				headers.Del(testingutils.CeIDHeader)
-				return fmt.Sprintf(`"%s"`, testingutils.CloudEventData), headers
+			ProvideMessage: func(eventType string) (string, http.Header) {
+				builder := testingutils.NewCloudEventBuilder(
+					testingutils.WithCloudEventID(""),
+				)
+				return builder.BuildBinary()
 			},
 			WantStatusCode: http.StatusBadRequest,
 		},
 		{
 			Name: "Binary CloudEvent without CE-Type header",
-			ProvideMessage: func() (string, http.Header) {
-				headers := testingutils.GetBinaryMessageHeaders()
-				headers.Del(testingutils.CeTypeHeader)
-				return fmt.Sprintf(`"%s"`, testingutils.CloudEventData), headers
+			ProvideMessage: func(eventType string) (string, http.Header) {
+				builder := testingutils.NewCloudEventBuilder(
+					testingutils.WithCloudEventType(""),
+				)
+				return builder.BuildBinary()
 			},
 			WantStatusCode: http.StatusBadRequest,
 		},
 		{
 			Name: "Binary CloudEvent without CE-SpecVersion header",
-			ProvideMessage: func() (string, http.Header) {
-				headers := testingutils.GetBinaryMessageHeaders()
-				headers.Del(testingutils.CeSpecVersionHeader)
-				return fmt.Sprintf(`"%s"`, testingutils.CloudEventData), headers
+			ProvideMessage: func(eventType string) (string, http.Header) {
+				builder := testingutils.NewCloudEventBuilder(
+					testingutils.WithCloudEventType(eventType),
+					testingutils.WithCloudEventSpecVersion(""),
+				)
+				return builder.BuildBinary()
 			},
 			WantStatusCode: http.StatusBadRequest,
 		},
 		{
 			Name: "Binary CloudEvent without CE-Source header",
-			ProvideMessage: func() (string, http.Header) {
-				headers := testingutils.GetBinaryMessageHeaders()
-				headers.Del(testingutils.CeSourceHeader)
-				return fmt.Sprintf(`"%s"`, testingutils.CloudEventData), headers
+			ProvideMessage: func(eventType string) (string, http.Header) {
+				builder := testingutils.NewCloudEventBuilder(
+					testingutils.WithCloudEventType(eventType),
+					testingutils.WithCloudEventSource(""),
+				)
+				return builder.BuildBinary()
 			},
 			WantStatusCode: http.StatusBadRequest,
 		},
 		{
 			Name: "Binary CloudEvent is valid with required headers",
-			ProvideMessage: func() (string, http.Header) {
-				return fmt.Sprintf(`"%s"`, testingutils.CloudEventData), testingutils.GetBinaryMessageHeaders()
+			ProvideMessage: func(eventType string) (string, http.Header) {
+				builder := testingutils.NewCloudEventBuilder(
+					testingutils.WithCloudEventType(eventType),
+				)
+				return builder.BuildBinary()
 			},
 			WantStatusCode: http.StatusNoContent,
 		},
@@ -184,9 +209,10 @@ var (
 		WantResponse   legacyapi.PublishEventResponses
 	}{
 		{
-			Name: "Send a legacy event successfully with event-id",
+			Name: "Send a legacy event successfully with event id",
 			ProvideMessage: func() (string, http.Header) {
-				return testingutils.ValidLegacyEventPayloadWithEventID, testingutils.GetApplicationJSONHeaders()
+				builder := testingutils.NewLegacyEventBuilder()
+				return builder.Build()
 			},
 			WantStatusCode: http.StatusOK,
 			WantResponse: legacyapi.PublishEventResponses{
@@ -198,9 +224,12 @@ var (
 			},
 		},
 		{
-			Name: "Send a legacy event successfully without event-id",
+			Name: "Send a legacy event successfully without event id",
 			ProvideMessage: func() (string, http.Header) {
-				return testingutils.ValidLegacyEventPayloadWithoutEventID, testingutils.GetApplicationJSONHeaders()
+				builder := testingutils.NewLegacyEventBuilder(
+					testingutils.WithLegacyEventID(""),
+				)
+				return builder.Build()
 			},
 			WantStatusCode: http.StatusOK,
 			WantResponse: legacyapi.PublishEventResponses{
@@ -214,7 +243,10 @@ var (
 		{
 			Name: "Send a legacy event with invalid event id",
 			ProvideMessage: func() (string, http.Header) {
-				return testingutils.LegacyEventPayloadWithInvalidEventID, testingutils.GetApplicationJSONHeaders()
+				builder := testingutils.NewLegacyEventBuilder(
+					testingutils.WithLegacyEventID("invalid-id"),
+				)
+				return builder.Build()
 			},
 			WantStatusCode: http.StatusBadRequest,
 			WantResponse: legacyapi.PublishEventResponses{
@@ -224,7 +256,10 @@ var (
 		{
 			Name: "Send a legacy event without event time",
 			ProvideMessage: func() (string, http.Header) {
-				return testingutils.LegacyEventPayloadWithoutEventTime, testingutils.GetApplicationJSONHeaders()
+				builder := testingutils.NewLegacyEventBuilder(
+					testingutils.WithLegacyEventTime(""),
+				)
+				return builder.Build()
 			},
 			WantStatusCode: http.StatusBadRequest,
 			WantResponse: legacyapi.PublishEventResponses{
@@ -234,7 +269,10 @@ var (
 		{
 			Name: "Send a legacy event without event type",
 			ProvideMessage: func() (string, http.Header) {
-				return testingutils.LegacyEventPayloadWithoutEventType, testingutils.GetApplicationJSONHeaders()
+				builder := testingutils.NewLegacyEventBuilder(
+					testingutils.WithLegacyEventType(""),
+				)
+				return builder.Build()
 			},
 			WantStatusCode: http.StatusBadRequest,
 			WantResponse: legacyapi.PublishEventResponses{
@@ -244,7 +282,10 @@ var (
 		{
 			Name: "Send a legacy event with invalid event time",
 			ProvideMessage: func() (string, http.Header) {
-				return testingutils.LegacyEventPayloadWithInvalidEventTime, testingutils.GetApplicationJSONHeaders()
+				builder := testingutils.NewLegacyEventBuilder(
+					testingutils.WithLegacyEventTime("invalid-time"),
+				)
+				return builder.Build()
 			},
 			WantStatusCode: http.StatusBadRequest,
 			WantResponse: legacyapi.PublishEventResponses{
@@ -252,9 +293,12 @@ var (
 			},
 		},
 		{
-			Name: "Send a legacy event without event version",
+			Name: "Send a legacy event without event type version",
 			ProvideMessage: func() (string, http.Header) {
-				return testingutils.LegacyEventPayloadWithWithoutEventVersion, testingutils.GetApplicationJSONHeaders()
+				builder := testingutils.NewLegacyEventBuilder(
+					testingutils.WithLegacyEventTypeVersion(""),
+				)
+				return builder.Build()
 			},
 			WantStatusCode: http.StatusBadRequest,
 			WantResponse: legacyapi.PublishEventResponses{
@@ -262,9 +306,12 @@ var (
 			},
 		},
 		{
-			Name: "Send a legacy event without data field",
+			Name: "Send a legacy event without data",
 			ProvideMessage: func() (string, http.Header) {
-				return testingutils.ValidLegacyEventPayloadWithoutData, testingutils.GetApplicationJSONHeaders()
+				builder := testingutils.NewLegacyEventBuilder(
+					testingutils.WithLegacyEventData(""),
+				)
+				return builder.Build()
 			},
 			WantStatusCode: http.StatusBadRequest,
 			WantResponse: legacyapi.PublishEventResponses{
@@ -286,8 +333,8 @@ var (
 			WantStatusCode: http.StatusOK,
 			WantResponse: subscribed.Events{
 				EventsInfo: []subscribed.Event{{
-					Name:    testingutils.LegacyEventType,
-					Version: testingutils.LegacyEventTypeVersion,
+					Name:    testingutils.EventName,
+					Version: testingutils.EventVersion,
 				}},
 			},
 		},
