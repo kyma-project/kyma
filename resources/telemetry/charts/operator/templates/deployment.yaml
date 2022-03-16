@@ -19,7 +19,7 @@ spec:
         {{- include "operator.selectorLabels" . | nindent 8 }}
         {{- toYaml .Values.extraLabels | nindent 8 }}
     spec:
-      serviceAccountName: {{ include "operator.serviceAccountName" . }}-controller-manager
+      serviceAccountName: {{ include "operator.serviceAccountName" . }}
       terminationGracePeriodSeconds: {{ .Values.terminationGracePeriodSeconds }}
       {{- if or .Values.priorityClassName .Values.global.priorityClassName -}}
       priorityClassName: {{ coalesce .Values.priorityClassName .Values.global.priorityClassName }}
@@ -31,7 +31,7 @@ spec:
             - /manager
           args:
             - --leader-elect
-            - --cm-name={{ .Release.Name }}-fluent-bit
+            - --cm-name={{ .Release.Name }}-{{ .Values.logProcessor }}
             - --sections-cm-name={{ .Release.Name }}-{{ .Values.logProcessor }}-sections
             - --parser-cm-name={{ .Release.Name }}-{{ .Values.logProcessor }}-parsers
             - --ds-name={{ .Release.Name }}-{{ .Values.logProcessor }}
