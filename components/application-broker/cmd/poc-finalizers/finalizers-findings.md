@@ -2,12 +2,12 @@
 
 ### Overview
 
-Finalizers concept is described in the [k8s finalizers page](https://kubernetes.io/docs/tasks/access-kubernetes-api/extend-api-custom-resource-definitions/#finalizers). This pull branch contains a separate cmd, which implements protection controller. Such controller plays with finalizers
+Finalizers concept is described in the [k8s finalizers page](https://kubernetes.io/docs/tasks/access-kubernetes-api/extend-api-custom-resource-definitions/#finalizers). This pull branch contains a separate cmd, which implements protection controller. Such controller plays with finalizers.
 Finalizers allow controllers to implement asynchronous pre-delete hooks. Custom objects support finalizers just like built-in objects.
 
 ### Description
 
-The protection controller adds a finalizer to Application, which checks, if any ApplicationMapping exists. It there is no ApplicationMapping with the same name - finalizer is removed and object is deleted.
+The protection controller adds a finalizer to Application, which checks, if any Application Mapping exists. It there is no Application Mapping with the same name - finalizer is removed and object is deleted.
 
 The protection controller implementation is similar to the [k8s PVC protection controller](https://github.com/kubernetes/kubernetes/blob/f4472b1a92877ed4b1576e7e44496b0de7a8efe2/pkg/controller/volume/pvcprotection/pvc_protection_controller.go)
 

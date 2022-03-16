@@ -40,7 +40,7 @@ The Connector Service has the following parameters:
 - **central** is the flag that determines whether the Connector Service works in the central mode.
 - **revocationConfigMapName** is the name of the ConfigMap containing the revoked certificates list.
 - **lookupEnabled** is the flag that determines if the Connector should make a call to get the gateway endpoint. The default value is `False`.
-- **lookupConfigMapPath** is the path in the Pod where ConfigMap for cluster lookup is stored. The default value is `/etc/config/config.json`. Used only when **lookupEnabled** is set to `True`.
+- **lookupConfigMapPath** is the path in the Pod where Config Map for cluster lookup is stored. The default value is `/etc/config/config.json`. Used only when **lookupEnabled** is set to `True`.
 
 Connector Service also uses the following environment variables for CSR-related information config:
 - **COUNTRY** (two-letter-long country code)
