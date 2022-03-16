@@ -138,7 +138,7 @@ var _ = Describe("LogPipeline webhook", func() {
 			Expect(err).NotTo(HaveOccurred())
 
 			logPipeline.Spec.Files = append(logPipeline.Spec.Files, telemetryv1alpha1.FileMount{
-				Name: "another-file",
+				Name: "2nd-file",
 				Content: "file content",
 			})
 			err = k8sClient.Update(ctx, &logPipeline)
@@ -147,7 +147,7 @@ var _ = Describe("LogPipeline webhook", func() {
 		})
 
 		It("Should reject new update of previously created LogPipeline", func() {
-			fsWrapperMock.On("CreateAndWrite", mock.AnythingOfType("fs.File")).Return(nil).Times(5)
+			fsWrapperMock.On("CreateAndWrite", mock.AnythingOfType("fs.File")).Return(nil).Times(6)
 			configErr := errors.New("Error in line 4: Invalid indentation level")
 			configValidatorMock.On("Validate", mock.Anything, mock.AnythingOfType("string")).Return(configErr).Times(1)
 			fsWrapperMock.On("RemoveDirectory", mock.AnythingOfType("string")).Return(nil).Times(1)
@@ -157,7 +157,7 @@ var _ = Describe("LogPipeline webhook", func() {
 			Expect(err).NotTo(HaveOccurred())
 
 			logPipeline.Spec.Files = append(logPipeline.Spec.Files, telemetryv1alpha1.FileMount{
-				Name: "another-file",
+				Name: "3rd-file",
 				Content: "file content",
 			})
 
