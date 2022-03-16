@@ -11,7 +11,7 @@ The Subscription custom resource definition (CRD) is used to subscribe to events
 
 This sample Subscription resource subscribes to an event called `sap.kyma.custom.commerce.order.created.v1`.
 
-> **WARNING:** Non-alphanumeric characters `[^a-zA-Z0-9]+` are not allowed in event names under the **spec.filter.filters.eventType.value** property. If any are detected, Eventing will clean them up automatically. Read [Event names](../evnt-01-event-names.md#event-name-cleanup) for more information.
+> **WARNING:** Non-alphanumeric characters `[^a-zA-Z0-9]+` are not allowed in event names under the **spec.filter.filters.eventType.value** property. If any are detected, Eventing will remove them. Read [Event names](../evnt-01-event-names.md#event-name-cleanup) for more information.
 
 > **NOTE:** Both the subscriber and the Subscription should exist in the same Namespace.
 
