@@ -18,7 +18,7 @@ webhooks:
     caBundle: {{ b64enc $ca.Cert }}
     service:
       name: {{ include "operator.fullname" . }}-webhook
-      namespace: kyma-system
+      namespace: {{ .Release.Namespace }}
       path: /validate-logpipeline
       port: 443
   failurePolicy: Fail
