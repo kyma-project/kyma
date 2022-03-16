@@ -43,7 +43,6 @@ If you want to provision a new volume or restore the existing one, create on-dem
 
 ### Prerequisites
 
-  - As of Kubernetes version 1.18, Gardener **GCP** and **AWS** by default use CSI drivers and support taking volume snapshots.
   - Gardener **Azure** supports CSI drivers as of Kubernetes version 1.21.
 
 ### Steps
@@ -72,6 +71,7 @@ If you want to provision a new volume or restore the existing one, create on-dem
   metadata:
     name: snapshot
   spec:
+    volumeSnapshotClassName: snapshot-class
     source:
       persistentVolumeClaimName: {PVC_NAME}
   ```
@@ -92,7 +92,6 @@ If you want to provision a new volume or restore the existing one, create on-dem
   spec:
     accessModes:
      - ReadWriteOnce
-    storageClassName: snapshot-class
     resources:
       requests:
         storage: {SIZE_OF_ORIGINAL_PVC}
@@ -108,14 +107,10 @@ If you want to provision a new volume or restore the existing one, create on-dem
   AKS
   </summary>
 
-### Prerequisites
-
-  The minimum supported Kubernetes version is 1.17.
-
 ### Steps
 
   1. [Install the CSI driver](https://github.com/kubernetes-sigs/azuredisk-csi-driver/blob/master/docs/install-csi-driver-master.md).
-  2. [Create a volume snapshot](https://github.com/kubernetes-sigs/azuredisk-csi-driver/tree/master/deploy/example/snapshot).
+  2. Follow our instructions to create a volume snapshot on Gardener, using the driver for Azure.
 
   </details>
   
@@ -123,10 +118,6 @@ If you want to provision a new volume or restore the existing one, create on-dem
   <summary label="GKE">
   GKE
   </summary>
-
-### Prerequisites
-
-  The minimum supported Kubernetes version is 1.14.
 
 ### Steps
 
