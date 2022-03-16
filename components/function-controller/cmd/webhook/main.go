@@ -34,7 +34,10 @@ type config struct {
 }
 
 const (
-	caBundleFile = "ca-cert.pem"
+	caBundleFile   = "ca-cert.pem"
+	certFile       = "server-cert.pem"
+	keyFile        = "server-key.pem"
+	defaultCertDir = "/tmp/k8s-webhook-server/serving-certs"
 )
 
 var (
@@ -63,10 +66,14 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+
+	if err := setupCertificates(context.Background(), mgr, *cfg); err != nil {
+		panic(err)
+	}
 	// webhook server setup
 	whs := mgr.GetWebhookServer()
-	whs.CertName = "server-cert.pem"
-	whs.KeyName = "server-key.pem"
+	whs.CertName = certFile
+	whs.KeyName = keyFile
 	whs.Register("/defaulting",
 		&ctrlwebhook.Admission{
 			Handler: webhook.NewDefaultingWebhook(webhook.ReadDefaultingConfig(), mgr.GetClient()),
@@ -95,15 +102,15 @@ func setupControllerLogger() {
 }
 
 func setupWebhookConfigurations(ctx context.Context, mgr ctrl.Manager, cfg config) error {
-	caPath := path.Join(mgr.GetWebhookServer().CertDir, caBundleFile)
-	caBundle, err := ioutil.ReadFile(caPath)
+	certPath := path.Join(mgr.GetWebhookServer().CertDir, certFile)
+	certBytes, err := ioutil.ReadFile(certPath)
 	if err != nil {
-		return errors.Wrapf(err, "failed to read caBundel file: %s", caBundle)
+		return errors.Wrapf(err, "failed to read caBundel file: %s", certBytes)
 	}
 
 	webhookConfig := resources.WebhookConfig{
 		Type:             resources.MutatingWebhook,
-		CABundel:         caBundle,
+		CABundel:         certBytes,
 		ServiceName:      cfg.WebhookServiceName,
 		ServiceNamespace: cfg.SystemNamespace,
 		Port:             int32(cfg.WebhookPort),
@@ -175,4 +182,27 @@ func (r *WebhookConfig) Reconcile(ctx context.Context, request reconcile.Request
 	}
 
 	return reconcile.Result{}, nil
+}
+
+func setupCertificates(ctx context.Context, mgr ctrl.Manager, cfg config) error {
+
+	cert, key, err := resources.GenerateWebhookCertificates(cfg.WebhookServiceName, cfg.SystemNamespace)
+
+	if err != nil {
+		return err
+	}
+
+	files := map[string][]byte{
+		keyFile:  key,
+		certFile: cert,
+	}
+
+	// write files
+	for file, content := range files {
+		if err := ioutil.WriteFile(path.Join(defaultCertDir, file), content, 0644); err != nil {
+			return err
+		}
+	}
+
+	return nil
 }

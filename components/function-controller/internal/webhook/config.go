@@ -6,6 +6,13 @@ import (
 	"github.com/vrischmann/envconfig"
 )
 
+type Config struct {
+	SystemNamespace    string `envconfig:"default=kyma-system"`
+	WebhookServiceName string `envconfig:"default=serverless-webhook"`
+	WebhookSecretName  string `envconfig:"default=serverless-webhook"`
+	WebhookPort        int    `envconfig:"default=8443"`
+}
+
 func ReadDefaultingConfig() *serverlessv1alpha1.DefaultingConfig {
 	defaultingCfg := &serverlessv1alpha1.DefaultingConfig{}
 	if err := envconfig.InitWithPrefix(defaultingCfg, "WEBHOOK_DEFAULTING"); err != nil {
