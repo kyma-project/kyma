@@ -89,10 +89,7 @@ func runValidations(vFuns []validationFunction, vc *ValidationConfig) error {
 			allErrs = append(allErrs, err.Error())
 		}
 	}
-	if len(allErrs) > 0 {
-		return errors.Errorf("validation failed: %v", allErrs)
-	}
-	return nil
+	return returnAllErrs("", allErrs)
 }
 
 func (fn *Function) validateObjectMeta(_ *ValidationConfig) error {
@@ -135,10 +132,7 @@ func (spec *FunctionSpec) validateEnv(vc *ValidationConfig) error {
 			)
 		}
 	}
-	if len(allErrs) > 0 {
-		return fmt.Errorf("invalid spec.env keys/values: %v", allErrs)
-	}
-	return nil
+	return returnAllErrs("invalid spec.env keys/values", allErrs)
 }
 
 func (spec *FunctionSpec) validateFunctionResources(vc *ValidationConfig) error {
@@ -183,10 +177,7 @@ func validateResources(resources corev1.ResourceRequirements, minMemory, minCpu 
 		allErrs = append(allErrs, fmt.Sprintf("%s.limits.memory(%s) should be higher than %s.requests.memory(%s)",
 			parent, limits.Memory().String(), parent, requests.Memory().String()))
 	}
-	if len(allErrs) > 0 {
-		return errors.Errorf("invalid function resources: %v", allErrs)
-	}
-	return nil
+	return returnAllErrs("invalid function resources", allErrs)
 }
 
 func (spec *FunctionSpec) validateReplicas(vc *ValidationConfig) error {
@@ -206,10 +197,7 @@ func (spec *FunctionSpec) validateReplicas(vc *ValidationConfig) error {
 		allErrs = append(allErrs, fmt.Sprintf("spec.maxReplicas(%d) is less than the smallest allowed value(%d)",
 			*maxReplicas, minValue))
 	}
-	if len(allErrs) > 0 {
-		return errors.Errorf("invalid values: %v", allErrs)
-	}
-	return nil
+	return returnAllErrs("invalid values", allErrs)
 }
 
 func (spec *FunctionSpec) validateLabels(_ *ValidationConfig) error {
@@ -233,10 +221,8 @@ func validateIfMissingFields(properties ...property) error {
 		}
 		allErrs = append(allErrs, fmt.Sprintf("%s is required", item.name))
 	}
-	if len(allErrs) > 0 {
-		return fmt.Errorf("missing required fields: %v", allErrs)
-	}
-	return nil
+
+	return returnAllErrs("missing required fields", allErrs)
 }
 
 func (in *Repository) validateRepository(_ *ValidationConfig) error {
@@ -244,4 +230,16 @@ func (in *Repository) validateRepository(_ *ValidationConfig) error {
 		{name: "spec.baseDir", value: in.BaseDir},
 		{name: "spec.reference", value: in.Reference},
 	}...)
+}
+
+func returnAllErrs(msg string, allErrs []string) error {
+	if len(allErrs) == 0 {
+		return nil
+	}
+
+	if len(msg) > 0 {
+		return fmt.Errorf("%s: %v", msg, allErrs)
+	}
+
+	return fmt.Errorf("%v", allErrs)
 }
