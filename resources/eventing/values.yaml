@@ -5,7 +5,7 @@ global:
   images:
     eventing_controller:
       name: eventing-controller
-      version: PR-13608
+      version: PR-13636
       pullPolicy: "IfNotPresent"
     publisher_proxy:
       name: event-publisher-proxy
@@ -18,8 +18,11 @@ global:
       name: natsio/nats-server-config-reloader
       version: 0.6.3
       directory: external
-  features:
-    enableJetstream: false
+
+  jetstream:
+    enabled: false
+    # Storage type of the stream, memory or file.
+    storage: memory
 
   # secretName defines optionally another name than the default secret name
   secretName: ""

@@ -63,11 +63,11 @@ spec:
           - name: APP_LOG_LEVEL
             value: {{ .Values.global.log.level | quote }}
           - name: ENABLE_JETSTREAM_BACKEND
-            value: {{ .Values.global.features.enableJetstream | quote }}
+            value: {{ .Values.global.jetstream.enabled | quote }}
           - name: JS_STREAM_NAME
             value: {{ .Values.jetstream.streamName | quote }}
           - name: JS_STREAM_STORAGE_TYPE
-            value: {{ .Values.jetstream.storage | quote }}
+            value: {{ .Values.global.jetstream.storage | quote }}
           - name: JS_STREAM_RETENTION_POLICY
             value: {{ .Values.jetstream.retentionPolicy | quote }}
           - name: JS_STREAM_MAX_MSGS

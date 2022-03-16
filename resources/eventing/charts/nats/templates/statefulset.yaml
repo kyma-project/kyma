@@ -62,7 +62,7 @@ spec:
       - name: pid
         emptyDir: {}
 
-      {{- if and .Values.nats.jetstream.fileStorage.enabled .Values.nats.jetstream.fileStorage.existingClaim }}
+      {{- if and (eq .Values.global.jetstream.storage "file") .Values.nats.jetstream.fileStorage.existingClaim }}
       # Persistent volume for jetstream running with file storage option
       - name: {{ include "nats.fullname" . }}-js-pvc
         persistentVolumeClaim:
@@ -149,7 +149,7 @@ spec:
         - name: CLUSTER_ADVERTISE
           value: {{ include "nats.clusterAdvertise" . }}
 
-        {{- if .Values.global.features.enableJetstream }}
+        {{- if .Values.global.jetstream.enabled }}
         {{- with .Values.nats.jetstream.encryption }}
         {{- with .secret }}
         - name: JS_KEY
@@ -165,7 +165,7 @@ spec:
             mountPath: /etc/nats-config
           - name: pid
             mountPath: /var/run/nats
-          {{- if .Values.nats.jetstream.fileStorage.enabled }}
+          {{- if eq .Values.global.jetstream.storage "file" }}
           - name: {{ include "nats.fullname" . }}-js-pvc
             mountPath: {{ .Values.nats.jetstream.fileStorage.storageDirectory }}
           {{- end }}
@@ -200,7 +200,7 @@ spec:
               - "nats-server -sl=ldm=/var/run/nats/nats.pid && /bin/sleep {{ .Values.nats.terminationGracePeriodSeconds }}"
 
   volumeClaimTemplates:
-  {{- if and .Values.nats.jetstream.fileStorage.enabled (not .Values.nats.jetstream.fileStorage.existingClaim) }}
+  {{- if and (eq .Values.global.jetstream.storage "file") (not .Values.nats.jetstream.fileStorage.existingClaim) }}
   #####################################
   #                                   #
   #  Jetstream New Persistent Volume  #
