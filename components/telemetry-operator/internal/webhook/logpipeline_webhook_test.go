@@ -9,8 +9,14 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
+
+var testLogPipeline = types.NamespacedName{
+	Name: "log-pipeline",
+	Namespace: ControllerNamespace,
+}
 
 func createResources() error {
 	cm := corev1.ConfigMap{
@@ -59,7 +65,8 @@ func getLogPipeline() *telemetryv1alpha1.LogPipeline {
 			Kind:       "LogPipeline",
 		},
 		ObjectMeta: metav1.ObjectMeta{
-			Name: "log-pipeline",
+			Name:      testLogPipeline.Name,
+			Namespace: testLogPipeline.Namespace,
 		},
 		Spec: telemetryv1alpha1.LogPipelineSpec{
 			Parsers: []telemetryv1alpha1.Parser{parser},
@@ -106,6 +113,69 @@ var _ = Describe("LogPipeline webhook", func() {
 
 			Expect(StatusReasonConfigurationError).To(Equal(string(status.Status().Reason)))
 			Expect(status.Status().Message).To(ContainSubstring(configErr.Error()))
+		})
+	})
+
+	Context("When updating LogPipeline", func() {
+
+		It("Should create valid LogPipeline", func() {
+			fsWrapperMock.On("CreateAndWrite", mock.AnythingOfType("fs.File")).Return(nil).Times(4)
+			configValidatorMock.On("Validate", mock.Anything, mock.AnythingOfType("string")).Return(nil).Times(1)
+			fsWrapperMock.On("RemoveDirectory", mock.AnythingOfType("string")).Return(nil).Times(1)
+			logPipeline := getLogPipeline()
+			err := k8sClient.Create(ctx, logPipeline)
+
+			Expect(err).NotTo(HaveOccurred())
+		})
+
+		It("Should update previously created valid LogPipeline", func() {
+			fsWrapperMock.On("CreateAndWrite", mock.AnythingOfType("fs.File")).Return(nil).Times(5)
+			configValidatorMock.On("Validate", mock.Anything, mock.AnythingOfType("string")).Return(nil).Times(1)
+			fsWrapperMock.On("RemoveDirectory", mock.AnythingOfType("string")).Return(nil).Times(1)
+
+			var logPipeline telemetryv1alpha1.LogPipeline
+			err:= k8sClient.Get(ctx, testLogPipeline, &logPipeline)
+			Expect(err).NotTo(HaveOccurred())
+
+			logPipeline.Spec.Files = append(logPipeline.Spec.Files, telemetryv1alpha1.FileMount{
+				Name: "another-file",
+				Content: "file content",
+			})
+			err = k8sClient.Update(ctx, &logPipeline)
+
+			Expect(err).NotTo(HaveOccurred())
+		})
+
+		It("Should reject new update of previously created LogPipeline", func() {
+			fsWrapperMock.On("CreateAndWrite", mock.AnythingOfType("fs.File")).Return(nil).Times(5)
+			configErr := errors.New("Error in line 4: Invalid indentation level")
+			configValidatorMock.On("Validate", mock.Anything, mock.AnythingOfType("string")).Return(configErr).Times(1)
+			fsWrapperMock.On("RemoveDirectory", mock.AnythingOfType("string")).Return(nil).Times(1)
+
+			var logPipeline telemetryv1alpha1.LogPipeline
+			err:= k8sClient.Get(ctx, testLogPipeline, &logPipeline)
+			Expect(err).NotTo(HaveOccurred())
+
+			logPipeline.Spec.Files = append(logPipeline.Spec.Files, telemetryv1alpha1.FileMount{
+				Name: "another-file",
+				Content: "file content",
+			})
+
+			err = k8sClient.Update(ctx, &logPipeline)
+
+			Expect(err).To(HaveOccurred())
+			var status apierrors.APIStatus
+			errors.As(err, &status)
+
+			Expect(StatusReasonConfigurationError).To(Equal(string(status.Status().Reason)))
+			Expect(status.Status().Message).To(ContainSubstring(configErr.Error()))
+		})
+
+		It("Should delete LogPipeline", func() {
+			logPipeline := getLogPipeline()
+			err := k8sClient.Delete(ctx, logPipeline, client.GracePeriodSeconds(0))
+			Expect(err).NotTo(HaveOccurred())
+
 		})
 	})
 })
