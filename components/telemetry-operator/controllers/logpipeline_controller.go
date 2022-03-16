@@ -273,14 +273,15 @@ func (r *LogPipelineReconciler) syncParsersConfigMap(ctx context.Context, logPip
 			data := make(map[string]string)
 			data[ParsersConfigMapKey] = fluentBitParsersConfig
 			cm.Data = data
+			controllerutil.AddFinalizer(logPipeline, parserConfigMapFinalizer)
 		} else {
 			if oldConfig, hasKey := cm.Data[ParsersConfigMapKey]; hasKey && oldConfig == fluentBitParsersConfig {
 				// Nothing changed
 				return false, nil
 			}
 			cm.Data[ParsersConfigMapKey] = fluentBitParsersConfig
+			controllerutil.AddFinalizer(logPipeline, parserConfigMapFinalizer)
 		}
-		controllerutil.AddFinalizer(logPipeline, parserConfigMapFinalizer)
 	}
 
 	// Update ConfigMap
