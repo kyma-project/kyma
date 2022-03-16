@@ -18,8 +18,7 @@ The event type is composed of the following components:
 
 For publishers, the event type takes this sample form:
 - `order.created` or `Account.Root.Created` for legacy events coming from the `commerce` application
-- `sap.kyma.custom.commerce.order.created.v1` or `sap.kyma.custom.commerce.AccountRoot.Created.v1` for Cloud Events
-
+- `sap.kyma.custom.commerce.order.created.v1` or `sap.kyma.custom.commerce.Account.Root.Created.v1` for Cloud Events
 
 ## Event name cleanup
 
