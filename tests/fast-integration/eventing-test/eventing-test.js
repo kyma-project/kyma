@@ -125,7 +125,8 @@ describe('Eventing tests', function() {
     // Running Eventing end-to-end tests
     eventingE2ETestSuite(natsBackend);
     // Running Eventing tracing tests
-    eventingTracingTestSuite();
+    // Enable tracing tests once fix is done for: https://github.com/kyma-project/kyma/issues/13576
+    // eventingTracingTestSuite();
     // Running Eventing Monitoring tests
     eventingMonitoringTest(natsBackend);
   });
@@ -169,7 +170,8 @@ describe('Eventing tests', function() {
     // Running Eventing end-to-end tests
     eventingE2ETestSuite();
     // Running Eventing tracing tests
-    eventingTracingTestSuite();
+    // Enable tracing tests once fix is done for: https://github.com/kyma-project/kyma/issues/13576
+    // eventingTracingTestSuite();
     // Running Eventing Monitoring tests
     eventingMonitoringTest(natsBackend);
   });
