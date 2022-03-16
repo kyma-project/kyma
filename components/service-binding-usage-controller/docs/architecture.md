@@ -18,7 +18,7 @@ The Service Binding Usage Controller workflow looks as follows:
 
     ```
      servicebindingusages.servicecatalog.kyma-project.io/tracing-information: '{
-      "{ServiceBindingUsage Name}": {
+      "{Service Binding Usage Name}": {
         "injectedLabels": {
           "{label-key}": "{label-value}"
         }

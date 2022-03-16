@@ -46,7 +46,7 @@ Run:
 [protection-finalizer]
 ```
 
-4. Create ApplicationMapping, which blocks Application deletion
+4. Create an Application Mapping, which blocks Application deletion
 ```bash
 > kubectl apply -f cmd/poc-finalizers/mapping-prod.yaml
 ```
