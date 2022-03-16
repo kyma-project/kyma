@@ -49,7 +49,7 @@ describe('Upgrade test tests', function() {
     printRestartReport(initialRestarts, afterTestRestarts);
   });
 
-  loggingTests();
-
   monitoringTests();
+
+  loggingTests();
 });
