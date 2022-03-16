@@ -18,23 +18,31 @@ replace (
 )
 
 require (
+	cloud.google.com/go v0.98.0 // indirect
 	github.com/go-logr/logr v1.2.2
 	github.com/go-logr/zapr v1.2.0
+	github.com/google/gofuzz v1.2.0 // indirect
+	github.com/google/uuid v1.3.0 // indirect
 	github.com/libgit2/git2go/v31 v31.4.14
 	github.com/onsi/gomega v1.17.0
 	github.com/pkg/errors v0.9.1
 	github.com/prometheus/client_golang v1.11.1
+	github.com/prometheus/common v0.32.1 // indirect
 	github.com/stretchr/objx v0.2.0 // indirect
 	github.com/stretchr/testify v1.7.0
 	github.com/vrischmann/envconfig v1.3.0
+	go.uber.org/atomic v1.9.0 // indirect
 	go.uber.org/zap v1.19.1
 	golang.org/x/crypto v0.0.0-20220214200702-86341886e292
+	golang.org/x/net v0.0.0-20220225172249-27dd8689420f // indirect
+	golang.org/x/sys v0.0.0-20220227234510-4e6760a101f9 // indirect
 	golang.org/x/time v0.0.0-20210723032227-1f47c861a9ac
+	gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c // indirect
 	gopkg.in/yaml.v2 v2.4.0
 	k8s.io/api v0.23.0
 	k8s.io/apimachinery v0.23.0
 	k8s.io/client-go v0.23.0
+	k8s.io/klog/v2 v2.40.1 // indirect
 	k8s.io/utils v0.0.0-20211116205334-6203023598ed
-	knative.dev/pkg v0.0.0-20220310182448-ce6f2877cef9
 	sigs.k8s.io/controller-runtime v0.11.1
 )
