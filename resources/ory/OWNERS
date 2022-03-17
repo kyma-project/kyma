@@ -1,10 +1,9 @@
+reviewers:
+  - api-gateway-reviewers
 approvers:
-  - Tomasz-Smelcerz-SAP
-  - strekm
-  - piotrmsc
-  - kubadz
-  - Demonsthere
+  - api-gateway-approvers
 
 labels:
+- area/api-gateway
 - area/service-mesh
 - area/security

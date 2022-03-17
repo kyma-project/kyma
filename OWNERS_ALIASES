@@ -139,18 +139,39 @@ aliases:
     - moelsayed
     - cortey
 
+   api-gateway-reviewers: # area/api-gateway
+     - strekm
+     - werdes72
+     - mjakobczyk
+     - veichtj
+     - dariusztutaj
+     - cnvergence
+     - piotrkpc
+   api-gateway-approvers: # area/api-gateway
+     - strekm
+     - werdes72
+     - mjakobczyk
+     - veichtj
+     - dariusztutaj
+     - cnvergence
+     - piotrkpc
+
   service-mesh-reviewers: # area/service-mesh
     - strekm
     - werdes72
-    - Tomasz-Smelcerz-SAP
     - mjakobczyk
+    - veichtj
     - dariusztutaj
-  service-mesh-approvers:
+    - cnvergence
+    - piotrkpc
+  service-mesh-approvers: # area/service-mesh
     - strekm
     - werdes72
-    - Tomasz-Smelcerz-SAP
     - mjakobczyk
+    - veichtj
     - dariusztutaj
+    - cnvergence
+    - piotrkpc
 
   observability-reviewers: # area/logging, area/monitoring, area/tracing
     - a-thaler

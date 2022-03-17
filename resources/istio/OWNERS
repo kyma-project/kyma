@@ -1,7 +1,7 @@
+reviewers:
+  - service-mesh-reviewers
 approvers:
-  - Tomasz-Smelcerz-SAP
-  - strekm
-
+  - service-mesh-approvers
 labels:
 - area/service-mesh
 - area/security
