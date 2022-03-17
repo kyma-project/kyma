@@ -73,12 +73,12 @@ Metadata:
   UID:               f5eaea15-2b5d-11e8-9892-080027ab8e2d
 ```
 
-7. The finalizers was not removed because ApplicationMapping still exists. Let's remove ApplicationMapping:
+7. The finalizers was not removed because Application Mapping still exists. Let's remove Application Mapping:
 ```bash
 > kubectl delete em ec-prod
 ```
 
-8. and do update on Application (the controller is not watching ApplicationMapping, which must be done in the production code) to trigger the controller:
+8. and do update on Application (the controller is not watching Application Mapping, which must be done in the production code) to trigger the controller:
 ```bash
 > kubectl delete em ec-prod
 applicationmapping "ec-prod" deleted
