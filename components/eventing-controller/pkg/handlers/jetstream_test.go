@@ -961,7 +961,7 @@ func TestJSSubscriptionUsingCESDK(t *testing.T) {
 	require.NoError(t, jsBackend.DeleteSubscription(sub))
 }
 
-func TestSubscription_JetStreamServerRestartWithReconnectDisabled(t *testing.T) {
+func TestJetStreamServerRestart_WithReconnectDisabled(t *testing.T) {
 	// given
 	testEnvironment := setupTestEnvironment(t)
 	jsBackend := testEnvironment.jsBackend
@@ -1023,7 +1023,7 @@ func TestSubscription_JetStreamServerRestartWithReconnectDisabled(t *testing.T) 
 	require.NoError(t, subscriber.CheckEvent(expectedEv2Data))
 }
 
-func TestSubscription_JetStreamServerRestartWithReconnectEnabled(t *testing.T) {
+func TestJetStreamServerRestart_WithReconnectEnabled(t *testing.T) {
 	// given
 	testEnvironment := setupTestEnvironment(t)
 	jsBackend := testEnvironment.jsBackend
@@ -1083,7 +1083,7 @@ func TestSubscription_JetStreamServerRestartWithReconnectEnabled(t *testing.T) {
 	require.NoError(t, subscriber.CheckEvent(expectedEv2Data))
 }
 
-func TestSubscription_JetStreamServerRestartWithFileStorage(t *testing.T) {
+func TestJetStreamServerRestart_WithFileStorage(t *testing.T) {
 	// given
 	testEnvironment := setupTestEnvironment(t)
 	jsBackend := testEnvironment.jsBackend
