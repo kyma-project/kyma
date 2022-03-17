@@ -30,11 +30,6 @@ spec:
    labelsPath: spec.deployment.spec.template.metadata.labels
 ```
 
-## Console Backend Service 
-
-UI needs two new endpoints which return:
- * all kinds which you can use with the binding usage. It is a list of all usage kinds.
- * all resources with a given kind. The result must be filtered out by the **metadata.ownerReference** field. If the resource contains **metadata.ownerReference**, the user should not see such a resource in the UI.
 ## Binding Usage Controller
 
 The Binding Usage Controller takes the value of the **spec.usedBy.kind** field of the Service Binding Usage resource, looks for the corresponding Usage Kind which contains information about the kind of resource to be bound. The controller must handle resources even if the specified **labelsPath** field does not exist.
@@ -64,12 +59,6 @@ There is also a RBAC role with the following rule for the Binding Usage Controll
 - apiGroups: ["kubeless.io"]
   resources: ["functions"]
   verbs: ["get", "update"]
-```
-and for the Console Backend Service:
-```yaml
-- apiGroups: ["kubeless.io"]
-  resources: ["functions"]
-  verbs: ["list"]
 ```
 
 The user creates binding and binding usage:
