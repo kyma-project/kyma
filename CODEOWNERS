@@ -16,7 +16,7 @@
 /hack @clebs
 
 # The `installation` directory and subdirectories
-/installation/ @Tomasz-Smelcerz-SAP @strekm @werdes72 @mjakobczyk @m00g3n @pPrecel @dariusztutaj
+/installation/ @khlifi411 @jeremyharisch @ruanxin @tobiscr @moelsayed @clebs @Tomasz-Smelcerz-SAP @jakobmoellersap @adityabhatia
 
 # The eventing crds
 /installation/resources/crds/eventing/ @k15r @lilitgh @marcobebway @pxsalehi @mfaizanse @friedrichwilken @vladislavpaskar @radufa @raypinto
@@ -127,9 +127,6 @@ components/etcd-tls-setup-job/ @PK85 @piotrmiskiewicz @szwedm @wozniakjan @hanng
 
 # Binding usage controller Component
 /components/service-binding-usage-controller/ @PK85 @piotrmiskiewicz @szwedm @wozniakjan @hanngos @tillknuesting @ralikio
-
-# Istioctl Installer Component
-/components/istio-installer/ @strekm @werdes72 @Tomasz-Smelcerz-SAP @mjakobczyk @dariusztutaj
 
 # Application broker Component
 /components/application-broker/ @PK85 @piotrmiskiewicz @szwedm @wozniakjan @hanngos @tillknuesting @ralikio

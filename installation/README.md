@@ -1,5 +1,7 @@
-# Kyma Installer
+# Installation Resources
 
 ## Overview
 
-The Kyma Installer is a proprietary solution based on the Kubernetes operator. See the document on [local Kyma installation](https://kyma-project-old.netlify.app/docs/#installation-install-kyma-locally) for basic information on how to use the installer and run Kyma locally. Read also the [installation instructions](https://kyma-project-old.netlify.app/docs/#installation-install-kyma-on-a-cluster) to learn how to set up Kyma on a cluster.
+This folder contains Kyma custom resource definitions (CRDs) and the components list for installation. 
+
+See the document on [Kyma installation](https://kyma-project.io/docs/kyma/latest/04-operation-guides/operations/02-install-kyma/) for basic information on how to set up Kyma on a cluster.
