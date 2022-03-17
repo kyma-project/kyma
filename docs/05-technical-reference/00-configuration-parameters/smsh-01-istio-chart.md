@@ -2,7 +2,7 @@
 title: Istio chart
 ---
 
-To configure the Istio chart, override the default values of its [`values.yaml`](https://github.com/kyma-project/kyma/blob/main/resources/istio-configuration/values.yaml) file. This document describes parameters that you can configure.
+To configure the Istio chart, override the default values of its [`values.yaml`](https://github.com/kyma-project/kyma/blob/main/resources/istio/values.yaml) file. This document describes parameters that you can configure.
 
 The Istio installation in Kyma uses the [Istio Operator](https://istio.io/docs/reference/config/istio.operator.v1alpha1/) API. Kyma provides default Istio Operator configurations for the production and evaluation profiles. You can also add a custom Istio Operator definition that overrides the default settings. See the default `values.yaml` files for the Istio [evaluation](https://github.com/kyma-project/kyma/blob/main/resources/istio/profile-evaluation.yaml) and [production](https://github.com/kyma-project/kyma/blob/main/resources/istio/profile-production.yaml) profiles. To learn more about profiles in Kyma, read about the [resource consumption](../../04-operation-guides/operations/02-install-kyma.md#choose-resource-consumption).
 

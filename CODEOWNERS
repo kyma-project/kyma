@@ -88,7 +88,7 @@
 /resources/istio-resources/ @strekm @werdes72 @Tomasz-Smelcerz-SAP @mjakobczyk @dariusztutaj @cnvergence @veichtj @piotrkpc
 
 # The monitoring of `istio` chart
-/resources/istio-resources/templates/dashboards @a-thaler @lilitgh @rakesh-garimella @skhalash @chrkl @shorim @lindnerby @dennis-ge
+/resources/istio-resources/templates/dashboards @a-thaler @lilitgh @rakesh-garimella @skhalash @chrkl @lindnerby @dennis-ge
 
 # The `tracing` chart
 /resources/tracing/ @a-thaler @lilitgh @clebs @rakesh-garimella @skhalash @jeremyharisch @chrkl @lindnerby @dennis-ge
