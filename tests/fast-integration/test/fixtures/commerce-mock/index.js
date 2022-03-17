@@ -266,7 +266,7 @@ async function checkEventTracing(targetNamespace = 'test', res) {
   const traceId = res.data.event.headers['x-b3-traceid'];
 
   // Define expected trace data
-  const correctTraceSpansLength = 6;
+  // const correctTraceSpansLength = 6; todo
   const correctTraceProcessSequence = [
     'istio-ingressgateway.istio-system',
     'central-application-connectivity-validator.kyma-system',
@@ -275,10 +275,11 @@ async function checkEventTracing(targetNamespace = 'test', res) {
     'eventing-controller.kyma-system',
     `lastorder-${res.data.podName.split('-')[1]}.${targetNamespace}`,
   ];
-
-  // wait sometime for jaeger to complete tracing data
+  debug(`length: ${correctTraceProcessSequence.length}`);// todo
+  debug(`array: ${correctTraceProcessSequence}`);
+  // wait some time for jaeger to complete tracing data
   await sleep(10 * 1000);
-  await checkTrace(traceId, correctTraceSpansLength, correctTraceProcessSequence);
+  await checkTrace(traceId, correctTraceProcessSequence.length, correctTraceProcessSequence);
 }
 
 async function sendLegacyEventAndCheckTracing(targetNamespace = 'test', mockNamespace = 'mocks') {
@@ -329,7 +330,9 @@ async function checkInClusterEventTracing(targetNamespace) {
 }
 
 async function checkTrace(traceId, expectedTraceLength, expectedTraceProcessSequence) {
-  // Port-forward to Jaeger and fetch trace data for the traceId
+  // todo remove length and just check the lengt of the seq
+
+  // port-forward to Jaeger and fetch trace data for the traceId
   const cancelJaegerPortForward = await jaegerPortForward();
   let traceRes;
   try {
@@ -341,29 +344,44 @@ async function checkTrace(traceId, expectedTraceLength, expectedTraceProcessSequ
   // the trace response should have data for single trace
   expect(traceRes.data).to.have.length(1);
 
-  // Extract trace data from response
+  // extract trace data from response
   const traceData = traceRes.data[0];
-  expect(traceData['spans']).to.have.length(expectedTraceLength);
+  debug(`number of actual spans should be greater or equal to the expected spans:
+    actual: ${traceData['spans'].length}, expected: ${expectedTraceLength}
+    -> ${traceData['spans'].length >= expectedTraceLength ? 'passed' : 'failed'}`);
+  expect(traceData['spans'].length >= expectedTraceLength).to.be.true; // todo at least
 
-  // Generate DAG for trace spans
+  debug('doohickey');
+  // generate DAG for trace spans
+  debug(traceData);
   const traceDAG = await getTraceDAG(traceData);
+  debug(traceDAG);
   expect(traceDAG).to.have.length(1);
 
-  // Check the tracing spans are correct
-  let currentSpan = traceDAG[0];
-  for (let i = 0; i < expectedTraceLength; i++) {
-    const processServiceName = traceData.processes[currentSpan.processID].serviceName;
-    debug(`Checking Trace Sequence # ${i}:
-    Expected process: ${expectedTraceProcessSequence[i]}, 
-    Received process: ${processServiceName}`);
-    expect(processServiceName).to.be.equal(expectedTraceProcessSequence[i]);
+  debug('dingus');
+  const wasFound = await findSpanSequence(expectedTraceProcessSequence, 0, traceDAG[0], traceData);
+  expect(wasFound).to.be.true;
+  debug('horsehockey');
+}
 
-    // Traverse to next trace span
-    if (i < expectedTraceLength - 1) {
-      expect(currentSpan.childSpans).to.have.length(1);
-      currentSpan = currentSpan.childSpans[0];
+async function findSpanSequence(expectedSpans, pos, currentSpan, traceData) {
+  // if this span contains the currently expected span, the position will be increased
+  const newPos = traceData.processes[currentSpan.processID].serviceName === expectedSpans[pos] ? pos+1 : pos;
+
+  // check if all traces have been found yet
+  if (newPos === expectedSpans.length) {
+    return true;
+  }
+
+  // recursive search through all the child spans
+  for (let i = 0; i < currentSpan.childSpans.length; i++) {
+    if (findSpanSequence(expectedSpans, newPos, currentSpan.childSpans[i], traceData)) {
+      return true;
     }
   }
+
+  // if nothing was found on this branch of the graph, close it
+  return false;
 }
 
 async function addService() {
