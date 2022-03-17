@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strconv"
 
+	"github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 	"github.com/kyma-project/kyma/components/eventing-controller/utils"
 
 	"k8s.io/apimachinery/pkg/api/resource"
@@ -22,10 +23,11 @@ const (
 	livenessTimeoutSecs      = int32(1)
 	livenessPeriodSecs       = int32(2)
 	bebNamespacePrefix       = "/"
-	instanceLabelKey         = "app.kubernetes.io/instance"
-	instanceLabelValue       = "eventing"
-	dashboardLabelKey        = "kyma-project.io/dashboard"
-	dashboardLabelValue      = "eventing"
+	InstanceLabelKey         = "app.kubernetes.io/instance"
+	InstanceLabelValue       = "eventing"
+	DashboardLabelKey        = "kyma-project.io/dashboard"
+	DashboardLabelValue      = "eventing"
+	BackendTypeLabelKey      = "backendType"
 	publisherPortName        = "http"
 	publisherPortNum         = int32(8080)
 	publisherMetricsPortName = "http-metrics"
@@ -49,106 +51,36 @@ var (
 )
 
 func NewBEBPublisherDeployment(publisherConfig env.PublisherConfig) *appsv1.Deployment {
-	labels := map[string]string{
-		AppLabelKey:       PublisherName,
-		instanceLabelKey:  instanceLabelValue,
-		dashboardLabelKey: dashboardLabelValue,
-	}
-	return &appsv1.Deployment{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      PublisherName,
-			Namespace: PublisherNamespace,
-			Labels:    labels,
-		},
-		Spec: appsv1.DeploymentSpec{
-
-			Replicas: utils.Int32Ptr(publisherConfig.Replicas),
-			Selector: metav1.SetAsLabelSelector(labels),
-			Template: v1.PodTemplateSpec{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:   PublisherName,
-					Labels: labels,
-				},
-				Spec: v1.PodSpec{
-					Containers: []v1.Container{
-						{
-							Name:            PublisherName,
-							Image:           publisherConfig.Image,
-							Ports:           getContainerPorts(),
-							Env:             getBEBEnvVars(publisherConfig),
-							LivenessProbe:   getLivenessProbe(),
-							ReadinessProbe:  getReadinessProbe(),
-							ImagePullPolicy: getImagePullPolicy(publisherConfig.ImagePullPolicy),
-							SecurityContext: getSecurityContext(),
-							Resources: getResources(publisherConfig.RequestsCPU,
-								publisherConfig.RequestsMemory,
-								publisherConfig.LimitsCPU,
-								publisherConfig.LimitsMemory),
-						},
-					},
-					RestartPolicy:                 v1.RestartPolicyAlways,
-					ServiceAccountName:            publisherConfig.ServiceAccount,
-					TerminationGracePeriodSeconds: &TerminationGracePeriodSeconds,
-					PriorityClassName:             publisherConfig.PriorityClassName,
-				},
-			},
-		},
-	}
+	return NewDeployment(
+		publisherConfig,
+		WithLabels(v1alpha1.BEBBackendType),
+		WithContainers(v1alpha1.BEBBackendType, publisherConfig),
+	)
+}
+func NewNATSPublisherDeployment(publisherConfig env.PublisherConfig) *appsv1.Deployment {
+	return NewDeployment(
+		publisherConfig,
+		WithLabels(v1alpha1.NatsBackendType),
+		WithContainers(v1alpha1.NatsBackendType, publisherConfig),
+		WithAffinity(),
+	)
 }
 
-func NewNATSPublisherDeployment(publisherConfig env.PublisherConfig) *appsv1.Deployment {
-	labels := map[string]string{
-		AppLabelKey:       PublisherName,
-		instanceLabelKey:  instanceLabelValue,
-		dashboardLabelKey: dashboardLabelValue,
-	}
-	return &appsv1.Deployment{
+type DeployOpt func(deployment *appsv1.Deployment)
+
+func NewDeployment(publisherConfig env.PublisherConfig, opts ...DeployOpt) *appsv1.Deployment {
+	newDeployment := &appsv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      PublisherName,
 			Namespace: PublisherNamespace,
-			Labels:    labels,
 		},
 		Spec: appsv1.DeploymentSpec{
-
 			Replicas: utils.Int32Ptr(publisherConfig.Replicas),
-			Selector: metav1.SetAsLabelSelector(labels),
 			Template: v1.PodTemplateSpec{
 				ObjectMeta: metav1.ObjectMeta{
-					Name:   PublisherName,
-					Labels: labels,
+					Name: PublisherName,
 				},
 				Spec: v1.PodSpec{
-					Affinity: &v1.Affinity{
-						PodAntiAffinity: &v1.PodAntiAffinity{
-							PreferredDuringSchedulingIgnoredDuringExecution: []v1.WeightedPodAffinityTerm{
-								{
-									Weight: 100,
-									PodAffinityTerm: v1.PodAffinityTerm{
-										LabelSelector: &metav1.LabelSelector{
-											MatchLabels: map[string]string{AppLabelKey: PublisherName},
-										},
-										TopologyKey: "kubernetes.io/hostname",
-									},
-								},
-							},
-						},
-					},
-					Containers: []v1.Container{
-						{
-							Name:            PublisherName,
-							Image:           publisherConfig.Image,
-							Ports:           getContainerPorts(),
-							Env:             getNATSEnvVars(publisherConfig),
-							LivenessProbe:   getLivenessProbe(),
-							ReadinessProbe:  getReadinessProbe(),
-							ImagePullPolicy: getImagePullPolicy(publisherConfig.ImagePullPolicy),
-							SecurityContext: getSecurityContext(),
-							Resources: getResources(publisherConfig.RequestsCPU,
-								publisherConfig.RequestsMemory,
-								publisherConfig.LimitsCPU,
-								publisherConfig.LimitsMemory),
-						},
-					},
 					RestartPolicy:                 v1.RestartPolicyAlways,
 					ServiceAccountName:            publisherConfig.ServiceAccount,
 					TerminationGracePeriodSeconds: &TerminationGracePeriodSeconds,
@@ -157,6 +89,69 @@ func NewNATSPublisherDeployment(publisherConfig env.PublisherConfig) *appsv1.Dep
 			},
 		},
 		Status: appsv1.DeploymentStatus{},
+	}
+	for _, o := range opts {
+		o(newDeployment)
+	}
+	return newDeployment
+}
+
+func WithLabels(backendType v1alpha1.BackendType) DeployOpt {
+	labels := map[string]string{
+		AppLabelKey:       PublisherName,
+		InstanceLabelKey:  InstanceLabelValue,
+		DashboardLabelKey: DashboardLabelValue}
+	return func(d *appsv1.Deployment) {
+		d.Spec.Selector = metav1.SetAsLabelSelector(labels)
+		d.Spec.Template.ObjectMeta.Labels = labels
+
+		// label the event-publisher proxy with the backendType label
+		labels[BackendTypeLabelKey] = fmt.Sprint(backendType)
+		d.ObjectMeta.Labels = labels
+	}
+}
+
+func WithAffinity() DeployOpt {
+	return func(d *appsv1.Deployment) {
+		d.Spec.Template.Spec.Affinity = &v1.Affinity{
+			PodAntiAffinity: &v1.PodAntiAffinity{
+				PreferredDuringSchedulingIgnoredDuringExecution: []v1.WeightedPodAffinityTerm{
+					{
+						Weight: 100,
+						PodAffinityTerm: v1.PodAffinityTerm{
+							LabelSelector: &metav1.LabelSelector{
+								MatchLabels: map[string]string{AppLabelKey: PublisherName},
+							},
+							TopologyKey: "kubernetes.io/hostname",
+						},
+					},
+				},
+			},
+		}
+	}
+}
+func WithContainers(backendType v1alpha1.BackendType, publisherConfig env.PublisherConfig) DeployOpt {
+	return func(d *appsv1.Deployment) {
+		envVars := getNATSEnvVars(publisherConfig)
+		if backendType == v1alpha1.BEBBackendType {
+			envVars = getBEBEnvVars(publisherConfig)
+		}
+		d.Spec.Template.Spec.Containers = []v1.Container{
+			{
+				Name:            PublisherName,
+				Image:           publisherConfig.Image,
+				Ports:           getContainerPorts(),
+				Env:             envVars,
+				LivenessProbe:   getLivenessProbe(),
+				ReadinessProbe:  getReadinessProbe(),
+				ImagePullPolicy: getImagePullPolicy(publisherConfig.ImagePullPolicy),
+				SecurityContext: getSecurityContext(),
+				Resources: getResources(publisherConfig.RequestsCPU,
+					publisherConfig.RequestsMemory,
+					publisherConfig.LimitsCPU,
+					publisherConfig.LimitsMemory),
+			},
+		}
 	}
 }
 
