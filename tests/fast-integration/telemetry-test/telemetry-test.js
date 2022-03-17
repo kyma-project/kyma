@@ -77,9 +77,6 @@ describe('Telemetry Operator tests', function() {
     const podList = res.body.items;
     assert.equal(podList.length, 1);
   });
-  it('Should sleep', async () => {
-    await sleep(100000);
-  });
 
   it('Should reject the invalid LogPipeline', async () => {
     try {
