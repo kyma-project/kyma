@@ -68,8 +68,6 @@ function getTracerProvider (serviceName, endpoint) {
   return opentelemetry.trace.getTracer(serviceName.concat('-tracer'),'0.0.1');
 }
 
-// export default ServerlessTracerProvider
-
 module.exports = {
   ServerlessTracerProvider
 }
