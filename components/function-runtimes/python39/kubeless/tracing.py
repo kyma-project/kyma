@@ -1,3 +1,4 @@
+import logging
 from contextlib import contextmanager
 from typing import Iterator
 
@@ -23,7 +24,7 @@ class ServerlessTracerProvider:
         if _is_jaeger_available(jaeger_endpoint):
             self.tracer = _get_tracer(jaeger_endpoint, service_name)
         else:
-            print("jaeger is not available")
+            logging.info("jaeger is not available")
             self.tracer = trace.NoOpTracer()
 
     def get_tracer(self, req):
