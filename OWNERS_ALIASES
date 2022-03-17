@@ -124,6 +124,18 @@ aliases:
     - kwiatekus
     - moelsayed
     - cortey
+  core-and-supporting-rewievers: # area/core-and-supporting
+    - m00g3n
+    - pPrecel
+    - dbadura
+    - kwiatekusmoelsayed
+    - cortey
+  core-and-supporting-approvers:
+    - m00g3n
+    - pPrecel
+    - dbadura
+    - kwiatekusmoelsayed
+    - cortey
   busola-migrator-reviewers: # area/busola-migrator
     - m00g3n
     - pPrecel
