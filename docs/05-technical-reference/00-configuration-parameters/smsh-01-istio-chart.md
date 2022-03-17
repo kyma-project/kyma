@@ -4,15 +4,7 @@ title: Istio chart
 
 To configure the Istio chart, override the default values of its [`values.yaml`](https://github.com/kyma-project/kyma/blob/main/resources/istio-configuration/values.yaml) file. This document describes parameters that you can configure.
 
-<<<<<<< HEAD
-<<<<<<< HEAD
 The Istio installation in Kyma uses the [Istio Operator](https://istio.io/docs/reference/config/istio.operator.v1alpha1/) API. Kyma provides default Istio Operator configurations for the production and evaluation profiles. You can also add a custom Istio Operator definition that overrides the default settings. See the default `values.yaml` files for the Istio [evaluation](https://github.com/kyma-project/kyma/blob/main/resources/istio/profile-evaluation.yaml) and [production](https://github.com/kyma-project/kyma/blob/main/resources/istio/profile-production.yaml) profiles. To learn more about profiles in Kyma, read about the [resource consumption](../../04-operation-guides/operations/02-install-kyma.md#choose-resource-consumption).
-=======
-The Istio installation in Kyma uses the [Istio Operator](https://istio.io/docs/reference/config/istio.operator.v1alpha1/) API. Kyma provides default Istio Operator configurations for the production and evaluation profiles. You can also add a custom Istio Operator definition that overrides the default settings. See the default `values.yaml` files for the Istio [evaluation](https://github.com/kyma-project/kyma/blob/main/resources/istio/profile-evaluation.yaml) and [production](https://github.com/kyma-project/kyma/blob/main/resources/istio/profile-production.yaml) profiles. To learn more about profiles in Kyma, read about the [resource consumption](../../04-operation-guides/operations/01-install-kyma.md#choose-resource-consumption).
->>>>>>> ded9494a0 (Remove Istio-configuration chart)
-=======
-The Istio installation in Kyma uses the [Istio Operator](https://istio.io/docs/reference/config/istio.operator.v1alpha1/) API. Kyma provides default Istio Operator configurations for the production and evaluation profiles. You can also add a custom Istio Operator definition that overrides the default settings. See the default `values.yaml` files for the Istio [evaluation](https://github.com/kyma-project/kyma/blob/main/resources/istio-configuration/profile-evaluation.yaml) and [production](https://github.com/kyma-project/kyma/blob/main/resources/istio-configuration/profile-production.yaml) profiles. To learn more about profiles in Kyma, read about the [resource consumption](../../04-operation-guides/operations/01-install-kyma.md#choose-resource-consumption).
->>>>>>> 410e4f03c (Remove docs)
 
 >**TIP:** See how to [change Kyma settings](../../04-operation-guides/operations/03-change-kyma-config-values.md).
 

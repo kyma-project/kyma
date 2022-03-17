@@ -87,13 +87,8 @@
 # The `istio-resources` chart
 /resources/istio-resources/ @strekm @werdes72 @Tomasz-Smelcerz-SAP @mjakobczyk @dariusztutaj @cnvergence @veichtj @piotrkpc
 
-<<<<<<< HEAD
-# The monitoring of `istio-configuration` chart
-/resources/istio-configuration/templates/monitoring @a-thaler @lilitgh @rakesh-garimella @skhalash @chrkl @lindnerby @dennis-ge
-=======
 # The monitoring of `istio` chart
 /resources/istio-resources/templates/dashboards @a-thaler @lilitgh @rakesh-garimella @skhalash @chrkl @shorim @lindnerby @dennis-ge
->>>>>>> 33011808d (Change OWNERS)
 
 # The `tracing` chart
 /resources/tracing/ @a-thaler @lilitgh @clebs @rakesh-garimella @skhalash @jeremyharisch @chrkl @lindnerby @dennis-ge
