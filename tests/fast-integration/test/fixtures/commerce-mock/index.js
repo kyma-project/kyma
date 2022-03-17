@@ -274,8 +274,6 @@ async function checkEventTracing(targetNamespace = 'test', res) {
     'eventing-controller.kyma-system',
     `lastorder-${res.data.podName.split('-')[1]}.${targetNamespace}`,
   ];
-  debug(`length: ${correctTraceProcessSequence.length}`);// todo
-  debug(`array: ${correctTraceProcessSequence}`);
   // wait some time for jaeger to complete tracing data
   await sleep(10 * 1000);
   await checkTrace(traceId, correctTraceProcessSequence);
