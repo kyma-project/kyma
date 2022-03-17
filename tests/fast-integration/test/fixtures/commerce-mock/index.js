@@ -266,7 +266,6 @@ async function checkEventTracing(targetNamespace = 'test', res) {
   const traceId = res.data.event.headers['x-b3-traceid'];
 
   // Define expected trace data
-  // const correctTraceSpansLength = 6; todo
   const correctTraceProcessSequence = [
     'istio-ingressgateway.istio-system',
     'central-application-connectivity-validator.kyma-system',
@@ -279,7 +278,7 @@ async function checkEventTracing(targetNamespace = 'test', res) {
   debug(`array: ${correctTraceProcessSequence}`);
   // wait some time for jaeger to complete tracing data
   await sleep(10 * 1000);
-  await checkTrace(traceId, correctTraceProcessSequence.length, correctTraceProcessSequence);
+  await checkTrace(traceId, correctTraceProcessSequence);
 }
 
 async function sendLegacyEventAndCheckTracing(targetNamespace = 'test', mockNamespace = 'mocks') {
@@ -315,9 +314,9 @@ async function checkInClusterEventTracing(targetNamespace) {
   const traceId = res.data.event.headers['x-b3-traceid'];
 
   // Define expected trace data
-  const correctTraceSpansLength = 4;
   const correctTraceProcessSequence = [
     // We are sending the in-cluster event from inside the lastorder pod
+    'istio-ingressgateway.istio-system',
     `lastorder-${res.data.podName.split('-')[1]}.${targetNamespace}`,
     'eventing-publisher-proxy.kyma-system',
     'eventing-controller.kyma-system',
@@ -326,12 +325,10 @@ async function checkInClusterEventTracing(targetNamespace) {
 
   // wait sometime for jaeger to complete tracing data
   await sleep(10 * 1000);
-  await checkTrace(traceId, correctTraceSpansLength, correctTraceProcessSequence);
+  await checkTrace(traceId, correctTraceProcessSequence);
 }
 
-async function checkTrace(traceId, expectedTraceLength, expectedTraceProcessSequence) {
-  // todo remove length and just check the lengt of the seq
-
+async function checkTrace(traceId, expectedTraceProcessSequence) {
   // port-forward to Jaeger and fetch trace data for the traceId
   const cancelJaegerPortForward = await jaegerPortForward();
   let traceRes;
@@ -346,27 +343,20 @@ async function checkTrace(traceId, expectedTraceLength, expectedTraceProcessSequ
 
   // extract trace data from response
   const traceData = traceRes.data[0];
-  debug(`number of actual spans should be greater or equal to the expected spans:
-    actual: ${traceData['spans'].length}, expected: ${expectedTraceLength}
-    -> ${traceData['spans'].length >= expectedTraceLength ? 'passed' : 'failed'}`);
-  expect(traceData['spans'].length >= expectedTraceLength).to.be.true; // todo at least
+  // expect(traceData['spans'].length >= expectedTraceProcessSequence.length).to.be.true;
+  expect(traceData['spans'].length).to.be.gte(expectedTraceProcessSequence.length);
 
-  debug('doohickey');
   // generate DAG for trace spans
-  debug(traceData);
   const traceDAG = await getTraceDAG(traceData);
-  debug(traceDAG);
   expect(traceDAG).to.have.length(1);
 
-  debug('dingus');
   const wasFound = await findSpanSequence(expectedTraceProcessSequence, 0, traceDAG[0], traceData);
   expect(wasFound).to.be.true;
-  debug('horsehockey');
 }
 
 async function findSpanSequence(expectedSpans, pos, currentSpan, traceData) {
   // if this span contains the currently expected span, the position will be increased
-  const newPos = traceData.processes[currentSpan.processID].serviceName === expectedSpans[pos] ? pos+1 : pos;
+  const newPos = pos + (traceData.processes[currentSpan.processID].serviceName === expectedSpans[pos] ? 1 : 0);
 
   // check if all traces have been found yet
   if (newPos === expectedSpans.length) {
@@ -375,7 +365,7 @@ async function findSpanSequence(expectedSpans, pos, currentSpan, traceData) {
 
   // recursive search through all the child spans
   for (let i = 0; i < currentSpan.childSpans.length; i++) {
-    if (findSpanSequence(expectedSpans, newPos, currentSpan.childSpans[i], traceData)) {
+    if (await findSpanSequence(expectedSpans, newPos, currentSpan.childSpans[i], traceData)) {
       return true;
     }
   }
@@ -844,6 +834,9 @@ async function checkInClusterEventDeliveryHelper(targetNamespace, encoding) {
       params: {
         send: true,
         encoding: encoding,
+      },
+      headers: {
+        'X-B3-Sampled': 1,
       },
     });
     debug('Event publishing result:', {
