@@ -50,8 +50,9 @@ func GenerateWebhookCertificates(serviceName, namespace string) ([]byte, []byte,
 
 // TODO: refactor this
 func EnsureWebhookSecret(ctx context.Context, client ctrlclient.Client, secretName, secretNamespace, serviceName string) error {
+	logger := ctrl.LoggerFrom(ctx)
 	secret := &corev1.Secret{}
-
+	logger.Info("ensuring webhook secret")
 	err := client.Get(ctx, types.NamespacedName{Name: secretName, Namespace: secretNamespace}, secret)
 	if err != nil && !apiErrors.IsNotFound(err) {
 		return err
@@ -61,6 +62,8 @@ func EnsureWebhookSecret(ctx context.Context, client ctrlclient.Client, secretNa
 		if err != nil {
 			return err
 		}
+
+		logger.Info("creating webhook secret")
 		if err := client.Create(ctx, secret); err != nil {
 			return err
 		}
@@ -82,6 +85,8 @@ func EnsureWebhookSecret(ctx context.Context, client ctrlclient.Client, secretNa
 			return nil
 		}
 		secret.Data = newSecret.Data
+
+		logger.Info("updating pre-exiting webhook secret")
 		return client.Update(ctx, secret)
 	}
 	return nil

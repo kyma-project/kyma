@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"os"
 
 	"github.com/kyma-project/kyma/components/function-controller/internal/webhook"
 	"github.com/kyma-project/kyma/components/function-controller/internal/webhook/resources"
@@ -42,27 +43,38 @@ func init() {
 }
 
 func main() {
+	log := ctrl.Log.WithName("setup:")
+
 	cfg := &config{}
+	log.Info("reading configuration")
 	if err := envconfig.Init(cfg); err != nil {
 		panic(errors.Wrap(err, "while reading env variables"))
 	}
 	// manager setup
+	log.Info("setting up controller-manager")
 	mgr, err := ctrl.NewManager(ctrl.GetConfigOrDie(), ctrl.Options{
 		Scheme:             scheme,
 		Port:               cfg.WebhookPort,
 		MetricsBindAddress: ":9090",
 	})
 	if err != nil {
-		panic(err)
+		log.Error(err, "failed to setup controller-manager")
+		os.Exit(1)
 	}
 
+	log.Info("setting up webhook certificates and webhook secret")
+	// we need to ensure the certificates and the webhook secret as early as possible
+	// because the webhook server needs to read it from disk to start.
 	if err := resources.SetupCertificates(
 		context.Background(),
 		cfg.WebhookSecretName,
 		cfg.SystemNamespace,
 		cfg.WebhookServiceName); err != nil {
-		panic(err)
+		log.Error(err, "failed to setup certificates and webhook secret")
+		os.Exit(1)
 	}
+
+	log.Info("setting up webhook server")
 	// webhook server setup
 	whs := mgr.GetWebhookServer()
 	whs.CertName = resources.CertFile
@@ -77,6 +89,8 @@ func main() {
 			Handler: webhook.NewValidatingHook(webhook.ReadValidationConfig(), mgr.GetClient()),
 		},
 	)
+
+	log.Info("setting up webhook resources controller")
 	// apply and monitor configuration
 	if err := resources.SetupResourcesController(
 		context.Background(),
@@ -85,12 +99,16 @@ func main() {
 		cfg.SystemNamespace,
 		cfg.WebhookSecretName,
 	); err != nil {
-		panic(err)
+		log.Error(err, "failed to setup webhook resources controller")
+		os.Exit(1)
 	}
-	// start the server manager:q
+
+	log.Info("starting the controller-manager")
+	// start the server manager
 	err = mgr.Start(ctrl.SetupSignalHandler())
 	if err != nil {
-		panic(err)
+		log.Error(err, "failed to start controller-manager")
+		os.Exit(1)
 	}
 }
 

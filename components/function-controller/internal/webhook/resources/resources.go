@@ -17,6 +17,7 @@ import (
 )
 
 func SetupResourcesController(ctx context.Context, mgr ctrl.Manager, serviceName, serviceNamespace, secretName string) error {
+	logger := ctrl.LoggerFrom(ctx)
 	certPath := path.Join(DefaultCertDir, CertFile)
 	certBytes, err := ioutil.ReadFile(certPath)
 	if err != nil {
@@ -37,14 +38,19 @@ func SetupResourcesController(ctx context.Context, mgr ctrl.Manager, serviceName
 	if err != nil {
 		return errors.Wrap(err, "failed to create a server client")
 	}
+
+	logger.Info("initializing the defaulting webhook configuration")
 	if err := EnsureWebhookConfigurationFor(ctx, serverClient, webhookConfig, MutatingWebhook); err != nil {
 		return errors.Wrap(err, "failed to ensure defaulting webhook configuration")
 	}
+
+	logger.Info("initializing the validation webhook configuration")
 	if err := EnsureWebhookConfigurationFor(ctx, serverClient, webhookConfig, ValidatingWebHook); err != nil {
 		return errors.Wrap(err, "failed to ensure validating webhook configuration")
 	}
 	// watch over the configuration
-	c, err := controller.New("webhook-config-controller", mgr, controller.Options{
+	logger.Info("creating webhook resources controller")
+	c, err := controller.New("webhook-resources-controller", mgr, controller.Options{
 		Reconciler: &resourceReconciler{
 			webhookConfig: webhookConfig,
 			client:        mgr.GetClient(),
@@ -84,8 +90,9 @@ func (r *resourceReconciler) Reconcile(ctx context.Context, request reconcile.Re
 		request.Name != ValidationWebhookName &&
 		request.NamespacedName.String() != secretNamespaced.String() {
 		return reconcile.Result{}, nil
-
 	}
+
+	ctrl.LoggerFrom(ctx).Info("reconciling webhook resources")
 	if err := r.reconcilerWebhooks(ctx, request); err != nil {
 		return reconcile.Result{}, err
 	}
@@ -96,12 +103,15 @@ func (r *resourceReconciler) Reconcile(ctx context.Context, request reconcile.Re
 }
 
 func (r *resourceReconciler) reconcilerWebhooks(ctx context.Context, request reconcile.Request) error {
+	logger := ctrl.LoggerFrom(ctx)
 	if request.Name == DefaultingWebhookName {
+		logger.Info("reconciling webhook defaulting webhook configuration")
 		if err := EnsureWebhookConfigurationFor(ctx, r.client, r.webhookConfig, MutatingWebhook); err != nil {
 			return err
 		}
 	}
 	if request.Name == ValidationWebhookName {
+		logger.Info("reconciling webhook validating webhook configuration")
 		if err := EnsureWebhookConfigurationFor(ctx, r.client, r.webhookConfig, ValidatingWebHook); err != nil {
 			return err
 		}
@@ -110,6 +120,7 @@ func (r *resourceReconciler) reconcilerWebhooks(ctx context.Context, request rec
 }
 
 func (r *resourceReconciler) reconcilerSecret(ctx context.Context, request reconcile.Request) error {
+	ctrl.LoggerFrom(ctx).Info("reconciling webhook secret")
 	secretNamespaced := types.NamespacedName{Name: r.secretName, Namespace: r.webhookConfig.ServiceNamespace}
 	if request.NamespacedName.String() == secretNamespaced.String() {
 		return EnsureWebhookSecret(ctx, r.client, request.Name, request.Namespace, r.webhookConfig.ServiceName)
