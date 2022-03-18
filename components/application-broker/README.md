@@ -8,7 +8,7 @@ The AB implements the [Service Broker API](https://github.com/openservicebrokera
 The AB fetches all the applications' custom resources and exposes their APIs and Events as service classes to the Service Catalog.
 When the applications list is available in the Service Catalog, you can provision those service classes and enable Kyma services to use them.
 
-The AB works as a Namespace-scoped broker which is registered in the specific Namespace when the ApplicationMapping is created in this Namespace.
+The AB works as a Namespace-scoped broker which is registered in the specific Namespace when the Application Mapping is created in this Namespace.
 
 For more details about provisioning, deprovisioning, binding, and unbinding, see the [Service Broker API](https://github.com/openservicebrokerapi/servicebroker/blob/master/spec.md) documentation.
 

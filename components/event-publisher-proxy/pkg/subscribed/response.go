@@ -6,6 +6,7 @@ import (
 
 	"github.com/sirupsen/logrus"
 
+	"github.com/kyma-project/kyma/components/event-publisher-proxy/internal"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/legacy-events"
 )
 
@@ -31,7 +32,7 @@ func RespondWithErrorAndLog(e error, w http.ResponseWriter) {
 }
 
 func respond(w http.ResponseWriter, httpCode int) {
-	w.Header().Set(legacy.HeaderContentType, legacy.ContentTypeApplicationJSON)
+	w.Header().Set(internal.HeaderContentType, internal.ContentTypeApplicationJSON)
 	w.WriteHeader(httpCode)
 	logrus.Infof("Response code from \"subscribed\" request: HTTP %d", httpCode)
 }

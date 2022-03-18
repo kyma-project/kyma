@@ -12,9 +12,12 @@ import (
 	dynamicfake "k8s.io/client-go/dynamic/fake"
 
 	"github.com/nats-io/nats-server/v2/server"
+	natsio "github.com/nats-io/nats.go"
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/require"
 
+	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/cloudevents/eventtype"
+	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/cloudevents/eventtype/eventtypetest"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/env"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/handler/handlertest"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/handler/health"
@@ -37,12 +40,15 @@ type NatsHandlerMock struct {
 	handler             *nats.Handler
 	livenessEndpoint    string
 	readinessEndpoint   string
+	eventTypePrefix     string
 	logger              *logrus.Logger
 	natsServer          *server.Server
 	natsConfig          *env.NatsConfig
 	collector           *metrics.Collector
 	legacyTransformer   *legacy.Transformer
 	subscribedProcessor *subscribed.Processor
+	eventTypeCleaner    eventtype.Cleaner
+	connection          *natsio.Conn
 }
 
 // NatsHandlerMockOpt represents a NatsHandlerMock option.
@@ -62,6 +68,7 @@ func StartOrDie(ctx context.Context, t *testing.T, opts ...NatsHandlerMockOpt) *
 		collector:           metrics.NewCollector(),
 		legacyTransformer:   &legacy.Transformer{},
 		subscribedProcessor: &subscribed.Processor{},
+		eventTypeCleaner:    eventtypetest.CleanerFunc(eventtypetest.DefaultCleaner),
 	}
 
 	for _, opt := range opts {
@@ -70,10 +77,15 @@ func StartOrDie(ctx context.Context, t *testing.T, opts ...NatsHandlerMockOpt) *
 
 	msgReceiver := receiver.NewHTTPMessageReceiver(mock.natsConfig.Port)
 
-	connection, err := pkgnats.Connect(mock.GetNatsURL(), true, 3, time.Second)
+	connection, err := pkgnats.Connect(mock.GetNatsURL(),
+		pkgnats.WithRetryOnFailedConnect(true),
+		pkgnats.WithMaxReconnects(3),
+		pkgnats.WithReconnectWait(time.Second),
+	)
 	require.NoError(t, err)
+	mock.connection = connection
 
-	msgSender := sender.NewNatsMessageSender(ctx, connection, mock.logger)
+	msgSender := sender.NewNatsMessageSender(ctx, mock.connection, mock.logger)
 
 	mock.handler = nats.NewHandler(
 		msgReceiver,
@@ -84,12 +96,19 @@ func StartOrDie(ctx context.Context, t *testing.T, opts ...NatsHandlerMockOpt) *
 		mock.subscribedProcessor,
 		mock.logger,
 		mock.collector,
+		mock.eventTypeCleaner,
 	)
 
 	go func() { require.NoError(t, mock.handler.Start(ctx)) }()
 	testingutils.WaitForEndpointStatusCodeOrFail(mock.livenessEndpoint, health.StatusCodeHealthy)
 
 	return mock
+}
+
+// Stop closes the sender.NatsMessageSender connection and calls the NatsHandlerMock.ShutdownNatsServerAndWait.
+func (m *NatsHandlerMock) Stop() {
+	m.connection.Close()
+	m.ShutdownNatsServerAndWait()
 }
 
 // ShutdownNatsServerAndWait shuts down the NATS server used by the NatsHandlerMock and waits for the shutdown.
@@ -128,10 +147,17 @@ func (m *NatsHandlerMock) GetNatsConfig() *env.NatsConfig {
 	return m.natsConfig
 }
 
-// WithSubscription returns NatsHandlerMockOpt which sets the subscribed.Processor for the given NatsHandlerMock.
-func WithSubscription(scheme *runtime.Scheme, subscription *eventingv1alpha1.Subscription, eventTypePrefix string) NatsHandlerMockOpt {
+// WithEventTypePrefix returns NatsHandlerMockOpt which sets the eventTypePrefix for the given NatsHandlerMock.
+func WithEventTypePrefix(eventTypePrefix string) NatsHandlerMockOpt {
 	return func(m *NatsHandlerMock) {
-		m.natsConfig.LegacyEventTypePrefix = eventTypePrefix
+		m.eventTypePrefix = eventTypePrefix
+	}
+}
+
+// WithSubscription returns NatsHandlerMockOpt which sets the subscribed.Processor for the given NatsHandlerMock.
+func WithSubscription(scheme *runtime.Scheme, subscription *eventingv1alpha1.Subscription) NatsHandlerMockOpt {
+	return func(m *NatsHandlerMock) {
+		m.natsConfig.LegacyEventTypePrefix = m.eventTypePrefix
 		dynamicTestClient := dynamicfake.NewSimpleDynamicClient(scheme, subscription)
 		dFilteredSharedInfFactory := dynamicinformer.NewFilteredDynamicSharedInformerFactory(dynamicTestClient, 10*time.Second, v1.NamespaceAll, nil)
 		genericInf := dFilteredSharedInfFactory.ForResource(subscribed.GVR)
@@ -140,7 +166,7 @@ func WithSubscription(scheme *runtime.Scheme, subscription *eventingv1alpha1.Sub
 		m.subscribedProcessor = &subscribed.Processor{
 			SubscriptionLister: &subLister,
 			Config:             m.natsConfig.ToConfig(),
-			Logger:             logrus.New(),
+			Logger:             m.logger,
 		}
 	}
 }
@@ -148,12 +174,13 @@ func WithSubscription(scheme *runtime.Scheme, subscription *eventingv1alpha1.Sub
 // WithApplication returns NatsHandlerMockOpt which sets the legacy.Transformer for the given NatsHandlerMock.
 func WithApplication(applicationName string) NatsHandlerMockOpt {
 	return func(m *NatsHandlerMock) {
-		appLister := handlertest.NewApplicationListerOrDie(m.ctx, applicationName)
+		applicationLister := handlertest.NewApplicationListerOrDie(m.ctx, applicationName)
 		m.legacyTransformer = legacy.NewTransformer(
 			m.natsConfig.ToConfig().BEBNamespace,
-			m.natsConfig.ToConfig().EventTypePrefix,
-			appLister,
+			m.eventTypePrefix,
+			applicationLister,
 		)
+		m.eventTypeCleaner = eventtype.NewCleaner(m.eventTypePrefix, applicationLister, m.logger)
 	}
 }
 

@@ -1811,4 +1811,5 @@ module.exports = {
   deleteEventingBackendK8sSecret,
   getTraceDAG,
   printStatusOfInClusterEventingInfrastructure,
+  getFunction,
 };

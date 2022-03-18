@@ -99,7 +99,7 @@ The feature flag **APP_PLUGGABLE_SBU=true** changes Binding Usage Controller log
 APP_APPLIED_SBU_CONFIG_MAP_NAME=binding-usage-controller-process-sbu-spec APP_LOGGER_LEVEL=debug APP_PLUGGABLE_SBU=true APP_KUBECONFIG_PATH=~/.kube/config go run cmd/controller/main.go
 ```
 
-2. Register **UsageKind** resources:
+2. Register Usage Kind resources:
 
 ```bash
 kubectl apply -f usage-kind/deployment.yaml

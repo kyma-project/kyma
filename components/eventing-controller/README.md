@@ -64,6 +64,12 @@ This section explains how to use the Eventing Controller. It expects the followi
 | `DEFAULT_MAX_IN_FLIGHT_MESSAGES`  | The maximum idle "in-flight messages" sent by NATS to the sink without waiting for a response. |
 | `DEFAULT_DISPATCHER_RETRY_PERIOD` | The retry period for resending an event to a sink, if the sink doesn't return 2XX.             |
 | `DEFAULT_DISPATCHER_MAX_RETRIES`  | The maximum number of retries to send an event to a sink in case of errors.                    |
+| **For NATS JetStream**            |                                                                                                |
+|  `JS_STREAM_NAME`                 | Name of the stream where all events are stored.                                                |
+|  `JS_STREAM_STORAGE_TYPE`         | Storage type of the stream: `memory` or `file`.                                                    |
+|  `JS_STREAM_RETENTION_POLICY`     | The policy to delete events from the stream: `limits` or `interest`. See https://docs.nats.io/using-nats/developer/develop_jetstream/model_deep_dive#stream-limits-retention-and-policy. |
+|  `JS_STREAM_MAX_MSGS`             | The maximum number of messages in the stream. Used only when storage policy is set to `limits`. |
+|  `JS_STREAM_MAX_BYTES`            | The maximum size of the stream in bytes. Used only when storage policy is set to `limits`.     |
 | **For BEB**                       |                                                                                                |
 | `TOKEN_ENDPOINT`                  | The Authentication Server Endpoint to provide Access Tokens.                                   |
 | `WEBHOOK_ACTIVATION_TIMEOUT`      | The timeout duration used for webhook activation to acquire Access Tokens for Kyma.            |
@@ -97,13 +103,13 @@ make install
 make uninstall
 ```
 
-- To install the sample CustomResources in a cluster, run:
+- To install the sample custom resources in a cluster, run:
 
 ```sh
 make install-samples
 ```
 
-- To uninstall the sample CustomResources in a cluster, run:
+- To uninstall the sample custom resources in a cluster, run:
 
 ```sh
 make uninstall-samples
@@ -149,7 +155,7 @@ make manifests
 make copy-crds
 ```
 
-- Add the necessary changes manually in the sample CustomResources after updating fields for an existing custom resource definition inside the folder `config/samples/`. For example, for subscriptions, update the fields manually in `config/samples/eventing_v1alpha1_subscriptioncomponents/eventing-controller/config/crd/bases/eventing.kyma-project.io_subscriptions.yaml.yaml`
+- Add the necessary changes manually in the sample custom resources after updating fields for an existing custom resource definition inside the folder `config/samples/`. For example, for subscriptions, update the fields manually in `config/samples/eventing_v1alpha1_subscriptioncomponents/eventing-controller/config/crd/bases/eventing.kyma-project.io_subscriptions.yaml.yaml`
 
 - The kubebuilder bootstrapped files have been reduced to the bare minimum. If at a later point one of these files are required (e.g. for a webhook), get them either from [this PR](https://github.com/kyma-project/kyma/pull/9510/commits/6ce5b914c5ef175dea45c27ccca826becb1b5818) or create a sample kubebuilder project and copy all required files from there:
 
