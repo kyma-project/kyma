@@ -341,7 +341,6 @@ async function checkTrace(traceId, expectedTraceProcessSequence) {
 
   // extract trace data from response
   const traceData = traceRes.data[0];
-  // expect(traceData['spans'].length >= expectedTraceProcessSequence.length).to.be.true;
   expect(traceData['spans'].length).to.be.gte(expectedTraceProcessSequence.length);
 
   // generate DAG for trace spans
