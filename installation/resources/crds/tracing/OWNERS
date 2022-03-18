@@ -1,0 +1,6 @@
+reviewers:
+  - observability-reviewers
+approvers:
+  - observability-approvers
+labels:
+  - area/tracing

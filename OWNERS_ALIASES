@@ -151,22 +151,22 @@ aliases:
     - moelsayed
     - cortey
 
-   api-gateway-reviewers: # area/api-gateway
-     - strekm
-     - werdes72
-     - mjakobczyk
-     - veichtj
-     - dariusztutaj
-     - cnvergence
-     - piotrkpc
-   api-gateway-approvers: # area/api-gateway
-     - strekm
-     - werdes72
-     - mjakobczyk
-     - veichtj
-     - dariusztutaj
-     - cnvergence
-     - piotrkpc
+  api-gateway-reviewers: # area/api-gateway
+    - strekm
+    - werdes72
+    - mjakobczyk
+    - veichtj
+    - dariusztutaj
+    - cnvergence
+    - piotrkpc
+  api-gateway-approvers: # area/api-gateway
+    - strekm
+    - werdes72
+    - mjakobczyk
+    - veichtj
+    - dariusztutaj
+    - cnvergence
+    - piotrkpc
 
   service-mesh-reviewers: # area/service-mesh
     - strekm
