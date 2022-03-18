@@ -78,7 +78,7 @@ func main() {
 	// webhook server setup
 	whs := mgr.GetWebhookServer()
 	whs.CertName = resources.CertFile
-	whs.KeyName = resources.KeyfFile
+	whs.KeyName = resources.KeyFile
 	whs.Register("/defaulting",
 		&ctrlwebhook.Admission{
 			Handler: webhook.NewDefaultingWebhook(webhook.ReadDefaultingConfig(), mgr.GetClient()),

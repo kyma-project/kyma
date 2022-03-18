@@ -14,8 +14,6 @@ import (
 )
 
 type WebhookConfig struct {
-	Prefix           string
-	Type             WebHookType
 	CABundel         []byte
 	ServiceName      string
 	ServiceNamespace string

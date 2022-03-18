@@ -25,7 +25,6 @@ func SetupResourcesController(ctx context.Context, mgr ctrl.Manager, serviceName
 	}
 
 	webhookConfig := WebhookConfig{
-		Type:             MutatingWebhook,
 		CABundel:         certBytes,
 		ServiceName:      serviceName,
 		ServiceNamespace: serviceNamespace,

@@ -17,7 +17,7 @@ import (
 
 const (
 	CertFile       = "server-cert.pem"
-	KeyfFile       = "server-key.pem"
+	KeyFile        = "server-key.pem"
 	DefaultCertDir = "/tmp/k8s-webhook-server/serving-certs"
 )
 
@@ -34,18 +34,22 @@ func SetupCertificates(ctx context.Context, secretName, secretNamespace, service
 	return EnsureWebhookSecret(ctx, serverClient, secretName, secretNamespace, serviceName)
 }
 
-func GenerateWebhookCertificates(serviceName, namespace string) ([]byte, []byte, error) {
+func serviceAltNames(serviceName, namespace string) []string {
 	namespacedServiceName := strings.Join([]string{serviceName, namespace}, ".")
 	commonName := strings.Join([]string{namespacedServiceName, "svc"}, ".")
 	serviceHostname := fmt.Sprintf("%s.%s.svc.cluster.local", serviceName, namespace)
 
-	serviceNames := []string{
+	return []string{
+		commonName,
 		serviceName,
 		namespacedServiceName,
-		commonName,
 		serviceHostname,
 	}
-	return cert.GenerateSelfSignedCertKey(commonName, nil, serviceNames)
+}
+
+func GenerateWebhookCertificates(serviceName, namespace string) ([]byte, []byte, error) {
+	altNames := serviceAltNames(serviceName, namespace)
+	return cert.GenerateSelfSignedCertKey(altNames[0], nil, altNames)
 }
 
 // TODO: refactor this
@@ -72,7 +76,7 @@ func EnsureWebhookSecret(ctx context.Context, client ctrlclient.Client, secretNa
 
 	update := false
 	if secret.Data != nil {
-		for _, key := range []string{CertFile, KeyfFile} {
+		for _, key := range []string{CertFile, KeyFile} {
 			if _, ok := secret.Data[key]; !ok {
 				update = true
 				break
@@ -104,7 +108,7 @@ func createSecret(name, namespace, serviceName string) (*corev1.Secret, error) {
 		},
 		Data: map[string][]byte{
 			CertFile: cert,
-			KeyfFile: key,
+			KeyFile:  key,
 		},
 	}, nil
 }
