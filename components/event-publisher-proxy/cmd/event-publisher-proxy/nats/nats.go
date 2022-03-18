@@ -11,6 +11,7 @@ import (
 	"github.com/sirupsen/logrus"
 
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/application"
+	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/cloudevents/eventtype"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/env"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/handler/nats"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/informers"
@@ -64,7 +65,11 @@ func (c *Commander) Start() error {
 	messageReceiver := receiver.NewHTTPMessageReceiver(c.envCfg.Port)
 
 	// connect to nats
-	connection, err := pkgnats.Connect(c.envCfg.URL, c.envCfg.RetryOnFailedConnect, c.envCfg.MaxReconnects, c.envCfg.ReconnectWait)
+	connection, err := pkgnats.Connect(c.envCfg.URL,
+		pkgnats.WithRetryOnFailedConnect(c.envCfg.RetryOnFailedConnect),
+		pkgnats.WithMaxReconnects(c.envCfg.MaxReconnects),
+		pkgnats.WithReconnectWait(c.envCfg.ReconnectWait),
+	)
 	if err != nil {
 		c.logger.Errorf("Failed to connect to NATS server with error: %s", err)
 		return err
@@ -102,9 +107,12 @@ func (c *Commander) Start() error {
 	informers.WaitForCacheSyncOrDie(ctx, subDynamicSharedInfFactory)
 	c.logger.Info("Informers are synced successfully")
 
+	// configure event type cleaner
+	eventTypeCleaner := eventtype.NewCleaner(c.envCfg.LegacyEventTypePrefix, applicationLister, c.logger)
+
 	// start handler which blocks until it receives a shutdown signal
 	if err := nats.NewHandler(messageReceiver, messageSenderToNats, c.envCfg.RequestTimeout, legacyTransformer, c.opts,
-		subscribedProcessor, c.logger, c.metricsCollector).Start(ctx); err != nil {
+		subscribedProcessor, c.logger, c.metricsCollector, eventTypeCleaner).Start(ctx); err != nil {
 		c.logger.Errorf("Start handler failed with error: %s", err)
 		return err
 	}

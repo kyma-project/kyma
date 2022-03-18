@@ -74,7 +74,7 @@ go test `go list ./internal/... ./cmd/...`
 ```
 ### Generate Kubernetes clients for custom resources
 
-1. Create a directory structure for each client, similar to the one in `pkg/apis`. For example, when generating a client for EgressRule in Istio, the directory structure looks like this: `pkg/apis/istio/v1alpha2`.
+1. Create a directory structure for each client, similar to the one in `pkg/apis`. For example, when generating a client for Egress Rule in Istio, the directory structure looks like this: `pkg/apis/istio/v1alpha2`.
 2. After creating the directories, define the following files:
     - `doc.go`
     - `register.go`

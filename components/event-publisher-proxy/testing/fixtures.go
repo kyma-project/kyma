@@ -1,132 +1,197 @@
 package testing
 
+import (
+	"fmt"
+	"net/http"
+	"strings"
+
+	"github.com/kyma-project/kyma/components/event-publisher-proxy/internal"
+)
+
 const (
 	ApplicationName         = "testapp1023"
-	ApplicationNameNotClean = "test.app_1-0+2=3"
+	ApplicationNameNotClean = "testapp_1-0+2=3"
 
 	MessagingNamespace            = "/messaging.namespace"
 	MessagingEventTypePrefix      = "prefix"
 	MessagingEventTypePrefixEmpty = ""
 
-	EventID                           = "8945ec08-256b-11eb-9928-acde48001122"
-	CloudEventType                    = MessagingEventTypePrefix + "." + ApplicationName + ".order.created.v1"
-	CloudEventTypePrefixEmpty         = ApplicationName + ".order.created.v1"
-	CloudEventTypeNotClean            = MessagingEventTypePrefix + "." + ApplicationNameNotClean + ".order.created.v1"
-	CloudEventTypeNotCleanPrefixEmpty = ApplicationNameNotClean + ".order.created.v1"
+	EventID      = "8945ec08-256b-11eb-9928-acde48001122"
+	EventData    = `{\"key\":\"value\"}`
+	EventName    = "order.created"
+	EventVersion = "v1"
+
+	CloudEventNameAndVersion          = EventName + "." + EventVersion
+	CloudEventType                    = MessagingEventTypePrefix + "." + ApplicationName + "." + CloudEventNameAndVersion
+	CloudEventTypePrefixEmpty         = ApplicationName + "." + CloudEventNameAndVersion
+	CloudEventTypeNotClean            = MessagingEventTypePrefix + "." + ApplicationNameNotClean + "." + CloudEventNameAndVersion
+	CloudEventTypeNotCleanPrefixEmpty = ApplicationNameNotClean + "." + CloudEventNameAndVersion
 	CloudEventSource                  = "/default/sap.kyma/id"
 	CloudEventSpecVersion             = "1.0"
-	CloudEventData                    = `{\"key\":\"value\"}`
-	CloudEventDataContentType         = "application/json"
-	LegacyEventType                   = "order.created"
-	LegacyEventTypeVersion            = "v1"
-	LegacyEventTime                   = "2020-04-02T21:37:00Z"
-	LegacyEventData                   = `{"key": "value"}`
 
-	StructuredCloudEventPayloadWithoutID = `{
-           "type":"` + CloudEventTypeNotClean + `",
-           "specversion":"` + CloudEventSpecVersion + `",
-           "source":"` + CloudEventSource + `",
-           "data":"` + CloudEventData + `",
-           "datacontenttype":"` + CloudEventDataContentType + `"
-        }`
-
-	StructuredCloudEventPayloadWithoutType = `{
-           "id":"` + EventID + `",
-           "specversion":"` + CloudEventSpecVersion + `",
-           "source":"` + CloudEventSource + `",
-           "data":"` + CloudEventData + `",
-           "datacontenttype":"` + CloudEventDataContentType + `"
-        }`
-
-	StructuredCloudEventPayloadWithoutSpecVersion = `{
-           "id":"` + EventID + `",
-           "type":"` + CloudEventTypeNotClean + `",
-           "source":"` + CloudEventSource + `",
-           "data":"` + CloudEventData + `",
-           "datacontenttype":"` + CloudEventDataContentType + `"
-        }`
-
-	StructuredCloudEventPayloadWithoutSource = `{
-           "id":"` + EventID + `",
-           "type":"` + CloudEventTypeNotClean + `",
-           "specversion":"` + CloudEventSpecVersion + `",
-           "data":"` + CloudEventData + `",
-           "datacontenttype":"` + CloudEventDataContentType + `"
-        }`
-
-	StructuredCloudEventPayload = `{
-           "id":"` + EventID + `",
-           "type":"` + CloudEventTypeNotClean + `",
-           "specversion":"` + CloudEventSpecVersion + `",
-           "source":"` + CloudEventSource + `",
-           "data":"` + CloudEventData + `",
-           "datacontenttype":"` + CloudEventDataContentType + `"
-        }`
-
-	StructuredCloudEventPayloadWithCleanEventType = `{
-           "id":"` + EventID + `",
-           "type":"` + CloudEventType + `",
-           "specversion":"` + CloudEventSpecVersion + `",
-           "source":"` + CloudEventSource + `",
-           "data":"` + CloudEventData + `",
-           "datacontenttype":"` + CloudEventDataContentType + `"
-        }`
-
-	ValidLegacyEventPayloadWithEventID = `{
-            "event-id": "` + EventID + `",
-            "event-type":"` + LegacyEventType + `",
-            "event-type-version":"` + LegacyEventTypeVersion + `",
-            "event-time": "` + LegacyEventTime + `",
-            "data": ` + LegacyEventData + `
-        }`
-
-	ValidLegacyEventPayloadWithoutEventID = `{
-            "event-type":"` + LegacyEventType + `",
-            "event-type-version":"` + LegacyEventTypeVersion + `",
-            "event-time": "` + LegacyEventTime + `",
-            "data": ` + LegacyEventData + `
-        }`
-	LegacyEventPayloadWithInvalidEventID = `{
-            "event-id":"foo-bar",
-            "event-type":"` + LegacyEventType + `",
-            "event-type-version":"` + LegacyEventTypeVersion + `",
-            "event-time": "` + LegacyEventTime + `",
-            "data": ` + LegacyEventData + `
-        }`
-
-	LegacyEventPayloadWithoutEventTime = `{
-            "event-id": "` + EventID + `",
-            "event-type":"` + LegacyEventType + `",
-            "event-type-version":"` + LegacyEventTypeVersion + `",
-            "data": ` + LegacyEventData + `
-        }`
-
-	LegacyEventPayloadWithoutEventType = `{
-            "event-id": "` + EventID + `",
-            "event-type-version":"` + LegacyEventTypeVersion + `",
-            "event-time": "` + LegacyEventTime + `",
-            "data": ` + LegacyEventData + `
-        }`
-
-	LegacyEventPayloadWithInvalidEventTime = `{
-            "event-id": "` + EventID + `",
-            "event-type":"` + LegacyEventType + `",
-            "event-type-version":"` + LegacyEventTypeVersion + `",
-            "event-time": "some time 10:23",
-            "data": ` + LegacyEventData + `
-        }`
-
-	LegacyEventPayloadWithWithoutEventVersion = `{
-            "event-id": "` + EventID + `",
-            "event-type":"` + LegacyEventType + `",
-            "event-time": "` + LegacyEventTime + `",
-            "data": ` + LegacyEventData + `
-        }`
-
-	ValidLegacyEventPayloadWithoutData = `{
-            "event-id": "` + EventID + `",
-            "event-type":"` + LegacyEventType + `",
-            "event-type-version":"` + LegacyEventTypeVersion + `",
-            "event-time": "` + LegacyEventTime + `"
-        }`
+	LegacyEventTime = "2020-04-02T21:37:00Z"
 )
+
+type Event struct {
+	id        string
+	data      string
+	eventType string
+}
+
+type CloudEvent struct {
+	Event
+	specVersion     string
+	eventSource     string
+	dataContentType string
+}
+
+type CloudEventBuilder struct {
+	CloudEvent
+}
+
+type CloudEventBuilderOpt func(*CloudEventBuilder)
+
+func NewCloudEventBuilder(opts ...CloudEventBuilderOpt) *CloudEventBuilder {
+	builder := &CloudEventBuilder{
+		CloudEvent{
+			Event: Event{
+				id:        EventID,
+				data:      EventData,
+				eventType: CloudEventType,
+			},
+			specVersion:     CloudEventSpecVersion,
+			eventSource:     CloudEventSource,
+			dataContentType: internal.ContentTypeApplicationJSON,
+		},
+	}
+	for _, opt := range opts {
+		opt(builder)
+	}
+	return builder
+}
+
+func WithCloudEventID(id string) CloudEventBuilderOpt {
+	return func(b *CloudEventBuilder) {
+		b.id = id
+	}
+}
+
+func WithCloudEventSource(eventSource string) CloudEventBuilderOpt {
+	return func(b *CloudEventBuilder) {
+		b.eventSource = eventSource
+	}
+}
+
+func WithCloudEventSpecVersion(specVersion string) CloudEventBuilderOpt {
+	return func(b *CloudEventBuilder) {
+		b.specVersion = specVersion
+	}
+}
+
+func WithCloudEventType(eventType string) CloudEventBuilderOpt {
+	return func(b *CloudEventBuilder) {
+		b.eventType = eventType
+	}
+}
+
+func addAsHeaderIfPresent(header http.Header, key, value string) {
+	if len(strings.TrimSpace(key)) == 0 || len(strings.TrimSpace(value)) == 0 {
+		return
+	}
+	header.Add(key, value)
+}
+
+func (b *CloudEventBuilder) BuildBinary() (string, http.Header) {
+	payload := fmt.Sprintf(`"%s"`, b.data)
+	headers := make(http.Header)
+	addAsHeaderIfPresent(headers, CeIDHeader, b.id)
+	addAsHeaderIfPresent(headers, CeTypeHeader, b.eventType)
+	addAsHeaderIfPresent(headers, CeSourceHeader, b.eventSource)
+	addAsHeaderIfPresent(headers, CeSpecVersionHeader, b.specVersion)
+	return payload, headers
+}
+
+func (b *CloudEventBuilder) BuildStructured() (string, http.Header) {
+	payload := `{
+           "id":"` + b.id + `",
+           "data":"` + b.data + `",
+           "type":"` + b.eventType + `",
+           "source":"` + b.eventSource + `",
+           "specversion":"` + b.specVersion + `",
+           "datacontenttype":"` + b.dataContentType + `"
+        }`
+	headers := http.Header{internal.HeaderContentType: []string{internal.ContentTypeApplicationCloudEventsJSON}}
+	return payload, headers
+}
+
+type LegacyEvent struct {
+	Event
+	eventTime        string
+	eventTypeVersion string
+}
+
+type LegacyEventBuilder struct {
+	LegacyEvent
+}
+
+type LegacyEventBuilderOpt func(*LegacyEventBuilder)
+
+func NewLegacyEventBuilder(opts ...LegacyEventBuilderOpt) *LegacyEventBuilder {
+	builder := &LegacyEventBuilder{
+		LegacyEvent{
+			Event: Event{
+				id:        EventID,
+				data:      EventData,
+				eventType: EventName,
+			},
+			eventTime:        LegacyEventTime,
+			eventTypeVersion: EventVersion,
+		},
+	}
+	for _, opt := range opts {
+		opt(builder)
+	}
+	return builder
+}
+
+func WithLegacyEventID(id string) LegacyEventBuilderOpt {
+	return func(b *LegacyEventBuilder) {
+		b.id = id
+	}
+}
+
+func WithLegacyEventType(eventType string) LegacyEventBuilderOpt {
+	return func(b *LegacyEventBuilder) {
+		b.eventType = eventType
+	}
+}
+
+func WithLegacyEventTime(eventTime string) LegacyEventBuilderOpt {
+	return func(b *LegacyEventBuilder) {
+		b.eventTime = eventTime
+	}
+}
+
+func WithLegacyEventTypeVersion(eventTypeVersion string) LegacyEventBuilderOpt {
+	return func(b *LegacyEventBuilder) {
+		b.eventTypeVersion = eventTypeVersion
+	}
+}
+
+func WithLegacyEventData(data string) LegacyEventBuilderOpt {
+	return func(b *LegacyEventBuilder) {
+		b.data = data
+	}
+}
+
+func (b *LegacyEventBuilder) Build() (string, http.Header) {
+	payload := `{
+            "data": "` + b.data + `",
+            "event-id": "` + b.id + `",
+            "event-type":"` + b.eventType + `",
+            "event-time": "` + b.eventTime + `",
+            "event-type-version":"` + b.eventTypeVersion + `"
+        }`
+	headers := http.Header{internal.HeaderContentType: []string{internal.ContentTypeApplicationJSON}}
+	return payload, headers
+}

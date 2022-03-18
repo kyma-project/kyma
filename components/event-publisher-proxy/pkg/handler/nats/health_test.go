@@ -45,7 +45,7 @@ func TestReadinessCheck(t *testing.T) {
 			}()
 
 			handlerMock := mock.StartOrDie(context.TODO(), t)
-			defer handlerMock.ShutdownNatsServerAndWait()
+			defer handlerMock.Stop()
 
 			var handler http.HandlerFunc
 			if tc.wantPanicForNilHandler {

@@ -10,6 +10,7 @@ const {
   sleep,
   deleteK8sObjects,
   listResources,
+  getFunction,
 } = require('../utils');
 
 class SMCreds {
@@ -49,16 +50,24 @@ async function readClusterID() {
   return cm.data.id;
 }
 
+async function functionReady(functionName) {
+  const fn = await getFunction(functionName, 'default');
+  return fn.status.conditions.reduce((acc, val) => acc && val.status == 'True', true);
+}
+
 async function getFunctionPod(functionName) {
   const labelSelector = `serverless.kyma-project.io/function-name=${functionName},` +
     'serverless.kyma-project.io/resource=deployment';
   let res = {};
   for (let i = 0; i < 30; i++) {
-    res = await listPods(labelSelector);
-    if (res.body.items.length == 1) {
-      const pod = res.body.items[0];
-      if (pod.status.phase == 'Running') {
-        return pod;
+    const ready = await functionReady(functionName);
+    if (ready) {
+      res = await listPods(labelSelector);
+      if (res.body.items.length == 1) {
+        const pod = res.body.items[0];
+        if (pod.status.phase == 'Running') {
+          return pod;
+        }
       }
     }
     sleep(10000);
@@ -66,7 +75,8 @@ async function getFunctionPod(functionName) {
   const podNames = res.body.items.map((p) => p.metadata.name);
   const phases = res.body.items.map((p) => p.status.phase);
   throw new Error(`Failed to find function ${functionName} pod in 5 minutes.
-  Expected 1 ${labelSelector} pod with phase "Running" but found ${res.body.items.length}, ${podNames}, ${phases}`);
+  Expected 1 ${labelSelector} pod with phase "Running" but found ${res.body.items.length}, ${podNames}, ${phases}\n
+  function status: ${JSON.stringify(fn.status)}`);
 }
 
 async function checkPodPresetEnvInjected() {
@@ -321,22 +331,22 @@ async function checkMigratedBTPResources() {
     const btpBindings = await listResources(`/apis/${btpGroup}/${btpVersion}/${bindings}`);
     const bindingsReady = btpBindings.reduce((ready, binding) => ready && binding.status.ready === 'True', true);
     if (btpBindings.length != 3 || !bindingsReady) {
-      const bs = JSON.stringify(btpBindings);
-      errors.push(`Expected 3 BTP bindings ready but found ${btpBindings.length} in states: ${bs}`);
+      const bs = JSON.stringify(btpBindings, null, 2);
+      errors.push(`Expected 3 BTP bindings ready but found ${btpBindings.length}:\n${bs}`);
     }
     const btpInstances = await listResources(`/apis/${btpGroup}/${btpVersion}/${instances}`);
     const instancesReady = btpInstances.reduce((ready, instance) => ready && instance.status.ready === 'True', true);
     if (btpInstances.length != 3 || !instancesReady) {
-      const is = JSON.stringify(btpInstances);
-      errors.push(`Expected 3 BTP instances ready but found ${btpInstances.length} in states ${is}`);
+      const is = JSON.stringify(btpInstances, null, 2);
+      errors.push(`Expected 3 BTP instances ready but found ${btpInstances.length}:\n${is}`);
     }
     const scBindings = await listResources(`/apis/${scGroup}/${scVersion}/${bindings}`);
-    if (scBindings.length != 0) {
-      errors.push(`Expected no Service Catalog bindings but found ${JSON.stringify(scBindings)}`);
+    if (scBindings.length != 4) {
+      errors.push(`Expected 4 Service Catalog bindings but found ${scBindings.length}`);
     }
     const scInstances = await listResources(`/apis/${scGroup}/${scVersion}/${instances}`);
-    if (scInstances.length != 0) {
-      errors.push(`Expected no Service Catalog instances but found ${JSON.stringify(scInstances)}`);
+    if (scInstances.length != 4) {
+      errors.push(`Expected 4 Service Catalog instances but found ${scInstances.length}`);
     }
     if (errors.length != 0) {
       await sleep(1000);
