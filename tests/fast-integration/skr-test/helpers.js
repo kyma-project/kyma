@@ -38,6 +38,12 @@ function withTestNS(testNS) {
   };
 }
 
+function withOIDC0(oidc0) {
+  return function (options) {
+    options.oidc0 = oidc0;
+  }
+}
+
 function gatherOptions(...opts) {
   const suffix = genRandom(4);
   // If no opts provided the options object will be set to these default values.
@@ -46,7 +52,7 @@ function gatherOptions(...opts) {
     runtimeName: `kyma-${suffix}`,
     appName: `app-${suffix}`,
     scenarioName: `test-${suffix}`,
-    testNS: 'skr-test',
+    testNS: `skr-test-${suffix}`,
     // These options are not meant to be rewritten apart from env variable for KEB_USER_ID
     // If that's needed please add separate function that overrides this field.
     oidc0: {
@@ -65,7 +71,7 @@ function gatherOptions(...opts) {
       usernameClaim: 'email',
       usernamePrefix: 'acme-',
     },
-    administrator0: getEnvOrThrow('KEB_USER_ID'),
+    administrator0: [getEnvOrThrow('KEB_USER_ID')],
     administrators1: ['admin1@acme.com', 'admin2@acme.com'],
   };
 
@@ -87,4 +93,5 @@ module.exports = {
   withRuntimeName,
   withScenarioName,
   withTestNS,
+  withOIDC0,
 };
