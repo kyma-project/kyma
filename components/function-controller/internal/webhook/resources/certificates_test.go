@@ -50,7 +50,6 @@ func Test_serviceAltNames(t *testing.T) {
 }
 
 func TestEnsureWebhookSecret(t *testing.T) {
-
 	ctx := context.Background()
 
 	t.Run("can ensure the secret if it doesn't exist", func(t *testing.T) {

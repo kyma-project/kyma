@@ -52,7 +52,6 @@ func GenerateWebhookCertificates(serviceName, namespace string) ([]byte, []byte,
 	return cert.GenerateSelfSignedCertKey(altNames[0], nil, altNames)
 }
 
-// TODO: refactor this
 func EnsureWebhookSecret(ctx context.Context, client ctrlclient.Client, secretName, secretNamespace, serviceName string) error {
 	logger := ctrl.LoggerFrom(ctx)
 	secret := &corev1.Secret{}
@@ -61,41 +60,17 @@ func EnsureWebhookSecret(ctx context.Context, client ctrlclient.Client, secretNa
 	if err != nil && !apiErrors.IsNotFound(err) {
 		return errors.Wrap(err, "failed to get webhook secret")
 	}
+
 	if apiErrors.IsNotFound(err) {
-		secret, err := createSecret(secretName, secretNamespace, serviceName)
-		if err != nil {
-			return errors.Wrap(err, "failed to create secret object")
-		}
 		logger.Info("creating webhook secret")
-		if err := client.Create(ctx, secret); err != nil {
-			return errors.Wrap(err, "failed to create secret")
-		}
-		return nil
+		return createSecret(ctx, client, secretName, secretNamespace, serviceName)
 	}
 
-	update := false
-	if secret.Data != nil {
-		for _, key := range []string{CertFile, KeyFile} {
-			if _, ok := secret.Data[key]; !ok {
-				update = true
-				break
-			}
-		}
-	}
-	if update || secret.Data == nil {
-		newSecret, err := createSecret(secretName, secretNamespace, serviceName)
-		if err != nil {
-			return errors.Wrap(err, "failed to create secrete object")
-		}
-		secret.Data = newSecret.Data
-
-		logger.Info("updating pre-exiting webhook secret")
-		return errors.Wrap(client.Update(ctx, secret), "failed to update secret")
-	}
-	return nil
+	logger.Info("updating pre-exiting webhook secret")
+	return errors.Wrap(updateSecret(ctx, client, secret, serviceName), "failed to update secret")
 }
 
-func createSecret(name, namespace, serviceName string) (*corev1.Secret, error) {
+func buildSecret(name, namespace, serviceName string) (*corev1.Secret, error) {
 	cert, key, err := GenerateWebhookCertificates(serviceName, namespace)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to generate webhook certificates")
@@ -110,4 +85,36 @@ func createSecret(name, namespace, serviceName string) (*corev1.Secret, error) {
 			KeyFile:  key,
 		},
 	}, nil
+}
+
+func createSecret(ctx context.Context, client ctrlclient.Client, name, namespace, serviceName string) error {
+	secret, err := buildSecret(name, namespace, serviceName)
+	if err != nil {
+		return errors.Wrap(err, "failed to create secret object")
+	}
+	if err := client.Create(ctx, secret); err != nil {
+		return errors.Wrap(err, "failed to create secret")
+	}
+	return nil
+}
+
+func updateSecret(ctx context.Context, client ctrlclient.Client, secret *corev1.Secret, serviceName string) error {
+	update := false
+	if secret.Data != nil {
+		for _, key := range []string{CertFile, KeyFile} {
+			if _, ok := secret.Data[key]; !ok {
+				update = true
+				break
+			}
+		}
+	}
+	if update || secret.Data == nil {
+		newSecret, err := buildSecret(secret.Name, secret.Namespace, serviceName)
+		if err != nil {
+			return errors.Wrap(err, "failed to create secret object")
+		}
+		secret.Data = newSecret.Data
+		return errors.Wrap(client.Update(ctx, secret), "failed to update secret")
+	}
+	return nil
 }
