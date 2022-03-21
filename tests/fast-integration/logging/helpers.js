@@ -25,7 +25,27 @@ async function checkLokiLogs(startTimestamp) {
   assert.isTrue(logsFetched, 'No logs fetched from Loki');
 }
 
-// Required checks have been set as per https://github.com/kyma-project/kyma/issues/11136.
+// Required checks have been added as per https://github.com/kyma-project/kyma/issues/11136.
+async function checkLokiLogsAllNamespaces(startTimestamp) {
+  const labels = ['{namespace="kyma-system"}',
+    '{namespace="kyma-integration"}'];
+  let logsFetched = false;
+  let retries = 0;
+  for (let el = 0; el < labels.length; el++) {
+    while (retries < 20) {
+      logsFetched = false;
+      const logs = await queryLoki(labels[el], startTimestamp);
+      if (logs.streams.length > 0) {
+        logsFetched = true;
+        break;
+      }
+      await sleep(5*1000);
+      retries++;
+    }
+  };
+  assert.isTrue(logsFetched, 'No logs fetched from Loki');
+}
+
 async function checkRetentionPeriod() {
   const secretData = k8s.loadYaml(await lokiSecretData());
   let periodCheck = false;
@@ -59,6 +79,7 @@ async function checkVirtualServicePresence() {
 
 module.exports = {
   checkLokiLogs,
+  checkLokiLogsAllNamespaces,
   checkRetentionPeriod,
   checkPersistentVolumeClaimSize,
   checkVirtualServicePresence,
