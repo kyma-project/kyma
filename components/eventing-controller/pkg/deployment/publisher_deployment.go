@@ -27,7 +27,7 @@ const (
 	InstanceLabelValue       = "eventing"
 	DashboardLabelKey        = "kyma-project.io/dashboard"
 	DashboardLabelValue      = "eventing"
-	BackendTypeLabelKey      = "backendType"
+	BackendLabelKey          = "kyma-project.io/eventingBackend"
 	publisherPortName        = "http"
 	publisherPortNum         = int32(8080)
 	publisherMetricsPortName = "http-metrics"
@@ -106,7 +106,7 @@ func WithLabels(backendType v1alpha1.BackendType) DeployOpt {
 		d.Spec.Template.ObjectMeta.Labels = labels
 
 		// label the event-publisher proxy with the backendType label
-		labels[BackendTypeLabelKey] = fmt.Sprint(backendType)
+		labels[BackendLabelKey] = fmt.Sprint(backendType)
 		d.ObjectMeta.Labels = labels
 	}
 }

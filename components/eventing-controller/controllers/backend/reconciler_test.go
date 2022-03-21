@@ -691,7 +691,7 @@ func getCurrentBackendType(ctx context.Context) string {
 
 func ensurePublisherProxyHasBackendRightLabel(ctx context.Context, deploy *appsv1.Deployment) {
 	backendType := getCurrentBackendType(ctx)
-	Expect(deploy.ObjectMeta.Labels).To(HaveKeyWithValue(deployment.BackendTypeLabelKey, backendType))
+	Expect(deploy.ObjectMeta.Labels).To(HaveKeyWithValue(deployment.BackendLabelKey, backendType))
 }
 
 func bebSecretExists(ctx context.Context) bool {
