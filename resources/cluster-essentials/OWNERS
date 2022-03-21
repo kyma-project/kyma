@@ -1,4 +1,18 @@
-approvers:
-  - piotrmsc
+reviewers:
   - PK85
-  - derberg
+  - janmedrek
+  - a-thaler
+  - strekm
+  - dariusztutaj
+  - cnvergence
+  - veichtj
+  - piotrkpc
+approvers:
+  - PK85
+  - janmedrek
+  - a-thaler
+  - strekm
+  - dariusztutaj
+  - cnvergence
+  - veichtj
+  - piotrkpc
