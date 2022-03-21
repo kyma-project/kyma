@@ -1456,13 +1456,18 @@ extraScrapeConfigs: |
       replacement: $1
       action: keep
     metric_relabel_configs:
+    - source_labels: [ __name__ ]
+      regex: {{.Values.envoyStats.metricKeepRegexp}}
+      action: keep
     - separator: ;
       regex: {{.Values.envoyStats.labeldropRegex}}
       replacement: $1
       action: labeldrop
-
 envoyStats:
   sampleLimit: "20000"
+  # keep only istio metrics. Other envoy metrics cannot be aggregated in a meaningul way to get rid of the pod flavor
+  metricKeepRegexp: "istio_.*"
+  # drop non-relevant labels from istio metrics
   labeldropRegex: "^(grpc_response_status|source_version|destination_version|source_app|destination_app)$"
 
 # Adds option to add alert_relabel_configs to avoid duplicate alerts in alertmanager

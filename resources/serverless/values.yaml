@@ -77,22 +77,22 @@ global:
       directory: "tpi"
     function_controller:
       name: "function-controller"
-      version: "PR-13548"
+      version: "a0a4ec40"
     function_webhook:
       name: "function-webhook"
-      version: "PR-13548"
+      version: "a0a4ec40"
     function_build_init:
       name: "function-build-init"
-      version: "PR-13548"
+      version: "a0a4ec40"
     function_runtime_nodejs12:
       name: "function-runtime-nodejs12"
-      version: "PR-13616"
+      version: "1ebd9636"
     function_runtime_nodejs14:
       name: "function-runtime-nodejs14"
-      version: "PR-13616"
+      version: "1ebd9636"
     function_runtime_python39:
       name: "function-runtime-python39"
-      version: "PR-13616"
+      version: "1ebd9636"
     kaniko_executor:
       name: "kaniko-executor"
       version: "1.7.0-6d270da8"
@@ -108,10 +108,10 @@ global:
   testImages:
     function_controller_test:
       name: "function-controller-test"
-      version: "PR-13214"
+      version: "708f6a87"
     git_server:
       name: "gitserver"
-      version: "PR-13313"
+      version: "708f6a87"
   highPriorityClassName: "kyma-system-priority"
 
 images:
