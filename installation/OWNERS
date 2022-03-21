@@ -1,34 +1,19 @@
-filters:
-  ".*":
-    approvers:
-      - Tomasz-Smelcerz-SAP
-      - strekm
-      - piotrmsc
-      - kubadz
-      - Demonsthere
-      - crabtree
-      - PK85
-      - mszostok
-      - piotrmiskiewicz
-      - polskikiel
-      - jasiu001
-    labels:
-      - area/installation
-  ".*\.ps1$"
-    approvers:
-      - crabtree
-      - venturasr
-    reviewers:
-      - Tomasz-Smelcerz-SAP
-      - strekm
-      - piotrmsc
-      - kubadz
-      - Demonsthere
-      - PK85
-      - mszostok
-      - piotrmiskiewicz
-      - polskikiel
-      - jasiu001
-      - ksputo
-    labels:
-      - area/installation
+approvers:
+  - jeremyharisch
+  - ruanxin
+  - tobiscr
+  - moelsayed
+  - clebs
+  - Tomasz-Smelcerz-SAP
+reviewers:
+  - khlifi411
+  - jeremyharisch
+  - ruanxin
+  - tobiscr
+  - moelsayed
+  - clebs
+  - Tomasz-Smelcerz-SAP
+  - jakobmoellersap
+  - adityabhatia
+labels:
+  - area/installation
