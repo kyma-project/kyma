@@ -37,6 +37,7 @@ func (w *DefaultingWebHook) InjectDecoder(decoder *admission.Decoder) error {
 	w.decoder = decoder
 	return nil
 }
+
 func (w *DefaultingWebHook) handleFunctionDefaulting(ctx context.Context, req admission.Request) admission.Response {
 	f := &serverlessv1alpha1.Function{}
 	if err := w.decoder.Decode(req, f); err != nil {

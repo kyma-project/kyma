@@ -31,7 +31,7 @@ func SetupCertificates(ctx context.Context, secretName, secretNamespace, service
 		return errors.Wrap(err, "failed to create a server client")
 	}
 
-	return EnsureWebhookSecret(ctx, serverClient, secretName, secretNamespace, serviceName)
+	return errors.Wrap(EnsureWebhookSecret(ctx, serverClient, secretName, secretNamespace, serviceName), "failed to ensure webhook secret")
 }
 
 func serviceAltNames(serviceName, namespace string) []string {
@@ -59,17 +59,16 @@ func EnsureWebhookSecret(ctx context.Context, client ctrlclient.Client, secretNa
 	logger.Info("ensuring webhook secret")
 	err := client.Get(ctx, types.NamespacedName{Name: secretName, Namespace: secretNamespace}, secret)
 	if err != nil && !apiErrors.IsNotFound(err) {
-		return err
+		return errors.Wrap(err, "failed to get webhook secret")
 	}
 	if apiErrors.IsNotFound(err) {
 		secret, err := createSecret(secretName, secretNamespace, serviceName)
 		if err != nil {
-			return err
+			return errors.Wrap(err, "failed to create secret object")
 		}
-
 		logger.Info("creating webhook secret")
 		if err := client.Create(ctx, secret); err != nil {
-			return err
+			return errors.Wrap(err, "failed to create secret")
 		}
 		return nil
 	}
@@ -86,12 +85,12 @@ func EnsureWebhookSecret(ctx context.Context, client ctrlclient.Client, secretNa
 	if update || secret.Data == nil {
 		newSecret, err := createSecret(secretName, secretNamespace, serviceName)
 		if err != nil {
-			return nil
+			return errors.Wrap(err, "failed to create secrete object")
 		}
 		secret.Data = newSecret.Data
 
 		logger.Info("updating pre-exiting webhook secret")
-		return client.Update(ctx, secret)
+		return errors.Wrap(client.Update(ctx, secret), "failed to update secret")
 	}
 	return nil
 }
@@ -99,7 +98,7 @@ func EnsureWebhookSecret(ctx context.Context, client ctrlclient.Client, secretNa
 func createSecret(name, namespace, serviceName string) (*corev1.Secret, error) {
 	cert, key, err := GenerateWebhookCertificates(serviceName, namespace)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "failed to generate webhook certificates")
 	}
 	return &corev1.Secret{
 		ObjectMeta: v1.ObjectMeta{

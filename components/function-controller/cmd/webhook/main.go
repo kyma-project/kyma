@@ -50,6 +50,10 @@ func main() {
 	if err := envconfig.Init(cfg); err != nil {
 		panic(errors.Wrap(err, "while reading env variables"))
 	}
+
+	validationConfig := webhook.ReadValidationConfig()
+	defaultingConfig := webhook.ReadDefaultingConfig()
+
 	// manager setup
 	log.Info("setting up controller-manager")
 	mgr, err := ctrl.NewManager(ctrl.GetConfigOrDie(), ctrl.Options{
@@ -81,12 +85,12 @@ func main() {
 	whs.KeyName = resources.KeyFile
 	whs.Register("/defaulting",
 		&ctrlwebhook.Admission{
-			Handler: webhook.NewDefaultingWebhook(webhook.ReadDefaultingConfig(), mgr.GetClient()),
+			Handler: webhook.NewDefaultingWebhook(defaultingConfig, mgr.GetClient()),
 		},
 	)
 	whs.Register("/validation",
 		&ctrlwebhook.Admission{
-			Handler: webhook.NewValidatingHook(webhook.ReadValidationConfig(), mgr.GetClient()),
+			Handler: webhook.NewValidatingHook(validationConfig, mgr.GetClient()),
 		},
 	)
 

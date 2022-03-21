@@ -21,7 +21,7 @@ func SetupResourcesController(ctx context.Context, mgr ctrl.Manager, serviceName
 	certPath := path.Join(DefaultCertDir, CertFile)
 	certBytes, err := ioutil.ReadFile(certPath)
 	if err != nil {
-		return errors.Wrapf(err, "failed to read caBundel file: %s", certBytes)
+		return errors.Wrapf(err, "failed to read caBundel file: %s", certPath)
 	}
 
 	webhookConfig := WebhookConfig{
@@ -93,10 +93,10 @@ func (r *resourceReconciler) Reconcile(ctx context.Context, request reconcile.Re
 
 	ctrl.LoggerFrom(ctx).Info("reconciling webhook resources")
 	if err := r.reconcilerWebhooks(ctx, request); err != nil {
-		return reconcile.Result{}, err
+		return reconcile.Result{}, errors.Wrap(err, "failed to reconcile webhook resources")
 	}
 	if err := r.reconcilerSecret(ctx, request); err != nil {
-		return reconcile.Result{}, err
+		return reconcile.Result{}, errors.Wrap(err, "failed to reconcile webhook resources")
 	}
 	return reconcile.Result{}, nil
 }
@@ -106,13 +106,13 @@ func (r *resourceReconciler) reconcilerWebhooks(ctx context.Context, request rec
 	if request.Name == DefaultingWebhookName {
 		logger.Info("reconciling webhook defaulting webhook configuration")
 		if err := EnsureWebhookConfigurationFor(ctx, r.client, r.webhookConfig, MutatingWebhook); err != nil {
-			return err
+			return errors.Wrap(err, "failed to ensure defaulting webhook configuration")
 		}
 	}
 	if request.Name == ValidationWebhookName {
 		logger.Info("reconciling webhook validating webhook configuration")
 		if err := EnsureWebhookConfigurationFor(ctx, r.client, r.webhookConfig, ValidatingWebHook); err != nil {
-			return err
+			return errors.Wrap(err, "failed to ensure validating webhook configuration")
 		}
 	}
 	return nil
@@ -122,7 +122,7 @@ func (r *resourceReconciler) reconcilerSecret(ctx context.Context, request recon
 	ctrl.LoggerFrom(ctx).Info("reconciling webhook secret")
 	secretNamespaced := types.NamespacedName{Name: r.secretName, Namespace: r.webhookConfig.ServiceNamespace}
 	if request.NamespacedName.String() == secretNamespaced.String() {
-		return EnsureWebhookSecret(ctx, r.client, request.Name, request.Namespace, r.webhookConfig.ServiceName)
+		return errors.Wrap(EnsureWebhookSecret(ctx, r.client, request.Name, request.Namespace, r.webhookConfig.ServiceName), "failed to reconcile webhook secret")
 	}
 	return nil
 }
