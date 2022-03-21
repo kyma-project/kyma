@@ -28,7 +28,7 @@ To run integration tests, follow these instructions:
 
    Alternatively, build the image and push it to a registry, such as Docker Hub.
 
-3. Edit the TestDefinition CR and update its `.spec.template.spec.containers[0].image` field to `rafter-test:latest` using this command:
+3. Edit the Test Definition CR and update its `.spec.template.spec.containers[0].image` field to `rafter-test:latest` using this command:
 
    ```bash
    k edit testdefinitions.testing.kyma-project.io -n kyma-system rafter
@@ -63,11 +63,11 @@ Use the following environment variables to configure the application:
 | **APP_KUBECONFIG_PATH**               | No       | None                       | The path to the `kubeconfig` file, needed for running an application outside of the cluster. If not supplied in-cluster config will be used |
 | **APP_TEST_WAIT_TIMEOUT**             | No       | `3m`                       | The period of time for which the application waits for the resources to meet defined conditions                                             |
 | **APP_TEST_NAMESPACE**                | No       | `rafter-test`              | The name of the Namespace created and deleted during integration tests                                                                      |
-| **APP_TEST_CLUSTER_BUCKET_NAME**      | No       | `test-cluster-bucket`      | The ClusterBucket resource name                                                                                                             |
+| **APP_TEST_CLUSTER_BUCKET_NAME**      | No       | `test-cluster-bucket`      | The Cluster Bucket resource name                                                                                                             |
 | **APP_TEST_BUCKET_NAME**              | No       | `test-bucket`              | The Bucket resource name                                                                                                                    |
-| **APP_TEST_ASSET_GROUP_NAME**         | No       | `test-asset-group`         | The AssetGroup resource name                                                                                                                |
-| **APP_TEST_CLUSTER_ASSET_GROUP_NAME** | No       | `test-cluster-asset-group` | The ClusterAssetGroup resource name                                                                                                         |
-| **APP_TEST_COMMON_ASSET_PREFIX**      | No       | `test`                     | The name of the prefix for the Asset and ClusterAsset resources                                                                             |
+| **APP_TEST_ASSET_GROUP_NAME**         | No       | `test-asset-group`         | The Asset Group resource name                                                                                                                |
+| **APP_TEST_CLUSTER_ASSET_GROUP_NAME** | No       | `test-cluster-asset-group` | The Cluster Asset Group resource name                                                                                                         |
+| **APP_TEST_COMMON_ASSET_PREFIX**      | No       | `test`                     | The name of the prefix for the Asset and Cluster Asset resources                                                                             |
 | **APP_TEST_MOCKICE_NAME**             | No       | `rafter-test-svc`          | The name of the pod, service, and configmap used by the test service                                                                        |
 
 ## Development

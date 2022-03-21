@@ -114,6 +114,12 @@ describe('SKR SVCAT migration test', function() {
     await updateSKR(keb, kcp, gardener, instanceID, skr.shoot.name, null, updateTimeout, btpOperatorCreds, true);
   });
 
+  it('Should get Runtime Status after patch with BTP Operator Credentials', async function() {
+    const runtimeStatus = await kcp.getRuntimeStatusOperations(instanceID);
+    console.log(`\nRuntime status after patch: ${runtimeStatus}`);
+    await kcp.reconcileInformationLog(runtimeStatus);
+  });
+
   it('Should wait for btp-operator deployment availability', async function() {
     await waitForDeployment('sap-btp-operator-controller-manager', 'kyma-system', 10 * 60 * 1000); // 10 minutes
   });
