@@ -24,84 +24,116 @@ import (
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 )
 
-func TestNatsHandlerForCloudEvents(t *testing.T) {
+func TestHandlerForCloudEvents(t *testing.T) {
 	testCases := []struct {
 		name                 string
 		givenEventTypePrefix string
 		givenApplicationName string
 		givenEventType       string
-		wantNatsSubject      string
+		wantEventType        string
 	}{
+		// not-clean event-types
 		{
 			name:                 "With prefix and clean application name and not-clean event-type",
 			givenEventTypePrefix: testingutils.MessagingEventTypePrefix,
 			givenApplicationName: testingutils.ApplicationName,
 			givenEventType:       testingutils.CloudEventTypeNotClean,
-			wantNatsSubject:      testingutils.CloudEventTypeNotClean,
+			wantEventType:        testingutils.CloudEventType,
 		},
 		{
 			name:                 "With prefix and not-clean application name and not-clean event-type",
 			givenEventTypePrefix: testingutils.MessagingEventTypePrefix,
 			givenApplicationName: testingutils.ApplicationNameNotClean,
 			givenEventType:       testingutils.CloudEventTypeNotClean,
-			wantNatsSubject:      testingutils.CloudEventTypeNotClean,
+			wantEventType:        testingutils.CloudEventType,
 		},
 		{
 			name:                 "With empty prefix and clean application name and not-clean event-type",
 			givenEventTypePrefix: testingutils.MessagingEventTypePrefixEmpty,
 			givenApplicationName: testingutils.ApplicationName,
 			givenEventType:       testingutils.CloudEventTypeNotCleanPrefixEmpty,
-			wantNatsSubject:      testingutils.CloudEventTypeNotClean,
+			wantEventType:        testingutils.CloudEventTypePrefixEmpty,
 		},
 		{
 			name:                 "With empty prefix and not-clean application name and not-clean event-type",
 			givenEventTypePrefix: testingutils.MessagingEventTypePrefixEmpty,
 			givenApplicationName: testingutils.ApplicationNameNotClean,
 			givenEventType:       testingutils.CloudEventTypeNotCleanPrefixEmpty,
-			wantNatsSubject:      testingutils.CloudEventTypeNotClean,
+			wantEventType:        testingutils.CloudEventTypePrefixEmpty,
+		},
+		// clean event-types
+		{
+			name:                 "With prefix and clean application name and clean event-type",
+			givenEventTypePrefix: testingutils.MessagingEventTypePrefix,
+			givenApplicationName: testingutils.ApplicationName,
+			givenEventType:       testingutils.CloudEventType,
+			wantEventType:        testingutils.CloudEventType,
+		},
+		{
+			name:                 "With prefix and not-clean application name and clean event-type",
+			givenEventTypePrefix: testingutils.MessagingEventTypePrefix,
+			givenApplicationName: testingutils.ApplicationNameNotClean,
+			givenEventType:       testingutils.CloudEventType,
+			wantEventType:        testingutils.CloudEventType,
+		},
+		{
+			name:                 "With empty prefix and clean application name and clean event-type",
+			givenEventTypePrefix: testingutils.MessagingEventTypePrefixEmpty,
+			givenApplicationName: testingutils.ApplicationName,
+			givenEventType:       testingutils.CloudEventTypePrefixEmpty,
+			wantEventType:        testingutils.CloudEventTypePrefixEmpty,
+		},
+		{
+			name:                 "With empty prefix and not-clean application name and clean event-type",
+			givenEventTypePrefix: testingutils.MessagingEventTypePrefixEmpty,
+			givenApplicationName: testingutils.ApplicationNameNotClean,
+			givenEventType:       testingutils.CloudEventTypePrefixEmpty,
+			wantEventType:        testingutils.CloudEventTypePrefixEmpty,
 		},
 	}
 	for _, tc := range testCases {
+		tc := tc
 		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+
 			ctx, cancel := context.WithCancel(context.Background())
 			defer cancel()
 
 			handlerMock := mock.StartOrDie(ctx, t,
+				mock.WithEventTypePrefix(tc.givenEventTypePrefix),
 				mock.WithApplication(tc.givenApplicationName),
 			)
-			defer handlerMock.ShutdownNatsServerAndWait()
+			defer handlerMock.Stop()
 
-			// setup test environment
-			publishEndpoint := fmt.Sprintf("http://localhost:%d/publish", handlerMock.GetNatsConfig().Port)
-			subscription := testingutils.NewSubscription(
-				testingutils.SubscriptionWithFilter(testingutils.MessagingNamespace, tc.givenEventType),
-			)
-
-			// prepare event type from subscription
-			assert.NotNil(t, subscription.Spec.Filter)
-			assert.NotEmpty(t, subscription.Spec.Filter.Filters)
-			eventTypeToSubscribe := subscription.Spec.Filter.Filters[0].EventType.Value
-
-			// connect to nats
-			connection, err := pkgnats.Connect(handlerMock.GetNatsURL(), true, 3, time.Second)
-			assert.Nil(t, err)
-			assert.NotNil(t, connection)
-
-			// publish a message to NATS and validate it
-			validator := testingutils.ValidateNatsSubjectOrFail(t, tc.wantNatsSubject)
-			testingutils.SubscribeToEventOrFail(t, connection, eventTypeToSubscribe, validator)
-
-			// nolint:scopelint
 			// run the tests for publishing cloudevents
+			publishEndpoint := fmt.Sprintf("http://localhost:%d/publish", handlerMock.GetNatsConfig().Port)
 			for _, testCase := range handlertest.TestCasesForCloudEvents {
+				testCase := testCase
 				t.Run(testCase.Name, func(t *testing.T) {
-					body, headers := testCase.ProvideMessage()
+					// connect to nats
+					connection, err := pkgnats.Connect(handlerMock.GetNatsURL(),
+						pkgnats.WithRetryOnFailedConnect(true),
+						pkgnats.WithMaxReconnects(3),
+						pkgnats.WithReconnectWait(time.Second),
+					)
+					assert.Nil(t, err)
+					assert.NotNil(t, connection)
+					defer connection.Close()
+
+					// validator to check NATS received events
+					notify := make(chan bool)
+					defer close(notify)
+					validator := testingutils.ValidateNatsSubjectOrFail(t, tc.wantEventType, notify)
+					testingutils.SubscribeToEventOrFail(t, connection, tc.wantEventType, validator)
+
+					body, headers := testCase.ProvideMessage(tc.wantEventType)
 					resp, err := testingutils.SendEvent(publishEndpoint, body, headers)
 					assert.NoError(t, err)
-					_ = resp.Body.Close()
+					assert.NoError(t, resp.Body.Close())
 					assert.Equal(t, testCase.WantStatusCode, resp.StatusCode)
 					if testingutils.Is2XX(resp.StatusCode) {
 						metricstest.EnsureMetricLatency(t, handlerMock.GetMetricsCollector())
+						assert.NoError(t, testingutils.WaitForChannelOrTimeout(notify, time.Second*3))
 					}
 				})
 			}
@@ -109,88 +141,122 @@ func TestNatsHandlerForCloudEvents(t *testing.T) {
 	}
 }
 
-func TestNatsHandlerForLegacyEvents(t *testing.T) {
+func TestHandlerForLegacyEvents(t *testing.T) {
 	testCases := []struct {
 		name                 string
 		givenEventTypePrefix string
 		givenApplicationName string
 		givenEventType       string
-		wantNatsSubject      string
+		wantEventType        string
 	}{
+		// not-clean event-types
 		{
 			name:                 "With prefix and clean application name and not-clean event-type",
 			givenEventTypePrefix: testingutils.MessagingEventTypePrefix,
 			givenApplicationName: testingutils.ApplicationName,
 			givenEventType:       testingutils.CloudEventTypeNotClean,
-			wantNatsSubject:      testingutils.CloudEventType,
+			wantEventType:        testingutils.CloudEventType,
 		},
 		{
 			name:                 "With empty prefix and clean application name and not-clean event-type",
 			givenEventTypePrefix: testingutils.MessagingEventTypePrefixEmpty,
 			givenApplicationName: testingutils.ApplicationName,
 			givenEventType:       testingutils.CloudEventTypeNotCleanPrefixEmpty,
-			wantNatsSubject:      testingutils.CloudEventType,
+			wantEventType:        testingutils.CloudEventTypePrefixEmpty,
 		},
 		{
 			name:                 "With prefix and not-clean application name and not-clean event-type",
 			givenEventTypePrefix: testingutils.MessagingEventTypePrefix,
 			givenApplicationName: testingutils.ApplicationNameNotClean,
 			givenEventType:       testingutils.CloudEventTypeNotClean,
-			wantNatsSubject:      testingutils.CloudEventType,
+			wantEventType:        testingutils.CloudEventType,
 		},
 		{
 			name:                 "With empty prefix and not-clean application name and not-clean event-type",
 			givenEventTypePrefix: testingutils.MessagingEventTypePrefixEmpty,
 			givenApplicationName: testingutils.ApplicationNameNotClean,
 			givenEventType:       testingutils.CloudEventTypeNotCleanPrefixEmpty,
-			wantNatsSubject:      testingutils.CloudEventType,
+			wantEventType:        testingutils.CloudEventTypePrefixEmpty,
+		},
+		// clean event-types
+		{
+			name:                 "With prefix and clean application name and clean event-type",
+			givenEventTypePrefix: testingutils.MessagingEventTypePrefix,
+			givenApplicationName: testingutils.ApplicationName,
+			givenEventType:       testingutils.CloudEventType,
+			wantEventType:        testingutils.CloudEventType,
+		},
+		{
+			name:                 "With empty prefix and clean application name and clean event-type",
+			givenEventTypePrefix: testingutils.MessagingEventTypePrefixEmpty,
+			givenApplicationName: testingutils.ApplicationName,
+			givenEventType:       testingutils.CloudEventTypePrefixEmpty,
+			wantEventType:        testingutils.CloudEventTypePrefixEmpty,
+		},
+		{
+			name:                 "With prefix and not-clean application name and clean event-type",
+			givenEventTypePrefix: testingutils.MessagingEventTypePrefix,
+			givenApplicationName: testingutils.ApplicationNameNotClean,
+			givenEventType:       testingutils.CloudEventType,
+			wantEventType:        testingutils.CloudEventType,
+		},
+		{
+			name:                 "With empty prefix and not-clean application name and clean event-type",
+			givenEventTypePrefix: testingutils.MessagingEventTypePrefixEmpty,
+			givenApplicationName: testingutils.ApplicationNameNotClean,
+			givenEventType:       testingutils.CloudEventTypePrefixEmpty,
+			wantEventType:        testingutils.CloudEventTypePrefixEmpty,
 		},
 	}
 	for _, tc := range testCases {
+		tc := tc
 		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+
 			ctx, cancel := context.WithCancel(context.Background())
 			defer cancel()
 
 			handlerMock := mock.StartOrDie(ctx, t,
+				mock.WithEventTypePrefix(tc.givenEventTypePrefix),
 				mock.WithApplication(tc.givenApplicationName),
 			)
-			defer handlerMock.ShutdownNatsServerAndWait()
+			defer handlerMock.Stop()
 
-			// setup test environment
-			publishLegacyEndpoint := fmt.Sprintf("http://localhost:%d/%s/v1/events", handlerMock.GetNatsConfig().Port, tc.givenApplicationName)
-			subscription := testingutils.NewSubscription(testingutils.SubscriptionWithFilter(testingutils.MessagingNamespace, tc.givenEventType))
-
-			// prepare event type from subscription
-			assert.NotNil(t, subscription.Spec.Filter)
-			assert.NotEmpty(t, subscription.Spec.Filter.Filters)
-			eventTypeToSubscribe := subscription.Spec.Filter.Filters[0].EventType.Value
-
-			// connect to nats
-			connection, err := pkgnats.Connect(handlerMock.GetNatsURL(), true, 3, time.Second)
-			assert.Nil(t, err)
-			assert.NotNil(t, connection)
-
-			// publish a message to NATS and validate it
-			validator := testingutils.ValidateNatsSubjectOrFail(t, tc.wantNatsSubject)
-			testingutils.SubscribeToEventOrFail(t, connection, eventTypeToSubscribe, validator)
-
-			// nolint:scopelint
 			// run the tests for publishing legacy events
+			publishLegacyEndpoint := fmt.Sprintf("http://localhost:%d/%s/v1/events", handlerMock.GetNatsConfig().Port, tc.givenApplicationName)
 			for _, testCase := range handlertest.TestCasesForLegacyEvents {
+				testCase := testCase
 				t.Run(testCase.Name, func(t *testing.T) {
+					// connect to nats
+					connection, err := pkgnats.Connect(handlerMock.GetNatsURL(),
+						pkgnats.WithRetryOnFailedConnect(true),
+						pkgnats.WithMaxReconnects(3),
+						pkgnats.WithReconnectWait(time.Second),
+					)
+					assert.Nil(t, err)
+					assert.NotNil(t, connection)
+					defer connection.Close()
+
+					// publish a message to NATS and validate it
+					notify := make(chan bool)
+					defer close(notify)
+					validator := testingutils.ValidateNatsSubjectOrFail(t, tc.wantEventType, notify)
+					testingutils.SubscribeToEventOrFail(t, connection, tc.wantEventType, validator)
+
 					body, headers := testCase.ProvideMessage()
 					resp, err := testingutils.SendEvent(publishLegacyEndpoint, body, headers)
 					require.NoError(t, err)
 					require.Equal(t, testCase.WantStatusCode, resp.StatusCode)
 
 					if testCase.WantStatusCode == http.StatusOK {
-						handlertest.ValidateOkResponse(t, *resp, &testCase.WantResponse)
+						handlertest.ValidateLegacyOkResponse(t, *resp, &testCase.WantResponse)
 					} else {
-						handlertest.ValidateErrorResponse(t, *resp, &testCase.WantResponse)
+						handlertest.ValidateLegacyErrorResponse(t, *resp, &testCase.WantResponse)
 					}
 
 					if testingutils.Is2XX(resp.StatusCode) {
 						metricstest.EnsureMetricLatency(t, handlerMock.GetMetricsCollector())
+						assert.NoError(t, testingutils.WaitForChannelOrTimeout(notify, time.Second*3))
 					}
 				})
 			}
@@ -198,7 +264,7 @@ func TestNatsHandlerForLegacyEvents(t *testing.T) {
 	}
 }
 
-func TestNatsHandlerForSubscribedEndpoint(t *testing.T) {
+func TestHandlerForSubscribedEndpoint(t *testing.T) {
 	testCases := []struct {
 		name                 string
 		givenEventTypePrefix string
@@ -216,7 +282,10 @@ func TestNatsHandlerForSubscribedEndpoint(t *testing.T) {
 		},
 	}
 	for _, tc := range testCases {
+		tc := tc
 		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+
 			ctx, cancel := context.WithCancel(context.Background())
 			defer cancel()
 
@@ -230,23 +299,24 @@ func TestNatsHandlerForSubscribedEndpoint(t *testing.T) {
 				testingutils.SubscriptionWithFilter(testingutils.MessagingNamespace, tc.givenEventType),
 			)
 			handlerMock := mock.StartOrDie(ctx, t,
-				mock.WithSubscription(scheme, subscription, tc.givenEventTypePrefix),
+				mock.WithEventTypePrefix(tc.givenEventTypePrefix),
+				mock.WithSubscription(scheme, subscription),
 				mock.WithApplication(testingutils.ApplicationName),
 			)
-			defer handlerMock.ShutdownNatsServerAndWait()
+			defer handlerMock.Stop()
 
-			// nolint:scopelint
 			// run the tests for subscribed endpoint
 			for _, testCase := range handlertest.TestCasesForSubscribedEndpoint {
+				testCase := testCase
 				t.Run(testCase.Name, func(t *testing.T) {
 					subscribedURL := fmt.Sprintf(subscribedEndpointFormat, handlerMock.GetNatsConfig().Port, testCase.AppName)
 					resp, err := testingutils.QuerySubscribedEndpoint(subscribedURL)
 					require.NoError(t, err)
 					require.Equal(t, testCase.WantStatusCode, resp.StatusCode)
-					defer func() { _ = resp.Body.Close() }()
 
 					respBodyBytes, err := ioutil.ReadAll(resp.Body)
 					require.NoError(t, err)
+					require.NoError(t, resp.Body.Close())
 
 					gotEventsResponse := subscribed.Events{}
 					err = json.Unmarshal(respBodyBytes, &gotEventsResponse)

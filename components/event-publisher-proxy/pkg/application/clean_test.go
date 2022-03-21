@@ -31,19 +31,19 @@ func TestCleanName(t *testing.T) {
 		},
 		// application type label is available, then use it instead of the application name
 		{
-			givenApplication: applicationtest.NewApplication("alphanumeric0123", map[string]string{typeLabel: "apptype"}),
+			givenApplication: applicationtest.NewApplication("alphanumeric0123", map[string]string{TypeLabel: "apptype"}),
 			wantName:         "apptype",
 		},
 		{
-			givenApplication: applicationtest.NewApplication("with.!@#none-$%^alphanumeric_&*-characters", map[string]string{typeLabel: "apptype"}),
+			givenApplication: applicationtest.NewApplication("with.!@#none-$%^alphanumeric_&*-characters", map[string]string{TypeLabel: "apptype"}),
 			wantName:         "apptype",
 		},
 		{
-			givenApplication: applicationtest.NewApplication("alphanumeric0123", map[string]string{typeLabel: "apptype=with.!@#none-$%^alphanumeric_&*-characters"}),
+			givenApplication: applicationtest.NewApplication("alphanumeric0123", map[string]string{TypeLabel: "apptype=with.!@#none-$%^alphanumeric_&*-characters"}),
 			wantName:         "apptypewithnonealphanumericcharacters",
 		},
 		{
-			givenApplication: applicationtest.NewApplication("with.!@#none-$%^alphanumeric_&*-characters", map[string]string{typeLabel: "apptype=with.!@#none-$%^alphanumeric_&*-characters"}),
+			givenApplication: applicationtest.NewApplication("with.!@#none-$%^alphanumeric_&*-characters", map[string]string{TypeLabel: "apptype=with.!@#none-$%^alphanumeric_&*-characters"}),
 			wantName:         "apptypewithnonealphanumericcharacters",
 		},
 	}

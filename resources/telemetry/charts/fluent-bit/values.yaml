@@ -126,7 +126,10 @@ priorityClassName: ""
 
 env: []
 
-envFrom: []
+envFrom:
+  - secretRef:
+      name: telemetry-fluent-bit-env
+      optional: true
 
 extraContainers: []
 #   - name: do-something
@@ -142,9 +145,15 @@ extraPorts: []
 volumes:
   mountMachineIdFile: false
 
-extraVolumes: []
+extraVolumes:
+  - name: dynamic-files
+    configMap:
+      name: telemetry-fluent-bit-files
+      optional: true
 
-extraVolumeMounts: []
+extraVolumeMounts:
+  - name: dynamic-files
+    mountPath: /files
 
 updateStrategy: {}
 #   type: RollingUpdate
@@ -168,7 +177,6 @@ config:
   service: |
     [SERVICE]
         Daemon Off
-        Flush 1
         Log_Level {{ .Values.logLevel }}
         Parsers_File parsers.conf
         Parsers_File custom_parsers.conf

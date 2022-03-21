@@ -11,9 +11,9 @@ The [monitoring chart](https://github.com/kyma-project/kyma/blob/main/resources/
 1. The concept of collecting the [service-level](https://istio.io/latest/docs/concepts/observability/#service-level-metrics) metrics is based on the Istio Proxy implemented by Envoy. Istio Proxy collects all communication details inside the service mesh in a decentralized way. After scraping these high-cardinality metrics from the envoys, the metrics must be aggregated on a service level to get the final service-related details.
 
 2. A dedicated Prometheus instance (Prometheus-Istio) scrapes and aggregates the service-level metrics. That instance is configured with the smallest possible data retention time because the raw metrics scraped from the Istio Proxies have high-cardinality and don't need to be kept further. 
-The Istio-Prometheus instance is a Deployment named `monitoring-prometheus-istio-server`, with a hardcoded configuration that must not be changed. It also has no PersistentVolume attached. This instance never discovers additional metric endpoints from such resources as ServiceMonitors.
+The Istio-Prometheus instance is a Deployment named `monitoring-prometheus-istio-server`, with a hardcoded configuration that must not be changed. It also has no Persistent Volume attached. This instance never discovers additional metric endpoints from such resources as Service Monitors.
 
-3. The main Prometheus instance scrapes these aggregated Istio metrics through the `/federate` endpoint of the Prometheus-Istio instance and any other metric endpoints from such resources as ServiceMonitors.
+3. The main Prometheus instance scrapes these aggregated Istio metrics through the `/federate` endpoint of the Prometheus-Istio instance and any other metric endpoints from such resources as Service Monitors.
 The main Prometheus instance supports scraping metrics using [`Strict mTLS`](https://istio.io/latest/docs/tasks/security/authentication/authn-policy/#globally-enabling-istio-mutual-tls-in-strict-mode). For this to work, Prometheus is configured to scrape metrics using Istio certificates.  
    
 4. Prometheus is deployed with a sidecar proxy which rotates SDS certificates and outputs them to a volume mounted to the corresponding Prometheus container. It is configured to not intercept or redirect any traffic. 
@@ -55,7 +55,7 @@ By default, `monitoring-prometheus-istio-server` is not provided as a data sourc
 
 ## Enable mTLS for custom metrics
 
-To enable Strict mTLS scraping for a component, configure the Istio TLS certificates in the corresponding ServiceMonitor:
+To enable Strict mTLS scraping for a component, configure the Istio TLS certificates in the corresponding Service Monitor:
 
 ```yaml
 ---
