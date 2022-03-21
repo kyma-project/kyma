@@ -13,13 +13,11 @@ import (
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	http2 "github.com/cloudevents/sdk-go/v2/protocol/http"
-
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 )
 
+// binary cloudevent headers
 const (
-	// binary cloudevent headers
 	CeIDHeader          = "ce-id"
 	CeTypeHeader        = "ce-type"
 	CeSourceHeader      = "ce-source"
@@ -55,22 +53,12 @@ func SendEvent(endpoint, body string, headers http.Header) (*http.Response, erro
 	return client.Do(req)
 }
 
-func GetStructuredMessageHeaders() http.Header {
-	return http.Header{"Content-Type": []string{"application/cloudevents+json"}}
-}
-
 func GetBinaryMessageHeaders() http.Header {
 	headers := make(http.Header)
 	headers.Add(CeIDHeader, EventID)
 	headers.Add(CeTypeHeader, CloudEventTypeNotClean)
 	headers.Add(CeSourceHeader, CloudEventSource)
 	headers.Add(CeSpecVersionHeader, CloudEventSpecVersion)
-	return headers
-}
-
-func GetApplicationJSONHeaders() http.Header {
-	headers := make(http.Header)
-	headers.Add(http2.ContentType, "application/json")
 	return headers
 }
 

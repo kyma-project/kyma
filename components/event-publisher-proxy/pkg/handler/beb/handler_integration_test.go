@@ -44,32 +44,67 @@ func TestHandlerForCloudEvents(t *testing.T) {
 	testCases := []struct {
 		name                           string
 		givenEventTypePrefix           string
+		givenEventType                 string
 		givenApplicationNameToCreate   string
 		givenApplicationNameToValidate string
 	}{
+		// not-clean event-types
 		{
-			name:                           "With prefix and clean application name",
+			name:                           "With prefix and clean application name and not-clean event-type",
 			givenEventTypePrefix:           testingutils.MessagingEventTypePrefix,
+			givenEventType:                 testingutils.CloudEventTypeNotClean,
 			givenApplicationNameToCreate:   testingutils.ApplicationName,
-			givenApplicationNameToValidate: testingutils.ApplicationNameNotClean,
+			givenApplicationNameToValidate: testingutils.ApplicationName,
 		},
 		{
-			name:                           "With empty prefix and clean application name",
+			name:                           "With empty prefix and clean application name and not-clean event-type",
 			givenEventTypePrefix:           testingutils.MessagingEventTypePrefixEmpty,
+			givenEventType:                 testingutils.CloudEventTypeNotClean,
 			givenApplicationNameToCreate:   testingutils.ApplicationName,
-			givenApplicationNameToValidate: testingutils.ApplicationNameNotClean,
+			givenApplicationNameToValidate: testingutils.ApplicationName,
 		},
 		{
-			name:                           "With prefix and not-clean application name",
+			name:                           "With prefix and not-clean application name and not-clean event-type",
 			givenEventTypePrefix:           testingutils.MessagingEventTypePrefix,
+			givenEventType:                 testingutils.CloudEventTypeNotClean,
 			givenApplicationNameToCreate:   testingutils.ApplicationNameNotClean,
-			givenApplicationNameToValidate: testingutils.ApplicationNameNotClean,
+			givenApplicationNameToValidate: testingutils.ApplicationName,
 		},
 		{
-			name:                           "With empty prefix and not-clean application name",
+			name:                           "With empty prefix and not-clean application name and not-clean event-type",
 			givenEventTypePrefix:           testingutils.MessagingEventTypePrefixEmpty,
+			givenEventType:                 testingutils.CloudEventTypeNotClean,
 			givenApplicationNameToCreate:   testingutils.ApplicationNameNotClean,
-			givenApplicationNameToValidate: testingutils.ApplicationNameNotClean,
+			givenApplicationNameToValidate: testingutils.ApplicationName,
+		},
+		// clean event-types
+		{
+			name:                           "With prefix and clean application name and clean event-type",
+			givenEventTypePrefix:           testingutils.MessagingEventTypePrefix,
+			givenEventType:                 testingutils.CloudEventType,
+			givenApplicationNameToCreate:   testingutils.ApplicationName,
+			givenApplicationNameToValidate: testingutils.ApplicationName,
+		},
+		{
+			name:                           "With empty prefix and clean application name and clean event-type",
+			givenEventTypePrefix:           testingutils.MessagingEventTypePrefixEmpty,
+			givenEventType:                 testingutils.CloudEventType,
+			givenApplicationNameToCreate:   testingutils.ApplicationName,
+			givenApplicationNameToValidate: testingutils.ApplicationName,
+		},
+		{
+			name:                           "With prefix and not-clean application name and clean event-type",
+			givenEventTypePrefix:           testingutils.MessagingEventTypePrefix,
+			givenEventType:                 testingutils.CloudEventType,
+			givenApplicationNameToCreate:   testingutils.ApplicationNameNotClean,
+			givenApplicationNameToValidate: testingutils.ApplicationName,
+		},
+		{
+			name:                           "With empty prefix and not-clean application name and clean event-type",
+			givenEventTypePrefix:           testingutils.MessagingEventTypePrefixEmpty,
+			givenEventType:                 testingutils.CloudEventType,
+			givenApplicationNameToCreate:   testingutils.ApplicationNameNotClean,
+			givenApplicationNameToValidate: testingutils.ApplicationName,
 		},
 	}
 	for _, tc := range testCases {
@@ -85,6 +120,7 @@ func TestHandlerForCloudEvents(t *testing.T) {
 			)
 
 			handlerMock := mock.StartOrDie(context.TODO(), t, requestSize, tc.givenEventTypePrefix, eventsEndpoint, requestTimeout, serverResponseTime,
+				mock.WithEventTypePrefix(tc.givenEventTypePrefix),
 				mock.WithApplication(tc.givenApplicationNameToCreate, tc.givenApplicationNameToValidate),
 			)
 			defer handlerMock.Close()
@@ -93,10 +129,10 @@ func TestHandlerForCloudEvents(t *testing.T) {
 			for _, testCase := range handlertest.TestCasesForCloudEvents {
 				testCase := testCase
 				t.Run(testCase.Name, func(t *testing.T) {
-					body, headers := testCase.ProvideMessage()
+					body, headers := testCase.ProvideMessage(tc.givenEventType)
 					resp, err := testingutils.SendEvent(publishEndpoint, body, headers)
 					require.NoError(t, err)
-					_ = resp.Body.Close()
+					require.NoError(t, resp.Body.Close())
 					require.Equal(t, testCase.WantStatusCode, resp.StatusCode)
 					if testingutils.Is2XX(resp.StatusCode) {
 						metricstest.EnsureMetricLatency(t, handlerMock.GetMetricsCollector())
@@ -154,6 +190,7 @@ func TestHandlerForLegacyEvents(t *testing.T) {
 			)
 
 			handlerMock := mock.StartOrDie(context.TODO(), t, requestSize, tc.givenEventTypePrefix, eventsEndpoint, requestTimeout, serverResponseTime,
+				mock.WithEventTypePrefix(tc.givenEventTypePrefix),
 				mock.WithApplication(tc.givenApplicationNameToCreate, tc.givenApplicationNameToValidate),
 			)
 			defer handlerMock.Close()
@@ -210,6 +247,7 @@ func TestHandlerForBEBFailures(t *testing.T) {
 			)
 
 			handlerMock := mock.StartOrDie(context.TODO(), t, requestSize, tc.givenEventTypePrefix, eventsEndpoint, requestTimeout, serverResponseTime,
+				mock.WithEventTypePrefix(tc.givenEventTypePrefix),
 				mock.WithApplication(applicationName, applicationName),
 			)
 			defer handlerMock.Close()
@@ -226,20 +264,21 @@ func TestHandlerForBEBFailures(t *testing.T) {
 				{
 					name: "Send a legacy event with event-id",
 					provideMessage: func() (string, http.Header) {
-						return testingutils.ValidLegacyEventPayloadWithEventID, testingutils.GetApplicationJSONHeaders()
+						builder := testingutils.NewLegacyEventBuilder()
+						return builder.Build()
 					},
 					givenEndpoint:  publishLegacyEndpoint,
 					wantStatusCode: http.StatusBadRequest,
 					wantResponse: legacyapi.PublishEventResponses{
 						Error: &legacyapi.Error{
-							Status:  400,
+							Status:  http.StatusBadRequest,
 							Message: "invalid request"},
 					},
 				},
 				{
 					name: "Binary CloudEvent is valid with required headers",
 					provideMessage: func() (string, http.Header) {
-						return fmt.Sprintf(`"%s"`, testingutils.CloudEventData), testingutils.GetBinaryMessageHeaders()
+						return fmt.Sprintf(`"%s"`, testingutils.EventData), testingutils.GetBinaryMessageHeaders()
 					},
 					givenEndpoint:  publishEndpoint,
 					wantStatusCode: http.StatusBadRequest,
@@ -294,6 +333,7 @@ func TestHandlerForHugeRequests(t *testing.T) {
 			)
 
 			handlerMock := mock.StartOrDie(context.TODO(), t, requestSize, tc.givenEventTypePrefix, eventsEndpoint, requestTimeout, serverResponseTime,
+				mock.WithEventTypePrefix(tc.givenEventTypePrefix),
 				mock.WithApplication(applicationName, applicationName),
 			)
 			defer handlerMock.Close()
@@ -308,7 +348,8 @@ func TestHandlerForHugeRequests(t *testing.T) {
 				{
 					name: "Should fail with HTTP 413 with a request which is larger than 2 Bytes as the maximum accepted size is 2 Bytes",
 					provideMessage: func() (string, http.Header) {
-						return testingutils.ValidLegacyEventPayloadWithEventID, testingutils.GetApplicationJSONHeaders()
+						builder := testingutils.NewLegacyEventBuilder()
+						return builder.Build()
 					},
 					givenEndpoint:  publishLegacyEndpoint,
 					wantStatusCode: http.StatusRequestEntityTooLarge,
@@ -387,7 +428,7 @@ func TestHandlerForSubscribedEndpoint(t *testing.T) {
 					resp, err := testingutils.QuerySubscribedEndpoint(subscribedURL)
 					require.NoError(t, err)
 					require.Equal(t, testCase.WantStatusCode, resp.StatusCode)
-					defer func() { _ = resp.Body.Close() }()
+					defer func() { require.NoError(t, resp.Body.Close()) }()
 					respBodyBytes, err := ioutil.ReadAll(resp.Body)
 					require.NoError(t, err)
 					gotEventsResponse := subscribed.Events{}
@@ -406,14 +447,29 @@ func TestHandlerTimeout(t *testing.T) {
 	testCases := []struct {
 		name                 string
 		givenEventTypePrefix string
+		givenEventType       string
 	}{
+		// not-clean event-types
 		{
-			name:                 "With prefix",
+			name:                 "With prefix and not-clean event-type",
 			givenEventTypePrefix: testingutils.MessagingEventTypePrefix,
+			givenEventType:       testingutils.CloudEventTypeNotClean,
 		},
 		{
-			name:                 "With empty prefix",
+			name:                 "With empty prefix and not-clean event-type",
 			givenEventTypePrefix: testingutils.MessagingEventTypePrefixEmpty,
+			givenEventType:       testingutils.CloudEventTypeNotCleanPrefixEmpty,
+		},
+		// clean event-types
+		{
+			name:                 "With prefix and clean event-type",
+			givenEventTypePrefix: testingutils.MessagingEventTypePrefix,
+			givenEventType:       testingutils.CloudEventType,
+		},
+		{
+			name:                 "With empty prefix and clean event-type",
+			givenEventTypePrefix: testingutils.MessagingEventTypePrefixEmpty,
+			givenEventType:       testingutils.CloudEventTypePrefixEmpty,
 		},
 	}
 	for _, tc := range testCases {
@@ -430,15 +486,19 @@ func TestHandlerTimeout(t *testing.T) {
 			)
 
 			handlerMock := mock.StartOrDie(context.TODO(), t, requestSize, tc.givenEventTypePrefix, eventsEndpoint, requestTimeout, serverResponseTime,
+				mock.WithEventTypePrefix(tc.givenEventTypePrefix),
 				mock.WithApplication(applicationName, applicationName),
 			)
 			defer handlerMock.Close()
 			publishEndpoint := fmt.Sprintf(publishEndpointFormat, handlerMock.GetPort())
 
-			body, headers := testingutils.StructuredCloudEventPayload, testingutils.GetStructuredMessageHeaders()
+			builder := testingutils.NewCloudEventBuilder(
+				testingutils.WithCloudEventType(tc.givenEventType),
+			)
+			body, headers := builder.BuildStructured()
 			resp, err := testingutils.SendEvent(publishEndpoint, body, headers)
 			require.NoError(t, err)
-			_ = resp.Body.Close()
+			require.NoError(t, resp.Body.Close())
 			require.Equal(t, http.StatusInternalServerError, resp.StatusCode)
 			metricstest.EnsureMetricErrors(t, handlerMock.GetMetricsCollector())
 		})

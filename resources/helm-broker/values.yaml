@@ -109,13 +109,13 @@ global:
   images:
     helm_broker_webhook:
       name: "helm-broker-webhook"
-      version: "de09b314"
+      version: "7e9eee5e"
     helm_broker:
       name: "helm-broker"
-      version: "de09b314"
+      version: "7e9eee5e"
     helm_controller:
       name: "helm-controller"
-      version: "de09b314"
+      version: "7e9eee5e"
     etcd:
       name: "etcd"
       version: "v3.3.25-b582f7ea"
