@@ -37,7 +37,7 @@ import (
 
 const (
 	fluentBitConfigDirectory       = "/tmp/dry-run"
-	StatusReasonConfigurationError = "ConfigurationError"
+	StatusReasonConfigurationError = "Configuration Error"
 	fluentBitParsersConfigMapKey   = "parsers.conf"
 )
 

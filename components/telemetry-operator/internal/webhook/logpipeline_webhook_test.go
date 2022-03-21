@@ -14,7 +14,7 @@ import (
 )
 
 var testLogPipeline = types.NamespacedName{
-	Name: "log-pipeline",
+	Name:      "log-pipeline",
 	Namespace: ControllerNamespace,
 }
 
@@ -134,11 +134,11 @@ var _ = Describe("LogPipeline webhook", func() {
 			fsWrapperMock.On("RemoveDirectory", mock.AnythingOfType("string")).Return(nil).Times(1)
 
 			var logPipeline telemetryv1alpha1.LogPipeline
-			err:= k8sClient.Get(ctx, testLogPipeline, &logPipeline)
+			err := k8sClient.Get(ctx, testLogPipeline, &logPipeline)
 			Expect(err).NotTo(HaveOccurred())
 
 			logPipeline.Spec.Files = append(logPipeline.Spec.Files, telemetryv1alpha1.FileMount{
-				Name: "2nd-file",
+				Name:    "2nd-file",
 				Content: "file content",
 			})
 			err = k8sClient.Update(ctx, &logPipeline)
@@ -153,11 +153,11 @@ var _ = Describe("LogPipeline webhook", func() {
 			fsWrapperMock.On("RemoveDirectory", mock.AnythingOfType("string")).Return(nil).Times(1)
 
 			var logPipeline telemetryv1alpha1.LogPipeline
-			err:= k8sClient.Get(ctx, testLogPipeline, &logPipeline)
+			err := k8sClient.Get(ctx, testLogPipeline, &logPipeline)
 			Expect(err).NotTo(HaveOccurred())
 
 			logPipeline.Spec.Files = append(logPipeline.Spec.Files, telemetryv1alpha1.FileMount{
-				Name: "3rd-file",
+				Name:    "3rd-file",
 				Content: "file content",
 			})
 

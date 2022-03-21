@@ -25,13 +25,13 @@ func TestExtractError(t *testing.T) {
 		},
 		{
 			name:          "Multiline error present",
-			output:        "Error setting up tail.0 plugin property 'Mem_Buf_Limit'\nError: Configuration file contains errors. Aborting\n",
+			output:        "Error setting up tail.0 plugin property 'Mem_Buf_Limit'\nError: Configuration file contains errors. Aborting",
 			expectedError: "Error setting up tail.0 plugin property 'Mem_Buf_Limit'",
 		},
 		{
 			name:          "Multiline error with logs present",
-			output:        "[2022/03/14 10:51:59] [  Error] File dynamic-parsers/parsers.conf\n[2022/03/14 10:51:59] [  Error] Error in line 4: Invalid indentation level",
-			expectedError: "Error in line 4: Invalid indentation level",
+			output:        "[2022/03/21 09:36:37] [  Error] File /tmp/dry-rundabf0a0d-f27c-4bb8-860e-e90553aa6ef8/dynamic/logpipeline.conf\n[2022/03/21 09:36:37] [  Error] Error in line 3: Invalid indentation level\nError: Configuration file contains errors. Aborting",
+			expectedError: "Error in line 3: Invalid indentation level",
 		},
 	}
 	for _, tc := range testCases {

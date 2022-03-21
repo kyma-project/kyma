@@ -11,6 +11,7 @@ import (
 
 const (
 	fluentBitBinPath = "fluent-bit/bin/fluent-bit"
+	errDescription   = "The Fluent Bit dry-run could not validate the provided Log Pipeline: "
 	// From https://github.com/acarl005/stripansi/blob/master/stripansi.go#L7
 	ansiColorsRegex = "[\u001B\u009B][[\\]()#;?]*(?:(?:(?:[a-zA-Z\\d]*(?:;[a-zA-Z\\d]*)*)?\u0007)|(?:(?:\\d{1,4}(?:;\\d{0,4})*)?[\\dA-PRZcf-ntqry=><~]))"
 )
@@ -38,10 +39,8 @@ func (v *configValidator) RunCmd(ctx context.Context, name string, args ...strin
 func (v *configValidator) Validate(ctx context.Context, configFilePath string) error {
 	out, err := v.RunCmd(ctx, fluentBitBinPath, "--dry-run", "--quiet", "--config", configFilePath)
 	if err != nil {
-		fmt.Println("out: '", out, "'")
-		fmt.Println("err: '", err, "'")
 		if strings.Contains(out, "Error") {
-			return errors.New(extractError(out))
+			return errors.New(errDescription + extractError(out))
 		}
 		return errors.New(fmt.Sprintf("Error while validating Fluent Bit config: %v", err))
 	}
@@ -53,12 +52,13 @@ func (v *configValidator) Validate(ctx context.Context, configFilePath string) e
 // Thereby, it supports the following error patterns:
 // 1. Error <msg>\nError: Configuration file contains errors. Aborting
 // 2. Error: <msg>. Aborting
-// 3. [<time>] [  Error] File <filename>\n[<time>] [  Error] Error in line 4: <msg>
+// 3. [<time>] [  Error] File <filename>\n[<time>] [  Error] Error in line 4: <msg> Error: Configuration file contains errors. Aborting
 func extractError(output string) string {
+
 	rColors := regexp.MustCompile(ansiColorsRegex)
 	output = rColors.ReplaceAllString(output, "")
 
-	r1 := regexp.MustCompile(`(?P<description>Error.+)\n(?P<label>Error:.+)`)
+	r1 := regexp.MustCompile(`(?P<description>Error[^\]].+)\n(?P<label>Error:.+)`)
 	if r1Matches := r1.FindStringSubmatch(output); r1Matches != nil {
 		return r1Matches[1] // 0: complete output, 1: description, 2: label
 	}
