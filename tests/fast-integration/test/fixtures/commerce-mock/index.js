@@ -347,10 +347,13 @@ async function checkTrace(traceId, expectedTraceProcessSequence) {
   const traceDAG = await getTraceDAG(traceData);
   expect(traceDAG).to.have.length(1);
 
+  // searching through the trace-graph for the expected span sequence staring at the root element
   const wasFound = await findSpanSequence(expectedTraceProcessSequence, 0, traceDAG[0], traceData);
   expect(wasFound).to.be.true;
 }
 
+// findSpanSequence recursively searches through the trace-graph to find all expected spans in the right, consecutive
+// order while ignoring the spans that are not expected.
 async function findSpanSequence(expectedSpans, pos, currentSpan, traceData) {
   // if this span contains the currently expected span, the position will be increased
   const newPos = pos + (traceData.processes[currentSpan.processID].serviceName === expectedSpans[pos] ? 1 : 0);
