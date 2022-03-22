@@ -224,7 +224,8 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			givenSubscription := reconcilertesting.NewSubscription(subscriptionName, namespaceName,
 				reconcilertesting.WithOrderCreatedFilter(),
 				reconcilertesting.WithWebhookAuthForBEB(),
-				reconcilertesting.WithInvalidSink(),
+				// The following sink is invalid because it is missing a scheme.
+				reconcilertesting.WithSinkMissingScheme(subscriberSvc.Namespace, subscriberSvc.Name),
 			)
 			ensureSubscriptionCreated(ctx, givenSubscription)
 
