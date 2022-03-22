@@ -21,7 +21,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/controller"
 
 	"github.com/kyma-project/kyma/components/function-controller/internal/controllers/kubernetes"
-	fnRuntime "github.com/kyma-project/kyma/components/function-controller/internal/controllers/serverless/runtime"
 	"github.com/kyma-project/kyma/components/function-controller/internal/git"
 	"github.com/kyma-project/kyma/components/function-controller/internal/resource"
 	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
@@ -46,6 +45,15 @@ type FunctionReconciler struct {
 	gitOperator    GitOperator
 	statsCollector StatsCollector
 	healthCh       chan bool
+}
+
+type functionResources struct {
+	configMaps       corev1.ConfigMapList
+	jobs             batchv1.JobList
+	runtimeConfigMap corev1.ConfigMapList
+	deployments      appsv1.DeploymentList
+	services         corev1.ServiceList
+	hpas             autoscalingv1.HorizontalPodAutoscalerList
 }
 
 func NewFunction(client resource.Client, log logr.Logger, config FunctionConfig, gitOperator GitOperator, recorder record.EventRecorder, statsCollector StatsCollector, healthCh chan bool) *FunctionReconciler {
@@ -114,120 +122,11 @@ func (r *FunctionReconciler) Reconcile(ctx context.Context, request ctrl.Request
 		return ctrl.Result{}, nil
 	}
 
-	var configMaps corev1.ConfigMapList
-	if err := r.client.ListByLabel(ctx, instance.GetNamespace(), r.internalFunctionLabels(instance), &configMaps); err != nil {
-		log.Error(err, "Cannot list ConfigMaps")
-		return ctrl.Result{}, err
+	if instance.Spec.Type == serverlessv1alpha1.SourceTypeGit {
+		return r.reconcileGitFunction(ctx, instance, log)
 	}
+	return r.reconcileInlineFunction(ctx, instance, log)
 
-	var jobs batchv1.JobList
-	if err := r.client.ListByLabel(ctx, instance.GetNamespace(), r.internalFunctionLabels(instance), &jobs); err != nil {
-		log.Error(err, "Cannot list Jobs")
-		return ctrl.Result{}, err
-	}
-
-	var runtimeConfigMap corev1.ConfigMapList
-	labels := map[string]string{
-		kubernetes.ConfigLabel:  kubernetes.RuntimeLabelValue,
-		kubernetes.RuntimeLabel: string(instance.Spec.Runtime),
-	}
-	if err := r.client.ListByLabel(ctx, instance.GetNamespace(), labels, &runtimeConfigMap); err != nil {
-		log.Error(err, "Cannot list runtime configmap")
-		return ctrl.Result{}, err
-	}
-
-	if len(runtimeConfigMap.Items) != 1 {
-		return ctrl.Result{}, fmt.Errorf("Expected one config map, found %d, with labels: %+v", len(runtimeConfigMap.Items), labels)
-	}
-
-	var deployments appsv1.DeploymentList
-	if err := r.client.ListByLabel(ctx, instance.GetNamespace(), r.internalFunctionLabels(instance), &deployments); err != nil {
-		log.Error(err, "Cannot list Deployments")
-		return ctrl.Result{}, err
-	}
-
-	var services corev1.ServiceList
-	if err := r.client.ListByLabel(ctx, instance.GetNamespace(), r.internalFunctionLabels(instance), &services); err != nil {
-		log.Error(err, "Cannot list Services")
-		return ctrl.Result{}, err
-	}
-
-	var hpas autoscalingv1.HorizontalPodAutoscalerList
-	if err := r.client.ListByLabel(ctx, instance.GetNamespace(), r.internalFunctionLabels(instance), &hpas); err != nil {
-		log.Error(err, "Cannot list HorizontalPodAutoscalers")
-		return ctrl.Result{}, err
-	}
-
-	dockerConfig, err := r.readDockerConfig(ctx, instance)
-	if err != nil {
-		log.Error(err, "Cannot read Docker registry configuration")
-		return ctrl.Result{}, err
-	}
-
-	gitOptions, err := r.readGITOptions(ctx, instance)
-	if err != nil {
-		if updateErr := r.updateStatusWithoutRepository(ctx, instance, serverlessv1alpha1.Condition{
-			Type:               serverlessv1alpha1.ConditionConfigurationReady,
-			Status:             corev1.ConditionFalse,
-			LastTransitionTime: metav1.Now(),
-			Reason:             serverlessv1alpha1.ConditionReasonSourceUpdateFailed,
-			Message:            fmt.Sprintf("Reading git options failed: %v", err),
-		}); updateErr != nil {
-			log.Error(err, "Reading git options failed")
-			return ctrl.Result{}, errors.Wrap(updateErr, "while updating status")
-		}
-		return ctrl.Result{}, err
-	}
-
-	revision, err := r.syncRevision(instance, gitOptions)
-	if err != nil {
-		result, errMsg := NextRequeue(err)
-		// TODO: This return masks the error from r.syncRevision() and doesn't pass it to the controller. This should be fixed in a follow up PR.
-		return result, r.updateStatusWithoutRepository(ctx, instance, serverlessv1alpha1.Condition{
-			Type:               serverlessv1alpha1.ConditionConfigurationReady,
-			Status:             corev1.ConditionFalse,
-			LastTransitionTime: metav1.Now(),
-			Reason:             serverlessv1alpha1.ConditionReasonSourceUpdateFailed,
-			Message:            errMsg,
-		})
-	}
-
-	rtmCfg := fnRuntime.GetRuntimeConfig(instance.Spec.Runtime)
-	rtm := fnRuntime.GetRuntime(instance.Spec.Runtime)
-	var result ctrl.Result
-
-	switch {
-	case instance.Spec.Type == serverlessv1alpha1.SourceTypeGit &&
-		r.isOnSourceChange(instance, revision):
-		return result, r.onSourceChange(ctx, instance, &serverlessv1alpha1.Repository{
-			Reference: instance.Spec.Reference,
-			BaseDir:   instance.Spec.Repository.BaseDir,
-		}, revision)
-
-	case instance.Spec.Type != serverlessv1alpha1.SourceTypeGit &&
-		r.isOnConfigMapChange(instance, rtm, configMaps.Items, deployments.Items, dockerConfig):
-		return result, r.onConfigMapChange(ctx, log, instance, rtm, configMaps.Items)
-
-	case instance.Spec.Type == serverlessv1alpha1.SourceTypeGit &&
-		r.isOnJobChange(instance, rtmCfg, jobs.Items, deployments.Items, gitOptions, dockerConfig):
-		return r.onGitJobChange(ctx, log, instance, rtmCfg, jobs.Items, gitOptions, dockerConfig)
-
-	case instance.Spec.Type != serverlessv1alpha1.SourceTypeGit &&
-		r.isOnJobChange(instance, rtmCfg, jobs.Items, deployments.Items, git.Options{}, dockerConfig):
-		return r.onJobChange(ctx, log, instance, rtmCfg, configMaps.Items[0].GetName(), jobs.Items, dockerConfig)
-
-	case r.isOnDeploymentChange(instance, rtmCfg, deployments.Items, dockerConfig):
-		return r.onDeploymentChange(ctx, log, instance, rtmCfg, deployments.Items, dockerConfig)
-
-	case r.isOnServiceChange(instance, services.Items):
-		return result, r.onServiceChange(ctx, log, instance, services.Items)
-
-	case r.isOnHorizontalPodAutoscalerChange(instance, hpas.Items, deployments.Items):
-		return result, r.onHorizontalPodAutoscalerChange(ctx, log, instance, hpas.Items, deployments.Items[0].GetName())
-
-	default:
-		return r.updateDeploymentStatus(ctx, log, instance, deployments.Items, corev1.ConditionTrue)
-	}
 }
 
 func (r *FunctionReconciler) isOnSourceChange(instance *serverlessv1alpha1.Function, commit string) bool {
@@ -288,4 +187,58 @@ func (r *FunctionReconciler) readSecretData(data map[string][]byte) map[string]s
 		output[k] = string(v)
 	}
 	return output
+}
+
+func (r *FunctionReconciler) fetchFunctionResources(ctx context.Context, instance *serverlessv1alpha1.Function, log logr.Logger) (*functionResources, error) {
+	var configMaps corev1.ConfigMapList
+	if err := r.client.ListByLabel(ctx, instance.GetNamespace(), r.internalFunctionLabels(instance), &configMaps); err != nil {
+		log.Error(err, "Cannot list ConfigMaps")
+		return nil, err
+	}
+
+	var jobs batchv1.JobList
+	if err := r.client.ListByLabel(ctx, instance.GetNamespace(), r.internalFunctionLabels(instance), &jobs); err != nil {
+		log.Error(err, "Cannot list Jobs")
+		return nil, err
+	}
+
+	var runtimeConfigMap corev1.ConfigMapList
+	labels := map[string]string{
+		kubernetes.ConfigLabel:  kubernetes.RuntimeLabelValue,
+		kubernetes.RuntimeLabel: string(instance.Spec.Runtime),
+	}
+	if err := r.client.ListByLabel(ctx, instance.GetNamespace(), labels, &runtimeConfigMap); err != nil {
+		log.Error(err, "Cannot list runtime configmap")
+		return nil, err
+	}
+
+	if len(runtimeConfigMap.Items) != 1 {
+		return nil, fmt.Errorf("Expected one config map, found %d, with labels: %+v", len(runtimeConfigMap.Items), labels)
+	}
+
+	var deployments appsv1.DeploymentList
+	if err := r.client.ListByLabel(ctx, instance.GetNamespace(), r.internalFunctionLabels(instance), &deployments); err != nil {
+		log.Error(err, "Cannot list Deployments")
+		return nil, err
+	}
+
+	var services corev1.ServiceList
+	if err := r.client.ListByLabel(ctx, instance.GetNamespace(), r.internalFunctionLabels(instance), &services); err != nil {
+		log.Error(err, "Cannot list Services")
+		return nil, err
+	}
+
+	var hpas autoscalingv1.HorizontalPodAutoscalerList
+	if err := r.client.ListByLabel(ctx, instance.GetNamespace(), r.internalFunctionLabels(instance), &hpas); err != nil {
+		log.Error(err, "Cannot list HorizontalPodAutoscalers")
+		return nil, err
+	}
+	return &functionResources{
+		configMaps:       configMaps,
+		jobs:             jobs,
+		runtimeConfigMap: runtimeConfigMap,
+		deployments:      deployments,
+		services:         services,
+		hpas:             hpas,
+	}, nil
 }
