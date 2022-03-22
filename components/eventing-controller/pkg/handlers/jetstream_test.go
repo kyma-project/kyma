@@ -922,7 +922,7 @@ func TestJSSubscriptionWithMaxInFlightChange(t *testing.T) {
 		// so these events will be pending for receiving an ACK from dispatchers
 		// check consumer current maxAckPending
 		return consumerInfo.NumAckPending == defaultMaxInflight
-	}, 10*time.Second, 200*time.Millisecond)
+	}, 10*time.Second, 10*time.Millisecond)
 }
 
 // TestJSSubscriptionUsingCESDK tests that eventing works with Cloud events.
