@@ -4,7 +4,7 @@ global:
   images:
     busola_migrator:
       name: "busola-migrator"
-      version: "PR-12963"
+      version: "708f6a87"
     k8s_tools:
       name: "k8s-tools"
       version: "20220318-b6a7453e"
