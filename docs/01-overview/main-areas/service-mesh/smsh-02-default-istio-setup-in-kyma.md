@@ -31,4 +31,4 @@ These configuration changes are applied to customize Istio for use with Kyma:
 - Ingress Gateway is expanded to handle ports `80`, `443`, and `31400` for local Kyma deployments.
 - The `istio-sidecar-injector` Mutating Webhook Configuration is patched to exclude Gardener resources in the `kube-system` Namespace and the timeout is set to 10 seconds.
 - The use of HTTP 1.0 is enabled in the outbound HTTP listeners by `PILOT_HTTP10` flag set in Istiod component environment variables.
-- IstioOperator configuration file is modified. [Change Kyma settings](../../../04-operation-guides/operations/03-change-kyma-config-values.md) to customize the configuration.
+- Istio Operator configuration file is modified. [Change Kyma settings](../../../04-operation-guides/operations/03-change-kyma-config-values.md) to customize the configuration.

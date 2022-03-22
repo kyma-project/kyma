@@ -51,6 +51,7 @@ func TestConnect(t *testing.T) {
 			)
 			assert.Nil(t, err)
 			assert.NotNil(t, connection)
+			defer func() { connection.Close() }()
 
 			// then
 			assert.Equal(t, connection.Status(), nats.CONNECTED)
