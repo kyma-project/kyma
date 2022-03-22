@@ -18,7 +18,7 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 )
 
-func (r *FunctionReconciler) reconcileInlineFunctionReconcile(ctx context.Context, instance *serverlessv1alpha1.Function, resources *functionResources, log logr.Logger) (ctrl.Result, error) {
+func (r *FunctionReconciler) reconcileInlineFunctionReconcile(ctx context.Context, instance *serverlessv1alpha1.Function, resources *functionResources, su *statusUpdater, log logr.Logger) (ctrl.Result, error) {
 
 	dockerConfig, err := readDockerConfig(ctx, r.client, r.config, instance)
 	if err != nil {
@@ -30,23 +30,23 @@ func (r *FunctionReconciler) reconcileInlineFunctionReconcile(ctx context.Contex
 	var result ctrl.Result
 
 	switch {
-	case r.isOnConfigMapChange(instance, rtm, resources.configMaps.Items, resources.deployments.Items, dockerConfig):
-		return result, r.onConfigMapChange(ctx, log, instance, rtm, resources.configMaps.Items)
+	case isOnConfigMapChange(instance, rtm, resources.configMaps.Items, resources.deployments.Items, dockerConfig):
+		return result, r.onConfigMapChange(ctx, su, log, instance, rtm, resources.configMaps.Items)
 
-	case r.isOnJobChange(instance, rtmCfg, resources.jobs.Items, resources.deployments.Items, git.Options{}, dockerConfig):
-		return r.onJobChange(ctx, log, instance, rtmCfg, resources.configMaps.Items[0].GetName(), resources.jobs.Items, dockerConfig)
+	case isOnJobChange(instance, rtmCfg, resources.jobs.Items, resources.deployments.Items, git.Options{}, dockerConfig, r.config):
+		return onJobChange(ctx, su, log, instance, rtmCfg, resources.configMaps.Items[0].GetName(), resources.jobs.Items, dockerConfig)
 
 	case isOnDeploymentChange(instance, rtmCfg, resources.deployments.Items, dockerConfig, r.config):
-		return r.onDeploymentChange(ctx, log, instance, rtmCfg, resources.deployments.Items, dockerConfig, r.config)
+		return onDeploymentChange(ctx, su, log, instance, rtmCfg, resources.deployments.Items, dockerConfig, r.config)
 
 	case isOnServiceChange(instance, resources.services.Items):
-		return result, r.onServiceChange(ctx, log, instance, resources.services.Items)
+		return result, onServiceChange(ctx, su, log, instance, resources.services.Items)
 
 	case isOnHorizontalPodAutoscalerChange(instance, resources.hpas.Items, resources.deployments.Items, r.config):
-		return result, r.onHorizontalPodAutoscalerChange(ctx, log, instance, resources.hpas.Items, resources.deployments.Items[0].GetName(), r.config)
+		return result, onHorizontalPodAutoscalerChange(ctx, su, log, instance, resources.hpas.Items, resources.deployments.Items[0].GetName(), r.config)
 
 	default:
-		return r.updateDeploymentStatus(ctx, log, instance, resources.deployments.Items, corev1.ConditionTrue)
+		return updateDeploymentStatus(ctx, su, log, instance, resources.deployments.Items, corev1.ConditionTrue)
 	}
 }
 
@@ -61,7 +61,7 @@ func calculateInlineImageTag(instance *serverlessv1alpha1.Function) string {
 	return fmt.Sprintf("%x", hash)
 }
 
-func (r *FunctionReconciler) isOnConfigMapChange(instance *serverlessv1alpha1.Function, rtm runtime.Runtime, configMaps []corev1.ConfigMap, deployments []appsv1.Deployment, dockerConfig DockerConfig) bool {
+func isOnConfigMapChange(instance *serverlessv1alpha1.Function, rtm runtime.Runtime, configMaps []corev1.ConfigMap, deployments []appsv1.Deployment, dockerConfig DockerConfig) bool {
 	image := buildInlineImageAddress(instance, dockerConfig.PullAddress)
 	configurationStatus := getConditionStatus(instance.Status.Conditions, serverlessv1alpha1.ConditionConfigurationReady)
 
@@ -80,27 +80,27 @@ func (r *FunctionReconciler) isOnConfigMapChange(instance *serverlessv1alpha1.Fu
 		mapsEqual(configMaps[0].Labels, functionLabels(instance)))
 }
 
-func (r *FunctionReconciler) onConfigMapChange(ctx context.Context, log logr.Logger, instance *serverlessv1alpha1.Function, rtm runtime.Runtime, configMaps []corev1.ConfigMap) error {
+func (r *FunctionReconciler) onConfigMapChange(ctx context.Context, su *statusUpdater, log logr.Logger, instance *serverlessv1alpha1.Function, rtm runtime.Runtime, configMaps []corev1.ConfigMap) error {
 	configMapsLen := len(configMaps)
 
 	switch configMapsLen {
 	case 0:
-		return r.createConfigMap(ctx, log, instance, rtm)
+		return createConfigMap(ctx, su, log, instance, rtm)
 	case 1:
-		return r.updateConfigMap(ctx, log, instance, rtm, configMaps[0])
+		return updateConfigMap(ctx, su, log, instance, rtm, configMaps[0])
 	default:
-		return r.deleteAllConfigMaps(ctx, instance, log)
+		return deleteAllConfigMaps(ctx, su.client, instance, log)
 	}
 }
 
-func (r *FunctionReconciler) buildJob(instance *serverlessv1alpha1.Function, rtmConfig runtime.Config, configMapName string, dockerConfig DockerConfig) batchv1.Job {
+func buildJob(instance *serverlessv1alpha1.Function, rtmConfig runtime.Config, configMapName string, dockerConfig DockerConfig, config FunctionConfig) batchv1.Job {
 	one := int32(1)
 	zero := int32(0)
 	rootUser := int64(0)
 	optional := true
 
 	imageName := buildInlineImageAddress(instance, dockerConfig.PushAddress)
-	args := r.config.Build.ExecutorArgs
+	args := config.Build.ExecutorArgs
 	args = append(args, fmt.Sprintf("%s=%s", destinationArg, imageName), fmt.Sprintf("--context=dir://%s", workspaceMountPath))
 
 	return batchv1.Job{
@@ -155,7 +155,7 @@ func (r *FunctionReconciler) buildJob(instance *serverlessv1alpha1.Function, rtm
 							Name: "registry-config",
 							VolumeSource: corev1.VolumeSource{
 								Secret: &corev1.SecretVolumeSource{
-									SecretName: r.config.PackageRegistryConfigSecretName,
+									SecretName: config.PackageRegistryConfigSecretName,
 									Optional:   &optional,
 								},
 							},
@@ -164,7 +164,7 @@ func (r *FunctionReconciler) buildJob(instance *serverlessv1alpha1.Function, rtm
 					Containers: []corev1.Container{
 						{
 							Name:            "executor",
-							Image:           r.config.Build.ExecutorImage,
+							Image:           config.Build.ExecutorImage,
 							Args:            args,
 							Resources:       instance.Spec.BuildResources,
 							VolumeMounts:    getBuildJobVolumeMounts(rtmConfig),
@@ -175,7 +175,7 @@ func (r *FunctionReconciler) buildJob(instance *serverlessv1alpha1.Function, rtm
 						},
 					},
 					RestartPolicy:      corev1.RestartPolicyNever,
-					ServiceAccountName: r.config.BuildServiceAccountName,
+					ServiceAccountName: config.BuildServiceAccountName,
 					SecurityContext: &corev1.PodSecurityContext{
 						RunAsUser: &rootUser,
 					},
@@ -185,11 +185,11 @@ func (r *FunctionReconciler) buildJob(instance *serverlessv1alpha1.Function, rtm
 	}
 }
 
-func (r *FunctionReconciler) isOnJobChange(instance *serverlessv1alpha1.Function, rtmCfg runtime.Config, jobs []batchv1.Job, deployments []appsv1.Deployment, gitOptions git.Options, dockerConfig DockerConfig) bool {
+func isOnJobChange(instance *serverlessv1alpha1.Function, rtmCfg runtime.Config, jobs []batchv1.Job, deployments []appsv1.Deployment, gitOptions git.Options, dockerConfig DockerConfig, config FunctionConfig) bool {
 	image := buildInlineImageAddress(instance, dockerConfig.PullAddress)
 	buildStatus := getConditionStatus(instance.Status.Conditions, serverlessv1alpha1.ConditionBuildReady)
 
-	expectedJob := r.buildJob(instance, rtmCfg, "", dockerConfig)
+	expectedJob := buildJob(instance, rtmCfg, "", dockerConfig, config)
 
 	if len(deployments) == 1 &&
 		deployments[0].Spec.Template.Spec.Containers[0].Image == image &&

@@ -48,14 +48,14 @@ func envsEqual(existing, expected []corev1.EnvVar) bool {
 	return true
 }
 
-func (r *FunctionReconciler) updateStatusWithoutRepository(ctx context.Context, instance *serverlessv1alpha1.Function, condition serverlessv1alpha1.Condition) error {
-	return r.updateStatus(ctx, instance, condition, nil, "")
+func updateStatusWithoutRepository(ctx context.Context, su *statusUpdater, instance *serverlessv1alpha1.Function, condition serverlessv1alpha1.Condition) error {
+	return updateStatus(ctx, su, instance, condition, nil, "")
 }
 
-func (r *FunctionReconciler) updateStatus(ctx context.Context, instance *serverlessv1alpha1.Function, condition serverlessv1alpha1.Condition, repository *serverlessv1alpha1.Repository, commit string) error {
+func updateStatus(ctx context.Context, su *statusUpdater, instance *serverlessv1alpha1.Function, condition serverlessv1alpha1.Condition, repository *serverlessv1alpha1.Repository, commit string) error {
 	condition.LastTransitionTime = metav1.Now()
 	currentFunction := &serverlessv1alpha1.Function{}
-	err := r.client.Get(ctx, types.NamespacedName{Namespace: instance.Namespace, Name: instance.Name}, currentFunction)
+	err := su.client.Get(ctx, types.NamespacedName{Namespace: instance.Namespace, Name: instance.Name}, currentFunction)
 	if err != nil {
 		return client.IgnoreNotFound(err)
 	}
@@ -82,18 +82,18 @@ func (r *FunctionReconciler) updateStatus(ctx context.Context, instance *serverl
 	currentFunction.Status.Runtime = serverlessv1alpha1.RuntimeExtended(instance.Spec.Runtime)
 
 	if !equalFunctionStatus(currentFunction.Status, instance.Status) {
-		if err := r.client.Status().Update(ctx, currentFunction); err != nil {
+		if err := su.client.Status().Update(ctx, currentFunction); err != nil {
 			return errors.Wrap(err, "while updating function status")
 		}
 
-		r.statsCollector.UpdateReconcileStats(instance, condition)
+		su.statsCollector.UpdateReconcileStats(instance, condition)
 
 		eventType := "Normal"
 		if condition.Status == corev1.ConditionFalse {
 			eventType = "Warning"
 		}
 
-		r.recorder.Event(currentFunction, eventType, string(condition.Reason), condition.Message)
+		su.recorder.Event(currentFunction, eventType, string(condition.Reason), condition.Message)
 	}
 	return nil
 }

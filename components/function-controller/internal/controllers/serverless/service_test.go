@@ -426,9 +426,8 @@ func TestFunctionReconciler_deleteExcessServices(t *testing.T) {
 		client := new(automock.Client)
 		client.On("Delete", context.TODO(), &services[1]).Return(nil).Once()
 		defer client.AssertExpectations(t)
-		r := &FunctionReconciler{client: client}
 
-		err := r.deleteExcessServices(context.TODO(), instance, logf, services)
+		err := deleteExcessServices(context.TODO(), client, instance, logf, services)
 		g.Expect(err).To(gomega.Succeed())
 
 		g.Expect(client.Calls).To(gomega.HaveLen(1), "delete should happen only for service which has different name than it's parent fn")
@@ -449,9 +448,8 @@ func TestFunctionReconciler_deleteExcessServices(t *testing.T) {
 		client.On("Delete", context.TODO(), &services[0]).Return(nil).Once()
 		client.On("Delete", context.TODO(), &services[1]).Return(nil).Once()
 		defer client.AssertExpectations(t)
-		r := &FunctionReconciler{client: client}
 
-		err := r.deleteExcessServices(context.TODO(), instance, logf, services)
+		err := deleteExcessServices(context.TODO(), client, instance, logf, services)
 		g.Expect(err).To(gomega.Succeed())
 
 		g.Expect(client.Calls).To(gomega.HaveLen(2), "delete should happen only for service which has different name than it's parent fn")

@@ -11,6 +11,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	apilabels "k8s.io/apimachinery/pkg/labels"
 
+	"github.com/kyma-project/kyma/components/function-controller/internal/resource"
 	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
 )
 
@@ -28,7 +29,7 @@ func isOnHorizontalPodAutoscalerChange(instance *serverlessv1alpha1.Function, hp
 		(!scalingEnabled && numHpa != 0)
 }
 
-func (r *FunctionReconciler) onHorizontalPodAutoscalerChange(ctx context.Context, log logr.Logger, instance *serverlessv1alpha1.Function, hpas []autoscalingv1.HorizontalPodAutoscaler, deploymentName string, config FunctionConfig) error {
+func onHorizontalPodAutoscalerChange(ctx context.Context, su *statusUpdater, log logr.Logger, instance *serverlessv1alpha1.Function, hpas []autoscalingv1.HorizontalPodAutoscaler, deploymentName string, config FunctionConfig) error {
 	newHpa := buildHorizontalPodAutoscaler(instance, deploymentName, config)
 	hpasNum := len(hpas)
 
@@ -36,18 +37,18 @@ func (r *FunctionReconciler) onHorizontalPodAutoscalerChange(ctx context.Context
 	case hpasNum == 0:
 		{
 			if !equalInt32Pointer(instance.Spec.MinReplicas, instance.Spec.MaxReplicas) {
-				return r.createHorizontalPodAutoscaler(ctx, log, instance, newHpa)
+				return createHorizontalPodAutoscaler(ctx, su, log, instance, newHpa)
 			}
 			return nil
 		}
 	case hpasNum > 1: // case len(hpas)>1: this step is needed, as sometimes informers lag behind reality, and then we create 2 (or more) hpas by accident
-		return r.deleteAllHorizontalPodAutoscalers(ctx, instance, log)
+		return deleteAllHorizontalPodAutoscalers(ctx, su.client, instance, log)
 	case hpasNum == 1 && equalInt32Pointer(instance.Spec.MinReplicas, instance.Spec.MaxReplicas):
 		// this case is when we previously created HPA with maxReplicas > minReplicas, but now user changed
 		// function spec and NOW maxReplicas == minReplicas, so hpa is not needed anymore
-		return r.deleteAllHorizontalPodAutoscalers(ctx, instance, log)
+		return deleteAllHorizontalPodAutoscalers(ctx, su.client, instance, log)
 	case !equalHorizontalPodAutoscalers(hpas[0], newHpa):
-		return r.updateHorizontalPodAutoscaler(ctx, log, instance, hpas[0], newHpa)
+		return updateHorizontalPodAutoscaler(ctx, su, log, instance, hpas[0], newHpa)
 	default:
 		if hpasNum == 1 {
 			log.Info(fmt.Sprintf("HorizontalPodAutoscaler %s is ready", hpas[0].GetName()))
@@ -80,15 +81,15 @@ func equalHorizontalPodAutoscalers(existing, expected autoscalingv1.HorizontalPo
 		existing.Spec.ScaleTargetRef.Name == expected.Spec.ScaleTargetRef.Name
 }
 
-func (r *FunctionReconciler) createHorizontalPodAutoscaler(ctx context.Context, log logr.Logger, instance *serverlessv1alpha1.Function, hpa autoscalingv1.HorizontalPodAutoscaler) error {
+func createHorizontalPodAutoscaler(ctx context.Context, su *statusUpdater, log logr.Logger, instance *serverlessv1alpha1.Function, hpa autoscalingv1.HorizontalPodAutoscaler) error {
 	log.Info("Creating HorizontalPodAutoscaler")
-	if err := r.client.CreateWithReference(ctx, instance, &hpa); err != nil {
+	if err := su.client.CreateWithReference(ctx, instance, &hpa); err != nil {
 		log.Error(err, fmt.Sprintf("Cannot create HorizontalPodAutoscaler with name %s", hpa.GetName()))
 		return err
 	}
 	log.Info(fmt.Sprintf("HorizontalPodAutoscaler %s created", hpa.GetName()))
 
-	return r.updateStatusWithoutRepository(ctx, instance, serverlessv1alpha1.Condition{
+	return updateStatusWithoutRepository(ctx, su, instance, serverlessv1alpha1.Condition{
 		Type:               serverlessv1alpha1.ConditionRunning,
 		Status:             corev1.ConditionUnknown,
 		LastTransitionTime: metav1.Now(),
@@ -97,19 +98,19 @@ func (r *FunctionReconciler) createHorizontalPodAutoscaler(ctx context.Context, 
 	})
 }
 
-func (r *FunctionReconciler) updateHorizontalPodAutoscaler(ctx context.Context, log logr.Logger, instance *serverlessv1alpha1.Function, oldHpa, newHpa autoscalingv1.HorizontalPodAutoscaler) error {
+func updateHorizontalPodAutoscaler(ctx context.Context, su *statusUpdater, log logr.Logger, instance *serverlessv1alpha1.Function, oldHpa, newHpa autoscalingv1.HorizontalPodAutoscaler) error {
 	hpaCopy := oldHpa.DeepCopy()
 	hpaCopy.Spec = newHpa.Spec
 	hpaCopy.ObjectMeta.Labels = newHpa.GetLabels()
 
 	log.Info(fmt.Sprintf("Updating HorizontalPodAutoscaler %s", hpaCopy.GetName()))
-	if err := r.client.Update(ctx, hpaCopy); err != nil {
+	if err := su.client.Update(ctx, hpaCopy); err != nil {
 		log.Error(err, fmt.Sprintf("Cannot update HorizontalPodAutoscaler with name %s", hpaCopy.GetName()))
 		return err
 	}
 	log.Info(fmt.Sprintf("HorizontalPodAutoscaler %s updated", hpaCopy.GetName()))
 
-	return r.updateStatusWithoutRepository(ctx, instance, serverlessv1alpha1.Condition{
+	return updateStatusWithoutRepository(ctx, su, instance, serverlessv1alpha1.Condition{
 		Type:               serverlessv1alpha1.ConditionRunning,
 		Status:             corev1.ConditionUnknown,
 		LastTransitionTime: metav1.Now(),
@@ -118,10 +119,10 @@ func (r *FunctionReconciler) updateHorizontalPodAutoscaler(ctx context.Context, 
 	})
 }
 
-func (r *FunctionReconciler) deleteAllHorizontalPodAutoscalers(ctx context.Context, instance *serverlessv1alpha1.Function, log logr.Logger) error {
+func deleteAllHorizontalPodAutoscalers(ctx context.Context, client resource.Client, instance *serverlessv1alpha1.Function, log logr.Logger) error {
 	log.Info("Deleting all HorizontalPodAutoscalers attached to function")
 	selector := apilabels.SelectorFromSet(internalFunctionLabels(instance))
-	if err := r.client.DeleteAllBySelector(ctx, &autoscalingv1.HorizontalPodAutoscaler{}, instance.GetNamespace(), selector); err != nil {
+	if err := client.DeleteAllBySelector(ctx, &autoscalingv1.HorizontalPodAutoscaler{}, instance.GetNamespace(), selector); err != nil {
 		log.Error(err, "Cannot delete underlying HorizontalPodAutoscalers")
 		return err
 	}

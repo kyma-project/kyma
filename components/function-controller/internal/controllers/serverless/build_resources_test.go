@@ -48,8 +48,7 @@ func TestFunctionReconciler_buildConfigMap(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			g := gomega.NewGomegaWithT(t)
-			r := &FunctionReconciler{}
-			got := r.buildConfigMap(tt.fn, runtime.GetRuntime(serverlessv1alpha1.Nodejs14))
+			got := buildConfigMap(tt.fn, runtime.GetRuntime(serverlessv1alpha1.Nodejs14))
 			g.Expect(got).To(gomega.Equal(tt.want))
 		})
 	}
@@ -484,7 +483,7 @@ func TestFunctionReconciler_buildJob(t *testing.T) {
 			rtmCfg.Runtime = testCase.Runtime
 
 			// when
-			job := r.buildJob(&instance, rtmCfg, cmName, dockerCfg)
+			job := buildJob(&instance, rtmCfg, cmName, dockerCfg, FunctionConfig{})
 
 			// then
 			g.Expect(job.ObjectMeta.GenerateName).To(gomega.Equal(fmt.Sprintf("%s-build-", fnName)))

@@ -45,8 +45,6 @@ type FunctionReconciler struct {
 	healthCh       chan bool
 }
 
-type typedFunctionReconciler interface {
-}
 type functionResources struct {
 	configMaps       corev1.ConfigMapList
 	jobs             batchv1.JobList
@@ -54,6 +52,13 @@ type functionResources struct {
 	deployments      appsv1.DeploymentList
 	services         corev1.ServiceList
 	hpas             autoscalingv1.HorizontalPodAutoscalerList
+}
+
+type statusUpdater struct {
+	client         resource.Client
+	config         FunctionConfig
+	statsCollector StatsCollector
+	recorder       record.EventRecorder
 }
 
 func NewFunction(client resource.Client, log logr.Logger, config FunctionConfig, gitOperator GitOperator, recorder record.EventRecorder, statsCollector StatsCollector, healthCh chan bool) *FunctionReconciler {
@@ -127,10 +132,11 @@ func (r *FunctionReconciler) Reconcile(ctx context.Context, request ctrl.Request
 		return ctrl.Result{}, err
 	}
 
+	su := r.newStatusUpdater()
 	if instance.Spec.Type == serverlessv1alpha1.SourceTypeGit {
-		return newGitFunctionReconciler(r).reconcileGitFunction(ctx, instance, resources, log)
+		return newGitFunctionReconciler(r).reconcileGitFunction(ctx, instance, resources, su, log)
 	}
-	return r.reconcileInlineFunctionReconcile(ctx, instance, resources, log)
+	return r.reconcileInlineFunctionReconcile(ctx, instance, resources, su, log)
 }
 
 func (r *FunctionReconciler) fetchFunctionResources(ctx context.Context, instance *serverlessv1alpha1.Function, log logr.Logger) (*functionResources, error) {
@@ -185,4 +191,13 @@ func (r *FunctionReconciler) fetchFunctionResources(ctx context.Context, instanc
 		services:         services,
 		hpas:             hpas,
 	}, nil
+}
+
+func (r *FunctionReconciler) newStatusUpdater() *statusUpdater {
+	return &statusUpdater{
+		client:         r.client,
+		config:         r.config,
+		statsCollector: r.statsCollector,
+		recorder:       r.recorder,
+	}
 }

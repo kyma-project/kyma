@@ -33,7 +33,7 @@ func newGitFunctionReconciler(fr *FunctionReconciler) *gitFunctionReconciler {
 	}
 }
 
-func (r *gitFunctionReconciler) reconcileGitFunction(ctx context.Context, instance *serverlessv1alpha1.Function, resources *functionResources, log logr.Logger) (ctrl.Result, error) {
+func (r *gitFunctionReconciler) reconcileGitFunction(ctx context.Context, instance *serverlessv1alpha1.Function, resources *functionResources, su *statusUpdater, log logr.Logger) (ctrl.Result, error) {
 	dockerConfig, err := readDockerConfig(ctx, r.functionReconciler.client, r.config, instance)
 	if err != nil {
 		log.Error(err, "Cannot read Docker registry configuration")
@@ -42,7 +42,7 @@ func (r *gitFunctionReconciler) reconcileGitFunction(ctx context.Context, instan
 
 	gitOptions, err := r.readGITOptions(ctx, instance)
 	if err != nil {
-		if updateErr := r.functionReconciler.updateStatusWithoutRepository(ctx, instance, serverlessv1alpha1.Condition{
+		if updateErr := updateStatusWithoutRepository(ctx, su, instance, serverlessv1alpha1.Condition{
 			Type:               serverlessv1alpha1.ConditionConfigurationReady,
 			Status:             corev1.ConditionFalse,
 			LastTransitionTime: metav1.Now(),
@@ -59,7 +59,7 @@ func (r *gitFunctionReconciler) reconcileGitFunction(ctx context.Context, instan
 	if err != nil {
 		result, errMsg := NextRequeue(err)
 		// TODO: This return masks the error from r.syncRevision() and doesn't pass it to the controller. This should be fixed in a follow up PR.
-		return result, r.functionReconciler.updateStatusWithoutRepository(ctx, instance, serverlessv1alpha1.Condition{
+		return result, updateStatusWithoutRepository(ctx, su, instance, serverlessv1alpha1.Condition{
 			Type:               serverlessv1alpha1.ConditionConfigurationReady,
 			Status:             corev1.ConditionFalse,
 			LastTransitionTime: metav1.Now(),
@@ -73,25 +73,25 @@ func (r *gitFunctionReconciler) reconcileGitFunction(ctx context.Context, instan
 
 	switch {
 	case isOnSourceChange(instance, revision):
-		return result, r.onSourceChange(ctx, instance, &serverlessv1alpha1.Repository{
+		return result, r.onSourceChange(ctx, su, instance, &serverlessv1alpha1.Repository{
 			Reference: instance.Spec.Reference,
 			BaseDir:   instance.Spec.Repository.BaseDir,
 		}, revision)
 
 	case r.isOnJobChange(instance, rtmCfg, resources.jobs.Items, resources.deployments.Items, gitOptions, dockerConfig):
-		return r.onGitJobChange(ctx, log, instance, rtmCfg, resources.jobs.Items, gitOptions, dockerConfig)
+		return r.onGitJobChange(ctx, su, log, instance, rtmCfg, resources.jobs.Items, gitOptions, dockerConfig)
 
 	case isOnDeploymentChange(instance, rtmCfg, resources.deployments.Items, dockerConfig, r.config):
-		return r.functionReconciler.onDeploymentChange(ctx, log, instance, rtmCfg, resources.deployments.Items, dockerConfig, r.config)
+		return onDeploymentChange(ctx, su, log, instance, rtmCfg, resources.deployments.Items, dockerConfig, r.config)
 
 	case isOnServiceChange(instance, resources.services.Items):
-		return result, r.functionReconciler.onServiceChange(ctx, log, instance, resources.services.Items)
+		return result, onServiceChange(ctx, su, log, instance, resources.services.Items)
 
 	case isOnHorizontalPodAutoscalerChange(instance, resources.hpas.Items, resources.deployments.Items, r.config):
-		return result, r.functionReconciler.onHorizontalPodAutoscalerChange(ctx, log, instance, resources.hpas.Items, resources.deployments.Items[0].GetName(), r.config)
+		return result, onHorizontalPodAutoscalerChange(ctx, su, log, instance, resources.hpas.Items, resources.deployments.Items[0].GetName(), r.config)
 
 	default:
-		return r.functionReconciler.updateDeploymentStatus(ctx, log, instance, resources.deployments.Items, corev1.ConditionTrue)
+		return updateDeploymentStatus(ctx, su, log, instance, resources.deployments.Items, corev1.ConditionTrue)
 	}
 }
 
@@ -306,9 +306,9 @@ func (r *gitFunctionReconciler) isOnJobChange(instance *serverlessv1alpha1.Funct
 		buildStatus == corev1.ConditionFalse
 }
 
-func (r *gitFunctionReconciler) onGitJobChange(ctx context.Context, log logr.Logger, instance *serverlessv1alpha1.Function, rtmCfg runtime.Config, jobs []batchv1.Job, gitOptions git.Options, dockerConfig DockerConfig) (ctrl.Result, error) {
+func (r *gitFunctionReconciler) onGitJobChange(ctx context.Context, su *statusUpdater, log logr.Logger, instance *serverlessv1alpha1.Function, rtmCfg runtime.Config, jobs []batchv1.Job, gitOptions git.Options, dockerConfig DockerConfig) (ctrl.Result, error) {
 	newJob := r.buildGitJob(instance, gitOptions, rtmCfg, dockerConfig)
-	return r.functionReconciler.changeJob(ctx, log, instance, newJob, jobs)
+	return changeJob(ctx, su, log, instance, newJob, jobs)
 }
 
 func isOnSourceChange(instance *serverlessv1alpha1.Function, commit string) bool {
@@ -320,8 +320,8 @@ func isOnSourceChange(instance *serverlessv1alpha1.Function, commit string) bool
 		getConditionStatus(instance.Status.Conditions, serverlessv1alpha1.ConditionConfigurationReady) == corev1.ConditionFalse
 }
 
-func (r *gitFunctionReconciler) onSourceChange(ctx context.Context, instance *serverlessv1alpha1.Function, repository *serverlessv1alpha1.Repository, commit string) error {
-	return r.functionReconciler.updateStatus(ctx, instance, serverlessv1alpha1.Condition{
+func (r *gitFunctionReconciler) onSourceChange(ctx context.Context, su *statusUpdater, instance *serverlessv1alpha1.Function, repository *serverlessv1alpha1.Repository, commit string) error {
+	return updateStatus(ctx, su, instance, serverlessv1alpha1.Condition{
 		Type:               serverlessv1alpha1.ConditionConfigurationReady,
 		Status:             corev1.ConditionTrue,
 		LastTransitionTime: metav1.Now(),

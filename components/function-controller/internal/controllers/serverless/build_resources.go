@@ -33,7 +33,7 @@ func boolPtr(b bool) *bool {
 	return &b
 }
 
-func (r *FunctionReconciler) buildConfigMap(instance *serverlessv1alpha1.Function, rtm runtime.Runtime) corev1.ConfigMap {
+func buildConfigMap(instance *serverlessv1alpha1.Function, rtm runtime.Runtime) corev1.ConfigMap {
 	data := map[string]string{
 		FunctionSourceKey: instance.Spec.Source,
 		FunctionDepsKey:   rtm.SanitizeDependencies(instance.Spec.Deps),
