@@ -3,14 +3,12 @@ package serverless
 import (
 	"fmt"
 	"path"
-	"strings"
 
 	"github.com/kyma-project/kyma/components/function-controller/internal/controllers/serverless/runtime"
 	"github.com/kyma-project/kyma/components/function-controller/internal/git"
 	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
 	appsv1 "k8s.io/api/apps/v1"
 	autoscalingv1 "k8s.io/api/autoscaling/v1"
-	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -43,7 +41,7 @@ func (r *FunctionReconciler) buildConfigMap(instance *serverlessv1alpha1.Functio
 
 	return corev1.ConfigMap{
 		ObjectMeta: metav1.ObjectMeta{
-			Labels:       r.functionLabels(instance),
+			Labels:       functionLabels(instance),
 			GenerateName: fmt.Sprintf("%s-", instance.GetName()),
 			Namespace:    instance.GetNamespace(),
 		},
@@ -51,99 +49,7 @@ func (r *FunctionReconciler) buildConfigMap(instance *serverlessv1alpha1.Functio
 	}
 }
 
-func (r *FunctionReconciler) buildJob(instance *serverlessv1alpha1.Function, rtmConfig runtime.Config, configMapName string, dockerConfig DockerConfig) batchv1.Job {
-	one := int32(1)
-	zero := int32(0)
-	rootUser := int64(0)
-	optional := true
-
-	imageName := r.buildImageAddress(instance, dockerConfig.PushAddress)
-	args := r.config.Build.ExecutorArgs
-	args = append(args, fmt.Sprintf("%s=%s", destinationArg, imageName), fmt.Sprintf("--context=dir://%s", workspaceMountPath))
-
-	return batchv1.Job{
-		ObjectMeta: metav1.ObjectMeta{
-			GenerateName: fmt.Sprintf("%s-build-", instance.GetName()),
-			Namespace:    instance.GetNamespace(),
-			Labels:       r.functionLabels(instance),
-		},
-		Spec: batchv1.JobSpec{
-			Parallelism:           &one,
-			Completions:           &one,
-			ActiveDeadlineSeconds: nil,
-			BackoffLimit:          &zero,
-			Template: corev1.PodTemplateSpec{
-				ObjectMeta: metav1.ObjectMeta{
-					Labels:      r.functionLabels(instance),
-					Annotations: istioSidecarInjectFalse,
-				},
-				Spec: corev1.PodSpec{
-					Volumes: []corev1.Volume{
-						{
-							Name: "sources",
-							VolumeSource: corev1.VolumeSource{
-								ConfigMap: &corev1.ConfigMapVolumeSource{
-									LocalObjectReference: corev1.LocalObjectReference{Name: configMapName},
-								},
-							},
-						},
-						{
-							Name: "runtime",
-							VolumeSource: corev1.VolumeSource{
-								ConfigMap: &corev1.ConfigMapVolumeSource{
-									LocalObjectReference: corev1.LocalObjectReference{Name: rtmConfig.DockerfileConfigMapName},
-								},
-							},
-						},
-						{
-							Name: "credentials",
-							VolumeSource: corev1.VolumeSource{
-								Secret: &corev1.SecretVolumeSource{
-									SecretName: dockerConfig.ActiveRegistryConfigSecretName,
-									Items: []corev1.KeyToPath{
-										{
-											Key:  ".dockerconfigjson",
-											Path: ".docker/config.json",
-										},
-									},
-								},
-							},
-						},
-						{
-							Name: "registry-config",
-							VolumeSource: corev1.VolumeSource{
-								Secret: &corev1.SecretVolumeSource{
-									SecretName: r.config.PackageRegistryConfigSecretName,
-									Optional:   &optional,
-								},
-							},
-						},
-					},
-					Containers: []corev1.Container{
-						{
-							Name:            "executor",
-							Image:           r.config.Build.ExecutorImage,
-							Args:            args,
-							Resources:       instance.Spec.BuildResources,
-							VolumeMounts:    r.getBuildJobVolumeMounts(rtmConfig),
-							ImagePullPolicy: corev1.PullIfNotPresent,
-							Env: []corev1.EnvVar{
-								{Name: "DOCKER_CONFIG", Value: "/docker/.docker/"},
-							},
-						},
-					},
-					RestartPolicy:      corev1.RestartPolicyNever,
-					ServiceAccountName: r.config.BuildServiceAccountName,
-					SecurityContext: &corev1.PodSecurityContext{
-						RunAsUser: &rootUser,
-					},
-				},
-			},
-		},
-	}
-}
-
-func (r *FunctionReconciler) getBuildJobVolumeMounts(rtmConfig runtime.Config) []corev1.VolumeMount {
+func getBuildJobVolumeMounts(rtmConfig runtime.Config) []corev1.VolumeMount {
 	volumeMounts := []corev1.VolumeMount{
 		// Must be mounted with SubPath otherwise files are symlinks and it is not possible to use COPY in Dockerfile
 		// If COPY is not used, then the cache will not work
@@ -153,7 +59,7 @@ func (r *FunctionReconciler) getBuildJobVolumeMounts(rtmConfig runtime.Config) [
 		{Name: "credentials", ReadOnly: true, MountPath: "/docker"},
 	}
 	// add package registry config volume mount depending on the used runtime
-	volumeMounts = append(volumeMounts, r.getPackageConfigVolumeMountsForRuntime(rtmConfig.Runtime)...)
+	volumeMounts = append(volumeMounts, getPackageConfigVolumeMountsForRuntime(rtmConfig.Runtime)...)
 	return volumeMounts
 }
 
@@ -238,121 +144,6 @@ func buildRepoFetcherEnvVars(instance *serverlessv1alpha1.Function, gitOptions g
 	return vars
 }
 
-func (r *FunctionReconciler) buildGitJob(instance *serverlessv1alpha1.Function, gitOptions git.Options, rtmConfig runtime.Config, dockerConfig DockerConfig) batchv1.Job {
-	imageName := r.buildImageAddress(instance, dockerConfig.PushAddress)
-	args := r.config.Build.ExecutorArgs
-	args = append(args, fmt.Sprintf("%s=%s", destinationArg, imageName), fmt.Sprintf("--context=dir://%s", workspaceMountPath))
-
-	one := int32(1)
-	zero := int32(0)
-	rootUser := int64(0)
-	optional := true
-
-	return batchv1.Job{
-		ObjectMeta: metav1.ObjectMeta{
-			GenerateName: fmt.Sprintf("%s-build-", instance.GetName()),
-			Namespace:    instance.GetNamespace(),
-			Labels:       r.functionLabels(instance),
-		},
-		Spec: batchv1.JobSpec{
-			Parallelism:           &one,
-			Completions:           &one,
-			ActiveDeadlineSeconds: nil,
-			BackoffLimit:          &zero,
-			Template: corev1.PodTemplateSpec{
-				ObjectMeta: metav1.ObjectMeta{
-					Labels:      r.functionLabels(instance),
-					Annotations: istioSidecarInjectFalse,
-				},
-				Spec: corev1.PodSpec{
-					Volumes: []corev1.Volume{
-						{
-							Name: "credentials",
-							VolumeSource: corev1.VolumeSource{
-								Secret: &corev1.SecretVolumeSource{
-									SecretName: dockerConfig.ActiveRegistryConfigSecretName,
-									Items: []corev1.KeyToPath{
-										{
-											Key:  ".dockerconfigjson",
-											Path: ".docker/config.json",
-										},
-									},
-								},
-							},
-						},
-						{
-							Name: "runtime",
-							VolumeSource: corev1.VolumeSource{
-								ConfigMap: &corev1.ConfigMapVolumeSource{
-									LocalObjectReference: corev1.LocalObjectReference{Name: rtmConfig.DockerfileConfigMapName},
-								},
-							},
-						},
-						{
-							Name:         "workspace",
-							VolumeSource: corev1.VolumeSource{EmptyDir: &corev1.EmptyDirVolumeSource{}},
-						},
-						{
-							Name: "registry-config",
-							VolumeSource: corev1.VolumeSource{
-								Secret: &corev1.SecretVolumeSource{
-									SecretName: r.config.PackageRegistryConfigSecretName,
-									Optional:   &optional,
-								},
-							},
-						},
-					},
-					InitContainers: []corev1.Container{
-						{
-							Name:            "repo-fetcher",
-							Image:           r.config.Build.RepoFetcherImage,
-							Env:             buildRepoFetcherEnvVars(instance, gitOptions),
-							ImagePullPolicy: corev1.PullAlways,
-							VolumeMounts: []corev1.VolumeMount{
-								{
-									Name:      "workspace",
-									MountPath: workspaceMountPath,
-								},
-							},
-						},
-					},
-					Containers: []corev1.Container{
-						{
-							Name:            "executor",
-							Image:           r.config.Build.ExecutorImage,
-							Args:            args,
-							Resources:       instance.Spec.BuildResources,
-							VolumeMounts:    r.getGitBuildJobVolumeMounts(instance, rtmConfig),
-							ImagePullPolicy: corev1.PullIfNotPresent,
-							Env: []corev1.EnvVar{
-								{Name: "DOCKER_CONFIG", Value: "/docker/.docker/"},
-							},
-						},
-					},
-					RestartPolicy:      corev1.RestartPolicyNever,
-					ServiceAccountName: r.config.BuildServiceAccountName,
-					SecurityContext: &corev1.PodSecurityContext{
-						RunAsUser: &rootUser,
-					},
-				},
-			},
-		},
-	}
-}
-
-func (r *FunctionReconciler) getGitBuildJobVolumeMounts(instance *serverlessv1alpha1.Function, rtmConfig runtime.Config) []corev1.VolumeMount {
-	volumeMounts := []corev1.VolumeMount{
-		{Name: "credentials", ReadOnly: true, MountPath: "/docker"},
-		// Must be mounted with SubPath otherwise files are symlinks and it is not possible to use COPY in Dockerfile
-		// If COPY is not used, then the cache will not work
-		{Name: "workspace", MountPath: path.Join(workspaceMountPath, "src"), SubPath: strings.TrimPrefix(instance.Spec.BaseDir, "/")},
-		{Name: "runtime", ReadOnly: true, MountPath: path.Join(workspaceMountPath, "Dockerfile"), SubPath: "Dockerfile"},
-	}
-	// add package registry config volume mount depending on the used runtime
-	volumeMounts = append(volumeMounts, r.getPackageConfigVolumeMountsForRuntime(rtmConfig.Runtime)...)
-	return volumeMounts
-}
-
 func (r *FunctionReconciler) buildDeploymentEnvs(namespace string) []corev1.EnvVar {
 	return []corev1.EnvVar{
 		{Name: "SERVICE_NAMESPACE", Value: namespace},
@@ -366,7 +157,7 @@ func (r *FunctionReconciler) buildDeploymentEnvs(namespace string) []corev1.EnvV
 
 func (r *FunctionReconciler) buildDeployment(instance *serverlessv1alpha1.Function, rtmConfig runtime.Config, dockerConfig DockerConfig) appsv1.Deployment {
 	imageName := r.buildImageAddress(instance, dockerConfig.PullAddress)
-	deploymentLabels := r.functionLabels(instance)
+	deploymentLabels := functionLabels(instance)
 	podLabels := r.podLabels(instance)
 
 	functionUser := int64(1000)
@@ -385,7 +176,7 @@ func (r *FunctionReconciler) buildDeployment(instance *serverlessv1alpha1.Functi
 		Spec: appsv1.DeploymentSpec{
 			Replicas: instance.Spec.MinReplicas,
 			Selector: &metav1.LabelSelector{
-				MatchLabels: r.deploymentSelectorLabels(instance), // this has to match spec.template.objectmeta.Labels
+				MatchLabels: deploymentSelectorLabels(instance), // this has to match spec.template.objectmeta.Labels
 				// and also it has to be immutable
 			},
 			Template: corev1.PodTemplateSpec{
@@ -488,7 +279,7 @@ func (r *FunctionReconciler) buildService(instance *serverlessv1alpha1.Function)
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      instance.GetName(),
 			Namespace: instance.GetNamespace(),
-			Labels:    r.functionLabels(instance),
+			Labels:    functionLabels(instance),
 		},
 		Spec: corev1.ServiceSpec{
 			Ports: []corev1.ServicePort{{
@@ -497,18 +288,18 @@ func (r *FunctionReconciler) buildService(instance *serverlessv1alpha1.Function)
 				Port:       80,
 				Protocol:   corev1.ProtocolTCP,
 			}},
-			Selector: r.deploymentSelectorLabels(instance),
+			Selector: deploymentSelectorLabels(instance),
 		},
 	}
 }
 
 func (r *FunctionReconciler) buildHorizontalPodAutoscaler(instance *serverlessv1alpha1.Function, deploymentName string) autoscalingv1.HorizontalPodAutoscaler {
-	minReplicas, maxReplicas := r.defaultReplicas(instance.Spec)
+	minReplicas, maxReplicas := defaultReplicas(instance.Spec)
 	return autoscalingv1.HorizontalPodAutoscaler{
 		ObjectMeta: metav1.ObjectMeta{
 			GenerateName: fmt.Sprintf("%s-", instance.GetName()),
 			Namespace:    instance.GetNamespace(),
-			Labels:       r.functionLabels(instance),
+			Labels:       functionLabels(instance),
 		},
 		Spec: autoscalingv1.HorizontalPodAutoscalerSpec{
 			ScaleTargetRef: autoscalingv1.CrossVersionObjectReference{
@@ -523,7 +314,7 @@ func (r *FunctionReconciler) buildHorizontalPodAutoscaler(instance *serverlessv1
 	}
 }
 
-func (r *FunctionReconciler) defaultReplicas(spec serverlessv1alpha1.FunctionSpec) (int32, int32) {
+func defaultReplicas(spec serverlessv1alpha1.FunctionSpec) (int32, int32) {
 	min, max := int32(1), int32(1)
 	if spec.MinReplicas != nil && *spec.MinReplicas > 0 {
 		min = *spec.MinReplicas
@@ -538,20 +329,15 @@ func (r *FunctionReconciler) defaultReplicas(spec serverlessv1alpha1.FunctionSpe
 }
 
 func (r *FunctionReconciler) buildImageAddress(instance *serverlessv1alpha1.Function, registryAddress string) string {
-	var imageTag string
-	if instance.Spec.Type == serverlessv1alpha1.SourceTypeGit {
-		imageTag = r.calculateGitImageTag(instance)
-	} else {
-		imageTag = r.calculateImageTag(instance)
-	}
+	imageTag := r.calculateImageTag(instance)
 	return fmt.Sprintf("%s/%s-%s:%s", registryAddress, instance.Namespace, instance.Name, imageTag)
 }
 
-func (r *FunctionReconciler) functionLabels(instance *serverlessv1alpha1.Function) map[string]string {
-	return r.mergeLabels(instance.GetLabels(), r.internalFunctionLabels(instance))
+func functionLabels(instance *serverlessv1alpha1.Function) map[string]string {
+	return mergeLabels(instance.GetLabels(), internalFunctionLabels(instance))
 }
 
-func (r *FunctionReconciler) internalFunctionLabels(instance *serverlessv1alpha1.Function) map[string]string {
+func internalFunctionLabels(instance *serverlessv1alpha1.Function) map[string]string {
 	labels := make(map[string]string, 3)
 
 	labels[serverlessv1alpha1.FunctionNameLabel] = instance.Name
@@ -561,15 +347,15 @@ func (r *FunctionReconciler) internalFunctionLabels(instance *serverlessv1alpha1
 	return labels
 }
 
-func (r *FunctionReconciler) deploymentSelectorLabels(instance *serverlessv1alpha1.Function) map[string]string {
-	return r.mergeLabels(map[string]string{serverlessv1alpha1.FunctionResourceLabel: serverlessv1alpha1.FunctionResourceLabelDeploymentValue}, r.internalFunctionLabels(instance))
+func deploymentSelectorLabels(instance *serverlessv1alpha1.Function) map[string]string {
+	return mergeLabels(map[string]string{serverlessv1alpha1.FunctionResourceLabel: serverlessv1alpha1.FunctionResourceLabelDeploymentValue}, internalFunctionLabels(instance))
 }
 
 func (r *FunctionReconciler) podLabels(instance *serverlessv1alpha1.Function) map[string]string {
-	return r.mergeLabels(instance.Spec.Labels, r.deploymentSelectorLabels(instance))
+	return mergeLabels(instance.Spec.Labels, deploymentSelectorLabels(instance))
 }
 
-func (r *FunctionReconciler) mergeLabels(labelsCollection ...map[string]string) map[string]string {
+func mergeLabels(labelsCollection ...map[string]string) map[string]string {
 	result := make(map[string]string, 0)
 	for _, labels := range labelsCollection {
 		for key, value := range labels {
@@ -579,7 +365,7 @@ func (r *FunctionReconciler) mergeLabels(labelsCollection ...map[string]string) 
 	return result
 }
 
-func (r *FunctionReconciler) getPackageConfigVolumeMountsForRuntime(rtm serverlessv1alpha1.Runtime) []corev1.VolumeMount {
+func getPackageConfigVolumeMountsForRuntime(rtm serverlessv1alpha1.Runtime) []corev1.VolumeMount {
 	switch rtm {
 	case serverlessv1alpha1.Nodejs12, serverlessv1alpha1.Nodejs14:
 		return []corev1.VolumeMount{{Name: "registry-config", ReadOnly: true, MountPath: path.Join(workspaceMountPath, "registry-config/.npmrc"), SubPath: ".npmrc"}}

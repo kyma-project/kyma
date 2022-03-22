@@ -7,10 +7,8 @@ import (
 	"time"
 
 	"github.com/kyma-project/kyma/components/function-controller/internal/controllers/serverless/runtime"
-	"github.com/kyma-project/kyma/components/function-controller/internal/git"
 
 	"github.com/go-logr/logr"
-	appsv1 "k8s.io/api/apps/v1"
 
 	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -22,34 +20,6 @@ import (
 )
 
 var fcManagedByLabel = map[string]string{serverlessv1alpha1.FunctionManagedByLabel: serverlessv1alpha1.FunctionControllerValue}
-
-func (r *FunctionReconciler) isOnJobChange(instance *serverlessv1alpha1.Function, rtmCfg runtime.Config, jobs []batchv1.Job, deployments []appsv1.Deployment, gitOptions git.Options, dockerConfig DockerConfig) bool {
-	image := r.buildImageAddress(instance, dockerConfig.PullAddress)
-	buildStatus := r.getConditionStatus(instance.Status.Conditions, serverlessv1alpha1.ConditionBuildReady)
-
-	var expectedJob batchv1.Job
-	if instance.Spec.Type != serverlessv1alpha1.SourceTypeGit {
-		expectedJob = r.buildJob(instance, rtmCfg, "", dockerConfig)
-	} else {
-		expectedJob = r.buildGitJob(instance, gitOptions, rtmCfg, dockerConfig)
-	}
-
-	if len(deployments) == 1 &&
-		deployments[0].Spec.Template.Spec.Containers[0].Image == image &&
-		buildStatus != corev1.ConditionUnknown &&
-		len(jobs) > 0 &&
-		r.mapsEqual(expectedJob.GetLabels(), jobs[0].GetLabels()) {
-		return buildStatus == corev1.ConditionFalse
-	}
-
-	return len(jobs) != 1 ||
-		len(jobs[0].Spec.Template.Spec.Containers) != 1 ||
-		// Compare image argument
-		!r.equalJobs(jobs[0], expectedJob) ||
-		!r.mapsEqual(expectedJob.GetLabels(), jobs[0].GetLabels()) ||
-		buildStatus == corev1.ConditionUnknown ||
-		buildStatus == corev1.ConditionFalse
-}
 
 func (r *FunctionReconciler) changeJob(ctx context.Context, log logr.Logger, instance *serverlessv1alpha1.Function, newJob batchv1.Job, jobs []batchv1.Job) (ctrl.Result, error) {
 	jobsLen := len(jobs)
@@ -68,36 +38,32 @@ func (r *FunctionReconciler) changeJob(ctx context.Context, log logr.Logger, ins
 		}
 
 		return ctrl.Result{}, r.createJob(ctx, log, instance, newJob)
-	case jobsLen > 1 || !r.equalJobs(jobs[0], newJob):
+	case jobsLen > 1 || !equalJobs(jobs[0], newJob):
 		return ctrl.Result{}, r.deleteJobs(ctx, log, instance)
-	case !r.mapsEqual(jobs[0].GetLabels(), newJob.GetLabels()):
+	case !mapsEqual(jobs[0].GetLabels(), newJob.GetLabels()):
 		return ctrl.Result{}, r.updateJobLabels(ctx, log, instance, jobs[0], newJob.GetLabels())
 	default:
 		return r.updateBuildStatus(ctx, log, instance, jobs[0])
 	}
 }
 
-func (r *FunctionReconciler) onGitJobChange(ctx context.Context, log logr.Logger, instance *serverlessv1alpha1.Function, rtmCfg runtime.Config, jobs []batchv1.Job, gitOptions git.Options, dockerConfig DockerConfig) (ctrl.Result, error) {
-	newJob := r.buildGitJob(instance, gitOptions, rtmCfg, dockerConfig)
-	return r.changeJob(ctx, log, instance, newJob, jobs)
-}
 func (r *FunctionReconciler) onJobChange(ctx context.Context, log logr.Logger, instance *serverlessv1alpha1.Function, rtmCfg runtime.Config, configMapName string, jobs []batchv1.Job, dockerConfig DockerConfig) (ctrl.Result, error) {
 	newJob := r.buildJob(instance, rtmCfg, configMapName, dockerConfig)
 	return r.changeJob(ctx, log, instance, newJob, jobs)
 }
 
-func (r *FunctionReconciler) equalJobs(existing batchv1.Job, expected batchv1.Job) bool {
+func equalJobs(existing batchv1.Job, expected batchv1.Job) bool {
 	existingArgs := existing.Spec.Template.Spec.Containers[0].Args
 	expectedArgs := expected.Spec.Template.Spec.Containers[0].Args
 
 	// Compare destination argument as it contains image tag
-	existingDst := r.getArg(existingArgs, destinationArg)
-	expectedDst := r.getArg(expectedArgs, destinationArg)
+	existingDst := getArg(existingArgs, destinationArg)
+	expectedDst := getArg(expectedArgs, destinationArg)
 
 	return existingDst == expectedDst
 }
 
-func (r *FunctionReconciler) getArg(args []string, arg string) string {
+func getArg(args []string, arg string) string {
 	for _, item := range args {
 		if strings.HasPrefix(item, arg) {
 			return item
@@ -125,7 +91,7 @@ func (r *FunctionReconciler) createJob(ctx context.Context, log logr.Logger, ins
 
 func (r *FunctionReconciler) deleteJobs(ctx context.Context, log logr.Logger, instance *serverlessv1alpha1.Function) error {
 	log.Info("Deleting all old jobs")
-	selector := apilabels.SelectorFromSet(r.internalFunctionLabels(instance))
+	selector := apilabels.SelectorFromSet(internalFunctionLabels(instance))
 	if err := r.client.DeleteAllBySelector(ctx, &batchv1.Job{}, instance.GetNamespace(), selector); err != nil {
 		log.Error(err, "Cannot delete old Jobs")
 		return err

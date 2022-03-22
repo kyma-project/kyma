@@ -142,7 +142,7 @@ func TestGitOps(t *testing.T) {
 				statsCollector: statsCollector,
 			}
 
-			fnLabels := reconciler.internalFunctionLabels(inFunction)
+			fnLabels := internalFunctionLabels(inFunction)
 
 			//WHEN
 			t.Log("creating the Function")

@@ -209,8 +209,7 @@ func TestFunctionReconciler_mergeLabels(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			g := gomega.NewGomegaWithT(t)
-			r := &FunctionReconciler{}
-			got := r.mergeLabels(tt.args.labelsCollection...)
+			got := mergeLabels(tt.args.labelsCollection...)
 			g.Expect(got).To(gomega.Equal(tt.want))
 		})
 	}
@@ -241,8 +240,7 @@ func TestFunctionReconciler_internalFunctionLabels(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			g := gomega.NewGomegaWithT(t)
-			r := &FunctionReconciler{}
-			got := r.internalFunctionLabels(tt.args.instance)
+			got := internalFunctionLabels(tt.args.instance)
 			g.Expect(got).To(gomega.Equal(tt.want))
 			g.Expect(got).To(gomega.HaveLen(3))
 		})
@@ -386,8 +384,7 @@ func TestFunctionReconciler_functionLabels(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			g := gomega.NewGomegaWithT(t)
-			r := &FunctionReconciler{}
-			got := r.functionLabels(tt.args.instance)
+			got := functionLabels(tt.args.instance)
 			g.Expect(got).To(gomega.Equal(tt.want))
 		})
 	}

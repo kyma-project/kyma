@@ -183,7 +183,7 @@ func Test_isOnSourceChange(t *testing.T) {
 	for _, tC := range testCases {
 		t.Run(tC.desc, func(t *testing.T) {
 			g := gomega.NewGomegaWithT(t)
-			r := FunctionReconciler{}
+			r := &gitFunctionReconciler{}
 			actual := r.isOnSourceChange(&tC.fn, tC.revision)
 			g.Expect(actual).To(gomega.Equal(tC.expectedResult))
 		})

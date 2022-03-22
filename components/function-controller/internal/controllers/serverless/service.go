@@ -34,8 +34,8 @@ func (r *FunctionReconciler) onServiceChange(ctx context.Context, log logr.Logge
 }
 
 func (r *FunctionReconciler) equalServices(existing corev1.Service, expected corev1.Service) bool {
-	return r.mapsEqual(existing.Spec.Selector, expected.Spec.Selector) &&
-		r.mapsEqual(existing.Labels, expected.Labels) &&
+	return mapsEqual(existing.Spec.Selector, expected.Spec.Selector) &&
+		mapsEqual(existing.Labels, expected.Labels) &&
 		len(existing.Spec.Ports) == len(expected.Spec.Ports) &&
 		len(expected.Spec.Ports) > 0 &&
 		len(existing.Spec.Ports) > 0 &&

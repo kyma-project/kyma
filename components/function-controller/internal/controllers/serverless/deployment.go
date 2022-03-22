@@ -95,9 +95,9 @@ func (r *FunctionReconciler) equalDeployments(existing appsv1.Deployment, expect
 	return len(existing.Spec.Template.Spec.Containers) == 1 &&
 		len(existing.Spec.Template.Spec.Containers) == len(expected.Spec.Template.Spec.Containers) &&
 		existing.Spec.Template.Spec.Containers[0].Image == expected.Spec.Template.Spec.Containers[0].Image &&
-		r.envsEqual(existing.Spec.Template.Spec.Containers[0].Env, expected.Spec.Template.Spec.Containers[0].Env) &&
-		r.mapsEqual(existing.GetLabels(), expected.GetLabels()) &&
-		r.mapsEqual(existing.Spec.Template.GetLabels(), expected.Spec.Template.GetLabels()) &&
+		envsEqual(existing.Spec.Template.Spec.Containers[0].Env, expected.Spec.Template.Spec.Containers[0].Env) &&
+		mapsEqual(existing.GetLabels(), expected.GetLabels()) &&
+		mapsEqual(existing.Spec.Template.GetLabels(), expected.Spec.Template.GetLabels()) &&
 		equalResources(existing.Spec.Template.Spec.Containers[0].Resources, expected.Spec.Template.Spec.Containers[0].Resources) &&
 		(scalingEnabled || equalInt32Pointer(existing.Spec.Replicas, expected.Spec.Replicas))
 }
@@ -195,7 +195,7 @@ func equalResources(existing, expected corev1.ResourceRequirements) bool {
 
 func (r *FunctionReconciler) deleteAllDeployments(ctx context.Context, instance *serverlessv1alpha1.Function, log logr.Logger) error {
 	log.Info("Deleting all underlying Deployments")
-	selector := apilabels.SelectorFromSet(r.internalFunctionLabels(instance))
+	selector := apilabels.SelectorFromSet(internalFunctionLabels(instance))
 	if err := r.client.DeleteAllBySelector(ctx, &appsv1.Deployment{}, instance.GetNamespace(), selector); err != nil {
 		log.Error(err, "Cannot delete underlying Deployments")
 		return err

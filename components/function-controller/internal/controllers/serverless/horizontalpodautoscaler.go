@@ -76,7 +76,7 @@ func (r *FunctionReconciler) equalHorizontalPodAutoscalers(existing, expected au
 	return equalInt32Pointer(existing.Spec.TargetCPUUtilizationPercentage, expected.Spec.TargetCPUUtilizationPercentage) &&
 		equalInt32Pointer(existing.Spec.MinReplicas, expected.Spec.MinReplicas) &&
 		existing.Spec.MaxReplicas == expected.Spec.MaxReplicas &&
-		r.mapsEqual(existing.Labels, expected.Labels) &&
+		mapsEqual(existing.Labels, expected.Labels) &&
 		existing.Spec.ScaleTargetRef.Name == expected.Spec.ScaleTargetRef.Name
 }
 
@@ -120,7 +120,7 @@ func (r *FunctionReconciler) updateHorizontalPodAutoscaler(ctx context.Context, 
 
 func (r *FunctionReconciler) deleteAllHorizontalPodAutoscalers(ctx context.Context, instance *serverlessv1alpha1.Function, log logr.Logger) error {
 	log.Info("Deleting all HorizontalPodAutoscalers attached to function")
-	selector := apilabels.SelectorFromSet(r.internalFunctionLabels(instance))
+	selector := apilabels.SelectorFromSet(internalFunctionLabels(instance))
 	if err := r.client.DeleteAllBySelector(ctx, &autoscalingv1.HorizontalPodAutoscaler{}, instance.GetNamespace(), selector); err != nil {
 		log.Error(err, "Cannot delete underlying HorizontalPodAutoscalers")
 		return err

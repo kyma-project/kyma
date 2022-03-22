@@ -2,9 +2,6 @@ package serverless
 
 import (
 	"context"
-	"crypto/sha256"
-	"fmt"
-	"strings"
 
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -20,7 +17,7 @@ const (
 	FunctionDepsKey   = "dependencies"
 )
 
-func (r *FunctionReconciler) mapsEqual(existing, expected map[string]string) bool {
+func mapsEqual(existing, expected map[string]string) bool {
 	if len(existing) != len(expected) {
 		return false
 	}
@@ -34,7 +31,7 @@ func (r *FunctionReconciler) mapsEqual(existing, expected map[string]string) boo
 	return true
 }
 
-func (r *FunctionReconciler) envsEqual(existing, expected []corev1.EnvVar) bool {
+func envsEqual(existing, expected []corev1.EnvVar) bool {
 	if len(existing) != len(expected) {
 		return false
 	}
@@ -49,30 +46,8 @@ func (r *FunctionReconciler) envsEqual(existing, expected []corev1.EnvVar) bool 
 	return true
 }
 
-func (r *FunctionReconciler) calculateImageTag(instance *serverlessv1alpha1.Function) string {
-	hash := sha256.Sum256([]byte(strings.Join([]string{
-		string(instance.GetUID()),
-		instance.Spec.Source,
-		instance.Spec.Deps,
-		string(instance.Status.Runtime),
-	}, "-")))
-
-	return fmt.Sprintf("%x", hash)
-}
-
 func (r *FunctionReconciler) updateStatusWithoutRepository(ctx context.Context, instance *serverlessv1alpha1.Function, condition serverlessv1alpha1.Condition) error {
 	return r.updateStatus(ctx, instance, condition, nil, "")
-}
-
-func (r *FunctionReconciler) calculateGitImageTag(instance *serverlessv1alpha1.Function) string {
-	data := strings.Join([]string{
-		string(instance.GetUID()),
-		instance.Status.Commit,
-		instance.Status.Repository.BaseDir,
-		string(instance.Status.Runtime),
-	}, "-")
-	hash := sha256.Sum256([]byte(data))
-	return fmt.Sprintf("%x", hash)
 }
 
 func (r *FunctionReconciler) updateStatus(ctx context.Context, instance *serverlessv1alpha1.Function, condition serverlessv1alpha1.Condition, repository *serverlessv1alpha1.Repository, commit string) error {
@@ -83,15 +58,15 @@ func (r *FunctionReconciler) updateStatus(ctx context.Context, instance *serverl
 		return client.IgnoreNotFound(err)
 	}
 
-	currentFunction.Status.Conditions = r.updateCondition(currentFunction.Status.Conditions, condition)
+	currentFunction.Status.Conditions = updateCondition(currentFunction.Status.Conditions, condition)
 
-	equalConditions := r.equalConditions(instance.Status.Conditions, currentFunction.Status.Conditions)
+	equalConditions := equalConditions(instance.Status.Conditions, currentFunction.Status.Conditions)
 	if equalConditions {
 		if instance.Spec.Type != serverlessv1alpha1.SourceTypeGit {
 			return nil
 		}
 		// checking if status changed in gitops flow
-		if r.equalRepositories(instance.Status.Repository, repository) &&
+		if equalRepositories(instance.Status.Repository, repository) &&
 			instance.Status.Commit == commit {
 			return nil
 		}
@@ -104,7 +79,7 @@ func (r *FunctionReconciler) updateStatus(ctx context.Context, instance *serverl
 	currentFunction.Status.Source = instance.Spec.Source
 	currentFunction.Status.Runtime = serverlessv1alpha1.RuntimeExtended(instance.Spec.Runtime)
 
-	if !r.equalFunctionStatus(currentFunction.Status, instance.Status) {
+	if !equalFunctionStatus(currentFunction.Status, instance.Status) {
 		if err := r.client.Status().Update(ctx, currentFunction); err != nil {
 			return errors.Wrap(err, "while updating function status")
 		}
@@ -121,7 +96,7 @@ func (r *FunctionReconciler) updateStatus(ctx context.Context, instance *serverl
 	return nil
 }
 
-func (r *FunctionReconciler) updateCondition(conditions []serverlessv1alpha1.Condition, condition serverlessv1alpha1.Condition) []serverlessv1alpha1.Condition {
+func updateCondition(conditions []serverlessv1alpha1.Condition, condition serverlessv1alpha1.Condition) []serverlessv1alpha1.Condition {
 	conditionTypes := make(map[serverlessv1alpha1.ConditionType]interface{}, 3)
 	var result []serverlessv1alpha1.Condition
 
@@ -138,7 +113,7 @@ func (r *FunctionReconciler) updateCondition(conditions []serverlessv1alpha1.Con
 	return result
 }
 
-func (r *FunctionReconciler) equalConditions(existing, expected []serverlessv1alpha1.Condition) bool {
+func equalConditions(existing, expected []serverlessv1alpha1.Condition) bool {
 	if len(existing) != len(expected) {
 		return false
 	}
@@ -157,7 +132,7 @@ func (r *FunctionReconciler) equalConditions(existing, expected []serverlessv1al
 	return true
 }
 
-func (r *FunctionReconciler) equalRepositories(existing serverlessv1alpha1.Repository, new *serverlessv1alpha1.Repository) bool {
+func equalRepositories(existing serverlessv1alpha1.Repository, new *serverlessv1alpha1.Repository) bool {
 	if new == nil {
 		return true
 	}
@@ -167,7 +142,7 @@ func (r *FunctionReconciler) equalRepositories(existing serverlessv1alpha1.Repos
 		existing.BaseDir == expected.BaseDir
 }
 
-func (r *FunctionReconciler) getConditionStatus(conditions []serverlessv1alpha1.Condition, conditionType serverlessv1alpha1.ConditionType) corev1.ConditionStatus {
+func getConditionStatus(conditions []serverlessv1alpha1.Condition, conditionType serverlessv1alpha1.ConditionType) corev1.ConditionStatus {
 	for _, condition := range conditions {
 		if condition.Type == conditionType {
 			return condition.Status
@@ -177,7 +152,7 @@ func (r *FunctionReconciler) getConditionStatus(conditions []serverlessv1alpha1.
 	return corev1.ConditionUnknown
 }
 
-func (r *FunctionReconciler) getConditionReason(conditions []serverlessv1alpha1.Condition, conditionType serverlessv1alpha1.ConditionType) serverlessv1alpha1.ConditionReason {
+func getConditionReason(conditions []serverlessv1alpha1.Condition, conditionType serverlessv1alpha1.ConditionType) serverlessv1alpha1.ConditionReason {
 	for _, condition := range conditions {
 		if condition.Type == conditionType {
 			return condition.Reason
@@ -187,8 +162,8 @@ func (r *FunctionReconciler) getConditionReason(conditions []serverlessv1alpha1.
 	return ""
 }
 
-func (r *FunctionReconciler) equalFunctionStatus(left, right serverlessv1alpha1.FunctionStatus) bool {
-	if !r.equalConditions(left.Conditions, right.Conditions) {
+func equalFunctionStatus(left, right serverlessv1alpha1.FunctionStatus) bool {
+	if !equalConditions(left.Conditions, right.Conditions) {
 		return false
 	}
 

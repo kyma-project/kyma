@@ -12,12 +12,11 @@ import (
 	autoscalingv1 "k8s.io/api/autoscaling/v1"
 	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/tools/record"
 	"k8s.io/client-go/util/workqueue"
 	ctrl "sigs.k8s.io/controller-runtime"
-	"sigs.k8s.io/controller-runtime/pkg/client"
+	ctrlclient "sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
 
 	"github.com/kyma-project/kyma/components/function-controller/internal/controllers/kubernetes"
@@ -47,6 +46,8 @@ type FunctionReconciler struct {
 	healthCh       chan bool
 }
 
+type typedFunctionReconciler interface {
+}
 type functionResources struct {
 	configMaps       corev1.ConfigMapList
 	jobs             batchv1.JobList
@@ -110,7 +111,7 @@ func (r *FunctionReconciler) Reconcile(ctx context.Context, request ctrl.Request
 	instance := &serverlessv1alpha1.Function{}
 	err := r.client.Get(ctx, request.NamespacedName, instance)
 	if err != nil {
-		return ctrl.Result{}, client.IgnoreNotFound(err)
+		return ctrl.Result{}, ctrlclient.IgnoreNotFound(err)
 	}
 
 	log := r.Log.WithValues("kind", instance.GetObjectKind().GroupVersionKind().Kind,
@@ -123,65 +124,46 @@ func (r *FunctionReconciler) Reconcile(ctx context.Context, request ctrl.Request
 	}
 
 	if instance.Spec.Type == serverlessv1alpha1.SourceTypeGit {
-		return r.reconcileGitFunction(ctx, instance, log)
+		return newGitFunctionReconciler(r).reconcileGitFunction(ctx, instance, log)
 	}
-	return r.reconcileInlineFunction(ctx, instance, log)
+	return r.reconcileInlineFunctionReconcile(ctx, instance, log)
 
 }
 
-func (r *FunctionReconciler) isOnSourceChange(instance *serverlessv1alpha1.Function, commit string) bool {
-	return instance.Status.Commit == "" ||
-		commit != instance.Status.Commit ||
-		instance.Spec.Reference != instance.Status.Reference ||
-		serverlessv1alpha1.RuntimeExtended(instance.Spec.Runtime) != instance.Status.Runtime ||
-		instance.Spec.BaseDir != instance.Status.BaseDir ||
-		r.getConditionStatus(instance.Status.Conditions, serverlessv1alpha1.ConditionConfigurationReady) == corev1.ConditionFalse
-}
-
-func (r *FunctionReconciler) onSourceChange(ctx context.Context, instance *serverlessv1alpha1.Function, repository *serverlessv1alpha1.Repository, commit string) error {
-	return r.updateStatus(ctx, instance, serverlessv1alpha1.Condition{
-		Type:               serverlessv1alpha1.ConditionConfigurationReady,
-		Status:             corev1.ConditionTrue,
-		LastTransitionTime: metav1.Now(),
-		Reason:             serverlessv1alpha1.ConditionReasonSourceUpdated,
-		Message:            fmt.Sprintf("Sources %s updated", instance.Name),
-	}, repository, commit)
-}
-
-func (r *FunctionReconciler) readDockerConfig(ctx context.Context, instance *serverlessv1alpha1.Function) (DockerConfig, error) {
+func readDockerConfig(ctx context.Context, client resource.Client, config FunctionConfig, instance *serverlessv1alpha1.Function) (DockerConfig, error) {
 	var secret corev1.Secret
 	// try reading user config
-	if err := r.client.Get(ctx, client.ObjectKey{Namespace: instance.Namespace, Name: r.config.ImageRegistryExternalDockerConfigSecretName}, &secret); err == nil {
-		data := r.readSecretData(secret.Data)
+	if err := client.Get(ctx, ctrlclient.ObjectKey{Namespace: instance.Namespace, Name: config.ImageRegistryExternalDockerConfigSecretName}, &secret); err == nil {
+		data := readSecretData(secret.Data)
 		return DockerConfig{
-			ActiveRegistryConfigSecretName: r.config.ImageRegistryExternalDockerConfigSecretName,
+			ActiveRegistryConfigSecretName: config.ImageRegistryExternalDockerConfigSecretName,
 			PushAddress:                    data["registryAddress"],
 			PullAddress:                    data["registryAddress"],
 		}, nil
 	}
 
 	// try reading default config
-	if err := r.client.Get(ctx, client.ObjectKey{Namespace: instance.Namespace, Name: r.config.ImageRegistryDefaultDockerConfigSecretName}, &secret); err == nil {
-		data := r.readSecretData(secret.Data)
+	if err := client.Get(ctx, ctrlclient.ObjectKey{Namespace: instance.Namespace, Name: config.ImageRegistryDefaultDockerConfigSecretName}, &secret); err == nil {
+		data := readSecretData(secret.Data)
 		if data["isInternal"] == "true" {
 			return DockerConfig{
-				ActiveRegistryConfigSecretName: r.config.ImageRegistryDefaultDockerConfigSecretName,
+				ActiveRegistryConfigSecretName: config.ImageRegistryDefaultDockerConfigSecretName,
 				PushAddress:                    data["registryAddress"],
 				PullAddress:                    data["serverAddress"],
 			}, nil
 		} else {
 			return DockerConfig{
-				ActiveRegistryConfigSecretName: r.config.ImageRegistryDefaultDockerConfigSecretName,
+				ActiveRegistryConfigSecretName: config.ImageRegistryDefaultDockerConfigSecretName,
 				PushAddress:                    data["registryAddress"],
 				PullAddress:                    data["registryAddress"],
 			}, nil
 		}
 	}
 
-	return DockerConfig{}, errors.Errorf("Docker registry configuration not found, none of configuration secrets (%s, %s) found in function namespace", r.config.ImageRegistryDefaultDockerConfigSecretName, r.config.ImageRegistryExternalDockerConfigSecretName)
+	return DockerConfig{}, errors.Errorf("Docker registry configuration not found, none of configuration secrets (%s, %s) found in function namespace", config.ImageRegistryDefaultDockerConfigSecretName, config.ImageRegistryExternalDockerConfigSecretName)
 }
 
-func (r *FunctionReconciler) readSecretData(data map[string][]byte) map[string]string {
+func readSecretData(data map[string][]byte) map[string]string {
 	output := make(map[string]string)
 	for k, v := range data {
 		output[k] = string(v)
@@ -191,13 +173,13 @@ func (r *FunctionReconciler) readSecretData(data map[string][]byte) map[string]s
 
 func (r *FunctionReconciler) fetchFunctionResources(ctx context.Context, instance *serverlessv1alpha1.Function, log logr.Logger) (*functionResources, error) {
 	var configMaps corev1.ConfigMapList
-	if err := r.client.ListByLabel(ctx, instance.GetNamespace(), r.internalFunctionLabels(instance), &configMaps); err != nil {
+	if err := r.client.ListByLabel(ctx, instance.GetNamespace(), internalFunctionLabels(instance), &configMaps); err != nil {
 		log.Error(err, "Cannot list ConfigMaps")
 		return nil, err
 	}
 
 	var jobs batchv1.JobList
-	if err := r.client.ListByLabel(ctx, instance.GetNamespace(), r.internalFunctionLabels(instance), &jobs); err != nil {
+	if err := r.client.ListByLabel(ctx, instance.GetNamespace(), internalFunctionLabels(instance), &jobs); err != nil {
 		log.Error(err, "Cannot list Jobs")
 		return nil, err
 	}
@@ -217,19 +199,19 @@ func (r *FunctionReconciler) fetchFunctionResources(ctx context.Context, instanc
 	}
 
 	var deployments appsv1.DeploymentList
-	if err := r.client.ListByLabel(ctx, instance.GetNamespace(), r.internalFunctionLabels(instance), &deployments); err != nil {
+	if err := r.client.ListByLabel(ctx, instance.GetNamespace(), internalFunctionLabels(instance), &deployments); err != nil {
 		log.Error(err, "Cannot list Deployments")
 		return nil, err
 	}
 
 	var services corev1.ServiceList
-	if err := r.client.ListByLabel(ctx, instance.GetNamespace(), r.internalFunctionLabels(instance), &services); err != nil {
+	if err := r.client.ListByLabel(ctx, instance.GetNamespace(), internalFunctionLabels(instance), &services); err != nil {
 		log.Error(err, "Cannot list Services")
 		return nil, err
 	}
 
 	var hpas autoscalingv1.HorizontalPodAutoscalerList
-	if err := r.client.ListByLabel(ctx, instance.GetNamespace(), r.internalFunctionLabels(instance), &hpas); err != nil {
+	if err := r.client.ListByLabel(ctx, instance.GetNamespace(), internalFunctionLabels(instance), &hpas); err != nil {
 		log.Error(err, "Cannot list HorizontalPodAutoscalers")
 		return nil, err
 	}
