@@ -14,22 +14,22 @@ import (
 	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
 )
 
-func (r *FunctionReconciler) isOnHorizontalPodAutoscalerChange(instance *serverlessv1alpha1.Function, hpas []autoscalingv1.HorizontalPodAutoscaler, deployments []appsv1.Deployment) bool {
+func isOnHorizontalPodAutoscalerChange(instance *serverlessv1alpha1.Function, hpas []autoscalingv1.HorizontalPodAutoscaler, deployments []appsv1.Deployment, config FunctionConfig) bool {
 	if len(deployments) == 0 {
 		return false
 	}
 
-	newHpa := r.buildHorizontalPodAutoscaler(instance, deployments[0].GetName())
+	newHpa := buildHorizontalPodAutoscaler(instance, deployments[0].GetName(), config)
 	scalingEnabled := isScalingEnabled(instance)
 	numHpa := len(hpas)
 
 	return (scalingEnabled && numHpa != 1) ||
-		(scalingEnabled && !r.equalHorizontalPodAutoscalers(hpas[0], newHpa)) ||
+		(scalingEnabled && !equalHorizontalPodAutoscalers(hpas[0], newHpa)) ||
 		(!scalingEnabled && numHpa != 0)
 }
 
-func (r *FunctionReconciler) onHorizontalPodAutoscalerChange(ctx context.Context, log logr.Logger, instance *serverlessv1alpha1.Function, hpas []autoscalingv1.HorizontalPodAutoscaler, deploymentName string) error {
-	newHpa := r.buildHorizontalPodAutoscaler(instance, deploymentName)
+func (r *FunctionReconciler) onHorizontalPodAutoscalerChange(ctx context.Context, log logr.Logger, instance *serverlessv1alpha1.Function, hpas []autoscalingv1.HorizontalPodAutoscaler, deploymentName string, config FunctionConfig) error {
+	newHpa := buildHorizontalPodAutoscaler(instance, deploymentName, config)
 	hpasNum := len(hpas)
 
 	switch {
@@ -46,7 +46,7 @@ func (r *FunctionReconciler) onHorizontalPodAutoscalerChange(ctx context.Context
 		// this case is when we previously created HPA with maxReplicas > minReplicas, but now user changed
 		// function spec and NOW maxReplicas == minReplicas, so hpa is not needed anymore
 		return r.deleteAllHorizontalPodAutoscalers(ctx, instance, log)
-	case !r.equalHorizontalPodAutoscalers(hpas[0], newHpa):
+	case !equalHorizontalPodAutoscalers(hpas[0], newHpa):
 		return r.updateHorizontalPodAutoscaler(ctx, log, instance, hpas[0], newHpa)
 	default:
 		if hpasNum == 1 {
@@ -72,7 +72,7 @@ func isScalingEnabled(instance *serverlessv1alpha1.Function) bool {
 	return !equalInt32Pointer(instance.Spec.MinReplicas, instance.Spec.MaxReplicas)
 }
 
-func (r *FunctionReconciler) equalHorizontalPodAutoscalers(existing, expected autoscalingv1.HorizontalPodAutoscaler) bool {
+func equalHorizontalPodAutoscalers(existing, expected autoscalingv1.HorizontalPodAutoscaler) bool {
 	return equalInt32Pointer(existing.Spec.TargetCPUUtilizationPercentage, expected.Spec.TargetCPUUtilizationPercentage) &&
 		equalInt32Pointer(existing.Spec.MinReplicas, expected.Spec.MinReplicas) &&
 		existing.Spec.MaxReplicas == expected.Spec.MaxReplicas &&

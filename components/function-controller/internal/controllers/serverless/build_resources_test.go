@@ -73,8 +73,7 @@ func TestFunctionReconciler_buildDeployment(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			g := gomega.NewGomegaWithT(t)
-			r := &FunctionReconciler{}
-			got := r.buildDeployment(tt.args.instance, rtmCfg, DockerConfig{})
+			got := buildDeployment(tt.args.instance, rtmCfg, DockerConfig{}, FunctionConfig{})
 
 			for key, value := range got.Spec.Selector.MatchLabels {
 				g.Expect(got.Spec.Template.Labels[key]).To(gomega.Equal(value))
@@ -168,8 +167,7 @@ func TestFunctionReconciler_buildHorizontalPodAutoscaler(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			g := gomega.NewGomegaWithT(t)
-			r := &FunctionReconciler{}
-			got := r.buildHorizontalPodAutoscaler(tt.args.instance, "foo-bar")
+			got := buildHorizontalPodAutoscaler(tt.args.instance, "foo-bar", FunctionConfig{})
 
 			g.Expect(*got.Spec.MinReplicas).To(gomega.Equal(tt.wants.minReplicas))
 			g.Expect(got.Spec.MaxReplicas).To(gomega.Equal(tt.wants.maxReplicas))
@@ -313,8 +311,7 @@ func TestFunctionReconciler_servicePodLabels(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			g := gomega.NewGomegaWithT(t)
-			r := &FunctionReconciler{}
-			got := r.podLabels(tt.args.instance)
+			got := podLabels(tt.args.instance)
 			g.Expect(got).To(gomega.Equal(tt.want))
 		})
 	}

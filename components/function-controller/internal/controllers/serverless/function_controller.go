@@ -7,7 +7,9 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	ctrlclient "sigs.k8s.io/controller-runtime/pkg/client"
 
+	"github.com/kyma-project/kyma/components/function-controller/internal/resource"
 	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
 	"github.com/pkg/errors"
 )
@@ -174,4 +176,45 @@ func equalFunctionStatus(left, right serverlessv1alpha1.FunctionStatus) bool {
 		return false
 	}
 	return true
+}
+
+func readDockerConfig(ctx context.Context, client resource.Client, config FunctionConfig, instance *serverlessv1alpha1.Function) (DockerConfig, error) {
+	var secret corev1.Secret
+	// try reading user config
+	if err := client.Get(ctx, ctrlclient.ObjectKey{Namespace: instance.Namespace, Name: config.ImageRegistryExternalDockerConfigSecretName}, &secret); err == nil {
+		data := readSecretData(secret.Data)
+		return DockerConfig{
+			ActiveRegistryConfigSecretName: config.ImageRegistryExternalDockerConfigSecretName,
+			PushAddress:                    data["registryAddress"],
+			PullAddress:                    data["registryAddress"],
+		}, nil
+	}
+
+	// try reading default config
+	if err := client.Get(ctx, ctrlclient.ObjectKey{Namespace: instance.Namespace, Name: config.ImageRegistryDefaultDockerConfigSecretName}, &secret); err == nil {
+		data := readSecretData(secret.Data)
+		if data["isInternal"] == "true" {
+			return DockerConfig{
+				ActiveRegistryConfigSecretName: config.ImageRegistryDefaultDockerConfigSecretName,
+				PushAddress:                    data["registryAddress"],
+				PullAddress:                    data["serverAddress"],
+			}, nil
+		} else {
+			return DockerConfig{
+				ActiveRegistryConfigSecretName: config.ImageRegistryDefaultDockerConfigSecretName,
+				PushAddress:                    data["registryAddress"],
+				PullAddress:                    data["registryAddress"],
+			}, nil
+		}
+	}
+
+	return DockerConfig{}, errors.Errorf("Docker registry configuration not found, none of configuration secrets (%s, %s) found in function namespace", config.ImageRegistryDefaultDockerConfigSecretName, config.ImageRegistryExternalDockerConfigSecretName)
+}
+
+func readSecretData(data map[string][]byte) map[string]string {
+	output := make(map[string]string)
+	for k, v := range data {
+		output[k] = string(v)
+	}
+	return output
 }

@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"github.com/go-logr/logr"
-	"github.com/pkg/errors"
 	"golang.org/x/time/rate"
 	appsv1 "k8s.io/api/apps/v1"
 	autoscalingv1 "k8s.io/api/autoscaling/v1"
@@ -123,52 +122,15 @@ func (r *FunctionReconciler) Reconcile(ctx context.Context, request ctrl.Request
 		return ctrl.Result{}, nil
 	}
 
+	resources, err := r.fetchFunctionResources(ctx, instance, log)
+	if err != nil {
+		return ctrl.Result{}, err
+	}
+
 	if instance.Spec.Type == serverlessv1alpha1.SourceTypeGit {
-		return newGitFunctionReconciler(r).reconcileGitFunction(ctx, instance, log)
+		return newGitFunctionReconciler(r).reconcileGitFunction(ctx, instance, resources, log)
 	}
-	return r.reconcileInlineFunctionReconcile(ctx, instance, log)
-
-}
-
-func readDockerConfig(ctx context.Context, client resource.Client, config FunctionConfig, instance *serverlessv1alpha1.Function) (DockerConfig, error) {
-	var secret corev1.Secret
-	// try reading user config
-	if err := client.Get(ctx, ctrlclient.ObjectKey{Namespace: instance.Namespace, Name: config.ImageRegistryExternalDockerConfigSecretName}, &secret); err == nil {
-		data := readSecretData(secret.Data)
-		return DockerConfig{
-			ActiveRegistryConfigSecretName: config.ImageRegistryExternalDockerConfigSecretName,
-			PushAddress:                    data["registryAddress"],
-			PullAddress:                    data["registryAddress"],
-		}, nil
-	}
-
-	// try reading default config
-	if err := client.Get(ctx, ctrlclient.ObjectKey{Namespace: instance.Namespace, Name: config.ImageRegistryDefaultDockerConfigSecretName}, &secret); err == nil {
-		data := readSecretData(secret.Data)
-		if data["isInternal"] == "true" {
-			return DockerConfig{
-				ActiveRegistryConfigSecretName: config.ImageRegistryDefaultDockerConfigSecretName,
-				PushAddress:                    data["registryAddress"],
-				PullAddress:                    data["serverAddress"],
-			}, nil
-		} else {
-			return DockerConfig{
-				ActiveRegistryConfigSecretName: config.ImageRegistryDefaultDockerConfigSecretName,
-				PushAddress:                    data["registryAddress"],
-				PullAddress:                    data["registryAddress"],
-			}, nil
-		}
-	}
-
-	return DockerConfig{}, errors.Errorf("Docker registry configuration not found, none of configuration secrets (%s, %s) found in function namespace", config.ImageRegistryDefaultDockerConfigSecretName, config.ImageRegistryExternalDockerConfigSecretName)
-}
-
-func readSecretData(data map[string][]byte) map[string]string {
-	output := make(map[string]string)
-	for k, v := range data {
-		output[k] = string(v)
-	}
-	return output
+	return r.reconcileInlineFunctionReconcile(ctx, instance, resources, log)
 }
 
 func (r *FunctionReconciler) fetchFunctionResources(ctx context.Context, instance *serverlessv1alpha1.Function, log logr.Logger) (*functionResources, error) {

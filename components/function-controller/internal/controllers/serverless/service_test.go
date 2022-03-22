@@ -404,8 +404,7 @@ func TestFunctionReconciler_equalServices(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			g := gomega.NewGomegaWithT(t)
-			r := &FunctionReconciler{}
-			got := r.equalServices(tt.args.existing, tt.args.expected)
+			got := equalServices(tt.args.existing, tt.args.expected)
 			g.Expect(got).To(gomega.Equal(tt.want))
 		})
 	}

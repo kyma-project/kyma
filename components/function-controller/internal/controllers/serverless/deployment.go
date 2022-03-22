@@ -31,22 +31,22 @@ const (
 	MinimumReplicasUnavailable = "MinimumReplicasUnavailable"
 )
 
-func (r *FunctionReconciler) isOnDeploymentChange(instance *serverlessv1alpha1.Function, rtmConfig runtime.Config, deployments []appsv1.Deployment, dockerConfig DockerConfig) bool {
-	expectedDeployment := r.buildDeployment(instance, rtmConfig, dockerConfig)
-	resourceOk := len(deployments) == 1 && r.equalDeployments(deployments[0], expectedDeployment, isScalingEnabled(instance))
+func isOnDeploymentChange(instance *serverlessv1alpha1.Function, rtmConfig runtime.Config, deployments []appsv1.Deployment, dockerConfig DockerConfig, config FunctionConfig) bool {
+	expectedDeployment := buildDeployment(instance, rtmConfig, dockerConfig, config)
+	resourceOk := len(deployments) == 1 && equalDeployments(deployments[0], expectedDeployment, isScalingEnabled(instance))
 
 	return !resourceOk
 }
 
-func (r *FunctionReconciler) onDeploymentChange(ctx context.Context, log logr.Logger, instance *serverlessv1alpha1.Function, rtmConfig runtime.Config, deployments []appsv1.Deployment, dockerConfig DockerConfig) (ctrl.Result, error) {
-	newDeployment := r.buildDeployment(instance, rtmConfig, dockerConfig)
+func (r *FunctionReconciler) onDeploymentChange(ctx context.Context, log logr.Logger, instance *serverlessv1alpha1.Function, rtmConfig runtime.Config, deployments []appsv1.Deployment, dockerConfig DockerConfig, config FunctionConfig) (ctrl.Result, error) {
+	newDeployment := buildDeployment(instance, rtmConfig, dockerConfig, config)
 
 	switch {
 	case len(deployments) == 0:
 		return ctrl.Result{}, r.createDeployment(ctx, log, instance, newDeployment)
 	case len(deployments) > 1: // this step is needed, as sometimes informers lag behind reality, and then we create 2 (or more) deployments by accident
 		return ctrl.Result{}, r.deleteAllDeployments(ctx, instance, log)
-	case !r.equalDeployments(deployments[0], newDeployment, isScalingEnabled(instance)):
+	case !equalDeployments(deployments[0], newDeployment, isScalingEnabled(instance)):
 		return ctrl.Result{}, r.updateDeployment(ctx, log, instance, deployments[0], newDeployment)
 	default:
 		return r.updateDeploymentStatus(ctx, log, instance, deployments, corev1.ConditionUnknown)
@@ -91,7 +91,7 @@ func (r *FunctionReconciler) updateDeployment(ctx context.Context, log logr.Logg
 	})
 }
 
-func (r *FunctionReconciler) equalDeployments(existing appsv1.Deployment, expected appsv1.Deployment, scalingEnabled bool) bool {
+func equalDeployments(existing appsv1.Deployment, expected appsv1.Deployment, scalingEnabled bool) bool {
 	return len(existing.Spec.Template.Spec.Containers) == 1 &&
 		len(existing.Spec.Template.Spec.Containers) == len(expected.Spec.Template.Spec.Containers) &&
 		existing.Spec.Template.Spec.Containers[0].Image == expected.Spec.Template.Spec.Containers[0].Image &&

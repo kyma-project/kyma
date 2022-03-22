@@ -11,21 +11,21 @@ import (
 	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
 )
 
-func (r *FunctionReconciler) isOnServiceChange(instance *serverlessv1alpha1.Function, services []corev1.Service) bool {
-	newSvc := r.buildService(instance)
+func isOnServiceChange(instance *serverlessv1alpha1.Function, services []corev1.Service) bool {
+	newSvc := buildService(instance)
 	return !(len(services) == 1 &&
-		r.equalServices(services[0], newSvc))
+		equalServices(services[0], newSvc))
 }
 
 func (r *FunctionReconciler) onServiceChange(ctx context.Context, log logr.Logger, instance *serverlessv1alpha1.Function, services []corev1.Service) error {
-	newSvc := r.buildService(instance)
+	newSvc := buildService(instance)
 
 	switch {
 	case len(services) == 0:
 		return r.createService(ctx, log, instance, newSvc)
 	case len(services) > 1:
 		return r.deleteExcessServices(ctx, instance, log, services)
-	case !r.equalServices(services[0], newSvc):
+	case !equalServices(services[0], newSvc):
 		return r.updateService(ctx, log, instance, services[0], newSvc)
 	default:
 		log.Info(fmt.Sprintf("Service %s is ready", services[0].GetName()))
@@ -33,7 +33,7 @@ func (r *FunctionReconciler) onServiceChange(ctx context.Context, log logr.Logge
 	}
 }
 
-func (r *FunctionReconciler) equalServices(existing corev1.Service, expected corev1.Service) bool {
+func equalServices(existing corev1.Service, expected corev1.Service) bool {
 	return mapsEqual(existing.Spec.Selector, expected.Spec.Selector) &&
 		mapsEqual(existing.Labels, expected.Labels) &&
 		len(existing.Spec.Ports) == len(expected.Spec.Ports) &&

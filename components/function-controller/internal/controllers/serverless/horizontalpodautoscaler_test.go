@@ -263,8 +263,7 @@ func TestFunctionReconciler_equalHorizontalPodAutoscalers(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			g := gomega.NewGomegaWithT(t)
-			r := &FunctionReconciler{}
-			got := r.equalHorizontalPodAutoscalers(tt.args.existing, tt.args.expected)
+			got := equalHorizontalPodAutoscalers(tt.args.existing, tt.args.expected)
 			g.Expect(got).To(gomega.Equal(tt.want))
 		})
 	}
@@ -331,7 +330,7 @@ func TestFunctionReconciler_isOnHorizontalPodAutoscalerChange(t *testing.T) {
 		},
 	}
 	equalFunction := newFixFunction(testName, testName, 1, 2)
-	equalHPA := (&FunctionReconciler{}).buildHorizontalPodAutoscaler(equalFunction, testName)
+	equalHPA := buildHorizontalPodAutoscaler(equalFunction, testName, FunctionConfig{})
 
 	type args struct {
 		instance    *serverlessv1alpha1.Function
@@ -432,8 +431,7 @@ func TestFunctionReconciler_isOnHorizontalPodAutoscalerChange(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			r := &FunctionReconciler{}
-			if got := r.isOnHorizontalPodAutoscalerChange(tt.args.instance, tt.args.hpas, tt.args.deployments); got != tt.want {
+			if got := isOnHorizontalPodAutoscalerChange(tt.args.instance, tt.args.hpas, tt.args.deployments, FunctionConfig{}); got != tt.want {
 				t.Errorf("isOnHorizontalPodAutoscalerChange() = %v, want %v", got, tt.want)
 			}
 		})

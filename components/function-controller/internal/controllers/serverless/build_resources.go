@@ -144,28 +144,28 @@ func buildRepoFetcherEnvVars(instance *serverlessv1alpha1.Function, gitOptions g
 	return vars
 }
 
-func (r *FunctionReconciler) buildDeploymentEnvs(namespace string) []corev1.EnvVar {
+func buildDeploymentEnvs(namespace string, config FunctionConfig) []corev1.EnvVar {
 	return []corev1.EnvVar{
 		{Name: "SERVICE_NAMESPACE", Value: namespace},
-		{Name: "JAEGER_SERVICE_ENDPOINT", Value: r.config.JaegerServiceEndpoint},
-		{Name: "PUBLISHER_PROXY_ADDRESS", Value: r.config.PublisherProxyAddress},
+		{Name: "JAEGER_SERVICE_ENDPOINT", Value: config.JaegerServiceEndpoint},
+		{Name: "PUBLISHER_PROXY_ADDRESS", Value: config.PublisherProxyAddress},
 		{Name: "FUNC_HANDLER", Value: "main"},
 		{Name: "MOD_NAME", Value: "handler"},
 		{Name: "FUNC_PORT", Value: "8080"},
 	}
 }
 
-func (r *FunctionReconciler) buildDeployment(instance *serverlessv1alpha1.Function, rtmConfig runtime.Config, dockerConfig DockerConfig) appsv1.Deployment {
-	imageName := r.buildImageAddress(instance, dockerConfig.PullAddress)
+func buildDeployment(instance *serverlessv1alpha1.Function, rtmConfig runtime.Config, dockerConfig DockerConfig, config FunctionConfig) appsv1.Deployment {
+	imageName := buildInlineImageAddress(instance, dockerConfig.PullAddress)
 	deploymentLabels := functionLabels(instance)
-	podLabels := r.podLabels(instance)
+	podLabels := podLabels(instance)
 
 	functionUser := int64(1000)
 	const volumeName = "tmp-dir"
 	emptyDirVolumeSize := resource.MustParse("100Mi")
 
 	envs := append(instance.Spec.Env, rtmConfig.RuntimeEnvs...)
-	envs = append(envs, r.buildDeploymentEnvs(instance.Namespace)...)
+	envs = append(envs, buildDeploymentEnvs(instance.Namespace, config)...)
 
 	return appsv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
@@ -267,14 +267,14 @@ func (r *FunctionReconciler) buildDeployment(instance *serverlessv1alpha1.Functi
 							},
 						},
 					},
-					ServiceAccountName: r.config.ImagePullAccountName,
+					ServiceAccountName: config.ImagePullAccountName,
 				},
 			},
 		},
 	}
 }
 
-func (r *FunctionReconciler) buildService(instance *serverlessv1alpha1.Function) corev1.Service {
+func buildService(instance *serverlessv1alpha1.Function) corev1.Service {
 	return corev1.Service{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      instance.GetName(),
@@ -293,7 +293,7 @@ func (r *FunctionReconciler) buildService(instance *serverlessv1alpha1.Function)
 	}
 }
 
-func (r *FunctionReconciler) buildHorizontalPodAutoscaler(instance *serverlessv1alpha1.Function, deploymentName string) autoscalingv1.HorizontalPodAutoscaler {
+func buildHorizontalPodAutoscaler(instance *serverlessv1alpha1.Function, deploymentName string, config FunctionConfig) autoscalingv1.HorizontalPodAutoscaler {
 	minReplicas, maxReplicas := defaultReplicas(instance.Spec)
 	return autoscalingv1.HorizontalPodAutoscaler{
 		ObjectMeta: metav1.ObjectMeta{
@@ -309,7 +309,7 @@ func (r *FunctionReconciler) buildHorizontalPodAutoscaler(instance *serverlessv1
 			},
 			MinReplicas:                    &minReplicas,
 			MaxReplicas:                    maxReplicas,
-			TargetCPUUtilizationPercentage: &r.config.TargetCPUUtilizationPercentage,
+			TargetCPUUtilizationPercentage: &config.TargetCPUUtilizationPercentage,
 		},
 	}
 }
@@ -328,8 +328,8 @@ func defaultReplicas(spec serverlessv1alpha1.FunctionSpec) (int32, int32) {
 	return min, max
 }
 
-func (r *FunctionReconciler) buildImageAddress(instance *serverlessv1alpha1.Function, registryAddress string) string {
-	imageTag := r.calculateImageTag(instance)
+func buildInlineImageAddress(instance *serverlessv1alpha1.Function, registryAddress string) string {
+	imageTag := calculateInlineImageTag(instance)
 	return fmt.Sprintf("%s/%s-%s:%s", registryAddress, instance.Namespace, instance.Name, imageTag)
 }
 
@@ -351,7 +351,7 @@ func deploymentSelectorLabels(instance *serverlessv1alpha1.Function) map[string]
 	return mergeLabels(map[string]string{serverlessv1alpha1.FunctionResourceLabel: serverlessv1alpha1.FunctionResourceLabelDeploymentValue}, internalFunctionLabels(instance))
 }
 
-func (r *FunctionReconciler) podLabels(instance *serverlessv1alpha1.Function) map[string]string {
+func podLabels(instance *serverlessv1alpha1.Function) map[string]string {
 	return mergeLabels(instance.Spec.Labels, deploymentSelectorLabels(instance))
 }
 

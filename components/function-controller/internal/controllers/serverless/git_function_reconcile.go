@@ -23,22 +23,18 @@ import (
 
 type gitFunctionReconciler struct {
 	functionReconciler *FunctionReconciler
+	config             FunctionConfig
 }
 
 func newGitFunctionReconciler(fr *FunctionReconciler) *gitFunctionReconciler {
 	return &gitFunctionReconciler{
 		functionReconciler: fr,
+		config:             fr.config,
 	}
 }
 
-func (r *gitFunctionReconciler) reconcileGitFunction(ctx context.Context, instance *serverlessv1alpha1.Function, log logr.Logger) (ctrl.Result, error) {
-
-	resources, err := r.functionReconciler.fetchFunctionResources(ctx, instance, log)
-	if err != nil {
-		return ctrl.Result{}, err
-	}
-
-	dockerConfig, err := readDockerConfig(ctx, r.functionReconciler.client, r.functionReconciler.config, instance)
+func (r *gitFunctionReconciler) reconcileGitFunction(ctx context.Context, instance *serverlessv1alpha1.Function, resources *functionResources, log logr.Logger) (ctrl.Result, error) {
+	dockerConfig, err := readDockerConfig(ctx, r.functionReconciler.client, r.config, instance)
 	if err != nil {
 		log.Error(err, "Cannot read Docker registry configuration")
 		return ctrl.Result{}, err
@@ -76,7 +72,7 @@ func (r *gitFunctionReconciler) reconcileGitFunction(ctx context.Context, instan
 	var result ctrl.Result
 
 	switch {
-	case r.isOnSourceChange(instance, revision):
+	case isOnSourceChange(instance, revision):
 		return result, r.onSourceChange(ctx, instance, &serverlessv1alpha1.Repository{
 			Reference: instance.Spec.Reference,
 			BaseDir:   instance.Spec.Repository.BaseDir,
@@ -85,14 +81,14 @@ func (r *gitFunctionReconciler) reconcileGitFunction(ctx context.Context, instan
 	case r.isOnJobChange(instance, rtmCfg, resources.jobs.Items, resources.deployments.Items, gitOptions, dockerConfig):
 		return r.onGitJobChange(ctx, log, instance, rtmCfg, resources.jobs.Items, gitOptions, dockerConfig)
 
-	case r.functionReconciler.isOnDeploymentChange(instance, rtmCfg, resources.deployments.Items, dockerConfig):
-		return r.functionReconciler.onDeploymentChange(ctx, log, instance, rtmCfg, resources.deployments.Items, dockerConfig)
+	case isOnDeploymentChange(instance, rtmCfg, resources.deployments.Items, dockerConfig, r.config):
+		return r.functionReconciler.onDeploymentChange(ctx, log, instance, rtmCfg, resources.deployments.Items, dockerConfig, r.config)
 
-	case r.functionReconciler.isOnServiceChange(instance, resources.services.Items):
+	case isOnServiceChange(instance, resources.services.Items):
 		return result, r.functionReconciler.onServiceChange(ctx, log, instance, resources.services.Items)
 
-	case r.functionReconciler.isOnHorizontalPodAutoscalerChange(instance, resources.hpas.Items, resources.deployments.Items):
-		return result, r.functionReconciler.onHorizontalPodAutoscalerChange(ctx, log, instance, resources.hpas.Items, resources.deployments.Items[0].GetName())
+	case isOnHorizontalPodAutoscalerChange(instance, resources.hpas.Items, resources.deployments.Items, r.config):
+		return result, r.functionReconciler.onHorizontalPodAutoscalerChange(ctx, log, instance, resources.hpas.Items, resources.deployments.Items[0].GetName(), r.config)
 
 	default:
 		return r.functionReconciler.updateDeploymentStatus(ctx, log, instance, resources.deployments.Items, corev1.ConditionTrue)
@@ -174,7 +170,7 @@ func (r *gitFunctionReconciler) calculateGitImageTag(instance *serverlessv1alpha
 
 func (r *gitFunctionReconciler) buildGitJob(instance *serverlessv1alpha1.Function, gitOptions git.Options, rtmConfig runtime.Config, dockerConfig DockerConfig) batchv1.Job {
 	imageName := r.buildImageAddress(instance, dockerConfig.PushAddress)
-	args := r.functionReconciler.config.Build.ExecutorArgs
+	args := r.config.Build.ExecutorArgs
 	args = append(args, fmt.Sprintf("%s=%s", destinationArg, imageName), fmt.Sprintf("--context=dir://%s", workspaceMountPath))
 
 	one := int32(1)
@@ -230,7 +226,7 @@ func (r *gitFunctionReconciler) buildGitJob(instance *serverlessv1alpha1.Functio
 							Name: "registry-config",
 							VolumeSource: corev1.VolumeSource{
 								Secret: &corev1.SecretVolumeSource{
-									SecretName: r.functionReconciler.config.PackageRegistryConfigSecretName,
+									SecretName: r.config.PackageRegistryConfigSecretName,
 									Optional:   &optional,
 								},
 							},
@@ -239,7 +235,7 @@ func (r *gitFunctionReconciler) buildGitJob(instance *serverlessv1alpha1.Functio
 					InitContainers: []corev1.Container{
 						{
 							Name:            "repo-fetcher",
-							Image:           r.functionReconciler.config.Build.RepoFetcherImage,
+							Image:           r.config.Build.RepoFetcherImage,
 							Env:             buildRepoFetcherEnvVars(instance, gitOptions),
 							ImagePullPolicy: corev1.PullAlways,
 							VolumeMounts: []corev1.VolumeMount{
@@ -253,7 +249,7 @@ func (r *gitFunctionReconciler) buildGitJob(instance *serverlessv1alpha1.Functio
 					Containers: []corev1.Container{
 						{
 							Name:            "executor",
-							Image:           r.functionReconciler.config.Build.ExecutorImage,
+							Image:           r.config.Build.ExecutorImage,
 							Args:            args,
 							Resources:       instance.Spec.BuildResources,
 							VolumeMounts:    r.getGitBuildJobVolumeMounts(instance, rtmConfig),
@@ -264,7 +260,7 @@ func (r *gitFunctionReconciler) buildGitJob(instance *serverlessv1alpha1.Functio
 						},
 					},
 					RestartPolicy:      corev1.RestartPolicyNever,
-					ServiceAccountName: r.functionReconciler.config.BuildServiceAccountName,
+					ServiceAccountName: r.config.BuildServiceAccountName,
 					SecurityContext: &corev1.PodSecurityContext{
 						RunAsUser: &rootUser,
 					},
@@ -315,7 +311,7 @@ func (r *gitFunctionReconciler) onGitJobChange(ctx context.Context, log logr.Log
 	return r.functionReconciler.changeJob(ctx, log, instance, newJob, jobs)
 }
 
-func (r *gitFunctionReconciler) isOnSourceChange(instance *serverlessv1alpha1.Function, commit string) bool {
+func isOnSourceChange(instance *serverlessv1alpha1.Function, commit string) bool {
 	return instance.Status.Commit == "" ||
 		commit != instance.Status.Commit ||
 		instance.Spec.Reference != instance.Status.Reference ||
