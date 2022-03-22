@@ -1,7 +1,7 @@
 # Eventing Test
 
 
-## Overview 
+## Overview
 
 This test covers the end-to-end flow for Eventing. It is divided in three parts:
 1. `eventing-test-prep.js` - prepares all the resources, mocks and assets required for tests to be executed
@@ -30,8 +30,7 @@ COMPASS_TENANT=              # Only required if KYMA_TYPE=SKR
 GARDENER_KUBECONFIG=         # Only required if KYMA_TYPE=SKR
 ```
 >**IMPORTANT:** The `TEST_SUFFIX` is required for every test run for SKR cluster. It needs to be 4 characters long, as it is the name for the compass scenario.
-> The eventing tests are adding a scenario with the `"test-TEST_SUFFIX"` name and if you did not clean the compass scenario (which is done in the `eventing-test-cleanup.js` script),
-> the tests will try to reuse an already existing scenario and will fail on the tests preparation with the following error: *Update of API/Event is not supported yet for the compass scenario*.
+> The eventing tests add a scenario with the `"test-${TEST_SUFFIX}"` name.
 
 >**NOTE:** The Event Mesh Credentials JSON file can be downloaded from the BTP Cockpit under your subaccount instances.
 
@@ -40,7 +39,7 @@ GARDENER_KUBECONFIG=         # Only required if KYMA_TYPE=SKR
 export $(xargs < .env)
 ```
 
-4. Execute the Eventing tests locally
+4. Execute the Eventing tests locally:
 
 - **inside the OSS cluster:**
 ```bash
@@ -53,11 +52,11 @@ npm run test-eventing TEST_SUFFIX=abcd
 
 ## Troubleshooting ##
 
-1. if the `TEST_SUFFIX` env variable was not set during the test execution or a scenario with that suffix already exists, you can get the following error:
+If the `TEST_SUFFIX` environment variable was not set during the test execution or a scenario with that suffix already exists, you will get the following error:
 >_Update of API/Event is not supported yet for the compass scenario_.
 
-To avoid this error you can first get the list of the already used scenarios:
+To avoid this error, first get the list of the already existing scenarios:
 ```bash
  npm run eventing-get-registered-scenarios
 ```
-and then assign the `TEST_SUFFIX` env variable a value which is not listed in the output of the command above.
+Then, for the `TEST_SUFFIX` environment variable, assign a value that is not listed in the list of existing scenarios.
