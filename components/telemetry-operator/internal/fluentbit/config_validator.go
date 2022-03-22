@@ -11,7 +11,7 @@ import (
 
 const (
 	fluentBitBinPath = "fluent-bit/bin/fluent-bit"
-	errDescription   = "The Fluent Bit dry-run could not validate the provided Log Pipeline: "
+	errDescription   = "Validation of the supplied configuration failed with the following reason: "
 	// From https://github.com/acarl005/stripansi/blob/master/stripansi.go#L7
 	ansiColorsRegex = "[\u001B\u009B][[\\]()#;?]*(?:(?:(?:[a-zA-Z\\d]*(?:;[a-zA-Z\\d]*)*)?\u0007)|(?:(?:\\d{1,4}(?:;\\d{0,4})*)?[\\dA-PRZcf-ntqry=><~]))"
 )

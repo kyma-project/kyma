@@ -148,7 +148,7 @@ func (v *LogPipelineValidator) getFluentBitConfig(ctx context.Context, currentBa
 		})
 	}
 
-	sectionsConfig := fluentbit.MergeFluentBitConfig(logPipeline)
+	sectionsConfig := fluentbit.MergeSectionsConfig(logPipeline)
 	configFiles = append(configFiles, fs.File{
 		Path: fluentBitSectionsConfigDirectory,
 		Name: logPipeline.Name + ".conf",
@@ -159,7 +159,7 @@ func (v *LogPipelineValidator) getFluentBitConfig(ctx context.Context, currentBa
 	if err := v.List(ctx, &logPipelines); err != nil {
 		return nil, err
 	}
-	parsersConfig := fluentbit.MergeFluentBitParsersConfig(&logPipelines)
+	parsersConfig := fluentbit.MergeParsersConfig(&logPipelines)
 	configFiles = append(configFiles, fs.File{
 		Path: fluentBitParsersConfigDirectory,
 		Name: fluentBitParsersConfigMapKey,

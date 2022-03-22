@@ -207,7 +207,7 @@ func (r *LogPipelineReconciler) syncSectionsConfigMap(ctx context.Context, logPi
 			controllerutil.RemoveFinalizer(logPipeline, sectionsConfigMapFinalizer)
 		}
 	} else {
-		fluentBitConfig := fluentbit.MergeFluentBitConfig(logPipeline)
+		fluentBitConfig := fluentbit.MergeSectionsConfig(logPipeline)
 		if cm.Data == nil {
 			data := make(map[string]string)
 			data[cmKey] = fluentBitConfig
@@ -250,7 +250,7 @@ func (r *LogPipelineReconciler) syncParsersConfigMap(ctx context.Context, logPip
 			if err != nil {
 				return false, err
 			}
-			fluentBitParsersConfig := fluentbit.MergeFluentBitParsersConfig(&logPipelines)
+			fluentBitParsersConfig := fluentbit.MergeParsersConfig(&logPipelines)
 			if fluentBitParsersConfig == "" {
 				cm.Data = nil
 			} else {
@@ -266,7 +266,7 @@ func (r *LogPipelineReconciler) syncParsersConfigMap(ctx context.Context, logPip
 			return false, err
 		}
 
-		fluentBitParsersConfig := fluentbit.MergeFluentBitParsersConfig(&logPipelines)
+		fluentBitParsersConfig := fluentbit.MergeParsersConfig(&logPipelines)
 		if fluentBitParsersConfig == "" {
 			cm.Data = nil
 		} else if cm.Data == nil {

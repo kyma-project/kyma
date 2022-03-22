@@ -27,8 +27,8 @@ func BuildConfigSection(header ConfigHeader, content string) string {
 	return sb.String()
 }
 
-// MergeFluentBitConfig merges Fluent Bit filters and outputs to a single Fluent Bit configuration.
-func MergeFluentBitConfig(logPipeline *telemetryv1alpha1.LogPipeline) string {
+// MergeSectionsConfig merges Fluent Bit filters and outputs to a single Fluent Bit configuration.
+func MergeSectionsConfig(logPipeline *telemetryv1alpha1.LogPipeline) string {
 	var sb strings.Builder
 	for _, filter := range logPipeline.Spec.Filters {
 		sb.WriteString(BuildConfigSection(FilterConfigHeader, filter.Content))
@@ -39,8 +39,8 @@ func MergeFluentBitConfig(logPipeline *telemetryv1alpha1.LogPipeline) string {
 	return sb.String()
 }
 
-// MergeFluentBitParsersConfig merges Fluent Bit parsers and multiLine parsers to a single Fluent Bit configuration.
-func MergeFluentBitParsersConfig(logPipelines *telemetryv1alpha1.LogPipelineList) string {
+// MergeParsersConfig merges Fluent Bit parsers and multiLine parsers to a single Fluent Bit configuration.
+func MergeParsersConfig(logPipelines *telemetryv1alpha1.LogPipelineList) string {
 	var sb strings.Builder
 	for _, logPipeline := range logPipelines.Items {
 		if logPipeline.DeletionTimestamp == nil {
