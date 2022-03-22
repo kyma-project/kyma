@@ -63,7 +63,7 @@ global:
       version: "6d430445"
     connection_token_handler:
       name: "connection-token-handler"
-      version: "PR-12963"
+      version: "245170b1"
     connector_service:
       name: "connector-service"
       version: "ae096c4a"
