@@ -10,6 +10,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/sink"
+
 	equality "github.com/kyma-project/kyma/components/eventing-controller/controllers/subscription"
 
 	"github.com/kyma-project/kyma/components/eventing-controller/controllers/events"
@@ -54,7 +56,8 @@ type Reconciler struct {
 	eventTypeCleaner  eventtype.Cleaner
 	oauth2credentials *handlers.OAuth2ClientCredentials
 	// nameMapper is used to map the Kyma subscription name to a subscription name on BEB
-	nameMapper handlers.NameMapper
+	nameMapper    handlers.NameMapper
+	sinkValidator sink.Validator
 }
 
 var (
@@ -66,13 +69,13 @@ const (
 	externalHostPrefix          = "web"
 	externalSinkScheme          = "https"
 	apiRuleNamePrefix           = "webhook-"
-	clusterLocalURLSuffix       = "svc.cluster.local"
 	reconcilerName              = "beb-subscription-reconciler"
 	timeoutRetryActiveEmsStatus = time.Second * 30
 )
 
-func NewReconciler(ctx context.Context, client client.Client, logger *logger.Logger, recorder record.EventRecorder, cfg env.Config,
-	cleaner eventtype.Cleaner, bebBackend handlers.BEBBackend, credential *handlers.OAuth2ClientCredentials, mapper handlers.NameMapper) *Reconciler {
+func NewReconciler(ctx context.Context, client client.Client, logger *logger.Logger, recorder record.EventRecorder,
+	cfg env.Config, cleaner eventtype.Cleaner, bebBackend handlers.BEBBackend, credential *handlers.OAuth2ClientCredentials,
+	mapper handlers.NameMapper, validator sink.Validator) *Reconciler {
 	if err := bebBackend.Initialize(cfg); err != nil {
 		logger.WithContext().Errorw("start reconciler failed", "name", reconcilerName, "error", err)
 		panic(err)
@@ -87,6 +90,7 @@ func NewReconciler(ctx context.Context, client client.Client, logger *logger.Log
 		eventTypeCleaner:  cleaner,
 		oauth2credentials: credential,
 		nameMapper:        mapper,
+		sinkValidator:     validator,
 	}
 }
 
@@ -343,7 +347,7 @@ func (r *Reconciler) deleteBEBSubscription(subscription *eventingv1alpha1.Subscr
 
 // syncAPIRule validate the given subscription sink URL and sync its APIRule.
 func (r *Reconciler) syncAPIRule(ctx context.Context, subscription *eventingv1alpha1.Subscription, logger *zap.SugaredLogger) (*apigatewayv1alpha1.APIRule, error) {
-	if err := r.isSinkURLValid(ctx, subscription); err != nil {
+	if err := r.sinkValidator.Validate(subscription); err != nil {
 		return nil, err
 	}
 
@@ -375,63 +379,6 @@ func (r *Reconciler) syncAPIRule(ctx context.Context, subscription *eventingv1al
 	}
 
 	return apiRule, nil
-}
-
-func (r *Reconciler) isSinkURLValid(ctx context.Context, subscription *eventingv1alpha1.Subscription) error {
-	if !isValidScheme(subscription.Spec.Sink) {
-		events.Warn(r.recorder, subscription, events.ReasonValidationFailed, "Sink URL scheme should be HTTP or HTTPS %s", subscription.Spec.Sink)
-		return recerrors.NewSkippable(fmt.Errorf("sink URL scheme should be 'http' or 'https'"))
-	}
-
-	sURL, err := url.ParseRequestURI(subscription.Spec.Sink)
-	if err != nil {
-		events.Warn(r.recorder, subscription, events.ReasonValidationFailed, "Sink URL is not valid %s", err.Error())
-		return recerrors.NewSkippable(err)
-	}
-
-	// Validate sink URL is a cluster local URL
-	trimmedHost := strings.Split(sURL.Host, ":")[0]
-	if !strings.HasSuffix(trimmedHost, clusterLocalURLSuffix) {
-		events.Warn(r.recorder, subscription, events.ReasonValidationFailed, "Sink does not contain suffix %s", clusterLocalURLSuffix)
-		return recerrors.NewSkippable(fmt.Errorf("sink does not contain suffix: %s in the URL", clusterLocalURLSuffix))
-	}
-
-	// we expected a sink in the format "service.namespace.svc.cluster.local"
-	subDomains := strings.Split(trimmedHost, ".")
-	if len(subDomains) != 5 {
-		events.Warn(r.recorder, subscription, events.ReasonValidationFailed, "Sink should contain 5 sub-domains %s", trimmedHost)
-		return recerrors.NewSkippable(fmt.Errorf("sink should contain 5 sub-domains: %s", trimmedHost))
-	}
-
-	// Assumption: Subscription CR and Subscriber should be deployed in the same namespace
-	svcNs := subDomains[1]
-	if subscription.Namespace != svcNs {
-		events.Warn(r.recorder, subscription, events.ReasonValidationFailed, "Namespace of subscription %s and the subscriber %s are different", subscription.Namespace, svcNs)
-		return recerrors.NewSkippable(fmt.Errorf("namespace of subscription: %s and the namespace of subscriber: %s are different", subscription.Namespace, svcNs))
-	}
-
-	// Validate svc is a cluster-local one
-	svcName := subDomains[0]
-	if _, err := r.getClusterLocalService(ctx, svcNs, svcName); err != nil {
-		if k8serrors.IsNotFound(err) {
-			events.Warn(r.recorder, subscription, events.ReasonValidationFailed, "Sink does not correspond to a valid cluster local svc")
-			return recerrors.NewSkippable(errors.Wrapf(err, "sink is not valid cluster local svc"))
-		}
-
-		events.Warn(r.recorder, subscription, events.ReasonValidationFailed, "Fetch cluster-local svc failed namespace %s name %s", svcNs, svcName)
-		return errors.Wrapf(err, "fetch cluster-local svc failed namespace:%s name:%s", svcNs, svcName)
-	}
-
-	return nil
-}
-
-func (r *Reconciler) getClusterLocalService(ctx context.Context, svcNs, svcName string) (*corev1.Service, error) {
-	svcLookupKey := k8stypes.NamespacedName{Name: svcName, Namespace: svcNs}
-	svc := &corev1.Service{}
-	if err := r.Client.Get(ctx, svcLookupKey, svc); err != nil {
-		return nil, err
-	}
-	return svc, nil
 }
 
 // createOrUpdateAPIRule create new or update existing APIRule for the given subscription.
@@ -925,9 +872,4 @@ func (r *Reconciler) checkLastFailedDelivery(subscription *eventingv1alpha1.Subs
 
 func (r *Reconciler) namedLogger() *zap.SugaredLogger {
 	return r.logger.WithContext().Named(reconcilerName)
-}
-
-// isValidScheme returns true if the sink scheme is http or https, otherwise returns false.
-func isValidScheme(sink string) bool {
-	return strings.HasPrefix(sink, "http://") || strings.HasPrefix(sink, "https://")
 }
