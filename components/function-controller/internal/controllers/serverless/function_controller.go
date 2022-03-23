@@ -2,6 +2,9 @@ package serverless
 
 import (
 	"context"
+	"crypto/sha256"
+	"fmt"
+	"strings"
 
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -46,6 +49,17 @@ func envsEqual(existing, expected []corev1.EnvVar) bool {
 	}
 
 	return true
+}
+
+func calculateInlineImageTag(instance *serverlessv1alpha1.Function) string {
+	hash := sha256.Sum256([]byte(strings.Join([]string{
+		string(instance.GetUID()),
+		instance.Spec.Source,
+		instance.Spec.Deps,
+		string(instance.Status.Runtime),
+	}, "-")))
+
+	return fmt.Sprintf("%x", hash)
 }
 
 func updateStatusWithoutRepository(ctx context.Context, su *statusUpdater, instance *serverlessv1alpha1.Function, condition serverlessv1alpha1.Condition) error {

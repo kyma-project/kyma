@@ -9,6 +9,7 @@ import (
 	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
 	appsv1 "k8s.io/api/apps/v1"
 	autoscalingv1 "k8s.io/api/autoscaling/v1"
+	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -46,6 +47,98 @@ func buildConfigMap(instance *serverlessv1alpha1.Function, rtm runtime.Runtime) 
 			Namespace:    instance.GetNamespace(),
 		},
 		Data: data,
+	}
+}
+
+func buildJob(instance *serverlessv1alpha1.Function, rtmConfig runtime.Config, configMapName string, dockerConfig DockerConfig, config FunctionConfig) batchv1.Job {
+	one := int32(1)
+	zero := int32(0)
+	rootUser := int64(0)
+	optional := true
+
+	imageName := buildInlineImageAddress(instance, dockerConfig.PushAddress)
+	args := config.Build.ExecutorArgs
+	args = append(args, fmt.Sprintf("%s=%s", destinationArg, imageName), fmt.Sprintf("--context=dir://%s", workspaceMountPath))
+
+	return batchv1.Job{
+		ObjectMeta: metav1.ObjectMeta{
+			GenerateName: fmt.Sprintf("%s-build-", instance.GetName()),
+			Namespace:    instance.GetNamespace(),
+			Labels:       functionLabels(instance),
+		},
+		Spec: batchv1.JobSpec{
+			Parallelism:           &one,
+			Completions:           &one,
+			ActiveDeadlineSeconds: nil,
+			BackoffLimit:          &zero,
+			Template: corev1.PodTemplateSpec{
+				ObjectMeta: metav1.ObjectMeta{
+					Labels:      functionLabels(instance),
+					Annotations: istioSidecarInjectFalse,
+				},
+				Spec: corev1.PodSpec{
+					Volumes: []corev1.Volume{
+						{
+							Name: "sources",
+							VolumeSource: corev1.VolumeSource{
+								ConfigMap: &corev1.ConfigMapVolumeSource{
+									LocalObjectReference: corev1.LocalObjectReference{Name: configMapName},
+								},
+							},
+						},
+						{
+							Name: "runtime",
+							VolumeSource: corev1.VolumeSource{
+								ConfigMap: &corev1.ConfigMapVolumeSource{
+									LocalObjectReference: corev1.LocalObjectReference{Name: rtmConfig.DockerfileConfigMapName},
+								},
+							},
+						},
+						{
+							Name: "credentials",
+							VolumeSource: corev1.VolumeSource{
+								Secret: &corev1.SecretVolumeSource{
+									SecretName: dockerConfig.ActiveRegistryConfigSecretName,
+									Items: []corev1.KeyToPath{
+										{
+											Key:  ".dockerconfigjson",
+											Path: ".docker/config.json",
+										},
+									},
+								},
+							},
+						},
+						{
+							Name: "registry-config",
+							VolumeSource: corev1.VolumeSource{
+								Secret: &corev1.SecretVolumeSource{
+									SecretName: config.PackageRegistryConfigSecretName,
+									Optional:   &optional,
+								},
+							},
+						},
+					},
+					Containers: []corev1.Container{
+						{
+							Name:            "executor",
+							Image:           config.Build.ExecutorImage,
+							Args:            args,
+							Resources:       instance.Spec.BuildResources,
+							VolumeMounts:    getBuildJobVolumeMounts(rtmConfig),
+							ImagePullPolicy: corev1.PullIfNotPresent,
+							Env: []corev1.EnvVar{
+								{Name: "DOCKER_CONFIG", Value: "/docker/.docker/"},
+							},
+						},
+					},
+					RestartPolicy:      corev1.RestartPolicyNever,
+					ServiceAccountName: config.BuildServiceAccountName,
+					SecurityContext: &corev1.PodSecurityContext{
+						RunAsUser: &rootUser,
+					},
+				},
+			},
+		},
 	}
 }
 

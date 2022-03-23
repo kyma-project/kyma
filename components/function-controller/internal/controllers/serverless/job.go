@@ -7,10 +7,12 @@ import (
 	"time"
 
 	"github.com/kyma-project/kyma/components/function-controller/internal/controllers/serverless/runtime"
+	"github.com/kyma-project/kyma/components/function-controller/internal/git"
 	"github.com/kyma-project/kyma/components/function-controller/internal/resource"
 
 	"github.com/go-logr/logr"
 
+	appsv1 "k8s.io/api/apps/v1"
 	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -21,6 +23,29 @@ import (
 )
 
 var fcManagedByLabel = map[string]string{serverlessv1alpha1.FunctionManagedByLabel: serverlessv1alpha1.FunctionControllerValue}
+
+func isOnJobChange(instance *serverlessv1alpha1.Function, rtmCfg runtime.Config, jobs []batchv1.Job, deployments []appsv1.Deployment, gitOptions git.Options, dockerConfig DockerConfig, config FunctionConfig) bool {
+	image := buildInlineImageAddress(instance, dockerConfig.PullAddress)
+	buildStatus := getConditionStatus(instance.Status.Conditions, serverlessv1alpha1.ConditionBuildReady)
+
+	expectedJob := buildJob(instance, rtmCfg, "", dockerConfig, config)
+
+	if len(deployments) == 1 &&
+		deployments[0].Spec.Template.Spec.Containers[0].Image == image &&
+		buildStatus != corev1.ConditionUnknown &&
+		len(jobs) > 0 &&
+		mapsEqual(expectedJob.GetLabels(), jobs[0].GetLabels()) {
+		return buildStatus == corev1.ConditionFalse
+	}
+
+	return len(jobs) != 1 ||
+		len(jobs[0].Spec.Template.Spec.Containers) != 1 ||
+		// Compare image argument
+		!equalJobs(jobs[0], expectedJob) ||
+		!mapsEqual(expectedJob.GetLabels(), jobs[0].GetLabels()) ||
+		buildStatus == corev1.ConditionUnknown ||
+		buildStatus == corev1.ConditionFalse
+}
 
 func changeJob(ctx context.Context, su *statusUpdater, log logr.Logger, instance *serverlessv1alpha1.Function, newJob batchv1.Job, jobs []batchv1.Job) (ctrl.Result, error) {
 	jobsLen := len(jobs)
