@@ -925,6 +925,63 @@ func TestJSSubscriptionWithMaxInFlightChange(t *testing.T) {
 	}, 10*time.Second, 10*time.Millisecond)
 }
 
+// TestJSSubscriptionRedeliverWithFailedDispatch tests the redelivering
+// of event when the dispatch fails.
+func TestJSSubscriptionRedeliverWithFailedDispatch(t *testing.T) {
+	// given
+	testEnvironment := setupTestEnvironment(t)
+	jsBackend := testEnvironment.jsBackend
+	defer testEnvironment.natsServer.Shutdown()
+	defer testEnvironment.jsClient.natsConn.Close()
+	initErr := jsBackend.Initialize(nil)
+	require.NoError(t, initErr)
+
+	// create New Subscriber
+	subscriber := evtesting.NewSubscriber()
+	subscriber.Shutdown() // shutdown the subscriber intentionally
+	require.False(t, subscriber.IsRunning())
+
+	defaultSubsConfig := env.DefaultSubscriptionConfig{MaxInFlightMessages: 10}
+	// create a new Subscription
+	sub := evtesting.NewSubscription("sub", "foo",
+		evtesting.WithNotCleanFilter(),
+		evtesting.WithSinkURL(subscriber.SinkURL),
+		evtesting.WithStatusConfig(defaultSubsConfig),
+	)
+	addJSCleanEventTypesToStatus(sub, testEnvironment.cleaner, jsBackend)
+
+	// when
+	err := jsBackend.SyncSubscription(sub)
+
+	// then
+	require.NoError(t, err)
+
+	// when
+	// send an event
+	ev2data := "newsampledata"
+	require.NoError(t, SendEventToJetStream(jsBackend, ev2data))
+
+	// then
+	// it should have failed to dispatch
+	expectedEv2Data := fmt.Sprintf("\"%s\"", ev2data)
+	require.Error(t, subscriber.CheckEvent(expectedEv2Data))
+
+	// when
+	// start a new subscriber
+	subscriber = evtesting.NewSubscriber()
+	defer subscriber.Shutdown()
+	require.True(t, subscriber.IsRunning())
+	// and update sink in the subscription
+	sub.Spec.Sink = subscriber.SinkURL
+	require.NoError(t, jsBackend.SyncSubscription(sub))
+
+	// then
+	// the same event should be redelivered
+	require.Eventually(t, func() bool {
+		return subscriber.CheckEvent(expectedEv2Data) == nil
+	}, 60*time.Second, 5*time.Second)
+}
+
 // TestJSSubscriptionUsingCESDK tests that eventing works with Cloud events.
 func TestJSSubscriptionUsingCESDK(t *testing.T) {
 	// given
