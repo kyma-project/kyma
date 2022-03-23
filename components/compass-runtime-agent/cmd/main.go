@@ -3,6 +3,10 @@ package main
 import (
 	"context"
 	"encoding/json"
+	"github.com/kyma-incubator/compass/components/director/pkg/correlation"
+	"github.com/kyma-incubator/compass/components/director/pkg/str"
+
+	"github.com/google/uuid"
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/certificates"
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/compass"
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/compass/cache"
@@ -102,19 +106,19 @@ func main() {
 	compassConnectionSupervisor, err := controllerDependencies.InitializeController()
 	exitOnError(err, "Failed to initialize Controller")
 
-	//rtmConfig, err := configProvider.GetRuntimeConfig()
+	rtmConfig, err := configProvider.GetRuntimeConfig()
 
-	//var correlationID string
-	//
-	//if err == nil {
-	//	correlationID = rtmConfig.RuntimeId + "_" + uuid.New().String()
-	//} else {
-	//	correlationID = uuid.New().String() + "_" + uuid.New().String()
-	//}
-	//ctx := correlation.SaveCorrelationIDHeaderToContext(context.Background(), str.Ptr(correlation.RequestIDHeaderKey), str.Ptr(correlationID))
+	var correlationID string
+
+	if err == nil {
+		correlationID = rtmConfig.RuntimeId + "_" + uuid.New().String()
+	} else {
+		correlationID = uuid.New().String() + "_" + uuid.New().String()
+	}
+	ctx := correlation.SaveCorrelationIDHeaderToContext(context.Background(), str.Ptr(correlation.RequestIDHeaderKey), str.Ptr(correlationID))
 
 	log.Infoln("Initializing Compass Connection CR")
-	_, err = compassConnectionSupervisor.InitializeCompassConnection(context.Background())
+	_, err = compassConnectionSupervisor.InitializeCompassConnection(ctx)
 	exitOnError(err, "Failed to initialize Compass Connection CR")
 
 	log.Infoln("Initializing metrics logger")
