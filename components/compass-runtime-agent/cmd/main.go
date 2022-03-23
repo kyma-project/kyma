@@ -108,7 +108,16 @@ func main() {
 	exitOnError(err, "Failed to initialize Controller")
 
 	rtmConfig, err := configProvider.GetRuntimeConfig()
-	correlationID := rtmConfig.RuntimeId + "_" + uuid.New().String()
+
+	var runtimeId = ""
+
+	if err != nil {
+		runtimeId = rtmConfig.RuntimeId
+	} else {
+		runtimeId = "Uninitialised"
+	}
+
+	correlationID := runtimeId + "_" + uuid.New().String()
 	ctx := correlation.SaveCorrelationIDHeaderToContext(context.Background(), str.Ptr(correlation.RequestIDHeaderKey), str.Ptr(correlationID))
 
 	log.Infoln("Initializing Compass Connection CR")
