@@ -56,12 +56,12 @@ func (config DependencyConfig) InitializeController() (Supervisor, error) {
 		config.RuntimeURLsConfig,
 		config.ConnectionDataCache)
 
-	//runtimeConfig, err := config.ConfigProvider.GetRuntimeConfig()
-	//if err != nil {
-	//	return nil, errors.Wrap(err, "Unable to fetch runtime config")
-	//}
+	runtimeConfig, err := config.ConfigProvider.GetRuntimeConfig()
+	if err != nil {
+		return nil, errors.Wrap(err, "Unable to fetch runtime config")
+	}
 
-	if err := InitCompassConnectionController(config.ControllerManager, connectionSupervisor, config.MinimalCompassSyncTime, "just_id"); err != nil {
+	if err := InitCompassConnectionController(config.ControllerManager, connectionSupervisor, config.MinimalCompassSyncTime, runtimeConfig.RuntimeId); err != nil {
 		return nil, errors.Wrap(err, "Unable to register controllers to the manager")
 	}
 
