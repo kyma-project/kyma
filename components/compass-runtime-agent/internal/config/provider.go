@@ -57,7 +57,7 @@ func (p *provider) GetConnectionConfig() (ConnectionConfig, error) {
 func (p *provider) GetRuntimeConfig() (RuntimeConfig, error) {
 	configSecret, err := p.secretsRepo.Get(p.secretName)
 	if err != nil {
-		return RuntimeConfig{}, errors.WithMessagef(err, "Failed to read Runtime config from %s Secret", p.secretName)
+		return RuntimeConfig{}, nil //errors.WithMessagef(err, "Failed to read Runtime config from %s Secret", p.secretName)
 	}
 
 	return RuntimeConfig{
