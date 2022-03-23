@@ -1,0 +1,7 @@
+reviewers:
+  - service-mesh-reviewers
+approvers:
+  - service-mesh-approvers
+labels:
+- area/service-mesh
+- area/security

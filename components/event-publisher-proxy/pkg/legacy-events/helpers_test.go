@@ -2,70 +2,82 @@ package legacy
 
 import (
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestParseApplicationNameFromPath(t *testing.T) {
 	testCases := []struct {
-		name          string
-		inputPath     string
-		wantedAppName string
+		name           string
+		givenInputPath string
+		wantAppName    string
 	}{
 		{
-			name:          "should return application when correct path is used",
-			inputPath:     "/application/v1/events",
-			wantedAppName: "application",
+			name:           "should return application when correct path is used",
+			givenInputPath: "/application/v1/events",
+			wantAppName:    "application",
 		}, {
-			name:          "should return application when extra slash is in the path",
-			inputPath:     "//application/v1/events",
-			wantedAppName: "application",
+			name:           "should return application when extra slash is in the path",
+			givenInputPath: "//application/v1/events",
+			wantAppName:    "application",
 		},
 	}
 	for _, tc := range testCases {
+		tc := tc
 		t.Run(tc.name, func(t *testing.T) {
-			gotAppName := ParseApplicationNameFromPath(tc.inputPath)
-			if tc.wantedAppName != gotAppName {
-				t.Errorf("incorrect parsing, wanted: %s, got: %s", tc.wantedAppName, gotAppName)
-			}
+			t.Parallel()
+			gotAppName := ParseApplicationNameFromPath(tc.givenInputPath)
+			assert.Equal(t, tc.wantAppName, gotAppName)
 		})
 	}
 }
 
-func TestFormatEventType4BEB(t *testing.T) {
+func TestFormatEventType(t *testing.T) {
 	testCases := []struct {
-		eventTypePrefix   string
-		app               string
-		eventType         string
-		version           string
-		expectedEventType string
+		givenPrefix      string
+		givenApplication string
+		givenEventType   string
+		givenVersion     string
+		wantEventType    string
 	}{
 		{
-			eventTypePrefix:   "prefix",
-			app:               "app",
-			eventType:         "order.foo",
-			version:           "v1",
-			expectedEventType: "prefix.app.order.foo.v1",
+			givenPrefix:      "prefix",
+			givenApplication: "app",
+			givenEventType:   "order.foo",
+			givenVersion:     "v1",
+			wantEventType:    "prefix.app.order.foo.v1",
 		},
 		{
-			eventTypePrefix:   "prefix",
-			app:               "app",
-			eventType:         "order-foo",
-			version:           "v1",
-			expectedEventType: "prefix.app.order-foo.v1",
+			givenPrefix:      "prefix",
+			givenApplication: "app",
+			givenEventType:   "order-foo",
+			givenVersion:     "v1",
+			wantEventType:    "prefix.app.order-foo.v1",
 		},
 		{
-			eventTypePrefix:   "",
-			app:               "app",
-			eventType:         "order-foo",
-			version:           "v1",
-			expectedEventType: "app.order-foo.v1",
+			givenPrefix:      "prefix",
+			givenApplication: "app",
+			givenEventType:   "order-foo.bar@123",
+			givenVersion:     "v1",
+			wantEventType:    "prefix.app.order-foo.bar@123.v1",
+		},
+		{
+			givenPrefix:      "",
+			givenApplication: "app",
+			givenEventType:   "order-foo",
+			givenVersion:     "v1",
+			wantEventType:    "app.order-foo.v1",
+		},
+		{
+			givenPrefix:      "",
+			givenApplication: "app",
+			givenEventType:   "order-foo.bar@123",
+			givenVersion:     "v1",
+			wantEventType:    "app.order-foo.bar@123.v1",
 		},
 	}
-
 	for _, tc := range testCases {
-		gotEventType := formatEventType4BEB(tc.eventTypePrefix, tc.app, tc.eventType, tc.version)
-		if tc.expectedEventType != gotEventType {
-			t.Errorf("incorrect formatting of eventType: "+
-				"%s, wanted: %s got: %s", tc.eventType, tc.expectedEventType, gotEventType)
-		}
+		eventType := formatEventType(tc.givenPrefix, tc.givenApplication, tc.givenEventType, tc.givenVersion)
+		assert.Equal(t, tc.wantEventType, eventType)
 	}
 }

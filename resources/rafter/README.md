@@ -6,7 +6,7 @@ Rafter is a solution for storing and managing different types of files called as
 
 - Asset CR which manages a single asset or a package of assets
 - Bucket CR which manages buckets
-- AssetGroup CR which manages a group of Asset CRs of a specific type to make it easier to use and extract webhook information
+- Asset Group CR which manages a group of Asset CRs of a specific type to make it easier to use and extract webhook information
 
 Rafter enables you to manage assets using supported webhooks. For example, if you use Rafter to store a file such as a specification, you can additionally define a webhook service that Rafter should call before the file is sent to storage. The webhook service can:
 

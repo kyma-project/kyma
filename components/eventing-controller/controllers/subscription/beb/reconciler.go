@@ -10,6 +10,8 @@ import (
 	"strings"
 	"time"
 
+	equality "github.com/kyma-project/kyma/components/eventing-controller/controllers/subscription"
+
 	"github.com/kyma-project/kyma/components/eventing-controller/controllers/events"
 
 	"github.com/pkg/errors"
@@ -32,7 +34,6 @@ import (
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 	recerrors "github.com/kyma-project/kyma/components/eventing-controller/controllers/errors"
 	"github.com/kyma-project/kyma/components/eventing-controller/logger"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/application"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/constants"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/types"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
@@ -48,7 +49,7 @@ type Reconciler struct {
 	client.Client
 	logger            *logger.Logger
 	recorder          record.EventRecorder
-	Backend           handlers.MessagingBackend
+	Backend           handlers.BEBBackend
 	Domain            string
 	eventTypeCleaner  eventtype.Cleaner
 	oauth2credentials *handlers.OAuth2ClientCredentials
@@ -70,21 +71,20 @@ const (
 	timeoutRetryActiveEmsStatus = time.Second * 30
 )
 
-func NewReconciler(ctx context.Context, client client.Client, applicationLister *application.Lister, logger *logger.Logger, recorder record.EventRecorder, cfg env.Config, credential *handlers.OAuth2ClientCredentials, mapper handlers.NameMapper) *Reconciler {
-	bebHandler := handlers.NewBEB(credential, mapper, logger)
-	if err := bebHandler.Initialize(cfg); err != nil {
+func NewReconciler(ctx context.Context, client client.Client, logger *logger.Logger, recorder record.EventRecorder, cfg env.Config,
+	cleaner eventtype.Cleaner, bebBackend handlers.BEBBackend, credential *handlers.OAuth2ClientCredentials, mapper handlers.NameMapper) *Reconciler {
+	if err := bebBackend.Initialize(cfg); err != nil {
 		logger.WithContext().Errorw("start reconciler failed", "name", reconcilerName, "error", err)
 		panic(err)
 	}
-
 	return &Reconciler{
 		ctx:               ctx,
 		Client:            client,
 		logger:            logger,
 		recorder:          recorder,
-		Backend:           bebHandler,
+		Backend:           bebBackend,
 		Domain:            cfg.Domain,
-		eventTypeCleaner:  eventtype.NewCleaner(cfg.EventTypePrefix, applicationLister, logger),
+		eventTypeCleaner:  cleaner,
 		oauth2credentials: credential,
 		nameMapper:        mapper,
 	}
@@ -203,7 +203,7 @@ func (r *Reconciler) updateSubscription(ctx context.Context, subscription *event
 func (r *Reconciler) emitConditionEvents(oldSubscription, newSubscription *eventingv1alpha1.Subscription, logger *zap.SugaredLogger) {
 	for _, condition := range newSubscription.Status.Conditions {
 		oldCondition := oldSubscription.Status.FindCondition(condition.Type)
-		if oldCondition != nil && conditionEquals(*oldCondition, condition) {
+		if oldCondition != nil && equality.ConditionEquals(*oldCondition, condition) {
 			continue
 		}
 		// condition is modified, so emit an event
@@ -215,7 +215,7 @@ func (r *Reconciler) emitConditionEvents(oldSubscription, newSubscription *event
 // updateStatus updates the status to k8s if modified
 func (r *Reconciler) updateStatus(ctx context.Context, oldSubscription, newSubscription *eventingv1alpha1.Subscription, logger *zap.SugaredLogger) error {
 	// compare the status taking into consideration lastTransitionTime in conditions
-	if isSubscriptionStatusEqual(oldSubscription.Status, newSubscription.Status) {
+	if equality.IsSubscriptionStatusEqual(oldSubscription.Status, newSubscription.Status) {
 		return nil
 	}
 
@@ -754,7 +754,7 @@ func (r *Reconciler) replaceStatusCondition(subscription *eventingv1alpha1.Subsc
 	}
 
 	// prevent unnecessary updates
-	if conditionsEquals(subscription.Status.Conditions, desiredConditions) && subscription.Status.Ready == isReady {
+	if equality.ConditionsEquals(subscription.Status.Conditions, desiredConditions) && subscription.Status.Ready == isReady {
 		return false
 	}
 

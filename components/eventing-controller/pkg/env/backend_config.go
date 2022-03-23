@@ -30,6 +30,7 @@ type PublisherConfig struct {
 	LimitsCPU              string `envconfig:"PUBLISHER_LIMITS_CPU" default:"100m"`
 	LimitsMemory           string `envconfig:"PUBLISHER_LIMITS_MEMORY" default:"128Mi"`
 	EnableJetStreamBackend bool   `envconfig:"ENABLE_JETSTREAM_BACKEND" default:"false"`
+	PriorityClassName      string `envconfig:"PUBLISHER_PRIORITY_CLASS_NAME" default:""`
 }
 
 type DefaultSubscriptionConfig struct {

@@ -5,17 +5,24 @@ global:
   images:
     eventing_controller:
       name: eventing-controller
-      version: PR-13494
+      version: PR-13667
       pullPolicy: "IfNotPresent"
     publisher_proxy:
       name: event-publisher-proxy
-      version: PR-13469
+      version: 2a7740a1
     nats:
       name: nats
-      version: 2.6.5-alpine
+      version: 2.7.4-alpine
       directory: external
-  features:
-    enableJetStream: false
+    nats_config_reloader:
+      name: natsio/nats-server-config-reloader
+      version: 0.6.3
+      directory: external
+
+  jetstream:
+    enabled: false
+    # Storage type of the stream, memory or file.
+    storage: memory
 
   # secretName defines optionally another name than the default secret name
   secretName: ""
@@ -57,6 +64,3 @@ authentication:
   publishUrl: ""
   # bebNamespace is the name of the namespace BEB is provisioned with
   bebNamespace: ""
-
-jetStream:
-  streamName: kyma-eventing

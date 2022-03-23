@@ -1,5 +1,5 @@
 const k8s = require('@kubernetes/client-node');
-const {assert} = require('chai');
+const {assert, expect} = require('chai');
 const fs = require('fs');
 const path = require('path');
 const {
@@ -28,6 +28,7 @@ function loadResourceFromFile(file) {
 }
 
 const logPipelineCR = loadResourceFromFile('./log-pipeline.yaml');
+const invalidLogPipelineCR = loadResourceFromFile('./invalid-log-pipeline.yaml');
 const mockserverResources = loadResourceFromFile('./mockserver-resources.yaml');
 
 function assertMockserverWasCalled() {
@@ -71,18 +72,27 @@ describe('Telemetry Operator tests', function() {
         undefined,
         undefined,
         undefined,
-        'control-plane=telemetry-operator-controller-manager',
+        'control-plane=telemetry-operator',
     );
     const podList = res.body.items;
     assert.equal(podList.length, 1);
   });
 
-  it('Apply HTTP output plugin to fluent-bit', async () => {
+  it('Should reject the invalid LogPipeline', async () => {
+    try {
+      await k8sApply(invalidLogPipelineCR, telemetryNamespace);
+    } catch (e) {
+      assert.equal(e.statusCode, 403);
+      expect(e.body.message).to.have.string('denied the request', 'Invalid indentation level');
+    };
+  });
+
+  it('Should create valid LogPipeline with HTTP output plugin', async () => {
     await k8sApply(logPipelineCR, telemetryNamespace);
     await waitForDaemonSet(fluentBitName, telemetryNamespace, 30000);
   });
 
-  it('Should receive HTTP traffic from fluent-bit', async () => {
+  it('Mockserver should receive HTTP traffic from fluent-bit', async () => {
     await sleep(30000);
     await assertMockserverWasCalled(true);
   });

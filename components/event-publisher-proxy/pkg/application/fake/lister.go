@@ -13,7 +13,7 @@ import (
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/application"
 )
 
-func NewListerOrDie(ctx context.Context, app *applicationv1alpha1.Application) *application.Lister {
+func NewApplicationListerOrDie(ctx context.Context, app *applicationv1alpha1.Application) *application.Lister {
 	scheme := setupSchemeOrDie()
 	dynamicClient := dynamicfake.NewSimpleDynamicClient(scheme, app)
 	return application.NewLister(ctx, dynamicClient)

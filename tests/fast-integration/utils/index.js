@@ -366,7 +366,6 @@ async function k8sApply(resources, namespace, patch = true) {
             debug(resource.kind, resource.metadata.name, 'created');
           } catch (createError) {
             debug(resource.kind, resource.metadata.name, 'failed to create');
-            console.log(createError);
             throw createError;
           }
         } else {
@@ -1811,4 +1810,5 @@ module.exports = {
   deleteEventingBackendK8sSecret,
   getTraceDAG,
   printStatusOfInClusterEventingInfrastructure,
+  getFunction,
 };

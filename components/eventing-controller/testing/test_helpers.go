@@ -2,6 +2,7 @@ package testing
 
 import (
 	"fmt"
+	"net"
 	"net/http"
 
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
@@ -64,6 +65,21 @@ const (
 )
 
 type APIRuleOption func(r *apigatewayv1alpha1.APIRule)
+
+// GetFreePort determines a free port on the host. It does so by delegating the job to net.ListenTCP.
+// Then providing a port of 0 to net.ListenTCP, it will automatically choose a port for us.
+func GetFreePort() (port int, err error) {
+	var a *net.TCPAddr
+	if a, err = net.ResolveTCPAddr("tcp", "localhost:0"); err == nil {
+		var l *net.TCPListener
+		if l, err = net.ListenTCP("tcp", a); err == nil {
+			port := l.Addr().(*net.TCPAddr).Port
+			err = l.Close()
+			return port, err
+		}
+	}
+	return
+}
 
 // NewAPIRule returns a valid APIRule
 func NewAPIRule(subscription *eventingv1alpha1.Subscription, opts ...APIRuleOption) *apigatewayv1alpha1.APIRule {
@@ -137,22 +153,6 @@ func MarkReady(r *apigatewayv1alpha1.APIRule) {
 	}
 }
 
-type SubscriptionOpt func(subscription *eventingv1alpha1.Subscription)
-
-func NewSubscription(name, namespace string, opts ...SubscriptionOpt) *eventingv1alpha1.Subscription {
-	newSub := &eventingv1alpha1.Subscription{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      name,
-			Namespace: namespace,
-		},
-		Spec: eventingv1alpha1.SubscriptionSpec{},
-	}
-	for _, o := range opts {
-		o(newSub)
-	}
-	return newSub
-}
-
 type ProtoOpt func(p *eventingv1alpha1.ProtocolSettings)
 
 func NewProtocolSettings(opts ...ProtoOpt) *eventingv1alpha1.ProtocolSettings {
@@ -197,6 +197,22 @@ func WithDefaultWebhookAuth() ProtoOpt {
 	}
 }
 
+type SubscriptionOpt func(subscription *eventingv1alpha1.Subscription)
+
+func NewSubscription(name, namespace string, opts ...SubscriptionOpt) *eventingv1alpha1.Subscription {
+	newSub := &eventingv1alpha1.Subscription{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      name,
+			Namespace: namespace,
+		},
+		Spec: eventingv1alpha1.SubscriptionSpec{},
+	}
+	for _, o := range opts {
+		o(newSub)
+	}
+	return newSub
+}
+
 func NewBEBSubscription(name, contentMode string, webhookURL string, events types.Events, webhookAuth *types.WebhookAuth) *types.Subscription {
 	return &types.Subscription{
 		Name:            name,
@@ -224,6 +240,27 @@ func WithFakeSubscriptionStatus() SubscriptionOpt {
 				Message: "foo-message",
 			},
 		}
+	}
+}
+
+func WithSink(sink string) SubscriptionOpt {
+	return func(sub *eventingv1alpha1.Subscription) {
+		sub.Spec.Sink = sink
+	}
+}
+func WithConditions(conditions []eventingv1alpha1.Condition) SubscriptionOpt {
+	return func(sub *eventingv1alpha1.Subscription) {
+		sub.Status.Conditions = conditions
+	}
+}
+func WithStatus(status bool) SubscriptionOpt {
+	return func(sub *eventingv1alpha1.Subscription) {
+		sub.Status.Ready = status
+	}
+}
+func WithFinalizers(finalizers []string) SubscriptionOpt {
+	return func(sub *eventingv1alpha1.Subscription) {
+		sub.ObjectMeta.Finalizers = finalizers
 	}
 }
 
@@ -535,22 +572,29 @@ func NewEventingControllerPod(backend string) *corev1.Pod {
 	}
 }
 
+// WithMultipleConditions is a SubscriptionOpt for creating Subscriptions with multiple conditions.
 func WithMultipleConditions() SubscriptionOpt {
 	return func(s *eventingv1alpha1.Subscription) {
-		s.Status.Conditions = NewDefaultMultipleConditions()
+		s.Status.Conditions = MultipleDefaultConditions()
 	}
 }
 
-func NewDefaultMultipleConditions() []eventingv1alpha1.Condition {
-	cond1 := eventingv1alpha1.MakeCondition(
+func MultipleDefaultConditions() []eventingv1alpha1.Condition {
+	return []eventingv1alpha1.Condition{CustomReadyCondition("One"), CustomReadyCondition("Two")}
+}
+
+func CustomReadyCondition(msg string) eventingv1alpha1.Condition {
+	return eventingv1alpha1.MakeCondition(
 		eventingv1alpha1.ConditionSubscriptionActive,
 		eventingv1alpha1.ConditionReasonNATSSubscriptionActive,
-		v1.ConditionTrue, "cond1")
-	cond2 := eventingv1alpha1.MakeCondition(
+		v1.ConditionTrue, msg)
+}
+
+func DefaultReadyCondition() eventingv1alpha1.Condition {
+	return eventingv1alpha1.MakeCondition(
 		eventingv1alpha1.ConditionSubscriptionActive,
 		eventingv1alpha1.ConditionReasonNATSSubscriptionActive,
-		v1.ConditionTrue, "cond2")
-	return []eventingv1alpha1.Condition{cond1, cond2}
+		v1.ConditionTrue, "")
 }
 
 // ToSubscription converts an unstructured subscription into a typed one

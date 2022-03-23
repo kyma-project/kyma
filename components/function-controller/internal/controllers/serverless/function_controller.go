@@ -20,15 +20,6 @@ const (
 	FunctionDepsKey   = "dependencies"
 )
 
-var (
-	// shared between all runtimes
-	envVarsForDeployment = []corev1.EnvVar{
-		{Name: "FUNC_HANDLER", Value: "main"},
-		{Name: "MOD_NAME", Value: "handler"},
-		{Name: "FUNC_PORT", Value: "8080"},
-	}
-)
-
 func (r *FunctionReconciler) mapsEqual(existing, expected map[string]string) bool {
 	if len(existing) != len(expected) {
 		return false

@@ -266,7 +266,6 @@ async function checkEventTracing(targetNamespace = 'test', res) {
   const traceId = res.data.event.headers['x-b3-traceid'];
 
   // Define expected trace data
-  const correctTraceSpansLength = 6;
   const correctTraceProcessSequence = [
     'istio-ingressgateway.istio-system',
     'central-application-connectivity-validator.kyma-system',
@@ -275,10 +274,9 @@ async function checkEventTracing(targetNamespace = 'test', res) {
     'eventing-controller.kyma-system',
     `lastorder-${res.data.podName.split('-')[1]}.${targetNamespace}`,
   ];
-
-  // wait sometime for jaeger to complete tracing data
+  // wait some time for jaeger to complete tracing data
   await sleep(10 * 1000);
-  await checkTrace(traceId, correctTraceSpansLength, correctTraceProcessSequence);
+  await checkTrace(traceId, correctTraceProcessSequence);
 }
 
 async function sendLegacyEventAndCheckTracing(targetNamespace = 'test', mockNamespace = 'mocks') {
@@ -314,9 +312,9 @@ async function checkInClusterEventTracing(targetNamespace) {
   const traceId = res.data.event.headers['x-b3-traceid'];
 
   // Define expected trace data
-  const correctTraceSpansLength = 4;
   const correctTraceProcessSequence = [
     // We are sending the in-cluster event from inside the lastorder pod
+    'istio-ingressgateway.istio-system',
     `lastorder-${res.data.podName.split('-')[1]}.${targetNamespace}`,
     'eventing-publisher-proxy.kyma-system',
     'eventing-controller.kyma-system',
@@ -325,11 +323,11 @@ async function checkInClusterEventTracing(targetNamespace) {
 
   // wait sometime for jaeger to complete tracing data
   await sleep(10 * 1000);
-  await checkTrace(traceId, correctTraceSpansLength, correctTraceProcessSequence);
+  await checkTrace(traceId, correctTraceProcessSequence);
 }
 
-async function checkTrace(traceId, expectedTraceLength, expectedTraceProcessSequence) {
-  // Port-forward to Jaeger and fetch trace data for the traceId
+async function checkTrace(traceId, expectedTraceProcessSequence) {
+  // port-forward to Jaeger and fetch trace data for the traceId
   const cancelJaegerPortForward = await jaegerPortForward();
   let traceRes;
   try {
@@ -341,29 +339,39 @@ async function checkTrace(traceId, expectedTraceLength, expectedTraceProcessSequ
   // the trace response should have data for single trace
   expect(traceRes.data).to.have.length(1);
 
-  // Extract trace data from response
+  // extract trace data from response
   const traceData = traceRes.data[0];
-  expect(traceData['spans']).to.have.length(expectedTraceLength);
+  expect(traceData['spans'].length).to.be.gte(expectedTraceProcessSequence.length);
 
-  // Generate DAG for trace spans
+  // generate DAG for trace spans
   const traceDAG = await getTraceDAG(traceData);
   expect(traceDAG).to.have.length(1);
 
-  // Check the tracing spans are correct
-  let currentSpan = traceDAG[0];
-  for (let i = 0; i < expectedTraceLength; i++) {
-    const processServiceName = traceData.processes[currentSpan.processID].serviceName;
-    debug(`Checking Trace Sequence # ${i}:
-    Expected process: ${expectedTraceProcessSequence[i]}, 
-    Received process: ${processServiceName}`);
-    expect(processServiceName).to.be.equal(expectedTraceProcessSequence[i]);
+  // searching through the trace-graph for the expected span sequence staring at the root element
+  const wasFound = await findSpanSequence(expectedTraceProcessSequence, 0, traceDAG[0], traceData);
+  expect(wasFound).to.be.true;
+}
 
-    // Traverse to next trace span
-    if (i < expectedTraceLength - 1) {
-      expect(currentSpan.childSpans).to.have.length(1);
-      currentSpan = currentSpan.childSpans[0];
+// findSpanSequence recursively searches through the trace-graph to find all expected spans in the right, consecutive
+// order while ignoring the spans that are not expected.
+async function findSpanSequence(expectedSpans, pos, currentSpan, traceData) {
+  // if this span contains the currently expected span, the position will be increased
+  const newPos = pos + (traceData.processes[currentSpan.processID].serviceName === expectedSpans[pos] ? 1 : 0);
+
+  // check if all traces have been found yet
+  if (newPos === expectedSpans.length) {
+    return true;
+  }
+
+  // recursive search through all the child spans
+  for (let i = 0; i < currentSpan.childSpans.length; i++) {
+    if (await findSpanSequence(expectedSpans, newPos, currentSpan.childSpans[i], traceData)) {
+      return true;
     }
   }
+
+  // if nothing was found on this branch of the graph, close it
+  return false;
 }
 
 async function addService() {
@@ -539,12 +547,14 @@ async function connectCommerceMock(mockHost, tokenData) {
   }
 }
 
-async function ensureCommerceMockWithCompassTestFixture(client,
+async function ensureCommerceMockWithCompassTestFixture(
+    client,
     appName,
     scenarioName,
     mockNamespace,
     targetNamespace,
-    withCentralApplicationConnectivity = false) {
+    withCentralApplicationConnectivity = false,
+    compassScenarioAlreadyExist = false) {
   const lastOrderFunction = withCentralApplicationConnectivity ?
     prepareFunction('central-app-gateway-compass', `mp-${appName}`) :
     prepareFunction();
@@ -554,8 +564,11 @@ async function ensureCommerceMockWithCompassTestFixture(client,
       mockNamespace,
       targetNamespace,
       lastOrderFunction);
-  await retryPromise(() => connectMockCompass(client, appName, scenarioName, mockHost, targetNamespace), 10, 3000);
-  await retryPromise(() => registerAllApis(mockHost), 10, 3000);
+  await retryPromise(() => connectMockCompass(client, appName, scenarioName, mockHost, targetNamespace), 10, 30000);
+  // do not register the apis again for an already existing compass scenario
+  if (!compassScenarioAlreadyExist) {
+    await retryPromise(() => registerAllApis(mockHost), 10, 30000);
+  }
 
   const commerceSC = await waitForServiceClass(appName, targetNamespace, 300 * 1000);
   await waitForServicePlanByServiceClass(commerceSC.metadata.name, targetNamespace, 300 * 1000);
@@ -646,8 +659,8 @@ async function ensureCommerceMockLocalTestFixture(mockNamespace,
       mockNamespace,
       targetNamespace,
     withCentralApplicationConnectivity ? prepareFunction('central-app-gateway') : prepareFunction());
-  await retryPromise(() => connectMockLocal(mockHost, targetNamespace), 10, 3000);
-  await retryPromise(() => registerAllApis(mockHost), 10, 3000);
+  await retryPromise(() => connectMockLocal(mockHost, targetNamespace), 10, 30000);
+  await retryPromise(() => registerAllApis(mockHost), 10, 30000);
 
   if (withCentralApplicationConnectivity) {
     await waitForDeployment('central-application-gateway', 'kyma-system');
@@ -826,6 +839,9 @@ async function checkInClusterEventDeliveryHelper(targetNamespace, encoding) {
       params: {
         send: true,
         encoding: encoding,
+      },
+      headers: {
+        'X-B3-Sampled': 1,
       },
     });
     debug('Event publishing result:', {

@@ -15,7 +15,6 @@ const {
   genRandom,
   initializeK8sClient,
   switchDebug,
-  waitForJob,
   printContainerLogs,
   waitForDeployment,
 } = require('../utils');
@@ -103,6 +102,10 @@ describe('SKR SVCAT migration test', function() {
     await t.checkPodPresetEnvInjected();
   });
 
+  it('Should print the container logs of the sm proxy', async function() {
+    await printContainerLogs('app=service-broker-proxy-k8s', 'service-broker-proxy-k8s', 'kyma-system');
+  });
+
   it('Should mark the platform for migration in Service Manager', async function() {
     await t.markForMigration(smAdminCreds, platformCreds.clusterId, btpOperatorCreds.instanceId);
   });
@@ -111,16 +114,18 @@ describe('SKR SVCAT migration test', function() {
     await updateSKR(keb, kcp, gardener, instanceID, skr.shoot.name, null, updateTimeout, btpOperatorCreds, true);
   });
 
+  it('Should get Runtime Status after patch with BTP Operator Credentials', async function() {
+    const runtimeStatus = await kcp.getRuntimeStatusOperations(instanceID);
+    console.log(`\nRuntime status after patch: ${runtimeStatus}`);
+    await kcp.reconcileInformationLog(runtimeStatus);
+  });
+
   it('Should wait for btp-operator deployment availability', async function() {
     await waitForDeployment('sap-btp-operator-controller-manager', 'kyma-system', 10 * 60 * 1000); // 10 minutes
   });
 
-  it('Should wait for migration job to finish', async function() {
-    await waitForJob('sap-btp-operator-migration', 'kyma-system', 10 * 60 * 1000); // 10 minutes
-  });
-
-  it('Should print the container logs of the migration job', async function() {
-    await printContainerLogs('job-name=sap-btp-operator-migration', 'migration', 'kyma-system');
+  it('Should check migrated BTP resources', async function() {
+    await t.checkMigratedBTPResources();
   });
 
   it('Should still contain pod presets and the secrets', async function() {
@@ -134,10 +139,9 @@ describe('SKR SVCAT migration test', function() {
     await t.restartFunctionsPods();
   });
 
-  it('Should check if pod presets injected secrets in functions containers are present after migration',
-      async function() {
-        await t.checkPodPresetEnvInjected();
-      });
+  it('Should check if presets injected secrets in func containers are present after migration', async function() {
+    await t.checkPodPresetEnvInjected();
+  });
 
   it('Should destroy sample service catalog resources', async function() {
     await sampleResources.destroy();

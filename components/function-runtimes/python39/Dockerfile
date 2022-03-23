@@ -7,7 +7,7 @@
 # We use this code to manually use newest alpine and nodejs.
 # Use official build when it will be available.
 
-FROM alpine:3.14.2
+FROM alpine:3.15.1
 
 SHELL ["/bin/ash", "-o", "pipefail", "-c"]
 
@@ -148,6 +148,9 @@ RUN set -ex; \
 # Serverless
 
 LABEL source = git@github.com:kyma-project/kyma.git
+
+# build-base and linux-headers are needed to install all requirements
+RUN apk add --no-cache --virtual .build-deps build-base linux-headers 
 
 COPY kubeless/requirements.txt /kubeless/requirements.txt
 RUN pip install --no-cache-dir -r /kubeless/requirements.txt

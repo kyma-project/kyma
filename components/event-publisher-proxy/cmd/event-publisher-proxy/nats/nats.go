@@ -3,8 +3,15 @@ package nats
 import (
 	"context"
 
+	"k8s.io/client-go/dynamic"
+	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp" // TODO: remove as this is only required in a dev setup
+	"sigs.k8s.io/controller-runtime/pkg/client/config"
+
 	"github.com/kelseyhightower/envconfig"
+	"github.com/sirupsen/logrus"
+
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/application"
+	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/cloudevents/eventtype"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/env"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/handler/nats"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/informers"
@@ -16,10 +23,6 @@ import (
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/sender"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/signals"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/subscribed"
-	"github.com/sirupsen/logrus"
-	"k8s.io/client-go/dynamic"
-	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp" // TODO: remove as this is only required in a dev setup
-	"sigs.k8s.io/controller-runtime/pkg/client/config"
 )
 
 // Commander implements the Commander interface.
@@ -62,15 +65,19 @@ func (c *Commander) Start() error {
 	messageReceiver := receiver.NewHTTPMessageReceiver(c.envCfg.Port)
 
 	// connect to nats
-	bc := pkgnats.NewBackendConnection(c.envCfg.URL, c.envCfg.RetryOnFailedConnect, c.envCfg.MaxReconnects, c.envCfg.ReconnectWait)
-	if err := bc.Connect(); err != nil {
+	connection, err := pkgnats.Connect(c.envCfg.URL,
+		pkgnats.WithRetryOnFailedConnect(c.envCfg.RetryOnFailedConnect),
+		pkgnats.WithMaxReconnects(c.envCfg.MaxReconnects),
+		pkgnats.WithReconnectWait(c.envCfg.ReconnectWait),
+	)
+	if err != nil {
 		c.logger.Errorf("Failed to connect to NATS server with error: %s", err)
 		return err
 	}
-	defer bc.Connection.Close()
+	defer connection.Close()
 
 	// configure message sender
-	messageSenderToNats := sender.NewNatsMessageSender(ctx, bc, c.logger)
+	messageSenderToNats := sender.NewNatsMessageSender(ctx, connection, c.logger)
 
 	// cluster config
 	k8sConfig := config.GetConfigOrDie()
@@ -100,9 +107,12 @@ func (c *Commander) Start() error {
 	informers.WaitForCacheSyncOrDie(ctx, subDynamicSharedInfFactory)
 	c.logger.Info("Informers are synced successfully")
 
+	// configure event type cleaner
+	eventTypeCleaner := eventtype.NewCleaner(c.envCfg.LegacyEventTypePrefix, applicationLister, c.logger)
+
 	// start handler which blocks until it receives a shutdown signal
 	if err := nats.NewHandler(messageReceiver, messageSenderToNats, c.envCfg.RequestTimeout, legacyTransformer, c.opts,
-		subscribedProcessor, c.logger, c.metricsCollector).Start(ctx); err != nil {
+		subscribedProcessor, c.logger, c.metricsCollector, eventTypeCleaner).Start(ctx); err != nil {
 		c.logger.Errorf("Start handler failed with error: %s", err)
 		return err
 	}
