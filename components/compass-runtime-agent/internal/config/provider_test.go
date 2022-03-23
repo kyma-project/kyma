@@ -93,12 +93,12 @@ func TestProvider_Errors(t *testing.T) {
 		assert.Empty(t, connectionConfig)
 	})
 
-	//t.Run("should return error when failed to get config map for Runtime config", func(t *testing.T) {
-	//	// when
-	//	runtimeConfig, err := configProvider.GetRuntimeConfig()
-	//
-	//	// then
-	//	require.Error(t, err)
-	//	assert.Empty(t, runtimeConfig)
-	//})
+	t.Run("should return error when failed to get config map for Runtime config", func(t *testing.T) {
+		// when
+		runtimeConfig, err := configProvider.GetRuntimeConfig()
+
+		// then
+		require.Error(t, err)
+		assert.Empty(t, runtimeConfig)
+	})
 }
