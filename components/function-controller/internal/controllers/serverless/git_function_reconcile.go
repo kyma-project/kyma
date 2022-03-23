@@ -150,14 +150,7 @@ func (r *gitFunctionReconciler) readGITOptions(ctx context.Context, instance *se
 	}, nil
 }
 
-func (r *gitFunctionReconciler) buildImageAddress(instance *serverlessv1alpha1.Function, registryAddress string) string {
-
-	imageTag := r.calculateGitImageTag(instance)
-
-	return fmt.Sprintf("%s/%s-%s:%s", registryAddress, instance.Namespace, instance.Name, imageTag)
-}
-
-func (r *gitFunctionReconciler) calculateGitImageTag(instance *serverlessv1alpha1.Function) string {
+func calculateGitImageTag(instance *serverlessv1alpha1.Function) string {
 	data := strings.Join([]string{
 		string(instance.GetUID()),
 		instance.Status.Commit,
@@ -169,7 +162,7 @@ func (r *gitFunctionReconciler) calculateGitImageTag(instance *serverlessv1alpha
 }
 
 func (r *gitFunctionReconciler) buildGitJob(instance *serverlessv1alpha1.Function, gitOptions git.Options, rtmConfig runtime.Config, dockerConfig DockerConfig) batchv1.Job {
-	imageName := r.buildImageAddress(instance, dockerConfig.PushAddress)
+	imageName := buildImageAddress(instance, dockerConfig.PushAddress)
 	args := r.config.Build.ExecutorArgs
 	args = append(args, fmt.Sprintf("%s=%s", destinationArg, imageName), fmt.Sprintf("--context=dir://%s", workspaceMountPath))
 
@@ -284,7 +277,7 @@ func (r *gitFunctionReconciler) getGitBuildJobVolumeMounts(instance *serverlessv
 }
 
 func (r *gitFunctionReconciler) isOnJobChange(instance *serverlessv1alpha1.Function, rtmCfg runtime.Config, jobs []batchv1.Job, deployments []appsv1.Deployment, gitOptions git.Options, dockerConfig DockerConfig) bool {
-	image := r.buildImageAddress(instance, dockerConfig.PullAddress)
+	image := buildImageAddress(instance, dockerConfig.PullAddress)
 	buildStatus := getConditionStatus(instance.Status.Conditions, serverlessv1alpha1.ConditionBuildReady)
 
 	expectedJob := r.buildGitJob(instance, gitOptions, rtmCfg, dockerConfig)

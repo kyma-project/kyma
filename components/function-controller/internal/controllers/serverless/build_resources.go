@@ -1,8 +1,10 @@
 package serverless
 
 import (
+	"crypto/sha256"
 	"fmt"
 	"path"
+	"strings"
 
 	"github.com/kyma-project/kyma/components/function-controller/internal/controllers/serverless/runtime"
 	"github.com/kyma-project/kyma/components/function-controller/internal/git"
@@ -56,7 +58,7 @@ func buildJob(instance *serverlessv1alpha1.Function, rtmConfig runtime.Config, c
 	rootUser := int64(0)
 	optional := true
 
-	imageName := buildInlineImageAddress(instance, dockerConfig.PushAddress)
+	imageName := buildImageAddress(instance, dockerConfig.PushAddress)
 	args := config.Build.ExecutorArgs
 	args = append(args, fmt.Sprintf("%s=%s", destinationArg, imageName), fmt.Sprintf("--context=dir://%s", workspaceMountPath))
 
@@ -249,7 +251,7 @@ func buildDeploymentEnvs(namespace string, config FunctionConfig) []corev1.EnvVa
 }
 
 func buildDeployment(instance *serverlessv1alpha1.Function, rtmConfig runtime.Config, dockerConfig DockerConfig, config FunctionConfig) appsv1.Deployment {
-	imageName := buildInlineImageAddress(instance, dockerConfig.PullAddress)
+	imageName := buildImageAddress(instance, dockerConfig.PullAddress)
 	deploymentLabels := functionLabels(instance)
 	podLabels := podLabels(instance)
 
@@ -421,9 +423,27 @@ func defaultReplicas(spec serverlessv1alpha1.FunctionSpec) (int32, int32) {
 	return min, max
 }
 
-func buildInlineImageAddress(instance *serverlessv1alpha1.Function, registryAddress string) string {
-	imageTag := calculateInlineImageTag(instance)
+func buildImageAddress(instance *serverlessv1alpha1.Function, registryAddress string) string {
+	var imageTag string
+
+	// this is not easy to split, but can be refactored later with helper functions
+	if instance.Spec.Type == serverlessv1alpha1.SourceTypeGit {
+		imageTag = calculateGitImageTag(instance)
+	} else {
+		imageTag = calculateInlineImageTag(instance)
+	}
 	return fmt.Sprintf("%s/%s-%s:%s", registryAddress, instance.Namespace, instance.Name, imageTag)
+}
+
+func calculateInlineImageTag(instance *serverlessv1alpha1.Function) string {
+	hash := sha256.Sum256([]byte(strings.Join([]string{
+		string(instance.GetUID()),
+		instance.Spec.Source,
+		instance.Spec.Deps,
+		string(instance.Status.Runtime),
+	}, "-")))
+
+	return fmt.Sprintf("%x", hash)
 }
 
 func functionLabels(instance *serverlessv1alpha1.Function) map[string]string {

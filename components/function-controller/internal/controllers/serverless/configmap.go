@@ -58,7 +58,7 @@ func updateConfigMap(ctx context.Context, su *statusUpdater, log logr.Logger, in
 }
 
 func isOnConfigMapChange(instance *serverlessv1alpha1.Function, rtm runtime.Runtime, configMaps []corev1.ConfigMap, deployments []appsv1.Deployment, dockerConfig DockerConfig) bool {
-	image := buildInlineImageAddress(instance, dockerConfig.PullAddress)
+	image := buildImageAddress(instance, dockerConfig.PullAddress)
 	configurationStatus := getConditionStatus(instance.Status.Conditions, serverlessv1alpha1.ConditionConfigurationReady)
 
 	if len(deployments) == 1 &&

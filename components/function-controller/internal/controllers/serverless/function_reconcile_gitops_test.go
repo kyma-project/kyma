@@ -300,7 +300,7 @@ func TestGitOps(t *testing.T) {
 			g.Expect(len(deployments.Items)).To(gomega.Equal(1))
 
 			deployment := &deployments.Items[0]
-			expectedImage := buildInlineImageAddress(function, "registry.kyma.local")
+			expectedImage := buildImageAddress(function, "registry.kyma.local")
 			g.Expect(deployment).To(gomega.Not(gomega.BeNil()))
 			g.Expect(deployment).To(haveSpecificContainer0Image(expectedImage))
 			g.Expect(deployment).To(haveLabelLen(7))

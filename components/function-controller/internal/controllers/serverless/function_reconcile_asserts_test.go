@@ -113,7 +113,7 @@ func assertSuccessfulFunctionDeployment(t *testing.T, resourceClient resource.Cl
 	deployment := &deployments.Items[0]
 	g.Expect(deployment).ToNot(gomega.BeNil())
 	g.Expect(deployment.Spec.Template.Spec.Containers).To(gomega.HaveLen(1))
-	g.Expect(deployment.Spec.Template.Spec.Containers[0].Image).To(gomega.Equal(buildInlineImageAddress(function, registryAddress)))
+	g.Expect(deployment.Spec.Template.Spec.Containers[0].Image).To(gomega.Equal(buildImageAddress(function, registryAddress)))
 	g.Expect(deployment.Spec.Template.Labels).To(gomega.HaveLen(7))
 	g.Expect(deployment.Spec.Template.Labels[serverlessv1alpha1.FunctionNameLabel]).To(gomega.Equal(function.Name))
 	g.Expect(deployment.Spec.Template.Labels[serverlessv1alpha1.FunctionManagedByLabel]).To(gomega.Equal(serverlessv1alpha1.FunctionControllerValue))

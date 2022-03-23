@@ -25,7 +25,7 @@ import (
 var fcManagedByLabel = map[string]string{serverlessv1alpha1.FunctionManagedByLabel: serverlessv1alpha1.FunctionControllerValue}
 
 func isOnJobChange(instance *serverlessv1alpha1.Function, rtmCfg runtime.Config, jobs []batchv1.Job, deployments []appsv1.Deployment, gitOptions git.Options, dockerConfig DockerConfig, config FunctionConfig) bool {
-	image := buildInlineImageAddress(instance, dockerConfig.PullAddress)
+	image := buildImageAddress(instance, dockerConfig.PullAddress)
 	buildStatus := getConditionStatus(instance.Status.Conditions, serverlessv1alpha1.ConditionBuildReady)
 
 	expectedJob := buildJob(instance, rtmCfg, "", dockerConfig, config)
