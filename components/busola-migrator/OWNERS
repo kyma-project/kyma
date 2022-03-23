@@ -1,0 +1,7 @@
+reviewers:
+  - busola-migrator-reviewers
+approvers:
+  - busola-migrator-approvers
+
+labels:
+  - area/busola-migrator

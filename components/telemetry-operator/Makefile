@@ -3,11 +3,15 @@ APP_NAME = telemetry-operator
 APP_PATH = components/$(APP_NAME)
 BUILDPACK = eu.gcr.io/kyma-project/test-infra/buildpack-golang:v20210723-91c9654f
 SCRIPTS_DIR = $(realpath $(shell pwd)/../..)/common/makefiles
+PROJECT_DIR := $(shell pwd)
 
 include $(SCRIPTS_DIR)/generic-make-go.mk
 
 # Produce CRDs that work back to Kubernetes 1.11 (no version conversion)
 CRD_OPTIONS ?= "crd:trivialVersions=true,preserveUnknownFields=false"
+
+# ENVTEST_K8S_VERSION refers to the version of kubebuilder assets to be downloaded by envtest binary.
+ENVTEST_K8S_VERSION = 1.21
 
 # Get the currently used golang install path (in GOPATH/bin, unless GOBIN is set)
 ifneq (,$(shell which go))
@@ -64,18 +68,15 @@ dep-status-local:
 mod-verify-local:
 	GO111MODULE=on go mod verify
 
-ENVTEST_ASSETS_DIR=$(shell pwd)/testbin
  ## Run tests.
-test-local: manifests-local generate-local fmt-local vet-local
-	mkdir -p ${ENVTEST_ASSETS_DIR}
-	test -f ${ENVTEST_ASSETS_DIR}/setup-envtest.sh || curl -sSLo ${ENVTEST_ASSETS_DIR}/setup-envtest.sh https://raw.githubusercontent.com/kubernetes-sigs/controller-runtime/v0.8.3/hack/setup-envtest.sh
-	source ${ENVTEST_ASSETS_DIR}/setup-envtest.sh; fetch_envtest_tools $(ENVTEST_ASSETS_DIR); setup_envtest_env $(ENVTEST_ASSETS_DIR); go test ./... -coverprofile cover.out
+test-local: manifests-local generate-local fmt-local vet-local envtest
+	KUBEBUILDER_ASSETS="$(shell $(ENVTEST) use $(ENVTEST_K8S_VERSION) -p path)" go test ./... -coverprofile cover.out
 
 build: generate fmt vet ## Build manager binary.
 	go build -o bin/manager main.go
 
 run-local: manifests-local generate-local fmt-local vet-local ## Run a controller from your host.
-	go run ./main.go --cm-name=telemetry-fluent-bit-sections --parser-cm-name=telemetry-fluent-bit-parsers --ds-name=telemetry-fluent-bit --env-secret=telemetry-fluent-bit-env --files-cm=telemetry-fluent-bit-files --fluent-bit-ns=kyma-system
+	go run ./main.go --cm-name=telemetry-fluent-bit --sections-cm-name=telemetry-fluent-bit-sections --parser-cm-name=telemetry-fluent-bit-parsers --ds-name=telemetry-fluent-bit --env-secret=telemetry-fluent-bit-env --files-cm=telemetry-fluent-bit-files --fluent-bit-ns=kyma-system
 
 ## Will be called from Prow-Pipeline; using targets from generic make file
 release: resolve generate verify build-image push-image
@@ -95,10 +96,13 @@ deploy-local: manifests-local ## Deploy controller to the K8s cluster specified 
 undeploy-local: ## Undeploy controller from the K8s cluster specified in ~/.kube/config.
 	kustomize build config/default | kubectl delete -f -
 
-# find or download controller-gen
-# download controller-gen if necessary
+ENVTEST = $(PROJECT_DIR)/bin/setup-envtest
+.PHONY: envtest
+envtest: ## Download envtest-setup locally if necessary.
+	$(call go-get-tool,$(ENVTEST),sigs.k8s.io/controller-runtime/tools/setup-envtest@latest)
+
 .PHONY: controller-gen-local
-controller-gen-local:
+controller-gen-local: ## find or download controller-gen if necessary
 ifeq (, $(shell which controller-gen))
 	@{ \
 	set -e ;\
@@ -134,7 +138,6 @@ CONTROLLER_GEN=$(shell which controller-gen)
 endif
 
 # go-get-tool will 'go get' any package $2 and install it to $1.
-PROJECT_DIR := $(shell dirname $(abspath $(lastword $(MAKEFILE_LIST))))
 define go-get-tool
 @[ -f $(1) ] || { \
 set -e ;\

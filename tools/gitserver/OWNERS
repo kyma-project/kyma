@@ -1,0 +1,14 @@
+reviewers:
+  - m00g3n
+  - pPrecel
+  - dbadura
+  - kwiatekusmoelsayed
+  - cortey
+approvers:
+  - m00g3n
+  - pPrecel
+  - dbadura
+  - kwiatekusmoelsayed
+  - cortey
+labels:
+  - area/tools/gitserver
