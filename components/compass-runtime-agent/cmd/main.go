@@ -3,7 +3,9 @@ package main
 import (
 	"context"
 	"encoding/json"
+	"time"
 
+	"github.com/avast/retry-go/v4"
 	"github.com/google/uuid"
 	"github.com/kyma-incubator/compass/components/director/pkg/correlation"
 	"github.com/kyma-incubator/compass/components/director/pkg/str"
@@ -107,17 +109,13 @@ func main() {
 	compassConnectionSupervisor, err := controllerDependencies.InitializeController()
 	exitOnError(err, "Failed to initialize Controller")
 
-	rtmConfig, err := configProvider.GetRuntimeConfig()
-
-	var runtimeId = ""
-
-	if err != nil {
-		runtimeId = rtmConfig.RuntimeId
-	} else {
-		runtimeId = "Uninitialised"
+	rtmConfig := confProvider.RuntimeConfig{}
+	opts := []retry.Option{retry.Attempts(0), retry.Delay(15 * time.Second), retry.DelayType(retry.FixedDelay)}
+	if err := retry.Do(getRuntimeConfigWithRetry(&rtmConfig, configProvider), opts...); err != nil {
+		exitOnError(err, "Failed to get runtime config with retry")
 	}
 
-	correlationID := runtimeId + "_" + uuid.New().String()
+	correlationID := rtmConfig.RuntimeId + "_" + uuid.New().String()
 	ctx := correlation.SaveCorrelationIDHeaderToContext(context.Background(), str.Ptr(correlation.RequestIDHeaderKey), str.Ptr(correlationID))
 
 	log.Infoln("Initializing Compass Connection CR")
@@ -197,5 +195,16 @@ func createSynchronisationService(k8sResourceClients *k8sResourceClientSets, opt
 func exitOnError(err error, context string) {
 	if err != nil {
 		log.Fatal(errors.Wrap(err, context))
+	}
+}
+
+func getRuntimeConfigWithRetry(rtmConfig *confProvider.RuntimeConfig, provider confProvider.Provider) func() error {
+	var err error
+	return func() error {
+		if *rtmConfig, err = provider.GetRuntimeConfig(); err != nil {
+			log.Warn("RuntimeConfig secret not yet initialized.")
+			return err
+		}
+		return nil
 	}
 }
