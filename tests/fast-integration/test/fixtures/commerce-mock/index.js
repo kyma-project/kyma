@@ -539,12 +539,14 @@ async function connectCommerceMock(mockHost, tokenData) {
   }
 }
 
-async function ensureCommerceMockWithCompassTestFixture(client,
+async function ensureCommerceMockWithCompassTestFixture(
+    client,
     appName,
     scenarioName,
     mockNamespace,
     targetNamespace,
-    withCentralApplicationConnectivity = false) {
+    withCentralApplicationConnectivity = false,
+    compassScenarioAlreadyExist = false) {
   const lastOrderFunction = withCentralApplicationConnectivity ?
     prepareFunction('central-app-gateway-compass', `mp-${appName}`) :
     prepareFunction();
@@ -555,7 +557,10 @@ async function ensureCommerceMockWithCompassTestFixture(client,
       targetNamespace,
       lastOrderFunction);
   await retryPromise(() => connectMockCompass(client, appName, scenarioName, mockHost, targetNamespace), 10, 30000);
-  await retryPromise(() => registerAllApis(mockHost), 10, 30000);
+  // do not register the apis again for an already existing compass scenario
+  if (!compassScenarioAlreadyExist) {
+    await retryPromise(() => registerAllApis(mockHost), 10, 30000);
+  }
 
   const commerceSC = await waitForServiceClass(appName, targetNamespace, 300 * 1000);
   await waitForServicePlanByServiceClass(commerceSC.metadata.name, targetNamespace, 300 * 1000);
