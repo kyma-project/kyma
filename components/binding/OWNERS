@@ -1,11 +1,7 @@
+reviewers:
+  - binding-reviewers
 approvers:
-  - PK85
-  - piotrmiskiewicz
-  - polskikiel
-  - jasiu001
-  - crabtree
-  - kjaksik
-  - ksputo
+  - binding-approvers
 
 labels:
-  - area/binding
+  - area/service-management

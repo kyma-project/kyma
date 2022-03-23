@@ -22,7 +22,7 @@ The diagram presents monitoring components and the way they interact with one an
 
 ![Monitoring components](./assets/obsv-monitoring-architecture.svg)
 
-1. [**Prometheus Operator**](https://github.com/coreos/prometheus-operator) creates a **Prometheus** instance, manages its deployment, and provides configuration for it. It also deploys **Alertmanager** and manages **ServiceMonitor** custom resources that specify monitoring definitions for groups of services.
+1. [**Prometheus Operator**](https://github.com/coreos/prometheus-operator) creates a **Prometheus** instance, manages its deployment, and provides configuration for it. It also deploys **Alertmanager** and manages **Service Monitor** custom resources that specify monitoring definitions for groups of services.
 
 2. [**Prometheus**](https://prometheus.io/docs/introduction) collects metrics from Pods.
 
@@ -33,9 +33,9 @@ Prometheus stores this polled data in a time-series database (TSDB) and runs rul
 
    >**NOTE:** Besides this main Prometheus instance, there is a second Prometheus instance running in the `kyma-system` Namespace. This second instance is responsible for collecting and aggregating [Istio Service Mesh metrics](../../01-overview/main-areas/service-mesh/smsh-01-details.md).
 
-3. You can use **PrometheusRules** to define alert conditions for metrics. Kyma provides a set of out-of-the-box alerting rules. The definitions of such rules specify the alert logic, the value at which alerts are triggered, the alerts' severity, and more.
+3. You can use **Prometheus Rules** to define alert conditions for metrics. Kyma provides a set of out-of-the-box alerting rules. The definitions of such rules specify the alert logic, the value at which alerts are triggered, the alerts' severity, and more.
 
-4. **ServiceMonitors** monitor services and specify the endpoints from which Prometheus polls the metrics. Even if you expose a handful of metrics in your application, Prometheus polls only those from the `/metrics` endpoints of ports specified in ServiceMonitor CRDs.
+4. **Service Monitors** monitor services and specify the endpoints from which Prometheus polls the metrics. Even if you expose a handful of metrics in your application, Prometheus polls only those from the `/metrics` endpoints of ports specified in Service Monitor CRDs.
 
 5. [**Alertmanager**](https://prometheus.io/docs/alerting/alertmanager/) receives alerts from Prometheus and forwards this data to configured notification channels like Slack or Victor Ops.
 

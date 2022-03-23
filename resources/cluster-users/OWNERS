@@ -1,10 +1,19 @@
-approvers:
-  - Tomasz-Smelcerz-SAP
+reviewers:
   - strekm
-  - piotrmsc
-  - kubadz
-  - Demonsthere
-
+  - werdes72
+  - mjakobczyk
+  - veichtj
+  - dariusztutaj
+  - cnvergence
+  - piotrkpc
+approvers:
+  - strekm
+  - werdes72
+  - mjakobczyk
+  - veichtj
+  - dariusztutaj
+  - cnvergence
+  - piotrkpc
 labels:
 - area/service-mesh
 - area/security

@@ -15,7 +15,7 @@ If you're interested in learning more about Runtime Agent, follow these links to
     
 - Analyze Runtime Agent specification and configuration files:
 
-    - [CompassConnection](../../../05-technical-reference/00-custom-resources/ra-01-compassconnection.md) custom resource (CR)
+    - [Compass Connection](../../../05-technical-reference/00-custom-resources/ra-01-compassconnection.md) custom resource (CR)
     - [Connection with Compass](../../../05-technical-reference/00-configuration-parameters/ra-01-connection-with-compass.md) 
 
 - Understand technicalities behind the Runtime Agent implementation:
