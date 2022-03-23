@@ -537,9 +537,12 @@ func NewEventingControllerDeployment() *appsv1.Deployment {
 	}
 }
 
-func NewEventingControllerPod(backend string) *corev1.Pod {
+func NewEventingPublisherProxyPod(backend string) *corev1.Pod {
 	labels := map[string]string{
-		deployment.AppLabelKey: deployment.PublisherName,
+		deployment.AppLabelKey:       deployment.PublisherName,
+		deployment.InstanceLabelKey:  deployment.InstanceLabelValue,
+		deployment.DashboardLabelKey: deployment.DashboardLabelValue,
+		deployment.BackendLabelKey:   backend,
 	}
 	return &corev1.Pod{
 		ObjectMeta: metav1.ObjectMeta{
