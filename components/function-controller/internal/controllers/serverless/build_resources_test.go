@@ -483,7 +483,7 @@ func TestFunctionReconciler_buildJob(t *testing.T) {
 			rtmCfg.Runtime = testCase.Runtime
 
 			// when
-			job := buildJob(&instance, rtmCfg, cmName, dockerCfg, FunctionConfig{})
+			job := buildJob(&instance, rtmCfg, cmName, dockerCfg, r.config)
 
 			// then
 			g.Expect(job.ObjectMeta.GenerateName).To(gomega.Equal(fmt.Sprintf("%s-build-", fnName)))
