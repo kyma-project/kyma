@@ -4,12 +4,28 @@ const {
   kubectlPortForward,
   retryPromise,
   convertAxiosError,
+  getPersistentVolumeClaim,
+  getSecretData,
+  getAllVirtualServices,
 } = require('../utils');
 
 const lokiPort = 3100;
 
 function lokiPortForward() {
   return kubectlPortForward('kyma-system', 'logging-loki-0', lokiPort);
+}
+
+async function lokiPersistentVolumClaim() {
+  return await getPersistentVolumeClaim('kyma-system', 'storage-logging-loki-0');
+}
+
+async function lokiSecretData() {
+  const secretData = await getSecretData('logging-loki', 'kyma-system');
+  return secretData['loki.yaml'];
+}
+
+function getVirtualServices() {
+  return getAllVirtualServices();
 }
 
 async function queryLoki(labels, startTimestamp) {
@@ -25,4 +41,7 @@ async function queryLoki(labels, startTimestamp) {
 module.exports = {
   lokiPortForward,
   queryLoki,
+  getVirtualServices,
+  lokiPersistentVolumClaim,
+  lokiSecretData,
 };
