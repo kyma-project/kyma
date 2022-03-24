@@ -56,7 +56,7 @@ func (config DependencyConfig) InitializeController() (Supervisor, error) {
 		config.RuntimeURLsConfig,
 		config.ConnectionDataCache)
 
-	if err := InitCompassConnectionController(config.ControllerManager, connectionSupervisor, config.MinimalCompassSyncTime); err != nil {
+	if err := InitCompassConnectionController(config.ControllerManager, connectionSupervisor, config.MinimalCompassSyncTime, config.ConfigProvider); err != nil {
 		return nil, errors.Wrap(err, "Unable to register controllers to the manager")
 	}
 
