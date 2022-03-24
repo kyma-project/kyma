@@ -103,6 +103,7 @@ func (r *FunctionReconciler) updateStatus(ctx context.Context, instance *serverl
 	}
 	currentFunction.Status.Source = instance.Spec.Source
 	currentFunction.Status.Runtime = serverlessv1alpha1.RuntimeExtended(instance.Spec.Runtime)
+	currentFunction.Status.CustomRuntimeImage = instance.Spec.CustomRuntimeImage
 
 	if !r.equalFunctionStatus(currentFunction.Status, instance.Status) {
 		if err := r.client.Status().Update(ctx, currentFunction); err != nil {
@@ -195,7 +196,8 @@ func (r *FunctionReconciler) equalFunctionStatus(left, right serverlessv1alpha1.
 	if left.Repository != right.Repository ||
 		left.Commit != right.Commit ||
 		left.Source != right.Source ||
-		left.Runtime != right.Runtime {
+		left.Runtime != right.Runtime ||
+		left.CustomRuntimeImage != right.CustomRuntimeImage {
 		return false
 	}
 	return true

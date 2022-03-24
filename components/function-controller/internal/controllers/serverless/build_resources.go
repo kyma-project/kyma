@@ -60,6 +60,9 @@ func (r *FunctionReconciler) buildJob(instance *serverlessv1alpha1.Function, rtm
 	imageName := r.buildImageAddress(instance, dockerConfig.PushAddress)
 	args := r.config.Build.ExecutorArgs
 	args = append(args, fmt.Sprintf("%s=%s", destinationArg, imageName), fmt.Sprintf("--context=dir://%s", workspaceMountPath))
+	if instance.Spec.CustomRuntimeImage != "" {
+		args = append(args, fmt.Sprintf("--build-arg=base_image=%s", instance.Spec.CustomRuntimeImage))
+	}
 
 	return batchv1.Job{
 		ObjectMeta: metav1.ObjectMeta{
@@ -242,6 +245,9 @@ func (r *FunctionReconciler) buildGitJob(instance *serverlessv1alpha1.Function, 
 	imageName := r.buildImageAddress(instance, dockerConfig.PushAddress)
 	args := r.config.Build.ExecutorArgs
 	args = append(args, fmt.Sprintf("%s=%s", destinationArg, imageName), fmt.Sprintf("--context=dir://%s", workspaceMountPath))
+	if instance.Spec.CustomRuntimeImage != "" {
+		args = append(args, fmt.Sprintf("--build-arg=base_image=%s", instance.Spec.CustomRuntimeImage))
+	}
 
 	one := int32(1)
 	zero := int32(0)
