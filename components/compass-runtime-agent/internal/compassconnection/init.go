@@ -56,16 +56,7 @@ func (config DependencyConfig) InitializeController() (Supervisor, error) {
 		config.RuntimeURLsConfig,
 		config.ConnectionDataCache)
 
-	var runtimeId = ""
-
-	runtimeConfig, err := config.ConfigProvider.GetRuntimeConfig()
-	if err != nil {
-		runtimeId = "Uninitialised"
-	} else {
-		runtimeId = runtimeConfig.RuntimeId
-	}
-
-	if err := InitCompassConnectionController(config.ControllerManager, connectionSupervisor, config.MinimalCompassSyncTime, runtimeId); err != nil {
+	if err := InitCompassConnectionController(config.ControllerManager, connectionSupervisor, config.MinimalCompassSyncTime, config.ConfigProvider); err != nil {
 		return nil, errors.Wrap(err, "Unable to register controllers to the manager")
 	}
 

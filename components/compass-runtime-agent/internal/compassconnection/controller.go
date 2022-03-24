@@ -2,6 +2,7 @@ package compassconnection
 
 import (
 	"context"
+	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/config"
 	"time"
 
 	"github.com/kyma-incubator/compass/components/director/pkg/correlation"
@@ -38,17 +39,18 @@ type Reconciler struct {
 
 	minimalConfigSyncTime time.Duration
 
-	log       *logrus.Entry
-	runtimeID string
+	log            *logrus.Entry
+	runtimeID      string
+	configProvider config.Provider
 }
 
 func InitCompassConnectionController(
 	mgr manager.Manager,
 	supervisior Supervisor,
 	minimalConfigSyncTime time.Duration,
-	runtimeID string) error {
+	configProvider config.Provider) error {
 
-	reconciler := newReconciler(mgr.GetClient(), supervisior, minimalConfigSyncTime, runtimeID)
+	reconciler := newReconciler(mgr.GetClient(), supervisior, minimalConfigSyncTime, configProvider)
 
 	return startController(mgr, reconciler)
 }
@@ -62,17 +64,25 @@ func startController(mgr manager.Manager, reconciler reconcile.Reconciler) error
 	return c.Watch(&source.Kind{Type: &v1alpha1.CompassConnection{}}, &handler.EnqueueRequestForObject{})
 }
 
-func newReconciler(client Client, supervisior Supervisor, minimalConfigSyncTime time.Duration, runtimeID string) reconcile.Reconciler {
+func newReconciler(client Client, supervisior Supervisor, minimalConfigSyncTime time.Duration, configProvider config.Provider) reconcile.Reconciler {
 	return &Reconciler{
 		client:                client,
 		supervisor:            supervisior,
 		minimalConfigSyncTime: minimalConfigSyncTime,
 		log:                   logrus.WithField("Controller", "CompassConnection"),
-		runtimeID:             runtimeID,
+		configProvider:        configProvider,
 	}
 }
 
 func (r *Reconciler) Reconcile(ctx context.Context, request reconcile.Request) (reconcile.Result, error) {
+
+	if r.runtimeID == "" {
+		runtimeConfig, err := r.configProvider.GetRuntimeConfig()
+		if err == nil {
+			r.runtimeID = runtimeConfig.RuntimeId
+		}
+	}
+
 	correlationID := r.runtimeID + "_" + uuid.New().String()
 	logFields := logrus.Fields{
 		"CompassConnection":            request.Name,
