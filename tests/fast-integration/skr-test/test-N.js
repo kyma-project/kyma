@@ -8,6 +8,7 @@ const {oidcE2ETest, commerceMockTest} = require('./skr-test-N');
 const {KCPWrapper, KCPConfig} = require('../kcp/client');
 
 const SKR_CLUSTER = process.env.SKR_CLUSTER === "true";
+let N = 3;// process.env.N;
 
 const kcp = new KCPWrapper(KCPConfig.fromEnv());
 
@@ -15,7 +16,7 @@ const delay = millis => new Promise((resolve, reject) => {
   setTimeout(_ => resolve(), millis)
 });
 
-describe('Execute SKR test', function () {
+describe('Execute SKR test',  async function () {
   this.timeout(60 * 60 * 1000 * 3); // 3h
   this.slow(5000);
 
@@ -51,9 +52,8 @@ describe('Execute SKR test', function () {
       // await addScenarioInCompass(director, this.options.scenarioName);
       // await assignRuntimeToScenario(director, this.shoot.compassID, this.options.scenarioName);
       // initializeK8sClient({kubeconfig: this.shoot.kubeconfig});
-///TODO
-      console.log(this.shoot.name)
-      await kcp.getLastReconciliation(this.shoot.name)
+///
+      this.lastReconciliation = await kcp.getLastReconciliation(this.shoot.name)
 ///
     } catch (e) {
       throw new Error(`before hook failed: ${e.toString()}`);
@@ -63,8 +63,8 @@ describe('Execute SKR test', function () {
     }
   });
 
-  for (let i = 0; i < 1; i++) {
-    describe('Loop', function () {
+  for(let i=0; i<N; i++) {
+    describe(`Loop ${i+1}`, function () {
       before('Before', async function () {
         this.options = gatherOptions(
             withInstanceID(this.options.instanceID),
@@ -75,14 +75,41 @@ describe('Execute SKR test', function () {
         await delay(60000);
       })
       oidcE2ETest();
-      //commerceMockTest();//Uncaught Error: listen EADDRINUSE: address already in use 127.0.0.1:9090
-//503: Service Unavailable: "no healthy upstream"
-      after('After', async function(){
+      after('After', async function () {
         await unregisterKymaFromCompass(director, this.options.scenarioName);
       })
     });
   }
 
+  // while (N > 0) {
+  // for(let i=0; i<N; i++) {
+  //   const myPromise = new Promise((resolve, reject) => {
+  //     describe(`Loop ${N}`, async function () {
+  //       it(`Assure initial OIDC config is applied on shoot cluster ${N} `, async function () {
+  //         console.log("it")
+  //         let l = await kcp.getLastReconciliation(this.shoot.name)
+  //         console.log(l.schedulingID, l.status)
+  //
+  //         while (!(this.lastReconciliation.schedulingID !== l.schedulingID && l.status === "ready")) {
+  //           console.log(`Last Reconciliation is  ${this.lastReconciliation.schedulingID}`)
+  //           console.log(`Current Reconciliation is  ${l.schedulingID}`)
+  //           console.log(`Current Reconciliation status is  ${l.status}`)
+  //           console.log(`condition  is  ${!(this.lastReconciliation.schedulingID !== l.schedulingID && l.status === "ready")}`)
+  //           await delay(5000)
+  //           l = await kcp.getLastReconciliation(this.shoot.name)
+  //         }
+  //
+  //         this.lastReconciliation = l;
+  //         oidcE2ETest();
+  //         //N--;
+  //         resolve();
+  //         console.log("it -  I am done")
+  //
+  //       });
+  //     });
+  //   });
+  //   await myPromise;
+  // }
 
   after('Deprovision SKR', async function () {
     try {
@@ -99,3 +126,15 @@ describe('Execute SKR test', function () {
     }
   });
 });
+
+
+// let l = await kcp.getLastReconciliation(this.shoot.name)
+// while (!(this.lastReconciliation.schedulingID !== l.schedulingID && l.status === "ready")) {
+//   console.log(`Lasts Reeconciliation is  ${this.lastReconciliation.schedulingID}`)
+//   console.log(`Current Reeconciliation is  ${l.schedulingID}`)
+//   console.log(`Current Reeconciliation status is  ${l.status}`)
+//   console.log(`condition  is  ${!(this.lastReconciliation.schedulingID !== l.schedulingID && l.status === "ready")}`)
+//   await delay(5000)
+//   l = await kcp.getLastReconciliation(this.shoot.name)
+// }
+// this.lastReconciliation = l;
