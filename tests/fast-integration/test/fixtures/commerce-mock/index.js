@@ -349,6 +349,14 @@ async function checkTrace(traceId, expectedTraceProcessSequence) {
 
   // searching through the trace-graph for the expected span sequence staring at the root element
   const wasFound = await findSpanSequence(expectedTraceProcessSequence, 0, traceDAG[0], traceData);
+  if (!wasFound) {
+    debug(`\nnot all expected spans found in the expected order:`);
+    for (let i = 0; i < expectedTraceProcessSequence.length; i++) {
+      debug(`${expectedTraceProcessSequence[i]}`);
+    }
+  } else {
+    debug(`\nall expected spans found in the expected order:`);
+  }
   expect(wasFound).to.be.true;
 }
 
@@ -356,7 +364,14 @@ async function checkTrace(traceId, expectedTraceProcessSequence) {
 // order while ignoring the spans that are not expected.
 async function findSpanSequence(expectedSpans, pos, currentSpan, traceData) {
   // if this span contains the currently expected span, the position will be increased
-  const newPos = pos + (traceData.processes[currentSpan.processID].serviceName === expectedSpans[pos] ? 1 : 0);
+  let newPos = pos;
+  const actualSpan = traceData.processes[currentSpan.processID].serviceName;
+  const expectedSpan = expectedSpans[pos];
+  const match = (actualSpan === expectedSpan);
+  debug(`${match?'✓':'𐄂'}${await buildLevel(newPos)} ${actualSpan} ##### expected ${expectedSpan}`);
+  if (match) {
+    newPos++;
+  }
 
   // check if all traces have been found yet
   if (newPos === expectedSpans.length) {
@@ -372,6 +387,14 @@ async function findSpanSequence(expectedSpans, pos, currentSpan, traceData) {
 
   // if nothing was found on this branch of the graph, close it
   return false;
+}
+
+async function buildLevel(n) {
+  let level = '';
+  for (let i = 0; i < n+1; i++) {
+    level=`${level} `;
+  }
+  return `${level} └>`;
 }
 
 async function addService() {
