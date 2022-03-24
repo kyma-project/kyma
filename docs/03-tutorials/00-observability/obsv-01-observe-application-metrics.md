@@ -110,6 +110,6 @@ The configured memory limits of the Prometheus and Prometheus-Istio instances li
 * Frequency of Pod recreation
 * Topology of the Istio service mesh
 
-The default resource configuration of the monitoring component in the production profile is sufficient to serve 800K time series in the Prometheus Pod and 400K time series in the Prometheus-Istio Pod.
+The default resource configuration of the monitoring component in the production profile is sufficient to serve 800K time series in the Prometheus Pod and 400K time series with a retention time of 30 days in the Prometheus-Istio Pod. The evaluation profile has lower limits.
 
 The number of ingested time series samples can be taken from the `prometheus_tsdb_head_series` metric, which is exported by the Prometheus itself. Furthermore, the [TSDB Status](http://localhost:9090/tsdb-status) page helps to identify expensive metrics.
