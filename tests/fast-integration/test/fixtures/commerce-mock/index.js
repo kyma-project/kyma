@@ -348,30 +348,64 @@ async function checkTrace(traceId, expectedTraceProcessSequence) {
   expect(traceDAG).to.have.length(1);
 
   // searching through the trace-graph for the expected span sequence staring at the root element
-  const wasFound = await findSpanSequence(expectedTraceProcessSequence, 0, traceDAG[0], traceData);
+  const wasFound = findSpanSequence(expectedTraceProcessSequence, 0, traceDAG[0], traceData);
+  if (!wasFound) {
+    debug(`Not all expected spans found in the expected order:`);
+    for (let i = 0; i < expectedTraceProcessSequence.length; i++) {
+      debug(`${expectedTraceProcessSequence[i]}`);
+    }
+  }
   expect(wasFound).to.be.true;
 }
 
 // findSpanSequence recursively searches through the trace-graph to find all expected spans in the right, consecutive
 // order while ignoring the spans that are not expected.
-async function findSpanSequence(expectedSpans, pos, currentSpan, traceData) {
+function findSpanSequence(expectedSpans, position, currentSpan, traceData) {
+  // validate if the actual span is the expected span
+  const actualSpan = traceData.processes[currentSpan.processID].serviceName;
+  const expectedSpan = expectedSpans[position];
+  let newPosition = position;
+  const debugMsg = `${buildLevel(position)} ${actualSpan}`;
   // if this span contains the currently expected span, the position will be increased
-  const newPos = pos + (traceData.processes[currentSpan.processID].serviceName === expectedSpans[pos] ? 1 : 0);
+  if (actualSpan === expectedSpan) {
+    newPosition++;
+    debug(debugMsg);
+  } else {
+    debug(`${debugMsg} expected ${expectedSpan}`);
+  }
 
   // check if all traces have been found yet
-  if (newPos === expectedSpans.length) {
+  if (newPosition === expectedSpans.length) {
     return true;
   }
 
   // recursive search through all the child spans
   for (let i = 0; i < currentSpan.childSpans.length; i++) {
-    if (await findSpanSequence(expectedSpans, newPos, currentSpan.childSpans[i], traceData)) {
+    if (findSpanSequence(expectedSpans, newPosition, currentSpan.childSpans[i], traceData)) {
       return true;
     }
   }
 
   // if nothing was found on this branch of the graph, close it
   return false;
+}
+
+// buildLevel helps to display trace hierarchy by adding a whitespace for each level of hierarchy in front of the trace
+// to get output like
+// -> myTrace
+//  └> myChildTrace
+//   └> ChildOfMyChildTrace
+// ...
+function buildLevel(n) {
+  if (n === 0) {
+    return '  ->';
+  }
+
+  let level = '';
+  for (let i = 0; i < n+1; i++) {
+    level += ' ';
+  }
+  return `${level} └>`;
 }
 
 async function addService() {
