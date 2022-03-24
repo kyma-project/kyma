@@ -15,7 +15,7 @@ RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -o webhook-server cmd/webh
 && mkdir /app \
 && mv ./webhook-server /app/webhook-server
 
-FROM eu.gcr.io/kyma-project/external/alpine:3.14.2 as certs
+FROM eu.gcr.io/kyma-project/external/alpine:3.15.0 as certs
 RUN apk add --no-cache ca-certificates
 
 FROM scratch
