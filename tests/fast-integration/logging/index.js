@@ -1,5 +1,6 @@
 const logging = require('./helpers');
 const {lokiPortForward} = require('./client');
+const {getEnvOrDefault} = require('../utils');
 
 function loggingTests() {
   const testStartTimestamp = new Date().toISOString();
@@ -25,9 +26,13 @@ function loggingTests() {
       await logging.checkRetentionPeriod();
     });
 
-    // it('Persistent Volume Claim Size should be 30Gi', async () => {
-    //   await logging.checkPersistentVolumeClaimSize();
-    // });
+    it('Persistent Volume Claim Size should be 30Gi', async () => {
+      if ( getEnvOrDefault('EXECUTION_PROFILE', 'Default') == 'evaluation') {
+        console.log('Skipping PVC test due to evaluation profile');
+      } else {
+        await logging.checkPersistentVolumeClaimSize();
+      }
+    });
 
     it('Loki should not be exposed through Virtual Service', async () => {
       await logging.checkVirtualServicePresence();

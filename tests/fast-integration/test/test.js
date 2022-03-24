@@ -1,14 +1,16 @@
 const {
-  commerceMockTests,
-  gettingStartedGuideTests,
+  // commerceMockTests,
+  // gettingStartedGuideTests,
 } = require('./');
 
 const {
-  monitoringTests,
+  // monitoringTests,
 } = require('../monitoring');
+const {loggingTests} = require('../logging');
 
 describe('Executing Standard Testsuite:', function() {
-  commerceMockTests();
-  gettingStartedGuideTests();
-  monitoringTests();
+  // commerceMockTests();
+  // gettingStartedGuideTests();
+  // monitoringTests();
+  loggingTests();
 });
