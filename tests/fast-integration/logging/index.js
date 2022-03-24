@@ -25,9 +25,9 @@ function loggingTests() {
       await logging.checkRetentionPeriod();
     });
 
-    it('Persistent Volume Claim Size should be 30Gi', async () => {
-      await logging.checkPersistentVolumeClaimSize();
-    });
+    // it('Persistent Volume Claim Size should be 30Gi', async () => {
+    //   await logging.checkPersistentVolumeClaimSize();
+    // });
 
     it('Loki should not be exposed through Virtual Service', async () => {
       await logging.checkVirtualServicePresence();
