@@ -100,7 +100,7 @@ Follow these steps to redirect the metrics:
 
 ## Limitations
 
-The configured memory limits of the Prometheus and Prometheus-Istio instances limit the number of time series samples that can be ingested. The amount of generated time series in a Kyma cluster is depending on the following factors:
+The configured memory limits of the Prometheus and Prometheus-Istio instances limit the number of time series samples that can be ingested. The amount of generated time series in a Kyma cluster depends on the following factors:
 
 * Number of Pods in the cluster
 * Number of Nodes in the cluster
@@ -110,6 +110,6 @@ The configured memory limits of the Prometheus and Prometheus-Istio instances li
 * Frequency of Pod recreation
 * Topology of the Istio service mesh
 
-The default resource configuration of the monitoring component in the production profile is sufficient to serve 800K time series in the Prometheus Pod and 400K time series with a retention time of 30 days in the Prometheus-Istio Pod. The evaluation profile has lower limits. For more information about profiles, see the [Install Kyma Guide](../../04-operation-guides/operations/02-install-kyma.md#choose-resource-consumption).
+The default resource configuration of the monitoring component in the production profile is sufficient to serve 800K time series in the Prometheus Pod, and 400K time series with a retention time of 30 days in the Prometheus-Istio Pod. The evaluation profile has lower limits. For more information about profiles, see the [Install Kyma Guide](../../04-operation-guides/operations/02-install-kyma.md#choose-resource-consumption).
 
-The number of ingested time series samples can be taken from the `prometheus_tsdb_head_series` metric, which is exported by the Prometheus itself. Furthermore, the [TSDB Status](http://localhost:9090/tsdb-status) page helps to identify expensive metrics.
+You can see the number of ingested time series samples from the `prometheus_tsdb_head_series` metric, which is exported by the Prometheus itself. Furthermore, you can identify expensive metrics with the [TSDB Status](http://localhost:9090/tsdb-status) page.
