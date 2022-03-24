@@ -25,8 +25,10 @@ import (
 var _ JetStreamBackend = &JetStream{}
 
 const (
-	jsHandlerName         = "js-handler"
-	idleHeartBeatDuration = 1 * time.Minute
+	jsHandlerName          = "js-handler"
+	idleHeartBeatDuration  = 1 * time.Minute
+	jsConsumerMaxRedeliver = 100
+	jsConsumerAcKWait      = 30 * time.Second
 )
 
 type JetStreamBackend interface {
@@ -334,6 +336,8 @@ func (js *JetStream) getDefaultSubscriptionOptions(consumerName string, subConfi
 		nats.EnableFlowControl(),
 		nats.DeliverNew(),
 		nats.MaxAckPending(subConfig.MaxInFlightMessages),
+		nats.MaxDeliver(jsConsumerMaxRedeliver),
+		nats.AckWait(jsConsumerAcKWait),
 	}
 	return defaultOpts
 }
@@ -352,7 +356,6 @@ func (js *JetStream) getCallback(subKeyPrefix string) nats.MsgHandler {
 			js.namedLogger().Errorw("failed to convert sink value to string", "sinkValue", sinkValue)
 			return
 		}
-
 		ce, err := convertMsgToCE(msg)
 		if err != nil {
 			js.namedLogger().Errorw("convert Jetstream message to CE failed", "error", err)
@@ -370,10 +373,8 @@ func (js *JetStream) getCallback(subKeyPrefix string) nats.MsgHandler {
 		// dispatch the event to sink
 		result := js.client.Send(traceCtxWithCE, *ce)
 		if !cev2protocol.IsACK(result) {
-			if err := msg.Nak(); err != nil {
-				js.namedLogger().Errorw("failed to NAK an event on JetStream")
-			}
 			js.namedLogger().Errorw("failed to dispatch an event", "id", ce.ID(), "source", ce.Source(), "type", ce.Type(), "sink", sink)
+			// Do not NAK the msg so that the server waits for AckWait and then redeliver the msg.
 			return
 		}
 		if err := msg.Ack(); err != nil {
