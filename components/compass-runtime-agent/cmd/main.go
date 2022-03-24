@@ -5,8 +5,6 @@ import (
 	"encoding/json"
 	"time"
 
-	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/healthz"
-
 	"github.com/avast/retry-go/v4"
 	"github.com/google/uuid"
 	"github.com/kyma-incubator/compass/components/director/pkg/correlation"
@@ -19,6 +17,7 @@ import (
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/compassconnection"
 	confProvider "github.com/kyma-project/kyma/components/compass-runtime-agent/internal/config"
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/graphql"
+	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/healthz"
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma"
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/secrets"
 	apis "github.com/kyma-project/kyma/components/compass-runtime-agent/pkg/apis/compass/v1alpha1"
@@ -110,11 +109,6 @@ func main() {
 	compassConnectionSupervisor, err := controllerDependencies.InitializeController()
 	exitOnError(err, "Failed to initialize Controller")
 
-	go func() {
-		log.Info("Starting Healthcheck Server")
-		healthz.StartHealthCheckServer(log.StandardLogger(), options.HealthPort)
-	}()
-
 	rtmConfig := confProvider.RuntimeConfig{}
 	opts := []retry.Option{retry.Attempts(0), retry.Delay(15 * time.Second), retry.DelayType(retry.FixedDelay)}
 	if err := retry.Do(getRuntimeConfigWithRetry(&rtmConfig, configProvider), opts...); err != nil {
@@ -133,6 +127,11 @@ func main() {
 	exitOnError(err, "Failed to create metrics logger")
 	err = mgr.Add(metricsLogger)
 	exitOnError(err, "Failed to add metrics logger to manager")
+
+	go func() {
+		log.Info("Starting Healthcheck Server")
+		healthz.StartHealthCheckServer(log.StandardLogger(), options.HealthPort)
+	}()
 
 	log.Info("Starting the Cmd.")
 	err = mgr.Start(signals.SetupSignalHandler())
