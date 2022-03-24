@@ -7,7 +7,7 @@ global:
       version: "3ea8a951"
     fluent_bit:
       name: "fluent-bit"
-      version: "1.8.14-2a0b8675"
+      version: "1.8.15-66554e68"
       directory: "tpi"
     busybox:
       name: "busybox"
