@@ -106,7 +106,7 @@ describe('SKR SVCAT migration test', function() {
     await printContainerLogs('app=service-broker-proxy-k8s', 'service-broker-proxy-k8s', 'kyma-system');
   });
 
-  it('Should mark the platform for migration in Service Manager', async function() {
+  /*it('Should mark the platform for migration in Service Manager', async function() {
     await t.markForMigration(smAdminCreds, platformCreds.clusterId, btpOperatorCreds.instanceId);
   });
 
@@ -162,5 +162,5 @@ describe('SKR SVCAT migration test', function() {
 
   it('Should cleanup platform --cascade, operator instances and bindings', async function() {
     await t.cleanupInstanceBinding(smAdminCreds, svcatPlatform, btpOperatorInstance, btpOperatorBinding);
-  });
+  });*/
 });
