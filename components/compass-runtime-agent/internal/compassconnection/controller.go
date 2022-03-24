@@ -2,8 +2,9 @@ package compassconnection
 
 import (
 	"context"
-	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/config"
 	"time"
+
+	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/config"
 
 	"github.com/kyma-incubator/compass/components/director/pkg/correlation"
 	"github.com/kyma-incubator/compass/components/director/pkg/str"
