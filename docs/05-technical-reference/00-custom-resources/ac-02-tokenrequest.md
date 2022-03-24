@@ -1,5 +1,5 @@
 ---
-title: TokenRequest
+title: Token Request
 ---
 
 The `tokenrequests.applicationconnector.kyma-project.io` custom resource definition (CRD) is a detailed description of the kind of data and the format used to request a token for an Application configuration URL from Connector Service. To get the up-to-date CRD and show the output in the `yaml` format, run this command:
@@ -34,7 +34,7 @@ This table lists all the possible parameters of a given resource together with t
 
 ## Additional information
 
-When you fetch an existing TokenRequest CR, the system adds the **status** section which describes the status of the request and lists the configuration details. This table lists the fields of the **status** section.
+When you fetch an existing Token Request CR, the system adds the **status** section which describes the status of the request and lists the configuration details. This table lists the fields of the **status** section.
 
 | Field   |  Description |
 |----------|-------------|

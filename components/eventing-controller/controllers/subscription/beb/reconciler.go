@@ -10,6 +10,8 @@ import (
 	"strings"
 	"time"
 
+	equality "github.com/kyma-project/kyma/components/eventing-controller/controllers/subscription"
+
 	"github.com/kyma-project/kyma/components/eventing-controller/controllers/events"
 
 	"github.com/pkg/errors"
@@ -90,10 +92,11 @@ func NewReconciler(ctx context.Context, client client.Client, logger *logger.Log
 
 // +kubebuilder:rbac:groups=eventing.kyma-project.io,resources=subscriptions,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=eventing.kyma-project.io,resources=subscriptions/status,verbs=get;update;patch
-// Generate required RBAC to emit kubernetes events in the controller
+// Generate required RBAC to emit kubernetes events in the controller.
 // +kubebuilder:rbac:groups="",resources=events,verbs=create;patch
 // +kubebuilder:rbac:groups=gateway.kyma-project.io,resources=apirules,verbs=get;list;watch;create;update;patch;delete
-// +kubebuilder:printcolumn:name="Ready",type=bool,JSONPath=`.status.Ready`
+// Generated required RBAC to list Applications (required by event type cleaner).
+// +kubebuilder:rbac:groups="applicationconnector.kyma-project.io",resources=applications,verbs=get;list;watch
 
 func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	// fetch current subscription object and ensure the object was not deleted in the meantime
@@ -201,7 +204,7 @@ func (r *Reconciler) updateSubscription(ctx context.Context, subscription *event
 func (r *Reconciler) emitConditionEvents(oldSubscription, newSubscription *eventingv1alpha1.Subscription, logger *zap.SugaredLogger) {
 	for _, condition := range newSubscription.Status.Conditions {
 		oldCondition := oldSubscription.Status.FindCondition(condition.Type)
-		if oldCondition != nil && conditionEquals(*oldCondition, condition) {
+		if oldCondition != nil && equality.ConditionEquals(*oldCondition, condition) {
 			continue
 		}
 		// condition is modified, so emit an event
@@ -213,7 +216,7 @@ func (r *Reconciler) emitConditionEvents(oldSubscription, newSubscription *event
 // updateStatus updates the status to k8s if modified
 func (r *Reconciler) updateStatus(ctx context.Context, oldSubscription, newSubscription *eventingv1alpha1.Subscription, logger *zap.SugaredLogger) error {
 	// compare the status taking into consideration lastTransitionTime in conditions
-	if isSubscriptionStatusEqual(oldSubscription.Status, newSubscription.Status) {
+	if equality.IsSubscriptionStatusEqual(oldSubscription.Status, newSubscription.Status) {
 		return nil
 	}
 
@@ -752,7 +755,7 @@ func (r *Reconciler) replaceStatusCondition(subscription *eventingv1alpha1.Subsc
 	}
 
 	// prevent unnecessary updates
-	if conditionsEquals(subscription.Status.Conditions, desiredConditions) && subscription.Status.Ready == isReady {
+	if equality.ConditionsEquals(subscription.Status.Conditions, desiredConditions) && subscription.Status.Ready == isReady {
 		return false
 	}
 

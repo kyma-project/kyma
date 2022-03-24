@@ -8,6 +8,7 @@ import (
 
 	log "github.com/sirupsen/logrus"
 
+	"github.com/kyma-project/kyma/components/event-publisher-proxy/internal"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/legacy-events/api"
 )
 
@@ -44,7 +45,7 @@ func is2XXStatusCode(statusCode int) bool {
 // writeJSONResponse writes a JSON response
 func writeJSONResponse(w http.ResponseWriter, resp *api.PublishEventResponses) {
 	encoder := json.NewEncoder(w)
-	w.Header().Set("Content-Type", ContentTypeApplicationJSON)
+	w.Header().Set(internal.HeaderContentType, internal.ContentTypeApplicationJSON)
 
 	if resp.Error != nil {
 		w.WriteHeader(resp.Error.Status)
@@ -60,10 +61,11 @@ func writeJSONResponse(w http.ResponseWriter, resp *api.PublishEventResponses) {
 	log.Errorf("received an empty response")
 }
 
-// formatEventType4BEB format eventType as per BEB spec
-func formatEventType4BEB(eventTypePrefix, app, eventType, version string) string {
-	if len(strings.TrimSpace(eventTypePrefix)) == 0 {
-		return fmt.Sprintf(eventTypeFormatWithoutPrefix, app, eventType, version)
+// formatEventType joins the given prefix, application, eventType and version with a "." as a separator.
+// It ignores the prefix if it is empty.
+func formatEventType(prefix, application, eventType, version string) string {
+	if len(strings.TrimSpace(prefix)) == 0 {
+		return fmt.Sprintf(eventTypeFormatWithoutPrefix, application, eventType, version)
 	}
-	return fmt.Sprintf(eventTypeFormat, eventTypePrefix, app, eventType, version)
+	return fmt.Sprintf(eventTypeFormat, prefix, application, eventType, version)
 }

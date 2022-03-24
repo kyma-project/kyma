@@ -18,11 +18,12 @@ COPY internal/ internal/
 # Build
 RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -o manager main.go
 
-# Use distroless as minimal base image to package the manager binary
-# Refer to https://github.com/GoogleContainerTools/distroless for more details
-FROM gcr.io/distroless/static:nonroot
+# Use the fluent-bit image because we need the fluent-bit binary
+FROM eu.gcr.io/kyma-project/tpi/fluent-bit:1.8.13-0ef8d26c
+
 WORKDIR /
 COPY --from=builder /workspace/manager .
+
 USER 65532:65532
 
 ENTRYPOINT ["/manager"]

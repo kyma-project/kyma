@@ -9,6 +9,8 @@ import (
 	"testing"
 
 	cehttp "github.com/cloudevents/sdk-go/v2/protocol/http"
+
+	"github.com/kyma-project/kyma/components/event-publisher-proxy/internal"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/ems"
 )
 
@@ -16,14 +18,14 @@ func TestWriteRequestWithHeaders(t *testing.T) {
 	t.Parallel()
 
 	req := httptest.NewRequest(http.MethodPost, "/", nil)
-	req.Header.Add("Content-Type", "application/cloudevents+json")
+	req.Header.Add(internal.HeaderContentType, internal.ContentTypeApplicationCloudEventsJSON)
 
 	message := cehttp.NewMessageFromHttpRequest(req)
 	defer func() { _ = message.Finish(nil) }()
 
 	additionalHeaders := http.Header{
 		"qos":    []string{string(ems.QosAtLeastOnce)},
-		"accept": []string{"application/json"},
+		"accept": []string{internal.ContentTypeApplicationJSON},
 		"key1":   []string{"value1", "value2"},
 		"key2":   []string{"value3"},
 	}

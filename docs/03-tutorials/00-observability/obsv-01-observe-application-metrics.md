@@ -6,7 +6,7 @@ title: Observe application metrics
 
 Learn how to list all metrics exposed by a sample Go service and watch their changing values by redirecting the metrics port and the default Prometheus server port to the localhost.
 
-Use the [`monitoring-custom-metrics`](https://github.com/kyma-project/examples/tree/master/monitoring-custom-metrics) example and one of its services named `sample-metrics`. The service exposes its metrics on the standard `/metrics` endpoint that is available under port `8080`. You deploy the service (`deployment.yaml`) along with the ServiceMonitor custom resource (`service-monitor.yaml`) that instructs Prometheus to scrape metrics:
+Use the [`monitoring-custom-metrics`](https://github.com/kyma-project/examples/tree/master/monitoring-custom-metrics) example and one of its services named `sample-metrics`. The service exposes its metrics on the standard `/metrics` endpoint that is available under port `8080`. You deploy the service (`deployment.yaml`) along with the Service Monitor custom resource (`service-monitor.yaml`) that instructs Prometheus to scrape metrics:
 
 - From the service with the `app: sample-metrics` label
 - From the `/metrics` endpoint
@@ -39,7 +39,7 @@ Follow this tutorial to:
    kubectl create -f https://raw.githubusercontent.com/kyma-project/examples/main/monitoring-custom-metrics/deployment/deployment.yaml --namespace=testing-monitoring
    ```
 
-3. Deploy the ServiceMonitor custom resource definition (CRD) in the `testing-monitoring` Namespace.
+3. Deploy the Service Monitor custom resource definition (CRD) in the `testing-monitoring` Namespace.
 
    ```bash
    kubectl apply -f https://raw.githubusercontent.com/kyma-project/examples/main/monitoring-custom-metrics/deployment/service-monitor.yaml --namespace=testing-monitoring
@@ -97,3 +97,19 @@ Follow these steps to redirect the metrics:
    The Prometheus UI shows a new value every 10 seconds upon refreshing the page.
 
 4. If you don't want to proceed with the following tutorial, [clean up the configuration](obsv-05-clean-up-configuration.md).
+
+## Limitations
+
+The configured memory limits of the Prometheus and Prometheus-Istio instances limit the number of time series samples that can be ingested. The amount of generated time series in a Kyma cluster depends on the following factors:
+
+* Number of Pods in the cluster
+* Number of Nodes in the cluster
+* Amount of exported (custom) metrics
+* Label cardinality of metrics
+* Number of buckets for histogram metrics
+* Frequency of Pod recreation
+* Topology of the Istio service mesh
+
+The default resource configuration of the monitoring component in the production profile is sufficient to serve 800K time series in the Prometheus Pod, and 400K time series with a retention time of 30 days in the Prometheus-Istio Pod. The evaluation profile has lower limits. For more information about profiles, see the [Install Kyma Guide](../../04-operation-guides/operations/02-install-kyma.md#choose-resource-consumption).
+
+You can see the number of ingested time series samples from the `prometheus_tsdb_head_series` metric, which is exported by the Prometheus itself. Furthermore, you can identify expensive metrics with the [TSDB Status](http://localhost:9090/tsdb-status) page.

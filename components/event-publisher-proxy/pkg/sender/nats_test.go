@@ -54,15 +54,19 @@ func TestNatsMessageSender(t *testing.T) {
 			)
 			assert.NoError(t, err)
 			assert.NotNil(t, connection)
+			defer func() { connection.Close() }()
 
 			receive := make(chan bool, 1)
-			validator := testingutils.ValidateNatsMessageDataOrFail(t, fmt.Sprintf(`"%s"`, testingutils.CloudEventData), receive)
+			validator := testingutils.ValidateNatsMessageDataOrFail(t, fmt.Sprintf(`"%s"`, testingutils.EventData), receive)
 			testingutils.SubscribeToEventOrFail(t, connection, testingutils.CloudEventType, validator)
 
-			ce := testingutils.StructuredCloudEventPayloadWithCleanEventType
+			builder := testingutils.NewCloudEventBuilder(
+				testingutils.WithCloudEventType(testingutils.CloudEventType),
+			)
+			payload, _ := builder.BuildStructured()
 			event := cloudevents.NewEvent()
 			event.SetType(testingutils.CloudEventType)
-			err = json.Unmarshal([]byte(ce), &event)
+			err = json.Unmarshal([]byte(payload), &event)
 			assert.NoError(t, err)
 
 			ctx := context.Background()

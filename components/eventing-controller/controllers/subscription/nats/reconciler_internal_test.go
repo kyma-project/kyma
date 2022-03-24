@@ -5,9 +5,10 @@ package nats
 
 import (
 	"context"
-	"strings"
 	"testing"
 	"time"
+
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/sink"
 
 	"github.com/stretchr/testify/require"
 
@@ -19,7 +20,6 @@ import (
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/mocks"
 	controllertesting "github.com/kyma-project/kyma/components/eventing-controller/testing"
 	corev1 "k8s.io/api/core/v1"
-	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/kubernetes/scheme"
 	"k8s.io/client-go/tools/record"
@@ -215,104 +215,6 @@ func Test_syncSubscriptionStatus(t *testing.T) {
 	}
 }
 
-func Test_defaultSinkValidator(t *testing.T) {
-	testEnvironment := setupTestEnvironment(t)
-	ctx, r, log := testEnvironment.Context, testEnvironment.Reconciler, testEnvironment.Logger
-
-	testCases := []struct {
-		name                  string
-		givenSubscriptionSink string
-		givenSvcNameToCreate  string
-		wantErrString         string
-	}{
-		{
-			name:                  "With invalid scheme",
-			givenSubscriptionSink: "invalid Sink",
-			wantErrString:         "sink URL scheme should be 'http' or 'https'",
-		},
-		{
-			name:                  "With invalid URL",
-			givenSubscriptionSink: "http://invalid Sink",
-			wantErrString:         "not able to parse sink url with error",
-		},
-		{
-			name:                  "With invalid suffix",
-			givenSubscriptionSink: "https://svc2.test.local",
-			wantErrString:         "sink does not contain suffix",
-		},
-		{
-			name:                  "With invalid suffix and port",
-			givenSubscriptionSink: "https://svc2.test.local:8080",
-			wantErrString:         "sink does not contain suffix",
-		},
-		{
-			name:                  "With invalid number of subdomains",
-			givenSubscriptionSink: "https://svc.cluster.local:8080", // right suffix but 3 subdomains
-			wantErrString:         "sink should contain 5 sub-domains",
-		},
-		{
-			name:                  "With different namespaces in subscription and sink name",
-			givenSubscriptionSink: "https://eventing-nats.kyma-system.svc.cluster.local:8080", // sub is in test ns
-			wantErrString:         "namespace of subscription: test and the namespace of subscriber: kyma-system are different",
-		},
-		{
-			name:                  "With no existing svc in the cluster",
-			givenSubscriptionSink: "https://eventing-nats.test.svc.cluster.local:8080",
-			wantErrString:         "sink is not valid cluster local svc, failed with error",
-		},
-		{
-			name:                  "With no existing svc in the cluster, service has the wrong name",
-			givenSubscriptionSink: "https://eventing-nats.test.svc.cluster.local:8080",
-			givenSvcNameToCreate:  "test", // wrong name
-			wantErrString:         "sink is not valid cluster local svc, failed with error",
-		},
-		{
-			name:                  "With no existing svc in the cluster, service has the wrong name",
-			givenSubscriptionSink: "https://eventing-nats.test.svc.cluster.local:8080",
-			givenSvcNameToCreate:  "eventing-nats",
-			wantErrString:         "",
-		},
-	}
-	for _, tC := range testCases {
-		testCase := tC
-		t.Run(testCase.name, func(t *testing.T) {
-			// given
-			sub := NewTestSubscription(
-				controllertesting.WithConditions([]eventingv1alpha1.Condition{}),
-				controllertesting.WithStatus(true),
-				controllertesting.WithSink(testCase.givenSubscriptionSink),
-			)
-
-			// create the service if required for test
-			if testCase.givenSvcNameToCreate != "" {
-				svc := &corev1.Service{
-					ObjectMeta: v1.ObjectMeta{
-						Name:      testCase.givenSvcNameToCreate,
-						Namespace: namespaceName,
-					},
-				}
-
-				err := r.Client.Create(ctx, svc)
-				require.NoError(t, err)
-			}
-
-			// when
-			// call the defaultSinkValidator function
-			err := r.sinkValidator(ctx, r, sub)
-			log.WithContext().Infof("Result of defaultSinkValidatorCall: %+v", err)
-
-			// then
-			// given error should match expected error
-			if testCase.wantErrString == "" {
-				require.NoError(t, err)
-			} else {
-				substringResult := strings.Contains(err.Error(), testCase.wantErrString)
-				require.True(t, substringResult)
-			}
-		})
-	}
-}
-
 func Test_syncInitialStatus(t *testing.T) {
 	testEnvironment := setupTestEnvironment(t)
 	r := testEnvironment.Reconciler
@@ -431,6 +333,7 @@ func setupTestEnvironment(t *testing.T) *TestEnvironment {
 	cleaner := func(et string) (string, error) {
 		return et, nil
 	}
+	defaultSinkValidator := sink.NewValidator(ctx, fakeClient, recorder, defaultLogger)
 
 	r := Reconciler{
 		Backend:          mockedBackend,
