@@ -28,7 +28,7 @@
 
 FROM alpine:3.15.1
 
-ENV NODE_VERSION 14.19.0
+ENV NODE_VERSION 14.19.1
 
 SHELL ["/bin/ash", "-o", "pipefail", "-c"]
 
