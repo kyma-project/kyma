@@ -68,10 +68,21 @@ type SecretReference struct {
 	Namespace string `json:"namespace,omitempty"`
 }
 
+type LogPipelinePhase string
+
+// These are the valid statuses of LogPipeline.
+const (
+	LogPipelinePending LogPipelinePhase = "Pending"
+	LogPipelineRunning LogPipelinePhase = "Running"
+	LogPipelineFailed  LogPipelinePhase = "Failed"
+)
+
 // LogPipelineStatus defines the observed state of LogPipeline
 type LogPipelineStatus struct {
 	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
+
+	Phase LogPipelinePhase `json:"phase,omitempty"`
 }
 
 //+kubebuilder:object:root=true
