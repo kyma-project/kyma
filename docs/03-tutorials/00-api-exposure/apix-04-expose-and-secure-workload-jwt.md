@@ -2,7 +2,7 @@
 title: Expose and secure a workload with JWT
 ---
 
-This tutorial shows how to expose and secure services or Functions using API Gateway Controller. The controller reacts to an instance of the API Rule custom resource (CR) and creates an Istio Virtual Service and [Oathkeeper Access Rules](https://www.ory.sh/docs/oathkeeper/api-access-rules) according to the details specified in the CR. To interact with the secured workloads, the tutorial uses a JWT token.
+This tutorial shows how to expose and secure services or Functions using API Gateway Controller. The Controller reacts to an instance of the API Rule custom resource (CR) and creates an Istio Virtual Service and [Oathkeeper Access Rules](https://www.ory.sh/docs/oathkeeper/api-access-rules) according to the details specified in the CR. To interact with the secured workloads, the tutorial uses a JWT token.
 
 You can use it as a follow-up to the [Use a custom domain to expose a workload](./apix-01-own-domain.md) tutorial.
 
