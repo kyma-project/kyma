@@ -54,6 +54,7 @@ func (r *FunctionReconciler) calculateImageTag(instance *serverlessv1alpha1.Func
 		string(instance.GetUID()),
 		instance.Spec.Source,
 		instance.Spec.Deps,
+		instance.Spec.CustomRuntimeImage,
 		string(instance.Status.Runtime),
 	}, "-")))
 
@@ -69,6 +70,7 @@ func (r *FunctionReconciler) calculateGitImageTag(instance *serverlessv1alpha1.F
 		string(instance.GetUID()),
 		instance.Status.Commit,
 		instance.Status.Repository.BaseDir,
+		instance.Spec.CustomRuntimeImage,
 		string(instance.Status.Runtime),
 	}, "-")
 	hash := sha256.Sum256([]byte(data))
