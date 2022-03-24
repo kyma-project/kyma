@@ -98,6 +98,13 @@ func (r *Reconciler) SetupUnmanaged(mgr ctrl.Manager) error {
 	return nil
 }
 
+// +kubebuilder:rbac:groups=eventing.kyma-project.io,resources=subscriptions,verbs=get;list;watch;create;update;patch;delete
+// +kubebuilder:rbac:groups=eventing.kyma-project.io,resources=subscriptions/status,verbs=get;update;patch
+// Generate required RBAC to emit kubernetes events in the controller.
+// +kubebuilder:rbac:groups="",resources=events,verbs=create;patch
+// Generated required RBAC to list Applications (required by event type cleaner).
+// +kubebuilder:rbac:groups="applicationconnector.kyma-project.io",resources=applications,verbs=get;list;watch
+
 func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	r.namedLogger().Debugw("received subscription reconciliation request", "namespace", req.Namespace, "name", req.Name)
 
