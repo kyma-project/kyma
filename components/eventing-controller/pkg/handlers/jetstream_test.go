@@ -1203,8 +1203,8 @@ func setupTestEnvironment(t *testing.T) *TestEnvironment {
 	}
 }
 
-// TestSubscriptionSubjectEqual checks the equality of two SubscriptionSubject instances and their consumer names.
-func TestSubscriptionSubjectEqual(t *testing.T) {
+// TestSubscriptionSubjectIdentifierEqual checks the equality of two SubscriptionSubjectIdentifier instances and their consumer names.
+func TestSubscriptionSubjectIdentifierEqual(t *testing.T) {
 	t.Parallel()
 	testCases := []struct {
 		name             string
@@ -1301,9 +1301,9 @@ func TestSubscriptionSubjectEqual(t *testing.T) {
 	}
 }
 
-// TestSubscriptionSubjectConsumerNameLength checks that the consumer name length is equal to the recommended
-// length by JetStream https://docs.nats.io/running-a-nats-service/nats_admin/jetstream_admin/naming.
-func TestSubscriptionSubjectConsumerNameLength(t *testing.T) {
+// TestSubscriptionSubjectIdentifierConsumerNameLength checks that the SubscriptionSubjectIdentifier consumer name
+// length is equal to the recommended length by JetStream.
+func TestSubscriptionSubjectIdentifierConsumerNameLength(t *testing.T) {
 	t.Parallel()
 	testCases := []struct {
 		name                   string
@@ -1336,8 +1336,8 @@ func TestSubscriptionSubjectConsumerNameLength(t *testing.T) {
 	}
 }
 
-// TestSubscriptionSubjectNamespacedName checks the syntax of the SubscriptionSubject namespaced name.
-func TestSubscriptionSubjectNamespacedName(t *testing.T) {
+// TestSubscriptionSubjectIdentifierNamespacedName checks the syntax of the SubscriptionSubjectIdentifier namespaced name.
+func TestSubscriptionSubjectIdentifierNamespacedName(t *testing.T) {
 	t.Parallel()
 	testCases := []struct {
 		name               string
