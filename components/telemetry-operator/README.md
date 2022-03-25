@@ -98,14 +98,11 @@ kubectl delete configmap -n kyma-system logging-fluent-bit
 
 ### Disabling Telemetry Operator integration
 ```bash
-kyma deploy --component logging --value logging.fluent-bit.enabled=true 
+kyma deploy --component logging 
 ```
 
 The above command would redeploy the fluent-bit from the logging chart. After installing the chart we can disable the log pipleline CR so that it does not handle the logs anymore
 ```bash
-# delete loki logpipeline CR.
-# Delete the telemetry chart
-```
 kubectl delete validatingwebhookconfigurations validation.webhook.telemetry.kyma-project.io
 kubectl delete servicemonitor -n kyma-system telemetry-operator-metrics
 kubectl delete deployment -n kyma-system telemetry-operator
@@ -124,7 +121,7 @@ kubectl delete configmap -n kyma-system telemetry-fluent-bit
 kubectl delete secret -n kyma-system telemetry-operator-webhook-cert
 kubectl delete serviceaccount -n kyma-system telemetry-operator
 kubectl delete serviceaccount -n kyma-system telemetry-fluent-bit
-
+```
 
 
 
