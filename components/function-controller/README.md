@@ -66,3 +66,31 @@ To develop the component, use the formulae declared in the [generic](/common/mak
 | **WEBHOOK_DEFAULTING_MINREPLICAS**        | Value of the minReplicas which webhook should set if origin equals null                   | `1`                  |
 | **WEBHOOK_DEFAULTING_MAXREPLICAS**        | Value of the maxReplicas which webhook should set if origin equals null                   | `1`                  |
 | **WEBHOOK_DEFAULTING_RUNTIME**            | Value of the runtime which webhook should set if origin equals null                       | `nodejs14`           |
+
+## Troubleshooting
+
+### How to build and install `libgit2` binary, required by the Function Controller, on macOS
+
+1. Navigate to the Function Controller's root directory and verify the version of `git2go`:
+
+   ```bash
+   $ cat go.mod | grep git2go
+        github.com/libgit2/git2go/v31 v31.4.14
+   ```
+2. Go to the git2go page to check which version of `libgit2` you must use (e.g. for `libigit2` in version 1.1 the `git2go` version is v31).
+   
+3. Clone `libgit2` repository:
+
+   ```bash
+   git clone https://github.com/libgit2/libgit2.git
+   ```
+4. Checkout sources (the following example is for `git2go` version v31):
+   ```bash
+   git checkout v1.1.0
+   ```
+5. Build and install:
+   ```bash
+   cmake -DCMAKE_OSX_ARCHITECTURES="x86_64" .
+   make install
+   ```
+   
