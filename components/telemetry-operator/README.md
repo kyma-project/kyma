@@ -67,3 +67,65 @@ make deploy-local IMG_NAME=<my container repo> TAG=latest
 ```bash
 make undeploy-local
 ```
+## Trying it out on local Kyma cluster
+
+### Prerequisites
+
+- A Kyma Cluster with latest installation of kyma
+
+### Enable Telemetry Operator integration
+```bash
+kyma deploy --component=telemetry 
+```
+
+The above command would perform following tasks
+- installs telemetry operator
+- Installs Telemetry fluent-bit daemon set with null output config
+
+After installing the telemetry operator its necessary to configure the telemetry fluent-bit  to push logs to the Loki (which is already present on the Kyma cluster)
+
+```bash
+kyma deploy --component logging --value logging.fluent-bit.enabled=false
+```
+
+The above command would additionally install a Logpipeline CR which would configure the telemetry fluent-bit to push logs to the Loki. After disabling the fluent-bit from logging chart we need delete the unneded resources
+
+```bash
+kubectl delete daemonset -n kyma-system logging-fluent-bit
+kubectl delete configmap -n kyma-system logging-fluent-bit
+```
+
+
+### Disabling Telemetry Operator integration
+```bash
+kyma deploy --component logging --value logging.fluent-bit.enabled=true 
+```
+
+The above command would redeploy the fluent-bit from the logging chart. After installing the chart we can disable the log pipleline CR so that it does not handle the logs anymore
+```bash
+# delete loki logpipeline CR.
+# Delete the telemetry chart
+```
+kubectl delete validatingwebhookconfigurations validation.webhook.telemetry.kyma-project.io
+kubectl delete servicemonitor -n kyma-system telemetry-operator-metrics
+kubectl delete deployment -n kyma-system telemetry-operator
+kubectl delete daemonset -n kyma-system telemetry-fluent-bit
+kubectl delete service -n kyma-system telemetry-operator-webhook
+kubectl delete service -n kyma-system telemetry-operator-metrics
+kubectl delete service -n kyma-system telemetry-fluent-bit
+kubectl delete rolebinding -n kyma-system telemetry-operator-leader-election-rolebinding
+kubectl delete clusterrolebinding telemetry-operator-manager-rolebinding
+kubectl delete clusterrolebinding telemetry-fluent-bit
+kubectl delete clusterrole telemetry-operator-manager-role
+kubectl delete clusterrole logpipeline-viewer-role
+kubectl delete clusterrole logpipeline-editor-role
+kubectl delete clusterrole telemetry-fluent-bit
+kubectl delete configmap -n kyma-system telemetry-fluent-bit
+kubectl delete secret -n kyma-system telemetry-operator-webhook-cert
+kubectl delete serviceaccount -n kyma-system telemetry-operator
+kubectl delete serviceaccount -n kyma-system telemetry-fluent-bit
+
+
+
+
+```
