@@ -374,9 +374,8 @@ func WithOrderCreatedFilter() SubscriptionOpt {
 	return WithFilter(EventSource, OrderCreatedEventType)
 }
 
-func WithInvalidSink() SubscriptionOpt {
-	return WithSinkURL("invalid")
-
+func WithSinkMissingScheme(svcNamespace, svcName string) SubscriptionOpt {
+	return WithSinkURL(fmt.Sprintf("%s.%s.svc.cluster.local", svcName, svcNamespace))
 }
 
 // WithValidSink is a SubscriptionOpt for creating a subscription with a valid sink that itself gets created from
