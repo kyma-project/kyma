@@ -135,24 +135,6 @@ func (r *LogPipelineReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
 
-	if logPipeline.Status.Phase == telemetryv1alpha1.LogPipelinePending {
-		ready, err := r.isFluentBitDaemonSetReady(ctx)
-		if err != nil {
-			log.Error(err, "Failed to check fluent bit readiness")
-			return ctrl.Result{RequeueAfter: requeueTime}, nil
-		}
-		if !ready {
-			return ctrl.Result{RequeueAfter: requeueTime}, nil
-		}
-
-		if err := r.updateStatusPhase(ctx, &logPipeline, telemetryv1alpha1.LogPipelineRunning); err != nil {
-			log.Error(err, "Failed to update log pipeline status")
-			return ctrl.Result{RequeueAfter: requeueTime}, nil
-		}
-
-		return ctrl.Result{}, nil
-	}
-
 	updatedSectionsCm, err := r.syncSectionsConfigMap(ctx, &logPipeline)
 	if err != nil {
 		log.Error(err, "Failed to sync Sections ConfigMap")
@@ -184,7 +166,7 @@ func (r *LogPipelineReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 			return ctrl.Result{}, err
 		}
 
-		if err := r.deleteFluentBitPods(ctx); err != nil {
+		if err := r.restartFluentBit(ctx); err != nil {
 			log.Error(err, "Failed deleting fluent bit pods")
 			return ctrl.Result{}, err
 		}
@@ -195,6 +177,24 @@ func (r *LogPipelineReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 		}
 
 		return ctrl.Result{RequeueAfter: requeueTime}, nil
+	}
+
+	log.Info("Nothing has to be synced")
+
+	if logPipeline.Status.Phase == telemetryv1alpha1.LogPipelinePending {
+		ready, err := r.isFluentBitDaemonSetReady(ctx)
+		if err != nil {
+			log.Error(err, "Failed to check fluent bit readiness")
+			return ctrl.Result{RequeueAfter: requeueTime}, err
+		}
+		if !ready {
+			return ctrl.Result{RequeueAfter: requeueTime}, nil
+		}
+
+		if err := r.updateStatusPhase(ctx, &logPipeline, telemetryv1alpha1.LogPipelineRunning); err != nil {
+			log.Error(err, "Failed to update log pipeline status")
+			return ctrl.Result{RequeueAfter: requeueTime}, err
+		}
 	}
 
 	return ctrl.Result{}, nil
@@ -435,27 +435,29 @@ func (r *LogPipelineReconciler) syncSecretRefs(ctx context.Context, logPipeline 
 	return changed, nil
 }
 
+type patchStringValue struct {
+	Op    string `json:"op"`
+	Path  string `json:"path"`
+	Value string `json:"value"`
+}
+
 // Delete all Fluent Bit pods to apply new configuration.
-func (r *LogPipelineReconciler) deleteFluentBitPods(ctx context.Context) error {
+func (r *LogPipelineReconciler) restartFluentBit(ctx context.Context) error {
 	log := logf.FromContext(ctx)
-	var fluentBitDs appsv1.DaemonSet
-	if err := r.Get(ctx, r.FluentBitDaemonSet, &fluentBitDs); err != nil {
+	var fluentBitDS appsv1.DaemonSet
+	if err := r.Get(ctx, r.FluentBitDaemonSet, &fluentBitDS); err != nil {
 		log.Error(err, "Failed getting fluent bit DaemonSet")
 	}
 
-	var fluentBitPods corev1.PodList
-	if err := r.List(ctx, &fluentBitPods, client.InNamespace(r.FluentBitDaemonSet.Namespace), client.MatchingLabels(fluentBitDs.Spec.Template.Labels)); err != nil {
-		log.Error(err, "Failed listing fluent bit pods")
-		return err
+	patchedFluentBitDS := *fluentBitDS.DeepCopy()
+	if patchedFluentBitDS.Spec.Template.ObjectMeta.Annotations == nil {
+		patchedFluentBitDS.Spec.Template.ObjectMeta.Annotations = make(map[string]string)
 	}
+	patchedFluentBitDS.Spec.Template.ObjectMeta.Annotations["kubectl.kubernetes.io/restartedAt"] = time.Now().Format(time.RFC3339)
 
-	log.Info("Restarting Fluent Bit pods")
-	for i := range fluentBitPods.Items {
-		if err := r.Delete(ctx, &fluentBitPods.Items[i]); err != nil {
-			log.Error(err, "Failed deleting pod "+fluentBitPods.Items[i].Name)
-		}
+	if err := r.Patch(ctx, &patchedFluentBitDS, client.MergeFrom(&fluentBitDS)); err != nil {
+		log.Error(err, "Failed to patch fluent bit to trigger rolling update")
 	}
-
 	r.FluentBitRestartsCount.Inc()
 	return nil
 }
