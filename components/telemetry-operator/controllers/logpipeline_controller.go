@@ -19,6 +19,8 @@ package controllers
 import (
 	"bytes"
 	"context"
+	"fmt"
+	"time"
 
 	"github.com/prometheus/client_golang/prometheus"
 
@@ -44,6 +46,10 @@ const (
 	//nolint:gosec
 	secretRefsFinalizer = "FLUENT_BIT_SECRETS"
 	filesFinalizer      = "FLUENT_BIT_FILES"
+)
+
+var (
+	requeueTime = 2 * time.Minute
 )
 
 // LogPipelineReconciler reconciles a LogPipeline object
@@ -129,6 +135,24 @@ func (r *LogPipelineReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
 
+	if logPipeline.Status.Phase == telemetryv1alpha1.LogPipelinePending {
+		ready, err := r.isFluentBitDaemonSetReady(ctx)
+		if err != nil {
+			log.Error(err, "Failed to check fluent bit readiness")
+			return ctrl.Result{RequeueAfter: requeueTime}, nil
+		}
+		if !ready {
+			return ctrl.Result{RequeueAfter: requeueTime}, nil
+		}
+
+		if err := r.updateStatusPhase(ctx, &logPipeline, telemetryv1alpha1.LogPipelineRunning); err != nil {
+			log.Error(err, "Failed to update log pipeline status")
+			return ctrl.Result{RequeueAfter: requeueTime}, nil
+		}
+
+		return ctrl.Result{}, nil
+	}
+
 	updatedSectionsCm, err := r.syncSectionsConfigMap(ctx, &logPipeline)
 	if err != nil {
 		log.Error(err, "Failed to sync Sections ConfigMap")
@@ -164,6 +188,13 @@ func (r *LogPipelineReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 			log.Error(err, "Failed deleting fluent bit pods")
 			return ctrl.Result{}, err
 		}
+
+		if err := r.updateStatusPhase(ctx, &logPipeline, telemetryv1alpha1.LogPipelinePending); err != nil {
+			log.Error(err, "Failed to update log pipeline status")
+			return ctrl.Result{}, err
+		}
+
+		return ctrl.Result{RequeueAfter: requeueTime}, nil
 	}
 
 	return ctrl.Result{}, nil
@@ -426,5 +457,32 @@ func (r *LogPipelineReconciler) deleteFluentBitPods(ctx context.Context) error {
 	}
 
 	r.FluentBitRestartsCount.Inc()
+	return nil
+}
+
+func (r *LogPipelineReconciler) isFluentBitDaemonSetReady(ctx context.Context) (bool, error) {
+	log := logf.FromContext(ctx)
+	var fluentBitDaemonSet appsv1.DaemonSet
+	if err := r.Get(ctx, r.FluentBitDaemonSet, &fluentBitDaemonSet); err != nil {
+		log.Error(err, "Failed getting fluent bit DaemonSet")
+		return false, nil
+	}
+
+	updated := fluentBitDaemonSet.Status.UpdatedNumberScheduled
+	desired := fluentBitDaemonSet.Status.DesiredNumberScheduled
+	ready := fluentBitDaemonSet.Status.NumberReady
+	return updated == desired && ready >= desired, nil
+}
+
+func (r *LogPipelineReconciler) updateStatusPhase(ctx context.Context,
+	logPipeline *telemetryv1alpha1.LogPipeline,
+	phase telemetryv1alpha1.LogPipelinePhase) error {
+	log := logf.FromContext(ctx)
+	log.Info(fmt.Sprintf("Updating log pipeline status to %s", phase))
+	logPipeline.Status.Phase = phase
+	if err := r.Status().Update(ctx, logPipeline); err != nil {
+		log.Error(err, fmt.Sprintf("Updating log pipeline status to %s", phase))
+		return err
+	}
 	return nil
 }
