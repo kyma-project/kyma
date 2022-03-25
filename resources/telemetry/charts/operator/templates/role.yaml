@@ -20,14 +20,6 @@ rules:
   - apiGroups:
       - ""
     resources:
-      - pods
-    verbs:
-      - delete
-      - list
-      - watch
-  - apiGroups:
-      - ""
-    resources:
       - secrets
     verbs:
       - create
@@ -45,6 +37,7 @@ rules:
       - get
       - list
       - watch
+      - patch
   - apiGroups:
       - telemetry.kyma-project.io
     resources:
