@@ -1,0 +1,40 @@
+{{ if .Values.global.telemetry.enabled }}
+apiVersion: telemetry.kyma-project.io/v1alpha1
+kind: LogPipeline
+metadata:
+  name: loki
+spec:
+  parsers: []
+  multilineParsers: []
+  filters: []
+  outputs:
+    - content: |
+        Name               grafana-loki
+        Alias              loki-output
+        Match              {{ .Values.kyma.logPipeline.match }}
+        Url                http://{{ template "loki.fullname" . }}:{{ .Values.service.port }}/loki/api/v1/push
+        Labels             {job="telemetry-fluent-bit"}
+        RemoveKeys         {{ .Values.kyma.logPipeline.removeKeys }}
+        LineFormat         {{ .Values.kyma.logPipeline.lineFormat }}
+        LogLevel           {{ .Values.kyma.logPipeline.logLevel }}
+        LabelMapPath       /files/labelmap.json
+  files:
+    - name: labelmap.json
+      content: |
+        {
+          "kubernetes": {
+            "container_name": "container",
+            "host": "node",
+            "labels": {
+              "app": "app",
+              "app.kubernetes.io/component": "component",
+              "app.kubernetes.io/name": "app",
+              "serverless.kyma-project.io/function-name": "function"
+            },
+            "namespace_name": "namespace",
+            "pod_name": "pod"
+          },
+          "stream": "stream"
+        }
+  secretRefs: []
+{{ end}}

@@ -45,6 +45,8 @@ global:
     gateway:
       name: kyma-gateway
       namespace: kyma-system
+  telemetry:
+    enabled: false
   tracing:
     enabled: true
   highPriorityClassName: "kyma-system-priority"
