@@ -1,6 +1,7 @@
 package connector
 
 import (
+	"context"
 	"testing"
 
 	gqlschema "github.com/kyma-incubator/compass/components/connector/pkg/graphql/externalschema"
@@ -49,7 +50,7 @@ func TestCertificateSecuredClient_Configuration(t *testing.T) {
 
 	setExpectedConfigFunc := func(config gqlschema.Configuration) func(args mock.Arguments) {
 		return func(args mock.Arguments) {
-			response, ok := args[1].(*ConfigurationResponse)
+			response, ok := args[2].(*ConfigurationResponse)
 			require.True(t, ok)
 			assert.Empty(t, response)
 			response.Result = config
@@ -69,7 +70,7 @@ func TestCertificateSecuredClient_Configuration(t *testing.T) {
 
 		client := &mocks.Client{}
 		client.
-			On("Do", expectedRequest, &ConfigurationResponse{}).
+			On("Do", context.Background(), expectedRequest, &ConfigurationResponse{}).
 			Return(nil).
 			Run(setExpectedConfigFunc(expectedResponse)).
 			Once()
@@ -77,7 +78,7 @@ func TestCertificateSecuredClient_Configuration(t *testing.T) {
 		certSecuredClient := NewConnectorClient(client)
 
 		// when
-		configResponse, err := certSecuredClient.Configuration(connectorTokenHeaders)
+		configResponse, err := certSecuredClient.Configuration(context.Background(), connectorTokenHeaders)
 
 		// then
 		require.NoError(t, err)
@@ -88,13 +89,13 @@ func TestCertificateSecuredClient_Configuration(t *testing.T) {
 		// given
 		client := &mocks.Client{}
 		client.
-			On("Do", expectedRequest, &ConfigurationResponse{}).
+			On("Do", context.Background(), expectedRequest, &ConfigurationResponse{}).
 			Return(errors.New("error"))
 
 		certSecuredClient := NewConnectorClient(client)
 
 		// when
-		configResponse, err := certSecuredClient.Configuration(connectorTokenHeaders)
+		configResponse, err := certSecuredClient.Configuration(context.Background(), connectorTokenHeaders)
 
 		// then
 		require.Error(t, err)
@@ -109,7 +110,7 @@ func TestCertificateSecuredClient_SignCSR(t *testing.T) {
 
 	setExpectedCertFunc := func(cert gqlschema.CertificationResult) func(args mock.Arguments) {
 		return func(args mock.Arguments) {
-			response, ok := args[1].(*CertificationResponse)
+			response, ok := args[2].(*CertificationResponse)
 			require.True(t, ok)
 			assert.Empty(t, response)
 			response.Result = cert
@@ -126,7 +127,7 @@ func TestCertificateSecuredClient_SignCSR(t *testing.T) {
 
 		client := &mocks.Client{}
 		client.
-			On("Do", expectedRequest, &CertificationResponse{}).
+			On("Do", context.Background(), expectedRequest, &CertificationResponse{}).
 			Return(nil).
 			Run(setExpectedCertFunc(expectedResponse)).
 			Once()
@@ -134,7 +135,7 @@ func TestCertificateSecuredClient_SignCSR(t *testing.T) {
 		certSecuredClient := NewConnectorClient(client)
 
 		// when
-		configResponse, err := certSecuredClient.SignCSR(encodedCSR, connectorTokenHeaders)
+		configResponse, err := certSecuredClient.SignCSR(context.Background(), encodedCSR, connectorTokenHeaders)
 
 		// then
 		require.NoError(t, err)
@@ -145,13 +146,13 @@ func TestCertificateSecuredClient_SignCSR(t *testing.T) {
 		// given
 		client := &mocks.Client{}
 		client.
-			On("Do", expectedRequest, &CertificationResponse{}).
+			On("Do", context.Background(), expectedRequest, &CertificationResponse{}).
 			Return(errors.New("error"))
 
 		certSecuredClient := NewConnectorClient(client)
 
 		// when
-		configResponse, err := certSecuredClient.SignCSR(encodedCSR, connectorTokenHeaders)
+		configResponse, err := certSecuredClient.SignCSR(context.Background(), encodedCSR, connectorTokenHeaders)
 
 		// then
 		require.Error(t, err)

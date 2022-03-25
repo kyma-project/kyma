@@ -11,6 +11,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/sink"
+
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/eventtype"
 
 	bebreconciler "github.com/kyma-project/kyma/components/eventing-controller/controllers/subscription/beb"
@@ -222,7 +224,8 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			givenSubscription := reconcilertesting.NewSubscription(subscriptionName, namespaceName,
 				reconcilertesting.WithOrderCreatedFilter(),
 				reconcilertesting.WithWebhookAuthForBEB(),
-				reconcilertesting.WithInvalidSink(),
+				// The following sink is invalid because it is missing a scheme.
+				reconcilertesting.WithSinkMissingScheme(subscriberSvc.Namespace, subscriberSvc.Name),
 			)
 			ensureSubscriptionCreated(ctx, givenSubscription)
 
@@ -1405,8 +1408,10 @@ var _ = BeforeSuite(func(done Done) {
 	nameMapper = handlers.NewBEBSubscriptionNameMapper(domain, handlers.MaxBEBSubscriptionNameLength)
 	bebHandler := handlers.NewBEB(credentials, nameMapper, defaultLogger)
 
+	recorder := k8sManager.GetEventRecorderFor("eventing-controller")
+	sinkValidator := sink.NewValidator(context.Background(), k8sManager.GetClient(), recorder, defaultLogger)
 	err = bebreconciler.NewReconciler(context.Background(), k8sManager.GetClient(), defaultLogger,
-		k8sManager.GetEventRecorderFor("eventing-controller"), envConf, cleaner, bebHandler, credentials, nameMapper).SetupUnmanaged(k8sManager)
+		recorder, envConf, cleaner, bebHandler, credentials, nameMapper, sinkValidator).SetupUnmanaged(k8sManager)
 	Expect(err).ToNot(HaveOccurred())
 
 	go func() {
