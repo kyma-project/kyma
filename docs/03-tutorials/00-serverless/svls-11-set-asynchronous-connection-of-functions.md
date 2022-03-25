@@ -60,6 +60,7 @@ This tutorial shows only one possible use case. There are many more use cases on
 
    ```js
    const { v4: uuidv4 } = require('uuid');
+   require('axios');
    module.exports = {
        main: function (event, context) {
            let sanitsedData = sanitise(event.data)
@@ -80,7 +81,7 @@ This tutorial shows only one possible use case. There are many more use cases on
    >**NOTE:** The `sap.kyma.custom.acme.payload.sanitised.v1` is a sample event type declared by the emitter Function when publishing events. You can choose a different one that better suits your use case. Keep in mind the constraints described on the [Event names](../../05-technical-reference/evnt-01-event-names.md) page. The receiver subscribes to the event type to consume the events.
 
    >**NOTE:** The event object provides convenience functions to build and publish events. To send the event, build the Cloud Event. To learn more, read [Function's specification](../../05-technical-reference/svls-08-function-specification.md#event-object-sdk). In addition, your **eventOut.source** key must point to `“kyma”` to use Kyma in-cluster Eventing.
-   >**NOTE:** If you would like to trace outgoing requests send via the `publishCloudEvent` method then import axios at the beggining of the functions handler by adding `require('axios')` line and adding axios as a dependencie to the package.json.
+   >**NOTE:** Please note there is a `require('axios')` line even though the function code is not using it directly. This is needed for the auto-instrumentation to properly handle outgoing requests sent via `publishCloudEvent` method (which uses `axios` library under the hood). Without `axios` import the function would still work, but the published events would not be reflected in Jaeger.
 
 4. Apply your emitter Function:
 
