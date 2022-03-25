@@ -95,11 +95,11 @@ global:
       version: "PR-13710"
     kaniko_executor:
       name: "kaniko-executor"
-      version: "PR-202"
+      version: "1.8.0-a6fe5eca"
       directory: "tpi"
     registry:
       name: "registry"
-      version: "PR-202"
+      version: "2.7.1-a6fe5eca"
       directory: "tpi"
     google_pause:
       name: "pause-amd64"
