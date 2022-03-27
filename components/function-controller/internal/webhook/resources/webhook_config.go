@@ -69,15 +69,14 @@ func createMutatingWebhookConfiguration(config WebhookConfig) *admissionregistra
 	reinvocationPolicy := admissionregistrationv1.NeverReinvocationPolicy
 	scope := admissionregistrationv1.AllScopes
 	sideEffects := admissionregistrationv1.SideEffectClassNone
-	name := "defaulting.webhook.serverless.kyma-project.io"
 
 	return &admissionregistrationv1.MutatingWebhookConfiguration{
 		ObjectMeta: metav1.ObjectMeta{
-			Name: name,
+			Name: DefaultingWebhookName,
 		},
 		Webhooks: []admissionregistrationv1.MutatingWebhook{
 			{
-				Name: name,
+				Name: DefaultingWebhookName,
 				AdmissionReviewVersions: []string{
 					"v1beta1",
 					"v1",
@@ -124,15 +123,14 @@ func createValidatingWebhookConfiguration(config WebhookConfig) *admissionregist
 	matchPolicy := admissionregistrationv1.Exact
 	scope := admissionregistrationv1.AllScopes
 	sideEffects := admissionregistrationv1.SideEffectClassNone
-	name := "validation.webhook.serverless.kyma-project.io"
 
 	return &admissionregistrationv1.ValidatingWebhookConfiguration{
 		ObjectMeta: metav1.ObjectMeta{
-			Name: name,
+			Name: ValidationWebhookName,
 		},
 		Webhooks: []admissionregistrationv1.ValidatingWebhook{
 			{
-				Name: name,
+				Name: ValidationWebhookName,
 				AdmissionReviewVersions: []string{
 					"v1beta1",
 					"v1",

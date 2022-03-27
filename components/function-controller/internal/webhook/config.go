@@ -13,7 +13,7 @@ type Config struct {
 	WebhookPort        int    `envconfig:"default=8443"`
 }
 
-func ReadDefaultingConfig() *serverlessv1alpha1.DefaultingConfig {
+func ReadDefaultingConfigOrDie() *serverlessv1alpha1.DefaultingConfig {
 	defaultingCfg := &serverlessv1alpha1.DefaultingConfig{}
 	if err := envconfig.InitWithPrefix(defaultingCfg, "WEBHOOK_DEFAULTING"); err != nil {
 		panic(errors.Wrap(err, "while reading env defaulting variables"))
@@ -46,7 +46,7 @@ func ReadDefaultingConfig() *serverlessv1alpha1.DefaultingConfig {
 	return defaultingCfg
 }
 
-func ReadValidationConfig() *serverlessv1alpha1.ValidationConfig {
+func ReadValidationConfigOrDie() *serverlessv1alpha1.ValidationConfig {
 	validationCfg := &serverlessv1alpha1.ValidationConfig{}
 	if err := envconfig.InitWithPrefix(validationCfg, "WEBHOOK_VALIDATION"); err != nil {
 		panic(errors.Wrap(err, "while reading env defaulting variables"))

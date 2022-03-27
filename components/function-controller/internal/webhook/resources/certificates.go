@@ -34,24 +34,6 @@ func SetupCertificates(ctx context.Context, secretName, secretNamespace, service
 	return errors.Wrap(EnsureWebhookSecret(ctx, serverClient, secretName, secretNamespace, serviceName), "failed to ensure webhook secret")
 }
 
-func serviceAltNames(serviceName, namespace string) []string {
-	namespacedServiceName := strings.Join([]string{serviceName, namespace}, ".")
-	commonName := strings.Join([]string{namespacedServiceName, "svc"}, ".")
-	serviceHostname := fmt.Sprintf("%s.%s.svc.cluster.local", serviceName, namespace)
-
-	return []string{
-		commonName,
-		serviceName,
-		namespacedServiceName,
-		serviceHostname,
-	}
-}
-
-func GenerateWebhookCertificates(serviceName, namespace string) ([]byte, []byte, error) {
-	altNames := serviceAltNames(serviceName, namespace)
-	return cert.GenerateSelfSignedCertKey(altNames[0], nil, altNames)
-}
-
 func EnsureWebhookSecret(ctx context.Context, client ctrlclient.Client, secretName, secretNamespace, serviceName string) error {
 	logger := ctrl.LoggerFrom(ctx)
 	secret := &corev1.Secret{}
@@ -70,8 +52,43 @@ func EnsureWebhookSecret(ctx context.Context, client ctrlclient.Client, secretNa
 	return errors.Wrap(updateSecret(ctx, client, secret, serviceName), "failed to update secret")
 }
 
+func createSecret(ctx context.Context, client ctrlclient.Client, name, namespace, serviceName string) error {
+	secret, err := buildSecret(name, namespace, serviceName)
+	if err != nil {
+		return errors.Wrap(err, "failed to create secret object")
+	}
+	if err := client.Create(ctx, secret); err != nil {
+		return errors.Wrap(err, "failed to create secret")
+	}
+	return nil
+}
+
+func updateSecret(ctx context.Context, client ctrlclient.Client, secret *corev1.Secret, serviceName string) error {
+	if !hasRequiredKeys(secret.Data) {
+		newSecret, err := buildSecret(secret.Name, secret.Namespace, serviceName)
+		if err != nil {
+			return errors.Wrap(err, "failed to create secret object")
+		}
+		secret.Data = newSecret.Data
+		return errors.Wrap(client.Update(ctx, secret), "failed to update secret")
+	}
+	return nil
+}
+
+func hasRequiredKeys(data map[string][]byte) bool {
+	if data == nil {
+		return false
+	}
+	for _, key := range []string{CertFile, KeyFile} {
+		if _, ok := data[key]; !ok {
+			return false
+		}
+	}
+	return true
+}
+
 func buildSecret(name, namespace, serviceName string) (*corev1.Secret, error) {
-	cert, key, err := GenerateWebhookCertificates(serviceName, namespace)
+	cert, key, err := generateWebhookCertificates(serviceName, namespace)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to generate webhook certificates")
 	}
@@ -87,34 +104,20 @@ func buildSecret(name, namespace, serviceName string) (*corev1.Secret, error) {
 	}, nil
 }
 
-func createSecret(ctx context.Context, client ctrlclient.Client, name, namespace, serviceName string) error {
-	secret, err := buildSecret(name, namespace, serviceName)
-	if err != nil {
-		return errors.Wrap(err, "failed to create secret object")
-	}
-	if err := client.Create(ctx, secret); err != nil {
-		return errors.Wrap(err, "failed to create secret")
-	}
-	return nil
+func generateWebhookCertificates(serviceName, namespace string) ([]byte, []byte, error) {
+	altNames := serviceAltNames(serviceName, namespace)
+	return cert.GenerateSelfSignedCertKey(altNames[0], nil, altNames)
 }
 
-func updateSecret(ctx context.Context, client ctrlclient.Client, secret *corev1.Secret, serviceName string) error {
-	update := false
-	if secret.Data != nil {
-		for _, key := range []string{CertFile, KeyFile} {
-			if _, ok := secret.Data[key]; !ok {
-				update = true
-				break
-			}
-		}
+func serviceAltNames(serviceName, namespace string) []string {
+	namespacedServiceName := strings.Join([]string{serviceName, namespace}, ".")
+	commonName := strings.Join([]string{namespacedServiceName, "svc"}, ".")
+	serviceHostname := fmt.Sprintf("%s.%s.svc.cluster.local", serviceName, namespace)
+
+	return []string{
+		commonName,
+		serviceName,
+		namespacedServiceName,
+		serviceHostname,
 	}
-	if update || secret.Data == nil {
-		newSecret, err := buildSecret(secret.Name, secret.Namespace, serviceName)
-		if err != nil {
-			return errors.Wrap(err, "failed to create secret object")
-		}
-		secret.Data = newSecret.Data
-		return errors.Wrap(client.Update(ctx, secret), "failed to update secret")
-	}
-	return nil
 }

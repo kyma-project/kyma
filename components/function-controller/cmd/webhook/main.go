@@ -51,8 +51,8 @@ func main() {
 		panic(errors.Wrap(err, "while reading env variables"))
 	}
 
-	validationConfig := webhook.ReadValidationConfig()
-	defaultingConfig := webhook.ReadDefaultingConfig()
+	validationConfig := webhook.ReadValidationConfigOrDie()
+	defaultingConfig := webhook.ReadDefaultingConfigOrDie()
 
 	// manager setup
 	log.Info("setting up controller-manager")

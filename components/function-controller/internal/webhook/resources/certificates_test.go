@@ -42,7 +42,8 @@ func Test_serviceAltNames(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := serviceAltNames(tt.args.serviceName, tt.args.namespace); !reflect.DeepEqual(got, tt.want) {
+			got := serviceAltNames(tt.args.serviceName, tt.args.namespace)
+			if !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("invalid serviec altNames: serviceAltNames() = %v, want %v", got, tt.want)
 			}
 		})
@@ -63,8 +64,8 @@ func TestEnsureWebhookSecret(t *testing.T) {
 
 		require.NoError(t, err)
 		require.NotNil(t, secret)
-		require.Equal(t, secret.Name, testSecretName)
-		require.Equal(t, secret.Namespace, testNamespaceName)
+		require.Equal(t, testSecretName, secret.Name)
+		require.Equal(t, testNamespaceName, secret.Namespace)
 		require.Contains(t, secret.Data, KeyFile)
 		require.Contains(t, secret.Data, CertFile)
 	})
@@ -91,8 +92,77 @@ func TestEnsureWebhookSecret(t *testing.T) {
 
 		require.NoError(t, err)
 		require.NotNil(t, secret)
-		require.Equal(t, updatedSecret.Name, testSecretName)
-		require.Equal(t, updatedSecret.Namespace, testNamespaceName)
+		require.Equal(t, testSecretName, updatedSecret.Name)
+		require.Equal(t, testNamespaceName, updatedSecret.Namespace)
+		require.Contains(t, updatedSecret.Data, KeyFile)
+		require.Contains(t, updatedSecret.Data, CertFile)
+		require.Contains(t, updatedSecret.Labels, "dont-remove-me")
+	})
+
+	t.Run("can ensure the secret is updated if it's missing a value", func(t *testing.T) {
+		client := fake.NewClientBuilder().Build()
+		secret := &corev1.Secret{
+			ObjectMeta: v1.ObjectMeta{
+				Name:      testSecretName,
+				Namespace: testNamespaceName,
+				Labels: map[string]string{
+					"dont-remove-me": "true",
+				},
+			},
+			Data: map[string][]byte{
+				KeyFile: []byte("key content"),
+			},
+		}
+		err := client.Create(ctx, secret)
+		require.NoError(t, err)
+
+		err = EnsureWebhookSecret(ctx, client, testSecretName, testNamespaceName, testServiceName)
+		require.NoError(t, err)
+
+		updatedSecret := &corev1.Secret{}
+		err = client.Get(ctx, types.NamespacedName{Name: testSecretName, Namespace: testNamespaceName}, updatedSecret)
+
+		require.NoError(t, err)
+		require.NotNil(t, secret)
+		require.Equal(t, testSecretName, updatedSecret.Name)
+		require.Equal(t, testNamespaceName, updatedSecret.Namespace)
+		// make sure the test is updated
+		require.NotEqual(t, secret.ResourceVersion, updatedSecret.ResourceVersion)
+		require.Contains(t, updatedSecret.Data, KeyFile)
+		require.Contains(t, updatedSecret.Data, CertFile)
+		require.Contains(t, updatedSecret.Labels, "dont-remove-me")
+	})
+
+	t.Run("doesn't update the secret if it's ok", func(t *testing.T) {
+		client := fake.NewClientBuilder().Build()
+		secret := &corev1.Secret{
+			ObjectMeta: v1.ObjectMeta{
+				Name:      testSecretName,
+				Namespace: testNamespaceName,
+				Labels: map[string]string{
+					"dont-remove-me": "true",
+				},
+			},
+			Data: map[string][]byte{
+				KeyFile:  []byte("key content"),
+				CertFile: []byte("cert content"),
+			},
+		}
+		err := client.Create(ctx, secret)
+		require.NoError(t, err)
+
+		err = EnsureWebhookSecret(ctx, client, testSecretName, testNamespaceName, testServiceName)
+		require.NoError(t, err)
+
+		updatedSecret := &corev1.Secret{}
+		err = client.Get(ctx, types.NamespacedName{Name: testSecretName, Namespace: testNamespaceName}, updatedSecret)
+
+		require.NoError(t, err)
+		require.NotNil(t, secret)
+		require.Equal(t, testSecretName, updatedSecret.Name)
+		require.Equal(t, testNamespaceName, updatedSecret.Namespace)
+		// make sure it's not updated
+		require.Equal(t, secret.ResourceVersion, updatedSecret.ResourceVersion)
 		require.Contains(t, updatedSecret.Data, KeyFile)
 		require.Contains(t, updatedSecret.Data, CertFile)
 		require.Contains(t, updatedSecret.Labels, "dont-remove-me")
