@@ -46,8 +46,8 @@ type ValidationConfig struct {
 }
 type validationFunction func(*ValidationConfig) error
 
-func (fn *Function) performBasicValidation(vc *ValidationConfig) error {
-	validationFns := []validationFunction{
+func (fn *Function) getBasicValidations(vc *ValidationConfig) []validationFunction {
+	return []validationFunction{
 		fn.validateObjectMeta,
 		fn.Spec.validateSource,
 		fn.Spec.validateEnv,
@@ -56,27 +56,18 @@ func (fn *Function) performBasicValidation(vc *ValidationConfig) error {
 		fn.Spec.validateFunctionResources,
 		fn.Spec.validateBuildResources,
 	}
-	return runValidations(validationFns, vc)
 }
 
 func (fn *Function) Validate(vc *ValidationConfig) error {
-	spec := fn.Spec
+	validations := fn.getBasicValidations(vc)
 
-	if spec.Type == SourceTypeGit {
-		return runValidations(
-			[]validationFunction{
-				fn.performBasicValidation,
-				spec.validateRepository,
-			},
-			vc)
+	if fn.Spec.Type == SourceTypeGit {
+		validations = append(validations, fn.Spec.validateRepository)
+	} else {
+		validations = append(validations, fn.Spec.validateDeps)
 	}
 
-	return runValidations(
-		[]validationFunction{
-			fn.performBasicValidation,
-			spec.validateDeps,
-		},
-		vc)
+	return runValidations(validations, vc)
 }
 
 func runValidations(vFuns []validationFunction, vc *ValidationConfig) error {
