@@ -16,6 +16,7 @@ This tutorial is based on a sample HttpBin service deployment and a sample Funct
 
    ```shell
    export NAMESPACE={NAMESPACE} # e.g. default
+   export DOMAIN={DOMAIN_NAME} # This is a Kyma domain or your custom subdomain e.g. api.mydomain.com.
    ```
 
 1. Run:
@@ -26,7 +27,7 @@ This tutorial is based on a sample HttpBin service deployment and a sample Funct
    kind: Gateway
    metadata:
      name: httpbin-gateway
-     namespace: istio-system
+     namespace: $NAMESPACE
    spec:
      selector:
        istio: ingressgateway
@@ -36,7 +37,7 @@ This tutorial is based on a sample HttpBin service deployment and a sample Funct
          name: http
          protocol: HTTP
        hosts:
-       - "*"
+       - "$DOMAIN"
    ---
    apiVersion: networking.istio.io/v1alpha3
    kind: VirtualService
@@ -63,7 +64,6 @@ This tutorial is based on a sample HttpBin service deployment and a sample Funct
 2. Export the following values:
 
    ```shell
-   export DOMAIN={DOMAIN_NAME} # This is a Kyma domain or your custom subdomain e.g. api.mydomain.com.
    export IP=$(kubectl -n istio-system get service istio-ingressgateway -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
    ```
 
@@ -124,13 +124,13 @@ This tutorial is based on a sample HttpBin service deployment and a sample Funct
 2. If you try to access secured workload you should get 403 Forbidden error:
 
    ```shell
-   curl -ik -X GET $DOMAIN/status/200
+   curl -ik -X GET http://$DOMAIN/status/200
    ```
 
 3. Using correct JWT token should give you 200 OK response
 
    ```shell
-   curl -ik -X GET $DOMAIN/status/200 --header 'Authorization:Bearer JWT_TOKEN'
+   curl -ik -X GET http://$DOMAIN/status/200 --header 'Authorization:Bearer JWT_TOKEN'
    ```
 
 ## Add a different JWT requirement for a different host
