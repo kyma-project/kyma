@@ -22,7 +22,7 @@ async function testPrep() {
     this.slow(slowTime);
 
     it('Prepare the test assets', async function() {
-    // runs once before the first test in this block
+    // run once before the first test in this block
       console.log('Running with mockNamespace =', mockNamespace);
 
       // If eventMeshSecretFilePath is specified then create a k8s secret for eventing-backend
@@ -39,7 +39,7 @@ async function testPrep() {
       await prepareAssetsForOSSTests();
     });
 
-    // prepareAssetsForOSSTests - Sets up CommerceMost for the OSS
+    // prepareAssetsForOSSTests - Set up CommerceMock for the OSS
     async function prepareAssetsForOSSTests() {
       console.log('Preparing CommerceMock test fixture on Kyma OSS');
       await ensureCommerceMockLocalTestFixture(mockNamespace, testNamespace).catch((err) => {
