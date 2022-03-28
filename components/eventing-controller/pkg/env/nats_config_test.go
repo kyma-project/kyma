@@ -75,6 +75,11 @@ func Test_getStreamNameForJetStream(t *testing.T) {
 			givenEventTypePrefix: "ONE.TWO",
 			wantStreamName:       "one",
 		},
+		{
+			name:                 "When eventTypePrefix contains non-alphanumeric characters",
+			givenEventTypePrefix: "O^^>*N< E.TWO",
+			wantStreamName:       "one",
+		},
 	}
 	for _, tc := range testCases {
 		tc := tc

@@ -2,10 +2,17 @@ package env
 
 import (
 	"log"
+	"regexp"
 	"strings"
 	"time"
 
 	"github.com/kelseyhightower/envconfig"
+)
+
+var (
+	// invalidStreamNameCharacters used to match and replace non-alphanumeric characters in the stream name
+	// as per JetStream naming spec https://docs.nats.io/running-a-nats-service/nats_admin/jetstream_admin/naming.
+	invalidStreamNameCharacters = regexp.MustCompile("[^a-zA-Z0-9_]")
 )
 
 // NatsConfig represents the environment config for the Eventing Controller with Nats.
@@ -52,10 +59,14 @@ func GetNatsConfig(maxReconnects int, reconnectWait time.Duration) NatsConfig {
 	// set stream name for JetStream
 	if len(cfg.EventTypePrefix) > 0 {
 		cfg.JSStreamName = getStreamNameForJetStream(cfg.EventTypePrefix)
+		if len(cfg.JSStreamName) == 0 {
+			log.Fatalf("Invalid configuration! Failed to extract appropriate stream name from EventTypePrefix: %s", cfg.EventTypePrefix)
+		}
 	}
 	return cfg
 }
 
 func getStreamNameForJetStream(eventTypePrefix string) string {
-	return strings.ToLower(strings.Split(eventTypePrefix, ".")[0])
+	streamName := strings.ToLower(strings.Split(eventTypePrefix, ".")[0])
+	return invalidStreamNameCharacters.ReplaceAllString(streamName, "")
 }
