@@ -18,7 +18,7 @@ func Test_InitializeConditions(t *testing.T) {
 		{
 			name: "Conditions empty",
 			givenConditions: func() []Condition {
-				return makeConditions()
+				return makeSubscriptionConditions()
 			}(),
 		},
 		{
@@ -45,7 +45,7 @@ func Test_InitializeConditions(t *testing.T) {
 			wantConditionTypes := []ConditionType{ConditionSubscribed, ConditionSubscriptionActive, ConditionAPIRuleStatus, ConditionWebhookCallStatus}
 
 			// when
-			s.InitializeConditions()
+			s.InitializeSubscriptionConditions()
 
 			// then
 			g.Expect(s.Conditions).To(HaveLen(len(wantConditionTypes)))

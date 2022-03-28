@@ -14,9 +14,12 @@ const (
 	ConditionSubscriptionActive ConditionType = "Subscription active"
 	ConditionAPIRuleStatus      ConditionType = "APIRule status"
 	ConditionWebhookCallStatus  ConditionType = "Webhook call status"
+
+	ConditionPublisherProxyReady ConditionType = "Publisher Proxy Ready"
+	ConditionControllerReady     ConditionType = "Subscription Controller Ready"
 )
 
-var allConditions = makeConditions()
+var allSubscriptionConditions = makeSubscriptionConditions()
 
 type Condition struct {
 	Type               ConditionType          `json:"type,omitempty"`
@@ -41,17 +44,16 @@ const (
 	ConditionReasonWebhookCallStatus          ConditionReason = "BEB Subscription webhook call no errors status"
 )
 
-// InitializeConditions sets unset conditions to Unknown
-func (s *SubscriptionStatus) InitializeConditions() {
-	initialConditions := makeConditions()
+// initializeConditions sets unset conditions to Unknown
+func initializeConditions(initialConditions, currentConditions []Condition) []Condition {
 	givenConditions := make(map[ConditionType]Condition)
 
 	// create map of Condition per ConditionType
-	for _, condition := range s.Conditions {
+	for _, condition := range currentConditions {
 		givenConditions[condition.Type] = condition
 	}
 
-	finalConditions := s.Conditions
+	finalConditions := currentConditions
 	// check if every Condition is present in the current Conditions
 	for _, expectedCondition := range initialConditions {
 		if _, ok := givenConditions[expectedCondition.Type]; !ok {
@@ -59,12 +61,23 @@ func (s *SubscriptionStatus) InitializeConditions() {
 			finalConditions = append(finalConditions, expectedCondition)
 		}
 	}
+	return finalConditions
+}
 
-	s.Conditions = finalConditions
+// InitializeSubscriptionConditions sets unset Subscription conditions to Unknown
+func (s *SubscriptionStatus) InitializeSubscriptionConditions() {
+	initialConditions := makeSubscriptionConditions()
+	s.Conditions = initializeConditions(initialConditions, s.Conditions)
+}
+
+// InitializeBackendConditions sets unset Backend conditions to Unknown
+func (b *EventingBackendStatus) InitializeBackendConditions() {
+	initialConditions := makeBackendConditions()
+	b.Conditions = initializeConditions(initialConditions, b.Conditions)
 }
 
 func (s SubscriptionStatus) IsReady() bool {
-	if !ContainSameConditionTypes(allConditions, s.Conditions) {
+	if !ContainSameConditionTypes(allSubscriptionConditions, s.Conditions) {
 		return false
 	}
 
@@ -95,8 +108,8 @@ func (s SubscriptionStatus) ShouldUpdateReadyStatus() bool {
 	return false
 }
 
-// makeConditions creates a map of all conditions which the Subscription should have.
-func makeConditions() []Condition {
+// makeSubscriptionConditions creates a map of all conditions which the Subscription should have.
+func makeSubscriptionConditions() []Condition {
 	conditions := []Condition{
 		{
 			Type:               ConditionAPIRuleStatus,
@@ -206,4 +219,21 @@ func (s *SubscriptionStatus) SetConditionAPIRuleStatus(ready bool) {
 
 func CreateMessageForConditionReasonSubscriptionCreated(bebName string) string {
 	return fmt.Sprintf("BEB-subscription-name=%s", bebName)
+}
+
+// makeBackendConditions creates a map of all conditions which the Backend should have.
+func makeBackendConditions() []Condition {
+	conditions := []Condition{
+		{
+			Type:               ConditionPublisherProxyReady,
+			LastTransitionTime: metav1.Now(),
+			Status:             corev1.ConditionUnknown,
+		},
+		{
+			Type:               ConditionControllerReady,
+			LastTransitionTime: metav1.Now(),
+			Status:             corev1.ConditionUnknown,
+		},
+	}
+	return conditions
 }

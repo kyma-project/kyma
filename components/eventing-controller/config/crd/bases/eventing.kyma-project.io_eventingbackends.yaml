@@ -67,6 +67,25 @@ spec:
                 description: The namespace of the secret containing BEB access tokens,
                   required only for BEB
                 type: string
+              conditions:
+                description: Conditions defines the status conditions
+                items:
+                  properties:
+                    lastTransitionTime:
+                      format: date-time
+                      type: string
+                    message:
+                      type: string
+                    reason:
+                      type: string
+                    status:
+                      type: string
+                    type:
+                      type: string
+                  required:
+                  - status
+                  type: object
+                type: array
               eventingReady:
                 type: boolean
               publisherProxyReady:

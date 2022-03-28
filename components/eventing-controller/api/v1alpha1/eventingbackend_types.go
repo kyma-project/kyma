@@ -33,13 +33,17 @@ type EventingBackendStatus struct {
 	// +optional
 	PublisherProxyReady *bool `json:"publisherProxyReady"`
 
+	// Conditions defines the status conditions
+	// +optional
+	Conditions []Condition `json:"conditions,omitempty"`
+
 	// The name of the secret containing BEB access tokens, required only for BEB
 	// +optional
-	BEBSecretName string `json:"bebSecretName"`
+	BEBSecretName string `json:"bebSecretName,omitempty"`
 
 	// The namespace of the secret containing BEB access tokens, required only for BEB
 	// +optional
-	BEBSecretNamespace string `json:"bebSecretNamespace"`
+	BEBSecretNamespace string `json:"bebSecretNamespace,omitempty"`
 }
 
 // +kubebuilder:object:root=true
