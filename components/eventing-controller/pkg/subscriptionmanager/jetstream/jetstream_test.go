@@ -22,34 +22,31 @@ import (
 )
 
 const (
-	data                  = "sampledata"
 	subscriptionName      = "test"
 	subscriptionNamespace = "test"
 )
-
-var expectedDataInStore = fmt.Sprintf("%q", data)
 
 func TestCleanup(t *testing.T) {
 	// given
 	testEnv := setUpTestEnvironment(t)
 	defer controllertesting.ShutDownNATSServer(testEnv.natsServer)
 	defer testEnv.subscriber.Shutdown()
-	err := testEventing(testEnv)
+	err := testEnv.testSendingAndReceivingAnEvent()
 	require.NoError(t, err)
-	consumersEquals(t, 1, testEnv)
+	testEnv.consumersEquals(t, 1)
 
 	// when
 	err = cleanup(testEnv.jsBackend, testEnv.dynamicClient, testEnv.defaultLogger.WithContext())
 
 	// then
 	require.NoError(t, err)
-	gotSub := getK8sSubscription(t, testEnv)
+	gotSub := testEnv.getK8sSubscription(t)
 	wantSubStatus := eventingv1alpha1.SubscriptionStatus{}
 	require.Equal(t, wantSubStatus, gotSub.Status)
 	// test JetStream subscriptions/consumers are gone
-	consumersEquals(t, 0, testEnv)
+	testEnv.consumersEquals(t, 0)
 	// eventing should fail
-	err = testEventing(testEnv)
+	err = testEnv.testSendingAndReceivingAnEvent()
 	require.Error(t, err)
 }
 
@@ -66,9 +63,9 @@ type TestEnvironment struct {
 	defaultLogger *logger.Logger
 }
 
-func getK8sSubscription(t *testing.T, testEnv *TestEnvironment) *eventingv1alpha1.Subscription {
-	unstructuredSub, err := testEnv.dynamicClient.Resource(controllertesting.SubscriptionGroupVersionResource()).Namespace(
-		subscriptionNamespace).Get(testEnv.ctx, subscriptionName, metav1.GetOptions{})
+func (te *TestEnvironment) getK8sSubscription(t *testing.T) *eventingv1alpha1.Subscription {
+	unstructuredSub, err := te.dynamicClient.Resource(controllertesting.SubscriptionGroupVersionResource()).Namespace(
+		subscriptionNamespace).Get(te.ctx, subscriptionName, metav1.GetOptions{})
 	require.NoError(t, err)
 	subscription, err := controllertesting.ToSubscription(unstructuredSub)
 	require.NoError(t, err)
@@ -128,30 +125,33 @@ func createAndSyncSubscription(t *testing.T, sinkURL string, jsBackend *handlers
 	return testSub
 }
 
-func testEventing(testEnv *TestEnvironment) error {
-	// make sure subscriber works
-	err := testEnv.subscriber.CheckEvent("")
+func (te *TestEnvironment) testSendingAndReceivingAnEvent() error {
+	data := "sampledata"
+	expectedDataInStore := fmt.Sprintf("%q", data)
+
+	// make sure subscriber is reachable via http
+	err := te.subscriber.CheckEvent("")
 	if err != nil {
 		return err
 	}
 
 	// send an event
-	err = handlers.SendEventToJetStream(testEnv.jsBackend, data)
+	err = handlers.SendEventToJetStream(te.jsBackend, data)
 	if err != nil {
 		return err
 	}
 
 	// check for the event
-	err = testEnv.subscriber.CheckEvent(expectedDataInStore)
+	err = te.subscriber.CheckEvent(expectedDataInStore)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func consumersEquals(t *testing.T, length int, testEnv *TestEnvironment) {
+func (te *TestEnvironment) consumersEquals(t *testing.T, length int) {
 	// verify that the number of consumers is one
-	info, err := testEnv.jsCtx.StreamInfo(testEnv.envConf.JSStreamName)
+	info, err := te.jsCtx.StreamInfo(te.envConf.JSStreamName)
 	require.NoError(t, err)
 	require.Equal(t, info.State.Consumers, length)
 }
