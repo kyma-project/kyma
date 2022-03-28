@@ -8,6 +8,7 @@ const {
   k8sDelete,
   kubectlPortForward,
   namespaceObj,
+  waitForK8sObject,
   waitForDaemonSet,
   waitForDeployment,
   waitForNamespace,
@@ -25,6 +26,20 @@ function loadResourceFromFile(file) {
     encoding: 'utf8',
   });
   return k8s.loadAllYaml(yaml);
+}
+
+function waitForLogPipelineStatusPhase(name, namespace = 'default', expectedPhase, timeout = 90000) {
+  return waitForK8sObject(
+      `/apis/telemetry.kyma-project.io/v1alpha1/watch/namespaces/${namespace}/logpipelines/${name}`,
+      {},
+      (_type, watchObj, _) => {
+        return (
+          watchObj.status.phase === expectedPhase
+        );
+      },
+      timeout,
+      `Waiting for daemonset ${name} timeout (${timeout} ms)`,
+  );
 }
 
 const logPipelineCR = loadResourceFromFile('./log-pipeline.yaml');
@@ -89,7 +104,9 @@ describe('Telemetry Operator tests', function() {
 
   it('Should create valid LogPipeline with HTTP output plugin', async () => {
     await k8sApply(logPipelineCR, telemetryNamespace);
+    await waitForLogPipelineStatusPhase(logpipeline-test, telemetryNamespace, 'Pending', 20000);
     await waitForDaemonSet(fluentBitName, telemetryNamespace, 30000);
+    await waitForLogPipelineStatusPhase(logpipeline-test, telemetryNamespace, 'Pending', 20000);
   });
 
   it('Mockserver should receive HTTP traffic from fluent-bit', async () => {
