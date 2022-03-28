@@ -49,7 +49,7 @@ const (
 )
 
 var (
-	requeueTime = 2 * time.Minute
+	requeueTime = 30 * time.Second
 )
 
 // LogPipelineReconciler reconciles a LogPipeline object
@@ -178,8 +178,6 @@ func (r *LogPipelineReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 
 		return ctrl.Result{RequeueAfter: requeueTime}, nil
 	}
-
-	log.Info("Nothing has to be synced")
 
 	if logPipeline.Status.Phase == telemetryv1alpha1.LogPipelinePending {
 		ready, err := r.isFluentBitDaemonSetReady(ctx)

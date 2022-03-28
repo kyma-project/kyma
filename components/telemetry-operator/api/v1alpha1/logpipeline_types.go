@@ -74,7 +74,6 @@ type LogPipelinePhase string
 const (
 	LogPipelinePending LogPipelinePhase = "Pending"
 	LogPipelineRunning LogPipelinePhase = "Running"
-	LogPipelineFailed  LogPipelinePhase = "Failed"
 )
 
 // LogPipelineStatus defines the observed state of LogPipeline
