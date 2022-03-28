@@ -28,3 +28,20 @@ kubectl -n kyma-system delete deployment rafter-ctrl-mngr
 kubectl -n kyma-system delete deployment rafter-front-matter-svc
 kubectl -n kyma-system delete deployment rafter-minio
 kubectl -n kyma-system delete deployment rafter-upload-svc
+
+echo "
+Deleting Service Catalog"
+
+kubectl delete crd addonsconfigurations.addons.kyma-project.io
+kubectl delete crd clusteraddonsconfigurations.addons.kyma-project.io
+kubectl delete crd podpresets.settings.svcat.k8s.io
+kubectl delete crd clusterservicebrokers.servicecatalog.k8s.io
+kubectl delete crd clusterserviceclasses.servicecatalog.k8s.io
+kubectl delete crd clusterserviceplans.servicecatalog.k8s.io
+kubectl delete crd servicebindings.servicecatalog.k8s.io
+kubectl delete crd servicebindingusages.servicecatalog.kyma-project.io
+kubectl delete crd servicebrokers.servicecatalog.k8s.io
+kubectl delete crd serviceclasses.servicecatalog.k8s.io
+kubectl delete crd serviceinstances.servicecatalog.k8s.io
+kubectl delete crd serviceplans.servicecatalog.k8s.io
+kubectl delete crd usagekinds.servicecatalog.kyma-project.io
