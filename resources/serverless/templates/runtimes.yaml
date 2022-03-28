@@ -8,7 +8,7 @@ metadata:
     serverless.kyma-project.io/runtime: nodejs12
 data:
   Dockerfile: |-
-    ARG base_image {{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.function_runtime_nodejs12) }}
+    ARG base_image={{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.function_runtime_nodejs12) }}
     FROM ${base_image}
     USER root
     ENV KUBELESS_INSTALL_VOLUME=/kubeless
@@ -32,7 +32,7 @@ metadata:
     serverless.kyma-project.io/runtime: nodejs14
 data:
   Dockerfile: |-
-    ARG base_image {{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.function_runtime_nodejs14) }}
+    ARG base_image={{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.function_runtime_nodejs14) }}
     FROM ${base_image}
     USER root
     ENV KUBELESS_INSTALL_VOLUME=/kubeless
@@ -56,7 +56,7 @@ metadata:
     serverless.kyma-project.io/runtime: python39
 data:
   Dockerfile: |-
-    ARG base_image {{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.function_runtime_python39) }}
+    ARG base_image={{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.function_runtime_python39) }}
     FROM ${base_image}
     USER root
     ENV KUBELESS_INSTALL_VOLUME=/kubeless
