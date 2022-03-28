@@ -30,8 +30,10 @@ func SetupCertificates(ctx context.Context, secretName, secretNamespace, service
 	if err != nil {
 		return errors.Wrap(err, "failed to create a server client")
 	}
-
-	return errors.Wrap(EnsureWebhookSecret(ctx, serverClient, secretName, secretNamespace, serviceName), "failed to ensure webhook secret")
+	if err := EnsureWebhookSecret(ctx, serverClient, secretName, secretNamespace, serviceName); err != nil {
+		return errors.Wrap(err, "failed to ensure webhook secret")
+	}
+	return nil
 }
 
 func EnsureWebhookSecret(ctx context.Context, client ctrlclient.Client, secretName, secretNamespace, serviceName string) error {
@@ -49,7 +51,10 @@ func EnsureWebhookSecret(ctx context.Context, client ctrlclient.Client, secretNa
 	}
 
 	logger.Info("updating pre-exiting webhook secret")
-	return errors.Wrap(updateSecret(ctx, client, secret, serviceName), "failed to update secret")
+	if err := updateSecret(ctx, client, secret, serviceName); err != nil {
+		return errors.Wrap(err, "failed to update secret")
+	}
+	return nil
 }
 
 func createSecret(ctx context.Context, client ctrlclient.Client, name, namespace, serviceName string) error {
@@ -70,7 +75,10 @@ func updateSecret(ctx context.Context, client ctrlclient.Client, secret *corev1.
 			return errors.Wrap(err, "failed to create secret object")
 		}
 		secret.Data = newSecret.Data
-		return errors.Wrap(client.Update(ctx, secret), "failed to update secret")
+		if err := client.Update(ctx, secret); err != nil {
+			return errors.Wrap(err, "failed to update secret")
+		}
+		return nil
 	}
 	return nil
 }

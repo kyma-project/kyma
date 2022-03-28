@@ -30,7 +30,7 @@ func (w *DefaultingWebHook) Handle(ctx context.Context, req admission.Request) a
 	if req.RequestKind.Kind == "GitRepository" {
 		return w.handleGitRepoDefaulting(ctx, req)
 	}
-	return admission.Errored(http.StatusBadRequest, fmt.Errorf("invalid kind"))
+	return admission.Errored(http.StatusBadRequest, fmt.Errorf("invalid kind: %v", req.RequestKind.Kind))
 }
 
 func (w *DefaultingWebHook) InjectDecoder(decoder *admission.Decoder) error {

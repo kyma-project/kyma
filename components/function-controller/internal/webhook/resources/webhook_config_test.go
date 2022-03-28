@@ -35,6 +35,13 @@ func TestEnsureWebhookConfigurationFor(t *testing.T) {
 		require.NotNil(t, mwh)
 		require.Equal(t, mwh.Name, DefaultingWebhookName)
 		require.NotNil(t, mwh.Webhooks)
+
+		require.Equal(t, int32(443), *mwh.Webhooks[0].ClientConfig.Service.Port)
+		require.Equal(t, "/defaulting", *mwh.Webhooks[0].ClientConfig.Service.Path)
+		require.Equal(t, wc.ServiceName, mwh.Webhooks[0].ClientConfig.Service.Name)
+		require.Equal(t, wc.ServiceNamespace, mwh.Webhooks[0].ClientConfig.Service.Namespace)
+		require.Contains(t, mwh.Webhooks[0].Rules[0].Resources, "functions")
+		require.Contains(t, mwh.Webhooks[0].Rules[0].Resources, "functions/status")
 	})
 
 	t.Run("ensure a Validating Webhook is created if it doesn't exist", func(t *testing.T) {
@@ -54,6 +61,16 @@ func TestEnsureWebhookConfigurationFor(t *testing.T) {
 		require.NotNil(t, vwh)
 		require.Equal(t, vwh.Name, ValidationWebhookName)
 		require.NotNil(t, vwh.Webhooks)
+
+		require.Equal(t, int32(443), *vwh.Webhooks[0].ClientConfig.Service.Port)
+		require.Equal(t, "/validation", *vwh.Webhooks[0].ClientConfig.Service.Path)
+		require.Equal(t, wc.ServiceName, vwh.Webhooks[0].ClientConfig.Service.Name)
+		require.Equal(t, wc.ServiceNamespace, vwh.Webhooks[0].ClientConfig.Service.Namespace)
+		require.Contains(t, vwh.Webhooks[0].Rules[0].Resources, "functions")
+		require.Contains(t, vwh.Webhooks[0].Rules[0].Resources, "functions/status")
+		require.Contains(t, vwh.Webhooks[0].Rules[1].Resources, "gitrepositories")
+		require.Contains(t, vwh.Webhooks[0].Rules[1].Resources, "gitrepositories/status")
+
 	})
 
 	t.Run("ensure a Mutating Webhook is updated if it already exist", func(t *testing.T) {
@@ -85,6 +102,14 @@ func TestEnsureWebhookConfigurationFor(t *testing.T) {
 		require.Equal(t, UpdateMwh.Name, DefaultingWebhookName)
 		require.NotNil(t, UpdateMwh.Webhooks)
 		require.Contains(t, UpdateMwh.Labels, "dont-remove-me")
+
+		require.Equal(t, int32(443), *UpdateMwh.Webhooks[0].ClientConfig.Service.Port)
+		require.Equal(t, "/defaulting", *UpdateMwh.Webhooks[0].ClientConfig.Service.Path)
+		require.Equal(t, wc.ServiceName, UpdateMwh.Webhooks[0].ClientConfig.Service.Name)
+		require.Equal(t, wc.ServiceNamespace, UpdateMwh.Webhooks[0].ClientConfig.Service.Namespace)
+		require.Contains(t, UpdateMwh.Webhooks[0].Rules[0].Resources, "functions")
+		require.Contains(t, UpdateMwh.Webhooks[0].Rules[0].Resources, "functions/status")
+
 	})
 
 	t.Run("ensure a Validating Webhook is updated if it already exist", func(t *testing.T) {
@@ -116,5 +141,14 @@ func TestEnsureWebhookConfigurationFor(t *testing.T) {
 		require.Equal(t, UpdateVwh.Name, ValidationWebhookName)
 		require.NotNil(t, UpdateVwh.Webhooks)
 		require.Contains(t, UpdateVwh.Labels, "dont-remove-me")
+
+		require.Equal(t, int32(443), *UpdateVwh.Webhooks[0].ClientConfig.Service.Port)
+		require.Equal(t, "/validation", *UpdateVwh.Webhooks[0].ClientConfig.Service.Path)
+		require.Equal(t, wc.ServiceName, UpdateVwh.Webhooks[0].ClientConfig.Service.Name)
+		require.Equal(t, wc.ServiceNamespace, UpdateVwh.Webhooks[0].ClientConfig.Service.Namespace)
+		require.Contains(t, UpdateVwh.Webhooks[0].Rules[0].Resources, "functions")
+		require.Contains(t, UpdateVwh.Webhooks[0].Rules[0].Resources, "functions/status")
+		require.Contains(t, UpdateVwh.Webhooks[0].Rules[1].Resources, "gitrepositories")
+		require.Contains(t, UpdateVwh.Webhooks[0].Rules[1].Resources, "gitrepositories/status")
 	})
 }

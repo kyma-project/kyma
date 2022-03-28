@@ -121,8 +121,11 @@ func (r *resourceReconciler) reconcilerWebhooks(ctx context.Context, request rec
 func (r *resourceReconciler) reconcilerSecret(ctx context.Context, request reconcile.Request) error {
 	ctrl.LoggerFrom(ctx).Info("reconciling webhook secret")
 	secretNamespaced := types.NamespacedName{Name: r.secretName, Namespace: r.webhookConfig.ServiceNamespace}
-	if request.NamespacedName.String() == secretNamespaced.String() {
-		return errors.Wrap(EnsureWebhookSecret(ctx, r.client, request.Name, request.Namespace, r.webhookConfig.ServiceName), "failed to reconcile webhook secret")
+	if request.NamespacedName.String() != secretNamespaced.String() {
+		return nil
+	}
+	if err := EnsureWebhookSecret(ctx, r.client, request.Name, request.Namespace, r.webhookConfig.ServiceName); err != nil {
+		return errors.Wrap(err, "failed to reconcile webhook secret")
 	}
 	return nil
 }

@@ -34,7 +34,7 @@ func (w *ValidatingWebHook) Handle(ctx context.Context, req admission.Request) a
 	if req.RequestKind.Kind == "GitRepository" {
 		return w.handleGitRepoValidation(ctx, req)
 	}
-	return admission.Errored(http.StatusBadRequest, fmt.Errorf("invalid kind"))
+	return admission.Errored(http.StatusBadRequest, fmt.Errorf("invalid kind: %v", req.RequestKind.Kind))
 }
 
 func (w *ValidatingWebHook) InjectDecoder(decoder *admission.Decoder) error {
