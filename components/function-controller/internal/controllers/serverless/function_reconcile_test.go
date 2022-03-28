@@ -139,48 +139,6 @@ func TestFunctionReconciler_Reconcile(t *testing.T) {
 
 		assertSuccessfulFunctionDeployment(t, resourceClient, reconciler, request, fnLabels, "registry.kyma.local", true)
 	})
-	t.Run("should reconcile function with customRuntimeImage", func(t *testing.T) {
-		//GIVEN
-		g := gomega.NewGomegaWithT(t)
-		customRuntimeImage := "any-custom-image"
-		inFunction := newFixFunctionWithCustomImage(testNamespace, "custom-runtime-image", customRuntimeImage, 1, 2)
-		g.Expect(resourceClient.Create(context.TODO(), inFunction)).To(gomega.Succeed())
-		defer deleteFunction(g, resourceClient, inFunction)
-
-		request := ctrl.Request{NamespacedName: types.NamespacedName{Namespace: inFunction.GetNamespace(), Name: inFunction.GetName()}}
-
-		//WHEN
-		t.Log("should detect customRuntimeImage change")
-
-		function := &serverlessv1alpha1.Function{}
-		g.Expect(resourceClient.Get(context.TODO(), request.NamespacedName, function)).To(gomega.Succeed())
-		function.Spec.CustomRuntimeImage = customRuntimeImage
-		g.Expect((resourceClient.Update(ctx, function))).To(gomega.Succeed())
-
-		result, err := reconciler.Reconcile(ctx, request)
-		g.Expect(err).To(gomega.BeNil())
-		g.Expect(result.Requeue).To(gomega.BeFalse())
-		g.Expect(result.RequeueAfter).To(gomega.Equal(time.Duration(0)))
-
-		function = &serverlessv1alpha1.Function{}
-		g.Expect(resourceClient.Get(context.TODO(), request.NamespacedName, function)).To(gomega.Succeed())
-		g.Expect(function.Spec.CustomRuntimeImage).To(gomega.Equal(customRuntimeImage))
-		g.Expect(function.Status.CustomRuntimeImage).To(gomega.Equal(customRuntimeImage))
-
-		t.Log("should detect customRuntimeImage rollback")
-
-		function.Spec.CustomRuntimeImage = ""
-		g.Expect((resourceClient.Update(ctx, function))).To(gomega.Succeed())
-
-		result, err = reconciler.Reconcile(ctx, request)
-		g.Expect(err).To(gomega.BeNil())
-		g.Expect(result.Requeue).To(gomega.BeFalse())
-		g.Expect(result.RequeueAfter).To(gomega.Equal(time.Duration(0)))
-
-		function = &serverlessv1alpha1.Function{}
-		g.Expect(function.Spec.CustomRuntimeImage).To(gomega.Equal(""))
-		g.Expect(function.Status.CustomRuntimeImage).To(gomega.Equal(""))
-	})
 	t.Run("should set proper status on deployment fail", func(t *testing.T) {
 		//GIVEN
 		g := gomega.NewGomegaWithT(t)
@@ -1183,6 +1141,48 @@ func TestFunctionReconciler_Reconcile(t *testing.T) {
 		g.Expect(deployment).ToNot(gomega.BeNil())
 
 		g.Expect(deployment.Spec.Template.Annotations).To(gomega.Equal(restartedAtAnnotation))
+	})
+	t.Run("should reconcile function with customRuntimeImage", func(t *testing.T) {
+		//GIVEN
+		g := gomega.NewGomegaWithT(t)
+		customRuntimeImage := "any-custom-image"
+		inFunction := newFixFunctionWithCustomImage(testNamespace, "custom-runtime-image", customRuntimeImage, 1, 2)
+		g.Expect(resourceClient.Create(context.TODO(), inFunction)).To(gomega.Succeed())
+		defer deleteFunction(g, resourceClient, inFunction)
+
+		request := ctrl.Request{NamespacedName: types.NamespacedName{Namespace: inFunction.GetNamespace(), Name: inFunction.GetName()}}
+
+		//WHEN
+		t.Log("should detect customRuntimeImage change")
+
+		function := &serverlessv1alpha1.Function{}
+		g.Expect(resourceClient.Get(context.TODO(), request.NamespacedName, function)).To(gomega.Succeed())
+		function.Spec.CustomRuntimeImage = customRuntimeImage
+		g.Expect((resourceClient.Update(ctx, function))).To(gomega.Succeed())
+
+		result, err := reconciler.Reconcile(ctx, request)
+		g.Expect(err).To(gomega.BeNil())
+		g.Expect(result.Requeue).To(gomega.BeFalse())
+		g.Expect(result.RequeueAfter).To(gomega.Equal(time.Duration(0)))
+
+		function = &serverlessv1alpha1.Function{}
+		g.Expect(resourceClient.Get(context.TODO(), request.NamespacedName, function)).To(gomega.Succeed())
+		g.Expect(function.Spec.CustomRuntimeImage).To(gomega.Equal(customRuntimeImage))
+		g.Expect(function.Status.CustomRuntimeImage).To(gomega.Equal(customRuntimeImage))
+
+		t.Log("should detect customRuntimeImage rollback")
+
+		function.Spec.CustomRuntimeImage = ""
+		g.Expect((resourceClient.Update(ctx, function))).To(gomega.Succeed())
+
+		result, err = reconciler.Reconcile(ctx, request)
+		g.Expect(err).To(gomega.BeNil())
+		g.Expect(result.Requeue).To(gomega.BeFalse())
+		g.Expect(result.RequeueAfter).To(gomega.Equal(time.Duration(0)))
+
+		function = &serverlessv1alpha1.Function{}
+		g.Expect(function.Spec.CustomRuntimeImage).To(gomega.Equal(""))
+		g.Expect(function.Status.CustomRuntimeImage).To(gomega.Equal(""))
 	})
 }
 
