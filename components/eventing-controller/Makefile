@@ -92,8 +92,9 @@ undeploy: ## Undeploy controller from the K8s cluster specified in ~/.kube/confi
 	kustomize build config/default | kubectl delete -f -
 
 CONTROLLER_GEN = $(PROJECT_DIR)/bin/$(shell uname)/controller-gen
+ARCH := $(shell uname)
 controller-gen-local: ## Download controller-gen locally if necessary.
-	$(call go-get-tool,$(CONTROLLER_GEN),sigs.k8s.io/controller-tools/cmd/controller-gen@v0.4.1)
+	GOBIN=$(PROJECT_DIR)/bin/$(ARCH) go install sigs.k8s.io/controller-tools/cmd/controller-gen@v0.4.1
 
 path-to-referenced-charts:
 	@echo "resources/eventing"
@@ -113,20 +114,6 @@ copy-external-crds: ## copy external CRDs to config/crd/external
 	mkdir -p config/crd/external
 	cp ../../installation/resources/crds/api-gateway/apirules.gateway.crd.yaml config/crd/external/apirules-gateway-kyma-project-io.yaml
 	cp ../../installation/resources/crds/application-connector/applications.applicationconnector.crd.yaml config/crd/external/applications-applicationconnector-kyma-project-io.yaml
-
-# go-get-tool will 'go get' any package $2 and install it to $1.
-ARCH := $(shell uname)
-define go-get-tool
-@[ -f $(1) ] || { \
-set -e ;\
-TMP_DIR=$$(mktemp -d) ;\
-cd $$TMP_DIR ;\
-go mod init tmp ;\
-echo "Downloading $(2)" ;\
-GOBIN=$(PROJECT_DIR)/bin/$(ARCH) go get $(2) ;\
-rm -rf $$TMP_DIR ;\
-}
-endef
 
 $(eval $(call buildpack-cp-ro,resolve))
 $(eval $(call buildpack-mount,mod-verify))
