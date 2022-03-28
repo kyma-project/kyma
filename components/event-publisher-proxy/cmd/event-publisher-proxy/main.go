@@ -16,8 +16,11 @@ const (
 )
 
 type Config struct {
-	// Backend used for Eventing. It could be "nats" or "beb"
+	// Backend used for Eventing. It could be "nats" or "beb".
 	Backend string `envconfig:"BACKEND" required:"true"`
+
+	// JetstreamModeEnabled indicates whether NATS backend will be used in default or jetstream mode.
+	JetstreamModeEnabled bool `envconfig:"ENABLE_JETSTREAM_BACKEND" default:"false"`
 }
 
 // Commander defines the interface of different implementations
@@ -52,7 +55,7 @@ func main() {
 	case backendBEB:
 		commander = beb.NewCommander(opts, metricsCollector, logger)
 	case backendNATS:
-		commander = nats.NewCommander(opts, metricsCollector, logger)
+		commander = nats.NewCommander(opts, metricsCollector, logger, cfg.JetstreamModeEnabled)
 	default:
 		logger.Fatalf("Invalid publisher backend: %v", cfg.Backend)
 	}
@@ -69,7 +72,11 @@ func main() {
 		logger.Infof("Metrics server failed to start with error: %v", err)
 	}
 
-	logger.Infof("Starting publisher to: %v", cfg.Backend)
+	if cfg.JetstreamModeEnabled {
+		logger.Infof("Starting publisher to: %v in the Jetstream mode", cfg.Backend)
+	} else {
+		logger.Infof("Starting publisher to: %v", cfg.Backend)
+	}
 
 	// Start the commander.
 	if err := commander.Start(); err != nil {
