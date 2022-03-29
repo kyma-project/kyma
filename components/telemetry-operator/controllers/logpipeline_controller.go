@@ -167,7 +167,7 @@ func (r *LogPipelineReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 		}
 
 		if err := r.restartFluentBit(ctx); err != nil {
-			log.Error(err, "Failed deleting fluent bit pods")
+			log.Error(err, "Failed restarting fluent bit daemon set")
 			return ctrl.Result{}, err
 		}
 
@@ -176,7 +176,7 @@ func (r *LogPipelineReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 			telemetryv1alpha1.LogPipelinePending,
 		)
 		if err := r.updateLogPipelineStatus(ctx, &logPipeline, condition); err != nil {
-			log.Error(err, "Failed to update log pipeline status")
+			log.Error(err, "Failed updating log pipeline status")
 			return ctrl.Result{}, err
 		}
 
@@ -473,7 +473,7 @@ func (r *LogPipelineReconciler) isFluentBitDaemonSetReady(ctx context.Context) (
 	log := logf.FromContext(ctx)
 	var fluentBitDaemonSet appsv1.DaemonSet
 	if err := r.Get(ctx, r.FluentBitDaemonSet, &fluentBitDaemonSet); err != nil {
-		log.Error(err, "Failed getting fluent bit DaemonSet")
+		log.Error(err, "Failed getting fluent bit daemon set")
 		return false, nil
 	}
 
@@ -487,7 +487,7 @@ func (r *LogPipelineReconciler) updateLogPipelineStatus(ctx context.Context, log
 	log := logf.FromContext(ctx)
 	logPipeline.Status.SetCondition(*condition)
 	if err := r.Status().Update(ctx, logPipeline); err != nil {
-		log.Error(err, fmt.Sprintf("Updating log pipeline status to %s", condition.Type))
+		log.Error(err, fmt.Sprintf("Failed updating log pipeline status to %s", condition.Type))
 		return err
 	}
 	return nil
