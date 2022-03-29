@@ -144,6 +144,7 @@ Follow the instructions in the tabs to secure httpbin or a function using JWT to
 1. Export the following values:
 
    ```shell
+   export ISSUER={ISSUER} # e.g. https://YOUR_OIDC_COMPLIANT_IDENTITY_PROVIDER_INSTANCE.com
    export JWKS_URI={JWKS_URL} # e.g. https://YOUR_OIDC_COMPLIANT_IDENTITY_PROVIDER_INSTANCE/.well-known/jwks.json
    ```
 
@@ -154,15 +155,15 @@ Follow the instructions in the tabs to secure httpbin or a function using JWT to
    apiVersion: security.istio.io/v1beta1
    kind: RequestAuthentication
    metadata:
-    name: jwt-auth-httpbin
-    namespace: $NAMESPACE
+     name: jwt-auth-httpbin
+     namespace: $NAMESPACE
    spec:
-    selector:
-      matchLabels:
-        app: httpbin
-    jwtRules:
-    - issuer: issuer
-      jwksUri: $JWKS_URI
+     selector:
+       matchLabels:
+         app: httpbin
+     jwtRules:
+     - issuer: $ISSUER
+       jwksUri: $JWKS_URI
    ---
    apiVersion: security.istio.io/v1beta1
    kind: AuthorizationPolicy
@@ -201,6 +202,7 @@ Follow the instructions in the tabs to secure httpbin or a function using JWT to
 1. Export the following values:
 
    ```shell
+   export ISSUER={ISSUER} # e.g. https://YOUR_OIDC_COMPLIANT_IDENTITY_PROVIDER_INSTANCE.com
    export JWKS_URI={JWKS_URL} # e.g. https://YOUR_OIDC_COMPLIANT_IDENTITY_PROVIDER_INSTANCE/.well-known/jwks.json
    ```
 
@@ -218,7 +220,7 @@ Follow the instructions in the tabs to secure httpbin or a function using JWT to
        matchLabels:
          app: function
      jwtRules:
-     - issuer: issuer
+     - issuer: $ISSUER
        jwksUri: $JWKS_URI
    ---
    apiVersion: security.istio.io/v1beta1
