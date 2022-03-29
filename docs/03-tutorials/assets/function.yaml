@@ -13,6 +13,8 @@ spec:
     }
   minReplicas: 1
   maxReplicas: 1
+  labels:
+    app: function
   resources:
     limits:
       cpu: 100m
