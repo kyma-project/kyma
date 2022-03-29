@@ -74,7 +74,7 @@ This tutorial is based on a sample HttpBin service deployment and a sample Funct
        name: httpbin
        port: 8000
        host: httpbin.$DOMAIN_TO_EXPOSE_WORKLOADS   
-     gateway: $NAMESPACE/httpbin-gateway #The value corresponds to the Gateway CR you created.
+     gateway: $GATEWAY
      rules:
        - accessStrategies:
          - handler: jwt
