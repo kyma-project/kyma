@@ -179,7 +179,7 @@ func (r *LogPipelineReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 		return ctrl.Result{RequeueAfter: requeueTime}, nil
 	}
 
-	if logPipeline.Status.Phase == telemetryv1alpha1.LogPipelinePending {
+	if logPipeline.Status.Pending() {
 		ready, err := r.isFluentBitDaemonSetReady(ctx)
 		if err != nil {
 			log.Error(err, "Failed to check fluent bit readiness")
@@ -476,12 +476,12 @@ func (r *LogPipelineReconciler) isFluentBitDaemonSetReady(ctx context.Context) (
 
 func (r *LogPipelineReconciler) updateStatusPhase(ctx context.Context,
 	logPipeline *telemetryv1alpha1.LogPipeline,
-	phase telemetryv1alpha1.LogPipelinePhase) error {
+	conditionType telemetryv1alpha1.LogPipelineConditionType) error {
 	log := logf.FromContext(ctx)
-	log.Info(fmt.Sprintf("Updating log pipeline status to %s", phase))
-	logPipeline.Status.Phase = phase
+	log.Info(fmt.Sprintf("Updating log pipeline status to %s", conditionType))
+	//logPipeline.Status.Phase = phase
 	if err := r.Status().Update(ctx, logPipeline); err != nil {
-		log.Error(err, fmt.Sprintf("Updating log pipeline status to %s", phase))
+		log.Error(err, fmt.Sprintf("Updating log pipeline status to %s", conditionType))
 		return err
 	}
 	return nil

@@ -98,8 +98,23 @@ spec:
           status:
             description: LogPipelineStatus defines the observed state of LogPipeline
             properties:
-              phase:
-                type: string
+              conditions:
+                description: 'INSERT ADDITIONAL STATUS FIELD - define observed state
+                  of cluster Important: Run "make" to regenerate code after modifying
+                  this file'
+                items:
+                  description: PodCondition contains details for the current condition
+                    of this pod.
+                  properties:
+                    lastTransitionTime:
+                      format: date-time
+                      type: string
+                    reason:
+                      type: string
+                    type:
+                      type: string
+                  type: object
+                type: array
             type: object
         type: object
     served: true

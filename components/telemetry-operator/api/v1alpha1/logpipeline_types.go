@@ -68,20 +68,61 @@ type SecretReference struct {
 	Namespace string `json:"namespace,omitempty"`
 }
 
-type LogPipelinePhase string
+type LogPipelineConditionType string
 
 // These are the valid statuses of LogPipeline.
 const (
-	LogPipelinePending LogPipelinePhase = "Pending"
-	LogPipelineRunning LogPipelinePhase = "Running"
+	LogPipelinePending LogPipelineConditionType = "Pending"
+	LogPipelineRunning LogPipelineConditionType = "Running"
 )
+
+const (
+	FluentBitDaemonSetUpdatedReason = "FluentBitDaemonSetUpdated"
+	FluentBitDaemonSetReadyReason   = "FluentBitDaemonSetReady"
+)
+
+// PodCondition contains details for the current condition of this pod.
+type LogPipelineCondition struct {
+	LastTransitionTime metav1.Time              `json:"lastTransitionTime,omitempty"`
+	Reason             string                   `json:"reason,omitempty"`
+	Type               LogPipelineConditionType `json:"type,omitempty"`
+}
 
 // LogPipelineStatus defines the observed state of LogPipeline
 type LogPipelineStatus struct {
 	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
+	Conditions []LogPipelineCondition `json:"conditions,omitempty"`
+}
 
-	Phase LogPipelinePhase `json:"phase,omitempty"`
+func (lps *LogPipelineStatus) GetCondition(condType LogPipelineConditionType) *LogPipelineCondition {
+	for cond := range lps.Conditions {
+		if lps.Conditions[cond].Type == condType {
+			return &lps.Conditions[cond]
+		}
+	}
+	return nil
+}
+
+func (lps *LogPipelineStatus) SetCondition(cond LogPipelineCondition) {
+	currentCond := lps.GetCondition(cond.Type)
+	if currentCond != nil && currentCond.Reason == cond.Reason {
+		return
+	}
+	cond.LastTransitionTime = currentCond.LastTransitionTime
+	newConditions := filterOutCondition(lps.Conditions, cond.Type)
+	lps.Conditions = append(newConditions, cond)
+}
+
+func filterOutCondition(conds []LogPipelineCondition, condType LogPipelineConditionType) []LogPipelineCondition {
+	var newConditions []LogPipelineCondition
+	for _, cond := range conds {
+		if cond.Type == condType {
+			continue
+		}
+		newConditions = append(newConditions, cond)
+	}
+	return newConditions
 }
 
 //+kubebuilder:object:root=true
