@@ -223,15 +223,18 @@ func (js *JetStream) DeleteSubscription(subscription *eventingv1alpha1.Subscript
 
 // GetJsSubjectToSubscribe appends stream name to subject if needed.
 func (js *JetStream) GetJsSubjectToSubscribe(subject string) string {
-	if strings.HasPrefix(subject, js.config.JSStreamName) {
+	if strings.HasPrefix(subject, js.config.JSStreamSubjectPrefix) {
 		return subject
 	}
-	return fmt.Sprintf("%s.%s", js.config.JSStreamName, subject)
+	return fmt.Sprintf("%s.%s", js.config.JSStreamSubjectPrefix, subject)
 }
 
 func (js *JetStream) validateConfig() error {
 	if js.config.JSStreamName == "" {
 		return errors.New("Stream name cannot be empty")
+	}
+	if js.config.JSStreamSubjectPrefix == "" {
+		return errors.New("Stream subject prefix cannot be empty")
 	}
 	if _, err := toJetStreamStorageType(js.config.JSStreamStorageType); err != nil {
 		return err
@@ -317,12 +320,20 @@ func getStreamConfig(natsConfig env.NatsConfig) (*nats.StreamConfig, error) {
 		MaxBytes:  natsConfig.JSStreamMaxBytes,
 		// Since one stream is used to store events of all types, the stream has to match all event types, and therefore
 		// we use the wildcard char >. However, to avoid matching internal JetStream and non-Kyma-related subjects, we
-		// use the stream name as a prefix. This prefix is handled only on the JetStream level (i.e. JetStream handler
+		// use a prefix. This prefix is handled only on the JetStream level (i.e. JetStream handler
 		// and EPP) and should not be exposed in the Kyma subscription. Any Kyma event type gets appended with the
-		// configured stream name.
-		Subjects: []string{fmt.Sprintf("%s.>", natsConfig.JSStreamName)},
+		// configured stream's subject prefix.
+		Subjects: []string{fmt.Sprintf("%s.>", natsConfig.JSStreamSubjectPrefix)},
 	}
 	return streamConfig, nil
+}
+
+func (js *JetStream) getStreamSubjectPrefix() string {
+	if js.config.EventTypePrefix != "" {
+		return "kyma"
+	}
+	// @TODO: should we also clean EventTypePrefix for non-alphanumeric characters
+	return js.config.EventTypePrefix
 }
 
 type DefaultSubOpts []nats.SubOpt

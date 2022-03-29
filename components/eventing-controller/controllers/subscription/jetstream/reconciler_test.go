@@ -576,6 +576,7 @@ func startReconciler(eventTypePrefix string, ens *jetStreamTestEnsemble) *jetStr
 		ReconnectWait:           time.Second,
 		EventTypePrefix:         eventTypePrefix,
 		JSStreamName:            eventTypePrefix,
+		JSStreamSubjectPrefix:   eventTypePrefix,
 		JSStreamStorageType:     "memory",
 		JSStreamMaxBytes:        -1,
 		JSStreamMaxMessages:     -1,

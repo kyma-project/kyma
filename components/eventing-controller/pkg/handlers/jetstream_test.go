@@ -1182,6 +1182,7 @@ type TestEnvironment struct {
 func setupTestEnvironment(t *testing.T) *TestEnvironment {
 	natsServer, natsPort := startNATSServer(evtesting.WithJetStreamEnabled())
 	natsConfig := defaultNatsConfig(natsServer.ClientURL())
+	natsConfig.JSStreamSubjectPrefix = evtesting.EventTypePrefix
 	defaultLogger, err := logger.New(string(kymalogger.JSON), string(kymalogger.INFO))
 	require.NoError(t, err)
 

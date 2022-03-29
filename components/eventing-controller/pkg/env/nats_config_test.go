@@ -54,42 +54,7 @@ func Test_GetNatsConfig(t *testing.T) {
 	g.Expect(config.IdleConnTimeout).To(Equal(idleConnTimeout))
 }
 
-func Test_getStreamNameForJetStream(t *testing.T) {
-	testCases := []struct {
-		name                 string
-		givenEventTypePrefix string
-		wantStreamName       string
-	}{
-		{
-			name:                 "When eventTypePrefix is capitalized",
-			givenEventTypePrefix: "EVENT_TYPE_PREFIX",
-			wantStreamName:       "event_type_prefix",
-		},
-		{
-			name:                 "When eventTypePrefix only contains single part",
-			givenEventTypePrefix: "ONE",
-			wantStreamName:       "one",
-		},
-		{
-			name:                 "When eventTypePrefix contains two part",
-			givenEventTypePrefix: "ONE.TWO",
-			wantStreamName:       "one",
-		},
-		{
-			name:                 "When eventTypePrefix contains non-alphanumeric characters",
-			givenEventTypePrefix: "O^^>*N< E.TWO",
-			wantStreamName:       "one",
-		},
-	}
-	for _, tc := range testCases {
-		tc := tc
-		t.Run(tc.name, func(t *testing.T) {
-			require.Equal(t, getStreamNameForJetStream(tc.givenEventTypePrefix), tc.wantStreamName)
-		})
-	}
-}
-
-func Test_GetNatsConfigJetStreamName(t *testing.T) {
+func Test_JSStreamSubjectPrefix(t *testing.T) {
 	maxIdleConns := 10
 	maxConnsPerHost := 20
 	maxIdleConnsPerHost := 30
@@ -98,7 +63,6 @@ func Test_GetNatsConfigJetStreamName(t *testing.T) {
 
 	envs := map[string]string{
 		"NATS_URL":                "NATS_URL",
-		"EVENT_TYPE_PREFIX":       "EVENT_TYPE_PREFIX",
 		"MAX_IDLE_CONNS":          fmt.Sprintf("%d", maxIdleConns),
 		"MAX_CONNS_PER_HOST":      fmt.Sprintf("%d", maxConnsPerHost),
 		"MAX_IDLE_CONNS_PER_HOST": fmt.Sprintf("%d", maxIdleConnsPerHost),
@@ -119,34 +83,19 @@ func Test_GetNatsConfigJetStreamName(t *testing.T) {
 
 	// define test cases
 	testCases := []struct {
-		name                 string
-		givenEventTypePrefix string
-		wantStreamName       string
+		name                      string
+		givenEventTypePrefix      string
+		wantJSStreamSubjectPrefix string
 	}{
 		{
-			name:                 "When eventTypePrefix is capitalized",
-			givenEventTypePrefix: "EVENT_TYPE_PREFIX",
-			wantStreamName:       "event_type_prefix",
+			name:                      "When eventTypePrefix is empty",
+			givenEventTypePrefix:      "",
+			wantJSStreamSubjectPrefix: "kyma",
 		},
 		{
-			name:                 "When eventTypePrefix is empty",
-			givenEventTypePrefix: "",
-			wantStreamName:       "kyma",
-		},
-		{
-			name:                 "When eventTypePrefix only contains single part",
-			givenEventTypePrefix: "ONE",
-			wantStreamName:       "one",
-		},
-		{
-			name:                 "When eventTypePrefix contains two part",
-			givenEventTypePrefix: "ONE.TWO",
-			wantStreamName:       "one",
-		},
-		{
-			name:                 "When eventTypePrefix contains three part",
-			givenEventTypePrefix: "ONE.TWO.THREE",
-			wantStreamName:       "one",
+			name:                      "When eventTypePrefix is non-empty",
+			givenEventTypePrefix:      "one.two.three",
+			wantJSStreamSubjectPrefix: "one.two.three",
 		},
 	}
 	// run test cases
@@ -160,7 +109,7 @@ func Test_GetNatsConfigJetStreamName(t *testing.T) {
 			config := GetNatsConfig(maxReconnects, reconnectWait)
 
 			// then
-			require.Equal(t, config.JSStreamName, tc.wantStreamName)
+			require.Equal(t, config.JSStreamSubjectPrefix, tc.wantJSStreamSubjectPrefix)
 		})
 	}
 

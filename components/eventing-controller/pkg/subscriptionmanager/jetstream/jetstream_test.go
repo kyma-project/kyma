@@ -87,6 +87,7 @@ func getNATSConf(natsURL string) env.NatsConfig {
 		ReconnectWait:           time.Second,
 		EventTypePrefix:         controllertesting.EventTypePrefix,
 		JSStreamName:            controllertesting.EventTypePrefix,
+		JSStreamSubjectPrefix:   controllertesting.EventTypePrefix,
 		JSStreamStorageType:     handlers.JetStreamStorageTypeMemory,
 		JSStreamRetentionPolicy: handlers.JetStreamRetentionPolicyInterest,
 	}
