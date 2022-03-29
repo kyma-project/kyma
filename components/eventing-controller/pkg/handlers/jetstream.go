@@ -328,14 +328,6 @@ func getStreamConfig(natsConfig env.NatsConfig) (*nats.StreamConfig, error) {
 	return streamConfig, nil
 }
 
-func (js *JetStream) getStreamSubjectPrefix() string {
-	if js.config.EventTypePrefix != "" {
-		return "kyma"
-	}
-	// @TODO: should we also clean EventTypePrefix for non-alphanumeric characters
-	return js.config.EventTypePrefix
-}
-
 type DefaultSubOpts []nats.SubOpt
 
 func (js *JetStream) getDefaultSubscriptionOptions(consumerName string, subConfig *eventingv1alpha1.SubscriptionConfig) DefaultSubOpts {

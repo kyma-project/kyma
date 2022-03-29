@@ -64,6 +64,8 @@ spec:
             value: {{ .Values.global.log.level | quote }}
           - name: ENABLE_JETSTREAM_BACKEND
             value: {{ .Values.global.jetstream.enabled | quote }}
+          - name: JS_STREAM_NAME
+            value: {{ .Values.jetstream.streamName | quote }}
           - name: JS_STREAM_STORAGE_TYPE
             value: {{ .Values.global.jetstream.storage | quote }}
           - name: JS_STREAM_RETENTION_POLICY
