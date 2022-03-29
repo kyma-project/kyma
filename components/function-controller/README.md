@@ -77,7 +77,7 @@ Function Controller tests keep failing with such an error message:
 
 ### Cause
 
-Function Controller tests failing.
+Function Controller tests failing due to the wrong version of the libgit2 binary. The required version of the binary is 1.1.
 
 ### Remedy
 
