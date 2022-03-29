@@ -10,7 +10,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-func Test_InitializeConditions(t *testing.T) {
+func Test_InitializeSubscriptionConditions(t *testing.T) {
 	var tests = []struct {
 		name            string
 		givenConditions []Condition
@@ -262,6 +262,154 @@ func Test_ShouldUpdateReadyStatus(t *testing.T) {
 			status.Ready = tc.subscriptionReady
 			if gotStatus := status.ShouldUpdateReadyStatus(); tc.wantStatus != gotStatus {
 				t.Errorf("ShouldUpdateReadyStatus is not valid, want: %v but got: %v", tc.wantStatus, gotStatus)
+			}
+		})
+	}
+}
+
+func Test_conditionsEquals(t *testing.T) {
+	testCases := []struct {
+		name            string
+		conditionsSet1  []Condition
+		conditionsSet2  []Condition
+		wantEqualStatus bool
+	}{
+		{
+			name: "should not be equal if the number of conditions are not equal",
+			conditionsSet1: []Condition{
+				{Type: ConditionSubscribed, Status: corev1.ConditionTrue},
+			},
+			conditionsSet2:  []Condition{},
+			wantEqualStatus: false,
+		},
+		{
+			name: "should be equal if the conditions are the same",
+			conditionsSet1: []Condition{
+				{Type: ConditionSubscribed, Status: corev1.ConditionTrue},
+				{Type: ConditionAPIRuleStatus, Status: corev1.ConditionTrue},
+			},
+			conditionsSet2: []Condition{
+				{Type: ConditionSubscribed, Status: corev1.ConditionTrue},
+				{Type: ConditionAPIRuleStatus, Status: corev1.ConditionTrue},
+			},
+			wantEqualStatus: true,
+		},
+		{
+			name: "should not be equal if the condition types are different",
+			conditionsSet1: []Condition{
+				{Type: ConditionSubscribed, Status: corev1.ConditionTrue},
+				{Type: ConditionAPIRuleStatus, Status: corev1.ConditionTrue},
+			},
+			conditionsSet2: []Condition{
+				{Type: ConditionWebhookCallStatus, Status: corev1.ConditionTrue},
+				{Type: ConditionSubscriptionActive, Status: corev1.ConditionTrue},
+			},
+			wantEqualStatus: false,
+		},
+		{
+			name: "should not be equal if the condition types are the same but the status is different",
+			conditionsSet1: []Condition{
+				{Type: ConditionSubscribed, Status: corev1.ConditionTrue},
+			},
+			conditionsSet2: []Condition{
+				{Type: ConditionSubscribed, Status: corev1.ConditionFalse},
+			},
+			wantEqualStatus: false,
+		},
+		{
+			name: "should not be equal if the condition types are different but the status is the same",
+			conditionsSet1: []Condition{
+				{Type: ConditionSubscribed, Status: corev1.ConditionTrue},
+				{Type: ConditionAPIRuleStatus, Status: corev1.ConditionFalse},
+			},
+			conditionsSet2: []Condition{
+				{Type: ConditionSubscribed, Status: corev1.ConditionTrue},
+				{Type: ConditionAPIRuleStatus, Status: corev1.ConditionTrue},
+			},
+			wantEqualStatus: false,
+		},
+	}
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			if gotEqualStatus := ConditionsEquals(tc.conditionsSet1, tc.conditionsSet2); tc.wantEqualStatus != gotEqualStatus {
+				t.Errorf("The list of conditions are not equal, want: %v but got: %v", tc.wantEqualStatus, gotEqualStatus)
+			}
+		})
+	}
+}
+
+func Test_conditionEquals(t *testing.T) {
+	testCases := []struct {
+		name            string
+		condition1      Condition
+		condition2      Condition
+		wantEqualStatus bool
+	}{
+		{
+			name: "should not be equal if the types are the same but the status is different",
+			condition1: Condition{
+				Type: ConditionSubscribed, Status: corev1.ConditionTrue,
+			},
+
+			condition2: Condition{
+				Type: ConditionSubscribed, Status: corev1.ConditionUnknown,
+			},
+			wantEqualStatus: false,
+		},
+		{
+			name: "should not be equal if the types are different but the status is the same",
+			condition1: Condition{
+				Type: ConditionSubscribed, Status: corev1.ConditionTrue,
+			},
+
+			condition2: Condition{
+				Type: ConditionAPIRuleStatus, Status: corev1.ConditionTrue,
+			},
+			wantEqualStatus: false,
+		},
+		{
+			name: "should not be equal if the message fields are different",
+			condition1: Condition{
+				Type: ConditionSubscribed, Status: corev1.ConditionTrue, Message: "",
+			},
+
+			condition2: Condition{
+				Type: ConditionSubscribed, Status: corev1.ConditionTrue, Message: "some message",
+			},
+			wantEqualStatus: false,
+		},
+		{
+			name: "should not be equal if the reason fields are different",
+			condition1: Condition{
+				Type: ConditionSubscribed, Status: corev1.ConditionTrue, Reason: ConditionReasonSubscriptionDeleted,
+			},
+
+			condition2: Condition{
+				Type: ConditionSubscribed, Status: corev1.ConditionTrue, Reason: ConditionReasonSubscriptionActive,
+			},
+			wantEqualStatus: false,
+		},
+		{
+			name: "should be equal if all the fields are the same",
+			condition1: Condition{
+				Type:    ConditionAPIRuleStatus,
+				Status:  corev1.ConditionFalse,
+				Reason:  ConditionReasonAPIRuleStatusNotReady,
+				Message: "API Rule is not ready",
+			},
+			condition2: Condition{
+				Type:    ConditionAPIRuleStatus,
+				Status:  corev1.ConditionFalse,
+				Reason:  ConditionReasonAPIRuleStatusNotReady,
+				Message: "API Rule is not ready",
+			},
+			wantEqualStatus: true,
+		},
+	}
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			if gotEqualStatus := ConditionEquals(tc.condition1, tc.condition2); tc.wantEqualStatus != gotEqualStatus {
+				t.Errorf("The conditions are not equal, want: %v but got: %v", tc.wantEqualStatus, gotEqualStatus)
 			}
 		})
 	}

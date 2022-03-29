@@ -123,7 +123,8 @@ func (r *Reconciler) Reconcile(ctx context.Context, _ ctrl.Request) (ctrl.Result
 		// Do not change the value of backend type if it cannot be changed
 		desiredBackend.Status.Backend = currentBackend.Status.Backend
 		desiredBackend.Status.EventingReady = utils.BoolPtr(false)
-		if object.Semantic.DeepEqual(&desiredBackend.Status, &currentBackend.Status) {
+
+		if isBackendStatusEqual(currentBackend.Status, desiredBackend.Status) {
 			return ctrl.Result{}, nil
 		}
 		if err := r.Client.Status().Update(ctx, desiredBackend); err != nil {
@@ -347,7 +348,7 @@ func (r *Reconciler) UpdateBackendStatus(ctx context.Context, backendType eventi
 		desiredBackend := currentBackend.DeepCopy()
 		desiredBackend.Status = desiredStatus
 
-		if object.Semantic.DeepEqual(&desiredStatus, &currentStatus) {
+		if isBackendStatusEqual(currentStatus, desiredStatus) {
 			return nil
 		}
 
@@ -394,14 +395,12 @@ func (r *Reconciler) UpdateBackendStatus(ctx context.Context, backendType eventi
 		desiredStatus.BEBSecretNamespace = ""
 		subscriptionControllerReady = r.natsSubMgrStarted
 	}
-	eventingReady := subscriptionControllerReady && publisherReady
 
-	desiredStatus.Backend = backendType
-	desiredStatus.SubscriptionControllerReady = utils.BoolPtr(subscriptionControllerReady)
-	desiredStatus.EventingReady = utils.BoolPtr(eventingReady)
-	desiredStatus.PublisherProxyReady = utils.BoolPtr(publisherReady)
+	desiredStatus.SetSubscriptionControllerReady(subscriptionControllerReady, "")
+	desiredStatus.SetPublisherReady(publisherReady, "")
+	desiredStatus.EventingReady = utils.BoolPtr(subscriptionControllerReady && publisherReady)
 
-	if object.Semantic.DeepEqual(&desiredStatus, &currentStatus) {
+	if isBackendStatusEqual(currentStatus, desiredStatus) {
 		return nil
 	}
 
@@ -471,13 +470,10 @@ func hasBackendTypeChanged(currentBackendStatus, desiredBackendStatus eventingv1
 }
 
 func getDefaultBackendStatus() eventingv1alpha1.EventingBackendStatus {
-	return eventingv1alpha1.EventingBackendStatus{
-		SubscriptionControllerReady: utils.BoolPtr(false),
-		PublisherProxyReady:         utils.BoolPtr(false),
-		EventingReady:               utils.BoolPtr(false),
-		BEBSecretName:               "",
-		BEBSecretNamespace:          "",
-	}
+	defaultStatus := eventingv1alpha1.EventingBackendStatus{}
+	defaultStatus.InitializeBackendConditions()
+	defaultStatus.EventingReady = utils.BoolPtr(false)
+	return defaultStatus
 }
 
 func (r *Reconciler) DeletePublisherProxySecret(ctx context.Context) error {

@@ -27,12 +27,6 @@ type EventingBackendStatus struct {
 	// +optional
 	EventingReady *bool `json:"eventingReady"`
 
-	// +optional
-	SubscriptionControllerReady *bool `json:"subscriptionControllerReady"`
-
-	// +optional
-	PublisherProxyReady *bool `json:"publisherProxyReady"`
-
 	// Conditions defines the status conditions
 	// +optional
 	Conditions []Condition `json:"conditions,omitempty"`

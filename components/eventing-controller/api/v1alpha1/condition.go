@@ -42,6 +42,11 @@ const (
 	ConditionReasonNATSSubscriptionActive     ConditionReason = "NATS Subscription active"
 	ConditionReasonNATSSubscriptionNotActive  ConditionReason = "NATS Subscription not active"
 	ConditionReasonWebhookCallStatus          ConditionReason = "BEB Subscription webhook call no errors status"
+
+	ConditionReasonSubscriptionControllerReady    ConditionReason = "Subscription Manager started"
+	ConditionReasonSubscriptionControllerNotReady ConditionReason = "Subscription Manager not started"
+	ConditionReasonPublisherDeploymentReady       ConditionReason = "Publisher proxy deployment ready"
+	ConditionReasonPublisherDeploymentNotReady    ConditionReason = "Publisher proxy deployment not ready"
 )
 
 // initializeConditions sets unset conditions to Unknown
@@ -236,4 +241,76 @@ func makeBackendConditions() []Condition {
 		},
 	}
 	return conditions
+}
+
+func (b *EventingBackendStatus) SetSubscriptionControllerReady(ready bool, message string) {
+	reason := ConditionReasonSubscriptionControllerNotReady
+	status := corev1.ConditionFalse
+	if ready {
+		reason = ConditionReasonSubscriptionControllerReady
+		status = corev1.ConditionTrue
+	}
+
+	newConditions := []Condition{MakeCondition(ConditionControllerReady, reason, status, message)}
+	for _, condition := range b.Conditions {
+		if condition.Type == ConditionControllerReady {
+			continue
+		}
+		newConditions = append(newConditions, condition)
+	}
+	b.Conditions = newConditions
+}
+
+func (b *EventingBackendStatus) SetPublisherReady(ready bool, message string) {
+	reason := ConditionReasonPublisherDeploymentNotReady
+	status := corev1.ConditionFalse
+	if ready {
+		reason = ConditionReasonPublisherDeploymentReady
+		status = corev1.ConditionTrue
+	}
+
+	newConditions := []Condition{MakeCondition(ConditionPublisherProxyReady, reason, status, message)}
+	for _, condition := range b.Conditions {
+		if condition.Type == ConditionPublisherProxyReady {
+			continue
+		}
+		newConditions = append(newConditions, condition)
+	}
+	b.Conditions = newConditions
+}
+
+// ConditionsEquals checks if two list of conditions are equal.
+func ConditionsEquals(existing, expected []Condition) bool {
+	// not equal if length is different
+	if len(existing) != len(expected) {
+		return false
+	}
+
+	// compile map of Conditions per ConditionType
+	existingMap := make(map[ConditionType]Condition, len(existing))
+	for _, value := range existing {
+		existingMap[value.Type] = value
+	}
+
+	for _, value := range expected {
+		if !ConditionEquals(existingMap[value.Type], value) {
+			return false
+		}
+	}
+
+	return true
+}
+
+// ConditionsEquals checks if two conditions are equal.
+func ConditionEquals(existing, expected Condition) bool {
+	isTypeEqual := existing.Type == expected.Type
+	isStatusEqual := existing.Status == expected.Status
+	isReasonEqual := existing.Reason == expected.Reason
+	isMessageEqual := existing.Message == expected.Message
+
+	if !isStatusEqual || !isReasonEqual || !isMessageEqual || !isTypeEqual {
+		return false
+	}
+
+	return true
 }

@@ -12,8 +12,6 @@ import (
 
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/sink"
 
-	equality "github.com/kyma-project/kyma/components/eventing-controller/controllers/subscription"
-
 	"github.com/kyma-project/kyma/components/eventing-controller/controllers/events"
 
 	"github.com/pkg/errors"
@@ -208,7 +206,7 @@ func (r *Reconciler) updateSubscription(ctx context.Context, subscription *event
 func (r *Reconciler) emitConditionEvents(oldSubscription, newSubscription *eventingv1alpha1.Subscription, logger *zap.SugaredLogger) {
 	for _, condition := range newSubscription.Status.Conditions {
 		oldCondition := oldSubscription.Status.FindCondition(condition.Type)
-		if oldCondition != nil && equality.ConditionEquals(*oldCondition, condition) {
+		if oldCondition != nil && eventingv1alpha1.ConditionEquals(*oldCondition, condition) {
 			continue
 		}
 		// condition is modified, so emit an event
@@ -220,7 +218,7 @@ func (r *Reconciler) emitConditionEvents(oldSubscription, newSubscription *event
 // updateStatus updates the status to k8s if modified
 func (r *Reconciler) updateStatus(ctx context.Context, oldSubscription, newSubscription *eventingv1alpha1.Subscription, logger *zap.SugaredLogger) error {
 	// compare the status taking into consideration lastTransitionTime in conditions
-	if equality.IsSubscriptionStatusEqual(oldSubscription.Status, newSubscription.Status) {
+	if isSubscriptionStatusEqual(oldSubscription.Status, newSubscription.Status) {
 		return nil
 	}
 
@@ -702,7 +700,7 @@ func (r *Reconciler) replaceStatusCondition(subscription *eventingv1alpha1.Subsc
 	}
 
 	// prevent unnecessary updates
-	if equality.ConditionsEquals(subscription.Status.Conditions, desiredConditions) && subscription.Status.Ready == isReady {
+	if eventingv1alpha1.ConditionsEquals(subscription.Status.Conditions, desiredConditions) && subscription.Status.Ready == isReady {
 		return false
 	}
 
