@@ -67,12 +67,12 @@ To develop the component, use the formulae declared in the [generic](/common/mak
 | **WEBHOOK_DEFAULTING_MAXREPLICAS**        | Value of the maxReplicas which webhook should set if origin equals null                   | `1`                  |
 | **WEBHOOK_DEFAULTING_RUNTIME**            | Value of the runtime which webhook should set if origin equals null                       | `nodejs14`           |
 
-# Troubleshooting
+## Troubleshooting
 
-## How to build and install `libgit2` binary, required by the Function Controller, on macOS
 
 ### Symptom
 
+Function Controller tests keep failing with such an error message:
 `error: Invalid libgit2 version; this git2go supports libgit2 between vA.B.C and vX.Y.Z`
 
 ### Cause
@@ -81,7 +81,9 @@ Function Controller tests failing.
 
 ### Remedy
 
-1. Navigate to the Function Controller's root directory and verify the version of `git2go`:
+Build and Install the libgit2 binary required by the Function Controller on macOS. Follow these steps:
+
+1. Navigate to the Function Controller's root directory and verify the version of git2go:
 
    ```bash
    $ cat go.mod | grep git2go
@@ -91,7 +93,7 @@ Function Controller tests failing.
    ```bash
    github.com/libgit2/git2go/v31 v31.4.14
    ```
-2. Go to the [git2go page](https://github.com/libgit2/git2go#git2go) to check which version of libgit2 you must use. For example, for libigit2 in version 1.1, use git2go v31.
+2. Go to the [git2go page](https://github.com/libgit2/git2go#git2go) to check which version of libgit2 you must use. For example, for git2go v31, use libigit2 in version 1.1.
    
 3. Clone the `libgit2` repository:
 
@@ -102,7 +104,7 @@ Function Controller tests failing.
    ```bash
    git checkout v1.1.0
    ```
-5. Build and install:
+5. Build and install the libgit2 binary:
    ```bash
    cmake -DCMAKE_OSX_ARCHITECTURES="x86_64" .
    make install
