@@ -2,7 +2,7 @@
 title: Expose and secure a workload with Istio external auth
 ---
 
-This tutorial shows how to expose workload using Istio authorization policy and secure it using Istio RequestAuthentication with JWT token
+This tutorial shows how to expose workload using VirtualService and secure it using Istio authorization policy together with Istio RequestAuthentication based on JWT token
 
 ## Prerequisites
 
@@ -24,31 +24,15 @@ This tutorial is based on a sample HttpBin service deployment and a sample Funct
    ```shell
    cat <<EOF | kubectl apply -f -
    apiVersion: networking.istio.io/v1alpha3
-   kind: Gateway
-   metadata:
-     name: httpbin-gateway
-     namespace: $NAMESPACE
-   spec:
-     selector:
-       istio: ingressgateway
-     servers:
-     - port:
-         number: 80
-         name: http
-         protocol: HTTP
-       hosts:
-       - "$DOMAIN"
-   ---
-   apiVersion: networking.istio.io/v1alpha3
    kind: VirtualService
    metadata:
      name: httpbin
      namespace: $NAMESPACE
    spec:
      hosts:
-     - "*"
+     - "httpbin.$DOMAIN"
      gateways:
-     - istio-system/httpbin-gateway
+     - kyma-system/kyma-gateway # or the Gateway CR you created
      http:
      - match:
        - uri:
@@ -61,32 +45,13 @@ This tutorial is based on a sample HttpBin service deployment and a sample Funct
    EOF
    ```
 
-2. Export the following values:
+## Add a RequestAuthentication which requires JWT token for all requests for workloads that have label app:httpbin
+
+1. Export the following values:
 
    ```shell
-   export IP=$(kubectl -n istio-system get service istio-ingressgateway -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
+   export JWKSURI={YOURJWKSURL} # e.g. https://example.com/.well-known/jwks.json
    ```
-
-3. Create DNSEntry with your domain address:
-
-   ```shell
-   cat <<EOF | kubectl apply -f -
-   apiVersion: dns.gardener.cloud/v1alpha1
-   kind: DNSEntry
-   metadata:
-     name: dns-httpbin
-     namespace: $NAMESPACE
-     annotations:
-       dns.gardener.cloud/class: garden
-   spec:
-     dnsName: "$DOMAIN"
-     ttl: 600
-     targets:
-       - $IP
-   EOF
-   ```
-
-## Add a RequestAuthentication which requires JWT token for all request for workloads that have label app:httpbin
 
 1. Run:
 
@@ -102,8 +67,8 @@ This tutorial is based on a sample HttpBin service deployment and a sample Funct
       matchLabels:
         app: httpbin
     jwtRules:
-    - issuer: "issuer-foo"
-      jwksUri: https://example.com/.well-known/jwks.json
+    - issuer: issuer
+      jwksUri: $JWKSURI
    ---
    apiVersion: security.istio.io/v1beta1
    kind: AuthorizationPolicy
@@ -124,13 +89,13 @@ This tutorial is based on a sample HttpBin service deployment and a sample Funct
 2. If you try to access secured workload you should get 403 Forbidden error:
 
    ```shell
-   curl -ik -X GET http://$DOMAIN/status/200
+   curl -ik -X GET https://httpbin.$DOMAIN/status/200
    ```
 
 3. Using correct JWT token should give you 200 OK response
 
    ```shell
-   curl -ik -X GET http://$DOMAIN/status/200 --header 'Authorization:Bearer JWT_TOKEN'
+   curl -ik -X GET https://httpbin.$DOMAIN/status/200 --header 'Authorization:Bearer JWT_TOKEN'
    ```
 
 ## Add a different JWT requirement for a different host
