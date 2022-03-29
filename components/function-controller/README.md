@@ -77,11 +77,11 @@ Function Controller tests keep failing with such an error message:
 
 ### Cause
 
-Function Controller tests failing due to the wrong version of the libgit2 binary. The required version of the binary is 1.1.
+Function Controller tests are failing due to the wrong version of the libgit2 binary. The required version of the binary is 1.1.
 
 ### Remedy
 
-Build and Install the libgit2 binary required by the Function Controller on macOS. Follow these steps:
+Build and install the libgit2 binary required by the Function Controller on macOS. Follow these steps:
 
 1. Navigate to the Function Controller's root directory and verify the version of git2go:
 
