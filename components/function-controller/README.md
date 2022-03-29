@@ -85,7 +85,11 @@ Function Controller tests failing.
 
    ```bash
    $ cat go.mod | grep git2go
-        github.com/libgit2/git2go/v31 v31.4.14
+   ```
+   You should get a result similar to this example:
+
+   ```bash
+   github.com/libgit2/git2go/v31 v31.4.14
    ```
 2. Go to the [git2go page](https://github.com/libgit2/git2go#git2go) to check which version of libgit2 you must use. For example, for libigit2 in version 1.1, use git2go v31.
    
