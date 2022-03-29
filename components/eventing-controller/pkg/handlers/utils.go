@@ -250,7 +250,7 @@ func GetRandString(l int) string {
 	return string(b)
 }
 
-func RemoveStatus(sub eventingv1alpha1.Subscription) *eventingv1alpha1.Subscription {
+func ResetStatusToDefaults(sub eventingv1alpha1.Subscription) *eventingv1alpha1.Subscription {
 	desiredSub := sub.DeepCopy()
 	desiredSub.Status = eventingv1alpha1.SubscriptionStatus{}
 	return desiredSub

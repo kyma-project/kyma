@@ -205,7 +205,7 @@ func cleanup(backend handlers.BEBBackend, dynamicClient dynamic.Interface, logge
 		}
 
 		// Clean statuses.
-		desiredSub := handlers.RemoveStatus(sub)
+		desiredSub := handlers.ResetStatusToDefaults(sub)
 		if err := handlers.UpdateSubscriptionStatus(ctx, dynamicClient, desiredSub); err != nil {
 			isCleanupSuccessful = false
 			logger.Errorw("update BEB subscription status failed", "namespace", sub.Namespace, "name", sub.Name, "error", err)
