@@ -3,8 +3,6 @@ package v1alpha1
 import (
 	"reflect"
 	"testing"
-
-	"k8s.io/kubernetes/pkg/apis/apps"
 )
 
 func TestGetCondition(t *testing.T) {
@@ -42,6 +40,10 @@ func TestGetCondition(t *testing.T) {
 }
 
 func TestSetCondition(t *testing.T) {
+	condPending := LogPipelineCondition{Type: LogPipelinePending, Reason: "ForSomeReason"}
+	condRunning := LogPipelineCondition{Type: LogPipelineRunning, Reason: "ForSomeOtherReason"}
+	condRunningOtherReason := LogPipelineCondition{Type: LogPipelineRunning, Reason: "BecauseItIs"}
+
 	tests := []struct {
 		name           string
 		status         LogPipelineStatus
@@ -50,27 +52,27 @@ func TestSetCondition(t *testing.T) {
 	}{
 		{
 			name:           "set for the first time",
-			status:         &apps.DeploymentStatus{},
-			cond:           condAvailable(),
-			expectedStatus: LogPipelineStatus{Conditions: []apps.DeploymentCondition{condAvailable()}},
+			status:         LogPipelineStatus{},
+			cond:           condPending,
+			expectedStatus: LogPipelineStatus{Conditions: []LogPipelineCondition{condPending}},
 		},
 		{
 			name:           "simple set",
-			status:         &apps.DeploymentStatus{Conditions: []apps.DeploymentCondition{condProgressing()}},
-			cond:           LogPipelineCondition{Type: LogPipelinePending},
-			expectedStatus: LogPipelineStatus{Conditions: []LogPipelineCondition{{Type: LogPipelinePending}}},
+			status:         LogPipelineStatus{Conditions: []LogPipelineCondition{condPending}},
+			cond:           condRunning,
+			expectedStatus: LogPipelineStatus{Conditions: []LogPipelineCondition{condPending, condRunning}},
 		},
 		{
 			name:           "overwrite",
-			status:         &apps.DeploymentStatus{Conditions: []apps.DeploymentCondition{condProgressing()}},
-			cond:           condProgressing2(),
-			expectedStatus: LogPipelineStatus{Conditions: []apps.DeploymentCondition{condProgressing2()}},
+			status:         LogPipelineStatus{Conditions: []LogPipelineCondition{condRunning}},
+			cond:           condRunningOtherReason,
+			expectedStatus: LogPipelineStatus{Conditions: []LogPipelineCondition{condRunningOtherReason}},
 		},
 	}
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			test.status.SetCondition(test.status, test.cond)
+			test.status.SetCondition(test.cond)
 			if !reflect.DeepEqual(test.status, test.expectedStatus) {
 				t.Errorf("%s: expected status: %v, got: %v", test.name, test.expectedStatus, test.status)
 			}

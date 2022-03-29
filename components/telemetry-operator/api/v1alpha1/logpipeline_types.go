@@ -77,8 +77,8 @@ const (
 )
 
 const (
-	FluentBitDaemonSetUpdatedReason = "FluentBitDaemonSetUpdated"
-	FluentBitDaemonSetReadyReason   = "FluentBitDaemonSetReady"
+	FluentBitDSRestartedReason        = "FluentBitDaemonSetRestarted"
+	FluentBitDSRestartCompletedReason = "FluentBitDaemonSetRestartCompleted"
 )
 
 // PodCondition contains details for the current condition of this pod.
@@ -95,6 +95,14 @@ type LogPipelineStatus struct {
 	Conditions []LogPipelineCondition `json:"conditions,omitempty"`
 }
 
+func NewLogPipelineCondition(reason string, condType LogPipelineConditionType) *LogPipelineCondition {
+	return &LogPipelineCondition{
+		LastTransitionTime: metav1.Now(),
+		Reason:             reason,
+		Type:               condType,
+	}
+}
+
 func (lps *LogPipelineStatus) GetCondition(condType LogPipelineConditionType) *LogPipelineCondition {
 	for cond := range lps.Conditions {
 		if lps.Conditions[cond].Type == condType {
@@ -109,7 +117,6 @@ func (lps *LogPipelineStatus) SetCondition(cond LogPipelineCondition) {
 	if currentCond != nil && currentCond.Reason == cond.Reason {
 		return
 	}
-	cond.LastTransitionTime = currentCond.LastTransitionTime
 	newConditions := filterOutCondition(lps.Conditions, cond.Type)
 	lps.Conditions = append(newConditions, cond)
 }

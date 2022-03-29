@@ -171,7 +171,11 @@ func (r *LogPipelineReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 			return ctrl.Result{}, err
 		}
 
-		if err := r.updateStatusPhase(ctx, &logPipeline, telemetryv1alpha1.LogPipelinePending); err != nil {
+		condition := telemetryv1alpha1.NewLogPipelineCondition(
+			telemetryv1alpha1.FluentBitDSRestartedReason,
+			telemetryv1alpha1.LogPipelinePending,
+		)
+		if err := r.updateLogPipelineStatus(ctx, &logPipeline, condition); err != nil {
 			log.Error(err, "Failed to update log pipeline status")
 			return ctrl.Result{}, err
 		}
@@ -179,7 +183,8 @@ func (r *LogPipelineReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 		return ctrl.Result{RequeueAfter: requeueTime}, nil
 	}
 
-	if logPipeline.Status.Pending() {
+	isNotRunning := logPipeline.Status.GetCondition(telemetryv1alpha1.LogPipelineRunning) == nil
+	if isNotRunning {
 		ready, err := r.isFluentBitDaemonSetReady(ctx)
 		if err != nil {
 			log.Error(err, "Failed to check fluent bit readiness")
@@ -189,7 +194,11 @@ func (r *LogPipelineReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 			return ctrl.Result{RequeueAfter: requeueTime}, nil
 		}
 
-		if err := r.updateStatusPhase(ctx, &logPipeline, telemetryv1alpha1.LogPipelineRunning); err != nil {
+		condition := telemetryv1alpha1.NewLogPipelineCondition(
+			telemetryv1alpha1.FluentBitDSRestartCompletedReason,
+			telemetryv1alpha1.LogPipelineRunning,
+		)
+		if err := r.updateLogPipelineStatus(ctx, &logPipeline, condition); err != nil {
 			log.Error(err, "Failed to update log pipeline status")
 			return ctrl.Result{RequeueAfter: requeueTime}, err
 		}
@@ -474,14 +483,11 @@ func (r *LogPipelineReconciler) isFluentBitDaemonSetReady(ctx context.Context) (
 	return updated == desired && ready >= desired, nil
 }
 
-func (r *LogPipelineReconciler) updateStatusPhase(ctx context.Context,
-	logPipeline *telemetryv1alpha1.LogPipeline,
-	conditionType telemetryv1alpha1.LogPipelineConditionType) error {
+func (r *LogPipelineReconciler) updateLogPipelineStatus(ctx context.Context, logPipeline *telemetryv1alpha1.LogPipeline, condition *telemetryv1alpha1.LogPipelineCondition) error {
 	log := logf.FromContext(ctx)
-	log.Info(fmt.Sprintf("Updating log pipeline status to %s", conditionType))
-	//logPipeline.Status.Phase = phase
+	logPipeline.Status.SetCondition(*condition)
 	if err := r.Status().Update(ctx, logPipeline); err != nil {
-		log.Error(err, fmt.Sprintf("Updating log pipeline status to %s", conditionType))
+		log.Error(err, fmt.Sprintf("Updating log pipeline status to %s", condition.Type))
 		return err
 	}
 	return nil
