@@ -164,15 +164,13 @@ function shouldIgnoreTarget(target) {
 function shouldIgnoreAlert(alert) {
   // List of alerts that we don't care about and should be filtered
   const alertNamesToIgnore = [
-    // Watchdog is an alert meant to ensure that the entire alerting pipeline is functional
+    // Watchdog is an alert meant to ensure functioning of the entire alerting pipeline
     'Watchdog',
     // Scrape limits can be exceeded on long-running clusters and can be ignored
     'ScrapeLimitForTargetExceeded',
     // Resource overcommitment is fine for e2e test scenarios
     'KubeCPUOvercommit',
     'KubeMemoryOvercommit',
-    // API server certificates are auto-renewed
-    'K8sCertificateExpirationNotice',
   ];
 
   return alert.labels.severity != 'critical' || alertNamesToIgnore.includes(alert.labels.alertname);
