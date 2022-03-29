@@ -64,8 +64,7 @@ This section explains how to use the Eventing Controller. It expects the followi
 | `DEFAULT_MAX_IN_FLIGHT_MESSAGES`  | The maximum idle "in-flight messages" sent by NATS to the sink without waiting for a response. |
 | `DEFAULT_DISPATCHER_RETRY_PERIOD` | The retry period for resending an event to a sink, if the sink doesn't return 2XX.             |
 | `DEFAULT_DISPATCHER_MAX_RETRIES`  | The maximum number of retries to send an event to a sink in case of errors.                    |
-| **For NATS JetStream**            |                                                                                                |
-|  `JS_STREAM_NAME`                 | Name of the stream where all events are stored.                                                |
+| **For NATS JetStream**            |                                                                                                | |
 |  `JS_STREAM_STORAGE_TYPE`         | Storage type of the stream: `memory` or `file`.                                                    |
 |  `JS_STREAM_RETENTION_POLICY`     | The policy to delete events from the stream: `limits` or `interest`. See https://docs.nats.io/using-nats/developer/develop_jetstream/model_deep_dive#stream-limits-retention-and-policy. |
 |  `JS_STREAM_MAX_MSGS`             | The maximum number of messages in the stream. Used only when storage policy is set to `limits`. |
