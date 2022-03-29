@@ -92,9 +92,9 @@ undeploy: ## Undeploy controller from the K8s cluster specified in ~/.kube/confi
 	kustomize build config/default | kubectl delete -f -
 
 CONTROLLER_GEN = $(PROJECT_DIR)/bin/$(shell uname)/controller-gen
-ARCH := $(shell uname)
+OS := $(shell uname)
 controller-gen-local: ## Download controller-gen locally if necessary.
-	GOBIN=$(PROJECT_DIR)/bin/$(ARCH) go install sigs.k8s.io/controller-tools/cmd/controller-gen@v0.4.1
+	GOBIN=$(PROJECT_DIR)/bin/$(OS) go install sigs.k8s.io/controller-tools/cmd/controller-gen@v0.4.1
 
 path-to-referenced-charts:
 	@echo "resources/eventing"
