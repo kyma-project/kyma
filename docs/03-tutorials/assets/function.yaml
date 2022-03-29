@@ -2,6 +2,8 @@ apiVersion: serverless.kyma-project.io/v1alpha1
 kind: Function
 metadata:
   name: function
+  labels:
+    app: function
 spec:
   source: |
     module.exports = {
