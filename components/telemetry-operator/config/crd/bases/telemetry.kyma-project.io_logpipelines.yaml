@@ -103,8 +103,8 @@ spec:
                   of cluster Important: Run "make" to regenerate code after modifying
                   this file'
                 items:
-                  description: PodCondition contains details for the current condition
-                    of this pod.
+                  description: LogPipelineCondition contains details for the current
+                    condition of this LogPipeline
                   properties:
                     lastTransitionTime:
                       format: date-time

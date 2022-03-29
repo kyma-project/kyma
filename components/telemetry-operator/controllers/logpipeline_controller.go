@@ -176,7 +176,6 @@ func (r *LogPipelineReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 			telemetryv1alpha1.LogPipelinePending,
 		)
 		if err := r.updateLogPipelineStatus(ctx, &logPipeline, condition); err != nil {
-			log.Error(err, "Failed updating log pipeline status")
 			return ctrl.Result{}, err
 		}
 
@@ -199,7 +198,6 @@ func (r *LogPipelineReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 			telemetryv1alpha1.LogPipelineRunning,
 		)
 		if err := r.updateLogPipelineStatus(ctx, &logPipeline, condition); err != nil {
-			log.Error(err, "Failed to update log pipeline status")
 			return ctrl.Result{RequeueAfter: requeueTime}, err
 		}
 	}
