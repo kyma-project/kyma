@@ -81,7 +81,7 @@ const (
 	FluentBitDSRestartCompletedReason = "FluentBitDaemonSetRestartCompleted"
 )
 
-// PodCondition contains details for the current condition of this pod.
+// LogPipelineCondition contains details for the current condition of this LogPipeline
 type LogPipelineCondition struct {
 	LastTransitionTime metav1.Time              `json:"lastTransitionTime,omitempty"`
 	Reason             string                   `json:"reason,omitempty"`
