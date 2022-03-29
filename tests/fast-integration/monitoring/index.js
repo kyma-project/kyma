@@ -1,8 +1,14 @@
+const axios = require('axios');
 const prometheus = require('./prometheus');
 const grafana = require('./grafana');
 const {getEnvOrDefault} = require('../utils');
-
+const {
+  debug,
+  convertAxiosError,
+  retryPromise,
+} = require('../utils');
 const {prometheusPortForward} = require('./client');
+const {assert} = require('chai');
 
 function monitoringTests() {
   if (getEnvOrDefault('KYMA_MAJOR_UPGRADE', 'false') === 'true') {
@@ -18,6 +24,16 @@ function monitoringTests() {
 
     before(async () => {
       cancelPortForward = prometheusPortForward();
+
+      try {
+        debug('Checking if port forward works...');
+        const url = `http://localhost:9090/graph`;
+        const responseBody = await retryPromise(() => axios.get(url, {timeout: 10000}), 5);
+        debug('responseBody', responseBody);
+        assert.equal(responseBody.status, 200, 'Prometheus is not running');
+      } catch (err) {
+        throw convertAxiosError(err, 'Port Forward seems not to be working');
+      }
     });
 
     after(async () => {
@@ -52,7 +68,7 @@ function monitoringTests() {
       await prometheus.assertMetricsExist();
     });
   });
-
+  return;
   describe('Grafana Tests:', async function() {
     this.timeout(5 * 60 * 1000); // 5 min
     this.slow(5 * 1000);
