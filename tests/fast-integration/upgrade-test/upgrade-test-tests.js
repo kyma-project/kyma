@@ -17,9 +17,6 @@ const {
 const {
   monitoringTests,
 } = require('../monitoring');
-const {
-  tracingTests,
-} = require('../tracing');
 
 describe('Upgrade test tests', function() {
   this.timeout(10 * 60 * 1000);
@@ -55,6 +52,4 @@ describe('Upgrade test tests', function() {
   monitoringTests();
 
   loggingTests();
-
-  tracingTests();
 });
