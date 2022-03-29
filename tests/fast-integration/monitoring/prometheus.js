@@ -166,6 +166,8 @@ function shouldIgnoreAlert(alert) {
   const alertNamesToIgnore = [
     // Watchdog is an alert meant to ensure functioning of the entire alerting pipeline
     'Watchdog',
+    // Scrape limits can be exceeded on long-running clusters and can be ignored
+    'ScrapeLimitForTargetExceeded',
     // Resource overcommitment is fine for e2e test scenarios
     'KubeCPUOvercommit',
     'KubeMemoryOvercommit',
