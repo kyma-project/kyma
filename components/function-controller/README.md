@@ -67,9 +67,19 @@ To develop the component, use the formulae declared in the [generic](/common/mak
 | **WEBHOOK_DEFAULTING_MAXREPLICAS**        | Value of the maxReplicas which webhook should set if origin equals null                   | `1`                  |
 | **WEBHOOK_DEFAULTING_RUNTIME**            | Value of the runtime which webhook should set if origin equals null                       | `nodejs14`           |
 
-## Troubleshooting
+# Troubleshooting
 
-### How to build and install `libgit2` binary, required by the Function Controller, on macOS
+## How to build and install `libgit2` binary, required by the Function Controller, on macOS
+
+### Symptom
+
+`error: Invalid libgit2 version; this git2go supports libgit2 between vA.B.C and vX.Y.Z`
+
+### Cause
+
+Function Controller tests failing.
+
+### Remedy
 
 1. Navigate to the Function Controller's root directory and verify the version of `git2go`:
 
@@ -77,7 +87,7 @@ To develop the component, use the formulae declared in the [generic](/common/mak
    $ cat go.mod | grep git2go
         github.com/libgit2/git2go/v31 v31.4.14
    ```
-2. Go to the git2go page to check which version of libgit2 you must use. For example, for libigit2 in version 1.1, use git2go v31.
+2. Go to the [git2go page](https://github.com/libgit2/git2go#git2go) to check which version of libgit2 you must use. For example, for libigit2 in version 1.1, use git2go v31.
    
 3. Clone the `libgit2` repository:
 
