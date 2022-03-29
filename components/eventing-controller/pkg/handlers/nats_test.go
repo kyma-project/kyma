@@ -55,7 +55,7 @@ func TestConvertMsgToCE(t *testing.T) {
 				Sub:     nil,
 			},
 			expectedCloudEvent: cev2event.New(cev2event.CloudEventsVersionV1),
-			expectedErr:        errors.New("id: MUST be a non-empty string\n"), //nolint:golint
+			expectedErr:        errors.New("id: MUST be a non-empty string\n"), //nolint:revive
 		},
 	}
 	for _, tc := range testCases {

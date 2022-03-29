@@ -56,7 +56,7 @@ golangci::run_checks() {
     deadcode errcheck gosimple govet ineffassign staticcheck \
     structcheck typecheck unused varcheck \
     # additional lints
-    golint gofmt misspell gochecknoinits unparam scopelint gosec
+    revive gofmt misspell gochecknoinits unparam exportloopref gosec
     ${ADDITIONAL_LINTERS}
   )
 
