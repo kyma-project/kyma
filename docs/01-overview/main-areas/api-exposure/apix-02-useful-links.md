@@ -9,7 +9,7 @@ If you're interested in learning more about API Exposure in Kyma, follow these l
   - [Create a workload](../../../03-tutorials/00-api-exposure/apix-02-create-workload.md)
   - [Expose a workload](../../../03-tutorials/00-api-exposure/apix-02-expose-workload-apigateway.md)
   - [Expose and secure a workload with OAuth2](../../../03-tutorials/00-api-exposure/apix-03-expose-and-secure-workload-oauth2.md)
-  - [Expose and secure a workload with Istio external auth](../../../03-tutorials/00-api-exposure/apix-04-expose-and-secure-workload-jwt-istio-ext-auth.md)
+  - [Expose and secure a workload with Istio external auth](../../../03-tutorials/00-api-exposure/apix-04-expose-and-secure-workload-istio.md)
   
 - Troubleshoot API Exposure-related issues when:
 

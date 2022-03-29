@@ -1,5 +1,5 @@
 ---
-title: Expose and secure a workload with Istio external auth
+title: Expose and secure a workload with Istio
 ---
 
 This tutorial shows how to expose a workload with Virtual Service and secure it using [Authorization Policy](https://istio.io/latest/docs/reference/config/security/authorization-policy/) together with [Request Authentication](https://istio.io/latest/docs/reference/config/security/request_authentication/) based on JWT token. 
