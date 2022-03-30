@@ -28,7 +28,7 @@ function monitoringTests() {
     });
 
     it('Prometheus Port-Forward should be working', async () => {
-      await prometheus.assertPortForwardIsWorking();
+      await prometheus.assertPrometheusUIReachable();
     });
 
     it('Prometheus targets should be healthy', async () => {

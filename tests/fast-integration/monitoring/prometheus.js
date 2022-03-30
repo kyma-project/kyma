@@ -26,9 +26,9 @@ async function assertPodsExist() {
   );
 }
 
-async function assertPortForwardIsWorking() {
+async function assertPrometheusUIReachable() {
   status = await getPrometheusUIStatus();
-  assert.equal(status, 200, 'Prometheus Port-Forward is not running');
+  assert.equal(status, 200, 'Prometheus UI is not reachable');
 }
 
 async function assertAllTargetsAreHealthy() {
@@ -320,7 +320,7 @@ async function retry(getList, maxRetries = 20, interval = 5 * 1000) {
 
 module.exports = {
   assertPodsExist,
-  assertPortForwardIsWorking,
+  assertPrometheusUIReachable,
   assertAllTargetsAreHealthy,
   assertNoCriticalAlertsExist,
   assertScrapePoolTargetsExist,
