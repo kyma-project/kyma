@@ -132,7 +132,7 @@ func TestCreateSubscription(t *testing.T) {
 			},
 			want: utils.Want{
 				K8sSubscription: []gomegatypes.GomegaMatcher{
-					reconcilertesting.HaveCondition(utils.ConditionInvalidSink("sink URL scheme should be 'http' or 'https'")),
+					reconcilertesting.HaveCondition(utils.ConditionInvalidSink(sink.MissingSchemeErrMsg)),
 				},
 				K8sEvents: []v1.Event{utils.EventInvalidSink("Sink URL scheme should be HTTP or HTTPS: invalid")},
 			},

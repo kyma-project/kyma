@@ -18,7 +18,8 @@ import (
 )
 
 const (
-	defaultStreamName = "kyma"
+	defaultStreamName    = "kyma"
+	defaultMaxReconnects = 10
 )
 
 type jetStreamClient struct {
@@ -922,7 +923,64 @@ func TestJSSubscriptionWithMaxInFlightChange(t *testing.T) {
 		// so these events will be pending for receiving an ACK from dispatchers
 		// check consumer current maxAckPending
 		return consumerInfo.NumAckPending == defaultMaxInflight
-	}, 10*time.Second, 200*time.Millisecond)
+	}, 10*time.Second, 10*time.Millisecond)
+}
+
+// TestJSSubscriptionRedeliverWithFailedDispatch tests the redelivering
+// of event when the dispatch fails.
+func TestJSSubscriptionRedeliverWithFailedDispatch(t *testing.T) {
+	// given
+	testEnvironment := setupTestEnvironment(t)
+	jsBackend := testEnvironment.jsBackend
+	defer testEnvironment.natsServer.Shutdown()
+	defer testEnvironment.jsClient.natsConn.Close()
+	initErr := jsBackend.Initialize(nil)
+	require.NoError(t, initErr)
+
+	// create New Subscriber
+	subscriber := evtesting.NewSubscriber()
+	subscriber.Shutdown() // shutdown the subscriber intentionally
+	require.False(t, subscriber.IsRunning())
+
+	defaultSubsConfig := env.DefaultSubscriptionConfig{MaxInFlightMessages: 10}
+	// create a new Subscription
+	sub := evtesting.NewSubscription("sub", "foo",
+		evtesting.WithNotCleanFilter(),
+		evtesting.WithSinkURL(subscriber.SinkURL),
+		evtesting.WithStatusConfig(defaultSubsConfig),
+	)
+	addJSCleanEventTypesToStatus(sub, testEnvironment.cleaner, jsBackend)
+
+	// when
+	err := jsBackend.SyncSubscription(sub)
+
+	// then
+	require.NoError(t, err)
+
+	// when
+	// send an event
+	ev2data := "newsampledata"
+	require.NoError(t, SendEventToJetStream(jsBackend, ev2data))
+
+	// then
+	// it should have failed to dispatch
+	expectedEv2Data := fmt.Sprintf("\"%s\"", ev2data)
+	require.Error(t, subscriber.CheckEvent(expectedEv2Data))
+
+	// when
+	// start a new subscriber
+	subscriber = evtesting.NewSubscriber()
+	defer subscriber.Shutdown()
+	require.True(t, subscriber.IsRunning())
+	// and update sink in the subscription
+	sub.Spec.Sink = subscriber.SinkURL
+	require.NoError(t, jsBackend.SyncSubscription(sub))
+
+	// then
+	// the same event should be redelivered
+	require.Eventually(t, func() bool {
+		return subscriber.CheckEvent(expectedEv2Data) == nil
+	}, 60*time.Second, 5*time.Second)
 }
 
 // TestJSSubscriptionUsingCESDK tests that eventing works with Cloud events.
@@ -961,196 +1019,125 @@ func TestJSSubscriptionUsingCESDK(t *testing.T) {
 	require.NoError(t, jsBackend.DeleteSubscription(sub))
 }
 
-func TestJetStreamServerRestart_WithReconnectDisabled(t *testing.T) {
+// TestJetStream_ServerRestart tests that eventing works when NATS server is restarted
+// for scenarios involving the stream storage type and when reconnect attempts are exhausted or not.
+func TestJetStream_ServerRestart(t *testing.T) {
 	// given
-	testEnvironment := setupTestEnvironment(t)
-	jsBackend := testEnvironment.jsBackend
-	defer testEnvironment.natsServer.Shutdown()
-	defer testEnvironment.jsClient.natsConn.Close()
-
-	// Do not reconnect once server is shutdown
-	jsBackend.config.MaxReconnects = 0
-
-	initErr := jsBackend.Initialize(nil)
-	require.NoError(t, initErr)
-	defaultSubsConfig := env.DefaultSubscriptionConfig{MaxInFlightMessages: 10}
-
 	subscriber := evtesting.NewSubscriber()
 	defer subscriber.Shutdown()
 	require.True(t, subscriber.IsRunning())
-
-	// Create a subscription
-	sub := evtesting.NewSubscription("sub", "foo",
-		evtesting.WithNotCleanFilter(),
-		evtesting.WithSinkURL(subscriber.SinkURL),
-		evtesting.WithStatusConfig(defaultSubsConfig),
-	)
-	addJSCleanEventTypesToStatus(sub, testEnvironment.cleaner, jsBackend)
-
-	// when
-	err := jsBackend.SyncSubscription(sub)
-
-	// then
-	require.NoError(t, err)
-
-	ev1data := "sampledata"
-	require.NoError(t, SendEventToJetStream(jsBackend, ev1data))
-	expectedEv1Data := fmt.Sprintf("\"%s\"", ev1data)
-	require.NoError(t, subscriber.CheckEvent(expectedEv1Data))
-
-	testEnvironment.natsServer.Shutdown()
-	require.Eventually(t, func() bool {
-		return !jsBackend.conn.IsConnected()
-	}, 30*time.Second, 2*time.Second)
-
-	_ = evtesting.RunNatsServerOnPort(
-		evtesting.WithPort(testEnvironment.natsPort),
-		evtesting.WithJetStreamEnabled())
-
-	_, err = testEnvironment.jsClient.StreamInfo(defaultStreamName)
-	require.True(t, errors.Is(err, nats.ErrStreamNotFound))
-	// sync the subscription again to reconnect and
-	// recreate the stream and consumer
-	err = jsBackend.SyncSubscription(sub)
-	require.NoError(t, err)
-
-	_, err = testEnvironment.jsClient.StreamInfo(defaultStreamName)
-	require.NoError(t, err)
-
-	ev2data := "newsampledata"
-	require.NoError(t, SendEventToJetStream(jsBackend, ev2data))
-	expectedEv2Data := fmt.Sprintf("\"%s\"", ev2data)
-	require.NoError(t, subscriber.CheckEvent(expectedEv2Data))
-}
-
-func TestJetStreamServerRestart_WithReconnectEnabled(t *testing.T) {
-	// given
-	testEnvironment := setupTestEnvironment(t)
-	jsBackend := testEnvironment.jsBackend
-	defer testEnvironment.natsServer.Shutdown()
-	defer testEnvironment.jsClient.natsConn.Close()
-
-	initErr := jsBackend.Initialize(nil)
-	require.NoError(t, initErr)
 	defaultSubsConfig := env.DefaultSubscriptionConfig{MaxInFlightMessages: 10}
 
-	subscriber := evtesting.NewSubscriber()
-	defer subscriber.Shutdown()
-	require.True(t, subscriber.IsRunning())
+	testCases := []struct {
+		name               string
+		givenMaxReconnects int
+		givenStorageType   string
+	}{
+		{
+			name:               "with reconnects disabled and memory storage for streams",
+			givenMaxReconnects: 0,
+			givenStorageType:   JetStreamStorageTypeMemory,
+		},
+		{
+			name:               "with reconnects enabled and memory storage for streams",
+			givenMaxReconnects: defaultMaxReconnects,
+			givenStorageType:   JetStreamStorageTypeMemory,
+		},
+		{
+			name:               "with reconnects disabled and file storage for streams",
+			givenMaxReconnects: 0,
+			givenStorageType:   JetStreamStorageTypeFile,
+		},
+		{
+			name:               "with reconnects enabled and file storage for streams",
+			givenMaxReconnects: defaultMaxReconnects,
+			givenStorageType:   JetStreamStorageTypeFile,
+		},
+	}
 
-	// Create a subscription
-	sub := evtesting.NewSubscription("sub", "foo",
-		evtesting.WithNotCleanFilter(),
-		evtesting.WithSinkURL(subscriber.SinkURL),
-		evtesting.WithStatusConfig(defaultSubsConfig),
-	)
-	addJSCleanEventTypesToStatus(sub, testEnvironment.cleaner, jsBackend)
+	for id, tc := range testCases {
+		tc, id := tc, id
+		t.Run(tc.name, func(t *testing.T) {
+			// given
+			testEnvironment := setupTestEnvironment(t)
+			jsBackend := testEnvironment.jsBackend
+			defer testEnvironment.natsServer.Shutdown()
+			defer testEnvironment.jsClient.natsConn.Close()
+			defer func() { _ = testEnvironment.jsClient.DeleteStream(defaultStreamName) }()
 
-	// when
-	err := jsBackend.SyncSubscription(sub)
+			jsBackend.config.JSStreamStorageType = tc.givenStorageType
+			jsBackend.config.MaxReconnects = tc.givenMaxReconnects
+			initErr := jsBackend.Initialize(nil)
+			require.NoError(t, initErr)
 
-	// then
-	require.NoError(t, err)
+			// Create a subscription
+			subName := fmt.Sprintf("%s%d", "sub", id)
+			sub := evtesting.NewSubscription(subName, "foo",
+				evtesting.WithNotCleanFilter(),
+				evtesting.WithSinkURL(subscriber.SinkURL),
+				evtesting.WithStatusConfig(defaultSubsConfig),
+			)
+			addJSCleanEventTypesToStatus(sub, testEnvironment.cleaner, jsBackend)
 
-	ev1data := "sampledata"
-	require.NoError(t, SendEventToJetStream(jsBackend, ev1data))
-	expectedEv1Data := fmt.Sprintf("\"%s\"", ev1data)
-	require.NoError(t, subscriber.CheckEvent(expectedEv1Data))
+			// when
+			err := jsBackend.SyncSubscription(sub)
 
-	testEnvironment.natsServer.Shutdown()
-	require.Eventually(t, func() bool {
-		return !jsBackend.conn.IsConnected()
-	}, 30*time.Second, 2*time.Second)
+			// then
+			require.NoError(t, err)
 
-	_ = evtesting.RunNatsServerOnPort(
-		evtesting.WithPort(testEnvironment.natsPort),
-		evtesting.WithJetStreamEnabled())
+			ev1data := fmt.Sprintf("%s%d", "sampledata", id)
+			require.NoError(t, SendEventToJetStream(jsBackend, ev1data))
+			expectedEv1Data := fmt.Sprintf("%q", ev1data)
+			require.NoError(t, subscriber.CheckEvent(expectedEv1Data))
 
-	testEnvironment.natsServer.Shutdown()
-	require.Eventually(t, func() bool {
-		return jsBackend.conn.IsConnected()
-	}, 30*time.Second, 2*time.Second)
+			// given
+			testEnvironment.natsServer.Shutdown()
+			require.Eventually(t, func() bool {
+				return !jsBackend.conn.IsConnected()
+			}, 30*time.Second, 2*time.Second)
 
-	_, err = testEnvironment.jsClient.StreamInfo(defaultStreamName)
-	require.NoError(t, err)
-	// sync the subscription again to reconnect and sync consumers
-	err = jsBackend.SyncSubscription(sub)
-	require.NoError(t, err)
+			// when
+			_ = evtesting.RunNatsServerOnPort(
+				evtesting.WithPort(testEnvironment.natsPort),
+				evtesting.WithJetStreamEnabled())
 
-	ev2data := "newsampledata"
-	require.NoError(t, SendEventToJetStream(jsBackend, ev2data))
-	expectedEv2Data := fmt.Sprintf("\"%s\"", ev2data)
-	require.NoError(t, subscriber.CheckEvent(expectedEv2Data))
-}
+			// then
+			if tc.givenMaxReconnects > 0 {
+				require.Eventually(t, func() bool {
+					return jsBackend.conn.IsConnected()
+				}, 30*time.Second, 2*time.Second)
+			}
 
-func TestJetStreamServerRestart_WithFileStorage(t *testing.T) {
-	// given
-	testEnvironment := setupTestEnvironment(t)
-	jsBackend := testEnvironment.jsBackend
-	defer testEnvironment.natsServer.Shutdown()
-	defer testEnvironment.jsClient.natsConn.Close()
+			_, err = testEnvironment.jsClient.StreamInfo(defaultStreamName)
+			if tc.givenStorageType == JetStreamStorageTypeMemory && tc.givenMaxReconnects == 0 {
+				// for memory storage with reconnects disabled
+				require.True(t, errors.Is(err, nats.ErrStreamNotFound))
+			} else {
+				// check that the stream is still present for file storage
+				// or recreated via reconnect handler for memory storage
+				require.NoError(t, err)
+			}
 
-	// use File storage to restore streams
-	jsBackend.config.JSStreamStorageType = JetStreamStorageTypeFile
+			// sync the subscription again to recreate invalid subscriptions or consumers, if any
+			err = jsBackend.SyncSubscription(sub)
+			require.NoError(t, err)
 
-	initErr := jsBackend.Initialize(nil)
-	require.NoError(t, initErr)
-	defaultSubsConfig := env.DefaultSubscriptionConfig{MaxInFlightMessages: 10}
+			// stream exists
+			_, err = testEnvironment.jsClient.StreamInfo(defaultStreamName)
+			require.NoError(t, err)
 
-	subscriber := evtesting.NewSubscriber()
-	defer subscriber.Shutdown()
-	require.True(t, subscriber.IsRunning())
-
-	// Create a subscription
-	sub := evtesting.NewSubscription("sub", "foo",
-		evtesting.WithNotCleanFilter(),
-		evtesting.WithSinkURL(subscriber.SinkURL),
-		evtesting.WithStatusConfig(defaultSubsConfig),
-	)
-	addJSCleanEventTypesToStatus(sub, testEnvironment.cleaner, jsBackend)
-
-	// when
-	err := jsBackend.SyncSubscription(sub)
-
-	// then
-	require.NoError(t, err)
-
-	ev1data := "sampledata"
-	require.NoError(t, SendEventToJetStream(jsBackend, ev1data))
-	expectedEv1Data := fmt.Sprintf("\"%s\"", ev1data)
-	require.NoError(t, subscriber.CheckEvent(expectedEv1Data))
-
-	testEnvironment.natsServer.Shutdown()
-	require.Eventually(t, func() bool {
-		return !jsBackend.conn.IsConnected()
-	}, 30*time.Second, 2*time.Second)
-
-	_ = evtesting.RunNatsServerOnPort(
-		evtesting.WithPort(testEnvironment.natsPort),
-		evtesting.WithJetStreamEnabled())
-
-	require.Eventually(t, func() bool {
-		return jsBackend.conn.IsConnected()
-	}, 60*time.Second, 2*time.Second)
-
-	// check that the stream is still present
-	_, err = testEnvironment.jsClient.StreamInfo(defaultStreamName)
-	require.NoError(t, err)
-
-	ev2data := "newsampledata"
-	require.NoError(t, SendEventToJetStream(jsBackend, ev2data))
-	expectedEv2Data := fmt.Sprintf("\"%s\"", ev2data)
-	require.NoError(t, subscriber.CheckEvent(expectedEv2Data))
-
-	// cleanup the stream from file storage
-	err = testEnvironment.jsClient.DeleteStream(defaultStreamName)
-	require.NoError(t, err)
+			ev2data := fmt.Sprintf("%s%d", "newsampledata", id)
+			require.NoError(t, SendEventToJetStream(jsBackend, ev2data))
+			expectedEv2Data := fmt.Sprintf("%q", ev2data)
+			require.NoError(t, subscriber.CheckEvent(expectedEv2Data))
+		})
+	}
 }
 
 func defaultNatsConfig(url string) env.NatsConfig {
 	return env.NatsConfig{
 		URL:                     url,
-		MaxReconnects:           10,
+		MaxReconnects:           defaultMaxReconnects,
 		ReconnectWait:           3 * time.Second,
 		JSStreamName:            defaultStreamName,
 		JSStreamStorageType:     JetStreamStorageTypeMemory,
