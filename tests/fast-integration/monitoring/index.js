@@ -27,7 +27,7 @@ function monitoringTests() {
 
       try {
         debug('Checking if port forward works...');
-        const url = `http://localhost:9091/graph`; // wrong port
+        const url = `http://localhost:9090/graph`; // wrong port
         const responseBody = await retryPromise(() => axios.get(url, {timeout: 10000}), 3);
         debug('responseBody', responseBody);
         assert.equal(responseBody.status, 200, 'Prometheus is not running');
