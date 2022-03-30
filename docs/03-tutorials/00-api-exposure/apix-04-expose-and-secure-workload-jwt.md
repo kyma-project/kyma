@@ -38,6 +38,8 @@ This tutorial is based on a sample HttpBin service deployment and a sample Funct
    curl -X POST "$TOKEN_ENDPOINT" -d "grant_type=client_credentials" -d "client_id=$CLIENT_ID" -H "Content-Type: application/x-www-form-urlencoded" -H "Authorization: Basic $ENCODED_CREDENTIALS"
    ```
 
+   >**NOTE:** This is just example and may differ for IDP providers.
+
 5. Save the result, and export it as an environment variable:
 
    ```bash
@@ -84,7 +86,7 @@ This tutorial is based on a sample HttpBin service deployment and a sample Funct
          methods:
            - GET
          path: /.*
-   EOF      
+   EOF
    ```
 
    >**NOTE:** If you are running Kyma on k3d, add `httpbin.kyma.local` to the entry with k3d IP in your system's `/etc/hosts` file.
@@ -96,7 +98,7 @@ This tutorial is based on a sample HttpBin service deployment and a sample Funct
    ```
 
    This call returns the code `200` response.
-
+   
   </details>
 
   <details>
@@ -135,7 +137,7 @@ This tutorial is based on a sample HttpBin service deployment and a sample Funct
          methods:
            - GET
          path: /.*
-   EOF      
+   EOF
    ```
 
 3. To access the secured Function, call it using the JWT access token:
