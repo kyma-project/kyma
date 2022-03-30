@@ -150,6 +150,9 @@ extraVolumes:
     configMap:
       name: telemetry-fluent-bit-files
       optional: true
+  - name: varfluentbit
+    hostPath:
+      path: /var/telemetry-fluent-bit
 
 extraVolumeMounts:
   - name: dynamic-files
@@ -195,6 +198,8 @@ config:
         Tag kube.*
         Mem_Buf_Limit 5MB
         Skip_Long_Lines On
+        Refresh_Interval 10
+        DB /data/flb_kube_loki.db
 
   ## https://docs.fluentbit.io/manual/pipeline/filters
   filters: |
@@ -202,9 +207,9 @@ config:
         Name kubernetes
         Match kube.*
         Merge_Log On
-        Keep_Log Off
         K8S-Logging.Parser On
         K8S-Logging.Exclude On
+        Buffer_Size 1MB
 
   ## https://docs.fluentbit.io/manual/pipeline/outputs
   outputs: |
@@ -243,6 +248,8 @@ daemonSetVolumeMounts:
   - name: varlibdockercontainers
     mountPath: /var/lib/docker/containers
     readOnly: true
+  - name: varfluentbit
+    mountPath: /data
 
 args: []
 
@@ -262,4 +269,4 @@ initContainers:
       mountPath: /dynamic-parsers
     command: ['sh', '-c', 'cp /main/* /fluent-bit/etc/ && mkdir -p /fluent-bit/etc/dynamic/ && cp /dynamic/* /fluent-bit/etc/dynamic && mkdir -p /fluent-bit/etc/dynamic-parsers/ && cp /dynamic-parsers/* /fluent-bit/etc/dynamic-parsers || touch /fluent-bit/etc/dynamic/empty.conf']
 
-logLevel: info
+logLevel: warn
