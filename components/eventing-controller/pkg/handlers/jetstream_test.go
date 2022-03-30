@@ -110,7 +110,7 @@ func TestJetStream_SubscriptionDeletion(t *testing.T) {
 		evtesting.WithSinkURL(subscriber.SinkURL),
 		evtesting.WithStatusConfig(defaultSubsConfig),
 	)
-	addJSCleanEventTypesToStatus(sub, testEnvironment.cleaner, jsBackend)
+	addJSCleanEventTypesToStatus(sub, testEnvironment.cleaner)
 
 	// when
 	err := jsBackend.SyncSubscription(sub)
@@ -159,7 +159,7 @@ func TestJetStreamSubAfterSync_NoChange(t *testing.T) {
 		evtesting.WithSinkURL(subscriber1.SinkURL),
 		evtesting.WithStatusConfig(defaultSubsConfig),
 	)
-	addJSCleanEventTypesToStatus(sub, testEnvironment.cleaner, jsBackend)
+	addJSCleanEventTypesToStatus(sub, testEnvironment.cleaner)
 
 	// when
 	err := jsBackend.SyncSubscription(sub)
@@ -248,7 +248,7 @@ func TestJetStreamSubAfterSync_SinkChange(t *testing.T) {
 		evtesting.WithSinkURL(subscriber1.SinkURL),
 		evtesting.WithStatusConfig(defaultSubsConfig),
 	)
-	addJSCleanEventTypesToStatus(sub, testEnvironment.cleaner, jsBackend)
+	addJSCleanEventTypesToStatus(sub, testEnvironment.cleaner)
 
 	// when
 	err := jsBackend.SyncSubscription(sub)
@@ -335,7 +335,7 @@ func TestJetStreamSubAfterSync_FiltersChange(t *testing.T) {
 		evtesting.WithSinkURL(subscriber.SinkURL),
 		evtesting.WithStatusConfig(defaultSubsConfig),
 	)
-	addJSCleanEventTypesToStatus(sub, testEnvironment.cleaner, jsBackend)
+	addJSCleanEventTypesToStatus(sub, testEnvironment.cleaner)
 
 	// when
 	err := jsBackend.SyncSubscription(sub)
@@ -368,7 +368,7 @@ func TestJetStreamSubAfterSync_FiltersChange(t *testing.T) {
 	// Now, change the filter in subscription
 	sub.Spec.Filter.Filters[0].EventType.Value = fmt.Sprintf("%schanged", evtesting.OrderCreatedEventTypeNotClean)
 	// Sync the subscription status
-	addJSCleanEventTypesToStatus(sub, testEnvironment.cleaner, jsBackend)
+	addJSCleanEventTypesToStatus(sub, testEnvironment.cleaner)
 
 	// when
 	err = jsBackend.SyncSubscription(sub)
@@ -434,7 +434,7 @@ func TestJetStreamSubAfterSync_FilterAdded(t *testing.T) {
 		evtesting.WithSinkURL(subscriber.SinkURL),
 		evtesting.WithStatusConfig(defaultSubsConfig),
 	)
-	addJSCleanEventTypesToStatus(sub, testEnvironment.cleaner, jsBackend)
+	addJSCleanEventTypesToStatus(sub, testEnvironment.cleaner)
 
 	// when
 	err := jsBackend.SyncSubscription(sub)
@@ -465,7 +465,7 @@ func TestJetStreamSubAfterSync_FilterAdded(t *testing.T) {
 	secondSubject, err := getCleanSubject(newFilter, testEnvironment.cleaner)
 	require.NoError(t, err)
 	require.NotEmpty(t, secondSubject)
-	addJSCleanEventTypesToStatus(sub, testEnvironment.cleaner, jsBackend)
+	addJSCleanEventTypesToStatus(sub, testEnvironment.cleaner)
 
 	// when
 	err = jsBackend.SyncSubscription(sub)
@@ -534,7 +534,7 @@ func TestJetStreamSubAfterSync_FilterRemoved(t *testing.T) {
 	newFilter := sub.Spec.Filter.Filters[0].DeepCopy()
 	newFilter.EventType.Value = fmt.Sprintf("%snew1", evtesting.OrderCreatedEventTypeNotClean)
 	sub.Spec.Filter.Filters = append(sub.Spec.Filter.Filters, newFilter)
-	addJSCleanEventTypesToStatus(sub, testEnvironment.cleaner, jsBackend)
+	addJSCleanEventTypesToStatus(sub, testEnvironment.cleaner)
 
 	// when
 	err := jsBackend.SyncSubscription(sub)
@@ -566,7 +566,7 @@ func TestJetStreamSubAfterSync_FilterRemoved(t *testing.T) {
 	// given
 	// Now, remove the second filter from subscription
 	sub.Spec.Filter.Filters = sub.Spec.Filter.Filters[:1]
-	addJSCleanEventTypesToStatus(sub, testEnvironment.cleaner, jsBackend)
+	addJSCleanEventTypesToStatus(sub, testEnvironment.cleaner)
 
 	// when
 	err = jsBackend.SyncSubscription(sub)
@@ -632,7 +632,7 @@ func TestJetStreamSubAfterSync_MultipleSubs(t *testing.T) {
 		evtesting.WithSinkURL(subscriber.SinkURL),
 		evtesting.WithStatusConfig(defaultSubsConfig),
 	)
-	addJSCleanEventTypesToStatus(sub, testEnvironment.cleaner, jsBackend)
+	addJSCleanEventTypesToStatus(sub, testEnvironment.cleaner)
 
 	// when
 	err := jsBackend.SyncSubscription(sub)
@@ -646,7 +646,7 @@ func TestJetStreamSubAfterSync_MultipleSubs(t *testing.T) {
 		evtesting.WithSinkURL(subscriber.SinkURL),
 		evtesting.WithStatusConfig(defaultSubsConfig),
 	)
-	addJSCleanEventTypesToStatus(sub2, testEnvironment.cleaner, jsBackend)
+	addJSCleanEventTypesToStatus(sub2, testEnvironment.cleaner)
 
 	// when
 	err = jsBackend.SyncSubscription(sub2)
@@ -668,7 +668,7 @@ func TestJetStreamSubAfterSync_MultipleSubs(t *testing.T) {
 
 	// Now, change the filter in subscription 1
 	sub.Spec.Filter.Filters[0].EventType.Value = fmt.Sprintf("%schanged", evtesting.OrderCreatedEventTypeNotClean)
-	addJSCleanEventTypesToStatus(sub, testEnvironment.cleaner, jsBackend)
+	addJSCleanEventTypesToStatus(sub, testEnvironment.cleaner)
 
 	// when
 	err = jsBackend.SyncSubscription(sub)
@@ -809,7 +809,7 @@ func TestMultipleJSSubscriptionsToSameEvent(t *testing.T) {
 			evtesting.WithSinkURL(subscriber.SinkURL),
 			evtesting.WithStatusConfig(defaultSubsConfig),
 		)
-		addJSCleanEventTypesToStatus(subs[i], testEnvironment.cleaner, jsBackend)
+		addJSCleanEventTypesToStatus(subs[i], testEnvironment.cleaner)
 		// when
 		err := jsBackend.SyncSubscription(subs[i])
 		// then
@@ -860,7 +860,7 @@ func TestJSSubscriptionWithDuplicateFilters(t *testing.T) {
 		evtesting.WithSinkURL(subscriber.SinkURL),
 		evtesting.WithStatusConfig(defaultSubsConfig),
 	)
-	addJSCleanEventTypesToStatus(sub, testEnvironment.cleaner, jsBackend)
+	addJSCleanEventTypesToStatus(sub, testEnvironment.cleaner)
 
 	// when
 	err := jsBackend.SyncSubscription(sub)
@@ -900,7 +900,7 @@ func TestJSSubscriptionWithMaxInFlightChange(t *testing.T) {
 		evtesting.WithSinkURL(subscriber.SinkURL),
 		evtesting.WithStatusConfig(defaultSubsConfig),
 	)
-	addJSCleanEventTypesToStatus(sub, testEnvironment.cleaner, jsBackend)
+	addJSCleanEventTypesToStatus(sub, testEnvironment.cleaner)
 
 	// when
 	err := jsBackend.SyncSubscription(sub)
@@ -952,7 +952,7 @@ func TestJSSubscriptionRedeliverWithFailedDispatch(t *testing.T) {
 		evtesting.WithSinkURL(subscriber.SinkURL),
 		evtesting.WithStatusConfig(defaultSubsConfig),
 	)
-	addJSCleanEventTypesToStatus(sub, testEnvironment.cleaner, jsBackend)
+	addJSCleanEventTypesToStatus(sub, testEnvironment.cleaner)
 
 	// when
 	err := jsBackend.SyncSubscription(sub)
@@ -1006,7 +1006,7 @@ func TestJSSubscriptionUsingCESDK(t *testing.T) {
 		evtesting.WithSinkURL(subscriber.SinkURL),
 		evtesting.WithStatusConfig(defaultSubsConfig),
 	)
-	addJSCleanEventTypesToStatus(sub, testEnvironment.cleaner, jsBackend)
+	addJSCleanEventTypesToStatus(sub, testEnvironment.cleaner)
 
 	// when
 	err := jsBackend.SyncSubscription(sub)
@@ -1080,7 +1080,7 @@ func TestJetStream_ServerRestart(t *testing.T) {
 				evtesting.WithSinkURL(subscriber.SinkURL),
 				evtesting.WithStatusConfig(defaultSubsConfig),
 			)
-			addJSCleanEventTypesToStatus(sub, testEnvironment.cleaner, jsBackend)
+			addJSCleanEventTypesToStatus(sub, testEnvironment.cleaner)
 
 			// when
 			err := jsBackend.SyncSubscription(sub)
@@ -1165,7 +1165,7 @@ func getJetStreamClient(t *testing.T, serverURL string) *jetStreamClient {
 	}
 }
 
-func addJSCleanEventTypesToStatus(sub *eventingv1alpha1.Subscription, cleaner eventtype.Cleaner, jsBackend *JetStream) {
+func addJSCleanEventTypesToStatus(sub *eventingv1alpha1.Subscription, cleaner eventtype.Cleaner) {
 	sub.Status.CleanEventTypes, _ = GetCleanSubjects(sub, cleaner)
 }
 

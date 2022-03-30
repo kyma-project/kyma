@@ -271,7 +271,7 @@ func (js *JetStream) validateConfig() error {
 		return errors.New("Stream name cannot be empty")
 	}
 	if len(js.config.JSStreamName) > jsMaxStreamNameLength {
-		return errors.New(fmt.Sprintf("Stream name should be max %d characters long", jsMaxStreamNameLength))
+		return fmt.Errorf("Stream name should be max %d characters long", jsMaxStreamNameLength)
 	}
 	if js.config.JSStreamSubjectPrefix == "" {
 		return errors.New("Stream subject prefix cannot be empty")
