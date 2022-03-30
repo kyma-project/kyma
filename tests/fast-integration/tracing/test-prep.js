@@ -34,17 +34,17 @@ async function testPrep() {
         );
         setEventMeshSourceNamespace(eventMeshInfo['namespace']);
       }
-      // await prepareAssetsForOSSTests(); TODO
+      await prepareAssetsForOSSTests();
     });
 
     // prepareAssetsForOSSTests - Set up CommerceMock for the OSS TODO this is already done in upgrade-test-prep.js
-    // async function prepareAssetsForOSSTests() {
-    //   console.log('Preparing CommerceMock test fixture on Kyma OSS');
-    //   await ensureCommerceMockLocalTestFixture(mockNamespace, testNamespace).catch((err) => {
-    //     console.dir(err);
-    //     return ensureCommerceMockLocalTestFixture(mockNamespace, testNamespace);
-    //   });
-    // }
+    async function prepareAssetsForOSSTests() {
+      console.log('Preparing CommerceMock test fixture on Kyma OSS');
+      await ensureCommerceMockLocalTestFixture(mockNamespace, testNamespace).catch((err) => {
+        console.dir(err);
+        return ensureCommerceMockLocalTestFixture(mockNamespace, testNamespace);
+      });
+    }
 
     afterEach(async function() {
       // if the test preparation failed, perform the cleanup
