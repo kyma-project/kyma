@@ -4,7 +4,6 @@ package handlers
 import (
 	"context"
 	"crypto/sha1"
-	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"math/rand"
@@ -12,17 +11,16 @@ import (
 	"strings"
 	"time"
 
-	"github.com/mitchellh/hashstructure/v2"
-	"github.com/pkg/errors"
-
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	k8sruntime "k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/client-go/dynamic"
 
-	apigatewayv1alpha1 "github.com/kyma-incubator/api-gateway/api/v1alpha1"
+	"github.com/mitchellh/hashstructure/v2"
+	"github.com/pkg/errors"
 
+	apigatewayv1alpha1 "github.com/kyma-incubator/api-gateway/api/v1alpha1"
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/types"
 )
@@ -58,18 +56,6 @@ func (m *bebSubscriptionNameMapper) MapSubscriptionName(sub *eventingv1alpha1.Su
 func hashSubscriptionFullName(domainName, namespace, name string) string {
 	hash := sha1.Sum([]byte(domainName + namespace + name))
 	return fmt.Sprintf("%x", hash)
-}
-
-func encodeString(value string) string {
-	return base64.StdEncoding.EncodeToString([]byte(value))
-}
-
-func decodeString(value string) (string, error) {
-	data, err := base64.StdEncoding.DecodeString(value)
-	if err != nil {
-		return "", err
-	}
-	return string(data), nil
 }
 
 // produces a name+hash which is not longer than maxLength. If necessary, shortens name, not the hash.
