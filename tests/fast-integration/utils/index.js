@@ -218,12 +218,6 @@ function kubectlDelete(file, namespace) {
 function kubectlPortForward(namespace, podName, port) {
   const server = net.createServer(function(socket) {
     forward.portForward(namespace, podName, [port], socket, null, socket, 3);
-
-    socket.on('error', function(err) {
-      console.error('PortForward received an error:', err);
-      console.error.apply(null, 'PortForward received an error 1:', err);
-      server.close();
-    });
   });
 
   server.listen(port, 'localhost');

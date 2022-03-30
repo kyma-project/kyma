@@ -12,7 +12,7 @@
     "pretest": "npm run lint",
     "lint": "./node_modules/.bin/eslint --ignore-path .gitignore .",
     "lint-fix": "./node_modules/.bin/eslint --ignore-path .gitignore . --fix",
-    "test": "DEBUG=true mocha --inline-diffs --check-leaks --reporter mocha-multi-reporters --reporter-options configFile=mocha-reporter-config.json",
+    "test": "mocha --inline-diffs --check-leaks --reporter mocha-multi-reporters --reporter-options configFile=mocha-reporter-config.json",
     "test-utils": "mocha --inline-diffs --check-leaks --reporter mocha-multi-reporters --reporter-options configFile=mocha-reporter-config.json './utils/**/*.test.js'",
     "test-commerce-mock": "mocha --inline-diffs --check-leaks --reporter mocha-multi-reporters --reporter-options configFile=mocha-reporter-config.json ./test/2-commerce-mock.js",
     "test-certificate": "mocha --timeout 150000 --inline-diffs --check-leaks --reporter mocha-multi-reporters --reporter-options configFile=mocha-reporter-config.json ./certificate-test/",
