@@ -2,9 +2,16 @@ package env
 
 import (
 	"log"
+	"regexp"
 	"time"
 
 	"github.com/kelseyhightower/envconfig"
+)
+
+var (
+	// invalidSubjectPrefixCharacters used to match and replace non-alphanumeric characters in the subject-prefix
+	// as per JetStream spec https://docs.nats.io/running-a-nats-service/nats_admin/jetstream_admin/naming.
+	invalidSubjectPrefixCharacters = regexp.MustCompile("[^a-zA-Z0-9.]")
 )
 
 // NatsConfig represents the environment config for the Eventing Controller with Nats.
@@ -26,7 +33,7 @@ type NatsConfig struct {
 
 	// JetStream-specific configs
 	// Name of the JetStream stream where all events are stored.
-	JSStreamName string `envconfig:"JS_STREAM_NAME" default:"kyma"`
+	JSStreamName string `envconfig:"JS_STREAM_NAME" required:"true"`
 	// Storage type of the stream, memory or file.
 	JSStreamStorageType string `envconfig:"JS_STREAM_STORAGE_TYPE" default:"memory"`
 	// Retention policy specifies when to delete events from the stream.
@@ -39,7 +46,7 @@ type NatsConfig struct {
 
 	// Prefix for the JetStream stream subjects filter.
 	// It will be overridden by non-empty EventTypePrefix.
-	JSStreamSubjectPrefix string `envconfig:"JS_STREAM_SUBJECT_PREFIX" default:"kyma"`
+	JSStreamSubjectPrefix string `envconfig:"JS_STREAM_SUBJECT_PREFIX" required:"true"`
 }
 
 func GetNatsConfig(maxReconnects int, reconnectWait time.Duration) NatsConfig {
@@ -53,7 +60,11 @@ func GetNatsConfig(maxReconnects int, reconnectWait time.Duration) NatsConfig {
 
 	// set stream subjects prefix for JetStream
 	if len(cfg.EventTypePrefix) > 0 {
-		cfg.JSStreamSubjectPrefix = cfg.EventTypePrefix
+		cfg.JSStreamSubjectPrefix = getCleanJSStreamSubjectPrefix(cfg.EventTypePrefix)
 	}
 	return cfg
+}
+
+func getCleanJSStreamSubjectPrefix(prefix string) string {
+	return invalidSubjectPrefixCharacters.ReplaceAllString(prefix, "")
 }

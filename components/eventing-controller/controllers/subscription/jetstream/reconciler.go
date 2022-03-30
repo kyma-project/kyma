@@ -252,7 +252,7 @@ func (r *Reconciler) syncInitialStatus(subscription *eventingv1alpha1.Subscripti
 		return false, err
 	}
 	if !reflect.DeepEqual(subscription.Status.CleanEventTypes, cleanedSubjects) {
-		subscription.Status.CleanEventTypes = r.Backend.GetJetStreamSubjects(cleanedSubjects)
+		subscription.Status.CleanEventTypes = cleanedSubjects
 		statusChanged = true
 	}
 	subscriptionConfig := eventingv1alpha1.MergeSubsConfigs(subscription.Spec.Config, &r.subsConfig)

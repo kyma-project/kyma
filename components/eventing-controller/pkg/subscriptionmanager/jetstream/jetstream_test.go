@@ -117,8 +117,7 @@ func createAndSyncSubscription(t *testing.T, sinkURL string, jsBackend *handlers
 	cleaner := func(et string) (string, error) {
 		return et, nil
 	}
-	cleanedSubjects, _ := handlers.GetCleanSubjects(testSub, eventtype.CleanerFunc(cleaner))
-	testSub.Status.CleanEventTypes = jsBackend.GetJetStreamSubjects(cleanedSubjects)
+	testSub.Status.CleanEventTypes, _ = handlers.GetCleanSubjects(testSub, eventtype.CleanerFunc(cleaner))
 
 	// create NATS subscription
 	err := jsBackend.SyncSubscription(testSub)

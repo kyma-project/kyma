@@ -29,6 +29,7 @@ const (
 	idleHeartBeatDuration  = 1 * time.Minute
 	jsConsumerMaxRedeliver = 100
 	jsConsumerAcKWait      = 30 * time.Second
+	jsMaxStreamNameLength  = 32
 )
 
 type JetStreamBackend interface {
@@ -140,7 +141,7 @@ func (js *JetStream) SyncSubscription(subscription *eventingv1alpha1.Subscriptio
 			return err
 		}
 
-		if !utils.ContainsString(subscription.Status.CleanEventTypes, info.Config.FilterSubject) {
+		if !utils.ContainsString(js.GetJetStreamSubjects(subscription.Status.CleanEventTypes), info.Config.FilterSubject) {
 			if err := js.deleteSubscriptionFromJetStream(jsSub, key, log); err != nil {
 				return err
 			}
@@ -176,7 +177,7 @@ func (js *JetStream) SyncSubscription(subscription *eventingv1alpha1.Subscriptio
 
 		// subscribe to the subject on JetStream
 		jsSubscription, err := js.jsCtx.Subscribe(
-			subject,
+			js.GetJsSubjectToSubscribe(subject),
 			asyncCallback,
 			js.getDefaultSubscriptionOptions(jsSubKey, subscription.Status.Config)...,
 		)
@@ -232,6 +233,9 @@ func (js *JetStream) GetJsSubjectToSubscribe(subject string) string {
 func (js *JetStream) validateConfig() error {
 	if js.config.JSStreamName == "" {
 		return errors.New("Stream name cannot be empty")
+	}
+	if len(js.config.JSStreamName) > jsMaxStreamNameLength {
+		return errors.New(fmt.Sprintf("Stream name should be max %d characters long", jsMaxStreamNameLength))
 	}
 	if js.config.JSStreamSubjectPrefix == "" {
 		return errors.New("Stream subject prefix cannot be empty")

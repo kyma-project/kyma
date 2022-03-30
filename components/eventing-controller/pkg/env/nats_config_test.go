@@ -18,12 +18,14 @@ func Test_GetNatsConfig(t *testing.T) {
 	idleConnTimeout := time.Second * 40
 
 	envs := map[string]string{
-		"NATS_URL":                "NATS_URL",
-		"EVENT_TYPE_PREFIX":       "EVENT_TYPE_PREFIX",
-		"MAX_IDLE_CONNS":          fmt.Sprintf("%d", maxIdleConns),
-		"MAX_CONNS_PER_HOST":      fmt.Sprintf("%d", maxConnsPerHost),
-		"MAX_IDLE_CONNS_PER_HOST": fmt.Sprintf("%d", maxIdleConnsPerHost),
-		"IDLE_CONN_TIMEOUT":       fmt.Sprintf("%v", idleConnTimeout),
+		"NATS_URL":                 "NATS_URL",
+		"JS_STREAM_NAME":           "kyma",
+		"JS_STREAM_SUBJECT_PREFIX": "kyma",
+		"EVENT_TYPE_PREFIX":        "EVENT_TYPE_PREFIX",
+		"MAX_IDLE_CONNS":           fmt.Sprintf("%d", maxIdleConns),
+		"MAX_CONNS_PER_HOST":       fmt.Sprintf("%d", maxConnsPerHost),
+		"MAX_IDLE_CONNS_PER_HOST":  fmt.Sprintf("%d", maxIdleConnsPerHost),
+		"IDLE_CONN_TIMEOUT":        fmt.Sprintf("%v", idleConnTimeout),
 	}
 
 	g := NewGomegaWithT(t)
@@ -62,11 +64,13 @@ func Test_JSStreamSubjectPrefix(t *testing.T) {
 	maxReconnects, reconnectWait := 1, time.Second
 
 	envs := map[string]string{
-		"NATS_URL":                "NATS_URL",
-		"MAX_IDLE_CONNS":          fmt.Sprintf("%d", maxIdleConns),
-		"MAX_CONNS_PER_HOST":      fmt.Sprintf("%d", maxConnsPerHost),
-		"MAX_IDLE_CONNS_PER_HOST": fmt.Sprintf("%d", maxIdleConnsPerHost),
-		"IDLE_CONN_TIMEOUT":       fmt.Sprintf("%v", idleConnTimeout),
+		"NATS_URL":                 "NATS_URL",
+		"JS_STREAM_NAME":           "kyma",
+		"JS_STREAM_SUBJECT_PREFIX": "kyma",
+		"MAX_IDLE_CONNS":           fmt.Sprintf("%d", maxIdleConns),
+		"MAX_CONNS_PER_HOST":       fmt.Sprintf("%d", maxConnsPerHost),
+		"MAX_IDLE_CONNS_PER_HOST":  fmt.Sprintf("%d", maxIdleConnsPerHost),
+		"IDLE_CONN_TIMEOUT":        fmt.Sprintf("%v", idleConnTimeout),
 	}
 
 	// set initial env variables
@@ -112,5 +116,4 @@ func Test_JSStreamSubjectPrefix(t *testing.T) {
 			require.Equal(t, config.JSStreamSubjectPrefix, tc.wantJSStreamSubjectPrefix)
 		})
 	}
-
 }

@@ -1163,8 +1163,7 @@ func getJetStreamClient(t *testing.T, serverURL string) *jetStreamClient {
 }
 
 func addJSCleanEventTypesToStatus(sub *eventingv1alpha1.Subscription, cleaner eventtype.Cleaner, jsBackend *JetStream) {
-	cleanedSubjects, _ := GetCleanSubjects(sub, cleaner)
-	sub.Status.CleanEventTypes = jsBackend.GetJetStreamSubjects(cleanedSubjects)
+	sub.Status.CleanEventTypes, _ = GetCleanSubjects(sub, cleaner)
 }
 
 // TestEnvironment provides mocked resources for tests.
