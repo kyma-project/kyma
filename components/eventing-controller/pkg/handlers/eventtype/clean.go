@@ -22,6 +22,7 @@ type Cleaner interface {
 	Clean(eventType string) (string, error)
 }
 
+// CleanerFunc implements the Cleaner interface.
 type CleanerFunc func(et string) (string, error)
 
 func (cf CleanerFunc) Clean(et string) (string, error) {

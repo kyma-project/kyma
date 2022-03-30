@@ -407,6 +407,14 @@ func WithSinkURL(sinkURL string) SubscriptionOpt {
 	return func(subscription *eventingv1alpha1.Subscription) { subscription.Spec.Sink = sinkURL }
 }
 
+// WithNonZeroDeletionTimestamp sets the deletion timestamp of the subscription to Now()
+func WithNonZeroDeletionTimestamp() SubscriptionOpt {
+	return func(subscription *eventingv1alpha1.Subscription) {
+		now := metav1.Now()
+		subscription.DeletionTimestamp = &now
+	}
+}
+
 // SetSink sets the subscription's sink to a valid sink created from svcNameSpace and svcName.
 func SetSink(svcNamespace, svcName string, subscription *eventingv1alpha1.Subscription) {
 	subscription.Spec.Sink = ValidSinkURL(svcNamespace, svcName)
