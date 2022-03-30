@@ -282,7 +282,7 @@ async function checkEventTracing(targetNamespace = 'test', res) {
 async function sendLegacyEventAndCheckTracing(targetNamespace = 'test', mockNamespace = 'mocks') {
   // Send an event and get it back from the lastorder function
   const res = await sendLegacyEventAndCheckResponse(mockNamespace);
-
+  debug('res', res);
   // Check the correct event tracing
   await checkEventTracing(targetNamespace, res);
 }
@@ -335,6 +335,7 @@ async function checkTrace(traceId, expectedTraceProcessSequence) {
   } finally {
     cancelJaegerPortForward();
   }
+  debug('traceRes', traceRes);
 
   // the trace response should have data for single trace
   expect(traceRes.data).to.have.length(1);
@@ -346,8 +347,10 @@ async function checkTrace(traceId, expectedTraceProcessSequence) {
   // generate DAG for trace spans
   const traceDAG = await getTraceDAG(traceData);
   expect(traceDAG).to.have.length(1);
+  debug('traceDAG', traceDAG);
 
   // searching through the trace-graph for the expected span sequence staring at the root element
+  debug('expectedTraceProcessSequence', expectedTraceProcessSequence);
   const wasFound = await findSpanSequence(expectedTraceProcessSequence, 0, traceDAG[0], traceData);
   expect(wasFound).to.be.true;
 }

@@ -27,7 +27,7 @@ function loggingTests() {
     });
 
     it('Persistent Volume Claim Size should be 30Gi', async () => {
-      if ( getEnvOrDefault('EXECUTION_PROFILE', 'Default') == 'evaluation') {
+      if ( getEnvOrDefault('EXECUTION_PROFILE', 'Default') === 'evaluation') {
         console.log('Skipping PVC test due to evaluation profile');
       } else {
         await logging.checkPersistentVolumeClaimSize();

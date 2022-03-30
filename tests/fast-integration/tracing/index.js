@@ -50,15 +50,19 @@ async function tracingTests() {
         }
         await switchEventingBackend(backendK8sSecretName, backendK8sSecretNamespace, natsBackend);
       });
+
       it('Wait until subscriptions are ready', async () => {
         await waitForSubscriptionsTillReady(testNamespace);
       });
+
       it('order.created.v1 event from CommerceMock should have correct tracing spans', async () => {
         await sendLegacyEventAndCheckTracing(testNamespace, mockNamespace);
       });
+
       it('order.created.v1 structured cloud from CommerceMock should have correct tracing spans', async function() {
         await sendCloudEventStructuredModeAndCheckTracing(testNamespace, mockNamespace);
       });
+
       it('order.created.v1 binary cloud event from CommerceMock should have correct tracing spans', async function() {
         await sendCloudEventBinaryModeAndCheckTracing(testNamespace, mockNamespace);
       });

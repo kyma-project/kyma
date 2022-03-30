@@ -12,9 +12,7 @@ const {
   ensureCommerceMockLocalTestFixture,
   setEventMeshSourceNamespace,
 } = require('../test/fixtures/commerce-mock');
-const {
-  createEventingBackendK8sSecret,
-} = require('../utils');
+const {createEventingBackendK8sSecret} = require('../utils');
 
 async function testPrep() {
   describe('Eventing tests preparation', function() {
@@ -36,17 +34,17 @@ async function testPrep() {
         );
         setEventMeshSourceNamespace(eventMeshInfo['namespace']);
       }
-      await prepareAssetsForOSSTests();
+      // await prepareAssetsForOSSTests(); TODO
     });
 
-    // prepareAssetsForOSSTests - Set up CommerceMock for the OSS
-    async function prepareAssetsForOSSTests() {
-      console.log('Preparing CommerceMock test fixture on Kyma OSS');
-      await ensureCommerceMockLocalTestFixture(mockNamespace, testNamespace).catch((err) => {
-        console.dir(err);
-        return ensureCommerceMockLocalTestFixture(mockNamespace, testNamespace);
-      });
-    }
+    // prepareAssetsForOSSTests - Set up CommerceMock for the OSS TODO this is already done in upgrade-test-prep.js
+    // async function prepareAssetsForOSSTests() {
+    //   console.log('Preparing CommerceMock test fixture on Kyma OSS');
+    //   await ensureCommerceMockLocalTestFixture(mockNamespace, testNamespace).catch((err) => {
+    //     console.dir(err);
+    //     return ensureCommerceMockLocalTestFixture(mockNamespace, testNamespace);
+    //   });
+    // }
 
     afterEach(async function() {
       // if the test preparation failed, perform the cleanup

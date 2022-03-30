@@ -7,18 +7,11 @@ const {
   printRestartReport,
   getContainerRestartsForAllNamespaces,
 } = require('../utils');
-const {
-  checkServiceInstanceExistence,
-} = require('./fixtures/helm-broker');
-const {
-  loggingTests,
-} = require('../logging');
-const {
-  monitoringTests,
-} = require('../monitoring');
-const {
-  tracingTests,
-} = require('../tracing');
+const {checkServiceInstanceExistence} = require('./fixtures/helm-broker');
+
+const {loggingTests} = require('../logging');
+const {monitoringTests} = require('../monitoring');
+const {tracingTests} = require('../tracing');
 
 describe('Upgrade test tests', function() {
   this.timeout(10 * 60 * 1000);
