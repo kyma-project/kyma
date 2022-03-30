@@ -3,6 +3,9 @@ package v1alpha1
 import (
 	"reflect"
 	"testing"
+	"time"
+
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 func TestGetCondition(t *testing.T) {
@@ -44,6 +47,9 @@ func TestSetCondition(t *testing.T) {
 	condRunning := LogPipelineCondition{Type: LogPipelineRunning, Reason: "ForSomeOtherReason"}
 	condRunningOtherReason := LogPipelineCondition{Type: LogPipelineRunning, Reason: "BecauseItIs"}
 
+	ts := metav1.Now()
+	tsLater := metav1.NewTime(ts.Add(1 * time.Minute))
+
 	tests := []struct {
 		name           string
 		status         LogPipelineStatus
@@ -67,6 +73,18 @@ func TestSetCondition(t *testing.T) {
 			status:         LogPipelineStatus{Conditions: []LogPipelineCondition{condRunning}},
 			cond:           condRunningOtherReason,
 			expectedStatus: LogPipelineStatus{Conditions: []LogPipelineCondition{condRunningOtherReason}},
+		},
+		{
+			name:           "overwrite",
+			status:         LogPipelineStatus{Conditions: []LogPipelineCondition{condRunning}},
+			cond:           condRunningOtherReason,
+			expectedStatus: LogPipelineStatus{Conditions: []LogPipelineCondition{condRunningOtherReason}},
+		},
+		{
+			name:           "not overwrite last transition time",
+			status:         LogPipelineStatus{Conditions: []LogPipelineCondition{LogPipelineCondition{Type: LogPipelinePending, LastTransitionTime: ts}}},
+			cond:           LogPipelineCondition{Type: LogPipelinePending, LastTransitionTime: tsLater},
+			expectedStatus: LogPipelineStatus{Conditions: []LogPipelineCondition{LogPipelineCondition{Type: LogPipelinePending, LastTransitionTime: ts}}},
 		},
 	}
 

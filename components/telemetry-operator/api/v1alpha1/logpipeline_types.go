@@ -117,6 +117,9 @@ func (lps *LogPipelineStatus) SetCondition(cond LogPipelineCondition) {
 	if currentCond != nil && currentCond.Reason == cond.Reason {
 		return
 	}
+	if currentCond != nil {
+		cond.LastTransitionTime = currentCond.LastTransitionTime
+	}
 	newConditions := filterOutCondition(lps.Conditions, cond.Type)
 	lps.Conditions = append(newConditions, cond)
 }

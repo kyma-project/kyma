@@ -49,7 +49,7 @@ const (
 )
 
 var (
-	requeueTime = 30 * time.Second
+	requeueTime = 10 * time.Second
 )
 
 // LogPipelineReconciler reconciles a LogPipeline object
@@ -162,7 +162,7 @@ func (r *LogPipelineReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 	if updatedSectionsCm || updatedParsersCm || updatedFilesCm || updatedEnv {
 		log.Info("Updated fluent bit configuration")
 		if err := r.Update(ctx, &logPipeline); err != nil {
-			log.Error(err, "Failed updating LogPipeline")
+			log.Error(err, "Failed updating log pipeline")
 			return ctrl.Result{}, err
 		}
 
@@ -176,7 +176,7 @@ func (r *LogPipelineReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 			telemetryv1alpha1.LogPipelinePending,
 		)
 		if err := r.updateLogPipelineStatus(ctx, &logPipeline, condition); err != nil {
-			return ctrl.Result{}, err
+			return ctrl.Result{RequeueAfter: requeueTime}, err
 		}
 
 		return ctrl.Result{RequeueAfter: requeueTime}, nil
@@ -288,6 +288,9 @@ func (r *LogPipelineReconciler) syncParsersConfigMap(ctx context.Context, logPip
 			}
 			fluentBitParsersConfig := fluentbit.MergeParsersConfig(&logPipelines)
 			if fluentBitParsersConfig == "" {
+				if cm.Data == nil {
+					return false, nil
+				}
 				cm.Data = nil
 			} else {
 				data := make(map[string]string)
@@ -304,6 +307,9 @@ func (r *LogPipelineReconciler) syncParsersConfigMap(ctx context.Context, logPip
 
 		fluentBitParsersConfig := fluentbit.MergeParsersConfig(&logPipelines)
 		if fluentBitParsersConfig == "" {
+			if cm.Data == nil {
+				return false, nil
+			}
 			cm.Data = nil
 		} else if cm.Data == nil {
 			data := make(map[string]string)

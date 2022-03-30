@@ -9,7 +9,6 @@ const {
   kubectlPortForward,
   namespaceObj,
   waitForK8sObject,
-  waitForDaemonSet,
   waitForDeployment,
   waitForNamespace,
   sleep,
@@ -19,7 +18,6 @@ const {mockServerClient} = require('mockserver-client');
 const mockServerPort = 1080;
 const telemetryNamespace = 'kyma-system';
 const mockNamespace = 'mockserver';
-const fluentBitName = 'telemetry-fluent-bit';
 
 function loadResourceFromFile(file) {
   const yaml = fs.readFileSync(path.join(__dirname, file), {
@@ -28,17 +26,26 @@ function loadResourceFromFile(file) {
   return k8s.loadAllYaml(yaml);
 }
 
-function waitForLogPipelineStatusCondition(name, namespace, lastConditionType, timeout) {
+function checkLastCondition(logPipeline, conditionType) {
+  const conditions = logPipeline.status.conditions;
+  if (conditions.length == 0) {
+    return false;
+  }
+  const lastCondition = conditions[conditions.length - 1];
+  return lastCondition.type === conditionType;
+}
+
+function waitForLogPipelineStatusCondition(name, lastConditionType, timeout) {
   return waitForK8sObject(
-      `/apis/telemetry.kyma-project.io/v1alpha1/watch/namespaces/${namespace}/logpipelines/${name}`,
+      '/apis/telemetry.kyma-project.io/v1alpha1/logpipelines',
       {},
       (_type, watchObj, _) => {
-        const conditions = watchObj.status.conditions;
-        const lastCondition = conditions[conditions.length - 1];
-        return lastCondition.type == lastConditionType;
+        return (
+          watchObj.metadata.name == name && checkLastCondition(watchObj, lastConditionType)
+        );
       },
       timeout,
-      `Waiting for daemonset ${name} timeout (${timeout} ms)`,
+      `Waiting for log pipeline ${name} timeout (${timeout} ms)`,
   );
 }
 
@@ -104,9 +111,8 @@ describe('Telemetry Operator tests', function() {
 
   it('Should create valid LogPipeline with HTTP output plugin', async () => {
     await k8sApply(logPipelineCR, telemetryNamespace);
-    await waitForLogPipelineStatusCondition('logpipeline-test', telemetryNamespace, 'Pending', 20000);
-    await waitForDaemonSet(fluentBitName, telemetryNamespace, 30000);
-    await waitForLogPipelineStatusCondition('logpipeline-test', telemetryNamespace, 'Running', 20000);
+    await waitForLogPipelineStatusCondition('logpipeline-test', 'Pending', 20000);
+    await waitForLogPipelineStatusCondition('logpipeline-test', 'Running', 180000);
   });
 
   it('Mockserver should receive HTTP traffic from fluent-bit', async () => {
