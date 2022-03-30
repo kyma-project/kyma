@@ -82,9 +82,9 @@ func TestSetCondition(t *testing.T) {
 		},
 		{
 			name:           "not overwrite last transition time",
-			status:         LogPipelineStatus{Conditions: []LogPipelineCondition{LogPipelineCondition{Type: LogPipelinePending, LastTransitionTime: ts}}},
+			status:         LogPipelineStatus{Conditions: []LogPipelineCondition{{Type: LogPipelinePending, LastTransitionTime: ts}}},
 			cond:           LogPipelineCondition{Type: LogPipelinePending, LastTransitionTime: tsLater},
-			expectedStatus: LogPipelineStatus{Conditions: []LogPipelineCondition{LogPipelineCondition{Type: LogPipelinePending, LastTransitionTime: ts}}},
+			expectedStatus: LogPipelineStatus{Conditions: []LogPipelineCondition{{Type: LogPipelinePending, LastTransitionTime: ts}}},
 		},
 	}
 

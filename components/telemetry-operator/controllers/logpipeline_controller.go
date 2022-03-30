@@ -161,6 +161,7 @@ func (r *LogPipelineReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 
 	if updatedSectionsCm || updatedParsersCm || updatedFilesCm || updatedEnv {
 		log.Info("Updated fluent bit configuration")
+
 		if err := r.Update(ctx, &logPipeline); err != nil {
 			log.Error(err, "Failed updating log pipeline")
 			return ctrl.Result{}, err
@@ -175,7 +176,7 @@ func (r *LogPipelineReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 			telemetryv1alpha1.FluentBitDSRestartedReason,
 			telemetryv1alpha1.LogPipelinePending,
 		)
-		if err := r.updateLogPipelineStatus(ctx, &logPipeline, condition); err != nil {
+		if err := r.updateLogPipelineStatus(ctx, req.NamespacedName, condition); err != nil {
 			return ctrl.Result{RequeueAfter: requeueTime}, err
 		}
 
@@ -197,7 +198,7 @@ func (r *LogPipelineReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 			telemetryv1alpha1.FluentBitDSRestartCompletedReason,
 			telemetryv1alpha1.LogPipelineRunning,
 		)
-		if err := r.updateLogPipelineStatus(ctx, &logPipeline, condition); err != nil {
+		if err := r.updateLogPipelineStatus(ctx, req.NamespacedName, condition); err != nil {
 			return ctrl.Result{RequeueAfter: requeueTime}, err
 		}
 	}
@@ -487,10 +488,18 @@ func (r *LogPipelineReconciler) isFluentBitDaemonSetReady(ctx context.Context) (
 	return updated == desired && ready >= desired, nil
 }
 
-func (r *LogPipelineReconciler) updateLogPipelineStatus(ctx context.Context, logPipeline *telemetryv1alpha1.LogPipeline, condition *telemetryv1alpha1.LogPipelineCondition) error {
+func (r *LogPipelineReconciler) updateLogPipelineStatus(ctx context.Context, name types.NamespacedName, condition *telemetryv1alpha1.LogPipelineCondition) error {
 	log := logf.FromContext(ctx)
+
+	var logPipeline telemetryv1alpha1.LogPipeline
+	if err := r.Get(ctx, name, &logPipeline); err != nil {
+		log.Error(err, "Failed getting log pipeline")
+		return err
+	}
+
 	logPipeline.Status.SetCondition(*condition)
-	if err := r.Status().Update(ctx, logPipeline); err != nil {
+
+	if err := r.Status().Update(ctx, &logPipeline); err != nil {
 		log.Error(err, fmt.Sprintf("Failed updating log pipeline status to %s", condition.Type))
 		return err
 	}
