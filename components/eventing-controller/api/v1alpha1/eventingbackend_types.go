@@ -44,8 +44,8 @@ type EventingBackendStatus struct {
 // +kubebuilder:subresource:status
 // +kubebuilder:printcolumn:name="Backend",type=string,JSONPath=`.status.backendType`
 // +kubebuilder:printcolumn:name="EventingReady",type=boolean,JSONPath=`.status.eventingReady`
-// +kubebuilder:printcolumn:name="SubscriptionControllerReady",type=boolean,JSONPath=`.status.subscriptionControllerReady`
-// +kubebuilder:printcolumn:name="PublisherProxyReady",type=boolean,JSONPath=`.status.publisherProxyReady`
+// +kubebuilder:printcolumn:name="SubscriptionControllerReady",type=string,JSONPath=`.status.conditions[?(@.type=="Subscription Controller Ready")].status`
+// +kubebuilder:printcolumn:name="PublisherProxyReady",type=string,JSONPath=`.status.conditions[?(@.type=="Publisher Proxy Ready")].status`
 // EventingBackend is the Schema for the eventingbackends API
 type EventingBackend struct {
 	metav1.TypeMeta   `json:",inline"`

@@ -7,8 +7,6 @@ import (
 
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
 
-	v1 "k8s.io/api/core/v1"
-
 	k8sresource "k8s.io/apimachinery/pkg/api/resource"
 
 	apigatewayv1alpha1 "github.com/kyma-incubator/api-gateway/api/v1alpha1"
@@ -589,14 +587,14 @@ func CustomReadyCondition(msg string) eventingv1alpha1.Condition {
 	return eventingv1alpha1.MakeCondition(
 		eventingv1alpha1.ConditionSubscriptionActive,
 		eventingv1alpha1.ConditionReasonNATSSubscriptionActive,
-		v1.ConditionTrue, msg)
+		corev1.ConditionTrue, msg)
 }
 
 func DefaultReadyCondition() eventingv1alpha1.Condition {
 	return eventingv1alpha1.MakeCondition(
 		eventingv1alpha1.ConditionSubscriptionActive,
 		eventingv1alpha1.ConditionReasonNATSSubscriptionActive,
-		v1.ConditionTrue, "")
+		corev1.ConditionTrue, "")
 }
 
 // ToSubscription converts an unstructured subscription into a typed one
@@ -664,4 +662,54 @@ func GetBinaryMessageHeaders() http.Header {
 	headers.Add(CeSourceHeader, CloudEventSource)
 	headers.Add(CeSpecVersionHeader, CloudEventSpecVersion)
 	return headers
+}
+
+func PublisherProxyDefaultReadyCondition() eventingv1alpha1.Condition {
+	return eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionPublisherProxyReady,
+		eventingv1alpha1.ConditionReasonPublisherDeploymentReady,
+		corev1.ConditionTrue, "")
+}
+
+func PublisherProxyDefaultNotReadyCondition() eventingv1alpha1.Condition {
+	return eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionPublisherProxyReady,
+		eventingv1alpha1.ConditionReasonPublisherDeploymentNotReady,
+		corev1.ConditionFalse, "")
+}
+
+func SubscriptionControllerDefaultReadyCondition() eventingv1alpha1.Condition {
+	return eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionControllerReady,
+		eventingv1alpha1.ConditionReasonSubscriptionControllerReady,
+		corev1.ConditionTrue, "")
+}
+
+func SubscriptionControllerReadyConditionWith(ready corev1.ConditionStatus, reason eventingv1alpha1.ConditionReason) eventingv1alpha1.Condition {
+	return eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionControllerReady, reason, ready, "")
+}
+
+func SubscriptionControllerReadyEvent() corev1.Event {
+	return corev1.Event{
+		Reason: string(eventingv1alpha1.ConditionReasonSubscriptionControllerReady),
+		Type:   corev1.EventTypeNormal,
+	}
+}
+
+func SubscriptionControllerNotReadyEvent() corev1.Event {
+	return corev1.Event{
+		Reason: string(eventingv1alpha1.ConditionReasonSubscriptionControllerNotReady),
+		Type:   corev1.EventTypeWarning,
+	}
+}
+
+func PublisherDeploymentReadyEvent() corev1.Event {
+	return corev1.Event{
+		Reason: string(eventingv1alpha1.ConditionReasonPublisherDeploymentReady),
+		Type:   corev1.EventTypeNormal,
+	}
+}
+
+func PublisherDeploymentNotReadyEvent() corev1.Event {
+	return corev1.Event{
+		Reason: string(eventingv1alpha1.ConditionReasonPublisherDeploymentNotReady),
+		Type:   corev1.EventTypeWarning,
+	}
 }

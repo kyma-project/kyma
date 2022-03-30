@@ -7,7 +7,6 @@ import (
 
 	kymalogger "github.com/kyma-project/kyma/common/logging/logger"
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
-	equality "github.com/kyma-project/kyma/components/eventing-controller/controllers/subscription"
 	"github.com/kyma-project/kyma/components/eventing-controller/logger"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/eventtype"
@@ -372,7 +371,7 @@ func createFakeClient(t *testing.T) client.WithWatch {
 
 func ensureSubscriptionMatchesConditionsAndStatus(t *testing.T, subscription eventingv1alpha1.Subscription, wantConditions []eventingv1alpha1.Condition, wantStatus bool) {
 	require.Equal(t, len(wantConditions), len(subscription.Status.Conditions))
-	comparisonResult := equality.ConditionsEquals(wantConditions, subscription.Status.Conditions)
+	comparisonResult := eventingv1alpha1.ConditionsEquals(wantConditions, subscription.Status.Conditions)
 	require.True(t, comparisonResult)
 	require.Equal(t, wantStatus, subscription.Status.Ready)
 }

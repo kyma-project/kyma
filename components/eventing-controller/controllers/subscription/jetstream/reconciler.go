@@ -5,7 +5,6 @@ import (
 	"os"
 	"reflect"
 
-	equality "github.com/kyma-project/kyma/components/eventing-controller/controllers/subscription"
 	"sigs.k8s.io/controller-runtime/pkg/event"
 
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
@@ -192,7 +191,7 @@ func (r *Reconciler) syncSubscriptionStatus(ctx context.Context, sub *eventingv1
 	desiredConditions := initializeDesiredConditions()
 	setConditionSubscriptionActive(desiredConditions, error)
 	// check if the conditions are missing or changed
-	if !equality.ConditionsEquals(sub.Status.Conditions, desiredConditions) {
+	if !eventingv1alpha1.ConditionsEquals(sub.Status.Conditions, desiredConditions) {
 		sub.Status.Conditions = desiredConditions
 		updateStatus = true
 	}

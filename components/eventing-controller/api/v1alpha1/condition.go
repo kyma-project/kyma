@@ -43,10 +43,16 @@ const (
 	ConditionReasonNATSSubscriptionNotActive  ConditionReason = "NATS Subscription not active"
 	ConditionReasonWebhookCallStatus          ConditionReason = "BEB Subscription webhook call no errors status"
 
-	ConditionReasonSubscriptionControllerReady    ConditionReason = "Subscription Manager started"
-	ConditionReasonSubscriptionControllerNotReady ConditionReason = "Subscription Manager not started"
-	ConditionReasonPublisherDeploymentReady       ConditionReason = "Publisher proxy deployment ready"
-	ConditionReasonPublisherDeploymentNotReady    ConditionReason = "Publisher proxy deployment not ready"
+	ConditionReasonSubscriptionControllerReady        ConditionReason = "Subscription manager and controller started"
+	ConditionReasonSubscriptionControllerNotReady     ConditionReason = "Subscription controller not started"
+	ConditionReasonPublisherDeploymentReady           ConditionReason = "Publisher proxy deployment ready"
+	ConditionReasonPublisherDeploymentNotReady        ConditionReason = "Publisher proxy deployment not ready"
+	ConditionReasonBackendCreationUpdateFailed        ConditionReason = "Backend CR creation or update failed"
+	ConditionReasonPublisherProxyCreationUpdateFailed ConditionReason = "Publisher Proxy deployment creation or update failed"
+	ConditionReasonControllerStopStartFailed          ConditionReason = "Starting or stopping the controller failed"
+	ConditionReasonOauth2ClientSyncFailed             ConditionReason = "Failed to get or update OAuth2 Client Credentials"
+	ConditionReasonPublisherProxySecretError          ConditionReason = "Publisher proxy secret sync failed"
+	ConditionDuplicateSecrets                         ConditionReason = "Multiple eventing backend labeled secrets exist"
 )
 
 // initializeConditions sets unset conditions to Unknown
@@ -97,6 +103,15 @@ func (s SubscriptionStatus) IsReady() bool {
 
 func (s SubscriptionStatus) FindCondition(conditionType ConditionType) *Condition {
 	for _, condition := range s.Conditions {
+		if conditionType == condition.Type {
+			return &condition
+		}
+	}
+	return nil
+}
+
+func (b EventingBackendStatus) FindCondition(conditionType ConditionType) *Condition {
+	for _, condition := range b.Conditions {
 		if conditionType == condition.Type {
 			return &condition
 		}
@@ -232,22 +247,22 @@ func makeBackendConditions() []Condition {
 		{
 			Type:               ConditionPublisherProxyReady,
 			LastTransitionTime: metav1.Now(),
-			Status:             corev1.ConditionUnknown,
+			Status:             corev1.ConditionTrue,
+			Reason:             ConditionReasonPublisherDeploymentReady,
 		},
 		{
 			Type:               ConditionControllerReady,
 			LastTransitionTime: metav1.Now(),
-			Status:             corev1.ConditionUnknown,
+			Status:             corev1.ConditionTrue,
+			Reason:             ConditionReasonSubscriptionControllerReady,
 		},
 	}
 	return conditions
 }
 
-func (b *EventingBackendStatus) SetSubscriptionControllerReady(ready bool, message string) {
-	reason := ConditionReasonSubscriptionControllerNotReady
+func (b *EventingBackendStatus) SetSubscriptionControllerReadyCondition(ready bool, reason ConditionReason, message string) {
 	status := corev1.ConditionFalse
 	if ready {
-		reason = ConditionReasonSubscriptionControllerReady
 		status = corev1.ConditionTrue
 	}
 
@@ -261,11 +276,9 @@ func (b *EventingBackendStatus) SetSubscriptionControllerReady(ready bool, messa
 	b.Conditions = newConditions
 }
 
-func (b *EventingBackendStatus) SetPublisherReady(ready bool, message string) {
-	reason := ConditionReasonPublisherDeploymentNotReady
+func (b *EventingBackendStatus) SetPublisherReadyCondition(ready bool, reason ConditionReason, message string) {
 	status := corev1.ConditionFalse
 	if ready {
-		reason = ConditionReasonPublisherDeploymentReady
 		status = corev1.ConditionTrue
 	}
 
@@ -277,6 +290,24 @@ func (b *EventingBackendStatus) SetPublisherReady(ready bool, message string) {
 		newConditions = append(newConditions, condition)
 	}
 	b.Conditions = newConditions
+}
+
+func (b *EventingBackendStatus) GetSubscriptionControllerReadyStatus() bool {
+	for _, condition := range b.Conditions {
+		if condition.Type == ConditionControllerReady {
+			return condition.Status == corev1.ConditionTrue
+		}
+	}
+	return false
+}
+
+func (b *EventingBackendStatus) GetPublisherReadyStatus() bool {
+	for _, condition := range b.Conditions {
+		if condition.Type == ConditionPublisherProxyReady {
+			return condition.Status == corev1.ConditionTrue
+		}
+	}
+	return false
 }
 
 // ConditionsEquals checks if two list of conditions are equal.

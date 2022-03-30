@@ -218,7 +218,7 @@ func (r *Reconciler) emitConditionEvents(oldSubscription, newSubscription *event
 // updateStatus updates the status to k8s if modified
 func (r *Reconciler) updateStatus(ctx context.Context, oldSubscription, newSubscription *eventingv1alpha1.Subscription, logger *zap.SugaredLogger) error {
 	// compare the status taking into consideration lastTransitionTime in conditions
-	if isSubscriptionStatusEqual(oldSubscription.Status, newSubscription.Status) {
+	if object.IsSubscriptionStatusEqual(oldSubscription.Status, newSubscription.Status) {
 		return nil
 	}
 

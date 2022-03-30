@@ -23,12 +23,12 @@ spec:
     - jsonPath: .status.eventingReady
       name: EventingReady
       type: boolean
-    - jsonPath: .status.subscriptionControllerReady
+    - jsonPath: .status.conditions[?(@.type=="Subscription Controller Ready")].status
       name: SubscriptionControllerReady
-      type: boolean
-    - jsonPath: .status.publisherProxyReady
+      type: string
+    - jsonPath: .status.conditions[?(@.type=="Publisher Proxy Ready")].status
       name: PublisherProxyReady
-      type: boolean
+      type: string
     name: v1alpha1
     schema:
       openAPIV3Schema:
@@ -87,10 +87,6 @@ spec:
                   type: object
                 type: array
               eventingReady:
-                type: boolean
-              publisherProxyReady:
-                type: boolean
-              subscriptionControllerReady:
                 type: boolean
             type: object
         type: object

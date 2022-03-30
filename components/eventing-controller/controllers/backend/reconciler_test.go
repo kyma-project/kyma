@@ -36,7 +36,6 @@ import (
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/deployment"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/subscriptionmanager"
 	reconcilertesting "github.com/kyma-project/kyma/components/eventing-controller/testing"
-	"github.com/kyma-project/kyma/components/eventing-controller/utils"
 )
 
 const (
@@ -236,27 +235,36 @@ var _ = Describe("Backend Reconciliation Tests", func() {
 			Eventually(publisherProxyDeploymentGetter(ctx), timeout, pollingInterval).
 				ShouldNot(BeNil())
 			Eventually(eventingBackendStatusGetter(ctx, eventingBackendName, kymaSystemNamespace), timeout, pollingInterval).
-				Should(Equal(&eventingv1alpha1.EventingBackendStatus{
-					Backend:                     eventingv1alpha1.NatsBackendType,
-					EventingReady:               utils.BoolPtr(false),
-					SubscriptionControllerReady: utils.BoolPtr(true),
-					PublisherProxyReady:         utils.BoolPtr(false),
-					BEBSecretName:               "",
-					BEBSecretNamespace:          "",
-				}))
+				Should(And(
+					reconcilertesting.HaveBackendType(eventingv1alpha1.NatsBackendType),
+					reconcilertesting.HaveBackendCondition(reconcilertesting.PublisherProxyDefaultNotReadyCondition()),
+					reconcilertesting.HaveBackendCondition(reconcilertesting.SubscriptionControllerDefaultReadyCondition()),
+					reconcilertesting.HaveNoBEBSecretNameAndNamespace(),
+					reconcilertesting.HaveEventingBackendNotReady(),
+				))
+			k8sEventsGetter().Should(And(
+				reconcilertesting.HaveEvent(reconcilertesting.PublisherDeploymentNotReadyEvent()),
+				reconcilertesting.HaveEvent(reconcilertesting.SubscriptionControllerNotReadyEvent()),
+				reconcilertesting.HaveEvent(reconcilertesting.SubscriptionControllerReadyEvent()),
+			))
 		})
 		It("Should mark eventing as ready when publisher proxy is ready", func() {
 			ctx := context.Background()
 			ensurePublisherProxyIsReady(ctx)
 			Eventually(eventingBackendStatusGetter(ctx, eventingBackendName, kymaSystemNamespace), timeout, pollingInterval).
-				Should(Equal(&eventingv1alpha1.EventingBackendStatus{
-					Backend:                     eventingv1alpha1.NatsBackendType,
-					EventingReady:               utils.BoolPtr(true),
-					SubscriptionControllerReady: utils.BoolPtr(true),
-					PublisherProxyReady:         utils.BoolPtr(true),
-					BEBSecretName:               "",
-					BEBSecretNamespace:          "",
-				}))
+				Should(And(
+					reconcilertesting.HaveBackendType(eventingv1alpha1.NatsBackendType),
+					reconcilertesting.HaveBackendCondition(reconcilertesting.PublisherProxyDefaultReadyCondition()),
+					reconcilertesting.HaveBackendCondition(reconcilertesting.SubscriptionControllerDefaultReadyCondition()),
+					reconcilertesting.HaveNoBEBSecretNameAndNamespace(),
+					reconcilertesting.HaveEventingBackendReady(),
+				))
+			k8sEventsGetter().Should(And(
+				reconcilertesting.HaveEvent(reconcilertesting.PublisherDeploymentNotReadyEvent()),
+				reconcilertesting.HaveEvent(reconcilertesting.PublisherDeploymentReadyEvent()),
+				reconcilertesting.HaveEvent(reconcilertesting.SubscriptionControllerNotReadyEvent()),
+				reconcilertesting.HaveEvent(reconcilertesting.SubscriptionControllerReadyEvent()),
+			))
 		})
 		It("Should check that the owner of publisher deployment is the controller deployment", func() {
 			ctx := context.Background()
@@ -288,27 +296,25 @@ var _ = Describe("Backend Reconciliation Tests", func() {
 				reconcilertesting.HaveValidBEBNamespace(deployment.PublisherSecretBEBNamespaceKey, "test/ns"),
 			))
 			Eventually(eventingBackendStatusGetter(ctx, eventingBackendName, kymaSystemNamespace), timeout, pollingInterval).
-				Should(Equal(&eventingv1alpha1.EventingBackendStatus{
-					Backend:                     eventingv1alpha1.BEBBackendType,
-					EventingReady:               utils.BoolPtr(false),
-					SubscriptionControllerReady: utils.BoolPtr(true),
-					PublisherProxyReady:         utils.BoolPtr(false),
-					BEBSecretName:               bebSecret1name,
-					BEBSecretNamespace:          kymaSystemNamespace,
-				}))
+				Should(And(
+					reconcilertesting.HaveBackendType(eventingv1alpha1.BEBBackendType),
+					reconcilertesting.HaveBackendCondition(reconcilertesting.PublisherProxyDefaultNotReadyCondition()),
+					reconcilertesting.HaveBackendCondition(reconcilertesting.SubscriptionControllerDefaultReadyCondition()),
+					reconcilertesting.HaveBEBSecretNameAndNamespace(bebSecret1name, kymaSystemNamespace),
+					reconcilertesting.HaveEventingBackendNotReady(),
+				))
 		})
 		It("Should mark eventing as ready when publisher proxy is ready", func() {
 			ctx := context.Background()
 			ensurePublisherProxyIsReady(ctx)
 			Eventually(eventingBackendStatusGetter(ctx, eventingBackendName, kymaSystemNamespace), timeout, pollingInterval).
-				Should(Equal(&eventingv1alpha1.EventingBackendStatus{
-					Backend:                     eventingv1alpha1.BEBBackendType,
-					EventingReady:               utils.BoolPtr(true),
-					SubscriptionControllerReady: utils.BoolPtr(true),
-					PublisherProxyReady:         utils.BoolPtr(true),
-					BEBSecretName:               bebSecret1name,
-					BEBSecretNamespace:          kymaSystemNamespace,
-				}))
+				Should(And(
+					reconcilertesting.HaveBackendType(eventingv1alpha1.BEBBackendType),
+					reconcilertesting.HaveBackendCondition(reconcilertesting.PublisherProxyDefaultReadyCondition()),
+					reconcilertesting.HaveBackendCondition(reconcilertesting.SubscriptionControllerDefaultReadyCondition()),
+					reconcilertesting.HaveBEBSecretNameAndNamespace(bebSecret1name, kymaSystemNamespace),
+					reconcilertesting.HaveEventingBackendReady(),
+				))
 		})
 		It("Should check that the owner of publisher deployment is the controller deployment", func() {
 			ctx := context.Background()
@@ -325,14 +331,20 @@ var _ = Describe("Backend Reconciliation Tests", func() {
 			bebSubMgr.resetState()
 			removeOAuth2Secret(ctx)
 			Eventually(eventingBackendStatusGetter(ctx, eventingBackendName, kymaSystemNamespace), timeout, pollingInterval).
-				Should(Equal(&eventingv1alpha1.EventingBackendStatus{
-					Backend:                     eventingv1alpha1.BEBBackendType,
-					EventingReady:               utils.BoolPtr(false),
-					SubscriptionControllerReady: utils.BoolPtr(false),
-					PublisherProxyReady:         utils.BoolPtr(false),
-					BEBSecretName:               bebSecret1name,
-					BEBSecretNamespace:          kymaSystemNamespace,
-				}))
+				Should(And(
+					reconcilertesting.HaveBackendType(eventingv1alpha1.BEBBackendType),
+					reconcilertesting.HaveBackendCondition(reconcilertesting.PublisherProxyDefaultNotReadyCondition()),
+					reconcilertesting.HaveBackendCondition(reconcilertesting.SubscriptionControllerReadyConditionWith(corev1.ConditionFalse,
+						eventingv1alpha1.ConditionReasonSubscriptionControllerNotReady)),
+					reconcilertesting.HaveBEBSecretNameAndNamespace(bebSecret1name, kymaSystemNamespace),
+					reconcilertesting.HaveEventingBackendNotReady(),
+				))
+			k8sEventsGetter().Should(reconcilertesting.HaveEvent(corev1.Event{
+				Reason: string(eventingv1alpha1.ConditionReasonOauth2ClientSyncFailed),
+				Type:   corev1.EventTypeWarning,
+				Message: fmt.Sprintf("get secret failed namespace:%s name:%s: Secret %q not found",
+					kymaSystemNamespace, getOAuth2ClientSecretName(), getOAuth2ClientSecretName()),
+			}))
 			Eventually(bebSubMgr.StopCalledWithoutCleanup, timeout, pollingInterval).Should(BeTrue())
 		})
 	})
@@ -343,14 +355,13 @@ var _ = Describe("Backend Reconciliation Tests", func() {
 			bebSubMgr.resetState()
 			createOAuth2Secret(ctx, []byte("id2"), []byte("secret2"))
 			Eventually(eventingBackendStatusGetter(ctx, eventingBackendName, kymaSystemNamespace), timeout, pollingInterval).
-				Should(Equal(&eventingv1alpha1.EventingBackendStatus{
-					Backend:                     eventingv1alpha1.BEBBackendType,
-					EventingReady:               utils.BoolPtr(true),
-					SubscriptionControllerReady: utils.BoolPtr(true),
-					PublisherProxyReady:         utils.BoolPtr(true),
-					BEBSecretName:               bebSecret1name,
-					BEBSecretNamespace:          kymaSystemNamespace,
-				}))
+				Should(And(
+					reconcilertesting.HaveBackendType(eventingv1alpha1.BEBBackendType),
+					reconcilertesting.HaveBackendCondition(reconcilertesting.PublisherProxyDefaultReadyCondition()),
+					reconcilertesting.HaveBackendCondition(reconcilertesting.SubscriptionControllerDefaultReadyCondition()),
+					reconcilertesting.HaveBEBSecretNameAndNamespace(bebSecret1name, kymaSystemNamespace),
+					reconcilertesting.HaveEventingBackendReady(),
+				))
 			Eventually(bebSubMgr.StartCalled, timeout, pollingInterval).Should(BeTrue())
 		})
 	})
@@ -361,14 +372,14 @@ var _ = Describe("Backend Reconciliation Tests", func() {
 			ensureBEBSecretCreated(ctx, bebSecret2name, kymaSystemNamespace)
 			By("Checking EventingReady status is set to false")
 			Eventually(eventingBackendStatusGetter(ctx, eventingBackendName, kymaSystemNamespace), timeout, pollingInterval).
-				Should(Equal(&eventingv1alpha1.EventingBackendStatus{
-					Backend:                     eventingv1alpha1.BEBBackendType,
-					EventingReady:               utils.BoolPtr(false),
-					SubscriptionControllerReady: utils.BoolPtr(false),
-					PublisherProxyReady:         utils.BoolPtr(false),
-					BEBSecretName:               "",
-					BEBSecretNamespace:          "",
-				}))
+				Should(And(
+					reconcilertesting.HaveBackendType(eventingv1alpha1.BEBBackendType),
+					reconcilertesting.HaveBackendCondition(reconcilertesting.PublisherProxyDefaultNotReadyCondition()),
+					reconcilertesting.HaveBackendCondition(reconcilertesting.SubscriptionControllerReadyConditionWith(corev1.ConditionFalse,
+						eventingv1alpha1.ConditionDuplicateSecrets)),
+					reconcilertesting.HaveNoBEBSecretNameAndNamespace(),
+					reconcilertesting.HaveEventingBackendNotReady(),
+				))
 		})
 	})
 
@@ -380,14 +391,13 @@ var _ = Describe("Backend Reconciliation Tests", func() {
 			Expect(k8sClient.Delete(ctx, bebSecret2)).Should(BeNil())
 			By("Checking EventingReady status is set to true")
 			Eventually(eventingBackendStatusGetter(ctx, eventingBackendName, kymaSystemNamespace), timeout, pollingInterval).
-				Should(Equal(&eventingv1alpha1.EventingBackendStatus{
-					Backend:                     eventingv1alpha1.BEBBackendType,
-					EventingReady:               utils.BoolPtr(true),
-					SubscriptionControllerReady: utils.BoolPtr(true),
-					PublisherProxyReady:         utils.BoolPtr(true),
-					BEBSecretName:               bebSecret1name,
-					BEBSecretNamespace:          kymaSystemNamespace,
-				}))
+				Should(And(
+					reconcilertesting.HaveBackendType(eventingv1alpha1.BEBBackendType),
+					reconcilertesting.HaveBackendCondition(reconcilertesting.PublisherProxyDefaultReadyCondition()),
+					reconcilertesting.HaveBackendCondition(reconcilertesting.SubscriptionControllerDefaultReadyCondition()),
+					reconcilertesting.HaveBEBSecretNameAndNamespace(bebSecret1name, kymaSystemNamespace),
+					reconcilertesting.HaveEventingBackendReady(),
+				))
 		})
 	})
 
@@ -401,14 +411,14 @@ var _ = Describe("Backend Reconciliation Tests", func() {
 			Expect(k8sClient.Update(ctx, bebSecret)).Should(BeNil())
 			By("Checking EventingReady status is set to false")
 			Eventually(eventingBackendStatusGetter(ctx, eventingBackendName, kymaSystemNamespace), timeout, pollingInterval).
-				Should(Equal(&eventingv1alpha1.EventingBackendStatus{
-					Backend:                     eventingv1alpha1.NatsBackendType,
-					EventingReady:               utils.BoolPtr(false),
-					SubscriptionControllerReady: utils.BoolPtr(false),
-					PublisherProxyReady:         utils.BoolPtr(false),
-					BEBSecretName:               "",
-					BEBSecretNamespace:          "",
-				}))
+				Should(And(
+					reconcilertesting.HaveBackendType(eventingv1alpha1.NatsBackendType),
+					reconcilertesting.HaveBackendCondition(reconcilertesting.PublisherProxyDefaultNotReadyCondition()),
+					reconcilertesting.HaveBackendCondition(reconcilertesting.SubscriptionControllerReadyConditionWith(corev1.ConditionFalse,
+						eventingv1alpha1.ConditionReasonControllerStopStartFailed)),
+					reconcilertesting.HaveNoBEBSecretNameAndNamespace(),
+					reconcilertesting.HaveEventingBackendNotReady(),
+				))
 		})
 	})
 
@@ -422,14 +432,13 @@ var _ = Describe("Backend Reconciliation Tests", func() {
 			natsSubMgr.startErr = nil
 			By("Checking EventingReady status is set to false")
 			Eventually(eventingBackendStatusGetter(ctx, eventingBackendName, kymaSystemNamespace), timeout, pollingInterval).
-				Should(Equal(&eventingv1alpha1.EventingBackendStatus{
-					Backend:                     eventingv1alpha1.NatsBackendType,
-					EventingReady:               utils.BoolPtr(false),
-					SubscriptionControllerReady: utils.BoolPtr(true),
-					PublisherProxyReady:         utils.BoolPtr(false),
-					BEBSecretName:               "",
-					BEBSecretNamespace:          "",
-				}))
+				Should(And(
+					reconcilertesting.HaveBackendType(eventingv1alpha1.NatsBackendType),
+					reconcilertesting.HaveBackendCondition(reconcilertesting.PublisherProxyDefaultNotReadyCondition()),
+					reconcilertesting.HaveBackendCondition(reconcilertesting.SubscriptionControllerDefaultReadyCondition()),
+					reconcilertesting.HaveNoBEBSecretNameAndNamespace(),
+					reconcilertesting.HaveEventingBackendNotReady(),
+				))
 			By("Ensure publisher proxy secret is removed")
 			eventuallyPublisherProxySecret(ctx).Should(BeNil())
 		})
@@ -437,14 +446,13 @@ var _ = Describe("Backend Reconciliation Tests", func() {
 			ctx := context.Background()
 			ensurePublisherProxyIsReady(ctx)
 			Eventually(eventingBackendStatusGetter(ctx, eventingBackendName, kymaSystemNamespace), timeout, pollingInterval).
-				Should(Equal(&eventingv1alpha1.EventingBackendStatus{
-					Backend:                     eventingv1alpha1.NatsBackendType,
-					EventingReady:               utils.BoolPtr(true),
-					SubscriptionControllerReady: utils.BoolPtr(true),
-					PublisherProxyReady:         utils.BoolPtr(true),
-					BEBSecretName:               "",
-					BEBSecretNamespace:          "",
-				}))
+				Should(And(
+					reconcilertesting.HaveBackendType(eventingv1alpha1.NatsBackendType),
+					reconcilertesting.HaveBackendCondition(reconcilertesting.PublisherProxyDefaultReadyCondition()),
+					reconcilertesting.HaveBackendCondition(reconcilertesting.SubscriptionControllerDefaultReadyCondition()),
+					reconcilertesting.HaveNoBEBSecretNameAndNamespace(),
+					reconcilertesting.HaveEventingBackendReady(),
+				))
 		})
 	})
 
@@ -460,14 +468,14 @@ var _ = Describe("Backend Reconciliation Tests", func() {
 			Expect(k8sClient.Update(ctx, bebSecret)).Should(BeNil())
 			By("Checking EventingReady status is set to false")
 			Eventually(eventingBackendStatusGetter(ctx, eventingBackendName, kymaSystemNamespace), timeout, pollingInterval).
-				Should(Equal(&eventingv1alpha1.EventingBackendStatus{
-					Backend:                     eventingv1alpha1.BEBBackendType,
-					EventingReady:               utils.BoolPtr(false),
-					SubscriptionControllerReady: utils.BoolPtr(false),
-					PublisherProxyReady:         utils.BoolPtr(false),
-					BEBSecretName:               bebSecret1name,
-					BEBSecretNamespace:          kymaSystemNamespace,
-				}))
+				Should(And(
+					reconcilertesting.HaveBackendType(eventingv1alpha1.BEBBackendType),
+					reconcilertesting.HaveBackendCondition(reconcilertesting.PublisherProxyDefaultNotReadyCondition()),
+					reconcilertesting.HaveBackendCondition(reconcilertesting.SubscriptionControllerReadyConditionWith(corev1.ConditionFalse,
+						eventingv1alpha1.ConditionReasonControllerStopStartFailed)),
+					reconcilertesting.HaveBEBSecretNameAndNamespace(bebSecret1name, kymaSystemNamespace),
+					reconcilertesting.HaveEventingBackendNotReady(),
+				))
 			By("Checking that no BEB secret is created for publisher")
 			eventuallyPublisherProxySecret(ctx).Should(BeNil())
 		})
@@ -479,14 +487,13 @@ var _ = Describe("Backend Reconciliation Tests", func() {
 			natsSubMgr.stopErr = nil
 			ensurePublisherProxyPodIsCreated(ctx)
 			Eventually(eventingBackendStatusGetter(ctx, eventingBackendName, kymaSystemNamespace), timeout, pollingInterval).
-				Should(Equal(&eventingv1alpha1.EventingBackendStatus{
-					Backend:                     eventingv1alpha1.BEBBackendType,
-					EventingReady:               utils.BoolPtr(true),
-					SubscriptionControllerReady: utils.BoolPtr(true),
-					PublisherProxyReady:         utils.BoolPtr(true),
-					BEBSecretName:               bebSecret1name,
-					BEBSecretNamespace:          kymaSystemNamespace,
-				}))
+				Should(And(
+					reconcilertesting.HaveBackendType(eventingv1alpha1.BEBBackendType),
+					reconcilertesting.HaveBackendCondition(reconcilertesting.PublisherProxyDefaultReadyCondition()),
+					reconcilertesting.HaveBackendCondition(reconcilertesting.SubscriptionControllerDefaultReadyCondition()),
+					reconcilertesting.HaveBEBSecretNameAndNamespace(bebSecret1name, kymaSystemNamespace),
+					reconcilertesting.HaveEventingBackendReady(),
+				))
 		})
 	})
 
@@ -764,6 +771,18 @@ func eventingBackendStatusGetter(ctx context.Context, name, namespace string) fu
 		}
 		return &backend.Status, nil
 	}
+}
+
+func k8sEventsGetter() AsyncAssertion {
+	ctx := context.TODO()
+	var eventList = corev1.EventList{}
+	return Eventually(func() corev1.EventList {
+		err := k8sClient.List(ctx, &eventList, client.InNamespace(kymaSystemNamespace))
+		if err != nil {
+			return corev1.EventList{}
+		}
+		return eventList
+	}, timeout, pollingInterval)
 }
 
 func publisherProxyDeploymentGetter(ctx context.Context) func() (*appsv1.Deployment, error) {
