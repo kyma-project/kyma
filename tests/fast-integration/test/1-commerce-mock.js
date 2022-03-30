@@ -87,7 +87,8 @@ function commerceMockTests() {
     });
 
     it('Logs from commerce mock pod should be retrieved through Loki', async function() {
-      await checkLokiLogs(testStartTimestamp);
+      const labels = '{app="commerce-mock", container="mock", namespace="mocks"}';
+      await checkLokiLogs(testStartTimestamp, labels);
     });
 
     it('Test namespaces should be deleted', async function() {

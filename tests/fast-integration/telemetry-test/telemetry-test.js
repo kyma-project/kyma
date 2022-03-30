@@ -6,19 +6,12 @@ const {
   k8sCoreV1Api,
   k8sApply,
   k8sDelete,
-  kubectlPortForward,
-  namespaceObj,
-  waitForDaemonSet,
-  waitForDeployment,
-  waitForNamespace,
-  sleep,
 } = require('../utils');
-const {mockServerClient} = require('mockserver-client');
 
-const mockServerPort = 1080;
+const {checkLokiLogs, lokiPortForward} = require('../logging');
 const telemetryNamespace = 'kyma-system';
-const mockNamespace = 'mockserver';
-const fluentBitName = 'telemetry-fluent-bit';
+const testStartTimestamp = new Date().toISOString();
+
 
 function loadResourceFromFile(file) {
   const yaml = fs.readFileSync(path.join(__dirname, file), {
@@ -27,42 +20,15 @@ function loadResourceFromFile(file) {
   return k8s.loadAllYaml(yaml);
 }
 
-const logPipelineCR = loadResourceFromFile('./log-pipeline.yaml');
 const invalidLogPipelineCR = loadResourceFromFile('./invalid-log-pipeline.yaml');
-const mockserverResources = loadResourceFromFile('./mockserver-resources.yaml');
-
-function assertMockserverWasCalled() {
-  return mockServerClient('localhost', mockServerPort)
-      .verify(
-          {
-            path: '/',
-          },
-          1,
-      )
-      .then(
-          function() {},
-          function(error) {
-            console.log(error);
-            assert.fail('The HTTP endpoint was not called');
-          },
-      );
-}
+// TODO: Fetch the logpipeline CR from kyma project
+const logPipelineCR = loadResourceFromFile('./log-pipeline.yaml');
 
 describe('Telemetry Operator tests', function() {
   let cancelPortForward;
 
   before(async function() {
-    await k8sApply([namespaceObj(mockNamespace)]);
-    await waitForNamespace(mockNamespace);
-    await k8sApply(mockserverResources, mockNamespace);
-    await waitForDeployment('mockserver', mockNamespace);
-    const {body} = await k8sCoreV1Api.listNamespacedPod(mockNamespace);
-    const mockPod = body.items[0].metadata.name;
-    cancelPortForward = kubectlPortForward(
-        mockNamespace,
-        mockPod,
-        mockServerPort,
-    );
+    cancelPortForward = lokiPortForward();
   });
 
   it('Operator should be ready', async () => {
@@ -87,19 +53,15 @@ describe('Telemetry Operator tests', function() {
     };
   });
 
-  it('Should create valid LogPipeline with HTTP output plugin', async () => {
-    await k8sApply(logPipelineCR, telemetryNamespace);
-    await waitForDaemonSet(fluentBitName, telemetryNamespace, 30000);
-  });
+  // TODO: It deploys a logpipeline CR with the loki output configured
 
-  it('Mockserver should receive HTTP traffic from fluent-bit', async () => {
-    await sleep(30000);
-    await assertMockserverWasCalled(true);
+  it('should push the logs to the loki output', async () => {
+    const labels = '{job="telemetry-fluent-bit"}';
+    await checkLokiLogs(testStartTimestamp, labels);
   });
 
   after(async function() {
     cancelPortForward();
     await k8sDelete(logPipelineCR, telemetryNamespace);
-    await k8sCoreV1Api.deleteNamespace(mockNamespace);
   });
 });

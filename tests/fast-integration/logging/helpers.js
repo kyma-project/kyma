@@ -9,8 +9,7 @@ const {
 } = require('./client');
 
 // checkLokiLogs used directly in Commerce Mock tests.
-async function checkLokiLogs(startTimestamp) {
-  const labels = '{app="commerce-mock", container="mock", namespace="mocks"}';
+async function checkLokiLogs(startTimestamp, labels) {
   let logsFetched = false;
   let retries = 0;
   while (retries < 20) {
