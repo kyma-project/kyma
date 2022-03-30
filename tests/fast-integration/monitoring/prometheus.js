@@ -27,7 +27,7 @@ async function assertPodsExist() {
 }
 
 async function assertPrometheusUIIsReachable() {
-  status = await getPrometheusUIStatus();
+  const status = await getPrometheusUIStatus();
   assert.equal(status, 200, 'Prometheus UI is not reachable');
 }
 
