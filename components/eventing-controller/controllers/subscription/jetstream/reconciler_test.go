@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"log"
 	"path/filepath"
-	"strings"
 	"testing"
 	"time"
 
@@ -661,9 +660,9 @@ func getSubscriptionFromJetStream(ens *jetStreamTestEnsemble, subscription *even
 
 	return g.Expect(func() *nats.Subscription {
 		subscriptions := ens.jetStreamBackend.GetAllSubscriptions()
-		jsSubkey := ens.jetStreamBackend.GenerateJsSubKey(subject, subscription)
+		subscriptionSubject := handlers.NewSubscriptionSubjectIdentifier(subscription, subject)
 		for key, sub := range subscriptions {
-			if strings.EqualFold(key, jsSubkey) {
+			if key.ConsumerName() == subscriptionSubject.ConsumerName() {
 				return sub
 			}
 		}
