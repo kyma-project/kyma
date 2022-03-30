@@ -16,7 +16,7 @@ function monitoringTests() {
     return;
   }
 
-  describe('Prometheus Tests:', function() {
+  describe('Prometheus Tests:', function () {
     this.timeout(5 * 60 * 1000); // 5 min
     this.slow(5 * 1000);
 
@@ -27,8 +27,8 @@ function monitoringTests() {
 
       try {
         debug('Checking if port forward works...');
-        const url = `http://localhost:9090/graph`;
-        const responseBody = await retryPromise(() => axios.get(url, {timeout: 10000}), 5);
+        const url = `http://localhost:9091/graph`; // wrong port
+        const responseBody = await retryPromise(() => axios.get(url, {timeout: 10000}), 3);
         debug('responseBody', responseBody);
         assert.equal(responseBody.status, 200, 'Prometheus is not running');
       } catch (err) {
@@ -69,7 +69,7 @@ function monitoringTests() {
     });
   });
   return;
-  describe('Grafana Tests:', async function() {
+  describe('Grafana Tests:', async function () {
     this.timeout(5 * 60 * 1000); // 5 min
     this.slow(5 * 1000);
 

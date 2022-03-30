@@ -40,6 +40,7 @@ function initializeK8sClient(opts) {
     console.log(err.message);
   }
 }
+
 initializeK8sClient();
 
 /**
@@ -73,18 +74,18 @@ async function retryPromise(fn, retriesLeft = 10, interval = 30) {
 
   return new Promise((resolve, reject) => {
     return fn()
-        .then(resolve)
-        .catch((error) => {
-          if (retriesLeft === 1) {
+      .then(resolve)
+      .catch((error) => {
+        if (retriesLeft === 1) {
           // reject('maximum retries exceeded');
-            reject(error);
-            return;
-          }
-          setTimeout(() => {
+          reject(error);
+          return;
+        }
+        setTimeout(() => {
           // Passing on "reject" is the important part
-            retryPromise(fn, retriesLeft - 1, interval).then(resolve, reject);
-          }, interval);
-        });
+          retryPromise(fn, retriesLeft - 1, interval).then(resolve, reject);
+        }, interval);
+      });
   });
 }
 
@@ -112,31 +113,31 @@ function convertAxiosError(axiosError, message) {
 const updateNamespacedResource =
   (client, group, version, pluralName) => async (name, namespace, updateFn) => {
     const obj = await client.getNamespacedCustomObject(
-        group,
-        version,
-        namespace,
-        pluralName,
-        name,
+      group,
+      version,
+      namespace,
+      pluralName,
+      name,
     );
 
     const updatedObj = updateFn(_.cloneDeep(obj.body));
 
     await client.replaceNamespacedCustomObject(
-        group,
-        version,
-        namespace,
-        pluralName,
-        name,
-        updatedObj,
+      group,
+      version,
+      namespace,
+      pluralName,
+      name,
+      updatedObj,
     );
   };
 
 async function removeServiceInstanceFinalizer(client, name, namespace) {
   const serviceInstanceUpdater = updateNamespacedResource(
-      client,
-      'servicecatalog.k8s.io',
-      'v1beta1',
-      'serviceinstances',
+    client,
+    'servicecatalog.k8s.io',
+    'v1beta1',
+    'serviceinstances',
   );
 
   await serviceInstanceUpdater(name, namespace, (obj) => {
@@ -147,10 +148,10 @@ async function removeServiceInstanceFinalizer(client, name, namespace) {
 
 async function removeServiceBindingFinalizer(client, name, namespace) {
   const serviceBindingUpdater = updateNamespacedResource(
-      client,
-      'servicecatalog.k8s.io',
-      'v1beta1',
-      'servicebindings',
+    client,
+    'servicecatalog.k8s.io',
+    'v1beta1',
+    'servicebindings',
   );
 
   await serviceBindingUpdater(name, namespace, (obj) => {
@@ -162,17 +163,17 @@ async function removeServiceBindingFinalizer(client, name, namespace) {
 // "polyfill" for Promise.allSettled
 async function promiseAllSettled(promises) {
   return Promise.all(
-      promises.map((promise) =>
-        promise
-            .then((value) => ({
-              status: 'fulfilled',
-              value,
-            }))
-            .catch((reason) => ({
-              status: 'rejected',
-              reason,
-            })),
-      ),
+    promises.map((promise) =>
+      promise
+        .then((value) => ({
+          status: 'fulfilled',
+          value,
+        }))
+        .catch((reason) => ({
+          status: 'rejected',
+          reason,
+        })),
+    ),
   );
 }
 
@@ -215,8 +216,14 @@ function kubectlDelete(file, namespace) {
 }
 
 function kubectlPortForward(namespace, podName, port) {
-  const server = net.createServer(function(socket) {
+  const server = net.createServer(function (socket) {
     forward.portForward(namespace, podName, [port], socket, null, socket, 3);
+
+    socket.on('error', function (err) {
+      console.error("PortForward received an error:", err);
+      console.error.apply(null, "PortForward received an error 1:", err);
+      server.close();
+    });
   });
 
   server.listen(port, 'localhost');
@@ -242,7 +249,7 @@ async function k8sDelete(listOfSpecs, namespace) {
         });
       } else {
         throw Error(
-            'Object kind or metadata.selfLink is required to delete the resource',
+          'Object kind or metadata.selfLink is required to delete the resource',
         );
       }
       if (res.kind == 'CustomResourceDefinition') {
@@ -264,8 +271,8 @@ async function getAllCRDs() {
   const stat = {};
   const body = JSON.parse(response.body);
   body.items.forEach(
-      (crd) =>
-        (stat[crd.spec.group] = stat[crd.spec.group] ?
+    (crd) =>
+      (stat[crd.spec.group] = stat[crd.spec.group] ?
         stat[crd.spec.group] + 1 :
         1),
   );
@@ -350,12 +357,12 @@ async function k8sApply(resources, namespace, patch = true) {
     }
     try {
       await k8sDynamicApi.patch(
-          resource,
-          undefined,
-          undefined,
-          undefined,
-          undefined,
-          options,
+        resource,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        options,
       );
       debug(resource.kind, resource.metadata.name, 'reconfigured');
     } catch (e) {
@@ -382,74 +389,75 @@ function waitForK8sObject(path, query, checkFn, timeout, timeoutMsg) {
   let timer;
   const result = new Promise((resolve, reject) => {
     watch
-        .watch(
-            path,
-            query,
-            (type, apiObj, watchObj) => {
-              if (checkFn(type, apiObj, watchObj)) {
-                if (res) {
-                  res.abort();
-                }
-                clearTimeout(timer);
-                debug('finished waiting for ', path);
-                resolve(watchObj.object);
-              }
-            },
-            () => {},
-        )
-        .then((r) => {
-          res = r;
-          timer = setTimeout(() => {
-            res.abort();
-            reject(new Error(timeoutMsg));
-          }, timeout);
-        });
+      .watch(
+        path,
+        query,
+        (type, apiObj, watchObj) => {
+          if (checkFn(type, apiObj, watchObj)) {
+            if (res) {
+              res.abort();
+            }
+            clearTimeout(timer);
+            debug('finished waiting for ', path);
+            resolve(watchObj.object);
+          }
+        },
+        () => {
+        },
+      )
+      .then((r) => {
+        res = r;
+        timer = setTimeout(() => {
+          res.abort();
+          reject(new Error(timeoutMsg));
+        }, timeout);
+      });
   });
   return result;
 }
 
 function waitForNamespace(name, timeout = 30000) {
   return waitForK8sObject(
-      `/api/v1/namespaces/${name}`,
-      {},
-      (_type, _apiObj, watchObj) => {
-        return (
-          watchObj.metadata.name === name &&
-            watchObj.status.phase === 'Active'
-        );
-      },
-      timeout,
-      `Waiting for ${name} namespace timeout 3000 ms)`,
+    `/api/v1/namespaces/${name}`,
+    {},
+    (_type, _apiObj, watchObj) => {
+      return (
+        watchObj.metadata.name === name &&
+        watchObj.status.phase === 'Active'
+      );
+    },
+    timeout,
+    `Waiting for ${name} namespace timeout 3000 ms)`,
   );
 }
 
 function waitForClusterAddonsConfiguration(name, timeout = 90000) {
   return waitForK8sObject(
-      '/apis/addons.kyma-project.io/v1alpha1/clusteraddonsconfigurations',
-      {},
-      (_type, _apiObj, watchObj) => {
-        return watchObj.object.metadata.name == name;
-      },
-      timeout,
-      `Waiting for ${name} ClusterAddonsConfiguration timeout (${timeout} ms)`,
+    '/apis/addons.kyma-project.io/v1alpha1/clusteraddonsconfigurations',
+    {},
+    (_type, _apiObj, watchObj) => {
+      return watchObj.object.metadata.name == name;
+    },
+    timeout,
+    `Waiting for ${name} ClusterAddonsConfiguration timeout (${timeout} ms)`,
   );
 }
 
 function waitForFunction(name, namespace = 'default', timeout = 90000) {
   return waitForK8sObject(
-      `/apis/serverless.kyma-project.io/v1alpha1/namespaces/${namespace}/functions`,
-      {},
-      (_type, _apiObj, watchObj) => {
-        return (
-          watchObj.object.metadata.name == name &&
+    `/apis/serverless.kyma-project.io/v1alpha1/namespaces/${namespace}/functions`,
+    {},
+    (_type, _apiObj, watchObj) => {
+      return (
+        watchObj.object.metadata.name == name &&
         watchObj.object.status.conditions &&
         watchObj.object.status.conditions.some(
-            (c) => c.type == 'Running' && c.status == 'True',
+          (c) => c.type == 'Running' && c.status == 'True',
         )
-        );
-      },
-      timeout,
-      `Waiting for ${name} function timeout (${timeout} ms)`,
+      );
+    },
+    timeout,
+    `Waiting for ${name} function timeout (${timeout} ms)`,
   );
 }
 
@@ -463,14 +471,14 @@ async function getAllSubscriptions(namespace = 'default') {
     const body = JSON.parse(response.body);
 
     return Promise.all(
-        body.items.map((sub) => {
-          return {
-            apiVersion: sub['apiVersion'],
-            spec: sub['spec'],
-            status: sub['status'],
+      body.items.map((sub) => {
+        return {
+          apiVersion: sub['apiVersion'],
+          spec: sub['spec'],
+          status: sub['status'],
 
-          };
-        }),
+        };
+      }),
     ).then((results) => {
       return results.flat();
     });
@@ -502,203 +510,203 @@ async function getEventingBackend(namespace = 'kyma-system') {
 
 function waitForSubscription(name, namespace = 'default', timeout = 180000) {
   return waitForK8sObject(
-      `/apis/eventing.kyma-project.io/v1alpha1/namespaces/${namespace}/subscriptions`,
-      {},
-      (_type, _apiObj, watchObj) => {
-        return (
-          watchObj.object.metadata.name == name &&
+    `/apis/eventing.kyma-project.io/v1alpha1/namespaces/${namespace}/subscriptions`,
+    {},
+    (_type, _apiObj, watchObj) => {
+      return (
+        watchObj.object.metadata.name == name &&
         watchObj.object.status.conditions &&
         watchObj.object.status.conditions.some(
-            (c) => c.type == 'Subscription active' && c.status == 'True',
+          (c) => c.type == 'Subscription active' && c.status == 'True',
         )
-        );
-      },
-      timeout,
-      `Waiting for ${name} subscription timeout (${timeout} ms)`,
+      );
+    },
+    timeout,
+    `Waiting for ${name} subscription timeout (${timeout} ms)`,
   );
 }
 
 function waitForClusterServiceBroker(name, timeout = 90000) {
   return waitForK8sObject(
-      '/apis/servicecatalog.k8s.io/v1beta1/clusterservicebrokers',
-      {},
-      (_type, _apiObj, watchObj) => {
-        return (
-          watchObj.object.metadata.name.includes(name) &&
-            watchObj.object.status.conditions.some(
-                (c) => c.type == 'Ready' && c.status == 'True',
-            )
-        );
-      },
-      timeout,
-      `Waiting for ${name} cluster service broker (${timeout} ms)`,
+    '/apis/servicecatalog.k8s.io/v1beta1/clusterservicebrokers',
+    {},
+    (_type, _apiObj, watchObj) => {
+      return (
+        watchObj.object.metadata.name.includes(name) &&
+        watchObj.object.status.conditions.some(
+          (c) => c.type == 'Ready' && c.status == 'True',
+        )
+      );
+    },
+    timeout,
+    `Waiting for ${name} cluster service broker (${timeout} ms)`,
   );
 }
 
 function waitForServiceClass(name, namespace = 'default', timeout = 90000) {
   return waitForK8sObject(
-      `/apis/servicecatalog.k8s.io/v1beta1/namespaces/${namespace}/serviceclasses`,
-      {},
-      (_type, _apiObj, watchObj) => {
-        return watchObj.object.spec.externalName.includes(name);
-      },
-      timeout,
-      `Waiting for ${name} service class timeout (${timeout} ms)`,
+    `/apis/servicecatalog.k8s.io/v1beta1/namespaces/${namespace}/serviceclasses`,
+    {},
+    (_type, _apiObj, watchObj) => {
+      return watchObj.object.spec.externalName.includes(name);
+    },
+    timeout,
+    `Waiting for ${name} service class timeout (${timeout} ms)`,
   );
 }
 
 function waitForServicePlanByServiceClass(
-    serviceClassName,
-    namespace = 'default',
-    timeout = 90000,
+  serviceClassName,
+  namespace = 'default',
+  timeout = 90000,
 ) {
   return waitForK8sObject(
-      `/apis/servicecatalog.k8s.io/v1beta1/namespaces/${namespace}/serviceplans`,
-      {},
-      (_type, _apiObj, watchObj) => {
-        return watchObj.object.spec.serviceClassRef.name.includes(
-            serviceClassName,
-        );
-      },
-      timeout,
-      `Waiting for ${serviceClassName} service plan timeout (${timeout} ms)`,
+    `/apis/servicecatalog.k8s.io/v1beta1/namespaces/${namespace}/serviceplans`,
+    {},
+    (_type, _apiObj, watchObj) => {
+      return watchObj.object.spec.serviceClassRef.name.includes(
+        serviceClassName,
+      );
+    },
+    timeout,
+    `Waiting for ${serviceClassName} service plan timeout (${timeout} ms)`,
   );
 }
 
 function waitForServiceInstance(name, namespace = 'default', timeout = 90000) {
   return waitForK8sObject(
-      `/apis/servicecatalog.k8s.io/v1beta1/namespaces/${namespace}/serviceinstances`,
-      {},
-      (_type, _apiObj, watchObj) => {
-        return (
-          watchObj.object.metadata.name == name &&
+    `/apis/servicecatalog.k8s.io/v1beta1/namespaces/${namespace}/serviceinstances`,
+    {},
+    (_type, _apiObj, watchObj) => {
+      return (
+        watchObj.object.metadata.name == name &&
         watchObj.object.status.conditions &&
         watchObj.object.status.conditions.some(
-            (c) => c.type == 'Ready' && c.status == 'True',
+          (c) => c.type == 'Ready' && c.status == 'True',
         )
-        );
-      },
-      timeout,
-      `Waiting for service instance ${name} timeout (${timeout} ms)`,
+      );
+    },
+    timeout,
+    `Waiting for service instance ${name} timeout (${timeout} ms)`,
   );
 }
 
 function waitForServiceBinding(name, namespace = 'default', timeout = 90000) {
   return waitForK8sObject(
-      `/apis/servicecatalog.k8s.io/v1beta1/namespaces/${namespace}/servicebindings`,
-      {},
-      (_type, _apiObj, watchObj) => {
-        return (
-          watchObj.object.metadata.name == name &&
+    `/apis/servicecatalog.k8s.io/v1beta1/namespaces/${namespace}/servicebindings`,
+    {},
+    (_type, _apiObj, watchObj) => {
+      return (
+        watchObj.object.metadata.name == name &&
         watchObj.object.status.conditions &&
         watchObj.object.status.conditions.some(
-            (c) => c.type == 'Ready' && c.status == 'True',
+          (c) => c.type == 'Ready' && c.status == 'True',
         )
-        );
-      },
-      timeout,
-      `Waiting for service binding ${name} timeout (${timeout} ms)`,
+      );
+    },
+    timeout,
+    `Waiting for service binding ${name} timeout (${timeout} ms)`,
   );
 }
 
 function waitForServiceBindingUsage(
-    name,
-    namespace = 'default',
-    timeout = 90000,
+  name,
+  namespace = 'default',
+  timeout = 90000,
 ) {
   return waitForK8sObject(
-      `/apis/servicecatalog.kyma-project.io/v1alpha1/namespaces/${namespace}/servicebindingusages`,
-      {},
-      (_type, _apiObj, watchObj) => {
-        return (
-          watchObj.object.metadata.name == name &&
+    `/apis/servicecatalog.kyma-project.io/v1alpha1/namespaces/${namespace}/servicebindingusages`,
+    {},
+    (_type, _apiObj, watchObj) => {
+      return (
+        watchObj.object.metadata.name == name &&
         watchObj.object.status.conditions &&
         watchObj.object.status.conditions.some(
-            (c) => c.type == 'Ready' && c.status == 'True',
+          (c) => c.type == 'Ready' && c.status == 'True',
         )
-        );
-      },
-      timeout,
-      `Waiting for service binding usage ${name} timeout (${timeout} ms)`,
+      );
+    },
+    timeout,
+    `Waiting for service binding usage ${name} timeout (${timeout} ms)`,
   );
 }
 
 function waitForReplicaSet(name, namespace = 'default', timeout = 90000) {
   return waitForK8sObject(
-      `/apis/apps/v1/namespaces/${namespace}/replicasets`,
-      {},
-      (_type, _apiObj, watchObj) => {
-        return (
-          watchObj.object.metadata.name === name &&
+    `/apis/apps/v1/namespaces/${namespace}/replicasets`,
+    {},
+    (_type, _apiObj, watchObj) => {
+      return (
+        watchObj.object.metadata.name === name &&
         watchObj.object.status &&
         watchObj.object.status.readyReplicas > 0 &&
         watchObj.object.status.availableReplicas > 0
-        );
-      },
-      timeout,
-      `Waiting for replica set ${name} timeout (${timeout} ms)`,
+      );
+    },
+    timeout,
+    `Waiting for replica set ${name} timeout (${timeout} ms)`,
   );
 }
 
 function waitForDaemonSet(name, namespace = 'default', timeout = 90000) {
   return waitForK8sObject(
-      `/apis/apps/v1/watch/namespaces/${namespace}/daemonsets/${name}`,
-      {},
-      (_type, watchObj, _) => {
-        return (
-          watchObj.status.numberReady === watchObj.status.desiredNumberScheduled
-        );
-      },
-      timeout,
-      `Waiting for daemonset ${name} timeout (${timeout} ms)`,
+    `/apis/apps/v1/watch/namespaces/${namespace}/daemonsets/${name}`,
+    {},
+    (_type, watchObj, _) => {
+      return (
+        watchObj.status.numberReady === watchObj.status.desiredNumberScheduled
+      );
+    },
+    timeout,
+    `Waiting for daemonset ${name} timeout (${timeout} ms)`,
   );
 }
 
 function waitForDeployment(name, namespace = 'default', timeout = 90000) {
   return waitForK8sObject(
-      `/apis/apps/v1/namespaces/${namespace}/deployments`,
-      {},
-      (_type, _apiObj, watchObj) => {
-        return (
-          watchObj.object.metadata.name === name &&
+    `/apis/apps/v1/namespaces/${namespace}/deployments`,
+    {},
+    (_type, _apiObj, watchObj) => {
+      return (
+        watchObj.object.metadata.name === name &&
         watchObj.object.status.conditions &&
         watchObj.object.status.conditions.some(
-            (c) => c.type === 'Available' && c.status === 'True',
+          (c) => c.type === 'Available' && c.status === 'True',
         )
-        );
-      },
-      timeout,
-      `Waiting for deployment ${name} timeout (${timeout} ms)`,
+      );
+    },
+    timeout,
+    `Waiting for deployment ${name} timeout (${timeout} ms)`,
   );
 }
 
 function waitForStatefulSet(name, namespace = 'default', timeout = 90000) {
   return waitForK8sObject(
-      `/apis/apps/v1/namespaces/${namespace}/statefulsets`,
-      {},
-      (_type, _apiObj, watchObj) => {
-        return (
-          watchObj.object.metadata.name === name &&
+    `/apis/apps/v1/namespaces/${namespace}/statefulsets`,
+    {},
+    (_type, _apiObj, watchObj) => {
+      return (
+        watchObj.object.metadata.name === name &&
         watchObj.object.status.readyReplicas > 0
-        );
-      },
-      timeout,
-      `Waiting for StatefulSet ${name} timeout (${timeout} ms)`,
+      );
+    },
+    timeout,
+    `Waiting for StatefulSet ${name} timeout (${timeout} ms)`,
   );
 }
 
 function waitForJob(name, namespace = 'default', timeout = 900000, success = 1) {
   return waitForK8sObject(
-      `/apis/batch/v1/namespaces/${namespace}/jobs`,
-      {},
-      (_type, _apiObj, watchObj) => {
-        return (
-          watchObj.object.metadata.name === name &&
+    `/apis/batch/v1/namespaces/${namespace}/jobs`,
+    {},
+    (_type, _apiObj, watchObj) => {
+      return (
+        watchObj.object.metadata.name === name &&
         watchObj.object.status.succeeded >= success
-        );
-      },
-      timeout,
-      `Waiting for Job ${name} to succeed ${success} timeout (${timeout} ms)`,
+      );
+    },
+    timeout,
+    `Waiting for Job ${name} to succeed ${success} timeout (${timeout} ms)`,
   );
 }
 
@@ -727,9 +735,10 @@ async function printContainerLogs(selector, container, namespace = 'default', ti
       // use write rather than console.log to prevent double line feed
       process.stdout.write(chunk);
     });
-    const end = new Promise(function(resolve, reject) {
+    const end = new Promise(function (resolve, reject) {
       logStream.on('end', () => {
-        process.stdout.write('\n'); resolve();
+        process.stdout.write('\n');
+        resolve();
       });
       logStream.on('error', reject);
     });
@@ -745,15 +754,15 @@ function waitForVirtualService(namespace, apiRuleName, timeout = 20000) {
     labelSelector: `apirule.gateway.kyma-project.io/v1alpha1=${apiRuleName}.${namespace}`,
   };
   return waitForK8sObject(
-      path,
-      query,
-      (_type, _apiObj, watchObj) => {
-        return (
-          watchObj.object.spec.hosts && watchObj.object.spec.hosts.length == 1
-        );
-      },
-      timeout,
-      `Wait for VirtualService ${apiRuleName} timeout (${timeout} ms)`,
+    path,
+    query,
+    (_type, _apiObj, watchObj) => {
+      return (
+        watchObj.object.spec.hosts && watchObj.object.spec.hosts.length == 1
+      );
+    },
+    timeout,
+    `Wait for VirtualService ${apiRuleName} timeout (${timeout} ms)`,
   );
 }
 
@@ -787,78 +796,78 @@ async function getPersistentVolumeClaim(namespace, name) {
 function waitForTokenRequest(name, namespace, timeout = 5000) {
   const path = `/apis/applicationconnector.kyma-project.io/v1alpha1/namespaces/${namespace}/tokenrequests`;
   return waitForK8sObject(
-      path,
-      {},
-      (_type, _apiObj, watchObj) => {
-        return (
-          watchObj.object.metadata.name === name &&
+    path,
+    {},
+    (_type, _apiObj, watchObj) => {
+      return (
+        watchObj.object.metadata.name === name &&
         watchObj.object.status &&
         watchObj.object.status.state == 'OK' &&
         watchObj.object.status.url
-        );
-      },
-      timeout,
-      'Wait for TokenRequest timeout',
+      );
+    },
+    timeout,
+    'Wait for TokenRequest timeout',
   );
 }
 
 function waitForCompassConnection(name, timeout = 90000) {
   const path = '/apis/compass.kyma-project.io/v1alpha1/compassconnections';
   return waitForK8sObject(
-      path,
-      {},
-      (_type, _apiObj, watchObj) => {
-        return (
-          watchObj.object.metadata.name === name &&
+    path,
+    {},
+    (_type, _apiObj, watchObj) => {
+      return (
+        watchObj.object.metadata.name === name &&
         watchObj.object.status.connectionState &&
         ['Connected', 'Synchronized'].indexOf(
-            watchObj.object.status.connectionState,
+          watchObj.object.status.connectionState,
         ) !== -1
-        );
-      },
-      timeout,
-      `Wait for Compass connection ${name} timeout (${timeout} ms)`,
+      );
+    },
+    timeout,
+    `Wait for Compass connection ${name} timeout (${timeout} ms)`,
   );
 }
 
 function waitForPodWithLabel(
-    labelKey,
-    labelValue,
-    namespace = 'default',
-    timeout = 90000,
+  labelKey,
+  labelValue,
+  namespace = 'default',
+  timeout = 90000,
 ) {
   const query = {
     labelSelector: `${labelKey}=${labelValue}`,
   };
   return waitForK8sObject(
-      `/api/v1/namespaces/${namespace}/pods`,
-      query,
-      (_type, _apiObj, watchObj) => {
-        return (
-          watchObj.object.status.phase == 'Running' &&
+    `/api/v1/namespaces/${namespace}/pods`,
+    query,
+    (_type, _apiObj, watchObj) => {
+      return (
+        watchObj.object.status.phase == 'Running' &&
         watchObj.object.status.containerStatuses.every((cs) => cs.ready)
-        );
-      },
-      timeout,
-      `Waiting for pod with label ${labelKey}=${labelValue} timeout (${timeout} ms)`,
+      );
+    },
+    timeout,
+    `Waiting for pod with label ${labelKey}=${labelValue} timeout (${timeout} ms)`,
   );
 }
 
 function waitForConfigMap(
-    cmName,
-    namespace = 'default',
-    timeout = 90000,
+  cmName,
+  namespace = 'default',
+  timeout = 90000,
 ) {
   return waitForK8sObject(
-      `/api/v1/namespaces/${namespace}/configmaps`,
-      {},
-      (_type, _apiObj, watchObj) => {
-        return watchObj.object.metadata.name.includes(
-            cmName,
-        );
-      },
-      timeout,
-      `Waiting for ${cmName} service plan timeout (${timeout} ms)`,
+    `/api/v1/namespaces/${namespace}/configmaps`,
+    {},
+    (_type, _apiObj, watchObj) => {
+      return watchObj.object.metadata.name.includes(
+        cmName,
+      );
+    },
+    timeout,
+    `Waiting for ${cmName} service plan timeout (${timeout} ms)`,
   );
 }
 
@@ -870,28 +879,28 @@ async function deleteNamespaces(namespaces, wait = true) {
     return;
   }
   const waitForNamespacesResult = waitForK8sObject(
-      '/api/v1/namespaces',
-      {},
-      (type, _, watchObj) => {
-        if (type == 'DELETED') {
-          namespaces = namespaces.filter(
-              (n) => n != watchObj.object.metadata.name,
-          );
-        }
-        return namespaces.length == 0 || !wait;
-      },
-      10 * 60 * 1000,
-      'Timeout for deleting namespaces: ' + namespaces,
+    '/api/v1/namespaces',
+    {},
+    (type, _, watchObj) => {
+      if (type == 'DELETED') {
+        namespaces = namespaces.filter(
+          (n) => n != watchObj.object.metadata.name,
+        );
+      }
+      return namespaces.length == 0 || !wait;
+    },
+    10 * 60 * 1000,
+    'Timeout for deleting namespaces: ' + namespaces,
   );
 
   for (const name of namespaces) {
     k8sDynamicApi
-        .delete({
-          apiVersion: 'v1',
-          kind: 'Namespace',
-          metadata: {name},
-        })
-        .catch(ignoreNotFound);
+      .delete({
+        apiVersion: 'v1',
+        kind: 'Namespace',
+        metadata: {name},
+      })
+      .catch(ignoreNotFound);
   }
   return waitForNamespacesResult;
 }
@@ -949,9 +958,9 @@ async function getAllResourceTypes() {
     });
     const body = JSON.parse(response.body);
     return Promise.all(
-        body.items.map((api) => {
-          return resourceTypes(api.spec.group, api.spec.version);
-        }),
+      body.items.map((api) => {
+        return resourceTypes(api.spec.group, api.spec.version);
+      }),
     ).then((results) => {
       return results.flat();
     });
@@ -970,11 +979,11 @@ async function getSecretData(name, namespace) {
     const secret = await getSecret(name, namespace);
     const encodedData = secret.data;
     return Object.fromEntries(
-        Object.entries(encodedData).map(([key, value]) => {
-          const buff = Buffer.from(value, 'base64');
-          const decoded = buff.toString('ascii');
-          return [key, decoded];
-        }),
+      Object.entries(encodedData).map(([key, value]) => {
+        const buff = Buffer.from(value, 'base64');
+        const decoded = buff.toString('ascii');
+        return [key, decoded];
+      }),
     );
   } catch (e) {
     console.log('Error:', e);
@@ -985,7 +994,7 @@ async function getSecretData(name, namespace) {
 function ignore404(e) {
   if (
     (e.statusCode && e.statusCode == 404) ||
-      (e.response && e.response.statusCode && e.response.statusCode == 404)
+    (e.response && e.response.statusCode && e.response.statusCode == 404)
   ) {
     debug('Warning: Ignoring NotFound error');
     return;
@@ -1008,11 +1017,11 @@ async function deleteK8sObjects(objects) {
 
 // NOTE: this no longer works, it relies on kube-api sending `selfLink` but the field has been deprecated
 async function deleteAllK8sResources(
-    path,
-    query = {},
-    retries = 2,
-    interval = 1000,
-    keepFinalizer = false,
+  path,
+  query = {},
+  retries = 2,
+  interval = 1000,
+  keepFinalizer = false,
 ) {
   try {
     let i = 0;
@@ -1084,10 +1093,10 @@ async function deleteK8sResource(o, path, keepFinalizer = false) {
   }
 
   debug(
-      'Deleted resource:',
-      o.metadata.name,
-      'namespace:',
-      o.metadata.namespace,
+    'Deleted resource:',
+    o.metadata.name,
+    'namespace:',
+    o.metadata.namespace,
   );
 }
 
@@ -1095,40 +1104,40 @@ async function getContainerRestartsForAllNamespaces() {
   const {body} = await k8sCoreV1Api.listPodForAllNamespaces();
   const pods = body.items;
   return pods
-      .filter((pd) => !!pd.status && !!pd.status.containerStatuses)
-      .map((pod) => ({
-        name: pod.metadata.name,
-        containerStatuses: pod.status.containerStatuses.map((elem) => ({
-          name: elem.name,
-          image: elem.image,
-          restartCount: elem.restartCount,
-        })),
-      }));
+    .filter((pd) => !!pd.status && !!pd.status.containerStatuses)
+    .map((pod) => ({
+      name: pod.metadata.name,
+      containerStatuses: pod.status.containerStatuses.map((elem) => ({
+        name: elem.name,
+        image: elem.image,
+        restartCount: elem.restartCount,
+      })),
+    }));
 }
 
 async function getKymaAdminBindings() {
   const {body} = await k8sRbacAuthorizationV1Api.listClusterRoleBinding();
   const adminRoleBindings = body.items;
   return adminRoleBindings
-      .filter(
-          (clusterRoleBinding) => clusterRoleBinding.roleRef.name === 'cluster-admin',
-      )
-      .map((clusterRoleBinding) => ({
-        name: clusterRoleBinding.metadata.name,
-        role: clusterRoleBinding.roleRef.name,
-        users: clusterRoleBinding.subjects
-            .filter((sub) => sub.kind == 'User')
-            .map((sub) => sub.name),
-        groups: clusterRoleBinding.subjects
-            .filter((sub) => sub.kind == 'Group')
-            .map((sub) => sub.name),
-      }));
+    .filter(
+      (clusterRoleBinding) => clusterRoleBinding.roleRef.name === 'cluster-admin',
+    )
+    .map((clusterRoleBinding) => ({
+      name: clusterRoleBinding.metadata.name,
+      role: clusterRoleBinding.roleRef.name,
+      users: clusterRoleBinding.subjects
+        .filter((sub) => sub.kind == 'User')
+        .map((sub) => sub.name),
+      groups: clusterRoleBinding.subjects
+        .filter((sub) => sub.kind == 'Group')
+        .map((sub) => sub.name),
+    }));
 }
 
 async function findKymaAdminBindingForUser(targetUser) {
   const kymaAdminBindings = await getKymaAdminBindings();
   return kymaAdminBindings.find(
-      (binding) => binding.users.indexOf(targetUser) >= 0,
+    (binding) => binding.users.indexOf(targetUser) >= 0,
   );
 }
 
@@ -1149,59 +1158,59 @@ function getContainerStatusByImage(pod, image) {
 
 const printRestartReport = (prevPodList = [], afterTestPodList = []) => {
   const report = prevPodList
-      .map((elem) => {
+    .map((elem) => {
       // check if the pod that existed before the test started still exists after test
-        const afterTestPod = afterTestPodList.find(
-            (arg) => arg.name === elem.name,
-        );
-        if (!afterTestPod || !afterTestPod.containerStatuses) {
-          return {
-            name: elem.name,
-            containerRestarts: null,
-          };
-        }
-
+      const afterTestPod = afterTestPodList.find(
+        (arg) => arg.name === elem.name,
+      );
+      if (!afterTestPod || !afterTestPod.containerStatuses) {
         return {
           name: elem.name,
-          containerRestarts: elem.containerStatuses
-              .map((status) => {
-                const afterTestContainerStatus = getContainerStatusByImage(
-                    afterTestPod,
-                    status.image,
-                );
-
-                let restartsTillTestStart = 0;
-                let message = '';
-                if (!afterTestContainerStatus || !status) {
-                  restartsTillTestStart = -1;
-                  message = 'Container removed during report generation';
-                } else {
-                  restartsTillTestStart =
-                afterTestContainerStatus.restartCount - status.restartCount;
-                }
-
-                return {
-                  name: status.name,
-                  image: status.image,
-                  restartsTillTestStart: restartsTillTestStart,
-                  info: message,
-                };
-              })
-              .filter((status) => {
-                // we're interested only in containers that crashed during test
-                return status.restartsTillTestStart > 0;
-              }),
+          containerRestarts: null,
         };
-      })
-      .filter((arg) => {
+      }
+
+      return {
+        name: elem.name,
+        containerRestarts: elem.containerStatuses
+          .map((status) => {
+            const afterTestContainerStatus = getContainerStatusByImage(
+              afterTestPod,
+              status.image,
+            );
+
+            let restartsTillTestStart = 0;
+            let message = '';
+            if (!afterTestContainerStatus || !status) {
+              restartsTillTestStart = -1;
+              message = 'Container removed during report generation';
+            } else {
+              restartsTillTestStart =
+                afterTestContainerStatus.restartCount - status.restartCount;
+            }
+
+            return {
+              name: status.name,
+              image: status.image,
+              restartsTillTestStart: restartsTillTestStart,
+              info: message,
+            };
+          })
+          .filter((status) => {
+            // we're interested only in containers that crashed during test
+            return status.restartsTillTestStart > 0;
+          }),
+      };
+    })
+    .filter((arg) => {
       // filter out pods that do not have statuses after test or somehow cannot be mapped to pods before test start
-        return (
-          Array.isArray(arg.containerRestarts) &&
+      return (
+        Array.isArray(arg.containerRestarts) &&
         arg.containerRestarts.some(
-            (container) => container.restartsTillTestStart != 0,
+          (container) => container.restartsTillTestStart != 0,
         )
-        );
-      });
+      );
+    });
   if (report.length > 0) {
     console.log(`
 =========RESTART REPORT========
@@ -1271,11 +1280,11 @@ function getEnvOrThrow(key) {
 
 function wait(fn, checkFn, timeout, interval) {
   return new Promise((resolve, reject) => {
-    const th = setTimeout(function() {
+    const th = setTimeout(function () {
       debug('wait timeout');
       done(reject, new Error('wait timeout'));
     }, timeout);
-    const ih = setInterval(async function() {
+    const ih = setInterval(async function () {
       let res;
       try {
         res = await fn();
@@ -1299,7 +1308,8 @@ async function ensureApplicationMapping(name, ns) {
     kind: 'ApplicationMapping',
     metadata: {name: name, namespace: ns},
   };
-  await k8sDynamicApi.delete(applicationMapping).catch(() => {});
+  await k8sDynamicApi.delete(applicationMapping).catch(() => {
+  });
   return await k8sDynamicApi.create(applicationMapping).catch((ex) => {
     debug(ex);
     throw ex;
@@ -1308,17 +1318,17 @@ async function ensureApplicationMapping(name, ns) {
 
 async function patchApplicationGateway(name, ns) {
   const deployment = await retryPromise(
-      async () => {
-        return k8sAppsApi.readNamespacedDeployment(name, ns);
-      },
-      12,
-      5000,
+    async () => {
+      return k8sAppsApi.readNamespacedDeployment(name, ns);
+    },
+    12,
+    5000,
   ).catch(() => {
     throw new Error(`Timeout: ${name} is not ready`);
   });
   if (
     deployment.body.spec.template.spec.containers[0].args.includes(
-        '--skipVerify=true',
+      '--skipVerify=true',
     )
   ) {
     debug('Application Gateway already patched');
@@ -1333,8 +1343,8 @@ async function patchApplicationGateway(name, ns) {
 
   let replicaSets = await k8sAppsApi.listNamespacedReplicaSet(ns);
   const appGatewayRSsNames = replicaSets.body.items
-      .filter((rs) => rs.metadata.labels['app'] === name)
-      .map((r) => r.metadata.name);
+    .filter((rs) => rs.metadata.labels['app'] === name)
+    .map((r) => r.metadata.name);
   expect(appGatewayRSsNames.length).to.not.equal(0);
 
   const patch = [
@@ -1348,21 +1358,21 @@ async function patchApplicationGateway(name, ns) {
     headers: {'Content-type': k8s.PatchUtils.PATCH_FORMAT_JSON_PATCH},
   };
   await k8sAppsApi.patchNamespacedDeployment(
-      name,
-      ns,
-      patch,
-      undefined,
-      undefined,
-      undefined,
-      undefined,
-      options,
+    name,
+    ns,
+    patch,
+    undefined,
+    undefined,
+    undefined,
+    undefined,
+    options,
   );
 
   const patchedDeployment = await k8sAppsApi.readNamespacedDeployment(name, ns);
   expect(
-      patchedDeployment.body.spec.template.spec.containers[0].args.findIndex(
-          (arg) => arg.toString().includes('--skipVerify=true'),
-      ),
+    patchedDeployment.body.spec.template.spec.containers[0].args.findIndex(
+      (arg) => arg.toString().includes('--skipVerify=true'),
+    ),
   ).to.not.equal(-1);
 
   // We have to wait for the deployment to redeploy the actual pod.
@@ -1374,15 +1384,15 @@ async function patchApplicationGateway(name, ns) {
   // the deployment are running and the old ones are being terminated.
   replicaSets = await k8sAppsApi.listNamespacedReplicaSet(ns);
   const patchedAppGatewayRSs = replicaSets.body.items.filter(
-      (rs) =>
-        rs.metadata.labels['app'] === name &&
+    (rs) =>
+      rs.metadata.labels['app'] === name &&
       !appGatewayRSsNames.includes(rs.metadata.name),
   );
   expect(patchedAppGatewayRSs.length).to.not.equal(0);
   await waitForReplicaSet(
-      patchedAppGatewayRSs[0].metadata.name,
-      ns,
-      120 * 1000,
+    patchedAppGatewayRSs[0].metadata.name,
+    ns,
+    120 * 1000,
   );
 
   return patchedDeployment;
@@ -1437,14 +1447,14 @@ async function patchDeployment(name, ns, patch) {
     headers: {'Content-type': k8s.PatchUtils.PATCH_FORMAT_JSON_PATCH},
   };
   await k8sAppsApi.patchNamespacedDeployment(
-      name,
-      ns,
-      patch,
-      undefined,
-      undefined,
-      undefined,
-      undefined,
-      options,
+    name,
+    ns,
+    patch,
+    undefined,
+    undefined,
+    undefined,
+    undefined,
+    options,
   );
 }
 
@@ -1487,7 +1497,7 @@ function sleep(ms) {
  * @param {string} namespace - namespace where to create the secret
  * @return {json} - event mesh config data
  */
-async function createEventingBackendK8sSecret(eventMeshSecretFilePath, name, namespace='default') {
+async function createEventingBackendK8sSecret(eventMeshSecretFilePath, name, namespace = 'default') {
   // read EventMesh secret from specified file
   const eventMeshSecret = JSON.parse(fs.readFileSync(eventMeshSecretFilePath, {encoding: 'utf8'}));
 
@@ -1524,7 +1534,7 @@ async function createEventingBackendK8sSecret(eventMeshSecretFilePath, name, nam
  * @param {string} namespace - namespace where the secret exists
  * @return {Promise<void>}
  */
-function deleteEventingBackendK8sSecret(name, namespace='default') {
+function deleteEventingBackendK8sSecret(name, namespace = 'default') {
   const secretJson = {
     apiVersion: 'v1',
     kind: 'Secret',
@@ -1544,7 +1554,7 @@ function deleteEventingBackendK8sSecret(name, namespace='default') {
  * @param {string} namespace - namespace where the secret exists
  * @param {string} backendType - backend type to switch to. (beb or nats)
  */
-async function switchEventingBackend(secretName, namespace='default', backendType='beb') {
+async function switchEventingBackend(secretName, namespace = 'default', backendType = 'beb') {
   // patch data to label the eventing-backend secret
   const patch = [
     {
@@ -1560,14 +1570,14 @@ async function switchEventingBackend(secretName, namespace='default', backendTyp
 
   // apply k8s patch
   await k8sCoreV1Api.patchNamespacedSecret(
-      secretName,
-      namespace,
-      patch,
-      undefined,
-      undefined,
-      undefined,
-      undefined,
-      options,
+    secretName,
+    namespace,
+    patch,
+    undefined,
+    undefined,
+    undefined,
+    undefined,
+    options,
   );
 
   await sleep(30 * 1000); // Putting on sleep because there may be a delay in eventing-backend status update propagation
@@ -1582,24 +1592,24 @@ async function switchEventingBackend(secretName, namespace='default', backendTyp
  * @param {number} timeout - timeout for waiting
  * @return {void}
  */
-function waitForEventingBackendToReady(backendType='beb',
-    name='eventing-backend',
-    namespace = 'kyma-system',
-    timeout = 180000) {
+function waitForEventingBackendToReady(backendType = 'beb',
+                                       name = 'eventing-backend',
+                                       namespace = 'kyma-system',
+                                       timeout = 180000) {
   return waitForK8sObject(
-      `/apis/eventing.kyma-project.io/v1alpha1/namespaces/${namespace}/eventingbackends`,
-      {},
-      (_type, _apiObj, watchObj) => {
-        return (
-          watchObj.object.metadata.name == name &&
+    `/apis/eventing.kyma-project.io/v1alpha1/namespaces/${namespace}/eventingbackends`,
+    {},
+    (_type, _apiObj, watchObj) => {
+      return (
+        watchObj.object.metadata.name == name &&
         watchObj.object.status.backendType.toLowerCase() == backendType.toLowerCase() &&
         watchObj.object.status.eventingReady == true &&
         watchObj.object.status.publisherProxyReady == true &&
         watchObj.object.status.subscriptionControllerReady == true
-        );
-      },
-      timeout,
-      `Waiting for eventing-backend: ${name} to get ready  timeout (${timeout} ms)`,
+      );
+    },
+    timeout,
+    `Waiting for eventing-backend: ${name} to get ready  timeout (${timeout} ms)`,
   );
 }
 
@@ -1610,9 +1620,9 @@ async function printEventingControllerLogs() {
   try {
     console.log('****** Printing logs of eventing-controller from kyma-system');
     await printContainerLogs('app.kubernetes.io/name=controller,app.kubernetes.io/instance=eventing',
-        'controller',
-        'kyma-system',
-        180000);
+      'controller',
+      'kyma-system',
+      180000);
   } catch (err) {
     console.log(err);
     throw err;
@@ -1629,33 +1639,33 @@ async function printStatusOfInClusterEventingInfrastructure(targetNamespace, enc
     let functionReady = false;
 
     const publisherDepl = await k8sAppsApi.listNamespacedDeployment(kymaSystem,
-        undefined,
-        undefined,
-        undefined,
-        undefined,
-        'app.kubernetes.io/name=eventing-publisher-proxy, app.kubernetes.io/instance=eventing',
-        undefined );
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      'app.kubernetes.io/name=eventing-publisher-proxy, app.kubernetes.io/instance=eventing',
+      undefined);
     if (publisherDepl.body.items[0].status.replicas === publisherDepl.body.items[0].status.readyReplicas) {
       publisherProxyReady = true;
     }
 
     const controllerDepl = await k8sAppsApi.listNamespacedDeployment(kymaSystem,
-        undefined,
-        undefined,
-        undefined,
-        undefined,
-        'app.kubernetes.io/name=controller, app.kubernetes.io/instance=eventing',
-        undefined );
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      'app.kubernetes.io/name=controller, app.kubernetes.io/instance=eventing',
+      undefined);
     if (controllerDepl.body.items[0].status.replicas === controllerDepl.body.items[0].status.readyReplicas) {
       eventingControllerReady = true;
     }
 
     const natsServerPods = await k8sCoreV1Api.listNamespacedPod(kymaSystem,
-        undefined,
-        undefined,
-        undefined,
-        undefined,
-        'kyma-project.io/dashboard=eventing, nats_cluster=eventing-nats');
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      'kyma-project.io/dashboard=eventing, nats_cluster=eventing-nats');
     for (const nats of natsServerPods.body.items) {
       if (nats.status.phase === 'Running') {
         natsServerReadyCounts += 1;
@@ -1692,9 +1702,9 @@ async function printEventingPublisherProxyLogs() {
   try {
     console.log('****** Printing logs of eventing-publisher-proxy from kyma-system');
     await printContainerLogs('app.kubernetes.io/name=eventing-publisher-proxy, app.kubernetes.io/instance=eventing',
-        'eventing-publisher-proxy',
-        'kyma-system',
-        180000);
+      'eventing-publisher-proxy',
+      'kyma-system',
+      180000);
   } catch (err) {
     console.log(err);
     throw err;
@@ -1729,8 +1739,8 @@ async function getTraceDAG(trace) {
 async function attachTraceChildSpans(parentSpan, trace) {
   // find child spans of current parentSpan and attach it to parentSpan object
   parentSpan['childSpans'] = trace['spans'].filter((s) => s['references'].find((r) => r['refType'] === 'CHILD_OF' &&
-  r['spanID'] === parentSpan['spanID'] &&
-  r['traceID'] === parentSpan['traceID']));
+    r['spanID'] === parentSpan['spanID'] &&
+    r['traceID'] === parentSpan['traceID']));
   // recursively, find and attach further child span of each parentSpan["childSpans"]
   if (parentSpan['childSpans'] && parentSpan['childSpans'].length > 0) {
     for (const child of parentSpan['childSpans']) {
