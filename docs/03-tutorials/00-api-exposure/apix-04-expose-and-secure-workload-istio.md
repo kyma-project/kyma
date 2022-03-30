@@ -84,7 +84,7 @@ Follow the instructions in the tabs to expose httpbin workload or a function usi
        - destination:
            port:
              number: 8000
-           host: httpbin.default.svc.cluster.local
+           host: httpbin.$NAMESPACE.svc.cluster.local
    EOF
    ```
   </details>
@@ -123,7 +123,7 @@ Follow the instructions in the tabs to expose httpbin workload or a function usi
        - destination:
            port:
              number: 80
-           host: function.default.svc.cluster.local
+           host: function.$NAMESPACE.svc.cluster.local
    EOF
    ```
 
@@ -144,7 +144,7 @@ Follow the instructions in the tabs to secure httpbin or a function using JWT to
 1. Export the following values:
 
    ```shell
-   export ISSUER={ISSUER} # e.g. https://YOUR_OIDC_COMPLIANT_IDENTITY_PROVIDER_INSTANCE.com
+   export ISSUER={ISSUER} # e.g. https://YOUR_OIDC_COMPLIANT_IDENTITY_PROVIDER_INSTANCE
    export JWKS_URI={JWKS_URL} # e.g. https://YOUR_OIDC_COMPLIANT_IDENTITY_PROVIDER_INSTANCE/.well-known/jwks.json
    ```
 
@@ -190,7 +190,7 @@ Follow the instructions in the tabs to secure httpbin or a function using JWT to
 3. Using correct JWT token should give you 200 OK response
 
    ```shell
-   curl -ik -X GET https://httpbin.$DOMAIN/status/200 --header 'Authorization:Bearer ACCESS_TOKEN'
+   curl -ik -X GET https://httpbin.$DOMAIN/status/200 --header "Authorization:Bearer $ACCESS_TOKEN"
    ```
   </details>
 
@@ -248,7 +248,7 @@ Follow the instructions in the tabs to secure httpbin or a function using JWT to
 3. Using correct JWT token should give you 200 OK response
 
    ```shell
-   curl -ik -X GET https://function.$DOMAIN/status/200 --header 'Authorization:Bearer ACCESS_TOKEN'
+   curl -ik -X GET https://function.$DOMAIN/status/200 --header "Authorization:Bearer $ACCESS_TOKEN"
    ```
   </details>
 </div>
