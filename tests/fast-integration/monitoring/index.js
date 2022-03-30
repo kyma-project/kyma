@@ -27,8 +27,8 @@ function monitoringTests() {
       await prometheus.assertPodsExist();
     });
 
-    it('Prometheus Port-Forward should be working', async () => {
-      await prometheus.assertPrometheusUIReachable();
+    it('Prometheus UI should be reachable', async () => {
+      await prometheus.assertPrometheusUIIsReachable();
     });
 
     it('Prometheus targets should be healthy', async () => {
