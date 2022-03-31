@@ -122,7 +122,7 @@ describe('Telemetry Operator tests', function() {
 
   after(async function() {
     cancelPortForward();
-    await k8sDelete(logPipelineCR, telemetryNamespace);
-    await k8sCoreV1Api.deleteNamespace(mockNamespace);
+    // await k8sDelete(logPipelineCR, telemetryNamespace);
+    // await k8sCoreV1Api.deleteNamespace(mockNamespace);
   });
 });
