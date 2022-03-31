@@ -4,29 +4,25 @@ const {
   switchEventingBackend,
 } = require('../utils');
 const {
-  testNamespace,
-  backendK8sSecretName,
-  backendK8sSecretNamespace,
-  mockNamespace,
-  natsBackend,
-  isSKR,
-} = require('./utils');
-const {
   sendLegacyEventAndCheckTracing,
   sendCloudEventStructuredModeAndCheckTracing,
   sendCloudEventBinaryModeAndCheckTracing,
   waitForSubscriptionsTillReady,
 } = require('../test/fixtures/commerce-mock');
 const {prometheusPortForward} = require('../monitoring/client');
-// const {testPrep} = require('./test-prep');
-// const {testCleanup} = require('./test-cleanup');
+
+const testNamespace = `test`;
+const mockNamespace = process.env.MOCK_NAMESPACE || 'mocks';
+const backendK8sSecretName = process.env.BACKEND_SECRET_NAME || 'tracing-backend';
+const backendK8sSecretNamespace = process.env.BACKEND_SECRET_NAMESPACE || 'default';
+const isSKR = process.env.KYMA_TYPE === 'SKR';
+const natsBackend = 'nats';
 
 async function tracingTests() {
   if (isSKR) {
     console.log('Skipping eventing tracing tests on SKR...');
     return;
   }
-  // await testPrep();
   describe('Tracing Tests:', function() {
     this.timeout(5 * 60 * 1000); // 5 min
     let cancelPrometheusPortForward = null;
@@ -68,7 +64,6 @@ async function tracingTests() {
       });
     });
   });
-  // await testCleanup();
 }
 module.exports = {
   tracingTests,
