@@ -33,37 +33,37 @@ This tutorial is based on a sample HttpBin service deployment and a sample Funct
    export ISSUER={YOUR_ISSUER}
    ```
 
-4. Get the JWT access token:
+4. Get the JWT:
 
    ```bash
    curl -X POST "$TOKEN_ENDPOINT" -d "grant_type=client_credentials" -d "client_id=$CLIENT_ID" -H "Content-Type: application/x-www-form-urlencoded" -H "Authorization: Basic $ENCODED_CREDENTIALS"
    ```
 
-5. Save the result, and export it as an environment variable:
+5. Save the token, and export it as an environment variable:
 
    ```bash
    export ACCESS_TOKEN={YOUR_ACCESSS_TOKEN}
    ```
 
-## Expose your workload using VirtualService
+## Expose your workload using a Virtual Service
 
-Follow the instructions in the tabs to expose httpbin workload or a function using VirtualService.
+Follow the instructions in the tabs to expose the HttpBin workload or a Function using a Virtual Service.
 
 <div tabs>
 
   <details>
   <summary>
-  Expose HttpBin
+  Expose the HttpBin workload
   </summary>
 
-1. Export the following environment variables:
+1. Export your domain name and gateway as environment variables:
 
    ```shell
-   export DOMAIN_TO_EXPOSE_WORKLOADS={DOMAIN_NAME} # This is a Kyma domain or your custom subdomain e.g. api.mydomain.com.
+   export DOMAIN_TO_EXPOSE_WORKLOADS={DOMAIN_NAME} # This is a Kyma domain or your custom subdomain, for example: api.mydomain.com.
    export GATEWAY=$NAMESPACE/httpbin-gateway # If you don't want to use your custom domain but a Kyma domain, use the following Kyma Gateway: `kyma-system/kyma-gateway`.
    ```
 
-2. Run:
+2. Create a Virtual Service:
 
    ```shell
    cat <<EOF | kubectl apply -f -
@@ -95,14 +95,14 @@ Follow the instructions in the tabs to expose httpbin workload or a function usi
   Expose a function
   </summary>
 
-1. Export the following environment variables:
+1. Export your domain name and gateway as environment variables:
 
    ```shell
-   export DOMAIN_TO_EXPOSE_WORKLOADS={DOMAIN_NAME} # This is a Kyma domain or your custom subdomain e.g. api.mydomain.com.
+   export DOMAIN_TO_EXPOSE_WORKLOADS={DOMAIN_NAME} # This is a Kyma domain or your custom subdomain, for example: api.mydomain.com.
    export GATEWAY=$NAMESPACE/httpbin-gateway # If you don't want to use your custom domain but a Kyma domain, use the following Kyma Gateway: `kyma-system/kyma-gateway`.
    ```
 
-2. Run:
+2. Create a Virtual Service:
 
    ```shell
    cat <<EOF | kubectl apply -f -
@@ -131,15 +131,15 @@ Follow the instructions in the tabs to expose httpbin workload or a function usi
   </details>
 </div>
 
-## Add a RequestAuthentication which requires JWT token for all requests for workloads that have matching label
+## Secure a workload or a Function using JWT
 
-Follow the instructions in the tabs to secure httpbin or a function using JWT token.
+To secure the Httpbin workload or a Function using JWT, add a Request Authentication. It requires a JWT for all requests for workloads that have matching label. Follow the instructions in the tabs:
 
 <div tabs>
 
   <details>
   <summary>
-  Secure HttpBin
+  Secure the Httpbin workload
   </summary>
 
 1. Create RequestAuthentication and AuthorizationPolicy resources:
