@@ -73,11 +73,10 @@ describe('Execute SKR test',  async function () {
         await delay(60000);
       });
 
-      describe("Actual tests", () => {
         oidcE2ETest();
         commerceMockTest();
         waitForReconciliation();
-        });
+
       after("After", async function () {
         await unregisterScenarioFromCompass(director, this.options.scenarioName);
       });

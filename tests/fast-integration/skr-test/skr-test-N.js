@@ -30,6 +30,15 @@ const updateTimeout = 1000 * 60 * 20; // 20m
 
 function oidcE2ETest() {
   describe('OIDC E2E Test', function() {
+
+    beforeEach('beforeEach', async function() {
+      console.log(`beforeEach started at ${new Date(Date.now()).toISOString()}`)
+    });
+
+    it('Start OIDCE2ETest timestamp', async function() {
+      console.log(`OIDC E2E Test started at ${new Date(Date.now()).toISOString()}`)
+    });
+
     it('Assure initial OIDC config is applied on shoot cluster', async function() {
       ensureValidShootOIDCConfig(this.shoot, this.options.oidc0);
     });
@@ -147,6 +156,10 @@ function oidcE2ETest() {
       await ensureKymaAdminBindingDoesNotExistsForUser(this.options.administrators1[0]);
       await ensureKymaAdminBindingDoesNotExistsForUser(this.options.administrators1[1]);
       await ensureKymaAdminBindingExistsForUser(this.options.administrator0[0]);
+    });
+
+    it('Finish OIDCE2ETest timestamp', async function() {
+      console.log(`OIDC E2E Test finished at ${new Date(Date.now()).toISOString()}`)
     });
 
   });
