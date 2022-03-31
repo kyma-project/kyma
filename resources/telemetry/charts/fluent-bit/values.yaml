@@ -71,7 +71,7 @@ service:
 #   prometheus.io/scrape: "true"
 
 serviceMonitor:
-  enabled: false
+  enabled: true
 #   namespace: monitoring
 #   interval: 10s
 #   scrapeTimeout: 10s
@@ -270,3 +270,8 @@ initContainers:
     command: ['sh', '-c', 'cp /main/* /fluent-bit/etc/ && mkdir -p /fluent-bit/etc/dynamic/ && cp /dynamic/* /fluent-bit/etc/dynamic && mkdir -p /fluent-bit/etc/dynamic-parsers/ && cp /dynamic-parsers/* /fluent-bit/etc/dynamic-parsers || touch /fluent-bit/etc/dynamic/empty.conf']
 
 logLevel: warn
+
+istio:
+# Allows you to loosen strict mTLS for exposed HTTP endpoint (basically, the /metrics endpoint)
+# If omitted or set to false the mesh-wide policy is applied which sets mTLS mode to strict
+  permissiveMtls: false
