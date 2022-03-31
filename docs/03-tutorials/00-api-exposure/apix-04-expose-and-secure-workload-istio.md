@@ -2,7 +2,8 @@
 title: Expose and secure a workload with Istio
 ---
 
-This tutorial shows how to expose and secure a workload using Istio build in security features. You will expose the workload via creating a [Virtual Service](https://istio.io/latest/docs/reference/config/networking/virtual-service/) and securing the access to it via adding JWT token validation verified by Istio security configuration with [Authorization Policy](https://istio.io/latest/docs/reference/config/security/authorization-policy/) together with [Request Authentication](https://istio.io/latest/docs/reference/config/security/request_authentication/) 
+This tutorial shows how to expose and secure a workload using Istio build in security features. You will expose the workload via creating a [Virtual Service](https://istio.io/latest/docs/reference/config/networking/virtual-service/) and securing the access to it via adding JWT token validation verified by Istio security configuration with [Authorization Policy](https://istio.io/latest/docs/reference/config/security/authorization-policy/) together with [Request Authentication](https://istio.io/latest/docs/reference/config/security/request_authentication/).
+
 ## Prerequisites
 
 To follow this tutorial, use Kyma 2.0 or higher.
