@@ -40,7 +40,6 @@ function initializeK8sClient(opts) {
     console.log(err.message);
   }
 }
-
 initializeK8sClient();
 
 /**
@@ -396,8 +395,7 @@ function waitForK8sObject(path, query, checkFn, timeout, timeoutMsg) {
                 resolve(watchObj.object);
               }
             },
-            () => {
-            },
+            () => {},
         )
         .then((r) => {
           res = r;
@@ -417,7 +415,7 @@ function waitForNamespace(name, timeout = 30000) {
       (_type, _apiObj, watchObj) => {
         return (
           watchObj.metadata.name === name &&
-        watchObj.status.phase === 'Active'
+            watchObj.status.phase === 'Active'
         );
       },
       timeout,
@@ -527,9 +525,9 @@ function waitForClusterServiceBroker(name, timeout = 90000) {
       (_type, _apiObj, watchObj) => {
         return (
           watchObj.object.metadata.name.includes(name) &&
-        watchObj.object.status.conditions.some(
-            (c) => c.type == 'Ready' && c.status == 'True',
-        )
+            watchObj.object.status.conditions.some(
+                (c) => c.type == 'Ready' && c.status == 'True',
+            )
         );
       },
       timeout,
@@ -731,8 +729,7 @@ async function printContainerLogs(selector, container, namespace = 'default', ti
     });
     const end = new Promise(function(resolve, reject) {
       logStream.on('end', () => {
-        process.stdout.write('\n');
-        resolve();
+        process.stdout.write('\n'); resolve();
       });
       logStream.on('error', reject);
     });
@@ -988,7 +985,7 @@ async function getSecretData(name, namespace) {
 function ignore404(e) {
   if (
     (e.statusCode && e.statusCode == 404) ||
-    (e.response && e.response.statusCode && e.response.statusCode == 404)
+      (e.response && e.response.statusCode && e.response.statusCode == 404)
   ) {
     debug('Warning: Ignoring NotFound error');
     return;
@@ -1302,8 +1299,7 @@ async function ensureApplicationMapping(name, ns) {
     kind: 'ApplicationMapping',
     metadata: {name: name, namespace: ns},
   };
-  await k8sDynamicApi.delete(applicationMapping).catch(() => {
-  });
+  await k8sDynamicApi.delete(applicationMapping).catch(() => {});
   return await k8sDynamicApi.create(applicationMapping).catch((ex) => {
     debug(ex);
     throw ex;
@@ -1491,7 +1487,7 @@ function sleep(ms) {
  * @param {string} namespace - namespace where to create the secret
  * @return {json} - event mesh config data
  */
-async function createEventingBackendK8sSecret(eventMeshSecretFilePath, name, namespace = 'default') {
+async function createEventingBackendK8sSecret(eventMeshSecretFilePath, name, namespace='default') {
   // read EventMesh secret from specified file
   const eventMeshSecret = JSON.parse(fs.readFileSync(eventMeshSecretFilePath, {encoding: 'utf8'}));
 
@@ -1528,7 +1524,7 @@ async function createEventingBackendK8sSecret(eventMeshSecretFilePath, name, nam
  * @param {string} namespace - namespace where the secret exists
  * @return {Promise<void>}
  */
-function deleteEventingBackendK8sSecret(name, namespace = 'default') {
+function deleteEventingBackendK8sSecret(name, namespace='default') {
   const secretJson = {
     apiVersion: 'v1',
     kind: 'Secret',
@@ -1548,7 +1544,7 @@ function deleteEventingBackendK8sSecret(name, namespace = 'default') {
  * @param {string} namespace - namespace where the secret exists
  * @param {string} backendType - backend type to switch to. (beb or nats)
  */
-async function switchEventingBackend(secretName, namespace = 'default', backendType = 'beb') {
+async function switchEventingBackend(secretName, namespace='default', backendType='beb') {
   // patch data to label the eventing-backend secret
   const patch = [
     {
@@ -1586,8 +1582,8 @@ async function switchEventingBackend(secretName, namespace = 'default', backendT
  * @param {number} timeout - timeout for waiting
  * @return {void}
  */
-function waitForEventingBackendToReady(backendType = 'beb',
-    name = 'eventing-backend',
+function waitForEventingBackendToReady(backendType='beb',
+    name='eventing-backend',
     namespace = 'kyma-system',
     timeout = 180000) {
   return waitForK8sObject(
@@ -1638,7 +1634,7 @@ async function printStatusOfInClusterEventingInfrastructure(targetNamespace, enc
         undefined,
         undefined,
         'app.kubernetes.io/name=eventing-publisher-proxy, app.kubernetes.io/instance=eventing',
-        undefined);
+        undefined );
     if (publisherDepl.body.items[0].status.replicas === publisherDepl.body.items[0].status.readyReplicas) {
       publisherProxyReady = true;
     }
@@ -1649,7 +1645,7 @@ async function printStatusOfInClusterEventingInfrastructure(targetNamespace, enc
         undefined,
         undefined,
         'app.kubernetes.io/name=controller, app.kubernetes.io/instance=eventing',
-        undefined);
+        undefined );
     if (controllerDepl.body.items[0].status.replicas === controllerDepl.body.items[0].status.readyReplicas) {
       eventingControllerReady = true;
     }
@@ -1733,8 +1729,8 @@ async function getTraceDAG(trace) {
 async function attachTraceChildSpans(parentSpan, trace) {
   // find child spans of current parentSpan and attach it to parentSpan object
   parentSpan['childSpans'] = trace['spans'].filter((s) => s['references'].find((r) => r['refType'] === 'CHILD_OF' &&
-    r['spanID'] === parentSpan['spanID'] &&
-    r['traceID'] === parentSpan['traceID']));
+  r['spanID'] === parentSpan['spanID'] &&
+  r['traceID'] === parentSpan['traceID']));
   // recursively, find and attach further child span of each parentSpan["childSpans"]
   if (parentSpan['childSpans'] && parentSpan['childSpans'].length > 0) {
     for (const child of parentSpan['childSpans']) {
