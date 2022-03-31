@@ -142,7 +142,7 @@ Follow the instructions in the tabs to secure httpbin or a function using JWT to
   Secure HttpBin
   </summary>
 
-1. Run:
+1. Create RequestAuthentication and AuthorizationPolicy resources:
 
    ```shell
    cat <<EOF | kubectl apply -f -
@@ -175,13 +175,13 @@ Follow the instructions in the tabs to secure httpbin or a function using JWT to
    EOF
    ```
 
-2. If you try to access secured workload you should get 403 Forbidden error:
+2. Access the workload you secured. You will get the `403 Forbidden` error.
 
    ```shell
    curl -ik -X GET https://httpbin.$DOMAIN_TO_EXPOSE_WORKLOADS/status/200
    ```
 
-3. Using correct JWT token should give you 200 OK response
+3. Now, access the secured workload using the correct JWT. You will get the `200 OK` response.
 
    ```shell
    curl -ik -X GET https://httpbin.$DOMAIN_TO_EXPOSE_WORKLOADS/status/200 --header "Authorization:Bearer $ACCESS_TOKEN"
@@ -190,10 +190,10 @@ Follow the instructions in the tabs to secure httpbin or a function using JWT to
 
   <details>
   <summary>
-  Secure a function
+  Secure a Function
   </summary>
 
-1. Run:
+1. Create RequestAuthentication and AuthorizationPolicy resources:
 
    ```shell
    cat <<EOF | kubectl apply -f -
@@ -226,13 +226,13 @@ Follow the instructions in the tabs to secure httpbin or a function using JWT to
    EOF
    ```
 
-2. If you try to access secured workload you should get 403 Forbidden error:
+2. Access the workload you secured. You will get the `403 Forbidden` error.
 
    ```shell
    curl -ik -X GET https://function.$DOMAIN_TO_EXPOSE_WORKLOADS/status/200
    ```
 
-3. Using correct JWT token should give you 200 OK response
+3. Now, access the secured workload using the correct JWT. You will get the `200 OK` response.
 
    ```shell
    curl -ik -X GET https://function.$DOMAIN_TO_EXPOSE_WORKLOADS/status/200 --header "Authorization:Bearer $ACCESS_TOKEN"
