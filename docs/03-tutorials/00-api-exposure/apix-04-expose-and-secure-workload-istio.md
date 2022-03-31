@@ -2,7 +2,7 @@
 title: Expose and secure a workload with Istio
 ---
 
-This tutorial shows how to expose and secure a workload using Istio built-in security features. You will expose the workload by creating a [Virtual Service](https://istio.io/latest/docs/reference/config/networking/virtual-service/). Then, you will secure the access to your workload by adding the JWT token validation verified by Istio security configuration with [Authorization Policy](https://istio.io/latest/docs/reference/config/security/authorization-policy/) and [Request Authentication](https://istio.io/latest/docs/reference/config/security/request_authentication/).
+This tutorial shows how to expose and secure a workload using Istio built-in security features. You will expose the workload by creating a [Virtual Service](https://istio.io/latest/docs/reference/config/networking/virtual-service/). Then, you will secure access to your workload by adding the JWT validation verified by the Istio security configuration with [Authorization Policy](https://istio.io/latest/docs/reference/config/security/authorization-policy/) and [Request Authentication](https://istio.io/latest/docs/reference/config/security/request_authentication/).
 
 ## Prerequisites
 
@@ -39,7 +39,7 @@ This tutorial is based on a sample HttpBin service deployment and a sample Funct
    curl -X POST "$TOKEN_ENDPOINT" -d "grant_type=client_credentials" -d "client_id=$CLIENT_ID" -H "Content-Type: application/x-www-form-urlencoded" -H "Authorization: Basic $ENCODED_CREDENTIALS"
    ```
 
-5. Save the token, and export it as an environment variable:
+5. Save the token and export it as an environment variable:
 
    ```bash
    export ACCESS_TOKEN={YOUR_ACCESSS_TOKEN}
@@ -47,7 +47,7 @@ This tutorial is based on a sample HttpBin service deployment and a sample Funct
 
 ## Expose your workload using a Virtual Service
 
-Follow the instructions in the tabs to expose the HttpBin workload or a Function using a Virtual Service.
+Follow the instructions in the tabs to expose the HttpBin workload or the Function using a Virtual Service.
 
 <div tabs>
 
@@ -92,10 +92,10 @@ Follow the instructions in the tabs to expose the HttpBin workload or a Function
 
   <details>
   <summary>
-  Expose a function
+  Expose the Function
   </summary>
 
-1. Export your domain name and gateway as environment variables:
+1. Export your domain name and gateway name as environment variables:
 
    ```shell
    export DOMAIN_TO_EXPOSE_WORKLOADS={DOMAIN_NAME} # This is a Kyma domain or your custom subdomain, for example: api.mydomain.com.
@@ -131,9 +131,9 @@ Follow the instructions in the tabs to expose the HttpBin workload or a Function
   </details>
 </div>
 
-## Secure a workload or a Function using JWT
+## Secure a workload or the Function using a JWT
 
-To secure the Httpbin workload or a Function using JWT, add a Request Authentication. Workloads that have the **matchLabels** parameter specified, require a JWT for all requests. Follow the instructions in the tabs:
+To secure the Httpbin workload or the Function using a JWT, create a Request Authentication with AuthorizationPolicy. Workloads that have the **matchLabels** parameter specified require a JWT for all requests. Follow the instructions in the tabs:
 
 <div tabs>
 
@@ -142,7 +142,7 @@ To secure the Httpbin workload or a Function using JWT, add a Request Authentica
   Secure the Httpbin workload
   </summary>
 
-1. Create RequestAuthentication and AuthorizationPolicy resources:
+1. Create the Request Authentication and Authorization Policy resources:
 
    ```shell
    cat <<EOF | kubectl apply -f -
@@ -190,10 +190,10 @@ To secure the Httpbin workload or a Function using JWT, add a Request Authentica
 
   <details>
   <summary>
-  Secure a Function
+  Secure the Function
   </summary>
 
-1. Create RequestAuthentication and AuthorizationPolicy resources:
+1. Create the Request Authentication and Authorization Policy resources:
 
    ```shell
    cat <<EOF | kubectl apply -f -
