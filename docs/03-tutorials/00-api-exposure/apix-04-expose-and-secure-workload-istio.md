@@ -56,7 +56,7 @@ Follow the instructions in the tabs to expose the HttpBin workload or the Functi
   Expose the HttpBin workload
   </summary>
 
-1. Export your domain name and gateway as environment variables:
+1. Export your domain name and gateway name as environment variables:
 
    ```shell
    export DOMAIN_TO_EXPOSE_WORKLOADS={DOMAIN_NAME} # This is a Kyma domain or your custom subdomain, for example: api.mydomain.com.
