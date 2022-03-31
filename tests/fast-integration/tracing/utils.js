@@ -7,7 +7,7 @@ const {
   deleteEventingBackendK8sSecret,
 } = require('../utils');
 
-const testNamespace = `test-tracing`;
+const testNamespace = `test`;
 const mockNamespace = process.env.MOCK_NAMESPACE || 'mocks';
 const backendK8sSecretName = process.env.BACKEND_SECRET_NAME || 'tracing-backend';
 const backendK8sSecretNamespace = process.env.BACKEND_SECRET_NAMESPACE || 'default';

@@ -18,15 +18,15 @@ const {
   waitForSubscriptionsTillReady,
 } = require('../test/fixtures/commerce-mock');
 const {prometheusPortForward} = require('../monitoring/client');
-const {testPrep} = require('./test-prep');
-const {testCleanup} = require('./test-cleanup');
+// const {testPrep} = require('./test-prep');
+// const {testCleanup} = require('./test-cleanup');
 
 async function tracingTests() {
   if (isSKR) {
     console.log('Skipping eventing tracing tests on SKR...');
     return;
   }
-  await testPrep();
+  // await testPrep();
   describe('Tracing Tests:', function() {
     this.timeout(5 * 60 * 1000); // 5 min
     let cancelPrometheusPortForward = null;
@@ -68,7 +68,7 @@ async function tracingTests() {
       });
     });
   });
-  await testCleanup();
+  // await testCleanup();
 }
 module.exports = {
   tracingTests,
