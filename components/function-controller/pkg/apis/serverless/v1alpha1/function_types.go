@@ -53,7 +53,7 @@ type FunctionSpec struct {
 	Runtime Runtime `json:"runtime,omitempty"`
 
 	// +optional
-	CustomRuntimeImage string `json:"customRuntimeImage,omitempty"`
+	RuntimeImageOverride string `json:"runtimeImageOverride,omitempty"`
 
 	// Env defines an array of key value pairs need to be used as env variable for a function
 	Env []corev1.EnvVar `json:"env,omitempty"`
@@ -134,12 +134,12 @@ type Condition struct {
 
 // FunctionStatus defines the observed state of Function
 type FunctionStatus struct {
-	Conditions         []Condition `json:"conditions,omitempty"`
-	Repository         `json:",inline,omitempty"`
-	Commit             string          `json:"commit,omitempty"`
-	Source             string          `json:"source,omitempty"`
-	Runtime            RuntimeExtended `json:"runtime,omitempty"`
-	CustomRuntimeImage string          `json:"customRuntimeImage,omitempty"`
+	Conditions           []Condition `json:"conditions,omitempty"`
+	Repository           `json:",inline,omitempty"`
+	Commit               string          `json:"commit,omitempty"`
+	Source               string          `json:"source,omitempty"`
+	Runtime              RuntimeExtended `json:"runtime,omitempty"`
+	RuntimeImageOverride string          `json:"runtimeImageOverride,omitempty"`
 }
 
 type Repository struct {

@@ -1142,22 +1142,22 @@ func TestFunctionReconciler_Reconcile(t *testing.T) {
 
 		g.Expect(deployment.Spec.Template.Annotations).To(gomega.Equal(restartedAtAnnotation))
 	})
-	t.Run("should reconcile function with customRuntimeImage", func(t *testing.T) {
+	t.Run("should reconcile function with RuntimeImageOverride", func(t *testing.T) {
 		//GIVEN
 		g := gomega.NewGomegaWithT(t)
-		customRuntimeImage := "any-custom-image"
-		inFunction := newFixFunctionWithCustomImage(testNamespace, "custom-runtime-image", customRuntimeImage, 1, 2)
+		runtimeImageOverride := "any-custom-image"
+		inFunction := newFixFunctionWithCustomImage(testNamespace, "custom-runtime-image", runtimeImageOverride, 1, 2)
 		g.Expect(resourceClient.Create(context.TODO(), inFunction)).To(gomega.Succeed())
 		defer deleteFunction(g, resourceClient, inFunction)
 
 		request := ctrl.Request{NamespacedName: types.NamespacedName{Namespace: inFunction.GetNamespace(), Name: inFunction.GetName()}}
 
 		//WHEN
-		t.Log("should detect customRuntimeImage change")
+		t.Log("should detect runtimeImageOverride change")
 
 		function := &serverlessv1alpha1.Function{}
 		g.Expect(resourceClient.Get(context.TODO(), request.NamespacedName, function)).To(gomega.Succeed())
-		function.Spec.CustomRuntimeImage = customRuntimeImage
+		function.Spec.RuntimeImageOverride = runtimeImageOverride
 		g.Expect((resourceClient.Update(ctx, function))).To(gomega.Succeed())
 
 		result, err := reconciler.Reconcile(ctx, request)
@@ -1167,12 +1167,12 @@ func TestFunctionReconciler_Reconcile(t *testing.T) {
 
 		function = &serverlessv1alpha1.Function{}
 		g.Expect(resourceClient.Get(context.TODO(), request.NamespacedName, function)).To(gomega.Succeed())
-		g.Expect(function.Spec.CustomRuntimeImage).To(gomega.Equal(customRuntimeImage))
-		g.Expect(function.Status.CustomRuntimeImage).To(gomega.Equal(customRuntimeImage))
+		g.Expect(function.Spec.RuntimeImageOverride).To(gomega.Equal(runtimeImageOverride))
+		g.Expect(function.Status.RuntimeImageOverride).To(gomega.Equal(runtimeImageOverride))
 
-		t.Log("should detect customRuntimeImage rollback")
+		t.Log("should detect runtimeImageOverride rollback")
 
-		function.Spec.CustomRuntimeImage = ""
+		function.Spec.RuntimeImageOverride = ""
 		g.Expect((resourceClient.Update(ctx, function))).To(gomega.Succeed())
 
 		result, err = reconciler.Reconcile(ctx, request)
@@ -1181,8 +1181,8 @@ func TestFunctionReconciler_Reconcile(t *testing.T) {
 		g.Expect(result.RequeueAfter).To(gomega.Equal(time.Duration(0)))
 
 		function = &serverlessv1alpha1.Function{}
-		g.Expect(function.Spec.CustomRuntimeImage).To(gomega.Equal(""))
-		g.Expect(function.Status.CustomRuntimeImage).To(gomega.Equal(""))
+		g.Expect(function.Spec.RuntimeImageOverride).To(gomega.Equal(""))
+		g.Expect(function.Status.RuntimeImageOverride).To(gomega.Equal(""))
 	})
 }
 

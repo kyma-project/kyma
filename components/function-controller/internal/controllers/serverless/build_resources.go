@@ -60,8 +60,8 @@ func (r *FunctionReconciler) buildJob(instance *serverlessv1alpha1.Function, rtm
 	imageName := r.buildImageAddress(instance, dockerConfig.PushAddress)
 	args := r.config.Build.ExecutorArgs
 	args = append(args, fmt.Sprintf("%s=%s", destinationArg, imageName), fmt.Sprintf("--context=dir://%s", workspaceMountPath))
-	if instance.Spec.CustomRuntimeImage != "" {
-		args = append(args, fmt.Sprintf("--build-arg=base_image=%s", instance.Spec.CustomRuntimeImage))
+	if instance.Spec.RuntimeImageOverride != "" {
+		args = append(args, fmt.Sprintf("--build-arg=base_image=%s", instance.Spec.RuntimeImageOverride))
 	}
 
 	return batchv1.Job{
@@ -245,8 +245,8 @@ func (r *FunctionReconciler) buildGitJob(instance *serverlessv1alpha1.Function, 
 	imageName := r.buildImageAddress(instance, dockerConfig.PushAddress)
 	args := r.config.Build.ExecutorArgs
 	args = append(args, fmt.Sprintf("%s=%s", destinationArg, imageName), fmt.Sprintf("--context=dir://%s", workspaceMountPath))
-	if instance.Spec.CustomRuntimeImage != "" {
-		args = append(args, fmt.Sprintf("--build-arg=base_image=%s", instance.Spec.CustomRuntimeImage))
+	if instance.Spec.RuntimeImageOverride != "" {
+		args = append(args, fmt.Sprintf("--build-arg=base_image=%s", instance.Spec.RuntimeImageOverride))
 	}
 
 	one := int32(1)
