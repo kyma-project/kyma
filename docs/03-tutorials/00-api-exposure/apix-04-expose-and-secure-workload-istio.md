@@ -58,7 +58,7 @@ Follow the instructions in the tabs to expose httpbin workload or a function usi
 1. Export the following environment variables:
 
    ```shell
-   export DOMAIN={DOMAIN_NAME} # This is a Kyma domain or your custom subdomain e.g. api.mydomain.com.
+   export DOMAIN_TO_EXPOSE_WORKLOADS={DOMAIN_NAME} # This is a Kyma domain or your custom subdomain e.g. api.mydomain.com.
    export GATEWAY=$NAMESPACE/httpbin-gateway # If you don't want to use your custom domain but a Kyma domain, use the following Kyma Gateway: `kyma-system/kyma-gateway`.
    ```
 
@@ -73,7 +73,7 @@ Follow the instructions in the tabs to expose httpbin workload or a function usi
      namespace: $NAMESPACE
    spec:
      hosts:
-     - "httpbin.$DOMAIN"
+     - "httpbin.$DOMAIN_TO_EXPOSE_WORKLOADS"
      gateways:
      - $GATEWAY
      http:
@@ -97,7 +97,7 @@ Follow the instructions in the tabs to expose httpbin workload or a function usi
 1. Export the following environment variables:
 
    ```shell
-   export DOMAIN={DOMAIN_NAME} # This is a Kyma domain or your custom subdomain e.g. api.mydomain.com.
+   export DOMAIN_TO_EXPOSE_WORKLOADS={DOMAIN_NAME} # This is a Kyma domain or your custom subdomain e.g. api.mydomain.com.
    export GATEWAY=$NAMESPACE/httpbin-gateway # If you don't want to use your custom domain but a Kyma domain, use the following Kyma Gateway: `kyma-system/kyma-gateway`.
    ```
 
@@ -112,7 +112,7 @@ Follow the instructions in the tabs to expose httpbin workload or a function usi
      namespace: $NAMESPACE
    spec:
      hosts:
-     - "function.$DOMAIN"
+     - "function.$DOMAIN_TO_EXPOSE_WORKLOADS"
      gateways:
      - $GATEWAY
      http:
@@ -130,7 +130,7 @@ Follow the instructions in the tabs to expose httpbin workload or a function usi
   </details>
 </div>
 
-## Add a RequestAuthentication which requires JWT token for all requests for workloads that have label app:httpbin
+## Add a RequestAuthentication which requires JWT token for all requests for workloads that have matching label
 
 Follow the instructions in the tabs to secure httpbin or a function using JWT token.
 
@@ -184,13 +184,13 @@ Follow the instructions in the tabs to secure httpbin or a function using JWT to
 2. If you try to access secured workload you should get 403 Forbidden error:
 
    ```shell
-   curl -ik -X GET https://httpbin.$DOMAIN/status/200
+   curl -ik -X GET https://httpbin.$DOMAIN_TO_EXPOSE_WORKLOADS/status/200
    ```
 
 3. Using correct JWT token should give you 200 OK response
 
    ```shell
-   curl -ik -X GET https://httpbin.$DOMAIN/status/200 --header "Authorization:Bearer $ACCESS_TOKEN"
+   curl -ik -X GET https://httpbin.$DOMAIN_TO_EXPOSE_WORKLOADS/status/200 --header "Authorization:Bearer $ACCESS_TOKEN"
    ```
   </details>
 
@@ -242,13 +242,13 @@ Follow the instructions in the tabs to secure httpbin or a function using JWT to
 2. If you try to access secured workload you should get 403 Forbidden error:
 
    ```shell
-   curl -ik -X GET https://function.$DOMAIN/status/200
+   curl -ik -X GET https://function.$DOMAIN_TO_EXPOSE_WORKLOADS/status/200
    ```
 
 3. Using correct JWT token should give you 200 OK response
 
    ```shell
-   curl -ik -X GET https://function.$DOMAIN/status/200 --header "Authorization:Bearer $ACCESS_TOKEN"
+   curl -ik -X GET https://function.$DOMAIN_TO_EXPOSE_WORKLOADS/status/200 --header "Authorization:Bearer $ACCESS_TOKEN"
    ```
   </details>
 </div>
