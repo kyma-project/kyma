@@ -280,53 +280,28 @@ class KCPWrapper {
   }
 
   async getLastReconciliation(shootName) {
-    try {
-
-      // try {
-      //   if (!shootName) {}
-      // } catch (e) {
-      //   console.log('skipping reconciliation logging: no shootName provided by runtimeStatus');
-      //   return;
-      // }
-
-      // kcp reconciliations operations -c <shootName> -o json
-      const reconciliationsOperations = await this.getReconciliationsOperations(shootName);
-
-      const objReconciliationsOperations = JSON.parse(reconciliationsOperations);
-
-      if ( objReconciliationsOperations == null ) {
-        console.log(`skipping reconciliation logging: kcp rc operations -c ${shootName}
+    const reconciliationsOperations = await this.getReconciliationsOperations(shootName);
+    const objReconciliationsOperations = JSON.parse(reconciliationsOperations);
+    if (objReconciliationsOperations == null) {
+      console.log(`skipping reconciliation logging: kcp rc operations -c ${shootName}
          -o json returned null`);
-        return;
-      }
-      const objReconciliationsOperationsLength = objReconciliationsOperations.length;
-
-      if (objReconciliationsOperationsLength === 0) {
-        console.log(`no reconciliation operations found`);
-        return;
-      }
-      console.log(`number of reconciliation operations: ${objReconciliationsOperationsLength}`);
-
-      // using only last three operations
-      const lastObjReconciliationsOperations = objReconciliationsOperations.
-      slice(Math.max(0, objReconciliationsOperations.length - 1), objReconciliationsOperations.length);
-
-      console.log(`reconciliation operation status: ${lastObjReconciliationsOperations.status}`);
-
-      // kcp reconciliations info -i <scheduling-id> -o json
-      const getReconciliationsInfo = await this.getReconciliationsInfo(lastObjReconciliationsOperations.schedulingID);
-      console.log(`reconciliation info: ${lastObjReconciliationsOperations.schedulingID}: ${getReconciliationsInfo}`);
-
-      // for (const i of lastObjReconciliationsOperations) {
-      //   console.log(`reconciliation operation status: ${i.status}`);
-      //
-      //   // kcp reconciliations info -i <scheduling-id> -o json
-      //   const getReconciliationsInfo = await this.getReconciliationsInfo(i.schedulingID);
-      //   console.log(`reconciliation info: ${i.schedulingID}: ${getReconciliationsInfo}`);
-      // }
-    } catch {
-      console.log('skipping reconciliation logging: error in reconcileInformationLog');
+      return;
     }
+    const objReconciliationsOperationsLength = objReconciliationsOperations.length;
+    if (objReconciliationsOperationsLength === 0) {
+      console.log(`no reconciliation operations found`);
+      return;
+    }
+
+    const lastObjReconciliationsOperations = objReconciliationsOperations
+        .slice(Math.max(0, objReconciliationsOperations.length - 1), objReconciliationsOperations.length);
+
+    const lastReconciliation = {
+      schedulingID: lastObjReconciliationsOperations[0].schedulingID,
+      status: lastObjReconciliationsOperations[0].status
+    }
+
+    return lastReconciliation;
   }
 
   async reconcileInformationLog(runtimeStatus) {

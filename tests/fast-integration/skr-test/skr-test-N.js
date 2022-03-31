@@ -22,6 +22,7 @@ const {
 const {keb, gardener, director} = require('./helpers');
 const {prometheusPortForward} = require('../monitoring/client');
 const {KCPWrapper, KCPConfig} = require('../kcp/client');
+const {delay} = require('./');
 
 const kcp = new KCPWrapper(KCPConfig.fromEnv());
 
@@ -33,120 +34,120 @@ function oidcE2ETest() {
       ensureValidShootOIDCConfig(this.shoot, this.options.oidc0);
     });
 
-    // it('Assure initial OIDC config is part of kubeconfig', async function() {
-    //   await ensureValidOIDCConfigInCustomerFacingKubeconfig(keb, this.options.instanceID, this.options.oidc0);
-    // });
-    //
-    // it('Assure initial cluster admin', async function() {
-    //   await ensureKymaAdminBindingExistsForUser(this.options.administrator0[0]);
-    // });
-    //
-    // it('Update SKR service instance with OIDC config', async function() {
-    //   const customParams = {
-    //     oidc: this.options.oidc1,
-    //   };
-    //   const skr = await updateSKR(keb,
-    //       kcp,
-    //       gardener,
-    //       this.options.instanceID,
-    //       this.shoot.name,
-    //       customParams,
-    //       updateTimeout,
-    //       null,
-    //       false);
-    //   this.shoot = skr.shoot;
-    // });
-    //
-    // it('Should get Runtime Status after updating OIDC config', async function() {
-    //   try {
-    //     const runtimeStatus = await kcp.getRuntimeStatusOperations(this.options.instanceID);
-    //     console.log(`\nRuntime status: ${runtimeStatus}`);
-    //     await kcp.reconcileInformationLog(runtimeStatus);
-    //   } catch (e) {
-    //     console.log(`before hook failed: ${e.toString()}`);
-    //   }
-    // });
-    //
-    // it('Assure updated OIDC config is applied on shoot cluster', async function() {
-    //   ensureValidShootOIDCConfig(this.shoot, this.options.oidc1);
-    // });
+    it('Assure initial OIDC config is part of kubeconfig', async function() {
+      await ensureValidOIDCConfigInCustomerFacingKubeconfig(keb, this.options.instanceID, this.options.oidc0);
+    });
 
-    // it('Assure updated OIDC config is part of kubeconfig', async function() {
-    //   await ensureValidOIDCConfigInCustomerFacingKubeconfig(keb, this.options.instanceID, this.options.oidc1);
-    // });
-    //
-    // it('Assure cluster admin is preserved', async function() {
-    //   await ensureKymaAdminBindingExistsForUser(this.options.administrator0[0]);
-    // });
+    it('Assure initial cluster admin', async function() {
+      await ensureKymaAdminBindingExistsForUser(this.options.administrator0[0]);
+    });
 
-//     it('Update SKR service instance with new admins', async function() {
-//       const customParams = {
-//         administrators: this.options.administrators1,
-//       };
-//       const skr = await updateSKR(keb,
-//           kcp,
-//           gardener,
-//           this.options.instanceID,
-//           this.shoot.name,
-//           customParams,
-//           updateTimeout,
-//           null,
-//           false);
-//       this.shoot = skr.shoot;
-//     });
-//
-//     it('Should get Runtime Status after updating admins', async function() {
-//       const runtimeStatus = await kcp.getRuntimeStatusOperations(this.options.instanceID);
-//       console.log(`\nRuntime status: ${runtimeStatus}`);
-//       await kcp.reconcileInformationLog(runtimeStatus);
-//     });
-//
-//     it('Assure only new cluster admins are configured', async function() {
-//       await ensureKymaAdminBindingExistsForUser(this.options.administrators1[0]);
-//       await ensureKymaAdminBindingExistsForUser(this.options.administrators1[1]);
-//       await ensureKymaAdminBindingDoesNotExistsForUser(this.options.administrator0[0]);
-//     });
-// //=================
-//     it('C Update SKR service instance with OIDC config', async function() {
-//       const customParams = {
-//         oidc: this.options.oidc0,
-//         administrators: this.options.administrator0
-//       };
-//       const skr = await updateSKR(keb,
-//           kcp,
-//           gardener,
-//           this.options.instanceID,
-//           this.shoot.name,
-//           customParams,
-//           updateTimeout,
-//           null,
-//           false);
-//       this.shoot = skr.shoot;
-//     });
-//
-//     it('C Should get Runtime Status after updating OIDC config', async function() {
-//       try {
-//         const runtimeStatus = await kcp.getRuntimeStatusOperations(this.options.instanceID);
-//         console.log(`\nRuntime status: ${runtimeStatus}`);
-//         await kcp.reconcileInformationLog(runtimeStatus);
-//       } catch (e) {
-//         console.log(`before hook failed: ${e.toString()}`);
-//       }
-//     });
-//
-//     it('C Assure updated OIDC config is applied on shoot cluster', async function() {
-//       ensureValidShootOIDCConfig(this.shoot, this.options.oidc0);
-//     });
-//
-//     it('C Assure updated OIDC config is part of kubeconfig', async function() {
-//       await ensureValidOIDCConfigInCustomerFacingKubeconfig(keb, this.options.instanceID, this.options.oidc0);
-//     });
-//
-//     it('C Assure only new cluster admins are configured', async function() {
-//       await ensureKymaAdminBindingDoesNotExistsForUser(this.options.administrators1[0]);
-//       await ensureKymaAdminBindingDoesNotExistsForUser(this.options.administrators1[1]);
-//       await ensureKymaAdminBindingExistsForUser(this.options.administrator0[0]);
-//     });
+    it('Update SKR service instance with OIDC config', async function() {
+      const customParams = {
+        oidc: this.options.oidc1,
+      };
+      const skr = await updateSKR(keb,
+          kcp,
+          gardener,
+          this.options.instanceID,
+          this.shoot.name,
+          customParams,
+          updateTimeout,
+          null,
+          false);
+      this.shoot = skr.shoot;
+    });
+
+    it('Should get Runtime Status after updating OIDC config', async function() {
+      try {
+        const runtimeStatus = await kcp.getRuntimeStatusOperations(this.options.instanceID);
+        console.log(`\nRuntime status: ${runtimeStatus}`);
+        await kcp.reconcileInformationLog(runtimeStatus);
+      } catch (e) {
+        console.log(`before hook failed: ${e.toString()}`);
+      }
+    });
+
+    it('Assure updated OIDC config is applied on shoot cluster', async function() {
+      ensureValidShootOIDCConfig(this.shoot, this.options.oidc1);
+    });
+
+    it('Assure updated OIDC config is part of kubeconfig', async function() {
+      await ensureValidOIDCConfigInCustomerFacingKubeconfig(keb, this.options.instanceID, this.options.oidc1);
+    });
+
+    it('Assure cluster admin is preserved', async function() {
+      await ensureKymaAdminBindingExistsForUser(this.options.administrator0[0]);
+    });
+
+    it('Update SKR service instance with new admins', async function() {
+      const customParams = {
+        administrators: this.options.administrators1,
+      };
+      const skr = await updateSKR(keb,
+          kcp,
+          gardener,
+          this.options.instanceID,
+          this.shoot.name,
+          customParams,
+          updateTimeout,
+          null,
+          false);
+      this.shoot = skr.shoot;
+    });
+
+    it('Should get Runtime Status after updating admins', async function() {
+      const runtimeStatus = await kcp.getRuntimeStatusOperations(this.options.instanceID);
+      console.log(`\nRuntime status: ${runtimeStatus}`);
+      await kcp.reconcileInformationLog(runtimeStatus);
+    });
+
+    it('Assure only new cluster admins are configured', async function() {
+      await ensureKymaAdminBindingExistsForUser(this.options.administrators1[0]);
+      await ensureKymaAdminBindingExistsForUser(this.options.administrators1[1]);
+      await ensureKymaAdminBindingDoesNotExistsForUser(this.options.administrator0[0]);
+    });
+
+    it('Cleanup - update SKR service instance with initial OIDC config and admins', async function() {
+      const customParams = {
+        oidc: this.options.oidc0,
+        administrators: this.options.administrator0
+      };
+      const skr = await updateSKR(keb,
+          kcp,
+          gardener,
+          this.options.instanceID,
+          this.shoot.name,
+          customParams,
+          updateTimeout,
+          null,
+          false);
+      this.shoot = skr.shoot;
+    });
+
+    it('Cleanup - should get Runtime Status after updating OIDC config and admins', async function() {
+      try {
+        const runtimeStatus = await kcp.getRuntimeStatusOperations(this.options.instanceID);
+        console.log(`\nRuntime status: ${runtimeStatus}`);
+        await kcp.reconcileInformationLog(runtimeStatus);
+      } catch (e) {
+        console.log(`before hook failed: ${e.toString()}`);
+      }
+    });
+
+    it('Cleanup - assure updated OIDC config is applied on shoot cluster', async function() {
+      ensureValidShootOIDCConfig(this.shoot, this.options.oidc0);
+    });
+
+    it('Cleanup - assure updated OIDC config is part of kubeconfig', async function() {
+      await ensureValidOIDCConfigInCustomerFacingKubeconfig(keb, this.options.instanceID, this.options.oidc0);
+    });
+
+    it('Cleanup - assure only initial cluster admins are configured', async function() {
+      await ensureKymaAdminBindingDoesNotExistsForUser(this.options.administrators1[0]);
+      await ensureKymaAdminBindingDoesNotExistsForUser(this.options.administrators1[1]);
+      await ensureKymaAdminBindingExistsForUser(this.options.administrator0[0]);
+    });
 
   });
 }
@@ -200,7 +201,21 @@ function commerceMockTest() {
   });
 }
 
+function waitForReconciliation() {
+  describe("Wait For Reconciliation", function () {
+    it("Waiting for new reconciliation", async function () {
+      let l = await kcp.getLastReconciliation(this.shoot.name, true);
+      this.lastReconciliation = l;
+      while (!(this.lastReconciliation.schedulingID !== l.schedulingID && l.status === "ready")) {
+        await delay(10000);
+        l = await kcp.getLastReconciliation(this.shoot.name);
+      }
+    });
+  });
+}
+
 module.exports = {
   commerceMockTest,
   oidcE2ETest,
+  waitForReconciliation
 };

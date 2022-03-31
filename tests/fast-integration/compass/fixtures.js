@@ -15,7 +15,7 @@ const {
   deleteAllK8sResources,
 } = require('../utils');
 
-const UNREGISTER = process.env.UNREGISTER_FROM_COMPASS === "true" ;
+//const UNREGISTER = process.env.UNREGISTER_FROM_COMPASS === "true" ;
 
 async function registerKymaInCompass(client, runtimeName, scenarioName) {
   await addScenarioInCompass(client, scenarioName);
@@ -40,7 +40,7 @@ async function registerKymaInCompass(client, runtimeName, scenarioName) {
   await waitForCompassConnection('compass-connection');
 }
 
-async function unregisterKymaFromCompass(client, scenarioName) {
+async function unregisterScenarioFromCompass(client, scenarioName) {
   // Cleanup Compass
   const applications = await queryApplicationsForScenario(client, scenarioName);
   for (const application of applications) {
@@ -57,15 +57,20 @@ async function unregisterKymaFromCompass(client, scenarioName) {
   const runtimes = await queryRuntimesForScenario(client, scenarioName);
   for (const runtime of runtimes) {
     await unassignRuntimeFromScenario(client, runtime.id, scenarioName)
-    if (UNREGISTER) {
-      await client.unregisterRuntime(runtime.id);
-    }
   }
 
   await removeScenarioFromCompass(client, scenarioName);
 }
 
+async function unregisterRuntimeFromCompass(client, scenarioName) {
+  const runtimes = await queryRuntimesForScenario(client, scenarioName);
+  for (const runtime of runtimes) {
+      await client.unregisterRuntime(runtime.id);
+  }
+}
+
 module.exports = {
   registerKymaInCompass,
-  unregisterKymaFromCompass,
+  unregisterScenarioFromCompass,
+  unregisterRuntimeFromCompass
 };

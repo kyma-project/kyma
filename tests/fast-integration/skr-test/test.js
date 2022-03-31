@@ -2,7 +2,7 @@ const {gatherOptions} = require('./');
 const {provisionSKR, deprovisionSKR} = require('../kyma-environment-broker');
 const {keb, gardener, director} = require('./helpers');
 const {initializeK8sClient} = require('../utils');
-const {unregisterKymaFromCompass, addScenarioInCompass, assignRuntimeToScenario} = require('../compass');
+const {unregisterScenarioFromCompass, unregisterRuntimeFromCompass, addScenarioInCompass, assignRuntimeToScenario} = require('../compass');
 const {oidcE2ETest, commerceMockTest} = require('./skr-test');
 const {KCPWrapper, KCPConfig} = require('../kcp/client');
 
@@ -58,6 +58,7 @@ describe('Execute SKR test', function() {
       console.log(`\nRuntime status after deprovisioning: ${runtimeStatus}`);
       await kcp.reconcileInformationLog(runtimeStatus);
     }
-    await unregisterKymaFromCompass(director, this.options.scenarioName);
+    await unregisterScenarioFromCompass(director, this.options.scenarioName);
+    await unregisterRuntimeFromCompass(director, this.options.scenarioName)
   });
 });

@@ -38,11 +38,11 @@ function withTestNS(testNS) {
   };
 }
 
-function withOIDC0(oidc0) {
-  return function (options) {
-    options.oidc0 = oidc0;
-  }
-}
+// function withOIDC0(oidc0) {
+//   return function (options) {
+//     options.oidc0 = oidc0;
+//   }
+// }
 
 function gatherOptions(...opts) {
   const suffix = genRandom(4);
@@ -83,6 +83,12 @@ function gatherOptions(...opts) {
   return options;
 }
 
+function delay(millis) {
+  return new Promise((resolve, reject) => {
+    setTimeout((_) => resolve(), millis);
+  });
+}
+
 module.exports = {
   keb,
   gardener,
@@ -93,5 +99,6 @@ module.exports = {
   withRuntimeName,
   withScenarioName,
   withTestNS,
-  withOIDC0,
+  //withOIDC0,
+  delay
 };
