@@ -25,11 +25,12 @@ This tutorial is based on a sample HttpBin service deployment and a sample Funct
    export ENCODED_CREDENTIALS=$(echo -n "$CLIENT_ID:$CLIENT_SECRET" | base64)
    ```
 
-3. In your browser, go to `https://YOUR_OIDC_COMPLIANT_IDENTITY_PROVIDER_INSTANCE/.well-known/openid-configuration`, save values of the **token_endpoint** and **jwks_uri** parameters, and export them as environment variables:
+3. In your browser, go to `https://YOUR_OIDC_COMPLIANT_IDENTITY_PROVIDER_INSTANCE/.well-known/openid-configuration`, save values of the **token_endpoint**, **jwks_uri** and **issuer** parameters, and export them as environment variables:
 
    ```bash
    export TOKEN_ENDPOINT={YOUR_TOKEN_ENDPOINT}
    export JWKS_URI={YOUR_JWKS_URI}
+   export ISSUER={YOUR_ISSUER}
    ```
 
 4. Get the JWT access token:
@@ -62,7 +63,7 @@ Follow the instructions in the tabs to expose httpbin workload or a function usi
    export GATEWAY=$NAMESPACE/httpbin-gateway # If you don't want to use your custom domain but a Kyma domain, use the following Kyma Gateway: `kyma-system/kyma-gateway`.
    ```
 
-1. Run:
+2. Run:
 
    ```shell
    cat <<EOF | kubectl apply -f -
@@ -101,7 +102,7 @@ Follow the instructions in the tabs to expose httpbin workload or a function usi
    export GATEWAY=$NAMESPACE/httpbin-gateway # If you don't want to use your custom domain but a Kyma domain, use the following Kyma Gateway: `kyma-system/kyma-gateway`.
    ```
 
-1. Run:
+2. Run:
 
    ```shell
    cat <<EOF | kubectl apply -f -
@@ -140,13 +141,6 @@ Follow the instructions in the tabs to secure httpbin or a function using JWT to
   <summary>
   Secure HttpBin
   </summary>
-
-1. Export the following values:
-
-   ```shell
-   export ISSUER={ISSUER} # e.g. https://YOUR_OIDC_COMPLIANT_IDENTITY_PROVIDER_INSTANCE
-   export JWKS_URI={JWKS_URL} # e.g. https://YOUR_OIDC_COMPLIANT_IDENTITY_PROVIDER_INSTANCE/.well-known/jwks.json
-   ```
 
 1. Run:
 
@@ -198,13 +192,6 @@ Follow the instructions in the tabs to secure httpbin or a function using JWT to
   <summary>
   Secure a function
   </summary>
-
-1. Export the following values:
-
-   ```shell
-   export ISSUER={ISSUER} # e.g. https://YOUR_OIDC_COMPLIANT_IDENTITY_PROVIDER_INSTANCE.com
-   export JWKS_URI={JWKS_URL} # e.g. https://YOUR_OIDC_COMPLIANT_IDENTITY_PROVIDER_INSTANCE/.well-known/jwks.json
-   ```
 
 1. Run:
 
