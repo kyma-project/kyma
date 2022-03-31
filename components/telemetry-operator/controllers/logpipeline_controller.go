@@ -191,6 +191,7 @@ func (r *LogPipelineReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 			return ctrl.Result{RequeueAfter: requeueTime}, err
 		}
 		if !ready {
+			log.Info(fmt.Sprintf("Checked %s - not yet ready. Requeueing...", req.NamespacedName))
 			return ctrl.Result{RequeueAfter: requeueTime}, nil
 		}
 
@@ -447,12 +448,6 @@ func (r *LogPipelineReconciler) syncSecretRefs(ctx context.Context, logPipeline 
 	return changed, nil
 }
 
-type patchStringValue struct {
-	Op    string `json:"op"`
-	Path  string `json:"path"`
-	Value string `json:"value"`
-}
-
 // Delete all Fluent Bit pods to apply new configuration.
 func (r *LogPipelineReconciler) restartFluentBit(ctx context.Context) error {
 	log := logf.FromContext(ctx)
@@ -497,6 +492,7 @@ func (r *LogPipelineReconciler) updateLogPipelineStatus(ctx context.Context, nam
 		return err
 	}
 
+	log.Info(fmt.Sprintf("Updating the status of %s to %s", name, condition.Type))
 	logPipeline.Status.SetCondition(*condition)
 
 	if err := r.Status().Update(ctx, &logPipeline); err != nil {
