@@ -2,7 +2,7 @@
 title: Expose and secure a workload with Istio
 ---
 
-This tutorial shows how to expose and secure a workload using Istio build in security features. You will expose the workload via creating a [Virtual Service](https://istio.io/latest/docs/reference/config/networking/virtual-service/) and securing the access to it via adding JWT token validation verified by Istio security configuration with [Authorization Policy](https://istio.io/latest/docs/reference/config/security/authorization-policy/) together with [Request Authentication](https://istio.io/latest/docs/reference/config/security/request_authentication/).
+This tutorial shows how to expose and secure a workload using Istio built-in security features. You will expose the workload by creating a [Virtual Service](https://istio.io/latest/docs/reference/config/networking/virtual-service/). Then, you will secure the access to your workload by adding the JWT token validation verified by Istio security configuration with [Authorization Policy](https://istio.io/latest/docs/reference/config/security/authorization-policy/) and [Request Authentication](https://istio.io/latest/docs/reference/config/security/request_authentication/).
 
 ## Prerequisites
 
@@ -10,7 +10,7 @@ To follow this tutorial, use Kyma 2.0 or higher.
 
 This tutorial is based on a sample HttpBin service deployment and a sample Function. To deploy or create one of those, follow the [Create a workload](./apix-02-create-workload.md) tutorial. It can also be a follow up to the [Use a custom domain to expose a workload](./apix-01-own-domain.md) tutorial.
 
-## Get a JWT access token
+## Get a JWT
 
 1. In your OpenID Connect-compliant (OIDC-compliant) identity provider, create an application to get your client credentials such as Client ID and Client Secret. Export your client credentials as environment variables. Run:
 
