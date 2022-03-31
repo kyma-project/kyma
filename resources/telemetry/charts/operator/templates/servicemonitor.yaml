@@ -8,6 +8,7 @@ metadata:
 spec:
   endpoints:
     - path: {{ .Values.serviceMonitor.endpoints.path }}
+      port: {{ .Values.serviceMonitor.endpoints.port }}
       metricRelabelings:
         {{- toYaml .Values.serviceMonitor.endpoints.metricRelabelings | nindent 8 }}
   selector:
