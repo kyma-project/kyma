@@ -51,6 +51,8 @@ func Test_GetNatsConfig(t *testing.T) {
 	require.Equal(t, config.IdleConnTimeout, idleConnTimeout)
 
 	require.Equal(t, config.JSStreamName, envs["JS_STREAM_NAME"])
+	// JSStreamSubjectPrefix would be `EVENTTYPEPREFIX`
+	// because JSStreamSubjectPrefix is cleaned up for non-alphanumeric characters.
 	require.Equal(t, config.JSStreamSubjectPrefix, "EVENTTYPEPREFIX")
 }
 
@@ -112,6 +114,34 @@ func Test_JSStreamSubjectPrefix(t *testing.T) {
 
 			// then
 			require.Equal(t, config.JSStreamSubjectPrefix, tc.wantJSStreamSubjectPrefix)
+		})
+	}
+}
+
+func Test_getCleanJSStreamSubjectPrefix(t *testing.T) {
+	// define test cases
+	testCases := []struct {
+		name        string
+		givenPrefix string
+		wantPrefix  string
+	}{
+		{
+			name:        "when the prefix does not contain any alpha-numeric characters except dot",
+			givenPrefix: "testapp.Segment1Part1Part2.Segment2Part1Part2",
+			wantPrefix:  "testapp.Segment1Part1Part2.Segment2Part1Part2",
+		},
+		{
+			name:        "when the prefix contains alpha-numeric characters except dot",
+			givenPrefix: "testapp@@.Segment1$%-Part1>>-Part2-Ä.Segment2**##-Part1##-Part2-Ä",
+			wantPrefix:  "testapp.Segment1Part1Part2.Segment2Part1Part2",
+		},
+	}
+
+	// run test cases
+	for _, tc := range testCases {
+		tc := tc
+		t.Run(tc.name, func(t *testing.T) {
+			require.Equal(t, getCleanJSStreamSubjectPrefix(tc.givenPrefix), tc.wantPrefix)
 		})
 	}
 }
