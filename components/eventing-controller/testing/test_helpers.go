@@ -374,9 +374,8 @@ func WithOrderCreatedFilter() SubscriptionOpt {
 	return WithFilter(EventSource, OrderCreatedEventType)
 }
 
-func WithInvalidSink() SubscriptionOpt {
-	return WithSinkURL("invalid")
-
+func WithSinkMissingScheme(svcNamespace, svcName string) SubscriptionOpt {
+	return WithSinkURL(fmt.Sprintf("%s.%s.svc.cluster.local", svcName, svcNamespace))
 }
 
 // WithValidSink is a SubscriptionOpt for creating a subscription with a valid sink that itself gets created from
@@ -537,9 +536,12 @@ func NewEventingControllerDeployment() *appsv1.Deployment {
 	}
 }
 
-func NewEventingControllerPod(backend string) *corev1.Pod {
+func NewEventingPublisherProxyPod(backend string) *corev1.Pod {
 	labels := map[string]string{
-		deployment.AppLabelKey: deployment.PublisherName,
+		deployment.AppLabelKey:       deployment.PublisherName,
+		deployment.InstanceLabelKey:  deployment.InstanceLabelValue,
+		deployment.DashboardLabelKey: deployment.DashboardLabelValue,
+		deployment.BackendLabelKey:   backend,
 	}
 	return &corev1.Pod{
 		ObjectMeta: metav1.ObjectMeta{

@@ -1,7 +1,7 @@
+reviewers:
+  - service-management-reviewers
 approvers:
-  - mszostok
-  - polskikiel
-  - piotrmiskiewicz
-  - PK85
-  - jasiu001
-  - ksputo
+  - service-management-approvers
+  
+labels:
+  - area/service-management

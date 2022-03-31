@@ -27,7 +27,7 @@ The Connector Service has the following parameters, which can be set through the
 - **appCertificateValidityTime** is the time until which the certificates that the service issues for Applications are valid. The default value is 90 days.
 - **runtimeCertificateValidityTime** is the time until which the certificates that the service issues for Runtimes are valid. The default value is 90 days.
 - **central** determines whether the Connector Service works in the central mode.
-- **revocationConfigMapName** is the name of the ConfigMap containing the revoked certificates list.
+- **revocationConfigMapName** is the name of the Config Map containing the revoked certificates list.
 
 The Connector Service also uses the following environment variables for CSR-related information config:
 - **COUNTRY** (two-letter-long country code)

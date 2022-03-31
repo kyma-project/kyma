@@ -37,45 +37,12 @@ If you want to provision a new volume or restore the existing one, create on-dem
 
 <div tabs name="backup-providers">
   <details>
-  <summary label="AKS">
-  AKS
-  </summary>
-
-### Prerequisites
-
-  The minimum supported Kubernetes version is 1.17.
-
-### Steps
-
-  1. [Install the CSI driver](https://github.com/kubernetes-sigs/azuredisk-csi-driver/blob/master/docs/install-csi-driver-master.md).
-  2. [Create a volume snapshot](https://github.com/kubernetes-sigs/azuredisk-csi-driver/tree/master/deploy/example/snapshot).
-
-  </details>
-  
-  <details>
-  <summary label="GKE">
-  GKE
-  </summary>
-
-### Prerequisites
-
-  The minimum supported Kubernetes version is 1.14.
-
-### Steps
-
-  1. [Enable the required feature gate on the cluster](https://cloud.google.com/kubernetes-engine/docs/how-to/gce-pd-csi-driver).
-  2. Check out [the repository for the Google Compute Engine Persistent Disk (GCE PD) CSI driver](https://github.com/kubernetes-sigs/gcp-compute-persistent-disk-csi-driver) for details on how to use volume snapshots on GKE.
-
-  </details>
-
-  <details>
   <summary label="Gardener GCP">
   Gardener
   </summary>
 
 ### Prerequisites
 
-  - As of Kubernetes version 1.18, Gardener **GCP** and **AWS** by default use CSI drivers and support taking volume snapshots.
   - Gardener **Azure** supports CSI drivers as of Kubernetes version 1.21.
 
 ### Steps
@@ -104,6 +71,7 @@ If you want to provision a new volume or restore the existing one, create on-dem
   metadata:
     name: snapshot
   spec:
+    volumeSnapshotClassName: snapshot-class
     source:
       persistentVolumeClaimName: {PVC_NAME}
   ```
@@ -124,7 +92,6 @@ If you want to provision a new volume or restore the existing one, create on-dem
   spec:
     accessModes:
      - ReadWriteOnce
-    storageClassName: snapshot-class
     resources:
       requests:
         storage: {SIZE_OF_ORIGINAL_PVC}
@@ -133,6 +100,29 @@ If you want to provision a new volume or restore the existing one, create on-dem
       kind: VolumeSnapshot
       apiGroup: snapshot.storage.k8s.io
   ```
+
+  </details>
+  <details>
+  <summary label="AKS">
+  AKS
+  </summary>
+
+### Steps
+
+  1. [Install the CSI driver](https://github.com/kubernetes-sigs/azuredisk-csi-driver/blob/master/docs/install-csi-driver-master.md).
+  2. Follow our instructions to create a volume snapshot on Gardener, using the driver for Azure.
+
+  </details>
+  
+  <details>
+  <summary label="GKE">
+  GKE
+  </summary>
+
+### Steps
+
+  1. [Enable the required feature gate on the cluster](https://cloud.google.com/kubernetes-engine/docs/how-to/gce-pd-csi-driver).
+  2. Check out [the repository for the Google Compute Engine Persistent Disk (GCE PD) CSI driver](https://github.com/kubernetes-sigs/gcp-compute-persistent-disk-csi-driver) for details on how to use volume snapshots on GKE.
 
   </details>
  </div>
@@ -185,7 +175,7 @@ spec:
           serviceAccountName: volume-snapshotter
           containers:
           - name: job
-            image: eu.gcr.io/kyma-project/incubator/k8s-tools:20220222-0161f9f8
+            image: eu.gcr.io/kyma-project/incubator/k8s-tools:20220318-b6a7453e
             command:
               - /bin/bash
               - -c

@@ -6,6 +6,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/sink"
+
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/eventtype"
 
 	"github.com/pkg/errors"
@@ -103,16 +105,19 @@ func (c *SubscriptionManager) Start(_ env.DefaultSubscriptionConfig, params subs
 		"maxNameLength", handlers.MaxBEBSubscriptionNameLength)
 	bebHandler := handlers.NewBEB(oauth2credential, nameMapper, c.logger)
 
+	client := c.mgr.GetClient()
+	recorder := c.mgr.GetEventRecorderFor("eventing-controller-beb")
 	bebReconciler := beb.NewReconciler(
 		ctx,
-		c.mgr.GetClient(),
+		client,
 		c.logger,
-		c.mgr.GetEventRecorderFor("eventing-controller-beb"),
+		recorder,
 		c.envCfg,
 		cleaner,
 		bebHandler,
 		oauth2credential,
 		nameMapper,
+		sink.NewValidator(ctx, client, recorder, c.logger),
 	)
 	c.backend = bebReconciler.Backend
 	if err := bebReconciler.SetupUnmanaged(c.mgr); err != nil {
@@ -200,7 +205,7 @@ func cleanup(backend handlers.BEBBackend, dynamicClient dynamic.Interface, logge
 		}
 
 		// Clean statuses.
-		desiredSub := handlers.RemoveStatus(sub)
+		desiredSub := handlers.ResetStatusToDefaults(sub)
 		if err := handlers.UpdateSubscriptionStatus(ctx, dynamicClient, desiredSub); err != nil {
 			isCleanupSuccessful = false
 			logger.Errorw("update BEB subscription status failed", "namespace", sub.Namespace, "name", sub.Name, "error", err)

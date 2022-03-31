@@ -3,8 +3,14 @@ package handlers
 import (
 	"errors"
 	"fmt"
+	"reflect"
 	"testing"
 	"time"
+
+	"github.com/nats-io/nats-server/v2/server"
+	"github.com/nats-io/nats.go"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	kymalogger "github.com/kyma-project/kyma/common/logging/logger"
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
@@ -12,13 +18,15 @@ import (
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/eventtype"
 	evtesting "github.com/kyma-project/kyma/components/eventing-controller/testing"
-	"github.com/nats-io/nats-server/v2/server"
-	"github.com/nats-io/nats.go"
-	"github.com/stretchr/testify/require"
 )
 
 const (
-	defaultStreamName = "kyma"
+	defaultStreamName    = "kyma"
+	defaultMaxReconnects = 10
+
+	// maxJetStreamConsumerNameLength is the maximum preferred length for the JetStream consumer names
+	// as per https://docs.nats.io/running-a-nats-service/nats_admin/jetstream_admin/naming
+	maxJetStreamConsumerNameLength = 32
 )
 
 type jetStreamClient struct {
@@ -192,10 +200,11 @@ func TestJetStreamSubAfterSync_NoChange(t *testing.T) {
 	// by comparing the metadata of nats subscription
 	require.Len(t, jsBackend.subscriptions, 1)
 	jsSubject := jsBackend.GetJsSubjectToSubscribe(subject)
-	jsSubKey := jsBackend.GenerateJsSubKey(jsSubject, sub)
+	jsSubKey := NewSubscriptionSubjectIdentifier(sub, jsSubject)
 	jsSub := jsBackend.subscriptions[jsSubKey]
 	require.NotNil(t, jsSub)
 	require.True(t, jsSub.IsValid())
+
 	// check the metadata, if they are now same then it means that NATS subscription
 	// were not re-created by SyncSubscription method
 	subMsgLimit, subBytesLimit, err := jsSub.PendingLimits()
@@ -282,10 +291,11 @@ func TestJetStreamSubAfterSync_SinkChange(t *testing.T) {
 	// by comparing the metadata of nats subscription
 	require.Len(t, jsBackend.subscriptions, 1)
 	jsSubject := jsBackend.GetJsSubjectToSubscribe(subject)
-	jsSubKey := jsBackend.GenerateJsSubKey(jsSubject, sub)
+	jsSubKey := NewSubscriptionSubjectIdentifier(sub, jsSubject)
 	jsSub := jsBackend.subscriptions[jsSubKey]
 	require.NotNil(t, jsSub)
 	require.True(t, jsSub.IsValid())
+
 	// check the metadata, if they are now same then it means that NATS subscription
 	// were not re-created by SyncSubscription method
 	subMsgLimit, subBytesLimit, err := jsSub.PendingLimits()
@@ -297,6 +307,7 @@ func TestJetStreamSubAfterSync_SinkChange(t *testing.T) {
 	data = fmt.Sprintf("data-%s", time.Now().Format(time.RFC850))
 	expectedDataInStore = fmt.Sprintf("\"%s\"", data)
 	require.NoError(t, SendEventToJetStream(jsBackend, data))
+
 	// Old sink should not have received the event, the new sink should have
 	require.Error(t, subscriber1.CheckEvent(expectedDataInStore))
 	require.NoError(t, subscriber2.CheckEvent(expectedDataInStore))
@@ -374,11 +385,11 @@ func TestJetStreamSubAfterSync_FiltersChange(t *testing.T) {
 	// because the subscriptions should have being re-created for new subject
 	require.Len(t, jsBackend.subscriptions, 1)
 	jsSubject := jsBackend.GetJsSubjectToSubscribe(newSubject)
-	jsSubKey := jsBackend.GenerateJsSubKey(jsSubject, sub)
-
+	jsSubKey := NewSubscriptionSubjectIdentifier(sub, jsSubject)
 	jsSub := jsBackend.subscriptions[jsSubKey]
 	require.NotNil(t, jsSub)
 	require.True(t, jsSub.IsValid())
+
 	// check the metadata, if they are NOT same then it means that NATS subscription
 	// were re-created by SyncSubscription method
 	subMsgLimit, subBytesLimit, err := jsSub.PendingLimits()
@@ -467,11 +478,11 @@ func TestJetStreamSubAfterSync_FilterAdded(t *testing.T) {
 	require.Len(t, jsBackend.subscriptions, 2)
 	// Verify that the nats subscriptions for first subject was not re-created
 	jsSubject := jsBackend.GetJsSubjectToSubscribe(firstSubject)
-	jsSubKey := jsBackend.GenerateJsSubKey(jsSubject, sub)
-
+	jsSubKey := NewSubscriptionSubjectIdentifier(sub, jsSubject)
 	jsSub := jsBackend.subscriptions[jsSubKey]
 	require.NotNil(t, jsSub)
 	require.True(t, jsSub.IsValid())
+
 	// check the metadata, if they are now same then it means that NATS subscription
 	// were not re-created by SyncSubscription method
 	subMsgLimit, subBytesLimit, err := jsSub.PendingLimits()
@@ -567,11 +578,11 @@ func TestJetStreamSubAfterSync_FilterRemoved(t *testing.T) {
 	require.Len(t, jsBackend.subscriptions, 1)
 	// Verify that the nats subscriptions for first subject was not re-created
 	jsSubject := jsBackend.GetJsSubjectToSubscribe(firstSubject)
-	jsSubKey := jsBackend.GenerateJsSubKey(jsSubject, sub)
-
+	jsSubKey := NewSubscriptionSubjectIdentifier(sub, jsSubject)
 	jsSub := jsBackend.subscriptions[jsSubKey]
 	require.NotNil(t, jsSub)
 	require.True(t, jsSub.IsValid())
+
 	// check the metadata, if they are now same then it means that NATS subscription
 	// were not re-created by SyncSubscription method
 	subMsgLimit, subBytesLimit, err := jsSub.PendingLimits()
@@ -677,11 +688,11 @@ func TestJetStreamSubAfterSync_MultipleSubs(t *testing.T) {
 	// check if the NATS subscription are NOT the same after sync for subscription 1
 	// because the subscriptions should have being re-created for new subject
 	jsSubject := jsBackend.GetJsSubjectToSubscribe(newSubject)
-	jsSubKey := jsBackend.GenerateJsSubKey(jsSubject, sub)
-
+	jsSubKey := NewSubscriptionSubjectIdentifier(sub, jsSubject)
 	jsSub := jsBackend.subscriptions[jsSubKey]
 	require.NotNil(t, jsSub)
 	require.True(t, jsSub.IsValid())
+
 	// check the metadata, if they are now same then it means that NATS subscription
 	// were not re-created by SyncSubscription method
 	subMsgLimit, subBytesLimit, err := jsSub.PendingLimits()
@@ -698,11 +709,11 @@ func TestJetStreamSubAfterSync_MultipleSubs(t *testing.T) {
 	// because the subscriptions should NOT have being re-created as
 	// subscription 2 was not modified
 	jsSubject = jsBackend.GetJsSubjectToSubscribe(cleanSubjectSub2)
-	jsSubKey = jsBackend.GenerateJsSubKey(jsSubject, sub2)
-
+	jsSubKey = NewSubscriptionSubjectIdentifier(sub2, jsSubject)
 	jsSub = jsBackend.subscriptions[jsSubKey]
 	require.NotNil(t, jsSub)
 	require.True(t, jsSub.IsValid())
+
 	// check the metadata, if they are now same then it means that NATS subscription
 	// were not re-created by SyncSubscription method
 	subMsgLimit, subBytesLimit, err = jsSub.PendingLimits()
@@ -724,20 +735,16 @@ func TestJetStream_isJsSubAssociatedWithKymaSub(t *testing.T) {
 	// create subscription 1 and its JetStream subscription
 	cleanSubject1 := "subOne"
 	sub1 := evtesting.NewSubscription(cleanSubject1, "foo", evtesting.WithNotCleanFilter())
-	jsSub1Key := jsBackend.GenerateJsSubKey(
-		jsBackend.GetJsSubjectToSubscribe(cleanSubject1),
-		sub1)
+	jsSub1Key := NewSubscriptionSubjectIdentifier(sub1, cleanSubject1)
 
 	// create subscription 2 and its JetStream subscription
 	cleanSubject2 := "subOneTwo"
 	sub2 := evtesting.NewSubscription(cleanSubject2, "foo", evtesting.WithNotCleanFilter())
-	jsSub2Key := jsBackend.GenerateJsSubKey(
-		jsBackend.GetJsSubjectToSubscribe(cleanSubject2),
-		sub2)
+	jsSub2Key := NewSubscriptionSubjectIdentifier(sub2, cleanSubject2)
 
 	testCases := []struct {
 		name            string
-		givenJSSubKey   string
+		givenJSSubKey   SubscriptionSubjectIdentifier
 		givenKymaSubKey *eventingv1alpha1.Subscription
 		wantResult      bool
 	}{
@@ -770,11 +777,8 @@ func TestJetStream_isJsSubAssociatedWithKymaSub(t *testing.T) {
 	for _, tC := range testCases {
 		testCase := tC
 		t.Run(testCase.name, func(t *testing.T) {
-			gotResult, err := jsBackend.isJsSubAssociatedWithKymaSub(
-				tC.givenJSSubKey,
-				tC.givenKymaSubKey)
-			require.Equal(t, gotResult, tC.wantResult)
-			require.NoError(t, err)
+			gotResult := jsBackend.isJsSubAssociatedWithKymaSub(tC.givenJSSubKey, tC.givenKymaSubKey)
+			require.Equal(t, tC.wantResult, gotResult)
 		})
 	}
 }
@@ -913,8 +917,8 @@ func TestJSSubscriptionWithMaxInFlightChange(t *testing.T) {
 
 	// then
 	require.Eventually(t, func() bool {
-		consumerName := jsBackend.GenerateJsSubKey(sub.Status.CleanEventTypes[0], sub)
 		// fetch consumer info from JetStream
+		consumerName := NewSubscriptionSubjectIdentifier(sub, sub.Status.CleanEventTypes[0]).ConsumerName()
 		consumerInfo, err := jsBackend.jsCtx.ConsumerInfo(jsBackend.config.JSStreamName, consumerName)
 		require.NoError(t, err)
 
@@ -922,7 +926,64 @@ func TestJSSubscriptionWithMaxInFlightChange(t *testing.T) {
 		// so these events will be pending for receiving an ACK from dispatchers
 		// check consumer current maxAckPending
 		return consumerInfo.NumAckPending == defaultMaxInflight
-	}, 10*time.Second, 200*time.Millisecond)
+	}, 10*time.Second, 10*time.Millisecond)
+}
+
+// TestJSSubscriptionRedeliverWithFailedDispatch tests the redelivering
+// of event when the dispatch fails.
+func TestJSSubscriptionRedeliverWithFailedDispatch(t *testing.T) {
+	// given
+	testEnvironment := setupTestEnvironment(t)
+	jsBackend := testEnvironment.jsBackend
+	defer testEnvironment.natsServer.Shutdown()
+	defer testEnvironment.jsClient.natsConn.Close()
+	initErr := jsBackend.Initialize(nil)
+	require.NoError(t, initErr)
+
+	// create New Subscriber
+	subscriber := evtesting.NewSubscriber()
+	subscriber.Shutdown() // shutdown the subscriber intentionally
+	require.False(t, subscriber.IsRunning())
+
+	defaultSubsConfig := env.DefaultSubscriptionConfig{MaxInFlightMessages: 10}
+	// create a new Subscription
+	sub := evtesting.NewSubscription("sub", "foo",
+		evtesting.WithNotCleanFilter(),
+		evtesting.WithSinkURL(subscriber.SinkURL),
+		evtesting.WithStatusConfig(defaultSubsConfig),
+	)
+	addJSCleanEventTypesToStatus(sub, testEnvironment.cleaner, jsBackend)
+
+	// when
+	err := jsBackend.SyncSubscription(sub)
+
+	// then
+	require.NoError(t, err)
+
+	// when
+	// send an event
+	ev2data := "newsampledata"
+	require.NoError(t, SendEventToJetStream(jsBackend, ev2data))
+
+	// then
+	// it should have failed to dispatch
+	expectedEv2Data := fmt.Sprintf("\"%s\"", ev2data)
+	require.Error(t, subscriber.CheckEvent(expectedEv2Data))
+
+	// when
+	// start a new subscriber
+	subscriber = evtesting.NewSubscriber()
+	defer subscriber.Shutdown()
+	require.True(t, subscriber.IsRunning())
+	// and update sink in the subscription
+	sub.Spec.Sink = subscriber.SinkURL
+	require.NoError(t, jsBackend.SyncSubscription(sub))
+
+	// then
+	// the same event should be redelivered
+	require.Eventually(t, func() bool {
+		return subscriber.CheckEvent(expectedEv2Data) == nil
+	}, 60*time.Second, 5*time.Second)
 }
 
 // TestJSSubscriptionUsingCESDK tests that eventing works with Cloud events.
@@ -961,196 +1022,125 @@ func TestJSSubscriptionUsingCESDK(t *testing.T) {
 	require.NoError(t, jsBackend.DeleteSubscription(sub))
 }
 
-func TestJetStreamServerRestart_WithReconnectDisabled(t *testing.T) {
+// TestJetStream_ServerRestart tests that eventing works when NATS server is restarted
+// for scenarios involving the stream storage type and when reconnect attempts are exhausted or not.
+func TestJetStream_ServerRestart(t *testing.T) {
 	// given
-	testEnvironment := setupTestEnvironment(t)
-	jsBackend := testEnvironment.jsBackend
-	defer testEnvironment.natsServer.Shutdown()
-	defer testEnvironment.jsClient.natsConn.Close()
-
-	// Do not reconnect once server is shutdown
-	jsBackend.config.MaxReconnects = 0
-
-	initErr := jsBackend.Initialize(nil)
-	require.NoError(t, initErr)
-	defaultSubsConfig := env.DefaultSubscriptionConfig{MaxInFlightMessages: 10}
-
 	subscriber := evtesting.NewSubscriber()
 	defer subscriber.Shutdown()
 	require.True(t, subscriber.IsRunning())
-
-	// Create a subscription
-	sub := evtesting.NewSubscription("sub", "foo",
-		evtesting.WithNotCleanFilter(),
-		evtesting.WithSinkURL(subscriber.SinkURL),
-		evtesting.WithStatusConfig(defaultSubsConfig),
-	)
-	addJSCleanEventTypesToStatus(sub, testEnvironment.cleaner, jsBackend)
-
-	// when
-	err := jsBackend.SyncSubscription(sub)
-
-	// then
-	require.NoError(t, err)
-
-	ev1data := "sampledata"
-	require.NoError(t, SendEventToJetStream(jsBackend, ev1data))
-	expectedEv1Data := fmt.Sprintf("\"%s\"", ev1data)
-	require.NoError(t, subscriber.CheckEvent(expectedEv1Data))
-
-	testEnvironment.natsServer.Shutdown()
-	require.Eventually(t, func() bool {
-		return !jsBackend.conn.IsConnected()
-	}, 30*time.Second, 2*time.Second)
-
-	_ = evtesting.RunNatsServerOnPort(
-		evtesting.WithPort(testEnvironment.natsPort),
-		evtesting.WithJetStreamEnabled())
-
-	_, err = testEnvironment.jsClient.StreamInfo(defaultStreamName)
-	require.True(t, errors.Is(err, nats.ErrStreamNotFound))
-	// sync the subscription again to reconnect and
-	// recreate the stream and consumer
-	err = jsBackend.SyncSubscription(sub)
-	require.NoError(t, err)
-
-	_, err = testEnvironment.jsClient.StreamInfo(defaultStreamName)
-	require.NoError(t, err)
-
-	ev2data := "newsampledata"
-	require.NoError(t, SendEventToJetStream(jsBackend, ev2data))
-	expectedEv2Data := fmt.Sprintf("\"%s\"", ev2data)
-	require.NoError(t, subscriber.CheckEvent(expectedEv2Data))
-}
-
-func TestJetStreamServerRestart_WithReconnectEnabled(t *testing.T) {
-	// given
-	testEnvironment := setupTestEnvironment(t)
-	jsBackend := testEnvironment.jsBackend
-	defer testEnvironment.natsServer.Shutdown()
-	defer testEnvironment.jsClient.natsConn.Close()
-
-	initErr := jsBackend.Initialize(nil)
-	require.NoError(t, initErr)
 	defaultSubsConfig := env.DefaultSubscriptionConfig{MaxInFlightMessages: 10}
 
-	subscriber := evtesting.NewSubscriber()
-	defer subscriber.Shutdown()
-	require.True(t, subscriber.IsRunning())
+	testCases := []struct {
+		name               string
+		givenMaxReconnects int
+		givenStorageType   string
+	}{
+		{
+			name:               "with reconnects disabled and memory storage for streams",
+			givenMaxReconnects: 0,
+			givenStorageType:   JetStreamStorageTypeMemory,
+		},
+		{
+			name:               "with reconnects enabled and memory storage for streams",
+			givenMaxReconnects: defaultMaxReconnects,
+			givenStorageType:   JetStreamStorageTypeMemory,
+		},
+		{
+			name:               "with reconnects disabled and file storage for streams",
+			givenMaxReconnects: 0,
+			givenStorageType:   JetStreamStorageTypeFile,
+		},
+		{
+			name:               "with reconnects enabled and file storage for streams",
+			givenMaxReconnects: defaultMaxReconnects,
+			givenStorageType:   JetStreamStorageTypeFile,
+		},
+	}
 
-	// Create a subscription
-	sub := evtesting.NewSubscription("sub", "foo",
-		evtesting.WithNotCleanFilter(),
-		evtesting.WithSinkURL(subscriber.SinkURL),
-		evtesting.WithStatusConfig(defaultSubsConfig),
-	)
-	addJSCleanEventTypesToStatus(sub, testEnvironment.cleaner, jsBackend)
+	for id, tc := range testCases {
+		tc, id := tc, id
+		t.Run(tc.name, func(t *testing.T) {
+			// given
+			testEnvironment := setupTestEnvironment(t)
+			jsBackend := testEnvironment.jsBackend
+			defer testEnvironment.natsServer.Shutdown()
+			defer testEnvironment.jsClient.natsConn.Close()
+			defer func() { _ = testEnvironment.jsClient.DeleteStream(defaultStreamName) }()
 
-	// when
-	err := jsBackend.SyncSubscription(sub)
+			jsBackend.config.JSStreamStorageType = tc.givenStorageType
+			jsBackend.config.MaxReconnects = tc.givenMaxReconnects
+			initErr := jsBackend.Initialize(nil)
+			require.NoError(t, initErr)
 
-	// then
-	require.NoError(t, err)
+			// Create a subscription
+			subName := fmt.Sprintf("%s%d", "sub", id)
+			sub := evtesting.NewSubscription(subName, "foo",
+				evtesting.WithNotCleanFilter(),
+				evtesting.WithSinkURL(subscriber.SinkURL),
+				evtesting.WithStatusConfig(defaultSubsConfig),
+			)
+			addJSCleanEventTypesToStatus(sub, testEnvironment.cleaner, jsBackend)
 
-	ev1data := "sampledata"
-	require.NoError(t, SendEventToJetStream(jsBackend, ev1data))
-	expectedEv1Data := fmt.Sprintf("\"%s\"", ev1data)
-	require.NoError(t, subscriber.CheckEvent(expectedEv1Data))
+			// when
+			err := jsBackend.SyncSubscription(sub)
 
-	testEnvironment.natsServer.Shutdown()
-	require.Eventually(t, func() bool {
-		return !jsBackend.conn.IsConnected()
-	}, 30*time.Second, 2*time.Second)
+			// then
+			require.NoError(t, err)
 
-	_ = evtesting.RunNatsServerOnPort(
-		evtesting.WithPort(testEnvironment.natsPort),
-		evtesting.WithJetStreamEnabled())
+			ev1data := fmt.Sprintf("%s%d", "sampledata", id)
+			require.NoError(t, SendEventToJetStream(jsBackend, ev1data))
+			expectedEv1Data := fmt.Sprintf("%q", ev1data)
+			require.NoError(t, subscriber.CheckEvent(expectedEv1Data))
 
-	testEnvironment.natsServer.Shutdown()
-	require.Eventually(t, func() bool {
-		return jsBackend.conn.IsConnected()
-	}, 30*time.Second, 2*time.Second)
+			// given
+			testEnvironment.natsServer.Shutdown()
+			require.Eventually(t, func() bool {
+				return !jsBackend.conn.IsConnected()
+			}, 30*time.Second, 2*time.Second)
 
-	_, err = testEnvironment.jsClient.StreamInfo(defaultStreamName)
-	require.NoError(t, err)
-	// sync the subscription again to reconnect and sync consumers
-	err = jsBackend.SyncSubscription(sub)
-	require.NoError(t, err)
+			// when
+			_ = evtesting.RunNatsServerOnPort(
+				evtesting.WithPort(testEnvironment.natsPort),
+				evtesting.WithJetStreamEnabled())
 
-	ev2data := "newsampledata"
-	require.NoError(t, SendEventToJetStream(jsBackend, ev2data))
-	expectedEv2Data := fmt.Sprintf("\"%s\"", ev2data)
-	require.NoError(t, subscriber.CheckEvent(expectedEv2Data))
-}
+			// then
+			if tc.givenMaxReconnects > 0 {
+				require.Eventually(t, func() bool {
+					return jsBackend.conn.IsConnected()
+				}, 30*time.Second, 2*time.Second)
+			}
 
-func TestJetStreamServerRestart_WithFileStorage(t *testing.T) {
-	// given
-	testEnvironment := setupTestEnvironment(t)
-	jsBackend := testEnvironment.jsBackend
-	defer testEnvironment.natsServer.Shutdown()
-	defer testEnvironment.jsClient.natsConn.Close()
+			_, err = testEnvironment.jsClient.StreamInfo(defaultStreamName)
+			if tc.givenStorageType == JetStreamStorageTypeMemory && tc.givenMaxReconnects == 0 {
+				// for memory storage with reconnects disabled
+				require.True(t, errors.Is(err, nats.ErrStreamNotFound))
+			} else {
+				// check that the stream is still present for file storage
+				// or recreated via reconnect handler for memory storage
+				require.NoError(t, err)
+			}
 
-	// use File storage to restore streams
-	jsBackend.config.JSStreamStorageType = JetStreamStorageTypeFile
+			// sync the subscription again to recreate invalid subscriptions or consumers, if any
+			err = jsBackend.SyncSubscription(sub)
+			require.NoError(t, err)
 
-	initErr := jsBackend.Initialize(nil)
-	require.NoError(t, initErr)
-	defaultSubsConfig := env.DefaultSubscriptionConfig{MaxInFlightMessages: 10}
+			// stream exists
+			_, err = testEnvironment.jsClient.StreamInfo(defaultStreamName)
+			require.NoError(t, err)
 
-	subscriber := evtesting.NewSubscriber()
-	defer subscriber.Shutdown()
-	require.True(t, subscriber.IsRunning())
-
-	// Create a subscription
-	sub := evtesting.NewSubscription("sub", "foo",
-		evtesting.WithNotCleanFilter(),
-		evtesting.WithSinkURL(subscriber.SinkURL),
-		evtesting.WithStatusConfig(defaultSubsConfig),
-	)
-	addJSCleanEventTypesToStatus(sub, testEnvironment.cleaner, jsBackend)
-
-	// when
-	err := jsBackend.SyncSubscription(sub)
-
-	// then
-	require.NoError(t, err)
-
-	ev1data := "sampledata"
-	require.NoError(t, SendEventToJetStream(jsBackend, ev1data))
-	expectedEv1Data := fmt.Sprintf("\"%s\"", ev1data)
-	require.NoError(t, subscriber.CheckEvent(expectedEv1Data))
-
-	testEnvironment.natsServer.Shutdown()
-	require.Eventually(t, func() bool {
-		return !jsBackend.conn.IsConnected()
-	}, 30*time.Second, 2*time.Second)
-
-	_ = evtesting.RunNatsServerOnPort(
-		evtesting.WithPort(testEnvironment.natsPort),
-		evtesting.WithJetStreamEnabled())
-
-	require.Eventually(t, func() bool {
-		return jsBackend.conn.IsConnected()
-	}, 60*time.Second, 2*time.Second)
-
-	// check that the stream is still present
-	_, err = testEnvironment.jsClient.StreamInfo(defaultStreamName)
-	require.NoError(t, err)
-
-	ev2data := "newsampledata"
-	require.NoError(t, SendEventToJetStream(jsBackend, ev2data))
-	expectedEv2Data := fmt.Sprintf("\"%s\"", ev2data)
-	require.NoError(t, subscriber.CheckEvent(expectedEv2Data))
-
-	// cleanup the stream from file storage
-	err = testEnvironment.jsClient.DeleteStream(defaultStreamName)
-	require.NoError(t, err)
+			ev2data := fmt.Sprintf("%s%d", "newsampledata", id)
+			require.NoError(t, SendEventToJetStream(jsBackend, ev2data))
+			expectedEv2Data := fmt.Sprintf("%q", ev2data)
+			require.NoError(t, subscriber.CheckEvent(expectedEv2Data))
+		})
+	}
 }
 
 func defaultNatsConfig(url string) env.NatsConfig {
 	return env.NatsConfig{
 		URL:                     url,
-		MaxReconnects:           10,
+		MaxReconnects:           defaultMaxReconnects,
 		ReconnectWait:           3 * time.Second,
 		JSStreamName:            defaultStreamName,
 		JSStreamStorageType:     JetStreamStorageTypeMemory,
@@ -1210,5 +1200,172 @@ func setupTestEnvironment(t *testing.T) *TestEnvironment {
 		natsConfig: natsConfig,
 		cleaner:    cleaner,
 		natsPort:   natsPort,
+	}
+}
+
+// TestSubscriptionSubjectIdentifierEqual checks the equality of two SubscriptionSubjectIdentifier instances and their consumer names.
+func TestSubscriptionSubjectIdentifierEqual(t *testing.T) {
+	t.Parallel()
+	testCases := []struct {
+		name             string
+		givenIdentifier1 SubscriptionSubjectIdentifier
+		givenIdentifier2 SubscriptionSubjectIdentifier
+		wantEqual        bool
+	}{
+		// instances are equal
+		{
+			name: "should be equal if the two instances are identical",
+			givenIdentifier1: NewSubscriptionSubjectIdentifier(
+				evtesting.NewSubscription("sub-1", "ns-1"),
+				"prefix.app.event.operation.v1",
+			),
+			givenIdentifier2: NewSubscriptionSubjectIdentifier(
+				evtesting.NewSubscription("sub-1", "ns-1"),
+				"prefix.app.event.operation.v1",
+			),
+			wantEqual: true,
+		},
+		// instances are not equal
+		{
+			name: "should not be equal if only name is different",
+			givenIdentifier1: NewSubscriptionSubjectIdentifier(
+				evtesting.NewSubscription("sub-1", "ns-1"),
+				"prefix.app.event.operation.v1",
+			),
+			givenIdentifier2: NewSubscriptionSubjectIdentifier(
+				evtesting.NewSubscription("sub-2", "ns-1"),
+				"prefix.app.event.operation.v1",
+			),
+			wantEqual: false,
+		},
+		{
+			name: "should not be equal if only namespace is different",
+			givenIdentifier1: NewSubscriptionSubjectIdentifier(
+				evtesting.NewSubscription("sub-1", "ns-1"),
+				"prefix.app.event.operation.v1",
+			),
+			givenIdentifier2: NewSubscriptionSubjectIdentifier(
+				evtesting.NewSubscription("sub-1", "ns-2"),
+				"prefix.app.event.operation.v1",
+			),
+			wantEqual: false,
+		},
+		{
+			name: "should not be equal if only subject is different",
+			givenIdentifier1: NewSubscriptionSubjectIdentifier(
+				evtesting.NewSubscription("sub-1", "ns-1"),
+				"prefix.app.event.operation.v1",
+			),
+			givenIdentifier2: NewSubscriptionSubjectIdentifier(
+				evtesting.NewSubscription("sub-1", "ns-1"),
+				"prefix.app.event.operation.v2",
+			),
+			wantEqual: false,
+		},
+		// possible naming collisions
+		{
+			name: "should not be equal if subject is the same but name and namespace are swapped",
+			givenIdentifier1: NewSubscriptionSubjectIdentifier(
+				evtesting.NewSubscription("sub-1", "ns-1"),
+				"prefix.app.event.operation.v1",
+			),
+			givenIdentifier2: NewSubscriptionSubjectIdentifier(
+				evtesting.NewSubscription("ns-1", "sub-1"),
+				"prefix.app.event.operation.v1",
+			),
+			wantEqual: false,
+		},
+		{
+			name: "should not be equal if subject is the same but name and namespace are only equal if joined together",
+			givenIdentifier1: NewSubscriptionSubjectIdentifier(
+				evtesting.NewSubscription("sub-1", "ns-1"), // evaluates to "sub-1ns-1" when joined
+				"prefix.app.event.operation.v1",
+			),
+			givenIdentifier2: NewSubscriptionSubjectIdentifier(
+				evtesting.NewSubscription("sub-1n", "s-1"), // evaluates to "sub-1ns-1" when joined
+				"prefix.app.event.operation.v1",
+			),
+			wantEqual: false,
+		},
+	}
+	for _, tc := range testCases {
+		tc := tc
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+			gotInstanceEqual := reflect.DeepEqual(tc.givenIdentifier1, tc.givenIdentifier2)
+			assert.Equal(t, tc.wantEqual, gotInstanceEqual)
+
+			gotConsumerNameEqual := tc.givenIdentifier1.ConsumerName() == tc.givenIdentifier2.ConsumerName()
+			assert.Equal(t, tc.wantEqual, gotConsumerNameEqual)
+		})
+	}
+}
+
+// TestSubscriptionSubjectIdentifierConsumerNameLength checks that the SubscriptionSubjectIdentifier consumer name
+// length is equal to the recommended length by JetStream.
+func TestSubscriptionSubjectIdentifierConsumerNameLength(t *testing.T) {
+	t.Parallel()
+	testCases := []struct {
+		name                   string
+		givenIdentifier        SubscriptionSubjectIdentifier
+		wantConsumerNameLength int
+	}{
+		{
+			name: "short string values",
+			givenIdentifier: NewSubscriptionSubjectIdentifier(
+				evtesting.NewSubscription("sub", "ns"),
+				"app.event.operation.v1",
+			),
+			wantConsumerNameLength: maxJetStreamConsumerNameLength,
+		},
+		{
+			name: "long string values",
+			givenIdentifier: NewSubscriptionSubjectIdentifier(
+				evtesting.NewSubscription("some-test-subscription", "some-test-namespace"),
+				"some.test.prefix.some-test-application.some-test-event-name.some-test-operation.some-test-version",
+			),
+			wantConsumerNameLength: maxJetStreamConsumerNameLength,
+		},
+	}
+	for _, tc := range testCases {
+		tc := tc
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+			assert.Equal(t, tc.wantConsumerNameLength, len(tc.givenIdentifier.ConsumerName()))
+		})
+	}
+}
+
+// TestSubscriptionSubjectIdentifierNamespacedName checks the syntax of the SubscriptionSubjectIdentifier namespaced name.
+func TestSubscriptionSubjectIdentifierNamespacedName(t *testing.T) {
+	t.Parallel()
+	testCases := []struct {
+		name               string
+		givenIdentifier    SubscriptionSubjectIdentifier
+		wantNamespacedName string
+	}{
+		{
+			name: "short name and namespace values",
+			givenIdentifier: NewSubscriptionSubjectIdentifier(
+				evtesting.NewSubscription("sub", "ns"),
+				"app.event.operation.v1",
+			),
+			wantNamespacedName: "ns/sub",
+		},
+		{
+			name: "long name and namespace values",
+			givenIdentifier: NewSubscriptionSubjectIdentifier(
+				evtesting.NewSubscription("some-test-subscription", "some-test-namespace"),
+				"app.event.operation.v1",
+			),
+			wantNamespacedName: "some-test-namespace/some-test-subscription",
+		},
+	}
+	for _, tc := range testCases {
+		tc := tc
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+			assert.Equal(t, tc.wantNamespacedName, tc.givenIdentifier.NamespacedName())
+		})
 	}
 }

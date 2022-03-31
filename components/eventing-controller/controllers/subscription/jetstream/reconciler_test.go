@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"log"
 	"path/filepath"
-	"strings"
 	"testing"
 	"time"
 
@@ -132,7 +131,7 @@ func TestCreateSubscription(t *testing.T) {
 			},
 			want: utils.Want{
 				K8sSubscription: []gomegatypes.GomegaMatcher{
-					reconcilertesting.HaveCondition(utils.ConditionInvalidSink("sink URL scheme should be 'http' or 'https'")),
+					reconcilertesting.HaveCondition(utils.ConditionInvalidSink(sink.MissingSchemeErrMsg)),
 				},
 				K8sEvents: []v1.Event{utils.EventInvalidSink("Sink URL scheme should be HTTP or HTTPS: invalid")},
 			},
@@ -627,9 +626,9 @@ func getSubscriptionFromJetStream(ens *jetStreamTestEnsemble, subscription *even
 
 	return g.Expect(func() *nats.Subscription {
 		subscriptions := ens.jetStreamBackend.GetAllSubscriptions()
-		jsSubkey := ens.jetStreamBackend.GenerateJsSubKey(subject, subscription)
+		subscriptionSubject := handlers.NewSubscriptionSubjectIdentifier(subscription, subject)
 		for key, sub := range subscriptions {
-			if strings.EqualFold(key, jsSubkey) {
+			if key.ConsumerName() == subscriptionSubject.ConsumerName() {
 				return sub
 			}
 		}

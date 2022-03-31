@@ -147,7 +147,7 @@ func cleanup(backend handlers.NatsBackend, dynamicClient dynamic.Interface, logg
 		subKey := types.NamespacedName{Namespace: sub.Namespace, Name: sub.Name}
 		log := logger.With("key", subKey.String())
 
-		desiredSub := handlers.RemoveStatus(sub)
+		desiredSub := handlers.ResetStatusToDefaults(sub)
 		if err := handlers.UpdateSubscriptionStatus(ctx, dynamicClient, desiredSub); err != nil {
 			isCleanupSuccessful = false
 			log.Errorw("update NATS subscription status failed", "error", err)
