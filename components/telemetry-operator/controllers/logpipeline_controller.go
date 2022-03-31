@@ -194,6 +194,7 @@ func (r *LogPipelineReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 			log.Info(fmt.Sprintf("Checked %s - not yet ready. Requeueing...", req.NamespacedName))
 			return ctrl.Result{RequeueAfter: requeueTime}, nil
 		}
+		log.Info(fmt.Sprintf("Checked %s - ready", req.NamespacedName))
 
 		condition := telemetryv1alpha1.NewLogPipelineCondition(
 			telemetryv1alpha1.FluentBitDSRestartCompletedReason,
