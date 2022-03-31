@@ -10,6 +10,7 @@ const { JaegerExporter } = require('@opentelemetry/exporter-jaeger');
 const { HttpInstrumentation } = require('@opentelemetry/instrumentation-http');
 const { B3Propagator,B3InjectEncoding } = require("@opentelemetry/propagator-b3");
 const  {NoopTracerProvider} = require('@opentelemetry/api')
+const {ExpressInstrumentation} = require("@opentelemetry/instrumentation-express");
 
 const TRACER_SAMPLE_HEADER= "x-b3-sampled"
 
@@ -42,6 +43,7 @@ function getTracerProvider (serviceName, endpoint) {
   registerInstrumentations({
     tracerProvider: provider,
     instrumentations: [
+      new ExpressInstrumentation(),
       new HttpInstrumentation({
         ignoreIncomingPaths: [
           "/healthz",
