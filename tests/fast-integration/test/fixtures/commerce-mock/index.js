@@ -282,6 +282,7 @@ async function checkEventTracing(targetNamespace = 'test', res) {
 async function sendLegacyEventAndCheckTracing(targetNamespace = 'test', mockNamespace = 'mocks') {
   // Send an event and get it back from the lastorder function
   const res = await sendLegacyEventAndCheckResponse(mockNamespace);
+
   // Check the correct event tracing
   await checkEventTracing(targetNamespace, res);
 }
