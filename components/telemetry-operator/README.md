@@ -85,7 +85,7 @@ The above command would perform following tasks
 After installing the telemetry operator its necessary to configure the telemetry fluent-bit  to push logs to the Loki (which is already present on the Kyma cluster)
 
 ```bash
-kyma deploy --component logging --value logging.fluent-bit.enabled=false
+kyma deploy --component logging --value global.telemetry.enabled=true
 ```
 
 The above command would additionally install a Logpipeline CR which would configure the telemetry fluent-bit to push logs to the Loki. After disabling the fluent-bit from logging chart we need delete the unneded resources
@@ -121,8 +121,4 @@ kubectl delete configmap -n kyma-system telemetry-fluent-bit
 kubectl delete secret -n kyma-system telemetry-operator-webhook-cert
 kubectl delete serviceaccount -n kyma-system telemetry-operator
 kubectl delete serviceaccount -n kyma-system telemetry-fluent-bit
-```
-
-
-
 ```
