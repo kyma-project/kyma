@@ -25,7 +25,7 @@ This tutorial is based on a sample HttpBin service deployment and a sample Funct
    export ENCODED_CREDENTIALS=$(echo -n "$CLIENT_ID:$CLIENT_SECRET" | base64)
    ```
 
-3. In your browser, go to `https://YOUR_OIDC_COMPLIANT_IDENTITY_PROVIDER_INSTANCE/.well-known/openid-configuration`, save values of the **token_endpoint** and **jwks_uri** parameters, and export them as environment variables:
+3. In your browser, go to `https://{YOUR_OIDC_COMPLIANT_IDENTITY_PROVIDER_INSTANCE}/.well-known/openid-configuration`, save values of the **token_endpoint** and **jwks_uri** parameters, and export them as environment variables:
 
    ```bash
    export TOKEN_ENDPOINT={YOUR_TOKEN_ENDPOINT}
