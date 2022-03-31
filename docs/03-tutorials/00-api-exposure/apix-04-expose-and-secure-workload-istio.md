@@ -133,7 +133,7 @@ Follow the instructions in the tabs to expose the HttpBin workload or a Function
 
 ## Secure a workload or a Function using JWT
 
-To secure the Httpbin workload or a Function using JWT, add a Request Authentication. It requires a JWT for all requests for workloads that have matching label. Follow the instructions in the tabs:
+To secure the Httpbin workload or a Function using JWT, add a Request Authentication. Workloads that have the **matchLabels** parameter specified, require a JWT for all requests. Follow the instructions in the tabs:
 
 <div tabs>
 
