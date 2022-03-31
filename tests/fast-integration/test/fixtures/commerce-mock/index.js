@@ -590,7 +590,8 @@ async function ensureCommerceMockWithCompassTestFixture(
     mockNamespace,
     targetNamespace,
     withCentralApplicationConnectivity = false,
-    compassScenarioAlreadyExist = false) {
+    compassScenarioAlreadyExist = false,
+    noSC = false) {
   const lastOrderFunction = withCentralApplicationConnectivity ?
     prepareFunction('central-app-gateway-compass', `mp-${appName}`) :
     prepareFunction();
@@ -606,14 +607,16 @@ async function ensureCommerceMockWithCompassTestFixture(
     await retryPromise(() => registerAllApis(mockHost), 10, 30000);
   }
 
-  const commerceSC = await waitForServiceClass(appName, targetNamespace, 300 * 1000);
-  await waitForServicePlanByServiceClass(commerceSC.metadata.name, targetNamespace, 300 * 1000);
-  await retryPromise(
-      () => k8sApply([serviceInstanceObj('commerce', commerceSC.spec.externalName)], targetNamespace, false),
-      5,
-      2000,
-  );
-  await waitForServiceInstance('commerce', targetNamespace, 600 * 1000);
+  if ( !noSC ) {
+    const commerceSC = await waitForServiceClass(appName, targetNamespace, 300 * 1000);
+    await waitForServicePlanByServiceClass(commerceSC.metadata.name, targetNamespace, 300 * 1000);
+    await retryPromise(
+        () => k8sApply([serviceInstanceObj('commerce', commerceSC.spec.externalName)], targetNamespace, false),
+        5,
+        2000,
+    );
+    await waitForServiceInstance('commerce', targetNamespace, 600 * 1000);
+  }
 
   if (withCentralApplicationConnectivity) {
     await waitForDeployment('central-application-gateway', 'kyma-system');
@@ -623,39 +626,40 @@ async function ensureCommerceMockWithCompassTestFixture(
     await patchApplicationGateway(`${targetNamespace}-gateway`, targetNamespace);
   }
 
-  const serviceBinding = {
-    apiVersion: 'servicecatalog.k8s.io/v1beta1',
-    kind: 'ServiceBinding',
-    metadata: {name: 'commerce-binding'},
-    spec: {
-      instanceRef: {name: 'commerce'},
-    },
-  };
-  await k8sApply([serviceBinding], targetNamespace, false);
-  await waitForServiceBinding('commerce-binding', targetNamespace);
+  if ( !noSC ) {
+    const serviceBinding = {
+      apiVersion: 'servicecatalog.k8s.io/v1beta1',
+      kind: 'ServiceBinding',
+      metadata: {name: 'commerce-binding'},
+      spec: {
+        instanceRef: {name: 'commerce'},
+      },
+    };
+    await k8sApply([serviceBinding], targetNamespace, false);
+    await waitForServiceBinding('commerce-binding', targetNamespace);
 
-  const serviceBindingUsage = {
-    apiVersion: 'servicecatalog.kyma-project.io/v1alpha1',
-    kind: 'ServiceBindingUsage',
-    metadata: {name: 'commerce-lastorder-sbu'},
-    spec: {
-      serviceBindingRef: {name: 'commerce-binding'},
-      usedBy: {kind: 'serverless-function', name: 'lastorder'},
-    },
-  };
-  await k8sApply([serviceBindingUsage], targetNamespace);
-  await waitForServiceBindingUsage('commerce-lastorder-sbu', targetNamespace);
+    const serviceBindingUsage = {
+      apiVersion: 'servicecatalog.kyma-project.io/v1alpha1',
+      kind: 'ServiceBindingUsage',
+      metadata: {name: 'commerce-lastorder-sbu'},
+      spec: {
+        serviceBindingRef: {name: 'commerce-binding'},
+        usedBy: {kind: 'serverless-function', name: 'lastorder'},
+      },
+    };
+    await k8sApply([serviceBindingUsage], targetNamespace);
+    await waitForServiceBindingUsage('commerce-lastorder-sbu', targetNamespace);
 
-  await waitForFunction('lastorder', targetNamespace);
+    await waitForFunction('lastorder', targetNamespace);
 
-  await k8sApply([eventingSubscription(
-      `sap.kyma.custom.inapp.order.received.v1`,
-      `http://lastorder.${targetNamespace}.svc.cluster.local`,
-      'order-received',
-      targetNamespace)]);
-  await waitForSubscription('order-received', targetNamespace);
-  await waitForSubscription('order-created', targetNamespace);
-
+    await k8sApply([eventingSubscription(
+        `sap.kyma.custom.inapp.order.received.v1`,
+        `http://lastorder.${targetNamespace}.svc.cluster.local`,
+        'order-received',
+        targetNamespace)]);
+    await waitForSubscription('order-received', targetNamespace);
+    await waitForSubscription('order-created', targetNamespace);
+  }
   return mockHost;
 }
 
