@@ -169,7 +169,7 @@ collectors:
   - deployments
   - endpoints
   - horizontalpodautoscalers
-  # - ingresses # kube-state-metrics panics for badly configured ingress: https://github.com/kyma-project/kyma/issues/13768
+  # - ingresses # kube-state-metrics panics for badly configured ingress: https://github.com/kyma-project/kyma/issues/13768 
   - jobs
   - limitranges
   - mutatingwebhookconfigurations
