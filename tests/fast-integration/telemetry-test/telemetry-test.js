@@ -21,7 +21,6 @@ function loadResourceFromFile(file) {
 }
 
 const invalidLogPipelineCR = loadResourceFromFile('./invalid-log-pipeline.yaml');
-// TODO: Fetch the logpipeline CR from kyma project
 const logPipelineCR = loadResourceFromFile('./log-pipeline.yaml');
 
 describe('Telemetry Operator tests', function() {
@@ -52,8 +51,6 @@ describe('Telemetry Operator tests', function() {
       expect(e.body.message).to.have.string('denied the request', 'Invalid indentation level');
     };
   });
-
-  // TODO: It deploys a logpipeline CR with the loki output configured
 
   it('should push the logs to the loki output', async () => {
     const labels = '{job="telemetry-fluent-bit"}';
