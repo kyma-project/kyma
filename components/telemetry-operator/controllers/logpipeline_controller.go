@@ -171,6 +171,12 @@ func (r *LogPipelineReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 			return ctrl.Result{}, err
 		}
 
+		// If the log pipeline had a running condition and then was modified, all conditions are removed.
+		// In this case, condition tracking starts off from the beginning.
+		if hasRunningCondition(&logPipeline) {
+			logPipeline.Status.Conditions = []telemetryv1alpha1.LogPipelineCondition{}
+		}
+
 		condition := telemetryv1alpha1.NewLogPipelineCondition(
 			telemetryv1alpha1.FluentBitDSRestartedReason,
 			telemetryv1alpha1.LogPipelinePending,
@@ -182,8 +188,7 @@ func (r *LogPipelineReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 		return ctrl.Result{RequeueAfter: requeueTime}, nil
 	}
 
-	isNotRunning := logPipeline.Status.GetCondition(telemetryv1alpha1.LogPipelineRunning) == nil
-	if isNotRunning {
+	if hasRunningCondition(&logPipeline) {
 		ready, err := r.isFluentBitDaemonSetReady(ctx)
 		if err != nil {
 			log.Error(err, "Failed to check fluent bit readiness")
@@ -510,4 +515,8 @@ func (r *LogPipelineReconciler) updateLogPipelineStatus(ctx context.Context,
 		return err
 	}
 	return nil
+}
+
+func hasRunningCondition(logPipeline *telemetryv1alpha1.LogPipeline) bool {
+	return logPipeline.Status.GetCondition(telemetryv1alpha1.LogPipelineRunning) != nil
 }
