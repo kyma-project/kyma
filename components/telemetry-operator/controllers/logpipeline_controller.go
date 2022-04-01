@@ -160,7 +160,7 @@ func (r *LogPipelineReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 	}
 
 	if updatedSectionsCm || updatedParsersCm || updatedFilesCm || updatedEnv {
-		log.Info("Updated fluent bit configuration")
+		log.V(1).Info("Fluent bit configuration was updated. Restarting the daemon set")
 
 		if err := r.Update(ctx, &logPipeline); err != nil {
 			log.Error(err, "Failed updating log pipeline")
@@ -191,10 +191,10 @@ func (r *LogPipelineReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 			return ctrl.Result{RequeueAfter: requeueTime}, err
 		}
 		if !ready {
-			log.Info(fmt.Sprintf("Checked %s - not yet ready. Requeueing...", req.NamespacedName))
+			log.V(1).Info(fmt.Sprintf("Checked %s - not yet ready. Requeueing...", req.NamespacedName.Name))
 			return ctrl.Result{RequeueAfter: requeueTime}, nil
 		}
-		log.Info(fmt.Sprintf("Checked %s - ready", req.NamespacedName))
+		log.V(1).Info(fmt.Sprintf("Checked %s - ready", req.NamespacedName.Name))
 
 		condition := telemetryv1alpha1.NewLogPipelineCondition(
 			telemetryv1alpha1.FluentBitDSRestartCompletedReason,
@@ -404,7 +404,7 @@ func (r *LogPipelineReconciler) syncSecretRefs(ctx context.Context, logPipeline 
 		}
 	}
 
-	//Sync environment from referenced Secrets to Fluent Bit Secret
+	// Sync environment from referenced Secrets to Fluent Bit Secret
 	for _, secretRef := range logPipeline.Spec.SecretRefs {
 		var referencedSecret corev1.Secret
 		if err := r.Get(ctx, types.NamespacedName{Name: secretRef.Name, Namespace: secretRef.Namespace}, &referencedSecret); err != nil {
@@ -452,19 +452,21 @@ func (r *LogPipelineReconciler) syncSecretRefs(ctx context.Context, logPipeline 
 // Delete all Fluent Bit pods to apply new configuration.
 func (r *LogPipelineReconciler) restartFluentBit(ctx context.Context) error {
 	log := logf.FromContext(ctx)
-	var fluentBitDS appsv1.DaemonSet
-	if err := r.Get(ctx, r.FluentBitDaemonSet, &fluentBitDS); err != nil {
+	var ds appsv1.DaemonSet
+	if err := r.Get(ctx, r.FluentBitDaemonSet, &ds); err != nil {
 		log.Error(err, "Failed getting fluent bit DaemonSet")
+		return err
 	}
 
-	patchedFluentBitDS := *fluentBitDS.DeepCopy()
-	if patchedFluentBitDS.Spec.Template.ObjectMeta.Annotations == nil {
-		patchedFluentBitDS.Spec.Template.ObjectMeta.Annotations = make(map[string]string)
+	patchedDS := *ds.DeepCopy()
+	if patchedDS.Spec.Template.ObjectMeta.Annotations == nil {
+		patchedDS.Spec.Template.ObjectMeta.Annotations = make(map[string]string)
 	}
-	patchedFluentBitDS.Spec.Template.ObjectMeta.Annotations["kubectl.kubernetes.io/restartedAt"] = time.Now().Format(time.RFC3339)
+	patchedDS.Spec.Template.ObjectMeta.Annotations["kubectl.kubernetes.io/restartedAt"] = time.Now().Format(time.RFC3339)
 
-	if err := r.Patch(ctx, &patchedFluentBitDS, client.MergeFrom(&fluentBitDS)); err != nil {
+	if err := r.Patch(ctx, &patchedDS, client.MergeFrom(&ds)); err != nil {
 		log.Error(err, "Failed to patch fluent bit to trigger rolling update")
+		return err
 	}
 	r.FluentBitRestartsCount.Inc()
 	return nil
@@ -472,27 +474,29 @@ func (r *LogPipelineReconciler) restartFluentBit(ctx context.Context) error {
 
 func (r *LogPipelineReconciler) isFluentBitDaemonSetReady(ctx context.Context) (bool, error) {
 	log := logf.FromContext(ctx)
-	var fluentBitDaemonSet appsv1.DaemonSet
-	if err := r.Get(ctx, r.FluentBitDaemonSet, &fluentBitDaemonSet); err != nil {
+	var ds appsv1.DaemonSet
+	if err := r.Get(ctx, r.FluentBitDaemonSet, &ds); err != nil {
 		log.Error(err, "Failed getting fluent bit daemon set")
-		return false, nil
+		return false, err
 	}
 
-	updated := fluentBitDaemonSet.Status.UpdatedNumberScheduled
-	desired := fluentBitDaemonSet.Status.DesiredNumberScheduled
-	ready := fluentBitDaemonSet.Status.NumberReady
+	updated := ds.Status.UpdatedNumberScheduled
+	desired := ds.Status.DesiredNumberScheduled
+	ready := ds.Status.NumberReady
 
-	log.Info(fmt.Sprintf("Checking fluent bit: updated: %d, desired: %d, ready: %d, generation: %d, observedGeneration: %d",
+	log.V(1).Info(fmt.Sprintf("Checking fluent bit: updated: %d, desired: %d, ready: %d, generation: %d, observed generation: %d",
 		updated,
 		desired,
 		ready,
-		fluentBitDaemonSet.Generation,
-		fluentBitDaemonSet.Status.ObservedGeneration))
+		ds.Generation,
+		ds.Status.ObservedGeneration))
 
 	return updated == desired && ready >= desired, nil
 }
 
-func (r *LogPipelineReconciler) updateLogPipelineStatus(ctx context.Context, name types.NamespacedName, condition *telemetryv1alpha1.LogPipelineCondition) error {
+func (r *LogPipelineReconciler) updateLogPipelineStatus(ctx context.Context,
+	name types.NamespacedName,
+	condition *telemetryv1alpha1.LogPipelineCondition) error {
 	log := logf.FromContext(ctx)
 
 	var logPipeline telemetryv1alpha1.LogPipeline
@@ -501,7 +505,7 @@ func (r *LogPipelineReconciler) updateLogPipelineStatus(ctx context.Context, nam
 		return err
 	}
 
-	log.Info(fmt.Sprintf("Updating the status of %s to %s", name, condition.Type))
+	log.V(1).Info(fmt.Sprintf("Updating the status of %s to %s", name.Name, condition.Type))
 	logPipeline.Status.SetCondition(*condition)
 
 	if err := r.Status().Update(ctx, &logPipeline); err != nil {
