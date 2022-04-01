@@ -6,7 +6,7 @@ title: Best Practices for Function Development
 # Overview - Its all about Custom Resources
 
 Kyma serverless introduces a [`Function`](https://kyma-project.io/docs/kyma/latest/05-technical-reference/00-custom-resources/svls-01-function/) Custom Resource Definition (CRD) as an extension to the kubernetes API server.
-Defining a Function in kyma essentially means creating a new instance of Function Custom Resource (CR). However, the content of Function CR specification consists of  - it contains the code (or git reference to the code), dependencies, runtime specification, build-time specification,  etc. Additionally there are other CRs that are relevant for function developer - I.e `APIRule` ( defining how function is exposed to the outside world), `Subscription` (defining which cloud events should trigger the function) and others.
+Defining a Function in kyma essentially means creating a new instance of Function Custom Resource (CR). However, the content of Function CR specification may become quite long. It consists of the code (or git reference to the code), dependencies, runtime specification, build-time specification,  etc. Additionally there are other CRs that are relevant for function developer - I.e `APIRule` ( defining how function is exposed to the outside world), `Subscription` (defining which cloud events should trigger the function) and others.
 All of that makes it cumbersome to define the setup by hand. 
 The following sections will guide you through the best practices for function development. You will find hints that will be helpful for you at any stage of your development journey.
 
@@ -46,7 +46,7 @@ It all comes down to being able to deploy k8s applications on different kyma run
 
 So in the end what you need is those yaml manifests for everything - including functions.
 
-Fortunatelly, Kyma CLI helps you generate the yaml mainfests matching your `config.yaml` file.
+Fortunatelly, Kyma CLI helps you generate the yaml mainfests matching your `config.yaml` file you crafted in earlier phase.
 Use `--dry-run` option of the `kyma apply function` command to generate kubernetes manifests that will include the function CR itself but also all the related CRs (i.e ApiRules, Subscriptions, etc).
 
 ```bash
