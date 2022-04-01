@@ -93,6 +93,7 @@ The above command would additionally install a Logpipeline CR which would config
 ```bash
 kubectl delete daemonset -n kyma-system logging-fluent-bit
 kubectl delete configmap -n kyma-system logging-fluent-bit
+kubectl delete servicemonitor -n kyma-system logging-fluent-bit
 ```
 
 
