@@ -8,13 +8,8 @@ const {
 
 const testNamespace = 'test';
 const mockNamespace = process.env.MOCK_NAMESPACE || 'mocks';
-const isSKR = process.env.KYMA_TYPE === 'SKR';
 
 async function tracingTests() {
-  if (isSKR) {
-    console.log('Skipping eventing tracing tests on SKR...');
-    return;
-  }
   describe('Tracing Tests:', function() {
     this.timeout(5 * 60 * 1000); // 5 min
 
