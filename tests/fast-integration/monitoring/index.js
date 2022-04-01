@@ -1,7 +1,6 @@
 const prometheus = require('./prometheus');
 const grafana = require('./grafana');
 const {getEnvOrDefault} = require('../utils');
-
 const {prometheusPortForward} = require('./client');
 
 function monitoringTests() {
@@ -26,6 +25,10 @@ function monitoringTests() {
 
     it('Prometheus pods should be ready', async () => {
       await prometheus.assertPodsExist();
+    });
+
+    it('Prometheus UI should be reachable', async () => {
+      await prometheus.assertPrometheusUIIsReachable();
     });
 
     it('Prometheus targets should be healthy', async () => {

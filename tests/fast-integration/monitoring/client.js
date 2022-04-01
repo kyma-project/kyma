@@ -17,6 +17,17 @@ function prometheusPortForward() {
   return kubectlPortForward('kyma-system', 'prometheus-monitoring-prometheus-0', prometheusPort);
 }
 
+async function getPrometheusUIStatus() {
+  const path = '/graph';
+  const url = `http://localhost:${prometheusPort}${path}`;
+  try {
+    const responseBody = await retryPromise(() => axios.get(url, {timeout: 10000}), 5);
+    return responseBody.status;
+  } catch (err) {
+    throw convertAxiosError(err, 'cannot get prometheus UI status');
+  }
+}
+
 async function getPrometheusActiveTargets() {
   const path = '/api/v1/targets?state=active';
   const url = `http://localhost:${prometheusPort}${path}`;
@@ -135,6 +146,7 @@ async function getJaegerTrace(traceId) {
 
 module.exports = {
   prometheusPortForward,
+  getPrometheusUIStatus,
   getPrometheusActiveTargets,
   getPrometheusAlerts,
   getPrometheusRuleGroups,

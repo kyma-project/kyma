@@ -5,6 +5,13 @@ const path = require('path');
 const {
   k8sCoreV1Api,
   k8sApply,
+  k8sDelete,
+  kubectlPortForward,
+  namespaceObj,
+  waitForK8sObject,
+  waitForDeployment,
+  waitForNamespace,
+  sleep,
 } = require('../utils');
 
 const {checkLokiLogs, lokiPortForward} = require('../logging');
@@ -17,6 +24,29 @@ function loadResourceFromFile(file) {
     encoding: 'utf8',
   });
   return k8s.loadAllYaml(yaml);
+}
+
+function checkLastCondition(logPipeline, conditionType) {
+  const conditions = logPipeline.status.conditions;
+  if (conditions.length == 0) {
+    return false;
+  }
+  const lastCondition = conditions[conditions.length - 1];
+  return lastCondition.type === conditionType;
+}
+
+function waitForLogPipelineStatusCondition(name, lastConditionType, timeout) {
+  return waitForK8sObject(
+      '/apis/telemetry.kyma-project.io/v1alpha1/logpipelines',
+      {},
+      (_type, watchObj, _) => {
+        return (
+          watchObj.metadata.name == name && checkLastCondition(watchObj, lastConditionType)
+        );
+      },
+      timeout,
+      `Waiting for log pipeline ${name} timeout (${timeout} ms)`,
+  );
 }
 
 const invalidLogPipelineCR = loadResourceFromFile('./invalid-log-pipeline.yaml');
@@ -39,6 +69,10 @@ describe('Telemetry Operator tests', function() {
     );
     const podList = res.body.items;
     assert.equal(podList.length, 1);
+  });
+
+  it('Loki LogPipeline should have Running condition', async () => {
+    await waitForLogPipelineStatusCondition('loki', 'Running', 180000);
   });
 
   it('Should reject the invalid LogPipeline', async () => {

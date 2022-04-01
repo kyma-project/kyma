@@ -3,8 +3,14 @@ package handlers
 import (
 	"errors"
 	"fmt"
+	"reflect"
 	"testing"
 	"time"
+
+	"github.com/nats-io/nats-server/v2/server"
+	"github.com/nats-io/nats.go"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	kymalogger "github.com/kyma-project/kyma/common/logging/logger"
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
@@ -12,14 +18,15 @@ import (
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/eventtype"
 	evtesting "github.com/kyma-project/kyma/components/eventing-controller/testing"
-	"github.com/nats-io/nats-server/v2/server"
-	"github.com/nats-io/nats.go"
-	"github.com/stretchr/testify/require"
 )
 
 const (
 	defaultStreamName    = "kyma"
 	defaultMaxReconnects = 10
+
+	// maxJetStreamConsumerNameLength is the maximum preferred length for the JetStream consumer names
+	// as per https://docs.nats.io/running-a-nats-service/nats_admin/jetstream_admin/naming
+	maxJetStreamConsumerNameLength = 32
 )
 
 type jetStreamClient struct {
@@ -103,7 +110,7 @@ func TestJetStream_SubscriptionDeletion(t *testing.T) {
 		evtesting.WithSinkURL(subscriber.SinkURL),
 		evtesting.WithStatusConfig(defaultSubsConfig),
 	)
-	addJSCleanEventTypesToStatus(sub, testEnvironment.cleaner, jsBackend)
+	require.NoError(t, addJSCleanEventTypesToStatus(sub, testEnvironment.cleaner))
 
 	// when
 	err := jsBackend.SyncSubscription(sub)
@@ -152,7 +159,7 @@ func TestJetStreamSubAfterSync_NoChange(t *testing.T) {
 		evtesting.WithSinkURL(subscriber1.SinkURL),
 		evtesting.WithStatusConfig(defaultSubsConfig),
 	)
-	addJSCleanEventTypesToStatus(sub, testEnvironment.cleaner, jsBackend)
+	require.NoError(t, addJSCleanEventTypesToStatus(sub, testEnvironment.cleaner))
 
 	// when
 	err := jsBackend.SyncSubscription(sub)
@@ -193,10 +200,11 @@ func TestJetStreamSubAfterSync_NoChange(t *testing.T) {
 	// by comparing the metadata of nats subscription
 	require.Len(t, jsBackend.subscriptions, 1)
 	jsSubject := jsBackend.GetJsSubjectToSubscribe(subject)
-	jsSubKey := jsBackend.GenerateJsSubKey(jsSubject, sub)
+	jsSubKey := NewSubscriptionSubjectIdentifier(sub, jsSubject)
 	jsSub := jsBackend.subscriptions[jsSubKey]
 	require.NotNil(t, jsSub)
 	require.True(t, jsSub.IsValid())
+
 	// check the metadata, if they are now same then it means that NATS subscription
 	// were not re-created by SyncSubscription method
 	subMsgLimit, subBytesLimit, err := jsSub.PendingLimits()
@@ -240,7 +248,7 @@ func TestJetStreamSubAfterSync_SinkChange(t *testing.T) {
 		evtesting.WithSinkURL(subscriber1.SinkURL),
 		evtesting.WithStatusConfig(defaultSubsConfig),
 	)
-	addJSCleanEventTypesToStatus(sub, testEnvironment.cleaner, jsBackend)
+	require.NoError(t, addJSCleanEventTypesToStatus(sub, testEnvironment.cleaner))
 
 	// when
 	err := jsBackend.SyncSubscription(sub)
@@ -283,10 +291,11 @@ func TestJetStreamSubAfterSync_SinkChange(t *testing.T) {
 	// by comparing the metadata of nats subscription
 	require.Len(t, jsBackend.subscriptions, 1)
 	jsSubject := jsBackend.GetJsSubjectToSubscribe(subject)
-	jsSubKey := jsBackend.GenerateJsSubKey(jsSubject, sub)
+	jsSubKey := NewSubscriptionSubjectIdentifier(sub, jsSubject)
 	jsSub := jsBackend.subscriptions[jsSubKey]
 	require.NotNil(t, jsSub)
 	require.True(t, jsSub.IsValid())
+
 	// check the metadata, if they are now same then it means that NATS subscription
 	// were not re-created by SyncSubscription method
 	subMsgLimit, subBytesLimit, err := jsSub.PendingLimits()
@@ -298,6 +307,7 @@ func TestJetStreamSubAfterSync_SinkChange(t *testing.T) {
 	data = fmt.Sprintf("data-%s", time.Now().Format(time.RFC850))
 	expectedDataInStore = fmt.Sprintf("\"%s\"", data)
 	require.NoError(t, SendEventToJetStream(jsBackend, data))
+
 	// Old sink should not have received the event, the new sink should have
 	require.Error(t, subscriber1.CheckEvent(expectedDataInStore))
 	require.NoError(t, subscriber2.CheckEvent(expectedDataInStore))
@@ -325,7 +335,7 @@ func TestJetStreamSubAfterSync_FiltersChange(t *testing.T) {
 		evtesting.WithSinkURL(subscriber.SinkURL),
 		evtesting.WithStatusConfig(defaultSubsConfig),
 	)
-	addJSCleanEventTypesToStatus(sub, testEnvironment.cleaner, jsBackend)
+	require.NoError(t, addJSCleanEventTypesToStatus(sub, testEnvironment.cleaner))
 
 	// when
 	err := jsBackend.SyncSubscription(sub)
@@ -358,7 +368,7 @@ func TestJetStreamSubAfterSync_FiltersChange(t *testing.T) {
 	// Now, change the filter in subscription
 	sub.Spec.Filter.Filters[0].EventType.Value = fmt.Sprintf("%schanged", evtesting.OrderCreatedEventTypeNotClean)
 	// Sync the subscription status
-	addJSCleanEventTypesToStatus(sub, testEnvironment.cleaner, jsBackend)
+	require.NoError(t, addJSCleanEventTypesToStatus(sub, testEnvironment.cleaner))
 
 	// when
 	err = jsBackend.SyncSubscription(sub)
@@ -375,11 +385,11 @@ func TestJetStreamSubAfterSync_FiltersChange(t *testing.T) {
 	// because the subscriptions should have being re-created for new subject
 	require.Len(t, jsBackend.subscriptions, 1)
 	jsSubject := jsBackend.GetJsSubjectToSubscribe(newSubject)
-	jsSubKey := jsBackend.GenerateJsSubKey(jsSubject, sub)
-
+	jsSubKey := NewSubscriptionSubjectIdentifier(sub, jsSubject)
 	jsSub := jsBackend.subscriptions[jsSubKey]
 	require.NotNil(t, jsSub)
 	require.True(t, jsSub.IsValid())
+
 	// check the metadata, if they are NOT same then it means that NATS subscription
 	// were re-created by SyncSubscription method
 	subMsgLimit, subBytesLimit, err := jsSub.PendingLimits()
@@ -424,7 +434,7 @@ func TestJetStreamSubAfterSync_FilterAdded(t *testing.T) {
 		evtesting.WithSinkURL(subscriber.SinkURL),
 		evtesting.WithStatusConfig(defaultSubsConfig),
 	)
-	addJSCleanEventTypesToStatus(sub, testEnvironment.cleaner, jsBackend)
+	require.NoError(t, addJSCleanEventTypesToStatus(sub, testEnvironment.cleaner))
 
 	// when
 	err := jsBackend.SyncSubscription(sub)
@@ -455,7 +465,7 @@ func TestJetStreamSubAfterSync_FilterAdded(t *testing.T) {
 	secondSubject, err := getCleanSubject(newFilter, testEnvironment.cleaner)
 	require.NoError(t, err)
 	require.NotEmpty(t, secondSubject)
-	addJSCleanEventTypesToStatus(sub, testEnvironment.cleaner, jsBackend)
+	require.NoError(t, addJSCleanEventTypesToStatus(sub, testEnvironment.cleaner))
 
 	// when
 	err = jsBackend.SyncSubscription(sub)
@@ -468,11 +478,11 @@ func TestJetStreamSubAfterSync_FilterAdded(t *testing.T) {
 	require.Len(t, jsBackend.subscriptions, 2)
 	// Verify that the nats subscriptions for first subject was not re-created
 	jsSubject := jsBackend.GetJsSubjectToSubscribe(firstSubject)
-	jsSubKey := jsBackend.GenerateJsSubKey(jsSubject, sub)
-
+	jsSubKey := NewSubscriptionSubjectIdentifier(sub, jsSubject)
 	jsSub := jsBackend.subscriptions[jsSubKey]
 	require.NotNil(t, jsSub)
 	require.True(t, jsSub.IsValid())
+
 	// check the metadata, if they are now same then it means that NATS subscription
 	// were not re-created by SyncSubscription method
 	subMsgLimit, subBytesLimit, err := jsSub.PendingLimits()
@@ -524,7 +534,7 @@ func TestJetStreamSubAfterSync_FilterRemoved(t *testing.T) {
 	newFilter := sub.Spec.Filter.Filters[0].DeepCopy()
 	newFilter.EventType.Value = fmt.Sprintf("%snew1", evtesting.OrderCreatedEventTypeNotClean)
 	sub.Spec.Filter.Filters = append(sub.Spec.Filter.Filters, newFilter)
-	addJSCleanEventTypesToStatus(sub, testEnvironment.cleaner, jsBackend)
+	require.NoError(t, addJSCleanEventTypesToStatus(sub, testEnvironment.cleaner))
 
 	// when
 	err := jsBackend.SyncSubscription(sub)
@@ -556,7 +566,7 @@ func TestJetStreamSubAfterSync_FilterRemoved(t *testing.T) {
 	// given
 	// Now, remove the second filter from subscription
 	sub.Spec.Filter.Filters = sub.Spec.Filter.Filters[:1]
-	addJSCleanEventTypesToStatus(sub, testEnvironment.cleaner, jsBackend)
+	require.NoError(t, addJSCleanEventTypesToStatus(sub, testEnvironment.cleaner))
 
 	// when
 	err = jsBackend.SyncSubscription(sub)
@@ -568,11 +578,11 @@ func TestJetStreamSubAfterSync_FilterRemoved(t *testing.T) {
 	require.Len(t, jsBackend.subscriptions, 1)
 	// Verify that the nats subscriptions for first subject was not re-created
 	jsSubject := jsBackend.GetJsSubjectToSubscribe(firstSubject)
-	jsSubKey := jsBackend.GenerateJsSubKey(jsSubject, sub)
-
+	jsSubKey := NewSubscriptionSubjectIdentifier(sub, jsSubject)
 	jsSub := jsBackend.subscriptions[jsSubKey]
 	require.NotNil(t, jsSub)
 	require.True(t, jsSub.IsValid())
+
 	// check the metadata, if they are now same then it means that NATS subscription
 	// were not re-created by SyncSubscription method
 	subMsgLimit, subBytesLimit, err := jsSub.PendingLimits()
@@ -622,7 +632,7 @@ func TestJetStreamSubAfterSync_MultipleSubs(t *testing.T) {
 		evtesting.WithSinkURL(subscriber.SinkURL),
 		evtesting.WithStatusConfig(defaultSubsConfig),
 	)
-	addJSCleanEventTypesToStatus(sub, testEnvironment.cleaner, jsBackend)
+	require.NoError(t, addJSCleanEventTypesToStatus(sub, testEnvironment.cleaner))
 
 	// when
 	err := jsBackend.SyncSubscription(sub)
@@ -636,7 +646,7 @@ func TestJetStreamSubAfterSync_MultipleSubs(t *testing.T) {
 		evtesting.WithSinkURL(subscriber.SinkURL),
 		evtesting.WithStatusConfig(defaultSubsConfig),
 	)
-	addJSCleanEventTypesToStatus(sub2, testEnvironment.cleaner, jsBackend)
+	require.NoError(t, addJSCleanEventTypesToStatus(sub2, testEnvironment.cleaner))
 
 	// when
 	err = jsBackend.SyncSubscription(sub2)
@@ -658,7 +668,7 @@ func TestJetStreamSubAfterSync_MultipleSubs(t *testing.T) {
 
 	// Now, change the filter in subscription 1
 	sub.Spec.Filter.Filters[0].EventType.Value = fmt.Sprintf("%schanged", evtesting.OrderCreatedEventTypeNotClean)
-	addJSCleanEventTypesToStatus(sub, testEnvironment.cleaner, jsBackend)
+	require.NoError(t, addJSCleanEventTypesToStatus(sub, testEnvironment.cleaner))
 
 	// when
 	err = jsBackend.SyncSubscription(sub)
@@ -678,11 +688,11 @@ func TestJetStreamSubAfterSync_MultipleSubs(t *testing.T) {
 	// check if the NATS subscription are NOT the same after sync for subscription 1
 	// because the subscriptions should have being re-created for new subject
 	jsSubject := jsBackend.GetJsSubjectToSubscribe(newSubject)
-	jsSubKey := jsBackend.GenerateJsSubKey(jsSubject, sub)
-
+	jsSubKey := NewSubscriptionSubjectIdentifier(sub, jsSubject)
 	jsSub := jsBackend.subscriptions[jsSubKey]
 	require.NotNil(t, jsSub)
 	require.True(t, jsSub.IsValid())
+
 	// check the metadata, if they are now same then it means that NATS subscription
 	// were not re-created by SyncSubscription method
 	subMsgLimit, subBytesLimit, err := jsSub.PendingLimits()
@@ -699,11 +709,11 @@ func TestJetStreamSubAfterSync_MultipleSubs(t *testing.T) {
 	// because the subscriptions should NOT have being re-created as
 	// subscription 2 was not modified
 	jsSubject = jsBackend.GetJsSubjectToSubscribe(cleanSubjectSub2)
-	jsSubKey = jsBackend.GenerateJsSubKey(jsSubject, sub2)
-
+	jsSubKey = NewSubscriptionSubjectIdentifier(sub2, jsSubject)
 	jsSub = jsBackend.subscriptions[jsSubKey]
 	require.NotNil(t, jsSub)
 	require.True(t, jsSub.IsValid())
+
 	// check the metadata, if they are now same then it means that NATS subscription
 	// were not re-created by SyncSubscription method
 	subMsgLimit, subBytesLimit, err = jsSub.PendingLimits()
@@ -725,20 +735,16 @@ func TestJetStream_isJsSubAssociatedWithKymaSub(t *testing.T) {
 	// create subscription 1 and its JetStream subscription
 	cleanSubject1 := "subOne"
 	sub1 := evtesting.NewSubscription(cleanSubject1, "foo", evtesting.WithNotCleanFilter())
-	jsSub1Key := jsBackend.GenerateJsSubKey(
-		jsBackend.GetJsSubjectToSubscribe(cleanSubject1),
-		sub1)
+	jsSub1Key := NewSubscriptionSubjectIdentifier(sub1, cleanSubject1)
 
 	// create subscription 2 and its JetStream subscription
 	cleanSubject2 := "subOneTwo"
 	sub2 := evtesting.NewSubscription(cleanSubject2, "foo", evtesting.WithNotCleanFilter())
-	jsSub2Key := jsBackend.GenerateJsSubKey(
-		jsBackend.GetJsSubjectToSubscribe(cleanSubject2),
-		sub2)
+	jsSub2Key := NewSubscriptionSubjectIdentifier(sub2, cleanSubject2)
 
 	testCases := []struct {
 		name            string
-		givenJSSubKey   string
+		givenJSSubKey   SubscriptionSubjectIdentifier
 		givenKymaSubKey *eventingv1alpha1.Subscription
 		wantResult      bool
 	}{
@@ -771,11 +777,8 @@ func TestJetStream_isJsSubAssociatedWithKymaSub(t *testing.T) {
 	for _, tC := range testCases {
 		testCase := tC
 		t.Run(testCase.name, func(t *testing.T) {
-			gotResult, err := jsBackend.isJsSubAssociatedWithKymaSub(
-				tC.givenJSSubKey,
-				tC.givenKymaSubKey)
-			require.Equal(t, gotResult, tC.wantResult)
-			require.NoError(t, err)
+			gotResult := jsBackend.isJsSubAssociatedWithKymaSub(tC.givenJSSubKey, tC.givenKymaSubKey)
+			require.Equal(t, tC.wantResult, gotResult)
 		})
 	}
 }
@@ -806,7 +809,7 @@ func TestMultipleJSSubscriptionsToSameEvent(t *testing.T) {
 			evtesting.WithSinkURL(subscriber.SinkURL),
 			evtesting.WithStatusConfig(defaultSubsConfig),
 		)
-		addJSCleanEventTypesToStatus(subs[i], testEnvironment.cleaner, jsBackend)
+		require.NoError(t, addJSCleanEventTypesToStatus(subs[i], testEnvironment.cleaner))
 		// when
 		err := jsBackend.SyncSubscription(subs[i])
 		// then
@@ -857,7 +860,7 @@ func TestJSSubscriptionWithDuplicateFilters(t *testing.T) {
 		evtesting.WithSinkURL(subscriber.SinkURL),
 		evtesting.WithStatusConfig(defaultSubsConfig),
 	)
-	addJSCleanEventTypesToStatus(sub, testEnvironment.cleaner, jsBackend)
+	require.NoError(t, addJSCleanEventTypesToStatus(sub, testEnvironment.cleaner))
 
 	// when
 	err := jsBackend.SyncSubscription(sub)
@@ -897,7 +900,7 @@ func TestJSSubscriptionWithMaxInFlightChange(t *testing.T) {
 		evtesting.WithSinkURL(subscriber.SinkURL),
 		evtesting.WithStatusConfig(defaultSubsConfig),
 	)
-	addJSCleanEventTypesToStatus(sub, testEnvironment.cleaner, jsBackend)
+	require.NoError(t, addJSCleanEventTypesToStatus(sub, testEnvironment.cleaner))
 
 	// when
 	err := jsBackend.SyncSubscription(sub)
@@ -914,8 +917,8 @@ func TestJSSubscriptionWithMaxInFlightChange(t *testing.T) {
 
 	// then
 	require.Eventually(t, func() bool {
-		consumerName := jsBackend.GenerateJsSubKey(sub.Status.CleanEventTypes[0], sub)
 		// fetch consumer info from JetStream
+		consumerName := NewSubscriptionSubjectIdentifier(sub, sub.Status.CleanEventTypes[0]).ConsumerName()
 		consumerInfo, err := jsBackend.jsCtx.ConsumerInfo(jsBackend.config.JSStreamName, consumerName)
 		require.NoError(t, err)
 
@@ -949,7 +952,7 @@ func TestJSSubscriptionRedeliverWithFailedDispatch(t *testing.T) {
 		evtesting.WithSinkURL(subscriber.SinkURL),
 		evtesting.WithStatusConfig(defaultSubsConfig),
 	)
-	addJSCleanEventTypesToStatus(sub, testEnvironment.cleaner, jsBackend)
+	require.NoError(t, addJSCleanEventTypesToStatus(sub, testEnvironment.cleaner))
 
 	// when
 	err := jsBackend.SyncSubscription(sub)
@@ -1003,7 +1006,7 @@ func TestJSSubscriptionUsingCESDK(t *testing.T) {
 		evtesting.WithSinkURL(subscriber.SinkURL),
 		evtesting.WithStatusConfig(defaultSubsConfig),
 	)
-	addJSCleanEventTypesToStatus(sub, testEnvironment.cleaner, jsBackend)
+	require.NoError(t, addJSCleanEventTypesToStatus(sub, testEnvironment.cleaner))
 
 	// when
 	err := jsBackend.SyncSubscription(sub)
@@ -1077,7 +1080,7 @@ func TestJetStream_ServerRestart(t *testing.T) {
 				evtesting.WithSinkURL(subscriber.SinkURL),
 				evtesting.WithStatusConfig(defaultSubsConfig),
 			)
-			addJSCleanEventTypesToStatus(sub, testEnvironment.cleaner, jsBackend)
+			require.NoError(t, addJSCleanEventTypesToStatus(sub, testEnvironment.cleaner))
 
 			// when
 			err := jsBackend.SyncSubscription(sub)
@@ -1162,9 +1165,13 @@ func getJetStreamClient(t *testing.T, serverURL string) *jetStreamClient {
 	}
 }
 
-func addJSCleanEventTypesToStatus(sub *eventingv1alpha1.Subscription, cleaner eventtype.Cleaner, jsBackend *JetStream) {
-	cleanedSubjects, _ := GetCleanSubjects(sub, cleaner)
-	sub.Status.CleanEventTypes = jsBackend.GetJetStreamSubjects(cleanedSubjects)
+func addJSCleanEventTypesToStatus(sub *eventingv1alpha1.Subscription, cleaner eventtype.Cleaner) error {
+	cleanEventType, err := GetCleanSubjects(sub, cleaner)
+	if err != nil {
+		return err
+	}
+	sub.Status.CleanEventTypes = cleanEventType
+	return nil
 }
 
 // TestEnvironment provides mocked resources for tests.
@@ -1182,6 +1189,7 @@ type TestEnvironment struct {
 func setupTestEnvironment(t *testing.T) *TestEnvironment {
 	natsServer, natsPort := startNATSServer(evtesting.WithJetStreamEnabled())
 	natsConfig := defaultNatsConfig(natsServer.ClientURL())
+	natsConfig.JSStreamSubjectPrefix = evtesting.EventTypePrefix
 	defaultLogger, err := logger.New(string(kymalogger.JSON), string(kymalogger.INFO))
 	require.NoError(t, err)
 
@@ -1197,5 +1205,172 @@ func setupTestEnvironment(t *testing.T) *TestEnvironment {
 		natsConfig: natsConfig,
 		cleaner:    cleaner,
 		natsPort:   natsPort,
+	}
+}
+
+// TestSubscriptionSubjectIdentifierEqual checks the equality of two SubscriptionSubjectIdentifier instances and their consumer names.
+func TestSubscriptionSubjectIdentifierEqual(t *testing.T) {
+	t.Parallel()
+	testCases := []struct {
+		name             string
+		givenIdentifier1 SubscriptionSubjectIdentifier
+		givenIdentifier2 SubscriptionSubjectIdentifier
+		wantEqual        bool
+	}{
+		// instances are equal
+		{
+			name: "should be equal if the two instances are identical",
+			givenIdentifier1: NewSubscriptionSubjectIdentifier(
+				evtesting.NewSubscription("sub-1", "ns-1"),
+				"prefix.app.event.operation.v1",
+			),
+			givenIdentifier2: NewSubscriptionSubjectIdentifier(
+				evtesting.NewSubscription("sub-1", "ns-1"),
+				"prefix.app.event.operation.v1",
+			),
+			wantEqual: true,
+		},
+		// instances are not equal
+		{
+			name: "should not be equal if only name is different",
+			givenIdentifier1: NewSubscriptionSubjectIdentifier(
+				evtesting.NewSubscription("sub-1", "ns-1"),
+				"prefix.app.event.operation.v1",
+			),
+			givenIdentifier2: NewSubscriptionSubjectIdentifier(
+				evtesting.NewSubscription("sub-2", "ns-1"),
+				"prefix.app.event.operation.v1",
+			),
+			wantEqual: false,
+		},
+		{
+			name: "should not be equal if only namespace is different",
+			givenIdentifier1: NewSubscriptionSubjectIdentifier(
+				evtesting.NewSubscription("sub-1", "ns-1"),
+				"prefix.app.event.operation.v1",
+			),
+			givenIdentifier2: NewSubscriptionSubjectIdentifier(
+				evtesting.NewSubscription("sub-1", "ns-2"),
+				"prefix.app.event.operation.v1",
+			),
+			wantEqual: false,
+		},
+		{
+			name: "should not be equal if only subject is different",
+			givenIdentifier1: NewSubscriptionSubjectIdentifier(
+				evtesting.NewSubscription("sub-1", "ns-1"),
+				"prefix.app.event.operation.v1",
+			),
+			givenIdentifier2: NewSubscriptionSubjectIdentifier(
+				evtesting.NewSubscription("sub-1", "ns-1"),
+				"prefix.app.event.operation.v2",
+			),
+			wantEqual: false,
+		},
+		// possible naming collisions
+		{
+			name: "should not be equal if subject is the same but name and namespace are swapped",
+			givenIdentifier1: NewSubscriptionSubjectIdentifier(
+				evtesting.NewSubscription("sub-1", "ns-1"),
+				"prefix.app.event.operation.v1",
+			),
+			givenIdentifier2: NewSubscriptionSubjectIdentifier(
+				evtesting.NewSubscription("ns-1", "sub-1"),
+				"prefix.app.event.operation.v1",
+			),
+			wantEqual: false,
+		},
+		{
+			name: "should not be equal if subject is the same but name and namespace are only equal if joined together",
+			givenIdentifier1: NewSubscriptionSubjectIdentifier(
+				evtesting.NewSubscription("sub-1", "ns-1"), // evaluates to "sub-1ns-1" when joined
+				"prefix.app.event.operation.v1",
+			),
+			givenIdentifier2: NewSubscriptionSubjectIdentifier(
+				evtesting.NewSubscription("sub-1n", "s-1"), // evaluates to "sub-1ns-1" when joined
+				"prefix.app.event.operation.v1",
+			),
+			wantEqual: false,
+		},
+	}
+	for _, tc := range testCases {
+		tc := tc
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+			gotInstanceEqual := reflect.DeepEqual(tc.givenIdentifier1, tc.givenIdentifier2)
+			assert.Equal(t, tc.wantEqual, gotInstanceEqual)
+
+			gotConsumerNameEqual := tc.givenIdentifier1.ConsumerName() == tc.givenIdentifier2.ConsumerName()
+			assert.Equal(t, tc.wantEqual, gotConsumerNameEqual)
+		})
+	}
+}
+
+// TestSubscriptionSubjectIdentifierConsumerNameLength checks that the SubscriptionSubjectIdentifier consumer name
+// length is equal to the recommended length by JetStream.
+func TestSubscriptionSubjectIdentifierConsumerNameLength(t *testing.T) {
+	t.Parallel()
+	testCases := []struct {
+		name                   string
+		givenIdentifier        SubscriptionSubjectIdentifier
+		wantConsumerNameLength int
+	}{
+		{
+			name: "short string values",
+			givenIdentifier: NewSubscriptionSubjectIdentifier(
+				evtesting.NewSubscription("sub", "ns"),
+				"app.event.operation.v1",
+			),
+			wantConsumerNameLength: maxJetStreamConsumerNameLength,
+		},
+		{
+			name: "long string values",
+			givenIdentifier: NewSubscriptionSubjectIdentifier(
+				evtesting.NewSubscription("some-test-subscription", "some-test-namespace"),
+				"some.test.prefix.some-test-application.some-test-event-name.some-test-operation.some-test-version",
+			),
+			wantConsumerNameLength: maxJetStreamConsumerNameLength,
+		},
+	}
+	for _, tc := range testCases {
+		tc := tc
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+			assert.Equal(t, tc.wantConsumerNameLength, len(tc.givenIdentifier.ConsumerName()))
+		})
+	}
+}
+
+// TestSubscriptionSubjectIdentifierNamespacedName checks the syntax of the SubscriptionSubjectIdentifier namespaced name.
+func TestSubscriptionSubjectIdentifierNamespacedName(t *testing.T) {
+	t.Parallel()
+	testCases := []struct {
+		name               string
+		givenIdentifier    SubscriptionSubjectIdentifier
+		wantNamespacedName string
+	}{
+		{
+			name: "short name and namespace values",
+			givenIdentifier: NewSubscriptionSubjectIdentifier(
+				evtesting.NewSubscription("sub", "ns"),
+				"app.event.operation.v1",
+			),
+			wantNamespacedName: "ns/sub",
+		},
+		{
+			name: "long name and namespace values",
+			givenIdentifier: NewSubscriptionSubjectIdentifier(
+				evtesting.NewSubscription("some-test-subscription", "some-test-namespace"),
+				"app.event.operation.v1",
+			),
+			wantNamespacedName: "some-test-namespace/some-test-subscription",
+		},
+	}
+	for _, tc := range testCases {
+		tc := tc
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+			assert.Equal(t, tc.wantNamespacedName, tc.givenIdentifier.NamespacedName())
+		})
 	}
 }
