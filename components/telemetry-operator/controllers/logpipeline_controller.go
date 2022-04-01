@@ -182,8 +182,6 @@ func (r *LogPipelineReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 		return ctrl.Result{RequeueAfter: requeueTime}, nil
 	}
 
-	log.V(1).Info("Checking if need to add Running condition")
-
 	if logPipeline.Status.GetCondition(telemetryv1alpha1.LogPipelineRunning) == nil {
 		ready, err := r.isFluentBitDaemonSetReady(ctx)
 		if err != nil {
