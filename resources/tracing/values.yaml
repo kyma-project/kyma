@@ -60,9 +60,11 @@ jaeger:
                 url: "https://kyma-project.io/docs/kyma/latest/01-overview/main-areas/observability"
     ingress:
       enabled: false
-    annotations:
-      sidecar.istio.io/inject: "true"
-      sidecar.istio.io/rewriteAppHTTPProbers: "true"
+    template:
+      metadata:
+        annotations:
+          sidecar.istio.io/inject: "true"
+          sidecar.istio.io/rewriteAppHTTPProbers: "true"
     resources:
       limits:
         cpu: 100m
