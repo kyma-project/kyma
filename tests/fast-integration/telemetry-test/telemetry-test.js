@@ -5,7 +5,6 @@ const path = require('path');
 const {
   k8sCoreV1Api,
   k8sApply,
-  k8sDelete,
 } = require('../utils');
 
 const {checkLokiLogs, lokiPortForward} = require('../logging');
