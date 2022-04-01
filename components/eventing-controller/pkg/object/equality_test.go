@@ -292,7 +292,12 @@ func TestPublisherProxyDeploymentEqual(t *testing.T) {
 		LimitsCPU:      "64m",
 		LimitsMemory:   "128Mi",
 	}
-	defaultNATSPublisher := deployment.NewNATSPublisherDeployment(publisherCfg)
+	natsConfig := env.NatsConfig{
+		EventTypePrefix:       "prefix",
+		JSStreamName:          "kyma",
+		JSStreamSubjectPrefix: "prefix",
+	}
+	defaultNATSPublisher := deployment.NewNATSPublisherDeployment(natsConfig, publisherCfg)
 	defaultBEBPublisher := deployment.NewBEBPublisherDeployment(publisherCfg)
 
 	testCases := map[string]struct {

@@ -32,6 +32,7 @@ type NatsConfig struct {
 	IdleConnTimeout     time.Duration `envconfig:"IDLE_CONN_TIMEOUT" default:"10s"`
 
 	// JetStream-specific configs
+	EnableJetStreamBackend bool `envconfig:"ENABLE_JETSTREAM_BACKEND" default:"false"`
 	// Name of the JetStream stream where all events are stored.
 	JSStreamName string `envconfig:"JS_STREAM_NAME" required:"true"`
 	// Storage type of the stream, memory or file.
