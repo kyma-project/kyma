@@ -480,18 +480,16 @@ func (r *LogPipelineReconciler) isFluentBitDaemonSetReady(ctx context.Context) (
 		return false, err
 	}
 
+	generation := ds.Generation
+	observedGeneration := ds.Status.ObservedGeneration
 	updated := ds.Status.UpdatedNumberScheduled
 	desired := ds.Status.DesiredNumberScheduled
 	ready := ds.Status.NumberReady
 
 	log.V(1).Info(fmt.Sprintf("Checking fluent bit: updated: %d, desired: %d, ready: %d, generation: %d, observed generation: %d",
-		updated,
-		desired,
-		ready,
-		ds.Generation,
-		ds.Status.ObservedGeneration))
+		updated, desired, ready, generation, observedGeneration))
 
-	return updated == desired && ready >= desired, nil
+	return observedGeneration == generation && updated == desired && ready >= desired, nil
 }
 
 func (r *LogPipelineReconciler) updateLogPipelineStatus(ctx context.Context,
