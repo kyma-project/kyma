@@ -100,15 +100,6 @@ describe('Telemetry Operator tests', function() {
     assert.equal(podList.length, 1);
   });
 
-  it('Should reject the invalid LogPipeline', async () => {
-    try {
-      await k8sApply(invalidLogPipelineCR, telemetryNamespace);
-    } catch (e) {
-      assert.equal(e.statusCode, 403);
-      expect(e.body.message).to.have.string('denied the request', 'Invalid indentation level');
-    };
-  });
-
   it('Should create valid LogPipeline with HTTP output plugin', async () => {
     await k8sApply(logPipelineCR, telemetryNamespace);
     await waitForLogPipelineStatusCondition('logpipeline-test', 'Pending', 20000);
@@ -118,6 +109,15 @@ describe('Telemetry Operator tests', function() {
   it('Mockserver should receive HTTP traffic from fluent-bit', async () => {
     await sleep(30000);
     await assertMockserverWasCalled(true);
+  });
+
+  it('Should reject the invalid LogPipeline', async () => {
+    try {
+      await k8sApply(invalidLogPipelineCR, telemetryNamespace);
+    } catch (e) {
+      assert.equal(e.statusCode, 403);
+      expect(e.body.message).to.have.string('denied the request', 'Invalid indentation level');
+    };
   });
 
   after(async function() {
