@@ -113,7 +113,7 @@ metrics:
     name:
     type: ClusterIP
     port:
-      name: metrics
+      name: http-controller-metrics
       internal: metrics
       external: 8080
       protocol: TCP
