@@ -21,7 +21,6 @@ function loadResourceFromFile(file) {
 }
 
 const invalidLogPipelineCR = loadResourceFromFile('./invalid-log-pipeline.yaml');
-const logPipelineCR = loadResourceFromFile('./log-pipeline.yaml');
 
 describe('Telemetry Operator tests', function() {
   let cancelPortForward;
@@ -59,6 +58,5 @@ describe('Telemetry Operator tests', function() {
 
   after(async function() {
     cancelPortForward();
-    await k8sDelete(logPipelineCR, telemetryNamespace);
   });
 });
