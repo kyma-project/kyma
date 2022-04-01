@@ -5,13 +5,7 @@ const path = require('path');
 const {
   k8sCoreV1Api,
   k8sApply,
-  k8sDelete,
-  kubectlPortForward,
-  namespaceObj,
   waitForK8sObject,
-  waitForDeployment,
-  waitForNamespace,
-  sleep,
 } = require('../utils');
 
 const {checkLokiLogs, lokiPortForward} = require('../logging');
