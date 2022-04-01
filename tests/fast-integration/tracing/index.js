@@ -1,22 +1,14 @@
-const {
-  getEventingBackend,
-  waitForNamespace,
-  switchEventingBackend,
-} = require('../utils');
+const {waitForNamespace} = require('../utils');
 const {
   sendLegacyEventAndCheckTracing,
   sendCloudEventStructuredModeAndCheckTracing,
   sendCloudEventBinaryModeAndCheckTracing,
   waitForSubscriptionsTillReady,
 } = require('../test/fixtures/commerce-mock');
-const {prometheusPortForward} = require('../monitoring/client');
 
-const testNamespace = `test`;
+const testNamespace = 'test';
 const mockNamespace = process.env.MOCK_NAMESPACE || 'mocks';
-const backendK8sSecretName = process.env.BACKEND_SECRET_NAME || 'tracing-backend';
-const backendK8sSecretNamespace = process.env.BACKEND_SECRET_NAMESPACE || 'default';
 const isSKR = process.env.KYMA_TYPE === 'SKR';
-const natsBackend = 'nats';
 
 async function tracingTests() {
   if (isSKR) {
@@ -25,28 +17,13 @@ async function tracingTests() {
   }
   describe('Tracing Tests:', function() {
     this.timeout(5 * 60 * 1000); // 5 min
-    let cancelPrometheusPortForward = null;
 
     before('Ensure the test and mock namespaces exist', async function() {
       await waitForNamespace(testNamespace);
       await waitForNamespace(mockNamespace);
-      cancelPrometheusPortForward = prometheusPortForward();
     });
 
-    after(async function() {
-      cancelPrometheusPortForward();
-    });
-
-    // Run Eventing tracing tests
     context('with Nats backend', function() {
-      it('Switch Eventing Backend to Nats', async function() {
-        const currentBackend = await getEventingBackend();
-        if (currentBackend && currentBackend.toLowerCase() === natsBackend) {
-          this.skip();
-        }
-        await switchEventingBackend(backendK8sSecretName, backendK8sSecretNamespace, natsBackend);
-      });
-
       it('Wait until subscriptions are ready', async () => {
         await waitForSubscriptionsTillReady(testNamespace);
       });
