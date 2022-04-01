@@ -67,11 +67,11 @@ make deploy-local IMG_NAME=<my container repo> TAG=latest
 ```bash
 make undeploy-local
 ```
-## Trying it out on local Kyma cluster
+## Trying it out on a Kyma cluster
 
 ### Prerequisites
 
-- A Kyma Cluster with latest installation of kyma
+- A Kyma Cluster with the latest installation of kyma
 
 ### Enable Telemetry Operator integration
 ```bash
@@ -82,13 +82,13 @@ The above command would perform following tasks
 - installs telemetry operator
 - Installs Telemetry fluent-bit daemon set with null output config
 
-After installing the telemetry operator its necessary to configure the telemetry fluent-bit  to push logs to the Loki (which is already present on the Kyma cluster)
+After installing the telemetry operator, it is necessary to configure the telemetry fluent-bit component to push logs to the Loki backend (which is already present on the Kyma cluster)
 
 ```bash
 kyma deploy --component logging --value global.telemetry.enabled=true
 ```
 
-The above command would additionally install a Logpipeline CR which would configure the telemetry fluent-bit to push logs to the Loki. After disabling the fluent-bit from logging chart we need delete the unneded resources
+The above command would additionally install a LogPipeline CR which would configure the telemetry-fluent-bit to push logs to the Loki. After disabling the fluent-bit from logging chart we need delete the unneeded resources
 
 ```bash
 kubectl delete daemonset -n kyma-system logging-fluent-bit
@@ -102,7 +102,8 @@ kubectl delete servicemonitor -n kyma-system logging-fluent-bit
 kyma deploy --component logging 
 ```
 
-The above command would redeploy the fluent-bit from the logging chart. After installing the chart we can disable the log pipleline CR so that it does not handle the logs anymore
+The above command would redeploy the fluent-bit from the logging chart. After installing the chart we can disable the LogPipeline CR so that it does not collect the logs anymore
+
 ```bash
 kubectl delete validatingwebhookconfigurations validation.webhook.telemetry.kyma-project.io
 kubectl delete servicemonitor -n kyma-system telemetry-operator-metrics
