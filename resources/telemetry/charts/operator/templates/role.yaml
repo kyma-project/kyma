@@ -1,66 +1,68 @@
+
+---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
   creationTimestamp: null
-  name: {{ include "operator.fullname" . }}-manager-role
+    name: {{ include "operator.fullname" . }}-manager-role
   namespace: {{ .Release.Namespace }}
 rules:
-  - apiGroups:
-      - ""
-    resources:
-      - configmaps
-    verbs:
-      - create
-      - delete
-      - get
-      - list
-      - patch
-      - update
-      - watch
-  - apiGroups:
-      - ""
-    resources:
-      - secrets
-    verbs:
-      - create
-      - delete
-      - get
-      - list
-      - patch
-      - update
-      - watch
-  - apiGroups:
-      - apps
-    resources:
-      - daemonsets
-    verbs:
-      - get
-      - list
-      - watch
-      - patch
-  - apiGroups:
-      - telemetry.kyma-project.io
-    resources:
-      - logpipelines
-    verbs:
-      - create
-      - delete
-      - get
-      - list
-      - patch
-      - update
-      - watch
-  - apiGroups:
-      - telemetry.kyma-project.io
-    resources:
-      - logpipelines/finalizers
-    verbs:
-      - update
-  - apiGroups:
-      - telemetry.kyma-project.io
-    resources:
-      - logpipelines/status
-    verbs:
-      - get
-      - patch
-      - update
+- apiGroups:
+  - ""
+  resources:
+  - configmaps
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - ""
+  resources:
+  - secrets
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - apps
+  resources:
+  - daemonsets
+  verbs:
+  - get
+  - list
+  - patch
+  - watch
+- apiGroups:
+  - telemetry.kyma-project.io
+  resources:
+  - logpipelines
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - telemetry.kyma-project.io
+  resources:
+  - logpipelines/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - telemetry.kyma-project.io
+  resources:
+  - logpipelines/status
+  verbs:
+  - get
+  - patch
+  - update
