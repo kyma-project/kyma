@@ -31,6 +31,7 @@ ENV PYTHON_VERSION 3.9.11
 
 # hadolint ignore=DL3003,SC2155
 RUN set -ex \
+	&& apk update --no-cache && apk upgrade --no-cache \
 	&& apk add --no-cache --virtual .fetch-deps \
 		gnupg \
 		tar \

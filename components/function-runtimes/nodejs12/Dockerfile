@@ -35,7 +35,7 @@ SHELL ["/bin/ash", "-o", "pipefail", "-c"]
 # hadolint ignore=DL3003
 RUN addgroup -g 1000 node \
     && adduser -u 1000 -G node -s /bin/sh -D node \
-    && apk upgrade \
+    && apk update --no-cache && apk upgrade --no-cache \
     && apk add --no-cache \
         libstdc++ \
     && apk add --no-cache --virtual .build-deps \
