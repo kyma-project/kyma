@@ -74,9 +74,7 @@ nats:
   # of the NATS Server.
   # NOTE: For this to work the name of the configuration has to be
   # called `nats.conf`.
-  # 
   # e.g. kubectl create secret generic custom-nats-conf --from-file nats.conf
-  # 
   # customConfigSecret:
   #  name:
 
@@ -184,3 +182,19 @@ k8sClusterDomain: cluster.local
 
 # Add labels to all the deployed resources
 commonLabels: {}
+
+# Prometheus NATS Exporter configuration.
+exporter:
+  enabled: true
+  image: natsio/prometheus-nats-exporter:0.9.1
+  pullPolicy: IfNotPresent
+  securityContext: {}
+  resources: {}
+  # Prometheus operator ServiceMonitor support. Exporter has to be enabled
+  serviceMonitor:
+    enabled: true
+    labels: {}
+    annotations: {}
+    path: /metrics
+    # interval:
+    # scrapeTimeout:
