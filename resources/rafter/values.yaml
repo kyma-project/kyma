@@ -9,7 +9,7 @@ global:
   images:
     minio:
       name: "minio"
-      version: "RELEASE.2021-04-22T15-44-28Z-a6fe5eca"
+      version: "RELEASE.2021-04-22T15-44-28Z-ec157b48"
       directory: "tpi/minio"
     k8s_tools:
       name: "k8s-tools"
