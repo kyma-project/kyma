@@ -25,7 +25,7 @@ FROM alpine:3.14.2 as certs
 RUN apk add --no-cache ca-certificates
 
 # result container
-FROM eu.gcr.io/kyma-project/external/alpine:3.15.0
+FROM eu.gcr.io/kyma-project/external/alpine:3.15.3
 ENV LIBGIT2_VERSION=1.1.0-r2
 
 RUN apk update --no-cache && apk upgrade --no-cache
