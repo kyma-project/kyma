@@ -62,7 +62,7 @@ Kyma Functions come in two types : `git` and `inline`.
 [Git type](https://kyma-project.io/docs/kyma/latest/03-tutorials/00-serverless/svls-02-create-git-function/) allows you to configure a git repository as a source of your function code instead of creating it "inline".
 This allows you to skip rendering of k8s manifests and deploying them everytime you made a change in the function code or dependencies. Simply push the changes to the referenced got repository and the serverless controller will rebuild the functions that is deployed in your kyma runtime. 
 
-Please have a look at this [example](https://github.com/kyma-project/examples/tree/main/incluster_eventing) that illustrates how you could setup your git project. Mind  the `k8s resources` folder with yaml manifests to be pushed to the kubernetes API server ( i.e via kubeclt in our  CI/CD or GitOps ) and `src` folder containing functions source code that are pulled direclty by kyma serverless to build new function images whenever the code is changed.  
+Please have a look at this [example](https://github.com/kyma-project/examples/tree/main/incluster_eventing) that illustrates how you could setup your git project. Mind  the `k8s resources` folder with yaml manifests to be pushed to the kubernetes API server ( i.e via kubeclt in our  CI/CD or GitOps ) and `src` folder containing functions source code that are pulled direclty by kyma serverless to build new function images whenever the source content changes in the git repository.  
 
 
 >>
