@@ -18,7 +18,7 @@ Kyma Dashboard will also help you expose your function via HTTP, define environm
 
 Get started with [Function UI](https://kyma-project.io/docs/kyma/latest/03-tutorials/00-serverless/svls-01-create-inline-function/)
 
-![function-ui](./assets/function-ui.png)
+![function-ui](../assets/function-ui.png)
 
 # Use Kyma CLI for better development experience
 
@@ -33,7 +33,7 @@ Kyma CLI helps you run your code locally with a single `kyma run function` comma
 >>NOTE: Use `kyma run function` with `--hot-deploy` and spare yourself unnecessary restarts of the functions whenever you test a changed function logic. Also, use [`--debug` option](https://kyma-project.io/docs/kyma/latest/03-tutorials/00-serverless/svls-05-debug-function) to allow connecting with your favourite debugger.
 >>
 
-![kyma-cli-functions](./assets/kyma-cli-functions.png)
+![kyma-cli-functions](../assets/kyma-cli-functions.png)
 
 Having written and tested your function locally, simply deploy it to the kyma runtime with `kyma apply function` command used in the folder of your function's workspace. It will read the files, translate it to kubernetes manifests and deploy the function.
 
