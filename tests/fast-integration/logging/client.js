@@ -15,8 +15,12 @@ function lokiPortForward() {
   return kubectlPortForward('kyma-system', 'logging-loki-0', lokiPort);
 }
 
-async function lokiPersistentVolumClaim() {
-  return await getPersistentVolumeClaim('kyma-system', 'storage-logging-loki-0');
+async function tryGetLokiPersistentVolumClaim() {
+  try {
+    return await getPersistentVolumeClaim('kyma-system', 'storage-logging-loki-0');
+  } catch (err) {
+    return null;
+  }
 }
 
 async function lokiSecretData() {
@@ -42,6 +46,6 @@ module.exports = {
   lokiPortForward,
   queryLoki,
   getVirtualServices,
-  lokiPersistentVolumClaim,
+  tryGetLokiPersistentVolumClaim,
   lokiSecretData,
 };
