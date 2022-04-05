@@ -60,6 +60,9 @@ const (
            "source":"` + EventSource + `",
            "data":"` + EventData + `"
         }`
+
+	JSStreamName          = "kyma"
+	JSStreamSubjectPrefix = "prefix"
 )
 
 type APIRuleOption func(r *apigatewayv1alpha1.APIRule)
@@ -400,6 +403,14 @@ func ValidSinkURL(namespace, svcName string) string {
 // WithSinkURL is a SubscriptionOpt for creating a subscription with a specific sink.
 func WithSinkURL(sinkURL string) SubscriptionOpt {
 	return func(subscription *eventingv1alpha1.Subscription) { subscription.Spec.Sink = sinkURL }
+}
+
+// WithNonZeroDeletionTimestamp sets the deletion timestamp of the subscription to Now()
+func WithNonZeroDeletionTimestamp() SubscriptionOpt {
+	return func(subscription *eventingv1alpha1.Subscription) {
+		now := metav1.Now()
+		subscription.DeletionTimestamp = &now
+	}
 }
 
 // SetSink sets the subscription's sink to a valid sink created from svcNameSpace and svcName.

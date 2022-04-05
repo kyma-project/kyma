@@ -25,6 +25,13 @@ type Validator interface {
 	Validate(subscription *v1alpha1.Subscription) error
 }
 
+// ValidatorFunc implements the Validator interface.
+type ValidatorFunc func(*v1alpha1.Subscription) error
+
+func (vf ValidatorFunc) Validate(sub *v1alpha1.Subscription) error {
+	return vf(sub)
+}
+
 type defaultSinkValidator struct {
 	ctx      context.Context
 	client   client.Client

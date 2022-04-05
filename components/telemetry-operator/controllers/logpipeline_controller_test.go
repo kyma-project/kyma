@@ -30,7 +30,6 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
-	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 var _ = Describe("LogPipeline controller", func() {
@@ -249,15 +248,18 @@ var _ = Describe("LogPipeline controller", func() {
 
 			Expect(k8sClient.Delete(ctx, loggingConfiguration)).Should(Succeed())
 
-			// Fluent Bit pods should have been deleted for restart
+			// Fluent Bit daemon set should rollout-restarted (generation changes from 1 to 2)
 			Eventually(func() int {
-				var fluentBitPods corev1.PodList
-				err := k8sClient.List(ctx, &fluentBitPods, client.InNamespace(ControllerNamespace), client.MatchingLabels(podLabels))
+				var fluentBitDaemonSet appsv1.DaemonSet
+				err := k8sClient.Get(ctx, types.NamespacedName{
+					Name:      FluentBitDaemonSet,
+					Namespace: ControllerNamespace,
+				}, &fluentBitDaemonSet)
 				if err != nil {
-					return 1
+					return 0
 				}
-				return len(fluentBitPods.Items)
-			}, timeout, interval).Should(Equal(0))
+				return int(fluentBitDaemonSet.Generation)
+			}, timeout, interval).Should(Equal(2))
 
 			// Custom metrics should be exported
 			Eventually(func() bool {
