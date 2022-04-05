@@ -6,10 +6,7 @@ const {
   waitForSubscriptionsTillReady,
 } = require('../test/fixtures/commerce-mock');
 
-const testNamespace = 'test';
-const mockNamespace = process.env.MOCK_NAMESPACE || 'mocks';
-
-async function tracingTests() {
+function tracingTests(mockNamespace, testNamespace) {
   if (getEnvOrDefault('KYMA_MAJOR_UPGRADE', 'false') === 'true') {
     console.log('Skipping tracing tests for Kyma 1 to Kyma 2 upgrade scenario');
     return;

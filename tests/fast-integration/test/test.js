@@ -6,12 +6,30 @@ const {
 const {monitoringTests} = require('../monitoring');
 const {loggingTests} = require('../logging');
 const {tracingTests} = require('../tracing');
+const {cleanMockTestFixture} = require('./fixtures/commerce-mock');
+const {ensureCommerceMockLocalTestFixture} = require('../test/fixtures/commerce-mock');
+
 
 describe('Executing Standard Testsuite:', function() {
-  commerceMockTests();
+  const withCentralAppConnectivity = (process.env.WITH_CENTRAL_APP_CONNECTIVITY === 'true');
+  const mockNamespace = process.env.MOCK_NAMESPACE || 'mocks';
+  const testNamespace = 'test';
+
+  it('CommerceMock test fixture should be ready', async function() {
+    await ensureCommerceMockLocalTestFixture(mockNamespace, testNamespace, withCentralAppConnectivity).catch((err) => {
+      console.dir(err); // first error is logged
+      return ensureCommerceMockLocalTestFixture(mockNamespace, testNamespace, withCentralAppConnectivity);
+    });
+  });
+
+  commerceMockTests(testNamespace);
   gettingStartedGuideTests();
 
   monitoringTests();
   loggingTests();
-  tracingTests();
+  tracingTests(mockNamespace, testNamespace);
+
+  it('Test Cleanup: Test namespaces should be deleted', async function() {
+    await cleanMockTestFixture(mockNamespace, testNamespace, true);
+  });
 });

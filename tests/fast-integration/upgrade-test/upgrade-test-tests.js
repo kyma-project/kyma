@@ -17,6 +17,7 @@ describe('Upgrade test tests', function() {
   this.timeout(10 * 60 * 1000);
   this.slow(5000);
   let initialRestarts = null;
+  const mockNamespace = 'mocks';
   const testNamespace = 'test';
 
   it('Listing all pods in cluster', async function() {
@@ -46,5 +47,5 @@ describe('Upgrade test tests', function() {
 
   monitoringTests();
   loggingTests();
-  tracingTests();
+  tracingTests(mockNamespace, testNamespace);
 });

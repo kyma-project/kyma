@@ -5,14 +5,12 @@ const httpsAgent = new https.Agent({
 });
 axios.defaults.httpsAgent = httpsAgent;
 const {
-  ensureCommerceMockLocalTestFixture,
   checkFunctionResponse,
   addService,
   updateService,
   deleteService,
   sendLegacyEventAndCheckResponse,
   sendCloudEventStructuredModeAndCheckResponse,
-  cleanMockTestFixture,
   checkInClusterEventDelivery,
   sendCloudEventBinaryModeAndCheckResponse,
 } = require('./fixtures/commerce-mock');
@@ -25,12 +23,10 @@ const {
   lokiPortForward,
 } = require('../logging');
 
-function commerceMockTests() {
+function commerceMockTests(testNamespace) {
   describe('CommerceMock Tests:', function() {
     this.timeout(10 * 60 * 1000);
     this.slow(5000);
-    const withCentralAppConnectivity = (process.env.WITH_CENTRAL_APP_CONNECTIVITY === 'true');
-    const testNamespace = 'test';
     const testStartTimestamp = new Date().toISOString();
     let initialRestarts = null;
     let cancelPortForward = null;
@@ -45,13 +41,6 @@ function commerceMockTests() {
 
     it('Listing all pods in cluster', async function() {
       initialRestarts = await getContainerRestartsForAllNamespaces();
-    });
-
-    it('CommerceMock test fixture should be ready', async function() {
-      await ensureCommerceMockLocalTestFixture('mocks', testNamespace, withCentralAppConnectivity).catch((err) => {
-        console.dir(err); // first error is logged
-        return ensureCommerceMockLocalTestFixture('mocks', testNamespace, withCentralAppConnectivity);
-      });
     });
 
     it('in-cluster event should be delivered (structured and binary mode)', async function() {
@@ -88,10 +77,6 @@ function commerceMockTests() {
 
     it('Logs from commerce mock pod should be retrieved through Loki', async function() {
       await checkLokiLogs(testStartTimestamp);
-    });
-
-    it('Test namespaces should be deleted', async function() {
-      await cleanMockTestFixture('mocks', testNamespace, true);
     });
   });
 }
