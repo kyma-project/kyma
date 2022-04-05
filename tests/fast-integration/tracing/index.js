@@ -1,4 +1,4 @@
-const {waitForNamespace} = require('../utils');
+const {waitForNamespace, getEnvOrDefault} = require('../utils');
 const {
   sendLegacyEventAndCheckTracing,
   sendCloudEventStructuredModeAndCheckTracing,
@@ -10,6 +10,11 @@ const testNamespace = 'test';
 const mockNamespace = process.env.MOCK_NAMESPACE || 'mocks';
 
 async function tracingTests() {
+  if (getEnvOrDefault('KYMA_MAJOR_UPGRADE', 'false') === 'true') {
+    console.log('Skipping tracing tests for Kyma 1 to Kyma 2 upgrade scenario');
+    return;
+  }
+
   describe('Tracing Tests:', function() {
     this.timeout(5 * 60 * 1000); // 5 min
 
