@@ -15,7 +15,7 @@ At the beginning of your Kyma journey you will probably want to evaluate Serverl
 Kyma Dashboard is perfect to gain basic experience and start the journey with Kyma Functions. Dashboard consists of UI components dedicated to Serverless that will help you draft your first Functions by putting the code directly in the browser using Web IDE.
 Kyma Dashboard will also help you expose your Function via HTTP, define environment variables, subscribe to Cloud Events, bind Service Instances and even show you the Function logs - all in single place.
 
-Get started with [Function UI](./00-serverless/svls-01-create-inline-function.md)
+Get started with [Function UI](./svls-01-create-inline-function.md)
 
 ![function-ui](./assets/svls-function-ui.png)
 
@@ -29,7 +29,7 @@ Focus on the Function code and develop it from you favorite IDE. Configure your 
 >>
 
 Kyma CLI helps you run your code locally with a single `kyma run function` command. It runs the Function using your local Docker daemon with the same runtime Docker context as if it was run in the Kyma runtime. 
->>NOTE: Use `kyma run function` with `--hot-deploy` and spare yourself unnecessary restarts of the Functions whenever you test a changed Function logic. Also, use [`--debug` option](./00-serverless/svls-05-debug-function.md) to allow connecting with your favorite debugger.
+>>NOTE: Use `kyma run function` with `--hot-deploy` and spare yourself unnecessary restarts of the Functions whenever you test a changed Function logic. Also, use [`--debug` option](./svls-05-debug-function.md) to allow connecting with your favorite debugger.
 >>
 
 ![kyma-cli-functions](./assets/svls-kyma-cli-functions.png)
@@ -53,11 +53,11 @@ kyma apply function --dry-run --ci -o yaml > my-function.yaml
 ```  
 
 The generated manifest should be part of all the manifests that define your application and pushed to the git repository.
-Deploy everything in a consistent way either via CI/CD or via GitOps operators (e.g. [fluxcd](./00-serverless/svls-06-sync-function-with-gitops.md) installed on your Kyma runtime.
+Deploy everything in a consistent way either via CI/CD or via GitOps operators (e.g. [fluxcd](./svls-06-sync-function-with-gitops.md) installed on your Kyma runtime.
 
 >>NOTE: Source the Function code directly from git repository
 Kyma Functions come in two types: `git` and `inline`.
-[Git type](./00-serverless/svls-02-create-git-function.md) allows you to configure a git repository as a source of your Function code instead of creating it `inline`.
+[Git type](./svls-02-create-git-function.md) allows you to configure a git repository as a source of your Function code instead of creating it `inline`.
 This allows you to skip rendering of the Kubernetes manifests and deploying them each time you made a change in the Function code or dependencies. Simply push the changes to the referenced git repository and the Serverless controller will rebuild the Function that is deployed in your Kyma runtime. 
 
 Please have a look at this [example](https://github.com/kyma-project/examples/tree/main/incluster_eventing) that illustrates how you can setup your git project. Mind  the `k8s resources` folder with the yaml manifests to be pushed to the Kubernetes API server ( e.g. via kubectl in our CI/CD or GitOps ) and `src` folder containing the Functions' source code. They are pulled directly by Kyma Serverless to build new Function images whenever the source content changes in the git repository.  
