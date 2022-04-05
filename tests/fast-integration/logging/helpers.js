@@ -79,14 +79,13 @@ async function checkPersistentVolumeClaimSize() {
   assert.equal(pvc.status.capacity.storage, '30Gi');
 }
 
-async function checkIfLokiVirutalServiceIsPresence() {
-  try {
-    const hosts = await getVirtualService('kyma-system', 'loki');
-    console.log('hosts', hosts);
-    assert.isEmpty(hosts, 'Loki is exposed via Virtual Service');
-  } catch (err) {
+async function checkIfLokiVirtualServiceIsPresence() {
+  const vs = await getVirtualService('kyma-system', 'loki');
+  console.log('vs', vs);
+  assert.equal('kind', 'Status', 'Expected Status Kind when trying to retrieve Loki Virtual Service');
+  assert.equal(vs.status, 'Failure', 'Expected Failure when trying to retrieve Loki Virtual Service');
+  assert.equal(vs.reason, 'NotFound', 'Expected NotFound Reason when trying to retrieve Loki Virtual Service');
 
-  }
   // const hosts = getVirtualService('kyma-system', 'monitoring-grafana');
 }
 
@@ -109,7 +108,7 @@ module.exports = {
   checkKymaLogsInLoki,
   checkLokiLogsInKymaNamespaces,
   checkRetentionPeriod,
-  checkIfLokiVirutalServiceIsPresence,
+  checkIfLokiVirtualServiceIsPresence,
   checkPersistentVolumeClaimSize,
   checkVirtualServicePresence,
 };

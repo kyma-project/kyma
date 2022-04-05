@@ -17,9 +17,9 @@ function loggingTests() {
       cancelPortForward();
     });
 
-    it('Check Loki logs from kyma-system and kyma-integration namespaces', async () => {
-      await logging.checkLokiLogsInKymaNamespaces(testStartTimestamp);
-    });
+    // it('Check Loki logs from kyma-system and kyma-integration namespaces', async () => {
+    //   await logging.checkLokiLogsInKymaNamespaces(testStartTimestamp);
+    // });
 
     it('Check Loki logs from kyma-system and kyma-integration namespaces 2', async () => {
       await logging.checkKymaLogsInLoki(testStartTimestamp);
@@ -38,7 +38,7 @@ function loggingTests() {
     });
 
     it('Loki should not be exposed through Virtual Service 2', async () =>{
-      await logging.checkIfLokiVirutalServiceIsPresence();
+      await logging.checkIfLokiVirtualServiceIsPresence();
     });
   });
 }
