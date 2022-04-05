@@ -5,11 +5,11 @@ global:
   images:
     eventing_controller:
       name: eventing-controller
-      version: PR-13785
+      version: PR-13830
       pullPolicy: "IfNotPresent"
     publisher_proxy:
       name: event-publisher-proxy
-      version: PR-13673
+      version: PR-13830
     nats:
       name: nats
       version: 2.7.4-alpine
