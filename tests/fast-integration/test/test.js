@@ -18,11 +18,15 @@ describe('Executing Standard Testsuite:', function() {
   const mockNamespace = process.env.MOCK_NAMESPACE || 'mocks';
   const testNamespace = 'test';
 
-  it('CommerceMock test fixture should be ready', async function() {
+  before('CommerceMock test fixture should be ready', async function() {
     await ensureCommerceMockLocalTestFixture(mockNamespace, testNamespace, withCentralAppConnectivity).catch((err) => {
       console.dir(err); // first error is logged
       return ensureCommerceMockLocalTestFixture(mockNamespace, testNamespace, withCentralAppConnectivity);
     });
+  });
+
+  after('Test Cleanup: Test namespaces should be deleted', async function() {
+    await cleanMockTestFixture(mockNamespace, testNamespace, true);
   });
 
   commerceMockTests(testNamespace);
@@ -31,8 +35,4 @@ describe('Executing Standard Testsuite:', function() {
   monitoringTests();
   loggingTests();
   tracingTests(mockNamespace, testNamespace);
-
-  it('Test Cleanup: Test namespaces should be deleted', async function() {
-    await cleanMockTestFixture(mockNamespace, testNamespace, true);
-  });
 });

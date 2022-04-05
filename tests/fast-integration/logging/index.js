@@ -37,6 +37,10 @@ function loggingTests() {
     it('Loki should not be exposed through Virtual Service', async () => {
       await logging.checkVirtualServicePresence();
     });
+
+    it('Loki should not be exposed through Virtual Service 2', async () =>{
+      await logging.checkIfLokiVirutalServiceIsPresence();
+    });
   });
 }
 module.exports = {
@@ -44,3 +48,5 @@ module.exports = {
   ...require('./helpers'),
   ...require('./client'),
 };
+
+loggingTests();

@@ -14,6 +14,8 @@ function tracingTests(mockNamespace, testNamespace) {
 
   describe('Tracing Tests:', function() {
     this.timeout(5 * 60 * 1000); // 5 min
+    this.slow(5000);
+
 
     before('Ensure the test and mock namespaces exist', async function() {
       await waitForNamespace(testNamespace);
