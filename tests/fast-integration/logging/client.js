@@ -5,7 +5,7 @@ const {
   convertAxiosError,
   getPersistentVolumeClaim,
   getSecretData,
-  getAllVirtualServices,
+  getAllVirtualServices, sleep,
 } = require('../utils');
 
 const lokiPort = 3100;
@@ -37,6 +37,7 @@ async function logsPresentInLoki(query, startTimestamp) {
     if (logs.streams.length > 0) {
       return true;
     }
+    await sleep(5 * 1000);
   }
   return false;
 }
