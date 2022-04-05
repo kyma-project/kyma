@@ -20,7 +20,7 @@ spec:
     - port: 15020
       targetPort: 15020
       protocol: TCP
-      name: status-port
+      name: tcp-status-port
   selector:
     app.kubernetes.io/name: {{ include "hydra.name" . }}
     app.kubernetes.io/instance: {{ .Release.Name }}
