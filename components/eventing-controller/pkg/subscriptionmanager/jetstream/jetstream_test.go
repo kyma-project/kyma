@@ -87,6 +87,7 @@ func getNATSConf(natsURL string) env.NatsConfig {
 		ReconnectWait:           time.Second,
 		EventTypePrefix:         controllertesting.EventTypePrefix,
 		JSStreamName:            controllertesting.EventTypePrefix,
+		JSStreamSubjectPrefix:   controllertesting.EventTypePrefix,
 		JSStreamStorageType:     handlers.JetStreamStorageTypeMemory,
 		JSStreamRetentionPolicy: handlers.JetStreamRetentionPolicyInterest,
 	}
@@ -116,11 +117,12 @@ func createAndSyncSubscription(t *testing.T, sinkURL string, jsBackend *handlers
 	cleaner := func(et string) (string, error) {
 		return et, nil
 	}
-	cleanedSubjects, _ := handlers.GetCleanSubjects(testSub, eventtype.CleanerFunc(cleaner))
-	testSub.Status.CleanEventTypes = jsBackend.GetJetStreamSubjects(cleanedSubjects)
+	cleanEventTypes, err := handlers.GetCleanSubjects(testSub, eventtype.CleanerFunc(cleaner))
+	require.NoError(t, err)
+	testSub.Status.CleanEventTypes = cleanEventTypes
 
 	// create NATS subscription
-	err := jsBackend.SyncSubscription(testSub)
+	err = jsBackend.SyncSubscription(testSub)
 	require.NoError(t, err)
 	return testSub
 }

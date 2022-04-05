@@ -1,12 +1,16 @@
 // This file contains unit tests for the NATS subscription reconciler.
 // It uses the testing.T and stretchr/testify libraries to perform assertions.
-// TestEnvironment struct mocks the required resources.
+// testEnvironment struct mocks the required resources.
 package nats
 
 import (
 	"context"
+	"errors"
 	"testing"
 	"time"
+
+	"github.com/stretchr/testify/mock"
+	ctrl "sigs.k8s.io/controller-runtime"
 
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/sink"
 
@@ -23,7 +27,6 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/kubernetes/scheme"
 	"k8s.io/client-go/tools/record"
-	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
 )
 
@@ -36,7 +39,7 @@ var defaultSubsConfig = env.DefaultSubscriptionConfig{MaxInFlightMessages: 1, Di
 
 func Test_handleSubscriptionDeletion(t *testing.T) {
 	testEnvironment := setupTestEnvironment(t)
-	ctx, r, mockedBackend := testEnvironment.Context, testEnvironment.Reconciler, testEnvironment.Backend
+	ctx, r, mockedBackend := context.Background(), testEnvironment.reconciler, testEnvironment.backend
 
 	testCases := []struct {
 		name            string
@@ -71,7 +74,7 @@ func Test_handleSubscriptionDeletion(t *testing.T) {
 			subscription := NewTestSubscription(
 				controllertesting.WithFinalizers(testCase.givenFinalizers),
 			)
-			err := r.Client.Create(testEnvironment.Context, subscription)
+			err := r.Client.Create(context.Background(), subscription)
 			require.NoError(t, err)
 
 			mockedBackend.On("DeleteSubscription", subscription).Return(nil)
@@ -103,7 +106,7 @@ func Test_handleSubscriptionDeletion(t *testing.T) {
 
 func Test_syncSubscriptionStatus(t *testing.T) {
 	testEnvironment := setupTestEnvironment(t)
-	ctx, r := testEnvironment.Context, testEnvironment.Reconciler
+	ctx, r := context.Background(), testEnvironment.reconciler
 
 	message := "message is not required for tests"
 	falseNatsSubActiveCondition := eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionSubscriptionActive,
@@ -217,7 +220,7 @@ func Test_syncSubscriptionStatus(t *testing.T) {
 
 func Test_syncInitialStatus(t *testing.T) {
 	testEnvironment := setupTestEnvironment(t)
-	r := testEnvironment.Reconciler
+	r := testEnvironment.reconciler
 
 	wantSubConfig := eventingv1alpha1.MergeSubsConfigs(nil, &defaultSubsConfig)
 	newSubsConfig := env.DefaultSubscriptionConfig{MaxInFlightMessages: 5}
@@ -307,23 +310,142 @@ func Test_syncInitialStatus(t *testing.T) {
 	}
 }
 
-// helper functions and structs
+// Test the return values of the Reconcile() method of the reconciler. This is important, as it dictates whether the
+// reconciliation should be requeued by Controller Runtime, and if so with how much initial delay.
+// Returning error or a `Result{Requeue: true}` would cause the reconciliation to be requeued.
+// Everything else is mocked since we are only interested in the logic of the Reconcile method and not the reconciler dependencies.
+func TestReconciler_Reconcile(t *testing.T) {
+	ctx := context.Background()
+	req := require.New(t)
 
-// TestEnvironment provides mocked resources for tests.
-type TestEnvironment struct {
-	Context    context.Context
-	Client     *client.WithWatch
-	Backend    *mocks.NatsBackend
-	Reconciler *Reconciler
-	Logger     *logger.Logger
-	Recorder   *record.FakeRecorder
+	defaultSubConfig := env.DefaultSubscriptionConfig{}
+	// A subscription with the correct Finalizer, ready for reconciliation with the backend.
+	testSub := controllertesting.NewSubscription("sub1", "test",
+		controllertesting.WithFinalizers([]string{Finalizer}),
+		controllertesting.WithFilter(controllertesting.EventSource, controllertesting.OrderCreatedEventType),
+	)
+	// A subscription marked for deletion.
+	testSubUnderDeletion := controllertesting.NewSubscription("sub2", "test",
+		controllertesting.WithNonZeroDeletionTimestamp(),
+		controllertesting.WithFinalizers([]string{Finalizer}),
+		controllertesting.WithFilter(controllertesting.EventSource, controllertesting.OrderCreatedEventType),
+	)
+
+	backendSyncErr := errors.New("backend sync error")
+	backendDeleteErr := errors.New("backend delete error")
+	validatorErr := errors.New("invalid sink")
+	cleanerErr := errors.New("invalid event type format")
+	happyCleaner := eventtype.CleanerFunc(func(et string) (string, error) { return et, nil })
+	unhappyCleaner := eventtype.CleanerFunc(func(et string) (string, error) { return et, cleanerErr })
+	happyValidator := sink.ValidatorFunc(func(s *eventingv1alpha1.Subscription) error { return nil })
+	unhappyValidator := sink.ValidatorFunc(func(s *eventingv1alpha1.Subscription) error { return validatorErr })
+
+	var testCases = []struct {
+		name                 string
+		givenSubscription    *eventingv1alpha1.Subscription
+		givenReconcilerSetup func() *Reconciler
+		wantReconcileResult  ctrl.Result
+		wantReconcileError   error
+	}{
+		{
+			name:              "Return nil and default Result{} when there is no error from the reconciler dependencies",
+			givenSubscription: testSub,
+			givenReconcilerSetup: func() *Reconciler {
+				te := setupTestEnvironment(t)
+				fakeClient := te.clientBuilder.WithObjects(testSub).Build()
+				te.backend.On("Initialize", mock.Anything).Return(nil)
+				te.backend.On("SyncSubscription", mock.Anything).Return(nil)
+				return NewReconciler(ctx, fakeClient, te.backend, happyCleaner, te.logger, te.recorder, defaultSubConfig, happyValidator)
+			},
+			wantReconcileResult: ctrl.Result{},
+			wantReconcileError:  nil,
+		},
+		{
+			name:              "Return error and default Result{} when backend sync returns error",
+			givenSubscription: testSub,
+			givenReconcilerSetup: func() *Reconciler {
+				te := setupTestEnvironment(t)
+				fakeClient := te.clientBuilder.WithObjects(testSub).Build()
+				te.backend.On("Initialize", mock.Anything).Return(nil)
+				te.backend.On("SyncSubscription", mock.Anything).Return(backendSyncErr)
+				return NewReconciler(ctx, fakeClient, te.backend, happyCleaner, te.logger, te.recorder, defaultSubConfig, happyValidator)
+			},
+			wantReconcileResult: ctrl.Result{},
+			wantReconcileError:  backendSyncErr,
+		},
+		{
+			name:              "Return error and default Result{} when backend delete returns error",
+			givenSubscription: testSubUnderDeletion,
+			givenReconcilerSetup: func() *Reconciler {
+				te := setupTestEnvironment(t)
+				fakeClient := te.clientBuilder.WithObjects(testSubUnderDeletion).Build()
+				te.backend.On("Initialize", mock.Anything).Return(nil)
+				te.backend.On("DeleteSubscription", mock.Anything).Return(backendDeleteErr)
+				return NewReconciler(ctx, fakeClient, te.backend, happyCleaner, te.logger, te.recorder, defaultSubConfig, happyValidator)
+			},
+			wantReconcileResult: ctrl.Result{},
+			wantReconcileError:  backendDeleteErr,
+		},
+		{
+			name:              "Return error and default Result{} when validator returns error",
+			givenSubscription: testSub,
+			givenReconcilerSetup: func() *Reconciler {
+				te := setupTestEnvironment(t)
+				fakeClient := te.clientBuilder.WithObjects(testSub).Build()
+				te.backend.On("Initialize", mock.Anything).Return(nil)
+				te.backend.On("SyncSubscription", mock.Anything).Return(nil)
+				return NewReconciler(ctx, fakeClient, te.backend, happyCleaner, te.logger, te.recorder, defaultSubConfig, unhappyValidator)
+			},
+			wantReconcileResult: ctrl.Result{},
+			wantReconcileError:  validatorErr,
+		},
+		{
+			name:              "Return error and default Result{} when event type cleaner returns error",
+			givenSubscription: testSub,
+			givenReconcilerSetup: func() *Reconciler {
+				te := setupTestEnvironment(t)
+				fakeClient := te.clientBuilder.WithObjects(testSub).Build()
+				te.backend.On("Initialize", mock.Anything).Return(nil)
+				te.backend.On("SyncSubscription", mock.Anything).Return(nil)
+				return NewReconciler(ctx, fakeClient, te.backend, unhappyCleaner, te.logger, te.recorder, defaultSubConfig, happyValidator)
+			},
+			wantReconcileResult: ctrl.Result{},
+			wantReconcileError:  cleanerErr,
+		},
+	}
+
+	for _, testCase := range testCases {
+		tc := testCase
+		t.Run(tc.name, func(t *testing.T) {
+			reconciler := testCase.givenReconcilerSetup()
+			r := ctrl.Request{NamespacedName: types.NamespacedName{
+				Namespace: tc.givenSubscription.Namespace,
+				Name:      tc.givenSubscription.Name,
+			}}
+			res, err := reconciler.Reconcile(context.Background(), r)
+			req.Equal(res, tc.wantReconcileResult)
+			req.Equal(err, tc.wantReconcileError)
+		})
+	}
 }
 
-// setupTestEnvironment is a TestEnvironment constructor
-func setupTestEnvironment(t *testing.T) *TestEnvironment {
+// helper functions and structs
+
+// testEnvironment provides mocked resources for tests.
+type testEnvironment struct {
+	clientBuilder *fake.ClientBuilder
+	backend       *mocks.NatsBackend
+	reconciler    *Reconciler
+	logger        *logger.Logger
+	recorder      *record.FakeRecorder
+}
+
+// setupTestEnvironment is a testEnvironment constructor
+func setupTestEnvironment(t *testing.T) *testEnvironment {
 	mockedBackend := &mocks.NatsBackend{}
 	ctx := context.Background()
-	fakeClient := createFakeClient(t)
+	fakeClientBuilder := createFakeClientBuilder(t)
+	fakeClient := fakeClientBuilder.Build()
 	recorder := &record.FakeRecorder{}
 
 	defaultLogger, err := logger.New(string(kymalogger.JSON), string(kymalogger.INFO))
@@ -345,20 +467,19 @@ func setupTestEnvironment(t *testing.T) *TestEnvironment {
 		eventTypeCleaner: eventtype.CleanerFunc(cleaner),
 	}
 
-	return &TestEnvironment{
-		Context:    ctx,
-		Client:     &fakeClient,
-		Backend:    mockedBackend,
-		Reconciler: &r,
-		Logger:     defaultLogger,
-		Recorder:   recorder,
+	return &testEnvironment{
+		clientBuilder: fakeClientBuilder,
+		backend:       mockedBackend,
+		reconciler:    &r,
+		logger:        defaultLogger,
+		recorder:      recorder,
 	}
 }
 
-func createFakeClient(t *testing.T) client.WithWatch {
+func createFakeClientBuilder(t *testing.T) *fake.ClientBuilder {
 	err := eventingv1alpha1.AddToScheme(scheme.Scheme)
 	require.NoError(t, err)
-	return fake.NewClientBuilder().WithScheme(scheme.Scheme).Build()
+	return fake.NewClientBuilder().WithScheme(scheme.Scheme)
 }
 
 // NewTestSubscription creates a test subscription

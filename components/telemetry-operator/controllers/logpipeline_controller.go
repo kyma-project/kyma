@@ -19,6 +19,8 @@ package controllers
 import (
 	"bytes"
 	"context"
+	"fmt"
+	"time"
 
 	"github.com/prometheus/client_golang/prometheus"
 
@@ -44,6 +46,10 @@ const (
 	//nolint:gosec
 	secretRefsFinalizer = "FLUENT_BIT_SECRETS"
 	filesFinalizer      = "FLUENT_BIT_FILES"
+)
+
+var (
+	requeueTime = 10 * time.Second
 )
 
 // LogPipelineReconciler reconciles a LogPipeline object
@@ -109,8 +115,7 @@ func (r *LogPipelineReconciler) SetupWithManager(mgr ctrl.Manager) error {
 //+kubebuilder:rbac:groups=telemetry.kyma-project.io,resources=logpipelines/finalizers,verbs=update
 //+kubebuilder:rbac:groups="",resources=configmaps,verbs=get;list;watch;create;update;patch;delete
 //+kubebuilder:rbac:groups="",resources=secrets,verbs=get;list;watch;create;update;patch;delete
-//+kubebuilder:rbac:groups="",resources=pods,verbs=delete;list;watch
-//+kubebuilder:rbac:groups="apps",resources=daemonsets,verbs=get;list;watch
+//+kubebuilder:rbac:groups="apps",resources=daemonsets,verbs=get;list;watch;patch
 
 // Reconcile is part of the main kubernetes reconciliation loop which aims to
 // move the current state of the cluster closer to the desired state.
@@ -154,15 +159,47 @@ func (r *LogPipelineReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 	}
 
 	if updatedSectionsCm || updatedParsersCm || updatedFilesCm || updatedEnv {
-		log.Info("Updated fluent bit configuration")
+		log.V(1).Info("Fluent bit configuration was updated. Restarting the daemon set")
+
 		if err := r.Update(ctx, &logPipeline); err != nil {
-			log.Error(err, "Failed updating LogPipeline")
+			log.Error(err, "Failed updating log pipeline")
 			return ctrl.Result{}, err
 		}
 
-		if err := r.deleteFluentBitPods(ctx); err != nil {
-			log.Error(err, "Failed deleting fluent bit pods")
+		if err := r.restartFluentBit(ctx); err != nil {
+			log.Error(err, "Failed restarting fluent bit daemon set")
 			return ctrl.Result{}, err
+		}
+
+		condition := telemetryv1alpha1.NewLogPipelineCondition(
+			telemetryv1alpha1.FluentBitDSRestartedReason,
+			telemetryv1alpha1.LogPipelinePending,
+		)
+		if err := r.updateLogPipelineStatus(ctx, req.NamespacedName, condition); err != nil {
+			return ctrl.Result{RequeueAfter: requeueTime}, err
+		}
+
+		return ctrl.Result{RequeueAfter: requeueTime}, nil
+	}
+
+	if logPipeline.Status.GetCondition(telemetryv1alpha1.LogPipelineRunning) == nil {
+		ready, err := r.isFluentBitDaemonSetReady(ctx)
+		if err != nil {
+			log.Error(err, "Failed to check fluent bit readiness")
+			return ctrl.Result{RequeueAfter: requeueTime}, err
+		}
+		if !ready {
+			log.V(1).Info(fmt.Sprintf("Checked %s - not yet ready. Requeueing...", req.NamespacedName.Name))
+			return ctrl.Result{RequeueAfter: requeueTime}, nil
+		}
+		log.V(1).Info(fmt.Sprintf("Checked %s - ready", req.NamespacedName.Name))
+
+		condition := telemetryv1alpha1.NewLogPipelineCondition(
+			telemetryv1alpha1.FluentBitDSRestartCompletedReason,
+			telemetryv1alpha1.LogPipelineRunning,
+		)
+		if err := r.updateLogPipelineStatus(ctx, req.NamespacedName, condition); err != nil {
+			return ctrl.Result{RequeueAfter: requeueTime}, err
 		}
 	}
 
@@ -252,6 +289,9 @@ func (r *LogPipelineReconciler) syncParsersConfigMap(ctx context.Context, logPip
 			}
 			fluentBitParsersConfig := fluentbit.MergeParsersConfig(&logPipelines)
 			if fluentBitParsersConfig == "" {
+				if cm.Data == nil {
+					return false, nil
+				}
 				cm.Data = nil
 			} else {
 				data := make(map[string]string)
@@ -268,6 +308,9 @@ func (r *LogPipelineReconciler) syncParsersConfigMap(ctx context.Context, logPip
 
 		fluentBitParsersConfig := fluentbit.MergeParsersConfig(&logPipelines)
 		if fluentBitParsersConfig == "" {
+			if cm.Data == nil {
+				return false, nil
+			}
 			cm.Data = nil
 		} else if cm.Data == nil {
 			data := make(map[string]string)
@@ -359,7 +402,7 @@ func (r *LogPipelineReconciler) syncSecretRefs(ctx context.Context, logPipeline 
 		}
 	}
 
-	//Sync environment from referenced Secrets to Fluent Bit Secret
+	// Sync environment from referenced Secrets to Fluent Bit Secret
 	for _, secretRef := range logPipeline.Spec.SecretRefs {
 		var referencedSecret corev1.Secret
 		if err := r.Get(ctx, types.NamespacedName{Name: secretRef.Name, Namespace: secretRef.Namespace}, &referencedSecret); err != nil {
@@ -405,26 +448,74 @@ func (r *LogPipelineReconciler) syncSecretRefs(ctx context.Context, logPipeline 
 }
 
 // Delete all Fluent Bit pods to apply new configuration.
-func (r *LogPipelineReconciler) deleteFluentBitPods(ctx context.Context) error {
+func (r *LogPipelineReconciler) restartFluentBit(ctx context.Context) error {
 	log := logf.FromContext(ctx)
-	var fluentBitDs appsv1.DaemonSet
-	if err := r.Get(ctx, r.FluentBitDaemonSet, &fluentBitDs); err != nil {
+	var ds appsv1.DaemonSet
+	if err := r.Get(ctx, r.FluentBitDaemonSet, &ds); err != nil {
 		log.Error(err, "Failed getting fluent bit DaemonSet")
-	}
-
-	var fluentBitPods corev1.PodList
-	if err := r.List(ctx, &fluentBitPods, client.InNamespace(r.FluentBitDaemonSet.Namespace), client.MatchingLabels(fluentBitDs.Spec.Template.Labels)); err != nil {
-		log.Error(err, "Failed listing fluent bit pods")
 		return err
 	}
 
-	log.Info("Restarting Fluent Bit pods")
-	for i := range fluentBitPods.Items {
-		if err := r.Delete(ctx, &fluentBitPods.Items[i]); err != nil {
-			log.Error(err, "Failed deleting pod "+fluentBitPods.Items[i].Name)
-		}
+	patchedDS := *ds.DeepCopy()
+	if patchedDS.Spec.Template.ObjectMeta.Annotations == nil {
+		patchedDS.Spec.Template.ObjectMeta.Annotations = make(map[string]string)
+	}
+	patchedDS.Spec.Template.ObjectMeta.Annotations["kubectl.kubernetes.io/restartedAt"] = time.Now().Format(time.RFC3339)
+
+	if err := r.Patch(ctx, &patchedDS, client.MergeFrom(&ds)); err != nil {
+		log.Error(err, "Failed to patch fluent bit to trigger rolling update")
+		return err
+	}
+	r.FluentBitRestartsCount.Inc()
+	return nil
+}
+
+func (r *LogPipelineReconciler) isFluentBitDaemonSetReady(ctx context.Context) (bool, error) {
+	log := logf.FromContext(ctx)
+	var ds appsv1.DaemonSet
+	if err := r.Get(ctx, r.FluentBitDaemonSet, &ds); err != nil {
+		log.Error(err, "Failed getting fluent bit daemon set")
+		return false, err
 	}
 
-	r.FluentBitRestartsCount.Inc()
+	generation := ds.Generation
+	observedGeneration := ds.Status.ObservedGeneration
+	updated := ds.Status.UpdatedNumberScheduled
+	desired := ds.Status.DesiredNumberScheduled
+	ready := ds.Status.NumberReady
+
+	log.V(1).Info(fmt.Sprintf("Checking fluent bit: updated: %d, desired: %d, ready: %d, generation: %d, observed generation: %d",
+		updated, desired, ready, generation, observedGeneration))
+
+	return observedGeneration == generation && updated == desired && ready >= desired, nil
+}
+
+func (r *LogPipelineReconciler) updateLogPipelineStatus(ctx context.Context,
+	name types.NamespacedName,
+	condition *telemetryv1alpha1.LogPipelineCondition) error {
+	log := logf.FromContext(ctx)
+
+	var logPipeline telemetryv1alpha1.LogPipeline
+	if err := r.Get(ctx, name, &logPipeline); err != nil {
+		log.Error(err, "Failed getting log pipeline")
+		return err
+	}
+
+	// If the log pipeline had a running condition and then was modified, all conditions are removed.
+	// In this case, condition tracking starts off from the beginning.
+	if logPipeline.Status.GetCondition(telemetryv1alpha1.LogPipelineRunning) != nil &&
+		condition.Type == telemetryv1alpha1.LogPipelinePending {
+		log.V(1).Info(fmt.Sprintf("Updating the status of %s to %s. Resetting previous conditions", name.Name, condition.Type))
+		logPipeline.Status.Conditions = []telemetryv1alpha1.LogPipelineCondition{}
+	} else {
+		log.V(1).Info(fmt.Sprintf("Updating the status of %s to %s", name.Name, condition.Type))
+	}
+
+	logPipeline.Status.SetCondition(*condition)
+
+	if err := r.Status().Update(ctx, &logPipeline); err != nil {
+		log.Error(err, fmt.Sprintf("Failed updating log pipeline status to %s", condition.Type))
+		return err
+	}
 	return nil
 }

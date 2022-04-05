@@ -77,6 +77,8 @@ spec:
             value: "memory"
           - name: JS_STREAM_NAME
             value: "sap"
+          - name: JS_STREAM_SUBJECT_PREFIX
+            value: "kyma"
         resources:
           limits:
             cpu: 500m

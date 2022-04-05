@@ -49,6 +49,12 @@ func newTestGitFunction(namespace, name string, minReplicas, maxReplicas int) *s
 	}
 }
 
+func newFixFunctionWithCustomImage(namespace, name, runtimeImageOverride string, minReplicas, maxReplicas int) *serverlessv1alpha1.Function {
+	fn := newFixFunction(namespace, name, minReplicas, maxReplicas)
+	fn.Spec.RuntimeImageOverride = runtimeImageOverride
+	return fn
+}
+
 func newFixFunction(namespace, name string, minReplicas, maxReplicas int) *serverlessv1alpha1.Function {
 	one := int32(minReplicas)
 	two := int32(maxReplicas)

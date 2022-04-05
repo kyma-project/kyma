@@ -4,7 +4,7 @@ const {sleep, getVirtualService} = require('../utils');
 const {
   queryLoki,
   lokiSecretData,
-  lokiPersistentVolumClaim,
+  tryGetLokiPersistentVolumClaim,
   getVirtualServices,
 } = require('./client');
 
@@ -55,7 +55,12 @@ async function checkRetentionPeriod() {
 }
 
 async function checkPersistentVolumeClaimSize() {
-  const pvc = await lokiPersistentVolumClaim();
+  const pvc = await tryGetLokiPersistentVolumClaim();
+  if (pvc == null) {
+    console.log('Loki PVC not found. Skipping...');
+    return;
+  }
+
   let claimSizeCheck = false;
   if (pvc.status.capacity.storage == '30Gi') {
     claimSizeCheck = true;

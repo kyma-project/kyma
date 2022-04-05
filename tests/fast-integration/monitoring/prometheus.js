@@ -8,6 +8,7 @@ const {
 } = require('../utils');
 
 const {
+  getPrometheusUIStatus,
   getPrometheusActiveTargets,
   getPrometheusAlerts,
   queryPrometheus,
@@ -25,11 +26,16 @@ async function assertPodsExist() {
   );
 }
 
+async function assertPrometheusUIIsReachable() {
+  const status = await getPrometheusUIStatus();
+  assert.equal(status, 200, 'Prometheus UI is not reachable');
+}
+
 async function assertAllTargetsAreHealthy() {
   const unhealthyTargets = await retry(async () => {
     const activeTargets = await getPrometheusActiveTargets();
     return activeTargets
-        .filter((t) => !shouldIgnoreTarget(t) && t.health != 'up')
+        .filter((t) => !shouldIgnoreTarget(t) && t.health !== 'up')
         .map((t) => `${t.labels.job}: ${t.lastError}`);
   });
 
@@ -43,7 +49,7 @@ async function assertNoCriticalAlertsExist() {
   const firingAlerts = await retry(async () => {
     const allAlerts = await getPrometheusAlerts();
     return allAlerts
-        .filter((a) => !shouldIgnoreAlert(a) && a.state == 'firing');
+        .filter((a) => !shouldIgnoreAlert(a) && a.state === 'firing');
   });
 
   assert.isEmpty(
@@ -73,7 +79,7 @@ async function assertAllRulesAreHealthy() {
     const ruleGroups = await getPrometheusRuleGroups();
     const allRules = ruleGroups.flatMap((g) => g.rules);
     return allRules
-        .filter((r) => r.health != 'ok')
+        .filter((r) => r.health !== 'ok')
         .map((r) => r.name);
   });
 
@@ -86,40 +92,56 @@ async function assertAllRulesAreHealthy() {
 async function assertMetricsExist() {
   // Object with exporter, its corressponding metrics followed by labels and resources.
   const metricsList = [
-    {'monitoring-kubelet': [
-      {'container_memory_usage_bytes': [['pod', 'container']]},
-      {'kubelet_pod_start_duration_seconds_count': [[]]}]},
+    {
+      'monitoring-kubelet': [
+        {'container_memory_usage_bytes': [['pod', 'container']]},
+        {'kubelet_pod_start_duration_seconds_count': [[]]}],
+    },
 
-    {'monitoring-apiserver': [
-      {'apiserver_request_duration_seconds_bucket': [[]]},
-      {'etcd_disk_backend_commit_duration_seconds_bucket': [[]]}]},
+    {
+      'monitoring-apiserver': [
+        {'apiserver_request_duration_seconds_bucket': [[]]},
+        {'etcd_disk_backend_commit_duration_seconds_bucket': [[]]}],
+    },
 
-    {'monitoring-kube-state-metrics': [
-      {'kube_deployment_status_replicas_available': [['deployment', 'namespace']]},
-      {'kube_pod_container_resource_limits': [['pod', 'container'], ['memory']]}]},
+    {
+      'monitoring-kube-state-metrics': [
+        {'kube_deployment_status_replicas_available': [['deployment', 'namespace']]},
+        {'kube_pod_container_resource_limits': [['pod', 'container'], ['memory']]}],
+    },
 
-    {'monitoring-node-exporter': [
-      {'process_cpu_seconds_total': [['pod']]},
-      {'go_memstats_heap_inuse_bytes': [['pod']]}]},
+    {
+      'monitoring-node-exporter': [
+        {'process_cpu_seconds_total': [['pod']]},
+        {'go_memstats_heap_inuse_bytes': [['pod']]}],
+    },
 
-    {'istio-component-monitor': [
-      {'istio_requests_total': [['destination_service', 'source_workload', 'response_code']]}]},
+    {
+      'istio-component-monitor': [
+        {'istio_requests_total': [['destination_service', 'source_workload', 'response_code']]}],
+    },
 
-    {'logging-fluent-bit': [
-      {'fluentbit_input_bytes_total': [['name']]},
-      {'fluentbit_input_records_total': [[]]}]},
+    {
+      'logging-fluent-bit': [
+        {'fluentbit_input_bytes_total': [['name']]},
+        {'fluentbit_input_records_total': [[]]}],
+    },
 
-    {'logging-loki': [
-      {'log_messages_total': [['level']]},
-      {'loki_request_duration_seconds_bucket': [['route']]}]},
+    {
+      'logging-loki': [
+        {'log_messages_total': [['level']]},
+        {'loki_request_duration_seconds_bucket': [['route']]}],
+    },
 
-    {'monitoring-grafana': [
-      {'grafana_stat_totals_dashboard': [[]]},
-      {'grafana_api_dataproxy_request_all_milliseconds_sum ': [['pod']]}]},
+    {
+      'monitoring-grafana': [
+        {'grafana_stat_totals_dashboard': [[]]},
+        {'grafana_api_dataproxy_request_all_milliseconds_sum ': [['pod']]}],
+    },
 
   ];
 
-  for (let index=0; index < metricsList.length; index++ ) {
+  for (let index = 0; index < metricsList.length; index++) {
     for (const [exporter, object] of Object.entries(metricsList[index])) {
       for (const [, obj] of Object.entries(object)) {
         await assertTimeSeriesExist(exporter,
@@ -173,7 +195,7 @@ function shouldIgnoreAlert(alert) {
     'KubeMemoryOvercommit',
   ];
 
-  return alert.labels.severity != 'critical' || alertNamesToIgnore.includes(alert.labels.alertname);
+  return alert.labels.severity !== 'critical' || alertNamesToIgnore.includes(alert.labels.alertname);
 }
 
 async function getServiceMonitors() {
@@ -230,7 +252,7 @@ async function buildScrapePoolSet() {
   return scrapePools;
 }
 
-async function assertTimeSeriesExist(exporter, metric, labels, resource='') {
+async function assertTimeSeriesExist(exporter, metric, labels, resource = '') {
   const resultlessQueries = [];
   let result = '';
   let query = '';
@@ -244,7 +266,7 @@ async function assertTimeSeriesExist(exporter, metric, labels, resource='') {
       result = await queryPrometheus(query);
     }
 
-    if (result.length == 0) {
+    if (result.length === 0) {
       resultlessQueries.push(query.concat('metric from service monitor: '.concat(exporter)));
     }
   }
@@ -298,6 +320,7 @@ async function retry(getList, maxRetries = 20, interval = 5 * 1000) {
 
 module.exports = {
   assertPodsExist,
+  assertPrometheusUIIsReachable,
   assertAllTargetsAreHealthy,
   assertNoCriticalAlertsExist,
   assertScrapePoolTargetsExist,
