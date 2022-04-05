@@ -1299,5 +1299,4 @@ data:
        "version":1,
        "weekStart":""
     }`}}
-
-  {{- end }}
+{{- end }}
