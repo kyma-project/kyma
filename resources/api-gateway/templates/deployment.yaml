@@ -59,9 +59,8 @@ spec:
           ports:
           - containerPort: {{ .Values.config.ports.metrics }}
             name: metrics
-          ports:
           - containerPort: {{ .Values.config.ports.healthProbe }}
-            name: health           
+            name: health
           livenessProbe:
             httpGet:
               port: health

@@ -156,6 +156,15 @@ func (r *Reconciler) SetupUnmanaged(mgr ctrl.Manager) error {
 	return nil
 }
 
+// +kubebuilder:rbac:groups=eventing.kyma-project.io,resources=subscriptions,verbs=get;list;watch;create;update;patch;delete
+// +kubebuilder:rbac:groups=eventing.kyma-project.io,resources=subscriptions/status,verbs=get;update;patch
+// Generate required RBAC to emit kubernetes events in the controller.
+// +kubebuilder:rbac:groups="",resources=events,verbs=create;patch
+// Generate required RBAC to watch the NATS pods.
+// +kubebuilder:rbac:groups="",resources=pods,verbs=get;list;watch;delete
+// Generated required RBAC to list Applications (required by event type cleaner).
+// +kubebuilder:rbac:groups="applicationconnector.kyma-project.io",resources=applications,verbs=get;list;watch
+
 func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	if req.Name == natsFirstInstanceName && req.Namespace == natsNamespace {
 		r.namedLogger().Debugw("received watch request", "namespace", req.Namespace, "name", req.Name)
@@ -196,7 +205,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 	statusChanged, err := r.syncInitialStatus(subscription, log)
 	if err != nil {
 		log.Errorw("sync initial status failed", "error", err)
-		if syncErr := r.syncSubscriptionStatus(ctx, subscription, false, statusChanged, err.Error()); err != nil {
+		if syncErr := r.syncSubscriptionStatus(ctx, subscription, false, statusChanged, err.Error()); syncErr != nil {
 			return ctrl.Result{}, syncErr
 		}
 		return ctrl.Result{}, err
@@ -205,7 +214,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 	// Check for valid sink
 	if err := r.sinkValidator.Validate(subscription); err != nil {
 		log.Errorw("sink URL validation failed", "error", err)
-		if syncErr := r.syncSubscriptionStatus(ctx, subscription, false, statusChanged, err.Error()); err != nil {
+		if syncErr := r.syncSubscriptionStatus(ctx, subscription, false, statusChanged, err.Error()); syncErr != nil {
 			return ctrl.Result{}, syncErr
 		}
 		// No point in reconciling as the sink is invalid, return latest error to requeue the reconciliation request

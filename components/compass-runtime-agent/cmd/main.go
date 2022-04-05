@@ -1,7 +1,12 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
+
+	"github.com/google/uuid"
+	"github.com/kyma-incubator/compass/components/director/pkg/correlation"
+	"github.com/kyma-incubator/compass/components/director/pkg/str"
 
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/certificates"
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/compass"
@@ -102,8 +107,11 @@ func main() {
 	compassConnectionSupervisor, err := controllerDependencies.InitializeController()
 	exitOnError(err, "Failed to initialize Controller")
 
+	correlationID := uuid.New().String()
+	ctx := correlation.SaveCorrelationIDHeaderToContext(context.Background(), str.Ptr(correlation.RequestIDHeaderKey), str.Ptr(correlationID))
+
 	log.Infoln("Initializing Compass Connection CR")
-	_, err = compassConnectionSupervisor.InitializeCompassConnection()
+	_, err = compassConnectionSupervisor.InitializeCompassConnection(ctx)
 	exitOnError(err, "Failed to initialize Compass Connection CR")
 
 	log.Infoln("Initializing metrics logger")

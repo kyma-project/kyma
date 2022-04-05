@@ -8,7 +8,7 @@ describe('Eventing tests cleanup', function() {
   this.timeout(timeoutTime);
   this.slow(slowTime);
 
-  it('Cleaning: Test namespaces should be deleted', async function() {
+  it('Cleaning: Test resources should be deleted', async function() {
     await cleanupTestingResources();
   });
 });

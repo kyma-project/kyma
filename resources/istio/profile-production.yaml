@@ -9,10 +9,10 @@ helmValues:
     proxy:
       resources:
         requests:
-          cpu: 150m
-          memory: 128Mi
+          cpu: 100m
+          memory: 192Mi
         limits:
-          cpu: 500m
+          cpu: 1000m
           memory: 1024Mi
 
 components:
@@ -53,6 +53,11 @@ components:
 
   pilot:
     enabled: true
+    k8s:
+      strategy:
+        rollingUpdate:
+          maxSurge: 50%
+          maxUnavailable: "0"
     config:
       hpaSpec:
         maxReplicas: 5

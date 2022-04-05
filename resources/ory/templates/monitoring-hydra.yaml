@@ -11,7 +11,7 @@ metadata:
   name: {{ include "ory.fullname" . }}-hydra-maester
 spec:
   endpoints:
-  - port: metrics
+  - port: http-metrics
     scheme: http
     metricRelabelings:
     - sourceLabels: [ __name__ ]

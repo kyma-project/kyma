@@ -99,7 +99,8 @@ describe('SKR SVCAT migration test', function() {
   });
 
   it('Should check if pod presets injected secrets to functions containers', async function() {
-    await t.checkPodPresetEnvInjected();
+    const timeoutInMinutes = 30;
+    await t.checkPodPresetEnvInjected(timeoutInMinutes);
   });
 
   it('Should print the container logs of the sm proxy', async function() {
@@ -140,7 +141,8 @@ describe('SKR SVCAT migration test', function() {
   });
 
   it('Should check if presets injected secrets in func containers are present after migration', async function() {
-    await t.checkPodPresetEnvInjected();
+    const timeoutInMinutes = 5;
+    await t.checkPodPresetEnvInjected(timeoutInMinutes);
   });
 
   it('Should destroy sample service catalog resources', async function() {

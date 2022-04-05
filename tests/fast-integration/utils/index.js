@@ -366,7 +366,6 @@ async function k8sApply(resources, namespace, patch = true) {
             debug(resource.kind, resource.metadata.name, 'created');
           } catch (createError) {
             debug(resource.kind, resource.metadata.name, 'failed to create');
-            console.log(createError);
             throw createError;
           }
         } else {
@@ -765,6 +764,24 @@ async function getVirtualService(namespace, name) {
   });
   const body = JSON.parse(response.body);
   return body.spec.hosts[0];
+}
+
+async function getAllVirtualServices() {
+  const path = `/apis/networking.istio.io/v1beta1/virtualservices/`;
+  const response = await k8sDynamicApi.requestPromise({
+    url: k8sDynamicApi.basePath + path,
+  });
+  const body = JSON.parse(response.body);
+  return body.items;
+}
+
+async function getPersistentVolumeClaim(namespace, name) {
+  const path = `/api/v1/namespaces/${namespace}/persistentvolumeclaims/${name}`;
+  const response = await k8sDynamicApi.requestPromise({
+    url: k8sDynamicApi.basePath + path,
+  });
+  const body = JSON.parse(response.body);
+  return body;
 }
 
 function waitForTokenRequest(name, namespace, timeout = 5000) {
@@ -1791,6 +1808,8 @@ module.exports = {
   patchApplicationGateway,
   eventingSubscription,
   getVirtualService,
+  getAllVirtualServices,
+  getPersistentVolumeClaim,
   patchDeployment,
   isKyma2,
   namespaceObj,

@@ -634,6 +634,8 @@ func ensurePublisherProxyIsReady(ctx context.Context) {
 	err = ctrl.SetControllerReference(publisherProxyDeployment, &pod, scheme.Scheme)
 	Expect(err).ShouldNot(HaveOccurred())
 
+	ensurePublisherProxyHasBackendRightLabel(ctx, publisherProxyDeployment)
+
 	// update the deployment's status
 	updatedDeployment := publisherProxyDeployment.DeepCopy()
 	updatedDeployment.Status.ReadyReplicas = 1
@@ -643,11 +645,8 @@ func ensurePublisherProxyIsReady(ctx context.Context) {
 }
 
 func ensurePublisherProxyPodIsCreated(ctx context.Context) corev1.Pod {
-	backendType := fmt.Sprint(eventingv1alpha1.NatsBackendType)
-	if bebSecretExists(ctx) {
-		backendType = fmt.Sprint(eventingv1alpha1.BEBBackendType)
-	}
-	pod := reconcilertesting.NewEventingControllerPod(backendType)
+	backendType := getCurrentBackendType(ctx)
+	pod := reconcilertesting.NewEventingPublisherProxyPod(backendType)
 	var pods corev1.PodList
 	if err := k8sClient.List(ctx, &pods, client.MatchingLabels{
 		deployment.AppLabelKey: deployment.PublisherName,
@@ -679,6 +678,20 @@ func ensurePublisherProxyPodIsCreated(ctx context.Context) corev1.Pod {
 	Expect(err).Should(BeNil())
 
 	return *pod
+}
+
+// getCurrentBackendType gets the backend type depending on the beb secret
+func getCurrentBackendType(ctx context.Context) string {
+	backendType := eventingv1alpha1.NatsBackendType
+	if bebSecretExists(ctx) {
+		backendType = eventingv1alpha1.BEBBackendType
+	}
+	return fmt.Sprint(backendType)
+}
+
+func ensurePublisherProxyHasBackendRightLabel(ctx context.Context, deploy *appsv1.Deployment) {
+	backendType := getCurrentBackendType(ctx)
+	Expect(deploy.ObjectMeta.Labels).To(HaveKeyWithValue(deployment.BackendLabelKey, backendType))
 }
 
 func bebSecretExists(ctx context.Context) bool {

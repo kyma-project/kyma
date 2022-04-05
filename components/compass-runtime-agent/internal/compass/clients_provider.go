@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"time"
 
+	cmp_http "github.com/kyma-incubator/compass/components/director/pkg/http"
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/compass/cache"
 
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/compass/connector"
@@ -25,6 +26,7 @@ type ClientsProvider interface {
 func NewClientsProvider(gqlClientConstr graphql.ClientConstructor, skipCompassTLSVerification, enableLogging bool) *clientsProvider {
 	transport := http.DefaultTransport.(*http.Transport).Clone()
 	transport.TLSClientConfig.InsecureSkipVerify = skipCompassTLSVerification
+	corrIdTransport := cmp_http.NewCorrelationIDTransport(transport)
 
 	return &clientsProvider{
 		gqlClientConstructor:       gqlClientConstr,
@@ -33,7 +35,7 @@ func NewClientsProvider(gqlClientConstr graphql.ClientConstructor, skipCompassTL
 
 		httpClient: &http.Client{
 			Timeout:   30 * time.Second,
-			Transport: transport,
+			Transport: corrIdTransport,
 		},
 	}
 }
@@ -62,8 +64,7 @@ func (cp *clientsProvider) UpdateConnectionData(data cache.ConnectionData) error
 	transport.TLSClientConfig.InsecureSkipVerify = cp.skipCompassTLSVerification
 	transport.TLSClientConfig.Certificates = []tls.Certificate{data.Certificate}
 
-	cp.mtlsHTTPClient.Transport = transport
-
+	cp.mtlsHTTPClient.Transport = cmp_http.NewCorrelationIDTransport(transport)
 	cp.directorURL = data.DirectorURL
 	cp.connectorSecuredURL = data.ConnectorURL
 

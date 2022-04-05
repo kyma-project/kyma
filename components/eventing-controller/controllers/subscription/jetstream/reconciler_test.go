@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"log"
 	"path/filepath"
-	"strings"
 	"testing"
 	"time"
 
@@ -132,7 +131,7 @@ func TestCreateSubscription(t *testing.T) {
 			},
 			want: utils.Want{
 				K8sSubscription: []gomegatypes.GomegaMatcher{
-					reconcilertesting.HaveCondition(utils.ConditionInvalidSink("sink URL scheme should be 'http' or 'https'")),
+					reconcilertesting.HaveCondition(utils.ConditionInvalidSink(sink.MissingSchemeErrMsg)),
 				},
 				K8sEvents: []v1.Event{utils.EventInvalidSink("Sink URL scheme should be HTTP or HTTPS: invalid")},
 			},
@@ -496,8 +495,41 @@ func TestChangeSubscription(t *testing.T) {
 	t.Cleanup(ens.Cancel)
 }
 
-// TODO: TestEmptyEventTypePrefix to be implemented once
-// https://github.com/kyma-project/kyma/issues/13544 is resolved
+// TestEmptyEventTypePrefix tests if a subscription is reconciled properly if the EventTypePrefix is empty.
+func TestEmptyEventTypePrefix(t *testing.T) {
+	ctx := context.Background()
+	g := gomega.NewGomegaWithT(t)
+
+	natsPort, err := reconcilertesting.GetFreePort()
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+	ens := setupTestEnsemble(ctx, reconcilertesting.EventTypePrefixEmpty, g, natsPort)
+
+	// when
+	subscription := utils.CreateSubscription(ens.TestEnsemble,
+		reconcilertesting.WithFilter(emptyEventSource, reconcilertesting.OrderCreatedEventTypeNotCleanPrefixEmpty),
+		reconcilertesting.WithSinkURLFromSvc(ens.SubscriberSvc),
+	)
+
+	// then
+	utils.TestSubscriptionOnK8s(ens.TestEnsemble, subscription,
+		reconcilertesting.HaveCleanEventTypes([]string{reconcilertesting.OrderCreatedEventTypePrefixEmpty}),
+		reconcilertesting.HaveCondition(reconcilertesting.DefaultReadyCondition()),
+		reconcilertesting.HaveSubsConfiguration(utils.ConfigDefault(ens.DefaultSubscriptionConfig.MaxInFlightMessages)),
+		reconcilertesting.HaveSubscriptionReady(),
+	)
+
+	expectedNatsSubscription := []gomegatypes.GomegaMatcher{
+		natstesting.BeExistingSubscription(),
+		natstesting.BeValidSubscription(),
+		natstesting.BeJetStreamSubscriptionWithSubject(fmt.Sprintf("%s.%s", reconcilertesting.JSStreamSubjectPrefix, reconcilertesting.OrderCreatedEventTypePrefixEmpty)),
+	}
+
+	testSubscriptionOnNATS(ens, subscription, reconcilertesting.OrderCreatedEventTypePrefixEmpty, expectedNatsSubscription...)
+
+	testDeletion(ens, subscription, reconcilertesting.OrderCreatedEventTypePrefixEmpty)
+
+	t.Cleanup(ens.Cancel)
+}
 
 func testSubscriptionOnNATS(ens *jetStreamTestEnsemble, subscription *eventingv1alpha1.Subscription, subject string, expectations ...gomegatypes.GomegaMatcher) {
 	getSubscriptionFromJetStream(ens, subscription, subject).Should(gomega.And(expectations...))
@@ -575,7 +607,8 @@ func startReconciler(eventTypePrefix string, ens *jetStreamTestEnsemble) *jetStr
 		MaxReconnects:           10,
 		ReconnectWait:           time.Second,
 		EventTypePrefix:         eventTypePrefix,
-		JSStreamName:            eventTypePrefix,
+		JSStreamName:            reconcilertesting.JSStreamName,
+		JSStreamSubjectPrefix:   reconcilertesting.JSStreamSubjectPrefix,
 		JSStreamStorageType:     "memory",
 		JSStreamMaxBytes:        -1,
 		JSStreamMaxMessages:     -1,
@@ -627,9 +660,9 @@ func getSubscriptionFromJetStream(ens *jetStreamTestEnsemble, subscription *even
 
 	return g.Expect(func() *nats.Subscription {
 		subscriptions := ens.jetStreamBackend.GetAllSubscriptions()
-		jsSubkey := ens.jetStreamBackend.GenerateJsSubKey(subject, subscription)
+		subscriptionSubject := handlers.NewSubscriptionSubjectIdentifier(subscription, subject)
 		for key, sub := range subscriptions {
-			if strings.EqualFold(key, jsSubkey) {
+			if key.ConsumerName() == subscriptionSubject.ConsumerName() {
 				return sub
 			}
 		}
