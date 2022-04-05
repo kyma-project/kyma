@@ -76,8 +76,11 @@ function commerceMockTests(testNamespace) {
     });
 
     it('Logs from commerce mock pod should be retrieved through Loki', async function() {
-      await checkCommerceMockLogsInLoki(testStartTimestamp);
       await checkLokiLogs(testStartTimestamp);
+    });
+
+    it('Logs from commerce mock pod should be retrieved through Loki 2', async function() {
+      await checkCommerceMockLogsInLoki(testStartTimestamp);
     });
   });
 }

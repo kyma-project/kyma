@@ -762,6 +762,7 @@ async function getVirtualService(namespace, name) {
   const response = await k8sDynamicApi.requestPromise({
     url: k8sDynamicApi.basePath + path,
   });
+  console.log('response.status', response.status);
   const body = JSON.parse(response.body);
   return body.spec.hosts[0];
 }

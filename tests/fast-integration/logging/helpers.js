@@ -16,6 +16,17 @@ async function checkCommerceMockLogsInLoki(startTimestamp) {
   assert.isTrue(commerceMockLogsPresent, 'No logs from commerce mock present in Loki');
 }
 
+async function checkKymaLogsInLoki(startTimestamp) {
+  const systemLabel = '{namespace="kyma-system"}';
+  const integrationLabel = '{namespace="kyma-integration"}';
+
+  const kymaSystemLogsPresent = logsPresentInLoki(systemLabel, startTimestamp);
+  const kymaIntegrationLogsPresent = logsPresentInLoki(integrationLabel, startTimestamp);
+
+  assert.isTrue(kymaSystemLogsPresent, 'No logs from kyma-system namespace present in Loki');
+  assert.isTrue(kymaIntegrationLogsPresent, 'No logs from kyma-integration namespace present in Loki');
+}
+
 async function checkLokiLogs(startTimestamp) {
   const labels = '{app="commerce-mock", container="mock", namespace="mocks"}';
   let logsFetched = false;
@@ -91,6 +102,7 @@ async function checkVirtualServicePresence() {
 module.exports = {
   checkLokiLogs,
   checkCommerceMockLogsInLoki,
+  checkKymaLogsInLoki,
   checkLokiLogsInKymaNamespaces,
   checkRetentionPeriod,
   checkIfLokiVirutalServiceIsPresence,
