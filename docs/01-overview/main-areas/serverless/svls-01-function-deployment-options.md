@@ -1,9 +1,9 @@
 ---
-title: Best Practices for Function Development
+title: Best Practices for Function development
 ---
 
 
-# Overview - Its all about Custom Resources
+# Overview - Its all about custom resources
 
 Kyma serverless introduces a [`Function`](https://kyma-project.io/docs/kyma/latest/05-technical-reference/00-custom-resources/svls-01-function/) Custom Resource Definition (CRD) as an extension to the kubernetes API server.
 Defining a Function in kyma essentially means creating a new instance of Function Custom Resource (CR). However, the content of Function CR specification may become quite long. It consists of the code (or git reference to the code), dependencies, runtime specification, build-time specification,  etc. Additionally there are other CRs that are relevant for function developer - I.e `APIRule` ( defining how function is exposed to the outside world), `Subscription` (defining which cloud events should trigger the function) and others.
@@ -18,7 +18,7 @@ Kyma Dashboard will also help you expose your function via HTTP, define environm
 
 Get started with [Function UI](https://kyma-project.io/docs/kyma/latest/03-tutorials/00-serverless/svls-01-create-inline-function/)
 
-![function-ui](../assets/function-ui.png)
+![function-ui](../../assets/function-ui.png)
 
 # Use Kyma CLI for better development experience
 
@@ -33,7 +33,7 @@ Kyma CLI helps you run your code locally with a single `kyma run function` comma
 >>NOTE: Use `kyma run function` with `--hot-deploy` and spare yourself unnecessary restarts of the functions whenever you test a changed function logic. Also, use [`--debug` option](https://kyma-project.io/docs/kyma/latest/03-tutorials/00-serverless/svls-05-debug-function) to allow connecting with your favourite debugger.
 >>
 
-![kyma-cli-functions](../assets/kyma-cli-functions.png)
+![kyma-cli-functions](../../assets/kyma-cli-functions.png)
 
 Having written and tested your function locally, simply deploy it to the kyma runtime with `kyma apply function` command used in the folder of your function's workspace. It will read the files, translate it to kubernetes manifests and deploy the function.
 
