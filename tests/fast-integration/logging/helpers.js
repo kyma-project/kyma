@@ -4,9 +4,17 @@ const {sleep, getVirtualService} = require('../utils');
 const {
   queryLoki,
   lokiSecretData,
-  tryGetLokiPersistentVolumClaim,
-  getVirtualServices,
+  tryGetLokiPersistentVolumeClaim,
+  getVirtualServices, logsPresentInLoki,
 } = require('./client');
+
+async function checkCommerceMockLogsInLoki(startTimestamp) {
+  const labels = '{app="commerce-mock", container="mock", namespace="mocks"}';
+
+  const commerceMockLogsPresent = logsPresentInLoki(labels, startTimestamp);
+
+  assert.isTrue(commerceMockLogsPresent, 'No logs from commerce mock present in Loki');
+}
 
 async function checkLokiLogs(startTimestamp) {
   const labels = '{app="commerce-mock", container="mock", namespace="mocks"}';
@@ -52,7 +60,7 @@ async function checkRetentionPeriod() {
 }
 
 async function checkPersistentVolumeClaimSize() {
-  const pvc = await tryGetLokiPersistentVolumClaim();
+  const pvc = await tryGetLokiPersistentVolumeClaim();
   if (pvc == null) {
     console.log('Loki PVC not found. Skipping...');
     return;
@@ -61,7 +69,7 @@ async function checkPersistentVolumeClaimSize() {
 }
 
 async function checkIfLokiVirutalServiceIsPresence() {
-  const hosts = getVirtualService('kyma-system', 'loki');
+  const hosts = await getVirtualService('kyma-system', 'loki');
   // const hosts = getVirtualService('kyma-system', 'monitoring-grafana');
   console.log('hosts', hosts);
   assert.isEmpty(hosts, 'Loki is exposed via Virtual Service');
@@ -82,7 +90,8 @@ async function checkVirtualServicePresence() {
 
 module.exports = {
   checkLokiLogs,
-  checkLokiLogsAllNamespaces: checkLokiLogsInKymaNamespaces,
+  checkCommerceMockLogsInLoki,
+  checkLokiLogsInKymaNamespaces,
   checkRetentionPeriod,
   checkIfLokiVirutalServiceIsPresence,
   checkPersistentVolumeClaimSize,

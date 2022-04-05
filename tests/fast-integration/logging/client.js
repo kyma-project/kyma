@@ -14,7 +14,7 @@ function lokiPortForward() {
   return kubectlPortForward('kyma-system', 'logging-loki-0', lokiPort);
 }
 
-async function tryGetLokiPersistentVolumClaim() {
+async function tryGetLokiPersistentVolumeClaim() {
   try {
     return await getPersistentVolumeClaim('kyma-system', 'storage-logging-loki-0');
   } catch (err) {
@@ -31,6 +31,16 @@ function getVirtualServices() {
   return getAllVirtualServices();
 }
 
+async function logsPresentInLoki(query, startTimestamp) {
+  for (let i = 0; i < 20; i++) {
+    const logs = await queryLoki(query, startTimestamp);
+    if (logs.streams.length > 0) {
+      return true;
+    }
+  }
+  return false;
+}
+
 async function queryLoki(labels, startTimestamp) {
   const url = `http://localhost:${lokiPort}/api/prom/query?query=${labels}&start=${startTimestamp}`;
   try {
@@ -44,7 +54,8 @@ async function queryLoki(labels, startTimestamp) {
 module.exports = {
   lokiPortForward,
   queryLoki,
+  logsPresentInLoki,
   getVirtualServices,
-  tryGetLokiPersistentVolumClaim,
+  tryGetLokiPersistentVolumeClaim,
   lokiSecretData,
 };

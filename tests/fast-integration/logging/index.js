@@ -18,7 +18,7 @@ function loggingTests() {
     });
 
     it('Check Loki logs from kyma-system and kyma-integration namespaces', async () => {
-      await logging.checkLokiLogsAllNamespaces(testStartTimestamp);
+      await logging.checkLokiLogsInKymaNamespaces(testStartTimestamp);
     });
 
     it('Retention Period and Max look-back Period should be 120h', async () => {
