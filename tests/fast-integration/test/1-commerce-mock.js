@@ -55,7 +55,6 @@ function commerceMockTests(testNamespace) {
       await sendLegacyEventAndCheckResponse();
     });
 
-
     it('order.created.v1 cloud event in structured mode should trigger the lastorder function', async function() {
       await sendCloudEventStructuredModeAndCheckResponse();
     });

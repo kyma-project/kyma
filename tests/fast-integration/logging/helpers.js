@@ -8,7 +8,6 @@ const {
   getVirtualServices,
 } = require('./client');
 
-// checkLokiLogs used directly in Commerce Mock tests.
 async function checkLokiLogs(startTimestamp) {
   const labels = '{app="commerce-mock", container="mock", namespace="mocks"}';
   let logsFetched = false;
@@ -25,8 +24,7 @@ async function checkLokiLogs(startTimestamp) {
   assert.isTrue(logsFetched, 'No logs fetched from Loki');
 }
 
-// Required checks have been added as per https://github.com/kyma-project/kyma/issues/11136.
-async function checkLokiLogsAllNamespaces(startTimestamp) {
+async function checkLokiLogsInKymaNamespaces(startTimestamp) {
   const labels = ['{namespace="kyma-system"}',
     '{namespace="kyma-integration"}'];
   let logsFetched = false;
@@ -43,7 +41,6 @@ async function checkLokiLogsAllNamespaces(startTimestamp) {
       retries++;
     }
   }
-  ;
   assert.isTrue(logsFetched, 'No logs fetched from Loki');
 }
 
@@ -60,19 +57,14 @@ async function checkPersistentVolumeClaimSize() {
     console.log('Loki PVC not found. Skipping...');
     return;
   }
-
-  let claimSizeCheck = false;
-  if (pvc.status.capacity.storage == '30Gi') {
-    claimSizeCheck = true;
-  }
-  assert.isTrue(claimSizeCheck, 'Claim size for loki is not 30Gi');
+  assert.equal(pvc.status.capacity.storage, '30Gi');
 }
 
 async function checkIfLokiVirutalServiceIsPresence() {
   const hosts = getVirtualService('kyma-system', 'loki');
   // const hosts = getVirtualService('kyma-system', 'monitoring-grafana');
-
-  assert.isEmpty(hosts);
+  console.log('hosts', hosts);
+  assert.isEmpty(hosts, 'Loki is exposed via Virtual Service');
 }
 
 async function checkVirtualServicePresence() {
@@ -90,7 +82,7 @@ async function checkVirtualServicePresence() {
 
 module.exports = {
   checkLokiLogs,
-  checkLokiLogsAllNamespaces,
+  checkLokiLogsAllNamespaces: checkLokiLogsInKymaNamespaces,
   checkRetentionPeriod,
   checkIfLokiVirutalServiceIsPresence,
   checkPersistentVolumeClaimSize,

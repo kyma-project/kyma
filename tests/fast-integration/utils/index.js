@@ -759,13 +759,10 @@ function waitForVirtualService(namespace, apiRuleName, timeout = 20000) {
 
 async function getVirtualService(namespace, name) {
   const path = `/apis/networking.istio.io/v1beta1/namespaces/${namespace}/virtualservices/${name}`;
-  console.log('path', path);
   const response = await k8sDynamicApi.requestPromise({
     url: k8sDynamicApi.basePath + path,
   });
-  console.log('response', response);
   const body = JSON.parse(response.body);
-  console.log('body', body);
   return body.spec.hosts[0];
 }
 
