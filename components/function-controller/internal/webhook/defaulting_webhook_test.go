@@ -2,6 +2,7 @@ package webhook
 
 import (
 	"context"
+	"net/http"
 	"testing"
 
 	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
@@ -138,7 +139,7 @@ func TestDefaultingWebHook_Handle(t *testing.T) {
 				},
 			},
 			want: want{
-				statusCode: int32(400),
+				statusCode: http.StatusBadRequest,
 			},
 		},
 		{
@@ -174,7 +175,7 @@ func TestDefaultingWebHook_Handle(t *testing.T) {
 				},
 			},
 			want: want{
-				statusCode: int32(400),
+				statusCode: http.StatusBadRequest,
 			},
 		},
 	}

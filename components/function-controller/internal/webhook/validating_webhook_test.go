@@ -2,6 +2,7 @@ package webhook
 
 import (
 	"context"
+	"net/http"
 	"testing"
 
 	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
@@ -86,7 +87,7 @@ func TestValidatingWebHook_Handle(t *testing.T) {
 					},
 				},
 			},
-			responseCode: int32(200),
+			responseCode: http.StatusOK,
 		},
 		{
 			name: "Deny invalid function",
@@ -108,14 +109,14 @@ func TestValidatingWebHook_Handle(t *testing.T) {
 									"namespace": "default"
 								},
 								"spec": {
-									"runtime": "python39",
+									"runtime": "python39"
 								}   
 							}`),
 						},
 					},
 				},
 			},
-			responseCode: int32(400),
+			responseCode: http.StatusForbidden,
 		},
 		{
 			name: "Bad request",
@@ -135,7 +136,7 @@ func TestValidatingWebHook_Handle(t *testing.T) {
 					},
 				},
 			},
-			responseCode: int32(400),
+			responseCode: http.StatusBadRequest,
 		},
 		{
 			name: "Deny on invalid kind",
@@ -165,7 +166,68 @@ func TestValidatingWebHook_Handle(t *testing.T) {
 					},
 				},
 			},
-			responseCode: int32(400),
+			responseCode: http.StatusBadRequest,
+		},
+		{
+			name: "Accept valid git repository",
+			fields: fields{
+				config:  ReadValidationConfigOrDie(),
+				client:  fake.NewClientBuilder().Build(),
+				decoder: decoder,
+			},
+			args: args{
+				ctx: context.Background(),
+				req: admission.Request{
+					v1.AdmissionRequest{
+						RequestKind: &metav1.GroupVersionKind{Kind: "GitRepository"},
+						Object: runtime.RawExtension{
+							Raw: []byte(`{"apiVersion": "serverless.kyma-project.io/v1alpha1",
+								"kind": "GitRepository",
+								"metadata": {
+									"name": "testgitrepo",
+									"namespace": "default"
+								},
+								"spec": {
+									"url": "https://github.com/kyma-project/examples.git"
+								}
+							}`),
+						},
+					},
+				},
+			},
+			responseCode: http.StatusOK,
+		},
+		{
+			name: "Deny invalid git repository",
+			fields: fields{
+				config:  ReadValidationConfigOrDie(),
+				client:  fake.NewClientBuilder().Build(),
+				decoder: decoder,
+			},
+			args: args{
+				ctx: context.Background(),
+				req: admission.Request{
+					v1.AdmissionRequest{
+						RequestKind: &metav1.GroupVersionKind{Kind: "GitRepository"},
+						Object: runtime.RawExtension{
+							Raw: []byte(`{"apiVersion": "serverless.kyma-project.io/v1alpha1",
+								"kind": "GitRepository",
+								"metadata": {
+									"name": "testgitrepo",
+									"namespace": "default"
+								},
+								"spec": {
+									"url": "https://github.com/kyma-project/examples.git",
+									"auth":{
+										"type": "key"
+									}
+								}
+							}`),
+						},
+					},
+				},
+			},
+			responseCode: http.StatusForbidden,
 		},
 	}
 	for _, tt := range tests {

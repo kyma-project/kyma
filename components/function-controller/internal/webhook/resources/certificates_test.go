@@ -165,6 +165,8 @@ func TestEnsureWebhookSecret(t *testing.T) {
 		require.Equal(t, secret.ResourceVersion, updatedSecret.ResourceVersion)
 		require.Contains(t, updatedSecret.Data, KeyFile)
 		require.Contains(t, updatedSecret.Data, CertFile)
+		require.Equal(t, []byte("key content"), updatedSecret.Data[KeyFile])
+		require.Equal(t, []byte("cert content"), updatedSecret.Data[CertFile])
 		require.Contains(t, updatedSecret.Labels, "dont-remove-me")
 	})
 }

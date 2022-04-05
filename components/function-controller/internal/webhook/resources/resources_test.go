@@ -44,7 +44,7 @@ func Test_resourceReconciler_Reconcile(t *testing.T) {
 		require.NotNil(t, reconciledMc.Webhooks[0].Rules)
 	})
 
-	t.Run("should not reconcile incorrect resources", func(t *testing.T) {
+	t.Run("should not reconcile not owned resources", func(t *testing.T) {
 		ctx := context.Background()
 		client := fake.NewClientBuilder().Build()
 		namespacedName := types.NamespacedName{Namespace: "", Name: DefaultingWebhookName}

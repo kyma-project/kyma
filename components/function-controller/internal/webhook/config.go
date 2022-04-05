@@ -21,7 +21,7 @@ func ReadDefaultingConfigOrDie() *serverlessv1alpha1.DefaultingConfig {
 
 	functionReplicasPresets, err := serverlessv1alpha1.ParseReplicasPresets(defaultingCfg.Function.Replicas.PresetsMap)
 	if err != nil {
-		panic(errors.Wrap(err, "while parsing function resources presets"))
+		panic(errors.Wrap(err, "while parsing function replicas presets"))
 	}
 	defaultingCfg.Function.Replicas.Presets = functionReplicasPresets
 

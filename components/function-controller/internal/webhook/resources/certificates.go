@@ -69,16 +69,18 @@ func createSecret(ctx context.Context, client ctrlclient.Client, name, namespace
 }
 
 func updateSecret(ctx context.Context, client ctrlclient.Client, secret *corev1.Secret, serviceName string) error {
-	if !hasRequiredKeys(secret.Data) {
-		newSecret, err := buildSecret(secret.Name, secret.Namespace, serviceName)
-		if err != nil {
-			return errors.Wrap(err, "failed to create secret object")
-		}
-		secret.Data = newSecret.Data
-		if err := client.Update(ctx, secret); err != nil {
-			return errors.Wrap(err, "failed to update secret")
-		}
+	if hasRequiredKeys(secret.Data) {
 		return nil
+	}
+
+	newSecret, err := buildSecret(secret.Name, secret.Namespace, serviceName)
+	if err != nil {
+		return errors.Wrap(err, "failed to create secret object")
+	}
+
+	secret.Data = newSecret.Data
+	if err := client.Update(ctx, secret); err != nil {
+		return errors.Wrap(err, "failed to update secret")
 	}
 	return nil
 }

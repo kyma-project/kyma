@@ -35,7 +35,7 @@ func EnsureWebhookConfigurationFor(ctx context.Context, client ctlrclient.Client
 	if wt == MutatingWebhook {
 		return ensureMutatingWebhookConfigFor(ctx, client, config)
 	}
-	return ensureValidatinWebhookConfigFor(ctx, client, config)
+	return ensureValidatingWebhookConfigFor(ctx, client, config)
 }
 
 func ensureMutatingWebhookConfigFor(ctx context.Context, client ctlrclient.Client, config WebhookConfig) error {
@@ -54,7 +54,7 @@ func ensureMutatingWebhookConfigFor(ctx context.Context, client ctlrclient.Clien
 	return nil
 }
 
-func ensureValidatinWebhookConfigFor(ctx context.Context, client ctlrclient.Client, config WebhookConfig) error {
+func ensureValidatingWebhookConfigFor(ctx context.Context, client ctlrclient.Client, config WebhookConfig) error {
 	vwhc := &admissionregistrationv1.ValidatingWebhookConfiguration{}
 	if err := client.Get(ctx, types.NamespacedName{Name: ValidationWebhookName}, vwhc); err != nil {
 		if apiErrors.IsNotFound(err) {
