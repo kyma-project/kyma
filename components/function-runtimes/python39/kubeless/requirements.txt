@@ -1,3 +1,4 @@
+setuptools==61.0.0
 requests
 bottle==0.12.19
 cherrypy==8.9.1
