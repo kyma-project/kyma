@@ -6,7 +6,7 @@ const {
   convertAxiosError,
   getPersistentVolumeClaim,
   getSecretData,
-  getAllVirtualServices,
+  // getAllVirtualServices,
 } = require('../utils');
 
 const lokiPort = 3100;
@@ -24,9 +24,9 @@ async function lokiSecretData() {
   return secretData['loki.yaml'];
 }
 
-function getVirtualServices() {
-  return getAllVirtualServices();
-}
+// function getLokiVirtualService(name = 'loki') {
+//   const virtualServices = getAllVirtualServices();
+// }
 
 async function queryLoki(labels, startTimestamp) {
   const url = `http://localhost:${lokiPort}/api/prom/query?query=${labels}&start=${startTimestamp}`;
@@ -41,7 +41,7 @@ async function queryLoki(labels, startTimestamp) {
 module.exports = {
   lokiPortForward,
   queryLoki,
-  getVirtualServices,
+  // getVirtualServices,
   lokiPersistentVolumClaim,
   lokiSecretData,
 };

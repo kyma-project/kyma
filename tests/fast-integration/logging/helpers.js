@@ -48,12 +48,9 @@ async function checkLokiLogsAllNamespaces(startTimestamp) {
 
 async function checkRetentionPeriod() {
   const secretData = k8s.loadYaml(await lokiSecretData());
-  let periodCheck = false;
-  if (secretData?.chunk_store_config?.max_look_back_period == '120h' &&
-  secretData?.table_manager?.retention_period == '120h') {
-    periodCheck = true;
-  }
-  assert.isTrue(periodCheck, 'Loki retention_period or max_look_back_period is not 120h');
+
+  assert.equal(secretData?.table_manager?.retention_period, '120h');
+  assert.equal(secretData?.chunk_store_config?.max_look_back_period, '120h');
 }
 
 async function checkPersistentVolumeClaimSize() {
@@ -69,11 +66,13 @@ async function checkVirtualServicePresence() {
   const virtualServices = await getVirtualServices();
   let lokiVSPresence = false;
   for (let index = 0; index < virtualServices.length; index++) {
-    if (virtualServices[index]?.metadata?.name == 'loki') {
-      lokiVSPresence = virtualServices[index]?.metadata?.name == 'loki';
+    if (virtualServices[index]?.metadata?.name === 'loki') {
+      lokiVSPresence = true;
       break;
     }
   }
+  // getLokiVirtualService;
+
   assert.isFalse(lokiVSPresence, 'Loki is exposed via Virtual Service');
 }
 
