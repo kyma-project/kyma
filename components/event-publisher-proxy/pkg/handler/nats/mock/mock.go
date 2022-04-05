@@ -25,7 +25,6 @@ import (
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/informers"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/legacy-events"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/metrics"
-	pkgnats "github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/nats"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/options"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/receiver"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/sender"
@@ -43,6 +42,7 @@ type NatsHandlerMock struct {
 	eventTypePrefix     string
 	logger              *logrus.Logger
 	natsServer          *server.Server
+	jetstreamMode       bool
 	natsConfig          *env.NatsConfig
 	collector           *metrics.Collector
 	legacyTransformer   *legacy.Transformer
@@ -63,7 +63,6 @@ func StartOrDie(ctx context.Context, t *testing.T, opts ...NatsHandlerMockOpt) *
 		livenessEndpoint:    fmt.Sprintf("http://localhost:%d%s", port, health.LivenessURI),
 		readinessEndpoint:   fmt.Sprintf("http://localhost:%d%s", port, health.ReadinessURI),
 		logger:              logrus.New(),
-		natsServer:          testingutils.StartNatsServer(),
 		natsConfig:          newNatsConfig(port),
 		collector:           metrics.NewCollector(),
 		legacyTransformer:   &legacy.Transformer{},
@@ -74,22 +73,21 @@ func StartOrDie(ctx context.Context, t *testing.T, opts ...NatsHandlerMockOpt) *
 	for _, opt := range opts {
 		opt(mock)
 	}
+	mock.natsServer = testingutils.StartNatsServer(mock.jetstreamMode)
 
 	msgReceiver := receiver.NewHTTPMessageReceiver(mock.natsConfig.Port)
 
-	connection, err := pkgnats.Connect(mock.GetNatsURL(),
-		pkgnats.WithRetryOnFailedConnect(true),
-		pkgnats.WithMaxReconnects(3),
-		pkgnats.WithReconnectWait(time.Second),
-	)
+	connection, err := testingutils.ConnectToNatsServer(mock.GetNatsURL())
 	require.NoError(t, err)
 	mock.connection = connection
 
-	msgSender := sender.NewNatsMessageSender(ctx, mock.connection, mock.logger)
+	//nolint:gosimple
+	var msgSender sender.GenericSender
+	msgSender = sender.NewNatsMessageSender(ctx, mock.connection, mock.logger)
 
 	mock.handler = nats.NewHandler(
 		msgReceiver,
-		msgSender,
+		&msgSender,
 		mock.natsConfig.RequestTimeout,
 		mock.legacyTransformer,
 		&options.Options{MaxRequestSize: 65536},
@@ -184,10 +182,18 @@ func WithApplication(applicationName string) NatsHandlerMockOpt {
 	}
 }
 
+// WithJetstream returns NatsHandlerMockOpt which starts the NATS server in the jetstream mode for the given NatsHandlerMock.
+func WithJetstream(jsEnabled bool) NatsHandlerMockOpt {
+	return func(m *NatsHandlerMock) {
+		m.jetstreamMode = jsEnabled
+	}
+}
+
 func newNatsConfig(port int) *env.NatsConfig {
 	return &env.NatsConfig{
 		Port:                  port,
 		LegacyNamespace:       testingutils.MessagingNamespace,
 		LegacyEventTypePrefix: testingutils.MessagingEventTypePrefix,
+		JSStreamName:          testingutils.StreamName,
 	}
 }
