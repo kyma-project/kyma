@@ -1,7 +1,7 @@
 const {checkServiceInstanceExistence} = require('./fixtures/helm-broker');
 
 const {printRestartReport, getContainerRestartsForAllNamespaces} = require('../utils');
-const {loggingTests, checkCommerceMockLogsInLoki} = require('../logging');
+const {loggingTests, checkCommerceMockLogsInLoki, lokiPortForward} = require('../logging');
 const {monitoringTests} = require('../monitoring');
 const {tracingTests} = require('../tracing');
 const {checkInClusterEventDelivery,
@@ -16,6 +16,15 @@ describe('Upgrade test tests', function() {
   let initialRestarts = null;
   const mockNamespace = 'mocks';
   const testNamespace = 'test';
+  let cancelPortForward = null;
+
+  before(() => {
+    cancelPortForward = lokiPortForward();
+  });
+
+  after(() => {
+    cancelPortForward();
+  });
 
 
   it('Listing all pods in cluster', async function() {
