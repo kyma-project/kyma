@@ -8,7 +8,6 @@ const {
 } = require('../utils');
 
 const {
-  getPrometheusUIStatus,
   getPrometheusActiveTargets,
   getPrometheusAlerts,
   queryPrometheus,
@@ -24,11 +23,6 @@ async function assertPodsExist() {
       'kube-state-metrics',
       namespace,
   );
-}
-
-async function assertPrometheusUIIsReachable() {
-  const status = await getPrometheusUIStatus();
-  assert.equal(status, 200, 'Prometheus UI is not reachable');
 }
 
 async function assertAllTargetsAreHealthy() {
@@ -320,7 +314,6 @@ async function retry(getList, maxRetries = 20, interval = 5 * 1000) {
 
 module.exports = {
   assertPodsExist,
-  assertPrometheusUIIsReachable,
   assertAllTargetsAreHealthy,
   assertNoCriticalAlertsExist,
   assertScrapePoolTargetsExist,
