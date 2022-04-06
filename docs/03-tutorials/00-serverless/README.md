@@ -41,7 +41,7 @@ Having written and tested your Function locally, simply deploy it to the Kyma ru
 # Deploy via CI/CD
 
 Kyma UI helps you get started. Kyma CLI helps you iterate and develop Functions. 
-But at the end of the day you may probably want an automated deployment of your Functions. Or rather, of your whole application, where Functions are just part of it.
+But at the end of the day you may probably want an automated deployment of your application, where Functions are just part of it.
 It all comes down to deployment of the Kubernetes applications on different Kyma runtimes in a GitOps fashion. For the sake of simplicity, the deployment approach for Functions should not differ from deployment of the other Kubernetes workloads, Config Maps or Secrets.
 
 So in the end what you need is those yaml manifests for everything - including Functions.
