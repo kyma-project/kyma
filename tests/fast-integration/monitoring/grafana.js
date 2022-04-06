@@ -62,7 +62,7 @@ async function assertGrafanaRedirect(redirectURL) {
   const vs = await getVirtualService('kyma-system', 'monitoring-grafana');
   const hosts = vs.spec.hosts[0];
   let ignoreSSL = false;
-  if (vs.includes('local.kyma.dev')) {
+  if (hosts.includes('local.kyma.dev')) {
     ignoreSSL = true;
   }
   const url = 'https://' + hosts;

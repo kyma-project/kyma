@@ -5,7 +5,7 @@ const {
   convertAxiosError,
   getPersistentVolumeClaim,
   getSecretData,
-  getAllVirtualServices, sleep,
+  getVirtualService, sleep,
 } = require('../utils');
 
 const lokiPort = 3100;
@@ -27,8 +27,8 @@ async function lokiSecretData() {
   return secretData['loki.yaml'];
 }
 
-function getVirtualServices() {
-  return getAllVirtualServices();
+function getLokiVirtualService() {
+  return getVirtualService('kyma-system', 'loki');
 }
 
 async function logsPresentInLoki(query, startTimestamp) {
@@ -56,7 +56,7 @@ module.exports = {
   lokiPortForward,
   queryLoki,
   logsPresentInLoki,
-  getVirtualServices,
+  getLokiVirtualService,
   tryGetLokiPersistentVolumeClaim,
   lokiSecretData,
 };
