@@ -6,7 +6,6 @@ const {
   getLokiVirtualService,
   logsPresentInLoki,
 } = require('./client');
-const {debug} = require('../utils');
 
 async function checkCommerceMockLogsInLoki(startTimestamp) {
   const labels = '{app="commerce-mock", container="mock", namespace="mocks"}';
@@ -45,7 +44,6 @@ async function checkPersistentVolumeClaimSize() {
 
 async function checkIfLokiVirtualServiceIsPresence() {
   const vs = await getLokiVirtualService();
-  debug('vs', 'vs');
   assert.equal(vs.kind, 'Status', 'Expected Status Kind when trying to retrieve Loki Virtual Service');
   assert.equal(vs.status, 'Failure', 'Expected Failure when trying to retrieve Loki Virtual Service');
   assert.equal(vs.reason, 'NotFound', 'Expected NotFound Reason when trying to retrieve Loki Virtual Service');

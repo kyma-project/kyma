@@ -51,7 +51,7 @@ function commerceMockTests(testNamespace) {
       await checkFunctionResponse(testNamespace);
     });
 
-    it('order.created.v1 event should trigger the lastorder function', async function() {
+    it('order.created.v1 legacy event should trigger the lastorder function', async function() {
       await sendLegacyEventAndCheckResponse();
     });
 
