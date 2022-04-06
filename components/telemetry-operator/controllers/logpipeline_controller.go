@@ -137,25 +137,25 @@ func (r *LogPipelineReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 	updatedSectionsCm, err := r.syncSectionsConfigMap(ctx, &logPipeline)
 	if err != nil {
 		log.Error(err, "Failed to sync Sections ConfigMap")
-		return ctrl.Result{}, err
+		return ctrl.Result{Requeue: true}, err
 	}
 
 	updatedParsersCm, err := r.syncParsersConfigMap(ctx, &logPipeline)
 	if err != nil {
 		log.Error(err, "Failed to sync Parsers ConfigMap")
-		return ctrl.Result{}, err
+		return ctrl.Result{Requeue: true}, err
 	}
 
 	updatedFilesCm, err := r.syncFilesConfigMap(ctx, &logPipeline)
 	if err != nil {
 		log.Error(err, "Failed to sync mounted files")
-		return ctrl.Result{}, err
+		return ctrl.Result{Requeue: true}, err
 	}
 
 	updatedEnv, err := r.syncSecretRefs(ctx, &logPipeline)
 	if err != nil {
 		log.Error(err, "Failed to sync secret references")
-		return ctrl.Result{}, err
+		return ctrl.Result{Requeue: true}, err
 	}
 
 	if updatedSectionsCm || updatedParsersCm || updatedFilesCm || updatedEnv {
@@ -163,12 +163,12 @@ func (r *LogPipelineReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 
 		if err := r.Update(ctx, &logPipeline); err != nil {
 			log.Error(err, "Failed updating log pipeline")
-			return ctrl.Result{}, err
+			return ctrl.Result{Requeue: true}, err
 		}
 
 		if err := r.restartFluentBit(ctx); err != nil {
 			log.Error(err, "Failed restarting fluent bit daemon set")
-			return ctrl.Result{}, err
+			return ctrl.Result{Requeue: true}, err
 		}
 
 		condition := telemetryv1alpha1.NewLogPipelineCondition(
@@ -230,6 +230,7 @@ func (r *LogPipelineReconciler) getOrCreateConfigMap(ctx context.Context, name t
 // Synchronize LogPipeline with ConfigMap of FluentBit sections (Input, Filter and Output).
 func (r *LogPipelineReconciler) syncSectionsConfigMap(ctx context.Context, logPipeline *telemetryv1alpha1.LogPipeline) (bool, error) {
 	log := logf.FromContext(ctx)
+	changed := false
 	cm, err := r.getOrCreateConfigMap(ctx, r.FluentBitSectionsConfigMap)
 	if err != nil {
 		return false, err
@@ -242,6 +243,7 @@ func (r *LogPipelineReconciler) syncSectionsConfigMap(ctx context.Context, logPi
 			log.Info("Deleting fluent bit config")
 			delete(cm.Data, cmKey)
 			controllerutil.RemoveFinalizer(logPipeline, sectionsConfigMapFinalizer)
+			changed = true
 		}
 	} else {
 		fluentBitConfig := fluentbit.MergeSectionsConfig(logPipeline)
@@ -249,27 +251,32 @@ func (r *LogPipelineReconciler) syncSectionsConfigMap(ctx context.Context, logPi
 			data := make(map[string]string)
 			data[cmKey] = fluentBitConfig
 			cm.Data = data
-		} else {
-			if oldConfig, hasKey := cm.Data[cmKey]; hasKey && oldConfig == fluentBitConfig {
-				// Nothing changed
-				return false, nil
-			}
+			changed = true
+		} else if oldConfig, hasKey := cm.Data[cmKey]; !hasKey || oldConfig != fluentBitConfig {
 			cm.Data[cmKey] = fluentBitConfig
+			changed = true
 		}
-		controllerutil.AddFinalizer(logPipeline, sectionsConfigMapFinalizer)
+		if !controllerutil.ContainsFinalizer(logPipeline, sectionsConfigMapFinalizer) {
+			log.Info("Adding finalizer")
+			controllerutil.AddFinalizer(logPipeline, sectionsConfigMapFinalizer)
+			changed = true
+		}
 	}
 
 	// Update ConfigMap
-	if err := r.Update(ctx, &cm); err != nil {
-		return false, err
+	if changed {
+		if err = r.Update(ctx, &cm); err != nil {
+			return changed, err
+		}
 	}
 
-	return true, nil
+	return changed, nil
 }
 
 // Synchronize LogPipeline with ConfigMap of FluentBit parsers (Parser and MultiLineParser).
 func (r *LogPipelineReconciler) syncParsersConfigMap(ctx context.Context, logPipeline *telemetryv1alpha1.LogPipeline) (bool, error) {
 	log := logf.FromContext(ctx)
+	changed := false
 	cm, err := r.getOrCreateConfigMap(ctx, r.FluentBitParsersConfigMap)
 	if err != nil {
 		return false, err
@@ -279,25 +286,23 @@ func (r *LogPipelineReconciler) syncParsersConfigMap(ctx context.Context, logPip
 	if logPipeline.DeletionTimestamp != nil {
 		if cm.Data != nil && controllerutil.ContainsFinalizer(logPipeline, parserConfigMapFinalizer) {
 			log.Info("Deleting fluent bit parsers config")
-			delete(cm.Data, ParsersConfigMapKey)
-			controllerutil.RemoveFinalizer(logPipeline, parserConfigMapFinalizer)
 
 			var logPipelines telemetryv1alpha1.LogPipelineList
 			err = r.List(ctx, &logPipelines)
 			if err != nil {
 				return false, err
 			}
+
 			fluentBitParsersConfig := fluentbit.MergeParsersConfig(&logPipelines)
 			if fluentBitParsersConfig == "" {
-				if cm.Data == nil {
-					return false, nil
-				}
 				cm.Data = nil
 			} else {
 				data := make(map[string]string)
 				data[ParsersConfigMapKey] = fluentBitParsersConfig
 				cm.Data = data
 			}
+			controllerutil.RemoveFinalizer(logPipeline, parserConfigMapFinalizer)
+			changed = true
 		}
 	} else {
 		var logPipelines telemetryv1alpha1.LogPipelineList
@@ -312,31 +317,39 @@ func (r *LogPipelineReconciler) syncParsersConfigMap(ctx context.Context, logPip
 				return false, nil
 			}
 			cm.Data = nil
-		} else if cm.Data == nil {
-			data := make(map[string]string)
-			data[ParsersConfigMapKey] = fluentBitParsersConfig
-			cm.Data = data
-			controllerutil.AddFinalizer(logPipeline, parserConfigMapFinalizer)
 		} else {
-			if oldConfig, hasKey := cm.Data[ParsersConfigMapKey]; hasKey && oldConfig == fluentBitParsersConfig {
-				// Nothing changed
-				return false, nil
+			if cm.Data == nil {
+				data := make(map[string]string)
+				data[ParsersConfigMapKey] = fluentBitParsersConfig
+				cm.Data = data
+				changed = true
+			} else {
+				if oldConfig, hasKey := cm.Data[ParsersConfigMapKey]; !hasKey || oldConfig != fluentBitParsersConfig {
+					cm.Data[ParsersConfigMapKey] = fluentBitParsersConfig
+					changed = true
+				}
 			}
-			cm.Data[ParsersConfigMapKey] = fluentBitParsersConfig
-			controllerutil.AddFinalizer(logPipeline, parserConfigMapFinalizer)
+			if !controllerutil.ContainsFinalizer(logPipeline, parserConfigMapFinalizer) {
+				log.Info("Adding finalizer")
+				controllerutil.AddFinalizer(logPipeline, parserConfigMapFinalizer)
+				changed = true
+			}
 		}
 	}
 
 	// Update ConfigMap
-	if err := r.Update(ctx, &cm); err != nil {
-		return false, err
+	if changed {
+		if err := r.Update(ctx, &cm); err != nil {
+			return false, err
+		}
 	}
 
-	return true, nil
+	return changed, nil
 }
 
 // Synchronize file references with Fluent Bit files ConfigMap.
 func (r *LogPipelineReconciler) syncFilesConfigMap(ctx context.Context, logPipeline *telemetryv1alpha1.LogPipeline) (bool, error) {
+	log := logf.FromContext(ctx)
 	changed := false
 	cm, err := r.getOrCreateConfigMap(ctx, r.FluentBitFilesConfigMap)
 	if err != nil {
@@ -356,14 +369,13 @@ func (r *LogPipelineReconciler) syncFilesConfigMap(ctx context.Context, logPipel
 				data := make(map[string]string)
 				data[file.Name] = file.Content
 				cm.Data = data
-				controllerutil.AddFinalizer(logPipeline, filesFinalizer)
 				changed = true
-			} else {
-				if oldContent, hasKey := cm.Data[file.Name]; hasKey && oldContent == file.Content {
-					// Nothing changed
-					continue
-				}
+			} else if oldContent, hasKey := cm.Data[file.Name]; !hasKey || oldContent != file.Content {
 				cm.Data[file.Name] = file.Content
+				changed = true
+			}
+			if !controllerutil.ContainsFinalizer(logPipeline, filesFinalizer) {
+				log.Info("Adding finalizer")
 				controllerutil.AddFinalizer(logPipeline, filesFinalizer)
 				changed = true
 			}
@@ -371,8 +383,10 @@ func (r *LogPipelineReconciler) syncFilesConfigMap(ctx context.Context, logPipel
 	}
 
 	// Update ConfigMap
-	if err := r.Update(ctx, &cm); err != nil {
-		return false, err
+	if changed {
+		if err := r.Update(ctx, &cm); err != nil {
+			return false, err
+		}
 	}
 
 	return changed, nil
@@ -414,7 +428,6 @@ func (r *LogPipelineReconciler) syncSecretRefs(ctx context.Context, logPipeline 
 				if _, hasKey := secret.Data[k]; hasKey {
 					delete(secret.Data, k)
 					controllerutil.RemoveFinalizer(logPipeline, secretRefsFinalizer)
-					//nolint:ineffassign
 					changed = true
 				}
 			} else {
@@ -422,26 +435,26 @@ func (r *LogPipelineReconciler) syncSecretRefs(ctx context.Context, logPipeline 
 					data := make(map[string][]byte)
 					data[k] = v
 					secret.Data = data
-					controllerutil.AddFinalizer(logPipeline, secretRefsFinalizer)
-					//nolint:ineffassign
 					changed = true
 				} else {
-					if oldEnv, hasKey := secret.Data[k]; hasKey && bytes.Equal(oldEnv, v) {
-						continue
+					if oldEnv, hasKey := secret.Data[k]; !hasKey || !bytes.Equal(oldEnv, v) {
+						secret.Data[k] = v
+						changed = true
 					}
-					secret.Data[k] = v
+				}
+				if !controllerutil.ContainsFinalizer(logPipeline, secretRefsFinalizer) {
 					controllerutil.AddFinalizer(logPipeline, secretRefsFinalizer)
-					//nolint:ineffassign
 					changed = true
 				}
 			}
-			changed = true
 		}
 	}
 
 	// Update Fluent Bit Secret
-	if err := r.Update(ctx, &secret); err != nil {
-		return false, err
+	if changed {
+		if err := r.Update(ctx, &secret); err != nil {
+			return false, err
+		}
 	}
 
 	return changed, nil
@@ -499,6 +512,11 @@ func (r *LogPipelineReconciler) updateLogPipelineStatus(ctx context.Context,
 	if err := r.Get(ctx, name, &logPipeline); err != nil {
 		log.Error(err, "Failed getting log pipeline")
 		return err
+	}
+
+	// Do not update status if the log pipeline is being deleted
+	if logPipeline.DeletionTimestamp != nil {
+		return nil
 	}
 
 	// If the log pipeline had a running condition and then was modified, all conditions are removed.
