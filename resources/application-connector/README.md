@@ -9,9 +9,6 @@ The Application Connector connects an external solution to Kyma.
 The Application Connector Helm chart contains all the global components:
 - Application broker
 - Application operator
-- Application registry
-- Connection token handler
-- Connector service
 
 ## Connector Service
 
