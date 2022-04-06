@@ -12,7 +12,7 @@
     "pretest": "npm run lint",
     "lint": "./node_modules/.bin/eslint --ignore-path .gitignore .",
     "lint-fix": "./node_modules/.bin/eslint --ignore-path .gitignore . --fix",
-    "test": "DEBUG=true mocha --inline-diffs --check-leaks --reporter mocha-multi-reporters --reporter-options configFile=mocha-reporter-config.json",
+    "test": "mocha --inline-diffs --check-leaks --reporter mocha-multi-reporters --reporter-options configFile=mocha-reporter-config.json",
     "test-utils": "mocha --inline-diffs --check-leaks --reporter mocha-multi-reporters --reporter-options configFile=mocha-reporter-config.json './utils/**/*.test.js'",
     "test-commerce-mock": "mocha --inline-diffs --check-leaks --reporter mocha-multi-reporters --reporter-options configFile=mocha-reporter-config.json ./test/2-commerce-mock.js",
     "test-certificate": "mocha --timeout 150000 --inline-diffs --check-leaks --reporter mocha-multi-reporters --reporter-options configFile=mocha-reporter-config.json ./certificate-test/",
@@ -33,7 +33,7 @@
     "test-telemetry": "mocha --timeout 130000 --exit --inline-diffs --check-leaks --reporter mocha-multi-reporters --reporter-options configFile=mocha-reporter-config.json ./telemetry-test/",
     "logging": "mocha --timeout 130000 --exit --inline-diffs --check-leaks --reporter mocha-multi-reporters --reporter-options configFile=mocha-reporter-config.json ./logging/",
     "upgrade-test-prep": "mocha --inline-diffs --check-leaks --reporter mocha-multi-reporters --reporter-options configFile=mocha-reporter-config.json upgrade-test/upgrade-test-prep.js",
-    "upgrade-test-tests": "DEBUG=true mocha --inline-diffs --check-leaks --reporter mocha-multi-reporters --reporter-options configFile=mocha-reporter-config.json upgrade-test/upgrade-test-tests.js",
+    "upgrade-test-tests": "mocha --inline-diffs --check-leaks --reporter mocha-multi-reporters --reporter-options configFile=mocha-reporter-config.json upgrade-test/upgrade-test-tests.js",
     "upgrade-test-cleanup": "DEBUG=true mocha --inline-diffs --check-leaks --reporter mocha-multi-reporters --reporter-options configFile=mocha-reporter-config.json upgrade-test/upgrade-test-cleanup.js",
     "test-application-connectivity-2": "env WITH_CENTRAL_APP_CONNECTIVITY=true mocha --inline-diffs --check-leaks --reporter mocha-multi-reporters --reporter-options configFile=mocha-reporter-config.json",
     "test-application-connectivity-2-compass": "env WITH_CENTRAL_APP_CONNECTIVITY=true mocha --inline-diffs --check-leaks --reporter mocha-multi-reporters --reporter-options configFile=mocha-reporter-config.json ./compass-test/"
