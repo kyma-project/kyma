@@ -38,7 +38,6 @@ async function logsPresentInLoki(query, startTimestamp) {
       return true;
     }
     await sleep(5 * 1000);
-    console.log('sleep');
   }
   return false;
 }

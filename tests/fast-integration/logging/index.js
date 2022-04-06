@@ -5,7 +5,7 @@ function loggingTests() {
   const testStartTimestamp = new Date().toISOString();
   describe('Logging Tests:', function() {
     this.timeout(5 * 60 * 1000); // 5 min
-    this.slow(5 * 1000);
+    this.slow(5000);
 
     let cancelPortForward = null;
 
