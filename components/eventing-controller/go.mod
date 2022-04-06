@@ -4,19 +4,19 @@ go 1.17
 
 require (
 	github.com/avast/retry-go/v3 v3.1.1
-	github.com/cloudevents/sdk-go/protocol/nats/v2 v2.8.0
-	github.com/cloudevents/sdk-go/v2 v2.8.0
+	github.com/cloudevents/sdk-go/protocol/nats/v2 v2.9.0
+	github.com/cloudevents/sdk-go/v2 v2.9.0
 	github.com/go-logr/logr v1.2.3
 	github.com/go-logr/zapr v1.2.3
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/kyma-incubator/api-gateway v0.0.0-20220318061314-9fd030a8cbd1
-	github.com/kyma-project/kyma/common/logging v0.0.0-20220318092714-2229a6be2cc1
-	github.com/kyma-project/kyma/components/application-operator v0.0.0-20220318113114-607b05389daf
+	github.com/kyma-project/kyma/common/logging v0.0.0-20220405213124-43bea761ba4a
+	github.com/kyma-project/kyma/components/application-operator v0.0.0-20220405213124-43bea761ba4a
 	github.com/mitchellh/hashstructure/v2 v2.0.2
 	github.com/nats-io/nats-server/v2 v2.7.4
 	github.com/nats-io/nats.go v1.13.1-0.20220308171302-2f2f6968e98d
 	github.com/onsi/ginkgo v1.16.5
-	github.com/onsi/gomega v1.18.1
+	github.com/onsi/gomega v1.19.0
 	github.com/pkg/errors v0.9.1
 	github.com/stretchr/testify v1.7.1
 	go.uber.org/atomic v1.9.0
@@ -26,7 +26,7 @@ require (
 	k8s.io/api v0.23.5
 	k8s.io/apimachinery v0.23.5
 	k8s.io/client-go v0.23.5
-	sigs.k8s.io/controller-runtime v0.11.1
+	sigs.k8s.io/controller-runtime v0.11.2
 )
 
 require (
@@ -63,7 +63,7 @@ require (
 	github.com/stretchr/objx v0.2.0 // indirect
 	go.uber.org/multierr v1.6.0 // indirect
 	golang.org/x/crypto v0.0.0-20220112180741-5e0467b6c7ce // indirect
-	golang.org/x/net v0.0.0-20220127200216-cd36cc0744dd // indirect
+	golang.org/x/net v0.0.0-20220225172249-27dd8689420f // indirect
 	golang.org/x/sys v0.0.0-20220114195835-da31bd327af9 // indirect
 	golang.org/x/term v0.0.0-20210927222741-03fcf44c2211 // indirect
 	golang.org/x/text v0.3.7 // indirect
@@ -75,8 +75,8 @@ require (
 	gopkg.in/tomb.v1 v1.0.0-20141024135613-dd632973f1e7 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b // indirect
-	k8s.io/apiextensions-apiserver v0.23.0 // indirect
-	k8s.io/component-base v0.23.0 // indirect
+	k8s.io/apiextensions-apiserver v0.23.5 // indirect
+	k8s.io/component-base v0.23.5 // indirect
 	k8s.io/klog/v2 v2.30.0 // indirect
 	k8s.io/kube-openapi v0.0.0-20211115234752-e816edb12b65 // indirect
 	k8s.io/utils v0.0.0-20211116205334-6203023598ed // indirect
