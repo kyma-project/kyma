@@ -1,3 +1,5 @@
+
+# this stub is created to allow the reconciler to track this/these resource(s). It should not be deleted. The actual content of this resource and managed and reconciled by the function-webhook.
 apiVersion: admissionregistration.k8s.io/v1
 kind: ValidatingWebhookConfiguration
 metadata:
