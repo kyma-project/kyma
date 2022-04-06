@@ -4,6 +4,7 @@ metadata:
   name: podpresets.settings.svcat.k8s.io
   annotations:
     "helm.sh/resource-policy": keep
+    "api-approved.kubernetes.io": "https://github.com/kubernetes-sigs/service-catalog/pull/2630"
 spec:
   versions:
     - name: v1alpha1
