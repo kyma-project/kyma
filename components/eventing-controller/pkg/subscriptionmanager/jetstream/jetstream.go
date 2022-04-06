@@ -3,7 +3,6 @@ package jetstream
 import (
 	"context"
 	"fmt"
-	"time"
 
 	"github.com/pkg/errors"
 	corev1 "k8s.io/api/core/v1"
@@ -57,9 +56,9 @@ type SubscriptionManager struct {
 }
 
 // NewSubscriptionManager creates the subscription manager for JetStream.
-func NewSubscriptionManager(restCfg *rest.Config, metricsAddr string, maxReconnects int, reconnectWait time.Duration, logger *logger.Logger) *SubscriptionManager {
+func NewSubscriptionManager(restCfg *rest.Config, natsConfig env.NatsConfig, metricsAddr string, logger *logger.Logger) *SubscriptionManager {
 	return &SubscriptionManager{
-		envCfg:      env.GetNatsConfig(maxReconnects, reconnectWait),
+		envCfg:      natsConfig,
 		restCfg:     restCfg,
 		metricsAddr: metricsAddr,
 		logger:      logger,

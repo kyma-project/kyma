@@ -18,19 +18,18 @@ type BackendConfig struct {
 }
 
 type PublisherConfig struct {
-	Image                  string `envconfig:"PUBLISHER_IMAGE" default:"eu.gcr.io/kyma-project/event-publisher-proxy:c06eb4fc"`
-	ImagePullPolicy        string `envconfig:"PUBLISHER_IMAGE_PULL_POLICY" default:"IfNotPresent"`
-	PortNum                int    `envconfig:"PUBLISHER_PORT_NUM" default:"8080"`
-	MetricsPortNum         int    `envconfig:"PUBLISHER_METRICS_PORT_NUM" default:"8080"`
-	ServiceAccount         string `envconfig:"PUBLISHER_SERVICE_ACCOUNT" default:"eventing-publisher-proxy"`
-	Replicas               int32  `envconfig:"PUBLISHER_REPLICAS" default:"1"`
-	RequestsCPU            string `envconfig:"PUBLISHER_REQUESTS_CPU" default:"32m"`
-	RequestsMemory         string `envconfig:"PUBLISHER_REQUESTS_MEMORY" default:"64Mi"`
-	RequestTimeout         string `envconfig:"PUBLISHER_REQUEST_TIMEOUT" default:"5s"`
-	LimitsCPU              string `envconfig:"PUBLISHER_LIMITS_CPU" default:"100m"`
-	LimitsMemory           string `envconfig:"PUBLISHER_LIMITS_MEMORY" default:"128Mi"`
-	EnableJetStreamBackend bool   `envconfig:"ENABLE_JETSTREAM_BACKEND" default:"false"`
-	PriorityClassName      string `envconfig:"PUBLISHER_PRIORITY_CLASS_NAME" default:""`
+	Image             string `envconfig:"PUBLISHER_IMAGE" default:"eu.gcr.io/kyma-project/event-publisher-proxy:c06eb4fc"`
+	ImagePullPolicy   string `envconfig:"PUBLISHER_IMAGE_PULL_POLICY" default:"IfNotPresent"`
+	PortNum           int    `envconfig:"PUBLISHER_PORT_NUM" default:"8080"`
+	MetricsPortNum    int    `envconfig:"PUBLISHER_METRICS_PORT_NUM" default:"8080"`
+	ServiceAccount    string `envconfig:"PUBLISHER_SERVICE_ACCOUNT" default:"eventing-publisher-proxy"`
+	Replicas          int32  `envconfig:"PUBLISHER_REPLICAS" default:"1"`
+	RequestsCPU       string `envconfig:"PUBLISHER_REQUESTS_CPU" default:"32m"`
+	RequestsMemory    string `envconfig:"PUBLISHER_REQUESTS_MEMORY" default:"64Mi"`
+	RequestTimeout    string `envconfig:"PUBLISHER_REQUEST_TIMEOUT" default:"5s"`
+	LimitsCPU         string `envconfig:"PUBLISHER_LIMITS_CPU" default:"100m"`
+	LimitsMemory      string `envconfig:"PUBLISHER_LIMITS_MEMORY" default:"128Mi"`
+	PriorityClassName string `envconfig:"PUBLISHER_PRIORITY_CLASS_NAME" default:""`
 }
 
 type DefaultSubscriptionConfig struct {

@@ -2,13 +2,11 @@ package sender
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"net/http"
 	"testing"
 	"time"
 
-	cloudevents "github.com/cloudevents/sdk-go/v2"
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 
@@ -43,7 +41,7 @@ func TestNatsMessageSender(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
 
-			natsServer := testingutils.StartNatsServer()
+			natsServer := testingutils.StartNatsServer(false)
 			assert.NotNil(t, natsServer)
 			defer natsServer.Shutdown()
 
@@ -60,14 +58,7 @@ func TestNatsMessageSender(t *testing.T) {
 			validator := testingutils.ValidateNatsMessageDataOrFail(t, fmt.Sprintf(`"%s"`, testingutils.EventData), receive)
 			testingutils.SubscribeToEventOrFail(t, connection, testingutils.CloudEventType, validator)
 
-			builder := testingutils.NewCloudEventBuilder(
-				testingutils.WithCloudEventType(testingutils.CloudEventType),
-			)
-			payload, _ := builder.BuildStructured()
-			event := cloudevents.NewEvent()
-			event.SetType(testingutils.CloudEventType)
-			err = json.Unmarshal([]byte(payload), &event)
-			assert.NoError(t, err)
+			ce := createCloudEvent(t)
 
 			ctx := context.Background()
 			sender := NewNatsMessageSender(context.Background(), connection, logrus.New())
@@ -76,7 +67,7 @@ func TestNatsMessageSender(t *testing.T) {
 				connection.Close()
 			}
 
-			status, err := sender.Send(ctx, &event)
+			status, err := sender.Send(ctx, ce)
 			assert.Equal(t, tc.wantError, err != nil)
 			assert.Equal(t, tc.wantStatusCode, status)
 
