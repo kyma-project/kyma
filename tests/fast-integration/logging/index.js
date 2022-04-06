@@ -17,7 +17,7 @@ function loggingTests() {
       cancelPortForward();
     });
 
-    it('Check Loki logs from kyma-system and kyma-integration namespaces 2', async () => {
+    it('Check Loki logs from kyma-system and kyma-integration namespaces', async () => {
       await logging.checkKymaLogsInLoki(testStartTimestamp);
     });
 

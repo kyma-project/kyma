@@ -6,6 +6,7 @@ const {
   getLokiVirtualService,
   logsPresentInLoki,
 } = require('./client');
+const {debug} = require('../utils');
 
 async function checkCommerceMockLogsInLoki(startTimestamp) {
   const labels = '{app="commerce-mock", container="mock", namespace="mocks"}';
