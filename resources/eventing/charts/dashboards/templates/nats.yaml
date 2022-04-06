@@ -126,7 +126,7 @@ data:
              {
                "expr": "nats_varz_cpu",
                "intervalFactor": 2,
-               "legendFormat": "{{server_id}}",
+               "legendFormat": "{{pod}}",
                "metric": "nats_varz_cpu",
                "refId": "A",
                "step": 4
@@ -212,7 +212,7 @@ data:
              {
                "expr": "nats_varz_mem",
                "intervalFactor": 2,
-               "legendFormat": "{{server_id}}",
+               "legendFormat": "{{pod}}",
                "metric": "nats_varz_mem",
                "refId": "A",
                "step": 4
@@ -310,7 +310,7 @@ data:
              {
                "expr": "nats_varz_in_bytes",
                "intervalFactor": 2,
-               "legendFormat": "{{server_id}}",
+               "legendFormat": "{{pod}}",
                "metric": "nats_varz_in_bytes",
                "refId": "A",
                "step": 10
@@ -394,7 +394,7 @@ data:
              {
                "expr": "nats_varz_in_msgs",
                "intervalFactor": 2,
-               "legendFormat": "{{server_id}}",
+               "legendFormat": "{{pod}}",
                "metric": "nats_varz_in_msgs",
                "refId": "A",
                "step": 10
@@ -478,7 +478,7 @@ data:
              {
                "expr": "nats_varz_out_bytes",
                "intervalFactor": 2,
-               "legendFormat": "{{server_id}}",
+               "legendFormat": "{{pod}}",
                "metric": "nats_varz_out_bytes",
                "refId": "A",
                "step": 10
@@ -562,7 +562,7 @@ data:
              {
                "expr": "nats_varz_out_msgs",
                "intervalFactor": 2,
-               "legendFormat": "{{server_id}}",
+               "legendFormat": "{{pod}}",
                "metric": "nats_varz_out_msgs",
                "refId": "A",
                "step": 10
@@ -663,7 +663,7 @@ data:
              {
                "expr": "nats_varz_connections",
                "intervalFactor": 1,
-               "legendFormat": "{{server_id}}",
+               "legendFormat": "{{pod}}",
                "metric": "nats_varz_connections",
                "refId": "A",
                "step": 2
@@ -751,7 +751,7 @@ data:
                "expr": "nats_varz_subscriptions",
                "hide": false,
                "intervalFactor": 2,
-               "legendFormat": "{{server_id}}",
+               "legendFormat": "{{pod}}",
                "metric": "nats_varz_subscriptions",
                "refId": "A",
                "step": 4
@@ -838,7 +838,7 @@ data:
              {
                "expr": "nats_varz_slow_consumers",
                "intervalFactor": 1,
-               "legendFormat": "{{server_id}}",
+               "legendFormat": "{{pod}}",
                "metric": "nats_varz_slow_consumers",
                "refId": "A",
                "step": 2

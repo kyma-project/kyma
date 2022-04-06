@@ -95,16 +95,10 @@ data:
              "pluginVersion":"8.3.4",
              "targets":[
                 {
-                   "expr":"sum(nats_varz_jetstream_stats_storage{server_id=~\"$server\"})/sum(nats_varz_jetstream_config_max_storage{server_id=~\"$server\"})",
+                   "expr":"sum(nats_varz_jetstream_stats_storage{pod=~\"$server\"})/sum(nats_varz_jetstream_config_max_storage{pod=~\"$server\"})",
                    "interval":"",
                    "legendFormat":"",
                    "refId":"A"
-                },
-                {
-                   "expr":"",
-                   "interval":"",
-                   "legendFormat":"",
-                   "refId":"B"
                 }
              ],
              "title":"Storage Used",
@@ -156,7 +150,7 @@ data:
              "pluginVersion":"8.3.4",
              "targets":[
                 {
-                   "expr":"sum(nats_varz_jetstream_stats_storage{server_id=~\"$server\"})",
+                   "expr":"sum(nats_varz_jetstream_stats_storage{pod=~\"$server\"})",
                    "interval":"",
                    "legendFormat":"",
                    "refId":"A"
@@ -219,16 +213,10 @@ data:
              "pluginVersion":"8.3.4",
              "targets":[
                 {
-                   "expr":"sum(nats_varz_jetstream_stats_memory{server_id=~\"$server\"})/sum(nats_varz_jetstream_config_max_memory{server_id=~\"$server\"})",
+                   "expr":"sum(nats_varz_jetstream_stats_memory{pod=~\"$server\"})/sum(nats_varz_jetstream_config_max_memory{pod=~\"$server\"})",
                    "interval":"",
                    "legendFormat":"",
                    "refId":"A"
-                },
-                {
-                   "expr":"",
-                   "interval":"",
-                   "legendFormat":"",
-                   "refId":"B"
                 }
              ],
              "title":"Memory Used",
@@ -280,7 +268,7 @@ data:
              "pluginVersion":"8.3.4",
              "targets":[
                 {
-                   "expr":"sum(nats_varz_jetstream_stats_memory{server_id=~\"$server\"})",
+                   "expr":"sum(nats_varz_jetstream_stats_memory{pod=~\"$server\"})",
                    "interval":"",
                    "legendFormat":"",
                    "refId":"A"
@@ -339,7 +327,7 @@ data:
              "pluginVersion":"8.3.4",
              "targets":[
                 {
-                   "expr":"sum(nats_varz_connections{server_id=~\"$server\"})",
+                   "expr":"sum(nats_varz_connections{pod=~\"$server\"})",
                    "interval":"",
                    "legendFormat":"",
                    "refId":"A"
@@ -394,7 +382,7 @@ data:
              "pluginVersion":"8.3.4",
              "targets":[
                 {
-                   "expr":"sum(nats_varz_jetstream_config_max_storage{server_id=~\"$server\"})",
+                   "expr":"sum(nats_varz_jetstream_config_max_storage{pod=~\"$server\"})",
                    "interval":"",
                    "legendFormat":"",
                    "refId":"A"
@@ -449,7 +437,7 @@ data:
              "pluginVersion":"8.3.4",
              "targets":[
                 {
-                   "expr":"sum(nats_varz_jetstream_config_max_memory{server_id=~\"$server\"})",
+                   "expr":"sum(nats_varz_jetstream_config_max_memory{pod=~\"$server\"})",
                    "interval":"",
                    "legendFormat":"",
                    "refId":"A"
@@ -507,7 +495,7 @@ data:
              "pluginVersion":"8.3.4",
              "targets":[
                 {
-                   "expr":"sum(nats_server_total_consumers{server_id=~\"$server\"})",
+                   "expr":"sum(nats_server_total_consumers{pod=~\"$server\"})",
                    "interval":"",
                    "legendFormat":"",
                    "refId":"A"
@@ -783,7 +771,7 @@ data:
              "pluginVersion":"8.3.4",
              "targets":[
                 {
-                   "expr":"sum(rate(nats_stream_total_messages{server_id=~\"$server\",stream_name=~\"$stream\"}[$__rate_interval])) by (stream_name)",
+                   "expr":"sum(rate(nats_stream_total_messages{pod=~\"$server\",stream_name=~\"$stream\"}[$__rate_interval])) by (stream_name)",
                    "hide":false,
                    "interval":"",
                    "legendFormat":"{{stream_name}}",
@@ -887,7 +875,7 @@ data:
              "pluginVersion":"8.3.4",
              "targets":[
                 {
-                   "expr":"sum(rate(nats_consumer_num_pending{server_id=~\"$server\",stream_name=~\"$stream\",consumer_name=~\"$consumer\"}[$__rate_interval])+rate(nats_consumer_delivered_consumer_seq{server_id=~\"$server\",stream_name=~\"$stream\",consumer_name=~\"$consumer\"}[$__rate_interval])) by (consumer_name)",
+                   "expr":"sum(rate(nats_consumer_num_pending{pod=~\"$server\",stream_name=~\"$stream\",consumer_name=~\"$consumer\"}[$__rate_interval])+rate(nats_consumer_delivered_consumer_seq{pod=~\"$server\",stream_name=~\"$stream\",consumer_name=~\"$consumer\"}[$__rate_interval])) by (consumer_name)",
                    "hide":false,
                    "instant":false,
                    "interval":"",
@@ -896,7 +884,7 @@ data:
                    "refId":"B"
                 },
                 {
-                   "expr":"- sum(rate(nats_consumer_delivered_consumer_seq{server_id=~\"$server\",stream_name=~\"$stream\",consumer_name=~\"$consumer\",consumer_name=~\"$consumer\"}[$__rate_interval])) by (consumer_name)",
+                   "expr":"- sum(rate(nats_consumer_delivered_consumer_seq{pod=~\"$server\",stream_name=~\"$stream\",consumer_name=~\"$consumer\",consumer_name=~\"$consumer\"}[$__rate_interval])) by (consumer_name)",
                    "hide":false,
                    "interval":"",
                    "legendFormat":"{{consumer_name}} -",
@@ -984,7 +972,7 @@ data:
              "pluginVersion":"8.3.4",
              "targets":[
                 {
-                   "expr":"sum(nats_consumer_delivered_consumer_seq{server_id=~\"$server\",stream_name=~\"$stream\",consumer_name=~\"$consumer\"}) by (consumer_name)",
+                   "expr":"sum(nats_consumer_delivered_consumer_seq{pod=~\"$server\",stream_name=~\"$stream\",consumer_name=~\"$consumer\"}) by (consumer_name)",
                    "hide":false,
                    "interval":"",
                    "legendFormat":"{{consumer_name}}",
@@ -1073,7 +1061,7 @@ data:
              "pluginVersion":"8.3.4",
              "targets":[
                 {
-                   "expr":"sum(nats_consumer_num_pending{server_id=~\"$server\",stream_name=~\"$stream\",consumer_name=~\"$consumer\"}) by (consumer_name)",
+                   "expr":"sum(nats_consumer_num_pending{pod=~\"$server\",stream_name=~\"$stream\",consumer_name=~\"$consumer\"}) by (consumer_name)",
                    "hide":false,
                    "interval":"",
                    "legendFormat":"{{consumer_name}}",
@@ -1162,7 +1150,7 @@ data:
              "pluginVersion":"8.3.4",
              "targets":[
                 {
-                   "expr":"sum(nats_consumer_num_ack_pending{server_id=~\"$server\",stream_name=~\"$stream\",consumer_name=~\"$consumer\"}) by (consumer_name)",
+                   "expr":"sum(nats_consumer_num_ack_pending{pod=~\"$server\",stream_name=~\"$stream\",consumer_name=~\"$consumer\"}) by (consumer_name)",
                    "hide":false,
                    "interval":"",
                    "legendFormat":"{{consumer_name}}",
@@ -1185,7 +1173,7 @@ data:
                 "current":{
 
                 },
-                "definition":"label_values(nats_server_total_streams, server_id)",
+                "definition":"label_values(nats_server_total_streams, pod)",
                 "hide":0,
                 "includeAll":true,
                 "label":"Server",
@@ -1195,7 +1183,7 @@ data:
 
                 ],
                 "query":{
-                   "query":"label_values(nats_server_total_streams, server_id)",
+                   "query":"label_values(nats_server_total_streams, pod)",
                    "refId":"StandardVariableQuery"
                 },
                 "refresh":2,
