@@ -1938,7 +1938,7 @@ data:
             "targets": [
               {
                 "exemplar": true,
-                "expr": "node_namespace_pod_container:container_cpu_usage_seconds_total:sum_rate{namespace=\"$namespace\", pod=~\"logging-loki.*\"}",
+                "expr": "node_namespace_pod_container:container_cpu_usage_seconds_total:sum_irate{namespace=\"$namespace\", pod=~\"logging-loki.*\"}",
                 "interval": "",
                 "intervalFactor": 3,
                 "legendFormat": "{{`{{pod}}`}}-{{`{{container}}`}}",

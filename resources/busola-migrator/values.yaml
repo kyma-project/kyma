@@ -4,10 +4,10 @@ global:
   images:
     busola_migrator:
       name: "busola-migrator"
-      version: "708f6a87"
+      version: "PR-13844"
     k8s_tools:
       name: "k8s-tools"
-      version: "20220318-b6a7453e"
+      version: "20220331-9c1578c1"
       directory: "tpi"
   domainName: kyma.example.com
   ingress:

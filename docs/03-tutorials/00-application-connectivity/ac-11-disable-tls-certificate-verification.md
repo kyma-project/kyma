@@ -7,10 +7,10 @@ You can disable the [TLS certificate verification](../../01-overview/main-areas/
 >**NOTE:** By default, the TLS certificate verification is enabled when sending data and requests to every Application.
 Follow these steps to disable TLS certificate verification:
 
-1. Edit the `{APPLICATION_CR_NAME}` Application CR. Run:
+1. Edit the `{APP_NAME}` Application CR. Run:
 
    ```bash
-   kubectl edit application {APPLICATION_CR_NAME}
+   kubectl edit application {APP_NAME}
    ```
 
 2. Edit the Application by setting the **skipVerify** parameter to `true`.

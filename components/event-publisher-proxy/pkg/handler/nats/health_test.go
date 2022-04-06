@@ -7,6 +7,9 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+
+	testingutils "github.com/kyma-project/kyma/components/event-publisher-proxy/testing"
+
 	"github.com/stretchr/testify/require"
 
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/handler/health"
@@ -32,29 +35,34 @@ func TestReadinessCheck(t *testing.T) {
 			wantHandlerStatusCode:  health.StatusCodeHealthy,
 		},
 	}
+
 	for _, tc := range testCases {
 		tc := tc
 		t.Run(tc.name, func(t *testing.T) {
-			t.Parallel()
 
-			defer func() {
-				r := recover()
-				if !assert.Equal(t, tc.wantPanicForNilHandler, r != nil) {
-					t.Log(r)
-				}
-			}()
+			// test in both default and jetstream NATS modes
+			for _, serverMode := range testingutils.NatsServerModes {
+				t.Run(serverMode.Name, func(t *testing.T) {
+					defer func() {
+						r := recover()
+						if !assert.Equal(t, tc.wantPanicForNilHandler, r != nil) {
+							t.Log(r)
+						}
+					}()
 
-			handlerMock := mock.StartOrDie(context.TODO(), t)
-			defer handlerMock.Stop()
+					handlerMock := mock.StartOrDie(context.TODO(), t, mock.WithJetstream(serverMode.JetstreamEnabled))
+					defer handlerMock.Stop()
 
-			var handler http.HandlerFunc
-			if tc.wantPanicForNilHandler {
-				handler = nats.ReadinessCheck(nil)
-			} else {
-				handler = nats.ReadinessCheck(handlerMock.GetHandler())
+					var handler http.HandlerFunc
+					if tc.wantPanicForNilHandler {
+						handler = nats.ReadinessCheck(nil)
+					} else {
+						handler = nats.ReadinessCheck(handlerMock.GetHandler())
+					}
+
+					assertResponseStatusCode(t, tc.givenHandlerEndpoint, handler, tc.wantHandlerStatusCode)
+				})
 			}
-
-			assertResponseStatusCode(t, tc.givenHandlerEndpoint, handler, tc.wantHandlerStatusCode)
 		})
 	}
 }

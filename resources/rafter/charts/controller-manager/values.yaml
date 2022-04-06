@@ -113,8 +113,8 @@ metrics:
     name:
     type: ClusterIP
     port:
-      name: metrics
-      internal: metrics
+      name: http-metrics
+      internal: http-metrics
       external: 8080
       protocol: TCP
     labels: {}

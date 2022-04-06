@@ -7,7 +7,7 @@ metadata:
   name: {{ include "hydra-maester.fullname" . }}-metrics
 spec:
   ports:
-  - name: metrics
+  - name: http-metrics
     port: {{ .Values.port.metrics }}
   selector:
     app.kubernetes.io/instance: {{ .Release.Name }}

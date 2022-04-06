@@ -55,15 +55,17 @@ async function functionReady(functionName) {
   return fn.status.conditions.reduce((acc, val) => acc && val.status == 'True', true);
 }
 
-async function getFunctionPod(functionName) {
+async function getFunctionPod(functionName, timeoutInMinutes = 5) {
   const labelSelector = `serverless.kyma-project.io/function-name=${functionName},` +
     'serverless.kyma-project.io/resource=deployment';
   let res = {};
-  for (let i = 0; i < 30; i++) {
+  for (let i = 0; i < timeoutInMinutes*6; i++) {
     const ready = await functionReady(functionName);
     if (ready) {
       res = await listPods(labelSelector);
-      if (res.body.items.length == 1) {
+      // sometimes functions controller spins up two deployments
+      // and it acts slow to delete the extra pods
+      if (res.body.items.length > 0) {
         const pod = res.body.items[0];
         if (pod.status.phase == 'Running') {
           return pod;
@@ -75,16 +77,16 @@ async function getFunctionPod(functionName) {
   const podNames = res.body.items.map((p) => p.metadata.name);
   const phases = res.body.items.map((p) => p.status.phase);
   const fn = await getFunction(functionName, 'default');
-  throw new Error(`Failed to find function ${functionName} pod in 5 minutes.
+  throw new Error(`Failed to find function ${functionName} pod in ${timeoutInMinutes} minutes.
   Expected 1 ${labelSelector} pod with phase "Running" but found ${res.body.items.length}, ${podNames}, ${phases}\n
   function status: ${JSON.stringify(fn.status)}`);
 }
 
-async function checkPodPresetEnvInjected() {
+async function checkPodPresetEnvInjected(timeoutInMinutes) {
   const cmd = 'for v in {vars}; do x="$(eval echo \\$$v)"; if [[ -z "$x" ]];' +
     'then echo missing $v env variable; exit 1; else echo found $v env variable; fi; done';
   for (const f of functions) {
-    const pod = await getFunctionPod(f.name);
+    const pod = await getFunctionPod(f.name, timeoutInMinutes);
     const envCmd = cmd.replace('{vars}', f.checkEnvVars);
     await kubectlExecInPod(pod.metadata.name, 'function', ['sh', '-c', envCmd]);
   }

@@ -22,6 +22,10 @@ type NatsConfig struct {
 	// LegacyEventTypePrefix is the prefix of each event as per the eventing specification, used for legacy events
 	// It follows the eventType format: <LegacyEventTypePrefix>.<appName>.<event-name>.<version>
 	LegacyEventTypePrefix string `envconfig:"LEGACY_EVENT_TYPE_PREFIX" default:"kyma"`
+
+	// JetStream-specific configs
+	JSStreamName          string `envconfig:"JS_STREAM_NAME" default:"kyma"`
+	JSStreamSubjectPrefix string `envconfig:"JS_STREAM_SUBJECT_PREFIX" required:"true"`
 }
 
 // ToConfig converts to a default BEB BebConfig
