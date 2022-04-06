@@ -12,6 +12,7 @@
   {{- $encodedKey = b64enc $cert.Key }}
 {{ end }}
 
+
 apiVersion: admissionregistration.k8s.io/v1
 kind: MutatingWebhookConfiguration
 metadata:
