@@ -39,6 +39,7 @@ async function checkPersistentVolumeClaimSize() {
     console.log('Loki PVC not found. Skipping...');
     return;
   }
+
   assert.equal(pvc.status.capacity.storage, '30Gi');
 }
 
