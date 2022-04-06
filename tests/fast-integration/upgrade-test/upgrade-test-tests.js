@@ -1,7 +1,7 @@
 const {checkServiceInstanceExistence} = require('./fixtures/helm-broker');
 
 const {printRestartReport, getContainerRestartsForAllNamespaces} = require('../utils');
-const {loggingTests, checkCommerceMockLogsInLoki, lokiPortForward} = require('../logging');
+const {loggingTests} = require('../logging');
 const {monitoringTests} = require('../monitoring');
 const {tracingTests} = require('../tracing');
 const {checkInClusterEventDelivery,
