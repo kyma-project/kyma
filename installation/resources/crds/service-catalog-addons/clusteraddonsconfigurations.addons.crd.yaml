@@ -18,10 +18,10 @@ spec:
     served: true
     storage: true
     additionalPrinterColumns:
-      - JSONPath: .status.phase
+      - jsonPath: .status.phase
         name: Phase
         type: string
-      - JSONPath: .metadata.creationTimestamp
+      - jsonPath: .metadata.creationTimestamp
         name: Age
         type: date
     subresources:

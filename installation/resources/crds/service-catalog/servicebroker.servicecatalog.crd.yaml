@@ -3,6 +3,7 @@ kind: CustomResourceDefinition
 metadata:
   annotations:
     "helm.sh/resource-policy": keep
+    "api-approved.kubernetes.io": "https://github.com/kubernetes-sigs/service-catalog/pull/2630"
   name: servicebrokers.servicecatalog.k8s.io
   labels:
     svcat: "true"
@@ -15,15 +16,18 @@ spec:
     additionalPrinterColumns:
       - name: URL
         type: string
-        JSONPath: .spec.url
+        jsonPath: .spec.url
       - name: Status
         type: string
-        JSONPath: .status.lastConditionState
+        jsonPath: .status.lastConditionState
       - name: Age
         type: date
-        JSONPath: .metadata.creationTimestamp
+        jsonPath: .metadata.creationTimestamp
     subresources:
       status: {}
+    schema:
+      openAPIV3Schema:
+        type: object
   scope: Namespaced
   names:
     plural: servicebrokers

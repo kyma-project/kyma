@@ -3,6 +3,7 @@ kind: CustomResourceDefinition
 metadata:
   annotations:
     "helm.sh/resource-policy": keep
+    "api-approved.kubernetes.io": "https://github.com/kubernetes-sigs/service-catalog/pull/2630"
   name: clusterserviceplans.servicecatalog.k8s.io
   labels:
     svcat: "true"
@@ -15,18 +16,21 @@ spec:
     additionalPrinterColumns:
       - name: External-Name
         type: string
-        JSONPath: .spec.externalName
+        jsonPath: .spec.externalName
       - name: Broker
         type: string
-        JSONPath: .spec.clusterServiceBrokerName
+        jsonPath: .spec.clusterServiceBrokerName
       - name: Class
         type: string
-        JSONPath: .spec.clusterServiceClassRef.name
+        jsonPath: .spec.clusterServiceClassRef.name
       - name: Age
         type: date
-        JSONPath: .metadata.creationTimestamp
+        jsonPath: .metadata.creationTimestamp
     subresources:
       status: {}
+    schema:
+      openAPIV3Schema:
+        type: object
   scope: Cluster
   names:
     plural: clusterserviceplans
