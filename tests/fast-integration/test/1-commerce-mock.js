@@ -12,7 +12,6 @@ const {
   deleteService,
   sendLegacyEventAndCheckResponse,
   sendCloudEventStructuredModeAndCheckResponse,
-  cleanMockTestFixture,
   checkInClusterEventDelivery,
   sendCloudEventBinaryModeAndCheckResponse,
 } = require('./fixtures/commerce-mock');
@@ -88,10 +87,6 @@ function commerceMockTests() {
 
     it('Logs from commerce mock pod should be retrieved through Loki', async function() {
       await checkLokiLogs(testStartTimestamp);
-    });
-
-    it('Test namespaces should be deleted', async function() {
-      await cleanMockTestFixture('mocks', testNamespace, true);
     });
   });
 }
