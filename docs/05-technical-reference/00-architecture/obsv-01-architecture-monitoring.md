@@ -65,12 +65,10 @@ The main Prometheus instance supports scraping metrics using [`Strict mTLS`](htt
 
 5. By default, metrics from Kyma components are scraped using mTLS. As an exception, components deployed without sidecar proxy (for example, controllers like Prometheus operator) and Istio system components (for example, the Istio sidecars proxies themselves) are scraped using http; see also [Istio's setup recommendation](https://istio.io/latest/docs/ops/integrations/prometheus/#tls-settings).
 
->**NOTE:** Learn how to [deploy](../../../03-tutorials/00-observability/obsv-01-observe-application-metrics.md#deploy-the-example-configuration) a sample `Go` service exposing metrics, which are scraped by Prometheus using mTLS.
-
->**NOTE:** You can find more information about the monitoring architecture in the [Technical References](../../../05-technical-reference/00-architecture/obsv-01-architecture-monitoring.md).
+>**NOTE:** Learn how to [deploy](../../03-tutorials/00-observability/obsv-01-observe-application-metrics.md#deploy-the-example-configuration) a sample `Go` service exposing metrics, which are scraped by Prometheus using mTLS.
 
 ### Istio monitoring flow
 
 The following diagram shows how the Istio-related instance fits into the monitoring setup in Kyma:
 
-![Istio Monitoring](./assets/obsv-monitoring-istio)
+![Istio Monitoring](../assets/obsv-monitoring-istio.svg)

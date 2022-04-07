@@ -20,6 +20,6 @@ The configured memory limits of the Prometheus and Prometheus-Istio instances li
 * Frequency of Pod recreation
 * Topology of the Istio service mesh
 
-The default resource configuration of the monitoring component in the production profile is sufficient to serve 800K time series in the Prometheus Pod, and 400K time series in the Prometheus-Istio Pod. The samples are deleted after 30 days or when reaching the storage limit of 30 GB. The evaluation profile has lower limits. For more information about profiles, see the [Install Kyma Guide](../../04-operation-guides/operations/02-install-kyma.md#choose-resource-consumption).
+The default resource configuration of the monitoring component in the production profile is sufficient to serve 800K time series in the Prometheus Pod, and 400K time series in the Prometheus-Istio Pod. The samples are deleted after 30 days or when reaching the storage limit of 30 GB. The evaluation profile has lower limits. For more information about profiles, see the [Install Kyma Guide](../../../04-operation-guides/operations/02-install-kyma.md#choose-resource-consumption).
 
 You can see the number of ingested time series samples from the `prometheus_tsdb_head_series` metric, which is exported by the Prometheus itself. Furthermore, you can identify expensive metrics with the [TSDB Status](http://localhost:9090/tsdb-status) page.
