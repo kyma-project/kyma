@@ -29,20 +29,24 @@ func TestHandlerHealth(t *testing.T) {
 			wantReadinessStatusCode: health.StatusCodeNotHealthy,
 		},
 	}
+
 	for _, tc := range testCases {
 		tc := tc
 		t.Run(tc.name, func(t *testing.T) {
-			t.Parallel()
+			// test in both default and jetstream NATS modes
+			for _, serverMode := range testingutils.NatsServerModes {
+				t.Run(serverMode.Name, func(t *testing.T) {
+					handlerMock := mock.StartOrDie(context.TODO(), t, mock.WithJetstream(serverMode.JetstreamEnabled))
+					defer handlerMock.Stop()
 
-			handlerMock := mock.StartOrDie(context.TODO(), t)
-			defer handlerMock.Stop()
+					if tc.givenNatsServerShutdown {
+						handlerMock.ShutdownNatsServerAndWait()
+					}
 
-			if tc.givenNatsServerShutdown {
-				handlerMock.ShutdownNatsServerAndWait()
+					testingutils.WaitForEndpointStatusCodeOrFail(handlerMock.GetLivenessEndpoint(), tc.wantLivenessStatusCode)
+					testingutils.WaitForEndpointStatusCodeOrFail(handlerMock.GetReadinessEndpoint(), tc.wantReadinessStatusCode)
+				})
 			}
-
-			testingutils.WaitForEndpointStatusCodeOrFail(handlerMock.GetLivenessEndpoint(), tc.wantLivenessStatusCode)
-			testingutils.WaitForEndpointStatusCodeOrFail(handlerMock.GetReadinessEndpoint(), tc.wantReadinessStatusCode)
 		})
 	}
 }

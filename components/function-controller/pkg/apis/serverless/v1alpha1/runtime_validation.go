@@ -13,7 +13,6 @@ func ValidateDependencies(runtime Runtime, dependencies string) error {
 	case Python39:
 		return nil
 	}
-
 	return fmt.Errorf("cannot find runtime: %s", runtime)
 }
 

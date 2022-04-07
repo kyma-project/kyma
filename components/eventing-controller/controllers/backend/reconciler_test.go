@@ -146,6 +146,12 @@ func TestAPIs(t *testing.T) {
 // Prepare the test suite.
 var _ = BeforeSuite(func(done Done) {
 	var err error
+	// populate with required env variables
+	natsConfig := env.NatsConfig{
+		EventTypePrefix:       reconcilertesting.EventTypePrefix,
+		JSStreamName:          reconcilertesting.JSStreamName,
+		JSStreamSubjectPrefix: reconcilertesting.JSStreamSubjectPrefix,
+	}
 
 	defaultLogger, err = logger.New(string(kymalogger.JSON), string(kymalogger.INFO))
 	Expect(err).To(BeNil())
@@ -186,6 +192,7 @@ var _ = BeforeSuite(func(done Done) {
 	err = NewReconciler(
 		context.Background(),
 		natsSubMgr,
+		natsConfig,
 		bebSubMgr,
 		k8sManager.GetClient(),
 		defaultLogger,

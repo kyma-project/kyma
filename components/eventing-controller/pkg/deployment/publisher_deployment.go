@@ -3,6 +3,7 @@ package deployment
 import (
 	"fmt"
 	"strconv"
+	"strings"
 
 	"github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 	"github.com/kyma-project/kyma/components/eventing-controller/utils"
@@ -44,6 +45,8 @@ const (
 
 	configMapName               = "eventing"
 	configMapKeyEventTypePrefix = "eventTypePrefix"
+
+	natsURL = "eventing-nats.kyma-system.svc.cluster.local"
 )
 
 var (
@@ -54,14 +57,16 @@ func NewBEBPublisherDeployment(publisherConfig env.PublisherConfig) *appsv1.Depl
 	return NewDeployment(
 		publisherConfig,
 		WithLabels(v1alpha1.BEBBackendType),
-		WithContainers(v1alpha1.BEBBackendType, publisherConfig),
+		WithContainers(publisherConfig),
+		WithBEBEnvVars(publisherConfig),
 	)
 }
-func NewNATSPublisherDeployment(publisherConfig env.PublisherConfig) *appsv1.Deployment {
+func NewNATSPublisherDeployment(natsConfig env.NatsConfig, publisherConfig env.PublisherConfig) *appsv1.Deployment {
 	return NewDeployment(
 		publisherConfig,
 		WithLabels(v1alpha1.NatsBackendType),
-		WithContainers(v1alpha1.NatsBackendType, publisherConfig),
+		WithContainers(publisherConfig),
+		WithNATSEnvVars(natsConfig, publisherConfig),
 		WithAffinity(),
 	)
 }
@@ -130,18 +135,13 @@ func WithAffinity() DeployOpt {
 		}
 	}
 }
-func WithContainers(backendType v1alpha1.BackendType, publisherConfig env.PublisherConfig) DeployOpt {
+func WithContainers(publisherConfig env.PublisherConfig) DeployOpt {
 	return func(d *appsv1.Deployment) {
-		envVars := getNATSEnvVars(publisherConfig)
-		if backendType == v1alpha1.BEBBackendType {
-			envVars = getBEBEnvVars(publisherConfig)
-		}
 		d.Spec.Template.Spec.Containers = []v1.Container{
 			{
 				Name:            PublisherName,
 				Image:           publisherConfig.Image,
 				Ports:           getContainerPorts(),
-				Env:             envVars,
 				LivenessProbe:   getLivenessProbe(),
 				ReadinessProbe:  getReadinessProbe(),
 				ImagePullPolicy: getImagePullPolicy(publisherConfig.ImagePullPolicy),
@@ -151,6 +151,25 @@ func WithContainers(backendType v1alpha1.BackendType, publisherConfig env.Publis
 					publisherConfig.LimitsCPU,
 					publisherConfig.LimitsMemory),
 			},
+		}
+	}
+}
+
+func WithNATSEnvVars(natsConfig env.NatsConfig, publisherConfig env.PublisherConfig) DeployOpt {
+	return func(d *appsv1.Deployment) {
+		for i, container := range d.Spec.Template.Spec.Containers {
+			if strings.EqualFold(container.Name, PublisherName) {
+				d.Spec.Template.Spec.Containers[i].Env = getNATSEnvVars(natsConfig, publisherConfig)
+			}
+		}
+	}
+}
+func WithBEBEnvVars(publisherConfig env.PublisherConfig) DeployOpt {
+	return func(d *appsv1.Deployment) {
+		for i, container := range d.Spec.Template.Spec.Containers {
+			if strings.EqualFold(container.Name, PublisherName) {
+				d.Spec.Template.Spec.Containers[i].Env = getBEBEnvVars(publisherConfig)
+			}
 		}
 	}
 }
@@ -281,11 +300,11 @@ func getBEBEnvVars(publisherConfig env.PublisherConfig) []v1.EnvVar {
 	}
 }
 
-func getNATSEnvVars(publisherConfig env.PublisherConfig) []v1.EnvVar {
+func getNATSEnvVars(natsConfig env.NatsConfig, publisherConfig env.PublisherConfig) []v1.EnvVar {
 	return []v1.EnvVar{
 		{Name: "BACKEND", Value: "nats"},
 		{Name: "PORT", Value: strconv.Itoa(int(publisherPortNum))},
-		{Name: "NATS_URL", Value: "eventing-nats.kyma-system.svc.cluster.local"},
+		{Name: "NATS_URL", Value: natsURL},
 		{Name: "REQUEST_TIMEOUT", Value: publisherConfig.RequestTimeout},
 		{Name: "LEGACY_NAMESPACE", Value: "kyma"},
 		{
@@ -310,7 +329,10 @@ func getNATSEnvVars(publisherConfig env.PublisherConfig) []v1.EnvVar {
 				},
 			},
 		},
-		{Name: "ENABLE_JETSTREAM_BACKEND", Value: strconv.FormatBool(publisherConfig.EnableJetStreamBackend)},
+		// jetstream-specific config
+		{Name: "ENABLE_JETSTREAM_BACKEND", Value: strconv.FormatBool(natsConfig.EnableJetStreamBackend)},
+		{Name: "JS_STREAM_NAME", Value: natsConfig.JSStreamName},
+		{Name: "JS_STREAM_SUBJECT_PREFIX", Value: natsConfig.JSStreamSubjectPrefix},
 	}
 }
 

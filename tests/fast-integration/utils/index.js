@@ -1831,4 +1831,5 @@ module.exports = {
   getTraceDAG,
   printStatusOfInClusterEventingInfrastructure,
   getFunction,
+  kc,
 };

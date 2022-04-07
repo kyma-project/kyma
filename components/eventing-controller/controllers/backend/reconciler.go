@@ -65,6 +65,7 @@ type Reconciler struct {
 	client.Client
 	ctx               context.Context
 	natsSubMgr        subscriptionmanager.Manager
+	natsConfig        env.NatsConfig
 	natsSubMgrStarted bool
 	bebSubMgr         subscriptionmanager.Manager
 	bebSubMgrStarted  bool
@@ -78,11 +79,12 @@ type Reconciler struct {
 	oauth2ClientSecret []byte
 }
 
-func NewReconciler(ctx context.Context, natsSubMgr, bebSubMgr subscriptionmanager.Manager, client client.Client, logger *logger.Logger, recorder record.EventRecorder) *Reconciler {
+func NewReconciler(ctx context.Context, natsSubMgr subscriptionmanager.Manager, natsConfig env.NatsConfig, bebSubMgr subscriptionmanager.Manager, client client.Client, logger *logger.Logger, recorder record.EventRecorder) *Reconciler {
 	cfg := env.GetBackendConfig()
 	return &Reconciler{
 		ctx:        ctx,
 		natsSubMgr: natsSubMgr,
+		natsConfig: natsConfig,
 		bebSubMgr:  bebSubMgr,
 		Client:     client,
 		logger:     logger,
@@ -623,7 +625,7 @@ func (r *Reconciler) CreateOrUpdatePublisherProxy(ctx context.Context, backend e
 
 	switch backend {
 	case eventingv1alpha1.NatsBackendType:
-		desiredPublisher = deployment.NewNATSPublisherDeployment(r.cfg.PublisherConfig)
+		desiredPublisher = deployment.NewNATSPublisherDeployment(r.natsConfig, r.cfg.PublisherConfig)
 	case eventingv1alpha1.BEBBackendType:
 		desiredPublisher = deployment.NewBEBPublisherDeployment(r.cfg.PublisherConfig)
 	default:
