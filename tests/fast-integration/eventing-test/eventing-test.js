@@ -40,19 +40,14 @@ const {
   isSKR,
   eventMeshNamespace,
 } = require('./utils');
-const {prometheusPortForward} = require('../monitoring/client');
 
 describe('Eventing tests', function() {
   this.timeout(timeoutTime);
   this.slow(slowTime);
-  let cancelPrometheusPortForward = null;
 
   before('Ensure the test and mock namespaces exist', async function() {
     await waitForNamespace(testNamespace);
     await waitForNamespace(mockNamespace);
-
-    // Set port-forward to prometheus pod
-    cancelPrometheusPortForward = prometheusPortForward();
   });
 
   // eventingE2ETestSuite - Runs Eventing end-to-end tests
@@ -172,9 +167,5 @@ describe('Eventing tests', function() {
     eventingTracingTestSuite();
     // Running Eventing Monitoring tests
     eventingMonitoringTest(natsBackend);
-  });
-
-  after(async function() {
-    cancelPrometheusPortForward();
   });
 });
