@@ -178,14 +178,53 @@ function runDashboardTestCase(dashboardName, test) {
   }, 120, 5000);
 }
 
-function eventingMonitoringTest(backend) {
-  for (const [dashboardName, test] of Object.entries(dashboards)) {
+function eventingMonitoringTest(backend, isJetStreamEnabled = false) {
+  let allDashboards = dashboards
+  if (isJetStreamEnabled) {
+    allDashboards = Object.assign(allDashboards, getJetStreamDashboardTests())
+  }
+
+  for (const [dashboardName, test] of Object.entries(allDashboards)) {
     if (test.backends.includes(backend)) {
       it('Testing dashboard: ' + test.title, async () => {
         await runDashboardTestCase(dashboardName, test);
       });
     }
   }
+}
+
+function getJetStreamDashboardTests() {
+  const dashboardVariables = {
+    "$server": "eventing-nats-0",
+    "$stream": "sap",
+    "$consumer": ".*",
+    "$__rate_interval": "5m"
+  }
+
+  // load JetStream dashboard queries from JSON file
+  const natsDashboardQueries = require('./nats-dashboard-queries.json');
+
+  let dashboardTests = {}
+  for (let i = 0; i < natsDashboardQueries.length; i++) {
+    let finalQuery = natsDashboardQueries[i]["query"]
+    // replace variables in queries with values
+    for (const [variableName, value] of Object.entries(dashboardVariables)) {
+      finalQuery = finalQuery.replaceAll(variableName, value)
+    }
+
+    dashboardTests[`jetstream_dash_${i}`] = {
+      title: natsDashboardQueries[i]["title"],
+      query: finalQuery,
+      backends: ['nats'],
+      // The assert function receives the `data.result` section of the query result:
+      // https://prometheus.io/docs/prometheus/latest/querying/api/#instant-queries
+      assert: function(result) {
+        // checking if the length of the result contains something
+        expect(result).to.have.length.greaterThan(0)
+      }
+    }
+  }
+  return dashboardTests
 }
 
 module.exports = {
