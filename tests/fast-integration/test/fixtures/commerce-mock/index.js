@@ -495,8 +495,10 @@ async function connectMockLocal(mockHost, targetNamespace) {
     kind: 'TokenRequest',
     metadata: {name: 'commerce', namespace: targetNamespace},
   };
+  debug(tokenRequest);
   await k8sDynamicApi.delete(tokenRequest).catch(() => { }); // Ignore delete error
   await k8sDynamicApi.create(tokenRequest);
+  debug('Waiting for token request');
   const tokenObj = await waitForTokenRequest('commerce', targetNamespace);
 
   const pairingBody = {
@@ -659,10 +661,12 @@ async function ensureCommerceMockLocalTestFixture(mockNamespace,
       mockNamespace,
       targetNamespace,
     withCentralApplicationConnectivity ? prepareFunction('central-app-gateway') : prepareFunction());
+  debug(withCentralApplicationConnectivity);
   await retryPromise(() => connectMockLocal(mockHost, targetNamespace), 10, 30000);
   await retryPromise(() => registerAllApis(mockHost), 10, 30000);
 
   if (withCentralApplicationConnectivity) {
+    debug('waiting for central application connectivity');
     await waitForDeployment('central-application-gateway', 'kyma-system');
     await waitForDeployment('central-application-connectivity-validator', 'kyma-system');
   }

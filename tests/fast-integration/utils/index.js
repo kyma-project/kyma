@@ -786,10 +786,16 @@ async function getPersistentVolumeClaim(namespace, name) {
 
 function waitForTokenRequest(name, namespace, timeout = 5000) {
   const path = `/apis/applicationconnector.kyma-project.io/v1alpha1/namespaces/${namespace}/tokenrequests`;
+  debug('calling:');
+  debug(path);
   return waitForK8sObject(
       path,
       {},
       (_type, _apiObj, watchObj) => {
+        debug(watchObj.object.metadata.name);
+        debug(watchObj.object.status);
+        debug(watchObj.object.status.state);
+        debug(watchObj.object.status.url);
         return (
           watchObj.object.metadata.name === name &&
         watchObj.object.status &&
