@@ -10,17 +10,9 @@ Out of the box, Kyma provides tools to collect and expose **telemetry** data, su
 
 ## Collecting data
 
-<!-- 
-We need to add a new category on how to instrument your custom workload to be collectable, in case the auto-telemetry data is not enough. Also telling what is coming out-of-the-box and why.
-
-That section needs to give an overview and link to the guides which we have to provide
--->
-
 Kyma collects telemetry data with several in-cluster components:
 
-- [Prometheus](https://prometheus.io/docs/introduction) collects metrics from Pods. Metrics are the time-stamped data that provide information on the running jobs, workload, CPU consumption, memory usage, and more.
-
-  > **NOTE:** All metrics relevant for observing the in-cluster Istio Service Mesh are collected separately. You can find more information about it in the [Istio monitoring documentation](../../../01-overview/main-areas/observability/obsv-03-istio-monitoring.md).
+- [Prometheus](https://prometheus.io/docs/introduction) collects metrics from Pods. Metrics are the time-stamped data that provide information on the running jobs, workload, CPU consumption, memory usage, and more. All metrics relevant for observing the in-cluster Istio Service Mesh are collected separately.
 
 - [Fluent Bit](https://fluentbit.io/) collects logs.
 
