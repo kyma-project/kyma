@@ -17,11 +17,10 @@ spec:
       ca:
         secret:
           name: {{ template "kube-prometheus-stack.fullname" . }}-admission
-          key: ca
+          key: {{ if .Values.prometheusOperator.admissionWebhooks.certManager.enabled }}ca.crt{{ else }}ca{{ end }}
           optional: false
   {{- else }}
   - port: http
-    scheme: http
   {{- end }}
     honorLabels: true
     {{- if .Values.prometheusOperator.serviceMonitor.interval }}

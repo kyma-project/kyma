@@ -31,9 +31,3 @@ const (
 	FieldEventTypeVersion = "event-type-version"
 	FieldData             = "data"
 )
-
-// HTTP ContentType constants
-const (
-	ContentTypeApplicationJSON = "application/json"
-	HeaderContentType          = "Content-Type"
-)

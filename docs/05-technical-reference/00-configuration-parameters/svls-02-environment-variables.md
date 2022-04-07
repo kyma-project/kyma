@@ -2,11 +2,11 @@
 title: Environment variables
 ---
 
-You can configure environment variables either separately for a given runtime or make them runtime-agnostic using a ConfigMap.
+You can configure environment variables either separately for a given runtime or make them runtime-agnostic using a Config Map.
 
-## Define environment variables in a ConfigMap
+## Define environment variables in a Config Map
 
-ConfigMaps allow you to define Function's environment variables for any runtime through key-value pairs. After you define the values in a ConfigMap, simply reference it in the Function custom resource (CR) through the **valueFrom** parameter. See an example of such a Function CR that specifies the `my-var` value as a reference to the key stored in the `my-vars-cm` ConfigMap as the `MY_VAR` environment variable.
+Config Maps allow you to define Function's environment variables for any runtime through key-value pairs. After you define the values in a Config Map, simply reference it in the Function custom resource (CR) through the **valueFrom** parameter. See an example of such a Function CR that specifies the `my-var` value as a reference to the key stored in the `my-vars-cm` Config Map as the `MY_VAR` environment variable.
 
 ```yaml
 apiVersion: serverless.kyma-project.io/v1alpha1
@@ -70,7 +70,7 @@ To configure a Function with the Python runtime, override the default values of 
 | Environment variable             | Description                                                                                                                  | Unit    | Default value   |
 | -------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- | ------- | --------------- | ------------------------------------------------------------------------------ |
 | **FUNC_MEMFILE_MAX**             | Specifies the maximum size of the memory buffer for the HTTP request body in bytes.                                                            | Number  | `100*1024*1024` | <!-- https://bottlepy.org/docs/dev/api.html#bottle.BaseRequest.MEMFILE_MAX --> |
-| **CHERRYPY_NUMTHREADS**          | Specifies the number of requests that can be handled in parallel                                                                           | Number  | `10`              |
+| **CHERRYPY_NUMTHREADS**          | Specifies the number of requests that can be handled in parallel                                                                           | Number  | `50`              |
 | **KYMA_INTERNAL_LOGGER_ENABLED** | Enables the default HTTP request logger which uses the standard Apache combined log output. To enable it, set its value to `true`. | Boolean | `false`         |
 
 See [`kubeless.py`](https://github.com/kubeless/runtimes/blob/master/stable/python/_kubeless.py) to get a deeper understanding of how the Bottle server, that acts as a runtime, uses these values internally to run Python Functions.

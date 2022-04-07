@@ -5,13 +5,13 @@ metadata:
   name: stsdiscovery-{{ template "kube-state-metrics.fullname" . }}
   namespace: {{ template "kube-state-metrics.namespace" . }}
   labels:
-    {{- include "kube-state-metrics.labels" . | nindent 4 }}
+    {{- include "kube-state-metrics.labels" . | indent 4 }}
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: Role
   name: stsdiscovery-{{ template "kube-state-metrics.fullname" . }}
 subjects:
   - kind: ServiceAccount
-    name: {{ template "kube-state-metrics.fullname" . }}
+    name: {{ template "kube-state-metrics.serviceAccountName" . }}
     namespace: {{ template "kube-state-metrics.namespace" . }}
 {{- end }}

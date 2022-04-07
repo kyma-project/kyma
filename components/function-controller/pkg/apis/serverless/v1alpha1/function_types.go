@@ -13,19 +13,18 @@ const (
 
 // Runtime enumerates runtimes that are currently supported by Function Controller
 // It is a subset of RuntimeExtended
-// +kubebuilder:validation:Enum=nodejs12;nodejs14;python38;python39
+// +kubebuilder:validation:Enum=nodejs12;nodejs14;python39
 type Runtime string
 
 const (
 	Nodejs12 Runtime = "nodejs12"
 	Nodejs14 Runtime = "nodejs14"
-	Python38 Runtime = "python38"
 	Python39 Runtime = "python39"
 )
 
 // RuntimeExtended enumerates runtimes that are either currently supported or
 // no longer supported but there still might be "read-only" Functions using them
-// +kubebuilder:validation:Enum=nodejs12;nodejs14;python38;nodejs10;python39
+// +kubebuilder:validation:Enum=nodejs12;nodejs14;nodejs10;python38;python39
 type RuntimeExtended string
 
 const (
@@ -52,6 +51,9 @@ type FunctionSpec struct {
 
 	// +optional
 	Runtime Runtime `json:"runtime,omitempty"`
+
+	// +optional
+	RuntimeImageOverride string `json:"runtimeImageOverride,omitempty"`
 
 	// Env defines an array of key value pairs need to be used as env variable for a function
 	Env []corev1.EnvVar `json:"env,omitempty"`
@@ -132,11 +134,12 @@ type Condition struct {
 
 // FunctionStatus defines the observed state of Function
 type FunctionStatus struct {
-	Conditions []Condition `json:"conditions,omitempty"`
-	Repository `json:",inline,omitempty"`
-	Commit     string          `json:"commit,omitempty"`
-	Source     string          `json:"source,omitempty"`
-	Runtime    RuntimeExtended `json:"runtime,omitempty"`
+	Conditions           []Condition `json:"conditions,omitempty"`
+	Repository           `json:",inline,omitempty"`
+	Commit               string          `json:"commit,omitempty"`
+	Source               string          `json:"source,omitempty"`
+	Runtime              RuntimeExtended `json:"runtime,omitempty"`
+	RuntimeImageOverride string          `json:"runtimeImageOverride,omitempty"`
 }
 
 type Repository struct {

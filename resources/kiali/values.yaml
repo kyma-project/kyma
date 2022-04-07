@@ -9,11 +9,11 @@ global:
   images:
     kiali:
       name: kiali
-      version: 1.44.0-efa628c6
+      version: 1.44.0-581a4014
       directory: tpi
     oauth2_proxy:
       name: oauth2-proxy
-      version: 7.2.0-2696e5d5
+      version: 7.2.1-581a4014
       directory: tpi
   kymaRuntime:
     adminGroup: runtimeAdmin
@@ -42,6 +42,8 @@ authProxy:
     authLogging: true
     requestLogging: false
     passHostHeader: false
+    cookieExpire: 24h
+    cookieRefresh: 1h
   env: {}
   nodeSelector: {}
   securityContext:

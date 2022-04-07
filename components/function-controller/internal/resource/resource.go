@@ -16,7 +16,7 @@ type Client interface {
 	CreateWithReference(ctx context.Context, parent Object, object Object) error
 	Update(ctx context.Context, object Object) error
 	Get(ctx context.Context, key ctrlclient.ObjectKey, object Object) error
-	ListByLabel(ctx context.Context, namespace string, labels map[string]string, object runtime.Object) error
+	ListByLabel(ctx context.Context, namespace string, labels map[string]string, object ctrlclient.ObjectList) error
 	DeleteAllBySelector(ctx context.Context, resourceType Object, namespace string, selector apilabels.Selector) error
 	Delete(ctx context.Context, resourceType Object) error
 	Status() ctrlclient.StatusWriter
@@ -24,13 +24,13 @@ type Client interface {
 
 //go:generate mockery -name=K8sClient -output=automock -outpkg=automock -case=underscore
 type K8sClient interface {
-	Create(context.Context, runtime.Object, ...ctrlclient.CreateOption) error
-	Update(ctx context.Context, obj runtime.Object, opts ...ctrlclient.UpdateOption) error
-	Get(ctx context.Context, key ctrlclient.ObjectKey, obj runtime.Object) error
-	List(context.Context, runtime.Object, ...ctrlclient.ListOption) error
-	DeleteAllOf(context.Context, runtime.Object, ...ctrlclient.DeleteAllOfOption) error
+	Create(context.Context, ctrlclient.Object, ...ctrlclient.CreateOption) error
+	Update(ctx context.Context, obj ctrlclient.Object, opts ...ctrlclient.UpdateOption) error
+	Get(ctx context.Context, key ctrlclient.ObjectKey, obj ctrlclient.Object) error
+	List(context.Context, ctrlclient.ObjectList, ...ctrlclient.ListOption) error
+	DeleteAllOf(context.Context, ctrlclient.Object, ...ctrlclient.DeleteAllOfOption) error
 	Status() ctrlclient.StatusWriter
-	Delete(ctx context.Context, obj runtime.Object, opts ...ctrlclient.DeleteOption) error
+	Delete(ctx context.Context, obj ctrlclient.Object, opts ...ctrlclient.DeleteOption) error
 }
 
 type Object interface {
@@ -81,7 +81,7 @@ func (c *client) Get(ctx context.Context, key ctrlclient.ObjectKey, object Objec
 	return c.k8sClient.Get(ctx, key, object)
 }
 
-func (c *client) ListByLabel(ctx context.Context, namespace string, labels map[string]string, list runtime.Object) error {
+func (c *client) ListByLabel(ctx context.Context, namespace string, labels map[string]string, list ctrlclient.ObjectList) error {
 	return c.k8sClient.List(ctx, list, &ctrlclient.ListOptions{
 		LabelSelector: apilabels.SelectorFromSet(labels),
 		Namespace:     namespace,

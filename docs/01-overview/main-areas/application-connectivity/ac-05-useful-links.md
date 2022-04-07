@@ -19,9 +19,7 @@ If you're interested in learning more about the Application Connectivity area, f
   - [Rotate the Root certificate and the key issued by the Certificate Authority](../../../03-tutorials/00-application-connectivity/ac-08-rotate-root-ca.md)
   - [Get the API specification for AC components](../../../03-tutorials/00-application-connectivity/ac-09-get-api-specification.md)
   - [Get subscribed events](../../../03-tutorials/00-application-connectivity/ac-10-get-subscribed-events.md)
-<!-- NOT WORKING FOR NOW, RE-ADD IT WHEN FIXED
-  - [Disable TLS certificate verification] (../../../03-tutorials/00-application-connectivity/ac-11-disable-tls-certificate-verification.md)
--->
+  - [Disable TLS certificate verification](../../../03-tutorials/00-application-connectivity/ac-11-disable-tls-certificate-verification.md)
 
 - Check Application Connectivity troubleshooting guides for:
 
@@ -32,7 +30,7 @@ If you're interested in learning more about the Application Connectivity area, f
 - Analyze Application Connectivity specification and configuration files:
 
   - [Application](../../../05-technical-reference/00-custom-resources/ac-01-application.md) custom resource (CR)
-  - [TokenRequest](../../../05-technical-reference/00-custom-resources/ac-02-tokenrequest.md) CR
+  - [Token Request](../../../05-technical-reference/00-custom-resources/ac-02-tokenrequest.md) CR
   - [Application Connector chart](../../../05-technical-reference/00-configuration-parameters/ac-01-application-connector-chart.md)
   - [Application Registry sub-chart](../../../05-technical-reference/00-configuration-parameters/ac-02-application-registry-sub-chart.md)
   - [Connector Service sub-chart](../../../05-technical-reference/00-configuration-parameters/ac-03-connector-service-sub-chart.md)

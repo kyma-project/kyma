@@ -8,7 +8,8 @@ metadata:
     serverless.kyma-project.io/runtime: nodejs12
 data:
   Dockerfile: |-
-    FROM {{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.function_runtime_nodejs12) }}
+    ARG base_image={{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.function_runtime_nodejs12) }}
+    FROM ${base_image}
     USER root
     ENV KUBELESS_INSTALL_VOLUME=/kubeless
 
@@ -31,7 +32,8 @@ metadata:
     serverless.kyma-project.io/runtime: nodejs14
 data:
   Dockerfile: |-
-    FROM {{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.function_runtime_nodejs14) }}
+    ARG base_image={{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.function_runtime_nodejs14) }}
+    FROM ${base_image}
     USER root
     ENV KUBELESS_INSTALL_VOLUME=/kubeless
 
@@ -47,29 +49,6 @@ data:
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: dockerfile-python-38
-  namespace: {{ .Release.Namespace }}
-  labels:
-    serverless.kyma-project.io/config: runtime
-    serverless.kyma-project.io/runtime: python38
-data:
-  Dockerfile: |-
-    FROM {{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.function_runtime_python38) }}
-    USER root
-    ENV KUBELESS_INSTALL_VOLUME=/kubeless
-    
-    COPY /src/requirements.txt $KUBELESS_INSTALL_VOLUME/requirements.txt
-    COPY /registry-config/* /etc/
-    RUN pip install -r $KUBELESS_INSTALL_VOLUME/requirements.txt
-    COPY /src $KUBELESS_INSTALL_VOLUME
-
-    RUN rm -rf /etc/pip.conf
-
-    USER 1000
----
-apiVersion: v1
-kind: ConfigMap
-metadata:
   name: dockerfile-python-39
   namespace: {{ .Release.Namespace }}
   labels:
@@ -77,7 +56,8 @@ metadata:
     serverless.kyma-project.io/runtime: python39
 data:
   Dockerfile: |-
-    FROM {{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.function_runtime_python39) }}
+    ARG base_image={{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.function_runtime_python39) }}
+    FROM ${base_image}
     USER root
     ENV KUBELESS_INSTALL_VOLUME=/kubeless
     

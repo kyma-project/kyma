@@ -57,7 +57,7 @@ spec:
         return 'Hello ' + name;
       }
     }
-  runtime: nodejs12
+  runtime: nodejs14
   status:
     conditions:
       - lastTransitionTime: "2020-04-14T08:17:11Z"
@@ -89,7 +89,7 @@ spec:
   source: auth-basic
   baseDir: "/"
   reference: "branchA"
-  runtime: "nodejs12"
+  runtime: "nodejs14"
 ```
 
 ## Custom resource parameters
@@ -100,7 +100,7 @@ This table lists all the possible parameters of a given resource together with t
 | ---------------------------------------- | :------------: | ---------|
 | **metadata.name**              |      Yes       | Specifies the name of the CR.                 |
 | **metadata.namespace**     |       No       | Defines the Namespace in which the CR is available. It is set to `default` unless you specify otherwise.      |
-| **spec.env**                             |       No       | Specifies environment variables you need to export for the Function. You can export them either directly in the Function CR's spec or define them in a [ConfigMap](../00-configuration-parameters/svls-02-environment-variables.md#define-environment-variables-in-a-configmap). |
+| **spec.env**                             |       No       | Specifies environment variables you need to export for the Function. You can export them either directly in the Function CR's spec or define them in a [ConfigMap](../00-configuration-parameters/svls-02-environment-variables.md#define-environment-variables-in-a-config-map). |
 | **spec.deps**                            |       No       | Specifies the Function's dependencies.  |
 | **spec.labels**                          |       No       | Specifies the Function's Pod labels.    |
 | **spec.minReplicas**                     |       No       | Defines the minimum number of Function's Pods to run at a time.  |
@@ -113,7 +113,7 @@ This table lists all the possible parameters of a given resource together with t
 | **spec.buildResources.limits.memory**         |       No       | Defines the maximum amount of memory available for the Job's Pod to use.      |
 | **spec.buildResources.requests.cpu**          |       No       | Specifies the number of CPUs requested by the build Job's Pod to operate.       |
 | **spec.buildResources.requests.memory**       |       No       | Specifies the amount of memory requested by the build Job's Pod to operate.               |
-| **spec.runtime**                         |       No       | Specifies the runtime of the Function. The available values are `nodejs12`, `nodejs14`, and `python39`. It is set to `nodejs14` unless specified otherwise.  |
+| **spec.runtime**                         |       No       | Specifies the runtime of the Function. The available values are `nodejs14` and `python39`. It is set to `nodejs14` unless specified otherwise.  |
 | **spec.type**                          |      No       | Defines that you use a Git repository as the source of Function's code and dependencies. It must be set to `git`. |
 | **spec.source**                          |      Yes       | Provides the Function's full source code or the name of the Git directory in which the code and dependencies are stored.     |
 | **spec.baseDir**                          |      No       | Specifies the relative path to the Git directory that contains the source code from which the Function will be built​. |
@@ -130,8 +130,8 @@ Processing of a Function CR can succeed, continue, or fail for one of these reas
 
 | Reason                           | Type                 | Description                                                                                                                                                   |
 | -------------------------------- | -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `ConfigMapCreated`               | `ConfigurationReady` | A new ConfigMap was created based on the Function CR definition.                                                                                              |
-| `ConfigMapUpdated`               | `ConfigurationReady` | The existing ConfigMap was updated after changes in the Function CR name, its source code or dependencies.                                                    |
+| `ConfigMapCreated`               | `ConfigurationReady` | A new Config Map was created based on the Function CR definition.                                                                                              |
+| `ConfigMapUpdated`               | `ConfigurationReady` | The existing Config Map was updated after changes in the Function CR name, its source code or dependencies.                                                    |
 | `SourceUpdated`                  | `ConfigurationReady` | The Function Controller managed to fetch changes in the Functions's source code and configuration from the Git repository (`type: git`).                |
 | `SourceUpdateFailed`             | `ConfigurationReady` | The Function Controller failed to fetch changes in the Functions's source code and configuration from the Git repository.                            |
 | `JobFailed`                      | `BuildReady`         | The image with the Function's configuration could not be created due to an error.                                                                             |
@@ -147,8 +147,8 @@ Processing of a Function CR can succeed, continue, or fail for one of these reas
 | `DeploymentReady`                | `Running`            | The Function was deployed and is ready.                                                                                                                       |
 | `ServiceCreated`                 | `Running`            | A new Service referencing the Function's Deployment was created.                                                                                              |
 | `ServiceUpdated`                 | `Running`            | The existing Service was updated after applying required changes.                                                                                             |
-| `HorizontalPodAutoscalerCreated` | `Running`            | A new HorizontalPodScaler referencing the Function's Deployment was created.                                                                                  |
-| `HorizontalPodAutoscalerUpdated` | `Running`            | The existing HorizontalPodScaler was updated after applying required changes.                                                                                 |
+| `HorizontalPodAutoscalerCreated` | `Running`            | A new Horizontal Pod Scaler referencing the Function's Deployment was created.                                                                                  |
+| `HorizontalPodAutoscalerUpdated` | `Running`            | The existing Horizontal Pod Scaler was updated after applying required changes.                                                                                 |
 | `MinimumReplicasUnavailable`     | `Running`            | Insufficient number of available Replicas. The Function is unhealthy.                                                                                                       |
 
 ## Related resources and components
@@ -157,11 +157,11 @@ These are the resources related to this CR:
 
 | Custom resource                                                                                              | Description                                                                           |
 | ----------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
-| [ConfigMap](https://kubernetes.io/docs/concepts/configuration/configmap/)                             | Stores the Function's source code and dependencies.                                   |
+| [Config Map](https://kubernetes.io/docs/concepts/configuration/configmap/)                             | Stores the Function's source code and dependencies.                                   |
 | [Job](https://kubernetes.io/docs/concepts/workloads/controllers/jobs-run-to-completion/)              | Builds an image with the Function's code in a runtime.                                |
 | [Deployment](https://kubernetes.io/docs/concepts/workloads/controllers/deployment/)                   | Serves the Function's image as a microservice.                                        |
 | [Service](https://kubernetes.io/docs/concepts/services-networking/service/)                           | Exposes the Function's Deployment as a network service inside the Kubernetes cluster. |
-| [HorizontalPodAutoscaler](https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/) | Automatically scales the number of Function's Pods.                                   |
+| [Horizontal Pod Autoscaler](https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/) | Automatically scales the number of Function's Pods.                                   |
 
 These components use this CR:
 

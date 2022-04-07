@@ -7,7 +7,9 @@
 # We use this code to manually use newest alpine and nodejs.
 # Use official build when it will be available.
 
-FROM alpine:3.14.2
+FROM alpine:3.15.3
+
+SHELL ["/bin/ash", "-o", "pipefail", "-c"]
 
 # ensure local python is preferred over distribution python
 ENV PATH /usr/local/bin:$PATH
@@ -25,16 +27,18 @@ RUN set -eux; \
 # other runtime dependencies for Python are installed later
 
 ENV GPG_KEY E3FF2839C048B25C084DEBE9B26995E310250568
-ENV PYTHON_VERSION 3.9.8
+ENV PYTHON_VERSION 3.9.11
 
+# hadolint ignore=DL3003,SC2155
 RUN set -ex \
+	&& apk update --no-cache && apk upgrade --no-cache \
 	&& apk add --no-cache --virtual .fetch-deps \
 		gnupg \
 		tar \
 		xz \
 	\
-	&& wget -O python.tar.xz "https://www.python.org/ftp/python/${PYTHON_VERSION%%[a-z]*}/Python-$PYTHON_VERSION.tar.xz" \
-	&& wget -O python.tar.xz.asc "https://www.python.org/ftp/python/${PYTHON_VERSION%%[a-z]*}/Python-$PYTHON_VERSION.tar.xz.asc" \
+	&& wget -q -O python.tar.xz "https://www.python.org/ftp/python/${PYTHON_VERSION%%[a-z]*}/Python-$PYTHON_VERSION.tar.xz" \
+	&& wget -q -O python.tar.xz.asc "https://www.python.org/ftp/python/${PYTHON_VERSION%%[a-z]*}/Python-$PYTHON_VERSION.tar.xz.asc" \
 	&& export GNUPGHOME="$(mktemp -d)" \
 	&& gpg --batch --keyserver hkps://keys.openpgp.org --recv-keys "$GPG_KEY" \
 	&& gpg --batch --verify python.tar.xz.asc python.tar.xz \
@@ -109,6 +113,7 @@ RUN set -ex \
 	&& python3 --version
 
 # make some useful symlinks that are expected to exist
+# hadolint ignore=DL3003
 RUN cd /usr/local/bin \
 	&& ln -s idle3 idle \
 	&& ln -s pydoc3 pydoc \
@@ -116,14 +121,14 @@ RUN cd /usr/local/bin \
 	&& ln -s python3-config python-config
 
 # if this is called "PIP_VERSION", pip explodes with "ValueError: invalid truth value '<VERSION>'"
-ENV PYTHON_PIP_VERSION 21.3.1
+ENV PYTHON_PIP_VERSION 22.0.4
 # https://github.com/pypa/get-pip
 ENV PYTHON_GET_PIP_URL https://github.com/pypa/get-pip/raw/29f37dbe6b3842ccd52d61816a3044173962ebeb/public/get-pip.py
 ENV PYTHON_GET_PIP_SHA256 e03eb8a33d3b441ff484c56a436ff10680479d4bd14e59268e67977ed40904de
 
 RUN set -ex; \
 	\
-	wget -O get-pip.py "$PYTHON_GET_PIP_URL"; \
+	wget -q -O get-pip.py "$PYTHON_GET_PIP_URL"; \
 	echo "$PYTHON_GET_PIP_SHA256 *get-pip.py" | sha256sum -c -; \
 	\
 	python get-pip.py \
@@ -145,8 +150,11 @@ RUN set -ex; \
 
 LABEL source = git@github.com:kyma-project/kyma.git
 
+# build-base and linux-headers are needed to install all requirements
+RUN apk add --no-cache --virtual .build-deps build-base linux-headers 
+
 COPY kubeless/requirements.txt /kubeless/requirements.txt
-RUN pip install -r /kubeless/requirements.txt
+RUN pip install --no-cache-dir -r /kubeless/requirements.txt
 
 COPY kubeless/ /
 

@@ -26,13 +26,16 @@
 # We use this code to manually use newest alpine and nodejs.
 # Use official build when it will be available.
 
-FROM alpine:3.14.2
+FROM alpine:3.15.3
 
-ENV NODE_VERSION 14.17.6
+ENV NODE_VERSION 14.19.1
 
+SHELL ["/bin/ash", "-o", "pipefail", "-c"]
+
+# hadolint ignore=DL3003
 RUN addgroup -g 1000 node \
     && adduser -u 1000 -G node -s /bin/sh -D node \
-    && apk upgrade \
+    && apk update --no-cache && apk upgrade --no-cache \
     && apk add --no-cache \
         libstdc++ \
     && apk add --no-cache --virtual .build-deps \
@@ -41,7 +44,7 @@ RUN addgroup -g 1000 node \
       && case "${alpineArch##*-}" in \
         x86_64) \
           ARCH='x64' \
-          CHECKSUM="d9292c9fa9b4439f0d681110802d03750d34cc95a8b37a06314e5a228de827e7" \
+          CHECKSUM="094790128069eccc9534214e7435c70bcafa221a0ef0f229c59418f8762704fa" \
           ;; \
         *) ;; \
       esac \
@@ -88,7 +91,7 @@ RUN addgroup -g 1000 node \
     && tar -xf "node-v$NODE_VERSION.tar.xz" \
     && cd "node-v$NODE_VERSION" \
     && ./configure \
-    && make -j$(getconf _NPROCESSORS_ONLN) V= \
+    && make -j"$(getconf _NPROCESSORS_ONLN)" V= \
     && make install \
     && apk del .build-deps-full \
     && cd .. \
@@ -103,6 +106,7 @@ RUN addgroup -g 1000 node \
 
 ENV YARN_VERSION 1.22.5
 
+# hadolint ignore=SC2043
 RUN apk add --no-cache --virtual .build-deps-yarn curl gnupg tar \
   && for key in \
     6A010C5166006599AA17F08146C2130DFD2497F5 \

@@ -10,10 +10,9 @@ func ValidateDependencies(runtime Runtime, dependencies string) error {
 	switch runtime {
 	case Nodejs12, Nodejs14:
 		return validateNodeJSDependencies(dependencies)
-	case Python38, Python39:
+	case Python39:
 		return nil
 	}
-
 	return fmt.Errorf("cannot find runtime: %s", runtime)
 }
 

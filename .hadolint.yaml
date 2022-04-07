@@ -1,0 +1,7 @@
+ignored:
+  - DL3059 # Multiple consecutive RUN instructions. Disabled for readability
+  - DL3022 # COPY --from should reference previous image. Disabled for external image
+  - DL3008 # apt pin version. Disabled bcause hard dependencies management
+  - DL3013 # pip pin version. Disabled bcause hard dependencies management
+  - DL3018 # apk pin version. Disabled bcause hard dependencies management
+  - DL3033 # yum pin version. Disabled bcause hard dependencies management

@@ -1,4 +1,4 @@
-FROM golang:1.15-alpine3.12 as builder
+FROM golang:1.17.6-alpine3.15 as builder
 
 ENV BASE_APP_DIR /go/src/github.com/kyma-project/kyma/tests/rafter
 WORKDIR ${BASE_APP_DIR}
@@ -9,8 +9,9 @@ WORKDIR ${BASE_APP_DIR}
 
 COPY ./testsuite/ ${BASE_APP_DIR}/testsuite/
 COPY ./pkg/ ${BASE_APP_DIR}/pkg/
-COPY ./vendor/ ${BASE_APP_DIR}/vendor/
 COPY ./main_test.go ${BASE_APP_DIR}
+COPY ./go.mod ${BASE_APP_DIR}
+COPY ./go.sum ${BASE_APP_DIR}
 COPY ./licenses/ ${BASE_APP_DIR}/licenses/
 
 #
@@ -29,11 +30,9 @@ ENV TEST_DIR /go/src/github.com/kyma-project/kyma/tests/rafter
 # Install certificates and tools
 #
 
-RUN apk update --no-cache && \
-apk upgrade --no-cache && \
-apk add ca-certificates && \
-apk add --no-cache curl>=7.77.0-r1 --repository=http://dl-cdn.alpinelinux.org/alpine/edge/main && \
-rm -rf /var/cache/apk/*
+RUN apk upgrade --no-cache && \
+    apk add --no-cache ca-certificates && \
+    apk add --no-cache curl>=7.77.0-r1 --repository=http://dl-cdn.alpinelinux.org/alpine/edge/main
 
 #
 # Copy binaries

@@ -1,15 +1,12 @@
 package handlers
 
 import (
-	"fmt"
 	"testing"
 
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/config"
-
-	. "github.com/onsi/gomega"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-
 	kymalogger "github.com/kyma-project/kyma/common/logging/logger"
+	. "github.com/onsi/gomega"
+
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/types"
 
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 	"github.com/kyma-project/kyma/components/eventing-controller/logger"
@@ -43,7 +40,7 @@ func Test_SyncBEBSubscription(t *testing.T) {
 		Domain:                   "domain.com",
 		EventTypePrefix:          controllertesting.EventTypePrefix,
 		BEBNamespace:             "/default/ns",
-		Qos:                      "AT_LEAST_ONCE",
+		Qos:                      string(types.QosAtLeastOnce),
 	}
 
 	err = beb.Initialize(envConf)
@@ -54,83 +51,31 @@ func Test_SyncBEBSubscription(t *testing.T) {
 	subscription.Status.Emshash = 0
 	subscription.Status.Ev2hash = 0
 
-	apiRule := controllertesting.NewAPIRule(subscription, controllertesting.WithPath)
-	controllertesting.WithService("foo-host", "foo-svc", apiRule)
+	apiRule := controllertesting.NewAPIRule(subscription,
+		controllertesting.WithPath(),
+		controllertesting.WithService("foo-svc", "foo-host"),
+	)
 
 	// then
 	changed, err := beb.SyncSubscription(subscription, &Cleaner{}, apiRule)
 	g.Expect(err).To(BeNil())
 	g.Expect(changed).To(BeTrue())
+	bebMock.Stop()
 }
 
 // fixtureValidSubscription returns a valid subscription
 func fixtureValidSubscription(name, namespace string) *eventingv1alpha1.Subscription {
-	return &eventingv1alpha1.Subscription{
-		TypeMeta: metav1.TypeMeta{
-			Kind:       "Subscription",
-			APIVersion: "eventing.kyma-project.io/v1alpha1",
-		},
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      name,
-			Namespace: namespace,
-		},
-		Spec: eventingv1alpha1.SubscriptionSpec{
-			ID:       "id",
-			Protocol: "BEB",
-			ProtocolSettings: &eventingv1alpha1.ProtocolSettings{
-				ContentMode: func() *string {
-					cm := eventingv1alpha1.ProtocolSettingsContentModeBinary
-					return &cm
-				}(),
-				ExemptHandshake: func() *bool {
-					eh := true
-					return &eh
-				}(),
-				Qos: func() *string {
-					qos := "AT-LEAST_ONCE"
-					return &qos
-				}(),
-				WebhookAuth: &eventingv1alpha1.WebhookAuth{
-					Type:         "oauth2",
-					GrantType:    "client_credentials",
-					ClientID:     "xxx",
-					ClientSecret: "xxx",
-					TokenURL:     "https://oauth2.xxx.com/oauth2/token",
-					Scope:        []string{"guid-identifier"},
-				},
-			},
-			Sink: "https://webhook.xxx.com",
-			Filter: &eventingv1alpha1.BEBFilters{
-				Dialect: "beb",
-				Filters: []*eventingv1alpha1.BEBFilter{
-					{
-						EventSource: &eventingv1alpha1.Filter{
-							Type:     "exact",
-							Property: "source",
-							Value:    controllertesting.EventSource,
-						},
-						EventType: &eventingv1alpha1.Filter{
-							Type:     "exact",
-							Property: "type",
-							Value:    controllertesting.OrderCreatedEventTypeNotClean,
-						},
-					},
-				},
-			},
-		},
-	}
+	return controllertesting.NewSubscription(
+		name, namespace,
+		controllertesting.WithSinkURL("https://webhook.xxx.com"),
+		controllertesting.WithFilter(controllertesting.EventSource, controllertesting.OrderCreatedEventTypeNotClean),
+		controllertesting.WithWebhookAuthForBEB(),
+	)
 }
 
 func startBEBMock() *controllertesting.BEBMock {
-	bebConfig := &config.Config{}
-	beb := controllertesting.NewBEBMock(bebConfig)
-	bebURI := beb.Start()
-	tokenURL := fmt.Sprintf("%s%s", bebURI, controllertesting.TokenURLPath)
-	messagingURL := fmt.Sprintf("%s%s", bebURI, controllertesting.MessagingURLPath)
-	beb.TokenURL = tokenURL
-	beb.MessagingURL = messagingURL
-	bebConfig = config.GetDefaultConfig(messagingURL)
-	beb.BEBConfig = bebConfig
+	beb := controllertesting.NewBEBMock()
+	beb.Start()
 	return beb
 }
 

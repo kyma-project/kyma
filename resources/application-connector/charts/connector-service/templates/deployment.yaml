@@ -11,7 +11,6 @@ metadata:
     app.kubernetes.io/name: {{ template "name" . }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}
     app.kubernetes.io/instance: {{ .Release.Name }}
-    kyma-project.io/component: backend
 spec:
   replicas: 1
   strategy:
@@ -33,7 +32,6 @@ spec:
         app.kubernetes.io/name: {{ template "name" . }}
         app.kubernetes.io/managed-by: {{ .Release.Service }}
         app.kubernetes.io/instance: {{ .Release.Name }}
-        kyma-project.io/component: backend
     spec:
       serviceAccountName: {{ .Chart.Name }}
       containers:
@@ -48,7 +46,7 @@ spec:
             cpu: {{ .Values.deployment.resources.requests.cpu }}
             memory: {{ .Values.deployment.resources.requests.memory }}
         args:
-          - "/connectorservice"
+          - "/app/connectorservice"
           - "--appName={{ .Chart.Name }}"
           - "--externalAPIPort={{ .Values.deployment.args.externalAPIPort }}"
           - "--internalAPIPort={{ .Values.deployment.args.internalAPIPort }}"

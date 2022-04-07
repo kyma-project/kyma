@@ -8,23 +8,16 @@ import (
 
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	ctrl "sigs.k8s.io/controller-runtime"
+	"k8s.io/apimachinery/pkg/types"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
+	"github.com/pkg/errors"
 )
 
 const (
 	FunctionSourceKey = "source"
 	FunctionDepsKey   = "dependencies"
-)
-
-var (
-	// shared between all runtimes
-	envVarsForDeployment = []corev1.EnvVar{
-		{Name: "FUNC_HANDLER", Value: "main"},
-		{Name: "MOD_NAME", Value: "handler"},
-		{Name: "FUNC_PORT", Value: "8080"},
-	}
 )
 
 func (r *FunctionReconciler) mapsEqual(existing, expected map[string]string) bool {
@@ -61,14 +54,15 @@ func (r *FunctionReconciler) calculateImageTag(instance *serverlessv1alpha1.Func
 		string(instance.GetUID()),
 		instance.Spec.Source,
 		instance.Spec.Deps,
+		instance.Spec.RuntimeImageOverride,
 		string(instance.Status.Runtime),
 	}, "-")))
 
 	return fmt.Sprintf("%x", hash)
 }
 
-func (r *FunctionReconciler) updateStatusWithoutRepository(ctx context.Context, result ctrl.Result, instance *serverlessv1alpha1.Function, condition serverlessv1alpha1.Condition) (ctrl.Result, error) {
-	return r.updateStatus(ctx, result, instance, condition, nil, "")
+func (r *FunctionReconciler) updateStatusWithoutRepository(ctx context.Context, instance *serverlessv1alpha1.Function, condition serverlessv1alpha1.Condition) error {
+	return r.updateStatus(ctx, instance, condition, nil, "")
 }
 
 func (r *FunctionReconciler) calculateGitImageTag(instance *serverlessv1alpha1.Function) string {
@@ -76,40 +70,46 @@ func (r *FunctionReconciler) calculateGitImageTag(instance *serverlessv1alpha1.F
 		string(instance.GetUID()),
 		instance.Status.Commit,
 		instance.Status.Repository.BaseDir,
+		instance.Spec.RuntimeImageOverride,
 		string(instance.Status.Runtime),
 	}, "-")
 	hash := sha256.Sum256([]byte(data))
 	return fmt.Sprintf("%x", hash)
 }
 
-func (r *FunctionReconciler) updateStatus(ctx context.Context, result ctrl.Result, instance *serverlessv1alpha1.Function, condition serverlessv1alpha1.Condition, repository *serverlessv1alpha1.Repository, commit string) (ctrl.Result, error) {
+func (r *FunctionReconciler) updateStatus(ctx context.Context, instance *serverlessv1alpha1.Function, condition serverlessv1alpha1.Condition, repository *serverlessv1alpha1.Repository, commit string) error {
 	condition.LastTransitionTime = metav1.Now()
+	currentFunction := &serverlessv1alpha1.Function{}
+	err := r.client.Get(ctx, types.NamespacedName{Namespace: instance.Namespace, Name: instance.Name}, currentFunction)
+	if err != nil {
+		return client.IgnoreNotFound(err)
+	}
 
-	service := instance.DeepCopy()
-	service.Status.Conditions = r.updateCondition(service.Status.Conditions, condition)
+	currentFunction.Status.Conditions = r.updateCondition(currentFunction.Status.Conditions, condition)
 
-	equalConditions := r.equalConditions(instance.Status.Conditions, service.Status.Conditions)
+	equalConditions := r.equalConditions(instance.Status.Conditions, currentFunction.Status.Conditions)
 	if equalConditions {
 		if instance.Spec.Type != serverlessv1alpha1.SourceTypeGit {
-			return result, nil
+			return nil
 		}
 		// checking if status changed in gitops flow
 		if r.equalRepositories(instance.Status.Repository, repository) &&
 			instance.Status.Commit == commit {
-			return result, nil
+			return nil
 		}
 	}
 
 	if repository != nil {
-		service.Status.Repository = *repository
-		service.Status.Commit = commit
+		currentFunction.Status.Repository = *repository
+		currentFunction.Status.Commit = commit
 	}
-	service.Status.Source = instance.Spec.Source
-	service.Status.Runtime = serverlessv1alpha1.RuntimeExtended(instance.Spec.Runtime)
+	currentFunction.Status.Source = instance.Spec.Source
+	currentFunction.Status.Runtime = serverlessv1alpha1.RuntimeExtended(instance.Spec.Runtime)
+	currentFunction.Status.RuntimeImageOverride = instance.Spec.RuntimeImageOverride
 
-	if !r.equalFunctionStatus(service.Status, instance.Status) {
-		if err := r.client.Status().Update(ctx, service); err != nil {
-			return ctrl.Result{}, err
+	if !r.equalFunctionStatus(currentFunction.Status, instance.Status) {
+		if err := r.client.Status().Update(ctx, currentFunction); err != nil {
+			return errors.Wrap(err, "while updating function status")
 		}
 
 		r.statsCollector.UpdateReconcileStats(instance, condition)
@@ -119,9 +119,9 @@ func (r *FunctionReconciler) updateStatus(ctx context.Context, result ctrl.Resul
 			eventType = "Warning"
 		}
 
-		r.recorder.Event(instance, eventType, string(condition.Reason), condition.Message)
+		r.recorder.Event(currentFunction, eventType, string(condition.Reason), condition.Message)
 	}
-	return result, nil
+	return nil
 }
 
 func (r *FunctionReconciler) updateCondition(conditions []serverlessv1alpha1.Condition, condition serverlessv1alpha1.Condition) []serverlessv1alpha1.Condition {
@@ -132,7 +132,7 @@ func (r *FunctionReconciler) updateCondition(conditions []serverlessv1alpha1.Con
 	conditionTypes[condition.Type] = nil
 
 	for _, value := range conditions {
-		if _, ok := conditionTypes[value.Type]; ok == false {
+		if _, ok := conditionTypes[value.Type]; !ok {
 			result = append(result, value)
 			conditionTypes[value.Type] = nil
 		}
@@ -198,7 +198,8 @@ func (r *FunctionReconciler) equalFunctionStatus(left, right serverlessv1alpha1.
 	if left.Repository != right.Repository ||
 		left.Commit != right.Commit ||
 		left.Source != right.Source ||
-		left.Runtime != right.Runtime {
+		left.Runtime != right.Runtime ||
+		left.RuntimeImageOverride != right.RuntimeImageOverride {
 		return false
 	}
 	return true

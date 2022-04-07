@@ -1,20 +1,14 @@
 {{- /*
-  Customization:
-  * Unset the timezone
-  * Prepended the name with Kubernetes
-  * Added a kube-mixin tag
-*/ -}}
-{{- /*
-Generated from 'nodes' from https://raw.githubusercontent.com/prometheus-operator/kube-prometheus/master/manifests/grafana-dashboardDefinitions.yaml
+Generated from 'nodes' from https://raw.githubusercontent.com/prometheus-operator/kube-prometheus/main/manifests/grafana-dashboardDefinitions.yaml
 Do not change in-place! In order to change this file first read following link:
 https://github.com/prometheus-community/helm-charts/tree/main/charts/kube-prometheus-stack/hack
 */ -}}
 {{- $kubeTargetVersion := default .Capabilities.KubeVersion.GitVersion .Values.kubeTargetVersionOverride }}
-{{- if and (semverCompare ">=1.14.0-0" $kubeTargetVersion) (semverCompare "<9.9.9-9" $kubeTargetVersion) .Values.grafana.enabled .Values.grafana.defaultDashboardsEnabled }}
+{{- if and (or .Values.grafana.enabled .Values.grafana.forceDeployDashboards) (semverCompare ">=1.14.0-0" $kubeTargetVersion) (semverCompare "<9.9.9-9" $kubeTargetVersion) .Values.grafana.defaultDashboardsEnabled }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  namespace: {{ template "kube-prometheus-stack.namespace" . }}
+  namespace: {{ template "kube-prometheus-stack-grafana.namespace" . }}
   name: {{ printf "%s-%s" (include "kube-prometheus-stack.fullname" $) "nodes" | trunc 63 | trimSuffix "-" }}
   annotations:
 {{ toYaml .Values.grafana.sidecar.dashboards.annotations | indent 4 }}
@@ -40,13 +34,13 @@ data:
         },
         "editable": false,
         "gnetId": null,
-        "graphTooltip": 0,
+        "graphTooltip": 1,
         "hideControls": false,
         "id": null,
         "links": [
 
         ],
-        "refresh": "",
+        "refresh": "30s",
         "rows": [
             {
                 "collapse": false,
@@ -61,6 +55,7 @@ data:
                         "dashes": false,
                         "datasource": "$datasource",
                         "fill": 1,
+                        "fillGradient": 0,
                         "gridPos": {
 
                         },
@@ -97,9 +92,8 @@ data:
                         "steppedLine": false,
                         "targets": [
                             {
-                                "expr": "(\n  (1 - rate(node_cpu_seconds_total{job=\"node-exporter\", mode=\"idle\", instance=\"$instance\"}[$__interval]))\n/ ignoring(cpu) group_left\n  count without (cpu)( node_cpu_seconds_total{job=\"node-exporter\", mode=\"idle\", instance=\"$instance\"})\n)\n",
+                                "expr": "(\n  (1 - sum without (mode) (rate(node_cpu_seconds_total{job=\"node-exporter\", mode=~\"idle|iowait|steal\", instance=\"$instance\"}[$__rate_interval])))\n/ ignoring(cpu) group_left\n  count without (cpu, mode) (node_cpu_seconds_total{job=\"node-exporter\", mode=\"idle\", instance=\"$instance\"})\n)\n",
                                 "format": "time_series",
-                                "interval": "1m",
                                 "intervalFactor": 5,
                                 "legendFormat": "{{`{{`}}cpu{{`}}`}}",
                                 "refId": "A"
@@ -112,7 +106,7 @@ data:
                         "timeShift": null,
                         "title": "CPU Usage",
                         "tooltip": {
-                            "shared": false,
+                            "shared": true,
                             "sort": 0,
                             "value_type": "individual"
                         },
@@ -154,6 +148,7 @@ data:
                         "dashes": false,
                         "datasource": "$datasource",
                         "fill": 0,
+                        "fillGradient": 0,
                         "gridPos": {
 
                         },
@@ -225,7 +220,7 @@ data:
                         "timeShift": null,
                         "title": "Load Average",
                         "tooltip": {
-                            "shared": false,
+                            "shared": true,
                             "sort": 0,
                             "value_type": "individual"
                         },
@@ -280,6 +275,7 @@ data:
                         "dashes": false,
                         "datasource": "$datasource",
                         "fill": 1,
+                        "fillGradient": 0,
                         "gridPos": {
 
                         },
@@ -351,7 +347,7 @@ data:
                         "timeShift": null,
                         "title": "Memory Usage",
                         "tooltip": {
-                            "shared": false,
+                            "shared": true,
                             "sort": 0,
                             "value_type": "individual"
                         },
@@ -454,9 +450,6 @@ data:
                         ],
                         "thresholds": "80, 90",
                         "title": "Memory Usage",
-                        "tooltip": {
-                            "shared": false
-                        },
                         "type": "singlestat",
                         "valueFontSize": "80%",
                         "valueMaps": [
@@ -490,6 +483,7 @@ data:
                         "dashes": false,
                         "datasource": "$datasource",
                         "fill": 0,
+                        "fillGradient": 0,
                         "gridPos": {
 
                         },
@@ -533,25 +527,22 @@ data:
                         "steppedLine": false,
                         "targets": [
                             {
-                                "expr": "rate(node_disk_read_bytes_total{job=\"node-exporter\", instance=\"$instance\", device=~\"nvme.+|rbd.+|sd.+|vd.+|xvd.+|dm-.+|dasd.+\"}[$__interval])",
+                                "expr": "rate(node_disk_read_bytes_total{job=\"node-exporter\", instance=\"$instance\", device=~\"mmcblk.p.+|nvme.+|rbd.+|sd.+|vd.+|xvd.+|dm-.+|dasd.+\"}[$__rate_interval])",
                                 "format": "time_series",
-                                "interval": "1m",
                                 "intervalFactor": 2,
                                 "legendFormat": "{{`{{`}}device{{`}}`}} read",
                                 "refId": "A"
                             },
                             {
-                                "expr": "rate(node_disk_written_bytes_total{job=\"node-exporter\", instance=\"$instance\", device=~\"nvme.+|rbd.+|sd.+|vd.+|xvd.+|dm-.+|dasd.+\"}[$__interval])",
+                                "expr": "rate(node_disk_written_bytes_total{job=\"node-exporter\", instance=\"$instance\", device=~\"mmcblk.p.+|nvme.+|rbd.+|sd.+|vd.+|xvd.+|dm-.+|dasd.+\"}[$__rate_interval])",
                                 "format": "time_series",
-                                "interval": "1m",
                                 "intervalFactor": 2,
                                 "legendFormat": "{{`{{`}}device{{`}}`}} written",
                                 "refId": "B"
                             },
                             {
-                                "expr": "rate(node_disk_io_time_seconds_total{job=\"node-exporter\", instance=\"$instance\", device=~\"nvme.+|rbd.+|sd.+|vd.+|xvd.+|dm-.+|dasd.+\"}[$__interval])",
+                                "expr": "rate(node_disk_io_time_seconds_total{job=\"node-exporter\", instance=\"$instance\", device=~\"mmcblk.p.+|nvme.+|rbd.+|sd.+|vd.+|xvd.+|dm-.+|dasd.+\"}[$__rate_interval])",
                                 "format": "time_series",
-                                "interval": "1m",
                                 "intervalFactor": 2,
                                 "legendFormat": "{{`{{`}}device{{`}}`}} io time",
                                 "refId": "C"
@@ -564,7 +555,7 @@ data:
                         "timeShift": null,
                         "title": "Disk I/O",
                         "tooltip": {
-                            "shared": false,
+                            "shared": true,
                             "sort": 0,
                             "value_type": "individual"
                         },
@@ -606,6 +597,7 @@ data:
                         "dashes": false,
                         "datasource": "$datasource",
                         "fill": 1,
+                        "fillGradient": 0,
                         "gridPos": {
 
                         },
@@ -670,7 +662,7 @@ data:
                         "timeShift": null,
                         "title": "Disk Space Usage",
                         "tooltip": {
-                            "shared": false,
+                            "shared": true,
                             "sort": 0,
                             "value_type": "individual"
                         },
@@ -725,6 +717,7 @@ data:
                         "dashes": false,
                         "datasource": "$datasource",
                         "fill": 0,
+                        "fillGradient": 0,
                         "gridPos": {
 
                         },
@@ -761,9 +754,8 @@ data:
                         "steppedLine": false,
                         "targets": [
                             {
-                                "expr": "rate(node_network_receive_bytes_total{job=\"node-exporter\", instance=\"$instance\", device!=\"lo\"}[$__interval])",
+                                "expr": "rate(node_network_receive_bytes_total{job=\"node-exporter\", instance=\"$instance\", device!=\"lo\"}[$__rate_interval])",
                                 "format": "time_series",
-                                "interval": "1m",
                                 "intervalFactor": 2,
                                 "legendFormat": "{{`{{`}}device{{`}}`}}",
                                 "refId": "A"
@@ -776,7 +768,7 @@ data:
                         "timeShift": null,
                         "title": "Network Received",
                         "tooltip": {
-                            "shared": false,
+                            "shared": true,
                             "sort": 0,
                             "value_type": "individual"
                         },
@@ -818,6 +810,7 @@ data:
                         "dashes": false,
                         "datasource": "$datasource",
                         "fill": 0,
+                        "fillGradient": 0,
                         "gridPos": {
 
                         },
@@ -854,9 +847,8 @@ data:
                         "steppedLine": false,
                         "targets": [
                             {
-                                "expr": "rate(node_network_transmit_bytes_total{job=\"node-exporter\", instance=\"$instance\", device!=\"lo\"}[$__interval])",
+                                "expr": "rate(node_network_transmit_bytes_total{job=\"node-exporter\", instance=\"$instance\", device!=\"lo\"}[$__rate_interval])",
                                 "format": "time_series",
-                                "interval": "1m",
                                 "intervalFactor": 2,
                                 "legendFormat": "{{`{{`}}device{{`}}`}}",
                                 "refId": "A"
@@ -869,7 +861,7 @@ data:
                         "timeShift": null,
                         "title": "Network Transmitted",
                         "tooltip": {
-                            "shared": false,
+                            "shared": true,
                             "sort": 0,
                             "value_type": "individual"
                         },
@@ -915,7 +907,7 @@ data:
         "schemaVersion": 14,
         "style": "dark",
         "tags": [
-            "kubernetes-mixin"
+            "node-exporter-mixin"
         ],
         "templating": {
             "list": [
@@ -925,7 +917,7 @@ data:
                         "value": "Prometheus"
                     },
                     "hide": 0,
-                    "label": null,
+                    "label": "Data Source",
                     "name": "datasource",
                     "options": [
 
@@ -992,9 +984,8 @@ data:
                 "30d"
             ]
         },
-        "timezone": "",
-        "title": "Kubernetes / Nodes",
-        "uid": "fa49a4706d07a042595b664c87fb33ea",
+        "timezone": "{{ .Values.grafana.defaultDashboardsTimezone }}",
+        "title": "Node Exporter / Nodes",
         "version": 0
     }
 {{- end }}

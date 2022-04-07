@@ -43,7 +43,6 @@ The Central Application Gateway has the following parameters:
 - **externalAPIPort** is the port that exposes the API which allows checking the component status. The default port is `8081`.
 - **applicationSecretsNamespace** is the Namespace in which the Application secrets used by the Central Application Gateway exist. The default Namespace is `kyma-integration`.
 - **requestTimeout** is the timeout for requests sent through the Central Application Gateway, expressed in seconds. The default value is `1`.
-- **skipVerify** is the flag for skipping the verification of certificates for the proxy targets. The default value is `false`.
 - **requestLogging** is the flag for logging incoming requests. The default value is `false`.
 - **proxyTimeout** is the timeout for requests sent through the proxy, expressed in seconds. The default value is `10`.
 - **proxyCacheTTL** is the time to live of the remote API information stored in the proxy cache, expressed in seconds. The default value is `120`.

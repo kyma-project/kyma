@@ -17,4 +17,5 @@ If you're interested in learning more about Service Mesh in Kyma, follow these l
 
 - Analyze configuration details for:
 
-   - The [Istio chart](https://github.com/kyma-project/kyma/blob/main/resources/istio-configuration/values.yaml)
+   - The [Istio chart](../../../05-technical-reference/00-configuration-parameters/smsh-01-istio-chart.md)
+   - The [Istio Resources chart](../../../05-technical-reference/00-configuration-parameters/smsh-02-istio-resources-chart.md)

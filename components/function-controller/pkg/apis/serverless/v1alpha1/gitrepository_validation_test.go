@@ -1,7 +1,6 @@
 package v1alpha1
 
 import (
-	"context"
 	"testing"
 
 	"github.com/onsi/gomega"
@@ -109,8 +108,7 @@ func TestGitRepositoryValidation(t *testing.T) {
 			},
 			specifiedExpectedError: gomega.And(
 				gomega.ContainSubstring("spec.auth.type"),
-				gomega.ContainSubstring("spec.auth.secretName"),
-				gomega.ContainSubstring("invalid value for git ssh")),
+				gomega.ContainSubstring("spec.auth.secretName")),
 			expectedError: gomega.HaveOccurred(),
 		},
 	} {
@@ -118,7 +116,7 @@ func TestGitRepositoryValidation(t *testing.T) {
 			g := gomega.NewGomegaWithT(t)
 
 			// when
-			err := testData.givenFunc.Validate(context.Background())
+			err := testData.givenFunc.Validate()
 			g.Expect(err).To(testData.expectedError)
 			if testData.specifiedExpectedError != nil {
 				g.Expect(err.Error()).To(testData.specifiedExpectedError)

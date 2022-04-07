@@ -30,14 +30,14 @@ global:
   images:
     k8s_tools:
       name: "k8s-tools"
-      version: "20211022-85284bf9"
+      version: "20220331-9c1578c1"
       directory: "tpi"
     ## Google Cloud SQL Proxy image
     ## ref: https://cloud.google.com/sql/docs/mysql/sql-proxy
     ## ref: https://cloud.google.com/sql/docs/postgres/sql-proxy
     gce_proxy:
       name: "gce-proxy"
-      version: "v1.27.0-alpine-7c52185c"
+      version: "v1.28.0-alpine-68cd4000"
       directory: "tpi/cloudsql-docker"
     hydra:
       name: "hydra"
@@ -69,7 +69,7 @@ global:
       directory: "external/bitnami"
     alpine:
       name: "alpine"
-      version: "3.14.2"
+      version: "3.15.3"
       directory: "external"
 
 headerRewrite:

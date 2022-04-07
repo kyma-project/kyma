@@ -18,7 +18,6 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/tools/record"
 	ctrl "sigs.k8s.io/controller-runtime"
-	"sigs.k8s.io/controller-runtime/pkg/cache"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/handler"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
@@ -63,19 +62,16 @@ var (
 )
 
 type Reconciler struct {
+	client.Client
 	ctx               context.Context
 	natsSubMgr        subscriptionmanager.Manager
+	natsConfig        env.NatsConfig
 	natsSubMgrStarted bool
 	bebSubMgr         subscriptionmanager.Manager
 	bebSubMgrStarted  bool
-	client.Client
-	// TODO: Do we need to explicitly pass and use a cache here? The default client that we get from manager
-	//  already uses a cache internally (check manager.DefaultNewClient)
-	cache.Cache
-	logger *logger.Logger
-	record record.EventRecorder
-	cfg    env.BackendConfig
-
+	logger            *logger.Logger
+	record            record.EventRecorder
+	cfg               env.BackendConfig
 	// backendType is the type of the backend which the reconciler detects at runtime
 	backendType eventingv1alpha1.BackendType
 	// The OAuth2 credentials that are passed to the BEB subscription reconciler
@@ -83,14 +79,14 @@ type Reconciler struct {
 	oauth2ClientSecret []byte
 }
 
-func NewReconciler(ctx context.Context, natsSubMgr, bebSubMgr subscriptionmanager.Manager, client client.Client, cache cache.Cache, logger *logger.Logger, recorder record.EventRecorder) *Reconciler {
+func NewReconciler(ctx context.Context, natsSubMgr subscriptionmanager.Manager, natsConfig env.NatsConfig, bebSubMgr subscriptionmanager.Manager, client client.Client, logger *logger.Logger, recorder record.EventRecorder) *Reconciler {
 	cfg := env.GetBackendConfig()
 	return &Reconciler{
 		ctx:        ctx,
 		natsSubMgr: natsSubMgr,
+		natsConfig: natsConfig,
 		bebSubMgr:  bebSubMgr,
 		Client:     client,
-		Cache:      cache,
 		logger:     logger,
 		record:     recorder,
 		cfg:        cfg,
@@ -108,7 +104,7 @@ func NewReconciler(ctx context.Context, natsSubMgr, bebSubMgr subscriptionmanage
 func (r *Reconciler) Reconcile(ctx context.Context, _ ctrl.Request) (ctrl.Result, error) {
 	var secretList v1.SecretList
 
-	if err := r.Cache.List(ctx, &secretList, client.MatchingLabels{
+	if err := r.List(ctx, &secretList, client.MatchingLabels{
 		BEBBackendSecretLabelKey: BEBBackendSecretLabelValue,
 	}); err != nil {
 		return ctrl.Result{}, err
@@ -126,7 +122,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, _ ctrl.Request) (ctrl.Result
 		}
 		desiredBackend := currentBackend.DeepCopy()
 		desiredBackend.Status = getDefaultBackendStatus()
-		// Do not change the value of backend type if cannot change it
+		// Do not change the value of backend type if it cannot be changed
 		desiredBackend.Status.Backend = currentBackend.Status.Backend
 		desiredBackend.Status.EventingReady = utils.BoolPtr(false)
 		if object.Semantic.DeepEqual(&desiredBackend.Status, &currentBackend.Status) {
@@ -430,7 +426,7 @@ func isPublisherDeploymentReady(ctx context.Context, backendType eventingv1alpha
 
 	// get the publisherDeployment's pods
 	var pods v1.PodList
-	if err := r.Cache.List(ctx, &pods, client.MatchingLabels{
+	if err := r.List(ctx, &pods, client.MatchingLabels{
 		deployment.AppLabelKey: deployment.PublisherName,
 	}); err != nil {
 		return false, err
@@ -492,7 +488,7 @@ func (r *Reconciler) DeletePublisherProxySecret(ctx context.Context) error {
 		Name:      deployment.PublisherName,
 	}
 	currentSecret := new(v1.Secret)
-	err := r.Cache.Get(ctx, secretNamespacedName, currentSecret)
+	err := r.Get(ctx, secretNamespacedName, currentSecret)
 	if err != nil {
 		if k8serrors.IsNotFound(err) {
 			// Nothing needs to be done
@@ -518,7 +514,7 @@ func (r *Reconciler) SyncPublisherProxySecret(ctx context.Context, secret *v1.Se
 	if err != nil {
 		return nil, errors.Wrapf(err, "invalid secret for publisher")
 	}
-	err = r.Cache.Get(ctx, secretNamespacedName, currentSecret)
+	err = r.Get(ctx, secretNamespacedName, currentSecret)
 	if err != nil {
 		if k8serrors.IsNotFound(err) {
 			// Create secret
@@ -626,7 +622,7 @@ func (r *Reconciler) CreateOrUpdatePublisherProxy(ctx context.Context, backend e
 
 	switch backend {
 	case eventingv1alpha1.NatsBackendType:
-		desiredPublisher = deployment.NewNATSPublisherDeployment(r.cfg.PublisherConfig)
+		desiredPublisher = deployment.NewNATSPublisherDeployment(r.natsConfig, r.cfg.PublisherConfig)
 	case eventingv1alpha1.BEBBackendType:
 		desiredPublisher = deployment.NewBEBPublisherDeployment(r.cfg.PublisherConfig)
 	default:
@@ -637,7 +633,7 @@ func (r *Reconciler) CreateOrUpdatePublisherProxy(ctx context.Context, backend e
 		return nil, errors.Wrapf(err, "set owner reference for publisher failed")
 	}
 
-	err := r.Cache.Get(ctx, publisherNamespacedName, currentPublisher)
+	err := r.Get(ctx, publisherNamespacedName, currentPublisher)
 	if err != nil {
 		if k8serrors.IsNotFound(err) {
 			// Create
@@ -708,7 +704,7 @@ func (r *Reconciler) CreateOrUpdateBackendCR(ctx context.Context) (*eventingv1al
 
 func (r *Reconciler) getCurrentBackendCR(ctx context.Context) (*eventingv1alpha1.EventingBackend, error) {
 	backend := new(eventingv1alpha1.EventingBackend)
-	err := r.Cache.Get(ctx, types.NamespacedName{
+	err := r.Get(ctx, types.NamespacedName{
 		Name:      r.cfg.BackendCRName,
 		Namespace: r.cfg.BackendCRNamespace,
 	}, backend)
@@ -718,7 +714,7 @@ func (r *Reconciler) getCurrentBackendCR(ctx context.Context) (*eventingv1alpha1
 func (r *Reconciler) getOAuth2ClientCredentials(ctx context.Context, name, namespace string) (clientID, clientSecret []byte, err error) {
 	oauth2Secret := new(v1.Secret)
 	oauth2SecretNamespacedName := types.NamespacedName{Namespace: namespace, Name: name}
-	if getErr := r.Cache.Get(ctx, oauth2SecretNamespacedName, oauth2Secret); getErr != nil {
+	if getErr := r.Get(ctx, oauth2SecretNamespacedName, oauth2Secret); getErr != nil {
 		err = errors.Wrapf(getErr, "get secret failed namespace:%s name:%s", namespace, name)
 		return
 	}

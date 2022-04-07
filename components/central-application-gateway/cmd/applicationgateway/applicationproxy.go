@@ -164,7 +164,6 @@ func newInternalHandlerForCompass(serviceDefinitionService metadata.ServiceDefin
 
 func getProxyConfig(options *options) proxy.Config {
 	return proxy.Config{
-		SkipVerify:    options.skipVerify,
 		ProxyTimeout:  options.proxyTimeout,
 		ProxyCacheTTL: options.proxyCacheTTL,
 	}

@@ -73,26 +73,6 @@ spec:
             initialDelaySeconds: {{ .Values.deployment.readinessProbe.initialDelaySeconds }}
             timeoutSeconds: {{ .Values.deployment.readinessProbe.timeoutSeconds }}
             periodSeconds: {{.Values.deployment.readinessProbe.periodSeconds }}
-        - name: watcher
-          image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.k8s_tools) }}"
-          securityContext:
-            allowPrivilegeEscalation: false
-            capabilities:
-              drop:
-              - ALL
-            privileged: false
-            runAsGroup: 65534
-            runAsNonRoot: true
-            runAsUser: 65534
-          volumeMounts:
-            - name: hydra-dsn
-              mountPath: /etc/secrets
-              readOnly: true
-          command:
-            - /bin/bash
-            - -c
-            - |
-{{ tpl (.Files.Get "files/watcher.sh" | printf "%s" | indent 14) . }}
       serviceAccountName: {{ include "hydra-maester.name" . }}-account
       {{- if .Values.global.priorityClassName }}
       priorityClassName: {{ .Values.global.priorityClassName }}

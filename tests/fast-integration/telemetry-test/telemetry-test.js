@@ -1,98 +1,128 @@
-const k8s = require("@kubernetes/client-node");
-const { assert } = require("chai");
-const fs = require("fs");
-const path = require("path");
+const k8s = require('@kubernetes/client-node');
+const {assert, expect} = require('chai');
+const fs = require('fs');
+const path = require('path');
 const {
-  waitForDaemonSet,
-  waitForDeployment,
   k8sCoreV1Api,
   k8sApply,
   k8sDelete,
   kubectlPortForward,
-} = require("../utils");
-const mockServerClient = require("mockserver-client").mockServerClient;
+  namespaceObj,
+  waitForK8sObject,
+  waitForDeployment,
+  waitForNamespace,
+  sleep,
+} = require('../utils');
+const {mockServerClient} = require('mockserver-client');
+
 const mockServerPort = 1080;
+const telemetryNamespace = 'kyma-system';
+const mockNamespace = 'mockserver';
 
-function sleep(ms) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
-
-function loadCR(filepath) {
-  const _logPipelineYaml = fs.readFileSync(path.join(__dirname, filepath), {
-    encoding: "utf8",
+function loadResourceFromFile(file) {
+  const yaml = fs.readFileSync(path.join(__dirname, file), {
+    encoding: 'utf8',
   });
-  return k8s.loadAllYaml(_logPipelineYaml);
+  return k8s.loadAllYaml(yaml);
 }
 
-function checkMockserverWasCalled(wasCalled) {
-  const args = wasCalled ? [1] : [0, 0];
-  const not = wasCalled ? "not" : "";
-  return mockServerClient("localhost", mockServerPort)
-    .verify(
-      {
-        path: "/",
+function checkLastCondition(logPipeline, conditionType) {
+  const conditions = logPipeline.status.conditions;
+  if (conditions.length == 0) {
+    return false;
+  }
+  const lastCondition = conditions[conditions.length - 1];
+  return lastCondition.type === conditionType;
+}
+
+function waitForLogPipelineStatusCondition(name, lastConditionType, timeout) {
+  return waitForK8sObject(
+      '/apis/telemetry.kyma-project.io/v1alpha1/logpipelines',
+      {},
+      (_type, watchObj, _) => {
+        return (
+          watchObj.metadata.name == name && checkLastCondition(watchObj, lastConditionType)
+        );
       },
-      ...args
-    )
-    .then(
-      function () {},
-      function (error) {
-        assert.fail(`"The HTTP endpoint was ${not} called`);
-      }
-    );
+      timeout,
+      `Waiting for log pipeline ${name} timeout (${timeout} ms)`,
+  );
 }
 
-describe("Telemetry operator", function () {
-  let telemetryNamespace = "kyma-system"; // operator flag 'fluent-bit-ns' is set to kyma-system
-  let mockNamespace = "mockserver";
-  let cancelPortForward = null;
-  let fluentBitName = "telemetry-fluent-bit";
+const logPipelineCR = loadResourceFromFile('./log-pipeline.yaml');
+const invalidLogPipelineCR = loadResourceFromFile('./invalid-log-pipeline.yaml');
+const mockserverResources = loadResourceFromFile('./mockserver-resources.yaml');
 
-  const logPipelineCR = loadCR("./log-pipeline.yaml");
+function assertMockserverWasCalled() {
+  return mockServerClient('localhost', mockServerPort)
+      .verify(
+          {
+            path: '/',
+          },
+          1,
+      )
+      .then(
+          function() {},
+          function(error) {
+            console.log(error);
+            assert.fail('The HTTP endpoint was not called');
+          },
+      );
+}
 
-  it("Operator should be ready", async function () {
-    let res = await k8sCoreV1Api.listNamespacedPod(
-      telemetryNamespace,
-      "true",
-      undefined,
-      undefined,
-      undefined,
-      "control-plane=telemetry-operator-controller-manager"
+describe('Telemetry Operator tests', function() {
+  let cancelPortForward;
+
+  before(async function() {
+    await k8sApply([namespaceObj(mockNamespace)]);
+    await waitForNamespace(mockNamespace);
+    await k8sApply(mockserverResources, mockNamespace);
+    await waitForDeployment('mockserver', mockNamespace);
+    const {body} = await k8sCoreV1Api.listNamespacedPod(mockNamespace);
+    const mockPod = body.items[0].metadata.name;
+    cancelPortForward = kubectlPortForward(
+        mockNamespace,
+        mockPod,
+        mockServerPort,
     );
-    let podList = res.body.items;
+  });
+
+  it('Operator should be ready', async () => {
+    const res = await k8sCoreV1Api.listNamespacedPod(
+        telemetryNamespace,
+        'true',
+        undefined,
+        undefined,
+        undefined,
+        'control-plane=telemetry-operator',
+    );
+    const podList = res.body.items;
     assert.equal(podList.length, 1);
   });
 
-  describe("Set up mockserver", function () {
-    before(async function () {
-      await waitForDeployment("mockserver", mockNamespace);
-      let { body } = await k8sCoreV1Api.listNamespacedPod(mockNamespace);
-      let mockPod = body.items[0].metadata.name;
-      cancelPortForward = kubectlPortForward(
-        mockNamespace,
-        mockPod,
-        mockServerPort
-      );
-    });
+  it('Should create valid LogPipeline with HTTP output plugin', async () => {
+    await k8sApply(logPipelineCR, telemetryNamespace);
+    await waitForLogPipelineStatusCondition('logpipeline-test', 'Pending', 20000);
+    await waitForLogPipelineStatusCondition('logpipeline-test', 'Running', 180000);
+  });
 
-    it("Should not receive HTTP traffic", function () {
-      return checkMockserverWasCalled(false);
-    }).timeout(5000);
+  it('Mockserver should receive HTTP traffic from fluent-bit', async () => {
+    await sleep(30000);
+    await assertMockserverWasCalled(true);
+  });
 
-    it("Apply HTTP output plugin to fluent-bit", async function () {
-      await k8sApply(logPipelineCR, telemetryNamespace);
-      await sleep(10000); // wait for controller to reconcile
-      await waitForDaemonSet(fluentBitName, telemetryNamespace);
-    });
+  it('Should reject the invalid LogPipeline', async () => {
+    try {
+      await k8sApply(invalidLogPipelineCR, telemetryNamespace);
+    } catch (e) {
+      assert.equal(e.statusCode, 403);
+      expect(e.body.message).to.have.string('denied the request', 'Invalid indentation level');
+    };
+  });
 
-    it("Should receive HTTP traffic from fluent-bit", function () {
-      return checkMockserverWasCalled(true);
-    }).timeout(5000);
-
-    after(async function () {
-      cancelPortForward();
-      await k8sDelete(logPipelineCR, telemetryNamespace);
-      await k8sCoreV1Api.deleteNamespace(mockNamespace);
-    });
+  after(async function() {
+    cancelPortForward();
+    await k8sDelete(logPipelineCR, telemetryNamespace);
+    await k8sCoreV1Api.deleteNamespace(mockNamespace);
   });
 });

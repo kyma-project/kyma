@@ -42,7 +42,7 @@ subscriptions:
                 value: sap.kyma.custom.demo-app.order.created.v1
 apiRules:
     - name: function-practical-filip5
-      gateway: kyma-gateway.kyma-system.svc.cluster.local
+      gateway: kyma-system/kyma-gateway
       service:
         host: path.kyma.example.com
         port: 80
@@ -124,7 +124,7 @@ See all parameter descriptions.
 | ---------------------------------------- | :------------: | ---------| ---------| ------- |
 | **name**              | Yes | Function | | Specifies the name of your Function.         |
 | **namespace**             | No | Function | `default` | Defines the Namespace in which the Function is created.        |
-| **runtime**             | Yes | Function | | Specifies the execution environment for your Function. The available values are `nodejs12`, `nodejs14`, and `python39`.      |
+| **runtime**             | Yes | Function | | Specifies the execution environment for your Function. The available values are `nodejs14` and `python39`.      |
 | **labels**             | No | Function | | Specifies the Function's Pod labels. |
 | **source**            | Yes | Function | | Provides details on the type and location of your Function's source code and dependencies.         |
 | **source.sourceType**            | Yes | Function | | Defines whether you use either inline code or a Git repository as the source of the Function's code and dependencies. It must be set either to `inline` or `git`.         |
@@ -160,7 +160,7 @@ See all parameter descriptions.
 | **subscriptions.filter.filters.eventType.value**           | Yes  | Subscription | | Defines the name of the event the Function is subscribed to, for example `sap.kyma.custom.demo-app.order.created.v1`.         |
 | **apiRules**    | No | API Rule | | Provides the rules defining how your Function's Service API can be accessed. |
 | **apiRules.name**            | Yes | API Rule | Function name | Specifies the name of the exposed Service. It takes the name from the Function unless you specify otherwise.        |
-| **apiRules.gateway**            | No | API Rule | `kyma-gateway.kyma-system.svc.cluster.local` | Specifies the [Istio Gateway](https://istio.io/latest/docs/reference/config/networking/gateway/).   |
+| **apiRules.gateway**            | No | API Rule | `kyma-system/kyma-gateway` | Specifies the [Istio Gateway](https://istio.io/latest/docs/reference/config/networking/gateway/).   |
 | **apiRules.service**            | No | API Rule | | Specifies the name of the exposed Service.     |
 | **apiRules.service.host**            | No | API Rule | | Specifies the Service's communication address for inbound external traffic.         |
 | **apiRules.service.port**            | No | API Rule | `80`. | Defines the port on which the Function's Service is exposed. This value cannot be modified. |
