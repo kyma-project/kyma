@@ -9,42 +9,7 @@ You can use it as a follow-up to the [Use a custom domain to expose a workload](
 ## Prerequisites
 
 This tutorial is based on a sample HttpBin service deployment and a sample Function. To deploy or create them, follow the [Create a workload](./apix-02-create-workload.md) tutorial.
-
-## Get a JWT access token
-
-1. In your OpenID Connect-compliant (OIDC-compliant) identity provider, create an application to get your client credentials such as Client ID and Client Secret. Export your client credentials as environment variables. Run:
-
-   ```bash
-   export CLIENT_ID={YOUR_CLIENT_ID}
-   export CLIENT_SECRET={YOUR_CLIENT_SECRET}
-   ```
-
-2. Encode your client credentials and export them as an environment variable:
-
-   ```bash
-   export ENCODED_CREDENTIALS=$(echo -n "$CLIENT_ID:$CLIENT_SECRET" | base64)
-   ```
-
-3. In your browser, go to `https://{YOUR_OIDC_COMPLIANT_IDENTITY_PROVIDER_INSTANCE}/.well-known/openid-configuration`, save values of the **token_endpoint** and **jwks_uri** parameters, and export them as environment variables:
-
-   ```bash
-   export TOKEN_ENDPOINT={YOUR_TOKEN_ENDPOINT}
-   export JWKS_URI={YOUR_JWKS_URI}
-   ```
-
-4. Get the JWT access token:
-
-   ```bash
-   curl -X POST "$TOKEN_ENDPOINT" -d "grant_type=client_credentials" -d "client_id=$CLIENT_ID" -H "Content-Type: application/x-www-form-urlencoded" -H "Authorization: Basic $ENCODED_CREDENTIALS"
-   ```
-
-   >**NOTE:** This is just example and may differ for IDP providers.
-
-5. Save the result, and export it as an environment variable:
-
-   ```bash
-   export ACCESS_TOKEN={YOUR_ACCESSS_TOKEN}
-   ```
+To obtain JWT take a look at [Get a JWT](./apix-04-get-jwt.md) tutorial.
 
 ## Expose, secure, and access your workload
 
