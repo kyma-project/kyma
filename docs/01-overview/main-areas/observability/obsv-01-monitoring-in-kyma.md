@@ -2,8 +2,24 @@
 title: Monitoring in Kyma
 ---
 
-[Prometheus](https://prometheus.io/) is the open source monitoring and alerting toolkit that provides the telemetry data. This data is consumed by different addons, including [Grafana](https://grafana.com/) for analytics and monitoring, and [Alertmanager](https://prometheus.io/docs/alerting/alertmanager/) for handling alerts. 
+[Prometheus](https://prometheus.io/) is the open source monitoring and alerting toolkit that provides the telemetry data. This data is consumed by different addons, including [Grafana](https://grafana.com/) for analytics and monitoring, and [Alertmanager](https://prometheus.io/docs/alerting/alertmanager/) for handling alerts.
+
+Monitoring in Kyma is configured to collect all metrics relevant for observing the in-cluster [Istio](https://istio.io/latest/docs/concepts/observability/) Service Mesh. For diagrams of the default setup and the monitoring flow with Istio, see [Istio Monitoring Architecture](../../../05-technical-reference/00-architecture/obsv-01-architecture-monitoring-istio.md). Learn how to [enable Grafana visualization](../../../04-operation-guides/operations/obsv-03-enable-grafana-for-istio.md) and [enable mTLS for custom metrics](../../../04-operation-guides/operations/obsv-04-enable-mtls-istio). 
+
+## Limitations
 
 By default, Prometheus stores up to 15 GB of data for a maximum period of 30 days. If the default size or time is exceeded, the oldest records are removed first.
 
-Monitoring in Kyma is configured to collect all metrics relevant for observing the in-cluster [Istio](https://istio.io/latest/docs/concepts/observability/) Service Mesh. For diagrams of the default setup and the monitoring flow with Istio, see [Istio Monitoring Architecture](../../../05-technical-reference/00-architecture/obsv-01-architecture-monitoring-istio.md). Learn how to [enable Grafana visualization](../../../04-operation-guides/operations/obsv-03-enable-grafana-for-istio.md) and [enable mTLS for custom metrics](../../../04-operation-guides/operations/obsv-04-enable-mtls-istio). 
+The configured memory limits of the Prometheus and Prometheus-Istio instances limit the number of time series samples that can be ingested. The amount of generated time series in a Kyma cluster depends on the following factors:
+
+* Number of Pods in the cluster
+* Number of Nodes in the cluster
+* Amount of exported (custom) metrics
+* Label cardinality of metrics
+* Number of buckets for histogram metrics
+* Frequency of Pod recreation
+* Topology of the Istio service mesh
+
+The default resource configuration of the monitoring component in the production profile is sufficient to serve 800K time series in the Prometheus Pod, and 400K time series in the Prometheus-Istio Pod. The samples are deleted after 30 days or when reaching the storage limit of 30 GB. The evaluation profile has lower limits. For more information about profiles, see the [Install Kyma Guide](../../04-operation-guides/operations/02-install-kyma.md#choose-resource-consumption).
+
+You can see the number of ingested time series samples from the `prometheus_tsdb_head_series` metric, which is exported by the Prometheus itself. Furthermore, you can identify expensive metrics with the [TSDB Status](http://localhost:9090/tsdb-status) page.
