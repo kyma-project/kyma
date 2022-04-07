@@ -296,12 +296,10 @@ class KCPWrapper {
     const lastObjReconciliationsOperations = objReconciliationsOperations
         .slice(Math.max(0, objReconciliationsOperations.length - 1), objReconciliationsOperations.length);
 
-    const lastReconciliation = {
+    return {
       schedulingID: lastObjReconciliationsOperations[0].schedulingID,
       status: lastObjReconciliationsOperations[0].status
     }
-
-    return lastReconciliation;
   }
 
   async reconcileInformationLog(runtimeStatus) {

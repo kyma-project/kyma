@@ -38,12 +38,6 @@ function withTestNS(testNS) {
   };
 }
 
-// function withOIDC0(oidc0) {
-//   return function (options) {
-//     options.oidc0 = oidc0;
-//   }
-// }
-
 function gatherOptions(...opts) {
   const suffix = genRandom(4);
   // If no opts provided the options object will be set to these default values.
@@ -84,9 +78,18 @@ function gatherOptions(...opts) {
 }
 
 function delay(millis) {
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve) => {
     setTimeout((_) => resolve(), millis);
   });
+}
+
+async function waitForReconciliation(kcp, shootName) {
+  let l = await kcp.getLastReconciliation(shootName, true);
+  let lastReconciliation = l;
+  while (!(lastReconciliation.schedulingID !== l.schedulingID && l.status === "ready")) {
+    await delay(10000);
+    l = await kcp.getLastReconciliation(shootName);
+  }
 }
 
 module.exports = {
@@ -99,6 +102,6 @@ module.exports = {
   withRuntimeName,
   withScenarioName,
   withTestNS,
-  //withOIDC0,
+  waitForReconciliation,
   delay
 };

@@ -22,7 +22,6 @@ const {
 const {keb, gardener, director} = require('./helpers');
 const {prometheusPortForward} = require('../monitoring/client');
 const {KCPWrapper, KCPConfig} = require('../kcp/client');
-const {delay} = require('./');
 
 const kcp = new KCPWrapper(KCPConfig.fromEnv());
 
@@ -31,16 +30,16 @@ const updateTimeout = 1000 * 60 * 20; // 20m
 function oidcE2ETest() {
   describe('OIDC E2E Test', function() {
 
-    beforeEach('beforeEach', async function() {
-      console.log(`beforeEach started at ${new Date(Date.now()).toISOString()}`)
-    });
+    beforeEach("", function (){
+      console.time("test duration")
+    })
 
-    it('Start OIDCE2ETest timestamp', async function() {
-      console.log(`OIDC E2E Test started at ${new Date(Date.now()).toISOString()}`)
-    });
+    afterEach("", function (){
+      console.timeEnd("test duration")
+    })
 
     it('Assure initial OIDC config is applied on shoot cluster', async function() {
-      ensureValidShootOIDCConfig(this.shoot, this.options.oidc0);
+      ensureValidShootOIDCConfig(this.shoot, this.options.oidc0)
     });
 
     it('Assure initial OIDC config is part of kubeconfig', async function() {
@@ -157,11 +156,6 @@ function oidcE2ETest() {
       await ensureKymaAdminBindingDoesNotExistsForUser(this.options.administrators1[1]);
       await ensureKymaAdminBindingExistsForUser(this.options.administrator0[0]);
     });
-
-    it('Finish OIDCE2ETest timestamp', async function() {
-      console.log(`OIDC E2E Test finished at ${new Date(Date.now()).toISOString()}`)
-    });
-
   });
 }
 
@@ -176,6 +170,14 @@ function commerceMockTest() {
     after(function() {
       cancelPortForward();
     });
+
+    beforeEach("", function (){
+      console.time("test duration")
+    })
+
+    afterEach("", function (){
+      console.timeEnd("test duration")
+    })
 
     it('CommerceMock test fixture should be ready', async function() {
       await ensureCommerceMockWithCompassTestFixture(
@@ -214,21 +216,7 @@ function commerceMockTest() {
   });
 }
 
-function waitForReconciliation() {
-  describe("Wait For Reconciliation", function () {
-    it("Waiting for new reconciliation", async function () {
-      let l = await kcp.getLastReconciliation(this.shoot.name, true);
-      this.lastReconciliation = l;
-      while (!(this.lastReconciliation.schedulingID !== l.schedulingID && l.status === "ready")) {
-        await delay(10000);
-        l = await kcp.getLastReconciliation(this.shoot.name);
-      }
-    });
-  });
-}
-
 module.exports = {
   commerceMockTest,
   oidcE2ETest,
-  waitForReconciliation
 };
