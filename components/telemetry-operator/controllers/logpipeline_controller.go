@@ -137,25 +137,25 @@ func (r *LogPipelineReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 	updatedSectionsCm, err := r.syncSectionsConfigMap(ctx, &logPipeline)
 	if err != nil {
 		log.Error(err, "Failed to sync Sections ConfigMap")
-		return ctrl.Result{Requeue: true}, err
+		return ctrl.Result{Requeue: requeueRequest(err)}, err
 	}
 
 	updatedParsersCm, err := r.syncParsersConfigMap(ctx, &logPipeline)
 	if err != nil {
 		log.Error(err, "Failed to sync Parsers ConfigMap")
-		return ctrl.Result{Requeue: true}, err
+		return ctrl.Result{Requeue: requeueRequest(err)}, err
 	}
 
 	updatedFilesCm, err := r.syncFilesConfigMap(ctx, &logPipeline)
 	if err != nil {
 		log.Error(err, "Failed to sync mounted files")
-		return ctrl.Result{Requeue: true}, err
+		return ctrl.Result{Requeue: requeueRequest(err)}, err
 	}
 
 	updatedEnv, err := r.syncSecretRefs(ctx, &logPipeline)
 	if err != nil {
 		log.Error(err, "Failed to sync secret references")
-		return ctrl.Result{Requeue: true}, err
+		return ctrl.Result{Requeue: requeueRequest(err)}, err
 	}
 
 	if updatedSectionsCm || updatedParsersCm || updatedFilesCm || updatedEnv {
@@ -163,12 +163,12 @@ func (r *LogPipelineReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 
 		if err := r.Update(ctx, &logPipeline); err != nil {
 			log.Error(err, "Failed updating log pipeline")
-			return ctrl.Result{Requeue: true}, err
+			return ctrl.Result{Requeue: requeueRequest(err)}, err
 		}
 
 		if err := r.restartFluentBit(ctx); err != nil {
 			log.Error(err, "Failed restarting fluent bit daemon set")
-			return ctrl.Result{Requeue: true}, err
+			return ctrl.Result{Requeue: requeueRequest(err)}, err
 		}
 
 		condition := telemetryv1alpha1.NewLogPipelineCondition(
@@ -204,6 +204,17 @@ func (r *LogPipelineReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 	}
 
 	return ctrl.Result{}, nil
+}
+
+// Indicate if an error from the kubernetes client should be retried. Errors caused by a bad request or configuration should not be retried.
+func requeueRequest(err error) bool {
+	return !errors.IsInvalid(err) &&
+		!errors.IsNotAcceptable(err) &&
+		!errors.IsUnsupportedMediaType(err) &&
+		!errors.IsMethodNotSupported(err) &&
+		!errors.IsBadRequest(err) &&
+		!errors.IsUnauthorized(err) &&
+		!errors.IsForbidden(err)
 }
 
 // Get ConfigMap from Kubernetes API or create new one if not existing.
