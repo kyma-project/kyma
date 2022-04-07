@@ -344,12 +344,12 @@ async function checkMigratedBTPResources() {
       errors.push(`Expected 3 BTP instances ready but found ${btpInstances.length}:\n${is}`);
     }
     const scBindings = await listResources(`/apis/${scGroup}/${scVersion}/${bindings}`);
-    if (scBindings.length != 4) {
-      errors.push(`Expected 4 Service Catalog bindings but found ${scBindings.length}`);
+    if (scBindings.length != 0) {
+      errors.push(`Expected 0 Service Catalog bindings but found ${scBindings.length}`);
     }
     const scInstances = await listResources(`/apis/${scGroup}/${scVersion}/${instances}`);
-    if (scInstances.length != 4) {
-      errors.push(`Expected 4 Service Catalog instances but found ${scInstances.length}`);
+    if (scInstances.length != 0) {
+      errors.push(`Expected 0 Service Catalog instances but found ${scInstances.length}`);
     }
     if (errors.length != 0) {
       await sleep(1000);
