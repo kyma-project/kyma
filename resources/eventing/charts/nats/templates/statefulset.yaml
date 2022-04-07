@@ -114,7 +114,7 @@ spec:
       ##############################
       {{- if and .Values.exporter.enabled .Values.global.jetstream.enabled }}
       - name: metrics
-        image: {{ .Values.exporter.image }}
+        image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.prometheus_nats_exporter) }}"
         imagePullPolicy: {{ .Values.exporter.pullPolicy }}
         {{- if .Values.exporter.securityContext }}
         securityContext:

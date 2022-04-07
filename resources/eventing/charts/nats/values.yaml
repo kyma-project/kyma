@@ -186,7 +186,6 @@ commonLabels: {}
 # Prometheus NATS Exporter configuration.
 exporter:
   enabled: true
-  image: natsio/prometheus-nats-exporter:0.9.1
   pullPolicy: IfNotPresent
   securityContext: {}
   resources: {}
