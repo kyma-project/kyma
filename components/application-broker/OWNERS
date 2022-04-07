@@ -1,12 +1,8 @@
+reviewers:
+  - service-management-reviewers
 approvers:
-  - PK85
-  - mszostok
-  - piotrmiskiewicz
-  - polskikiel
-  - jasiu001
-  - adamwalach
-  - ksputo
+  - service-management-approvers
 
 labels:
-  - area/service-catalog
+  - area/service-management
   - area/application-connector

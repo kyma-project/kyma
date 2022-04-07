@@ -45,7 +45,6 @@ func New(
 
 	return &proxy{
 		cache:                        NewCache(config.ProxyCacheTTL),
-		skipVerify:                   config.SkipVerify,
 		proxyTimeout:                 config.ProxyTimeout,
 		authorizationStrategyFactory: authorizationStrategyFactory,
 		csrfTokenStrategyFactory:     csrfTokenStrategyFactory,
@@ -59,6 +58,7 @@ func NewForCompass(
 	authorizationStrategyFactory authorization.StrategyFactory,
 	csrfTokenStrategyFactory csrf.TokenStrategyFactory,
 	config Config) http.Handler {
+
 	extractFunc := func(path string) (model.APIIdentifier, string, apperrors.AppError) {
 		trimmed := strings.Trim(path, "/")
 		split := strings.Split(trimmed, "/")
@@ -84,7 +84,6 @@ func NewForCompass(
 
 	return &proxy{
 		cache:                        NewCache(config.ProxyCacheTTL),
-		skipVerify:                   config.SkipVerify,
 		proxyTimeout:                 config.ProxyTimeout,
 		authorizationStrategyFactory: authorizationStrategyFactory,
 		csrfTokenStrategyFactory:     csrfTokenStrategyFactory,

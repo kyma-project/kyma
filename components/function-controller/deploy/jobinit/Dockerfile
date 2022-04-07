@@ -1,4 +1,4 @@
-FROM eu.gcr.io/kyma-project/external/golang:1.17.3-alpine as builder
+FROM eu.gcr.io/kyma-project/external/golang:1.18.0-alpine3.15 as builder
 
 ENV BASE_APP_DIR=/workspace/go/src/github.com/kyma-project/kyma/components/function-controller \
     CGO_ENABLED=1 \
@@ -6,7 +6,7 @@ ENV BASE_APP_DIR=/workspace/go/src/github.com/kyma-project/kyma/components/funct
     GOARCH=amd64 \
     LIBGIT2_VERSION=1.1.0-r2
 
-RUN apk add gcc libc-dev
+RUN apk add --no-cache gcc libc-dev
 RUN apk add --no-cache --repository http://dl-cdn.alpinelinux.org/alpine/v3.14/community libgit2-dev=${LIBGIT2_VERSION}
 
 WORKDIR ${BASE_APP_DIR}
@@ -21,13 +21,14 @@ RUN go build -ldflags "-s -w" -a -o jobinit cmd/jobinit/main.go \
     && mv ./jobinit /app/jobinit
 
 # result container
-FROM eu.gcr.io/kyma-project/external/alpine:3.14.2
+FROM eu.gcr.io/kyma-project/external/alpine:3.15.3
 ENV LIBGIT2_VERSION=1.1.0-r2
 
 LABEL source = git@github.com:kyma-project/kyma.git
 
+RUN apk update --no-cache && apk upgrade --no-cache
 RUN apk add --no-cache ca-certificates
-RUN apk add --no-cache --update --repository=http://dl-cdn.alpinelinux.org/alpine/edge/main openssh-client
+RUN apk add --no-cache --update --repository=http://dl-cdn.alpinelinux.org/alpine/edge/main openssh-client openssl
 RUN apk add --no-cache --repository http://dl-cdn.alpinelinux.org/alpine/v3.14/community libgit2=${LIBGIT2_VERSION}
 
 COPY --from=builder /app /app

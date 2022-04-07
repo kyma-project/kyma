@@ -9,7 +9,7 @@ When you complete this tutorial, you get a Function that:
 - Is available on an unsecured endpoint (**handler** set to `noop` in the API Rule CR).
 - Accepts the `GET`, `POST`, `PUT`, and `DELETE` methods.
 
->**NOTE:** To learn more about securing your Function, see the [tutorial](../00-api-exposure/apix-03-expose-and-secure-service.md).
+>**NOTE:** To learn more about securing your Function, see the [Expose and secure a workload with OAuth2](../00-api-exposure/apix-03-expose-and-secure-workload-oauth2.md) or [Expose and secure a workload with JWT](../00-api-exposure/apix-04-expose-and-secure-workload-jwt.md) tutorials.
 
 >**TIP:** Read also about [Function’s specification](../../05-technical-reference/svls-08-function-specification.md) if you are interested in its signature, `event` and `context` objects, and custom HTTP responses the Function returns.
 
@@ -19,7 +19,7 @@ This tutorial is based on an existing Function. To create one, follow the [Creat
 
 ## Steps
 
-Follows these steps:
+Follow these steps:
 
 <div tabs name="steps" group="expose-function">
   <details>
@@ -31,9 +31,10 @@ Follows these steps:
 
       ```bash
       export DOMAIN={DOMAIN_NAME}
-      export NAME={APIRULE_NAME}
+      export NAME={FUNCTION_NAME}
+      export NAMESPACE={NAMESPACE_NAME}
       ```
-
+   >**NOTE:** The Function takes the name from the Function CR name. The API Rule CR can have a different name but for the purpose of this tutorial, all related resources share a common name defined under the **NAME** variable.
 2. Download the latest configuration of the Function from the cluster. This way you will update the local `config.yaml` file with the Function's code.
 
   ```bash
@@ -44,9 +45,9 @@ Follows these steps:
 
   ```yaml
   apiRules:
-      - name: {APIRULE_NAME}
+      - name: {FUNCTION_NAME}
         service:
-          host: {APIRULE_NAME}.{DOMAIN_NAME}
+          host: {FUNCTION_NAME}.{DOMAIN_NAME}
         rules:
           - methods:
               - GET
@@ -107,7 +108,7 @@ Follows these steps:
       name: $NAME
       namespace: $NAMESPACE
     spec:
-      gateway: kyma-gateway.kyma-system.svc.cluster.local
+      gateway: kyma-system/kyma-gateway
       rules:
       - path: /.*
         accessStrategies:
@@ -147,11 +148,11 @@ Follows these steps:
 
 1. Select a Namespace from the drop-down list in the top navigation panel. Make sure the Namespace includes the Function that you want to expose through an API Rule.
 
-2. In the left navigation panel, go to **Workloads** > **Functions** and select the Function you want to expose.
+2. Go to **Workloads** > **Functions** and select the Function you want to expose.
 
-3. Switch to the **Configuration** tab and select **Expose Function** in the API Rules section.
+3. Switch to the **Configuration** tab and select **Create API Rule** in the API Rules section.
 
-4. In the **General settings** section of the dialog box, enter the following information:
+4. Under **General settings**, enter the following information:
 
     - The API Rule's **Name** matching the Function's name.
 
@@ -159,9 +160,9 @@ Follows these steps:
 
     - **Subdomain** to determine the host on which you want to expose your Function.
 
-5. In the **Access strategies** section, select the `noop` handler from the drop-down list and leave the default settings with the `GET`, `POST`, `PUT`, `PATCH`, `DELETE`, and `HEAD` methods.
+5. In the **Rules** section, select the `noop` handler and mark **all** the methods.
 
-6. Select **Create** to confirm changes. The dialog box with the form will close.
+6. Select **Create** to confirm your changes.
 
 7. Check if you can access the Function by selecting the HTTPS link under the **Host** column for the newly created API Rule.
 

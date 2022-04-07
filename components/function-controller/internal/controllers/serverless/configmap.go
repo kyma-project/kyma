@@ -10,22 +10,21 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	apilabels "k8s.io/apimachinery/pkg/labels"
-	ctrl "sigs.k8s.io/controller-runtime"
 
 	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
 )
 
-func (r *FunctionReconciler) createConfigMap(ctx context.Context, log logr.Logger, instance *serverlessv1alpha1.Function, rtm runtime.Runtime) (ctrl.Result, error) {
+func (r *FunctionReconciler) createConfigMap(ctx context.Context, log logr.Logger, instance *serverlessv1alpha1.Function, rtm runtime.Runtime) error {
 	configMap := r.buildConfigMap(instance, rtm)
 
 	log.Info("CreateWithReference ConfigMap")
 	if err := r.client.CreateWithReference(ctx, instance, &configMap); err != nil {
 		log.Error(err, "Cannot create ConfigMap")
-		return ctrl.Result{}, err
+		return err
 	}
 	log.Info(fmt.Sprintf("ConfigMap %s created", configMap.GetName()))
 
-	return r.updateStatusWithoutRepository(ctx, ctrl.Result{}, instance, serverlessv1alpha1.Condition{
+	return r.updateStatusWithoutRepository(ctx, instance, serverlessv1alpha1.Condition{
 		Type:               serverlessv1alpha1.ConditionConfigurationReady,
 		Status:             corev1.ConditionTrue,
 		LastTransitionTime: metav1.Now(),
@@ -34,7 +33,7 @@ func (r *FunctionReconciler) createConfigMap(ctx context.Context, log logr.Logge
 	})
 }
 
-func (r *FunctionReconciler) updateConfigMap(ctx context.Context, log logr.Logger, instance *serverlessv1alpha1.Function, rtm runtime.Runtime, configMap corev1.ConfigMap) (ctrl.Result, error) {
+func (r *FunctionReconciler) updateConfigMap(ctx context.Context, log logr.Logger, instance *serverlessv1alpha1.Function, rtm runtime.Runtime, configMap corev1.ConfigMap) error {
 	newConfigMap := configMap.DeepCopy()
 	expectedConfigMap := r.buildConfigMap(instance, rtm)
 
@@ -44,11 +43,11 @@ func (r *FunctionReconciler) updateConfigMap(ctx context.Context, log logr.Logge
 	log.Info(fmt.Sprintf("Updating ConfigMap %s", configMap.GetName()))
 	if err := r.client.Update(ctx, newConfigMap); err != nil {
 		log.Error(err, fmt.Sprintf("Cannot update ConfigMap %s", newConfigMap.GetName()))
-		return ctrl.Result{}, err
+		return err
 	}
 	log.Info(fmt.Sprintf("ConfigMap %s updated", configMap.GetName()))
 
-	return r.updateStatusWithoutRepository(ctx, ctrl.Result{}, instance, serverlessv1alpha1.Condition{
+	return r.updateStatusWithoutRepository(ctx, instance, serverlessv1alpha1.Condition{
 		Type:               serverlessv1alpha1.ConditionConfigurationReady,
 		Status:             corev1.ConditionTrue,
 		LastTransitionTime: metav1.Now(),
@@ -76,7 +75,7 @@ func (r *FunctionReconciler) isOnConfigMapChange(instance *serverlessv1alpha1.Fu
 		r.mapsEqual(configMaps[0].Labels, r.functionLabels(instance)))
 }
 
-func (r *FunctionReconciler) onConfigMapChange(ctx context.Context, log logr.Logger, instance *serverlessv1alpha1.Function, rtm runtime.Runtime, configMaps []corev1.ConfigMap) (ctrl.Result, error) {
+func (r *FunctionReconciler) onConfigMapChange(ctx context.Context, log logr.Logger, instance *serverlessv1alpha1.Function, rtm runtime.Runtime, configMaps []corev1.ConfigMap) error {
 	configMapsLen := len(configMaps)
 
 	switch configMapsLen {
@@ -89,14 +88,14 @@ func (r *FunctionReconciler) onConfigMapChange(ctx context.Context, log logr.Log
 	}
 }
 
-func (r *FunctionReconciler) deleteAllConfigMaps(ctx context.Context, instance *serverlessv1alpha1.Function, log logr.Logger) (ctrl.Result, error) {
+func (r *FunctionReconciler) deleteAllConfigMaps(ctx context.Context, instance *serverlessv1alpha1.Function, log logr.Logger) error {
 	log.Info("Deleting all ConfigMaps")
 	selector := apilabels.SelectorFromSet(r.internalFunctionLabels(instance))
 	if err := r.client.DeleteAllBySelector(ctx, &corev1.ConfigMap{}, instance.GetNamespace(), selector); err != nil {
 		log.Error(err, "Cannot delete all ConfigMaps")
-		return ctrl.Result{}, err
+		return err
 	}
 
 	log.Info("All underlying ConfigMaps deleted")
-	return ctrl.Result{}, nil
+	return nil
 }

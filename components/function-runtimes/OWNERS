@@ -3,3 +3,6 @@ reviewers:
 
 approvers:
   - serverless-approvers
+
+labels:
+  - area/serverless

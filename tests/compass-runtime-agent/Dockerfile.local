@@ -11,4 +11,4 @@ WORKDIR $SRC_DIR
 COPY scripts/entrypoint.sh .
 COPY test.test .
 
-ENTRYPOINT ./entrypoint.sh
+ENTRYPOINT ["./entrypoint.sh"]

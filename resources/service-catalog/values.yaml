@@ -8,12 +8,12 @@ global:
       directory: "external/quay.io/kubernetes-service-catalog"
     # k8s_tools:
     #   name: "k8s-tools"
-    #   version: "20211022-85284bf9"
+    #   version: "20220222-0161f9f8"
     #   directory: "tpi"
     health_proxy:
       name: "health-proxy"
-      version: "bd223692"
-      directory: "incubator/develop"
+      version: "b1767e88"
+      directory: "incubator"
 
   istio:
     gateway:

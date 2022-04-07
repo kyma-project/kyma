@@ -1,7 +1,6 @@
 package v1alpha1
 
 import (
-	"context"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -144,7 +143,7 @@ func TestSetDefaults(t *testing.T) {
 		"Should not change runtime type": {
 			givenFunc: Function{
 				Spec: FunctionSpec{
-					Runtime: Python38,
+					Runtime: Python39,
 					Resources: corev1.ResourceRequirements{
 						Limits: corev1.ResourceList{
 							corev1.ResourceCPU:    resource.MustParse("150m"),
@@ -171,7 +170,7 @@ func TestSetDefaults(t *testing.T) {
 			},
 			expectedFunc: Function{
 				Spec: FunctionSpec{
-					Runtime: Python38,
+					Runtime: Python39,
 					Resources: corev1.ResourceRequirements{
 						Limits: corev1.ResourceList{
 							corev1.ResourceCPU:    resource.MustParse("150m"),
@@ -393,10 +392,8 @@ func TestSetDefaults(t *testing.T) {
 			g.Expect(err).To(gomega.BeNil())
 			config.BuildJob.Resources.Presets = buildResourcesPresets
 
-			ctx := context.WithValue(context.Background(), DefaultingConfigKey, *config)
-
 			// when
-			testData.givenFunc.SetDefaults(ctx)
+			testData.givenFunc.Default(config)
 
 			// then
 			g.Expect(testData.givenFunc).To(gomega.Equal(testData.expectedFunc))
@@ -540,11 +537,8 @@ func TestSetDefaults(t *testing.T) {
 			functionProfile, err := ParseRuntimePresets(functionProfiles)
 			g.Expect(err).To(gomega.BeNil())
 			config.Function.Resources.RuntimePresets = functionProfile
-
-			ctx := context.WithValue(context.Background(), DefaultingConfigKey, *config)
-
 			// when
-			testData.givenFunc.SetDefaults(ctx)
+			testData.givenFunc.Default(config)
 
 			// then
 			//g.Expect(testData.givenFunc).To(gomega.Equal(testData.expectedFunc))

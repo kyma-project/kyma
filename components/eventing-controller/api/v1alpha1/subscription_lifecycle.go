@@ -37,6 +37,7 @@ const (
 	ConditionReasonAPIRuleStatusReady         ConditionReason = "APIRule status ready"
 	ConditionReasonAPIRuleStatusNotReady      ConditionReason = "APIRule status not ready"
 	ConditionReasonNATSSubscriptionActive     ConditionReason = "NATS Subscription active"
+	ConditionReasonNATSSubscriptionNotActive  ConditionReason = "NATS Subscription not active"
 	ConditionReasonWebhookCallStatus          ConditionReason = "BEB Subscription webhook call no errors status"
 )
 
@@ -76,7 +77,25 @@ func (s SubscriptionStatus) IsReady() bool {
 	return true
 }
 
-// makeConditions creates an map of all conditions which the Subscription should have
+func (s SubscriptionStatus) FindCondition(conditionType ConditionType) *Condition {
+	for _, condition := range s.Conditions {
+		if conditionType == condition.Type {
+			return &condition
+		}
+	}
+	return nil
+}
+
+// ShouldUpdateReadyStatus checks if there is a mismatch between the
+// subscription Ready Status and the Ready status of all the conditions
+func (s SubscriptionStatus) ShouldUpdateReadyStatus() bool {
+	if !s.Ready && s.IsReady() || s.Ready && !s.IsReady() {
+		return true
+	}
+	return false
+}
+
+// makeConditions creates a map of all conditions which the Subscription should have.
 func makeConditions() []Condition {
 	conditions := []Condition{
 		{

@@ -76,6 +76,13 @@ Create the name of the service account to use
 {{- end -}}
 
 {{/*
+The image to use
+*/}}
+{{- define "prometheus-node-exporter.image" -}}
+{{- printf "%s:%s" .Values.image.repository (default (printf "v%s" .Chart.AppVersion) .Values.image.tag) }}
+{{- end }}
+
+{{/*
 Allow the release namespace to be overridden for multi-namespace deployments in combined charts
 */}}
 {{- define "prometheus-node-exporter.namespace" -}}
@@ -83,5 +90,20 @@ Allow the release namespace to be overridden for multi-namespace deployments in 
     {{- .Values.namespaceOverride -}}
   {{- else -}}
     {{- .Release.Namespace -}}
+  {{- end -}}
+{{- end -}}
+
+{{/*
+Create the namespace name of the service monitor
+*/}}
+{{- define "prometheus-node-exporter.monitor-namespace" -}}
+  {{- if .Values.namespaceOverride -}}
+    {{- .Values.namespaceOverride -}}
+  {{- else -}}
+    {{- if .Values.prometheus.monitor.namespace -}}
+      {{- .Values.prometheus.monitor.namespace -}}
+    {{- else -}}
+      {{- .Release.Namespace -}}
+    {{- end -}}
   {{- end -}}
 {{- end -}}

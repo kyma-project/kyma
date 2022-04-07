@@ -57,11 +57,3 @@ func GroupVersionResource() schema.GroupVersionResource {
 		Resource: "applications",
 	}
 }
-
-func GroupVersionKind() schema.GroupVersionKind {
-	return schema.GroupVersionKind{
-		Group:   applicationv1alpha1.SchemeGroupVersion.Group,
-		Version: applicationv1alpha1.SchemeGroupVersion.Version,
-		Kind:    "Application",
-	}
-}

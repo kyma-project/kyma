@@ -1,0 +1,41 @@
+# https://help.github.com/github/administering-a-repository/configuration-options-for-dependency-updates
+
+version: 2
+updates:
+{{- range .Values.JobConfigs }}
+{{- range .Jobs }}
+  - package-ecosystem: {{ .JobConfig.packageEcosystem | quote }}
+    directory: {{ .JobConfig.directory | quote }}
+    {{- if .JobConfig.labels }}
+    labels:
+    {{- range .JobConfig.labels }}
+      - {{ . | quote }}
+    {{- end }}
+    {{- end }}
+    schedule:
+      interval: {{ .JobConfig.scheduleInterval | quote }}
+    commit-message:
+      prefix: {{ .JobConfig.commitMsgPrefix | quote }}
+      {{- if .JobConfig.commitIncludeScope }}
+      include: "scope"
+      {{- end }}
+    {{- if .JobConfig.ignore }}
+    ignore:
+    {{- range .JobConfig.ignore }}
+      - dependency-name: {{ .dependencyName | quote }}
+        {{- if .versions }}
+        versions:
+        {{- range .versions }}
+          - {{ . | quote }}
+        {{- end }}
+        {{- end }}
+        {{- if .updateTypes }}
+        update-types:
+        {{- range .updateTypes }}
+          - {{ . | quote }}
+        {{- end }}
+        {{- end }}
+    {{- end }}
+    {{- end }}
+{{- end }}
+{{ end }}

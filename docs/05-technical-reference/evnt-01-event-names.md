@@ -18,17 +18,20 @@ The event type is composed of the following components:
 
 For publishers, the event type takes this sample form:
 - `order.created` or `Account.Root.Created` for legacy events coming from the `commerce` application
-- `sap.kyma.custom.commerce.order.created.v1` or `sap.kyma.custom.commerce.AccountRoot.Created.v1` for Cloud Events
-
+- `sap.kyma.custom.commerce.order.created.v1` or `sap.kyma.custom.commerce.Account.Root.Created.v1` for Cloud Events
 
 ## Event name cleanup
 
 To conform to Cloud Event specifications, sometimes Eventing must modify the event name before dispatching an event.
 
+### Events with more than two segments
+
 If the event name contains more than two segments, Eventing combines them into two segments when creating the underlying Eventing infrastructure. For example, `Account.Root.Created` becomes `AccountRoot.Created`.
 
-If the Application name contains `-` or `.`, the underlying Eventing services uses a clean name with alphanumeric characters only; for example, `system-prod` becomes `systemprod`.
+### Non-alphanumeric characters
+
+If the Application name contains any non-alphanumeric character `[^a-zA-Z0-9]+`, the underlying Eventing services use a clean name with alphanumeric characters only `[a-zA-Z0-9]+`; for example, `system-prod` becomes `systemprod`.
 
 This could lead to a naming collision. For example, both `system-prod` and `systemprod` become `systemprod`. While this won't result in an error, it can cause Kyma to not work as expected.
 
-A solution for this is to provide an `application-type` label (with alphanumeric characters only), which is then used by the Eventing services instead of the Application name. If the `application-type` label also contains `-` or `.`, the underlying Eventing services clean it and use the cleaned label.
+A solution for this is to provide an `application-type` label (with alphanumeric characters only), which is then used by the Eventing services instead of the Application name. If the `application-type` label also contains any non-alphanumeric character, the underlying Eventing services clean it and use the cleaned label.

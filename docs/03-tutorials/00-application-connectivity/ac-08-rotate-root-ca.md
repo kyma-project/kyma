@@ -161,4 +161,4 @@ To successfully rotate a soon-to-expire CA certificate, replace it with a new ce
    kubectl -n istio-system edit secret kyma-gateway-certs-cacert
    ```
 
-6. Generate new certificates in a Runtime. To do that, create a CertificateRequest custom resource (CR) in the Runtime in which you want to generate the certificates.
+6. Generate new certificates in a Runtime. To do that, create a Certificate Request custom resource (CR) in the Runtime in which you want to generate the certificates.

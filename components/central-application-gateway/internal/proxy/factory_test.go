@@ -33,7 +33,6 @@ func TestProxyFactory(t *testing.T) {
 	}
 
 	proxyConfig := Config{
-		SkipVerify:    true,
 		ProxyTimeout:  10,
 		Application:   "test",
 		ProxyCacheTTL: 10,
@@ -151,7 +150,6 @@ func TestProxyFactory(t *testing.T) {
 
 func TestPathExtractionErrors(t *testing.T) {
 	proxyConfig := Config{
-		SkipVerify:    true,
 		ProxyTimeout:  10,
 		Application:   "test",
 		ProxyCacheTTL: 10,

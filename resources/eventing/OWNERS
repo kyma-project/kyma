@@ -1,0 +1,6 @@
+reviewers:
+  - eventing-reviewers
+approvers:
+  - eventing-approvers
+labels:
+  - area/eventing

@@ -1,0 +1,12 @@
+{{- if (and .Values.monitoring.enabled .Values.monitoring.dashboards.enabled) }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: istio-mesh-grafana-dashboard
+  namespace: kyma-system
+  labels:
+    grafana_dashboard: "1"
+    app: monitoring-grafana
+data:
+  istio-mesh-dashboard.json: {{ .Files.Get "files/dashboards/mesh.json" | toJson }}
+{{- end }}

@@ -1,6 +1,8 @@
 package connector
 
 import (
+	"context"
+
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/graphql"
 
 	schema "github.com/kyma-incubator/compass/components/connector/pkg/graphql/externalschema"
@@ -10,8 +12,8 @@ import (
 
 //go:generate mockery --name=Client
 type Client interface {
-	Configuration(headers map[string]string) (schema.Configuration, error)
-	SignCSR(csr string, headers map[string]string) (schema.CertificationResult, error)
+	Configuration(ctx context.Context, headers map[string]string) (schema.Configuration, error)
+	SignCSR(ctx context.Context, csr string, headers map[string]string) (schema.CertificationResult, error)
 }
 
 type connectorClient struct {
@@ -26,7 +28,7 @@ func NewConnectorClient(graphQlClient graphql.Client) Client {
 	}
 }
 
-func (c connectorClient) Configuration(headers map[string]string) (schema.Configuration, error) {
+func (c connectorClient) Configuration(ctx context.Context, headers map[string]string) (schema.Configuration, error) {
 	query := c.queryProvider.configuration()
 	req := gcli.NewRequest(query)
 
@@ -34,14 +36,14 @@ func (c connectorClient) Configuration(headers map[string]string) (schema.Config
 
 	var response ConfigurationResponse
 
-	err := c.graphQlClient.Do(req, &response)
+	err := c.graphQlClient.Do(ctx, req, &response)
 	if err != nil {
 		return schema.Configuration{}, errors.Wrap(err, "Failed to get configuration")
 	}
 	return response.Result, nil
 }
 
-func (c connectorClient) SignCSR(csr string, headers map[string]string) (schema.CertificationResult, error) {
+func (c connectorClient) SignCSR(ctx context.Context, csr string, headers map[string]string) (schema.CertificationResult, error) {
 	query := c.queryProvider.signCSR(csr)
 	req := gcli.NewRequest(query)
 
@@ -49,7 +51,7 @@ func (c connectorClient) SignCSR(csr string, headers map[string]string) (schema.
 
 	var response CertificationResponse
 
-	err := c.graphQlClient.Do(req, &response)
+	err := c.graphQlClient.Do(ctx, req, &response)
 	if err != nil {
 		return schema.CertificationResult{}, errors.Wrap(err, "Failed to generate certificate")
 	}

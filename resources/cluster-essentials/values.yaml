@@ -15,15 +15,15 @@ global:
   images:
     k8s_tools:
       name: "k8s-tools"
-      version: "20211022-85284bf9"
+      version: "20220331-9c1578c1"
       directory: "tpi"
     podpreset_webhook:
       name: "podpreset-webhook"
-      version: "021a99c6"
+      version: "663a99a3"
       directory: "incubator"
     podpreset_controller:
       name: "podpreset-controller"
-      version: "021a99c6"
+      version: "663a99a3"
       directory: "incubator"
 
 image:

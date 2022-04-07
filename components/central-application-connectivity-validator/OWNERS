@@ -1,9 +1,6 @@
+reviewers:
+  - application-connector-reviewers
 approvers:
-  - akgalwas
-  - janmedrek
-  - franpog859
-  - Maladie
-  - koala7659
-  - ralikio
+  - application-connector-approvers
 labels:
   - area/application-connector

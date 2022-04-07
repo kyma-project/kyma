@@ -40,12 +40,14 @@ func TestServiceAccountReconciler_Reconcile(t *testing.T) {
 	request := ctrl.Request{NamespacedName: types.NamespacedName{Namespace: baseServiceAccount.GetNamespace(), Name: baseServiceAccount.GetName()}}
 	reconciler := NewServiceAccount(k8sClient, log.Log, testCfg, serviceAccountSvc)
 	namespace := userNamespace.GetName()
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
 
 	t.Run("should successfully propagate base ServiceAccount to user namespace", func(t *testing.T) {
 		g := gomega.NewGomegaWithT(t)
 
 		t.Log("reconciling the non existing Service Account")
-		_, err := reconciler.Reconcile(ctrl.Request{
+		_, err := reconciler.Reconcile(ctx, ctrl.Request{
 			NamespacedName: types.NamespacedName{
 				Namespace: baseServiceAccount.GetNamespace(),
 				Name:      "non-existing-svc-acc",
@@ -54,7 +56,7 @@ func TestServiceAccountReconciler_Reconcile(t *testing.T) {
 		g.Expect(err).To(gomega.BeNil())
 
 		t.Log("reconciling the Service Account")
-		result, err := reconciler.Reconcile(request)
+		result, err := reconciler.Reconcile(ctx, request)
 		g.Expect(err).To(gomega.BeNil())
 		g.Expect(result.Requeue).To(gomega.BeFalse())
 		g.Expect(result.RequeueAfter).To(gomega.Equal(testCfg.ServiceAccountRequeueDuration))
@@ -69,7 +71,7 @@ func TestServiceAccountReconciler_Reconcile(t *testing.T) {
 		baseServiceAccountCopy.AutomountServiceAccountToken = nil
 		g.Expect(k8sClient.Update(context.TODO(), baseServiceAccountCopy)).To(gomega.Succeed())
 
-		result, err = reconciler.Reconcile(request)
+		result, err = reconciler.Reconcile(ctx, request)
 		g.Expect(err).To(gomega.BeNil())
 		g.Expect(result.Requeue).To(gomega.BeFalse())
 		g.Expect(result.RequeueAfter).To(gomega.Equal(testCfg.ServiceAccountRequeueDuration))
@@ -84,7 +86,7 @@ func TestServiceAccountReconciler_Reconcile(t *testing.T) {
 		userCopy.AutomountServiceAccountToken = &trueValue
 		g.Expect(k8sClient.Update(context.TODO(), userCopy)).To(gomega.Succeed())
 
-		result, err = reconciler.Reconcile(request)
+		result, err = reconciler.Reconcile(ctx, request)
 		g.Expect(err).To(gomega.BeNil())
 		g.Expect(result.Requeue).To(gomega.BeFalse())
 		g.Expect(result.RequeueAfter).To(gomega.Equal(testCfg.ServiceAccountRequeueDuration))
@@ -112,9 +114,9 @@ func TestServiceAccountReconciler_getPredicates(t *testing.T) {
 
 	t.Run("deleteFunc", func(t *testing.T) {
 		g := gomega.NewGomegaWithT(t)
-		deleteEventPod := event.DeleteEvent{Meta: pod.GetObjectMeta(), Object: pod}
-		deleteEventLabelledSrvAcc := event.DeleteEvent{Meta: labelledSrvAcc.GetObjectMeta(), Object: labelledSrvAcc}
-		deleteEventUnlabelledSrvAcc := event.DeleteEvent{Meta: unlabelledSrvAcc.GetObjectMeta(), Object: unlabelledSrvAcc}
+		deleteEventPod := event.DeleteEvent{Object: pod}
+		deleteEventLabelledSrvAcc := event.DeleteEvent{Object: labelledSrvAcc}
+		deleteEventUnlabelledSrvAcc := event.DeleteEvent{Object: unlabelledSrvAcc}
 
 		g.Expect(preds.Delete(deleteEventPod)).To(gomega.BeFalse())
 		g.Expect(preds.Delete(deleteEventLabelledSrvAcc)).To(gomega.BeFalse())
@@ -124,9 +126,9 @@ func TestServiceAccountReconciler_getPredicates(t *testing.T) {
 
 	t.Run("createFunc", func(t *testing.T) {
 		g := gomega.NewGomegaWithT(t)
-		createEventPod := event.CreateEvent{Meta: pod.GetObjectMeta(), Object: pod}
-		createEventLabelledSrvAcc := event.CreateEvent{Meta: labelledSrvAcc.GetObjectMeta(), Object: labelledSrvAcc}
-		createEventUnlabelledSrvAcc := event.CreateEvent{Meta: unlabelledSrvAcc.GetObjectMeta(), Object: unlabelledSrvAcc}
+		createEventPod := event.CreateEvent{Object: pod}
+		createEventLabelledSrvAcc := event.CreateEvent{Object: labelledSrvAcc}
+		createEventUnlabelledSrvAcc := event.CreateEvent{Object: unlabelledSrvAcc}
 
 		g.Expect(preds.Create(createEventPod)).To(gomega.BeFalse())
 		g.Expect(preds.Create(createEventLabelledSrvAcc)).To(gomega.BeTrue())
@@ -136,9 +138,9 @@ func TestServiceAccountReconciler_getPredicates(t *testing.T) {
 
 	t.Run("genericFunc", func(t *testing.T) {
 		g := gomega.NewGomegaWithT(t)
-		genericEventPod := event.GenericEvent{Meta: pod.GetObjectMeta(), Object: pod}
-		genericEventLabelledSrvAcc := event.GenericEvent{Meta: labelledSrvAcc.GetObjectMeta(), Object: labelledSrvAcc}
-		genericEventUnlabelledSrvAcc := event.GenericEvent{Meta: unlabelledSrvAcc.GetObjectMeta(), Object: unlabelledSrvAcc}
+		genericEventPod := event.GenericEvent{Object: pod}
+		genericEventLabelledSrvAcc := event.GenericEvent{Object: labelledSrvAcc}
+		genericEventUnlabelledSrvAcc := event.GenericEvent{Object: unlabelledSrvAcc}
 
 		g.Expect(preds.Generic(genericEventPod)).To(gomega.BeFalse())
 		g.Expect(preds.Generic(genericEventLabelledSrvAcc)).To(gomega.BeTrue())
@@ -148,9 +150,9 @@ func TestServiceAccountReconciler_getPredicates(t *testing.T) {
 
 	t.Run("updateFunc", func(t *testing.T) {
 		g := gomega.NewGomegaWithT(t)
-		updateEventPod := event.UpdateEvent{MetaNew: pod.GetObjectMeta(), ObjectNew: pod}
-		updateEventLabelledSrvAcc := event.UpdateEvent{MetaNew: labelledSrvAcc.GetObjectMeta(), ObjectNew: labelledSrvAcc}
-		updateEventUnlabelledSrvAcc := event.UpdateEvent{MetaNew: unlabelledSrvAcc.GetObjectMeta(), ObjectNew: unlabelledSrvAcc}
+		updateEventPod := event.UpdateEvent{ObjectNew: pod}
+		updateEventLabelledSrvAcc := event.UpdateEvent{ObjectNew: labelledSrvAcc}
+		updateEventUnlabelledSrvAcc := event.UpdateEvent{ObjectNew: unlabelledSrvAcc}
 
 		g.Expect(preds.Update(updateEventPod)).To(gomega.BeFalse())
 		g.Expect(preds.Update(updateEventUnlabelledSrvAcc)).To(gomega.BeFalse())

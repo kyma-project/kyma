@@ -21,7 +21,12 @@ import (
 	"flag"
 	"os"
 
-	"k8s.io/apimachinery/pkg/types"
+	"github.com/go-logr/zapr"
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/fluentbit"
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/fs"
+
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/webhook"
+	k8sWebhook "sigs.k8s.io/controller-runtime/pkg/webhook"
 
 	// Import all Kubernetes client auth plugins (e.g. Azure, GCP, OIDC, etc.)
 	// to ensure that exec-entrypoint and run can make use of them.
@@ -32,22 +37,25 @@ import (
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/healthz"
-	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
 	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/api/v1alpha1"
 	"github.com/kyma-project/kyma/components/telemetry-operator/controllers"
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/logger"
 	//+kubebuilder:scaffold:imports
 )
 
 var (
 	scheme                     = runtime.NewScheme()
 	setupLog                   = ctrl.Log.WithName("setup")
+	fluentBitConfigMap         string
 	fluentBitSectionsConfigMap string
 	fluentBitParsersConfigMap  string
 	fluentBitDaemonSet         string
 	fluentBitNs                string
 	fluentBitEnvSecret         string
 	fluentBitFilesConfigMap    string
+	logFormat                  string
+	logLevel                   string
 )
 
 //nolint:gochecknoinits
@@ -58,6 +66,13 @@ func init() {
 	//+kubebuilder:scaffold:scheme
 }
 
+func getEnvOrDefault(envVar string, defaultValue string) string {
+	if value, ok := os.LookupEnv(envVar); ok {
+		return value
+	}
+	return defaultValue
+}
+
 func main() {
 	var metricsAddr string
 	var enableLeaderElection bool
@@ -66,24 +81,33 @@ func main() {
 	flag.StringVar(&probeAddr, "health-probe-bind-address", ":8081", "The address the probe endpoint binds to.")
 	flag.BoolVar(&enableLeaderElection, "leader-elect", false,
 		"Enable leader election for controller manager. Enabling this will ensure there is only one active controller manager.")
-	flag.StringVar(&fluentBitSectionsConfigMap, "cm-name", "", "ConfigMap name to be written by Fluent Bit controller")
-	flag.StringVar(&fluentBitParsersConfigMap, "parser-cm-name", "", "ConfigMap name of Fluent bit Parsers to be written by Fluent Bit controller")
-	flag.StringVar(&fluentBitDaemonSet, "ds-name", "", "DaemonSet name to be managed by FluentBit controller")
+	flag.StringVar(&fluentBitConfigMap, "cm-name", "", "ConfigMap name of Fluent Bit")
+	flag.StringVar(&fluentBitSectionsConfigMap, "sections-cm-name", "", "ConfigMap name of Fluent Bit Sections to be written by Fluent Bit controller")
+	flag.StringVar(&fluentBitParsersConfigMap, "parser-cm-name", "", "ConfigMap name of Fluent Bit Parsers to be written by Fluent Bit controller")
+	flag.StringVar(&fluentBitDaemonSet, "ds-name", "", "DaemonSet name to be managed by Fluent Bit controller")
 	flag.StringVar(&fluentBitEnvSecret, "env-secret", "", "Secret for environment variables")
 	flag.StringVar(&fluentBitFilesConfigMap, "files-cm", "", "ConfigMap for referenced files")
 	flag.StringVar(&fluentBitNs, "fluent-bit-ns", "", "Fluent Bit namespace")
-	opts := zap.Options{
-		Development: true,
-	}
-	opts.BindFlags(flag.CommandLine)
+	flag.StringVar(&logFormat, "log-format", getEnvOrDefault("APP_LOG_FORMAT", "text"), "Log format (json or text)")
+	flag.StringVar(&logLevel, "log-level", getEnvOrDefault("APP_LOG_LEVEL", "debug"), "Log level (debug, info, warn, error, fatal)")
 	flag.Parse()
 
-	if err := validateFlags(); err != nil {
-		setupLog.Error(err, "invalid flag provided")
+	ctrLogger, err := logger.New(logFormat, logLevel)
+	ctrl.SetLogger(zapr.NewLogger(ctrLogger.WithContext().Desugar()))
+	if err != nil {
+		setupLog.Error(err, "Failed to initialize logger")
 		os.Exit(1)
 	}
+	defer func() {
+		if err := ctrLogger.WithContext().Sync(); err != nil {
+			setupLog.Error(err, "Failed to flush logger")
+		}
+	}()
 
-	ctrl.SetLogger(zap.New(zap.UseFlagOptions(&opts)))
+	if err := validateFlags(); err != nil {
+		setupLog.Error(err, "Invalid flag provided")
+		os.Exit(1)
+	}
 
 	mgr, err := ctrl.NewManager(ctrl.GetConfigOrDie(), ctrl.Options{
 		Scheme:                 scheme,
@@ -92,60 +116,60 @@ func main() {
 		HealthProbeBindAddress: probeAddr,
 		LeaderElection:         enableLeaderElection,
 		LeaderElectionID:       "cdd7ef0b.kyma-project.io",
+		CertDir:                "/var/run/telemetry-webhook",
 	})
 	if err != nil {
-		setupLog.Error(err, "unable to start manager")
+		setupLog.Error(err, "Failed to start manager")
 		os.Exit(1)
 	}
 
-	if err = (&controllers.LogPipelineReconciler{
-		Client: mgr.GetClient(),
-		Scheme: mgr.GetScheme(),
-		FluentBitSectionsConfigMap: types.NamespacedName{
-			Name:      fluentBitSectionsConfigMap,
-			Namespace: fluentBitNs,
-		},
-		FluentBitParsersConfigMap: types.NamespacedName{
-			Name:      fluentBitParsersConfigMap,
-			Namespace: fluentBitNs,
-		},
-		FluentBitDaemonSet: types.NamespacedName{
-			Name:      fluentBitDaemonSet,
-			Namespace: fluentBitNs,
-		},
-		FluentBitEnvSecret: types.NamespacedName{
-			Name:      fluentBitEnvSecret,
-			Namespace: fluentBitNs,
-		},
-		FluentBitFilesConfigMap: types.NamespacedName{
-			Name:      fluentBitFilesConfigMap,
-			Namespace: fluentBitNs,
-		},
-	}).SetupWithManager(mgr); err != nil {
-		setupLog.Error(err, "unable to create controller", "controller", "LogPipeline")
+	logPipelineValidator := webhook.NewLogPipeLineValidator(mgr.GetClient(),
+		fluentBitConfigMap,
+		fluentBitNs,
+		fluentbit.NewConfigValidator(),
+		fs.NewWrapper(),
+	)
+	mgr.GetWebhookServer().Register(
+		"/validate-logpipeline",
+		&k8sWebhook.Admission{Handler: logPipelineValidator})
+
+	reconciler := controllers.NewLogPipelineReconciler(
+		mgr.GetClient(),
+		mgr.GetScheme(),
+		fluentBitNs,
+		fluentBitSectionsConfigMap,
+		fluentBitParsersConfigMap,
+		fluentBitDaemonSet,
+		fluentBitEnvSecret,
+		fluentBitFilesConfigMap)
+	if err = reconciler.SetupWithManager(mgr); err != nil {
+		setupLog.Error(err, "Failed to create controller", "controller", "LogPipeline")
 		os.Exit(1)
 	}
+
 	//+kubebuilder:scaffold:builder
 
 	if err := mgr.AddHealthzCheck("healthz", healthz.Ping); err != nil {
-		setupLog.Error(err, "unable to set up health check")
+		setupLog.Error(err, "Failed to set up health check")
 		os.Exit(1)
 	}
 	if err := mgr.AddReadyzCheck("readyz", healthz.Ping); err != nil {
-		setupLog.Error(err, "unable to set up ready check")
+		setupLog.Error(err, "Failed to set up ready check")
 		os.Exit(1)
 	}
 
-	setupLog.Info("starting manager")
 	if err := mgr.Start(ctrl.SetupSignalHandler()); err != nil {
-		setupLog.Error(err, "problem running manager")
+		setupLog.Error(err, "Failed to run manager")
 		os.Exit(1)
 	}
 }
 
 func validateFlags() error {
-	if fluentBitSectionsConfigMap == "" {
+	if fluentBitConfigMap == "" {
 		return errors.New("--cm-name flag is required")
+	}
+	if fluentBitSectionsConfigMap == "" {
+		return errors.New("--sections-cm-name flag is required")
 	}
 	if fluentBitParsersConfigMap == "" {
 		return errors.New("--parser-cm-name flag is required")
@@ -162,6 +186,11 @@ func validateFlags() error {
 	if fluentBitNs == "" {
 		return errors.New("--fluent-bit-ns flag is required")
 	}
-
+	if logFormat != "json" && logFormat != "text" {
+		return errors.New("--log-format has to be either json or text")
+	}
+	if logLevel != "debug" && logLevel != "info" && logLevel != "warn" && logLevel != "error" && logLevel != "fatal" {
+		return errors.New("--log-level has to be one of debug, info, warn, error, fatal")
+	}
 	return nil
 }

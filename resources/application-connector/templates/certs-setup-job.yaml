@@ -30,7 +30,7 @@ spec:
       - name: {{ .Chart.Name }}-certs-setup-job
         image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.application_connectivity_certs_setup_job) }}"
         args:
-          - "/appconnectivitycertssetupjob"
+          - "/app/appconnectivitycertssetupjob"
           - "--connectorCertificateSecret={{ .Values.application_connectivity_certs_setup_job.secrets.connectorCertificateSecret.namespace }}/{{ .Values.application_connectivity_certs_setup_job.secrets.connectorCertificateSecret.name }}"
           - "--caCertificateSecret={{ .Values.application_connectivity_certs_setup_job.secrets.caCertificateSecret.namespace }}/{{ .Values.application_connectivity_certs_setup_job.secrets.caCertificateSecret.name }}"
           - "--caCertificate={{ .Values.global.applicationConnectorCa }}"

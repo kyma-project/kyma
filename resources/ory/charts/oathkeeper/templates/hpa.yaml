@@ -6,6 +6,8 @@ kind: HorizontalPodAutoscaler
 metadata:
   name: {{ include "oathkeeper.fullname" . }}
   namespace: {{ .Release.Namespace }}
+  labels:
+{{ include "oathkeeper.labels" . | indent 4 }}
 spec:
   scaleTargetRef:
     apiVersion: apps/v1

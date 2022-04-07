@@ -39,8 +39,9 @@ type CRManager interface {
 
 //go:generate mockery --name=Supervisor
 type Supervisor interface {
-	InitializeCompassConnection() (*v1alpha1.CompassConnection, error)
-	SynchronizeWithCompass(connection *v1alpha1.CompassConnection) (*v1alpha1.CompassConnection, error)
+	InitializeCompassConnection(ctx context.Context) (*v1alpha1.CompassConnection, error)
+	SynchronizeWithCompass(ctx context.Context, connection *v1alpha1.CompassConnection) (*v1alpha1.CompassConnection, error)
+	MaintainCompassConnection(ctx context.Context, connection *v1alpha1.CompassConnection) error
 }
 
 func NewSupervisor(
@@ -84,11 +85,11 @@ type crSupervisor struct {
 	connectionDataCache          cache.ConnectionDataCache
 }
 
-func (s *crSupervisor) InitializeCompassConnection() (*v1alpha1.CompassConnection, error) {
+func (s *crSupervisor) InitializeCompassConnection(ctx context.Context) (*v1alpha1.CompassConnection, error) {
 	compassConnectionCR, err := s.crManager.Get(context.Background(), DefaultCompassConnectionName, v1.GetOptions{})
 	if err != nil {
 		if k8serrors.IsNotFound(err) {
-			return s.newCompassConnection()
+			return s.newCompassConnection(ctx)
 		}
 
 		return nil, errors.Wrap(err, "Connection failed while getting existing Compass Connection")
@@ -96,7 +97,7 @@ func (s *crSupervisor) InitializeCompassConnection() (*v1alpha1.CompassConnectio
 
 	s.log.Infof("Compass Connection exists with state %s", compassConnectionCR.Status.State)
 
-	if !compassConnectionCR.ShouldAttemptReconnect() {
+	if !compassConnectionCR.Failed() {
 		s.log.Infof("Connection already initialized, skipping ")
 
 		credentials, err := s.credentialsManager.GetClientCredentials()
@@ -113,21 +114,30 @@ func (s *crSupervisor) InitializeCompassConnection() (*v1alpha1.CompassConnectio
 		return compassConnectionCR, nil
 	}
 
-	s.establishConnection(compassConnectionCR)
+	s.establishConnection(ctx, compassConnectionCR)
 
 	return s.updateCompassConnection(compassConnectionCR)
 }
 
-func (s *crSupervisor) SynchronizeWithCompass(connection *v1alpha1.CompassConnection) (*v1alpha1.CompassConnection, error) {
+func (s *crSupervisor) MaintainCompassConnection(ctx context.Context, connection *v1alpha1.CompassConnection) error {
 	s.log = s.log.WithField("CompassConnection", connection.Name)
 
 	s.log.Infof("Trying to maintain connection to Connector with %s url...", connection.Spec.ManagementInfo.ConnectorURL)
-	err := s.maintainCompassConnection(connection)
+	err := s.maintainCompassConnection(ctx, connection)
 	if err != nil {
 		errorMsg := fmt.Sprintf("Error while trying to maintain connection: %s", err.Error())
 		s.setConnectionMaintenanceFailedStatus(connection, metav1.Now(), errorMsg) // save in ConnectionStatus.LastSync
-		return s.updateCompassConnection(connection)
+		_, updateErr := s.updateCompassConnection(connection)
+
+		if updateErr != nil {
+			return updateErr
+		}
 	}
+	return err
+}
+
+func (s *crSupervisor) SynchronizeWithCompass(ctx context.Context, connection *v1alpha1.CompassConnection) (*v1alpha1.CompassConnection, error) {
+	s.log = s.log.WithField("CompassConnection", connection.Name)
 
 	s.log.Infof("Reading configuration required to fetch Runtime configuration...")
 	runtimeConfig, err := s.configProvider.GetRuntimeConfig()
@@ -145,7 +155,7 @@ func (s *crSupervisor) SynchronizeWithCompass(connection *v1alpha1.CompassConnec
 		return s.updateCompassConnection(connection)
 	}
 
-	applicationsConfig, runtimeLabels, err := directorClient.FetchConfiguration()
+	applicationsConfig, runtimeLabels, err := directorClient.FetchConfiguration(ctx)
 	if err != nil {
 		errorMsg := fmt.Sprintf("Failed to fetch configuration: %s", err.Error())
 		s.setSyncFailedStatus(connection, metav1.Now(), errorMsg) // save in SynchronizationStatus.LastAttempt
@@ -172,7 +182,7 @@ func (s *crSupervisor) SynchronizeWithCompass(connection *v1alpha1.CompassConnec
 	}
 
 	s.log.Infof("Labeling Runtime with URLs...")
-	_, err = directorClient.SetURLsLabels(s.runtimeURLsConfig, runtimeLabels)
+	_, err = directorClient.SetURLsLabels(ctx, s.runtimeURLsConfig, runtimeLabels)
 	if err != nil {
 		syncAttemptTime := metav1.Now()
 		connection.Status.State = v1alpha1.MetadataUpdateFailed
@@ -191,7 +201,7 @@ func (s *crSupervisor) SynchronizeWithCompass(connection *v1alpha1.CompassConnec
 	return s.updateCompassConnection(connection)
 }
 
-func (s *crSupervisor) maintainCompassConnection(compassConnection *v1alpha1.CompassConnection) error {
+func (s *crSupervisor) maintainCompassConnection(ctx context.Context, compassConnection *v1alpha1.CompassConnection) error {
 	shouldRenew := compassConnection.ShouldRenewCertificate(s.certValidityRenewalThreshold, s.minimalCompassSyncTime)
 	credentialsExist, err := s.credentialsManager.CredentialsExist()
 	if err != nil {
@@ -199,7 +209,7 @@ func (s *crSupervisor) maintainCompassConnection(compassConnection *v1alpha1.Com
 	}
 
 	s.log.Infof("Trying to maintain certificates connection... Renewal: %v, CreadentialsExist: %v", shouldRenew, credentialsExist)
-	newCreds, managementInfo, err := s.compassConnector.MaintainConnection(shouldRenew, credentialsExist)
+	newCreds, managementInfo, err := s.compassConnector.MaintainConnection(ctx, shouldRenew, credentialsExist)
 	if err != nil {
 		return errors.Wrap(err, "Failed to connect to Compass Connector")
 	}
@@ -237,6 +247,7 @@ func (s *crSupervisor) maintainCompassConnection(compassConnection *v1alpha1.Com
 
 	compassConnection.Status.ConnectionStatus.LastSync = connectionTime
 	compassConnection.Status.ConnectionStatus.LastSuccess = connectionTime
+	// for alternative flow compassConnection.Status.State = v1alpha1.Connected
 
 	return nil
 }
@@ -246,7 +257,7 @@ func (s *crSupervisor) urlsUpdated(compassConnectionCR *v1alpha1.CompassConnecti
 		compassConnectionCR.Spec.ManagementInfo.DirectorURL != managementInfo.DirectorURL
 }
 
-func (s *crSupervisor) newCompassConnection() (*v1alpha1.CompassConnection, error) {
+func (s *crSupervisor) newCompassConnection(ctx context.Context) (*v1alpha1.CompassConnection, error) {
 	connectionCR := &v1alpha1.CompassConnection{
 		ObjectMeta: v1.ObjectMeta{
 			Name: DefaultCompassConnectionName,
@@ -254,19 +265,19 @@ func (s *crSupervisor) newCompassConnection() (*v1alpha1.CompassConnection, erro
 		Spec: v1alpha1.CompassConnectionSpec{},
 	}
 
-	s.establishConnection(connectionCR)
+	s.establishConnection(ctx, connectionCR)
 
 	return s.crManager.Create(context.Background(), connectionCR, v1.CreateOptions{})
 }
 
-func (s *crSupervisor) establishConnection(connectionCR *v1alpha1.CompassConnection) {
+func (s *crSupervisor) establishConnection(ctx context.Context, connectionCR *v1alpha1.CompassConnection) {
 	connCfg, err := s.configProvider.GetConnectionConfig()
 	if err != nil {
 		s.setConnectionFailedStatus(connectionCR, err, fmt.Sprintf("Failed to retrieve certificate: %s", err.Error()))
 		return
 	}
 
-	connection, err := s.compassConnector.EstablishConnection(connCfg.ConnectorURL, connCfg.Token)
+	connection, err := s.compassConnector.EstablishConnection(ctx, connCfg.ConnectorURL, connCfg.Token)
 	if err != nil {
 		s.setConnectionFailedStatus(connectionCR, err, fmt.Sprintf("Failed to retrieve certificate: %s", err.Error()))
 		return

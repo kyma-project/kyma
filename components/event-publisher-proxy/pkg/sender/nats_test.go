@@ -2,13 +2,11 @@ package sender
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"net/http"
 	"testing"
 	"time"
 
-	cloudevents "github.com/cloudevents/sdk-go/v2"
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 
@@ -16,99 +14,65 @@ import (
 	testingutils "github.com/kyma-project/kyma/components/event-publisher-proxy/testing"
 )
 
-func TestSendCloudEvent(t *testing.T) {
-	logger := logrus.New()
-	logger.Info("TestNatsSender started")
+func TestNatsMessageSender(t *testing.T) {
+	t.Parallel()
 
-	// Start Nats server
-	natsServer := testingutils.StartNatsServer()
-	assert.NotNil(t, natsServer)
-	defer natsServer.Shutdown()
-
-	// connect to nats
-	bc := pkgnats.NewBackendConnection(natsServer.ClientURL(), true, 1, time.Second)
-	err := bc.Connect()
-	assert.Nil(t, err)
-	assert.NotNil(t, bc.Connection)
-
-	// create message sender
-	ctx := context.Background()
-	sender := NewNatsMessageSender(ctx, bc, logger)
-
-	// subscribe to subject
-	done := make(chan bool, 1)
-	validator := testingutils.ValidateNatsMessageDataOrFail(t, fmt.Sprintf(`"%s"`, testingutils.CloudEventData), done)
-	testingutils.SubscribeToEventOrFail(t, bc.Connection, testingutils.CloudEventType, validator)
-
-	// create cloudevent
-	ce := testingutils.StructuredCloudEventPayloadWithCleanEventType
-	event := cloudevents.NewEvent()
-	event.SetType(testingutils.CloudEventType)
-	err = json.Unmarshal([]byte(ce), &event)
-	assert.Nil(t, err)
-
-	// send cloudevent
-	status, err := sender.Send(ctx, &event)
-	assert.Nil(t, err)
-	assert.Equal(t, status, http.StatusNoContent)
-
-	// wait for subscriber to receive the messages
-	if err := testingutils.WaitForChannelOrTimeout(done, time.Second*3); err != nil {
-		t.Fatalf("Subscriber did not receive the message with error: %v", err)
+	testCases := []struct {
+		name                      string
+		givenNatsConnectionClosed bool
+		wantError                 bool
+		wantStatusCode            int
+	}{
+		{
+			name:                      "send should succeed if NATS connection is open",
+			givenNatsConnectionClosed: false,
+			wantError:                 false,
+			wantStatusCode:            http.StatusNoContent,
+		},
+		{
+			name:                      "send should fail if NATS connection is not open",
+			givenNatsConnectionClosed: true,
+			wantError:                 true,
+			wantStatusCode:            http.StatusBadGateway,
+		},
 	}
-}
+	for _, tc := range testCases {
+		tc := tc
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
 
-func TestSendCloudEventWithReconnect(t *testing.T) {
-	logger := logrus.New()
-	logger.Info("TestNatsSender started")
+			natsServer := testingutils.StartNatsServer(false)
+			assert.NotNil(t, natsServer)
+			defer natsServer.Shutdown()
 
-	// Start Nats server
-	natsServer := testingutils.StartNatsServer()
-	assert.NotNil(t, natsServer)
-	defer natsServer.Shutdown()
+			connection, err := pkgnats.Connect(natsServer.ClientURL(),
+				pkgnats.WithRetryOnFailedConnect(true),
+				pkgnats.WithMaxReconnects(1),
+				pkgnats.WithReconnectWait(time.Second),
+			)
+			assert.NoError(t, err)
+			assert.NotNil(t, connection)
+			defer func() { connection.Close() }()
 
-	// connect to nats
-	bc := pkgnats.NewBackendConnection(natsServer.ClientURL(), true, 10, time.Second)
-	err := bc.Connect()
-	assert.Nil(t, err)
-	assert.NotNil(t, bc.Connection)
+			receive := make(chan bool, 1)
+			validator := testingutils.ValidateNatsMessageDataOrFail(t, fmt.Sprintf(`"%s"`, testingutils.EventData), receive)
+			testingutils.SubscribeToEventOrFail(t, connection, testingutils.CloudEventType, validator)
 
-	// create message sender
-	ctx := context.Background()
-	sender := NewNatsMessageSender(ctx, bc, logger)
+			ce := createCloudEvent(t)
 
-	// subscribe to subject
-	done := make(chan bool, 1)
-	validator := testingutils.ValidateNatsMessageDataOrFail(t, fmt.Sprintf(`"%s"`, testingutils.CloudEventData), done)
-	testingutils.SubscribeToEventOrFail(t, bc.Connection, testingutils.CloudEventType, validator)
+			ctx := context.Background()
+			sender := NewNatsMessageSender(context.Background(), connection, logrus.New())
 
-	// create cloudevent
-	ce := testingutils.StructuredCloudEventPayloadWithCleanEventType
-	event := cloudevents.NewEvent()
-	event.SetType(testingutils.CloudEventType)
-	err = json.Unmarshal([]byte(ce), &event)
-	assert.Nil(t, err)
+			if tc.givenNatsConnectionClosed {
+				connection.Close()
+			}
 
-	// send cloudevent
-	status, err := sender.Send(ctx, &event)
-	assert.Nil(t, err)
-	assert.Equal(t, status, http.StatusNoContent)
+			status, err := sender.Send(ctx, ce)
+			assert.Equal(t, tc.wantError, err != nil)
+			assert.Equal(t, tc.wantStatusCode, status)
 
-	// wait for subscriber to receive the messages
-	if err := testingutils.WaitForChannelOrTimeout(done, time.Second*3); err != nil {
-		t.Fatalf("Subscriber did not receive the message with error: %v", err)
+			err = testingutils.WaitForChannelOrTimeout(receive, time.Millisecond*5)
+			assert.Equal(t, tc.wantError, err != nil)
+		})
 	}
-
-	// close connection
-	bc.Connection.Close()
-
-	// send the cloudevent again, the message is not delivered cause the connection was closed
-	status, err = sender.Send(ctx, &event)
-	assert.NotNil(t, err)
-	assert.Equal(t, status, http.StatusBadGateway)
-
-	// send the cloudevent again, the reconnection should work
-	status, err = sender.Send(ctx, &event)
-	assert.Nil(t, err)
-	assert.Equal(t, status, http.StatusNoContent)
 }

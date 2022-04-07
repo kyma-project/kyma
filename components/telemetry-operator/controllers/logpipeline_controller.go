@@ -19,9 +19,13 @@ package controllers
 import (
 	"bytes"
 	"context"
-	"strings"
+	"fmt"
+	"time"
 
-	"github.com/go-logr/logr"
+	"github.com/prometheus/client_golang/prometheus"
+
+	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/api/v1alpha1"
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/fluentbit"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -31,13 +35,12 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
-	"sigs.k8s.io/controller-runtime/pkg/log"
-
-	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/api/v1alpha1"
-	"github.com/kyma-project/kyma/components/telemetry-operator/internal/fluentbit"
+	logf "sigs.k8s.io/controller-runtime/pkg/log"
+	"sigs.k8s.io/controller-runtime/pkg/metrics"
 )
 
 const (
+	ParsersConfigMapKey        = "parsers.conf"
 	sectionsConfigMapFinalizer = "FLUENT_BIT_SECTIONS_CONFIG_MAP"
 	parserConfigMapFinalizer   = "FLUENT_BIT_PARSERS_CONFIG_MAP"
 	//nolint:gosec
@@ -45,15 +48,66 @@ const (
 	filesFinalizer      = "FLUENT_BIT_FILES"
 )
 
+var (
+	requeueTime = 10 * time.Second
+)
+
 // LogPipelineReconciler reconciles a LogPipeline object
 type LogPipelineReconciler struct {
 	client.Client
-	Scheme                     *runtime.Scheme
+	Scheme *runtime.Scheme
+
 	FluentBitSectionsConfigMap types.NamespacedName
 	FluentBitParsersConfigMap  types.NamespacedName
 	FluentBitDaemonSet         types.NamespacedName
 	FluentBitEnvSecret         types.NamespacedName
 	FluentBitFilesConfigMap    types.NamespacedName
+
+	FluentBitRestartsCount prometheus.Counter
+}
+
+// NewLogPipelineReconciler returns a new LogPipelineReconciler using the given FluentBit config arguments
+func NewLogPipelineReconciler(client client.Client, scheme *runtime.Scheme, namespace string, sectionsCm string, parsersCm string, daemonSet string, envSecret string, filesCm string) *LogPipelineReconciler {
+	var result LogPipelineReconciler
+
+	result.Client = client
+	result.Scheme = scheme
+
+	result.FluentBitSectionsConfigMap = types.NamespacedName{
+		Name:      sectionsCm,
+		Namespace: namespace,
+	}
+	result.FluentBitParsersConfigMap = types.NamespacedName{
+		Name:      parsersCm,
+		Namespace: namespace,
+	}
+	result.FluentBitFilesConfigMap = types.NamespacedName{
+		Name:      filesCm,
+		Namespace: namespace,
+	}
+	result.FluentBitDaemonSet = types.NamespacedName{
+		Name:      daemonSet,
+		Namespace: namespace,
+	}
+	result.FluentBitEnvSecret = types.NamespacedName{
+		Name:      envSecret,
+		Namespace: namespace,
+	}
+
+	result.FluentBitRestartsCount = prometheus.NewCounter(prometheus.CounterOpts{
+		Name: "telemetry_operator_fluentbit_restarts_total",
+		Help: "Number of triggered FluentBit restarts",
+	})
+	metrics.Registry.MustRegister(result.FluentBitRestartsCount)
+
+	return &result
+}
+
+// SetupWithManager sets up the controller with the Manager.
+func (r *LogPipelineReconciler) SetupWithManager(mgr ctrl.Manager) error {
+	return ctrl.NewControllerManagedBy(mgr).
+		For(&telemetryv1alpha1.LogPipeline{}).
+		Complete(r)
 }
 
 //+kubebuilder:rbac:groups=telemetry.kyma-project.io,resources=logpipelines,verbs=get;list;watch;create;update;patch;delete
@@ -61,8 +115,7 @@ type LogPipelineReconciler struct {
 //+kubebuilder:rbac:groups=telemetry.kyma-project.io,resources=logpipelines/finalizers,verbs=update
 //+kubebuilder:rbac:groups="",resources=configmaps,verbs=get;list;watch;create;update;patch;delete
 //+kubebuilder:rbac:groups="",resources=secrets,verbs=get;list;watch;create;update;patch;delete
-//+kubebuilder:rbac:groups="",resources=pods,verbs=delete;list;watch
-//+kubebuilder:rbac:groups="apps",resources=daemonsets,verbs=get;list;watch
+//+kubebuilder:rbac:groups="apps",resources=daemonsets,verbs=get;list;watch;patch
 
 // Reconcile is part of the main kubernetes reconciliation loop which aims to
 // move the current state of the cluster closer to the desired state.
@@ -70,7 +123,7 @@ type LogPipelineReconciler struct {
 // For more details, check Reconcile and its Result here:
 // - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.10.0/pkg/reconcile
 func (r *LogPipelineReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
-	log := log.FromContext(ctx)
+	log := logf.FromContext(ctx)
 
 	var logPipeline telemetryv1alpha1.LogPipeline
 	if err := r.Get(ctx, req.NamespacedName, &logPipeline); err != nil {
@@ -106,15 +159,47 @@ func (r *LogPipelineReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 	}
 
 	if updatedSectionsCm || updatedParsersCm || updatedFilesCm || updatedEnv {
-		log.Info("Updated fluent bit configuration")
+		log.V(1).Info("Fluent bit configuration was updated. Restarting the daemon set")
+
 		if err := r.Update(ctx, &logPipeline); err != nil {
-			log.Error(err, "Cannot update LogPipeline")
+			log.Error(err, "Failed updating log pipeline")
 			return ctrl.Result{}, err
 		}
 
-		if err := r.deleteFluentBitPods(ctx, log); err != nil {
-			log.Error(err, "Cannot delete fluent bit pods")
+		if err := r.restartFluentBit(ctx); err != nil {
+			log.Error(err, "Failed restarting fluent bit daemon set")
 			return ctrl.Result{}, err
+		}
+
+		condition := telemetryv1alpha1.NewLogPipelineCondition(
+			telemetryv1alpha1.FluentBitDSRestartedReason,
+			telemetryv1alpha1.LogPipelinePending,
+		)
+		if err := r.updateLogPipelineStatus(ctx, req.NamespacedName, condition); err != nil {
+			return ctrl.Result{RequeueAfter: requeueTime}, err
+		}
+
+		return ctrl.Result{RequeueAfter: requeueTime}, nil
+	}
+
+	if logPipeline.Status.GetCondition(telemetryv1alpha1.LogPipelineRunning) == nil {
+		ready, err := r.isFluentBitDaemonSetReady(ctx)
+		if err != nil {
+			log.Error(err, "Failed to check fluent bit readiness")
+			return ctrl.Result{RequeueAfter: requeueTime}, err
+		}
+		if !ready {
+			log.V(1).Info(fmt.Sprintf("Checked %s - not yet ready. Requeueing...", req.NamespacedName.Name))
+			return ctrl.Result{RequeueAfter: requeueTime}, nil
+		}
+		log.V(1).Info(fmt.Sprintf("Checked %s - ready", req.NamespacedName.Name))
+
+		condition := telemetryv1alpha1.NewLogPipelineCondition(
+			telemetryv1alpha1.FluentBitDSRestartCompletedReason,
+			telemetryv1alpha1.LogPipelineRunning,
+		)
+		if err := r.updateLogPipelineStatus(ctx, req.NamespacedName, condition); err != nil {
+			return ctrl.Result{RequeueAfter: requeueTime}, err
 		}
 	}
 
@@ -144,7 +229,7 @@ func (r *LogPipelineReconciler) getOrCreateConfigMap(ctx context.Context, name t
 
 // Synchronize LogPipeline with ConfigMap of FluentBit sections (Input, Filter and Output).
 func (r *LogPipelineReconciler) syncSectionsConfigMap(ctx context.Context, logPipeline *telemetryv1alpha1.LogPipeline) (bool, error) {
-	log := log.FromContext(ctx)
+	log := logf.FromContext(ctx)
 	cm, err := r.getOrCreateConfigMap(ctx, r.FluentBitSectionsConfigMap)
 	if err != nil {
 		return false, err
@@ -159,7 +244,7 @@ func (r *LogPipelineReconciler) syncSectionsConfigMap(ctx context.Context, logPi
 			controllerutil.RemoveFinalizer(logPipeline, sectionsConfigMapFinalizer)
 		}
 	} else {
-		fluentBitConfig := mergeFluentBitConfig(logPipeline)
+		fluentBitConfig := fluentbit.MergeSectionsConfig(logPipeline)
 		if cm.Data == nil {
 			data := make(map[string]string)
 			data[cmKey] = fluentBitConfig
@@ -184,18 +269,17 @@ func (r *LogPipelineReconciler) syncSectionsConfigMap(ctx context.Context, logPi
 
 // Synchronize LogPipeline with ConfigMap of FluentBit parsers (Parser and MultiLineParser).
 func (r *LogPipelineReconciler) syncParsersConfigMap(ctx context.Context, logPipeline *telemetryv1alpha1.LogPipeline) (bool, error) {
-	log := log.FromContext(ctx)
+	log := logf.FromContext(ctx)
 	cm, err := r.getOrCreateConfigMap(ctx, r.FluentBitParsersConfigMap)
 	if err != nil {
 		return false, err
 	}
-	cmKey := "parsers.conf"
 
 	// Add or remove Fluent Bit configuration parsers
 	if logPipeline.DeletionTimestamp != nil {
 		if cm.Data != nil && controllerutil.ContainsFinalizer(logPipeline, parserConfigMapFinalizer) {
 			log.Info("Deleting fluent bit parsers config")
-			delete(cm.Data, cmKey)
+			delete(cm.Data, ParsersConfigMapKey)
 			controllerutil.RemoveFinalizer(logPipeline, parserConfigMapFinalizer)
 
 			var logPipelines telemetryv1alpha1.LogPipelineList
@@ -203,12 +287,15 @@ func (r *LogPipelineReconciler) syncParsersConfigMap(ctx context.Context, logPip
 			if err != nil {
 				return false, err
 			}
-			fluentBitParsersConfig := mergeFluentBitParsersConfig(&logPipelines)
+			fluentBitParsersConfig := fluentbit.MergeParsersConfig(&logPipelines)
 			if fluentBitParsersConfig == "" {
+				if cm.Data == nil {
+					return false, nil
+				}
 				cm.Data = nil
 			} else {
 				data := make(map[string]string)
-				data[cmKey] = fluentBitParsersConfig
+				data[ParsersConfigMapKey] = fluentBitParsersConfig
 				cm.Data = data
 			}
 		}
@@ -219,21 +306,25 @@ func (r *LogPipelineReconciler) syncParsersConfigMap(ctx context.Context, logPip
 			return false, err
 		}
 
-		fluentBitParsersConfig := mergeFluentBitParsersConfig(&logPipelines)
+		fluentBitParsersConfig := fluentbit.MergeParsersConfig(&logPipelines)
 		if fluentBitParsersConfig == "" {
+			if cm.Data == nil {
+				return false, nil
+			}
 			cm.Data = nil
 		} else if cm.Data == nil {
 			data := make(map[string]string)
-			data[cmKey] = fluentBitParsersConfig
+			data[ParsersConfigMapKey] = fluentBitParsersConfig
 			cm.Data = data
+			controllerutil.AddFinalizer(logPipeline, parserConfigMapFinalizer)
 		} else {
-			if oldConfig, hasKey := cm.Data[cmKey]; hasKey && oldConfig == fluentBitParsersConfig {
+			if oldConfig, hasKey := cm.Data[ParsersConfigMapKey]; hasKey && oldConfig == fluentBitParsersConfig {
 				// Nothing changed
 				return false, nil
 			}
-			cm.Data[cmKey] = fluentBitParsersConfig
+			cm.Data[ParsersConfigMapKey] = fluentBitParsersConfig
+			controllerutil.AddFinalizer(logPipeline, parserConfigMapFinalizer)
 		}
-		controllerutil.AddFinalizer(logPipeline, parserConfigMapFinalizer)
 	}
 
 	// Update ConfigMap
@@ -289,7 +380,7 @@ func (r *LogPipelineReconciler) syncFilesConfigMap(ctx context.Context, logPipel
 
 // Copy referenced secrets to global Fluent Bit environment secret.
 func (r *LogPipelineReconciler) syncSecretRefs(ctx context.Context, logPipeline *telemetryv1alpha1.LogPipeline) (bool, error) {
-	log := log.FromContext(ctx)
+	log := logf.FromContext(ctx)
 	var secret corev1.Secret
 	changed := false
 
@@ -311,11 +402,11 @@ func (r *LogPipelineReconciler) syncSecretRefs(ctx context.Context, logPipeline 
 		}
 	}
 
-	//Sync environment from referenced Secrets to Fluent Bit Secret
+	// Sync environment from referenced Secrets to Fluent Bit Secret
 	for _, secretRef := range logPipeline.Spec.SecretRefs {
 		var referencedSecret corev1.Secret
 		if err := r.Get(ctx, types.NamespacedName{Name: secretRef.Name, Namespace: secretRef.Namespace}, &referencedSecret); err != nil {
-			log.Error(err, "Cannot read secret %s from namespace %s", secretRef.Name, secretRef.Namespace)
+			log.Error(err, "Failed reading secret %s from namespace %s", secretRef.Name, secretRef.Namespace)
 			continue
 		}
 		for k, v := range referencedSecret.Data {
@@ -357,58 +448,74 @@ func (r *LogPipelineReconciler) syncSecretRefs(ctx context.Context, logPipeline 
 }
 
 // Delete all Fluent Bit pods to apply new configuration.
-func (r *LogPipelineReconciler) deleteFluentBitPods(ctx context.Context, log logr.Logger) error {
-	var fluentBitDs appsv1.DaemonSet
-	if err := r.Get(ctx, r.FluentBitDaemonSet, &fluentBitDs); err != nil {
-		log.Error(err, "Cannot get Fluent Bit DaemonSet")
-	}
-
-	var fluentBitPods corev1.PodList
-	if err := r.List(ctx, &fluentBitPods, client.InNamespace(r.FluentBitDaemonSet.Namespace), client.MatchingLabels(fluentBitDs.Spec.Template.Labels)); err != nil {
-		log.Error(err, "Cannot list fluent bit pods")
+func (r *LogPipelineReconciler) restartFluentBit(ctx context.Context) error {
+	log := logf.FromContext(ctx)
+	var ds appsv1.DaemonSet
+	if err := r.Get(ctx, r.FluentBitDaemonSet, &ds); err != nil {
+		log.Error(err, "Failed getting fluent bit DaemonSet")
 		return err
 	}
 
-	log.Info("Restarting Fluent Bit pods")
-	for i := range fluentBitPods.Items {
-		if err := r.Delete(ctx, &fluentBitPods.Items[i]); err != nil {
-			log.Error(err, "Cannot delete pod "+fluentBitPods.Items[i].Name)
-		}
+	patchedDS := *ds.DeepCopy()
+	if patchedDS.Spec.Template.ObjectMeta.Annotations == nil {
+		patchedDS.Spec.Template.ObjectMeta.Annotations = make(map[string]string)
 	}
+	patchedDS.Spec.Template.ObjectMeta.Annotations["kubectl.kubernetes.io/restartedAt"] = time.Now().Format(time.RFC3339)
+
+	if err := r.Patch(ctx, &patchedDS, client.MergeFrom(&ds)); err != nil {
+		log.Error(err, "Failed to patch fluent bit to trigger rolling update")
+		return err
+	}
+	r.FluentBitRestartsCount.Inc()
 	return nil
 }
 
-// Merge FluentBit filters and outputs to single FluentBit configuration.
-func mergeFluentBitConfig(logPipeline *telemetryv1alpha1.LogPipeline) string {
-	var sb strings.Builder
-	for _, filter := range logPipeline.Spec.Filters {
-		sb.WriteString(fluentbit.BuildConfigSection(fluentbit.FilterConfigHeader, filter.Content))
+func (r *LogPipelineReconciler) isFluentBitDaemonSetReady(ctx context.Context) (bool, error) {
+	log := logf.FromContext(ctx)
+	var ds appsv1.DaemonSet
+	if err := r.Get(ctx, r.FluentBitDaemonSet, &ds); err != nil {
+		log.Error(err, "Failed getting fluent bit daemon set")
+		return false, err
 	}
-	for _, output := range logPipeline.Spec.Outputs {
-		sb.WriteString(fluentbit.BuildConfigSection(fluentbit.OutputConfigHeader, output.Content))
-	}
-	return sb.String()
+
+	generation := ds.Generation
+	observedGeneration := ds.Status.ObservedGeneration
+	updated := ds.Status.UpdatedNumberScheduled
+	desired := ds.Status.DesiredNumberScheduled
+	ready := ds.Status.NumberReady
+
+	log.V(1).Info(fmt.Sprintf("Checking fluent bit: updated: %d, desired: %d, ready: %d, generation: %d, observed generation: %d",
+		updated, desired, ready, generation, observedGeneration))
+
+	return observedGeneration == generation && updated == desired && ready >= desired, nil
 }
 
-// Merge FluentBit parsers and multiLine parsers to single FluentBit configuration.
-func mergeFluentBitParsersConfig(logPipelines *telemetryv1alpha1.LogPipelineList) string {
-	var sb strings.Builder
-	for _, logPipeline := range logPipelines.Items {
-		if logPipeline.DeletionTimestamp == nil {
-			for _, parser := range logPipeline.Spec.Parsers {
-				sb.WriteString(fluentbit.BuildConfigSection(fluentbit.ParserConfigHeader, parser.Content))
-			}
-			for _, multiLineParser := range logPipeline.Spec.MultiLineParsers {
-				sb.WriteString(fluentbit.BuildConfigSection(fluentbit.MultiLineParserConfigHeader, multiLineParser.Content))
-			}
-		}
-	}
-	return sb.String()
-}
+func (r *LogPipelineReconciler) updateLogPipelineStatus(ctx context.Context,
+	name types.NamespacedName,
+	condition *telemetryv1alpha1.LogPipelineCondition) error {
+	log := logf.FromContext(ctx)
 
-// SetupWithManager sets up the controller with the Manager.
-func (r *LogPipelineReconciler) SetupWithManager(mgr ctrl.Manager) error {
-	return ctrl.NewControllerManagedBy(mgr).
-		For(&telemetryv1alpha1.LogPipeline{}).
-		Complete(r)
+	var logPipeline telemetryv1alpha1.LogPipeline
+	if err := r.Get(ctx, name, &logPipeline); err != nil {
+		log.Error(err, "Failed getting log pipeline")
+		return err
+	}
+
+	// If the log pipeline had a running condition and then was modified, all conditions are removed.
+	// In this case, condition tracking starts off from the beginning.
+	if logPipeline.Status.GetCondition(telemetryv1alpha1.LogPipelineRunning) != nil &&
+		condition.Type == telemetryv1alpha1.LogPipelinePending {
+		log.V(1).Info(fmt.Sprintf("Updating the status of %s to %s. Resetting previous conditions", name.Name, condition.Type))
+		logPipeline.Status.Conditions = []telemetryv1alpha1.LogPipelineCondition{}
+	} else {
+		log.V(1).Info(fmt.Sprintf("Updating the status of %s to %s", name.Name, condition.Type))
+	}
+
+	logPipeline.Status.SetCondition(*condition)
+
+	if err := r.Status().Update(ctx, &logPipeline); err != nil {
+		log.Error(err, fmt.Sprintf("Failed updating log pipeline status to %s", condition.Type))
+		return err
+	}
+	return nil
 }

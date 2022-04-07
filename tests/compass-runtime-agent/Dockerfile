@@ -14,9 +14,11 @@ FROM eu.gcr.io/kyma-project/external/alpine:3.12.0
 LABEL source=git@github.com:kyma-project/kyma.git
 RUN apk add --no-cache curl
 
+WORKDIR /app
+
 COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 COPY --from=builder /go/src/github.com/kyma-project/kyma/tests/compass-runtime-agent/scripts/entrypoint.sh .
 COPY --from=builder /go/src/github.com/kyma-project/kyma/tests/compass-runtime-agent/test.test .
 COPY --from=builder /go/src/github.com/kyma-project/kyma/tests/compass-runtime-agent/licenses ./licenses
 
-ENTRYPOINT ./entrypoint.sh
+ENTRYPOINT ["./entrypoint.sh"]

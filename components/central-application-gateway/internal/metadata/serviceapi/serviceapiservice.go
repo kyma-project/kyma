@@ -46,7 +46,8 @@ func NewService(secretsRepository secrets.Repository) Service {
 
 func (sas defaultService) Read(applicationAPI *applications.ServiceAPI) (*model.API, apperrors.AppError) {
 	api := &model.API{
-		TargetUrl: applicationAPI.TargetURL,
+		TargetUrl:  applicationAPI.TargetURL,
+		SkipVerify: applicationAPI.SkipVerify,
 	}
 
 	if applicationAPI.Credentials != nil {

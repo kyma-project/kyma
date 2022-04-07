@@ -1,17 +1,19 @@
 package director
 
 import (
+	"context"
 	"testing"
 
 	"github.com/kyma-incubator/compass/components/director/pkg/graphql"
-	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/config"
-	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/graphql/mocks"
-	kymamodel "github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/model"
 	gcli "github.com/machinebox/graphql"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
+
+	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/config"
+	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/graphql/mocks"
+	kymamodel "github.com/kyma-project/kyma/components/compass-runtime-agent/internal/kyma/model"
 )
 
 const (
@@ -30,7 +32,7 @@ const (
 		description
 		labels
 		auths {id}
-		packages {data {
+		bundles {data {
 		id
 		name
 		description
@@ -140,12 +142,10 @@ const (
 	}`
 )
 
-var (
-	runtimeConfig = config.RuntimeConfig{
-		RuntimeId: runtimeId,
-		Tenant:    tenant,
-	}
-)
+var runtimeConfig = config.RuntimeConfig{
+	RuntimeId: runtimeId,
+	Tenant:    tenant,
+}
 
 func TestConfigClient_FetchConfiguration(t *testing.T) {
 	expectedRequest := gcli.NewRequest(expectedAppsAndLabelsForRuntimeQuery)
@@ -153,7 +153,7 @@ func TestConfigClient_FetchConfiguration(t *testing.T) {
 
 	setExpectedFetchConfigFunc := func(appsResponse *ApplicationPage, runtimeResponse *Runtime) func(args mock.Arguments) {
 		return func(args mock.Arguments) {
-			response, ok := args[1].(*ApplicationsAndLabelsForRuntimeResponse)
+			response, ok := args[2].(*ApplicationsAndLabelsForRuntimeResponse)
 			require.True(t, ok)
 			assert.Empty(t, response.ApplicationsPage)
 			assert.Empty(t, response.Runtime)
@@ -177,7 +177,7 @@ func TestConfigClient_FetchConfiguration(t *testing.T) {
 				{
 					ID:    "asda-oqiu",
 					Name:  "App3",
-					Auths: []*graphql.SystemAuth{&graphql.SystemAuth{"asd", nil}},
+					Auths: []*graphql.AppSystemAuth{{"asd", nil}},
 				},
 			},
 			PageInfo:   &graphql.PageInfo{},
@@ -216,7 +216,7 @@ func TestConfigClient_FetchConfiguration(t *testing.T) {
 
 		client := &mocks.Client{}
 		client.
-			On("Do", expectedRequest, &ApplicationsAndLabelsForRuntimeResponse{}).
+			On("Do", context.Background(), expectedRequest, &ApplicationsAndLabelsForRuntimeResponse{}).
 			Return(nil).
 			Run(setExpectedFetchConfigFunc(expectedResponseApplications, expectedResponseRuntime)).
 			Once()
@@ -224,7 +224,7 @@ func TestConfigClient_FetchConfiguration(t *testing.T) {
 		configClient := NewConfigurationClient(client, runtimeConfig)
 
 		// when
-		applicationsResponse, labelsResponse, err := configClient.FetchConfiguration()
+		applicationsResponse, labelsResponse, err := configClient.FetchConfiguration(context.Background())
 
 		// then
 		require.NoError(t, err)
@@ -246,7 +246,7 @@ func TestConfigClient_FetchConfiguration(t *testing.T) {
 
 		client := &mocks.Client{}
 		client.
-			On("Do", expectedRequest, &ApplicationsAndLabelsForRuntimeResponse{}).
+			On("Do", context.Background(), expectedRequest, &ApplicationsAndLabelsForRuntimeResponse{}).
 			Return(nil).
 			Run(setExpectedFetchConfigFunc(expectedResponseApps, expectedResponseRuntime)).
 			Once()
@@ -254,7 +254,7 @@ func TestConfigClient_FetchConfiguration(t *testing.T) {
 		configClient := NewConfigurationClient(client, runtimeConfig)
 
 		// when
-		applicationsResponse, _, err := configClient.FetchConfiguration()
+		applicationsResponse, _, err := configClient.FetchConfiguration(context.Background())
 
 		// then
 		require.NoError(t, err)
@@ -275,7 +275,7 @@ func TestConfigClient_FetchConfiguration(t *testing.T) {
 
 		client := &mocks.Client{}
 		client.
-			On("Do", expectedRequest, &ApplicationsAndLabelsForRuntimeResponse{}).
+			On("Do", context.Background(), expectedRequest, &ApplicationsAndLabelsForRuntimeResponse{}).
 			Return(nil).
 			Run(setExpectedFetchConfigFunc(expectedResponseApps, expectedResponseRuntime)).
 			Once()
@@ -283,7 +283,7 @@ func TestConfigClient_FetchConfiguration(t *testing.T) {
 		configClient := NewConfigurationClient(client, runtimeConfig)
 
 		// when
-		_, labelsResponse, err := configClient.FetchConfiguration()
+		_, labelsResponse, err := configClient.FetchConfiguration(context.Background())
 
 		// then
 		require.NoError(t, err)
@@ -294,7 +294,7 @@ func TestConfigClient_FetchConfiguration(t *testing.T) {
 		// given
 		client := &mocks.Client{}
 		client.
-			On("Do", expectedRequest, &ApplicationsAndLabelsForRuntimeResponse{}).
+			On("Do", context.Background(), expectedRequest, &ApplicationsAndLabelsForRuntimeResponse{}).
 			Return(nil).
 			Run(setExpectedFetchConfigFunc(nil, nil)).
 			Once()
@@ -302,7 +302,7 @@ func TestConfigClient_FetchConfiguration(t *testing.T) {
 		configClient := NewConfigurationClient(client, runtimeConfig)
 
 		// when
-		applicationsResponse, labelsResponse, err := configClient.FetchConfiguration()
+		applicationsResponse, labelsResponse, err := configClient.FetchConfiguration(context.Background())
 
 		// then
 		require.Error(t, err)
@@ -315,14 +315,14 @@ func TestConfigClient_FetchConfiguration(t *testing.T) {
 		// given
 		client := &mocks.Client{}
 		client.
-			On("Do", expectedRequest, &ApplicationsAndLabelsForRuntimeResponse{}).
+			On("Do", context.Background(), expectedRequest, &ApplicationsAndLabelsForRuntimeResponse{}).
 			Return(errors.New("error")).
 			Once()
 
 		configClient := NewConfigurationClient(client, runtimeConfig)
 
 		// when
-		applicationsResponse, labelsResponse, err := configClient.FetchConfiguration()
+		applicationsResponse, labelsResponse, err := configClient.FetchConfiguration(context.Background())
 
 		// then
 		require.Error(t, err)
@@ -345,7 +345,7 @@ func TestConfigClient_SetURLsLabels(t *testing.T) {
 
 	setExpectedRuntimeLabelFunc := func(expectedResponses *graphql.Label) func(args mock.Arguments) {
 		return func(args mock.Arguments) {
-			response, ok := args[1].(*SetRuntimeLabelResponse)
+			response, ok := args[2].(*SetRuntimeLabelResponse)
 			require.True(t, ok)
 			assert.Empty(t, response.Result)
 			response.Result = expectedResponses
@@ -367,12 +367,12 @@ func TestConfigClient_SetURLsLabels(t *testing.T) {
 
 		client := &mocks.Client{}
 		client.
-			On("Do", expectedSetEventsURLRequest, &SetRuntimeLabelResponse{}).
+			On("Do", context.Background(), expectedSetEventsURLRequest, &SetRuntimeLabelResponse{}).
 			Return(nil).
 			Run(setExpectedRuntimeLabelFunc(eventsURLLabel)).
 			Once()
 		client.
-			On("Do", expectedSetConsoleURLRequest, &SetRuntimeLabelResponse{}).
+			On("Do", context.Background(), expectedSetConsoleURLRequest, &SetRuntimeLabelResponse{}).
 			Return(nil).
 			Run(setExpectedRuntimeLabelFunc(consoleURLLabel)).
 			Once()
@@ -380,7 +380,7 @@ func TestConfigClient_SetURLsLabels(t *testing.T) {
 		configClient := NewConfigurationClient(client, runtimeConfig)
 
 		// when
-		updatedLabels, err := configClient.SetURLsLabels(runtimeURLsConfig, currentLabels)
+		updatedLabels, err := configClient.SetURLsLabels(context.Background(), runtimeURLsConfig, currentLabels)
 
 		// then
 		require.NoError(t, err)
@@ -397,7 +397,7 @@ func TestConfigClient_SetURLsLabels(t *testing.T) {
 		configClient := NewConfigurationClient(&mocks.Client{}, runtimeConfig)
 
 		// when
-		updatedLabels, err := configClient.SetURLsLabels(runtimeURLsConfig, currentLabels)
+		updatedLabels, err := configClient.SetURLsLabels(context.Background(), runtimeURLsConfig, currentLabels)
 
 		// then
 		require.NoError(t, err)
@@ -411,12 +411,12 @@ func TestConfigClient_SetURLsLabels(t *testing.T) {
 
 		client := &mocks.Client{}
 		client.
-			On("Do", expectedSetEventsURLRequest, &SetRuntimeLabelResponse{}).
+			On("Do", context.Background(), expectedSetEventsURLRequest, &SetRuntimeLabelResponse{}).
 			Return(nil).
 			Run(setExpectedRuntimeLabelFunc(eventsURLLabel)).
 			Once()
 		client.
-			On("Do", expectedSetConsoleURLRequest, &SetRuntimeLabelResponse{}).
+			On("Do", context.Background(), expectedSetConsoleURLRequest, &SetRuntimeLabelResponse{}).
 			Return(nil).
 			Run(setExpectedRuntimeLabelFunc(consoleURLLabel)).
 			Once()
@@ -424,7 +424,7 @@ func TestConfigClient_SetURLsLabels(t *testing.T) {
 		configClient := NewConfigurationClient(client, runtimeConfig)
 
 		// when
-		updatedLabels, err := configClient.SetURLsLabels(runtimeURLsConfig, currentLabels)
+		updatedLabels, err := configClient.SetURLsLabels(context.Background(), runtimeURLsConfig, currentLabels)
 
 		// then
 		require.NoError(t, err)
@@ -439,7 +439,7 @@ func TestConfigClient_SetURLsLabels(t *testing.T) {
 
 		client := &mocks.Client{}
 		client.
-			On("Do", expectedSetConsoleURLRequest, &SetRuntimeLabelResponse{}).
+			On("Do", context.Background(), expectedSetConsoleURLRequest, &SetRuntimeLabelResponse{}).
 			Return(nil).
 			Run(setExpectedRuntimeLabelFunc(consoleURLLabel)).
 			Once()
@@ -447,7 +447,7 @@ func TestConfigClient_SetURLsLabels(t *testing.T) {
 		configClient := NewConfigurationClient(client, runtimeConfig)
 
 		// when
-		updatedLabels, err := configClient.SetURLsLabels(runtimeURLsConfig, currentLabels)
+		updatedLabels, err := configClient.SetURLsLabels(context.Background(), runtimeURLsConfig, currentLabels)
 
 		// then
 		require.NoError(t, err)
@@ -460,13 +460,13 @@ func TestConfigClient_SetURLsLabels(t *testing.T) {
 
 		client := &mocks.Client{}
 		client.
-			On("Do", expectedSetEventsURLRequest, &SetRuntimeLabelResponse{}).
+			On("Do", context.Background(), expectedSetEventsURLRequest, &SetRuntimeLabelResponse{}).
 			Return(nil).
 			Run(setExpectedRuntimeLabelFunc(eventsURLLabel)).
 			Once()
 
 		client.
-			On("Do", expectedSetConsoleURLRequest, &SetRuntimeLabelResponse{}).
+			On("Do", context.Background(), expectedSetConsoleURLRequest, &SetRuntimeLabelResponse{}).
 			Return(nil).
 			Run(setExpectedRuntimeLabelFunc(nil)).
 			Once()
@@ -474,7 +474,7 @@ func TestConfigClient_SetURLsLabels(t *testing.T) {
 		configClient := NewConfigurationClient(client, runtimeConfig)
 
 		// when
-		updatedLabels, err := configClient.SetURLsLabels(runtimeURLsConfig, currentLabels)
+		updatedLabels, err := configClient.SetURLsLabels(context.Background(), runtimeURLsConfig, currentLabels)
 
 		// then
 		require.Error(t, err)

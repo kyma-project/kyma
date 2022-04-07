@@ -21,7 +21,7 @@ func (r *Reconciler) setAsOwnerReference(ctx context.Context, obj metav1.Object)
 		Name:      deployment.ControllerName,
 	}
 	var deploymentController appsv1.Deployment
-	if err := r.Cache.Get(ctx, controllerNamespacedName, &deploymentController); err != nil {
+	if err := r.Get(ctx, controllerNamespacedName, &deploymentController); err != nil {
 		r.namedLogger().Errorw("get controller NamespacedName failed", "error", err)
 		return err
 	}

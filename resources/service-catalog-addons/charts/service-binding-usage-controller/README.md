@@ -2,7 +2,7 @@
 
 ## Overview
 
-The Binding Usage Controller injects **ServiceBindings** to a given application.
+The Binding Usage Controller injects **Service Bindings** to a given application.
 
 ## Details
 
