@@ -415,7 +415,7 @@ var _ = Describe("Backend Reconciliation Tests", func() {
 					reconcilertesting.HaveBackendType(eventingv1alpha1.NatsBackendType),
 					reconcilertesting.HaveBackendCondition(reconcilertesting.PublisherProxyDefaultNotReadyCondition()),
 					reconcilertesting.HaveBackendCondition(reconcilertesting.SubscriptionControllerReadyConditionWith(corev1.ConditionFalse,
-						eventingv1alpha1.ConditionReasonControllerStopStartFailed)),
+						eventingv1alpha1.ConditionReasonControllerStartFailed)),
 					reconcilertesting.HaveNoBEBSecretNameAndNamespace(),
 					reconcilertesting.HaveEventingBackendNotReady(),
 				))
@@ -472,7 +472,7 @@ var _ = Describe("Backend Reconciliation Tests", func() {
 					reconcilertesting.HaveBackendType(eventingv1alpha1.BEBBackendType),
 					reconcilertesting.HaveBackendCondition(reconcilertesting.PublisherProxyDefaultNotReadyCondition()),
 					reconcilertesting.HaveBackendCondition(reconcilertesting.SubscriptionControllerReadyConditionWith(corev1.ConditionFalse,
-						eventingv1alpha1.ConditionReasonControllerStopStartFailed)),
+						eventingv1alpha1.ConditionReasonControllerStopFailed)),
 					reconcilertesting.HaveBEBSecretNameAndNamespace(bebSecret1name, kymaSystemNamespace),
 					reconcilertesting.HaveEventingBackendNotReady(),
 				))

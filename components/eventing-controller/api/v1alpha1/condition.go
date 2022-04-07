@@ -43,16 +43,17 @@ const (
 	ConditionReasonNATSSubscriptionNotActive  ConditionReason = "NATS Subscription not active"
 	ConditionReasonWebhookCallStatus          ConditionReason = "BEB Subscription webhook call no errors status"
 
-	ConditionReasonSubscriptionControllerReady        ConditionReason = "Subscription manager and controller started"
-	ConditionReasonSubscriptionControllerNotReady     ConditionReason = "Subscription controller not started"
-	ConditionReasonPublisherDeploymentReady           ConditionReason = "Publisher proxy deployment ready"
-	ConditionReasonPublisherDeploymentNotReady        ConditionReason = "Publisher proxy deployment not ready"
-	ConditionReasonBackendCreationUpdateFailed        ConditionReason = "Backend CR creation or update failed"
-	ConditionReasonPublisherProxyCreationUpdateFailed ConditionReason = "Publisher Proxy deployment creation or update failed"
-	ConditionReasonControllerStopStartFailed          ConditionReason = "Starting or stopping the controller failed"
-	ConditionReasonOauth2ClientSyncFailed             ConditionReason = "Failed to get or update OAuth2 Client Credentials"
-	ConditionReasonPublisherProxySecretError          ConditionReason = "Publisher proxy secret sync failed"
-	ConditionDuplicateSecrets                         ConditionReason = "Multiple eventing backend labeled secrets exist"
+	ConditionReasonSubscriptionControllerReady    ConditionReason = "Subscription controller started"
+	ConditionReasonSubscriptionControllerNotReady ConditionReason = "Subscription controller not ready"
+	ConditionReasonPublisherDeploymentReady       ConditionReason = "Publisher proxy deployment ready"
+	ConditionReasonPublisherDeploymentNotReady    ConditionReason = "Publisher proxy deployment not ready"
+	ConditionReasonBackendCRSyncFailed            ConditionReason = "Backend CR sync failed"
+	ConditionReasonPublisherProxySyncFailed       ConditionReason = "Publisher Proxy deployment sync failed"
+	ConditionReasonControllerStartFailed          ConditionReason = "Starting the controller failed"
+	ConditionReasonControllerStopFailed           ConditionReason = "Stopping the controller failed"
+	ConditionReasonOauth2ClientSyncFailed         ConditionReason = "Failed to sync OAuth2 Client Credentials"
+	ConditionReasonPublisherProxySecretError      ConditionReason = "Publisher proxy secret sync failed"
+	ConditionDuplicateSecrets                     ConditionReason = "Multiple eventing backend labeled secrets exist"
 )
 
 // initializeConditions sets unset conditions to Unknown
@@ -75,14 +76,14 @@ func initializeConditions(initialConditions, currentConditions []Condition) []Co
 	return finalConditions
 }
 
-// InitializeSubscriptionConditions sets unset Subscription conditions to Unknown
-func (s *SubscriptionStatus) InitializeSubscriptionConditions() {
+// InitializeConditions sets unset Subscription conditions to Unknown
+func (s *SubscriptionStatus) InitializeConditions() {
 	initialConditions := makeSubscriptionConditions()
 	s.Conditions = initializeConditions(initialConditions, s.Conditions)
 }
 
-// InitializeBackendConditions sets unset Backend conditions to Unknown
-func (b *EventingBackendStatus) InitializeBackendConditions() {
+// InitializeConditions sets all the Backend conditions to true
+func (b *EventingBackendStatus) InitializeConditions() {
 	initialConditions := makeBackendConditions()
 	b.Conditions = initializeConditions(initialConditions, b.Conditions)
 }
@@ -292,7 +293,7 @@ func (b *EventingBackendStatus) SetPublisherReadyCondition(ready bool, reason Co
 	b.Conditions = newConditions
 }
 
-func (b *EventingBackendStatus) GetSubscriptionControllerReadyStatus() bool {
+func (b *EventingBackendStatus) IsSubscriptionControllerStatusReady() bool {
 	for _, condition := range b.Conditions {
 		if condition.Type == ConditionControllerReady {
 			return condition.Status == corev1.ConditionTrue

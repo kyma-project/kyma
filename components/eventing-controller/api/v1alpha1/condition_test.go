@@ -45,7 +45,7 @@ func Test_InitializeSubscriptionConditions(t *testing.T) {
 			wantConditionTypes := []ConditionType{ConditionSubscribed, ConditionSubscriptionActive, ConditionAPIRuleStatus, ConditionWebhookCallStatus}
 
 			// when
-			s.InitializeSubscriptionConditions()
+			s.InitializeConditions()
 
 			// then
 			g.Expect(s.Conditions).To(HaveLen(len(wantConditionTypes)))
@@ -325,6 +325,18 @@ func Test_conditionsEquals(t *testing.T) {
 			conditionsSet2: []Condition{
 				{Type: ConditionSubscribed, Status: corev1.ConditionTrue},
 				{Type: ConditionAPIRuleStatus, Status: corev1.ConditionTrue},
+			},
+			wantEqualStatus: false,
+		},
+		{
+			name: "should not be equal if the condition types are different and an empty key is referenced",
+			conditionsSet1: []Condition{
+				{Type: ConditionSubscribed, Status: corev1.ConditionTrue},
+				{Type: ConditionAPIRuleStatus, Status: corev1.ConditionTrue},
+			},
+			conditionsSet2: []Condition{
+				{Type: ConditionAPIRuleStatus, Status: corev1.ConditionTrue},
+				{Type: ConditionControllerReady, Status: corev1.ConditionTrue},
 			},
 			wantEqualStatus: false,
 		},

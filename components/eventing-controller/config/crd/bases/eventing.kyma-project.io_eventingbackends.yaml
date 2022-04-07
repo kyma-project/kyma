@@ -68,7 +68,8 @@ spec:
                   required only for BEB
                 type: string
               conditions:
-                description: Conditions defines the status conditions
+                description: Conditions defines the status of the Controller and the
+                  EPP
                 items:
                   properties:
                     lastTransitionTime:
