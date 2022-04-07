@@ -543,13 +543,13 @@ async function connectCommerceMock(mockHost, tokenData) {
   };
 
   try {
-    debug('POST request:')
-    debug(url)
+    debug('POST request:');
+    debug(url);
 
     await axios.post(url, body, params);
   } catch (err) {
-    debug(JSON.stringify(err))
-    debug(err)
+    debug(JSON.stringify(err));
+    debug(err);
     throw convertAxiosError(err, 'Error during establishing connection from Commerce Mock to Kyma connector service');
   }
 }
