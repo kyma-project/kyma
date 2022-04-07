@@ -71,4 +71,4 @@ The main Prometheus instance supports scraping metrics using [`Strict mTLS`](htt
 
 The following diagram shows how the Istio-related instance fits into the monitoring setup in Kyma:
 
-![Istio Monitoring](../assets/obsv-monitoring-istio.svg)
+![Istio Monitoring](./assets/obsv-monitoring-istio.svg)
