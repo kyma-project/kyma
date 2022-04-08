@@ -66,8 +66,6 @@ func main() {
 		options.eventingPublisherHost,
 		options.eventingPathPrefixEvents,
 		options.eventingDestinationPath,
-		options.appRegistryPathPrefix,
-		options.appRegistryHost,
 		idCache,
 		log)
 

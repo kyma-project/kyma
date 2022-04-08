@@ -3,7 +3,7 @@
 ## Overview
 
 The Application Connectivity Validator validates client certificate subjects.
-It proxies the requests to the Eventing Publisher and the Application Registry.
+It proxies the requests to the Eventing Publisher.
 
 A single instance of the component is deployed for an Application and uses these parameters:
 - **proxyPort** is the port on which the reverse proxy is exposed. The default port is `8081`.
@@ -14,8 +14,6 @@ A single instance of the component is deployed for an Application and uses these
 - **eventingPathPrefixV2** is the path prefix for which requests are forwarded to the Eventing Publisher V2 API. The default value is `/v2/events`.
 - **eventingPublisherHost** is the host and the port of the Eventing Publisher. The default value is `events-api:8080`.
 - **eventingDestinationPath** is the destination path for the requests coming to the Eventing. The default value is `/`.
-- **appRegistryPathPrefix** is the path prefix for which requests are forwarded to the Application Registry. The default value is `/v1/metadata`.
-- **appRegistryHost** is the host and the port of the Eventing Publisher. The default value is `application-registry-external-api:8081`.
 - **kubeConfig** is the path to a cluster kubeconfig. Used for running the service outside of the cluster.
 - **apiServerURL** is the address of the Kubernetes API server. Overrides any value in kubeconfig. Used for running the service outside of the cluster.
 - **syncPeriod** is the period of time, in seconds, after which the controller should reconcile the Application resource. The default value is `120 seconds`.
