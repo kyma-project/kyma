@@ -1592,10 +1592,8 @@ function waitForEventingBackendToReady(backendType='beb',
       (_type, _apiObj, watchObj) => {
         return (
           watchObj.object.metadata.name == name &&
-        watchObj.object.status.backendType.toLowerCase() == backendType.toLowerCase() &&
-        watchObj.object.status.eventingReady == true &&
-        watchObj.object.status.publisherProxyReady == true &&
-        watchObj.object.status.subscriptionControllerReady == true
+          watchObj.object.status.backendType.toLowerCase() == backendType.toLowerCase() &&
+          watchObj.object.status.eventingReady == true
         );
       },
       timeout,
