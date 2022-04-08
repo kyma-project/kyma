@@ -31,7 +31,7 @@ To do that, we'll use the Grafana dashboard that comes with Kyma.
 
 You can now browse the logs.  
 
-   > **NOTE:** You can find different ways of displaying logs (for example, in Kyma Dashboard or using `kubectl`) on the [Access Kyma application logs](./04-operation-guides/operations/obsv-01-access-logs.md) page.
+   > **NOTE:** You can find different ways of displaying logs (for example, in Kyma Dashboard or using `kubectl`) on the [Access Kyma application logs](../04-operation-guides/operations/obsv-01-access-logs.md) page.
 
 ## View the metrics
 
