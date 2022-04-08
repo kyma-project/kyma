@@ -9,7 +9,7 @@ Some of your Pods are stuck in the Pending/Failed/Unknown state, or their sideca
 
 ## Cause
 
-During the upgrade Kyma will trigger rollout restart to instance of resources to ensure full compatibility of sidecar proxy with newly installed Istio version. Exception to this are standalone pods (without OwnerReference) or pods created by Job controller. Pods that cannot complete rollout restart process or rollout restart cannot be triggered because a pod is standalone or created by Job resource will get annotation `istio.reconciler.kyma-project.io/proxy-reset-warning` with brief explanation of the cause.
+During the upgrade, Kyma triggers rollout restart to the instance of resources, in order to ensure full compatibility of sidecar proxy with the newly installed Istio version. Exception to this are standalone Pods (without owner reference) or Pods created by the Job controller. Pods that cannot complete the rollout restart process, or the restart cannot be triggered because a Pod is a standalone resource or is created by the Job controller, get annotation `istio.reconciler.kyma-project.io/proxy-reset-warning` with brief explanation of the cause.
 
 ## Remedy
 
