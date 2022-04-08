@@ -1,3 +1,4 @@
+{{- if .Values.global.disableLegacyConnectivity }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -83,3 +84,4 @@ spec:
     {{- if .Values.global.priorityClassName }}
       priorityClassName: {{ .Values.global.priorityClassName }}
     {{- end }}
+{{- end }}

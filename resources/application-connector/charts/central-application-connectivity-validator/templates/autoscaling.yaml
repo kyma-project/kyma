@@ -1,4 +1,4 @@
-{{- if .Values.autoscaling.enable }}
+{{- if and (.Values.autoscaling.enable) (.Values.global.disableLegacyConnectivity) }}
 apiVersion: autoscaling/v1
 kind: HorizontalPodAutoscaler
 metadata:
