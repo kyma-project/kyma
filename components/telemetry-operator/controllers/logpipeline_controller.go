@@ -137,25 +137,25 @@ func (r *LogPipelineReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 	updatedSectionsCm, err := r.syncSectionsConfigMap(ctx, &logPipeline)
 	if err != nil {
 		log.Error(err, "Failed to sync Sections ConfigMap")
-		return ctrl.Result{Requeue: requeueRequest(err)}, err
+		return ctrl.Result{Requeue: shouldRetryOn(err)}, err
 	}
 
 	updatedParsersCm, err := r.syncParsersConfigMap(ctx, &logPipeline)
 	if err != nil {
 		log.Error(err, "Failed to sync Parsers ConfigMap")
-		return ctrl.Result{Requeue: requeueRequest(err)}, err
+		return ctrl.Result{Requeue: shouldRetryOn(err)}, err
 	}
 
 	updatedFilesCm, err := r.syncFilesConfigMap(ctx, &logPipeline)
 	if err != nil {
 		log.Error(err, "Failed to sync mounted files")
-		return ctrl.Result{Requeue: requeueRequest(err)}, err
+		return ctrl.Result{Requeue: shouldRetryOn(err)}, err
 	}
 
 	updatedEnv, err := r.syncSecretRefs(ctx, &logPipeline)
 	if err != nil {
 		log.Error(err, "Failed to sync secret references")
-		return ctrl.Result{Requeue: requeueRequest(err)}, err
+		return ctrl.Result{Requeue: shouldRetryOn(err)}, err
 	}
 
 	if updatedSectionsCm || updatedParsersCm || updatedFilesCm || updatedEnv {
@@ -163,12 +163,12 @@ func (r *LogPipelineReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 
 		if err := r.Update(ctx, &logPipeline); err != nil {
 			log.Error(err, "Failed updating log pipeline")
-			return ctrl.Result{Requeue: requeueRequest(err)}, err
+			return ctrl.Result{Requeue: shouldRetryOn(err)}, err
 		}
 
 		if err := r.restartFluentBit(ctx); err != nil {
 			log.Error(err, "Failed restarting fluent bit daemon set")
-			return ctrl.Result{Requeue: requeueRequest(err)}, err
+			return ctrl.Result{Requeue: shouldRetryOn(err)}, err
 		}
 
 		condition := telemetryv1alpha1.NewLogPipelineCondition(
@@ -207,7 +207,7 @@ func (r *LogPipelineReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 }
 
 // Indicate if an error from the kubernetes client should be retried. Errors caused by a bad request or configuration should not be retried.
-func requeueRequest(err error) bool {
+func shouldRetryOn(err error) bool {
 	return !errors.IsInvalid(err) &&
 		!errors.IsNotAcceptable(err) &&
 		!errors.IsUnsupportedMediaType(err) &&
@@ -274,11 +274,13 @@ func (r *LogPipelineReconciler) syncSectionsConfigMap(ctx context.Context, logPi
 		}
 	}
 
+	if !changed {
+		return false, nil
+	}
+
 	// Update ConfigMap
-	if changed {
-		if err = r.Update(ctx, &cm); err != nil {
-			return changed, err
-		}
+	if err = r.Update(ctx, &cm); err != nil {
+		return false, err
 	}
 
 	return changed, nil
@@ -348,11 +350,13 @@ func (r *LogPipelineReconciler) syncParsersConfigMap(ctx context.Context, logPip
 		}
 	}
 
+	if !changed {
+		return false, nil
+	}
+
 	// Update ConfigMap
-	if changed {
-		if err := r.Update(ctx, &cm); err != nil {
-			return false, err
-		}
+	if err := r.Update(ctx, &cm); err != nil {
+		return false, err
 	}
 
 	return changed, nil
@@ -393,11 +397,13 @@ func (r *LogPipelineReconciler) syncFilesConfigMap(ctx context.Context, logPipel
 		}
 	}
 
+	if !changed {
+		return false, nil
+	}
+
 	// Update ConfigMap
-	if changed {
-		if err := r.Update(ctx, &cm); err != nil {
-			return false, err
-		}
+	if err := r.Update(ctx, &cm); err != nil {
+		return false, err
 	}
 
 	return changed, nil
@@ -461,11 +467,13 @@ func (r *LogPipelineReconciler) syncSecretRefs(ctx context.Context, logPipeline 
 		}
 	}
 
+	if !changed {
+		return false, nil
+	}
+
 	// Update Fluent Bit Secret
-	if changed {
-		if err := r.Update(ctx, &secret); err != nil {
-			return false, err
-		}
+	if err := r.Update(ctx, &secret); err != nil {
+		return false, err
 	}
 
 	return changed, nil
