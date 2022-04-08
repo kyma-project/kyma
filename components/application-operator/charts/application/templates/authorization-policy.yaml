@@ -1,4 +1,4 @@
-{{- if and (eq .Values.global.strictMode "enabled") (not .Values.global.centralApplicationConnectivityValidatorEnabled) }}
+{{- if and (.Values.global.disableLegacyConnectivity) (eq .Values.global.strictMode "enabled") (not .Values.global.centralApplicationConnectivityValidatorEnabled) }}
 ---
 apiVersion: security.istio.io/v1beta1
 kind: AuthorizationPolicy
