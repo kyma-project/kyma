@@ -1,4 +1,4 @@
-{{- if not .Values.global.centralApplicationConnectivityValidatorEnabled }}
+{{- if and (.Values.global.disableLegacyConnectivity) (not .Values.global.centralApplicationConnectivityValidatorEnabled) }}
 apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
 metadata:

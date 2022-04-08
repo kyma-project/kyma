@@ -1,4 +1,4 @@
-{{- if not .Values.global.centralApplicationConnectivityValidatorEnabled }}
+{{- if and (.Values.global.disableLegacyConnectivity) (not .Values.global.centralApplicationConnectivityValidatorEnabled) }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
