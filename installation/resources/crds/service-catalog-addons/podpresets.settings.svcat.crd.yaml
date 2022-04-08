@@ -24,13 +24,16 @@ spec:
                 env:
                   items:
                     type: object
+                    x-kubernetes-preserve-unknown-fields: true
                   type: array
                 envFrom:
                   items:
                     type: object
+                    x-kubernetes-preserve-unknown-fields: true
                   type: array
                 selector:
                   type: object
+                  x-kubernetes-preserve-unknown-fields: true
                 volumeMounts:
                   items:
                     type: object
