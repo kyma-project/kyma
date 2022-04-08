@@ -302,7 +302,7 @@ func (b *EventingBackendStatus) IsSubscriptionControllerStatusReady() bool {
 	return false
 }
 
-func (b *EventingBackendStatus) GetPublisherReadyStatus() bool {
+func (b *EventingBackendStatus) IsPublisherStatusReady() bool {
 	for _, condition := range b.Conditions {
 		if condition.Type == ConditionPublisherProxyReady {
 			return condition.Status == corev1.ConditionTrue
