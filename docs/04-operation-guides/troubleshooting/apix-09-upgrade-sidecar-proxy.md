@@ -13,7 +13,7 @@ During the upgrade, Kyma triggers rollout restart to the instance of resources, 
 
 ## Remedy
 
-There are multiple reasons why Pods cannot become available and each case should be troubleshot separately. After resolving the root cause it's safe to perform rollout restart manually and remove annotation with proxy reset warning.
+There are multiple reasons why Pods cannot become available and each case must be troubleshot separately. After resolving the root cause it's safe to perform rollout restart manually and remove the annotation with proxy reset warning.
 
 In case of standalone pods or pods created by Job controller owner should recreate pods with incompatible sidecar proxy and verify if version match installed version (see commands: `istioctl version` and `istioctl proxy-status`)
 
