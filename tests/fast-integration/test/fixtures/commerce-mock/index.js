@@ -24,6 +24,7 @@ const {
   waitForTokenRequest,
   waitForFunction,
   waitForSubscription,
+  waitForPodWithLabel,
   deleteAllK8sResources,
   genRandom,
   k8sDynamicApi,
