@@ -15,8 +15,6 @@ const {
   deleteAllK8sResources,
 } = require('../utils');
 
-//const UNREGISTER = process.env.UNREGISTER_FROM_COMPASS === "true" ;
-
 async function registerKymaInCompass(client, runtimeName, scenarioName) {
   await addScenarioInCompass(client, scenarioName);
   const runtimeID = await client.registerRuntime(runtimeName, scenarioName);

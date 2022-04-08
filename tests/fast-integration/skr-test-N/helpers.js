@@ -46,7 +46,7 @@ function gatherOptions(...opts) {
     runtimeName: `kyma-${suffix}`,
     appName: `app-${suffix}`,
     scenarioName: `test-${suffix}`,
-    testNS: 'skr-test',
+    testNS: `skr-test-${suffix}`,
     // These options are not meant to be rewritten apart from env variable for KEB_USER_ID
     // If that's needed please add separate function that overrides this field.
     oidc0: {
@@ -65,7 +65,7 @@ function gatherOptions(...opts) {
       usernameClaim: 'email',
       usernamePrefix: 'acme-',
     },
-    administrator0: getEnvOrThrow('KEB_USER_ID'),
+    administrator0: [getEnvOrThrow('KEB_USER_ID')],
     administrators1: ['admin1@acme.com', 'admin2@acme.com'],
   };
 
@@ -75,6 +75,21 @@ function gatherOptions(...opts) {
   debug(options);
 
   return options;
+}
+
+function delay(millis) {
+  return new Promise((resolve) => {
+    setTimeout((_) => resolve(), millis);
+  });
+}
+
+async function waitForReconciliation(kcp, shootName) {
+  let l = await kcp.getLastReconciliation(shootName, true);
+  let lastReconciliation = l;
+  while (!(lastReconciliation.schedulingID !== l.schedulingID && l.status === "ready")) {
+    await delay(10000);
+    l = await kcp.getLastReconciliation(shootName);
+  }
 }
 
 module.exports = {
@@ -87,4 +102,6 @@ module.exports = {
   withRuntimeName,
   withScenarioName,
   withTestNS,
+  waitForReconciliation,
+  delay
 };

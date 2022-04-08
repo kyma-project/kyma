@@ -6,7 +6,7 @@ const {unregisterScenarioFromCompass, addScenarioInCompass, assignRuntimeToScena
 const {oidcE2ETest, commerceMockTest} = require('./skr-test-N');
 const {KCPWrapper, KCPConfig} = require('../kcp/client');
 
-const N = process.env.N > 1 ? process.env.N : 1;
+const N = process.env.N_TIMES > 1 ? process.env.N_TIMES : 1;
 const kcp = new KCPWrapper(KCPConfig.fromEnv());
 
 describe('Execute SKR test',  async function () {

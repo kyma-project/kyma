@@ -20,7 +20,7 @@
     "test-compass": "mocha --inline-diffs --check-leaks --reporter mocha-multi-reporters --reporter-options configFile=mocha-reporter-config.json ./compass-test/",
     "test-skr": "mocha --inline-diffs --check-leaks --reporter mocha-multi-reporters --reporter-options configFile=mocha-reporter-config.json ./skr-test/",
     "skr-test-without-sc": "mocha --timeout 15000 --inline-diffs --check-leaks --reporter mocha-multi-reporters --reporter-options configFile=mocha-reporter-config.json ./skr-test-without-sc/ ",
-    "test-skr-N": "mocha --inline-diffs --check-leaks --reporter mocha-multi-reporters --reporter-options configFile=mocha-reporter-config.json ./skr-test/test-N.js",
+    "test-skr-N": "mocha --inline-diffs --check-leaks --reporter mocha-multi-reporters --reporter-options configFile=mocha-reporter-config.json ./skr-test-N/",
     "nightly-skr": "mocha --inline-diffs --check-leaks --reporter mocha-multi-reporters --reporter-options configFile=mocha-reporter-config.json ./skr-nightly/provision/",
     "test-nightly-skr": "mocha --inline-diffs --check-leaks --reporter mocha-multi-reporters --reporter-options configFile=mocha-reporter-config.json ./skr-nightly/test/",
     "test-skr-kyma-to-kyma2-upgrade": "mocha --inline-diffs --check-leaks --reporter mocha-multi-reporters --reporter-options configFile=mocha-reporter-config.json ./skr-kyma-to-kyma2-upgrade/index.js",
