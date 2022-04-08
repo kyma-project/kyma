@@ -1,5 +1,5 @@
 ---
-title: Pods stuck in Pending/Failed/Unknown state after upgrade
+title: Pods stuck in `Pending/Failed/Unknown` state after upgrade
 ---
 
 ## Symptom
