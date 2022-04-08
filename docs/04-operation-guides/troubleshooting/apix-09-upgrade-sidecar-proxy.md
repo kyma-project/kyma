@@ -5,7 +5,7 @@ title: Pods stuck in Pending/Failed/Unknown state after upgrade
 ## Symptom
 
 You cannot access services or functions using the API Rules created. The Kyma Gateway refuses the connection.
-Some of your Pods are stuck in the Pending/Failed/Unknown state, or it's sidecar proxy version differ from installed Istio version.
+Some of your Pods are stuck in the Pending/Failed/Unknown state, or their sidecar proxy version differ from the installed Istio version.
 
 ## Cause
 
@@ -13,7 +13,7 @@ During the upgrade Kyma will trigger rollout restart to instance of resources to
 
 ## Remedy
 
-There are multiple reasons why Pods cannot become available and each case should be troubleshooted separately. After resolving root-cause it's safe to perform rollout restart manually and remove annotation with proxy reset warning.
+There are multiple reasons why Pods cannot become available and each case should be troubleshot separately. After resolving the root cause it's safe to perform rollout restart manually and remove annotation with proxy reset warning.
 
 In case of standalone pods or pods created by Job controller owner should recreate pods with incompatible sidecar proxy and verify if version match installed version (see commands: `istioctl version` and `istioctl proxy-status`)
 
