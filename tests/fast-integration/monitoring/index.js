@@ -1,7 +1,6 @@
 const prometheus = require('./prometheus');
 const grafana = require('./grafana');
 const {getEnvOrDefault} = require('../utils');
-const {prometheusPortForward} = require('./client');
 
 function monitoringTests() {
   if (getEnvOrDefault('KYMA_MAJOR_UPGRADE', 'false') === 'true') {
@@ -13,22 +12,8 @@ function monitoringTests() {
     this.timeout(5 * 60 * 1000); // 5 min
     this.slow(5 * 1000);
 
-    let cancelPortForward;
-
-    before(async () => {
-      cancelPortForward = prometheusPortForward();
-    });
-
-    after(async () => {
-      cancelPortForward();
-    });
-
     it('Prometheus pods should be ready', async () => {
       await prometheus.assertPodsExist();
-    });
-
-    it('Prometheus UI should be reachable', async () => {
-      await prometheus.assertPrometheusUIIsReachable();
     });
 
     it('Prometheus targets should be healthy', async () => {

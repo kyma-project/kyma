@@ -22,7 +22,7 @@ spec:
       targetPort: http-proxy
       protocol: TCP
       name: http
-    - name: status-port
+    - name: tcp-status-port
       port: 15020
       targetPort: 15020
       protocol: TCP

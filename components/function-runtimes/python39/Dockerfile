@@ -7,7 +7,7 @@
 # We use this code to manually use newest alpine and nodejs.
 # Use official build when it will be available.
 
-FROM alpine:3.15.1
+FROM alpine:3.15.3
 
 SHELL ["/bin/ash", "-o", "pipefail", "-c"]
 
@@ -31,6 +31,7 @@ ENV PYTHON_VERSION 3.9.11
 
 # hadolint ignore=DL3003,SC2155
 RUN set -ex \
+	&& apk update --no-cache && apk upgrade --no-cache \
 	&& apk add --no-cache --virtual .fetch-deps \
 		gnupg \
 		tar \

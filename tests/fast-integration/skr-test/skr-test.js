@@ -20,7 +20,6 @@ const {
   checkAuditEventsThreshold,
 } = require('../audit-log');
 const {keb, gardener, director} = require('./helpers');
-const {prometheusPortForward} = require('../monitoring/client');
 const {KCPWrapper, KCPConfig} = require('../kcp/client');
 
 const kcp = new KCPWrapper(KCPConfig.fromEnv());
@@ -112,14 +111,6 @@ function oidcE2ETest() {
 function commerceMockTest() {
   describe('CommerceMockTest()', function() {
     const AWS_PLAN_ID = '361c511f-f939-4621-b228-d0fb79a1fe15';
-    let cancelPortForward = null;
-    before(function() {
-      cancelPortForward = prometheusPortForward();
-    });
-
-    after(function() {
-      cancelPortForward();
-    });
 
     it('CommerceMock test fixture should be ready', async function() {
       await ensureCommerceMockWithCompassTestFixture(

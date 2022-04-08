@@ -17,6 +17,7 @@ var _ GenericSender = &NatsMessageSender{}
 
 type GenericSender interface {
 	Send(context.Context, *event.Event) (int, error)
+	ConnectionStatus() nats.Status
 }
 
 // NatsMessageSender is responsible for sending messages over HTTP.
