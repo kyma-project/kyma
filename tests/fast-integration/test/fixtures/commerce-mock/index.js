@@ -495,10 +495,8 @@ async function connectMockLocal(mockHost, targetNamespace) {
     kind: 'TokenRequest',
     metadata: {name: 'commerce', namespace: targetNamespace},
   };
-  debug(tokenRequest);
   await k8sDynamicApi.delete(tokenRequest).catch(() => { }); // Ignore delete error
   await k8sDynamicApi.create(tokenRequest);
-  debug('Waiting for token request');
   const tokenObj = await waitForTokenRequest('commerce', targetNamespace);
 
   const pairingBody = {
@@ -506,10 +504,8 @@ async function connectMockLocal(mockHost, targetNamespace) {
     baseUrl: `https://${mockHost}`,
     insecure: true,
   };
-  debug('Token URL', tokenObj.status.url);
   await connectCommerceMock(mockHost, pairingBody);
   await ensureApplicationMapping('commerce', targetNamespace);
-  debug('Commerce mock connected locally');
 }
 
 async function connectMockCompass(client, appName, scenarioName, mockHost, targetNamespace) {
@@ -543,12 +539,8 @@ async function connectCommerceMock(mockHost, tokenData) {
   };
 
   try {
-    debug('POST request:');
-    debug(url);
-
     await axios.post(url, body, params);
   } catch (err) {
-    debug(JSON.stringify(err));
     debug(err);
     throw convertAxiosError(err, 'Error during establishing connection from Commerce Mock to Kyma connector service');
   }
@@ -666,12 +658,11 @@ async function ensureCommerceMockLocalTestFixture(mockNamespace,
       mockNamespace,
       targetNamespace,
     withCentralApplicationConnectivity ? prepareFunction('central-app-gateway') : prepareFunction());
-  debug(withCentralApplicationConnectivity);
+  await waitForPodWithLabel('app.kubernetes.io/name', 'connector-service', 'kyma-integration');
   await retryPromise(() => connectMockLocal(mockHost, targetNamespace), 10, 30000);
   await retryPromise(() => registerAllApis(mockHost), 10, 30000);
 
   if (withCentralApplicationConnectivity) {
-    debug('waiting for central application connectivity');
     await waitForDeployment('central-application-gateway', 'kyma-system');
     await waitForDeployment('central-application-connectivity-validator', 'kyma-system');
   }
