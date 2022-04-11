@@ -1,5 +1,6 @@
 APP_NAME = event-publisher-proxy
 APP_PATH = components/$(APP_NAME)
+BUILDPACK = eu.gcr.io/kyma-project/test-infra/buildpack-golang-kubebuilder2:v20210601-24c60b5a
 SCRIPTS_DIR = $(realpath $(shell pwd)/../..)/common/makefiles
 
 # fail on lint issues
