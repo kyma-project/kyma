@@ -2,6 +2,10 @@ FROM eu.gcr.io/kyma-project/external/golang:1.18.0-alpine3.15 as builder
 
 ARG DOCK_PKG_DIR=/go/src/github.com/kyma-project/kyma/components/event-publisher-proxy
 
+ARG DOCK_PKG_DIR2=/go/src/github.com/kyma-project/kyma/common
+
+COPY ../../common/. $DOCK_PKG_DIR2
+
 WORKDIR $DOCK_PKG_DIR
 COPY . $DOCK_PKG_DIR
 
