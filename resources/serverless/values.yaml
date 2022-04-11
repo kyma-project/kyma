@@ -73,7 +73,7 @@ global:
   images:
     k8s_tools:
       name: "k8s-tools"
-      version: "20220331-9c1578c1"
+      version: "20220406-be8951f6"
       directory: "tpi"
     function_controller:
       name: "function-controller"
