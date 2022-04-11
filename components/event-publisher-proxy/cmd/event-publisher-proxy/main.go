@@ -36,6 +36,7 @@ type Commander interface {
 }
 
 func main() {
+	// test comment
 	logger := logrus.New()
 	opts := options.ParseArgs()
 

@@ -22,6 +22,7 @@ import (
 )
 
 func main() {
+	// test comment
 	setupLogger := ctrl.Log.WithName("setup")
 
 	opts := options.New()
