@@ -86,13 +86,13 @@ global:
       version: "PR-13631"
     function_runtime_nodejs12:
       name: "function-runtime-nodejs12"
-      version: "PR-13804"
+      version: "PR-13881"
     function_runtime_nodejs14:
       name: "function-runtime-nodejs14"
-      version: "PR-13804"
+      version: "PR-13881"
     function_runtime_python39:
       name: "function-runtime-python39"
-      version: "PR-13804"
+      version: "PR-13881"
     kaniko_executor:
       name: "kaniko-executor"
       version: "1.8.0-ec157b48"
