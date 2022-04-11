@@ -6,21 +6,37 @@ You can use environment variables in a few ways to configure existing runtime, t
 
 ## Environments passed to runtimes
 
-Every king of runtime provide its own unique environment configuration which is albe to read during for a server and handlers file during container run:
+Every king of runtime provide its own unique environment configuration which can be read by server and handlers file during container run:
+
+### Common environments
 
 | Environment | Default | Description |
 |---------------|-----------|-------------|
-| **KUBELESS_INSTALL_VOLUME** | `/kubeless` | Full path to volume mount with users source code |
-| **NODE_PATH** | `$(KUBELESS_INSTALL_VOLUME)/node_modules` | Full path to fetched users dependencies. This envornment ocurres only on nodejs runtimes |
-| **PYTHONPATH** | `$(KUBELESS_INSTALL_VOLUME)/lib.python3.9/site-packages:$(KUBELESS_INSTALL_VOLUME)` | ????. This environment occures only on the python runtimes |
-| **PYTHONUNBUFFERED** | `TRUE` | ????. This environment occures only on the python runtimes |
-| **FUNC_RUNTIME** | | The name of the actual runtime |
+| **FUNC_HANDLER** | `main` | The name of the exported function inside the `MOD_NAME` file |
+| **MOD_NAME** | `handler` | The name of the main exported file. The extension should be added on the servers side and should be equal `.py` for the python runtimes and `.js` for one ones |
+| **FUNC_PORT** | `8080` | The right port server should listen on |
 | **SERVICE_NAMESPACE** | | The namespace where the right function exists on the cluster |
+| **KUBELESS_INSTALL_VOLUME** | `/kubeless` | Full path to volume mount with users source code |
+| **FUNC_RUNTIME** | | The name of the actual runtime. Possible values: `python39`, `nodejs12`, `nodejs14` |
 | **JAEGER_SERVICE_ENDPOINT** | `http://tracing-jaeger-collector.kyma-system.svc.cluster.local:14268/api/traces` | Full address of the Jaeger service |
 | **PUBLISHER_PROXY_ADDRESS** | `http://eventing-publisher-proxy.kyma-system.svc.cluster.local/publish` | Full address of the Publisher Proxy service |
-| **MOD_NAME** | `handler` | The name of the main exported file. The extension should be added on the servers side and should be equal `.py` for the python runtimes and `.js` for one ones |
-| **FUNC_HANDLER** | `main` | The name of the exported function inside the `MOD_NAME` file |
-| **FUNC_PORT** | `8080` | The right port server should listen on |
+
+### Specific environments
+
+There are a few environments that occures only for a specific runtimes and here are full list of them:
+
+#### NodeJS runtimes-specific environments
+
+| Environment | Default | Description |
+|---------------|-----------|-------------|
+| **NODE_PATH** | `$(KUBELESS_INSTALL_VOLUME)/node_modules` | Full path to fetched users dependencies |
+
+#### Python runtime-specific environment variables
+
+| Environment | Default | Description |
+|---------------|-----------|-------------|
+| **PYTHONPATH** | `$(KUBELESS_INSTALL_VOLUME)/lib.python3.9/site-packages:$(KUBELESS_INSTALL_VOLUME)` | list of directories that Python should add to the sys.path directory list |
+| **PYTHONUNBUFFERED** | `TRUE` | Defines if pythons logs should be first buffered before printing them out |
 
 ## Configure runtime
 
