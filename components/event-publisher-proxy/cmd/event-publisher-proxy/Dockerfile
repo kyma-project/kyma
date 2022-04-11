@@ -5,6 +5,12 @@ ARG DOCK_PKG_DIR=/go/src/github.com/kyma-project/kyma/components/event-publisher
 WORKDIR $DOCK_PKG_DIR
 COPY . $DOCK_PKG_DIR
 
+RUN echo "Running make test"
+
+RUN make test
+
+RUN echo "Completed make test"
+
 RUN CGO_ENABLED=0 GOOS=linux GO111MODULE=on go build -o event-publisher-proxy ./cmd/event-publisher-proxy
 
 FROM gcr.io/distroless/static:nonroot
