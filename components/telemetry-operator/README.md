@@ -68,19 +68,19 @@ make deploy-local IMG_NAME=<my container repo> TAG=latest
 make undeploy-local
 ```
 ## Trying it out on a Kyma cluster
-You can try out the Telemetry Operator on your Kyma cluster. Learn here how to  install and configure it. When you're finished testing the Telemetry Operator, you should disable it again.
+You can try out the Telemetry Operator on your Kyma cluster. Learn here how to install and configure it. When you're finished testing the Telemetry Operator, you should disable it again.
 ### Prerequisites
 
 - A Kyma Cluster with the latest Kyma version installed
 
 ### Enable Telemetry Operator integration
-1. To install the Telemetry Operator together with the Telemetry Fluent Bit Daemon Set with null output config, run: 
+1. Install the Telemetry Operator together with the Telemetry Fluent Bit Daemon Set with null output config: 
 
    ```bash
    kyma deploy --component=telemetry 
    ```
 
-2. Configure the Telemetry Fluent Bit component to push logs to the Loki backend. Loki comes with the Kyma out of the box .
+2. Configure the Telemetry Fluent Bit component to push logs to the Loki backend. Loki comes with the Kyma out of the box:
 
    ```bash
    kyma deploy --component logging --value global.telemetry.enabled=true
@@ -88,7 +88,7 @@ You can try out the Telemetry Operator on your Kyma cluster. Learn here how to  
 
    The previous command also installs a Log Pipeline CR, which configures the Telemetry Fluent Bit to push logs to the Loki backend.
 
-3. After disabling Fluent Bit from the logging chart, delete the unneeded resources. Run:
+3. After disabling Fluent Bit from the logging chart, delete the unneeded resources:
 
    ```bash
    kubectl delete daemonset -n kyma-system logging-fluent-bit
