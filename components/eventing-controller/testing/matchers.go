@@ -54,6 +54,22 @@ func IsAnEmptySubscription() gomegatypes.GomegaMatcher {
 	}, BeTrue())
 }
 
+func HaveEventingBackendReady() gomegatypes.GomegaMatcher {
+	return WithTransform(func(s *eventingv1alpha1.EventingBackendStatus) bool {
+		return *s.EventingReady
+	}, BeTrue())
+}
+
+func HaveEventingBackendNotReady() gomegatypes.GomegaMatcher {
+	return WithTransform(func(s *eventingv1alpha1.EventingBackendStatus) bool {
+		return *s.EventingReady
+	}, BeFalse())
+}
+
+func HaveBackendType(backendType eventingv1alpha1.BackendType) gomegatypes.GomegaMatcher {
+	return WithTransform(func(s *eventingv1alpha1.EventingBackendStatus) eventingv1alpha1.BackendType { return s.Backend }, Equal(backendType))
+}
+
 //
 // APIRule matchers
 //
@@ -166,6 +182,14 @@ func HaveCondition(condition eventingv1alpha1.Condition) gomegatypes.GomegaMatch
 	})))
 }
 
+func HaveBackendCondition(condition eventingv1alpha1.Condition) gomegatypes.GomegaMatcher {
+	return WithTransform(func(s *eventingv1alpha1.EventingBackendStatus) []eventingv1alpha1.Condition { return s.Conditions }, ContainElement(MatchFields(IgnoreExtras|IgnoreMissing, Fields{
+		"Type":   Equal(condition.Type),
+		"Reason": Equal(condition.Reason),
+		"Status": Equal(condition.Status),
+	})))
+}
+
 func HaveConditionBadSubject() gomegatypes.GomegaMatcher {
 	condition := eventingv1alpha1.MakeCondition(
 		eventingv1alpha1.ConditionSubscriptionActive,
@@ -245,5 +269,17 @@ func HaveValidBEBNamespace(bebNamespaceKey, namespace string) gomegatypes.Gomega
 			return string(secret.Data[bebNamespaceKey]) == namespace
 		}
 		return false
+	}, BeTrue())
+}
+
+func HaveNoBEBSecretNameAndNamespace() gomegatypes.GomegaMatcher {
+	return WithTransform(func(s *eventingv1alpha1.EventingBackendStatus) bool {
+		return s.BEBSecretName == "" && s.BEBSecretNamespace == ""
+	}, BeTrue())
+}
+
+func HaveBEBSecretNameAndNamespace(bebSecretName, namespace string) gomegatypes.GomegaMatcher {
+	return WithTransform(func(s *eventingv1alpha1.EventingBackendStatus) bool {
+		return s.BEBSecretName == bebSecretName && s.BEBSecretNamespace == namespace
 	}, BeTrue())
 }
