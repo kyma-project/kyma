@@ -5,6 +5,10 @@ ARG DOCK_PKG_DIR=/go/src/github.com/kyma-project/kyma/components/event-publisher
 WORKDIR $DOCK_PKG_DIR
 COPY . $DOCK_PKG_DIR
 
+RUN apk update
+
+RUN apk add --update alpine-sdk
+
 RUN echo "Running make test"
 
 RUN make test
