@@ -98,11 +98,13 @@ You can try out the Telemetry Operator on your Kyma cluster. Learn here how to i
 
 ### Disable Telemetry Operator integration
 
+1. To disable the Telemetry Fluent Bit integration, simply deploy the default version of the logging component, which doesn't contain the Loki Log Pipeline:
+
    ```bash
    kyma deploy --component logging 
    ```
 
-After installing the chart, disable the Log Pipeline CR so that it does not collect the logs anymore:
+2. After installing the chart, disable the Telemetry component so that it does not collect the logs anymore:
 
    ```bash
    kubectl delete validatingwebhookconfigurations validation.webhook.telemetry.kyma-project.io
