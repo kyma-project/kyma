@@ -8,7 +8,7 @@ require (
 	github.com/prometheus/client_golang v1.12.1
 	github.com/sirupsen/logrus v1.6.0
 	github.com/stretchr/testify v1.4.0
-	github.com/tidwall/gjson v1.9.3
+	github.com/tidwall/gjson v1.14.0
 	k8s.io/api v0.18.15
 	k8s.io/apimachinery v0.18.15
 	k8s.io/client-go v0.18.15
