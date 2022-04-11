@@ -102,7 +102,7 @@ You can try out the Telemetry Operator on your Kyma cluster. Learn here how to i
    kyma deploy --component logging 
    ```
 
-After installing the chart, disable the Log Pipeline CR so that it does not collect the logs anymore. Run:
+After installing the chart, disable the Log Pipeline CR so that it does not collect the logs anymore:
 
    ```bash
    kubectl delete validatingwebhookconfigurations validation.webhook.telemetry.kyma-project.io
