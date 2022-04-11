@@ -68,44 +68,41 @@ make deploy-local IMG_NAME=<my container repo> TAG=latest
 make undeploy-local
 ```
 ## Trying it out on a Kyma cluster
-
+You can try out the Telemetry Operator on your Kyma cluster. Learn here how to  install and configure it. When you're finished testing the Telemetry Operator, you should disable it again.
 ### Prerequisites
 
-- A Kyma Cluster with the latest installation of kyma
+- A Kyma Cluster with the latest Kyma version installed
 
 ### Enable Telemetry Operator integration
+1. To install the Telemetry Operator together with the Telemetry Fluent Bit Daemon Set with null output config, run: 
+
+   ```bash
+   kyma deploy --component=telemetry 
+
+
+2. Configure the Telemetry Fluent Bit component to push logs to the Loki backend. Loki comes with the Kyma out of the box .
+
+   ```bash
+   kyma deploy --component logging --value global.telemetry.enabled=true
+
+   The previous command also installs a Log Pipeline CR, which configures the Telemetry Fluent Bit to push logs to the Loki backend.
+
+3. After disabling Fluent Bit from the logging chart, delete the unneeded resources. Run:
+
+   ```bash
+   kubectl delete daemonset -n kyma-system logging-fluent-bit
+   kubectl delete configmap -n kyma-system logging-fluent-bit
+   kubectl delete servicemonitor -n kyma-system logging-fluent-bit
+
+
+### Disable Telemetry Operator integration
 ```bash
-kyma deploy --component=telemetry 
-```
+   kyma deploy --component logging 
 
-The above command would perform following tasks
-- installs telemetry operator
-- Installs Telemetry fluent-bit daemon set with null output config
+2. After installing the chart, disable the Log Pipeline CR so that it does not collect the logs anymore. Run:
 
-After installing the telemetry operator, it is necessary to configure the telemetry fluent-bit component to push logs to the Loki backend (which is already present on the Kyma cluster)
-
-```bash
-kyma deploy --component logging --value global.telemetry.enabled=true
-```
-
-The above command would additionally install a LogPipeline CR which would configure the telemetry-fluent-bit to push logs to the Loki. After disabling the fluent-bit from logging chart we need delete the unneeded resources
-
-```bash
-kubectl delete daemonset -n kyma-system logging-fluent-bit
-kubectl delete configmap -n kyma-system logging-fluent-bit
-kubectl delete servicemonitor -n kyma-system logging-fluent-bit
-```
-
-
-### Disabling Telemetry Operator integration
-```bash
-kyma deploy --component logging 
-```
-
-The above command would redeploy the fluent-bit from the logging chart. After installing the chart we can disable the LogPipeline CR so that it does not collect the logs anymore
-
-```bash
-kubectl delete validatingwebhookconfigurations validation.webhook.telemetry.kyma-project.io
+   ```bash
+   kubectl delete validatingwebhookconfigurations validation.webhook.telemetry.kyma-project.io
 kubectl delete servicemonitor -n kyma-system telemetry-operator-metrics
 kubectl delete deployment -n kyma-system telemetry-operator
 kubectl delete daemonset -n kyma-system telemetry-fluent-bit
@@ -123,4 +120,3 @@ kubectl delete configmap -n kyma-system telemetry-fluent-bit
 kubectl delete secret -n kyma-system telemetry-operator-webhook-cert
 kubectl delete serviceaccount -n kyma-system telemetry-operator
 kubectl delete serviceaccount -n kyma-system telemetry-fluent-bit
-```
