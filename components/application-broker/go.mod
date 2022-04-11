@@ -1,6 +1,6 @@
 module github.com/kyma-project/kyma/components/application-broker
 
-go 1.17
+go 1.18
 
 require (
 	github.com/asaskevich/govalidator v0.0.0-20200428143746-21a406dcc535

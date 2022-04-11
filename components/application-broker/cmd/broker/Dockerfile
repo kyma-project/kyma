@@ -1,4 +1,4 @@
-FROM eu.gcr.io/kyma-project/external/golang:1.17.8-alpine3.15 as builder
+FROM eu.gcr.io/kyma-project/external/golang:1.18.0-alpine3.15 as builder
 
 ENV SRC_DIR=/go/src/github.com/kyma-project/kyma/components/application-broker
 COPY . $SRC_DIR
@@ -14,7 +14,7 @@ WORKDIR $SRC_DIR
 
 RUN CGO_ENABLED=0 go build -o /application-broker ./cmd/broker
 
-FROM eu.gcr.io/kyma-project/external/alpine:3.12.4 as certs
+FROM eu.gcr.io/kyma-project/external/alpine:3.15.3 as certs
 RUN apk --no-cache add ca-certificates
 
 FROM scratch
