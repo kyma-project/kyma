@@ -2,9 +2,31 @@
 title: Environment variables
 ---
 
+You can use environment variables in a few ways to configure existing runtime, to read existing configuration or to build your own runtime based on them.
+
+## Environments passed to runtimes
+
+Every king of runtime provide its own unique environment configuration which is albe to read during for a server and handlers file during container run:
+
+| Environment | Default | Description |
+|---------------|-----------|-------------|
+| **KUBELESS_INSTALL_VOLUME** | `/kubeless` | Full path to volume mount with users source code |
+| **NODE_PATH** | `$(KUBELESS_INSTALL_VOLUME)/node_modules` | Full path to fetched users dependencies. This envornment ocurres only on nodejs runtimes |
+| **PYTHONPATH** | `$(KUBELESS_INSTALL_VOLUME)/lib.python3.9/site-packages:$(KUBELESS_INSTALL_VOLUME)` | ????. This environment occures only on the python runtimes |
+| **PYTHONUNBUFFERED** | `TRUE` | ????. This environment occures only on the python runtimes |
+| **FUNC_RUNTIME** | | The name of the actual runtime |
+| **SERVICE_NAMESPACE** | | The namespace where the right function exists on the cluster |
+| **JAEGER_SERVICE_ENDPOINT** | `http://tracing-jaeger-collector.kyma-system.svc.cluster.local:14268/api/traces` | Full address of the Jaeger service |
+| **PUBLISHER_PROXY_ADDRESS** | `http://eventing-publisher-proxy.kyma-system.svc.cluster.local/publish` | Full address of the Publisher Proxy service |
+| **MOD_NAME** | `handler` | The name of the main exported file. The extension should be added on the servers side and should be equal `.py` for the python runtimes and `.js` for one ones |
+| **FUNC_HANDLER** | `main` | The name of the exported function inside the `MOD_NAME` file |
+| **FUNC_PORT** | `8080` | The right port server should listen on |
+
+## Configure runtime
+
 You can configure environment variables either separately for a given runtime or make them runtime-agnostic using a Config Map.
 
-## Define environment variables in a Config Map
+### Define environment variables in a Config Map
 
 Config Maps allow you to define Function's environment variables for any runtime through key-value pairs. After you define the values in a Config Map, simply reference it in the Function custom resource (CR) through the **valueFrom** parameter. See an example of such a Function CR that specifies the `my-var` value as a reference to the key stored in the `my-vars-cm` Config Map as the `MY_VAR` environment variable.
 
@@ -29,7 +51,7 @@ spec:
     }
 ```
 
-## NodeJS runtime-specific environment variables
+### NodeJS runtime-specific environment variables
 
 To configure the Function with the Node.js runtime, override the default values of these environment variables:
 
@@ -63,7 +85,7 @@ spec:
     }
 ```
 
-## Python runtime-specific environment variables
+### Python runtime-specific environment variables
 
 To configure a Function with the Python runtime, override the default values of these environment variables:
 
