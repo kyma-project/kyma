@@ -70,6 +70,8 @@ spec:
             value: {{ .Values.global.jetstream.storage | quote }}
           - name: JS_STREAM_RETENTION_POLICY
             value: {{ .Values.jetstream.retentionPolicy | quote }}
+          - name: JS_CONSUMER_DELIVER_POLICY
+            value: {{ .Values.jetstream.consumerDeliverPolicy | quote }}
           - name: JS_STREAM_MAX_MSGS
             value: {{ .Values.jetstream.maxMessages | quote }}
           - name: JS_STREAM_MAX_BYTES
