@@ -128,13 +128,15 @@ aliases:
     - m00g3n
     - pPrecel
     - dbadura
-    - kwiatekusmoelsayed
+    - kwiatekus
+    - moelsayed
     - cortey
   core-and-supporting-approvers:
     - m00g3n
     - pPrecel
     - dbadura
-    - kwiatekusmoelsayed
+    - kwiatekus
+    - moelsayed
     - cortey
   busola-migrator-reviewers: # area/busola-migrator
     - m00g3n
