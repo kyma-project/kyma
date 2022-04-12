@@ -8,7 +8,7 @@ Monitoring in Kyma is configured to collect all metrics relevant for observing t
 
 ## Limitations
 
-By default, in the production profile, Prometheus stores up to **15 GB** of data for a maximum period of **30 days**. If the default size or time is exceeded, the oldest records are removed first.
+In the production profile, Prometheus stores up to **15 GB** of data for a maximum period of **30 days**. If the default size or time is exceeded, the oldest records are removed first.
 
 The configured memory limits of the Prometheus and Prometheus-Istio instances define the number of time series samples that can be ingested. 
 
