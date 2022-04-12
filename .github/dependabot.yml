@@ -18,8 +18,8 @@ updates:
     directory: "/components/event-publisher-proxy"
     labels:
       - "go"
-      - "skip-review"
       - "area/dependency"
+      - "skip-review"
     schedule:
       interval: "daily"
     commit-message:
@@ -29,8 +29,8 @@ updates:
     directory: "/components/eventing-controller"
     labels:
       - "go"
-      - "skip-review"
       - "area/dependency"
+      - "skip-review"
     schedule:
       interval: "daily"
     commit-message:
@@ -38,6 +38,166 @@ updates:
       include: "scope"
   - package-ecosystem: "docker"
     directory: "/components/eventing-controller"
+    labels:
+      - "docker"
+      - "area/dependency"
+    schedule:
+      interval: "daily"
+    commit-message:
+      prefix: "docker"
+      include: "scope"
+  - package-ecosystem: "gomod"
+    directory: "/components/compass-runtime-agent"
+    labels:
+      - "go"
+      - "area/dependency"
+    schedule:
+      interval: "daily"
+    commit-message:
+      prefix: "gomod"
+      include: "scope"
+  - package-ecosystem: "docker"
+    directory: "/components/compass-runtime-agent"
+    labels:
+      - "docker"
+      - "area/dependency"
+    schedule:
+      interval: "daily"
+    commit-message:
+      prefix: "docker"
+      include: "scope"
+  - package-ecosystem: "gomod"
+    directory: "/components/central-application-gateway"
+    labels:
+      - "go"
+      - "area/dependency"
+    schedule:
+      interval: "daily"
+    commit-message:
+      prefix: "gomod"
+      include: "scope"
+  - package-ecosystem: "docker"
+    directory: "/components/central-application-gateway"
+    labels:
+      - "docker"
+      - "area/dependency"
+    schedule:
+      interval: "daily"
+    commit-message:
+      prefix: "docker"
+      include: "scope"
+  - package-ecosystem: "gomod"
+    directory: "/components/central-application-connectivity-validator"
+    labels:
+      - "go"
+      - "area/dependency"
+    schedule:
+      interval: "daily"
+    commit-message:
+      prefix: "gomod"
+      include: "scope"
+  - package-ecosystem: "docker"
+    directory: "/components/central-application-connectivity-validator"
+    labels:
+      - "docker"
+      - "area/dependency"
+    schedule:
+      interval: "daily"
+    commit-message:
+      prefix: "docker"
+      include: "scope"
+  - package-ecosystem: "gomod"
+    directory: "/components/application-registry"
+    labels:
+      - "go"
+      - "area/dependency"
+    schedule:
+      interval: "daily"
+    commit-message:
+      prefix: "gomod"
+      include: "scope"
+  - package-ecosystem: "docker"
+    directory: "/components/application-registry"
+    labels:
+      - "docker"
+      - "area/dependency"
+    schedule:
+      interval: "daily"
+    commit-message:
+      prefix: "docker"
+      include: "scope"
+  - package-ecosystem: "gomod"
+    directory: "/components/application-connectivity-certs-setup-job"
+    labels:
+      - "go"
+      - "area/dependency"
+    schedule:
+      interval: "daily"
+    commit-message:
+      prefix: "gomod"
+      include: "scope"
+  - package-ecosystem: "docker"
+    directory: "/components/application-connectivity-certs-setup-job"
+    labels:
+      - "docker"
+      - "area/dependency"
+    schedule:
+      interval: "daily"
+    commit-message:
+      prefix: "docker"
+      include: "scope"
+  - package-ecosystem: "gomod"
+    directory: "/components/application-operator"
+    labels:
+      - "go"
+      - "area/dependency"
+    schedule:
+      interval: "daily"
+    commit-message:
+      prefix: "gomod"
+      include: "scope"
+  - package-ecosystem: "docker"
+    directory: "/components/application-operator"
+    labels:
+      - "docker"
+      - "area/dependency"
+    schedule:
+      interval: "daily"
+    commit-message:
+      prefix: "docker"
+      include: "scope"
+  - package-ecosystem: "gomod"
+    directory: "/components/application-gateway"
+    labels:
+      - "go"
+      - "area/dependency"
+    schedule:
+      interval: "daily"
+    commit-message:
+      prefix: "gomod"
+      include: "scope"
+  - package-ecosystem: "docker"
+    directory: "/components/application-gateway"
+    labels:
+      - "docker"
+      - "area/dependency"
+    schedule:
+      interval: "daily"
+    commit-message:
+      prefix: "docker"
+      include: "scope"
+  - package-ecosystem: "gomod"
+    directory: "/components/connector-service"
+    labels:
+      - "go"
+      - "area/dependency"
+    schedule:
+      interval: "daily"
+    commit-message:
+      prefix: "gomod"
+      include: "scope"
+  - package-ecosystem: "docker"
+    directory: "/components/connector-service"
     labels:
       - "docker"
       - "area/dependency"

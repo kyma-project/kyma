@@ -42,7 +42,7 @@ func (v *configValidator) Validate(ctx context.Context, configFilePath string) e
 		if strings.Contains(out, "Error") {
 			return errors.New(errDescription + extractError(out))
 		}
-		return errors.New(fmt.Sprintf("Error while validating Fluent Bit config: %v", err))
+		return fmt.Errorf("Error while validating Fluent Bit config: %v", err)
 	}
 
 	return nil

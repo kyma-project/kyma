@@ -4,8 +4,6 @@ import (
 	"testing"
 	"time"
 
-	equality "github.com/kyma-project/kyma/components/eventing-controller/controllers/subscription"
-
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/types"
 	"github.com/pkg/errors"
 
@@ -207,7 +205,7 @@ func Test_getRequiredConditions(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			gotConditions := getRequiredConditions(tc.subscriptionConditions, expectedConditions)
-			if !equality.ConditionsEquals(gotConditions, tc.wantConditions) {
+			if !eventingv1alpha1.ConditionsEquals(gotConditions, tc.wantConditions) {
 				t.Errorf("ShouldUpdateReadyStatus is not valid, want: %v but got: %v", tc.wantConditions, gotConditions)
 			}
 			g.Expect(len(gotConditions)).To(BeEquivalentTo(len(expectedConditions)))
@@ -303,7 +301,7 @@ func Test_syncConditionSubscribed(t *testing.T) {
 			// then
 			newCondition := subscription.Status.FindCondition(tc.wantCondition.Type)
 			g.Expect(newCondition).ShouldNot(BeNil())
-			g.Expect(equality.ConditionEquals(*newCondition, tc.wantCondition)).To(Equal(true))
+			g.Expect(eventingv1alpha1.ConditionEquals(*newCondition, tc.wantCondition)).To(Equal(true))
 		})
 	}
 }
@@ -403,7 +401,7 @@ func Test_syncConditionSubscriptionActive(t *testing.T) {
 			// then
 			newCondition := subscription.Status.FindCondition(tc.wantCondition.Type)
 			g.Expect(newCondition).ShouldNot(BeNil())
-			g.Expect(equality.ConditionEquals(*newCondition, tc.wantCondition)).To(Equal(true))
+			g.Expect(eventingv1alpha1.ConditionEquals(*newCondition, tc.wantCondition)).To(Equal(true))
 		})
 	}
 }
@@ -553,7 +551,7 @@ func Test_syncConditionWebhookCallStatus(t *testing.T) {
 			// then
 			newCondition := subscription.Status.FindCondition(tc.wantCondition.Type)
 			g.Expect(newCondition).ShouldNot(BeNil())
-			g.Expect(equality.ConditionEquals(*newCondition, tc.wantCondition)).To(Equal(true))
+			g.Expect(eventingv1alpha1.ConditionEquals(*newCondition, tc.wantCondition)).To(Equal(true))
 		})
 	}
 }
