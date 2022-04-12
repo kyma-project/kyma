@@ -34,3 +34,4 @@ roleRef:
   kind: ClusterRole
   name: {{ .Chart.Name }}-role
   apiGroup: rbac.authorization.k8s.io
+
