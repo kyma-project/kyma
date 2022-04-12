@@ -17,34 +17,48 @@ function base64Decode(str) {
   return Buffer.from(str, 'base64').toString();
 }
 
-function prometheusGet(path) {
+async function prometheusGet(path) {
   let httpsAgent;
-  let headers;
-  const token = kc.getCurrentUser().token;
+  let headers = {};
+  const currentUser = kc.getCurrentUser();
   const caCrt = base64Decode(kc.getCurrentCluster().caData, 'base64');
-  if (token) {
+
+  console.log('currentUser', currentUser);
+  console.log('currentUser.authProvider', currentUser.authProvider);
+
+  if (currentUser.token) {
+    console.log('1. case');
     httpsAgent = new https.Agent({
       rejectUnauthorized: false,
       ca: caCrt,
-      timeout: 10000,
     });
-    headers = {'Authorization': `Bearer ${token}`};
+    headers = {'Authorization': `Bearer ${currentUser.token}`};
+  } else if (currentUser.authProvider) {
+    console.log('2. case');
+    httpsAgent = new https.Agent({
+      rejectUnauthorized: false,
+      ca: caCrt,
+    });
+    const opts = {};
+    await kc.applyToRequest(opts);
+    headers = opts.headers;
+    console.log('opts', opts);
   } else {
+    console.log('3. case');
     httpsAgent = new https.Agent({
       rejectUnauthorized: false,
       ca: caCrt,
-      cert: base64Decode(kc.getCurrentUser().certData),
-      key: base64Decode(kc.getCurrentUser().keyData),
-      timeout: 10000,
+      cert: base64Decode(currentUser.certData),
+      key: base64Decode(currentUser.keyData),
     });
-    headers = {'Authorization': `Bearer ${token}`};
+    // headers = {'Authorization': `Bearer ${token}`};
   }
 
   const server = kc.getCurrentCluster().server;
   const prometheusProxyUrl = 'api/v1/namespaces/kyma-system/services/monitoring-prometheus:9090/proxy';
   const url = `${server}/${prometheusProxyUrl}${path}`;
-
-  return retryPromise(() => axios.get(url, {httpsAgent: httpsAgent, headers: headers}), 5);
+  console.log('final headers', headers);
+  return retryPromise(() => axios.get(url, {httpsAgent: httpsAgent, headers: headers, timeout: 10000}), 5);
 }
 
 async function getPrometheusActiveTargets() {
