@@ -52,7 +52,6 @@ module.exports = {
   lokiPortForward,
   queryLoki,
   logsPresentInLoki,
-  getLokiVirtualService,
   tryGetLokiPersistentVolumeClaim,
   lokiSecretData,
 };
