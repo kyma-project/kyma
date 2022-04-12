@@ -8,6 +8,6 @@ dependencies:
   - name: application-broker
   - name: application-operator
   - name: central-application-connectivity-validator
-    condition: global.centralApplicationConnectivityValidatorEnabled
+    condition: global.disableLegacyConnectivity
   - name: central-application-gateway
     condition: central_application_gateway.enabled
