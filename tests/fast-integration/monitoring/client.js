@@ -25,6 +25,10 @@ async function prometheusGet(path) {
 
   console.log('currentUser', currentUser);
   console.log('currentUser.authProvider', currentUser.authProvider);
+  const opts = {};
+  await kc.applyToRequest(opts);
+  console.log('opts', opts);
+  headers = opts.headers;
 
   if (currentUser.token) {
     console.log('1. case');
@@ -37,17 +41,13 @@ async function prometheusGet(path) {
     console.log('2. case');
     httpsAgent = new https.Agent({
       rejectUnauthorized: false,
-      ca: caCrt,
+      ca: opts.ca,
     });
-    const opts = {};
-    await kc.applyToRequest(opts);
-    headers = opts.headers;
-    console.log('opts', opts);
   } else {
     console.log('3. case');
     httpsAgent = new https.Agent({
       rejectUnauthorized: false,
-      ca: caCrt,
+      ca: opts.ca,
       cert: base64Decode(currentUser.certData),
       key: base64Decode(currentUser.keyData),
     });
