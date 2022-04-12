@@ -14,12 +14,8 @@ const SECOND = 1000;
 const jaegerPort = 16686;
 
 async function prometheusGet(path) {
-  // const currentUser = kc.getCurrentUser();
-  // const caCrt = base64Decode(kc.getCurrentCluster().caData, 'base64');
-
   const opts = {};
   await kc.applyToRequest(opts);
-  console.log('opts', opts);
 
   const httpsAgent = new https.Agent({
     rejectUnauthorized: false,
@@ -27,10 +23,6 @@ async function prometheusGet(path) {
     key: opts.key,
     cert: opts.cert,
   });
-  // if (opts.token) {
-  //   console.log('1. case');
-  //   headers = {'Authorization': `Bearer ${opts.token}`};
-  // }
 
   const server = kc.getCurrentCluster().server;
   const prometheusProxyUrl = 'api/v1/namespaces/kyma-system/services/monitoring-prometheus:9090/proxy';
