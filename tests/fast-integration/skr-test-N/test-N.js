@@ -46,9 +46,6 @@ describe('Execute SKR test',  async function () {
 
   for (let i = 0; i < N; i++) {
     describe(`Loop ${i + 1}`, function () {
-      before("Wait for reconciliation", async function () {
-        await waitForReconciliation(kcp, this.shoot.name);
-      });
       before("Add scenario and assign runtime", async function () {
         this.options = gatherOptions(
             withInstanceID(this.options.instanceID),
@@ -69,6 +66,9 @@ describe('Execute SKR test',  async function () {
 
       after("Unregister scenario from compass", async function () {
         await unregisterScenarioFromCompass(director, this.options.scenarioName);
+      });
+      after("Wait for reconciliation", async function () {
+        await waitForReconciliation(kcp, this.shoot.name);
       });
     });
   }
