@@ -3,7 +3,6 @@ const k8s = require('@kubernetes/client-node');
 const {
   lokiSecretData,
   tryGetLokiPersistentVolumeClaim,
-  getLokiVirtualService,
   logsPresentInLoki,
 } = require('./client');
 
@@ -43,17 +42,9 @@ async function checkPersistentVolumeClaimSize() {
   assert.equal(pvc.status.capacity.storage, '30Gi');
 }
 
-async function checkIfLokiVirtualServiceIsPresence() {
-  const vs = await getLokiVirtualService();
-  assert.equal(vs.kind, 'Status', 'Expected Status Kind when trying to retrieve Loki Virtual Service');
-  assert.equal(vs.status, 'Failure', 'Expected Failure when trying to retrieve Loki Virtual Service');
-  assert.equal(vs.reason, 'NotFound', 'Expected NotFound Reason when trying to retrieve Loki Virtual Service');
-}
-
 module.exports = {
   checkCommerceMockLogsInLoki,
   checkKymaLogsInLoki,
   checkRetentionPeriod,
-  checkIfLokiVirtualServiceIsPresence,
   checkPersistentVolumeClaimSize,
 };

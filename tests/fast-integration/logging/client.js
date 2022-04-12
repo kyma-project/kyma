@@ -5,7 +5,7 @@ const {
   convertAxiosError,
   getPersistentVolumeClaim,
   getSecretData,
-  getVirtualService, sleep,
+  sleep,
 } = require('../utils');
 
 const lokiPort = 3100;
@@ -25,10 +25,6 @@ async function tryGetLokiPersistentVolumeClaim() {
 async function lokiSecretData() {
   const secretData = await getSecretData('logging-loki', 'kyma-system');
   return secretData['loki.yaml'];
-}
-
-function getLokiVirtualService() {
-  return getVirtualService('kyma-system', 'loki');
 }
 
 async function logsPresentInLoki(query, startTimestamp) {
