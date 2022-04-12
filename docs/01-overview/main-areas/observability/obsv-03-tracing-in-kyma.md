@@ -6,7 +6,7 @@ With the [Jaeger](https://github.com/jaegertracing) distributed tracing system, 
 
 ## Limitations
 
-In the production profile, Jaeger has no persistence enabled and keeps all data in-memory with a retention of 10.000 traces.
+In the production profile, Jaeger has no persistence enabled and keeps up to 10.000 traces stored in-memory. The oldest records are removed first.
 
 The evaluation profile has lower limits. For more information about profiles, see [Install Kyma: Choose resource consumption](../../../04-operation-guides/operations/02-install-kyma.md#choose-resource-consumption).
 
