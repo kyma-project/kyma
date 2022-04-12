@@ -12,7 +12,7 @@ global:
       version: 0f5579fd
     nats:
       name: nats
-      version: 2.7.4-alpine
+      version: 2.7.4-alpine-2022-04-05
       directory: external
 
   # secretName defines optionally another name than the default secret name
