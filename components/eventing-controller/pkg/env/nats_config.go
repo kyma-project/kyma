@@ -49,14 +49,13 @@ type NatsConfig struct {
 	// It will be overridden by non-empty EventTypePrefix.
 	JSStreamSubjectPrefix string `envconfig:"JS_STREAM_SUBJECT_PREFIX" required:"true"`
 
-	// Deliver policy determines for a consumer where in the stream it wants to start receiving messages
+	// Deliver Policy determines for a consumer where in the stream it starts receiving messages
 	// (more info https://docs.nats.io/nats-concepts/jetstream/consumers#deliverpolicy-optstartseq-optstarttime):
-	// - all: The consumer will start receiving from the earliest available message.
-	// - last: When first consuming messages, the consumer will start receiving messages with the last message
-	//   added to the stream, so the very last message in the stream when the server realizes the consumer is ready.
+	// - all: The consumer starts receiving from the earliest available message.
+	// - last: When first consuming messages, the consumer starts receiving messages with the latest message.
 	// - last_per_subject: When first consuming messages, start with the latest one for each filtered subject
 	//   currently in the stream.
-	// - new: When first consuming messages, the consumer will only start receiving messages that were created
+	// - new: When first consuming messages, the consumer starts receiving messages that were created
 	//   after the consumer was created.
 	JSConsumerDeliverPolicy string `envconfig:"JS_CONSUMER_DELIVER_POLICY" default:"new"`
 }
