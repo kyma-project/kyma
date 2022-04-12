@@ -24,8 +24,10 @@ The collected telemetry data are exposed so that you can view and analyze them w
 
 You can use the following in-cluster components to observe your applications' telemetry data:
 
-- [Alertmanager](https://prometheus.io/docs/alerting/alertmanager/) receives and manages alerts coming from Prometheus. It can then forward the notifications about fired alerts to specific channels, such as Slack or an on-call paging system of your choice.
-- [Grafana](https://grafana.com/docs/guides/getting_started/) provides a dashboard and a graph editor to visualize metrics collected from Prometheus.
+- Kyma uses [Prometheus](https://prometheus.io/docs/introduction), which is a lightweight backend for metrics.
+- Kyma uses [Loki](https://github.com/grafana/loki), which is a lightweight Prometheus-like backend for logs.
 - Kyma uses [Jaeger](https://www.jaegertracing.io/docs/) as a backend, which serves as the query mechanism for displaying information about traces.
-- Kyma uses [Loki](https://github.com/grafana/loki), which is a lightweight Prometheus-like log management system.
+
+- [Alertmanager](https://prometheus.io/docs/alerting/alertmanager/) receives and manages alerts coming from Prometheus. It can then forward the notifications about fired alerts to specific channels, such as Slack or an on-call paging system of your choice.
+- [Grafana](https://grafana.com/docs/guides/getting_started/) provides a dashboard and a query editor to visualize metrics and logs collected from Prometheus and Loki.
 - Kyma uses [Kiali](https://www.kiali.io) to enable validation, observe the Istio Service Mesh, and provide details on microservices included in the Service Mesh and connections between them.
