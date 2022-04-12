@@ -18,47 +18,28 @@ function base64Decode(str) {
 }
 
 async function prometheusGet(path) {
-  let httpsAgent;
-  let headers = {};
-  const currentUser = kc.getCurrentUser();
-  const caCrt = base64Decode(kc.getCurrentCluster().caData, 'base64');
+  // const currentUser = kc.getCurrentUser();
+  // const caCrt = base64Decode(kc.getCurrentCluster().caData, 'base64');
 
-  console.log('currentUser', currentUser);
-  console.log('currentUser.authProvider', currentUser.authProvider);
   const opts = {};
   await kc.applyToRequest(opts);
   console.log('opts', opts);
-  headers = opts.headers;
 
-  if (currentUser.token) {
-    console.log('1. case');
-    httpsAgent = new https.Agent({
-      rejectUnauthorized: false,
-      ca: caCrt,
-    });
-    headers = {'Authorization': `Bearer ${currentUser.token}`};
-  } else if (currentUser.authProvider) {
-    console.log('2. case');
-    httpsAgent = new https.Agent({
-      rejectUnauthorized: false,
-      ca: opts.ca,
-    });
-  } else {
-    console.log('3. case');
-    httpsAgent = new https.Agent({
-      rejectUnauthorized: false,
-      ca: opts.ca,
-      cert: base64Decode(currentUser.certData),
-      key: base64Decode(currentUser.keyData),
-    });
-    // headers = {'Authorization': `Bearer ${token}`};
-  }
+  const httpsAgent = new https.Agent({
+    rejectUnauthorized: false,
+    ca: opts.ca,
+    key: opts.key,
+    cert: opts.cert,
+  });
+  // if (opts.token) {
+  //   console.log('1. case');
+  //   headers = {'Authorization': `Bearer ${opts.token}`};
+  // }
 
   const server = kc.getCurrentCluster().server;
   const prometheusProxyUrl = 'api/v1/namespaces/kyma-system/services/monitoring-prometheus:9090/proxy';
   const url = `${server}/${prometheusProxyUrl}${path}`;
-  console.log('final headers', headers);
-  return retryPromise(() => axios.get(url, {httpsAgent: httpsAgent, headers: headers, timeout: 10000}), 5);
+  return retryPromise(() => axios.get(url, {httpsAgent: httpsAgent, headers: opts.headers, timeout: 10000}), 5);
 }
 
 async function getPrometheusActiveTargets() {
