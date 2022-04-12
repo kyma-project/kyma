@@ -80,9 +80,18 @@ jetstream:
   streamName: sap
   # Subject prefix for the JetStream stream when eventTypePrefix is not provided.
   subjectPrefix: kyma
-  # When should events be deleted from the stream:
-  # interest: when all known observables have acknowledged a message it can be removed.
-  # limits: messages are retained until any given limit is reached. This can be configured via maxMessages and maxBytes.
+  # Retention policy determines when messages are deleted from the stream:
+  # (more info https://docs.nats.io/using-nats/developer/develop_jetstream/model_deep_dive#stream-limits-retention-and-policy):
+  # - interest: When all known observables have acknowledged a message, it can be removed.
+  # - limits: Retain messages until any given limit is reached. Configure limits with maxMessages and maxBytes.
   retentionPolicy: interest
+  # Consumer Deliver Policy determines from where in the stream a consumer starts receiving messages
+  # (more info https://docs.nats.io/nats-concepts/jetstream/consumers#deliverpolicy-optstartseq-optstarttime):
+  # - all: The consumer starts receiving from the earliest available message.
+  # - last: When first consuming messages, the consumer starts receiving messages with the latest message.
+  # - last_per_subject: When first consuming messages, start with the latest one for each filtered subject
+  #   currently in the stream.
+  # - new: When first consuming messages, the consumer starts receiving messages that were created
+  consumerDeliverPolicy: new
   maxMessages: -1 # no limit
   maxBytes: -1
