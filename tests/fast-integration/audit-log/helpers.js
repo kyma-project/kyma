@@ -55,6 +55,7 @@ async function checkAuditEventsThreshold(threshold) {
   // Get the max rate for apiserver audit events over the last 60 min
   const query = 'max_over_time(rate(apiserver_audit_event_total{job="apiserver"}[1m])[60m:])';
   const result = await queryPrometheus(query);
+  assert.isNotEmpty(result, 'The metrics "apiserver_audit_event_total" should not be empty! ');
   const maxAuditEventsRate = result[0].value[1];
   assert.isBelow(parseFloat(maxAuditEventsRate), threshold);
 }
