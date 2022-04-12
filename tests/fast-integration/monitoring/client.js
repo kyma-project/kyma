@@ -22,12 +22,13 @@ async function prometheusGet(path) {
     ca: opts.ca,
     key: opts.key,
     cert: opts.cert,
+    timeout: 10000,
   });
 
   const server = kc.getCurrentCluster().server;
   const prometheusProxyUrl = 'api/v1/namespaces/kyma-system/services/monitoring-prometheus:9090/proxy';
   const url = `${server}/${prometheusProxyUrl}${path}`;
-  return retryPromise(() => axios.get(url, {httpsAgent: httpsAgent, headers: opts.headers, timeout: 10000}), 5);
+  return retryPromise(() => axios.get(url, {httpsAgent: httpsAgent, headers: opts.headers}), 5);
 }
 
 async function getPrometheusActiveTargets() {
