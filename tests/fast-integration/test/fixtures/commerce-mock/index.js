@@ -23,6 +23,7 @@ const {
   waitForDeployment,
   waitForTokenRequest,
   waitForFunction,
+  waitForPodWithLabel,
   waitForSubscription,
   deleteAllK8sResources,
   genRandom,
