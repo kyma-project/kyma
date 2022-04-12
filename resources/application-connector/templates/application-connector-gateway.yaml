@@ -1,4 +1,3 @@
-#will be installed only when Kyma is installed in SKR mode
 {{- if .Values.global.disableLegacyConnectivity }}
 apiVersion: networking.istio.io/v1alpha3
 kind: Gateway

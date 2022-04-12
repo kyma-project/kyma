@@ -1,15 +1,8 @@
-connector_service:
-  enabled: &connectorServiceEnabled true
-
-connection_token_handler:
-  enabled: *connectorServiceEnabled
-
 central_application_gateway:
   enabled: true
 
 global:
   domainName: kyma.example.com
-  centralApplicationConnectivityValidatorEnabled: true
   disableLegacyConnectivity: false
   isLocalEnv: false
   integrationNamespace: kyma-integration
