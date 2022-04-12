@@ -13,10 +13,6 @@ const {
 const SECOND = 1000;
 const jaegerPort = 16686;
 
-function base64Decode(str) {
-  return Buffer.from(str, 'base64').toString();
-}
-
 async function prometheusGet(path) {
   // const currentUser = kc.getCurrentUser();
   // const caCrt = base64Decode(kc.getCurrentCluster().caData, 'base64');
