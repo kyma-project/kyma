@@ -24,10 +24,17 @@ spec:
   serviceName: {{ include "nats.fullname" . }}
   template:
     metadata:
-      {{- if .Values.podAnnotations }}
+      {{- if or .Values.exporter.enabled .Values.podAnnotations }}
       annotations:
+      {{- if .Values.exporter.enabled }}
+        prometheus.io/path: /metrics
+        prometheus.io/port: "7777"
+        prometheus.io/scrape: "true"
+      {{- end }}
+      {{- if .Values.podAnnotations }}
       {{- range $key, $value := .Values.podAnnotations }}
         {{ $key }}: {{ $value | quote }}
+      {{- end }}
       {{- end }}
       {{- end }}
       labels:
@@ -99,6 +106,35 @@ spec:
             mountPath: /etc/nats-config
           - name: pid
             mountPath: /var/run/nats
+
+      ##############################
+      #                            #
+      #  NATS Prometheus Exporter  #
+      #                            #
+      ##############################
+      {{- if and .Values.exporter.enabled .Values.global.jetstream.enabled }}
+      - name: metrics
+        image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.prometheus_nats_exporter) }}"
+        imagePullPolicy: {{ .Values.exporter.pullPolicy }}
+        {{- if .Values.exporter.securityContext }}
+        securityContext:
+          {{- toYaml .Values.exporter.securityContext | nindent 10 }}
+        {{- end }}
+        resources:
+          {{- toYaml .Values.exporter.resources | nindent 10 }}
+        args:
+        - -connz
+        - -routez
+        - -subz
+        - -varz
+        - -prefix=nats
+        - -use_internal_server_id
+        - -jsz=all
+        - http://localhost:8222/
+        ports:
+          - containerPort: 7777
+            name: metrics
+      {{- end }}
       - name: nats
         image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.nats) }}"
         imagePullPolicy: {{ .Values.nats.pullPolicy }}
