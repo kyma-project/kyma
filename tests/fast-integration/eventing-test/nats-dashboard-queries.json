@@ -1,0 +1,102 @@
+[
+  {
+    "title":"NATS Servers: Server CPU",
+    "query":"nats_varz_cpu"
+  },
+  {
+    "title":"NATS Servers: Server Memory",
+    "query":"nats_varz_mem"
+  },
+  {
+    "title":"NATS Servers: Bytes In",
+    "query":"nats_varz_in_bytes"
+  },
+  {
+    "title":"NATS Servers: NATS Msgs In",
+    "query":"nats_varz_in_msgs"
+  },
+  {
+    "title":"NATS Servers: Bytes Out",
+    "query":"nats_varz_out_bytes"
+  },
+  {
+    "title":"NATS Servers: NATS Msgs Out",
+    "query":"nats_varz_out_msgs"
+  },
+  {
+    "title":"NATS Servers: Connections",
+    "query":"nats_varz_connections"
+  },
+  {
+    "title":"NATS Servers: Subscriptions",
+    "query":"nats_varz_subscriptions"
+  },
+  {
+    "title":"NATS Servers: Slow Consumers",
+    "query":"nats_varz_slow_consumers"
+  },
+  {
+    "title":"NATS JetStream: Storage Used",
+    "query":"sum(nats_varz_jetstream_stats_storage{pod=~\"$server\"})/sum(nats_varz_jetstream_config_max_storage{pod=~\"$server\"})"
+  },
+  {
+    "title":"NATS JetStream: Total Storage Used",
+    "query":"sum(nats_varz_jetstream_stats_storage{pod=~\"$server\"})"
+  },
+  {
+    "title":"NATS JetStream: Memory Used",
+    "query":"sum(nats_varz_jetstream_stats_memory{pod=~\"$server\"})/sum(nats_varz_jetstream_config_max_memory{pod=~\"$server\"})"
+  },
+  {
+    "title":"NATS JetStream: Memory Used",
+    "query":"sum(nats_varz_jetstream_stats_memory{pod=~\"$server\"})"
+  },
+  {
+    "title":"NATS JetStream: Connections",
+    "query":"sum(nats_varz_connections{pod=~\"$server\"})"
+  },
+  {
+    "title":"NATS JetStream: Max Storage",
+    "query":"sum(nats_varz_jetstream_config_max_storage{pod=~\"$server\"})"
+  },
+  {
+    "title":"NATS JetStream: Total Memory",
+    "query":"sum(nats_varz_jetstream_config_max_memory{pod=~\"$server\"})"
+  },
+  {
+    "title":"NATS JetStream: Total Consumers",
+    "query":"sum(nats_server_total_consumers{pod=~\"$server\"})"
+  },
+  {
+    "title":"NATS JetStream: Stream data size",
+    "query":"sum(nats_stream_total_bytes) by (stream_name)"
+  },
+  {
+    "title":"NATS JetStream: Stream message count",
+    "query":"sum(nats_stream_total_messages) by (stream_name)"
+  },
+  {
+    "title":"NATS JetStream: Message Rate (per second)",
+    "query":"sum(rate(nats_stream_total_messages{pod=~\"$server\",stream_name=~\"$stream\"}[$__rate_interval])) by (stream_name)"
+  },
+  {
+    "title":"NATS JetStream: Messages per second (++/--) - 1",
+    "query":"sum(rate(nats_consumer_num_pending{pod=~\"$server\",stream_name=~\"$stream\",consumer_name=~\"$consumer\"}[$__rate_interval])+rate(nats_consumer_delivered_consumer_seq{pod=~\"$server\",stream_name=~\"$stream\",consumer_name=~\"$consumer\"}[$__rate_interval])) by (consumer_name)"
+  },
+  {
+    "title":"NATS JetStream: Messages per second (++/--) - 2",
+    "query":"- sum(rate(nats_consumer_delivered_consumer_seq{pod=~\"$server\",stream_name=~\"$stream\",consumer_name=~\"$consumer\",consumer_name=~\"$consumer\"}[$__rate_interval])) by (consumer_name)"
+  },
+  {
+    "title":"NATS JetStream: Total delivered messages",
+    "query":"sum(nats_consumer_delivered_consumer_seq{pod=~\"$server\",stream_name=~\"$stream\",consumer_name=~\"$consumer\"}) by (consumer_name)"
+  },
+  {
+    "title":"NATS JetStream: Pending messages",
+    "query":"sum(nats_consumer_num_pending{pod=~\"$server\",stream_name=~\"$stream\",consumer_name=~\"$consumer\"}) by (consumer_name)"
+  },
+  {
+    "title":"NATS JetStream: Message Acks Pending",
+    "query":"sum(nats_consumer_num_ack_pending{pod=~\"$server\",stream_name=~\"$stream\",consumer_name=~\"$consumer\"}) by (consumer_name)"
+  }
+]
