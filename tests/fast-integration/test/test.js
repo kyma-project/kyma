@@ -19,7 +19,8 @@ describe('Executing Standard Testsuite:', function() {
   // const testNamespace = 'test';
   //
   // before('CommerceMock test fixture should be ready', async function() {
-  //   await ensureCommerceMockLocalTestFixture(mockNamespace, testNamespace, withCentralAppConnectivity).catch((err) => {
+  //   await ensureCommerceMockLocalTestFixture(mockNamespace, testNamespace,
+  //   withCentralAppConnectivity).catch((err) => {
   //     console.dir(err); // first error is logged
   //     return ensureCommerceMockLocalTestFixture(mockNamespace, testNamespace, withCentralAppConnectivity);
   //   });
