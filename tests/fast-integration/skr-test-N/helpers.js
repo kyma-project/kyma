@@ -88,6 +88,7 @@ async function waitForReconciliation(kcp, shootName) {
   let lastReconciliation = l;
   while (!(lastReconciliation.schedulingID !== l.schedulingID && l.status === "ready")) {
     await delay(10000);
+    console.log(l.schedulingID, l.status)
     l = await kcp.getLastReconciliation(shootName);
   }
 }
