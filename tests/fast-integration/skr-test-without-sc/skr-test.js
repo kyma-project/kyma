@@ -139,15 +139,13 @@ function commerceMockTest() {
       await checkFunctionResponse(this.options.testNS);
     });
 
-    // TODO: LegacyEvent needed after not SC is present?
-    // it('order.created.v1 legacy event should trigger the lastorder function', async function() {
-    //   await sendLegacyEventAndCheckResponse();
-    // });
+    it('order.created.v1 legacy event should trigger the lastorder function', async function() {
+      await sendLegacyEventAndCheckResponse();
+    });
 
-    // TODO: Check if this is needed with SC
-    // it('order.created.v1 cloud event in binary mode should trigger the lastorder function', async function() {
-    //   await sendCloudEventBinaryModeAndCheckResponse();
-    // });
+    it('order.created.v1 cloud event in binary mode should trigger the lastorder function', async function() {
+      await sendCloudEventBinaryModeAndCheckResponse();
+    });
 
     it('Deletes the resources that have been created', async function() {
       await deleteMockTestFixture('mocks', this.options.testNS);
