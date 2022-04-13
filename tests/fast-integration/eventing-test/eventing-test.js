@@ -35,11 +35,9 @@ const {
   timeoutTime,
   slowTime,
   mockNamespace,
-  natsBackend,
-  bebBackend,
   isSKR,
-  eventMeshNamespace,
 } = require('./utils');
+const {bebBackend, natsBackend, eventMeshNamespace} = require('./common/common');
 
 describe('Eventing tests', function() {
   this.timeout(timeoutTime);
