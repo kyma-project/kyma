@@ -34,7 +34,7 @@ async function logsPresentInLoki(query, startTimestamp) {
   return false;
 }
 
-async function queryLoki(labels, startTimestamp) {
+async function queryLoki(query, startTimestamp) {
   const path = `api/prom/query?query=${query}&start=${startTimestamp}`;
   try {
     const responseBody = await getLoki(path);

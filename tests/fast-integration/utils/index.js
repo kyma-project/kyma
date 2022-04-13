@@ -691,7 +691,7 @@ function waitForJob(name, namespace = 'default', timeout = 900000, success = 1) 
       {},
       (_type, _apiObj, watchObj) => {
         return (
-          watchObj.object.metadata.name == name &&
+          watchObj.object.metadata.name === name &&
         watchObj.object.status.succeeded >= success
         );
       },
@@ -1758,11 +1758,11 @@ async function callServiceViaProxy(namespace, service, port, path, opts = {},
 
   const url = `${k8sServerUrl}/api/v1/namespaces/${namespace}/services/${service}:${port}/proxy/${path}`;
 
-  return retryPromise(() => {
+  return retryPromise(async () => {
     if (debugMsg) {
       debug(debugMsg);
     }
-    axios.request({url: url, httpsAgent: httpsAgent, timeout: timeout,
+    await axios.request({url: url, httpsAgent: httpsAgent, timeout: timeout,
       method: opts.method, headers: opts.headers, data: opts.data});
   }, retries, interval);
 }
