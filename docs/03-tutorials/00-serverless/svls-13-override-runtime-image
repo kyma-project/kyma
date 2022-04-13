@@ -35,7 +35,7 @@ Follows these steps:
     ```bash
     mkdir {FOLDER_NAME}
     cd {FOLDER_NAME}
-    kyma init function --name $NAME --namespace $NAMESPACE --runtime-image-override $RUNTIME_IMAGE
+    kyma init function --name $NAME --namespace $NAMESPACE --runtime-image-override $RUNTIME_IMAGE --runtime python39
     ```
 
 4. Deploy function:
@@ -74,7 +74,7 @@ Follows these steps:
       name: $NAME
       namespace: $NAMESPACE
     spec:
-      runtime: nodejs14
+      runtime: python39
       runtimeImageOverride: $RUNTIME_IMAGE
       source: |
         module.exports = {
