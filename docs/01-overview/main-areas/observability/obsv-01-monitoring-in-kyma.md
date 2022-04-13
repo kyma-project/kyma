@@ -12,7 +12,7 @@ In the production profile, Prometheus stores up to **15 GB** of data for a maxim
 
 The configured memory limits of the Prometheus and Prometheus-Istio instances define the number of time series samples that can be ingested. 
 
-The default resource configuration of the monitoring component in the production profile is sufficient to serve **800K time series in the Prometheus Pod**, and **400K time series in the Prometheus-Istio Pod**. The samples are deleted after 30 days or when reaching the storage limit of 30 GB. 
+The default resource configuration of the monitoring component in the production profile is sufficient to serve **800K time series in the Prometheus Pod**, and **400K time series in the Prometheus-Istio Pod**. The samples are deleted after 30 days or when reaching the storage limit of 15 GB. 
 
 The evaluation profile has lower limits. For more information about profiles, see [Install Kyma: Choose resource consumption](../../../04-operation-guides/operations/02-install-kyma.md#choose-resource-consumption).
 
