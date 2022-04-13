@@ -7,8 +7,10 @@ const {
   k8sApply,
   waitForK8sObject,
 } = require('../utils');
-const lokiPortForward = require('../logging');
-const logsPresentInLoki = require('./client');
+const {
+  lokiPortForward,
+  logsPresentInLoki
+} = require('../logging');
 
 const telemetryNamespace = 'kyma-system';
 const testStartTimestamp = new Date().toISOString();
