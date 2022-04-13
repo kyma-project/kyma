@@ -12,7 +12,6 @@ const {
   isSKR,
   backendK8sSecretName,
   backendK8sSecretNamespace,
-  eventMeshSecretFilePath,
   timeoutTime,
   slowTime,
   gardener,
@@ -20,6 +19,7 @@ const {
   shootName,
   cleanupTestingResources,
 } = require('./utils');
+const {eventMeshSecretFilePath} = require('./common/common');
 const {
   ensureCommerceMockLocalTestFixture,
   setEventMeshSourceNamespace,
