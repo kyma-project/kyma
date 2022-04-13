@@ -12,7 +12,7 @@ See the sample `config.yaml` for an inline Function for which code and dependenc
 name: function-practical-filip5
 namespace: testme
 runtime: nodejs14
-runtimeImageOverride: eu.gcr.io/kyma-project/function-runtime-nodejs12:9e934c09
+runtimeImageOverride: eu.gcr.io/kyma-project/function-runtime-nodejs14:9e934c09
 labels:
     app: serverless-test
 source:
