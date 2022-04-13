@@ -8,6 +8,7 @@ const {
   getEnvOrThrow,
   deleteEventingBackendK8sSecret,
   getShootNameFromK8sServerUrl,
+  listPods,
 } = require('../utils');
 
 const {DirectorClient, DirectorConfig, getAlreadyAssignedScenarios} = require('../compass');
@@ -15,6 +16,8 @@ const {GardenerClient, GardenerConfig} = require('../gardener');
 const {eventMeshSecretFilePath} = require('./common/common');
 const isSKR = process.env.KYMA_TYPE === 'SKR';
 const skipResourceCleanup = process.env.SKIP_CLEANUP || false;
+const isJetStreamEnabled = process.env.BACKEND === 'nats_jetstream';
+const isFileStorage = process.env.STORAGE === 'file';
 const suffix = getSuffix(isSKR);
 const appName = `app-${suffix}`;
 const scenarioName = `test-${suffix}`;
@@ -22,7 +25,6 @@ const testNamespace = `test-${suffix}`;
 const mockNamespace = process.env.MOCK_NAMESPACE || 'mocks';
 const backendK8sSecretName = process.env.BACKEND_SECRET_NAME || 'eventing-backend';
 const backendK8sSecretNamespace = process.env.BACKEND_SECRET_NAMESPACE || 'default';
-const DEBUG_MODE = process.env.DEBUG;
 const timeoutTime = 10 * 60 * 1000;
 const slowTime = 5000;
 
@@ -83,6 +85,11 @@ async function getRegisteredCompassScenarios() {
   }
 }
 
+async function getNatsPods() {
+  const labelSelector = 'app.kubernetes.io/name=nats';
+  return await listPods(labelSelector, 'kyma-system');
+}
+
 module.exports = {
   appName,
   scenarioName,
@@ -91,7 +98,6 @@ module.exports = {
   isSKR,
   backendK8sSecretName,
   backendK8sSecretNamespace,
-  DEBUG_MODE,
   timeoutTime,
   slowTime,
   director,
@@ -100,4 +106,7 @@ module.exports = {
   suffix,
   cleanupTestingResources,
   getRegisteredCompassScenarios,
+  isJetStreamEnabled,
+  isFileStorage,
+  getNatsPods,
 };
