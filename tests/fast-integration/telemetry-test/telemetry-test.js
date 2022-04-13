@@ -7,8 +7,9 @@ const {
   k8sApply,
   waitForK8sObject,
 } = require('../utils');
+const lokiPortForward = require('../logging');
+const logsPresentInLoki = require('./client');
 
-const {checkLokiLogs, lokiPortForward} = require('../logging');
 const telemetryNamespace = 'kyma-system';
 const testStartTimestamp = new Date().toISOString();
 
@@ -80,7 +81,8 @@ describe('Telemetry Operator tests', function() {
 
   it('should push the logs to the loki output', async () => {
     const labels = '{job="telemetry-fluent-bit"}';
-    await checkLokiLogs(testStartTimestamp, labels);
+    const logsPresent = await logsPresentInLoki(labels, testStartTimestamp);
+    assert.isTrue(logsPresent, 'No logs present in Loki');
   });
 
   after(async function() {

@@ -11,19 +11,6 @@ async function checkCommerceMockLogsInLoki(startTimestamp) {
 
   const commerceMockLogsPresent = await logsPresentInLoki(labels, startTimestamp);
 
-// checkLokiLogs used directly in Commerce Mock tests.
-async function checkLokiLogs(startTimestamp, labels) {
-  let logsFetched = false;
-  let retries = 0;
-  while (retries < 20) {
-    const logs = await queryLoki(labels, startTimestamp);
-    if (logs.streams.length > 0) {
-      logsFetched = true;
-      break;
-    }
-    await sleep(5*1000);
-    retries++;
-  }
   assert.isTrue(commerceMockLogsPresent, 'No logs from commerce mock present in Loki');
 }
 
