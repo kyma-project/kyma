@@ -4,6 +4,7 @@ const net = require('net');
 const fs = require('fs');
 const {join} = require('path');
 const {expect} = require('chai');
+const execa = require('execa');
 
 const kc = new k8s.KubeConfig();
 let k8sDynamicApi;
@@ -705,6 +706,7 @@ function waitForJob(name, namespace = 'default', timeout = 900000, success = 1) 
 async function kubectlExecInPod(pod, container, cmd, namespace = 'default') {
   const execCmd = ['exec', pod, '-c', container, '-n', namespace, '--', ...cmd];
   try {
+    await execa(`kubectl`, execCmd);
   } catch (error) {
     if (error.stdout === undefined) {
       throw error;
