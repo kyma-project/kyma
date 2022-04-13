@@ -14,7 +14,7 @@ Before you start, make sure you have these tools installed:
 
 Follows these steps:
 
-1. Follow this example to build python's custom runtime image.
+1. Follow [this example](https://github.com/kyma-project/examples) to build python's custom runtime image.
 
 <div tabs name="steps" group="create-function">
   <details>
