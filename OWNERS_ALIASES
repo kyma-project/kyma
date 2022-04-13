@@ -32,7 +32,6 @@ aliases:
     - k15r
     - nachtmaar
     - marcobebway
-    - radufa
     - pxsalehi
     - mfaizanse
     - friedrichwilken
@@ -42,7 +41,6 @@ aliases:
     - k15r
     - nachtmaar
     - marcobebway
-    - radufa
     - pxsalehi
     - mfaizanse
     - friedrichwilken
@@ -128,13 +126,15 @@ aliases:
     - m00g3n
     - pPrecel
     - dbadura
-    - kwiatekusmoelsayed
+    - kwiatekus
+    - moelsayed
     - cortey
   core-and-supporting-approvers:
     - m00g3n
     - pPrecel
     - dbadura
-    - kwiatekusmoelsayed
+    - kwiatekus
+    - moelsayed
     - cortey
   busola-migrator-reviewers: # area/busola-migrator
     - m00g3n

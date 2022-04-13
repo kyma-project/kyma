@@ -758,12 +758,15 @@ function waitForVirtualService(namespace, apiRuleName, timeout = 20000) {
 }
 
 async function getVirtualService(namespace, name) {
-  const path = `/apis/networking.istio.io/v1beta1/namespaces/${namespace}/virtualservices/${name}`;
-  const response = await k8sDynamicApi.requestPromise({
-    url: k8sDynamicApi.basePath + path,
-  });
-  const body = JSON.parse(response.body);
-  return body.spec.hosts[0];
+  try {
+    const path = `/apis/networking.istio.io/v1beta1/namespaces/${namespace}/virtualservices/${name}`;
+    const response = await k8sDynamicApi.requestPromise({
+      url: k8sDynamicApi.basePath + path,
+    });
+    return JSON.parse(response.body);
+  } catch (err) {
+    return JSON.parse(err.response.body);
+  }
 }
 
 async function getAllVirtualServices() {
@@ -1591,11 +1594,9 @@ function waitForEventingBackendToReady(backendType='beb',
       {},
       (_type, _apiObj, watchObj) => {
         return (
-          watchObj.object.metadata.name == name &&
-        watchObj.object.status.backendType.toLowerCase() == backendType.toLowerCase() &&
-        watchObj.object.status.eventingReady == true &&
-        watchObj.object.status.publisherProxyReady == true &&
-        watchObj.object.status.subscriptionControllerReady == true
+          watchObj.object.metadata.name === name &&
+          watchObj.object.status.backendType.toLowerCase() === backendType.toLowerCase() &&
+          watchObj.object.status.eventingReady === true
         );
       },
       timeout,

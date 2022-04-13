@@ -23,12 +23,12 @@ spec:
     - jsonPath: .status.eventingReady
       name: EventingReady
       type: boolean
-    - jsonPath: .status.subscriptionControllerReady
+    - jsonPath: .status.conditions[?(@.type=="Subscription Controller Ready")].status
       name: SubscriptionControllerReady
-      type: boolean
-    - jsonPath: .status.publisherProxyReady
+      type: string
+    - jsonPath: .status.conditions[?(@.type=="Publisher Proxy Ready")].status
       name: PublisherProxyReady
-      type: boolean
+      type: string
     name: v1alpha1
     schema:
       openAPIV3Schema:
@@ -67,11 +67,27 @@ spec:
                 description: The namespace of the secret containing BEB access tokens,
                   required only for BEB
                 type: string
+              conditions:
+                description: Conditions defines the status of the Controller and the
+                  EPP
+                items:
+                  properties:
+                    lastTransitionTime:
+                      format: date-time
+                      type: string
+                    message:
+                      type: string
+                    reason:
+                      type: string
+                    status:
+                      type: string
+                    type:
+                      type: string
+                  required:
+                  - status
+                  type: object
+                type: array
               eventingReady:
-                type: boolean
-              publisherProxyReady:
-                type: boolean
-              subscriptionControllerReady:
                 type: boolean
             type: object
         type: object

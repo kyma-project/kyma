@@ -10,7 +10,6 @@ import (
 	apigatewayv1alpha1 "github.com/kyma-incubator/api-gateway/api/v1alpha1"
 
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
-	"github.com/kyma-project/kyma/components/eventing-controller/utils"
 )
 
 // Semantic can do semantic deep equality checks for API objects. Fields which
@@ -19,7 +18,6 @@ var Semantic = conversion.EqualitiesOrDie(
 	apiRuleEqual,
 	eventingBackendEqual,
 	publisherProxyDeploymentEqual,
-	eventingBackendStatusEqual,
 )
 
 // apiRuleEqual asserts the equality of two APIRule objects.
@@ -257,33 +255,24 @@ func realProto(pr corev1.Protocol) corev1.Protocol {
 	return pr
 }
 
-// eventingBackendStatusEqual asserts the equality of EventingBackendStatus objects.
-func eventingBackendStatusEqual(s1, s2 *eventingv1alpha1.EventingBackendStatus) bool {
-	if s1 == nil || s2 == nil {
-		return false
-	}
-	if s1 == s2 {
-		return true
-	}
+func IsBackendStatusEqual(oldStatus, newStatus eventingv1alpha1.EventingBackendStatus) bool {
+	oldStatusWithoutCond := oldStatus.DeepCopy()
+	newStatusWithoutCond := newStatus.DeepCopy()
 
-	if s1.Backend != s2.Backend {
-		return false
-	}
-	if !utils.BoolPtrEqual(s1.SubscriptionControllerReady, s2.SubscriptionControllerReady) {
-		return false
-	}
-	if !utils.BoolPtrEqual(s1.PublisherProxyReady, s2.PublisherProxyReady) {
-		return false
-	}
-	if !utils.BoolPtrEqual(s1.EventingReady, s2.EventingReady) {
-		return false
-	}
-	if s1.BEBSecretName != s2.BEBSecretName {
-		return false
-	}
-	if s1.BEBSecretNamespace != s2.BEBSecretNamespace {
-		return false
-	}
+	// remove conditions, so that we don't compare them
+	oldStatusWithoutCond.Conditions = []eventingv1alpha1.Condition{}
+	newStatusWithoutCond.Conditions = []eventingv1alpha1.Condition{}
 
-	return true
+	return reflect.DeepEqual(oldStatusWithoutCond, newStatusWithoutCond) && eventingv1alpha1.ConditionsEquals(oldStatus.Conditions, newStatus.Conditions)
+}
+
+func IsSubscriptionStatusEqual(oldStatus, newStatus eventingv1alpha1.SubscriptionStatus) bool {
+	oldStatusWithoutCond := oldStatus.DeepCopy()
+	newStatusWithoutCond := newStatus.DeepCopy()
+
+	// remove conditions, so that we don't compare them
+	oldStatusWithoutCond.Conditions = []eventingv1alpha1.Condition{}
+	newStatusWithoutCond.Conditions = []eventingv1alpha1.Condition{}
+
+	return reflect.DeepEqual(oldStatusWithoutCond, newStatusWithoutCond) && eventingv1alpha1.ConditionsEquals(oldStatus.Conditions, newStatus.Conditions)
 }

@@ -23,6 +23,7 @@ const {
   waitForDeployment,
   waitForTokenRequest,
   waitForFunction,
+  waitForPodWithLabel,
   waitForSubscription,
   deleteAllK8sResources,
   genRandom,
@@ -693,6 +694,7 @@ async function ensureCommerceMockLocalTestFixture(mockNamespace,
       mockNamespace,
       targetNamespace,
     withCentralApplicationConnectivity ? prepareFunction('central-app-gateway') : prepareFunction());
+  await waitForPodWithLabel('app.kubernetes.io/name', 'connector-service', 'kyma-integration');
   await retryPromise(() => connectMockLocal(mockHost, targetNamespace), 10, 30000);
   await retryPromise(() => registerAllApis(mockHost), 10, 30000);
 
