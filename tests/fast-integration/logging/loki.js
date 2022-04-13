@@ -6,7 +6,7 @@ const {
   logsPresentInLoki,
 } = require('./client');
 
-async function checkCommerceMockLogsInLoki(startTimestamp) {
+async function checkCommerceMockLogs(startTimestamp) {
   const labels = '{app="commerce-mock", container="mock", namespace="mocks"}';
 
   const commerceMockLogsPresent = await logsPresentInLoki(labels, startTimestamp);
@@ -14,7 +14,7 @@ async function checkCommerceMockLogsInLoki(startTimestamp) {
   assert.isTrue(commerceMockLogsPresent, 'No logs from commerce mock present in Loki');
 }
 
-async function checkKymaLogsInLoki(startTimestamp) {
+async function checkKymaLogs(startTimestamp) {
   const systemLabel = '{namespace="kyma-system"}';
   const integrationLabel = '{namespace="kyma-integration"}';
 
@@ -43,8 +43,8 @@ async function checkPersistentVolumeClaimSize() {
 }
 
 module.exports = {
-  checkCommerceMockLogsInLoki,
-  checkKymaLogsInLoki,
+  checkCommerceMockLogs,
+  checkKymaLogs,
   checkRetentionPeriod,
   checkPersistentVolumeClaimSize,
 };

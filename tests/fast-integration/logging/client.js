@@ -1,17 +1,13 @@
-const axios = require('axios');
 const {
-  kubectlPortForward,
-  retryPromise,
   convertAxiosError,
   getPersistentVolumeClaim,
   getSecretData,
   sleep,
+  callServiceViaProxy,
 } = require('../utils');
 
-const lokiPort = 3100;
-
-function lokiPortForward() {
-  return kubectlPortForward('kyma-system', 'logging-loki-0', lokiPort);
+function getLoki(path) {
+  return callServiceViaProxy('kyma-system', 'logging-loki', '3100', path);
 }
 
 async function tryGetLokiPersistentVolumeClaim() {
@@ -39,9 +35,9 @@ async function logsPresentInLoki(query, startTimestamp) {
 }
 
 async function queryLoki(labels, startTimestamp) {
-  const url = `http://localhost:${lokiPort}/api/prom/query?query=${labels}&start=${startTimestamp}`;
+  const path = `api/prom/query?query=${query}&start=${startTimestamp}`;
   try {
-    const responseBody = await retryPromise(() => axios.get(url, {timeout: 10000}), 5);
+    const responseBody = await getLoki(path);
     return responseBody.data;
   } catch (err) {
     throw convertAxiosError(err, 'cannot query loki');
@@ -49,8 +45,6 @@ async function queryLoki(labels, startTimestamp) {
 }
 
 module.exports = {
-  lokiPortForward,
-  queryLoki,
   logsPresentInLoki,
   tryGetLokiPersistentVolumeClaim,
   lokiSecretData,

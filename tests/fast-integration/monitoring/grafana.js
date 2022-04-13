@@ -181,9 +181,9 @@ async function updateProxyDeployment(fromArg, toArg) {
 
 async function resetProxy() {
   // delete secret
-  manageSecret('delete');
+  await manageSecret('delete');
   // remove add reverse proxy
-  updateProxyDeployment('--trusted-ip=0.0.0.0/0', '--reverse-proxy=true');
+  await updateProxyDeployment('--trusted-ip=0.0.0.0/0', '--reverse-proxy=true');
   // Check if the redirect works like again after reset
   const res = await assertGrafanaRedirect('https://kyma-project.io/docs');
   assert.isTrue(res, 'Grafana redirect to kyma docs does not work!');

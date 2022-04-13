@@ -2,39 +2,24 @@ const axios = require('axios');
 const https = require('https');
 
 const {
-  kc,
-  kubectlPortForward,
-  retryPromise,
+  callServiceViaProxy,
   convertAxiosError,
-  listPods,
   debug,
 } = require('../utils');
 
-const SECOND = 1000;
-const jaegerPort = 16686;
+function getPrometheus(path) {
+  return callServiceViaProxy('kyma-system', 'monitoring-prometheus', '9090', path);
+}
 
-async function prometheusGet(path) {
-  const opts = {};
-  await kc.applyToRequest(opts);
-
-  const httpsAgent = new https.Agent({
-    rejectUnauthorized: false,
-    ca: opts.ca,
-    key: opts.key,
-    cert: opts.cert,
-    timeout: 10000,
-  });
-
-  const server = kc.getCurrentCluster().server;
-  const prometheusProxyUrl = 'api/v1/namespaces/kyma-system/services/monitoring-prometheus:9090/proxy';
-  const url = `${server}/${prometheusProxyUrl}${path}`;
-  return retryPromise(() => axios.get(url, {httpsAgent: httpsAgent, headers: opts.headers}), 5);
+async function getJaeger(path, retries, interval, timeout, debugMsg) {
+  return await callServiceViaProxy('kyma-system', '  tracing-jaeger-query', '16686', path,
+      {}, retries, interval, timeout, debugMsg);
 }
 
 async function getPrometheusActiveTargets() {
-  const path = '/api/v1/targets?state=active';
+  const path = 'api/v1/targets?state=active';
   try {
-    const responseBody = await prometheusGet(path);
+    const responseBody = await getPrometheus(path);
     return responseBody.data.data.activeTargets;
   } catch (err) {
     throw convertAxiosError(err, 'cannot get prometheus targets');
@@ -42,9 +27,9 @@ async function getPrometheusActiveTargets() {
 }
 
 async function getPrometheusAlerts() {
-  const path = '/api/v1/alerts';
+  const path = 'api/v1/alerts';
   try {
-    const responseBody = await prometheusGet(path);
+    const responseBody = await getPrometheus(path);
     return responseBody.data.data.alerts;
   } catch (err) {
     throw convertAxiosError(err, 'cannot get prometheus alerts');
@@ -52,9 +37,9 @@ async function getPrometheusAlerts() {
 }
 
 async function getPrometheusRuleGroups() {
-  const path = '/api/v1/rules';
+  const path = 'api/v1/rules';
   try {
-    const responseBody = await prometheusGet(path);
+    const responseBody = await getPrometheus(path);
     return responseBody.data.data.groups;
   } catch (err) {
     throw convertAxiosError(err, 'cannot get prometheus rules');
@@ -62,9 +47,9 @@ async function getPrometheusRuleGroups() {
 }
 
 async function queryPrometheus(query) {
-  const path = `/api/v1/query?query=${encodeURIComponent(query)}`;
+  const path = `api/v1/query?query=${encodeURIComponent(query)}`;
   try {
-    const responseBody = await prometheusGet(path);
+    const responseBody = await getPrometheus(path);
     return responseBody.data.data.result;
   } catch (err) {
     throw convertAxiosError(err, 'cannot query prometheus');
@@ -103,40 +88,17 @@ async function queryGrafana(url, redirectURL, ignoreSSL, httpErrorCode) {
   }
 }
 
-async function jaegerPortForward() {
-  const res = await getJaegerPods();
-  if (res.body.items.length === 0) {
-    throw new Error('cannot find any jaeger pods');
-  }
-
-  return kubectlPortForward('kyma-system', res.body.items[0].metadata.name, jaegerPort);
-}
-
-async function getJaegerPods() {
-  const labelSelector = 'app=jaeger,' +
-    'app.kubernetes.io/component=all-in-one,' +
-    'app.kubernetes.io/instance=tracing-jaeger,' +
-    'app.kubernetes.io/managed-by=jaeger-operator,' +
-    'app.kubernetes.io/name=tracing-jaeger,' +
-    'app.kubernetes.io/part-of=jaeger';
-  return listPods(labelSelector, 'kyma-system');
-}
-
 async function getJaegerTrace(traceId) {
-  const path = `/api/traces/${traceId}`;
-  const url = `http://localhost:${jaegerPort}${path}`;
+  const path = `api/traces/${traceId}`;
+
+  const retries = 30;
+  const interval = 1000;
+  const timeout = 30 * 1000;
+  const debugMsg = `waiting for trace (id: ${traceId}) from jaeger...`;
+  debug(`fetching trace: ${traceId} from jaeger`);
 
   try {
-    debug(`fetching trace: ${traceId} from jaeger`);
-    const responseBody = await retryPromise(
-        () => {
-          debug(`waiting for trace (id: ${traceId}) from jaeger...`);
-          return axios.get(url, {timeout: 30 * SECOND});
-        },
-        30,
-        1000,
-    );
-
+    const responseBody = getJaeger(path, retries, interval, timeout, debugMsg);
     return responseBody.data;
   } catch (err) {
     throw convertAxiosError(err, 'cannot get jaeger trace');
@@ -149,6 +111,5 @@ module.exports = {
   getPrometheusRuleGroups,
   queryPrometheus,
   queryGrafana,
-  jaegerPortForward,
   getJaegerTrace,
 };

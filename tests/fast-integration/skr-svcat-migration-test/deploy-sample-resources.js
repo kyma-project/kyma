@@ -257,7 +257,7 @@ async function deploy() {
     await waitForClusterServiceBroker('sm-auditlog-management', 5 * 60 * 1000);
   } catch (e) {
     const csb = await listResources(`/apis/servicecatalog.k8s.io/v1beta1/clusterservicebrokers`);
-    msg = 'Cluster service brokers failed to be available in 5 minutes';
+    const msg = 'Cluster service brokers failed to be available in 5 minutes';
     throw new Error(`${msg} ${JSON.stringify(e)}:\n${JSON.stringify(csb)}`);
   }
 
