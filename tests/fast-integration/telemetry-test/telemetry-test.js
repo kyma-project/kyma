@@ -9,7 +9,7 @@ const {
 } = require('../utils');
 const {
   lokiPortForward,
-  logsPresentInLoki
+  logsPresentInLoki,
 } = require('../logging');
 
 const telemetryNamespace = 'kyma-system';
