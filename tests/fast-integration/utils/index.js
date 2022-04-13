@@ -1763,7 +1763,7 @@ async function callServiceViaProxy(namespace, service, port, path, opts = {},
     if (debugMsg) {
       debug(debugMsg);
     }
-    await axios.request({url: url, httpsAgent: httpsAgent, timeout: timeout,
+    return await axios.request({url: url, httpsAgent: httpsAgent, timeout: timeout,
       method: opts.method, headers: opts.headers, data: opts.data});
   }, retries, interval);
 }
