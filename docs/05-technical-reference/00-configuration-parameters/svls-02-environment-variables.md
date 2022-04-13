@@ -6,7 +6,7 @@ You can use environment variables in a few ways to configure existing runtime, t
 
 ## Environments passed to runtimes
 
-Every king of runtime provide its own unique environment configuration which can be read by server and handlers file during container run:
+Every runtime provides its own unique environment configuration which can be read by server and the handlers file during the container run:
 
 ### Common environments
 
@@ -14,8 +14,8 @@ Every king of runtime provide its own unique environment configuration which can
 |---------------|-----------|-------------|
 | **FUNC_HANDLER** | `main` | The name of the exported function inside the `MOD_NAME` file |
 | **MOD_NAME** | `handler` | The name of the main exported file. The extension should be added on the servers side and should be equal `.py` for the python runtimes and `.js` for one ones |
-| **FUNC_PORT** | `8080` | The right port server should listen on |
-| **SERVICE_NAMESPACE** | | The namespace where the right function exists on the cluster |
+| **FUNC_PORT** | `8080` | The right port, a server should listen to |
+| **SERVICE_NAMESPACE** | | The Namespace where the right Function exists on a cluster |
 | **KUBELESS_INSTALL_VOLUME** | `/kubeless` | Full path to volume mount with users source code |
 | **FUNC_RUNTIME** | | The name of the actual runtime. Possible values: `python39`, `nodejs12`, `nodejs14` |
 | **JAEGER_SERVICE_ENDPOINT** | `http://tracing-jaeger-collector.kyma-system.svc.cluster.local:14268/api/traces` | Full address of the Jaeger service |
@@ -23,7 +23,7 @@ Every king of runtime provide its own unique environment configuration which can
 
 ### Specific environments
 
-There are a few environments that occures only for a specific runtimes and here are full list of them:
+There are a few environments that occur only for a specific runtimes and here are full list of them:
 
 #### NodeJS runtimes-specific environments
 
