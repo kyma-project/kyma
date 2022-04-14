@@ -2,11 +2,11 @@
 title: Environment variables
 ---
 
-You can use environment variables in a few ways to configure an existing runtime, to read existing configuration or to build your own runtime based on them.
+You can use environment variables to configure an existing runtime, to read existing configuration or to build your own runtime based on them.
 
 ## Environments passed to runtimes
 
-Every runtime provides its own unique environment configuration which can be read by server and the handlers file during the container run:
+Every runtime provides its own unique environment configuration which can be read by a server and the `handler.js` file during the container run:
 
 ### Common environments
 
@@ -14,7 +14,7 @@ Every runtime provides its own unique environment configuration which can be rea
 |---------------|-----------|-------------|
 | **FUNC_HANDLER** | `main` | The name of the exported Function inside the `MOD_NAME` file |
 | **MOD_NAME** | `handler` | The name of the main exported file. The extension must be added on the server side and must be equal to `.py` for the Python runtimes and `.js` for the Node.js ones |
-| **FUNC_PORT** | `8080` | The right port, a server should listen to |
+| **FUNC_PORT** | `8080` | The right port, a server listens to |
 | **SERVICE_NAMESPACE** | | The Namespace where the right Function exists on a cluster |
 | **KUBELESS_INSTALL_VOLUME** | `/kubeless` | Full path to volume mount with users source code |
 | **FUNC_RUNTIME** | | The name of the actual runtime. Possible values: `python39`, `nodejs12`, `nodejs14` |

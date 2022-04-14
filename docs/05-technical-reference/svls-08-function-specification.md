@@ -201,7 +201,7 @@ For more information, see [Kubeless monitoring](https://github.com/vmware-archiv
 
 ## Override runtime image
 
-You can use custom runtime image to override the existing one. Your image must meet all the following requirements:
+You can use a custom runtime image to override the existing one. Your image must meet all the following requirements:
 
 - Expose the workload endpoint on the right port
 - Provide liveness and readiness check endpoints at `/healthz`

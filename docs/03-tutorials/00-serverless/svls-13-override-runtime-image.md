@@ -2,7 +2,7 @@
 title: Override runtime image
 ---
 
-This tutorial shows how to build a custom runtime image and override Functions base image with it.
+This tutorial shows how to build a custom runtime image and override the Function's base image with it.
 
 ## Prerequisites
 
@@ -44,7 +44,7 @@ Follow these steps:
     kyma apply function
     ```
 
-5. Verify if Function is running:
+5. Verify whether your Function is running:
 
     ```bash
     kubectl get functions $NAME -n $NAMESPACE
