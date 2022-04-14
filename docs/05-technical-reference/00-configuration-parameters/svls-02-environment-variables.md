@@ -13,7 +13,7 @@ Every runtime provides its own unique environment configuration which can be rea
 | Environment | Default | Description |
 |---------------|-----------|-------------|
 | **FUNC_HANDLER** | `main` | The name of the exported Function inside the `MOD_NAME` file |
-| **MOD_NAME** | `handler` | The name of the main exported file. The extension should be added on the servers side and should be equal `.py` for the python runtimes and `.js` for one ones |
+| **MOD_NAME** | `handler` | The name of the main exported file. The extension should be added on the servers side and should be equal `.py` for the Python runtimes and `.js` for one ones |
 | **FUNC_PORT** | `8080` | The right port, a server should listen to |
 | **SERVICE_NAMESPACE** | | The Namespace where the right Function exists on a cluster |
 | **KUBELESS_INSTALL_VOLUME** | `/kubeless` | Full path to volume mount with users source code |
@@ -23,7 +23,7 @@ Every runtime provides its own unique environment configuration which can be rea
 
 ### Specific environments
 
-There are a few environments that occur only for a specific runtimes and here are full list of them:
+There are a few environments that occur only for a specific runtimes. The following list includes all of them:
 
 #### NodeJS runtimes-specific environments
 
@@ -36,7 +36,7 @@ There are a few environments that occur only for a specific runtimes and here ar
 | Environment | Default | Description |
 |---------------|-----------|-------------|
 | **PYTHONPATH** | `$(KUBELESS_INSTALL_VOLUME)/lib.python3.9/site-packages:$(KUBELESS_INSTALL_VOLUME)` | list of directories that Python should add to the sys.path directory list |
-| **PYTHONUNBUFFERED** | `TRUE` | Defines if pythons logs should be first buffered before printing them out |
+| **PYTHONUNBUFFERED** | `TRUE` | Defines if Python's logs must be buffered before printing them out |
 
 ## Configure runtime
 
