@@ -10,10 +10,15 @@ const {cleanMockTestFixture} = require('./fixtures/commerce-mock');
 const {ensureCommerceMockLocalTestFixture} = require('../test/fixtures/commerce-mock');
 
 
+const {
+  istioConnectivityTests,
+} = require('../istio');
+
 describe('Executing Standard Testsuite:', function() {
   this.timeout(10 * 60 * 1000);
   this.slow(5000);
-
+  istioConnectivityTests();
+  
   const withCentralAppConnectivity = (process.env.WITH_CENTRAL_APP_CONNECTIVITY === 'true');
   const mockNamespace = process.env.MOCK_NAMESPACE || 'mocks';
   const testNamespace = 'test';
