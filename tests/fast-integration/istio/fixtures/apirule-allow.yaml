@@ -1,7 +1,7 @@
 apiVersion: gateway.kyma-project.io/v1alpha1
 kind: APIRule
 metadata:
-  name: httpbin-api-rule
+  name: httpbin-allow
   namespace: istio-connectivity-test
 spec:
   gateway: kyma-system/kyma-gateway
@@ -12,6 +12,6 @@ spec:
         - handler: allow
           config: {}
   service:
-    host: httpbin
+    host: httpbin-allow
     name: httpbin
     port: 80

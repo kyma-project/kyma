@@ -1,6 +1,7 @@
 const {
   ensureIstioConnectivityFixture,
-  checkHttpbinResponse,
+  checkHttpbinOAuthResponse,
+  checkHttpbinAllowResponse,
   cleanIstioConnectivityFixture,
 } = require('./fixtures');
 const {
@@ -27,8 +28,18 @@ function istioConnectivityTests() {
       });
     });
 
-    it('Httpbin call should returned 200', async function() {
-      await checkHttpbinResponse();
+    it('Httpbin call should return 200', async function() {
+      await checkHttpbinAllowResponse().catch((err) => {
+        console.dir(err); // first error is logged
+        return checkHttpbinAllowResponse();
+      });
+    });
+
+    it('Httpbin OAuth2 call should return 200', async function() {
+      await checkHttpbinOAuthResponse().catch((err) => {
+        console.dir(err); // first error is logged
+        return checkHttpbinOAuthResponse();
+      });
     });
 
     it('Should print report of restarted containers, skipped if no crashes happened', async function() {
