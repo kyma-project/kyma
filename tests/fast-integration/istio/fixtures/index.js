@@ -71,7 +71,7 @@ const apiRuleOAuthObj = k8s.loadAllYaml(
     apiRuleOAuthYaml,
 );
 
-async function checkHttpbinAllowResponse() {
+async function testHttpbinAllowResponse() {
   const vs = await waitForVirtualService(httpbinNamespace, httpbinAllowService);
   const host = vs.spec.hosts[0];
   const res = await retryPromise(
@@ -85,7 +85,7 @@ async function checkHttpbinAllowResponse() {
   expect(res.status).to.be.equal(200);
 }
 
-async function checkHttpbinOAuthResponse() {
+async function testHttpbinOAuthResponse() {
   const vs = await waitForVirtualService(httpbinNamespace, httpbinOAuthService);
   const host = vs.spec.hosts[0];
   const domain = host.split('.').slice(1).join('.');
@@ -173,7 +173,7 @@ function cleanIstioConnectivityFixture(wait = true) {
 
 module.exports = {
   ensureIstioConnectivityFixture,
-  checkHttpbinOAuthResponse,
-  checkHttpbinAllowResponse,
+  testHttpbinOAuthResponse,
+  testHttpbinAllowResponse,
   cleanIstioConnectivityFixture,
 };
