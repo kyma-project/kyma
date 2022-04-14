@@ -79,7 +79,7 @@ describe('Execute SKR test', function() {
 
   after('Deprovision SKR', async function() {
     try {
-      await deprovisionSKR(keb, kcp, this.options.instanceID, deprovisioningTimeout);
+      //await deprovisionSKR(keb, kcp, this.options.instanceID, deprovisioningTimeout);
     } catch (e) {
       throw new Error(`before hook failed: ${e.toString()}`);
     } finally {
@@ -87,6 +87,6 @@ describe('Execute SKR test', function() {
       console.log(`\nRuntime status after deprovisioning: ${runtimeStatus}`);
       await kcp.reconcileInformationLog(runtimeStatus);
     }
-    await unregisterKymaFromCompass(director, this.options.scenarioName);
+    //await unregisterKymaFromCompass(director, this.options.scenarioName);
   });
 });
