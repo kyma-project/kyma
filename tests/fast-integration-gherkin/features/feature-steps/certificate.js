@@ -37,7 +37,7 @@ Then(/^The validity date of the certificate should be after the date of today$/,
 	const todayDate = this.context.date;
 	const certificate = this.context.certificate;
 
-	//assert.isTrue(certificate.validity.notAfter >= todayDate, 'Certificate is going to outdate, please create new one');
+	assert.isTrue(certificate.validity.notAfter >= todayDate, 'Certificate is going to outdate, please create new one');
 });
 
 Then(/^The validity date of the certificate should not be earlier than the date of today$/, () => {
