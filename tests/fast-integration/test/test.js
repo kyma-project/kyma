@@ -17,8 +17,7 @@ const {
 describe('Executing Standard Testsuite:', function() {
   this.timeout(10 * 60 * 1000);
   this.slow(5000);
-  istioConnectivityTests();
-  
+
   const withCentralAppConnectivity = (process.env.WITH_CENTRAL_APP_CONNECTIVITY === 'true');
   const mockNamespace = process.env.MOCK_NAMESPACE || 'mocks';
   const testNamespace = 'test';
@@ -34,6 +33,7 @@ describe('Executing Standard Testsuite:', function() {
     await cleanMockTestFixture(mockNamespace, testNamespace, true);
   });
 
+  istioConnectivityTests();
   commerceMockTests(testNamespace);
   gettingStartedGuideTests();
 
