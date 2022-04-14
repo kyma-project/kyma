@@ -1,10 +1,12 @@
 ---
-title: Monitoring in Kyma
+title: Monitoring
 ---
 
 [Prometheus](https://prometheus.io/) is the open source monitoring and alerting toolkit that collects and stores metrics data. This data is consumed by different addons, including [Grafana](https://grafana.com/) for analytics and monitoring, and [Alertmanager](https://prometheus.io/docs/alerting/alertmanager/) for handling alerts.
 
-Monitoring in Kyma is configured to collect all metrics relevant for observing the in-cluster [Istio](https://istio.io/latest/docs/concepts/observability/) Service Mesh. For diagrams of the default setup and the monitoring flow with Istio, see [Istio Monitoring Architecture](../../../05-technical-reference/00-architecture/obsv-01-architecture-monitoring-istio.md). Learn how to [enable Grafana visualization](../../../04-operation-guides/operations/obsv-03-enable-grafana-for-istio.md) and [enable mTLS for custom metrics](../../../04-operation-guides/operations/obsv-04-enable-mtls-istio). 
+Monitoring in Kyma is configured to collect all metrics relevant for observing the in-cluster [Istio](https://istio.io/latest/docs/concepts/observability/) Service Mesh. For diagrams of the default setup and the monitoring flow including Istio, see [Monitoring Architecture](../../../05-technical-reference/00-architecture/obsv-01-architecture-monitoring.md).
+
+Learn how to [enable Grafana visualization](../../../04-operation-guides/operations/obsv-03-enable-grafana-for-istio.md) and [enable mTLS for custom metrics](../../../04-operation-guides/operations/obsv-04-enable-mtls-istio.md).
 
 ## Limitations
 

@@ -1,5 +1,5 @@
 ---
-title: Logging in Kyma
+title: Logging
 ---
 
 For logging, Kyma uses [Loki](https://github.com/grafana/loki), a Prometheus-like log management system.
