@@ -206,8 +206,8 @@ You can use a custom runtime image to override the existing one. Your image must
 - Expose the workload endpoint on the right port
 - Provide liveness and readiness check endpoints at `/healthz`
 - Fetch sources from the path under the `KUBELESS_INSTALL_VOLUME` environment
-- Security support. Our runtimes are secure by default but you need to take care of your images on your own
+- Security support. Kyma runtimes are secure by default. You only need to protect your images.
 
 > Note: For better understanding you can look at [main dockerfiles](https://github.com/kyma-project/kyma/blob/main/resources/serverless/templates/runtimes.yaml) which are responsible for building the final image based on the `base_image` argument which you as an user can override and what we are doing in [this tutorial](../03-tutorials/00-serverless/svls-13-override-runtime-image).
 
-Every Function's Pods container have the same system environments which helps you configure the Functions server. For more information, read the [Environment variables] page(../05-technical-reference/00-configuration-parameters/svls-02-environment-variables.md).
+Every Function's Pods container have the same system environments which helps you configure the Functions server. For more information, read the [Environment variables](../05-technical-reference/00-configuration-parameters/svls-02-environment-variables.md) page.

@@ -85,7 +85,7 @@ Follow these steps:
     EOF
     ```
 
-4. Verify whether Function is running:
+4. Verify whether your Function is running:
 
     ```bash
     kubectl get functions $NAME -n $NAMESPACE
