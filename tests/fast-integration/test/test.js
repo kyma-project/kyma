@@ -8,6 +8,7 @@ const {loggingTests} = require('../logging');
 const {tracingTests} = require('../tracing');
 const {cleanMockTestFixture} = require('./fixtures/commerce-mock');
 const {ensureCommerceMockLocalTestFixture} = require('../test/fixtures/commerce-mock');
+const {error} = require('../utils');
 
 
 describe('Executing Standard Testsuite:', function() {
@@ -19,8 +20,9 @@ describe('Executing Standard Testsuite:', function() {
   const testNamespace = 'test';
 
   before('CommerceMock test fixture should be ready', async function() {
-    await ensureCommerceMockLocalTestFixture(mockNamespace, testNamespace, withCentralAppConnectivity).catch((err) => {
-      console.dir(err); // first error is logged
+    await ensureCommerceMockLocalTestFixture(mockNamespace, testNamespace,
+        withCentralAppConnectivity).catch((err) => {
+      error(err);
       return ensureCommerceMockLocalTestFixture(mockNamespace, testNamespace, withCentralAppConnectivity);
     });
   });

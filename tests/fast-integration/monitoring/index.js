@@ -8,6 +8,19 @@ function monitoringTests() {
     return;
   }
 
+  describe('Grafana Tests:', async function() {
+    this.timeout(5 * 60 * 1000); // 5 min
+    this.slow(5 * 1000);
+
+    it('Grafana pods should be ready', async () => {
+      await grafana.assertPodsExist();
+    });
+
+    it('Grafana redirects should work', async () => {
+      await grafana.assertGrafanaRedirectsExist();
+    });
+  });
+
   describe('Prometheus Tests:', function() {
     this.timeout(5 * 60 * 1000); // 5 min
     this.slow(5000);
@@ -38,19 +51,6 @@ function monitoringTests() {
 
     it('Metrics used by Kyma Dashboard should exist', async () => {
       await prometheus.assertMetricsExist();
-    });
-  });
-
-  describe('Grafana Tests:', async function() {
-    this.timeout(5 * 60 * 1000); // 5 min
-    this.slow(5 * 1000);
-
-    it('Grafana pods should be ready', async () => {
-      await grafana.assertPodsExist();
-    });
-
-    it('Grafana redirects should work', async () => {
-      await grafana.assertGrafanaRedirectsExist();
     });
   });
 }
