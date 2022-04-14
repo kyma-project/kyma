@@ -4,8 +4,6 @@ title: What is Observability in Kyma?
 
 The term "Observability" can be defined as a measure of how well the internal states of single components can be reflected by the application's external outputs. The insights that are exposed are called "telemetry" or "signals" and they are usually displayed in the form of metrics, traces, and logs. They can be exposed by employing modern instrumentation.
 
-Modern cloud applications consist of multiple components that you can scale and deploy individually, and are focused on one concern using the most fitting technology - essentially, they're distributed systems. Monitoring such an application is no longer an action you apply to a specific component; instead applications must actively expose insights. Monitoring becomes a joint aspect for all components, where every single component must actively expose its internal state.
-
 Out of the box, Kyma provides tools to collect and expose **telemetry** data, such as metrics, traces, and log data. Of course, you'll want to view and analyze the data you're collecting. This is where **observability** tools come in.
 
 ## Collecting data
