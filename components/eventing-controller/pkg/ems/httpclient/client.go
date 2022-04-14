@@ -6,7 +6,7 @@ import (
 	"io"
 	"io/ioutil"
 	"net/http"
-	"net/url"
+	neturl "net/url"
 	"strings"
 )
 
@@ -21,14 +21,14 @@ type BaseURLAwareClient interface {
 }
 
 type Client struct {
-	baseURL    *url.URL
+	baseURL    *neturl.URL
 	httpClient *http.Client
 }
 
-// BaseURLAwareClient creates a new client and ensures that the given baseURL ends with a trailing '/'.
+// NewHTTPClient creates a new client and ensures that the given baseURL ends with a trailing '/'.
 // The trailing '/' is required later for constructing the full URL using a relative path.
 func NewHTTPClient(baseURL string, client *http.Client) (*Client, error) {
-	url, err := url.Parse(baseURL)
+	url, err := neturl.Parse(baseURL)
 
 	// add trailing '/' to the url path, so that we can combine the url with other paths according to standards
 	if !strings.HasSuffix(url.Path, "/") {
@@ -56,7 +56,7 @@ func (c Client) NewRequest(method, path string, body interface{}) (*http.Request
 		}
 	}
 
-	pu, err := url.Parse(path)
+	pu, err := neturl.Parse(path)
 	if err != nil {
 		return nil, NewError(err)
 	}
@@ -74,8 +74,8 @@ func (c Client) NewRequest(method, path string, body interface{}) (*http.Request
 	return req, nil
 }
 
-func resolveReferenceAsRelative(base, ref *url.URL) *url.URL {
-	return base.ResolveReference(&url.URL{Path: strings.TrimPrefix(ref.Path, "/")})
+func resolveReferenceAsRelative(base, ref *neturl.URL) *neturl.URL {
+	return base.ResolveReference(&neturl.URL{Path: strings.TrimPrefix(ref.Path, "/")})
 }
 
 func (c Client) Do(req *http.Request, result interface{}) (*http.Response, *[]byte, *Error) {

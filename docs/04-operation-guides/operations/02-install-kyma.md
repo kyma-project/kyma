@@ -16,17 +16,21 @@ Meet the prerequisites, provision a k3d cluster, and use the `deploy` command to
 
 ## Provision and install
 
+> **CAUTION:** Installation on a local k3d cluster does not work on Apple M1 SoC due to Istio installation error. 
+
 You can either use an out-of-the-box k3d cluster or choose any other cluster provider. To quickly provision a k3d cluster, run:
 
   ```bash
   kyma provision k3d
   ```
 
-  > **TIP:** If you want to define the name of your k3d cluster and pass arguments to the Kubernetes API server (for example, to log to stderr), run:
-  >
-  > ```bash
-  > kyma provision k3d --name='{CUSTOM_NAME}' --k3s-arg='--alsologtostderr@server:0'
-  > ```
+  But you can do more. To define the name of your k3d cluster and pass arguments to the Kubernetes API server, for example, to log to stderr, run:
+  
+  ```bash
+  kyma provision k3d --name='{CUSTOM_NAME}' --k3s-arg='--alsologtostderr@server:0'
+  ```
+
+> **NOTE:** If you're on Linux and provisioning k3d fails, follow the [troubleshooting guide](../troubleshooting/01-k3d-fails-on-linux.md).
 
 ## Default installation
 

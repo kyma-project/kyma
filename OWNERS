@@ -1,16 +1,12 @@
 filters:
   '.*':
-    approvers:
-      - derberg
+    reviewers:
       - pbochynski
       - PK85
       - a-thaler
-      - piotrmsc
       - kwiatekus
-  '\.md$|/docs/|^milv\.config\.yaml$':
     approvers:
-      - documentation-approvers
-    reviewers:
-      - documentation-reviewers
-    labels:
-      - area/documentation
+      - pbochynski
+      - PK85
+      - a-thaler
+      - kwiatekus

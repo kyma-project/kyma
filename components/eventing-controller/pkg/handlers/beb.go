@@ -29,7 +29,19 @@ const (
 )
 
 // compile time check
-var _ MessagingBackend = &BEB{}
+var _ BEBBackend = &BEB{}
+
+type BEBBackend interface {
+	// Initialize should initialize the communication layer with the messaging backend system
+	Initialize(cfg env.Config) error
+
+	// SyncSubscription should synchronize the Kyma eventing subscription with the subscriber infrastructure of messaging backend system.
+	// It should return true if Kyma eventing subscription status was changed during this synchronization process.
+	SyncSubscription(subscription *eventingv1alpha1.Subscription, cleaner eventtype.Cleaner, apiRule *apigatewayv1alpha1.APIRule) (bool, error)
+
+	// DeleteSubscription should delete the corresponding subscriber data of messaging backend
+	DeleteSubscription(subscription *eventingv1alpha1.Subscription) error
+}
 
 type OAuth2ClientCredentials struct {
 	ClientID     string
@@ -91,21 +103,9 @@ func getWebHookAuth(cfg env.Config, credentials *OAuth2ClientCredentials) *types
 }
 
 // SyncSubscription synchronize the EV2 subscription with the EMS subscription. It returns true, if the EV2 subscription status was changed
-func (b *BEB) SyncSubscription(subscription *eventingv1alpha1.Subscription, params ...interface{}) (bool, error) {
+func (b *BEB) SyncSubscription(subscription *eventingv1alpha1.Subscription, cleaner eventtype.Cleaner, apiRule *apigatewayv1alpha1.APIRule) (bool, error) {
 	// Format logger
 	log := utils.LoggerWithSubscription(b.namedLogger(), subscription)
-
-	cleaner, ok := params[0].(eventtype.Cleaner)
-	if !ok {
-		err := fmt.Errorf("get cleaner from params[0] failed: %v", params[0])
-		log.Errorw("wrong parameter for subscription", ErrorLogKey, err)
-	}
-
-	apiRule, ok := params[1].(*apigatewayv1alpha1.APIRule)
-	if !ok {
-		err := fmt.Errorf("get ApiRule from params[0] failed: %v", params[0])
-		log.Errorw("wrong parameter for subscription", ErrorLogKey, err)
-	}
 
 	// get the internal view for the ev2 subscription
 	var statusChanged = false

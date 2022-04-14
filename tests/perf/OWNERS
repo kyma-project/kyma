@@ -1,4 +1,4 @@
 approvers:
- - clebs
- - lilitgh
- - a-thaler
+  - observability-approvers
+reviwers:
+  - observability-approvers

@@ -44,15 +44,18 @@ func TestRoleReconciler_Reconcile(t *testing.T) {
 
 	request := ctrl.Request{NamespacedName: types.NamespacedName{Namespace: baseRole.GetNamespace(), Name: baseRole.GetName()}}
 
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
 	//WHEN
 	t.Run("should successfully propagate base Role to user namespace", func(t *testing.T) {
 		g := gomega.NewGomegaWithT(t)
 		t.Log("reconciling Role that doesn't exist")
-		_, err := reconciler.Reconcile(ctrl.Request{NamespacedName: types.NamespacedName{Namespace: baseRole.GetNamespace(), Name: "not-existing-role"}})
+		_, err := reconciler.Reconcile(ctx, ctrl.Request{NamespacedName: types.NamespacedName{Namespace: baseRole.GetNamespace(), Name: "not-existing-role"}})
 		g.Expect(err).To(gomega.BeNil(), "should not throw error on non existing Role")
 
 		t.Log("reconciling the Role")
-		result, err := reconciler.Reconcile(request)
+		result, err := reconciler.Reconcile(ctx, request)
 		g.Expect(err).To(gomega.BeNil())
 		g.Expect(result.Requeue).To(gomega.BeFalse())
 		g.Expect(result.RequeueAfter).To(gomega.Equal(testCfg.RoleRequeueDuration))
@@ -74,7 +77,7 @@ func TestRoleReconciler_Reconcile(t *testing.T) {
 		}
 		g.Expect(k8sClient.Update(context.TODO(), baseRoleCopy)).To(gomega.Succeed())
 
-		result, err = reconciler.Reconcile(request)
+		result, err = reconciler.Reconcile(ctx, request)
 		g.Expect(err).To(gomega.BeNil())
 		g.Expect(result.Requeue).To(gomega.BeFalse())
 		g.Expect(result.RequeueAfter).To(gomega.Equal(testCfg.RoleRequeueDuration))
@@ -95,7 +98,7 @@ func TestRoleReconciler_Reconcile(t *testing.T) {
 		}
 		g.Expect(k8sClient.Update(context.TODO(), userCopy)).To(gomega.Succeed())
 
-		result, err = reconciler.Reconcile(request)
+		result, err = reconciler.Reconcile(ctx, request)
 		g.Expect(err).To(gomega.BeNil())
 		g.Expect(result.Requeue).To(gomega.BeFalse())
 		g.Expect(result.RequeueAfter).To(gomega.Equal(testCfg.RoleRequeueDuration))
@@ -123,9 +126,9 @@ func TestRoleReconciler_predicate(t *testing.T) {
 
 	t.Run("deleteFunc", func(t *testing.T) {
 		g := gomega.NewGomegaWithT(t)
-		deleteEventPod := event.DeleteEvent{Meta: pod.GetObjectMeta(), Object: pod}
-		deleteEventLabelledSrvAcc := event.DeleteEvent{Meta: labelledRole.GetObjectMeta(), Object: labelledRole}
-		deleteEventUnlabelledSrvAcc := event.DeleteEvent{Meta: unlabelledRole.GetObjectMeta(), Object: unlabelledRole}
+		deleteEventPod := event.DeleteEvent{Object: pod}
+		deleteEventLabelledSrvAcc := event.DeleteEvent{Object: labelledRole}
+		deleteEventUnlabelledSrvAcc := event.DeleteEvent{Object: unlabelledRole}
 
 		g.Expect(preds.Delete(deleteEventPod)).To(gomega.BeFalse())
 		g.Expect(preds.Delete(deleteEventLabelledSrvAcc)).To(gomega.BeFalse())
@@ -135,9 +138,9 @@ func TestRoleReconciler_predicate(t *testing.T) {
 
 	t.Run("createFunc", func(t *testing.T) {
 		g := gomega.NewGomegaWithT(t)
-		createEventPod := event.CreateEvent{Meta: pod.GetObjectMeta(), Object: pod}
-		createEventLabelledSrvAcc := event.CreateEvent{Meta: labelledRole.GetObjectMeta(), Object: labelledRole}
-		createEventUnlabelledSrvAcc := event.CreateEvent{Meta: unlabelledRole.GetObjectMeta(), Object: unlabelledRole}
+		createEventPod := event.CreateEvent{Object: pod}
+		createEventLabelledSrvAcc := event.CreateEvent{Object: labelledRole}
+		createEventUnlabelledSrvAcc := event.CreateEvent{Object: unlabelledRole}
 
 		g.Expect(preds.Create(createEventPod)).To(gomega.BeFalse())
 		g.Expect(preds.Create(createEventLabelledSrvAcc)).To(gomega.BeTrue())
@@ -147,9 +150,9 @@ func TestRoleReconciler_predicate(t *testing.T) {
 
 	t.Run("genericFunc", func(t *testing.T) {
 		g := gomega.NewGomegaWithT(t)
-		genericEventPod := event.GenericEvent{Meta: pod.GetObjectMeta(), Object: pod}
-		genericEventLabelledSrvAcc := event.GenericEvent{Meta: labelledRole.GetObjectMeta(), Object: labelledRole}
-		genericEventUnlabelledSrvAcc := event.GenericEvent{Meta: unlabelledRole.GetObjectMeta(), Object: unlabelledRole}
+		genericEventPod := event.GenericEvent{Object: pod}
+		genericEventLabelledSrvAcc := event.GenericEvent{Object: labelledRole}
+		genericEventUnlabelledSrvAcc := event.GenericEvent{Object: unlabelledRole}
 
 		g.Expect(preds.Generic(genericEventPod)).To(gomega.BeFalse())
 		g.Expect(preds.Generic(genericEventLabelledSrvAcc)).To(gomega.BeTrue())
@@ -159,9 +162,9 @@ func TestRoleReconciler_predicate(t *testing.T) {
 
 	t.Run("updateFunc", func(t *testing.T) {
 		g := gomega.NewGomegaWithT(t)
-		updateEventPod := event.UpdateEvent{MetaNew: pod.GetObjectMeta(), ObjectNew: pod}
-		updateEventLabelledSrvAcc := event.UpdateEvent{MetaNew: labelledRole.GetObjectMeta(), ObjectNew: labelledRole}
-		updateEventUnlabelledSrvAcc := event.UpdateEvent{MetaNew: unlabelledRole.GetObjectMeta(), ObjectNew: unlabelledRole}
+		updateEventPod := event.UpdateEvent{ObjectNew: pod}
+		updateEventLabelledSrvAcc := event.UpdateEvent{ObjectNew: labelledRole}
+		updateEventUnlabelledSrvAcc := event.UpdateEvent{ObjectNew: unlabelledRole}
 
 		g.Expect(preds.Update(updateEventPod)).To(gomega.BeFalse())
 		g.Expect(preds.Update(updateEventUnlabelledSrvAcc)).To(gomega.BeFalse())

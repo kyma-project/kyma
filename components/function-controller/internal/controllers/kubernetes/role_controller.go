@@ -67,10 +67,7 @@ func (r *RoleReconciler) predicate() predicate.Predicate {
 // Reconcile reads that state of the cluster for a ConfigMap object and makes changes based
 // +kubebuilder:rbac:groups=rbac.authorization.k8s.io,resources=roles,verbs=get;list;watch;create;update;patch;delete;escalate;bind
 
-func (r *RoleReconciler) Reconcile(request ctrl.Request) (ctrl.Result, error) {
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
-
+func (r *RoleReconciler) Reconcile(ctx context.Context, request ctrl.Request) (ctrl.Result, error) {
 	instance := &rbacv1.Role{}
 	if err := r.client.Get(ctx, request.NamespacedName, instance); err != nil {
 		return ctrl.Result{}, client.IgnoreNotFound(err)

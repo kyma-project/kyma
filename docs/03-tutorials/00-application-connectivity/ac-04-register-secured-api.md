@@ -6,7 +6,7 @@ Application Registry allows you to register a secured API for every service. The
 
 You can specify only one authentication method for every secured API you register. If you try to register and specify more than one authentication method, Application Registry returns the `400` code response.
 
-Additionally, you can secure the API against cross-site request forgery (CSRF) attacks. CSRF tokens are an additional layer of protection and can accompany any authentication method.  
+Additionally, you can secure the API against cross-site request forgery (CSRF) attacks. CSRF tokens are an additional layer of protection and can accompany any authentication method.
 
 >**NOTE:** Registering a secured API is a part of registering services of an external solution connected to Kyma. To learn more about this process, follow the [tutorial](ac-03-register-manage-services.md).
 
@@ -29,7 +29,7 @@ This is an example of the **api** section of the request body for an API secured
                 "username": "{USERNAME}",
                 "password": "{PASSWORD}"
             }
-        }  
+        }
     }
 ```
 
@@ -64,7 +64,7 @@ This is an example of the **api** section of the request body for an API secured
                     }
                 }
             }
-        }  
+        }
     }
 ```
 
@@ -87,7 +87,7 @@ This is an example of the `api` section of the request body for an API secured w
             "certificateGen": {
                 "commonName": "{CERT_NAME}"
             }
-        }  
+        }
     }
 ```
 

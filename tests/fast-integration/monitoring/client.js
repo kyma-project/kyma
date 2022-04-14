@@ -2,6 +2,7 @@ const axios = require('axios');
 const https = require('https');
 
 const {
+  kc,
   kubectlPortForward,
   retryPromise,
   convertAxiosError,
@@ -10,18 +11,46 @@ const {
 } = require('../utils');
 
 const SECOND = 1000;
-const prometheusPort = 9090;
 const jaegerPort = 16686;
 
-function prometheusPortForward() {
-  return kubectlPortForward('kyma-system', 'prometheus-monitoring-prometheus-0', prometheusPort);
+function base64Decode(str) {
+  return Buffer.from(str, 'base64').toString();
+}
+
+function prometheusGet(path) {
+  let httpsAgent;
+  let headers;
+  const token = kc.getCurrentUser().token;
+  const caCrt = base64Decode(kc.getCurrentCluster().caData, 'base64');
+  if (token) {
+    httpsAgent = new https.Agent({
+      rejectUnauthorized: false,
+      ca: caCrt,
+      timeout: 10000,
+    });
+    headers = {'Authorization': `Bearer ${token}`};
+  } else {
+    httpsAgent = new https.Agent({
+      rejectUnauthorized: false,
+      ca: caCrt,
+      cert: base64Decode(kc.getCurrentUser().certData),
+      key: base64Decode(kc.getCurrentUser().keyData),
+      timeout: 10000,
+    });
+    headers = {'Authorization': `Bearer ${token}`};
+  }
+
+  const server = kc.getCurrentCluster().server;
+  const prometheusProxyUrl = 'api/v1/namespaces/kyma-system/services/monitoring-prometheus:9090/proxy';
+  const url = `${server}/${prometheusProxyUrl}${path}`;
+
+  return retryPromise(() => axios.get(url, {httpsAgent: httpsAgent, headers: headers}), 5);
 }
 
 async function getPrometheusActiveTargets() {
   const path = '/api/v1/targets?state=active';
-  const url = `http://localhost:${prometheusPort}${path}`;
   try {
-    const responseBody = await retryPromise(() => axios.get(url, {timeout: 10000}), 5);
+    const responseBody = await prometheusGet(path);
     return responseBody.data.data.activeTargets;
   } catch (err) {
     throw convertAxiosError(err, 'cannot get prometheus targets');
@@ -30,9 +59,8 @@ async function getPrometheusActiveTargets() {
 
 async function getPrometheusAlerts() {
   const path = '/api/v1/alerts';
-  const url = `http://localhost:${prometheusPort}${path}`;
   try {
-    const responseBody = await retryPromise(() => axios.get(url, {timeout: 10000}), 5);
+    const responseBody = await prometheusGet(path);
     return responseBody.data.data.alerts;
   } catch (err) {
     throw convertAxiosError(err, 'cannot get prometheus alerts');
@@ -41,9 +69,8 @@ async function getPrometheusAlerts() {
 
 async function getPrometheusRuleGroups() {
   const path = '/api/v1/rules';
-  const url = `http://localhost:${prometheusPort}${path}`;
   try {
-    const responseBody = await retryPromise(() => axios.get(url, {timeout: 10000}), 5);
+    const responseBody = await prometheusGet(path);
     return responseBody.data.data.groups;
   } catch (err) {
     throw convertAxiosError(err, 'cannot get prometheus rules');
@@ -52,9 +79,8 @@ async function getPrometheusRuleGroups() {
 
 async function queryPrometheus(query) {
   const path = `/api/v1/query?query=${encodeURIComponent(query)}`;
-  const url = `http://localhost:${prometheusPort}${path}`;
   try {
-    const responseBody = await retryPromise(() => axios.get(url, {timeout: 10000}), 5);
+    const responseBody = await prometheusGet(path);
     return responseBody.data.data.result;
   } catch (err) {
     throw convertAxiosError(err, 'cannot query prometheus');
@@ -134,7 +160,6 @@ async function getJaegerTrace(traceId) {
 }
 
 module.exports = {
-  prometheusPortForward,
   getPrometheusActiveTargets,
   getPrometheusAlerts,
   getPrometheusRuleGroups,

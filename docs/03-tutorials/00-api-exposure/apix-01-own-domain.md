@@ -1,10 +1,8 @@
 ---
-title: Use a custom domain to expose a service
+title: Use a custom domain to expose a workload
 ---
 
-This tutorial shows how to set up your custom domain and prepare a certificate for exposing a service. The components used are Gardener [External DNS Management](https://github.com/gardener/external-dns-management) and [Certificate Management](https://github.com/gardener/cert-management).
-
-Once you finish the steps, learn how to [expose a service](./apix-02-expose-service-apigateway.md) or how to [expose and secure a service](./apix-03-expose-and-sercure-service.md).
+This tutorial shows how to set up your custom domain and prepare a certificate for exposing a workload. It uses Gardener [External DNS Management](https://github.com/gardener/external-dns-management) and [Certificate Management](https://github.com/gardener/cert-management) components.
 
 ## Prerequisites
 
@@ -14,12 +12,13 @@ If you use a cluster not managed by Gardener, install the [External DNS Manageme
 
 ## Steps
 
-Follow these steps to set up your custom domain and prepare a certificate required to expose a service.
+Follow these steps to set up your custom domain and prepare a certificate required to expose a workload.
 
-1. Create a Namespace. Run:
+1. Create a Namespace and export it as an environment variable. Run:
 
-  ```bash
-   kubectl create ns {NAMESPACE_NAME}
+   ```bash
+   export NAMESPACE={NAMESPACE_NAME}
+   kubectl create ns $NAMESPACE
    ```
 
 2. Create a Secret containing credentials for your DNS cloud service provider account in your Namespace.
@@ -37,10 +36,9 @@ Follow these steps to set up your custom domain and prepare a certificate requir
    As the **SPEC_TYPE**, use the relevant provider type. See the [official Gardener examples](https://github.com/gardener/external-dns-management/tree/master/examples) of the DNS Provider CR.
 
    ```bash
-   export NAMESPACE={NAMESPACE_NAME}
    export SPEC_TYPE={PROVIDER_TYPE}
    export SECRET={SECRET_NAME}
-   export DOMAIN={DOMAIN_NAME} # The domain that you own, e.g. mydomain.com.
+   export DOMAIN_TO_EXPOSE_WORKLOADS={DOMAIN_NAME} # The domain that you own, e.g. mydomain.com.
    ```
 
     ```bash
@@ -58,7 +56,7 @@ Follow these steps to set up your custom domain and prepare a certificate requir
         name: $SECRET
       domains:
         include:
-          - $DOMAIN
+          - $DOMAIN_TO_EXPOSE_WORKLOADS
     EOF
     ```
 
@@ -111,6 +109,7 @@ Follow these steps to set up your custom domain and prepare a certificate requir
          namespace: $NAMESPACE
        domains:
          include:
+           - $DOMAIN_TO_EXPOSE_WORKLOADS
            - "$WILDCARD"
    EOF
    ```
@@ -120,7 +119,7 @@ Follow these steps to set up your custom domain and prepare a certificate requir
   Export the following values as environment variables and run the command provided.
 
    ```bash
-   export TLS_SECRET={SECRET_NAME} #e.g. httpbin-tls-credentials
+   export TLS_SECRET={TLS_SECRET_NAME} # The name of the TLS Secret that will be created in this step, e.g. httpbin-tls-credentials
    export ISSUER={ISSUER_NAME} # The name of the Issuer CR, e.g.letsencrypt-staging.
    ```
 
@@ -133,13 +132,19 @@ Follow these steps to set up your custom domain and prepare a certificate requir
      namespace: istio-system
    spec:  
      secretName: $TLS_SECRET
-     commonName: $DOMAIN
+     commonName: $DOMAIN_TO_EXPOSE_WORKLOADS
      issuerRef:
        name: $ISSUER
        namespace: default
    EOF
    ```
 
-## Next tutorial
+## Next steps
 
-Proceed with [this](./apix-02-expose-service-apigateway.md) tutorial to expose a service using your custom domain.
+Proceed with the [Create a workload](./apix-02-create-workload.md) tutorial to deploy an instance of the HttpBin service or a sample Function.
+
+Once you have your workload deployed, you can continue by choosing one of the following tutorials:
+
+- [Expose a workload](./apix-02-expose-workload-apigateway.md)
+- [Expose and secure a workload with OAuth2](./apix-03-expose-and-secure-workload-oauth2.md)
+- [Expose and secure a workload with Istio](./apix-04-expose-and-secure-workload-istio.md)

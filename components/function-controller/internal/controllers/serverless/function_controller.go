@@ -20,15 +20,6 @@ const (
 	FunctionDepsKey   = "dependencies"
 )
 
-var (
-	// shared between all runtimes
-	envVarsForDeployment = []corev1.EnvVar{
-		{Name: "FUNC_HANDLER", Value: "main"},
-		{Name: "MOD_NAME", Value: "handler"},
-		{Name: "FUNC_PORT", Value: "8080"},
-	}
-)
-
 func (r *FunctionReconciler) mapsEqual(existing, expected map[string]string) bool {
 	if len(existing) != len(expected) {
 		return false
@@ -63,6 +54,7 @@ func (r *FunctionReconciler) calculateImageTag(instance *serverlessv1alpha1.Func
 		string(instance.GetUID()),
 		instance.Spec.Source,
 		instance.Spec.Deps,
+		instance.Spec.RuntimeImageOverride,
 		string(instance.Status.Runtime),
 	}, "-")))
 
@@ -78,6 +70,7 @@ func (r *FunctionReconciler) calculateGitImageTag(instance *serverlessv1alpha1.F
 		string(instance.GetUID()),
 		instance.Status.Commit,
 		instance.Status.Repository.BaseDir,
+		instance.Spec.RuntimeImageOverride,
 		string(instance.Status.Runtime),
 	}, "-")
 	hash := sha256.Sum256([]byte(data))
@@ -112,6 +105,7 @@ func (r *FunctionReconciler) updateStatus(ctx context.Context, instance *serverl
 	}
 	currentFunction.Status.Source = instance.Spec.Source
 	currentFunction.Status.Runtime = serverlessv1alpha1.RuntimeExtended(instance.Spec.Runtime)
+	currentFunction.Status.RuntimeImageOverride = instance.Spec.RuntimeImageOverride
 
 	if !r.equalFunctionStatus(currentFunction.Status, instance.Status) {
 		if err := r.client.Status().Update(ctx, currentFunction); err != nil {
@@ -204,7 +198,8 @@ func (r *FunctionReconciler) equalFunctionStatus(left, right serverlessv1alpha1.
 	if left.Repository != right.Repository ||
 		left.Commit != right.Commit ||
 		left.Source != right.Source ||
-		left.Runtime != right.Runtime {
+		left.Runtime != right.Runtime ||
+		left.RuntimeImageOverride != right.RuntimeImageOverride {
 		return false
 	}
 	return true

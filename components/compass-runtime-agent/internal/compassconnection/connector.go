@@ -1,10 +1,12 @@
 package compassconnection
 
 import (
+	"context"
 	"crypto/x509/pkix"
 	"strings"
 
-	"github.com/google/uuid"
+	"github.com/kyma-incubator/compass/components/director/pkg/correlation"
+
 	gqlschema "github.com/kyma-incubator/compass/components/connector/pkg/graphql/externalschema"
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/certificates"
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/compass"
@@ -20,13 +22,12 @@ type EstablishedConnection struct {
 
 const (
 	ConnectorTokenHeader = "Connector-Token"
-	RequestIDHeader      = "x-request-id"
 )
 
 //go:generate mockery --name=Connector
 type Connector interface {
-	EstablishConnection(connectorURL, token string) (EstablishedConnection, error)
-	MaintainConnection(renewCert bool, credentialsExist bool) (*certificates.Credentials, v1alpha1.ManagementInfo, error)
+	EstablishConnection(ctx context.Context, connectorURL, token string) (EstablishedConnection, error)
+	MaintainConnection(ctx context.Context, renewCert bool, credentialsExist bool) (*certificates.Credentials, v1alpha1.ManagementInfo, error)
 }
 
 func NewCompassConnector(
@@ -44,13 +45,14 @@ type compassConnector struct {
 	clientsProvider compass.ClientsProvider
 }
 
-func (cc *compassConnector) EstablishConnection(connectorURL, token string) (EstablishedConnection, error) {
-	requestID := uuid.New().String()
-	connection, err := cc.establishConnection(connectorURL, token, requestID)
+func (cc *compassConnector) EstablishConnection(ctx context.Context, connectorURL, token string) (EstablishedConnection, error) {
+	connection, err := cc.establishConnection(ctx, connectorURL, token)
+	requestID := correlation.HeadersFromContext(ctx)[correlation.RequestIDHeaderKey]
 	return connection, errors.Wrapf(err, "x-request-id: %s failed", requestID)
 }
 
-func (cc *compassConnector) establishConnection(connectorURL, token, requestID string) (EstablishedConnection, error) {
+func (cc *compassConnector) establishConnection(ctx context.Context, connectorURL, token string) (EstablishedConnection, error) {
+	requestID := correlation.HeadersFromContext(ctx)[correlation.RequestIDHeaderKey]
 	logger := logrus.WithFields(logrus.Fields{"x-request-id": requestID})
 
 	if connectorURL == "" {
@@ -63,7 +65,7 @@ func (cc *compassConnector) establishConnection(connectorURL, token, requestID s
 	}
 
 	logger.Infof("Fetching configuration")
-	configuration, err := tokenSecuredConnectorClient.Configuration(connectorTokenHeader(token, requestID))
+	configuration, err := tokenSecuredConnectorClient.Configuration(ctx, connectorTokenHeader(token))
 	if err != nil {
 		return EstablishedConnection{}, errors.Wrap(err, "Failed to fetch configuration")
 	}
@@ -75,7 +77,7 @@ func (cc *compassConnector) establishConnection(connectorURL, token, requestID s
 	}
 
 	logger.Infof("Signing CSR")
-	certResponse, err := tokenSecuredConnectorClient.SignCSR(csr, connectorTokenHeader(configuration.Token.Token, requestID))
+	certResponse, err := tokenSecuredConnectorClient.SignCSR(ctx, csr, connectorTokenHeader(configuration.Token.Token))
 	if err != nil {
 		return EstablishedConnection{}, errors.Wrap(err, "Failed to sign CSR")
 	}
@@ -91,13 +93,13 @@ func (cc *compassConnector) establishConnection(connectorURL, token, requestID s
 	}, nil
 }
 
-func (cc *compassConnector) MaintainConnection(renewCert bool, credentialsExist bool) (*certificates.Credentials, v1alpha1.ManagementInfo, error) {
+func (cc *compassConnector) MaintainConnection(ctx context.Context, renewCert bool, credentialsExist bool) (*certificates.Credentials, v1alpha1.ManagementInfo, error) {
 	certSecuredClient, err := cc.clientsProvider.GetConnectorCertSecuredClient()
 	if err != nil {
 		return nil, v1alpha1.ManagementInfo{}, errors.Wrap(err, "Failed to prepare Certificate-secured Connector client while checking connection")
 	}
 
-	configuration, err := certSecuredClient.Configuration(nil)
+	configuration, err := certSecuredClient.Configuration(ctx, nil)
 	if err != nil {
 		return nil, v1alpha1.ManagementInfo{}, errors.Wrap(err, "Failed to query Connection Configuration while checking connection")
 	}
@@ -117,7 +119,7 @@ func (cc *compassConnector) MaintainConnection(renewCert bool, credentialsExist 
 		return nil, v1alpha1.ManagementInfo{}, errors.Wrap(err, "Failed to create CSR while renewing connection")
 	}
 
-	certResponse, err := certSecuredClient.SignCSR(csr, nil)
+	certResponse, err := certSecuredClient.SignCSR(ctx, csr, nil)
 	if err != nil {
 		return nil, v1alpha1.ManagementInfo{}, errors.Wrap(err, "Failed to sign CSR while renewing connection")
 	}
@@ -162,10 +164,9 @@ func toManagementInfo(configInfo *gqlschema.ManagementPlaneInfo) v1alpha1.Manage
 	}
 }
 
-func connectorTokenHeader(token string, requestID string) map[string]string {
+func connectorTokenHeader(token string) map[string]string {
 	return map[string]string{
 		ConnectorTokenHeader: token,
-		RequestIDHeader:      requestID,
 	}
 }
 

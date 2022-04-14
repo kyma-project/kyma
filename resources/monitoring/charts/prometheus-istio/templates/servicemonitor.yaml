@@ -25,9 +25,15 @@ spec:
     path: /federate
     targetPort: 9090
     honorLabels: true
+    honorTimestamps: true
     metricRelabelings:
     - sourceLabels: ["__name__"]
       regex: 'workload:(.*)'
       targetLabel: "__name__"
       action: replace
+    # remove labels added by servicemonitor itself as they are useless for federational scrape
+    - separator: ;
+      regex: (namespace|pod|container|endpoint)
+      replacement: $1
+      action: labeldrop
     scheme: http

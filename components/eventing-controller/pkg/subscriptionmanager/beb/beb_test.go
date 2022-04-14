@@ -6,6 +6,11 @@ import (
 	"net/http"
 	"testing"
 
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/eventtype"
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/subscriptionmanager"
+	"k8s.io/client-go/dynamic"
+	"sigs.k8s.io/controller-runtime/pkg/manager"
+
 	kymalogger "github.com/kyma-project/kyma/common/logging/logger"
 	"github.com/onsi/gomega"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -16,7 +21,6 @@ import (
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/types"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers"
-	"github.com/kyma-project/kyma/components/eventing-controller/pkg/subscriptionmanager/mock"
 	controllertesting "github.com/kyma-project/kyma/components/eventing-controller/testing"
 )
 
@@ -24,8 +28,25 @@ const (
 	domain = "domain.com"
 )
 
+type bebSubMgrMock struct {
+	Client  dynamic.Interface
+	Backend handlers.BEBBackend
+}
+
+func (c *bebSubMgrMock) Init(_ manager.Manager) error {
+	return nil
+}
+
+func (c *bebSubMgrMock) Start(_ env.DefaultSubscriptionConfig, _ subscriptionmanager.Params) error {
+	return nil
+}
+
+func (c *bebSubMgrMock) Stop(_ bool) error {
+	return nil
+}
+
 func TestCleanup(t *testing.T) {
-	bebSubMgr := mock.Manager{}
+	bebSubMgr := bebSubMgrMock{}
 	g := gomega.NewWithT(t)
 
 	// When
@@ -89,8 +110,10 @@ func TestCleanup(t *testing.T) {
 	g.Expect(unstructuredAPIRuleBeforeCleanup).ToNot(gomega.BeNil())
 
 	// create a BEB subscription from Kyma subscription
-	mockCleaner := mock.Cleaner{}
-	_, err = bebSubMgr.Backend.SyncSubscription(subscription, &mockCleaner, apiRule)
+	cleaner := func(et string) (string, error) {
+		return et, nil
+	}
+	_, err = bebSubMgr.Backend.SyncSubscription(subscription, eventtype.CleanerFunc(cleaner), apiRule)
 	g.Expect(err).To(gomega.BeNil())
 
 	//  check that the susbcription exist in bebMock

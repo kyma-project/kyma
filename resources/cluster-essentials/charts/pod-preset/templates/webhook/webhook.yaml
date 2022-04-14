@@ -12,7 +12,7 @@
   {{- $encodedKey = b64enc $cert.Key }}
 {{ end }}
 
-apiVersion: admissionregistration.k8s.io/v1beta1
+apiVersion: admissionregistration.k8s.io/v1
 kind: MutatingWebhookConfiguration
 metadata:
   name: {{ template "pod-preset.fullname" . }}-webhook
@@ -24,6 +24,9 @@ webhooks:
       namespace: "{{ .Release.Namespace }}"
       path: /mutating-pods
   failurePolicy: Ignore
+  admissionReviewVersions:
+  - v1beta1
+  sideEffects: None
   name: podpresets.settings.svcat.k8s.io
   rules:
   - apiGroups:

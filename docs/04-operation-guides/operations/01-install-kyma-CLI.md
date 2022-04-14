@@ -44,6 +44,7 @@ curl -Lo kyma.tar.gz "https://github.com/kyma-project/cli/releases/download/$(cu
 && mkdir kyma-release && tar -C kyma-release -zxvf kyma.tar.gz && chmod +x kyma-release/kyma && sudo mv kyma-release/kyma /usr/local/bin \
 && rm -rf kyma-release kyma.tar.gz
 ```
+
   </details>
   <details>
   <summary label="Windows">

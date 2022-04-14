@@ -9,18 +9,15 @@ import (
 	"net"
 	"net/http"
 	"strconv"
-	"testing"
 	"time"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	http2 "github.com/cloudevents/sdk-go/v2/protocol/http"
-
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 )
 
+// binary cloudevent headers
 const (
-	// binary cloudevent headers
 	CeIDHeader          = "ce-id"
 	CeTypeHeader        = "ce-type"
 	CeSourceHeader      = "ce-source"
@@ -56,22 +53,12 @@ func SendEvent(endpoint, body string, headers http.Header) (*http.Response, erro
 	return client.Do(req)
 }
 
-func GetStructuredMessageHeaders() http.Header {
-	return http.Header{"Content-Type": []string{"application/cloudevents+json"}}
-}
-
 func GetBinaryMessageHeaders() http.Header {
 	headers := make(http.Header)
 	headers.Add(CeIDHeader, EventID)
 	headers.Add(CeTypeHeader, CloudEventTypeNotClean)
 	headers.Add(CeSourceHeader, CloudEventSource)
 	headers.Add(CeSpecVersionHeader, CloudEventSpecVersion)
-	return headers
-}
-
-func GetApplicationJSONHeaders() http.Header {
-	headers := make(http.Header)
-	headers.Add(http2.ContentType, "application/json")
 	return headers
 }
 
@@ -137,8 +124,8 @@ func SubscriptionWithFilter(eventSource, eventType string) SubscriptionOpt {
 	}
 }
 
-// WaitForHandlerToStart is waits for the test handler to start before testing could start
-func WaitForHandlerToStart(t *testing.T, healthEndpoint string) {
+// WaitForEndpointStatusCodeOrFail waits for endpoint status code or timeout.
+func WaitForEndpointStatusCodeOrFail(endpoint string, statusCode int) {
 	timeout := time.After(time.Second * 30)
 	ticker := time.NewTicker(time.Second * 1)
 
@@ -146,13 +133,13 @@ func WaitForHandlerToStart(t *testing.T, healthEndpoint string) {
 		select {
 		case <-timeout:
 			{
-				t.Fatal("Failed to start handler")
+				log.Fatalf("Endpoint:%s did not respond with the expected status-code:%d", endpoint, statusCode)
 			}
 		case <-ticker.C:
 			{
-				if resp, err := http.Get(healthEndpoint); err != nil { //nolint:gosec
+				if resp, err := http.Get(endpoint); err != nil { //nolint:gosec
 					continue
-				} else if resp.StatusCode == http.StatusOK {
+				} else if resp.StatusCode == statusCode {
 					return
 				}
 			}

@@ -28,9 +28,27 @@ import (
 )
 
 // compile time check
-var _ MessagingBackend = &Nats{}
+var _ NatsBackend = &Nats{}
+
+const (
+	backoffStrategy = cev2context.BackoffStrategyConstant
+	natsHandlerName = "nats-handler"
+)
 
 type ConnClosedHandler func(conn *nats.Conn)
+
+type NatsBackend interface {
+	// Initialize connects and initializes the NATS backend.
+	// connCloseHandler can be used to register a handler that gets called when connection
+	// to the NATS server is closed and retry attempts are exceeded.
+	Initialize(connCloseHandler ConnClosedHandler) error
+
+	// SyncSubscription synchronizes the Kyma Subscription on the NATS backend.
+	SyncSubscription(subscription *eventingv1alpha1.Subscription) error
+
+	// DeleteSubscription deletes the corresponding subscription on the NATS backend
+	DeleteSubscription(subscription *eventingv1alpha1.Subscription) error
+}
 
 type Nats struct {
 	config            env.NatsConfig
@@ -43,23 +61,17 @@ type Nats struct {
 	connClosedHandler ConnClosedHandler
 }
 
-func NewNats(config env.NatsConfig, subsConfig env.DefaultSubscriptionConfig, closeHandler ConnClosedHandler, logger *logger.Logger) *Nats {
+func NewNats(config env.NatsConfig, subsConfig env.DefaultSubscriptionConfig, logger *logger.Logger) *Nats {
 	return &Nats{
 		config:            config,
 		defaultSubsConfig: subsConfig,
-		connClosedHandler: closeHandler,
 		logger:            logger,
 		subscriptions:     make(map[string]*nats.Subscription),
 	}
 }
 
-const (
-	backoffStrategy = cev2context.BackoffStrategyConstant
-	natsHandlerName = "nats-handler"
-)
-
 // Initialize creates a connection to NATS.
-func (n *Nats) Initialize(env.Config) (err error) {
+func (n *Nats) Initialize(connCloseHandler ConnClosedHandler) (err error) {
 	if n.connection == nil || n.connection.Status() != nats.CONNECTED {
 		natsOptions := []nats.Option{
 			nats.RetryOnFailedConnect(true),
@@ -67,14 +79,15 @@ func (n *Nats) Initialize(env.Config) (err error) {
 			nats.ReconnectWait(n.config.ReconnectWait),
 		}
 		n.connection, err = nats.Connect(n.config.URL, natsOptions...)
-		if n.connClosedHandler != nil {
-			n.connection.SetClosedHandler(nats.ConnHandler(n.connClosedHandler))
-		}
 		if err != nil {
 			return errors.Wrapf(err, "connect to NATS failed")
 		}
 		if n.connection.Status() != nats.CONNECTED {
 			return errors.Errorf("connect to NATS failed status: %v", n.connection.Status())
+		}
+		n.connClosedHandler = connCloseHandler
+		if n.connClosedHandler != nil {
+			n.connection.SetClosedHandler(nats.ConnHandler(n.connClosedHandler))
 		}
 	}
 
@@ -123,8 +136,7 @@ func GetCleanSubjects(sub *eventingv1alpha1.Subscription, cleaner eventtype.Clea
 }
 
 // SyncSubscription synchronizes the given Kyma subscription to NATS subscription.
-// The returned bool acts as a marker for changed subscription status.
-func (n *Nats) SyncSubscription(sub *eventingv1alpha1.Subscription, _ ...interface{}) (bool, error) {
+func (n *Nats) SyncSubscription(sub *eventingv1alpha1.Subscription) error {
 	// Format logger
 	log := utils.LoggerWithSubscription(n.namedLogger(), sub)
 	subKeyPrefix := createKeyPrefix(sub)
@@ -135,7 +147,7 @@ func (n *Nats) SyncSubscription(sub *eventingv1alpha1.Subscription, _ ...interfa
 	for key, s := range n.subscriptions {
 		if isNatsSubAssociatedWithKymaSub(key, s, sub) && !utils.ContainsString(sub.Status.CleanEventTypes, s.Subject) {
 			if err := n.deleteSubscriptionFromNATS(s, key, log); err != nil {
-				return false, err
+				return err
 			}
 			log.Infow(
 				"deleted NATS subscription because it was deleted from subscription filters",
@@ -154,9 +166,9 @@ func (n *Nats) SyncSubscription(sub *eventingv1alpha1.Subscription, _ ...interfa
 		callback := n.getCallback(subKeyPrefix)
 
 		if n.connection.Status() != nats.CONNECTED {
-			if err := n.Initialize(env.Config{}); err != nil {
+			if err := n.Initialize(n.connClosedHandler); err != nil {
 				log.Errorw("reset NATS connection failed", "status", n.connection.Stats(), "error", err)
-				return false, err
+				return err
 			}
 		}
 
@@ -169,7 +181,7 @@ func (n *Nats) SyncSubscription(sub *eventingv1alpha1.Subscription, _ ...interfa
 			if existingNatsSub, ok := n.subscriptions[natsSubKey]; ok {
 				if existingNatsSub.Subject != subject {
 					if err := n.deleteSubscriptionFromNATS(existingNatsSub, natsSubKey, log); err != nil {
-						return false, err
+						return err
 					}
 				} else if existingNatsSub.IsValid() {
 					log.Debugw("skipping creating subscription on NATS because it already exists", "subject", subject)
@@ -181,7 +193,7 @@ func (n *Nats) SyncSubscription(sub *eventingv1alpha1.Subscription, _ ...interfa
 			natsSub, err := n.connection.QueueSubscribe(subject, queueGroupName, callback)
 			if err != nil {
 				log.Errorw("create NATS subscription failed", "error", err)
-				return false, err
+				return err
 			}
 
 			// save created NATS subscription in storage
@@ -189,7 +201,7 @@ func (n *Nats) SyncSubscription(sub *eventingv1alpha1.Subscription, _ ...interfa
 		}
 	}
 
-	return false, nil
+	return nil
 }
 
 // DeleteSubscription deletes all NATS subscriptions corresponding to a Kyma subscription
@@ -239,7 +251,7 @@ func (n *Nats) GetAllSubscriptions() map[string]*nats.Subscription {
 func (n *Nats) deleteSubscriptionFromNATS(natsSub *nats.Subscription, subKey string, log *zap.SugaredLogger) error {
 	// Unsubscribe call to NATS is async hence checking the status of the connection is important
 	if n.connection.Status() != nats.CONNECTED {
-		if err := n.Initialize(env.Config{}); err != nil {
+		if err := n.Initialize(n.connClosedHandler); err != nil {
 			log.Errorw("connect to NATS failed", "status", n.connection.Status(), "error", err)
 			return errors.Wrapf(err, "connect to NATS failed")
 		}

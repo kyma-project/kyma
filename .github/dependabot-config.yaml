@@ -3,6 +3,9 @@ templates:
     render:
       - to: dependabot.yml
         localSets:
+          autoMerge:
+            labels:
+              - "skip-review"
           dailyGoEcosystem:
             packageEcosystem: "gomod"
             scheduleInterval: "daily"
@@ -10,7 +13,6 @@ templates:
             commitIncludeScope: "true"
             labels:
               - "go"
-              - "skip-review"
               - "area/dependency"
           dailyDockerEcosystem:
             packageEcosystem: "docker"
@@ -33,13 +35,95 @@ templates:
                 inheritedConfigs:
                   local:
                     - "dailyGoEcosystem"
+                    - "autoMerge"
               - jobConfig:
                   directory: "/components/eventing-controller"
                 inheritedConfigs:
                   local:
                     - "dailyGoEcosystem"
+                    - "autoMerge"
               - jobConfig:
                   directory: "/components/eventing-controller"
+                inheritedConfigs:
+                  local:
+                    - "dailyDockerEcosystem"
+              - jobConfig:
+                  directory: "/components/compass-runtime-agent"
+                inheritedConfigs:
+                  local:
+                    - "dailyGoEcosystem"
+              - jobConfig:
+                  directory: "/components/compass-runtime-agent"
+                inheritedConfigs:
+                  local:
+                    - "dailyDockerEcosystem"
+              - jobConfig:
+                  directory: "/components/central-application-gateway"
+                inheritedConfigs:
+                  local:
+                    - "dailyGoEcosystem"
+              - jobConfig:
+                  directory: "/components/central-application-gateway"
+                inheritedConfigs:
+                  local:
+                    - "dailyDockerEcosystem"
+              - jobConfig:
+                  directory: "/components/central-application-connectivity-validator"
+                inheritedConfigs:
+                  local:
+                    - "dailyGoEcosystem"
+              - jobConfig:
+                  directory: "/components/central-application-connectivity-validator"
+                inheritedConfigs:
+                  local:
+                    - "dailyDockerEcosystem"
+              - jobConfig:
+                  directory: "/components/application-registry"
+                inheritedConfigs:
+                  local:
+                    - "dailyGoEcosystem"
+              - jobConfig:
+                  directory: "/components/application-registry"
+                inheritedConfigs:
+                  local:
+                    - "dailyDockerEcosystem"
+              - jobConfig:
+                  directory: "/components/application-connectivity-certs-setup-job"
+                inheritedConfigs:
+                  local:
+                    - "dailyGoEcosystem"
+              - jobConfig:
+                  directory: "/components/application-connectivity-certs-setup-job"
+                inheritedConfigs:
+                  local:
+                    - "dailyDockerEcosystem"
+              - jobConfig:
+                  directory: "/components/application-operator"
+                inheritedConfigs:
+                  local:
+                    - "dailyGoEcosystem"
+              - jobConfig:
+                  directory: "/components/application-operator"
+                inheritedConfigs:
+                  local:
+                    - "dailyDockerEcosystem"
+              - jobConfig:
+                  directory: "/components/application-gateway"
+                inheritedConfigs:
+                  local:
+                    - "dailyGoEcosystem"
+              - jobConfig:
+                  directory: "/components/application-gateway"
+                inheritedConfigs:
+                  local:
+                    - "dailyDockerEcosystem"
+              - jobConfig:
+                  directory: "/components/connector-service"
+                inheritedConfigs:
+                  local:
+                    - "dailyGoEcosystem"
+              - jobConfig:
+                  directory: "/components/connector-service"
                 inheritedConfigs:
                   local:
                     - "dailyDockerEcosystem"

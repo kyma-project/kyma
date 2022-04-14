@@ -2,11 +2,10 @@ package testing
 
 import (
 	"fmt"
+	"net"
 	"net/http"
 
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
-
-	v1 "k8s.io/api/core/v1"
 
 	k8sresource "k8s.io/apimachinery/pkg/api/resource"
 
@@ -61,9 +60,27 @@ const (
            "source":"` + EventSource + `",
            "data":"` + EventData + `"
         }`
+
+	JSStreamName          = "kyma"
+	JSStreamSubjectPrefix = "prefix"
 )
 
 type APIRuleOption func(r *apigatewayv1alpha1.APIRule)
+
+// GetFreePort determines a free port on the host. It does so by delegating the job to net.ListenTCP.
+// Then providing a port of 0 to net.ListenTCP, it will automatically choose a port for us.
+func GetFreePort() (port int, err error) {
+	var a *net.TCPAddr
+	if a, err = net.ResolveTCPAddr("tcp", "localhost:0"); err == nil {
+		var l *net.TCPListener
+		if l, err = net.ListenTCP("tcp", a); err == nil {
+			port := l.Addr().(*net.TCPAddr).Port
+			err = l.Close()
+			return port, err
+		}
+	}
+	return
+}
 
 // NewAPIRule returns a valid APIRule
 func NewAPIRule(subscription *eventingv1alpha1.Subscription, opts ...APIRuleOption) *apigatewayv1alpha1.APIRule {
@@ -137,22 +154,6 @@ func MarkReady(r *apigatewayv1alpha1.APIRule) {
 	}
 }
 
-type SubscriptionOpt func(subscription *eventingv1alpha1.Subscription)
-
-func NewSubscription(name, namespace string, opts ...SubscriptionOpt) *eventingv1alpha1.Subscription {
-	newSub := &eventingv1alpha1.Subscription{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      name,
-			Namespace: namespace,
-		},
-		Spec: eventingv1alpha1.SubscriptionSpec{},
-	}
-	for _, o := range opts {
-		o(newSub)
-	}
-	return newSub
-}
-
 type ProtoOpt func(p *eventingv1alpha1.ProtocolSettings)
 
 func NewProtocolSettings(opts ...ProtoOpt) *eventingv1alpha1.ProtocolSettings {
@@ -197,6 +198,22 @@ func WithDefaultWebhookAuth() ProtoOpt {
 	}
 }
 
+type SubscriptionOpt func(subscription *eventingv1alpha1.Subscription)
+
+func NewSubscription(name, namespace string, opts ...SubscriptionOpt) *eventingv1alpha1.Subscription {
+	newSub := &eventingv1alpha1.Subscription{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      name,
+			Namespace: namespace,
+		},
+		Spec: eventingv1alpha1.SubscriptionSpec{},
+	}
+	for _, o := range opts {
+		o(newSub)
+	}
+	return newSub
+}
+
 func NewBEBSubscription(name, contentMode string, webhookURL string, events types.Events, webhookAuth *types.WebhookAuth) *types.Subscription {
 	return &types.Subscription{
 		Name:            name,
@@ -224,6 +241,27 @@ func WithFakeSubscriptionStatus() SubscriptionOpt {
 				Message: "foo-message",
 			},
 		}
+	}
+}
+
+func WithSink(sink string) SubscriptionOpt {
+	return func(sub *eventingv1alpha1.Subscription) {
+		sub.Spec.Sink = sink
+	}
+}
+func WithConditions(conditions []eventingv1alpha1.Condition) SubscriptionOpt {
+	return func(sub *eventingv1alpha1.Subscription) {
+		sub.Status.Conditions = conditions
+	}
+}
+func WithStatus(status bool) SubscriptionOpt {
+	return func(sub *eventingv1alpha1.Subscription) {
+		sub.Status.Ready = status
+	}
+}
+func WithFinalizers(finalizers []string) SubscriptionOpt {
+	return func(sub *eventingv1alpha1.Subscription) {
+		sub.ObjectMeta.Finalizers = finalizers
 	}
 }
 
@@ -337,9 +375,8 @@ func WithOrderCreatedFilter() SubscriptionOpt {
 	return WithFilter(EventSource, OrderCreatedEventType)
 }
 
-func WithInvalidSink() SubscriptionOpt {
-	return WithSinkURL("invalid")
-
+func WithSinkMissingScheme(svcNamespace, svcName string) SubscriptionOpt {
+	return WithSinkURL(fmt.Sprintf("%s.%s.svc.cluster.local", svcName, svcNamespace))
 }
 
 // WithValidSink is a SubscriptionOpt for creating a subscription with a valid sink that itself gets created from
@@ -366,6 +403,14 @@ func ValidSinkURL(namespace, svcName string) string {
 // WithSinkURL is a SubscriptionOpt for creating a subscription with a specific sink.
 func WithSinkURL(sinkURL string) SubscriptionOpt {
 	return func(subscription *eventingv1alpha1.Subscription) { subscription.Spec.Sink = sinkURL }
+}
+
+// WithNonZeroDeletionTimestamp sets the deletion timestamp of the subscription to Now()
+func WithNonZeroDeletionTimestamp() SubscriptionOpt {
+	return func(subscription *eventingv1alpha1.Subscription) {
+		now := metav1.Now()
+		subscription.DeletionTimestamp = &now
+	}
 }
 
 // SetSink sets the subscription's sink to a valid sink created from svcNameSpace and svcName.
@@ -500,9 +545,12 @@ func NewEventingControllerDeployment() *appsv1.Deployment {
 	}
 }
 
-func NewEventingControllerPod(backend string) *corev1.Pod {
+func NewEventingPublisherProxyPod(backend string) *corev1.Pod {
 	labels := map[string]string{
-		deployment.AppLabelKey: deployment.PublisherName,
+		deployment.AppLabelKey:       deployment.PublisherName,
+		deployment.InstanceLabelKey:  deployment.InstanceLabelValue,
+		deployment.DashboardLabelKey: deployment.DashboardLabelValue,
+		deployment.BackendLabelKey:   backend,
 	}
 	return &corev1.Pod{
 		ObjectMeta: metav1.ObjectMeta{
@@ -535,22 +583,29 @@ func NewEventingControllerPod(backend string) *corev1.Pod {
 	}
 }
 
+// WithMultipleConditions is a SubscriptionOpt for creating Subscriptions with multiple conditions.
 func WithMultipleConditions() SubscriptionOpt {
 	return func(s *eventingv1alpha1.Subscription) {
-		s.Status.Conditions = NewDefaultMultipleConditions()
+		s.Status.Conditions = MultipleDefaultConditions()
 	}
 }
 
-func NewDefaultMultipleConditions() []eventingv1alpha1.Condition {
-	cond1 := eventingv1alpha1.MakeCondition(
+func MultipleDefaultConditions() []eventingv1alpha1.Condition {
+	return []eventingv1alpha1.Condition{CustomReadyCondition("One"), CustomReadyCondition("Two")}
+}
+
+func CustomReadyCondition(msg string) eventingv1alpha1.Condition {
+	return eventingv1alpha1.MakeCondition(
 		eventingv1alpha1.ConditionSubscriptionActive,
 		eventingv1alpha1.ConditionReasonNATSSubscriptionActive,
-		v1.ConditionTrue, "cond1")
-	cond2 := eventingv1alpha1.MakeCondition(
+		corev1.ConditionTrue, msg)
+}
+
+func DefaultReadyCondition() eventingv1alpha1.Condition {
+	return eventingv1alpha1.MakeCondition(
 		eventingv1alpha1.ConditionSubscriptionActive,
 		eventingv1alpha1.ConditionReasonNATSSubscriptionActive,
-		v1.ConditionTrue, "cond2")
-	return []eventingv1alpha1.Condition{cond1, cond2}
+		corev1.ConditionTrue, "")
 }
 
 // ToSubscription converts an unstructured subscription into a typed one
@@ -618,4 +673,54 @@ func GetBinaryMessageHeaders() http.Header {
 	headers.Add(CeSourceHeader, CloudEventSource)
 	headers.Add(CeSpecVersionHeader, CloudEventSpecVersion)
 	return headers
+}
+
+func PublisherProxyDefaultReadyCondition() eventingv1alpha1.Condition {
+	return eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionPublisherProxyReady,
+		eventingv1alpha1.ConditionReasonPublisherDeploymentReady,
+		corev1.ConditionTrue, "")
+}
+
+func PublisherProxyDefaultNotReadyCondition() eventingv1alpha1.Condition {
+	return eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionPublisherProxyReady,
+		eventingv1alpha1.ConditionReasonPublisherDeploymentNotReady,
+		corev1.ConditionFalse, "")
+}
+
+func SubscriptionControllerDefaultReadyCondition() eventingv1alpha1.Condition {
+	return eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionControllerReady,
+		eventingv1alpha1.ConditionReasonSubscriptionControllerReady,
+		corev1.ConditionTrue, "")
+}
+
+func SubscriptionControllerReadyConditionWith(ready corev1.ConditionStatus, reason eventingv1alpha1.ConditionReason) eventingv1alpha1.Condition {
+	return eventingv1alpha1.MakeCondition(eventingv1alpha1.ConditionControllerReady, reason, ready, "")
+}
+
+func SubscriptionControllerReadyEvent() corev1.Event {
+	return corev1.Event{
+		Reason: string(eventingv1alpha1.ConditionReasonSubscriptionControllerReady),
+		Type:   corev1.EventTypeNormal,
+	}
+}
+
+func SubscriptionControllerNotReadyEvent() corev1.Event {
+	return corev1.Event{
+		Reason: string(eventingv1alpha1.ConditionReasonSubscriptionControllerNotReady),
+		Type:   corev1.EventTypeWarning,
+	}
+}
+
+func PublisherDeploymentReadyEvent() corev1.Event {
+	return corev1.Event{
+		Reason: string(eventingv1alpha1.ConditionReasonPublisherDeploymentReady),
+		Type:   corev1.EventTypeNormal,
+	}
+}
+
+func PublisherDeploymentNotReadyEvent() corev1.Event {
+	return corev1.Event{
+		Reason: string(eventingv1alpha1.ConditionReasonPublisherDeploymentNotReady),
+		Type:   corev1.EventTypeWarning,
+	}
 }
