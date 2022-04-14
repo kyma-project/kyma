@@ -179,17 +179,17 @@ async function updateProxyDeployment(fromArg, toArg) {
   await waitForDeployment(name, ns);
 }
 
-async function resetProxy() {
-  // delete secret
-  await manageSecret('delete');
-  // remove add reverse proxy
-  await updateProxyDeployment('--trusted-ip=0.0.0.0/0', '--reverse-proxy=true');
-  // Check if the redirect works like again after reset
-  const res = await assertGrafanaRedirect('https://kyma-project.io/docs');
-  assert.isTrue(res, 'Grafana redirect to kyma docs does not work!');
-
-  return res;
-}
+// async function resetProxy() {
+//   // delete secret
+//   await manageSecret('delete');
+//   // remove add reverse proxy
+//   await updateProxyDeployment('--trusted-ip=0.0.0.0/0', '--reverse-proxy=true');
+//   // Check if the redirect works like again after reset
+//   const res = await assertGrafanaRedirect('https://kyma-project.io/docs');
+//   assert.isTrue(res, 'Grafana redirect to kyma docs does not work!');
+//
+//   return res;
+// }
 
 async function retryUrl(url, redirectURL, ignoreSSL, httpStatus) {
   let retries = 0;
