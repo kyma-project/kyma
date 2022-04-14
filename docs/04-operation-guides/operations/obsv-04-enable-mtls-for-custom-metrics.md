@@ -28,7 +28,7 @@ spec:
         caFile: /etc/prometheus/secrets/istio.default/root-cert.pem
         certFile: /etc/prometheus/secrets/istio.default/cert-chain.pem
         keyFile: /etc/prometheus/secrets/istio.default/key.pem
-        insecureSkipVerify: true  # Prometheus does not support Istio security naming, thus skip verifying target pod ceritifcate
+        insecureSkipVerify: true  # Prometheus does not support Istio security naming; skip verifying the target Pod certificate
   namespaceSelector:
     any: true
 ```

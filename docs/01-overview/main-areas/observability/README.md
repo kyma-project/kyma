@@ -24,7 +24,7 @@ The collected telemetry data are exposed so that you can view and analyze them w
 
 You can use the following in-cluster components to observe your applications' telemetry data:
 
-- Kyma uses [Prometheus](https://prometheus.io/docs/introduction), which is a lightweight backend for metrics.
+- [Prometheus](https://prometheus.io/docs/introduction) is a lightweight backend for metrics.
 - Kyma uses [Loki](https://github.com/grafana/loki), which is a lightweight Prometheus-like backend for logs.
 - Kyma uses [Jaeger](https://www.jaegertracing.io/docs/) as a backend, which serves as the query mechanism for displaying information about traces.
 

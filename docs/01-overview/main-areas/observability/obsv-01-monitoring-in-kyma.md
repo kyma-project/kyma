@@ -8,13 +8,12 @@ Monitoring in Kyma is configured to collect all metrics relevant for observing t
 
 ## Limitations
 
-In the production profile, Prometheus stores up to **15 GB** of data for a maximum period of **30 days**. If the default size or time is exceeded, the oldest records are removed first.
+In the [production profile](../../../04-operation-guides/operations/02-install-kyma.md##choose-resource-consumption), Prometheus stores up to **15 GB** of data for a maximum period of **30 days**. If the default size or time is exceeded, the oldest records are removed first. The evaluation profile has lower limits.
 
 The configured memory limits of the Prometheus and Prometheus-Istio instances define the number of time series samples that can be ingested. 
 
 The default resource configuration of the monitoring component in the production profile is sufficient to serve **800K time series in the Prometheus Pod**, and **400K time series in the Prometheus-Istio Pod**. The samples are deleted after 30 days or when reaching the storage limit of 15 GB. 
 
-The evaluation profile has lower limits. For more information about profiles, see [Install Kyma: Choose resource consumption](../../../04-operation-guides/operations/02-install-kyma.md#choose-resource-consumption).
 
 The amount of generated time series in a Kyma cluster depends on the following factors:
 
@@ -24,6 +23,6 @@ The amount of generated time series in a Kyma cluster depends on the following f
 * Label cardinality of metrics
 * Number of buckets for histogram metrics
 * Frequency of Pod recreation
-* Topology of the Istio service mesh
+* Topology of the Istio Service Mesh
 
 You can see the number of ingested time series samples from the `prometheus_tsdb_head_series` metric, which is exported by the Prometheus itself. Furthermore, you can identify expensive metrics with the [TSDB Status](http://localhost:9090/tsdb-status) page.
