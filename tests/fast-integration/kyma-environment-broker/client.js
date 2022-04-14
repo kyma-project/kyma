@@ -98,8 +98,8 @@ class KEBClient {
         user_id: this.userID,
       },
       parameters: {
-        name: name,
-        ...customParams,
+        name: name, // ,
+        // ...customParams,
       },
     };
 

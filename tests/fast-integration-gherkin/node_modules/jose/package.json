@@ -1,0 +1,143 @@
+{
+  "name": "jose",
+  "version": "2.0.5",
+  "description": "JSON Web Almost Everything - JWA, JWS, JWE, JWK, JWT, JWKS for Node.js with minimal dependencies",
+  "keywords": [
+    "access token",
+    "access_token",
+    "compact",
+    "decode",
+    "decrypt",
+    "detached",
+    "ec",
+    "ecdsa",
+    "eddsa",
+    "electron",
+    "embedded",
+    "encrypt",
+    "flattened",
+    "general",
+    "id token",
+    "id_token",
+    "jose",
+    "json web token",
+    "jsonwebtoken",
+    "jwa",
+    "jwe",
+    "jwk",
+    "jwks",
+    "jws",
+    "jwt",
+    "logout token",
+    "logout_token",
+    "oct",
+    "okp",
+    "payload",
+    "rsa",
+    "secp256k1",
+    "sign",
+    "signature",
+    "validate",
+    "verify"
+  ],
+  "homepage": "https://github.com/panva/jose",
+  "repository": "panva/jose",
+  "funding": "https://github.com/sponsors/panva",
+  "license": "MIT",
+  "author": "Filip Skokan <panva.ip@gmail.com>",
+  "exports": {
+    ".": {
+      "import": "./lib/index.mjs",
+      "require": "./lib/index.js"
+    },
+    "./": "./"
+  },
+  "main": "lib/index.js",
+  "types": "types/index.d.ts",
+  "files": [
+    "lib/**/*.js",
+    "lib/**/*.mjs",
+    "LICENSE_THIRD_PARTY",
+    "types/index.d.ts"
+  ],
+  "scripts": {
+    "coverage": "c8 ava",
+    "lint": "standard",
+    "lint-fix": "standard --fix",
+    "lint-ts": "npx typescript@~3.6.0 --build types",
+    "test": "ava",
+    "watch": "ava --watch"
+  },
+  "husky": {
+    "hooks": {
+      "commit-msg": "commitlint -E HUSKY_GIT_PARAMS"
+    }
+  },
+  "commitlint": {
+    "extends": [
+      "@commitlint/config-conventional"
+    ]
+  },
+  "ava": {
+    "babel": false,
+    "compileEnhancements": false,
+    "files": [
+      "test/**/*.test.js"
+    ]
+  },
+  "dependencies": {
+    "@panva/asn1.js": "^1.0.0"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^11.0.0",
+    "@commitlint/config-conventional": "^11.0.0",
+    "ava": "^2.4.0",
+    "c8": "^7.3.5",
+    "husky": "^4.3.0",
+    "standard": "^16.0.0"
+  },
+  "engines": {
+    "node": ">=10.13.0 < 13 || >=13.7.0"
+  },
+  "standard-version": {
+    "scripts": {
+      "postchangelog": "sed -i '' -e 's/### \\[/## [/g' CHANGELOG.md"
+    },
+    "types": [
+      {
+        "type": "feat",
+        "section": "Features"
+      },
+      {
+        "type": "fix",
+        "section": "Bug Fixes"
+      },
+      {
+        "type": "chore",
+        "hidden": true
+      },
+      {
+        "type": "docs",
+        "hidden": true
+      },
+      {
+        "type": "style",
+        "hidden": true
+      },
+      {
+        "type": "refactor",
+        "section": "Refactor",
+        "hidden": true
+      },
+      {
+        "type": "perf",
+        "section": "Performance",
+        "hidden": false
+      },
+      {
+        "type": "test",
+        "hidden": true
+      }
+    ]
+  }
+}

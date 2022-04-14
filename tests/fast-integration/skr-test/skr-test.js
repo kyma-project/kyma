@@ -144,17 +144,17 @@ function commerceMockTest() {
     });
 
     // Check audit log for AWS
-    if (process.env.KEB_PLAN_ID === AWS_PLAN_ID) {
-      const auditlogs = new AuditLogClient(AuditLogCreds.fromEnv());
+    // if (process.env.KEB_PLAN_ID === AWS_PLAN_ID) {
+    //   const auditlogs = new AuditLogClient(AuditLogCreds.fromEnv());
 
-      it('Check audit logs', async function() {
-        await checkAuditLogs(auditlogs);
-      });
+    //   it('Check audit logs', async function() {
+    //     await checkAuditLogs(auditlogs);
+    //   });
 
-      it('Amount of audit events must not exceed a certain threshold', async function() {
-        await checkAuditEventsThreshold(4);
-      });
-    }
+    //   it('Amount of audit events must not exceed a certain threshold', async function() {
+    //     await checkAuditEventsThreshold(4);
+    //   });
+    // }
   });
 }
 

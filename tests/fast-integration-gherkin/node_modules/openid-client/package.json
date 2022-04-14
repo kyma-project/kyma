@@ -1,0 +1,121 @@
+{
+  "name": "openid-client",
+  "version": "4.9.1",
+  "description": "OpenID Connect Relying Party (RP, Client) implementation for Node.js runtime, supports passportjs",
+  "keywords": [
+    "auth",
+    "authentication",
+    "basic",
+    "certified",
+    "client",
+    "connect",
+    "dynamic",
+    "electron",
+    "hybrid",
+    "identity",
+    "implicit",
+    "oauth",
+    "oauth2",
+    "oidc",
+    "openid",
+    "passport",
+    "relying party",
+    "strategy"
+  ],
+  "homepage": "https://github.com/panva/node-openid-client",
+  "repository": "panva/node-openid-client",
+  "funding": {
+    "url": "https://github.com/sponsors/panva"
+  },
+  "license": "MIT",
+  "author": "Filip Skokan <panva.ip@gmail.com>",
+  "exports": {
+    "import": "./lib/index.mjs",
+    "require": "./lib/index.js"
+  },
+  "main": "lib/index.js",
+  "types": "types/index.d.ts",
+  "files": [
+    "lib",
+    "types/index.d.ts"
+  ],
+  "scripts": {
+    "coverage": "nyc mocha test/**/*.test.js",
+    "lint": "eslint lib test",
+    "lint-fix": "eslint lib test --fix",
+    "test": "mocha test/**/*.test.js"
+  },
+  "nyc": {
+    "reporter": [
+      "lcov",
+      "text-summary"
+    ]
+  },
+  "dependencies": {
+    "aggregate-error": "^3.1.0",
+    "got": "^11.8.0",
+    "jose": "^2.0.5",
+    "lru-cache": "^6.0.0",
+    "make-error": "^1.3.6",
+    "object-hash": "^2.0.1",
+    "oidc-token-hash": "^5.0.1"
+  },
+  "devDependencies": {
+    "@types/passport": "^1.0.4",
+    "base64url": "^3.0.1",
+    "chai": "^4.2.0",
+    "eslint": "^7.12.1",
+    "eslint-config-airbnb-base": "^14.2.0",
+    "eslint-plugin-import": "^2.22.1",
+    "mocha": "^8.2.0",
+    "nock": "^13.0.2",
+    "nyc": "^15.1.0",
+    "readable-mock-req": "^0.2.2",
+    "sinon": "^9.2.0",
+    "timekeeper": "^2.2.0"
+  },
+  "engines": {
+    "node": "^10.19.0 || >=12.0.0 < 13 || >=13.7.0 < 14 || >= 14.2.0"
+  },
+  "standard-version": {
+    "scripts": {
+      "postchangelog": "sed -i '' -e 's/### \\[/## [/g' CHANGELOG.md"
+    },
+    "types": [
+      {
+        "type": "feat",
+        "section": "Features"
+      },
+      {
+        "type": "fix",
+        "section": "Bug Fixes"
+      },
+      {
+        "type": "chore",
+        "hidden": true
+      },
+      {
+        "type": "docs",
+        "hidden": true
+      },
+      {
+        "type": "style",
+        "hidden": true
+      },
+      {
+        "type": "refactor",
+        "section": "Refactor",
+        "hidden": true
+      },
+      {
+        "type": "perf",
+        "section": "Performance",
+        "hidden": false
+      },
+      {
+        "type": "test",
+        "hidden": true
+      }
+    ]
+  }
+}

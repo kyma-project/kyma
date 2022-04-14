@@ -1,0 +1,1 @@
+{"version":3,"file":"Expression.d.ts","sourceRoot":"","sources":["../../src/Expression.ts"],"names":[],"mappings":"AAAA,OAAO,QAAQ,MAAM,YAAY,CAAA;AAEjC,MAAM,CAAC,OAAO,WAAW,UAAU;IACjC,QAAQ,CAAC,MAAM,EAAE,MAAM,CAAA;IACvB,KAAK,CAAC,IAAI,EAAE,MAAM,GAAG,SAAS,QAAQ,CAAC,GAAG,CAAC,EAAE,CAAA;CAC9C"}

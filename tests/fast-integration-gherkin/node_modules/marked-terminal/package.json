@@ -1,0 +1,47 @@
+{
+  "name": "marked-terminal",
+  "version": "4.2.0",
+  "description": "A custom render for marked to output to the Terminal",
+  "main": "index.js",
+  "scripts": {
+    "test": "FORCE_HYPERLINK=0 mocha tests/*.js --reporter spec"
+  },
+  "files": [
+    "index.js"
+  ],
+  "keywords": [
+    "marked",
+    "render",
+    "terminal",
+    "markdown",
+    "markdown-to-terminal"
+  ],
+  "author": "Mikael Brevik",
+  "license": "MIT",
+  "peerDependencies": {
+    "marked": "^1.0.0 || ^2.0.0"
+  },
+  "dependencies": {
+    "ansi-escapes": "^4.3.1",
+    "cardinal": "^2.1.1",
+    "chalk": "^4.1.0",
+    "cli-table3": "^0.6.0",
+    "node-emoji": "^1.10.0",
+    "supports-hyperlinks": "^2.1.0"
+  },
+  "directories": {
+    "example": "example"
+  },
+  "devDependencies": {
+    "marked": "^2.0.1",
+    "mocha": "^8.2.1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mikaelbr/marked-terminal.git"
+  },
+  "bugs": {
+    "url": "https://github.com/mikaelbr/marked-terminal/issues"
+  },
+  "homepage": "https://github.com/mikaelbr/marked-terminal"
+}
