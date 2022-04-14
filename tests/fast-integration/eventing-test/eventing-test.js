@@ -210,7 +210,7 @@ describe('Eventing tests', function() {
     // Running Eventing tracing tests
     eventingTracingTestSuite();
     // Running Eventing Monitoring tests
-    eventingMonitoringTest(natsBackend);
+    eventingMonitoringTest(natsBackend, isJetStreamEnabled);
   });
 
   context('with BEB backend', function() {
@@ -254,6 +254,6 @@ describe('Eventing tests', function() {
     // Running Eventing tracing tests
     eventingTracingTestSuite();
     // Running Eventing Monitoring tests
-    eventingMonitoringTest(natsBackend);
+    eventingMonitoringTest(natsBackend, isJetStreamEnabled);
   });
 });
