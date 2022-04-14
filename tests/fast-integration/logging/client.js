@@ -1,13 +1,25 @@
+const axios = require('axios');
+const https = require('https');
 const {
   convertAxiosError,
   getPersistentVolumeClaim,
   getSecretData,
   sleep,
-  callServiceViaProxy,
+  retryPromise,
 } = require('../utils');
+const {getGrafanaUrl} = require('../monitoring/client');
 
-function getLoki(path) {
-  return callServiceViaProxy('kyma-system', 'logging-loki', '3100', path);
+async function getLokiViaGrafana(path, retries = 5, interval = 30, timeout = 10000) {
+  const grafanaUrl = getGrafanaUrl();
+  const url = `${grafanaUrl}/api/datasources/proxy/3/loki/${path}`;
+
+  delete axios.defaults.headers.common['Accept'];
+  const httpsAgent = new https.Agent({
+    rejectUnauthorized: false,
+  });
+
+  return retryPromise(() => axios.get(url, {httpsAgent: httpsAgent, timeout: timeout}),
+      retries, interval);
 }
 
 async function tryGetLokiPersistentVolumeClaim() {
@@ -37,7 +49,7 @@ async function logsPresentInLoki(query, startTimestamp) {
 async function queryLoki(query, startTimestamp) {
   const path = `api/prom/query?query=${query}&start=${startTimestamp}`;
   try {
-    const responseBody = await getLoki(path);
+    const responseBody = await getLokiViaGrafana(path);
     return responseBody.data;
   } catch (err) {
     throw convertAxiosError(err, 'cannot query loki');

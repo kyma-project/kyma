@@ -29,10 +29,11 @@ describe('Executing Standard Testsuite:', function() {
     await cleanMockTestFixture(mockNamespace, testNamespace, true);
   });
 
+  monitoringTests();
+
   commerceMockTests(testNamespace);
   gettingStartedGuideTests();
 
-  monitoringTests();
   loggingTests();
   tracingTests(mockNamespace, testNamespace);
 });

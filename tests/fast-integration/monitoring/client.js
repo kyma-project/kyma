@@ -5,15 +5,29 @@ const {
   callServiceViaProxy,
   convertAxiosError,
   debug,
+  retryPromise,
+  getVirtualService,
 } = require('../utils');
 
 function getPrometheus(path) {
   return callServiceViaProxy('kyma-system', 'monitoring-prometheus', '9090', path);
 }
 
-async function getJaeger(path, retries, interval, timeout, debugMsg) {
-  return await callServiceViaProxy('kyma-system', '  tracing-jaeger-query', '16686', path,
-      {}, retries, interval, timeout, debugMsg);
+async function getJaegerViaGrafana(path, retries, interval, timeout, debugMsg) {
+  const grafanaUrl = getGrafanaUrl();
+  const url = `${grafanaUrl}/api/datasources/proxy/2/jaeger/${path}`;
+
+  delete axios.defaults.headers.common['Accept'];
+  const httpsAgent = new https.Agent({
+    rejectUnauthorized: false,
+  });
+  return retryPromise(async () => {
+    if (debugMsg) {
+      debug(debugMsg);
+    }
+    return await axios.get(url, {httpsAgent: httpsAgent, timeout: timeout,
+      method: opts.method, headers: opts.headers, data: opts.data});
+  }, retries, interval);
 }
 
 async function getPrometheusActiveTargets() {
@@ -98,11 +112,18 @@ async function getJaegerTrace(traceId) {
   debug(`fetching trace: ${traceId} from jaeger`);
 
   try {
-    const responseBody = getJaeger(path, retries, interval, timeout, debugMsg);
+    const responseBody = getJaegerViaGrafana(path, retries, interval, timeout, debugMsg);
     return responseBody.data;
   } catch (err) {
     throw convertAxiosError(err, 'cannot get jaeger trace');
   }
+}
+
+async function getGrafanaUrl() {
+  const vs = await getVirtualService('kyma-system', 'monitoring-grafana');
+  const hosts = vs.spec.hosts[0];
+
+  return `https://${hosts}`;
 }
 
 module.exports = {
@@ -111,5 +132,6 @@ module.exports = {
   getPrometheusRuleGroups,
   queryPrometheus,
   queryGrafana,
+  getGrafanaUrl,
   getJaegerTrace,
 };

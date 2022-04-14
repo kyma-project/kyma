@@ -5,7 +5,6 @@ const {
 
 const {
   getEnvOrDefault,
-  getVirtualService,
   toBase64,
   k8sApply,
   k8sDelete,
@@ -17,7 +16,7 @@ const {
   waitForPodWithLabel,
 } = require('../utils');
 
-const {queryGrafana} = require('./client');
+const {queryGrafana, getGrafanaUrl} = require('./client');
 
 async function assertPodsExist() {
   const namespace = 'kyma-system';
@@ -59,13 +58,12 @@ async function checkGrafanaRedirectsInKyma1() {
 }
 
 async function assertGrafanaRedirect(redirectURL) {
-  const vs = await getVirtualService('kyma-system', 'monitoring-grafana');
-  const hosts = vs.spec.hosts[0];
+  const url = getGrafanaUrl();
   let ignoreSSL = false;
   if (hosts.includes('local.kyma.dev')) {
     ignoreSSL = true;
   }
-  const url = 'https://' + hosts;
+
   if (redirectURL.includes('https://dex.')) {
     console.log('Checking redirect for dex');
     return await retryUrl(url, redirectURL, ignoreSSL, 200);
