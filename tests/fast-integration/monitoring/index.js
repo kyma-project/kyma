@@ -1,10 +1,10 @@
 const prometheus = require('./prometheus');
 const grafana = require('./grafana');
-const {getEnvOrDefault} = require('../utils');
+const {getEnvOrDefault, info} = require('../utils');
 
 function monitoringTests() {
   if (getEnvOrDefault('KYMA_MAJOR_UPGRADE', 'false') === 'true') {
-    console.log('Skipping monitoring tests for Kyma 1 to Kyma 2 upgrade scenario');
+    info('Skipping monitoring tests for Kyma 1 to Kyma 2 upgrade scenario');
     return;
   }
 

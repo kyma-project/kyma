@@ -6,13 +6,14 @@ const {
   getSecretData,
   sleep,
   retryPromise,
+  info,
 } = require('../utils');
 const {getGrafanaUrl} = require('../monitoring/client');
 
 async function getLokiViaGrafana(path, retries = 5, interval = 30, timeout = 10000) {
   const grafanaUrl = getGrafanaUrl();
   const url = `${grafanaUrl}/api/datasources/proxy/3/loki/${path}`;
-
+  info('loki grafana url', url);
   delete axios.defaults.headers.common['Accept'];
   const httpsAgent = new https.Agent({
     rejectUnauthorized: false,

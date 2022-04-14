@@ -4,9 +4,10 @@ const https = require('https');
 const {
   callServiceViaProxy,
   convertAxiosError,
-  debug,
   retryPromise,
   getVirtualService,
+  debug,
+  error,
 } = require('../utils');
 
 function getPrometheus(path) {
@@ -16,6 +17,7 @@ function getPrometheus(path) {
 async function getJaegerViaGrafana(path, retries, interval, timeout, debugMsg) {
   const grafanaUrl = getGrafanaUrl();
   const url = `${grafanaUrl}/api/datasources/proxy/2/jaeger/${path}`;
+  info('jaeger grafana url', url);
 
   delete axios.defaults.headers.common['Accept'];
   const httpsAgent = new https.Agent({
@@ -93,10 +95,10 @@ async function queryGrafana(url, redirectURL, ignoreSSL, httpErrorCode) {
           return true;
         }
       }
-      console.log(msg + err.response.status + ' : ' + err.response.data);
+      error(msg + err.response.status + ' : ' + err.response.data);
       return false;
     } else {
-      console.log(`${msg}: ${err.toString()}`);
+      error(`${msg}: ${err.toString()}`);
       return false;
     }
   }

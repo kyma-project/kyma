@@ -5,6 +5,7 @@ const {
   tryGetLokiPersistentVolumeClaim,
   logsPresentInLoki,
 } = require('./client');
+const {info} = require('../utils');
 
 async function checkCommerceMockLogs(startTimestamp) {
   const labels = '{app="commerce-mock", container="mock", namespace="mocks"}';
@@ -35,7 +36,7 @@ async function checkRetentionPeriod() {
 async function checkPersistentVolumeClaimSize() {
   const pvc = await tryGetLokiPersistentVolumeClaim();
   if (pvc == null) {
-    console.log('Loki PVC not found. Skipping...');
+    info('Loki PVC not found. Skipping...');
     return;
   }
 

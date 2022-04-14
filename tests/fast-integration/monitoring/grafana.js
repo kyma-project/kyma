@@ -14,6 +14,8 @@ const {
   sleep,
   waitForDeployment,
   waitForPodWithLabel,
+  info,
+  error,
 } = require('../utils');
 
 const {queryGrafana, getGrafanaUrl} = require('./client');
@@ -60,27 +62,27 @@ async function checkGrafanaRedirectsInKyma1() {
 async function assertGrafanaRedirect(redirectURL) {
   const url = getGrafanaUrl();
   let ignoreSSL = false;
-  if (hosts.includes('local.kyma.dev')) {
+  if (url.includes('local.kyma.dev')) {
     ignoreSSL = true;
   }
 
   if (redirectURL.includes('https://dex.')) {
-    console.log('Checking redirect for dex');
+    info('Checking redirect for dex');
     return await retryUrl(url, redirectURL, ignoreSSL, 200);
   }
 
   if (redirectURL.includes('https://kyma-project.io/docs')) {
-    console.log('Checking redirect for kyma docs');
+    info('Checking redirect for kyma docs');
     return await retryUrl(url, redirectURL, ignoreSSL, 403);
   }
 
   if (redirectURL.includes('https://accounts.google.com/signin/oauth')) {
-    console.log('Checking redirect for google');
+    info('Checking redirect for google');
     return await retryUrl(url, redirectURL, ignoreSSL, 200);
   }
 
   if (redirectURL.includes('grafana')) {
-    console.log('Checking redirect for grafana');
+    info('Checking redirect for grafana');
     return await retryUrl(url, redirectURL, ignoreSSL, 200);
   }
 }
@@ -99,10 +101,10 @@ async function manageSecret(action) {
     },
   };
   if (action === 'create') {
-    console.log('Creating secret: monitoring-auth-proxy-grafana-user ');
+    info('Creating secret: monitoring-auth-proxy-grafana-user ');
     await k8sApply([secret], 'kyma-system');
   } else if (action === 'delete') {
-    console.log('Deleting secret: monitoring-auth-proxy-grafana-user ');
+    info('Deleting secret: monitoring-auth-proxy-grafana-user ');
     await k8sDelete([secret], 'kyma-system');
   }
 }
@@ -149,7 +151,7 @@ async function updateProxyDeployment(fromArg, toArg) {
       12,
       5000,
   ).catch((err) => {
-    console.log(err);
+    error(err);
     throw new Error(`Timeout: ${name} is not found`);
   });
 
