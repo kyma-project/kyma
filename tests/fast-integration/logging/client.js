@@ -12,7 +12,7 @@ const {getGrafanaUrl} = require('../monitoring/client');
 
 async function getLokiViaGrafana(path, retries = 5, interval = 30, timeout = 10000) {
   const grafanaUrl = await getGrafanaUrl();
-  const url = `${grafanaUrl}/api/datasources/proxy/3/loki/${path}`;
+  const url = `${grafanaUrl}/api/datasources/proxy/2/loki/${path}`;
   info('loki grafana url', url);
   delete axios.defaults.headers.common['Accept'];
   const httpsAgent = new https.Agent({
@@ -50,9 +50,9 @@ async function logsPresentInLoki(query, startTimestamp) {
 async function queryLoki(query, startTimestamp) {
   const path = `api/prom/query?query=${query}&start=${startTimestamp}`;
   try {
-    const responseBody = await getLokiViaGrafana(path);
-    info('responseBody', responseBody);
-    return responseBody.data;
+    const response = await getLokiViaGrafana(path);
+    info('loki.response.data', response.data);
+    return response.data;
   } catch (err) {
     throw convertAxiosError(err, 'cannot query loki');
   }

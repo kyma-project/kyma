@@ -16,7 +16,7 @@ function getPrometheus(path) {
 
 async function getJaegerViaGrafana(path, retries, interval, timeout, debugMsg) {
   const grafanaUrl = await getGrafanaUrl();
-  const url = `${grafanaUrl}/api/datasources/proxy/2/jaeger/${path}`;
+  const url = `${grafanaUrl}/api/datasources/proxy/3/jaeger/${path}`;
   info('jaeger grafana url', url);
 
   delete axios.defaults.headers.common['Accept'];
@@ -114,8 +114,9 @@ async function getJaegerTrace(traceId) {
   debug(`fetching trace: ${traceId} from jaeger`);
 
   try {
-    const responseBody = getJaegerViaGrafana(path, retries, interval, timeout, debugMsg);
-    return responseBody.data;
+    const response = getJaegerViaGrafana(path, retries, interval, timeout, debugMsg);
+    info('jaeger.response.data', response.data);
+    return response.data;
   } catch (err) {
     throw convertAxiosError(err, 'cannot get jaeger trace');
   }
