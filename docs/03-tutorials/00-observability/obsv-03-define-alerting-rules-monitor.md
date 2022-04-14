@@ -73,5 +73,5 @@ You have performed the steps to observe application metrics using the `monitorin
 
 ## Next steps
 
-- Follow the tutorial to [Send notifications](obsv-04-send-notifications.md).
+- Follow the tutorial to [Send notifications to Slack](obsv-04-send-notifications.md).
 - If you don't want to proceed with the following tutorial, [clean up the configuration](obsv-05-clean-up-configuration.md).
