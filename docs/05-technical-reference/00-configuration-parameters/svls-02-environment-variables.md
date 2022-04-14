@@ -25,7 +25,7 @@ Every runtime provides its own unique environment configuration which can be rea
 
 There are a few environments that occur only for a specific runtimes. The following list includes all of them:
 
-#### NodeJS runtimes-specific environments
+#### Node.js runtimes-specific environments
 
 | Environment | Default | Description |
 |---------------|-----------|-------------|
@@ -67,7 +67,7 @@ spec:
     }
 ```
 
-### NodeJS runtime-specific environment variables
+### Node.js runtime-specific environment variables
 
 To configure the Function with the Node.js runtime, override the default values of these environment variables:
 
