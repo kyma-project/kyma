@@ -60,7 +60,7 @@ async function checkGrafanaRedirectsInKyma1() {
 }
 
 async function assertGrafanaRedirect(redirectURL) {
-  const url = getGrafanaUrl();
+  const url = await getGrafanaUrl();
   let ignoreSSL = false;
   if (url.includes('local.kyma.dev')) {
     ignoreSSL = true;

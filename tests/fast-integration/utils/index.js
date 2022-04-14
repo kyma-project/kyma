@@ -1804,7 +1804,6 @@ async function callServiceViaProxy(namespace, service, port, path, opts = {},
   }
 
   const url = `${k8sServerUrl}/api/v1/namespaces/${namespace}/services/${service}:${port}/proxy/${path}`;
-  console.log('url', url);
   return retryPromise(async () => {
     if (debugMsg) {
       debug(debugMsg);

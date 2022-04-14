@@ -15,7 +15,7 @@ function getPrometheus(path) {
 }
 
 async function getJaegerViaGrafana(path, retries, interval, timeout, debugMsg) {
-  const grafanaUrl = getGrafanaUrl();
+  const grafanaUrl = await getGrafanaUrl();
   const url = `${grafanaUrl}/api/datasources/proxy/2/jaeger/${path}`;
   info('jaeger grafana url', url);
 
