@@ -19,7 +19,7 @@ async function getLokiViaGrafana(path, retries = 5, interval = 30, timeout = 100
     rejectUnauthorized: false,
   });
 
-  return retryPromise(() => axios.get(url, {httpsAgent: httpsAgent, timeout: timeout}),
+  return retryPromise(async () => await axios.get(url, {httpsAgent: httpsAgent, timeout: timeout}),
       retries, interval);
 }
 
@@ -51,6 +51,7 @@ async function queryLoki(query, startTimestamp) {
   const path = `api/prom/query?query=${query}&start=${startTimestamp}`;
   try {
     const responseBody = await getLokiViaGrafana(path);
+    info('responseBody', responseBody);
     return responseBody.data;
   } catch (err) {
     throw convertAxiosError(err, 'cannot query loki');
