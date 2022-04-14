@@ -2,7 +2,7 @@
 title: Override runtime image
 ---
 
-This tutorial show how to build custom runtime image and override functions base image with thee built one
+This tutorial shows how to build a custom runtime image and override Functions base image with the built one
 
 ## Prerequisites
 
@@ -12,9 +12,9 @@ Before you start, make sure you have these tools installed:
 
 ## Steps
 
-Follows these steps:
+Follow these steps:
 
-1. Follow [this example](https://github.com/kyma-project/examples) to build python's custom runtime image.
+1. Follow [this example](https://github.com/kyma-project/examples) to build the Python's custom runtime image.
 
 <div tabs name="steps" group="create-function">
   <details>
@@ -38,13 +38,13 @@ Follows these steps:
     kyma init function --name $NAME --namespace $NAMESPACE --runtime-image-override $RUNTIME_IMAGE --runtime python39
     ```
 
-4. Deploy function:
+4. Deploy your Function:
 
     ```bash
     kyma apply function
     ```
 
-5. Verify if the function is running:
+5. Verify if Function is running:
 
     ```bash
     kubectl get functions $NAME -n $NAMESPACE
@@ -85,7 +85,7 @@ Follows these steps:
     EOF
     ```
 
-4. Verify if the function is running:
+4. Verify whether Function is running:
 
     ```bash
     kubectl get functions $NAME -n $NAMESPACE

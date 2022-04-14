@@ -12,7 +12,7 @@ Every runtime provides its own unique environment configuration which can be rea
 
 | Environment | Default | Description |
 |---------------|-----------|-------------|
-| **FUNC_HANDLER** | `main` | The name of the exported function inside the `MOD_NAME` file |
+| **FUNC_HANDLER** | `main` | The name of the exported Function inside the `MOD_NAME` file |
 | **MOD_NAME** | `handler` | The name of the main exported file. The extension should be added on the servers side and should be equal `.py` for the python runtimes and `.js` for one ones |
 | **FUNC_PORT** | `8080` | The right port, a server should listen to |
 | **SERVICE_NAMESPACE** | | The Namespace where the right Function exists on a cluster |
