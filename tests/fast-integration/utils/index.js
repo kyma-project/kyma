@@ -97,7 +97,7 @@ function sleep(ms) {
 function escapeRegExp(str) {
   return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // $& means the whole matched string
 }
-function replaceAllInString(str, match, replacement){
+function replaceAllInString(str, match, replacement) {
   return str.replace(new RegExp(escapeRegExp(match), 'g'), () => replacement);
 }
 
