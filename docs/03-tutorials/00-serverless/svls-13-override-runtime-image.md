@@ -2,7 +2,7 @@
 title: Override runtime image
 ---
 
-This tutorial shows how to build a custom runtime image and override Functions base image with the built one
+This tutorial shows how to build a custom runtime image and override Functions base image with it.
 
 ## Prerequisites
 
@@ -30,7 +30,7 @@ Follow these steps:
     export RUNTIME_IMAGE={RUNTIME_IMAGE_WITH_TAG}
     ```
 
-3. Create your local development workspace using built image:
+3. Create your local development workspace using the built image:
 
     ```bash
     mkdir {FOLDER_NAME}
