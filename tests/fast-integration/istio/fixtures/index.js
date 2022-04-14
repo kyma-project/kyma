@@ -33,6 +33,7 @@ const {
   k8sApply,
   deleteAllK8sResources,
   deleteNamespaces,
+  convertAxiosError,
 } = require('../../utils');
 
 const https = require('https');
