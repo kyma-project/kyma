@@ -50,8 +50,8 @@ async function checkGrafanaRedirectsInKyma2() {
   res = await assertGrafanaRedirect('https://grafana.');
   assert.isTrue(res, 'Grafana redirect to grafana landing page does not work!');
 
-  res = await resetProxy();
-  assert.isTrue(res, 'Grafana Authproxy is not reset successfully!  ');
+  // res = await resetProxy();
+  // assert.isTrue(res, 'Grafana Authproxy is not reset successfully!');
 }
 
 async function checkGrafanaRedirectsInKyma1() {

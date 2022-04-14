@@ -7,7 +7,7 @@ const {
   retryPromise,
   getVirtualService,
   debug,
-  error,
+  error, info,
 } = require('../utils');
 
 function getPrometheus(path) {
