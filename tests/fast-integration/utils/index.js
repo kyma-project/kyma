@@ -862,7 +862,7 @@ function waitForPodStatusWithLabel(
       query,
       (_type, _apiObj, watchObj) => {
         debug(`Waiting for pod "${namespace}/${watchObj.object.metadata.name}" status "${status}"`);
-        return watchObj.object.status.phase == status;
+        return watchObj.object.status.phase === status;
       },
       timeout,
       `Waiting for pod status ${status} with label ${labelKey}=${labelValue} timeout (${timeout} ms)`,
@@ -1248,7 +1248,7 @@ function ignoreNotFound(e) {
 let DEBUG = process.env.DEBUG;
 
 function log(prefix, ...args) {
-  if (args.length == 0) {
+  if (args.length === 0) {
     return;
   }
 
