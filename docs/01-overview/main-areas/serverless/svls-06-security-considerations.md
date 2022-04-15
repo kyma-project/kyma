@@ -4,6 +4,8 @@ title: Security considerations
 
 To eliminate potential security risks when using Functions, bear in mind these few facts:
 
+- Kyma provides base images for serverless runtimes. Those default runtimes are maintained with regards commonly known security advisories. It is possible to use a custom runtime image (check the [tutorial](../../../03-tutorials/00-serverless/svls-13-override-runtime-image.md)), however in such case the responsibility of security compliance and assesing exploitability of any potential vulnerabilities of the custom runtime image remains on the user side.
+
 - Kyma does not run any security scans against Functions and their images. Before you store any sensitive data in Functions, consider the potential risk of data leakage.
 
 - Kyma does not define any authorization policies that would restrict Functions' access to other resources within the Namespace. If you deploy a Function in a given Namespace, it can freely access all events and APIs of services within this Namespace.
