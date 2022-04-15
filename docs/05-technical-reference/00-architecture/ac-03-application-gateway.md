@@ -2,7 +2,7 @@
 title: Application Gateway
 ---
 
-Application Gateway sends the requests from Functions and services in Kyma to external APIs registered with Application Registry.
+Application Gateway sends the requests from Functions and services in Kyma to external APIs.
 
 The following diagram illustrates how Application Gateway interacts with other components and external APIs
 which are either unsecured or secured with various security mechanisms and protected against cross-site request forgery (CSRF) attacks.

@@ -13,26 +13,7 @@ You can access every exposed Application using the assigned path. For example, t
 
 ## Application Connectivity Validator
 
-Application Connectivity Validator verifies the subject of the client certificate, and proxies requests to Application Registry and Event Publisher.
-
-## Connector Service
-
->**CAUTION:** Connector Service is used only in the [legacy mode](../../01-overview/main-areas/application-connectivity/README.md) of Application Connectivity. 
-
-Connector Service:
-
-- Handles the exchange of client certificates for a given Application.
-- Provides the Application Registry and Event Publisher endpoints.
-- Signs client certificates using the server-side certificate stored in a Kubernetes Secret.
-
-## Application Registry
-
->**CAUTION:** Application Registry is used only in the [legacy mode](../../01-overview/main-areas/application-connectivity/README.md) of Application Connectivity.
-
-Application Registry saves and reads the APIs and Event Catalog metadata of the connected external solution in the [Application](../../05-technical-reference/00-custom-resources/ac-01-application.md) custom resource (CR).
-The system creates a new Kubernetes Service for each registered API.
-
->**NOTE:** Using Application Registry, you can register an API along with its OAuth or Basic Authentication credentials. The credentials are stored in a Kubernetes Secret.
+Application Connectivity Validator verifies the subject of the client certificate, and proxies requests to <!-- TODO: is this bit to be removed or more? "Application Registry and" -->Event Publisher.
 
 ## Event Publisher
 

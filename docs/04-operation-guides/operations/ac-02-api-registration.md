@@ -2,6 +2,8 @@
 title: Register an API in Application Registry
 ---
 
+<!-- TODO: is this doc to be removed altogether or replaced with an alternative way to register an API? -->
+
 Application Registry supports the following formats of the API specification:
 - OpenAPI 2.0
 - OData XML 2.0, 3.0 and 4.0

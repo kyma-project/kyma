@@ -13,4 +13,3 @@ This table lists the configurable parameters, their descriptions, and default va
 | Parameter | Description | Default value |
 |-----------|-------------|---------------|
 | **global.disableLegacyConnectivity** | Disables the default standalone (legacy) connectivity components and enables the Compass mode. | `false` |
-| **global.isLocalEnv** | Specifies whether the component is run locally or on a cluster. Used in Connector Service and Application Registry. | `false` |

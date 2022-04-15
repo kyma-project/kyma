@@ -13,6 +13,8 @@ You can [disable the TLS certificate verification](../../../03-tutorials/00-appl
 
 ## API security type
 
+<!-- TODO: is this section to be removed altogether or replaced with an alternative way that allows for API registration? -->
+
 Application Registry allows you to register APIs:
 - Secured with [Basic Authentication](https://tools.ietf.org/html/rfc7617)
 - Secured with OAuth flow
