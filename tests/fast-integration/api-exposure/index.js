@@ -5,22 +5,11 @@ const {
   testHttpbinOAuthMethod,
   cleanApiExposureFixture,
 } = require('./fixtures');
-const {
-  printRestartReport,
-  getContainerRestartsForAllNamespaces,
-} = require('../utils');
-
 
 function apiExposureTests() {
   describe('API Exposure Tests:', function() {
     this.timeout(10 * 60 * 1000);
     this.slow(5000);
-
-    let initialRestarts = null;
-
-    it('Listing all pods in cluster', async function() {
-      initialRestarts = await getContainerRestartsForAllNamespaces();
-    });
 
     it('Httpbin deployment should be ready', async function() {
       await ensureApiExposureFixture().catch((err) => {
@@ -39,11 +28,6 @@ function apiExposureTests() {
 
     it('Secured httpbin should fail on disallowed method call', async function() {
       await testHttpbinOAuthMethod();
-    });
-
-    it('Should print report of restarted containers, skipped if no crashes happened', async function() {
-      const afterTestRestarts = await getContainerRestartsForAllNamespaces();
-      printRestartReport(initialRestarts, afterTestRestarts);
     });
 
     it('Namespace should be deleted', async function() {
