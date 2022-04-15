@@ -74,14 +74,23 @@ const apiRuleOAuthObj = k8s.loadAllYaml(
 async function testHttpbinAllowResponse() {
   const vs = await waitForVirtualService(httpbinNamespace, httpbinAllowService);
   const host = vs.spec.hosts[0];
-  const res = await retryPromise(
-      () => getHttpbin(host),
+
+  let res = await retryPromise(
+      () => getHttpbin(host, ''),
       30,
       2000,
   ).catch((err) => {
-    throw convertAxiosError(err, 'Httpbin call responded with error');
+    throw convertAxiosError(err, 'Httpbin-allow GET call responded with error');
   });
+  expect(res.status).to.be.equal(200);
 
+  res = await retryPromise(
+      () => postHttpbin(host, ''),
+      30,
+      2000,
+  ).catch((err) => {
+    throw convertAxiosError(err, 'Httpbin-allow POST call responded with error');
+  });
   expect(res.status).to.be.equal(200);
 }
 
@@ -94,7 +103,7 @@ async function testHttpbinOAuthResponse() {
   // expect error when unauthorized
   let errorOccurred = false;
   try {
-    res = await axios.get(`https://${host}/headers`);
+    res = await getHttpbin(host, '');
   } catch (err) {
     errorOccurred = true;
     expect(err.response.status).to.be.equal(401);
@@ -102,29 +111,45 @@ async function testHttpbinOAuthResponse() {
   expect(errorOccurred).to.be.equal(true);
 
   let res = await retryPromise(
-      () => getHttpbinOauth2(host, accessToken),
+      () => getHttpbin(host, accessToken),
       30,
       2000,
   ).catch((err) => {
-    throw convertAxiosError(err, 'Httpbin Oauth2 call responded with error');
+    throw convertAxiosError(err, 'Httpbin Oauth2 GET call responded with error');
   });
-
   expect(res.status).to.be.equal(200);
 }
 
-async function getHttpbin(host) {
-  return axios.get(`https://${host}/headers`).catch((err) => {
-    throw convertAxiosError(err, 'Httpbin call responded with error');
-  });
+async function testHttpbinOAuthMethod() {
+  const vs = await waitForVirtualService(httpbinNamespace, httpbinOAuthService);
+  const host = vs.spec.hosts[0];
+  const domain = host.split('.').slice(1).join('.');
+  const accessToken = await getOAuthToken(domain);
+
+  // expect error when using disallowed method
+  let errorOccurred = false;
+  try {
+    res = await postHttpbin(host, accessToken);
+  } catch (err) {
+    errorOccurred = true;
+    expect(err.response.status).to.be.equal(404);
+  }
+  expect(errorOccurred).to.be.equal(true);
 }
 
-async function getHttpbinOauth2(host, accessToken) {
+async function getHttpbin(host, accessToken) {
   return await axios.get(`https://${host}/headers`, {
     headers: {
       Authorization: `bearer ${accessToken}`,
     },
-  }).catch((err) => {
-    throw convertAxiosError(err, 'Httpbin call responded with error');
+  });
+}
+
+async function postHttpbin(host, accessToken) {
+  return await axios.post(`https://${host}/post`, 'test data', {
+    headers: {
+      Authorization: `bearer ${accessToken}`,
+    },
   });
 }
 
@@ -134,7 +159,7 @@ async function getOAuthToken(domain) {
       `https://oauth2.${domain}/oauth2/token`,
       new OAuthCredentials(oAuthSecretData['client_id'], oAuthSecretData['client_secret']),
   );
-  const accessToken = oAuthTokenGetter.getToken(['read', 'write']);
+  const accessToken = oAuthTokenGetter.getToken(['read']);
 
   return accessToken;
 }
@@ -176,5 +201,6 @@ module.exports = {
   ensureApiExposureFixture,
   testHttpbinOAuthResponse,
   testHttpbinAllowResponse,
+  testHttpbinOAuthMethod,
   cleanApiExposureFixture,
 };

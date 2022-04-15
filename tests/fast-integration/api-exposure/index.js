@@ -2,6 +2,7 @@ const {
   ensureApiExposureFixture,
   testHttpbinOAuthResponse,
   testHttpbinAllowResponse,
+  testHttpbinOAuthMethod,
   cleanApiExposureFixture,
 } = require('./fixtures');
 const {
@@ -34,6 +35,10 @@ function apiExposureTests() {
 
     it('Testing secured httpbin API Rule', async function() {
       await testHttpbinOAuthResponse();
+    });
+
+    it('Secured httpbin should fail on disallowed method call', async function() {
+      await testHttpbinOAuthMethod();
     });
 
     it('Should print report of restarted containers, skipped if no crashes happened', async function() {

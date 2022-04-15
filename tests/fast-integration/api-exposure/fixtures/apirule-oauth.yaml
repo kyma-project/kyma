@@ -18,10 +18,10 @@ spec:
   gateway: kyma-system/kyma-gateway
   rules:
     - path: /.*
-      methods: ["GET", "POST"]
+      methods: ["GET"]
       accessStrategies:
         - handler: oauth2_introspection
-          config: {}
+          config: {}        
   service:
     host: httpbin-oauth2
     name: httpbin
