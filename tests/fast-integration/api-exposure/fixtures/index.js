@@ -139,7 +139,7 @@ async function getOAuthToken(domain) {
   return accessToken;
 }
 
-async function ensureIstioConnectivityFixture() {
+async function ensureApiExposureFixture() {
   await k8sApply([istioTestNamespaceObj]);
   await k8sApply(httpbinDeploymentObj, httpbinNamespace);
   await k8sApply([apiRuleAllowObj], httpbinNamespace);
@@ -165,7 +165,7 @@ function getResourcePaths(namespace) {
   ];
 }
 
-function cleanIstioConnectivityFixture(wait = true) {
+function cleanApiExposureFixture(wait = true) {
   for (const path of getResourcePaths(httpbinNamespace)) {
     deleteAllK8sResources(path);
   }
@@ -173,8 +173,8 @@ function cleanIstioConnectivityFixture(wait = true) {
 }
 
 module.exports = {
-  ensureIstioConnectivityFixture,
+  ensureApiExposureFixture,
   testHttpbinOAuthResponse,
   testHttpbinAllowResponse,
-  cleanIstioConnectivityFixture,
+  cleanApiExposureFixture,
 };

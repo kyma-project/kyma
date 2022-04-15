@@ -1,8 +1,8 @@
 const {
-  ensureIstioConnectivityFixture,
+  ensureApiExposureFixture,
   testHttpbinOAuthResponse,
   testHttpbinAllowResponse,
-  cleanIstioConnectivityFixture,
+  cleanApiExposureFixture,
 } = require('./fixtures');
 const {
   printRestartReport,
@@ -10,8 +10,8 @@ const {
 } = require('../utils');
 
 
-function istioConnectivityTests() {
-  describe('Istio Connectivity Tests:', function() {
+function apiExposureTests() {
+  describe('API Exposure Tests:', function() {
     this.timeout(10 * 60 * 1000);
     this.slow(5000);
 
@@ -22,9 +22,9 @@ function istioConnectivityTests() {
     });
 
     it('Httpbin deployment should be ready', async function() {
-      await ensureIstioConnectivityFixture().catch((err) => {
+      await ensureApiExposureFixture().catch((err) => {
         console.dir(err); // first error is logged
-        return ensureIstioConnectivityFixture();
+        return ensureApiExposureFixture();
       });
     });
 
@@ -42,11 +42,11 @@ function istioConnectivityTests() {
     });
 
     it('Namespace should be deleted', async function() {
-      await cleanIstioConnectivityFixture(false);
+      await cleanApiExposureFixture(false);
     });
   });
 }
 
 module.exports = {
-  istioConnectivityTests,
+  apiExposureTests,
 };

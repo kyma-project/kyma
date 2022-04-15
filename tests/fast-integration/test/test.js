@@ -8,7 +8,7 @@ const {loggingTests} = require('../logging');
 const {tracingTests} = require('../tracing');
 const {cleanMockTestFixture} = require('./fixtures/commerce-mock');
 const {ensureCommerceMockLocalTestFixture} = require('../test/fixtures/commerce-mock');
-const {istioConnectivityTests} = require('../istio-connectivity');
+const {apiExposureTests} = require('../api-exposure');
 
 describe('Executing Standard Testsuite:', function() {
   this.timeout(10 * 60 * 1000);
@@ -29,7 +29,7 @@ describe('Executing Standard Testsuite:', function() {
     await cleanMockTestFixture(mockNamespace, testNamespace, true);
   });
 
-  istioConnectivityTests();
+  apiExposureTests();
   commerceMockTests(testNamespace);
   gettingStartedGuideTests();
 
