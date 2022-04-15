@@ -2,7 +2,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: httpbin
-  namespace: istio-connectivity-test
+  namespace: api-exposure-test
   labels:
     app: httpbin
     service: httpbin
@@ -18,7 +18,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: httpbin
-  namespace: istio-connectivity-test
+  namespace: api-exposure-test
 spec:
   replicas: 1
   selector:

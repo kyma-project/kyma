@@ -60,7 +60,7 @@ axios.defaults.httpsAgent = httpsAgent;
 
 const httpbinAllowService = 'httpbin-allow';
 const httpbinOAuthService = 'httpbin-oauth2';
-const httpbinNamespace = 'istio-connectivity-test';
+const httpbinNamespace = 'api-exposure-test';
 
 const istioTestNamespaceObj = k8s.loadYaml(istioTestNamespaceYaml);
 const httpbinDeploymentObj = k8s.loadAllYaml(

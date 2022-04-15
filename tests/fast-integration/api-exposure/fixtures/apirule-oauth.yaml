@@ -2,7 +2,7 @@ apiVersion: hydra.ory.sh/v1alpha1
 kind: OAuth2Client
 metadata:
   name: httpbin-client
-  namespace: istio-connectivity-test
+  namespace: api-exposure-test
 spec:
   grantTypes:
     - "client_credentials"
@@ -13,7 +13,7 @@ apiVersion: gateway.kyma-project.io/v1alpha1
 kind: APIRule
 metadata:
   name: httpbin-oauth2
-  namespace: istio-connectivity-test
+  namespace: api-exposure-test
 spec:
   gateway: kyma-system/kyma-gateway
   rules:

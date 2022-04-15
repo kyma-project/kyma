@@ -2,7 +2,7 @@ apiVersion: gateway.kyma-project.io/v1alpha1
 kind: APIRule
 metadata:
   name: httpbin-allow
-  namespace: istio-connectivity-test
+  namespace: api-exposure-test
 spec:
   gateway: kyma-system/kyma-gateway
   rules:
