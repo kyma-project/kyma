@@ -108,6 +108,7 @@ async function testHttpbinOAuthResponse() {
   ).catch((err) => {
     throw convertAxiosError(err, 'Httpbin Oauth2 call responded with error');
   });
+
   expect(res.status).to.be.equal(200);
 }
 
