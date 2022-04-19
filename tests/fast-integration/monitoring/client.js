@@ -37,8 +37,7 @@ async function getJaegerViaGrafana(path, retries, interval, timeout, debugMsg) {
     if (debugMsg) {
       debug(debugMsg);
     }
-    return await axios.get(url, {timeout: timeout, method: opts.method,
-      headers: opts.headers, data: opts.data});
+    return await axios.get(url, {timeout: timeout});
   }, retries, interval);
 }
 

@@ -23,8 +23,7 @@ async function getLokiViaGrafana(path, retries = 5, interval = 30, timeout = 100
   const url = `${grafanaUrl}/api/datasources/proxy/${lokiDatasourceId}/loki/${path}`;
   info('loki grafana url', url);
 
-  return retryPromise(async () => await axios.get(url, {timeout: timeout}),
-      retries, interval);
+  return retryPromise(async () => await axios.get(url, {timeout: timeout}), retries, interval);
 }
 
 async function tryGetLokiPersistentVolumeClaim() {
