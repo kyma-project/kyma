@@ -84,7 +84,7 @@ Follow these steps:
         secretName: # "git-creds-basic" or "git-creds-key"
     ```
    
-    >**NOTE:** It is recommended to use small repositories to source your git functions. Using large multi-repos can cause problems.
+    >**NOTE:** It is recommended to use small repositories to source your git functions. Using large multi-repos can cause problems with function controller stability as it may run out of CPU and i/o resources.
 
 4. Create a Function CR that specifies the Function's logic and points to the directory with code and dependencies in the given repository.
 
