@@ -34,11 +34,10 @@ describe('Execute SKR test', function() {
       const suffix = genRandom(4);
       const runtimeName = `kyma-${suffix}`;
       const appName = `app-${suffix}`;
-
-      const svcatPlatform = `svcat-${suffix}`;
+      
       const btpOperatorInstance = `btp-operator-${suffix}`;
       const btpOperatorBinding = `btp-operator-binding-${suffix}`;
-      
+
       const btpOperatorCreds = await t.smInstanceBinding(btpOperatorInstance, btpOperatorBinding);
 
 
