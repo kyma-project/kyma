@@ -28,8 +28,9 @@ async function getGrafanaDatasourceId(grafanaUrl, datasourceName) {
 
 async function getJaegerViaGrafana(path, retries, interval, timeout, debugMsg) {
   const grafanaUrl = await getGrafanaUrl();
-  const jaegerDatasourceId = await getGrafanaDatasourceId(grafanaUrl, 'Jaeger');
-  const url = `${grafanaUrl}/api/datasources/proxy/${jaegerDatasourceId.id}/jaeger/${path}`;
+  const jaegerDatasourceResponse = await getGrafanaDatasourceId(grafanaUrl, 'Jaeger');
+  const jaegerDatasourceId = jaegerDatasourceResponse.data.id;
+  const url = `${grafanaUrl}/api/datasources/proxy/${jaegerDatasourceId}/jaeger/${path}`;
   info('jaeger grafana url', url);
 
   return retryPromise(async () => {
