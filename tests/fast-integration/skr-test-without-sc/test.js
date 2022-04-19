@@ -38,8 +38,7 @@ describe('Execute SKR test', function() {
       const svcatPlatform = `svcat-${suffix}`;
       const btpOperatorInstance = `btp-operator-${suffix}`;
       const btpOperatorBinding = `btp-operator-binding-${suffix}`;
-
-      await t.provisionPlatform(smAdminCreds, svcatPlatform);
+      
       const btpOperatorCreds = await t.smInstanceBinding(btpOperatorInstance, btpOperatorBinding);
 
 
