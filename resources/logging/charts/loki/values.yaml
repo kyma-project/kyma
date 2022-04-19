@@ -281,6 +281,12 @@ kyma:
   auth:
     useKymaGroups: false
     groups: ""
+  logPipeline:
+    match: "kube.*"
+    logLevel: warn
+    lineFormat: json
+    removeKeys: "kubernetes, stream"
+
 chunkCleaner:
   enabled: true
   targetSizePercentage: 5

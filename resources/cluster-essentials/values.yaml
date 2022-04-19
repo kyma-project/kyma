@@ -13,10 +13,6 @@ global:
   containerRegistry:
     path: eu.gcr.io/kyma-project
   images:
-    k8s_tools:
-      name: "k8s-tools"
-      version: "20220406-be8951f6"
-      directory: "tpi"
     podpreset_webhook:
       name: "podpreset-webhook"
       version: "663a99a3"

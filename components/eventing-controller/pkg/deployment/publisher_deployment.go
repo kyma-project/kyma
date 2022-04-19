@@ -28,7 +28,7 @@ const (
 	InstanceLabelValue       = "eventing"
 	DashboardLabelKey        = "kyma-project.io/dashboard"
 	DashboardLabelValue      = "eventing"
-	BackendLabelKey          = "kyma-project.io/eventingBackend"
+	BackendLabelKey          = "eventing.kyma-project.io/eventing"
 	publisherPortName        = "http"
 	publisherPortNum         = int32(8080)
 	publisherMetricsPortName = "http-metrics"

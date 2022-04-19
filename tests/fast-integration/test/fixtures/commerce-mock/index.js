@@ -29,7 +29,9 @@ const {
   genRandom,
   k8sDynamicApi,
   deleteNamespaces,
+  error,
   debug,
+  isDebugEnabled,
   toBase64,
   ensureApplicationMapping,
   patchApplicationGateway,
@@ -60,7 +62,8 @@ const {
   OAuthToken,
   OAuthCredentials,
 } = require('../../../lib/oauth');
-const {bebBackend, eventMeshNamespace} = require('../../../eventing-test/utils');
+
+const {bebBackend, eventMeshNamespace} = require('../../../eventing-test/common/common');
 
 const commerceMockYaml = fs.readFileSync(
     path.join(__dirname, './commerce-mock.yaml'),
@@ -166,7 +169,7 @@ async function sendEventAndCheckResponse(eventType, body, params, mockNamespace 
         await axios
             .post(url, body, params)
             .catch((e) => {
-              console.log('Cannot send %s, the response from event gateway: %s', eventType, e.response.data);
+              error('Cannot send %s, the response from event gateway: %s', eventType, e.response.data);
               throw convertAxiosError(e, 'Cannot send %s, the response from event gateway', eventType);
             });
 
@@ -852,6 +855,13 @@ async function deleteMockTestFixture(mockNamespace) {
   await k8sDelete(applicationObjs);
 }
 
+async function waitForSubscriptions(subscriptions) {
+  for (let i = 0; i < subscriptions.length; i++) {
+    const subscription = subscriptions[i];
+    await waitForSubscription(subscription.metadata.name, subscription.metadata.namespace);
+  }
+}
+
 async function waitForSubscriptionsTillReady(targetNamespace) {
   await waitForSubscription('order-received', targetNamespace);
   await waitForSubscription('order-created', targetNamespace);
@@ -862,14 +872,8 @@ async function checkInClusterEventDelivery(targetNamespace) {
   await checkInClusterEventDeliveryHelper(targetNamespace, 'binary');
 }
 
-async function checkInClusterEventDeliveryHelper(targetNamespace, encoding) {
-  const eventId = 'event-' + encoding + '-' + genRandom(5);
-  const vs = await waitForVirtualService(targetNamespace, 'lastorder');
-  const mockHost = vs.spec.hosts[0];
-
-  await printStatusOfInClusterEventingInfrastructure(targetNamespace, encoding, 'lastorder');
-
-  // send event using function query parameter send=true
+// send event using function query parameter send=true
+async function sendInClusterEventWithRetry(mockHost, eventId, encoding, retriesLeft = 10) {
   await retryPromise(async () => {
     const response = await axios.post(`https://${mockHost}`, {id: eventId}, {
       params: {
@@ -880,34 +884,63 @@ async function checkInClusterEventDeliveryHelper(targetNamespace, encoding) {
         'X-B3-Sampled': 1,
       },
     });
-    debug('Event publishing result:', {
+
+    debug('Send response:', {
       status: response.status,
       statusText: response.statusText,
       data: response.data,
     });
+
     if (response.data.eventPublishError) {
       throw convertAxiosError(response.data.statusText);
     }
     expect(response.status).to.be.equal(200);
-  }, 10, 1000);
-  debug(`Event ${eventId} was successfully published`);
+  }, retriesLeft, 1000);
 
-  // verify if event was received using function query parameter inappevent=eventId
+  debug(`Event "${eventId}" is sent`);
+}
+
+// verify if event was received using function query parameter inappevent=eventId
+async function ensureInClusterEventReceivedWithRetry(mockHost, eventId, retriesLeft = 10) {
   return await retryPromise(async () => {
-    debug('Waiting for event: ', eventId);
+    debug(`Waiting to receive event "${eventId}"`);
+
     const response = await axios.get(`https://${mockHost}`, {params: {inappevent: eventId}});
-    debug('Received Event response: ', {
+
+    debug('Received response:', {
       status: response.status,
       statusText: response.statusText,
       data: response.data,
     });
+
     expect(response.data).to.have.nested.property('event.id', eventId, 'The same event id expected in the result');
     expect(response.data).to.have.nested.property('event.shipped', true, 'Order should have property shipped');
     return response;
-  }, 30, 2 * 1000)
+  }, retriesLeft, 2 * 1000)
       .catch((err) => {
         throw convertAxiosError(err, 'Fetching published event responded with error');
       });
+}
+
+function getRandomEventId(encoding) {
+  return 'event-' + encoding + '-' + genRandom(5);
+}
+
+async function getVirtualServiceHost(targetNamespace, funcName) {
+  const vs = await waitForVirtualService(targetNamespace, funcName);
+  return vs.spec.hosts[0];
+}
+
+async function checkInClusterEventDeliveryHelper(targetNamespace, encoding) {
+  const eventId = getRandomEventId(encoding);
+  const mockHost = await getVirtualServiceHost(targetNamespace, 'lastorder');
+
+  if (isDebugEnabled()) {
+    await printStatusOfInClusterEventingInfrastructure(targetNamespace, encoding, 'lastorder');
+  }
+
+  await sendInClusterEventWithRetry(mockHost, eventId, encoding);
+  return ensureInClusterEventReceivedWithRetry(mockHost, eventId);
 }
 
 module.exports = {
@@ -928,7 +961,12 @@ module.exports = {
   cleanMockTestFixture,
   deleteMockTestFixture,
   waitForSubscriptionsTillReady,
+  waitForSubscriptions,
   setEventMeshSourceNamespace,
   cleanCompassResourcesSKR,
   sendEventAndCheckResponse,
+  getRandomEventId,
+  getVirtualServiceHost,
+  sendInClusterEventWithRetry,
+  ensureInClusterEventReceivedWithRetry,
 };
