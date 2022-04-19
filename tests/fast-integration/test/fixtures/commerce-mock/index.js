@@ -41,7 +41,7 @@ const {
   namespaceObj,
   serviceInstanceObj,
   getTraceDAG,
-  printStatusOfInClusterEventingInfrastructure, info,
+  printStatusOfInClusterEventingInfrastructure,
 } = require('../../../utils');
 
 const {
@@ -329,7 +329,7 @@ async function checkInClusterEventTracing(targetNamespace) {
 
 async function checkTrace(traceId, expectedTraceProcessSequence) {
   const traceRes = await getJaegerTrace(traceId);
-  info('traceRes', traceRes);
+
   // the trace response should have data for single trace
   expect(traceRes.data).to.have.length(1);
 

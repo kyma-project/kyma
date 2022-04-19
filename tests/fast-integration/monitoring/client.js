@@ -6,7 +6,7 @@ const {
   retryPromise,
   getVirtualService,
   debug,
-  error, info,
+  error,
 } = require('../utils');
 
 async function getGrafanaUrl() {
@@ -27,7 +27,6 @@ async function proxyGrafanaDatasource(datasourceName, path, retries, interval,
   const datasourceResponse = await getGrafanaDatasourceId(grafanaUrl, datasourceName);
   const datasourceId = datasourceResponse.data.id;
   const url = `${grafanaUrl}/api/datasources/proxy/${datasourceId}/${path}`;
-  info('Proxying grafana datasource: ', url); // TODO change to debug
 
   return retryPromise(async () => {
     if (debugMsg) {

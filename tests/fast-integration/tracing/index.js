@@ -1,4 +1,7 @@
-const {waitForNamespace, getEnvOrDefault} = require('../utils');
+const {
+  waitForNamespace,
+  getEnvOrDefault,
+} = require('../utils');
 const {
   sendLegacyEventAndCheckTracing,
   sendCloudEventStructuredModeAndCheckTracing,
