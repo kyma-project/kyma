@@ -35,7 +35,7 @@ describe('Executing Standard Testsuite:', function() {
 
   commerceMockTests(testNamespace);
   gettingStartedGuideTests();
-  //
+
   loggingTests();
   tracingTests(mockNamespace, testNamespace);
 

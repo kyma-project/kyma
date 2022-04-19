@@ -23,26 +23,21 @@ async function getGrafanaUrl() {
 
 async function getGrafanaDatasourceId(grafanaUrl, datasourceName) {
   const url = `${grafanaUrl}/api/datasources/id/${datasourceName}`;
-
   return retryPromise(async () => await axios.get(url), 5, 1000);
 }
 
 async function getJaegerViaGrafana(path, retries, interval, timeout, debugMsg) {
-  const grafanaUrl = await getGrafanaBaseUrl();
+  const grafanaUrl = await getGrafanaUrl();
   const jaegerDatasourceId = await getGrafanaDatasourceId(grafanaUrl, 'Jaeger');
   const url = `${grafanaUrl}/api/datasources/proxy/${jaegerDatasourceId.id}/jaeger/${path}`;
   info('jaeger grafana url', url);
 
-  delete axios.defaults.headers.common['Accept'];
-  const httpsAgent = new https.Agent({
-    rejectUnauthorized: false,
-  });
   return retryPromise(async () => {
     if (debugMsg) {
       debug(debugMsg);
     }
-    return await axios.get(url, {httpsAgent: httpsAgent, timeout: timeout,
-      method: opts.method, headers: opts.headers, data: opts.data});
+    return await axios.get(url, {timeout: timeout, method: opts.method,
+      headers: opts.headers, data: opts.data});
   }, retries, interval);
 }
 
@@ -128,8 +123,8 @@ async function getJaegerTrace(traceId) {
   debug(`fetching trace: ${traceId} from jaeger`);
 
   try {
-    const response = getJaegerViaGrafana(path, retries, interval, timeout, debugMsg);
-    return response.data;
+    const responseBody = await getJaegerViaGrafana(path, retries, interval, timeout, debugMsg);
+    return responseBody.data;
   } catch (err) {
     throw convertAxiosError(err, 'cannot get jaeger trace');
   }
