@@ -55,6 +55,18 @@ function monitoringTests() {
   });
 }
 
+function resetGrafanaProxy() {
+  if (getEnvOrDefault('KYMA_MAJOR_UPGRADE', 'false') === 'true') {
+    info('Skipping resetting of Grafana Proxy for Kyma 1 to Kyma 2 upgrade scenario');
+    return;
+  }
+
+  describe('Resetting Grafana Proxy', async () => {
+    await grafana.resetGrafanaProxy();
+  });
+}
+
 module.exports = {
   monitoringTests,
+  resetGrafanaProxy,
 };

@@ -3,7 +3,7 @@ const {
   gettingStartedGuideTests,
 } = require('./');
 
-const {monitoringTests} = require('../monitoring');
+const {monitoringTests, resetGrafanaProxy} = require('../monitoring');
 const {loggingTests} = require('../logging');
 const {tracingTests} = require('../tracing');
 const {cleanMockTestFixture} = require('./fixtures/commerce-mock');
@@ -35,7 +35,9 @@ describe('Executing Standard Testsuite:', function() {
 
   commerceMockTests(testNamespace);
   gettingStartedGuideTests();
-
+  //
   loggingTests();
   tracingTests(mockNamespace, testNamespace);
+
+  resetGrafanaProxy();
 });

@@ -14,9 +14,23 @@ function getPrometheus(path) {
   return callServiceViaProxy('kyma-system', 'monitoring-prometheus', '9090', path);
 }
 
+async function getGrafanaUrl() {
+  const vs = await getVirtualService('kyma-system', 'monitoring-grafana');
+  const host = vs.spec.hosts[0];
+
+  return `https://${host}`;
+}
+
+async function getGrafanaDatasourceId(grafanaUrl, datasourceName) {
+  const url = `${grafanaUrl}/api/datasources/id/${datasourceName}`;
+
+  return retryPromise(async () => await axios.get(url), 5, 1000);
+}
+
 async function getJaegerViaGrafana(path, retries, interval, timeout, debugMsg) {
-  const grafanaUrl = await getGrafanaUrl();
-  const url = `${grafanaUrl}/api/datasources/proxy/3/jaeger/${path}`;
+  const grafanaUrl = await getGrafanaBaseUrl();
+  const jaegerDatasourceId = await getGrafanaDatasourceId(grafanaUrl, 'Jaeger');
+  const url = `${grafanaUrl}/api/datasources/proxy/${jaegerDatasourceId.id}/jaeger/${path}`;
   info('jaeger grafana url', url);
 
   delete axios.defaults.headers.common['Accept'];
@@ -115,18 +129,10 @@ async function getJaegerTrace(traceId) {
 
   try {
     const response = getJaegerViaGrafana(path, retries, interval, timeout, debugMsg);
-    info('jaeger.response.data', response.data);
     return response.data;
   } catch (err) {
     throw convertAxiosError(err, 'cannot get jaeger trace');
   }
-}
-
-async function getGrafanaUrl() {
-  const vs = await getVirtualService('kyma-system', 'monitoring-grafana');
-  const hosts = vs.spec.hosts[0];
-
-  return `https://${hosts}`;
 }
 
 module.exports = {
