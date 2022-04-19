@@ -48,14 +48,8 @@ function waitForLogPipelineStatusCondition(name, lastConditionType, timeout) {
 
 
 describe('Telemetry Operator tests', async () => {
-  before('Should prepare Grafana', async () => {
-    it('Grafana redirects should work', async () => {
-      await grafana.assertGrafanaRedirectsExist();
-    });
-  });
-
-  after('Should cleanup Grafana', async () => {
-    await resetGrafanaProxy();
+  it('Grafana redirects should work', async () => {
+    await grafana.assertGrafanaRedirectsExist();
   });
 
   it('Operator should be ready', async () => {
@@ -88,5 +82,9 @@ describe('Telemetry Operator tests', async () => {
     const labels = '{job="telemetry-fluent-bit"}';
     const logsPresent = await logsPresentInLoki(labels, testStartTimestamp);
     assert.isTrue(logsPresent, 'No logs present in Loki');
+  });
+
+  it('Should cleanup Grafana', async () => {
+    await resetGrafanaProxy();
   });
 });
