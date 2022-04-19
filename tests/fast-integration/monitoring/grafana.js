@@ -42,8 +42,8 @@ async function checkGrafanaRedirectsInKyma2() {
   await manageSecret('create');
   await restartProxyPod();
   // Checking grafana redirect to OIDC provider
-  // res = await assertGrafanaRedirect('https://accounts.google.com/signin/oauth');
-  // assert.isTrue(res, 'Grafana redirect to google does not work!');
+  res = await assertGrafanaRedirect('https://accounts.google.com/signin/oauth');
+  assert.isTrue(res, 'Grafana redirect to google does not work!');
 
   await updateProxyDeployment('--reverse-proxy=true', '--trusted-ip=0.0.0.0/0');
   // Checking that authentication works and redirects to grafana URL

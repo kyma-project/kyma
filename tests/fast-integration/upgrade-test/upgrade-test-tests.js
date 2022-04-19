@@ -16,6 +16,8 @@ describe('Upgrade test tests', function() {
   const mockNamespace = 'mocks';
   const testNamespace = 'test';
 
+  monitoringTests();
+
   it('Listing all pods in cluster', async function() {
     initialRestarts = await getContainerRestartsForAllNamespaces();
   });
@@ -41,7 +43,6 @@ describe('Upgrade test tests', function() {
     printRestartReport(initialRestarts, afterTestRestarts);
   });
 
-  monitoringTests();
   loggingTests();
   tracingTests(mockNamespace, testNamespace);
   resetGrafanaProxy();
