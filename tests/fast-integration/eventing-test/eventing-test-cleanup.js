@@ -1,8 +1,9 @@
 const {
   timeoutTime,
   slowTime,
-  cleanupTestingResources,
+  cleanupTestingResources, isSKR,
 } = require('./utils');
+const {resetGrafanaProxy} = require('../monitoring');
 
 describe('Eventing tests cleanup', function() {
   this.timeout(timeoutTime);
@@ -10,5 +11,9 @@ describe('Eventing tests cleanup', function() {
 
   it('Cleaning: Test resources should be deleted', async function() {
     await cleanupTestingResources();
+
+    if (!isSKR) {
+      await resetGrafanaProxy();
+    }
   });
 });

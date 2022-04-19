@@ -60,10 +60,6 @@ const {
 const {
   assert,
 } = require('chai');
-const {
-  resetGrafanaProxy,
-  grafanaTests,
-} = require('../monitoring');
 
 describe('Eventing tests', function() {
   this.timeout(timeoutTime);
@@ -74,9 +70,6 @@ describe('Eventing tests', function() {
     await waitForNamespace(mockNamespace);
   });
 
-  if (!isSKR) {
-    grafanaTests();
-  }
   // eventingE2ETestSuite - Runs Eventing end-to-end tests
   function eventingE2ETestSuite(backend) {
     it('lastorder function should be reachable through secured API Rule', async function() {
@@ -263,8 +256,4 @@ describe('Eventing tests', function() {
     // Running Eventing Monitoring tests
     eventingMonitoringTest(natsBackend, isJetStreamEnabled);
   });
-
-  if (!isSKR) {
-    resetGrafanaProxy();
-  }
 });

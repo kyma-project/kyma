@@ -37,6 +37,7 @@ const {
   scenarioExistsInCompass,
   isRuntimeAssignedToScenario,
 } = require('../compass');
+const {grafanaTests} = require('../monitoring');
 
 
 describe('Eventing tests preparation', function() {
@@ -64,6 +65,10 @@ describe('Eventing tests preparation', function() {
       await prepareAssetsForSKRTests();
     } else {
       await prepareAssetsForOSSTests();
+    }
+
+    if (!isSKR) {
+      await grafanaTests();
     }
   });
 
