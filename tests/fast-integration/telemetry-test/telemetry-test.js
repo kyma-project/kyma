@@ -7,14 +7,14 @@ const {
   k8sApply,
   waitForK8sObject,
 } = require('../utils');
+const {logsPresentInLoki} = require('../logging');
 const {
-  lokiPortForward,
-  logsPresentInLoki,
-} = require('../logging');
-
+  resetGrafanaProxy,
+  grafanaTests,
+} = require('../monitoring');
 const telemetryNamespace = 'kyma-system';
 const testStartTimestamp = new Date().toISOString();
-
+const invalidLogPipelineCR = loadResourceFromFile('./invalid-log-pipeline.yaml');
 
 function loadResourceFromFile(file) {
   const yaml = fs.readFileSync(path.join(__dirname, file), {
@@ -46,14 +46,9 @@ function waitForLogPipelineStatusCondition(name, lastConditionType, timeout) {
   );
 }
 
-const invalidLogPipelineCR = loadResourceFromFile('./invalid-log-pipeline.yaml');
 
 describe('Telemetry Operator tests', function() {
-  let cancelPortForward;
-
-  before(async function() {
-    cancelPortForward = lokiPortForward();
-  });
+  grafanaTests();
 
   it('Operator should be ready', async () => {
     const res = await k8sCoreV1Api.listNamespacedPod(
@@ -87,7 +82,5 @@ describe('Telemetry Operator tests', function() {
     assert.isTrue(logsPresent, 'No logs present in Loki');
   });
 
-  after(async function() {
-    cancelPortForward();
-  });
+  resetGrafanaProxy();
 });
