@@ -198,3 +198,16 @@ module.exports = {
 
 You can use the `/metrics` endpoint to return the Function metrics. All the information is gathered using Prometheus and can be displayed using the Grafana dashboard (see [Kyma observability](https://kyma-project.io/docs/kyma/latest/02-get-started/05-observability/) for more information on how to use Grafana dashboard in Kyma). As this endpoint is provided by Kubeless, it cannot be customized.  
 For more information, see [Kubeless monitoring](https://github.com/vmware-archive/kubeless/blob/master/docs/monitoring.md) and [Kubeless runtime variants](https://github.com/vmware-archive/kubeless/blob/master/docs/runtimes.md) pages.
+
+## Override runtime image
+
+You can use a custom runtime image to override the existing one. Your image must meet all the following requirements:
+
+- Expose the workload endpoint on the right port
+- Provide liveness and readiness check endpoints at `/healthz`
+- Fetch sources from the path under the `KUBELESS_INSTALL_VOLUME` environment
+- Security support. Kyma runtimes are secure by default. You only need to protect your images.
+
+> Note: For better understanding you can look at [main dockerfiles](https://github.com/kyma-project/kyma/blob/main/resources/serverless/templates/runtimes.yaml) which are responsible for building the final image based on the `base_image` argument which you as an user can override and what we are doing in [this tutorial](../03-tutorials/00-serverless/svls-13-override-runtime-image).
+
+Every Function's Pods container have the same system environments which helps you configure the Functions server. For more information, read the [Environment variables](../05-technical-reference/00-configuration-parameters/svls-02-environment-variables.md) page.
