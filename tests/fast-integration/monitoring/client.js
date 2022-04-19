@@ -26,12 +26,13 @@ async function getGrafanaDatasourceId(grafanaUrl, datasourceName) {
   return retryPromise(async () => await axios.get(url), 5, 1000);
 }
 
-async function getJaegerViaGrafana(path, retries, interval, timeout, debugMsg) {
+async function proxyGrafanaDatasource(datasourceName, path, retries, interval,
+    timeout, debugMsg = undefined) {
   const grafanaUrl = await getGrafanaUrl();
-  const jaegerDatasourceResponse = await getGrafanaDatasourceId(grafanaUrl, 'Jaeger');
-  const jaegerDatasourceId = jaegerDatasourceResponse.data.id;
-  const url = `${grafanaUrl}/api/datasources/proxy/${jaegerDatasourceId}/jaeger/${path}`;
-  info('jaeger grafana url', url);
+  const datasourceResponse = await getGrafanaDatasourceId(grafanaUrl, datasourceName);
+  const datasourceId = datasourceResponse.data.id;
+  const url = `${grafanaUrl}/api/datasources/proxy/${datasourceId}/${datasourceName.toLowerCase()}/${path}`;
+  info('Proxying grafana datasource: ', url); // TODO change to debug
 
   return retryPromise(async () => {
     if (debugMsg) {
@@ -40,6 +41,10 @@ async function getJaegerViaGrafana(path, retries, interval, timeout, debugMsg) {
     return await axios.get(url, {timeout: timeout});
   }, retries, interval);
 }
+
+// async function getPrometheusViaGrafana(path) {
+//   return await proxyGrafanaDatasource('Prometheus', path);
+// }
 
 async function getPrometheusActiveTargets() {
   const path = 'api/v1/targets?state=active';
@@ -113,29 +118,12 @@ async function queryGrafana(url, redirectURL, ignoreSSL, httpErrorCode) {
   }
 }
 
-async function getJaegerTrace(traceId) {
-  const path = `api/traces/${traceId}`;
-
-  const retries = 30;
-  const interval = 1000;
-  const timeout = 30 * 1000;
-  const debugMsg = `waiting for trace (id: ${traceId}) from jaeger...`;
-  debug(`fetching trace: ${traceId} from jaeger`);
-
-  try {
-    const responseBody = await getJaegerViaGrafana(path, retries, interval, timeout, debugMsg);
-    return responseBody.data;
-  } catch (err) {
-    throw convertAxiosError(err, 'cannot get jaeger trace');
-  }
-}
-
 module.exports = {
+  getGrafanaUrl,
+  proxyGrafanaDatasource,
   getPrometheusActiveTargets,
   getPrometheusAlerts,
   getPrometheusRuleGroups,
   queryPrometheus,
   queryGrafana,
-  getGrafanaUrl,
-  getJaegerTrace,
 };

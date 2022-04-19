@@ -1,29 +1,14 @@
-const axios = require('axios');
 const {
   convertAxiosError,
   getPersistentVolumeClaim,
   getSecretData,
   sleep,
-  retryPromise,
-  info,
 } = require('../utils');
-const {getGrafanaUrl} = require('../monitoring/client');
+const {proxyGrafanaDatasource} = require('../monitoring/client');
 
-
-async function getGrafanaDatasourceId(grafanaUrl, datasourceName) {
-  const url = `${grafanaUrl}/api/datasources/id/${datasourceName}`;
-
-  return retryPromise(async () => await axios.get(url), 5, 1000);
-}
 
 async function getLokiViaGrafana(path, retries = 5, interval = 30, timeout = 10000) {
-  const grafanaUrl = await getGrafanaUrl();
-  const lokiDatasourceResponse = await getGrafanaDatasourceId(grafanaUrl, 'Loki');
-  const lokiDatasourceId = lokiDatasourceResponse.data.id;
-  const url = `${grafanaUrl}/api/datasources/proxy/${lokiDatasourceId}/loki/${path}`;
-  info('loki grafana url', url);
-
-  return retryPromise(async () => await axios.get(url, {timeout: timeout}), retries, interval);
+  return await proxyGrafanaDatasource('Loki', path, retries, interval, timeout);
 }
 
 async function tryGetLokiPersistentVolumeClaim() {
