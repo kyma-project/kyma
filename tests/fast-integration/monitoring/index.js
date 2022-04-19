@@ -8,18 +8,7 @@ function monitoringTests() {
     return;
   }
 
-  describe('Grafana Tests:', async function() {
-    this.timeout(5 * 60 * 1000); // 5 min
-    this.slow(5 * 1000);
-
-    it('Grafana pods should be ready', async () => {
-      await grafana.assertPodsExist();
-    });
-
-    it('Grafana redirects should work', async () => {
-      await grafana.assertGrafanaRedirectsExist();
-    });
-  });
+  grafanaTests();
 
   describe('Prometheus Tests:', function() {
     this.timeout(5 * 60 * 1000); // 5 min
@@ -55,6 +44,21 @@ function monitoringTests() {
   });
 }
 
+function grafanaTests() {
+  describe('Grafana Tests:', async function() {
+    this.timeout(5 * 60 * 1000); // 5 min
+    this.slow(5 * 1000);
+
+    it('Grafana pods should be ready', async () => {
+      await grafana.assertPodsExist();
+    });
+
+    it('Grafana redirects should work', async () => {
+      await grafana.assertGrafanaRedirectsExist();
+    });
+  });
+}
+
 function resetGrafanaProxy() {
   if (getEnvOrDefault('KYMA_MAJOR_UPGRADE', 'false') === 'true') {
     info('Skipping resetting of Grafana Proxy for Kyma 1 to Kyma 2 upgrade scenario');
@@ -67,6 +71,7 @@ function resetGrafanaProxy() {
 }
 
 module.exports = {
+  grafanaTests,
   monitoringTests,
   resetGrafanaProxy,
 };

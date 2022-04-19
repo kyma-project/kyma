@@ -60,6 +60,10 @@ const {
 const {
   assert,
 } = require('chai');
+const {
+  resetGrafanaProxy,
+  grafanaTests,
+} = require('../monitoring');
 
 describe('Eventing tests', function() {
   this.timeout(timeoutTime);
@@ -69,6 +73,8 @@ describe('Eventing tests', function() {
     await waitForNamespace(testNamespace);
     await waitForNamespace(mockNamespace);
   });
+
+  grafanaTests();
 
   // eventingE2ETestSuite - Runs Eventing end-to-end tests
   function eventingE2ETestSuite(backend) {
@@ -256,4 +262,6 @@ describe('Eventing tests', function() {
     // Running Eventing Monitoring tests
     eventingMonitoringTest(natsBackend, isJetStreamEnabled);
   });
+
+  resetGrafanaProxy();
 });
