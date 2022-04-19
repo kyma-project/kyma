@@ -94,6 +94,14 @@ function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
+
+function escapeRegExp(str) {
+  return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // $& means the whole matched string
+}
+function replaceAllInString(str, match, replacement) {
+  return str.replace(new RegExp(escapeRegExp(match), 'g'), () => replacement);
+}
+
 function convertAxiosError(axiosError, message) {
   if (!axiosError.response) {
     return new Error(`${message}: ${axiosError.toString()}`);
@@ -1779,6 +1787,7 @@ module.exports = {
   removeServiceInstanceFinalizer,
   removeServiceBindingFinalizer,
   sleep,
+  replaceAllInString,
   promiseAllSettled,
   kubectlApplyDir,
   kubectlApply,
