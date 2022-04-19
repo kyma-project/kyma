@@ -10,6 +10,7 @@ axios.defaults.httpsAgent = httpsAgent;
 const {
   debug,
   retryPromise,
+  replaceAllInString,
 } = require('../utils');
 
 const {queryPrometheus} = require('../monitoring/client');
@@ -209,7 +210,7 @@ function getJetStreamDashboardTests() {
     let finalQuery = natsDashboardQueries[i]['query'];
     // replace variables in queries with values
     for (const [variableName, value] of Object.entries(dashboardVariables)) {
-      finalQuery = finalQuery.replaceAll(variableName, value);
+      finalQuery = replaceAllInString(finalQuery, variableName, value);
     }
 
     dashboardTests[`jetstream_dash_${i}`] = {
