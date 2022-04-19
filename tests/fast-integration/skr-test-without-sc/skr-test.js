@@ -119,7 +119,7 @@ function commerceMockTest() {
           this.options.scenarioName,
           'mocks',
           this.options.testNS,
-          true
+          true,
       );
     });
 
