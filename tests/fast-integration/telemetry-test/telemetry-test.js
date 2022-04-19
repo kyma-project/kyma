@@ -10,8 +10,8 @@ const {
 const {logsPresentInLoki} = require('../logging');
 const {
   resetGrafanaProxy,
-  grafanaTests,
 } = require('../monitoring');
+const grafana = require('../monitoring/grafana');
 const telemetryNamespace = 'kyma-system';
 const testStartTimestamp = new Date().toISOString();
 const invalidLogPipelineCR = loadResourceFromFile('./invalid-log-pipeline.yaml');
@@ -49,7 +49,9 @@ function waitForLogPipelineStatusCondition(name, lastConditionType, timeout) {
 
 describe('Telemetry Operator tests', async () => {
   before('Should prepare Grafana', async () => {
-    await grafanaTests();
+    it('Grafana redirects should work', async () => {
+      await grafana.assertGrafanaRedirectsExist();
+    });
   });
 
   after('Should cleanup Grafana', async () => {
