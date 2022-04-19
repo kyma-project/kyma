@@ -4,8 +4,6 @@ const net = require('net');
 const fs = require('fs');
 const {join} = require('path');
 const {expect} = require('chai');
-const https = require('https');
-const axios = require('axios');
 const execa = require('execa');
 
 const kc = new k8s.KubeConfig();
