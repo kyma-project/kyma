@@ -45,6 +45,11 @@ function monitoringTests() {
 }
 
 function grafanaTests() {
+  if (getEnvOrDefault('KYMA_MAJOR_UPGRADE', 'false') === 'true') {
+    info('Skipping grafana tests for Kyma 1 to Kyma 2 upgrade scenario');
+    return;
+  }
+
   describe('Grafana Tests:', async function() {
     this.timeout(5 * 60 * 1000); // 5 min
     this.slow(5 * 1000);

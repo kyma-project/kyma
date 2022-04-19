@@ -74,8 +74,9 @@ describe('Eventing tests', function() {
     await waitForNamespace(mockNamespace);
   });
 
-  grafanaTests();
-
+  if (!isSKR) {
+    grafanaTests();
+  }
   // eventingE2ETestSuite - Runs Eventing end-to-end tests
   function eventingE2ETestSuite(backend) {
     it('lastorder function should be reachable through secured API Rule', async function() {
@@ -263,5 +264,7 @@ describe('Eventing tests', function() {
     eventingMonitoringTest(natsBackend, isJetStreamEnabled);
   });
 
-  resetGrafanaProxy();
+  if (!isSKR) {
+    resetGrafanaProxy();
+  }
 });

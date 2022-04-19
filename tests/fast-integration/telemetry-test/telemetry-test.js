@@ -25,7 +25,7 @@ function loadResourceFromFile(file) {
 
 function checkLastCondition(logPipeline, conditionType) {
   const conditions = logPipeline.status.conditions;
-  if (conditions.length == 0) {
+  if (conditions.length === 0) {
     return false;
   }
   const lastCondition = conditions[conditions.length - 1];
@@ -38,7 +38,7 @@ function waitForLogPipelineStatusCondition(name, lastConditionType, timeout) {
       {},
       (_type, watchObj, _) => {
         return (
-          watchObj.metadata.name == name && checkLastCondition(watchObj, lastConditionType)
+          watchObj.metadata.name === name && checkLastCondition(watchObj, lastConditionType)
         );
       },
       timeout,
@@ -78,7 +78,7 @@ describe('Telemetry Operator tests', function() {
     } catch (e) {
       assert.equal(e.statusCode, 403);
       expect(e.body.message).to.have.string('denied the request', 'Invalid indentation level');
-    };
+    }
   });
 
   it('should push the logs to the loki output', async () => {

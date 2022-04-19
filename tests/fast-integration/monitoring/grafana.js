@@ -18,6 +18,7 @@ const {
   error,
 } = require('../utils');
 
+
 const {queryGrafana, getGrafanaUrl} = require('./client');
 
 async function assertPodsExist() {
@@ -27,61 +28,45 @@ async function assertPodsExist() {
 
 async function assertGrafanaRedirectsExist() {
   if (getEnvOrDefault('KYMA_MAJOR_VERSION', '2') === '2') {
-    await checkGrafanaRedirectsInKyma2();
+    await assertGrafanaRedirectsInKyma2();
   } else {
-    await checkGrafanaRedirectsInKyma1();
+    await assertGrafanaRedirectsInKyma1();
   }
 }
 
-async function checkGrafanaRedirectsInKyma2() {
-  // Checking grafana redirect to kyma docs
-  let res = await assertGrafanaRedirect('https://kyma-project.io/docs');
+async function assertGrafanaRedirectsInKyma2() {
+  info('Checking grafana redirect for kyma docs');
+  let res = await checkGrafanaRedirect('https://kyma-project.io/docs', 403);
   assert.isTrue(res, 'Grafana redirect to kyma docs does not work!');
 
   // Creating secret for auth proxy redirect
   await manageSecret('create');
   await restartProxyPod();
-  // Checking grafana redirect to OIDC provider
-  res = await assertGrafanaRedirect('https://accounts.google.com/signin/oauth');
+
+  info('Checking grafana redirect for google as OIDC provider');
+  res = await checkGrafanaRedirect('https://accounts.google.com/signin/oauth', 200);
   assert.isTrue(res, 'Grafana redirect to google does not work!');
 
   await updateProxyDeployment('--reverse-proxy=true', '--trusted-ip=0.0.0.0/0');
-  // Checking that authentication works and redirects to grafana URL
-  res = await assertGrafanaRedirect('https://grafana.');
+
+  info('Checking grafana redirect to grafana URL');
+  res = await checkGrafanaRedirect('https://grafana.', 200);
   assert.isTrue(res, 'Grafana redirect to grafana landing page does not work!');
 }
 
-async function checkGrafanaRedirectsInKyma1() {
-  const res = await assertGrafanaRedirect('https://dex.');
+async function assertGrafanaRedirectsInKyma1() {
+  info('Checking grafana redirect for dex');
+  const res = await checkGrafanaRedirect('https://dex.', 200);
   assert.isTrue(res, 'Grafana redirect to dex does not work!');
 }
 
-async function assertGrafanaRedirect(redirectURL) {
+async function checkGrafanaRedirect(redirectURL, httpStatus) {
   const url = await getGrafanaUrl();
   let ignoreSSL = false;
   if (url.includes('local.kyma.dev')) {
     ignoreSSL = true;
   }
-
-  if (redirectURL.includes('https://dex.')) {
-    info('Checking redirect for dex');
-    return await retryUrl(url, redirectURL, ignoreSSL, 200);
-  }
-
-  if (redirectURL.includes('https://kyma-project.io/docs')) {
-    info('Checking redirect for kyma docs');
-    return await retryUrl(url, redirectURL, ignoreSSL, 403);
-  }
-
-  if (redirectURL.includes('https://accounts.google.com/signin/oauth')) {
-    info('Checking redirect for google');
-    return await retryUrl(url, redirectURL, ignoreSSL, 200);
-  }
-
-  if (redirectURL.includes('grafana')) {
-    info('Checking redirect for grafana');
-    return await retryUrl(url, redirectURL, ignoreSSL, 200);
-  }
+  return await retryUrl(url, redirectURL, ignoreSSL, httpStatus);
 }
 
 async function manageSecret(action) {
