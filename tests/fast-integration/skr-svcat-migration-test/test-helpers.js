@@ -211,12 +211,22 @@ async function provisionPlatform(creds, svcatPlatform) {
 async function smInstanceBinding(creds, btpOperatorInstance, btpOperatorBinding) {
   let args = [];
   try {
-    args = ['provision', btpOperatorInstance, 'service-manager', 'service-operator-access', '--mode=sync', '--client-id', creds.clientid, '--client-secret', creds.clientsecret];
+    args = ['login',
+      '-a',
+      creds.url,
+      '--param',
+      'subdomain=e2etestingscmigration',
+      '--auth-flow',
+      'client-credentials'];
+    await execa('smctl', args.concat(['--client-id', creds.clientid, '--client-secret', creds.clientsecret]));
+
+    args = ['provision', btpOperatorInstance, 'service-manager', 'service-operator-access', '--mode=sync'];
     await execa('smctl', args);
 
     // Move to Operator Install
     args = ['bind', btpOperatorInstance, btpOperatorBinding, '--mode=sync'];
     await execa('smctl', args);
+
     args = ['get-binding', btpOperatorBinding, '-o', 'json'];
     const out = await execa('smctl', args);
     const b = JSON.parse(out.stdout);
