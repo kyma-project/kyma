@@ -54,7 +54,7 @@ describe('SKR SVCAT migration test', function() {
 
   let btpOperatorCreds;
   it('Should instantiate ServiceManager instance and binding for BTP operator', async function() {
-    btpOperatorCreds = await t.smInstanceBinding(btpOperatorInstance, btpOperatorBinding);
+    btpOperatorCreds = await t.smInstanceBinding(smAdminCreds, btpOperatorInstance, btpOperatorBinding);
   });
 
   let skr;
