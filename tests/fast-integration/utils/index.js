@@ -1772,47 +1772,6 @@ async function attachTraceChildSpans(parentSpan, trace) {
   }
 }
 
-
-/**
- * This function calls a k8s service via its proxy url and returns the result.
- *
- * @param {string} namespace - Kubernetes namespace
- * @param {string} service - Kubernetes service
- * @param {string} port - Port of the service
- * @param {string} path - Path of the service
- * @param {object} [opts={}] - Options that can be applied to the request. E.g. method or body
- * @param {number} [retries=5] - Number of times the request will be retried
- * @param {number} [interval=30] - Interval between the retries
- * @param {number} [timeout=10000] - Timeout of a request
- * @param {string} [debugMsg=undefined] - Debug message to display at each retry
- * @return {object}
- *
- */
-async function callServiceViaProxy(namespace, service, port, path, opts = {},
-    retries = 5, interval = 30, timeout = 10000, debugMsg = undefined) {
-  await kc.applyToRequest(opts);
-
-  const httpsAgent = new https.Agent({
-    rejectUnauthorized: false,
-    ca: opts.ca,
-    key: opts.key,
-    cert: opts.cert,
-  });
-
-  if (!opts.method) {
-    opts.method = 'get';
-  }
-
-  const url = `${k8sServerUrl}/api/v1/namespaces/${namespace}/services/${service}:${port}/proxy/${path}`;
-  return retryPromise(async () => {
-    if (debugMsg) {
-      debug(debugMsg);
-    }
-    return await axios.request({url: url, httpsAgent: httpsAgent, timeout: timeout,
-      method: opts.method, headers: opts.headers, data: opts.data});
-  }, retries, interval);
-}
-
 module.exports = {
   initializeK8sClient,
   getShootNameFromK8sServerUrl,
@@ -1908,5 +1867,4 @@ module.exports = {
   getTraceDAG,
   printStatusOfInClusterEventingInfrastructure,
   getFunction,
-  callServiceViaProxy,
 };

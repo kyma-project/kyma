@@ -36,7 +36,7 @@ async function logsPresentInLoki(query, startTimestamp) {
 }
 
 async function queryLoki(query, startTimestamp) {
-  const path = `api/v1/query_range?query=${query}&start=${startTimestamp}`;
+  const path = `loki/api/v1/query_range?query=${query}&start=${startTimestamp}`;
   try {
     const response = await getLokiViaGrafana(path);
     return response.data;

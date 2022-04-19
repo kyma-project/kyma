@@ -2,17 +2,12 @@ const axios = require('axios');
 const https = require('https');
 
 const {
-  callServiceViaProxy,
   convertAxiosError,
   retryPromise,
   getVirtualService,
   debug,
   error, info,
 } = require('../utils');
-
-function getPrometheus(path) {
-  return callServiceViaProxy('kyma-system', 'monitoring-prometheus', '9090', path);
-}
 
 async function getGrafanaUrl() {
   const vs = await getVirtualService('kyma-system', 'monitoring-grafana');
@@ -31,7 +26,7 @@ async function proxyGrafanaDatasource(datasourceName, path, retries, interval,
   const grafanaUrl = await getGrafanaUrl();
   const datasourceResponse = await getGrafanaDatasourceId(grafanaUrl, datasourceName);
   const datasourceId = datasourceResponse.data.id;
-  const url = `${grafanaUrl}/api/datasources/proxy/${datasourceId}/${datasourceName.toLowerCase()}/${path}`;
+  const url = `${grafanaUrl}/api/datasources/proxy/${datasourceId}/${path}`;
   info('Proxying grafana datasource: ', url); // TODO change to debug
 
   return retryPromise(async () => {
@@ -42,14 +37,14 @@ async function proxyGrafanaDatasource(datasourceName, path, retries, interval,
   }, retries, interval);
 }
 
-// async function getPrometheusViaGrafana(path) {
-//   return await proxyGrafanaDatasource('Prometheus', path);
-// }
+async function getPrometheusViaGrafana(path, retries = 5, interval = 30, timeout = 10000) {
+  return await proxyGrafanaDatasource('Prometheus', path, retries, interval, timeout);
+}
 
 async function getPrometheusActiveTargets() {
   const path = 'api/v1/targets?state=active';
   try {
-    const responseBody = await getPrometheus(path);
+    const responseBody = await getPrometheusViaGrafana(path);
     return responseBody.data.data.activeTargets;
   } catch (err) {
     throw convertAxiosError(err, 'cannot get prometheus targets');
@@ -59,7 +54,7 @@ async function getPrometheusActiveTargets() {
 async function getPrometheusAlerts() {
   const path = 'api/v1/alerts';
   try {
-    const responseBody = await getPrometheus(path);
+    const responseBody = await getPrometheusViaGrafana(path);
     return responseBody.data.data.alerts;
   } catch (err) {
     throw convertAxiosError(err, 'cannot get prometheus alerts');
@@ -69,7 +64,7 @@ async function getPrometheusAlerts() {
 async function getPrometheusRuleGroups() {
   const path = 'api/v1/rules';
   try {
-    const responseBody = await getPrometheus(path);
+    const responseBody = await getPrometheusViaGrafana(path);
     return responseBody.data.data.groups;
   } catch (err) {
     throw convertAxiosError(err, 'cannot get prometheus rules');
@@ -79,7 +74,7 @@ async function getPrometheusRuleGroups() {
 async function queryPrometheus(query) {
   const path = `api/v1/query?query=${encodeURIComponent(query)}`;
   try {
-    const responseBody = await getPrometheus(path);
+    const responseBody = await getPrometheusViaGrafana(path);
     return responseBody.data.data.result;
   } catch (err) {
     throw convertAxiosError(err, 'cannot query prometheus');
