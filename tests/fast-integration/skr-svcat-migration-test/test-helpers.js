@@ -208,10 +208,10 @@ async function provisionPlatform(creds, svcatPlatform) {
   }
 }
 
-async function smInstanceBinding(btpOperatorInstance, btpOperatorBinding) {
+async function smInstanceBinding(creds, btpOperatorInstance, btpOperatorBinding) {
   let args = [];
   try {
-    args = ['provision', btpOperatorInstance, 'service-manager', 'service-operator-access', '--mode=sync'];
+    args = ['provision', btpOperatorInstance, 'service-manager', 'service-operator-access', '--mode=sync', '--client-id', creds.clientid, '--client-secret', creds.clientsecret];
     await execa('smctl', args);
 
     // Move to Operator Install
