@@ -110,7 +110,7 @@ function oidcE2ETest() {
 
 function commerceMockTest() {
   describe('CommerceMockTest()', function() {
-    const AWS_PLAN_ID = '361c511f-f939-4621-b228-d0fb79a1fe15';
+    // const AWS_PLAN_ID = '361c511f-f939-4621-b228-d0fb79a1fe15';
 
     it('CommerceMock test fixture should be ready', async function() {
       await ensureCommerceMockWithCompassTestFixture(
@@ -131,22 +131,22 @@ function commerceMockTest() {
       await sendLegacyEventAndCheckResponse();
     });
 
-    it('Deletes the resources that have been created', async function() {
-      await deleteMockTestFixture('mocks', this.options.testNS);
-    });
+    // it('Deletes the resources that have been created', async function() {
+    //   await deleteMockTestFixture('mocks', this.options.testNS);
+    // });
 
-    // Check audit log for AWS
-    if (process.env.KEB_PLAN_ID === AWS_PLAN_ID) {
-      const auditlogs = new AuditLogClient(AuditLogCreds.fromEnv());
-
-      it('Check audit logs', async function() {
-        await checkAuditLogs(auditlogs, null, true);
-      });
-
-      it('Amount of audit events must not exceed a certain threshold', async function() {
-        await checkAuditEventsThreshold(4);
-      });
-    }
+    // // Check audit log for AWS
+    // if (process.env.KEB_PLAN_ID === AWS_PLAN_ID) {
+    //   const auditlogs = new AuditLogClient(AuditLogCreds.fromEnv());
+    //
+    //   it('Check audit logs', async function() {
+    //     await checkAuditLogs(auditlogs, null, true);
+    //   });
+    //
+    //   it('Amount of audit events must not exceed a certain threshold', async function() {
+    //     await checkAuditEventsThreshold(4);
+    //   });
+    // }
   });
 }
 
