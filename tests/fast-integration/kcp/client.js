@@ -292,6 +292,7 @@ class KCPWrapper {
       console.log(`no reconciliation operations found`);
       return;
     }
+    console.log(`number of reconciliation operations: ${objReconciliationsOperationsLength}`);
 
     const lastObjReconciliationsOperations = objReconciliationsOperations
         .slice(Math.max(0, objReconciliationsOperations.length - 1), objReconciliationsOperations.length);

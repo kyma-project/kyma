@@ -39,8 +39,8 @@ describe('Execute SKR test',  async function () {
     } catch (e) {
       throw new Error(`before hook failed: ${e.toString()}`);
     } finally {
-      // const runtimeStatus = await kcp.getRuntimeStatusOperations(this.options.instanceID);
-      // await kcp.reconcileInformationLog(runtimeStatus);
+      const runtimeStatus = await kcp.getRuntimeStatusOperations(this.options.instanceID);
+      await kcp.reconcileInformationLog(runtimeStatus);
     }
   });
 
@@ -79,9 +79,9 @@ describe('Execute SKR test',  async function () {
     } catch (e) {
       throw new Error(`before hook failed: ${e.toString()}`);
     } finally {
-      // const runtimeStatus = await kcp.getRuntimeStatusOperations(this.options.instanceID);
-      // console.log(`\nRuntime status after deprovisioning: ${runtimeStatus}`);
-      // await kcp.reconcileInformationLog(runtimeStatus);
+      const runtimeStatus = await kcp.getRuntimeStatusOperations(this.options.instanceID);
+      console.log(`\nRuntime status after deprovisioning: ${runtimeStatus}`);
+      await kcp.reconcileInformationLog(runtimeStatus);
     }
   });
 });
