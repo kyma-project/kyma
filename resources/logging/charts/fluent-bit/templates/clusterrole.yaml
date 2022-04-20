@@ -1,3 +1,7 @@
+{{- /*
+  Customizations:
+    * prefix PodSecurityPolicy resource name with 000
+*/ -}}
 {{- if .Values.rbac.create -}}
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
@@ -25,7 +29,7 @@ rules:
     resources:
       - podsecuritypolicies
     resourceNames:
-      - {{ include "fluent-bit.fullname" . }}
+      - 000-{{ include "fluent-bit.fullname" . }}
     verbs:
       - use
   {{- end }}
