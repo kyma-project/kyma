@@ -71,7 +71,7 @@ describe('Execute SKR test', function() {
     }
   });
 
-  oidcE2ETest();
+
   commerceMockTest();
 
   after('Deprovision  SKR', async function() {
