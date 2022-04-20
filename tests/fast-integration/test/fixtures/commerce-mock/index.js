@@ -163,6 +163,7 @@ async function sendEventAndCheckResponse(eventType, body, params, mockNamespace 
   const mockHost = vs.spec.hosts[0];
   const host = mockHost.split('.').slice(1).join('.');
   const uri = `https://${mockHost}/events`;
+  params.uri = uri;
 
   return await retryPromise(
       async () => {
