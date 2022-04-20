@@ -18,18 +18,12 @@ spec:
       targetPort: http
       protocol: TCP
       name: http
-      {{- if and (eq .Values.service.type "NodePort") (.Values.service.nodePort) }}
-      nodePort: {{ .Values.service.nodePort }}
-      {{- end }}
   {{- if .Values.extraPorts }}
     {{- range .Values.extraPorts }}
     - name: {{ .name }}
       targetPort: {{ .name }}
       protocol: {{ .protocol }}
       port: {{ .port }}
-      {{- if and (eq $.Values.service.type "NodePort") (.nodePort) }}
-      nodePort: {{ .nodePort }}
-      {{- end }}
     {{- end }}
   {{- end }}
   selector:

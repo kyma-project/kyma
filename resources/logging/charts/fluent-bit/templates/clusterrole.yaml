@@ -1,7 +1,3 @@
-{{- /*
-  Customizations:
-    * prefix PodSecurityPolicy resource name with 000
-*/ -}}
 {{- if .Values.rbac.create -}}
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
@@ -13,12 +9,8 @@ rules:
   - apiGroups:
       - ""
     resources:
-      - namespaces
       - pods
-      {{- if .Values.rbac.nodeAccess }}
-      - nodes
-      - nodes/proxy
-      {{- end }}
+      - namespaces
     verbs:
       - get
       - list
