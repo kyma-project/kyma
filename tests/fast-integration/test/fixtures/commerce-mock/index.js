@@ -162,13 +162,14 @@ async function sendEventAndCheckResponse(eventType, body, params, mockNamespace 
   const vs = await waitForVirtualService(mockNamespace, 'commerce-mock');
   const mockHost = vs.spec.hosts[0];
   const host = mockHost.split('.').slice(1).join('.');
-  const url = `https://${mockHost}/events`;
+  const uri = `https://${mockHost}/events`;
 
   return await retryPromise(
       async () => {
         await axios
-            .post(url, body, params)
+            .post(uri, body, params)
             .catch((e) => {
+              console.log('mock uri:', uri);
               error('Cannot send %s, the response from event gateway: %s', eventType, e.response.data);
               throw convertAxiosError(e, 'Cannot send %s, the response from event gateway', eventType);
             });
