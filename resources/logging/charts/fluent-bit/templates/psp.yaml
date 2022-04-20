@@ -2,6 +2,7 @@
   Customizations:
     * prefix PodSecurityPolicy resource name with 000
     * allowedHostPaths
+    * allowedCapabilities (sidecar)
     * hostPorts
 */ -}}
 {{- if .Values.podSecurityPolicy.create }}
@@ -17,10 +18,10 @@ spec:
   privileged: false
   # Required to prevent escalations to root.
   allowPrivilegeEscalation: false
-  # This is redundant with non-root + disallow privilege escalation,
-  # but we can provide it for defense in depth.
-  requiredDropCapabilities:
-    - ALL
+  allowedCapabilities:
+    - FOWNER
+    - NET_ADMIN # istio-init conatiner requires that
+    - NET_RAW # istio-init conatiner requires that
   volumes:
     - '*'
   hostNetwork: {{ .Values.hostNetwork }}
