@@ -163,7 +163,6 @@ async function sendEventAndCheckResponse(eventType, body, params, mockNamespace 
   const mockHost = vs.spec.hosts[0];
   const host = mockHost.split('.').slice(1).join('.');
   const uri = `https://${mockHost}/events`;
-  params.uri = uri;
 
   return await retryPromise(
       async () => {
@@ -171,7 +170,8 @@ async function sendEventAndCheckResponse(eventType, body, params, mockNamespace 
             .post(uri, body, params)
             .catch((e) => {
               console.log('mock uri:', uri);
-              error('Cannot send %s, the response from event gateway: %s', eventType, e.response.data);
+              console.log(e);
+              error('Cannot send %s, the response from event gateway: %s , uri %s', eventType, e.response.data);
               throw convertAxiosError(e, 'Cannot send %s, the response from event gateway', eventType);
             });
 
