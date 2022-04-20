@@ -40,9 +40,9 @@ describe('Execute SKR test', function() {
 
       const btpOperatorCreds = await t.smInstanceBinding(smAdminCreds, btpOperatorInstance, btpOperatorBinding);
 
-      const customParams = {
-        oidc: this.options.oidc0,
-      };
+      // const customParams = {
+      //   oidc: this.options.oidc0,
+      // };
 
       console.log(`\nInstanceID ${this.options.instanceID}`,
           `Runtime ${runtimeName}`, `Application ${appName}`, `Suffix ${suffix}`);
@@ -71,19 +71,18 @@ describe('Execute SKR test', function() {
     }
   });
 
-
   commerceMockTest();
 
-  after('Deprovision  SKR', async function() {
-    try {
-      await deprovisionSKR(keb, kcp, this.options.instanceID, deprovisioningTimeout);
-    } catch (e) {
-      throw new Error(`before hook failed: ${e.toString()}`);
-    } finally {
-      const runtimeStatus = await kcp.getRuntimeStatusOperations(this.options.instanceID);
-      console.log(`\nRuntime status after deprovisioning: ${runtimeStatus}`);
-      await kcp.reconcileInformationLog(runtimeStatus);
-    }
-    await unregisterKymaFromCompass(director, this.options.scenarioName);
+  after('', async function() {
+    // try {
+    //   await deprovisionSKR(keb, kcp, this.options.instanceID, deprovisioningTimeout);
+    // } catch (e) {
+    //   throw new Error(`before hook failed: ${e.toString()}`);
+    // } finally {
+    //   const runtimeStatus = await kcp.getRuntimeStatusOperations(this.options.instanceID);
+    //   console.log(`\nRuntime status after deprovisioning: ${runtimeStatus}`);
+    //   await kcp.reconcileInformationLog(runtimeStatus);
+    // }
+    // await unregisterKymaFromCompass(director, this.options.scenarioName);
   });
 });
