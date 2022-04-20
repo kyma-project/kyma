@@ -1,19 +1,29 @@
+{{- /*
+  Customizations:
+    * prefix PodSecurityPolicy resource name with 000
+    * allowedHostPaths
+    * hostPorts
+*/ -}}
 {{- if .Values.podSecurityPolicy.create }}
 apiVersion: policy/v1beta1
 kind: PodSecurityPolicy
 metadata:
   name: 000-{{ include "fluent-bit.fullname" . }}
+{{- if .Values.podSecurityPolicy.annotations }}
+  annotations:
+    {{- toYaml .Values.podSecurityPolicy.annotations | nindent 4 }}
+{{- end }}
 spec:
   privileged: false
   # Required to prevent escalations to root.
   allowPrivilegeEscalation: false
-  allowedCapabilities:
-    - FOWNER
-    - NET_ADMIN # istio-init conatiner requires that
-    - NET_RAW # istio-init conatiner requires that
+  # This is redundant with non-root + disallow privilege escalation,
+  # but we can provide it for defense in depth.
+  requiredDropCapabilities:
+    - ALL
   volumes:
     - '*'
-  hostNetwork: false
+  hostNetwork: {{ .Values.hostNetwork }}
   hostIPC: false
   hostPID: false
   runAsUser:
@@ -23,11 +33,18 @@ spec:
     # This policy assumes the nodes are using AppArmor rather than SELinux.
     rule: 'RunAsAny'
   supplementalGroups:
-    rule: 'RunAsAny'
+    rule: 'MustRunAs'
+    ranges:
+      # Forbid adding the root group.
+      - min: 1
+        max: 65535
   fsGroup:
-    rule: 'RunAsAny'
-  readOnlyRootFilesystem: false # istio-init conatiner requires that
-
+    rule: 'MustRunAs'
+    ranges:
+      # Forbid adding the root group.
+      - min: 1
+        max: 65535
+  readOnlyRootFilesystem: false
   allowedHostPaths:
   - pathPrefix: "/var/fluent-bit"
     readOnly: false
