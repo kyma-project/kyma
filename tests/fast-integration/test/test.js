@@ -31,6 +31,10 @@ describe('Executing Standard Testsuite:', function() {
     await cleanMockTestFixture(mockNamespace, testNamespace, true);
   });
 
+  after('Test Cleanup: Grafana', async function() {
+    await resetGrafanaProxy();
+  });
+
   it('Should ensure that Grafana is not exposed', async function() {
     await resetGrafanaProxy();
   });
@@ -42,8 +46,4 @@ describe('Executing Standard Testsuite:', function() {
 
   loggingTests();
   tracingTests(mockNamespace, testNamespace);
-
-  it('Test Cleanup: Grafana', async function() {
-    await resetGrafanaProxy();
-  });
 });
