@@ -11,7 +11,7 @@ const {ensureCommerceMockLocalTestFixture} = require('../test/fixtures/commerce-
 const {error} = require('../utils');
 
 
-describe('Executing Standard Testsuite:', function() {
+describe('Executing Standard Testsuite:', async function() {
   this.timeout(10 * 60 * 1000);
   this.slow(5000);
 
@@ -32,9 +32,10 @@ describe('Executing Standard Testsuite:', function() {
   });
 
   after('Test Cleanup: Grafana', async function() {
-    resetGrafanaProxy();
+    await resetGrafanaProxy();
   });
 
+  await resetGrafanaProxy();
   monitoringTests();
 
   commerceMockTests(testNamespace);

@@ -60,7 +60,7 @@ const {
 const {
   assert,
 } = require('chai');
-const {setGrafanaProxy} = require('../monitoring');
+const {setGrafanaProxy, resetGrafanaProxy} = require('../monitoring');
 
 describe('Eventing tests', function() {
   this.timeout(timeoutTime);
@@ -73,7 +73,13 @@ describe('Eventing tests', function() {
 
   before('Ensure Grafana is proxied', async function() {
     if (!isSKR) {
-      setGrafanaProxy();
+      await setGrafanaProxy();
+    }
+  });
+
+  after('Cleaning: Grafana Proxy', async function() {
+    if (!isSKR) {
+      await resetGrafanaProxy();
     }
   });
 

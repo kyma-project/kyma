@@ -1,5 +1,4 @@
 const {cleanMockTestFixture} = require('../test/fixtures/commerce-mock');
-const {resetGrafanaProxy} = require('../monitoring');
 
 describe('Upgrade test cleanup', function() {
   this.timeout(10 * 60 * 1000);
@@ -9,6 +8,4 @@ describe('Upgrade test cleanup', function() {
   it('Test namespaces should be deleted', async function() {
     await cleanMockTestFixture('mocks', testNamespace, true);
   });
-
-  resetGrafanaProxy();
 });
