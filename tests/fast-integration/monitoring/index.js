@@ -61,8 +61,10 @@ function setGrafanaProxy() {
     return;
   }
 
-  it('Setting Grafana Proxy', async () => {
-    await grafana.setGrafanaProxy();
+  describe('Should prepare Grafana', function() {
+    it('Setting Grafana Proxy', async () => {
+      await grafana.setGrafanaProxy();
+    });
   });
 }
 
@@ -72,8 +74,10 @@ function resetGrafanaProxy() {
     return;
   }
 
-  it('Resetting Grafana Proxy', async () => {
-    await grafana.resetGrafanaProxy();
+  describe('Should ensure that Grafana is not exposed', function() {
+    it('Resetting Grafana Proxy', async () => {
+      await grafana.resetGrafanaProxy();
+    });
   });
 }
 

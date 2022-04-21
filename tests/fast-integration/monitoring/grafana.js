@@ -82,7 +82,7 @@ async function resetGrafanaProxy() {
     await updateProxyDeployment('--trusted-ip=0.0.0.0/0', '--reverse-proxy=true');
 
     info('Checking grafana redirect to kyma docs');
-    const res = await checkGrafanaRedirect('https://kyma-project.io/docs');
+    const res = await checkGrafanaRedirect('https://kyma-project.io/docs', 403);
     assert.isTrue(res, 'Authproxy reset was not successful. Grafana is not redirected to kyma docs!');
   }
 }
@@ -148,7 +148,6 @@ async function updateProxyDeployment(fromArg, toArg) {
     error(err);
     throw new Error(`Timeout: ${kymaProxyDeployment} is not found`);
   });
-
   const argPosFrom = deployment.body.spec.template.spec.containers[0].args.findIndex(
       (arg) => arg.toString().includes(fromArg),
   );

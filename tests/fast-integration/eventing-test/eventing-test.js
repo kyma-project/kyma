@@ -71,17 +71,7 @@ describe('Eventing tests', function() {
     await waitForNamespace(mockNamespace);
   });
 
-  before('Ensure Grafana is proxied', async function() {
-    if (!isSKR) {
-      await setGrafanaProxy();
-    }
-  });
-
-  after('Cleaning: Grafana Proxy', async function() {
-    if (!isSKR) {
-      await resetGrafanaProxy();
-    }
-  });
+  setGrafanaProxy();
 
   // eventingE2ETestSuite - Runs Eventing end-to-end tests
   function eventingE2ETestSuite(backend) {
@@ -269,4 +259,6 @@ describe('Eventing tests', function() {
     // Running Eventing Monitoring tests
     eventingMonitoringTest(natsBackend, isJetStreamEnabled);
   });
+
+  resetGrafanaProxy();
 });

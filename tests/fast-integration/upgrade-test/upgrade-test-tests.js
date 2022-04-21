@@ -45,7 +45,5 @@ describe('Upgrade test tests', function() {
   loggingTests();
   tracingTests(mockNamespace, testNamespace);
 
-  after('Test Cleanup: Grafana', async function() {
-    await resetGrafanaProxy();
-  });
+  resetGrafanaProxy();
 });
