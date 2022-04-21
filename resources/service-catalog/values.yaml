@@ -6,10 +6,6 @@ global:
       name: "service-catalog"
       version: "v0.3.1-12-g880e400-dirty"
       directory: "external/quay.io/kubernetes-service-catalog"
-    # k8s_tools:
-    #   name: "k8s-tools"
-    #   version: "20220222-0161f9f8"
-    #   directory: "tpi"
     health_proxy:
       name: "health-proxy"
       version: "b1767e88"

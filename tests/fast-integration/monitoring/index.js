@@ -10,7 +10,7 @@ function monitoringTests() {
 
   describe('Prometheus Tests:', function() {
     this.timeout(5 * 60 * 1000); // 5 min
-    this.slow(5 * 1000);
+    this.slow(5000);
 
     it('Prometheus pods should be ready', async () => {
       await prometheus.assertPodsExist();

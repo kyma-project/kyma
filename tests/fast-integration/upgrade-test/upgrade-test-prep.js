@@ -1,11 +1,6 @@
-const {
-  ensureCommerceMockLocalTestFixture,
-} = require('../test/fixtures/commerce-mock');
-const {
-} = require('../utils');
-const {
-  ensureHelmBrokerTestFixture,
-} = require('./fixtures/helm-broker');
+const {ensureCommerceMockLocalTestFixture} = require('../test/fixtures/commerce-mock');
+
+const {ensureHelmBrokerTestFixture} = require('./fixtures/helm-broker');
 
 describe('Upgrade test preparation', function() {
   this.timeout(10 * 60 * 1000);
