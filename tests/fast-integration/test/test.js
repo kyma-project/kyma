@@ -31,6 +31,10 @@ describe('Executing Standard Testsuite:', function() {
     await cleanMockTestFixture(mockNamespace, testNamespace, true);
   });
 
+  after('Test Cleanup: Grafana', async function() {
+    resetGrafanaProxy();
+  });
+
   monitoringTests();
 
   commerceMockTests(testNamespace);
@@ -38,6 +42,4 @@ describe('Executing Standard Testsuite:', function() {
 
   loggingTests();
   tracingTests(mockNamespace, testNamespace);
-
-  resetGrafanaProxy();
 });

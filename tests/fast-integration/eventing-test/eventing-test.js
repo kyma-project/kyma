@@ -71,9 +71,11 @@ describe('Eventing tests', function() {
     await waitForNamespace(mockNamespace);
   });
 
-  if (!isSKR) {
-    setGrafanaProxy();
-  }
+  before('Ensure Grafana is proxied', async function() {
+    if (!isSKR) {
+      setGrafanaProxy();
+    }
+  });
 
   // eventingE2ETestSuite - Runs Eventing end-to-end tests
   function eventingE2ETestSuite(backend) {

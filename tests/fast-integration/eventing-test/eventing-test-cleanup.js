@@ -11,7 +11,9 @@ describe('Eventing tests cleanup', function() {
 
   it('Cleaning: Test resources should be deleted', async function() {
     await cleanupTestingResources();
+  });
 
+  it('Cleaning: Grafana Proxy', async function() {
     if (!isSKR) {
       await resetGrafanaProxy();
     }
