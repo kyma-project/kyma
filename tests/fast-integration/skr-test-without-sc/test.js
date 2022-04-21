@@ -35,6 +35,8 @@ describe('Execute SKR test', function() {
       const runtimeName = `kyma-${suffix}`;
       const appName = `app-${suffix}`;
 
+      this.options.appName = appName;
+
       const btpOperatorInstance = `btp-operator-${suffix}`;
       const btpOperatorBinding = `btp-operator-binding-${suffix}`;
 
