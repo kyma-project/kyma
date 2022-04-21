@@ -306,7 +306,6 @@ config:
         Name kubernetes
         Match kube.*
         Merge_Log On
-        Keep_Log Off
         K8S-Logging.Parser On
         K8S-Logging.Exclude On
         Buffer_Size 1MB
@@ -336,6 +335,8 @@ config:
 
 # The config volume is mounted by default, either to the existingConfigMap value, or the default of "fluent-bit.fullname"
 volumeMounts:
+  - name: shared-fluent-bit-config
+    mountPath: /fluent-bit/etc
   - name: config
     mountPath: /fluent-bit/etc/fluent-bit.conf
     subPath: fluent-bit.conf
@@ -379,17 +380,17 @@ command: []
 initContainers: |-
   - name: prep-fluent-bit-config
     image: "{{ include "imageurl" (dict "reg" $.Values.global.containerRegistry "img" $.Values.global.images.busybox) }}"
-    volumeMounts:
-    - name: shared-fluent-bit-config
-      mountPath: /fluent-bit/etc/
-    - name: config
-      mountPath: /main/fluent-bit.conf
-      subPath: fluent-bit.conf
-    - name: dynamic-config
-      mountPath: /dynamic
-    - name: dynamic-parsers-config
-      mountPath: /dynamic-parsers
     command: ['sh', '-c', 'cp /main/* /fluent-bit/etc/ && mkdir -p /fluent-bit/etc/dynamic/ && cp /dynamic/* /fluent-bit/etc/dynamic && mkdir -p /fluent-bit/etc/dynamic-parsers/ && cp /dynamic-parsers/* /fluent-bit/etc/dynamic-parsers || touch /fluent-bit/etc/dynamic/empty.conf']
+    volumeMounts:
+    - mountPath: /fluent-bit/etc/
+      name: shared-fluent-bit-config
+    - mountPath: /main/fluent-bit.conf
+      name: config
+      subPath: fluent-bit.conf
+    - mountPath: /dynamic
+      name: dynamic-config
+    - mountPath: /dynamic-parsers
+      name: dynamic-parsers-config
 
 logLevel: warn
 
