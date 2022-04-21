@@ -140,7 +140,7 @@ function commerceMockTest() {
       const auditlogs = new AuditLogClient(AuditLogCreds.fromEnv());
 
       it('Check audit logs', async function() {
-        await checkAuditLogs(auditlogs, null, true);
+        await checkAuditLogs(auditlogs, null);
       });
 
       it('Amount of audit events must not exceed a certain threshold', async function() {
