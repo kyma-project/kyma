@@ -11,7 +11,7 @@ const {ensureCommerceMockLocalTestFixture} = require('../test/fixtures/commerce-
 const {error} = require('../utils');
 
 
-describe('Executing Standard Testsuite:', () => {
+describe('Executing Standard Testsuite:', function() {
   this.timeout(10 * 60 * 1000);
   this.slow(5000);
 
@@ -19,7 +19,7 @@ describe('Executing Standard Testsuite:', () => {
   const mockNamespace = process.env.MOCK_NAMESPACE || 'mocks';
   const testNamespace = 'test';
 
-  before('CommerceMock test fixture should be ready', async () => {
+  before('CommerceMock test fixture should be ready', async function() {
     await ensureCommerceMockLocalTestFixture(mockNamespace, testNamespace,
         withCentralAppConnectivity).catch((err) => {
       error(err);
@@ -27,11 +27,11 @@ describe('Executing Standard Testsuite:', () => {
     });
   });
 
-  after('Test Cleanup: Test namespaces should be deleted', async () => {
+  after('Test Cleanup: Test namespaces should be deleted', async function() {
     await cleanMockTestFixture(mockNamespace, testNamespace, true);
   });
 
-  it('Should ensure that Grafana is not exposed', async () => {
+  it('Should ensure that Grafana is not exposed', async function() {
     await resetGrafanaProxy();
   });
 
@@ -43,7 +43,7 @@ describe('Executing Standard Testsuite:', () => {
   loggingTests();
   tracingTests(mockNamespace, testNamespace);
 
-  it('Test Cleanup: Grafana', async () => {
+  it('Test Cleanup: Grafana', async function() {
     await resetGrafanaProxy();
   });
 });
