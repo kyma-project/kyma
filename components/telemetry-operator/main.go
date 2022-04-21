@@ -54,6 +54,8 @@ var (
 	fluentBitNs                string
 	fluentBitEnvSecret         string
 	fluentBitFilesConfigMap    string
+	fluentBitPath              string
+	fluentBitPluginDirectory   string
 	logFormat                  string
 	logLevel                   string
 )
@@ -88,6 +90,8 @@ func main() {
 	flag.StringVar(&fluentBitEnvSecret, "env-secret", "", "Secret for environment variables")
 	flag.StringVar(&fluentBitFilesConfigMap, "files-cm", "", "ConfigMap for referenced files")
 	flag.StringVar(&fluentBitNs, "fluent-bit-ns", "", "Fluent Bit namespace")
+	flag.StringVar(&fluentBitPath, "fluent-bit-path", "fluent-bit/bin/fluent-bit", "Fluent Bit binary path")
+	flag.StringVar(&fluentBitPluginDirectory, "fluent-bit-plugin-directory", "fluent-bit/lib", "Fluent Bit plugin directory")
 	flag.StringVar(&logFormat, "log-format", getEnvOrDefault("APP_LOG_FORMAT", "text"), "Log format (json or text)")
 	flag.StringVar(&logLevel, "log-level", getEnvOrDefault("APP_LOG_LEVEL", "debug"), "Log level (debug, info, warn, error, fatal)")
 	flag.Parse()
@@ -126,7 +130,7 @@ func main() {
 	logPipelineValidator := webhook.NewLogPipeLineValidator(mgr.GetClient(),
 		fluentBitConfigMap,
 		fluentBitNs,
-		fluentbit.NewConfigValidator(),
+		fluentbit.NewConfigValidator(fluentBitPath, fluentBitPluginDirectory),
 		fs.NewWrapper(),
 	)
 	mgr.GetWebhookServer().Register(
