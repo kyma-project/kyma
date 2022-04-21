@@ -18,12 +18,17 @@ const {
   error,
 } = require('../utils');
 
+const {
+  queryGrafana,
+  getGrafanaUrl,
+} = require('./client');
 
-const {queryGrafana, getGrafanaUrl} = require('./client');
+const kymaNs = 'kyma-system';
+const kymaProxyDeployment = 'monitoring-auth-proxy-grafana';
+
 
 async function assertPodsExist() {
-  const namespace = 'kyma-system';
-  await waitForPodWithLabel('app', 'grafana', namespace);
+  await waitForPodWithLabel('app', 'grafana', kymaNs);
 }
 
 async function assertGrafanaRedirectsExist() {
@@ -60,98 +65,6 @@ async function assertGrafanaRedirectsInKyma1() {
   assert.isTrue(res, 'Grafana redirect to dex does not work!');
 }
 
-async function manageSecret(action) {
-  const secret = {
-    apiVersion: 'v1',
-    kind: 'Secret',
-    metadata: {
-      name: 'monitoring-auth-proxy-grafana-user',
-      namespace: 'kyma-system',
-    },
-    type: 'Opaque',
-    data: {
-      OAUTH2_PROXY_SKIP_PROVIDER_BUTTON: toBase64('true'),
-    },
-  };
-  if (action === 'create') {
-    info('Creating secret: monitoring-auth-proxy-grafana-user ');
-    await k8sApply([secret], 'kyma-system');
-  } else if (action === 'delete') {
-    info('Deleting secret: monitoring-auth-proxy-grafana-user ');
-    await k8sDelete([secret], 'kyma-system');
-  }
-}
-
-async function restartProxyPod() {
-  const name = 'monitoring-auth-proxy-grafana';
-  const ns = 'kyma-system';
-
-  const patchRep0 = [
-    {
-      op: 'replace',
-      path: '/spec/replicas',
-      value: 0,
-    },
-  ];
-  await patchDeployment(name, ns, patchRep0);
-  const patchedDeploymentRep0 = await k8sAppsApi.readNamespacedDeployment(name, ns);
-  expect(patchedDeploymentRep0.body.spec.replicas).to.be.equal(0);
-
-  const patchRep1 = [
-    {
-      op: 'replace',
-      path: '/spec/replicas',
-      value: 1,
-    },
-  ];
-  await patchDeployment(name, ns, patchRep1);
-  const patchedDeploymentRep1 = await k8sAppsApi.readNamespacedDeployment(name, ns);
-  expect(patchedDeploymentRep1.body.spec.replicas).to.be.equal(1);
-
-  // We have to wait for the deployment to redeploy the actual pod.
-  await sleep(1000);
-  await waitForDeployment(name, ns);
-}
-
-async function updateProxyDeployment(fromArg, toArg) {
-  const name = 'monitoring-auth-proxy-grafana';
-  const ns = 'kyma-system';
-
-  const deployment = await retryPromise(
-      async () => {
-        return k8sAppsApi.readNamespacedDeployment(name, ns);
-      },
-      12,
-      5000,
-  ).catch((err) => {
-    error(err);
-    throw new Error(`Timeout: ${name} is not found`);
-  });
-
-  const argPos = deployment.body.spec.template.spec.containers[0].args.findIndex(
-      (arg) => arg.toString().includes(fromArg),
-  );
-  expect(argPos).to.not.equal(-1);
-
-  const patch = [
-    {
-      op: 'replace',
-      path: `/spec/template/spec/containers/0/args/${argPos}`,
-      value: toArg,
-    },
-  ];
-
-  await patchDeployment(name, ns, patch);
-  const patchedDeployment = await k8sAppsApi.readNamespacedDeployment(name, ns);
-  expect(patchedDeployment.body.spec.template.spec.containers[0].args.findIndex(
-      (arg) => arg.toString().includes(toArg),
-  )).to.not.equal(-1);
-
-  // We have to wait for the deployment to redeploy the actual pod.
-  await sleep(1000);
-  await waitForDeployment(name, ns);
-}
-
 async function setGrafanaProxy() {
   if (getEnvOrDefault('KYMA_MAJOR_VERSION', '2') === '2') {
     await manageSecret('create');
@@ -165,14 +78,107 @@ async function setGrafanaProxy() {
 
 async function resetGrafanaProxy() {
   if (getEnvOrDefault('KYMA_MAJOR_VERSION', '2') === '2') {
-    // delete secret
     await manageSecret('delete');
-    // remove add reverse proxy
     await updateProxyDeployment('--trusted-ip=0.0.0.0/0', '--reverse-proxy=true');
-    // Check if the redirect works like again after reset
+
+    info('Checking grafana redirect to kyma docs');
     const res = await checkGrafanaRedirect('https://kyma-project.io/docs');
     assert.isTrue(res, 'Authproxy reset was not successful. Grafana is not redirected to kyma docs!');
   }
+}
+
+async function manageSecret(action) {
+  const secret = {
+    apiVersion: 'v1',
+    kind: 'Secret',
+    metadata: {
+      name: 'monitoring-auth-proxy-grafana-user',
+      namespace: kymaNs,
+    },
+    type: 'Opaque',
+    data: {
+      OAUTH2_PROXY_SKIP_PROVIDER_BUTTON: toBase64('true'),
+    },
+  };
+  if (action === 'create') {
+    info('Creating secret: monitoring-auth-proxy-grafana-user');
+    await k8sApply([secret], kymaNs);
+  } else if (action === 'delete') {
+    info('Deleting secret: monitoring-auth-proxy-grafana-user');
+    await k8sDelete([secret], kymaNs);
+  }
+}
+
+async function restartProxyPod() {
+  const patchRep0 = [
+    {
+      op: 'replace',
+      path: '/spec/replicas',
+      value: 0,
+    },
+  ];
+  await patchDeployment(kymaProxyDeployment, kymaNs, patchRep0);
+  const patchedDeploymentRep0 = await k8sAppsApi.readNamespacedDeployment(kymaProxyDeployment, kymaNs);
+  expect(patchedDeploymentRep0.body.spec.replicas).to.be.equal(0);
+
+  const patchRep1 = [
+    {
+      op: 'replace',
+      path: '/spec/replicas',
+      value: 1,
+    },
+  ];
+  await patchDeployment(kymaProxyDeployment, kymaNs, patchRep1);
+  const patchedDeploymentRep1 = await k8sAppsApi.readNamespacedDeployment(kymaProxyDeployment, kymaNs);
+  expect(patchedDeploymentRep1.body.spec.replicas).to.be.equal(1);
+
+  // We have to wait for the deployment to redeploy the actual pod.
+  await sleep(1000);
+  await waitForDeployment(kymaProxyDeployment, kymaNs);
+}
+
+async function updateProxyDeployment(fromArg, toArg) {
+  const deployment = await retryPromise(
+      async () => {
+        return k8sAppsApi.readNamespacedDeployment(kymaProxyDeployment, kymaNs);
+      },
+      12,
+      5000,
+  ).catch((err) => {
+    error(err);
+    throw new Error(`Timeout: ${kymaProxyDeployment} is not found`);
+  });
+
+  const argPosFrom = deployment.body.spec.template.spec.containers[0].args.findIndex(
+      (arg) => arg.toString().includes(fromArg),
+  );
+
+  const argPosTo = deployment.body.spec.template.spec.containers[0].args.findIndex(
+      (arg) => arg.toString().includes(toArg),
+  );
+
+  if (argPosFrom === -1 && argPosTo !== -1) {
+    info(`Skipping updating Proxy Deployment as it is already in desired state`);
+    return;
+  }
+
+  const patch = [
+    {
+      op: 'replace',
+      path: `/spec/template/spec/containers/0/args/${argPosFrom}`,
+      value: toArg,
+    },
+  ];
+
+  await patchDeployment(kymaProxyDeployment, kymaNs, patch);
+  const patchedDeployment = await k8sAppsApi.readNamespacedDeployment(kymaProxyDeployment, kymaNs);
+  expect(patchedDeployment.body.spec.template.spec.containers[0].args.findIndex(
+      (arg) => arg.toString().includes(toArg),
+  )).to.not.equal(-1);
+
+  // We have to wait for the deployment to redeploy the actual pod.
+  await sleep(1000);
+  await waitForDeployment(kymaProxyDeployment, kymaNs);
 }
 
 async function checkGrafanaRedirect(redirectURL, httpStatus) {
