@@ -10,10 +10,10 @@ require (
 	github.com/go-logr/zapr v1.2.3
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/kyma-incubator/api-gateway v0.0.0-20220318061314-9fd030a8cbd1
-	github.com/kyma-project/kyma/common/logging v0.0.0-20220412113922-54faf51c33cb
-	github.com/kyma-project/kyma/components/application-operator v0.0.0-20220412113922-54faf51c33cb
+	github.com/kyma-project/kyma/common/logging v0.0.0-20220421142140-496cc7687d1f
+	github.com/kyma-project/kyma/components/application-operator v0.0.0-20220421142140-496cc7687d1f
 	github.com/mitchellh/hashstructure/v2 v2.0.2
-	github.com/nats-io/nats-server/v2 v2.7.4
+	github.com/nats-io/nats-server/v2 v2.8.0
 	github.com/nats-io/nats.go v1.14.0
 	github.com/onsi/ginkgo v1.16.5
 	github.com/onsi/gomega v1.19.0
@@ -25,7 +25,7 @@ require (
 	golang.org/x/xerrors v0.0.0-20220411194840-2f41105eb62f
 	k8s.io/api v0.23.6
 	k8s.io/apimachinery v0.23.6
-	k8s.io/client-go v0.23.5
+	k8s.io/client-go v0.23.6
 	sigs.k8s.io/controller-runtime v0.11.2
 )
 
@@ -50,7 +50,7 @@ require (
 	github.com/minio/highwayhash v1.0.2 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.2 // indirect
-	github.com/nats-io/jwt/v2 v2.2.1-0.20220113022732-58e87895b296 // indirect
+	github.com/nats-io/jwt/v2 v2.2.1-0.20220330180145-442af02fd36a // indirect
 	github.com/nats-io/nkeys v0.3.0 // indirect
 	github.com/nats-io/nuid v1.0.1 // indirect
 	github.com/nxadm/tail v1.4.8 // indirect
