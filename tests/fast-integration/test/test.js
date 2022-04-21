@@ -35,7 +35,6 @@ describe('Executing Standard Testsuite:', async function() {
     await resetGrafanaProxy();
   });
 
-  await resetGrafanaProxy();
   monitoringTests();
 
   commerceMockTests(testNamespace);
