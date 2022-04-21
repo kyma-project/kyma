@@ -2,7 +2,7 @@ const {checkServiceInstanceExistence} = require('./fixtures/helm-broker');
 
 const {printRestartReport, getContainerRestartsForAllNamespaces} = require('../utils');
 const {loggingTests} = require('../logging');
-const {monitoringTests, resetGrafanaProxy} = require('../monitoring');
+const {monitoringTests} = require('../monitoring');
 const {tracingTests} = require('../tracing');
 const {checkInClusterEventDelivery,
   checkFunctionResponse,
@@ -44,5 +44,4 @@ describe('Upgrade test tests', function() {
   monitoringTests();
   loggingTests();
   tracingTests(mockNamespace, testNamespace);
-  resetGrafanaProxy();
 });

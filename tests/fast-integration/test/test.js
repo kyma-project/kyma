@@ -3,7 +3,7 @@ const {
   gettingStartedGuideTests,
 } = require('./');
 
-const {monitoringTests, resetGrafanaProxy} = require('../monitoring');
+const {monitoringTests, setGrafanaProxy, resetGrafanaProxy} = require('../monitoring');
 const {loggingTests} = require('../logging');
 const {tracingTests} = require('../tracing');
 const {cleanMockTestFixture} = require('./fixtures/commerce-mock');

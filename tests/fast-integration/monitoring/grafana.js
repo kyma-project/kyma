@@ -60,15 +60,6 @@ async function assertGrafanaRedirectsInKyma1() {
   assert.isTrue(res, 'Grafana redirect to dex does not work!');
 }
 
-async function checkGrafanaRedirect(redirectURL, httpStatus) {
-  const url = await getGrafanaUrl();
-  let ignoreSSL = false;
-  if (url.includes('local.kyma.dev')) {
-    ignoreSSL = true;
-  }
-  return await retryUrl(url, redirectURL, ignoreSSL, httpStatus);
-}
-
 async function manageSecret(action) {
   const secret = {
     apiVersion: 'v1',
@@ -161,6 +152,17 @@ async function updateProxyDeployment(fromArg, toArg) {
   await waitForDeployment(name, ns);
 }
 
+async function setGrafanaProxy() {
+  if (getEnvOrDefault('KYMA_MAJOR_VERSION', '2') === '2') {
+    await manageSecret('create');
+    await restartProxyPod();
+    await updateProxyDeployment('--reverse-proxy=true', '--trusted-ip=0.0.0.0/0');
+    info('Checking grafana redirect to grafana URL');
+    const res = await checkGrafanaRedirect('https://grafana.', 200);
+    assert.isTrue(res, 'Grafana redirect to grafana landing page does not work!');
+  }
+}
+
 async function resetGrafanaProxy() {
   if (getEnvOrDefault('KYMA_MAJOR_VERSION', '2') === '2') {
     // delete secret
@@ -168,9 +170,18 @@ async function resetGrafanaProxy() {
     // remove add reverse proxy
     await updateProxyDeployment('--trusted-ip=0.0.0.0/0', '--reverse-proxy=true');
     // Check if the redirect works like again after reset
-    const res = await assertGrafanaRedirect('https://kyma-project.io/docs');
+    const res = await checkGrafanaRedirect('https://kyma-project.io/docs');
     assert.isTrue(res, 'Authproxy reset was not successful. Grafana is not redirected to kyma docs!');
   }
+}
+
+async function checkGrafanaRedirect(redirectURL, httpStatus) {
+  const url = await getGrafanaUrl();
+  let ignoreSSL = false;
+  if (url.includes('local.kyma.dev')) {
+    ignoreSSL = true;
+  }
+  return await retryUrl(url, redirectURL, ignoreSSL, httpStatus);
 }
 
 async function retryUrl(url, redirectURL, ignoreSSL, httpStatus) {
@@ -189,5 +200,6 @@ async function retryUrl(url, redirectURL, ignoreSSL, httpStatus) {
 module.exports = {
   assertPodsExist,
   assertGrafanaRedirectsExist,
+  setGrafanaProxy,
   resetGrafanaProxy,
 };

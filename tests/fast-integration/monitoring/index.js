@@ -8,7 +8,18 @@ function monitoringTests() {
     return;
   }
 
-  grafanaTests();
+  describe('Grafana Tests:', async function() {
+    this.timeout(5 * 60 * 1000); // 5 min
+    this.slow(5 * 1000);
+
+    it('Grafana pods should be ready', async () => {
+      await grafana.assertPodsExist();
+    });
+
+    it('Grafana redirects should work', async () => {
+      await grafana.assertGrafanaRedirectsExist();
+    });
+  });
 
   describe('Prometheus Tests:', function() {
     this.timeout(5 * 60 * 1000); // 5 min
@@ -44,23 +55,14 @@ function monitoringTests() {
   });
 }
 
-function grafanaTests() {
+function setGrafanaProxy() {
   if (getEnvOrDefault('KYMA_MAJOR_UPGRADE', 'false') === 'true') {
-    info('Skipping grafana tests for Kyma 1 to Kyma 2 upgrade scenario');
+    info('Skipping setting of Grafana Proxy for Kyma 1 to Kyma 2 upgrade scenario');
     return;
   }
 
-  describe('Grafana Tests:', async function() {
-    this.timeout(5 * 60 * 1000); // 5 min
-    this.slow(5 * 1000);
-
-    it('Grafana pods should be ready', async () => {
-      await grafana.assertPodsExist();
-    });
-
-    it('Grafana redirects should work', async () => {
-      await grafana.assertGrafanaRedirectsExist();
-    });
+  it('Setting Grafana Proxy', async () => {
+    await grafana.setGrafanaProxy();
   });
 }
 
@@ -70,13 +72,13 @@ function resetGrafanaProxy() {
     return;
   }
 
-  describe('Resetting Grafana Proxy', async () => {
+  it('Resetting Grafana Proxy', async () => {
     await grafana.resetGrafanaProxy();
   });
 }
 
 module.exports = {
-  grafanaTests,
   monitoringTests,
+  setGrafanaProxy,
   resetGrafanaProxy,
 };
