@@ -54,7 +54,7 @@ global:
       version: "3f163e8f"
     application_registry:
       name: "application-registry"
-      version: "3f163e8f"
+      version: "PR-12986"
     central_application_connectivity_validator:
       name: "central-application-connectivity-validator"
       version: "245170b1"
