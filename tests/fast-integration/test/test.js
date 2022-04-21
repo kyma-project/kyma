@@ -3,13 +3,13 @@ const {
   gettingStartedGuideTests,
 } = require('./');
 
+const {apiExposureTests} = require('../api-exposure');
 const {monitoringTests, resetGrafanaProxy} = require('../monitoring');
 const {loggingTests} = require('../logging');
 const {tracingTests} = require('../tracing');
 const {cleanMockTestFixture} = require('./fixtures/commerce-mock');
 const {ensureCommerceMockLocalTestFixture} = require('../test/fixtures/commerce-mock');
 const {error} = require('../utils');
-
 
 describe('Executing Standard Testsuite:', function() {
   this.timeout(10 * 60 * 1000);
@@ -33,6 +33,7 @@ describe('Executing Standard Testsuite:', function() {
 
   monitoringTests();
 
+  apiExposureTests();
   commerceMockTests(testNamespace);
   gettingStartedGuideTests();
 
