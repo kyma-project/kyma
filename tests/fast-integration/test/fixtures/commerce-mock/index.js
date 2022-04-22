@@ -162,12 +162,11 @@ async function sendEventAndCheckResponse(eventType, body, params, mockNamespace 
   const vs = await waitForVirtualService(mockNamespace, 'commerce-mock');
   const mockHost = vs.spec.hosts[0];
   const host = mockHost.split('.').slice(1).join('.');
-  const url = `https://${mockHost}/events`;
 
   return await retryPromise(
       async () => {
         await axios
-            .post(url, body, params)
+            .post(`https://${mockHost}/events`, body, params)
             .catch((e) => {
               error('Cannot send %s, the response from event gateway: %s', eventType, e.response.data);
               console.log(e);
@@ -653,10 +652,7 @@ async function ensureCommerceMockWithCompassTestFixture(
 
   await waitForFunction('lastorder', targetNamespace);
 
-  const kind = 'Application ' + `mp-${appName}`;
-
-  debug('waitForApplicationCr');
-  await waitForApplicationCr('applicationconnector.kyma-project.io/v1alpha1', kind);
+  await waitForApplicationCr(`mp-${appName}`);
 
   await k8sApply([eventingSubscription(
       `sap.kyma.custom.inapp.order.received.v1`,

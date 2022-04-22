@@ -444,17 +444,17 @@ function waitForClusterAddonsConfiguration(name, timeout = 90000) {
   );
 }
 
-function waitForApplicationCr(version, kind, timeout = 90000) {
+function waitForApplicationCr(appName, timeout = 90000) {
   return waitForK8sObject(
-      '/apis/apiextensions.k8s.io/v1/customresourcedefinitions',
+      '/apis/applicationconnector.kyma-project.io/v1alpha1/applications',
       {},
       (_type, _apiObj, watchObj) => {
         return (
-          watchObj.object.kind == kind && watchObj.apiVersion == version
+          watchObj.object.status.installationStatus.status == 'deployed' && watchObj.object.metadata.name == appName
         );
       },
       timeout,
-      `Waiting for kind ${kind} cr timeout (${timeout} ms)`,
+      `Waiting for application ${appName} timeout (${timeout} ms)`,
   );
 }
 
