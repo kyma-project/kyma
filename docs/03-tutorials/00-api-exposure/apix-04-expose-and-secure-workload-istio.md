@@ -6,9 +6,10 @@ This tutorial shows how to expose and secure a workload using Istio built-in sec
 
 ## Prerequisites
 
-To follow this tutorial, use Kyma 2.0 or higher. Get a JWT by following [Get a JWT](./apix-04-get-jwt.md) tutorial.
+- You are using Kyma 2.0 or higher. 
+- You have got a JSON Web Token (JWT). For more information, see [Get a JWT](./apix-04-get-jwt.md).
 
-This tutorial is based on a sample HttpBin service deployment and a sample Function. To deploy or create one of those, follow the [Create a workload](./apix-02-create-workload.md) tutorial. It can also be a follow up to the [Use a custom domain to expose a workload](./apix-01-own-domain.md) tutorial.
+This tutorial is based on a sample HttpBin service deployment and a sample Function. To deploy or create one of those, follow the [Create a workload](./apix-02-create-workload.md) tutorial. It can also be a follow-up to the [Use a custom domain to expose a workload](./apix-01-own-domain.md) tutorial.
 
 ## Expose your workload using a Virtual Service
 
