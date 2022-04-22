@@ -593,8 +593,6 @@ async function ensureCommerceMockWithCompassTestFixture(
     targetNamespace,
     withCentralApplicationConnectivity = false,
     compassScenarioAlreadyExist = false) {
-  consol.log('ensureCommerceMockWithCompassTestFixture appName:', appName);
-
   const lastOrderFunction = withCentralApplicationConnectivity ?
     prepareFunction('central-app-gateway-compass', `mp-${appName}`) :
     prepareFunction();
