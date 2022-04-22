@@ -45,9 +45,12 @@ type proxyHandler struct {
 	eventingPathPrefixV2     string
 	eventingPublisherHost    string
 	eventingPathPrefixEvents string
+	appRegistryPathPrefix    string
+	appRegistryHost          string
 
 	legacyEventsProxy *httputil.ReverseProxy
 	cloudEventsProxy  *httputil.ReverseProxy
+	appRegistryProxy  *httputil.ReverseProxy
 
 	log *logger.Logger
 
@@ -62,6 +65,8 @@ func NewProxyHandler(
 	eventingPublisherHost string,
 	eventingPathPrefixEvents string,
 	eventingDestinationPath string,
+	appRegistryPathPrefix string,
+	appRegistryHost string,
 	cache Cache,
 	log *logger.Logger) *proxyHandler {
 
@@ -72,9 +77,12 @@ func NewProxyHandler(
 		eventingPathPrefixV2:     eventingPathPrefixV2,
 		eventingPublisherHost:    eventingPublisherHost,
 		eventingPathPrefixEvents: eventingPathPrefixEvents,
+		appRegistryPathPrefix:    appRegistryPathPrefix,
+		appRegistryHost:          appRegistryHost,
 
 		legacyEventsProxy: createReverseProxy(log, eventingPublisherHost, withEmptyRequestHost, withEmptyXFwdClientCert, withHTTPScheme),
 		cloudEventsProxy:  createReverseProxy(log, eventingPublisherHost, withRewriteBaseURL(eventingDestinationPath), withEmptyRequestHost, withEmptyXFwdClientCert, withHTTPScheme),
+		appRegistryProxy:  createReverseProxy(log, appRegistryHost, withEmptyRequestHost, withHTTPScheme),
 
 		cache: cache,
 		log:   log,
@@ -145,6 +153,9 @@ func (ph *proxyHandler) mapRequestToProxy(path string) (*httputil.ReverseProxy, 
 	// cloud-events reaching /{application}/v2/events or /{application}/events will be routed to /publish endpoint of event-publisher-proxy
 	case strings.HasPrefix(path, ph.eventingPathPrefixV2), strings.HasPrefix(path, ph.eventingPathPrefixEvents):
 		return ph.cloudEventsProxy, nil
+
+	case strings.HasPrefix(path, ph.appRegistryPathPrefix):
+		return ph.appRegistryProxy, nil
 	}
 
 	return nil, apperrors.NotFound("could not determine destination host, requested resource not found")

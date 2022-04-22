@@ -18,6 +18,8 @@ type args struct {
 	eventingPublisherHost    string
 	eventingPathPrefixEvents string
 	eventingDestinationPath  string
+	appRegistryPathPrefix    string
+	appRegistryHost          string
 	appName                  string
 	cacheExpirationMinutes   int
 	cacheCleanupMinutes      int
@@ -46,6 +48,8 @@ func parseOptions() (*options, error) {
 	eventingPublisherHost := flag.String("eventingPublisherHost", "eventing-event-publisher-proxy.kyma-system", "Host (and port) of the Eventing Publisher")
 	eventingDestinationPath := flag.String("eventingDestinationPath", "/publish", "Path of the destination of the requests to the Eventing")
 	eventingPathPrefixEvents := flag.String("eventingPathPrefixEvents", "/events", "Prefix of paths that will be directed to the Eventing")
+	appRegistryPathPrefix := flag.String("appRegistryPathPrefix", "/v1/metadata", "Prefix of paths that will be directed to the Application Registry")
+	appRegistryHost := flag.String("appRegistryHost", "application-registry-external-api:8081", "Host (and port) of the Application Registry")
 	appName := flag.String("appName", "", "Name of the application CR the validator is created for")
 	cacheExpirationMinutes := flag.Int("cacheExpirationMinutes", 1, "Expiration time for client IDs stored in cache expressed in minutes")
 	cacheCleanupMinutes := flag.Int("cacheCleanupMinutes", 2, "Clean up time for client IDs stored in cache expressed in minutes")
@@ -71,6 +75,8 @@ func parseOptions() (*options, error) {
 			eventingPublisherHost:    *eventingPublisherHost,
 			eventingPathPrefixEvents: *eventingPathPrefixEvents,
 			eventingDestinationPath:  *eventingDestinationPath,
+			appRegistryPathPrefix:    *appRegistryPathPrefix,
+			appRegistryHost:          *appRegistryHost,
 			appName:                  *appName,
 			cacheExpirationMinutes:   *cacheExpirationMinutes,
 			cacheCleanupMinutes:      *cacheCleanupMinutes,
@@ -86,14 +92,14 @@ func (o *options) String() string {
 	return fmt.Sprintf("--proxyPort=%d --externalAPIPort=%d --tenant=%s --group=%s "+
 		"--eventingPathPrefixV1=%s --eventingPathPrefixV2=%s --eventingPublisherHost=%s "+
 		"--eventingPathPrefixEvents=%s --eventingDestinationPath=%s "+
-		"--appName=%s "+
+		"--appRegistryPathPrefix=%s --appRegistryHost=%s --appName=%s "+
 		"--cacheExpirationMinutes=%d --cacheCleanupMinutes=%d "+
 		"--kubeConfig=%s --apiServerURL=%s --syncPeriod=%d "+
 		"APP_LOG_FORMAT=%s APP_LOG_LEVEL=%s",
 		o.proxyPort, o.externalAPIPort, o.tenant, o.group,
 		o.eventingPathPrefixV1, o.eventingPathPrefixV2, o.eventingPublisherHost,
 		o.eventingPathPrefixEvents, o.eventingDestinationPath,
-		o.appName,
+		o.appRegistryPathPrefix, o.appRegistryHost, o.appName,
 		o.cacheExpirationMinutes, o.cacheCleanupMinutes,
 		o.kubeConfig, o.apiServerURL, o.syncPeriod,
 		o.LogFormat, o.LogLevel)

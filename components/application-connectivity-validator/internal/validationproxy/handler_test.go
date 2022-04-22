@@ -33,6 +33,7 @@ const (
 	eventingPathPrefixV1           = "/test-application/v1/events"
 	eventingPathPrefixV2           = "/test-application/v2/events"
 	eventingPathPrefixEvents       = "/test-application/events"
+	appRegistryPathPrefix          = "/test-application/v1/metadata"
 	eventingDestinationPathPublish = "/publish"
 	eventingDestinationPath        = "/"
 )
@@ -220,6 +221,10 @@ func TestProxyHandler_ProxyAppConnectorRequests(t *testing.T) {
 		eventingPublisherServer := httptest.NewServer(eventingPublisherHandler)
 		eventingPublisherHost := strings.TrimPrefix(eventingPublisherServer.URL, "http://")
 
+		appRegistryHandler := mux.NewRouter()
+		appRegistryServer := httptest.NewServer(appRegistryHandler)
+		appRegistryHost := strings.TrimPrefix(appRegistryServer.URL, "http://")
+
 		for _, testCase := range testCases {
 			// given
 			idCache := cache.New(time.Minute, time.Minute)
@@ -232,6 +237,7 @@ func TestProxyHandler_ProxyAppConnectorRequests(t *testing.T) {
 			eventingPathPrefixV1 := fmt.Sprintf("/%s/v1/events", testCase.application.Name)
 			eventingPathPrefixV2 := fmt.Sprintf("/%s/v2/events", testCase.application.Name)
 			eventingPathPrefixEvents := fmt.Sprintf("/%s/events", testCase.application.Name)
+			appRegistryPathPrefix := fmt.Sprintf("/%s/v1/metadata", testCase.application.Name)
 			proxyHandler := NewProxyHandler(
 				testCase.group,
 				testCase.tenant,
@@ -240,6 +246,8 @@ func TestProxyHandler_ProxyAppConnectorRequests(t *testing.T) {
 				eventingPublisherHost,
 				eventingPathPrefixEvents,
 				eventingDestinationPath,
+				appRegistryPathPrefix,
+				appRegistryHost,
 				idCache,
 				log)
 
@@ -311,21 +319,52 @@ func TestProxyHandler_ProxyAppConnectorRequests(t *testing.T) {
 				// then
 				assert.Equal(t, testCase.expectedStatus, recorder.Code)
 			})
+
+			t.Run("should proxy application registry request when "+testCase.caseDescription, func(t *testing.T) {
+				appRegistryHandler.PathPrefix("/{application}/v1/metadata/services").HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+					appName := mux.Vars(r)["application"]
+					assert.Equal(t, testCase.application.Name, appName, `Error reading "application" route variable from request context`)
+					w.WriteHeader(http.StatusOK)
+				})
+
+				req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("/%s/v1/metadata/services", testCase.application.Name), nil)
+				require.NoError(t, err)
+				req.Header.Set(CertificateInfoHeader, testCase.certInfoHeader)
+				req = mux.SetURLVars(req, map[string]string{"application": testCase.application.Name})
+
+				recorder := httptest.NewRecorder()
+
+				// when
+				proxyHandler.ProxyAppConnectorRequests(recorder, req)
+
+				// then
+				assert.Equal(t, testCase.expectedStatus, recorder.Code)
+			})
 		}
 	})
 
-	t.Run("should return 500 failed when cache doesn't contain the element", func(t *testing.T) {
+	t.Run("should use cached IDs while proxying requests", func(t *testing.T) {
 		eventingPublisherHandler := mux.NewRouter()
 		eventingPublisherServer := httptest.NewServer(eventingPublisherHandler)
 		eventingPublisherHost := strings.TrimPrefix(eventingPublisherServer.URL, "http://")
 
+		appRegistryHandler := mux.NewRouter()
+		appRegistryServer := httptest.NewServer(appRegistryHandler)
+		appRegistryHost := strings.TrimPrefix(appRegistryServer.URL, "http://")
+
 		for _, testCase := range testCases {
 			// given
 			idCache := cache.New(time.Minute, time.Minute)
+			if testCase.application.Spec.CompassMetadata != nil {
+				idCache.Set(testCase.application.Name, []string{applicationID}, cache.NoExpiration)
+			} else {
+				idCache.Set(testCase.application.Name, []string{}, cache.NoExpiration)
+			}
 
 			eventingPathPrefixV1 := fmt.Sprintf("/%s/v1/events", testCase.application.Name)
 			eventingPathPrefixV2 := fmt.Sprintf("/%s/v2/events", testCase.application.Name)
 			eventingPathPrefixEvents := fmt.Sprintf("/%s/events", testCase.application.Name)
+			appRegistryPathPrefix := fmt.Sprintf("/%s/v1/metadata", testCase.application.Name)
 			proxyHandler := NewProxyHandler(
 				testCase.group,
 				testCase.tenant,
@@ -334,6 +373,60 @@ func TestProxyHandler_ProxyAppConnectorRequests(t *testing.T) {
 				eventingPublisherHost,
 				eventingPathPrefixEvents,
 				eventingDestinationPath,
+				appRegistryPathPrefix,
+				appRegistryHost,
+				idCache,
+				log)
+
+			t.Run("should proxy application registry request when "+testCase.caseDescription, func(t *testing.T) {
+				appRegistryHandler.PathPrefix("/{application}/v1/metadata/services").HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+					appName := mux.Vars(r)["application"]
+					assert.Equal(t, testCase.application.Name, appName)
+					w.WriteHeader(http.StatusOK)
+				})
+
+				req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("/%s/v1/metadata/services", testCase.application.Name), nil)
+				require.NoError(t, err)
+				req.Header.Set(CertificateInfoHeader, testCase.certInfoHeader)
+				req = mux.SetURLVars(req, map[string]string{"application": testCase.application.Name})
+				recorder := httptest.NewRecorder()
+
+				// when
+				proxyHandler.ProxyAppConnectorRequests(recorder, req)
+
+				// then
+				assert.Equal(t, testCase.expectedStatus, recorder.Code)
+			})
+		}
+	})
+
+	t.Run("should return 500 failed when cache doesn't contain the element", func(t *testing.T) {
+		eventingPublisherHandler := mux.NewRouter()
+		eventingPublisherServer := httptest.NewServer(eventingPublisherHandler)
+		eventingPublisherHost := strings.TrimPrefix(eventingPublisherServer.URL, "http://")
+
+		appRegistryHandler := mux.NewRouter()
+		appRegistryServer := httptest.NewServer(appRegistryHandler)
+		appRegistryHost := strings.TrimPrefix(appRegistryServer.URL, "http://")
+
+		for _, testCase := range testCases {
+			// given
+			idCache := cache.New(time.Minute, time.Minute)
+
+			eventingPathPrefixV1 := fmt.Sprintf("/%s/v1/events", testCase.application.Name)
+			eventingPathPrefixV2 := fmt.Sprintf("/%s/v2/events", testCase.application.Name)
+			eventingPathPrefixEvents := fmt.Sprintf("/%s/events", testCase.application.Name)
+			appRegistryPathPrefix := fmt.Sprintf("/%s/v1/metadata", testCase.application.Name)
+			proxyHandler := NewProxyHandler(
+				testCase.group,
+				testCase.tenant,
+				eventingPathPrefixV1,
+				eventingPathPrefixV2,
+				eventingPublisherHost,
+				eventingPathPrefixEvents,
+				eventingDestinationPath,
+				appRegistryPathPrefix,
+				appRegistryHost,
 				idCache,
 				log)
 
@@ -356,6 +449,9 @@ func TestProxyHandler_ProxyAppConnectorRequests(t *testing.T) {
 		eventingPublisherServer := httptest.NewServer(eventingPublisherHandler)
 		eventingPublisherHost := strings.TrimPrefix(eventingPublisherServer.URL, "http://")
 
+		appRegistryHandler := mux.NewRouter()
+		appRegistryServer := httptest.NewServer(appRegistryHandler)
+		appRegistryHost := strings.TrimPrefix(appRegistryServer.URL, "http://")
 		// given
 		certInfoHeader :=
 			`Hash=f4cf22fb633d4df500e371daf703d4b4d14a0ea9d69cd631f95f9e6ba840f8ad;Subject="CN=test-application,OU=OrgUnit,O=Organization,L=Waldorf,ST=Waldorf,C=DE";URI=`
@@ -371,6 +467,8 @@ func TestProxyHandler_ProxyAppConnectorRequests(t *testing.T) {
 			eventingPublisherHost,
 			eventingPathPrefixEvents,
 			eventingDestinationPath,
+			appRegistryPathPrefix,
+			appRegistryHost,
 			idCache,
 			log)
 
@@ -391,6 +489,9 @@ func TestProxyHandler_ProxyAppConnectorRequests(t *testing.T) {
 		eventingPublisherServer := httptest.NewServer(eventingPublisherHandler)
 		eventingPublisherHost := strings.TrimPrefix(eventingPublisherServer.URL, "http://")
 
+		appRegistryHandler := mux.NewRouter()
+		appRegistryServer := httptest.NewServer(appRegistryHandler)
+		appRegistryHost := strings.TrimPrefix(appRegistryServer.URL, "http://")
 		// given
 		certInfoHeader :=
 			`Hash=f4cf22fb633d4df500e371daf703d4b4d14a0ea9d69cd631f95f9e6ba840f8ad;Subject="CN=test-application-id,OU=OrgUnit,O=Organization,L=Waldorf,ST=Waldorf,C=DE";` +
@@ -410,6 +511,8 @@ func TestProxyHandler_ProxyAppConnectorRequests(t *testing.T) {
 			eventingPublisherHost,
 			eventingPathPrefixEvents,
 			eventingDestinationPath,
+			appRegistryPathPrefix,
+			appRegistryHost,
 			idCache,
 			log)
 
@@ -427,6 +530,9 @@ func TestProxyHandler_ProxyAppConnectorRequests(t *testing.T) {
 	})
 
 	t.Run("should proxy requests to Event Publisher Proxy(EPP)", func(t *testing.T) {
+		appRegistryHandler := mux.NewRouter()
+		appRegistryServer := httptest.NewServer(appRegistryHandler)
+		appRegistryHost := strings.TrimPrefix(appRegistryServer.URL, "http://")
 
 		eventPublisherV1ProxyHandler := mux.NewRouter()
 		eventPublisherV1ProxyServer := httptest.NewServer(eventPublisherV1ProxyHandler)
@@ -444,6 +550,7 @@ func TestProxyHandler_ProxyAppConnectorRequests(t *testing.T) {
 			eventingPathPrefixV1 := fmt.Sprintf("/%s/v1/events", testCase.application.Name)
 			eventingPathPrefixV2 := fmt.Sprintf("/%s/v2/events", testCase.application.Name)
 			eventingPathPrefixEvents := fmt.Sprintf("/%s/events", testCase.application.Name)
+			appRegistryPathPrefix := fmt.Sprintf("/%s/v1/metadata", testCase.application.Name)
 
 			t.Run("should proxy requests in V1 to V1 endpoint of EPP when "+testCase.caseDescription, func(t *testing.T) {
 
@@ -455,6 +562,8 @@ func TestProxyHandler_ProxyAppConnectorRequests(t *testing.T) {
 					eventPublisherV1ProxyHost,
 					eventingPathPrefixEvents,
 					eventingDestinationPathPublish,
+					appRegistryPathPrefix,
+					appRegistryHost,
 					idCache,
 					log)
 				eventTitle := "my-event-1"
@@ -504,6 +613,8 @@ func TestProxyHandler_ProxyAppConnectorRequests(t *testing.T) {
 					eventPublisherProxyHost,
 					eventingPathPrefixEvents,
 					eventingDestinationPathPublish,
+					appRegistryPathPrefix,
+					appRegistryHost,
 					idCache,
 					log)
 
@@ -549,6 +660,8 @@ func TestProxyHandler_ProxyAppConnectorRequests(t *testing.T) {
 					eventPublisherProxyHost,
 					eventingPathPrefixEvents,
 					eventingDestinationPathPublish,
+					appRegistryPathPrefix,
+					appRegistryHost,
 					idCache,
 					log)
 
