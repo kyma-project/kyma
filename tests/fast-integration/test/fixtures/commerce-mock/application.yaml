@@ -18,7 +18,7 @@ spec:
     entries:
     - accessLabel: commerce-468ed067-dacb-4009-a9d5-497e3d2333c8
       centralGatewayUrl: http://central-application-gateway.kyma-system:8080/commerce/sap-commerce-cloud-commerce-webservices
-      credentials:
+      credentials: # TODO: Internal or templating URLs
         authenticationUrl: https://commerce-mocks.void-dev.frog-dev.shoot.canary.k8s-hana.ondemand.com/rest/v2/authorizationserver/oauth/token
         secretName: commerce-468ed067-dacb-4009-a9d5-497e3d2333c8
         type: OAuth

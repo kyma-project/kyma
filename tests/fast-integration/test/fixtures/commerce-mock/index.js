@@ -106,7 +106,8 @@ function prepareFunction(type = 'standard', appName = 'commerce') {
           .replace('%%APP_NAME%%', appName));
     default:
       return k8s.loadAllYaml(functionYaml.toString()
-          .replace('%%URL%%', 'findEnv("GATEWAY_URL") + "/site/orders/" + code'));
+          .replace('%%URL%%', '"http://central-application-gateway.kyma-system:8080' +
+                   '/commerce/sap-commerce-cloud-commerce-webservices/site/orders/" + code'));
   }
 }
 
