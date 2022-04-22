@@ -57,7 +57,7 @@ global:
       version: "3f163e8f"
     central_application_connectivity_validator:
       name: "central-application-connectivity-validator"
-      version: "245170b1"
+      version: "PR-13891"
     central_application_gateway:
       name: "central-application-gateway"
       version: "6d430445"
