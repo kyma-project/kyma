@@ -17,8 +17,7 @@ async function checkDefaultCertificateIsValid() {
   const cert = forge.pki.certificateFromPem(tlsCert);
   const date = new Date();
   date.setDate(date.getDate() + 90);
-  assert.isTrue(cert.validity.notAfter >= date, 'Certificate is going to outdate, please create new one');
-  assert.isTrue(cert.validity.notBefore <= new Date(), 'Certificate is not yet valid');
+  assert.isAtLeast(cert.validity.notAfter, date,
+      'Certificate will expire in less than 3 months, please create a new one');
+  assert.isAtMost(cert.validity.notBefore, new Date(), 'Certificate is not yet valid');
 }
-
-

@@ -191,14 +191,12 @@ async function resetProxy() {
 }
 
 async function retryUrl(url, redirectURL, ignoreSSL, httpStatus) {
-  let retries = 0;
-  while (retries < 20) {
+  for (let i = 0; i < 20; i++) {
     const res = await queryGrafana(url, redirectURL, ignoreSSL, httpStatus);
     if (res === true) {
       return res;
     }
     await sleep(5 * 1000);
-    retries++;
   }
   return false;
 }

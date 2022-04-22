@@ -5,20 +5,19 @@ const {
   queryLoki,
 } = require('./client');
 
+
 async function checkLokiLogs(startTimestamp) {
   const labels = '{app="commerce-mock", container="mock", namespace="mocks"}';
-  let logsFetched = false;
-  let retries = 0;
-  while (retries < 20) {
+  let logsLength = 0;
+  for (let i = 0; i < 20; ++i) {
     const logs = await queryLoki(labels, startTimestamp);
     if (logs.streams.length > 0) {
-      logsFetched = true;
+      logsLength = logs.streams.length;
       break;
     }
-    await sleep(5*1000);
-    retries++;
+    await sleep(5 * 1000);
   }
-  assert.isTrue(logsFetched, 'No logs fetched from Loki');
+  assert.isAbove(logsLength, 0, 'No logs fetched from Loki');
 }
 
 module.exports = {

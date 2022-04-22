@@ -286,8 +286,7 @@ async function getNotRegisteredPrometheusRuleNames() {
 // Retries to execute getList() {maxRetries} times every {interval} ms until the returned list is empty
 async function retry(getList, maxRetries = 20, interval = 5 * 1000) {
   let list = [];
-  let retries = 0;
-  while (retries < maxRetries) {
+  for (let i = 0; i < maxRetries; ++i) {
     list = await getList();
     if (list.length === 0) {
       break;

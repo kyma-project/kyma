@@ -998,11 +998,8 @@ async function deleteAllK8sResources(
     keepFinalizer = false,
 ) {
   try {
-    let i = 0;
-    while (i < retries) {
-      if (i++) {
-        await sleep(interval);
-      }
+    for (let i = 0; i < retries; ++i) {
+      i && await sleep(interval);
       const response = await k8sDynamicApi.requestPromise({
         url: k8sDynamicApi.basePath + path,
         qs: query,

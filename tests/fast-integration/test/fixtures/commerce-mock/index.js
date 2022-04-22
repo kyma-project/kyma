@@ -647,7 +647,7 @@ async function ensureCommerceMockLocalTestFixture(mockNamespace,
       targetNamespace,
     withCentralApplicationConnectivity ? prepareFunction('central-app-gateway') : prepareFunction());
   await retryPromise(() => connectMockLocal(mockHost, targetNamespace), 10, 3000);
-  await retryPromise(() => registerAllApis(mockHost), 10, 3000);
+  // await retryPromise(() => registerAllApis(mockHost), 10, 3000);
 
   if (withCentralApplicationConnectivity) {
     await waitForDeployment('central-application-gateway', 'kyma-system');
