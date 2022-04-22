@@ -1,10 +1,17 @@
 const {checkServiceInstanceExistence} = require('./fixtures/helm-broker');
 
-const {printRestartReport, getContainerRestartsForAllNamespaces} = require('../utils');
+const {
+  printRestartReport,
+  getContainerRestartsForAllNamespaces,
+} = require('../utils');
 const {loggingTests} = require('../logging');
-const {monitoringTests, resetGrafanaProxy} = require('../monitoring');
+const {
+  monitoringTests,
+  resetGrafanaProxy,
+} = require('../monitoring');
 const {tracingTests} = require('../tracing');
-const {checkInClusterEventDelivery,
+const {
+  checkInClusterEventDelivery,
   checkFunctionResponse,
   sendLegacyEventAndCheckResponse,
 } = require('../test/fixtures/commerce-mock');

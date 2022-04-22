@@ -47,8 +47,8 @@ function waitForLogPipelineStatusCondition(name, lastConditionType, timeout) {
 }
 
 
-describe('Telemetry Operator tests', async () => {
-  await setGrafanaProxy();
+describe('Telemetry Operator tests', function() {
+  setGrafanaProxy();
 
   it('Operator should be ready', async () => {
     const res = await k8sCoreV1Api.listNamespacedPod(
@@ -82,5 +82,5 @@ describe('Telemetry Operator tests', async () => {
     assert.isTrue(logsPresent, 'No logs present in Loki');
   });
 
-  await resetGrafanaProxy();
+  resetGrafanaProxy();
 });

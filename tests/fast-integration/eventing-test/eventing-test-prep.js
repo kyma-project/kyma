@@ -38,6 +38,7 @@ const {
   isRuntimeAssignedToScenario,
 } = require('../compass');
 
+
 describe('Eventing tests preparation', function() {
   this.timeout(timeoutTime);
   this.slow(slowTime);
