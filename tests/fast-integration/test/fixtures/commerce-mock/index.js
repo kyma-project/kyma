@@ -648,8 +648,12 @@ async function ensureCommerceMockWithCompassTestFixture(
     await waitForServiceBindingUsage('commerce-lastorder-sbu', targetNamespace);
   }
 
-
   await waitForFunction('lastorder', targetNamespace);
+
+  const kind = Application `mp-${appName}`;
+
+  debug('waitForApplicationCr');
+  await waitForApplicationCr('applicationconnector.kyma-project.io/v1alpha1', kind);
 
   await k8sApply([eventingSubscription(
       `sap.kyma.custom.inapp.order.received.v1`,

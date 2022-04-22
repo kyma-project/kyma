@@ -444,6 +444,20 @@ function waitForClusterAddonsConfiguration(name, timeout = 90000) {
   );
 }
 
+function waitForApplicationCr(version, kind, timeout = 90000) {
+  return waitForK8sObject(
+      '/apis/apiextensions.k8s.io/v1/customresourcedefinitions',
+      {},
+      (_type, _apiObj, watchObj) => {
+        return (
+          watchObj.object.kind == kind && watchObj.apiVersion == version
+        );
+      },
+      timeout,
+      `Waiting for kind ${kind} cr timeout (${timeout} ms)`,
+  );
+}
+
 function waitForFunction(name, namespace = 'default', timeout = 90000) {
   return waitForK8sObject(
       `/apis/serverless.kyma-project.io/v1alpha1/namespaces/${namespace}/functions`,
@@ -1871,6 +1885,7 @@ module.exports = {
   getVirtualService,
   getAllVirtualServices,
   getPersistentVolumeClaim,
+  waitForApplicationCr,
   patchDeployment,
   isKyma2,
   namespaceObj,
