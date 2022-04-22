@@ -244,6 +244,16 @@ extraPorts: []
 #     nodePort: 30517
 
 extraVolumes:
+  - name: shared-fluent-bit-config
+    emptyDir: {}
+  - name: dynamic-config
+    configMap:
+      name: telemetry-fluent-bit-sections
+      optional: true
+  - name: dynamic-parsers-config
+    configMap:
+      name: telemetry-fluent-bit-parsers
+      optional: true
   - name: dynamic-files
     configMap:
       name: telemetry-fluent-bit-files
