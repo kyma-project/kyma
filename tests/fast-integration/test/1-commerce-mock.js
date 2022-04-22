@@ -12,7 +12,7 @@ const {
   deleteService,
   sendLegacyEventAndCheckResponse,
   sendCloudEventStructuredModeAndCheckResponse,
-  cleanMockTestFixture,
+  // cleanMockTestFixture,
   checkInClusterEventDelivery,
   sendCloudEventBinaryModeAndCheckResponse,
 } = require('./fixtures/commerce-mock');
@@ -90,9 +90,9 @@ function commerceMockTests() {
       await checkLokiLogs(testStartTimestamp);
     });
 
-    it('Test namespaces should be deleted', async function() {
-      await cleanMockTestFixture('mocks', testNamespace, true);
-    });
+    // it('Test namespaces should be deleted', async function() {
+    //   await cleanMockTestFixture('mocks', testNamespace, true);
+    // });
   });
 }
 

@@ -1,7 +1,7 @@
 const {
   ensureGettingStartedTestFixture,
   verifyOrderPersisted,
-  cleanGettingStartedTestFixture,
+  // cleanGettingStartedTestFixture,
 } = require('./fixtures/getting-started-guide');
 const {
   printRestartReport,
@@ -41,9 +41,9 @@ function gettingStartedGuideTests() {
       printRestartReport(initialRestarts, afterTestRestarts);
     });
 
-    it('Namespace should be deleted', async function() {
-      await cleanGettingStartedTestFixture(false);
-    });
+    // it('Namespace should be deleted', async function() {
+    //   await cleanGettingStartedTestFixture(false);
+    // });
   });
 }
 
