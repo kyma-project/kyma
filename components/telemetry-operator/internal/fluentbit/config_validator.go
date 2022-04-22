@@ -4,14 +4,15 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"io/ioutil"
 	"os/exec"
+	"path/filepath"
 	"regexp"
 	"strings"
 )
 
 const (
-	fluentBitBinPath = "fluent-bit/bin/fluent-bit"
-	errDescription   = "Validation of the supplied configuration failed with the following reason: "
+	errDescription = "Validation of the supplied configuration failed with the following reason: "
 	// From https://github.com/acarl005/stripansi/blob/master/stripansi.go#L7
 	ansiColorsRegex = "[\u001B\u009B][[\\]()#;?]*(?:(?:(?:[a-zA-Z\\d]*(?:;[a-zA-Z\\d]*)*)?\u0007)|(?:(?:\\d{1,4}(?:;\\d{0,4})*)?[\\dA-PRZcf-ntqry=><~]))"
 )
@@ -22,10 +23,16 @@ type ConfigValidator interface {
 	Validate(ctx context.Context, configFilePath string) error
 }
 
-type configValidator struct{}
+type configValidator struct {
+	FluentBitPath   string
+	PluginDirectory string
+}
 
-func NewConfigValidator() ConfigValidator {
-	return &configValidator{}
+func NewConfigValidator(fluentBitPath string, pluginDirectory string) ConfigValidator {
+	return &configValidator{
+		FluentBitPath:   fluentBitPath,
+		PluginDirectory: pluginDirectory,
+	}
 }
 
 func (v *configValidator) RunCmd(ctx context.Context, name string, args ...string) (string, error) {
@@ -37,7 +44,16 @@ func (v *configValidator) RunCmd(ctx context.Context, name string, args ...strin
 }
 
 func (v *configValidator) Validate(ctx context.Context, configFilePath string) error {
-	out, err := v.RunCmd(ctx, fluentBitBinPath, "--dry-run", "--quiet", "--config", configFilePath)
+	fluentBitArgs := []string{"--dry-run", "--quiet", "--config", configFilePath}
+	plugins, err := listPlugins(v.PluginDirectory)
+	if err != nil {
+		return err
+	}
+	for _, plugin := range plugins {
+		fluentBitArgs = append(fluentBitArgs, "-e", plugin)
+	}
+
+	out, err := v.RunCmd(ctx, v.FluentBitPath, fluentBitArgs...)
 	if err != nil {
 		if strings.Contains(out, "Error") {
 			return errors.New(errDescription + extractError(out))
@@ -48,13 +64,27 @@ func (v *configValidator) Validate(ctx context.Context, configFilePath string) e
 	return nil
 }
 
+func listPlugins(pluginPath string) ([]string, error) {
+	var plugins []string
+	files, err := ioutil.ReadDir(pluginPath)
+	if err != nil {
+		return nil, err
+	}
+	for _, f := range files {
+		if f.IsDir() {
+			continue
+		}
+		plugins = append(plugins, filepath.Join(pluginPath, f.Name()))
+	}
+	return plugins, err
+}
+
 // extractError extracts the error message from the output of fluent-bit
 // Thereby, it supports the following error patterns:
 // 1. Error <msg>\nError: Configuration file contains errors. Aborting
 // 2. Error: <msg>. Aborting
 // 3. [<time>] [  Error] File <filename>\n[<time>] [  Error] Error in line 4: <msg> Error: Configuration file contains errors. Aborting
 func extractError(output string) string {
-
 	rColors := regexp.MustCompile(ansiColorsRegex)
 	output = rColors.ReplaceAllString(output, "")
 
