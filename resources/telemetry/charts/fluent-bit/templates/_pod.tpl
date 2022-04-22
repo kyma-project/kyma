@@ -1,9 +1,4 @@
-{{- /*
-  Customizations:
-    * priorityClassName
-    * container image templates
-    * do not mount machine ID file
-*/ -}}
+
 {{- define "fluent-bit.pod" -}}
 serviceAccountName: {{ include "fluent-bit.serviceAccountName" . }}
 {{- with .Values.imagePullSecrets }}
