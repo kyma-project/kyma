@@ -10,10 +10,10 @@ require (
 	github.com/go-logr/zapr v1.2.3
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/kyma-incubator/api-gateway v0.0.0-20220318061314-9fd030a8cbd1
-	github.com/kyma-project/kyma/common/logging v0.0.0-20220421142140-496cc7687d1f
-	github.com/kyma-project/kyma/components/application-operator v0.0.0-20220421142140-496cc7687d1f
+	github.com/kyma-project/kyma/common/logging v0.0.0-20220422083339-385009e35e7b
+	github.com/kyma-project/kyma/components/application-operator v0.0.0-20220422083339-385009e35e7b
 	github.com/mitchellh/hashstructure/v2 v2.0.2
-	github.com/nats-io/nats-server/v2 v2.8.0
+	github.com/nats-io/nats-server/v2 v2.8.1
 	github.com/nats-io/nats.go v1.14.0
 	github.com/onsi/ginkgo v1.16.5
 	github.com/onsi/gomega v1.19.0
