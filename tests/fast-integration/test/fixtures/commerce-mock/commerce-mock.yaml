@@ -19,7 +19,7 @@ spec:
         app: commerce-mock
     spec:
       containers:
-        - image: ghcr.io/sap-samples/xf-application-mocks/commerce-mock-lite:0.7.1
+        - image: ghcr.io/sap-samples/xf-application-mocks/commerce-mock-lite:0.7.2
           imagePullPolicy: Always
           name: mock
           ports:
