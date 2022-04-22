@@ -57,6 +57,10 @@ spec:
       let url = %%URL%%;
       console.log("URL: %s", url);
       let response = await axios.get(url, { headers: { "X-B3-Sampled": 1 } }).catch((e)=>{
+        console.log("---- DEBUG ----");
+        console.log(e);
+        console.log(e.response);
+        console.log("-----------");
         return e.response.data;
       })
       return response.data;
