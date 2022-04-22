@@ -652,7 +652,7 @@ async function ensureCommerceMockWithCompassTestFixture(
 
   await waitForFunction('lastorder', targetNamespace);
 
-  const kind = Application `mp-${appName}`;
+  const kind = 'Application ' + `mp-${appName}`;
 
   debug('waitForApplicationCr');
   await waitForApplicationCr('applicationconnector.kyma-project.io/v1alpha1', kind);
