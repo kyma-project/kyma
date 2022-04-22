@@ -1,91 +1,50 @@
 const {assert} = require('chai');
 const k8s = require('@kubernetes/client-node');
-const {sleep} = require('../utils');
 const {
-  queryLoki,
   lokiSecretData,
-  tryGetLokiPersistentVolumClaim,
-  getVirtualServices,
+  tryGetLokiPersistentVolumeClaim,
+  logsPresentInLoki,
 } = require('./client');
 
-// checkLokiLogs used directly in Commerce Mock tests.
-async function checkLokiLogs(startTimestamp) {
+async function checkCommerceMockLogsInLoki(startTimestamp) {
   const labels = '{app="commerce-mock", container="mock", namespace="mocks"}';
-  let logsFetched = false;
-  let retries = 0;
-  while (retries < 20) {
-    const logs = await queryLoki(labels, startTimestamp);
-    if (logs.streams.length > 0) {
-      logsFetched = true;
-      break;
-    }
-    await sleep(5*1000);
-    retries++;
-  }
-  assert.isTrue(logsFetched, 'No logs fetched from Loki');
+
+  const commerceMockLogsPresent = await logsPresentInLoki(labels, startTimestamp);
+
+  assert.isTrue(commerceMockLogsPresent, 'No logs from commerce mock present in Loki');
 }
 
-// Required checks have been added as per https://github.com/kyma-project/kyma/issues/11136.
-async function checkLokiLogsAllNamespaces(startTimestamp) {
-  const labels = ['{namespace="kyma-system"}',
-    '{namespace="kyma-integration"}'];
-  let logsFetched = false;
-  let retries = 0;
-  for (let el = 0; el < labels.length; el++) {
-    while (retries < 20) {
-      logsFetched = false;
-      const logs = await queryLoki(labels[el], startTimestamp);
-      if (logs.streams.length > 0) {
-        logsFetched = true;
-        break;
-      }
-      await sleep(5*1000);
-      retries++;
-    }
-  };
-  assert.isTrue(logsFetched, 'No logs fetched from Loki');
+async function checkKymaLogsInLoki(startTimestamp) {
+  const systemLabel = '{namespace="kyma-system"}';
+  const integrationLabel = '{namespace="kyma-integration"}';
+
+  const kymaSystemLogsPresent = await logsPresentInLoki(systemLabel, startTimestamp);
+  const kymaIntegrationLogsPresent = await logsPresentInLoki(integrationLabel, startTimestamp);
+
+  assert.isTrue(kymaSystemLogsPresent, 'No logs from kyma-system namespace present in Loki');
+  assert.isTrue(kymaIntegrationLogsPresent, 'No logs from kyma-integration namespace present in Loki');
 }
 
 async function checkRetentionPeriod() {
   const secretData = k8s.loadYaml(await lokiSecretData());
-  let periodCheck = false;
-  if (secretData?.chunk_store_config?.max_look_back_period == '120h' &&
-  secretData?.table_manager?.retention_period == '120h') {
-    periodCheck = true;
-  }
-  assert.isTrue(periodCheck, 'Loki retention_period or max_look_back_period is not 120h');
+
+  assert.equal(secretData?.table_manager?.retention_period, '120h');
+  assert.equal(secretData?.chunk_store_config?.max_look_back_period, '120h');
 }
 
 async function checkPersistentVolumeClaimSize() {
-  const pvc = await tryGetLokiPersistentVolumClaim();
+  const pvc = await tryGetLokiPersistentVolumeClaim();
   if (pvc == null) {
     console.log('Loki PVC not found. Skipping...');
     return;
   }
 
-  let claimSizeCheck = false;
-  if (pvc.status.capacity.storage == '30Gi') {
-    claimSizeCheck = true;
-  }
-  assert.isTrue(claimSizeCheck, 'Claim size for loki is not 30Gi');
-}
-
-async function checkVirtualServicePresence() {
-  const virtualServices = await getVirtualServices();
-  let lokiVSPresence = false;
-  for (let index = 0; index < virtualServices.length; index++) {
-    if (virtualServices[index]?.metadata?.name == 'loki') {
-      lokiVSPresence = virtualServices[index]?.metadata?.name == 'loki';
-      break;
-    }
-  }
-  assert.isFalse(lokiVSPresence, 'Loki is exposed via Virtual Service');
+  assert.equal(pvc.status.capacity.storage, '30Gi');
 }
 
 module.exports = {
-  checkLokiLogs,
-  checkLokiLogsAllNamespaces,
+  checkCommerceMockLogsInLoki,
+  checkKymaLogsInLoki,
   checkRetentionPeriod,
   checkPersistentVolumeClaimSize,
-  checkVirtualServicePresence,
 };

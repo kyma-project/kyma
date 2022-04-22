@@ -377,7 +377,7 @@ func (js *JetStream) getDefaultSubscriptionOptions(consumerName string, subConfi
 		nats.AckExplicit(),
 		nats.IdleHeartbeat(idleHeartBeatDuration),
 		nats.EnableFlowControl(),
-		nats.DeliverNew(),
+		toJetStreamConsumerDeliverPolicyOptOrDefault(js.config.JSConsumerDeliverPolicy),
 		nats.MaxAckPending(subConfig.MaxInFlightMessages),
 		nats.MaxDeliver(jsConsumerMaxRedeliver),
 		nats.AckWait(jsConsumerAcKWait),

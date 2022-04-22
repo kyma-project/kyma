@@ -46,7 +46,7 @@ Create the name of the service account
 Selector labels
 */}}
 {{- define "loki.selectorLabels" -}}
-app.kubernetes.io/name: {{ include "fluent-bit.name" . }}
+app.kubernetes.io/name: {{ include "loki.name" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end -}}
 

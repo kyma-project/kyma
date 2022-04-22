@@ -4,6 +4,7 @@ const net = require('net');
 const fs = require('fs');
 const {join} = require('path');
 const {expect} = require('chai');
+const execa = require('execa');
 
 const kc = new k8s.KubeConfig();
 let k8sDynamicApi;
@@ -90,6 +91,14 @@ async function retryPromise(fn, retriesLeft = 10, interval = 30) {
 
 function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+
+function escapeRegExp(str) {
+  return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // $& means the whole matched string
+}
+function replaceAllInString(str, match, replacement) {
+  return str.replace(new RegExp(escapeRegExp(match), 'g'), () => replacement);
 }
 
 function convertAxiosError(axiosError, message) {
@@ -478,7 +487,7 @@ async function getAllSubscriptions(namespace = 'default') {
     if (e.statusCode == 404 || e.statusCode == 405) {
       // do nothing
     } else {
-      console.log('Error:', e);
+      error(e);
       throw e;
     }
   }
@@ -705,6 +714,7 @@ function waitForJob(name, namespace = 'default', timeout = 900000, success = 1) 
 async function kubectlExecInPod(pod, container, cmd, namespace = 'default') {
   const execCmd = ['exec', pod, '-c', container, '-n', namespace, '--', ...cmd];
   try {
+    await execa(`kubectl`, execCmd);
   } catch (error) {
     if (error.stdout === undefined) {
       throw error;
@@ -758,12 +768,15 @@ function waitForVirtualService(namespace, apiRuleName, timeout = 20000) {
 }
 
 async function getVirtualService(namespace, name) {
-  const path = `/apis/networking.istio.io/v1beta1/namespaces/${namespace}/virtualservices/${name}`;
-  const response = await k8sDynamicApi.requestPromise({
-    url: k8sDynamicApi.basePath + path,
-  });
-  const body = JSON.parse(response.body);
-  return body.spec.hosts[0];
+  try {
+    const path = `/apis/networking.istio.io/v1beta1/namespaces/${namespace}/virtualservices/${name}`;
+    const response = await k8sDynamicApi.requestPromise({
+      url: k8sDynamicApi.basePath + path,
+    });
+    return JSON.parse(response.body);
+  } catch (err) {
+    return JSON.parse(err.response.body);
+  }
 }
 
 async function getAllVirtualServices() {
@@ -841,6 +854,28 @@ function waitForPodWithLabel(
       },
       timeout,
       `Waiting for pod with label ${labelKey}=${labelValue} timeout (${timeout} ms)`,
+  );
+}
+
+function waitForPodStatusWithLabel(
+    labelKey,
+    labelValue,
+    namespace = 'default',
+    status = 'Running',
+    timeout = 90000,
+) {
+  const query = {
+    labelSelector: `${labelKey}=${labelValue}`,
+  };
+  return waitForK8sObject(
+      `/api/v1/namespaces/${namespace}/pods`,
+      query,
+      (_type, _apiObj, watchObj) => {
+        debug(`Waiting for pod "${namespace}/${watchObj.object.metadata.name}" status "${status}"`);
+        return watchObj.object.status.phase === status;
+      },
+      timeout,
+      `Waiting for pod status ${status} with label ${labelKey}=${labelValue} timeout (${timeout} ms)`,
   );
 }
 
@@ -1222,14 +1257,38 @@ function ignoreNotFound(e) {
 
 let DEBUG = process.env.DEBUG;
 
-function debug(...args) {
-  if (DEBUG) {
-    console.log.apply(null, args);
+function log(prefix, ...args) {
+  if (args.length === 0) {
+    return;
   }
+
+  args = [...args];
+  const fmt = `[${prefix}] ` + args[0];
+  args = args.slice(1);
+  console.log.apply(console, [fmt, ...args]);
+}
+
+function isDebugEnabled() {
+  return DEBUG === 'true';
 }
 
 function switchDebug(on = true) {
   DEBUG = on;
+}
+
+function debug(...args) {
+  if (!isDebugEnabled()) {
+    return;
+  }
+  log('DEBUG', ...args);
+}
+
+function info(...args) {
+  log('INFO', ...args);
+}
+
+function error(...args) {
+  log('ERROR', ...args);
 }
 
 function fromBase64(s) {
@@ -1591,11 +1650,9 @@ function waitForEventingBackendToReady(backendType='beb',
       {},
       (_type, _apiObj, watchObj) => {
         return (
-          watchObj.object.metadata.name == name &&
-        watchObj.object.status.backendType.toLowerCase() == backendType.toLowerCase() &&
-        watchObj.object.status.eventingReady == true &&
-        watchObj.object.status.publisherProxyReady == true &&
-        watchObj.object.status.subscriptionControllerReady == true
+          watchObj.object.metadata.name === name &&
+          watchObj.object.status.backendType.toLowerCase() === backendType.toLowerCase() &&
+          watchObj.object.status.eventingReady === true
         );
       },
       timeout,
@@ -1608,7 +1665,7 @@ function waitForEventingBackendToReady(backendType='beb',
  */
 async function printEventingControllerLogs() {
   try {
-    console.log('****** Printing logs of eventing-controller from kyma-system');
+    debug('Printing logs of eventing-controller from kyma-system');
     await printContainerLogs('app.kubernetes.io/name=controller,app.kubernetes.io/instance=eventing',
         'controller',
         'kyma-system',
@@ -1673,14 +1730,13 @@ async function printStatusOfInClusterEventingInfrastructure(targetNamespace, enc
       }
     }
 
-    console.log(`****** Printing status of infrastructure for in-cluster eventing, mode: ${encoding} *******`);
-    console.log(`****** Eventing-publisher-proxy deployment from ns: ${kymaSystem} ready: ${publisherProxyReady}`);
-    console.log(`****** Eventing-controller deployment from ns: ${kymaSystem} ready: ${eventingControllerReady}`);
-    console.log(`****** NATS-server pods from ns: ${kymaSystem} ready: ${natsServerReady}`);
-    console.log(`****** Function ${funcName} from ns: ${targetNamespace} ready: ${functionReady}`);
-    console.log('****** End *******');
+    debug(`Printing status of infrastructure for in-cluster eventing, mode: ${encoding}`);
+    debug(`Eventing-publisher-proxy deployment from ns: ${kymaSystem} ready: ${publisherProxyReady}`);
+    debug(`Eventing-controller deployment from ns: ${kymaSystem} ready: ${eventingControllerReady}`);
+    debug(`NATS-server pods from ns: ${kymaSystem} ready: ${natsServerReady}`);
+    debug(`Function ${funcName} from ns: ${targetNamespace} ready: ${functionReady}`);
   } catch (err) {
-    console.log(err);
+    error(err);
     throw err;
   }
 }
@@ -1690,24 +1746,24 @@ async function printStatusOfInClusterEventingInfrastructure(targetNamespace, enc
  */
 async function printEventingPublisherProxyLogs() {
   try {
-    console.log('****** Printing logs of eventing-publisher-proxy from kyma-system');
+    debug('Printing logs of eventing-publisher-proxy from kyma-system');
     await printContainerLogs('app.kubernetes.io/name=eventing-publisher-proxy, app.kubernetes.io/instance=eventing',
         'eventing-publisher-proxy',
         'kyma-system',
         180000);
   } catch (err) {
-    console.log(err);
+    error(err);
     throw err;
   }
 }
 
 async function printAllSubscriptions(testNamespace) {
   try {
-    console.log(`****** Printing all subscriptions from namespace: ${testNamespace}`);
+    debug(`Printing all subscriptions from namespace: ${testNamespace}`);
     const subs = await getAllSubscriptions(testNamespace);
-    console.log(JSON.stringify(subs, null, 4));
+    debug(JSON.stringify(subs, null, 4));
   } catch (err) {
-    console.log(err);
+    error(err);
     throw err;
   }
 }
@@ -1748,6 +1804,7 @@ module.exports = {
   removeServiceInstanceFinalizer,
   removeServiceBindingFinalizer,
   sleep,
+  replaceAllInString,
   promiseAllSettled,
   kubectlApplyDir,
   kubectlApply,
@@ -1774,6 +1831,7 @@ module.exports = {
   waitForFunction,
   waitForSubscription,
   waitForPodWithLabel,
+  waitForPodStatusWithLabel,
   waitForConfigMap,
   waitForJob,
   deleteNamespaces,
@@ -1796,8 +1854,11 @@ module.exports = {
   k8sAppsApi,
   k8sCoreV1Api,
   getContainerRestartsForAllNamespaces,
+  info,
+  error,
   debug,
   switchDebug,
+  isDebugEnabled,
   printRestartReport,
   fromBase64,
   toBase64,

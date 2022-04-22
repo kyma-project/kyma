@@ -15,7 +15,7 @@ data:
 
     COPY /src/package.json $KUBELESS_INSTALL_VOLUME/package.json
     COPY /registry-config/* $KUBELESS_INSTALL_VOLUME/
-    RUN /kubeless-npm-install.sh
+    RUN npm install --production --prefix=$KUBELESS_INSTALL_VOLUME
     COPY /src $KUBELESS_INSTALL_VOLUME
 
     RUN rm -rf $KUBELESS_INSTALL_VOLUME/.npmrc
@@ -39,7 +39,7 @@ data:
 
     COPY /src/package.json $KUBELESS_INSTALL_VOLUME/package.json
     COPY /registry-config/* $KUBELESS_INSTALL_VOLUME/
-    RUN /kubeless-npm-install.sh
+    RUN npm install --production --prefix=$KUBELESS_INSTALL_VOLUME
     COPY /src $KUBELESS_INSTALL_VOLUME
 
     RUN rm -rf $KUBELESS_INSTALL_VOLUME/.npmrc

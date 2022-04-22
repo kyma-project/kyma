@@ -113,6 +113,13 @@ class KEBClient {
         },
         url: btpOperatorCreds.smURL,
       };
+    } else if (btpOperatorCreds) {
+      payload.context['sm_operator_credentials'] = {
+        clientid: btpOperatorCreds.clientId,
+        clientsecret: btpOperatorCreds.clientSecret,
+        sm_url: btpOperatorCreds.smURL,
+        url: btpOperatorCreds.url,
+      };
     }
 
     const endpoint = `service_instances/${instanceID}`;
