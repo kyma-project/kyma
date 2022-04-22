@@ -60,7 +60,10 @@ const {
 const {
   assert,
 } = require('chai');
-const {setGrafanaProxy, resetGrafanaProxy} = require('../monitoring');
+const {
+  setGrafanaProxy,
+  resetGrafanaProxy,
+} = require('../monitoring');
 
 describe('Eventing tests', function() {
   this.timeout(timeoutTime);

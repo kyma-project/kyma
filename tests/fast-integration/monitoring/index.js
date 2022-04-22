@@ -1,6 +1,9 @@
+const {
+  getEnvOrDefault,
+  info,
+} = require('../utils');
 const prometheus = require('./prometheus');
 const grafana = require('./grafana');
-const {getEnvOrDefault, info} = require('../utils');
 
 function monitoringTests() {
   if (getEnvOrDefault('KYMA_MAJOR_UPGRADE', 'false') === 'true') {

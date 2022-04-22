@@ -19,8 +19,7 @@ const {
 } = require('../utils');
 
 const {
-  queryGrafana,
-  getGrafanaUrl,
+  checkIfGrafanaIsReachable,
 } = require('./client');
 
 const kymaNs = 'kyma-system';
@@ -44,7 +43,6 @@ async function assertGrafanaRedirectsInKyma2() {
   let res = await checkGrafanaRedirect('https://kyma-project.io/docs', 403);
   assert.isTrue(res, 'Grafana redirect to kyma docs does not work!');
 
-  // Creating secret for auth proxy redirect
   await manageSecret('create');
   await restartProxyPod();
 
@@ -181,20 +179,11 @@ async function updateProxyDeployment(fromArg, toArg) {
 }
 
 async function checkGrafanaRedirect(redirectURL, httpStatus) {
-  const url = await getGrafanaUrl();
-  let ignoreSSL = false;
-  if (url.includes('local.kyma.dev')) {
-    ignoreSSL = true;
-  }
-  return await retryUrl(url, redirectURL, ignoreSSL, httpStatus);
-}
-
-async function retryUrl(url, redirectURL, ignoreSSL, httpStatus) {
   let retries = 0;
   while (retries < 20) {
-    const res = await queryGrafana(url, redirectURL, ignoreSSL, httpStatus);
-    if (res === true) {
-      return res;
+    const isReachable = await checkIfGrafanaIsReachable(redirectURL, httpStatus);
+    if (isReachable === true) {
+      return true;
     }
     await sleep(5 * 1000);
     retries++;

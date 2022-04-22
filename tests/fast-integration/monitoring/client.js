@@ -12,20 +12,19 @@ const {
 async function getGrafanaUrl() {
   const vs = await getVirtualService('kyma-system', 'monitoring-grafana');
   const host = vs.spec.hosts[0];
-
   return `https://${host}`;
 }
 
 async function getGrafanaDatasourceId(grafanaUrl, datasourceName) {
   const url = `${grafanaUrl}/api/datasources/id/${datasourceName}`;
-  return retryPromise(async () => await axios.get(url), 5, 1000);
+  const responseBody = await retryPromise(async () => await axios.get(url), 5, 1000);
+  return responseBody.data.id;
 }
 
 async function proxyGrafanaDatasource(datasourceName, path, retries, interval,
     timeout, debugMsg = undefined) {
   const grafanaUrl = await getGrafanaUrl();
-  const datasourceResponse = await getGrafanaDatasourceId(grafanaUrl, datasourceName);
-  const datasourceId = datasourceResponse.data.id;
+  const datasourceId = await getGrafanaDatasourceId(grafanaUrl, datasourceName);
   const url = `${grafanaUrl}/api/datasources/proxy/${datasourceId}/${path}`;
 
   return retryPromise(async () => {
@@ -80,44 +79,44 @@ async function queryPrometheus(query) {
   }
 }
 
-async function queryGrafana(url, redirectURL, ignoreSSL, httpErrorCode) {
+async function checkIfGrafanaIsReachable(redirectURL, httpErrorCode) {
+  const url = await getGrafanaUrl();
+  let ignoreSSL = false;
+  if (url.includes('local.kyma.dev')) {
+    ignoreSSL = true; // Ignore SSL certificate for self signed certificates
+  }
+
+  // For more details see here: https://oauth2-proxy.github.io/oauth2-proxy/docs/behaviour
+  delete axios.defaults.headers.common['Accept'];
+  const agent = new https.Agent({
+    rejectUnauthorized: !ignoreSSL, // reject unauthorized when ssl should not be ignored
+  });
+
   try {
-    // For more details see here: https://oauth2-proxy.github.io/oauth2-proxy/docs/behaviour
-    delete axios.defaults.headers.common['Accept'];
-    // Ignore SSL certificate for self signed certificates
-    const agent = new https.Agent({
-      rejectUnauthorized: !ignoreSSL,
-    });
-    const res = await axios.get(url, {httpsAgent: agent});
-    if (res.status === httpErrorCode) {
-      if (res.request.res.responseUrl.includes(redirectURL)) {
-        return true;
-      }
+    const response = await axios.get(url, {httpsAgent: agent});
+    if (response.status === httpErrorCode && response.request.res.responseUrl.includes(redirectURL)) {
+      return true;
     }
-    return false;
   } catch (err) {
     const msg = 'Error when querying Grafana: ';
     if (err.response) {
-      if (err.response.status === httpErrorCode) {
-        if (err.response.data.includes(redirectURL)) {
-          return true;
-        }
+      if (err.response.status === httpErrorCode && err.response.data.includes(redirectURL)) {
+        return true;
       }
       error(msg + err.response.status + ' : ' + err.response.data);
-      return false;
     } else {
       error(`${msg}: ${err.toString()}`);
-      return false;
     }
   }
+
+  return false;
 }
 
 module.exports = {
-  getGrafanaUrl,
   proxyGrafanaDatasource,
   getPrometheusActiveTargets,
   getPrometheusAlerts,
   getPrometheusRuleGroups,
   queryPrometheus,
-  queryGrafana,
+  checkIfGrafanaIsReachable,
 };
