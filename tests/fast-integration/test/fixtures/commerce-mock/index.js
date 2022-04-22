@@ -170,6 +170,7 @@ async function sendEventAndCheckResponse(eventType, body, params, mockNamespace 
             .post(url, body, params)
             .catch((e) => {
               error('Cannot send %s, the response from event gateway: %s', eventType, e.response.data);
+              console.log(e);
               throw convertAxiosError(e, 'Cannot send %s, the response from event gateway', eventType);
             });
 
@@ -192,8 +193,8 @@ async function sendEventAndCheckResponse(eventType, body, params, mockNamespace 
               throw convertAxiosError(e, 'Error during request to function lastorder');
             });
       },
-      30,
-      2 * 1000,
+      3,
+      10 * 1000,
   );
 }
 
