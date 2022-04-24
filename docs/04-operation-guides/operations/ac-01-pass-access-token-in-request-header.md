@@ -1,6 +1,7 @@
 ---
 title: Pass an access token in a request header
 ---
+<!-- TODO: verify -->
 
 Application Connector supports passing the access token directly in the request.
 

@@ -8,12 +8,12 @@ title: Application Connector components
 
 The Istio Ingress Gateway exposes Application Connector and other Kyma components.
 The DNS name of the Ingress is cluster-dependent and follows the `gateway.{cluster-dns}` format. For example, `gateway.servicemanager.cluster.kyma.cx`.
-Istio Ingress Gateway secures the endpoints with certificate validation. Each call must include a valid client certificate.
-You can access every exposed Application using the assigned path. For example, to reach the Gateway for the `user-custom` Application, use `gateway.servicemanager.cluster.kyma.cx/user-custom`.
+Istio Ingress Gateway secures the endpoints with certificate validation in the [Compass scenario](../../01-overview/main-areas/application-connectivity/README.md). Each call must include a valid client certificate. <!-- TODO: verify -->
+You can access every exposed Application using the assigned path. For example, to reach the Gateway for the `user-custom` Application, use `gateway.servicemanager.cluster.kyma.cx/user-custom`. <!-- TODO: verify -->
 
 ## Application Connectivity Validator
 
-Application Connectivity Validator verifies the subject of the client certificate, and proxies requests to <!-- TODO: is this bit to be removed or more? "Application Registry and" -->Event Publisher.
+Application Connectivity Validator verifies the subject of the client certificate, and proxies requests to Event Publisher in the [Compass scenario](../../01-overview/main-areas/application-connectivity/README.md).
 
 ## Event Publisher
 
@@ -24,7 +24,7 @@ This allows routing events to Functions and services based on their source Appli
 
 An Application represents an external solution connected to Kyma. It handles the integration with other components, such as Eventing.
 Using the components of Application Connector, the Application creates a coherent identity for a connected external solution and ensures its separation.
-All Applications are instances of the Application custom resource, which also stores all of the relevant metadata.
+All Applications are instances of the Application custom resource, which also stores all the relevant metadata.
 
 >**NOTE:** Every Application custom resource corresponds to a single Application to which you can connect an external solution.
 

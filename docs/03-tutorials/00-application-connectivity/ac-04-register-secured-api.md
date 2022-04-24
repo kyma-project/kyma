@@ -1,6 +1,7 @@
 ---
 title: Register a secured API
 ---
+<!-- TODO: Adjust to the new flow -->
 
 Application Registry allows you to register a secured API for every service. The supported authentication methods are [Basic Authentication](https://tools.ietf.org/html/rfc7617), [OAuth](https://tools.ietf.org/html/rfc6750) (Client Credentials Grant), and client certificates.
 

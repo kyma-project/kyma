@@ -1,6 +1,7 @@
 ---
 title: Call a registered external service from Kyma
 ---
+<!-- TODO: Adjust to the new flow -->
 
 This guide shows how to call a registered external service from Kyma using a simple Function.
 
@@ -8,7 +9,10 @@ This guide shows how to call a registered external service from Kyma using a sim
 
 - Client certificates generated for the connected Application
 - Your [Application name exported](ac-01-create-application.md#prerequisites) as an environment variable
-- Your [cluster domain exported](ac-02-get-client-certificate.md#generate-a-csr-and-send-it-to-kyma) as an environment variable
+- Your cluster domain exported as an environment variable
+  ```bash
+  export CLUSTER_DOMAIN=local.kyma.dev
+   ```
 
 > **CAUTION:** On a local Kyma deployment, skip SSL certificate verification when making a `curl` call, by adding the `-k` flag to it. Alternatively, add the Kyma certificates to your local certificate storage on your machine using the `kyma import certs` command.
 

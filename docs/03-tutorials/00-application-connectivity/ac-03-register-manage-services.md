@@ -1,6 +1,7 @@
 ---
 title: Register a service
 ---
+<!-- TODO: Adjust to the new flow -->
 
 This guide shows you how to register a service of your external solution in Kyma.
 
@@ -9,7 +10,7 @@ This guide shows you how to register a service of your external solution in Kyma
 - A valid certificate signed by the Kyma Certificate Authority
 - The [jq](https://stedolan.github.io/jq/download/) tool to prettify the JSON output
 - Your [Application name exported](ac-01-create-application.md#prerequisites) as an environment variable
-- Your [cluster domain, generated client certificate and key exported](ac-02-get-client-certificate.md#generate-a-csr-and-send-it-to-kyma) as environment variables
+- Your cluster domain, generated client certificate and key exported as environment variables <!-- TODO: adjust to the new flow -->
 
 > **CAUTION:** On a local Kyma deployment, skip SSL certificate verification when making a `curl` call, by adding the `-k` flag to it. Alternatively, add the Kyma certificates to your local certificate storage on your machine using the `kyma import certs` command.
 

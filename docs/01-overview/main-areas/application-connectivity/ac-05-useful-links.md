@@ -7,15 +7,10 @@ If you're interested in learning more about the Application Connectivity area, f
 - Perform some simple and more advanced tasks:
 
   - [Pass the access token in the request header](../../../04-operation-guides/operations/ac-01-pass-access-token-in-request-header.md)
-  - [Provide a custom AC certificate and key](../../../04-operation-guides/operations/ac-03-application-connector-certificates.md)
   - [Create a new Application](../../../03-tutorials/00-application-connectivity/ac-01-create-application.md)
-  - [Get the client certificate](../../../03-tutorials/00-application-connectivity/ac-02-get-client-certificate.md)
-  - [Register a service](../../../03-tutorials/00-application-connectivity/ac-03-register-manage-services.md)
-  - [Register a secured API](../../../03-tutorials/00-application-connectivity/ac-04-register-secured-api.md)
+  - [Register a service](../../../03-tutorials/00-application-connectivity/ac-03-register-manage-services.md) <!-- TODO: adjust to the new flow -->
+  - [Register a secured API](../../../03-tutorials/00-application-connectivity/ac-04-register-secured-api.md) <!-- TODO: adjust to the new flow -->
   - [Call a registered external service from Kyma](../../../03-tutorials/00-application-connectivity/ac-05-call-registered-service-from-kyma.md)
-  - [Renew a client certificate](../../../03-tutorials/00-application-connectivity/ac-06-renew-client-cert.md)
-  - [Revoke a client certificate (AC)](../../../03-tutorials/00-application-connectivity/ac-07-revoke-client-cert.md)
-  - [Rotate the Root certificate and the key issued by the Certificate Authority](../../../03-tutorials/00-application-connectivity/ac-08-rotate-root-ca.md)
   - [Get subscribed events](../../../03-tutorials/00-application-connectivity/ac-10-get-subscribed-events.md)
   - [Disable TLS certificate verification](../../../03-tutorials/00-application-connectivity/ac-11-disable-tls-certificate-verification.md)
 
@@ -26,9 +21,7 @@ If you're interested in learning more about the Application Connectivity area, f
 - Analyze Application Connectivity specification and configuration files:
 
   - [Application](../../../05-technical-reference/00-custom-resources/ac-01-application.md) custom resource (CR)
-  - [Token Request](../../../05-technical-reference/00-custom-resources/ac-02-tokenrequest.md) CR
   - [Application Connector chart](../../../05-technical-reference/00-configuration-parameters/ac-01-application-connector-chart.md)
-  - [Application Connectivity Certs Setup Job](../../../05-technical-reference/00-configuration-parameters/ac-04-application-connectivity-certs-setup-job.md)
 
 - Understand technicalities behind the Application Connectivity implementation:
 

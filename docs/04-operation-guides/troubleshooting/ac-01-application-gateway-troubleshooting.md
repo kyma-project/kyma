@@ -24,7 +24,8 @@ Follow these steps to detect the source of the problem:
 2. Check the API URL.
 
    If your call reaches Application Gateway, but you still receive an error, check if the API URL in the service definition matches the API URL of the actual service you are trying to call.
-   To check the target URL of the API, fetch the service definition from Application Registry:
+<!-- TODO: Is this bit below (lines 28-37) to be adjusted, or removed altogether? If adjusted, how? ...BEGIN... -->
+   To check the target URL of the API, fetch the Service definition from Application Registry:
 
    > **CAUTION:** On a local Kyma deployment, skip SSL certificate verification when making a `curl` call, by adding the `-k` flag to it. Alternatively, add the Kyma certificates to your local certificate storage on your machine using the `kyma import certs` command.
 
@@ -34,3 +35,5 @@ Follow these steps to detect the source of the problem:
 
    A successful call returns a `json` response with the service definition that contains the target URL.
    Call the target URL directly to verify that the value of **api.targetUrl** is correct.
+
+<!-- TODO: Is this bit below (lines 28-37) to be adjusted, or removed altogether? If adjusted, how? ...END...-->
