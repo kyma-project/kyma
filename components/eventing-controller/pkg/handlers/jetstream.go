@@ -140,21 +140,14 @@ func (js *JetStream) Initialize(connCloseHandler ConnClosedHandler) error {
 	return js.ensureStreamExists()
 }
 
-func (js *JetStream) SyncSubscription(subscription *eventingv1alpha1.Subscription) error {
-	log := utils.LoggerWithSubscription(js.namedLogger(), subscription)
-	subKeyPrefix := createKeyPrefix(subscription)
-	if err := js.checkJetStreamConnection(log); err != nil {
-		return err
-	}
-
-	// check if there is any existing JetStream subscription in global list
-	// which is not anymore in this subscription filters (i.e. cleanSubjects).
-	// e.g. when filters are modified.
+// deleteInvalidSubscriptions checks if there is any existing JetStream subscription in the global list
+// which is not anymore in this subscription filters (i.e. cleanSubjects) (e.g. when filters are modified).
+func (js *JetStream) deleteInvalidSubscriptions(log *zap.SugaredLogger, subscription *eventingv1alpha1.Subscription) error {
 	for key, jsSub := range js.subscriptions {
 		if !js.isJsSubAssociatedWithKymaSub(key, subscription) {
 			continue
 		}
-		// Delete the subscription if it is no longer valid
+		// delete the subscription if it is no longer valid
 		if !jsSub.IsValid() {
 			log.Debugw("Deleting invalid subscription!")
 			if err := js.deleteSubscriptionFromJetStream(jsSub, key, log); err != nil {
@@ -190,11 +183,11 @@ func (js *JetStream) SyncSubscription(subscription *eventingv1alpha1.Subscriptio
 		}
 	}
 
-	// add/update sink info in map for callbacks
-	if sinkURL, ok := js.sinks.Load(subKeyPrefix); !ok || sinkURL != subscription.Spec.Sink {
-		js.sinks.Store(subKeyPrefix, subscription.Spec.Sink)
-	}
+	return nil
+}
 
+// resolveCallback needs a better name
+func (js *JetStream) resolveCallback(log *zap.SugaredLogger, subKeyPrefix string, subscription *eventingv1alpha1.Subscription) error {
 	callback := js.getCallback(subKeyPrefix)
 	for _, subject := range subscription.Status.CleanEventTypes {
 		jsSubKey := NewSubscriptionSubjectIdentifier(subscription, subject)
@@ -225,6 +218,29 @@ func (js *JetStream) SyncSubscription(subscription *eventingv1alpha1.Subscriptio
 		// save created JetStream subscription in storage
 		js.subscriptions[jsSubKey] = jsSubscription
 		log.Debugw("created subscription on JetStream", "subject", subject)
+	}
+	return nil
+}
+
+func (js *JetStream) SyncSubscription(subscription *eventingv1alpha1.Subscription) error {
+	log := utils.LoggerWithSubscription(js.namedLogger(), subscription)
+
+	if err := js.checkJetStreamConnection(log); err != nil {
+		return err
+	}
+
+	if err := js.deleteInvalidSubscriptions(log, subscription); err != nil {
+		return err
+	}
+
+	// add/update sink info in map for callbacks
+	subKeyPrefix := createKeyPrefix(subscription)
+	if sinkURL, ok := js.sinks.Load(subKeyPrefix); !ok || sinkURL != subscription.Spec.Sink {
+		js.sinks.Store(subKeyPrefix, subscription.Spec.Sink)
+	}
+
+	if err := js.resolveCallback(log, subKeyPrefix, subscription); err != nil {
+		return err
 	}
 	return nil
 }
