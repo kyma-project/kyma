@@ -13,7 +13,7 @@ require (
 	github.com/nats-io/nats.go v1.12.3
 	github.com/onsi/gomega v1.16.0
 	github.com/pkg/errors v0.9.1
-	github.com/prometheus/client_golang v1.11.0
+	github.com/prometheus/client_golang v1.11.1
 	github.com/sirupsen/logrus v1.8.1
 	github.com/stretchr/testify v1.7.0
 	go.opencensus.io v0.23.0
@@ -81,4 +81,5 @@ replace (
 	github.com/docker/distribution => github.com/docker/distribution v0.0.0-20191216044856-a8371794149d
 	github.com/docker/docker => github.com/docker/docker v20.10.3+incompatible
 	github.com/opencontainers/runc => github.com/opencontainers/runc v1.0.0-rc93
+	github.com/prometheus/client_golang => github.com/prometheus/client_golang v1.11.1
 )
