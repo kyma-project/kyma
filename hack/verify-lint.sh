@@ -10,6 +10,8 @@ readonly ROOT_PATH="${1:-$( cd "${CURRENT_DIR}/.." && pwd )}" # first argument o
 readonly TMP_DIR=$(mktemp -d)
 readonly GOLANGCI_LINT_VERSION="v1.45.2"
 
+ADDITIONAL_LINTERS=${ADDITIONAL_LINTERS:-}
+
 source "${CURRENT_DIR}/utilities.sh" || { echo 'Cannot load CI utilities.'; exit 1; }
 
 cleanup() {
