@@ -53,10 +53,7 @@ const {
   unassignRuntimeFromScenario,
 } = require('../../../compass');
 
-const {
-  jaegerPortForward,
-  getJaegerTrace,
-} = require('../../../monitoring/client');
+const {getJaegerTrace} = require('../../../tracing/client');
 
 const {
   OAuthToken,
@@ -331,14 +328,7 @@ async function checkInClusterEventTracing(targetNamespace) {
 }
 
 async function checkTrace(traceId, expectedTraceProcessSequence) {
-  // port-forward to Jaeger and fetch trace data for the traceId
-  const cancelJaegerPortForward = await jaegerPortForward();
-  let traceRes;
-  try {
-    traceRes = await getJaegerTrace(traceId);
-  } finally {
-    cancelJaegerPortForward();
-  }
+  const traceRes = await getJaegerTrace(traceId);
 
   // the trace response should have data for single trace
   expect(traceRes.data).to.have.length(1);

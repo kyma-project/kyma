@@ -18,10 +18,7 @@ const {
   printRestartReport,
   getContainerRestartsForAllNamespaces,
 } = require('../utils');
-const {
-  lokiPortForward,
-  checkCommerceMockLogsInLoki,
-} = require('../logging');
+const loki = require('../logging');
 
 function commerceMockTests(testNamespace) {
   describe('CommerceMock Tests:', function() {
@@ -29,15 +26,6 @@ function commerceMockTests(testNamespace) {
     this.slow(5000);
     const testStartTimestamp = new Date().toISOString();
     let initialRestarts = null;
-    let cancelPortForward = null;
-
-    before(() => {
-      cancelPortForward = lokiPortForward();
-    });
-
-    after(() => {
-      cancelPortForward();
-    });
 
     it('Listing all pods in cluster', async function() {
       initialRestarts = await getContainerRestartsForAllNamespaces();
@@ -75,7 +63,7 @@ function commerceMockTests(testNamespace) {
     });
 
     it('Logs from commerce mock pod should be retrieved through Loki', async function() {
-      await checkCommerceMockLogsInLoki(testStartTimestamp);
+      await loki.checkCommerceMockLogs(testStartTimestamp);
     });
   });
 }

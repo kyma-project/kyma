@@ -293,8 +293,7 @@ async function getNotRegisteredPrometheusRuleNames() {
   const registeredRules = await getRegisteredPrometheusRuleNames();
   let k8sRuleNames = await getK8sPrometheusRuleNames();
   k8sRuleNames = removeNamePrefixes(k8sRuleNames);
-  const notRegisteredRules = k8sRuleNames.filter((rule) => !registeredRules.includes(rule));
-  return notRegisteredRules;
+  return k8sRuleNames.filter((rule) => !registeredRules.includes(rule));
 }
 
 // Retries to execute getList() {maxRetries} times every {interval} ms until the returned list is empty

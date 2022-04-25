@@ -3,12 +3,13 @@ const {
   gettingStartedGuideTests,
 } = require('./');
 
-const {monitoringTests} = require('../monitoring');
+const {apiExposureTests} = require('../api-exposure');
+const {monitoringTests, unexposeGrafana} = require('../monitoring');
 const {loggingTests} = require('../logging');
 const {tracingTests} = require('../tracing');
 const {cleanMockTestFixture} = require('./fixtures/commerce-mock');
 const {ensureCommerceMockLocalTestFixture} = require('../test/fixtures/commerce-mock');
-const {apiExposureTests} = require('../api-exposure');
+const {error} = require('../utils');
 
 describe('Executing Standard Testsuite:', function() {
   this.timeout(10 * 60 * 1000);
@@ -19,8 +20,9 @@ describe('Executing Standard Testsuite:', function() {
   const testNamespace = 'test';
 
   before('CommerceMock test fixture should be ready', async function() {
-    await ensureCommerceMockLocalTestFixture(mockNamespace, testNamespace, withCentralAppConnectivity).catch((err) => {
-      console.dir(err); // first error is logged
+    await ensureCommerceMockLocalTestFixture(mockNamespace, testNamespace,
+        withCentralAppConnectivity).catch((err) => {
+      error(err);
       return ensureCommerceMockLocalTestFixture(mockNamespace, testNamespace, withCentralAppConnectivity);
     });
   });
@@ -29,11 +31,14 @@ describe('Executing Standard Testsuite:', function() {
     await cleanMockTestFixture(mockNamespace, testNamespace, true);
   });
 
+  monitoringTests();
+
   apiExposureTests();
   commerceMockTests(testNamespace);
   gettingStartedGuideTests();
 
-  monitoringTests();
   loggingTests();
   tracingTests(mockNamespace, testNamespace);
+
+  unexposeGrafana();
 });
