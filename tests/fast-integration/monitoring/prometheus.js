@@ -95,7 +95,7 @@ async function assertMetricsExist() {
     {
       'monitoring-apiserver': [
         {'apiserver_request_duration_seconds_bucket': [[]]},
-        {'etcd_disk_backend_commit_duration_seconds_bucket': [[]]}],
+        {'apiserver_audit_event_total': [[]]}],
     },
 
     {
