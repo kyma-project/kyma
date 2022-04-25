@@ -16,9 +16,9 @@ Application Connector:
 
 - Simplifies and secures the connection between external systems and Kyma
 - Stores and handles the metadata of external APIs
-- Proxies calls sent from Kyma to external APIs registered by the connected external solution <!-- TODO: verify -->
+- Proxies calls sent from Kyma to external APIs registered by the connected external solution 
 - Provides certificate handling for the [Eventing](../eventing/README.md) flow in the [Compass scenario](./README.md)
-- Delivers events from the connected external solution to Eventing in the [Compass scenario](./README.md)  <!-- TODO: verify -->
+- Delivers events from the connected external solution to Eventing in the [Compass scenario](./README.md) 
 - Manages secure access to external systems
 
 All the AC components scale independently, which allows to adjust it to fit the needs of the implementation built using Kyma.
