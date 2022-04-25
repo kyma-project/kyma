@@ -10,6 +10,7 @@ const kc = new k8s.KubeConfig();
 let k8sDynamicApi;
 let k8sAppsApi;
 let k8sCoreV1Api;
+let k8sRbacAuthorizationV1Api;
 let k8sLog;
 let k8sServerUrl;
 
@@ -254,7 +255,7 @@ async function k8sDelete(listOfSpecs, namespace) {
             'Object kind or metadata.selfLink is required to delete the resource',
         );
       }
-      if (res.kind == 'CustomResourceDefinition') {
+      if (res.kind === 'CustomResourceDefinition') {
         const version = res.spec.version || res.spec.versions[0].name;
         const path = `/apis/${res.spec.group}/${version}/${res.spec.names.plural}`;
         await deleteAllK8sResources(path);
@@ -314,8 +315,7 @@ async function getSecret(name, namespace) {
   const response = await k8sDynamicApi.requestPromise({
     url: k8sDynamicApi.basePath + path,
   });
-  const body = JSON.parse(response.body);
-  return body;
+  return JSON.parse(response.body);
 }
 
 async function getFunction(name, namespace) {
@@ -323,8 +323,7 @@ async function getFunction(name, namespace) {
   const response = await k8sDynamicApi.requestPromise({
     url: k8sDynamicApi.basePath + path,
   });
-  const body = JSON.parse(response.body);
-  return body;
+  return JSON.parse(response.body);
 }
 
 async function getConfigMap(name, namespace) {
@@ -332,8 +331,7 @@ async function getConfigMap(name, namespace) {
   const response = await k8sDynamicApi.requestPromise({
     url: k8sDynamicApi.basePath + path,
   });
-  const body = JSON.parse(response.body);
-  return body;
+  return JSON.parse(response.body);
 }
 
 async function getServiceInstance(name, namespace) {
@@ -341,8 +339,7 @@ async function getServiceInstance(name, namespace) {
   const response = await k8sDynamicApi.requestPromise({
     url: k8sDynamicApi.basePath + path,
   });
-  const body = JSON.parse(response.body);
-  return body;
+  return JSON.parse(response.body);
 }
 
 async function k8sApply(resources, namespace, patch = true) {
@@ -369,7 +366,7 @@ async function k8sApply(resources, namespace, patch = true) {
       debug(resource.kind, resource.metadata.name, 'reconfigured');
     } catch (e) {
       {
-        if (e.body && e.body.reason == 'NotFound') {
+        if (e.body && e.body.reason === 'NotFound') {
           try {
             await k8sDynamicApi.create(resource);
             debug(resource.kind, resource.metadata.name, 'created');
@@ -389,23 +386,23 @@ function waitForK8sObject(path, query, checkFn, timeout, timeoutMsg) {
   debug('waiting for', path);
   let res;
   let timer;
-  const result = new Promise((resolve, reject) => {
-    watch
-        .watch(
-            path,
-            query,
-            (type, apiObj, watchObj) => {
-              if (checkFn(type, apiObj, watchObj)) {
-                if (res) {
-                  res.abort();
-                }
-                clearTimeout(timer);
-                debug('finished waiting for ', path);
-                resolve(watchObj.object);
-              }
-            },
-            () => {},
-        )
+  return new Promise((resolve, reject) => {
+    watch.watch(
+        path,
+        query,
+        (type, apiObj, watchObj) => {
+          if (checkFn(type, apiObj, watchObj)) {
+            if (res) {
+              res.abort();
+            }
+            clearTimeout(timer);
+            debug('finished waiting for ', path);
+            resolve(watchObj.object);
+          }
+        },
+        () => {
+        },
+    )
         .then((r) => {
           res = r;
           timer = setTimeout(() => {
@@ -414,7 +411,6 @@ function waitForK8sObject(path, query, checkFn, timeout, timeoutMsg) {
           }, timeout);
         });
   });
-  return result;
 }
 
 function waitForNamespace(name, timeout = 30000) {
@@ -437,7 +433,7 @@ function waitForClusterAddonsConfiguration(name, timeout = 90000) {
       '/apis/addons.kyma-project.io/v1alpha1/clusteraddonsconfigurations',
       {},
       (_type, _apiObj, watchObj) => {
-        return watchObj.object.metadata.name == name;
+        return watchObj.object.metadata.name === name;
       },
       timeout,
       `Waiting for ${name} ClusterAddonsConfiguration timeout (${timeout} ms)`,
@@ -464,10 +460,10 @@ function waitForFunction(name, namespace = 'default', timeout = 90000) {
       {},
       (_type, _apiObj, watchObj) => {
         return (
-          watchObj.object.metadata.name == name &&
+          watchObj.object.metadata.name === name &&
         watchObj.object.status.conditions &&
         watchObj.object.status.conditions.some(
-            (c) => c.type == 'Running' && c.status == 'True',
+            (c) => c.type === 'Running' && c.status === 'True',
         )
         );
       },
@@ -498,7 +494,7 @@ async function getAllSubscriptions(namespace = 'default') {
       return results.flat();
     });
   } catch (e) {
-    if (e.statusCode == 404 || e.statusCode == 405) {
+    if (e.statusCode === 404 || e.statusCode === 405) {
       // do nothing
     } else {
       error(e);
@@ -529,10 +525,10 @@ function waitForSubscription(name, namespace = 'default', timeout = 180000) {
       {},
       (_type, _apiObj, watchObj) => {
         return (
-          watchObj.object.metadata.name == name &&
+          watchObj.object.metadata.name === name &&
         watchObj.object.status.conditions &&
         watchObj.object.status.conditions.some(
-            (c) => c.type == 'Subscription active' && c.status == 'True',
+            (c) => c.type === 'Subscription active' && c.status === 'True',
         )
         );
       },
@@ -549,7 +545,7 @@ function waitForClusterServiceBroker(name, timeout = 90000) {
         return (
           watchObj.object.metadata.name.includes(name) &&
             watchObj.object.status.conditions.some(
-                (c) => c.type == 'Ready' && c.status == 'True',
+                (c) => c.type === 'Ready' && c.status === 'True',
             )
         );
       },
@@ -594,10 +590,10 @@ function waitForServiceInstance(name, namespace = 'default', timeout = 90000) {
       {},
       (_type, _apiObj, watchObj) => {
         return (
-          watchObj.object.metadata.name == name &&
+          watchObj.object.metadata.name === name &&
         watchObj.object.status.conditions &&
         watchObj.object.status.conditions.some(
-            (c) => c.type == 'Ready' && c.status == 'True',
+            (c) => c.type === 'Ready' && c.status === 'True',
         )
         );
       },
@@ -612,10 +608,10 @@ function waitForServiceBinding(name, namespace = 'default', timeout = 90000) {
       {},
       (_type, _apiObj, watchObj) => {
         return (
-          watchObj.object.metadata.name == name &&
+          watchObj.object.metadata.name === name &&
         watchObj.object.status.conditions &&
         watchObj.object.status.conditions.some(
-            (c) => c.type == 'Ready' && c.status == 'True',
+            (c) => c.type === 'Ready' && c.status === 'True',
         )
         );
       },
@@ -634,10 +630,10 @@ function waitForServiceBindingUsage(
       {},
       (_type, _apiObj, watchObj) => {
         return (
-          watchObj.object.metadata.name == name &&
+          watchObj.object.metadata.name === name &&
         watchObj.object.status.conditions &&
         watchObj.object.status.conditions.some(
-            (c) => c.type == 'Ready' && c.status == 'True',
+            (c) => c.type === 'Ready' && c.status === 'True',
         )
         );
       },
@@ -773,7 +769,7 @@ function waitForVirtualService(namespace, apiRuleName, timeout = 20000) {
       query,
       (_type, _apiObj, watchObj) => {
         return (
-          watchObj.object.spec.hosts && watchObj.object.spec.hosts.length == 1
+          watchObj.object.spec.hosts && watchObj.object.spec.hosts.length === 1
         );
       },
       timeout,
@@ -793,22 +789,12 @@ async function getVirtualService(namespace, name) {
   }
 }
 
-async function getAllVirtualServices() {
-  const path = `/apis/networking.istio.io/v1beta1/virtualservices/`;
-  const response = await k8sDynamicApi.requestPromise({
-    url: k8sDynamicApi.basePath + path,
-  });
-  const body = JSON.parse(response.body);
-  return body.items;
-}
-
 async function getPersistentVolumeClaim(namespace, name) {
   const path = `/api/v1/namespaces/${namespace}/persistentvolumeclaims/${name}`;
   const response = await k8sDynamicApi.requestPromise({
     url: k8sDynamicApi.basePath + path,
   });
-  const body = JSON.parse(response.body);
-  return body;
+  return JSON.parse(response.body);
 }
 
 function waitForTokenRequest(name, namespace, timeout = 5000) {
@@ -820,7 +806,7 @@ function waitForTokenRequest(name, namespace, timeout = 5000) {
         return (
           watchObj.object.metadata.name === name &&
         watchObj.object.status &&
-        watchObj.object.status.state == 'OK' &&
+        watchObj.object.status.state === 'OK' &&
         watchObj.object.status.url
         );
       },
@@ -862,7 +848,7 @@ function waitForPodWithLabel(
       query,
       (_type, _apiObj, watchObj) => {
         return (
-          watchObj.object.status.phase == 'Running' &&
+          watchObj.object.status.phase === 'Running' &&
         watchObj.object.status.containerStatuses.every((cs) => cs.ready)
         );
       },
@@ -915,19 +901,19 @@ async function deleteNamespaces(namespaces, wait = true) {
   const result = await k8sCoreV1Api.listNamespace();
   const allNamespaces = result.body.items.map((i) => i.metadata.name);
   namespaces = namespaces.filter((n) => allNamespaces.includes(n));
-  if (namespaces.length == 0) {
+  if (namespaces.length === 0) {
     return;
   }
   const waitForNamespacesResult = waitForK8sObject(
       '/api/v1/namespaces',
       {},
       (type, _, watchObj) => {
-        if (type == 'DELETED') {
+        if (type === 'DELETED') {
           namespaces = namespaces.filter(
-              (n) => n != watchObj.object.metadata.name,
+              (n) => n !== watchObj.object.metadata.name,
           );
         }
-        return namespaces.length == 0 || !wait;
+        return namespaces.length === 0 || !wait;
       },
       10 * 60 * 1000,
       'Timeout for deleting namespaces: ' + namespaces,
@@ -955,7 +941,7 @@ async function listResources(path) {
       return listObj.items;
     }
   } catch (e) {
-    if (e.statusCode != 404 && e.statusCode != 405) {
+    if (e.statusCode !== 404 && e.statusCode !== 405) {
       console.error('Error:', e);
       throw e;
     }
@@ -981,7 +967,7 @@ async function resourceTypes(group, version) {
       return {group, version, path, ...res};
     });
   } catch (e) {
-    if (e.statusCode != 404 && e.statusCode != 405) {
+    if (e.statusCode !== 404 && e.statusCode !== 405) {
       console.log('Error:', e);
       throw e;
     }
@@ -1005,7 +991,7 @@ async function getAllResourceTypes() {
       return results.flat();
     });
   } catch (e) {
-    if (e.statusCode == 404 || e.statusCode == 405) {
+    if (e.statusCode === 404 || e.statusCode === 405) {
       // do nothing
     } else {
       console.log('Error:', e);
@@ -1033,13 +1019,22 @@ async function getSecretData(name, namespace) {
 
 function ignore404(e) {
   if (
-    (e.statusCode && e.statusCode == 404) ||
-      (e.response && e.response.statusCode && e.response.statusCode == 404)
+    (e.statusCode && e.statusCode === 404) ||
+      (e.response && e.response.statusCode && e.response.statusCode === 404)
   ) {
     debug('Warning: Ignoring NotFound error');
     return;
   }
 
+  throw e;
+}
+
+function ignoreNotFound(e) {
+  if (e.body && e.body.reason === 'NotFound') {
+    return;
+  }
+
+  console.log(e.body);
   throw e;
 }
 
@@ -1166,10 +1161,10 @@ async function getKymaAdminBindings() {
         name: clusterRoleBinding.metadata.name,
         role: clusterRoleBinding.roleRef.name,
         users: clusterRoleBinding.subjects
-            .filter((sub) => sub.kind == 'User')
+            .filter((sub) => sub.kind === 'User')
             .map((sub) => sub.name),
         groups: clusterRoleBinding.subjects
-            .filter((sub) => sub.kind == 'Group')
+            .filter((sub) => sub.kind === 'Group')
             .map((sub) => sub.name),
       }));
 }
@@ -1219,7 +1214,7 @@ const printRestartReport = (prevPodList = [], afterTestPodList = []) => {
                     status.image,
                 );
 
-                let restartsTillTestStart = 0;
+                let restartsTillTestStart;
                 let message = '';
                 if (!afterTestContainerStatus || !status) {
                   restartsTillTestStart = -1;
@@ -1247,7 +1242,7 @@ const printRestartReport = (prevPodList = [], afterTestPodList = []) => {
         return (
           Array.isArray(arg.containerRestarts) &&
         arg.containerRestarts.some(
-            (container) => container.restartsTillTestStart != 0,
+            (container) => container.restartsTillTestStart !== 0,
         )
         );
       });
@@ -1259,15 +1254,6 @@ ${k8s.dumpYaml(report)}
 `);
   }
 };
-
-function ignoreNotFound(e) {
-  if (e.body && e.body.reason == 'NotFound') {
-    return;
-  } else {
-    console.log(e.body);
-    throw e;
-  }
-}
 
 let DEBUG = process.env.DEBUG;
 
@@ -1325,7 +1311,7 @@ function genRandom(len) {
 
 function getEnvOrDefault(key, defValue = '') {
   if (!process.env[key]) {
-    if (defValue != '') {
+    if (defValue !== '') {
       return defValue;
     }
     throw new Error(`Env ${key} not present`);
@@ -1549,9 +1535,6 @@ function serviceInstanceObj(name, serviceClassExternalName) {
   };
 }
 
-function sleep(ms) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
 
 /**
  * Creates eventing backend secret for event mesh (BEB)
@@ -1883,7 +1866,6 @@ module.exports = {
   patchApplicationGateway,
   eventingSubscription,
   getVirtualService,
-  getAllVirtualServices,
   getPersistentVolumeClaim,
   waitForApplicationCr,
   patchDeployment,
@@ -1907,5 +1889,4 @@ module.exports = {
   getTraceDAG,
   printStatusOfInClusterEventingInfrastructure,
   getFunction,
-  kc,
 };

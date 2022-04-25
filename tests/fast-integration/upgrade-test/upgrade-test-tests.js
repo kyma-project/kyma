@@ -1,10 +1,17 @@
 const {checkServiceInstanceExistence} = require('./fixtures/helm-broker');
 
-const {printRestartReport, getContainerRestartsForAllNamespaces} = require('../utils');
+const {
+  printRestartReport,
+  getContainerRestartsForAllNamespaces,
+} = require('../utils');
 const {loggingTests} = require('../logging');
-const {monitoringTests} = require('../monitoring');
+const {
+  monitoringTests,
+  unexposeGrafana,
+} = require('../monitoring');
 const {tracingTests} = require('../tracing');
-const {checkInClusterEventDelivery,
+const {
+  checkInClusterEventDelivery,
   checkFunctionResponse,
   sendLegacyEventAndCheckResponse,
 } = require('../test/fixtures/commerce-mock');
@@ -44,4 +51,6 @@ describe('Upgrade test tests', function() {
   monitoringTests();
   loggingTests();
   tracingTests(mockNamespace, testNamespace);
+
+  unexposeGrafana();
 });

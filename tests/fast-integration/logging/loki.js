@@ -5,8 +5,9 @@ const {
   tryGetLokiPersistentVolumeClaim,
   logsPresentInLoki,
 } = require('./client');
+const {info} = require('../utils');
 
-async function checkCommerceMockLogsInLoki(startTimestamp) {
+async function checkCommerceMockLogs(startTimestamp) {
   const labels = '{app="commerce-mock", container="mock", namespace="mocks"}';
 
   const commerceMockLogsPresent = await logsPresentInLoki(labels, startTimestamp);
@@ -14,7 +15,7 @@ async function checkCommerceMockLogsInLoki(startTimestamp) {
   assert.isTrue(commerceMockLogsPresent, 'No logs from commerce mock present in Loki');
 }
 
-async function checkKymaLogsInLoki(startTimestamp) {
+async function checkKymaLogs(startTimestamp) {
   const systemLabel = '{namespace="kyma-system"}';
   const integrationLabel = '{namespace="kyma-integration"}';
 
@@ -35,7 +36,7 @@ async function checkRetentionPeriod() {
 async function checkPersistentVolumeClaimSize() {
   const pvc = await tryGetLokiPersistentVolumeClaim();
   if (pvc == null) {
-    console.log('Loki PVC not found. Skipping...');
+    info('Loki PVC not found. Skipping...');
     return;
   }
 
@@ -43,8 +44,8 @@ async function checkPersistentVolumeClaimSize() {
 }
 
 module.exports = {
-  checkCommerceMockLogsInLoki,
-  checkKymaLogsInLoki,
+  checkCommerceMockLogs,
+  checkKymaLogs,
   checkRetentionPeriod,
   checkPersistentVolumeClaimSize,
 };

@@ -12,6 +12,9 @@ metadata:
     {{- toYaml . | nindent 4 }}
     {{- end }}
 spec:
+  {{- if .Values.serviceMonitor.jobLabel }}
+  jobLabel: {{ .Values.serviceMonitor.jobLabel }}
+  {{- end }}
   endpoints:
     - port: http
       path: /api/v1/metrics/prometheus
@@ -21,9 +24,18 @@ spec:
       {{- with .Values.serviceMonitor.scrapeTimeout }}
       scrapeTimeout: {{ . }}
       {{- end }}
-      {{- if .Values.istio.permissiveMtls }}
-      scheme: http
+      {{- with .Values.serviceMonitor.metricRelabelings }}
+      metricRelabelings:
+      {{- if kindIs "string" . }}
+        {{- tpl . $ | nindent 8 }}
       {{- else }}
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- end }}
+      {{- with .Values.serviceMonitor.relabelings }}
+      relabelings:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
       ## scheme: HTTP scheme to use for scraping. Can be used with `tlsConfig` for example if using istio mTLS.
       scheme: https
       ## tlsConfig: TLS configuration to use when scraping the endpoint. For example if using istio mTLS.
@@ -33,7 +45,6 @@ spec:
         certFile: /etc/prometheus/secrets/istio.default/cert-chain.pem
         keyFile: /etc/prometheus/secrets/istio.default/key.pem
         insecureSkipVerify: true  # Prometheus does not support Istio security naming, thus skip verifying target pod ceritifcate
-      {{- end }}
   namespaceSelector:
     matchNames:
       - {{ .Release.Namespace }}

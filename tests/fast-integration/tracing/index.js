@@ -1,4 +1,7 @@
-const {waitForNamespace, getEnvOrDefault} = require('../utils');
+const {
+  waitForNamespace,
+  getEnvOrDefault,
+} = require('../utils');
 const {
   sendLegacyEventAndCheckTracing,
   sendCloudEventStructuredModeAndCheckTracing,
@@ -30,11 +33,11 @@ function tracingTests(mockNamespace, testNamespace) {
         await sendLegacyEventAndCheckTracing(testNamespace, mockNamespace);
       });
 
-      it('order.created.v1 structured cloud from CommerceMock should have correct tracing spans', async function() {
+      it('order.created.v1 structured cloud from CommerceMock should have correct tracing spans', async () => {
         await sendCloudEventStructuredModeAndCheckTracing(testNamespace, mockNamespace);
       });
 
-      it('order.created.v1 binary cloud event from CommerceMock should have correct tracing spans', async function() {
+      it('order.created.v1 binary cloud event from CommerceMock should have correct tracing spans', async () => {
         await sendCloudEventBinaryModeAndCheckTracing(testNamespace, mockNamespace);
       });
     });

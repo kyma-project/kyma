@@ -7,14 +7,14 @@ const {
   k8sApply,
   waitForK8sObject,
 } = require('../utils');
+const {logsPresentInLoki} = require('../logging');
 const {
-  lokiPortForward,
-  logsPresentInLoki,
-} = require('../logging');
-
+  exposeGrafana,
+  unexposeGrafana,
+} = require('../monitoring');
 const telemetryNamespace = 'kyma-system';
 const testStartTimestamp = new Date().toISOString();
-
+const invalidLogPipelineCR = loadResourceFromFile('./invalid-log-pipeline.yaml');
 
 function loadResourceFromFile(file) {
   const yaml = fs.readFileSync(path.join(__dirname, file), {
@@ -25,7 +25,7 @@ function loadResourceFromFile(file) {
 
 function checkLastCondition(logPipeline, conditionType) {
   const conditions = logPipeline.status.conditions;
-  if (conditions.length == 0) {
+  if (conditions.length === 0) {
     return false;
   }
   const lastCondition = conditions[conditions.length - 1];
@@ -38,7 +38,7 @@ function waitForLogPipelineStatusCondition(name, lastConditionType, timeout) {
       {},
       (_type, watchObj, _) => {
         return (
-          watchObj.metadata.name == name && checkLastCondition(watchObj, lastConditionType)
+          watchObj.metadata.name === name && checkLastCondition(watchObj, lastConditionType)
         );
       },
       timeout,
@@ -46,14 +46,9 @@ function waitForLogPipelineStatusCondition(name, lastConditionType, timeout) {
   );
 }
 
-const invalidLogPipelineCR = loadResourceFromFile('./invalid-log-pipeline.yaml');
 
 describe('Telemetry Operator tests', function() {
-  let cancelPortForward;
-
-  before(async function() {
-    cancelPortForward = lokiPortForward();
-  });
+  exposeGrafana();
 
   it('Operator should be ready', async () => {
     const res = await k8sCoreV1Api.listNamespacedPod(
@@ -78,16 +73,14 @@ describe('Telemetry Operator tests', function() {
     } catch (e) {
       assert.equal(e.statusCode, 403);
       expect(e.body.message).to.have.string('denied the request', 'Invalid indentation level');
-    };
+    }
   });
 
-  it('should push the logs to the loki output', async () => {
+  it('Should push the logs to the loki output', async () => {
     const labels = '{job="telemetry-fluent-bit"}';
     const logsPresent = await logsPresentInLoki(labels, testStartTimestamp);
     assert.isTrue(logsPresent, 'No logs present in Loki');
   });
 
-  after(async function() {
-    cancelPortForward();
-  });
+  unexposeGrafana();
 });
