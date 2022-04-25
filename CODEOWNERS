@@ -2,126 +2,126 @@
 
 # Each line is a file pattern followed by one or more owners.
 # The last matching pattern has the most precedence.
-# For more details, read the following article on GitHub: https://help.github.com/articles/about-codeowners/.
+# For more details read the following article on GitHub: https://help.github.com/articles/about-codeowners/.
 
-# These are the default owners for the whole content of the `kyma` repository. The default owners are automatically added as reviewers when you open a pull request, unless different owners are specified in the file.
+# These are the default owners for the whole content of the `kyma` repository. The default owners are automatically added as reviewers when you open a pull request unless different owners are specified in the file.
 * @pbochynski @PK85 @a-thaler
 
 # All .md files
 *.md @klaudiagrz @mmitoraj @majakurcius @alexandra-simeonova @NHingerl @grego952
 
-# TODO
+/.github @kyma-project/prow
 /.github/workflows @PK85 @piotrmiskiewicz @szwedm @wozniakjan @hanngos @tillknuesting @ralikio @kyma-project/prow @voigt
-/.github/ISSUE_TEMPLATE @kyma-project/documentation
-/.github @kyma-project/ci
+/.github/ISSUE_TEMPLATE @klaudiagrz @mmitoraj @majakurcius @NHingerl @grego952
+
 
 # Owners of the .kyma-project-io folder
 /.kyma-project-io/ @valentinvieriu @akucharska @dariadomagala @qbalukom @Wawrzyn321 @Sawthis @wchrapka @mrCherry97 @Lyczeq
 
-/common @Tomasz-Smelcerz-SAP, @strekm, @crabtree, @akgalwas, @janmedrek, @mszostok, @piotrmiskiewicz
+/common @Tomasz-Smelcerz-SAP @strekm @crabtree,@akgalwas @janmedrek @mszostok @piotrmiskiewicz
 # Logging library
-/common/logging @franpog859, @dbadura, @janmedrek
+/common/logging @franpog859 @dbadura @janmedrek
 
-/components/application-broker @kyma-project/service-management
-/components/application-connectivity-certs-setup-job @kyma-project/application-connector
-/components/application-connectivity-validator @kyma-project/application-connector
-/components/application-gateway @kyma-project/application-connector
-/components/application-operator @kyma-project/application-connector
-/components/application-registry @kyma-project/application-connector
-/components/binding @kyma-project/binding
-/components/busola-migrator @kyma-project/busola-migrator
-/components/central-application-connectivity-validator @kyma-project/application-connector
-/components/central-application-gateway @kyma-project/application-connector
-/components/compass-runtime-agent @kyma-project/application-connector PK85 dbadura
-/components/connection-token-handler @kyma-project/application-connector
-/components/connector-service @kyma-project/application-connector
-/components/event-publisher-proxy @kyma-project/eventing
-/components/eventing-controller @kyma-project/eventing
-/components/function-controller @kyma-project/serverless
-/components/function-runtimes @kyma-project/serverless
-/components/service-binding-usage-controller @kyma-project/service-management
-/components/telemetry-operator @kyma-project/observability
-/components/uaa-activator @kyma-project/uaa-activator
+/components/application-broker @wozniakjan @PK85 @piotrmiskiewicz @szwedm @ralikio @hanngos @tillknuesting
+/components/application-connectivity-certs-setup-job  @VOID404 @akgawlas @koala7659 @janmedrek @Maladie @franpog859 @mvshao
+/components/application-connectivity-validator  @VOID404 @akgawlas @koala7659 @janmedrek @Maladie @franpog859 @mvshao
+/components/application-gateway  @VOID404 @akgawlas @koala7659 @janmedrek @Maladie @franpog859 @mvshao
+/components/application-operator  @VOID404 @akgawlas @koala7659 @janmedrek @Maladie @franpog859 @mvshao
+/components/application-registry  @VOID404 @akgawlas @koala7659 @janmedrek @Maladie @franpog859 @mvshao
+/components/binding @wozniakjan @PK85 @piotrmiskiewicz @szwedm @ralikio @hanngos @tillknuesting
+/components/busola-migrator @m00g3n @pPrecel @dbadura @kwiatekus @moelsayed @cortey
+/components/central-application-connectivity-validator  @VOID404 @akgawlas @koala7659 @janmedrek @Maladie @franpog859 @mvshao
+/components/central-application-gateway  @VOID404 @akgawlas @koala7659 @janmedrek @Maladie @franpog859 @mvshao
+/components/compass-runtime-agent  @VOID404 @akgawlas @koala7659 @janmedrek @Maladie @franpog859 @mvshao @PK85 @dbadura
+/components/connection-token-handler  @VOID404 @akgawlas @koala7659 @janmedrek @Maladie @franpog859 @mvshao
+/components/connector-service  @VOID404 @akgawlas @koala7659 @janmedrek @Maladie @franpog859 @mvshao
+/components/event-publisher-proxy @k15r @nachtmaar @marcobebway @pxsalehi @mfaizanse @friedrichwilken @vladislavpaskar @raypinto @radufa @lilitgh
+/components/eventing-controller @k15r @nachtmaar @marcobebway @pxsalehi @mfaizanse @friedrichwilken @vladislavpaskar @raypinto @radufa @lilitgh
+/components/function-controller @m00g3n @pPrecel @dbadura @kwiatekus @moelsayed @cortey
+/components/function-runtimes @m00g3n @pPrecel @dbadura @kwiatekus @moelsayed @cortey
+/components/service-binding-usage-controller @wozniakjan @PK85 @piotrmiskiewicz @szwedm @ralikio @hanngos @tillknuesting
+/components/telemetry-operator @a-thaler @clebs @rakesh-garimella @skhalash @jeremyharisch @chrkl @lindnerby @dennis-ge @lilitgh
+/components/uaa-activator @wozniakjan @PK85 @piotrmiskiewicz @szwedm @ralikio @hanngos @tillknuesting
 
 # All files and subdirectories in /docs
-/docs @kyma-project/documentation
+/docs @klaudiagrz @mmitoraj @majakurcius @NHingerl @grego952
 
 /hack @clebs
 
 /installation @khlifi411 @jeremyharisch @ruanxin @tobiscr @moelsayed @clebs @Tomasz-Smelcerz-SAP @jakobmoellersap @adityabhatia
-/installation/resources/crds/api-gateway @kyma-project/api-gateway
-/installation/resources/crds/application-connector @kyma-project/application-connector
-/installation/resources/crds/compass-runtime-agent @kyma-project/application-connector
-/installation/resources/crds/eventing @kyma-project/eventing
-/installation/resources/crds/monitoring @kyma-project/observability
-/installation/resources/crds/ory @kyma-project/api-gateway
-/installation/resources/crds/rafter @kyma-project/core-and-supporting
-/installation/resources/crds/serverless @kyma-project/serverless
-/installation/resources/crds/service-catalog @kyma-project/service-management
-/installation/resources/crds/service-catalog-addons @kyma-project/service-management
-/installation/resources/crds/telemetry @kyma-project/observability
-/installation/resources/crds/tracing @kyma-project/observability
+/installation/resources/crds/api-gateway @strekm @werdes72 @mjakobczyk @veichtj @dariusztutaj @cnvergence @piotrkpc
+/installation/resources/crds/application-connector  @VOID404 @akgawlas @koala7659 @janmedrek @Maladie @franpog859 @mvshao
+/installation/resources/crds/compass-runtime-agent  @VOID404 @akgawlas @koala7659 @janmedrek @Maladie @franpog859 @mvshao
+/installation/resources/crds/eventing @k15r @nachtmaar @marcobebway @pxsalehi @mfaizanse @friedrichwilken @vladislavpaskar @raypinto @radufa @lilitgh
+/installation/resources/crds/monitoring @a-thaler @clebs @rakesh-garimella @skhalash @jeremyharisch @chrkl @lindnerby @dennis-ge @lilitgh
+/installation/resources/crds/ory @strekm @werdes72 @mjakobczyk @veichtj @dariusztutaj @cnvergence @piotrkpc
+/installation/resources/crds/rafter @m00g3n @pPrecel @dbadura @kwiatekus @moelsayed @cortey
+/installation/resources/crds/serverless @m00g3n @pPrecel @dbadura @kwiatekus @moelsayed @cortey
+/installation/resources/crds/service-catalog @wozniakjan @PK85 @piotrmiskiewicz @szwedm @ralikio @hanngos @tillknuesting
+/installation/resources/crds/service-catalog-addons @wozniakjan @PK85 @piotrmiskiewicz @szwedm @ralikio @hanngos @tillknuesting
+/installation/resources/crds/telemetry @a-thaler @clebs @rakesh-garimella @skhalash @jeremyharisch @chrkl @lindnerby @dennis-ge @lilitgh
+/installation/resources/crds/tracing @a-thaler @clebs @rakesh-garimella @skhalash @jeremyharisch @chrkl @lindnerby @dennis-ge @lilitgh
 
-/resources/api-gateway @kyma-project/api-gateway
-/resources/application-connector @kyma-project/application-connector
-/resources/application-connector/charts/application-broker @kyma-project/service-management
-/resources/application-connector/charts/application-operator @kyma-project/application-connector
-/resources/application-connector/charts/application-registry @kyma-project/application-connector
-/resources/application-connector/charts/central-application-connectivity-validator @kyma-project/application-connector
-/resources/application-connector/charts/central-application-gateway @kyma-project/application-connector
-/resources/application-connector/charts/connection-token-handler @kyma-project/application-connector
-/resources/application-connector/charts/connector-service @kyma-project/application-connector
+/resources/api-gateway @strekm @werdes72 @mjakobczyk @veichtj @dariusztutaj @cnvergence @piotrkpc
+/resources/application-connector  @VOID404 @akgawlas @koala7659 @janmedrek @Maladie @franpog859 @mvshao
+/resources/application-connector/charts/application-broker @wozniakjan @PK85 @piotrmiskiewicz @szwedm @ralikio @hanngos @tillknuesting
+/resources/application-connector/charts/application-operator  @VOID404 @akgawlas @koala7659 @janmedrek @Maladie @franpog859 @mvshao
+/resources/application-connector/charts/application-registry  @VOID404 @akgawlas @koala7659 @janmedrek @Maladie @franpog859 @mvshao
+/resources/application-connector/charts/central-application-connectivity-validator  @VOID404 @akgawlas @koala7659 @janmedrek @Maladie @franpog859 @mvshao
+/resources/application-connector/charts/central-application-gateway  @VOID404 @akgawlas @koala7659 @janmedrek @Maladie @franpog859 @mvshao
+/resources/application-connector/charts/connection-token-handler  @VOID404 @akgawlas @koala7659 @janmedrek @Maladie @franpog859 @mvshao
+/resources/application-connector/charts/connector-service  @VOID404 @akgawlas @koala7659 @janmedrek @Maladie @franpog859 @mvshao
 /resources/busola-migrator @m00g3n @pPrecel @dbadura @kwiatekus @moelsayed @cortey
 /resources/certificates @mjakobczyk @veichtj @dariusztutaj @cnvergence @piotrkpc @strekm @werdes72
 /resources/cluster-essentials @janmedrek @a-thaler @strekm @dariusztutaj @cnvergence @veichtj @piotrkpc @PK85
-/resources/cluster-essentials/charts/pod-preset @kyma-project/service-management
+/resources/cluster-essentials/charts/pod-preset @wozniakjan @PK85 @piotrmiskiewicz @szwedm @ralikio @hanngos @tillknuesting
 /resources/cluster-users @cnvergence @piotrkpc @strekm @werdes72 @mjakobczyk @veichtj @dariusztutaj
-/resources/compass-runtime-agent @kyma-project/application-connector
-/resources/eventing @kyma-project/eventing
-/resources/helm-broker @kyma-project/service-management
-/resources/istio @kyma-project/service-mesh
-/resources/istio-resources @kyma-project/service-mesh
-/resources/istio-resources/files/dashboards @kyma-project/observability
-/resources/kiali @kyma-project/observability
-/resources/logging @kyma-project/observability
-/resources/monitoring @kyma-project/observability
-/resources/ory @kyma-project/api-gateway
-/resources/rafter @kyma-project/core-and-supporting
-/resources/serverless @kyma-project/serverless
-/resources/service-catalog @kyma-project/service-management
-/resources/service-catalog-addons @kyma-project/service-management
-/resources/service-manager-proxy @kyma-project/service-management
-/resources/telemetry @kyma-project/observability
-/resources/tracing @kyma-project/observability
+/resources/compass-runtime-agent  @VOID404 @akgawlas @koala7659 @janmedrek @Maladie @franpog859 @mvshao
+/resources/eventing @k15r @nachtmaar @marcobebway @pxsalehi @mfaizanse @friedrichwilken @vladislavpaskar @raypinto @radufa @lilitgh
+/resources/helm-broker @wozniakjan @PK85 @piotrmiskiewicz @szwedm @ralikio @hanngos @tillknuesting
+/resources/istio @strekm @werdes72 @mjakobczyk @veichtj @dariusztutaj @cnvergence @piotrkpc
+/resources/istio-resources @strekm @werdes72 @mjakobczyk @veichtj @dariusztutaj @cnvergence @piotrkpc
+/resources/istio-resources/files/dashboards @a-thaler @clebs @rakesh-garimella @skhalash @jeremyharisch @chrkl @lindnerby @dennis-ge @lilitgh
+/resources/kiali @a-thaler @clebs @rakesh-garimella @skhalash @jeremyharisch @chrkl @lindnerby @dennis-ge @lilitgh
+/resources/logging @a-thaler @clebs @rakesh-garimella @skhalash @jeremyharisch @chrkl @lindnerby @dennis-ge @lilitgh
+/resources/monitoring @a-thaler @clebs @rakesh-garimella @skhalash @jeremyharisch @chrkl @lindnerby @dennis-ge @lilitgh
+/resources/ory @strekm @werdes72 @mjakobczyk @veichtj @dariusztutaj @cnvergence @piotrkpc
+/resources/rafter @m00g3n @pPrecel @dbadura kwiatekus @moelsayed @cortey
+/resources/serverless @m00g3n @pPrecel @dbadura @kwiatekus @moelsayed @cortey
+/resources/service-catalog @wozniakjan @PK85 @piotrmiskiewicz @szwedm @ralikio @hanngos @tillknuesting
+/resources/service-catalog-addons @wozniakjan @PK85 @piotrmiskiewicz @szwedm @ralikio @hanngos @tillknuesting
+/resources/service-manager-proxy @wozniakjan @PK85 @piotrmiskiewicz @szwedm @ralikio @hanngos @tillknuesting
+/resources/telemetry @a-thaler @clebs @rakesh-garimella @skhalash @jeremyharisch @chrkl @lindnerby @dennis-ge @lilitgh
+/resources/tracing @a-thaler @clebs @rakesh-garimella @skhalash @jeremyharisch @chrkl @lindnerby @dennis-ge @lilitgh
 
-/tests/application-connector-tests @kyma-project/application-connector
-/tests/application-gateway-legacy-tests @kyma-project/application-connector
-/tests/application-gateway-tests @kyma-project/application-connector
-/tests/application-operator-tests @kyma-project/application-connector
-/tests/application-registry-tests @kyma-project/application-connector
-/tests/compass-runtime-agent @kyma-project/application-connector
-/tests/connection-token-handler-tests @kyma-project/application-connector
-/tests/connector-service-tests @kyma-project/application-connector
+/tests/application-connector-tests  @VOID404 @akgawlas @koala7659 @janmedrek @Maladie @franpog859 @mvshao
+/tests/application-gateway-legacy-tests  @VOID404 @akgawlas @koala7659 @janmedrek @Maladie @franpog859 @mvshao
+/tests/application-gateway-tests  @VOID404 @akgawlas @koala7659 @janmedrek @Maladie @franpog859 @mvshao
+/tests/application-operator-tests  @VOID404 @akgawlas @koala7659 @janmedrek @Maladie @franpog859 @mvshao
+/tests/application-registry-tests  @VOID404 @akgawlas @koala7659 @janmedrek @Maladie @franpog859 @mvshao
+/tests/compass-runtime-agent  @VOID404 @akgawlas @koala7659 @janmedrek @Maladie @franpog859 @mvshao
+/tests/connection-token-handler-tests  @VOID404 @akgawlas @koala7659 @janmedrek @Maladie @franpog859 @mvshao
+/tests/connector-service-tests  @VOID404 @akgawlas @koala7659 @janmedrek @Maladie @franpog859 @mvshao
 
 # Fast Integration Tests
-/tests/fast-integration @lindnerby, @skhalash, @voigt, @rakesh-garimella, @jeremyharisch, @khlifi411, @ruanxin, @tobiscr, @clebs, @pbochynski, @dennis-ge, @jakobmoellersap, @Tomasz-Smelcerz-SAP
+/tests/fast-integration @lindnerby @skhalash @voigt @rakesh-garimella @jeremyharisch @khlifi411 @ruanxin @tobiscr @clebs @pbochynski @dennis-ge @jakobmoellersap @Tomasz-Smelcerz-SAP
 /tests/fast-integration/eventing-test @yma-project/eventing
-/tests/fast-integration/kcp @PK85, @piotrmiskiewicz, @szwedm, @wozniakjan, @hanngos, @tillknuesting, @ralikio
-/tests/fast-integration/kyma-environment-broker @PK85, @piotrmiskiewicz, @szwedm, @wozniakjan, @hanngos, @tillknuesting, @ralikio
-/tests/fast-integration/skr-kyma-to-kyma2-upgrade @hanngos, @tillknuesting, @ralikio, @PK85, @piotrmiskiewicz, @szwedm, @wozniakjan
-/tests/fast-integration/skr-nightly @hanngos, @tillknuesting, @ralikio, @PK85, @piotrmiskiewicz, @szwedm, @wozniakjan
-/tests/fast-integration/skr-svcat-migration-test @wozniakjan, @hanngos, @tillknuesting, @ralikio, @PK85, @piotrmiskiewicz, @szwedm
-/tests/fast-integration/skr-test @szwedm, @wozniakjan, @hanngos, @tillknuesting, @ralikio, @PK85, @piotrmiskiewicz
+/tests/fast-integration/kcp @PK85 @piotrmiskiewicz @szwedm @wozniakjan @hanngos @tillknuesting @ralikio
+/tests/fast-integration/kyma-environment-broker @PK85 @piotrmiskiewicz @szwedm @wozniakjan @hanngos @tillknuesting @ralikio
+/tests/fast-integration/skr-kyma-to-kyma2-upgrade @hanngos @tillknuesting @ralikio @PK85 @piotrmiskiewicz @szwedm @wozniakjan
+/tests/fast-integration/skr-nightly @hanngos @tillknuesting @ralikio @PK85 @piotrmiskiewicz @szwedm @wozniakjan
+/tests/fast-integration/skr-svcat-migration-test @wozniakjan @hanngos @tillknuesting @ralikio @PK85 @piotrmiskiewicz @szwedm
+/tests/fast-integration/skr-test @szwedm @wozniakjan @hanngos @tillknuesting @ralikio @PK85 @piotrmiskiewicz
 /tests/fast-integration/skr-test-without-sc @PK85 @piotrmiskiewicz @szwedm @wozniakjan @hanngos @tillknuesting @ralikio
 
-/tests/function-controller @kyma-project/serverless
-/tests/integration/api-gateway @kyma-project/api-gateway
+/tests/function-controller @m00g3n @pPrecel @dbadura @kwiatekus @moelsayed @cortey
+/tests/integration/api-gateway @strekm @werdes72 @mjakobczyk @veichtj @dariusztutaj @cnvergence @piotrkpc
 
 # performance tests
-/tests/perf @kyma-project/observability
-/tests/rafter @kyma-project/core-and-supporting
-/tests/serverless-bench @kyma-project/serverless
-/tests/service-catalog @kyma-project/service
+/tests/perf @a-thaler @clebs @rakesh-garimella @skhalash @jeremyharisch @chrkl @lindnerby @dennis-ge @lilitgh
+/tests/rafter @m00g3n @pPrecel @dbadura @kwiatekus @moelsayed @cortey
+/tests/serverless-bench @m00g3n @pPrecel @dbadura @kwiatekus @moelsayed @cortey
+/tests/service-catalog @wozniakjan @PK85 @piotrmiskiewicz @szwedm @ralikio @hanngos @tillknuesting
 
 # The tools/event-subscriber directory
 /tools/event-subscriber/ @lilitgh @k15r @nachtmaar @marcobebway @radufa @pxsalehi @mfaizanse @friedrichwilken @vladislavpaskar @raypinto
