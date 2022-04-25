@@ -24,7 +24,18 @@ const {
 
 const kymaNs = 'kyma-system';
 const kymaProxyDeployment = 'monitoring-auth-proxy-grafana';
-
+const proxySecret = {
+  apiVersion: 'v1',
+  kind: 'Secret',
+  metadata: {
+    name: 'monitoring-auth-proxy-grafana-user',
+    namespace: kymaNs,
+  },
+  type: 'Opaque',
+  data: {
+    OAUTH2_PROXY_SKIP_PROVIDER_BUTTON: toBase64('true'),
+  },
+};
 
 async function assertPodsExist() {
   await waitForPodWithLabel('app', 'grafana', kymaNs);
@@ -43,7 +54,7 @@ async function assertGrafanaRedirectsInKyma2() {
   let res = await checkGrafanaRedirect('https://kyma-project.io/docs', 403);
   assert.isTrue(res, 'Grafana redirect to kyma docs does not work!');
 
-  await manageSecret('create');
+  await createProxySecret();
   await restartProxyPod();
 
   info('Checking grafana redirect for google as OIDC provider');
@@ -65,7 +76,7 @@ async function assertGrafanaRedirectsInKyma1() {
 
 async function setGrafanaProxy() {
   if (getEnvOrDefault('KYMA_MAJOR_VERSION', '2') === '2') {
-    await manageSecret('create');
+    await createProxySecret();
     await restartProxyPod();
     await updateProxyDeployment('--reverse-proxy=true', '--trusted-ip=0.0.0.0/0');
     info('Checking grafana redirect to grafana URL');
@@ -76,7 +87,7 @@ async function setGrafanaProxy() {
 
 async function resetGrafanaProxy() {
   if (getEnvOrDefault('KYMA_MAJOR_VERSION', '2') === '2') {
-    await manageSecret('delete');
+    await deleteProxySecret();
     await updateProxyDeployment('--trusted-ip=0.0.0.0/0', '--reverse-proxy=true');
 
     info('Checking grafana redirect to kyma docs');
@@ -85,26 +96,14 @@ async function resetGrafanaProxy() {
   }
 }
 
-async function manageSecret(action) {
-  const secret = {
-    apiVersion: 'v1',
-    kind: 'Secret',
-    metadata: {
-      name: 'monitoring-auth-proxy-grafana-user',
-      namespace: kymaNs,
-    },
-    type: 'Opaque',
-    data: {
-      OAUTH2_PROXY_SKIP_PROVIDER_BUTTON: toBase64('true'),
-    },
-  };
-  if (action === 'create') {
-    info('Creating secret: monitoring-auth-proxy-grafana-user');
-    await k8sApply([secret], kymaNs);
-  } else if (action === 'delete') {
-    info('Deleting secret: monitoring-auth-proxy-grafana-user');
-    await k8sDelete([secret], kymaNs);
-  }
+async function createProxySecret() {
+  info(`Creating secret: ${proxySecret.metadata.name}`);
+  await k8sApply([proxySecret], kymaNs);
+}
+
+async function deleteProxySecret() {
+  info(`Deleting secret: ${proxySecret.metadata.name}`);
+  await k8sDelete([proxySecret], kymaNs);
 }
 
 async function restartProxyPod() {

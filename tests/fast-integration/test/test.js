@@ -4,7 +4,7 @@ const {
 } = require('./');
 
 const {apiExposureTests} = require('../api-exposure');
-const {monitoringTests, resetGrafanaProxy} = require('../monitoring');
+const {monitoringTests, unexposeGrafana} = require('../monitoring');
 const {loggingTests} = require('../logging');
 const {tracingTests} = require('../tracing');
 const {cleanMockTestFixture} = require('./fixtures/commerce-mock');
@@ -40,5 +40,5 @@ describe('Executing Standard Testsuite:', function() {
   loggingTests();
   tracingTests(mockNamespace, testNamespace);
 
-  resetGrafanaProxy();
+  unexposeGrafana();
 });

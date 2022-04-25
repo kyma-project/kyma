@@ -7,7 +7,7 @@ const {
 const {loggingTests} = require('../logging');
 const {
   monitoringTests,
-  resetGrafanaProxy,
+  unexposeGrafana,
 } = require('../monitoring');
 const {tracingTests} = require('../tracing');
 const {
@@ -52,5 +52,5 @@ describe('Upgrade test tests', function() {
   loggingTests();
   tracingTests(mockNamespace, testNamespace);
 
-  resetGrafanaProxy();
+  unexposeGrafana();
 });

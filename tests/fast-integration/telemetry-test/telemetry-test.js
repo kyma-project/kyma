@@ -9,8 +9,8 @@ const {
 } = require('../utils');
 const {logsPresentInLoki} = require('../logging');
 const {
-  setGrafanaProxy,
-  resetGrafanaProxy,
+  exposeGrafana,
+  unexposeGrafana,
 } = require('../monitoring');
 const telemetryNamespace = 'kyma-system';
 const testStartTimestamp = new Date().toISOString();
@@ -48,7 +48,7 @@ function waitForLogPipelineStatusCondition(name, lastConditionType, timeout) {
 
 
 describe('Telemetry Operator tests', function() {
-  setGrafanaProxy();
+  exposeGrafana();
 
   it('Operator should be ready', async () => {
     const res = await k8sCoreV1Api.listNamespacedPod(
@@ -82,5 +82,5 @@ describe('Telemetry Operator tests', function() {
     assert.isTrue(logsPresent, 'No logs present in Loki');
   });
 
-  resetGrafanaProxy();
+  unexposeGrafana();
 });

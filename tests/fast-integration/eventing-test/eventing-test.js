@@ -61,8 +61,8 @@ const {
   assert,
 } = require('chai');
 const {
-  setGrafanaProxy,
-  resetGrafanaProxy,
+  exposeGrafana,
+  unexposeGrafana,
 } = require('../monitoring');
 
 describe('Eventing tests', function() {
@@ -75,7 +75,7 @@ describe('Eventing tests', function() {
   });
 
   if (!isSKR) {
-    setGrafanaProxy();
+    exposeGrafana();
   }
 
   // eventingE2ETestSuite - Runs Eventing end-to-end tests
@@ -266,6 +266,6 @@ describe('Eventing tests', function() {
   });
 
   if (!isSKR) {
-    resetGrafanaProxy();
+    unexposeGrafana();
   }
 });
