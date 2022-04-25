@@ -133,4 +133,4 @@ milv.config.yaml @m00g3n @pPrecel @kwiatekus @moelsayed @cortey @klaudiagrz @mmi
 VERSION @kyma-project/prow
 
 # All .md files
-*.md @klaudiagrz @mmitoraj @majakurcius @alexandra-simeonova @NHingerl @grego952
+*.md @klaudiagrz @mmitoraj @majakurcius @NHingerl @grego952
