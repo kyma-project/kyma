@@ -114,7 +114,7 @@ prometheusRule:
 #       severity: critical
 
 dashboards:
-  enabled: false
+  enabled: true
   labelKey: grafana_dashboard
   annotations: {}
   namespace: ""
