@@ -8,15 +8,10 @@ If you're interested in learning more about the Application Connectivity area, f
 
   - [Pass the access token in the request header](../../../04-operation-guides/operations/ac-01-pass-access-token-in-request-header.md)
   - [Create a new Application](../../../03-tutorials/00-application-connectivity/ac-01-create-application.md)
-  - [Register a service](../../../03-tutorials/00-application-connectivity/ac-03-register-manage-services.md) <!-- TODO: adjust to the new flow -->
-  - [Register a secured API](../../../03-tutorials/00-application-connectivity/ac-04-register-secured-api.md) <!-- TODO: adjust to the new flow -->
+  - [Register a service](../../../03-tutorials/00-application-connectivity/ac-03-register-manage-services.md)
+  - [Register a secured API](../../../03-tutorials/00-application-connectivity/ac-04-register-secured-api.md)
   - [Call a registered external service from Kyma](../../../03-tutorials/00-application-connectivity/ac-05-call-registered-service-from-kyma.md)
-  - [Get subscribed events](../../../03-tutorials/00-application-connectivity/ac-10-get-subscribed-events.md)
   - [Disable TLS certificate verification](../../../03-tutorials/00-application-connectivity/ac-11-disable-tls-certificate-verification.md)
-
-- Check Application Connectivity troubleshooting guides for:
-
-  - [Application Gateway](../../../04-operation-guides/troubleshooting/ac-01-application-gateway-troubleshooting.md) errors when calling a registered service
 
 - Analyze Application Connectivity specification and configuration files:
 

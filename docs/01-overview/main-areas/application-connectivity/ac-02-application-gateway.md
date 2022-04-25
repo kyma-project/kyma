@@ -17,6 +17,10 @@ Additionally, Application Gateway supports cross-site request forgery (CSRF) tok
 
 Application Gateway calls the registered APIs accordingly, basing on the security type specified for the API in the Application CR.
 
+## Provide a custom access token
+
 Application Gateway overrides the registered API's security type if it gets a request which contains the **Access-Token** header. In such a case, Application Gateway rewrites the token from the **Access-Token** header into an OAuth-compliant **Authorization** header and forwards it to the target API.
 
 This mechanism is suited for implementations in which an external application handles user authentication.
+
+See how to [pass an access token in a request header](../../../04-operation-guides/operations/ac-01-pass-access-token-in-request-header.md).

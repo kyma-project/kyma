@@ -67,4 +67,5 @@ These components use this CR:
 
 | Component   |  Description |
 |-----------|-------------|
-| Application Registry | Reads and saves the APIs and Event Catalog metadata of the connected external solution in this CR. | <!-- TODO: adjust -->
+| Application Gateway | Reads the API metadata in order to connect to the external system. | 
+| Runtime Agent (in the [Compass mode](../../01-overview/main-areas/application-connectivity/README.md)) | Saves the metadata of the connected external system in the Application CR, synchronises the metadata stored in Compass with the state in the cluster stored in the Application CR. |
