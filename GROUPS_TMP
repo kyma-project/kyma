@@ -1,0 +1,115 @@
+aliases:
+  ci:
+    - Ressetkk
+    - ammarlakis
+    - dekiel
+    - Halamix2
+    - kasiakepka
+  documentation: # technical-writers
+    - klaudiagrz
+    - mmitoraj
+    - majakurcius
+    - NHingerl
+    - grego952
+  eventing:
+    - k15r
+    - nachtmaar
+    - marcobebway
+    - pxsalehi
+    - mfaizanse
+    - friedrichwilken
+    - vladislavpaskar
+    - raypinto
+    - radufa
+    - lilitgh
+  service-management:
+    - wozniakjan
+    - PK85
+    - piotrmiskiewicz
+    - szwedm
+    - ralikio
+    - hanngos
+    - tillknuesting
+  binding: # area/service-management
+    - wozniakjan
+    - PK85
+    - piotrmiskiewicz
+    - szwedm
+    - ralikio
+    - hanngos
+    - tillknuesting
+
+  uaa-activator: # area/service-management
+    - wozniakjan
+    - PK85
+    - piotrmiskiewicz
+    - szwedm
+    - ralikio
+    - hanngos
+    - tillknuesting
+
+  application-connector: # area/application-connector
+    - VOID404
+    - akgawlas
+    - koala7659
+    - janmedrek
+    - Maladie
+    - franpog859
+    - mvshao
+
+    - PK85 # singular
+
+  serverless: # area/serverless
+    - m00g3n
+    - pPrecel
+    - dbadura
+    - kwiatekus
+    - moelsayed
+    - cortey
+
+  core-and-supporting: # area/core-and-supporting
+    - m00g3n
+    - pPrecel
+    - dbadura
+    - kwiatekus
+    - moelsayed
+    - cortey
+
+  busola-migrator: # area/busola-migrator
+    - m00g3n
+    - pPrecel
+    - dbadura
+    - kwiatekus
+    - moelsayed
+    - cortey
+
+  api-gateway: # area/api-gateway
+    - strekm
+    - werdes72
+    - mjakobczyk
+    - veichtj
+    - dariusztutaj
+    - cnvergence
+    - piotrkpc
+
+    - Tomasz-Smelcerz-SAP
+
+  service-mesh: # area/service-mesh
+    - strekm
+    - werdes72
+    - mjakobczyk
+    - veichtj
+    - dariusztutaj
+    - cnvergence
+    - piotrkpc
+
+  observability: # area/logging, area/monitoring, area/tracing
+    - a-thaler
+    - clebs
+    - rakesh-garimella
+    - skhalash
+    - jeremyharisch
+    - chrkl
+    - lindnerby
+    - dennis-ge
+    - lilitgh
