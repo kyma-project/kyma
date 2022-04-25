@@ -74,7 +74,9 @@ describe('Eventing tests', function() {
     await waitForNamespace(mockNamespace);
   });
 
-  setGrafanaProxy();
+  if (!isSKR) {
+    setGrafanaProxy();
+  }
 
   // eventingE2ETestSuite - Runs Eventing end-to-end tests
   function eventingE2ETestSuite(backend) {
@@ -263,5 +265,7 @@ describe('Eventing tests', function() {
     eventingMonitoringTest(natsBackend, isJetStreamEnabled);
   });
 
-  resetGrafanaProxy();
+  if (!isSKR) {
+    resetGrafanaProxy();
+  }
 });
