@@ -42,10 +42,6 @@ describe('Execute SKR test', function() {
 
       const btpOperatorCreds = await t.smInstanceBinding(smAdminCreds, btpOperatorInstance, btpOperatorBinding);
 
-      const customParams = {
-        oidc: this.options.oidc0,
-      };
-
       console.log(`\nInstanceID ${this.options.instanceID}`,
           `Runtime ${runtimeName}`, `Application ${this.options.appName}`, `Suffix ${suffix}`);
 
@@ -73,9 +69,8 @@ describe('Execute SKR test', function() {
     }
   });
 
-  // oidcE2ETest();
+  oidcE2ETest();
   commerceMockTest();
-
 
   after('Deprovision SKR', async function() {
     try {
