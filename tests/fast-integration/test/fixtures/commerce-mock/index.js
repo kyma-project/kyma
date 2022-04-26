@@ -143,9 +143,8 @@ async function checkFunctionResponse(functionNamespace, mockNamespace = 'mocks')
     throw convertAxiosError(err, 'Function lastorder responded with error');
   });
 
-  // expect(res.data).to.have.nested.property('order.totalPriceWithTax.value', 100);
   console.log('This fails: ');
-  console.log(res);
+  expect(res.data).to.have.nested.property('order.totalPriceWithTax.value', 100);
 
   // expect error when unauthorized
   let errorOccurred = false;
