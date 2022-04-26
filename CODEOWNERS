@@ -32,8 +32,8 @@
 /components/compass-runtime-agent  @VOID404 @akgawlas @koala7659 @janmedrek @Maladie @franpog859 @mvshao @PK85 @dbadura
 /components/connection-token-handler  @VOID404 @akgawlas @koala7659 @janmedrek @Maladie @franpog859 @mvshao
 /components/connector-service  @VOID404 @akgawlas @koala7659 @janmedrek @Maladie @franpog859 @mvshao
-/components/event-publisher-proxy @k15r @nachtmaar @marcobebway @pxsalehi @mfaizanse @friedrichwilken @vladislavpaskar @raypinto @radufa @lilitgh
-/components/eventing-controller @k15r @nachtmaar @marcobebway @pxsalehi @mfaizanse @friedrichwilken @vladislavpaskar @raypinto @radufa @lilitgh
+/components/event-publisher-proxy @k15r @nachtmaar @marcobebway @pxsalehi @mfaizanse @friedrichwilken @vladislavpaskar @raypinto @lilitgh
+/components/eventing-controller @k15r @nachtmaar @marcobebway @pxsalehi @mfaizanse @friedrichwilken @vladislavpaskar @raypinto @lilitgh
 /components/function-controller @m00g3n @pPrecel @dbadura @kwiatekus @moelsayed @cortey
 /components/function-runtimes @m00g3n @pPrecel @dbadura @kwiatekus @moelsayed @cortey
 /components/service-binding-usage-controller @wozniakjan @PK85 @piotrmiskiewicz @szwedm @ralikio @hanngos @tillknuesting
@@ -49,7 +49,7 @@
 /installation/resources/crds/api-gateway @strekm @werdes72 @mjakobczyk @veichtj @dariusztutaj @cnvergence @piotrkpc
 /installation/resources/crds/application-connector  @VOID404 @akgawlas @koala7659 @janmedrek @Maladie @franpog859 @mvshao
 /installation/resources/crds/compass-runtime-agent  @VOID404 @akgawlas @koala7659 @janmedrek @Maladie @franpog859 @mvshao
-/installation/resources/crds/eventing @k15r @nachtmaar @marcobebway @pxsalehi @mfaizanse @friedrichwilken @vladislavpaskar @raypinto @radufa @lilitgh
+/installation/resources/crds/eventing @k15r @nachtmaar @marcobebway @pxsalehi @mfaizanse @friedrichwilken @vladislavpaskar @raypinto @lilitgh
 /installation/resources/crds/monitoring @a-thaler @clebs @rakesh-garimella @skhalash @jeremyharisch @chrkl @lindnerby @dennis-ge @lilitgh
 /installation/resources/crds/ory @strekm @werdes72 @mjakobczyk @veichtj @dariusztutaj @cnvergence @piotrkpc
 /installation/resources/crds/rafter @m00g3n @pPrecel @dbadura @kwiatekus @moelsayed @cortey
@@ -74,7 +74,7 @@
 /resources/cluster-essentials/charts/pod-preset @wozniakjan @PK85 @piotrmiskiewicz @szwedm @ralikio @hanngos @tillknuesting
 /resources/cluster-users @cnvergence @piotrkpc @strekm @werdes72 @mjakobczyk @veichtj @dariusztutaj
 /resources/compass-runtime-agent  @VOID404 @akgawlas @koala7659 @janmedrek @Maladie @franpog859 @mvshao
-/resources/eventing @k15r @nachtmaar @marcobebway @pxsalehi @mfaizanse @friedrichwilken @vladislavpaskar @raypinto @radufa @lilitgh
+/resources/eventing @k15r @nachtmaar @marcobebway @pxsalehi @mfaizanse @friedrichwilken @vladislavpaskar @raypinto @lilitgh
 /resources/helm-broker @wozniakjan @PK85 @piotrmiskiewicz @szwedm @ralikio @hanngos @tillknuesting
 /resources/istio @strekm @werdes72 @mjakobczyk @veichtj @dariusztutaj @cnvergence @piotrkpc
 /resources/istio-resources @strekm @werdes72 @mjakobczyk @veichtj @dariusztutaj @cnvergence @piotrkpc
@@ -83,7 +83,7 @@
 /resources/logging @a-thaler @clebs @rakesh-garimella @skhalash @jeremyharisch @chrkl @lindnerby @dennis-ge @lilitgh
 /resources/monitoring @a-thaler @clebs @rakesh-garimella @skhalash @jeremyharisch @chrkl @lindnerby @dennis-ge @lilitgh
 /resources/ory @strekm @werdes72 @mjakobczyk @veichtj @dariusztutaj @cnvergence @piotrkpc
-/resources/rafter @m00g3n @pPrecel @dbadura kwiatekus @moelsayed @cortey
+/resources/rafter @m00g3n @pPrecel @dbadura @kwiatekus @moelsayed @cortey
 /resources/serverless @m00g3n @pPrecel @dbadura @kwiatekus @moelsayed @cortey
 /resources/service-catalog @wozniakjan @PK85 @piotrmiskiewicz @szwedm @ralikio @hanngos @tillknuesting
 /resources/service-catalog-addons @wozniakjan @PK85 @piotrmiskiewicz @szwedm @ralikio @hanngos @tillknuesting
@@ -121,7 +121,7 @@
 /tests/service-catalog @wozniakjan @PK85 @piotrmiskiewicz @szwedm @ralikio @hanngos @tillknuesting
 
 # The tools/event-subscriber directory
-/tools/event-subscriber/ @lilitgh @k15r @nachtmaar @marcobebway @radufa @pxsalehi @mfaizanse @friedrichwilken @vladislavpaskar @raypinto
+/tools/event-subscriber/ @lilitgh @k15r @nachtmaar @marcobebway @pxsalehi @mfaizanse @friedrichwilken @vladislavpaskar @raypinto
 
 # The tools/gitserver directory
 /tools/gitserver/ @m00g3n @pPrecel @dbadura @kwiatekus @moelsayed @cortey
