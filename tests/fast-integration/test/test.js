@@ -31,6 +31,10 @@ describe('Executing Standard Testsuite:', function() {
     await cleanMockTestFixture(mockNamespace, testNamespace, true);
   });
 
+  after('Unexpose Grafana', async function() {
+    await unexposeGrafana();
+  });
+
   monitoringTests();
 
   apiExposureTests();
@@ -39,6 +43,4 @@ describe('Executing Standard Testsuite:', function() {
 
   loggingTests();
   tracingTests(mockNamespace, testNamespace);
-
-  unexposeGrafana();
 });

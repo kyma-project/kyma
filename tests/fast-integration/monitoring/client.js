@@ -1,5 +1,9 @@
 const axios = require('axios');
 const https = require('https');
+const httpsAgent = new https.Agent({
+  rejectUnauthorized: false, // curl -k
+});
+axios.defaults.httpsAgent = httpsAgent;
 
 const {
   convertAxiosError,

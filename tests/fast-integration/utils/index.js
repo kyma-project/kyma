@@ -1,6 +1,5 @@
 const stream = require('stream');
 const k8s = require('@kubernetes/client-node');
-const net = require('net');
 const fs = require('fs');
 const {join} = require('path');
 const {expect} = require('chai');
@@ -15,7 +14,6 @@ let k8sLog;
 let k8sServerUrl;
 
 let watch;
-let forward;
 
 const eventingBackendName = 'eventing-backend';
 
@@ -36,7 +34,6 @@ function initializeK8sClient(opts) {
     k8sRbacAuthorizationV1Api = kc.makeApiClient(k8s.RbacAuthorizationV1Api);
     k8sLog = new k8s.Log(kc);
     watch = new k8s.Watch(kc);
-    forward = new k8s.PortForward(kc);
     k8sServerUrl = kc.getCurrentCluster() ? kc.getCurrentCluster().server : null;
   } catch (err) {
     console.log(err.message);
@@ -222,18 +219,6 @@ function kubectlDelete(file, namespace) {
   const yaml = fs.readFileSync(file);
   const listOfSpecs = k8s.loadAllYaml(yaml);
   return k8sDelete(listOfSpecs, namespace);
-}
-
-function kubectlPortForward(namespace, podName, port) {
-  const server = net.createServer(function(socket) {
-    forward.portForward(namespace, podName, [port], socket, null, socket, 3);
-  });
-
-  server.listen(port, 'localhost');
-
-  return () => {
-    server.close();
-  };
 }
 
 async function k8sDelete(listOfSpecs, namespace) {
@@ -1793,7 +1778,6 @@ module.exports = {
   kubectlApply,
   kubectlDelete,
   kubectlDeleteDir,
-  kubectlPortForward,
   k8sApply,
   k8sDelete,
   waitForK8sObject,

@@ -46,9 +46,14 @@ function waitForLogPipelineStatusCondition(name, lastConditionType, timeout) {
   );
 }
 
-
 describe('Telemetry Operator tests', function() {
-  exposeGrafana();
+  before('Expose Grafana', async () => {
+    await exposeGrafana();
+  });
+
+  after('Unexpose Grafana', async () => {
+    await unexposeGrafana();
+  });
 
   it('Operator should be ready', async () => {
     const res = await k8sCoreV1Api.listNamespacedPod(
@@ -81,6 +86,6 @@ describe('Telemetry Operator tests', function() {
     const logsPresent = await logsPresentInLoki(labels, testStartTimestamp);
     assert.isTrue(logsPresent, 'No logs present in Loki');
   });
-
-  unexposeGrafana();
 });
+
+

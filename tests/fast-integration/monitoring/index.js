@@ -58,30 +58,22 @@ function monitoringTests() {
   });
 }
 
-function exposeGrafana() {
+async function exposeGrafana() {
   if (getEnvOrDefault('KYMA_MAJOR_UPGRADE', 'false') === 'true') {
     info('Skipping setting of Grafana Proxy for Kyma 1 to Kyma 2 upgrade scenario');
     return;
   }
 
-  describe('Should expose Grafana', function() {
-    it('Setting Grafana Proxy', async () => {
-      await grafana.setGrafanaProxy();
-    });
-  });
+  await grafana.setGrafanaProxy();
 }
 
-function unexposeGrafana() {
+async function unexposeGrafana() {
   if (getEnvOrDefault('KYMA_MAJOR_UPGRADE', 'false') === 'true') {
     info('Skipping resetting of Grafana Proxy for Kyma 1 to Kyma 2 upgrade scenario');
     return;
   }
 
-  describe('Should ensure that Grafana is not exposed', function() {
-    it('Resetting Grafana Proxy', async () => {
-      await grafana.resetGrafanaProxy();
-    });
-  });
+  await grafana.resetGrafanaProxy();
 }
 
 module.exports = {
