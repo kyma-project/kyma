@@ -52,5 +52,7 @@ describe('Upgrade test tests', function() {
   loggingTests();
   tracingTests(mockNamespace, testNamespace);
 
-  unexposeGrafana();
+  it('Unexpose Grafana', async () => {
+    await unexposeGrafana();
+  });
 });
