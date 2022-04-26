@@ -196,24 +196,6 @@ async function sendEventAndCheckResponse(eventType, body, params, mockNamespace 
   );
 }
 
-async function sendLegacyEventAndCheckResponse(mockNamespace = 'mocks') {
-  const body = {
-    'event-type': 'order.created',
-    'event-type-version': 'v1',
-    'event-time': '2020-09-28T14:47:16.491Z',
-    'data': {'orderCode': '567'},
-    // this parameter sets the x-b3-sampled header on the commerce-mock side,
-    // which configures istio-proxies to collect the traces no matter what sampling rate is configured
-    'event-tracing': true,
-  };
-  const params = {
-    headers: {
-      'content-type': 'application/json',
-    },
-  };
-
-  return await sendEventAndCheckResponse('legacy event', body, params, mockNamespace);
-}
 
 async function sendCloudEventStructuredModeAndCheckResponse(backendType = 'nats', mockNamespace = 'mocks') {
   let source = 'commerce';
@@ -485,22 +467,22 @@ async function registerAllApis(mockHost) {
 }
 
 async function connectMockLocal(mockHost, targetNamespace) {
-  const tokenRequest = {
-    apiVersion: 'applicationconnector.kyma-project.io/v1alpha1',
-    kind: 'TokenRequest',
-    metadata: {name: 'commerce', namespace: targetNamespace},
-  };
-  await k8sDynamicApi.delete(tokenRequest).catch(() => { }); // Ignore delete error
-  await k8sDynamicApi.create(tokenRequest);
-  const tokenObj = await waitForTokenRequest('commerce', targetNamespace);
-
-  const pairingBody = {
-    token: tokenObj.status.url,
-    baseUrl: `https://${mockHost}`,
-    insecure: true,
-  };
-  debug('Token URL', tokenObj.status.url);
-  await connectCommerceMock(mockHost, pairingBody);
+  // const tokenRequest = {
+  //   apiVersion: 'applicationconnector.kyma-project.io/v1alpha1',
+  //   kind: 'TokenRequest',
+  //   metadata: {name: 'commerce', namespace: targetNamespace},
+  // };
+  // await k8sDynamicApi.delete(tokenRequest).catch(() => { }); // Ignore delete error
+  // await k8sDynamicApi.create(tokenRequest);
+  // const tokenObj = await waitForTokenRequest('commerce', targetNamespace);
+  //
+  // const pairingBody = {
+  //   token: tokenObj.status.url,
+  //   baseUrl: `https://${mockHost}`,
+  //   insecure: true,
+  // };
+  // debug('Token URL', tokenObj.status.url);
+  // await connectCommerceMock(mockHost, pairingBody);
   await ensureApplicationMapping('commerce', targetNamespace);
   debug('Commerce mock connected locally');
 }
@@ -649,71 +631,13 @@ async function ensureCommerceMockLocalTestFixture(mockNamespace,
       mockNamespace,
       targetNamespace,
     withCentralApplicationConnectivity ? prepareFunction('central-app-gateway') : prepareFunction());
-  await retryPromise(() => connectMockLocal(mockHost, targetNamespace), 10, 3000);
-  // await retryPromise(() => registerAllApis(mockHost), 10, 3000);
-
-  false && exit(0);
 
   if (withCentralApplicationConnectivity) {
     await waitForDeployment('central-application-gateway', 'kyma-system');
     await waitForDeployment('central-application-connectivity-validator', 'kyma-system');
   }
 
-  const webServicesSC = await waitForServiceClass(
-      'webservices',
-      targetNamespace,
-      400 * 1000,
-  );
-  const eventsSC = await waitForServiceClass('events', targetNamespace);
-  const webServicesSCExternalName = webServicesSC.spec.externalName;
-  const eventsSCExternalName = eventsSC.spec.externalName;
-  const serviceCatalogObjs = [
-    serviceInstanceObj('commerce-webservices', webServicesSCExternalName),
-    serviceInstanceObj('commerce-events', eventsSCExternalName),
-  ];
-
-  await retryPromise(
-      () => k8sApply(serviceCatalogObjs, targetNamespace, false),
-      5,
-      2000,
-  );
-  await waitForServiceInstance('commerce-webservices', targetNamespace);
-  await waitForServiceInstance('commerce-events', targetNamespace);
-
-  const serviceBinding = {
-    apiVersion: 'servicecatalog.k8s.io/v1beta1',
-    kind: 'ServiceBinding',
-    metadata: {
-      name: 'commerce-binding',
-    },
-    spec: {
-      instanceRef: {name: 'commerce-webservices'},
-    },
-  };
-  await k8sApply([serviceBinding], targetNamespace, false);
-  await waitForServiceBinding('commerce-binding', targetNamespace);
-
-  const serviceBindingUsage = {
-    apiVersion: 'servicecatalog.kyma-project.io/v1alpha1',
-    kind: 'ServiceBindingUsage',
-    metadata: {name: 'commerce-lastorder-sbu'},
-    spec: {
-      serviceBindingRef: {name: 'commerce-binding'},
-      usedBy: {kind: 'serverless-function', name: 'lastorder'},
-    },
-  };
-  await k8sApply([serviceBindingUsage], targetNamespace);
-  await waitForServiceBindingUsage('commerce-lastorder-sbu', targetNamespace);
-
   await waitForFunction('lastorder', targetNamespace);
-
-  await k8sApply([eventingSubscription(
-      `sap.kyma.custom.inapp.order.received.v1`,
-      `http://lastorder.${targetNamespace}.svc.cluster.local`,
-      'order-received',
-      targetNamespace)]);
-  await waitForSubscription('order-received', targetNamespace);
-  await waitForSubscription('order-created', targetNamespace);
 
   return mockHost;
 }
@@ -813,60 +737,10 @@ async function waitForSubscriptionsTillReady(targetNamespace) {
   await waitForSubscription('order-created', targetNamespace);
 }
 
-async function checkInClusterEventDelivery(targetNamespace) {
-  await checkInClusterEventDeliveryHelper(targetNamespace, 'structured');
-  await checkInClusterEventDeliveryHelper(targetNamespace, 'binary');
-}
-
-async function checkInClusterEventDeliveryHelper(targetNamespace, encoding) {
-  const eventId = 'event-' + encoding + '-' + genRandom(5);
-  const vs = await waitForVirtualService(targetNamespace, 'lastorder');
-  const mockHost = vs.spec.hosts[0];
-
-  await printStatusOfInClusterEventingInfrastructure(targetNamespace, encoding, 'lastorder');
-
-  // send event using function query parameter send=true
-  await retryPromise(async () => {
-    const response = await axios.post(`https://${mockHost}`, {id: eventId}, {
-      params: {
-        send: true,
-        encoding: encoding,
-      },
-    });
-    debug('Event publishing result:', {
-      status: response.status,
-      statusText: response.statusText,
-      data: response.data,
-    });
-    if (response.data.eventPublishError) {
-      throw convertAxiosError(response.data.statusText);
-    }
-    expect(response.status).to.be.equal(200);
-  }, 10, 1000);
-  debug(`Event ${eventId} was successfully published`);
-
-  // verify if event was received using function query parameter inappevent=eventId
-  return await retryPromise(async () => {
-    debug('Waiting for event: ', eventId);
-    const response = await axios.get(`https://${mockHost}`, {params: {inappevent: eventId}});
-    debug('Received Event response: ', {
-      status: response.status,
-      statusText: response.statusText,
-      data: response.data,
-    });
-    expect(response.data).to.have.nested.property('event.id', eventId, 'The same event id expected in the result');
-    expect(response.data).to.have.nested.property('event.shipped', true, 'Order should have property shipped');
-    return response;
-  }, 30, 2 * 1000)
-      .catch((err) => {
-        throw convertAxiosError(err, 'Fetching published event responded with error');
-      });
-}
 
 module.exports = {
   ensureCommerceMockLocalTestFixture,
   ensureCommerceMockWithCompassTestFixture,
-  sendLegacyEventAndCheckResponse,
   sendCloudEventStructuredModeAndCheckResponse,
   sendCloudEventBinaryModeAndCheckResponse,
   sendLegacyEventAndCheckTracing,
@@ -876,7 +750,6 @@ module.exports = {
   updateService,
   deleteService,
   checkFunctionResponse,
-  checkInClusterEventDelivery,
   checkInClusterEventTracing,
   cleanMockTestFixture,
   deleteMockTestFixture,
