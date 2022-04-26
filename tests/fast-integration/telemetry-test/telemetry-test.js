@@ -46,10 +46,13 @@ function waitForLogPipelineStatusCondition(name, lastConditionType, timeout) {
   );
 }
 
-
 describe('Telemetry Operator tests', function() {
-  before('Prepare Grafana', async () => {
+  before('Expose Grafana', async () => {
     await exposeGrafana();
+  });
+
+  after('Unexpose Grafana', async () => {
+    await unexposeGrafana();
   });
 
   it('Operator should be ready', async () => {
@@ -83,8 +86,6 @@ describe('Telemetry Operator tests', function() {
     const logsPresent = await logsPresentInLoki(labels, testStartTimestamp);
     assert.isTrue(logsPresent, 'No logs present in Loki');
   });
-
-  after('Cleanup Grafana', async () => {
-    await unexposeGrafana();
-  });
 });
+
+

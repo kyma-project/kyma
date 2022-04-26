@@ -144,7 +144,7 @@ function commerceMockTest() {
         await checkAuditLogs(auditlogs, null, true);
       });
 
-      it('Prepare Grafana', async function() {
+      it('Expose Grafana', async function() {
         await exposeGrafana();
       });
 
@@ -152,7 +152,7 @@ function commerceMockTest() {
         await checkAuditEventsThreshold(4);
       });
 
-      it('Cleanup Grafana', async function() {
+      it('Unexpose Grafana', async function() {
         await unexposeGrafana();
       });
     }

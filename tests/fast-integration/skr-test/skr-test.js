@@ -151,7 +151,7 @@ function commerceMockTest() {
         await checkAuditEventsThreshold(4);
       });
 
-      it('Cleanup Grafana', async function() {
+      it('Unexpose Grafana', async function() {
         await unexposeGrafana();
       });
     }

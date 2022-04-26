@@ -1,6 +1,5 @@
 const stream = require('stream');
 const k8s = require('@kubernetes/client-node');
-const net = require('net');
 const fs = require('fs');
 const {join} = require('path');
 const {expect} = require('chai');
@@ -15,7 +14,6 @@ let k8sLog;
 let k8sServerUrl;
 
 let watch;
-let forward;
 
 const eventingBackendName = 'eventing-backend';
 
@@ -36,7 +34,6 @@ function initializeK8sClient(opts) {
     k8sRbacAuthorizationV1Api = kc.makeApiClient(k8s.RbacAuthorizationV1Api);
     k8sLog = new k8s.Log(kc);
     watch = new k8s.Watch(kc);
-    forward = new k8s.PortForward(kc);
     k8sServerUrl = kc.getCurrentCluster() ? kc.getCurrentCluster().server : null;
   } catch (err) {
     console.log(err.message);

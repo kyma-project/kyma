@@ -75,7 +75,9 @@ describe('Eventing tests', function() {
   });
 
   if (!isSKR) {
-    exposeGrafana();
+    before('Expose Grafana', async function() {
+      await exposeGrafana();
+    });
   }
 
   // eventingE2ETestSuite - Runs Eventing end-to-end tests
@@ -266,6 +268,8 @@ describe('Eventing tests', function() {
   });
 
   if (!isSKR) {
-    unexposeGrafana();
+    before('Unexpose Grafana', async function() {
+      await unexposeGrafana();
+    });
   }
 });
