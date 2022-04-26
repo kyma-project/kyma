@@ -21,7 +21,6 @@ const {
 } = require('../audit-log');
 const {keb, gardener, director} = require('./helpers');
 const {KCPWrapper, KCPConfig} = require('../kcp/client');
-const {exposeGrafana, unexposeGrafana} = require('../monitoring');
 
 const kcp = new KCPWrapper(KCPConfig.fromEnv());
 
@@ -144,16 +143,8 @@ function commerceMockTest() {
         await checkAuditLogs(auditlogs, null, true);
       });
 
-      it('Expose Grafana', async function() {
-        await exposeGrafana();
-      });
-
       it('Amount of audit events must not exceed a certain threshold', async function() {
         await checkAuditEventsThreshold(4);
-      });
-
-      it('Unexpose Grafana', async function() {
-        await unexposeGrafana();
       });
     }
   });
