@@ -1,4 +1,3 @@
-
 {{- define "fluent-bit.pod" -}}
 serviceAccountName: {{ include "fluent-bit.serviceAccountName" . }}
 {{- with .Values.imagePullSecrets }}

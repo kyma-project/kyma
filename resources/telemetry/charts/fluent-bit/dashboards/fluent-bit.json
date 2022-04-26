@@ -1299,7 +1299,7 @@
     ]
   },
   "timezone": "",
-  "title": "{{ include "fluent-bit.fullname" . }}",
+  "title": "Kyma / Telemetry / Fluent Bit",
   "uid": "{{ include "fluent-bit.fullname" . }}",
   "version": 2
 }
