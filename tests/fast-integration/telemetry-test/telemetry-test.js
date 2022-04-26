@@ -48,41 +48,43 @@ function waitForLogPipelineStatusCondition(name, lastConditionType, timeout) {
 
 
 describe('Telemetry Operator tests', function() {
-  exposeGrafana();
-
-  context('', () => {
-    it('Operator should be ready', async () => {
-      const res = await k8sCoreV1Api.listNamespacedPod(
-          telemetryNamespace,
-          'true',
-          undefined,
-          undefined,
-          undefined,
-          'control-plane=telemetry-operator',
-      );
-      const podList = res.body.items;
-      assert.equal(podList.length, 1);
-    });
-
-    it('Loki LogPipeline should have Running condition', async () => {
-      await waitForLogPipelineStatusCondition('loki', 'Running', 180000);
-    });
-
-    it('Should reject the invalid LogPipeline', async () => {
-      try {
-        await k8sApply(invalidLogPipelineCR, telemetryNamespace);
-      } catch (e) {
-        assert.equal(e.statusCode, 403);
-        expect(e.body.message).to.have.string('denied the request', 'Invalid indentation level');
-      }
-    });
-
-    it('Should push the logs to the loki output', async () => {
-      const labels = '{job="telemetry-fluent-bit"}';
-      const logsPresent = await logsPresentInLoki(labels, testStartTimestamp);
-      assert.isTrue(logsPresent, 'No logs present in Loki');
-    });
+  it('Prepare Grafana', async () => {
+    await exposeGrafana();
   });
 
-  unexposeGrafana();
+  it('Operator should be ready', async () => {
+    const res = await k8sCoreV1Api.listNamespacedPod(
+        telemetryNamespace,
+        'true',
+        undefined,
+        undefined,
+        undefined,
+        'control-plane=telemetry-operator',
+    );
+    const podList = res.body.items;
+    assert.equal(podList.length, 1);
+  });
+
+  it('Loki LogPipeline should have Running condition', async () => {
+    await waitForLogPipelineStatusCondition('loki', 'Running', 180000);
+  });
+
+  it('Should reject the invalid LogPipeline', async () => {
+    try {
+      await k8sApply(invalidLogPipelineCR, telemetryNamespace);
+    } catch (e) {
+      assert.equal(e.statusCode, 403);
+      expect(e.body.message).to.have.string('denied the request', 'Invalid indentation level');
+    }
+  });
+
+  it('Should push the logs to the loki output', async () => {
+    const labels = '{job="telemetry-fluent-bit"}';
+    const logsPresent = await logsPresentInLoki(labels, testStartTimestamp);
+    assert.isTrue(logsPresent, 'No logs present in Loki');
+  });
+
+  it('Cleanup Grafana', async () => {
+    await unexposeGrafana();
+  });
 });
