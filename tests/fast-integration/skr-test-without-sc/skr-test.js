@@ -18,7 +18,6 @@ const {
   AuditLogCreds,
   AuditLogClient,
   checkAuditLogs,
-  checkAuditEventsThreshold,
 } = require('../audit-log');
 const {keb, gardener, director} = require('./helpers');
 const {KCPWrapper, KCPConfig} = require('../kcp/client');
