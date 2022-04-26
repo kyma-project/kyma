@@ -41,10 +41,30 @@ help-generic:
 
 
 ##@ Development
-# Deploy eventing-controller in the configured Kubernetes cluster in ~/.kube/config for local development
-deploy: manifests-local set-up-local-env ## build the binary locally using `ko` and deploy it to a cluster
+HELM_TEMPLATE_ASSETS_DIR=./config/helm/manifests
+# Deploy eventing-controller in the configured Kubernetes cluster in ~/.kube/config for local development using helm templates.
+deploy: manifests-local copy-crds copy-external-crds set-up-local-env ## build the binary locally using `ko` and deploy it to a cluster
+	$(shell cd ../event-publisher-proxy; ko publish github.com/kyma-project/kyma/components/event-publisher-proxy/cmd/event-publisher-proxy -B > /dev/null)
+	rm -rf ${HELM_TEMPLATE_ASSETS_DIR}; mkdir -p ${HELM_TEMPLATE_ASSETS_DIR}
+	helm template --output-dir ${HELM_TEMPLATE_ASSETS_DIR} eventing ../../resources/eventing
+	kustomize build config/helm | envsubst | ko apply -f -
+	rm -rf ${HELM_TEMPLATE_ASSETS_DIR}
+
+deploy-dry-run: manifests-local copy-crds copy-external-crds set-up-local-env ## Dry run for deploying eventing-controller for local development using helm templates.
+	$(shell cd ../event-publisher-proxy; ko publish github.com/kyma-project/kyma/components/event-publisher-proxy/cmd/event-publisher-proxy -B > /dev/null)
+	rm -rf ${HELM_TEMPLATE_ASSETS_DIR}; mkdir -p ${HELM_TEMPLATE_ASSETS_DIR}
+	helm template --output-dir ${HELM_TEMPLATE_ASSETS_DIR} eventing ../../resources/eventing
+	kustomize build config/helm | envsubst
+	rm -rf ${HELM_TEMPLATE_ASSETS_DIR}
+
+# Deploy eventing-controller in the configured Kubernetes cluster in ~/.kube/config for local development using kustomize templates.
+deploy-kustomize: manifests-local set-up-local-env ## build the binary locally using `ko` and deploy it to a cluster
 	$(shell cd ../event-publisher-proxy; ko publish github.com/kyma-project/kyma/components/event-publisher-proxy/cmd/event-publisher-proxy -B > /dev/null)
 	kustomize build config/default | envsubst | ko apply -f -
+
+deploy-kustomize-dry-run: set-up-local-env manifests-local ## Dry run for deploying eventing-controller for local development using kustomize templates.
+	cd config/rbac && kustomize edit set namespace ${NAMESPACE}
+	kustomize build config/default | envsubst
 
 manifests-local: controller-gen-local ## Generate WebhookConfiguration, ClusterRole and CustomResourceDefinition objects.
 	$(CONTROLLER_GEN) $(CRD_OPTIONS) rbac:roleName=manager-role webhook paths="./..." output:crd:artifacts:config=config/crd/bases
@@ -99,11 +119,6 @@ controller-gen-local: ## Download controller-gen locally if necessary.
 
 path-to-referenced-charts:
 	@echo "resources/eventing"
-
-
-deploy-dry-run: set-up-local-env manifests-local ## Dry run for deploying eventing-controller for local development
-	cd config/rbac && kustomize edit set namespace ${NAMESPACE}
-	kustomize build config/default | envsubst
 
 ##@ CRD
 
