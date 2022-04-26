@@ -10,9 +10,8 @@ const {
   addService,
   updateService,
   deleteService,
-  sendLegacyEventAndCheckResponse,
   sendCloudEventStructuredModeAndCheckResponse,
-  // cleanMockTestFixture,
+  cleanMockTestFixture,
   checkInClusterEventDelivery,
   sendCloudEventBinaryModeAndCheckResponse,
 } = require('./fixtures/commerce-mock');
@@ -26,7 +25,7 @@ const {
 } = require('../logging');
 
 function commerceMockTests() {
-  describe('CommerceMock Tests:', function() {
+  describe('CommerceMocko Tests:', function() {
     this.timeout(10 * 60 * 1000);
     this.slow(5000);
     const withCentralAppConnectivity = (process.env.WITH_CENTRAL_APP_CONNECTIVITY === 'true');
@@ -54,25 +53,8 @@ function commerceMockTests() {
       });
     });
 
-    it('in-cluster event should be delivered (structured and binary mode)', async function() {
-      await checkInClusterEventDelivery(testNamespace);
-    });
-
     it('function should be reachable through secured API Rule', async function() {
       await checkFunctionResponse(testNamespace);
-    });
-
-    it('order.created.v1 event should trigger the lastorder function', async function() {
-      await sendLegacyEventAndCheckResponse();
-    });
-
-
-    it('order.created.v1 cloud event in structured mode should trigger the lastorder function', async function() {
-      await sendCloudEventStructuredModeAndCheckResponse();
-    });
-
-    it('order.created.v1 cloud event in binary mode should trigger the lastorder function', async function() {
-      await sendCloudEventBinaryModeAndCheckResponse();
     });
 
     it('should add, update and delete a service', async function() {
@@ -80,7 +62,7 @@ function commerceMockTests() {
       await updateService(serviceId);
       await deleteService(serviceId);
     });
-
+    //
     it('Should print report of restarted containers, skipped if no crashes happened', async function() {
       const afterTestRestarts = await getContainerRestartsForAllNamespaces();
       printRestartReport(initialRestarts, afterTestRestarts);
