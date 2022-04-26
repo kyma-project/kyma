@@ -31,3 +31,13 @@ Event Publisher Proxy receives legacy and Cloud Event publishing requests from t
 ## Eventing Controller
 
 Eventing Controller manages the internal infrastructure in order to receive an event. It watches Subscription Custom Resource Definitions. When an event is received in an Application, it lays down the Eventing infrastructure in NATS in order to trigger a Function. Eventing Controller also dispatches messages to subscribers such as a Function or another workload.
+
+## JetStream
+
+Kyma now supports JetStream, which is a persistence offering from NATS, that guarantees `atleast once` delivery. It is build-in within our default NATS backend and can be enabled as shown [here](../../04-operation-guides/operations/evnt-01-enable-kyma-with-jetstream.md#enable-jet-stream).
+
+The key advantages of JetStream over Core NATS are:
+
+- [At least once delivery of JetStream](../../04-operation-guides/operations/evnt-01-enable-kyma-with-jetstream.md#at-least-once-delivery-guarantees-using-jet-stream-backend) vs at most once delivery of NATS.
+- Streaming: Streams receive and store messages that are published and subscribers can consume these messages at any time.
+- Persistent stream storage: Messages stored in the stream can be persisted in case of server restart.
