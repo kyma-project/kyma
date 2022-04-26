@@ -85,8 +85,6 @@ Follow these steps:
 
 ### Required programming skills
 
-- Mural Learning path   https://app.mural.co/t/sappm1454/m/sappm1454/1623833112208/70a6f14316e3f216ed2e1a62cfbdd33498af9686
-
 - Kubernetes skills
    - Basic [Kubernetes architecture](https://shipit.dev/posts/kubernetes-overview-diagrams.html)
    - CKAD level preferred
