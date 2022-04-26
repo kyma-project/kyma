@@ -45,17 +45,13 @@ describe('Execute SKR test', function() {
       console.log(`\nInstanceID ${this.options.instanceID}`,
           `Runtime ${runtimeName}`, `Application ${this.options.appName}`, `Suffix ${suffix}`);
 
-      const customParams = {
-        oidc: this.options.oidc0,
-      };
-
       const skr = await provisionSKR(keb,
           kcp, gardener,
           this.options.instanceID,
           runtimeName,
           null,
           btpOperatorCreds,
-          customParams,
+          null,
           provisioningTimeout);
       this.shoot = skr.shoot;
 

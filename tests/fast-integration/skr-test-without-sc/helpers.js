@@ -50,9 +50,9 @@ function gatherOptions(...opts) {
     // These options are not meant to be rewritten apart from env variable for KEB_USER_ID
     // If that's needed please add separate function that overrides this field.
     oidc0: {
-      clientID: 'abc-xyz',
+      clientID: '9bd05ed7-a930-44e6-8c79-e6defeb7dec5',
       groupsClaim: 'groups',
-      issuerURL: 'https://custom.ias.com',
+      issuerURL: 'https://kymatest.accounts400.ondemand.com',
       signingAlgs: ['RS256'],
       usernameClaim: 'sub',
       usernamePrefix: '-',
