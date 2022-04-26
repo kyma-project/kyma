@@ -178,10 +178,10 @@ function shouldIgnoreTarget(target) {
 }
 
 function shouldIgnoreAlert(alert) {
-
   // List of critical alerts we care about but which we have to ignore due to Workarounds
   const criticalAlertNamesToIgnore = [
-    // Sometimes the Gardener API Server has an expiring Cert Warning shortly before Rotation which causes the alert to fire as false positive
+    // Sometimes the Gardener API Server has an expiring Cert Warning shortly before Rotation 
+    // which causes the alert to fire as false positive
     "K8sCertificateExpirationNotice",
   ];
 
@@ -197,11 +197,11 @@ function shouldIgnoreAlert(alert) {
   ];
 
   const ignoreCriticalAlert = criticalAlertNamesToIgnore.includes(
-    alert.labels.alertname
+    alert.labels.alertname,
   );
 
   const ignoreAlert =
-    alert.labels.severity !== "critical" ||
+    alert.labels.severity !== 'critical' ||
     alertNamesToIgnore.includes(alert.labels.alertname);
 
   return ignoreCriticalAlert || ignoreAlert;
