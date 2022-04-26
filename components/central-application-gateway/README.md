@@ -33,7 +33,7 @@ This section explains how to use Central Application Gateway.
 
 To start Central Application Gateway, run this command:
 
-```bash <!-- TODO: are we sure this is the command? It's the exact same as the one for the OLD App Gateway... -->
+```bash
 ./applicationgateway 
 ```
 
@@ -61,12 +61,10 @@ The proxy API exposes the following endpoint:
 {APPLICATION_NAME}/{SERVICE_NAME}/{TARGET_API_PATH}
 ``` 
 
-<!-- TODO: verify 
-< For instance, if there's a `cc-occ-commerce-webservices` service in the `ec` Application CR, the user can send a request to the following URL: 
-< ```bash
-< http://central-application-gateway.kyma-system:8080/ec/cc-occ-commerce-webservices/basesites
-< ```
--->
+For instance, if there's a `cc-occ-commerce-webservices` service in the `ec` Application CR, the user can send a request to the following URL: 
+```bash
+http://central-application-gateway.kyma-system:8080/ec/cc-occ-commerce-webservices/basesites
+```
 
 As a result, Central Application Gateway:
 1. Looks for the `cc-occ-commerce-webservices` service in the `ec` Application CR and extracts the target URL path along with the authentication configuration.

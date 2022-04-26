@@ -36,7 +36,7 @@ Runtime Agent uses these environment variables:
 - **APP_CERT_VALIDITY_RENEWAL_THRESHOLD** specifies when the certificate must be renewed based on the remaining validity time of the current certificate.
 - **APP_CLUSTER_CERTIFICATES_SECRET** specifies the Namespace and the Name of the Secret in which to store the client certificate and the key.
 - **APP_CA_CERTIFICATES_SECRET** specifies the Namespace and the Name of the Secret in which to store the CA certificate.
-- **APP_SKIP_COMPASS_TLS_VERIFY** specifies whether to communicate with <!-- TODO: verify that this bit should be removed: "the Connector Service and" -> Director with disabled TLS verification.
+- **APP_SKIP_COMPASS_TLS_VERIFY** specifies whether to communicate with Connector and Director with disabled TLS verification.
 - **APP_SKIP_APPS_TLS_VERIFY** specifies whether to set up Applications synchronized from Compass to communicate with external systems with disabled TLS verification.
 - **APP_GATEWAY_PORT** specifies the Application Gateway port.
 - **APP_UPLOAD_SERVICE_URL** specifies the URL of the upload service.
