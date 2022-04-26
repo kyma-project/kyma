@@ -2,7 +2,7 @@
 
 ## Overview
 
-The Central Application Connectivity Validator validates client certificate subjects.
+The Central Application Connectivity Validator validates client certificate subjects in the Compass mode of Kyma.
 It proxies the requests to the Eventing Publisher Proxy.
 
 ## Usage
