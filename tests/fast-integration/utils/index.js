@@ -441,7 +441,6 @@ function waitForClusterAddonsConfiguration(name, timeout = 90000) {
 }
 
 function waitForApplicationCr(appName, timeout = 300000) {
-  console.log('waiting for application:', appName);
   return waitForK8sObject(
       '/apis/applicationconnector.kyma-project.io/v1alpha1/applications',
       {},
