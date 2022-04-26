@@ -116,12 +116,15 @@ Kyma team is located mostly in Poland and Germany. See the open job positions fo
 ### FAQ
 
 **What is your IDE?**
+
  Nothing is enforced. People often use GoLand, Visual Studio Code, VIM.
 
 **How do you approach testing in Go? Do you use any frameworks?**
+
 We use tools such as classical Go runner, Gomega, Testify.
 
 **How to learn Go?**
+
 Here are some useful sources to learn Go:
 - [Official Go learning tutorials](https://go.dev/learn/)
 - [50 Shades of Go: Traps, Gotchas, and Common Mistakes for New Golang Devs](http://devs.cloudimmunity.com/gotchas-and-common-mistakes-in-go-golang/)
