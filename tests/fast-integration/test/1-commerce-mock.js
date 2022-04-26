@@ -57,6 +57,7 @@ function commerceMockTests() {
       await checkFunctionResponse(testNamespace);
     });
 
+    // this test fails. We need to find out why
     it('should add, update and delete a service', async function() {
       const serviceId = await addService();
       await updateService(serviceId);
