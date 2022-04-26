@@ -80,3 +80,51 @@ Follow these steps:
   <img src="https://github.com/kyma-project/website/blob/main/content/adopters/logos/arineo.svg" alt="Arineo" width="250" height="40" />
   <img src="https://github.com/kyma-project/website/blob/main/content/adopters/logos/dotsource.svg" alt="dotSource" width="250" height="40" />
 </p>
+
+## Join us
+
+### Required programming skills
+
+- Mural Learning path   https://app.mural.co/t/sappm1454/m/sappm1454/1623833112208/70a6f14316e3f216ed2e1a62cfbdd33498af9686
+
+- Kubernetes skills
+   - Basic [Kubernetes architecture](https://shipit.dev/posts/kubernetes-overview-diagrams.html)
+   - CKAD level preferred
+   - deep knowledge about Kubernetes Control Loop
+   - and important Design Patterns like Sidecar / Init Containers)
+- Deep Go understanding, especially regarding Dependency Management and Go Modules
+- Docker skills
+- Fluency with jq,yq, grep etc. ;
+- CLI/Terminal confident use
+- High level knowledge about Gardener architecture - enough to interact with it
+- Shellscript experience, all our tooling is written in sh
+- CI/CD experience, ideally Prow
+- Process Understanding of Agile and Escalation Management
+- Architecture Base Pattern Understanding
+
+### Basic Kyma knowledge
+
+- [Official Kyma documentation](https://kyma-project.io/)
+- [Getting Started guide](https://kyma-project.io/docs/kyma/latest/02-get-started/)
+- Examples
+- Kyma project [Youtube channel](https://www.youtube.com/watch?v=wqQflgmyboY&list=PLmZLSvJAm8FabPF4hLjScx-dDl84NK3l5)
+
+### Open job positions
+
+Kyma team is located mostly in Poland and Germany. See the open job positions for both locations:
+- [Gliwice, Poland](https://jobs.sap.com/search/?createNewAlert=false&q=%23kymaopensource&optionsFacetsDD_department=&optionsFacetsDD_customfield3=&optionsFacetsDD_country=&locationsearch=)
+- [Munich, Germany](https://jobs.sap.com/search/?createNewAlert=false&q=%23kyma&optionsFacetsDD_department=&optionsFacetsDD_customfield3=&optionsFacetsDD_country=&locationsearch=munich)
+
+### FAQ
+
+**What is your IDE?**
+ Nothing is enforced. People often use GoLand, Visual Studio Code, VIM.
+
+**How do you approach testing in Go? Do you use any frameworks?**
+We use tools such as classical Go runner, Gomega, Testify.
+
+**How to learn Go?**
+Here are some useful sources to learn Go:
+- [Official Go learning tutorials](https://go.dev/learn/)
+- [50 Shades of Go: Traps, Gotchas, and Common Mistakes for New Golang Devs](http://devs.cloudimmunity.com/gotchas-and-common-mistakes-in-go-golang/)
+- [Language converter](https://ide.onelang.io/?input=HelloWorldRaw) - this tool helps you to convert code from one language to any other one
