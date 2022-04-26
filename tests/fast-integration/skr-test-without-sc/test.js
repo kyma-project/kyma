@@ -3,8 +3,7 @@ const {provisionSKR, deprovisionSKR, KEBClient, KEBConfig} = require('../kyma-en
 const {unregisterKymaFromCompass, addScenarioInCompass, assignRuntimeToScenario} = require('../compass');
 const {oidcE2ETest, commerceMockTest} = require('./skr-test');
 const {KCPWrapper, KCPConfig} = require('../kcp/client');
-const t = require('../skr-svcat-migration-test/test-helpers');
-const {keb, director} = require('./helpers');
+const {keb, director, smInstanceBinding} = require('./helpers');
 const {initializeK8sClient, debug} = require('../utils');
 const {
   GardenerConfig,
@@ -40,7 +39,7 @@ describe('Execute SKR test', function() {
       const btpOperatorInstance = `btp-operator-${suffix}`;
       const btpOperatorBinding = `btp-operator-binding-${suffix}`;
 
-      const btpOperatorCreds = await t.smInstanceBinding(smAdminCreds, btpOperatorInstance, btpOperatorBinding);
+      const btpOperatorCreds = await smInstanceBinding(smAdminCreds, btpOperatorInstance, btpOperatorBinding);
 
       console.log(`\nInstanceID ${this.options.instanceID}`,
           `Runtime ${runtimeName}`, `Application ${this.options.appName}`, `Suffix ${suffix}`);
