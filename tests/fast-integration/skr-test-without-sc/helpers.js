@@ -3,7 +3,7 @@ const {KEBConfig, KEBClient}= require('../kyma-environment-broker');
 const {GardenerClient, GardenerConfig} = require('../gardener');
 const {DirectorClient, DirectorConfig} = require('../compass');
 const {genRandom, debug, getEnvOrThrow} = require('../utils');
-const execa = require("execa");
+const execa = require('execa');
 
 const keb = new KEBClient(KEBConfig.fromEnv());
 const gardener = new GardenerClient(GardenerConfig.fromEnv());
