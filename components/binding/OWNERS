@@ -1,7 +1,0 @@
-reviewers:
-  - binding-reviewers
-approvers:
-  - binding-approvers
-
-labels:
-  - area/service-management
