@@ -27,11 +27,15 @@ async function proxyGrafanaDatasource(datasourceName, path, retries, interval,
   const datasourceId = await getGrafanaDatasourceId(grafanaUrl, datasourceName);
   const url = `${grafanaUrl}/api/datasources/proxy/${datasourceId}/${path}`;
 
+  const httpsAgent = new https.Agent({
+    rejectUnauthorized: false,
+  });
+
   return retryPromise(async () => {
     if (debugMsg) {
       debug(debugMsg);
     }
-    return await axios.get(url, {timeout: timeout});
+    return await axios.get(url, {timeout: timeout, httpsAgent: httpsAgent});
   }, retries, interval);
 }
 
