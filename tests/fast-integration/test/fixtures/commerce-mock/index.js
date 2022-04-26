@@ -14,6 +14,7 @@ const {
   convertAxiosError,
   sleep,
   k8sApply,
+  waitForApplicationCr,
   waitForServiceClass,
   waitForServicePlanByServiceClass,
   waitForServiceInstance,
