@@ -40,4 +40,4 @@ The key advantages of JetStream over Core NATS are:
 
 - [At least once delivery of JetStream](../../04-operation-guides/operations/evnt-01-enable-kyma-with-jetstream.md#at-least-once-delivery-guarantees-using-jet-stream-backend) vs at most once delivery of NATS.
 - Streaming: Streams receive and store messages that are published and subscribers can consume these messages at any time.
-- Persistent stream storage: Messages stored in the stream can be persisted in case of server restart.
+- Persistent stream storage: Messages are retained in the stream storage even when the NATS server is restarted.
