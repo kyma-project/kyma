@@ -1,4 +1,3 @@
-const execa = require('execa');
 const fs = require('fs');
 const os = require('os');
 const {
@@ -138,137 +137,6 @@ async function restartFunctionsPods() {
   console.log('functions pods successfully restarted');
 }
 
-async function provisionPlatform(creds, svcatPlatform) {
-  let args = [];
-  try {
-    args = ['login',
-      '-a',
-      creds.url,
-      '--param',
-      'subdomain=e2etestingscmigration',
-      '--auth-flow',
-      'client-credentials'];
-    await execa('smctl', args.concat(['--client-id', creds.clientid, '--client-secret', creds.clientsecret]));
-
-    // $ smctl register-platform <name> kubernetes -o json
-    // Output:
-    // {
-    //   "id": "<platform-id/cluster-id>",
-    //   "name": "<name>",
-    //   "type": "kubernetes",
-    //   "created_at": "...",
-    //   "updated_at": "...",
-    //   "credentials": {
-    //     "basic": {
-    //       "username": "...",
-    //       "password": "..."
-    //     }
-    //   },
-    //   "labels": {
-    //     "subaccount_id": [
-    //       "..."
-    //     ]
-    //   },
-    //   "ready": true
-    // }
-    args = ['register-platform', svcatPlatform, 'kubernetes', '-o', 'json'];
-    const registerPlatformOut = await execa('smctl', args);
-    const platform = JSON.parse(registerPlatformOut.stdout);
-
-    return {
-      clusterId: platform.id,
-      name: platform.name,
-      credentials: platform.credentials.basic,
-    };
-  } catch (error) {
-    if (error.stderr === undefined) {
-      throw new Error(`failed to process output of "smctl ${args.join(' ')}"`);
-    }
-    throw new Error(`failed "smctl ${args.join(' ')}": ${error.stderr}`);
-  }
-}
-
-async function markForMigration(creds, svcatPlatform, btpOperatorInstanceId) {
-  let errors = [];
-  let args = [];
-  try {
-    args = ['login',
-      '-a',
-      creds.url,
-      '--param',
-      'subdomain=e2etestingscmigration',
-      '--auth-flow',
-      'client-credentials'];
-    await execa('smctl', args.concat(['--client-id', creds.clientid, '--client-secret', creds.clientsecret]));
-  } catch (error) {
-    errors = errors.concat([`failed "smctl ${args.join(' ')}": ${error.stderr}\n`]);
-  }
-
-  try {
-    // usage: smctl curl -X PUT -d '{"sourcePlatformID": ":platformID"}' /v1/migrate/service_operator/:instanceID
-    const data = {sourcePlatformID: svcatPlatform};
-    args = ['curl', '-X', 'PUT', '-d', JSON.stringify(data), '/v1/migrate/service_operator/' + btpOperatorInstanceId];
-    await execa('smctl', args);
-  } catch (error) {
-    errors = errors.concat([`failed "smctl ${args.join(' ')}": ${error.stderr}\n`]);
-  }
-  if (errors.length > 0) {
-    throw new Error(errors.join(', '));
-  }
-}
-
-async function cleanupInstanceBinding(creds, svcatPlatform, btpOperatorInstance, btpOperatorBinding) {
-  let errors = [];
-  let args = [];
-  try {
-    args = ['login',
-      '-a',
-      creds.url,
-      '--param',
-      'subdomain=e2etestingscmigration',
-      '--auth-flow',
-      'client-credentials'];
-    await execa('smctl', args.concat(['--client-id', creds.clientid, '--client-secret', creds.clientsecret]));
-  } catch (error) {
-    errors = errors.concat([`failed "smctl ${args.join(' ')}": ${error.stderr}\n`]);
-  }
-
-  try {
-    args = ['unbind', btpOperatorInstance, btpOperatorBinding, '-f', '--mode=sync'];
-    const {stdout} = await execa('smctl', args);
-    if (stdout !== 'Service Binding successfully deleted.') {
-      errors = errors.concat([`failed "smctl ${args.join(' ')}": ${stdout}`]);
-    }
-  } catch (error) {
-    errors = errors.concat([`failed "smctl ${args.join(' ')}": ${error.stderr}\n${error}`]);
-  }
-
-  try {
-    // hint: probably should fail cause that instance created other instannces (after the migration is done)
-    args = ['deprovision', btpOperatorInstance, '-f', '--mode=sync'];
-    const {stdout} = await execa('smctl', args);
-    if (stdout !== 'Service Instance successfully deleted.') {
-      errors = errors.concat([`failed "smctl ${args.join(' ')}": ${stdout}`]);
-    }
-  } catch (error) {
-    errors = errors.concat([`failed "smctl ${args.join(' ')}": ${error.stderr}\n${error}`]);
-  }
-
-  try {
-    args = ['delete-platform', svcatPlatform, '-f', '--cascade'];
-    await execa('smctl', args);
-    // if (stdout !== "Platform(s) successfully deleted.") {
-    //     errors = errors.concat([`failed "smctl ${args.join(' ')}": ${stdout}`])
-    // }
-  } catch (error) {
-    errors = errors.concat([`failed "smctl ${args.join(' ')}": ${error.stderr}\n`]);
-  }
-
-  if (errors.length > 0) {
-    throw new Error(errors.join(', '));
-  }
-}
-
 async function checkMigratedBTPResources() {
   const btpGroup = 'services.cloud.sap.com';
   const btpVersion = 'v1alpha1';
@@ -346,8 +214,6 @@ async function deleteBTPResources() {
 }
 
 module.exports = {
-  provisionPlatform,
-  cleanupInstanceBinding,
   saveKubeconfig,
   markForMigration,
   readClusterID,

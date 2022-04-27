@@ -3,7 +3,6 @@ const {KEBConfig, KEBClient}= require('../kyma-environment-broker');
 const {GardenerClient, GardenerConfig} = require('../gardener');
 const {DirectorClient, DirectorConfig} = require('../compass');
 const {genRandom, debug, getEnvOrThrow} = require('../utils');
-const execa = require('execa');
 
 const keb = new KEBClient(KEBConfig.fromEnv());
 const gardener = new GardenerClient(GardenerConfig.fromEnv());
@@ -78,64 +77,6 @@ function gatherOptions(...opts) {
   return options;
 }
 
-async function smInstanceBinding(creds, btpOperatorInstance, btpOperatorBinding) {
-  let args = [];
-  try {
-    args = ['login',
-      '-a',
-      creds.url,
-      '--param',
-      'subdomain=e2etestingscmigration',
-      '--auth-flow',
-      'client-credentials'];
-    await execa('smctl', args.concat(['--client-id', creds.clientid, '--client-secret', creds.clientsecret]));
-
-    args = ['provision', btpOperatorInstance, 'service-manager', 'service-operator-access', '--mode=sync'];
-    await execa('smctl', args);
-
-    // Move to Operator Install
-    args = ['bind', btpOperatorInstance, btpOperatorBinding, '--mode=sync'];
-    await execa('smctl', args);
-
-    args = ['get-binding', btpOperatorBinding, '-o', 'json'];
-    const out = await execa('smctl', args);
-    const b = JSON.parse(out.stdout);
-    const c = b.items[0].credentials;
-
-    return {
-      clientId: c.clientid,
-      clientSecret: c.clientsecret,
-      smURL: c.sm_url,
-      url: c.url,
-      instanceId: b.items[0].service_instance_id,
-    };
-  } catch (error) {
-    if (error.stderr === undefined) {
-      throw new Error(`failed to process output of "smctl ${args.join(' ')}"`);
-    }
-    throw new Error(`failed "smctl ${args.join(' ')}": ${error.stderr}`);
-  }
-}
-
-class SMCreds {
-  static fromEnv() {
-    return new SMCreds(
-        // TODO: rename to BTP_SM_ADMIN_CLIENTID
-        getEnvOrThrow('BTP_OPERATOR_CLIENTID'),
-        // TODO: rename to BTP_SM_ADMIN_CLIENTID
-        getEnvOrThrow('BTP_OPERATOR_CLIENTSECRET'),
-        // TODO: rename to BTP_SM_URL
-        getEnvOrThrow('BTP_OPERATOR_URL'),
-    );
-  }
-
-  constructor(clientid, clientsecret, url) {
-    this.clientid = clientid;
-    this.clientsecret = clientsecret;
-    this.url = url;
-  }
-}
-
 module.exports = {
   keb,
   gardener,
@@ -146,6 +87,4 @@ module.exports = {
   withRuntimeName,
   withScenarioName,
   withTestNS,
-  smInstanceBinding,
-  SMCreds,
 };
