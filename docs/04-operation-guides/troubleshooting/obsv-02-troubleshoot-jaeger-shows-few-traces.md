@@ -23,17 +23,11 @@ To override the default percentage, you deploy a YAML file. You can do this eith
    The following example sets the value to `60`, which means 60% of the requests are sent to Jaeger.
 
    ```yaml
-   istio:
-     kyma_istio_operator: |-
-       apiVersion: install.istio.io/v1alpha1
-       kind: IstioOperator
-       metadata:
-         namespace: istio-system
-       spec:
-         meshConfig:
-           defaultConfig:
-             tracing:
-               sampling: 60
+    istio:
+      meshConfig:
+        defaultConfig:
+          tracing:
+            sampling: 60
    ```
 
    > **CAUTION:** Sending 100% of the requests to Jaeger might destabilize Istio.
