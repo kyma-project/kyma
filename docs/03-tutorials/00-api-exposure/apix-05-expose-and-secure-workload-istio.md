@@ -6,44 +6,10 @@ This tutorial shows how to expose and secure a workload using Istio built-in sec
 
 ## Prerequisites
 
-To follow this tutorial, use Kyma 2.0 or higher.
+- You are using Kyma 2.0 or higher. 
+- You have got a JSON Web Token (JWT). For more information, see [Get a JWT](./apix-04-get-jwt.md).
 
-This tutorial is based on a sample HttpBin service deployment and a sample Function. To deploy or create one of those, follow the [Create a workload](./apix-02-create-workload.md) tutorial. It can also be a follow up to the [Use a custom domain to expose a workload](./apix-01-own-domain.md) tutorial.
-
-## Get a JWT
-
-1. In your OpenID Connect-compliant (OIDC-compliant) identity provider, create an application to get your client credentials such as Client ID and Client Secret. Export your client credentials as environment variables. Run:
-
-   ```bash
-   export CLIENT_ID={YOUR_CLIENT_ID}
-   export CLIENT_SECRET={YOUR_CLIENT_SECRET}
-   ```
-
-2. Encode your client credentials and export them as an environment variable:
-
-   ```bash
-   export ENCODED_CREDENTIALS=$(echo -n "$CLIENT_ID:$CLIENT_SECRET" | base64)
-   ```
-
-3. In your browser, go to `https://YOUR_OIDC_COMPLIANT_IDENTITY_PROVIDER_INSTANCE/.well-known/openid-configuration`, save values of the **token_endpoint**, **jwks_uri** and **issuer** parameters, and export them as environment variables:
-
-   ```bash
-   export TOKEN_ENDPOINT={YOUR_TOKEN_ENDPOINT}
-   export JWKS_URI={YOUR_JWKS_URI}
-   export ISSUER={YOUR_ISSUER}
-   ```
-
-4. Get the JWT:
-
-   ```bash
-   curl -X POST "$TOKEN_ENDPOINT" -d "grant_type=client_credentials" -d "client_id=$CLIENT_ID" -H "Content-Type: application/x-www-form-urlencoded" -H "Authorization: Basic $ENCODED_CREDENTIALS"
-   ```
-
-5. Save the token and export it as an environment variable:
-
-   ```bash
-   export ACCESS_TOKEN={YOUR_ACCESSS_TOKEN}
-   ```
+This tutorial is based on a sample HttpBin service deployment and a sample Function. To deploy or create one of those, follow the [Create a workload](./apix-02-create-workload.md) tutorial. It can also be a follow-up to the [Use a custom domain to expose a workload](./apix-01-own-domain.md) tutorial.
 
 ## Expose your workload using a Virtual Service
 
