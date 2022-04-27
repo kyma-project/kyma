@@ -21,14 +21,14 @@ const {
 const t = require('./test-helpers');
 const sampleResources = require('./deploy-sample-resources');
 const {KCPWrapper, KCPConfig} = require('../kcp/client');
-const h = require('../skr-test-without-sc');
+const {smInstanceBinding, SMCreds} = require('../skr-test-without-sc/helpers');
 
 const kcp = new KCPWrapper(KCPConfig.fromEnv());
 
 describe('SKR SVCAT migration test', function() {
   const keb = new KEBClient(KEBConfig.fromEnv());
   const gardener = new GardenerClient(GardenerConfig.fromEnv());
-  const smAdminCreds = h.SMCreds.fromEnv();
+  const smAdminCreds = SMCreds.fromEnv();
 
   const suffix = genRandom(4);
   const appName = `app-${suffix}`;
@@ -55,7 +55,7 @@ describe('SKR SVCAT migration test', function() {
 
   let btpOperatorCreds;
   it('Should instantiate ServiceManager instance and binding for BTP operator', async function() {
-    btpOperatorCreds = await h.smInstanceBinding(smAdminCreds, btpOperatorInstance, btpOperatorBinding);
+    btpOperatorCreds = await smInstanceBinding(smAdminCreds, btpOperatorInstance, btpOperatorBinding);
   });
 
   let skr;

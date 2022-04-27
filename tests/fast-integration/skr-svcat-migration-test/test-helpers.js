@@ -8,7 +8,6 @@ const {
   deleteK8sPod,
   sleep,
   deleteK8sObjects,
-  listResources,
   getFunction,
 } = require('../utils');
 
