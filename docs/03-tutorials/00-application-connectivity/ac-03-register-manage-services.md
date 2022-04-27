@@ -117,4 +117,4 @@ export GATEWAY_URL=http://central-application-gateway.kyma-system:8080/$APP_NAME
 kubectl exec test-app-gateway -c test-app-gateway -- sh -c "wget -O- '$GATEWAY_URL'"
 ```
 
-   Successful response indicates that 
+   Successful response indicates that service is registered correctly.
