@@ -215,7 +215,6 @@ async function deleteBTPResources() {
 
 module.exports = {
   saveKubeconfig,
-  markForMigration,
   readClusterID,
   checkPodPresetEnvInjected,
   restartFunctionsPods,
