@@ -17,6 +17,7 @@ spec:
     controller-tools.k8s.io: "1.0"
   ports:
   - port: 443
+    name: https-port
 ---
 apiVersion: v1
 kind: Service

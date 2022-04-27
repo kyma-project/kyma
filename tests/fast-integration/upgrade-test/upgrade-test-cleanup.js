@@ -1,8 +1,4 @@
-const {
-  cleanMockTestFixture,
-} = require('../test/fixtures/commerce-mock');
-const {
-} = require('../utils');
+const {cleanMockTestFixture} = require('../test/fixtures/commerce-mock');
 
 describe('Upgrade test cleanup', function() {
   this.timeout(10 * 60 * 1000);

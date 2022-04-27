@@ -19,9 +19,9 @@ how to [revoke the client certificate](../../03-tutorials/00-application-connect
 
 ## Get the configuration URL with a token
 
-To get the configuration URL which allows you to fetch the required configuration details, create a TokenRequest custom resource (CR). The controller which handles this CR kind adds the **status** section to the created CR. The **status** section contains the required configuration details.
+To get the configuration URL which allows you to fetch the required configuration details, create a Token Request custom resource (CR). The controller which handles this CR kind adds the **status** section to the created CR. The **status** section contains the required configuration details.
 
-1. Create a TokenRequest CR. The CR name must match the name of the Application for which you want to get the configuration details. Run:
+1. Create a Token Request CR. The CR name must match the name of the Application for which you want to get the configuration details. Run:
 
    ```bash
    cat <<EOF | kubectl apply -f -
@@ -32,7 +32,7 @@ To get the configuration URL which allows you to fetch the required configuratio
    EOF
    ```
 
-2. Fetch the TokenRequest CR you created to get the configuration details from the **status** section. Run:
+2. Fetch the Token Request CR you created to get the configuration details from the **status** section. Run:
 
    ```bash
    kubectl get tokenrequest.applicationconnector.kyma-project.io $APP_NAME -o yaml

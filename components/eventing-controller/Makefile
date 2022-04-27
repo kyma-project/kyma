@@ -1,6 +1,6 @@
 APP_NAME = eventing-controller
 APP_PATH = components/$(APP_NAME)
-BUILDPACK = eu.gcr.io/kyma-project/test-infra/buildpack-golang-kubebuilder2:v20210601-24c60b5a
+BUILDPACK = eu.gcr.io/kyma-project/test-infra/buildpack-golang:v20220407-4da6c929
 SCRIPTS_DIR = $(realpath $(shell pwd)/../..)/common/makefiles
 
 override ENTRYPOINT = cmd/eventing-controller/main.go
@@ -59,7 +59,7 @@ set-up-local-env:
     export WEBHOOK_TOKEN_ENDPOINT ?= "https://oauth2.${DOMAIN}/oauth2/token"
 
 ENVTEST_ASSETS_DIR=$(PROJECT_DIR)/testbin/$(shell uname)
-test-local: copy-external-crds go-test; ## Run tests.
+test-local: go-test; ## Run tests.
 
 setup-envtest:
 	mkdir -p ${ENVTEST_ASSETS_DIR}
@@ -79,6 +79,7 @@ eventing-controller: gomod-vendor-local ## Build the binary
         $(GOBUILD_FLAGS) \
         $(PKG)/$(ENTRYPOINT)
 
+test: copy-external-crds ## It will also run overridden `test` target from generic makefile after `copy-external-crds`
 
 ##@ Release
 
@@ -92,8 +93,9 @@ undeploy: ## Undeploy controller from the K8s cluster specified in ~/.kube/confi
 	kustomize build config/default | kubectl delete -f -
 
 CONTROLLER_GEN = $(PROJECT_DIR)/bin/$(shell uname)/controller-gen
+OS := $(shell uname)
 controller-gen-local: ## Download controller-gen locally if necessary.
-	$(call go-get-tool,$(CONTROLLER_GEN),sigs.k8s.io/controller-tools/cmd/controller-gen@v0.4.1)
+	GOBIN=$(PROJECT_DIR)/bin/$(OS) go install sigs.k8s.io/controller-tools/cmd/controller-gen@v0.4.1
 
 path-to-referenced-charts:
 	@echo "resources/eventing"
@@ -114,20 +116,6 @@ copy-external-crds: ## copy external CRDs to config/crd/external
 	cp ../../installation/resources/crds/api-gateway/apirules.gateway.crd.yaml config/crd/external/apirules-gateway-kyma-project-io.yaml
 	cp ../../installation/resources/crds/application-connector/applications.applicationconnector.crd.yaml config/crd/external/applications-applicationconnector-kyma-project-io.yaml
 
-# go-get-tool will 'go get' any package $2 and install it to $1.
-ARCH := $(shell uname)
-define go-get-tool
-@[ -f $(1) ] || { \
-set -e ;\
-TMP_DIR=$$(mktemp -d) ;\
-cd $$TMP_DIR ;\
-go mod init tmp ;\
-echo "Downloading $(2)" ;\
-GOBIN=$(PROJECT_DIR)/bin/$(ARCH) go get $(2) ;\
-rm -rf $$TMP_DIR ;\
-}
-endef
-
 $(eval $(call buildpack-cp-ro,resolve))
 $(eval $(call buildpack-mount,mod-verify))
 $(eval $(call buildpack-mount,test))
@@ -140,3 +128,5 @@ resolve_clean:
 
 licenses_clean:
 	rm -rf licenses
+
+

@@ -3,6 +3,8 @@
 package mocks
 
 import (
+	context "context"
+
 	graphql "github.com/machinebox/graphql"
 
 	mock "github.com/stretchr/testify/mock"
@@ -13,13 +15,13 @@ type Client struct {
 	mock.Mock
 }
 
-// Do provides a mock function with given fields: req, res
-func (_m *Client) Do(req *graphql.Request, res interface{}) error {
-	ret := _m.Called(req, res)
+// Do provides a mock function with given fields: ctx, req, res
+func (_m *Client) Do(ctx context.Context, req *graphql.Request, res interface{}) error {
+	ret := _m.Called(ctx, req, res)
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(*graphql.Request, interface{}) error); ok {
-		r0 = rf(req, res)
+	if rf, ok := ret.Get(0).(func(context.Context, *graphql.Request, interface{}) error); ok {
+		r0 = rf(ctx, req, res)
 	} else {
 		r0 = ret.Error(0)
 	}

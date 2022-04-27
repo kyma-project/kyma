@@ -8,7 +8,7 @@ Changes added to the original upstream chart:
     annotations:
             sidecar.istio.io/inject: "false" 
     ```
-2. In __helpers.tpl_ file the `{{- printf "%s-%s" .Release.Name $name | trunc 63 | trimSuffix "-" -}}` was replaced with `{{- .Release.Name | trunc 63 | trimSuffix "-" -}}`. As a result we have shorten and more readable names for Deployments, Secrets, ConfigMaps etc.
+2. In __helpers.tpl_ file the `{{- printf "%s-%s" .Release.Name $name | trunc 63 | trimSuffix "-" -}}` was replaced with `{{- .Release.Name | trunc 63 | trimSuffix "-" -}}`. As a result we have shorten and more readable names for Deployments, Secrets, Config Maps etc.
 
 ## Introduction
 

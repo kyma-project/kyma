@@ -10,13 +10,14 @@ import (
 	cev2client "github.com/cloudevents/sdk-go/v2/client"
 	cev2event "github.com/cloudevents/sdk-go/v2/event"
 	cev2http "github.com/cloudevents/sdk-go/v2/protocol/http"
-
 	"github.com/sirupsen/logrus"
 
+	"github.com/kyma-project/kyma/components/event-publisher-proxy/internal"
 	cloudevents "github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/cloudevents"
+	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/cloudevents/eventtype"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/ems"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/handler"
-	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/health"
+	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/handler/health"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/legacy-events"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/metrics"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/options"
@@ -35,7 +36,7 @@ var (
 	// Any alteration or removal of those headers might cause publish requests to fail.
 	additionalHeaders = http.Header{
 		"qos":    []string{string(ems.QosAtLeastOnce)},
-		"Accept": []string{"application/json"},
+		"Accept": []string{internal.ContentTypeApplicationJSON},
 	}
 )
 
@@ -60,12 +61,14 @@ type Handler struct {
 	Options *options.Options
 	// collector collects metrics
 	collector *metrics.Collector
+	// eventTypeCleaner cleans the cloud event type
+	eventTypeCleaner eventtype.Cleaner
 }
 
 // NewHandler returns a new HTTP Handler instance.
 func NewHandler(receiver *receiver.HTTPMessageReceiver, sender *sender.BebMessageSender, requestTimeout time.Duration,
 	legacyTransformer *legacy.Transformer, opts *options.Options, subscribedProcessor *subscribed.Processor,
-	logger *logrus.Logger, collector *metrics.Collector) *Handler {
+	logger *logrus.Logger, collector *metrics.Collector, eventTypeCleaner eventtype.Cleaner) *Handler {
 	return &Handler{
 		Receiver:            receiver,
 		Sender:              sender,
@@ -75,15 +78,17 @@ func NewHandler(receiver *receiver.HTTPMessageReceiver, sender *sender.BebMessag
 		Logger:              logger,
 		Options:             opts,
 		collector:           collector,
+		eventTypeCleaner:    eventTypeCleaner,
 	}
 }
 
 // Start starts the Handler with the given context.
 func (h *Handler) Start(ctx context.Context) error {
-	return h.Receiver.StartListen(ctx, health.CheckHealth(h))
+	healthChecker := health.NewChecker()
+	return h.Receiver.StartListen(ctx, healthChecker.Check(h))
 }
 
-// ServeHTTP serves an HTTP request and returns back an HTTP response.
+// ServeHTTP serves an HTTP request and returns an HTTP response.
 // It ensures that the incoming request is a valid Cloud Event, then dispatches it
 // to the EMS gateway and writes back the HTTP response.
 func (h *Handler) ServeHTTP(writer http.ResponseWriter, request *http.Request) {
@@ -122,7 +127,7 @@ func (h *Handler) ServeHTTP(writer http.ResponseWriter, request *http.Request) {
 }
 
 func (h *Handler) publishLegacyEventsAsCE(writer http.ResponseWriter, request *http.Request) {
-	event := h.LegacyTransformer.TransformLegacyRequestsToCE(writer, request)
+	event, eventTypeOriginal := h.LegacyTransformer.TransformLegacyRequestsToCE(writer, request)
 	if event == nil {
 		h.Logger.Debug("failed to transform legacy event to CE, event is nil")
 		return
@@ -140,7 +145,8 @@ func (h *Handler) publishLegacyEventsAsCE(writer http.ResponseWriter, request *h
 		logrus.Fields{
 			"id":           event.ID(),
 			"source":       event.Source(),
-			"type":         event.Type(),
+			"before":       eventTypeOriginal,
+			"after":        event.Type(),
 			"statusCode":   statusCode,
 			"duration":     dispatchTime,
 			"responseBody": string(respBody),
@@ -156,13 +162,22 @@ func (h *Handler) publishCloudEvents(writer http.ResponseWriter, request *http.R
 
 	event, err := binding.ToEvent(ctx, message)
 	if err != nil {
-		h.Logger.Warnf("Failed to extract event from request with error: %s", err)
+		h.Logger.Errorf("Failed to extract event from request with error: %s", err)
 		h.writeResponse(writer, http.StatusBadRequest, []byte(err.Error()))
 		return
 	}
 
+	eventTypeOriginal := event.Type()
+	eventTypeClean, err := h.eventTypeCleaner.Clean(eventTypeOriginal)
+	if err != nil {
+		h.Logger.Errorf("Failed to clean event type with error: %s", err)
+		h.writeResponse(writer, http.StatusBadRequest, []byte(err.Error()))
+		return
+	}
+	event.SetType(eventTypeClean)
+
 	if err := event.Validate(); err != nil {
-		h.Logger.Warnf("Request is invalid as per CE spec with error: %s", err)
+		h.Logger.Errorf("Request is invalid as per CE spec with error: %s", err)
 		h.writeResponse(writer, http.StatusBadRequest, []byte(err.Error()))
 		return
 	}
@@ -181,7 +196,8 @@ func (h *Handler) publishCloudEvents(writer http.ResponseWriter, request *http.R
 		logrus.Fields{
 			"id":           event.ID(),
 			"source":       event.Source(),
-			"type":         event.Type(),
+			"before":       eventTypeOriginal,
+			"after":        eventTypeClean,
 			"statusCode":   statusCode,
 			"duration":     dispatchTime,
 			"responseBody": string(respBody),

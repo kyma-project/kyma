@@ -58,13 +58,16 @@ func TestNamespaceReconciler_Reconcile(t *testing.T) {
 	reconciler := NewNamespace(k8sClient, log.Log, testCfg, configMapSvc, secretSvc, serviceAccountSvc, roleSvc, roleBindingSvc)
 	namespace := userNamespace.GetName()
 
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
 	//WHEN
 	t.Log("reconciling Namespace that doesn't exist")
-	_, err := reconciler.Reconcile(ctrl.Request{NamespacedName: types.NamespacedName{Name: "not-existing-ns"}})
+	_, err := reconciler.Reconcile(ctx, ctrl.Request{NamespacedName: types.NamespacedName{Name: "not-existing-ns"}})
 	g.Expect(err).To(gomega.BeNil(), "should not throw error on non existing namespace")
 
 	t.Log("reconciling the Namespace")
-	result, err := reconciler.Reconcile(request)
+	result, err := reconciler.Reconcile(ctx, request)
 	g.Expect(err).To(gomega.BeNil())
 	g.Expect(result.Requeue).To(gomega.BeFalse())
 	g.Expect(result.RequeueAfter).To(gomega.Equal(0 * time.Second))
@@ -90,7 +93,7 @@ func TestNamespaceReconciler_Reconcile(t *testing.T) {
 	compareRoleBinding(g, roleBinding, baseRoleBinding)
 
 	t.Log("one more time reconciling the Namespace")
-	result, err = reconciler.Reconcile(request)
+	result, err = reconciler.Reconcile(ctx, request)
 	g.Expect(err).To(gomega.BeNil())
 	g.Expect(result.Requeue).To(gomega.BeFalse())
 	g.Expect(result.RequeueAfter).To(gomega.Equal(0 * time.Second))
@@ -130,10 +133,10 @@ func TestNamespaceReconciler_predicate(t *testing.T) {
 
 	t.Run("deleteFunc", func(t *testing.T) {
 		g := gomega.NewGomegaWithT(t)
-		podEvent := event.DeleteEvent{Meta: pod.GetObjectMeta(), Object: pod}
-		eventBaseNs := event.DeleteEvent{Meta: baseNs.GetObjectMeta(), Object: baseNs}
-		eventExcludedNs := event.DeleteEvent{Meta: excludedNs.GetObjectMeta(), Object: excludedNs}
-		normalNsEvent := event.DeleteEvent{Meta: normalNs.GetObjectMeta(), Object: normalNs}
+		podEvent := event.DeleteEvent{Object: pod}
+		eventBaseNs := event.DeleteEvent{Object: baseNs}
+		eventExcludedNs := event.DeleteEvent{Object: excludedNs}
+		normalNsEvent := event.DeleteEvent{Object: normalNs}
 
 		g.Expect(preds.Delete(podEvent)).To(gomega.BeFalse())
 		g.Expect(preds.Delete(eventBaseNs)).To(gomega.BeFalse())
@@ -144,10 +147,10 @@ func TestNamespaceReconciler_predicate(t *testing.T) {
 
 	t.Run("createFunc", func(t *testing.T) {
 		g := gomega.NewGomegaWithT(t)
-		podEvent := event.CreateEvent{Meta: pod.GetObjectMeta(), Object: pod}
-		eventBaseNs := event.CreateEvent{Meta: baseNs.GetObjectMeta(), Object: baseNs}
-		eventExcludedNs := event.CreateEvent{Meta: excludedNs.GetObjectMeta(), Object: excludedNs}
-		normalNsEvent := event.CreateEvent{Meta: normalNs.GetObjectMeta(), Object: normalNs}
+		podEvent := event.CreateEvent{Object: pod}
+		eventBaseNs := event.CreateEvent{Object: baseNs}
+		eventExcludedNs := event.CreateEvent{Object: excludedNs}
+		normalNsEvent := event.CreateEvent{Object: normalNs}
 
 		g.Expect(preds.Create(podEvent)).To(gomega.BeFalse())
 		g.Expect(preds.Create(eventBaseNs)).To(gomega.BeFalse())
@@ -159,10 +162,10 @@ func TestNamespaceReconciler_predicate(t *testing.T) {
 
 	t.Run("genericFunc", func(t *testing.T) {
 		g := gomega.NewGomegaWithT(t)
-		podEvent := event.GenericEvent{Meta: pod.GetObjectMeta(), Object: pod}
-		eventBaseNs := event.GenericEvent{Meta: baseNs.GetObjectMeta(), Object: baseNs}
-		eventExcludedNs := event.GenericEvent{Meta: excludedNs.GetObjectMeta(), Object: excludedNs}
-		normalNsEvent := event.GenericEvent{Meta: normalNs.GetObjectMeta(), Object: normalNs}
+		podEvent := event.GenericEvent{Object: pod}
+		eventBaseNs := event.GenericEvent{Object: baseNs}
+		eventExcludedNs := event.GenericEvent{Object: excludedNs}
+		normalNsEvent := event.GenericEvent{Object: normalNs}
 
 		g.Expect(preds.Generic(podEvent)).To(gomega.BeFalse())
 		g.Expect(preds.Generic(eventBaseNs)).To(gomega.BeFalse())
@@ -173,10 +176,10 @@ func TestNamespaceReconciler_predicate(t *testing.T) {
 
 	t.Run("updateFunc", func(t *testing.T) {
 		g := gomega.NewGomegaWithT(t)
-		podEvent := event.UpdateEvent{MetaNew: pod.GetObjectMeta(), ObjectNew: pod}
-		eventBaseNs := event.UpdateEvent{MetaNew: baseNs.GetObjectMeta(), ObjectNew: baseNs}
-		eventExcludedNs := event.UpdateEvent{MetaNew: excludedNs.GetObjectMeta(), ObjectNew: excludedNs}
-		normalNsEvent := event.UpdateEvent{MetaNew: normalNs.GetObjectMeta(), ObjectNew: normalNs}
+		podEvent := event.UpdateEvent{ObjectNew: pod}
+		eventBaseNs := event.UpdateEvent{ObjectNew: baseNs}
+		eventExcludedNs := event.UpdateEvent{ObjectNew: excludedNs}
+		normalNsEvent := event.UpdateEvent{ObjectNew: normalNs}
 
 		g.Expect(preds.Update(podEvent)).To(gomega.BeFalse())
 		g.Expect(preds.Update(eventBaseNs)).To(gomega.BeFalse())

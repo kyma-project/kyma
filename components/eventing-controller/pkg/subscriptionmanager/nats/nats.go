@@ -3,7 +3,8 @@ package nats
 import (
 	"context"
 	"fmt"
-	"time"
+
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/sink"
 
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/eventtype"
 
@@ -56,9 +57,9 @@ type SubscriptionManager struct {
 
 // NewSubscriptionManager creates the subscription manager for BEB and initializes it as far as it
 // does not depend on non-common options.
-func NewSubscriptionManager(restCfg *rest.Config, metricsAddr string, maxReconnects int, reconnectWait time.Duration, logger *logger.Logger) *SubscriptionManager {
+func NewSubscriptionManager(restCfg *rest.Config, natsConfig env.NatsConfig, metricsAddr string, logger *logger.Logger) *SubscriptionManager {
 	return &SubscriptionManager{
-		envCfg:      env.GetNatsConfig(maxReconnects, reconnectWait), // TODO Harmonization.
+		envCfg:      natsConfig,
 		restCfg:     restCfg,
 		metricsAddr: metricsAddr,
 		logger:      logger,
@@ -79,18 +80,21 @@ func (c *SubscriptionManager) Start(defaultSubsConfig env.DefaultSubscriptionCon
 	ctx, cancel := context.WithCancel(context.Background())
 
 	c.cancel = cancel
+	client := c.mgr.GetClient()
+	recorder := c.mgr.GetEventRecorderFor("eventing-controller-nats")
 	dynamicClient := dynamic.NewForConfigOrDie(c.restCfg)
 	applicationLister := application.NewLister(ctx, dynamicClient)
 	natsHandler := handlers.NewNats(c.envCfg, defaultSubsConfig, c.logger)
 	cleaner := eventtype.NewCleaner(c.envCfg.EventTypePrefix, applicationLister, c.logger)
 	natsReconciler := subscription.NewReconciler(
 		ctx,
-		c.mgr.GetClient(),
+		client,
 		natsHandler,
 		cleaner,
 		c.logger,
-		c.mgr.GetEventRecorderFor("eventing-controller-nats"),
+		recorder,
 		defaultSubsConfig,
+		sink.NewValidator(ctx, client, recorder, c.logger),
 	)
 	c.backend = natsReconciler.Backend
 	if err := natsReconciler.SetupUnmanaged(c.mgr); err != nil {
@@ -142,7 +146,7 @@ func cleanup(backend handlers.NatsBackend, dynamicClient dynamic.Interface, logg
 		subKey := types.NamespacedName{Namespace: sub.Namespace, Name: sub.Name}
 		log := logger.With("key", subKey.String())
 
-		desiredSub := handlers.RemoveStatus(sub)
+		desiredSub := handlers.ResetStatusToDefaults(sub)
 		if err := handlers.UpdateSubscriptionStatus(ctx, dynamicClient, desiredSub); err != nil {
 			isCleanupSuccessful = false
 			log.Errorw("update NATS subscription status failed", "error", err)

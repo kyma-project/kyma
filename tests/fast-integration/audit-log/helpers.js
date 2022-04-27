@@ -26,16 +26,21 @@ function parseAuditLogs(logs, groups) {
   return groups;
 }
 
-async function checkAuditLogs(client, groups) {
+async function checkAuditLogs(client, groups, noSC = false) {
   let retries = 0;
   let notFound = [
-    {'resName': 'commerce-binding', 'groupName': 'servicecatalog.k8s.io', 'action': 'create'},
-    {'resName': 'commerce-binding', 'groupName': 'servicecatalog.k8s.io', 'action': 'delete'},
     {'resName': 'lastorder', 'groupName': 'serverless.kyma-project.io', 'action': 'create'},
     {'resName': 'lastorder', 'groupName': 'serverless.kyma-project.io', 'action': 'delete'},
     {'resName': 'commerce-mock', 'groupName': 'deployments', 'action': 'create'},
     {'resName': 'commerce-mock', 'groupName': 'deployments', 'action': 'delete'},
   ];
+
+  if (!noSC) {
+    notFound.push(
+        {'resName': 'commerce-binding', 'groupName': 'servicecatalog.k8s.io', 'action': 'create'},
+        {'resName': 'commerce-binding', 'groupName': 'servicecatalog.k8s.io', 'action': 'delete'});
+  }
+
   while (retries < 15) {
     const logs = await client.fetchLogs();
     assert.isNotEmpty(logs);
@@ -55,6 +60,7 @@ async function checkAuditEventsThreshold(threshold) {
   // Get the max rate for apiserver audit events over the last 60 min
   const query = 'max_over_time(rate(apiserver_audit_event_total{job="apiserver"}[1m])[60m:])';
   const result = await queryPrometheus(query);
+  assert.isNotEmpty(result, 'The metrics "apiserver_audit_event_total" should not be empty! ');
   const maxAuditEventsRate = result[0].value[1];
   assert.isBelow(parseFloat(maxAuditEventsRate), threshold);
 }

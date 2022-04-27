@@ -66,6 +66,7 @@ Functions in Kyma accept [CloudEvents](https://cloudevents.io/) (**ce**) with th
     "ce-id": "abc123",
     "ce-time": "2020-12-20T13:37:33.647Z",
     "data": {BUFFER},
+    "tracer": {OPENTELEMETRY_TRACER},
     "extensions": {
         "request": {INCOMING_MESSAGE},
         "response": {SERVER_RESPONSE},
@@ -86,7 +87,8 @@ Python
     "ce-specversion": "1.0",
     "ce-id": "abc123",
     "ce-time": "2020-12-20T13:37:33.647Z",
-    "data": b"",
+    "data": "",
+    "tracer": {OPENTELEMETRY_TRACER},
     "extensions": {
         "request": {PICKLABLE_BOTTLE_REQUEST},
     }
@@ -107,6 +109,7 @@ See the detailed descriptions of these fields:
 | **ce-id** | Unique identifier of the event |
 | **ce-time** | Time at which the event was sent |
 | **data** | Either JSON or a string, depending on the request type. Read more about [Buffer](https://nodejs.org/api/buffer.html) in Node.js and [bytes literals](https://docs.python.org/3/reference/lexical_analysis.html#string-and-bytes-literals) in Python. |
+| **tracer** | Fully configured OpenTelemetry [tracer](https://opentelemetry.io/docs/reference/specification/trace/api/#tracer) object that allows you to communicate with the Jaeger service to share tracing data. For more information on how to use the tracer object see [Use the OpenTelemetry standard](../03-tutorials/00-serverless/svls-12-use-opentelemetry-client.md) |
 | **extensions** | JSON object that can contain event payload, a Function's incoming request, or an outgoing response |
 
 ### Event object SDK
@@ -195,3 +198,16 @@ module.exports = {
 
 You can use the `/metrics` endpoint to return the Function metrics. All the information is gathered using Prometheus and can be displayed using the Grafana dashboard (see [Kyma observability](https://kyma-project.io/docs/kyma/latest/02-get-started/05-observability/) for more information on how to use Grafana dashboard in Kyma). As this endpoint is provided by Kubeless, it cannot be customized.  
 For more information, see [Kubeless monitoring](https://github.com/vmware-archive/kubeless/blob/master/docs/monitoring.md) and [Kubeless runtime variants](https://github.com/vmware-archive/kubeless/blob/master/docs/runtimes.md) pages.
+
+## Override runtime image
+
+You can use a custom runtime image to override the existing one. Your image must meet all the following requirements:
+
+- Expose the workload endpoint on the right port
+- Provide liveness and readiness check endpoints at `/healthz`
+- Fetch sources from the path under the `KUBELESS_INSTALL_VOLUME` environment
+- Security support. Kyma runtimes are secure by default. You only need to protect your images.
+
+> Note: For better understanding you can look at [main dockerfiles](https://github.com/kyma-project/kyma/blob/main/resources/serverless/templates/runtimes.yaml) which are responsible for building the final image based on the `base_image` argument which you as an user can override and what we are doing in [this tutorial](../03-tutorials/00-serverless/svls-13-override-runtime-image).
+
+Every Function's Pods container have the same system environments which helps you configure the Functions server. For more information, read the [Environment variables](../05-technical-reference/00-configuration-parameters/svls-02-environment-variables.md) page.

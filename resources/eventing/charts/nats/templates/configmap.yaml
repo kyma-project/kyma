@@ -19,7 +19,7 @@ data:
     http: 8222
     server_name: $POD_NAME
 
-    {{- if .Values.global.features.enableJetStream }}
+    {{- if .Values.global.jetstream.enabled }}
     ###################################
     #                                 #
     # NATS JetStream                  #
@@ -42,7 +42,7 @@ data:
       domain: {{ .Values.nats.jetstream.domain }}
       {{- end }}
 
-      {{- if .Values.nats.jetstream.fileStorage.enabled }}
+      {{- if eq .Values.global.jetstream.storage "file" }}
       store_dir: {{ .Values.nats.jetstream.fileStorage.storageDirectory }}
 
       max_file:
@@ -64,7 +64,7 @@ data:
     cluster {
       port: 6222
 
-      {{- if .Values.global.features.enableJetStream }}
+      {{- if .Values.global.jetstream.enabled }}
       {{- if .Values.cluster.name }}
       name: {{ .Values.cluster.name }}
       {{- else }}

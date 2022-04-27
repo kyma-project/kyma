@@ -27,17 +27,14 @@ data:
       "editable": false,
       "gnetId": null,
       "graphTooltip": 0,
-      "id": 58,
-      "iteration": 1600435026453,
+      "id": 266,
+      "iteration": 1645030435854,
       "links": [],
       "panels": [
         {
-          "content": "\nAll pods having label `kyma-project.io/component: controller`\n\n",
           "datasource": null,
           "fieldConfig": {
-            "defaults": {
-              "custom": {}
-            },
+            "defaults": {},
             "overrides": []
           },
           "gridPos": {
@@ -47,7 +44,11 @@ data:
             "y": 0
           },
           "id": 28,
-          "mode": "markdown",
+          "options": {
+            "content": "\nAll pods having label `kyma-project.io/component: controller`\n\n",
+            "mode": "markdown"
+          },
+          "pluginVersion": "",
           "timeFrom": null,
           "timeShift": null,
           "title": "Note",
@@ -62,6 +63,404 @@ data:
             "x": 0,
             "y": 2
           },
+          "id": 30,
+          "panels": [],
+          "title": "Controller Runtimes Metrics",
+          "type": "row"
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "dashLength": 10,
+          "dashes": false,
+          "datasource": null,
+          "fieldConfig": {
+            "defaults": {},
+            "overrides": []
+          },
+          "fill": 1,
+          "fillGradient": 0,
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 0,
+            "y": 3
+          },
+          "hiddenSeries": false,
+          "id": 32,
+          "legend": {
+            "avg": false,
+            "current": false,
+            "max": false,
+            "min": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null as zero",
+          "options": {
+            "alertThreshold": true
+          },
+          "percentage": false,
+          "pluginVersion": "",
+          "pointradius": 2,
+          "points": false,
+          "renderer": "flot",
+          "seriesOverrides": [],
+          "spaceLength": 10,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "exemplar": true,
+              "expr": "rate (workqueue_queue_duration_seconds_sum{namespace=\"$namespace\", pod=\"$pod\"}[1m]) / rate (workqueue_queue_duration_seconds_count{namespace=\"$namespace\", pod=\"$pod\"}[1m])",
+              "interval": "",
+              "legendFormat": "{{`{{ name }}`}}",
+              "refId": "A"
+            }
+          ],
+          "thresholds": [],
+          "timeFrom": null,
+          "timeRegions": [],
+          "timeShift": null,
+          "title": "Reconcile Latency",
+          "tooltip": {
+            "shared": true,
+            "sort": 0,
+            "value_type": "individual"
+          },
+          "type": "graph",
+          "xaxis": {
+            "buckets": null,
+            "mode": "time",
+            "name": null,
+            "show": true,
+            "values": []
+          },
+          "yaxes": [
+            {
+              "$$hashKey": "object:1371",
+              "format": "short",
+              "label": "Average reconcile time [s]",
+              "logBase": 1,
+              "max": null,
+              "min": "0",
+              "show": true
+            },
+            {
+              "$$hashKey": "object:1372",
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            }
+          ],
+          "yaxis": {
+            "align": false,
+            "alignLevel": null
+          }
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "dashLength": 10,
+          "dashes": false,
+          "datasource": null,
+          "fieldConfig": {
+            "defaults": {},
+            "overrides": []
+          },
+          "fill": 1,
+          "fillGradient": 0,
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 12,
+            "y": 3
+          },
+          "hiddenSeries": false,
+          "id": 34,
+          "legend": {
+            "avg": false,
+            "current": false,
+            "max": false,
+            "min": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null as zero",
+          "options": {
+            "alertThreshold": true
+          },
+          "percentage": false,
+          "pluginVersion": "",
+          "pointradius": 2,
+          "points": false,
+          "renderer": "flot",
+          "seriesOverrides": [],
+          "spaceLength": 10,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "exemplar": true,
+              "expr": "increase(workqueue_depth{namespace=\"$namespace\", pod=\"$pod\"}[1m])",
+              "interval": "",
+              "legendFormat": "{{`{{ name }}`}}",
+              "refId": "A"
+            }
+          ],
+          "thresholds": [],
+          "timeFrom": null,
+          "timeRegions": [],
+          "timeShift": null,
+          "title": "Queue Length",
+          "tooltip": {
+            "shared": true,
+            "sort": 0,
+            "value_type": "individual"
+          },
+          "type": "graph",
+          "xaxis": {
+            "buckets": null,
+            "mode": "time",
+            "name": null,
+            "show": true,
+            "values": []
+          },
+          "yaxes": [
+            {
+              "$$hashKey": "object:1428",
+              "format": "short",
+              "label": "Average queue length",
+              "logBase": 1,
+              "max": null,
+              "min": "0",
+              "show": true
+            },
+            {
+              "$$hashKey": "object:1429",
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            }
+          ],
+          "yaxis": {
+            "align": false,
+            "alignLevel": null
+          }
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "dashLength": 10,
+          "dashes": false,
+          "datasource": null,
+          "fieldConfig": {
+            "defaults": {},
+            "overrides": []
+          },
+          "fill": 1,
+          "fillGradient": 0,
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 0,
+            "y": 11
+          },
+          "hiddenSeries": false,
+          "id": 36,
+          "legend": {
+            "avg": false,
+            "current": false,
+            "max": false,
+            "min": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null as zero",
+          "options": {
+            "alertThreshold": true
+          },
+          "percentage": false,
+          "pluginVersion": "",
+          "pointradius": 2,
+          "points": false,
+          "renderer": "flot",
+          "seriesOverrides": [],
+          "spaceLength": 10,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "exemplar": true,
+              "expr": "rate(workqueue_work_duration_seconds_sum{namespace=\"$namespace\", pod=\"$pod\"}[1m]) / rate(workqueue_work_duration_seconds_count{namespace=\"$namespace\", pod=\"$pod\"}[1m])",
+              "interval": "",
+              "legendFormat": "{{`{{ name }}`}}",
+              "refId": "A"
+            }
+          ],
+          "thresholds": [],
+          "timeFrom": null,
+          "timeRegions": [],
+          "timeShift": null,
+          "title": "Reconcile Time",
+          "tooltip": {
+            "shared": true,
+            "sort": 0,
+            "value_type": "individual"
+          },
+          "type": "graph",
+          "xaxis": {
+            "buckets": null,
+            "mode": "time",
+            "name": null,
+            "show": true,
+            "values": []
+          },
+          "yaxes": [
+            {
+              "$$hashKey": "object:1638",
+              "format": "short",
+              "label": "Average reconcile time [s]",
+              "logBase": 1,
+              "max": null,
+              "min": "0",
+              "show": true
+            },
+            {
+              "$$hashKey": "object:1639",
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            }
+          ],
+          "yaxis": {
+            "align": false,
+            "alignLevel": null
+          }
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "dashLength": 10,
+          "dashes": false,
+          "datasource": null,
+          "fieldConfig": {
+            "defaults": {},
+            "overrides": []
+          },
+          "fill": 1,
+          "fillGradient": 0,
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 12,
+            "y": 11
+          },
+          "hiddenSeries": false,
+          "id": 38,
+          "legend": {
+            "avg": false,
+            "current": false,
+            "max": false,
+            "min": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null as zero",
+          "options": {
+            "alertThreshold": true
+          },
+          "percentage": false,
+          "pluginVersion": "",
+          "pointradius": 2,
+          "points": false,
+          "renderer": "flot",
+          "seriesOverrides": [],
+          "spaceLength": 10,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "exemplar": true,
+              "expr": "rate(controller_runtime_reconcile_errors_total{namespace=\"$namespace\", pod=\"$pod\"}[5m])",
+              "interval": "",
+              "legendFormat": "{{`{{ controller }}`}}",
+              "refId": "A"
+            }
+          ],
+          "thresholds": [],
+          "timeFrom": null,
+          "timeRegions": [],
+          "timeShift": null,
+          "title": "Reconcile Errors",
+          "tooltip": {
+            "shared": true,
+            "sort": 0,
+            "value_type": "individual"
+          },
+          "type": "graph",
+          "xaxis": {
+            "buckets": null,
+            "mode": "time",
+            "name": null,
+            "show": true,
+            "values": []
+          },
+          "yaxes": [
+            {
+              "$$hashKey": "object:1797",
+              "format": "short",
+              "label": "Error rate",
+              "logBase": 1,
+              "max": null,
+              "min": "0",
+              "show": true
+            },
+            {
+              "$$hashKey": "object:1798",
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            }
+          ],
+          "yaxis": {
+            "align": false,
+            "alignLevel": null
+          }
+        },
+        {
+          "collapsed": false,
+          "datasource": null,
+          "gridPos": {
+            "h": 1,
+            "w": 24,
+            "x": 0,
+            "y": 19
+          },
           "id": 4,
           "panels": [],
           "title": "Pod Metrics",
@@ -75,7 +474,7 @@ data:
           "datasource": null,
           "fieldConfig": {
             "defaults": {
-              "custom": {}
+              "links": []
             },
             "overrides": []
           },
@@ -85,7 +484,7 @@ data:
             "h": 9,
             "w": 12,
             "x": 0,
-            "y": 3
+            "y": 20
           },
           "hiddenSeries": false,
           "id": 2,
@@ -102,9 +501,10 @@ data:
           "linewidth": 2,
           "nullPointMode": "null",
           "options": {
-            "dataLinks": []
+            "alertThreshold": true
           },
           "percentage": false,
+          "pluginVersion": "",
           "pointradius": 2,
           "points": false,
           "renderer": "flot",
@@ -187,7 +587,7 @@ data:
           "datasource": null,
           "fieldConfig": {
             "defaults": {
-              "custom": {}
+              "links": []
             },
             "overrides": []
           },
@@ -197,7 +597,7 @@ data:
             "h": 9,
             "w": 12,
             "x": 12,
-            "y": 3
+            "y": 20
           },
           "hiddenSeries": false,
           "id": 8,
@@ -214,9 +614,10 @@ data:
           "linewidth": 1,
           "nullPointMode": "null",
           "options": {
-            "dataLinks": []
+            "alertThreshold": true
           },
           "percentage": false,
+          "pluginVersion": "",
           "pointradius": 2,
           "points": false,
           "renderer": "flot",
@@ -293,7 +694,7 @@ data:
           "datasource": null,
           "fieldConfig": {
             "defaults": {
-              "custom": {}
+              "links": []
             },
             "overrides": []
           },
@@ -303,7 +704,7 @@ data:
             "h": 8,
             "w": 12,
             "x": 0,
-            "y": 12
+            "y": 29
           },
           "hiddenSeries": false,
           "id": 6,
@@ -320,9 +721,10 @@ data:
           "linewidth": 1,
           "nullPointMode": "null",
           "options": {
-            "dataLinks": []
+            "alertThreshold": true
           },
           "percentage": false,
+          "pluginVersion": "",
           "pointradius": 2,
           "points": false,
           "renderer": "flot",
@@ -393,7 +795,7 @@ data:
           "datasource": null,
           "fieldConfig": {
             "defaults": {
-              "custom": {}
+              "links": []
             },
             "overrides": []
           },
@@ -403,7 +805,7 @@ data:
             "h": 8,
             "w": 12,
             "x": 12,
-            "y": 12
+            "y": 29
           },
           "hiddenSeries": false,
           "id": 10,
@@ -420,9 +822,10 @@ data:
           "linewidth": 1,
           "nullPointMode": "null",
           "options": {
-            "dataLinks": []
+            "alertThreshold": true
           },
           "percentage": false,
+          "pluginVersion": "",
           "pointradius": 2,
           "points": false,
           "renderer": "flot",
@@ -480,13 +883,13 @@ data:
           }
         },
         {
-          "collapsed": true,
+          "collapsed": false,
           "datasource": null,
           "gridPos": {
             "h": 1,
             "w": 24,
             "x": 0,
-            "y": 20
+            "y": 37
           },
           "id": 16,
           "panels": [],
@@ -501,7 +904,7 @@ data:
           "datasource": null,
           "fieldConfig": {
             "defaults": {
-              "custom": {}
+              "links": []
             },
             "overrides": []
           },
@@ -511,7 +914,7 @@ data:
             "h": 8,
             "w": 8,
             "x": 0,
-            "y": 21
+            "y": 38
           },
           "hiddenSeries": false,
           "id": 18,
@@ -528,9 +931,10 @@ data:
           "linewidth": 1,
           "nullPointMode": "null",
           "options": {
-            "dataLinks": []
+            "alertThreshold": true
           },
           "percentage": false,
+          "pluginVersion": "",
           "pointradius": 2,
           "points": false,
           "renderer": "flot",
@@ -595,7 +999,7 @@ data:
           "datasource": null,
           "fieldConfig": {
             "defaults": {
-              "custom": {}
+              "links": []
             },
             "overrides": []
           },
@@ -605,7 +1009,7 @@ data:
             "h": 8,
             "w": 8,
             "x": 8,
-            "y": 21
+            "y": 38
           },
           "hiddenSeries": false,
           "id": 20,
@@ -622,9 +1026,10 @@ data:
           "linewidth": 1,
           "nullPointMode": "null",
           "options": {
-            "dataLinks": []
+            "alertThreshold": true
           },
           "percentage": false,
+          "pluginVersion": "",
           "pointradius": 2,
           "points": false,
           "renderer": "flot",
@@ -689,7 +1094,7 @@ data:
           "datasource": null,
           "fieldConfig": {
             "defaults": {
-              "custom": {}
+              "links": []
             },
             "overrides": []
           },
@@ -699,7 +1104,7 @@ data:
             "h": 8,
             "w": 8,
             "x": 16,
-            "y": 21
+            "y": 38
           },
           "hiddenSeries": false,
           "id": 22,
@@ -716,9 +1121,10 @@ data:
           "linewidth": 1,
           "nullPointMode": "null",
           "options": {
-            "dataLinks": []
+            "alertThreshold": true
           },
           "percentage": false,
+          "pluginVersion": "",
           "pointradius": 2,
           "points": false,
           "renderer": "flot",
@@ -783,7 +1189,7 @@ data:
           "datasource": null,
           "fieldConfig": {
             "defaults": {
-              "custom": {}
+              "links": []
             },
             "overrides": []
           },
@@ -793,7 +1199,7 @@ data:
             "h": 8,
             "w": 12,
             "x": 0,
-            "y": 29
+            "y": 46
           },
           "hiddenSeries": false,
           "id": 25,
@@ -810,9 +1216,10 @@ data:
           "linewidth": 1,
           "nullPointMode": "null",
           "options": {
-            "dataLinks": []
+            "alertThreshold": true
           },
           "percentage": false,
+          "pluginVersion": "",
           "pointradius": 2,
           "points": false,
           "renderer": "flot",
@@ -897,7 +1304,7 @@ data:
           "datasource": null,
           "fieldConfig": {
             "defaults": {
-              "custom": {}
+              "links": []
             },
             "overrides": []
           },
@@ -907,7 +1314,7 @@ data:
             "h": 8,
             "w": 12,
             "x": 12,
-            "y": 29
+            "y": 46
           },
           "hiddenSeries": false,
           "id": 26,
@@ -924,9 +1331,10 @@ data:
           "linewidth": 1,
           "nullPointMode": "null",
           "options": {
-            "dataLinks": []
+            "alertThreshold": true
           },
           "percentage": false,
+          "pluginVersion": "",
           "pointradius": 2,
           "points": false,
           "renderer": "flot",
@@ -990,7 +1398,7 @@ data:
             "h": 1,
             "w": 24,
             "x": 0,
-            "y": 37
+            "y": 54
           },
           "id": 12,
           "panels": [],
@@ -1000,19 +1408,18 @@ data:
         {
           "datasource": "Loki",
           "fieldConfig": {
-            "defaults": {
-              "custom": {}
-            },
+            "defaults": {},
             "overrides": []
           },
           "gridPos": {
             "h": 8,
             "w": 24,
             "x": 0,
-            "y": 38
+            "y": 55
           },
           "id": 14,
           "options": {
+            "dedupStrategy": "none",
             "showLabels": false,
             "showTime": true,
             "sortOrder": "Descending",
@@ -1031,10 +1438,9 @@ data:
         }
       ],
       "refresh": "10s",
-      "schemaVersion": 25,
-      "tags": [
-        "kyma"
-      ],
+      "schemaVersion": 27,
+      "style": "dark",
+      "tags": ["kyma"],
       "templating": {
         "list": [
           {
@@ -1046,13 +1452,18 @@ data:
             },
             "datasource": "Prometheus",
             "definition": "label_values(kube_pod_labels{label_kyma_project_io_component=\"controller\"},namespace)",
+            "description": null,
+            "error": null,
             "hide": 0,
             "includeAll": false,
             "label": null,
             "multi": false,
             "name": "namespace",
             "options": [],
-            "query": "label_values(kube_pod_labels{label_kyma_project_io_component=\"controller\"},namespace)",
+            "query": {
+              "query": "label_values(kube_pod_labels{label_kyma_project_io_component=\"controller\"},namespace)",
+              "refId": "Prometheus-namespace-Variable-Query"
+            },
             "refresh": 1,
             "regex": "",
             "skipUrlSync": false,
@@ -1066,19 +1477,24 @@ data:
           {
             "allValue": null,
             "current": {
-              "selected": true,
-              "text": "permission-controller-c5874b79c-8dsqs",
-              "value": "permission-controller-c5874b79c-8dsqs"
+              "selected": false,
+              "text": "api-gateway-9f8fcfd67-shclx",
+              "value": "api-gateway-9f8fcfd67-shclx"
             },
             "datasource": "Prometheus",
             "definition": "label_values(kube_pod_labels{label_kyma_project_io_component=\"controller\",namespace=\"$namespace\"},pod)",
+            "description": null,
+            "error": null,
             "hide": 0,
             "includeAll": false,
             "label": null,
             "multi": false,
             "name": "pod",
             "options": [],
-            "query": "label_values(kube_pod_labels{label_kyma_project_io_component=\"controller\",namespace=\"$namespace\"},pod)",
+            "query": {
+              "query": "label_values(kube_pod_labels{label_kyma_project_io_component=\"controller\",namespace=\"$namespace\"},pod)",
+              "refId": "Prometheus-pod-Variable-Query"
+            },
             "refresh": 1,
             "regex": "",
             "skipUrlSync": false,
@@ -1111,7 +1527,7 @@ data:
         ]
       },
       "timezone": "",
-      "title": "Kyma / Components / Controllers",
-      "uid": "WK_q8xdMl",
-      "version": 4
+      "title": "Kyma / Controllers",
+      "uid": "yKo9R6-nk",
+      "version": 8
     }

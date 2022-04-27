@@ -1,4 +1,13 @@
+global:
+  jetstream:
+    storage: memory
+
 controller:
+  jetstream:
+    retentionPolicy: interest
+    consumerDeliverPolicy: new
+    maxMessages: -1
+    maxBytes: -1
   resources:
     limits:
       cpu: 20m
@@ -23,12 +32,10 @@ nats:
     enabled: false
   nats:
     jetstream:
-      enabled: false
       memStorage:
         enabled: true
         size: 1Gi
       fileStorage:
-        enabled: false
         size: 1Gi
     resources:
       limits:

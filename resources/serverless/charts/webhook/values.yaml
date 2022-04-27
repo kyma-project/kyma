@@ -63,11 +63,11 @@ container:
     metricsDomain:
       value: "kyma-project.io/serverless"
     configObservabilityName:
-      value: '{{ template "webhook.fullname" . }}-config-observability'
+      value: serverless-webhook-config-observability'
     webhookServiceName:
-      value: '{{ template "webhook.fullname" . }}'
+      value: serverless-webhook
     webhookSecretName:
-      value: '{{ template "webhook.fullname" . }}'
+      value: serverless-webhook
     webhookPort:
       value: "{{ .Values.service.ports.httpsWebhook.targetPort }}"
 

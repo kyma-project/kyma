@@ -75,8 +75,8 @@ async function installRedisExample(options) {
   const sbuManifestPath = options.resourcesPath || join(__dirname, 'fixtures', '05_sbu_redis.yaml');
 
   await installResource(serviceInstanceManifestPath, 'serviceInstance', 'hb-instbind-redis-1', 'default');
-  await installResource(functionManifestPath, 'function', 'hb-instbind-redis-1', 'default');
   await installResource(funcSBManifestPath, 'servicebinding', 'func-sb-redis-function-1', 'default');
+  await installResource(functionManifestPath, 'function', 'hb-instbind-redis-1', 'default');
   await installResource(sbuManifestPath, 'servicebindingusage', 'hb-instbind-redis-1', 'default');
 
   const t1 = performance.now();
@@ -96,8 +96,8 @@ async function installAuditlogExample(options) {
   const sbuManifestPath = options.resourcesPath || join(__dirname, 'fixtures', '05_sbu_auditlog.yaml');
 
   await installResource(serviceInstanceManifestPath, 'serviceInstance', 'svcat-auditlog-api-1', 'default');
-  await installResource(functionManifestPath, 'function', 'svcat-auditlog-api-1', 'default');
   await installResource(funcSBManifestPath, 'servicebinding', 'func-sb-svcat-auditlog-api-1', 'default');
+  await installResource(functionManifestPath, 'function', 'svcat-auditlog-api-1', 'default');
   await installResource(sbuManifestPath, 'servicebindingusage', 'func-sbu-svcat-auditlog-api-1', 'default');
 
 
@@ -118,8 +118,8 @@ async function installHTML5AppsRepoExample(options) {
   const sbuManifestPath = options.resourcesPath || join(__dirname, 'fixtures', '05_sbu_html5appsrepo.yaml');
 
   await installResource(serviceInstanceManifestPath, 'serviceInstance', 'svcat-html5-apps-repo-1', 'default');
-  await installResource(functionManifestPath, 'function', 'svcat-html5-apps-repo-1', 'default');
   await installResource(funcSBManifestPath, 'servicebinding', 'func-sb-svcat-html5-apps-repo-1', 'default');
+  await installResource(functionManifestPath, 'function', 'svcat-html5-apps-repo-1', 'default');
   await installResource(sbuManifestPath, 'servicebindingusage', 'func-sbu-svcat-html5-apps-repo-1', 'default');
 
   const t1 = performance.now();
@@ -140,8 +140,8 @@ async function installAuditManagementExample(options) {
   const sbuManifestPath = options.resourcesPath || join(__dirname, 'fixtures', '05_sbu_auditlogmanagement.yaml');
 
   await installResource(serviceInstanceManifestPath, 'serviceInstance', 'svcat-auditlog-management-1', 'default');
-  await installResource(functionManifestPath, 'function', 'svcat-auditlog-management-1', 'default');
   await installResource(funcSBManifestPath, 'servicebinding', 'func-sb-svcat-auditlog-management-1', 'default');
+  await installResource(functionManifestPath, 'function', 'svcat-auditlog-management-1', 'default');
   await installResource(sbuManifestPath, 'servicebindingusage', 'func-sbu-svcat-auditlog-management-1', 'default');
 
   const t1 = performance.now();
@@ -257,7 +257,7 @@ async function deploy() {
     await waitForClusterServiceBroker('sm-auditlog-management', 5 * 60 * 1000);
   } catch (e) {
     const csb = await listResources(`/apis/servicecatalog.k8s.io/v1beta1/clusterservicebrokers`);
-    msg = 'Cluster service brokers failed to be available in 5 minutes';
+    const msg = 'Cluster service brokers failed to be available in 5 minutes';
     throw new Error(`${msg} ${JSON.stringify(e)}:\n${JSON.stringify(csb)}`);
   }
 

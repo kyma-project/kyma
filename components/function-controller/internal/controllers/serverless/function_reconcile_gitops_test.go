@@ -18,7 +18,6 @@ import (
 	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/apimachinery/pkg/util/intstr"
 	"k8s.io/client-go/tools/record"
@@ -100,6 +99,9 @@ func TestGitOps(t *testing.T) {
 	initializeServerlessResources(g, resourceClient)
 	createDockerfileForRuntime(g, resourceClient, rtm)
 
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
 	for _, testData := range testDataScenarios {
 		t.Run(fmt.Sprintf("[%s] should successfully update Function]", testData.info), func(t *testing.T) {
 			//GIVEN
@@ -144,7 +146,7 @@ func TestGitOps(t *testing.T) {
 
 			//WHEN
 			t.Log("creating the Function")
-			g.Expect(reconciler.Reconcile(request)).To(beOKReconcileResult)
+			g.Expect(reconciler.Reconcile(ctx, request)).To(beOKReconcileResult)
 			// verify function
 			function := &serverlessv1alpha1.Function{}
 			g.Expect(resourceClient.Get(context.TODO(), request.NamespacedName, function)).To(gomega.Succeed())
@@ -155,7 +157,7 @@ func TestGitOps(t *testing.T) {
 			g.Expect(function).To(haveConditionReasonSourceUpdated)
 
 			t.Log("creating the Job")
-			g.Expect(reconciler.Reconcile(request)).To(beOKReconcileResult)
+			g.Expect(reconciler.Reconcile(ctx, request)).To(beOKReconcileResult)
 
 			function = &serverlessv1alpha1.Function{}
 			g.Expect(resourceClient.Get(context.TODO(), request.NamespacedName, function)).To(gomega.Succeed())
@@ -170,7 +172,7 @@ func TestGitOps(t *testing.T) {
 			g.Expect(jobList.Items).To(gomega.HaveLen(1))
 
 			t.Log("build in progress")
-			g.Expect(reconciler.Reconcile(request)).To(beOKReconcileResult)
+			g.Expect(reconciler.Reconcile(ctx, request)).To(beOKReconcileResult)
 
 			function = &serverlessv1alpha1.Function{}
 			g.Expect(resourceClient.Get(context.TODO(), request.NamespacedName, function)).To(gomega.Succeed())
@@ -193,7 +195,7 @@ func TestGitOps(t *testing.T) {
 			job.Status.CompletionTime = &now
 			g.Expect(resourceClient.Status().Update(context.TODO(), job)).To(gomega.Succeed())
 
-			g.Expect(reconciler.Reconcile(request)).To(beOKReconcileResult)
+			g.Expect(reconciler.Reconcile(ctx, request)).To(beOKReconcileResult)
 
 			function = &serverlessv1alpha1.Function{}
 			g.Expect(resourceClient.Get(context.TODO(), request.NamespacedName, function)).To(gomega.Succeed())
@@ -207,7 +209,7 @@ func TestGitOps(t *testing.T) {
 			function.Spec.Reference = "newone"
 			g.Expect(resourceClient.Update(context.TODO(), function)).To(gomega.Succeed())
 
-			g.Expect(reconciler.Reconcile(request)).To(beOKReconcileResult)
+			g.Expect(reconciler.Reconcile(ctx, request)).To(beOKReconcileResult)
 
 			// check if status was updated
 			g.Expect(resourceClient.Get(context.TODO(), request.NamespacedName, function)).To(gomega.Succeed())
@@ -219,7 +221,7 @@ func TestGitOps(t *testing.T) {
 			g.Expect(function).To(haveStatusCommit("a376218bdcd705cc39aa7ce7f310769fab6d51c9"))
 
 			t.Log("delete the old Job")
-			g.Expect(reconciler.Reconcile(request)).To(beOKReconcileResult)
+			g.Expect(reconciler.Reconcile(ctx, request)).To(beOKReconcileResult)
 
 			function = &serverlessv1alpha1.Function{}
 			g.Expect(resourceClient.Get(context.TODO(), request.NamespacedName, function)).To(gomega.Succeed())
@@ -234,7 +236,7 @@ func TestGitOps(t *testing.T) {
 			g.Expect(jobList.Items).To(gomega.HaveLen(0))
 
 			t.Log("creating the Job")
-			g.Expect(reconciler.Reconcile(request)).To(beOKReconcileResult)
+			g.Expect(reconciler.Reconcile(ctx, request)).To(beOKReconcileResult)
 
 			function = &serverlessv1alpha1.Function{}
 			g.Expect(resourceClient.Get(context.TODO(), request.NamespacedName, function)).To(gomega.Succeed())
@@ -249,7 +251,7 @@ func TestGitOps(t *testing.T) {
 			g.Expect(jobList.Items).To(gomega.HaveLen(1))
 
 			t.Log("build in progress")
-			g.Expect(reconciler.Reconcile(request)).To(beOKReconcileResult)
+			g.Expect(reconciler.Reconcile(ctx, request)).To(beOKReconcileResult)
 
 			function = &serverlessv1alpha1.Function{}
 			g.Expect(resourceClient.Get(context.TODO(), request.NamespacedName, function)).To(gomega.Succeed())
@@ -271,7 +273,7 @@ func TestGitOps(t *testing.T) {
 			job.Status.CompletionTime = &now
 			g.Expect(resourceClient.Status().Update(context.TODO(), job)).To(gomega.Succeed())
 
-			g.Expect(reconciler.Reconcile(request)).To(beOKReconcileResult)
+			g.Expect(reconciler.Reconcile(ctx, request)).To(beOKReconcileResult)
 
 			function = &serverlessv1alpha1.Function{}
 			g.Expect(resourceClient.Get(context.TODO(), request.NamespacedName, function)).To(gomega.Succeed())
@@ -282,7 +284,7 @@ func TestGitOps(t *testing.T) {
 			g.Expect(function).To(haveConditionReasonJobFinished)
 
 			t.Log("deploy started")
-			g.Expect(reconciler.Reconcile(request)).To(beOKReconcileResult)
+			g.Expect(reconciler.Reconcile(ctx, request)).To(beOKReconcileResult)
 
 			function = &serverlessv1alpha1.Function{}
 			g.Expect(resourceClient.Get(context.TODO(), request.NamespacedName, function)).To(gomega.Succeed())
@@ -313,7 +315,7 @@ func TestGitOps(t *testing.T) {
 			g.Expect(deployment).To(haveLabelWithValue("foo", "bar"))
 
 			t.Log("service creation")
-			g.Expect(reconciler.Reconcile(request)).To(beOKReconcileResult)
+			g.Expect(reconciler.Reconcile(ctx, request)).To(beOKReconcileResult)
 
 			function = &serverlessv1alpha1.Function{}
 			g.Expect(resourceClient.Get(context.TODO(), request.NamespacedName, function)).To(gomega.Succeed())
@@ -331,13 +333,13 @@ func TestGitOps(t *testing.T) {
 			g.Expect(svc.Spec.Ports[0].Name).To(gomega.Equal("http"))
 			g.Expect(svc.Spec.Ports[0].TargetPort).To(gomega.Equal(intstr.FromInt(8080)))
 
-			g.Expect(labels.AreLabelsInWhiteList(svc.Spec.Selector, job.Spec.Template.Labels)).
+			g.Expect(isSubset(svc.Spec.Selector, job.Spec.Template.Labels)).
 				To(gomega.BeFalse(), "svc selector should not catch job pods")
 
 			g.Expect(svc.Spec.Selector).To(gomega.Equal(deployment.Spec.Selector.MatchLabels))
 
 			t.Log("hpa creation")
-			g.Expect(reconciler.Reconcile(request)).To(beOKReconcileResult)
+			g.Expect(reconciler.Reconcile(ctx, request)).To(beOKReconcileResult)
 
 			function = &serverlessv1alpha1.Function{}
 			g.Expect(resourceClient.Get(context.TODO(), request.NamespacedName, function)).To(gomega.Succeed())
@@ -365,7 +367,7 @@ func TestGitOps(t *testing.T) {
 			}
 			g.Expect(resourceClient.Status().Update(context.TODO(), deployment)).To(gomega.Succeed())
 
-			g.Expect(reconciler.Reconcile(request)).To(beFinishedReconcileResult)
+			g.Expect(reconciler.Reconcile(ctx, request)).To(beFinishedReconcileResult)
 
 			function = &serverlessv1alpha1.Function{}
 			g.Expect(resourceClient.Get(context.TODO(), request.NamespacedName, function)).To(gomega.Succeed())
@@ -376,7 +378,7 @@ func TestGitOps(t *testing.T) {
 			g.Expect(function).To(haveConditionReasonDeploymentReady)
 
 			t.Log("should not change state on reconcile")
-			g.Expect(reconciler.Reconcile(request)).To(beFinishedReconcileResult)
+			g.Expect(reconciler.Reconcile(ctx, request)).To(beFinishedReconcileResult)
 
 			function = &serverlessv1alpha1.Function{}
 			g.Expect(resourceClient.Get(context.TODO(), request.NamespacedName, function)).To(gomega.Succeed())
@@ -398,6 +400,10 @@ func TestGitOps_GitErrorHandling(t *testing.T) {
 	testCfg := setUpControllerConfig(g)
 	initializeServerlessResources(g, resourceClient)
 	createDockerfileForRuntime(g, resourceClient, rtm)
+
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
 	t.Run("Check if Requeue is set to true in case of recoverable error", func(t *testing.T) {
 		//GIVEN
 		g := gomega.NewGomegaWithT(t)
@@ -444,7 +450,7 @@ func TestGitOps_GitErrorHandling(t *testing.T) {
 		}
 
 		//WHEN
-		res, err := reconciler.Reconcile(request)
+		res, err := reconciler.Reconcile(ctx, request)
 
 		//THEN
 		g.Expect(err).To(gomega.BeNil())
@@ -467,6 +473,10 @@ func Test_ReadGITOptions(t *testing.T) {
 	testCfg := setUpControllerConfig(g)
 	initializeServerlessResources(g, resourceClient)
 	createDockerfileForRuntime(g, resourceClient, rtm)
+
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
 	t.Run("Check if requeue in-case of non-existing git-repo-cr", func(t *testing.T) {
 		//GIVEN
 		g := gomega.NewGomegaWithT(t)
@@ -500,11 +510,24 @@ func Test_ReadGITOptions(t *testing.T) {
 		}
 
 		//WHEN
-		res, err := reconciler.Reconcile(request)
+		res, err := reconciler.Reconcile(ctx, request)
 
 		//THEN
 		g.Expect(err).ToNot(gomega.BeNil())
 		// this is expected to be false, because returning an error is enough to requeue
 		g.Expect(res.Requeue).To(gomega.BeFalse())
 	})
+}
+
+func isSubset(subSet, superSet map[string]string) bool {
+	if len(superSet) == 0 {
+		return true
+	}
+	for k, v := range subSet {
+		value, ok := superSet[k]
+		if !ok || value != v {
+			return false
+		}
+	}
+	return true
 }

@@ -74,14 +74,12 @@ nats:
   # of the NATS Server.
   # NOTE: For this to work the name of the configuration has to be
   # called `nats.conf`.
-  # 
   # e.g. kubectl create secret generic custom-nats-conf --from-file nats.conf
-  # 
   # customConfigSecret:
   #  name:
 
   jetstream:
-    #enabled: JetStream can be enabled via .Values.global.features.enableJetStream
+    #enabled: JetStream can be enabled via .Values.global.jetstream.enabled
 
     # Jetstream Domain
     domain:
@@ -115,7 +113,7 @@ nats:
     #                          #
     ############################
     fileStorage:
-      enabled: false
+      #enabled: JetStream fileStorage can be enabled if .Values.global.jetstream.storage equals "file"
       storageDirectory: /data
 
       # Set for use with existing PVC
@@ -184,3 +182,18 @@ k8sClusterDomain: cluster.local
 
 # Add labels to all the deployed resources
 commonLabels: {}
+
+# Prometheus NATS Exporter configuration.
+exporter:
+  enabled: true
+  pullPolicy: IfNotPresent
+  securityContext: {}
+  resources: {}
+  # Prometheus operator ServiceMonitor support. Exporter has to be enabled
+  serviceMonitor:
+    enabled: true
+    labels: {}
+    annotations: {}
+    path: /metrics
+    # interval:
+    # scrapeTimeout:
