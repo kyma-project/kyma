@@ -97,17 +97,17 @@ async function checkIfGrafanaIsReachable(redirectURL, httpErrorCode) {
   });
 
   try {
-    const response = await axios.get(url, {httpsAgent: agent});
+    const response = await axios.get(url, {httpsAgent: agent, timeout: 30000});
     if (response.status === httpErrorCode && response.request.res.responseUrl.includes(redirectURL)) {
       return true;
     }
   } catch (err) {
-    const msg = 'Error when querying Grafana: ';
+    const msg = 'Grafana is not reachable: ';
     if (err.response) {
       if (err.response.status === httpErrorCode && err.response.data.includes(redirectURL)) {
         return true;
       }
-      error(msg + err.response.status + ' : ' + err.response.data);
+      error(`${msg} ${err.response.data} (${err.response.status})`);
     } else {
       error(`${msg}: ${err.toString()}`);
     }
