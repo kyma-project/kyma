@@ -52,6 +52,7 @@ This guide shows you how to register a service of your external solution in Kyma
    spec:
      services:
      - description: httpbin.org
+       name: test-proxy-basic-auth
        displayName: test-proxy-basic-auth
        entries:
        - credentials:
@@ -60,11 +61,8 @@ This guide shows you how to register a service of your external solution in Kyma
          targetUrl: $TARGET_API_URL
          type: API
        id: $TARGET_API_UUID
-       labels:
-         connected-app: test
-       longDescription: httpbin.org
-       name: test-proxy-basic-auth-690bd
-       providerDisplayName: SAP Hybris
+       longDescription: "This is your API"
+       providerDisplayName: "Your organisation"
      skipVerify: false
    EOF
    ```
@@ -87,7 +85,6 @@ cat <<EOF | kubectl apply -f -
 apiVersion: v1
 kind: Pod
 metadata:
-  creationTimestamp: null
   labels:
     run: test-app-gateway
   name: test-app-gateway
