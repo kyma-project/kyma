@@ -50,13 +50,11 @@ This guide shows you how to register a service of your external solution in Kyma
    metadata:
      name: $APP_NAME
    spec:
-     accessLabel: test
      services:
      - description: httpbin.org
        displayName: test-proxy-basic-auth
        entries:
-       - accessLabel: test-f03aafcc-85ad-4665-a46a-bf455f5fa0b3
-         credentials:
+       - credentials:
            secretName: $SECRET_NAME
            type: Basic
          targetUrl: $TARGET_API_URL
