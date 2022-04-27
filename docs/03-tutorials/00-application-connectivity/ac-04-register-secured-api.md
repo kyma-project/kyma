@@ -5,34 +5,61 @@ title: Register a secured API
 
 Application Registry allows you to register a secured API for every service. The supported authentication methods are [Basic Authentication](https://tools.ietf.org/html/rfc7617), [OAuth](https://tools.ietf.org/html/rfc6750) (Client Credentials Grant), and client certificates.
 
-You can specify only one authentication method for every secured API you register. If you try to register and specify more than one authentication method, Application Registry returns the `400` code response.
+You can specify only one authentication method for every secured API you register. 
 
 Additionally, you can secure the API against cross-site request forgery (CSRF) attacks. CSRF tokens are an additional layer of protection and can accompany any authentication method.
 
 >**NOTE:** Registering a secured API is a part of registering services of an external solution connected to Kyma. To learn more about this process, follow the [tutorial](ac-03-register-manage-services.md).
 
-## Register a Basic Authentication-secured API
+## Register a secured API
 
-To register an API secured with Basic Authentication, add a **credentials.basic** object to the **api** section of the service registration request body. You must include these fields:
+To register a secured API, add a **service** object to the **services** section of the Application CRD. You must include these fields:
 
 | Field   |  Description |
 |----------|------|
-| **username** | Basic Authorization username |
-| **password** | Basic Authorization password |
+| **id** | Identifier of the service. Must be unique in the scope of Application CRD |
+| **name** | Name of the service. Must be unique in the scope of Application CRD |
+| **displayName** | Display name of the service. Must be unique in the scope of Application CRD |
+| **description** | Descripion of the service |
+| **providerDisplayName** | Name of the service provider |
+| **entries** | Object containing service details |
 
-This is an example of the **api** section of the request body for an API secured with Basic Authentication:
+**Entries** object must contain the following fields:
+
+| Field           | Description                             |
+| --------------- | --------------------------------------- |
+| **credentials** | Object describing authentication method |
+| **targetUrl**   | URL to the API                          |
+| **type**        | Entry type                              |
+
+**Credentials** object must contain the following fields:
+
+| Field          | Description                          |
+| -------------- | ------------------------------------ |
+| **secretName** | Name of a secret storing credentials |
+| **type**       | Authentication method                |
+
+## Register a  Basic Authentication-secured API
+
+This is an example of the service section for an API secured with Basic Authentication:
 
 ```json
-    "api": {
-        "targetUrl": "https://sampleapi.targeturl/v1",
-        "credentials": {
-            "basic": {
-                "username": "{USERNAME}",
-                "password": "{PASSWORD}"
-            }
-        }
-    }
+  services:
+  - description: "Your service"
+    name: my-basic-auth-service
+    displayName: my-basic-auth-service
+    entries:
+    - credentials:
+        secretName: my-basic-auth-secret
+        type: Basic
+      targetUrl: {Your API URL}
+      type: API
+    id: 721da9cc-616e-4558-b4dc-4b58554ce7ee
+    providerDisplayName: "Your organisation"
+  skipVerify: false
 ```
+
+This is an example of secret containing credentials
 
 ## Register an OAuth-secured API
 

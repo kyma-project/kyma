@@ -51,7 +51,7 @@ This guide shows you how to register a service of your external solution in Kyma
      name: $APP_NAME
    spec:
      services:
-     - description: httpbin.org
+     - description: "Your service"
        name: test-proxy-basic-auth
        displayName: test-proxy-basic-auth
        entries:
@@ -61,7 +61,6 @@ This guide shows you how to register a service of your external solution in Kyma
          targetUrl: $TARGET_API_URL
          type: API
        id: $TARGET_API_UUID
-       longDescription: "This is your API"
        providerDisplayName: "Your organisation"
      skipVerify: false
    EOF
@@ -70,7 +69,7 @@ This guide shows you how to register a service of your external solution in Kyma
 2. Create a secret contains user name and password
 
    ```bash
-   kubectl create secret generic $SECRET_NAME --from-literal username=$USER_NAME --from-literal password=$PASSWORD 
+   kubectl create secret generic $SECRET_NAME --from-literal username=$USER_NAME --from-literal password=$PASSWORD -n kyma-integration
    ```
 
 
@@ -104,7 +103,7 @@ EOF
 2. Follow this template to build path for accessing your registered service
 
    ```bash
-   export GATEWAY_URL=http://central-application-gateway.kyma-system:8080/test/test-proxy-basic-auth/{YOUR SERVICE API PATH}
+   export GATEWAY_URL=http://central-application-gateway.kyma-system:8080/$APP_NAME/test-proxy-basic-auth/{YOUR SERVICE API PATH}
    ```
 
 3. Execute request 
