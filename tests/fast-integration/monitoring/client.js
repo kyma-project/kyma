@@ -97,7 +97,7 @@ async function checkIfGrafanaIsReachable(redirectURL, httpErrorCode) {
   });
 
   try {
-    const response = await axios.get(url, {httpsAgent: agent, timeout: 30000});
+    const response = await axios.get(url, {httpsAgent: agent});
     if (response.status === httpErrorCode && response.request.res.responseUrl.includes(redirectURL)) {
       return true;
     }
