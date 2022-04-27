@@ -31,10 +31,6 @@ describe('Executing Standard Testsuite:', function() {
     await cleanMockTestFixture(mockNamespace, testNamespace, true);
   });
 
-  before('Unexpose Grafana 1', async function() {
-    await unexposeGrafana();
-  });
-
   after('Unexpose Grafana', async function() {
     await unexposeGrafana();
   });
