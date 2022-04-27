@@ -109,7 +109,7 @@ describe('SKR SVCAT migration test', function() {
   });
 
   it('Should mark the platform for migration in Service Manager', async function() {
-    await t.markForMigration(smAdminCreds, platformCreds.clusterId, btpOperatorCreds.instanceId);
+    await s.markForMigration(smAdminCreds, platformCreds.clusterId, btpOperatorCreds.instanceId);
   });
 
   it('Should update SKR with BTP Operator Credentials', async function() {
