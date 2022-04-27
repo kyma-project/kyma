@@ -54,7 +54,6 @@ function commerceMockTests() {
       await checkFunctionResponse(testNamespace);
     });
 
-    // //
     it('Should print report of restarted containers, skipped if no crashes happened', async function() {
       const afterTestRestarts = await getContainerRestartsForAllNamespaces();
       printRestartReport(initialRestarts, afterTestRestarts);
@@ -64,9 +63,9 @@ function commerceMockTests() {
       await checkLokiLogs(testStartTimestamp);
     });
 
-     it('Test namespaces should be deleted', async function() {
-       await cleanMockTestFixture('mocks', testNamespace, true);
-     });
+    // it('Test namespaces should be deleted', async function() {
+    //   await cleanMockTestFixture('mocks', testNamespace, true);
+    // });
   });
 }
 

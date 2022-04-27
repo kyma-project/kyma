@@ -21,13 +21,9 @@ const {
   waitForServiceBindingUsage,
   waitForVirtualService,
   waitForDeployment,
-  waitForTokenRequest,
   waitForFunction,
   waitForSubscription,
   deleteAllK8sResources,
-  genRandom,
-  k8sDynamicApi,
-  deleteNamespaces,
   debug,
   toBase64,
   ensureApplicationMapping,
@@ -38,7 +34,6 @@ const {
   namespaceObj,
   serviceInstanceObj,
   getTraceDAG,
-  printStatusOfInClusterEventingInfrastructure,
 } = require('../../../utils');
 
 const {
@@ -60,7 +55,6 @@ const {
   OAuthCredentials,
 } = require('../../../lib/oauth');
 const {bebBackend, eventMeshNamespace} = require('../../../eventing-test/utils');
-const {exit} = require('process');
 
 const commerceMockYaml = fs.readFileSync(
     path.join(__dirname, './commerce-mock.yaml'),
@@ -143,7 +137,6 @@ async function checkFunctionResponse(functionNamespace, mockNamespace = 'mocks')
     throw convertAxiosError(err, 'Function lastorder responded with error');
   });
 
-  console.log('This fails: ');
   expect(res.data).to.have.nested.property('order.totalPriceWithTax.value', 100);
 
   // expect error when unauthorized
@@ -392,27 +385,6 @@ async function registerAllApis(mockHost) {
   expect(remoteApis.data).to.have.lengthOf.at.least(2);
   debug('Commerce APIs registered');
   return remoteApis;
-}
-
-async function connectMockLocal(mockHost, targetNamespace) {
-  // const tokenRequest = {
-  //   apiVersion: 'applicationconnector.kyma-project.io/v1alpha1',
-  //   kind: 'TokenRequest',
-  //   metadata: {name: 'commerce', namespace: targetNamespace},
-  // };
-  // await k8sDynamicApi.delete(tokenRequest).catch(() => { }); // Ignore delete error
-  // await k8sDynamicApi.create(tokenRequest);
-  // const tokenObj = await waitForTokenRequest('commerce', targetNamespace);
-  //
-  // const pairingBody = {
-  //   token: tokenObj.status.url,
-  //   baseUrl: `https://${mockHost}`,
-  //   insecure: true,
-  // };
-  // debug('Token URL', tokenObj.status.url);
-  // await connectCommerceMock(mockHost, pairingBody);
-  await ensureApplicationMapping('commerce', targetNamespace);
-  debug('Commerce mock connected locally');
 }
 
 async function connectMockCompass(client, appName, scenarioName, mockHost, targetNamespace) {
