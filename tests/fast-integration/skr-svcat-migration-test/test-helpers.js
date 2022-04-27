@@ -2,7 +2,6 @@ const execa = require('execa');
 const fs = require('fs');
 const os = require('os');
 const {
-  getEnvOrThrow,
   getConfigMap,
   kubectlExecInPod,
   listPods,
@@ -12,25 +11,6 @@ const {
   listResources,
   getFunction,
 } = require('../utils');
-
-class SMCreds {
-  static fromEnv() {
-    return new SMCreds(
-        // TODO: rename to BTP_SM_ADMIN_CLIENTID
-        getEnvOrThrow('BTP_OPERATOR_CLIENTID'),
-        // TODO: rename to BTP_SM_ADMIN_CLIENTID
-        getEnvOrThrow('BTP_OPERATOR_CLIENTSECRET'),
-        // TODO: rename to BTP_SM_URL
-        getEnvOrThrow('BTP_OPERATOR_URL'),
-    );
-  }
-
-  constructor(clientid, clientsecret, url) {
-    this.clientid = clientid;
-    this.clientsecret = clientsecret;
-    this.url = url;
-  }
-}
 
 const functions = [
   {name: 'svcat-auditlog-api-1', checkEnvVars: 'uaa url vendor'},
@@ -208,45 +188,6 @@ async function provisionPlatform(creds, svcatPlatform) {
   }
 }
 
-async function smInstanceBinding(creds, btpOperatorInstance, btpOperatorBinding) {
-  let args = [];
-  try {
-    args = ['login',
-      '-a',
-      creds.url,
-      '--param',
-      'subdomain=e2etestingscmigration',
-      '--auth-flow',
-      'client-credentials'];
-    await execa('smctl', args.concat(['--client-id', creds.clientid, '--client-secret', creds.clientsecret]));
-
-    args = ['provision', btpOperatorInstance, 'service-manager', 'service-operator-access', '--mode=sync'];
-    await execa('smctl', args);
-
-    // Move to Operator Install
-    args = ['bind', btpOperatorInstance, btpOperatorBinding, '--mode=sync'];
-    await execa('smctl', args);
-
-    args = ['get-binding', btpOperatorBinding, '-o', 'json'];
-    const out = await execa('smctl', args);
-    const b = JSON.parse(out.stdout);
-    const c = b.items[0].credentials;
-
-    return {
-      clientId: c.clientid,
-      clientSecret: c.clientsecret,
-      smURL: c.sm_url,
-      url: c.url,
-      instanceId: b.items[0].service_instance_id,
-    };
-  } catch (error) {
-    if (error.stderr === undefined) {
-      throw new Error(`failed to process output of "smctl ${args.join(' ')}"`);
-    }
-    throw new Error(`failed "smctl ${args.join(' ')}": ${error.stderr}`);
-  }
-}
-
 async function markForMigration(creds, svcatPlatform, btpOperatorInstanceId) {
   let errors = [];
   let args = [];
@@ -406,12 +347,10 @@ async function deleteBTPResources() {
 
 module.exports = {
   provisionPlatform,
-  smInstanceBinding,
   cleanupInstanceBinding,
   saveKubeconfig,
   markForMigration,
   readClusterID,
-  SMCreds,
   checkPodPresetEnvInjected,
   restartFunctionsPods,
   deleteBTPResources,
