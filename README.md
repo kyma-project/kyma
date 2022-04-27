@@ -83,28 +83,88 @@ Follow these steps:
 
 ## Join us
 
+There ar skills should be treated as a 0 level starting point of your work as a developer in Kyma. Git basic skills are the most important ones for a quick start with the code. Mastering Kubernetes skills is very important for your future work.
+
 ### Required programming skills
 
-- Kubernetes skills
-   - Basic [Kubernetes architecture](https://shipit.dev/posts/kubernetes-overview-diagrams.html)
-   - CKAD level preferred
-   - deep knowledge about Kubernetes Control Loop
-   - and important Design Patterns like Sidecar / Init Containers)
-- Deep Go understanding, especially regarding Dependency Management and Go Modules
-- Docker skills
+- Git basic skillset
+  - Fork project from main repository to your own repo
+  - Checkout code from our public and private repo
+  - Manage your remote repositories, fetch remote repository
+  - Create custom branch/add some commits/push your commts on your remote branch on your forked project
+  - Rebase/merge your local branch with changes from the main branch
+  - Create pull request to the main branch
+  - Interpret automatic test results, rerun test suite
+  - Resolve conflicts with the main branch
+  - Merge PR to the main project branch
+- Kubernetes basic skillset
+  - Using kubeconfig file to connect to the cluster
+  - Understanding bascic K8s concepts like: Namespace, Pod, Deployment, Secret, configMap, ReplicaSet, Service
+  - Browsing K8S cluster resources with kubectl command
+  - Apply yaml file for a cluster with Kubernetes resources
+  - Forwarding port from ruinning pod to your local machine
+  - Installing and using minikube
+  - Display logs from one container
+  - Exporting Kubernetes objects to .yaml files
+  - Editing Kubernetes resources from terminal
+  - Understanding Helm package manager
+  - Understanding Custom Resource Definition concept
+  - Basic [Kubernetes architecture](https://shipit.dev/posts/kubernetes-overview-diagrams.html)
+  - CKAD level preferred
+  - deep knowledge about Kubernetes Control Loop
+  - and important Design Patterns like Sidecar / Init Containers)
+- Go basic skillset
+  - Using kubeconfig file to connect to the cluster
+  - Understanding bascic K8s concepts like: Namespace, Pod, Deployment, Secret, configMap, ReplicaSet, Service
+  - Browsing K8S cluster resources with kubectl command
+  - Apply yaml file for a cluster with Kubernetes resources
+  - Forwarding port from running pod to your local machine
+  - Installing and using Minikube
+  - Display logs from one container
+  - Exporting Kubernetes objects to YAML files
+  - Editing Kubernetes resources from Terminal
+  - Understanding Helm package manager
+  - Understanding Custom Resource Definition concept
+  - Deep Go understanding, especially regarding Dependency Management and Go Modules
+- Docker basic skillset
+  - List running Docker containers
+  - Start/stop/delete any Docker container
+  - Expose ports from running container
+  - Manage your local image repo
+  - Pull image from remote repo and run it
+  - Build own image and tag it
+  - Push your own image to your Docker Hub accoount (you should have one)
+  - Manage images on your Docker Hub account
+  - Execute bash command inside container
+- Cloud services skillset
+  - Login to GCP
+  - Understanding basics concepts about GCP
+  - Create/Delete Kubernetes cluster in team project in GCP
+  - Login to Gardener
+  - Create Kubernetes shoot cluster on GCP and Azure
 - Fluency with jq,yq, grep etc. ;
-- CLI/Terminal confident use
+- Linux/Terminal basic skill set
+  - VIM editor basics
+  - Understanding some basic bash scripting
+  - Understanding basics of Unix filesystem
+  - Beeing able to do basic operations on files (list, create, copy, delete, move, execute)
+  - Sending REST queries with curl, or httpie
+  - CLI/Terminal confident use
 - High level knowledge about Gardener architecture - enough to interact with it
 - Shellscript experience, all our tooling is written in sh
 - CI/CD experience, ideally Prow
-- Process Understanding of Agile and Escalation Management
-- Architecture Base Pattern Understanding
+- Other skills
+  - Process Understanding of Agile and Escalation Management
+  - Architecture Base Pattern Understanding
+  - Understanding Service Mesh concept
+  - Basic markdown editing
+
+> **TIP:** Complete [this](https://github.tools.sap/kubernetes/docker-k8s-training) training to gain basic Docker and Kubernetes knowledge.
 
 ### Basic Kyma knowledge
 
 - [Official Kyma documentation](https://kyma-project.io/)
 - [Getting Started guide](https://kyma-project.io/docs/kyma/latest/02-get-started/)
-- Examples
 - Kyma project [Youtube channel](https://www.youtube.com/watch?v=wqQflgmyboY&list=PLmZLSvJAm8FabPF4hLjScx-dDl84NK3l5)
 
 ### Open job positions
@@ -115,17 +175,17 @@ Kyma team is located mostly in Poland and Germany. See the open job positions fo
 
 ### FAQ
 
-**What is your IDE?**
+- **What is your IDE?**
 
- Nothing is enforced. People often use GoLand, Visual Studio Code, VIM.
+  Nothing is enforced. People often use GoLand, Visual Studio Code, VIM.
 
-**How do you approach testing in Go? Do you use any frameworks?**
+- **How do you approach testing in Go? Do you use any frameworks?**
 
-We use tools such as classical Go runner, Gomega, Testify.
+  We use tools such as classical Go runner, Gomega, Testify.
 
-**How to learn Go?**
+- **How to learn Go?**
 
-Here are some useful sources to learn Go:
-- [Official Go learning tutorials](https://go.dev/learn/)
-- [50 Shades of Go: Traps, Gotchas, and Common Mistakes for New Golang Devs](http://devs.cloudimmunity.com/gotchas-and-common-mistakes-in-go-golang/)
-- [Language converter](https://ide.onelang.io/?input=HelloWorldRaw) - this tool helps you to convert code from one language to any other one
+  Here are some useful sources to learn Go:
+  - [Official Go learning tutorials](https://go.dev/learn/)
+  - [50 Shades of Go: Traps, Gotchas, and Common Mistakes for New Golang Devs](http://devs.cloudimmunity.com/gotchas-and-common-mistakes-in-go-golang/)
+  - [Language converter](https://ide.onelang.io/?input=HelloWorldRaw) - this tool helps you to convert code from one language to any other one
