@@ -14,6 +14,7 @@ const {
   waitForDeployment,
   waitForPodWithLabel,
   info,
+  getSecret,
 } = require('../utils');
 
 const {
@@ -105,7 +106,11 @@ async function createProxySecretWithIPAllowlisting() {
   const secret = proxySecret;
   secret.data.OAUTH2_PROXY_REVERSE_PROXY = toBase64('false');
   secret.data.OAUTH2_PROXY_TRUSTED_IP = toBase64('0.0.0.0/0');
+  info('secret', secret);
   await k8sApply([secret], kymaNs);
+
+  const secretData = await getSecret(secret.metadata.name, kymaNs);
+  info('secretData', secretData);
 }
 
 async function deleteProxySecret() {
