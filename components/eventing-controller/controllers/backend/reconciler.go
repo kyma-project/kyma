@@ -595,7 +595,7 @@ func (r *Reconciler) CreateOrUpdatePublisherProxy(ctx context.Context, backend e
 	}
 
 	if currentPublisher == nil { // no deployment found
-		// delete the publisher proxy with wrong backend type if it still exists
+		// delete the publisher proxy with invalid backend type if it still exists
 		if err := r.deletePublisherProxy(ctx); err != nil {
 			return nil, err
 		}
@@ -803,7 +803,7 @@ func (r *Reconciler) deletePublisherProxy(ctx context.Context) error {
 		}
 		return err
 	}
-	r.namedLogger().Debug("event-publisher proxy with the wrong backend type found, deleting it")
+	r.namedLogger().Debug("event-publisher proxy with invalid backend type found, deleting it")
 	err = r.Delete(ctx, publisher)
 	return err
 }
