@@ -183,7 +183,7 @@ kubectl port-forward -n kyma-system svc/eventing-nats 4222
 |--------------------------|----------------------------------------------------|----------|-----------------------------|
 | `KUBECONFIG`             | Path to a local kubeconfig file.                   | yes      | ~/.kube/config              |
 | `NATS_URL`               | URL of the NATS server.                            | no       | nats.nats.svc.cluster.local |
-| `EVENT_TYPE_PREFIX`      | The Event Type Prefix for the NATS backend.        | yes      | sap.kyma.custom             |
+| `EVENT_TYPE_PREFIX`      | The event type prefix for the NATS backend.        | yes      | sap.kyma.custom             |
 | `WEBHOOK_TOKEN_ENDPOINT` | The Kyma public endpoint to provide Access Tokens. | yes      | WEBHOOK_TOKEN_ENDPOINT      |
 | `DOMAIN`                 | Domain.                                            | yes      | example.com                 |
 
