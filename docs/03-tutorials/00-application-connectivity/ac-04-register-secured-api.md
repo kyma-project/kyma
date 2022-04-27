@@ -45,56 +45,70 @@ This is an example of the service section for an API secured with Basic Authenti
 
 ```json
   services:
-  - description: "Your service"
+  - id: {MY_UNIQUE_ID} 
+    name: my-basic-auth-service
+    displayName: my-basic-auth-service 
+    description: "My service"
+    entries:
+    - credentials:
+        secretName: {MY_SECRET_NAME}
+        type: Basic
+      targetUrl: {MY_API_URL}
+      type: API
+    providerDisplayName: "My organisation"
+  skipVerify: false
+```
+
+This is an example of secret containing credentials: 
+
+```bash
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {MY_SECRET_NAME}
+  namespace: kyma-integration
+data:
+  username: {MY_USER_NAME}
+  password: {MY_PASSWORD}
+```
+
+
+
+## Register an OAuth-secured API
+
+
+
+```json
+  services:
+  - description: "My service"
     name: my-basic-auth-service
     displayName: my-basic-auth-service
     entries:
     - credentials:
-        secretName: my-basic-auth-secret
-        type: Basic
-      targetUrl: {Your API URL}
+        secretName: {MY_SECRET_NAME}
+        authenticationUrl: {MY_OAUTH_TOKEN_URL}
+        type: OAuth
+      targetUrl: {MY_API_URL}
       type: API
     id: 721da9cc-616e-4558-b4dc-4b58554ce7ee
-    providerDisplayName: "Your organisation"
+    providerDisplayName: "My organisation"
   skipVerify: false
 ```
 
-This is an example of secret containing credentials
+This is an example of secret containing credentials: 
 
-## Register an OAuth-secured API
-
-To register an API secured with OAuth, add a **credentials.oauth** object to the **api** section of the service registration request body. Include these fields in the request body:
-
-| Field   |  Description |
-|----------|------|
-| **url** |  OAuth token exchange endpoint of the service |
-| **clientId** | OAuth client ID |
-| **clientSecret** | OAuth client Secret |    
-| **requestParameters.headers** | Custom request headers (optional)|   
-| **requestParameters.queryParameters** | Custom query parameters (optional)|    
-
-This is an example of the **api** section of the request body for an API secured with OAuth:
-
-```json
-    "api": {
-        "targetUrl": "https://sampleapi.targeturl/v1",
-        "credentials": {
-            "oauth": {
-                "url": "https://sampleapi.targeturl/authorizationserver/oauth/token",
-                "clientId": "{CLIENT_ID}",
-                "clientSecret": "{CLIENT_SECRET}",
-                "requestParameters": {
-                    "headers": {
-                        "{CUSTOM_HEADER_NAME}": ["{CUSTOM_HEADER_VALUE}"]
-                    },
-                    "queryParameters":  {
-                        "{CUSTOM_QUERY_PARAMETER_NAME}": ["{CUSTOM_QUERY_PARAMETER_VALUE}"]
-                    }
-                }
-            }
-        }
-    }
+```bash
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {MY_SECRET_NAME}
+  namespace: kyma-integration
+data:
+  clientId: {MY_CLIENT_ID}
+  clientSecret: {MY_CLIENT_SECRET}
 ```
+
+
 
 ## Register a client certificate-secured API
 
