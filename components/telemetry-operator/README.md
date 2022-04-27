@@ -97,6 +97,12 @@ make
 make manifests
 ```
 
+- Copy CRDs to installation directory
+
+```bash
+make copy-crds-local
+```
+
 - Install CRDs to cluster in current kubeconfig context
 
 ```bash
