@@ -83,85 +83,85 @@ Follow these steps:
 
 ## Join us
 
-There ar skills should be treated as a 0 level starting point of your work as a developer in Kyma. Git basic skills are the most important ones for a quick start with the code. Mastering Kubernetes skills is very important for your future work.
+If you would like to join us and work together on the Kyma project, there are some prerequisite skills you should acquire beforehand. Git basic skills are the most important for a quick start with the code. Mastering Kubernetes skills is very important for your future work.
 
 ### Required programming skills
 
-- Git basic skillset
-  - Fork project from main repository to your own repo
-  - Checkout code from our public and private repo
-  - Manage your remote repositories, fetch remote repository
-  - Create custom branch/add some commits/push your commts on your remote branch on your forked project
-  - Rebase/merge your local branch with changes from the main branch
-  - Create pull request to the main branch
-  - Interpret automatic test results, rerun test suite
-  - Resolve conflicts with the main branch
-  - Merge PR to the main project branch
-- Kubernetes basic skillset
-  - Using kubeconfig file to connect to the cluster
-  - Understanding bascic K8s concepts like: Namespace, Pod, Deployment, Secret, configMap, ReplicaSet, Service
-  - Browsing K8S cluster resources with kubectl command
-  - Apply yaml file for a cluster with Kubernetes resources
-  - Forwarding port from ruinning pod to your local machine
-  - Installing and using minikube
-  - Display logs from one container
-  - Exporting Kubernetes objects to .yaml files
-  - Editing Kubernetes resources from terminal
-  - Understanding Helm package manager
-  - Understanding Custom Resource Definition concept
-  - Basic [Kubernetes architecture](https://shipit.dev/posts/kubernetes-overview-diagrams.html)
-  - CKAD level preferred
-  - deep knowledge about Kubernetes Control Loop
-  - and important Design Patterns like Sidecar / Init Containers)
-- Go basic skillset
-  - Using kubeconfig file to connect to the cluster
-  - Understanding bascic K8s concepts like: Namespace, Pod, Deployment, Secret, configMap, ReplicaSet, Service
-  - Browsing K8S cluster resources with kubectl command
-  - Apply yaml file for a cluster with Kubernetes resources
-  - Forwarding port from running pod to your local machine
+- Git basic skillset:
+  - Forking a project from the `main` repository to your own repository
+  - Checking out code from a public and private repository
+  - Managing and fetching remote repositories
+  - Creating a custom branch, adding and pushing commits to a remote branch of a forked project
+  - Rebasing and merging a local branch with changes to the `main` branch
+  - Creating and merging pull requests to the `main` branch
+  - Interpreting automatic test results, rerunning a test suite
+  - Resolving conflicts with the `main` branch
+
+- Go basic skillset:
+  - Installing and upgrading Go compiler
+  - Setting up your IDE
+  - Building a GoLang project
+  - Running tests on a Golang project
+  - Running code in the debug mode in your IDE
+  - Understanding Makefiles and Dockerfiles
+  - Downloading dependencies for the project
+  - Understanding dependency tools such as `go mod` and `dep`
+  - Downloading additional tools modules with the `go get` command
+
+- Kubernetes basic skillset:
+  - Understanding basic [Kubernetes architecture](https://shipit.dev/posts/kubernetes-overview-diagrams.html) and basic concepts such as: Namespace, Pod, Deployment, Secret, Config Map, Replica Set, Service, Custom Resource Definition, Kubernetes Control Loop; understanding Kubernetes Design Patterns such as sidecars and init containers
+  - Using a kubeconfig file to connect to a cluster
+  - Browsing cluster resources using `kubectl` commands and editing Kubernetes resources using Terminal
+  - Applying YAML files to a cluster with Kubernetes resources
+  - Port forwarding from a running Pod to a local machine
   - Installing and using Minikube
-  - Display logs from one container
+  - Displaying logs from a container
   - Exporting Kubernetes objects to YAML files
-  - Editing Kubernetes resources from Terminal
   - Understanding Helm package manager
-  - Understanding Custom Resource Definition concept
-  - Deep Go understanding, especially regarding Dependency Management and Go Modules
-- Docker basic skillset
-  - List running Docker containers
-  - Start/stop/delete any Docker container
-  - Expose ports from running container
-  - Manage your local image repo
-  - Pull image from remote repo and run it
-  - Build own image and tag it
-  - Push your own image to your Docker Hub accoount (you should have one)
-  - Manage images on your Docker Hub account
-  - Execute bash command inside container
-- Cloud services skillset
-  - Login to GCP
-  - Understanding basics concepts about GCP
-  - Create/Delete Kubernetes cluster in team project in GCP
-  - Login to Gardener
-  - Create Kubernetes shoot cluster on GCP and Azure
-- Fluency with jq,yq, grep etc. ;
+  - Certified Kubernetes Application Developer (CKAD) level preferred
+
+- Docker basic skillset:
+  - Listing all running Docker containers
+  - Starting, stopping, deleting Docker containers
+  - Exposing ports from running containers
+  - Managing local image repositories
+  - Pulling images from a remote repository and running them
+  - Building images and tagging them
+  - Pushing and managing images in your Docker Hub account
+  - Executing `bash` commands inside containers
+
+> **TIP:** Complete the [Docker and Kubernetes fundamentals](https://github.tools.sap/kubernetes/docker-k8s-training) training to get the basic Docker and Kubernetes knowledge.
+
+- Cloud services skillset:
+  - Logging in to Google Cloud Platform (GCP)
+  - Understanding GCP basics concepts
+  - Creating and deleting Kubernetes clusters in team projects on GCP
+  - Logging in to Gardener
+  - Creating Kubernetes shoot clusters on GCP and Azure
+
 - Linux/Terminal basic skill set
   - VIM editor basics
-  - Understanding some basic bash scripting
-  - Understanding basics of Unix filesystem
-  - Beeing able to do basic operations on files (list, create, copy, delete, move, execute)
-  - Sending REST queries with curl, or httpie
+  - Understanding basic `bash` scripting
+  - Understanding the basics of the Unix filesystem
+  - Performing basic operations on files (list, create, copy, delete, move, execute)
+  - Sending REST queries with curl or HTTPie
   - CLI/Terminal confident use
-- High level knowledge about Gardener architecture - enough to interact with it
-- Shellscript experience, all our tooling is written in sh
-- CI/CD experience, ideally Prow
-- Other skills
-  - Process Understanding of Agile and Escalation Management
-  - Architecture Base Pattern Understanding
-  - Understanding Service Mesh concept
-  - Basic markdown editing
 
-> **TIP:** Complete [this](https://github.tools.sap/kubernetes/docker-k8s-training) training to gain basic Docker and Kubernetes knowledge.
+- Fluency with jq, yq, grep
+- High level knowledge about Gardener architecture
+- Shell script experience
+- CI/CD experience (ideally Prow)
+
+- Other skills
+  - Understanding Agile and Escalation Management
+  - Understanding the Architecture Base Pattern
+  - Understanding the Service Mesh concept
+  - Basic Markdown editing
+
 
 ### Basic Kyma knowledge
+
+These are the sources you can get the basic Kyma knowledge from:
 
 - [Official Kyma documentation](https://kyma-project.io/)
 - [Getting Started guide](https://kyma-project.io/docs/kyma/latest/02-get-started/)
