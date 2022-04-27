@@ -10,10 +10,6 @@ const {
   addService,
   updateService,
   deleteService,
-  sendCloudEventStructuredModeAndCheckResponse,
-  cleanMockTestFixture,
-  checkInClusterEventDelivery,
-  sendCloudEventBinaryModeAndCheckResponse,
 } = require('./fixtures/commerce-mock');
 const {
   printRestartReport,
