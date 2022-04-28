@@ -2,6 +2,8 @@ package sync
 
 import (
 	"context"
+	"testing"
+
 	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/api/v1alpha1"
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/sync/mocks"
 	"github.com/stretchr/testify/mock"
@@ -11,7 +13,6 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/types"
-	"testing"
 )
 
 var (

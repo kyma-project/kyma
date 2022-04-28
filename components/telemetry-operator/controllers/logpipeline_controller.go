@@ -19,8 +19,9 @@ package controllers
 import (
 	"context"
 	"fmt"
-	"github.com/kyma-project/kyma/components/telemetry-operator/internal/sync"
 	"time"
+
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/sync"
 
 	"github.com/prometheus/client_golang/prometheus"
 
