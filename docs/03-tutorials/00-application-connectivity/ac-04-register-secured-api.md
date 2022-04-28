@@ -1,7 +1,7 @@
 ---
 title: Register a secured API
 ---
-You can register a secured API exposed by your external soliution. The supported authentication methods are [Basic Authentication](https://tools.ietf.org/html/rfc7617), [OAuth](https://tools.ietf.org/html/rfc6750), and client certificates.
+You can register a secured API exposed by your external solution. The supported authentication methods are [Basic Authentication](https://tools.ietf.org/html/rfc7617), [OAuth](https://tools.ietf.org/html/rfc6750), and client certificates.
 
 You can specify only one authentication method for every secured API you register. 
 
