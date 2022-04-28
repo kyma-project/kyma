@@ -95,9 +95,9 @@ This is an example of the **service** object for an API secured with OAuth:
       type: API
 ```
 
-This is an example of secret containing credentials: 
+This is an example of a secret containing credentials: 
 
-```bash
+```yaml
 apiVersion: v1
 kind: Secret
 metadata:
@@ -134,7 +134,7 @@ This is an example of the **service** object for an API secured with certificate
 
 This is an example of a secret containing credentials: 
 
-```bash
+```yaml
 apiVersion: v1
 kind: Secret
 metadata:
