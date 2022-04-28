@@ -51,9 +51,9 @@ export TARGET_API_PATH={RELATIVE_SERVICE_PATH}
 kubectl create secret generic $SECRET_NAME --from-literal username=$USER_NAME --from-literal password=$PASSWORD -n kyma-integration
 ```
 
-1. To register a service with a Basic Authentication-secured API, you must create or modify Application CRD. Run this command to create Application CRD with the service definition.
+2. To register a service with a Basic Authentication-secured API, you must create or modify Application CRD. Run this command to create Application CRD with the service definition.
 
-   >**NOTE:** Follow the [tutorial](ac-04-register-secured-api.md) to learn how to register APIs secured with different security schemes or protected against cross-site request forgery (CSRF) attacks.
+>**NOTE:** Follow the [tutorial](ac-04-register-secured-api.md) to learn how to register APIs secured with different security schemes or protected against cross-site request forgery (CSRF) attacks.
 
 ```bash
 cat <<EOF | kubectl apply -f -
@@ -65,8 +65,8 @@ spec:
   skipVerify: false
   services:
   - id: $TARGET_API_UUID
-    name: test-proxy-basic-auth
-    displayName: test-proxy-basic-auth
+    name: test-basic-auth
+    displayName: "Test Basic Auth"
     description: "Your service"
     providerDisplayName: "Your organisation"
     entries:
@@ -82,7 +82,13 @@ EOF
 
 You can access the registered service from within any workload deployed in Kyma cluster. To verify whether service is registered you can create a test Pod and execute a request to Application Gateway.   
 
-1. Create test pod 
+1. Execute this command to build path for accessing your registered service
+
+```bash
+export GATEWAY_URL=http://central-application-gateway.kyma-system:8080/$APP_NAME/test-basic-auth/$TARGET_API_PATH
+```
+
+2. Create test pod 
 
 ```bash
 cat <<EOF | kubectl apply -f -
@@ -105,13 +111,13 @@ status: {}
 EOF
 ```
 
-2. Execute this command to build path for accessing your registered service
+3. Execute this command and wait until Pod is in Running state:
 
 ```bash
-export GATEWAY_URL=http://central-application-gateway.kyma-system:8080/$APP_NAME/test-proxy-basic-auth/$TARGET_API_PATH
+kubectl get po -w | grep test-app-gateway
 ```
 
-3. Execute request 
+4. Execute request
 
 ```bash
 kubectl exec test-app-gateway -c test-app-gateway -- sh -c "wget -O- '$GATEWAY_URL'"

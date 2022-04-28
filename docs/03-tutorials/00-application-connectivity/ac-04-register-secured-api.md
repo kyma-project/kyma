@@ -17,7 +17,7 @@ To register a secured API, add a **service** object to the **services** section 
 |----------|------|
 | **id** | Identifier of the service. Must be unique in the scope of Application CRD |
 | **name** | Name of the service. Must be unique in the scope of Application CRD. Allowed characters include: lowercase letters, numbers, and hyphens. |
-| **displayName** | Display name of the service. Must be unique in the scope of Application CRD. |
+| **displayName** | Display name of the service. Must be unique in the scope of Application CRD. Its normalized form constitutes a part of the path. |
 | **description** | Descripion of the service |
 | **providerDisplayName** | Name of the service provider |
 | **entries** | Object containing service details |
@@ -46,7 +46,7 @@ This is an example of the **service** object for an API secured with Basic Authe
 ```json
   - id: {MY_UNIQUE_ID}
     name: my-basic-auth-service
-    displayName: my-basic-auth-service
+    displayName: "My Basic Auth Service"
     description: "My service"
     providerDisplayName: "My organisation"
     entries:
@@ -83,7 +83,7 @@ This is an example of the **service** object for an API secured with OAuth:
 ```json
   - id: {MY_UNIQUE_ID}
     name: my-oauth-service
-    displayName: my-oauth-service    
+    displayName: "My OAuth Service"    
     description: "My service"
     providerDisplayName: "My organisation"
     entries:
@@ -121,7 +121,7 @@ This is an example of the **service** object for an API secured with certificate
 ```json
   - id: {MY_UNIQUE_ID}
     name: my-client-cert-service
-    displayName: my-client-cert-service
+    displayName: "My Client Cert Service"
     description: "My service"
     providerDisplayName: "My organisation"
     entries:
@@ -158,7 +158,7 @@ This is an example of the **service** object for an API secured with both Basic 
 ```json
   - id: {MY_UNIQUE_ID} 
     name: my-csrf-service
-    displayName: my-csrf-service 
+    displayName: "My CSRF Service" 
     description: "My service"
     providerDisplayName: "My organisation"
     entries:
@@ -170,6 +170,8 @@ This is an example of the **service** object for an API secured with both Basic 
       targetUrl: {MY_API_URL}
       type: API
 ```
+
+> **NOTE:** it is assumed that CSRF token endpoint service uses the same credentials as the target API.
 
 This is an example of a secret containing credentials: 
 
@@ -199,7 +201,7 @@ This is an example of the **service** object for an API secured with Basic Authe
 ```json
   - id: {MY_UNIQUE_ID}
     name: my-headers-params-service
-    displayName: my-headers-params-service
+    displayName: "My Headers Params Service"
     description: "My service"
     providerDisplayName: "My organisation"
     entries:
