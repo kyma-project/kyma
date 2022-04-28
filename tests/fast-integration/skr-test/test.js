@@ -12,7 +12,7 @@ describe('Execute SKR test', function() {
   this.timeout(60 * 60 * 1000 * 3); // 3h
   this.slow(5000);
 
-  const provisioningTimeout = 1000 * 60 * 45; // 30m
+  const provisioningTimeout = 1000 * 60 * 30; // 30m
   const deprovisioningTimeout = 1000 * 60 * 95; // 95m
 
   before('Provision SKR', async function() {
@@ -22,7 +22,7 @@ describe('Execute SKR test', function() {
       const customParams = {
         oidc: this.options.oidc0,
         kymaVersion: 'PR-14116',
-        overridesVersion: '2.1.3',
+        overridesVersion: '2.1',
       };
       const skr = await provisionSKR(keb, kcp, gardener,
           this.options.instanceID,
