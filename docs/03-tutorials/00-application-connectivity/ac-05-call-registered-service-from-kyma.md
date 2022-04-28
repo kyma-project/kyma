@@ -1,8 +1,6 @@
 ---
 title: Call a registered external service from Kyma
 ---
-<!-- TODO: Adjust to the new flow -->
-
 This guide shows how to call a registered external service from Kyma using a simple Function.
 
 ## Prerequisites
