@@ -17,8 +17,6 @@ const s = require('../smctl/helpers');
 const kcp = new KCPWrapper(KCPConfig.fromEnv());
 
 describe('Execute SKR test', function() {
-  debug.enabled = true;
-
   this.timeout(60 * 60 * 1000 * 3); // 3h
   this.slow(5000);
 
