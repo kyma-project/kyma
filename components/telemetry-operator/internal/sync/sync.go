@@ -289,7 +289,7 @@ func (s *LogPipelineSyncer) syncSecretRefs(ctx context.Context, logPipeline *tel
 func (s *LogPipelineSyncer) getOrCreate(ctx context.Context, obj client.Object) error {
 	err := s.Get(ctx, client.ObjectKeyFromObject(obj), obj)
 	if err != nil && errors.IsNotFound(err) {
-		err = s.Create(ctx, obj)
+		return s.Create(ctx, obj)
 	}
 	return err
 }
