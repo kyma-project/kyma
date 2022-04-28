@@ -1,8 +1,6 @@
 ---
 title: Register a secured API
 ---
-<!-- TODO: Adjust to the new flow -->
-
 Application Registry allows you to register a secured API for every service. The supported authentication methods are [Basic Authentication](https://tools.ietf.org/html/rfc7617), [OAuth](https://tools.ietf.org/html/rfc6750) (Client Credentials Grant), and client certificates.
 
 You can specify only one authentication method for every secured API you register. 
@@ -18,19 +16,20 @@ To register a secured API, add a **service** object to the **services** section 
 | Field   |  Description |
 |----------|------|
 | **id** | Identifier of the service. Must be unique in the scope of Application CRD |
-| **name** | Name of the service. Must be unique in the scope of Application CRD |
-| **displayName** | Display name of the service. Must be unique in the scope of Application CRD |
+| **name** | Name of the service. Must be unique in the scope of Application CRD. Allowed characters include: lowercase letters, numbers, and hyphens |
+| **displayName** | Display name of the service. Must be unique in the scope of Application CRD. |
 | **description** | Descripion of the service |
 | **providerDisplayName** | Name of the service provider |
 | **entries** | Object containing service details |
 
 **Entries** object must contain the following fields:
 
-| Field           | Description                             |
-| --------------- | --------------------------------------- |
-| **credentials** | Object describing authentication method |
-| **targetUrl**   | URL to the API                          |
-| **type**        | Entry type                              |
+| Field                           | Description                                                  |
+| ------------------------------- | ------------------------------------------------------------ |
+| **credentials**                 | Object describing authentication method                      |
+| **targetUrl**                   | URL to the API                                               |
+| **type**                        | Entry type                                                   |
+| **requestParametersSecretName** | Optional name of a secret with additional request parameters and headers |
 
 **Credentials** object must contain the following fields:
 
@@ -73,7 +72,11 @@ data:
   password: {MY_PASSWORD}
 ```
 
+You can execute this command to create the secret:
 
+```bash
+kubectl create secret generic $SECRET_NAME --from-literal username={MY_USER_NAME} --from-literal password={MY_PASSWORD} -n kyma-integration
+```
 
 ## Register an OAuth-secured API
 
@@ -82,8 +85,8 @@ This is an example of the service section for an API secured with OAuth:
 ```json
   services:
   - description: "My service"
-    name: my-basic-auth-service
-    displayName: my-basic-auth-service
+    name: my-oauth-service
+    displayName: my-oauth-service
     entries:
     - credentials:
         secretName: {MY_SECRET_NAME}
@@ -109,25 +112,21 @@ data:
   clientSecret: {MY_CLIENT_SECRET}
 ```
 
+You can execute this command to create the secret:
 
+```bash
+kubectl create secret generic $SECRET_NAME --from-literal clientId={MY_CLIENT_ID} --from-literal clientSecret={MY_CLIENT_SECRET} -n kyma-integration
+```
 
 ## Register a client certificate-secured API
 
-To register an API and secure it with client certificates, you must add the **credentials.certificateGen** object to the **api** section of the service registration request body. Application Registry generates a ready to use certificate and key pair for every API registered this way. You can use the generated pair or replace it with your own certificate and key.
-
-Include this field in the service registration request body:
-
-| Field   |  Description |
-|----------|------|
-| **commonName** |  Name of the generated certificate. Set as the **CN** field of the certificate Subject.  |
-
-This is an example of the `api` section of the request body for an API secured with generated client certificates:
+This is an example of the `api` section of the request body for an API secured with client certificates:
 
 ```json
   services:
   - description: "My service"
-    name: my-basic-auth-service
-    displayName: my-basic-auth-service
+    name: my-client-cert-service
+    displayName: my-client-cert-service
     entries:
     - credentials:
         secretName: {MY_SECRET_NAME}
@@ -138,8 +137,6 @@ This is an example of the `api` section of the request body for an API secured w
     providerDisplayName: "My organisation"
   skipVerify: false
 ```
-
->**NOTE:** If you update the registered API and change the **certificateGen.commonName**, Application Registry generates a new certificate-key pair for that API. When you delete an API secured with generated client certificates, Application Registry deletes the corresponding certificate and key.
 
 This is an example of secret containing credentials: 
 
@@ -154,36 +151,52 @@ data:
   key: {MY_PRIVATE_KEY}
 ```
 
+You can execute this command to create the secret:
+
+```bash
+kubectl create secret generic $SECRET_NAME --from-literal crt={MY_CERTIFICATE} --from-literal key={MY_PRIVATE_KEY} -n kyma-integration
+```
+
 ## Register a CSRF-protected API
-
-Application Registry supports CSRF tokens as an additional layer of API protection. To register a CSRF-protected API, add the **credentials.{AUTHENTICATION_METHOD}.csrfInfo** object to the **api** section of the service registration request body.
-
-Include this field in the service registration request body:
-
-| Field | Description |
-|-----|-----------|
-| **tokenEndpointURL** | The URL to the upstream service endpoint that exposes CSRF tokens. |
 
 This is an example of the **api** section of the request body for an API secured with both Basic Authentication and a CSRF token.
 
 ```json
  services:
   - id: {MY_UNIQUE_ID} 
-    name: my-basic-auth-service
-    displayName: my-basic-auth-service 
+    name: my-csrf-service
+    displayName: my-csrf-service 
     description: "My service"
     entries:
     - credentials:
         secretName: {MY_SECRET_NAME}
         type: Basic
         csrfInfo:
-          tokenEndpointURL: {www.example.com}
+          tokenEndpointURL: {MY_CSRF_TOKEN_URL}
       targetUrl: {MY_API_URL}
       type: API
     providerDisplayName: "My organisation"
   skipVerify: false
 ```
 
+This is an example of secret containing credentials: 
+
+```bash
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {MY_SECRET_NAME}
+  namespace: kyma-integration
+data:
+  username: {MY_USER_NAME}
+  password: {MY_PASSWORD}
+```
+
+You can execute this command to create the secret:
+
+```bash
+kubectl create secret generic $SECRET_NAME --from-literal username={MY_USER_NAME} --from-literal password={MY_PASSWORD} -n kyma-integration
+```
 
 ## Use headers and query parameters for custom authentication
 
@@ -194,8 +207,8 @@ This is an example of the **api** section of the request body for an API secured
 ```json
   services:
   - description: "My service"
-    name: my-basic-auth-service
-    displayName: my-basic-auth-service
+    name: my-headers-params-service
+    displayName: my-headers-params-service
     entries:
     - credentials:
         secretName: {MY_SECRET_NAME}
@@ -221,7 +234,13 @@ data:
   password: {MY_PASSWORD}
 ```
 
-This is an example of secret containing headers and request parameters: 
+You can execute this command to create the secret:
+
+```bash
+kubectl create secret generic $SECRET_NAME --from-literal username={MY_USER_NAME} --from-literal password={MY_PASSWORD} -n kyma-integration
+```
+
+This is an example of a secret containing headers and request parameters: 
 
 ```bash
 apiVersion: v1
@@ -234,3 +253,22 @@ data:
   queryParameters: {MY_QUERY_PARAMETERS}
 ```
 
+ You can execute this command to create the secret:
+
+```bash
+kubectl create secret generic $SECRET_NAME --from-literal headers={MY_HEADERS} --from-literal headers={MY_QUERY_PARAMETERS} -n kyma-integration
+```
+
+Additional headers stored in the secret must be a valid JSON document. This is an example of headers JSON:
+
+```json
+{"{MY_HEADER}":["{MY_VALUE}"]}
+```
+
+Additional request parameters stored in the secret must be a valid JSON document. This is an example of headers JSON:
+
+```json
+{"{MY_REQUEST_PARAM}":["{MY_REQUEST_PARAM}"]}
+```
+
+ 
