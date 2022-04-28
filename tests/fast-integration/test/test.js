@@ -1,12 +1,13 @@
 const {
   commerceMockTests,
-  gettingStartedGuideTests,
+  // gettingStartedGuideTests,
 } = require('./');
 
 const {apiExposureTests} = require('../api-exposure');
-const {monitoringTests, unexposeGrafana} = require('../monitoring');
-const {loggingTests} = require('../logging');
-const {tracingTests} = require('../tracing');
+// const {monitoringTests,
+const {unexposeGrafana} = require('../monitoring');
+// const {loggingTests} = require('../logging');
+// const {tracingTests} = require('../tracing');
 const {cleanMockTestFixture} = require('./fixtures/commerce-mock');
 const {ensureCommerceMockLocalTestFixture} = require('../test/fixtures/commerce-mock');
 const {error} = require('../utils');
@@ -35,12 +36,12 @@ describe('Executing Standard Testsuite:', function() {
     await unexposeGrafana();
   });
 
-  monitoringTests();
+  // monitoringTests();
 
   apiExposureTests();
   commerceMockTests(testNamespace);
-  gettingStartedGuideTests();
+  // gettingStartedGuideTests();
 
-  loggingTests();
-  tracingTests(mockNamespace, testNamespace);
+  // loggingTests();
+  // tracingTests(mockNamespace, testNamespace);
 });
