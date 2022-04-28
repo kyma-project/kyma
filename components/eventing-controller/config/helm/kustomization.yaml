@@ -1,16 +1,6 @@
 # Adds namespace to all resources.
 namespace: kyma-system
 
-# Value of this field is prepended to the
-# names of all resources, e.g. a deployment named
-# "wordpress" becomes "alices-wordpress".
-# Note that it should also match with the prefix (text before '-') of the namespace
-# field above.
-#namePrefix: eventing-
-
-#generatorOptions:
-#  disableNameSuffixHash: true
-
 # Include CRDs because they are not part of eventing-controller helm chart.
 bases:
   - ../crd
@@ -29,5 +19,4 @@ resources:
 
 patchesStrategicMerge:
 - eventing_controller_patch.yaml
-
-
+# NOTE: If ../rbac/role.yaml is updated by Kubebuilder then sync the changes to eventing-controller helm chart manually.
