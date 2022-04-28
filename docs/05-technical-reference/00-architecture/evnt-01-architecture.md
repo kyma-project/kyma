@@ -34,10 +34,10 @@ Eventing Controller manages the internal infrastructure in order to receive an e
 
 ## JetStream
 
-Kyma now supports JetStream, which is a persistence offering from NATS, that guarantees `at least once` delivery. It is built-in within our default NATS backend. Follow the [tutorial](../../04-operation-guides/operations/evnt-01-enable-kyma-with-jetstream#enable-jetstream) to enable Kyma with JetStream.
+Kyma now supports JetStream, which is a persistence offering from NATS, that guarantees `at least once` delivery. It is built-in within our default NATS backend. Follow the [tutorial](../../04-operation-guides/operations/evnt-01-enable-kyma-with-jetstream.md#enable-jetstream) to enable Kyma with JetStream.
 
 The key advantages of JetStream over Core NATS are:
 
-- [At least once delivery of JetStream](../../04-operation-guides/operations/evnt-01-enable-kyma-with-jetstream#at-least-once-delivery-using-jetstream-backend) compared to at most once delivery of NATS.
+- [At least once delivery of JetStream](../../04-operation-guides/operations/evnt-01-enable-kyma-with-jetstream.md#at-least-once-delivery-using-jetstream-backend) compared to at most once delivery of NATS.
 - Streaming: Streams receive and store messages that are published and subscribers can consume these messages at any time.
 - Persistent stream storage: Messages are retained in the stream storage even when the NATS server is restarted.
