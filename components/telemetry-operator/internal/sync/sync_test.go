@@ -21,7 +21,7 @@ var (
 	envSecret = types.NamespacedName{Name: "env-secret", Namespace: "cm-ns"}
 )
 
-func TestGetOrCreateConfigMapIsNotFoundCreatesNewWithGivenNamespacedNameAndNoError(t *testing.T) {
+func TestGetOrCreateWithConfigMapIsNotFoundCreatesNewWithGivenNamespacedNameAndNoError(t *testing.T) {
 	mockClient := &mocks.Client{}
 	notFoundErr := errors.NewNotFound(schema.GroupResource{}, "")
 	mockClient.On("Get", mock.Anything, mock.Anything, mock.Anything).Return(notFoundErr)
@@ -36,7 +36,7 @@ func TestGetOrCreateConfigMapIsNotFoundCreatesNewWithGivenNamespacedNameAndNoErr
 	require.Equal(t, "cm-ns", cm.Namespace)
 }
 
-func TestGetOrCreateConfigMapAnyOtherErrorPropagates(t *testing.T) {
+func TestGetOrCreateWithConfigMapAnyOtherErrorPropagates(t *testing.T) {
 	mockClient := &mocks.Client{}
 	badReqErr := errors.NewBadRequest("")
 	mockClient.On("Get", mock.Anything, mock.Anything, mock.Anything).Return(badReqErr)
@@ -48,7 +48,7 @@ func TestGetOrCreateConfigMapAnyOtherErrorPropagates(t *testing.T) {
 	require.Error(t, err)
 }
 
-func TestGetOrCreateSecretIsNotFoundCreatesNewWithGivenNamespacedNameAndNoError(t *testing.T) {
+func TestGetOrCreateWithSecretIsNotFoundCreatesNewWithGivenNamespacedNameAndNoError(t *testing.T) {
 	mockClient := &mocks.Client{}
 	notFoundErr := errors.NewNotFound(schema.GroupResource{}, "")
 	mockClient.On("Get", mock.Anything, mock.Anything, mock.Anything).Return(notFoundErr)
@@ -63,7 +63,7 @@ func TestGetOrCreateSecretIsNotFoundCreatesNewWithGivenNamespacedNameAndNoError(
 	require.Equal(t, "secret-ns", secret.Namespace)
 }
 
-func TestGetOrCreateSecretAnyOtherErrorPropagates(t *testing.T) {
+func TestGetOrCreateWithSecretAnyOtherErrorPropagates(t *testing.T) {
 	mockClient := &mocks.Client{}
 	badReqErr := errors.NewBadRequest("")
 	mockClient.On("Get", mock.Anything, mock.Anything, mock.Anything).Return(badReqErr)
