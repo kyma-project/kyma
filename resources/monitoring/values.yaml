@@ -278,7 +278,7 @@ alertmanager:
        icon_emoji: ":ghost:"
        title: '{{`{{ template "__subject" . }}`}} ({{ .Values.global.domainName }})'
        title_link: 'https://console.{{ .Values.global.domainName }}'
-       text: '{{`{{ range .Alerts }}`}}<!channel>{{`{{- "\n" -}}`}}{{`{{ .Annotations.description }}`}}{{`{{- "\n" -}}`}}{{`{{ end }}`}}'
+       text: '{{`{{ range .Alerts.Firing }}`}}<!channel>{{`{{- "\n" -}}`}}{{`{{ .Annotations.description }}`}}{{`{{- "\n" -}}`}}{{`{{ end }}`}}'
    {{- end }}
    templates:
    - '/etc/alertmanager/config/*.tmpl'
