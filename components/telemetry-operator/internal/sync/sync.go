@@ -45,25 +45,25 @@ func NewLogPipelineSyncer(client client.Client,
 	return &lps
 }
 
-func (s *LogPipelineSyncer) SyncAll(ctx context.Context, logPipeline telemetryv1alpha1.LogPipeline) (bool, error) {
+func (s *LogPipelineSyncer) SyncAll(ctx context.Context, logPipeline *telemetryv1alpha1.LogPipeline) (bool, error) {
 	log := logf.FromContext(ctx)
 	var changed bool
-	changed, err := s.syncSectionsConfigMap(ctx, &logPipeline)
+	changed, err := s.syncSectionsConfigMap(ctx, logPipeline)
 	if err != nil {
 		log.Error(err, "Failed to sync Sections ConfigMap")
 		return false, err
 	}
-	changed, err = s.syncParsersConfigMap(ctx, &logPipeline)
+	changed, err = s.syncParsersConfigMap(ctx, logPipeline)
 	if err != nil {
 		log.Error(err, "Failed to sync Parsers ConfigMap")
 		return false, err
 	}
-	changed, err = s.syncFilesConfigMap(ctx, &logPipeline)
+	changed, err = s.syncFilesConfigMap(ctx, logPipeline)
 	if err != nil {
 		log.Error(err, "Failed to sync mounted files")
 		return false, err
 	}
-	changed, err = s.syncSecretRefs(ctx, &logPipeline)
+	changed, err = s.syncSecretRefs(ctx, logPipeline)
 	if err != nil {
 		log.Error(err, "Failed to sync secret references")
 		return false, err
