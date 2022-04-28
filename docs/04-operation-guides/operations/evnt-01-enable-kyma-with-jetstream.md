@@ -2,7 +2,7 @@
 title: Enable Kyma with JetStream
 ---
 
-This guide shows how to enable JetStream and how it upholds `at least once delivery` quality of service.
+This guide shows how to enable JetStream and how it ensures `at least once` delivery.
 
 ### Enable JetStream
 
@@ -12,24 +12,24 @@ Install Kyma and enable the JetStream flag by running:
 kyma deploy --value global.jetstream.enabled=true --value global.jetstream.storage=file
 ```
 
-> **NOTE:** The storage flag set to `file` enables persistence of messages and streams, in case of NATS server restart.
+> **NOTE:** The storage flag set to `file` enables persistence of messages and streams if the NATS server restarts.
 
-### At least once delivery guarantees using JetStream backend
+### At least once delivery using JetStream backend
 
-1. Create a [function](../../02-get-started/04-trigger-workload-with-event.md#create-a-function), [subscription](../../02-get-started/04-trigger-workload-with-event.md#create-a-subscription) and [trigger the workload with an event](../../02-get-started/04-trigger-workload-with-event.md#trigger-the-workload-with-an-event). Everything should work as usual.
+1. Create a [Function](../../02-get-started/04-trigger-workload-with-event.md#create-a-function), [Subscription](../../02-get-started/04-trigger-workload-with-event.md#create-a-subscription) and [trigger the workload with an event](../../02-get-started/04-trigger-workload-with-event.md#trigger-the-workload-with-an-event).
 
-2. Once JetStream is enabled, delete the function (the sink of the subscription).
+2. Once you have JetStream enabled, delete your Function (the sink of Subscription).
 
 ```bash
 kubectl -n default delete function lastorder
 ```
 
-3. Trigger the event again as shown [here](../../02-get-started/04-trigger-workload-with-event.md#trigger-the-workload-with-an-event). The message is stored and is visible in the stream.
-   1. Port-forward the Kyma Eventing NATS Service to localhost. We will use port `4222`. Run:
+3. Follow the [Trigger the workload with an event](../../02-get-started/04-trigger-workload-with-event.md#trigger-the-workload-with-an-event) tutorial to trigger the event once again. The message is stored and is visible in the stream.
+   1. Port forward the Kyma Eventing NATS Service to localhost. Use port `4222`. Run:
       ```bash
       kubectl -n kyma-system port-forward svc/eventing-nats 4222
       ```
-   2. Use the [nats cli](https://github.com/nats-io/natscli) to list the streams:
+   2. Use the [nats CLI](https://github.com/nats-io/natscli) to list the streams:
       ```bash
       nats stream ls
       ```
@@ -45,4 +45,4 @@ kubectl -n default delete function lastorder
        ╰──────┴─────────────┴─────────────────────┴──────────┴───────┴──────────────╯
       ```
 
-5. Recreate the [function](../../02-get-started/04-trigger-workload-with-event.md#create-a-function). The stream should no longer contain any undelivered messages and the event should be delivered. You can verify it as shown [here](../../02-get-started/04-trigger-workload-with-event.md#verify-the-event-delivery). 
+5. Recreate your [Function](../../02-get-started/04-trigger-workload-with-event.md#create-a-function). The stream no longer contains any undelivered messages and the event is delivered. Follow the [tutorial](../../02-get-started/04-trigger-workload-with-event.md#verify-the-event-delivery) to verify the event delivery. 
