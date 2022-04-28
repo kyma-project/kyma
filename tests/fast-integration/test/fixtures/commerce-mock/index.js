@@ -14,6 +14,7 @@ const {
   convertAxiosError,
   sleep,
   k8sApply,
+  waitForApplicationCr,
   waitForServiceClass,
   waitForServicePlanByServiceClass,
   waitForServiceInstance,
@@ -159,14 +160,14 @@ async function sendEventAndCheckResponse(eventType, body, params, mockNamespace 
   const vs = await waitForVirtualService(mockNamespace, 'commerce-mock');
   const mockHost = vs.spec.hosts[0];
   const host = mockHost.split('.').slice(1).join('.');
-  const url = `https://${mockHost}/events`;
 
   return await retryPromise(
       async () => {
         await axios
-            .post(url, body, params)
+            .post(`https://${mockHost}/events`, body, params)
             .catch((e) => {
               error('Cannot send %s, the response from event gateway: %s', eventType, e.response.data);
+              console.log(e);
               throw convertAxiosError(e, 'Cannot send %s, the response from event gateway', eventType);
             });
 
@@ -189,8 +190,8 @@ async function sendEventAndCheckResponse(eventType, body, params, mockNamespace 
               throw convertAxiosError(e, 'Error during request to function lastorder');
             });
       },
-      30,
-      2 * 1000,
+      10,
+      30 * 1000,
   );
 }
 
@@ -638,8 +639,9 @@ async function ensureCommerceMockWithCompassTestFixture(
     await waitForServiceBindingUsage('commerce-lastorder-sbu', targetNamespace);
   }
 
-
   await waitForFunction('lastorder', targetNamespace);
+
+  await waitForApplicationCr(`mp-${appName}`);
 
   await k8sApply([eventingSubscription(
       `sap.kyma.custom.inapp.order.received.v1`,

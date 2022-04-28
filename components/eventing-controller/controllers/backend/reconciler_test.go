@@ -285,9 +285,6 @@ var _ = Describe("Backend Reconciliation Tests", func() {
 	When("A secret labeled for BEB is found", func() {
 		It("Should switch from NATS to BEB", func() {
 			ctx := context.Background()
-			// As there is no deployment-controller running in envtest, patching the deployment
-			// in the reconciler will not result in a new deployment status. Let's simulate that!
-			resetPublisherProxyStatus(ctx)
 			// As there is no Hydra operator that creates secrets based on OAuth2Client CRs, we create the secret.
 			createOAuth2Secret(ctx, []byte("id1"), []byte("secret1"))
 			ensureBEBSecretCreated(ctx, bebSecret1name, kymaSystemNamespace)
@@ -432,9 +429,6 @@ var _ = Describe("Backend Reconciliation Tests", func() {
 	When("Eventually starting NATS controller succeeds", func() {
 		It("Should mark Eventing Backend CR to ready", func() {
 			ctx := context.Background()
-			// As there is no deployment-controller running in envtest, patching the deployment
-			// in the reconciler will not result in a new deployment status. Let's simulate that!
-			resetPublisherProxyStatus(ctx)
 			By("NATS controller starts and reports as ready")
 			natsSubMgr.startErr = nil
 			By("Checking EventingReady status is set to false")
@@ -492,7 +486,8 @@ var _ = Describe("Backend Reconciliation Tests", func() {
 		It("Should mark Eventing Backend CR to ready", func() {
 			ctx := context.Background()
 			natsSubMgr.stopErr = nil
-			ensurePublisherProxyPodIsCreated(ctx)
+			Eventually(publisherProxyDeploymentGetter(ctx), timeout, pollingInterval).ShouldNot(BeNil())
+			ensurePublisherProxyIsReady(ctx)
 			Eventually(eventingBackendStatusGetter(ctx, eventingBackendName, kymaSystemNamespace), timeout, pollingInterval).
 				Should(And(
 					reconcilertesting.HaveBackendType(eventingv1alpha1.BEBBackendType),
@@ -643,12 +638,7 @@ func ensurePublisherProxyIsReady(ctx context.Context) {
 	By("Ensure publisher proxy is ready")
 	publisherProxyDeployment, err := publisherProxyDeploymentGetter(ctx)()
 	Expect(err).ShouldNot(HaveOccurred())
-
-	pod := ensurePublisherProxyPodIsCreated(ctx)
-	err = ctrl.SetControllerReference(publisherProxyDeployment, &pod, scheme.Scheme)
-	Expect(err).ShouldNot(HaveOccurred())
-
-	ensurePublisherProxyHasBackendRightLabel(ctx, publisherProxyDeployment)
+	ensurePublisherProxyHasRightBackendTypeLabel(ctx, publisherProxyDeployment)
 
 	// update the deployment's status
 	updatedDeployment := publisherProxyDeployment.DeepCopy()
@@ -656,42 +646,6 @@ func ensurePublisherProxyIsReady(ctx context.Context) {
 	updatedDeployment.Status.Replicas = 1
 	err = k8sClient.Status().Update(ctx, updatedDeployment)
 	Expect(err).ShouldNot(HaveOccurred())
-}
-
-func ensurePublisherProxyPodIsCreated(ctx context.Context) corev1.Pod {
-	backendType := getCurrentBackendType(ctx)
-	pod := reconcilertesting.NewEventingPublisherProxyPod(backendType)
-	var pods corev1.PodList
-	if err := k8sClient.List(ctx, &pods, client.MatchingLabels{
-		deployment.AppLabelKey: deployment.PublisherName,
-	}); err == nil {
-		// remove already created pods manually
-		for i := range pods.Items {
-			err := k8sClient.Delete(ctx, &pods.Items[i])
-			Expect(err).ShouldNot(HaveOccurred())
-		}
-	}
-	err := k8sClient.Create(ctx, pod)
-	if !k8serrors.IsAlreadyExists(err) {
-		Expect(err).Should(BeNil())
-	}
-
-	// update the pod's status
-	updatedPod := pod.DeepCopy()
-	updatedPod.Status.InitContainerStatuses = []corev1.ContainerStatus{
-		{
-			Name:  deployment.PublisherName,
-			Ready: true,
-		}}
-	updatedPod.Status.ContainerStatuses = []corev1.ContainerStatus{
-		{
-			Name:  deployment.PublisherName,
-			Ready: true,
-		}}
-	err = k8sClient.Status().Update(ctx, updatedPod)
-	Expect(err).Should(BeNil())
-
-	return *pod
 }
 
 // getCurrentBackendType gets the backend type depending on the beb secret
@@ -703,7 +657,7 @@ func getCurrentBackendType(ctx context.Context) string {
 	return fmt.Sprint(backendType)
 }
 
-func ensurePublisherProxyHasBackendRightLabel(ctx context.Context, deploy *appsv1.Deployment) {
+func ensurePublisherProxyHasRightBackendTypeLabel(ctx context.Context, deploy *appsv1.Deployment) {
 	backendType := getCurrentBackendType(ctx)
 	Expect(deploy.ObjectMeta.Labels).To(HaveKeyWithValue(deployment.BackendLabelKey, backendType))
 }
@@ -717,15 +671,6 @@ func bebSecretExists(ctx context.Context) bool {
 	}
 
 	return len(secretList.Items) > 0
-}
-
-func resetPublisherProxyStatus(ctx context.Context) {
-	d, err := publisherProxyDeploymentGetter(ctx)()
-	Expect(err).ShouldNot(HaveOccurred())
-	updatedDeployment := d.DeepCopy()
-	updatedDeployment.Status.Reset()
-	err = k8sClient.Status().Update(ctx, updatedDeployment)
-	Expect(err).ShouldNot(HaveOccurred())
 }
 
 // creates a secret containing the oauth2 credentials that is expected to be
@@ -793,16 +738,22 @@ func k8sEventsGetter() AsyncAssertion {
 }
 
 func publisherProxyDeploymentGetter(ctx context.Context) func() (*appsv1.Deployment, error) {
-	lookupKey := types.NamespacedName{
-		Namespace: deployment.PublisherNamespace,
-		Name:      deployment.PublisherName,
-	}
-	dep := new(appsv1.Deployment)
+	var list appsv1.DeploymentList
 	return func() (*appsv1.Deployment, error) {
-		if err := k8sClient.Get(ctx, lookupKey, dep); err != nil {
+		backendType := getCurrentBackendType(ctx)
+		if err := k8sClient.List(ctx, &list, client.MatchingLabels{
+			deployment.AppLabelKey:       deployment.PublisherName,
+			deployment.InstanceLabelKey:  deployment.InstanceLabelValue,
+			deployment.DashboardLabelKey: deployment.DashboardLabelValue,
+			deployment.BackendLabelKey:   backendType,
+		}); err != nil {
 			return nil, err
 		}
-		return dep, nil
+
+		if len(list.Items) == 0 { // no deployment found
+			return nil, nil
+		}
+		return &list.Items[0], nil
 	}
 }
 

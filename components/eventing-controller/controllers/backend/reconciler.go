@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
-	"strings"
 
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
@@ -368,11 +367,10 @@ func (r *Reconciler) syncBackendStatus(ctx context.Context, backendStatus *event
 			backendStatus.SetPublisherReadyCondition(false, eventingv1alpha1.ConditionReasonPublisherDeploymentNotReady, "")
 		}
 	} else {
-		publisherReady, err = r.isPublisherDeploymentReady(ctx, backendStatus.Backend, publisher)
-		if err != nil || !publisherReady {
+		publisherReady = r.isPublisherDeploymentReady(publisher)
+		if !publisherReady {
 			backendStatus.SetPublisherReadyCondition(false, eventingv1alpha1.ConditionReasonPublisherDeploymentNotReady, "")
-		}
-		if publisherReady {
+		} else {
 			backendStatus.SetPublisherReadyCondition(publisherReady, eventingv1alpha1.ConditionReasonPublisherDeploymentReady, "")
 		}
 	}
@@ -422,50 +420,13 @@ func (r *Reconciler) emitConditionEvent(backend *eventingv1alpha1.EventingBacken
 	r.record.Event(backend, eventType, string(condition.Reason), condition.Message)
 }
 
-// check the publisher proxy deployment pods for the right backend type and ready status
-func (r *Reconciler) isPublisherDeploymentReady(ctx context.Context, backendType eventingv1alpha1.BackendType, publisher *appsv1.Deployment) (bool, error) {
-	// get the publisherDeployment's pods
-	var pods v1.PodList
-	if err := r.List(ctx, &pods, client.MatchingLabels{
-		deployment.AppLabelKey: deployment.PublisherName,
-	}); err != nil {
-		return false, err
+// check if the publisher deployment's pods are ready
+func (r *Reconciler) isPublisherDeploymentReady(publisher *appsv1.Deployment) bool {
+	result := *publisher.Spec.Replicas == publisher.Status.ReadyReplicas
+	if !result {
+		r.namedLogger().Errorf("Publisher Deployment not ready: expected replicas: %d, got: %d", *publisher.Spec.Replicas, publisher.Status.ReadyReplicas)
 	}
-
-	var containers []v1.Container
-	var statuses []v1.ContainerStatus
-	for _, pod := range pods.Items {
-		if pod.DeletionTimestamp.IsZero() {
-			containers = append(containers, pod.Spec.Containers...)
-			statuses = append(statuses, pod.Status.ContainerStatuses...)
-		}
-	}
-
-	// check the pods for right backend type
-	for _, container := range containers {
-		if container.Name == deployment.PublisherName {
-			for _, envVar := range container.Env {
-				if strings.EqualFold(envVar.Name, "BACKEND") && !strings.EqualFold(envVar.Value, fmt.Sprint(backendType)) {
-					return false, nil
-				}
-			}
-		}
-	}
-
-	// check if the container's status is set to Ready
-	readyPodsCount := 0
-	for _, status := range statuses {
-		// skip the sidecars
-		if status.Name != deployment.PublisherName {
-			continue
-		}
-		if !status.Ready {
-			return false, nil
-		}
-		readyPodsCount++
-		// the ready pods number of the right backend type should match the spec
-	}
-	return readyPodsCount == int(*publisher.Spec.Replicas), nil
+	return result
 }
 
 func hasBackendTypeChanged(currentBackendStatus, desiredBackendStatus eventingv1alpha1.EventingBackendStatus) bool {
@@ -613,11 +574,6 @@ func getSecretStringData(clientID, clientSecret, tokenEndpoint, grantType, publi
 }
 
 func (r *Reconciler) CreateOrUpdatePublisherProxy(ctx context.Context, backend eventingv1alpha1.BackendType) (*appsv1.Deployment, error) {
-	publisherNamespacedName := types.NamespacedName{
-		Namespace: deployment.PublisherNamespace,
-		Name:      deployment.PublisherName,
-	}
-	currentPublisher := new(appsv1.Deployment)
 	var desiredPublisher *appsv1.Deployment
 
 	switch backend {
@@ -633,14 +589,19 @@ func (r *Reconciler) CreateOrUpdatePublisherProxy(ctx context.Context, backend e
 		return nil, errors.Wrapf(err, "set owner reference for publisher failed")
 	}
 
-	err := r.Get(ctx, publisherNamespacedName, currentPublisher)
+	currentPublisher, err := r.getEPPDeployment(ctx)
 	if err != nil {
-		if k8serrors.IsNotFound(err) {
-			// Create
-			r.namedLogger().Debug("creating publisher proxy")
-			return desiredPublisher, r.Create(ctx, desiredPublisher)
+		return nil, errors.Wrapf(err, "fetching publisher proxy deployment failed")
+	}
+
+	if currentPublisher == nil { // no deployment found
+		// delete the publisher proxy with invalid backend type if it still exists
+		if err := r.deletePublisherProxy(ctx); err != nil {
+			return nil, err
 		}
-		return nil, err
+		// Create
+		r.namedLogger().Debug("creating publisher proxy")
+		return desiredPublisher, r.Create(ctx, desiredPublisher)
 	}
 
 	desiredPublisher.ResourceVersion = currentPublisher.ResourceVersion
@@ -808,6 +769,43 @@ func (r *Reconciler) stopBEBController() error {
 		r.namedLogger().Info("stop BEB subscription manager succeeded")
 	}
 	return nil
+}
+
+// getEPPDeployment fetches the event publisher by the current active backend type.
+func (r *Reconciler) getEPPDeployment(ctx context.Context) (*appsv1.Deployment, error) {
+	var list appsv1.DeploymentList
+	if err := r.List(ctx, &list, client.MatchingLabels{
+		deployment.AppLabelKey:       deployment.PublisherName,
+		deployment.InstanceLabelKey:  deployment.InstanceLabelValue,
+		deployment.DashboardLabelKey: deployment.DashboardLabelValue,
+		deployment.BackendLabelKey:   fmt.Sprint(r.backendType),
+	}); err != nil {
+		return nil, err
+	}
+
+	if len(list.Items) == 0 { // no deployment found
+		return nil, nil
+	}
+	return &list.Items[0], nil
+}
+
+// deletePublisherProxy removes the existing publisher proxy.
+func (r *Reconciler) deletePublisherProxy(ctx context.Context) error {
+	publisherNamespacedName := types.NamespacedName{
+		Namespace: deployment.PublisherNamespace,
+		Name:      deployment.PublisherName,
+	}
+	publisher := new(appsv1.Deployment)
+	err := r.Get(ctx, publisherNamespacedName, publisher)
+	if err != nil {
+		if k8serrors.IsNotFound(err) {
+			return nil
+		}
+		return err
+	}
+	r.namedLogger().Debug("event-publisher proxy with invalid backend type found, deleting it")
+	err = r.Delete(ctx, publisher)
+	return err
 }
 
 func (r *Reconciler) namedLogger() *zap.SugaredLogger {

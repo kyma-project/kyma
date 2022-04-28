@@ -99,9 +99,6 @@ spec:
             description: LogPipelineStatus defines the observed state of LogPipeline
             properties:
               conditions:
-                description: 'INSERT ADDITIONAL STATUS FIELD - define observed state
-                  of cluster Important: Run "make" to regenerate code after modifying
-                  this file'
                 items:
                   description: LogPipelineCondition contains details for the current
                     condition of this LogPipeline
