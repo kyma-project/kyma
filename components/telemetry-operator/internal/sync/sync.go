@@ -15,7 +15,7 @@ import (
 )
 
 const (
-	ParsersConfigMapKey        = "parsers.conf"
+	parsersConfigMapKey        = "parsers.conf"
 	sectionsConfigMapFinalizer = "FLUENT_BIT_SECTIONS_CONFIG_MAP"
 	parserConfigMapFinalizer   = "FLUENT_BIT_PARSERS_CONFIG_MAP"
 	secretRefsFinalizer        = "FLUENT_BIT_SECRETS"
@@ -140,7 +140,7 @@ func (s *LogPipelineSyncer) syncParsersConfigMap(ctx context.Context, logPipelin
 				cm.Data = nil
 			} else {
 				data := make(map[string]string)
-				data[ParsersConfigMapKey] = fluentBitParsersConfig
+				data[parsersConfigMapKey] = fluentBitParsersConfig
 				cm.Data = data
 			}
 			controllerutil.RemoveFinalizer(logPipeline, parserConfigMapFinalizer)
@@ -162,12 +162,12 @@ func (s *LogPipelineSyncer) syncParsersConfigMap(ctx context.Context, logPipelin
 		} else {
 			if cm.Data == nil {
 				data := make(map[string]string)
-				data[ParsersConfigMapKey] = fluentBitParsersConfig
+				data[parsersConfigMapKey] = fluentBitParsersConfig
 				cm.Data = data
 				changed = true
 			} else {
-				if oldConfig, hasKey := cm.Data[ParsersConfigMapKey]; !hasKey || oldConfig != fluentBitParsersConfig {
-					cm.Data[ParsersConfigMapKey] = fluentBitParsersConfig
+				if oldConfig, hasKey := cm.Data[parsersConfigMapKey]; !hasKey || oldConfig != fluentBitParsersConfig {
+					cm.Data[parsersConfigMapKey] = fluentBitParsersConfig
 					changed = true
 				}
 			}

@@ -50,25 +50,24 @@ type LogPipelineReconciler struct {
 
 // NewLogPipelineReconciler returns a new LogPipelineReconciler using the given FluentBit config arguments
 func NewLogPipelineReconciler(client client.Client, scheme *runtime.Scheme, namespace string, sectionsCm string, parsersCm string, daemonSet string, envSecret string, filesCm string) *LogPipelineReconciler {
-	var result LogPipelineReconciler
-
-	result.Client = client
-	result.Scheme = scheme
-	result.Syncer = sync.NewLogPipelineSyncer(client,
+	var lpr LogPipelineReconciler
+	lpr.Client = client
+	lpr.Scheme = scheme
+	lpr.Syncer = sync.NewLogPipelineSyncer(client,
 		types.NamespacedName{Name: sectionsCm, Namespace: namespace},
 		types.NamespacedName{Name: parsersCm, Namespace: namespace},
 		types.NamespacedName{Name: filesCm, Namespace: namespace},
 		types.NamespacedName{Name: envSecret, Namespace: namespace},
 	)
 
-	result.FluentBitDaemonSet = types.NamespacedName{Name: daemonSet, Namespace: namespace}
-	result.FluentBitRestartsCount = prometheus.NewCounter(prometheus.CounterOpts{
+	lpr.FluentBitDaemonSet = types.NamespacedName{Name: daemonSet, Namespace: namespace}
+	lpr.FluentBitRestartsCount = prometheus.NewCounter(prometheus.CounterOpts{
 		Name: "telemetry_operator_fluentbit_restarts_total",
 		Help: "Number of triggered FluentBit restarts",
 	})
-	metrics.Registry.MustRegister(result.FluentBitRestartsCount)
+	metrics.Registry.MustRegister(lpr.FluentBitRestartsCount)
 
-	return &result
+	return &lpr
 }
 
 // SetupWithManager sets up the controller with the Manager.
@@ -96,9 +95,7 @@ func (r *LogPipelineReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 	var logPipeline telemetryv1alpha1.LogPipeline
 	if err := r.Get(ctx, req.NamespacedName, &logPipeline); err != nil {
 		log.Info("Ignoring deleted LogPipeline")
-		// we'll ignore not-found errors, since they can't be fixed by an immediate
-		// requeue (we'll need to wait for a new notification), and we can get them
-		// on deleted requests.
+		// Ignore not-found errors since we can get them on deleted requests.
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
 
