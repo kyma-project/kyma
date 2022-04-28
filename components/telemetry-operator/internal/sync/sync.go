@@ -48,28 +48,28 @@ func NewLogPipelineSyncer(client client.Client,
 
 func (s *LogPipelineSyncer) SyncAll(ctx context.Context, logPipeline *telemetryv1alpha1.LogPipeline) (bool, error) {
 	log := logf.FromContext(ctx)
-	var changed bool
-	changed, err := s.syncSectionsConfigMap(ctx, logPipeline)
+
+	sectionsChanged, err := s.syncSectionsConfigMap(ctx, logPipeline)
 	if err != nil {
 		log.Error(err, "Failed to sync Sections ConfigMap")
 		return false, err
 	}
-	changed, err = s.syncParsersConfigMap(ctx, logPipeline)
+	parsersChanged, err := s.syncParsersConfigMap(ctx, logPipeline)
 	if err != nil {
 		log.Error(err, "Failed to sync Parsers ConfigMap")
 		return false, err
 	}
-	changed, err = s.syncFilesConfigMap(ctx, logPipeline)
+	filesChanged, err := s.syncFilesConfigMap(ctx, logPipeline)
 	if err != nil {
 		log.Error(err, "Failed to sync mounted files")
 		return false, err
 	}
-	changed, err = s.syncSecretRefs(ctx, logPipeline)
+	secretsChanged, err := s.syncSecretRefs(ctx, logPipeline)
 	if err != nil {
 		log.Error(err, "Failed to sync secret references")
 		return false, err
 	}
-	return changed, nil
+	return sectionsChanged || parsersChanged || filesChanged || secretsChanged, nil
 }
 
 // Synchronize LogPipeline with ConfigMap of FluentBit sections (Input, Filter and Output).
