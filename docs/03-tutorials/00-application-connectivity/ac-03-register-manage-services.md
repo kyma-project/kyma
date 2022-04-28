@@ -1,7 +1,10 @@
 ---
 title: Register a service
 ---
-This guide shows you how to register a service of your external solution in Kyma.
+This guide shows you how to register a service of your external solution in Kyma. Execute these steps to register a Basic Authentication-secured API.   
+
+>**NOTE:** Follow the [tutorial](ac-04-register-secured-api.md) to learn how to register APIs secured with different security schemes or protected against cross-site request forgery (CSRF) attacks.
+
 
 ## Prerequisites
 
@@ -25,19 +28,19 @@ export PASSWORD={EXTERNAL_SYSTEM_PASSWORD}
 export SECRET_NAME={SECRET_WITH_CREDENTIALS}
 ```
 
-- URL to your service 
+- URL to your service exported as an environment variable
 
 ```bash
 export TARGET_API_URL={EXTERNAL_SYSTEM_URL}
 ```
 
-- Unique ID identifying your service within Application CRD
+- Unique ID identifying your service within Application CRD exported as an environment variable
 
 ```bash
 export TARGET_API_UUID={UNIQUE_ID}
 ```
 
-- Relative path in your API
+- Relative path in your API exported as an environment variable
 
 ```bash
 export TARGET_API_PATH={RELATIVE_SERVICE_PATH}
@@ -45,15 +48,13 @@ export TARGET_API_PATH={RELATIVE_SERVICE_PATH}
 
 ## Register a service
 
-1. Create a secret contains user name and password
+1. Create a secret that contains user name and password
 
 ```bash
 kubectl create secret generic $SECRET_NAME --from-literal username=$USER_NAME --from-literal password=$PASSWORD -n kyma-integration
 ```
 
-2. To register a service with a Basic Authentication-secured API, you must create or modify Application CRD. Run this command to create Application CRD with the service definition.
-
->**NOTE:** Follow the [tutorial](ac-04-register-secured-api.md) to learn how to register APIs secured with different security schemes or protected against cross-site request forgery (CSRF) attacks.
+2. To register a service  with a Basic Authentication-secured API, you must create or modify Application CRD. Run this command to create Application CRD with the service definition.
 
 ```bash
 cat <<EOF | kubectl apply -f -
@@ -80,7 +81,7 @@ EOF
 
 ## Access registered service 
 
-You can access the registered service from within any workload deployed in Kyma cluster. To verify whether service is registered you can create a test Pod and execute a request to Application Gateway.   
+To verify whether service is registered correctly you can create a test Pod and execute a request to Application Gateway.   
 
 1. Execute this command to build path for accessing your registered service
 
