@@ -42,14 +42,9 @@ var (
 // LogPipelineReconciler reconciles a LogPipeline object
 type LogPipelineReconciler struct {
 	client.Client
-	Scheme *runtime.Scheme
-
-	FluentBitSectionsConfigMap types.NamespacedName
-	FluentBitParsersConfigMap  types.NamespacedName
-	FluentBitDaemonSet         types.NamespacedName
-	FluentBitEnvSecret         types.NamespacedName
-	FluentBitFilesConfigMap    types.NamespacedName
-
+	Scheme                 *runtime.Scheme
+	Syncer                 *sync.LogPipelineSyncer
+	FluentBitDaemonSet     types.NamespacedName
 	FluentBitRestartsCount prometheus.Counter
 }
 
@@ -59,28 +54,14 @@ func NewLogPipelineReconciler(client client.Client, scheme *runtime.Scheme, name
 
 	result.Client = client
 	result.Scheme = scheme
+	result.Syncer = sync.NewLogPipelineSyncer(client,
+		types.NamespacedName{Name: sectionsCm, Namespace: namespace},
+		types.NamespacedName{Name: parsersCm, Namespace: namespace},
+		types.NamespacedName{Name: filesCm, Namespace: namespace},
+		types.NamespacedName{Name: envSecret, Namespace: namespace},
+	)
 
-	result.FluentBitSectionsConfigMap = types.NamespacedName{
-		Name:      sectionsCm,
-		Namespace: namespace,
-	}
-	result.FluentBitParsersConfigMap = types.NamespacedName{
-		Name:      parsersCm,
-		Namespace: namespace,
-	}
-	result.FluentBitFilesConfigMap = types.NamespacedName{
-		Name:      filesCm,
-		Namespace: namespace,
-	}
-	result.FluentBitDaemonSet = types.NamespacedName{
-		Name:      daemonSet,
-		Namespace: namespace,
-	}
-	result.FluentBitEnvSecret = types.NamespacedName{
-		Name:      envSecret,
-		Namespace: namespace,
-	}
-
+	result.FluentBitDaemonSet = types.NamespacedName{Name: daemonSet, Namespace: namespace}
 	result.FluentBitRestartsCount = prometheus.NewCounter(prometheus.CounterOpts{
 		Name: "telemetry_operator_fluentbit_restarts_total",
 		Help: "Number of triggered FluentBit restarts",
@@ -121,8 +102,7 @@ func (r *LogPipelineReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
 
-	syncer := sync.NewLogPipelineSyncer(r.Client, r.FluentBitSectionsConfigMap, r.FluentBitParsersConfigMap, r.FluentBitFilesConfigMap, r.FluentBitDaemonSet, r.FluentBitEnvSecret)
-	var changed, err = syncer.SyncAll(ctx, logPipeline)
+	var changed, err = r.Syncer.SyncAll(ctx, logPipeline)
 	if err != nil {
 		return ctrl.Result{Requeue: shouldRetryOn(err)}, nil
 	}
@@ -130,12 +110,12 @@ func (r *LogPipelineReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 	if changed {
 		log.V(1).Info("Fluent bit configuration was updated. Restarting the daemon set")
 
-		if err := r.Update(ctx, &logPipeline); err != nil {
+		if err = r.Update(ctx, &logPipeline); err != nil {
 			log.Error(err, "Failed updating log pipeline")
 			return ctrl.Result{Requeue: shouldRetryOn(err)}, err
 		}
 
-		if err := r.restartFluentBit(ctx); err != nil {
+		if err = r.restartFluentBit(ctx); err != nil {
 			log.Error(err, "Failed restarting fluent bit daemon set")
 			return ctrl.Result{Requeue: shouldRetryOn(err)}, err
 		}
@@ -144,7 +124,7 @@ func (r *LogPipelineReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 			telemetryv1alpha1.FluentBitDSRestartedReason,
 			telemetryv1alpha1.LogPipelinePending,
 		)
-		if err := r.updateLogPipelineStatus(ctx, req.NamespacedName, condition); err != nil {
+		if err = r.updateLogPipelineStatus(ctx, req.NamespacedName, condition); err != nil {
 			return ctrl.Result{RequeueAfter: requeueTime}, err
 		}
 
@@ -152,7 +132,8 @@ func (r *LogPipelineReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 	}
 
 	if logPipeline.Status.GetCondition(telemetryv1alpha1.LogPipelineRunning) == nil {
-		ready, err := r.isFluentBitDaemonSetReady(ctx)
+		var ready bool
+		ready, err = r.isFluentBitDaemonSetReady(ctx)
 		if err != nil {
 			log.Error(err, "Failed to check fluent bit readiness")
 			return ctrl.Result{RequeueAfter: requeueTime}, err
@@ -167,7 +148,7 @@ func (r *LogPipelineReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 			telemetryv1alpha1.FluentBitDSRestartCompletedReason,
 			telemetryv1alpha1.LogPipelineRunning,
 		)
-		if err := r.updateLogPipelineStatus(ctx, req.NamespacedName, condition); err != nil {
+		if err = r.updateLogPipelineStatus(ctx, req.NamespacedName, condition); err != nil {
 			return ctrl.Result{RequeueAfter: requeueTime}, err
 		}
 	}

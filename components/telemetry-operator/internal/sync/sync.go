@@ -27,7 +27,6 @@ type LogPipelineSyncer struct {
 	FluentBitSectionsConfigMap types.NamespacedName
 	FluentBitParsersConfigMap  types.NamespacedName
 	FluentBitFilesConfigMap    types.NamespacedName
-	FluentBitDaemonSet         types.NamespacedName
 	FluentBitEnvSecret         types.NamespacedName
 }
 
@@ -35,61 +34,53 @@ func NewLogPipelineSyncer(client client.Client,
 	sectionsCm types.NamespacedName,
 	parsersCm types.NamespacedName,
 	filesCm types.NamespacedName,
-	daemonSet types.NamespacedName,
 	envSecret types.NamespacedName,
 ) *LogPipelineSyncer {
-	var syncer LogPipelineSyncer
-	syncer.Client = client
-	syncer.FluentBitSectionsConfigMap = sectionsCm
-	syncer.FluentBitParsersConfigMap = parsersCm
-	syncer.FluentBitFilesConfigMap = filesCm
-	syncer.FluentBitDaemonSet = daemonSet
-	syncer.FluentBitEnvSecret = envSecret
-	return &syncer
+	var lps LogPipelineSyncer
+	lps.Client = client
+	lps.FluentBitSectionsConfigMap = sectionsCm
+	lps.FluentBitParsersConfigMap = parsersCm
+	lps.FluentBitFilesConfigMap = filesCm
+	lps.FluentBitEnvSecret = envSecret
+	return &lps
 }
 
 func (s *LogPipelineSyncer) SyncAll(ctx context.Context, logPipeline telemetryv1alpha1.LogPipeline) (bool, error) {
 	log := logf.FromContext(ctx)
 	var changed bool
-
 	changed, err := s.syncSectionsConfigMap(ctx, &logPipeline)
 	if err != nil {
 		log.Error(err, "Failed to sync Sections ConfigMap")
 		return false, err
 	}
-
 	changed, err = s.syncParsersConfigMap(ctx, &logPipeline)
 	if err != nil {
 		log.Error(err, "Failed to sync Parsers ConfigMap")
 		return false, err
 	}
-
 	changed, err = s.syncFilesConfigMap(ctx, &logPipeline)
 	if err != nil {
 		log.Error(err, "Failed to sync mounted files")
 		return false, err
 	}
-
 	changed, err = s.syncSecretRefs(ctx, &logPipeline)
 	if err != nil {
 		log.Error(err, "Failed to sync secret references")
 		return false, err
 	}
-
 	return changed, nil
 }
 
 // Synchronize LogPipeline with ConfigMap of FluentBit sections (Input, Filter and Output).
 func (s *LogPipelineSyncer) syncSectionsConfigMap(ctx context.Context, logPipeline *telemetryv1alpha1.LogPipeline) (bool, error) {
 	log := logf.FromContext(ctx)
-	changed := false
-	cm, err := s.getOrCreateConfigMap(ctx, s.FluentBitSectionsConfigMap)
-	if err != nil {
+	cm := corev1.ConfigMap{ObjectMeta: metav1.ObjectMeta{Name: s.FluentBitSectionsConfigMap.Name, Namespace: s.FluentBitSectionsConfigMap.Namespace}}
+	if err := s.getOrCreate(ctx, &cm); err != nil {
 		return false, err
 	}
-	cmKey := logPipeline.Name + ".conf"
 
-	// Add or remove Fluent Bit configuration sections
+	changed := false
+	cmKey := logPipeline.Name + ".conf"
 	if logPipeline.DeletionTimestamp != nil {
 		if cm.Data != nil && controllerutil.ContainsFinalizer(logPipeline, sectionsConfigMapFinalizer) {
 			log.Info("Deleting fluent bit config")
@@ -118,9 +109,7 @@ func (s *LogPipelineSyncer) syncSectionsConfigMap(ctx context.Context, logPipeli
 	if !changed {
 		return false, nil
 	}
-
-	// Update ConfigMap
-	if err = s.Update(ctx, &cm); err != nil {
+	if err := s.Update(ctx, &cm); err != nil {
 		return false, err
 	}
 
@@ -130,19 +119,18 @@ func (s *LogPipelineSyncer) syncSectionsConfigMap(ctx context.Context, logPipeli
 // Synchronize LogPipeline with ConfigMap of FluentBit parsers (Parser and MultiLineParser).
 func (s *LogPipelineSyncer) syncParsersConfigMap(ctx context.Context, logPipeline *telemetryv1alpha1.LogPipeline) (bool, error) {
 	log := logf.FromContext(ctx)
-	changed := false
-	cm, err := s.getOrCreateConfigMap(ctx, s.FluentBitParsersConfigMap)
-	if err != nil {
+	cm := corev1.ConfigMap{ObjectMeta: metav1.ObjectMeta{Name: s.FluentBitParsersConfigMap.Name, Namespace: s.FluentBitParsersConfigMap.Namespace}}
+	if err := s.getOrCreate(ctx, &cm); err != nil {
 		return false, err
 	}
 
-	// Add or remove Fluent Bit configuration parsers
+	changed := false
 	if logPipeline.DeletionTimestamp != nil {
 		if cm.Data != nil && controllerutil.ContainsFinalizer(logPipeline, parserConfigMapFinalizer) {
 			log.Info("Deleting fluent bit parsers config")
 
 			var logPipelines telemetryv1alpha1.LogPipelineList
-			err = s.List(ctx, &logPipelines)
+			err := s.List(ctx, &logPipelines)
 			if err != nil {
 				return false, err
 			}
@@ -160,7 +148,7 @@ func (s *LogPipelineSyncer) syncParsersConfigMap(ctx context.Context, logPipelin
 		}
 	} else {
 		var logPipelines telemetryv1alpha1.LogPipelineList
-		err = s.List(ctx, &logPipelines)
+		err := s.List(ctx, &logPipelines)
 		if err != nil {
 			return false, err
 		}
@@ -194,8 +182,6 @@ func (s *LogPipelineSyncer) syncParsersConfigMap(ctx context.Context, logPipelin
 	if !changed {
 		return false, nil
 	}
-
-	// Update ConfigMap
 	if err := s.Update(ctx, &cm); err != nil {
 		return false, err
 	}
@@ -206,13 +192,12 @@ func (s *LogPipelineSyncer) syncParsersConfigMap(ctx context.Context, logPipelin
 // Synchronize file references with Fluent Bit files ConfigMap.
 func (s *LogPipelineSyncer) syncFilesConfigMap(ctx context.Context, logPipeline *telemetryv1alpha1.LogPipeline) (bool, error) {
 	log := logf.FromContext(ctx)
-	changed := false
-	cm, err := s.getOrCreateConfigMap(ctx, s.FluentBitFilesConfigMap)
-	if err != nil {
+	cm := corev1.ConfigMap{ObjectMeta: metav1.ObjectMeta{Name: s.FluentBitFilesConfigMap.Name, Namespace: s.FluentBitFilesConfigMap.Namespace}}
+	if err := s.getOrCreate(ctx, &cm); err != nil {
 		return false, err
 	}
 
-	// Sync files from every section
+	changed := false
 	for _, file := range logPipeline.Spec.Files {
 		if logPipeline.DeletionTimestamp != nil {
 			if _, hasKey := cm.Data[file.Name]; hasKey {
@@ -241,8 +226,6 @@ func (s *LogPipelineSyncer) syncFilesConfigMap(ctx context.Context, logPipeline 
 	if !changed {
 		return false, nil
 	}
-
-	// Update ConfigMap
 	if err := s.Update(ctx, &cm); err != nil {
 		return false, err
 	}
@@ -253,13 +236,12 @@ func (s *LogPipelineSyncer) syncFilesConfigMap(ctx context.Context, logPipeline 
 // Copy referenced secrets to global Fluent Bit environment secret.
 func (s *LogPipelineSyncer) syncSecretRefs(ctx context.Context, logPipeline *telemetryv1alpha1.LogPipeline) (bool, error) {
 	log := logf.FromContext(ctx)
-	changed := false
-	secret, err := s.getOrCreateSecret(ctx, s.FluentBitEnvSecret)
-	if err != nil {
+	secret := corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: s.FluentBitEnvSecret.Name, Namespace: s.FluentBitEnvSecret.Namespace}}
+	if err := s.getOrCreate(ctx, &secret); err != nil {
 		return false, err
 	}
 
-	// Sync environment from referenced Secrets to Fluent Bit Secret
+	changed := false
 	for _, secretRef := range logPipeline.Spec.SecretRefs {
 		var referencedSecret corev1.Secret
 		if err := s.Get(ctx, types.NamespacedName{Name: secretRef.Name, Namespace: secretRef.Namespace}, &referencedSecret); err != nil {
@@ -296,8 +278,6 @@ func (s *LogPipelineSyncer) syncSecretRefs(ctx context.Context, logPipeline *tel
 	if !changed {
 		return false, nil
 	}
-
-	// Update Fluent Bit Secret
 	if err := s.Update(ctx, &secret); err != nil {
 		return false, err
 	}
@@ -305,43 +285,11 @@ func (s *LogPipelineSyncer) syncSecretRefs(ctx context.Context, logPipeline *tel
 	return changed, nil
 }
 
-// Get ConfigMap from Kubernetes API or create new one if not existing.
-func (s *LogPipelineSyncer) getOrCreateConfigMap(ctx context.Context, name types.NamespacedName) (corev1.ConfigMap, error) {
-	var cm corev1.ConfigMap
-	if err := s.Get(ctx, name, &cm); err != nil {
-		if errors.IsNotFound(err) {
-			cm = corev1.ConfigMap{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      name.Name,
-					Namespace: name.Namespace,
-				},
-			}
-			if err := s.Create(ctx, &cm); err != nil {
-				return cm, err
-			}
-		} else {
-			return cm, err
-		}
+// Gets or creates the given obj in the Kubernetes cluster. obj must be a struct pointer so that obj can be updated with the content returned by the Server.
+func (s *LogPipelineSyncer) getOrCreate(ctx context.Context, obj client.Object) error {
+	err := s.Get(ctx, client.ObjectKeyFromObject(obj), obj)
+	if err != nil && errors.IsNotFound(err) {
+		err = s.Create(ctx, obj)
 	}
-	return cm, nil
-}
-
-func (s *LogPipelineSyncer) getOrCreateSecret(ctx context.Context, name types.NamespacedName) (corev1.Secret, error) {
-	var secret corev1.Secret
-	if err := s.Get(ctx, name, &secret); err != nil {
-		if errors.IsNotFound(err) {
-			secret = corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      name.Name,
-					Namespace: name.Namespace,
-				},
-			}
-			if err := s.Create(ctx, &secret); err != nil {
-				return secret, err
-			}
-		} else {
-			return secret, err
-		}
-	}
-	return secret, nil
+	return err
 }
