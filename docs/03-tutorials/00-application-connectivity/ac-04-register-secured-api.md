@@ -1,7 +1,7 @@
 ---
 title: Register a secured API
 ---
-You can register a secured API exposed by your external soliution. The supported authentication methods are [Basic Authentication](https://tools.ietf.org/html/rfc7617), [OAuth](https://tools.ietf.org/html/rfc6750) (Client Credentials Grant), and client certificates.
+You can register a secured API exposed by your external soliution. The supported authentication methods are [Basic Authentication](https://tools.ietf.org/html/rfc7617), [OAuth](https://tools.ietf.org/html/rfc6750), and client certificates.
 
 You can specify only one authentication method for every secured API you register. 
 
@@ -43,7 +43,7 @@ To register a secured API, add a **service** object to the **services** section 
 
 This is an example of the **service** object for an API secured with Basic Authentication:
 
-```json
+```yaml
   - id: {MY_UNIQUE_ID}
     name: my-basic-auth-service
     displayName: "My Basic Auth Service"
@@ -59,7 +59,7 @@ This is an example of the **service** object for an API secured with Basic Authe
 
 This is an example of a secret containing credentials: 
 
-```bash
+```yaml
 apiVersion: v1
 kind: Secret
 metadata:
@@ -80,7 +80,7 @@ kubectl create secret generic {MY_SECRET_NAME} --from-literal username={MY_USER_
 
 This is an example of the **service** object for an API secured with OAuth:
 
-```json
+```yaml
   - id: {MY_UNIQUE_ID}
     name: my-oauth-service
     displayName: "My OAuth Service"    
@@ -118,7 +118,7 @@ kubectl create secret generic {MY_SECRET_NAME} --from-literal clientId={MY_CLIEN
 
 This is an example of the **service** object for an API secured with certificate:
 
-```json
+```yaml
   - id: {MY_UNIQUE_ID}
     name: my-client-cert-service
     displayName: "My Client Cert Service"
@@ -155,7 +155,7 @@ kubectl create secret generic {MY_SECRET_NAME} --from-literal crt={MY_CERTIFICAT
 
 This is an example of the **service** object for an API secured with both Basic Authentication and a CSRF token:
 
-```json
+```yaml
   - id: {MY_UNIQUE_ID} 
     name: my-csrf-service
     displayName: "My CSRF Service" 
@@ -175,7 +175,7 @@ This is an example of the **service** object for an API secured with both Basic 
 
 This is an example of a secret containing credentials: 
 
-```bash
+```yaml
 apiVersion: v1
 kind: Secret
 metadata:
@@ -198,7 +198,7 @@ You can specify additional headers and query parameters to inject to requests ma
 
 This is an example of the **service** object for an API secured with Basic Authentication and including additional headers and query parameters.
 
-```json
+```yaml
   - id: {MY_UNIQUE_ID}
     name: my-headers-params-service
     displayName: "My Headers Params Service"
@@ -215,7 +215,7 @@ This is an example of the **service** object for an API secured with Basic Authe
 
 This is an example of a secret containing credentials: 
 
-```bash
+```yaml
 apiVersion: v1
 kind: Secret
 metadata:
@@ -234,7 +234,7 @@ kubectl create secret generic {MY_SECRET_NAME} --from-literal username={MY_USER_
 
 This is an example of a secret containing headers and request parameters: 
 
-```bash
+```yaml
 apiVersion: v1
 kind: Secret
 metadata:
