@@ -100,7 +100,7 @@ class KCPWrapper {
     const result = await this.exec(args);
     return JSON.parse(result);
   }
-
+//kcp reconciliations operations --output json --shoot shootName
   async reconciliations(query) {
     let args = ['reconciliations', `${query.parameter}`, '--output', 'json'];
     if (query.shootName) {
@@ -109,6 +109,9 @@ class KCPWrapper {
     if (query.schedulingID) {
       args = args.concat('--scheduling-id', `${query.schedulingID}`);
     }
+    args.args.concat(' -v 6');
+    debug(args)
+    console.log(args)
     const result = await this.exec(args);
     return JSON.parse(result);
   }
@@ -278,7 +281,7 @@ class KCPWrapper {
       throw new Error('failed during ensureOrchestrationSucceeded');
     }
   }
-
+  //kcp reconciliations operations -c <shootName> -o json
   async getLastReconciliation(shootName) {
     const reconciliationsOperations = await this.getReconciliationsOperations(shootName);
     const objReconciliationsOperations = JSON.parse(reconciliationsOperations);
