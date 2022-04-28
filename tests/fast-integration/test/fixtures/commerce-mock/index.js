@@ -22,9 +22,7 @@ const {
   waitForServiceBindingUsage,
   waitForVirtualService,
   waitForDeployment,
-  waitForTokenRequest,
   waitForFunction,
-  waitForPodWithLabel,
   waitForSubscription,
   deleteAllK8sResources,
   genRandom,
@@ -107,7 +105,8 @@ function prepareFunction(type = 'standard', appName = 'commerce') {
           .replace('%%APP_NAME%%', appName));
     default:
       return k8s.loadAllYaml(functionYaml.toString()
-          .replace('%%URL%%', 'findEnv("GATEWAY_URL") + "/site/orders/" + code'));
+          .replace('%%URL%%', '"http://central-application-gateway.kyma-system:8080' +
+                   '/commerce/sap-commerce-cloud-commerce-webservices/site/orders/" + code'));
   }
 }
 
@@ -518,27 +517,6 @@ async function registerAllApis(mockHost) {
   return remoteApis;
 }
 
-async function connectMockLocal(mockHost, targetNamespace) {
-  const tokenRequest = {
-    apiVersion: 'applicationconnector.kyma-project.io/v1alpha1',
-    kind: 'TokenRequest',
-    metadata: {name: 'commerce', namespace: targetNamespace},
-  };
-  await k8sDynamicApi.delete(tokenRequest).catch(() => { }); // Ignore delete error
-  await k8sDynamicApi.create(tokenRequest);
-  const tokenObj = await waitForTokenRequest('commerce', targetNamespace);
-
-  const pairingBody = {
-    token: tokenObj.status.url,
-    baseUrl: `https://${mockHost}`,
-    insecure: true,
-  };
-  debug('Token URL', tokenObj.status.url);
-  await connectCommerceMock(mockHost, pairingBody);
-  await ensureApplicationMapping('commerce', targetNamespace);
-  debug('Commerce mock connected locally');
-}
-
 async function connectMockCompass(client, appName, scenarioName, mockHost, targetNamespace) {
   const appID = await registerOrReturnApplication(client, appName, scenarioName);
   debug(`Application ID in Compass ${appID}`);
@@ -689,60 +667,6 @@ async function ensureCommerceMockLocalTestFixture(mockNamespace,
       mockNamespace,
       targetNamespace,
     withCentralApplicationConnectivity ? prepareFunction('central-app-gateway') : prepareFunction());
-  await waitForPodWithLabel('app.kubernetes.io/name', 'connector-service', 'kyma-integration');
-  await retryPromise(() => connectMockLocal(mockHost, targetNamespace), 10, 30000);
-  await retryPromise(() => registerAllApis(mockHost), 10, 30000);
-
-  if (withCentralApplicationConnectivity) {
-    await waitForDeployment('central-application-gateway', 'kyma-system');
-    await waitForDeployment('central-application-connectivity-validator', 'kyma-system');
-  }
-
-  const webServicesSC = await waitForServiceClass(
-      'webservices',
-      targetNamespace,
-      400 * 1000,
-  );
-  const eventsSC = await waitForServiceClass('events', targetNamespace);
-  const webServicesSCExternalName = webServicesSC.spec.externalName;
-  const eventsSCExternalName = eventsSC.spec.externalName;
-  const serviceCatalogObjs = [
-    serviceInstanceObj('commerce-webservices', webServicesSCExternalName),
-    serviceInstanceObj('commerce-events', eventsSCExternalName),
-  ];
-
-  await retryPromise(
-      () => k8sApply(serviceCatalogObjs, targetNamespace, false),
-      5,
-      2000,
-  );
-  await waitForServiceInstance('commerce-webservices', targetNamespace);
-  await waitForServiceInstance('commerce-events', targetNamespace);
-
-  const serviceBinding = {
-    apiVersion: 'servicecatalog.k8s.io/v1beta1',
-    kind: 'ServiceBinding',
-    metadata: {
-      name: 'commerce-binding',
-    },
-    spec: {
-      instanceRef: {name: 'commerce-webservices'},
-    },
-  };
-  await k8sApply([serviceBinding], targetNamespace, false);
-  await waitForServiceBinding('commerce-binding', targetNamespace);
-
-  const serviceBindingUsage = {
-    apiVersion: 'servicecatalog.kyma-project.io/v1alpha1',
-    kind: 'ServiceBindingUsage',
-    metadata: {name: 'commerce-lastorder-sbu'},
-    spec: {
-      serviceBindingRef: {name: 'commerce-binding'},
-      usedBy: {kind: 'serverless-function', name: 'lastorder'},
-    },
-  };
-  await k8sApply([serviceBindingUsage], targetNamespace);
-  await waitForServiceBindingUsage('commerce-lastorder-sbu', targetNamespace);
 
   await waitForFunction('lastorder', targetNamespace);
 
