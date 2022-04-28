@@ -26,7 +26,7 @@ function parseAuditLogs(logs, groups) {
   return groups;
 }
 
-async function checkAuditLogs(client, groups, noSC = false) {
+async function checkAuditLogs(client, groups) {
   let retries = 0;
   let notFound = [
     {'resName': 'lastorder', 'groupName': 'serverless.kyma-project.io', 'action': 'create'},
@@ -34,12 +34,6 @@ async function checkAuditLogs(client, groups, noSC = false) {
     {'resName': 'commerce-mock', 'groupName': 'deployments', 'action': 'create'},
     {'resName': 'commerce-mock', 'groupName': 'deployments', 'action': 'delete'},
   ];
-
-  if (!noSC) {
-    notFound.push(
-        {'resName': 'commerce-binding', 'groupName': 'servicecatalog.k8s.io', 'action': 'create'},
-        {'resName': 'commerce-binding', 'groupName': 'servicecatalog.k8s.io', 'action': 'delete'});
-  }
 
   while (retries < 15) {
     const logs = await client.fetchLogs();
