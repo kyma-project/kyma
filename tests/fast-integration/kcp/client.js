@@ -109,7 +109,7 @@ class KCPWrapper {
     if (query.schedulingID) {
       args = args.concat('--scheduling-id', `${query.schedulingID}`);
     }
-    args = args.concat(' -v 6');
+    args = args.concat('--verbose', '6');
     debug(args)
     console.log(args)
     const result = await this.exec(args);
