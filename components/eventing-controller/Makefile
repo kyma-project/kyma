@@ -53,7 +53,7 @@ deploy-dry-run: manifests-local copy-crds copy-external-crds set-up-local-env ##
 	rm -rf ${HELM_TEMPLATE_ASSETS_DIR}; mkdir -p ${HELM_TEMPLATE_ASSETS_DIR}
 	helm template --output-dir ${HELM_TEMPLATE_ASSETS_DIR} eventing ../../resources/eventing
 	kustomize build config/helm | envsubst
-	#rm -rf ${HELM_TEMPLATE_ASSETS_DIR}
+	rm -rf ${HELM_TEMPLATE_ASSETS_DIR}
 
 manifests-local: controller-gen-local ## Generate WebhookConfiguration, ClusterRole and CustomResourceDefinition objects.
 	$(CONTROLLER_GEN) $(CRD_OPTIONS) rbac:roleName=manager-role webhook paths="./..." output:crd:artifacts:config=config/crd/bases
