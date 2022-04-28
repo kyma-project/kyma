@@ -22,7 +22,7 @@ describe('Execute SKR test', function() {
       const customParams = {
         oidc: this.options.oidc0,
         kymaVersion: 'PR-14103',
-        overridesVersion: '2.1',
+        overridesVersion: '2.1.2',
       };
       const skr = await provisionSKR(keb, kcp, gardener,
           this.options.instanceID,
