@@ -111,4 +111,4 @@ To check that the service was registered correctly, create a test Pod, and make 
     kubectl exec $POD_NAME -c $POD_NAME -- sh -c "wget -O- '$GATEWAY_URL'"
     ```
 
-   A successful response indicates that the service was registered correctly.
+   A successful response from the service means that it was registered correctly.
