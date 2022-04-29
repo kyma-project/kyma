@@ -72,7 +72,7 @@ To check that the service was registered correctly, create a test Pod, and make 
     export GATEWAY_URL=http://central-application-gateway.kyma-system:8080/$APP_NAME/$SERVICE_DISPLAY_NAME/$TARGET_PATH
     ```
    
-    > **CAUTION:** Mind that the `SERVICE_DISPLAY_NAME` in the path must be in its [normalized form](./ac-04-register-secured-api.md#register-a-secured-api)! The version of **displayName** in the path is stripped of all non-lowercase, non-alphanumeric characters except hyphens, and of all trailing hyphens. This means that, for example, if you used `test-basic-auth` as the service **displayName**, you're good to go, but if you used `"Test Basic Auth"`, you must replace it with `test-basic-auth` in the path. 
+    > **CAUTION:** Mind that the `SERVICE_DISPLAY_NAME` in the **GATEWAY_URL** path must be in its [normalized form](./ac-04-register-secured-api.md#register-a-secured-api)! This means that, for example, if you used `test-basic-auth` as the service **displayName**, you're good to go, but if you used `"Test Basic Auth"`, you must replace it with `test-basic-auth` in the path. 
 
 2. Export the name of the test Pod as an environment variable:
 
