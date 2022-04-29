@@ -29,7 +29,7 @@ async function provisionSKR(
   await ensureOperationSucceeded(keb, kcp, instanceID, operationID, timeout);
   const runtimeStatus = await kcp.getRuntimeStatusOperations(instanceID);
   const objRuntimeStatus = JSON.parse(runtimeStatus);
-  expect(objRuntimeStatus).to.have.nested.property("data[0].shootName").not.empty;
+  expect(objRuntimeStatus).to.have.nested.property('data[0].shootName').not.empty;
   const shoot = await gardener.getShoot(objRuntimeStatus.data[0].shootName);
   debug(`Compass ID ${shoot.compassID}`);
 
