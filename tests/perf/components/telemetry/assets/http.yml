@@ -1,7 +1,7 @@
 apiVersion: telemetry.kyma-project.io/v1alpha1
 kind: LogPipeline
 metadata:
-  name: {{ .name }}
+  name: {{ .Name }}
 spec:
   parsers: []
   multilineParsers: []
@@ -9,16 +9,16 @@ spec:
     - content: |
         Name   rewrite_tag
         Match  kube.*
-        Rule   $log "^.*$" {{ .tag }} true
-        Emitter_Name  log_emitter
+        Rule   $log "^.*$" {{ .Tag }} true
+        Emitter_Name  {{ .Tag }}
         Emitter_Storage.type filesystem
   outputs:
     - content: |
         Name               http
         Alias              mock-output
-        Match              {{ .tag }}
+        Match              {{ .Tag }}
         Retry_Limit        False
-        Host               {{ .host }}  #mockserver.mockserver
+        Host               {{ .Host }}  #mockserver.mockserver
         Port               1080
         URI                /
         Header             Content-Type application/json
@@ -27,6 +27,6 @@ spec:
         Format             json_stream
         tls                off
         tls.verify         off
-        storage.total_limit_size {{ .storageLimit }}
+        storage.total_limit_size {{ .StorageLimit }}
   files: []
   secretRefs: []
