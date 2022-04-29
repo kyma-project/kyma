@@ -115,6 +115,56 @@ function prepareCommerceObjs(mockNamespace) {
   return k8s.loadAllYaml(commerceMockYaml.toString().replace(/%%MOCK_NAMESPACE%%/g, mockNamespace));
 }
 
+async function callFunctionWithToken(functionNamespace, mockNamespace = 'mocks'){
+  const vs = await waitForVirtualService(mockNamespace, 'commerce-mock');
+  const mockHost = vs.spec.hosts[0];
+  const host = mockHost.split('.').slice(1).join('.');
+
+  // get OAuth client id and client secret from Kubernetes Secret
+  const oAuthSecretData = await getSecretData('lastorder-oauth', functionNamespace);
+
+  // get access token from OAuth server
+  const oAuthTokenGetter = new OAuthToken(
+      `https://oauth2.${host}/oauth2/token`,
+      new OAuthCredentials(oAuthSecretData['client_id'], oAuthSecretData['client_secret']),
+  );
+  const accessToken = await oAuthTokenGetter.getToken(['read', 'write']);
+  let res = await retryPromise(
+    () => axios.post(`https://lastorder.${host}/function`, {orderCode: '789'}, {
+      timeout: 5000,
+      headers: {Authorization: `bearer ${accessToken}`},
+    }),
+    45,
+    2000,
+  ).catch((err) => {
+    throw convertAxiosError(err, 'Function lastorder responded with error');
+  });
+
+  return res;
+}
+
+function assertSuccessfulFunctionResponse(functionResponse){
+  expect(functionResponse.data).to.have.nested.property('order.totalPriceWithTax.value', 100);
+}
+
+async function callFunctionWithNoToken(){
+  let errorOccurred = false;
+  let error = null;
+  try {
+    res = await axios.post(`https://lastorder.${host}/function`, {orderCode: '789'}, {timeout: 5000});
+  } catch (err) {
+    error = err;
+    errorOccurred = true;
+    expect(errorOccurred).to.be.equal(true);
+  }
+
+  return error;
+}
+
+function assertUnauthorizedFunctionResponse(functionResponse){
+  expect(functionResponse.response.status).to.be.equal(401);
+}
+
 async function checkFunctionResponse(functionNamespace, mockNamespace = 'mocks') {
   const vs = await waitForVirtualService(mockNamespace, 'commerce-mock');
   const mockHost = vs.spec.hosts[0];
@@ -211,6 +261,63 @@ async function sendLegacyEventAndCheckResponse(mockNamespace = 'mocks') {
   };
 
   return await sendEventAndCheckResponse('legacy event', body, params, mockNamespace);
+}
+
+async function sendLegacyEvent(mockNamespace = 'mocks') {
+  const body = {
+    'event-type': 'order.created',
+    'event-type-version': 'v1',
+    'event-time': '2020-09-28T14:47:16.491Z',
+    'data': {'orderCode': '567'},
+    // this parameter sets the x-b3-sampled header on the commerce-mock side,
+    // which configures istio-proxies to collect the traces no matter what sampling rate is configured
+    'event-tracing': true,
+  };
+  const params = {
+    headers: {
+      'content-type': 'application/json',
+    },
+  };
+
+  const vs = await waitForVirtualService(mockNamespace, 'commerce-mock');
+  const mockHost = vs.spec.hosts[0];
+  const host = mockHost.split('.').slice(1).join('.');
+  const url = `https://${mockHost}/events`;
+
+  let response = null;
+  await retryPromise(
+      async () => {
+        await axios
+            .post(url, body, params)
+            .catch((e) => {
+              console.log('Cannot send %s, the response from event gateway: %s', 'legacy event', e.response.data);
+              throw convertAxiosError(e, 'Cannot send %s, the response from event gateway', eventType);
+            });
+
+        await sleep(500);
+
+        return axios
+            .get(`https://lastorder.${host}`, {timeout: 5000})
+            .then((res) => {
+              response = res;
+            })
+            .catch((e) => {
+              throw convertAxiosError(e, 'Error during request to function lastorder');
+            });
+      },
+      30,
+      2 * 1000,
+  );
+}
+
+function checkLegacyEventResponse(response){
+    expect(response.data).to.have.nested.property('event.data.orderCode', '567');
+    expect(response.data).to.have.nested.property('event.ce-type').that.contains('order.created');
+    expect(response.data).to.have.nested.property('event.ce-source');
+    expect(response.data).to.have.nested.property('event.ce-eventtypeversion', 'v1');
+    expect(response.data).to.have.nested.property('event.ce-specversion', '1.0');
+    expect(response.data).to.have.nested.property('event.ce-id');
+    expect(response.data).to.have.nested.property('event.ce-time');
 }
 
 async function sendCloudEventStructuredModeAndCheckResponse(backendType ='nats', mockNamespace = 'mocks') {
@@ -910,6 +1017,60 @@ async function checkInClusterEventDeliveryHelper(targetNamespace, encoding) {
       });
 }
 
+async function sendInClusterEvent(targetNamespace, encoding) {
+  const eventId = 'event-' + encoding + '-' + genRandom(5);
+  const vs = await waitForVirtualService(targetNamespace, 'lastorder');
+  const mockHost = vs.spec.hosts[0];
+
+  await printStatusOfInClusterEventingInfrastructure(targetNamespace, encoding, 'lastorder');
+
+  // send event using function query parameter send=true
+  await retryPromise(async () => {
+    const response = await axios.post(`https://${mockHost}`, {id: eventId}, {
+      params: {
+        send: true,
+        encoding: encoding,
+      },
+      headers: {
+        'X-B3-Sampled': 1,
+      },
+    });
+    debug('Event publishing result:', {
+      status: response.status,
+      statusText: response.statusText,
+      data: response.data,
+    });
+    if (response.data.eventPublishError) {
+      throw convertAxiosError(response.data.statusText);
+    }
+    expect(response.status).to.be.equal(200);
+  }, 10, 1000);
+  debug(`Event ${eventId} was successfully published`);
+  return {
+    'eventId': eventId,
+    'mockHost': mockHost
+  };
+}
+
+async function verifyInClusterEventIsReceivedCorrectly(mockHost, eventId){
+  // verify if event was received using function query parameter inappevent=eventId
+  return await retryPromise(async () => {
+    debug('Waiting for event: ', eventId);
+    const response = await axios.get(`https://${mockHost}`, {params: {inappevent: eventId}});
+    debug('Received Event response: ', {
+      status: response.status,
+      statusText: response.statusText,
+      data: response.data,
+    });
+    expect(response.data).to.have.nested.property('event.id', eventId, 'The same event id expected in the result');
+    expect(response.data).to.have.nested.property('event.shipped', true, 'Order should have property shipped');
+    return response;
+  }, 30, 2 * 1000)
+      .catch((err) => {
+        throw convertAxiosError(err, 'Fetching published event responded with error');
+      });
+}
+
 module.exports = {
   ensureCommerceMockLocalTestFixture,
   ensureCommerceMockWithCompassTestFixture,
@@ -931,4 +1092,12 @@ module.exports = {
   setEventMeshSourceNamespace,
   cleanCompassResourcesSKR,
   sendEventAndCheckResponse,
+  sendInClusterEvent,
+  verifyInClusterEventIsReceivedCorrectly,
+  callFunctionWithToken,
+  assertSuccessfulFunctionResponse,
+  callFunctionWithNoToken,
+  assertUnauthorizedFunctionResponse,
+  sendLegacyEvent,
+  checkLegacyEventResponse
 };
