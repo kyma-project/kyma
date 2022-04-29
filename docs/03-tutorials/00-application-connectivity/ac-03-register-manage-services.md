@@ -12,6 +12,7 @@ Before you start, expose the following as environment variables:
 - Your [Application](./ac-01-create-application.md#prerequisites) name
 - Username and password to access the external system
 - Name of the Secret containing the service credentials
+- Name of your service
 - URL to your service
 - Unique ID identifying your service within the Application CR
 - Relative path in your service
@@ -21,6 +22,7 @@ Before you start, expose the following as environment variables:
     export USER_NAME=test-user
     export PASSWORD=test-password
     export SECRET_NAME=test-secret
+    export SERVICE_DISPLAY_NAME=test-basic-auth
     export TARGET_URL=https://httpbin.org/
     export TARGET_UUID=f03aafcc-85ad-4665-a46a-bf455f5fa0b3
     export TARGET_PATH=basic-auth/$USER_NAME/$PASSWORD
@@ -47,8 +49,8 @@ Before you start, expose the following as environment variables:
       skipVerify: false
       services:
       - id: $TARGET_UUID
-        name: test-basic-auth
-        displayName: "Test Basic Auth"
+        name: $SERVICE_DISPLAY_NAME
+        displayName: $SERVICE_DISPLAY_NAME
         description: "Your service"
         providerDisplayName: "Your organisation"
         entries:
@@ -67,8 +69,10 @@ To check that the service was registered correctly, create a test Pod, and make 
 1. To build a path to access your registered service, run this command:
 
     ```bash
-    export GATEWAY_URL=http://central-application-gateway.kyma-system:8080/$APP_NAME/test-basic-auth/$TARGET_PATH
+    export GATEWAY_URL=http://central-application-gateway.kyma-system:8080/$APP_NAME/$SERVICE_DISPLAY_NAME/$TARGET_PATH
     ```
+   
+    > **CAUTION:** Mind that the `SERVICE_DISPLAY_NAME` in the path must be in its [normalized form](./ac-04-register-secured-api.md#register-a-secured-api)!
 
 2. Export the name of the test Pod as an environment variable:
 
