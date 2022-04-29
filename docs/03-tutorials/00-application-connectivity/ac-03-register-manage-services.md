@@ -99,10 +99,10 @@ To check that the service was registered correctly, create a test Pod, and make 
     EOF
     ```
 
-4. Wait for the Pod to be in state `Running`. To check the state of the Pod, run:
+4. Wait for the Pod to be in state `Running`. To check that the Pod is ready, run this command and wait for the response:
 
     ```bash
-    kubectl get pod -w | grep $POD_NAME
+    kubectl wait --for=condition=Ready pod $POD_NAME
     ```
 
 5. To make a call to Application Gateway from within the Pod, run: 
