@@ -7,7 +7,7 @@
 # We use this code to manually use newest alpine and nodejs.
 # Use official build when it will be available.
 
-FROM alpine:3.15.3
+FROM alpine:3.15.4
 
 SHELL ["/bin/ash", "-o", "pipefail", "-c"]
 

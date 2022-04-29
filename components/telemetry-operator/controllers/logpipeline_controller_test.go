@@ -37,7 +37,7 @@ var _ = Describe("LogPipeline controller", func() {
 		LogPipelineName                = "log-pipeline"
 		FluentBitParserConfig          = "Name   dummy_test\nFormat   regex\nRegex   ^(?<INT>[^ ]+) (?<FLOAT>[^ ]+) (?<BOOL>[^ ]+) (?<STRING>.+)$"
 		FluentBitMultiLineParserConfig = "Name          multiline-custom-regex\nType          regex\nFlush_timeout 1000\nRule      \"start_state\"   \"/(Dec \\d+ \\d+\\:\\d+\\:\\d+)(.*)/\"  \"cont\"\nRule      \"cont\"          \"/^\\s+at.*/\"                     \"cont\""
-		FluentBitFilterConifg          = "Name   grep\nMatch   *\nRegex   $kubernetes['labels']['app'] my-deployment"
+		FluentBitFilterConfig          = "Name   grep\nMatch   *\nRegex   $kubernetes['labels']['app'] my-deployment"
 		FluentBitOutputConfig          = "Name   stdout\nMatch   *"
 		timeout                        = time.Second * 10
 		interval                       = time.Millisecond * 250
@@ -150,7 +150,7 @@ var _ = Describe("LogPipeline controller", func() {
 				Content: FluentBitMultiLineParserConfig,
 			}
 			filter := telemetryv1alpha1.Filter{
-				Content: FluentBitFilterConifg,
+				Content: FluentBitFilterConfig,
 			}
 			output := telemetryv1alpha1.Output{
 				Content: FluentBitOutputConfig,
@@ -244,7 +244,7 @@ var _ = Describe("LogPipeline controller", func() {
 					return []string{err.Error()}
 				}
 				return updatedLogPipeline.Finalizers
-			}, timeout, interval).Should(ContainElement(sectionsConfigMapFinalizer))
+			}, timeout, interval).Should(ContainElement("FLUENT_BIT_SECTIONS_CONFIG_MAP"))
 
 			Expect(k8sClient.Delete(ctx, loggingConfiguration)).Should(Succeed())
 

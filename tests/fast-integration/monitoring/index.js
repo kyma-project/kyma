@@ -1,16 +1,32 @@
+const {
+  getEnvOrDefault,
+  info,
+} = require('../utils');
 const prometheus = require('./prometheus');
 const grafana = require('./grafana');
-const {getEnvOrDefault} = require('../utils');
 
 function monitoringTests() {
   if (getEnvOrDefault('KYMA_MAJOR_UPGRADE', 'false') === 'true') {
-    console.log('Skipping monitoring tests for Kyma 1 to Kyma 2 upgrade scenario');
+    info('Skipping monitoring tests for Kyma 1 to Kyma 2 upgrade scenario');
     return;
   }
 
-  describe('Prometheus Tests:', function() {
+  describe('Grafana Tests:', async function() {
     this.timeout(5 * 60 * 1000); // 5 min
     this.slow(5 * 1000);
+
+    it('Grafana pods should be ready', async () => {
+      await grafana.assertPodsExist();
+    });
+
+    it('Grafana redirects should work', async () => {
+      await grafana.assertGrafanaRedirectsExist();
+    });
+  });
+
+  describe('Prometheus Tests:', function() {
+    this.timeout(5 * 60 * 1000); // 5 min
+    this.slow(5000);
 
     it('Prometheus pods should be ready', async () => {
       await prometheus.assertPodsExist();
@@ -40,21 +56,28 @@ function monitoringTests() {
       await prometheus.assertMetricsExist();
     });
   });
+}
 
-  describe('Grafana Tests:', async function() {
-    this.timeout(5 * 60 * 1000); // 5 min
-    this.slow(5 * 1000);
+async function exposeGrafana() {
+  if (getEnvOrDefault('KYMA_MAJOR_UPGRADE', 'false') === 'true') {
+    info('Skipping setting of Grafana Proxy for Kyma 1 to Kyma 2 upgrade scenario');
+    return;
+  }
 
-    it('Grafana pods should be ready', async () => {
-      await grafana.assertPodsExist();
-    });
+  await grafana.setGrafanaProxy();
+}
 
-    it('Grafana redirects should work', async () => {
-      await grafana.assertGrafanaRedirectsExist();
-    });
-  });
+async function unexposeGrafana() {
+  if (getEnvOrDefault('KYMA_MAJOR_UPGRADE', 'false') === 'true') {
+    info('Skipping resetting of Grafana Proxy for Kyma 1 to Kyma 2 upgrade scenario');
+    return;
+  }
+
+  await grafana.resetGrafanaProxy();
 }
 
 module.exports = {
   monitoringTests,
+  exposeGrafana,
+  unexposeGrafana,
 };

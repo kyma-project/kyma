@@ -24,12 +24,13 @@ async function provisionSKR(
   expect(resp).to.have.property('operation');
 
   const operationID = resp.operation;
-  const shootName = "shoot--kyma-dev--abfb85e";// resp.dashboard_url.split('.')[1];
-  debug(`Operation ID ${operationID}`, `Shoot name ${shootName}`);
+  debug(`Operation ID ${operationID}`);
 
   await ensureOperationSucceeded(keb, kcp, instanceID, operationID, timeout);
-
-  const shoot = await gardener.getShoot(shootName);
+  const runtimeStatus = await kcp.getRuntimeStatusOperations(instanceID);
+  const objRuntimeStatus = JSON.parse(runtimeStatus);
+  expect(objRuntimeStatus).to.have.nested.property('data[0].shootName').not.empty;
+  const shoot = await gardener.getShoot(objRuntimeStatus.data[0].shootName);
   debug(`Compass ID ${shoot.compassID}`);
 
   return {
@@ -89,7 +90,7 @@ async function updateSKR(keb,
   };
 }
 
-async function ensureOperationSucceeded(keb, kcp, instanceID, operationID, timeout) {  
+async function ensureOperationSucceeded(keb, kcp, instanceID, operationID, timeout) {
   const res = await wait(
       () => keb.getOperation(instanceID, operationID),
       (res) => res && res.state && (res.state === 'succeeded' || res.state === 'failed'),
@@ -101,8 +102,6 @@ async function ensureOperationSucceeded(keb, kcp, instanceID, operationID, timeo
   });
 
   if (res.state !== 'succeeded') {
-    const runtimeStatus1 = await kcp.getRuntimeStatusOperations(instanceID);
-    console.log(runtimeStatus1);
     const runtimeStatus = await kcp.getRuntimeStatusOperations(instanceID);
     throw new Error(`Error thrown by ensureOperationSucceeded: operation didn't succeed in time:
      ${JSON.stringify(res, null, `\t`)}\nRuntime status: ${runtimeStatus}`);

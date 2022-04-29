@@ -50,6 +50,9 @@ help: ## Display this help.
 manifests-local: controller-gen-local
 	$(CONTROLLER_GEN) $(CRD_OPTIONS) rbac:roleName=manager-role webhook paths="./..." output:crd:artifacts:config=config/crd/bases
 
+copy-crds-local: manifests-local
+	@cp ./config/crd/bases/telemetry.kyma-project.io_logpipelines.yaml ./../../installation/resources/crds/telemetry/logpipelines.crd.yaml
+
 generate-local: controller-gen-local
 	$(CONTROLLER_GEN) object:headerFile="hack/boilerplate.go.txt" paths="./..."
 
@@ -75,8 +78,18 @@ test-local: manifests-local generate-local fmt-local vet-local envtest
 build: generate fmt vet ## Build manager binary.
 	go build -o bin/manager main.go
 
-run-local: manifests-local generate-local fmt-local vet-local ## Run a controller from your host.
-	go run ./main.go --cm-name=telemetry-fluent-bit --sections-cm-name=telemetry-fluent-bit-sections --parser-cm-name=telemetry-fluent-bit-parsers --ds-name=telemetry-fluent-bit --env-secret=telemetry-fluent-bit-env --files-cm=telemetry-fluent-bit-files --fluent-bit-ns=kyma-system
+tls.key:
+	@openssl genrsa -out tls.key 4096
+
+tls.crt: tls.key
+	@openssl req -sha256 -new -key tls.key -out tls.csr -subj '/CN=localhost'
+	@openssl x509 -req -sha256 -days 3650 -in tls.csr -signkey tls.key -out tls.crt
+	@rm tls.csr
+
+gen-webhook-cert-local: tls.key tls.crt
+
+run-local: gen-webhook-cert-local manifests-local generate-local fmt-local vet-local ## Run a controller from your host.
+	go run ./main.go --cm-name=telemetry-fluent-bit --sections-cm-name=telemetry-fluent-bit-sections --parser-cm-name=telemetry-fluent-bit-parsers --ds-name=telemetry-fluent-bit --env-secret=telemetry-fluent-bit-env --files-cm=telemetry-fluent-bit-files --fluent-bit-ns=kyma-system --cert-dir=.
 
 ## Will be called from Prow-Pipeline; using targets from generic make file
 release: resolve generate verify build-image push-image
@@ -89,13 +102,6 @@ install-local: manifests-local ## Install CRDs into the K8s cluster specified in
 uninstall-local: manifests-local ## Uninstall CRDs from the K8s cluster specified in ~/.kube/config.
 	kustomize build config/crd | kubectl delete -f -
 
-deploy-local: manifests-local ## Deploy controller to the K8s cluster specified in ~/.kube/config.
-	cd config/manager && kustomize edit set image controller=${IMG_NAME}:${TAG}
-	kustomize build config/default | kubectl apply -f -
-
-undeploy-local: ## Undeploy controller from the K8s cluster specified in ~/.kube/config.
-	kustomize build config/default | kubectl delete -f -
-
 ENVTEST = $(PROJECT_DIR)/bin/setup-envtest
 .PHONY: envtest
 envtest: ## Download envtest-setup locally if necessary.
@@ -103,24 +109,6 @@ envtest: ## Download envtest-setup locally if necessary.
 
 .PHONY: controller-gen-local
 controller-gen-local: ## find or download controller-gen if necessary
-ifeq (, $(shell which controller-gen))
-	@{ \
-	set -e ;\
-	CONTROLLER_GEN_TMP_DIR=$$(mktemp -d) ;\
-	cd $$CONTROLLER_GEN_TMP_DIR ;\
-	if [ ! $(which go) ]; then \
-		go mod init tmp ; \
-		go get sigs.k8s.io/controller-tools/cmd/controller-gen@v0.6.0 ; \
-		rm -rf $$CONTROLLER_GEN_TMP_DIR ; \
-	fi; \
-	}
-CONTROLLER_GEN=$(GOBIN)/controller-gen
-else
-CONTROLLER_GEN=$(shell which controller-gen)
-endif
-
-.PHONY: controller-gen
-controller-gen:
 ifeq (, $(shell which controller-gen))
 	@{ \
 	set -e ;\

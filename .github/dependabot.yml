@@ -19,7 +19,6 @@ updates:
     labels:
       - "go"
       - "area/dependency"
-      - "skip-review"
     schedule:
       interval: "daily"
     commit-message:
@@ -30,7 +29,6 @@ updates:
     labels:
       - "go"
       - "area/dependency"
-      - "skip-review"
     schedule:
       interval: "daily"
     commit-message:

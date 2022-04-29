@@ -54,8 +54,11 @@ var (
 	fluentBitNs                string
 	fluentBitEnvSecret         string
 	fluentBitFilesConfigMap    string
+	fluentBitPath              string
+	fluentBitPluginDirectory   string
 	logFormat                  string
 	logLevel                   string
+	certDir                    string
 )
 
 //nolint:gochecknoinits
@@ -88,8 +91,11 @@ func main() {
 	flag.StringVar(&fluentBitEnvSecret, "env-secret", "", "Secret for environment variables")
 	flag.StringVar(&fluentBitFilesConfigMap, "files-cm", "", "ConfigMap for referenced files")
 	flag.StringVar(&fluentBitNs, "fluent-bit-ns", "", "Fluent Bit namespace")
+	flag.StringVar(&fluentBitPath, "fluent-bit-path", "fluent-bit/bin/fluent-bit", "Fluent Bit binary path")
+	flag.StringVar(&fluentBitPluginDirectory, "fluent-bit-plugin-directory", "fluent-bit/lib", "Fluent Bit plugin directory")
 	flag.StringVar(&logFormat, "log-format", getEnvOrDefault("APP_LOG_FORMAT", "text"), "Log format (json or text)")
 	flag.StringVar(&logLevel, "log-level", getEnvOrDefault("APP_LOG_LEVEL", "debug"), "Log level (debug, info, warn, error, fatal)")
+	flag.StringVar(&certDir, "cert-dir", "/var/run/telemetry-webhook", "Webhook TLS certificate directory")
 	flag.Parse()
 
 	ctrLogger, err := logger.New(logFormat, logLevel)
@@ -116,7 +122,7 @@ func main() {
 		HealthProbeBindAddress: probeAddr,
 		LeaderElection:         enableLeaderElection,
 		LeaderElectionID:       "cdd7ef0b.kyma-project.io",
-		CertDir:                "/var/run/telemetry-webhook",
+		CertDir:                certDir,
 	})
 	if err != nil {
 		setupLog.Error(err, "Failed to start manager")
@@ -126,7 +132,7 @@ func main() {
 	logPipelineValidator := webhook.NewLogPipeLineValidator(mgr.GetClient(),
 		fluentBitConfigMap,
 		fluentBitNs,
-		fluentbit.NewConfigValidator(),
+		fluentbit.NewConfigValidator(fluentBitPath, fluentBitPluginDirectory),
 		fs.NewWrapper(),
 	)
 	mgr.GetWebhookServer().Register(
