@@ -1,23 +1,24 @@
 ---
 title: Register a secured API
 ---
-You can register a secured API exposed by your external solution. The supported authentication methods are [Basic Authentication](https://tools.ietf.org/html/rfc7617), [OAuth](https://tools.ietf.org/html/rfc6750), and client certificates.
+
+Application Connectivity allows you to register a secured API exposed by your external solution. The supported authentication methods are [Basic Authentication](https://tools.ietf.org/html/rfc7617), [OAuth](https://tools.ietf.org/html/rfc6750), and client certificates.
 
 You can specify only one authentication method for every secured API you register. 
 
 Additionally, you can secure the API against cross-site request forgery (CSRF) attacks. CSRF tokens are an additional layer of protection and can accompany any authentication method.
 
->**NOTE:** Registering a secured API is a part of registering services of an external solution connected to Kyma. To learn more about this process, follow the [tutorial](ac-03-register-manage-services.md).
+>**NOTE:** Registering a secured API is a part of [registering services](ac-03-register-manage-services.md) of an external solution connected to Kyma.
 
 ## Register a secured API
 
-To register a secured API, add a **service** object to the **services** section of the Application CRD. You must include these fields:
+To register a secured API, add a **service** object to the **services** section of the Application CR. You must include these fields:
 
 | Field   |  Description |
 |----------|------|
 | **id** | Identifier of the service. Must be unique in the scope of Application CRD |
 | **name** | Name of the service. Must be unique in the scope of Application CRD. Allowed characters include: lowercase letters, numbers, and hyphens. |
-| **displayName** | Display name of the service. Must be unique in the scope of Application CRD. Its normalized form constitutes a part of the path. |
+| **displayName** | Display name of the service. Must be unique in the scope of Application CR. Its normalized form constitutes a part of the path. |
 | **description** | Descripion of the service |
 | **providerDisplayName** | Name of the service provider |
 | **entries** | Object containing service details |
