@@ -53,11 +53,8 @@ describe('Execute SKR test', function() {
           btpOperatorCreds,
           null,
           provisioningTimeout);
+
       this.shoot = skr.shoot;
-
-      const runtimeStatus = await kcp.getRuntimeStatusOperations(this.options.instanceID);
-      console.log(`\nRuntime status after provisioning: ${runtimeStatus}`);
-
       await addScenarioInCompass(director, this.options.scenarioName);
       await assignRuntimeToScenario(director, this.shoot.compassID, this.options.scenarioName);
       initializeK8sClient({kubeconfig: this.shoot.kubeconfig});
@@ -65,6 +62,7 @@ describe('Execute SKR test', function() {
       throw new Error(`before hook failed: ${e.toString()}`);
     } finally {
       const runtimeStatus = await kcp.getRuntimeStatusOperations(this.options.instanceID);
+      console.log(`\nRuntime status after provisioning: ${runtimeStatus}`);
       await kcp.reconcileInformationLog(runtimeStatus);
     }
   });
