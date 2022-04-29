@@ -18,7 +18,7 @@ Before you start, expose the following as environment variables:
 
     ```bash
     export APP_NAME=test-app
-    export USERNAME=test-user
+    export USER_NAME=test-user
     export PASSWORD=test-password
     export SECRET_NAME=test-secret
     export TARGET_URL=https://httpbin.org/
@@ -32,7 +32,7 @@ Before you start, expose the following as environment variables:
 1. Create a Secret that contains your username and password to the external service:
 
     ```bash
-    kubectl create secret generic $SECRET_NAME --from-literal username=$USERNAME --from-literal password=$PASSWORD -n kyma-integration
+    kubectl create secret generic $SECRET_NAME --from-literal username=$USER_NAME --from-literal password=$PASSWORD -n kyma-integration
     ```
 
 2. To register a service with a Basic Authentication-secured API, you must create or modify the respective Application CR. To create an Application CR with the service definition, run this command:
