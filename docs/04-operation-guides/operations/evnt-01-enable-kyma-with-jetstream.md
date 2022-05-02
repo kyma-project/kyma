@@ -25,7 +25,7 @@ kubectl -n default delete function lastorder
 ```
 
 3. Follow the [Trigger the workload with an event](../../02-get-started/04-trigger-workload-with-event.md#trigger-the-workload-with-an-event) tutorial to trigger the event once again. The message is stored and is visible in the stream.
-   1. Port forward the Kyma Eventing NATS Service to localhost. Use port `4222`. Run:
+   1. Port forward the Kyma Eventing NATS service to localhost. Use port `4222`. Run:
       ```bash
       kubectl -n kyma-system port-forward svc/eventing-nats 4222
       ```

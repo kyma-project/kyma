@@ -6,11 +6,11 @@ Application Registry is a global component responsible for managing metadata of 
 ## Configuration
 This service has the following parameters:
 
-- **proxyPort** is the port used for services created for the Proxy Service. The default port is `8080`.
+- **proxyPort** is the port used for services created for the proxy service. The default port is `8080`.
 - **externalAPIPort** is the port that exposes the metadata API to an external system. The default port is `8081`.
 - **minioURL** is the URL of a MinIO service which stores specifications and documentation.
-- **namespace** is the Namespace to which you deploy the Proxy Service. The default Namespace is `kyma-integration`.
-- **requestTimeout** is the time-out for requests sent through the Proxy Service. Provide it in seconds. The default time-out is `10`.
+- **namespace** is the Namespace to which you deploy the proxy service. The default Namespace is `kyma-integration`.
+- **requestTimeout** is the time-out for requests sent through the proxy service. Provide it in seconds. The default time-out is `10`.
 - **requestLogging** is the flag to enable logging of incoming requests. The default value is `false`.
 - **specRequestTimeout** is the time-out for requests fetching specifications provided by the user. It is provided in seconds. The default time-out is `20`.
 - **rafterRequestTimeout** is the time-out for requests fetching specifications from Rafter. It is provided in seconds. The default time-out is `20`.
