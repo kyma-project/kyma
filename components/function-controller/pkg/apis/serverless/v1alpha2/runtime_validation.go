@@ -1,4 +1,4 @@
-package v1alpha1
+package v1alpha2
 
 import (
 	"errors"
@@ -8,7 +8,7 @@ import (
 
 func ValidateDependencies(runtime Runtime, dependencies string) error {
 	switch runtime {
-	case Nodejs12, Nodejs14, Nodejs16:
+	case NodeJs12, NodeJs14, NodeJs16:
 		return validateNodeJSDependencies(dependencies)
 	case Python39:
 		return nil

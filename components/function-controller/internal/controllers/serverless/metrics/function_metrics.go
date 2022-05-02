@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
+	serverlessv1alpha2 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha2"
 	"github.com/prometheus/client_golang/prometheus"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/types"
@@ -20,7 +20,7 @@ const (
 
 type PrometheusStatsCollector struct {
 	conditionGaugeSet                map[string]bool
-	conditionGauges                  map[serverlessv1alpha1.ConditionType]*prometheus.GaugeVec
+	conditionGauges                  map[serverlessv1alpha2.ConditionType]*prometheus.GaugeVec
 	FunctionConfiguredStatusGaugeVec *prometheus.GaugeVec
 	FunctionBuiltStatusGaugeVec      *prometheus.GaugeVec
 	FunctionRunningStatusGaugeVec    *prometheus.GaugeVec
@@ -58,10 +58,10 @@ func NewPrometheusStatsCollector() *PrometheusStatsCollector {
 
 	instance := &PrometheusStatsCollector{
 		conditionGaugeSet: map[string]bool{},
-		conditionGauges: map[serverlessv1alpha1.ConditionType]*prometheus.GaugeVec{
-			serverlessv1alpha1.ConditionRunning:            functionRunningStatusGaugeVec,
-			serverlessv1alpha1.ConditionBuildReady:         functionBuiltStatusGaugeVec,
-			serverlessv1alpha1.ConditionConfigurationReady: functionConfiguredStatusGaugeVec,
+		conditionGauges: map[serverlessv1alpha2.ConditionType]*prometheus.GaugeVec{
+			serverlessv1alpha2.ConditionRunning:            functionRunningStatusGaugeVec,
+			serverlessv1alpha2.ConditionBuildReady:         functionBuiltStatusGaugeVec,
+			serverlessv1alpha2.ConditionConfigurationReady: functionConfiguredStatusGaugeVec,
 		},
 		FunctionConfiguredStatusGaugeVec: functionConfiguredStatusGaugeVec,
 		FunctionBuiltStatusGaugeVec:      functionBuiltStatusGaugeVec,
@@ -78,7 +78,7 @@ func (p *PrometheusStatsCollector) Register() {
 		p.FunctionRunningStatusGaugeVec)
 }
 
-func (p *PrometheusStatsCollector) UpdateReconcileStats(f *serverlessv1alpha1.Function, cond serverlessv1alpha1.Condition) {
+func (p *PrometheusStatsCollector) UpdateReconcileStats(f *serverlessv1alpha2.Function, cond serverlessv1alpha2.Condition) {
 	if _, ok := p.conditionGauges[cond.Type]; !ok { // we don't have a gauge for this condition type
 		return
 	}
@@ -95,7 +95,7 @@ func (p *PrometheusStatsCollector) UpdateReconcileStats(f *serverlessv1alpha1.Fu
 
 	// If the condition status is not true, yet, we will try later.
 	// Except for the ConfigReady condition, we always push the metric for it.
-	if cond.Status != corev1.ConditionTrue && cond.Type != serverlessv1alpha1.ConditionConfigurationReady {
+	if cond.Status != corev1.ConditionTrue && cond.Type != serverlessv1alpha2.ConditionConfigurationReady {
 		return
 	}
 
@@ -104,15 +104,21 @@ func (p *PrometheusStatsCollector) UpdateReconcileStats(f *serverlessv1alpha1.Fu
 	p.conditionGaugeSet[gaugeID] = true
 }
 
-func (p *PrometheusStatsCollector) createGaugeID(uid types.UID, conditionType serverlessv1alpha1.ConditionType) string {
+func (p *PrometheusStatsCollector) createGaugeID(uid types.UID, conditionType serverlessv1alpha2.ConditionType) string {
 	return fmt.Sprintf("%s-%s", uid, conditionType)
 }
 
-func (p *PrometheusStatsCollector) createLabels(f *serverlessv1alpha1.Function) prometheus.Labels {
+func (p *PrometheusStatsCollector) createLabels(f *serverlessv1alpha2.Function) prometheus.Labels {
+	functionType := serverlessv1alpha2.FunctionTypeInline
+
+	if f.TypeOf(serverlessv1alpha2.FunctionTypeGit) {
+		functionType = serverlessv1alpha2.FunctionTypeGit
+	}
+
 	return prometheus.Labels{
 		NameLabelKey:      f.Name,
 		NamespaceLabelKey: f.Namespace,
 		RuntimeLabelKey:   string(f.Spec.Runtime),
-		TypeLabelKey:      string(f.Spec.Type),
+		TypeLabelKey:      string(functionType),
 	}
 }

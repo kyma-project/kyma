@@ -105,9 +105,9 @@ func (d DefaultedFunctionCheck) Run() error {
 		return errors.New("minReplicas equal nil")
 	} else if spec.MaxReplicas == nil {
 		return errors.New("maxReplicas equal nil")
-	} else if spec.Resources.Requests.Memory().IsZero() || spec.Resources.Requests.Cpu().IsZero() {
+	} else if spec.ResourceConfiguration.Function.Resources.Requests.Memory().IsZero() || spec.ResourceConfiguration.Function.Resources.Requests.Cpu().IsZero() {
 		return errors.New("requests equal zero")
-	} else if spec.Resources.Limits.Memory().IsZero() || spec.Resources.Limits.Cpu().IsZero() {
+	} else if spec.ResourceConfiguration.Function.Resources.Limits.Memory().IsZero() || spec.ResourceConfiguration.Function.Resources.Limits.Cpu().IsZero() {
 		return errors.New("limits equal zero")
 	}
 	return nil

@@ -3,9 +3,8 @@ package serverless
 import (
 	"fmt"
 
-	ctrl "sigs.k8s.io/controller-runtime"
-
 	"github.com/kyma-project/kyma/components/function-controller/internal/git"
+	ctrl "sigs.k8s.io/controller-runtime"
 )
 
 func NextRequeue(err error) (res ctrl.Result, errMsg string) {

@@ -2,7 +2,7 @@ package serverless
 
 import (
 	"github.com/kyma-project/kyma/components/function-controller/internal/git"
-	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
+	serverlessv1alpha2 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha2"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
 )
@@ -25,7 +25,7 @@ func boolPtr(b bool) *bool {
 	return &b
 }
 
-func buildRepoFetcherEnvVars(instance *serverlessv1alpha1.Function, gitOptions git.Options) []corev1.EnvVar {
+func buildRepoFetcherEnvVars(instance *serverlessv1alpha2.Function, gitOptions git.Options) []corev1.EnvVar {
 	vars := []corev1.EnvVar{
 		{
 			Name:  "APP_REPOSITORY_URL",
@@ -104,22 +104,22 @@ func buildRepoFetcherEnvVars(instance *serverlessv1alpha1.Function, gitOptions g
 	return vars
 }
 
-func (r *FunctionReconciler) internalFunctionLabels(instance *serverlessv1alpha1.Function) map[string]string {
+func (r *FunctionReconciler) internalFunctionLabels(instance *serverlessv1alpha2.Function) map[string]string {
 	labels := make(map[string]string, 3)
 
-	labels[serverlessv1alpha1.FunctionNameLabel] = instance.Name
-	labels[serverlessv1alpha1.FunctionManagedByLabel] = serverlessv1alpha1.FunctionControllerValue
-	labels[serverlessv1alpha1.FunctionUUIDLabel] = string(instance.GetUID())
+	labels[serverlessv1alpha2.FunctionNameLabel] = instance.Name
+	labels[serverlessv1alpha2.FunctionManagedByLabel] = serverlessv1alpha2.FunctionControllerValue
+	labels[serverlessv1alpha2.FunctionUUIDLabel] = string(instance.GetUID())
 
 	return labels
 }
 
-func (r *FunctionReconciler) deploymentSelectorLabels(instance *serverlessv1alpha1.Function) map[string]string {
-	return r.mergeLabels(map[string]string{serverlessv1alpha1.FunctionResourceLabel: serverlessv1alpha1.FunctionResourceLabelDeploymentValue}, r.internalFunctionLabels(instance))
+func (r *FunctionReconciler) deploymentSelectorLabels(instance *serverlessv1alpha2.Function) map[string]string {
+	return r.mergeLabels(map[string]string{serverlessv1alpha2.FunctionResourceLabel: serverlessv1alpha2.FunctionResourceLabelDeploymentValue}, r.internalFunctionLabels(instance))
 }
 
-func (r *FunctionReconciler) podLabels(instance *serverlessv1alpha1.Function) map[string]string {
-	return r.mergeLabels(instance.Spec.Labels, r.deploymentSelectorLabels(instance))
+func (r *FunctionReconciler) podLabels(instance *serverlessv1alpha2.Function) map[string]string {
+	return r.mergeLabels(instance.Spec.Template.Labels, r.deploymentSelectorLabels(instance))
 }
 
 func (r *FunctionReconciler) mergeLabels(labelsCollection ...map[string]string) map[string]string {

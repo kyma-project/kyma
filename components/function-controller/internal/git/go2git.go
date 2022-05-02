@@ -120,14 +120,14 @@ func (g *Git2GoClient) cloneRepo(opts Options, path string) (*git2go.Repository,
 	if err != nil {
 		return nil, errors.Wrap(err, "while getting authentication opts")
 	}
-	return g.cloner.git2goClone(opts.URL, path, authCallbacks)
+	return g.git2goClone(opts.URL, path, authCallbacks)
 }
 func (g *Git2GoClient) fetchRepo(opts Options, path string) (*git2go.Repository, error) {
 	authCallbacks, err := GetAuth(opts.Auth)
 	if err != nil {
 		return nil, errors.Wrap(err, "while getting authentication opts")
 	}
-	return g.fetcher.git2goFetch(opts.URL, path, authCallbacks)
+	return g.git2goFetch(opts.URL, path, authCallbacks)
 }
 
 func (g *Git2GoClient) lookupBranch(repo *git2go.Repository, branchName string) (*git2go.Reference, error) {

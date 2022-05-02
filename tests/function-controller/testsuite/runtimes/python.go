@@ -3,36 +3,54 @@ package runtimes
 import (
 	"fmt"
 
-	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
-
-	"github.com/kyma-project/kyma/tests/function-controller/pkg/function"
+	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha2"
 )
 
-func BasicPythonFunction(msg string, runtime serverlessv1alpha1.Runtime) *function.FunctionData {
-	return &function.FunctionData{
-		Body: fmt.Sprintf(
-			`import arrow
+var (
+	minReplicas int32 = 1
+	maxReplicas int32 = 2
+)
+
+func BasicPythonFunction(msg string, runtime serverlessv1alpha1.Runtime) serverlessv1alpha1.FunctionSpec {
+	src := fmt.Sprintf(`import arrow 
 def main(event, context):
-	return "%s"`, msg),
-		Deps: `requests==2.24.0
-arrow==0.15.8`,
-		MinReplicas: 1,
-		MaxReplicas: 1,
+	return "%s"`, msg)
+
+	dpd := `requests==2.24.0
+arrow==0.15.8`
+
+	return serverlessv1alpha1.FunctionSpec{
 		Runtime:     runtime,
+		MinReplicas: &minReplicas,
+		MaxReplicas: &maxReplicas,
+		Source: serverlessv1alpha1.Source{
+			Inline: serverlessv1alpha1.InlineSource{
+				Source:       src,
+				Dependencies: dpd,
+			},
+		},
 	}
 }
 
-func BasicPythonFunctionWithCustomDependency(msg string, runtime serverlessv1alpha1.Runtime) *function.FunctionData {
-	return &function.FunctionData{
-		Body: fmt.Sprintf(
-			`import arrow
+func BasicPythonFunctionWithCustomDependency(msg string, runtime serverlessv1alpha1.Runtime) serverlessv1alpha1.FunctionSpec {
+	src := fmt.Sprintf(
+		`import arrow
 def main(event, context):
-	return "%s"`, msg),
-		Deps: `requests==2.24.0
+	return "%s"`, msg)
+
+	dpd := `requests==2.24.0
 arrow==0.15.8
-kyma-pypi-test==1.0.0`,
-		MinReplicas: 1,
-		MaxReplicas: 1,
+kyma-pypi-test==1.0.0`
+
+	return serverlessv1alpha1.FunctionSpec{
 		Runtime:     runtime,
+		MinReplicas: &minReplicas,
+		MaxReplicas: &maxReplicas,
+		Source: serverlessv1alpha1.Source{
+			Inline: serverlessv1alpha1.InlineSource{
+				Source:       src,
+				Dependencies: dpd,
+			},
+		},
 	}
 }

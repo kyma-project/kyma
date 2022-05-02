@@ -19,7 +19,7 @@ import (
 
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/resource"
 
-	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
+	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha2"
 )
 
 type Function struct {
@@ -42,7 +42,7 @@ func NewFunction(name string, c shared.Container) *Function {
 	}
 }
 
-func (f *Function) Create(data *FunctionData) error {
+func (f *Function) Create(spec serverlessv1alpha1.FunctionSpec) error {
 	function := &serverlessv1alpha1.Function{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "Function",
@@ -52,17 +52,7 @@ func (f *Function) Create(data *FunctionData) error {
 			Name:      f.name,
 			Namespace: f.namespace,
 		},
-		Spec: serverlessv1alpha1.FunctionSpec{
-			Source:  data.Body,
-			Deps:    data.Deps,
-			Runtime: data.Runtime,
-			Type:    data.SourceType,
-			Repository: serverlessv1alpha1.Repository{
-				BaseDir:   data.Repository.BaseDir,
-				Reference: data.Repository.Reference,
-			},
-			Env: data.Env,
-		},
+		Spec: spec,
 	}
 
 	_, err := f.resCli.Create(function)
@@ -101,7 +91,7 @@ func (f *Function) Delete() error {
 	return nil
 }
 
-func (f *Function) Update(data *FunctionData) error {
+func (f *Function) Update(spec serverlessv1alpha1.FunctionSpec) error {
 	// correct update must first perform get
 	fn, err := f.Get()
 	if err != nil {
@@ -109,15 +99,7 @@ func (f *Function) Update(data *FunctionData) error {
 	}
 
 	fnCopy := fn.DeepCopy()
-
-	fnCopy.Spec.MinReplicas = &data.MinReplicas
-	fnCopy.Spec.MaxReplicas = &data.MaxReplicas
-	fnCopy.Spec.Deps = data.Deps
-	fnCopy.Spec.Source = data.Body
-	fnCopy.Spec.Runtime = data.Runtime
-	fnCopy.Spec.Type = data.SourceType
-	fnCopy.Spec.Repository.Reference = data.Repository.Reference
-	fnCopy.Spec.Repository.BaseDir = data.Repository.Reference
+	fnCopy.Spec = spec
 
 	_, err = f.resCli.Update(fnCopy)
 	return err

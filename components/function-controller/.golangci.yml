@@ -1,6 +1,6 @@
 run:
   skip-files:
-    - pkg/apis/serverless/v1alpha1/zz_generated.deepcopy.go
+    - pkg/apis/serverless/v1alpha2/zz_generated.deepcopy.go
     # make it a regexp if we have more generated files later on
 
 linters:

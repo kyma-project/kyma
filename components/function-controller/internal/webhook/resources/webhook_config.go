@@ -25,7 +25,7 @@ const (
 	ValidatingWebHook WebHookType = "Validating"
 
 	serverlessAPIGroup   = "serverless.kyma-project.io"
-	serverlessAPIVersion = "v1alpha1"
+	serverlessAPIVersion = "v1alpha2"
 
 	DefaultingWebhookName     = "defaulting.webhook.serverless.kyma-project.io"
 	SecretMutationWebhookName = "mutating.secret.webhook.serverless.kyma-project.io"

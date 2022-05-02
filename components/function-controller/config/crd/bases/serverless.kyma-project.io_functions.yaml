@@ -26,7 +26,7 @@ spec:
     - jsonPath: .status.conditions[?(@.type=='Running')].status
       name: Running
       type: string
-    - jsonPath: .status.runtime
+    - jsonPath: .spec.runtime
       name: Runtime
       type: string
     - jsonPath: .metadata.generation
@@ -35,7 +35,7 @@ spec:
     - jsonPath: .metadata.creationTimestamp
       name: Age
       type: date
-    name: v1alpha1
+    name: v1alpha2
     schema:
       openAPIV3Schema:
         properties:
@@ -54,37 +54,16 @@ spec:
           spec:
             description: FunctionSpec defines the desired state of Function
             properties:
-              baseDir:
-                type: string
-              buildResources:
-                description: ResourceRequirements describes the compute resource requirements.
+              customRuntimeConfiguration:
                 properties:
-                  limits:
-                    additionalProperties:
-                      anyOf:
-                      - type: integer
-                      - type: string
-                      pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
-                      x-kubernetes-int-or-string: true
-                    description: 'Limits describes the maximum amount of compute resources
-                      allowed. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/'
-                    type: object
-                  requests:
-                    additionalProperties:
-                      anyOf:
-                      - type: integer
-                      - type: string
-                      pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
-                      x-kubernetes-int-or-string: true
-                    description: 'Requests describes the minimum amount of compute
-                      resources required. If Requests is omitted for a container,
-                      it defaults to Limits if that is explicitly specified, otherwise
-                      to an implementation-defined value. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/'
-                    type: object
+                  name:
+                    type: string
+                  namespace:
+                    type: string
+                required:
+                - name
+                - namespace
                 type: object
-              deps:
-                description: Deps defines the dependencies for a function
-                type: string
               env:
                 description: Env defines an array of key value pairs need to be used
                   as env variable for a function
@@ -191,10 +170,6 @@ spec:
                   - name
                   type: object
                 type: array
-              labels:
-                additionalProperties:
-                  type: string
-                type: object
               maxReplicas:
                 format: int32
                 minimum: 1
@@ -203,37 +178,78 @@ spec:
                 format: int32
                 minimum: 1
                 type: integer
-              reference:
-                type: string
-              resources:
-                description: ResourceRequirements describes the compute resource requirements.
+              resourceConfiguration:
                 properties:
-                  limits:
-                    additionalProperties:
-                      anyOf:
-                      - type: integer
-                      - type: string
-                      pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
-                      x-kubernetes-int-or-string: true
-                    description: 'Limits describes the maximum amount of compute resources
-                      allowed. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/'
+                  build:
+                    properties:
+                      profile:
+                        type: string
+                      resources:
+                        description: ResourceRequirements describes the compute resource
+                          requirements.
+                        properties:
+                          limits:
+                            additionalProperties:
+                              anyOf:
+                              - type: integer
+                              - type: string
+                              pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                              x-kubernetes-int-or-string: true
+                            description: 'Limits describes the maximum amount of compute
+                              resources allowed. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/'
+                            type: object
+                          requests:
+                            additionalProperties:
+                              anyOf:
+                              - type: integer
+                              - type: string
+                              pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                              x-kubernetes-int-or-string: true
+                            description: 'Requests describes the minimum amount of
+                              compute resources required. If Requests is omitted for
+                              a container, it defaults to Limits if that is explicitly
+                              specified, otherwise to an implementation-defined value.
+                              More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/'
+                            type: object
+                        type: object
                     type: object
-                  requests:
-                    additionalProperties:
-                      anyOf:
-                      - type: integer
-                      - type: string
-                      pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
-                      x-kubernetes-int-or-string: true
-                    description: 'Requests describes the minimum amount of compute
-                      resources required. If Requests is omitted for a container,
-                      it defaults to Limits if that is explicitly specified, otherwise
-                      to an implementation-defined value. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/'
+                  function:
+                    properties:
+                      profile:
+                        type: string
+                      resources:
+                        description: ResourceRequirements describes the compute resource
+                          requirements.
+                        properties:
+                          limits:
+                            additionalProperties:
+                              anyOf:
+                              - type: integer
+                              - type: string
+                              pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                              x-kubernetes-int-or-string: true
+                            description: 'Limits describes the maximum amount of compute
+                              resources allowed. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/'
+                            type: object
+                          requests:
+                            additionalProperties:
+                              anyOf:
+                              - type: integer
+                              - type: string
+                              pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                              x-kubernetes-int-or-string: true
+                            description: 'Requests describes the minimum amount of
+                              compute resources required. If Requests is omitted for
+                              a container, it defaults to Limits if that is explicitly
+                              specified, otherwise to an implementation-defined value.
+                              More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/'
+                            type: object
+                        type: object
                     type: object
                 type: object
               runtime:
                 description: Runtime enumerates runtimes that are currently supported
-                  by Function Controller It is a subset of RuntimeExtended
+                  by Function Controller. It is a subset of RuntimeExtended.
                 enum:
                 - nodejs12
                 - nodejs14
@@ -243,11 +259,61 @@ spec:
               runtimeImageOverride:
                 type: string
               source:
-                description: Source defines the source code of a function
-                type: string
-              type:
-                type: string
+                properties:
+                  gitRepository:
+                    properties:
+                      auth:
+                        description: Auth is the optional definition of authentication
+                          that should be used for repository operations
+                        properties:
+                          secretName:
+                            description: SecretName is the name of Kubernetes Secret
+                              containing credentials used for authentication
+                            type: string
+                          type:
+                            description: Type is the type of authentication
+                            enum:
+                            - basic
+                            - key
+                            type: string
+                        required:
+                        - secretName
+                        - type
+                        type: object
+                      baseDir:
+                        type: string
+                      reference:
+                        type: string
+                      url:
+                        description: URL is the address of GIT repository
+                        type: string
+                    required:
+                    - url
+                    type: object
+                  inline:
+                    properties:
+                      dependencies:
+                        type: string
+                      source:
+                        type: string
+                    required:
+                    - dependencies
+                    - source
+                    type: object
+                type: object
+              template:
+                properties:
+                  annotations:
+                    additionalProperties:
+                      type: string
+                    type: object
+                  labels:
+                    additionalProperties:
+                      type: string
+                    type: object
+                type: object
             required:
+            - runtime
             - source
             type: object
           status:
@@ -270,7 +336,7 @@ spec:
                     status:
                       type: string
                     type:
-                      description: ConditionType defines condition of function.
+                      description: 'TODO: Status related things needs to be developed.'
                       type: string
                   required:
                   - status
@@ -291,8 +357,6 @@ spec:
                 - python39
                 type: string
               runtimeImageOverride:
-                type: string
-              source:
                 type: string
             type: object
         type: object

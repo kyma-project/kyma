@@ -4,8 +4,9 @@ import (
 	"context"
 	"fmt"
 
-	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
 	corev1 "k8s.io/api/core/v1"
+
+	serverlessv1alpha2 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha2"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	apilabels "k8s.io/apimachinery/pkg/labels"
 )
@@ -68,11 +69,11 @@ func stateFnInlineCreateConfigMap(ctx context.Context, r *reconciler, s *systemS
 		return nil
 	}
 
-	currentCondition := serverlessv1alpha1.Condition{
-		Type:               serverlessv1alpha1.ConditionConfigurationReady,
+	currentCondition := serverlessv1alpha2.Condition{
+		Type:               serverlessv1alpha2.ConditionConfigurationReady,
 		Status:             corev1.ConditionTrue,
 		LastTransitionTime: metav1.Now(),
-		Reason:             serverlessv1alpha1.ConditionReasonConfigMapCreated,
+		Reason:             serverlessv1alpha2.ConditionReasonConfigMapCreated,
 		Message:            fmt.Sprintf("ConfigMap %s created", configMap.GetName()),
 	}
 
@@ -94,11 +95,11 @@ func stateFnInlineUpdateConfigMap(ctx context.Context, r *reconciler, s *systemS
 		return nil
 	}
 
-	condition := serverlessv1alpha1.Condition{
-		Type:               serverlessv1alpha1.ConditionConfigurationReady,
+	condition := serverlessv1alpha2.Condition{
+		Type:               serverlessv1alpha2.ConditionConfigurationReady,
 		Status:             corev1.ConditionTrue,
 		LastTransitionTime: metav1.Now(),
-		Reason:             serverlessv1alpha1.ConditionReasonConfigMapUpdated,
+		Reason:             serverlessv1alpha2.ConditionReasonConfigMapUpdated,
 		Message:            fmt.Sprintf("Updated ConfigMap: %q", cmName),
 	}
 

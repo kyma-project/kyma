@@ -4,9 +4,8 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha2"
 	"go.uber.org/zap"
-
-	"github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
 
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -62,7 +61,7 @@ func (r *secretService) UpdateNamespace(ctx context.Context, logger *zap.Sugared
 		logger.Error(err, fmt.Sprintf("Gathering existing Secret '%s/%s' failed", namespace, baseInstance.GetName()))
 		return err
 	}
-	if instance.Labels[v1alpha1.FunctionManagedByLabel] == v1alpha1.FunctionResourceLabelUserValue {
+	if instance.Labels[v1alpha2.FunctionManagedByLabel] == v1alpha2.FunctionResourceLabelUserValue {
 		return nil
 	}
 	return r.updateSecret(ctx, logger, instance, baseInstance)
@@ -138,7 +137,7 @@ func (r *secretService) deleteSecret(ctx context.Context, logger *zap.SugaredLog
 	if err := r.client.Get(ctx, client.ObjectKey{Namespace: namespace, Name: baseInstanceName}, instance); err != nil {
 		return client.IgnoreNotFound(err)
 	}
-	if instance.Labels[v1alpha1.FunctionManagedByLabel] == v1alpha1.FunctionResourceLabelUserValue {
+	if instance.Labels[v1alpha2.FunctionManagedByLabel] == v1alpha2.FunctionResourceLabelUserValue {
 		return nil
 	}
 	if err := r.client.Delete(ctx, instance); err != nil {

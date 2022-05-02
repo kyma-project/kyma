@@ -6,7 +6,7 @@ import (
 
 	"github.com/kyma-project/kyma/components/function-controller/internal/webhook"
 	"github.com/kyma-project/kyma/components/function-controller/internal/webhook/resources"
-	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
+	serverlessv1alpha2 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha2"
 
 	"github.com/go-logr/zapr"
 	"github.com/pkg/errors"
@@ -35,7 +35,7 @@ var (
 
 //nolint
 func init() {
-	_ = serverlessv1alpha1.AddToScheme(scheme)
+	_ = serverlessv1alpha2.AddToScheme(scheme)
 	_ = admissionregistrationv1.AddToScheme(scheme)
 	_ = corev1.AddToScheme(scheme)
 	// +kubebuilder:scaffold:scheme

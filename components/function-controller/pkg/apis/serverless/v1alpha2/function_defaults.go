@@ -1,4 +1,4 @@
-package v1alpha1
+package v1alpha2
 
 import (
 	"encoding/json"
@@ -87,24 +87,24 @@ func (spec *FunctionSpec) defaultReplicas(config *DefaultingConfig, fn *Function
 }
 
 func (spec *FunctionSpec) defaultFunctionResources(config *DefaultingConfig, fn *Function) {
-	resources := spec.Resources
+	resources := spec.ResourceConfiguration.Function.Resources
 	defaultingConfig := config.Function.Resources
 	resourcesPreset := mergeResourcesPreset(fn, FunctionResourcesPresetLabel, defaultingConfig.Presets, defaultingConfig.DefaultPreset, defaultingConfig.RuntimePresets)
 
-	spec.Resources = defaultResources(resources, resourcesPreset.RequestMemory, resourcesPreset.RequestCPU, resourcesPreset.LimitMemory, resourcesPreset.LimitCPU)
+	spec.ResourceConfiguration.Function.Resources = defaultResources(&resources, resourcesPreset.RequestMemory, resourcesPreset.RequestCPU, resourcesPreset.LimitMemory, resourcesPreset.LimitCPU)
 }
 
 func (spec *FunctionSpec) defaultBuildResources(config *DefaultingConfig, fn *Function) {
-	resources := spec.BuildResources
+	buildResourceCfg := spec.ResourceConfiguration.Build
 	// if build resources are not set by the user we don't default them.
 	// However, if only a part is set or the preset label is set, we should correctly set missing defaults.
 	if shouldSkipBuildResourcesDefault(fn) {
 		return
 	}
+
 	defaultingConfig := config.BuildJob.Resources
 	resourcesPreset := mergeResourcesPreset(fn, BuildResourcesPresetLabel, defaultingConfig.Presets, defaultingConfig.DefaultPreset, nil)
-
-	spec.BuildResources = defaultResources(resources, resourcesPreset.RequestMemory, resourcesPreset.RequestCPU, resourcesPreset.LimitMemory, resourcesPreset.LimitCPU)
+	spec.ResourceConfiguration.Build.Resources = defaultResources(&buildResourceCfg.Resources, resourcesPreset.RequestMemory, resourcesPreset.RequestCPU, resourcesPreset.LimitMemory, resourcesPreset.LimitCPU)
 }
 
 func (spec *FunctionSpec) defaultRuntime(config *DefaultingConfig) {
@@ -114,16 +114,16 @@ func (spec *FunctionSpec) defaultRuntime(config *DefaultingConfig) {
 }
 
 func shouldSkipBuildResourcesDefault(fn *Function) bool {
-	resources := fn.Spec.BuildResources
+	resourceCfg := fn.Spec.ResourceConfiguration.Build
 	_, hasPresetLabel := fn.Labels[BuildResourcesPresetLabel]
 
-	if resources.Limits == nil && resources.Requests == nil && !hasPresetLabel {
+	if resourceCfg.Resources.Limits == nil && resourceCfg.Resources.Requests == nil && !hasPresetLabel {
 		return true
 	}
 	return false
 }
 
-func defaultResources(res corev1.ResourceRequirements, requestMemory, requestCPU, limitMemory, limitCPU string) corev1.ResourceRequirements {
+func defaultResources(res *corev1.ResourceRequirements, requestMemory, requestCPU, limitMemory, limitCPU string) corev1.ResourceRequirements {
 	copiedRes := res.DeepCopy()
 
 	if copiedRes.Requests == nil {

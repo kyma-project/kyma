@@ -5,10 +5,9 @@ import (
 	"errors"
 	"testing"
 
-	"go.uber.org/zap"
-
-	"github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
+	"github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha2"
 	"github.com/stretchr/testify/require"
+	"go.uber.org/zap"
 	ctrl "sigs.k8s.io/controller-runtime"
 )
 
@@ -87,7 +86,7 @@ func Test_reconciler_reconcile(t *testing.T) {
 
 			m.log.Info("starting...")
 
-			got, err := m.reconcile(ctx, v1alpha1.Function{})
+			got, err := m.reconcile(ctx, v1alpha2.Function{})
 
 			m.log.Info("done")
 

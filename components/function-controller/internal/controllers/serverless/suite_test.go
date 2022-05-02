@@ -11,7 +11,7 @@ import (
 	"github.com/kyma-project/kyma/components/function-controller/internal/controllers/kubernetes"
 
 	"github.com/kyma-project/kyma/components/function-controller/internal/resource"
-	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
+	serverlessv1alpha2 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha2"
 	"github.com/onsi/gomega"
 	"github.com/vrischmann/envconfig"
 	"k8s.io/client-go/kubernetes/scheme"
@@ -37,7 +37,7 @@ func setUpTestEnv(g *gomega.GomegaWithT) (cl resource.Client, env *envtest.Envir
 	err = scheme.AddToScheme(scheme.Scheme)
 	g.Expect(err).NotTo(gomega.HaveOccurred())
 
-	err = serverlessv1alpha1.AddToScheme(scheme.Scheme)
+	err = serverlessv1alpha2.AddToScheme(scheme.Scheme)
 	g.Expect(err).NotTo(gomega.HaveOccurred())
 
 	k8sClient, err := client.New(cfg, client.Options{Scheme: scheme.Scheme})
@@ -79,7 +79,7 @@ func initializeServerlessResources(g *gomega.GomegaWithT, client resource.Client
 	g.Expect(client.Create(context.TODO(), &dockerRegistryConfiguration)).To(gomega.Succeed())
 }
 
-func createDockerfileForRuntime(g *gomega.GomegaWithT, client resource.Client, rtm serverlessv1alpha1.Runtime) {
+func createDockerfileForRuntime(g *gomega.GomegaWithT, client resource.Client, rtm serverlessv1alpha2.Runtime) {
 	runtimeDockerfileConfigMap := corev1.ConfigMap{
 		ObjectMeta: metav1.ObjectMeta{
 			Name: fmt.Sprintf("dockerfile-%s", string(rtm)),

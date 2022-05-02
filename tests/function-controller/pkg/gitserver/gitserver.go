@@ -203,7 +203,7 @@ func (gs *GitServer) LogResource() error {
 		return errors.Wrap(err, "while getting service")
 	}
 	// The client doesn't fill service TypeMeta
-	svc.TypeMeta.Kind = "service"
+	svc.Kind = "service"
 	out, err := helpers.PrettyMarshall(svc)
 	if err != nil {
 		return errors.Wrap(err, "while marshalling service")
@@ -215,7 +215,7 @@ func (gs *GitServer) LogResource() error {
 		return errors.Wrap(err, "while getting deployment")
 	}
 	// The client doesn't fill deployment TypeMeta
-	deployment.TypeMeta.Kind = "deployment"
+	deployment.Kind = "deployment"
 	out, err = helpers.PrettyMarshall(deployment)
 	if err != nil {
 		return errors.Wrap(err, "while marshalling deployment")

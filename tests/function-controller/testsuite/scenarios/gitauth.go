@@ -9,9 +9,8 @@ import (
 
 	"github.com/vrischmann/envconfig"
 
-	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
+	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha2"
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/function"
-	"github.com/kyma-project/kyma/tests/function-controller/pkg/gitrepository"
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/poller"
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/secret"
 	"github.com/kyma-project/kyma/tests/function-controller/pkg/shared"
@@ -147,14 +146,6 @@ func gitAuthFunctionTestSteps(genericContainer shared.Container, tr testRepo, po
 			secret,
 			fmt.Sprintf("Create %s Auth Secret", tr.provider),
 			tr.secretData),
-		teststep.NewCreateGitRepository(
-			genericContainer.Log,
-			gitrepository.New(fmt.Sprintf("%s-repo", tr.name), genericContainer),
-			fmt.Sprintf("Create GitRepository for %s", tr.provider),
-			gitops.AuthRepositorySpecWithURL(
-				tr.url,
-				tr.auth,
-			)),
 		teststep.CreateFunction(
 			genericContainer.Log,
 			function.NewFunction(tr.name, genericContainer),
@@ -194,7 +185,7 @@ func getAzureDevopsTestcase(cfg *config) testRepo {
 		baseDir:          cfg.Azure.BaseDir,
 		reference:        cfg.Azure.Reference,
 		expectedResponse: "Hello azure",
-		runtime:          serverlessv1alpha1.Nodejs14,
+		runtime:          serverlessv1alpha1.NodeJs14,
 		auth: &serverlessv1alpha1.RepositoryAuth{
 			Type:       serverlessv1alpha1.RepositoryAuthBasic,
 			SecretName: "azure-devops-auth-secret",

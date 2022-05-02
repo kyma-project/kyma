@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
+	serverlessv1alpha2 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha2"
 	autoscalingv1 "k8s.io/api/autoscaling/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -60,11 +60,11 @@ func buildStateFnCreateHorizontalPodAutoscaler(hpa autoscalingv1.HorizontalPodAu
 			return nil
 		}
 
-		condition := serverlessv1alpha1.Condition{
-			Type:               serverlessv1alpha1.ConditionRunning,
+		condition := serverlessv1alpha2.Condition{
+			Type:               serverlessv1alpha2.ConditionRunning,
 			Status:             corev1.ConditionUnknown,
 			LastTransitionTime: metav1.Now(),
-			Reason:             serverlessv1alpha1.ConditionReasonHorizontalPodAutoscalerCreated,
+			Reason:             serverlessv1alpha2.ConditionReasonHorizontalPodAutoscalerCreated,
 			Message:            fmt.Sprintf("HorizontalPodAutoscaler %s created", hpa.GetName()),
 		}
 
@@ -100,11 +100,11 @@ func buildStateFnUpdateHorizontalPodAutoscaler(expectd autoscalingv1.HorizontalP
 			return nil
 		}
 
-		condition := serverlessv1alpha1.Condition{
-			Type:               serverlessv1alpha1.ConditionRunning,
+		condition := serverlessv1alpha2.Condition{
+			Type:               serverlessv1alpha2.ConditionRunning,
 			Status:             corev1.ConditionUnknown,
 			LastTransitionTime: metav1.Now(),
-			Reason:             serverlessv1alpha1.ConditionReasonHorizontalPodAutoscalerUpdated,
+			Reason:             serverlessv1alpha2.ConditionReasonHorizontalPodAutoscalerUpdated,
 			Message:            fmt.Sprintf("HorizontalPodAutoscaler %s updated", hpaName),
 		}
 

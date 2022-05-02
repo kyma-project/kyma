@@ -5,7 +5,7 @@ APP_NAME = function-controller
 APP_PATH = components/$(APP_NAME)
 SCRIPTS_DIR = $(realpath $(shell pwd)/../..)/common/makefiles
 
-override VERIFY_IGNORE := /vendor\|/automock\|/pkg/apis/serverless/v1alpha1/zz_generated.deepcopy.go
+override VERIFY_IGNORE := /vendor\|/automock\|/pkg/apis/serverless/v1alpha2/zz_generated.deepcopy.go
 
 include $(SCRIPTS_DIR)/generic-make-go.mk
 
@@ -29,7 +29,7 @@ test-local: export KUBEBUILDER_CONTROLPLANE_START_TIMEOUT = 2m
 test-local: export KUBEBUILDER_CONTROLPLANE_STOP_TIMEOUT = 2m
 test-local:
 	mkdir -p /tmp/artifacts
-	go test -race -coverprofile=/tmp/artifacts/cover.out ./...
+	go test -count=1 -race -coverprofile=/tmp/artifacts/cover.out ./...
 	@echo -n "Total coverage: "
 	@go tool cover -func=/tmp/artifacts/cover.out | grep total | awk '{print $$3}'
 
