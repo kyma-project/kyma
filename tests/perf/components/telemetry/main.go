@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"context"
 	"flag"
 	"fmt"
 	"io"
@@ -9,6 +10,11 @@ import (
 	"path/filepath"
 	"text/template"
 
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+	"k8s.io/apimachinery/pkg/runtime/schema"
+	"k8s.io/apimachinery/pkg/util/yaml"
+	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/tools/clientcmd"
 	"k8s.io/client-go/util/homedir"
 )
@@ -44,32 +50,35 @@ func main() {
 }
 
 func run(out io.Writer, f flags) error {
-	// use the current context in kubeconfig
 	config, err := clientcmd.BuildConfigFromFlags("", *f.kubeconfig)
 	if err != nil {
 		return err
 	}
 
-	// create the clientset
-	// clientset, err := dynamic.NewForConfig(config)
-	// if err != nil {
-	// 	return err
-	// }
-
-	logPipeline, err := renderHttpLogPipeline(f.count)
+	dynamicClient, err := dynamic.NewForConfig(config)
 	if err != nil {
 		return err
 	}
 
-	// obj, gvk, err := scheme.Codecs.UniversalDeserializer().Decode(logPipeline, nil, nil)
-	// logPipelineRes := schema.GroupVersionResource{Group: "telemetry.kyma-project.io", Version: "v1alpha1", Resource: "LogPipeline"}
+	logPipelineYAML, err := renderHttpLogPipeline(f.count)
+	if err != nil {
+		return err
+	}
 
-	// fmt.Println("Creating deployment...")
-	// result, err := clientset.Resource(logPipelineRes).Create(context.TODO(), obj, metav1.CreateOptions{})
-	// if err != nil {
-	// 	panic(err)
-	// }
-	// fmt.Printf("Created deployment %q.\n", result.GetName())
+	var logPipeline map[string]interface{}
+	if err := yaml.Unmarshal(logPipelineYAML, &logPipeline); err != nil {
+		return err
+	}
+
+	gvr := schema.GroupVersionResource{Group: "telemetry.kyma-project.io", Version: "v1alpha1", Resource: "logpipelines"}
+	obj := unstructured.Unstructured{Object: logPipeline}
+
+	fmt.Println("Creating log pipeline...")
+	result, err := dynamicClient.Resource(gvr).Create(context.TODO(), &obj, metav1.CreateOptions{})
+	if err != nil {
+		return err
+	}
+	fmt.Printf("Created log piepline %q.\n", result.GetName())
 
 	return nil
 }
