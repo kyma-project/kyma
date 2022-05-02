@@ -5,11 +5,8 @@ metadata:
 spec:
   accessLabel: commerce
   description: Commerce mock
-  displayName: ""
   labels:
     override.deployment.args.skipVerify: "true"
-  longDescription: ""
-  providerDisplayName: ""
   services:
   - description: These services manage all of the common commerce functionality, and
       also include customizations from installed AddOns. The implementing extension
@@ -18,18 +15,13 @@ spec:
     entries:
     - accessLabel: commerce-468ed067-dacb-4009-a9d5-497e3d2333c8
       centralGatewayUrl: http://central-application-gateway.kyma-system:8080/commerce/sap-commerce-cloud-commerce-webservices
-      credentials: # TODO: Internal or templating URLs
+      credentials:
         authenticationUrl: http://commerce-mock.mocks.svc.cluster.local:10000/rest/v2/authorizationserver/oauth/token
         secretName: commerce-468ed067-dacb-4009-a9d5-497e3d2333c8
         type: OAuth
-      gatewayUrl: http://commerce-468ed067-dacb-4009-a9d5-497e3d2333c8.kyma-integration.svc.cluster.local
-      id: ""
-      name: ""
-      specificationUrl: http://commerce-mock.mocks.svc.cluster.local:10000/rest/v2/metadata
       targetUrl: http://commerce-mock.mocks.svc.cluster.local:10000/rest/v2
       type: API
     id: 468ed067-dacb-4009-a9d5-497e3d2333c8
-    identifier: ""
     labels:
       connected-app: commerce
     longDescription: These services manage all of the common commerce functionality,
@@ -40,17 +32,8 @@ spec:
   - description: Set of events emitted typically by SAP Commerce Cloud
     displayName: SAP Commerce Cloud - Events
     entries:
-    - centralGatewayUrl: ""
-      credentials:
-        secretName: ""
-        type: ""
-      gatewayUrl: ""
-      id: ""
-      name: ""
-      targetUrl: ""
-      type: Events
+    - type: Events
     id: 6fe4ad26-ea6f-4c57-affe-b2e866b66db3
-    identifier: ""
     labels:
       connected-app: commerce
     longDescription: Set of events emitted typically by SAP Commerce Cloud
@@ -69,5 +52,4 @@ metadata:
   labels:
     app: commerce
   name: commerce-468ed067-dacb-4009-a9d5-497e3d2333c8
-  namespace: kyma-integration
 type: Opaque
