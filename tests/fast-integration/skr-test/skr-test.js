@@ -152,7 +152,7 @@ function commerceMockTest() {
       });
 
       it('Unexpose Grafana', async function() {
-        await unexposeGrafana();
+        await unexposeGrafana(true);
       });
     }
   });

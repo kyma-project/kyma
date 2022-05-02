@@ -21,8 +21,8 @@ describe('Execute SKR test', function() {
       console.log(`Provision SKR with instance ID ${this.options.instanceID}`);
       const customParams = {
         oidc: this.options.oidc0,
-        kymaVersion: 'PR-14103',
-        overridesVersion: '2.1',
+        kymaVersion: 'PR-14116',
+        overridesVersion: '2.1.3',
       };
       const skr = await provisionSKR(keb, kcp, gardener,
           this.options.instanceID,
