@@ -7,7 +7,8 @@ const {
   ensureCommerceMockWithCompassTestFixture,
   checkFunctionResponse,
   sendLegacyEventAndCheckResponse,
-  deleteMockTestFixture,
+  deleteMockTestFixture, sendCloudEventStructuredModeAndCheckResponse, sendCloudEventBinaryModeAndCheckResponse,
+  checkInClusterEventDelivery,
 } = require('../test/fixtures/commerce-mock');
 const {
   ensureKymaAdminBindingExistsForUser,
@@ -124,12 +125,24 @@ function commerceMockTest() {
       );
     });
 
+    it('in-cluster event should be delivered (structured and binary mode)', async function() {
+      await checkInClusterEventDelivery(this.options.testNS);
+    });
+
     it('function should be reachable through secured API Rule', async function() {
       await checkFunctionResponse(this.options.testNS);
     });
 
     it('order.created.v1 legacy event should trigger the lastorder function', async function() {
       await sendLegacyEventAndCheckResponse();
+    });
+
+    it('order.created.v1 cloud event in structured mode should trigger the lastorder function', async function() {
+      await sendCloudEventStructuredModeAndCheckResponse();
+    });
+
+    it('order.created.v1 cloud event in binary mode should trigger the lastorder function', async function() {
+      await sendCloudEventBinaryModeAndCheckResponse();
     });
 
     it('Deletes the resources that have been created', async function() {
@@ -141,7 +154,7 @@ function commerceMockTest() {
       const auditlogs = new AuditLogClient(AuditLogCreds.fromEnv());
 
       it('Check audit logs', async function() {
-        await checkAuditLogs(auditlogs, null, true);
+        await checkAuditLogs(auditlogs, null);
       });
 
       it('Expose Grafana', async function() {

@@ -178,6 +178,13 @@ function shouldIgnoreTarget(target) {
 }
 
 function shouldIgnoreAlert(alert) {
+  // List of critical alerts we care about but which we have to ignore due to Workarounds
+  const criticalAlertNamesToIgnore = [
+    // Sometimes the Gardener API Server has an expiring Cert Warning shortly before Rotation
+    // which causes the alert to fire as false positive
+    'K8sCertificateExpirationNotice',
+  ];
+
   // List of alerts that we don't care about and should be filtered
   const alertNamesToIgnore = [
     // Watchdog is an alert meant to ensure functioning of the entire alerting pipeline
@@ -189,7 +196,13 @@ function shouldIgnoreAlert(alert) {
     'KubeMemoryOvercommit',
   ];
 
-  return alert.labels.severity !== 'critical' || alertNamesToIgnore.includes(alert.labels.alertname);
+  const ignoreCriticalAlert = criticalAlertNamesToIgnore.includes(alert.labels.alertname);
+
+  const ignoreAlert =
+    alert.labels.severity !== 'critical' ||
+    alertNamesToIgnore.includes(alert.labels.alertname);
+
+  return ignoreCriticalAlert || ignoreAlert;
 }
 
 async function getServiceMonitors() {

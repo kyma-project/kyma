@@ -3,9 +3,8 @@ const {provisionSKR, deprovisionSKR, KEBClient, KEBConfig} = require('../kyma-en
 const {unregisterKymaFromCompass, addScenarioInCompass, assignRuntimeToScenario} = require('../compass');
 const {oidcE2ETest, commerceMockTest} = require('./skr-test');
 const {KCPWrapper, KCPConfig} = require('../kcp/client');
-const t = require('../skr-svcat-migration-test/test-helpers');
 const {keb, director} = require('./helpers');
-const {initializeK8sClient} = require('../utils');
+const {initializeK8sClient, debug} = require('../utils');
 const {
   GardenerConfig,
   GardenerClient,
@@ -13,10 +12,13 @@ const {
 const {
   genRandom,
 } = require('../utils');
+const s = require('../smctl/helpers');
 
 const kcp = new KCPWrapper(KCPConfig.fromEnv());
 
 describe('Execute SKR test', function() {
+  debug.enabled = true;
+
   this.timeout(60 * 60 * 1000 * 3); // 3h
   this.slow(5000);
 
@@ -28,24 +30,20 @@ describe('Execute SKR test', function() {
 
       const keb = new KEBClient(KEBConfig.fromEnv());
       const gardener = new GardenerClient(GardenerConfig.fromEnv());
-      const smAdminCreds = t.SMCreds.fromEnv();
+      const smAdminCreds = s.SMCreds.fromEnv();
 
 
       const suffix = genRandom(4);
       const runtimeName = `kyma-${suffix}`;
-      const appName = `app-${suffix}`;
+      this.options.appName = `app-${suffix}`;
 
       const btpOperatorInstance = `btp-operator-${suffix}`;
       const btpOperatorBinding = `btp-operator-binding-${suffix}`;
 
-      const btpOperatorCreds = await t.smInstanceBinding(smAdminCreds, btpOperatorInstance, btpOperatorBinding);
-
-      const customParams = {
-        oidc: this.options.oidc0,
-      };
+      const btpOperatorCreds = await s.smInstanceBinding(smAdminCreds, btpOperatorInstance, btpOperatorBinding);
 
       console.log(`\nInstanceID ${this.options.instanceID}`,
-          `Runtime ${runtimeName}`, `Application ${appName}`, `Suffix ${suffix}`);
+          `Runtime ${runtimeName}`, `Application ${this.options.appName}`, `Suffix ${suffix}`);
 
       const skr = await provisionSKR(keb,
           kcp, gardener,
@@ -53,13 +51,10 @@ describe('Execute SKR test', function() {
           runtimeName,
           null,
           btpOperatorCreds,
-          customParams,
+          null,
           provisioningTimeout);
+
       this.shoot = skr.shoot;
-
-      const runtimeStatus = await kcp.getRuntimeStatusOperations(this.options.instanceID);
-      console.log(`\nRuntime status after provisioning: ${runtimeStatus}`);
-
       await addScenarioInCompass(director, this.options.scenarioName);
       await assignRuntimeToScenario(director, this.shoot.compassID, this.options.scenarioName);
       initializeK8sClient({kubeconfig: this.shoot.kubeconfig});
@@ -67,6 +62,7 @@ describe('Execute SKR test', function() {
       throw new Error(`before hook failed: ${e.toString()}`);
     } finally {
       const runtimeStatus = await kcp.getRuntimeStatusOperations(this.options.instanceID);
+      console.log(`\nRuntime status after provisioning: ${runtimeStatus}`);
       await kcp.reconcileInformationLog(runtimeStatus);
     }
   });

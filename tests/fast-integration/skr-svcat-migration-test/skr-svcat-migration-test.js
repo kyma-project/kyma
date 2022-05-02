@@ -21,13 +21,14 @@ const {
 const t = require('./test-helpers');
 const sampleResources = require('./deploy-sample-resources');
 const {KCPWrapper, KCPConfig} = require('../kcp/client');
+const s = require('../smctl/helpers');
 
 const kcp = new KCPWrapper(KCPConfig.fromEnv());
 
 describe('SKR SVCAT migration test', function() {
   const keb = new KEBClient(KEBConfig.fromEnv());
   const gardener = new GardenerClient(GardenerConfig.fromEnv());
-  const smAdminCreds = t.SMCreds.fromEnv();
+  const smAdminCreds = s.SMCreds.fromEnv();
 
   const suffix = genRandom(4);
   const appName = `app-${suffix}`;
@@ -49,12 +50,12 @@ describe('SKR SVCAT migration test', function() {
 
   let platformCreds;
   it('Should provision new ServiceManager platform', async function() {
-    platformCreds = await t.provisionPlatform(smAdminCreds, svcatPlatform);
+    platformCreds = await s.provisionPlatform(smAdminCreds, svcatPlatform);
   });
 
   let btpOperatorCreds;
   it('Should instantiate ServiceManager instance and binding for BTP operator', async function() {
-    btpOperatorCreds = await t.smInstanceBinding(smAdminCreds, btpOperatorInstance, btpOperatorBinding);
+    btpOperatorCreds = await s.smInstanceBinding(smAdminCreds, btpOperatorInstance, btpOperatorBinding);
   });
 
   let skr;
@@ -108,7 +109,7 @@ describe('SKR SVCAT migration test', function() {
   });
 
   it('Should mark the platform for migration in Service Manager', async function() {
-    await t.markForMigration(smAdminCreds, platformCreds.clusterId, btpOperatorCreds.instanceId);
+    await s.markForMigration(smAdminCreds, platformCreds.clusterId, btpOperatorCreds.instanceId);
   });
 
   it('Should update SKR with BTP Operator Credentials', async function() {
@@ -163,6 +164,6 @@ describe('SKR SVCAT migration test', function() {
   });
 
   it('Should cleanup platform --cascade, operator instances and bindings', async function() {
-    await t.cleanupInstanceBinding(smAdminCreds, svcatPlatform, btpOperatorInstance, btpOperatorBinding);
+    await s.cleanupInstanceBinding(smAdminCreds, svcatPlatform, btpOperatorInstance, btpOperatorBinding);
   });
 });
