@@ -1,10 +1,10 @@
 ---
-title: jetstream backend troubleshooting
+title: JetStream backend troubleshooting
 ---
 
 ## Symptom
 
-Events were not received by the consumers
+Events were not received by the consumers.
 
 ## Remedy
 

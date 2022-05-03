@@ -2,15 +2,15 @@
 title: Introduction to JetStream
 ---
 
-JetStream is the "built-in distributed persistence system" of NATS. You can read more about it [here](../../05-technical-reference/00-architecture/evnt-01-architecture.md#jet-stream).
+JetStream is the 'built-in distributed persistence system' of NATS. You can read more about it [here](../../05-technical-reference/00-architecture/evnt-01-architecture.md#jet-stream).
 
-### Streams and Consumers
+## Streams and Consumers
 
-A `Stream` is a "message store" for the events published. In Kyma, we use only one stream for all the events. You can configure the retention and delivery policies of the streams, based on the use-case.
+A `Stream` is a 'message store' for the events published. In Kyma, we use only one stream for all the events. You can configure the retention and delivery policies for the stream, based on the use-case.
 
-A `Consumer` is a 'view' into the stream. A kyma subscription creates a consumer for each filter specified. In Kyma we use push based consumers.
+A `Consumer` is a 'view' into the stream. A kyma subscription creates one consumer for each filter specified. In Kyma we use push based consumers.
 
-### Steps to verify at least once delivery with JetStream backend
+## Steps to verify at least once delivery with JetStream backend
 
 1. Create a [Function](../../02-get-started/04-trigger-workload-with-event.md#create-a-function), [Subscription](../../02-get-started/04-trigger-workload-with-event.md#create-a-subscription) and [trigger the workload with an event](../../02-get-started/04-trigger-workload-with-event.md#trigger-the-workload-with-an-event).
 
