@@ -2,7 +2,7 @@
 title: Introduction to JetStream
 ---
 
-JetStream is the 'built-in distributed persistence system' of NATS. You can read more about it [here](../../05-technical-reference/00-architecture/evnt-01-architecture.md#jet-stream).
+JetStream is the 'built-in distributed persistence system' of NATS. You can read more about it [here](../../05-technical-reference/00-architecture/evnt-01-architecture.md#jetstream).
 
 ## Streams and Consumers
 
