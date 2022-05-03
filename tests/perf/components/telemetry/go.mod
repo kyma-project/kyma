@@ -2,7 +2,9 @@ module github.com/kyma-project/kyma/tests/perf/components/telemetry-perf
 
 go 1.17
 
-require k8s.io/client-go v0.23.6
+require k8s.io/client-go v0.22.2
+
+require sigs.k8s.io/controller-runtime v0.10.3 // indirect
 
 require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
@@ -13,6 +15,7 @@ require (
 	github.com/google/gofuzz v1.1.0 // indirect
 	github.com/imdario/mergo v0.3.12 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
+	github.com/kyma-project/kyma/components/telemetry-operator v0.0.0-20220503090526-e024cf8b037c
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect

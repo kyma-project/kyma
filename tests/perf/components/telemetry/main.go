@@ -15,9 +15,12 @@ import (
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/util/yaml"
 	"k8s.io/client-go/dynamic"
-	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
 	"k8s.io/client-go/util/homedir"
+)
+
+var (
+	logPipelineGVR = schema.GroupVersionResource{Group: "telemetry.kyma-project.io", Version: "v1alpha1", Resource: "logpipelines"}
 )
 
 type flags struct {
@@ -59,12 +62,21 @@ func run(f flags) error {
 		return err
 	}
 
+	dynamicClient, err := dynamic.NewForConfig(config)
+	if err != nil {
+		return err
+	}
+
 	for i := 0; i < f.count; i++ {
 		logPipelineYAML, err := renderHTTPLogPipeline(i)
 		if err != nil {
 			return err
 		}
-		if err := createLogPipeline(config, logPipelineYAML); err != nil {
+		name, err := createLogPipeline(dynamicClient, logPipelineYAML)
+		if err != nil {
+			return err
+		}
+		if err := waitForLogPipelineRunning(dynamicClient, name); err != nil {
 			return err
 		}
 	}
@@ -77,8 +89,8 @@ func renderHTTPLogPipeline(count int) ([]byte, error) {
 	values := httpLogPipeline{
 		Name:         fmt.Sprintf("http-%d", count),
 		Tag:          randomTag(),
-		Host:         "foo",
-		StorageLimit: "5M",
+		Host:         "mockserver.mockserver:1080",
+		StorageLimit: "128M",
 	}
 	httpTempl := template.Must(template.ParseFiles("./assets/http.yml"))
 	err := httpTempl.Execute(&rendered, values)
@@ -99,28 +111,62 @@ func randomTag() string {
 	return string(chars)
 }
 
-func createLogPipeline(config *rest.Config, logPipelineYAML []byte) error {
-	dynamicClient, err := dynamic.NewForConfig(config)
-	if err != nil {
-		return err
-	}
-
+func createLogPipeline(dynamicClient dynamic.Interface, logPipelineYAML []byte) (string, error) {
 	var logPipeline map[string]interface{}
 	if err := yaml.Unmarshal(logPipelineYAML, &logPipeline); err != nil {
-		return err
+		return "", err
 	}
-
-	gvr := schema.GroupVersionResource{Group: "telemetry.kyma-project.io", Version: "v1alpha1", Resource: "logpipelines"}
-	obj := unstructured.Unstructured{Object: logPipeline}
 
 	fmt.Println("Creating a log pipeline...")
 
-	result, err := dynamicClient.Resource(gvr).Create(context.TODO(), &obj, metav1.CreateOptions{})
+	result, err := dynamicClient.Resource(logPipelineGVR).Create(context.TODO(),
+		&unstructured.Unstructured{Object: logPipeline},
+		metav1.CreateOptions{})
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	fmt.Println("Created a log pipeline ", result.GetName())
 
+	return result.GetName(), nil
+}
+
+func waitForLogPipelineRunning(dynamicClient dynamic.Interface, name string) error {
+	watch, err := dynamicClient.Resource(logPipelineGVR).Watch(context.TODO(),
+		metav1.ListOptions{FieldSelector: fmt.Sprintf("metadata.name=%s", name)})
+	if err != nil {
+		return err
+	}
+
+	for event := range watch.ResultChan() {
+		running, err := isLogPipelineRunning(event.Object.(*unstructured.Unstructured))
+		if err != nil {
+			return err
+		}
+
+		fmt.Printf("Status: %v\n", running)
+	}
+
 	return nil
+}
+
+func isLogPipelineRunning(logPipeline *unstructured.Unstructured) (bool, error) {
+	status, _, err := unstructured.NestedMap(logPipeline.Object, "status")
+	if err != nil {
+		return false, err
+	}
+
+	conditions, _, err := unstructured.NestedSlice(status, "conditions")
+	if err != nil {
+		return false, err
+	}
+
+	for _, cond := range conditions {
+		condType := cond.(map[string]interface{})["type"]
+		if condType == "Running" {
+			return true, nil
+		}
+	}
+
+	return false, nil
 }

@@ -18,7 +18,7 @@ spec:
         Alias              mock-output
         Match              {{ .Tag }}
         Retry_Limit        False
-        Host               {{ .Host }}  #mockserver.mockserver
+        Host               {{ .Host }}
         Port               1080
         URI                /
         Header             Content-Type application/json
