@@ -89,7 +89,7 @@ func renderHTTPLogPipeline(count int) ([]byte, error) {
 	values := httpLogPipeline{
 		Name:         fmt.Sprintf("http-%d", count),
 		Tag:          randomTag(),
-		Host:         "mockserver.mockserver:1080",
+		Host:         "mockserver.mockserver",
 		StorageLimit: "128M",
 	}
 	httpTempl := template.Must(template.ParseFiles("./assets/http.yml"))
