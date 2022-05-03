@@ -25,13 +25,19 @@ type cloner interface {
 	git2goClone(url, outputPath string, remoteCallbacks git2go.RemoteCallbacks) (*git2go.Repository, error)
 }
 
+type fetcher interface {
+	git2goFetch(url, outputPath string, remoteCallbacks git2go.RemoteCallbacks) (*git2go.Repository, error)
+}
+
 type Git2GoClient struct {
 	cloner
+	fetcher
 }
 
 func NewGit2Go() *Git2GoClient {
 	return &Git2GoClient{
-		cloner: &git2goCloner{},
+		cloner:  &git2goCloner{},
+		fetcher: &git2goFetcher{},
 	}
 }
 
@@ -48,10 +54,11 @@ func (g *Git2GoClient) LastCommit(options Options) (string, error) {
 	}
 	defer removeDir(tmpPath)
 
-	repo, err := g.cloneRepo(options, tmpPath)
+	repo, err := g.fetchRepo(options, tmpPath)
 	if err != nil {
-		return "", errors.Wrap(err, "while cloning the repository")
+		return "", errors.Wrap(err, "while fetching repo")
 	}
+	defer repo.Free()
 
 	//branch
 	ref, err := g.lookupBranch(repo, options.Reference)
@@ -61,7 +68,6 @@ func (g *Git2GoClient) LastCommit(options Options) (string, error) {
 	if !git2go.IsErrorCode(err, git2go.ErrNotFound) {
 		return "", errors.Wrap(err, "while lookup branch")
 	}
-
 	//tag
 	commit, err := g.lookupTag(repo, options.Reference)
 	if err != nil {
@@ -105,6 +111,13 @@ func (g *Git2GoClient) cloneRepo(opts Options, path string) (*git2go.Repository,
 		return nil, errors.Wrap(err, "while getting authentication opts")
 	}
 	return g.cloner.git2goClone(opts.URL, path, authCallbacks)
+}
+func (g *Git2GoClient) fetchRepo(opts Options, path string) (*git2go.Repository, error) {
+	authCallbacks, err := GetAuth(opts.Auth)
+	if err != nil {
+		return nil, errors.Wrap(err, "while getting authentication opts")
+	}
+	return g.fetcher.git2goFetch(opts.URL, path, authCallbacks)
 }
 
 func (g *Git2GoClient) lookupBranch(repo *git2go.Repository, branchName string) (*git2go.Reference, error) {
