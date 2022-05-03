@@ -25,6 +25,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/fluentbit"
+
 	fluentbitmocks "github.com/kyma-project/kyma/components/telemetry-operator/internal/fluentbit/mocks"
 	fsmocks "github.com/kyma-project/kyma/components/telemetry-operator/internal/fs/mocks"
 	"k8s.io/client-go/kubernetes/scheme"
@@ -104,12 +106,14 @@ var _ = BeforeSuite(func() {
 	Expect(err).NotTo(HaveOccurred())
 
 	configValidatorMock = &fluentbitmocks.ConfigValidator{}
+	pluginValidator := fluentbit.NewPluginValidator([]string{}, []string{})
 	fsWrapperMock = &fsmocks.Wrapper{}
 	logPipelineValidator := NewLogPipeLineValidator(
 		mgr.GetClient(),
 		FluentBitConfigMapName,
 		ControllerNamespace,
 		configValidatorMock,
+		pluginValidator,
 		fsWrapperMock,
 	)
 
