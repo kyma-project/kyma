@@ -4,7 +4,7 @@ const {unregisterKymaFromCompass, addScenarioInCompass, assignRuntimeToScenario}
 const {oidcE2ETest, commerceMockTest} = require('./skr-test');
 const {KCPWrapper, KCPConfig} = require('../kcp/client');
 const {keb, director} = require('./helpers');
-const {initializeK8sClient, debug} = require('../utils');
+const {initializeK8sClient} = require('../utils');
 const {
   GardenerConfig,
   GardenerClient,
