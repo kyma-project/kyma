@@ -19,7 +19,7 @@ type RepositoryAuthType string
 
 const (
 	RepositoryAuthBasic  RepositoryAuthType = "basic"
-	RepositoryAuthSSHKey                    = "key"
+	RepositoryAuthSSHKey RepositoryAuthType = "key"
 )
 
 type AuthOptions struct {
