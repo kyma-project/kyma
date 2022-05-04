@@ -47,6 +47,9 @@ describe('Execute SKR test',  async function () {
   for (let i = 0; i < N; i++) {
     describe(`Loop ${i + 1}`, function () {
       before("Add scenario and assign runtime", async function () {
+        const version = await kcp.version([]);
+        console.log(version);
+
         this.options = gatherOptions(
             withInstanceID(this.options.instanceID),
         );
