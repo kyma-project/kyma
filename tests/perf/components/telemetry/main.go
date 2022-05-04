@@ -85,14 +85,14 @@ func run(f flags) error {
 
 	portForwardToPrometheus(config)
 	time.Sleep(1 * time.Second)
-	queryCPU := `sum(
-		node_namespace_pod_container:container_cpu_usage_seconds_total:sum_irate{cluster="", namespace="kyma-system"}
+	queryCPU := `avg(
+		node_namespace_pod_container:container_cpu_usage_seconds_total:sum_irate{cluster="", namespace="kyma-system", container="fluent-bit"}
 	  * on(namespace,pod)
 		group_left(workload, workload_type) namespace_workload_pod:kube_pod_owner:relabel{cluster="", namespace="kyma-system", workload_type="daemonset", workload="telemetry-fluent-bit"}
 	  ) by (workload, workload_type)`
 
-	queryMemory := `sum(
-		container_memory_working_set_bytes{job="kubelet", metrics_path="/metrics/cadvisor", cluster="", namespace="kyma-system", container!="", image!=""}
+	queryMemory := `avg(
+		container_memory_working_set_bytes{job="kubelet", metrics_path="/metrics/cadvisor", cluster="", namespace="kyma-system", container="fluent-bit", image!=""}
 	  * on(namespace,pod)
 		group_left(workload, workload_type) namespace_workload_pod:kube_pod_owner:relabel{cluster="", namespace="kyma-system", workload_type="daemonset", workload="telemetry-fluent-bit"}
 	) by (workload, workload_type)`
@@ -103,13 +103,14 @@ func run(f flags) error {
 	if err != nil {
 		return err
 	}
-	fmt.Printf("CPU result: %v at time: %s\n", resultCPU.Value, resultCPU.Timestamp)
+	fmt.Printf("CPU result: %.3f at time: %s\n", resultCPU.Value, resultCPU.Timestamp.Time().Format(time.RFC3339Nano))
 
 	resultMemory, err := queryPrometheus(queryMemory, t)
 	if err != nil {
 		return err
 	}
-	fmt.Printf("Memory result: %v at time: %s\n", resultMemory.Value, resultMemory.Timestamp)
+	memory := formatBytes(int64(resultMemory.Value))
+	fmt.Printf("Memory result: %s at time: %s\n", memory, resultMemory.Timestamp.Time().Format(time.RFC3339Nano))
 
 	return nil
 }
@@ -195,4 +196,18 @@ func waitForLogPipeline(dynamicClient dynamic.Interface, logPipeline *unstructur
 	}
 
 	return nil
+}
+
+func formatBytes(b int64) string {
+	const unit = 1000
+	if b < unit {
+		return fmt.Sprintf("%d B", b)
+	}
+	div, exp := int64(unit), 0
+	for n := b / unit; n >= unit; n /= unit {
+		div *= unit
+		exp++
+	}
+	return fmt.Sprintf("%.1f %cB",
+		float64(b)/float64(div), "kMGTPE"[exp])
 }
