@@ -27,6 +27,6 @@ spec:
         Format             json_stream
         tls                off
         tls.verify         off
-        storage.total_limit_size {{ .StorageLimit }}
+        storage.total_limit_size 128M
   files: []
   secretRefs: []

@@ -67,22 +67,18 @@ func run(f flags) error {
 		return err
 	}
 
+	lokiPipelineYAML, err := os.ReadFile("./assets/loki.yml")
+	if err := createLogPipeline(dynamicClient, lokiPipelineYAML); err != nil {
+		return err
+	}
+
 	for i := 0; i < f.count; i++ {
-		logPipelineYAML, err := renderHTTPLogPipeline(i)
+		httpPipelineYAML, err := renderHTTPLogPipeline(i)
 		if err != nil {
 			return err
 		}
 
-		logPipeline, err := toUnstructured(logPipelineYAML)
-		if err != nil {
-			return err
-		}
-
-		if err := createLogPipeline(dynamicClient, logPipeline); err != nil {
-			return err
-		}
-
-		if err := waitForLogPipeline(dynamicClient, logPipeline); err != nil {
+		if err := createLogPipeline(dynamicClient, httpPipelineYAML); err != nil {
 			return err
 		}
 	}
@@ -93,10 +89,9 @@ func run(f flags) error {
 func renderHTTPLogPipeline(count int) ([]byte, error) {
 	rendered := bytes.Buffer{}
 	values := httpLogPipeline{
-		Name:         fmt.Sprintf("http-%d", count),
-		Tag:          randomTag(),
-		Host:         "mockserver.mockserver",
-		StorageLimit: "128M",
+		Name: fmt.Sprintf("http-%d", count),
+		Tag:  randomTag(),
+		Host: "mockserver.mockserver",
 	}
 	httpTempl := template.Must(template.ParseFiles("./assets/http.yml"))
 	err := httpTempl.Execute(&rendered, values)
@@ -116,7 +111,12 @@ func randomTag() string {
 	return string(chars)
 }
 
-func createLogPipeline(dynamicClient dynamic.Interface, logPipeline *unstructured.Unstructured) error {
+func createLogPipeline(dynamicClient dynamic.Interface, logPipelineYAML []byte) error {
+	logPipeline, err := toUnstructured(logPipelineYAML)
+	if err != nil {
+		return err
+	}
+
 	logPipelineName, err := name(logPipeline)
 	if err != nil {
 		return err
@@ -132,6 +132,11 @@ func createLogPipeline(dynamicClient dynamic.Interface, logPipeline *unstructure
 	}
 
 	fmt.Printf("Created a log pipeline %s\n", logPipelineName)
+
+	if err := waitForLogPipeline(dynamicClient, logPipeline); err != nil {
+		return err
+	}
+
 	return nil
 }
 
