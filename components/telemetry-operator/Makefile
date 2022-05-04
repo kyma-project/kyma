@@ -96,10 +96,10 @@ release: resolve generate verify build-image push-image
 
 ##@ Deployment
 
-install-local: manifests-local ## Install CRDs into the K8s cluster specified in ~/.kube/config.
+install-crds-local: manifests-local ## Install CRDs into the K8s cluster specified in ~/.kube/config.
 	kustomize build config/crd | kubectl apply -f -
 
-uninstall-local: manifests-local ## Uninstall CRDs from the K8s cluster specified in ~/.kube/config.
+uninstall-crds-local: manifests-local ## Uninstall CRDs from the K8s cluster specified in ~/.kube/config.
 	kustomize build config/crd | kubectl delete -f -
 
 ENVTEST = $(PROJECT_DIR)/bin/setup-envtest
