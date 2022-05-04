@@ -106,13 +106,13 @@ make copy-crds-local
 - Install CRDs to cluster in current kubeconfig context
 
 ```bash
-make install-local
+make install-crds-local
 ```
 
 - Uninstall CRDs to cluster in current kubeconfig context
 
 ```bash
-make uninstall-local
+make uninstall-crds-local
 ```
 
 - Run the operator locally (uses current kubeconfig context)
