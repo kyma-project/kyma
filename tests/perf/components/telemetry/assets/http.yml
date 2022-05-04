@@ -10,8 +10,6 @@ spec:
         Name   rewrite_tag
         Match  kube.*
         Rule   $log "^.*$" {{ .Tag }} true
-        Emitter_Name  {{ .Tag }}
-        Emitter_Storage.type filesystem
   outputs:
     - content: |
         Name               http
