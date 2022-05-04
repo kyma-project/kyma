@@ -53,7 +53,6 @@ func main() {
 		fmt.Printf("Error: %v\n", err)
 		os.Exit(2)
 	}
-
 }
 
 func run(f flags) error {
@@ -82,6 +81,8 @@ func run(f flags) error {
 			return err
 		}
 	}
+
+	portForwardToPrometheus(config)
 
 	return nil
 }
