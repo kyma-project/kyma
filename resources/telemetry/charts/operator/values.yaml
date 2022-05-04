@@ -82,6 +82,12 @@ serviceMonitor:
 
 logProcessor: fluent-bit
 
+allowedPlugins:
+  filter: []
+  output:
+    - grafana-loki
+    - http
+
 nodeSelector: {}
 
 tolerations: []
