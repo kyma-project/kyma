@@ -91,23 +91,25 @@ func run(f flags) error {
 		group_left(workload, workload_type) namespace_workload_pod:kube_pod_owner:relabel{cluster="", namespace="kyma-system", workload_type="daemonset", workload="telemetry-fluent-bit"}
 	  ) by (workload, workload_type)`
 
-	queryMem := `sum(
+	queryMemory := `sum(
 		container_memory_working_set_bytes{job="kubelet", metrics_path="/metrics/cadvisor", cluster="", namespace="kyma-system", container!="", image!=""}
 	  * on(namespace,pod)
 		group_left(workload, workload_type) namespace_workload_pod:kube_pod_owner:relabel{cluster="", namespace="kyma-system", workload_type="daemonset", workload="telemetry-fluent-bit"}
 	) by (workload, workload_type)`
 
 	t := time.Now()
-	metCPU, err := queryPrometheus(queryCPU, t)
+
+	resultCPU, err := queryPrometheus(queryCPU, t)
 	if err != nil {
 		return err
 	}
-	fmt.Printf("CPU Value: %v at time: %s", metCPU, t)
-	metMem, err := queryPrometheus(queryMem, t)
+	fmt.Printf("CPU result: %v at time: %s\n", resultCPU.Value, resultCPU.Timestamp)
+
+	resultMemory, err := queryPrometheus(queryMemory, t)
 	if err != nil {
 		return err
 	}
-	fmt.Printf("Mem Value: %v at time: %s", metMem, t)
+	fmt.Printf("Memory result: %v at time: %s\n", resultMemory.Value, resultMemory.Timestamp)
 
 	return nil
 }

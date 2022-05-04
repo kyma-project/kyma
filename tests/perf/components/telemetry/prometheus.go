@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"context"
+	"errors"
 	"fmt"
 	"net/http"
 	"net/url"
@@ -54,7 +55,7 @@ func portForwardToPrometheus(config *rest.Config) {
 	}()
 }
 
-func queryPrometheus(query string, t time.Time) (model.Value, error) {
+func queryPrometheus(query string, t time.Time) (*model.Sample, error) {
 	client, err := api.NewClient(api.Config{
 		Address: "http://127.0.0.1:9090",
 	})
@@ -75,7 +76,10 @@ func queryPrometheus(query string, t time.Time) (model.Value, error) {
 	if len(warnings) > 0 {
 		fmt.Printf("Warnings: %v\n", warnings)
 	}
-	fmt.Printf("Result:\n%v\n", result)
-	return result, nil
 
+	if vector, ok := result.(model.Vector); ok && len(vector) == 1 {
+		return vector[0], nil
+	}
+
+	return nil, errors.New("unsupported result")
 }
