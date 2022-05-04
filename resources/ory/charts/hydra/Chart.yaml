@@ -1,5 +1,5 @@
 apiVersion: v2
-appVersion: "v1.10.5"
+appVersion: "v1.11.7"
 description: A Helm chart for deploying ORY Hydra in Kubernetes
 name: hydra
 version: 0.23.1
