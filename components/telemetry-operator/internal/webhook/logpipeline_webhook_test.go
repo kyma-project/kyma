@@ -92,6 +92,7 @@ var _ = Describe("LogPipeline webhook", func() {
 		It("Should accept valid LogPipeline", func() {
 			fsWrapperMock.On("CreateAndWrite", mock.AnythingOfType("fs.File")).Return(nil).Times(4)
 			configValidatorMock.On("Validate", mock.Anything, mock.AnythingOfType("string")).Return(nil).Times(1)
+			pluginValidatorMock.On("Validate", mock.Anything, mock.AnythingOfType("string")).Return(nil).Times(1)
 			fsWrapperMock.On("RemoveDirectory", mock.AnythingOfType("string")).Return(nil).Times(1)
 			logPipeline := getLogPipeline()
 			err := k8sClient.Create(ctx, logPipeline)
@@ -103,6 +104,7 @@ var _ = Describe("LogPipeline webhook", func() {
 			fsWrapperMock.On("CreateAndWrite", mock.AnythingOfType("fs.File")).Return(nil).Times(4)
 			configErr := errors.New("Error in line 4: Invalid indentation level")
 			configValidatorMock.On("Validate", mock.Anything, mock.AnythingOfType("string")).Return(configErr).Times(1)
+			pluginValidatorMock.On("Validate", mock.Anything, mock.AnythingOfType("string")).Return(nil).Times(1)
 			fsWrapperMock.On("RemoveDirectory", mock.AnythingOfType("string")).Return(nil).Times(1)
 			logPipeline := getLogPipeline()
 			err := k8sClient.Create(ctx, logPipeline)
@@ -114,6 +116,22 @@ var _ = Describe("LogPipeline webhook", func() {
 			Expect(StatusReasonConfigurationError).To(Equal(string(status.Status().Reason)))
 			Expect(status.Status().Message).To(ContainSubstring(configErr.Error()))
 		})
+
+		It("Should reject LogPipeline with forbidden plugin", func() {
+			fsWrapperMock.On("CreateAndWrite", mock.AnythingOfType("fs.File")).Return(nil).Times(4)
+			pluginErr := errors.New("output plugin stdout is not allowed")
+			pluginValidatorMock.On("Validate", mock.Anything, mock.AnythingOfType("string")).Return(pluginErr).Times(1)
+			fsWrapperMock.On("RemoveDirectory", mock.AnythingOfType("string")).Return(nil).Times(1)
+			logPipeline := getLogPipeline()
+			err := k8sClient.Create(ctx, logPipeline)
+
+			Expect(err).To(HaveOccurred())
+			var status apierrors.APIStatus
+			errors.As(err, &status)
+
+			Expect(StatusReasonConfigurationError).To(Equal(string(status.Status().Reason)))
+			Expect(status.Status().Message).To(ContainSubstring(pluginErr.Error()))
+		})
 	})
 
 	Context("When updating LogPipeline", func() {
@@ -121,6 +139,7 @@ var _ = Describe("LogPipeline webhook", func() {
 		It("Should create valid LogPipeline", func() {
 			fsWrapperMock.On("CreateAndWrite", mock.AnythingOfType("fs.File")).Return(nil).Times(4)
 			configValidatorMock.On("Validate", mock.Anything, mock.AnythingOfType("string")).Return(nil).Times(1)
+			pluginValidatorMock.On("Validate", mock.Anything, mock.AnythingOfType("string")).Return(nil).Times(1)
 			fsWrapperMock.On("RemoveDirectory", mock.AnythingOfType("string")).Return(nil).Times(1)
 			logPipeline := getLogPipeline()
 			err := k8sClient.Create(ctx, logPipeline)
@@ -131,6 +150,7 @@ var _ = Describe("LogPipeline webhook", func() {
 		It("Should update previously created valid LogPipeline", func() {
 			fsWrapperMock.On("CreateAndWrite", mock.AnythingOfType("fs.File")).Return(nil).Times(5)
 			configValidatorMock.On("Validate", mock.Anything, mock.AnythingOfType("string")).Return(nil).Times(1)
+			pluginValidatorMock.On("Validate", mock.Anything, mock.AnythingOfType("string")).Return(nil).Times(1)
 			fsWrapperMock.On("RemoveDirectory", mock.AnythingOfType("string")).Return(nil).Times(1)
 
 			var logPipeline telemetryv1alpha1.LogPipeline
@@ -150,6 +170,7 @@ var _ = Describe("LogPipeline webhook", func() {
 			fsWrapperMock.On("CreateAndWrite", mock.AnythingOfType("fs.File")).Return(nil).Times(6)
 			configErr := errors.New("Error in line 4: Invalid indentation level")
 			configValidatorMock.On("Validate", mock.Anything, mock.AnythingOfType("string")).Return(configErr).Times(1)
+			pluginValidatorMock.On("Validate", mock.Anything, mock.AnythingOfType("string")).Return(nil).Times(1)
 			fsWrapperMock.On("RemoveDirectory", mock.AnythingOfType("string")).Return(nil).Times(1)
 
 			var logPipeline telemetryv1alpha1.LogPipeline
@@ -169,6 +190,31 @@ var _ = Describe("LogPipeline webhook", func() {
 
 			Expect(StatusReasonConfigurationError).To(Equal(string(status.Status().Reason)))
 			Expect(status.Status().Message).To(ContainSubstring(configErr.Error()))
+		})
+
+		It("Should reject new update with invalid plugin usage of previously created LogPipeline", func() {
+			fsWrapperMock.On("CreateAndWrite", mock.AnythingOfType("fs.File")).Return(nil).Times(6)
+			pluginErr := errors.New("output plugin stdout is not allowed")
+			pluginValidatorMock.On("Validate", mock.Anything, mock.AnythingOfType("string")).Return(pluginErr).Times(1)
+			fsWrapperMock.On("RemoveDirectory", mock.AnythingOfType("string")).Return(nil).Times(1)
+
+			var logPipeline telemetryv1alpha1.LogPipeline
+			err := k8sClient.Get(ctx, testLogPipeline, &logPipeline)
+			Expect(err).NotTo(HaveOccurred())
+
+			logPipeline.Spec.Files = append(logPipeline.Spec.Files, telemetryv1alpha1.FileMount{
+				Name:    "3rd-file",
+				Content: "file content",
+			})
+
+			err = k8sClient.Update(ctx, &logPipeline)
+
+			Expect(err).To(HaveOccurred())
+			var status apierrors.APIStatus
+			errors.As(err, &status)
+
+			Expect(StatusReasonConfigurationError).To(Equal(string(status.Status().Reason)))
+			Expect(status.Status().Message).To(ContainSubstring(pluginErr.Error()))
 		})
 
 		It("Should delete LogPipeline", func() {

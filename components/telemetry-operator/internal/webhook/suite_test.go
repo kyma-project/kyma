@@ -25,8 +25,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/kyma-project/kyma/components/telemetry-operator/internal/fluentbit"
-
 	fluentbitmocks "github.com/kyma-project/kyma/components/telemetry-operator/internal/fluentbit/mocks"
 	fsmocks "github.com/kyma-project/kyma/components/telemetry-operator/internal/fs/mocks"
 	"k8s.io/client-go/kubernetes/scheme"
@@ -55,6 +53,7 @@ var (
 	cancel              context.CancelFunc
 	fsWrapperMock       *fsmocks.Wrapper
 	configValidatorMock *fluentbitmocks.ConfigValidator
+	pluginValidatorMock *fluentbitmocks.PluginValidator
 )
 
 func TestAPIs(t *testing.T) {
@@ -106,14 +105,14 @@ var _ = BeforeSuite(func() {
 	Expect(err).NotTo(HaveOccurred())
 
 	configValidatorMock = &fluentbitmocks.ConfigValidator{}
-	pluginValidator := fluentbit.NewPluginValidator([]string{}, []string{})
+	pluginValidatorMock = &fluentbitmocks.PluginValidator{}
 	fsWrapperMock = &fsmocks.Wrapper{}
 	logPipelineValidator := NewLogPipeLineValidator(
 		mgr.GetClient(),
 		FluentBitConfigMapName,
 		ControllerNamespace,
 		configValidatorMock,
-		pluginValidator,
+		pluginValidatorMock,
 		fsWrapperMock,
 	)
 
