@@ -4,7 +4,7 @@ const {unregisterKymaFromCompass, addScenarioInCompass, assignRuntimeToScenario}
 const {oidcE2ETest, commerceMockTest} = require('./skr-test');
 const {KCPWrapper, KCPConfig} = require('../kcp/client');
 const {keb, director} = require('./helpers');
-const {initializeK8sClient, debug} = require('../utils');
+const {initializeK8sClient} = require('../utils');
 const {
   GardenerConfig,
   GardenerClient,
@@ -17,8 +17,6 @@ const s = require('../smctl/helpers');
 const kcp = new KCPWrapper(KCPConfig.fromEnv());
 
 describe('Execute SKR test', function() {
-  debug.enabled = true;
-
   this.timeout(60 * 60 * 1000 * 3); // 3h
   this.slow(5000);
 
