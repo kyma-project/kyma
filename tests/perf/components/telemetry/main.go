@@ -9,6 +9,7 @@ import (
 	"os"
 	"path/filepath"
 	"text/template"
+	"time"
 
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -83,6 +84,30 @@ func run(f flags) error {
 	}
 
 	portForwardToPrometheus(config)
+	time.Sleep(1 * time.Second)
+	queryCPU := `sum(
+		node_namespace_pod_container:container_cpu_usage_seconds_total:sum_irate{cluster="", namespace="kyma-system"}
+	  * on(namespace,pod)
+		group_left(workload, workload_type) namespace_workload_pod:kube_pod_owner:relabel{cluster="", namespace="kyma-system", workload_type="daemonset", workload="telemetry-fluent-bit"}
+	  ) by (workload, workload_type)`
+
+	queryMem := `sum(
+		container_memory_working_set_bytes{job="kubelet", metrics_path="/metrics/cadvisor", cluster="", namespace="kyma-system", container!="", image!=""}
+	  * on(namespace,pod)
+		group_left(workload, workload_type) namespace_workload_pod:kube_pod_owner:relabel{cluster="", namespace="kyma-system", workload_type="daemonset", workload="telemetry-fluent-bit"}
+	) by (workload, workload_type)`
+
+	t := time.Now()
+	metCPU, err := queryPrometheus(queryCPU, t)
+	if err != nil {
+		return err
+	}
+	fmt.Printf("CPU Value: %v at time: %s", metCPU, t)
+	metMem, err := queryPrometheus(queryMem, t)
+	if err != nil {
+		return err
+	}
+	fmt.Printf("Mem Value: %v at time: %s", metMem, t)
 
 	return nil
 }

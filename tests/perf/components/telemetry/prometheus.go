@@ -2,11 +2,16 @@ package main
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"net/http"
 	"net/url"
 	"strings"
+	"time"
 
+	"github.com/prometheus/client_golang/api"
+	v1 "github.com/prometheus/client_golang/api/prometheus/v1"
+	"github.com/prometheus/common/model"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/portforward"
 	"k8s.io/client-go/transport/spdy"
@@ -42,7 +47,35 @@ func portForwardToPrometheus(config *rest.Config) {
 		}
 	}()
 
-	if err = forwarder.ForwardPorts(); err != nil {
-		panic(err)
+	go func() {
+		if err = forwarder.ForwardPorts(); err != nil {
+			panic(err)
+		}
+	}()
+}
+
+func queryPrometheus(query string, t time.Time) (model.Value, error) {
+	client, err := api.NewClient(api.Config{
+		Address: "http://127.0.0.1:9090",
+	})
+	if err != nil {
+		fmt.Printf("Error creating client: %v\n", err)
+		return nil, err
 	}
+
+	v1api := v1.NewAPI(client)
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	result, warnings, err := v1api.Query(ctx, query, t)
+	if err != nil {
+		fmt.Printf("Error querying Prometheus: %v\n", err)
+		return nil, err
+	}
+	if len(warnings) > 0 {
+		fmt.Printf("Warnings: %v\n", warnings)
+	}
+	fmt.Printf("Result:\n%v\n", result)
+	return result, nil
+
 }
