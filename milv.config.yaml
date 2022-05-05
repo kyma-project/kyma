@@ -113,5 +113,5 @@ files:
       external-links-to-ignore: [ "http://tracing-jaeger-collector.kyma-system.svc.cluster.local:14268/api/traces",
                                   "http://eventing-publisher-proxy.kyma-system.svc.cluster.local/publish" ]
   - path: "./kyma/docs/04-operation-guides/troubleshooting/evnt-02-jetstream-troubleshooting.md"
-      config:
-        external-links-to-ignore: [ "https://grafana.com/grafana/dashboards/14725" ]
+    config:
+      external-links-to-ignore: [ "https://grafana.com/grafana/dashboards/14725" ]
