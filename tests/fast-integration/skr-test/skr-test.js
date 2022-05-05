@@ -7,7 +7,8 @@ const {
   ensureCommerceMockWithCompassTestFixture,
   checkFunctionResponse,
   sendLegacyEventAndCheckResponse,
-  deleteMockTestFixture,
+  deleteMockTestFixture, sendCloudEventStructuredModeAndCheckResponse, sendCloudEventBinaryModeAndCheckResponse,
+  checkInClusterEventDelivery,
 } = require('../test/fixtures/commerce-mock');
 const {
   ensureKymaAdminBindingExistsForUser,
@@ -17,7 +18,6 @@ const {
   AuditLogCreds,
   AuditLogClient,
   checkAuditLogs,
-  checkAuditEventsThreshold,
 } = require('../audit-log');
 const {keb, gardener, director} = require('./helpers');
 const {KCPWrapper, KCPConfig} = require('../kcp/client');
@@ -119,7 +119,12 @@ function commerceMockTest() {
           this.options.scenarioName,
           'mocks',
           this.options.testNS,
+          true,
       );
+    });
+
+    it('in-cluster event should be delivered (structured and binary mode)', async function() {
+      await checkInClusterEventDelivery(this.options.testNS);
     });
 
     it('function should be reachable through secured API Rule', async function() {
@@ -130,22 +135,31 @@ function commerceMockTest() {
       await sendLegacyEventAndCheckResponse();
     });
 
+    it('order.created.v1 cloud event in structured mode should trigger the lastorder function', async function() {
+      await sendCloudEventStructuredModeAndCheckResponse();
+    });
+
+    it('order.created.v1 cloud event in binary mode should trigger the lastorder function', async function() {
+      await sendCloudEventBinaryModeAndCheckResponse();
+    });
+
     it('Deletes the resources that have been created', async function() {
       await deleteMockTestFixture('mocks', this.options.testNS);
     });
 
     // Check audit log for AWS
-    // if (process.env.KEB_PLAN_ID === AWS_PLAN_ID) {
-    //   const auditlogs = new AuditLogClient(AuditLogCreds.fromEnv());
+    if (process.env.KEB_PLAN_ID === AWS_PLAN_ID) {
+      const auditlogs = new AuditLogClient(AuditLogCreds.fromEnv());
 
-    //   it('Check audit logs', async function() {
-    //     await checkAuditLogs(auditlogs);
-    //   });
+      it('Check audit logs', async function() {
+        await checkAuditLogs(auditlogs, null);
+      });
 
-    //   it('Amount of audit events must not exceed a certain threshold', async function() {
-    //     await checkAuditEventsThreshold(4);
-    //   });
-    // }
+      // TODO: Enable checkAuditEventsThreshold again when fix is ready by Andreas Thaler
+      // it('Amount of audit events must not exceed a certain threshold', async function() {
+      //   await checkAuditEventsThreshold(4);
+      // });
+    }
   });
 }
 

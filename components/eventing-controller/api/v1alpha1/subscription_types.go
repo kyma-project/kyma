@@ -210,7 +210,7 @@ type SubscriptionStatus struct {
 
 	// EmsSubscriptionStatus defines the status of Subscription in BEB
 	// +optional
-	EmsSubscriptionStatus EmsSubscriptionStatus `json:"emsSubscriptionStatus,omitempty"`
+	EmsSubscriptionStatus *EmsSubscriptionStatus `json:"emsSubscriptionStatus,omitempty"`
 
 	// Config defines the configurations that have been applied to the eventing backend when creating this subscription
 	// +optional

@@ -4,7 +4,7 @@ const {unregisterKymaFromCompass, addScenarioInCompass, assignRuntimeToScenario}
 const {oidcE2ETest, commerceMockTest} = require('./skr-test');
 const {KCPWrapper, KCPConfig} = require('../kcp/client');
 const {keb, director} = require('./helpers');
-const {initializeK8sClient, debug} = require('../utils');
+const {initializeK8sClient} = require('../utils');
 const {
   GardenerConfig,
   GardenerClient,
@@ -12,13 +12,11 @@ const {
 const {
   genRandom,
 } = require('../utils');
-const s = require('../smctl/helpers');
+const {BTPOperatorCreds} = require('../smctl/helpers');
 
 const kcp = new KCPWrapper(KCPConfig.fromEnv());
 
 describe('Execute SKR test', function() {
-  debug.enabled = true;
-
   this.timeout(60 * 60 * 1000 * 3); // 3h
   this.slow(5000);
 
@@ -30,17 +28,11 @@ describe('Execute SKR test', function() {
 
       const keb = new KEBClient(KEBConfig.fromEnv());
       const gardener = new GardenerClient(GardenerConfig.fromEnv());
-      const smAdminCreds = s.SMCreds.fromEnv();
-
+      const btpOperatorCreds = BTPOperatorCreds.fromEnv();
 
       const suffix = genRandom(4);
       const runtimeName = `kyma-${suffix}`;
       this.options.appName = `app-${suffix}`;
-
-      const btpOperatorInstance = `btp-operator-${suffix}`;
-      const btpOperatorBinding = `btp-operator-binding-${suffix}`;
-
-      const btpOperatorCreds = await s.smInstanceBinding(smAdminCreds, btpOperatorInstance, btpOperatorBinding);
 
       console.log(`\nInstanceID ${this.options.instanceID}`,
           `Runtime ${runtimeName}`, `Application ${this.options.appName}`, `Suffix ${suffix}`);

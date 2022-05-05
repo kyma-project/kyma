@@ -1240,7 +1240,7 @@ ${k8s.dumpYaml(report)}
   }
 };
 
-let DEBUG = process.env.DEBUG;
+let DEBUG = process.env.DEBUG === 'true';
 
 function log(prefix, ...args) {
   if (args.length === 0) {
@@ -1254,7 +1254,7 @@ function log(prefix, ...args) {
 }
 
 function isDebugEnabled() {
-  return DEBUG === 'true';
+  return DEBUG;
 }
 
 function switchDebug(on = true) {
