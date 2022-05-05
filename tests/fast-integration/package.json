@@ -9,14 +9,15 @@
     "directory": "tests/fast-integration"
   },
   "scripts": {
+    "pretest": "npm run lint",
     "lint": "./node_modules/.bin/eslint --ignore-path .gitignore .",
     "lint-fix": "./node_modules/.bin/eslint --ignore-path .gitignore . --fix",
-    "test": "DEBUG=true mocha --inline-diffs --check-leaks --reporter mocha-multi-reporters --reporter-options configFile=mocha-reporter-config.json",
+    "test": "mocha --inline-diffs --check-leaks --reporter mocha-multi-reporters --reporter-options configFile=mocha-reporter-config.json",
     "test-utils": "mocha --inline-diffs --check-leaks --reporter mocha-multi-reporters --reporter-options configFile=mocha-reporter-config.json './utils/**/*.test.js'",
     "test-commerce-mock": "mocha --inline-diffs --check-leaks --reporter mocha-multi-reporters --reporter-options configFile=mocha-reporter-config.json ./test/2-commerce-mock.js",
     "test-certificate": "mocha --timeout 150000 --inline-diffs --check-leaks --reporter mocha-multi-reporters --reporter-options configFile=mocha-reporter-config.json ./certificate-test/",
     "test-getting-started": "mocha --inline-diffs --check-leaks --reporter mocha-multi-reporters --reporter-options configFile=mocha-reporter-config.json ./test/3-getting-started-guides.js",
-    "test-compass": "DEBUG=true mocha --inline-diffs --check-leaks --reporter mocha-multi-reporters --reporter-options configFile=mocha-reporter-config.json ./compass-test/",
+    "test-compass": "mocha --inline-diffs --check-leaks --reporter mocha-multi-reporters --reporter-options configFile=mocha-reporter-config.json ./compass-test/",
     "test-skr": "mocha --inline-diffs --check-leaks --reporter mocha-multi-reporters --reporter-options configFile=mocha-reporter-config.json ./skr-test/",
     "skr-test-without-sc": "mocha --timeout 15000 --inline-diffs --check-leaks --reporter mocha-multi-reporters --reporter-options configFile=mocha-reporter-config.json ./skr-test-without-sc/ ",
     "nightly-skr": "mocha --inline-diffs --check-leaks --reporter mocha-multi-reporters --reporter-options configFile=mocha-reporter-config.json ./skr-nightly/provision/",
@@ -39,9 +40,8 @@
   },
   "license": "Apache-2.0",
   "devDependencies": {
-    "@cucumber/cucumber": "^8.0.0",
     "chai": "^4.2.0",
-    "eslint": "^8.11.0",
+    "eslint": "^8.4.1",
     "eslint-config-google": "^0.14.0",
     "mocha": "^8.3.2",
     "mocha-multi-reporters": "^1.5.1"
