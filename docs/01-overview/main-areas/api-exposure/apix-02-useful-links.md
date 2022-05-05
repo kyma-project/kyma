@@ -9,8 +9,9 @@ If you're interested in learning more about API Exposure in Kyma, follow these l
   - [Create a workload](../../../03-tutorials/00-api-exposure/apix-02-create-workload.md)
   - [Expose a workload](../../../03-tutorials/00-api-exposure/apix-02-expose-workload-apigateway.md)
   - [Expose and secure a workload with OAuth2](../../../03-tutorials/00-api-exposure/apix-03-expose-and-secure-workload-oauth2.md)
-  - [Expose and secure a workload with Istio](../../../03-tutorials/00-api-exposure/apix-04-expose-and-secure-workload-istio.md)
-  - [Expose and secure a workload with JWT](../../../03-tutorials/00-api-exposure/apix-04-expose-and-secure-workload-jwt.md)
+  - [Expose and secure a workload with Istio](../../../03-tutorials/00-api-exposure/apix-05-expose-and-secure-workload-istio.md)
+  - [Expose and secure a workload with JWT](../../../03-tutorials/00-api-exposure/apix-05-expose-and-secure-workload-jwt.md)
+  - [Get a JWT](../../../03-tutorials/00-api-exposure/apix-04-get-jwt.md)
   
 - Troubleshoot API Exposure-related issues when:
 
@@ -22,6 +23,7 @@ If you're interested in learning more about API Exposure in Kyma, follow these l
   - A [resource is ignored by the controller](../../../04-operation-guides/troubleshooting/apix-06-dns-mgt-resource-ignored.md)
   - The [Issuer Custom Resource fails to be created](../../../04-operation-guides/troubleshooting/apix-07-cert-mgt-issuer-not-created.md)
   - The [Kyma Gateway is not reachable](../../../04-operation-guides/troubleshooting/apix-08-gateway-not-reachable.md)
+  - The [Pods stuck in `Pending/Failed/Unknown` state after upgrade](../../../04-operation-guides/troubleshooting/apix-09-upgrade-sidecar-proxy.md)
 
 - Learn something more about:
 

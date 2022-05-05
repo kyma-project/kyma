@@ -7,7 +7,8 @@ const {
   ensureCommerceMockWithCompassTestFixture,
   checkFunctionResponse,
   sendLegacyEventAndCheckResponse,
-  deleteMockTestFixture,
+  deleteMockTestFixture, sendCloudEventStructuredModeAndCheckResponse, sendCloudEventBinaryModeAndCheckResponse,
+  checkInClusterEventDelivery,
 } = require('../test/fixtures/commerce-mock');
 const {
   ensureKymaAdminBindingExistsForUser,
@@ -17,10 +18,8 @@ const {
   AuditLogCreds,
   AuditLogClient,
   checkAuditLogs,
-  checkAuditEventsThreshold,
 } = require('../audit-log');
 const {keb, gardener, director} = require('./helpers');
-const {prometheusPortForward} = require('../monitoring/client');
 const {KCPWrapper, KCPConfig} = require('../kcp/client');
 
 const kcp = new KCPWrapper(KCPConfig.fromEnv());
@@ -112,14 +111,6 @@ function oidcE2ETest() {
 function commerceMockTest() {
   describe('CommerceMockTest()', function() {
     const AWS_PLAN_ID = '361c511f-f939-4621-b228-d0fb79a1fe15';
-    let cancelPortForward = null;
-    before(function() {
-      cancelPortForward = prometheusPortForward();
-    });
-
-    after(function() {
-      cancelPortForward();
-    });
 
     it('CommerceMock test fixture should be ready', async function() {
       await ensureCommerceMockWithCompassTestFixture(
@@ -128,7 +119,12 @@ function commerceMockTest() {
           this.options.scenarioName,
           'mocks',
           this.options.testNS,
+          true,
       );
+    });
+
+    it('in-cluster event should be delivered (structured and binary mode)', async function() {
+      await checkInClusterEventDelivery(this.options.testNS);
     });
 
     it('function should be reachable through secured API Rule', async function() {
@@ -137,6 +133,14 @@ function commerceMockTest() {
 
     it('order.created.v1 legacy event should trigger the lastorder function', async function() {
       await sendLegacyEventAndCheckResponse();
+    });
+
+    it('order.created.v1 cloud event in structured mode should trigger the lastorder function', async function() {
+      await sendCloudEventStructuredModeAndCheckResponse();
+    });
+
+    it('order.created.v1 cloud event in binary mode should trigger the lastorder function', async function() {
+      await sendCloudEventBinaryModeAndCheckResponse();
     });
 
     it('Deletes the resources that have been created', async function() {
@@ -148,12 +152,13 @@ function commerceMockTest() {
       const auditlogs = new AuditLogClient(AuditLogCreds.fromEnv());
 
       it('Check audit logs', async function() {
-        await checkAuditLogs(auditlogs);
+        await checkAuditLogs(auditlogs, null);
       });
 
-      it('Amount of audit events must not exceed a certain threshold', async function() {
-        await checkAuditEventsThreshold(4);
-      });
+      // TODO: Enable checkAuditEventsThreshold again when fix is ready by Andreas Thaler
+      // it('Amount of audit events must not exceed a certain threshold', async function() {
+      //   await checkAuditEventsThreshold(4);
+      // });
     }
   });
 }

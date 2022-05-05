@@ -1,21 +1,17 @@
-
-const axios = require('axios');
 const {
-  kubectlPortForward,
-  retryPromise,
   convertAxiosError,
   getPersistentVolumeClaim,
   getSecretData,
-  getAllVirtualServices,
+  sleep,
 } = require('../utils');
+const {proxyGrafanaDatasource} = require('../monitoring/client');
 
-const lokiPort = 3100;
 
-function lokiPortForward() {
-  return kubectlPortForward('kyma-system', 'logging-loki-0', lokiPort);
+async function getLokiViaGrafana(path, retries = 5, interval = 30, timeout = 10000) {
+  return await proxyGrafanaDatasource('Loki', path, retries, interval, timeout);
 }
 
-async function tryGetLokiPersistentVolumClaim() {
+async function tryGetLokiPersistentVolumeClaim() {
   try {
     return await getPersistentVolumeClaim('kyma-system', 'storage-logging-loki-0');
   } catch (err) {
@@ -28,24 +24,29 @@ async function lokiSecretData() {
   return secretData['loki.yaml'];
 }
 
-function getVirtualServices() {
-  return getAllVirtualServices();
+async function logsPresentInLoki(query, startTimestamp) {
+  for (let i = 0; i < 20; i++) {
+    const responseBody = await queryLoki(query, startTimestamp);
+    if (responseBody.data.result.length > 0) {
+      return true;
+    }
+    await sleep(5 * 1000);
+  }
+  return false;
 }
 
-async function queryLoki(labels, startTimestamp) {
-  const url = `http://localhost:${lokiPort}/api/prom/query?query=${labels}&start=${startTimestamp}`;
+async function queryLoki(query, startTimestamp) {
+  const path = `loki/api/v1/query_range?query=${query}&start=${startTimestamp}`;
   try {
-    const responseBody = await retryPromise(() => axios.get(url, {timeout: 10000}), 5);
-    return responseBody.data;
+    const response = await getLokiViaGrafana(path);
+    return response.data;
   } catch (err) {
     throw convertAxiosError(err, 'cannot query loki');
   }
 }
 
 module.exports = {
-  lokiPortForward,
-  queryLoki,
-  getVirtualServices,
-  tryGetLokiPersistentVolumClaim,
+  logsPresentInLoki,
+  tryGetLokiPersistentVolumeClaim,
   lokiSecretData,
 };

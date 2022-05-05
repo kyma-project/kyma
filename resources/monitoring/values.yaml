@@ -926,11 +926,11 @@ kubeApiServer:
     ## ref: https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/api.md#relabelconfig
     ##
     metricRelabelings:
-      - action: keep
-        regex: 'apiserver_request_duration_seconds_bucket;(0.1|0.5|1|5|30|\+Inf)' # only keep 0.1, 0.5, 1, 5, 30 and +Inf buckets
+      - action: drop
+        regex: 'apiserver_request_duration_seconds_bucket;(0.05|0.15|0.2|0.25|0.3|0.35|0.4|0.45|0.6|0.7|0.8|0.9|1.25|1.5|1.75|2|2.5|3|3.5|4|4.5|6|7|8|9|10|15|20|25|40|50|60)' # only keep 0.1, 0.5, 1, 5, 30 and +Inf buckets
         sourceLabels: [__name__,le]
       - action: keep
-        regex: ^(apiserver_audit_event_total|apiserver_audit_level_total|apiserver_audit_requests_rejected_total|apiserver_client_certificate_expiration_seconds_bucket|apiserver_registered_watchers|apiserver_request_total|apiserver_request_duration_seconds_bucket|etcd_helper_cache_entry_total|etcd_helper_cache_hit_total|etcd_helper_cache_miss_total|etcd_request_cache_add_duration_seconds_bucket|etcd_request_cache_get_duration_seconds_bucket|go_goroutines|go_memstats_alloc_bytes|go_memstats_heap_alloc_bytes|go_memstats_heap_inuse_bytes|go_memstats_heap_sys_bytes|go_memstats_stack_inuse_bytes|kubernetes_build_info|process_cpu_seconds_total|process_max_fds|process_open_fds|process_resident_memory_bytes|process_start_time_seconds|process_virtual_memory_bytes|rest_client_request_latency_seconds_bucket|rest_client_requests_total|workqueue_adds_total|workqueue_depth|workqueue_queue_duration_seconds_bucket)$
+        regex: ^(apiserver_audit_event_total|apiserver_audit_level_total|apiserver_audit_requests_rejected_total|apiserver_client_certificate_expiration_seconds_bucket|apiserver_registered_watchers|apiserver_request_total|apiserver_request_duration_seconds_bucket|go_goroutines|go_memstats_alloc_bytes|go_memstats_heap_alloc_bytes|go_memstats_heap_inuse_bytes|go_memstats_heap_sys_bytes|go_memstats_stack_inuse_bytes|kubernetes_build_info|process_cpu_seconds_total|process_max_fds|process_open_fds|process_resident_memory_bytes|process_start_time_seconds|process_virtual_memory_bytes|rest_client_requests_total|workqueue_adds_total|workqueue_depth|workqueue_queue_duration_seconds_bucket)$
         sourceLabels: [__name__]
 
     ## RelabelConfigs to apply to samples before scraping

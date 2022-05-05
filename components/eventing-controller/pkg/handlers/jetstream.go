@@ -216,7 +216,7 @@ func (js *JetStream) SyncSubscription(subscription *eventingv1alpha1.Subscriptio
 		jsSubscription, err := js.jsCtx.Subscribe(
 			js.GetJsSubjectToSubscribe(subject),
 			asyncCallback,
-			js.getDefaultSubscriptionOptions(jsSubKey.ConsumerName(), subscription.Status.Config)...,
+			js.getDefaultSubscriptionOptions(jsSubKey, subscription.Status.Config)...,
 		)
 		if err != nil {
 			log.Errorw("failed to subscribe on JetStream", "subject", subject, "error", err)
@@ -370,14 +370,15 @@ func getStreamConfig(natsConfig env.NatsConfig) (*nats.StreamConfig, error) {
 
 type DefaultSubOpts []nats.SubOpt
 
-func (js *JetStream) getDefaultSubscriptionOptions(consumerName string, subConfig *eventingv1alpha1.SubscriptionConfig) DefaultSubOpts {
+func (js *JetStream) getDefaultSubscriptionOptions(consumer SubscriptionSubjectIdentifier, subConfig *eventingv1alpha1.SubscriptionConfig) DefaultSubOpts {
 	defaultOpts := DefaultSubOpts{
-		nats.Durable(consumerName),
+		nats.Durable(consumer.consumerName),
+		nats.Description(consumer.namespacedName),
 		nats.ManualAck(),
 		nats.AckExplicit(),
 		nats.IdleHeartbeat(idleHeartBeatDuration),
 		nats.EnableFlowControl(),
-		nats.DeliverNew(),
+		toJetStreamConsumerDeliverPolicyOptOrDefault(js.config.JSConsumerDeliverPolicy),
 		nats.MaxAckPending(subConfig.MaxInFlightMessages),
 		nats.MaxDeliver(jsConsumerMaxRedeliver),
 		nats.AckWait(jsConsumerAcKWait),

@@ -4,8 +4,6 @@ import (
 	"testing"
 	"time"
 
-	equality "github.com/kyma-project/kyma/components/eventing-controller/controllers/subscription"
-
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/ems/api/events/types"
 	"github.com/pkg/errors"
 
@@ -207,7 +205,7 @@ func Test_getRequiredConditions(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			gotConditions := getRequiredConditions(tc.subscriptionConditions, expectedConditions)
-			if !equality.ConditionsEquals(gotConditions, tc.wantConditions) {
+			if !eventingv1alpha1.ConditionsEquals(gotConditions, tc.wantConditions) {
 				t.Errorf("ShouldUpdateReadyStatus is not valid, want: %v but got: %v", tc.wantConditions, gotConditions)
 			}
 			g.Expect(len(gotConditions)).To(BeEquivalentTo(len(expectedConditions)))
@@ -303,7 +301,7 @@ func Test_syncConditionSubscribed(t *testing.T) {
 			// then
 			newCondition := subscription.Status.FindCondition(tc.wantCondition.Type)
 			g.Expect(newCondition).ShouldNot(BeNil())
-			g.Expect(equality.ConditionEquals(*newCondition, tc.wantCondition)).To(Equal(true))
+			g.Expect(eventingv1alpha1.ConditionEquals(*newCondition, tc.wantCondition)).To(Equal(true))
 		})
 	}
 }
@@ -395,6 +393,7 @@ func Test_syncConditionSubscriptionActive(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			// given
 			subscription := tc.givenSubscription
+			subscription.Status.EmsSubscriptionStatus = &eventingv1alpha1.EmsSubscriptionStatus{}
 			log := utils.LoggerWithSubscription(r.namedLogger(), subscription)
 
 			// when
@@ -403,7 +402,7 @@ func Test_syncConditionSubscriptionActive(t *testing.T) {
 			// then
 			newCondition := subscription.Status.FindCondition(tc.wantCondition.Type)
 			g.Expect(newCondition).ShouldNot(BeNil())
-			g.Expect(equality.ConditionEquals(*newCondition, tc.wantCondition)).To(Equal(true))
+			g.Expect(eventingv1alpha1.ConditionEquals(*newCondition, tc.wantCondition)).To(Equal(true))
 		})
 	}
 }
@@ -438,7 +437,7 @@ func Test_syncConditionWebhookCallStatus(t *testing.T) {
 					},
 				}
 				// set EmsSubscriptionStatus
-				subscription.Status.EmsSubscriptionStatus = eventingv1alpha1.EmsSubscriptionStatus{
+				subscription.Status.EmsSubscriptionStatus = &eventingv1alpha1.EmsSubscriptionStatus{
 					LastSuccessfulDelivery:   "invalid",
 					LastFailedDelivery:       "invalid",
 					LastFailedDeliveryReason: "",
@@ -476,7 +475,7 @@ func Test_syncConditionWebhookCallStatus(t *testing.T) {
 				}
 				// set EmsSubscriptionStatus
 				// LastFailedDelivery is latest
-				subscription.Status.EmsSubscriptionStatus = eventingv1alpha1.EmsSubscriptionStatus{
+				subscription.Status.EmsSubscriptionStatus = &eventingv1alpha1.EmsSubscriptionStatus{
 					LastSuccessfulDelivery:   time.Now().Format(time.RFC3339),
 					LastFailedDelivery:       time.Now().Add(1 * time.Hour).Format(time.RFC3339),
 					LastFailedDeliveryReason: "abc",
@@ -514,7 +513,7 @@ func Test_syncConditionWebhookCallStatus(t *testing.T) {
 				}
 				// set EmsSubscriptionStatus
 				// LastSuccessfulDelivery is latest
-				subscription.Status.EmsSubscriptionStatus = eventingv1alpha1.EmsSubscriptionStatus{
+				subscription.Status.EmsSubscriptionStatus = &eventingv1alpha1.EmsSubscriptionStatus{
 					LastSuccessfulDelivery:   time.Now().Add(1 * time.Hour).Format(time.RFC3339),
 					LastFailedDelivery:       time.Now().Format(time.RFC3339),
 					LastFailedDeliveryReason: "",
@@ -553,7 +552,7 @@ func Test_syncConditionWebhookCallStatus(t *testing.T) {
 			// then
 			newCondition := subscription.Status.FindCondition(tc.wantCondition.Type)
 			g.Expect(newCondition).ShouldNot(BeNil())
-			g.Expect(equality.ConditionEquals(*newCondition, tc.wantCondition)).To(Equal(true))
+			g.Expect(eventingv1alpha1.ConditionEquals(*newCondition, tc.wantCondition)).To(Equal(true))
 		})
 	}
 }
@@ -571,7 +570,7 @@ func Test_checkStatusActive(t *testing.T) {
 			subscription: func() *eventingv1alpha1.Subscription {
 				subscription := reconcilertesting.NewSubscription("some-name", "some-namespace")
 				subscription.Status.InitializeConditions()
-				subscription.Status.EmsSubscriptionStatus = eventingv1alpha1.EmsSubscriptionStatus{
+				subscription.Status.EmsSubscriptionStatus = &eventingv1alpha1.EmsSubscriptionStatus{
 					SubscriptionStatus: string(types.SubscriptionStatusActive),
 				}
 				return subscription
@@ -585,7 +584,7 @@ func Test_checkStatusActive(t *testing.T) {
 				subscription := reconcilertesting.NewSubscription("some-name", "some-namespace")
 				subscription.Status.InitializeConditions()
 				subscription.Status.FailedActivation = currentTime.Format(time.RFC3339)
-				subscription.Status.EmsSubscriptionStatus = eventingv1alpha1.EmsSubscriptionStatus{
+				subscription.Status.EmsSubscriptionStatus = &eventingv1alpha1.EmsSubscriptionStatus{
 					SubscriptionStatus: string(types.SubscriptionStatusActive),
 				}
 				return subscription
@@ -598,7 +597,7 @@ func Test_checkStatusActive(t *testing.T) {
 			subscription: func() *eventingv1alpha1.Subscription {
 				subscription := reconcilertesting.NewSubscription("some-name", "some-namespace")
 				subscription.Status.InitializeConditions()
-				subscription.Status.EmsSubscriptionStatus = eventingv1alpha1.EmsSubscriptionStatus{
+				subscription.Status.EmsSubscriptionStatus = &eventingv1alpha1.EmsSubscriptionStatus{
 					SubscriptionStatus: string(types.SubscriptionStatusPaused),
 				}
 				return subscription
@@ -612,7 +611,7 @@ func Test_checkStatusActive(t *testing.T) {
 				subscription := reconcilertesting.NewSubscription("some-name", "some-namespace")
 				subscription.Status.InitializeConditions()
 				subscription.Status.FailedActivation = currentTime.Format(time.RFC3339)
-				subscription.Status.EmsSubscriptionStatus = eventingv1alpha1.EmsSubscriptionStatus{
+				subscription.Status.EmsSubscriptionStatus = &eventingv1alpha1.EmsSubscriptionStatus{
 					SubscriptionStatus: string(types.SubscriptionStatusPaused),
 				}
 				return subscription
@@ -626,7 +625,7 @@ func Test_checkStatusActive(t *testing.T) {
 				subscription := reconcilertesting.NewSubscription("some-name", "some-namespace")
 				subscription.Status.InitializeConditions()
 				subscription.Status.FailedActivation = currentTime.Add(time.Minute * -1).Format(time.RFC3339)
-				subscription.Status.EmsSubscriptionStatus = eventingv1alpha1.EmsSubscriptionStatus{
+				subscription.Status.EmsSubscriptionStatus = &eventingv1alpha1.EmsSubscriptionStatus{
 					SubscriptionStatus: string(types.SubscriptionStatusPaused),
 				}
 				return subscription
@@ -663,7 +662,7 @@ func Test_checkLastFailedDelivery(t *testing.T) {
 			givenSubscription: func() *eventingv1alpha1.Subscription {
 				subscription := reconcilertesting.NewSubscription("some-name", "some-namespace")
 				// set EmsSubscriptionStatus
-				subscription.Status.EmsSubscriptionStatus = eventingv1alpha1.EmsSubscriptionStatus{
+				subscription.Status.EmsSubscriptionStatus = &eventingv1alpha1.EmsSubscriptionStatus{
 					LastSuccessfulDelivery:   "",
 					LastFailedDelivery:       "",
 					LastFailedDeliveryReason: "",
@@ -678,7 +677,7 @@ func Test_checkLastFailedDelivery(t *testing.T) {
 			givenSubscription: func() *eventingv1alpha1.Subscription {
 				subscription := reconcilertesting.NewSubscription("some-name", "some-namespace")
 				// set EmsSubscriptionStatus
-				subscription.Status.EmsSubscriptionStatus = eventingv1alpha1.EmsSubscriptionStatus{
+				subscription.Status.EmsSubscriptionStatus = &eventingv1alpha1.EmsSubscriptionStatus{
 					LastSuccessfulDelivery:   "",
 					LastFailedDelivery:       "invalid",
 					LastFailedDeliveryReason: "",
@@ -693,7 +692,7 @@ func Test_checkLastFailedDelivery(t *testing.T) {
 			givenSubscription: func() *eventingv1alpha1.Subscription {
 				subscription := reconcilertesting.NewSubscription("some-name", "some-namespace")
 				// set EmsSubscriptionStatus
-				subscription.Status.EmsSubscriptionStatus = eventingv1alpha1.EmsSubscriptionStatus{
+				subscription.Status.EmsSubscriptionStatus = &eventingv1alpha1.EmsSubscriptionStatus{
 					LastSuccessfulDelivery:   "invalid",
 					LastFailedDelivery:       time.Now().Format(time.RFC3339),
 					LastFailedDeliveryReason: "",
@@ -708,7 +707,7 @@ func Test_checkLastFailedDelivery(t *testing.T) {
 			givenSubscription: func() *eventingv1alpha1.Subscription {
 				subscription := reconcilertesting.NewSubscription("some-name", "some-namespace")
 				// set EmsSubscriptionStatus
-				subscription.Status.EmsSubscriptionStatus = eventingv1alpha1.EmsSubscriptionStatus{
+				subscription.Status.EmsSubscriptionStatus = &eventingv1alpha1.EmsSubscriptionStatus{
 					LastSuccessfulDelivery:   time.Now().Format(time.RFC3339),
 					LastFailedDelivery:       time.Now().Add(1 * time.Hour).Format(time.RFC3339),
 					LastFailedDeliveryReason: "",
@@ -723,7 +722,7 @@ func Test_checkLastFailedDelivery(t *testing.T) {
 			givenSubscription: func() *eventingv1alpha1.Subscription {
 				subscription := reconcilertesting.NewSubscription("some-name", "some-namespace")
 				// set EmsSubscriptionStatus
-				subscription.Status.EmsSubscriptionStatus = eventingv1alpha1.EmsSubscriptionStatus{
+				subscription.Status.EmsSubscriptionStatus = &eventingv1alpha1.EmsSubscriptionStatus{
 					LastSuccessfulDelivery:   time.Now().Add(1 * time.Hour).Format(time.RFC3339),
 					LastFailedDelivery:       time.Now().Format(time.RFC3339),
 					LastFailedDeliveryReason: "",

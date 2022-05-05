@@ -28,7 +28,7 @@ const (
 	InstanceLabelValue       = "eventing"
 	DashboardLabelKey        = "kyma-project.io/dashboard"
 	DashboardLabelValue      = "eventing"
-	BackendLabelKey          = "kyma-project.io/eventingBackend"
+	BackendLabelKey          = "eventing.kyma-project.io/backend"
 	publisherPortName        = "http"
 	publisherPortNum         = int32(8080)
 	publisherMetricsPortName = "http-metrics"
@@ -105,7 +105,8 @@ func WithLabels(backendType v1alpha1.BackendType) DeployOpt {
 	labels := map[string]string{
 		AppLabelKey:       PublisherName,
 		InstanceLabelKey:  InstanceLabelValue,
-		DashboardLabelKey: DashboardLabelValue}
+		DashboardLabelKey: DashboardLabelValue,
+	}
 	return func(d *appsv1.Deployment) {
 		d.Spec.Selector = metav1.SetAsLabelSelector(labels)
 		d.Spec.Template.ObjectMeta.Labels = labels

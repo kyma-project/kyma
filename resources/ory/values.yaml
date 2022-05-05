@@ -30,14 +30,14 @@ global:
   images:
     k8s_tools:
       name: "k8s-tools"
-      version: "20220331-9c1578c1"
+      version: "20220426-5e9a4f50"
       directory: "tpi"
     ## Google Cloud SQL Proxy image
     ## ref: https://cloud.google.com/sql/docs/mysql/sql-proxy
     ## ref: https://cloud.google.com/sql/docs/postgres/sql-proxy
     gce_proxy:
       name: "gce-proxy"
-      version: "v1.28.0-alpine-68cd4000"
+      version: "v1.30.0-alpine-979d1ebd"
       directory: "tpi/cloudsql-docker"
     hydra:
       name: "hydra"
@@ -61,7 +61,7 @@ global:
       directory: "external/oryd"
     postgres:
       name: "postgres"
-      version: "11.14-alpine-v1"
+      version: "11.14-alpine3.15"
       directory: "external"
     postgres_exporter:
       name: "postgres-exporter"

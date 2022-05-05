@@ -5,6 +5,7 @@ global:
 controller:
   jetstream:
     retentionPolicy: limits
+    consumerDeliverPolicy: new
     maxMessages: -1
     maxBytes: -1
   resources:
