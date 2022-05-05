@@ -26,7 +26,27 @@ func TestValidateAllowedFilters(t *testing.T) {
 			Filters: []telemetryv1alpha1.Filter{
 				{
 					Content: `
-    Name   grep
+    Name    grep
+    Match   *
+    Regex   $kubernetes['labels']['app'] my-deployment`,
+				},
+			},
+		},
+	}
+
+	err := pluginValidator.Validate(logPipeline)
+	require.NoError(t, err)
+}
+
+func TestValidateAllowedUpperCaseFilters(t *testing.T) {
+	pluginValidator := NewPluginValidator([]string{"grep", "lua", "multiline"}, []string{})
+
+	logPipeline := &telemetryv1alpha1.LogPipeline{
+		Spec: telemetryv1alpha1.LogPipelineSpec{
+			Filters: []telemetryv1alpha1.Filter{
+				{
+					Content: `
+    Name    Grep
     Match   *
     Regex   $kubernetes['labels']['app'] my-deployment`,
 				},
@@ -46,7 +66,7 @@ func TestValidateForbiddenFilters(t *testing.T) {
 			Filters: []telemetryv1alpha1.Filter{
 				{
 					Content: `
-    Name   grep
+    Name    grep
     Match   *
     Regex   $kubernetes['labels']['app'] my-deployment`,
 				},
@@ -129,7 +149,7 @@ func TestValidateAllowAll(t *testing.T) {
 			Filters: []telemetryv1alpha1.Filter{
 				{
 					Content: `
-    Name   grep
+    Name    grep
     Match   *
     Regex   $kubernetes['labels']['app'] my-deployment`,
 				},

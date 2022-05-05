@@ -2,6 +2,7 @@ package fluentbit
 
 import (
 	"fmt"
+	"strings"
 
 	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/api/v1alpha1"
 )
@@ -76,7 +77,7 @@ func isPluginAllowed(pluginName string, allowedPlugins []string) bool {
 		return true
 	}
 	for _, allowedPlugin := range allowedPlugins {
-		if pluginName == allowedPlugin {
+		if strings.EqualFold(pluginName, allowedPlugin) {
 			return true
 		}
 	}
