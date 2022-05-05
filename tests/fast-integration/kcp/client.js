@@ -103,8 +103,8 @@ class KCPWrapper {
 
   async reconciliations(query) {
     let args = ['reconciliations', `${query.parameter}`, '--output', 'json'];
-    if (query.shootName) {
-      args = args.concat('--shoot', `${query.shootName}`);
+    if (query.runtimeID) {
+      args = args.concat('--runtime-id', `${query.runtimeID}`);
     }
     if (query.schedulingID) {
       args = args.concat('--scheduling-id', `${query.schedulingID}`);
@@ -168,10 +168,10 @@ class KCPWrapper {
     }
   };
 
-  async getReconciliationsOperations(shootName) {
+  async getReconciliationsOperations(runtimeID) {
     await this.login();
     const reconciliationsOperations = await this.reconciliations({parameter: 'operations',
-      shootName: shootName});
+      runtimeID: runtimeID});
     return JSON.stringify(reconciliationsOperations, null, '\t');
   }
 
@@ -284,19 +284,19 @@ class KCPWrapper {
       const objRuntimeStatus = JSON.parse(runtimeStatus);
 
       try {
-        if (!objRuntimeStatus.data[0].shootName) {}
+        if (!objRuntimeStatus.data[0].runtimeID) {}
       } catch (e) {
-        console.log('skipping reconciliation logging: no shootName provided by runtimeStatus');
+        console.log('skipping reconciliation logging: no runtimeID provided by runtimeStatus');
         return;
       }
 
-      // kcp reconciliations operations -c <shootName> -o json
-      const reconciliationsOperations = await this.getReconciliationsOperations(objRuntimeStatus.data[0].shootName);
+      // kcp reconciliations operations -r <runtimeID> -o json
+      const reconciliationsOperations = await this.getReconciliationsOperations(objRuntimeStatus.data[0].runtimeID);
 
       const objReconciliationsOperations = JSON.parse(reconciliationsOperations);
 
       if ( objReconciliationsOperations == null ) {
-        console.log(`skipping reconciliation logging: kcp rc operations -c ${objRuntimeStatus.data[0].shootName}
+        console.log(`skipping reconciliation logging: kcp rc operations -r ${objRuntimeStatus.data[0].runtimeID}
          -o json returned null`);
         return;
       }
