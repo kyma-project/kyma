@@ -668,6 +668,7 @@ async function ensureCommerceMockLocalTestFixture(mockNamespace,
       targetNamespace,
     withCentralApplicationConnectivity ? prepareFunction('central-app-gateway') : prepareFunction());
 
+  await waitForDeployment('central-application-gateway', 'kyma-system');
   await waitForFunction('lastorder', targetNamespace);
 
   await k8sApply([eventingSubscription(
