@@ -171,15 +171,13 @@ async function cleanupInstanceBinding(creds, svcatPlatform, btpOperatorInstance,
   }
 }
 
-class SMCreds {
+
+class AdminCreds {
   static fromEnv() {
-    return new SMCreds(
-        // TODO: rename to BTP_SM_ADMIN_CLIENTID
-        getEnvOrThrow('BTP_OPERATOR_CLIENTID'),
-        // TODO: rename to BTP_SM_ADMIN_CLIENTID
-        getEnvOrThrow('BTP_OPERATOR_CLIENTSECRET'),
-        // TODO: rename to BTP_SM_URL
-        getEnvOrThrow('BTP_OPERATOR_URL'),
+    return new AdminCreds(
+        getEnvOrThrow('BTP_SM_ADMIN_CLIENTID'),
+        getEnvOrThrow('BTP_SM_ADMIN_CLIENTSECRET'),
+        getEnvOrThrow('BTP_SM_ADMIN_URL'),
     );
   }
 
@@ -190,10 +188,29 @@ class SMCreds {
   }
 }
 
+class BTPOperatorCreds {
+  static fromEnv() {
+    return new BTPOperatorCreds(
+        getEnvOrThrow('BTP_OPERATOR_CLIENTID'),
+        getEnvOrThrow('BTP_OPERATOR_CLIENTSECRET'),
+        getEnvOrThrow('BTP_OPERATOR_URL'),
+        getEnvOrThrow('BTP_OPERATOR_TOKENURL'),
+    );
+  }
+
+  constructor(clientid, clientsecret, smURL, url) {
+    this.clientid = clientid;
+    this.clientsecret = clientsecret;
+    this.smURL = smURL;
+    this.url = url;
+  }
+}
+
 module.exports = {
   provisionPlatform,
   smInstanceBinding,
   markForMigration,
   cleanupInstanceBinding,
-  SMCreds,
+  AdminCreds: AdminCreds,
+  BTPOperatorCreds: BTPOperatorCreds,
 };
