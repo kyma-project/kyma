@@ -2,6 +2,7 @@ FROM debian:11
 
 ENV KUBECONFIG=/KUBECONFIG/kubeconfig.yaml
 ENV EVENTMESH_SECRET_FILE=/EMS/ems.json
+ENV FIT_MAKE_TARGET=ci-test-eventing
 
 VOLUME /KUBECONFIG
 VOLUME /EMS
@@ -20,7 +21,7 @@ RUN curl -fLSs https://deb.nodesource.com/setup_14.x | bash -
 RUN apt-get -y --no-install-recommends install nodejs
 
 WORKDIR /
-COPY clone-and-run-eventing-fit.sh /run-fit.sh
-RUN chmod +x /run-fit.sh
+COPY clone-and-run-fit.sh /clone-and-run-fit.sh
+RUN chmod +x /clone-and-run-fit.sh
 
-CMD ["./run-fit.sh"]
+CMD ["./clone-and-run-fit.sh"]
