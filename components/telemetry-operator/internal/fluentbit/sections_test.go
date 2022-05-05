@@ -12,6 +12,13 @@ func TestParseInvalidSections(t *testing.T) {
 	require.Error(t, err)
 }
 
+func TestEmptySection(t *testing.T) {
+	section := ""
+	result, err := parseSection(section)
+	require.NoError(t, err)
+	require.Equal(t, map[string]string{}, result)
+}
+
 func TestParseInvalidMultiLineSections(t *testing.T) {
 	section := "key value\ninvalid"
 	_, err := parseSection(section)
@@ -48,6 +55,20 @@ func TestParseUntrimmedLine(t *testing.T) {
 
 func TestParseMultiLine(t *testing.T) {
 	section := "key1 value1\nkey2 value2\n\nkey3 value3"
+	result, err := parseSection(section)
+	require.NoError(t, err)
+	require.Equal(t, map[string]string{"key1": "value1", "key2": "value2", "key3": "value3"}, result)
+}
+
+func TestParseComment(t *testing.T) {
+	section := "#comment"
+	result, err := parseSection(section)
+	require.NoError(t, err)
+	require.Equal(t, map[string]string{}, result)
+}
+
+func TestParseMultiLineWithComment(t *testing.T) {
+	section := "key1 value1\n#comment\nkey2 value2\n\nkey3 value3"
 	result, err := parseSection(section)
 	require.NoError(t, err)
 	require.Equal(t, map[string]string{"key1": "value1", "key2": "value2", "key3": "value3"}, result)
