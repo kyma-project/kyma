@@ -123,14 +123,18 @@ class KCPWrapper {
     return await this.exec(args);
   }
 
-  async upgradeKyma(instanceID, kymaUpgradeVersion, subAccountID) {
+  async upgradeKyma(instanceID, kymaUpgradeVersion) {
     const args = ['upgrade', 'kyma', `--version=${kymaUpgradeVersion}`, '--target', `instance-id=${instanceID}`];
     try {
       const res = await this.exec(args);
 
-      // output if successful: "OrchestrationID: 22f19856-679b-4e68-b533-f1a0a46b1eed"
+      // output if successful:
+      // "Note: Ignore sending slack notification when slackAPIURL is empty\nOrchestrationID: 22f19856-679b-4e68-b533-f1a0a46b1eed"
       // so we need to extract the uuid
-      const orchestrationID = res.split(' ')[1];
+      if (!res.includes('OrchestrationID: ')) {
+        throw new Error(`Kyma Upgrade failed. KCP upgrade command returned no OrchestrationID. Response: \"${res}\"`);
+      }
+      const orchestrationID = res.split('OrchestrationID: ')[1];
       debug(`OrchestrationID: ${orchestrationID}`);
 
       try {
@@ -141,7 +145,7 @@ class KCPWrapper {
       }
 
       try {
-        const runtime = await this.runtimes({subaccount: subAccountID});
+        const runtime = await this.runtimes({instanceID: instanceID});
         debug(`Runtime Status: ${inspect(runtime, false, null, false)}`);
       } catch (error) {
         debug(error);
