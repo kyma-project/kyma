@@ -12,7 +12,7 @@ const {
 const {
   genRandom,
 } = require('../utils');
-const s = require('../smctl/helpers');
+const {BTPOperatorCreds} = require('../smctl/helpers');
 
 const kcp = new KCPWrapper(KCPConfig.fromEnv());
 
@@ -28,17 +28,11 @@ describe('Execute SKR test', function() {
 
       const keb = new KEBClient(KEBConfig.fromEnv());
       const gardener = new GardenerClient(GardenerConfig.fromEnv());
-      const smAdminCreds = s.SMCreds.fromEnv();
-
+      const btpOperatorCreds = BTPOperatorCreds.fromEnv();
 
       const suffix = genRandom(4);
       const runtimeName = `kyma-${suffix}`;
       this.options.appName = `app-${suffix}`;
-
-      const btpOperatorInstance = `btp-operator-${suffix}`;
-      const btpOperatorBinding = `btp-operator-binding-${suffix}`;
-
-      const btpOperatorCreds = await s.smInstanceBinding(smAdminCreds, btpOperatorInstance, btpOperatorBinding);
 
       console.log(`\nInstanceID ${this.options.instanceID}`,
           `Runtime ${runtimeName}`, `Application ${this.options.appName}`, `Suffix ${suffix}`);

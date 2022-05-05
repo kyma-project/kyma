@@ -28,7 +28,7 @@ const kcp = new KCPWrapper(KCPConfig.fromEnv());
 describe('SKR SVCAT migration test', function() {
   const keb = new KEBClient(KEBConfig.fromEnv());
   const gardener = new GardenerClient(GardenerConfig.fromEnv());
-  const smAdminCreds = s.SMCreds.fromEnv();
+  const smAdminCreds = s.AdminCreds.fromEnv();
 
   const suffix = genRandom(4);
   const appName = `app-${suffix}`;
