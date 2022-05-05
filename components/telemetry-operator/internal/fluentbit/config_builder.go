@@ -21,7 +21,7 @@ func BuildConfigSection(header ConfigHeader, content string) string {
 	sb.WriteByte('\n')
 	for _, line := range strings.Split(content, "\n") {
 		if len(strings.TrimSpace(line)) > 0 { // Skip empty lines to do not break rendering in yaml output
-			sb.WriteString("    " + line + "\n") // 4 indentations
+			sb.WriteString("    " + strings.TrimSpace(line) + "\n") // 4 indentations
 		}
 	}
 	sb.WriteByte('\n')
