@@ -10,12 +10,12 @@ You publish an event but the event is not received by the subscriber.
 
 Follow these steps to detect the source of the problem:
 
-1. Check the eventing backend CRD, if eventingReady is true. Run the command:
+1. Check the eventing backend CRD, if the field `EVENTINGREADY` is true:
    
    ```bash
    kubectl -n kyma-system get eventingBackend
    ```
-   If eventingReady is false, check the exact reason of the error in the status of the CRD by running the command:
+   If `EVENTINGREADY` is false, check the exact reason of the error in the status of the CRD by running the command:
 
    ```bash
    kubectl -n kyma-system get eventingBackend eventing-backend -o yaml
@@ -32,13 +32,13 @@ Follow these steps to detect the source of the problem:
    kubectl -n {NAMESPACE} get subscription {NAME} -o yaml
    ```
 
-4. Check the controller logs.
+3. Check the controller logs.
 
-   Check the logs from the Eventing Controller Pod to verify that the event is dispatched.
+   Check the logs from the Eventing Controller Pod for any errors or to verify that the event is dispatched.
    To fetch these logs, run this command:
 
    ```bash
    kubectl -n kyma-system logs -l app.kubernetes.io/instance=eventing,app.kubernetes.io/name=controller
    ```
    
-   If the event dispatch log is not present, then the issue could lie with how the event was published.
+   If the event dispatch log `"message":"event dispatched"` is not present for NATS backend, then the issue could lie with how the event was published.

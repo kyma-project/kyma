@@ -6,11 +6,13 @@ JetStream is the 'built-in distributed persistence system' of NATS. You can read
 
 ## Streams and Consumers
 
-A `Stream` is a 'message store' for the events published. In Kyma, we use only one stream for all the events. You can configure the retention and delivery policies for the stream, based on the use-case.
+A `Stream` is a 'message store' for the published events. In Kyma, we use only one stream for all the events. You can configure the retention and delivery policies for the stream, based on the use-case.
 
 A `Consumer` is a 'view' into the stream. A kyma subscription creates one consumer for each filter specified. In Kyma we use push based consumers.
 
 ## Steps to verify at least once delivery with JetStream backend
+
+In this tutorial, we will verify how JetStream persists events even when the sink is not reachable, and redelivers the event when the sink is available again.
 
 1. Create a [Function](../../02-get-started/04-trigger-workload-with-event.md#create-a-function), [Subscription](../../02-get-started/04-trigger-workload-with-event.md#create-a-subscription) and [trigger the workload with an event](../../02-get-started/04-trigger-workload-with-event.md#trigger-the-workload-with-an-event).
 

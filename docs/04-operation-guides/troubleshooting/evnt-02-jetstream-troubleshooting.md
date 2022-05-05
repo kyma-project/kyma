@@ -18,10 +18,7 @@ Events were not received by the consumers.
         ```
     2. Use the [nats CLI](https://github.com/nats-io/natscli) to list the streams:
        ```bash
-       nats stream ls
-       ```
-    
-        ```bash
+        $ nats stream ls
         ╭────────────────────────────────────────────────────────────────────────────╮
         │                                  Streams                                   │
         ├──────┬─────────────┬─────────────────────┬──────────┬───────┬──────────────┤
@@ -38,9 +35,9 @@ Events were not received by the consumers.
        nats consumer info
        ```
        
-    To correlate the consumer to the subscription, check the `description` field of the consumer. You can also see the consumerNames in the status field of the Subscription CRD.
+    To correlate the consumer to the subscription, check the `description` field of the consumer. You can also see the consumer, corresponding to the subject, in the status field of the Subscription CRD.
 
-3. Check the JetStream grafana dashboard
+3. Check the [JetStream grafana dashboard](https://grafana.com/grafana/dashboards/14725):
 
     1. Port forward the Kyma Eventing NATS Service to localhost. Use port `8081`. Run:
         ```bash
