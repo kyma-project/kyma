@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"context"
+	"errors"
 	"flag"
 	"fmt"
 	"math/rand"
@@ -31,37 +32,45 @@ type flags struct {
 	count      int
 	kubeconfig *string
 	timeout    time.Duration
+	host       string
+	port       int
 }
 
 type httpLogPipeline struct {
-	Name         string
-	Tag          string
-	Host         string
-	StorageLimit string
+	Name string
+	Tag  string
+	Host string
+	Port int
 }
 
 func main() {
-	var args = flags{}
+	var f = flags{}
 	kubeconfig := os.Getenv("KUBECONFIG")
 	if kubeconfig != "" {
-		args.kubeconfig = &kubeconfig
+		f.kubeconfig = &kubeconfig
 	} else if home := homedir.HomeDir(); home != "" {
-		args.kubeconfig = flag.String("kubeconfig", filepath.Join(home, ".kube", "config"), "(optional) absolute path to the kubeconfig file")
+		f.kubeconfig = flag.String("kubeconfig", filepath.Join(home, ".kube", "config"), "(optional) absolute path to the kubeconfig file")
 	} else {
-		args.kubeconfig = flag.String("kubeconfig", "", "absolute path to the kubeconfig file")
+		f.kubeconfig = flag.String("kubeconfig", "", "absolute path to the kubeconfig file")
 	}
 
-	flag.IntVar(&args.count, "count", 1, "Number of log pipelines to deploy")
-	flag.DurationVar(&args.timeout, "timeout", defaultTimeout, "Timeout")
+	flag.IntVar(&f.count, "count", 1, "Number of http log pipelines to deploy")
+	flag.DurationVar(&f.timeout, "timeout", defaultTimeout, "Timeout")
+	flag.StringVar(&f.host, "host", "", "Http host log pipelines will send logs to")
+	flag.IntVar(&f.port, "port", 80, "Http port log pipelines will send logs to")
 	flag.Parse()
 
-	if err := run(args); err != nil {
+	if err := run(f); err != nil {
 		fmt.Printf("Error: %v\n", err)
 		os.Exit(2)
 	}
 }
 
 func run(f flags) error {
+	if f.host == "" {
+		return errors.New("flag not specified: host")
+	}
+
 	ctx, cancel := context.WithTimeout(context.Background(), f.timeout)
 	defer cancel()
 
@@ -84,7 +93,7 @@ func run(f flags) error {
 	for i := 0; i < f.count; i++ {
 		current := i
 		g.Go(func() error {
-			httpPipelineYAML, err := renderHTTPLogPipeline(current)
+			httpPipelineYAML, err := renderHTTPLogPipeline(f.host, f.port, current)
 			if err != nil {
 				return err
 			}
@@ -106,12 +115,13 @@ func run(f flags) error {
 	return nil
 }
 
-func renderHTTPLogPipeline(count int) ([]byte, error) {
+func renderHTTPLogPipeline(host string, port, index int) ([]byte, error) {
 	rendered := bytes.Buffer{}
 	values := httpLogPipeline{
-		Name: fmt.Sprintf("http-%d", count),
+		Name: fmt.Sprintf("http-%d", index),
 		Tag:  randomTag(),
-		Host: "mockserver.mockserver",
+		Host: host,
+		Port: port,
 	}
 	httpTempl := template.Must(template.ParseFiles("./assets/http.yml"))
 	err := httpTempl.Execute(&rendered, values)

@@ -19,7 +19,7 @@ spec:
         Match              {{ .Tag }}
         Retry_Limit        False
         Host               {{ .Host }}
-        Port               1080
+        Port               {{ .Port }}
         URI                /
         Header             Content-Type application/json
         HTTP_User          user
