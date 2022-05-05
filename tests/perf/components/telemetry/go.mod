@@ -2,11 +2,14 @@ module github.com/kyma-project/kyma/tests/perf/components/telemetry-perf
 
 go 1.17
 
-require k8s.io/client-go v0.22.2
+require (
+	github.com/prometheus/common v0.32.1
+	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c
+	k8s.io/client-go v0.22.2
+)
 
 require (
 	github.com/moby/spdystream v0.2.0 // indirect
-	github.com/prometheus/common v0.32.1 // indirect
 	k8s.io/api v0.22.2 // indirect
 )
 

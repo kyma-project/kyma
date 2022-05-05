@@ -11,22 +11,26 @@ import (
 	"text/template"
 	"time"
 
+	"golang.org/x/sync/errgroup"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/client-go/dynamic"
+	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
 	"k8s.io/client-go/util/homedir"
 )
 
 var (
 	logPipelineGVR = schema.GroupVersionResource{Group: "telemetry.kyma-project.io", Version: "v1alpha1", Resource: "logpipelines"}
+	defaultTimeout = 15 * time.Minute
 )
 
 type flags struct {
 	count      int
 	kubeconfig *string
+	timeout    time.Duration
 }
 
 type httpLogPipeline struct {
@@ -48,6 +52,7 @@ func main() {
 	}
 
 	flag.IntVar(&args.count, "count", 1, "Number of log pipelines to deploy")
+	flag.DurationVar(&args.timeout, "timeout", defaultTimeout, "Timeout")
 	flag.Parse()
 
 	if err := run(args); err != nil {
@@ -57,6 +62,9 @@ func main() {
 }
 
 func run(f flags) error {
+	ctx, cancel := context.WithTimeout(context.Background(), f.timeout)
+	defer cancel()
+
 	config, err := clientcmd.BuildConfigFromFlags("", *f.kubeconfig)
 	if err != nil {
 		return err
@@ -68,49 +76,32 @@ func run(f flags) error {
 	}
 
 	lokiPipelineYAML, err := os.ReadFile("./assets/loki.yml")
-	if err := createLogPipeline(dynamicClient, lokiPipelineYAML); err != nil {
+	if err := createLogPipeline(ctx, dynamicClient, lokiPipelineYAML); err != nil {
 		return err
 	}
 
+	g, gctx := errgroup.WithContext(ctx)
 	for i := 0; i < f.count; i++ {
-		httpPipelineYAML, err := renderHTTPLogPipeline(i)
-		if err != nil {
-			return err
-		}
-
-		if err := createLogPipeline(dynamicClient, httpPipelineYAML); err != nil {
-			return err
-		}
+		current := i
+		g.Go(func() error {
+			httpPipelineYAML, err := renderHTTPLogPipeline(current)
+			if err != nil {
+				return err
+			}
+			if err := createLogPipeline(gctx, dynamicClient, httpPipelineYAML); err != nil {
+				return err
+			}
+			return nil
+		})
 	}
 
-	portForwardToPrometheus(config)
-	time.Sleep(1 * time.Second)
-	queryCPU := `avg(
-		node_namespace_pod_container:container_cpu_usage_seconds_total:sum_irate{cluster="", namespace="kyma-system", container="fluent-bit"}
-	  * on(namespace,pod)
-		group_left(workload, workload_type) namespace_workload_pod:kube_pod_owner:relabel{cluster="", namespace="kyma-system", workload_type="daemonset", workload="telemetry-fluent-bit"}
-	  ) by (workload, workload_type)`
-
-	queryMemory := `avg(
-		container_memory_working_set_bytes{job="kubelet", metrics_path="/metrics/cadvisor", cluster="", namespace="kyma-system", container="fluent-bit", image!=""}
-	  * on(namespace,pod)
-		group_left(workload, workload_type) namespace_workload_pod:kube_pod_owner:relabel{cluster="", namespace="kyma-system", workload_type="daemonset", workload="telemetry-fluent-bit"}
-	) by (workload, workload_type)`
-
-	t := time.Now()
-
-	resultCPU, err := queryPrometheus(queryCPU, t)
-	if err != nil {
+	if err := g.Wait(); err != nil {
 		return err
 	}
-	fmt.Printf("CPU result: %.3f at time: %s\n", resultCPU.Value, resultCPU.Timestamp.Time().Format(time.RFC3339Nano))
 
-	resultMemory, err := queryPrometheus(queryMemory, t)
-	if err != nil {
+	if err := collectMetrics(ctx, config); err != nil {
 		return err
 	}
-	memory := formatBytes(int64(resultMemory.Value))
-	fmt.Printf("Memory result: %s at time: %s\n", memory, resultMemory.Timestamp.Time().Format(time.RFC3339Nano))
 
 	return nil
 }
@@ -140,7 +131,7 @@ func randomTag() string {
 	return string(chars)
 }
 
-func createLogPipeline(dynamicClient dynamic.Interface, logPipelineYAML []byte) error {
+func createLogPipeline(ctx context.Context, dynamicClient dynamic.Interface, logPipelineYAML []byte) error {
 	logPipeline, err := toUnstructured(logPipelineYAML)
 	if err != nil {
 		return err
@@ -152,7 +143,7 @@ func createLogPipeline(dynamicClient dynamic.Interface, logPipelineYAML []byte) 
 	}
 
 	fmt.Printf("Creating a log pipeline %s...\n", logPipelineName)
-	if _, err := dynamicClient.Resource(logPipelineGVR).Create(context.TODO(), logPipeline, metav1.CreateOptions{}); err != nil {
+	if _, err := dynamicClient.Resource(logPipelineGVR).Create(ctx, logPipeline, metav1.CreateOptions{}); err != nil {
 		if apierrors.IsAlreadyExists(err) {
 			fmt.Printf("Log pipeline %s already exists\n", logPipelineName)
 			return nil
@@ -162,21 +153,21 @@ func createLogPipeline(dynamicClient dynamic.Interface, logPipelineYAML []byte) 
 
 	fmt.Printf("Created a log pipeline %s\n", logPipelineName)
 
-	if err := waitForLogPipeline(dynamicClient, logPipeline); err != nil {
+	if err := waitForLogPipeline(ctx, dynamicClient, logPipeline); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func waitForLogPipeline(dynamicClient dynamic.Interface, logPipeline *unstructured.Unstructured) error {
+func waitForLogPipeline(ctx context.Context, dynamicClient dynamic.Interface, logPipeline *unstructured.Unstructured) error {
 	logPipelineName, err := name(logPipeline)
 	if err != nil {
 		return err
 	}
 
-	watch, err := dynamicClient.Resource(logPipelineGVR).Watch(context.TODO(),
-		metav1.ListOptions{FieldSelector: fmt.Sprintf("metadata.name=%s", logPipelineName)})
+	selector := metav1.ListOptions{FieldSelector: fmt.Sprintf("metadata.name=%s", logPipelineName)}
+	watch, err := dynamicClient.Resource(logPipelineGVR).Watch(ctx, selector)
 	if err != nil {
 		return err
 	}
@@ -194,6 +185,41 @@ func waitForLogPipeline(dynamicClient dynamic.Interface, logPipeline *unstructur
 
 		fmt.Printf("Log pipeline %s is not yet running. Waiting...\n", logPipelineName)
 	}
+
+	return nil
+}
+
+func collectMetrics(ctx context.Context, config *rest.Config) error {
+	portForwardToPrometheus(config)
+
+	time.Sleep(1 * time.Second)
+
+	queryCPU := `avg(
+		node_namespace_pod_container:container_cpu_usage_seconds_total:sum_irate{cluster="", namespace="kyma-system", container="fluent-bit"}
+	  * on(namespace,pod)
+		group_left(workload, workload_type) namespace_workload_pod:kube_pod_owner:relabel{cluster="", namespace="kyma-system", workload_type="daemonset", workload="telemetry-fluent-bit"}
+	  ) by (workload, workload_type)`
+
+	queryMemory := `avg(
+		container_memory_working_set_bytes{job="kubelet", metrics_path="/metrics/cadvisor", cluster="", namespace="kyma-system", container="fluent-bit", image!=""}
+	  * on(namespace,pod)
+		group_left(workload, workload_type) namespace_workload_pod:kube_pod_owner:relabel{cluster="", namespace="kyma-system", workload_type="daemonset", workload="telemetry-fluent-bit"}
+	) by (workload, workload_type)`
+
+	t := time.Now()
+
+	resultCPU, err := queryPrometheus(ctx, queryCPU, t)
+	if err != nil {
+		return err
+	}
+	fmt.Printf("CPU result: %.3f at time: %s\n", resultCPU.Value, resultCPU.Timestamp.Time().Format(time.RFC3339Nano))
+
+	resultMemory, err := queryPrometheus(ctx, queryMemory, t)
+	if err != nil {
+		return err
+	}
+	memory := formatBytes(int64(resultMemory.Value))
+	fmt.Printf("Memory result: %s at time: %s\n", memory, resultMemory.Timestamp.Time().Format(time.RFC3339Nano))
 
 	return nil
 }
