@@ -29,11 +29,12 @@ var (
 )
 
 type flags struct {
-	count      int
-	kubeconfig *string
-	timeout    time.Duration
-	host       string
-	port       int
+	count          int
+	kubeconfig     *string
+	timeout        time.Duration
+	host           string
+	port           int
+	unhealthyRatio float64
 }
 
 type httpLogPipeline struct {
@@ -58,6 +59,7 @@ func main() {
 	flag.DurationVar(&f.timeout, "timeout", defaultTimeout, "Timeout")
 	flag.StringVar(&f.host, "host", "", "Http host log pipelines will send logs to")
 	flag.IntVar(&f.port, "port", 80, "Http port log pipelines will send logs to")
+	flag.Float64Var(&f.unhealthyRatio, "unhealthy-ratio", 0, "Ratio of unhealthy to healthy http log pipelines (from 0 to 1, where 0 means all are healthy and 1 means all are unhealthy)")
 	flag.Parse()
 
 	if err := run(f); err != nil {
@@ -90,10 +92,17 @@ func run(f flags) error {
 	}
 
 	g, gctx := errgroup.WithContext(ctx)
+
 	for i := 0; i < f.count; i++ {
 		current := i
 		g.Go(func() error {
-			httpPipelineYAML, err := renderHTTPLogPipeline(f.host, f.port, current)
+			var httpPipelineYAML []byte
+			unhealthy := int(f.unhealthyRatio * float64(f.count))
+			if current < unhealthy {
+				httpPipelineYAML, err = renderUnhealthyHTTPLogPipeline(current)
+			} else {
+				httpPipelineYAML, err = renderHealthyHTTPLogPipeline(f.host, f.port, current)
+			}
 			if err != nil {
 				return err
 			}
@@ -115,13 +124,29 @@ func run(f flags) error {
 	return nil
 }
 
-func renderHTTPLogPipeline(host string, port, index int) ([]byte, error) {
+func renderHealthyHTTPLogPipeline(host string, port, index int) ([]byte, error) {
 	rendered := bytes.Buffer{}
 	values := httpLogPipeline{
 		Name: fmt.Sprintf("http-%d", index),
 		Tag:  randomTag(),
 		Host: host,
 		Port: port,
+	}
+	httpTempl := template.Must(template.ParseFiles("./assets/http.yml"))
+	err := httpTempl.Execute(&rendered, values)
+	if err != nil {
+		return nil, err
+	}
+	return rendered.Bytes(), nil
+}
+
+func renderUnhealthyHTTPLogPipeline(index int) ([]byte, error) {
+	rendered := bytes.Buffer{}
+	values := httpLogPipeline{
+		Name: fmt.Sprintf("http-%d", index),
+		Tag:  randomTag(),
+		Host: "broken",
+		Port: 80,
 	}
 	httpTempl := template.Must(template.ParseFiles("./assets/http.yml"))
 	err := httpTempl.Execute(&rendered, values)
