@@ -71,7 +71,7 @@ This guide shows how to call a registered external service from Kyma using a sim
    
        module.exports = { main: function (event, context) {
            return new Promise((resolve, reject) => {
-               const url = \`http://\${process.env.GATEWAY_URL}/uuid\`;
+               const url = `${process.env.GATEWAY_URL}/uuid`;
                const options = {
                    url: url,
                };
