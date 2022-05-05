@@ -27,8 +27,9 @@ class SKRSetup {
                 const customParams = {
                   oidc: this.options.oidc0,
                 };
-                const provisioningTimeout = 1000 * 60 * 30 * 60; // 30m
+                const provisioningTimeout = 1000 * 60 * 30; // 30m
 
+                console.log(this.options.runtimeName);
                 const skr = await provisionSKR(keb, this.kcp, gardener,
                     this.options.instanceID,
                     this.options.runtimeName,
@@ -57,7 +58,7 @@ class SKRSetup {
     static async updateSKR(options,
         customParams,
         btpOperatorCreds = null,
-        isMigration = false){
+        isMigration = false) {
         if (!this._skrUpdated){
             try{
                 this.updateSkrResponse = await keb.updateSKR(options.instanceID, customParams, btpOperatorCreds, isMigration);
@@ -71,7 +72,7 @@ class SKRSetup {
     static async updateSKRAdmins(options,
         customParams,
         btpOperatorCreds = null,
-        isMigration = false){
+        isMigration = false) {
         if (!this._skrAdminsUpdated){
             try{
                 this.updateSkrAdminsResponse = await keb.updateSKR(options.instanceID, customParams, btpOperatorCreds, isMigration);
@@ -82,7 +83,7 @@ class SKRSetup {
         }
     }
 
-    static async deprovisionSKR(){
+    static async deprovisionSKR() {
         const deprovisioningTimeout = 1000 * 60 * 95; // 95m
 
         try {
