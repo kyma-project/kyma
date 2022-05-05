@@ -73,6 +73,10 @@ func run(f flags) error {
 		return errors.New("flag not specified: host")
 	}
 
+	if f.unhealthyRatio < 0 || f.unhealthyRatio > 1 {
+		return errors.New("flag invalid: unhealthyRatio (should be between 0 and 1)")
+	}
+
 	ctx, cancel := context.WithTimeout(context.Background(), f.timeout)
 	defer cancel()
 
