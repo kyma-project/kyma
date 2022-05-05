@@ -9,9 +9,6 @@ const {
   sendLegacyEventAndCheckResponse,
   sendCloudEventStructuredModeAndCheckResponse,
   sendCloudEventBinaryModeAndCheckResponse,
-  sendLegacyEventAndCheckTracing,
-  sendCloudEventStructuredModeAndCheckTracing,
-  sendCloudEventBinaryModeAndCheckTracing,
   checkInClusterEventDelivery,
   waitForSubscriptionsTillReady,
   waitForSubscriptions,
@@ -179,15 +176,6 @@ describe('Eventing tests', function() {
       return;
     }
 
-    it('order.created.v1 event from CommerceMock should have correct tracing spans', async function() {
-      await sendLegacyEventAndCheckTracing(testNamespace, mockNamespace);
-    });
-    it('order.created.v1 structured cloud event from CommerceMock should have correct tracing spans', async function() {
-      await sendCloudEventStructuredModeAndCheckTracing(testNamespace, mockNamespace);
-    });
-    it('order.created.v1 binary cloud event from CommerceMock should have correct tracing spans', async function() {
-      await sendCloudEventBinaryModeAndCheckTracing(testNamespace, mockNamespace);
-    });
     it('In-cluster event should have correct tracing spans', async function() {
       await checkInClusterEventTracing(testNamespace);
     });
