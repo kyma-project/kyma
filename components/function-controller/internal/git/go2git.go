@@ -56,7 +56,7 @@ func (g *Git2GoClient) LastCommit(options Options) (string, error) {
 
 	repo, err := g.fetchRepo(options, tmpPath)
 	if err != nil {
-		return "", errors.Wrap(err, "while fetching repo")
+		return "", errors.Wrap(err, "while fetching the repository")
 	}
 	defer repo.Free()
 
@@ -81,6 +81,7 @@ func (g *Git2GoClient) Clone(path string, options Options) (string, error) {
 	if err != nil {
 		return "", errors.Wrap(err, "while cloning the repository")
 	}
+	defer repo.Free()
 
 	oid, err := git2go.NewOid(options.Reference)
 	if err != nil {
