@@ -87,6 +87,7 @@ allowedPlugins:
   output:
     - grafana-loki
     - http
+    - forward
 
 nodeSelector: {}
 
