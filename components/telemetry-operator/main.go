@@ -20,6 +20,7 @@ import (
 	"errors"
 	"flag"
 	"os"
+	"strings"
 
 	"github.com/go-logr/zapr"
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/fluentbit"
@@ -59,6 +60,8 @@ var (
 	logFormat                  string
 	logLevel                   string
 	certDir                    string
+	allowedFilterPlugins       string
+	allowedOutputPlugins       string
 )
 
 //nolint:gochecknoinits
@@ -96,6 +99,8 @@ func main() {
 	flag.StringVar(&logFormat, "log-format", getEnvOrDefault("APP_LOG_FORMAT", "text"), "Log format (json or text)")
 	flag.StringVar(&logLevel, "log-level", getEnvOrDefault("APP_LOG_LEVEL", "debug"), "Log level (debug, info, warn, error, fatal)")
 	flag.StringVar(&certDir, "cert-dir", "/var/run/telemetry-webhook", "Webhook TLS certificate directory")
+	flag.StringVar(&allowedFilterPlugins, "allowed-filter-plugins", "", "Comma separated list of allowed filter plugins. If empty, all filter plugins are allowed.")
+	flag.StringVar(&allowedOutputPlugins, "allowed-output-plugins", "", "Comma separated list of allowed output plugins. If empty, all output plugins are allowed.")
 	flag.Parse()
 
 	ctrLogger, err := logger.New(logFormat, logLevel)
@@ -133,6 +138,9 @@ func main() {
 		fluentBitConfigMap,
 		fluentBitNs,
 		fluentbit.NewConfigValidator(fluentBitPath, fluentBitPluginDirectory),
+		fluentbit.NewPluginValidator(
+			strings.SplitN(strings.ReplaceAll(allowedFilterPlugins, " ", ""), ",", len(allowedFilterPlugins)),
+			strings.SplitN(strings.ReplaceAll(allowedOutputPlugins, " ", ""), ",", len(allowedOutputPlugins))),
 		fs.NewWrapper(),
 	)
 	mgr.GetWebhookServer().Register(

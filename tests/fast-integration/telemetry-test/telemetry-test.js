@@ -5,6 +5,7 @@ const path = require('path');
 const {
   k8sCoreV1Api,
   k8sApply,
+  k8sDelete,
   waitForK8sObject,
 } = require('../utils');
 const {logsPresentInLoki} = require('../logging');
@@ -75,6 +76,8 @@ describe('Telemetry Operator tests', function() {
   it('Should reject the invalid LogPipeline', async () => {
     try {
       await k8sApply(invalidLogPipelineCR, telemetryNamespace);
+      await k8sDelete(invalidLogPipelineCR, telemetryNamespace);
+      assert.fail('Should not be able to apply invalid LogPipeline');
     } catch (e) {
       assert.equal(e.statusCode, 403);
       expect(e.body.message).to.have.string('denied the request', 'Invalid indentation level');
