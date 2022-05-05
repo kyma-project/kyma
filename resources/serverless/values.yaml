@@ -125,13 +125,17 @@ deployment:
   annotations: {}
   extraProperties: {}
   livenessProbe:
+    successThreshold: 1
+    failureThreshold: 3
     initialDelaySeconds: 50
-    timeoutSeconds: 2
-    periodSeconds: 10
+    timeoutSeconds: 10
+    periodSeconds: 30
   readinessProbe:
+    successThreshold: 1
+    failureThreshold: 3
     initialDelaySeconds: 10
-    timeoutSeconds: 1
-    periodSeconds: 2
+    timeoutSeconds: 10
+    periodSeconds: 30
 
 pod:
   labels: {}
@@ -203,7 +207,7 @@ containers:
       logLevel:
         value: "info"
       healthzLivenessTimeout:
-        value: "1s"
+        value: "10s"
 
 services:
   manager:
