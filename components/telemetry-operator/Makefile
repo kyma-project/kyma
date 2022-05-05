@@ -1,9 +1,10 @@
 
 APP_NAME = telemetry-operator
 APP_PATH = components/$(APP_NAME)
-BUILDPACK = eu.gcr.io/kyma-project/test-infra/buildpack-golang:v20210723-91c9654f
+BUILDPACK = eu.gcr.io/kyma-project/test-infra/buildpack-golang:v20220428-6e81d2c4
 SCRIPTS_DIR = $(realpath $(shell pwd)/../..)/common/makefiles
 PROJECT_DIR := $(shell pwd)
+OS := $(shell uname)
 
 include $(SCRIPTS_DIR)/generic-make-go.mk
 
@@ -102,28 +103,15 @@ install-crds-local: manifests-local ## Install CRDs into the K8s cluster specifi
 uninstall-crds-local: manifests-local ## Uninstall CRDs from the K8s cluster specified in ~/.kube/config.
 	kustomize build config/crd | kubectl delete -f -
 
-ENVTEST = $(PROJECT_DIR)/bin/setup-envtest
+ENVTEST = $(PROJECT_DIR)/bin/$(OS)/setup-envtest
 .PHONY: envtest
 envtest: ## Download envtest-setup locally if necessary.
 	$(call go-get-tool,$(ENVTEST),sigs.k8s.io/controller-runtime/tools/setup-envtest@latest)
 
+CONTROLLER_GEN = $(PROJECT_DIR)/bin/$(OS)/controller-gen
 .PHONY: controller-gen-local
 controller-gen-local: ## find or download controller-gen if necessary
-ifeq (, $(shell which controller-gen))
-	@{ \
-	set -e ;\
-	CONTROLLER_GEN_TMP_DIR=$$(mktemp -d) ;\
-	cd $$CONTROLLER_GEN_TMP_DIR ;\
-	if [ ! $(which go) ]; then \
-		go mod init tmp ; \
-		go get sigs.k8s.io/controller-tools/cmd/controller-gen@v0.6.0 ; \
-		rm -rf $$CONTROLLER_GEN_TMP_DIR ; \
-	fi; \
-	}
-CONTROLLER_GEN=$(GOBIN)/controller-gen
-else
-CONTROLLER_GEN=$(shell which controller-gen)
-endif
+	$(call go-get-tool,$(CONTROLLER_GEN),sigs.k8s.io/controller-tools/cmd/controller-gen@v0.6.0)
 
 # go-get-tool will 'go get' any package $2 and install it to $1.
 define go-get-tool
@@ -133,7 +121,7 @@ TMP_DIR=$$(mktemp -d) ;\
 cd $$TMP_DIR ;\
 go mod init tmp ;\
 echo "Downloading $(2)" ;\
-GOBIN=$(PROJECT_DIR)/bin go get $(2) ;\
+GOBIN=$(PROJECT_DIR)/bin/$(OS) go install $(2) ;\
 rm -rf $$TMP_DIR ;\
 }
 endef

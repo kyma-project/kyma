@@ -46,21 +46,23 @@ type LogPipelineValidator struct {
 	client.Client
 
 	fluentBitConfigMap types.NamespacedName
-	cfg                fluentbit.ConfigValidator
+	configValidator    fluentbit.ConfigValidator
+	pluginValidator    fluentbit.PluginValidator
 	fsWrapper          fs.Wrapper
 
 	decoder *admission.Decoder
 }
 
-func NewLogPipeLineValidator(client client.Client, fluentBitConfigMap string, namespace string, cfg fluentbit.ConfigValidator, fsWrapper fs.Wrapper) *LogPipelineValidator {
+func NewLogPipeLineValidator(client client.Client, fluentBitConfigMap string, namespace string, configValidator fluentbit.ConfigValidator, pluginValidator fluentbit.PluginValidator, fsWrapper fs.Wrapper) *LogPipelineValidator {
 	return &LogPipelineValidator{
 		Client: client,
 		fluentBitConfigMap: types.NamespacedName{
 			Name:      fluentBitConfigMap,
 			Namespace: namespace,
 		},
-		cfg:       cfg,
-		fsWrapper: fsWrapper,
+		configValidator: configValidator,
+		pluginValidator: pluginValidator,
+		fsWrapper:       fsWrapper,
 	}
 }
 
@@ -108,13 +110,18 @@ func (v *LogPipelineValidator) validateLogPipeline(ctx context.Context, currentB
 
 	log.Info("Fluent Bit config files count", "count", len(configFiles))
 	for _, configFile := range configFiles {
-		if err := v.fsWrapper.CreateAndWrite(configFile); err != nil {
+		if err = v.fsWrapper.CreateAndWrite(configFile); err != nil {
 			log.Error(err, "Failed to write Fluent Bit config file", "filename", configFile.Name, "path", configFile.Path)
 			return err
 		}
 	}
 
-	if err = v.cfg.Validate(ctx, fmt.Sprintf("%s/fluent-bit.conf", currentBaseDirectory)); err != nil {
+	if err = v.pluginValidator.Validate(logPipeline); err != nil {
+		log.Error(err, "Failed to validate plugins")
+		return err
+	}
+
+	if err = v.configValidator.Validate(ctx, fmt.Sprintf("%s/fluent-bit.conf", currentBaseDirectory)); err != nil {
 		log.Error(err, "Failed to validate Fluent Bit config")
 		return err
 	}
