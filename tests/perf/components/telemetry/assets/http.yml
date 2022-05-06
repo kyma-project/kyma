@@ -20,13 +20,11 @@ spec:
         Retry_Limit        False
         Host               {{ .Host }}
         Port               {{ .Port }}
-        URI                /
+        URI                {{ .URI }}
         Header             Content-Type application/json
-        HTTP_User          user
-        HTTP_Passwd        pass
         Format             json_stream
-        tls                off
-        tls.verify         off
+        tls                on
+        tls.verify         on
         storage.total_limit_size 128M
   files: []
   secretRefs: []

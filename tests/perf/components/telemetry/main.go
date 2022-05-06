@@ -34,6 +34,7 @@ type flags struct {
 	timeout        time.Duration
 	host           string
 	port           int
+	uri            string
 	unhealthyRatio float64
 }
 
@@ -42,6 +43,7 @@ type httpLogPipeline struct {
 	Tag  string
 	Host string
 	Port int
+	URI  string
 }
 
 func main() {
@@ -58,6 +60,7 @@ func main() {
 	flag.IntVar(&f.count, "count", 1, "Number of http log pipelines to deploy")
 	flag.DurationVar(&f.timeout, "timeout", defaultTimeout, "Timeout")
 	flag.StringVar(&f.host, "host", "", "Http host log pipelines will send logs to")
+	flag.StringVar(&f.uri, "uri", "", " URI Path")
 	flag.IntVar(&f.port, "port", 80, "Http port log pipelines will send logs to")
 	flag.Float64Var(&f.unhealthyRatio, "unhealthy-ratio", 0, "Ratio of unhealthy to healthy http log pipelines (from 0 to 1, where 0 means all are healthy and 1 means all are unhealthy)")
 	flag.Parse()
@@ -103,9 +106,9 @@ func run(f flags) error {
 			var httpPipelineYAML []byte
 			unhealthy := int(f.unhealthyRatio * float64(f.count))
 			if current < unhealthy {
-				httpPipelineYAML, err = renderUnhealthyHTTPLogPipeline(current)
+				httpPipelineYAML, err = renderHTTPLogPipeline(f.host, "/bad", f.port, current)
 			} else {
-				httpPipelineYAML, err = renderHealthyHTTPLogPipeline(f.host, f.port, current)
+				httpPipelineYAML, err = renderHTTPLogPipeline(f.host, "/good", f.port, current)
 			}
 			if err != nil {
 				return err
@@ -128,13 +131,14 @@ func run(f flags) error {
 	return nil
 }
 
-func renderHealthyHTTPLogPipeline(host string, port, index int) ([]byte, error) {
+func renderHTTPLogPipeline(host, uri string, port, index int) ([]byte, error) {
 	rendered := bytes.Buffer{}
 	values := httpLogPipeline{
 		Name: fmt.Sprintf("http-%d", index),
 		Tag:  randomTag(),
 		Host: host,
 		Port: port,
+		URI:  uri,
 	}
 	httpTempl := template.Must(template.ParseFiles("./assets/http.yml"))
 	err := httpTempl.Execute(&rendered, values)

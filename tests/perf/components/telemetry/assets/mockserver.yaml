@@ -62,7 +62,7 @@ metadata:
   name: mockserver
   namespace: mockserver
 spec:
-  replicas: 1
+  replicas: 5
   selector:
     matchLabels:
       app: mockserver
@@ -121,21 +121,24 @@ apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
 metadata:
   name: mockserver
+  namespace: mockserver
 spec:
   gateways:
   - kyma-gateway.kyma-system.svc.cluster.local
   hosts:
-  - mockserver.rg-prod.berlin.shoot.canary.k8s-hana.ondemand.com
+  - mockserver.rg-1.berlin.shoot.canary.k8s-hana.ondemand.com
   http:
   - name: good
     match:
     - uri:
         prefix: /good
+    - uri:
+        prefix: /
     rewrite:
       uri: /good
     route:
     - destination:
-        host: mockserver.default.svc.cluster.local
+        host: mockserver.mockserver.svc.cluster.local
         port:
           number: 1080
   - name: bad
@@ -146,6 +149,7 @@ spec:
       uri: /bad
     route:
     - destination:
-        host: mockserver.default.svc.cluster.local
+        host: mockserver.mockserver.svc.cluster.local
         port:
           number: 1080
+
