@@ -721,7 +721,8 @@ async function kubectlExecInPod(pod, container, cmd, namespace = 'default', time
         }
         throw new Error(`failed to execute kubectl ${execCmd.join(' ')}:\n${error.stdout},\n${error.stderr}`);
       }
-      console.log(`Retry attempt: ${i} Failed to execute kubectl ${execCmd.join(' ')}:\n${error.stdout},\n${error.stderr}`);
+      console.log(`Retry attempt: ${i} Failed to execute kubectl ${execCmd.join(' ')}:\n${error.stdout},
+        ${error.stderr}`);
     }
     await sleep(10000);
   }
