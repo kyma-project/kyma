@@ -1,8 +1,8 @@
 apiVersion: v2
-appVersion: "v0.38.4-beta.1"
+appVersion: "v0.38.25-beta.1"
 description: A Helm chart for deploying ORY Oathkeeper in Kubernetes
 name: oathkeeper
-version: 0.5.7
+version: 0.23.1
 keywords:
   - zero-trust
   - beyond-corp
@@ -23,5 +23,5 @@ maintainers: # (optional)
 type: application
 dependencies:
   - name: oathkeeper-maester
-    version: 0.0.1
+    version: 0.23.1
     condition: oathkeeper-maester.enabled
