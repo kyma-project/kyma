@@ -4,11 +4,12 @@ const {
 } = require('./');
 
 const {apiExposureTests} = require('../api-exposure');
-const {monitoringTests, unexposeGrafana} = require('../monitoring');
+const {monitoringTests,
+  unexposeGrafana} = require('../monitoring');
 const {loggingTests} = require('../logging');
-const {tracingTests} = require('../tracing');
 const {cleanMockTestFixture} = require('./fixtures/commerce-mock');
 const {ensureCommerceMockLocalTestFixture} = require('../test/fixtures/commerce-mock');
+const {tracingTests} = require('../tracing');
 const {error} = require('../utils');
 
 describe('Executing Standard Testsuite:', function() {
@@ -42,5 +43,5 @@ describe('Executing Standard Testsuite:', function() {
   gettingStartedGuideTests();
 
   loggingTests();
-  tracingTests(mockNamespace, testNamespace);
+  tracingTests(testNamespace);
 });
