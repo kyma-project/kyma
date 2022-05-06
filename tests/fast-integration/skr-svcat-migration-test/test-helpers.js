@@ -51,7 +51,7 @@ async function getFunctionPod(functionName, timeoutInMinutes = 5) {
         }
       }
     }
-    sleep(10000);
+    await sleep(10000);
   }
   const podNames = res.body.items.map((p) => p.metadata.name);
   const phases = res.body.items.map((p) => p.status.phase);
