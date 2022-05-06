@@ -8,7 +8,7 @@ JetStream is the 'built-in distributed persistence system' of NATS. Read the [Ev
 
 A Stream stores messages for the published events. In Kyma, we use only one stream for all the events. You can configure the retention and delivery policies for the stream, depending on the use case.
 
-A Consumer reads or consumes the messages from the stream. Kyma Subscription creates one consumer for each filter specified. In Kyma we use push based consumers.
+A Consumer reads or consumes the messages from the stream. Kyma Subscription creates one consumer for each filter specified. In Kyma we use push-based consumers.
 
 ## Steps to verify at least once delivery with JetStream backend
 
