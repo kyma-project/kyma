@@ -204,6 +204,21 @@ spec:
                     minimum: 1
                     type: integer
                 type: object
+              consumerSubjectMapping:
+                description: ConsumerSubjectMapping defines the JetStream consumer
+                  names associated with the Subscription's subjects
+                items:
+                  properties:
+                    consumer:
+                      description: Consumer defines the name of the consumer associated
+                        with the Subscription and the Subject
+                      type: string
+                    subject:
+                      description: Subject defines the subject associated with the
+                        Subscription and the Consumer
+                      type: string
+                  type: object
+                type: array
               emsSubscriptionStatus:
                 description: EmsSubscriptionStatus defines the status of Subscription
                   in BEB
