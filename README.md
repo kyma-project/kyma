@@ -146,7 +146,6 @@ If you would like to join us and work together on the Kyma project, there are so
   - CLI/Terminal confident use
 
 - Fluency with command-line JSON and YAML processors, such as jq, yq, grep
-- Shell script experience
 - CI/CD experience (ideally Prow)
 
 - Other skills
