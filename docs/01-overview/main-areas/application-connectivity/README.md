@@ -5,7 +5,7 @@ title: What is Application Connectivity in Kyma?
 Application Connectivity in Kyma is an area that: 
 
 - Simplifies and secures the connection between external systems and Kyma
-- Stores and handles the metadata of external APIs
+- Stores and handles the metadata of external systems
 - Provides certificate handling for the [Eventing](../eventing/README.md) flow in the Compass scenario (mode)
 - Manages secure access to external systems
 - Provides monitoring and tracing capabilities to facilitate operational aspects
