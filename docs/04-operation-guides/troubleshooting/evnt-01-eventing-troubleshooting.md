@@ -10,7 +10,7 @@ You publish an event but the event is not received by the subscriber.
 
 Follow these steps to detect the source of the problem:
 
-1. Check the eventing backend CRD, if the field `EVENTINGREADY` is true:
+1. Check the Eventing backend CRD, if the field `EVENTINGREADY` is true:
    
    ```bash
    kubectl -n kyma-system get eventingBackend
@@ -21,12 +21,12 @@ Follow these steps to detect the source of the problem:
    kubectl -n kyma-system get eventingBackend eventing-backend -o yaml
    ```
 
-2. Check the subscription, if it is ready. Run the command:
+2. Check the Subscription, if it is ready. Run the command:
 
    ```bash
    kubectl get subscription -A
    ```
-   If the subscription is not ready, check the exact reason of the error in the status of the subscription by running the command:
+   If the Subscription is not ready, check the exact reason of the error in the status of the Subscription by running the command:
 
    ```bash
    kubectl -n {NAMESPACE} get subscription {NAME} -o yaml
