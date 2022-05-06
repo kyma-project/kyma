@@ -146,6 +146,20 @@ describe('SKR SVCAT migration test', function() {
     await t.checkPodPresetEnvInjected(timeoutInMinutes);
   });
 
+  it('Perform Upgrade to the same version', async function() {
+    await kcp.upgradeKyma(instanceID, '2.2.0');
+  });
+
+  it('Should get Runtime Status after kyma upgrade', async function() {
+    const runtimeStatus = await kcp.getRuntimeStatusOperations(instanceID);
+    console.log(`\nRuntime status after kyma upgrade: ${runtimeStatus}`);
+    await kcp.reconcileInformationLog(runtimeStatus);
+  });
+
+  it('Should wait for btp-operator deployment to be still available after kyma upgrade', async function() {
+    await waitForDeployment('sap-btp-operator-controller-manager', 'kyma-system', 10 * 60 * 1000); // 10 minutes
+  });
+
   it('Should destroy sample service catalog resources', async function() {
     await sampleResources.destroy();
   });
