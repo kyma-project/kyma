@@ -136,24 +136,20 @@ If you would like to join us and work together on the Kyma project, there are so
   - Logging in to Google Cloud Platform (GCP)
   - Understanding GCP basics concepts
   - Creating and deleting Kubernetes clusters in team projects on GCP
-  - Logging in to Gardener
   - Creating Kubernetes shoot clusters on GCP and Azure
 
 - Linux/Terminal basic skill set
-  - VIM editor basics
   - Understanding basic `bash` scripting
   - Understanding the basics of the Unix filesystem
   - Performing basic operations on files (list, create, copy, delete, move, execute)
   - Sending REST queries with curl or HTTPie
   - CLI/Terminal confident use
 
-- Fluency with jq, yq, grep
-- High level knowledge about Gardener architecture
+- Fluency with command-line JSON and YAML processors, such as jq, yq, grep
 - Shell script experience
 - CI/CD experience (ideally Prow)
 
 - Other skills
-  - Understanding Agile and Escalation Management
   - Understanding the Architecture Base Pattern
   - Understanding the Service Mesh concept
   - Basic Markdown editing
