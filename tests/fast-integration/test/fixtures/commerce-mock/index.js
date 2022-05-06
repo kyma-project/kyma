@@ -94,19 +94,15 @@ function prepareFunction(type = 'standard', appName = 'commerce') {
   const functionYaml = lastorderFunctionYaml.toString().replace(/%%BEB_NAMESPACE%%/g, eventMeshSourceNamespace);
   const gatewayUrl = 'http://central-application-gateway.kyma-system';
   switch (type) {
-    case 'central-app-gateway':
-      const orders = `${gatewayUrl}:8080/commerce/sap-commerce-cloud-commerce-webservices/site/orders/`;
-      return k8s.loadAllYaml(functionYaml.toString()
-          .replace('%%URL%%', `"${orders}" + code`));
     case 'central-app-gateway-compass':
       const orderWithCompass = `${gatewayUrl}:8082/%%APP_NAME%%/sap-commerce-cloud/commerce-webservices/site/orders/`;
       return k8s.loadAllYaml(functionYaml.toString()
           .replace('%%URL%%', `"${orderWithCompass}" + code`)
           .replace('%%APP_NAME%%', appName));
     default:
+      const orders = `${gatewayUrl}:8080/commerce/sap-commerce-cloud-commerce-webservices/site/orders/`;
       return k8s.loadAllYaml(functionYaml.toString()
-          .replace('%%URL%%', '"http://central-application-gateway.kyma-system:8080' +
-                   '/commerce/sap-commerce-cloud-commerce-webservices/site/orders/" + code'));
+          .replace('%%URL%%', `"${orders}" + code`));
   }
 }
 
