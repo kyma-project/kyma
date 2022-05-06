@@ -72,13 +72,10 @@ describe('Eventing tests', function() {
   before('Ensure the test and mock namespaces exist', async function() {
     await waitForNamespace(testNamespace);
     await waitForNamespace(mockNamespace);
-  });
 
-  if (!isSKR) {
-    before('Expose Grafana', async function() {
-      await exposeGrafana();
-    });
-  }
+    // Expose Grafana for querying
+    await exposeGrafana();
+  });
 
   // eventingE2ETestSuite - Runs Eventing end-to-end tests
   function eventingE2ETestSuite(backend) {
