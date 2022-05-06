@@ -136,6 +136,7 @@ func filterOutCondition(conds []LogPipelineCondition, condType LogPipelineCondit
 //+kubebuilder:object:root=true
 //+kubebuilder:resource:scope=Cluster
 //+kubebuilder:subresource:status
+// +kubebuilder:printcolumn:name="Status",type=string,JSONPath=`.status.conditions[-1].type`
 
 // LogPipeline is the Schema for the logpipelines API
 type LogPipeline struct {
