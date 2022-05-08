@@ -87,10 +87,10 @@ func main() {
 	log.Infoln("Setting up Director Proxy Service")
 	directorProxy := director.NewProxy(options.DirectorProxy)
 	err = mgr.Add(directorProxy)
-	exitOnError(err, "Failed to create director proxy")
+	exitOnError(err, "Failed to create director proxy.")
 	connectionDataCache.AddSubscriber(directorProxy.SetURLAndCerts)
 
-	log.Infoln("Setting up Controller")
+	log.Infoln("Setting up Controller.")
 	controllerDependencies := compassconnection.DependencyConfig{
 		K8sConfig:                    cfg,
 		ControllerManager:            mgr,
