@@ -37,6 +37,7 @@ func main() {
 	log.Info("Starting Application Operator.")
 
 	options, err := parseOptions()
+
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -58,9 +59,9 @@ func main() {
 		log.Fatal(err)
 	}
 
-	log.Printf("Registering Components:")
+	log.Printf("Registering Components")
 
-	log.Printf("Setting up scheme.")
+	log.Printf("Setting up scheme")
 
 	err = scheme.AddToScheme(mgr.GetScheme())
 	if err != nil {
