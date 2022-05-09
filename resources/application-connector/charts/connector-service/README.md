@@ -19,7 +19,7 @@ The Connector Service has the following parameters, which can be set through the
 - **requestLogging** is the flag for logging incoming requests. It is set to `False` by default.
 - **connectorServiceHost** isi the host under which this service is accessible. It is used for generating the URL. The default host is `cert-service.wormhole.cluster.kyma.cx`.
 - **appRegistryHost** the host under which the Application Registry is accessible. The default value is an empty string.
-- **eventsHost** the host under which the event service is accessible. The default value is an empty string.
+- **eventsHost** the host under which the Event Service is accessible. The default value is an empty string.
 - **appsInfoURL** is the URL at which management information for Applications is available. If not provided, it is based on `connectorServiceHost`.
 - **runtimesInfoURL** is the URL at which management information for runtimes is available. If not provided, it is based on `connectorServiceHost`.
 - **group** is the group for which certificates are generated. If the chart does not provide a default value, you must specify it in the request header of the request sent to the token endpoint.
