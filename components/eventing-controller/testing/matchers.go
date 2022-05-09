@@ -161,6 +161,12 @@ func HaveAPIRuleName(name string) gomegatypes.GomegaMatcher {
 	}, BeTrue())
 }
 
+func HaveConsumerNames(length int) gomegatypes.GomegaMatcher {
+	return WithTransform(func(s *eventingv1alpha1.Subscription) bool {
+		return len(s.Status.ConsumerSubjectMapping) == length
+	}, BeTrue())
+}
+
 func HaveSubscriptionReady() gomegatypes.GomegaMatcher {
 	return WithTransform(func(s *eventingv1alpha1.Subscription) bool {
 		return s.Status.Ready
