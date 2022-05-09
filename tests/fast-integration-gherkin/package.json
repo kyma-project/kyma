@@ -12,6 +12,7 @@
     "@kubernetes/client-node": "0.15.1",
     "chai": "^4.2.0",
     "cucumber": "^7.0.0-rc.0",
+    "fast-integration-tests": "file:../fast-integration",
     "node-forge": "^0.10.0"
   }
 }
