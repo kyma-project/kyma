@@ -9,7 +9,7 @@ require (
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/kyma-project/kyma/components/application-operator v0.0.0-20220504115926-940176391e17
 	github.com/kyma-project/kyma/components/eventing-controller v0.0.0-20220504115926-940176391e17
-	github.com/nats-io/nats-server/v2 v2.8.1
+	github.com/nats-io/nats-server/v2 v2.8.2
 	github.com/nats-io/nats.go v1.14.0
 	github.com/onsi/gomega v1.19.0
 	github.com/pkg/errors v0.9.1
