@@ -8,7 +8,7 @@ spec:
   gateways:
   - kyma-gateway.kyma-system.svc.cluster.local
   hosts:
-  - mockserver.rg-1.berlin.shoot.canary.k8s-hana.ondemand.com
+  - KYMA_HOST_PLACEHOLDER
   http:
   - name: good
     match:

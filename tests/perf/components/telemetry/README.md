@@ -21,12 +21,12 @@ Install dummy log generator:
 kubectl apply -f deploy/logspammer.yaml
 ```
 
-Install HTTP mock server (not exposed, only available inside the cluster):
+Install HTTP mock server (not exposed, only available inside the cluster). The mock server is configured to expose 2 endpoints: /good (returns 201 status code) and /bad (returns 503 status code):
 ```bash
 kubectl apply -f deploy/mockserver.yaml
 ```
 
-Expose the HTTP mockserver via the Kyma Istio Gateway
+Expose the HTTP mock server via the Kyma Istio Gateway at https://mockserver.here_comes_my_cluster_hostname (provide your host name):
 ```bash
-kubectl apply -f deploy/mockserver-vs.yaml
+cat deploy/mockserver-vs.yaml | sed "s/KYMA_HOST_PLACEHOLDER/here_comes_my_cluster_hostname/g" | kubectl apply -f -
 ``` 
