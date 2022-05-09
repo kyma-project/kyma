@@ -212,7 +212,7 @@ describe('SKR-Upgrade-test', function() {
   });
 
   it('Perform Upgrade', async function() {
-    await kcp.upgradeKyma(instanceID, kymaUpgradeVersion, subAccountID);
+    await kcp.upgradeKyma(instanceID, kymaUpgradeVersion);
     debug('Upgrade Done!');
   });
 

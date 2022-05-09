@@ -263,8 +263,16 @@ func TestFunctionReconciler_equalHorizontalPodAutoscalers(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			g := gomega.NewGomegaWithT(t)
-			r := &FunctionReconciler{}
-			got := r.equalHorizontalPodAutoscalers(tt.args.existing, tt.args.expected)
+
+			s := systemState{
+				hpas: autoscalingv1.HorizontalPodAutoscalerList{
+					Items: []autoscalingv1.HorizontalPodAutoscaler{
+						tt.args.existing,
+					},
+				},
+			}
+
+			got := s.equalHorizontalPodAutoscalers(tt.args.expected)
 			g.Expect(got).To(gomega.Equal(tt.want))
 		})
 	}
@@ -323,6 +331,7 @@ func Test_isScalingEnabled(t *testing.T) {
 
 func TestFunctionReconciler_isOnHorizontalPodAutoscalerChange(t *testing.T) {
 	testName := "test"
+
 	deploys := []appsv1.Deployment{
 		{
 			ObjectMeta: metav1.ObjectMeta{
@@ -330,14 +339,24 @@ func TestFunctionReconciler_isOnHorizontalPodAutoscalerChange(t *testing.T) {
 			},
 		},
 	}
+
 	equalFunction := newFixFunction(testName, testName, 1, 2)
-	equalHPA := (&FunctionReconciler{}).buildHorizontalPodAutoscaler(equalFunction, testName)
+
+	s := systemState{
+		instance: *equalFunction,
+		deployments: appsv1.DeploymentList{
+			Items: deploys,
+		},
+	}
+
+	equalHPA := s.buildHorizontalPodAutoscaler(0)
 
 	type args struct {
 		instance    *serverlessv1alpha1.Function
 		hpas        []autoscalingv1.HorizontalPodAutoscaler
 		deployments []appsv1.Deployment
 	}
+
 	tests := []struct {
 		name string
 		args args
@@ -366,7 +385,7 @@ func TestFunctionReconciler_isOnHorizontalPodAutoscalerChange(t *testing.T) {
 		{
 			name: "no deployments",
 			args: args{
-				deployments: []appsv1.Deployment{},
+				deployments: []appsv1.Deployment{}, //FIXME tutaj!
 			},
 			want: false,
 		},
@@ -432,8 +451,23 @@ func TestFunctionReconciler_isOnHorizontalPodAutoscalerChange(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			r := &FunctionReconciler{}
-			if got := r.isOnHorizontalPodAutoscalerChange(tt.args.instance, tt.args.hpas, tt.args.deployments); got != tt.want {
+
+			var instance serverlessv1alpha1.Function
+			if tt.args.instance != nil {
+				instance = *tt.args.instance
+			}
+
+			s := systemState{
+				instance: instance,
+				deployments: appsv1.DeploymentList{
+					Items: tt.args.deployments,
+				},
+				hpas: autoscalingv1.HorizontalPodAutoscalerList{
+					Items: tt.args.hpas,
+				},
+			}
+
+			if got := s.hpaEqual(0); got != tt.want {
 				t.Errorf("isOnHorizontalPodAutoscalerChange() = %v, want %v", got, tt.want)
 			}
 		})

@@ -22,6 +22,7 @@ async function installResource(manifest, resource, name, namespace) {
     debug(`Applying ${resource} manifest ${manifest}`);
     await kubectlApply(manifest);
   } catch (error) {
+    console.log(error);
     throw new Error(`Failed to apply resource ${name}: ${manifest}.`);
   }
 

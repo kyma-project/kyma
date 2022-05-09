@@ -348,6 +348,13 @@ func TestJetStreamSubAfterSync_FiltersChange(t *testing.T) {
 	require.NoError(t, err)
 	require.NotEmpty(t, subject)
 
+	// check if the consumerNames are updated in the status
+	jsSubject := jsBackend.GetJsSubjectToSubscribe(subject)
+	jsSubKey := NewSubscriptionSubjectIdentifier(sub, jsSubject)
+	require.Equal(t, sub.Status.ConsumerSubjectMapping[0], eventingv1alpha1.ConsumerSubjectMapping{
+		Consumer: jsSubKey.ConsumerName(),
+		Subject:  subject})
+
 	// test if subscription is working properly by sending an event
 	// and checking if it is received by the subscriber
 	data := fmt.Sprintf("data-%s", time.Now().Format(time.RFC850))
@@ -384,11 +391,14 @@ func TestJetStreamSubAfterSync_FiltersChange(t *testing.T) {
 	// check if the NATS subscription are NOT the same after sync
 	// because the subscriptions should have being re-created for new subject
 	require.Len(t, jsBackend.subscriptions, 1)
-	jsSubject := jsBackend.GetJsSubjectToSubscribe(newSubject)
-	jsSubKey := NewSubscriptionSubjectIdentifier(sub, jsSubject)
+	jsSubject = jsBackend.GetJsSubjectToSubscribe(newSubject)
+	jsSubKey = NewSubscriptionSubjectIdentifier(sub, jsSubject)
 	jsSub := jsBackend.subscriptions[jsSubKey]
 	require.NotNil(t, jsSub)
 	require.True(t, jsSub.IsValid())
+	require.Equal(t, sub.Status.ConsumerSubjectMapping[0], eventingv1alpha1.ConsumerSubjectMapping{
+		Consumer: jsSubKey.ConsumerName(),
+		Subject:  newSubject})
 
 	// check the metadata, if they are NOT same then it means that NATS subscription
 	// were re-created by SyncSubscription method
@@ -476,6 +486,7 @@ func TestJetStreamSubAfterSync_FilterAdded(t *testing.T) {
 	// Check if total existing NATS subscriptions are correct
 	// Because we have two filters (i.e. two subjects)
 	require.Len(t, jsBackend.subscriptions, 2)
+	require.Len(t, sub.Status.ConsumerSubjectMapping, 2)
 	// Verify that the nats subscriptions for first subject was not re-created
 	jsSubject := jsBackend.GetJsSubjectToSubscribe(firstSubject)
 	jsSubKey := NewSubscriptionSubjectIdentifier(sub, jsSubject)
@@ -554,6 +565,7 @@ func TestJetStreamSubAfterSync_FilterRemoved(t *testing.T) {
 	// Check if total existing NATS subscriptions are correct
 	// Because we have two filters (i.e. two subjects)
 	require.Len(t, jsBackend.subscriptions, 2)
+	require.Len(t, sub.Status.ConsumerSubjectMapping, 2)
 
 	// set metadata on NATS subscriptions
 	// so that we can later verify if the nats subscriptions are the same (not re-created by Sync)
@@ -576,6 +588,7 @@ func TestJetStreamSubAfterSync_FilterRemoved(t *testing.T) {
 
 	// Check if total existing NATS subscriptions are correct
 	require.Len(t, jsBackend.subscriptions, 1)
+	require.Len(t, sub.Status.ConsumerSubjectMapping, 1)
 	// Verify that the nats subscriptions for first subject was not re-created
 	jsSubject := jsBackend.GetJsSubjectToSubscribe(firstSubject)
 	jsSubKey := NewSubscriptionSubjectIdentifier(sub, jsSubject)
@@ -977,7 +990,8 @@ func TestJSSubscriptionRedeliverWithFailedDispatch(t *testing.T) {
 	require.True(t, subscriber.IsRunning())
 	// and update sink in the subscription
 	sub.Spec.Sink = subscriber.SinkURL
-	require.NoError(t, jsBackend.SyncSubscription(sub))
+	err = jsBackend.SyncSubscription(sub)
+	require.NoError(t, err)
 
 	// then
 	// the same event should be redelivered

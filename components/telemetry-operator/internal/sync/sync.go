@@ -19,7 +19,7 @@ const (
 	parsersConfigMapKey        = "parsers.conf"
 	sectionsConfigMapFinalizer = "FLUENT_BIT_SECTIONS_CONFIG_MAP"
 	parserConfigMapFinalizer   = "FLUENT_BIT_PARSERS_CONFIG_MAP"
-	secretRefsFinalizer        = "FLUENT_BIT_SECRETS"
+	secretRefsFinalizer        = "FLUENT_BIT_SECRETS" //nolint:gosec
 	filesFinalizer             = "FLUENT_BIT_FILES"
 )
 

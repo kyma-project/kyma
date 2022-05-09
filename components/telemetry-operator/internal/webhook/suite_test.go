@@ -53,6 +53,7 @@ var (
 	cancel              context.CancelFunc
 	fsWrapperMock       *fsmocks.Wrapper
 	configValidatorMock *fluentbitmocks.ConfigValidator
+	pluginValidatorMock *fluentbitmocks.PluginValidator
 )
 
 func TestAPIs(t *testing.T) {
@@ -104,12 +105,14 @@ var _ = BeforeSuite(func() {
 	Expect(err).NotTo(HaveOccurred())
 
 	configValidatorMock = &fluentbitmocks.ConfigValidator{}
+	pluginValidatorMock = &fluentbitmocks.PluginValidator{}
 	fsWrapperMock = &fsmocks.Wrapper{}
 	logPipelineValidator := NewLogPipeLineValidator(
 		mgr.GetClient(),
 		FluentBitConfigMapName,
 		ControllerNamespace,
 		configValidatorMock,
+		pluginValidatorMock,
 		fsWrapperMock,
 	)
 

@@ -40,7 +40,7 @@ chart and their default values.
 
 | Parameter | Description | Default |
 |-----------|-------------|---------|
-| `image` | Service catalog image to use | `eu.gcr.io/kyma-project/external/quay.io/kubernetes-service-catalog/service-catalog:v0.3.0` |
+| `image` | Service Catalog image to use | `eu.gcr.io/kyma-project/external/quay.io/kubernetes-service-catalog/service-catalog:v0.3.0` |
 | `imagePullPolicy` | `imagePullPolicy` for the service catalog | `Always` |
 | `imagePullSecrets`|  The pre-existing secrets to use to pull images from a private registry | `[]` | 
 | `webhook.updateStrategy` | `updateStrategy` for the service catalog webhook deployment | `RollingUpdate` |

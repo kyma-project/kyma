@@ -313,6 +313,7 @@ func TestChangeSubscription(t *testing.T) {
 				K8sSubscription: []gomegatypes.GomegaMatcher{
 					reconcilertesting.HaveCondition(reconcilertesting.DefaultReadyCondition()),
 					reconcilertesting.HaveSubsConfiguration(utils.ConfigDefault(ens.DefaultSubscriptionConfig.MaxInFlightMessages)),
+					reconcilertesting.HaveConsumerNames(0),
 				},
 			},
 			changeSubscription: func(subscription *eventingv1alpha1.Subscription) {
@@ -328,6 +329,7 @@ func TestChangeSubscription(t *testing.T) {
 				K8sSubscription: []gomegatypes.GomegaMatcher{
 					reconcilertesting.HaveCondition(reconcilertesting.DefaultReadyCondition()),
 					reconcilertesting.HaveSubsConfiguration(utils.ConfigDefault(ens.DefaultSubscriptionConfig.MaxInFlightMessages)),
+					reconcilertesting.HaveConsumerNames(2),
 					reconcilertesting.HaveCleanEventTypes([]string{
 						utils.NewCleanEventType("0"),
 						utils.NewCleanEventType("1"),
@@ -347,6 +349,7 @@ func TestChangeSubscription(t *testing.T) {
 				K8sSubscription: []gomegatypes.GomegaMatcher{
 					reconcilertesting.HaveCondition(reconcilertesting.DefaultReadyCondition()),
 					reconcilertesting.HaveSubsConfiguration(utils.ConfigDefault(ens.DefaultSubscriptionConfig.MaxInFlightMessages)),
+					reconcilertesting.HaveConsumerNames(2),
 					reconcilertesting.HaveCleanEventTypes([]string{
 						utils.NewCleanEventType("0"),
 						utils.NewCleanEventType("1"),
@@ -363,6 +366,7 @@ func TestChangeSubscription(t *testing.T) {
 				K8sSubscription: []gomegatypes.GomegaMatcher{
 					reconcilertesting.HaveCondition(reconcilertesting.DefaultReadyCondition()),
 					reconcilertesting.HaveSubsConfiguration(utils.ConfigDefault(ens.DefaultSubscriptionConfig.MaxInFlightMessages)),
+					reconcilertesting.HaveConsumerNames(2),
 					reconcilertesting.HaveCleanEventTypes([]string{
 						utils.NewCleanEventType("0alpha"),
 						utils.NewCleanEventType("1alpha"),
@@ -395,6 +399,7 @@ func TestChangeSubscription(t *testing.T) {
 				K8sSubscription: []gomegatypes.GomegaMatcher{
 					reconcilertesting.HaveCondition(reconcilertesting.DefaultReadyCondition()),
 					reconcilertesting.HaveSubsConfiguration(utils.ConfigDefault(ens.DefaultSubscriptionConfig.MaxInFlightMessages)),
+					reconcilertesting.HaveConsumerNames(1),
 					reconcilertesting.HaveCleanEventTypes([]string{
 						utils.NewCleanEventType("0"),
 					}),
