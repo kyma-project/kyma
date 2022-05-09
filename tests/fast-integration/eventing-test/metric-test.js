@@ -174,6 +174,7 @@ function runDashboardTestCase(dashboardName, test) {
       debug(dashboardName + ' result: ' + JSON.stringify(result, null, 2));
       test.assert(result);
     }).catch((reason) => {
+      debug(reason)
       throw new Error(reason);
     });
   }, 120, 5000);
