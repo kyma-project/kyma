@@ -93,7 +93,7 @@ func run(f flags) error {
 		return err
 	}
 
-	lokiPipelineYAML, err := os.ReadFile("./assets/loki.yml")
+	lokiPipelineYAML, err := os.ReadFile("./deploy/loki.yml")
 	if err := createLogPipeline(ctx, dynamicClient, lokiPipelineYAML); err != nil {
 		return err
 	}
@@ -140,23 +140,7 @@ func renderHTTPLogPipeline(host, uri string, port, index int) ([]byte, error) {
 		Port: port,
 		URI:  uri,
 	}
-	httpTempl := template.Must(template.ParseFiles("./assets/http.yml"))
-	err := httpTempl.Execute(&rendered, values)
-	if err != nil {
-		return nil, err
-	}
-	return rendered.Bytes(), nil
-}
-
-func renderUnhealthyHTTPLogPipeline(index int) ([]byte, error) {
-	rendered := bytes.Buffer{}
-	values := httpLogPipeline{
-		Name: fmt.Sprintf("http-%d", index),
-		Tag:  randomTag(),
-		Host: "broken",
-		Port: 80,
-	}
-	httpTempl := template.Must(template.ParseFiles("./assets/http.yml"))
+	httpTempl := template.Must(template.ParseFiles("./deploy/http.yml"))
 	err := httpTempl.Execute(&rendered, values)
 	if err != nil {
 		return nil, err
