@@ -21,6 +21,7 @@ const {
 } = require('../audit-log');
 const {keb, gardener, director} = require('./helpers');
 const {KCPWrapper, KCPConfig} = require('../kcp/client');
+const monitoringTests = require('../monitoring/index.js');
 
 const kcp = new KCPWrapper(KCPConfig.fromEnv());
 
@@ -142,6 +143,8 @@ function commerceMockTest() {
     it('order.created.v1 cloud event in binary mode should trigger the lastorder function', async function() {
       await sendCloudEventBinaryModeAndCheckResponse();
     });
+
+    monitoringTests.monitoringTests();
 
     it('Deletes the resources that have been created', async function() {
       await deleteMockTestFixture('mocks', this.options.testNS);
