@@ -56,7 +56,7 @@ type config struct {
 
 type healthzConfig struct {
 	Address         string        `envconfig:"default=:8090"`
-	LivenessTimeout time.Duration `envconfig:"default=1s"`
+	LivenessTimeout time.Duration `envconfig:"default=10s"`
 }
 
 func main() {

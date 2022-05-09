@@ -13,7 +13,7 @@ export $(xargs < .env)
 Run the test scenario:
 
 ```bash
-npm run test-skr
+npm run test-skr-aws-upgrade-integration
 ```
 
 ## Environment variables

@@ -136,7 +136,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 	statusChanged, err := r.syncInitialStatus(desiredSubscription, log)
 	if err != nil {
 		log.Errorw("sync initial status failed", "error", err)
-		if syncErr := r.syncSubscriptionStatus(ctx, desiredSubscription, statusChanged, err); err != nil {
+		if syncErr := r.syncSubscriptionStatus(ctx, desiredSubscription, actualSubscription, statusChanged, err); err != nil {
 			return ctrl.Result{}, syncErr
 		}
 		return ctrl.Result{}, err
@@ -145,7 +145,7 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 	// Check for valid sink
 	if err := r.sinkValidator.Validate(desiredSubscription); err != nil {
 		log.Errorw("sink URL validation failed", "error", err)
-		if syncErr := r.syncSubscriptionStatus(ctx, desiredSubscription, statusChanged, err); err != nil {
+		if syncErr := r.syncSubscriptionStatus(ctx, desiredSubscription, actualSubscription, statusChanged, err); err != nil {
 			return ctrl.Result{}, syncErr
 		}
 		// No point in reconciling as the sink is invalid, return latest error to requeue the reconciliation request
@@ -155,14 +155,14 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 	// Synchronize Kyma subscription to JetStream backend
 	if syncErr := r.Backend.SyncSubscription(desiredSubscription); syncErr != nil {
 		log.Errorw("sync subscription failed", "error", syncErr)
-		if err := r.syncSubscriptionStatus(ctx, desiredSubscription, statusChanged, syncErr); err != nil {
+		if err := r.syncSubscriptionStatus(ctx, desiredSubscription, actualSubscription, statusChanged, syncErr); err != nil {
 			return ctrl.Result{}, err
 		}
 		return ctrl.Result{}, syncErr
 	}
 
 	// Update Subscription status
-	if err := r.syncSubscriptionStatus(ctx, desiredSubscription, statusChanged, nil); err != nil {
+	if err := r.syncSubscriptionStatus(ctx, desiredSubscription, actualSubscription, statusChanged, nil); err != nil {
 		return ctrl.Result{}, err
 	}
 	return ctrl.Result{}, nil
@@ -184,26 +184,31 @@ func (r *Reconciler) handleNatsConnClose(_ *nats.Conn) {
 }
 
 // syncSubscriptionStatus syncs Subscription status and keeps the status up to date.
-func (r *Reconciler) syncSubscriptionStatus(ctx context.Context, sub *eventingv1alpha1.Subscription, updateStatus bool, error error) error {
+func (r *Reconciler) syncSubscriptionStatus(ctx context.Context, desiredSub, actualSub *eventingv1alpha1.Subscription, updateStatus bool, error error) error {
 	isNatsReady := error == nil
-	readyStatusChanged := setSubReadyStatus(&sub.Status, isNatsReady)
+	readyStatusChanged := setSubReadyStatus(&desiredSub.Status, isNatsReady)
 
 	desiredConditions := initializeDesiredConditions()
 	setConditionSubscriptionActive(desiredConditions, error)
 	// check if the conditions are missing or changed
-	if !eventingv1alpha1.ConditionsEquals(sub.Status.Conditions, desiredConditions) {
-		sub.Status.Conditions = desiredConditions
+	if !eventingv1alpha1.ConditionsEquals(desiredSub.Status.Conditions, desiredConditions) {
+		desiredSub.Status.Conditions = desiredConditions
+		updateStatus = true
+	}
+
+	//
+	if !reflect.DeepEqual(desiredSub.Status.ConsumerSubjectMapping, actualSub.Status.ConsumerSubjectMapping) {
 		updateStatus = true
 	}
 
 	// Update the status only if something needs to be updated
 	if updateStatus || readyStatusChanged {
-		err := r.Client.Status().Update(ctx, sub, &client.UpdateOptions{})
+		err := r.Client.Status().Update(ctx, desiredSub, &client.UpdateOptions{})
 		if err != nil {
-			events.Warn(r.recorder, sub, events.ReasonUpdateFailed, "Update Subscription status failed %s", sub.Name)
+			events.Warn(r.recorder, desiredSub, events.ReasonUpdateFailed, "Update Subscription status failed %s", desiredSub.Name)
 			return errors.Wrapf(err, "update subscription status failed")
 		}
-		events.Normal(r.recorder, sub, events.ReasonUpdate, "Update Subscription status succeeded %s", sub.Name)
+		events.Normal(r.recorder, desiredSub, events.ReasonUpdate, "Update Subscription status succeeded %s", desiredSub.Name)
 	}
 	return nil
 }

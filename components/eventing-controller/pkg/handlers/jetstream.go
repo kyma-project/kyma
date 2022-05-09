@@ -196,8 +196,16 @@ func (js *JetStream) SyncSubscription(subscription *eventingv1alpha1.Subscriptio
 	}
 
 	callback := js.getCallback(subKeyPrefix)
+	var consumerSubjectMapping []eventingv1alpha1.ConsumerSubjectMapping
 	for _, subject := range subscription.Status.CleanEventTypes {
 		jsSubKey := NewSubscriptionSubjectIdentifier(subscription, subject)
+
+		// prepare the consumerSubject Mapping to display in the Subscription Status
+		consumerSubject := eventingv1alpha1.ConsumerSubjectMapping{
+			Consumer: jsSubKey.consumerName,
+			Subject:  subject,
+		}
+		consumerSubjectMapping = append(consumerSubjectMapping, consumerSubject)
 
 		// check if the subscription already exists and if it is valid.
 		if existingNatsSub, ok := js.subscriptions[jsSubKey]; ok {
@@ -226,6 +234,8 @@ func (js *JetStream) SyncSubscription(subscription *eventingv1alpha1.Subscriptio
 		js.subscriptions[jsSubKey] = jsSubscription
 		log.Debugw("created subscription on JetStream", "subject", subject)
 	}
+	// update the consumerSubjectMapping for the subscription
+	subscription.Status.ConsumerSubjectMapping = consumerSubjectMapping
 	return nil
 }
 

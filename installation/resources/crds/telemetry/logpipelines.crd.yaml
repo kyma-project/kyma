@@ -16,7 +16,11 @@ spec:
     singular: logpipeline
   scope: Cluster
   versions:
-  - name: v1alpha1
+  - additionalPrinterColumns:
+    - jsonPath: .status.conditions[-1].type
+      name: Status
+      type: string
+    name: v1alpha1
     schema:
       openAPIV3Schema:
         description: LogPipeline is the Schema for the logpipelines API
