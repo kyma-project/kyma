@@ -38,7 +38,7 @@ describe('Execute SKR test', function() {
           `Runtime ${runtimeName}`, `Application ${this.options.appName}`, `Suffix ${suffix}`);
 
       const customParams = {
-        oidc: this.options.oidc0,
+        oidc: this.options.oidc1,
         kymaVersion: 'PR-14116',
         overridesVersion: '2.1.3',
       };
