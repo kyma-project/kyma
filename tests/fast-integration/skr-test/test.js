@@ -1,7 +1,7 @@
 const {gatherOptions} = require('./');
 const {provisionSKR, deprovisionSKR, KEBClient, KEBConfig} = require('../kyma-environment-broker');
 const {unregisterKymaFromCompass, addScenarioInCompass, assignRuntimeToScenario} = require('../compass');
-const {oidcE2ETest, commerceMockTest} = require('./skr-test');
+const {commerceMockTest} = require('./skr-test');
 const {KCPWrapper, KCPConfig} = require('../kcp/client');
 const {keb, director} = require('./helpers');
 const {initializeK8sClient} = require('../utils');
@@ -38,7 +38,6 @@ describe('Execute SKR test', function() {
           `Runtime ${runtimeName}`, `Application ${this.options.appName}`, `Suffix ${suffix}`);
 
       const customParams = {
-        oidc: this.options.oidc1,
         kymaVersion: 'PR-14116',
         overridesVersion: '2.1.3',
       };
@@ -65,7 +64,7 @@ describe('Execute SKR test', function() {
     }
   });
 
-  oidcE2ETest();
+  // oidcE2ETest();
   commerceMockTest();
 
   after('Deprovision SKR', async function() {
