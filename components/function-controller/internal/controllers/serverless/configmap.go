@@ -30,6 +30,7 @@ func stateFnInlineCheckSources(ctx context.Context, r *reconciler, s *systemStat
 	}
 
 	cfgMapCount := len(s.configMaps.Items)
+
 	// TODO create issue to refactor the way how function controller is handling status
 	next := stateFnInlineDeleteConfigMap
 
@@ -45,7 +46,6 @@ func stateFnInlineCheckSources(ctx context.Context, r *reconciler, s *systemStat
 }
 
 func stateFnInlineDeleteConfigMap(ctx context.Context, r *reconciler, s *systemState) stateFn {
-
 	r.log.Info("delete all ConfigMaps")
 
 	labels := s.internalFunctionLabels()
