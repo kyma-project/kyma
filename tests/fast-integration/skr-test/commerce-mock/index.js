@@ -37,9 +37,9 @@ function commerceMockTest(options) {
     commerceMockTests(options.testNS);
     commerceMockCleanup(options.testNS);
 
-    it('Check audit logs for AWS', async function() {
+    describe('Check audit logs for AWS', async function() {
       // if (process.env.KEB_PLAN_ID === AWS_PLAN_ID) {
-      await checkAuditLogsForAWS();
+      checkAuditLogsForAWS();
       // } else {
       //   debug('Skipping step for non-AWS plan');
       // }

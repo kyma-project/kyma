@@ -6,6 +6,7 @@ const {
 const {
   ensureKymaAdminBindingExistsForUser,
   ensureKymaAdminBindingDoesNotExistsForUser,
+  debug,
 } = require('../../utils');
 const {keb, kcp, gardener} = require('../provision/provision-skr');
 
@@ -34,8 +35,8 @@ function oidcE2ETest(options, shoot) {
         overridesVersion: '2.1.3',
       };
 
-      console.log('options.instanceID', options.instanceID);
-      console.log('shoot.name', shoot.name);
+      debug('options.instanceID', options.instanceID);
+      debug('shoot.name', shoot.name);
       const skr = await updateSKR(keb,
           kcp,
           gardener,
@@ -46,6 +47,8 @@ function oidcE2ETest(options, shoot) {
           null,
           false);
       shoot = skr.shoot;
+      debug('options.instanceID', options.instanceID);
+      debug('shoot.name', shoot.name);
     });
 
     it('Should get Runtime Status after updating OIDC config', async function() {

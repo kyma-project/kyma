@@ -3,7 +3,7 @@ const {
   withSuffix,
   withInstanceID,
   provisionSKRInstance,
-  director,
+  // director,
   commerceMockTest,
   oidcE2ETest,
 } = require('./index');
@@ -11,8 +11,8 @@ const {
   getEnvOrThrow,
   genRandom,
 } = require('../utils');
-const {unregisterKymaFromCompass} = require('../compass');
-const {deprovisionSKRInstance} = require('./provision/deprovision-skr');
+// const {unregisterKymaFromCompass} = require('../compass');
+// const {deprovisionSKRInstance} = require('./provision/deprovision-skr');
 const {
   getSKRConfig,
   prepareCompassResources,
@@ -59,15 +59,16 @@ describe('SKR test', function() {
   it('Execute the tests', async function() {
     oidcE2ETest(options, shoot);
     commerceMockTest(options);
-
-    after('Cleanup the resources', async function() {
-      this.timeout(deprovisioningTimeout);
-      if (!skipProvisioning) {
-        await deprovisionSKRInstance(options, deprovisioningTimeout);
-      } else {
-        console.log('An external SKR cluster was used, de-provisioning skipped');
-      }
-      await unregisterKymaFromCompass(director, options.scenarioName);
-    });
   });
+
+  // TODO uncomment
+  // after('Cleanup the resources', async function() {
+  //   this.timeout(deprovisioningTimeout);
+  //   if (!skipProvisioning) {
+  //     await deprovisionSKRInstance(options, deprovisioningTimeout);
+  //   } else {
+  //     console.log('An external SKR cluster was used, de-provisioning skipped');
+  //   }
+  //   await unregisterKymaFromCompass(director, options.scenarioName);
+  // });
 });
