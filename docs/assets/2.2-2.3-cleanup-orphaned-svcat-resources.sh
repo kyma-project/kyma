@@ -1,10 +1,12 @@
 #!/usr/bin/env bash
 
-echo "
-Deleting application broker"
+echo "Deleting Application Connectivity related resources"
+APPS=$(kubectl get app -oname | cut -d '/' -f 2)
 
-echo "Framefrogs please contribute"
-exit 1
+for APP in $APPS
+do
+	kubectl delete svc,deploy -l app="${APP}-application-gateway" -n kyma-integration
+done
 
 echo "
 Deleting rafter"
