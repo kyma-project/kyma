@@ -2,7 +2,7 @@ const {Given, When, Then, AfterAll} = require('cucumber');
 const {expect} = require('chai');
 const {SKRSetup} = require('../../helpers/skr-setup');
 const {CommerceCompassMock} = require('../../helpers/commerce-mock-with-compass-setup');
-const {debug} = require('fast-integration-tests');
+const {debug} = require('.../../helpers/utils');
 const {
     ensureValidShootOIDCConfig,
     ensureValidOIDCConfigInCustomerFacingKubeconfig,
@@ -12,7 +12,7 @@ const {keb, gardener} = require('../../../fast-integration/skr-test/helpers');
 const {
     ensureKymaAdminBindingExistsForUser,
     ensureKymaAdminBindingDoesNotExistsForUser
-} = require('fast-integration-tests');
+} = require('../../helpers/utils');
 const {
     callFunctionWithToken,
     assertSuccessfulFunctionResponse,

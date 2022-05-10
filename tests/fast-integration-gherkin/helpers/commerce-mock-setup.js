@@ -1,7 +1,3 @@
-const {
-    ensureCommerceMockWithCompassTestFixture
-} = require('../../fast-integration/test/fixtures/commerce-mock');
-
 class CommerceMock {
 
     constructor() {

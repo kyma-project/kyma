@@ -3,7 +3,7 @@ const {provisionSKR, deprovisionSKR} = require('../../fast-integration/kyma-envi
 const {KCPWrapper, KCPConfig} = require('../../fast-integration/kcp/client');
 const {addScenarioInCompass, assignRuntimeToScenario} = require('../../fast-integration/compass');
 const {keb, gardener, director} = require('../../fast-integration/skr-test/helpers');
-const {initializeK8sClient} = require('../../fast-integration/utils');
+const {initializeK8sClient} = require('./utils');
 
 class SKRSetup {
     constructor() {
