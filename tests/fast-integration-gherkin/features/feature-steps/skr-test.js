@@ -2,7 +2,7 @@ const {Given, When, Then, AfterAll} = require('cucumber');
 const {expect} = require('chai');
 const {SKRSetup} = require('../../helpers/skr-setup');
 const {CommerceCompassMock} = require('../../helpers/commerce-mock-with-compass-setup');
-const {debug} = require('.../../helpers/utils');
+const {debug} = require('../../helpers/utils');
 const {
     ensureValidShootOIDCConfig,
     ensureValidOIDCConfigInCustomerFacingKubeconfig,
