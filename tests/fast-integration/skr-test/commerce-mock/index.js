@@ -91,20 +91,21 @@ function commerceMockCleanup(testNamespace) {
 }
 
 function checkAuditLogsForAWS() {
+  before('Expose Grafana', async function() {
+    await exposeGrafana();
+  });
+
   it('Check audit logs', async function() {
     const auditLogs = new AuditLogClient(AuditLogCreds.fromEnv());
     await checkAuditLogs(auditLogs, null);
   });
 
-  it('Expose Grafana', async function() {
-    await exposeGrafana();
-  });
 
   it('Amount of audit events must not exceed a certain threshold', async function() {
     await checkAuditEventsThreshold(auditLogsThreshold);
   });
 
-  it('Unexpose Grafana', async function() {
+  after('Unexpose Grafana', async function() {
     await unexposeGrafana(true);
   });
 }

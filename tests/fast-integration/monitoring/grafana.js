@@ -104,7 +104,6 @@ async function createProxySecretWithIPAllowlisting() {
   info(`Creating secret with ip allowlisting: ${proxySecret.metadata.name}`);
 
   const secret = proxySecret;
-  secret.data.OAUTH2_PROXY_REVERSE_PROXY = toBase64('false');
   secret.data.OAUTH2_PROXY_TRUSTED_IPS = toBase64('0.0.0.0/0');
   await k8sApply([secret], kymaNs);
 }
