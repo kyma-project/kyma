@@ -167,13 +167,14 @@ When(/^A legacy event is sent$/, async() => {
     this.context.legacyEventResponse = legacyEventResponse;
 });
 
+
 Then(/^The event should be received correctly$/, () => {
     const legacyEventResponse = this.context.legacyEventResponse;
 
 	checkLegacyEventResponse(legacyEventResponse);
 });
 
-AfterAll({timeout: 1000 * 60 * 95}, async() => {
+AfterAll({tags: "@skrtest", timeout: 1000 * 60 * 95}, async() => {
     const options = SKRSetup.options;
 
     // Delete commerce mock
