@@ -37,11 +37,6 @@ describe('Execute SKR test', function() {
       console.log(`\nInstanceID ${this.options.instanceID}`,
           `Runtime ${runtimeName}`, `Application ${this.options.appName}`, `Suffix ${suffix}`);
 
-      const customParams = {
-        kymaVersion: 'PR-14116',
-        overridesVersion: '2.1.3',
-      };
-
       const skr = await provisionSKR(keb,
           kcp, gardener,
           this.options.instanceID,
