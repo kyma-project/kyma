@@ -76,18 +76,8 @@ async function unexposeGrafana() {
   await grafana.resetGrafanaProxy();
 }
 
-async function ensureGrafanaProxySet() {
-  if (getEnvOrDefault('KYMA_MAJOR_UPGRADE', 'false') === 'true') {
-    info('Skipping setting of Grafana Proxy for Kyma 1 to Kyma 2 upgrade scenario');
-    return;
-  }
-
-  await grafana.ensureGrafanaProxySet();
-}
-
 module.exports = {
   monitoringTests,
   exposeGrafana,
   unexposeGrafana,
-  ensureGrafanaProxySet,
 };

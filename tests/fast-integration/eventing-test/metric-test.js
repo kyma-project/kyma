@@ -5,9 +5,6 @@ const {expect} = require('chai');
 const httpsAgent = new https.Agent({
   rejectUnauthorized: false, // curl -k
 });
-const {
-  ensureGrafanaProxySet,
-} = require('../monitoring');
 axios.defaults.httpsAgent = httpsAgent;
 
 const {
@@ -192,9 +189,6 @@ function eventingMonitoringTest(backend, isJetStreamEnabled = false) {
   for (const [dashboardName, test] of Object.entries(allDashboards)) {
     if (test.backends.includes(backend)) {
       it('Testing dashboard: ' + test.title, async () => {
-        // Expose Grafana is set up for querying
-        await ensureGrafanaProxySet();
-        // run dashboard test
         await runDashboardTestCase(dashboardName, test);
       });
     }
