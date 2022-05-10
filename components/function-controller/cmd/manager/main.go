@@ -33,7 +33,7 @@ import (
 
 var (
 	scheme   = runtime.NewScheme()
-	setupLog = ctrlzap.New()
+	setupLog = ctrlzap.New().WithName("setup")
 )
 
 func init() {
