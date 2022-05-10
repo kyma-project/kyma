@@ -30,6 +30,8 @@ function oidcE2ETest(options, shoot) {
       this.timeout(updateTimeout);
       const customParams = {
         oidc: options.oidc1,
+        kymaVersion: 'PR-14116',
+        overridesVersion: '2.1.3',
       };
       const skr = await updateSKR(keb,
           kcp,
