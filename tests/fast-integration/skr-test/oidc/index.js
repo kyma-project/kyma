@@ -33,6 +33,9 @@ function oidcE2ETest(options, shoot) {
         kymaVersion: 'PR-14116',
         overridesVersion: '2.1.3',
       };
+
+      console.log('options.instanceID', options.instanceID);
+      console.log('shoot.name', shoot.name);
       const skr = await updateSKR(keb,
           kcp,
           gardener,
