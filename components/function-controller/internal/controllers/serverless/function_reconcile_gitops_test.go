@@ -3,6 +3,7 @@ package serverless
 import (
 	"context"
 	"fmt"
+	"go.uber.org/zap"
 	"testing"
 
 	"github.com/stretchr/testify/mock"
@@ -22,7 +23,6 @@ import (
 	"k8s.io/apimachinery/pkg/util/intstr"
 	"k8s.io/client-go/tools/record"
 	ctrl "sigs.k8s.io/controller-runtime"
-	"sigs.k8s.io/controller-runtime/pkg/log"
 )
 
 type testDataScenario struct {
@@ -134,7 +134,7 @@ func TestGitOps(t *testing.T) {
 			statsCollector.On("UpdateReconcileStats", mock.Anything, mock.Anything).Return()
 
 			reconciler := &FunctionReconciler{
-				Log:               log.Log,
+				Log:               zap.NewNop().Sugar(),
 				client:            resourceClient,
 				recorder:          record.NewFakeRecorder(100),
 				config:            testCfg,
@@ -448,7 +448,7 @@ func TestGitOps_GitErrorHandling(t *testing.T) {
 		}
 
 		reconciler := &FunctionReconciler{
-			Log:               log.Log,
+			Log:               zap.NewNop().Sugar(),
 			client:            resourceClient,
 			recorder:          record.NewFakeRecorder(100),
 			config:            testCfg,
@@ -510,7 +510,7 @@ func Test_stateFnGitCheckSources(t *testing.T) {
 		}
 
 		reconciler := &FunctionReconciler{
-			Log:               log.Log,
+			Log:               zap.NewNop().Sugar(),
 			client:            resourceClient,
 			recorder:          record.NewFakeRecorder(100),
 			config:            testCfg,
