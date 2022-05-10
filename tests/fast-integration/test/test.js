@@ -7,7 +7,7 @@ const {apiExposureTests} = require('../api-exposure');
 const {monitoringTests,
   unexposeGrafana} = require('../monitoring');
 const {loggingTests} = require('../logging');
-const {cleanMockTestFixture} = require('./fixtures/commerce-mock');
+// const {cleanMockTestFixture} = require('./fixtures/commerce-mock');
 const {ensureCommerceMockLocalTestFixture} = require('../test/fixtures/commerce-mock');
 const {tracingTests} = require('../tracing');
 const {error} = require('../utils');
@@ -29,7 +29,7 @@ describe('Executing Standard Testsuite:', function() {
   });
 
   after('Test Cleanup: Test namespaces should be deleted', async function() {
-    await cleanMockTestFixture(mockNamespace, testNamespace, true);
+    // await cleanMockTestFixture(mockNamespace, testNamespace, true);
   });
 
   after('Unexpose Grafana', async function() {
