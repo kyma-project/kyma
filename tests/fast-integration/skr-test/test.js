@@ -43,7 +43,7 @@ describe('Execute SKR test', function() {
           runtimeName,
           null,
           btpOperatorCreds,
-          customParams,
+          null,
           provisioningTimeout);
 
       this.shoot = skr.shoot;
