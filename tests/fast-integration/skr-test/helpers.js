@@ -1,12 +1,15 @@
 const uuid = require('uuid');
-const {KEBConfig, KEBClient}= require('../kyma-environment-broker');
-const {GardenerClient, GardenerConfig} = require('../gardener');
-const {DirectorClient, DirectorConfig} = require('../compass');
-const {genRandom, debug, getEnvOrThrow} = require('../utils');
+const {genRandom, getEnvOrThrow, initializeK8sClient} = require('../utils');
+const {keb, gardener, director} = require('./provision/provision-skr');
+const {
+  scenarioExistsInCompass,
+  addScenarioInCompass,
+  isRuntimeAssignedToScenario,
+  assignRuntimeToScenario,
+} = require('../compass');
+const {saveKubeconfig} = require('../skr-svcat-migration-test/test-helpers');
 
-const keb = new KEBClient(KEBConfig.fromEnv());
-const gardener = new GardenerClient(GardenerConfig.fromEnv());
-const director = new DirectorClient(DirectorConfig.fromEnv());
+const testNS = 'skr-test';
 
 function withInstanceID(instanceID) {
   return function(options) {
@@ -38,15 +41,17 @@ function withTestNS(testNS) {
   };
 }
 
+function withSuffix(suffix) {
+  return function(options) {
+    options.suffix = suffix;
+  };
+}
+
 function gatherOptions(...opts) {
-  const suffix = genRandom(4);
   // If no opts provided the options object will be set to these default values.
   const options = {
     instanceID: uuid.v4(),
-    runtimeName: `kyma-${suffix}`,
-    appName: `app-${suffix}`,
-    scenarioName: `test-${suffix}`,
-    testNS: 'skr-test',
+    testNS: testNS,
     // These options are not meant to be rewritten apart from env variable for KEB_USER_ID
     // If that's needed please add separate function that overrides this field.
     oidc0: {
@@ -65,26 +70,81 @@ function gatherOptions(...opts) {
       usernameClaim: 'email',
       usernamePrefix: 'acme-',
     },
-    administrator0: getEnvOrThrow('KEB_USER_ID'),
+    kebUserId: getEnvOrThrow('KEB_USER_ID'),
     administrators1: ['admin1@acme.com', 'admin2@acme.com'],
   };
 
   opts.forEach((opt) => {
     opt(options);
   });
-  debug(options);
+
+  if (options.suffix === undefined) {
+    options.suffix = genRandom(4);
+  }
+
+  options.runtimeName = `kyma-${options.suffix}`;
+  options.appName = `app-${options.suffix}`;
+  options.scenarioName = `test-${options.suffix}`;
 
   return options;
 }
 
+// gets the skr config by it's instance id
+async function getSKRConfig(instanceID) {
+  let shoot;
+  try {
+    shoot = await keb.getSKR(instanceID);
+  } catch (e) {
+    throw new Error(`Cannot fetch the shoot: ${e.toString()}`);
+  }
+  const shootName = shoot.dashboard_url.split('.')[1];
+
+  console.log(`Fetching SKR info for shoot: ${shootName}`);
+  return await gardener.getShoot(shootName);
+}
+
+async function prepareCompassResources(shoot, options) {
+  // check if compass scenario setup is needed
+  const compassScenarioAlreadyExist = await scenarioExistsInCompass(director, options.scenarioName);
+  if (compassScenarioAlreadyExist) {
+    console.log(`Compass scenario with the name ${options.scenarioName} already exist, do not register it again`);
+  } else {
+    console.log('Assigning SKR to scenario in Compass');
+    // Create a new scenario (systems/formations) in compass for this test
+    await addScenarioInCompass(director, options.scenarioName);
+  }
+
+  // check if assigning the runtime to the scenario is needed
+  const runtimeAssignedToScenario = await isRuntimeAssignedToScenario(director,
+      shoot.compassID,
+      options.scenarioName);
+  if (!runtimeAssignedToScenario) {
+    console.log('Assigning Runtime to a compass scenario');
+    // map scenario to target SKR
+    await assignRuntimeToScenario(director, shoot.compassID, options.scenarioName);
+  } else {
+    console.log('Runtime %s is already assigned to the %s compass scenario', shoot.compassID, options.scenarioName);
+  }
+}
+
+async function initK8sConfig(shoot) {
+  console.log('Should save kubeconfig for the SKR to ~/.kube/config');
+  await saveKubeconfig(shoot.kubeconfig);
+
+  console.log('Should initialize K8s client');
+  await initializeK8sClient({kubeconfig: shoot.kubeconfig});
+}
+
 module.exports = {
-  keb,
-  gardener,
-  director,
+  testNS,
+  getSKRConfig,
+  prepareCompassResources,
+  initK8sConfig,
   gatherOptions,
   withInstanceID,
   withAppName,
   withRuntimeName,
   withScenarioName,
   withTestNS,
+  withSuffix,
 };
