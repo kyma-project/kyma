@@ -56,7 +56,7 @@ describe('SKR test', function() {
     await initK8sConfig(shoot);
   });
 
-  it('Execute the tests', async function() {
+  it('Execute the tests', function() {
     // oidcE2ETest(options, shoot);
     commerceMockTest(options);
   });

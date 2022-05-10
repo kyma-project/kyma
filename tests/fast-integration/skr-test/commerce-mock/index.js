@@ -37,13 +37,13 @@ function commerceMockTest(options) {
     commerceMockTests(options.testNS);
     commerceMockCleanup(options.testNS);
 
-    describe('Check audit logs for AWS', async function() {
-      // if (process.env.KEB_PLAN_ID === AWS_PLAN_ID) {
-      checkAuditLogsForAWS();
-      // } else {
-      //   debug('Skipping step for non-AWS plan');
-      // }
-    });
+    // describe('Check audit logs for AWS', async function() {
+    // if (process.env.KEB_PLAN_ID === AWS_PLAN_ID) {
+    checkAuditLogsForAWS();
+    // } else {
+    //   debug('Skipping step for non-AWS plan');
+    // }
+    // });
   });
 }
 
