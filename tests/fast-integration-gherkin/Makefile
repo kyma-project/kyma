@@ -1,5 +1,5 @@
 .PHONY: ci-certificate-gherkin
 ci-certificate-gherkin:
-	npm install
-	npm install ../fast-integration
+	cd ../fast-integration && npm install
+	cd ../ fast-integration-gherking && npm install
 	./node_modules/.bin/cucumber-js features/Ingress-certificate/certificate.feature
