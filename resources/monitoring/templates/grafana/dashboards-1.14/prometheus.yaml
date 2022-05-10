@@ -1,6 +1,6 @@
 {{- /*
   Customization: 
-  * Made the dashboard not editable
+  * Dashboard not editable
   * Remove hard-coded monitoring namespace in label_values
 */ -}}
 {{- /*
@@ -19,7 +19,7 @@ metadata:
 {{ toYaml .Values.grafana.sidecar.dashboards.annotations | indent 4 }}
   labels:
     {{- if $.Values.grafana.sidecar.dashboards.label }}
-    {{ $.Values.grafana.sidecar.dashboards.label }}: "1"
+    {{ $.Values.grafana.sidecar.dashboards.label }}: {{ ternary $.Values.grafana.sidecar.dashboards.labelValue "1" (not (empty $.Values.grafana.sidecar.dashboards.labelValue)) | quote }}
     {{- end }}
     app: {{ template "kube-prometheus-stack.name" $ }}-grafana
 {{ include "kube-prometheus-stack.labels" $ | indent 4 }}
@@ -1161,7 +1161,7 @@ data:
                     "options": [
 
                     ],
-                    "query": "label_values(prometheus_build_info, job)",
+                     "query": "label_values(prometheus_build_info, job)",
                     "refresh": 1,
                     "regex": "",
                     "sort": 2,
