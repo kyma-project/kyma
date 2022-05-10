@@ -3,9 +3,10 @@ package serverless
 import (
 	"context"
 	"fmt"
-	"go.uber.org/zap"
 	"testing"
 	"time"
+
+	"go.uber.org/zap"
 
 	"github.com/kyma-project/kyma/components/function-controller/internal/controllers/serverless/automock"
 	"github.com/stretchr/testify/mock"

@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+
 	"go.uber.org/zap"
 
 	"github.com/kyma-project/kyma/components/function-controller/internal/git"

@@ -3,8 +3,9 @@ package serverless
 import (
 	"context"
 	"fmt"
-	"go.uber.org/zap"
 	"testing"
+
+	"go.uber.org/zap"
 
 	"github.com/stretchr/testify/mock"
 

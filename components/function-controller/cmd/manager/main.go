@@ -4,8 +4,9 @@ import (
 	"errors"
 	"fmt"
 	"os"
-	ctrl "sigs.k8s.io/controller-runtime"
 	"time"
+
+	ctrl "sigs.k8s.io/controller-runtime"
 
 	"github.com/kyma-project/kyma/components/function-controller/internal/controllers/serverless/metrics"
 

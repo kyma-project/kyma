@@ -2,8 +2,9 @@ package serverless
 
 import (
 	"context"
-	"go.uber.org/zap"
 	"time"
+
+	"go.uber.org/zap"
 
 	"github.com/pkg/errors"
 	"golang.org/x/time/rate"
