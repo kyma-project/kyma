@@ -52,4 +52,5 @@ metadata:
   labels:
     app: commerce
   name: commerce-468ed067-dacb-4009-a9d5-497e3d2333c8
+  namespace: kyma-integration
 type: Opaque
