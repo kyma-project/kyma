@@ -174,12 +174,12 @@ Then(/^The event should be received correctly$/, () => {
 	checkLegacyEventResponse(legacyEventResponse);
 });
 
-AfterAll({tags: "@skrtest", timeout: 1000 * 60 * 95}, async() => {
-    const options = SKRSetup.options;
+// AfterAll({tags: "@skrtest", timeout: 1000 * 60 * 95}, async() => {
+//     const options = SKRSetup.options;
 
-    // Delete commerce mock
-    await CommerceCompassMock.deleteCommerceMockResources(options.testNS);
+//     // Delete commerce mock
+//     await CommerceCompassMock.deleteCommerceMockResources(options.testNS);
 
-    // Deprovision SKR
-    await SKRSetup.deprovisionSKR();
-});
+//     // Deprovision SKR
+//     await SKRSetup.deprovisionSKR();
+// });
