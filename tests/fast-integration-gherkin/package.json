@@ -1,6 +1,6 @@
 {
   "name": "fast-integration-gherkin",
-  "version": "0.0.1-alpha.12",
+  "version": "1.0.0",
   "description": "Fast integration tests written in Gherkin",
   "main": "index.js",
   "scripts": {
@@ -9,7 +9,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@kubernetes/client-node": "0.15.1",
+    "@kubernetes/client-node": "file:../fast-integration/node_modules/@kubernetes/client-node/index",
     "axios": "^0.21.0",
     "execa": "^5.0.0",
     "mocha-junit-reporter": "^2.0.0",
