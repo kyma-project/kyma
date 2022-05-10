@@ -1,6 +1,6 @@
 {
   "name": "fast-integration-gherkin",
-  "version": "1.0.0",
+  "version": "0.0.1-alpha.12",
   "description": "Fast integration tests written in Gherkin",
   "main": "index.js",
   "scripts": {
