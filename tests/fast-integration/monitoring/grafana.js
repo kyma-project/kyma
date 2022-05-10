@@ -85,6 +85,12 @@ async function setGrafanaProxy() {
   }
 }
 
+async function ensureGrafanaProxySet() {
+  if (!await checkGrafanaRedirect('https://grafana.', 200)){
+    await setGrafanaProxy()
+  }
+}
+
 async function resetGrafanaProxy() {
   if (getEnvOrDefault('KYMA_MAJOR_VERSION', '2') === '2') {
     await deleteProxySecret();
@@ -179,7 +185,7 @@ async function updateProxyDeployment(fromArg, toArg) {
 
 async function checkGrafanaRedirect(redirectURL, httpStatus) {
   let retries = 0;
-  while (retries < 20) {
+  while (retries < 60) {
     const isReachable = await checkIfGrafanaIsReachable(redirectURL, httpStatus);
     if (isReachable === true) {
       return true;
@@ -194,5 +200,6 @@ module.exports = {
   assertPodsExist,
   assertGrafanaRedirectsExist,
   setGrafanaProxy,
+  ensureGrafanaProxySet,
   resetGrafanaProxy,
 };
