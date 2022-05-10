@@ -15,22 +15,22 @@ var (
 	testResult ctrl.Result
 	testErr    = errors.New("test error")
 
-	testStateFn1 = func(ctx context.Context, r *reconciler, s *systemState) stateFn {
+	testStateFn1 = func(_ context.Context, r *reconciler, s *systemState) stateFn {
 		r.log.Info("test state function #1")
 		return testStateFn2
 	}
 
-	testStateFn2 = func(ctx context.Context, r *reconciler, s *systemState) stateFn {
+	testStateFn2 = func(_ context.Context, r *reconciler, s *systemState) stateFn {
 		r.log.Info("test state function #2")
 		return nil
 	}
 
-	testStateFn3 = func(ctx context.Context, r *reconciler, s *systemState) stateFn {
+	testStateFn3 = func(_ context.Context, r *reconciler, s *systemState) stateFn {
 		r.log.Info("test state function #3")
 		return testStateFnErr
 	}
 
-	testStateFnErr = func(ctx context.Context, r *reconciler, s *systemState) stateFn {
+	testStateFnErr = func(_ context.Context, r *reconciler, s *systemState) stateFn {
 		r.log.Info("test error state")
 		r.err = testErr
 		return nil
