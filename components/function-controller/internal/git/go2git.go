@@ -1,10 +1,13 @@
 package git
 
 import (
-	"io/ioutil"
+	"crypto/md5"
+	"fmt"
 	"log"
 	"os"
+	"path"
 	"strings"
+	"sync"
 
 	git2go "github.com/libgit2/git2go/v31"
 	"github.com/pkg/errors"
@@ -32,6 +35,7 @@ type fetcher interface {
 type Git2GoClient struct {
 	cloner
 	fetcher
+	mutex sync.Mutex
 }
 
 func NewGit2Go() *Git2GoClient {
@@ -48,13 +52,13 @@ func (g *Git2GoClient) LastCommit(options Options) (string, error) {
 		return options.Reference, nil
 	}
 
-	tmpPath, err := ioutil.TempDir(tempDir, "fn-git")
+	repoPath := path.Join(tempDir, fmt.Sprintf("%x", md5.Sum([]byte(options.URL))))
+	err = os.MkdirAll(repoPath, os.ModePerm)
 	if err != nil {
 		return "", errors.Wrap(err, "while creating temporary directory")
 	}
-	defer removeDir(tmpPath)
 
-	repo, err := g.fetchRepo(options, tmpPath)
+	repo, err := g.fetchRepo(options, repoPath)
 	if err != nil {
 		return "", errors.Wrap(err, "while fetching the repository")
 	}
@@ -68,6 +72,7 @@ func (g *Git2GoClient) LastCommit(options Options) (string, error) {
 	if !git2go.IsErrorCode(err, git2go.ErrNotFound) {
 		return "", errors.Wrap(err, "while lookup branch")
 	}
+
 	//tag
 	commit, err := g.lookupTag(repo, options.Reference)
 	if err != nil {
@@ -113,11 +118,16 @@ func (g *Git2GoClient) cloneRepo(opts Options, path string) (*git2go.Repository,
 	}
 	return g.cloner.git2goClone(opts.URL, path, authCallbacks)
 }
+
 func (g *Git2GoClient) fetchRepo(opts Options, path string) (*git2go.Repository, error) {
 	authCallbacks, err := GetAuth(opts.Auth)
 	if err != nil {
 		return nil, errors.Wrap(err, "while getting authentication opts")
 	}
+	// fetcher uses the same directory for the repo every time.
+	// we need need to make this safe to use if we switch to multiple workers
+	g.mutex.Lock()
+	defer g.mutex.Unlock()
 	return g.fetcher.git2goFetch(opts.URL, path, authCallbacks)
 }
 

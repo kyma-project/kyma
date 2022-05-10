@@ -14,14 +14,27 @@ func (g *git2goFetcher) git2goFetch(url, outputPath string, remoteCallbacks git2
 		return nil, errors.Wrap(err, "while initializing repository")
 	}
 
-	remote, err := repo.Remotes.Create("origin", url)
+	remote, err := useRemote(repo, url)
 	if err != nil {
-		return nil, errors.Wrap(err, "while creating remote")
+		return nil, errors.Wrap(err, "while using remote")
 	}
 	defer remote.Free()
+
 	err = remote.Fetch(nil, &git2go.FetchOptions{RemoteCallbacks: remoteCallbacks}, "")
 	if err != nil {
 		return nil, errors.Wrap(err, "while fetching remote")
 	}
+
 	return repo, nil
+}
+
+func useRemote(repo *git2go.Repository, url string) (*git2go.Remote, error) {
+	remote, err := repo.Remotes.Lookup("origin")
+	if err == nil {
+		return remote, nil
+	}
+	if git2go.IsErrorCode(err, git2go.ErrNotFound) {
+		return repo.Remotes.Create("origin", url)
+	}
+	return nil, errors.Wrap(err, "while looking up remote")
 }
