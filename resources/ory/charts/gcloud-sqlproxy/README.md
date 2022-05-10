@@ -10,7 +10,7 @@ Accessing your Cloud SQL instance using the Cloud SQL Proxy offers these advanta
 
 ## Introduction
 
-This chart creates a Google Cloud SQL proxy deployment and service on a Kubernetes cluster using the Helm package manager.
+This chart creates a Google Cloud SQL proxy Deployment and Service on a Kubernetes cluster using the Helm package manager.
 You need to enable Cloud SQL Administration API and create a service account for the proxy as per these [instructions](https://cloud.google.com/sql/docs/postgres/connect-container-engine).
 
 ## Prerequisites
