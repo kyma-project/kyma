@@ -200,7 +200,7 @@ func Test_syncSubscriptionStatus(t *testing.T) {
 			require.NoError(t, err)
 
 			// when
-			err = r.syncSubscriptionStatus(ctx, sub, sub, testCase.givenUpdateStatus, testCase.givenError)
+			err = r.syncSubscriptionStatus(ctx, sub, testCase.givenUpdateStatus, testCase.givenError)
 			require.NoError(t, err)
 
 			// then

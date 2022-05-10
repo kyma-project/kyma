@@ -51,14 +51,14 @@ type JetStreamBackend interface {
 // SubscriptionSubjectIdentifier is used to uniquely identify a Subscription subject.
 // It should be used only with JetStream backend.
 type SubscriptionSubjectIdentifier struct {
-	consumerName, namespacedName string
+	consumerName, namespacedSubjectName string
 }
 
 // NewSubscriptionSubjectIdentifier returns a new SubscriptionSubjectIdentifier instance.
 func NewSubscriptionSubjectIdentifier(subscription *eventingv1alpha1.Subscription, subject string) SubscriptionSubjectIdentifier {
-	cn := computeConsumerName(subscription, subject) // compute the consumer name once
-	nn := computeNamespacedName(subscription)        // compute the namespaced name once
-	return SubscriptionSubjectIdentifier{consumerName: cn, namespacedName: nn}
+	cn := computeConsumerName(subscription, subject)          // compute the consumer name once
+	nn := computeNamespacedSubjectName(subscription, subject) // compute the namespaced name with the subject once
+	return SubscriptionSubjectIdentifier{consumerName: cn, namespacedSubjectName: nn}
 }
 
 // ConsumerName returns the JetStream consumer name.
@@ -68,7 +68,7 @@ func (s SubscriptionSubjectIdentifier) ConsumerName() string {
 
 // NamespacedName returns the Kubernetes namespaced name.
 func (s SubscriptionSubjectIdentifier) NamespacedName() string {
-	return s.namespacedName
+	return s.namespacedSubjectName[:strings.LastIndex(s.namespacedSubjectName, separator)]
 }
 
 // computeConsumerName returns JetStream consumer name of the given subscription and subject.
@@ -80,9 +80,9 @@ func computeConsumerName(subscription *eventingv1alpha1.Subscription, subject st
 	return hex.EncodeToString(h[:])
 }
 
-// computeNamespacedName returns Kubernetes namespaced name of the given subscription.
-func computeNamespacedName(subscription *eventingv1alpha1.Subscription) string {
-	return subscription.Namespace + separator + subscription.Name
+// computeNamespacedSubjectName returns Kubernetes namespaced name of the given subscription along with the subject.
+func computeNamespacedSubjectName(subscription *eventingv1alpha1.Subscription, subject string) string {
+	return subscription.Namespace + separator + subscription.Name + separator + subject
 }
 
 type JetStream struct {
@@ -196,16 +196,8 @@ func (js *JetStream) SyncSubscription(subscription *eventingv1alpha1.Subscriptio
 	}
 
 	callback := js.getCallback(subKeyPrefix)
-	var consumerSubjectMapping []eventingv1alpha1.ConsumerSubjectMapping
 	for _, subject := range subscription.Status.CleanEventTypes {
 		jsSubKey := NewSubscriptionSubjectIdentifier(subscription, subject)
-
-		// prepare the consumerSubject Mapping to display in the Subscription Status
-		consumerSubject := eventingv1alpha1.ConsumerSubjectMapping{
-			Consumer: jsSubKey.consumerName,
-			Subject:  subject,
-		}
-		consumerSubjectMapping = append(consumerSubjectMapping, consumerSubject)
 
 		// check if the subscription already exists and if it is valid.
 		if existingNatsSub, ok := js.subscriptions[jsSubKey]; ok {
@@ -234,8 +226,6 @@ func (js *JetStream) SyncSubscription(subscription *eventingv1alpha1.Subscriptio
 		js.subscriptions[jsSubKey] = jsSubscription
 		log.Debugw("created subscription on JetStream", "subject", subject)
 	}
-	// update the consumerSubjectMapping for the subscription
-	subscription.Status.ConsumerSubjectMapping = consumerSubjectMapping
 	return nil
 }
 
@@ -383,7 +373,7 @@ type DefaultSubOpts []nats.SubOpt
 func (js *JetStream) getDefaultSubscriptionOptions(consumer SubscriptionSubjectIdentifier, subConfig *eventingv1alpha1.SubscriptionConfig) DefaultSubOpts {
 	defaultOpts := DefaultSubOpts{
 		nats.Durable(consumer.consumerName),
-		nats.Description(consumer.namespacedName),
+		nats.Description(consumer.namespacedSubjectName),
 		nats.ManualAck(),
 		nats.AckExplicit(),
 		nats.IdleHeartbeat(idleHeartBeatDuration),

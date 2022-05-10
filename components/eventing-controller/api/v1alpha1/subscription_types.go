@@ -174,16 +174,6 @@ type EmsSubscriptionStatus struct {
 	LastFailedDeliveryReason string `json:"lastFailedDeliveryReason,omitempty"`
 }
 
-type ConsumerSubjectMapping struct {
-	// Consumer defines the name of the consumer associated with the Subscription and the Subject
-	// +optional
-	Consumer string `json:"consumer,omitempty"`
-
-	// Subject defines the subject associated with the Subscription and the Consumer
-	// +optional
-	Subject string `json:"subject,omitempty"`
-}
-
 // SubscriptionStatus defines the observed state of Subscription
 // +kubebuilder:subresource:status
 type SubscriptionStatus struct {
@@ -217,10 +207,6 @@ type SubscriptionStatus struct {
 	// APIRuleName defines the name of the APIRule which is used by the Subscription
 	// +optional
 	APIRuleName string `json:"apiRuleName,omitempty"`
-
-	// ConsumerSubjectMapping defines the JetStream consumer names associated with the Subscription's subjects
-	// +optional
-	ConsumerSubjectMapping []ConsumerSubjectMapping `json:"consumerSubjectMapping,omitempty"`
 
 	// EmsSubscriptionStatus defines the status of Subscription in BEB
 	// +optional

@@ -35,7 +35,7 @@ Events were not received by the consumers.
        nats consumer info
        ```
        
-    To correlate the consumer to the subscription, check the `description` field of the consumer. You can also see the consumer, corresponding to the subject, in the status field of the Subscription CRD.
+    To correlate the consumer to the Subscription and the specific event type, check the `description` field of the consumer.
 
 3. Check the [JetStream grafana dashboard](https://grafana.com/grafana/dashboards/14725):
 
@@ -43,5 +43,5 @@ Events were not received by the consumers.
         ```bash
         kubectl -n kyma-system port-forward svc/monitoring-grafana 8081:80
         ```
-    2. On `localhost:8081` search for `NATS JetStream` dashboard. You can find the stream and consumer metrics as well as the storage and memory consumption. You can correlate the consumer names to the exact kyma subscription and filter, as described in the previous step.
+    2. On `localhost:8081` search for `NATS JetStream` dashboard. You can find the stream and consumer metrics as well as the storage and memory consumption.
     
