@@ -5,11 +5,10 @@ APPS=$(kubectl get app -oname | cut -d '/' -f 2)
 
 for APP in $APPS
 do
-	kubectl delete svc,deploy -l app="${APP}-application-gateway" -n kyma-integration
+  kubectl delete svc,deploy -l app="${APP}-application-gateway" -n kyma-integration
 done
 
-echo "
-Deleting rafter"
+echo "Deleting rafter"
 
 kubectl -n kyma-system delete crd assetgroups.rafter.kyma-project.io
 kubectl -n kyma-system delete crd assets.rafter.kyma-project.io
@@ -30,8 +29,7 @@ kubectl -n kyma-system delete deployment rafter-front-matter-svc
 kubectl -n kyma-system delete deployment rafter-minio
 kubectl -n kyma-system delete deployment rafter-upload-svc
 
-echo "
-Deleting Service Catalog"
+echo "Deleting Service Catalog"
 
 kubectl delete crd addonsconfigurations.addons.kyma-project.io
 kubectl delete crd clusteraddonsconfigurations.addons.kyma-project.io
