@@ -1,5 +1,5 @@
 const {CommerceMock} = require('../../helpers/commerce-mock-setup');
-const {kubectlPortForward} = require('../../../fast-integration/utils');
+const {kubectlPortForward} = require('fast-integration-tests');
 const {
     sendInClusterEvent,
     verifyInClusterEventIsReceivedCorrectly
