@@ -18,7 +18,7 @@ async function provisionSKRInstance(options, timeout) {
         `Runtime ${options.runtimeName}`, `Application ${options.appName}`, `Suffix ${options.suffix}`);
 
     const customParams = {
-      oidc: this.options.oidc0,
+      oidc: options.oidc0,
       kymaVersion: 'PR-14116',
       overridesVersion: '2.1.3',
     };
