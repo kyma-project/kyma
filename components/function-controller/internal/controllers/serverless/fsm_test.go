@@ -3,9 +3,9 @@ package serverless
 import (
 	"context"
 	"errors"
+	"go.uber.org/zap"
 	"testing"
 
-	testr "github.com/go-logr/logr/testr"
 	"github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
 	"github.com/stretchr/testify/require"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -15,22 +15,22 @@ var (
 	testResult ctrl.Result
 	testErr    = errors.New("test error")
 
-	testStateFn1 = func(_ context.Context, r *reconciler, s *systemState) stateFn {
+	testStateFn1 = func(ctx context.Context, r *reconciler, s *systemState) stateFn {
 		r.log.Info("test state function #1")
 		return testStateFn2
 	}
 
-	testStateFn2 = func(_ context.Context, r *reconciler, s *systemState) stateFn {
+	testStateFn2 = func(ctx context.Context, r *reconciler, s *systemState) stateFn {
 		r.log.Info("test state function #2")
 		return nil
 	}
 
-	testStateFn3 = func(_ context.Context, r *reconciler, s *systemState) stateFn {
+	testStateFn3 = func(ctx context.Context, r *reconciler, s *systemState) stateFn {
 		r.log.Info("test state function #3")
 		return testStateFnErr
 	}
 
-	testStateFnErr = func(_ context.Context, r *reconciler, s *systemState) stateFn {
+	testStateFnErr = func(ctx context.Context, r *reconciler, s *systemState) stateFn {
 		r.log.Info("test error state")
 		r.err = testErr
 		return nil
@@ -78,8 +78,7 @@ func Test_reconciler_reconcile(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			ctx := context.Background()
-			log := testr.New(t)
-
+			log := zap.NewNop().Sugar()
 			m := &reconciler{
 				fn:  tt.fields.fn,
 				log: log,

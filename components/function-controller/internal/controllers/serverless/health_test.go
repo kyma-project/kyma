@@ -14,7 +14,7 @@ import (
 )
 
 func TestHealthChecker_Checker(t *testing.T) {
-	logger := zap.NewNop()
+	logger := zap.NewNop().Sugar()
 	t.Run("Success", func(t *testing.T) {
 		//GIVEN
 		timeout := 10 * time.Second

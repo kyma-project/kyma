@@ -2,9 +2,9 @@ package serverless
 
 import (
 	"context"
+	"go.uber.org/zap"
 	"time"
 
-	"github.com/go-logr/logr"
 	"github.com/pkg/errors"
 	"golang.org/x/time/rate"
 	appsv1 "k8s.io/api/apps/v1"
@@ -34,7 +34,7 @@ type StatsCollector interface {
 }
 
 type FunctionReconciler struct {
-	Log               logr.Logger
+	Log               *zap.SugaredLogger
 	client            resource.Client
 	recorder          record.EventRecorder
 	config            FunctionConfig
@@ -45,9 +45,9 @@ type FunctionReconciler struct {
 	initStateFunction stateFn
 }
 
-func NewFunction(client resource.Client, log logr.Logger, config FunctionConfig, gitOperator GitOperator, recorder record.EventRecorder, statsCollector StatsCollector, healthCh chan bool) *FunctionReconciler {
+func NewFunction(client resource.Client, log *zap.SugaredLogger, config FunctionConfig, gitOperator GitOperator, recorder record.EventRecorder, statsCollector StatsCollector, healthCh chan bool) *FunctionReconciler {
 	return &FunctionReconciler{
-		Log:               log.WithName("controllers").WithName("function"),
+		Log:               log.Named("controllers").Named("function"), //log.WithName("controllers").WithName("function"),
 		client:            client,
 		recorder:          recorder,
 		config:            config,
@@ -109,7 +109,7 @@ func (r *FunctionReconciler) Reconcile(ctx context.Context, request ctrl.Request
 		return ctrl.Result{}, nil
 	}
 
-	recLogger := r.Log.WithValues(
+	zapLog := r.Log.With(
 		"kind", instance.GetObjectKind().GroupVersionKind().Kind,
 		"name", instance.GetName(),
 		"namespace", instance.GetNamespace(),
@@ -122,7 +122,7 @@ func (r *FunctionReconciler) Reconcile(ctx context.Context, request ctrl.Request
 
 	stateReconciler := reconciler{
 		fn:  r.initStateFunction,
-		log: recLogger,
+		log: zapLog,
 		k8s: k8s{
 			client:         r.client,
 			recorder:       r.recorder,

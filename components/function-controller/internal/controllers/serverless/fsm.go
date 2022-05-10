@@ -4,8 +4,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"go.uber.org/zap"
 
-	"github.com/go-logr/logr"
 	"github.com/kyma-project/kyma/components/function-controller/internal/git"
 	"github.com/kyma-project/kyma/components/function-controller/internal/resource"
 	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
@@ -38,7 +38,7 @@ type out struct {
 type reconciler struct {
 	cfg      cfg
 	fn       stateFn
-	log      logr.Logger
+	log      *zap.SugaredLogger
 	operator GitOperator
 	k8s
 	out

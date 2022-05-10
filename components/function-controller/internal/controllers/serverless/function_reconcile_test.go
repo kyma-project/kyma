@@ -3,6 +3,7 @@ package serverless
 import (
 	"context"
 	"fmt"
+	"go.uber.org/zap"
 	"testing"
 	"time"
 
@@ -10,6 +11,7 @@ import (
 	"github.com/stretchr/testify/mock"
 
 	"github.com/kyma-project/kyma/components/function-controller/internal/resource"
+	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
 	"github.com/onsi/gomega"
 	appsv1 "k8s.io/api/apps/v1"
 	autoscalingv1 "k8s.io/api/autoscaling/v1"
@@ -20,9 +22,6 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/tools/record"
 	ctrl "sigs.k8s.io/controller-runtime"
-	"sigs.k8s.io/controller-runtime/pkg/log"
-
-	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
 )
 
 const (
@@ -46,7 +45,7 @@ func TestFunctionReconciler_Reconcile(t *testing.T) {
 	statsCollector := &automock.StatsCollector{}
 	statsCollector.On("UpdateReconcileStats", mock.Anything, mock.Anything).Return()
 
-	reconciler := NewFunction(resourceClient, log.Log, testCfg, nil, record.NewFakeRecorder(100), statsCollector, make(chan bool))
+	reconciler := NewFunction(resourceClient, zap.NewNop().Sugar(), testCfg, nil, record.NewFakeRecorder(100), statsCollector, make(chan bool))
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
@@ -501,7 +500,7 @@ func TestFunctionReconciler_Reconcile(t *testing.T) {
 		statsCollector := &automock.StatsCollector{}
 		statsCollector.On("UpdateReconcileStats", mock.Anything, mock.Anything).Return()
 
-		reconciler := NewFunction(resourceClient, log.Log, testCfg, nil, record.NewFakeRecorder(100), statsCollector, make(chan bool))
+		reconciler := NewFunction(resourceClient, zap.NewNop().Sugar(), testCfg, nil, record.NewFakeRecorder(100), statsCollector, make(chan bool))
 		reconciler.config.Build.MaxSimultaneousJobs = 1
 
 		s := systemState{

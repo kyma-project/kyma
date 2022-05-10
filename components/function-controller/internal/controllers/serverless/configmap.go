@@ -3,12 +3,10 @@ package serverless
 import (
 	"context"
 	"fmt"
-
-	corev1 "k8s.io/api/core/v1"
-	apilabels "k8s.io/apimachinery/pkg/labels"
-
 	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
+	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	apilabels "k8s.io/apimachinery/pkg/labels"
 )
 
 func stateFnInlineCheckSources(ctx context.Context, r *reconciler, s *systemState) stateFn {
@@ -32,7 +30,6 @@ func stateFnInlineCheckSources(ctx context.Context, r *reconciler, s *systemStat
 	}
 
 	cfgMapCount := len(s.configMaps.Items)
-
 	// TODO create issue to refactor the way how function controller is handling status
 	next := stateFnInlineDeleteConfigMap
 
@@ -48,6 +45,7 @@ func stateFnInlineCheckSources(ctx context.Context, r *reconciler, s *systemStat
 }
 
 func stateFnInlineDeleteConfigMap(ctx context.Context, r *reconciler, s *systemState) stateFn {
+
 	r.log.Info("delete all ConfigMaps")
 
 	labels := s.internalFunctionLabels()
