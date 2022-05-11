@@ -2,6 +2,7 @@ package kubernetes
 
 import (
 	"context"
+	"go.uber.org/zap"
 	"testing"
 	"time"
 
@@ -16,7 +17,6 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/event"
-	"sigs.k8s.io/controller-runtime/pkg/log"
 )
 
 func TestNamespaceReconciler_Reconcile(t *testing.T) {
@@ -55,7 +55,7 @@ func TestNamespaceReconciler_Reconcile(t *testing.T) {
 	g.Expect(k8sClient.Create(context.TODO(), baseRoleBinding)).To(gomega.Succeed())
 
 	request := ctrl.Request{NamespacedName: types.NamespacedName{Name: userNamespace.GetName()}}
-	reconciler := NewNamespace(k8sClient, log.Log, testCfg, configMapSvc, secretSvc, serviceAccountSvc, roleSvc, roleBindingSvc)
+	reconciler := NewNamespace(k8sClient, zap.NewNop().Sugar(), testCfg, configMapSvc, secretSvc, serviceAccountSvc, roleSvc, roleBindingSvc)
 	namespace := userNamespace.GetName()
 
 	ctx, cancel := context.WithCancel(context.Background())
