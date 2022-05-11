@@ -240,6 +240,9 @@ class KCPWrapper {
       let upgradeOperation = {};
       if (operations.count > 0) {
         upgradeOperation = await this.getOrchestrationsOperationStatus(orchestrationID, operations.data[0].operationID);
+
+        debug("!!! "+ upgradeOperation)
+
         debug(`OrchestrationID: ${orchestrationID}
         OperationID: ${operations.data[0].operationID}
         OperationStatus: ${upgradeOperation.state}`);
