@@ -116,6 +116,5 @@ dist
 .pnp.*
 
 istio-*
-junit_kyma-fast-integration.xml
 tmp-*
 hack/registry
