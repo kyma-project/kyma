@@ -141,31 +141,31 @@ func main() {
 		os.Exit(1)
 	}
 
-	if err := k8s.NewNamespace(mgr.GetClient(), ctrl.Log, config.Kubernetes, configMapSvc, secretSvc, serviceAccountSvc, roleSvc, roleBindingSvc).
+	if err := k8s.NewNamespace(mgr.GetClient(), zap.NewNop().Sugar(), config.Kubernetes, configMapSvc, secretSvc, serviceAccountSvc, roleSvc, roleBindingSvc).
 		SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create Namespace controller")
 		os.Exit(1)
 	}
 
-	if err := k8s.NewSecret(mgr.GetClient(), ctrl.Log, config.Kubernetes, secretSvc).
+	if err := k8s.NewSecret(mgr.GetClient(), zap.NewNop().Sugar(), config.Kubernetes, secretSvc).
 		SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create Secret controller")
 		os.Exit(1)
 	}
 
-	if err := k8s.NewServiceAccount(mgr.GetClient(), ctrl.Log, config.Kubernetes, serviceAccountSvc).
+	if err := k8s.NewServiceAccount(mgr.GetClient(), zap.NewNop().Sugar(), config.Kubernetes, serviceAccountSvc).
 		SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create ServiceAccount controller")
 		os.Exit(1)
 	}
 
-	if err := k8s.NewRole(mgr.GetClient(), ctrl.Log, config.Kubernetes, roleSvc).
+	if err := k8s.NewRole(mgr.GetClient(), zap.NewNop().Sugar(), config.Kubernetes, roleSvc).
 		SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create Role controller")
 		os.Exit(1)
 	}
 
-	if err := k8s.NewRoleBinding(mgr.GetClient(), ctrl.Log, config.Kubernetes, roleBindingSvc).
+	if err := k8s.NewRoleBinding(mgr.GetClient(), zap.NewNop().Sugar(), config.Kubernetes, roleBindingSvc).
 		SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create RoleBinding controller")
 		os.Exit(1)
