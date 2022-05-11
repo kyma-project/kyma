@@ -96,7 +96,8 @@ describe('Eventing tests', function() {
     //   await sendCloudEventStructuredModeAndCheckResponse(backend, mockNamespace);
     // });
     //
-    // it('order.created.v1 binary cloud event from CommerceMock should trigger the lastorder function', async function() {
+    // it('order.created.v1 binary cloud event from CommerceMock should trigger the lastorder function',
+    // async function() {
     //   await sendCloudEventBinaryModeAndCheckResponse(backend, mockNamespace);
     // });
 
