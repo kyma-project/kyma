@@ -135,7 +135,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	if err := k8s.NewConfigMap(mgr.GetClient(), ctrl.Log, config.Kubernetes, configMapSvc).
+	if err := k8s.NewConfigMap(mgr.GetClient(), zap.NewNop().Sugar(), config.Kubernetes, configMapSvc).
 		SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create ConfigMap controller")
 		os.Exit(1)
