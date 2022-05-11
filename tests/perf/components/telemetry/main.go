@@ -24,8 +24,9 @@ import (
 )
 
 var (
-	logPipelineGVR = schema.GroupVersionResource{Group: "telemetry.kyma-project.io", Version: "v1alpha1", Resource: "logpipelines"}
-	defaultTimeout = 15 * time.Minute
+	logPipelineGVR  = schema.GroupVersionResource{Group: "telemetry.kyma-project.io", Version: "v1alpha1", Resource: "logpipelines"}
+	defaultTimeout  = 15 * time.Minute
+	defaultWaitTime = 5 * time.Minute
 )
 
 type flags struct {
@@ -36,6 +37,7 @@ type flags struct {
 	port           int
 	uri            string
 	unhealthyRatio float64
+	waitTime       time.Duration
 }
 
 type httpLogPipeline struct {
@@ -63,6 +65,7 @@ func main() {
 	flag.StringVar(&f.uri, "uri", "", " URI Path")
 	flag.IntVar(&f.port, "port", 80, "Http port log pipelines will send logs to")
 	flag.Float64Var(&f.unhealthyRatio, "unhealthy-ratio", 0, "Ratio of unhealthy to healthy http log pipelines (from 0 to 1, where 0 means all are healthy and 1 means all are unhealthy)")
+	flag.DurationVar(&f.timeout, "wait", defaultWaitTime, "Time to wait for before collecting the metrics")
 	flag.Parse()
 
 	if err := run(f); err != nil {
@@ -100,12 +103,12 @@ func run(f flags) error {
 
 	g, gctx := errgroup.WithContext(ctx)
 
+	unhealthyCount := int(f.unhealthyRatio * float64(f.count))
 	for i := 0; i < f.count; i++ {
 		current := i
 		g.Go(func() error {
 			var httpPipelineYAML []byte
-			unhealthy := int(f.unhealthyRatio * float64(f.count))
-			if current < unhealthy {
+			if current < unhealthyCount {
 				httpPipelineYAML, err = renderHTTPLogPipeline(f.host, "/bad", f.port, current)
 			} else {
 				httpPipelineYAML, err = renderHTTPLogPipeline(f.host, "/good", f.port, current)
@@ -113,6 +116,7 @@ func run(f flags) error {
 			if err != nil {
 				return err
 			}
+
 			if err := createLogPipeline(gctx, dynamicClient, httpPipelineYAML); err != nil {
 				return err
 			}
@@ -123,6 +127,9 @@ func run(f flags) error {
 	if err := g.Wait(); err != nil {
 		return err
 	}
+
+	fmt.Printf("Waiting for %s before collecting the metrics", f.waitTime)
+	time.Sleep(f.waitTime)
 
 	if err := collectMetrics(ctx, config); err != nil {
 		return err
