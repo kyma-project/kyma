@@ -9,7 +9,7 @@ import (
 	"time"
 
 	"github.com/avast/retry-go"
-	"github.com/kyma-project/kyma/tests/integration/api-gateway/gateway-tests/pkg/api"
+	"github.com/kyma-project/kyma/tests/components/api-gateway/gateway-tests/pkg/api"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -46,19 +46,19 @@ func TestTestUnsecuredAPI(t *testing.T) {
 
 	t.Run("should return no error if the endpoint is not secured", func(t *testing.T) {
 
-		//when
+		// when
 		err := tester.TestUnsecuredEndpoint(unsecuredEndpoint)
 
-		//then
+		// then
 		assert.NoError(t, err)
 	})
 
 	t.Run("should return an error if the endpoint is secured", func(t *testing.T) {
 
-		//when
+		// when
 		err := tester.TestUnsecuredEndpoint(securedEndpoint)
 
-		//then
+		// then
 		assert.Error(t, err)
 	})
 }
@@ -66,17 +66,17 @@ func TestTestUnsecuredAPI(t *testing.T) {
 func TestTestSecuredAPI(t *testing.T) {
 
 	for desc, token := range map[string]string{
-		//given
+		// given
 		"return an error if no token":   "",
 		"return an error if bad token":  "bad_token",
 		"return no error if good token": testToken,
 	} {
 		t.Run(fmt.Sprintf("case: call secured API should %s has been included in the request", desc), func(t *testing.T) {
 
-			//when
+			// when
 			err := tester.TestSecuredEndpoint(securedEndpoint, fmt.Sprintf("Bearer %s", token), "Authorization")
 
-			//then
+			// then
 			if token == testToken {
 				assert.NoError(t, err)
 			} else {

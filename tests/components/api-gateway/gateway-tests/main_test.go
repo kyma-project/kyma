@@ -12,21 +12,20 @@ import (
 	"testing"
 	"time"
 
-	"github.com/kyma-project/kyma/tests/integration/api-gateway/gateway-tests/pkg/client"
-	"github.com/kyma-project/kyma/tests/integration/api-gateway/gateway-tests/pkg/resource"
+	"github.com/avast/retry-go"
+	"github.com/kyma-project/kyma/tests/components/api-gateway/gateway-tests/pkg/client"
+	"github.com/kyma-project/kyma/tests/components/api-gateway/gateway-tests/pkg/resource"
 	"github.com/stretchr/testify/require"
 
 	"github.com/kyma-project/kyma/common/ingressgateway"
 
-	"github.com/avast/retry-go"
-
 	"github.com/stretchr/testify/assert"
 	"github.com/vrischmann/envconfig"
 
-	"github.com/kyma-project/kyma/tests/integration/api-gateway/gateway-tests/pkg/api"
-	"github.com/kyma-project/kyma/tests/integration/api-gateway/gateway-tests/pkg/jwt"
+	"github.com/kyma-project/kyma/tests/components/api-gateway/gateway-tests/pkg/api"
+	"github.com/kyma-project/kyma/tests/components/api-gateway/gateway-tests/pkg/jwt"
 
-	"github.com/kyma-project/kyma/tests/integration/api-gateway/gateway-tests/pkg/manifestprocessor"
+	"github.com/kyma-project/kyma/tests/components/api-gateway/gateway-tests/pkg/manifestprocessor"
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/clientcredentials"
 
@@ -62,7 +61,7 @@ type Config struct {
 	Domain           string        `envconfig:"TEST_DOMAIN"`
 	GatewayName      string        `envconfig:"TEST_GATEWAY_NAME,default=kyma-gateway"`
 	GatewayNamespace string        `envconfig:"TEST_GATEWAY_NAMESPACE,default=kyma-system"`
-	ClientTimeout    time.Duration `envconfig:"TEST_CLIENT_TIMEOUT,default=10s"` //Don't forget the unit!
+	ClientTimeout    time.Duration `envconfig:"TEST_CLIENT_TIMEOUT,default=10s"` // Don't forget the unit!
 	IsMinikubeEnv    bool          `envconfig:"TEST_MINIKUBE_ENV,default=false"`
 }
 
@@ -405,7 +404,7 @@ func TestApiGatewayIntegration(t *testing.T) {
 			require.NotNil(token)
 			assert.NoError(tester.TestSecuredEndpoint(fmt.Sprintf("https://httpbin-%s.%s", testID, conf.Domain), fmt.Sprintf("Bearer %s", token.AccessToken), defaultHeaderName))
 
-			//Update API to give plain access
+			// Update API to give plain access
 			namePrefix := strings.TrimSuffix(resources[0].GetName(), "-"+testID)
 
 			unsecuredApiruleResource, err := manifestprocessor.ParseFromFileWithTemplate(noAccessStrategyApiruleFile, manifestsDirectory, resourceSeparator, struct {
@@ -464,7 +463,7 @@ func TestApiGatewayIntegration(t *testing.T) {
 
 			assert.NoError(tester.TestUnsecuredEndpoint(fmt.Sprintf("https://httpbin-%s.%s", testID, conf.Domain)))
 
-			//update to secure API
+			// update to secure API
 
 			namePrefix := strings.TrimSuffix(noAccessStrategyApiruleResource[0].GetName(), "-"+testID)
 
@@ -524,7 +523,7 @@ func TestApiGatewayIntegration(t *testing.T) {
 
 			assert.NoError(tester.TestUnsecuredEndpoint(fmt.Sprintf("https://httpbin-%s.%s", testID, conf.Domain)))
 
-			//update to secure API
+			// update to secure API
 
 			namePrefix := strings.TrimSuffix(noAccessStrategyApiruleResource[0].GetName(), "-"+testID)
 

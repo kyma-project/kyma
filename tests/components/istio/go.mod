@@ -1,4 +1,4 @@
-module github.com/kyma-project/kyma/tests/integration/istio
+module github.com/kyma-project/kyma/tests/components/istio
 
 go 1.17
 

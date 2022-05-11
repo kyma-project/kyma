@@ -1,4 +1,4 @@
-module github.com/kyma-project/kyma/tests/integration/api-gateway/gateway-tests
+module github.com/kyma-project/kyma/tests/components/api-gateway/gateway-tests
 
 go 1.12
 

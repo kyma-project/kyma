@@ -1,6 +1,6 @@
 FROM eu.gcr.io/kyma-project/test-infra/buildpack-golang-toolbox:v20210601-19326f24 as builder
 
-ENV BASE_DIR /workspace/go/src/github.com/kyma-project/kyma/tests/integration/api-gateway
+ENV BASE_DIR /workspace/go/src/github.com/kyma-project/kyma/tests/components/api-gateway
 WORKDIR ${BASE_DIR}
 
 COPY . ${BASE_DIR}/
