@@ -68,13 +68,13 @@ func main() {
 	flag.DurationVar(&f.timeout, "wait", defaultWaitTime, "Time to wait for before collecting the metrics")
 	flag.Parse()
 
-	if err := run(f); err != nil {
+	if err := run(&f); err != nil {
 		fmt.Printf("Error: %v\n", err)
 		os.Exit(2)
 	}
 }
 
-func run(f flags) error {
+func run(f *flags) error {
 	if f.host == "" {
 		return errors.New("flag not specified: host")
 	}
@@ -160,6 +160,7 @@ func randomTag() string {
 	tagLength := 5
 	chars := make([]rune, tagLength)
 	for i := range chars {
+		//#nosec G404
 		chars[i] = letterRunes[rand.Intn(len(letterRunes))]
 	}
 	return string(chars)

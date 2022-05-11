@@ -31,7 +31,7 @@ func portForwardToPrometheus(config *rest.Config) {
 	}
 
 	path := fmt.Sprintf("/api/v1/namespaces/%s/pods/%s/portforward", prometheusNamespace, prometheusPod)
-	hostIP := strings.TrimLeft(config.Host, "https:/")
+	hostIP := strings.TrimLeft(config.Host, "htps:/")
 	serverURL := url.URL{Scheme: "https", Path: path, Host: hostIP}
 
 	dialer := spdy.NewDialer(upgrader, &http.Client{Transport: roundTripper}, http.MethodPost, &serverURL)
