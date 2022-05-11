@@ -94,15 +94,18 @@ function prepareFunction(type = 'standard', appName = 'commerce') {
   const functionYaml = lastorderFunctionYaml.toString().replace(/%%BEB_NAMESPACE%%/g, eventMeshSourceNamespace);
   const gatewayUrl = 'http://central-application-gateway.kyma-system';
   switch (type) {
-    case 'central-app-gateway-compass':
-      const orderWithCompass = `${gatewayUrl}:8082/%%APP_NAME%%/sap-commerce-cloud/commerce-webservices/site/orders/`;
-      return k8s.loadAllYaml(functionYaml.toString()
-          .replace('%%URL%%', `"${orderWithCompass}" + code`)
-          .replace('%%APP_NAME%%', appName));
-    default:
+    case 'central-app-gateway':
       const orders = `${gatewayUrl}:8080/commerce/sap-commerce-cloud-commerce-webservices/site/orders/`;
       return k8s.loadAllYaml(functionYaml.toString()
           .replace('%%URL%%', `"${orders}" + code`));
+    case 'central-app-gateway-compass':
+      const ordersWithCompass = `${gatewayUrl}:8082/%%APP_NAME%%/sap-commerce-cloud/commerce-webservices/site/orders/`;
+      return k8s.loadAllYaml(functionYaml.toString()
+          .replace('%%URL%%', `"${ordersWithCompass}" + code`)
+          .replace('%%APP_NAME%%', appName));
+    default:
+      return k8s.loadAllYaml(functionYaml.toString()
+          .replace('%%URL%%', 'findEnv("GATEWAY_URL") + "/site/orders/" + code'));
   }
 }
 
@@ -664,7 +667,13 @@ async function ensureCommerceMockLocalTestFixture(mockNamespace,
       targetNamespace,
     withCentralApplicationConnectivity ? prepareFunction('central-app-gateway') : prepareFunction());
 
-  await waitForDeployment('central-application-gateway', 'kyma-system');
+  if (withCentralApplicationConnectivity) {
+    await waitForDeployment('central-application-gateway', 'kyma-system');
+  } else {
+    await waitForDeployment(`${targetNamespace}-gateway`, targetNamespace);
+    await patchApplicationGateway(`${targetNamespace}-gateway`, targetNamespace);
+  }
+
   await waitForFunction('lastorder', targetNamespace);
 
   await k8sApply([eventingSubscription(
