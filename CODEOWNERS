@@ -113,8 +113,8 @@
 /tests/fast-integration/skr-test-without-sc @PK85 @piotrmiskiewicz @szwedm @wozniakjan @hanngos @tillknuesting @ralikio
 
 /tests/function-controller @m00g3n @pPrecel @dbadura @kwiatekus @moelsayed @cortey
-/tests/integration/api-gateway @strekm @werdes72 @mjakobczyk @veichtj @dariusztutaj @cnvergence @piotrkpc
-/tests/integration/istio @strekm @werdes72 @mjakobczyk @veichtj @dariusztutaj @cnvergence @piotrkpc
+/tests/components/api-gateway @strekm @werdes72 @mjakobczyk @veichtj @dariusztutaj @cnvergence @piotrkpc
+/tests/components/istio @strekm @werdes72 @mjakobczyk @veichtj @dariusztutaj @cnvergence @piotrkpc
 
 # performance tests
 /tests/perf @a-thaler @clebs @rakesh-garimella @skhalash @jeremyharisch @chrkl @lindnerby @dennis-ge @lilitgh
