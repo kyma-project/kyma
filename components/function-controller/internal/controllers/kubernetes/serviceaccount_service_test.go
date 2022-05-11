@@ -3,6 +3,7 @@ package kubernetes
 import (
 	"context"
 	"errors"
+	"go.uber.org/zap"
 	"reflect"
 	"testing"
 
@@ -373,7 +374,7 @@ func TestServiceAccountService_createServiceAccount(t *testing.T) {
 			Secrets:    []corev1.ObjectReference{{Name: "base-secret-1"}, {Name: "base-secret-2"}},
 		}
 
-		err := r.createServiceAccount(ctx, log.Log, "random-ns", base)
+		err := r.createServiceAccount(ctx, zap.NewNop().Sugar(), "random-ns", base)
 		g.Expect(err).To(gomega.HaveOccurred())
 	})
 }
