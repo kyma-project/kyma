@@ -2,8 +2,8 @@ package kubernetes
 
 import (
 	"context"
+	"go.uber.org/zap"
 
-	"github.com/go-logr/logr"
 	rbacv1 "k8s.io/api/rbac/v1"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -12,16 +12,16 @@ import (
 )
 
 type RoleReconciler struct {
-	Log    logr.Logger
+	Log    *zap.SugaredLogger
 	client client.Client
 	config Config
 	svc    RoleService
 }
 
-func NewRole(client client.Client, log logr.Logger, config Config, service RoleService) *RoleReconciler {
+func NewRole(client client.Client, log *zap.SugaredLogger, config Config, service RoleService) *RoleReconciler {
 	return &RoleReconciler{
 		client: client,
-		Log:    log.WithName("controllers").WithName("role"),
+		Log:    log.Named("controllers").Named("role"),
 		config: config,
 		svc:    service,
 	}
@@ -73,7 +73,7 @@ func (r *RoleReconciler) Reconcile(ctx context.Context, request ctrl.Request) (c
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
 
-	logger := r.Log.WithValues("namespace", instance.GetNamespace(), "name", instance.GetName())
+	logger := r.Log.With("namespace", instance.GetNamespace(), "name", instance.GetName())
 
 	namespaces, err := getNamespaces(ctx, r.client, r.config.BaseNamespace, r.config.ExcludedNamespaces)
 	if err != nil {

@@ -3,8 +3,8 @@ package kubernetes
 import (
 	"context"
 	"fmt"
+	"go.uber.org/zap"
 
-	"github.com/go-logr/logr"
 	corev1 "k8s.io/api/core/v1"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -13,7 +13,7 @@ import (
 )
 
 type NamespaceReconciler struct {
-	Log                logr.Logger
+	Log                *zap.SugaredLogger
 	client             client.Client
 	config             Config
 	configMapSvc       ConfigMapService
@@ -23,12 +23,12 @@ type NamespaceReconciler struct {
 	roleBindingService RoleBindingService
 }
 
-func NewNamespace(client client.Client, log logr.Logger, config Config,
+func NewNamespace(client client.Client, log *zap.SugaredLogger, config Config,
 	configMapSvc ConfigMapService, secretSvc SecretService, serviceAccountSvc ServiceAccountService,
 	roleService RoleService, roleBindingService RoleBindingService) *NamespaceReconciler {
 	return &NamespaceReconciler{
 		client:             client,
-		Log:                log.WithName("controllers").WithName("namespace"),
+		Log:                log.Named("controllers").Named("namespace"),
 		config:             config,
 		configMapSvc:       configMapSvc,
 		secretSvc:          secretSvc,
@@ -77,7 +77,7 @@ func (r *NamespaceReconciler) Reconcile(ctx context.Context, request ctrl.Reques
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
 
-	logger := r.Log.WithValues("name", instance.GetName())
+	logger := r.Log.With("name", instance.GetName())
 
 	logger.Info(fmt.Sprintf("Updating ConfigMaps in namespace '%s'", instance.GetName()))
 	configMaps, err := r.configMapSvc.ListBase(ctx)
