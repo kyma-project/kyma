@@ -197,7 +197,8 @@ func (js *JetStream) SyncSubscription(subscription *eventingv1alpha1.Subscriptio
 
 	callback := js.getCallback(subKeyPrefix)
 	for _, subject := range subscription.Status.CleanEventTypes {
-		jsSubKey := NewSubscriptionSubjectIdentifier(subscription, subject)
+		jsSubject := js.GetJestreamSubject(subject)
+		jsSubKey := NewSubscriptionSubjectIdentifier(subscription, jsSubject)
 
 		// check if the subscription already exists and if it is valid.
 		if existingNatsSub, ok := js.subscriptions[jsSubKey]; ok {
@@ -214,7 +215,7 @@ func (js *JetStream) SyncSubscription(subscription *eventingv1alpha1.Subscriptio
 
 		// subscribe to the subject on JetStream
 		jsSubscription, err := js.jsCtx.Subscribe(
-			js.GetJsSubjectToSubscribe(subject),
+			jsSubject,
 			asyncCallback,
 			js.getDefaultSubscriptionOptions(jsSubKey, subscription.Status.Config)...,
 		)
@@ -246,7 +247,8 @@ func (js *JetStream) DeleteSubscription(subscription *eventingv1alpha1.Subscript
 	// cleanup consumers on nats-server
 	// in-case data in js.subscriptions[] was lost due to handler restart
 	for _, subject := range subscription.Status.CleanEventTypes {
-		jsSubKey := NewSubscriptionSubjectIdentifier(subscription, subject)
+		jsSubject := js.GetJestreamSubject(subject)
+		jsSubKey := NewSubscriptionSubjectIdentifier(subscription, jsSubject)
 		if err := js.deleteConsumerFromJetStream(jsSubKey.ConsumerName(), log); err != nil {
 			return err
 		}
@@ -258,12 +260,9 @@ func (js *JetStream) DeleteSubscription(subscription *eventingv1alpha1.Subscript
 	return nil
 }
 
-// GetJsSubjectToSubscribe appends stream name to subject if needed.
-func (js *JetStream) GetJsSubjectToSubscribe(subject string) string {
-	if strings.HasPrefix(subject, js.config.JSStreamSubjectPrefix) {
-		return subject
-	}
-	return fmt.Sprintf("%s.%s", js.config.JSStreamSubjectPrefix, subject)
+// GetJestreamSubject appends the prefix to subject.
+func (js *JetStream) GetJestreamSubject(subject string) string {
+	return fmt.Sprintf("%s.%s", env.JetstreamSubjectPrefix, subject)
 }
 
 func (js *JetStream) validateConfig() error {
@@ -272,9 +271,6 @@ func (js *JetStream) validateConfig() error {
 	}
 	if len(js.config.JSStreamName) > jsMaxStreamNameLength {
 		return fmt.Errorf("Stream name should be max %d characters long", jsMaxStreamNameLength)
-	}
-	if js.config.JSStreamSubjectPrefix == "" {
-		return errors.New("Stream subject prefix cannot be empty")
 	}
 	if _, err := toJetStreamStorageType(js.config.JSStreamStorageType); err != nil {
 		return err
@@ -338,7 +334,7 @@ func (js *JetStream) ensureStreamExists() error {
 		return err
 	}
 	js.namedLogger().Infow("Stream not found, creating a new Stream",
-		"streamName", js.config.JSStreamName, "streamStorageType", streamConfig.Storage)
+		"streamName", js.config.JSStreamName, "streamStorageType", streamConfig.Storage, "subjects", streamConfig.Subjects)
 	_, err = js.jsCtx.AddStream(streamConfig)
 	return err
 }
@@ -363,7 +359,7 @@ func getStreamConfig(natsConfig env.NatsConfig) (*nats.StreamConfig, error) {
 		// use a prefix. This prefix is handled only on the JetStream level (i.e. JetStream handler
 		// and EPP) and should not be exposed in the Kyma subscription. Any Kyma event type gets appended with the
 		// configured stream's subject prefix.
-		Subjects: []string{fmt.Sprintf("%s.>", natsConfig.JSStreamSubjectPrefix)},
+		Subjects: []string{fmt.Sprintf("%s.>", env.JetstreamSubjectPrefix)},
 	}
 	return streamConfig, nil
 }
@@ -480,7 +476,7 @@ func (js *JetStream) deleteConsumerFromJetStream(name string, log *zap.SugaredLo
 func (js *JetStream) GetJetStreamSubjects(subjects []string) []string {
 	var result []string
 	for _, subject := range subjects {
-		result = append(result, js.GetJsSubjectToSubscribe(subject))
+		result = append(result, js.GetJestreamSubject(subject))
 	}
 	return result
 }

@@ -148,9 +148,8 @@ var _ = BeforeSuite(func(done Done) {
 	var err error
 	// populate with required env variables
 	natsConfig := env.NatsConfig{
-		EventTypePrefix:       reconcilertesting.EventTypePrefix,
-		JSStreamName:          reconcilertesting.JSStreamName,
-		JSStreamSubjectPrefix: reconcilertesting.JSStreamSubjectPrefix,
+		EventTypePrefix: reconcilertesting.EventTypePrefix,
+		JSStreamName:    reconcilertesting.JSStreamName,
 	}
 
 	defaultLogger, err = logger.New(string(kymalogger.JSON), string(kymalogger.INFO))

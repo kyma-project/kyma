@@ -549,7 +549,7 @@ func TestEmptyEventTypePrefix(t *testing.T) {
 	expectedNatsSubscription := []gomegatypes.GomegaMatcher{
 		natstesting.BeExistingSubscription(),
 		natstesting.BeValidSubscription(),
-		natstesting.BeJetStreamSubscriptionWithSubject(fmt.Sprintf("%s.%s", reconcilertesting.JSStreamSubjectPrefix, reconcilertesting.OrderCreatedEventTypePrefixEmpty)),
+		natstesting.BeJetStreamSubscriptionWithSubject(reconcilertesting.OrderCreatedEventTypePrefixEmpty),
 	}
 
 	testSubscriptionOnNATS(ens, subscription, reconcilertesting.OrderCreatedEventTypePrefixEmpty, expectedNatsSubscription...)
@@ -560,7 +560,7 @@ func TestEmptyEventTypePrefix(t *testing.T) {
 }
 
 func testSubscriptionOnNATS(ens *jetStreamTestEnsemble, subscription *eventingv1alpha1.Subscription, subject string, expectations ...gomegatypes.GomegaMatcher) {
-	getSubscriptionFromJetStream(ens, subscription, subject).Should(gomega.And(expectations...))
+	getSubscriptionFromJetStream(ens, subscription, ens.jetStreamBackend.GetJestreamSubject(subject)).Should(gomega.And(expectations...))
 }
 
 func testDeletion(ens *jetStreamTestEnsemble, subscription *eventingv1alpha1.Subscription, subject string) {
@@ -636,7 +636,6 @@ func startReconciler(eventTypePrefix string, ens *jetStreamTestEnsemble) *jetStr
 		ReconnectWait:           time.Second,
 		EventTypePrefix:         eventTypePrefix,
 		JSStreamName:            reconcilertesting.JSStreamName,
-		JSStreamSubjectPrefix:   reconcilertesting.JSStreamSubjectPrefix,
 		JSStreamStorageType:     "memory",
 		JSStreamMaxBytes:        -1,
 		JSStreamMaxMessages:     -1,
