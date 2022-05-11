@@ -1,4 +1,5 @@
 {{- if .Values.service.admin.enabled -}}
+---
 apiVersion: v1
 kind: Service
 metadata:
@@ -6,6 +7,10 @@ metadata:
   namespace: {{ .Release.Namespace }}
   labels:
 {{ include "hydra.labels" . | indent 4 }}
+    {{- with .Values.service.admin.labels }}
+      {{- toYaml . | nindent 4 }}
+    {{- end }}
+    app.kubernetes.io/component: admin
   {{- with .Values.service.admin.annotations }}
   annotations:
     {{- toYaml . | nindent 4 }}
@@ -16,12 +21,42 @@ spec:
     - port: {{ .Values.service.admin.port }}
       targetPort: http-admin
       protocol: TCP
-      name: http
-    - port: 15020
-      targetPort: 15020
-      protocol: TCP
-      name: tcp-status-port
+      name: {{ .Values.service.admin.name }}
   selector:
     app.kubernetes.io/name: {{ include "hydra.name" . }}
     app.kubernetes.io/instance: {{ .Release.Name }}
+{{- if and (.Capabilities.APIVersions.Has "monitoring.coreos.com/v1") (.Values.serviceMonitor.enabled) }}
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ include "hydra.fullname" . }}-admin
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app.kubernetes.io/component: admin
+{{ include "hydra.labels" . | indent 4 }}
+{{- with .Values.serviceMonitor.labels }}
+  {{- toYaml . | nindent 4 }}
+{{- end }}
+  {{- with .Values.service.admin.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  endpoints:
+    - path: /metrics/prometheus
+      port: {{ .Values.service.admin.name }}
+      scheme: {{ .Values.serviceMonitor.scheme }}
+      interval: {{ .Values.serviceMonitor.scrapeInterval }}
+      scrapeTimeout: {{ .Values.serviceMonitor.scrapeTimeout }}
+    {{- with .Values.serviceMonitor.tlsConfig }}
+      tlsConfig:
+      {{- toYaml . | nindent 6 }}
+    {{- end }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "hydra.name" . }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
+      app.kubernetes.io/component: admin
+{{- end -}}
 {{- end }}

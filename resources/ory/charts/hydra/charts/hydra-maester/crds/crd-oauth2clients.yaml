@@ -1,0 +1,199 @@
+
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.2.9
+  creationTimestamp: null
+  name: oauth2clients.hydra.ory.sh
+spec:
+  group: hydra.ory.sh
+  names:
+    kind: OAuth2Client
+    listKind: OAuth2ClientList
+    plural: oauth2clients
+    singular: oauth2client
+  scope: Namespaced
+  versions:
+  - name: v1alpha1
+    schema:
+      openAPIV3Schema:
+        description: OAuth2Client is the Schema for the oauth2clients API
+        properties:
+          apiVersion:
+            description: 'APIVersion defines the versioned schema of this representation
+              of an object. Servers should convert recognized schemas to the latest
+              internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+            type: string
+          kind:
+            description: 'Kind is a string value representing the REST resource this
+              object represents. Servers may infer this from the endpoint the client
+              submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: OAuth2ClientSpec defines the desired state of OAuth2Client
+            properties:
+              allowedCorsOrigins:
+                description: AllowedCorsOrigins is an array of allowed CORS origins
+                items:
+                  description: RedirectURI represents a redirect URI for the client
+                  pattern: \w+:/?/?[^\s]+
+                  type: string
+                type: array
+              audience:
+                description: Audience is a whitelist defining the audiences this client
+                  is allowed to request tokens for
+                items:
+                  type: string
+                type: array
+              clientName:
+                description: ClientName is the human-readable string name of the client
+                  to be presented to the end-user during authorization.
+                type: string
+              grantTypes:
+                description: GrantTypes is an array of grant types the client is allowed
+                  to use.
+                items:
+                  description: GrantType represents an OAuth 2.0 grant type
+                  enum:
+                  - client_credentials
+                  - authorization_code
+                  - implicit
+                  - refresh_token
+                  type: string
+                maxItems: 4
+                minItems: 1
+                type: array
+              hydraAdmin:
+                description: HydraAdmin is the optional configuration to use for managing
+                  this client
+                properties:
+                  endpoint:
+                    description: Endpoint is the endpoint for the hydra instance on
+                      which to set up the client. This value will override the value
+                      provided to `--endpoint` (defaults to `"/clients"` in the application)
+                    pattern: (^$|^/.*)
+                    type: string
+                  forwardedProto:
+                    description: ForwardedProto overrides the `--forwarded-proto`
+                      flag. The value "off" will force this to be off even if `--forwarded-proto`
+                      is specified
+                    pattern: (^$|https?|off)
+                    type: string
+                  port:
+                    description: Port is the port for the hydra instance on which
+                      to set up the client. This value will override the value provided
+                      to `--hydra-port`
+                    maximum: 65535
+                    type: integer
+                  url:
+                    description: URL is the URL for the hydra instance on which to
+                      set up the client. This value will override the value provided
+                      to `--hydra-url`
+                    maxLength: 64
+                    pattern: (^$|^https?://.*)
+                    type: string
+                type: object
+              metadata:
+                description: Metadata is abritrary data
+                nullable: true
+                type: object
+                x-kubernetes-preserve-unknown-fields: true
+              postLogoutRedirectUris:
+                description: PostLogoutRedirectURIs is an array of the post logout
+                  redirect URIs allowed for the application
+                items:
+                  description: RedirectURI represents a redirect URI for the client
+                  pattern: \w+:/?/?[^\s]+
+                  type: string
+                type: array
+              redirectUris:
+                description: RedirectURIs is an array of the redirect URIs allowed
+                  for the application
+                items:
+                  description: RedirectURI represents a redirect URI for the client
+                  pattern: \w+:/?/?[^\s]+
+                  type: string
+                type: array
+              responseTypes:
+                description: ResponseTypes is an array of the OAuth 2.0 response type
+                  strings that the client can use at the authorization endpoint.
+                items:
+                  description: ResponseType represents an OAuth 2.0 response type
+                    strings
+                  enum:
+                  - id_token
+                  - code
+                  - token
+                  type: string
+                maxItems: 3
+                minItems: 1
+                type: array
+              scope:
+                description: Scope is a string containing a space-separated list of
+                  scope values (as described in Section 3.3 of OAuth 2.0 [RFC6749])
+                  that the client can use when requesting access tokens.
+                pattern: ([a-zA-Z0-9\.\*]+\s?)+
+                type: string
+              secretName:
+                description: SecretName points to the K8s secret that contains this
+                  client's ID and password
+                maxLength: 253
+                minLength: 1
+                pattern: '[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*'
+                type: string
+              tokenEndpointAuthMethod:
+                allOf:
+                - enum:
+                  - client_secret_basic
+                  - client_secret_post
+                  - private_key_jwt
+                  - none
+                - enum:
+                  - client_secret_basic
+                  - client_secret_post
+                  - private_key_jwt
+                  - none
+                description: Indication which authentication method shoud be used
+                  for the token endpoint
+                type: string
+            required:
+            - grantTypes
+            - scope
+            - secretName
+            type: object
+          status:
+            description: OAuth2ClientStatus defines the observed state of OAuth2Client
+            properties:
+              observedGeneration:
+                description: ObservedGeneration represents the most recent generation
+                  observed by the daemon set controller.
+                format: int64
+                type: integer
+              reconciliationError:
+                description: ReconciliationError represents an error that occurred
+                  during the reconciliation process
+                properties:
+                  description:
+                    description: Description is the description of the reconciliation
+                      error
+                    type: string
+                  statusCode:
+                    description: Code is the status code of the reconciliation error
+                    type: string
+                type: object
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}
+status:
+  acceptedNames:
+    kind: ""
+    plural: ""
+  conditions: []
+  storedVersions: []

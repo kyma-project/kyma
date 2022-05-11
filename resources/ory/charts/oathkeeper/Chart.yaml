@@ -24,4 +24,5 @@ type: application
 dependencies:
   - name: oathkeeper-maester
     version: 0.23.1
-    condition: oathkeeper-maester.enabled
+    condition: maester.enabled
+    alias: oathkeeper-maester

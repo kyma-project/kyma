@@ -1,24 +1,28 @@
+# -- Number of replicas in deployment
 replicaCount: 1
 
-config:
-  # SyncPeriod determines the minimum frequency at which watched resources are
-  # reconciled. A lower period will correct entropy more quickly, but reduce
-  # responsiveness to change if there are many watched resources.
-  syncPeriod: 10h
-  # Name of existingSecret for hydra, if used
-  # hydraSecret: secret
-
-globalAccess: false
-
-#The Controller have CREATE and READ access to all Secrets in the namespaces listed below.
+# -- The Controller have CREATE and READ access to all Secrets in the namespaces listed below.
 enabledNamespaces: []
+
+# -- Single namespace mode. If enabled the controller will watch for resources only from namespace it is deployed in, ignoring others
+singleNamespaceMode: false
 
 image:
   # Image pull policy
   pullPolicy: IfNotPresent
 
+# -- Image pull secrets
+imagePullSecrets: []
+
+# -- Pod priority
+## https://kubernetes.io/docs/concepts/configuration/pod-priority-preemption/
+priorityClassName: ""
+
+# -- Connection data to admin service of Hydra
 adminService:
+  # -- Service name
   name:
+  # -- Service port
   port:
 
 forwardedProto:
@@ -27,10 +31,7 @@ port:
   metrics: 8080
 
 deployment:
-  strategy: {} # Read more: https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#strategy
-
-  resources:
-    {}
+  resources: {}
     #  We usually recommend not to specify default resources and to leave this as a conscious
     #  choice for the user. This also increases chances charts run on environments with little
     #  resources, such as Minikube. If you do want to specify resources, uncomment the following
@@ -41,6 +42,17 @@ deployment:
     # requests:
     #   cpu: 100m
     #   memory: 20Mi
+
+  # -- Default security context
+  securityContext:
+    capabilities:
+      drop:
+        - ALL
+    readOnlyRootFilesystem: true
+    runAsNonRoot: true
+    runAsUser: 1000
+    allowPrivilegeEscalation: false
+    privileged: false
 
   # Node labels for pod assignment.
   nodeSelector: {}
@@ -53,15 +65,21 @@ deployment:
   annotations: {}
   podLabels: {}
 
-  livenessProbe:
-    initialDelaySeconds: 50
-    timeoutSeconds: 1
-    periodSeconds: 10
+  # https://github.com/kubernetes/kubernetes/issues/57601
+  # -- This applications connects to the k8s API and requires the permissions
+  automountServiceAccountToken: true
 
-  readinessProbe:
-    initialDelaySeconds: 10
-    timeoutSeconds: 1
-    periodSeconds: 2
+  # -- Arguments to be passed to the program
+  args:
+    # -- The minimum frequency at which watched resources are reconciled
+    syncPeriod: ""
+    # syncPeriod: 10h
 
-# Configure node affinity
+# -- Configure node affinity
 affinity: {}
+
+# -- PodDistributionBudget configuration
+pdb:
+  enabled: false
+  spec:
+    minAvailable: 1
