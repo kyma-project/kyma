@@ -215,7 +215,6 @@ class KCPWrapper {
     const args = ['orchestration', `${orchestrationID}`, '--operation', `${operationID}`, '-o', 'json'];
     try {
       let res = await this.exec(args);
-      debug("RES " + res);
       res = JSON.parse(res);
 
       return res;
@@ -242,13 +241,9 @@ class KCPWrapper {
       if (operations.count > 0) {
         upgradeOperation = await this.getOrchestrationsOperationStatus(orchestrationID, operations.data[0].operationID);
 
-        debug("!!!! "+ JSON.stringify(upgradeOperation));
-        debug("[] " + upgradeOperation[0]);
-        debug("[state] " + upgradeOperation[0].state);
-
         debug(`OrchestrationID: ${orchestrationID}
         OperationID: ${operations.data[0].operationID}
-        OperationStatus: ${upgradeOperation.state}`);
+        OperationStatus: ${upgradeOperation[0].state}`);
       } else {
         debug(`No operations in OrchestrationID ${o.orchestrationID}`);
       }
