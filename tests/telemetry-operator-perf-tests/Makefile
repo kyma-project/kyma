@@ -1,7 +1,7 @@
 APP_NAME = telemetry-operator-perf-tests
 APP_PATH = tests/$(APP_NAME)
 BUILDPACK = eu.gcr.io/kyma-project/test-infra/buildpack-golang-toolbox:v20200423-1d9d6590
-SCRIPTS_DIR = $(realpath $(shell pwd)/../../../..)/common/makefiles
+SCRIPTS_DIR = $(realpath $(shell pwd)/../..)/common/makefiles
 
 include $(SCRIPTS_DIR)/generic-make-go.mk
 
