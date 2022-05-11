@@ -670,8 +670,8 @@ async function ensureCommerceMockLocalTestFixture(mockNamespace,
   if (withCentralApplicationConnectivity) {
     await waitForDeployment('central-application-gateway', 'kyma-system');
   } else {
-    await waitForDeployment(`${targetNamespace}-gateway`, targetNamespace);
-    await patchApplicationGateway(`${targetNamespace}-gateway`, targetNamespace);
+    await waitForDeployment(`commerce-application-gateway`, 'kyma-integration');
+    await patchApplicationGateway(`commerce-application-gateway`, 'kyma-integration');
   }
 
   await waitForFunction('lastorder', targetNamespace);
