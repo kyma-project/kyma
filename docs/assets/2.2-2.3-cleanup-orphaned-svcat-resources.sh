@@ -1,9 +1,11 @@
 #!/usr/bin/env bash
 
 echo "Deleting Application Connectivity related resources"
-APPS=$(kubectl get app -oname | cut -d '/' -f 2)
+kubectl delete crd applicationmappings.applicationconnector.kyma-project.io
+kubectl delete crd eventactivations.applicationconnector.kyma-project.io
+kubectl delete crd tokenrequests.applicationconnector.kyma-project.io 
 
-for APP in $APPS
+for APP in $(kubectl get app -oname | cut -d '/' -f 2)
 do
   kubectl delete svc,deploy -l app="${APP}-application-gateway" -n kyma-integration
 done
