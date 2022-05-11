@@ -10,4 +10,36 @@ metadata:
   annotations:
     {{- toYaml . | nindent 4 }}
   {{- end }}
+
+{{- if .Values.watcher.enabled }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: {{ include "hydra.fullname" . }}-watcher
+  namespace: {{ .Release.Namespace }}
+rules:
+  - apiGroups: ["apps"]
+    resources: ["deployments"]
+    verbs: ["list", "watch"]
+  - apiGroups: ["apps"]
+    resources: ["deployments"]
+    verbs: ["list", "patch", "get", "watch"]
+    resourceNames:
+      - {{ include "hydra.fullname" . }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: {{ include "hydra.fullname" . }}-watcher
+  namespace: {{ .Release.Namespace }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: {{ include "hydra.fullname" . }}-watcher
+subjects:
+  - kind: ServiceAccount
+    name: {{ include "hydra.serviceAccountName" . }}
+    namespace: {{ .Release.Namespace }}
+{{- end }}
 {{- end }}
