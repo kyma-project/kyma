@@ -77,13 +77,13 @@ global:
       directory: "tpi"
     function_controller:
       name: "function-controller"
-      version: "PR-14197"
+      version: "PR-14237"
     function_webhook:
       name: "function-webhook"
-      version: "PR-14197"
+      version: "PR-14237"
     function_build_init:
       name: "function-build-init"
-      version: "PR-14197"
+      version: "PR-14237"
     function_runtime_nodejs12:
       name: "function-runtime-nodejs12"
       version: "a56411a8"
@@ -95,7 +95,7 @@ global:
       version: "a56411a8"
     kaniko_executor:
       name: "kaniko-executor"
-      version: "1.8.0-ec157b48"
+      version: "1.8.0-a0c08196"
       directory: "tpi"
     registry:
       name: "registry"
