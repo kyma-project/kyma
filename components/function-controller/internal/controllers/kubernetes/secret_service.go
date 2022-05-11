@@ -3,6 +3,7 @@ package kubernetes
 import (
 	"context"
 	"fmt"
+
 	"go.uber.org/zap"
 
 	"github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"

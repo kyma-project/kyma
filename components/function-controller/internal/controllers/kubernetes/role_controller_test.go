@@ -2,8 +2,9 @@ package kubernetes
 
 import (
 	"context"
-	"go.uber.org/zap"
 	"testing"
+
+	"go.uber.org/zap"
 
 	"k8s.io/client-go/kubernetes/scheme"
 

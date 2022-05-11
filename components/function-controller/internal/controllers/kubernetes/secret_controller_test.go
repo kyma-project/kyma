@@ -2,8 +2,9 @@ package kubernetes
 
 import (
 	"context"
-	"go.uber.org/zap"
 	"testing"
+
+	"go.uber.org/zap"
 
 	"github.com/kyma-project/kyma/components/function-controller/internal/resource"
 	"k8s.io/client-go/kubernetes/scheme"

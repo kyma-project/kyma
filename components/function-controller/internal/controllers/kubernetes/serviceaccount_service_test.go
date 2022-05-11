@@ -3,9 +3,10 @@ package kubernetes
 import (
 	"context"
 	"errors"
-	"go.uber.org/zap"
 	"reflect"
 	"testing"
+
+	"go.uber.org/zap"
 
 	"github.com/kyma-project/kyma/components/function-controller/internal/resource"
 	"github.com/kyma-project/kyma/components/function-controller/internal/resource/automock"
