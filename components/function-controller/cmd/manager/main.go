@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"sigs.k8s.io/controller-runtime/pkg/healthz"
 	"time"
 
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -119,6 +120,11 @@ func main() {
 	healthHandler := serverless.NewHealthChecker(events, healthCh, config.Healthz.LivenessTimeout, zapLogger.Named("healthz").Sugar())
 	if err := mgr.AddHealthzCheck("health check", healthHandler.Checker); err != nil {
 		setupLog.Error(err, "unable to register healthz")
+		os.Exit(1)
+	}
+
+	if err := mgr.AddReadyzCheck("readiness check", healthz.Ping); err != nil {
+		setupLog.Error(err, "unable to register readyz")
 		os.Exit(1)
 	}
 
