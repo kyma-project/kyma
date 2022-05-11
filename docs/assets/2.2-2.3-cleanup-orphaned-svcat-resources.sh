@@ -12,12 +12,12 @@ done
 
 echo "Deleting rafter"
 
-kubectl -n kyma-system delete crd assetgroups.rafter.kyma-project.io
-kubectl -n kyma-system delete crd assets.rafter.kyma-project.io
-kubectl -n kyma-system delete crd buckets.rafter.kyma-project.io
-kubectl -n kyma-system delete crd clusterassetgroups.rafter.kyma-project.io
-kubectl -n kyma-system delete crd clusterassets.rafter.kyma-project.io
-kubectl -n kyma-system delete crd clusterbuckets.rafter.kyma-project.io
+kubectl delete crd assetgroups.rafter.kyma-project.io
+kubectl delete crd assets.rafter.kyma-project.io
+kubectl delete crd buckets.rafter.kyma-project.io
+kubectl delete crd clusterassetgroups.rafter.kyma-project.io
+kubectl delete crd clusterassets.rafter.kyma-project.io
+kubectl delete crd clusterbuckets.rafter.kyma-project.io
 
 kubectl -n kyma-system delete service rafter-asyncapi-service
 kubectl -n kyma-system delete service rafter-controller-manager
