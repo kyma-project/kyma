@@ -4,8 +4,7 @@ const {
 } = require('./');
 
 const {apiExposureTests} = require('../api-exposure');
-const {monitoringTests,
-  unexposeGrafana} = require('../monitoring');
+const {monitoringTests, unexposeGrafana} = require('../monitoring');
 const {loggingTests} = require('../logging');
 const {cleanMockTestFixture} = require('./fixtures/commerce-mock');
 const {ensureCommerceMockLocalTestFixture} = require('../test/fixtures/commerce-mock');
