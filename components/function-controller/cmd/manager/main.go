@@ -4,8 +4,9 @@ import (
 	"errors"
 	"fmt"
 	"os"
-	"sigs.k8s.io/controller-runtime/pkg/healthz"
 	"time"
+
+	"sigs.k8s.io/controller-runtime/pkg/healthz"
 
 	ctrl "sigs.k8s.io/controller-runtime"
 
