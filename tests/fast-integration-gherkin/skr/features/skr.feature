@@ -1,4 +1,3 @@
-@skrtest
 Feature: SKR test
     These scenarios cover SAP Kyma runtime
 
