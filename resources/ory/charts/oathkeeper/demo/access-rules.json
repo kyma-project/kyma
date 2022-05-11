@@ -22,9 +22,9 @@
     "authorizer": {
       "handler": "allow"
     },
-    "mutator": {
+    "mutators": [{
       "handler": "noop"
-    }
+    }]
   },
   {
     "id": "rule-2",
@@ -49,9 +49,9 @@
     "authorizer": {
       "handler": "allow"
     },
-    "mutator": {
+    "mutators": [{
       "handler": "header"
-    }
+    }]
   },
   {
     "id": "rule-3",
@@ -76,8 +76,8 @@
     "authorizer": {
       "handler": "allow"
     },
-    "mutator": {
+    "mutators": [{
       "handler": "id_token"
-    }
+    }]
   }
 ]

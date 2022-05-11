@@ -3,7 +3,7 @@ The ORY Oathkeeper HTTP Reverse Proxy is available via:
 {{- if .Values.ingress.proxy.enabled }}
 {{- range $host := .Values.ingress.proxy.hosts }}
   {{- range .paths }}
-  http{{ if $.Values.ingress.proxy.tls }}s{{ end }}://{{ $host.host }}{{ . }}
+  http{{ if $.Values.ingress.proxy.tls }}s{{ end }}://{{ $host.host }}{{ .path }}
   {{- end }}
 {{- end }}
 {{- else if contains "NodePort" .Values.service.proxy.type }}
@@ -39,7 +39,7 @@ The ORY Oathkeeper HTTP API is available via:
 {{- if .Values.ingress.api.enabled }}
 {{- range $host := .Values.ingress.api.hosts }}
   {{- range .paths }}
-  http{{ if $.Values.ingress.api.tls }}s{{ end }}://{{ $host.host }}{{ . }}
+  http{{ if $.Values.ingress.api.tls }}s{{ end }}://{{ $host.host }}{{ .path }}
   {{- end }}
 {{- end }}
 {{- else if contains "NodePort" .Values.service.api.type }}
