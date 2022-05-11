@@ -242,7 +242,7 @@ class KCPWrapper {
         upgradeOperation = await this.getOrchestrationsOperationStatus(orchestrationID, operations.data[0].operationID);
         debug(`OrchestrationID: ${orchestrationID}
         OperationID: ${operations.data[0].operationID}
-        OperationStatus: ${upgradeOperation.state}`);
+        OperationStatus: ${upgradeOperation[0].state}`);
       } else {
         debug(`No operations in OrchestrationID ${o.orchestrationID}`);
       }
