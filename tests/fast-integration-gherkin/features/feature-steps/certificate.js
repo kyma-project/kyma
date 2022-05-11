@@ -6,6 +6,8 @@ const forge = require('node-forge');
 this.context = new Object();
 
 Given(/^The "([^"]*)" secret is retrieved from "([^"]*)" namespace$/, async (args1,args2) => {
+	this.context.featureName = "certificate-test";
+
 	if (!this.context.kymaGateWaySecret){
 		this.context.kymaGateWaySecret = await getSecretData(args1, args2);
 	}
