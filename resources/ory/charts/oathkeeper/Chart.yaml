@@ -1,5 +1,5 @@
 apiVersion: v2
-appVersion: "v0.38.19-beta.1"
+appVersion: "v0.38.25-beta.1"
 description: A Helm chart for deploying ORY Oathkeeper in Kubernetes
 name: oathkeeper
 icon: https://raw.githubusercontent.com/ory/docs/master/docs/static/img/logo-oathkeeper.svg

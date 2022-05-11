@@ -1,0 +1,82 @@
+# -- Mode for oathkeeper controller
+# -- Two possible modes are: controller or sidecar
+global:
+  ory:
+    oathkeeper:
+      maester:
+        mode: controller
+
+# -- Number of controller replicas in deployment mode
+replicaCount: 1
+
+# -- Single namespace mode. If enabled the controller will watch for resources only from namespace it is deployed in, ignoring others
+singleNamespaceMode: false
+
+# oathkeeperFullnameOverride: oathkeeper
+# -- Defines the Namespace in which the ConfigMap is stored. Defaults to the same Namespace as the ORY Maester Helm release.
+rulesConfigmapNamespace: ""
+# rulesConfigmapNamespace: some-namespace
+# -- Defines the name of the single root-level ConfigMap key used to store the entire array of Access Rules. 
+# When the ConfigMap is mounted in the Oathkeeper Pod, this becomes also the filename of the "rules file" to the Oathkeeper process. Defaults to `access-rules.json`.
+rulesFileName: ""
+# rulesFileName: access-rules.json
+
+image:
+  # -- ORY Oathkeeper Rule Controller image
+  repository: oryd/oathkeeper-maester
+  # -- ORY Oathkeeper Rule Controller version
+  tag: "v0.1.6"
+  # -- Image pull policy
+  pullPolicy: IfNotPresent
+
+# -- Image pull secrets
+imagePullSecrets: []
+
+deployment:
+  resources: {}
+    #  We usually recommend not to specify default resources and to leave this as a conscious
+    #  choice for the user. This also increases chances charts run on environments with little
+    #  resources, such as Minikube. If you do want to specify resources, uncomment the following
+    #  lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+    # limits:
+    #   cpu: 100m
+    #   memory: 30Mi
+    # requests:
+    #   cpu: 100m
+    #   memory: 20Mi
+  securityContext:
+    capabilities:
+      drop:
+      - ALL
+    readOnlyRootFilesystem: true
+    runAsNonRoot: true
+    runAsUser: 1000
+    allowPrivilegeEscalation: false
+    privileged: false
+
+  # -- Node labels for pod assignment.
+  nodeSelector: {}
+  # If you do want to specify node labels, uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'annotations:'.
+  #   foo: bar
+
+  # -- Configure node tolerations.
+  tolerations: []
+
+  # -- Configure annotations.
+  annotations: {}
+
+  # -- Configure environment variables.
+  envs: {}
+  # https://github.com/kubernetes/kubernetes/issues/57601
+  # This applications connects to the k8s API and requires the permissions
+  automountServiceAccountToken: true
+
+# -- Configure node affinity
+affinity: {}
+
+# -- PodDistributionBudget configuration
+pdb:
+  enabled: false
+  spec:
+    minAvailable: 1
