@@ -1,5 +1,5 @@
 apiVersion: v2
 name: prometheus-istio
-appVersion: 2.31.1
-version: 15.0.2
+appVersion: 2.34.0
+version: 15.8.5
 description: Prometheus is a monitoring system and time series database.
