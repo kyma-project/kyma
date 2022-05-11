@@ -3,7 +3,7 @@ const {
   testHttpbinOAuthResponse,
   testHttpbinAllowResponse,
   testHttpbinOAuthMethod,
-  //cleanApiExposureFixture,
+  // cleanApiExposureFixture,
 } = require('./fixtures');
 
 function apiExposureTests() {
