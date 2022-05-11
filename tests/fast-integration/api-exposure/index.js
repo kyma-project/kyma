@@ -3,7 +3,7 @@ const {
   testHttpbinOAuthResponse,
   testHttpbinAllowResponse,
   testHttpbinOAuthMethod,
-  cleanApiExposureFixture,
+  //cleanApiExposureFixture,
 } = require('./fixtures');
 
 function apiExposureTests() {
@@ -30,9 +30,9 @@ function apiExposureTests() {
       await testHttpbinOAuthMethod();
     });
 
-    it('Namespace should be deleted', async function() {
-      await cleanApiExposureFixture(false);
-    });
+    // it('Namespace should be deleted', async function() {
+    //   await cleanApiExposureFixture(false);
+    // });
   });
 }
 
