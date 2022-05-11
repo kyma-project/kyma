@@ -3,7 +3,7 @@
 ## Overview
 
 Small program to deploy a bunch of log pipelines to a Kubernetes cluster. The following pipelines are deployed:
-1. Simple log pipeline that logs to Loki
+1. Single log pipeline that logs to Loki
 2. Multiple log pipelines that log to an HTTP host of choice. The upstream host, port, as well as the number of log pipelines can be set via flags.
 In order to simulate upstream unavailability, the `unhealthy-ratio` can be set.
 
