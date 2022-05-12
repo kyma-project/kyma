@@ -28,15 +28,6 @@ const dashboards = {
       expect(foundMetric).to.be.not.undefined;
     },
   },
-  // delivery_applicationConnectivityValidator: {
-  //   title: 'Requests to application connectivity validator',
-  //   query: 'sum by(destination_service) (rate(istio_requests_total{destination_service="central-application-connectivity-validator.kyma-system.svc.cluster.local", response_code=~"2.*"}[5m]))',
-  //   backends: ['nats', 'beb'],
-  //   assert: function(result) {
-  //     const foundMetric = result.find((res) => res.metric.destination_service.startsWith('central-application-connectivity-validator'));
-  //     expect(foundMetric).to.be.not.undefined;
-  //   },
-  // },
   delivery_subscribers: {
     title: 'Requests to subscribers',
     query: `
@@ -53,29 +44,6 @@ const dashboards = {
       expect(foundMetric).to.be.not.undefined;
     },
   },
-  // The latency dashboard
-  // latency_connectivityValidatorToPublisherProxy: {
-  //   title: 'Latency of Connectivity Validator -> Event Publisher',
-  //   query: `
-  //       histogram_quantile(
-  //         0.99999,
-  //         sum(rate(
-  //           istio_request_duration_milliseconds_bucket{
-  //             source_workload_namespace="kyma-system",
-  //             source_workload="central-application-connectivity-validator",
-  //             destination_workload_namespace="kyma-system",
-  //             destination_workload="eventing-publisher-proxy"
-  //           }[5m])
-  //         ) by (le,source_workload_namespace,source_workload,destination_workload_namespace,destination_workload))
-  //       `,
-  //   backends: ['nats', 'beb'],
-  //   assert: function(result) {
-  //     const foundMetric = result.find((res) =>
-  //       res.metric.source_workload.toLowerCase() === 'central-application-connectivity-validator' &&
-  //       res.metric.destination_workload.toLowerCase() === 'eventing-publisher-proxy');
-  //     expect(foundMetric).to.be.not.undefined;
-  //   },
-  // },
   latency_eventPublisherToMessagingServer: {
     title: 'Latency of Event Publisher -> Messaging Server',
     query: 'histogram_quantile(0.99999, sum(rate(event_publish_to_messaging_server_latency_bucket{namespace="kyma-system"}[5m])) by (le,pod,namespace,service))',
