@@ -851,7 +851,10 @@ data:
        "refresh": false,
        "schemaVersion": 27,
        "style": "dark",
-       "tags": [],
+       "tags": [
+          "kyma",
+          "eventing"
+        ],
        "templating": {
          "list": []
        },

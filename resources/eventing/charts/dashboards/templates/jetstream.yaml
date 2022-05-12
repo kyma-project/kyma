@@ -101,7 +101,8 @@ data:
                    "refId":"A"
                 }
              ],
-             "title":"Storage Used",
+             "title":"File Storage Used (%)",
+             "description": "Percentage of file storage used by streams for storing messages",
              "type":"gauge"
           },
           {
@@ -156,7 +157,8 @@ data:
                    "refId":"A"
                 }
              ],
-             "title":"Total Storage Used",
+             "title":"File Storage Used",
+             "description": "Total file storage used by streams for storing messages",
              "type":"stat"
           },
           {
@@ -219,7 +221,8 @@ data:
                    "refId":"A"
                 }
              ],
-             "title":"Memory Used",
+             "title":"In-Memory Storage Used (%)",
+             "description": "Percentage of in-memory storage used by streams for storing messages",
              "type":"gauge"
           },
           {
@@ -274,7 +277,8 @@ data:
                    "refId":"A"
                 }
              ],
-             "title":"Memory Used",
+             "title":"In-Memory Storage Used",
+             "description": "Total in-memory storage used by streams for storing messages",
              "type":"stat"
           },
           {
@@ -334,6 +338,7 @@ data:
                 }
              ],
              "title":"Connections",
+             "description": "Total number of active clients connected to NATS",
              "type":"stat"
           },
           {
@@ -388,7 +393,8 @@ data:
                    "refId":"A"
                 }
              ],
-             "title":"Max Storage",
+             "title":"Max File Storage",
+             "description": "Maximum amount of file storage allowed to be used by streams for storing messages",
              "type":"stat"
           },
           {
@@ -443,7 +449,8 @@ data:
                    "refId":"A"
                 }
              ],
-             "title":"Total Memory",
+             "title":"Max In-Memory Storage",
+             "description": "Maximum amount of in-memory storage allowed to be used by streams for storing messages",
              "type":"stat"
           },
           {
@@ -502,6 +509,7 @@ data:
                 }
              ],
              "title":"Total Consumers",
+             "description": "Total number of consumers on NATS server",
              "type":"stat"
           },
           {
@@ -1165,7 +1173,8 @@ data:
        "schemaVersion":34,
        "style":"dark",
        "tags":[
-
+          "kyma",
+          "eventing"
        ],
        "templating":{
           "list":[
