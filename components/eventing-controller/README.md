@@ -56,7 +56,7 @@ This section explains how to use the Eventing Controller. It expects the followi
 | `PUBLISHER_LIMITS_MEMORY`         | The memory limits of the Event Publisher Proxy.                                                |
 | **For NATS**                      |                                                                                                |
 | `NATS_URL`                        | The URL for the NATS server.                                                                   |
-| `EVENT_TYPE_PREFIX`               | The event type prefix for the NATS backend.                                                    |
+| `EVENT_TYPE_PREFIX`               | The event type prefix for the NATS and BEB backend.                                                    |
 | `MAX_IDLE_CONNS`                  | The maximum number of idle connections for the HTTP transport of the NATS backend.             |
 | `MAX_CONNS_PER_HOST`              | The maximum connections per host for the HTTP transport of the NATS backend.                   |
 | `MAX_IDLE_CONNS_PER_HOST`         | The maximum idle connections per host for the HTTP transport of the NATS backend.              |
@@ -183,7 +183,7 @@ kubectl port-forward -n kyma-system svc/eventing-nats 4222
 |--------------------------|----------------------------------------------------|----------|-----------------------------|
 | `KUBECONFIG`             | Path to a local kubeconfig file.                   | yes      | ~/.kube/config              |
 | `NATS_URL`               | URL of the NATS server.                            | no       | nats.nats.svc.cluster.local |
-| `EVENT_TYPE_PREFIX`      | The event type prefix for the NATS backend.        | yes      | sap.kyma.custom             |
+| `EVENT_TYPE_PREFIX`      | The event type prefix for the NATS and BEB backend.        | yes      | sap.kyma.custom             |
 | `WEBHOOK_TOKEN_ENDPOINT` | The Kyma public endpoint to provide Access Tokens. | yes      | WEBHOOK_TOKEN_ENDPOINT      |
 | `DOMAIN`                 | Domain.                                            | yes      | example.com                 |
 
