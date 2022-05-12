@@ -16,6 +16,12 @@ go run ./... -count=4 -unhealthy-ratio=0.5 -host=mockserver.mockserver -port=108
 
 ## Test Setup
 
+Deploy telemetry config file to configure storage path for the filesystem buffer.
+
+```bash
+kubectl apply -f deploy/telemetry-config.yaml
+```
+
 Install dummy log generator:
 ```bash
 kubectl apply -f deploy/logspammer.yaml
@@ -30,3 +36,4 @@ Expose the HTTP mock server via the Kyma Istio Gateway at mockserver.here_comes_
 ```bash
 cat deploy/mockserver-vs.yaml | sed "s/KYMA_HOST_PLACEHOLDER/here_comes_my_cluster_hostname/g" | kubectl apply -f -
 ``` 
+

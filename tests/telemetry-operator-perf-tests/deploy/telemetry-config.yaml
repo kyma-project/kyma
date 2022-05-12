@@ -23,6 +23,8 @@ data:
 
     [INPUT]
         Name tail
+        alias tail
+        storage.type filesystem
         Path /var/log/containers/*.log
         multiline.parser docker, cri
         Tag kube.*

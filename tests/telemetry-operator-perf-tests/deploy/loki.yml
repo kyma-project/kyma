@@ -41,4 +41,4 @@ spec:
       auto_kubernetes_labels off
       remove_keys        kubernetes, stream
       line_format        json
-      storage.total_limit_size 150M
+      storage.total_limit_size 20M

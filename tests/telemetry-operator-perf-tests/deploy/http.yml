@@ -15,7 +15,7 @@ spec:
   outputs:
     - content: |
         Name               http
-        Alias              mock-output
+        Alias              {{ .Name }}
         Match              {{ .Tag }}
         Retry_Limit        False
         Host               {{ .Host }}
@@ -25,6 +25,6 @@ spec:
         Format             json_stream
         tls                on
         tls.verify         on
-        storage.total_limit_size 128M
+        storage.total_limit_size 10M
   files: []
   secretRefs: []
