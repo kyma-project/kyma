@@ -657,22 +657,15 @@ async function cleanCompassResourcesSKR(client, appName, scenarioName, runtimeID
   }
 }
 
-async function ensureCommerceMockLocalTestFixture(mockNamespace,
-    targetNamespace,
-    withCentralApplicationConnectivity = false) {
+async function ensureCommerceMockLocalTestFixture(mockNamespace, targetNamespace) {
   await k8sApply(applicationObjs);
   const mockHost = await provisionCommerceMockResources(
       'commerce',
       mockNamespace,
       targetNamespace,
-    withCentralApplicationConnectivity ? prepareFunction('central-app-gateway') : prepareFunction());
+      prepareFunction('central-app-gateway'));
 
-  if (withCentralApplicationConnectivity) {
-    await waitForDeployment('central-application-gateway', 'kyma-system');
-  } else {
-    await waitForDeployment(`commerce-application-gateway`, 'kyma-integration');
-    await patchApplicationGateway(`commerce-application-gateway`, 'kyma-integration');
-  }
+  await waitForDeployment('central-application-gateway', 'kyma-system');
 
   await waitForFunction('lastorder', targetNamespace);
 
