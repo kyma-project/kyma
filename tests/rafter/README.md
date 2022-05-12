@@ -68,7 +68,7 @@ Use the following environment variables to configure the application:
 | **APP_TEST_ASSET_GROUP_NAME**         | No       | `test-asset-group`         | The Asset Group resource name                                                                                                                |
 | **APP_TEST_CLUSTER_ASSET_GROUP_NAME** | No       | `test-cluster-asset-group` | The Cluster Asset Group resource name                                                                                                         |
 | **APP_TEST_COMMON_ASSET_PREFIX**      | No       | `test`                     | The name of the prefix for the Asset and Cluster Asset resources                                                                             |
-| **APP_TEST_MOCKICE_NAME**             | No       | `rafter-test-svc`          | The name of the pod, service, and configmap used by the test service                                                                        |
+| **APP_TEST_MOCKICE_NAME**             | No       | `rafter-test-svc`          | The name of the Pod, service, and Config Map used by the test service                                                                        |
 
 ## Development
 

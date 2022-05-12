@@ -875,19 +875,19 @@ data:
              "pluginVersion":"8.3.4",
              "targets":[
                 {
-                   "expr":"sum(rate(nats_consumer_num_pending{pod=~\"$server\",stream_name=~\"$stream\",consumer_name=~\"$consumer\"}[$__rate_interval])+rate(nats_consumer_delivered_consumer_seq{pod=~\"$server\",stream_name=~\"$stream\",consumer_name=~\"$consumer\"}[$__rate_interval])) by (consumer_name)",
+                   "expr":"sum(rate(nats_consumer_num_pending{pod=~\"$server\",stream_name=~\"$stream\",consumer_desc=~\"$consumer\"}[$__rate_interval])+rate(nats_consumer_delivered_consumer_seq{pod=~\"$server\",stream_name=~\"$stream\",consumer_desc=~\"$consumer\"}[$__rate_interval])) by (consumer_desc)",
                    "hide":false,
                    "instant":false,
                    "interval":"",
                    "intervalFactor":1,
-                   "legendFormat":"{{consumer_name}} +",
+                   "legendFormat":"{{consumer_desc}} +",
                    "refId":"B"
                 },
                 {
-                   "expr":"- sum(rate(nats_consumer_delivered_consumer_seq{pod=~\"$server\",stream_name=~\"$stream\",consumer_name=~\"$consumer\",consumer_name=~\"$consumer\"}[$__rate_interval])) by (consumer_name)",
+                   "expr":"- sum(rate(nats_consumer_delivered_consumer_seq{pod=~\"$server\",stream_name=~\"$stream\",consumer_desc=~\"$consumer\",consumer_desc=~\"$consumer\"}[$__rate_interval])) by (consumer_desc)",
                    "hide":false,
                    "interval":"",
-                   "legendFormat":"{{consumer_name}} -",
+                   "legendFormat":"{{consumer_desc}} -",
                    "refId":"A"
                 }
              ],
@@ -972,10 +972,10 @@ data:
              "pluginVersion":"8.3.4",
              "targets":[
                 {
-                   "expr":"sum(nats_consumer_delivered_consumer_seq{pod=~\"$server\",stream_name=~\"$stream\",consumer_name=~\"$consumer\"}) by (consumer_name)",
+                   "expr":"sum(nats_consumer_delivered_consumer_seq{pod=~\"$server\",stream_name=~\"$stream\",consumer_desc=~\"$consumer\"}) by (consumer_desc)",
                    "hide":false,
                    "interval":"",
-                   "legendFormat":"{{consumer_name}}",
+                   "legendFormat":"{{consumer_desc}}",
                    "refId":"A"
                 }
              ],
@@ -1061,10 +1061,10 @@ data:
              "pluginVersion":"8.3.4",
              "targets":[
                 {
-                   "expr":"sum(nats_consumer_num_pending{pod=~\"$server\",stream_name=~\"$stream\",consumer_name=~\"$consumer\"}) by (consumer_name)",
+                   "expr":"sum(nats_consumer_num_pending{pod=~\"$server\",stream_name=~\"$stream\",consumer_desc=~\"$consumer\"}) by (consumer_desc)",
                    "hide":false,
                    "interval":"",
-                   "legendFormat":"{{consumer_name}}",
+                   "legendFormat":"{{consumer_desc}}",
                    "refId":"A"
                 }
              ],
@@ -1150,10 +1150,10 @@ data:
              "pluginVersion":"8.3.4",
              "targets":[
                 {
-                   "expr":"sum(nats_consumer_num_ack_pending{pod=~\"$server\",stream_name=~\"$stream\",consumer_name=~\"$consumer\"}) by (consumer_name)",
+                   "expr":"sum(nats_consumer_num_ack_pending{pod=~\"$server\",stream_name=~\"$stream\",consumer_desc=~\"$consumer\"}) by (consumer_desc)",
                    "hide":false,
                    "interval":"",
-                   "legendFormat":"{{consumer_name}}",
+                   "legendFormat":"{{consumer_desc}}",
                    "refId":"A"
                 }
              ],
@@ -1227,7 +1227,7 @@ data:
                 "current":{
 
                 },
-                "definition":"label_values(nats_consumer_num_pending, consumer_name)",
+                "definition":"label_values(nats_consumer_num_pending, consumer_desc)",
                 "hide":0,
                 "includeAll":true,
                 "label":"Consumer",
@@ -1237,7 +1237,7 @@ data:
 
                 ],
                 "query":{
-                   "query":"label_values(nats_consumer_num_pending, consumer_name)",
+                   "query":"label_values(nats_consumer_num_pending, consumer_desc)",
                    "refId":"StandardVariableQuery"
                 },
                 "refresh":2,

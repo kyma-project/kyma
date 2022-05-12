@@ -123,7 +123,7 @@ class KCPWrapper {
     return await this.exec(args);
   }
 
-  async upgradeKyma(instanceID, kymaUpgradeVersion) {
+  async upgradeKyma(instanceID, kymaUpgradeVersion, upgradeTimeoutMin = 30) {
     const args = ['upgrade', 'kyma', `--version=${kymaUpgradeVersion}`, '--target', `instance-id=${instanceID}`];
     try {
       const res = await this.exec(args);
@@ -139,7 +139,7 @@ class KCPWrapper {
       debug(`OrchestrationID: ${orchestrationID}`);
 
       try {
-        const orchestrationStatus = await this.ensureOrchestrationSucceeded(orchestrationID);
+        const orchestrationStatus = await this.ensureOrchestrationSucceeded(orchestrationID, upgradeTimeoutMin);
         return orchestrationStatus;
       } catch (error) {
         debug(error);
@@ -242,7 +242,7 @@ class KCPWrapper {
         upgradeOperation = await this.getOrchestrationsOperationStatus(orchestrationID, operations.data[0].operationID);
         debug(`OrchestrationID: ${orchestrationID}
         OperationID: ${operations.data[0].operationID}
-        OperationStatus: ${upgradeOperation.state}`);
+        OperationStatus: ${upgradeOperation[0].state}`);
       } else {
         debug(`No operations in OrchestrationID ${o.orchestrationID}`);
       }
@@ -254,7 +254,7 @@ class KCPWrapper {
     }
   };
 
-  async ensureOrchestrationSucceeded(orchenstrationID) {
+  async ensureOrchestrationSucceeded(orchenstrationID, upgradeTimeoutMin = 30) {
     // Decides whether to go to the next step of while or not based on
     // the orchestration result (0 = succeeded, 1 = failed, 2 = cancelled, 3 = pending/other)
     debug(`Waiting for Kyma Upgrade with OrchestrationID ${orchenstrationID} to succeed...`);
@@ -262,7 +262,7 @@ class KCPWrapper {
       const res = await wait(
           () => this.getOrchestrationStatus(orchenstrationID),
           (res) => res && res.state && (res.state === 'succeeded' || res.state === 'failed'),
-          1000*60*15, // 15 min
+          1000 * 60 * upgradeTimeoutMin, // 30 min
           1000 * 30, // 30 seconds
       );
 
