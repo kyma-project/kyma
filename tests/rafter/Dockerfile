@@ -22,7 +22,7 @@ RUN CGO_ENABLED=0 go test main_test.go -c
 
 FROM alpine:3.14.2
 LABEL source = git@github.com:kyma-project/kyma.git
-WORKDIR /app2
+WORKDIR /app
 
 ENV TEST_DIR /go/src/github.com/kyma-project/kyma/tests/rafter
 
