@@ -115,12 +115,12 @@ class KEBClient {
       };
     } else if (btpOperatorCreds) {
       payload.context['sm_operator_credentials'] = {
-        clientid: btpOperatorCreds.clientId,
-        clientsecret: btpOperatorCreds.clientSecret,
+        clientid: btpOperatorCreds.clientid,
+        clientsecret: btpOperatorCreds.clientsecret,
         sm_url: btpOperatorCreds.smURL,
         url: btpOperatorCreds.url,
       };
-    }
+    }gi
 
     const endpoint = `service_instances/${instanceID}`;
     try {
