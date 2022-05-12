@@ -120,7 +120,7 @@ class KEBClient {
         sm_url: btpOperatorCreds.smURL,
         url: btpOperatorCreds.url,
       };
-    }gi
+    }
 
     const endpoint = `service_instances/${instanceID}`;
     try {
