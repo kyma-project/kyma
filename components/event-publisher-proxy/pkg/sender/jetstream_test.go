@@ -148,48 +148,6 @@ func TestStreamExists(t *testing.T) {
 	}
 }
 
-func TestJSSubjectPrefix(t *testing.T) {
-
-	testCases := []struct {
-		name              string
-		givenPrefix       string
-		givenEventSubject string
-		wantSubject       string
-	}{
-		{
-			name:              "With empty prefix",
-			givenEventSubject: "custom.test",
-			givenPrefix:       "",
-			wantSubject:       "custom.test",
-		},
-		{
-			name:              "With non-empty prefix",
-			givenEventSubject: "custom.test",
-			givenPrefix:       "prefix",
-			wantSubject:       "prefix.custom.test",
-		},
-	}
-
-	for _, tc := range testCases {
-		tc := tc
-		t.Run(tc.name, func(t *testing.T) {
-			// given
-			config := &env.NatsConfig{
-				JSStreamSubjectPrefix: tc.givenPrefix,
-			}
-			s := JetstreamMessageSender{envCfg: config}
-			ce := createCloudEvent(t)
-			ce.SetType(tc.givenEventSubject)
-
-			// when
-			subject := s.getJsSubjectToPublish(ce.Type())
-
-			// then
-			assert.Equal(t, subject, tc.wantSubject)
-		})
-	}
-}
-
 // helper functions and structs
 
 type TestEnvironment struct {
