@@ -99,6 +99,7 @@
 /tests/compass-runtime-agent  @VOID404 @akgalwas @koala7659 @janmedrek @Maladie @franpog859 @mvshao
 /tests/connection-token-handler-tests  @VOID404 @akgalwas @koala7659 @janmedrek @Maladie @franpog859 @mvshao
 /tests/connector-service-tests  @VOID404 @akgalwas @koala7659 @janmedrek @Maladie @franpog859 @mvshao
+/tests/telemetry-operator-perf-tests @a-thaler @rakesh-garimella @skhalash @chrkl @lindnerby @dennis-ge
 
 # Fast Integration Tests
 /tests/fast-integration @lindnerby @skhalash @voigt @rakesh-garimella @jeremyharisch @khlifi411 @ruanxin @tobiscr @clebs @pbochynski @dennis-ge @jakobmoellersap @Tomasz-Smelcerz-SAP
