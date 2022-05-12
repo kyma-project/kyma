@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"strings"
 	"time"
 
 	"go.uber.org/zap"
@@ -45,6 +46,10 @@ type reconciler struct {
 	k8s
 	out
 }
+
+const (
+	skipGitCheckLabel = "serverless.kyma-project.io/skipGitSourceCheck"
+)
 
 func (m *reconciler) reconcile(ctx context.Context, f serverlessv1alpha1.Function) (ctrl.Result, error) {
 	state := systemState{instance: f}
@@ -169,14 +174,12 @@ func stateFnGitCheckSources(ctx context.Context, r *reconciler, s *systemState) 
 		Reference: s.instance.Spec.Reference,
 		Auth:      auth,
 	}
-	// ConditionConfigurationReady is set to true for git functions when the source is updated.
-	configured := s.instance.Status.Condition(serverlessv1alpha1.ConditionConfigurationReady)
-	if configured != nil && configured.IsTrue() {
-		if time.Since(configured.LastTransitionTime.Time) < r.cfg.fn.FunctionReadyRequeueDuration {
-			r.log.Info(fmt.Sprintf("skipping function [%s] source check", s.instance.Name))
-			expectedJob := s.buildGitJob(options, r.cfg)
-			return buildStateFnCheckImageJob(expectedJob)
-		}
+
+	if skipGitSourceCheck(s.instance, r.cfg) {
+		r.log.Info(fmt.Sprintf("skipping function [%s] source check", s.instance.Name))
+		expectedJob := s.buildGitJob(options, r.cfg)
+		return buildStateFnCheckImageJob(expectedJob)
+
 	}
 
 	var revision string
@@ -228,4 +231,18 @@ func stateFnInitialize(ctx context.Context, r *reconciler, s *systemState) state
 	}
 
 	return stateFnInlineCheckSources
+}
+
+func skipGitSourceCheck(f serverlessv1alpha1.Function, cfg cfg) bool {
+	if v, ok := f.Labels[skipGitCheckLabel]; ok && strings.ToLower(v) == "false" {
+		return false
+	}
+
+	// ConditionConfigurationReady is set to true for git functions when the source is updated. if not, this is a new function, we need to do git check.
+	configured := f.Status.Condition(serverlessv1alpha1.ConditionConfigurationReady)
+	if configured == nil || !configured.IsTrue() {
+		return false
+	}
+
+	return time.Since(configured.LastTransitionTime.Time) < cfg.fn.FunctionReadyRequeueDuration
 }

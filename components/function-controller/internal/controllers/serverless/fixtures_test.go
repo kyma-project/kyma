@@ -18,6 +18,9 @@ func newTestGitFunction(namespace, name string, minReplicas, maxReplicas int) *s
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      fmt.Sprintf("%s-%d", name, suffix),
 			Namespace: namespace,
+			Labels: map[string]string{
+				skipGitCheckLabel: "false",
+			},
 		},
 		Spec: serverlessv1alpha1.FunctionSpec{
 			Type:    serverlessv1alpha1.SourceTypeGit,
