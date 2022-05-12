@@ -14,10 +14,13 @@ In your custom [Loki values.yaml](https://github.com/kyma-project/kyma/blob/main
 
 ## Adjust volume size
 
-If you're running out of volume (for example, because you increased the log retention period), you can expand the volume size.
+The way to change the volume size depends on whether you want to do it during the installation or later.
 
-1. In your custom [Loki values.yaml](https://github.com/kyma-project/kyma/blob/main/resources/logging/charts/loki/values.yaml) file, enter the desired volume size as value for `persistence: size`.
-1. Additionally, expand the Persistent Volume Claims (PVC). For more information, see Kubernetes documentation on [Expanding Persistent Volumes Claims](https://kubernetes.io/docs/concepts/storage/persistent-volumes/#expanding-persistent-volumes-claims).
+If you know already when you're installing Kyma that the default storage size isn't going to be enough, expand the Loki volume size for the initial deployment:
+In your custom [Loki values.yaml](https://github.com/kyma-project/kyma/blob/main/resources/logging/charts/loki/values.yaml) file, enter the desired volume size as value for `persistence: size`.
+
+If you're running out of volume later on (for example, because you increased the log retention period), you can increase the volume size by [expanding the Persistent Volume Claims (PVC)](https://kubernetes.io/docs/concepts/storage/persistent-volumes/#expanding-persistent-volumes-claims) for the Loki Pod.
+After editing the PVC, stop the workload and restart it so that the changes take effect.
 
 ## Adjust ingestion limit
 
