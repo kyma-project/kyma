@@ -178,13 +178,14 @@ Then(/^The event should be received correctly$/, () => {
 AfterAll({timeout: 1000 * 60 * 95}, async() => {
     const featureName = this.context.featureName;
 
-    if (featureName == "skr-test"){
-        const options = this.context.options;
+    console.log("Executing afterall step now");
+    // if (featureName == "skr-test"){
+    //     const options = this.context.options;
 
-        // Delete commerce mock
-        await CommerceCompassMock.deleteCommerceMockResources(options.testNS);
+    //     // Delete commerce mock
+    //     await CommerceCompassMock.deleteCommerceMockResources(options.testNS);
 
-        // Deprovision SKR
-        await SKRSetup.deprovisionSKR();    
-    }
+    //     // Deprovision SKR
+    //     await SKRSetup.deprovisionSKR();    
+    // }
 });

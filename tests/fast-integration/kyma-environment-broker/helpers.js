@@ -26,6 +26,7 @@ async function provisionSKR(
   const operationID = resp.operation;
   debug(`Operation ID ${operationID}`);
 
+  console.log("Keb has provisioned the SKR and waiting for the operation to be successful");
   await ensureOperationSucceeded(keb, kcp, instanceID, operationID, timeout);
   const runtimeStatus = await kcp.getRuntimeStatusOperations(instanceID);
   const objRuntimeStatus = JSON.parse(runtimeStatus);
