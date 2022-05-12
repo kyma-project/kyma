@@ -6,9 +6,6 @@ const httpsAgent = new https.Agent({
 axios.defaults.httpsAgent = httpsAgent;
 const {
   checkFunctionResponse,
-  // sendLegacyEventAndCheckResponse,
-  // sendCloudEventStructuredModeAndCheckResponse,
-  // sendCloudEventBinaryModeAndCheckResponse,
   checkInClusterEventDelivery,
   waitForSubscriptionsTillReady,
   waitForSubscriptions,
