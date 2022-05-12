@@ -43,6 +43,7 @@ spec:
         - --cookie-domain=kiali.{{ .Values.global.domainName }}
         - --cookie-name=KYMA_KIALI_OAUTH2_PROXY_TOKEN
         - --silence-ping-logging=true
+        - --reverse-proxy=true
         - --auth-logging={{ .Values.authProxy.config.authLogging }}
         - --request-logging={{ .Values.authProxy.config.requestLogging }}
         - --pass-host-header={{ .Values.authProxy.config.passHostHeader }}

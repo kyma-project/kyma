@@ -10,10 +10,12 @@ const {
   k8sDelete,
   patchDeployment,
   k8sAppsApi,
+  retryPromise,
   sleep,
   waitForDeployment,
   waitForPodWithLabel,
   info,
+  error,
 } = require('../utils');
 
 const {
@@ -52,15 +54,14 @@ async function assertGrafanaRedirectsInKyma2() {
   let res = await checkGrafanaRedirect('https://kyma-project.io/docs', 403);
   assert.isTrue(res, 'Grafana redirect to kyma docs does not work!');
 
-  await createBasicProxySecret();
+  await createProxySecret();
   await restartProxyPod();
 
   info('Checking grafana redirect for google as OIDC provider');
   res = await checkGrafanaRedirect('https://accounts.google.com/signin/oauth', 200);
   assert.isTrue(res, 'Grafana redirect to google does not work!');
 
-  await createProxySecretWithIPAllowlisting();
-  await restartProxyPod();
+  await updateProxyDeployment('--reverse-proxy=true', '--trusted-ip=0.0.0.0/0');
 
   info('Checking grafana redirect to grafana URL');
   res = await checkGrafanaRedirect('https://grafana.', 200);
@@ -75,37 +76,29 @@ async function assertGrafanaRedirectsInKyma1() {
 
 async function setGrafanaProxy() {
   if (getEnvOrDefault('KYMA_MAJOR_VERSION', '2') === '2') {
-    await createProxySecretWithIPAllowlisting();
+    await createProxySecret();
     await restartProxyPod();
+    await updateProxyDeployment('--reverse-proxy=true', '--trusted-ip=0.0.0.0/0');
     info('Checking grafana redirect to grafana URL');
     const res = await checkGrafanaRedirect('https://grafana.', 200);
     assert.isTrue(res, 'Grafana redirect to grafana landing page does not work!');
   }
 }
 
-async function resetGrafanaProxy(isSkr) {
+async function resetGrafanaProxy() {
   if (getEnvOrDefault('KYMA_MAJOR_VERSION', '2') === '2') {
     await deleteProxySecret();
-    await restartProxyPod();
+    await updateProxyDeployment('--trusted-ip=0.0.0.0/0', '--reverse-proxy=true');
 
-    info(`Checking grafana redirect to kyma docs`);
-    const docsUrl = (isSkr ? 'https://help.sap.com/docs/BTP/' : 'https://kyma-project.io/docs');
-    const res = await checkGrafanaRedirect(docsUrl, 403);
+    info('Checking grafana redirect to kyma docs');
+    const res = await checkGrafanaRedirect('https://kyma-project.io/docs', 403);
     assert.isTrue(res, 'Authproxy reset was not successful. Grafana is not redirected to kyma docs!');
   }
 }
 
-async function createBasicProxySecret() {
+async function createProxySecret() {
   info(`Creating secret: ${proxySecret.metadata.name}`);
   await k8sApply([proxySecret], kymaNs);
-}
-
-async function createProxySecretWithIPAllowlisting() {
-  info(`Creating secret with ip allowlisting: ${proxySecret.metadata.name}`);
-
-  const secret = proxySecret;
-  secret.data.OAUTH2_PROXY_TRUSTED_IPS = toBase64('0.0.0.0/0');
-  await k8sApply([secret], kymaNs);
 }
 
 async function deleteProxySecret() {
@@ -135,6 +128,49 @@ async function restartProxyPod() {
   await patchDeployment(kymaProxyDeployment, kymaNs, patchRep1);
   const patchedDeploymentRep1 = await k8sAppsApi.readNamespacedDeployment(kymaProxyDeployment, kymaNs);
   expect(patchedDeploymentRep1.body.spec.replicas).to.be.equal(1);
+
+  // We have to wait for the deployment to redeploy the actual pod.
+  await sleep(1000);
+  await waitForDeployment(kymaProxyDeployment, kymaNs);
+}
+
+async function updateProxyDeployment(fromArg, toArg) {
+  const deployment = await retryPromise(
+      async () => {
+        return k8sAppsApi.readNamespacedDeployment(kymaProxyDeployment, kymaNs);
+      },
+      12,
+      5000,
+  ).catch((err) => {
+    error(err);
+    throw new Error(`Timeout: ${kymaProxyDeployment} is not found`);
+  });
+  const argPosFrom = deployment.body.spec.template.spec.containers[0].args.findIndex(
+      (arg) => arg.toString().includes(fromArg),
+  );
+
+  const argPosTo = deployment.body.spec.template.spec.containers[0].args.findIndex(
+      (arg) => arg.toString().includes(toArg),
+  );
+
+  if (argPosFrom === -1 && argPosTo !== -1) {
+    info(`Skipping updating Proxy Deployment as it is already in desired state`);
+    return;
+  }
+
+  const patch = [
+    {
+      op: 'replace',
+      path: `/spec/template/spec/containers/0/args/${argPosFrom}`,
+      value: toArg,
+    },
+  ];
+
+  await patchDeployment(kymaProxyDeployment, kymaNs, patch);
+  const patchedDeployment = await k8sAppsApi.readNamespacedDeployment(kymaProxyDeployment, kymaNs);
+  expect(patchedDeployment.body.spec.template.spec.containers[0].args.findIndex(
+      (arg) => arg.toString().includes(toArg),
+  )).to.not.equal(-1);
 
   // We have to wait for the deployment to redeploy the actual pod.
   await sleep(1000);
