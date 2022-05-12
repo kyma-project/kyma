@@ -130,7 +130,6 @@ COPY docker-entrypoint.sh /usr/local/bin/
 ENTRYPOINT ["docker-entrypoint.sh"]
 
 # Serverless
-
 LABEL source = git@github.com:kyma-project/kyma.git
 
 COPY kubeless/ /
