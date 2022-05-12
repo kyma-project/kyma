@@ -1,6 +1,6 @@
 const uuid = require('uuid');
 const {genRandom, getEnvOrThrow, initializeK8sClient} = require('../utils');
-const {keb, gardener, director} = require('./provision/provision-skr');
+const {kcp, gardener, director} = require('./provision/provision-skr');
 const {
   scenarioExistsInCompass,
   addScenarioInCompass,
@@ -8,6 +8,7 @@ const {
   assignRuntimeToScenario,
 } = require('../compass');
 const {saveKubeconfig} = require('../skr-svcat-migration-test/test-helpers');
+const {expect} = require('chai');
 
 const testNS = 'skr-test';
 
@@ -91,16 +92,21 @@ function gatherOptions(...opts) {
 
 // gets the skr config by it's instance id
 async function getSKRConfig(instanceID) {
-  let shoot;
-  try {
-    shoot = await keb.getSKR(instanceID);
-  } catch (e) {
-    throw new Error(`Cannot fetch the shoot: ${e.toString()}`);
-  }
-  const shootName = shoot.dashboard_url.split('.')[1];
-
-  console.log(`Fetching SKR info for shoot: ${shootName}`);
-  return await gardener.getShoot(shootName);
+  // console.log(getEnvOrThrow('KCP_KEB_API_URL'));
+  // console.log(getEnvOrThrow('KCP_OIDC_ISSUER_URL'));
+  // console.log(getEnvOrThrow('KCP_GARDENER_NAMESPACE'));
+  // console.log(getEnvOrThrow('KCP_TECH_USER_LOGIN'));
+  // console.log(getEnvOrThrow('KCP_TECH_USER_PASSWORD'));
+  // console.log(getEnvOrThrow('KCP_OIDC_CLIENT_ID'));
+  // console.log(getEnvOrThrow('KCP_OIDC_CLIENT_SECRET'));
+  // console.log(getEnvOrThrow('KCP_MOTHERSHIP_API_URL'));
+  // console.log(getEnvOrThrow('KCP_KUBECONFIG_API_URL'));
+  const runtimeStatus = await kcp.getRuntimeStatusOperations(instanceID);
+  console.log(runtimeStatus);
+  const objRuntimeStatus = JSON.parse(runtimeStatus);
+  console.log(objRuntimeStatus);
+  expect(objRuntimeStatus).to.have.nested.property('data[0].shootName').not.empty;
+  return await gardener.getShoot(objRuntimeStatus.data[0].shootName);
 }
 
 async function prepareCompassResources(shoot, options) {

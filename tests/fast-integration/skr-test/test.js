@@ -54,20 +54,22 @@ describe('SKR test', function() {
     }
     await prepareCompassResources(shoot, options);
     await initK8sConfig(shoot);
+
+    console.log(shoot);
   });
 
-  it('Execute the tests', async function() {
+  it('Execute the tests', function() {
     oidcE2ETest(options, shoot);
     commerceMockTest(options);
-
-    after('Cleanup the resources', async function() {
-      this.timeout(deprovisioningTimeout);
-      if (!skipProvisioning) {
-        await deprovisionSKRInstance(options, deprovisioningTimeout);
-      } else {
-        console.log('An external SKR cluster was used, de-provisioning skipped');
-      }
-      await unregisterKymaFromCompass(director, options.scenarioName);
-    });
   });
+
+  // after('Cleanup the resources', async function() {
+  //   this.timeout(deprovisioningTimeout);
+  //   if (!skipProvisioning) {
+  //     await deprovisionSKRInstance(options, deprovisioningTimeout);
+  //   } else {
+  //     console.log('An external SKR cluster was used, de-provisioning skipped');
+  //   }
+  //   await unregisterKymaFromCompass(director, options.scenarioName);
+  // });
 });

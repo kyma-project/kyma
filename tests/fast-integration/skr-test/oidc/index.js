@@ -12,7 +12,7 @@ const {keb, kcp, gardener} = require('../provision/provision-skr');
 const updateTimeout = 1000 * 60 * 20; // 20m
 
 function oidcE2ETest(options, shoot) {
-  describe('OIDC Test', async function() {
+  describe('OIDC Test', function() {
     const givenOidcConfig = shoot.oidcConfig;
     it('Assure initial OIDC config is applied on shoot cluster', async function() {
       ensureValidShootOIDCConfig(shoot, givenOidcConfig);

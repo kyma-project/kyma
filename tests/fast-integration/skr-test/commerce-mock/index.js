@@ -23,7 +23,7 @@ const testTimeout = 1000 * 60 * 30; // 30m
 // prepares all the resources required for commerce mock to be executed;
 // runs the actual tests and checks the audit logs in case of AWS plan
 function commerceMockTest(options) {
-  context('CommerceMock Test', async function() {
+  context('CommerceMock Test', function() {
     this.timeout(testTimeout);
     if (options === undefined) {
       throw new Error('Empty configuration given');

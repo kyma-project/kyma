@@ -27,9 +27,6 @@ async function provisionSKRInstance(options, timeout) {
         timeout);
     const shoot = skr.shoot;
 
-    const runtimeStatus = await kcp.getRuntimeStatusOperations(options.instanceID);
-    console.log(`\nRuntime status after provisioning: ${runtimeStatus}`);
-
     await addScenarioInCompass(director, options.scenarioName);
     await assignRuntimeToScenario(director, shoot.compassID, options.scenarioName);
     return shoot;
