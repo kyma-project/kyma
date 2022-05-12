@@ -674,6 +674,52 @@ async function ensureCommerceMockLocalTestFixture(mockNamespace,
     await patchApplicationGateway(`commerce-application-gateway`, 'kyma-integration');
   }
 
+  const webServicesSC = await waitForServiceClass(
+      'webservices',
+      targetNamespace,
+      400 * 1000,
+  );
+  const eventsSC = await waitForServiceClass('events', targetNamespace);
+  const webServicesSCExternalName = webServicesSC.spec.externalName;
+  const eventsSCExternalName = eventsSC.spec.externalName;
+  const serviceCatalogObjs = [
+    serviceInstanceObj('commerce-webservices', webServicesSCExternalName),
+    serviceInstanceObj('commerce-events', eventsSCExternalName),
+  ];
+
+  await retryPromise(
+      () => k8sApply(serviceCatalogObjs, targetNamespace, false),
+      5,
+      2000,
+  );
+  await waitForServiceInstance('commerce-webservices', targetNamespace);
+  await waitForServiceInstance('commerce-events', targetNamespace);
+
+  const serviceBinding = {
+    apiVersion: 'servicecatalog.k8s.io/v1beta1',
+    kind: 'ServiceBinding',
+    metadata: {
+      name: 'commerce-binding',
+    },
+    spec: {
+      instanceRef: {name: 'commerce-webservices'},
+    },
+  };
+  await k8sApply([serviceBinding], targetNamespace, false);
+  await waitForServiceBinding('commerce-binding', targetNamespace);
+
+  const serviceBindingUsage = {
+    apiVersion: 'servicecatalog.kyma-project.io/v1alpha1',
+    kind: 'ServiceBindingUsage',
+    metadata: {name: 'commerce-lastorder-sbu'},
+    spec: {
+      serviceBindingRef: {name: 'commerce-binding'},
+      usedBy: {kind: 'serverless-function', name: 'lastorder'},
+    },
+  };
+  await k8sApply([serviceBindingUsage], targetNamespace);
+  await waitForServiceBindingUsage('commerce-lastorder-sbu', targetNamespace);
+
   await waitForFunction('lastorder', targetNamespace);
 
   await k8sApply([eventingSubscription(
