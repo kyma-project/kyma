@@ -5,13 +5,13 @@ Feature: SKR test
         Given SKR is provisioned
 
     Scenario: Initial OIDC config is applied on shoot cluster
-        Then Initial OIDC config is applied on the shoot cluster
+        Then "Initial" OIDC config is applied on the shoot cluster
 
     Scenario: Initial OIDC config is part of the kubeconfig
-        Then Initial OIDC config is part of the kubeconfig
+        Then "Initial" OIDC config is part of the kubeconfig
 
     Scenario: Admin binding exists for the target user
-        Then Admin binding exists for old user
+        Then Admin binding exists for "old" user
 
     Scenario: SKR Service can be updated with OIDC config
         When SKR service is updated
@@ -23,15 +23,15 @@ Feature: SKR test
 
     Scenario: Updated OIDC config is applied on shoot cluster
         When SKR service is updated
-        Then Updated OIDC config is applied on the shoot cluster
+        Then "Updated" OIDC config is applied on the shoot cluster
 
     Scenario: Updated OIDC config is part of the kubeconfig
         When SKR service is updated
-        Then Updated OIDC config is part of the kubeconfig
+        Then "Updated" OIDC config is part of the kubeconfig
 
     Scenario: Admin binding exists for the target user after updating the SKR service
         When SKR service is updated
-        Then Admin binding exists for old user
+        Then Admin binding exists for "old" user
 
     Scenario: SKR Service Admins can be updated
         When The admins for the SKR service are updated
@@ -43,7 +43,7 @@ Feature: SKR test
 
     Scenario: New cluster admins are configured correctly after SKR service admins are updated
         When The admins for the SKR service are updated
-        Then Admin binding exists for new user
+        Then Admin binding exists for "new" user
 
     Scenario: Old cluster admin no longer exists after SKR service admins are updated
         When The admins for the SKR service are updated
