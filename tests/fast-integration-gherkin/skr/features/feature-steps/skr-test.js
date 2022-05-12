@@ -1,18 +1,18 @@
 const {Given, When, Then, AfterAll} = require('cucumber');  
 const {expect} = require('chai');
-const {SKRSetup} = require('../../helpers/skr-setup');
-const {CommerceCompassMock} = require('../../helpers/commerce-mock-with-compass-setup');
-const {debug} = require('../../helpers/utils');
+const {SKRSetup} = require('../../../helpers/skr-setup');
+const {CommerceCompassMock} = require('../../../helpers/commerce-mock-with-compass-setup');
+const {
+    debug,
+    ensureKymaAdminBindingDoesNotExistsForUser,
+    ensureKymaAdminBindingDoesNotExistsForUser
+} = require('../../../helpers/utils');
 const {
     ensureValidShootOIDCConfig,
     ensureValidOIDCConfigInCustomerFacingKubeconfig,
     ensureOperationSucceeded
-} = require('../../../fast-integration/kyma-environment-broker');
-const {keb, gardener} = require('../../../fast-integration/skr-test/helpers');
-const {
-    ensureKymaAdminBindingExistsForUser,
-    ensureKymaAdminBindingDoesNotExistsForUser
-} = require('../../helpers/utils');
+} = require('../../../../fast-integration/kyma-environment-broker');
+const {keb, gardener} = require('../../../../fast-integration/skr-test/helpers');
 const {
     callFunctionWithToken,
     assertSuccessfulFunctionResponse,
@@ -20,7 +20,7 @@ const {
     callFunctionWithNoToken,
     sendLegacyEvent,
     checkLegacyEventResponse,
-} = require('../../../fast-integration/test/fixtures/commerce-mock');
+} = require('../../../../fast-integration/test/fixtures/commerce-mock');
 
 this.context = new Object();
 
