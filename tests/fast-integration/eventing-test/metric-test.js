@@ -28,15 +28,15 @@ const dashboards = {
       expect(foundMetric).to.be.not.undefined;
     },
   },
-  delivery_applicationConnectivityValidator: {
-    title: 'Requests to application connectivity validator',
-    query: 'sum by(destination_service) (rate(istio_requests_total{destination_service="central-application-connectivity-validator.kyma-system.svc.cluster.local", response_code=~"2.*"}[5m]))',
-    backends: ['nats', 'beb'],
-    assert: function(result) {
-      const foundMetric = result.find((res) => res.metric.destination_service.startsWith('central-application-connectivity-validator'));
-      expect(foundMetric).to.be.not.undefined;
-    },
-  },
+  // delivery_applicationConnectivityValidator: {
+  //   title: 'Requests to application connectivity validator',
+  //   query: 'sum by(destination_service) (rate(istio_requests_total{destination_service="central-application-connectivity-validator.kyma-system.svc.cluster.local", response_code=~"2.*"}[5m]))',
+  //   backends: ['nats', 'beb'],
+  //   assert: function(result) {
+  //     const foundMetric = result.find((res) => res.metric.destination_service.startsWith('central-application-connectivity-validator'));
+  //     expect(foundMetric).to.be.not.undefined;
+  //   },
+  // },
   delivery_subscribers: {
     title: 'Requests to subscribers',
     query: `
