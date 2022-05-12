@@ -1,4 +1,4 @@
-FROM golang:1.17.6-alpine3.14 as builder
+FROM golang:1.17.6-alpine3.15 as builder
 
 ENV BASE_APP_DIR /go/src/github.com/kyma-project/kyma/tests/rafter
 WORKDIR ${BASE_APP_DIR}
@@ -22,7 +22,7 @@ RUN CGO_ENABLED=0 go test main_test.go -c
 
 FROM alpine:3.14.2
 LABEL source = git@github.com:kyma-project/kyma.git
-WORKDIR /app
+WORKDIR /app2
 
 ENV TEST_DIR /go/src/github.com/kyma-project/kyma/tests/rafter
 
