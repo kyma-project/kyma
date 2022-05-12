@@ -76,7 +76,11 @@ async function assertGrafanaRedirectsInKyma1() {
 async function setGrafanaProxy() {
   if (getEnvOrDefault('KYMA_MAJOR_VERSION', '2') === '2') {
     await createProxySecretWithIPAllowlisting();
+    // Remove the --reverse-proxy flag from the deployment to make the whitelisting also working for old deployment
+    // versions in the upgrade tests
+    await patchProxyDeployment('--reverse-proxy=true');
     await restartProxyPod();
+
     info('Checking grafana redirect to grafana URL');
     const res = await checkGrafanaRedirect('https://grafana.', 200);
     assert.isTrue(res, 'Grafana redirect to grafana landing page does not work!');
@@ -93,6 +97,45 @@ async function resetGrafanaProxy(isSkr) {
     const res = await checkGrafanaRedirect(docsUrl, 403);
     assert.isTrue(res, 'Authproxy reset was not successful. Grafana is not redirected to kyma docs!');
   }
+}
+
+async function patchProxyDeployment(toRemove) {
+  const deployment = await retryPromise(
+      async () => {
+        return k8sAppsApi.readNamespacedDeployment(kymaProxyDeployment, kymaNs);
+      },
+      12,
+      5000,
+  ).catch((err) => {
+    error(err);
+    throw new Error(`Timeout: ${kymaProxyDeployment} is not found`);
+  });
+  const argPosFrom = deployment.body.spec.template.spec.containers[0].args.findIndex(
+      (arg) => arg.toString().includes(toRemove),
+  );
+
+
+  if (argPosFrom === -1) {
+    info(`Skipping updating Proxy Deployment as it is already in desired state`);
+    return;
+  }
+
+  const patch = [
+    {
+      op: 'remove',
+      path: `/spec/template/spec/containers/0/args/${argPosFrom}`,
+    },
+  ];
+
+  await patchDeployment(kymaProxyDeployment, kymaNs, patch);
+  const patchedDeployment = await k8sAppsApi.readNamespacedDeployment(kymaProxyDeployment, kymaNs);
+  expect(patchedDeployment.body.spec.template.spec.containers[0].args.findIndex(
+      (arg) => arg.toString().includes(toRemove),
+  )).to.equal(-1);
+
+  // We have to wait for the deployment to redeploy the actual pod.
+  await sleep(1000);
+  await waitForDeployment(kymaProxyDeployment, kymaNs);
 }
 
 async function createBasicProxySecret() {
