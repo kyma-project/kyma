@@ -518,13 +518,13 @@ data:
                 "h":1,
                 "w":24,
                 "x":0,
-                "y":6
+                "y":7
              },
              "id":19,
              "panels":[
 
              ],
-             "title":"Stream metrics",
+             "title":"Stream Metrics",
              "type":"row"
           },
           {
@@ -585,9 +585,9 @@ data:
              },
              "gridPos":{
                 "h":6,
-                "w":8,
+                "w":6,
                 "x":0,
-                "y":7
+                "y":8
              },
              "id":17,
              "options":{
@@ -611,7 +611,8 @@ data:
                    "refId":"A"
                 }
              ],
-             "title":"Stream data size",
+             "title":"Stream Data Size",
+             "description": "Total size of data stored by the streams to persist messages",
              "type":"timeseries"
           },
           {
@@ -672,11 +673,99 @@ data:
              },
              "gridPos":{
                 "h":6,
-                "w":8,
-                "x":8,
-                "y":7
+                "w":6,
+                "x":6,
+                "y":8
              },
              "id":24,
+             "options":{
+                "legend":{
+                   "calcs":[
+
+                   ],
+                   "displayMode":"list",
+                   "placement":"bottom"
+                },
+                "tooltip":{
+                   "mode":"single"
+                }
+             },
+             "pluginVersion":"8.3.4",
+             "targets":[
+                {
+                   "expr":"sum(nats_stream_consumer_count) by (stream_name)",
+                   "interval":"",
+                   "legendFormat":"{{stream_name}}",
+                   "refId":"A"
+                }
+             ],
+             "title":"Stream Consumer Count",
+             "description":"Total number of active consumers per stream",
+             "type":"timeseries"
+          },
+          {
+             "fieldConfig":{
+                "defaults":{
+                   "color":{
+                      "mode":"palette-classic"
+                   },
+                   "custom":{
+                      "axisLabel":"",
+                      "axisPlacement":"auto",
+                      "barAlignment":0,
+                      "drawStyle":"line",
+                      "fillOpacity":10,
+                      "gradientMode":"none",
+                      "hideFrom":{
+                         "legend":false,
+                         "tooltip":false,
+                         "viz":false
+                      },
+                      "lineInterpolation":"linear",
+                      "lineWidth":1,
+                      "pointSize":5,
+                      "scaleDistribution":{
+                         "type":"linear"
+                      },
+                      "showPoints":"never",
+                      "spanNulls":true,
+                      "stacking":{
+                         "group":"A",
+                         "mode":"none"
+                      },
+                      "thresholdsStyle":{
+                         "mode":"off"
+                      }
+                   },
+                   "mappings":[
+
+                   ],
+                   "thresholds":{
+                      "mode":"absolute",
+                      "steps":[
+                         {
+                            "color":"green",
+                            "value":null
+                         },
+                         {
+                            "color":"red",
+                            "value":80
+                         }
+                      ]
+                   },
+                   "unit":"short"
+                },
+                "overrides":[
+
+                ]
+             },
+             "gridPos":{
+                "h":6,
+                "w":6,
+                "x":12,
+                "y":8
+             },
+             "id":36,
              "options":{
                 "legend":{
                    "calcs":[
@@ -698,7 +787,8 @@ data:
                    "refId":"A"
                 }
              ],
-             "title":"Stream message count",
+             "title":"Stream Message Count",
+             "description": "Total number of messages stored by the streams",
              "type":"timeseries"
           },
           {
@@ -759,9 +849,9 @@ data:
              },
              "gridPos":{
                 "h":6,
-                "w":8,
-                "x":16,
-                "y":7
+                "w":6,
+                "x":18,
+                "y":8
              },
              "id":20,
              "options":{
@@ -787,6 +877,7 @@ data:
                 }
              ],
              "title":"Message Rate (per second)",
+             "description": "Number of messages published to streams per second",
              "type":"timeseries"
           },
           {
@@ -980,14 +1071,15 @@ data:
              "pluginVersion":"8.3.4",
              "targets":[
                 {
-                   "expr":"sum(nats_consumer_delivered_consumer_seq{pod=~\"$server\",stream_name=~\"$stream\",consumer_desc=~\"$consumer\"}) by (consumer_desc)",
+                   "expr":"sum(nats_consumer_num_redelivered{pod=~\"$server\",stream_name=~\"$stream\",consumer_desc=~\"$consumer\"}) by (consumer_desc)",
                    "hide":false,
                    "interval":"",
                    "legendFormat":"{{consumer_desc}}",
                    "refId":"A"
                 }
              ],
-             "title":"Total delivered messages",
+             "title":"Pending Re-delivery Messages",
+             "description": "Total number of messages to be re-delivered to the dispatcher per consumer",
              "type":"timeseries"
           },
           {
@@ -1076,7 +1168,8 @@ data:
                    "refId":"A"
                 }
              ],
-             "title":"Pending messages",
+             "title":"Pending Messages",
+             "description": "Number of messages pending to be forwarded to the dispatcher per consumer",
              "type":"timeseries"
           },
           {
@@ -1166,6 +1259,7 @@ data:
                 }
              ],
              "title":"Message Acks Pending",
+             "description": "Number of messages forwarded to the dispatcher but have not been acknowledged by the dispatcher (per consumer)",
              "type":"timeseries"
           }
        ],
