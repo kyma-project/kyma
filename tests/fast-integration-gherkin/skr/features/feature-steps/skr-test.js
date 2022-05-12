@@ -5,7 +5,7 @@ const {CommerceCompassMock} = require('../../../helpers/commerce-mock-with-compa
 const {
     debug,
     ensureKymaAdminBindingDoesNotExistsForUser,
-    ensureKymaAdminBindingDoesNotExistsForUser
+    ensureKymaAdminBindingExistsForUser
 } = require('../../../helpers/utils');
 const {
     ensureValidShootOIDCConfig,
