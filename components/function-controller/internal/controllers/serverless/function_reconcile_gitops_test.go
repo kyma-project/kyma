@@ -134,12 +134,13 @@ func TestGitOps(t *testing.T) {
 			statsCollector.On("UpdateReconcileStats", mock.Anything, mock.Anything).Return()
 
 			reconciler := &FunctionReconciler{
-				Log:            log.Log,
-				client:         resourceClient,
-				recorder:       record.NewFakeRecorder(100),
-				config:         testCfg,
-				gitOperator:    operator,
-				statsCollector: statsCollector,
+				Log:               log.Log,
+				client:            resourceClient,
+				recorder:          record.NewFakeRecorder(100),
+				config:            testCfg,
+				gitOperator:       operator,
+				statsCollector:    statsCollector,
+				initStateFunction: stateFnGitCheckSources,
 			}
 
 			fnLabels := reconciler.internalFunctionLabels(inFunction)
@@ -300,7 +301,13 @@ func TestGitOps(t *testing.T) {
 			g.Expect(len(deployments.Items)).To(gomega.Equal(1))
 
 			deployment := &deployments.Items[0]
-			expectedImage := reconciler.buildImageAddress(function, "registry.kyma.local")
+
+			s := systemState{
+				//TODO https://github.com/kyma-project/kyma/issues/14079
+				instance: *function,
+			}
+
+			expectedImage := s.buildImageAddress("registry.kyma.local")
 			g.Expect(deployment).To(gomega.Not(gomega.BeNil()))
 			g.Expect(deployment).To(haveSpecificContainer0Image(expectedImage))
 			g.Expect(deployment).To(haveLabelLen(7))
@@ -441,12 +448,13 @@ func TestGitOps_GitErrorHandling(t *testing.T) {
 		}
 
 		reconciler := &FunctionReconciler{
-			Log:            log.Log,
-			client:         resourceClient,
-			recorder:       record.NewFakeRecorder(100),
-			config:         testCfg,
-			gitOperator:    operator,
-			statsCollector: prometheusCollector,
+			Log:               log.Log,
+			client:            resourceClient,
+			recorder:          record.NewFakeRecorder(100),
+			config:            testCfg,
+			gitOperator:       operator,
+			statsCollector:    prometheusCollector,
+			initStateFunction: stateFnGitCheckSources,
 		}
 
 		//WHEN
@@ -464,7 +472,7 @@ func TestGitOps_GitErrorHandling(t *testing.T) {
 	})
 }
 
-func Test_ReadGITOptions(t *testing.T) {
+func Test_stateFnGitCheckSources(t *testing.T) {
 	g := gomega.NewGomegaWithT(t)
 	testRepoName := "non-existing-repo"
 	rtm := serverlessv1alpha1.Nodejs14
@@ -502,11 +510,12 @@ func Test_ReadGITOptions(t *testing.T) {
 		}
 
 		reconciler := &FunctionReconciler{
-			Log:            log.Log,
-			client:         resourceClient,
-			recorder:       record.NewFakeRecorder(100),
-			config:         testCfg,
-			statsCollector: prometheusCollector,
+			Log:               log.Log,
+			client:            resourceClient,
+			recorder:          record.NewFakeRecorder(100),
+			config:            testCfg,
+			statsCollector:    prometheusCollector,
+			initStateFunction: stateFnGitCheckSources,
 		}
 
 		//WHEN

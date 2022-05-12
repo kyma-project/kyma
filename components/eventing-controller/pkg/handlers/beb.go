@@ -263,6 +263,9 @@ func cleanEventTypes(subscription *types.Subscription, cleaner eventtype.Cleaner
 // setEmsSubscriptionStatus sets the status of bebSubscription in ev2Subscription
 func (b *BEB) setEmsSubscriptionStatus(subscription *eventingv1alpha1.Subscription, bebSubscription *types.Subscription) bool {
 	var statusChanged = false
+	if subscription.Status.EmsSubscriptionStatus == nil {
+		subscription.Status.EmsSubscriptionStatus = &eventingv1alpha1.EmsSubscriptionStatus{}
+	}
 	if subscription.Status.EmsSubscriptionStatus.SubscriptionStatus != string(bebSubscription.SubscriptionStatus) {
 		subscription.Status.EmsSubscriptionStatus.SubscriptionStatus = string(bebSubscription.SubscriptionStatus)
 		statusChanged = true

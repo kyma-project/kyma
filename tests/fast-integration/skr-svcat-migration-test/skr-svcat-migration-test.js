@@ -28,7 +28,7 @@ const kcp = new KCPWrapper(KCPConfig.fromEnv());
 describe('SKR SVCAT migration test', function() {
   const keb = new KEBClient(KEBConfig.fromEnv());
   const gardener = new GardenerClient(GardenerConfig.fromEnv());
-  const smAdminCreds = s.SMCreds.fromEnv();
+  const smAdminCreds = s.AdminCreds.fromEnv();
 
   const suffix = genRandom(4);
   const appName = `app-${suffix}`;
@@ -144,6 +144,20 @@ describe('SKR SVCAT migration test', function() {
   it('Should check if presets injected secrets in func containers are present after migration', async function() {
     const timeoutInMinutes = 5;
     await t.checkPodPresetEnvInjected(timeoutInMinutes);
+  });
+
+  it('Perform Upgrade to the same version', async function() {
+    await kcp.upgradeKyma(instanceID, '2.2.0');
+  });
+
+  it('Should get Runtime Status after kyma upgrade', async function() {
+    const runtimeStatus = await kcp.getRuntimeStatusOperations(instanceID);
+    console.log(`\nRuntime status after kyma upgrade: ${runtimeStatus}`);
+    await kcp.reconcileInformationLog(runtimeStatus);
+  });
+
+  it('Should wait for btp-operator deployment to be still available after kyma upgrade', async function() {
+    await waitForDeployment('sap-btp-operator-controller-manager', 'kyma-system', 10 * 60 * 1000); // 10 minutes
   });
 
   it('Should destroy sample service catalog resources', async function() {
