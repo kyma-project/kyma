@@ -5,7 +5,9 @@ const {CommerceCompassMock} = require('../../../helpers/commerce-mock-with-compa
 const {
     debug,
     ensureKymaAdminBindingDoesNotExistsForUser,
-    ensureKymaAdminBindingExistsForUser
+    ensureKymaAdminBindingExistsForUser,
+    isDebugEnabled,
+    printStatusOfInClusterEventingInfrastructure
 } = require('../../../helpers/utils');
 const {
     ensureValidShootOIDCConfig,
@@ -20,6 +22,9 @@ const {
     callFunctionWithNoToken,
     sendLegacyEvent,
     checkLegacyEventResponse,
+    getRandomEventId,
+    getVirtualServiceHost,
+    sendInClusterEventWithRetry
 } = require('../../../../fast-integration/test/fixtures/commerce-mock');
 
 this.context = new Object();
@@ -168,6 +173,29 @@ Then(/^The event should be received correctly$/, () => {
     const legacyEventResponse = this.context.legacyEventResponse;
 
 	checkLegacyEventResponse(legacyEventResponse);
+});
+
+When(/^An in-cluster "([^"]*)" event is sent$/, async(eventEncoding) => {
+    const targetNamespace = this.context.options.testNS;
+
+	const eventId = getRandomEventId(encoding);
+    const mockHost = await getVirtualServiceHost(targetNamespace, 'lastorder');
+
+    if (isDebugEnabled()) {
+        await printStatusOfInClusterEventingInfrastructure(targetNamespace, eventEncoding, 'lastorder');
+    }
+
+    await sendInClusterEventWithRetry(mockHost, eventId, encoding);
+
+    this.context.lastOrderMockHost = mockHost;
+    this.context.eventId = eventId;
+});
+
+Then(/^The event is received successfully$/, () => {
+    const mockHost = this.context.mockHost;
+    const eventId = this.context.eventId;
+    
+	ensureInClusterEventReceivedWithRetry(mockHost, eventId);
 });
 
 AfterAll({timeout: 1000 * 60 * 95}, async() => {

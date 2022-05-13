@@ -48,6 +48,16 @@ Feature: SKR test
     Scenario: Old cluster admin no longer exists after SKR service admins are updated
         When The admins for the SKR service are updated
         Then The old admin no longer exists for the SKR service instance
+        
+    Scenario: In cluster binary event should be delivered
+        Given Commerce Backend is set up
+        When An in-cluster "binary" event is sent
+        Then The event is received successfully
+
+    Scenario: In cluster structured event should be delivered
+        Given Commerce Backend is set up
+        When An in-cluster "structured" event is sent
+        Then The event is received successfully
 
     Scenario: Function should be reachable when commerce backend is up using a correct authorization token
         Given Commerce Backend is set up
