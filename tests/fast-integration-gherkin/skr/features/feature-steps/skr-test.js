@@ -20,12 +20,15 @@ const {
     assertSuccessfulFunctionResponse,
     assertUnauthorizedFunctionResponse,
     callFunctionWithNoToken,
-    sendLegacyEvent,
-    checkLegacyEventResponse,
+    sendEvent,
+    checkEventResponse,
     getRandomEventId,
     getVirtualServiceHost,
     sendInClusterEventWithRetry,
-    GetCommerceMockHost
+    GetCommerceMockHost,
+    GetLegacyEventParams,
+    GetStructuredEventParams,
+    GetBinaryEventParams
 } = require('../../../../fast-integration/test/fixtures/commerce-mock');
 
 this.context = new Object();
@@ -171,17 +174,29 @@ Then(/^The function returns an error$/, () => {
 	assertUnauthorizedFunctionResponse(unauthorizedFunctionResponse);
 });
 
-When(/^A legacy event is sent$/, async() => {
-	const legacyEventResponse = await sendLegacyEvent();
+When(/^A "([^"]*)" event is sent$/, async(eventEncoding) => {
+    const commerceMockHost = this.context.commerceMockHost;
 
-    this.context.legacyEventResponse = legacyEventResponse;
+    const requestParams = null;
+    if (eventEncoding === 'legacy'){
+        requestParams = GetLegacyEventParams();
+    } else if (eventEncoding === 'structured'){
+        requestParams = GetStructuredEventParams();
+    } else if (eventEncoding === 'binary'){
+        requestParams = GetBinaryEventParams();
+    } else {
+        console.error("Not supported eventEncoding type:", eventEncoding);
+    }
+	const eventResponse = await sendEvent(commerceMockHost, requestParams);
+
+    this.context.eventResponse = eventResponse;
 });
 
 
 Then(/^The event should be received correctly$/, () => {
-    const legacyEventResponse = this.context.legacyEventResponse;
+    const eventResponse = this.context.eventResponse;
 
-	checkLegacyEventResponse(legacyEventResponse);
+	checkEventResponse(eventResponse);
 });
 
 When(/^An in-cluster "([^"]*)" event is sent$/, {timeout: 60 * 60 * 1000 * 3}, async(eventEncoding) => {

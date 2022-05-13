@@ -273,7 +273,7 @@ async function sendLegacyEventAndCheckResponse(mockNamespace = 'mocks') {
   return await sendEventAndCheckResponse('legacy event', body, params, mockNamespace);
 }
 
-async function sendLegacyEvent(mockNamespace = 'mocks'){
+function GetLegacyEventParams(){
   const body = {
     'event-type': 'order.created',
     'event-type-version': 'v1',
@@ -289,19 +289,24 @@ async function sendLegacyEvent(mockNamespace = 'mocks'){
     },
   };
 
-  const vs = await waitForVirtualService(mockNamespace, 'commerce-mock');
-  const mockHost = vs.spec.hosts[0];
-  const host = mockHost.split('.').slice(1).join('.');
+  return{
+    body: body,
+    params: params,
+    eventType: 'legacy event'
+  }
+}
+
+async function sendEvent(host, requestParams){
   let eventResponse = null;
 
   await retryPromise(
       async () => {
         await axios
-            .post(`https://${mockHost}/events`, body, params)
+            .post(`https://${mockHost}/events`, requestParams.body, requestParams.params)
             .catch((e) => {
-              error('Cannot send %s, the response from event gateway: %s', eventType, e.response.data);
+              error('Cannot send %s, the response from event gateway: %s', requestParams.eventType, e.response.data);
               console.log(e);
-              throw convertAxiosError(e, 'Cannot send %s, the response from event gateway', eventType);
+              throw convertAxiosError(e, 'Cannot send %s, the response from event gateway', requestParams.eventType);
             });
 
         await sleep(500);
@@ -323,7 +328,7 @@ async function sendLegacyEvent(mockNamespace = 'mocks'){
   return eventResponse;
 }
 
-async function checkLegacyEventResponse(eventResponse) {
+function checkEventResponse(eventResponse) {
   expect(eventResponse.data).to.have.nested.property('event.data.orderCode', '567');
   // See: https://github.com/kyma-project/kyma/issues/10720
   expect(eventResponse.data).to.have.nested.property('event.ce-type').that.contains('order.created');
@@ -358,6 +363,34 @@ async function sendCloudEventStructuredModeAndCheckResponse(backendType ='nats',
   return await sendEventAndCheckResponse('cloud event', body, params, mockNamespace);
 }
 
+function GetStructuredEventParams(){
+  let source = 'commerce';
+  if (backendType === bebBackend) {
+    source = eventMeshNamespace;
+  }
+  const body = {
+    'specversion': '1.0',
+    'source': source,
+    'type': 'sap.kyma.custom.noapp.order.created.v1',
+    'eventtypeversion': 'v1',
+    'id': 'A234-1234-1234',
+    'data': {'orderCode': '567'},
+    'datacontenttype': 'application/json',
+    'eventtracing': true,
+  };
+  const params = {
+    headers: {
+      'content-type': 'application/cloudevents+json',
+    },
+  };
+
+  return{
+    body: body,
+    params: params,
+    eventType: 'cloud event'
+  };
+}
+
 async function sendCloudEventBinaryModeAndCheckResponse(backendType = 'nats', mockNamespace = 'mocks') {
   let source = 'commerce';
   if (backendType === bebBackend) {
@@ -378,6 +411,32 @@ async function sendCloudEventBinaryModeAndCheckResponse(backendType = 'nats', mo
   };
 
   return await sendEventAndCheckResponse('cloud event binary', body, params, mockNamespace);
+}
+
+function GetBinaryEventParams(){
+  let source = 'commerce';
+  if (backendType === bebBackend) {
+    source = eventMeshNamespace;
+  }
+  const body = {
+    'data': {'orderCode': '567'},
+    'eventtracing': true,
+  };
+  const params = {
+    headers: {
+      'content-type': 'application/json',
+      'ce-specversion': '1.0',
+      'ce-type': 'sap.kyma.custom.noapp.order.created.v1',
+      'ce-source': source,
+      'ce-id': 'A234-1234-1234',
+    },
+  };
+
+  return{
+    body: body,
+    params: params,
+    eventType: 'cloud event binary'
+  };
 }
 
 async function checkEventTracing(targetNamespace = 'test', res) {
@@ -1086,6 +1145,9 @@ module.exports = {
   assertSuccessfulFunctionResponse,
   callFunctionWithNoToken,
   assertUnauthorizedFunctionResponse,
-  sendLegacyEvent,
-  checkLegacyEventResponse
+  sendEvent,
+  checkEventResponse,
+  GetLegacyEventParams,
+  GetStructuredEventParams,
+  GetBinaryEventParams
 };
