@@ -38,7 +38,7 @@ Given(/^SKR is provisioned$/, {timeout: 60 * 60 * 1000 * 3}, async () => {
 Then(/^"([^"]*)" OIDC config is applied on the shoot cluster$/, (oidcConfig) => {
     const shoot = this.context.shoot;
     const options = this.context.options;
-    const oidc = options.oidc0;
+    let oidc = options.oidc0;
     if (oidcConfig !== 'Initial'){
         oidc = options.oidc1;
     }
@@ -48,7 +48,7 @@ Then(/^"([^"]*)" OIDC config is applied on the shoot cluster$/, (oidcConfig) => 
 
 Then(/^"([^"]*)" OIDC config is part of the kubeconfig$/, async (oidcConfig) => {
     const options = this.context.options;
-    const oidc = options.oidc0;
+    let oidc = options.oidc0;
     if (oidcConfig !== 'Initial'){
         oidc = options.oidc1;
     }
@@ -58,13 +58,11 @@ Then(/^"([^"]*)" OIDC config is part of the kubeconfig$/, async (oidcConfig) => 
 
 Then(/^Admin binding exists for "([^"]*)" user$/, async(userAdmin) => {
 	const options = this.context.options;
-
     const admins = userAdmin === 'old' ? [options.administrator0]: options.administrators1;
 
     admins.forEach(async (admin) => {
         await ensureKymaAdminBindingExistsForUser(admin)
     });
-    console.log("Admin binding exists for old user");
 });
 
 When(/^SKR service is updated$/, async() => {
@@ -76,7 +74,6 @@ When(/^SKR service is updated$/, async() => {
 	await SKRSetup.updateSKR(options.instanceID, customParams, false);
 
     this.context.updateSkrResponse = SKRSetup.updateSkrResponse;
-    console.log("SKR service is updated");
 });
 
 Then(/^The operation response should have a succeeded state$/, {timeout: 1000 * 60 * 20}, async() => {
@@ -97,8 +94,6 @@ Then(/^The operation response should have a succeeded state$/, {timeout: 1000 * 
 
     this.context.operationID = operationID;
     this.context.shoot = shoot;
-
-    console.log("Update operation response has a successful state");
 });
 
 Then(/^Runtime status should be fetched successfully$/, async() => {
@@ -111,8 +106,6 @@ Then(/^Runtime status should be fetched successfully$/, async() => {
     } catch (e) {
       console.log(`before hook failed: ${e.toString()}`);
     }
-
-    console.log("Runtime status fetched successfully");
 });
 
 When(/^The admins for the SKR service are updated$/, async() => {
@@ -124,22 +117,18 @@ When(/^The admins for the SKR service are updated$/, async() => {
 	await SKRSetup.updateSKRAdmins(options.instanceID, customParams, false);
 
     this.context.updateSkrAdminsResponse = SKRSetup.updateSkrAdminsResponse;
-    console.log("Admins are updated");
 });
 
 Then(/^The old admin no longer exists for the SKR service instance$/, async() => {
     const options = this.context.options;
 
     await ensureKymaAdminBindingDoesNotExistsForUser(options.administrator0);
-    
-    console.log("Old admin no longer exists");
 });
 
 Given(/^Commerce Backend is set up$/, async() => {
 	const options = this.context.options;
 
     await CommerceCompassMock.ensureCommerceWithCompassMockIsSetUp(options);
-    console.log("Commerce Back end is set up");
 });
 
 When(/^Function is called using a correct authorization token$/, async() => {
@@ -148,36 +137,30 @@ When(/^Function is called using a correct authorization token$/, async() => {
 	const successfulFunctionResponse = await callFunctionWithToken(options.testNS);
 
     this.context.successfulFunctionResponse = successfulFunctionResponse;
-    console.log("Function is called using a correct auth token");
 });
 
 Then(/^The function should be reachable$/, () => {
     const successfulFunctionResponse = this.context.successfulFunctionResponse;
 
 	assertSuccessfulFunctionResponse(successfulFunctionResponse);
-    console.log("Function is reachable using a correct auth token");
 });
 
 When(/^Function is called without an authorization token$/, async() => {
 	const error = await callFunctionWithNoToken();
 
     this.context.unauthorizedFunctionResponse = error;
-    console.log("Function is not reachable without using a correct auth token");
 });
 
 Then(/^The function returns an error$/, () => {
     const unauthorizedFunctionResponse = this.context.unauthorizedFunctionResponse;
 
 	assertUnauthorizedFunctionResponse(unauthorizedFunctionResponse);
-    console.log("Function returns an error with no token");
 });
 
 When(/^A legacy event is sent$/, async() => {
 	const legacyEventResponse = await sendLegacyEvent();
 
     this.context.legacyEventResponse = legacyEventResponse;
-
-    console.log("Legacy event is sent");
 });
 
 
@@ -185,13 +168,11 @@ Then(/^The event should be received correctly$/, () => {
     const legacyEventResponse = this.context.legacyEventResponse;
 
 	checkLegacyEventResponse(legacyEventResponse);
-    console.log("Legacy event is received");
 });
 
 AfterAll({timeout: 1000 * 60 * 95}, async() => {
     const featureName = this.context.featureName;
 
-    console.log("Executing afterall step now");
     // if (featureName === "skr-test"){
     //     const options = this.context.options;
 

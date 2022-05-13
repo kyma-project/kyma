@@ -76,7 +76,7 @@ class SKRSetup {
         isMigration = false) {
         if (!this._skrAdminsUpdated){
             try{
-                this.updateSkrAdminsResponse = await keb.updateSKR(instanceID, customParams, this.btpOperatorCreds, isMigration);
+                this.updateSkrAdminsResponse = await keb.updateSKR(instanceID, customParams, null, isMigration);
                 this._skrAdminsUpdated = true;
             } catch(e) {
                 throw new Error(`Failed to update SKR: ${e.toString()}`);
