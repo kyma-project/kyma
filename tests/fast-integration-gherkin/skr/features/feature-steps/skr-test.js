@@ -33,41 +33,32 @@ Given(/^SKR is provisioned$/, {timeout: 60 * 60 * 1000 * 3}, async () => {
 
     this.context.options = options;
     this.context.shoot = shoot;
-    console.log("Provisioned Successfully");
 });
 
 Then(/^"([^"]*)" OIDC config is applied on the shoot cluster$/, (oidcConfig) => {
     const shoot = this.context.shoot;
     const options = this.context.options;
     const oidc = options.oidc0;
-    if (oidcConfig != 'Initial'){
+    if (oidcConfig !== 'Initial'){
         oidc = options.oidc1;
     }
 
     ensureValidShootOIDCConfig(shoot, oidc);
-    
-    console.log("Valid initial OIDC config on shoot cluster");
 });
 
 Then(/^"([^"]*)" OIDC config is part of the kubeconfig$/, async (oidcConfig) => {
     const options = this.context.options;
     const oidc = options.oidc0;
-    if (oidcConfig != 'Initial'){
+    if (oidcConfig !== 'Initial'){
         oidc = options.oidc1;
     }
 
 	await ensureValidOIDCConfigInCustomerFacingKubeconfig(keb, options.instanceID, oidc);
-    console.log("Valid initial OIDC config in kubeconfig");
 });
 
 Then(/^Admin binding exists for "([^"]*)" user$/, async(userAdmin) => {
 	const options = this.context.options;
-    let admins = [];
-    if (userAdmin == 'old'){
-        admins.push(options.administrator0);
-    } else {
-        admins = options.administrators1;
-    }
+    const admins = userAdmin === 'old' ? [...options.administrator0]: options.administrators1;
 
     admins.foreach(async (admin) => {
         await ensureKymaAdminBindingExistsForUser(admin)
@@ -200,7 +191,7 @@ AfterAll({timeout: 1000 * 60 * 95}, async() => {
     const featureName = this.context.featureName;
 
     console.log("Executing afterall step now");
-    // if (featureName == "skr-test"){
+    // if (featureName === "skr-test"){
     //     const options = this.context.options;
 
     //     // Delete commerce mock
