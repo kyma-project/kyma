@@ -12,7 +12,7 @@ const {
     ensureValidOIDCConfigInCustomerFacingKubeconfig,
     ensureOperationSucceeded
 } = require('../../../../fast-integration/kyma-environment-broker');
-const {keb, gardener} = require('../../../../fast-integration/skr-test/helpers');
+const {keb, gardener} = require('../../../../fast-integration/skr-test/provision/provision-skr');
 const {
     callFunctionWithToken,
     assertSuccessfulFunctionResponse,

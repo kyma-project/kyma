@@ -2,7 +2,7 @@ const {gatherOptions} = require('../../fast-integration/skr-test');
 const {provisionSKR, deprovisionSKR} = require('../../fast-integration/kyma-environment-broker');
 const {KCPWrapper, KCPConfig} = require('../../fast-integration/kcp/client');
 const {addScenarioInCompass, assignRuntimeToScenario} = require('../../fast-integration/compass');
-const {keb, gardener, director} = require('../../fast-integration/skr-test/helpers');
+const {keb, gardener, director} = require('../../fast-integration/skr-test/provision/provision-skr');
 const {initializeK8sClient} = require('./utils');
 const {BTPOperatorCreds} = require('../../fast-integration/smctl/helpers');
 
