@@ -83,3 +83,7 @@ Feature: SKR test
         Given Commerce Backend is set up
         When A binary event is sent
         Then The event should be received correctly
+
+    Scenario: Audit logs should be there for AWS
+        Given KEB plan is AWS
+        Then Audit logs should be available

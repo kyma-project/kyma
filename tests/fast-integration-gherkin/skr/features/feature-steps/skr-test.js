@@ -30,6 +30,11 @@ const {
     GetStructuredEventParams,
     GetBinaryEventParams
 } = require('../../../../fast-integration/test/fixtures/commerce-mock');
+const {
+    AuditLogCreds,
+    AuditLogClient,
+    checkAuditLogs,
+} = require('../../../../fast-integration/audit-log');
 
 this.context = new Object();
 
@@ -224,6 +229,23 @@ Then(/^The event is received successfully$/, () => {
     const eventId = this.context.eventId;
 
 	ensureInClusterEventReceivedWithRetry(mockHost, eventId);
+});
+
+Given(/^KEB plan is AWS$/, () => {
+    let auditLogs = null
+	if (process.env.KEB_PLAN_ID === AWS_PLAN_ID) {
+        auditLogs = new AuditLogClient(AuditLogCreds.fromEnv());
+    }
+
+    this.context.auditLogs = auditLogs;
+});
+
+Then(/^Audit logs should be available$/, () => {
+	const auditLogs = this.context.auditLogs;
+
+    if (auditLogs !== null){
+        await checkAuditLogs(auditLogs, null);
+    }
 });
 
 AfterAll({timeout: 1000 * 60 * 95}, async() => {
