@@ -196,7 +196,7 @@ deployment:
 
   #  Kyma controlled
   securityContext:
-    sidecar:
+    oathkeeper:
       allowPrivilegeEscalation: false
       capabilities:
         drop:
@@ -205,6 +205,15 @@ deployment:
       runAsGroup: 1000
       runAsNonRoot: true
       runAsUser: 1000
+    maester:
+      allowPrivilegeEscalation: false
+      capabilities:
+        drop:
+        - ALL
+      privileged: false
+      runAsGroup: 101
+      runAsNonRoot: true
+      runAsUser: 100
     controller:
       allowPrivilegeEscalation: false
       capabilities:

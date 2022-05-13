@@ -39,11 +39,7 @@ spec:
       volumes:
         - name: {{ include "oathkeeper.name" . }}-config-volume
           configMap:
-            {{- if .Values.demo }}
-            name: {{ include "oathkeeper.fullname" . }}-config-demo
-            {{- else }}
             name: {{ include "oathkeeper.fullname" . }}-config
-            {{- end }}
         - name: {{ include "oathkeeper.name" . }}-rules-volume
           emptyDir: {}
         - name: {{ include "oathkeeper.name" . }}-secrets-volume
@@ -110,19 +106,10 @@ spec:
               initialDelaySeconds: 45
               periodSeconds: 10
               failureThreshold: 10
-          securityContext:
-            allowPrivilegeEscalation: false
-            capabilities:
-              drop:
-              - ALL
-            privileged: false
-            runAsGroup: 101
-            runAsNonRoot: true
-            runAsUser: 100
           resources:
             {{- toYaml .Values.deployment.resources | nindent 12 }}
           securityContext:
-            {{- toYaml .Values.deployment.securityContext.controller | nindent 12 }}  #Kyma controlled
+            {{- toYaml .Values.deployment.securityContext.oathkeeper | nindent 12 }}  #Kyma controlled
         - name: {{ .Chart.Name }}-maester
           image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.oathkeeper_maester) }}"  #Kyma controlled
           imagePullPolicy: {{ .Values.image.pullPolicy }}
