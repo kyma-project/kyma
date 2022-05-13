@@ -13,6 +13,9 @@ globalAccess: false
 #The Controller have CREATE and READ access to all Secrets in the namespaces listed below.
 enabledNamespaces: []
 
+# -- Single namespace mode. If enabled the controller will watch for resources only from namespace it is deployed in, ignoring others
+singleNamespaceMode: false
+
 image:
   # Image pull policy
   pullPolicy: IfNotPresent
@@ -52,6 +55,9 @@ deployment:
   tolerations: []
   annotations: {}
   podLabels: {}
+  # https://github.com/kubernetes/kubernetes/issues/57601
+  # -- This applications connects to the k8s API and requires the permissions
+  automountServiceAccountToken: true
 
   livenessProbe:
     initialDelaySeconds: 50
@@ -65,3 +71,9 @@ deployment:
 
 # Configure node affinity
 affinity: {}
+
+# -- PodDistributionBudget configuration
+pdb:
+  enabled: false
+  spec:
+    minAvailable: 1
