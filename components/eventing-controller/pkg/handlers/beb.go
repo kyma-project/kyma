@@ -124,6 +124,8 @@ func (b *BEB) SyncSubscription(subscription *eventingv1alpha1.Subscription, clea
 	var bebSubscription *types.Subscription
 	// check the hash values for ev2 and EMS
 	if newEv2Hash != subscription.Status.Ev2hash {
+		// reset the cleanEventTypes
+		subscription.Status.CleanEventTypes = nil
 		// delete & create a new EMS subscription
 		var newEMSHash int64
 		bebSubscription, newEMSHash, err = b.deleteCreateAndHashSubscription(sEv2, cleaner, log)
@@ -157,6 +159,8 @@ func (b *BEB) SyncSubscription(subscription *eventingv1alpha1.Subscription, clea
 			return false, err
 		}
 		if newEmsHash != subscription.Status.Emshash {
+			// reset the cleanEventTypes
+			subscription.Status.CleanEventTypes = nil
 			// delete & create a new EMS subscription
 			bebSubscription, newEmsHash, err = b.deleteCreateAndHashSubscription(sEv2, cleaner, log)
 			if err != nil {

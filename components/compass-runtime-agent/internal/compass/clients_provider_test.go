@@ -140,5 +140,22 @@ func TestClientsProvider_GetConnectorCertSecuredClient(t *testing.T) {
 		// then
 		require.Error(t, err)
 	})
+}
 
+func TestClientsProvider_UpdateConnectionData(t *testing.T) {
+	url := "http://api.io"
+	enableLogging := true
+	insecureFetch := true
+
+	t.Run("should update connection data twice", func(t *testing.T) {
+		constructor := newMockGQLConstructor(t, nil, url, enableLogging)
+
+		provider := NewClientsProvider(constructor, insecureFetch, enableLogging)
+
+		err := provider.UpdateConnectionData(cache.ConnectionData{ConnectorURL: url})
+		require.NoError(t, err)
+
+		err = provider.UpdateConnectionData(cache.ConnectionData{ConnectorURL: url})
+		require.NoError(t, err)
+	})
 }
