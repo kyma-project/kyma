@@ -24,7 +24,8 @@ const {
     checkLegacyEventResponse,
     getRandomEventId,
     getVirtualServiceHost,
-    sendInClusterEventWithRetry
+    sendInClusterEventWithRetry,
+    GetCommerceMockHost
 } = require('../../../../fast-integration/test/fixtures/commerce-mock');
 
 this.context = new Object();
@@ -143,8 +144,10 @@ Given(/^Commerce Backend is set up$/, async() => {
 When(/^Function is called using a correct authorization token$/, async() => {
     const options = this.context.options;
 
-	const successfulFunctionResponse = await callFunctionWithToken(options.testNS);
+    const commerceMockHost = await GetCommerceMockHost();
+	const successfulFunctionResponse = await callFunctionWithToken(options.testNS, commerceMockHost);
 
+    this.context.commerceMockHost = commerceMockHost;
     this.context.successfulFunctionResponse = successfulFunctionResponse;
 });
 
@@ -155,7 +158,9 @@ Then(/^The function should be reachable$/, () => {
 });
 
 When(/^Function is called without an authorization token$/, async() => {
-	const error = await callFunctionWithNoToken();
+    const commerceMockHost = this.context.commerceMockHost;
+
+	const error = await callFunctionWithNoToken(commerceMockHost);
 
     this.context.unauthorizedFunctionResponse = error;
 });

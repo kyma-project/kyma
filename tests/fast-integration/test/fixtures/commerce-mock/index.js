@@ -116,6 +116,65 @@ function prepareCommerceObjs(mockNamespace) {
   return k8s.loadAllYaml(commerceMockYaml.toString().replace(/%%MOCK_NAMESPACE%%/g, mockNamespace));
 }
 
+async function GetCommerceMockHost(mockNamespace = 'mocks'){
+  const vs = await waitForVirtualService(mockNamespace, 'commerce-mock');
+  const mockHost = vs.spec.hosts[0];
+  const host = mockHost.split('.').slice(1).join('.');
+
+  return host;
+}
+
+async function callFunctionWithToken(functionNamespace, host){
+  // get OAuth client id and client secret from Kubernetes Secret
+  const oAuthSecretData = await getSecretData('lastorder-oauth', functionNamespace);
+
+  // get access token from OAuth server
+  const oAuthTokenGetter = new OAuthToken(
+      `https://oauth2.${host}/oauth2/token`,
+      new OAuthCredentials(oAuthSecretData['client_id'], oAuthSecretData['client_secret']),
+  );
+  const accessToken = await oAuthTokenGetter.getToken(['read', 'write']);
+
+  // expect no error when authorized
+  let res = await retryPromise(
+      () => axios.post(`https://lastorder.${host}/function`, {orderCode: '789'}, {
+        timeout: 5000,
+        headers: {Authorization: `bearer ${accessToken}`},
+      }),
+      45,
+      2000,
+  ).catch((err) => {
+    throw convertAxiosError(err, 'Function lastorder responded with error');
+  });
+
+  return res;
+}
+
+function assertSuccessfulFunctionResponse(functionResponse){
+  expect(functionResponse.data).to.have.nested.property('order.totalPriceWithTax.value', 100); 
+}
+
+async function callFunctionWithNoToken(host){
+  let errorOccurred = false;
+  let errorStatus = null;
+  try {
+    res = await axios.post(`https://lastorder.${host}/function`, {orderCode: '789'}, {timeout: 5000});
+  } catch (err) {
+    errorOccurred = true;
+    errorStatus = err.response.status;
+  }
+
+  return {
+    errorOccurred : errorOccurred,
+    errorStatus: errorStatus
+  };
+}
+
+function assertUnauthorizedFunctionResponse(functionResponse){
+  expect(functionResponse.errorOccurred).to.be.equal(true);
+  expect(errorStatus).to.be.equal(401);
+}
+
 async function checkFunctionResponse(functionNamespace, mockNamespace = 'mocks') {
   const vs = await waitForVirtualService(mockNamespace, 'commerce-mock');
   const mockHost = vs.spec.hosts[0];
@@ -961,4 +1020,9 @@ module.exports = {
   getVirtualServiceHost,
   sendInClusterEventWithRetry,
   ensureInClusterEventReceivedWithRetry,
+  GetCommerceMockHost,
+  callFunctionWithToken,
+  assertSuccessfulFunctionResponse,
+  callFunctionWithNoToken,
+  assertUnauthorizedFunctionResponse
 };
