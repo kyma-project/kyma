@@ -179,7 +179,7 @@ Then(/^The event should be received correctly$/, () => {
 	checkLegacyEventResponse(legacyEventResponse);
 });
 
-When(/^An in-cluster "([^"]*)" event is sent$/, {timeout: 60 * 60 * 1000}, async(eventEncoding) => {
+When(/^An in-cluster "([^"]*)" event is sent$/, {timeout: 60 * 60 * 1000 * 3}, async(eventEncoding) => {
     const targetNamespace = this.context.options.testNS;
 
 	const eventId = getRandomEventId(eventEncoding);
