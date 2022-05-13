@@ -26,11 +26,10 @@ spec:
       labels:
         app.kubernetes.io/name: {{ include "oathkeeper.name" . }}
         app.kubernetes.io/instance: {{ .Release.Name }}
+      {{- with .Values.deployment.annotations }}
       annotations:
-        {{- include "oathkeeper.annotations.checksum" . | indent 8 -}}
-        {{- with .Values.deployment.annotations }}
-          {{- toYaml . | nindent 8 }}
-        {{- end }}
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
     spec:
     {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
@@ -58,9 +57,9 @@ spec:
             - |
               touch /etc/rules/access-rules.json
               chmod 666 /etc/rules/access-rules.json
-          {{- if .Values.deployment.securityContext }}
+          {{- if .Values.deployment.securityContext.sidecar }}
           securityContext:
-            {{- toYaml .Values.deployment.securityContext | nindent 12 }}
+            {{- toYaml .Values.deployment.securityContext.sidecar | nindent 12 }}
           {{- end }}
       containers:
         - name: {{ .Chart.Name }}
@@ -68,7 +67,7 @@ spec:
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           command: [ "oathkeeper", "serve", "--config", "/etc/config/config.yaml" ]
           env:
-            {{- if .Values.oathkeeper.mutatorIdTokenJWKs }}
+            {{- if .Values.oathkeeper.config.mutators.id_token.config.jwks_url }}
             - name: MUTATORS_ID_TOKEN_CONFIG_JWKS_URL
               value: "{{ .Values.oathkeeper.config.mutators.id_token.config.jwks_url }}"
             {{- end }}
@@ -80,7 +79,7 @@ spec:
               mountPath: /etc/rules
               readOnly: true
             - name: {{ include "oathkeeper.name" . }}-secrets-volume
-              mountPath: {{ .Values.secret.mountPath }}
+              mountPath: /etc/secrets
               readOnly: true
           ports:
             - name: http-api
@@ -89,23 +88,20 @@ spec:
             - name: http-proxy
               containerPort: {{ .Values.oathkeeper.config.serve.proxy.port }}
               protocol: TCP
-            - name: http-metrics
-              protocol: TCP
-              containerPort: {{ .Values.oathkeeper.config.serve.prometheus.port }}
           livenessProbe:
             httpGet:
               path: /health/alive
               port: http-api
-              initialDelaySeconds: 45
-              periodSeconds: 10
-              failureThreshold: 10
+            initialDelaySeconds: 45
+            periodSeconds: 10
+            failureThreshold: 10
           readinessProbe:
             httpGet:
               path: /health/ready
               port: http-api
-              initialDelaySeconds: 45
-              periodSeconds: 10
-              failureThreshold: 10
+            initialDelaySeconds: 45
+            periodSeconds: 10
+            failureThreshold: 10
           resources:
             {{- toYaml .Values.deployment.resources | nindent 12 }}
           securityContext:
@@ -120,7 +116,7 @@ spec:
             - sidecar
             - --rulesFilePath=/etc/rules/access-rules.json
           resources:
-            {{- toYaml .Values.deployment.resources | nindent 12 }}
+            {{- index .Values "oathkeeper-maester" "deployment" "resources" | toYaml | nindent 12 }}
           env:
           - name: mutatorsAvailable
             value: noop,id_token,header,cookie,hydrator

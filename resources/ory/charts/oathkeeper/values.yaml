@@ -196,6 +196,15 @@ deployment:
 
   #  Kyma controlled
   securityContext:
+    sidecar:
+      allowPrivilegeEscalation: false
+      capabilities:
+        drop:
+        - ALL
+      privileged: false
+      runAsGroup: 65534
+      runAsNonRoot: true
+      runAsUser: 65534
     oathkeeper:
       allowPrivilegeEscalation: false
       capabilities:
