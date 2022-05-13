@@ -37,4 +37,4 @@ The following authentication methods for your secured APIs are supported:
 
 In addition to authentication methods, Application Connector supports Cross-Site Request Forgery (CSRF) Tokens.
 
-AC supports any API that adheres to the REST principles and is available over the HTTP protocol. APIs implemented with the OData technology are also supported.
+AC supports any API that adheres to the REST principles and is available over the HTTP protocol.
