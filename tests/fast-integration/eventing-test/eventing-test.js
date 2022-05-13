@@ -6,9 +6,6 @@ const httpsAgent = new https.Agent({
 axios.defaults.httpsAgent = httpsAgent;
 const {
   checkFunctionResponse,
-  // sendLegacyEventAndCheckResponse,
-  // sendCloudEventStructuredModeAndCheckResponse,
-  // sendCloudEventBinaryModeAndCheckResponse,
   checkInClusterEventDelivery,
   waitForSubscriptionsTillReady,
   waitForSubscriptions,
@@ -86,20 +83,6 @@ describe('Eventing tests', function() {
     it('In-cluster event should be delivered (structured and binary mode)', async function() {
       await checkInClusterEventDelivery(testNamespace);
     });
-
-    // TODO: Test it in some different way
-    // it('order.created.v1 legacy event from CommerceMock should trigger the lastorder function', async function() {
-    //   await sendLegacyEventAndCheckResponse(mockNamespace);
-    // });
-    //
-    // it('order.created.v1 cloud event from CommerceMock should trigger the lastorder function', async function() {
-    //   await sendCloudEventStructuredModeAndCheckResponse(backend, mockNamespace);
-    // });
-    //
-    // it('order.created.v1 binary cloud event from CommerceMock should trigger the lastorder function',
-    // async function() {
-    //   await sendCloudEventBinaryModeAndCheckResponse(backend, mockNamespace);
-    // });
 
     if (backend === natsBackend && isJetStreamEnabled && isFileStorage) {
       testJetStreamFileStorage();
