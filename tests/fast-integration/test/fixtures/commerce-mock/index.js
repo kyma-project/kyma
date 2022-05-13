@@ -273,6 +273,67 @@ async function sendLegacyEventAndCheckResponse(mockNamespace = 'mocks') {
   return await sendEventAndCheckResponse('legacy event', body, params, mockNamespace);
 }
 
+async function sendLegacyEvent(mockNamespace = 'mocks'){
+  const body = {
+    'event-type': 'order.created',
+    'event-type-version': 'v1',
+    'event-time': '2020-09-28T14:47:16.491Z',
+    'data': {'orderCode': '567'},
+    // this parameter sets the x-b3-sampled header on the commerce-mock side,
+    // which configures istio-proxies to collect the traces no matter what sampling rate is configured
+    'event-tracing': true,
+  };
+  const params = {
+    headers: {
+      'content-type': 'application/json',
+    },
+  };
+
+  const vs = await waitForVirtualService(mockNamespace, 'commerce-mock');
+  const mockHost = vs.spec.hosts[0];
+  const host = mockHost.split('.').slice(1).join('.');
+  let eventResponse = null;
+
+  await retryPromise(
+      async () => {
+        await axios
+            .post(`https://${mockHost}/events`, body, params)
+            .catch((e) => {
+              error('Cannot send %s, the response from event gateway: %s', eventType, e.response.data);
+              console.log(e);
+              throw convertAxiosError(e, 'Cannot send %s, the response from event gateway', eventType);
+            });
+
+        await sleep(500);
+
+        return axios
+            .get(`https://lastorder.${host}`, {timeout: 5000})
+            .then((res) => {
+              eventResponse = res;
+              return res;
+            })
+            .catch((e) => {
+              throw convertAxiosError(e, 'Error during request to function lastorder');
+            });
+      },
+      10,
+      30 * 1000,
+  );
+
+  return eventResponse;
+}
+
+async function checkLegacyEventResponse(eventResponse) {
+  expect(eventResponse.data).to.have.nested.property('event.data.orderCode', '567');
+  // See: https://github.com/kyma-project/kyma/issues/10720
+  expect(eventResponse.data).to.have.nested.property('event.ce-type').that.contains('order.created');
+  expect(eventResponse.data).to.have.nested.property('event.ce-source');
+  expect(eventResponse.data).to.have.nested.property('event.ce-eventtypeversion', 'v1');
+  expect(eventResponse.data).to.have.nested.property('event.ce-specversion', '1.0');
+  expect(eventResponse.data).to.have.nested.property('event.ce-id');
+  expect(eventResponse.data).to.have.nested.property('event.ce-time');
+}
+
 async function sendCloudEventStructuredModeAndCheckResponse(backendType ='nats', mockNamespace = 'mocks') {
   let source = 'commerce';
   if (backendType === bebBackend) {
@@ -1024,5 +1085,7 @@ module.exports = {
   callFunctionWithToken,
   assertSuccessfulFunctionResponse,
   callFunctionWithNoToken,
-  assertUnauthorizedFunctionResponse
+  assertUnauthorizedFunctionResponse,
+  sendLegacyEvent,
+  checkLegacyEventResponse
 };
