@@ -178,14 +178,14 @@ Then(/^The event should be received correctly$/, () => {
 When(/^An in-cluster "([^"]*)" event is sent$/, async(eventEncoding) => {
     const targetNamespace = this.context.options.testNS;
 
-	const eventId = getRandomEventId(encoding);
+	const eventId = getRandomEventId(eventEncoding);
     const mockHost = await getVirtualServiceHost(targetNamespace, 'lastorder');
 
     if (isDebugEnabled()) {
         await printStatusOfInClusterEventingInfrastructure(targetNamespace, eventEncoding, 'lastorder');
     }
 
-    await sendInClusterEventWithRetry(mockHost, eventId, encoding);
+    await sendInClusterEventWithRetry(mockHost, eventId, eventEncoding);
 
     this.context.lastOrderMockHost = mockHost;
     this.context.eventId = eventId;
@@ -194,7 +194,7 @@ When(/^An in-cluster "([^"]*)" event is sent$/, async(eventEncoding) => {
 Then(/^The event is received successfully$/, () => {
     const mockHost = this.context.mockHost;
     const eventId = this.context.eventId;
-    
+
 	ensureInClusterEventReceivedWithRetry(mockHost, eventId);
 });
 
