@@ -32,7 +32,7 @@ Install an HTTP mock server (not exposed, only available inside the cluster). Th
 kubectl apply -f deploy/mockserver.yaml
 ```
 
-Expose the HTTP mock server via the Kyma Istio Gateway at mockserver.here_comes_my_cluster_hostname (provide your host name):
+Expose the HTTP mock server via the Kyma Istio Gateway at `mockserver.{YOUR_CLUSTER_HOSTNAME}` (provide your host name):
 ```bash
 cat deploy/mockserver-vs.yaml | sed "s/KYMA_HOST_PLACEHOLDER/here_comes_my_cluster_hostname/g" | kubectl apply -f -
 ``` 
