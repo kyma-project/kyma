@@ -103,6 +103,7 @@ Then(/^The operation response should have a succeeded state$/, {timeout: 1000 * 
 
 Then(/^Runtime status should be fetched successfully$/, async() => {
     const options = this.context.options;
+    const kcp = SKRSetup.kcp;
 
 	try {
       const runtimeStatus = await kcp.getRuntimeStatusOperations(options.instanceID);
