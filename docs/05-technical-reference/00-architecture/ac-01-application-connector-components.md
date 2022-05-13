@@ -12,7 +12,7 @@ Istio Ingress Gateway secures the endpoints with certificate validation in the [
 
 ## Application Connectivity Validator
 
-Application Connectivity Validator verifies the subject of the client certificate, and proxies requests to Event Publisher in the [Compass scenario](../../01-overview/main-areas/application-connectivity/README.md).
+Application Connectivity Validator verifies the subject of the client certificate and proxies requests to Event Publisher in the [Compass scenario](../../01-overview/main-areas/application-connectivity/README.md).
 
 ## Event Publisher
 
