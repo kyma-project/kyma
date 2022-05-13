@@ -117,7 +117,7 @@ Then(/^Runtime status should be fetched successfully$/, async() => {
 When(/^The admins for the SKR service are updated$/, async() => {
 	const options = this.context.options;
     const customParams = {
-        oidc: options.administrators1,
+        administrators: options.administrators1,
     };
 
     console.log("customParams", customParams);
