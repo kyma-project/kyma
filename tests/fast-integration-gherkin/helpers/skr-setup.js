@@ -58,12 +58,12 @@ class SKRSetup {
         }
     }
 
-    static async updateSKR(options,
+    static async updateSKR(instanceID,
         customParams,
         isMigration = false) {
         if (!this._skrUpdated){
             try{
-                this.updateSkrResponse = await keb.updateSKR(options.instanceID, customParams, this.btpOperatorCreds, isMigration);
+                this.updateSkrResponse = await keb.updateSKR(instanceID, customParams, null, isMigration);
                 this._skrUpdated = true;
             } catch(e) {
                 throw new Error(`Failed to update SKR: ${e.toString()}`);
@@ -71,12 +71,12 @@ class SKRSetup {
         }
     }
 
-    static async updateSKRAdmins(options,
+    static async updateSKRAdmins(instanceID,
         customParams,
         isMigration = false) {
         if (!this._skrAdminsUpdated){
             try{
-                this.updateSkrAdminsResponse = await keb.updateSKR(options.instanceID, customParams, this.btpOperatorCreds, isMigration);
+                this.updateSkrAdminsResponse = await keb.updateSKR(instanceID, customParams, this.btpOperatorCreds, isMigration);
                 this._skrAdminsUpdated = true;
             } catch(e) {
                 throw new Error(`Failed to update SKR: ${e.toString()}`);
