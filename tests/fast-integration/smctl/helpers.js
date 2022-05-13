@@ -191,10 +191,10 @@ class AdminCreds {
 class BTPOperatorCreds {
   static fromEnv() {
     return new BTPOperatorCreds(
-        // getEnvOrThrow('BTP_OPERATOR_CLIENTID'),
-        // getEnvOrThrow('BTP_OPERATOR_CLIENTSECRET'),
-        // getEnvOrThrow('BTP_OPERATOR_URL'),
-        // getEnvOrThrow('BTP_OPERATOR_TOKENURL'),
+        getEnvOrThrow('BTP_OPERATOR_CLIENTID'),
+        getEnvOrThrow('BTP_OPERATOR_CLIENTSECRET'),
+        getEnvOrThrow('BTP_OPERATOR_URL'),
+        getEnvOrThrow('BTP_OPERATOR_TOKENURL'),
     );
   }
 
