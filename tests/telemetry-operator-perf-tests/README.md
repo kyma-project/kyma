@@ -27,7 +27,7 @@ Install dummy log generator:
 kubectl apply -f deploy/logspammer.yaml
 ```
 
-Install HTTP mock server (not exposed, only available inside the cluster). The mock server is configured to expose 2 endpoints: /good (returns 201 status code) and /bad (returns 503 status code):
+Install an HTTP mock server (not exposed, only available inside the cluster). The mock server is configured to expose 2 endpoints: `/good` (returns the status code `201`) and `/bad` (returns the status code `503`):
 ```bash
 kubectl apply -f deploy/mockserver.yaml
 ```
