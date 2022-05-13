@@ -1,11 +1,11 @@
-# External custom resource definitions
+# External Custom Resource Definitions
 
 ## Overview
 
-This directory contains the external custom resource definitions used for testing purposes.
+This directory contains the external Custom Resource Definitions used for testing purposes.
 
-## Custom resource definitions
+## Custom Resource Definitions
 
 | Kind    | API Version                      | Description                                                              | Reference                                                                                       |
 |---------|----------------------------------|--------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------|
-| APIRule | gateway.kyma-project.io/v1alpha1 | The APIRule instance allows exposing services to outside of the cluster. | [APIRule CRD](../../../../../installation/resources/crds/api-gateway/apirules.gateway.crd.yaml) |
+| API Rule | gateway.kyma-project.io/v1alpha1 | The API Rule instance allows exposing services to outside of the cluster. | [API Rule CRD](../../../../../installation/resources/crds/api-gateway/apirules.gateway.crd.yaml) |

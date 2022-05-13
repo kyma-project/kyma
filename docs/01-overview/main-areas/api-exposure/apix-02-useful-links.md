@@ -21,7 +21,7 @@ If you're interested in learning more about API Exposure in Kyma, follow these l
   - [Connection refused](../../../04-operation-guides/troubleshooting/apix-04-dns-mgt-connection-refused.md) errors occur when you want to use your custom domain
   - You receive the [`could not resolve host`](../../../04-operation-guides/troubleshooting/apix-05-dns-mgt-could-not-resolve-host.md) error when you want to use your custom domain
   - A [resource is ignored by the controller](../../../04-operation-guides/troubleshooting/apix-06-dns-mgt-resource-ignored.md)
-  - The [Issuer Custom Resource fails to be created](../../../04-operation-guides/troubleshooting/apix-07-cert-mgt-issuer-not-created.md)
+  - The [Issuer custom resource fails to be created](../../../04-operation-guides/troubleshooting/apix-07-cert-mgt-issuer-not-created.md)
   - The [Kyma Gateway is not reachable](../../../04-operation-guides/troubleshooting/apix-08-gateway-not-reachable.md)
   - The [Pods stuck in `Pending/Failed/Unknown` state after upgrade](../../../04-operation-guides/troubleshooting/apix-09-upgrade-sidecar-proxy.md)
 

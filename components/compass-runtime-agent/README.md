@@ -57,10 +57,10 @@ To rename the Secret containing the CA cert, you must specify these environment 
 - **APP_CA_CERT_SECRET_TO_MIGRATE**
 - **APP_CA_CERT_SECRET_KEYS_TO_MIGRATE**
 
-## Generating Custom Resource client
+## Generating custom resource client
 
 Because Go Modules do not support code generation, you must run the code generator inside a Docker container.
-To generate a Custom Resource client and deep copy Functions, run this command from the component directory:
+To generate a custom resource client and deep copy Functions, run this command from the component directory:
 
 ```bash
 ./hack/code-gen-in-docker.sh

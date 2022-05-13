@@ -35,7 +35,7 @@ If you use a Gardener cluster or have the Certificate Management component insta
 
 The prerequisite is having the [Certificate Management](https://github.com/gardener/cert-management) and [External DNS Management](https://github.com/gardener/external-dns-management) components installed and properly configured. The Certificate Management uses the default issuer for generating certificates.
 
-Once you deploy Kyma on a Gardener cluster, Kyma CLI reads the pre-configured domain and uses it for issuing the certificate. If you use a non-Gardener cluster, you have to provide the domain as an override during the deployment process. The Certificate is a Custom Resource managed by Gardener, and is a wildcard certificate for the whole domain. The certificate's validity depends on the configuration details. For more information, read the official Gardener documentation.
+Once you deploy Kyma on a Gardener cluster, Kyma CLI reads the pre-configured domain and uses it for issuing the certificate. If you use a non-Gardener cluster, you have to provide the domain as an override during the deployment process. The Certificate is a custom resource managed by Gardener, and is a wildcard certificate for the whole domain. The certificate's validity depends on the configuration details. For more information, read the official Gardener documentation.
 
 ## Egress
 

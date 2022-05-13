@@ -39,7 +39,7 @@ Follow this tutorial to:
    kubectl create -f https://raw.githubusercontent.com/kyma-project/examples/main/monitoring-custom-metrics/deployment/deployment.yaml --namespace=testing-monitoring
    ```
 
-3. Deploy the Service Monitor custom resource definition (CRD) in the `testing-monitoring` Namespace.
+3. Deploy the Service Monitor Custom Resource Definition (CRD) in the `testing-monitoring` Namespace.
 
    ```bash
    kubectl apply -f https://raw.githubusercontent.com/kyma-project/examples/main/monitoring-custom-metrics/deployment/service-monitor.yaml --namespace=testing-monitoring
