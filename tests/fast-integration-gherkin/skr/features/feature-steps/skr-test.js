@@ -81,8 +81,10 @@ When(/^SKR service is updated$/, async() => {
     };
 
 	await SKRSetup.updateSKR(options.instanceID, customParams, false);
+    const shoot = await gardener.getShoot(this.context.shoot.name);
 
     this.context.updateSkrResponse = SKRSetup.updateSkrResponse;
+    this.context.shoot = shoot;
 });
 
 Then(/^The update skr "([^"]*)" operation response should have a succeeded state$/, {timeout: 1000 * 60 * 20}, async(updateAdmins) => {
@@ -128,8 +130,10 @@ When(/^The admins for the SKR service are updated$/, async() => {
     };
 
 	await SKRSetup.updateSKRAdmins(options.instanceID, customParams, false);
+    const shoot = await gardener.getShoot(this.context.shoot.name);
 
     this.context.updateSkrAdminsResponse = SKRSetup.updateSkrAdminsResponse;
+    this.context.shoot = shoot;
 });
 
 Then(/^The old admin no longer exists for the SKR service instance$/, async() => {
