@@ -3,7 +3,7 @@ const fs = require('fs');
 const {debug, getEnvOrThrow} = require('../utils');
 const {OAuthCredentials, OAuthToken} = require('../lib/oauth');
 
-const SCOPES = ['broker:write', 'cld:read'];
+const SCOPES = ['broker:write'];
 const KYMA_SERVICE_ID = '47c9dcbf-ff30-448e-ab36-d3bad66ba281';
 
 class KEBConfig {
@@ -115,8 +115,8 @@ class KEBClient {
       };
     } else if (btpOperatorCreds) {
       payload.context['sm_operator_credentials'] = {
-        clientid: btpOperatorCreds.clientId,
-        clientsecret: btpOperatorCreds.clientSecret,
+        clientid: btpOperatorCreds.clientid,
+        clientsecret: btpOperatorCreds.clientsecret,
         sm_url: btpOperatorCreds.smURL,
         url: btpOperatorCreds.url,
       };

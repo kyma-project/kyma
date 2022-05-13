@@ -23,11 +23,6 @@ ci-skr:
 	npm install
 	npm run test-skr
 
-.PHONY: ci-skr-without-sc
-ci-skr-without-sc:
-	npm install
-	npm run skr-test-without-sc
-
 .PHONY: ci-skr-nightly
 ci-skr-nightly:
 	npm install

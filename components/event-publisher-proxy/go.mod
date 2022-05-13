@@ -7,10 +7,10 @@ require (
 	github.com/cloudevents/sdk-go/v2 v2.9.0
 	github.com/google/uuid v1.3.0
 	github.com/kelseyhightower/envconfig v1.4.0
-	github.com/kyma-project/kyma/components/application-operator v0.0.0-20220504115926-940176391e17
-	github.com/kyma-project/kyma/components/eventing-controller v0.0.0-20220504115926-940176391e17
-	github.com/nats-io/nats-server/v2 v2.8.1
-	github.com/nats-io/nats.go v1.14.0
+	github.com/kyma-project/kyma/components/application-operator v0.0.0-20220506151527-6c74f7543a36
+	github.com/kyma-project/kyma/components/eventing-controller v0.0.0-20220506151527-6c74f7543a36
+	github.com/nats-io/nats-server/v2 v2.8.2
+	github.com/nats-io/nats.go v1.15.0
 	github.com/onsi/gomega v1.19.0
 	github.com/pkg/errors v0.9.1
 	github.com/prometheus/client_golang v1.12.1
@@ -21,7 +21,7 @@ require (
 	k8s.io/api v0.24.0
 	k8s.io/apimachinery v0.24.0
 	k8s.io/client-go v0.24.0
-	sigs.k8s.io/controller-runtime v0.11.2
+	sigs.k8s.io/controller-runtime v0.12.0
 )
 
 require (

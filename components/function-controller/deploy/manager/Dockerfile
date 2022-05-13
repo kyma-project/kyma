@@ -1,4 +1,4 @@
-FROM eu.gcr.io/kyma-project/external/golang:1.18.0-alpine3.15 as builder
+FROM eu.gcr.io/kyma-project/external/golang:1.18.1-alpine3.15 as builder
 
 ENV BASE_APP_DIR=/workspace/go/src/github.com/kyma-project/kyma/components/function-controller \
     CGO_ENABLED=1 \
@@ -38,3 +38,4 @@ COPY --from=builder /app /app
 COPY --from=certs /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
 
 ENTRYPOINT ["/app/manager"]
+

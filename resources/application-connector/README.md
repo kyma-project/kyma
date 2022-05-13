@@ -11,7 +11,7 @@ The Application Connector Helm chart contains all the global components:
 - Application operator
 - Application registry
 - Connection token handler
-- Connector service
+- Connector Service
 
 ## Connector Service
 

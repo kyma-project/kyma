@@ -706,15 +706,25 @@ function waitForJob(name, namespace = 'default', timeout = 900000, success = 1) 
   );
 }
 
-async function kubectlExecInPod(pod, container, cmd, namespace = 'default') {
+async function kubectlExecInPod(pod, container, cmd, namespace = 'default', timeoutInSeconds = 60) {
   const execCmd = ['exec', pod, '-c', container, '-n', namespace, '--', ...cmd];
-  try {
-    await execa(`kubectl`, execCmd);
-  } catch (error) {
-    if (error.stdout === undefined) {
-      throw error;
+
+  for (let i = 0; i < timeoutInSeconds/10; i++) {
+    try {
+      await execa(`kubectl`, execCmd);
+      console.log(`kubectl command ${execCmd.join(' ')} executed`);
+      return;
+    } catch (error) {
+      if (i === timeoutInSeconds/10-1) {
+        if (error.stdout === undefined) {
+          throw error;
+        }
+        throw new Error(`failed to execute kubectl ${execCmd.join(' ')}:\n${error.stdout},\n${error.stderr}`);
+      }
+      console.log(`Retry attempt: ${i} Failed to execute kubectl ${execCmd.join(' ')}:\n${error.stdout},
+        ${error.stderr}`);
     }
-    throw new Error(`failed to execute kubectl ${execCmd.join(' ')}:\n${error.stdout},\n${error.stderr}`);
+    await sleep(10000);
   }
 }
 

@@ -65,10 +65,10 @@ func TestNewGit2Go_LastCommit(t *testing.T) {
 		t.Run(testcase.name, func(t *testing.T) {
 			repoPath := prepareRepo(t)
 			defer deleteTmpRepo(t, repoPath)
-			cloner := &git2goClonerMock{repoPath: repoPath}
+			fetcher := &git2goFetcherMock{repoPath: repoPath}
 
-			opts := Options{Reference: testcase.refName}
-			client := Git2GoClient{cloner}
+			opts := Options{Reference: testcase.refName, URL: repoPath}
+			client := Git2GoClient{fetcher: fetcher}
 			//WHEN
 			commitID, err := client.LastCommit(opts)
 
@@ -91,7 +91,7 @@ func TestGo2GitClient_Clone(t *testing.T) {
 	cloner := &git2goClonerMock{repoPath: repoPath}
 	assertHeadCommitNotEqual(t, repoPath, secondCommitID)
 
-	client := Git2GoClient{cloner}
+	client := Git2GoClient{cloner: cloner}
 	opts := Options{Reference: secondCommitID}
 	//WHEN
 	commitID, err := client.Clone("", opts)
@@ -107,7 +107,14 @@ type git2goClonerMock struct {
 
 func (g *git2goClonerMock) git2goClone(url, outputPath string, remoteCallbacks git2go.RemoteCallbacks) (*git2go.Repository, error) {
 	return git2go.OpenRepository(g.repoPath)
+}
 
+type git2goFetcherMock struct {
+	repoPath string
+}
+
+func (g *git2goFetcherMock) git2goFetch(url, outputPath string, remoteCallbacks git2go.RemoteCallbacks) (*git2go.Repository, error) {
+	return git2go.OpenRepository(g.repoPath)
 }
 
 func prepareRepo(t *testing.T) string {

@@ -112,6 +112,7 @@ describe('SKR-Upgrade-test', function() {
 
   const provisioningTimeout = 1000 * 60 * 60; // 1h
   const deprovisioningTimeout = 1000 * 60 * 30; // 30m
+  const upgradeTimeoutMin = 30; // 30m
 
   let skr;
 
@@ -212,7 +213,7 @@ describe('SKR-Upgrade-test', function() {
   });
 
   it('Perform Upgrade', async function() {
-    await kcp.upgradeKyma(instanceID, kymaUpgradeVersion, subAccountID);
+    await kcp.upgradeKyma(instanceID, kymaUpgradeVersion, upgradeTimeoutMin);
     debug('Upgrade Done!');
   });
 
