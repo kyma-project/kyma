@@ -123,7 +123,6 @@ function commerceMockTest() {
       );
     });
 
-    // TODO
     it('in-cluster event should be delivered (structured and binary mode)', async function() {
       await checkInClusterEventDelivery(this.options.testNS);
     });
@@ -136,12 +135,10 @@ function commerceMockTest() {
       await sendLegacyEventAndCheckResponse();
     });
 
-    // TODO
     it('order.created.v1 cloud event in structured mode should trigger the lastorder function', async function() {
       await sendCloudEventStructuredModeAndCheckResponse();
     });
 
-    // TODO
     it('order.created.v1 cloud event in binary mode should trigger the lastorder function', async function() {
       await sendCloudEventBinaryModeAndCheckResponse();
     });
