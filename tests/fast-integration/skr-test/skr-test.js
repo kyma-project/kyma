@@ -123,6 +123,7 @@ function commerceMockTest() {
       );
     });
 
+    // TODO
     it('in-cluster event should be delivered (structured and binary mode)', async function() {
       await checkInClusterEventDelivery(this.options.testNS);
     });
@@ -135,10 +136,12 @@ function commerceMockTest() {
       await sendLegacyEventAndCheckResponse();
     });
 
+    // TODO
     it('order.created.v1 cloud event in structured mode should trigger the lastorder function', async function() {
       await sendCloudEventStructuredModeAndCheckResponse();
     });
 
+    // TODO
     it('order.created.v1 cloud event in binary mode should trigger the lastorder function', async function() {
       await sendCloudEventBinaryModeAndCheckResponse();
     });
@@ -147,6 +150,7 @@ function commerceMockTest() {
       await deleteMockTestFixture('mocks', this.options.testNS);
     });
 
+    // TODO
     // Check audit log for AWS
     if (process.env.KEB_PLAN_ID === AWS_PLAN_ID) {
       const auditlogs = new AuditLogClient(AuditLogCreds.fromEnv());

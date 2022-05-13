@@ -59,11 +59,9 @@ Then(/^"([^"]*)" OIDC config is part of the kubeconfig$/, async (oidcConfig) => 
 Then(/^Admin binding exists for "([^"]*)" user$/, async(userAdmin) => {
 	const options = this.context.options;
 
-    console.log("Admin 0", options.administrator0);
     const admins = userAdmin === 'old' ? [options.administrator0]: options.administrators1;
-    console.log("[admins]", admins);
 
-    admins.foreach(async (admin) => {
+    admins.forEach(async (admin) => {
         await ensureKymaAdminBindingExistsForUser(admin)
     });
     console.log("Admin binding exists for old user");
@@ -103,7 +101,7 @@ Then(/^The operation response should have a succeeded state$/, {timeout: 1000 * 
     console.log("Update operation response has a successful state");
 });
 
-Then(/^Runtime Status should be fetched successfully$/, async() => {
+Then(/^Runtime status should be fetched successfully$/, async() => {
     const options = this.context.options;
 
 	try {
