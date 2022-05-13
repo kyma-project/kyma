@@ -172,7 +172,7 @@ async function callFunctionWithNoToken(host){
 
 function assertUnauthorizedFunctionResponse(functionResponse){
   expect(functionResponse.errorOccurred).to.be.equal(true);
-  expect(errorStatus).to.be.equal(401);
+  expect(functionResponse.errorStatus).to.be.equal(401);
 }
 
 async function checkFunctionResponse(functionNamespace, mockNamespace = 'mocks') {

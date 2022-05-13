@@ -71,17 +71,17 @@ Feature: SKR test
 
     Scenario: order.created.v1 legacy event should trigger the lastorder function
         Given Commerce Backend is set up
-        When A legacy event is sent
+        When A "legacy" event is sent
         Then The event should be received correctly
 
     Scenario: order.created.v1 structured event should tigger the lastorder function
         Given Commerce Backend is set up
-        When A structured event is sent
+        When A "structured" event is sent
         Then The event should be received correctly
 
     Scenario: order.created.v1 binary event should trigger the lastorder function
         Given Commerce Backend is set up
-        When A binary event is sent
+        When A "binary" event is sent
         Then The event should be received correctly
 
     Scenario: Audit logs should be there for AWS

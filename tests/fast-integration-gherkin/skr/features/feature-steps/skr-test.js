@@ -153,7 +153,7 @@ Given(/^Commerce Backend is set up$/, async() => {
     await CommerceCompassMock.ensureCommerceWithCompassMockIsSetUp(options);
 });
 
-When(/^Function is called using a correct authorization token$/, async() => {
+When(/^Function is called using a correct authorization token$/, {timeout: 1000 * 60 * 20}, async() => {
     const options = this.context.options;
 
     const commerceMockHost = await GetCommerceMockHost();
@@ -200,7 +200,6 @@ When(/^A "([^"]*)" event is sent$/, async(eventEncoding) => {
 
     this.context.eventResponse = eventResponse;
 });
-
 
 Then(/^The event should be received correctly$/, () => {
     const eventResponse = this.context.eventResponse;
