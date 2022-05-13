@@ -16,7 +16,7 @@ go run ./... -count=4 -unhealthy-ratio=0.5 -host=mockserver.mockserver -port=108
 
 ## Test Setup
 
-Deploy telemetry config file to configure storage path for the filesystem buffer.
+Deploy a telemetry config file to configure a storage path for the filesystem buffer.
 
 ```bash
 kubectl apply -f deploy/telemetry-config.yaml
