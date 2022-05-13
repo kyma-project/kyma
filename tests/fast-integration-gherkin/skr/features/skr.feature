@@ -19,7 +19,7 @@ Feature: SKR test
 
     Scenario: Get runtime status after SKR service is updated with OIDC config
         When SKR service is updated
-        Then Runtime Status should be fetched successfully
+        Then Runtime status should be fetched successfully
 
     Scenario: Updated OIDC config is applied on shoot cluster
         When SKR service is updated
