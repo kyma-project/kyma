@@ -22,7 +22,7 @@ Deploy a telemetry config file to configure a storage path for the filesystem bu
 kubectl apply -f deploy/telemetry-config.yaml
 ```
 
-Install dummy log generator:
+Install a dummy log generator:
 ```bash
 kubectl apply -f deploy/logspammer.yaml
 ```
