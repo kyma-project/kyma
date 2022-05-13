@@ -21,7 +21,7 @@ Application Connector:
 - Delivers events from the connected external solution to Eventing in the [Compass scenario](./README.md) 
 - Manages secure access to external systems
 
-All the AC components scale independently, which allows to adjust it to fit the needs of the implementation built using Kyma.
+All the AC components scale independently, which allows you to adjust it to fit the needs of the implementation built using Kyma.
 
 ## Supported APIs
 

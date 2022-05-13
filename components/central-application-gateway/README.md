@@ -81,7 +81,7 @@ In this case, `{API_DEFINITION_NAME}` is removed from the URL and the pattern lo
 ```bash
 {APPLICATION_NAME}/{API_BUNDLE_NAME}/{TARGET_API_PATH}
 ```
-> **NOTE:** Invocation of service bundles configured with multiple API definitions will result in a `400 Bad Request` failure.
+> **NOTE:** Invocation of service bundles configured with multiple API definitions results in a `400 Bad Request` failure.
 
 ### Compass mode
 
@@ -105,8 +105,8 @@ As a result, Central Application Gateway:
 
 #### Handling ambiguous API definition names
 
-A combination of `{API_BUNDLE_NAME}` and `{API_DEFINITION_NAME}` which are extracted from an Application CR should be unique for a given application.
-Invocation of endpoints with duplicate names will result in a `400 Bad Request` failure. In such a case, one of the names must be changed to avoid ambiguity.
+A combination of `{API_BUNDLE_NAME}` and `{API_DEFINITION_NAME}` which are extracted from an Application CR must be unique for a given application.
+Invocation of endpoints with duplicate names results in a `400 Bad Request` failure. In such a case, you must change one of the names to avoid ambiguity.
 
 ## Development
 
