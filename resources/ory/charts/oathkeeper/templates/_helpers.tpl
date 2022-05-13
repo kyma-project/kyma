@@ -92,3 +92,16 @@ checksum/oathkeeper-rules: {{ include (print $.Template.BasePath "/configmap-rul
 checksum/oauthkeeper-secrets: {{ include (print $.Template.BasePath "/secrets.yaml") . | sha256sum }}
 {{- end }}
 {{- end }}
+
+{{/*
+ Common labels for maester sidecar
+ */}}
+ {{- define "oathkeeper-maester-sidecar.labels" -}}
+ app.kubernetes.io/name: {{ include "oathkeeper.name" . }}-maester
+ helm.sh/chart: {{ include "oathkeeper.chart" . }}
+ app.kubernetes.io/instance: {{ .Release.Name }}
+ {{- if .Chart.AppVersion }}
+ app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
+ {{- end }}
+ app.kubernetes.io/managed-by: {{ .Release.Service }}
+ {{- end -}}

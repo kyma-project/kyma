@@ -33,10 +33,10 @@ spec:
       http:
         paths:
           {{- range .paths }}
-          - path: {{ .path }}
-            {{- if .pathType }}
-            pathType: {{ .pathType }}
-            {{- end }}
+          #Kyma controlled
+          - path: {{ . }}
+            pathType: ImplementationSpecific
+          ################
             backend:
               {{- if semverCompare ">=1.19-0" $.Capabilities.KubeVersion.GitVersion }}
               service:

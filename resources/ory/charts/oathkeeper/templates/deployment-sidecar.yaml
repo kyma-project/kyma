@@ -11,11 +11,16 @@ metadata:
     mode: {{ .Values.global.ory.oathkeeper.maester.mode }}
 {{ include "oathkeeper.labels" . | indent 4 }}
 spec:
+  #Kyma controlled
+{{- if not .Values.deployment.autoscaling.enabled}}
   replicas: {{ .Values.replicaCount }}
+{{- end }}
   selector:
     matchLabels:
       app.kubernetes.io/name: {{ include "oathkeeper.name" . }}
       app.kubernetes.io/instance: {{ .Release.Name }}
+  strategy:
+    {{- toYaml .Values.deployment.strategy | nindent 4 }}  #Kyma controlled
   template:
     metadata:
       labels:
@@ -43,10 +48,10 @@ spec:
           emptyDir: {}
         - name: {{ include "oathkeeper.name" . }}-secrets-volume
           secret:
-            secretName: {{ include "oathkeeper.secretname" . }}
+            secretName: {{ include "oathkeeper.fullname" . }}-jwks-secret
       initContainers:
         - name: init
-          image: busybox:1
+          image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.busybox) }}"  #Kyma controlled
           volumeMounts:
             - name: {{ include "oathkeeper.name" . }}-rules-volume
               mountPath: /etc/rules
@@ -95,18 +100,22 @@ spec:
             httpGet:
               path: /health/alive
               port: http-api
+              initialDelaySeconds: 45
+              periodSeconds: 10
+              failureThreshold: 10
           readinessProbe:
             httpGet:
               path: /health/ready
               port: http-api
+              initialDelaySeconds: 45
+              periodSeconds: 10
+              failureThreshold: 10
           resources:
             {{- toYaml .Values.deployment.resources | nindent 12 }}
-          {{- if .Values.deployment.securityContext }}
           securityContext:
-            {{- toYaml .Values.deployment.securityContext | nindent 12 }}
-          {{- end }}
+            {{- toYaml .Values.deployment.securityContext.controller | nindent 12 }}  #Kyma controlled
         - name: {{ .Chart.Name }}-maester
-          image: "{{ .Values.sidecar.image.repository }}:{{ .Values.sidecar.image.tag }}"
+          image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.oathkeeper) }}"  #Kyma controlled
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           command:
             - /manager
@@ -134,12 +143,15 @@ spec:
         {{- if .Values.deployment.extraContainers }}
 {{ tpl .Values.deployment.extraContainers . | indent 8 }}
         {{- end }}
-      serviceAccountName: {{ default "maester" .Values.maester.nameOverride }}-account
+      serviceAccountName: {{ include "oathkeeper-maester.name" . }}-maester-account
       automountServiceAccountToken: {{ .Values.deployment.automountServiceAccountToken }}
       {{- with .Values.deployment.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+    {{- if .Values.global.priorityClassName }}
+       priorityClassName: {{ .Values.global.priorityClassName }}
+    {{- end }}
     {{- with .Values.affinity }}
       affinity:
         {{- toYaml . | nindent 8 }}

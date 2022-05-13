@@ -39,7 +39,7 @@ spec:
           {{- range .paths }}
           - path: {{ .path }}
             {{- if .pathType }}
-            pathType: {{ .pathType }}
+            pathType: ImplementationSpecific  #Kyma controlled
             {{- end }}
             backend:
               {{- if semverCompare ">=1.19-0" $.Capabilities.KubeVersion.GitVersion }}

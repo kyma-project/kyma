@@ -3,7 +3,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "oathkeeper-maester.fullname" . }}
+  name: {{ include "oathkeeper-maester.name" . }}
   {{- if .Release.Namespace }}
   namespace: {{ .Release.Namespace }}
   {{- end }}
@@ -15,36 +15,29 @@ spec:
   selector:
     matchLabels:
       control-plane: controller-manager
-      app.kubernetes.io/name: {{ include "oathkeeper-maester.fullname" . }}
+      app.kubernetes.io/name: {{ include "oathkeeper-maester.name" . }}
       app.kubernetes.io/instance: {{ .Release.Name }}
   strategy:
-    rollingUpdate:
-      maxSurge: 25%
-      maxUnavailable: 25%
-    type: RollingUpdate
+    {{- toYaml .Values.deployment.strategy | nindent 4 }}
   template:
     metadata:
       labels:
         control-plane: controller-manager
-        app.kubernetes.io/name: {{ include "oathkeeper-maester.fullname" . }}
+        app.kubernetes.io/name: {{ include "oathkeeper-maester.name" . }}
         app.kubernetes.io/instance: {{ .Release.Name }}
       {{- with .Values.deployment.annotations }}
       annotations:
         {{- toYaml . | nindent 8 }}
       {{- end }}
     spec:
-      {{- with .Values.imagePullSecrets }}
-      imagePullSecrets:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
       containers:
         - name: {{ .Chart.Name }}
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.oathkeeper) }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           command:
             - /manager
           args:
-            - --metrics-addr=0.0.0.0:8080
+            - --metrics-addr=0.0.0.0:{{ .Values.port.metrics }}
             - controller
             - --rulesConfigmapName={{ include "oathkeeper-maester.getCM" . }}
             {{- if .Values.rulesConfigmapNamespace }}
@@ -55,24 +48,27 @@ spec:
             {{- if .Values.rulesFileName }}
             - --rulesFileName={{ .Values.rulesFileName }}
             {{- end }}
-          env:
-            {{- if .Values.singleNamespaceMode }}
-            - name: NAMESPACE
-              value: {{ .Release.Namespace }}
-            {{- end }}
-            {{- with .Values.deployment.envs }}
-            {{- toYaml . | nindent 12 }}
-            {{- end }}
           resources:
             {{- toYaml .Values.deployment.resources | nindent 12 }}
+          securityContext:
+             allowPrivilegeEscalation: false
+             capabilities:
+               drop:
+               - ALL
+             privileged: false
+             runAsGroup: 1000
+             runAsNonRoot: true
+             runAsUser: 1000
           terminationMessagePath: /dev/termination-log
           terminationMessagePolicy: File
-          {{- if .Values.deployment.securityContext }}
-          securityContext:
-            {{- toYaml .Values.deployment.securityContext | nindent 12 }}
+          {{- with .Values.deployment.envs }}
+          env:
+            {{- toYaml . | nindent 12 }}
           {{- end }}
-      serviceAccountName: {{ include "oathkeeper-maester.fullname" . }}-account
-      automountServiceAccountToken: {{ .Values.deployment.automountServiceAccountToken }}
+          ports:
+            - containerPort: {{ .Values.port.metrics }}
+              name: metrics
+      serviceAccountName: {{ include "oathkeeper-maester.name" . }}-account
       dnsPolicy: ClusterFirst
       restartPolicy: Always
       securityContext: {}
@@ -81,6 +77,9 @@ spec:
       {{- with .Values.deployment.nodeSelector }}
         {{- toYaml . | nindent 8 }}
       {{- end }}
+    {{- if .Values.global.priorityClassName }}
+      priorityClassName: {{ .Values.global.priorityClassName }}
+    {{- end }}
     {{- with .Values.affinity }}
       affinity:
         {{- toYaml . | nindent 8 }}

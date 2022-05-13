@@ -1,0 +1,100 @@
+#Kyma resource
+
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: ory-oathkeeper-keys-service-account
+  namespace: {{ .Release.Namespace }}
+---
+kind: Role
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  namespace: {{.Release.Namespace}}
+  name: ory-oathkeeper-keys-job-role
+rules:
+  - apiGroups: [""]
+    resources: ["secrets"]
+    verbs: ["get", "update", "patch"]
+    resourceNames: ["{{ include "oathkeeper.fullname" . }}-jwks-secret"]
+  - apiGroups: [""]
+    resources: ["secrets"]
+    verbs: ["create"]
+---
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: ory-oathkeeper-keys-job-role-binding
+  namespace: {{.Release.Namespace}}
+subjects:
+  - kind: ServiceAccount
+    name: ory-oathkeeper-keys-service-account
+    namespace: {{.Release.Namespace}}
+roleRef:
+  kind: Role
+  name: ory-oathkeeper-keys-job-role
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: oathkeeper-jwks-rotator
+spec:
+  schedule: "0 0 1 * *"
+  successfulJobsHistoryLimit: 1
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          annotations:
+            sidecar.istio.io/inject: "false"
+        spec:
+          initContainers:
+            - name: keys-generator
+              image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.oathkeeper) }}"
+              command:
+                - /bin/sh
+                - -c
+                - |
+                  oathkeeper credentials generate --alg RS256 > /etc/secrets/jwks.json
+              securityContext:
+                allowPrivilegeEscalation: false
+                capabilities:
+                  drop:
+                  - ALL
+                privileged: false
+                runAsGroup: 101
+                runAsNonRoot: true
+                runAsUser: 100
+              volumeMounts:
+                - name: {{ include "oathkeeper.name" . }}-keys-volume
+                  mountPath: /etc/secrets
+          containers:
+          - name: keys-supplier
+            image: {{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.k8s_tools) }}
+            command:
+            - /bin/bash
+            - -c
+            - |
+              set -e
+              kubectl create secret generic {{ include "oathkeeper.fullname" . }}-jwks-secret \
+                --from-file=/etc/secrets/jwks.json \
+                -n kyma-system -o yaml --dry-run | kubectl apply -f -
+            securityContext:
+              allowPrivilegeEscalation: false
+              capabilities:
+                drop:
+                - ALL
+              privileged: false
+              runAsGroup: 65534
+              runAsNonRoot: true
+              runAsUser: 65534
+            volumeMounts:
+            - name: {{ include "oathkeeper.name" . }}-keys-volume
+              mountPath: /etc/secrets
+              readOnly: true
+          volumes:
+          - name: {{ include "oathkeeper.name" . }}-keys-volume
+            emptyDir: {}
+          restartPolicy: OnFailure
+          serviceAccountName: ory-oathkeeper-keys-service-account

@@ -10,19 +10,14 @@ global:
 replicaCount: 1
 
 image:
-  # -- ORY Oathkeeper image
-  repository: oryd/oathkeeper
-  # -- ORY Oathkeeper version
-  tag: v0.38.25-beta.1
+  # Kyma controlled
   # -- Image pull policy
   pullPolicy: IfNotPresent
 
 # -- Options for the sidecar
 sidecar:
-  image:
-    repository: oryd/oathkeeper-maester
-    tag: v0.1.2
-  envs: {}
+  port:
+    metrics: 8080
 
 # -- Image pull secrets
 imagePullSecrets: []
@@ -198,15 +193,30 @@ deployment:
   #  requests:
   #    cpu: 100m
   #  memory: 128Mi
+
+  #  Kyma controlled
   securityContext:
-    capabilities:
+    sidecar:
+      allowPrivilegeEscalation: false
+      capabilities:
       drop:
         - ALL
-    readOnlyRootFilesystem: true
-    runAsNonRoot: true
-    runAsUser: 1000
-    allowPrivilegeEscalation: false
-    privileged: false
+      privileged: false
+      runAsGroup: 1000
+      runAsNonRoot: true
+      runAsUser: 1000
+    controller:
+      allowPrivilegeEscalation: false
+      capabilities:
+        drop:
+          - ALL
+      privileged: false
+      runAsGroup: 65534
+      runAsNonRoot: true
+      runAsUser: 65534
+  autoscaling:
+    enabled: false
+  ################
 
   # -- Specify the serviceAccountName value.
   # In some situations it is needed to provides specific permissions to Hydra deployments
