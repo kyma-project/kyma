@@ -58,7 +58,10 @@ Then(/^"([^"]*)" OIDC config is part of the kubeconfig$/, async (oidcConfig) => 
 
 Then(/^Admin binding exists for "([^"]*)" user$/, async(userAdmin) => {
 	const options = this.context.options;
+
+    console.log("Admin 0", options.administrator0);
     const admins = userAdmin === 'old' ? [options.administrator0]: options.administrators1;
+    console.log("[admins]", admins);
 
     admins.foreach(async (admin) => {
         await ensureKymaAdminBindingExistsForUser(admin)
