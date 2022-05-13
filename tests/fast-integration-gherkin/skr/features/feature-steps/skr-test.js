@@ -73,7 +73,7 @@ When(/^SKR service is updated$/, async() => {
         oidc: options.oidc1,
     };
 
-	await SKRSetup.updateSKR(options.instanceID, customParams, null, false);
+	await SKRSetup.updateSKR(options.instanceID, customParams, false);
 
     this.context.updateSkrResponse = SKRSetup.updateSkrResponse;
     console.log("SKR service is updated");
@@ -121,7 +121,7 @@ When(/^The admins for the SKR service are updated$/, async() => {
         oidc: options.administrators1,
     };
 
-	await SKRSetup.updateSKRAdmins(options.instanceID, customParams, null, false);
+	await SKRSetup.updateSKRAdmins(options.instanceID, customParams, false);
 
     this.context.updateSkrAdminsResponse = SKRSetup.updateSkrAdminsResponse;
     console.log("Admins are updated");

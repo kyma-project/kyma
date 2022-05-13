@@ -4,6 +4,7 @@ const {KCPWrapper, KCPConfig} = require('../../fast-integration/kcp/client');
 const {addScenarioInCompass, assignRuntimeToScenario} = require('../../fast-integration/compass');
 const {keb, gardener, director} = require('../../fast-integration/skr-test/helpers');
 const {initializeK8sClient} = require('./utils');
+const {BTPOperatorCreds} = require('../../fast-integration/smctl/helpers');
 
 class SKRSetup {
     constructor() {
@@ -14,6 +15,7 @@ class SKRSetup {
         this.updateSkrResponse = null;
         this.updateSkrAdminsResponse = null;
         this.kcp = null;
+        this.btpOperatorCreds = null;
         this.shoot = null;
         this.options = null;
     }
@@ -21,6 +23,7 @@ class SKRSetup {
     static async provisionSKR() {
         if (!this._initialized){
             try {
+                this.btpOperatorCreds = BTPOperatorCreds.fromEnv();
                 this.kcp = new KCPWrapper(KCPConfig.fromEnv());
                 this.options = gatherOptions();
                 console.log(`Provision SKR with instance ID ${this.options.instanceID}`);
@@ -34,7 +37,7 @@ class SKRSetup {
                     this.options.instanceID,
                     this.options.runtimeName,
                     null,
-                    null,
+                    this.btpOperatorCreds,
                     customParams,
                     provisioningTimeout);
           
@@ -57,11 +60,10 @@ class SKRSetup {
 
     static async updateSKR(options,
         customParams,
-        btpOperatorCreds = null,
         isMigration = false) {
         if (!this._skrUpdated){
             try{
-                this.updateSkrResponse = await keb.updateSKR(options.instanceID, customParams, btpOperatorCreds, isMigration);
+                this.updateSkrResponse = await keb.updateSKR(options.instanceID, customParams, this.btpOperatorCreds, isMigration);
                 this._skrUpdated = true;
             } catch(e) {
                 throw new Error(`Failed to update SKR: ${e.toString()}`);
@@ -71,11 +73,10 @@ class SKRSetup {
 
     static async updateSKRAdmins(options,
         customParams,
-        btpOperatorCreds = null,
         isMigration = false) {
         if (!this._skrAdminsUpdated){
             try{
-                this.updateSkrAdminsResponse = await keb.updateSKR(options.instanceID, customParams, btpOperatorCreds, isMigration);
+                this.updateSkrAdminsResponse = await keb.updateSKR(options.instanceID, customParams, this.btpOperatorCreds, isMigration);
                 this._skrAdminsUpdated = true;
             } catch(e) {
                 throw new Error(`Failed to update SKR: ${e.toString()}`);
