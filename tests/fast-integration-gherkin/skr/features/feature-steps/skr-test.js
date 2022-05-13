@@ -119,6 +119,8 @@ When(/^The admins for the SKR service are updated$/, async() => {
         oidc: options.administrators1,
     };
 
+    console.log("customParams", customParams);
+
 	await SKRSetup.updateSKRAdmins(options.instanceID, customParams, false);
 
     this.context.updateSkrAdminsResponse = SKRSetup.updateSkrAdminsResponse;
