@@ -81,8 +81,11 @@ When(/^SKR service is updated$/, async() => {
     this.context.updateSkrResponse = SKRSetup.updateSkrResponse;
 });
 
-Then(/^The operation response should have a succeeded state$/, {timeout: 1000 * 60 * 20}, async() => {
-	const updateSkrResponse = this.context.updateSkrResponse;
+Then(/^The update skr "([^"]*)" operation response should have a succeeded state$/, {timeout: 1000 * 60 * 20}, async(updateAdmins) => {
+	let updateSkrResponse = this.context.updateSkrResponse;
+    if (updateAdmins === 'admins'){
+        updateSkrResponse = this.context.updateSKRAdminsResponse;
+    }
     const kcp = SKRSetup.kcp;
     const instanceID = this.context.options.instanceID;
     const shootName = this.context.shoot.name;
@@ -119,8 +122,6 @@ When(/^The admins for the SKR service are updated$/, async() => {
     const customParams = {
         administrators: options.administrators1,
     };
-
-    console.log("customParams", customParams);
 
 	await SKRSetup.updateSKRAdmins(options.instanceID, customParams, false);
 

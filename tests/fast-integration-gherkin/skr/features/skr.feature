@@ -15,7 +15,7 @@ Feature: SKR test
 
     Scenario: SKR Service can be updated with OIDC config
         When SKR service is updated
-        Then The operation response should have a succeeded state
+        Then The update skr "service" operation response should have a succeeded state
 
     Scenario: Get runtime status after SKR service is updated with OIDC config
         When SKR service is updated
@@ -35,7 +35,7 @@ Feature: SKR test
 
     Scenario: SKR Service Admins can be updated
         When The admins for the SKR service are updated
-        Then The operation response should have a succeeded state
+        Then The update skr "admins" operation response should have a succeeded state
 
     Scenario: Get runtime status after SKR service instance admins are updated
         When The admins for the SKR service are updated
