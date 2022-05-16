@@ -8,7 +8,7 @@ const {
     ensureKymaAdminBindingExistsForUser,
     isDebugEnabled,
     printStatusOfInClusterEventingInfrastructure
-} = require('../../../helpers/utils');
+} = require('../../../../fast-integration/utils');
 const {
     ensureValidShootOIDCConfig,
     ensureValidOIDCConfigInCustomerFacingKubeconfig,

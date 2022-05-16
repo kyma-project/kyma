@@ -1,5 +1,5 @@
 const {Given, When, Then} = require('cucumber');  
-const {getSecretData} = require('../../../helpers/utils');
+const {getSecretData} = require('../../../../fast-integration/utils');
 const {assert} = require('chai');
 const forge = require('node-forge');
 
