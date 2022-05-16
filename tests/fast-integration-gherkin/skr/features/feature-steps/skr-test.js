@@ -95,7 +95,7 @@ When(/^SKR service is updated$/, async() => {
 Then(/^The update skr "([^"]*)" operation response should have a succeeded state$/, {timeout: 1000 * 60 * 20}, async(updateAdmins) => {
 	let updateSkrResponse = this.context.updateSkrResponse;
     if (updateAdmins === 'admins'){
-        updateSkrResponse = this.context.updateSKRAdminsResponse;
+        updateSkrResponse = this.context.updateSkrAdminsResponse;
     }
 
     const kcp = SKRSetup.kcp;
@@ -139,8 +139,6 @@ When(/^The admins for the SKR service are updated$/, async() => {
     const shoot = await gardener.getShoot(this.context.shoot.name);
 
     this.context.updateSkrAdminsResponse = SKRSetup.updateSkrAdminsResponse;
-    console.log("Update Admins response", this.context.updateSKRAdminsResponse);
-
     this.context.shoot = shoot;
 });
 
