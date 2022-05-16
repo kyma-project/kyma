@@ -129,7 +129,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 							eventingv1alpha1.ConditionSubscriptionActive,
 							eventingv1alpha1.ConditionReasonSubscriptionActive,
 							v1.ConditionTrue, "")),
-						reconcilertesting.HaveCleanEventTypes(nil),
+						reconcilertesting.HaveCleanEventTypesEmpty(),
 					))
 				})
 			})
@@ -208,6 +208,43 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 							eventingv1alpha1.ConditionReasonSubscriptionActive,
 							v1.ConditionTrue, "")),
 						reconcilertesting.HaveCleanEventTypes(cleanEventTypes),
+					))
+				})
+			})
+
+			Context("Updating the Subscription filter with an invalid prefix", func() {
+				By("updating the Subscription filter", func() {
+					subscription.Spec.Filter.Filters[0].EventType.Value = fmt.Sprintf("invalid%s", reconcilertesting.OrderCreatedEventType)
+					ensureSubscriptionUpdated(ctx, subscription)
+				})
+
+				By("checking if Subscription status has no 'cleanEventTypes' and has ConditionSubscribed status set to false", func() {
+					getSubscription(ctx, subscription).Should(And(
+						reconcilertesting.HaveSubscriptionName(subscriptionName),
+						reconcilertesting.HaveCondition(eventingv1alpha1.MakeCondition(
+							eventingv1alpha1.ConditionSubscribed,
+							eventingv1alpha1.ConditionReasonSubscriptionCreationFailed,
+							v1.ConditionFalse, "")),
+						reconcilertesting.HaveCleanEventTypesEmpty(),
+					))
+				})
+			})
+
+			Context("Updating the invalid Subscription filter with a valid prefix", func() {
+				bebSubscriptionName := "test-validc1971deb47ad85e05c215e9271f111b0d3051283"
+				By("updating the Subscription filter", func() {
+					subscription.Spec.Filter.Filters[0].EventType.Value = reconcilertesting.OrderCreatedEventType
+					ensureSubscriptionUpdated(ctx, subscription)
+				})
+
+				By("checking if Subscription status has 'cleanEventTypes' with the correct filter value", func() {
+					getSubscription(ctx, subscription).Should(And(
+						reconcilertesting.HaveSubscriptionName(subscriptionName),
+						reconcilertesting.HaveCondition(eventingv1alpha1.MakeCondition(
+							eventingv1alpha1.ConditionSubscribed,
+							eventingv1alpha1.ConditionReasonSubscriptionCreated,
+							v1.ConditionTrue, fmt.Sprintf("BEB-subscription-name=%s", bebSubscriptionName))),
+						reconcilertesting.HaveCleanEventTypes([]string{reconcilertesting.OrderCreatedEventType}),
 					))
 				})
 			})
