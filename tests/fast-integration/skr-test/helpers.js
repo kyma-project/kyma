@@ -71,6 +71,7 @@ function gatherOptions(...opts) {
       usernamePrefix: 'acme-',
     },
     kebUserId: getEnvOrThrow('KEB_USER_ID'),
+    administrator0: getEnvOrThrow('KEB_USER_ID'),
     administrators1: ['admin1@acme.com', 'admin2@acme.com'],
   };
 
