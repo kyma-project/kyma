@@ -253,13 +253,13 @@ Then(/^Audit logs should be available$/, {timeout: 1000 * 60 * 60 * 2}, async() 
 AfterAll({timeout: 1000 * 60 * 60 * 95}, async() => {
     const featureName = this.context.featureName;
 
-    if (featureName === "skr-test"){
-        const options = this.context.options;
+    // if (featureName === "skr-test"){
+    //     const options = this.context.options;
 
-        // Delete commerce mock
-        await CommerceCompassMock.deleteCommerceMockResources(options.testNS);
+    //     // Delete commerce mock
+    //     await CommerceCompassMock.deleteCommerceMockResources(options.testNS);
 
-        // Deprovision SKR
-        await SKRSetup.deprovisionSKR();    
-    }
+    //     // Deprovision SKR
+    //     await SKRSetup.deprovisionSKR();    
+    // }
 });
