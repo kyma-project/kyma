@@ -74,11 +74,10 @@ describe('Eventing tests', function() {
     await waitForNamespace(mockNamespace);
   });
 
-  if (!isSKR) {
-    before('Expose Grafana', async function() {
-      await exposeGrafana();
-    });
-  }
+  before('Expose Grafana', async function() {
+    await exposeGrafana();
+  });
+
 
   // eventingE2ETestSuite - Runs Eventing end-to-end tests
   function eventingE2ETestSuite(backend) {
@@ -267,9 +266,7 @@ describe('Eventing tests', function() {
     eventingMonitoringTest(natsBackend, isJetStreamEnabled);
   });
 
-  if (!isSKR) {
-    after('Unexpose Grafana', async function() {
-      await unexposeGrafana();
-    });
-  }
+  after('Unexpose Grafana', async function() {
+    await unexposeGrafana(true);
+  });
 });
