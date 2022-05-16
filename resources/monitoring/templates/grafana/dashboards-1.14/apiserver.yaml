@@ -1,5 +1,5 @@
 {{- /*
-    Customization: Since there is no option to disable one single dashboard, rendering is disabled for this dashboard manually.
+    Customization: Disable dashboard.
   */ -}}
 {{- /*
 Generated from 'apiserver' from https://raw.githubusercontent.com/prometheus-operator/kube-prometheus/main/manifests/grafana-dashboardDefinitions.yaml
