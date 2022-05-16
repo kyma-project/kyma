@@ -25,10 +25,11 @@ const {
     getRandomEventId,
     getVirtualServiceHost,
     sendInClusterEventWithRetry,
-    GetCommerceMockHost,
-    GetLegacyEventParams,
-    GetStructuredEventParams,
-    GetBinaryEventParams
+    getCommerceMockHost,
+    getLegacyEventParams,
+    getStructuredEventParams,
+    getBinaryEventParams,
+    ensureInClusterEventReceivedWithRetry
 } = require('../../../../fast-integration/test/fixtures/commerce-mock');
 const {
     AuditLogCreds,
@@ -157,7 +158,7 @@ Given(/^Commerce Backend is set up$/, {timeout: 1000 * 60 * 60 * 3}, async() => 
 When(/^Function is called using a correct authorization token$/, {timeout: 1000 * 60 * 60 * 2}, async() => {
     const options = this.context.options;
 
-    const commerceMockHost = await GetCommerceMockHost();
+    const commerceMockHost = await getCommerceMockHost();
 	const successfulFunctionResponse = await callFunctionWithToken(options.testNS, commerceMockHost);
 
     this.context.commerceMockHost = commerceMockHost;
@@ -189,11 +190,11 @@ When(/^A "([^"]*)" event is sent$/, async(eventEncoding) => {
 
     let requestParams = null;
     if (eventEncoding === 'legacy'){
-        requestParams = GetLegacyEventParams();
+        requestParams = getLegacyEventParams();
     } else if (eventEncoding === 'structured'){
-        requestParams = GetStructuredEventParams();
+        requestParams = getStructuredEventParams();
     } else if (eventEncoding === 'binary'){
-        requestParams = GetBinaryEventParams();
+        requestParams = getBinaryEventParams();
     } else {
         console.error("Not supported eventEncoding type:", eventEncoding);
     }

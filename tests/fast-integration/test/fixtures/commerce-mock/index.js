@@ -116,7 +116,7 @@ function prepareCommerceObjs(mockNamespace) {
   return k8s.loadAllYaml(commerceMockYaml.toString().replace(/%%MOCK_NAMESPACE%%/g, mockNamespace));
 }
 
-async function GetCommerceMockHost(mockNamespace = 'mocks'){
+async function getCommerceMockHost(mockNamespace = 'mocks'){
   const vs = await waitForVirtualService(mockNamespace, 'commerce-mock');
   const mockHost = vs.spec.hosts[0];
   const host = mockHost.split('.').slice(1).join('.');
@@ -273,7 +273,7 @@ async function sendLegacyEventAndCheckResponse(mockNamespace = 'mocks') {
   return await sendEventAndCheckResponse('legacy event', body, params, mockNamespace);
 }
 
-function GetLegacyEventParams(){
+function getLegacyEventParams(){
   const body = {
     'event-type': 'order.created',
     'event-type-version': 'v1',
@@ -363,7 +363,7 @@ async function sendCloudEventStructuredModeAndCheckResponse(backendType ='nats',
   return await sendEventAndCheckResponse('cloud event', body, params, mockNamespace);
 }
 
-function GetStructuredEventParams(backendType = 'nats'){
+function getStructuredEventParams(backendType = 'nats'){
   let source = 'commerce';
   if (backendType === bebBackend) {
     source = eventMeshNamespace;
@@ -413,7 +413,7 @@ async function sendCloudEventBinaryModeAndCheckResponse(backendType = 'nats', mo
   return await sendEventAndCheckResponse('cloud event binary', body, params, mockNamespace);
 }
 
-function GetBinaryEventParams(backendType = 'nats'){
+function getBinaryEventParams(backendType = 'nats'){
   let source = 'commerce';
   if (backendType === bebBackend) {
     source = eventMeshNamespace;
@@ -1140,14 +1140,14 @@ module.exports = {
   getVirtualServiceHost,
   sendInClusterEventWithRetry,
   ensureInClusterEventReceivedWithRetry,
-  GetCommerceMockHost,
+  getCommerceMockHost,
   callFunctionWithToken,
   assertSuccessfulFunctionResponse,
   callFunctionWithNoToken,
   assertUnauthorizedFunctionResponse,
   sendEvent,
   checkEventResponse,
-  GetLegacyEventParams,
-  GetStructuredEventParams,
-  GetBinaryEventParams
+  getLegacyEventParams,
+  getStructuredEventParams,
+  getBinaryEventParams
 };
