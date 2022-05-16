@@ -231,7 +231,9 @@ Then(/^The event is received successfully$/, () => {
 });
 
 Given(/^KEB plan is AWS$/, () => {
-    let auditLogs = null
+    const AWS_PLAN_ID = '361c511f-f939-4621-b228-d0fb79a1fe15';
+    let auditLogs = null;
+
 	if (process.env.KEB_PLAN_ID === AWS_PLAN_ID) {
         auditLogs = new AuditLogClient(AuditLogCreds.fromEnv());
     }
