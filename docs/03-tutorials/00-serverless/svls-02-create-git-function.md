@@ -84,8 +84,7 @@ Follow these steps:
         secretName: # "git-creds-basic" or "git-creds-key"
     ```
    
-    >**NOTE:** It is recommended to use small repositories to source your git functions. Using large multi-repos can cause problems with function controller stability as it may run out of CPU and i/o resources.
-
+    >**NOTE:** To avoid performance degradation caused by large git repositories and large monorepos, the function controller implements a configurable backoff period for source checkout based on `APP_FUNCTION_REQUEUE_DURATION`. This behavior can be disabled, allowing the controller to perform source checkout with every reconciliation loop by labeling the function CR with the label `serverless.kyma-project.io/continuousGitCheckout: true`
 4. Create a Function CR that specifies the Function's logic and points to the directory with code and dependencies in the given repository.
 
     ```yaml
