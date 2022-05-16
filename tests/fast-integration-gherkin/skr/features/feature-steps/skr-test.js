@@ -239,7 +239,7 @@ Given(/^KEB plan is AWS$/, () => {
     this.context.auditLogs = auditLogs;
 });
 
-Then(/^Audit logs should be available$/, () => {
+Then(/^Audit logs should be available$/, async() => {
 	const auditLogs = this.context.auditLogs;
 
     if (auditLogs !== null){
