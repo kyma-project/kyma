@@ -17,16 +17,17 @@ Before you start, expose the following as environment variables:
 - Unique ID identifying your service within the Application CR
 - Relative path in your service
 
-    ```bash
-    export APP_NAME=test-app
-    export USER_NAME=test-user
-    export PASSWORD=test-password
-    export SECRET_NAME=test-secret
-    export SERVICE_DISPLAY_NAME=test-basic-auth
-    export TARGET_URL=https://httpbin.org/
-    export TARGET_UUID=f03aafcc-85ad-4665-a46a-bf455f5fa0b3
-    export TARGET_PATH=basic-auth/$USER_NAME/$PASSWORD
-    ```
+```bash
+export APP_NAME=test-app
+export USER_NAME=test-user
+export PASSWORD=test-password
+export SECRET_NAME=test-secret
+export SERVICE_DISPLAY_NAME=test-basic-auth
+export TARGET_URL=https://httpbin.org/
+export TARGET_UUID=f03aafcc-85ad-4665-a46a-bf455f5fa0b3
+export TARGET_PATH=basic-auth/$USER_NAME/$PASSWORD
+```
+  
 > **NOTE:** Replace the example values above with your actual values. 
 
 ## Register a service
