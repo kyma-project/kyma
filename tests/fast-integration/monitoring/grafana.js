@@ -14,6 +14,7 @@ const {
   waitForDeployment,
   waitForPodWithLabel,
   info,
+  retryPromise,
 } = require('../utils');
 
 const {
@@ -110,10 +111,10 @@ async function patchProxyDeployment(toRemove) {
     error(err);
     throw new Error(`Timeout: ${kymaProxyDeployment} is not found`);
   });
+
   const argPosFrom = deployment.body.spec.template.spec.containers[0].args.findIndex(
       (arg) => arg.toString().includes(toRemove),
   );
-
 
   if (argPosFrom === -1) {
     info(`Skipping updating Proxy Deployment as it is already in desired state`);
