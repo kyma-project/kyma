@@ -72,7 +72,7 @@ Then(/^"([^"]*)" OIDC config is part of the kubeconfig$/, async (oidcConfig) => 
 
 Then(/^Admin binding exists for "([^"]*)" user$/, async(userAdmin) => {
 	const options = this.context.options;
-    const admins = userAdmin === 'old' ? [options.administrator0]: options.administrators1;
+    const admins = userAdmin === 'old' ? [options.kebUserId]: options.administrators1;
 
     admins.forEach(async (admin) => {
         await ensureKymaAdminBindingExistsForUser(admin)
@@ -146,7 +146,7 @@ When(/^The admins for the SKR service are updated$/, async() => {
 Then(/^The old admin no longer exists for the SKR service instance$/, async() => {
     const options = this.context.options;
 
-    await ensureKymaAdminBindingDoesNotExistsForUser(options.administrator0);
+    await ensureKymaAdminBindingDoesNotExistsForUser(options.kebUserId);
 });
 
 Given(/^Commerce Backend is set up$/, async() => {
