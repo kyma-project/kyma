@@ -83,8 +83,8 @@ async function setGrafanaProxy() {
     await createProxySecretWithIPAllowlisting();
     // Remove the --reverse-proxy flag from the deployment to make the whitelisting also working for old deployment
     // versions in the upgrade tests
-    await patchProxyDeployment('--reverse-proxy=true');
     await restartProxyPod();
+    await patchProxyDeployment('--reverse-proxy=true');
 
     info('Checking grafana redirect to grafana URL');
     const res = await checkGrafanaRedirect('https://grafana.', 200);
@@ -149,8 +149,11 @@ async function createBasicProxySecret() {
 }
 
 async function createProxySecretWithIPAllowlisting() {
-  info(`Creating secret: ${proxySecret.metadata.name}`);
-  await k8sApply([proxySecret], kymaNs);
+  info(`Creating secret with ip allowlisting: ${proxySecret.metadata.name}`);
+
+  const secret = proxySecret;
+  secret.data.OAUTH2_PROXY_TRUSTED_IPS = toBase64('0.0.0.0/0');
+  await k8sApply([secret], kymaNs);
 }
 
 async function deleteProxySecret() {

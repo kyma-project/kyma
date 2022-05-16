@@ -48,7 +48,6 @@ spec:
         - --cookie-domain=grafana.{{ .Values.global.domainName }}
         - --cookie-name=KYMA_GRAFANA_OAUTH2_PROXY_TOKEN
         - --silence-ping-logging=true
-        - --reverse-proxy=true
         - --auth-logging={{ .Values.kyma.authProxy.config.authLogging }}
         - --request-logging={{ .Values.kyma.authProxy.config.requestLogging }}
         - --pass-host-header={{ .Values.kyma.authProxy.config.passHostHeader }}
