@@ -117,13 +117,13 @@ func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 	// instantiate a return object
 	result := ctrl.Result{}
 
-	// sync the initial Subscription status
-	r.syncInitialStatus(subscription)
-
 	// handle deletion of the subscription
 	if isInDeletion(subscription) {
 		return r.handleDeleteSubscription(ctx, subscription, log)
 	}
+
+	// sync the initial Subscription status
+	r.syncInitialStatus(subscription)
 
 	// sync Finalizers, ensure the finalizer is set
 	if err := r.syncFinalizer(subscription, log); err != nil {

@@ -313,7 +313,6 @@ func TestChangeSubscription(t *testing.T) {
 				K8sSubscription: []gomegatypes.GomegaMatcher{
 					reconcilertesting.HaveCondition(reconcilertesting.DefaultReadyCondition()),
 					reconcilertesting.HaveSubsConfiguration(utils.ConfigDefault(ens.DefaultSubscriptionConfig.MaxInFlightMessages)),
-					reconcilertesting.HaveConsumerNames(0),
 				},
 			},
 			changeSubscription: func(subscription *eventingv1alpha1.Subscription) {
@@ -329,7 +328,6 @@ func TestChangeSubscription(t *testing.T) {
 				K8sSubscription: []gomegatypes.GomegaMatcher{
 					reconcilertesting.HaveCondition(reconcilertesting.DefaultReadyCondition()),
 					reconcilertesting.HaveSubsConfiguration(utils.ConfigDefault(ens.DefaultSubscriptionConfig.MaxInFlightMessages)),
-					reconcilertesting.HaveConsumerNames(2),
 					reconcilertesting.HaveCleanEventTypes([]string{
 						utils.NewCleanEventType("0"),
 						utils.NewCleanEventType("1"),
@@ -349,7 +347,6 @@ func TestChangeSubscription(t *testing.T) {
 				K8sSubscription: []gomegatypes.GomegaMatcher{
 					reconcilertesting.HaveCondition(reconcilertesting.DefaultReadyCondition()),
 					reconcilertesting.HaveSubsConfiguration(utils.ConfigDefault(ens.DefaultSubscriptionConfig.MaxInFlightMessages)),
-					reconcilertesting.HaveConsumerNames(2),
 					reconcilertesting.HaveCleanEventTypes([]string{
 						utils.NewCleanEventType("0"),
 						utils.NewCleanEventType("1"),
@@ -366,7 +363,6 @@ func TestChangeSubscription(t *testing.T) {
 				K8sSubscription: []gomegatypes.GomegaMatcher{
 					reconcilertesting.HaveCondition(reconcilertesting.DefaultReadyCondition()),
 					reconcilertesting.HaveSubsConfiguration(utils.ConfigDefault(ens.DefaultSubscriptionConfig.MaxInFlightMessages)),
-					reconcilertesting.HaveConsumerNames(2),
 					reconcilertesting.HaveCleanEventTypes([]string{
 						utils.NewCleanEventType("0alpha"),
 						utils.NewCleanEventType("1alpha"),
@@ -399,7 +395,6 @@ func TestChangeSubscription(t *testing.T) {
 				K8sSubscription: []gomegatypes.GomegaMatcher{
 					reconcilertesting.HaveCondition(reconcilertesting.DefaultReadyCondition()),
 					reconcilertesting.HaveSubsConfiguration(utils.ConfigDefault(ens.DefaultSubscriptionConfig.MaxInFlightMessages)),
-					reconcilertesting.HaveConsumerNames(1),
 					reconcilertesting.HaveCleanEventTypes([]string{
 						utils.NewCleanEventType("0"),
 					}),
@@ -450,7 +445,7 @@ func TestChangeSubscription(t *testing.T) {
 			},
 			wantBefore: utils.Want{
 				K8sSubscription: []gomegatypes.GomegaMatcher{
-					reconcilertesting.HaveCleanEventTypes(nil),
+					reconcilertesting.HaveCleanEventTypesEmpty(),
 					reconcilertesting.HaveCondition(reconcilertesting.DefaultReadyCondition()),
 					reconcilertesting.HaveSubsConfiguration(utils.ConfigDefault(ens.DefaultSubscriptionConfig.MaxInFlightMessages)),
 					reconcilertesting.HaveSubscriptionReady(),
@@ -470,6 +465,34 @@ func TestChangeSubscription(t *testing.T) {
 					reconcilertesting.HaveCleanEventTypes([]string{reconcilertesting.OrderCreatedEventType}),
 					gomega.Not(reconcilertesting.HaveCondition(reconcilertesting.MultipleDefaultConditions()[0])),
 					gomega.Not(reconcilertesting.HaveCondition(reconcilertesting.MultipleDefaultConditions()[1])),
+				},
+			},
+		},
+		{
+			name: "CleanEventTypes; update valid filter to a filter with an invalid prefix",
+			givenSubscriptionOpts: []reconcilertesting.SubscriptionOpt{
+				reconcilertesting.WithFilter(reconcilertesting.EventSource, utils.NewCleanEventType("0")),
+				reconcilertesting.WithWebhookForNATS(),
+				reconcilertesting.WithSinkURLFromSvc(ens.SubscriberSvc),
+			},
+			wantBefore: utils.Want{
+				K8sSubscription: []gomegatypes.GomegaMatcher{
+					reconcilertesting.HaveCondition(reconcilertesting.DefaultReadyCondition()),
+					reconcilertesting.HaveCleanEventTypes([]string{
+						utils.NewCleanEventType("0"),
+					}),
+				},
+			},
+			changeSubscription: func(subscription *eventingv1alpha1.Subscription) {
+				// change the filter  to the event type
+				for _, f := range subscription.Spec.Filter.Filters {
+					f.EventType.Value = fmt.Sprintf("invalid%s", f.EventType.Value)
+				}
+			},
+			wantAfter: utils.Want{
+				K8sSubscription: []gomegatypes.GomegaMatcher{
+					reconcilertesting.HaveConditionInvalidPrefix(),
+					reconcilertesting.HaveCleanEventTypesEmpty(),
 				},
 			},
 		},

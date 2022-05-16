@@ -119,7 +119,7 @@ func GetCleanSubjects(sub *eventingv1alpha1.Subscription, cleaner eventtype.Clea
 	if sub.Spec.Filter != nil {
 		uniqueFilters, err := sub.Spec.Filter.Deduplicate()
 		if err != nil {
-			return []string{}, errors.Wrap(err, "deduplicate subscription filters failed")
+			return nil, errors.Wrap(err, "deduplicate subscription filters failed")
 		}
 		filters = uniqueFilters.Filters
 	}
@@ -128,7 +128,7 @@ func GetCleanSubjects(sub *eventingv1alpha1.Subscription, cleaner eventtype.Clea
 	for _, filter := range filters {
 		subject, err := getCleanSubject(filter, cleaner)
 		if err != nil {
-			return []string{}, err
+			return nil, err
 		}
 		cleanSubjects = append(cleanSubjects, subject)
 	}

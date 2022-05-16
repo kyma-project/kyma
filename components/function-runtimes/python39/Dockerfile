@@ -147,7 +147,6 @@ RUN set -ex; \
 	rm -f get-pip.py
 
 # Serverless
-
 LABEL source = git@github.com:kyma-project/kyma.git
 
 # build-base and linux-headers are needed to install all requirements
