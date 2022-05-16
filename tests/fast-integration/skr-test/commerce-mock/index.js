@@ -37,13 +37,13 @@ function commerceMockTest(options) {
     commerceMockTests(options.testNS);
     commerceMockCleanup(options.testNS);
 
-    // describe('Check audit logs for AWS', async function() {
+    describe('Check audit logs for AWS', function() {
     // if (process.env.KEB_PLAN_ID === AWS_PLAN_ID) {
-    checkAuditLogsForAWS();
+      checkAuditLogsForAWS();
     // } else {
     //   debug('Skipping step for non-AWS plan');
     // }
-    // });
+    });
   });
 }
 
@@ -91,7 +91,7 @@ function commerceMockCleanup(testNamespace) {
 }
 
 function checkAuditLogsForAWS() {
-  before('Expose Grafana', async function() {
+  it('Expose Grafana', async function() {
     await exposeGrafana();
   });
 
@@ -105,7 +105,7 @@ function checkAuditLogsForAWS() {
     await checkAuditEventsThreshold(auditLogsThreshold);
   });
 
-  after('Unexpose Grafana', async function() {
+  it('Unexpose Grafana', async function() {
     await unexposeGrafana(true);
   });
 }

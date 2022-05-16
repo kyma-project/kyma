@@ -5,7 +5,7 @@ const {
   provisionSKRInstance,
   director,
   commerceMockTest,
-  // oidcE2ETest,
+  oidcE2ETest,
 } = require('./index');
 const {
   getEnvOrThrow,
@@ -57,7 +57,7 @@ describe('SKR test', function() {
   });
 
   it('Execute the tests', function() {
-    // oidcE2ETest(options, shoot);
+    oidcE2ETest(options, shoot);
     commerceMockTest(options);
   });
 
