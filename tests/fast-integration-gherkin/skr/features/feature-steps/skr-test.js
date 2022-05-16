@@ -97,7 +97,6 @@ Then(/^The update skr "([^"]*)" operation response should have a succeeded state
     if (updateAdmins === 'admins'){
         updateSkrResponse = this.context.updateSKRAdminsResponse;
     }
-    console.log("Update Admins response", this.context.updateSKRAdminsResponse);
 
     const kcp = SKRSetup.kcp;
     const instanceID = this.context.options.instanceID;
@@ -140,6 +139,8 @@ When(/^The admins for the SKR service are updated$/, async() => {
     const shoot = await gardener.getShoot(this.context.shoot.name);
 
     this.context.updateSkrAdminsResponse = SKRSetup.updateSkrAdminsResponse;
+    console.log("Update Admins response", this.context.updateSKRAdminsResponse);
+
     this.context.shoot = shoot;
 });
 
