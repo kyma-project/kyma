@@ -94,9 +94,7 @@ When(/^SKR service is updated$/, async() => {
 
 Then(/^The update skr "([^"]*)" operation response should have a succeeded state$/, {timeout: 1000 * 60 * 20}, async(updateAdmins) => {
 	let updateSkrResponse = this.context.updateSkrResponse;
-    console.log("updateAdmins value is", updateAdmins)
     if (updateAdmins === 'admins'){
-        console.log("Entered the correct if condition for the admins");
         updateSkrResponse = this.context.updateSKRAdminsResponse;
     }
     const kcp = SKRSetup.kcp;
