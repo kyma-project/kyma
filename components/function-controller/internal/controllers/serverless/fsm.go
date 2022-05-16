@@ -48,7 +48,7 @@ type reconciler struct {
 }
 
 const (
-	skipGitCheckLabel = "serverless.kyma-project.io/skipGitSourceCheck"
+	continuousGitCheckoutLabel = "serverless.kyma-project.io/continuousGitCheckout"
 )
 
 func (m *reconciler) reconcile(ctx context.Context, f serverlessv1alpha1.Function) (ctrl.Result, error) {
@@ -179,7 +179,6 @@ func stateFnGitCheckSources(ctx context.Context, r *reconciler, s *systemState) 
 		r.log.Info(fmt.Sprintf("skipping function [%s] source check", s.instance.Name))
 		expectedJob := s.buildGitJob(options, r.cfg)
 		return buildStateFnCheckImageJob(expectedJob)
-
 	}
 
 	var revision string
@@ -234,7 +233,7 @@ func stateFnInitialize(ctx context.Context, r *reconciler, s *systemState) state
 }
 
 func skipGitSourceCheck(f serverlessv1alpha1.Function, cfg cfg) bool {
-	if v, ok := f.Labels[skipGitCheckLabel]; ok && strings.ToLower(v) == "false" {
+	if v, ok := f.Labels[continuousGitCheckoutLabel]; ok && strings.ToLower(v) == "true" {
 		return false
 	}
 
