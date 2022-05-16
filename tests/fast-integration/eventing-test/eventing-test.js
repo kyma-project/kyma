@@ -267,6 +267,6 @@ describe('Eventing tests', function() {
   });
 
   after('Unexpose Grafana', async function() {
-    await unexposeGrafana(true);
+    await unexposeGrafana(isSKR);
   });
 });
