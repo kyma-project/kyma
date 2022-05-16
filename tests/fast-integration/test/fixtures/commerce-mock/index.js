@@ -363,7 +363,7 @@ async function sendCloudEventStructuredModeAndCheckResponse(backendType ='nats',
   return await sendEventAndCheckResponse('cloud event', body, params, mockNamespace);
 }
 
-function GetStructuredEventParams(){
+function GetStructuredEventParams(backendType = 'nats'){
   let source = 'commerce';
   if (backendType === bebBackend) {
     source = eventMeshNamespace;
@@ -413,7 +413,7 @@ async function sendCloudEventBinaryModeAndCheckResponse(backendType = 'nats', mo
   return await sendEventAndCheckResponse('cloud event binary', body, params, mockNamespace);
 }
 
-function GetBinaryEventParams(){
+function GetBinaryEventParams(backendType = 'nats'){
   let source = 'commerce';
   if (backendType === bebBackend) {
     source = eventMeshNamespace;

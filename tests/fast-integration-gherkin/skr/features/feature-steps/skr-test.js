@@ -186,7 +186,7 @@ Then(/^The function returns an error$/, () => {
 When(/^A "([^"]*)" event is sent$/, async(eventEncoding) => {
     const commerceMockHost = this.context.commerceMockHost;
 
-    const requestParams = null;
+    let requestParams = null;
     if (eventEncoding === 'legacy'){
         requestParams = GetLegacyEventParams();
     } else if (eventEncoding === 'structured'){
