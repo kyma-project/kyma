@@ -3,6 +3,8 @@ Generated from 'grafana-overview' from https://raw.githubusercontent.com/prometh
 Do not change in-place! In order to change this file first read following link:
 https://github.com/prometheus-community/helm-charts/tree/main/charts/kube-prometheus-stack/hack
 */ -}}
+{{- $disable := "true" }}
+{{- if eq $disable "false" }}
 {{- $kubeTargetVersion := default .Capabilities.KubeVersion.GitVersion .Values.kubeTargetVersionOverride }}
 {{- if and (or .Values.grafana.enabled .Values.grafana.forceDeployDashboards) (semverCompare ">=1.14.0-0" $kubeTargetVersion) (semverCompare "<9.9.9-9" $kubeTargetVersion) .Values.grafana.defaultDashboardsEnabled }}
 apiVersion: v1
@@ -633,4 +635,5 @@ data:
         "uid": "6be0s85Mk",
         "version": 2
     }
+{{- end }}
 {{- end }}
