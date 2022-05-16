@@ -92,13 +92,14 @@ async function setGrafanaProxy() {
   }
 }
 
-async function resetGrafanaProxy() {
+async function resetGrafanaProxy(isSkr) {
   if (getEnvOrDefault('KYMA_MAJOR_VERSION', '2') === '2') {
     await deleteProxySecret();
     await restartProxyPod();
 
     info('Checking grafana redirect to kyma docs');
-    const res = await checkGrafanaRedirect('https://kyma-project.io/docs', 403);
+    const docsUrl = (isSkr ? 'https://help.sap.com/docs/BTP/' : 'https://kyma-project.io/docs');
+    const res = await checkGrafanaRedirect(docsUrl, 403);
     assert.isTrue(res, 'Authproxy reset was not successful. Grafana is not redirected to kyma docs!');
   }
 }
