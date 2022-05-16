@@ -148,7 +148,7 @@ Then(/^The old admin no longer exists for the SKR service instance$/, async() =>
     await ensureKymaAdminBindingDoesNotExistsForUser(options.kebUserId);
 });
 
-Given(/^Commerce Backend is set up$/, async() => {
+Given(/^Commerce Backend is set up$/, {timeout: 1000 * 60 * 3}, async() => {
 	const options = this.context.options;
 
     await CommerceCompassMock.ensureCommerceWithCompassMockIsSetUp(options);
