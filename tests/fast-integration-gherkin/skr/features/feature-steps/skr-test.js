@@ -97,6 +97,8 @@ Then(/^The update skr "([^"]*)" operation response should have a succeeded state
     if (updateAdmins === 'admins'){
         updateSkrResponse = this.context.updateSKRAdminsResponse;
     }
+    console.log("Update Admins response", this.context.updateSKRAdminsResponse);
+
     const kcp = SKRSetup.kcp;
     const instanceID = this.context.options.instanceID;
     const shootName = this.context.shoot.name;
