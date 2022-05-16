@@ -77,7 +77,6 @@ spec:
             timeoutSeconds: {{ .Values.deployment.readinessProbe.timeoutSeconds }}
             periodSeconds: {{.Values.deployment.readinessProbe.periodSeconds }}
       serviceAccountName: {{ include "hydra-maester.name" . }}-account
-      automountServiceAccountToken: {{ .Values.deployment.automountServiceAccountToken }}
       {{- if .Values.global.priorityClassName }}
       priorityClassName: {{ .Values.global.priorityClassName }}
       {{- end }}

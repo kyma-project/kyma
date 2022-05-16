@@ -56,10 +56,6 @@ deployment:
   annotations: {}
   podLabels: {}
 
-  # https://github.com/kubernetes/kubernetes/issues/57601
-  # -- This applications connects to the k8s API and requires the permissions
-  automountServiceAccountToken: true
-
   livenessProbe:
     initialDelaySeconds: 50
     timeoutSeconds: 1
