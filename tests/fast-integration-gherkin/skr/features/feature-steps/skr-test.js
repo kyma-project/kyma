@@ -148,13 +148,13 @@ Then(/^The old admin no longer exists for the SKR service instance$/, async() =>
     await ensureKymaAdminBindingDoesNotExistsForUser(options.kebUserId);
 });
 
-Given(/^Commerce Backend is set up$/, {timeout: 1000 * 60 * 3}, async() => {
+Given(/^Commerce Backend is set up$/, {timeout: 1000 * 60 * 60 * 3}, async() => {
 	const options = this.context.options;
 
     await CommerceCompassMock.ensureCommerceWithCompassMockIsSetUp(options);
 });
 
-When(/^Function is called using a correct authorization token$/, {timeout: 1000 * 60 * 20}, async() => {
+When(/^Function is called using a correct authorization token$/, {timeout: 1000 * 60 * 60 * 2}, async() => {
     const options = this.context.options;
 
     const commerceMockHost = await GetCommerceMockHost();
@@ -242,7 +242,7 @@ Given(/^KEB plan is AWS$/, () => {
     this.context.auditLogs = auditLogs;
 });
 
-Then(/^Audit logs should be available$/, async() => {
+Then(/^Audit logs should be available$/, {timeout: 1000 * 60 * 60 * 2}, async() => {
 	const auditLogs = this.context.auditLogs;
 
     if (auditLogs !== null){
@@ -250,7 +250,7 @@ Then(/^Audit logs should be available$/, async() => {
     }
 });
 
-AfterAll({timeout: 1000 * 60 * 95}, async() => {
+AfterAll({timeout: 1000 * 60 * 60 * 95}, async() => {
     const featureName = this.context.featureName;
 
     if (featureName === "skr-test"){
