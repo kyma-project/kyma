@@ -100,7 +100,7 @@ This is an example of the **service** object for an API secured with OAuth:
       type: API
 ```
 
-This is an example Secret containing credentials: 
+This is an example of the Secret containing credentials: 
 
 ```yaml
 apiVersion: v1
@@ -137,7 +137,7 @@ This is an example of the **service** object for an API secured with a client ce
       type: API
 ```
 
-This is an example Secret containing credentials: 
+This is an example of the Secret containing credentials: 
 
 ```yaml
 apiVersion: v1
@@ -178,7 +178,7 @@ This is an example of the **service** object for an API secured with both Basic 
 
 > **NOTE:** It is assumed that the CSRF token endpoint service uses the same credentials as the target API.
 
-This is an example Secret containing credentials: 
+This is an example of the Secret containing credentials: 
 
 ```yaml
 apiVersion: v1
@@ -218,7 +218,7 @@ This is an example of the **service** object for an API secured with Basic Authe
       type: API
 ```
 
-This is an example Secret containing credentials: 
+This is an example of the Secret containing credentials: 
 
 ```yaml
 apiVersion: v1
@@ -237,7 +237,7 @@ To create such a Secret, run this command:
 kubectl create secret generic {SECRET_NAME} --from-literal username={USER_NAME} --from-literal password={PASSWORD} -n kyma-integration
 ```
 
-This is an example Secret containing headers and request parameters: 
+This is an example of the Secret containing headers and request parameters: 
 
 ```yaml
 apiVersion: v1
