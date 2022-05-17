@@ -121,7 +121,10 @@ async function getCommerceMockHost(mockNamespace = 'mocks'){
   const mockHost = vs.spec.hosts[0];
   const host = mockHost.split('.').slice(1).join('.');
 
-  return host;
+  return {
+    mockHost: mockHost,
+    host: host
+  };
 }
 
 async function callFunctionWithToken(functionNamespace, host){
@@ -168,7 +171,7 @@ async function callFunctionWithNoToken(host){
   }
 
   return {
-    errorOccurred : errorOccurred,
+    errorOccurred: errorOccurred,
     errorStatus: errorStatus
   };
 }
@@ -299,7 +302,7 @@ function getLegacyEventParams(){
   }
 }
 
-async function sendEvent(host, requestParams){
+async function sendEvent(mockHost, host, requestParams){
   let eventResponse = null;
 
   await retryPromise(

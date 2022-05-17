@@ -158,10 +158,10 @@ Given(/^Commerce Backend is set up$/, {timeout: 1000 * 60 * 60 * 3}, async() => 
 When(/^Function is called using a correct authorization token$/, {timeout: 1000 * 60 * 60 * 2}, async() => {
     const options = this.context.options;
 
-    const commerceMockHost = await getCommerceMockHost();
+    const hostValues = await getCommerceMockHost();
 	const successfulFunctionResponse = await callFunctionWithToken(options.testNS, commerceMockHost);
 
-    this.context.commerceMockHost = commerceMockHost;
+    this.context.commerceHostValues = hostValues;
     this.context.successfulFunctionResponse = successfulFunctionResponse;
 });
 
@@ -172,9 +172,9 @@ Then(/^The function should be reachable$/, () => {
 });
 
 When(/^Function is called without an authorization token$/, async() => {
-    const commerceMockHost = this.context.commerceMockHost;
+    const commerceHost = this.context.commerceHostValues.host;
 
-	const unauthorizedFunctionResponse = await callFunctionWithNoToken(commerceMockHost);
+	const unauthorizedFunctionResponse = await callFunctionWithNoToken(commerceHost);
 
     this.context.unauthorizedFunctionResponse = unauthorizedFunctionResponse;
 });
@@ -186,7 +186,8 @@ Then(/^The function returns an error$/, () => {
 });
 
 When(/^A "([^"]*)" event is sent$/, {timeout: 60 * 60 * 1000}, async(eventEncoding) => {
-    const commerceMockHost = this.context.commerceMockHost;
+    const commerceHost = this.context.commerceHostValues.host;
+    const commerceMockHost = this.context.commerceHostValues.mockHost;
 
     let requestParams = null;
     if (eventEncoding === 'legacy'){
@@ -198,7 +199,7 @@ When(/^A "([^"]*)" event is sent$/, {timeout: 60 * 60 * 1000}, async(eventEncodi
     } else {
         console.error("Not supported eventEncoding type:", eventEncoding);
     }
-	const eventResponse = await sendEvent(commerceMockHost, requestParams);
+	const eventResponse = await sendEvent(commerceMockHost, commerceHost, requestParams);
 
     this.context.eventResponse = eventResponse;
 });
@@ -226,7 +227,7 @@ When(/^An in-cluster "([^"]*)" event is sent$/, {timeout: 60 * 60 * 1000}, async
 });
 
 Then(/^The event is received successfully$/, () => {
-    const mockHost = this.context.mockHost;
+    const mockHost = this.context.lastOrderMockHost;
     const eventId = this.context.eventId;
 
 	ensureInClusterEventReceivedWithRetry(mockHost, eventId);
