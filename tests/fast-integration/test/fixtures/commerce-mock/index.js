@@ -147,8 +147,11 @@ async function callFunctionWithToken(functionNamespace, host){
       45,
       2000,
   ).catch((err) => {
+    console.log("Valid access token call error:", err);
     throw convertAxiosError(err, 'Function lastorder responded with error');
   });
+
+  console.log("res is:", res);
 
   return res;
 }
@@ -161,11 +164,8 @@ async function callFunctionWithNoToken(host){
   let errorOccurred = false;
   let errorStatus = null;
   try {
-    console.log("Host is:", host);
-    console.log("Complete URL is:", `https://lastorder.${host}/function`);
     res = await axios.post(`https://lastorder.${host}/function`, {orderCode: '789'}, {timeout: 5000});
   } catch (err) {
-    console.log("Error object for unauthorization is:", err);
     errorOccurred = true;
     errorStatus = err.response.status;
   }

@@ -162,7 +162,6 @@ When(/^Function is called using a correct authorization token$/, {timeout: 1000 
     const options = this.context.options;
     const hostValues = this.context.commerceHostValues;
 
-    console.log("Commerce Host Values is:", hostValues);
 	const successfulFunctionResponse = await callFunctionWithToken(options.testNS, hostValues.host);
 
     this.context.successfulFunctionResponse = successfulFunctionResponse;
