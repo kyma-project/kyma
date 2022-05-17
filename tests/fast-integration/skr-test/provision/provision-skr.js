@@ -17,13 +17,19 @@ async function provisionSKRInstance(options, timeout) {
     console.log(`\nInstanceID ${options.instanceID}`,
         `Runtime ${options.runtimeName}`, `Application ${options.appName}`, `Suffix ${options.suffix}`);
 
+    const customParams = {
+      oidc: options.oidc0,
+      kymaVersion: 'PR-14116',
+      overridesVersion: '2.1.3',
+    };
+
     const skr = await provisionSKR(keb,
         kcp, gardener,
         options.instanceID,
         options.runtimeName,
         null,
         btpOperatorCreds,
-        null,
+        customParams,
         timeout);
     const shoot = skr.shoot;
 
