@@ -7,7 +7,7 @@ ENV FIT_MAKE_TARGET=ci-skr
 VOLUME /KUBECONFIG
 VOLUME /EMS
 
-RUN apk -U add build-base \
+RUN apk --no-cache add build-base \
     curl \
     git \
     nodejs && \
