@@ -8,13 +8,12 @@ class CommerceCompassMock {
 
     constructor() {
         this._initialized = false;
-
-        this._director = new DirectorClient(DirectorConfig.fromEnv());
     }
 
     static async ensureCommerceWithCompassMockIsSetUp(options){
         if(!this._initialized){
             try{
+                this._director = new DirectorClient(DirectorConfig.fromEnv());
                 await ensureCommerceMockWithCompassTestFixture(this._director, options.appName, options.scenarioName, 'mocks', options.testNS);
                 this._initialized = true;
             }catch(err){
