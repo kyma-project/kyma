@@ -1,4 +1,4 @@
-FROM alpine:latest
+FROM alpine:3.15.4
 
 ENV KUBECONFIG=/KUBECONFIG/kubeconfig.yaml
 ENV EVENTMESH_SECRET_FILE=/EMS/ems.json
