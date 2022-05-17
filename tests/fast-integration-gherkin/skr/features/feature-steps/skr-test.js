@@ -187,7 +187,7 @@ Then(/^The function returns an error$/, () => {
 	assertUnauthorizedFunctionResponse(unauthorizedFunctionResponse);
 });
 
-When(/^A "([^"]*)" event is sent$/, async(eventEncoding) => {
+When(/^A "([^"]*)" event is sent$/, {timeout: 60 * 60 * 1000}, async(eventEncoding) => {
     const commerceMockHost = this.context.commerceMockHost;
 
     let requestParams = null;
@@ -211,7 +211,7 @@ Then(/^The event should be received correctly$/, () => {
 	checkEventResponse(eventResponse);
 });
 
-When(/^An in-cluster "([^"]*)" event is sent$/, {timeout: 60 * 60 * 1000 * 3}, async(eventEncoding) => {
+When(/^An in-cluster "([^"]*)" event is sent$/, {timeout: 60 * 60 * 1000}, async(eventEncoding) => {
     const targetNamespace = this.context.options.testNS;
 
 	const eventId = getRandomEventId(eventEncoding);
@@ -245,7 +245,7 @@ Given(/^KEB plan is AWS$/, () => {
     this.context.auditLogs = auditLogs;
 });
 
-Then(/^Audit logs should be available$/, {timeout: 1000 * 60 * 60 * 2}, async() => {
+Then(/^Audit logs should be available$/, {timeout: 1000 * 60 * 60}, async() => {
 	const auditLogs = this.context.auditLogs;
 
     if (auditLogs !== null){
@@ -253,7 +253,7 @@ Then(/^Audit logs should be available$/, {timeout: 1000 * 60 * 60 * 2}, async() 
     }
 });
 
-AfterAll({timeout: 1000 * 60 * 60 * 95}, async() => {
+AfterAll({timeout: 1000 * 60 * 95}, async() => {
     const featureName = this.context.featureName;
 
     // if (featureName === "skr-test"){
