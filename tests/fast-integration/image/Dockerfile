@@ -10,7 +10,8 @@ VOLUME /EMS
 RUN apk -U add build-base \
     curl \
     git \
-    nodejs
+    nodejs && \
+    rm -rf /var/cache/apk/*
 
 WORKDIR /
 COPY clone-and-run-fit.sh /clone-and-run-fit.sh
