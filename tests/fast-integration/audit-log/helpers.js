@@ -1,5 +1,5 @@
 const {assert} = require('chai');
-const {sleep} = require('../utils');
+const {sleep, info} = require('../utils');
 const {queryPrometheus} = require('../monitoring/client');
 
 function findAuditLog(logs, group) {
@@ -54,6 +54,7 @@ async function checkAuditEventsThreshold(threshold) {
   // Get the max rate for apiserver audit events over the last 60 min
   const query = 'max_over_time(rate(apiserver_audit_event_total{job="apiserver"}[1m])[60m:])';
   const result = await queryPrometheus(query);
+  info('result', result);
   assert.isNotEmpty(result, 'The metrics "apiserver_audit_event_total" should not be empty! ');
   const maxAuditEventsRate = result[0].value[1];
   assert.isBelow(parseFloat(maxAuditEventsRate), threshold);
