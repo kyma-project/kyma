@@ -147,11 +147,8 @@ async function callFunctionWithToken(functionNamespace, host){
       45,
       2000,
   ).catch((err) => {
-    console.log("Valid access token call error:", err);
     throw convertAxiosError(err, 'Function lastorder responded with error');
   });
-
-  console.log("res is:", res);
 
   return res;
 }
