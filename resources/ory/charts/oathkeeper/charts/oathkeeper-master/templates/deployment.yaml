@@ -30,6 +30,10 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
     spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}    
       containers:
         - name: {{ .Chart.Name }}
           image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.oathkeeper) }}"
@@ -48,17 +52,20 @@ spec:
             {{- if .Values.rulesFileName }}
             - --rulesFileName={{ .Values.rulesFileName }}
             {{- end }}
+          env:
+            {{- if .Values.singleNamespaceMode }}
+            - name: NAMESPACE
+              value: {{ .Release.Namespace }}
+            {{- end }}
+            {{- with .Values.deployment.envs }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}            
           resources:
             {{- toYaml .Values.deployment.resources | nindent 12 }}
+          {{- if .Values.deployment.securityContext }}
           securityContext:
-             allowPrivilegeEscalation: false
-             capabilities:
-               drop:
-               - ALL
-             privileged: false
-             runAsGroup: 1000
-             runAsNonRoot: true
-             runAsUser: 1000
+            {{- toYaml .Values.deployment.securityContext | nindent 12 }}
+          {{- end }}
           terminationMessagePath: /dev/termination-log
           terminationMessagePolicy: File
           {{- with .Values.deployment.envs }}
