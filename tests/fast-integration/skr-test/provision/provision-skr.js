@@ -19,8 +19,8 @@ async function provisionSKRInstance(options, timeout) {
 
     const customParams = {
       oidc: options.oidc0,
-      kymaVersion: 'PR-14116',
-      overridesVersion: '2.1.3',
+      kymaVersion: 'PR-14312',
+      overridesVersion: '2.2.0',
     };
 
     const skr = await provisionSKR(keb,

@@ -30,8 +30,8 @@ function oidcE2ETest(options, shoot) {
       this.timeout(updateTimeout);
       const customParams = {
         oidc: options.oidc1,
-        kymaVersion: 'PR-14116', // TODO remove
-        overridesVersion: '2.1.3',
+        kymaVersion: 'PR-14312', // TODO remove
+        overridesVersion: '2.2.0',
       };
       const skr = await updateSKR(keb,
           kcp,
@@ -71,8 +71,8 @@ function oidcE2ETest(options, shoot) {
       this.timeout(updateTimeout);
       const customParams = {
         administrators: options.administrators1,
-        kymaVersion: 'PR-14116', // TODO remove
-        overridesVersion: '2.1.3',
+        kymaVersion: 'PR-14312', // TODO remove
+        overridesVersion: '2.2.0',
       };
       const skr = await updateSKR(keb,
           kcp,
