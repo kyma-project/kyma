@@ -1,4 +1,4 @@
-FROM eu.gcr.io/kyma-project/external/golang:1.18.0-alpine3.15 as builder
+FROM eu.gcr.io/kyma-project/external/golang:1.18.1-alpine3.15 as builder
 
 WORKDIR /go/src/github.com/kyma-project/kyma/components/busola-migrator
 

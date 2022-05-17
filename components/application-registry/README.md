@@ -98,7 +98,7 @@ The Application Registry stores its state in the Kubernetes custom resource, the
 
 You can, however, leverage [Telepresence](https://www.telepresence.io/). This works by replacing a container in a specified Pod, opening up a new local shell or a pre-configured bash, and proxying the network traffic from the local shell through the Pod.
 
-Although you are on your local machine, you can make calls such as `curl http://....svc.cluster.local:8081/v1/metadata/services`. When you run a server in this shell, other Kubernetes services can access it.
+Although you are on your local machine, you can make calls such as `curl http://....svc.cluster.local:8081/v1/metadata/services`. When you run a server in this shell, other Kubernetes Services can access it.
 
 1. [Install telepresence](https://www.telepresence.io/reference/install).
 2. Run Kyma or use the cluster. In the case of Kyma, point your local kubectl to Kyma in Docker.
@@ -110,7 +110,7 @@ telepresence --namespace kyma-system --swap-deployment metadata:metadata --run-s
  ```bash
 sudo ln -s $TELEPRESENCE_ROOT/var/run/secrets /var/run/secrets
 ```
-5. Run `CGO_ENABLED=0 go build ./cmd/applicationregistry` to build the Application Registry and give all Kubernetes services that call the Application Registry access to this process. The process runs locally on your machine. Use the same command to run different Application Connector services like Proxy or Events.
+5. Run `CGO_ENABLED=0 go build ./cmd/applicationregistry` to build the Application Registry and give all Kubernetes Services that call the Application Registry access to this process. The process runs locally on your machine. Use the same command to run different Application Connector services like Proxy or Events.
 
 You can also run another shell to make calls to this service. To run this shell, swap the Application Broker Deployment because Istio sidecar is already injected into this Deployment:
 ```bash

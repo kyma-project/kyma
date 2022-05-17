@@ -20,7 +20,7 @@ To start the Connector Service, run this command:
 ```
 
 The Connector Service has the following parameters:
-- **appName** is the name of the application used by Kubernetes deployments and services. The default value is `connector-service`.
+- **appName** is the name of the application used by Kubernetes deployments and Services. The default value is `connector-service`.
 - **externalAPIPort** is the port that exposes the Connector Service API to an external solution. The default port is `8081`.
 - **internalAPIPort** is the port that exposes the Connector Service within Kubernetes cluster. The default port is `8080`.
 - **namespace** is the Namespace in which the Connector Service is deployed. The default Namespace is `kyma-integration`.
