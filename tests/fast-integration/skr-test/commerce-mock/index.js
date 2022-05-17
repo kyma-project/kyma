@@ -1,10 +1,10 @@
 const {
-  // checkFunctionResponse,
-  // checkInClusterEventDelivery,
-  // sendLegacyEventAndCheckResponse,
-  // sendCloudEventStructuredModeAndCheckResponse,
-  // sendCloudEventBinaryModeAndCheckResponse,
-  // deleteMockTestFixture,
+  checkFunctionResponse,
+  checkInClusterEventDelivery,
+  sendLegacyEventAndCheckResponse,
+  sendCloudEventStructuredModeAndCheckResponse,
+  sendCloudEventBinaryModeAndCheckResponse,
+  deleteMockTestFixture,
   ensureCommerceMockWithCompassTestFixture,
 } = require('../../test/fixtures/commerce-mock');
 const {
