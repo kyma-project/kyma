@@ -6,6 +6,8 @@ import (
 	"os"
 	"time"
 
+	ctrl "sigs.k8s.io/controller-runtime"
+
 	"github.com/kyma-project/kyma/components/function-controller/internal/controllers/serverless/metrics"
 
 	"github.com/go-logr/zapr"
@@ -21,7 +23,6 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
-	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/event"
 	"sigs.k8s.io/controller-runtime/pkg/handler"
 	ctrlzap "sigs.k8s.io/controller-runtime/pkg/log/zap"
@@ -33,7 +34,7 @@ import (
 
 var (
 	scheme   = runtime.NewScheme()
-	setupLog = ctrl.Log.WithName("setup")
+	setupLog = ctrlzap.New().WithName("setup")
 )
 
 func init() {
@@ -115,13 +116,13 @@ func main() {
 
 	events := make(chan event.GenericEvent)
 	healthCh := make(chan bool)
-	healthHandler := serverless.NewHealthChecker(events, healthCh, config.Healthz.LivenessTimeout, zapLogger.Named("healthz"))
+	healthHandler := serverless.NewHealthChecker(events, healthCh, config.Healthz.LivenessTimeout, zapLogger.Named("healthz").Sugar())
 	if err := mgr.AddHealthzCheck("health check", healthHandler.Checker); err != nil {
 		setupLog.Error(err, "unable to register healthz")
 		os.Exit(1)
 	}
 
-	fnRecon := serverless.NewFunction(resourceClient, ctrl.Log, config.Function, git.NewGit2Go(), mgr.GetEventRecorderFor(serverlessv1alpha1.FunctionControllerValue), prometheusCollector, healthCh)
+	fnRecon := serverless.NewFunction(resourceClient, zap.NewNop().Sugar(), config.Function, git.NewGit2Go(), mgr.GetEventRecorderFor(serverlessv1alpha1.FunctionControllerValue), prometheusCollector, healthCh)
 	fnCtrl, err := fnRecon.SetupWithManager(mgr)
 	if err != nil {
 		setupLog.Error(err, "unable to create Function controller")
@@ -134,37 +135,37 @@ func main() {
 		os.Exit(1)
 	}
 
-	if err := k8s.NewConfigMap(mgr.GetClient(), ctrl.Log, config.Kubernetes, configMapSvc).
+	if err := k8s.NewConfigMap(mgr.GetClient(), zap.NewNop().Sugar(), config.Kubernetes, configMapSvc).
 		SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create ConfigMap controller")
 		os.Exit(1)
 	}
 
-	if err := k8s.NewNamespace(mgr.GetClient(), ctrl.Log, config.Kubernetes, configMapSvc, secretSvc, serviceAccountSvc, roleSvc, roleBindingSvc).
+	if err := k8s.NewNamespace(mgr.GetClient(), zap.NewNop().Sugar(), config.Kubernetes, configMapSvc, secretSvc, serviceAccountSvc, roleSvc, roleBindingSvc).
 		SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create Namespace controller")
 		os.Exit(1)
 	}
 
-	if err := k8s.NewSecret(mgr.GetClient(), ctrl.Log, config.Kubernetes, secretSvc).
+	if err := k8s.NewSecret(mgr.GetClient(), zap.NewNop().Sugar(), config.Kubernetes, secretSvc).
 		SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create Secret controller")
 		os.Exit(1)
 	}
 
-	if err := k8s.NewServiceAccount(mgr.GetClient(), ctrl.Log, config.Kubernetes, serviceAccountSvc).
+	if err := k8s.NewServiceAccount(mgr.GetClient(), zap.NewNop().Sugar(), config.Kubernetes, serviceAccountSvc).
 		SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create ServiceAccount controller")
 		os.Exit(1)
 	}
 
-	if err := k8s.NewRole(mgr.GetClient(), ctrl.Log, config.Kubernetes, roleSvc).
+	if err := k8s.NewRole(mgr.GetClient(), zap.NewNop().Sugar(), config.Kubernetes, roleSvc).
 		SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create Role controller")
 		os.Exit(1)
 	}
 
-	if err := k8s.NewRoleBinding(mgr.GetClient(), ctrl.Log, config.Kubernetes, roleBindingSvc).
+	if err := k8s.NewRoleBinding(mgr.GetClient(), zap.NewNop().Sugar(), config.Kubernetes, roleBindingSvc).
 		SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create RoleBinding controller")
 		os.Exit(1)

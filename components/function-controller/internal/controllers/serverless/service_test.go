@@ -4,14 +4,14 @@ import (
 	"context"
 	"testing"
 
+	"go.uber.org/zap"
+
+	"github.com/kyma-project/kyma/components/function-controller/internal/resource/automock"
+	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
 	"github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
-	"sigs.k8s.io/controller-runtime/pkg/log"
-
-	"github.com/kyma-project/kyma/components/function-controller/internal/resource/automock"
-	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
 )
 
 func TestFunctionReconciler_equalServices(t *testing.T) {
@@ -435,7 +435,7 @@ func TestFunctionReconciler_deleteExcessServices(t *testing.T) {
 		}
 
 		r := reconciler{
-			log: log.Log,
+			log: zap.NewNop().Sugar(),
 			k8s: k8s{
 				client: client,
 			},
@@ -472,7 +472,7 @@ func TestFunctionReconciler_deleteExcessServices(t *testing.T) {
 		}
 
 		r := reconciler{
-			log: log.Log,
+			log: zap.NewNop().Sugar(),
 			k8s: k8s{
 				client: client,
 			},
