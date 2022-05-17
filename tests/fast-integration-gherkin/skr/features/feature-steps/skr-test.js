@@ -159,6 +159,8 @@ When(/^Function is called using a correct authorization token$/, {timeout: 1000 
     const options = this.context.options;
 
     const commerceMockHost = await getCommerceMockHost();
+    console.log("CommerceMockHost is", commerceMockHost);
+    console.log("Test Namespace is:", options.testNS);
 	const successfulFunctionResponse = await callFunctionWithToken(options.testNS, commerceMockHost);
 
     this.context.commerceMockHost = commerceMockHost;
@@ -174,9 +176,9 @@ Then(/^The function should be reachable$/, () => {
 When(/^Function is called without an authorization token$/, async() => {
     const commerceMockHost = this.context.commerceMockHost;
 
-	const error = await callFunctionWithNoToken(commerceMockHost);
+	const unauthorizedFunctionResponse = await callFunctionWithNoToken(commerceMockHost);
 
-    this.context.unauthorizedFunctionResponse = error;
+    this.context.unauthorizedFunctionResponse = unauthorizedFunctionResponse;
 });
 
 Then(/^The function returns an error$/, () => {
