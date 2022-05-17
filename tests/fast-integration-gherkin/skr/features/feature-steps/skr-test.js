@@ -159,8 +159,6 @@ When(/^Function is called using a correct authorization token$/, {timeout: 1000 
     const options = this.context.options;
 
     const commerceMockHost = await getCommerceMockHost();
-    console.log("CommerceMockHost is", commerceMockHost);
-    console.log("Test Namespace is:", options.testNS);
 	const successfulFunctionResponse = await callFunctionWithToken(options.testNS, commerceMockHost);
 
     this.context.commerceMockHost = commerceMockHost;

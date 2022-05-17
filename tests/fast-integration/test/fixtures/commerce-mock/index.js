@@ -158,6 +158,8 @@ async function callFunctionWithNoToken(host){
   let errorOccurred = false;
   let errorStatus = null;
   try {
+    console.log("Host is:", host);
+    console.log("Complete URL is:", `https://lastorder.${host}/function`);
     res = await axios.post(`https://lastorder.${host}/function`, {orderCode: '789'}, {timeout: 5000});
   } catch (err) {
     console.log("Error object for unauthorization is:", err);
