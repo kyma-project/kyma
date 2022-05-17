@@ -153,15 +153,18 @@ Given(/^Commerce Backend is set up$/, {timeout: 1000 * 60 * 60 * 3}, async() => 
 	const options = this.context.options;
 
     await CommerceCompassMock.ensureCommerceWithCompassMockIsSetUp(options);
+
+    const hostValues = await getCommerceMockHost();
+    this.context.commerceHostValues = hostValues;
 });
 
 When(/^Function is called using a correct authorization token$/, {timeout: 1000 * 60 * 60 * 2}, async() => {
     const options = this.context.options;
+    const hostValues = this.context.commerceHostValues;
 
-    const hostValues = await getCommerceMockHost();
-	const successfulFunctionResponse = await callFunctionWithToken(options.testNS, commerceMockHost);
+    console.log("Commerce Host Values is:", hostValues);
+	const successfulFunctionResponse = await callFunctionWithToken(options.testNS, hostValues.host);
 
-    this.context.commerceHostValues = hostValues;
     this.context.successfulFunctionResponse = successfulFunctionResponse;
 });
 
@@ -172,9 +175,9 @@ Then(/^The function should be reachable$/, () => {
 });
 
 When(/^Function is called without an authorization token$/, async() => {
-    const commerceHost = this.context.commerceHostValues.host;
+    const commerceHostValues = this.context.commerceHostValues;
 
-	const unauthorizedFunctionResponse = await callFunctionWithNoToken(commerceHost);
+	const unauthorizedFunctionResponse = await callFunctionWithNoToken(commerceHostValues.host);
 
     this.context.unauthorizedFunctionResponse = unauthorizedFunctionResponse;
 });
