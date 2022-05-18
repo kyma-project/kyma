@@ -13,7 +13,6 @@ RUN apk --no-cache add build-base \
     curl \
     git \
     nodejs && \
-    rm -rf /var/cache/apk/*
 
 WORKDIR /
 COPY clone-and-run-fit.sh /clone-and-run-fit.sh
