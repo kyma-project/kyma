@@ -230,11 +230,11 @@ When(/^An in-cluster "([^"]*)" event is sent$/, {timeout: 60 * 60 * 1000}, async
     this.context.eventId = eventId;
 });
 
-Then(/^The event is received successfully$/, () => {
+Then(/^The event is received successfully$/, async() => {
     const mockHost = this.context.lastOrderMockHost;
     const eventId = this.context.eventId;
 
-	ensureInClusterEventReceivedWithRetry(mockHost, eventId);
+	await ensureInClusterEventReceivedWithRetry(mockHost, eventId);
 });
 
 Given(/^KEB plan is AWS$/, () => {
