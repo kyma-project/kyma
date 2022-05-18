@@ -209,8 +209,6 @@ When(/^A "([^"]*)" event is sent$/, {timeout: 60 * 60 * 1000}, async(eventEncodi
 Then(/^The event should be received correctly$/, () => {
     const eventResponse = this.context.eventResponse;
 
-    console.log("Event Response is:", eventResponse);
-    console.log("Event response data is:", eventResponse.data.event.data);
 	checkEventResponse(eventResponse);
 });
 
@@ -260,12 +258,12 @@ AfterAll({timeout: 1000 * 60 * 95}, async() => {
     const featureName = this.context.featureName;
 
     if (featureName === "skr-test"){
-        const options = this.context.options;
+        // const options = this.context.options;
 
-        // Delete commerce mock
-        await CommerceCompassMock.deleteCommerceMockResources(options.testNS);
+        // // Delete commerce mock
+        // await CommerceCompassMock.deleteCommerceMockResources(options.testNS);
 
-        // Deprovision SKR
-        await SKRSetup.deprovisionSKR();    
+        // // Deprovision SKR
+        // await SKRSetup.deprovisionSKR();    
     }
 });
