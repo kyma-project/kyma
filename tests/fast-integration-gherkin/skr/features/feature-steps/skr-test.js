@@ -194,16 +194,12 @@ When(/^A "([^"]*)" event is sent$/, {timeout: 60 * 60 * 1000}, async(eventEncodi
     let requestParams = null;
     if (eventEncoding === 'legacy'){
         requestParams = getLegacyEventParams();
-        console.log("Legacy");
     } else if (eventEncoding === 'structured'){
         requestParams = getStructuredEventParams();
-        console.log("structured");
     } else if (eventEncoding === 'binary'){
         requestParams = getBinaryEventParams();
-        console.log("binary");
     } else {
         console.error("Not supported eventEncoding type:", eventEncoding);
-        console.log("Not supported encoding");
     }
 	const eventResponse = await sendEvent(commerceMockHost, commerceHost, requestParams);
     console.log("EventResponse is:" , eventResponse);
