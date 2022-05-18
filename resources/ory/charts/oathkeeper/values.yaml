@@ -81,10 +81,10 @@ ingress:
         paths:
           - path: /
             pathType: ImplementationSpecific
-    #    tls: []
-    #        hosts:
-    #          - proxy.oathkeeper.local
-    #      - secretName: oathkeeper-proxy-example-tls
+    #   tls: []
+    #       hosts:
+    #         - proxy.oathkeeper.local
+    #     - secretName: oathkeeper-proxy-example-tls
 
   api:
     # -- En-/Disable the api ingress.
