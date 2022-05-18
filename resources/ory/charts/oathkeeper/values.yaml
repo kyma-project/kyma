@@ -10,7 +10,6 @@ global:
 replicaCount: 1
 
 image:
-  # Kyma controlled
   # -- Image pull policy
   pullPolicy: IfNotPresent
 
@@ -164,7 +163,6 @@ deployment:
   #    cpu: 100m
   #  memory: 128Mi
 
-  #  Kyma controlled
   securityContext:
     sidecar:
       allowPrivilegeEscalation: false

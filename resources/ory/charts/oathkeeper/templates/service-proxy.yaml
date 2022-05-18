@@ -23,12 +23,10 @@ spec:
       targetPort: http-proxy
       protocol: TCP
       name: {{ .Values.service.proxy.name }}
-      #Kyma controlled
     - name: tcp-status-port
       port: 15020
       targetPort: 15020
       protocol: TCP
-      ################
   selector:
     app.kubernetes.io/name: {{ include "oathkeeper.name" . }}
     app.kubernetes.io/instance: {{ .Release.Name }}

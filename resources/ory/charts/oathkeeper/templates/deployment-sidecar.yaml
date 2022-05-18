@@ -11,7 +11,6 @@ metadata:
     mode: {{ .Values.global.ory.oathkeeper.maester.mode }}
 {{ include "oathkeeper.labels" . | indent 4 }}
 spec:
-  #Kyma controlled
 {{- if not .Values.deployment.autoscaling.enabled}}
   replicas: {{ .Values.replicaCount }}
 {{- end }}
@@ -20,7 +19,7 @@ spec:
       app.kubernetes.io/name: {{ include "oathkeeper.name" . }}
       app.kubernetes.io/instance: {{ .Release.Name }}
   strategy:
-    {{- toYaml .Values.deployment.strategy | nindent 4 }}  #Kyma controlled
+    {{- toYaml .Values.deployment.strategy | nindent 4 }}
   template:
     metadata:
       labels:
@@ -46,7 +45,7 @@ spec:
             secretName: {{ include "oathkeeper.fullname" . }}-jwks-secret
       initContainers:
         - name: init
-          image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.busybox) }}"  #Kyma controlled
+          image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.busybox) }}"
           volumeMounts:
             - name: {{ include "oathkeeper.name" . }}-rules-volume
               mountPath: /etc/rules
@@ -103,9 +102,9 @@ spec:
           resources:
             {{- toYaml .Values.deployment.resources | nindent 12 }}
           securityContext:
-            {{- toYaml .Values.deployment.securityContext.oathkeeper | nindent 12 }}  #Kyma controlled
+            {{- toYaml .Values.deployment.securityContext.oathkeeper | nindent 12 }}
         - name: {{ .Chart.Name }}-maester
-          image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.oathkeeper_maester) }}"  #Kyma controlled
+          image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.oathkeeper_maester) }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           command:
             - /manager
