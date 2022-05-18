@@ -785,6 +785,7 @@ async function waitForSubscriptionsTillReady(targetNamespace) {
 async function checkInClusterEventDelivery(targetNamespace) {
   await checkInClusterEventDeliveryHelper(targetNamespace, 'structured');
   await checkInClusterEventDeliveryHelper(targetNamespace, 'binary');
+  await checkInClusterLegacyEvent(targetNamespace)
 }
 
 // send event using function query parameter send=true
@@ -815,6 +816,34 @@ async function sendInClusterEventWithRetry(mockHost, eventId, encoding, retriesL
   debug(`Event "${eventId}" is sent`);
 }
 
+// send legacy event using function query parameter send=true
+async function sendInClusterLegacyEventWithRetry(mockHost, eventData, retriesLeft = 10) {
+  await retryPromise(async () => {
+    const response = await axios.post(`https://${mockHost}`, eventData, {
+      params: {
+        send: true,
+        isLegacyEvent: true,
+      },
+      headers: {
+        'X-B3-Sampled': 1,
+      },
+    });
+
+    debug('Send response:', {
+      status: response.status,
+      statusText: response.statusText,
+      data: response.data,
+    });
+
+    if (response.data.eventPublishError) {
+      throw convertAxiosError(response.data.statusText);
+    }
+    expect(response.status).to.be.equal(200);
+  }, retriesLeft, 1000);
+
+  debug(`Legacy event is sent: `, eventData);
+}
+
 // verify if event was received using function query parameter inappevent=eventId
 async function ensureInClusterEventReceivedWithRetry(mockHost, eventId, retriesLeft = 10) {
   return await retryPromise(async () => {
@@ -837,6 +866,35 @@ async function ensureInClusterEventReceivedWithRetry(mockHost, eventId, retriesL
       });
 }
 
+// verify if legacy event was received using function query parameter inappevent=eventId
+async function ensureInClusterLegacyEventReceivedWithRetry(mockHost, eventId, retriesLeft = 10) {
+  return await retryPromise(async () => {
+    debug(`Waiting to receive legacy event "${eventId}"`);
+
+    const response = await axios.get(`https://${mockHost}`, {params: {inappevent: eventId}});
+
+    debug('Received response:', {
+      status: response.status,
+      statusText: response.statusText,
+      data: response.data,
+    });
+
+    expect(response.data).to.have.nested.property('event.id', eventId, 'The same event id expected in the result');
+    expect(response.data).to.have.nested.property('event.shipped', true, 'Order should have property shipped');
+    expect(response.data).to.have.nested.property('event.ce-type').that.contains('order.received');
+    expect(response.data).to.have.nested.property('event.ce-source');
+    expect(response.data).to.have.nested.property('event.ce-eventtypeversion', 'v1');
+    expect(response.data).to.have.nested.property('event.ce-specversion', '1.0');
+    expect(response.data).to.have.nested.property('event.ce-id');
+    expect(response.data).to.have.nested.property('event.ce-time');
+
+    return response;
+  }, retriesLeft, 2 * 1000)
+      .catch((err) => {
+        throw convertAxiosError(err, 'Fetching published legacy event responded with error');
+      });
+}
+
 function getRandomEventId(encoding) {
   return 'event-' + encoding + '-' + genRandom(5);
 }
@@ -856,6 +914,25 @@ async function checkInClusterEventDeliveryHelper(targetNamespace, encoding) {
 
   await sendInClusterEventWithRetry(mockHost, eventId, encoding);
   return ensureInClusterEventReceivedWithRetry(mockHost, eventId);
+}
+
+async function checkInClusterLegacyEvent(targetNamespace) {
+  const eventId = getRandomEventId("legacy");
+  const mockHost = await getVirtualServiceHost(targetNamespace, 'lastorder');
+
+  if (isDebugEnabled()) {
+    await printStatusOfInClusterEventingInfrastructure(targetNamespace, "legacy", 'lastorder');
+  }
+
+  const eventData = {
+    'event-type': 'order.received',
+    'event-type-version': 'v1',
+    'event-time': '2020-09-28T14:47:16.491Z',
+    'data': {'id': eventId, 'legacyOrder': '987'},
+  };
+
+  await sendInClusterLegacyEventWithRetry(mockHost, eventData);
+  return ensureInClusterLegacyEventReceivedWithRetry(mockHost, eventId);
 }
 
 module.exports = {

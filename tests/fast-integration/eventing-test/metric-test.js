@@ -122,6 +122,42 @@ const dashboards = {
   },
 };
 
+const skrDashboards = {
+  // The delivery dashboard
+  delivery_applicationConnectivityValidator: {
+    title: 'Requests to application connectivity validator',
+    query: 'sum by(destination_service) (rate(istio_requests_total{destination_service="central-application-connectivity-validator.kyma-system.svc.cluster.local", response_code=~"2.*"}[5m]))',
+    backends: ['nats', 'beb'],
+    assert: function(result) {
+      const foundMetric = result.find((res) => res.metric.destination_service.startsWith('central-application-connectivity-validator'));
+      expect(foundMetric).to.be.not.undefined;
+    },
+  },
+  // The latency dashboard
+  latency_connectivityValidatorToPublisherProxy: {
+    title: 'Latency of Connectivity Validator -> Event Publisher',
+    query: `
+        histogram_quantile(
+          0.99999, 
+          sum(rate(
+            istio_request_duration_milliseconds_bucket{
+              source_workload_namespace="kyma-system",
+              source_workload="central-application-connectivity-validator",
+              destination_workload_namespace="kyma-system",
+              destination_workload="eventing-publisher-proxy"
+            }[5m])
+          ) by (le,source_workload_namespace,source_workload,destination_workload_namespace,destination_workload))
+        `,
+    backends: ['nats', 'beb'],
+    assert: function(result) {
+      const foundMetric = result.find((res) =>
+          res.metric.source_workload.toLowerCase() === 'central-application-connectivity-validator' &&
+          res.metric.destination_workload.toLowerCase() === 'eventing-publisher-proxy');
+      expect(foundMetric).to.be.not.undefined;
+    },
+  },
+};
+
 // A generic assertion for the pod dashboards
 function ensureEventingPodsArePresent(result) {
   let controllerFound = false; let publisherProxyFound = false; let natsFound = false;
@@ -147,8 +183,12 @@ function runDashboardTestCase(dashboardName, test) {
   }, 120, 5000);
 }
 
-function eventingMonitoringTest(backend, isJetStreamEnabled = false) {
+function eventingMonitoringTest(backend, isSkr, isJetStreamEnabled = false) {
   let allDashboards = dashboards;
+  if (isSkr) {
+    allDashboards = Object.assign(allDashboards, skrDashboards);
+  }
+
   if (isJetStreamEnabled) {
     allDashboards = Object.assign(allDashboards, getJetStreamDashboardTests());
   }

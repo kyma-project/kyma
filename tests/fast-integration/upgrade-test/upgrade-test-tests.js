@@ -26,7 +26,7 @@ describe('Upgrade test tests', function() {
     initialRestarts = await getContainerRestartsForAllNamespaces();
   });
 
-  it('in-cluster event should be delivered (structured and binary mode)', async function() {
+  it('in-cluster event should be delivered (legacy events, structured and binary cloud events)', async function() {
     await checkInClusterEventDelivery(testNamespace);
   });
 

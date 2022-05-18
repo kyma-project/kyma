@@ -6,6 +6,9 @@ const httpsAgent = new https.Agent({
 axios.defaults.httpsAgent = httpsAgent;
 const {
   checkFunctionResponse,
+  sendLegacyEventAndCheckResponse,
+  sendCloudEventStructuredModeAndCheckResponse,
+  sendCloudEventBinaryModeAndCheckResponse,
   checkInClusterEventDelivery,
   waitForSubscriptionsTillReady,
   waitForSubscriptions,
@@ -74,19 +77,38 @@ describe('Eventing tests', function() {
     });
   }
 
-  // eventingE2ETestSuite - Runs Eventing end-to-end tests
-  function eventingE2ETestSuite(backend) {
+  // eventingTestSuite - Runs Eventing tests
+  function eventingTestSuite(backend, isSKR) {
     it('lastorder function should be reachable through secured API Rule', async function() {
       await checkFunctionResponse(testNamespace, mockNamespace);
     });
 
-    it('In-cluster event should be delivered (structured and binary mode)', async function() {
+    it('In-cluster event should be delivered (legacy events, structured and binary cloud events)', async function() {
       await checkInClusterEventDelivery(testNamespace);
     });
+
+    if(isSKR) {
+      eventingE2ETestSuiteWithCommerceMock(backend)
+    }
 
     if (backend === natsBackend && isJetStreamEnabled && isFileStorage) {
       testJetStreamFileStorage();
     }
+  }
+
+  // eventingE2ETestSuiteWithCommerceMock - Runs Eventing end-to-end tests with Compass
+  function eventingE2ETestSuiteWithCommerceMock(backend) {
+    it('order.created.v1 legacy event from CommerceMock should trigger the lastorder function', async function() {
+      await sendLegacyEventAndCheckResponse(mockNamespace);
+    });
+
+    it('order.created.v1 cloud event from CommerceMock should trigger the lastorder function', async function() {
+      await sendCloudEventStructuredModeAndCheckResponse(backend, mockNamespace);
+    });
+
+    it('order.created.v1 binary cloud event from CommerceMock should trigger the lastorder function', async function() {
+      await sendCloudEventBinaryModeAndCheckResponse(backend, mockNamespace);
+    });
   }
 
   function testJetStreamFileStorage() {
@@ -189,11 +211,11 @@ describe('Eventing tests', function() {
       await waitForSubscriptionsTillReady(testNamespace);
     });
     // Running Eventing end-to-end tests
-    eventingE2ETestSuite(natsBackend);
+    eventingTestSuite(natsBackend, isSKR);
     // Running Eventing tracing tests
     eventingTracingTestSuite();
     // Running Eventing Monitoring tests
-    eventingMonitoringTest(natsBackend, isJetStreamEnabled);
+    eventingMonitoringTest(natsBackend, isSKR, isJetStreamEnabled);
   });
 
   context('with BEB backend', function() {
@@ -216,9 +238,9 @@ describe('Eventing tests', function() {
       }
     });
     // Running Eventing end-to-end tests
-    eventingE2ETestSuite(bebBackend);
+    eventingTestSuite(bebBackend, isSKR);
     // Running Eventing Monitoring tests
-    eventingMonitoringTest(bebBackend);
+    eventingMonitoringTest(bebBackend, isSKR);
   });
 
   context('with Nats backend switched back from BEB', async function() {
@@ -233,11 +255,11 @@ describe('Eventing tests', function() {
       await waitForSubscriptionsTillReady(testNamespace);
     });
     // Running Eventing end-to-end tests
-    eventingE2ETestSuite(natsBackend);
+    eventingTestSuite(natsBackend, isSKR);
     // Running Eventing tracing tests
     eventingTracingTestSuite();
     // Running Eventing Monitoring tests
-    eventingMonitoringTest(natsBackend, isJetStreamEnabled);
+    eventingMonitoringTest(natsBackend, isSKR, isJetStreamEnabled);
   });
 
   if (!isSKR) {
