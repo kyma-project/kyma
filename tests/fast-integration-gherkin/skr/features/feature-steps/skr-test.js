@@ -209,6 +209,7 @@ When(/^A "([^"]*)" event is sent$/, {timeout: 60 * 60 * 1000}, async(eventEncodi
 Then(/^The event should be received correctly$/, () => {
     const eventResponse = this.context.eventResponse;
 
+    console.log("Event Response is:", eventResponse);
 	checkEventResponse(eventResponse);
 });
 
