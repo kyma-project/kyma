@@ -11,7 +11,6 @@ SHELL ["/bin/ash", "-o", "pipefail", "-c"]
 
 RUN apk --no-cache add \
     build-base \
-    curl \
     git \
     nodejs
 
