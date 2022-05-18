@@ -12,7 +12,7 @@ SHELL ["/bin/ash", "-o", "pipefail", "-c"]
 RUN apk --no-cache add \
     build-base \
     git \
-    nodejs
+    nodejs=16.14.2-r0
 
 WORKDIR /
 COPY clone-and-run-fit.sh /clone-and-run-fit.sh
