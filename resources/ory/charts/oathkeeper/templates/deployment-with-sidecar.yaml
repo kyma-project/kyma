@@ -100,7 +100,7 @@ spec:
             httpGet:
               path: /health/alive
               port: http-api
-            initialDelaySeconds: 45
+            initialDelaySeconds: 15
             periodSeconds: 10
             failureThreshold: 10
           readinessProbe:
