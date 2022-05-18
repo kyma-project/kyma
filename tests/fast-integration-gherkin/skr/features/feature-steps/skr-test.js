@@ -210,6 +210,7 @@ Then(/^The event should be received correctly$/, () => {
     const eventResponse = this.context.eventResponse;
 
     console.log("Event Response is:", eventResponse);
+    console.log("Event response data is:", eventResponse.data.event.data);
 	checkEventResponse(eventResponse);
 });
 
