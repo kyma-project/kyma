@@ -110,6 +110,13 @@ spec:
             initialDelaySeconds: 45
             periodSeconds: 10
             failureThreshold: 10
+          startupProbe:
+            httpGet:
+              path: /health/alive
+              port: http-api
+            initialDelaySeconds: 45
+            periodSeconds: 10
+            failureThreshold: 30
           securityContext:
             allowPrivilegeEscalation: false
             capabilities:
