@@ -1,6 +1,8 @@
 package serverless
 
 import (
+	"path"
+
 	"github.com/kyma-project/kyma/components/function-controller/internal/git"
 	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
 	corev1 "k8s.io/api/core/v1"
@@ -130,4 +132,14 @@ func (r *FunctionReconciler) mergeLabels(labelsCollection ...map[string]string) 
 		}
 	}
 	return result
+}
+
+func (r *FunctionReconciler) getPackageConfigVolumeMountsForRuntime(rtm serverlessv1alpha1.Runtime) []corev1.VolumeMount {
+	switch rtm {
+	case serverlessv1alpha1.Nodejs12, serverlessv1alpha1.Nodejs14, serverlessv1alpha1.Nodejs16:
+		return []corev1.VolumeMount{{Name: "registry-config", ReadOnly: true, MountPath: path.Join(workspaceMountPath, "registry-config/.npmrc"), SubPath: ".npmrc"}}
+	case serverlessv1alpha1.Python39:
+		return []corev1.VolumeMount{{Name: "registry-config", ReadOnly: true, MountPath: path.Join(workspaceMountPath, "registry-config/pip.conf"), SubPath: "pip.conf"}}
+	}
+	return nil
 }
