@@ -8,7 +8,9 @@ apiVersion: networking.k8s.io/v1beta1
 kind: Ingress
 metadata:
   name: {{ $fullName }}-proxy
+  {{- if .Release.Namespace }}
   namespace: {{ .Release.Namespace }}
+  {{- end }}
   labels:
     {{- include "oathkeeper.labels" . | nindent 4 }}
   annotations:
@@ -16,11 +18,6 @@ metadata:
     {{- toYaml . | nindent 4 }}
   {{- end }}
 spec:
-  ingressClassName: {{ .Values.ingress.proxy.className }}
-  defaultBackend:
-  {{- with .Values.ingress.proxy.defaultBackend }}
-    {{- toYaml . | nindent 4 }}
-  {{- end }}
   {{- if .Values.ingress.proxy.tls }}
   tls:
     {{- range .Values.ingress.proxy.tls }}

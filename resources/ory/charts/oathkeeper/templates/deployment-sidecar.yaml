@@ -57,10 +57,8 @@ spec:
             - |
               touch /etc/rules/access-rules.json
               chmod 666 /etc/rules/access-rules.json
-          {{- if .Values.deployment.securityContext.sidecar }}
           securityContext:
             {{- toYaml .Values.deployment.securityContext.sidecar | nindent 12 }}
-          {{- end }}
       containers:
         - name: {{ .Chart.Name }}
           image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.oathkeeper) }}"
@@ -127,10 +125,8 @@ spec:
             - name: {{ include "oathkeeper.name" . }}-rules-volume
               mountPath: /etc/rules
               readOnly: false
-          {{- if .Values.deployment.securityContext.maester }}
           securityContext:
             {{- toYaml .Values.deployment.securityContext.maester | nindent 12 }}
-          {{- end }}
         {{- if .Values.deployment.extraContainers }}
 {{ tpl .Values.deployment.extraContainers . | indent 8 }}
         {{- end }}

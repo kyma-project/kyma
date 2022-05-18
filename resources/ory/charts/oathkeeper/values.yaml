@@ -58,27 +58,6 @@ service:
     type: ClusterIP
     # -- The service port
     port: 4456
-    # -- The service port name. Useful to set a custom service port name if it must follow a scheme (e.g. Istio)
-    name: http
-    # -- If you do want to specify annotations, uncomment the following
-    # lines, adjust them as necessary, and remove the curly braces after 'annotations:'.
-    # kubernetes.io/ingress.class: nginx
-    # kubernetes.io/tls-acme: "true"
-    annotations: {}
-    # -- If you do want to specify additional labels, uncomment the following lines, adjust them as necessary, and remove the curly braces after 'labels:'.
-    # e.g.  app: oathkeeper
-    labels: {}
-
-  # -- Configures the Kubernetes service for the metrics port.
-  metrics:
-    # -- En-/disable the service
-    enabled: true
-    # -- The service type
-    type: ClusterIP
-    # -- The service port
-    port: 80
-    # -- The service port name. Useful to set a custom service port name if it must follow a scheme (e.g. Istio)
-    name: http
     # -- If you do want to specify annotations, uncomment the following
     # lines, adjust them as necessary, and remove the curly braces after 'annotations:'.
     # kubernetes.io/ingress.class: nginx
@@ -94,7 +73,6 @@ ingress:
   proxy:
     # -- En-/Disable the proxy ingress.
     enabled: false
-    className: ""
     annotations: {}
     #     kubernetes.io/ingress.class: nginx
     #     kubernetes.io/tls-acme: "true"
@@ -107,18 +85,10 @@ ingress:
     #        hosts:
     #          - proxy.oathkeeper.local
     #      - secretName: oathkeeper-proxy-example-tls
-    # -- Configuration for custom default service. This service will be used to handle the response when the configured service in the Ingress rule does not have any active endpoints
-    defaultBackend:
-      {}
-      # service:
-      #   name: myservice
-      #   port:
-      #     number: 80
 
   api:
     # -- En-/Disable the api ingress.
     enabled: false
-    className: ""
     annotations: {}
     #      If you do want to specify annotations, uncomment the following
     #      lines, adjust them as necessary, and remove the curly braces after 'annotations:'.
@@ -147,8 +117,6 @@ oathkeeper:
         port: 4455
       api:
         port: 4456
-      prometheus:
-        port: 9000
 # -- If set, uses the given JSON Web Key Set as the signing key for the ID Token Mutator.
 # mutatorIdTokenJWKs: {}
 # -- If set, uses the given access rules.
@@ -326,20 +294,6 @@ pdb:
   enabled: false
   spec:
     minAvailable: 1
-
-# -- Parameters for the Prometheus ServiceMonitor objects.
-# Reference: https://docs.openshift.com/container-platform/4.6/rest_api/monitoring_apis/servicemonitor-monitoring-coreos-com-v1.html
-serviceMonitor:
-  # -- HTTP scheme to use for scraping.
-  scheme: http
-  # -- Interval at which metrics should be scraped
-  scrapeInterval: 60s
-  # -- Timeout after which the scrape is ended
-  scrapeTimeout: 30s
-  # -- Provide additionnal labels to the ServiceMonitor ressource metadata
-  labels: {}
-  # -- TLS configuration to use when scraping the endpoint
-  tlsConfig: {}
 
 configmap:
   # -- switch to false to prevent checksum annotations being maintained and propogated to the pods

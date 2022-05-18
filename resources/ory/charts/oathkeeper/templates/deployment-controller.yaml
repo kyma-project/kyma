@@ -3,7 +3,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "oathkeeper.name" . }}  #Kyma controlled
+  name: {{ include "oathkeeper.fullname" . }}  #Kyma controlled
   {{- if .Release.Namespace }}
   namespace: {{ .Release.Namespace }}
   {{- end }}
@@ -64,8 +64,6 @@ spec:
         - name: {{ include "oathkeeper.name" . }}-secrets-volume
           secret:
             secretName: {{ include "oathkeeper.fullname" . }}-jwks-secret  #Kyma controlled
-      serviceAccountName: {{ include "oathkeeper.serviceAccountName" . }}
-      automountServiceAccountToken: {{ .Values.deployment.automountServiceAccountToken }}
       containers:
         - name: {{ .Chart.Name }}
           image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.oathkeeper) }}"  #Kyma controlled
@@ -106,7 +104,7 @@ spec:
               mountPath: /etc/rules
               readOnly: true
             - name: {{ include "oathkeeper.name" . }}-secrets-volume
-              mountPath: {{ .Values.secret.mountPath }}
+              mountPath: /etc/secrets
               readOnly: true
           ports:
             - name: http-api
@@ -115,13 +113,13 @@ spec:
             - name: http-proxy
               containerPort: {{ .Values.oathkeeper.config.serve.proxy.port }}
               protocol: TCP
-            - name: http-metrics
-              protocol: TCP
-              containerPort: {{ .Values.oathkeeper.config.serve.prometheus.port }}
           livenessProbe:
             httpGet:
               path: /health/alive
               port: http-api
+              initialDelaySeconds: 45
+              periodSeconds: 10
+              failureThreshold: 10
           readinessProbe:
             httpGet:
               path: /health/ready
