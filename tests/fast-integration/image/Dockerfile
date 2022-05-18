@@ -9,10 +9,11 @@ VOLUME /EMS
 
 SHELL ["/bin/ash", "-o", "pipefail", "-c"]
 
-RUN apk --no-cache add build-base \
+RUN apk --no-cache add \
+    build-base \
     curl \
     git \
-    nodejs && \
+    nodejs
 
 WORKDIR /
 COPY clone-and-run-fit.sh /clone-and-run-fit.sh
