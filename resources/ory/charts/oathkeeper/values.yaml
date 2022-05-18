@@ -53,7 +53,7 @@ service:
   # -- Configures the Kubernetes service for the api port.
   api:
     # -- Name for the api port
-    name: ""
+    name: http
     # -- En-/disable the service
     enabled: true
     # -- The service type
