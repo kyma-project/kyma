@@ -5,6 +5,7 @@ const {addScenarioInCompass, assignRuntimeToScenario} = require('../../fast-inte
 const {keb, gardener, director} = require('../../fast-integration/skr-test/provision/provision-skr');
 const {initializeK8sClient} = require('../../fast-integration/utils');
 const {BTPOperatorCreds} = require('../../fast-integration/smctl/helpers');
+const {unregisterKymaFromCompass} = require('../../fast-integration/compass');
 
 class SKRSetup {
     constructor() {
