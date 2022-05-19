@@ -1,17 +1,28 @@
-const {gatherOptions} = require('../../fast-integration/skr-test');
-const {provisionSKR, deprovisionSKR} = require('../../fast-integration/kyma-environment-broker');
+const {
+    gatherOptions,
+    withSuffix,
+    withInstanceID,
+    provisionSKRInstance
+} = require('../../fast-integration/skr-test');
 const {KCPWrapper, KCPConfig} = require('../../fast-integration/kcp/client');
-const {addScenarioInCompass, assignRuntimeToScenario} = require('../../fast-integration/compass');
-const {keb, gardener, director} = require('../../fast-integration/skr-test/provision/provision-skr');
-const {initializeK8sClient} = require('../../fast-integration/utils');
+const {keb, director} = require('../../fast-integration/skr-test/provision/provision-skr');
+const {
+    getEnvOrThrow,
+    genRandom
+} = require('../../fast-integration/utils');
 const {BTPOperatorCreds} = require('../../fast-integration/smctl/helpers');
 const {unregisterKymaFromCompass} = require('../../fast-integration/compass');
+const {getSKRConfig} = require('../../fast-integration/skr-test/helpers');
+const {deprovisionSKRInstance} = require('../../fast-integration/skr-test/provision/deprovision-skr');
 
 class SKRSetup {
     constructor() {
+        this._skipProvisioning = process.env.SKIP_PROVISIONING === 'true';
         this._initialized = false;
         this._skrUpdated = false;
         this._skrAdminsUpdated = false;
+        this._provisioningTimeout = 1000 * 60 * 30; // 30m
+        this._deprovisioningTimeout = 1000 * 60 * 95; // 95m
 
         this.updateSkrResponse = null;
         this.updateSkrAdminsResponse = null;
@@ -23,39 +34,26 @@ class SKRSetup {
 
     static async provisionSKR() {
         if (!this._initialized){
-            try {
-                this.btpOperatorCreds = BTPOperatorCreds.fromEnv();
-                this.kcp = new KCPWrapper(KCPConfig.fromEnv());
+            this.btpOperatorCreds = BTPOperatorCreds.fromEnv();
+            this.kcp = new KCPWrapper(KCPConfig.fromEnv());
+           
+            if (this._skipProvisioning){
+                console.log('Gather information from externally provisioned SKR and prepare the compass resources');
+                const instanceID = getEnvOrThrow('INSTANCE_ID');
+                let suffix = process.env.TEST_SUFFIX;
+                if (suffix === undefined) {
+                  suffix = genRandom(4);
+                }
+                this.options = gatherOptions(
+                    withInstanceID(instanceID),
+                    withSuffix(suffix),
+                );
+                this.shoot = await getSKRConfig(instanceID);
+            } else {
                 this.options = gatherOptions();
-                console.log(`Provision SKR with instance ID ${this.options.instanceID}`);
-                const customParams = {
-                  oidc: this.options.oidc0,
-                };
-                const provisioningTimeout = 1000 * 60 * 30; // 30m
-
-                console.log(this.options.runtimeName);
-                const skr = await provisionSKR(keb, this.kcp, gardener,
-                    this.options.instanceID,
-                    this.options.runtimeName,
-                    null,
-                    this.btpOperatorCreds,
-                    customParams,
-                    provisioningTimeout);
-          
-                const runtimeStatus = await this.kcp.getRuntimeStatusOperations(this.options.instanceID);
-                console.log(`\nRuntime status after provisioning: ${runtimeStatus}`);
-          
-                this.shoot = skr.shoot;
-                await addScenarioInCompass(director, this.options.scenarioName);
-                await assignRuntimeToScenario(director, this.shoot.compassID, this.options.scenarioName);
-                initializeK8sClient({kubeconfig: this.shoot.kubeconfig});
-                this._initialized = true;
-            } catch (e) {
-                throw new Error(`before hook failed: ${e.toString()}`);
-            } finally {
-                const runtimeStatus = await this.kcp.getRuntimeStatusOperations(this.options.instanceID);
-                await this.kcp.reconcileInformationLog(runtimeStatus);
+                this.shoot = await provisionSKRInstance(this.options, this._provisioningTimeout);
             }
+            this._initialized = true;
         }
     }
 
@@ -86,17 +84,13 @@ class SKRSetup {
     }
 
     static async deprovisionSKR() {
-        const deprovisioningTimeout = 1000 * 60 * 95; // 95m
-
-        try {
-          await deprovisionSKR(keb, this.kcp, this.options.instanceID, deprovisioningTimeout);
-        } catch (e) {
-            throw new Error(`before hook failed: ${e.toString()}`);
-        } finally {
-            const runtimeStatus = await this.kcp.getRuntimeStatusOperations(this.options.instanceID);
-            console.log(`\nRuntime status after deprovisioning: ${runtimeStatus}`);
-            await this.kcp.reconcileInformationLog(runtimeStatus);
+        if (!this._skipProvisioning){
+            await deprovisionSKRInstance(this.options, this._deprovisioningTimeout);
         }
+        else{
+            console.log('An external SKR cluster was used, de-provisioning skipped');
+        }
+        
         await unregisterKymaFromCompass(director, this.options.scenarioName);
     }
 }
