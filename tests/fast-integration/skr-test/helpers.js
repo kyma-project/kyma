@@ -92,15 +92,6 @@ function gatherOptions(...opts) {
 
 // gets the skr config by it's instance id
 async function getSKRConfig(instanceID) {
-  // console.log(getEnvOrThrow('KCP_KEB_API_URL'));
-  // console.log(getEnvOrThrow('KCP_OIDC_ISSUER_URL'));
-  // console.log(getEnvOrThrow('KCP_GARDENER_NAMESPACE'));
-  // console.log(getEnvOrThrow('KCP_TECH_USER_LOGIN'));
-  // console.log(getEnvOrThrow('KCP_TECH_USER_PASSWORD'));
-  // console.log(getEnvOrThrow('KCP_OIDC_CLIENT_ID'));
-  // console.log(getEnvOrThrow('KCP_OIDC_CLIENT_SECRET'));
-  // console.log(getEnvOrThrow('KCP_MOTHERSHIP_API_URL'));
-  // console.log(getEnvOrThrow('KCP_KUBECONFIG_API_URL'));
   const runtimeStatus = await kcp.getRuntimeStatusOperations(instanceID);
   console.log(runtimeStatus);
   const objRuntimeStatus = JSON.parse(runtimeStatus);
