@@ -24,4 +24,4 @@ Kyma comes with some extra dashboards to enable monitoring its components. All t
 
 ## Kyma alerting rules
 
-Kyma comes with some additional alerting rules to enable alerting for its components. You can find all Kyma alerting rules under [kyma-rules](templates/prometheus/kyma-rules).
+Kyma comes with some additional alerting rules to enable alerting for its components. You can find all Kyma alerting rules under [kyma-rules](templates/prometheus/rules-1.14).
