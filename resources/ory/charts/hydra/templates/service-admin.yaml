@@ -22,6 +22,10 @@ spec:
       targetPort: http-admin
       protocol: TCP
       name: {{ .Values.service.admin.name }}
+    - port: 15020
+      targetPort: 15020
+      protocol: TCP
+      name: tcp-status-port      
   selector:
     app.kubernetes.io/name: {{ include "hydra.name" . }}
     app.kubernetes.io/instance: {{ .Release.Name }}

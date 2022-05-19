@@ -130,9 +130,8 @@ oathkeeper:
 
 secret:
   # -- switch to false to prevent creating the secret
-  enabled: true
+  enabled: false
   # -- Provide custom name of existing secret, or custom name of secret to be created
-  nameOverride: ""
   # nameOverride: "myCustomSecret"
   # -- Annotations to be added to secret. Annotations are added only when secret is being created. Existing secret will not be modified.
   secretAnnotations:

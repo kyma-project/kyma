@@ -26,6 +26,7 @@ service:
     type: ClusterIP
     # The service port
     port: 4444
+    name: http
     # If you do want to specify annotations, uncomment the following
     # lines, adjust them as necessary, and remove the curly braces after 'annotations:'.
     annotations: {}
@@ -59,7 +60,6 @@ secret:
   # -- switch to false to prevent creating the secret
   enabled: false
   # -- Provide custom name of existing secret, or custom name of secret to be created
-  nameOverride: ""
   # nameOverride: "myCustomSecret"
   # -- Annotations to be added to secret. Annotations are added only when secret is being created. Existing secret will not be modified.
   secretAnnotations:
