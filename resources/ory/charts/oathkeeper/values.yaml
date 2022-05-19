@@ -216,7 +216,7 @@ deployment:
     name: ""
 
   # https://github.com/kubernetes/kubernetes/issues/57601
-  automountServiceAccountToken: true
+  automountServiceAccountToken: false
 
   # -- Node labels for pod assignment.
   nodeSelector: {}
