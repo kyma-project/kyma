@@ -17,7 +17,7 @@ const {getSKRConfig} = require('../../fast-integration/skr-test/helpers');
 
 class SKRSetup {
     constructor() {
-        this._skipProvisioning = process.env.SKIP_PROVISIONING === 'true';
+        this._skipProvisioning = false;
         this._initialized = false;
         this._skrUpdated = false;
         this._skrAdminsUpdated = false;
@@ -32,6 +32,7 @@ class SKRSetup {
 
     static async provisionSKR() {
         if (!this._initialized){
+            this._skipProvisioning = process.env.SKIP_PROVISIONING === 'true';
             if (this._skipProvisioning){
                 console.log('Gather information from externally provisioned SKR and prepare the compass resources');
                 const instanceID = getEnvOrThrow('INSTANCE_ID');
