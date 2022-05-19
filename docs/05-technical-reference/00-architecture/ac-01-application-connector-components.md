@@ -30,7 +30,7 @@ Connector Service:
 >**CAUTION:** Application Registry is used only in the [legacy mode](../../01-overview/main-areas/application-connectivity/README.md) of Application Connectivity.
 
 Application Registry saves and reads the APIs and Event Catalog metadata of the connected external solution in the [Application](../../05-technical-reference/00-custom-resources/ac-01-application.md) custom resource (CR).
-The system creates a new Kubernetes service for each registered API.
+The system creates a new Kubernetes Service for each registered API.
 
 >**NOTE:** Using Application Registry, you can register an API along with its OAuth or Basic Authentication credentials. The credentials are stored in a Kubernetes Secret.
 

@@ -102,12 +102,12 @@ async function checkIfGrafanaIsReachable(redirectURL, httpErrorCode) {
       return true;
     }
   } catch (err) {
-    const msg = 'Grafana is not reachable: ';
+    const msg = 'Error when querying Grafana: ';
     if (err.response) {
       if (err.response.status === httpErrorCode && err.response.data.includes(redirectURL)) {
         return true;
       }
-      error(`${msg} ${err.response.data} (${err.response.status})`);
+      error(msg + err.response.status + ' : ' + err.response.data);
     } else {
       error(`${msg}: ${err.toString()}`);
     }
