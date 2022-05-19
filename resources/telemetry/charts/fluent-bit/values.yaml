@@ -297,6 +297,7 @@ config:
         HTTP_Listen 0.0.0.0
         HTTP_Port {{ .Values.metricsPort }}
         Health_Check On
+        storage.path /data/log/flb-storage/
 
   ## https://docs.fluentbit.io/manual/pipeline/inputs
   inputs: |
@@ -309,6 +310,7 @@ config:
         Skip_Long_Lines On
         Refresh_Interval 10
         DB /data/flb_kube_loki.db
+        storage.type filesystem
 
   ## https://docs.fluentbit.io/manual/pipeline/filters
   filters: |
@@ -325,6 +327,8 @@ config:
     [OUTPUT]
         Name null
         Match *
+        storage.total_limit_size 5M
+
   ## https://docs.fluentbit.io/manual/pipeline/parsers
   customParsers: |
     [PARSER]
