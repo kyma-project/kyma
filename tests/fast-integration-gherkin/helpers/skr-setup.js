@@ -34,6 +34,7 @@ class SKRSetup {
 
     static async provisionSKR() {
         if (!this._initialized){
+            this.options = gatherOptions();
             this.btpOperatorCreds = BTPOperatorCreds.fromEnv();
             this.kcp = new KCPWrapper(KCPConfig.fromEnv());
            
@@ -50,7 +51,6 @@ class SKRSetup {
                 );
                 this.shoot = await getSKRConfig(instanceID);
             } else {
-                this.options = gatherOptions();
                 this.shoot = await provisionSKRInstance(this.options, this._provisioningTimeout);
             }
             this._initialized = true;
