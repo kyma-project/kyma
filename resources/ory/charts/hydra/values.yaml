@@ -57,7 +57,7 @@ service:
 
 secret:
   # -- switch to false to prevent creating the secret
-  enabled: true
+  enabled: false
   # -- Provide custom name of existing secret, or custom name of secret to be created
   nameOverride: ""
   # nameOverride: "myCustomSecret"
@@ -371,22 +371,6 @@ pdb:
   enabled: false
   spec:
     minAvailable: 1
-
-#  -- Parameters for the Prometheus ServiceMonitor objects.
-# Reference: https://docs.openshift.com/container-platform/4.6/rest_api/monitoring_apis/servicemonitor-monitoring-coreos-com-v1.html
-serviceMonitor:
-  # -- switch to false to prevent creating the ServiceMonitor
-  enabled: true
-  # -- HTTP scheme to use for scraping.
-  scheme: http
-  # -- Interval at which metrics should be scraped
-  scrapeInterval: 60s
-  # -- Timeout after which the scrape is ended
-  scrapeTimeout: 30s
-  # -- Provide additionnal labels to the ServiceMonitor ressource metadata
-  labels: {}
-  # -- TLS configuration to use when scraping the endpoint
-  tlsConfig: {}
 
 configmap:
   # -- switch to false to prevent checksum annotations being maintained and propogated to the pods
