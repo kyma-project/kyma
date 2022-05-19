@@ -323,9 +323,6 @@ job:
   #     exec:
   #       command: [...]
 
-  # -- Set automounting of the SA token
-  automountServiceAccountToken: true
-
   # -- Set sharing process namespace
   shareProcessNamespace: false
 
@@ -335,7 +332,7 @@ job:
   # Uncoment if it is needed to provide a ServiceAccount for the Hydra deployment.
   serviceAccount:
     # -- Specifies whether a service account should be created
-    create: true
+    create: false
     # -- Annotations to add to the service account
     annotations:
       helm.sh/hook-weight: "0"
