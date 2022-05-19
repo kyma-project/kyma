@@ -14,13 +14,13 @@ import (
 )
 
 func TestHealthChecker_Checker(t *testing.T) {
-	logger := zap.NewNop()
+	log := zap.NewNop().Sugar()
 	t.Run("Success", func(t *testing.T) {
 		//GIVEN
 		timeout := 10 * time.Second
 		inCh := make(chan event.GenericEvent, 1)
 		outCh := make(chan bool, 1)
-		checker := serverless.NewHealthChecker(inCh, outCh, timeout, logger)
+		checker := serverless.NewHealthChecker(inCh, outCh, timeout, log)
 
 		//WHEN
 		go func() {
@@ -39,7 +39,7 @@ func TestHealthChecker_Checker(t *testing.T) {
 		timeout := time.Second
 		inCh := make(chan event.GenericEvent, 1)
 		outCh := make(chan bool, 1)
-		checker := serverless.NewHealthChecker(inCh, outCh, timeout, logger)
+		checker := serverless.NewHealthChecker(inCh, outCh, timeout, log)
 
 		//WHEN
 		go func() {
@@ -57,7 +57,7 @@ func TestHealthChecker_Checker(t *testing.T) {
 		timeout := time.Second
 		inCh := make(chan event.GenericEvent, 1)
 		outCh := make(chan bool, 1)
-		checker := serverless.NewHealthChecker(inCh, outCh, timeout, logger)
+		checker := serverless.NewHealthChecker(inCh, outCh, timeout, log)
 
 		e := event.GenericEvent{
 			Object: &corev1.Event{

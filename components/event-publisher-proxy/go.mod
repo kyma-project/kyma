@@ -7,13 +7,13 @@ require (
 	github.com/cloudevents/sdk-go/v2 v2.9.0
 	github.com/google/uuid v1.3.0
 	github.com/kelseyhightower/envconfig v1.4.0
-	github.com/kyma-project/kyma/components/application-operator v0.0.0-20220504115926-940176391e17
-	github.com/kyma-project/kyma/components/eventing-controller v0.0.0-20220504115926-940176391e17
-	github.com/nats-io/nats-server/v2 v2.8.1
-	github.com/nats-io/nats.go v1.14.0
+	github.com/kyma-project/kyma/components/application-operator v0.0.0-20220517093305-874da3685d05
+	github.com/kyma-project/kyma/components/eventing-controller v0.0.0-20220517093305-874da3685d05
+	github.com/nats-io/nats-server/v2 v2.8.2
+	github.com/nats-io/nats.go v1.15.0
 	github.com/onsi/gomega v1.19.0
 	github.com/pkg/errors v0.9.1
-	github.com/prometheus/client_golang v1.12.1
+	github.com/prometheus/client_golang v1.12.2
 	github.com/sirupsen/logrus v1.8.1
 	github.com/stretchr/testify v1.7.1
 	go.opencensus.io v0.23.0
@@ -21,7 +21,7 @@ require (
 	k8s.io/api v0.24.0
 	k8s.io/apimachinery v0.24.0
 	k8s.io/client-go v0.24.0
-	sigs.k8s.io/controller-runtime v0.11.2
+	sigs.k8s.io/controller-runtime v0.12.1
 )
 
 require (
@@ -90,6 +90,6 @@ replace (
 	github.com/docker/distribution => github.com/docker/distribution v0.0.0-20191216044856-a8371794149d
 	github.com/docker/docker => github.com/docker/docker v20.10.3+incompatible
 	github.com/opencontainers/runc => github.com/opencontainers/runc v1.0.0-rc93
-	github.com/prometheus/client_golang => github.com/prometheus/client_golang v1.12.1
+	github.com/prometheus/client_golang => github.com/prometheus/client_golang v1.12.2
 	golang.org/x/crypto => golang.org/x/crypto v0.0.0-20220331220935-ae2d96664a29
 )

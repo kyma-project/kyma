@@ -41,9 +41,9 @@ chart and their default values.
 | Parameter | Description | Default |
 |-----------|-------------|---------|
 | `image` | Service Catalog image to use | `eu.gcr.io/kyma-project/external/quay.io/kubernetes-service-catalog/service-catalog:v0.3.0` |
-| `imagePullPolicy` | `imagePullPolicy` for the service catalog | `Always` |
-| `imagePullSecrets`|  The pre-existing secrets to use to pull images from a private registry | `[]` | 
-| `webhook.updateStrategy` | `updateStrategy` for the service catalog webhook deployment | `RollingUpdate` |
+| `imagePullPolicy` | `imagePullPolicy` for Service Catalog | `Always` |
+| `imagePullSecrets`|  The pre-existing Secrets to use to pull images from a private registry | `[]` | 
+| `webhook.updateStrategy` | `updateStrategy` for Service Catalog webhook deployment | `RollingUpdate` |
 | `webhook.minReadySeconds` | how many seconds an webhook server pod needs to be ready before killing the next, during update | `1` |
 | `webhook.annotations` | Annotations for webhook pods | `{}` |
 | `webhook.nodeSelector` | A nodeSelector value to apply to the webhook pods. If not specified, no nodeSelector will be applied | |
@@ -53,8 +53,8 @@ chart and their default values.
 | `webhook.verbosity` | Log level; valid values are in the range 0 - 10 | `10` |
 | `webhook.healthcheck.enabled` | Enable readiness and liveliness probes | `true` |
 | `webhook.resources` | Resources allocation (Requests and Limits) | `{requests: {cpu: 100m, memory: 20Mi}, limits: {cpu: 100m, memory: 30Mi}}` |
-| `controllerManager.replicas` | `replicas` for the service catalog controllerManager pod count | `1` |
-| `controllerManager.updateStrategy` | `updateStrategy` for the service catalog controllerManager deployments | `RollingUpdate` |
+| `controllerManager.replicas` | `replicas` for Service Catalog controllerManager pod count | `1` |
+| `controllerManager.updateStrategy` | `updateStrategy` for Service Catalog controllerManager deployments | `RollingUpdate` |
 | `controllerManager.minReadySeconds` | how many seconds a controllerManager pod needs to be ready before killing the next, during update | `1` |
 | `controllerManager.annotations` | Annotations for controllerManager pods | `{}` |
 | `controllerManager.nodeSelector` | A nodeSelector value to apply to the controllerManager pods. If not specified, no nodeSelector will be applied | |
