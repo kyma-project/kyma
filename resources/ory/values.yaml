@@ -229,7 +229,7 @@ oathkeeper:
   deployment:
     rollingUpdate:
       maxSurge: "50%"
-      maxUnavailable: "30%"
+      maxUnavailable: "35%"
     resources:
       limits:
         cpu: 100m
