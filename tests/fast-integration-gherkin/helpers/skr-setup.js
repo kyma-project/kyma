@@ -21,8 +21,6 @@ class SKRSetup {
         this._initialized = false;
         this._skrUpdated = false;
         this._skrAdminsUpdated = false;
-        this._provisioningTimeout = 1000 * 60 * 30; // 30m
-        this._deprovisioningTimeout = 1000 * 60 * 95; // 95m
 
         this.updateSkrResponse = null;
         this.updateSkrAdminsResponse = null;
