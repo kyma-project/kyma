@@ -21,8 +21,8 @@ class SKRSetup {
         this._initialized = false;
         this._skrUpdated = false;
         this._skrAdminsUpdated = false;
-        this._provisioningTimeout = 1000 * 60 * 30; // 30m
-        this._deprovisioningTimeout = 1000 * 60 * 95; // 95m
+        this._provisioningTimeout = 1000 * 60 * 60 * 30; 
+        this._deprovisioningTimeout = 1000 * 60 * 95; 
 
         this.updateSkrResponse = null;
         this.updateSkrAdminsResponse = null;
@@ -33,15 +33,6 @@ class SKRSetup {
     }
 
     static async provisionSKR() {
-        let globalTimeout = 1000 * 60 * 70; // 70m
-        const slowTime = 5000;
-
-        if (!this._skipProvisioning) {
-            globalTimeout += this._provisioningTimeout + this._deprovisioningTimeout;
-        }
-        this.timeout(globalTimeout);
-        this.slow(slowTime);
-
         if (!this._initialized){
             this.options = gatherOptions();
             this.btpOperatorCreds = BTPOperatorCreds.fromEnv();
