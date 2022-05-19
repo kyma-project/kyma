@@ -16,6 +16,10 @@ go run ./... -count=4 -unhealthy-ratio=0.5 -host=mockserver.mockserver -port=108
 
 ## Test Setup
 
+Two kyma clusters are required. One the load generating cluster (with min/max 4 nodes) , the second http log server sink (with minimum 6 nodes).
+
+## On load generating cluster
+
 Deploy a telemetry config file to configure a storage path for the filesystem buffer.
 
 ```bash
@@ -26,6 +30,8 @@ Install a dummy log generator:
 ```bash
 kubectl apply -f deploy/logspammer.yaml
 ```
+
+## On http log server sink
 
 Install an HTTP mock server (not exposed, only available inside the cluster). The mock server is configured to expose 2 endpoints: `/good` (returns the status code `201`) and `/bad` (returns the status code `503`):
 ```bash
