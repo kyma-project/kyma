@@ -29,7 +29,9 @@ const {
     getLegacyEventParams,
     getStructuredEventParams,
     getBinaryEventParams,
-    ensureInClusterEventReceivedWithRetry
+    ensureInClusterEventReceivedWithRetry,
+    sendCloudEventBinaryModeAndCheckResponse,
+    checkFunctionResponse
 } = require('../../../../fast-integration/test/fixtures/commerce-mock');
 const {
     AuditLogCreds,
@@ -160,11 +162,12 @@ Given(/^Commerce Backend is set up$/, {timeout: 1000 * 60 * 60 * 3}, async() => 
 
 When(/^Function is called using a correct authorization token$/, {timeout: 1000 * 60 * 60 * 2}, async() => {
     const options = this.context.options;
-    const hostValues = this.context.commerceHostValues;
+    // const hostValues = this.context.commerceHostValues;
 
-	const successfulFunctionResponse = await callFunctionWithToken(options.testNS, hostValues.host);
+    await checkFunctionResponse(options.testNS);
+	// const successfulFunctionResponse = await callFunctionWithToken(options.testNS, hostValues.host);
 
-    this.context.successfulFunctionResponse = successfulFunctionResponse;
+    // this.context.successfulFunctionResponse = successfulFunctionResponse;
 });
 
 Then(/^The function should be reachable$/, () => {
@@ -197,13 +200,16 @@ When(/^A "([^"]*)" event is sent$/, {timeout: 60 * 60 * 1000}, async(eventEncodi
     } else if (eventEncoding === 'structured'){
         requestParams = getStructuredEventParams();
     } else if (eventEncoding === 'binary'){
-        requestParams = getBinaryEventParams();
+        // requestParams = getBinaryEventParams();
+        await sendCloudEventBinaryModeAndCheckResponse();
     } else {
         console.error("Not supported eventEncoding type:", eventEncoding);
     }
-	const eventResponse = await sendEvent(commerceMockHost, commerceHost, requestParams);
-    console.log("EventResponse is:" , eventResponse);
 
+    let eventResponse = null;
+    if (eventEncoding !== 'binary'){
+	    eventResponse = await sendEvent(commerceMockHost, commerceHost, requestParams);
+    }
     this.context.eventResponse = eventResponse;
 });
 

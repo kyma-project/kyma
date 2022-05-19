@@ -424,8 +424,6 @@ function getBinaryEventParams(backendType = 'nats'){
   const body = {
     'data': {'orderCode': '567'},
     'eventtracing': true,
-    'type': 'sap.kyma.custom.noapp.order.created.v1',
-    'eventtypeversion': 'v1'
   };
   const params = {
     headers: {

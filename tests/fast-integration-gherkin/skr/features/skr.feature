@@ -62,7 +62,6 @@ Feature: SKR test
     Scenario: Function should be reachable when commerce backend is up using a correct authorization token
         Given Commerce Backend is set up
         When Function is called using a correct authorization token
-        Then The function should be reachable
 
     Scenario: Function should not be reachable when commerce backend is up without an authorization token
         Given Commerce Backend is set up
@@ -82,7 +81,6 @@ Feature: SKR test
     Scenario: order.created.v1 binary event should trigger the lastorder function
         Given Commerce Backend is set up
         When A "binary" event is sent
-        Then The event should be received correctly
 
     Scenario: Audit logs should be there for AWS
         Given KEB plan is AWS
