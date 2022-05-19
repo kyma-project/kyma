@@ -1030,95 +1030,6 @@ data:
                    "mappings":[
 
                    ],
-                   "thresholds":{
-                      "mode":"absolute",
-                      "steps":[
-                         {
-                            "color":"green",
-                            "value":null
-                         },
-                         {
-                            "color":"red",
-                            "value":80
-                         }
-                      ]
-                   },
-                   "unit":"short"
-                },
-                "overrides":[
-
-                ]
-             },
-             "gridPos":{
-                "h":6,
-                "w":8,
-                "x":0,
-                "y":20
-             },
-             "id":21,
-             "options":{
-                "legend":{
-                   "calcs":[
-
-                   ],
-                   "displayMode":"list",
-                   "placement":"bottom"
-                },
-                "tooltip":{
-                   "mode":"single"
-                }
-             },
-             "pluginVersion":"8.3.4",
-             "targets":[
-                {
-                   "expr":"sum(nats_consumer_num_redelivered{pod=~\"$server\",stream_name=~\"$stream\",consumer_desc=~\"$consumer\"}) by (consumer_desc)",
-                   "hide":false,
-                   "interval":"",
-                   "legendFormat":"{{consumer_desc}}",
-                   "refId":"A"
-                }
-             ],
-             "title":"Pending Re-delivery Messages",
-             "description": "Total number of messages to be re-delivered to the dispatcher per consumer",
-             "type":"timeseries"
-          },
-          {
-             "fieldConfig":{
-                "defaults":{
-                   "color":{
-                      "mode":"palette-classic"
-                   },
-                   "custom":{
-                      "axisLabel":"",
-                      "axisPlacement":"auto",
-                      "barAlignment":0,
-                      "drawStyle":"line",
-                      "fillOpacity":10,
-                      "gradientMode":"none",
-                      "hideFrom":{
-                         "legend":false,
-                         "tooltip":false,
-                         "viz":false
-                      },
-                      "lineInterpolation":"linear",
-                      "lineWidth":1,
-                      "pointSize":5,
-                      "scaleDistribution":{
-                         "type":"linear"
-                      },
-                      "showPoints":"never",
-                      "spanNulls":true,
-                      "stacking":{
-                         "group":"A",
-                         "mode":"none"
-                      },
-                      "thresholdsStyle":{
-                         "mode":"off"
-                      }
-                   },
-                   "mappings":[
-
-                   ],
                    "min":0,
                    "thresholds":{
                       "mode":"absolute",
@@ -1140,11 +1051,11 @@ data:
                 ]
              },
              "gridPos":{
-                "h":6,
-                "w":8,
-                "x":8,
-                "y":20
-             },
+               "h":6,
+               "w":8,
+               "x":0,
+               "y":20
+            },
              "id":26,
              "options":{
                 "legend":{
@@ -1169,7 +1080,7 @@ data:
                 }
              ],
              "title":"Pending Messages",
-             "description": "Number of messages pending to be forwarded to the dispatcher per consumer",
+             "description": "Number of messages pending to be forwarded to the dispatcher (per consumer)",
              "type":"timeseries"
           },
           {
@@ -1230,11 +1141,11 @@ data:
                 ]
              },
              "gridPos":{
-                "h":6,
-                "w":8,
-                "x":16,
-                "y":20
-             },
+                 "h":6,
+                 "w":8,
+                 "x":8,
+                 "y":20
+              },
              "id":27,
              "options":{
                 "legend":{
@@ -1260,6 +1171,95 @@ data:
              ],
              "title":"Message Acks Pending",
              "description": "Number of messages forwarded to the dispatcher but have not been acknowledged by the dispatcher (per consumer)",
+             "type":"timeseries"
+          },
+          {
+             "fieldConfig":{
+                "defaults":{
+                   "color":{
+                      "mode":"palette-classic"
+                   },
+                   "custom":{
+                      "axisLabel":"",
+                      "axisPlacement":"auto",
+                      "barAlignment":0,
+                      "drawStyle":"line",
+                      "fillOpacity":10,
+                      "gradientMode":"none",
+                      "hideFrom":{
+                         "legend":false,
+                         "tooltip":false,
+                         "viz":false
+                      },
+                      "lineInterpolation":"linear",
+                      "lineWidth":1,
+                      "pointSize":5,
+                      "scaleDistribution":{
+                         "type":"linear"
+                      },
+                      "showPoints":"never",
+                      "spanNulls":true,
+                      "stacking":{
+                         "group":"A",
+                         "mode":"none"
+                      },
+                      "thresholdsStyle":{
+                         "mode":"off"
+                      }
+                   },
+                   "mappings":[
+
+                   ],
+                   "thresholds":{
+                      "mode":"absolute",
+                      "steps":[
+                         {
+                            "color":"green",
+                            "value":null
+                         },
+                         {
+                            "color":"red",
+                            "value":80
+                         }
+                      ]
+                   },
+                   "unit":"short"
+                },
+                "overrides":[
+
+                ]
+             },
+             "gridPos":{
+                 "h":6,
+                 "w":8,
+                 "x":16,
+                 "y":20
+              },
+             "id":21,
+             "options":{
+                "legend":{
+                   "calcs":[
+
+                   ],
+                   "displayMode":"list",
+                   "placement":"bottom"
+                },
+                "tooltip":{
+                   "mode":"single"
+                }
+             },
+             "pluginVersion":"8.3.4",
+             "targets":[
+                {
+                   "expr":"sum(nats_consumer_num_redelivered{pod=~\"$server\",stream_name=~\"$stream\",consumer_desc=~\"$consumer\"}) by (consumer_desc)",
+                   "hide":false,
+                   "interval":"",
+                   "legendFormat":"{{consumer_desc}}",
+                   "refId":"A"
+                }
+             ],
+             "title":"Pending Re-delivery Messages",
+             "description": "Total number of messages to be re-delivered to the dispatcher (per consumer)",
              "type":"timeseries"
           }
        ],
