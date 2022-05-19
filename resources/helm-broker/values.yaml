@@ -120,6 +120,3 @@ global:
       name: "etcd"
       version: "v3.3.27-979d1ebd"
       directory: "tpi/quay.io/coreos"
-    add_ons_ui:
-      name: "add-ons-ui"
-      version: "c60a3c68"
