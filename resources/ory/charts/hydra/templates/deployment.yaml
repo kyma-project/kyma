@@ -22,6 +22,8 @@ spec:
     matchLabels:
       app.kubernetes.io/name: {{ include "hydra.name" . }}
       app.kubernetes.io/instance: {{ .Release.Name }}
+  strategy:
+     {{- toYaml .Values.deployment.strategy | nindent 4 }}
   template:
     metadata:
       labels:
@@ -39,6 +41,63 @@ spec:
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
     {{- end }}
+    {{- if .Values.hydra.autoMigrate }}
+      initContainers:
+        {{- if not .Values.global.ory.hydra.persistence.gcloud.enabled }} #Use only for in-cluster databases that may not be ready yet. External databases are made ready before installation.
+        - name: wait-for-db
+          image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.busybox) }}"
+          command:
+            - /bin/sh
+            - -c
+            - |
+{{ .Files.Get "files/wait-for-db.sh" | printf "%s" | indent 14 }}
+          env:
+            - name: DSN
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "hydra.secretname" . }}
+                  key: dsn
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+              - ALL
+            privileged: false
+            runAsGroup: 65534
+            runAsNonRoot: true
+            runAsUser: 65534
+        {{- end }}
+        - name: {{ .Chart.Name }}-automigrate
+          image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.hydra) }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command: ["hydra"]
+          args: ["migrate", "sql", "-e", "--yes", "--config", "/etc/config/config.yaml"]
+          volumeMounts:
+            - name: {{ include "hydra.name" . }}-config-volume
+              mountPath: /etc/config
+              readOnly: true
+            {{- if .Values.deployment.extraVolumeMounts }}
+{{ toYaml .Values.deployment.extraVolumeMounts | indent 12 }}
+            {{- end }}
+          env:
+            - name: DSN
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "hydra.secretname" . }}
+                  key: dsn
+            {{- with .Values.deployment.extraEnv }}
+              {{- toYaml . | nindent 12 }}
+            {{- end }}
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+              - ALL
+            privileged: false
+            runAsGroup: 1000
+            runAsNonRoot: true
+            runAsUser: 1000
+    {{- end}}
       volumes:
         - name: {{ include "hydra.name" . }}-config-volume
           configMap:
@@ -49,30 +108,6 @@ spec:
       serviceAccountName: {{ include "hydra.serviceAccountName" . }}
       automountServiceAccountToken: {{ .Values.deployment.automountServiceAccountToken }}
       containers:
-        {{- if .Values.watcher.enabled }}
-        - name: watcher
-          {{- if .Values.deployment.securityContext }}
-          securityContext:
-            {{- toYaml .Values.deployment.securityContext | nindent 12 }}
-          {{- end }}
-          image: {{ .Values.watcher.image }}
-          command:
-            - /bin/bash
-            - -c
-            - |
-{{ .Files.Get "files/watch.sh" | printf "%s" | indent 14 }}
-          env:
-            - name: NAMESPACE
-              value: {{ .Release.Namespace | quote }}
-            - name: WATCH_FILE
-              value: {{ .Values.watcher.mountFile | quote }}
-            - name: DEPLOYMENT_SELECTOR
-              value: 'app.kubernetes.io/name={{ include "hydra.name" . }}'
-          volumeMounts:
-          {{- with .Values.deployment.extraVolumeMounts }}
-            {{- toYaml . | nindent 12 }}
-          {{- end }}
-        {{- end }}
         - name: {{ .Chart.Name }}
           image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.hydra) }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
@@ -121,7 +156,7 @@ spec:
             - name: DD_ENV
               value: {{ .Values.deployment.tracing.datadog.env | default "none" | quote }}
             - name: DD_VERSION
-              value: {{ .Values.deployment.tracing.datadog.version | default .Values.image.tag | quote }}
+              value: {{ .Values.deployment.tracing.datadog.version | default .Values.global.images.hydra.version | quote }}
             - name: DD_SERVICE
               value: {{ .Values.deployment.tracing.datadog.service | default "ory/hydra" | quote }}
             {{- if .Values.deployment.tracing.datadog.useHostIP }}
