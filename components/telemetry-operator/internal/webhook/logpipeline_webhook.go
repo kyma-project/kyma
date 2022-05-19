@@ -48,12 +48,13 @@ type LogPipelineValidator struct {
 	fluentBitConfigMap types.NamespacedName
 	configValidator    fluentbit.ConfigValidator
 	pluginValidator    fluentbit.PluginValidator
+	emitterConfig      fluentbit.EmitterConfig
 	fsWrapper          fs.Wrapper
 
 	decoder *admission.Decoder
 }
 
-func NewLogPipeLineValidator(client client.Client, fluentBitConfigMap string, namespace string, configValidator fluentbit.ConfigValidator, pluginValidator fluentbit.PluginValidator, fsWrapper fs.Wrapper) *LogPipelineValidator {
+func NewLogPipeLineValidator(client client.Client, fluentBitConfigMap string, namespace string, configValidator fluentbit.ConfigValidator, pluginValidator fluentbit.PluginValidator, emitterConfig fluentbit.EmitterConfig, fsWrapper fs.Wrapper) *LogPipelineValidator {
 	return &LogPipelineValidator{
 		Client: client,
 		fluentBitConfigMap: types.NamespacedName{
@@ -63,6 +64,7 @@ func NewLogPipeLineValidator(client client.Client, fluentBitConfigMap string, na
 		configValidator: configValidator,
 		pluginValidator: pluginValidator,
 		fsWrapper:       fsWrapper,
+		emitterConfig:   emitterConfig,
 	}
 }
 
@@ -155,7 +157,7 @@ func (v *LogPipelineValidator) getFluentBitConfig(ctx context.Context, currentBa
 		})
 	}
 
-	sectionsConfig := fluentbit.MergeSectionsConfig(logPipeline)
+	sectionsConfig := fluentbit.MergeSectionsConfig(logPipeline, v.emitterConfig)
 	configFiles = append(configFiles, fs.File{
 		Path: fluentBitSectionsConfigDirectory,
 		Name: logPipeline.Name + ".conf",
