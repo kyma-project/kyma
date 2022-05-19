@@ -785,7 +785,7 @@ async function waitForSubscriptionsTillReady(targetNamespace) {
 async function checkInClusterEventDelivery(targetNamespace) {
   await checkInClusterEventDeliveryHelper(targetNamespace, 'structured');
   await checkInClusterEventDeliveryHelper(targetNamespace, 'binary');
-  await checkInClusterLegacyEvent(targetNamespace)
+  await checkInClusterLegacyEvent(targetNamespace);
 }
 
 // send event using function query parameter send=true
@@ -917,11 +917,11 @@ async function checkInClusterEventDeliveryHelper(targetNamespace, encoding) {
 }
 
 async function checkInClusterLegacyEvent(targetNamespace) {
-  const eventId = getRandomEventId("legacy");
+  const eventId = getRandomEventId('legacy');
   const mockHost = await getVirtualServiceHost(targetNamespace, 'lastorder');
 
   if (isDebugEnabled()) {
-    await printStatusOfInClusterEventingInfrastructure(targetNamespace, "legacy", 'lastorder');
+    await printStatusOfInClusterEventingInfrastructure(targetNamespace, 'legacy', 'lastorder');
   }
 
   const eventData = {

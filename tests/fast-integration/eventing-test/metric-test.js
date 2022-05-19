@@ -151,7 +151,7 @@ const skrDashboards = {
     backends: ['nats', 'beb'],
     assert: function(result) {
       const foundMetric = result.find((res) =>
-          res.metric.source_workload.toLowerCase() === 'central-application-connectivity-validator' &&
+        res.metric.source_workload.toLowerCase() === 'central-application-connectivity-validator' &&
           res.metric.destination_workload.toLowerCase() === 'eventing-publisher-proxy');
       expect(foundMetric).to.be.not.undefined;
     },

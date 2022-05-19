@@ -87,8 +87,8 @@ describe('Eventing tests', function() {
       await checkInClusterEventDelivery(testNamespace);
     });
 
-    if(isSKR) {
-      eventingE2ETestSuiteWithCommerceMock(backend)
+    if (isSKR) {
+      eventingE2ETestSuiteWithCommerceMock(backend);
     }
 
     if (backend === natsBackend && isJetStreamEnabled && isFileStorage) {
