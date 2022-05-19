@@ -81,8 +81,6 @@ class SKRSetup {
                     const runtimeStatus = await this.kcp.getRuntimeStatusOperations(this.options.instanceID);
                     await this.kcp.reconcileInformationLog(runtimeStatus);
                 }    
-                   
-                this._initialized = true;
             }
         }
     }
