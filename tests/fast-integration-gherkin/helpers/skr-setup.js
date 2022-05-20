@@ -5,7 +5,7 @@ const {
     withInstanceID
 } = require('../../fast-integration/skr-test');
 const {KCPWrapper, KCPConfig} = require('../../fast-integration/kcp/client');
-const {addScenarioInCompass, assignRuntimeToScenario} = require('../../fast-integration/compass');
+const {addScenarioInCompass, assignRuntimeToScenario, unregisterKymaFromCompass} = require('../../fast-integration/compass');
 const {keb, gardener, director} = require('../../fast-integration/skr-test/provision/provision-skr');
 const {
     getEnvOrThrow,
@@ -13,7 +13,6 @@ const {
     initializeK8sClient
 } = require('../../fast-integration/utils');
 const {BTPOperatorCreds} = require('../../fast-integration/smctl/helpers');
-const {unregisterKymaFromCompass} = require('../../fast-integration/compass');
 const {getSKRConfig} = require('../../fast-integration/skr-test/helpers');
 
 class SKRSetup {
@@ -48,39 +47,40 @@ class SKRSetup {
             //     this.shoot = await getSKRConfig(instanceID);
             //     this._initialized = true;
             // } else {
-                try{
-                    const provisioningTimeout = 1000 * 60 * 30; // 30m
-                    this.btpOperatorCreds = BTPOperatorCreds.fromEnv();
-                    this.kcp = new KCPWrapper(KCPConfig.fromEnv());
-                    this.options = gatherOptions();
-                    const customParams = {
-                      oidc: this.options.oidc0,
-                    };
-    
-                    console.log(this.options.runtimeName);
-                    const skr = await provisionSKR(keb, this.kcp, gardener,
-                        this.options.instanceID,
-                        this.options.runtimeName,
-                        null,
-                        this.btpOperatorCreds,
-                        customParams,
-                        provisioningTimeout);
-              
-                    const runtimeStatus = await this.kcp.getRuntimeStatusOperations(this.options.instanceID);
-                    console.log(`\nRuntime status after provisioning: ${runtimeStatus}`);
-              
-                    this.shoot = skr.shoot;
-                    await addScenarioInCompass(director, this.options.scenarioName);
-                    await assignRuntimeToScenario(director, this.shoot.compassID, this.options.scenarioName);
-                    initializeK8sClient({kubeconfig: this.shoot.kubeconfig});
-                    this._initialized = true;
-                } catch (e) {
-                    throw new Error(`before hook failed: ${e.toString()}`);
-                } finally {
-                    const runtimeStatus = await this.kcp.getRuntimeStatusOperations(this.options.instanceID);
-                    await this.kcp.reconcileInformationLog(runtimeStatus);
-                }    
-            }
+            try {
+                this.btpOperatorCreds = BTPOperatorCreds.fromEnv();
+                this.kcp = new KCPWrapper(KCPConfig.fromEnv());
+                this.options = gatherOptions();
+                console.log(`Provision SKR with instance ID ${this.options.instanceID}`);
+                const customParams = {
+                    oidc: this.options.oidc0,
+                };
+                const provisioningTimeout = 1000 * 60 * 30; // 30m
+
+                console.log(this.options.runtimeName);
+                const skr = await provisionSKR(keb, this.kcp, gardener,
+                    this.options.instanceID,
+                    this.options.runtimeName,
+                    null,
+                    this.btpOperatorCreds,
+                    customParams,
+                    provisioningTimeout);
+            
+                const runtimeStatus = await this.kcp.getRuntimeStatusOperations(this.options.instanceID);
+                console.log(`\nRuntime status after provisioning: ${runtimeStatus}`);
+            
+                this.shoot = skr.shoot;
+                await addScenarioInCompass(director, this.options.scenarioName);
+                await assignRuntimeToScenario(director, this.shoot.compassID, this.options.scenarioName);
+                initializeK8sClient({kubeconfig: this.shoot.kubeconfig});
+                this._initialized = true;
+            } catch (e) {
+                throw new Error(`before hook failed: ${e.toString()}`);
+            } finally {
+                const runtimeStatus = await this.kcp.getRuntimeStatusOperations(this.options.instanceID);
+                await this.kcp.reconcileInformationLog(runtimeStatus);
+            }    
+        }
         //}
     }
 
