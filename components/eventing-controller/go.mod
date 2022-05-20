@@ -4,14 +4,14 @@ go 1.17
 
 require (
 	github.com/avast/retry-go/v3 v3.1.1
-	github.com/cloudevents/sdk-go/protocol/nats/v2 v2.9.0
-	github.com/cloudevents/sdk-go/v2 v2.9.0
+	github.com/cloudevents/sdk-go/protocol/nats/v2 v2.10.0
+	github.com/cloudevents/sdk-go/v2 v2.10.0
 	github.com/go-logr/logr v1.2.3
 	github.com/go-logr/zapr v1.2.3
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/kyma-incubator/api-gateway v0.0.0-20220318061314-9fd030a8cbd1
-	github.com/kyma-project/kyma/common/logging v0.0.0-20220506151527-6c74f7543a36
-	github.com/kyma-project/kyma/components/application-operator v0.0.0-20220506151527-6c74f7543a36
+	github.com/kyma-project/kyma/common/logging v0.0.0-20220519113004-f9d1a6ba99e7
+	github.com/kyma-project/kyma/components/application-operator v0.0.0-20220519113004-f9d1a6ba99e7
 	github.com/mitchellh/hashstructure/v2 v2.0.2
 	github.com/nats-io/nats-server/v2 v2.8.2
 	github.com/nats-io/nats.go v1.15.0
@@ -22,11 +22,11 @@ require (
 	go.uber.org/atomic v1.9.0
 	go.uber.org/zap v1.21.0
 	golang.org/x/oauth2 v0.0.0-20220411215720-9780585627b5
-	golang.org/x/xerrors v0.0.0-20220411194840-2f41105eb62f
+	golang.org/x/xerrors v0.0.0-20220517211312-f3a8303e98df
 	k8s.io/api v0.24.0
 	k8s.io/apimachinery v0.24.0
 	k8s.io/client-go v0.24.0
-	sigs.k8s.io/controller-runtime v0.11.2
+	sigs.k8s.io/controller-runtime v0.12.1
 )
 
 require (
@@ -84,8 +84,8 @@ require (
 	gopkg.in/tomb.v1 v1.0.0-20141024135613-dd632973f1e7 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b // indirect
-	k8s.io/apiextensions-apiserver v0.23.5 // indirect
-	k8s.io/component-base v0.23.5 // indirect
+	k8s.io/apiextensions-apiserver v0.24.0 // indirect
+	k8s.io/component-base v0.24.0 // indirect
 	k8s.io/klog/v2 v2.60.1 // indirect
 	k8s.io/kube-openapi v0.0.0-20220328201542-3ee0da9b0b42 // indirect
 	k8s.io/utils v0.0.0-20220210201930-3a6ce19ff2f9 // indirect
