@@ -48,14 +48,16 @@ class SKRSetup {
                 this._initialized = true;
             } else {
                 try{
+                    const provisioningTimeout = 1000 * 60 * 30; // 30m
                     this.btpOperatorCreds = BTPOperatorCreds.fromEnv();
                     this.kcp = new KCPWrapper(KCPConfig.fromEnv());
                     this.options = gatherOptions();
+                    console.log("Options:", this.options);
+                    console.log("Provisioning timeout", provisioningTimeout);
                     console.log(`Provision SKR with instance ID ${this.options.instanceID}`);
                     const customParams = {
                       oidc: this.options.oidc0,
                     };
-                    const provisioningTimeout = 1000 * 60 * 30; // 30m
     
                     console.log(this.options.runtimeName);
                     const skr = await provisionSKR(keb, this.kcp, gardener,

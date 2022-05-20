@@ -91,6 +91,7 @@ async function updateSKR(keb,
 }
 
 async function ensureOperationSucceeded(keb, kcp, instanceID, operationID, timeout) {
+  console.log("Timeout is:", timeout);
   const res = await wait(
       () => keb.getOperation(instanceID, operationID),
       (res) => res && res.state && (res.state === 'succeeded' || res.state === 'failed'),
