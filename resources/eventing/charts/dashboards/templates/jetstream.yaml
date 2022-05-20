@@ -1170,7 +1170,7 @@ data:
                 }
              ],
              "title":"Message Acks Pending",
-             "description": "Number of messages forwarded to the dispatcher but have not been acknowledged by the dispatcher (per consumer)",
+             "description": "Number of messages forwarded to the dispatcher that have not been acknowledged by the dispatcher (per consumer)",
              "type":"timeseries"
           },
           {
