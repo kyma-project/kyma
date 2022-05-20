@@ -286,6 +286,7 @@ kyma:
     logLevel: warn
     lineFormat: json
     removeKeys: "kubernetes, stream"
+    fsBufferSize: 5M
 
 chunkCleaner:
   enabled: true

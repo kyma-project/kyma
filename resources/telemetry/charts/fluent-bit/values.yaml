@@ -327,7 +327,6 @@ config:
     [OUTPUT]
         Name null
         Match *
-        storage.total_limit_size 5M
 
   ## https://docs.fluentbit.io/manual/pipeline/parsers
   customParsers: |

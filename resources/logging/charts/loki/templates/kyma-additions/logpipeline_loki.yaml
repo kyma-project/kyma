@@ -9,15 +9,16 @@ spec:
   filters: []
   outputs:
     - content: |
-        Name               grafana-loki
-        Alias              loki-output
-        Match              {{ .Values.kyma.logPipeline.match }}
-        Url                http://{{ template "loki.fullname" . }}:{{ .Values.service.port }}/loki/api/v1/push
-        Labels             {job="telemetry-fluent-bit"}
-        RemoveKeys         {{ .Values.kyma.logPipeline.removeKeys }}
-        LineFormat         {{ .Values.kyma.logPipeline.lineFormat }}
-        LogLevel           {{ .Values.kyma.logPipeline.logLevel }}
-        LabelMapPath       /files/labelmap.json
+        Name                      grafana-loki
+        Alias                     loki-output
+        Match                     {{ .Values.kyma.logPipeline.match }}
+        Url                       http://{{ template "loki.fullname" . }}:{{ .Values.service.port }}/loki/api/v1/push
+        Labels                    {job="telemetry-fluent-bit"}
+        RemoveKeys                {{ .Values.kyma.logPipeline.removeKeys }}
+        LineFormat                {{ .Values.kyma.logPipeline.lineFormat }}
+        LogLevel                  {{ .Values.kyma.logPipeline.logLevel }}
+        LabelMapPath              /files/labelmap.json
+        storage.total_limit_size  {{ .Values.kyma.logPipeline.fsBufferSize }}
   files:
     - name: labelmap.json
       content: |
