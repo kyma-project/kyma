@@ -52,11 +52,6 @@ Get Oathkeeper rules configmap
 {{- printf "%s-rules" .Values.oathkeeperFullnameOverride | trimSuffix "-" -}}
 {{- else -}}
 {{- $fullName := include "oathkeeper-maester.fullname" . -}}
-{{- $nameParts := split "-" $fullName }}
-{{- if eq $nameParts._0 $nameParts._1 -}}
-{{- printf "%s-rules" $nameParts._0 | trimSuffix "-" -}}
-{{- else -}}
-{{- printf "%s-%s-rules" $nameParts._0 $nameParts._1 | trimSuffix "-" -}}
-{{- end -}}
+{{- printf "%s-rules" $fullName | replace "-oathkeeper-maester" "" -}}
 {{- end -}}
 {{- end -}}
