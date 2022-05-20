@@ -50,7 +50,7 @@ function withSuffix(suffix) {
 function gatherOptions(...opts) {
   // If no opts provided the options object will be set to these default values.
   const options = {
-    instanceID: "052b1ff9-0f91-4283-b0fa-5b34fe8f4490",
+    instanceID: uuid.v4(),
     testNS: testNS,
     // These options are not meant to be rewritten apart from env variable for KEB_USER_ID
     // If that's needed please add separate function that overrides this field.
