@@ -9,7 +9,7 @@ const {
 } = require('./index');
 const {
   getEnvOrThrow,
-  genRandom,
+  genRandom, retryPromise, wait,
 } = require('../utils');
 const {unregisterKymaFromCompass} = require('../compass');
 const {deprovisionSKRInstance} = require('./provision/deprovision-skr');
@@ -58,8 +58,10 @@ describe('SKR test', function() {
     console.log(shoot);
   });
 
-  oidcE2ETest(options, shoot);
-  commerceMockTest(options);
+  it('Execute the tests', async function() {
+    await oidcE2ETest(options, shoot);
+    await commerceMockTest(options);
+  });
 
   after('Cleanup the resources', async function() {
     this.timeout(deprovisioningTimeout);
