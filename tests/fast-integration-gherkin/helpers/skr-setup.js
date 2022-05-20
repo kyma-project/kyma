@@ -9,7 +9,8 @@ const {addScenarioInCompass, assignRuntimeToScenario} = require('../../fast-inte
 const {keb, gardener, director} = require('../../fast-integration/skr-test/provision/provision-skr');
 const {
     getEnvOrThrow,
-    genRandom
+    genRandom,
+    initializeK8sClient
 } = require('../../fast-integration/utils');
 const {BTPOperatorCreds} = require('../../fast-integration/smctl/helpers');
 const {unregisterKymaFromCompass} = require('../../fast-integration/compass');
@@ -32,29 +33,26 @@ class SKRSetup {
 
     static async provisionSKR() {
         if (!this._initialized){
-            // this._skipProvisioning = process.env.SKIP_PROVISIONING === 'true';
-            // if (this._skipProvisioning){
-            //     console.log('Gather information from externally provisioned SKR and prepare the compass resources');
-            //     const instanceID = getEnvOrThrow('INSTANCE_ID');
-            //     let suffix = process.env.TEST_SUFFIX;
-            //     if (suffix === undefined) {
-            //       suffix = genRandom(4);
-            //     }
-            //     this.options = gatherOptions(
-            //         withInstanceID(instanceID),
-            //         withSuffix(suffix),
-            //     );
-            //     this.shoot = await getSKRConfig(instanceID);
-            //     this._initialized = true;
-            // } else {
+            this._skipProvisioning = process.env.SKIP_PROVISIONING === 'true';
+            if (this._skipProvisioning){
+                console.log('Gather information from externally provisioned SKR and prepare the compass resources');
+                const instanceID = getEnvOrThrow('INSTANCE_ID');
+                let suffix = process.env.TEST_SUFFIX;
+                if (suffix === undefined) {
+                  suffix = genRandom(4);
+                }
+                this.options = gatherOptions(
+                    withInstanceID(instanceID),
+                    withSuffix(suffix),
+                );
+                this.shoot = await getSKRConfig(instanceID);
+                this._initialized = true;
+            } else {
                 try{
                     const provisioningTimeout = 1000 * 60 * 30; // 30m
                     this.btpOperatorCreds = BTPOperatorCreds.fromEnv();
                     this.kcp = new KCPWrapper(KCPConfig.fromEnv());
                     this.options = gatherOptions();
-                    console.log("Options:", this.options);
-                    console.log("Provisioning timeout", provisioningTimeout);
-                    console.log(`Provision SKR with instance ID ${this.options.instanceID}`);
                     const customParams = {
                       oidc: this.options.oidc0,
                     };
@@ -82,7 +80,7 @@ class SKRSetup {
                     const runtimeStatus = await this.kcp.getRuntimeStatusOperations(this.options.instanceID);
                     await this.kcp.reconcileInformationLog(runtimeStatus);
                 }    
-            //}
+            }
         }
     }
 
