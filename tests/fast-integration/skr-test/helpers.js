@@ -92,6 +92,7 @@ function gatherOptions(...opts) {
 
 // gets the skr config by it's instance id
 async function getSKRConfig(instanceID) {
+  console.log(instanceID);
   const runtimeStatus = await kcp.getRuntimeStatusOperations(instanceID);
   console.log(runtimeStatus);
   const objRuntimeStatus = JSON.parse(runtimeStatus);
