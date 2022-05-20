@@ -296,54 +296,6 @@ deployment:
   #  - name: ...
   #    image: ...
 
-# -- Values for initialization job
-job:
-  # -- If you do want to specify annotations, uncomment the following
-  # lines, adjust them as necessary, and remove the curly braces after 'annotations:'.
-  annotations: {}
-  # kubernetes.io/ingress.class: nginx
-  # kubernetes.io/tls-acme: "true"
-
-  # -- If you want to add extra sidecar containers.
-  extraContainers: {}
-  # extraContainers: |
-  #  - name: ...
-  #    image: ...
-
-  # -- If you want to add extra init containers.
-  # extraInitContainers: |
-  #  - name: ...
-  #    image: ...
-  extraInitContainers: {}
-
-  # -- If you want to add lifecycle hooks.
-  lifecycle: {}
-  # lifecycle: |
-  #   preStop:
-  #     exec:
-  #       command: [...]
-
-  # -- Set sharing process namespace
-  shareProcessNamespace: false
-
-  # -- Specify the serviceAccountName value.
-  # In some situations it is needed to provides specific permissions to Hydra deployments
-  # Like for example installing Hydra on a cluster with a PosSecurityPolicy and Istio.
-  # Uncoment if it is needed to provide a ServiceAccount for the Hydra deployment.
-  serviceAccount:
-    # -- Specifies whether a service account should be created
-    create: false
-    # -- Annotations to add to the service account
-    annotations:
-      helm.sh/hook-weight: "0"
-      helm.sh/hook: "pre-install, pre-upgrade"
-      helm.sh/hook-delete-policy: "before-hook-creation"
-    # -- The name of the service account to use. If not set and create is true, a name is generated using the fullname template
-    name: ""
-
-  spec:
-    # -- Set job back off limit
-    backoffLimit: 10
 # Configure node affinity
 affinity: {}
 
