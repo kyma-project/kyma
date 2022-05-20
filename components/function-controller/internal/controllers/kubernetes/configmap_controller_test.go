@@ -4,8 +4,12 @@ import (
 	"context"
 	"testing"
 
+	"go.uber.org/zap"
+
 	"k8s.io/client-go/kubernetes/scheme"
 
+	"github.com/kyma-project/kyma/components/function-controller/internal/resource"
+	"github.com/kyma-project/kyma/components/function-controller/internal/resource/automock"
 	"github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -13,10 +17,6 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/event"
-	"sigs.k8s.io/controller-runtime/pkg/log"
-
-	"github.com/kyma-project/kyma/components/function-controller/internal/resource"
-	"github.com/kyma-project/kyma/components/function-controller/internal/resource/automock"
 )
 
 func TestConfigMapReconciler_Reconcile(t *testing.T) {
@@ -38,7 +38,7 @@ func TestConfigMapReconciler_Reconcile(t *testing.T) {
 	g.Expect(k8sClient.Create(context.TODO(), baseConfigMap)).To(gomega.Succeed())
 
 	request := ctrl.Request{NamespacedName: types.NamespacedName{Namespace: baseConfigMap.GetNamespace(), Name: baseConfigMap.GetName()}}
-	reconciler := NewConfigMap(k8sClient, log.Log, testCfg, configMapSvc)
+	reconciler := NewConfigMap(k8sClient, zap.NewNop().Sugar(), testCfg, configMapSvc)
 	namespace := userNamespace.GetName()
 
 	ctx, cancel := context.WithCancel(context.Background())
