@@ -32,21 +32,21 @@ class SKRSetup {
 
     static async provisionSKR() {
         if (!this._initialized){
-            this._skipProvisioning = process.env.SKIP_PROVISIONING === 'true';
-            if (this._skipProvisioning){
-                console.log('Gather information from externally provisioned SKR and prepare the compass resources');
-                const instanceID = getEnvOrThrow('INSTANCE_ID');
-                let suffix = process.env.TEST_SUFFIX;
-                if (suffix === undefined) {
-                  suffix = genRandom(4);
-                }
-                this.options = gatherOptions(
-                    withInstanceID(instanceID),
-                    withSuffix(suffix),
-                );
-                this.shoot = await getSKRConfig(instanceID);
-                this._initialized = true;
-            } else {
+            // this._skipProvisioning = process.env.SKIP_PROVISIONING === 'true';
+            // if (this._skipProvisioning){
+            //     console.log('Gather information from externally provisioned SKR and prepare the compass resources');
+            //     const instanceID = getEnvOrThrow('INSTANCE_ID');
+            //     let suffix = process.env.TEST_SUFFIX;
+            //     if (suffix === undefined) {
+            //       suffix = genRandom(4);
+            //     }
+            //     this.options = gatherOptions(
+            //         withInstanceID(instanceID),
+            //         withSuffix(suffix),
+            //     );
+            //     this.shoot = await getSKRConfig(instanceID);
+            //     this._initialized = true;
+            // } else {
                 try{
                     const provisioningTimeout = 1000 * 60 * 30; // 30m
                     this.btpOperatorCreds = BTPOperatorCreds.fromEnv();
@@ -82,7 +82,7 @@ class SKRSetup {
                     const runtimeStatus = await this.kcp.getRuntimeStatusOperations(this.options.instanceID);
                     await this.kcp.reconcileInformationLog(runtimeStatus);
                 }    
-            }
+            //}
         }
     }
 
