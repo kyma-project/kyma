@@ -93,7 +93,9 @@ function gatherOptions(...opts) {
 // gets the skr config by it's instance id
 async function getSKRConfig(instanceID) {
   const runtimeStatus = await kcp.getRuntimeStatusOperations(instanceID);
+  console.log(runtimeStatus);
   const objRuntimeStatus = JSON.parse(runtimeStatus);
+  console.log(objRuntimeStatus);
   expect(objRuntimeStatus).to.have.nested.property('data[0].shootName').not.empty;
   return await gardener.getShoot(objRuntimeStatus.data[0].shootName);
 }
