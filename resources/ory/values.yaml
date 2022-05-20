@@ -227,9 +227,11 @@ oathkeeper:
         api:
           port: 4456
   deployment:
-    rollingUpdate:
-      maxSurge: "50%"
-      maxUnavailable: "35%"
+    strategy:
+      type: RollingUpdate
+      rollingUpdate:
+        maxSurge: "50%"
+        maxUnavailable: "35%"
     resources:
       limits:
         cpu: 100m
