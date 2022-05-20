@@ -13,25 +13,25 @@ func stateFnCheckService(ctx context.Context, r *reconciler, s *systemState) sta
 	r.err = r.client.ListByLabel(
 		ctx,
 		s.instance.GetNamespace(),
-		s.internalFunctionLabels(),
+		s.instance.GenerateInternalLabels(),
 		&s.services)
 
 	if r.err != nil {
 		return nil
 	}
 
-	expectedSvc := s.buildService()
+	expectedService := buildFunctionService(s.instance)
 
 	if len(s.services.Items) == 0 {
-		return buildStateFnCreateNewService(expectedSvc)
+		return buildStateFnCreateNewService(expectedService)
 	}
 
 	if len(s.services.Items) > 1 {
 		return stateFnDeleteServices
 	}
 
-	if s.svcChanged(expectedSvc) {
-		return buildStateFnUpdateService(expectedSvc)
+	if serviceChanged(s.services.Items[0], expectedService) {
+		return buildStateFnUpdateService(expectedService)
 	}
 
 	return stateFnCheckHPA
@@ -112,4 +112,27 @@ func stateFnDeleteServices(ctx context.Context, r *reconciler, s *systemState) s
 	}
 
 	return nil
+}
+
+func serviceChanged(existing, expected corev1.Service) bool {
+	return !equalServices(existing, expected)
+}
+
+func buildFunctionService(instance serverlessv1alpha1.Function) corev1.Service {
+	return corev1.Service{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      instance.GetName(),
+			Namespace: instance.GetNamespace(),
+			Labels:    instance.GetMergedLables(),
+		},
+		Spec: corev1.ServiceSpec{
+			Ports: []corev1.ServicePort{{
+				Name:       "http", // it has to be here for istio to work properly
+				TargetPort: svcTargetPort,
+				Port:       80,
+				Protocol:   corev1.ProtocolTCP,
+			}},
+			Selector: instance.DeploymentSelectorLabels(),
+		},
+	}
 }

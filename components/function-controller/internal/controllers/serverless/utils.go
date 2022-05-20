@@ -1,14 +1,13 @@
 package serverless
 
 import (
-	"crypto/sha256"
-	"fmt"
 	"path"
 	"strings"
 
 	"github.com/kyma-project/kyma/components/function-controller/internal/controllers/serverless/runtime"
 	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
 	appsv1 "k8s.io/api/apps/v1"
+	autoscalingv1 "k8s.io/api/autoscaling/v1"
 	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
 )
@@ -17,16 +16,6 @@ const (
 	FunctionSourceKey = "source"
 	FunctionDepsKey   = "dependencies"
 )
-
-func mergeLabels(labelsCollection ...map[string]string) map[string]string {
-	result := make(map[string]string, 0)
-	for _, labels := range labelsCollection {
-		for key, value := range labels {
-			result[key] = value
-		}
-	}
-	return result
-}
 
 func getConditionStatus(conditions []serverlessv1alpha1.Condition, conditionType serverlessv1alpha1.ConditionType) corev1.ConditionStatus {
 	for _, condition := range conditions {
@@ -205,6 +194,23 @@ func envsEqual(existing, expected []corev1.EnvVar) bool {
 	return true
 }
 
+func containersEqual(existing, expected []corev1.Container) bool {
+	if len(existing) != 1 || len(expected) != 1 {
+		return false
+	}
+	if existing[0].Image != expected[0].Image {
+		return false
+	}
+	if !envsEqual(existing[0].Env, expected[0].Env) {
+		return false
+	}
+	if !resourcesEqual(existing[0].Resources, expected[0].Resources) {
+		return false
+	}
+
+	return true
+}
+
 func mapsEqual(existing, expected map[string]string) bool {
 	if len(existing) != len(expected) {
 		return false
@@ -221,14 +227,13 @@ func mapsEqual(existing, expected map[string]string) bool {
 
 //TODO refactor to make this code more readable
 func equalDeployments(existing appsv1.Deployment, expected appsv1.Deployment, scalingEnabled bool) bool {
-	return len(existing.Spec.Template.Spec.Containers) == 1 &&
-		len(existing.Spec.Template.Spec.Containers) == len(expected.Spec.Template.Spec.Containers) &&
-		existing.Spec.Template.Spec.Containers[0].Image == expected.Spec.Template.Spec.Containers[0].Image &&
-		envsEqual(existing.Spec.Template.Spec.Containers[0].Env, expected.Spec.Template.Spec.Containers[0].Env) &&
-		mapsEqual(existing.GetLabels(), expected.GetLabels()) &&
-		mapsEqual(existing.Spec.Template.GetLabels(), expected.Spec.Template.GetLabels()) &&
-		equalResources(existing.Spec.Template.Spec.Containers[0].Resources, expected.Spec.Template.Spec.Containers[0].Resources) &&
-		(scalingEnabled || equalInt32Pointer(existing.Spec.Replicas, expected.Spec.Replicas))
+	equalContainerConfig := containersEqual(existing.Spec.Template.Spec.Containers, expected.Spec.Template.Spec.Containers)
+
+	equalLabels := mapsEqual(existing.GetLabels(), expected.GetLabels()) &&
+		mapsEqual(existing.Spec.Template.GetLabels(), expected.Spec.Template.GetLabels())
+	equalScalingConfig := scalingEnabled || equalInt32Pointer(existing.Spec.Replicas, expected.Spec.Replicas)
+
+	return equalContainerConfig && equalLabels && equalScalingConfig
 }
 
 func equalServices(existing corev1.Service, expected corev1.Service) bool {
@@ -248,7 +253,7 @@ func readSecretData(data map[string][]byte) map[string]string {
 	return output
 }
 
-func equalResources(existing, expected corev1.ResourceRequirements) bool {
+func resourcesEqual(existing, expected corev1.ResourceRequirements) bool {
 	return existing.Requests.Memory().Equal(*expected.Requests.Memory()) &&
 		existing.Requests.Cpu().Equal(*expected.Requests.Cpu()) &&
 		existing.Limits.Memory().Equal(*expected.Limits.Memory()) &&
@@ -280,26 +285,15 @@ func getConditionReason(conditions []serverlessv1alpha1.Condition, conditionType
 	return ""
 }
 
-func calculateImageTag(instance *serverlessv1alpha1.Function) string {
-	hash := sha256.Sum256([]byte(strings.Join([]string{
-		string(instance.GetUID()),
-		instance.Spec.Source,
-		instance.Spec.Deps,
-		string(instance.Status.Runtime),
-	}, "-")))
+func equalHorizontalPodAutoscalers(existing, expected autoscalingv1.HorizontalPodAutoscaler) bool {
+	equalCPUPercentage := equalInt32Pointer(existing.Spec.TargetCPUUtilizationPercentage, expected.Spec.TargetCPUUtilizationPercentage)
+	equalReplicas := equalInt32Pointer(existing.Spec.MinReplicas, expected.Spec.MinReplicas) &&
+		existing.Spec.MaxReplicas == expected.Spec.MaxReplicas
+	equalLabels := mapsEqual(existing.Labels, expected.Labels)
+	equalTargetName := existing.Spec.ScaleTargetRef.Name == expected.Spec.ScaleTargetRef.Name
 
-	return fmt.Sprintf("%x", hash)
-}
-
-func calculateGitImageTag(instance *serverlessv1alpha1.Function) string {
-	data := strings.Join([]string{
-		string(instance.GetUID()),
-		instance.Status.Commit,
-		instance.Status.Repository.BaseDir,
-		string(instance.Status.Runtime),
-	}, "-")
-	hash := sha256.Sum256([]byte(data))
-	return fmt.Sprintf("%x", hash)
+	return equalCPUPercentage && equalReplicas &&
+		equalLabels && equalTargetName
 }
 
 func jobFailed(job batchv1.Job, p func(reason string) bool) bool {

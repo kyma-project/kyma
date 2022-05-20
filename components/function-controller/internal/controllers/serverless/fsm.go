@@ -208,9 +208,9 @@ func stateFnGitCheckSources(ctx context.Context, r *reconciler, s *systemState) 
 		return buildStateFnUpdateStateFnFunctionCondition(condition)
 	}
 
-	srcChanged := s.gitFnSrcChanged(revision)
+	srcChanged := s.instance.GitSourceChanged(revision)
 	if !srcChanged {
-		expectedJob := s.buildGitJob(options, r.cfg)
+		expectedJob := buildGitJob(s.instance, options, r.cfg)
 		return buildStateFnCheckImageJob(expectedJob)
 	}
 

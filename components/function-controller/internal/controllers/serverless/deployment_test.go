@@ -458,7 +458,7 @@ func Test_equalResources(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			g := gomega.NewGomegaWithT(t)
-			got := equalResources(tt.args.expected, tt.args.existing)
+			got := resourcesEqual(tt.args.expected, tt.args.existing)
 			g.Expect(got).To(gomega.Equal(tt.want))
 		})
 	}
@@ -524,7 +524,7 @@ func TestFunctionReconciler_hasDeploymentConditionTrueStatus(t *testing.T) {
 				},
 			}
 
-			got := s.hasDeploymentConditionTrueStatus(tt.args.conditionType)
+			got := deploymentConditionTrue(s.deployments.Items[0], tt.args.conditionType)
 			g.Expect(got).To(gomega.Equal(tt.want))
 		})
 	}
@@ -609,7 +609,7 @@ func TestFunctionReconciler_hasDeploymentConditionTrueStatusWithReason(t *testin
 					},
 				},
 			}
-			got := s.hasDeploymentConditionTrueStatusWithReason(tt.args.conditionType, tt.args.conditionReason)
+			got := deploymentConditionTrueWithReason(s.deployments.Items[0], tt.args.conditionType, tt.args.conditionReason)
 			g.Expect(got).To(gomega.Equal(tt.want))
 		})
 	}
@@ -676,7 +676,7 @@ func TestFunctionReconciler_isDeploymentReady(t *testing.T) {
 						},
 					},
 				}}
-			got := s.isDeploymentReady()
+			got := isDeploymentReady(s.deployments.Items[0])
 			g.Expect(got).To(gomega.Equal(tt.want))
 		})
 	}

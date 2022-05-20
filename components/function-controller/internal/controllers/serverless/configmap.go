@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	fnRuntime "github.com/kyma-project/kyma/components/function-controller/internal/controllers/serverless/runtime"
 	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -12,7 +13,7 @@ import (
 
 func stateFnInlineCheckSources(ctx context.Context, r *reconciler, s *systemState) stateFn {
 
-	labels := s.internalFunctionLabels()
+	labels := s.instance.GenerateInternalLabels()
 
 	r.err = r.client.ListByLabel(ctx, s.instance.GetNamespace(), labels, &s.configMaps)
 	if r.err != nil {
@@ -24,9 +25,9 @@ func stateFnInlineCheckSources(ctx context.Context, r *reconciler, s *systemStat
 		return nil
 	}
 
-	srcChanged := s.inlineFnSrcChanged(r.cfg.docker.PullAddress)
+	srcChanged := s.inlineSourceChanged(r.cfg.docker.PullAddress)
 	if !srcChanged {
-		expectedJob := s.buildJob(s.configMaps.Items[0].GetName(), r.cfg)
+		expectedJob := buildJob(s.instance, s.configMaps.Items[0].GetName(), r.cfg)
 		return buildStateFnCheckImageJob(expectedJob)
 	}
 
@@ -49,7 +50,7 @@ func stateFnInlineCheckSources(ctx context.Context, r *reconciler, s *systemStat
 func stateFnInlineDeleteConfigMap(ctx context.Context, r *reconciler, s *systemState) stateFn {
 	r.log.Info("delete all ConfigMaps")
 
-	labels := s.internalFunctionLabels()
+	labels := s.instance.GenerateInternalLabels()
 	selector := apilabels.SelectorFromSet(labels)
 
 	r.err = r.client.DeleteAllBySelector(ctx, &corev1.ConfigMap{}, s.instance.GetNamespace(), selector)
@@ -61,7 +62,7 @@ func stateFnInlineDeleteConfigMap(ctx context.Context, r *reconciler, s *systemS
 }
 
 func stateFnInlineCreateConfigMap(ctx context.Context, r *reconciler, s *systemState) stateFn {
-	configMap := s.buildConfigMap()
+	configMap := buildInlineSourceConfigMap(s.instance)
 
 	r.err = r.client.CreateWithReference(ctx, &s.instance, &configMap)
 	if r.err != nil {
@@ -80,7 +81,7 @@ func stateFnInlineCreateConfigMap(ctx context.Context, r *reconciler, s *systemS
 }
 
 func stateFnInlineUpdateConfigMap(ctx context.Context, r *reconciler, s *systemState) stateFn {
-	expectedConfigMap := s.buildConfigMap()
+	expectedConfigMap := buildInlineSourceConfigMap(s.instance)
 
 	s.configMaps.Items[0].Data = expectedConfigMap.Data
 	s.configMaps.Items[0].Labels = expectedConfigMap.Labels
@@ -103,4 +104,22 @@ func stateFnInlineUpdateConfigMap(ctx context.Context, r *reconciler, s *systemS
 	}
 
 	return buildStateFnUpdateStateFnFunctionCondition(condition)
+}
+
+func buildInlineSourceConfigMap(instance serverlessv1alpha1.Function) corev1.ConfigMap {
+	rtm := fnRuntime.GetRuntime(instance.Spec.Runtime)
+	data := map[string]string{
+		FunctionSourceKey: instance.Spec.Source,
+		FunctionDepsKey:   rtm.SanitizeDependencies(instance.Spec.Deps),
+	}
+	labels := instance.GetMergedLables()
+
+	return corev1.ConfigMap{
+		ObjectMeta: metav1.ObjectMeta{
+			Labels:       labels,
+			GenerateName: fmt.Sprintf("%s-", instance.GetName()),
+			Namespace:    instance.GetNamespace(),
+		},
+		Data: data,
+	}
 }

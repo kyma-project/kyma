@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
+	appsv1 "k8s.io/api/apps/v1"
 	autoscalingv1 "k8s.io/api/autoscaling/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -13,7 +14,7 @@ import (
 
 func stateFnCheckHPA(ctx context.Context, r *reconciler, s *systemState) stateFn {
 	namespace := s.instance.GetNamespace()
-	labels := s.internalFunctionLabels()
+	labels := s.instance.GenerateInternalLabels()
 
 	r.err = r.client.ListByLabel(ctx, namespace, labels, &s.hpas)
 	if r.err != nil {
@@ -25,7 +26,7 @@ func stateFnCheckHPA(ctx context.Context, r *reconciler, s *systemState) stateFn
 	}
 
 	numHpa := len(s.hpas.Items)
-	expectedHPA := s.buildHorizontalPodAutoscaler(r.cfg.fn.TargetCPUUtilizationPercentage)
+	expectedHPA := buildFunctionHPA(s.instance, s.deployments.Items[0].GetName(), r.cfg.fn.TargetCPUUtilizationPercentage)
 
 	if numHpa == 0 {
 		if !equalInt32Pointer(s.instance.Spec.MinReplicas, s.instance.Spec.MaxReplicas) {
@@ -44,7 +45,7 @@ func stateFnCheckHPA(ctx context.Context, r *reconciler, s *systemState) stateFn
 		return stateFnDeleteAllHorizontalPodAutoscalers
 	}
 
-	if !s.equalHorizontalPodAutoscalers(expectedHPA) {
+	if !equalHorizontalPodAutoscalers(s.hpas.Items[0], expectedHPA) {
 		return buildStateFnUpdateHorizontalPodAutoscaler(expectedHPA)
 	}
 
@@ -74,7 +75,7 @@ func buildStateFnCreateHorizontalPodAutoscaler(hpa autoscalingv1.HorizontalPodAu
 
 func stateFnDeleteAllHorizontalPodAutoscalers(ctx context.Context, r *reconciler, s *systemState) stateFn {
 	r.log.Info("Deleting all HorizontalPodAutoscalers attached to function")
-	selector := apilabels.SelectorFromSet(s.internalFunctionLabels())
+	selector := apilabels.SelectorFromSet(s.instance.GenerateInternalLabels())
 
 	r.err = r.client.DeleteAllBySelector(ctx, &autoscalingv1.HorizontalPodAutoscaler{}, s.instance.GetNamespace(), selector)
 	if r.err != nil {
@@ -109,5 +110,27 @@ func buildStateFnUpdateHorizontalPodAutoscaler(expectd autoscalingv1.HorizontalP
 		}
 
 		return buildStateFnUpdateStateFnFunctionCondition(condition)
+	}
+}
+
+func buildFunctionHPA(instance serverlessv1alpha1.Function, deployName string, targetCPUUtilizationPercentage int32) autoscalingv1.HorizontalPodAutoscaler {
+	minReplicas, maxReplicas := instance.GetDefaultReplicas()
+	deploymentName := deployName
+	return autoscalingv1.HorizontalPodAutoscaler{
+		ObjectMeta: metav1.ObjectMeta{
+			GenerateName: fmt.Sprintf("%s-", instance.GetName()),
+			Namespace:    instance.GetNamespace(),
+			Labels:       instance.GetMergedLables(),
+		},
+		Spec: autoscalingv1.HorizontalPodAutoscalerSpec{
+			ScaleTargetRef: autoscalingv1.CrossVersionObjectReference{
+				Kind:       "Deployment",
+				Name:       deploymentName,
+				APIVersion: appsv1.SchemeGroupVersion.String(),
+			},
+			MinReplicas:                    &minReplicas,
+			MaxReplicas:                    maxReplicas,
+			TargetCPUUtilizationPercentage: &targetCPUUtilizationPercentage,
+		},
 	}
 }

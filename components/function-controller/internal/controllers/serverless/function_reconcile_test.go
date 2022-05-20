@@ -63,7 +63,7 @@ func TestFunctionReconciler_Reconcile(t *testing.T) {
 			instance: *inFunction,
 		}
 
-		fnLabels := s.functionLabels()
+		fnLabels := s.instance.GetMergedLables()
 		request := ctrl.Request{NamespacedName: types.NamespacedName{Namespace: inFunction.GetNamespace(), Name: inFunction.GetName()}}
 
 		//WHEN
@@ -156,7 +156,7 @@ func TestFunctionReconciler_Reconcile(t *testing.T) {
 			instance: *inFunction,
 		}
 
-		fnLabels := s.functionLabels()
+		fnLabels := s.instance.GetMergedLables()
 		request := ctrl.Request{NamespacedName: types.NamespacedName{Namespace: inFunction.GetNamespace(), Name: inFunction.GetName()}}
 
 		//WHEN
@@ -237,7 +237,7 @@ func TestFunctionReconciler_Reconcile(t *testing.T) {
 			instance: *inFunction,
 		}
 
-		fnLabels := s.functionLabels()
+		fnLabels := s.instance.GetMergedLables()
 		request := ctrl.Request{NamespacedName: types.NamespacedName{Namespace: inFunction.GetNamespace(), Name: inFunction.GetName()}}
 
 		//WHEN
@@ -509,7 +509,7 @@ func TestFunctionReconciler_Reconcile(t *testing.T) {
 			instance: *inFunction,
 		}
 
-		fnLabels := s.functionLabels()
+		fnLabels := s.instance.GetMergedLables()
 
 		secondFunction := newFixFunction(testNamespace, "second-function", 1, 2)
 		secondRequest := ctrl.Request{NamespacedName: types.NamespacedName{Namespace: secondFunction.GetNamespace(), Name: secondFunction.GetName()}}
@@ -591,7 +591,7 @@ func TestFunctionReconciler_Reconcile(t *testing.T) {
 			instance: *inFunction,
 		}
 
-		fnLabels := s.functionLabels()
+		fnLabels := s.instance.GetMergedLables()
 
 		request := ctrl.Request{NamespacedName: types.NamespacedName{Namespace: inFunction.GetNamespace(), Name: inFunction.GetName()}}
 
@@ -865,7 +865,7 @@ func TestFunctionReconciler_Reconcile(t *testing.T) {
 			instance: *inFunction,
 		}
 
-		fnLabels := s.functionLabels()
+		fnLabels := s.instance.GetMergedLables()
 
 		request := ctrl.Request{NamespacedName: types.NamespacedName{Namespace: inFunction.GetNamespace(), Name: inFunction.GetName()}}
 
@@ -998,7 +998,7 @@ func TestFunctionReconciler_Reconcile(t *testing.T) {
 			instance: *inFunction,
 		}
 
-		fnLabels := s.functionLabels()
+		fnLabels := s.instance.GetMergedLables()
 
 		request := ctrl.Request{NamespacedName: types.NamespacedName{Namespace: inFunction.GetNamespace(), Name: inFunction.GetName()}}
 
@@ -1141,7 +1141,7 @@ func TestFunctionReconciler_Reconcile(t *testing.T) {
 			instance: *inFunction,
 		}
 
-		fnLabels := s.functionLabels()
+		fnLabels := s.instance.GetMergedLables()
 
 		request := ctrl.Request{NamespacedName: types.NamespacedName{Namespace: inFunction.GetNamespace(), Name: inFunction.GetName()}}
 

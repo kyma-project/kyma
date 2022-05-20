@@ -272,7 +272,7 @@ func TestFunctionReconciler_equalHorizontalPodAutoscalers(t *testing.T) {
 				},
 			}
 
-			got := s.equalHorizontalPodAutoscalers(tt.args.expected)
+			got := equalHorizontalPodAutoscalers(s.hpas.Items[0], tt.args.expected)
 			g.Expect(got).To(gomega.Equal(tt.want))
 		})
 	}
@@ -349,7 +349,7 @@ func TestFunctionReconciler_isOnHorizontalPodAutoscalerChange(t *testing.T) {
 		},
 	}
 
-	equalHPA := s.buildHorizontalPodAutoscaler(0)
+	equalHPA := buildFunctionHPA(s.instance, s.deployments.Items[0].GetName(), 0)
 
 	type args struct {
 		instance    *serverlessv1alpha1.Function

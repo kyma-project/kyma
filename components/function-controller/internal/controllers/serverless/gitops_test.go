@@ -186,7 +186,7 @@ func Test_isOnSourceChange(t *testing.T) {
 			s := systemState{
 				instance: tC.fn,
 			}
-			actual := s.gitFnSrcChanged(tC.revision)
+			actual := s.instance.GitSourceChanged(tC.revision)
 			g.Expect(actual).To(gomega.Equal(tC.expectedResult))
 		})
 	}

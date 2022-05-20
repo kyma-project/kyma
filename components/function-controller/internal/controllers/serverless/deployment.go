@@ -6,10 +6,12 @@ import (
 
 	ctrl "sigs.k8s.io/controller-runtime"
 
+	fnRuntime "github.com/kyma-project/kyma/components/function-controller/internal/controllers/serverless/runtime"
 	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
 	"gopkg.in/yaml.v2"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	apilabels "k8s.io/apimachinery/pkg/labels"
 )
@@ -28,7 +30,7 @@ const (
 )
 
 func stateFnCheckDeployments(ctx context.Context, r *reconciler, s *systemState) stateFn {
-	labels := s.internalFunctionLabels()
+	labels := s.instance.GenerateInternalLabels()
 
 	r.err = r.client.ListByLabel(ctx, s.instance.GetNamespace(), labels, &s.deployments)
 	if r.err != nil {
@@ -46,13 +48,7 @@ func stateFnCheckDeployments(ctx context.Context, r *reconciler, s *systemState)
 		ImagePullAccountName:  r.cfg.fn.ImagePullAccountName,
 	}
 
-	expectedDeployment := s.buildDeployment(args)
-
-	deploymentChanged := !s.deploymentEqual(expectedDeployment)
-
-	if !deploymentChanged {
-		return stateFnCheckService
-	}
+	expectedDeployment := buildFunctionDeployment(s.instance, args)
 
 	if len(s.deployments.Items) == 0 {
 		return buildStateFnCreateDeployment(expectedDeployment)
@@ -62,6 +58,11 @@ func stateFnCheckDeployments(ctx context.Context, r *reconciler, s *systemState)
 		return stateFnDeleteDeployments
 	}
 
+	deploymentChanged := functionDeploymentChanged(s.deployments.Items[0], expectedDeployment, isScalingEnabled(&s.instance))
+
+	if !deploymentChanged {
+		return stateFnCheckService
+	}
 	if !equalDeployments(s.deployments.Items[0], expectedDeployment, isScalingEnabled(&s.instance)) {
 		return buildStateFnUpdateDeployment(expectedDeployment.Spec, expectedDeployment.Labels)
 	}
@@ -91,7 +92,7 @@ func buildStateFnCreateDeployment(d appsv1.Deployment) stateFn {
 func stateFnDeleteDeployments(ctx context.Context, r *reconciler, s *systemState) stateFn {
 	r.log.Info("deleting function")
 
-	labels := s.internalFunctionLabels()
+	labels := s.instance.GenerateInternalLabels()
 	selector := apilabels.SelectorFromSet(labels)
 
 	r.err = r.client.DeleteAllBySelector(ctx, &appsv1.Deployment{}, s.instance.GetNamespace(), selector)
@@ -132,7 +133,7 @@ func stateFnUpdateDeploymentStatus(ctx context.Context, r *reconciler, s *system
 	deploymentName := s.deployments.Items[0].GetName()
 
 	// ready deployment
-	if s.isDeploymentReady() {
+	if isDeploymentReady(s.deployments.Items[0]) {
 		r.log.Info(fmt.Sprintf("deployment ready %q", deploymentName))
 
 		condition := serverlessv1alpha1.Condition{
@@ -151,7 +152,7 @@ func stateFnUpdateDeploymentStatus(ctx context.Context, r *reconciler, s *system
 	}
 
 	// unhealthy deployment
-	if s.hasDeploymentConditionFalseStatusWithReason(appsv1.DeploymentAvailable, MinimumReplicasUnavailable) {
+	if deploymentConditionFalseWithReason(s.deployments.Items[0], appsv1.DeploymentAvailable, MinimumReplicasUnavailable) {
 		r.log.Info(fmt.Sprintf("deployment unhealthy: %q", deploymentName))
 
 		condition := serverlessv1alpha1.Condition{
@@ -166,7 +167,7 @@ func stateFnUpdateDeploymentStatus(ctx context.Context, r *reconciler, s *system
 	}
 
 	// deployment not ready
-	if s.hasDeploymentConditionTrueStatus(appsv1.DeploymentProgressing) {
+	if deploymentConditionTrue(s.deployments.Items[0], appsv1.DeploymentProgressing) {
 		r.log.Info(fmt.Sprintf("deployment %q not ready", deploymentName))
 
 		condition := serverlessv1alpha1.Condition{
@@ -201,4 +202,176 @@ func stateFnUpdateDeploymentStatus(ctx context.Context, r *reconciler, s *system
 	}
 
 	return buildStateFnUpdateStateFnFunctionCondition(condition)
+}
+
+type buildDeploymentArgs struct {
+	DockerPullAddress     string
+	JaegerServiceEndpoint string
+	PublisherProxyAddress string
+	ImagePullAccountName  string
+}
+
+func buildFunctionDeployment(instance serverlessv1alpha1.Function, cfg buildDeploymentArgs) appsv1.Deployment {
+
+	imageName := instance.BuildImageAddress(cfg.DockerPullAddress)
+	deploymentLabels := instance.GetMergedLables()
+	podLabels := instance.MergeLabels(instance.Spec.Labels, instance.DeploymentSelectorLabels())
+
+	const volumeName = "tmp-dir"
+	emptyDirVolumeSize := resource.MustParse("100Mi")
+
+	rtmCfg := fnRuntime.GetRuntimeConfig(instance.Spec.Runtime)
+
+	envs := append(instance.Spec.Env, rtmCfg.RuntimeEnvs...)
+
+	deploymentEnvs := buildDeploymentEnvs(
+		instance.GetNamespace(),
+		cfg.JaegerServiceEndpoint,
+		cfg.PublisherProxyAddress,
+	)
+	envs = append(envs, deploymentEnvs...)
+
+	return appsv1.Deployment{
+		ObjectMeta: metav1.ObjectMeta{
+			GenerateName: fmt.Sprintf("%s-", instance.GetName()),
+			Namespace:    instance.GetNamespace(),
+			Labels:       deploymentLabels,
+		},
+		Spec: appsv1.DeploymentSpec{
+			Replicas: instance.Spec.MinReplicas,
+			Selector: &metav1.LabelSelector{
+				MatchLabels: instance.DeploymentSelectorLabels(), // this has to match spec.template.objectmeta.Labels
+				// and also it has to be immutable
+			},
+			Template: corev1.PodTemplateSpec{
+				ObjectMeta: metav1.ObjectMeta{
+					Labels: podLabels, // podLabels contains InternalFnLabels, so it's ok
+					Annotations: map[string]string{
+						"proxy.istio.io/config": "{ \"holdApplicationUntilProxyStarts\": true }",
+					},
+				},
+				Spec: corev1.PodSpec{
+					Volumes: []corev1.Volume{{
+						Name: volumeName,
+						VolumeSource: corev1.VolumeSource{
+							EmptyDir: &corev1.EmptyDirVolumeSource{
+								Medium:    corev1.StorageMediumDefault,
+								SizeLimit: &emptyDirVolumeSize,
+							},
+						},
+					}},
+					Containers: []corev1.Container{
+						{
+							Name:      functionContainerName,
+							Image:     imageName,
+							Env:       envs,
+							Resources: instance.Spec.Resources,
+							VolumeMounts: []corev1.VolumeMount{{
+								Name: volumeName,
+								/* needed in order to have python functions working:
+								python functions need writable /tmp dir, but we disable writing to root filesystem via
+								security context below. That's why we override this whole /tmp directory with emptyDir volume.
+								We've decided to add this directory to be writable by all functions, as it may come in handy
+								*/
+								MountPath: "/tmp",
+								ReadOnly:  false,
+							}},
+							/*
+								In order to mark pod as ready we need to ensure the function is actually running and ready to serve traffic.
+								We do this but first ensuring that sidecar is raedy by using "proxy.istio.io/config": "{ \"holdApplicationUntilProxyStarts\": true }", annotation
+								Second thing is setting that probe which continously
+							*/
+							StartupProbe: &corev1.Probe{
+								Handler: corev1.Handler{
+									HTTPGet: &corev1.HTTPGetAction{
+										Path: "/healthz",
+										Port: svcTargetPort,
+									},
+								},
+								InitialDelaySeconds: 0,
+								PeriodSeconds:       5,
+								SuccessThreshold:    1,
+								FailureThreshold:    30, // FailureThreshold * PeriodSeconds = 150s in this case, this should be enough for any function pod to start up
+							},
+							ReadinessProbe: &corev1.Probe{
+								Handler: corev1.Handler{
+									HTTPGet: &corev1.HTTPGetAction{
+										Path: "/healthz",
+										Port: svcTargetPort,
+									},
+								},
+								InitialDelaySeconds: 0, // startup probe exists, so delaying anything here doesn't make sense
+								FailureThreshold:    1,
+								PeriodSeconds:       5,
+								TimeoutSeconds:      2,
+							},
+							LivenessProbe: &corev1.Probe{
+								Handler: corev1.Handler{
+									HTTPGet: &corev1.HTTPGetAction{
+										Path: "/healthz",
+										Port: svcTargetPort,
+									},
+								},
+								FailureThreshold: 3,
+								PeriodSeconds:    5,
+								TimeoutSeconds:   4,
+							},
+							ImagePullPolicy: corev1.PullIfNotPresent,
+							SecurityContext: &corev1.SecurityContext{
+								Capabilities: &corev1.Capabilities{
+									Add:  []corev1.Capability{},
+									Drop: []corev1.Capability{"ALL"},
+								},
+								Privileged:               boolPtr(false),
+								RunAsUser:                &functionUser,
+								RunAsGroup:               &functionUser,
+								RunAsNonRoot:             boolPtr(true),
+								ReadOnlyRootFilesystem:   boolPtr(true),
+								AllowPrivilegeEscalation: boolPtr(false),
+							},
+						},
+					},
+					ServiceAccountName: cfg.ImagePullAccountName,
+				},
+			},
+		},
+	}
+}
+
+func deploymentConditionTrueWithReason(deployment appsv1.Deployment, conditionType appsv1.DeploymentConditionType, reason string) bool {
+	for _, condition := range deployment.Status.Conditions {
+		if condition.Type == conditionType {
+			return condition.Status == corev1.ConditionTrue &&
+				condition.Reason == reason
+		}
+	}
+	return false
+}
+
+func isDeploymentReady(deployment appsv1.Deployment) bool {
+	return deploymentConditionTrueWithReason(deployment, appsv1.DeploymentAvailable, MinimumReplicasAvailable) &&
+		deploymentConditionTrueWithReason(deployment, appsv1.DeploymentProgressing, NewRSAvailableReason)
+}
+
+func deploymentConditionFalseWithReason(deployment appsv1.Deployment, conditionType appsv1.DeploymentConditionType, reason string) bool {
+	for _, condition := range deployment.Status.Conditions {
+		if condition.Type == conditionType {
+			return condition.Status == corev1.ConditionFalse &&
+				condition.Reason == reason
+		}
+	}
+	return false
+}
+
+func deploymentConditionTrue(deployment appsv1.Deployment, conditionType appsv1.DeploymentConditionType) bool {
+	for _, condition := range deployment.Status.Conditions {
+		if condition.Type == conditionType {
+			return condition.Status == corev1.ConditionTrue
+		}
+	}
+	return false
+}
+
+func functionDeploymentChanged(existing, expected appsv1.Deployment, scalingEnabled bool) bool {
+	return !equalDeployments(existing, expected, scalingEnabled)
 }

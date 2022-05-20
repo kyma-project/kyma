@@ -60,7 +60,7 @@ func TestFunctionReconciler_buildConfigMap(t *testing.T) {
 				//TODO: https://github.com/kyma-project/kyma/issues/14079
 				instance: *tt.fn,
 			}
-			got := s.buildConfigMap()
+			got := buildInlineSourceConfigMap(s.instance)
 			g.Expect(got).To(gomega.Equal(tt.want))
 		})
 	}
@@ -91,7 +91,7 @@ func TestFunctionReconciler_buildDeployment(t *testing.T) {
 				instance: *tt.args.instance,
 			}
 
-			got := s.buildDeployment(buildDeploymentArgs{})
+			got := buildFunctionDeployment(s.instance, buildDeploymentArgs{})
 
 			for key, value := range got.Spec.Selector.MatchLabels {
 				g.Expect(got.Spec.Template.Labels[key]).To(gomega.Equal(value))
@@ -196,7 +196,7 @@ func TestFunctionReconciler_buildHorizontalPodAutoscaler(t *testing.T) {
 				},
 			}
 
-			got := s.buildHorizontalPodAutoscaler(0)
+			got := buildFunctionHPA(s.instance, s.deployments.Items[0].GetName(), 0)
 
 			g.Expect(*got.Spec.MinReplicas).To(gomega.Equal(tt.wants.minReplicas))
 			g.Expect(got.Spec.MaxReplicas).To(gomega.Equal(tt.wants.maxReplicas))
@@ -417,7 +417,7 @@ func TestFunctionReconciler_functionLabels(t *testing.T) {
 				//TODO https://github.com/kyma-project/kyma/issues/14079
 				instance: *tt.args.instance,
 			}
-			got := s.functionLabels()
+			got := s.instance.GetMergedLables()
 			g.Expect(got).To(gomega.Equal(tt.want))
 		})
 	}
@@ -516,7 +516,7 @@ func TestFunctionReconciler_buildJob(t *testing.T) {
 			}
 
 			// when
-			job := s.buildJob(cmName, cfg{
+			job := buildJob(s.instance, cmName, cfg{
 				docker: dockerCfg,
 				fn: FunctionConfig{
 					PackageRegistryConfigSecretName: "pkg-config-secret",

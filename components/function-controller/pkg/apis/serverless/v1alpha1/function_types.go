@@ -1,6 +1,10 @@
 package v1alpha1
 
 import (
+	"crypto/sha256"
+	"fmt"
+	"strings"
+
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -39,6 +43,11 @@ const (
 	ReplicasPresetLabel          = "serverless.kyma-project.io/replicas-preset"
 	FunctionResourcesPresetLabel = "serverless.kyma-project.io/function-resources-preset"
 	BuildResourcesPresetLabel    = "serverless.kyma-project.io/build-resources-preset"
+)
+
+const (
+	FunctionSourceKey = "source"
+	FunctionDepsKey   = "dependencies"
 )
 
 // FunctionSpec defines the desired state of Function
@@ -188,4 +197,102 @@ func (s *FunctionStatus) Condition(c ConditionType) *Condition {
 
 func (c *Condition) IsTrue() bool {
 	return c.Status == corev1.ConditionTrue
+}
+
+func (c *Condition) HasStatus(s corev1.ConditionStatus) bool {
+	return c != nil && c.Status == s
+}
+
+func (f *Function) GenerateInternalLabels() map[string]string {
+	labels := make(map[string]string, 3)
+
+	labels[FunctionNameLabel] = f.Name
+	labels[FunctionManagedByLabel] = FunctionControllerValue
+	labels[FunctionUUIDLabel] = string(f.GetUID())
+	return labels
+}
+
+func (f *Function) GetMergedLables() map[string]string {
+	internalLabels := f.GenerateInternalLabels()
+	functionLabels := f.GetLabels()
+
+	return f.MergeLabels(functionLabels, internalLabels)
+}
+
+func (f *Function) MergeLabels(labelsCollection ...map[string]string) map[string]string {
+	result := make(map[string]string, 0)
+	for _, labels := range labelsCollection {
+		for key, value := range labels {
+			result[key] = value
+		}
+	}
+	return result
+}
+
+func (f *Function) CalculateImageTag() string {
+	hash := sha256.Sum256([]byte(strings.Join([]string{
+		string(f.GetUID()),
+		f.Spec.Source,
+		f.Spec.Deps,
+		string(f.Status.Runtime),
+	}, "-")))
+
+	return fmt.Sprintf("%x", hash)
+}
+
+func (f *Function) CalculateGitImageTag() string {
+	data := strings.Join([]string{
+		string(f.GetUID()),
+		f.Status.Commit,
+		f.Status.Repository.BaseDir,
+		string(f.Status.Runtime),
+	}, "-")
+	hash := sha256.Sum256([]byte(data))
+	return fmt.Sprintf("%x", hash)
+}
+
+func (f *Function) BuildImageAddress(registryAddress string) string {
+	var imageTag string
+	if f.Spec.Type == SourceTypeGit {
+		imageTag = f.CalculateGitImageTag()
+	} else {
+		imageTag = f.CalculateImageTag()
+	}
+	return fmt.Sprintf("%s/%s-%s:%s", registryAddress, f.Namespace, f.Name, imageTag)
+}
+
+func (f *Function) GetDefaultReplicas() (int32, int32) {
+	min, max := int32(1), int32(1)
+	spec := f.Spec
+	if spec.MinReplicas != nil && *spec.MinReplicas > 0 {
+		min = *spec.MinReplicas
+	}
+	// special case
+	if spec.MaxReplicas == nil || min > *spec.MaxReplicas {
+		max = min
+	} else {
+		max = *spec.MaxReplicas
+	}
+	return min, max
+}
+
+func (f *Function) gitConfigChanged(commit string) bool {
+	changedCommits := f.Status.Commit == "" || commit != f.Status.Commit
+	changedReferences := f.Spec.Reference != f.Status.Reference
+	changedBaseDirs := f.Spec.BaseDir != f.Status.BaseDir
+
+	return changedCommits || changedReferences || changedBaseDirs
+}
+func (f *Function) GitSourceChanged(commit string) bool {
+	gitConfigChanged := f.gitConfigChanged(commit)
+	changedRuntimes := RuntimeExtended(f.Spec.Runtime) != f.Status.Runtime
+	notConfigured := f.Status.Condition(ConditionConfigurationReady).HasStatus(corev1.ConditionFalse)
+
+	return gitConfigChanged || changedRuntimes || notConfigured
+}
+
+func (f *Function) DeploymentSelectorLabels() map[string]string {
+	labels := f.GenerateInternalLabels()
+	labels[FunctionResourceLabel] = FunctionResourceLabelDeploymentValue
+	return labels
 }
