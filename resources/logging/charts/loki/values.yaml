@@ -282,7 +282,7 @@ kyma:
     useKymaGroups: false
     groups: ""
   logPipeline:
-    match: "kube.*"
+    match: "telemetry-kube.*"
     logLevel: warn
     lineFormat: json
     removeKeys: "kubernetes, stream"
