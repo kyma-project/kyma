@@ -58,10 +58,8 @@ describe('SKR test', function() {
     console.log(shoot);
   });
 
-  it('Execute the tests', function() {
-    oidcE2ETest(options, shoot);
-    commerceMockTest(options);
-  });
+  oidcE2ETest(options, shoot);
+  commerceMockTest(options);
 
   after('Cleanup the resources', async function() {
     this.timeout(deprovisioningTimeout);

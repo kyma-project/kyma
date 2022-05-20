@@ -1,5 +1,5 @@
 const uuid = require('uuid');
-const {genRandom, getEnvOrThrow, initializeK8sClient} = require('../utils');
+const {genRandom, getEnvOrThrow, initializeK8sClient, debug} = require('../utils');
 const {kcp, gardener, director} = require('./provision/provision-skr');
 const {
   scenarioExistsInCompass,
@@ -93,9 +93,7 @@ function gatherOptions(...opts) {
 // gets the skr config by it's instance id
 async function getSKRConfig(instanceID) {
   const runtimeStatus = await kcp.getRuntimeStatusOperations(instanceID);
-  console.log(runtimeStatus);
   const objRuntimeStatus = JSON.parse(runtimeStatus);
-  console.log(objRuntimeStatus);
   expect(objRuntimeStatus).to.have.nested.property('data[0].shootName').not.empty;
   return await gardener.getShoot(objRuntimeStatus.data[0].shootName);
 }
