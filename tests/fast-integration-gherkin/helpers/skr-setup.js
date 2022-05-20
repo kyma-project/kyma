@@ -96,3 +96,7 @@ class SKRSetup {
         await unregisterKymaFromCompass(director, this.options.scenarioName);
     }
 }
+
+module.exports = {
+    SKRSetup
+};
