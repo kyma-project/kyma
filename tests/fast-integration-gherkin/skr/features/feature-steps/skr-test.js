@@ -262,7 +262,7 @@ AfterAll({timeout: 1000 * 60 * 95}, async() => {
         const options = this.context.options;
 
         // Delete commerce mock
-        await CommerceCompassMock.deleteCommerceMockResources(options.testNS);
+        // await CommerceCompassMock.deleteCommerceMockResources(options.testNS);
 
         // Deprovision SKR
         await SKRSetup.deprovisionSKR();    
