@@ -17,33 +17,6 @@ application-operator:
       requests:
         cpu: 100m
         memory: 128Mi
-connector-service:
-  deployment:
-    resources:
-      limits:
-        cpu: 100m
-        memory: 128Mi
-      requests:
-        cpu: 10m
-        memory: 32Mi
-application-registry:
-  deployment:
-    resources:
-      limits:
-        cpu: 100m
-        memory: 128Mi
-      requests:
-        cpu: 10m
-        memory: 32Mi
-connection-token-handler:
-  deployment:
-    resources:
-      limits:
-        cpu: 100m
-        memory: 96Mi
-      requests:
-        cpu: 10m
-        memory: 32Mi
 central-application-gateway:
   autoscaling:
     enable: true
