@@ -51,7 +51,7 @@ global:
       version: "6d430445"
     application_operator:
       name: "application-operator"
-      version: "3f163e8f"
+      version: "PR-14352"
     application_registry:
       name: "application-registry"
       version: "3f163e8f"
