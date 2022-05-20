@@ -469,7 +469,7 @@ func TestGitOpsWithoutContinuousGitCheckout(t *testing.T) {
 			statsCollector.On("UpdateReconcileStats", mock.Anything, mock.Anything).Return()
 
 			reconciler := &FunctionReconciler{
-				Log:               log.Log,
+				Log:               zap.NewNop().Sugar(),
 				client:            resourceClient,
 				recorder:          record.NewFakeRecorder(100),
 				config:            testCfg,
