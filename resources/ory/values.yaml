@@ -231,7 +231,7 @@ oathkeeper:
       type: RollingUpdate
       rollingUpdate:
         maxSurge: "50%"
-        maxUnavailable: "35%"
+        maxUnavailable: "0%"
     resources:
       limits:
         cpu: 100m
