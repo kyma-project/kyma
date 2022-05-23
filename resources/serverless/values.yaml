@@ -128,8 +128,8 @@ deployment:
     successThreshold: 1
     failureThreshold: 3
     initialDelaySeconds: 50
-    timeoutSeconds: 10
-    periodSeconds: 30
+    timeoutSeconds: 60
+    periodSeconds: 120
   readinessProbe:
     successThreshold: 1
     failureThreshold: 3
