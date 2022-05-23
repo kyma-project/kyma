@@ -1,3 +1,5 @@
+#Kyma resource
+
 {{- if .Capabilities.APIVersions.Has "autoscaling/v2beta2" }}
 {{- if .Values.deployment.autoscaling.enabled }}
 ---

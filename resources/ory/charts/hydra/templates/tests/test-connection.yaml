@@ -15,13 +15,4 @@ spec:
       image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.busybox) }}"
       command: ['wget']
       args:  ['{{ include "hydra.fullname" . }}-admin:{{ .Values.service.admin.port }}/health/ready']
-      securityContext:
-        allowPrivilegeEscalation: false
-        capabilities:
-          drop:
-          - ALL
-        privileged: false
-        runAsGroup: 65534
-        runAsNonRoot: true
-        runAsUser: 65534
   restartPolicy: Never
