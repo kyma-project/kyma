@@ -13,14 +13,14 @@ const {
   checkAuditLogs,
   checkAuditEventsThreshold,
 } = require('../../audit-log');
-// const {debug} = require('../../utils');
+const {debug} = require('../../utils');
 const {director} = require('../provision/provision-skr');
 const {
   exposeGrafana,
   unexposeGrafana,
 } = require('../../monitoring');
 
-// const AWS_PLAN_ID = '361c511f-f939-4621-b228-d0fb79a1fe15';
+const AWS_PLAN_ID = '361c511f-f939-4621-b228-d0fb79a1fe15';
 
 const auditLogsThreshold = 4;
 const testTimeout = 1000 * 60 * 30; // 30m
@@ -38,11 +38,11 @@ function commerceMockTest(options) {
     commerceMockCleanup(options.testNS);
 
     context('Check audit logs for AWS', function() {
-      // if (process.env.KEB_PLAN_ID === AWS_PLAN_ID) {
-      checkAuditLogsForAWS();
-      // } else {
-      // debug('Skipping step for non-AWS plan');
-      // }
+      if (process.env.KEB_PLAN_ID === AWS_PLAN_ID) {
+        checkAuditLogsForAWS();
+      } else {
+        debug('Skipping step for non-AWS plan');
+      }
     });
   });
 }
