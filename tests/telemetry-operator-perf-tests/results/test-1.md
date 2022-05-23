@@ -33,7 +33,7 @@ See the following summary of the tests performed. For more detailed results, che
 
 
 ## Learnings
-1. [Health check](https://docs.fluentbit.io/manual/administration/monitoring#health-check-for-fluent-bit) had to be adjusted as due to higher error rate the fluentbit would mark the pod unhealthy.
+- [Health check](https://docs.fluentbit.io/manual/administration/monitoring#health-check-for-fluent-bit) had to be adjusted because due to the higher error rate, Fluent Bit would mark the Pod unhealthy.
 - To improve the [performance](https://www.mock-server.com/mock_server/performance.html) of mockserver, we had to reduce the memory consumption. Logging the messages to stdout was disabled and the log level was changed to `trace`.
 - Over a period of time, the http output throughput was declining. After restarting mockserver, it increased again. It looks like an issue with mockserver.
 - Loki was running out of memory. We had to increase the memory of Loki to 1Gi.
