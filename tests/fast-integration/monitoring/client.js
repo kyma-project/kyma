@@ -11,6 +11,7 @@ const {
   getVirtualService,
   debug,
   error,
+  info,
 } = require('../utils');
 
 async function getGrafanaUrl() {
@@ -28,8 +29,11 @@ async function getGrafanaDatasourceId(grafanaUrl, datasourceName) {
 async function proxyGrafanaDatasource(datasourceName, path, retries, interval,
     timeout, debugMsg = undefined) {
   const grafanaUrl = await getGrafanaUrl();
+  info('grafanaUrl', grafanaUrl);
   const datasourceId = await getGrafanaDatasourceId(grafanaUrl, datasourceName);
+  info('datasourceId', datasourceId, datasourceName);
   const url = `${grafanaUrl}/api/datasources/proxy/${datasourceId}/${path}`;
+  info('url', url);
 
   return retryPromise(async () => {
     if (debugMsg) {
