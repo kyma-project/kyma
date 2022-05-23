@@ -9,7 +9,7 @@ import (
 
 //go:generate mockery --name PluginValidator --filename plugin_validator.go
 type PluginValidator interface {
-	Validate(logPipeline *telemetryv1alpha1.LogPipeline) error
+	Validate(logPipeline *telemetryv1alpha1.LogPipeline, logPipelines *telemetryv1alpha1.LogPipelineList) error
 }
 
 type pluginValidator struct {
@@ -24,13 +24,13 @@ func NewPluginValidator(allowedFilterPlugins []string, allowedOutputPlugins []st
 	}
 }
 
-func (v *pluginValidator) Validate(logPipeline *telemetryv1alpha1.LogPipeline) error {
+func (v *pluginValidator) Validate(logPipeline *telemetryv1alpha1.LogPipeline, logPipelines *telemetryv1alpha1.LogPipelineList) error {
 	err := v.validateFilterPlugins(logPipeline)
 	if err != nil {
 		return err
 	}
 
-	err = v.validateOutputPlugins(logPipeline)
+	err = v.validateOutputPlugins(logPipeline, logPipelines)
 	if err != nil {
 		return err
 	}
@@ -49,13 +49,17 @@ func (v *pluginValidator) validateFilterPlugins(logPipeline *telemetryv1alpha1.L
 			return err
 		}
 		if !isPluginAllowed(name, v.allowedFilterPlugins) {
-			return fmt.Errorf("filter plugin %s is not allowed", name)
+			return fmt.Errorf("filter plugin '%s' is not allowed", name)
+		}
+		matchCond, err := getMatchCondition(section)
+		if matchCond == "*" {
+			return fmt.Errorf("filter plugin '%s' with match condition '*' (match all) is not allowed", name)
 		}
 	}
 	return nil
 }
 
-func (v *pluginValidator) validateOutputPlugins(logPipeline *telemetryv1alpha1.LogPipeline) error {
+func (v *pluginValidator) validateOutputPlugins(logPipeline *telemetryv1alpha1.LogPipeline, logPipelines *telemetryv1alpha1.LogPipelineList) error {
 	for _, outputPlugin := range logPipeline.Spec.Outputs {
 		section, err := parseSection(outputPlugin.Content)
 		if err != nil {
@@ -66,8 +70,38 @@ func (v *pluginValidator) validateOutputPlugins(logPipeline *telemetryv1alpha1.L
 			return err
 		}
 		if !isPluginAllowed(name, v.allowedOutputPlugins) {
-			return fmt.Errorf("output plugin %s is not allowed", name)
+			return fmt.Errorf("output plugin '%s' is not allowed", name)
 		}
+		matchCond, err := getMatchCondition(section)
+		if err != nil {
+			return err
+		}
+
+		if matchCond == "*" {
+			return fmt.Errorf("output plugin '%s' with match condition '*' (match all) is not allowed", name)
+		}
+
+		if err = isMatchCondAllowed(name, matchCond, logPipelines); err != nil {
+			return err
+		}
+
+	}
+	return nil
+}
+
+func isMatchCondAllowed(name, matchCond string, logPipelines *telemetryv1alpha1.LogPipelineList) error {
+
+	checkMatchCond := false
+	pipelineNames := []string{}
+
+	for _, l := range logPipelines.Items {
+		if matchCond == l.Name {
+			checkMatchCond = true
+		}
+		pipelineNames = append(pipelineNames, l.Name)
+	}
+	if !checkMatchCond {
+		return fmt.Errorf("output plugin '%s' should have match condition matching any of the existing logpipeline names '%s'", name, pipelineNames)
 	}
 	return nil
 }
@@ -89,4 +123,11 @@ func getSectionName(section map[string]string) (string, error) {
 		return name, nil
 	}
 	return "", fmt.Errorf("configuration section does not have name attribute")
+}
+
+func getMatchCondition(section map[string]string) (string, error) {
+	if matchCond, hasKey := section["match"]; hasKey {
+		return matchCond, nil
+	}
+	return "", fmt.Errorf("configuration section does not have match attribute")
 }

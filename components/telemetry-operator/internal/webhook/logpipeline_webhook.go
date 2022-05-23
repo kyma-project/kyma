@@ -118,7 +118,13 @@ func (v *LogPipelineValidator) validateLogPipeline(ctx context.Context, currentB
 		}
 	}
 
-	if err = v.pluginValidator.Validate(logPipeline); err != nil {
+	// fetch all logpipelines
+	var logPipelines telemetryv1alpha1.LogPipelineList
+	if err := v.List(ctx, &logPipelines); err != nil {
+		return err
+	}
+
+	if err = v.pluginValidator.Validate(logPipeline, &logPipelines); err != nil {
 		log.Error(err, "Failed to validate plugins")
 		return err
 	}
