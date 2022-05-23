@@ -26,7 +26,7 @@ See the following summary of the tests performed. For more detailed results, che
 - Increasing CPU increases the rate at which inputs are read.
 - The average CPU usage is around 1.2 for up to 20 pipelines. The CPU plateaus after 2 pipelines.
 - Memory is usually not a problem for low number of pipelines. For 10 pipelines, we had to increase memory to 512 MB.
-5. The memory increases linearly
+5. The memory consuption increases linearly
 - With 1.5CPU/512 Mi memory, we can support 20 pipelines (under extreme conditions).
 - With two pipelines, when one pipeline (http server) is down, we see that the output and emitter throughput goes down to 0.
    However, in the filesystem buffer, the chunks are rolled. There are no logs saying why the output stops functioning.
