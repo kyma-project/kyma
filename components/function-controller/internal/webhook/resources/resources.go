@@ -4,6 +4,7 @@ import (
 	"context"
 	"io/ioutil"
 	"path"
+	"time"
 
 	"github.com/pkg/errors"
 	admissionregistrationv1 "k8s.io/api/admissionregistration/v1"
@@ -98,7 +99,7 @@ func (r *resourceReconciler) Reconcile(ctx context.Context, request reconcile.Re
 	if err := r.reconcilerSecret(ctx, request); err != nil {
 		return reconcile.Result{}, errors.Wrap(err, "failed to reconcile webhook resources")
 	}
-	return reconcile.Result{}, nil
+	return reconcile.Result{RequeueAfter: 1 * time.Hour}, nil
 }
 
 func (r *resourceReconciler) reconcilerWebhooks(ctx context.Context, request reconcile.Request) error {
