@@ -175,7 +175,7 @@ describe('Eventing tests', function() {
   }
 
   // eventingTracingTestSuite - Runs Eventing tracing tests
-  function eventingTracingTestSuite() {
+  function eventingTracingTestSuite(isSKR) {
     // Only run tracing tests on OSS
     if (isSKR) {
       debug('Skipping eventing tracing tests on SKR');
@@ -212,7 +212,7 @@ describe('Eventing tests', function() {
     // Running Eventing end-to-end tests
     eventingTestSuite(natsBackend, isSKR);
     // Running Eventing tracing tests
-    eventingTracingTestSuite();
+    eventingTracingTestSuite(isSKR);
     // Running Eventing Monitoring tests
     eventingMonitoringTest(natsBackend, isSKR, isJetStreamEnabled);
   });
@@ -256,7 +256,7 @@ describe('Eventing tests', function() {
     // Running Eventing end-to-end tests
     eventingTestSuite(natsBackend, isSKR);
     // Running Eventing tracing tests
-    eventingTracingTestSuite();
+    eventingTracingTestSuite(isSKR);
     // Running Eventing Monitoring tests
     eventingMonitoringTest(natsBackend, isSKR, isJetStreamEnabled);
   });

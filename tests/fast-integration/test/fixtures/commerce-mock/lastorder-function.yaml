@@ -30,7 +30,12 @@ spec:
       //// Legacy events
       if(isLegacyEvent) {
         return {
-          payload: data,
+          payload: {
+             "event-type": "order.received",
+             "event-type-version": "v1",
+             "event-time": "2020-09-28T14:47:16.491Z",
+             data
+           },
           headers: {
             "Content-Type": "application/json"
           }
