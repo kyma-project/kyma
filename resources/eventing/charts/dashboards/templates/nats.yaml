@@ -133,6 +133,7 @@ data:
              }
            ],
            "title": "Server CPU",
+           "description": "CPU consumption by NATS servers",
            "type": "timeseries"
          },
          {
@@ -219,6 +220,7 @@ data:
              }
            ],
            "title": "Server Memory",
+           "description": "Memory consumption by NATS servers",
            "type": "timeseries"
          },
          {
@@ -317,6 +319,7 @@ data:
              }
            ],
            "title": "Bytes In",
+           "description": "Amount of data received by NATS servers",
            "type": "timeseries"
          },
          {
@@ -401,6 +404,7 @@ data:
              }
            ],
            "title": "NATS Msgs In",
+           "description": "Total number of messages received by NATS servers including the count of NATS internal messages",
            "type": "timeseries"
          },
          {
@@ -485,6 +489,7 @@ data:
              }
            ],
            "title": "Bytes Out",
+           "description": "Amount of data sent out by NATS servers",
            "type": "timeseries"
          },
          {
@@ -569,6 +574,7 @@ data:
              }
            ],
            "title": "NATS Msgs Out",
+           "description": "Total number of messages sent by NATS servers including the count of NATS internal messages",
            "type": "timeseries"
          },
          {
@@ -670,6 +676,7 @@ data:
              }
            ],
            "title": "Connections",
+           "description": "Total number of active clients connected to NATS servers",
            "type": "timeseries"
          },
          {
@@ -758,6 +765,7 @@ data:
              }
            ],
            "title": "Subscriptions",
+           "description": "Total number of subscriptions on NATS servers including the count of NATS internal subscriptions",
            "type": "timeseries"
          },
          {
@@ -845,13 +853,17 @@ data:
              }
            ],
            "title": "Slow Consumers",
+           "description": "Total number of slow consumers identified by the NATS Servers. A slow consumer is a subscriber that cannot keep up with the message flow delivered from the NATS server.",
            "type": "timeseries"
          }
        ],
        "refresh": false,
        "schemaVersion": 27,
        "style": "dark",
-       "tags": [],
+       "tags": [
+          "kyma",
+          "eventing"
+        ],
        "templating": {
          "list": []
        },
