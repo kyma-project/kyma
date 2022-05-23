@@ -41,7 +41,7 @@ global:
       version: "6d430445"
     application_operator:
       name: "application-operator"
-      version: "PR-14352"
+      version: "PR-14366"
     central_application_connectivity_validator:
       name: "central-application-connectivity-validator"
       version: "245170b1"
