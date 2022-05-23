@@ -11,7 +11,7 @@ metadata:
     mode: {{ .Values.global.ory.oathkeeper.maester.mode }}
 {{ include "oathkeeper.labels" . | indent 4 }}
 spec:
-{{- if not .Values.deployment.autoscaling.enabled }}
+{{- if not .Values.deployment.autoscaling.enabled}}
   replicas: {{ .Values.replicaCount }}
 {{- end }}
   selector:
@@ -37,11 +37,7 @@ spec:
       volumes:
         - name: {{ include "oathkeeper.name" . }}-config-volume
           configMap:
-            {{- if .Values.demo }}
-            name: {{ include "oathkeeper.fullname" . }}-config-demo
-            {{- else }}
             name: {{ include "oathkeeper.fullname" . }}-config
-            {{- end }}
         - name: {{ include "oathkeeper.name" . }}-rules-volume
           emptyDir: {}
         - name: {{ include "oathkeeper.name" . }}-secrets-volume
@@ -61,14 +57,7 @@ spec:
               touch /etc/rules/access-rules.json
               chmod 666 /etc/rules/access-rules.json
           securityContext:
-            allowPrivilegeEscalation: false
-            capabilities:
-              drop:
-              - ALL
-            privileged: false
-            runAsGroup: 65534
-            runAsNonRoot: true
-            runAsUser: 65534
+            {{- toYaml .Values.deployment.securityContext.sidecar | nindent 12 }}
       containers:
         - name: {{ .Chart.Name }}
           image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.oathkeeper) }}"
@@ -77,7 +66,7 @@ spec:
           env:
             {{- if .Values.oathkeeper.config.mutators.id_token.config.jwks_url }}
             - name: MUTATORS_ID_TOKEN_CONFIG_JWKS_URL
-              value: "{{.Values.oathkeeper.config.mutators.id_token.config.jwks_url}}"
+              value: "{{ .Values.oathkeeper.config.mutators.id_token.config.jwks_url }}"
             {{- end }}
           volumeMounts:
             - name: {{ include "oathkeeper.name" . }}-config-volume
@@ -110,17 +99,10 @@ spec:
             initialDelaySeconds: 45
             periodSeconds: 10
             failureThreshold: 10
-          securityContext:
-            allowPrivilegeEscalation: false
-            capabilities:
-              drop:
-              - ALL
-            privileged: false
-            runAsGroup: 101
-            runAsNonRoot: true
-            runAsUser: 100
           resources:
             {{- toYaml .Values.deployment.resources | nindent 12 }}
+          securityContext:
+            {{- toYaml .Values.deployment.securityContext.oathkeeper | nindent 12 }}
         - name: {{ .Chart.Name }}-maester
           image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.oathkeeper_maester) }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
@@ -131,33 +113,29 @@ spec:
             - sidecar
             - --rulesFilePath=/etc/rules/access-rules.json
           resources:
-            {{- index .Values "oathkeeper-maester" "deployment" "resources"  | toYaml | nindent 12 }}
+            {{- index .Values "oathkeeper-maester" "deployment" "resources" | toYaml | nindent 12 }}
           env:
-            - name: mutatorsAvailable
-              value: noop,id_token,header,cookie,hydrator
+          - name: mutatorsAvailable
+            value: noop,id_token,header,cookie,hydrator
           ports:
             - containerPort: 8080
               name: metrics
-          securityContext:
-            allowPrivilegeEscalation: false
-            capabilities:
-              drop:
-              - ALL
-            privileged: false
-            runAsGroup: 1000
-            runAsNonRoot: true
-            runAsUser: 1000
           volumeMounts:
             - name: {{ include "oathkeeper.name" . }}-rules-volume
               mountPath: /etc/rules
               readOnly: false
+          securityContext:
+            {{- toYaml .Values.deployment.securityContext.maester | nindent 12 }}
+        {{- if .Values.deployment.extraContainers }}
+{{ tpl .Values.deployment.extraContainers . | indent 8 }}
+        {{- end }}
       serviceAccountName: {{ include "oathkeeper-maester.name" . }}-maester-account
       {{- with .Values.deployment.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
       {{- end }}
     {{- if .Values.global.priorityClassName }}
-      priorityClassName: {{ .Values.global.priorityClassName }}
+       priorityClassName: {{ .Values.global.priorityClassName }}
     {{- end }}
     {{- with .Values.affinity }}
       affinity:

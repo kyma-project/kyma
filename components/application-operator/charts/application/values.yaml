@@ -27,22 +27,6 @@ autoscaling:
   maxReplicas: 10
   cpuUsagePercent: 40
 
-applicationConnectivityValidator:
-  image:
-    pullPolicy: IfNotPresent
-  args:
-    proxyPort: 8081
-    appRegistryHost: application-registry-external-api:8081
-    externalAPIPort: 8080
-    cacheExpirationMinutes: 1
-    cacheCleanupMinutes: 2
-  resources:
-    limits:
-      cpu: 100m
-      memory: 128Mi
-    requests:
-      cpu: 50m
-      memory: 64Mi
 
 istio:
   gateway:

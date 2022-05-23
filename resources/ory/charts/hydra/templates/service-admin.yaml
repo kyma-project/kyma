@@ -1,4 +1,5 @@
 {{- if .Values.service.admin.enabled -}}
+---
 apiVersion: v1
 kind: Service
 metadata:
@@ -6,6 +7,10 @@ metadata:
   namespace: {{ .Release.Namespace }}
   labels:
 {{ include "hydra.labels" . | indent 4 }}
+    {{- with .Values.service.admin.labels }}
+      {{- toYaml . | nindent 4 }}
+    {{- end }}
+    app.kubernetes.io/component: admin
   {{- with .Values.service.admin.annotations }}
   annotations:
     {{- toYaml . | nindent 4 }}
@@ -16,11 +21,11 @@ spec:
     - port: {{ .Values.service.admin.port }}
       targetPort: http-admin
       protocol: TCP
-      name: http
+      name: {{ .Values.service.admin.name }}
     - port: 15020
       targetPort: 15020
       protocol: TCP
-      name: tcp-status-port
+      name: tcp-status-port      
   selector:
     app.kubernetes.io/name: {{ include "hydra.name" . }}
     app.kubernetes.io/instance: {{ .Release.Name }}

@@ -5,7 +5,8 @@ import (
 	"errors"
 	"testing"
 
-	testr "github.com/go-logr/logr/testr"
+	"go.uber.org/zap"
+
 	"github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
 	"github.com/stretchr/testify/require"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -78,8 +79,7 @@ func Test_reconciler_reconcile(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			ctx := context.Background()
-			log := testr.New(t)
-
+			log := zap.NewNop().Sugar()
 			m := &reconciler{
 				fn:  tt.fields.fn,
 				log: log,
