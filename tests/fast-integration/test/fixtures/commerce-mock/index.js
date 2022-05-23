@@ -924,13 +924,7 @@ async function checkInClusterLegacyEvent(targetNamespace) {
     await printStatusOfInClusterEventingInfrastructure(targetNamespace, 'legacy', 'lastorder');
   }
 
-  const eventData = {
-    'event-type': 'order.received',
-    'event-type-version': 'v1',
-    'event-time': '2020-09-28T14:47:16.491Z',
-    'data': {'id': eventId, 'legacyOrder': '987'},
-  };
-
+  const eventData = {'id': eventId, 'legacyOrder': '987'};
   await sendInClusterLegacyEventWithRetry(mockHost, eventData);
   return ensureInClusterLegacyEventReceivedWithRetry(mockHost, eventId);
 }
