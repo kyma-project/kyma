@@ -66,3 +66,37 @@ See the following summary of the tests performed. For more detailed results, che
 6. Output throughput: 50% pipelines are bad.
 
     ![a](./assets/output-throughput-50-bad.jpg)
+
+
+## Results in tabular form
+
+1. Results with 100% good pipelines
+
+    * Date of execution: 15.05.2022
+
+    | Pipelines | CPU  | Memory | input (tail in Kb/s) | input (http in kb/s) | input (loki_emiiter in kb/s) | output (loki in kbs/) | output (http in kb/s) |
+    |-----------|------|--------|----------------------|----------------------|------------------------------|-----------------------|-----------------------|
+    | 0         | 0,34 | 56     | 2240                 |                      |                              | 0                     | 0                     |
+    | 1         | 0,73 | 87,2   | 2240                 | 0                    | 11400                        | 114                   | 0                     |
+    | 2         | 1,32 | 138,5  | 800                  | 4000                 | 7600                         | 250                   | 700                   |
+    | 3         | 1,24 | 177,2  | 1130                 | 8500                 | 9000                         | 229                   | 1770                  |
+    | 5         | 1,32 | 212,6  | 700                  | 4750                 | 5200                         | 220                   | 1200                  |
+    | 10        | 1,14 | 375,3  | 150                  | 1100                 | 1216                         | 180                   | 240                   |
+    | 20        | 1,16 | 419,2  | 37                   | 362                  | 500                          | 235                   | 362                   |
+
+
+
+2. Results with 50% good pipelines
+
+   *  Date of execution: 15.05.2022
+
+
+    | Pipelines | CPU   | Memory | input (tail in Kb/s) | input (http in kb/s) | input (loki_emiiter in kb/s) | output (loki in kbs/) | output (http in kb/s) |
+    |-----------|-------|--------|----------------------|----------------------|------------------------------|-----------------------|-----------------------|
+    | 0         |       |        | 0                    | 0                    | 0                            | 0                     | 0                     |
+    | 1         |       |        | 0                    | 0                    | 0                            | 0                     | 0                     |
+    | 2         | 1,366 | 116,5  | 630                  | 0,2                  | 5000                         | 150                   | 0                     |
+    | 3         | 1,267 | 144,2  | 633                  | 2000                 | 4700                         | 250                   | 750                   |
+    | 5         | 1,134 | 229    | 170                  | 300                  | 1500                         | 400                   | 1600                  |
+    | 10        | 1,144 | 342,3  | 68                   | 750                  | 835                          | 880                   | 120                   |
+    | 20        | 0,991 | 452,7  | 84                   | 550                  | 550                          | 430                   | 0                     |
