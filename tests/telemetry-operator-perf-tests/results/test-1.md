@@ -74,7 +74,7 @@ See the following summary of the tests performed. For more detailed results, che
 
     * Date of execution: 15.05.2022
 
-    | Pipelines | CPU  | Memory | input (tail in Kb/s) | input (http in kb/s) | input (loki_emiiter in kb/s) | output (loki in kbs/) | output (http in kb/s) |
+    | Pipelines | CPU (virtual cores)  | Memory (MB) | input (tail in Kb/s) | input (http in kb/s) | input (loki_emiiter in kb/s) | output (loki in kbs/) | output (http in kb/s) |
     |-----------|------|--------|----------------------|----------------------|------------------------------|-----------------------|-----------------------|
     | 0         | 0,34 | 56     | 2240                 |                      |                              | 0                     | 0                     |
     | 1         | 0,73 | 87,2   | 2240                 | 0                    | 11400                        | 114                   | 0                     |
@@ -91,7 +91,7 @@ See the following summary of the tests performed. For more detailed results, che
    *  Date of execution: 15.05.2022
 
 
-    | Pipelines | CPU   | Memory | input (tail in Kb/s) | input (http in kb/s) | input (loki_emiiter in kb/s) | output (loki in kbs/) | output (http in kb/s) |
+    | Pipelines | CPU(virtual cores)   | Memory (MB) | input (tail in Kb/s) | input (http in kb/s) | input (loki_emiiter in kb/s) | output (loki in kbs/) | output (http in kb/s) |
     |-----------|-------|--------|----------------------|----------------------|------------------------------|-----------------------|-----------------------|
     | 0         |       |        | 0                    | 0                    | 0                            | 0                     | 0                     |
     | 1         |       |        | 0                    | 0                    | 0                            | 0                     | 0                     |
