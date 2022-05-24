@@ -1,16 +1,16 @@
+import { IOptions } from "../Interfaces/IOptions";
+
 const {
     ensureCommerceMockWithCompassTestFixture,
     deleteMockTestFixture
-} = require('../../fast-integration/test/fixtures/commerce-mock');
-const {DirectorClient, DirectorConfig} = require('../../fast-integration/compass');
+} = require('../../../fast-integration/test/fixtures/commerce-mock');
+const {DirectorClient, DirectorConfig} = require('../../../fast-integration/compass');
 
 class CommerceCompassMock {
+    private static _initialized = false;
+    private static _director: any;
 
-    constructor() {
-        this._initialized = false;
-    }
-
-    static async ensureCommerceWithCompassMockIsSetUp(options){
+    static async ensureCommerceWithCompassMockIsSetUp(options: IOptions){
         if(!this._initialized){
             try{
                 this._director = new DirectorClient(DirectorConfig.fromEnv());
@@ -22,11 +22,11 @@ class CommerceCompassMock {
         }
     }
 
-    static async deleteCommerceMockResources(testNamespace){
+    static async deleteCommerceMockResources(testNamespace: string){
         await deleteMockTestFixture('mocks', testNamespace);
     }
 }
 
-module.exports = {
+export {
     CommerceCompassMock
 }

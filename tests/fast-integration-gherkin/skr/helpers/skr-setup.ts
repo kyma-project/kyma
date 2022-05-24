@@ -1,35 +1,35 @@
-const {provisionSKR, deprovisionSKR} = require('../../fast-integration/kyma-environment-broker');
+import { IOptions } from "../Interfaces/IOptions";
+
+const {provisionSKR, deprovisionSKR} = require('../../../fast-integration/kyma-environment-broker');
 const {
     gatherOptions,
     withSuffix,
     withInstanceID
-} = require('../../fast-integration/skr-test');
-const {KCPWrapper, KCPConfig} = require('../../fast-integration/kcp/client');
-const {addScenarioInCompass, assignRuntimeToScenario} = require('../../fast-integration/compass');
-const {keb, gardener, director} = require('../../fast-integration/skr-test/provision/provision-skr');
+} = require('../../../fast-integration/skr-test');
+const {KCPWrapper, KCPConfig} = require('../../../fast-integration/kcp/client');
+const {addScenarioInCompass, assignRuntimeToScenario} = require('../../../fast-integration/compass');
+const {keb, gardener, director} = require('../../../fast-integration/skr-test/provision/provision-skr');
 const {
     getEnvOrThrow,
     genRandom,
     initializeK8sClient
-} = require('../../fast-integration/utils');
-const {BTPOperatorCreds} = require('../../fast-integration/smctl/helpers');
-const {unregisterKymaFromCompass} = require('../../fast-integration/compass');
-const {getSKRConfig} = require('../../fast-integration/skr-test/helpers');
+} = require('../../../fast-integration/utils');
+const {BTPOperatorCreds} = require('../../../fast-integration/smctl/helpers');
+const {unregisterKymaFromCompass} = require('../../../fast-integration/compass');
+const {getSKRConfig} = require('../../../fast-integration/skr-test/helpers');
 
 class SKRSetup {
-    constructor() {
-        this._skipProvisioning = false;
-        this._initialized = false;
-        this._skrUpdated = false;
-        this._skrAdminsUpdated = false;
+    private static _skipProvisioning = false;
+    private static _initialized = false;
+    private static _skrUpdated = false;
+    private static _skrAdminsUpdated = false;
 
-        this.updateSkrResponse = null;
-        this.updateSkrAdminsResponse = null;
-        this.kcp = null;
-        this.btpOperatorCreds = null;
-        this.shoot = null;
-        this.options = null;
-    }
+    public static updateSkrResponse: any;
+    public static updateSkrAdminsResponse: any;
+    public static kcp = new KCPWrapper(KCPConfig.fromEnv());;
+    public static btpOperatorCreds = BTPOperatorCreds.fromEnv();;
+    public static shoot: any;
+    public static options: IOptions;
 
     static async provisionSKR() {
         console.log("BEFORE: this.Initialized is now", this._initialized);
@@ -52,8 +52,6 @@ class SKRSetup {
             } else {
                 try{
                     const provisioningTimeout = 1000 * 60 * 30; // 30m
-                    this.btpOperatorCreds = BTPOperatorCreds.fromEnv();
-                    this.kcp = new KCPWrapper(KCPConfig.fromEnv());
                     this.options = gatherOptions();
                     console.log(`Provision SKR with instance ID ${this.options.instanceID}`);
                     const customParams = {
@@ -83,7 +81,7 @@ class SKRSetup {
                     this._initialized = true;
                     console.log("this.Initialized is now", this._initialized);
                 } catch (e) {
-                    throw new Error(`before hook failed: ${e.toString()}`);
+                    throw new Error(`before hook failed: ${e}`);
                 } finally {
                     const runtimeStatus = await this.kcp.getRuntimeStatusOperations(this.options.instanceID);
                     await this.kcp.reconcileInformationLog(runtimeStatus);
@@ -92,28 +90,28 @@ class SKRSetup {
         }
     }
 
-    static async updateSKR(instanceID,
-        customParams,
-        isMigration = false) {
+    static async updateSKR(instanceID: string,
+        customParams: any,
+        isMigration: boolean = false) {
         if (!this._skrUpdated){
             try{
                 this.updateSkrResponse = await keb.updateSKR(instanceID, customParams, null, isMigration);
                 this._skrUpdated = true;
             } catch(e) {
-                throw new Error(`Failed to update SKR: ${e.toString()}`);
+                throw new Error(`Failed to update SKR: ${e}`);
             }
         }
     }
 
-    static async updateSKRAdmins(instanceID,
-        customParams,
-        isMigration = false) {
+    static async updateSKRAdmins(instanceID: string,
+        customParams: any,
+        isMigration: boolean = false) {
         if (!this._skrAdminsUpdated){
             try{
                 this.updateSkrAdminsResponse = await keb.updateSKR(instanceID, customParams, null, isMigration);
                 this._skrAdminsUpdated = true;
             } catch(e) {
-                throw new Error(`Failed to update SKR: ${e.toString()}`);
+                throw new Error(`Failed to update SKR: ${e}`);
             }
         }
     }
@@ -125,7 +123,7 @@ class SKRSetup {
             try {
               await deprovisionSKR(keb, this.kcp, this.options.instanceID, deprovisioningTimeout);
             } catch (e) {
-                throw new Error(`before hook failed: ${e.toString()}`);
+                throw new Error(`before hook failed: ${e}`);
             } finally {
                 const runtimeStatus = await this.kcp.getRuntimeStatusOperations(this.options.instanceID);
                 console.log(`\nRuntime status after deprovisioning: ${runtimeStatus}`);
@@ -140,6 +138,6 @@ class SKRSetup {
     }
 }
 
-module.exports = {
+export {
     SKRSetup
 }

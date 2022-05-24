@@ -9,19 +9,26 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@cucumber/cucumber": "^7.0.0-rc.0",
     "@kubernetes/client-node": "0.15.1",
     "axios": "^0.21.0",
+    "chai": "^4.2.0",
+    "cucumber-tsflow": "^3.4.1",
     "execa": "^5.0.0",
+    "fast-integration-tests": "file:../fast-integration",
+    "lodash": "^4.17.21",
     "mocha-junit-reporter": "^2.0.0",
     "mockserver-client": "^5.11.2",
     "moment": "^2.29.1",
-    "chai": "^4.2.0",
-    "cucumber": "^7.0.0-rc.0",
-    "fast-integration-tests": "file:../fast-integration",
     "node-forge": "^0.10.0",
     "uuid": "^8.3.2"
   },
   "engines": {
     "node": ">=12"
+  },
+  "devDependencies": {
+    "@types/chai": "^4.3.1",
+    "@types/node-forge": "^1.0.2",
+    "ts-node": "^10.8.0"
   }
 }
