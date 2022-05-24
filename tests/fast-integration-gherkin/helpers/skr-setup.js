@@ -61,27 +61,27 @@ class SKRSetup {
                     };
     
                     console.log(this.options.runtimeName);
-                    const skr = await provisionSKR(keb, this.kcp, gardener,
-                        this.options.instanceID,
-                        this.options.runtimeName,
-                        null,
-                        this.btpOperatorCreds,
-                        customParams,
-                        provisioningTimeout);
+                    // const skr = await provisionSKR(keb, this.kcp, gardener,
+                    //     this.options.instanceID,
+                    //     this.options.runtimeName,
+                    //     null,
+                    //     this.btpOperatorCreds,
+                    //     customParams,
+                    //     provisioningTimeout);
               
-                    const runtimeStatus = await this.kcp.getRuntimeStatusOperations(this.options.instanceID);
-                    console.log(`\nRuntime status after provisioning: ${runtimeStatus}`);
+                    // const runtimeStatus = await this.kcp.getRuntimeStatusOperations(this.options.instanceID);
+                    // console.log(`\nRuntime status after provisioning: ${runtimeStatus}`);
               
-                    this.shoot = skr.shoot;
-                    console.log("Shoot:", this.shoot);
-                    await addScenarioInCompass(director, this.options.scenarioName);
-                    console.log("Scenario added to compass");
-                    await assignRuntimeToScenario(director, this.shoot.compassID, this.options.scenarioName);
-                    console.log("Runtime assigned to scenario");
-                    initializeK8sClient({kubeconfig: this.shoot.kubeconfig});
-                    console.log("K8s is initialized");
-                    this._initialized = true;
-                    console.log("this.Initialized is now", this._initialized);
+                    // this.shoot = skr.shoot;
+                    // console.log("Shoot:", this.shoot);
+                    // await addScenarioInCompass(director, this.options.scenarioName);
+                    // console.log("Scenario added to compass");
+                    // await assignRuntimeToScenario(director, this.shoot.compassID, this.options.scenarioName);
+                    // console.log("Runtime assigned to scenario");
+                    // initializeK8sClient({kubeconfig: this.shoot.kubeconfig});
+                    // console.log("K8s is initialized");
+                    // this._initialized = true;
+                    // console.log("this.Initialized is now", this._initialized);
                 } catch (e) {
                     throw new Error(`before hook failed: ${e.toString()}`);
                 } finally {
