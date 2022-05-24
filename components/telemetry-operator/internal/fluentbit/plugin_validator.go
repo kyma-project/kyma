@@ -51,6 +51,7 @@ func (v *pluginValidator) validateFilterPlugins(logPipeline *telemetryv1alpha1.L
 		if !isPluginAllowed(name, v.allowedFilterPlugins) {
 			return fmt.Errorf("filter plugin '%s' is not allowed", name)
 		}
+
 		matchCond, err := getMatchCondition(section)
 		if matchCond == "*" {
 			return fmt.Errorf("filter plugin '%s' with match condition '*' (match all) is not allowed", name)
@@ -72,36 +73,19 @@ func (v *pluginValidator) validateOutputPlugins(logPipeline *telemetryv1alpha1.L
 		if !isPluginAllowed(name, v.allowedOutputPlugins) {
 			return fmt.Errorf("output plugin '%s' is not allowed", name)
 		}
+
 		matchCond, err := getMatchCondition(section)
 		if err != nil {
 			return err
 		}
-
 		if matchCond == "*" {
 			return fmt.Errorf("output plugin '%s' with match condition '*' (match all) is not allowed", name)
 		}
 
-		if err = isMatchCondAllowed(name, matchCond, logPipelines); err != nil {
+		if err = isMatchCondAllowed(name, matchCond, logPipeline.Name, logPipelines); err != nil {
 			return err
 		}
 
-	}
-	return nil
-}
-
-func isMatchCondAllowed(name, matchCond string, logPipelines *telemetryv1alpha1.LogPipelineList) error {
-
-	checkMatchCond := false
-	pipelineNames := []string{}
-
-	for _, l := range logPipelines.Items {
-		if matchCond == l.Name {
-			checkMatchCond = true
-		}
-		pipelineNames = append(pipelineNames, l.Name)
-	}
-	if !checkMatchCond {
-		return fmt.Errorf("output plugin '%s' should have match condition matching any of the existing logpipeline names '%s'", name, pipelineNames)
 	}
 	return nil
 }
@@ -130,4 +114,24 @@ func getMatchCondition(section map[string]string) (string, error) {
 		return matchCond, nil
 	}
 	return "", fmt.Errorf("configuration section does not have match attribute")
+}
+
+func isMatchCondAllowed(pluginName, matchCond, logPipelineName string, logPipelines *telemetryv1alpha1.LogPipelineList) error {
+	matchCondValid := false
+	var pipelineNames []string
+
+	if pluginName == logPipelineName {
+		return nil
+	}
+
+	for _, l := range logPipelines.Items {
+		if matchCond == l.Name {
+			matchCondValid = true
+		}
+		pipelineNames = append(pipelineNames, l.Name)
+	}
+	if !matchCondValid {
+		return fmt.Errorf("output plugin '%s' should have match condition matching any of the existing logpipeline names '%s'", pluginName, pipelineNames)
+	}
+	return nil
 }
