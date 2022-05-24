@@ -32,8 +32,6 @@ class SKRSetup {
     public static options: IOptions;
 
     static async provisionSKR() {
-        console.log("BEFORE: this.Initialized is now", this._initialized);
-
         if (!this._initialized){
             this._skipProvisioning = process.env.SKIP_PROVISIONING === 'true';
             if (this._skipProvisioning){
@@ -48,6 +46,7 @@ class SKRSetup {
                     withSuffix(suffix),
                 );
                 this.shoot = await getSKRConfig(instanceID);
+                console.log("Shoot:", this.shoot);
                 this._initialized = true;
             } else {
                 try{
