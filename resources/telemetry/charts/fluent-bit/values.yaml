@@ -249,7 +249,7 @@ extraPorts:
     nodePort: 30517
 
 extraServiceMonitorPorts:
-  - port: 2021
+  - targetPort: 2021
     path: /metrics/
     ## scheme: HTTP scheme to use for scraping. Can be used with `tlsConfig` for example if using istio mTLS.
     scheme: https
