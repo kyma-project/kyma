@@ -22,7 +22,7 @@ const {
 
 const AWS_PLAN_ID = '361c511f-f939-4621-b228-d0fb79a1fe15';
 
-const auditLogsThreshold = 4;
+const auditLogsThreshold = 6;
 const testTimeout = 1000 * 60 * 30; // 30m
 
 // prepares all the resources required for commerce mock to be executed;
