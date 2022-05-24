@@ -118,3 +118,4 @@ dist
 istio-*
 tmp-*
 hack/registry
+test-report.json
