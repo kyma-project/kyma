@@ -1,3 +1,4 @@
+{{- if .Values.global.disableLegacyConnectivity }}
 apiVersion: networking.istio.io/v1alpha3
 kind: Gateway
 metadata:
@@ -29,3 +30,4 @@ spec:
         - ECDHE-RSA-AES128-SHA
       hosts:
         - "gateway.{{ .Values.global.domainName }}"
+{{- end }}

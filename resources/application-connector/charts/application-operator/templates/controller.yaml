@@ -68,7 +68,7 @@ spec:
         - "--healthPort={{ .Values.controller.args.healthPort }}"
         - "--profile={{ .Values.controller.resources.profile }}"
         - "--podSecurityPolicyEnabled={{ .Values.global.podSecurityPolicy.enabled }}"
-        - "--centralApplicationConnectivityValidatorEnabled={{ .Values.global.centralApplicationConnectivityValidatorEnabled }}"
+        - "--centralApplicationConnectivityValidatorEnabled=true"
         env:
           - name: APP_LOG_FORMAT
             value: {{ .Values.global.log.format | quote }}

@@ -91,8 +91,8 @@ spec:
             successThreshold: {{.Values.deployment.livenessProbe.successThreshold }}
           readinessProbe:
             httpGet:
-              port: {{ .Values.metrics.manager.port.port }}
-              path: "/metrics"
+              port: {{ .Values.containers.manager.healthz.port }}
+              path: "/readyz/"
             initialDelaySeconds: {{ .Values.deployment.readinessProbe.initialDelaySeconds }}
             timeoutSeconds: {{ .Values.deployment.readinessProbe.timeoutSeconds }}
             periodSeconds: {{.Values.deployment.readinessProbe.periodSeconds }}

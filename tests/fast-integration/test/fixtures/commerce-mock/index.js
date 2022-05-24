@@ -22,9 +22,7 @@ const {
   waitForServiceBindingUsage,
   waitForVirtualService,
   waitForDeployment,
-  waitForTokenRequest,
   waitForFunction,
-  waitForPodWithLabel,
   waitForSubscription,
   deleteAllK8sResources,
   genRandom,
@@ -101,9 +99,9 @@ function prepareFunction(type = 'standard', appName = 'commerce') {
       return k8s.loadAllYaml(functionYaml.toString()
           .replace('%%URL%%', `"${orders}" + code`));
     case 'central-app-gateway-compass':
-      const orderWithCompass = `${gatewayUrl}:8082/%%APP_NAME%%/sap-commerce-cloud/commerce-webservices/site/orders/`;
+      const ordersWithCompass = `${gatewayUrl}:8082/%%APP_NAME%%/sap-commerce-cloud/commerce-webservices/site/orders/`;
       return k8s.loadAllYaml(functionYaml.toString()
-          .replace('%%URL%%', `"${orderWithCompass}" + code`)
+          .replace('%%URL%%', `"${ordersWithCompass}" + code`)
           .replace('%%APP_NAME%%', appName));
     default:
       return k8s.loadAllYaml(functionYaml.toString()
@@ -700,27 +698,6 @@ async function registerAllApis(mockHost) {
   return remoteApis;
 }
 
-async function connectMockLocal(mockHost, targetNamespace) {
-  const tokenRequest = {
-    apiVersion: 'applicationconnector.kyma-project.io/v1alpha1',
-    kind: 'TokenRequest',
-    metadata: {name: 'commerce', namespace: targetNamespace},
-  };
-  await k8sDynamicApi.delete(tokenRequest).catch(() => { }); // Ignore delete error
-  await k8sDynamicApi.create(tokenRequest);
-  const tokenObj = await waitForTokenRequest('commerce', targetNamespace);
-
-  const pairingBody = {
-    token: tokenObj.status.url,
-    baseUrl: `https://${mockHost}`,
-    insecure: true,
-  };
-  debug('Token URL', tokenObj.status.url);
-  await connectCommerceMock(mockHost, pairingBody);
-  await ensureApplicationMapping('commerce', targetNamespace);
-  debug('Commerce mock connected locally');
-}
-
 async function connectMockCompass(client, appName, scenarioName, mockHost, targetNamespace) {
   const appID = await registerOrReturnApplication(client, appName, scenarioName);
   debug(`Application ID in Compass ${appID}`);
@@ -862,69 +839,15 @@ async function cleanCompassResourcesSKR(client, appName, scenarioName, runtimeID
   }
 }
 
-async function ensureCommerceMockLocalTestFixture(mockNamespace,
-    targetNamespace,
-    withCentralApplicationConnectivity = false) {
+async function ensureCommerceMockLocalTestFixture(mockNamespace, targetNamespace) {
   await k8sApply(applicationObjs);
   const mockHost = await provisionCommerceMockResources(
       'commerce',
       mockNamespace,
       targetNamespace,
-    withCentralApplicationConnectivity ? prepareFunction('central-app-gateway') : prepareFunction());
-  await waitForPodWithLabel('app.kubernetes.io/name', 'connector-service', 'kyma-integration');
-  await retryPromise(() => connectMockLocal(mockHost, targetNamespace), 10, 30000);
-  await retryPromise(() => registerAllApis(mockHost), 10, 30000);
+      prepareFunction('central-app-gateway'));
 
-  if (withCentralApplicationConnectivity) {
-    await waitForDeployment('central-application-gateway', 'kyma-system');
-    await waitForDeployment('central-application-connectivity-validator', 'kyma-system');
-  }
-
-  const webServicesSC = await waitForServiceClass(
-      'webservices',
-      targetNamespace,
-      400 * 1000,
-  );
-  const eventsSC = await waitForServiceClass('events', targetNamespace);
-  const webServicesSCExternalName = webServicesSC.spec.externalName;
-  const eventsSCExternalName = eventsSC.spec.externalName;
-  const serviceCatalogObjs = [
-    serviceInstanceObj('commerce-webservices', webServicesSCExternalName),
-    serviceInstanceObj('commerce-events', eventsSCExternalName),
-  ];
-
-  await retryPromise(
-      () => k8sApply(serviceCatalogObjs, targetNamespace, false),
-      5,
-      2000,
-  );
-  await waitForServiceInstance('commerce-webservices', targetNamespace);
-  await waitForServiceInstance('commerce-events', targetNamespace);
-
-  const serviceBinding = {
-    apiVersion: 'servicecatalog.k8s.io/v1beta1',
-    kind: 'ServiceBinding',
-    metadata: {
-      name: 'commerce-binding',
-    },
-    spec: {
-      instanceRef: {name: 'commerce-webservices'},
-    },
-  };
-  await k8sApply([serviceBinding], targetNamespace, false);
-  await waitForServiceBinding('commerce-binding', targetNamespace);
-
-  const serviceBindingUsage = {
-    apiVersion: 'servicecatalog.kyma-project.io/v1alpha1',
-    kind: 'ServiceBindingUsage',
-    metadata: {name: 'commerce-lastorder-sbu'},
-    spec: {
-      serviceBindingRef: {name: 'commerce-binding'},
-      usedBy: {kind: 'serverless-function', name: 'lastorder'},
-    },
-  };
-  await k8sApply([serviceBindingUsage], targetNamespace);
-  await waitForServiceBindingUsage('commerce-lastorder-sbu', targetNamespace);
+  await waitForDeployment('central-application-gateway', 'kyma-system');
 
   await waitForFunction('lastorder', targetNamespace);
 
@@ -1044,6 +967,7 @@ async function waitForSubscriptionsTillReady(targetNamespace) {
 async function checkInClusterEventDelivery(targetNamespace) {
   await checkInClusterEventDeliveryHelper(targetNamespace, 'structured');
   await checkInClusterEventDeliveryHelper(targetNamespace, 'binary');
+  await checkInClusterLegacyEvent(targetNamespace);
 }
 
 // send event using function query parameter send=true
@@ -1074,6 +998,34 @@ async function sendInClusterEventWithRetry(mockHost, eventId, encoding, retriesL
   debug(`Event "${eventId}" is sent`);
 }
 
+// send legacy event using function query parameter send=true
+async function sendInClusterLegacyEventWithRetry(mockHost, eventData, retriesLeft = 10) {
+  await retryPromise(async () => {
+    const response = await axios.post(`https://${mockHost}`, eventData, {
+      params: {
+        send: true,
+        isLegacyEvent: true,
+      },
+      headers: {
+        'X-B3-Sampled': 1,
+      },
+    });
+
+    debug('Send response:', {
+      status: response.status,
+      statusText: response.statusText,
+      data: response.data,
+    });
+
+    if (response.data.eventPublishError) {
+      throw convertAxiosError(response.data.statusText);
+    }
+    expect(response.status).to.be.equal(200);
+  }, retriesLeft, 1000);
+
+  debug(`Legacy event is sent: `, eventData);
+}
+
 // verify if event was received using function query parameter inappevent=eventId
 async function ensureInClusterEventReceivedWithRetry(mockHost, eventId, retriesLeft = 10) {
   return await retryPromise(async () => {
@@ -1096,6 +1048,35 @@ async function ensureInClusterEventReceivedWithRetry(mockHost, eventId, retriesL
       });
 }
 
+// verify if legacy event was received using function query parameter inappevent=eventId
+async function ensureInClusterLegacyEventReceivedWithRetry(mockHost, eventId, retriesLeft = 10) {
+  return await retryPromise(async () => {
+    debug(`Waiting to receive legacy event "${eventId}"`);
+
+    const response = await axios.get(`https://${mockHost}`, {params: {inappevent: eventId}});
+
+    debug('Received response:', {
+      status: response.status,
+      statusText: response.statusText,
+      data: response.data,
+    });
+
+    expect(response.data).to.have.nested.property('event.id', eventId, 'The same event id expected in the result');
+    expect(response.data).to.have.nested.property('event.shipped', true, 'Order should have property shipped');
+    expect(response.data).to.have.nested.property('event.ce-type').that.contains('order.received');
+    expect(response.data).to.have.nested.property('event.ce-source');
+    expect(response.data).to.have.nested.property('event.ce-eventtypeversion', 'v1');
+    expect(response.data).to.have.nested.property('event.ce-specversion', '1.0');
+    expect(response.data).to.have.nested.property('event.ce-id');
+    expect(response.data).to.have.nested.property('event.ce-time');
+
+    return response;
+  }, retriesLeft, 2 * 1000)
+      .catch((err) => {
+        throw convertAxiosError(err, 'Fetching published legacy event responded with error');
+      });
+}
+
 function getRandomEventId(encoding) {
   return 'event-' + encoding + '-' + genRandom(5);
 }
@@ -1115,6 +1096,19 @@ async function checkInClusterEventDeliveryHelper(targetNamespace, encoding) {
 
   await sendInClusterEventWithRetry(mockHost, eventId, encoding);
   return ensureInClusterEventReceivedWithRetry(mockHost, eventId);
+}
+
+async function checkInClusterLegacyEvent(targetNamespace) {
+  const eventId = getRandomEventId('legacy');
+  const mockHost = await getVirtualServiceHost(targetNamespace, 'lastorder');
+
+  if (isDebugEnabled()) {
+    await printStatusOfInClusterEventingInfrastructure(targetNamespace, 'legacy', 'lastorder');
+  }
+
+  const eventData = {'id': eventId, 'legacyOrder': '987'};
+  await sendInClusterLegacyEventWithRetry(mockHost, eventData);
+  return ensureInClusterLegacyEventReceivedWithRetry(mockHost, eventId);
 }
 
 module.exports = {

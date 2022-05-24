@@ -77,13 +77,13 @@ global:
       directory: "tpi"
     function_controller:
       name: "function-controller"
-      version: "PR-14249"
+      version: "PR-14264"
     function_webhook:
       name: "function-webhook"
-      version: "PR-14249"
+      version: "PR-14264"
     function_build_init:
       name: "function-build-init"
-      version: "PR-14249"
+      version: "PR-14264"
     function_runtime_nodejs12:
       name: "function-runtime-nodejs12"
       version: "PR-14284"
@@ -128,8 +128,8 @@ deployment:
     successThreshold: 1
     failureThreshold: 3
     initialDelaySeconds: 50
-    timeoutSeconds: 10
-    periodSeconds: 30
+    timeoutSeconds: 60
+    periodSeconds: 120
   readinessProbe:
     successThreshold: 1
     failureThreshold: 3
