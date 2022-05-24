@@ -108,7 +108,7 @@ global:
   images:
     prometheus_operator:
       name: "prometheus-operator"
-      version: "v0.56.2"
+      version: "v0.56.3"
       directory: "external/quay.io/prometheus-operator"
       sha: ""
     prometheus_config_reloader:
