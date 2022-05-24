@@ -118,8 +118,8 @@ func verifyCertificate(c []byte) error {
 	if err != nil {
 		return errors.Wrap(err, "failed to parse root certificate data")
 	}
-	// make sure the certificate is valid for the next two days. Otherwise it will be recreated.
-	_, err = certificate[0].Verify(x509.VerifyOptions{CurrentTime: time.Now().Add(48 * time.Hour), Roots: root})
+	// make sure the certificate is valid for the next 10 days. Otherwise it will be recreated.
+	_, err = certificate[0].Verify(x509.VerifyOptions{CurrentTime: time.Now().Add(10 * 24 * time.Hour), Roots: root})
 	if err != nil {
 		return errors.Wrap(err, "certificate verification failed")
 	}

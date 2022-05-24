@@ -179,10 +179,10 @@ func TestEnsureWebhookSecret(t *testing.T) {
 		require.Contains(t, updatedSecret.Labels, "dont-remove-me")
 	})
 
-	t.Run("should update if the cert will expire in 48 hours", func(t *testing.T) {
+	t.Run("should update if the cert will expire in 10 days", func(t *testing.T) {
 		client := fake.NewClientBuilder().Build()
 
-		oneDayCert, err := generateShortLivedCertWithKey(key, testServiceName, 24*time.Hour)
+		tenDaysCert, err := generateShortLivedCertWithKey(key, testServiceName, 10*24*time.Hour)
 		require.NoError(t, err)
 
 		secret := &corev1.Secret{
@@ -195,7 +195,7 @@ func TestEnsureWebhookSecret(t *testing.T) {
 			},
 			Data: map[string][]byte{
 				KeyFile:  key,
-				CertFile: oneDayCert,
+				CertFile: tenDaysCert,
 			},
 		}
 		err = client.Create(ctx, secret)
@@ -220,10 +220,10 @@ func TestEnsureWebhookSecret(t *testing.T) {
 		require.Contains(t, updatedSecret.Labels, "dont-remove-me")
 	})
 
-	t.Run("should not update if the cert will expire in more than 48 hours", func(t *testing.T) {
+	t.Run("should not update if the cert will expire in more than 10 days", func(t *testing.T) {
 		client := fake.NewClientBuilder().Build()
 
-		threeDayCert, err := generateShortLivedCertWithKey(key, testServiceName, 3*24*time.Hour)
+		elevenDaysCert, err := generateShortLivedCertWithKey(key, testServiceName, 11*24*time.Hour)
 		require.NoError(t, err)
 
 		secret := &corev1.Secret{
@@ -236,7 +236,7 @@ func TestEnsureWebhookSecret(t *testing.T) {
 			},
 			Data: map[string][]byte{
 				KeyFile:  key,
-				CertFile: threeDayCert,
+				CertFile: elevenDaysCert,
 			},
 		}
 		err = client.Create(ctx, secret)
@@ -257,7 +257,7 @@ func TestEnsureWebhookSecret(t *testing.T) {
 		// make sure it's NOT updated, not overridden.
 		require.Equal(t, secret.ResourceVersion, updatedSecret.ResourceVersion)
 		require.Equal(t, key, updatedSecret.Data[KeyFile])
-		require.Equal(t, threeDayCert, updatedSecret.Data[CertFile])
+		require.Equal(t, elevenDaysCert, updatedSecret.Data[CertFile])
 		require.Contains(t, updatedSecret.Labels, "dont-remove-me")
 	})
 }
