@@ -227,21 +227,39 @@ envFrom:
       name: telemetry-fluent-bit-env
       optional: true
 
-extraContainers: []
-#   - name: do-something
-#     image: busybox
-#     command: ['do', 'something']
+metricsPort: 2020
 
 flush: 1
 
-metricsPort: 2020
+extraContainers:
+#   - name: do-something
+#     image: busybox
+#     command: ['do', 'something']
+  - name: exporter
+    image: lindnerb/exporter:latest
+    volumeMounts:
+      - name: varfluentbit
+        mountPath: /data
 
-extraPorts: []
-#   - port: 5170
-#     containerPort: 5170
-#     protocol: TCP
-#     name: tcp
-#     nodePort: 30517
+extraPorts:
+  - port: 5170
+    containerPort: 5170
+    protocol: TCP
+    name: tcp
+    nodePort: 30517
+
+extraServiceMonitorPorts:
+  - port: 2021
+    path: /metrics/
+    ## scheme: HTTP scheme to use for scraping. Can be used with `tlsConfig` for example if using istio mTLS.
+    scheme: https
+    ## tlsConfig: TLS configuration to use when scraping the endpoint. For example if using istio mTLS.
+    ## Of type: https://github.com/coreos/prometheus-operator/blob/master/Documentation/api.md#tlsconfig
+    tlsConfig:
+      caFile: /etc/prometheus/secrets/istio.default/root-cert.pem
+      certFile: /etc/prometheus/secrets/istio.default/cert-chain.pem
+      keyFile: /etc/prometheus/secrets/istio.default/key.pem
+      insecureSkipVerify: true  # Prometheus does not support Istio security naming, thus skip verifying target pod ceritifcate
 
 extraVolumes:
   - name: shared-fluent-bit-config
