@@ -1,8 +1,8 @@
-apiVersion: v2
-appVersion: "v0.38.4-beta.1"
-description: A Helm chart for deploying ORY Oathkeeper in Kubernetes
-name: oathkeeper
-version: 0.5.7
+apiVersion: v1
+appVersion: "v0.0.1"
+description: A Helm chart for deployoing ORY Oathkeeper Rule Controller in Kubernetes
+name: oathkeeper-maester
+version: 0.0.1
 keywords:
   - zero-trust
   - beyond-corp
@@ -18,10 +18,5 @@ sources:
   - https://github.com/ory/k8s
 maintainers: # (optional)
   - name: ORY Team
-    email: office@ory.sh
+    email: hi@ory.sh
     url: https://www.ory.sh/
-type: application
-dependencies:
-  - name: oathkeeper-maester
-    version: 0.0.1
-    condition: oathkeeper-maester.enabled

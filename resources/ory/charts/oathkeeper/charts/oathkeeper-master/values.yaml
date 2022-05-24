@@ -1,27 +1,25 @@
+# Mode for oathkeeper controller
+# Two possible modes are: controller or sidecar
+global:
+  ory:
+    oathkeeper:
+      maester:
+        mode: controller
+
 replicaCount: 1
 
-config:
-  # SyncPeriod determines the minimum frequency at which watched resources are
-  # reconciled. A lower period will correct entropy more quickly, but reduce
-  # responsiveness to change if there are many watched resources.
-  syncPeriod: 10h
-  # Name of existingSecret for hydra, if used
-  # hydraSecret: secret
+# oathkeeperFullnameOverride: oathkeeper
 
-globalAccess: false
-
-#The Controller have CREATE and READ access to all Secrets in the namespaces listed below.
-enabledNamespaces: []
+# rulesConfigmapNamespace: some-namespace
+# rulesFileName: access-rules.json
 
 image:
+  # ORY Oathkeeper Rule Controller image
+  repository: oryd/oathkeeper-maester
+  # ORY Oathkeeper Rule Controller version
+  tag: "v0.1.0"
   # Image pull policy
   pullPolicy: IfNotPresent
-
-adminService:
-  name:
-  port:
-
-forwardedProto:
 
 port:
   metrics: 8080
@@ -29,8 +27,7 @@ port:
 deployment:
   strategy: {} # Read more: https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#strategy
 
-  resources:
-    {}
+  resources: {}
     #  We usually recommend not to specify default resources and to leave this as a conscious
     #  choice for the user. This also increases chances charts run on environments with little
     #  resources, such as Minikube. If you do want to specify resources, uncomment the following
@@ -50,18 +47,11 @@ deployment:
 
   # Configure node tolerations.
   tolerations: []
+
+  # Configure annotations.
   annotations: {}
-  podLabels: {}
 
-  livenessProbe:
-    initialDelaySeconds: 50
-    timeoutSeconds: 1
-    periodSeconds: 10
-
-  readinessProbe:
-    initialDelaySeconds: 10
-    timeoutSeconds: 1
-    periodSeconds: 2
+  envs: {}
 
 # Configure node affinity
 affinity: {}

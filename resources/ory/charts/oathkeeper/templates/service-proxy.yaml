@@ -7,7 +7,6 @@ metadata:
   namespace: {{ .Release.Namespace }}
   {{- end }}
   labels:
-    app.kubernetes.io/component: proxy
 {{ include "oathkeeper.labels" . | indent 4 }}
     {{- with .Values.service.proxy.labels }}
       {{- toYaml . | nindent 4 }}
@@ -22,7 +21,7 @@ spec:
     - port: {{ .Values.service.proxy.port }}
       targetPort: http-proxy
       protocol: TCP
-      name: {{ .Values.service.proxy.name }}
+      name: http
     - name: tcp-status-port
       port: 15020
       targetPort: 15020

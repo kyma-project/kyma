@@ -2,7 +2,7 @@
 {{/*
 Expand the name of the chart.
 */}}
-{{- define "hydra-maester.name" -}}
+{{- define "oathkeeper-maester.name" -}}
 {{- default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 
@@ -11,7 +11,7 @@ Create a default fully qualified app name.
 We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
 If release name contains chart name it will be used as a full name.
 */}}
-{{- define "hydra-maester.fullname" -}}
+{{- define "oathkeeper-maester.fullname" -}}
 {{- if .Values.fullnameOverride -}}
 {{- .Values.fullnameOverride | trunc 63 | trimSuffix "-" -}}
 {{- else -}}
@@ -27,16 +27,16 @@ If release name contains chart name it will be used as a full name.
 {{/*
 Create chart name and version as used by the chart label.
 */}}
-{{- define "hydra-maester.chart" -}}
+{{- define "oathkeeper-maester.chart" -}}
 {{- printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 
 {{/*
 Common labels
 */}}
-{{- define "hydra-maester.labels" -}}
-app.kubernetes.io/name: {{ include "hydra-maester.name" . }}
-helm.sh/chart: {{ include "hydra-maester.chart" . }}
+{{- define "oathkeeper-maester.labels" -}}
+app.kubernetes.io/name: {{ include "oathkeeper-maester.name" . }}
+helm.sh/chart: {{ include "oathkeeper-maester.chart" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
 {{- if .Chart.AppVersion }}
 app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
@@ -45,34 +45,18 @@ app.kubernetes.io/managed-by: {{ .Release.Service }}
 {{- end -}}
 
 {{/*
-Get Hydra name
+Get Oathkeeper rules configmap
 */}}
-{{- define "hydra-maester.getHydraName" -}}
-{{- $fullName := include "hydra-maester.fullname" . -}}
+{{- define "oathkeeper-maester.getCM" -}}
+{{- if .Values.oathkeeperFullnameOverride -}}
+{{- printf "%s-rules" .Values.oathkeeperFullnameOverride | trimSuffix "-" -}}
+{{- else -}}
+{{- $fullName := include "oathkeeper-maester.fullname" . -}}
 {{- $nameParts := split "-" $fullName }}
 {{- if eq $nameParts._0 $nameParts._1 -}}
-{{- printf "%s" $nameParts._0 | trimSuffix "-" -}}
+{{- printf "%s-rules" $nameParts._0 | trimSuffix "-" -}}
 {{- else -}}
-{{- printf "%s-%s" $nameParts._0 $nameParts._1 | trimSuffix "-" -}}
+{{- printf "%s-%s-rules" $nameParts._0 $nameParts._1 | trimSuffix "-" -}}
 {{- end -}}
-{{- end -}}
-
-{{/*
-Get Hydra admin service name
-*/}}
-{{- define "hydra-maester.adminService" -}}
-{{- $hydra := include "hydra-maester.getHydraName" . -}}
-{{- printf "%s-admin" $hydra -}}
-{{- end -}}
-
-{{/*
-Get Hydra secret name
-*/}}
-{{- define "hydra-maester.hydraSecret" -}}
-{{- if hasKey .Values.config "hydraSecret" -}}
-{{- printf "%s" .Values.config.hydraSecret -}}
-{{- else -}}
-{{- $hydra := include "hydra-maester.getHydraName" . -}}
-{{- printf "%s" $hydra -}}
 {{- end -}}
 {{- end -}}

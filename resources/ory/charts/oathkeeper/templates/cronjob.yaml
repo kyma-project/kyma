@@ -1,5 +1,3 @@
-#Kyma resource
-
 ---
 apiVersion: v1
 kind: ServiceAccount

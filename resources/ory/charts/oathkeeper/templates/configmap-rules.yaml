@@ -1,4 +1,3 @@
-{{- if .Values.oathkeeper.managedAccessRules }}
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -10,6 +9,5 @@ metadata:
   labels:
 {{ include "oathkeeper.labels" . | indent 4 }}
 data:
-  "access-rules.json": |-
+  "access-rules.json": |
 {{ .Values.oathkeeper.accessRules | default "[]" | indent 4 }}
-{{- end }}
