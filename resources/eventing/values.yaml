@@ -21,7 +21,7 @@ global:
 
   jetstream:
     enabled: false
-    # Storage type of the stream, memory or file.
+    # Storage type of the stream, memory or file
     storage: memory
 
   # secretName defines optionally another name than the default secret name
