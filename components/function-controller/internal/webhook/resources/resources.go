@@ -8,6 +8,7 @@ import (
 
 	"github.com/pkg/errors"
 	admissionregistrationv1 "k8s.io/api/admissionregistration/v1"
+	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
 	ctrlclient "sigs.k8s.io/controller-runtime/pkg/client"
@@ -74,6 +75,12 @@ func SetupResourcesController(ctx context.Context, mgr ctrl.Manager, serviceName
 	); err != nil {
 		return errors.Wrap(err, "failed to watch MutatingWebhookConfiguration")
 	}
+	if err := c.Watch(&source.Kind{
+		Type: &corev1.Secret{}},
+		&handler.EnqueueRequestForObject{},
+	); err != nil {
+		return errors.Wrap(err, "failed to watch Secrets")
+	}
 	return nil
 }
 
@@ -99,6 +106,7 @@ func (r *resourceReconciler) Reconcile(ctx context.Context, request reconcile.Re
 	if err := r.reconcilerSecret(ctx, request); err != nil {
 		return reconcile.Result{}, errors.Wrap(err, "failed to reconcile webhook resources")
 	}
+	ctrl.LoggerFrom(ctx).Info("webhook resources reconciled successfully")
 	return reconcile.Result{RequeueAfter: 1 * time.Hour}, nil
 }
 

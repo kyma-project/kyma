@@ -100,7 +100,6 @@ func isValidSecret(s *corev1.Secret) (bool, error) {
 	if err := verifyCertificate(s.Data[CertFile]); err != nil {
 		return false, err
 	}
-
 	if err := verifyKey(s.Data[KeyFile]); err != nil {
 		return false, err
 	}
