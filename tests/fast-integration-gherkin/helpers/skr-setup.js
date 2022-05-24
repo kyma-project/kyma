@@ -32,6 +32,8 @@ class SKRSetup {
     }
 
     static async provisionSKR() {
+        console.log("BEFORE: this.Initialized is now", this._initialized);
+
         if (!this._initialized){
             this._skipProvisioning = process.env.SKIP_PROVISIONING === 'true';
             if (this._skipProvisioning){
@@ -71,10 +73,15 @@ class SKRSetup {
                     console.log(`\nRuntime status after provisioning: ${runtimeStatus}`);
               
                     this.shoot = skr.shoot;
+                    console.log("Shoot:", this.shoot);
                     await addScenarioInCompass(director, this.options.scenarioName);
+                    console.log("Scenario added to compass");
                     await assignRuntimeToScenario(director, this.shoot.compassID, this.options.scenarioName);
+                    console.log("Runtime assigned to scenario");
                     initializeK8sClient({kubeconfig: this.shoot.kubeconfig});
+                    console.log("K8s is initialized");
                     this._initialized = true;
+                    console.log("this.Initialized is now", this._initialized);
                 } catch (e) {
                     throw new Error(`before hook failed: ${e.toString()}`);
                 } finally {
