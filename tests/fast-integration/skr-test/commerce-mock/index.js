@@ -21,7 +21,7 @@ const {
 } = require('../../monitoring');
 
 const AWS_PLAN_ID = '361c511f-f939-4621-b228-d0fb79a1fe15';
-
+// rate of audit events generated in 60 minutes. The value is derived from the actual prometheus query.
 const auditLogsThreshold = 6;
 const testTimeout = 1000 * 60 * 30; // 30m
 
