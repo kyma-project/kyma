@@ -4,7 +4,8 @@
   "description": "Fast integration tests written in Gherkin",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test-skr": "../node_modules/.bin/cucumber-js ./skr/features/skr.feature -f json:test-report.json",
+    "test-certificate": "../node_modules/.bin/cucumber-js ./certificate/features/certificate.feature -f json:test-report.json"
   },
   "author": "",
   "license": "ISC",
