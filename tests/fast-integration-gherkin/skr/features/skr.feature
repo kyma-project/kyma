@@ -3,3 +3,6 @@ Feature: SKR test
 
     Background: Provision SKR
         Given SKR is provisioned
+
+    Scenario: Initial OIDC config is applied on shoot cluster
+        Then "Initial" OIDC config is applied on the shoot cluster
