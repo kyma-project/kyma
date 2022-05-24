@@ -38,7 +38,8 @@ function commerceMockTest(options) {
     commerceMockCleanup(options.testNS);
 
     context('Check audit logs for AWS', function() {
-      if (process.env.KEB_PLAN_ID === AWS_PLAN_ID) {
+      // if (process.env.KEB_PLAN_ID === AWS_PLAN_ID) { TODO
+      if (AWS_PLAN_ID === AWS_PLAN_ID) {
         checkAuditLogsForAWS();
       } else {
         debug('Skipping step for non-AWS plan');
