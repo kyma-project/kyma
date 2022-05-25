@@ -250,14 +250,20 @@ extraPorts: []
 
 exporter:
   enabled: true
+  resources:
+    limits:
+      cpu: 100m
+      memory: 50Mi
+    requests:
+      memory: 5Mi
   containerPorts:
     - port: 2021
-      containerPort: 2021
+      targetPort: http-metrics
       protocol: TCP
-      name: http-exporter-metrics
+      name: http-metrics
 
   serviceMonitorPorts:
-    - port: http-exporter-metrics
+    - port: http-metrics
       path: /metrics
       ## scheme: HTTP scheme to use for scraping. Can be used with `tlsConfig` for example if using istio mTLS.
       scheme: https

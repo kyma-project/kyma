@@ -103,8 +103,12 @@ containers:
   {{- if .Values.exporter.enabled }}
   - name: exporter
     image: lindnerb/exporter:latest
+    {{- with .Values.exporter.resources }}
+    resources:
+      {{- toYaml . | nindent 6 }}
+  {{- end }}
     ports:
-    - name: http-exporter-metrics
+    - name: http-metrics
       containerPort: 2021
       protocol: TCP
     env:
