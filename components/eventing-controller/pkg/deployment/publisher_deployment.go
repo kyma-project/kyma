@@ -309,17 +309,6 @@ func getNATSEnvVars(natsConfig env.NatsConfig, publisherConfig env.PublisherConf
 		{Name: "REQUEST_TIMEOUT", Value: publisherConfig.RequestTimeout},
 		{Name: "LEGACY_NAMESPACE", Value: "kyma"},
 		{
-			Name: "LEGACY_EVENT_TYPE_PREFIX",
-			ValueFrom: &v1.EnvVarSource{
-				ConfigMapKeyRef: &v1.ConfigMapKeySelector{
-					LocalObjectReference: v1.LocalObjectReference{
-						Name: configMapName,
-					},
-					Key: configMapKeyEventTypePrefix,
-				},
-			},
-		},
-		{
 			Name: "EVENT_TYPE_PREFIX",
 			ValueFrom: &v1.EnvVarSource{
 				ConfigMapKeyRef: &v1.ConfigMapKeySelector{
