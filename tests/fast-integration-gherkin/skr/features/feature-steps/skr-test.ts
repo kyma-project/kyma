@@ -280,12 +280,16 @@ AfterAll({timeout: 1000 * 60 * 95}, async() => {
     const featureName = context.featureName;
 
     if (featureName === "skr-test"){
-        const options = context.options;
+        try{
+            const options = context.options;
 
-        // Delete commerce mock
-        await CommerceCompassMock.deleteCommerceMockResources(options.testNS);
-
-        // Deprovision SKR
-        await SKRSetup.deprovisionSKR();    
+            // Delete commerce mock
+            await CommerceCompassMock.deleteCommerceMockResources(options.testNS);
+        } catch(e){
+            console.log("Failed to delete commerce Mock Resouces, with error", e);
+        } finally{
+            // Deprovision SKR
+            await SKRSetup.deprovisionSKR();    
+        }
     }
 });
