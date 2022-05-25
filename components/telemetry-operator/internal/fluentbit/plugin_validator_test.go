@@ -105,11 +105,12 @@ func TestValidateAllowedOutputs(t *testing.T) {
 				{
 					Content: `
     Name    http
-    Match   tele.*`,
+    Match   foo.*`,
 				},
 			},
 		},
 	}
+	logPipeline.ObjectMeta = metav1.ObjectMeta{Name: "foo"}
 
 	logPipelines := &telemetryv1alpha1.LogPipelineList{
 		Items: []telemetryv1alpha1.LogPipeline{*logPipeline},
