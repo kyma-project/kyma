@@ -91,12 +91,10 @@ function gatherOptions(...opts) {
 
 // gets the skr config by it's instance id
 async function getSKRConfig(instanceID) {
-  const runtimeStatus = await kcp.getRuntimeStatusOperations(instanceID);
-  const objRuntimeStatus = JSON.parse(runtimeStatus);
-  expect(objRuntimeStatus).to.have.nested.property('data[0].shootName').not.empty;
+  const shootName = await keb.getShootName(keb, instanceID);
 
   console.log(`Fetching SKR info for shoot: ${shootName}`);
-  return await gardener.getShoot(objRuntimeStatus.data[0].shootName);
+  return await gardener.getShoot(shootName);
 }
 
 async function prepareCompassResources(shoot, options) {
