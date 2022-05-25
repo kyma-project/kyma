@@ -1,0 +1,23 @@
+apiVersion: v2
+appVersion: "v0.1.5"
+description: A Helm chart for deploying ORY Oathkeeper Rule Controller in Kubernetes
+name: oathkeeper-maester
+icon: https://raw.githubusercontent.com/ory/docs/master/docs/static/img/logo-oathkeeper.svg
+version: 0.23.2
+keywords:
+  - zero-trust
+  - beyond-corp
+  - access-control
+  - reverse-proxy
+  - nginx
+  - envoy
+  - ambassador
+  - auth-filter
+home: https://www.ory.sh/
+sources:
+  - https://github.com/ory/oathkeeper
+  - https://github.com/ory/k8s
+maintainers: # (optional)
+  - name: ORY Team
+    email: office@ory.sh
+    url: https://www.ory.sh/

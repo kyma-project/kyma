@@ -67,13 +67,13 @@ memory
 {{- end -}}
 
 {{/*
-Get the name of the secret resource containing secrets
+Generate the name of the secret resource containing secrets
 */}}
 {{- define "hydra.secretname" -}}
-{{- if .Values.hydra.existingSecret }}
-    {{- printf "%s" .Values.hydra.existingSecret -}}
+{{- if .Values.hydra.existingSecret -}}
+{{- .Values.hydra.existingSecret | trunc 63 | trimSuffix "-" -}}
 {{- else -}}
-    {{- printf "%s" (include "hydra.fullname" .) -}}
+{{ include "hydra.fullname" . }}
 {{- end -}}
 {{- end -}}
 
@@ -81,18 +81,26 @@ Get the name of the secret resource containing secrets
 Generate the secrets.system value
 */}}
 {{- define "hydra.secrets.system" -}}
-{{- if .Values.hydra.config.secrets.system -}}
-{{- .Values.hydra.config.secrets.system }}
-{{- else if .Values.demo -}}
-a-very-insecure-secret-for-checking-out-the-demo
-{{- end -}}
+  {{- if (.Values.hydra.config.secrets).system -}}
+    {{- if kindIs "slice" .Values.hydra.config.secrets.system -}}
+      {{- if gt (len .Values.hydra.config.secrets.system) 1 -}}
+        "{{- join "\",\"" .Values.hydra.config.secrets.system -}}"
+      {{- else -}}
+        {{- join "" .Values.hydra.config.secrets.system -}}
+      {{- end -}}
+    {{- else -}}
+      {{- fail "Expected hydra.config.secrets.system to be a list of strings" -}}
+    {{- end -}}
+  {{- else if .Values.demo -}}
+    a-very-insecure-secret-for-checking-out-the-demo
+  {{- end -}}
 {{- end -}}
 
 {{/*
 Generate the secrets.cookie value
 */}}
 {{- define "hydra.secrets.cookie" -}}
-{{- if .Values.hydra.config.secrets.cookie -}}
+{{- if (.Values.hydra.config.secrets).cookie -}}
 {{- .Values.hydra.config.secrets.cookie }}
 {{- else -}}
 {{- include "hydra.secrets.system" . }}
@@ -100,24 +108,11 @@ Generate the secrets.cookie value
 {{- end -}}
 
 {{/*
-Return true if a secret object should be created
-*/}}
-{{- define "hydra.createSecret" -}}
-{{- if .Values.hydra.existingSecret }}
-{{- else -}}
-    {{- true -}}
-{{- end -}}
-{{- end -}}
-
-{{/*
 Generate the configmap data, redacting secrets
 */}}
 {{- define "hydra.configmap" -}}
-{{- $configCopy := .Values.hydra.config | mustDeepCopy -}}
-{{- $result := unset $configCopy "dsn" -}}
-{{- $result := unset $result "secrets" -}}
-{{- $result := unset $result "secretAnnotations" -}}
-{{- toYaml $result -}}
+{{- $config := omit .Values.hydra.config "dsn" "secrets" -}}
+{{- toYaml $config -}}
 {{- end -}}
 
 {{/*
@@ -151,3 +146,26 @@ Check overrides consistency
 {{- $local := dict "first" true -}}
 {{- range $k, $v := . -}}{{- if not $local.first -}},{{- end -}}{{- $v -}}{{- $_ := set $local "first" false -}}{{- end -}}
 {{- end -}}
+
+{{/*
+Create the name of the service account to use
+*/}}
+{{- define "hydra.serviceAccountName" -}}
+{{- if .Values.deployment.serviceAccount.create }}
+{{- default (include "hydra.fullname" .) .Values.deployment.serviceAccount.name }}
+{{- else }}
+{{- default "default" .Values.deployment.serviceAccount.name }}
+{{- end }}
+{{- end }}
+
+{{/*
+Checksum annotations generated from configmaps and secrets
+*/}}
+{{- define "hydra.annotations.checksum" -}}
+{{- if .Values.configmap.hashSumEnabled }}
+checksum/hydra-config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
+{{- end }}
+{{- if and .Values.secret.enabled .Values.secret.hashSumEnabled }}
+checksum/hydra-secrets: {{ include (print $.Template.BasePath "/secrets.yaml") . | sha256sum }}
+{{- end }}
+{{- end }}

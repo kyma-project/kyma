@@ -6,13 +6,7 @@ const httpsAgent = new https.Agent({
 axios.defaults.httpsAgent = httpsAgent;
 const {
   checkFunctionResponse,
-  addService,
-  updateService,
-  deleteService,
-  sendLegacyEventAndCheckResponse,
-  sendCloudEventStructuredModeAndCheckResponse,
   checkInClusterEventDelivery,
-  sendCloudEventBinaryModeAndCheckResponse,
 } = require('./fixtures/commerce-mock');
 const {
   printRestartReport,
@@ -37,24 +31,6 @@ function commerceMockTests(testNamespace) {
 
     it('function should be reachable through secured API Rule', async function() {
       await checkFunctionResponse(testNamespace);
-    });
-
-    it('order.created.v1 legacy event should trigger the lastorder function', async function() {
-      await sendLegacyEventAndCheckResponse();
-    });
-
-    it('order.created.v1 cloud event in structured mode should trigger the lastorder function', async function() {
-      await sendCloudEventStructuredModeAndCheckResponse();
-    });
-
-    it('order.created.v1 cloud event in binary mode should trigger the lastorder function', async function() {
-      await sendCloudEventBinaryModeAndCheckResponse();
-    });
-
-    it('should add, update and delete a service', async function() {
-      const serviceId = await addService();
-      await updateService(serviceId);
-      await deleteService(serviceId);
     });
 
     it('Should print report of restarted containers, skipped if no crashes happened', async function() {
