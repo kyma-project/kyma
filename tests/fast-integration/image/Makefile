@@ -18,3 +18,7 @@ build-image:
 push-image:
 	$(info ___ Pushing image $(IMG) with all tags ___)
 	docker push -a $(IMG)
+
+.PHONY: release
+release: build-image push-image
+
