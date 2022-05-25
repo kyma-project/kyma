@@ -125,7 +125,7 @@ func isMatchCondAllowed(pluginName, matchCond, logPipelineName string, logPipeli
 	}
 
 	for _, l := range logPipelines.Items {
-		if matchCond == l.Name {
+		if matchCond == fmt.Sprintf("%s.*", l.Name) {
 			matchCondValid = true
 		}
 		pipelineNames = append(pipelineNames, l.Name)

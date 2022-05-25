@@ -282,7 +282,7 @@ kyma:
     useKymaGroups: false
     groups: ""
   logPipeline:
-    match: "loki"
+    match: "loki.*"
     logLevel: warn
     lineFormat: json
     removeKeys: "kubernetes, stream"

@@ -219,5 +219,5 @@ func TestValidateMatchCond(t *testing.T) {
 	}
 
 	err := pluginValidator.Validate(logPipeline, logPipelines)
-	assert.Contains(t, err.Error(), "output plugin http should have match condition matching any of the existing logpipeline names '[foo]'")
+	assert.Contains(t, err.Error(), "output plugin 'http' should have match condition matching any of the existing logpipeline names '[foo]'")
 }
