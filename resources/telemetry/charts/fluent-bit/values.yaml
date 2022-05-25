@@ -211,7 +211,7 @@ priorityClassName: ""
 
 env:
  - name: MAX_FSBUFFER_SIZE
-   value: 10M
+   value: 10000000
 
 # The envWithTpl array below has the same usage as "env", but is using the tpl function to support templatable string.
 # This can be useful when you want to pass dynamic values to the Chart using the helm argument "--set <variable>=<value>"
