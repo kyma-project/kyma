@@ -45,7 +45,7 @@ func TestGenerateEmitter(t *testing.T) {
 	expected := `
 name                  rewrite_tag
 match                 kube.*
-Rule                  $log "^.*$" test true
+Rule                  $log "^.*$" test.$TAG true
 Emitter_Name          test
 Emitter_Storage.type  filesystem
 Emitter_Mem_Buf_Limit 10M`

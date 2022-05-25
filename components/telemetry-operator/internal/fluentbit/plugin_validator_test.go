@@ -33,7 +33,7 @@ func TestValidateAllowedFilters(t *testing.T) {
 				{
 					Content: `
     Name    grep
-    Match   *
+    Match   tele.*
     Regex   $kubernetes['labels']['app'] my-deployment`,
 				},
 			},
@@ -57,7 +57,7 @@ func TestValidateAllowedUpperCaseFilters(t *testing.T) {
 				{
 					Content: `
     Name    Grep
-    Match   *
+    Match   tele.*
     Regex   $kubernetes['labels']['app'] my-deployment`,
 				},
 			},
@@ -105,7 +105,7 @@ func TestValidateAllowedOutputs(t *testing.T) {
 				{
 					Content: `
     Name    http
-    Match   *`,
+    Match   tele.*`,
 				},
 			},
 		},
@@ -164,7 +164,7 @@ func TestValidateUnnamedOutputs(t *testing.T) {
 	require.Error(t, err)
 }
 
-func TestValidateAllowAll(t *testing.T) {
+func TestValidateDisallowAll(t *testing.T) {
 	pluginValidator := NewPluginValidator([]string{}, []string{})
 
 	logPipeline := &telemetryv1alpha1.LogPipeline{
@@ -192,7 +192,7 @@ func TestValidateAllowAll(t *testing.T) {
 	}
 
 	err := pluginValidator.Validate(logPipeline, logPipelines)
-	assert.Contains(t, err.Error(), "filter plugin grep with match condition '*' (match all) is not allowed")
+	assert.Contains(t, err.Error(), "filter plugin 'grep' with match condition '*' (match all) is not allowed")
 }
 
 func TestValidateMatchCondWithFirstLogPipeline(t *testing.T) {
