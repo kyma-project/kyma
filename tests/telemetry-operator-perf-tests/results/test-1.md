@@ -26,14 +26,14 @@ See the following summary of the tests performed. For more detailed results, che
 - Increasing CPU increases the rate at which inputs are read.
 - The average CPU usage is around 1.2 for up to 20 pipelines. The CPU plateaus after 2 pipelines.
 - Memory is usually not a problem for low number of pipelines. For 10 pipelines, we had to increase memory to 512 MB.
-5. The memory consuption increases linearly
+5. The memory consumption increases linearly
 - With 1.5CPU/512 Mi memory, we can support 20 pipelines (under extreme conditions).
 - With two pipelines, when one pipeline (http server) is down, we see that the output and emitter throughput goes down to 0.
    However, in the filesystem buffer, the chunks are rolled. There are no logs saying why the output stops functioning.
 
 
 ## Learnings
-- [Health check](https://docs.fluentbit.io/manual/administration/monitoring#health-check-for-fluent-bit) had to be adjusted because due to the higher error rate, Fluent Bit would mark the Pod unhealthy.
+- [Health check](https://docs.fluentbit.io/manual/administration/monitoring#health-check-for-fluent-bit) had to be adjusted due to the higher error rate, Fluent Bit would mark the Pod unhealthy.
 - To improve the [performance](https://www.mock-server.com/mock_server/performance.html) of mockserver, we had to reduce the memory consumption. Logging the messages to stdout was disabled and the log level was changed to `trace`.
 - Over a period of time, the http output throughput was declining. After restarting mockserver, it increased again. It looks like an issue with mockserver.
 - Loki was running out of memory. We had to increase the memory of Loki to 1Gi.
