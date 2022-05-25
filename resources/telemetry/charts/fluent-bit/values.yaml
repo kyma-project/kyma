@@ -209,10 +209,6 @@ podLabels: {}
 
 priorityClassName: ""
 
-env:
- - name: MAX_FSBUFFER_SIZE
-   value: 10000000
-
 # The envWithTpl array below has the same usage as "env", but is using the tpl function to support templatable string.
 # This can be useful when you want to pass dynamic values to the Chart using the helm argument "--set <variable>=<value>"
 # https://helm.sh/docs/howto/charts_tips_and_tricks/#using-the-tpl-function
@@ -230,9 +226,13 @@ envFrom:
 extraContainers:
   - name: exporter
     image: lindnerb/exporter:latest
+    env:
+      - name: MAX_FSBUFFER_SIZE
+        value: 10000000
     volumeMounts:
       - name: varfluentbit
         mountPath: /data
+
 #     command: ['do', 'something']
 
 flush: 1
