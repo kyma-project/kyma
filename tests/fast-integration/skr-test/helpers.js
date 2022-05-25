@@ -91,7 +91,13 @@ function gatherOptions(...opts) {
 
 // gets the skr config by it's instance id
 async function getSKRConfig(instanceID) {
-  const shootName = await keb.getShootName(keb, instanceID);
+  let shoot;
+  try {
+    shoot = await keb.getSKR(instanceID);
+  } catch (e) {
+    throw new Error(`Cannot fetch the shoot: ${e.toString()}`);
+  }
+  const shootName = shoot.dashboard_url.split('.')[1];
 
   console.log(`Fetching SKR info for shoot: ${shootName}`);
   return await gardener.getShoot(shootName);

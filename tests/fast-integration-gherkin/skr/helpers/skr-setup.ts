@@ -1,6 +1,7 @@
 import { IOptions } from "../Interfaces/IOptions";
 
 const {provisionSKR, deprovisionSKR} = require('../../../fast-integration/kyma-environment-broker');
+const {getShootName} = require('../../../fast-integration/kyma-environment-broker/helpers');
 const {
     gatherOptions,
     withSuffix,
@@ -45,7 +46,10 @@ class SKRSetup {
                     withInstanceID(instanceID),
                     withSuffix(suffix),
                 );
-                this.shoot = await getSKRConfig(instanceID);
+                const shootName = await getShootName(keb, instanceID);
+                console.log("Shoot name", shootName);
+                this.shoot = await gardener.getShoot(shootName);
+
                 console.log("Shoot:", this.shoot);
                 this._initialized = true;
             } else {
