@@ -97,7 +97,7 @@ async function getSKRConfig(instanceID) {
   } catch (e) {
     throw new Error(`Cannot fetch the shoot: ${e.toString()}`);
   }
-  const shootName = "shoot--kyma-dev--e94ca0f"; // shoot.dashboard_url.split('.')[1];
+  const shootName = "kyma-dev--e94ca0f"; // shoot.dashboard_url.split('.')[1];
 
   console.log(`Fetching SKR info for shoot: ${shootName}`);
   return await gardener.getShoot(shootName);
