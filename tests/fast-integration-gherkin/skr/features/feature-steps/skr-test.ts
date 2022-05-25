@@ -280,12 +280,12 @@ AfterAll({timeout: 1000 * 60 * 95}, async() => {
     const featureName = context.featureName;
 
     if (featureName === "skr-test"){
-        // const options = context.options;
+        const options = context.options;
 
-        // // Delete commerce mock
-        // await CommerceCompassMock.deleteCommerceMockResources(options.testNS);
+        // Delete commerce mock
+        await CommerceCompassMock.deleteCommerceMockResources(options.testNS);
 
-        // // Deprovision SKR
-        // await SKRSetup.deprovisionSKR();    
+        // Deprovision SKR
+        await SKRSetup.deprovisionSKR();    
     }
 });
