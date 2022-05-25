@@ -255,7 +255,7 @@ exporter:
 
   serviceMonitorPorts:
     - port: http-exporter-metrics
-      path: /metrics/
+      path: /metrics
       ## scheme: HTTP scheme to use for scraping. Can be used with `tlsConfig` for example if using istio mTLS.
       scheme: https
       ## tlsConfig: TLS configuration to use when scraping the endpoint. For example if using istio mTLS.
