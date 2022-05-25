@@ -13,30 +13,24 @@ const {tracingTests} = require('../tracing');
 const {
   checkInClusterEventDelivery,
   checkFunctionResponse,
-  sendLegacyEventAndCheckResponse,
 } = require('../test/fixtures/commerce-mock');
 
 describe('Upgrade test tests', function() {
   this.timeout(10 * 60 * 1000);
   this.slow(5000);
   let initialRestarts = null;
-  const mockNamespace = 'mocks';
   const testNamespace = 'test';
 
   it('Listing all pods in cluster', async function() {
     initialRestarts = await getContainerRestartsForAllNamespaces();
   });
 
-  it('in-cluster event should be delivered (structured and binary mode)', async function() {
+  it('in-cluster event should be delivered (legacy events, structured and binary cloud events)', async function() {
     await checkInClusterEventDelivery(testNamespace);
   });
 
   it('function should be reachable through secured API Rule', async function() {
     await checkFunctionResponse(testNamespace);
-  });
-
-  it('order.created.v1 legacy event should trigger the lastorder function', async function() {
-    await sendLegacyEventAndCheckResponse();
   });
 
   it('service instance provisioned by helm broker should be reachable', async function() {
@@ -50,7 +44,7 @@ describe('Upgrade test tests', function() {
 
   monitoringTests();
   loggingTests();
-  tracingTests(mockNamespace, testNamespace);
+  tracingTests(testNamespace);
 
   after('Unexpose Grafana', async () => {
     await unexposeGrafana();
