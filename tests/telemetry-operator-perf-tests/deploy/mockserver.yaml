@@ -53,6 +53,7 @@ data:
     mockserver.enableCORSForAPI=true
     mockserver.enableCORSForAllResponses=true
     mockserver.initializationJsonPath=/config/initializerJson.json
+    mockserver.disableSystemOut="true"
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -62,7 +63,7 @@ metadata:
   name: mockserver
   namespace: mockserver
 spec:
-  replicas: 5
+  replicas: 10
   selector:
     matchLabels:
       app: mockserver
@@ -75,7 +76,7 @@ spec:
       containers:
       - env:
         - name: LOG_LEVEL
-          value: INFO
+          value: TRACE
         - name: SERVER_PORT
           value: "1080"
         image: eu.gcr.io/kyma-project/external/mockserver/mockserver:mockserver-5.11.2
@@ -100,7 +101,13 @@ spec:
           tcpSocket:
             port: serviceport
           timeoutSeconds: 1
-        resources: {}
+        resources:
+          limits:
+            cpu: 2
+            memory: 8Gi
+          requests:
+            cpu: 1
+            memory: 1Gi
         securityContext:
           readOnlyRootFilesystem: false
           runAsUser: 65534
