@@ -2,6 +2,9 @@ package main
 
 import (
 	"net/http"
+	"os"
+	"path/filepath"
+	"strconv"
 	"time"
 
 	"github.com/prometheus/client_golang/prometheus"
@@ -9,10 +12,10 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
-const logPath = "/data/log/flb-storage/" // pass as flag and check dockerfile entrypoint vs run
+const logPath = "../data/log/flb-storage/" // pass as flag and check dockerfile entrypoint vs run
 
 func recordMetrics() {
-	ticker := time.NewTicker(2 * time.Second)
+	ticker := time.NewTicker(5 * time.Second)
 	quit := make(chan struct{})
 	go func() {
 		for {
@@ -22,7 +25,7 @@ func recordMetrics() {
 				if err != nil {
 					panic(err)
 				}
-				opsProcessed.Set(float64(size))
+				fsbufferSize.Set(float64(size))
 			case <-quit:
 				ticker.Stop()
 				return
@@ -32,36 +35,49 @@ func recordMetrics() {
 }
 
 var (
-	opsProcessed = promauto.NewGauge(prometheus.GaugeOpts{
+	fsbufferSize = promauto.NewGauge(prometheus.GaugeOpts{
 		Namespace:   "",
 		Subsystem:   "",
 		Name:        "fluentbit_fsbuffer_size",
 		Help:        "The total disk size of the fluentbit chunk buffer",
 		ConstLabels: nil,
 	})
+
+	fsbufferMax = promauto.NewGauge(prometheus.GaugeOpts{
+		Namespace:   "",
+		Subsystem:   "",
+		Name:        "fluentbit_fsbuffer_max",
+		Help:        "The maximum defined size of the fluentbit chunk buffer",
+		ConstLabels: nil,
+	})
 )
 
 func main() {
+	max, err := strconv.ParseFloat(os.Getenv("MAX_FSBUFFER_SIZE"), 64)
+	if err != nil {
+		panic(err)
+	}
+
+	fsbufferMax.Set(max)
 	recordMetrics()
 
 	http.Handle("/metrics", promhttp.Handler())
-	err := http.ListenAndServe(":2021", nil)
+	err = http.ListenAndServe(":2021", nil)
 	if err != nil {
 		return
 	}
 }
 
 func dirSize(path string) (int64, error) {
-	return 60, nil
-	//var size int64
-	//err := filepath.Walk(path, func(_ string, info os.FileInfo, err error) error {
-	//	if err != nil {
-	//		return err
-	//	}
-	//	if !info.IsDir() {
-	//		size += info.Size()
-	//	}
-	//	return err
-	//})
-	//return size, err
+	var size int64
+	err := filepath.Walk(path, func(_ string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+		if !info.IsDir() {
+			size += info.Size()
+		}
+		return err
+	})
+	return size, err
 }
