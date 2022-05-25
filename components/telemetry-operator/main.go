@@ -101,7 +101,7 @@ func main() {
 	flag.StringVar(&fluentBitNs, "fluent-bit-ns", "", "Fluent Bit namespace")
 	flag.StringVar(&fluentBitPath, "fluent-bit-path", "fluent-bit/bin/fluent-bit", "Fluent Bit binary path")
 	flag.StringVar(&fluentBitPluginDirectory, "fluent-bit-plugin-directory", "fluent-bit/lib", "Fluent Bit plugin directory")
-	flag.StringVar(&fluentBitInputTag, "fluent-bit-input-tag", "telemetry-kube", "Fluent Bit base tag of the input to use")
+	flag.StringVar(&fluentBitInputTag, "fluent-bit-input-tag", "tele", "Fluent Bit base tag of the input to use")
 	flag.StringVar(&fluentBitBufferLimit, "fluent-bit-buffer-limit", "10M", "Fluent Bit buffer limit per log pipeline")
 	flag.StringVar(&fluentBitStorageType, "fluent-bit-storage-type", "filesystem", "Fluent Bit buffering mechanism (filesystem or memory)")
 	flag.StringVar(&logFormat, "log-format", getEnvOrDefault("APP_LOG_FORMAT", "text"), "Log format (json or text)")

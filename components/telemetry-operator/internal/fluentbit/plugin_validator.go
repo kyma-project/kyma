@@ -120,7 +120,7 @@ func isMatchCondAllowed(pluginName, matchCond, logPipelineName string, logPipeli
 	matchCondValid := false
 	var pipelineNames []string
 
-	if pluginName == logPipelineName {
+	if matchCond == fmt.Sprintf("%s.*", logPipelineName) {
 		return nil
 	}
 
@@ -130,8 +130,13 @@ func isMatchCondAllowed(pluginName, matchCond, logPipelineName string, logPipeli
 		}
 		pipelineNames = append(pipelineNames, l.Name)
 	}
+
 	if !matchCondValid {
-		return fmt.Errorf("output plugin '%s' should have match condition matching any of the existing logpipeline names '%s'", pluginName, pipelineNames)
+		if len(logPipelines.Items) == 0 {
+			return fmt.Errorf("output plugin '%s' should have match condition (pipelineName.*) matching the logpipeline name '%s'", pluginName, logPipelineName)
+		} else {
+			return fmt.Errorf("output plugin '%s' should have match condition (pipelineName.*) matching any of the current '%s' or existing logpipeline names '%s'", pluginName, logPipelineName, pipelineNames)
+		}
 	}
 	return nil
 }

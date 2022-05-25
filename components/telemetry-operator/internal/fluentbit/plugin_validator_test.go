@@ -195,7 +195,7 @@ func TestValidateAllowAll(t *testing.T) {
 	assert.Contains(t, err.Error(), "filter plugin grep with match condition '*' (match all) is not allowed")
 }
 
-func TestValidateMatchCond(t *testing.T) {
+func TestValidateMatchCondWithFirstLogPipeline(t *testing.T) {
 	pluginValidator := NewPluginValidator([]string{}, []string{})
 
 	logPipeline := &telemetryv1alpha1.LogPipeline{
@@ -211,13 +211,70 @@ func TestValidateMatchCond(t *testing.T) {
 		},
 	}
 
-	name := metav1.ObjectMeta{Name: "foo"}
-	logPipeline.ObjectMeta = name
+	logPipeline.ObjectMeta = metav1.ObjectMeta{Name: "foo"}
 
-	logPipelines := &telemetryv1alpha1.LogPipelineList{
-		Items: []telemetryv1alpha1.LogPipeline{*logPipeline},
-	}
+	logPipelines := &telemetryv1alpha1.LogPipelineList{}
 
 	err := pluginValidator.Validate(logPipeline, logPipelines)
-	assert.Contains(t, err.Error(), "output plugin 'http' should have match condition matching any of the existing logpipeline names '[foo]'")
+	assert.Contains(t, err.Error(), "output plugin 'http' should have match condition (pipelineName.*) matching the logpipeline name 'foo'")
+}
+
+func TestValidateMatchCondWithExistingLogPipeline(t *testing.T) {
+	pluginValidator := NewPluginValidator([]string{}, []string{})
+
+	logPipeline1 := &telemetryv1alpha1.LogPipeline{
+		Spec: telemetryv1alpha1.LogPipelineSpec{
+			Outputs: []telemetryv1alpha1.Output{
+				{
+					Content: `
+    Name    http
+    Match   foo.*`,
+				},
+			},
+		},
+	}
+	logPipeline1.ObjectMeta = metav1.ObjectMeta{Name: "foo"}
+
+	logPipelines := &telemetryv1alpha1.LogPipelineList{
+		Items: []telemetryv1alpha1.LogPipeline{*logPipeline1},
+	}
+
+	logPipeline2 := &telemetryv1alpha1.LogPipeline{
+		Spec: telemetryv1alpha1.LogPipelineSpec{
+			Outputs: []telemetryv1alpha1.Output{
+				{
+					Content: `
+    Name    http
+    Match   bar`,
+				},
+			},
+		},
+	}
+	logPipeline2.ObjectMeta = metav1.ObjectMeta{Name: "bar"}
+
+	err := pluginValidator.Validate(logPipeline2, logPipelines)
+	assert.Contains(t, err.Error(), "output plugin 'http' should have match condition (pipelineName.*) matching any of the current 'bar' or existing logpipeline names '[foo]'")
+}
+
+func TestValidatePipelineCreation(t *testing.T) {
+	pluginValidator := NewPluginValidator([]string{}, []string{})
+
+	logPipeline := &telemetryv1alpha1.LogPipeline{
+
+		Spec: telemetryv1alpha1.LogPipelineSpec{
+			Outputs: []telemetryv1alpha1.Output{
+				{
+					Content: `
+    Name    http
+    Match   foo.*`,
+				},
+			},
+		},
+	}
+	logPipeline.ObjectMeta = metav1.ObjectMeta{Name: "foo"}
+
+	logPipelines := &telemetryv1alpha1.LogPipelineList{}
+
+	err := pluginValidator.Validate(logPipeline, logPipelines)
+	require.NoError(t, err)
 }

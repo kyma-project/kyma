@@ -23,7 +23,7 @@ const (
 	EmitterTemplate             string       = `
 name                  rewrite_tag
 match                 %s.*
-Rule                  $log "^.*$" %s$TAG true
+Rule                  $log "^.*$" %s.$TAG true
 Emitter_Name          %s
 Emitter_Storage.type  %s
 Emitter_Mem_Buf_Limit %s`
