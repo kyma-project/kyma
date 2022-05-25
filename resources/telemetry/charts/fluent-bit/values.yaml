@@ -227,17 +227,15 @@ envFrom:
       name: telemetry-fluent-bit-env
       optional: true
 
-extraContainers:
-  - name: exporter
-    image: lindnerb/exporter:latest
-    env:
-      - name: MAX_FSBUFFER_SIZE
-        value: 10000000
-    volumeMounts:
-      - name: varfluentbit
-        mountPath: /data
-
-#     command: ['do', 'something']
+extraContainers: []
+#   - name: exporter
+#     image: lindnerb/exporter:latest
+#     env:
+#       - name: MAX_FSBUFFER_SIZE
+#         value: 10000000
+#     volumeMounts:
+#       - name: varfluentbit
+#         mountPath: /data
 
 flush: 1
 
@@ -251,6 +249,7 @@ extraPorts: []
 #     nodePort: 30517
 
 exporter:
+  enabled: true
   containerPorts:
     - port: 2021
       containerPort: 2021

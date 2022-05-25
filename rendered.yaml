@@ -1,0 +1,2059 @@
+---
+# Source: telemetry/charts/fluent-bit/templates/serviceaccount.yaml
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: name-fluent-bit
+  labels:
+    helm.sh/chart: fluent-bit-0.16.2
+    app.kubernetes.io/name: fluent-bit
+    app.kubernetes.io/instance: name
+    app.kubernetes.io/version: "1.8.3"
+    app.kubernetes.io/managed-by: Helm
+---
+# Source: telemetry/charts/operator/templates/serviceaccount.yaml
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: name-operator
+  labels:
+    helm.sh/chart: operator-0.2.0
+    app.kubernetes.io/name: operator
+    app.kubernetes.io/instance: name
+    kyma-project.io/component: controller
+    app.kubernetes.io/managed-by: Helm
+---
+# Source: telemetry/charts/operator/templates/validation_webhook.yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: name-operator-webhook-cert
+  labels:
+    helm.sh/chart: operator-0.2.0
+    app.kubernetes.io/name: operator
+    app.kubernetes.io/instance: name
+    kyma-project.io/component: controller
+    app.kubernetes.io/managed-by: Helm
+    control-plane: telemetry-operator
+type: Opaque
+data:
+  tls.crt: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSURxekNDQXBPZ0F3SUJBZ0lRRXQvaWp3M200b3Zma0pjNnZVTWE1VEFOQmdrcWhraUc5dzBCQVFzRkFEQXEKTVNnd0pnWURWUVFERXg5MFpXeGxiV1YwY25rdGRtRnNhV1JoZEdsdVp5MTNaV0pvYjI5ckxXTmhNQjRYRFRJeQpNRFV5TlRFek5UTTFORm9YRFRNeU1EVXlNakV6TlRNMU5Gb3dJREVlTUJ3R0ExVUVBeE1WYm1GdFpTMXZjR1Z5CllYUnZjaTEzWldKb2IyOXJNSUlCSWpBTkJna3Foa2lHOXcwQkFRRUZBQU9DQVE4QU1JSUJDZ0tDQVFFQTFjNXYKRlRDTkdoNkI2bTFyWC9QV1Y2OWpqSkpzV3NDRXR0azQyaCs5NkN2T2twOGtNUUJKb3FqMUFrUWpUWDYvaUc3cgpzM3ViTVR0Zjd3anJEcEdickpwclBud3hPYzk4TVhWUnRha1VSMmVZSHdBeGN6UzBabEZ6cHJKTXlGcVEydWxOCklob1ZPYzNERW1rS2ZXblcvT1owUmJPOTFCa2pGTDNUWUtsZXNLZGI4ZHVtRlpUeStOdnRpRHBqSHIxTmpkcDMKNk1qQklnVVpyUmNRZXFjblVFMG5CZ0ttNjlQSW5kcnJMRjZoaGpoNmdvanFHdE90NXFUdE1la2kzQ3BTQyt3cgoyZ1l0c2Y2RHBlNGsySy9hbXZKbElhRlJPWnZ2L1l2WGkvYXBvN2pMQmRzYUVnbWhxeVc0aVBESzU4SjVKUnI0CjBGUHZHZjVqZ1pKTzBSeDR6d0lEQVFBQm80SFdNSUhUTUE0R0ExVWREd0VCL3dRRUF3SUZvREFkQmdOVkhTVUUKRmpBVUJnZ3JCZ0VGQlFjREFRWUlLd1lCQlFVSEF3SXdEQVlEVlIwVEFRSC9CQUl3QURBZkJnTlZIU01FR0RBVwpnQlJRMk1lV0NmN0hTbHViWFFNVkpSa2ZkK1d6OHpCekJnTlZIUkVFYkRCcWdqRnVZVzFsTFc5d1pYSmhkRzl5CkxYZGxZbWh2YjJzdWFXMXdiM0owWVc1MExXUmxjR3h2ZVcxbGJuUXRjM2x6ZEdWdGdqVnVZVzFsTFc5d1pYSmgKZEc5eUxYZGxZbWh2YjJzdWFXMXdiM0owWVc1MExXUmxjR3h2ZVcxbGJuUXRjM2x6ZEdWdExuTjJZekFOQmdrcQpoa2lHOXcwQkFRc0ZBQU9DQVFFQWhYT1BsR1ZmbDVkUGtLeWxXbEJLakxuQVpabjFkZ0FZMkdhUitLbERDeVhvClJUQmxQVDhoZlY3cjhQUXh6Tm51N0c4NjluVjE3SXlHZGY0S2E5UFBDQkdhMGd5bjhVN0RCZW1mSDhRN2QwVFMKdXlZbHp0RFdHblFlNU05SWg0d3hzMHVaaUZlT1ZVckFzbDVaSGRjNjM5c1p1WE1uOHAwVyt5NlNnd1dwSEhneAoxS2t4TWp5NWo1eERDVWs1YjJVdzZjZlJFRXBSSlpnbWF0ZUZnVVpVVGxnYUJGYXVpRFhOKzJGY1ZpUDFaOVFrCmliek4rUWQrTE1pNTg1YjdieUwrTnpvY09EbTdaUCtYd09TZ0lmZW5nUk1tQlNUdlhPbk5Pak9MS0xGajNubFIKd09JYUQ0Sm5xNVQzVUZISEtzUS92MzVCakZtMkU1QTNENUFwd21oWXdBPT0KLS0tLS1FTkQgQ0VSVElGSUNBVEUtLS0tLQo=
+  tls.key: LS0tLS1CRUdJTiBSU0EgUFJJVkFURSBLRVktLS0tLQpNSUlFcEFJQkFBS0NBUUVBMWM1dkZUQ05HaDZCNm0xclgvUFdWNjlqakpKc1dzQ0V0dGs0MmgrOTZDdk9rcDhrCk1RQkpvcWoxQWtRalRYNi9pRzdyczN1Yk1UdGY3d2pyRHBHYnJKcHJQbnd4T2M5OE1YVlJ0YWtVUjJlWUh3QXgKY3pTMFpsRnpwckpNeUZxUTJ1bE5JaG9WT2MzREVta0tmV25XL09aMFJiTzkxQmtqRkwzVFlLbGVzS2RiOGR1bQpGWlR5K052dGlEcGpIcjFOamRwMzZNakJJZ1VaclJjUWVxY25VRTBuQmdLbTY5UEluZHJyTEY2aGhqaDZnb2pxCkd0T3Q1cVR0TWVraTNDcFNDK3dyMmdZdHNmNkRwZTRrMksvYW12SmxJYUZST1p2di9ZdlhpL2FwbzdqTEJkc2EKRWdtaHF5VzRpUERLNThKNUpScjQwRlB2R2Y1amdaSk8wUng0endJREFRQUJBb0lCQVFDWGY0MUtzSHByTlk3TQo4L2VQcUJJTFUrWHdKNWpMdlhyTXJhTVJQRWl1aU12NUxQYlNHZWdUY0RFY0IvZ1Q0Mm9JWE1CN0QyenFONjVFCmpFY3lyWTVuZ1l2WVhOdnNvTTdacE0zZk1RMkRneTVSV1N1dy9IbVB2c3Q2SlFFdlBxMUIwT3FzN1ZwNCtRbnUKczZ1UkxqditPN1hMNWc3dWlWbElTekhLWG5rUUpsbjZrSkVFR2w2d29QRGVCdkcrUDNMQWVlbXg3bDF0TzFlRgp6czQ1SmcrendlRmlpWWdZeHZZMzN2RnJTQWY2UzdzdmhFcUZUY3FpVGl2VHgwVHd0MlNDdEFPVzltbStkekxmCnFZbURaSXVuQi9xN0FJNGlqQVllRkJ1OTE5RmFFK0RoRTNtVFp2dXBZZ1MzRVZPWDlmb0NxSGxMN3IrbkVFdmYKK0JWdytsbGhBb0dCQVB6clQzQmhRZGtYeUtCTjRiMlEwNG1hVE9yVktZbXUxSzlsQ0FIYkZTcGJZMXZCT0E4bQpYKzE4OHUwTXlqUEZPNFNPb29zNi8rNFI1cDdMLzZZZy9nZHZJaGJMYXdzNllwYm1aamtBRm03U1Rjd0ZHMGR2CjlOMGtqdVp6aXJxVzA3Ynl4Q1JBc0NyYVNMTXhDb2lSY3JPb0hBSmMvYTBHUE5RMkZoMDFVSzZuQW9HQkFOaHAKS0FZWHdXcmJDK2dIN1l2MUs4VHhyNXVXUmZKeG9Wc1NMOGZPblVNd21LbVZhbHYwM2dEb2ZseVpaeTh4a2hVMgp5MUJkOTdiM1RjSDNtS3FzbmhtMnk2aERka1hNaUc5NDQzc3UwV25lSDJEOGlCclE0bXVEaEhxSithWDhPb1U1Ck9Zc2hja0VuS1U0eGpYMVR4ek1GekE3MU4yN29Yd2YzakhBQnZSR1pBb0dBSTRFazliR3hmTGhLQWJidEtaOWIKRXNZR1pqRG1VOTJuSGJnaEY2R1pwd2lOT2lRMXFtcklySjROdkJrL2lXVDJwZlVmL0V1Y0FkK2hjRWxTNmc5WAptZE9RQllNbzA3cXVmR0I3bVNUYUFWU2tkeStBVk5ieW1OaTQ5c0RoaUxBRHFIc0w3Y3JtOEIwVWQ1TTYxMUVUCnVRU3dhZVNEOS9ZWU0vSWp5SlhqYmFFQ2dZRUFzaVZXVWpXcC9jbVZzb3NjTEJORjFaalM0M1EvM2tWViszOHMKSUFIZ2lWZnV3K01BcS9RVjhJOXl2YzEyR0c1by85ZWNaR3NHS1BMSmFydmtTOU5QVG9HZ2dzSU9FWVUrWnUwUAo3ZTVyYXdmenNzWVBVR3ZWaDRXN1A1aG5EeEZrSnhrbFduZk04djlHekZ5VVNhLzJrZlRhdHhGN2NXd09GcVBjClVyUExyVGtDZ1lBbTRTbEE2WUFLT1V5c21Hek0vVWh1RW0yOHN3V0pNRWlRR2dOZDFUNHZqSmRFbHV0c1ZXR2gKUzNLUytDMGpLN0JUSjdOZzRpUkc2VXJSRzBvS0NUVlZ6V3V0a1l0VmpYWHVGZHpBakRNNElWS3VyUjUzZnV1MQp3NjR5dC9WTWcyM3BNZEhCZkM0M0tvNmFFMVYxSkF6S1VTa29hSnEvZkRFTkRuL3RGejhzcFE9PQotLS0tLUVORCBSU0EgUFJJVkFURSBLRVktLS0tLQo=
+---
+# Source: telemetry/charts/fluent-bit/templates/configmap-dashboards.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: name-fluent-bit-dashboard-fluent-bit
+  labels:
+    helm.sh/chart: fluent-bit-0.16.2
+    app.kubernetes.io/name: fluent-bit
+    app.kubernetes.io/instance: name
+    app.kubernetes.io/version: "1.8.3"
+    app.kubernetes.io/managed-by: Helm
+    grafana_dashboard: "1"
+data:
+  fluent-bit.json: |
+    {
+      "__inputs": [
+        {
+          "name": "DS_PROMETHEUS",
+          "label": "prometheus",
+          "description": "",
+          "type": "datasource",
+          "pluginId": "prometheus",
+          "pluginName": "Prometheus"
+        }
+      ],
+      "__requires": [
+        {
+          "type": "grafana",
+          "id": "grafana",
+          "name": "Grafana",
+          "version": "7.2.1"
+        },
+        {
+          "type": "panel",
+          "id": "graph",
+          "name": "Graph",
+          "version": ""
+        },
+        {
+          "type": "datasource",
+          "id": "prometheus",
+          "name": "Prometheus",
+          "version": "1.0.0"
+        },
+        {
+          "type": "panel",
+          "id": "stat",
+          "name": "Stat",
+          "version": ""
+        }
+      ],
+      "annotations": {
+        "list": [
+          {
+            "builtIn": 1,
+            "datasource": "${DS_PROMETHEUS}",
+            "enable": true,
+            "hide": true,
+            "iconColor": "rgba(0, 211, 255, 1)",
+            "name": "Annotations & Alerts",
+            "type": "dashboard"
+          }
+        ]
+      },
+      "description": "Inspired by https://grafana.com/grafana/dashboards/7752",
+      "editable": true,
+      "gnetId": 7752,
+      "graphTooltip": 1,
+      "id": null,
+      "iteration": 1612355253484,
+      "links": [],
+      "panels": [
+        {
+          "collapsed": false,
+          "datasource": null,
+          "gridPos": {
+            "h": 1,
+            "w": 24,
+            "x": 0,
+            "y": 0
+          },
+          "id": 45,
+          "panels": [],
+          "title": "Cluster Status",
+          "type": "row"
+        },
+        {
+          "cacheTimeout": null,
+          "datasource": "$DS_PROMETHEUS",
+          "fieldConfig": {
+            "defaults": {
+              "custom": {},
+              "mappings": [],
+              "nullValueMode": "connected",
+              "thresholds": {
+                "mode": "percentage",
+                "steps": [
+                  {
+                    "color": "#d44a3a",
+                    "value": null
+                  },
+                  {
+                    "color": "#299c46",
+                    "value": 0
+                  }
+                ]
+              },
+              "unit": "none"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 3,
+            "w": 24,
+            "x": 0,
+            "y": 1
+          },
+          "id": 6,
+          "interval": null,
+          "links": [],
+          "maxDataPoints": 100,
+          "options": {
+            "colorMode": "value",
+            "graphMode": "area",
+            "justifyMode": "auto",
+            "orientation": "vertical",
+            "reduceOptions": {
+              "calcs": [
+                "last"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "textMode": "auto"
+          },
+          "pluginVersion": "7.2.1",
+          "targets": [
+            {
+              "expr": "sum(kube_pod_info{pod=~\".*name-fluent-bit.*\"})",
+              "format": "time_series",
+              "interval": "",
+              "intervalFactor": 1,
+              "legendFormat": "Active Fluent-bit",
+              "refId": "A"
+            },
+            {
+              "expr": "sum(kube_node_status_condition{condition=\"Ready\",status=\"true\"})",
+              "interval": "",
+              "legendFormat": "Ready Nodes",
+              "refId": "B"
+            },
+            {
+              "expr": "sum(kube_node_status_condition{condition!=\"Ready\",status=\"true\"})",
+              "interval": "",
+              "legendFormat": "Non-Ready Nodes",
+              "refId": "C"
+            }
+          ],
+          "title": "",
+          "transparent": true,
+          "type": "stat"
+        },
+        {
+          "collapsed": false,
+          "datasource": null,
+          "gridPos": {
+            "h": 1,
+            "w": 24,
+            "x": 0,
+            "y": 4
+          },
+          "id": 43,
+          "panels": [],
+          "title": "FluentBit metrics",
+          "type": "row"
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "dashLength": 10,
+          "dashes": false,
+          "datasource": "$DS_PROMETHEUS",
+          "fieldConfig": {
+            "defaults": {
+              "custom": {},
+              "links": []
+            },
+            "overrides": []
+          },
+          "fill": 5,
+          "fillGradient": 0,
+          "gridPos": {
+            "h": 6,
+            "w": 12,
+            "x": 0,
+            "y": 5
+          },
+          "hiddenSeries": false,
+          "id": 2,
+          "legend": {
+            "alignAsTable": false,
+            "avg": false,
+            "current": true,
+            "hideEmpty": false,
+            "hideZero": false,
+            "max": false,
+            "min": false,
+            "rightSide": false,
+            "show": false,
+            "sort": "current",
+            "sortDesc": true,
+            "total": false,
+            "values": true
+          },
+          "lines": true,
+          "linewidth": 1,
+          "links": [],
+          "nullPointMode": "null",
+          "options": {
+            "alertThreshold": true
+          },
+          "percentage": false,
+          "pluginVersion": "7.2.1",
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "seriesOverrides": [],
+          "spaceLength": 10,
+          "stack": true,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "sum(rate(fluentbit_input_bytes_total{pod=~\"$pod\"}[5m])) by (pod, instance, name)",
+              "format": "time_series",
+              "hide": false,
+              "interval": "",
+              "intervalFactor": 1,
+              "legendFormat": "{{ pod }}/{{name}}",
+              "refId": "A"
+            }
+          ],
+          "thresholds": [],
+          "timeFrom": null,
+          "timeRegions": [],
+          "timeShift": null,
+          "title": "Input Bytes Processing Rate",
+          "tooltip": {
+            "shared": true,
+            "sort": 2,
+            "value_type": "individual"
+          },
+          "type": "graph",
+          "xaxis": {
+            "buckets": null,
+            "mode": "time",
+            "name": null,
+            "show": true,
+            "values": []
+          },
+          "yaxes": [
+            {
+              "format": "Bps",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            },
+            {
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            }
+          ],
+          "yaxis": {
+            "align": false,
+            "alignLevel": null
+          }
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "dashLength": 10,
+          "dashes": false,
+          "datasource": "$DS_PROMETHEUS",
+          "fieldConfig": {
+            "defaults": {
+              "custom": {},
+              "links": []
+            },
+            "overrides": []
+          },
+          "fill": 5,
+          "fillGradient": 0,
+          "gridPos": {
+            "h": 6,
+            "w": 12,
+            "x": 12,
+            "y": 5
+          },
+          "hiddenSeries": false,
+          "id": 9,
+          "legend": {
+            "alignAsTable": false,
+            "avg": false,
+            "current": true,
+            "max": false,
+            "min": false,
+            "rightSide": false,
+            "show": false,
+            "sort": "current",
+            "sortDesc": true,
+            "total": false,
+            "values": true
+          },
+          "lines": true,
+          "linewidth": 1,
+          "links": [],
+          "nullPointMode": "null",
+          "options": {
+            "alertThreshold": true
+          },
+          "percentage": false,
+          "pluginVersion": "7.2.1",
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "seriesOverrides": [],
+          "spaceLength": 10,
+          "stack": true,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "sum(rate(fluentbit_output_proc_bytes_total{pod=~\"$pod\"}[5m])) by (pod, instance, name)",
+              "format": "time_series",
+              "hide": false,
+              "interval": "",
+              "intervalFactor": 1,
+              "legendFormat": "{{ pod }}/{{name}}",
+              "refId": "A"
+            }
+          ],
+          "thresholds": [],
+          "timeFrom": null,
+          "timeRegions": [],
+          "timeShift": null,
+          "title": "Output Bytes Processing Rate",
+          "tooltip": {
+            "shared": true,
+            "sort": 2,
+            "value_type": "individual"
+          },
+          "type": "graph",
+          "xaxis": {
+            "buckets": null,
+            "mode": "time",
+            "name": null,
+            "show": true,
+            "values": []
+          },
+          "yaxes": [
+            {
+              "format": "Bps",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": "0",
+              "show": true
+            },
+            {
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            }
+          ],
+          "yaxis": {
+            "align": false,
+            "alignLevel": null
+          }
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "dashLength": 10,
+          "dashes": false,
+          "datasource": "$DS_PROMETHEUS",
+          "fieldConfig": {
+            "defaults": {
+              "custom": {},
+              "links": []
+            },
+            "overrides": []
+          },
+          "fill": 5,
+          "fillGradient": 0,
+          "gridPos": {
+            "h": 6,
+            "w": 12,
+            "x": 0,
+            "y": 11
+          },
+          "hiddenSeries": false,
+          "id": 40,
+          "legend": {
+            "alignAsTable": false,
+            "avg": false,
+            "current": true,
+            "max": false,
+            "min": false,
+            "rightSide": false,
+            "show": false,
+            "sort": "current",
+            "sortDesc": true,
+            "total": false,
+            "values": true
+          },
+          "lines": true,
+          "linewidth": 1,
+          "links": [],
+          "nullPointMode": "null",
+          "options": {
+            "alertThreshold": true
+          },
+          "percentage": false,
+          "pluginVersion": "7.2.1",
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "seriesOverrides": [],
+          "spaceLength": 10,
+          "stack": true,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "sum(rate(fluentbit_input_records_total{pod=~\"$pod\"}[5m])) by (pod, instance, name)",
+              "format": "time_series",
+              "hide": false,
+              "interval": "",
+              "intervalFactor": 1,
+              "legendFormat": "{{ pod }}/{{name}}",
+              "refId": "A"
+            }
+          ],
+          "thresholds": [],
+          "timeFrom": null,
+          "timeRegions": [],
+          "timeShift": null,
+          "title": "Input Records Processing Rate",
+          "tooltip": {
+            "shared": true,
+            "sort": 2,
+            "value_type": "individual"
+          },
+          "type": "graph",
+          "xaxis": {
+            "buckets": null,
+            "mode": "time",
+            "name": null,
+            "show": true,
+            "values": []
+          },
+          "yaxes": [
+            {
+              "format": "rps",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            },
+            {
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            }
+          ],
+          "yaxis": {
+            "align": false,
+            "alignLevel": null
+          }
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "dashLength": 10,
+          "dashes": false,
+          "datasource": "$DS_PROMETHEUS",
+          "fieldConfig": {
+            "defaults": {
+              "custom": {},
+              "links": []
+            },
+            "overrides": []
+          },
+          "fill": 5,
+          "fillGradient": 0,
+          "gridPos": {
+            "h": 6,
+            "w": 12,
+            "x": 12,
+            "y": 11
+          },
+          "hiddenSeries": false,
+          "id": 41,
+          "legend": {
+            "alignAsTable": false,
+            "avg": false,
+            "current": true,
+            "hideEmpty": false,
+            "hideZero": false,
+            "max": false,
+            "min": false,
+            "rightSide": false,
+            "show": false,
+            "sort": "current",
+            "sortDesc": true,
+            "total": false,
+            "values": true
+          },
+          "lines": true,
+          "linewidth": 1,
+          "links": [],
+          "nullPointMode": "null",
+          "options": {
+            "alertThreshold": true
+          },
+          "percentage": false,
+          "pluginVersion": "7.2.1",
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "seriesOverrides": [],
+          "spaceLength": 10,
+          "stack": true,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "sum(rate(fluentbit_output_proc_records_total{pod=~\"$pod\"}[5m])) by (pod, instance, name)",
+              "format": "time_series",
+              "hide": false,
+              "interval": "",
+              "intervalFactor": 1,
+              "legendFormat": "{{ pod }}/{{name}}",
+              "refId": "A"
+            }
+          ],
+          "thresholds": [],
+          "timeFrom": null,
+          "timeRegions": [],
+          "timeShift": null,
+          "title": "Output Record Processing Rate",
+          "tooltip": {
+            "shared": true,
+            "sort": 2,
+            "value_type": "individual"
+          },
+          "type": "graph",
+          "xaxis": {
+            "buckets": null,
+            "mode": "time",
+            "name": null,
+            "show": true,
+            "values": []
+          },
+          "yaxes": [
+            {
+              "format": "rps",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": "0",
+              "show": true
+            },
+            {
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            }
+          ],
+          "yaxis": {
+            "align": false,
+            "alignLevel": null
+          }
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "dashLength": 10,
+          "dashes": false,
+          "datasource": "$DS_PROMETHEUS",
+          "fieldConfig": {
+            "defaults": {
+              "custom": {},
+              "links": []
+            },
+            "overrides": []
+          },
+          "fill": 1,
+          "fillGradient": 0,
+          "gridPos": {
+            "h": 6,
+            "w": 12,
+            "x": 0,
+            "y": 17
+          },
+          "hiddenSeries": false,
+          "id": 11,
+          "legend": {
+            "alignAsTable": false,
+            "avg": true,
+            "current": true,
+            "hideEmpty": true,
+            "hideZero": true,
+            "max": true,
+            "min": false,
+            "rightSide": false,
+            "show": false,
+            "sort": "current",
+            "sortDesc": true,
+            "total": false,
+            "values": true
+          },
+          "lines": true,
+          "linewidth": 1,
+          "links": [],
+          "nullPointMode": "null",
+          "options": {
+            "alertThreshold": true
+          },
+          "percentage": false,
+          "pluginVersion": "7.2.1",
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "seriesOverrides": [],
+          "spaceLength": 10,
+          "stack": true,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "sum(rate(fluentbit_output_retries_total{pod=~\"$pod\"}[1m])) by (pod, instance, name)",
+              "format": "time_series",
+              "hide": false,
+              "interval": "",
+              "intervalFactor": 1,
+              "legendFormat": "{{pod}} Retries to {{name}}",
+              "refId": "A"
+            },
+            {
+              "expr": "sum(rate(fluentbit_output_retries_failed_total{pod=~\"$pod\"}[1m])) by (pod, instance, name)",
+              "format": "time_series",
+              "interval": "",
+              "intervalFactor": 1,
+              "legendFormat": "{{pod}} Failed Retries to {{ name }}",
+              "refId": "B"
+            }
+          ],
+          "thresholds": [],
+          "timeFrom": null,
+          "timeRegions": [],
+          "timeShift": null,
+          "title": "Output Retry/Failed Rates",
+          "tooltip": {
+            "shared": true,
+            "sort": 2,
+            "value_type": "individual"
+          },
+          "type": "graph",
+          "xaxis": {
+            "buckets": null,
+            "mode": "time",
+            "name": null,
+            "show": true,
+            "values": []
+          },
+          "yaxes": [
+            {
+              "decimals": null,
+              "format": "short",
+              "label": "",
+              "logBase": 1,
+              "max": null,
+              "min": "0",
+              "show": true
+            },
+            {
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": "0",
+              "show": false
+            }
+          ],
+          "yaxis": {
+            "align": false,
+            "alignLevel": null
+          }
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "dashLength": 10,
+          "dashes": false,
+          "datasource": "$DS_PROMETHEUS",
+          "fieldConfig": {
+            "defaults": {
+              "custom": {},
+              "links": []
+            },
+            "overrides": []
+          },
+          "fill": 1,
+          "fillGradient": 0,
+          "gridPos": {
+            "h": 6,
+            "w": 12,
+            "x": 12,
+            "y": 17
+          },
+          "hiddenSeries": false,
+          "id": 10,
+          "legend": {
+            "alignAsTable": false,
+            "avg": false,
+            "current": true,
+            "hideEmpty": true,
+            "hideZero": true,
+            "max": false,
+            "min": false,
+            "rightSide": false,
+            "show": true,
+            "sort": "current",
+            "sortDesc": true,
+            "total": false,
+            "values": true
+          },
+          "lines": true,
+          "linewidth": 1,
+          "links": [],
+          "nullPointMode": "null",
+          "options": {
+            "alertThreshold": true
+          },
+          "percentage": false,
+          "pluginVersion": "7.2.1",
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "seriesOverrides": [],
+          "spaceLength": 10,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "sum(rate(fluentbit_output_errors_total{pod=~\"$pod\"}[1m])) by (pod, instance, name)",
+              "format": "time_series",
+              "hide": false,
+              "interval": "",
+              "intervalFactor": 1,
+              "legendFormat": "{{ pod }}/{{ name }}",
+              "refId": "A"
+            }
+          ],
+          "thresholds": [],
+          "timeFrom": null,
+          "timeRegions": [],
+          "timeShift": null,
+          "title": "Output Error Rate",
+          "tooltip": {
+            "shared": true,
+            "sort": 0,
+            "value_type": "individual"
+          },
+          "type": "graph",
+          "xaxis": {
+            "buckets": null,
+            "mode": "time",
+            "name": null,
+            "show": true,
+            "values": []
+          },
+          "yaxes": [
+            {
+              "format": "errors/sec",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": "0",
+              "show": true
+            },
+            {
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            }
+          ],
+          "yaxis": {
+            "align": false,
+            "alignLevel": null
+          }
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "dashLength": 10,
+          "dashes": false,
+          "datasource": "$DS_PROMETHEUS",
+          "fieldConfig": {
+            "defaults": {
+              "custom": {}
+            },
+            "overrides": []
+          },
+          "fill": 1,
+          "fillGradient": 0,
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 0,
+            "y": 23
+          },
+          "hiddenSeries": false,
+          "id": 47,
+          "legend": {
+            "avg": false,
+            "current": false,
+            "max": false,
+            "min": false,
+            "show": false,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null",
+          "options": {
+            "alertThreshold": true
+          },
+          "percentage": false,
+          "pluginVersion": "7.2.1",
+          "pointradius": 2,
+          "points": false,
+          "renderer": "flot",
+          "seriesOverrides": [],
+          "spaceLength": 10,
+          "stack": true,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "sum(rate(fluentbit_filter_drop_records_total{pod=~\"$pod\"}[5m])) by (pod, instance, name)",
+              "interval": "",
+              "legendFormat": "{{ pod }} / {{ name }}",
+              "refId": "A"
+            }
+          ],
+          "thresholds": [],
+          "timeFrom": null,
+          "timeRegions": [],
+          "timeShift": null,
+          "title": "Filter Drop",
+          "tooltip": {
+            "shared": true,
+            "sort": 0,
+            "value_type": "individual"
+          },
+          "type": "graph",
+          "xaxis": {
+            "buckets": null,
+            "mode": "time",
+            "name": null,
+            "show": true,
+            "values": []
+          },
+          "yaxes": [
+            {
+              "format": "short",
+              "label": "",
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            },
+            {
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            }
+          ],
+          "yaxis": {
+            "align": false,
+            "alignLevel": null
+          }
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "dashLength": 10,
+          "dashes": false,
+          "datasource": "$DS_PROMETHEUS",
+          "fieldConfig": {
+            "defaults": {
+              "custom": {}
+            },
+            "overrides": []
+          },
+          "fill": 1,
+          "fillGradient": 0,
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 12,
+            "y": 23
+          },
+          "hiddenSeries": false,
+          "id": 48,
+          "legend": {
+            "avg": false,
+            "current": false,
+            "max": false,
+            "min": false,
+            "show": false,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null",
+          "options": {
+            "alertThreshold": true
+          },
+          "percentage": false,
+          "pluginVersion": "7.2.1",
+          "pointradius": 2,
+          "points": false,
+          "renderer": "flot",
+          "seriesOverrides": [],
+          "spaceLength": 10,
+          "stack": true,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "sum(rate(fluentbit_filter_add_records_total{pod=~\"$pod\"}[5m])) by (pod, instance, name)",
+              "interval": "",
+              "legendFormat": "{{ pod }} / {{ name }}",
+              "refId": "A"
+            }
+          ],
+          "thresholds": [],
+          "timeFrom": null,
+          "timeRegions": [],
+          "timeShift": null,
+          "title": "Filter Add",
+          "tooltip": {
+            "shared": true,
+            "sort": 0,
+            "value_type": "individual"
+          },
+          "type": "graph",
+          "xaxis": {
+            "buckets": null,
+            "mode": "time",
+            "name": null,
+            "show": true,
+            "values": []
+          },
+          "yaxes": [
+            {
+              "format": "short",
+              "label": "",
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            },
+            {
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            }
+          ],
+          "yaxis": {
+            "align": false,
+            "alignLevel": null
+          }
+        },
+        {
+          "collapsed": false,
+          "datasource": null,
+          "gridPos": {
+            "h": 1,
+            "w": 24,
+            "x": 0,
+            "y": 31
+          },
+          "id": 53,
+          "panels": [],
+          "title": "Kubernetes metrics",
+          "type": "row"
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "dashLength": 10,
+          "dashes": false,
+          "datasource": "$DS_PROMETHEUS",
+          "fieldConfig": {
+            "defaults": {
+              "custom": {}
+            },
+            "overrides": []
+          },
+          "fill": 1,
+          "fillGradient": 0,
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 0,
+            "y": 32
+          },
+          "hiddenSeries": false,
+          "id": 51,
+          "legend": {
+            "avg": false,
+            "current": false,
+            "max": false,
+            "min": false,
+            "show": false,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null",
+          "options": {
+            "alertThreshold": true
+          },
+          "percentage": false,
+          "pluginVersion": "7.2.1",
+          "pointradius": 2,
+          "points": false,
+          "renderer": "flot",
+          "seriesOverrides": [
+            {
+              "alias": "/.* request/",
+              "color": "#F2CC0C",
+              "fill": 0
+            }
+          ],
+          "spaceLength": 10,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "container_memory_working_set_bytes{pod=~\".*name-fluent-bit.*\",pod=~\"$pod\", image!=\"\", container!=\"POD\"}\n",
+              "interval": "",
+              "legendFormat": "{{ pod }}",
+              "refId": "A"
+            },
+            {
+              "expr": "avg(kube_pod_container_resource_requests_memory_bytes{pod=~\".*name-fluent-bit.*\",pod=~\"$pod\"}) by (pod)",
+              "interval": "",
+              "legendFormat": "{{ pod }} request",
+              "refId": "B"
+            }
+          ],
+          "thresholds": [],
+          "timeFrom": null,
+          "timeRegions": [],
+          "timeShift": null,
+          "title": "Memory Usage",
+          "tooltip": {
+            "shared": true,
+            "sort": 0,
+            "value_type": "individual"
+          },
+          "type": "graph",
+          "xaxis": {
+            "buckets": null,
+            "mode": "time",
+            "name": null,
+            "show": true,
+            "values": []
+          },
+          "yaxes": [
+            {
+              "format": "decbytes",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            },
+            {
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            }
+          ],
+          "yaxis": {
+            "align": false,
+            "alignLevel": null
+          }
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "dashLength": 10,
+          "dashes": false,
+          "datasource": "$DS_PROMETHEUS",
+          "fieldConfig": {
+            "defaults": {
+              "custom": {}
+            },
+            "overrides": []
+          },
+          "fill": 1,
+          "fillGradient": 0,
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 12,
+            "y": 32
+          },
+          "hiddenSeries": false,
+          "id": 50,
+          "legend": {
+            "avg": false,
+            "current": false,
+            "max": false,
+            "min": false,
+            "show": false,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null",
+          "options": {
+            "alertThreshold": true
+          },
+          "percentage": false,
+          "pluginVersion": "7.2.1",
+          "pointradius": 2,
+          "points": false,
+          "renderer": "flot",
+          "seriesOverrides": [
+            {
+              "alias": "/.* request/",
+              "color": "#F2CC0C",
+              "fill": 0
+            }
+          ],
+          "spaceLength": 10,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "rate(container_cpu_usage_seconds_total{pod=~\".*name-fluent-bit.*\",pod=~\"$pod\",image!=\"\",container!=\"POD\"}[5m])",
+              "interval": "",
+              "legendFormat": "{{ pod }}",
+              "refId": "A"
+            },
+            {
+              "expr": "avg(kube_pod_container_resource_requests_cpu_cores{pod=~\"$pod\"}) by (pod)",
+              "interval": "",
+              "legendFormat": "{{ pod }} request",
+              "refId": "B"
+            }
+          ],
+          "thresholds": [],
+          "timeFrom": null,
+          "timeRegions": [],
+          "timeShift": null,
+          "title": "CPU Usage",
+          "tooltip": {
+            "shared": true,
+            "sort": 0,
+            "value_type": "individual"
+          },
+          "type": "graph",
+          "xaxis": {
+            "buckets": null,
+            "mode": "time",
+            "name": null,
+            "show": true,
+            "values": []
+          },
+          "yaxes": [
+            {
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            },
+            {
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            }
+          ],
+          "yaxis": {
+            "align": false,
+            "alignLevel": null
+          }
+        }
+      ],
+      "refresh": "5s",
+      "schemaVersion": 26,
+      "style": "dark",
+      "tags": [],
+      "templating": {
+        "list": [
+          {
+            "current": {
+              "selected": true,
+              "text": "prometheus",
+              "value": "prometheus"
+            },
+            "hide": 0,
+            "includeAll": false,
+            "label": "Datasource",
+            "multi": false,
+            "name": "DS_PROMETHEUS",
+            "options": [],
+            "query": "prometheus",
+            "queryValue": "",
+            "refresh": 1,
+            "regex": "",
+            "skipUrlSync": false,
+            "type": "datasource"
+          },
+          {
+            "allValue": null,
+            "current": {},
+            "datasource": "$DS_PROMETHEUS",
+            "definition": "label_values(kube_pod_info{pod=~\".*name-fluent-bit.*\"}, pod)",
+            "hide": 0,
+            "includeAll": true,
+            "label": "pod",
+            "multi": false,
+            "name": "pod",
+            "options": [],
+            "query": "label_values(kube_pod_info{pod=~\".*name-fluent-bit.*\"}, pod)",
+            "refresh": 2,
+            "regex": "",
+            "skipUrlSync": false,
+            "sort": 0,
+            "tagValuesQuery": "",
+            "tags": [],
+            "tagsQuery": "",
+            "type": "query",
+            "useTags": false
+          }
+        ]
+      },
+      "time": {
+        "from": "now-15m",
+        "to": "now"
+      },
+      "timepicker": {
+        "refresh_intervals": [
+          "5s",
+          "10s",
+          "30s",
+          "1m",
+          "5m",
+          "15m",
+          "30m",
+          "1h",
+          "2h",
+          "1d"
+        ],
+        "time_options": [
+          "5m",
+          "15m",
+          "1h",
+          "6h",
+          "12h",
+          "24h",
+          "2d",
+          "7d",
+          "30d"
+        ]
+      },
+      "timezone": "",
+      "title": "Kyma / Telemetry / Fluent Bit",
+      "uid": "name-fluent-bit",
+      "version": 2
+    }
+---
+# Source: telemetry/charts/fluent-bit/templates/configmap.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: name-fluent-bit
+  labels:
+    helm.sh/chart: fluent-bit-0.16.2
+    app.kubernetes.io/name: fluent-bit
+    app.kubernetes.io/instance: name
+    app.kubernetes.io/version: "1.8.3"
+    app.kubernetes.io/managed-by: Helm
+data:
+  custom_parsers.conf: |
+    [PARSER]
+        Name docker_no_time
+        Format json
+        Time_Keep Off
+        Time_Key time
+        Time_Format %Y-%m-%dT%H:%M:%S.%L
+    
+  fluent-bit.conf: |
+    [SERVICE]
+        Daemon Off
+        Flush 1
+        Log_Level warn
+        Parsers_File parsers.conf
+        Parsers_File custom_parsers.conf
+        Parsers_File dynamic-parsers/parsers.conf
+        HTTP_Server On
+        HTTP_Listen 0.0.0.0
+        HTTP_Port 2020
+        Health_Check On
+        storage.path /data/log/flb-storage/
+        storage.metrics on
+    
+    [INPUT]
+        Name tail
+        Path /var/log/containers/*.log
+        multiline.parser docker, cri
+        Tag kube.*
+        Mem_Buf_Limit 5MB
+        Skip_Long_Lines On
+        Refresh_Interval 10
+        DB /data/flb_kube_loki.db
+        storage.type filesystem
+    
+    [FILTER]
+        Name kubernetes
+        Match kube.*
+        Merge_Log On
+        K8S-Logging.Parser On
+        K8S-Logging.Exclude On
+        Buffer_Size 1MB
+    
+    [OUTPUT]
+        Name null
+        Match *
+    
+    @INCLUDE dynamic/*.conf
+---
+# Source: telemetry/charts/fluent-bit/templates/clusterrole.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: name-fluent-bit
+  labels:
+    helm.sh/chart: fluent-bit-0.16.2
+    app.kubernetes.io/name: fluent-bit
+    app.kubernetes.io/instance: name
+    app.kubernetes.io/version: "1.8.3"
+    app.kubernetes.io/managed-by: Helm
+rules:
+  - apiGroups:
+      - ""
+    resources:
+      - namespaces
+      - pods
+    verbs:
+      - get
+      - list
+      - watch
+---
+# Source: telemetry/charts/operator/templates/logpipeline_editor_role.yaml
+# permissions for end users to edit logpipelines.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: logpipeline-editor-role
+  namespace: important-deployment-system
+rules:
+- apiGroups:
+  - telemetry.kyma-project.io
+  resources:
+  - logpipelines
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - telemetry.kyma-project.io
+  resources:
+  - logpipelines/status
+  verbs:
+  - get
+---
+# Source: telemetry/charts/operator/templates/logpipeline_viewer_role.yaml
+# permissions for end users to view logpipelines.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: logpipeline-viewer-role
+  namespace: important-deployment-system
+rules:
+- apiGroups:
+  - telemetry.kyma-project.io
+  resources:
+  - logpipelines
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - telemetry.kyma-project.io
+  resources:
+  - logpipelines/status
+  verbs:
+  - get
+---
+# Source: telemetry/charts/operator/templates/role.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: name-operator-manager-role
+  namespace: important-deployment-system
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - configmaps
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - ""
+  resources:
+  - secrets
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - apps
+  resources:
+  - daemonsets
+  verbs:
+  - get
+  - list
+  - patch
+  - watch
+- apiGroups:
+  - telemetry.kyma-project.io
+  resources:
+  - logpipelines
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - telemetry.kyma-project.io
+  resources:
+  - logpipelines/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - telemetry.kyma-project.io
+  resources:
+  - logpipelines/status
+  verbs:
+  - get
+  - patch
+  - update
+---
+# Source: telemetry/charts/fluent-bit/templates/clusterrolebinding.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: name-fluent-bit
+  labels:
+    helm.sh/chart: fluent-bit-0.16.2
+    app.kubernetes.io/name: fluent-bit
+    app.kubernetes.io/instance: name
+    app.kubernetes.io/version: "1.8.3"
+    app.kubernetes.io/managed-by: Helm
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: name-fluent-bit
+subjects:
+  - kind: ServiceAccount
+    name: name-fluent-bit
+    namespace: important-deployment-system
+---
+# Source: telemetry/charts/operator/templates/role-binding.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: name-operator-manager-rolebinding
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: name-operator-manager-role
+subjects:
+- kind: ServiceAccount
+  name: name-operator
+  namespace: important-deployment-system
+---
+# Source: telemetry/charts/operator/templates/leader-election-role.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: name-operator-leader-election-role
+  namespace: important-deployment-system
+rules:
+  - apiGroups:
+      - ""
+    resources:
+      - configmaps
+    verbs:
+      - get
+      - list
+      - watch
+      - create
+      - update
+      - patch
+      - delete
+  - apiGroups:
+      - coordination.k8s.io
+    resources:
+      - leases
+    verbs:
+      - get
+      - list
+      - watch
+      - create
+      - update
+      - patch
+      - delete
+  - apiGroups:
+      - ""
+    resources:
+      - events
+    verbs:
+      - create
+      - patch
+---
+# Source: telemetry/charts/operator/templates/leader-election-role-binding.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: name-operator-leader-election-rolebinding
+  namespace: important-deployment-system
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: name-operator-leader-election-role
+subjects:
+- kind: ServiceAccount
+  name: name-operator
+  namespace: important-deployment-system
+---
+# Source: telemetry/charts/fluent-bit/templates/service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: name-fluent-bit
+  labels:
+    helm.sh/chart: fluent-bit-0.16.2
+    app.kubernetes.io/name: fluent-bit
+    app.kubernetes.io/instance: name
+    app.kubernetes.io/version: "1.8.3"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  type: ClusterIP
+  ports:
+    - port: 2020
+      targetPort: http
+      protocol: TCP
+      name: http
+    - containerPort: 2021
+      name: http-exporter-metrics
+      port: 2021
+      protocol: TCP
+  selector:
+    app.kubernetes.io/name: fluent-bit
+    app.kubernetes.io/instance: name
+---
+# Source: telemetry/charts/operator/templates/service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: name-operator-metrics
+  labels:
+    app.kubernetes.io/name: operator
+    app.kubernetes.io/instance: name
+    kyma-project.io/component: controller
+    control-plane: telemetry-operator
+spec:
+  type: ClusterIP
+  ports:
+    - port: 8080
+      targetPort: 8080
+      protocol: TCP
+      name: http-metrics
+  selector:
+      app.kubernetes.io/name: operator
+      app.kubernetes.io/instance: name
+      kyma-project.io/component: controller
+      control-plane: telemetry-operator
+---
+# Source: telemetry/charts/operator/templates/webhook-service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: name-operator-webhook
+  labels:
+    app.kubernetes.io/name: operator
+    app.kubernetes.io/instance: name
+    kyma-project.io/component: controller
+    control-plane: telemetry-operator
+spec:
+  ports:
+    - port: 443
+      protocol: TCP
+      targetPort: 9443
+  selector:
+      app.kubernetes.io/name: operator
+      app.kubernetes.io/instance: name
+      kyma-project.io/component: controller
+      control-plane: telemetry-operator
+---
+# Source: telemetry/charts/fluent-bit/templates/daemonset.yaml
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: name-fluent-bit
+  labels:
+    helm.sh/chart: fluent-bit-0.16.2
+    app.kubernetes.io/name: fluent-bit
+    app.kubernetes.io/instance: name
+    app.kubernetes.io/version: "1.8.3"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: fluent-bit
+      app.kubernetes.io/instance: name
+  template:
+    metadata:
+      annotations:
+        checksum/config: 94e347453d291a3513e2d52120c56b347b9b4acfeea69c22915a5e41f9e53209
+        checksum/luascripts: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+      labels:
+        app.kubernetes.io/name: fluent-bit
+        app.kubernetes.io/instance: name
+    spec:
+      serviceAccountName: name-fluent-bit
+      priorityClassName: kyma-system-priority
+      hostNetwork: false
+      dnsPolicy: ClusterFirst
+      initContainers:
+        - name: prep-fluent-bit-config
+          image: "eu.gcr.io/kyma-project/external/busybox:1.34.1"
+          command: ['sh', '-c', 'cp /main/* /fluent-bit/etc/ && mkdir -p /fluent-bit/etc/dynamic/ && cp /dynamic/* /fluent-bit/etc/dynamic && mkdir -p /fluent-bit/etc/dynamic-parsers/ && cp /dynamic-parsers/* /fluent-bit/etc/dynamic-parsers || touch /fluent-bit/etc/dynamic/empty.conf']
+          volumeMounts:
+          - mountPath: /fluent-bit/etc/
+            name: shared-fluent-bit-config
+          - mountPath: /main/fluent-bit.conf
+            name: config
+            subPath: fluent-bit.conf
+          - mountPath: /dynamic
+            name: dynamic-config
+          - mountPath: /dynamic-parsers
+            name: dynamic-parsers-config
+      containers:
+        - name: fluent-bit
+          image: "eu.gcr.io/kyma-project/tpi/fluent-bit:1.9.3-39c7ed70"
+          imagePullPolicy: IfNotPresent
+          envFrom:
+            - secretRef:
+                name: telemetry-fluent-bit-env
+                optional: true
+          ports:
+            - name: http
+              containerPort: 2020
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http
+          readinessProbe:
+            httpGet:
+              path: /api/v1/health
+              port: http
+          resources:
+            limits:
+              cpu: 400m
+              memory: 256Mi
+            requests:
+              cpu: 20m
+              memory: 50Mi
+          volumeMounts:
+            - mountPath: /fluent-bit/etc
+              name: shared-fluent-bit-config
+            - mountPath: /fluent-bit/etc/fluent-bit.conf
+              name: config
+              subPath: fluent-bit.conf
+            - mountPath: /fluent-bit/etc/custom_parsers.conf
+              name: config
+              subPath: custom_parsers.conf
+            - mountPath: /var/log
+              name: varlog
+            - mountPath: /var/lib/docker/containers
+              name: varlibdockercontainers
+              readOnly: true
+            - mountPath: /data
+              name: varfluentbit
+            - mountPath: /files
+              name: dynamic-files
+        - name: exporter
+          image: lindnerb/exporter:latest
+          env:
+            - name: MAX_FSBUFFER_SIZE
+              value: 10000000
+          volumeMounts:
+            - name: varfluentbit
+              mountPath: /data
+      volumes:
+        - name: config
+          configMap:
+            name: name-fluent-bit
+        - hostPath:
+            path: /var/log
+          name: varlog
+        - hostPath:
+            path: /var/lib/docker/containers
+          name: varlibdockercontainers
+        - emptyDir: {}
+          name: shared-fluent-bit-config
+        - configMap:
+            name: telemetry-fluent-bit-sections
+            optional: true
+          name: dynamic-config
+        - configMap:
+            name: telemetry-fluent-bit-parsers
+            optional: true
+          name: dynamic-parsers-config
+        - configMap:
+            name: telemetry-fluent-bit-files
+            optional: true
+          name: dynamic-files
+        - hostPath:
+            path: /var/telemetry-fluent-bit
+          name: varfluentbit
+---
+# Source: telemetry/charts/operator/templates/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: name-operator
+  labels:
+    helm.sh/chart: operator-0.2.0
+    app.kubernetes.io/name: operator
+    app.kubernetes.io/instance: name
+    kyma-project.io/component: controller
+    app.kubernetes.io/managed-by: Helm
+    control-plane: telemetry-operator
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: operator
+      app.kubernetes.io/instance: name
+      kyma-project.io/component: controller
+      control-plane: telemetry-operator
+  template:
+    metadata:
+      annotations:
+        sidecar.istio.io/inject: "false"
+      labels:
+        app.kubernetes.io/name: operator
+        app.kubernetes.io/instance: name
+        kyma-project.io/component: controller
+        control-plane: telemetry-operator
+    spec:
+      serviceAccountName: name-operator
+      terminationGracePeriodSeconds: 10
+      securityContext:
+        runAsNonRoot: true
+      containers:
+        - command:
+            - /manager
+          args:
+            - --leader-elect
+            - --cm-name=name-fluent-bit
+            - --sections-cm-name=name-fluent-bit-sections
+            - --parser-cm-name=name-fluent-bit-parsers
+            - --ds-name=name-fluent-bit
+            - --env-secret=name-fluent-bit-env
+            - --files-cm=name-fluent-bit-files
+            - --fluent-bit-ns=important-deployment-system
+            - --allowed-filter-plugins=
+            - --allowed-output-plugins=grafana-loki,http,forward
+          name: manager
+          ports:
+          - containerPort: 9443
+            protocol: TCP
+          securityContext:
+            allowPrivilegeEscalation: false
+          image: "eu.gcr.io/kyma-project/telemetry-operator:5bacf9bf"
+          imagePullPolicy: IfNotPresent
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 8081
+            initialDelaySeconds: 15
+            periodSeconds: 20
+          readinessProbe:
+            httpGet:
+              path: /readyz
+              port: 8081
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          resources:
+            limits:
+              cpu: 100m
+              memory: 300Mi
+            requests:
+              cpu: 100m
+              memory: 200Mi
+          env:
+            - name: APP_LOG_FORMAT
+              value: "json"
+            - name: APP_LOG_LEVEL
+              value: "info"
+          volumeMounts:
+          - mountPath: /var/run/telemetry-webhook
+            name: telemetry-webhook-cert
+            readOnly: true
+      volumes:
+      - name: telemetry-webhook-cert
+        secret:
+          secretName: name-operator-webhook-cert
+          items:
+          - key: tls.crt
+            path: tls.crt
+          - key: tls.key
+            path: tls.key
+---
+# Source: telemetry/charts/fluent-bit/templates/servicemonitor.yaml
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: name-fluent-bit
+  labels:
+    helm.sh/chart: fluent-bit-0.16.2
+    app.kubernetes.io/name: fluent-bit
+    app.kubernetes.io/instance: name
+    app.kubernetes.io/version: "1.8.3"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  endpoints:
+    - port: http
+      path: /api/v1/metrics/prometheus
+      ## scheme: HTTP scheme to use for scraping. Can be used with `tlsConfig` for example if using istio mTLS.
+      scheme: https
+      ## tlsConfig: TLS configuration to use when scraping the endpoint. For example if using istio mTLS.
+      ## Of type: https://github.com/coreos/prometheus-operator/blob/master/Documentation/api.md#tlsconfig
+      tlsConfig:
+        caFile: /etc/prometheus/secrets/istio.default/root-cert.pem
+        certFile: /etc/prometheus/secrets/istio.default/cert-chain.pem
+        keyFile: /etc/prometheus/secrets/istio.default/key.pem
+        insecureSkipVerify: true  # Prometheus does not support Istio security naming, thus skip verifying target pod ceritifcate
+    - path: /metrics
+      port: http-exporter-metrics
+      scheme: https
+      tlsConfig:
+        caFile: /etc/prometheus/secrets/istio.default/root-cert.pem
+        certFile: /etc/prometheus/secrets/istio.default/cert-chain.pem
+        insecureSkipVerify: true
+        keyFile: /etc/prometheus/secrets/istio.default/key.pem
+  namespaceSelector:
+    matchNames:
+      - important-deployment-system
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: fluent-bit
+      app.kubernetes.io/instance: name
+---
+# Source: telemetry/charts/operator/templates/servicemonitor.yaml
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  labels:
+    control-plane: telemetry-operator
+  name: name-operator-metrics
+  namespace: important-deployment-system
+spec:
+  endpoints:
+    - path: /metrics
+      port: http-metrics
+      metricRelabelings:
+        - action: keep
+          regex: ^(go_gc_duration_seconds|go_goroutines|go_memstats_alloc_bytes|go_memstats_heap_alloc_bytes|go_memstats_heap_inuse_bytes|go_memstats_heap_sys_bytes|go_memstats_stack_inuse_bytes|go_threads|http_requests_total|process_cpu_seconds_total|process_max_fds|process_open_fds|process_resident_memory_bytes|process_start_time_seconds|process_virtual_memory_bytes|rest_client_requests_total|workqueue_adds_total|workqueue_depth|workqueue_queue_duration_seconds_bucket)$
+          sourceLabels:
+          - __name__
+  selector:
+    matchLabels:
+      control-plane: telemetry-operator
+---
+# Source: telemetry/charts/operator/templates/validation_webhook.yaml
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingWebhookConfiguration
+metadata:
+  labels:
+    helm.sh/chart: operator-0.2.0
+    app.kubernetes.io/name: operator
+    app.kubernetes.io/instance: name
+    kyma-project.io/component: controller
+    app.kubernetes.io/managed-by: Helm
+    control-plane: telemetry-operator
+  name: validation.webhook.telemetry.kyma-project.io
+webhooks:
+- admissionReviewVersions:
+  - v1beta1
+  - v1
+  clientConfig:
+    caBundle: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSURRRENDQWlpZ0F3SUJBZ0lSQU1tMlRzK1llbjBQd215ZlF3M1pGOGt3RFFZSktvWklodmNOQVFFTEJRQXcKS2pFb01DWUdBMVVFQXhNZmRHVnNaVzFsZEhKNUxYWmhiR2xrWVhScGJtY3RkMlZpYUc5dmF5MWpZVEFlRncweQpNakExTWpVeE16VXpOVFJhRncwek1qQTFNakl4TXpVek5UUmFNQ294S0RBbUJnTlZCQU1USDNSbGJHVnRaWFJ5CmVTMTJZV3hwWkdGMGFXNW5MWGRsWW1odmIyc3RZMkV3Z2dFaU1BMEdDU3FHU0liM0RRRUJBUVVBQTRJQkR3QXcKZ2dFS0FvSUJBUURPTFpMZDMzeVUwK000anlNalZQdER5ODNaeW1SZUxuSVdHb05Jd1dINFFNT2phUE9MR1dmUgp1cEdTUDl6aEYwYmdSSlNvV2VFdTRRRjZGeE9UV2FUdzBCSloyTVBNTmxXNy9PblFHMU1wZnBXaGphYy82TU1UClVTa1BBVndMSDVBMFlncXM5ZFVBQVlxcVRTUnlPRWZsZloyaTRscWVnOWNLVm1vTlVpN2lsL1FqZCtjcTU4bnQKaGh4ZDllaTduQWtzNWhxL052Y2oxTnQ3VHdUOEZwYjlZWWg5Rzk1OUZ3YUFOT1NRRHV2eDVTWURhS056bkVQVApWRjRTVG9EZTFNZjJUQjJqT0w5a2t6VVNodE5ZU0VTaG5yT1ZHWVpGS3FIL1pTWVgwbUduV1c2bWNmdlBFVy9DCnVEMVNHQWs1cU45NE1WZVp0UU0wUmlzdFM3MkoxY0duQWdNQkFBR2pZVEJmTUE0R0ExVWREd0VCL3dRRUF3SUMKcERBZEJnTlZIU1VFRmpBVUJnZ3JCZ0VGQlFjREFRWUlLd1lCQlFVSEF3SXdEd1lEVlIwVEFRSC9CQVV3QXdFQgovekFkQmdOVkhRNEVGZ1FVVU5qSGxnbit4MHBibTEwREZTVVpIM2Zscy9Nd0RRWUpLb1pJaHZjTkFRRUxCUUFECmdnRUJBSjVqNi9LK0hpb1c3cU1PZE5lRXRDVFVoZTB0TnhsQWMycUthb0UrU1FJUm1iNGxCUkc3VG5hT1ltSnQKRDZOYnZkd1VwVDh1YVU0UHN4Szk4dVdsNWV5S0xIanFWUVJnYmFhVURYSkJ2YkxSSWZBTVUrMG5zcVVVOSs4RwpSNGRZL3JGZGhMWHhvRTBMZ25nYnJmQmltcCt1Qkplc2Y4S2Z3b1VsQTQxRWFRK2Jld2JOWVpTSjM5VVQ4S1FVCkFrMjl0Wi9HSGlxc0o0UnllUG5ZSmp0eHRNQnBVMGQzV1Jaa3RQd0JVRkZGSVJlUVYxblBpcnhDelpZRjFWNDEKb1Z0clJqSTErODh1cEtUeGVvL0d4N05ILzhBandLOHhwendteXpTUmNISmliZHdNYWg2Wlo0R2hGbmwyQll5WQoya2hmbDR6TnpRNFFQT3dqUWQ3VUxnbEtaUDg9Ci0tLS0tRU5EIENFUlRJRklDQVRFLS0tLS0K
+    service:
+      name: name-operator-webhook
+      namespace: important-deployment-system
+      path: /validate-logpipeline
+      port: 443
+  failurePolicy: Fail
+  matchPolicy: Exact
+  name: validation.webhook.telemetry.kyma-project.io
+  rules:
+  - apiGroups:
+    - telemetry.kyma-project.io
+    apiVersions:
+    - v1alpha1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - logpipelines
+    scope: '*'
+  sideEffects: None
+  timeoutSeconds: 30
+---
+# Source: telemetry/charts/fluent-bit/templates/tests/test-connection.yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "name-fluent-bit-test-connection"
+  labels:
+    helm.sh/chart: fluent-bit-0.16.2
+    app.kubernetes.io/name: fluent-bit
+    app.kubernetes.io/instance: name
+    app.kubernetes.io/version: "1.8.3"
+    app.kubernetes.io/managed-by: Helm
+  annotations:
+    "helm.sh/hook": test-success
+spec:
+  containers:
+    - name: wget
+      image: "eu.gcr.io/kyma-project/external/busybox:1.34.1"
+      imagePullPolicy: Always
+      command: ['wget']
+      args: ['name-fluent-bit:2020']
+  restartPolicy: Never
