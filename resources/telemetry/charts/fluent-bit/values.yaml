@@ -209,6 +209,10 @@ podLabels: {}
 
 priorityClassName: ""
 
+env: []
+#  - name: FOO
+#    value: "bar"
+
 # The envWithTpl array below has the same usage as "env", but is using the tpl function to support templatable string.
 # This can be useful when you want to pass dynamic values to the Chart using the helm argument "--set <variable>=<value>"
 # https://helm.sh/docs/howto/charts_tips_and_tricks/#using-the-tpl-function
