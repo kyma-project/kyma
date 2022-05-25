@@ -143,17 +143,18 @@ The operation was successful if the command returns the **uid** of your Service.
 
 1. From the left navigation, go to **Discovery and Network > Services**.
 2. Click on **Create Service +**.
-3. In the **Create Service** view, paste the following values to your YAML file:
+3. In the **Create Service** view, paste the following values to your YAML file:  
+
    ```yaml
    apiVersion: v1
    kind: Service
    metadata:
-     name: 'orders-service'
+     name: orders-service
    spec:
      selector:
-       app: 'orders-service'
+       app: orders-service
      ports:
-       - protocol: 'TCP'
+       - protocol: TCP
          port: 80
          targetPort: 8080
     ```
