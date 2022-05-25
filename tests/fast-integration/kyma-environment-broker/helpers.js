@@ -112,11 +112,12 @@ async function ensureOperationSucceeded(keb, kcp, instanceID, operationID, timeo
   return res;
 }
 
-async function getShootName(keb, instanceID) {
-  const resp = await keb.getRuntime(instanceID);
-  expect(resp.data).to.be.lengthOf(1);
+async function getShootName(kcp, instanceID) {
+  const runtimeStatus = await kcp.getRuntimeStatusOperations(instanceID);
+  const objRuntimeStatus = JSON.parse(runtimeStatus);
+  expect(objRuntimeStatus).to.have.nested.property('data[0].shootName').not.empty;
 
-  return resp.data[0].shootName;
+  return objRuntimeStatus.data[0].shootName;
 }
 
 async function ensureValidOIDCConfigInCustomerFacingKubeconfig(keb, instanceID, oidcConfig) {

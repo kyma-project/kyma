@@ -17,7 +17,7 @@ const {
 } = require('../../../fast-integration/utils');
 const {BTPOperatorCreds} = require('../../../fast-integration/smctl/helpers');
 const {unregisterKymaFromCompass} = require('../../../fast-integration/compass');
-const {getSKRConfig} = require('../../../fast-integration/skr-test/helpers');
+// const {getSKRConfig} = require('../../../fast-integration/skr-test/helpers');
 
 class SKRSetup {
     private static _skipProvisioning = false;
@@ -46,7 +46,7 @@ class SKRSetup {
                     withInstanceID(instanceID),
                     withSuffix(suffix),
                 );
-                const shootName = await getShootName(keb, instanceID);
+                const shootName = await getShootName(this.kcp, instanceID);
                 console.log("Shoot name", shootName);
                 this.shoot = await gardener.getShoot(shootName);
 
