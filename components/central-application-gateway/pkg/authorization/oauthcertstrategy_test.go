@@ -1,9 +1,10 @@
 package authorization
 
 import (
-	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/apperrors"
 	"net/http"
 	"testing"
+
+	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/apperrors"
 
 	oauthMocks "github.com/kyma-project/kyma/components/central-application-gateway/pkg/authorization/oauth/mocks"
 	"github.com/kyma-project/kyma/components/central-application-gateway/pkg/httpconsts"
