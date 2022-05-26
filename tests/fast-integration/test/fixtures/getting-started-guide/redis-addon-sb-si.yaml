@@ -6,23 +6,3 @@ metadata:
 spec:
   repositories:
     - url: https://github.com/kyma-project/addons/releases/download/0.12.0/index-testing.yaml
----
-apiVersion: servicecatalog.k8s.io/v1beta1
-kind: ServiceInstance
-metadata:
-  name: redis-service
-  namespace: orders-service
-spec:
-  serviceClassExternalName: redis
-  servicePlanExternalName: micro
-  parameters:
-    imagePullPolicy: Always
----
-apiVersion: servicecatalog.k8s.io/v1beta1
-kind: ServiceBinding
-metadata:
-  name: orders-service
-  namespace: orders-service
-spec:
-  instanceRef:
-    name: redis-service

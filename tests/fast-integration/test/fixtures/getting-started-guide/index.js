@@ -151,9 +151,6 @@ async function ensureGettingStartedTestFixture() {
 
 function getResourcePaths(namespace) {
   return [
-    `/apis/servicecatalog.kyma-project.io/v1alpha1/namespaces/${namespace}/servicebindingusages`,
-    `/apis/servicecatalog.k8s.io/v1beta1/namespaces/${namespace}/servicebindings`,
-    `/apis/servicecatalog.k8s.io/v1beta1/namespaces/${namespace}/serviceinstances`,
     `/apis/serverless.kyma-project.io/v1alpha1/namespaces/${namespace}/functions`,
     `/apis/addons.kyma-project.io/v1alpha1/namespaces/${namespace}/addonsconfigurations`,
     `/apis/gateway.kyma-project.io/v1alpha1/namespaces/${namespace}/apirules`,
