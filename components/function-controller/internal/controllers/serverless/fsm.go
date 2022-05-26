@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"log"
 	"reflect"
 	"runtime"
 	"strings"
@@ -64,14 +63,14 @@ loop:
 			m.err = ctx.Err()
 			break loop
 		default:
-		log.Println("Next fn state:", runtime.FuncForPC(reflect.ValueOf(m.fn).Pointer()).Name())
+			m.log.Info("Next fn state:", runtime.FuncForPC(reflect.ValueOf(m.fn).Pointer()).Name())
 			m.fn = m.fn(ctx, m, &state)
 
 		}
 	}
 
-	log.Println("result: ", m.result.RequeueAfter, m.result.Requeue)
-	log.Println("err:", m.err)
+	m.log.Info("result", m.result.RequeueAfter, m.result.Requeue)
+	m.log.Info("err", m.err)
 
 	return m.result, m.err
 }
@@ -122,7 +121,7 @@ func buildStateFnGenericUpdateStatus(condition serverlessv1alpha1.Condition, rep
 		if !equalFunctionStatus(currentFunction.Status, s.instance.Status) {
 
 			if err := r.client.Status().Update(ctx, currentFunction); err != nil {
-				log.Printf("while updating function status: %s", err)
+				r.log.Warnf("while updating function status: %s", err)
 			}
 
 			r.statsCollector.UpdateReconcileStats(&s.instance, condition)

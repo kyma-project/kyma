@@ -1,12 +1,12 @@
 package main
 
 import (
-	"errors"
 	"fmt"
 	"os"
 	"time"
 
 	"sigs.k8s.io/controller-runtime/pkg/healthz"
+	"sigs.k8s.io/controller-runtime/pkg/webhook"
 
 	ctrl "sigs.k8s.io/controller-runtime"
 
@@ -77,7 +77,7 @@ func main() {
 	}
 
 	atomicLevel := zap.NewAtomicLevelAt(logLevel)
-	zapLogger := ctrlzap.NewRaw(ctrlzap.UseDevMode(true), ctrlzap.Level(&atomicLevel))
+	zapLogger := ctrlzap.NewRaw(ctrlzap.Level(&atomicLevel))
 	ctrl.SetLogger(zapr.NewLogger(zapLogger))
 
 	setupLog.Info("Generating Kubernetes client config")
@@ -107,13 +107,13 @@ func main() {
 	serviceAccountSvc := k8s.NewServiceAccountService(resourceClient, config.Kubernetes)
 	roleSvc := k8s.NewRoleService(resourceClient, config.Kubernetes)
 	roleBindingSvc := k8s.NewRoleBindingService(resourceClient, config.Kubernetes)
-	//
-	//mgr.GetWebhookServer().Register(
-	//	"/mutate-v1-secret",
-	//	&webhook.Admission{
-	//		Handler: k8s.NewRegistryWatcher(mgr.GetClient()),
-	//	},
-	//)
+
+	mgr.GetWebhookServer().Register(
+		"/mutate-v1-secret",
+		&webhook.Admission{
+			Handler: k8s.NewRegistryWatcher(mgr.GetClient()),
+		},
+	)
 
 	events := make(chan event.GenericEvent)
 	healthCh := make(chan bool)
@@ -208,6 +208,6 @@ func toZapLogLevel(level string) (zapcore.Level, error) {
 	case "error":
 		return zapcore.ErrorLevel, nil
 	default:
-		return 0, errors.New(fmt.Sprintf("Desired log level: %s not exist", level))
+		return 0, fmt.Errorf(fmt.Sprintf("Desired log level: %s not exist", level))
 	}
 }

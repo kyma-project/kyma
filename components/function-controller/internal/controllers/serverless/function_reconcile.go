@@ -2,7 +2,6 @@ package serverless
 
 import (
 	"context"
-	"fmt"
 	"reflect"
 	"time"
 
@@ -73,16 +72,16 @@ func (r *FunctionReconciler) SetupWithManager(mgr ctrl.Manager) (controller.Cont
 			MaxConcurrentReconciles: 1, // Build job scheduling mechanism requires this parameter to be set to 1. The mechanism is based on getting active and stateless jobs, concurrent reconciles makes it non deterministic . Value 1 removes data races while fetching list of jobs. https://github.com/kyma-project/kyma/issues/10037
 		}).
 		WithEventFilter(predicate.Funcs{UpdateFunc: func(event event.UpdateEvent) bool {
-			fmt.Println("old:", event.ObjectOld.GetName())
-			fmt.Println("new:", event.ObjectNew.GetName())
+			r.Log.Info("old", event.ObjectOld.GetName())
+			r.Log.Info("new:", event.ObjectNew.GetName())
 
 			oldFn, ok := event.ObjectOld.(*serverlessv1alpha1.Function)
 			if !ok {
 				v := reflect.ValueOf(oldFn)
-				fmt.Println("Can't cast:", v.Type())
+				r.Log.Info("Can't cast:", v.Type())
 				return true
 			}
-			
+
 			if oldFn == nil {
 				return false
 			}
@@ -90,7 +89,7 @@ func (r *FunctionReconciler) SetupWithManager(mgr ctrl.Manager) (controller.Cont
 			newFn, ok := event.ObjectNew.(*serverlessv1alpha1.Function)
 			if !ok {
 				v := reflect.ValueOf(newFn)
-				fmt.Println("Can't cast:", v.Type())
+				r.Log.Info("Can't cast:", v.Type())
 				return true
 			}
 			if newFn == nil {
@@ -98,7 +97,7 @@ func (r *FunctionReconciler) SetupWithManager(mgr ctrl.Manager) (controller.Cont
 			}
 
 			equalStasus := equalFunctionStatus(oldFn.Status, newFn.Status)
-			fmt.Println("Statuses are equal: ", equalStasus)
+			r.Log.Info("Statuses are equal: ", equalStasus)
 
 			return equalStasus
 		}}).
@@ -163,7 +162,7 @@ func (r *FunctionReconciler) Reconcile(ctx context.Context, request ctrl.Request
 	}
 
 	stateReconciler.result = ctrl.Result{
-		RequeueAfter: time.Second * 10,
+		RequeueAfter: time.Second * 5,
 	}
 
 	return stateReconciler.reconcile(ctx, instance)
