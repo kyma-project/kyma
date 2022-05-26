@@ -59,9 +59,6 @@ async function installRedisExample(options) {
 
   options = options || {};
 
-  debug(`Waiting for pod with label app=helm-broker...`);
-  await waitForPodWithLabel('app', 'helm-broker', 'kyma-system');
-
   const clusteraddonconfigurationPath = options.resourcesPath || join(__dirname,
       'fixtures', '01_clusteraddonconfiguration.yaml');
   debug(`Applying manifest ${clusteraddonconfigurationPath}`);
@@ -252,7 +249,6 @@ async function deploy() {
   await waitForPodWithLabel('app', 'service-broker-proxy-k8s', 'kyma-system');
 
   try {
-    await waitForClusterServiceBroker('helm-broker', 5 * 60 * 1000);
     await waitForClusterServiceBroker('sm-auditlog-api', 5 * 60 * 1000);
     await waitForClusterServiceBroker('sm-html5-apps-repo', 5 * 60 * 1000);
     await waitForClusterServiceBroker('sm-auditlog-management', 5 * 60 * 1000);
