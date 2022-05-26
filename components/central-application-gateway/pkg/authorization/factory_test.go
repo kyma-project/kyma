@@ -145,6 +145,54 @@ func TestStrategyFactory(t *testing.T) {
 		assert.Equal(t, "Bearer external", authHeader)
 	})
 
+	//TODO
+	t.Run("should create oauth with cert strategy", func(t *testing.T) {
+		// given
+		oauthClientMock := &oauthMocks.Client{}
+		oauthClientMock.On("GetToken", "clientId", "clientSecret", "www.example.com/token", (*map[string][]string)(nil), (*map[string][]string)(nil)).Return("token", nil)
+
+		factory := authorizationStrategyFactory{oauthClient: oauthClientMock}
+		credentials := &Credentials{
+			OAuth: &OAuth{
+				ClientID:     "clientId",
+				ClientSecret: "clientSecret",
+				URL:          "www.example.com/token",
+			},
+		}
+
+		// when
+		strategy := factory.Create(credentials)
+
+		// then
+		require.NotNil(t, strategy)
+
+		// given
+		request, err := http.NewRequest("GET", "www.example.com", nil)
+		require.NoError(t, err)
+
+		// when
+		err = strategy.AddAuthorization(request, nil)
+
+		// then
+		authHeader := request.Header.Get(httpconsts.HeaderAuthorization)
+		assert.Nil(t, err)
+		assert.Equal(t, authHeader, "Bearer token")
+
+		// given
+		requestWithExternalToken, err := http.NewRequest("GET", "www.example.com", nil)
+		require.NoError(t, err)
+
+		requestWithExternalToken.Header.Set(httpconsts.HeaderAccessToken, "Bearer external")
+
+		// when
+		err = strategy.AddAuthorization(requestWithExternalToken, nil)
+
+		// then
+		authHeader = requestWithExternalToken.Header.Get(httpconsts.HeaderAuthorization)
+		assert.Nil(t, err)
+		assert.Equal(t, "Bearer external", authHeader)
+	})
+
 	t.Run("should create certificate gen strategy", func(t *testing.T) {
 		// given
 		oauthClientMock := &oauthMocks.Client{}
