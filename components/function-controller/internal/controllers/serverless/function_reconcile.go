@@ -2,6 +2,7 @@ package serverless
 
 import (
 	"context"
+	"log"
 	"time"
 
 	"go.uber.org/zap"
@@ -18,6 +19,8 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
+	"sigs.k8s.io/controller-runtime/pkg/event"
+	"sigs.k8s.io/controller-runtime/pkg/predicate"
 
 	"github.com/kyma-project/kyma/components/function-controller/internal/git"
 	"github.com/kyma-project/kyma/components/function-controller/internal/resource"
@@ -75,6 +78,12 @@ func (r *FunctionReconciler) SetupWithManager(mgr ctrl.Manager) (controller.Cont
 				&workqueue.BucketRateLimiter{Limiter: rate.NewLimiter(rate.Limit(10), 100)},
 			),
 			MaxConcurrentReconciles: 1, // Build job scheduling mechanism requires this parameter to be set to 1. The mechanism is based on getting active and stateless jobs, concurrent reconciles makes it non deterministic . Value 1 removes data races while fetching list of jobs. https://github.com/kyma-project/kyma/issues/10037
+		}).
+		WithEventFilter(predicate.Funcs{
+			UpdateFunc: func(e event.UpdateEvent) bool {
+				log.Println(e)
+				return true
+			},
 		}).
 		Build(r)
 }
@@ -134,6 +143,10 @@ func (r *FunctionReconciler) Reconcile(ctx context.Context, request ctrl.Request
 			docker: dockerCfg,
 		},
 		operator: r.gitOperator,
+	}
+
+	stateReconciler.result = ctrl.Result{
+		RequeueAfter: r.config.RequeueDuration,
 	}
 
 	return stateReconciler.reconcile(ctx, instance)

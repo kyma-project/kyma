@@ -16,7 +16,10 @@ WORKDIR ${BASE_APP_DIR}
 #
 COPY . ${BASE_APP_DIR}/
 
-RUN go build -ldflags "-s -w" -a -o manager cmd/manager/main.go \
+# Install Delve
+RUN go install github.com/go-delve/delve/cmd/dlv@latest
+
+RUN go build -gcflags "all=-N -l" -a -o manager cmd/manager/main.go \
     && mkdir /app \
     && mv ./manager /app/manager
 
@@ -32,10 +35,14 @@ RUN apk update --no-cache && apk upgrade --no-cache
 RUN apk add --no-cache --update --repository=http://dl-cdn.alpinelinux.org/alpine/edge/main openssl
 RUN apk add --no-cache --repository http://dl-cdn.alpinelinux.org/alpine/v3.14/community libgit2=${LIBGIT2_VERSION}
 
+# Allow delve to run on Alpine based containers.
+RUN apk add --no-cache libc6-compat
+
 LABEL source = git@github.com:kyma-project/kyma.git
 
 COPY --from=builder /app /app
 COPY --from=certs /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
 
-ENTRYPOINT ["/app/manager"]
+# Copy the delve executable to root
+COPY --from=builder /go/bin/dlv /
 

@@ -16,6 +16,10 @@ import (
 
 var fcManagedByLabel = map[string]string{serverlessv1alpha1.FunctionManagedByLabel: serverlessv1alpha1.FunctionControllerValue}
 
+var backoffLimitExceeded func(string) bool = func(reason string) bool {
+	return reason == "BackoffLimitExceeded"
+}
+
 // build state function that will check if a job responsible for building function image succeeded or failed;
 // if a job is not running start one
 func buildStateFnCheckImageJob(expectedJob batchv1.Job) stateFn {
@@ -27,17 +31,42 @@ func buildStateFnCheckImageJob(expectedJob batchv1.Job) stateFn {
 			return nil
 		}
 
+		jobLen := len(s.jobs.Items)
+
+		if jobLen == 0 {
+			return buildStateFnInlineCreateJob(expectedJob)
+		}
+
+		jobFailed := s.jobFailed(backoffLimitExceeded)
+		conditionStatus := getConditionStatus(
+			s.instance.Status.Conditions,
+			serverlessv1alpha1.ConditionBuildReady,
+		)
+
+		if jobFailed && conditionStatus == corev1.ConditionFalse {
+			return stateFnInlineDeleteJobs
+		}
+
+		if jobFailed {
+			r.result = ctrl.Result{
+				RequeueAfter: time.Minute,
+			}
+
+			condition := serverlessv1alpha1.Condition{
+				Type:               serverlessv1alpha1.ConditionBuildReady,
+				Status:             corev1.ConditionFalse,
+				LastTransitionTime: metav1.Now(),
+				Reason:             serverlessv1alpha1.ConditionReasonJobFailed,
+				Message:            fmt.Sprintf("Job %s failed, it will be re-run", s.jobs.Items[0].Name),
+			}
+			return buildStateFnUpdateStateFnFunctionCondition(condition)
+		}
+
 		s.image = s.buildImageAddress(r.cfg.docker.PullAddress)
 
 		jobChanged := s.fnJobChanged(expectedJob)
 		if !jobChanged {
 			return stateFnCheckDeployments
-		}
-
-		jobLen := len(s.jobs.Items)
-
-		if jobLen == 0 {
-			return buildStateFnInlineCreateJob(expectedJob)
 		}
 
 		if jobLen > 1 || !equalJobs(s.jobs.Items[0], expectedJob) {
@@ -172,13 +201,5 @@ func stateFnUpdateJobStatus(ctx context.Context, r *reconciler, s *systemState) 
 		return buildStateFnUpdateStateFnFunctionCondition(condition)
 	}
 
-	r.log.Info(fmt.Sprintf("job failed %q", jobName))
-	condition := serverlessv1alpha1.Condition{
-		Type:               serverlessv1alpha1.ConditionBuildReady,
-		Status:             corev1.ConditionFalse,
-		LastTransitionTime: metav1.Now(),
-		Reason:             serverlessv1alpha1.ConditionReasonJobFailed,
-		Message:            fmt.Sprintf("Job %s failed", jobName),
-	}
-	return buildStateFnUpdateStateFnFunctionCondition(condition)
+	return nil
 }
