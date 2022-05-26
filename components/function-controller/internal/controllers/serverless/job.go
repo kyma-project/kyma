@@ -38,18 +38,16 @@ func buildStateFnCheckImageJob(expectedJob batchv1.Job) stateFn {
 		}
 
 		jobFailed := s.jobFailed(backoffLimitExceeded)
+
 		conditionStatus := getConditionStatus(
 			s.instance.Status.Conditions,
 			serverlessv1alpha1.ConditionBuildReady,
 		)
 
-		if jobFailed && conditionStatus == corev1.ConditionFalse {
-			return stateFnInlineDeleteJobs
-		}
-
-		if jobFailed {
+		if jobFailed && conditionStatus == corev1.ConditionUnknown {
 			r.result = ctrl.Result{
-				RequeueAfter: time.Minute,
+				RequeueAfter: time.Minute * 1,
+				Requeue:      true,
 			}
 
 			condition := serverlessv1alpha1.Condition{
@@ -60,6 +58,10 @@ func buildStateFnCheckImageJob(expectedJob batchv1.Job) stateFn {
 				Message:            fmt.Sprintf("Job %s failed, it will be re-run", s.jobs.Items[0].Name),
 			}
 			return buildStateFnUpdateStateFnFunctionCondition(condition)
+		}
+
+		if jobFailed && conditionStatus == corev1.ConditionFalse {
+			return stateFnInlineDeleteJobs
 		}
 
 		s.image = s.buildImageAddress(r.cfg.docker.PullAddress)
