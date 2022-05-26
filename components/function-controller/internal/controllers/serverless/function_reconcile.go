@@ -2,7 +2,7 @@ package serverless
 
 import (
 	"context"
-	"log"
+	"fmt"
 	"time"
 
 	"go.uber.org/zap"
@@ -79,12 +79,32 @@ func (r *FunctionReconciler) SetupWithManager(mgr ctrl.Manager) (controller.Cont
 			),
 			MaxConcurrentReconciles: 1, // Build job scheduling mechanism requires this parameter to be set to 1. The mechanism is based on getting active and stateless jobs, concurrent reconciles makes it non deterministic . Value 1 removes data races while fetching list of jobs. https://github.com/kyma-project/kyma/issues/10037
 		}).
-		WithEventFilter(predicate.Funcs{
-			UpdateFunc: func(e event.UpdateEvent) bool {
-				log.Println(e)
+		WithEventFilter(predicate.Funcs{UpdateFunc: func(event event.UpdateEvent) bool {
+			fmt.Println("old:", event.ObjectOld.GetName())
+			fmt.Println("new:", event.ObjectNew.GetName())
+			oldFn, ok := event.ObjectOld.(*serverlessv1alpha1.Function)
+			if !ok {
+				fmt.Println("Can't cast ")
 				return true
-			},
-		}).
+			}
+			if oldFn == nil {
+				oldFn = &serverlessv1alpha1.Function{}
+			}
+
+			newFn, ok := event.ObjectNew.(*serverlessv1alpha1.Function)
+			if !ok {
+				fmt.Println("Can't cast ")
+				return true
+			}
+			if newFn == nil {
+				oldFn = &serverlessv1alpha1.Function{}
+			}
+
+			equalStasus := equalFunctionStatus(oldFn.Status, newFn.Status)
+			fmt.Println("Statuses are equal: ", equalStasus)
+
+			return equalStasus
+		}}).
 		Build(r)
 }
 
@@ -146,7 +166,8 @@ func (r *FunctionReconciler) Reconcile(ctx context.Context, request ctrl.Request
 	}
 
 	stateReconciler.result = ctrl.Result{
-		RequeueAfter: r.config.RequeueDuration,
+		Requeue:      true,
+		RequeueAfter: time.Second,
 	}
 
 	return stateReconciler.reconcile(ctx, instance)

@@ -5,6 +5,8 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"reflect"
+	"runtime"
 	"strings"
 	"time"
 
@@ -57,6 +59,7 @@ func (m *reconciler) reconcile(ctx context.Context, f serverlessv1alpha1.Functio
 
 loop:
 	for m.fn != nil {
+		log.Println("Next fn state:", runtime.FuncForPC(reflect.ValueOf(m.fn).Pointer()).Name())
 		select {
 		case <-ctx.Done():
 			m.err = ctx.Err()

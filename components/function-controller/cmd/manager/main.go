@@ -30,7 +30,6 @@ import (
 	ctrlzap "sigs.k8s.io/controller-runtime/pkg/log/zap"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 	"sigs.k8s.io/controller-runtime/pkg/source"
-	"sigs.k8s.io/controller-runtime/pkg/webhook"
 	// +kubebuilder:scaffold:imports
 )
 
@@ -47,7 +46,7 @@ func init() {
 }
 
 type config struct {
-	MetricsAddress            string `envconfig:"default=:8080"`
+	MetricsAddress            string `envconfig:"default=:8081"`
 	Healthz                   healthzConfig
 	LeaderElectionEnabled     bool   `envconfig:"default=false"`
 	LeaderElectionID          string `envconfig:"default=serverless-controller-leader-election-helper"`
@@ -108,13 +107,13 @@ func main() {
 	serviceAccountSvc := k8s.NewServiceAccountService(resourceClient, config.Kubernetes)
 	roleSvc := k8s.NewRoleService(resourceClient, config.Kubernetes)
 	roleBindingSvc := k8s.NewRoleBindingService(resourceClient, config.Kubernetes)
-
-	mgr.GetWebhookServer().Register(
-		"/mutate-v1-secret",
-		&webhook.Admission{
-			Handler: k8s.NewRegistryWatcher(mgr.GetClient()),
-		},
-	)
+	//
+	//mgr.GetWebhookServer().Register(
+	//	"/mutate-v1-secret",
+	//	&webhook.Admission{
+	//		Handler: k8s.NewRegistryWatcher(mgr.GetClient()),
+	//	},
+	//)
 
 	events := make(chan event.GenericEvent)
 	healthCh := make(chan bool)
