@@ -618,7 +618,7 @@ func (s *systemState) getGitBuildJobVolumeMounts(rtmConfig runtime.Config) []cor
 	return volumeMounts
 }
 
-func (s *systemState) jobFailed(check func(reason string) bool) bool {
+func (s *systemState) jobFailed(p func(reason string) bool) bool {
 	if len(s.jobs.Items) == 0 {
 		return false
 	}
@@ -628,7 +628,7 @@ func (s *systemState) jobFailed(check func(reason string) bool) bool {
 		isStatusTrue := condition.Status == corev1.ConditionTrue
 
 		if isFailedType && isStatusTrue {
-			return check(condition.Reason)
+			return p(condition.Reason)
 		}
 	}
 

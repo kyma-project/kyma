@@ -3,15 +3,13 @@ package serverless
 import (
 	"context"
 	"fmt"
+	"reflect"
 	"time"
 
 	"go.uber.org/zap"
 
 	"github.com/pkg/errors"
 	"golang.org/x/time/rate"
-	appsv1 "k8s.io/api/apps/v1"
-	autoscalingv1 "k8s.io/api/autoscaling/v1"
-	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/tools/record"
@@ -66,11 +64,6 @@ func (r *FunctionReconciler) SetupWithManager(mgr ctrl.Manager) (controller.Cont
 	return ctrl.NewControllerManagedBy(mgr).
 		Named("function-controller").
 		For(&serverlessv1alpha1.Function{}).
-		Owns(&corev1.ConfigMap{}).
-		Owns(&batchv1.Job{}).
-		Owns(&appsv1.Deployment{}).
-		Owns(&corev1.Service{}).
-		Owns(&autoscalingv1.HorizontalPodAutoscaler{}).
 		WithOptions(controller.Options{
 			RateLimiter: workqueue.NewMaxOfRateLimiter(
 				workqueue.NewItemExponentialFailureRateLimiter(r.config.GitFetchRequeueDuration, 300*time.Second),
@@ -82,22 +75,26 @@ func (r *FunctionReconciler) SetupWithManager(mgr ctrl.Manager) (controller.Cont
 		WithEventFilter(predicate.Funcs{UpdateFunc: func(event event.UpdateEvent) bool {
 			fmt.Println("old:", event.ObjectOld.GetName())
 			fmt.Println("new:", event.ObjectNew.GetName())
+
 			oldFn, ok := event.ObjectOld.(*serverlessv1alpha1.Function)
 			if !ok {
-				fmt.Println("Can't cast ")
+				v := reflect.ValueOf(oldFn)
+				fmt.Println("Can't cast:", v.Type())
 				return true
 			}
+			
 			if oldFn == nil {
-				oldFn = &serverlessv1alpha1.Function{}
+				return false
 			}
 
 			newFn, ok := event.ObjectNew.(*serverlessv1alpha1.Function)
 			if !ok {
-				fmt.Println("Can't cast ")
+				v := reflect.ValueOf(newFn)
+				fmt.Println("Can't cast:", v.Type())
 				return true
 			}
 			if newFn == nil {
-				newFn = &serverlessv1alpha1.Function{}
+				return false
 			}
 
 			equalStasus := equalFunctionStatus(oldFn.Status, newFn.Status)
@@ -166,8 +163,7 @@ func (r *FunctionReconciler) Reconcile(ctx context.Context, request ctrl.Request
 	}
 
 	stateReconciler.result = ctrl.Result{
-		Requeue:      true,
-		RequeueAfter: time.Second,
+		RequeueAfter: time.Second * 10,
 	}
 
 	return stateReconciler.reconcile(ctx, instance)

@@ -59,12 +59,12 @@ func (m *reconciler) reconcile(ctx context.Context, f serverlessv1alpha1.Functio
 
 loop:
 	for m.fn != nil {
-		log.Println("Next fn state:", runtime.FuncForPC(reflect.ValueOf(m.fn).Pointer()).Name())
 		select {
 		case <-ctx.Done():
 			m.err = ctx.Err()
 			break loop
 		default:
+		log.Println("Next fn state:", runtime.FuncForPC(reflect.ValueOf(m.fn).Pointer()).Name())
 			m.fn = m.fn(ctx, m, &state)
 
 		}
