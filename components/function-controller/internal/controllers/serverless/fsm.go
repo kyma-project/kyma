@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log"
 	"strings"
 	"time"
 
@@ -66,6 +67,9 @@ loop:
 		}
 	}
 
+	log.Println("result: ", m.result.RequeueAfter, m.result.Requeue)
+	log.Println("err:", m.err)
+
 	return m.result, m.err
 }
 
@@ -114,8 +118,8 @@ func buildStateFnGenericUpdateStatus(condition serverlessv1alpha1.Condition, rep
 
 		if !equalFunctionStatus(currentFunction.Status, s.instance.Status) {
 
-			if r.err = r.client.Status().Update(ctx, currentFunction); r.err != nil {
-				r.err = fmt.Errorf("while updating function status: %w", r.err)
+			if err := r.client.Status().Update(ctx, currentFunction); err != nil {
+				log.Printf("while updating function status: %s", err)
 			}
 
 			r.statsCollector.UpdateReconcileStats(&s.instance, condition)

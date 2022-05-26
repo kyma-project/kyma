@@ -617,3 +617,20 @@ func (s *systemState) getGitBuildJobVolumeMounts(rtmConfig runtime.Config) []cor
 	volumeMounts = append(volumeMounts, getPackageConfigVolumeMountsForRuntime(rtmConfig.Runtime)...)
 	return volumeMounts
 }
+
+func (s *systemState) jobFailed(check func(reason string) bool) bool {
+	if len(s.jobs.Items) == 0 {
+		return false
+	}
+
+	for _, condition := range s.jobs.Items[0].Status.Conditions {
+		isFailedType := condition.Type == batchv1.JobFailed
+		isStatusTrue := condition.Status == corev1.ConditionTrue
+
+		if isFailedType && isStatusTrue {
+			return check(condition.Reason)
+		}
+	}
+
+	return false
+}
