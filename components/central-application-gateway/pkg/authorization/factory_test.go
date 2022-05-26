@@ -145,18 +145,21 @@ func TestStrategyFactory(t *testing.T) {
 		assert.Equal(t, "Bearer external", authHeader)
 	})
 
-	//TODO
 	t.Run("should create oauth with cert strategy", func(t *testing.T) {
 		// given
+		pair, err := tls.X509KeyPair(certificate, privateKey)
+		require.NoError(t, err)
+
 		oauthClientMock := &oauthMocks.Client{}
-		oauthClientMock.On("GetToken", "clientId", "clientSecret", "www.example.com/token", (*map[string][]string)(nil), (*map[string][]string)(nil)).Return("token", nil)
+		oauthClientMock.On("GetTokenMTLS", "clientId", "www.example.com/token", pair, (*map[string][]string)(nil), (*map[string][]string)(nil)).Return("token", nil)
 
 		factory := authorizationStrategyFactory{oauthClient: oauthClientMock}
 		credentials := &Credentials{
-			OAuth: &OAuth{
-				ClientID:     "clientId",
-				ClientSecret: "clientSecret",
-				URL:          "www.example.com/token",
+			OAuthWithCert: &OAuthWithCert{
+				ClientID:    "clientId",
+				Certificate: certificate,
+				PrivateKey:  privateKey,
+				URL:         "www.example.com/token",
 			},
 		}
 

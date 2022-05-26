@@ -44,7 +44,7 @@ func (asf authorizationStrategyFactory) Create(c *Credentials) Strategy {
 	if c != nil && c.OAuth != nil {
 		strategy = newOAuthStrategy(asf.oauthClient, c.OAuth.ClientID, c.OAuth.ClientSecret, c.OAuth.URL, c.OAuth.RequestParameters)
 	} else if c != nil && c.OAuthWithCert != nil {
-		strategy = newOAuthWithCertCertStrategy(asf.oauthClient, c.OAuthWithCert.ClientID, c.OAuthWithCert.Certificate, c.OAuthWithCert.PrivateKey, c.OAuth.URL, c.OAuth.RequestParameters)
+		strategy = newOAuthWithCertStrategy(asf.oauthClient, c.OAuthWithCert.ClientID, c.OAuthWithCert.Certificate, c.OAuthWithCert.PrivateKey, c.OAuthWithCert.URL, c.OAuthWithCert.RequestParameters)
 	} else if c != nil && c.BasicAuth != nil {
 		strategy = newBasicAuthStrategy(c.BasicAuth.Username, c.BasicAuth.Password)
 	} else if c != nil && c.CertificateGen != nil {

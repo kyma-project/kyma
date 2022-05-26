@@ -21,7 +21,7 @@ type oauthWithCertStrategy struct {
 	requestParameters *RequestParameters
 }
 
-func newOAuthWithCertCertStrategy(oauthClient OAuthClient, clientId string, certificate, privateKey []byte, url string, requestParameters *RequestParameters) oauthWithCertStrategy {
+func newOAuthWithCertStrategy(oauthClient OAuthClient, clientId string, certificate, privateKey []byte, url string, requestParameters *RequestParameters) oauthWithCertStrategy {
 	return oauthWithCertStrategy{
 		oauthClient:       oauthClient,
 		clientId:          clientId,
