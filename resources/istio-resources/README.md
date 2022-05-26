@@ -24,4 +24,5 @@ To install Istio Resources, run:
 kyma deploy --component istio-resources
 ```
 
+
 For more details regarding the installation of Istio itself in Kyma, see the [Istio chart](../istio/README.md).

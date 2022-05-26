@@ -35,4 +35,5 @@ Istio offers an Istio Control Plane CR, which is used to configure the installat
 - **values.pilot**
 - **values.sidecarInjectorWebhook**
 
+
 To override the default values, read how to [change Kyma settings](../../docs/04-operation-guides/operations/03-change-kyma-config-values.md).
