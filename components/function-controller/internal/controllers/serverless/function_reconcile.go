@@ -97,7 +97,7 @@ func (r *FunctionReconciler) SetupWithManager(mgr ctrl.Manager) (controller.Cont
 				return true
 			}
 			if newFn == nil {
-				oldFn = &serverlessv1alpha1.Function{}
+				newFn = &serverlessv1alpha1.Function{}
 			}
 
 			equalStasus := equalFunctionStatus(oldFn.Status, newFn.Status)
