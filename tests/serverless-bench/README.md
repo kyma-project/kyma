@@ -9,7 +9,7 @@ This a quick guide to simplify running the Function Controller benchmarks' tests
 
 To run the these tests, apply the following steps:
 
-- Start with a fresh Kyma cluster. The following minimum components are requireed:
+1. Start with a fresh Kyma cluster. The following minimum components are required:
 ```yaml
 ---
 defaultNamespace: kyma-system
