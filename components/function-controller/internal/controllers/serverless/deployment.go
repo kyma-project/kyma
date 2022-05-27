@@ -3,6 +3,7 @@ package serverless
 import (
 	"context"
 	"fmt"
+
 	ctrl "sigs.k8s.io/controller-runtime"
 
 	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
