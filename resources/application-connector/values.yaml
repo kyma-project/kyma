@@ -44,7 +44,7 @@ global:
       version: "PR-14398"
     central_application_connectivity_validator:
       name: "central-application-connectivity-validator"
-      version: "PR-13891"
+      version: "PR-14432"
     central_application_gateway:
       name: "central-application-gateway"
       version: "PR-14398"
