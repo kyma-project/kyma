@@ -1,6 +1,10 @@
 #!/usr/bin/env bash
 echo "Deleting Application Connectivity related resources"
 kubectl delete job/application-connector-certs-setup-job -n kyma-integration
+kubectl delete role,rolebinding -l app=application-connector-certs-setup-job -n kyma-integration
+kubectl delete role/application-connector-certs-setup-job-ca-cert-role -n istio-system
+kubectl delete rolebinding/application-connector-certs-setup-job-ca-cert-rolebinding -n istio-system
+kubectl delete sa/application-connector-certs-setup-job -n kyma-integration
 
 echo "Deleting Application Registry"
 kubectl delete service,servicemonitor,role,rolebinding,deployment -l app=application-registry -n kyma-integration
