@@ -1,6 +1,7 @@
 package nats
 
 import (
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers"
 	"github.com/nats-io/nats.go"
 	"github.com/onsi/gomega"
 	gomegatypes "github.com/onsi/gomega/types"
@@ -24,7 +25,8 @@ func BeJetStreamSubscriptionWithSubject(subject string) gomegatypes.GomegaMatche
 		if err != nil {
 			return false
 		}
-		return info.Config.FilterSubject == subject
+		js := handlers.JetStream{}
+		return info.Config.FilterSubject == js.GetJetstreamSubject(subject)
 	}, gomega.BeTrue())
 }
 
