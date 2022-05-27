@@ -27,7 +27,7 @@ components:
 2. Apply the Functions you need to benchmark from the test the [Function fixtures](./fixtures/functions/). If you need to benchmark a new Function runtime or configuration, you must create a similar Function manifest with the same naming pattern. 
 
 - Wait for the functions to be ready.
-- Apply the [local-test](./fixtures/local-test/) manifests. This will deploy the following resources:
+4. Apply the [local-test](./fixtures/local-test/) manifests. This will deploy the following resources:
     - A MySQL Pod and service to store the benchmarking data
     - A Grafana datasource to read the benchmark data from the MySQL backend.
     - The Grafana dashboard configuration to present the data.
