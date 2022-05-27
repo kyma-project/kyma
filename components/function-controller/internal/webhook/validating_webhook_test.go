@@ -46,6 +46,7 @@ func TestValidatingWebHook_Handle(t *testing.T) {
 			},
 			args: args{
 				ctx: context.Background(),
+				//nolint
 				req: admission.Request{
 					v1.AdmissionRequest{
 						RequestKind: &metav1.GroupVersionKind{Kind: "Function"},
@@ -98,6 +99,7 @@ func TestValidatingWebHook_Handle(t *testing.T) {
 			},
 			args: args{
 				ctx: context.Background(),
+				//nolint
 				req: admission.Request{
 					v1.AdmissionRequest{
 						RequestKind: &metav1.GroupVersionKind{Kind: "Function"},
@@ -127,6 +129,7 @@ func TestValidatingWebHook_Handle(t *testing.T) {
 			},
 			args: args{
 				ctx: context.Background(),
+				//nolint
 				req: admission.Request{
 					v1.AdmissionRequest{
 						RequestKind: &metav1.GroupVersionKind{Kind: "Function"},
@@ -147,6 +150,7 @@ func TestValidatingWebHook_Handle(t *testing.T) {
 			},
 			args: args{
 				ctx: context.Background(),
+				//nolint
 				req: admission.Request{
 					v1.AdmissionRequest{
 						RequestKind: &metav1.GroupVersionKind{Kind: "Function"},
@@ -177,6 +181,7 @@ func TestValidatingWebHook_Handle(t *testing.T) {
 			},
 			args: args{
 				ctx: context.Background(),
+				//nolint
 				req: admission.Request{
 					v1.AdmissionRequest{
 						RequestKind: &metav1.GroupVersionKind{Kind: "GitRepository"},
@@ -206,6 +211,7 @@ func TestValidatingWebHook_Handle(t *testing.T) {
 			},
 			args: args{
 				ctx: context.Background(),
+				//nolint
 				req: admission.Request{
 					v1.AdmissionRequest{
 						RequestKind: &metav1.GroupVersionKind{Kind: "GitRepository"},

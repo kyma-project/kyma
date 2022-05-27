@@ -59,9 +59,9 @@ func TestDefaultingWebHook_Handle(t *testing.T) {
 							DefaultPreset: "S",
 							Presets: map[string]serverlessv1alpha1.ResourcesPreset{
 								"S": {
-									RequestCpu:    "100m",
+									RequestCPU:    "100m",
 									RequestMemory: "128Mi",
-									LimitCpu:      "200m",
+									LimitCPU:      "200m",
 									LimitMemory:   "256Mi",
 								},
 							},
@@ -72,9 +72,9 @@ func TestDefaultingWebHook_Handle(t *testing.T) {
 							DefaultPreset: "normal",
 							Presets: map[string]serverlessv1alpha1.ResourcesPreset{
 								"normal": {
-									RequestCpu:    "700m",
+									RequestCPU:    "700m",
 									RequestMemory: "700Mi",
-									LimitCpu:      "1100m",
+									LimitCPU:      "1100m",
 									LimitMemory:   "1100Mi",
 								},
 							},
@@ -86,6 +86,7 @@ func TestDefaultingWebHook_Handle(t *testing.T) {
 			},
 			args: args{
 				ctx: context.Background(),
+				//nolint
 				req: admission.Request{
 					v1.AdmissionRequest{
 						RequestKind: &metav1.GroupVersionKind{Kind: "Function"},
@@ -129,6 +130,7 @@ func TestDefaultingWebHook_Handle(t *testing.T) {
 			},
 			args: args{
 				ctx: context.Background(),
+				//nolint
 				req: admission.Request{
 					v1.AdmissionRequest{
 						RequestKind: &metav1.GroupVersionKind{Kind: "Function"},
@@ -152,6 +154,7 @@ func TestDefaultingWebHook_Handle(t *testing.T) {
 			},
 			args: args{
 				ctx: context.Background(),
+				//nolint
 				req: admission.Request{
 					v1.AdmissionRequest{
 						RequestKind: &metav1.GroupVersionKind{Kind: "Function"},

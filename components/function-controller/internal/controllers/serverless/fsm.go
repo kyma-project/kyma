@@ -35,6 +35,7 @@ type cfg struct {
 	fn     FunctionConfig
 }
 
+//nolint
 type out struct {
 	err    error
 	result ctrl.Result

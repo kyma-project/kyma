@@ -16,7 +16,6 @@ import (
 const (
 	tarGitRepoPath = "./testdata"
 	tarGitName     = "test-repo.tar"
-	repoName       = "test-repo"
 	branchName     = "branch2"
 	branchCommit   = "728c47705dabc65c12583ff5feb2e5300983afc3"
 	tagName        = "tag1"
@@ -129,6 +128,7 @@ func prepareRepo(t *testing.T) string {
 		} else {
 			require.NoError(t, err)
 		}
+		//nolint
 		path := filepath.Join(tarGitRepoPath, h.Name)
 		info := h.FileInfo()
 		if info.IsDir() {
@@ -139,6 +139,7 @@ func prepareRepo(t *testing.T) string {
 		f, err := os.OpenFile(path, os.O_CREATE|os.O_WRONLY, info.Mode())
 		require.NoError(t, err)
 		defer closeAssert(t, f.Close)
+		//nolint:gosec
 		_, err = io.Copy(f, r)
 		require.NoError(t, err)
 	}

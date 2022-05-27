@@ -38,6 +38,7 @@ var (
 	setupLog = ctrlzap.New().WithName("setup")
 )
 
+//nolint
 func init() {
 	_ = clientgoscheme.AddToScheme(scheme)
 
@@ -208,6 +209,6 @@ func toZapLogLevel(level string) (zapcore.Level, error) {
 	case "error":
 		return zapcore.ErrorLevel, nil
 	default:
-		return 0, fmt.Errorf(fmt.Sprintf("Desired log level: %s not exist", level))
+		return 0, fmt.Errorf("Desired log level: %s not exist", level)
 	}
 }
