@@ -4,6 +4,8 @@ import (
 	"context"
 	"os"
 
+	k8s "github.com/kyma-project/kyma/components/function-controller/internal/controllers/kubernetes"
+
 	"github.com/kyma-project/kyma/components/function-controller/internal/webhook"
 	"github.com/kyma-project/kyma/components/function-controller/internal/webhook/resources"
 	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
@@ -92,6 +94,13 @@ func main() {
 	whs.Register("/validation",
 		&ctrlwebhook.Admission{
 			Handler: webhook.NewValidatingHook(validationConfig, mgr.GetClient()),
+		},
+	)
+
+	whs.Register(
+		"/mutate-v1-secret",
+		&ctrlwebhook.Admission{
+			Handler: k8s.NewRegistryWatcher(),
 		},
 	)
 
