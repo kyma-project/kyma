@@ -138,34 +138,6 @@ const updateNamespacedResource =
     );
   };
 
-async function removeServiceInstanceFinalizer(client, name, namespace) {
-  const serviceInstanceUpdater = updateNamespacedResource(
-      client,
-      'servicecatalog.k8s.io',
-      'v1beta1',
-      'serviceinstances',
-  );
-
-  await serviceInstanceUpdater(name, namespace, (obj) => {
-    obj.metadata.finalizers = [];
-    return obj;
-  });
-}
-
-async function removeServiceBindingFinalizer(client, name, namespace) {
-  const serviceBindingUpdater = updateNamespacedResource(
-      client,
-      'servicecatalog.k8s.io',
-      'v1beta1',
-      'servicebindings',
-  );
-
-  await serviceBindingUpdater(name, namespace, (obj) => {
-    obj.metadata.finalizers = [];
-    return obj;
-  });
-}
-
 // "polyfill" for Promise.allSettled
 async function promiseAllSettled(promises) {
   return Promise.all(
@@ -313,14 +285,6 @@ async function getFunction(name, namespace) {
 
 async function getConfigMap(name, namespace) {
   const path = `/api/v1/namespaces/${namespace}/configmaps/${name}`;
-  const response = await k8sDynamicApi.requestPromise({
-    url: k8sDynamicApi.basePath + path,
-  });
-  return JSON.parse(response.body);
-}
-
-async function getServiceInstance(name, namespace) {
-  const path = `/apis/servicecatalog.k8s.io/v1beta1/namespaces/${namespace}/serviceinstances/${name}`;
   const response = await k8sDynamicApi.requestPromise({
     url: k8sDynamicApi.basePath + path,
   });
@@ -519,111 +483,6 @@ function waitForSubscription(name, namespace = 'default', timeout = 180000) {
       },
       timeout,
       `Waiting for ${name} subscription timeout (${timeout} ms)`,
-  );
-}
-
-function waitForClusterServiceBroker(name, timeout = 90000) {
-  return waitForK8sObject(
-      '/apis/servicecatalog.k8s.io/v1beta1/clusterservicebrokers',
-      {},
-      (_type, _apiObj, watchObj) => {
-        return (
-          watchObj.object.metadata.name.includes(name) &&
-            watchObj.object.status.conditions.some(
-                (c) => c.type === 'Ready' && c.status === 'True',
-            )
-        );
-      },
-      timeout,
-      `Waiting for ${name} cluster service broker (${timeout} ms)`,
-  );
-}
-
-function waitForServiceClass(name, namespace = 'default', timeout = 90000) {
-  return waitForK8sObject(
-      `/apis/servicecatalog.k8s.io/v1beta1/namespaces/${namespace}/serviceclasses`,
-      {},
-      (_type, _apiObj, watchObj) => {
-        return watchObj.object.spec.externalName.includes(name);
-      },
-      timeout,
-      `Waiting for ${name} service class timeout (${timeout} ms)`,
-  );
-}
-
-function waitForServicePlanByServiceClass(
-    serviceClassName,
-    namespace = 'default',
-    timeout = 90000,
-) {
-  return waitForK8sObject(
-      `/apis/servicecatalog.k8s.io/v1beta1/namespaces/${namespace}/serviceplans`,
-      {},
-      (_type, _apiObj, watchObj) => {
-        return watchObj.object.spec.serviceClassRef.name.includes(
-            serviceClassName,
-        );
-      },
-      timeout,
-      `Waiting for ${serviceClassName} service plan timeout (${timeout} ms)`,
-  );
-}
-
-function waitForServiceInstance(name, namespace = 'default', timeout = 90000) {
-  return waitForK8sObject(
-      `/apis/servicecatalog.k8s.io/v1beta1/namespaces/${namespace}/serviceinstances`,
-      {},
-      (_type, _apiObj, watchObj) => {
-        return (
-          watchObj.object.metadata.name === name &&
-        watchObj.object.status.conditions &&
-        watchObj.object.status.conditions.some(
-            (c) => c.type === 'Ready' && c.status === 'True',
-        )
-        );
-      },
-      timeout,
-      `Waiting for service instance ${name} timeout (${timeout} ms)`,
-  );
-}
-
-function waitForServiceBinding(name, namespace = 'default', timeout = 90000) {
-  return waitForK8sObject(
-      `/apis/servicecatalog.k8s.io/v1beta1/namespaces/${namespace}/servicebindings`,
-      {},
-      (_type, _apiObj, watchObj) => {
-        return (
-          watchObj.object.metadata.name === name &&
-        watchObj.object.status.conditions &&
-        watchObj.object.status.conditions.some(
-            (c) => c.type === 'Ready' && c.status === 'True',
-        )
-        );
-      },
-      timeout,
-      `Waiting for service binding ${name} timeout (${timeout} ms)`,
-  );
-}
-
-function waitForServiceBindingUsage(
-    name,
-    namespace = 'default',
-    timeout = 90000,
-) {
-  return waitForK8sObject(
-      `/apis/servicecatalog.kyma-project.io/v1alpha1/namespaces/${namespace}/servicebindingusages`,
-      {},
-      (_type, _apiObj, watchObj) => {
-        return (
-          watchObj.object.metadata.name === name &&
-        watchObj.object.status.conditions &&
-        watchObj.object.status.conditions.some(
-            (c) => c.type === 'Ready' && c.status === 'True',
-        )
-        );
-      },
-      timeout,
-      `Waiting for service binding usage ${name} timeout (${timeout} ms)`,
   );
 }
 
@@ -1519,18 +1378,6 @@ function namespaceObj(name) {
   };
 }
 
-function serviceInstanceObj(name, serviceClassExternalName) {
-  return {
-    apiVersion: 'servicecatalog.k8s.io/v1beta1',
-    kind: 'ServiceInstance',
-    metadata: {
-      name: name,
-    },
-    spec: {serviceClassExternalName},
-  };
-}
-
-
 /**
  * Creates eventing backend secret for event mesh (BEB)
  * @param {string} eventMeshSecretFilePath - file path of the EventMesh secret file
@@ -1793,8 +1640,6 @@ module.exports = {
   retryPromise,
   convertAxiosError,
   ignore404,
-  removeServiceInstanceFinalizer,
-  removeServiceBindingFinalizer,
   sleep,
   replaceAllInString,
   promiseAllSettled,
@@ -1807,12 +1652,6 @@ module.exports = {
   waitForK8sObject,
   waitForNamespace,
   waitForClusterAddonsConfiguration,
-  waitForClusterServiceBroker,
-  waitForServiceClass,
-  waitForServicePlanByServiceClass,
-  waitForServiceInstance,
-  waitForServiceBinding,
-  waitForServiceBindingUsage,
   waitForVirtualService,
   waitForDeployment,
   waitForDaemonSet,
@@ -1838,7 +1677,6 @@ module.exports = {
   getConfigMap,
   getPodPresets,
   getSecretData,
-  getServiceInstance,
   listResources,
   listResourceNames,
   k8sDynamicApi,
@@ -1865,7 +1703,6 @@ module.exports = {
   patchDeployment,
   isKyma2,
   namespaceObj,
-  serviceInstanceObj,
   getEnvOrDefault,
   printContainerLogs,
   kubectlExecInPod,
