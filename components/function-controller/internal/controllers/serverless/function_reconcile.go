@@ -169,7 +169,7 @@ func (r *FunctionReconciler) Reconcile(ctx context.Context, request ctrl.Request
 	}
 
 	stateReconciler.result = ctrl.Result{
-		RequeueAfter: time.Second * 5,
+		RequeueAfter: time.Second * 1,
 	}
 
 	return stateReconciler.reconcile(ctx, instance)
