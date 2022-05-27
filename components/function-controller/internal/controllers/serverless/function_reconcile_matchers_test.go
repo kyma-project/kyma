@@ -12,7 +12,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 )
 
-var beOKReconcileResult = recResultMatcher(false, time.Second*5)
+var beOKReconcileResult = recResultMatcher(false, time.Second*1)
 var beFinishedReconcileResult = recResultMatcher(false, time.Minute*5)
 
 func recResultMatcher(requeue bool, requeueAfter time.Duration) gtypes.GomegaMatcher {
