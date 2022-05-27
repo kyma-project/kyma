@@ -137,9 +137,8 @@ func isMatchCondAllowed(pluginName, matchCond, logPipelineName string, logPipeli
 	if !matchCondValid {
 		if len(logPipelines.Items) == 0 {
 			return fmt.Errorf("output plugin '%s' should have match condition (pipelineName.*) matching the logpipeline name '%s'", pluginName, logPipelineName)
-		} else {
-			return fmt.Errorf("output plugin '%s' should have match condition (pipelineName.*) matching any of the current '%s' or existing logpipeline names '%s'", pluginName, logPipelineName, pipelineNames)
 		}
+		return fmt.Errorf("output plugin '%s' should have match condition (pipelineName.*) matching any of the current '%s' or existing logpipeline names '%s'", pluginName, logPipelineName, pipelineNames)
 	}
 	return nil
 }
