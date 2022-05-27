@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"log"
 	"reflect"
 	"runtime"
 	"strings"
@@ -64,14 +63,18 @@ loop:
 			m.err = ctx.Err()
 			break loop
 		default:
-			log.Println("Next fn state:", runtime.FuncForPC(reflect.ValueOf(m.fn).Pointer()).Name())
+			m.log.With("stateFn", runtime.FuncForPC(reflect.ValueOf(m.fn).Pointer()).Name()).
+				Info("next state")
+
 			m.fn = m.fn(ctx, m, &state)
 
 		}
 	}
 
-	log.Println("result", m.result.RequeueAfter, m.result.Requeue)
-	log.Println("err", m.err)
+	m.log.With("requeueAfter", m.result.RequeueAfter).
+		With("requeue", m.result.Requeue).
+		With("err", m.err).
+		Info("reconciliation result")
 
 	return m.result, m.err
 }
