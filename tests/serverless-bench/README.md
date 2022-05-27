@@ -24,7 +24,7 @@ components:
   - name: "serverless"
 ```
 
-- Apply the functions you need to benchmark from the test [function fixtures](./fixtures/functions/). If you need to benchmark a new function runtime or configuration, you should create a similar function manifest with the same naming pattern. 
+2. Apply the Functions you need to benchmark from the test the [Function fixtures](./fixtures/functions/). If you need to benchmark a new Function runtime or configuration, you must create a similar Function manifest with the same naming pattern. 
 
 - Wait for the functions to be ready.
 - Apply the [local-test](./fixtures/local-test/) manifests. This will deploy the following resources:
