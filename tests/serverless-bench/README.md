@@ -30,7 +30,7 @@ components:
 - Apply the [local-test](./fixtures/local-test/) manifests. This will deploy the following resources:
     - A MySQL Pod and service to store the benchmarking data
     - A Grafana datasource to read the benchmark data from the MySQL backend.
-    - A grafana dashboard configuration to present the data.
+    - The Grafana dashboard configuration to present the data.
 - Edit the [test job spec](./fixtures/serverless-benchmark-job.yaml) to set `USE_LOCAL_MYSQL` to `true`. You can also use `CUSTOM_FUNCTIONS` to test specific Functions instead of testing the full list.
 - Apply the test job. Each test run creates a data point for each defined Function.
 
