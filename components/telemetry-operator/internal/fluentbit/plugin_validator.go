@@ -53,6 +53,9 @@ func (v *pluginValidator) validateFilterPlugins(logPipeline *telemetryv1alpha1.L
 		}
 
 		matchCond, err := getMatchCondition(section)
+		if err != nil {
+			return err
+		}
 		if matchCond == "*" {
 			return fmt.Errorf("filter plugin '%s' with match condition '*' (match all) is not allowed", name)
 		}
