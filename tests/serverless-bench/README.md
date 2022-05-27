@@ -3,7 +3,7 @@
 The Serverless-Bench image is based on the `locustio/locust` image. It also includes a locust test configuration and a simple script to run the test and output the results in JSON to stdout. The logs are collected via a log sink and are pushed to Google Cloud BigQuery for further analysis.  
 
 
-## Running Serverless Benchmarks Locally
+## Running Serverless benchmarks Locally
 
 This a quick guide to simplify running the function controller benchmarks tests on in a development environment. This can be useful in several scenarios. For example, benchmarking a new runtime implementation.
 
