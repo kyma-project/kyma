@@ -8,6 +8,8 @@ import (
 // compile time check
 var _ fmt.Stringer = &NatsConfig{}
 
+const JetstreamSubjectPrefix = "kyma"
+
 // NatsConfig represents the environment config for the Event Publisher to NATS.
 type NatsConfig struct {
 	Port                 int           `envconfig:"INGRESS_PORT" default:"8080"`
@@ -24,8 +26,7 @@ type NatsConfig struct {
 	EventTypePrefix string `envconfig:"EVENT_TYPE_PREFIX" default:"kyma"`
 
 	// JetStream-specific configs
-	JSStreamName          string `envconfig:"JS_STREAM_NAME" default:"kyma"`
-	JSStreamSubjectPrefix string `envconfig:"JS_STREAM_SUBJECT_PREFIX" required:"true"`
+	JSStreamName string `envconfig:"JS_STREAM_NAME" default:"kyma"`
 }
 
 // ToConfig converts to a default BEB BebConfig

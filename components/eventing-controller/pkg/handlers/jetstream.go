@@ -197,7 +197,7 @@ func (js *JetStream) SyncSubscription(subscription *eventingv1alpha1.Subscriptio
 
 	callback := js.getCallback(subKeyPrefix)
 	for _, subject := range subscription.Status.CleanEventTypes {
-		jsSubject := js.GetJestreamSubject(subject)
+		jsSubject := js.GetJetstreamSubject(subject)
 		jsSubKey := NewSubscriptionSubjectIdentifier(subscription, jsSubject)
 
 		// check if the subscription already exists and if it is valid.
@@ -247,7 +247,7 @@ func (js *JetStream) DeleteSubscription(subscription *eventingv1alpha1.Subscript
 	// cleanup consumers on nats-server
 	// in-case data in js.subscriptions[] was lost due to handler restart
 	for _, subject := range subscription.Status.CleanEventTypes {
-		jsSubject := js.GetJestreamSubject(subject)
+		jsSubject := js.GetJetstreamSubject(subject)
 		jsSubKey := NewSubscriptionSubjectIdentifier(subscription, jsSubject)
 		if err := js.deleteConsumerFromJetStream(jsSubKey.ConsumerName(), log); err != nil {
 			return err
@@ -260,8 +260,8 @@ func (js *JetStream) DeleteSubscription(subscription *eventingv1alpha1.Subscript
 	return nil
 }
 
-// GetJestreamSubject appends the prefix to subject.
-func (js *JetStream) GetJestreamSubject(subject string) string {
+// GetJetstreamSubject appends the prefix to subject.
+func (js *JetStream) GetJetstreamSubject(subject string) string {
 	return fmt.Sprintf("%s.%s", env.JetstreamSubjectPrefix, subject)
 }
 
@@ -476,7 +476,7 @@ func (js *JetStream) deleteConsumerFromJetStream(name string, log *zap.SugaredLo
 func (js *JetStream) GetJetStreamSubjects(subjects []string) []string {
 	var result []string
 	for _, subject := range subjects {
-		result = append(result, js.GetJestreamSubject(subject))
+		result = append(result, js.GetJetstreamSubject(subject))
 	}
 	return result
 }

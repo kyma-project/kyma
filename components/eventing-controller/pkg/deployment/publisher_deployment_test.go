@@ -99,7 +99,6 @@ func Test_GetNATSEnvVars(t *testing.T) {
 				"REQUEST_TIMEOUT":          "10s",
 				"ENABLE_JETSTREAM_BACKEND": "true",
 				"JS_STREAM_NAME":           "",
-				"JS_STREAM_SUBJECT_PREFIX": env.JetstreamSubjectPrefix,
 			},
 		},
 		{
@@ -111,10 +110,8 @@ func Test_GetNATSEnvVars(t *testing.T) {
 			},
 			givenNatsConfig: env.NatsConfig{},
 			wantEnvs: map[string]string{
-				"REQUEST_TIMEOUT":          "10s",
-				"JS_STREAM_NAME":           "",
-				"JS_STREAM_SUBJECT_PREFIX": env.JetstreamSubjectPrefix,
-				"ENABLE_JETSTREAM_BACKEND": "false",
+				"REQUEST_TIMEOUT": "10s",
+				"JS_STREAM_NAME":  "",
 			},
 		},
 		{
@@ -129,7 +126,6 @@ func Test_GetNATSEnvVars(t *testing.T) {
 			wantEnvs: map[string]string{
 				"REQUEST_TIMEOUT":          "10s",
 				"JS_STREAM_NAME":           "kyma",
-				"JS_STREAM_SUBJECT_PREFIX": env.JetstreamSubjectPrefix,
 				"ENABLE_JETSTREAM_BACKEND": "true",
 			},
 		},

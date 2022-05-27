@@ -26,7 +26,7 @@ func BeJetStreamSubscriptionWithSubject(subject string) gomegatypes.GomegaMatche
 			return false
 		}
 		js := handlers.JetStream{}
-		return info.Config.FilterSubject == js.GetJestreamSubject(subject)
+		return info.Config.FilterSubject == js.GetJetstreamSubject(subject)
 	}, gomega.BeTrue())
 }
 

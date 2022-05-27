@@ -8,10 +8,9 @@ import (
 	"testing"
 	"time"
 
-	utils "github.com/kyma-project/kyma/components/eventing-controller/controllers/subscription/testing"
-
-	natstesting "github.com/kyma-project/kyma/components/eventing-controller/testing/nats"
 	"github.com/nats-io/nats.go"
+
+	utils "github.com/kyma-project/kyma/components/eventing-controller/controllers/subscription/testing"
 
 	kymalogger "github.com/kyma-project/kyma/common/logging/logger"
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
@@ -23,6 +22,7 @@ import (
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/eventtype"
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/sink"
 	reconcilertesting "github.com/kyma-project/kyma/components/eventing-controller/testing"
+	natstesting "github.com/kyma-project/kyma/components/eventing-controller/testing/nats"
 	natsserver "github.com/nats-io/nats-server/v2/server"
 	"github.com/onsi/gomega"
 	gomegatypes "github.com/onsi/gomega/types"
@@ -560,7 +560,7 @@ func TestEmptyEventTypePrefix(t *testing.T) {
 }
 
 func testSubscriptionOnNATS(ens *jetStreamTestEnsemble, subscription *eventingv1alpha1.Subscription, subject string, expectations ...gomegatypes.GomegaMatcher) {
-	getSubscriptionFromJetStream(ens, subscription, ens.jetStreamBackend.GetJestreamSubject(subject)).Should(gomega.And(expectations...))
+	getSubscriptionFromJetStream(ens, subscription, ens.jetStreamBackend.GetJetstreamSubject(subject)).Should(gomega.And(expectations...))
 }
 
 func testDeletion(ens *jetStreamTestEnsemble, subscription *eventingv1alpha1.Subscription, subject string) {

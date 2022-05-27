@@ -65,7 +65,7 @@ func TestJetstreamMessageSender(t *testing.T) {
 			}()
 
 			if tc.givenStream {
-				addStream(t, connection, getStreamConfig(testEnv.Config))
+				addStream(t, connection, getStreamConfig())
 			}
 
 			ce := createCloudEvent(t)
@@ -132,7 +132,7 @@ func TestStreamExists(t *testing.T) {
 			}()
 
 			if tc.givenStream {
-				addStream(t, connection, getStreamConfig(testEnv.Config))
+				addStream(t, connection, getStreamConfig())
 			}
 
 			// close the connection to provoke the error
@@ -206,10 +206,10 @@ func createCloudEvent(t *testing.T) *event.Event {
 }
 
 // getStreamConfig inits a testing stream config.
-func getStreamConfig(config *env.NatsConfig) *nats.StreamConfig {
+func getStreamConfig() *nats.StreamConfig {
 	return &nats.StreamConfig{
 		Name:      testingutils.StreamName,
-		Subjects:  []string{fmt.Sprintf("%s.>", config.JSStreamSubjectPrefix)},
+		Subjects:  []string{fmt.Sprintf("%s.>", env.JetstreamSubjectPrefix)},
 		Storage:   nats.MemoryStorage,
 		Retention: nats.InterestPolicy,
 	}
@@ -225,9 +225,8 @@ func addStream(t *testing.T, connection *nats.Conn, config *nats.StreamConfig) {
 
 func CreateNatsJsConfig(url string) *env.NatsConfig {
 	return &env.NatsConfig{
-		JSStreamName:          testingutils.StreamName,
-		JSStreamSubjectPrefix: testingutils.JSStreamPrefix,
-		URL:                   url,
-		ReconnectWait:         time.Second,
+		JSStreamName:  testingutils.StreamName,
+		URL:           url,
+		ReconnectWait: time.Second,
 	}
 }
