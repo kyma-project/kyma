@@ -71,7 +71,7 @@ func TestFunctionReconciler_Reconcile(t *testing.T) {
 		result, err := reconciler.Reconcile(ctx, request)
 		g.Expect(err).To(gomega.BeNil())
 		g.Expect(result.Requeue).To(gomega.BeFalse())
-		g.Expect(result.RequeueAfter).To(gomega.Equal(time.Second * 0))
+		g.Expect(result.RequeueAfter).To(gomega.Equal(time.Second * 1))
 
 		function := &serverlessv1alpha1.Function{}
 		g.Expect(resourceClient.Get(context.TODO(), request.NamespacedName, function)).To(gomega.Succeed())
@@ -108,7 +108,7 @@ func TestFunctionReconciler_Reconcile(t *testing.T) {
 		result, err = reconciler.Reconcile(ctx, request)
 		g.Expect(err).To(gomega.BeNil())
 		g.Expect(result.Requeue).To(gomega.BeFalse())
-		g.Expect(result.RequeueAfter).To(gomega.Equal(time.Duration(0)))
+		g.Expect(result.RequeueAfter).To(gomega.Equal(time.Second * 1))
 
 		function = &serverlessv1alpha1.Function{}
 		g.Expect(resourceClient.Get(context.TODO(), request.NamespacedName, function)).To(gomega.Succeed())
@@ -129,7 +129,7 @@ func TestFunctionReconciler_Reconcile(t *testing.T) {
 		result, err = reconciler.Reconcile(ctx, request)
 		g.Expect(err).To(gomega.BeNil())
 		g.Expect(result.Requeue).To(gomega.BeFalse())
-		g.Expect(result.RequeueAfter).To(gomega.Equal(time.Duration(0)))
+		g.Expect(result.RequeueAfter).To(gomega.Equal(time.Second * 1))
 
 		function = &serverlessv1alpha1.Function{}
 		g.Expect(resourceClient.Get(context.TODO(), request.NamespacedName, function)).To(gomega.Succeed())
@@ -1007,7 +1007,7 @@ func TestFunctionReconciler_Reconcile(t *testing.T) {
 		result, err := reconciler.Reconcile(ctx, request)
 		g.Expect(err).To(gomega.BeNil())
 		g.Expect(result.Requeue).To(gomega.BeFalse())
-		g.Expect(result.RequeueAfter).To(gomega.Equal(time.Second * 0))
+		g.Expect(result.RequeueAfter).To(gomega.Equal(time.Second * 1))
 
 		function := &serverlessv1alpha1.Function{}
 		g.Expect(resourceClient.Get(context.TODO(), request.NamespacedName, function)).To(gomega.Succeed())
@@ -1042,7 +1042,7 @@ func TestFunctionReconciler_Reconcile(t *testing.T) {
 		result, err = reconciler.Reconcile(ctx, request)
 		g.Expect(err).To(gomega.BeNil())
 		g.Expect(result.Requeue).To(gomega.BeFalse())
-		g.Expect(result.RequeueAfter).To(gomega.Equal(time.Second * 0))
+		g.Expect(result.RequeueAfter).To(gomega.Equal(time.Second * 1))
 
 		g.Expect(resourceClient.Get(context.TODO(), request.NamespacedName, function)).To(gomega.Succeed())
 		g.Expect(function.Status.Conditions).To(gomega.HaveLen(conditionLen))
@@ -1061,7 +1061,7 @@ func TestFunctionReconciler_Reconcile(t *testing.T) {
 		result, err = reconciler.Reconcile(ctx, request)
 		g.Expect(err).To(gomega.BeNil())
 		g.Expect(result.Requeue).To(gomega.BeFalse())
-		g.Expect(result.RequeueAfter).To(gomega.Equal(time.Second * 0))
+		g.Expect(result.RequeueAfter).To(gomega.Equal(time.Second * 1))
 
 		hpaList := &autoscalingv1.HorizontalPodAutoscalerList{}
 		err = reconciler.client.ListByLabel(context.TODO(), function.GetNamespace(), fnLabels, hpaList)
@@ -1090,7 +1090,7 @@ func TestFunctionReconciler_Reconcile(t *testing.T) {
 		result, err = reconciler.Reconcile(ctx, request)
 		g.Expect(err).To(gomega.BeNil())
 		g.Expect(result.Requeue).To(gomega.BeFalse())
-		g.Expect(result.RequeueAfter).To(gomega.Equal(time.Duration(0)))
+		g.Expect(result.RequeueAfter).To(gomega.Equal(time.Second * 1))
 
 		g.Expect(resourceClient.Get(context.TODO(), request.NamespacedName, function)).To(gomega.Succeed())
 		g.Expect(function.Status.Conditions).To(gomega.HaveLen(conditionLen))
@@ -1211,7 +1211,7 @@ func TestFunctionReconciler_Reconcile(t *testing.T) {
 		result, err := reconciler.Reconcile(ctx, request)
 		g.Expect(err).To(gomega.BeNil())
 		g.Expect(result.Requeue).To(gomega.BeFalse())
-		g.Expect(result.RequeueAfter).To(gomega.Equal(time.Duration(0)))
+		g.Expect(result.RequeueAfter).To(gomega.Equal(time.Second * 1))
 
 		function = &serverlessv1alpha1.Function{}
 		g.Expect(resourceClient.Get(context.TODO(), request.NamespacedName, function)).To(gomega.Succeed())
@@ -1226,7 +1226,7 @@ func TestFunctionReconciler_Reconcile(t *testing.T) {
 		result, err = reconciler.Reconcile(ctx, request)
 		g.Expect(err).To(gomega.BeNil())
 		g.Expect(result.Requeue).To(gomega.BeFalse())
-		g.Expect(result.RequeueAfter).To(gomega.Equal(time.Duration(0)))
+		g.Expect(result.RequeueAfter).To(gomega.Equal(time.Second * 1))
 
 		function = &serverlessv1alpha1.Function{}
 		g.Expect(function.Spec.RuntimeImageOverride).To(gomega.Equal(""))

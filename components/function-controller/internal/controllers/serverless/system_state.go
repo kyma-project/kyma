@@ -69,6 +69,8 @@ func (s *systemState) inlineFnSrcChanged(dockerPullAddress string) bool {
 	if len(s.deployments.Items) == 1 &&
 		len(s.configMaps.Items) == 1 &&
 		s.deployments.Items[0].Spec.Template.Spec.Containers[0].Image == image &&
+		s.instance.Spec.Source == s.configMaps.Items[0].Data[FunctionSourceKey] &&
+		rtm.SanitizeDependencies(s.instance.Spec.Deps) == s.configMaps.Items[0].Data[FunctionDepsKey] &&
 		configurationStatus != corev1.ConditionUnknown &&
 		mapsEqual(s.configMaps.Items[0].Labels, labels) {
 		return false
@@ -616,4 +618,12 @@ func (s *systemState) getGitBuildJobVolumeMounts(rtmConfig runtime.Config) []cor
 	// add package registry config volume mount depending on the used runtime
 	volumeMounts = append(volumeMounts, getPackageConfigVolumeMountsForRuntime(rtmConfig.Runtime)...)
 	return volumeMounts
+}
+
+func (s *systemState) jobFailed(p func(reason string) bool) bool {
+	if len(s.jobs.Items) == 0 {
+		return false
+	}
+
+	return jobFailed(s.jobs.Items[0], p)
 }
