@@ -5,7 +5,7 @@ The Serverless-Bench image is based on the `locustio/locust` image. It also incl
 
 ## Running Serverless benchmarks Locally
 
-This a quick guide to simplify running the function controller benchmarks tests on in a development environment. This can be useful in several scenarios. For example, benchmarking a new runtime implementation.
+This a quick guide to simplify running the Function Controller benchmarks' tests in a development environment. This can be useful in several scenarios. For example, benchmarking a new runtime implementation.
 
 To run the these tests, apply the following steps:
 
