@@ -625,14 +625,5 @@ func (s *systemState) jobFailed(p func(reason string) bool) bool {
 		return false
 	}
 
-	for _, condition := range s.jobs.Items[0].Status.Conditions {
-		isFailedType := condition.Type == batchv1.JobFailed
-		isStatusTrue := condition.Status == corev1.ConditionTrue
-
-		if isFailedType && isStatusTrue {
-			return p(condition.Reason)
-		}
-	}
-
-	return false
+	return jobFailed(s.jobs.Items[0], p)
 }

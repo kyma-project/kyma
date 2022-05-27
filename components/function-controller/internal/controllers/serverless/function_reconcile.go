@@ -9,6 +9,9 @@ import (
 
 	"github.com/pkg/errors"
 	"golang.org/x/time/rate"
+	appsv1 "k8s.io/api/apps/v1"
+	autoscalingv1 "k8s.io/api/autoscaling/v1"
+	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/tools/record"
@@ -63,6 +66,10 @@ func (r *FunctionReconciler) SetupWithManager(mgr ctrl.Manager) (controller.Cont
 	return ctrl.NewControllerManagedBy(mgr).
 		Named("function-controller").
 		For(&serverlessv1alpha1.Function{}).
+		Owns(&corev1.ConfigMap{}).
+		Owns(&appsv1.Deployment{}).
+		Owns(&corev1.Service{}).
+		Owns(&autoscalingv1.HorizontalPodAutoscaler{}).
 		WithOptions(controller.Options{
 			RateLimiter: workqueue.NewMaxOfRateLimiter(
 				workqueue.NewItemExponentialFailureRateLimiter(r.config.GitFetchRequeueDuration, 300*time.Second),
@@ -71,36 +78,37 @@ func (r *FunctionReconciler) SetupWithManager(mgr ctrl.Manager) (controller.Cont
 			),
 			MaxConcurrentReconciles: 1, // Build job scheduling mechanism requires this parameter to be set to 1. The mechanism is based on getting active and stateless jobs, concurrent reconciles makes it non deterministic . Value 1 removes data races while fetching list of jobs. https://github.com/kyma-project/kyma/issues/10037
 		}).
-		WithEventFilter(predicate.Funcs{UpdateFunc: func(event event.UpdateEvent) bool {
-			r.Log.Info("old", event.ObjectOld.GetName())
-			r.Log.Info("new:", event.ObjectNew.GetName())
+		WithEventFilter(predicate.Funcs{
+			UpdateFunc: func(event event.UpdateEvent) bool {
+				r.Log.Debug("old", event.ObjectOld.GetName())
+				r.Log.Debug("new:", event.ObjectNew.GetName())
 
-			oldFn, ok := event.ObjectOld.(*serverlessv1alpha1.Function)
-			if !ok {
-				v := reflect.ValueOf(oldFn)
-				r.Log.Info("Can't cast:", v.Type())
-				return true
-			}
+				oldFn, ok := event.ObjectOld.(*serverlessv1alpha1.Function)
+				if !ok {
+					v := reflect.ValueOf(oldFn)
+					r.Log.Debug("Can't cast:", v.Type())
+					return true
+				}
 
-			if oldFn == nil {
-				return false
-			}
+				if oldFn == nil {
+					return false
+				}
 
-			newFn, ok := event.ObjectNew.(*serverlessv1alpha1.Function)
-			if !ok {
-				v := reflect.ValueOf(newFn)
-				r.Log.Info("Can't cast:", v.Type())
-				return true
-			}
-			if newFn == nil {
-				return false
-			}
+				newFn, ok := event.ObjectNew.(*serverlessv1alpha1.Function)
+				if !ok {
+					v := reflect.ValueOf(newFn)
+					r.Log.Debug("Can't cast:", v.Type())
+					return true
+				}
+				if newFn == nil {
+					return false
+				}
 
-			equalStasus := equalFunctionStatus(oldFn.Status, newFn.Status)
-			r.Log.Info("Statuses are equal: ", equalStasus)
+				equalStasus := equalFunctionStatus(oldFn.Status, newFn.Status)
+				r.Log.Debug("Statuses are equal: ", equalStasus)
 
-			return equalStasus
-		}}).
+				return equalStasus
+			}}).
 		Build(r)
 }
 

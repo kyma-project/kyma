@@ -46,7 +46,7 @@ func init() {
 }
 
 type config struct {
-	MetricsAddress            string `envconfig:"default=:8081"`
+	MetricsAddress            string `envconfig:"default=:8080"`
 	Healthz                   healthzConfig
 	LeaderElectionEnabled     bool   `envconfig:"default=false"`
 	LeaderElectionID          string `envconfig:"default=serverless-controller-leader-election-helper"`
