@@ -1,4 +1,4 @@
-FROM alpine:3.15.4
+FROM alpine:3.14.6
 
 ENV KUBECONFIG=/KUBECONFIG/kubeconfig.yaml
 ENV EVENTMESH_SECRET_FILE=/EMS/ems.json
@@ -12,7 +12,7 @@ SHELL ["/bin/ash", "-o", "pipefail", "-c"]
 RUN apk --no-cache add \
     build-base \
     git \
-    nodejs=16.14.2-r0
+    nodejs=14.19.0-r0
 
 WORKDIR /
 COPY clone-and-run-fit.sh /clone-and-run-fit.sh
