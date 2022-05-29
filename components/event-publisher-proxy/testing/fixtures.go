@@ -14,6 +14,7 @@ const (
 
 	MessagingNamespace            = "/messaging.namespace"
 	MessagingEventTypePrefix      = "prefix"
+	JSStreamPrefix                = "sap.kyma.custom"
 	MessagingEventTypePrefixEmpty = ""
 
 	EventID      = "8945ec08-256b-11eb-9928-acde48001122"

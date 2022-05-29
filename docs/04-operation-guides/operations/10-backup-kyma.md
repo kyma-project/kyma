@@ -175,7 +175,7 @@ spec:
           serviceAccountName: volume-snapshotter
           containers:
           - name: job
-            image: eu.gcr.io/kyma-project/incubator/k8s-tools:20220516-9f87ea89
+            image: eu.gcr.io/kyma-project/incubator/k8s-tools:20220525-4bd6d72e
             command:
               - /bin/bash
               - -c
