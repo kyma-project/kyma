@@ -53,3 +53,67 @@ Emitter_Mem_Buf_Limit 10M`
 	actual := generateEmitter(emitterConfig, &logPipeline)
 	assert.Equal(t, expected, actual, "Fluent Bit Emitter config is invalid")
 }
+
+func TestFilter(t *testing.T) {
+	expected := `[FILTER]
+    name grep
+    match foo.*
+
+`
+
+	logPipeline := &telemetryv1alpha1.LogPipeline{
+		Spec: telemetryv1alpha1.LogPipelineSpec{
+			Filters: []telemetryv1alpha1.Filter{
+				{
+					Content: `
+	Name         grep	`,
+				},
+			},
+		},
+	}
+	logPipeline.Name = "foo"
+	emitterConfig := EmitterConfig{
+		InputTag:    "kube",
+		BufferLimit: "10M",
+		StorageType: "filesystem",
+	}
+
+	actual := MergeSectionsConfig(logPipeline, emitterConfig)
+	assert.Equal(t, expected, actual)
+
+}
+
+func TestOutput(t *testing.T) {
+	expected := `[FILTER]
+    name                  rewrite_tag
+    match                 kube.*
+    Rule                  $log "^.*$" foo.$TAG true
+    Emitter_Name          foo
+    Emitter_Storage.type  filesystem
+    Emitter_Mem_Buf_Limit 10M
+
+[OUTPUT]
+    name http
+    match foo.*
+
+`
+	logPipeline := &telemetryv1alpha1.LogPipeline{
+		Spec: telemetryv1alpha1.LogPipelineSpec{
+			Outputs: []telemetryv1alpha1.Output{
+				{
+					Content: `
+    Name    http`,
+				},
+			},
+		},
+	}
+	logPipeline.Name = "foo"
+	emitterConfig := EmitterConfig{
+		InputTag:    "kube",
+		BufferLimit: "10M",
+		StorageType: "filesystem",
+	}
+
+	actual := MergeSectionsConfig(logPipeline, emitterConfig)
+	assert.Equal(t, expected, actual)
+}

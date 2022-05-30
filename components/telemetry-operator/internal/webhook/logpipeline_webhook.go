@@ -118,6 +118,8 @@ func (v *LogPipelineValidator) validateLogPipeline(ctx context.Context, currentB
 		}
 	}
 
+	fmt.Printf("hello0\n")
+
 	var logPipelines telemetryv1alpha1.LogPipelineList
 	if err := v.List(ctx, &logPipelines); err != nil {
 		return err
@@ -128,7 +130,10 @@ func (v *LogPipelineValidator) validateLogPipeline(ctx context.Context, currentB
 		return err
 	}
 
+	fmt.Printf("helloo1\n")
+
 	if err = v.configValidator.Validate(ctx, fmt.Sprintf("%s/fluent-bit.conf", currentBaseDirectory)); err != nil {
+		fmt.Printf("helloo2\n")
 		log.Error(err, "Failed to validate Fluent Bit config")
 		return err
 	}
