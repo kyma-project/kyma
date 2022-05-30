@@ -1,14 +1,14 @@
 apiVersion: telemetry.kyma-project.io/v1alpha1
 kind: LogPipeline
 metadata:
-  name: logpipeline-test
+  name: logpipeline-test-1
 spec:
   parsers: [ ]
   multilineParsers: [ ]
-  filters: [ ]
-  outputs:
+  filters:
     - content: |
-        Name               stdout
-          Match              *
+        Name               abc
+        Match              logpipeline-test.*
+  outputs: []
   files: []
   secretRefs: [ ]

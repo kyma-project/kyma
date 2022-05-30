@@ -80,7 +80,9 @@ describe('Telemetry Operator tests', function() {
       assert.fail('Should not be able to apply invalid LogPipeline');
     } catch (e) {
       assert.equal(e.statusCode, 403);
-      expect(e.body.message).to.have.string('denied the request', 'Invalid indentation level');
+      expect(e.body.message).to.have.string('denied the request');
+      const errMsg = 'section \'abc\' tried to instance a plugin name that don\'t exists';
+      expect(e.body.message).to.have.string(errMsg);
     }
   });
 

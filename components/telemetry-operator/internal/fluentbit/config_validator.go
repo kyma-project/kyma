@@ -55,10 +55,10 @@ func (v *configValidator) Validate(ctx context.Context, configFilePath string) e
 
 	out, err := v.RunCmd(ctx, v.FluentBitPath, fluentBitArgs...)
 	if err != nil {
-		if strings.Contains(out, "Error") {
+		if strings.Contains(out, "error") || strings.Contains(out, "Error") {
 			return errors.New(errDescription + extractError(out))
 		}
-		return fmt.Errorf("Error while validating Fluent Bit config: %v", err)
+		return fmt.Errorf("error while validating Fluent Bit config: %v", err.Error())
 	}
 
 	return nil
