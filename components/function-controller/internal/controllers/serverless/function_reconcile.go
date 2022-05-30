@@ -2,7 +2,6 @@ package serverless
 
 import (
 	"context"
-	"reflect"
 	"time"
 
 	"go.uber.org/zap"
@@ -17,7 +16,6 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
-	"sigs.k8s.io/controller-runtime/pkg/event"
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
 
 	"github.com/kyma-project/kyma/components/function-controller/internal/git"
@@ -75,37 +73,7 @@ func (r *FunctionReconciler) SetupWithManager(mgr ctrl.Manager) (controller.Cont
 			),
 			MaxConcurrentReconciles: 1, // Build job scheduling mechanism requires this parameter to be set to 1. The mechanism is based on getting active and stateless jobs, concurrent reconciles makes it non deterministic . Value 1 removes data races while fetching list of jobs. https://github.com/kyma-project/kyma/issues/10037
 		}).
-		WithEventFilter(predicate.Funcs{
-			UpdateFunc: func(event event.UpdateEvent) bool {
-				r.Log.Debug("old", event.ObjectOld.GetName())
-				r.Log.Debug("new:", event.ObjectNew.GetName())
-
-				oldFn, ok := event.ObjectOld.(*serverlessv1alpha1.Function)
-				if !ok {
-					v := reflect.ValueOf(oldFn)
-					r.Log.Debug("Can't cast:", v.Type())
-					return true
-				}
-
-				if oldFn == nil {
-					return false
-				}
-
-				newFn, ok := event.ObjectNew.(*serverlessv1alpha1.Function)
-				if !ok {
-					v := reflect.ValueOf(newFn)
-					r.Log.Debug("Can't cast:", v.Type())
-					return true
-				}
-				if newFn == nil {
-					return false
-				}
-
-				equalStasus := equalFunctionStatus(oldFn.Status, newFn.Status)
-				r.Log.Debug("Statuses are equal: ", equalStasus)
-
-				return equalStasus
-			}}).
+		WithEventFilter(predicate.Funcs{UpdateFunc: IsNotFunctionStatusUpdate(r.Log)}).
 		Build(r)
 }
 
