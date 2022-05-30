@@ -4,6 +4,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"strings"
+	"time"
 
 	"go.uber.org/zap"
 
@@ -44,6 +46,10 @@ type reconciler struct {
 	k8s
 	out
 }
+
+const (
+	continuousGitCheckoutLabel = "serverless.kyma-project.io/continuousGitCheckout"
+)
 
 func (m *reconciler) reconcile(ctx context.Context, f serverlessv1alpha1.Function) (ctrl.Result, error) {
 	state := systemState{instance: f}
@@ -169,9 +175,16 @@ func stateFnGitCheckSources(ctx context.Context, r *reconciler, s *systemState) 
 		Auth:      auth,
 	}
 
+	if skipGitSourceCheck(s.instance, r.cfg) {
+		r.log.Info(fmt.Sprintf("skipping function [%s] source check", s.instance.Name))
+		expectedJob := s.buildGitJob(options, r.cfg)
+		return buildStateFnCheckImageJob(expectedJob)
+	}
+
 	var revision string
 	revision, r.err = r.operator.LastCommit(options)
 	if r.err != nil {
+		r.log.Error(r.err, "while fetching last commit")
 		var errMsg string
 		r.result, errMsg = NextRequeue(r.err)
 		// TODO: This return masks the error from r.syncRevision() and doesn't pass it to the controller. This should be fixed in a follow up PR.
@@ -217,4 +230,18 @@ func stateFnInitialize(ctx context.Context, r *reconciler, s *systemState) state
 	}
 
 	return stateFnInlineCheckSources
+}
+
+func skipGitSourceCheck(f serverlessv1alpha1.Function, cfg cfg) bool {
+	if v, ok := f.Labels[continuousGitCheckoutLabel]; ok && strings.ToLower(v) == "true" {
+		return false
+	}
+
+	// ConditionConfigurationReady is set to true for git functions when the source is updated. if not, this is a new function, we need to do git check.
+	configured := f.Status.Condition(serverlessv1alpha1.ConditionConfigurationReady)
+	if configured == nil || !configured.IsTrue() {
+		return false
+	}
+
+	return time.Since(configured.LastTransitionTime.Time) < cfg.fn.FunctionReadyRequeueDuration
 }

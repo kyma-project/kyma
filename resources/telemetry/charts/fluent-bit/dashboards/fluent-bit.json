@@ -1292,7 +1292,7 @@
   "refresh": "10s",
   "schemaVersion": 27,
   "style": "dark",
-  "tags": [],
+  "tags": ["kyma", "telemetry"],
   "templating": {
     "list": [
       {
@@ -1350,7 +1350,7 @@
     ]
   },
   "time": {
-    "from": "now-30m",
+    "from": "now-1h",
     "to": "now"
   },
   "timepicker": {
