@@ -60,7 +60,7 @@ Follow these steps:
 
     >**NOTE:** Read more about the [supported authentication methods](../../05-technical-reference/svls-04-git-source-type.md).
 
-3. Create a [GitRepository CR](../../05-technical-reference/00-custom-resources/svls-02-gitrepository.md) that specifies the Git repository metadata:
+3. Create a [Git Repository CR](../../05-technical-reference/00-custom-resources/svls-02-gitrepository.md) that specifies the Git repository metadata:
 
     ```yaml
     cat <<EOF | kubectl apply -f -
@@ -83,7 +83,8 @@ Follow these steps:
         type: # "basic" or "key"
         secretName: # "git-creds-basic" or "git-creds-key"
     ```
-
+   
+    >**NOTE:** To avoid performance degradation caused by large Git repositories and large monorepos, Function Controller implements a configurable backoff period for the source checkout based on `APP_FUNCTION_REQUEUE_DURATION`. This behavior can be disabled, allowing the controller to perform the source checkout with every reconciliation loop by labeling the Function CR with the label `serverless.kyma-project.io/continuousGitCheckout: true`
 4. Create a Function CR that specifies the Function's logic and points to the directory with code and dependencies in the given repository.
 
     ```yaml
@@ -145,17 +146,17 @@ Follow these steps:
 
     - Confirm by selecting **Create**.
 
-3. In the left navigation panel, go to **Workloads** > **Functions** and select **Connected repositories**.
+3. To connect the repository, go to **Workloads** > **Functions** > **Connected repositories**.
 
-4. Select **Connect Repository**, fill in the **URL** field with `https://github.com/kyma-project/examples.git`, and confirm by selecting **Connect**.
+4. Connect your repository, with `https://github.com/kyma-project/examples.git` as repository URL.
 
-    >**NOTE:** If you want to connect a secured repository, change the **Authorization** field from `Public` to `Basic` or `SSH key` and fill in the required fields.
+    >**NOTE:** If you want to connect a secured repository instead of a public one, select authorization method `Basic` or `SSH key` and fill in the required fields.
 
 5. Go back to the **Functions** view and select **Create Function**.
 
-6. In the pop-up box, change **Source Type** to `Git repository`. Select the created repository's name and fill in the **Reference** field with `main` and the **Base Directory** field with `orders-service/function`. Select **Create** to confirm changes.
+6. Under **Advanced**, change the source type to `Git repository` and select the created repository's name. As reference, enter `main`, and as base directory, `orders-service/function`.
 
-    The pop-up box closes and the message appears on the screen after a while, confirming that the Function was created.
+    After a while, a message confirms that the Function has been created.
     Make sure that the new Function has the `RUNNING` status.
 
     </details>

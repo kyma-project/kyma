@@ -20,7 +20,7 @@ If the etcd database experiences any problems, Gardener automatically restores t
 
 ### Volume backup
 
-We recommend that you back up your volumes periodically with the [VolumeSnapshot API resource](https://kubernetes.io/docs/concepts/storage/volume-snapshots/#volumesnapshots), which is provided by Kubernetes. You can use your snapshot to provision a new volume prepopulated with the snapshot data, or restore the existing volume to the state represented by the snapshot.
+We recommend that you back up your volumes periodically with the [Volume Snapshot API resource](https://kubernetes.io/docs/concepts/storage/volume-snapshots/#volumesnapshots), which is provided by Kubernetes. You can use your snapshot to provision a new volume prepopulated with the snapshot data, or restore the existing volume to the state represented by the snapshot.
 
 Taking volume snapshots is possible thanks to [Container Storage Interface (CSI) drivers](https://kubernetes-csi.github.io/docs/), which allow third-party storage providers to expose storage systems in Kubernetes. For details on available drivers, see the [full list of drivers](https://kubernetes-csi.github.io/docs/drivers.html).
 
@@ -37,50 +37,17 @@ If you want to provision a new volume or restore the existing one, create on-dem
 
 <div tabs name="backup-providers">
   <details>
-  <summary label="AKS">
-  AKS
-  </summary>
-
-### Prerequisites
-
-  The minimum supported Kubernetes version is 1.17.
-
-### Steps
-
-  1. [Install the CSI driver](https://github.com/kubernetes-sigs/azuredisk-csi-driver/blob/master/docs/install-csi-driver-master.md).
-  2. [Create a volume snapshot](https://github.com/kubernetes-sigs/azuredisk-csi-driver/tree/master/deploy/example/snapshot).
-
-  </details>
-  
-  <details>
-  <summary label="GKE">
-  GKE
-  </summary>
-
-### Prerequisites
-
-  The minimum supported Kubernetes version is 1.14.
-
-### Steps
-
-  1. [Enable the required feature gate on the cluster](https://cloud.google.com/kubernetes-engine/docs/how-to/gce-pd-csi-driver).
-  2. Check out [the repository for the Google Compute Engine Persistent Disk (GCE PD) CSI driver](https://github.com/kubernetes-sigs/gcp-compute-persistent-disk-csi-driver) for details on how to use volume snapshots on GKE.
-
-  </details>
-
-  <details>
   <summary label="Gardener GCP">
   Gardener
   </summary>
 
 ### Prerequisites
 
-  - As of Kubernetes version 1.18, Gardener **GCP** and **AWS** by default use CSI drivers and support taking volume snapshots.
   - Gardener **Azure** supports CSI drivers as of Kubernetes version 1.21.
 
 ### Steps
 
-  1. Create a VolumeSnapshotClass with the correct driver:
+  1. Create a Volume Snapshot Class with the correct driver:
     - for GCP: `pd.csi.storage.gke.io`
     - for AWS: `ebs.csi.aws.com`
     - for Azure: `disk.csi.azure.com`
@@ -96,7 +63,7 @@ If you want to provision a new volume or restore the existing one, create on-dem
   deletionPolicy: Delete
   ```
   
-  2. Create a VolumeSnapshot resource:
+  2. Create a Volume Snapshot resource:
 
   ```yaml
   apiVersion: snapshot.storage.k8s.io/v1beta1
@@ -104,6 +71,7 @@ If you want to provision a new volume or restore the existing one, create on-dem
   metadata:
     name: snapshot
   spec:
+    volumeSnapshotClassName: snapshot-class
     source:
       persistentVolumeClaimName: {PVC_NAME}
   ```
@@ -124,7 +92,6 @@ If you want to provision a new volume or restore the existing one, create on-dem
   spec:
     accessModes:
      - ReadWriteOnce
-    storageClassName: snapshot-class
     resources:
       requests:
         storage: {SIZE_OF_ORIGINAL_PVC}
@@ -135,11 +102,34 @@ If you want to provision a new volume or restore the existing one, create on-dem
   ```
 
   </details>
+  <details>
+  <summary label="AKS">
+  AKS
+  </summary>
+
+### Steps
+
+  1. [Install the CSI driver](https://github.com/kubernetes-sigs/azuredisk-csi-driver/blob/master/docs/install-csi-driver-master.md).
+  2. Follow our instructions to create a volume snapshot on Gardener, using the driver for Azure.
+
+  </details>
+  
+  <details>
+  <summary label="GKE">
+  GKE
+  </summary>
+
+### Steps
+
+  1. [Enable the required feature gate on the cluster](https://cloud.google.com/kubernetes-engine/docs/how-to/gce-pd-csi-driver).
+  2. Check out [the repository for the Google Compute Engine Persistent Disk (GCE PD) CSI driver](https://github.com/kubernetes-sigs/gcp-compute-persistent-disk-csi-driver) for details on how to use volume snapshots on GKE.
+
+  </details>
  </div>
 
 ## Create a periodic snapshot job
 
-You can also create a CronJob to handle taking volume snapshots periodically. A sample CronJob definition that includes the required ServiceAccount and roles looks as follows:
+You can also create a Cron Job to handle taking volume snapshots periodically. A sample Cron Job definition that includes the required Service Account and roles looks as follows:
 
 ```yaml
 ---
@@ -185,7 +175,7 @@ spec:
           serviceAccountName: volume-snapshotter
           containers:
           - name: job
-            image: eu.gcr.io/kyma-project/incubator/k8s-tools:20220222-0161f9f8
+            image: eu.gcr.io/kyma-project/incubator/k8s-tools:20220525-4bd6d72e
             command:
               - /bin/bash
               - -c

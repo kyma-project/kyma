@@ -12,6 +12,10 @@ nameOverride: ""
 # Full chart name override
 fullnameOverride: ""
 
+## -- Pod priority
+## https://kubernetes.io/docs/concepts/configuration/pod-priority-preemption/
+# priorityClassName: ""
+
 # Configures the Kubernetes service
 service:
   # Configures the Kubernetes service for the proxy port.
@@ -22,11 +26,16 @@ service:
     type: ClusterIP
     # The service port
     port: 4444
+    name: http
     # If you do want to specify annotations, uncomment the following
     # lines, adjust them as necessary, and remove the curly braces after 'annotations:'.
     annotations: {}
     # kubernetes.io/ingress.class: nginx
     # kubernetes.io/tls-acme: "true"
+    labels: { }
+    #      If you do want to specify additional labels, uncomment the following
+    #      lines, adjust them as necessary, and remove the curly braces after 'labels:'.
+    #      e.g.  app: hydra
   # Configures the Kubernetes service for the api port.
   admin:
     # En-/disable the service
@@ -35,11 +44,33 @@ service:
     type: ClusterIP
     # The service port
     port: 4445
+    # -- The service port name. Useful to set a custom service port name if it must follow a scheme (e.g. Istio)
+    name: http
     # If you do want to specify annotations, uncomment the following
     # lines, adjust them as necessary, and remove the curly braces after 'annotations:'.
     annotations: {}
     # kubernetes.io/ingress.class: nginx
     # kubernetes.io/tls-acme: "true"
+    labels: {}
+    #      If you do want to specify additional labels, uncomment the following
+    #      lines, adjust them as necessary, and remove the curly braces after 'labels:'.
+    #      e.g.  app: hydra
+
+secret:
+  # -- switch to false to prevent creating the secret
+  enabled: false
+  # -- Provide custom name of existing secret, or custom name of secret to be created
+  # nameOverride: "myCustomSecret"
+  # -- Annotations to be added to secret. Annotations are added only when secret is being created. Existing secret will not be modified.
+  secretAnnotations:
+    # Create the secret before installation, and only then. This saves the secret from regenerating during an upgrade
+    # pre-upgrade is needed to upgrade from 0.7.0 to newer. Can be deleted afterwards.
+    helm.sh/hook-weight: "0"
+    helm.sh/hook: "pre-install, pre-upgrade"
+    helm.sh/hook-delete-policy: "before-hook-creation"
+    helm.sh/resource-policy: "keep"
+  # -- switch to false to prevent checksum annotations being maintained and propogated to the pods
+  hashSumEnabled: true
 
 # Configure ingress
 ingress:
@@ -47,12 +78,15 @@ ingress:
   public:
     # En-/Disable the proxy ingress.
     enabled: false
+    classname: ""
     annotations: {}
     #     kubernetes.io/ingress.class: nginx
     #     kubernetes.io/tls-acme: "true"
     hosts:
       - host: public.hydra.localhost
-        paths: ["/"]
+        paths:
+          - path: /
+            pathType: ImplementationSpecific
   #    tls: []
   #        hosts:
   #          - proxy.hydra.local
@@ -61,7 +95,7 @@ ingress:
   admin:
     # En-/Disable the api ingress.
     enabled: false
-
+    classname: ""
     annotations: {}
     #      If you do want to specify annotations, uncomment the following
     #      lines, adjust them as necessary, and remove the curly braces after 'annotations:'.
@@ -69,7 +103,9 @@ ingress:
     #      kubernetes.io/tls-acme: "true"
     hosts:
       - host: admin.hydra.localhost
-        paths: ["/"]
+        paths:
+          - path: /
+            pathType: ImplementationSpecific
 #    tls: []
 #      hosts:
 #        - api.hydra.local
@@ -90,25 +126,23 @@ hydra:
           - 10.0.0.0/8
           - 172.16.0.0/12
           - 192.168.0.0/16
+    # -- The secrets have to be provided as a string slice, example:
+    # system:
+    #   - "OG5XbmxXa3dYeGplQXpQanYxeEFuRUFa"
+    #   - "foo bar 123 456 lorem"
+    #   - "foo bar 123 456 lorem 1"
+    #   - "foo bar 123 456 lorem 2"
+    #   - "foo bar 123 456 lorem 3"
     secrets: {}
-    secretAnnotations:
-    # Create the secret before installation, and only then. This saves the secret from regenerating during an upgrade
-      helm.sh/hook: "pre-install,pre-upgrade"
-      helm.sh/hook-delete-policy: "before-hook-creation"
-    # Use a pre-existing secret (see secret.yaml for required fields)
-    # existingSecret: my-preexisting-secret
+
     urls:
       self: {}
 
   autoMigrate: false
   dangerousForceHttp: false
   dangerousAllowInsecureRedirectUrls: false
-  # existingSecret: secret
 
 deployment:
-  strategy: {} # Read more: https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#strategy
-
-  resources: {}
   #  We usually recommend not to specify default resources and to leave this as a conscious
   #  choice for the user. This also increases chances charts run on environments with little
   #  resources, such as Minikube. If you do want to specify resources, uncomment the following
@@ -119,6 +153,19 @@ deployment:
   #  requests:
   #    cpu: 100m
   #  memory: 128Mi
+  resources: {}
+
+  securityContext:
+    capabilities:
+      drop:
+        - ALL
+    readOnlyRootFilesystem: true
+    runAsNonRoot: true
+    runAsUser: 100
+    allowPrivilegeEscalation: false
+    privileged: false
+
+  lifecycle: {}
 
   labels: {}
   #      If you do want to specify additional labels, uncomment the following
@@ -178,14 +225,32 @@ deployment:
   # Configure node tolerations.
   tolerations: []
 
-  ## Specify the serviceAccountName value.
-  ## In some situations it is needed to provides specific permissions to Hydra deployments
-  ## Like for example installing Hydra on a cluster with a PosSecurityPolicy and Istio.
-  ## Uncoment if it is needed to provide a ServiceAccount for the Hydra deployment.
-  # serviceAccountName:
+  # -- Specify the serviceAccountName value.
+  # In some situations it is needed to provides specific permissions to Hydra deployments
+  # Like for example installing Hydra on a cluster with a PosSecurityPolicy and Istio.
+  # Uncoment if it is needed to provide a ServiceAccount for the Hydra deployment.
+  # -- Specify the serviceAccountName value.
+  # In some situations it is needed to provides specific permissions to Hydra deployments
+  # Like for example installing Hydra on a cluster with a PosSecurityPolicy and Istio.
+  # Uncoment if it is needed to provide a ServiceAccount for the Hydra deployment.
+  serviceAccount:
+    # -- Specifies whether a service account should be created
+    create: false
+    # -- Annotations to add to the service account
+    annotations: {}
+    # -- The name of the service account to use. If not set and create is true, a name is generated using the fullname template
+    name: ""
 
+  # -- If you want to mount external volume
   extraVolumes: []
+  # - name: my-volume
+  #   secret:
+  #     secretName: my-secret
   extraVolumeMounts: []
+  # - name: my-volume
+  #   mountPath: /etc/secrets/my-secret
+  #   readOnly: true
+
   # If you want to mount external volume
   # For example, mount a secret containing Certificate root CA to verify database
   # TLS connection.
@@ -206,19 +271,59 @@ deployment:
   # targetCPUUtilizationPercentage: 80
   # targetMemoryUtilizationPercentage: 80
 
+  # -- Configure the probes for when the deployment is considered ready and ongoing health check
+  livenessProbe:
+    initialDelaySeconds: 30
+    periodSeconds: 10
+    failureThreshold: 5
+  readinessProbe:
+    initialDelaySeconds: 30
+    periodSeconds: 10
+    failureThreshold: 5
+
+  # https://github.com/kubernetes/kubernetes/issues/57601
+  automountServiceAccountToken: true
+
+  # -- If you want to add extra init containers.
+  extraInitContainers: {}
+  # extraInitContainers: |
+  #  - name: ...
+  #    image: ...
+
+  # -- If you want to add extra sidecar containers.
+  extraContainers: {}
+  # extraContainers: |
+  #  - name: ...
+  #    image: ...
+
 # Configure node affinity
 affinity: {}
 
-
-# Configures controller setup
+# -- Configures controller setup
 maester:
   enabled: true
-  # Values for the hydra admin service arguments to hydra-maester
-  adminService: {}
-    # The service name value may need to be set if you use
-    # `fullnameOverride` for the parent chart
-    # name:
 
-    # You only need to set this port if you change the value for
-    # `service.admin.port` in the parent chart
-    # port:
+# -- Values for the hydra admin service arguments to hydra-maester
+hydra-maester:
+  adminService:
+    # -- The service name value may need to be set if you use `fullnameOverride` for the parent chart
+    name: ""
+    # -- You only need to set this port if you change the value for `service.admin.port` in the parent chart
+    port:
+
+# -- Sidecar watcher configuration
+watcher:
+  enabled: false
+  #image: oryd/k8s-toolbox:0.0.2
+  mountFile: ""
+  # mountFile: /etc/secrets/my-secret/foo
+
+# -- PodDistributionBudget configuration
+pdb:
+  enabled: false
+  spec:
+    minAvailable: 1
+
+configmap:
+  # -- switch to false to prevent checksum annotations being maintained and propogated to the pods
+  hashSumEnabled: true

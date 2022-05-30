@@ -9,15 +9,20 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-func newTestGitFunction(namespace, name string, minReplicas, maxReplicas int) *serverlessv1alpha1.Function {
+func newTestGitFunction(namespace, name string, minReplicas, maxReplicas int, continuousGitCheckout bool) *serverlessv1alpha1.Function {
 	one := int32(minReplicas)
 	two := int32(maxReplicas)
 	suffix := rand.Int()
+	labels := map[string]string{}
+	if continuousGitCheckout {
+		labels[continuousGitCheckoutLabel] = "true"
+	}
 
 	return &serverlessv1alpha1.Function{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      fmt.Sprintf("%s-%d", name, suffix),
 			Namespace: namespace,
+			Labels:    labels,
 		},
 		Spec: serverlessv1alpha1.FunctionSpec{
 			Type:    serverlessv1alpha1.SourceTypeGit,
@@ -47,6 +52,12 @@ func newTestGitFunction(namespace, name string, minReplicas, maxReplicas int) *s
 			},
 		},
 	}
+}
+
+func newFixFunctionWithCustomImage(namespace, name, runtimeImageOverride string, minReplicas, maxReplicas int) *serverlessv1alpha1.Function {
+	fn := newFixFunction(namespace, name, minReplicas, maxReplicas)
+	fn.Spec.RuntimeImageOverride = runtimeImageOverride
+	return fn
 }
 
 func newFixFunction(namespace, name string, minReplicas, maxReplicas int) *serverlessv1alpha1.Function {

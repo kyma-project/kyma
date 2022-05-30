@@ -10,6 +10,7 @@ axios.defaults.httpsAgent = httpsAgent;
 const {
   debug,
   retryPromise,
+  replaceAllInString,
 } = require('../utils');
 
 const {queryPrometheus} = require('../monitoring/client');
@@ -27,15 +28,6 @@ const dashboards = {
       expect(foundMetric).to.be.not.undefined;
     },
   },
-  delivery_applicationConnectivityValidator: {
-    title: 'Requests to application connectivity validator',
-    query: 'sum by(destination_service) (rate(istio_requests_total{destination_service="central-application-connectivity-validator.kyma-system.svc.cluster.local", response_code=~"2.*"}[5m]))',
-    backends: ['nats', 'beb'],
-    assert: function(result) {
-      const foundMetric = result.find((res) => res.metric.destination_service.startsWith('central-application-connectivity-validator'));
-      expect(foundMetric).to.be.not.undefined;
-    },
-  },
   delivery_subscribers: {
     title: 'Requests to subscribers',
     query: `
@@ -49,29 +41,6 @@ const dashboards = {
     backends: ['nats'],
     assert: function(result) {
       const foundMetric = result.find((res) => res.metric.destination_workload.startsWith('lastorder'));
-      expect(foundMetric).to.be.not.undefined;
-    },
-  },
-  // The latency dashboard
-  latency_connectivityValidatorToPublisherProxy: {
-    title: 'Latency of Connectivity Validator -> Event Publisher',
-    query: `
-        histogram_quantile(
-          0.99999, 
-          sum(rate(
-            istio_request_duration_milliseconds_bucket{
-              source_workload_namespace="kyma-system",
-              source_workload="central-application-connectivity-validator",
-              destination_workload_namespace="kyma-system",
-              destination_workload="eventing-publisher-proxy"
-            }[5m])
-          ) by (le,source_workload_namespace,source_workload,destination_workload_namespace,destination_workload))
-        `,
-    backends: ['nats', 'beb'],
-    assert: function(result) {
-      const foundMetric = result.find((res) =>
-        res.metric.source_workload.toLowerCase() === 'central-application-connectivity-validator' &&
-        res.metric.destination_workload.toLowerCase() === 'eventing-publisher-proxy');
       expect(foundMetric).to.be.not.undefined;
     },
   },
@@ -153,6 +122,42 @@ const dashboards = {
   },
 };
 
+const skrDashboards = {
+  // The delivery dashboard
+  delivery_applicationConnectivityValidator: {
+    title: 'Requests to application connectivity validator',
+    query: 'sum by(destination_service) (rate(istio_requests_total{destination_service="central-application-connectivity-validator.kyma-system.svc.cluster.local", response_code=~"2.*"}[5m]))',
+    backends: ['nats', 'beb'],
+    assert: function(result) {
+      const foundMetric = result.find((res) => res.metric.destination_service.startsWith('central-application-connectivity-validator'));
+      expect(foundMetric).to.be.not.undefined;
+    },
+  },
+  // The latency dashboard
+  latency_connectivityValidatorToPublisherProxy: {
+    title: 'Latency of Connectivity Validator -> Event Publisher',
+    query: `
+        histogram_quantile(
+          0.99999, 
+          sum(rate(
+            istio_request_duration_milliseconds_bucket{
+              source_workload_namespace="kyma-system",
+              source_workload="central-application-connectivity-validator",
+              destination_workload_namespace="kyma-system",
+              destination_workload="eventing-publisher-proxy"
+            }[5m])
+          ) by (le,source_workload_namespace,source_workload,destination_workload_namespace,destination_workload))
+        `,
+    backends: ['nats', 'beb'],
+    assert: function(result) {
+      const foundMetric = result.find((res) =>
+        res.metric.source_workload.toLowerCase() === 'central-application-connectivity-validator' &&
+          res.metric.destination_workload.toLowerCase() === 'eventing-publisher-proxy');
+      expect(foundMetric).to.be.not.undefined;
+    },
+  },
+};
+
 // A generic assertion for the pod dashboards
 function ensureEventingPodsArePresent(result) {
   let controllerFound = false; let publisherProxyFound = false; let natsFound = false;
@@ -178,14 +183,57 @@ function runDashboardTestCase(dashboardName, test) {
   }, 120, 5000);
 }
 
-function eventingMonitoringTest(backend) {
-  for (const [dashboardName, test] of Object.entries(dashboards)) {
+function eventingMonitoringTest(backend, isSkr, isJetStreamEnabled = false) {
+  let allDashboards = dashboards;
+  if (isSkr) {
+    allDashboards = Object.assign(allDashboards, skrDashboards);
+  }
+
+  if (isJetStreamEnabled) {
+    allDashboards = Object.assign(allDashboards, getJetStreamDashboardTests());
+  }
+
+  for (const [dashboardName, test] of Object.entries(allDashboards)) {
     if (test.backends.includes(backend)) {
       it('Testing dashboard: ' + test.title, async () => {
         await runDashboardTestCase(dashboardName, test);
       });
     }
   }
+}
+
+function getJetStreamDashboardTests() {
+  const dashboardVariables = {
+    '$server': 'eventing-nats-0',
+    '$stream': 'sap',
+    '$consumer': '.*',
+    '$__rate_interval': '5m',
+  };
+
+  // load JetStream dashboard queries from JSON file
+  const natsDashboardQueries = require('./nats-dashboard-queries.json');
+
+  const dashboardTests = {};
+  for (let i = 0; i < natsDashboardQueries.length; i++) {
+    let finalQuery = natsDashboardQueries[i]['query'];
+    // replace variables in queries with values
+    for (const [variableName, value] of Object.entries(dashboardVariables)) {
+      finalQuery = replaceAllInString(finalQuery, variableName, value);
+    }
+
+    dashboardTests[`jetstream_dash_${i}`] = {
+      title: natsDashboardQueries[i]['title'],
+      query: finalQuery,
+      backends: ['nats'],
+      // The assert function receives the `data.result` section of the query result:
+      // https://prometheus.io/docs/prometheus/latest/querying/api/#instant-queries
+      assert: function(result) {
+        // checking if the length of the result contains something
+        expect(result).to.have.length.greaterThan(0);
+      },
+    };
+  }
+  return dashboardTests;
 }
 
 module.exports = {

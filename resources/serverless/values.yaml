@@ -73,33 +73,33 @@ global:
   images:
     k8s_tools:
       name: "k8s-tools"
-      version: "20220222-0161f9f8"
+      version: "20220525-4bd6d72e"
       directory: "tpi"
     function_controller:
       name: "function-controller"
-      version: "PR-13516"
+      version: "31f0ca68"
     function_webhook:
       name: "function-webhook"
-      version: "PR-13516"
+      version: "31f0ca68"
     function_build_init:
       name: "function-build-init"
-      version: "PR-13516"
+      version: "31f0ca68"
     function_runtime_nodejs12:
       name: "function-runtime-nodejs12"
-      version: "PR-13398"
+      version: "6575f14c"
     function_runtime_nodejs14:
       name: "function-runtime-nodejs14"
-      version: "PR-13398"
+      version: "6575f14c"
     function_runtime_python39:
       name: "function-runtime-python39"
-      version: "PR-13435"
+      version: "6575f14c"
     kaniko_executor:
       name: "kaniko-executor"
-      version: "1.7.0-6d270da8"
+      version: "1.8.0-a0c08196"
       directory: "tpi"
     registry:
       name: "registry"
-      version: "2.7.1-ff0c28bf"
+      version: "2.7.1-c33cdde0"
       directory: "tpi"
     google_pause:
       name: "pause-amd64"
@@ -108,10 +108,10 @@ global:
   testImages:
     function_controller_test:
       name: "function-controller-test"
-      version: "PR-13214"
+      version: "PR-14372"
     git_server:
       name: "gitserver"
-      version: "PR-13313"
+      version: "708f6a87"
   highPriorityClassName: "kyma-system-priority"
 
 images:
@@ -125,13 +125,17 @@ deployment:
   annotations: {}
   extraProperties: {}
   livenessProbe:
+    successThreshold: 1
+    failureThreshold: 3
     initialDelaySeconds: 50
-    timeoutSeconds: 2
-    periodSeconds: 10
+    timeoutSeconds: 60
+    periodSeconds: 120
   readinessProbe:
+    successThreshold: 1
+    failureThreshold: 3
     initialDelaySeconds: 10
-    timeoutSeconds: 1
-    periodSeconds: 2
+    timeoutSeconds: 10
+    periodSeconds: 30
 
 pod:
   labels: {}
@@ -153,10 +157,10 @@ containers:
   manager:
     resources:
       limits:
-        cpu: 100m
+        cpu: 300m
         memory: 160Mi #This is temporary. helm3 is using secrets as storage by default. I talked already with michalhudy to exclude secrets with helm labels from watching.
       requests:
-        cpu: 10m
+        cpu: 75m
         memory: 32Mi
     containerSecurityContext:
       privileged: false
@@ -190,6 +194,8 @@ containers:
         value: '{{ template "fullname" . }}-build'
       targetCPUUtilizationPercentage:
         value: "50"
+      functionJaegerServiceEndpoint:
+        value: "http://tracing-jaeger-collector.kyma-system.svc.cluster.local:14268/api/traces"
       functionPublisherProxyAddress:
         value: "http://eventing-publisher-proxy.kyma-system.svc.cluster.local/publish"
       functionRequeueDuration:
@@ -201,7 +207,7 @@ containers:
       logLevel:
         value: "info"
       healthzLivenessTimeout:
-        value: "1s"
+        value: "10s"
 
 services:
   manager:

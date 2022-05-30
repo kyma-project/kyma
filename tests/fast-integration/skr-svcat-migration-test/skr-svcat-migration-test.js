@@ -15,20 +15,20 @@ const {
   genRandom,
   initializeK8sClient,
   switchDebug,
-  waitForJob,
   printContainerLogs,
   waitForDeployment,
 } = require('../utils');
 const t = require('./test-helpers');
 const sampleResources = require('./deploy-sample-resources');
 const {KCPWrapper, KCPConfig} = require('../kcp/client');
+const s = require('../smctl/helpers');
 
 const kcp = new KCPWrapper(KCPConfig.fromEnv());
 
 describe('SKR SVCAT migration test', function() {
   const keb = new KEBClient(KEBConfig.fromEnv());
   const gardener = new GardenerClient(GardenerConfig.fromEnv());
-  const smAdminCreds = t.SMCreds.fromEnv();
+  const smAdminCreds = s.AdminCreds.fromEnv();
 
   const suffix = genRandom(4);
   const appName = `app-${suffix}`;
@@ -50,12 +50,12 @@ describe('SKR SVCAT migration test', function() {
 
   let platformCreds;
   it('Should provision new ServiceManager platform', async function() {
-    platformCreds = await t.provisionPlatform(smAdminCreds, svcatPlatform);
+    platformCreds = await s.provisionPlatform(smAdminCreds, svcatPlatform);
   });
 
   let btpOperatorCreds;
   it('Should instantiate ServiceManager instance and binding for BTP operator', async function() {
-    btpOperatorCreds = await t.smInstanceBinding(btpOperatorInstance, btpOperatorBinding);
+    btpOperatorCreds = await s.smInstanceBinding(smAdminCreds, btpOperatorInstance, btpOperatorBinding);
   });
 
   let skr;
@@ -100,7 +100,8 @@ describe('SKR SVCAT migration test', function() {
   });
 
   it('Should check if pod presets injected secrets to functions containers', async function() {
-    await t.checkPodPresetEnvInjected();
+    const timeoutInMinutes = 30;
+    await t.checkPodPresetEnvInjected(timeoutInMinutes);
   });
 
   it('Should print the container logs of the sm proxy', async function() {
@@ -108,23 +109,25 @@ describe('SKR SVCAT migration test', function() {
   });
 
   it('Should mark the platform for migration in Service Manager', async function() {
-    await t.markForMigration(smAdminCreds, platformCreds.clusterId, btpOperatorCreds.instanceId);
+    await s.markForMigration(smAdminCreds, platformCreds.clusterId, btpOperatorCreds.instanceId);
   });
 
   it('Should update SKR with BTP Operator Credentials', async function() {
     await updateSKR(keb, kcp, gardener, instanceID, skr.shoot.name, null, updateTimeout, btpOperatorCreds, true);
   });
 
+  it('Should get Runtime Status after patch with BTP Operator Credentials', async function() {
+    const runtimeStatus = await kcp.getRuntimeStatusOperations(instanceID);
+    console.log(`\nRuntime status after patch: ${runtimeStatus}`);
+    await kcp.reconcileInformationLog(runtimeStatus);
+  });
+
   it('Should wait for btp-operator deployment availability', async function() {
     await waitForDeployment('sap-btp-operator-controller-manager', 'kyma-system', 10 * 60 * 1000); // 10 minutes
   });
 
-  it('Should wait for migration job to finish', async function() {
-    await waitForJob('sap-btp-operator-migration', 'kyma-system', 10 * 60 * 1000); // 10 minutes
-  });
-
-  it('Should print the container logs of the migration job', async function() {
-    await printContainerLogs('job-name=sap-btp-operator-migration', 'migration', 'kyma-system');
+  it('Should check migrated BTP resources', async function() {
+    await t.checkMigratedBTPResources();
   });
 
   it('Should still contain pod presets and the secrets', async function() {
@@ -139,7 +142,22 @@ describe('SKR SVCAT migration test', function() {
   });
 
   it('Should check if presets injected secrets in func containers are present after migration', async function() {
-    await t.checkPodPresetEnvInjected();
+    const timeoutInMinutes = 5;
+    await t.checkPodPresetEnvInjected(timeoutInMinutes);
+  });
+
+  it('Perform Upgrade to the same version', async function() {
+    await kcp.upgradeKyma(instanceID, '2.2.0');
+  });
+
+  it('Should get Runtime Status after kyma upgrade', async function() {
+    const runtimeStatus = await kcp.getRuntimeStatusOperations(instanceID);
+    console.log(`\nRuntime status after kyma upgrade: ${runtimeStatus}`);
+    await kcp.reconcileInformationLog(runtimeStatus);
+  });
+
+  it('Should wait for btp-operator deployment to be still available after kyma upgrade', async function() {
+    await waitForDeployment('sap-btp-operator-controller-manager', 'kyma-system', 10 * 60 * 1000); // 10 minutes
   });
 
   it('Should destroy sample service catalog resources', async function() {
@@ -160,6 +178,6 @@ describe('SKR SVCAT migration test', function() {
   });
 
   it('Should cleanup platform --cascade, operator instances and bindings', async function() {
-    await t.cleanupInstanceBinding(smAdminCreds, svcatPlatform, btpOperatorInstance, btpOperatorBinding);
+    await s.cleanupInstanceBinding(smAdminCreds, svcatPlatform, btpOperatorInstance, btpOperatorBinding);
   });
 });

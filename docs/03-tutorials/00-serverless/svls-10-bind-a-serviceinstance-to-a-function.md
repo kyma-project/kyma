@@ -168,7 +168,7 @@ Follow these steps:
 
 1. Select a Namespace from the drop-down list in the top navigation panel where you want to provision the Redis service.
 
-2. In the left navigation panel, go to **Configuration** > **Addons** and select **Create Addons Configuration**.
+2. Go to **Configuration** > **Addons** and select **Create Addons Configuration**.
 
 3. Enter the name of your Addons Configuration and `https://github.com/kyma-project/addons/releases/download/0.15.0/index-testing.yaml` in the **Urls** field.
 
@@ -180,11 +180,11 @@ Follow these steps:
 
 ### Create a Service Instance
 
-1. In the left navigation panel, go to **Service Management** > **Catalog**. In the **Add-Ons** tab, you can see the list of all available Addons. Select **[Experimental] Redis**.
+1. Go to **Service Management** > **Catalog**. In the **Add-Ons** tab, you can see the list of all available Addons. Select **[Experimental] Redis**.
 
 2. Select **Add** to provision the Redis Service Class and create its instance in your Namespace.
 
-3. Change the **Name** to match the Function, select `micro` from the **Plan** drop-down list, and set **Image pull policy** to `Always`.
+3. Change the **Name** to match the Function, select `Micro` from the **Plan** drop-down list, and set **Image pull policy** to `Always`.
 
    > **NOTE:** The Service Instance, Service Binding, and Service Binding Usage can have different names than the Function, but it is recommended that all related resources share a common name.
 
@@ -194,7 +194,7 @@ Follow these steps:
 
 ### Bind the Function to the Service Instance
 
-1. In the left navigation panel, go to **Workloads** > **Functions** and select the Function you want to bind to the Service Instance.
+1. Go to **Workloads** > **Functions** and select the Function you want to bind to the Service Instance.
 
 2. Switch to the **Configuration** tab and select **Create Service Binding** in the **Service Bindings** section.
 

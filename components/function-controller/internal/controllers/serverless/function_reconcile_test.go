@@ -6,10 +6,13 @@ import (
 	"testing"
 	"time"
 
+	"go.uber.org/zap"
+
 	"github.com/kyma-project/kyma/components/function-controller/internal/controllers/serverless/automock"
 	"github.com/stretchr/testify/mock"
 
 	"github.com/kyma-project/kyma/components/function-controller/internal/resource"
+	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
 	"github.com/onsi/gomega"
 	appsv1 "k8s.io/api/apps/v1"
 	autoscalingv1 "k8s.io/api/autoscaling/v1"
@@ -20,9 +23,6 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/tools/record"
 	ctrl "sigs.k8s.io/controller-runtime"
-	"sigs.k8s.io/controller-runtime/pkg/log"
-
-	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
 )
 
 const (
@@ -46,7 +46,10 @@ func TestFunctionReconciler_Reconcile(t *testing.T) {
 	statsCollector := &automock.StatsCollector{}
 	statsCollector.On("UpdateReconcileStats", mock.Anything, mock.Anything).Return()
 
-	reconciler := NewFunction(resourceClient, log.Log, testCfg, nil, record.NewFakeRecorder(100), statsCollector, make(chan bool))
+	reconciler := NewFunction(resourceClient, zap.NewNop().Sugar(), testCfg, nil, record.NewFakeRecorder(100), statsCollector, make(chan bool))
+
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
 
 	t.Run("should successfully create Function", func(t *testing.T) {
 		//GIVEN
@@ -55,24 +58,29 @@ func TestFunctionReconciler_Reconcile(t *testing.T) {
 		g.Expect(resourceClient.Create(context.TODO(), inFunction)).To(gomega.Succeed())
 		defer deleteFunction(g, resourceClient, inFunction)
 
-		fnLabels := reconciler.functionLabels(inFunction)
+		s := systemState{
+			//TODO: https://github.com/kyma-project/kyma/issues/14079
+			instance: *inFunction,
+		}
+
+		fnLabels := s.functionLabels()
 		request := ctrl.Request{NamespacedName: types.NamespacedName{Namespace: inFunction.GetNamespace(), Name: inFunction.GetName()}}
 
 		//WHEN
 		t.Log("creating the ConfigMap")
-		result, err := reconciler.Reconcile(request)
+		result, err := reconciler.Reconcile(ctx, request)
 		g.Expect(err).To(gomega.BeNil())
 		g.Expect(result.Requeue).To(gomega.BeFalse())
-		g.Expect(result.RequeueAfter).To(gomega.Equal(time.Second * 0))
+		g.Expect(result.RequeueAfter).To(gomega.Equal(time.Second * 1))
 
 		function := &serverlessv1alpha1.Function{}
 		g.Expect(resourceClient.Get(context.TODO(), request.NamespacedName, function)).To(gomega.Succeed())
 		g.Expect(function.Status.Conditions).To(gomega.HaveLen(1))
-		g.Expect(reconciler.getConditionStatus(function.Status.Conditions, serverlessv1alpha1.ConditionConfigurationReady)).To(gomega.Equal(corev1.ConditionTrue))
-		g.Expect(reconciler.getConditionStatus(function.Status.Conditions, serverlessv1alpha1.ConditionBuildReady)).To(gomega.Equal(corev1.ConditionUnknown))
-		g.Expect(reconciler.getConditionStatus(function.Status.Conditions, serverlessv1alpha1.ConditionRunning)).To(gomega.Equal(corev1.ConditionUnknown))
+		g.Expect(getConditionStatus(function.Status.Conditions, serverlessv1alpha1.ConditionConfigurationReady)).To(gomega.Equal(corev1.ConditionTrue))
+		g.Expect(getConditionStatus(function.Status.Conditions, serverlessv1alpha1.ConditionBuildReady)).To(gomega.Equal(corev1.ConditionUnknown))
+		g.Expect(getConditionStatus(function.Status.Conditions, serverlessv1alpha1.ConditionRunning)).To(gomega.Equal(corev1.ConditionUnknown))
 
-		g.Expect(reconciler.getConditionReason(function.Status.Conditions, serverlessv1alpha1.ConditionConfigurationReady)).To(gomega.Equal(serverlessv1alpha1.ConditionReasonConfigMapCreated))
+		g.Expect(getConditionReason(function.Status.Conditions, serverlessv1alpha1.ConditionConfigurationReady)).To(gomega.Equal(serverlessv1alpha1.ConditionReasonConfigMapCreated))
 
 		configMapList := &corev1.ConfigMapList{}
 		err = reconciler.client.ListByLabel(context.TODO(), function.GetNamespace(), fnLabels, configMapList)
@@ -97,19 +105,19 @@ func TestFunctionReconciler_Reconcile(t *testing.T) {
 		}
 		g.Expect(resourceClient.Create(context.TODO(), &customDockerRegistryConfiguration)).To(gomega.Succeed())
 
-		result, err = reconciler.Reconcile(request)
+		result, err = reconciler.Reconcile(ctx, request)
 		g.Expect(err).To(gomega.BeNil())
 		g.Expect(result.Requeue).To(gomega.BeFalse())
-		g.Expect(result.RequeueAfter).To(gomega.Equal(time.Duration(0)))
+		g.Expect(result.RequeueAfter).To(gomega.Equal(time.Second * 1))
 
 		function = &serverlessv1alpha1.Function{}
 		g.Expect(resourceClient.Get(context.TODO(), request.NamespacedName, function)).To(gomega.Succeed())
 		g.Expect(function.Status.Conditions).To(gomega.HaveLen(conditionLen))
-		g.Expect(reconciler.getConditionStatus(function.Status.Conditions, serverlessv1alpha1.ConditionConfigurationReady)).To(gomega.Equal(corev1.ConditionTrue))
-		g.Expect(reconciler.getConditionStatus(function.Status.Conditions, serverlessv1alpha1.ConditionBuildReady)).To(gomega.Equal(corev1.ConditionUnknown))
-		g.Expect(reconciler.getConditionStatus(function.Status.Conditions, serverlessv1alpha1.ConditionRunning)).To(gomega.Equal(corev1.ConditionTrue))
+		g.Expect(getConditionStatus(function.Status.Conditions, serverlessv1alpha1.ConditionConfigurationReady)).To(gomega.Equal(corev1.ConditionTrue))
+		g.Expect(getConditionStatus(function.Status.Conditions, serverlessv1alpha1.ConditionBuildReady)).To(gomega.Equal(corev1.ConditionUnknown))
+		g.Expect(getConditionStatus(function.Status.Conditions, serverlessv1alpha1.ConditionRunning)).To(gomega.Equal(corev1.ConditionTrue))
 
-		g.Expect(reconciler.getConditionReason(function.Status.Conditions, serverlessv1alpha1.ConditionBuildReady)).To(gomega.Equal(serverlessv1alpha1.ConditionReasonJobsDeleted))
+		g.Expect(getConditionReason(function.Status.Conditions, serverlessv1alpha1.ConditionBuildReady)).To(gomega.Equal(serverlessv1alpha1.ConditionReasonJobsDeleted))
 
 		assertSuccessfulFunctionBuild(t, resourceClient, reconciler, request, fnLabels, true)
 
@@ -118,19 +126,19 @@ func TestFunctionReconciler_Reconcile(t *testing.T) {
 		t.Log("should detect registry configuration rollback to default configuration")
 		g.Expect(resourceClient.Delete(context.TODO(), &customDockerRegistryConfiguration)).To(gomega.Succeed())
 
-		result, err = reconciler.Reconcile(request)
+		result, err = reconciler.Reconcile(ctx, request)
 		g.Expect(err).To(gomega.BeNil())
 		g.Expect(result.Requeue).To(gomega.BeFalse())
-		g.Expect(result.RequeueAfter).To(gomega.Equal(time.Duration(0)))
+		g.Expect(result.RequeueAfter).To(gomega.Equal(time.Second * 1))
 
 		function = &serverlessv1alpha1.Function{}
 		g.Expect(resourceClient.Get(context.TODO(), request.NamespacedName, function)).To(gomega.Succeed())
 		g.Expect(function.Status.Conditions).To(gomega.HaveLen(conditionLen))
-		g.Expect(reconciler.getConditionStatus(function.Status.Conditions, serverlessv1alpha1.ConditionConfigurationReady)).To(gomega.Equal(corev1.ConditionTrue))
-		g.Expect(reconciler.getConditionStatus(function.Status.Conditions, serverlessv1alpha1.ConditionBuildReady)).To(gomega.Equal(corev1.ConditionUnknown))
-		g.Expect(reconciler.getConditionStatus(function.Status.Conditions, serverlessv1alpha1.ConditionRunning)).To(gomega.Equal(corev1.ConditionTrue))
+		g.Expect(getConditionStatus(function.Status.Conditions, serverlessv1alpha1.ConditionConfigurationReady)).To(gomega.Equal(corev1.ConditionTrue))
+		g.Expect(getConditionStatus(function.Status.Conditions, serverlessv1alpha1.ConditionBuildReady)).To(gomega.Equal(corev1.ConditionUnknown))
+		g.Expect(getConditionStatus(function.Status.Conditions, serverlessv1alpha1.ConditionRunning)).To(gomega.Equal(corev1.ConditionTrue))
 
-		g.Expect(reconciler.getConditionReason(function.Status.Conditions, serverlessv1alpha1.ConditionBuildReady)).To(gomega.Equal(serverlessv1alpha1.ConditionReasonJobsDeleted))
+		g.Expect(getConditionReason(function.Status.Conditions, serverlessv1alpha1.ConditionBuildReady)).To(gomega.Equal(serverlessv1alpha1.ConditionReasonJobsDeleted))
 
 		assertSuccessfulFunctionBuild(t, resourceClient, reconciler, request, fnLabels, true)
 
@@ -143,16 +151,21 @@ func TestFunctionReconciler_Reconcile(t *testing.T) {
 		g.Expect(resourceClient.Create(context.TODO(), inFunction)).To(gomega.Succeed())
 		defer deleteFunction(g, resourceClient, inFunction)
 
-		fnLabels := reconciler.functionLabels(inFunction)
+		s := systemState{
+			//TODO https://github.com/kyma-project/kyma/issues/14079
+			instance: *inFunction,
+		}
+
+		fnLabels := s.functionLabels()
 		request := ctrl.Request{NamespacedName: types.NamespacedName{Namespace: inFunction.GetNamespace(), Name: inFunction.GetName()}}
 
 		//WHEN
 		t.Log("creating cm")
-		_, err := reconciler.Reconcile(request)
+		_, err := reconciler.Reconcile(ctx, request)
 		g.Expect(err).To(gomega.BeNil())
 
 		t.Log("creating job")
-		_, err = reconciler.Reconcile(request)
+		_, err = reconciler.Reconcile(ctx, request)
 		g.Expect(err).To(gomega.BeNil())
 
 		function := &serverlessv1alpha1.Function{}
@@ -172,19 +185,19 @@ func TestFunctionReconciler_Reconcile(t *testing.T) {
 		g.Expect(resourceClient.Status().Update(context.TODO(), job)).To(gomega.Succeed())
 
 		t.Log("job finished")
-		_, err = reconciler.Reconcile(request)
+		_, err = reconciler.Reconcile(ctx, request)
 		g.Expect(err).To(gomega.BeNil())
 
 		t.Log("creating deployment")
-		_, err = reconciler.Reconcile(request)
+		_, err = reconciler.Reconcile(ctx, request)
 		g.Expect(err).To(gomega.BeNil())
 
 		t.Log("creating svc")
-		_, err = reconciler.Reconcile(request)
+		_, err = reconciler.Reconcile(ctx, request)
 		g.Expect(err).To(gomega.BeNil())
 
 		t.Log("creating hpa")
-		_, err = reconciler.Reconcile(request)
+		_, err = reconciler.Reconcile(ctx, request)
 		g.Expect(err).To(gomega.BeNil())
 
 		t.Log("deployment failed")
@@ -199,17 +212,17 @@ func TestFunctionReconciler_Reconcile(t *testing.T) {
 
 		g.Expect(resourceClient.Status().Update(context.TODO(), deployment)).To(gomega.Succeed())
 
-		_, err = reconciler.Reconcile(request)
+		_, err = reconciler.Reconcile(ctx, request)
 		g.Expect(err).To(gomega.BeNil())
 
 		function = &serverlessv1alpha1.Function{}
 		g.Expect(resourceClient.Get(context.TODO(), request.NamespacedName, function)).To(gomega.Succeed())
 		g.Expect(function.Status.Conditions).To(gomega.HaveLen(conditionLen))
-		g.Expect(reconciler.getConditionStatus(function.Status.Conditions, serverlessv1alpha1.ConditionConfigurationReady)).To(gomega.Equal(corev1.ConditionTrue))
-		g.Expect(reconciler.getConditionStatus(function.Status.Conditions, serverlessv1alpha1.ConditionBuildReady)).To(gomega.Equal(corev1.ConditionTrue))
-		g.Expect(reconciler.getConditionStatus(function.Status.Conditions, serverlessv1alpha1.ConditionRunning)).To(gomega.Equal(corev1.ConditionFalse))
+		g.Expect(getConditionStatus(function.Status.Conditions, serverlessv1alpha1.ConditionConfigurationReady)).To(gomega.Equal(corev1.ConditionTrue))
+		g.Expect(getConditionStatus(function.Status.Conditions, serverlessv1alpha1.ConditionBuildReady)).To(gomega.Equal(corev1.ConditionTrue))
+		g.Expect(getConditionStatus(function.Status.Conditions, serverlessv1alpha1.ConditionRunning)).To(gomega.Equal(corev1.ConditionFalse))
 
-		g.Expect(reconciler.getConditionReason(function.Status.Conditions, serverlessv1alpha1.ConditionRunning)).To(gomega.Equal(serverlessv1alpha1.ConditionReasonDeploymentFailed))
+		g.Expect(getConditionReason(function.Status.Conditions, serverlessv1alpha1.ConditionRunning)).To(gomega.Equal(serverlessv1alpha1.ConditionReasonDeploymentFailed))
 	})
 
 	t.Run("should properly handle apiserver lags, when two resources are created by accident", func(t *testing.T) {
@@ -219,12 +232,17 @@ func TestFunctionReconciler_Reconcile(t *testing.T) {
 		g.Expect(resourceClient.Create(context.TODO(), inFunction)).To(gomega.Succeed())
 		defer deleteFunction(g, resourceClient, inFunction)
 
-		fnLabels := reconciler.functionLabels(inFunction)
+		s := systemState{
+			//TODO https://github.com/kyma-project/kyma/issues/14079
+			instance: *inFunction,
+		}
+
+		fnLabels := s.functionLabels()
 		request := ctrl.Request{NamespacedName: types.NamespacedName{Namespace: inFunction.GetNamespace(), Name: inFunction.GetName()}}
 
 		//WHEN
 		t.Log("creating cm")
-		_, err := reconciler.Reconcile(request)
+		_, err := reconciler.Reconcile(ctx, request)
 		g.Expect(err).To(gomega.BeNil())
 
 		function := &serverlessv1alpha1.Function{}
@@ -247,7 +265,7 @@ func TestFunctionReconciler_Reconcile(t *testing.T) {
 		g.Expect(configMapList.Items).To(gomega.HaveLen(2))
 
 		t.Log("deleting all configMaps")
-		_, err = reconciler.Reconcile(request)
+		_, err = reconciler.Reconcile(ctx, request)
 		g.Expect(err).To(gomega.BeNil())
 
 		err = reconciler.client.ListByLabel(context.TODO(), function.GetNamespace(), fnLabels, configMapList)
@@ -255,7 +273,7 @@ func TestFunctionReconciler_Reconcile(t *testing.T) {
 		g.Expect(configMapList.Items).To(gomega.HaveLen(0))
 
 		t.Log("creating configMap again")
-		_, err = reconciler.Reconcile(request)
+		_, err = reconciler.Reconcile(ctx, request)
 		g.Expect(err).To(gomega.BeNil())
 
 		err = reconciler.client.ListByLabel(context.TODO(), function.GetNamespace(), fnLabels, configMapList)
@@ -263,7 +281,7 @@ func TestFunctionReconciler_Reconcile(t *testing.T) {
 		g.Expect(configMapList.Items).To(gomega.HaveLen(1))
 
 		t.Log("creating job")
-		_, err = reconciler.Reconcile(request)
+		_, err = reconciler.Reconcile(ctx, request)
 		g.Expect(err).To(gomega.BeNil())
 
 		function = &serverlessv1alpha1.Function{}
@@ -290,7 +308,7 @@ func TestFunctionReconciler_Reconcile(t *testing.T) {
 		g.Expect(jobList.Items).To(gomega.HaveLen(2))
 
 		t.Log("deleting all jobs")
-		_, err = reconciler.Reconcile(request)
+		_, err = reconciler.Reconcile(ctx, request)
 		g.Expect(err).To(gomega.BeNil())
 
 		err = reconciler.client.ListByLabel(context.TODO(), function.GetNamespace(), fnLabels, jobList)
@@ -298,7 +316,7 @@ func TestFunctionReconciler_Reconcile(t *testing.T) {
 		g.Expect(jobList.Items).To(gomega.HaveLen(0))
 
 		t.Log("creating job again")
-		_, err = reconciler.Reconcile(request)
+		_, err = reconciler.Reconcile(ctx, request)
 		g.Expect(err).To(gomega.BeNil())
 
 		err = reconciler.client.ListByLabel(context.TODO(), function.GetNamespace(), fnLabels, jobList)
@@ -313,11 +331,11 @@ func TestFunctionReconciler_Reconcile(t *testing.T) {
 		g.Expect(resourceClient.Status().Update(context.TODO(), job)).To(gomega.Succeed())
 
 		t.Log("job finished")
-		_, err = reconciler.Reconcile(request)
+		_, err = reconciler.Reconcile(ctx, request)
 		g.Expect(err).To(gomega.BeNil())
 
 		t.Log("creating deployment")
-		_, err = reconciler.Reconcile(request)
+		_, err = reconciler.Reconcile(ctx, request)
 		g.Expect(err).To(gomega.BeNil())
 
 		deployList := &appsv1.DeploymentList{}
@@ -339,7 +357,7 @@ func TestFunctionReconciler_Reconcile(t *testing.T) {
 		g.Expect(deployList.Items).To(gomega.HaveLen(2))
 
 		t.Log("deleting excess deployment")
-		_, err = reconciler.Reconcile(request)
+		_, err = reconciler.Reconcile(ctx, request)
 		g.Expect(err).To(gomega.BeNil())
 
 		err = reconciler.client.ListByLabel(context.TODO(), function.GetNamespace(), fnLabels, deployList)
@@ -347,7 +365,7 @@ func TestFunctionReconciler_Reconcile(t *testing.T) {
 		g.Expect(deployList.Items).To(gomega.HaveLen(0))
 
 		t.Log("creating new deployment")
-		_, err = reconciler.Reconcile(request)
+		_, err = reconciler.Reconcile(ctx, request)
 		g.Expect(err).To(gomega.BeNil())
 
 		err = reconciler.client.ListByLabel(context.TODO(), function.GetNamespace(), fnLabels, deployList)
@@ -355,7 +373,7 @@ func TestFunctionReconciler_Reconcile(t *testing.T) {
 		g.Expect(deployList.Items).To(gomega.HaveLen(1))
 
 		t.Log("creating svc")
-		_, err = reconciler.Reconcile(request)
+		_, err = reconciler.Reconcile(ctx, request)
 		g.Expect(err).To(gomega.BeNil())
 
 		svcList := &corev1.ServiceList{}
@@ -364,20 +382,25 @@ func TestFunctionReconciler_Reconcile(t *testing.T) {
 		g.Expect(svcList.Items).To(gomega.HaveLen(1))
 
 		t.Log("somehow there's been created a new svc with labels we use")
-		excessSvc := svcList.Items[0].DeepCopy()
-		excessSvc.Name = fmt.Sprintf("%s-%s", excessSvc.Name, "2")
-		excessSvc.Spec.ClusterIP = ""
-		excessSvc.ResourceVersion = ""
-		excessSvc.UID = ""
-		excessSvc.CreationTimestamp = metav1.Time{}
-		g.Expect(resourceClient.Create(context.TODO(), excessSvc)).To(gomega.Succeed())
+		excessSvc := corev1.Service{}
+
+		excessSvc.Name = fmt.Sprintf("%s-%s", svcList.Items[0].Name, "2")
+		excessSvc.Namespace = svcList.Items[0].Namespace
+		excessSvc.Labels = svcList.Items[0].Labels
+
+		excessSvc.Spec.Ports = svcList.Items[0].Spec.Ports
+		excessSvc.Spec.Selector = svcList.Items[0].Spec.Selector
+
+		err = resourceClient.Create(context.TODO(), &excessSvc)
+
+		g.Expect(err).To(gomega.Succeed())
 
 		err = reconciler.client.ListByLabel(context.TODO(), function.GetNamespace(), fnLabels, svcList)
 		g.Expect(err).To(gomega.BeNil())
 		g.Expect(svcList.Items).To(gomega.HaveLen(2))
 
 		t.Log("deleting that svc")
-		_, err = reconciler.Reconcile(request)
+		_, err = reconciler.Reconcile(ctx, request)
 		g.Expect(err).To(gomega.BeNil())
 
 		err = reconciler.client.ListByLabel(context.TODO(), function.GetNamespace(), fnLabels, svcList)
@@ -385,7 +408,7 @@ func TestFunctionReconciler_Reconcile(t *testing.T) {
 		g.Expect(svcList.Items).To(gomega.HaveLen(1))
 
 		t.Log("creating hpa")
-		_, err = reconciler.Reconcile(request)
+		_, err = reconciler.Reconcile(ctx, request)
 		g.Expect(err).To(gomega.BeNil())
 
 		hpaList := &autoscalingv1.HorizontalPodAutoscalerList{}
@@ -408,7 +431,7 @@ func TestFunctionReconciler_Reconcile(t *testing.T) {
 
 		t.Log("deleting excess hpa 🔫")
 
-		_, err = reconciler.Reconcile(request)
+		_, err = reconciler.Reconcile(ctx, request)
 		g.Expect(err).To(gomega.BeNil())
 
 		err = reconciler.client.ListByLabel(context.TODO(), function.GetNamespace(), fnLabels, hpaList)
@@ -416,7 +439,7 @@ func TestFunctionReconciler_Reconcile(t *testing.T) {
 		g.Expect(hpaList.Items).To(gomega.HaveLen(0))
 
 		t.Log("creating new hpa")
-		_, err = reconciler.Reconcile(request)
+		_, err = reconciler.Reconcile(ctx, request)
 		g.Expect(err).To(gomega.BeNil())
 
 		err = reconciler.client.ListByLabel(context.TODO(), function.GetNamespace(), fnLabels, hpaList)
@@ -435,7 +458,7 @@ func TestFunctionReconciler_Reconcile(t *testing.T) {
 		}
 		g.Expect(resourceClient.Status().Update(context.TODO(), deployment)).To(gomega.Succeed())
 
-		_, err = reconciler.Reconcile(request)
+		_, err = reconciler.Reconcile(ctx, request)
 		g.Expect(err).To(gomega.BeNil())
 
 		g.Expect(hpaList.Items[0].Spec.ScaleTargetRef.Name).To(gomega.Equal(deployList.Items[0].Name), "hpa should target proper deployment")
@@ -446,14 +469,14 @@ func TestFunctionReconciler_Reconcile(t *testing.T) {
 		g.Expect(err).To(gomega.BeNil())
 
 		t.Log("recreating deployment")
-		_, err = reconciler.Reconcile(request)
+		_, err = reconciler.Reconcile(ctx, request)
 		g.Expect(err).To(gomega.BeNil())
 
 		t.Log("updating hpa")
-		_, err = reconciler.Reconcile(request)
+		_, err = reconciler.Reconcile(ctx, request)
 		g.Expect(err).To(gomega.BeNil())
 
-		_, err = reconciler.Reconcile(request)
+		_, err = reconciler.Reconcile(ctx, request)
 		g.Expect(err).To(gomega.BeNil())
 
 		err = reconciler.client.ListByLabel(context.TODO(), function.GetNamespace(), fnLabels, hpaList)
@@ -478,10 +501,15 @@ func TestFunctionReconciler_Reconcile(t *testing.T) {
 		statsCollector := &automock.StatsCollector{}
 		statsCollector.On("UpdateReconcileStats", mock.Anything, mock.Anything).Return()
 
-		reconciler := NewFunction(resourceClient, log.Log, testCfg, nil, record.NewFakeRecorder(100), statsCollector, make(chan bool))
+		reconciler := NewFunction(resourceClient, zap.NewNop().Sugar(), testCfg, nil, record.NewFakeRecorder(100), statsCollector, make(chan bool))
 		reconciler.config.Build.MaxSimultaneousJobs = 1
 
-		fnLabels := reconciler.functionLabels(inFunction)
+		s := systemState{
+			//TODO https://github.com/kyma-project/kyma/issues/14079
+			instance: *inFunction,
+		}
+
+		fnLabels := s.functionLabels()
 
 		secondFunction := newFixFunction(testNamespace, "second-function", 1, 2)
 		secondRequest := ctrl.Request{NamespacedName: types.NamespacedName{Namespace: secondFunction.GetNamespace(), Name: secondFunction.GetName()}}
@@ -491,17 +519,17 @@ func TestFunctionReconciler_Reconcile(t *testing.T) {
 
 		//WHEN
 		t.Log("creating 2 cms")
-		_, err := reconciler.Reconcile(request)
+		_, err := reconciler.Reconcile(ctx, request)
 		g.Expect(err).To(gomega.BeNil())
 
-		_, err = reconciler.Reconcile(secondRequest)
+		_, err = reconciler.Reconcile(ctx, secondRequest)
 		g.Expect(err).To(gomega.BeNil())
 
 		t.Log("creating 2 jobs")
-		_, err = reconciler.Reconcile(request)
+		_, err = reconciler.Reconcile(ctx, request)
 		g.Expect(err).To(gomega.BeNil())
 
-		result, err := reconciler.Reconcile(secondRequest)
+		result, err := reconciler.Reconcile(ctx, secondRequest)
 		g.Expect(err).To(gomega.BeNil())
 		g.Expect(result.RequeueAfter).To(gomega.BeIdenticalTo(time.Second * 5))
 
@@ -523,14 +551,14 @@ func TestFunctionReconciler_Reconcile(t *testing.T) {
 		g.Expect(resourceClient.Status().Update(context.TODO(), job)).To(gomega.Succeed())
 
 		t.Log("first job finished")
-		_, err = reconciler.Reconcile(request)
+		_, err = reconciler.Reconcile(ctx, request)
 		g.Expect(err).To(gomega.BeNil())
 
 		t.Log("handling second job")
 		secFunction := &serverlessv1alpha1.Function{}
 		g.Expect(resourceClient.Get(context.TODO(), request.NamespacedName, secFunction)).To(gomega.Succeed())
 
-		_, err = reconciler.Reconcile(secondRequest)
+		_, err = reconciler.Reconcile(ctx, secondRequest)
 		g.Expect(err).To(gomega.BeNil())
 
 		secJobList := &batchv1.JobList{}
@@ -547,7 +575,7 @@ func TestFunctionReconciler_Reconcile(t *testing.T) {
 		g.Expect(resourceClient.Status().Update(context.TODO(), secJob)).To(gomega.Succeed())
 
 		t.Log("second job finished")
-		_, err = reconciler.Reconcile(secondRequest)
+		_, err = reconciler.Reconcile(ctx, secondRequest)
 		g.Expect(err).To(gomega.BeNil())
 	})
 
@@ -558,18 +586,23 @@ func TestFunctionReconciler_Reconcile(t *testing.T) {
 		g.Expect(resourceClient.Create(context.TODO(), inFunction)).To(gomega.Succeed())
 		defer deleteFunction(g, resourceClient, inFunction)
 
-		fnLabels := reconciler.functionLabels(inFunction)
+		s := systemState{
+			//TODO https://github.com/kyma-project/kyma/issues/14079
+			instance: *inFunction,
+		}
+
+		fnLabels := s.functionLabels()
+
 		request := ctrl.Request{NamespacedName: types.NamespacedName{Namespace: inFunction.GetNamespace(), Name: inFunction.GetName()}}
 
 		//WHEN
 		t.Log("creating cm")
-		_, err := reconciler.Reconcile(request)
+		_, err := reconciler.Reconcile(ctx, request)
 		g.Expect(err).To(gomega.BeNil())
 		function := &serverlessv1alpha1.Function{}
 		g.Expect(resourceClient.Get(context.TODO(), request.NamespacedName, function)).To(gomega.Succeed())
-
 		t.Log("creating job")
-		_, err = reconciler.Reconcile(request)
+		_, err = reconciler.Reconcile(ctx, request)
 		g.Expect(err).To(gomega.BeNil())
 
 		g.Expect(resourceClient.Get(context.TODO(), request.NamespacedName, function)).To(gomega.Succeed())
@@ -587,19 +620,19 @@ func TestFunctionReconciler_Reconcile(t *testing.T) {
 		g.Expect(resourceClient.Status().Update(context.TODO(), job)).To(gomega.Succeed())
 
 		t.Log("job finished")
-		_, err = reconciler.Reconcile(request)
+		_, err = reconciler.Reconcile(ctx, request)
 		g.Expect(err).To(gomega.BeNil())
 
 		t.Log("creating deployment")
-		_, err = reconciler.Reconcile(request)
+		_, err = reconciler.Reconcile(ctx, request)
 		g.Expect(err).To(gomega.BeNil())
 
 		t.Log("creating svc")
-		_, err = reconciler.Reconcile(request)
+		_, err = reconciler.Reconcile(ctx, request)
 		g.Expect(err).To(gomega.BeNil())
 
 		t.Log("creating hpa")
-		_, err = reconciler.Reconcile(request)
+		_, err = reconciler.Reconcile(ctx, request)
 		g.Expect(err).To(gomega.BeNil())
 
 		t.Log("deployment ready")
@@ -614,7 +647,7 @@ func TestFunctionReconciler_Reconcile(t *testing.T) {
 		}
 		g.Expect(resourceClient.Status().Update(context.TODO(), deployment)).To(gomega.Succeed())
 
-		_, err = reconciler.Reconcile(request)
+		_, err = reconciler.Reconcile(ctx, request)
 		g.Expect(err).To(gomega.BeNil())
 
 		t.Log("updating function metadata.labels")
@@ -634,7 +667,7 @@ func TestFunctionReconciler_Reconcile(t *testing.T) {
 		g.Expect(function.Labels).NotTo(gomega.BeNil())
 
 		t.Log("updating configmap")
-		_, err = reconciler.Reconcile(request)
+		_, err = reconciler.Reconcile(ctx, request)
 		g.Expect(err).To(gomega.BeNil())
 
 		configMapList := &corev1.ConfigMapList{}
@@ -648,13 +681,13 @@ func TestFunctionReconciler_Reconcile(t *testing.T) {
 		g.Expect(cmLabelVal).To(gomega.Equal(addedLabelValue))
 
 		t.Log("updating job")
-		_, err = reconciler.Reconcile(request)
+		_, err = reconciler.Reconcile(ctx, request)
 		g.Expect(err).To(gomega.BeNil())
 
 		function = &serverlessv1alpha1.Function{}
 		g.Expect(resourceClient.Get(context.TODO(), request.NamespacedName, function)).To(gomega.Succeed())
 		g.Expect(function.Status.Conditions).To(gomega.HaveLen(conditionLen))
-		g.Expect(reconciler.getConditionReason(function.Status.Conditions, serverlessv1alpha1.ConditionBuildReady)).To(gomega.Equal(serverlessv1alpha1.ConditionReasonJobUpdated))
+		g.Expect(getConditionReason(function.Status.Conditions, serverlessv1alpha1.ConditionBuildReady)).To(gomega.Equal(serverlessv1alpha1.ConditionReasonJobUpdated))
 
 		jobList = &batchv1.JobList{}
 		err = resourceClient.ListByLabel(context.TODO(), function.GetNamespace(), fnLabels, jobList)
@@ -667,16 +700,16 @@ func TestFunctionReconciler_Reconcile(t *testing.T) {
 		g.Expect(jobLabelVal).To(gomega.Equal(addedLabelValue))
 
 		t.Log("reconciling job to make sure it's already finished")
-		_, err = reconciler.Reconcile(request)
+		_, err = reconciler.Reconcile(ctx, request)
 		g.Expect(err).To(gomega.BeNil())
 
 		function = &serverlessv1alpha1.Function{}
 		g.Expect(resourceClient.Get(context.TODO(), request.NamespacedName, function)).To(gomega.Succeed())
 		g.Expect(function.Status.Conditions).To(gomega.HaveLen(conditionLen))
-		g.Expect(reconciler.getConditionReason(function.Status.Conditions, serverlessv1alpha1.ConditionBuildReady)).To(gomega.Equal(serverlessv1alpha1.ConditionReasonJobFinished))
+		g.Expect(getConditionReason(function.Status.Conditions, serverlessv1alpha1.ConditionBuildReady)).To(gomega.Equal(serverlessv1alpha1.ConditionReasonJobFinished))
 
 		t.Log("updating deployment")
-		_, err = reconciler.Reconcile(request)
+		_, err = reconciler.Reconcile(ctx, request)
 		g.Expect(err).To(gomega.BeNil())
 
 		deployList := &appsv1.DeploymentList{}
@@ -690,7 +723,7 @@ func TestFunctionReconciler_Reconcile(t *testing.T) {
 		g.Expect(deployLabelVal).To(gomega.Equal(addedLabelValue))
 
 		t.Log("updating service")
-		_, err = reconciler.Reconcile(request)
+		_, err = reconciler.Reconcile(ctx, request)
 		g.Expect(err).To(gomega.BeNil())
 
 		svcList := &corev1.ServiceList{}
@@ -704,7 +737,7 @@ func TestFunctionReconciler_Reconcile(t *testing.T) {
 		g.Expect(svcLabelVal).To(gomega.Equal(addedLabelValue))
 
 		t.Log("updating hpa")
-		_, err = reconciler.Reconcile(request)
+		_, err = reconciler.Reconcile(ctx, request)
 		g.Expect(err).To(gomega.BeNil())
 
 		hpaList := &autoscalingv1.HorizontalPodAutoscalerList{}
@@ -718,17 +751,17 @@ func TestFunctionReconciler_Reconcile(t *testing.T) {
 		g.Expect(hpaLabelVal).To(gomega.Equal(addedLabelValue))
 
 		t.Log("status ready")
-		_, err = reconciler.Reconcile(request)
+		_, err = reconciler.Reconcile(ctx, request)
 		g.Expect(err).To(gomega.BeNil())
 
 		function = &serverlessv1alpha1.Function{}
 		g.Expect(resourceClient.Get(context.TODO(), request.NamespacedName, function)).To(gomega.Succeed())
 		g.Expect(function.Status.Conditions).To(gomega.HaveLen(conditionLen))
-		g.Expect(reconciler.getConditionStatus(function.Status.Conditions, serverlessv1alpha1.ConditionConfigurationReady)).To(gomega.Equal(corev1.ConditionTrue))
-		g.Expect(reconciler.getConditionStatus(function.Status.Conditions, serverlessv1alpha1.ConditionBuildReady)).To(gomega.Equal(corev1.ConditionTrue))
-		g.Expect(reconciler.getConditionStatus(function.Status.Conditions, serverlessv1alpha1.ConditionRunning)).To(gomega.Equal(corev1.ConditionTrue))
+		g.Expect(getConditionStatus(function.Status.Conditions, serverlessv1alpha1.ConditionConfigurationReady)).To(gomega.Equal(corev1.ConditionTrue))
+		g.Expect(getConditionStatus(function.Status.Conditions, serverlessv1alpha1.ConditionBuildReady)).To(gomega.Equal(corev1.ConditionTrue))
+		g.Expect(getConditionStatus(function.Status.Conditions, serverlessv1alpha1.ConditionRunning)).To(gomega.Equal(corev1.ConditionTrue))
 
-		g.Expect(reconciler.getConditionReason(function.Status.Conditions, serverlessv1alpha1.ConditionRunning)).To(gomega.Equal(serverlessv1alpha1.ConditionReasonDeploymentReady))
+		g.Expect(getConditionReason(function.Status.Conditions, serverlessv1alpha1.ConditionRunning)).To(gomega.Equal(serverlessv1alpha1.ConditionReasonDeploymentReady))
 
 		t.Log("getting rid of formerly added labels")
 		g.Expect(resourceClient.Get(context.TODO(), request.NamespacedName, function)).To(gomega.Succeed())
@@ -743,7 +776,7 @@ func TestFunctionReconciler_Reconcile(t *testing.T) {
 		g.Expect(function.Labels).To(gomega.BeNil())
 
 		t.Log("reconciling again -> configmap")
-		_, err = reconciler.Reconcile(request)
+		_, err = reconciler.Reconcile(ctx, request)
 		g.Expect(err).To(gomega.BeNil())
 
 		configMapList = &corev1.ConfigMapList{}
@@ -755,7 +788,7 @@ func TestFunctionReconciler_Reconcile(t *testing.T) {
 		g.Expect(ok).To(gomega.BeFalse())
 
 		t.Log("reconciling again -> job")
-		_, err = reconciler.Reconcile(request)
+		_, err = reconciler.Reconcile(ctx, request)
 		g.Expect(err).To(gomega.BeNil())
 
 		jobList = &batchv1.JobList{}
@@ -767,11 +800,11 @@ func TestFunctionReconciler_Reconcile(t *testing.T) {
 		g.Expect(ok).To(gomega.BeFalse())
 
 		t.Log("reconciling again -> job finished")
-		_, err = reconciler.Reconcile(request)
+		_, err = reconciler.Reconcile(ctx, request)
 		g.Expect(err).To(gomega.BeNil())
 
 		t.Log("reconciling again -> deployment")
-		_, err = reconciler.Reconcile(request)
+		_, err = reconciler.Reconcile(ctx, request)
 		g.Expect(err).To(gomega.BeNil())
 
 		deployList = &appsv1.DeploymentList{}
@@ -783,7 +816,7 @@ func TestFunctionReconciler_Reconcile(t *testing.T) {
 		g.Expect(ok).To(gomega.BeFalse())
 
 		t.Log("reconciling again -> service")
-		_, err = reconciler.Reconcile(request)
+		_, err = reconciler.Reconcile(ctx, request)
 		g.Expect(err).To(gomega.BeNil())
 
 		svcList = &corev1.ServiceList{}
@@ -795,7 +828,7 @@ func TestFunctionReconciler_Reconcile(t *testing.T) {
 		g.Expect(ok).To(gomega.BeFalse())
 
 		t.Log("reconciling again -> hpa")
-		_, err = reconciler.Reconcile(request)
+		_, err = reconciler.Reconcile(ctx, request)
 		g.Expect(err).To(gomega.BeNil())
 
 		hpaList = &autoscalingv1.HorizontalPodAutoscalerList{}
@@ -807,17 +840,17 @@ func TestFunctionReconciler_Reconcile(t *testing.T) {
 		g.Expect(ok).To(gomega.BeFalse())
 
 		t.Log("reconciling again -> deployment ready")
-		_, err = reconciler.Reconcile(request)
+		_, err = reconciler.Reconcile(ctx, request)
 		g.Expect(err).To(gomega.BeNil())
 
 		function = &serverlessv1alpha1.Function{}
 		g.Expect(resourceClient.Get(context.TODO(), request.NamespacedName, function)).To(gomega.Succeed())
 		g.Expect(function.Status.Conditions).To(gomega.HaveLen(conditionLen))
-		g.Expect(reconciler.getConditionStatus(function.Status.Conditions, serverlessv1alpha1.ConditionConfigurationReady)).To(gomega.Equal(corev1.ConditionTrue))
-		g.Expect(reconciler.getConditionStatus(function.Status.Conditions, serverlessv1alpha1.ConditionBuildReady)).To(gomega.Equal(corev1.ConditionTrue))
-		g.Expect(reconciler.getConditionStatus(function.Status.Conditions, serverlessv1alpha1.ConditionRunning)).To(gomega.Equal(corev1.ConditionTrue))
+		g.Expect(getConditionStatus(function.Status.Conditions, serverlessv1alpha1.ConditionConfigurationReady)).To(gomega.Equal(corev1.ConditionTrue))
+		g.Expect(getConditionStatus(function.Status.Conditions, serverlessv1alpha1.ConditionBuildReady)).To(gomega.Equal(corev1.ConditionTrue))
+		g.Expect(getConditionStatus(function.Status.Conditions, serverlessv1alpha1.ConditionRunning)).To(gomega.Equal(corev1.ConditionTrue))
 
-		g.Expect(reconciler.getConditionReason(function.Status.Conditions, serverlessv1alpha1.ConditionRunning)).To(gomega.Equal(serverlessv1alpha1.ConditionReasonDeploymentReady))
+		g.Expect(getConditionReason(function.Status.Conditions, serverlessv1alpha1.ConditionRunning)).To(gomega.Equal(serverlessv1alpha1.ConditionReasonDeploymentReady))
 	})
 
 	t.Run("should behave correctly on label addition when job is in building phase", func(t *testing.T) {
@@ -827,16 +860,22 @@ func TestFunctionReconciler_Reconcile(t *testing.T) {
 		g.Expect(resourceClient.Create(context.TODO(), inFunction)).To(gomega.Succeed())
 		defer deleteFunction(g, resourceClient, inFunction)
 
-		fnLabels := reconciler.functionLabels(inFunction)
+		s := systemState{
+			//TODO https://github.com/kyma-project/kyma/issues/14079
+			instance: *inFunction,
+		}
+
+		fnLabels := s.functionLabels()
+
 		request := ctrl.Request{NamespacedName: types.NamespacedName{Namespace: inFunction.GetNamespace(), Name: inFunction.GetName()}}
 
 		//WHEN
 		t.Log("creating cm")
-		_, err := reconciler.Reconcile(request)
+		_, err := reconciler.Reconcile(ctx, request)
 		g.Expect(err).To(gomega.BeNil())
 
 		t.Log("creating job")
-		_, err = reconciler.Reconcile(request)
+		_, err = reconciler.Reconcile(ctx, request)
 		g.Expect(err).To(gomega.BeNil())
 
 		function := &serverlessv1alpha1.Function{}
@@ -863,11 +902,11 @@ func TestFunctionReconciler_Reconcile(t *testing.T) {
 		g.Expect(function.Labels).NotTo(gomega.BeNil())
 
 		t.Log("updating configmap")
-		_, err = reconciler.Reconcile(request)
+		_, err = reconciler.Reconcile(ctx, request)
 		g.Expect(err).To(gomega.BeNil())
 
 		t.Log("updating job")
-		_, err = reconciler.Reconcile(request)
+		_, err = reconciler.Reconcile(ctx, request)
 		g.Expect(err).To(gomega.BeNil())
 
 		t.Log("job's finished")
@@ -880,19 +919,19 @@ func TestFunctionReconciler_Reconcile(t *testing.T) {
 		job.Status.CompletionTime = &now
 		g.Expect(resourceClient.Status().Update(context.TODO(), job)).To(gomega.Succeed())
 
-		_, err = reconciler.Reconcile(request)
+		_, err = reconciler.Reconcile(ctx, request)
 		g.Expect(err).To(gomega.BeNil())
 
 		t.Log("creating deployment")
-		_, err = reconciler.Reconcile(request)
+		_, err = reconciler.Reconcile(ctx, request)
 		g.Expect(err).To(gomega.BeNil())
 
 		t.Log("creating svc")
-		_, err = reconciler.Reconcile(request)
+		_, err = reconciler.Reconcile(ctx, request)
 		g.Expect(err).To(gomega.BeNil())
 
 		t.Log("creating hpa")
-		_, err = reconciler.Reconcile(request)
+		_, err = reconciler.Reconcile(ctx, request)
 		g.Expect(err).To(gomega.BeNil())
 
 		t.Log("deployment ready")
@@ -907,7 +946,7 @@ func TestFunctionReconciler_Reconcile(t *testing.T) {
 		}
 		g.Expect(resourceClient.Status().Update(context.TODO(), deployment)).To(gomega.Succeed())
 
-		_, err = reconciler.Reconcile(request)
+		_, err = reconciler.Reconcile(ctx, request)
 		g.Expect(err).To(gomega.BeNil())
 	})
 
@@ -917,7 +956,7 @@ func TestFunctionReconciler_Reconcile(t *testing.T) {
 
 		//WHEN
 		t.Log("handling not existing Function")
-		result, err := reconciler.Reconcile(ctrl.Request{NamespacedName: types.NamespacedName{Namespace: "nope", Name: "noooooopppeee"}})
+		result, err := reconciler.Reconcile(ctx, ctrl.Request{NamespacedName: types.NamespacedName{Namespace: "nope", Name: "noooooopppeee"}})
 
 		//THEN
 		g.Expect(err).To(gomega.BeNil())
@@ -939,11 +978,11 @@ func TestFunctionReconciler_Reconcile(t *testing.T) {
 		defer deleteFunction(g, resourceClient, function)
 
 		//WHEN
-		_, err := reconciler.Reconcile(request)
+		_, err := reconciler.Reconcile(ctx, request)
 
 		//THEN
 		g.Expect(err).To(gomega.HaveOccurred())
-		g.Expect(err.Error()).To(gomega.ContainSubstring("Expected one config map, found 0"))
+		g.Expect(err.Error()).To(gomega.ContainSubstring("Docker registry configuration not found"))
 
 	})
 
@@ -954,24 +993,30 @@ func TestFunctionReconciler_Reconcile(t *testing.T) {
 		g.Expect(resourceClient.Create(context.TODO(), inFunction)).To(gomega.Succeed())
 		defer deleteFunction(g, resourceClient, inFunction)
 
-		fnLabels := reconciler.functionLabels(inFunction)
+		s := systemState{
+			//TODO https://github.com/kyma-project/kyma/issues/14079
+			instance: *inFunction,
+		}
+
+		fnLabels := s.functionLabels()
+
 		request := ctrl.Request{NamespacedName: types.NamespacedName{Namespace: inFunction.GetNamespace(), Name: inFunction.GetName()}}
 
 		//WHEN
 		t.Log("creating the ConfigMap")
-		result, err := reconciler.Reconcile(request)
+		result, err := reconciler.Reconcile(ctx, request)
 		g.Expect(err).To(gomega.BeNil())
 		g.Expect(result.Requeue).To(gomega.BeFalse())
-		g.Expect(result.RequeueAfter).To(gomega.Equal(time.Second * 0))
+		g.Expect(result.RequeueAfter).To(gomega.Equal(time.Second * 1))
 
 		function := &serverlessv1alpha1.Function{}
 		g.Expect(resourceClient.Get(context.TODO(), request.NamespacedName, function)).To(gomega.Succeed())
 		g.Expect(function.Status.Conditions).To(gomega.HaveLen(1))
-		g.Expect(reconciler.getConditionStatus(function.Status.Conditions, serverlessv1alpha1.ConditionConfigurationReady)).To(gomega.Equal(corev1.ConditionTrue))
-		g.Expect(reconciler.getConditionStatus(function.Status.Conditions, serverlessv1alpha1.ConditionBuildReady)).To(gomega.Equal(corev1.ConditionUnknown))
-		g.Expect(reconciler.getConditionStatus(function.Status.Conditions, serverlessv1alpha1.ConditionRunning)).To(gomega.Equal(corev1.ConditionUnknown))
+		g.Expect(getConditionStatus(function.Status.Conditions, serverlessv1alpha1.ConditionConfigurationReady)).To(gomega.Equal(corev1.ConditionTrue))
+		g.Expect(getConditionStatus(function.Status.Conditions, serverlessv1alpha1.ConditionBuildReady)).To(gomega.Equal(corev1.ConditionUnknown))
+		g.Expect(getConditionStatus(function.Status.Conditions, serverlessv1alpha1.ConditionRunning)).To(gomega.Equal(corev1.ConditionUnknown))
 
-		g.Expect(reconciler.getConditionReason(function.Status.Conditions, serverlessv1alpha1.ConditionConfigurationReady)).To(gomega.Equal(serverlessv1alpha1.ConditionReasonConfigMapCreated))
+		g.Expect(getConditionReason(function.Status.Conditions, serverlessv1alpha1.ConditionConfigurationReady)).To(gomega.Equal(serverlessv1alpha1.ConditionReasonConfigMapCreated))
 
 		configMapList := &corev1.ConfigMapList{}
 		err = reconciler.client.ListByLabel(context.TODO(), function.GetNamespace(), fnLabels, configMapList)
@@ -994,17 +1039,17 @@ func TestFunctionReconciler_Reconcile(t *testing.T) {
 		g.Expect(resourceClient.Update(context.TODO(), function)).To(gomega.Succeed())
 
 		t.Log("updating deployment with new number of replicas")
-		result, err = reconciler.Reconcile(request)
+		result, err = reconciler.Reconcile(ctx, request)
 		g.Expect(err).To(gomega.BeNil())
 		g.Expect(result.Requeue).To(gomega.BeFalse())
-		g.Expect(result.RequeueAfter).To(gomega.Equal(time.Second * 0))
+		g.Expect(result.RequeueAfter).To(gomega.Equal(time.Second * 1))
 
 		g.Expect(resourceClient.Get(context.TODO(), request.NamespacedName, function)).To(gomega.Succeed())
 		g.Expect(function.Status.Conditions).To(gomega.HaveLen(conditionLen))
-		g.Expect(reconciler.getConditionStatus(function.Status.Conditions, serverlessv1alpha1.ConditionConfigurationReady)).To(gomega.Equal(corev1.ConditionTrue))
-		g.Expect(reconciler.getConditionStatus(function.Status.Conditions, serverlessv1alpha1.ConditionBuildReady)).To(gomega.Equal(corev1.ConditionTrue))
-		g.Expect(reconciler.getConditionStatus(function.Status.Conditions, serverlessv1alpha1.ConditionRunning)).To(gomega.Equal(corev1.ConditionUnknown))
-		g.Expect(reconciler.getConditionReason(function.Status.Conditions, serverlessv1alpha1.ConditionRunning)).To(gomega.Equal(serverlessv1alpha1.ConditionReasonDeploymentUpdated))
+		g.Expect(getConditionStatus(function.Status.Conditions, serverlessv1alpha1.ConditionConfigurationReady)).To(gomega.Equal(corev1.ConditionTrue))
+		g.Expect(getConditionStatus(function.Status.Conditions, serverlessv1alpha1.ConditionBuildReady)).To(gomega.Equal(corev1.ConditionTrue))
+		g.Expect(getConditionStatus(function.Status.Conditions, serverlessv1alpha1.ConditionRunning)).To(gomega.Equal(corev1.ConditionUnknown))
+		g.Expect(getConditionReason(function.Status.Conditions, serverlessv1alpha1.ConditionRunning)).To(gomega.Equal(serverlessv1alpha1.ConditionReasonDeploymentUpdated))
 		deployments := &appsv1.DeploymentList{}
 		g.Expect(resourceClient.ListByLabel(context.TODO(), request.Namespace, fnLabels, deployments)).To(gomega.Succeed())
 		g.Expect(len(deployments.Items)).To(gomega.Equal(1))
@@ -1013,10 +1058,10 @@ func TestFunctionReconciler_Reconcile(t *testing.T) {
 		g.Expect(deployment.Spec.Replicas).To(gomega.Equal(&two))
 
 		t.Log("removing hpa")
-		result, err = reconciler.Reconcile(request)
+		result, err = reconciler.Reconcile(ctx, request)
 		g.Expect(err).To(gomega.BeNil())
 		g.Expect(result.Requeue).To(gomega.BeFalse())
-		g.Expect(result.RequeueAfter).To(gomega.Equal(time.Second * 0))
+		g.Expect(result.RequeueAfter).To(gomega.Equal(time.Second * 1))
 
 		hpaList := &autoscalingv1.HorizontalPodAutoscalerList{}
 		err = reconciler.client.ListByLabel(context.TODO(), function.GetNamespace(), fnLabels, hpaList)
@@ -1024,17 +1069,17 @@ func TestFunctionReconciler_Reconcile(t *testing.T) {
 		g.Expect(hpaList.Items).To(gomega.HaveLen(0))
 
 		t.Log("deployment ready")
-		result, err = reconciler.Reconcile(request)
+		result, err = reconciler.Reconcile(ctx, request)
 		g.Expect(err).To(gomega.BeNil())
 		g.Expect(result.Requeue).To(gomega.BeFalse())
 		g.Expect(result.RequeueAfter).To(gomega.Equal(time.Minute * 5))
 
 		g.Expect(resourceClient.Get(context.TODO(), request.NamespacedName, function)).To(gomega.Succeed())
 		g.Expect(function.Status.Conditions).To(gomega.HaveLen(conditionLen))
-		g.Expect(reconciler.getConditionStatus(function.Status.Conditions, serverlessv1alpha1.ConditionConfigurationReady)).To(gomega.Equal(corev1.ConditionTrue))
-		g.Expect(reconciler.getConditionStatus(function.Status.Conditions, serverlessv1alpha1.ConditionBuildReady)).To(gomega.Equal(corev1.ConditionTrue))
-		g.Expect(reconciler.getConditionStatus(function.Status.Conditions, serverlessv1alpha1.ConditionRunning)).To(gomega.Equal(corev1.ConditionTrue))
-		g.Expect(reconciler.getConditionReason(function.Status.Conditions, serverlessv1alpha1.ConditionRunning)).To(gomega.Equal(serverlessv1alpha1.ConditionReasonDeploymentReady))
+		g.Expect(getConditionStatus(function.Status.Conditions, serverlessv1alpha1.ConditionConfigurationReady)).To(gomega.Equal(corev1.ConditionTrue))
+		g.Expect(getConditionStatus(function.Status.Conditions, serverlessv1alpha1.ConditionBuildReady)).To(gomega.Equal(corev1.ConditionTrue))
+		g.Expect(getConditionStatus(function.Status.Conditions, serverlessv1alpha1.ConditionRunning)).To(gomega.Equal(corev1.ConditionTrue))
+		g.Expect(getConditionReason(function.Status.Conditions, serverlessv1alpha1.ConditionRunning)).To(gomega.Equal(serverlessv1alpha1.ConditionReasonDeploymentReady))
 
 		t.Log("updating function to use scalable replicas number")
 		g.Expect(resourceClient.Get(context.TODO(), request.NamespacedName, function)).To(gomega.Succeed())
@@ -1042,18 +1087,18 @@ func TestFunctionReconciler_Reconcile(t *testing.T) {
 		g.Expect(resourceClient.Update(context.TODO(), function)).To(gomega.Succeed())
 
 		t.Log("creating hpa")
-		result, err = reconciler.Reconcile(request)
+		result, err = reconciler.Reconcile(ctx, request)
 		g.Expect(err).To(gomega.BeNil())
 		g.Expect(result.Requeue).To(gomega.BeFalse())
-		g.Expect(result.RequeueAfter).To(gomega.Equal(time.Duration(0)))
+		g.Expect(result.RequeueAfter).To(gomega.Equal(time.Second * 1))
 
 		g.Expect(resourceClient.Get(context.TODO(), request.NamespacedName, function)).To(gomega.Succeed())
 		g.Expect(function.Status.Conditions).To(gomega.HaveLen(conditionLen))
-		g.Expect(reconciler.getConditionStatus(function.Status.Conditions, serverlessv1alpha1.ConditionConfigurationReady)).To(gomega.Equal(corev1.ConditionTrue))
-		g.Expect(reconciler.getConditionStatus(function.Status.Conditions, serverlessv1alpha1.ConditionBuildReady)).To(gomega.Equal(corev1.ConditionTrue))
-		g.Expect(reconciler.getConditionStatus(function.Status.Conditions, serverlessv1alpha1.ConditionRunning)).To(gomega.Equal(corev1.ConditionUnknown))
+		g.Expect(getConditionStatus(function.Status.Conditions, serverlessv1alpha1.ConditionConfigurationReady)).To(gomega.Equal(corev1.ConditionTrue))
+		g.Expect(getConditionStatus(function.Status.Conditions, serverlessv1alpha1.ConditionBuildReady)).To(gomega.Equal(corev1.ConditionTrue))
+		g.Expect(getConditionStatus(function.Status.Conditions, serverlessv1alpha1.ConditionRunning)).To(gomega.Equal(corev1.ConditionUnknown))
 
-		g.Expect(reconciler.getConditionReason(function.Status.Conditions, serverlessv1alpha1.ConditionRunning)).To(gomega.Equal(serverlessv1alpha1.ConditionReasonHorizontalPodAutoscalerCreated))
+		g.Expect(getConditionReason(function.Status.Conditions, serverlessv1alpha1.ConditionRunning)).To(gomega.Equal(serverlessv1alpha1.ConditionReasonHorizontalPodAutoscalerCreated))
 
 		err = reconciler.client.ListByLabel(context.TODO(), function.GetNamespace(), fnLabels, hpaList)
 		g.Expect(err).To(gomega.BeNil())
@@ -1072,17 +1117,17 @@ func TestFunctionReconciler_Reconcile(t *testing.T) {
 		}
 		g.Expect(resourceClient.Status().Update(context.TODO(), deployment)).To(gomega.Succeed())
 
-		result, err = reconciler.Reconcile(request)
+		result, err = reconciler.Reconcile(ctx, request)
 		g.Expect(err).To(gomega.BeNil())
 		g.Expect(result.Requeue).To(gomega.BeFalse())
 		g.Expect(result.RequeueAfter).To(gomega.Equal(time.Minute * 5))
 
 		g.Expect(resourceClient.Get(context.TODO(), request.NamespacedName, function)).To(gomega.Succeed())
 		g.Expect(function.Status.Conditions).To(gomega.HaveLen(conditionLen))
-		g.Expect(reconciler.getConditionStatus(function.Status.Conditions, serverlessv1alpha1.ConditionConfigurationReady)).To(gomega.Equal(corev1.ConditionTrue))
-		g.Expect(reconciler.getConditionStatus(function.Status.Conditions, serverlessv1alpha1.ConditionBuildReady)).To(gomega.Equal(corev1.ConditionTrue))
-		g.Expect(reconciler.getConditionStatus(function.Status.Conditions, serverlessv1alpha1.ConditionRunning)).To(gomega.Equal(corev1.ConditionTrue))
-		g.Expect(reconciler.getConditionReason(function.Status.Conditions, serverlessv1alpha1.ConditionRunning)).To(gomega.Equal(serverlessv1alpha1.ConditionReasonDeploymentReady))
+		g.Expect(getConditionStatus(function.Status.Conditions, serverlessv1alpha1.ConditionConfigurationReady)).To(gomega.Equal(corev1.ConditionTrue))
+		g.Expect(getConditionStatus(function.Status.Conditions, serverlessv1alpha1.ConditionBuildReady)).To(gomega.Equal(corev1.ConditionTrue))
+		g.Expect(getConditionStatus(function.Status.Conditions, serverlessv1alpha1.ConditionRunning)).To(gomega.Equal(corev1.ConditionTrue))
+		g.Expect(getConditionReason(function.Status.Conditions, serverlessv1alpha1.ConditionRunning)).To(gomega.Equal(serverlessv1alpha1.ConditionReasonDeploymentReady))
 	})
 	t.Run("should properly handle `kubectl rollout restart` changing annotations in deployment", func(t *testing.T) {
 		//GIVEN
@@ -1091,12 +1136,18 @@ func TestFunctionReconciler_Reconcile(t *testing.T) {
 		g.Expect(resourceClient.Create(context.TODO(), inFunction)).To(gomega.Succeed())
 		defer deleteFunction(g, resourceClient, inFunction)
 
-		fnLabels := reconciler.functionLabels(inFunction)
+		s := systemState{
+			//TODO https://github.com/kyma-project/kyma/issues/14079
+			instance: *inFunction,
+		}
+
+		fnLabels := s.functionLabels()
+
 		request := ctrl.Request{NamespacedName: types.NamespacedName{Namespace: inFunction.GetNamespace(), Name: inFunction.GetName()}}
 
 		//WHEN
 		t.Log("succesfully deploying a function")
-		_, err := reconciler.Reconcile(request)
+		_, err := reconciler.Reconcile(ctx, request)
 		g.Expect(err).To(gomega.BeNil())
 		assertSuccessfulFunctionBuild(t, resourceClient, reconciler, request, fnLabels, false)
 		assertSuccessfulFunctionDeployment(t, resourceClient, reconciler, request, fnLabels, "registry.kyma.local", false)
@@ -1118,17 +1169,17 @@ func TestFunctionReconciler_Reconcile(t *testing.T) {
 		copiedDeploy.Spec.Template.Annotations = restartedAtAnnotation
 		g.Expect(resourceClient.Update(context.Background(), copiedDeploy))
 
-		_, err = reconciler.Reconcile(request)
+		_, err = reconciler.Reconcile(ctx, request)
 		g.Expect(err).To(gomega.BeNil())
 
 		t.Log("making sure function is ready")
 		function := &serverlessv1alpha1.Function{}
 		g.Expect(resourceClient.Get(context.TODO(), request.NamespacedName, function)).To(gomega.Succeed())
 		g.Expect(function.Status.Conditions).To(gomega.HaveLen(conditionLen))
-		g.Expect(reconciler.getConditionStatus(function.Status.Conditions, serverlessv1alpha1.ConditionConfigurationReady)).To(gomega.Equal(corev1.ConditionTrue))
-		g.Expect(reconciler.getConditionStatus(function.Status.Conditions, serverlessv1alpha1.ConditionBuildReady)).To(gomega.Equal(corev1.ConditionTrue))
-		g.Expect(reconciler.getConditionStatus(function.Status.Conditions, serverlessv1alpha1.ConditionRunning)).To(gomega.Equal(corev1.ConditionTrue))
-		g.Expect(reconciler.getConditionReason(function.Status.Conditions, serverlessv1alpha1.ConditionRunning)).To(gomega.Equal(serverlessv1alpha1.ConditionReasonDeploymentReady))
+		g.Expect(getConditionStatus(function.Status.Conditions, serverlessv1alpha1.ConditionConfigurationReady)).To(gomega.Equal(corev1.ConditionTrue))
+		g.Expect(getConditionStatus(function.Status.Conditions, serverlessv1alpha1.ConditionBuildReady)).To(gomega.Equal(corev1.ConditionTrue))
+		g.Expect(getConditionStatus(function.Status.Conditions, serverlessv1alpha1.ConditionRunning)).To(gomega.Equal(corev1.ConditionTrue))
+		g.Expect(getConditionReason(function.Status.Conditions, serverlessv1alpha1.ConditionRunning)).To(gomega.Equal(serverlessv1alpha1.ConditionReasonDeploymentReady))
 
 		t.Log("checking whether that added annotation is still there")
 		deployments = &appsv1.DeploymentList{}
@@ -1138,6 +1189,48 @@ func TestFunctionReconciler_Reconcile(t *testing.T) {
 		g.Expect(deployment).ToNot(gomega.BeNil())
 
 		g.Expect(deployment.Spec.Template.Annotations).To(gomega.Equal(restartedAtAnnotation))
+	})
+	t.Run("should reconcile function with RuntimeImageOverride", func(t *testing.T) {
+		//GIVEN
+		g := gomega.NewGomegaWithT(t)
+		runtimeImageOverride := "any-custom-image"
+		inFunction := newFixFunctionWithCustomImage(testNamespace, "custom-runtime-image", runtimeImageOverride, 1, 2)
+		g.Expect(resourceClient.Create(context.TODO(), inFunction)).To(gomega.Succeed())
+		defer deleteFunction(g, resourceClient, inFunction)
+
+		request := ctrl.Request{NamespacedName: types.NamespacedName{Namespace: inFunction.GetNamespace(), Name: inFunction.GetName()}}
+
+		//WHEN
+		t.Log("should detect runtimeImageOverride change")
+
+		function := &serverlessv1alpha1.Function{}
+		g.Expect(resourceClient.Get(context.TODO(), request.NamespacedName, function)).To(gomega.Succeed())
+		function.Spec.RuntimeImageOverride = runtimeImageOverride
+		g.Expect((resourceClient.Update(ctx, function))).To(gomega.Succeed())
+
+		result, err := reconciler.Reconcile(ctx, request)
+		g.Expect(err).To(gomega.BeNil())
+		g.Expect(result.Requeue).To(gomega.BeFalse())
+		g.Expect(result.RequeueAfter).To(gomega.Equal(time.Second * 1))
+
+		function = &serverlessv1alpha1.Function{}
+		g.Expect(resourceClient.Get(context.TODO(), request.NamespacedName, function)).To(gomega.Succeed())
+		g.Expect(function.Spec.RuntimeImageOverride).To(gomega.Equal(runtimeImageOverride))
+		g.Expect(function.Status.RuntimeImageOverride).To(gomega.Equal(runtimeImageOverride))
+
+		t.Log("should detect runtimeImageOverride rollback")
+
+		function.Spec.RuntimeImageOverride = ""
+		g.Expect((resourceClient.Update(ctx, function))).To(gomega.Succeed())
+
+		result, err = reconciler.Reconcile(ctx, request)
+		g.Expect(err).To(gomega.BeNil())
+		g.Expect(result.Requeue).To(gomega.BeFalse())
+		g.Expect(result.RequeueAfter).To(gomega.Equal(time.Second * 1))
+
+		function = &serverlessv1alpha1.Function{}
+		g.Expect(function.Spec.RuntimeImageOverride).To(gomega.Equal(""))
+		g.Expect(function.Status.RuntimeImageOverride).To(gomega.Equal(""))
 	})
 }
 

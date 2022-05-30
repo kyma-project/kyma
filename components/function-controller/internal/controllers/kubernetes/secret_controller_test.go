@@ -4,6 +4,8 @@ import (
 	"context"
 	"testing"
 
+	"go.uber.org/zap"
+
 	"github.com/kyma-project/kyma/components/function-controller/internal/resource"
 	"k8s.io/client-go/kubernetes/scheme"
 
@@ -13,7 +15,6 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/event"
-	"sigs.k8s.io/controller-runtime/pkg/log"
 )
 
 func TestSecretReconciler_Reconcile(t *testing.T) {
@@ -31,9 +32,11 @@ func TestSecretReconciler_Reconcile(t *testing.T) {
 	g.Expect(resourceClient.Create(context.TODO(), userNamespace)).To(gomega.Succeed())
 
 	secretSvc := NewSecretService(resourceClient, testCfg)
-	reconciler := NewSecret(k8sClient, log.Log, testCfg, secretSvc)
+	reconciler := NewSecret(k8sClient, zap.NewNop().Sugar(), testCfg, secretSvc)
 
 	namespace := userNamespace.GetName()
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
 
 	t.Run("should successfully propagate base Secret to user namespace", func(t *testing.T) {
 		//GIVEN
@@ -42,7 +45,7 @@ func TestSecretReconciler_Reconcile(t *testing.T) {
 		baseSecret := newFixBaseSecret(testCfg.BaseNamespace, "successful-propagation")
 		createSecret(g, resourceClient, baseSecret)
 		defer deleteSecret(g, k8sClient, baseSecret)
-		_, err := reconciler.Reconcile(ctrl.Request{
+		_, err := reconciler.Reconcile(ctx, ctrl.Request{
 			NamespacedName: types.NamespacedName{
 				Namespace: baseSecret.GetNamespace(),
 				Name:      "not-existing-secret",
@@ -53,7 +56,7 @@ func TestSecretReconciler_Reconcile(t *testing.T) {
 
 		//WHEN
 		t.Log("reconciling the Secret")
-		result, err := reconciler.Reconcile(request)
+		result, err := reconciler.Reconcile(ctx, request)
 		g.Expect(err).To(gomega.BeNil())
 		g.Expect(result.Requeue).To(gomega.BeFalse())
 		g.Expect(result.RequeueAfter).To(gomega.Equal(testCfg.SecretRequeueDuration))
@@ -71,7 +74,7 @@ func TestSecretReconciler_Reconcile(t *testing.T) {
 		updateBaseSecretCopy.Data["test123"] = []byte("321tset")
 		g.Expect(k8sClient.Update(context.TODO(), updateBaseSecretCopy)).To(gomega.Succeed())
 
-		result, err = reconciler.Reconcile(request)
+		result, err = reconciler.Reconcile(ctx, request)
 		g.Expect(err).To(gomega.BeNil())
 		g.Expect(result.Requeue).To(gomega.BeFalse())
 		g.Expect(result.RequeueAfter).To(gomega.Equal(testCfg.SecretRequeueDuration))
@@ -85,7 +88,7 @@ func TestSecretReconciler_Reconcile(t *testing.T) {
 		userCopy.Data["test123"] = []byte("321tset")
 		g.Expect(k8sClient.Update(context.TODO(), userCopy)).To(gomega.Succeed())
 
-		result, err = reconciler.Reconcile(request)
+		result, err = reconciler.Reconcile(ctx, request)
 		g.Expect(err).To(gomega.BeNil())
 		g.Expect(result.Requeue).To(gomega.BeFalse())
 		g.Expect(result.RequeueAfter).To(gomega.Equal(testCfg.SecretRequeueDuration))
@@ -107,7 +110,7 @@ func TestSecretReconciler_Reconcile(t *testing.T) {
 		baseSecret := newFixBaseSecret(testCfg.BaseNamespace, "unsuccessful-propagation")
 		createSecret(g, resourceClient, baseSecret)
 		defer deleteSecret(g, k8sClient, baseSecret)
-		_, err := reconciler.Reconcile(ctrl.Request{
+		_, err := reconciler.Reconcile(ctx, ctrl.Request{
 			NamespacedName: types.NamespacedName{
 				Namespace: baseSecretWithManagedLabel.GetNamespace(),
 				Name:      "not-existing-secret",
@@ -116,7 +119,7 @@ func TestSecretReconciler_Reconcile(t *testing.T) {
 		g.Expect(err).To(gomega.BeNil())
 
 		t.Log("reconciling the Secret")
-		result, err := reconciler.Reconcile(requestForSecretWithManagedLabel)
+		result, err := reconciler.Reconcile(ctx, requestForSecretWithManagedLabel)
 		g.Expect(err).To(gomega.BeNil())
 		g.Expect(result.Requeue).To(gomega.BeFalse())
 		g.Expect(result.RequeueAfter).To(gomega.Equal(testCfg.SecretRequeueDuration))
@@ -132,7 +135,7 @@ func TestSecretReconciler_Reconcile(t *testing.T) {
 		updateBaseSecretCopy.Data["test123"] = []byte("321tset")
 		g.Expect(k8sClient.Update(context.TODO(), updateBaseSecretCopy)).To(gomega.Succeed())
 
-		result, err = reconciler.Reconcile(requestForSecretWithManagedLabel)
+		result, err = reconciler.Reconcile(ctx, requestForSecretWithManagedLabel)
 		g.Expect(err).To(gomega.BeNil())
 		g.Expect(result.Requeue).To(gomega.BeFalse())
 		g.Expect(result.RequeueAfter).To(gomega.Equal(testCfg.SecretRequeueDuration))
@@ -152,7 +155,7 @@ func TestSecretReconciler_Reconcile(t *testing.T) {
 		request := ctrl.Request{NamespacedName: types.NamespacedName{Namespace: testCfg.BaseNamespace, Name: baseSecret.GetName()}}
 
 		//WHEN
-		result, err := reconciler.Reconcile(request)
+		result, err := reconciler.Reconcile(ctx, request)
 		g.Expect(err).To(gomega.BeNil())
 		g.Expect(result.Requeue).To(gomega.BeFalse())
 		g.Expect(result.RequeueAfter).To(gomega.Equal(testCfg.SecretRequeueDuration))
@@ -166,7 +169,7 @@ func TestSecretReconciler_Reconcile(t *testing.T) {
 
 		t.Log("deleting base Secret")
 		g.Expect(k8sClient.Delete(context.TODO(), updatedBase)).To(gomega.Succeed())
-		result, err = reconciler.Reconcile(request)
+		result, err = reconciler.Reconcile(ctx, request)
 		g.Expect(err).To(gomega.BeNil())
 		g.Expect(result.Requeue).To(gomega.BeFalse())
 		g.Expect(result.RequeueAfter).To(gomega.BeZero())
@@ -185,7 +188,7 @@ func TestSecretReconciler_Reconcile(t *testing.T) {
 		g.Expect(resourceClient.Create(context.TODO(), baseSecretWithManagedLabel)).To(gomega.Succeed())
 		requestForSecretWithManagedLabel := ctrl.Request{NamespacedName: types.NamespacedName{Namespace: baseSecretWithManagedLabel.GetNamespace(), Name: baseSecretWithManagedLabel.GetName()}}
 
-		result, err := reconciler.Reconcile(requestForSecretWithManagedLabel)
+		result, err := reconciler.Reconcile(ctx, requestForSecretWithManagedLabel)
 		g.Expect(err).To(gomega.BeNil())
 		g.Expect(result.Requeue).To(gomega.BeFalse())
 		g.Expect(result.RequeueAfter).To(gomega.Equal(testCfg.SecretRequeueDuration))
@@ -198,7 +201,7 @@ func TestSecretReconciler_Reconcile(t *testing.T) {
 
 		t.Log("deleting base Secret")
 		g.Expect(k8sClient.Delete(context.TODO(), updatedBase)).To(gomega.Succeed())
-		result, err = reconciler.Reconcile(requestForSecretWithManagedLabel)
+		result, err = reconciler.Reconcile(ctx, requestForSecretWithManagedLabel)
 		g.Expect(err).To(gomega.BeNil())
 		g.Expect(result.Requeue).To(gomega.BeFalse())
 		g.Expect(result.RequeueAfter).To(gomega.BeZero())
@@ -221,9 +224,9 @@ func TestSecretReconciler_predicate(t *testing.T) {
 
 	t.Run("deleteFunc", func(t *testing.T) {
 		g := gomega.NewGomegaWithT(t)
-		podEvent := event.DeleteEvent{Meta: pod.GetObjectMeta(), Object: pod}
-		eventBaseSecret := event.DeleteEvent{Meta: baseSecret.GetObjectMeta(), Object: baseSecret}
-		eventNonBaseSecret := event.DeleteEvent{Meta: nonBaseSecret.GetObjectMeta(), Object: nonBaseSecret}
+		podEvent := event.DeleteEvent{Object: pod}
+		eventBaseSecret := event.DeleteEvent{Object: baseSecret}
+		eventNonBaseSecret := event.DeleteEvent{Object: nonBaseSecret}
 
 		g.Expect(preds.Delete(podEvent)).To(gomega.BeFalse())
 		g.Expect(preds.Delete(eventBaseSecret)).To(gomega.BeTrue(), "should be true for base secret")
@@ -233,9 +236,9 @@ func TestSecretReconciler_predicate(t *testing.T) {
 
 	t.Run("createFunc", func(t *testing.T) {
 		g := gomega.NewGomegaWithT(t)
-		podEvent := event.CreateEvent{Meta: pod.GetObjectMeta(), Object: pod}
-		eventBaseSecret := event.CreateEvent{Meta: baseSecret.GetObjectMeta(), Object: baseSecret}
-		eventNonBaseSecret := event.CreateEvent{Meta: nonBaseSecret.GetObjectMeta(), Object: nonBaseSecret}
+		podEvent := event.CreateEvent{Object: pod}
+		eventBaseSecret := event.CreateEvent{Object: baseSecret}
+		eventNonBaseSecret := event.CreateEvent{Object: nonBaseSecret}
 
 		g.Expect(preds.Create(podEvent)).To(gomega.BeFalse())
 		g.Expect(preds.Create(eventNonBaseSecret)).To(gomega.BeFalse())
@@ -246,9 +249,9 @@ func TestSecretReconciler_predicate(t *testing.T) {
 
 	t.Run("genericFunc", func(t *testing.T) {
 		g := gomega.NewGomegaWithT(t)
-		podEvent := event.GenericEvent{Meta: pod.GetObjectMeta(), Object: pod}
-		eventBaseSecret := event.GenericEvent{Meta: baseSecret.GetObjectMeta(), Object: baseSecret}
-		eventNonBaseSecret := event.GenericEvent{Meta: nonBaseSecret.GetObjectMeta(), Object: nonBaseSecret}
+		podEvent := event.GenericEvent{Object: pod}
+		eventBaseSecret := event.GenericEvent{Object: baseSecret}
+		eventNonBaseSecret := event.GenericEvent{Object: nonBaseSecret}
 
 		g.Expect(preds.Generic(podEvent)).To(gomega.BeFalse())
 		g.Expect(preds.Generic(eventNonBaseSecret)).To(gomega.BeFalse())
@@ -259,9 +262,9 @@ func TestSecretReconciler_predicate(t *testing.T) {
 
 	t.Run("updateFunc", func(t *testing.T) {
 		g := gomega.NewGomegaWithT(t)
-		podEvent := event.UpdateEvent{MetaNew: pod.GetObjectMeta(), ObjectNew: pod}
-		eventBaseSecret := event.UpdateEvent{MetaNew: baseSecret.GetObjectMeta(), ObjectNew: baseSecret}
-		eventNonBaseSecret := event.UpdateEvent{MetaNew: nonBaseSecret.GetObjectMeta(), ObjectNew: nonBaseSecret}
+		podEvent := event.UpdateEvent{ObjectNew: pod}
+		eventBaseSecret := event.UpdateEvent{ObjectNew: baseSecret}
+		eventNonBaseSecret := event.UpdateEvent{ObjectNew: nonBaseSecret}
 
 		g.Expect(preds.Update(podEvent)).To(gomega.BeFalse())
 		g.Expect(preds.Update(eventNonBaseSecret)).To(gomega.BeFalse())

@@ -9,7 +9,7 @@ metadata:
   name: {{ include "oathkeeper.fullname" . }}-maester-metrics
 spec:
   ports:
-  - name: metrics
+  - name: http-metrics
     port: {{ .Values.sidecar.port.metrics }}
   selector:
     app.kubernetes.io/instance: {{ .Release.Name }}

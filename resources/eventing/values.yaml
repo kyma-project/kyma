@@ -5,17 +5,28 @@ global:
   images:
     eventing_controller:
       name: eventing-controller
-      version: PR-13511
+      version: 19b21a76
       pullPolicy: "IfNotPresent"
     publisher_proxy:
       name: event-publisher-proxy
-      version: PR-13120
+      version: 19b21a76
     nats:
       name: nats
-      version: 2.6.5-alpine
+      version: 2.8.2-alpine
       directory: external
-  features:
-    enableJetStream: false
+    nats_config_reloader:
+      name: natsio/nats-server-config-reloader
+      version: 0.7.0
+      directory: external
+    prometheus_nats_exporter:
+      name: natsio/prometheus-nats-exporter
+      version: 0.9.3
+      directory: external
+
+  jetstream:
+    enabled: false
+    # Storage type of the stream, memory or file.
+    storage: memory
 
   # secretName defines optionally another name than the default secret name
   secretName: ""

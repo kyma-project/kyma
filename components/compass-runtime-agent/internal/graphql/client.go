@@ -18,7 +18,7 @@ type ClientConstructor func(httpClient *http.Client, graphqlEndpoint string, ena
 
 //go:generate mockery --name=Client
 type Client interface {
-	Do(req *graphql.Request, res interface{}) error
+	Do(ctx context.Context, req *graphql.Request, res interface{}) error
 }
 
 type client struct {
@@ -41,8 +41,8 @@ func New(httpClient *http.Client, graphqlEndpoint string, enableLogging bool) (C
 	return client, nil
 }
 
-func (c *client) Do(req *graphql.Request, res interface{}) error {
-	ctx, cancel := context.WithTimeout(context.Background(), timeout)
+func (c *client) Do(ctx context.Context, req *graphql.Request, res interface{}) error {
+	ctx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
 
 	c.clearLogs()

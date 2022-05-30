@@ -21,6 +21,11 @@ async function addScenarioInCompass(client, scenarioName) {
   await client.updateLabelDefinition(SCENARIOS_DEFINITION_NAME, scenariosDefinition.schema);
 }
 
+async function scenarioExistsInCompass(client, scenarioName) {
+  const scenariosDefinition = await client.queryLabelDefinition(SCENARIOS_DEFINITION_NAME);
+  return !!scenariosDefinition.schema.items.enum.includes(scenarioName);
+}
+
 async function queryRuntimesForScenario(client, scenarioName) {
   const filter = {
     key: SCENARIOS_DEFINITION_NAME,
@@ -81,6 +86,28 @@ async function assignRuntimeToScenario(client, runtimeID, scenarioName) {
   return await client.setRuntimeLabel(runtimeID, SCENARIOS_DEFINITION_NAME, scenarios);
 }
 
+async function isRuntimeAssignedToScenario(client, runtimeID, scenarioName) {
+  const runtime = await client.getRuntime(runtimeID);
+  if (!runtime || !runtime.labels[SCENARIOS_DEFINITION_NAME]) {
+    return false;
+  }
+
+  const idx = runtime.labels[SCENARIOS_DEFINITION_NAME].indexOf(scenarioName);
+  return idx !== -1;
+}
+
+// getAlreadyAssignedScenarios returns the list of the scenarios by one runtime
+async function getAlreadyAssignedScenarios(client, runtimeID) {
+  const runtime = await client.getRuntime(runtimeID);
+  if (!runtime) {
+    throw new Error(`Failed to find runtime: ${runtimeID}`);
+  }
+  if (!runtime.labels[SCENARIOS_DEFINITION_NAME]) {
+    return [];
+  }
+  return runtime.labels[SCENARIOS_DEFINITION_NAME];
+}
+
 async function unassignRuntimeFromScenario(client, runtimeID, scenarioName) {
   const runtime = await client.getRuntime(runtimeID);
   if (!runtime.labels[SCENARIOS_DEFINITION_NAME]) {
@@ -120,12 +147,15 @@ async function removeApplicationFromScenario(client, appID, scenarioName) {
 module.exports = {
   removeScenarioFromCompass,
   addScenarioInCompass,
+  scenarioExistsInCompass,
   queryRuntimesForScenario,
   queryApplicationsForScenario,
   getApplicationByName,
   registerOrReturnApplication,
   deregisterApplication,
   assignRuntimeToScenario,
+  isRuntimeAssignedToScenario,
+  getAlreadyAssignedScenarios,
   unassignRuntimeFromScenario,
   removeApplicationFromScenario,
 };

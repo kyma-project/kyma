@@ -8,7 +8,7 @@ global:
   images:
     service_binding_usage_controller:
       name: "service-binding-usage-controller"
-      version: "75da62ce"
+      version: "766fb282"
   istio:
     gateway:
       name: kyma-gateway

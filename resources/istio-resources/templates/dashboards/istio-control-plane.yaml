@@ -1,0 +1,12 @@
+{{- if (and .Values.monitoring.enabled .Values.monitoring.dashboards.enabled) }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: istio-control-plane-grafana-dashboard
+  namespace: kyma-system
+  labels:
+    grafana_dashboard: "1"
+    app: monitoring-grafana
+data:
+  istio-workload-dashboard.json: {{ .Files.Get "files/dashboards/control-plane.json" | toJson }}
+{{- end }}

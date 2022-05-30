@@ -14,6 +14,7 @@ const {
   convertAxiosError,
   sleep,
   k8sApply,
+  waitForApplicationCr,
   waitForServiceClass,
   waitForServicePlanByServiceClass,
   waitForServiceInstance,
@@ -21,14 +22,15 @@ const {
   waitForServiceBindingUsage,
   waitForVirtualService,
   waitForDeployment,
-  waitForTokenRequest,
   waitForFunction,
   waitForSubscription,
   deleteAllK8sResources,
   genRandom,
   k8sDynamicApi,
   deleteNamespaces,
+  error,
   debug,
+  isDebugEnabled,
   toBase64,
   ensureApplicationMapping,
   patchApplicationGateway,
@@ -50,16 +52,14 @@ const {
   unassignRuntimeFromScenario,
 } = require('../../../compass');
 
-const {
-  jaegerPortForward,
-  getJaegerTrace,
-} = require('../../../monitoring/client');
+const {getJaegerTrace} = require('../../../tracing/client');
 
 const {
   OAuthToken,
   OAuthCredentials,
 } = require('../../../lib/oauth');
-const {bebBackend, eventMeshNamespace} = require('../../../eventing-test/utils');
+
+const {bebBackend, eventMeshNamespace} = require('../../../eventing-test/common/common');
 
 const commerceMockYaml = fs.readFileSync(
     path.join(__dirname, './commerce-mock.yaml'),
@@ -99,9 +99,9 @@ function prepareFunction(type = 'standard', appName = 'commerce') {
       return k8s.loadAllYaml(functionYaml.toString()
           .replace('%%URL%%', `"${orders}" + code`));
     case 'central-app-gateway-compass':
-      const orderWithCompass = `${gatewayUrl}:8082/%%APP_NAME%%/sap-commerce-cloud/commerce-webservices/site/orders/`;
+      const ordersWithCompass = `${gatewayUrl}:8082/%%APP_NAME%%/sap-commerce-cloud/commerce-webservices/site/orders/`;
       return k8s.loadAllYaml(functionYaml.toString()
-          .replace('%%URL%%', `"${orderWithCompass}" + code`)
+          .replace('%%URL%%', `"${ordersWithCompass}" + code`)
           .replace('%%APP_NAME%%', appName));
     default:
       return k8s.loadAllYaml(functionYaml.toString()
@@ -158,14 +158,14 @@ async function sendEventAndCheckResponse(eventType, body, params, mockNamespace 
   const vs = await waitForVirtualService(mockNamespace, 'commerce-mock');
   const mockHost = vs.spec.hosts[0];
   const host = mockHost.split('.').slice(1).join('.');
-  const url = `https://${mockHost}/events`;
 
   return await retryPromise(
       async () => {
         await axios
-            .post(url, body, params)
+            .post(`https://${mockHost}/events`, body, params)
             .catch((e) => {
-              console.log('Cannot send %s, the response from event gateway: %s', eventType, e.response.data);
+              error('Cannot send %s, the response from event gateway: %s', eventType, e.response.data);
+              console.log(e);
               throw convertAxiosError(e, 'Cannot send %s, the response from event gateway', eventType);
             });
 
@@ -188,8 +188,8 @@ async function sendEventAndCheckResponse(eventType, body, params, mockNamespace 
               throw convertAxiosError(e, 'Error during request to function lastorder');
             });
       },
-      30,
-      2 * 1000,
+      10,
+      30 * 1000,
   );
 }
 
@@ -266,7 +266,6 @@ async function checkEventTracing(targetNamespace = 'test', res) {
   const traceId = res.data.event.headers['x-b3-traceid'];
 
   // Define expected trace data
-  const correctTraceSpansLength = 6;
   const correctTraceProcessSequence = [
     'istio-ingressgateway.istio-system',
     'central-application-connectivity-validator.kyma-system',
@@ -275,10 +274,9 @@ async function checkEventTracing(targetNamespace = 'test', res) {
     'eventing-controller.kyma-system',
     `lastorder-${res.data.podName.split('-')[1]}.${targetNamespace}`,
   ];
-
-  // wait sometime for jaeger to complete tracing data
+  // wait some time for jaeger to complete tracing data
   await sleep(10 * 1000);
-  await checkTrace(traceId, correctTraceSpansLength, correctTraceProcessSequence);
+  await checkTrace(traceId, correctTraceProcessSequence);
 }
 
 async function sendLegacyEventAndCheckTracing(targetNamespace = 'test', mockNamespace = 'mocks') {
@@ -314,9 +312,9 @@ async function checkInClusterEventTracing(targetNamespace) {
   const traceId = res.data.event.headers['x-b3-traceid'];
 
   // Define expected trace data
-  const correctTraceSpansLength = 4;
   const correctTraceProcessSequence = [
     // We are sending the in-cluster event from inside the lastorder pod
+    'istio-ingressgateway.istio-system',
     `lastorder-${res.data.podName.split('-')[1]}.${targetNamespace}`,
     'eventing-publisher-proxy.kyma-system',
     'eventing-controller.kyma-system',
@@ -325,45 +323,82 @@ async function checkInClusterEventTracing(targetNamespace) {
 
   // wait sometime for jaeger to complete tracing data
   await sleep(10 * 1000);
-  await checkTrace(traceId, correctTraceSpansLength, correctTraceProcessSequence);
+  await checkTrace(traceId, correctTraceProcessSequence);
 }
 
-async function checkTrace(traceId, expectedTraceLength, expectedTraceProcessSequence) {
-  // Port-forward to Jaeger and fetch trace data for the traceId
-  const cancelJaegerPortForward = await jaegerPortForward();
-  let traceRes;
-  try {
-    traceRes = await getJaegerTrace(traceId);
-  } finally {
-    cancelJaegerPortForward();
-  }
+async function checkTrace(traceId, expectedTraceProcessSequence) {
+  const traceRes = await getJaegerTrace(traceId);
 
   // the trace response should have data for single trace
   expect(traceRes.data).to.have.length(1);
 
-  // Extract trace data from response
+  // extract trace data from response
   const traceData = traceRes.data[0];
-  expect(traceData['spans']).to.have.length(expectedTraceLength);
+  expect(traceData['spans'].length).to.be.gte(expectedTraceProcessSequence.length);
 
-  // Generate DAG for trace spans
+  // generate DAG for trace spans
   const traceDAG = await getTraceDAG(traceData);
   expect(traceDAG).to.have.length(1);
 
-  // Check the tracing spans are correct
-  let currentSpan = traceDAG[0];
-  for (let i = 0; i < expectedTraceLength; i++) {
-    const processServiceName = traceData.processes[currentSpan.processID].serviceName;
-    debug(`Checking Trace Sequence # ${i}:
-    Expected process: ${expectedTraceProcessSequence[i]}, 
-    Received process: ${processServiceName}`);
-    expect(processServiceName).to.be.equal(expectedTraceProcessSequence[i]);
-
-    // Traverse to next trace span
-    if (i < expectedTraceLength - 1) {
-      expect(currentSpan.childSpans).to.have.length(1);
-      currentSpan = currentSpan.childSpans[0];
+  // searching through the trace-graph for the expected span sequence staring at the root element
+  const wasFound = findSpanSequence(expectedTraceProcessSequence, 0, traceDAG[0], traceData);
+  if (!wasFound) {
+    debug(`Not all expected spans found in the expected order:`);
+    for (let i = 0; i < expectedTraceProcessSequence.length; i++) {
+      debug(`${expectedTraceProcessSequence[i]}`);
     }
   }
+  expect(wasFound).to.be.true;
+}
+
+// findSpanSequence recursively searches through the trace-graph to find all expected spans in the right, consecutive
+// order while ignoring the spans that are not expected.
+function findSpanSequence(expectedSpans, position, currentSpan, traceData) {
+  // validate if the actual span is the expected span
+  const actualSpan = traceData.processes[currentSpan.processID].serviceName;
+  const expectedSpan = expectedSpans[position];
+  let newPosition = position;
+  const debugMsg = `${buildLevel(position)} ${actualSpan}`;
+  // if this span contains the currently expected span, the position will be increased
+  if (actualSpan === expectedSpan) {
+    newPosition++;
+    debug(debugMsg);
+  } else {
+    debug(`${debugMsg} expected ${expectedSpan}`);
+  }
+
+  // check if all traces have been found yet
+  if (newPosition === expectedSpans.length) {
+    return true;
+  }
+
+  // recursive search through all the child spans
+  for (let i = 0; i < currentSpan.childSpans.length; i++) {
+    if (findSpanSequence(expectedSpans, newPosition, currentSpan.childSpans[i], traceData)) {
+      return true;
+    }
+  }
+
+  // if nothing was found on this branch of the graph, close it
+  return false;
+}
+
+// buildLevel helps to display trace hierarchy by adding a whitespace for each level of hierarchy in front of the trace
+// to get output like
+// -> myTrace
+//  └> myChildTrace
+//   └> ChildOfMyChildTrace
+// ...
+function buildLevel(n) {
+  if (n === 0) {
+    return '  ->';
+  }
+
+  let level = '';
+  for (let i = 0; i < n+1; i++) {
+    level += ' ';
+  }
+  return `${level} └>`;
 }
 
 async function addService() {
@@ -481,27 +516,6 @@ async function registerAllApis(mockHost) {
   return remoteApis;
 }
 
-async function connectMockLocal(mockHost, targetNamespace) {
-  const tokenRequest = {
-    apiVersion: 'applicationconnector.kyma-project.io/v1alpha1',
-    kind: 'TokenRequest',
-    metadata: {name: 'commerce', namespace: targetNamespace},
-  };
-  await k8sDynamicApi.delete(tokenRequest).catch(() => { }); // Ignore delete error
-  await k8sDynamicApi.create(tokenRequest);
-  const tokenObj = await waitForTokenRequest('commerce', targetNamespace);
-
-  const pairingBody = {
-    token: tokenObj.status.url,
-    baseUrl: `https://${mockHost}`,
-    insecure: true,
-  };
-  debug('Token URL', tokenObj.status.url);
-  await connectCommerceMock(mockHost, pairingBody);
-  await ensureApplicationMapping('commerce', targetNamespace);
-  debug('Commerce mock connected locally');
-}
-
 async function connectMockCompass(client, appName, scenarioName, mockHost, targetNamespace) {
   const appID = await registerOrReturnApplication(client, appName, scenarioName);
   debug(`Application ID in Compass ${appID}`);
@@ -539,12 +553,14 @@ async function connectCommerceMock(mockHost, tokenData) {
   }
 }
 
-async function ensureCommerceMockWithCompassTestFixture(client,
+async function ensureCommerceMockWithCompassTestFixture(
+    client,
     appName,
     scenarioName,
     mockNamespace,
     targetNamespace,
-    withCentralApplicationConnectivity = false) {
+    withCentralApplicationConnectivity = false,
+    compassScenarioAlreadyExist = false) {
   const lastOrderFunction = withCentralApplicationConnectivity ?
     prepareFunction('central-app-gateway-compass', `mp-${appName}`) :
     prepareFunction();
@@ -554,50 +570,55 @@ async function ensureCommerceMockWithCompassTestFixture(client,
       mockNamespace,
       targetNamespace,
       lastOrderFunction);
-  await retryPromise(() => connectMockCompass(client, appName, scenarioName, mockHost, targetNamespace), 10, 3000);
-  await retryPromise(() => registerAllApis(mockHost), 10, 3000);
+  await retryPromise(() => connectMockCompass(client, appName, scenarioName, mockHost, targetNamespace), 10, 30000);
+  // do not register the apis again for an already existing compass scenario
+  if (!compassScenarioAlreadyExist) {
+    await retryPromise(() => registerAllApis(mockHost), 10, 30000);
+  }
 
-  const commerceSC = await waitForServiceClass(appName, targetNamespace, 300 * 1000);
-  await waitForServicePlanByServiceClass(commerceSC.metadata.name, targetNamespace, 300 * 1000);
-  await retryPromise(
-      () => k8sApply([serviceInstanceObj('commerce', commerceSC.spec.externalName)], targetNamespace, false),
-      5,
-      2000,
-  );
-  await waitForServiceInstance('commerce', targetNamespace, 600 * 1000);
 
   if (withCentralApplicationConnectivity) {
     await waitForDeployment('central-application-gateway', 'kyma-system');
     await waitForDeployment('central-application-connectivity-validator', 'kyma-system');
   } else {
+    const commerceSC = await waitForServiceClass(appName, targetNamespace, 300 * 1000);
+    await waitForServicePlanByServiceClass(commerceSC.metadata.name, targetNamespace, 300 * 1000);
+    await retryPromise(
+        () => k8sApply([serviceInstanceObj('commerce', commerceSC.spec.externalName)], targetNamespace, false),
+        5,
+        2000,
+    );
+    await waitForServiceInstance('commerce', targetNamespace, 600 * 1000);
     await waitForDeployment(`${targetNamespace}-gateway`, targetNamespace);
     await patchApplicationGateway(`${targetNamespace}-gateway`, targetNamespace);
+
+    const serviceBinding = {
+      apiVersion: 'servicecatalog.k8s.io/v1beta1',
+      kind: 'ServiceBinding',
+      metadata: {name: 'commerce-binding'},
+      spec: {
+        instanceRef: {name: 'commerce'},
+      },
+    };
+    await k8sApply([serviceBinding], targetNamespace, false);
+    await waitForServiceBinding('commerce-binding', targetNamespace);
+
+    const serviceBindingUsage = {
+      apiVersion: 'servicecatalog.kyma-project.io/v1alpha1',
+      kind: 'ServiceBindingUsage',
+      metadata: {name: 'commerce-lastorder-sbu'},
+      spec: {
+        serviceBindingRef: {name: 'commerce-binding'},
+        usedBy: {kind: 'serverless-function', name: 'lastorder'},
+      },
+    };
+    await k8sApply([serviceBindingUsage], targetNamespace);
+    await waitForServiceBindingUsage('commerce-lastorder-sbu', targetNamespace);
   }
 
-  const serviceBinding = {
-    apiVersion: 'servicecatalog.k8s.io/v1beta1',
-    kind: 'ServiceBinding',
-    metadata: {name: 'commerce-binding'},
-    spec: {
-      instanceRef: {name: 'commerce'},
-    },
-  };
-  await k8sApply([serviceBinding], targetNamespace, false);
-  await waitForServiceBinding('commerce-binding', targetNamespace);
-
-  const serviceBindingUsage = {
-    apiVersion: 'servicecatalog.kyma-project.io/v1alpha1',
-    kind: 'ServiceBindingUsage',
-    metadata: {name: 'commerce-lastorder-sbu'},
-    spec: {
-      serviceBindingRef: {name: 'commerce-binding'},
-      usedBy: {kind: 'serverless-function', name: 'lastorder'},
-    },
-  };
-  await k8sApply([serviceBindingUsage], targetNamespace);
-  await waitForServiceBindingUsage('commerce-lastorder-sbu', targetNamespace);
-
   await waitForFunction('lastorder', targetNamespace);
+
+  await waitForApplicationCr(`mp-${appName}`);
 
   await k8sApply([eventingSubscription(
       `sap.kyma.custom.inapp.order.received.v1`,
@@ -606,7 +627,6 @@ async function ensureCommerceMockWithCompassTestFixture(client,
       targetNamespace)]);
   await waitForSubscription('order-received', targetNamespace);
   await waitForSubscription('order-created', targetNamespace);
-
   return mockHost;
 }
 
@@ -637,68 +657,15 @@ async function cleanCompassResourcesSKR(client, appName, scenarioName, runtimeID
   }
 }
 
-async function ensureCommerceMockLocalTestFixture(mockNamespace,
-    targetNamespace,
-    withCentralApplicationConnectivity = false) {
+async function ensureCommerceMockLocalTestFixture(mockNamespace, targetNamespace) {
   await k8sApply(applicationObjs);
   const mockHost = await provisionCommerceMockResources(
       'commerce',
       mockNamespace,
       targetNamespace,
-    withCentralApplicationConnectivity ? prepareFunction('central-app-gateway') : prepareFunction());
-  await retryPromise(() => connectMockLocal(mockHost, targetNamespace), 10, 3000);
-  await retryPromise(() => registerAllApis(mockHost), 10, 3000);
+      prepareFunction('central-app-gateway'));
 
-  if (withCentralApplicationConnectivity) {
-    await waitForDeployment('central-application-gateway', 'kyma-system');
-    await waitForDeployment('central-application-connectivity-validator', 'kyma-system');
-  }
-
-  const webServicesSC = await waitForServiceClass(
-      'webservices',
-      targetNamespace,
-      400 * 1000,
-  );
-  const eventsSC = await waitForServiceClass('events', targetNamespace);
-  const webServicesSCExternalName = webServicesSC.spec.externalName;
-  const eventsSCExternalName = eventsSC.spec.externalName;
-  const serviceCatalogObjs = [
-    serviceInstanceObj('commerce-webservices', webServicesSCExternalName),
-    serviceInstanceObj('commerce-events', eventsSCExternalName),
-  ];
-
-  await retryPromise(
-      () => k8sApply(serviceCatalogObjs, targetNamespace, false),
-      5,
-      2000,
-  );
-  await waitForServiceInstance('commerce-webservices', targetNamespace);
-  await waitForServiceInstance('commerce-events', targetNamespace);
-
-  const serviceBinding = {
-    apiVersion: 'servicecatalog.k8s.io/v1beta1',
-    kind: 'ServiceBinding',
-    metadata: {
-      name: 'commerce-binding',
-    },
-    spec: {
-      instanceRef: {name: 'commerce-webservices'},
-    },
-  };
-  await k8sApply([serviceBinding], targetNamespace, false);
-  await waitForServiceBinding('commerce-binding', targetNamespace);
-
-  const serviceBindingUsage = {
-    apiVersion: 'servicecatalog.kyma-project.io/v1alpha1',
-    kind: 'ServiceBindingUsage',
-    metadata: {name: 'commerce-lastorder-sbu'},
-    spec: {
-      serviceBindingRef: {name: 'commerce-binding'},
-      usedBy: {kind: 'serverless-function', name: 'lastorder'},
-    },
-  };
-  await k8sApply([serviceBindingUsage], targetNamespace);
-  await waitForServiceBindingUsage('commerce-lastorder-sbu', targetNamespace);
+  await waitForDeployment('central-application-gateway', 'kyma-system');
 
   await waitForFunction('lastorder', targetNamespace);
 
@@ -803,6 +770,13 @@ async function deleteMockTestFixture(mockNamespace) {
   await k8sDelete(applicationObjs);
 }
 
+async function waitForSubscriptions(subscriptions) {
+  for (let i = 0; i < subscriptions.length; i++) {
+    const subscription = subscriptions[i];
+    await waitForSubscription(subscription.metadata.name, subscription.metadata.namespace);
+  }
+}
+
 async function waitForSubscriptionsTillReady(targetNamespace) {
   await waitForSubscription('order-received', targetNamespace);
   await waitForSubscription('order-created', targetNamespace);
@@ -811,51 +785,148 @@ async function waitForSubscriptionsTillReady(targetNamespace) {
 async function checkInClusterEventDelivery(targetNamespace) {
   await checkInClusterEventDeliveryHelper(targetNamespace, 'structured');
   await checkInClusterEventDeliveryHelper(targetNamespace, 'binary');
+  await checkInClusterLegacyEvent(targetNamespace);
 }
 
-async function checkInClusterEventDeliveryHelper(targetNamespace, encoding) {
-  const eventId = 'event-' + encoding + '-' + genRandom(5);
-  const vs = await waitForVirtualService(targetNamespace, 'lastorder');
-  const mockHost = vs.spec.hosts[0];
-
-  await printStatusOfInClusterEventingInfrastructure(targetNamespace, encoding, 'lastorder');
-
-  // send event using function query parameter send=true
+// send event using function query parameter send=true
+async function sendInClusterEventWithRetry(mockHost, eventId, encoding, retriesLeft = 10) {
   await retryPromise(async () => {
     const response = await axios.post(`https://${mockHost}`, {id: eventId}, {
       params: {
         send: true,
         encoding: encoding,
       },
+      headers: {
+        'X-B3-Sampled': 1,
+      },
     });
-    debug('Event publishing result:', {
+
+    debug('Send response:', {
       status: response.status,
       statusText: response.statusText,
       data: response.data,
     });
+
     if (response.data.eventPublishError) {
       throw convertAxiosError(response.data.statusText);
     }
     expect(response.status).to.be.equal(200);
-  }, 10, 1000);
-  debug(`Event ${eventId} was successfully published`);
+  }, retriesLeft, 1000);
 
-  // verify if event was received using function query parameter inappevent=eventId
-  return await retryPromise(async () => {
-    debug('Waiting for event: ', eventId);
-    const response = await axios.get(`https://${mockHost}`, {params: {inappevent: eventId}});
-    debug('Received Event response: ', {
+  debug(`Event "${eventId}" is sent`);
+}
+
+// send legacy event using function query parameter send=true
+async function sendInClusterLegacyEventWithRetry(mockHost, eventData, retriesLeft = 10) {
+  await retryPromise(async () => {
+    const response = await axios.post(`https://${mockHost}`, eventData, {
+      params: {
+        send: true,
+        isLegacyEvent: true,
+      },
+      headers: {
+        'X-B3-Sampled': 1,
+      },
+    });
+
+    debug('Send response:', {
       status: response.status,
       statusText: response.statusText,
       data: response.data,
     });
+
+    if (response.data.eventPublishError) {
+      throw convertAxiosError(response.data.statusText);
+    }
+    expect(response.status).to.be.equal(200);
+  }, retriesLeft, 1000);
+
+  debug(`Legacy event is sent: `, eventData);
+}
+
+// verify if event was received using function query parameter inappevent=eventId
+async function ensureInClusterEventReceivedWithRetry(mockHost, eventId, retriesLeft = 10) {
+  return await retryPromise(async () => {
+    debug(`Waiting to receive event "${eventId}"`);
+
+    const response = await axios.get(`https://${mockHost}`, {params: {inappevent: eventId}});
+
+    debug('Received response:', {
+      status: response.status,
+      statusText: response.statusText,
+      data: response.data,
+    });
+
     expect(response.data).to.have.nested.property('event.id', eventId, 'The same event id expected in the result');
     expect(response.data).to.have.nested.property('event.shipped', true, 'Order should have property shipped');
     return response;
-  }, 30, 2 * 1000)
+  }, retriesLeft, 2 * 1000)
       .catch((err) => {
         throw convertAxiosError(err, 'Fetching published event responded with error');
       });
+}
+
+// verify if legacy event was received using function query parameter inappevent=eventId
+async function ensureInClusterLegacyEventReceivedWithRetry(mockHost, eventId, retriesLeft = 10) {
+  return await retryPromise(async () => {
+    debug(`Waiting to receive legacy event "${eventId}"`);
+
+    const response = await axios.get(`https://${mockHost}`, {params: {inappevent: eventId}});
+
+    debug('Received response:', {
+      status: response.status,
+      statusText: response.statusText,
+      data: response.data,
+    });
+
+    expect(response.data).to.have.nested.property('event.id', eventId, 'The same event id expected in the result');
+    expect(response.data).to.have.nested.property('event.shipped', true, 'Order should have property shipped');
+    expect(response.data).to.have.nested.property('event.ce-type').that.contains('order.received');
+    expect(response.data).to.have.nested.property('event.ce-source');
+    expect(response.data).to.have.nested.property('event.ce-eventtypeversion', 'v1');
+    expect(response.data).to.have.nested.property('event.ce-specversion', '1.0');
+    expect(response.data).to.have.nested.property('event.ce-id');
+    expect(response.data).to.have.nested.property('event.ce-time');
+
+    return response;
+  }, retriesLeft, 2 * 1000)
+      .catch((err) => {
+        throw convertAxiosError(err, 'Fetching published legacy event responded with error');
+      });
+}
+
+function getRandomEventId(encoding) {
+  return 'event-' + encoding + '-' + genRandom(5);
+}
+
+async function getVirtualServiceHost(targetNamespace, funcName) {
+  const vs = await waitForVirtualService(targetNamespace, funcName);
+  return vs.spec.hosts[0];
+}
+
+async function checkInClusterEventDeliveryHelper(targetNamespace, encoding) {
+  const eventId = getRandomEventId(encoding);
+  const mockHost = await getVirtualServiceHost(targetNamespace, 'lastorder');
+
+  if (isDebugEnabled()) {
+    await printStatusOfInClusterEventingInfrastructure(targetNamespace, encoding, 'lastorder');
+  }
+
+  await sendInClusterEventWithRetry(mockHost, eventId, encoding);
+  return ensureInClusterEventReceivedWithRetry(mockHost, eventId);
+}
+
+async function checkInClusterLegacyEvent(targetNamespace) {
+  const eventId = getRandomEventId('legacy');
+  const mockHost = await getVirtualServiceHost(targetNamespace, 'lastorder');
+
+  if (isDebugEnabled()) {
+    await printStatusOfInClusterEventingInfrastructure(targetNamespace, 'legacy', 'lastorder');
+  }
+
+  const eventData = {'id': eventId, 'legacyOrder': '987'};
+  await sendInClusterLegacyEventWithRetry(mockHost, eventData);
+  return ensureInClusterLegacyEventReceivedWithRetry(mockHost, eventId);
 }
 
 module.exports = {
@@ -876,7 +947,12 @@ module.exports = {
   cleanMockTestFixture,
   deleteMockTestFixture,
   waitForSubscriptionsTillReady,
+  waitForSubscriptions,
   setEventMeshSourceNamespace,
   cleanCompassResourcesSKR,
   sendEventAndCheckResponse,
+  getRandomEventId,
+  getVirtualServiceHost,
+  sendInClusterEventWithRetry,
+  ensureInClusterEventReceivedWithRetry,
 };

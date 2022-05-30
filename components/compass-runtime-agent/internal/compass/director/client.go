@@ -1,6 +1,8 @@
 package director
 
 import (
+	"context"
+
 	"github.com/kyma-incubator/compass/components/director/pkg/graphql"
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/config"
 	gql "github.com/kyma-project/kyma/components/compass-runtime-agent/internal/graphql"
@@ -23,8 +25,8 @@ type RuntimeURLsConfig struct {
 
 //go:generate mockery --name=DirectorClient
 type DirectorClient interface {
-	FetchConfiguration() ([]kymamodel.Application, graphql.Labels, error)
-	SetURLsLabels(urlsCfg RuntimeURLsConfig, actualLabels graphql.Labels) (graphql.Labels, error)
+	FetchConfiguration(ctx context.Context) ([]kymamodel.Application, graphql.Labels, error)
+	SetURLsLabels(ctx context.Context, urlsCfg RuntimeURLsConfig, actualLabels graphql.Labels) (graphql.Labels, error)
 }
 
 func NewConfigurationClient(gqlClient gql.Client, runtimeConfig config.RuntimeConfig) DirectorClient {
@@ -41,14 +43,14 @@ type directorClient struct {
 	runtimeConfig config.RuntimeConfig
 }
 
-func (cc *directorClient) FetchConfiguration() ([]kymamodel.Application, graphql.Labels, error) {
+func (cc *directorClient) FetchConfiguration(ctx context.Context) ([]kymamodel.Application, graphql.Labels, error) {
 	response := ApplicationsAndLabelsForRuntimeResponse{}
 
 	appsAndLabelsForRuntimeQuery := cc.queryProvider.applicationsAndLabelsForRuntimeQuery(cc.runtimeConfig.RuntimeId)
 	req := gcli.NewRequest(appsAndLabelsForRuntimeQuery)
 	req.Header.Set(TenantHeader, cc.runtimeConfig.Tenant)
 
-	err := cc.gqlClient.Do(req, &response)
+	err := cc.gqlClient.Do(ctx, req, &response)
 	if err != nil {
 		return nil, nil, errors.Wrap(err, "Failed to fetch Applications and Labels")
 	}
@@ -68,7 +70,7 @@ func (cc *directorClient) FetchConfiguration() ([]kymamodel.Application, graphql
 	return applications, response.Runtime.Labels, nil
 }
 
-func (cc *directorClient) SetURLsLabels(urlsCfg RuntimeURLsConfig, currentLabels graphql.Labels) (graphql.Labels, error) {
+func (cc *directorClient) SetURLsLabels(ctx context.Context, urlsCfg RuntimeURLsConfig, currentLabels graphql.Labels) (graphql.Labels, error) {
 	targetLabels := map[string]string{
 		eventsURLLabelKey:  urlsCfg.EventsURL,
 		consoleURLLabelKey: urlsCfg.ConsoleURL,
@@ -77,7 +79,7 @@ func (cc *directorClient) SetURLsLabels(urlsCfg RuntimeURLsConfig, currentLabels
 	updatedLabels := make(map[string]interface{})
 	for key, value := range targetLabels {
 		if val, ok := currentLabels[key]; !ok || val != value {
-			l, err := cc.setURLLabel(key, value)
+			l, err := cc.setURLLabel(ctx, key, value)
 			if err != nil {
 				return nil, errors.WithMessagef(err, "Failed to set %s Runtime label to value %s", key, val)
 			}
@@ -89,14 +91,14 @@ func (cc *directorClient) SetURLsLabels(urlsCfg RuntimeURLsConfig, currentLabels
 	return updatedLabels, nil
 }
 
-func (cc *directorClient) setURLLabel(key, value string) (*graphql.Label, error) {
+func (cc *directorClient) setURLLabel(ctx context.Context, key, value string) (*graphql.Label, error) {
 	response := SetRuntimeLabelResponse{}
 
 	setLabelQuery := cc.queryProvider.setRuntimeLabelMutation(cc.runtimeConfig.RuntimeId, key, value)
 	req := gcli.NewRequest(setLabelQuery)
 	req.Header.Set(TenantHeader, cc.runtimeConfig.Tenant)
 
-	err := cc.gqlClient.Do(req, &response)
+	err := cc.gqlClient.Do(ctx, req, &response)
 	if err != nil {
 		return nil, errors.WithMessagef(err, "Failed to set %s Runtime label to value %s", key, value)
 	}

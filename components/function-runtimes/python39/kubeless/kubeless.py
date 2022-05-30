@@ -1,15 +1,24 @@
 #!/usr/bin/env python
 
 import importlib
-import io
 import os
-import sys
-import json
+import queue
 import threading
-import requests
+
 import bottle
 import prometheus_client as prom
-import queue
+import sys
+
+import tracing
+from ce import Event
+from tracing import set_req_context
+
+
+def create_service_name(pod_name: str, service_namespace: str) -> str:
+    # remove generated pods suffix ( two last sections )
+    deployment_name = '-'.join(pod_name.split('-')[0:pod_name.count('-') - 1])
+    return '.'.join([deployment_name, service_namespace])
+
 
 # The reason this file has an underscore prefix in its name is to avoid a
 # name collision with the user-defined module.
@@ -35,7 +44,6 @@ func = getattr(mod, os.getenv('FUNC_HANDLER'))
 func_port = os.getenv('FUNC_PORT', 8080)
 timeout = float(os.getenv('FUNC_TIMEOUT', 180))
 memfile_max = int(os.getenv('FUNC_MEMFILE_MAX', 100 * 1024 * 1024))
-publisher_proxy_address = os.getenv('PUBLISHER_PROXY_ADDRESS')
 bottle.BaseRequest.MEMFILE_MAX = memfile_max
 
 app = application = bottle.app()
@@ -47,91 +55,21 @@ function_context = {
     'memory-limit': os.getenv('FUNC_MEMORY_LIMIT'),
 }
 
+jaeger_endpoint = os.getenv('JAEGER_SERVICE_ENDPOINT')
+pod_name = os.getenv('HOSTNAME')
+service_namespace = os.getenv('SERVICE_NAMESPACE')
+service_name = create_service_name(pod_name, service_namespace)
 
-class PicklableBottleRequest(bottle.BaseRequest):
-    '''Bottle request that can be pickled (serialized).
-
-    `bottle.BaseRequest` is not picklable and therefore cannot be passed directly to a
-    python multiprocessing `Process` when using the forkserver or spawn multiprocessing
-    contexts. So, we selectively delete components that are not picklable.
-    '''
-
-    def __init__(self, data, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        # Bottle uses either `io.BytesIO` or `tempfile.TemporaryFile` to store the
-        # request body depending on whether the length of the body is less than
-        # `MEMFILE_MAX` or not, but `tempfile.TemporaryFile` is not picklable.
-        # So, we override it to always store the body as `io.BytesIO`.
-        self.environ['bottle.request.body'] = io.BytesIO(data)
-
-    def __getstate__(self):
-        env = self.environ.copy()
-
-        # File-like objects are not picklable.
-        del env['wsgi.errors']
-        del env['wsgi.input']
-
-        # bottle.ConfigDict is not picklable because it contains a lambda function.
-        del env['bottle.app']
-        del env['bottle.route']
-        del env['route.handle']
-
-        return env
-
-    def __setstate__(self, env):
-        setattr(self, 'environ', env)
+tracer_provider = None
+# To not create several tracer providers, when the server start forking.
+if __name__ == "__main__":
+    tracer_provider = tracing.ServerlessTracerProvider(jaeger_endpoint, service_name)
 
 
-class Event:
-    ceHeaders = dict()
-
-    def __init__(self, req):
-        data = req.body.read()
-        picklable_req = PicklableBottleRequest(data, req.environ.copy())
-        if req.get_header('content-type') == 'application/json':
-            data = req.json
-
-        self.req = req
-        self.ceHeaders = {
-            'data': data,
-            'ce-type': req.get_header('ce-type'),
-            'ce-source': req.get_header('ce-source'),
-            'ce-eventtypeversion': req.get_header('ce-eventtypeversion'),
-            'ce-specversion': req.get_header('ce-specversion'),
-            'ce-id': req.get_header('ce-id'),
-            'ce-time': req.get_header('ce-time'),
-            'extensions': {'request': picklable_req}
-        }
-
-    def __getitem__(self, item):
-        return self.ceHeaders[item]
-
-    def __setitem__(self, name, value):
-        self.ceHeaders[name] = value
-
-    def publishCloudEvent(self, data):
-        return requests.post(
-            publisher_proxy_address,
-            data = json.dumps(data),
-            headers = {"Content-Type": "application/cloudevents+json"}
-            )
-    
-    def resolveDataType(self, event_data):
-        if type(event_data) is dict:
-            return 'application/json'
-        elif type(event_data) is str:
-            return 'text/plain'
-
-    def buildResponseCloudEvent(self, event_id, event_type, event_data):
-        return {
-            'type': event_type,
-            'source': self.ceHeaders['ce-source'],
-            'eventtypeversion': self.ceHeaders['ce-eventtypeversion'],
-            'specversion': self.ceHeaders['ce-specversion'],
-            'id': event_id,
-            'data': event_data,
-            'datacontenttype': self.resolveDataType(event_data)
-        }
+def func_with_context(e, function_context):
+    ex = e.ceHeaders["extensions"]
+    with set_req_context(ex["request"]):
+        return func(e, function_context)
 
 
 @app.get('/healthz')
@@ -153,13 +91,15 @@ def exception_handler():
 @app.route('/<:re:.*>', method=['GET', 'POST', 'PATCH', 'DELETE'])
 def handler():
     req = bottle.request
-    event = Event(req)
+    tracer = tracer_provider.get_tracer(req)
+    event = Event(req, tracer)
+
     method = req.method
     func_calls.labels(method).inc()
     with func_errors.labels(method).count_exceptions():
         with func_hist.labels(method).time():
             que = queue.Queue()
-            t = threading.Thread(target=lambda q, e: q.put(func(e,function_context)), args=(que,event))
+            t = threading.Thread(target=lambda q, e: q.put(func_with_context(e, function_context)), args=(que, event))
             t.start()
             try:
                 res = que.get(block=True, timeout=timeout)
@@ -168,6 +108,7 @@ def handler():
             else:
                 t.join()
                 return res
+
 
 def preload():
     """This is a no-op function used to start the forkserver."""

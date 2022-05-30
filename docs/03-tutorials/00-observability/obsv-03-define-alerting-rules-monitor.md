@@ -10,9 +10,9 @@ You have performed the steps to observe application metrics using the `monitorin
 
 ## Steps
 
-1. Create the PrometheusRule resource holding the configuration of your alerting rule.
+1. Create the Prometheus Rule resource holding the configuration of your alerting rule.
 
-   >**NOTE:** Prometheus requires specific labels to identify PrometheusRule definitions. Make sure you set **app** and **release** to `monitoring`.
+   >**NOTE:** Prometheus requires specific labels to identify Prometheus Rule definitions. Make sure you set **app** and **release** to `monitoring`.
 
    ```yaml
    apiVersion: monitoring.coreos.com/v1
@@ -71,4 +71,7 @@ You have performed the steps to observe application metrics using the `monitorin
 
    ![Alert on the dashboard](./assets/fired-alert.png)
 
-6. If you don't want to proceed with the following tutorial, [clean up the configuration](obsv-05-clean-up-configuration.md).
+## Next steps
+
+- Follow the tutorial to [Send notifications to Slack](obsv-04-send-notifications.md).
+- If you don't want to proceed with the following tutorial, [clean up the configuration](obsv-05-clean-up-configuration.md).

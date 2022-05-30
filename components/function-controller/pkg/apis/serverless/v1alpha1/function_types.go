@@ -52,6 +52,9 @@ type FunctionSpec struct {
 	// +optional
 	Runtime Runtime `json:"runtime,omitempty"`
 
+	// +optional
+	RuntimeImageOverride string `json:"runtimeImageOverride,omitempty"`
+
 	// Env defines an array of key value pairs need to be used as env variable for a function
 	Env []corev1.EnvVar `json:"env,omitempty"`
 
@@ -131,11 +134,12 @@ type Condition struct {
 
 // FunctionStatus defines the observed state of Function
 type FunctionStatus struct {
-	Conditions []Condition `json:"conditions,omitempty"`
-	Repository `json:",inline,omitempty"`
-	Commit     string          `json:"commit,omitempty"`
-	Source     string          `json:"source,omitempty"`
-	Runtime    RuntimeExtended `json:"runtime,omitempty"`
+	Conditions           []Condition `json:"conditions,omitempty"`
+	Repository           `json:",inline,omitempty"`
+	Commit               string          `json:"commit,omitempty"`
+	Source               string          `json:"source,omitempty"`
+	Runtime              RuntimeExtended `json:"runtime,omitempty"`
+	RuntimeImageOverride string          `json:"runtimeImageOverride,omitempty"`
 }
 
 type Repository struct {
@@ -171,4 +175,17 @@ type FunctionList struct {
 
 func init() {
 	SchemeBuilder.Register(&Function{}, &FunctionList{})
+}
+
+func (s *FunctionStatus) Condition(c ConditionType) *Condition {
+	for _, cond := range s.Conditions {
+		if cond.Type == c {
+			return &cond
+		}
+	}
+	return nil
+}
+
+func (c *Condition) IsTrue() bool {
+	return c.Status == corev1.ConditionTrue
 }

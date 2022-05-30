@@ -51,7 +51,7 @@ The longest name that gets created adds and extra 37 characters, so truncation s
 {{- define "kube-prometheus-stack.labels" }}
 app.kubernetes.io/managed-by: {{ .Release.Service }}
 app.kubernetes.io/instance: {{ .Release.Name }}
-app.kubernetes.io/version: "{{ .Chart.Version }}"
+app.kubernetes.io/version: "{{ replace "+" "_" .Chart.Version }}"
 app.kubernetes.io/part-of: {{ template "kube-prometheus-stack.name" . }}
 chart: {{ template "kube-prometheus-stack.chartref" . }}
 release: {{ $.Release.Name | quote }}
@@ -204,7 +204,7 @@ Use the prometheus-node-exporter namespace override for multi-namespace deployme
   {{- include "kube-prometheus-stack.kubeVersionDefaultValue" (list $values ">= 1.23-0" $insecure $secure $userValue) -}}
 {{- end -}}
 
-{{/* Create a URL for container images */}}
+{{/* Create URL for container images */}}
 {{- define "imageurl" -}}
   {{- $registry := default $.reg.path $.img.containerRegistryPath -}}
   {{- $path := ternary (print $registry) (print $registry "/" $.img.directory) (empty $.img.directory) -}}

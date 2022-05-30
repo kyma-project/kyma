@@ -1,9 +1,13 @@
+global:
+  jetstream:
+    storage: file
+
 controller:
-  jetStream:
+  jetstream:
     retentionPolicy: limits
+    consumerDeliverPolicy: new
     maxMessages: -1
     maxBytes: -1
-    storage: file # requires a PV
   resources:
     limits:
       cpu: 500m
@@ -32,7 +36,6 @@ nats:
         enabled: true
         size: 1Gi
       fileStorage:
-        enabled: true
         size: 1Gi
     resources:
       limits:

@@ -4,74 +4,47 @@ package handlertest
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"net/http"
-	"reflect"
-	"regexp"
 	"testing"
+
+	"github.com/stretchr/testify/require"
 
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/application"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/application/applicationtest"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/application/fake"
-	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/legacy-events"
 	legacyapi "github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/legacy-events/api"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/pkg/subscribed"
 	testingutils "github.com/kyma-project/kyma/components/event-publisher-proxy/testing"
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/eventing-controller/api/v1alpha1"
 )
 
-// isValidEventID checks whether EventID is valid or not
-func isValidEventID(id string) bool {
-	return regexp.MustCompile(legacy.AllowedEventIDChars).MatchString(id)
-}
-
-// validateErrorResponse validates Error Response
-func ValidateErrorResponse(t *testing.T, resp http.Response, tcWantResponse *legacyapi.PublishEventResponses) {
+// ValidateLegacyErrorResponse validates error responses for the legacy events endpoint.
+func ValidateLegacyErrorResponse(t *testing.T, resp http.Response, wantResponse *legacyapi.PublishEventResponses) {
 	legacyResponse := legacyapi.PublishEventResponses{}
-	legacyError := legacyapi.Error{}
+	legacyErrorResponse := legacyapi.Error{}
 	bodyBytes, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		t.Fatalf("failed to read response body: %v", err)
-	}
-	if err = json.Unmarshal(bodyBytes, &legacyError); err != nil {
-		t.Fatalf("failed to unmarshal response body: %v", err)
-	}
-	legacyResponse.Error = &legacyError
-	if !reflect.DeepEqual(tcWantResponse.Error, legacyResponse.Error) {
-		t.Fatalf("Invalid error, want: %v, got: %v", tcWantResponse.Error, legacyResponse.Error)
-	}
+	require.NoError(t, err)
+	err = json.Unmarshal(bodyBytes, &legacyErrorResponse)
+	require.NoError(t, err)
+	legacyResponse.Error = &legacyErrorResponse
+	require.Equal(t, wantResponse.Error, legacyResponse.Error)
+	err = resp.Body.Close()
+	require.NoError(t, err)
 }
 
-// validateOkResponse validates Ok Response
-func ValidateOkResponse(t *testing.T, resp http.Response, tcWantResponse *legacyapi.PublishEventResponses) {
+// ValidateLegacyOkResponse validates ok responses for the legacy events endpoint.
+func ValidateLegacyOkResponse(t *testing.T, resp http.Response, wantResponse *legacyapi.PublishEventResponses) {
+	legacyResponse := legacyapi.PublishEventResponses{}
 	legacyOkResponse := legacyapi.PublishResponse{}
-	legacyResponse := legacyapi.PublishEventResponses{}
 	bodyBytes, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		t.Fatalf("failed to read response body: %v", err)
-	}
-	if err = json.Unmarshal(bodyBytes, &legacyOkResponse); err != nil {
-		t.Fatalf("failed to unmarshal response body: %v", err)
-	}
+	require.NoError(t, err)
+	err = json.Unmarshal(bodyBytes, &legacyOkResponse)
+	require.NoError(t, err)
 	legacyResponse.Ok = &legacyOkResponse
-	if err = resp.Body.Close(); err != nil {
-		t.Fatalf("failed to close body: %v", err)
-	}
-
-	if tcWantResponse.Ok.EventID != "" && tcWantResponse.Ok.EventID != legacyResponse.Ok.EventID {
-		t.Errorf("invalid event-id, want: %v, got: %v", tcWantResponse.Ok.EventID, legacyResponse.Ok.EventID)
-	}
-
-	if tcWantResponse.Ok.EventID == "" && !isValidEventID(legacyResponse.Ok.EventID) {
-		t.Errorf("should match regex: [%s] Not a valid event-id: %v ", legacy.AllowedEventIDChars, legacyResponse.Ok.EventID)
-	}
-	if tcWantResponse.Ok.Reason != legacyResponse.Ok.Reason {
-		t.Errorf("invalid reason, want: %v, got: %v", tcWantResponse.Ok.Reason, legacyResponse.Ok.Reason)
-	}
-	if tcWantResponse.Ok.Status != legacyResponse.Ok.Status {
-		t.Errorf("invalid status, want: %v, got: %v", tcWantResponse.Ok.Status, legacyResponse.Ok.Status)
-	}
+	require.Equal(t, wantResponse.Error, legacyResponse.Error)
+	err = resp.Body.Close()
+	require.NoError(t, err)
 }
 
 // getMissingFieldValidationError generates an Error message for a missing field
@@ -110,94 +83,120 @@ func getInvalidValidationError(field string) *legacyapi.Error {
 
 func NewApplicationListerOrDie(ctx context.Context, appName string) *application.Lister {
 	app := applicationtest.NewApplication(appName, nil)
-	appLister := fake.NewListerOrDie(ctx, app)
+	appLister := fake.NewApplicationListerOrDie(ctx, app)
 	return appLister
 }
 
-// common test-cases for the HTTP handler and NATS handler
 var (
 	TestCasesForCloudEvents = []struct {
 		Name           string
-		ProvideMessage func() (string, http.Header)
+		ProvideMessage func(string) (string, http.Header)
 		WantStatusCode int
 	}{
 		// structured cloudevents
 		{
 			Name: "Structured CloudEvent without id",
-			ProvideMessage: func() (string, http.Header) {
-				return testingutils.StructuredCloudEventPayloadWithoutID, testingutils.GetStructuredMessageHeaders()
+			ProvideMessage: func(eventType string) (string, http.Header) {
+				builder := testingutils.NewCloudEventBuilder(
+					testingutils.WithCloudEventType(eventType),
+					testingutils.WithCloudEventID(""),
+				)
+				return builder.BuildStructured()
 			},
 			WantStatusCode: http.StatusBadRequest,
 		},
 		{
 			Name: "Structured CloudEvent without type",
-			ProvideMessage: func() (string, http.Header) {
-				return testingutils.StructuredCloudEventPayloadWithoutType, testingutils.GetStructuredMessageHeaders()
+			ProvideMessage: func(eventType string) (string, http.Header) {
+				builder := testingutils.NewCloudEventBuilder(
+					testingutils.WithCloudEventType(""),
+				)
+				return builder.BuildStructured()
 			},
 			WantStatusCode: http.StatusBadRequest,
 		},
 		{
 			Name: "Structured CloudEvent without specversion",
-			ProvideMessage: func() (string, http.Header) {
-				return testingutils.StructuredCloudEventPayloadWithoutSpecVersion, testingutils.GetStructuredMessageHeaders()
+			ProvideMessage: func(eventType string) (string, http.Header) {
+				builder := testingutils.NewCloudEventBuilder(
+					testingutils.WithCloudEventType(eventType),
+					testingutils.WithCloudEventSpecVersion(""),
+				)
+				return builder.BuildStructured()
 			},
 			WantStatusCode: http.StatusBadRequest,
 		},
 		{
 			Name: "Structured CloudEvent without source",
-			ProvideMessage: func() (string, http.Header) {
-				return testingutils.StructuredCloudEventPayloadWithoutSource, testingutils.GetStructuredMessageHeaders()
+			ProvideMessage: func(eventType string) (string, http.Header) {
+				builder := testingutils.NewCloudEventBuilder(
+					testingutils.WithCloudEventType(eventType),
+					testingutils.WithCloudEventSource(""),
+				)
+				return builder.BuildStructured()
 			},
 			WantStatusCode: http.StatusBadRequest,
 		},
 		{
 			Name: "Structured CloudEvent is valid",
-			ProvideMessage: func() (string, http.Header) {
-				return testingutils.StructuredCloudEventPayload, testingutils.GetStructuredMessageHeaders()
+			ProvideMessage: func(eventType string) (string, http.Header) {
+				builder := testingutils.NewCloudEventBuilder(
+					testingutils.WithCloudEventType(eventType),
+				)
+				return builder.BuildStructured()
 			},
 			WantStatusCode: http.StatusNoContent,
 		},
 		// binary cloudevents
 		{
 			Name: "Binary CloudEvent without CE-ID header",
-			ProvideMessage: func() (string, http.Header) {
-				headers := testingutils.GetBinaryMessageHeaders()
-				headers.Del(testingutils.CeIDHeader)
-				return fmt.Sprintf(`"%s"`, testingutils.CloudEventData), headers
+			ProvideMessage: func(eventType string) (string, http.Header) {
+				builder := testingutils.NewCloudEventBuilder(
+					testingutils.WithCloudEventID(""),
+				)
+				return builder.BuildBinary()
 			},
 			WantStatusCode: http.StatusBadRequest,
 		},
 		{
 			Name: "Binary CloudEvent without CE-Type header",
-			ProvideMessage: func() (string, http.Header) {
-				headers := testingutils.GetBinaryMessageHeaders()
-				headers.Del(testingutils.CeTypeHeader)
-				return fmt.Sprintf(`"%s"`, testingutils.CloudEventData), headers
+			ProvideMessage: func(eventType string) (string, http.Header) {
+				builder := testingutils.NewCloudEventBuilder(
+					testingutils.WithCloudEventType(""),
+				)
+				return builder.BuildBinary()
 			},
 			WantStatusCode: http.StatusBadRequest,
 		},
 		{
 			Name: "Binary CloudEvent without CE-SpecVersion header",
-			ProvideMessage: func() (string, http.Header) {
-				headers := testingutils.GetBinaryMessageHeaders()
-				headers.Del(testingutils.CeSpecVersionHeader)
-				return fmt.Sprintf(`"%s"`, testingutils.CloudEventData), headers
+			ProvideMessage: func(eventType string) (string, http.Header) {
+				builder := testingutils.NewCloudEventBuilder(
+					testingutils.WithCloudEventType(eventType),
+					testingutils.WithCloudEventSpecVersion(""),
+				)
+				return builder.BuildBinary()
 			},
 			WantStatusCode: http.StatusBadRequest,
 		},
 		{
 			Name: "Binary CloudEvent without CE-Source header",
-			ProvideMessage: func() (string, http.Header) {
-				headers := testingutils.GetBinaryMessageHeaders()
-				headers.Del(testingutils.CeSourceHeader)
-				return fmt.Sprintf(`"%s"`, testingutils.CloudEventData), headers
+			ProvideMessage: func(eventType string) (string, http.Header) {
+				builder := testingutils.NewCloudEventBuilder(
+					testingutils.WithCloudEventType(eventType),
+					testingutils.WithCloudEventSource(""),
+				)
+				return builder.BuildBinary()
 			},
 			WantStatusCode: http.StatusBadRequest,
 		},
 		{
 			Name: "Binary CloudEvent is valid with required headers",
-			ProvideMessage: func() (string, http.Header) {
-				return fmt.Sprintf(`"%s"`, testingutils.CloudEventData), testingutils.GetBinaryMessageHeaders()
+			ProvideMessage: func(eventType string) (string, http.Header) {
+				builder := testingutils.NewCloudEventBuilder(
+					testingutils.WithCloudEventType(eventType),
+				)
+				return builder.BuildBinary()
 			},
 			WantStatusCode: http.StatusNoContent,
 		},
@@ -210,9 +209,10 @@ var (
 		WantResponse   legacyapi.PublishEventResponses
 	}{
 		{
-			Name: "Send a legacy event successfully with event-id",
+			Name: "Send a legacy event successfully with event id",
 			ProvideMessage: func() (string, http.Header) {
-				return testingutils.ValidLegacyEventPayloadWithEventID, testingutils.GetApplicationJSONHeaders()
+				builder := testingutils.NewLegacyEventBuilder()
+				return builder.Build()
 			},
 			WantStatusCode: http.StatusOK,
 			WantResponse: legacyapi.PublishEventResponses{
@@ -224,9 +224,12 @@ var (
 			},
 		},
 		{
-			Name: "Send a legacy event successfully without event-id",
+			Name: "Send a legacy event successfully without event id",
 			ProvideMessage: func() (string, http.Header) {
-				return testingutils.ValidLegacyEventPayloadWithoutEventID, testingutils.GetApplicationJSONHeaders()
+				builder := testingutils.NewLegacyEventBuilder(
+					testingutils.WithLegacyEventID(""),
+				)
+				return builder.Build()
 			},
 			WantStatusCode: http.StatusOK,
 			WantResponse: legacyapi.PublishEventResponses{
@@ -240,7 +243,10 @@ var (
 		{
 			Name: "Send a legacy event with invalid event id",
 			ProvideMessage: func() (string, http.Header) {
-				return testingutils.LegacyEventPayloadWithInvalidEventID, testingutils.GetApplicationJSONHeaders()
+				builder := testingutils.NewLegacyEventBuilder(
+					testingutils.WithLegacyEventID("invalid-id"),
+				)
+				return builder.Build()
 			},
 			WantStatusCode: http.StatusBadRequest,
 			WantResponse: legacyapi.PublishEventResponses{
@@ -250,7 +256,10 @@ var (
 		{
 			Name: "Send a legacy event without event time",
 			ProvideMessage: func() (string, http.Header) {
-				return testingutils.LegacyEventPayloadWithoutEventTime, testingutils.GetApplicationJSONHeaders()
+				builder := testingutils.NewLegacyEventBuilder(
+					testingutils.WithLegacyEventTime(""),
+				)
+				return builder.Build()
 			},
 			WantStatusCode: http.StatusBadRequest,
 			WantResponse: legacyapi.PublishEventResponses{
@@ -260,7 +269,10 @@ var (
 		{
 			Name: "Send a legacy event without event type",
 			ProvideMessage: func() (string, http.Header) {
-				return testingutils.LegacyEventPayloadWithoutEventType, testingutils.GetApplicationJSONHeaders()
+				builder := testingutils.NewLegacyEventBuilder(
+					testingutils.WithLegacyEventType(""),
+				)
+				return builder.Build()
 			},
 			WantStatusCode: http.StatusBadRequest,
 			WantResponse: legacyapi.PublishEventResponses{
@@ -270,7 +282,10 @@ var (
 		{
 			Name: "Send a legacy event with invalid event time",
 			ProvideMessage: func() (string, http.Header) {
-				return testingutils.LegacyEventPayloadWithInvalidEventTime, testingutils.GetApplicationJSONHeaders()
+				builder := testingutils.NewLegacyEventBuilder(
+					testingutils.WithLegacyEventTime("invalid-time"),
+				)
+				return builder.Build()
 			},
 			WantStatusCode: http.StatusBadRequest,
 			WantResponse: legacyapi.PublishEventResponses{
@@ -278,9 +293,12 @@ var (
 			},
 		},
 		{
-			Name: "Send a legacy event without event version",
+			Name: "Send a legacy event without event type version",
 			ProvideMessage: func() (string, http.Header) {
-				return testingutils.LegacyEventPayloadWithWithoutEventVersion, testingutils.GetApplicationJSONHeaders()
+				builder := testingutils.NewLegacyEventBuilder(
+					testingutils.WithLegacyEventTypeVersion(""),
+				)
+				return builder.Build()
 			},
 			WantStatusCode: http.StatusBadRequest,
 			WantResponse: legacyapi.PublishEventResponses{
@@ -288,9 +306,12 @@ var (
 			},
 		},
 		{
-			Name: "Send a legacy event without data field",
+			Name: "Send a legacy event without data",
 			ProvideMessage: func() (string, http.Header) {
-				return testingutils.ValidLegacyEventPayloadWithoutData, testingutils.GetApplicationJSONHeaders()
+				builder := testingutils.NewLegacyEventBuilder(
+					testingutils.WithLegacyEventData(""),
+				)
+				return builder.Build()
 			},
 			WantStatusCode: http.StatusBadRequest,
 			WantResponse: legacyapi.PublishEventResponses{
@@ -312,8 +333,8 @@ var (
 			WantStatusCode: http.StatusOK,
 			WantResponse: subscribed.Events{
 				EventsInfo: []subscribed.Event{{
-					Name:    testingutils.LegacyEventType,
-					Version: testingutils.LegacyEventTypeVersion,
+					Name:    testingutils.EventName,
+					Version: testingutils.EventVersion,
 				}},
 			},
 		},
