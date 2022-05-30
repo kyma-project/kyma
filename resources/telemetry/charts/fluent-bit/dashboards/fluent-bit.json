@@ -218,7 +218,7 @@
           "hide": false,
           "interval": "",
           "intervalFactor": 1,
-          "legendFormat": "{{ pod }}/{{name}}",
+          "legendFormat": "{{"{{"}} pod {{"}}"}}/{{"{{"}} name {{"}}"}}",
           "refId": "A"
         }
       ],
@@ -321,7 +321,7 @@
           "hide": false,
           "interval": "",
           "intervalFactor": 1,
-          "legendFormat": "{{ pod }}/{{name}}",
+          "legendFormat": "{{"{{"}} pod {{"}}"}}/{{"{{"}} name {{"}}"}}",
           "refId": "A"
         }
       ],
@@ -424,7 +424,7 @@
           "hide": false,
           "interval": "",
           "intervalFactor": 1,
-          "legendFormat": "{{ pod }}/{{name}}",
+          "legendFormat": "{{"{{"}} pod {{"}}"}}/{{"{{"}} name {{"}}"}}",
           "refId": "A"
         }
       ],
@@ -529,7 +529,7 @@
           "hide": false,
           "interval": "",
           "intervalFactor": 1,
-          "legendFormat": "{{ pod }}/{{name}}",
+          "legendFormat": "{{"{{"}} pod {{"}}"}}/{{"{{"}} name {{"}}"}}",
           "refId": "A"
         }
       ],
@@ -634,7 +634,7 @@
           "hide": false,
           "interval": "",
           "intervalFactor": 1,
-          "legendFormat": "{{pod}} Retries to {{name}}",
+          "legendFormat": "{{"{{"}} pod {{"}}"}} Retries to {{"{{"}} name {{"}}"}}",
           "refId": "A"
         },
         {
@@ -642,7 +642,7 @@
           "format": "time_series",
           "interval": "",
           "intervalFactor": 1,
-          "legendFormat": "{{pod}} Failed Retries to {{ name }}",
+          "legendFormat": "{{"{{"}} pod {{"}}"}} Failed Retries to {{"{{"}} name {{"}}"}}",
           "refId": "B"
         }
       ],
@@ -748,7 +748,7 @@
           "hide": false,
           "interval": "",
           "intervalFactor": 1,
-          "legendFormat": "{{ pod }}/{{ name }}",
+          "legendFormat": "{{"{{"}} pod {{"}}"}}/{{"{{"}} name {{"}}"}}",
           "refId": "A"
         }
       ],
@@ -841,7 +841,7 @@
         {
           "expr": "sum(rate(fluentbit_filter_drop_records_total{pod=~\"$pod\"}[5m])) by (pod, instance, name)",
           "interval": "",
-          "legendFormat": "{{ pod }} / {{ name }}",
+          "legendFormat": "{{"{{"}} pod {{"}}"}} / {{"{{"}} name {{"}}"}}",
           "refId": "A"
         }
       ],
@@ -936,7 +936,7 @@
         {
           "expr": "sum(rate(fluentbit_filter_add_records_total{pod=~\"$pod\"}[5m])) by (pod, instance, name)",
           "interval": "",
-          "legendFormat": "{{ pod }} / {{ name }}",
+          "legendFormat": "{{"{{"}} pod {{"}}"}} / {{"{{"}} name {{"}}"}}",
           "refId": "A"
         }
       ],
@@ -1033,7 +1033,7 @@
           "exemplar": true,
           "expr": "fluentbit_fsbuffer_size{pod=\"$pod\"}",
           "interval": "",
-          "legendFormat": "{{ pod }}",
+          "legendFormat": "{{"{{"}} pod {{"}}"}}",
           "refId": "A"
         },
         {
@@ -1041,7 +1041,7 @@
           "expr": "fluentbit_fsbuffer_max{pod=\"$pod\"}",
           "hide": false,
           "interval": "",
-          "legendFormat": "{{ pod }} - limit",
+          "legendFormat": "{{"{{"}} pod {{"}}"}} - limit",
           "refId": "B"
         }
       ],
@@ -1159,14 +1159,14 @@
           "exemplar": true,
           "expr": "container_memory_working_set_bytes{pod=~\"$pod\", image!=\"\", container!=\"POD\", container!=\"\"}\n",
           "interval": "",
-          "legendFormat": "{{ container }} - {{ pod }}",
+          "legendFormat": "{{"{{"}} container {{"}}"}} - {{"{{"}} pod {{"}}"}}",
           "refId": "A"
         },
         {
           "exemplar": true,
           "expr": "sum(kube_pod_container_resource_limits{pod=~\"$pod\", resource=\"memory\"}) by (pod)",
           "interval": "",
-          "legendFormat": "{{ pod }} limits",
+          "legendFormat": "{{"{{"}} pod {{"}}"}} limits",
           "refId": "B"
         }
       ],
@@ -1270,14 +1270,14 @@
           "exemplar": true,
           "expr": "sum(node_namespace_pod_container:container_cpu_usage_seconds_total:sum_irate{pod=~\"$pod\",container!=\"POD\",container!=\"\"}) by (container, pod)",
           "interval": "",
-          "legendFormat": "{{ container }} - {{ pod }} ",
+          "legendFormat": "{{"{{"}} container {{"}}"}} - {{"{{"}} pod {{"}}"}}",
           "refId": "A"
         },
         {
           "exemplar": true,
           "expr": "sum(kube_pod_container_resource_limits{pod=~\"$pod\", resource=\"cpu\"}) by (pod)",
           "interval": "",
-          "legendFormat": "{{ pod }} limits",
+          "legendFormat": "{{"{{"}} pod {{"}}"}} limits",
           "refId": "B"
         }
       ],
