@@ -128,7 +128,7 @@ func prepareRepo(t *testing.T) string {
 		} else {
 			require.NoError(t, err)
 		}
-		//nolint
+		//nolint:gosec
 		path := filepath.Join(tarGitRepoPath, h.Name)
 		info := h.FileInfo()
 		if info.IsDir() {
