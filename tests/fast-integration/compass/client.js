@@ -119,6 +119,8 @@ class DirectorClient {
   async registerRuntime(runtimeName, scenarioName) {
     const payload = gql.registerRuntime(runtimeName, scenarioName);
     console.log.apply(console, `[HERE registerRuntime]` + payload);
+    console.log(`[HERE registerRuntime]` + payload);
+    console.error(`[HERE registerRuntime]` + payload);
     try {
       const res = await this.callDirector(payload);
       return res.id;
@@ -159,6 +161,8 @@ class DirectorClient {
   async queryLabelDefinition(labelKey) {
     const payload = gql.queryLabelDefinition(labelKey);
     console.log.apply(console, `[HERE queryLabelDefinition]` + payload);
+    console.log(`[HERE queryLabelDefinition]` + payload);
+    console.error(`[HERE queryLabelDefinition]` + payload);
     try {
       const res = await this.callDirector(payload);
       if (res.schema) {
@@ -173,6 +177,8 @@ class DirectorClient {
   async updateLabelDefinition(labelKey, schema) {
     const payload = gql.updateLabelDefinition(labelKey, schema);
     console.log.apply(console, `[HERE updateLabelDefinition]` + payload);
+    console.log(`[HERE updateLabelDefinition]` + payload);
+    console.error(`[HERE updateLabelDefinition]` + payload);
     try {
       await this.callDirector(payload);
     } catch (err) {
