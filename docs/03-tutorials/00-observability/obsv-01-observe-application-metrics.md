@@ -90,7 +90,10 @@ Follow these steps to redirect the metrics:
 
    ![Prometheus Dashboard](./assets/pm-dashboard-1.png)
 
-3. Click the **Graph** tab, search for the `cpu_temperature_celsius` metric in the **Expression** search box, and click the **Execute** button to check the last value scraped by Prometheus.
+3. To check the last value scrapped by Prometheus:
+   1. Click the **Graph** tab.
+   2. Search for the `cpu_temperature_celsius` metric in the **Expression** search box.
+   3. Click the **Execute** button.
 
    ![Prometheus Dashboard](./assets/pm-dashboard-2.png)
 
