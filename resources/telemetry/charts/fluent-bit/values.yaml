@@ -228,14 +228,9 @@ envFrom:
       optional: true
 
 extraContainers: []
-#   - name: exporter
-#     image: lindnerb/exporter:latest
-#     env:
-#       - name: MAX_FSBUFFER_SIZE
-#         value: 10000000
-#     volumeMounts:
-#       - name: varfluentbit
-#         mountPath: /data
+#   - name: do-something
+#     image: busybox
+#     command: ['do', 'something']
 
 flush: 1
 
