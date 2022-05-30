@@ -130,7 +130,7 @@ func isMatchCondAllowed(pluginName, matchCond, logPipelineName string, logPipeli
 	matchCondValid := false
 	var pipelineNames []string
 
-	if matchCond == fmt.Sprintf("%s.", logPipelineName) {
+	if strings.Contains(matchCond, fmt.Sprintf("%s.", logPipelineName)) {
 		return nil
 	}
 

@@ -56,8 +56,8 @@ Emitter_Mem_Buf_Limit 10M`
 
 func TestFilter(t *testing.T) {
 	expected := `[FILTER]
-    name grep
-    match foo.*
+    name               grep
+    Match              foo.*
 
 `
 
@@ -66,7 +66,7 @@ func TestFilter(t *testing.T) {
 			Filters: []telemetryv1alpha1.Filter{
 				{
 					Content: `
-	Name         grep	`,
+	name               grep	`,
 				},
 			},
 		},
@@ -78,7 +78,8 @@ func TestFilter(t *testing.T) {
 		StorageType: "filesystem",
 	}
 
-	actual := MergeSectionsConfig(logPipeline, emitterConfig)
+	actual, err := MergeSectionsConfig(logPipeline, emitterConfig)
+	assert.NoError(t, err)
 	assert.Equal(t, expected, actual)
 
 }
@@ -93,8 +94,8 @@ func TestOutput(t *testing.T) {
     Emitter_Mem_Buf_Limit 10M
 
 [OUTPUT]
-    name http
-    match foo.*
+    name               http
+    Match              foo.*
 
 `
 	logPipeline := &telemetryv1alpha1.LogPipeline{
@@ -102,7 +103,7 @@ func TestOutput(t *testing.T) {
 			Outputs: []telemetryv1alpha1.Output{
 				{
 					Content: `
-    Name    http`,
+    name               http`,
 				},
 			},
 		},
@@ -114,6 +115,7 @@ func TestOutput(t *testing.T) {
 		StorageType: "filesystem",
 	}
 
-	actual := MergeSectionsConfig(logPipeline, emitterConfig)
+	actual, err := MergeSectionsConfig(logPipeline, emitterConfig)
+	assert.NoError(t, err)
 	assert.Equal(t, expected, actual)
 }

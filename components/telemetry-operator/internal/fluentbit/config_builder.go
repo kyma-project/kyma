@@ -44,32 +44,28 @@ func BuildConfigSection(header ConfigHeader, content string) string {
 }
 
 // MergeSectionsConfig merges Fluent Bit filters and outputs to a single Fluent Bit configuration.
-func MergeSectionsConfig(logPipeline *telemetryv1alpha1.LogPipeline, emitterConfig EmitterConfig) string {
+func MergeSectionsConfig(logPipeline *telemetryv1alpha1.LogPipeline, emitterConfig EmitterConfig) (string, error) {
 	var sb strings.Builder
 
 	if len(logPipeline.Spec.Outputs) > 0 {
 		sb.WriteString(BuildConfigSection(FilterConfigHeader, generateEmitter(emitterConfig, logPipeline)))
 	}
 	for _, filter := range logPipeline.Spec.Filters {
-		fmt.Printf("before: %v", filter.Content)
 		filterSection, err := validateMatchCond(filter.Content, logPipeline.Name)
 		if err != nil {
-			fmt.Printf("error:%v", err.Error())
+			return "", err
 		}
-		fmt.Printf("After: %v", filterSection)
 		sb.WriteString(BuildConfigSection(FilterConfigHeader, filterSection))
 	}
 	for _, output := range logPipeline.Spec.Outputs {
-		fmt.Printf("before output: %v", output.Content)
 		outputSection, err := validateMatchCond(output.Content, logPipeline.Name)
 		if err != nil {
-			fmt.Printf(err.Error())
+			return "", err
 		}
-		fmt.Printf("After output: %v", outputSection)
 		output.Content = outputSection
 		sb.WriteString(BuildConfigSection(OutputConfigHeader, output.Content))
 	}
-	return sb.String()
+	return sb.String(), nil
 }
 
 func validateMatchCond(filterContent, pipelineName string) (string, error) {
@@ -81,12 +77,8 @@ func validateMatchCond(filterContent, pipelineName string) (string, error) {
 	matchCond := getMatchCondition(section)
 
 	if matchCond == "" {
-		section["match"] = fmt.Sprintf("%s.*", pipelineName)
-		sectionStr := ""
-		for k, v := range section {
-			sectionStr += fmt.Sprintf("%s            %s\n", k, v)
-		}
-		return sectionStr, nil
+		filterContent += fmt.Sprintf("\nMatch              %s.*", pipelineName)
+		return filterContent, nil
 	}
 	return filterContent, nil
 }

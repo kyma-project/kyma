@@ -4,6 +4,7 @@ go 1.17
 
 require (
 	github.com/go-logr/zapr v0.4.0
+	github.com/google/martian v2.1.0+incompatible
 	github.com/google/uuid v1.1.2
 	github.com/kyma-project/kyma/common/logging v0.0.0-20220208093900-75da62ce99a9
 	github.com/onsi/ginkgo v1.16.4

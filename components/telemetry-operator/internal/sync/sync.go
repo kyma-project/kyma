@@ -92,7 +92,10 @@ func (s *LogPipelineSyncer) syncSectionsConfigMap(ctx context.Context, logPipeli
 			changed = true
 		}
 	} else {
-		fluentBitConfig := fluentbit.MergeSectionsConfig(logPipeline, s.EmitterConfig)
+		fluentBitConfig, err := fluentbit.MergeSectionsConfig(logPipeline, s.EmitterConfig)
+		if err != nil {
+			return false, err
+		}
 		if cm.Data == nil {
 			data := make(map[string]string)
 			data[cmKey] = fluentBitConfig
