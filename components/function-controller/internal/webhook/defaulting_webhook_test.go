@@ -86,9 +86,8 @@ func TestDefaultingWebHook_Handle(t *testing.T) {
 			},
 			args: args{
 				ctx: context.Background(),
-				//nolint
 				req: admission.Request{
-					v1.AdmissionRequest{
+					AdmissionRequest: v1.AdmissionRequest{
 						RequestKind: &metav1.GroupVersionKind{Kind: "Function"},
 						Object: runtime.RawExtension{
 							Raw: []byte(`{
@@ -130,9 +129,8 @@ func TestDefaultingWebHook_Handle(t *testing.T) {
 			},
 			args: args{
 				ctx: context.Background(),
-				//nolint
 				req: admission.Request{
-					v1.AdmissionRequest{
+					AdmissionRequest: v1.AdmissionRequest{
 						RequestKind: &metav1.GroupVersionKind{Kind: "Function"},
 						Object: runtime.RawExtension{
 							Raw: []byte(`bad request`),
@@ -147,16 +145,14 @@ func TestDefaultingWebHook_Handle(t *testing.T) {
 		{
 			name: "Fail on invalid kind",
 			fields: fields{
-				config: &serverlessv1alpha1.DefaultingConfig{},
 
 				client:  fake.NewClientBuilder().Build(),
 				decoder: decoder,
 			},
 			args: args{
 				ctx: context.Background(),
-				//nolint
 				req: admission.Request{
-					v1.AdmissionRequest{
+					AdmissionRequest: v1.AdmissionRequest{
 						RequestKind: &metav1.GroupVersionKind{Kind: "Function"},
 						Object: runtime.RawExtension{
 							Raw: []byte(`{
