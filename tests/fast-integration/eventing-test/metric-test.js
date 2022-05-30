@@ -183,14 +183,11 @@ function runDashboardTestCase(dashboardName, test) {
   }, 120, 5000);
 }
 
-function eventingMonitoringTest(backend, isSkr, isJetStreamEnabled = false) {
+function eventingMonitoringTest(backend, isSkr) {
   let allDashboards = dashboards;
+  allDashboards = Object.assign(allDashboards, getJetStreamDashboardTests());
   if (isSkr) {
     allDashboards = Object.assign(allDashboards, skrDashboards);
-  }
-
-  if (isJetStreamEnabled) {
-    allDashboards = Object.assign(allDashboards, getJetStreamDashboardTests());
   }
 
   for (const [dashboardName, test] of Object.entries(allDashboards)) {
