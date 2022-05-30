@@ -29,3 +29,7 @@ kubectl delete clusterrole,clusterrolebinding -l app=connection-token-handler
 kubectl delete podsecuritypolicy/connection-token-handler --ignore-not-found=true
 kubectl delete tokenrequest --all -A
 kubectl delete crd tokenrequests.applicationconnector.kyma-project.io
+
+echo "Cleaning up orphaned resources"
+kubectl delete -n kyma-system configmap ory-oathkeeper-rules
+kubectl delete -n kyma-system prometheusrules.monitoring.coreos.com monitoring-kyma-prometheus.rules
