@@ -39,8 +39,6 @@ func TestGenerateEmitter(t *testing.T) {
 		BufferLimit: "10M",
 		StorageType: "filesystem",
 	}
-	logPipeline := telemetryv1alpha1.LogPipeline{}
-	logPipeline.Name = "test"
 
 	expected := `
 name                  rewrite_tag
@@ -50,7 +48,7 @@ Emitter_Name          test
 Emitter_Storage.type  filesystem
 Emitter_Mem_Buf_Limit 10M`
 
-	actual := generateEmitter(emitterConfig, &logPipeline)
+	actual := generateEmitter(emitterConfig, "test")
 	assert.Equal(t, expected, actual, "Fluent Bit Emitter config is invalid")
 }
 

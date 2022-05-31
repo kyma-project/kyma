@@ -25,77 +25,53 @@ func NewPluginValidator(allowedFilterPlugins []string, allowedOutputPlugins []st
 }
 
 func (v *pluginValidator) Validate(logPipeline *telemetryv1alpha1.LogPipeline, logPipelines *telemetryv1alpha1.LogPipelineList) error {
-	err := v.validateFilterPlugins(logPipeline, logPipelines)
-	if err != nil {
-		return err
-	}
 
-	err = v.validateOutputPlugins(logPipeline, logPipelines)
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (v *pluginValidator) validateFilterPlugins(logPipeline *telemetryv1alpha1.LogPipeline, logPipelines *telemetryv1alpha1.LogPipelineList) error {
 	for _, filterPlugin := range logPipeline.Spec.Filters {
-		section, err := parseSection(filterPlugin.Content)
-		if err != nil {
-			return err
-		}
-		name, err := getSectionName(section)
-		if err != nil {
-			return err
-		}
-		if !isPluginAllowed(name, v.allowedFilterPlugins) {
-			return fmt.Errorf("filter plugin '%s' is not allowed", name)
-		}
-
-		matchCond := getMatchCondition(section)
-
-		if matchCond == "" {
-			return nil
-		}
-
-		if matchCond == "*" {
-			return fmt.Errorf("filter plugin '%s' with match condition '*' (match all) is not allowed", name)
-		}
-		if err = isMatchCondAllowed(name, matchCond, logPipeline.Name, logPipelines); err != nil {
+		if err := checkIfPluginIsValid("filter", filterPlugin.Content, logPipeline.Name, v.allowedFilterPlugins, logPipelines); err != nil {
 			return err
 		}
 	}
+
+	for _, outputPlugin := range logPipeline.Spec.Outputs {
+		if err := checkIfPluginIsValid("output", outputPlugin.Content, logPipeline.Name, v.allowedOutputPlugins, logPipelines); err != nil {
+			return err
+		}
+	}
+
 	return nil
 }
 
-func (v *pluginValidator) validateOutputPlugins(logPipeline *telemetryv1alpha1.LogPipeline, logPipelines *telemetryv1alpha1.LogPipelineList) error {
-	for _, outputPlugin := range logPipeline.Spec.Outputs {
-		section, err := parseSection(outputPlugin.Content)
-		if err != nil {
-			return err
-		}
-		name, err := getSectionName(section)
-		if err != nil {
-			return err
-		}
-		if !isPluginAllowed(name, v.allowedOutputPlugins) {
-			return fmt.Errorf("output plugin '%s' is not allowed", name)
-		}
+func checkIfPluginIsValid(pluginType, pluginContent, logPipelineName string, allowedPlugins []string, logPipelines *telemetryv1alpha1.LogPipelineList) error {
+	var err error
+	var section map[string]string
+	var pluginName string
 
-		matchCond := getMatchCondition(section)
+	if section, err = parseSection(pluginContent); err != nil {
+		return err
+	}
+	if pluginName, err = getSectionName(section); err != nil {
+		return err
+	}
 
-		if matchCond == "" {
-			return nil
+	if !isPluginAllowed(pluginName, allowedPlugins) {
+		return fmt.Errorf("%s plugin '%s' is not allowed", pluginType, pluginName)
+	}
+
+	matchCond := getMatchCondition(section)
+	if matchCond == "" {
+		return nil
+	}
+	if matchCond == "*" {
+		return fmt.Errorf("%s plugin '%s' with match condition '*' (match all) is not allowed", pluginType, pluginName)
+	}
+
+	if isValid, logPipelinesNames := isMatchCondValid(pluginName, matchCond, logPipelineName, logPipelines); !isValid {
+		validLogPipelinesNames := fmt.Sprintf("'%s' (current logpipeline name)", logPipelineName)
+		if len(logPipelinesNames) > 0 {
+			validLogPipelinesNames += fmt.Sprintf(" or '%s' (other existing logpipelines names)", logPipelinesNames)
 		}
-
-		if matchCond == "*" {
-			return fmt.Errorf("output plugin '%s' with match condition '*' (match all) is not allowed", name)
-		}
-
-		if err = isMatchCondAllowed(name, matchCond, logPipeline.Name, logPipelines); err != nil {
-			return err
-		}
-
+		return fmt.Errorf("%s plugin '%s' with match condition '%s' is not allowed. Valid match conditions are: %s",
+			pluginType, pluginName, matchCond, validLogPipelinesNames)
 	}
 	return nil
 }
@@ -126,26 +102,18 @@ func getMatchCondition(section map[string]string) string {
 	return ""
 }
 
-func isMatchCondAllowed(pluginName, matchCond, logPipelineName string, logPipelines *telemetryv1alpha1.LogPipelineList) error {
-	matchCondValid := false
-	var pipelineNames []string
-
+func isMatchCondValid(pluginName, matchCond, logPipelineName string, logPipelines *telemetryv1alpha1.LogPipelineList) (bool, []string) {
 	if strings.Contains(matchCond, fmt.Sprintf("%s.", logPipelineName)) {
-		return nil
+		return true, nil
 	}
 
+	var pipelineNames []string
 	for _, l := range logPipelines.Items {
 		if matchCond == fmt.Sprintf("%s.*", l.Name) {
-			matchCondValid = true
+			return true, nil
 		}
 		pipelineNames = append(pipelineNames, l.Name)
 	}
 
-	if !matchCondValid {
-		if len(logPipelines.Items) == 0 {
-			return fmt.Errorf("output plugin '%s' should have match condition (pipelineName.*) matching the logpipeline name '%s'", pluginName, logPipelineName)
-		}
-		return fmt.Errorf("output plugin '%s' should have match condition (pipelineName.*) matching any of the current '%s' or existing logpipeline names '%s'", pluginName, logPipelineName, pipelineNames)
-	}
-	return nil
+	return false, pipelineNames
 }

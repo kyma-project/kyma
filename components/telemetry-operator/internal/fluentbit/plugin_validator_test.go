@@ -207,7 +207,7 @@ func TestValidateMatchCondWithFirstLogPipeline(t *testing.T) {
 				{
 					Content: `
     Name    http
-    Match   saa`,
+    Match   abc`,
 				},
 			},
 		},
@@ -218,7 +218,7 @@ func TestValidateMatchCondWithFirstLogPipeline(t *testing.T) {
 	logPipelines := &telemetryv1alpha1.LogPipelineList{}
 
 	err := pluginValidator.Validate(logPipeline, logPipelines)
-	assert.Contains(t, err.Error(), "output plugin 'http' should have match condition (pipelineName.*) matching the logpipeline name 'foo'")
+	assert.Contains(t, err.Error(), "output plugin 'http' with match condition 'abc' is not allowed. Valid match conditions are: 'foo' (current logpipeline name)")
 }
 
 func TestValidateMatchCondWithExistingLogPipeline(t *testing.T) {
@@ -255,7 +255,7 @@ func TestValidateMatchCondWithExistingLogPipeline(t *testing.T) {
 	logPipeline2.ObjectMeta = metav1.ObjectMeta{Name: "bar"}
 
 	err := pluginValidator.Validate(logPipeline2, logPipelines)
-	assert.Contains(t, err.Error(), "output plugin 'http' should have match condition (pipelineName.*) matching any of the current 'bar' or existing logpipeline names '[foo]'")
+	assert.Contains(t, err.Error(), "output plugin 'http' with match condition 'bar' is not allowed. Valid match conditions are: 'bar' (current logpipeline name) or '[foo]' (other existing logpipelines names)")
 }
 
 func TestValidatePipelineCreation(t *testing.T) {

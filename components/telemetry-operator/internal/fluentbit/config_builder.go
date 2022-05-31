@@ -48,39 +48,37 @@ func MergeSectionsConfig(logPipeline *telemetryv1alpha1.LogPipeline, emitterConf
 	var sb strings.Builder
 
 	if len(logPipeline.Spec.Outputs) > 0 {
-		sb.WriteString(BuildConfigSection(FilterConfigHeader, generateEmitter(emitterConfig, logPipeline)))
+		sb.WriteString(BuildConfigSection(FilterConfigHeader, generateEmitter(emitterConfig, logPipeline.Name)))
 	}
 	for _, filter := range logPipeline.Spec.Filters {
-		filterSection, err := validateMatchCond(filter.Content, logPipeline.Name)
+		filterSection, err := ensureMatchCondIsValid(filter.Content, logPipeline.Name)
 		if err != nil {
 			return "", err
 		}
 		sb.WriteString(BuildConfigSection(FilterConfigHeader, filterSection))
 	}
 	for _, output := range logPipeline.Spec.Outputs {
-		outputSection, err := validateMatchCond(output.Content, logPipeline.Name)
+		outputSection, err := ensureMatchCondIsValid(output.Content, logPipeline.Name)
 		if err != nil {
 			return "", err
 		}
-		output.Content = outputSection
-		sb.WriteString(BuildConfigSection(OutputConfigHeader, output.Content))
+		sb.WriteString(BuildConfigSection(OutputConfigHeader, outputSection))
 	}
 	return sb.String(), nil
 }
 
-func validateMatchCond(filterContent, pipelineName string) (string, error) {
-
-	section, err := parseSection(filterContent)
+func ensureMatchCondIsValid(content, logPipelineName string) (string, error) {
+	section, err := parseSection(content)
 	if err != nil {
 		return "", err
 	}
-	matchCond := getMatchCondition(section)
 
+	matchCond := getMatchCondition(section)
 	if matchCond == "" {
-		filterContent += fmt.Sprintf("\nMatch              %s.*", pipelineName)
-		return filterContent, nil
+		content += fmt.Sprintf("\nMatch              %s.*", logPipelineName)
 	}
-	return filterContent, nil
+
+	return content, nil
 }
 
 // MergeParsersConfig merges Fluent Bit parsers and multiLine parsers to a single Fluent Bit configuration.
@@ -99,6 +97,6 @@ func MergeParsersConfig(logPipelines *telemetryv1alpha1.LogPipelineList) string 
 	return sb.String()
 }
 
-func generateEmitter(emitterConfig EmitterConfig, logPipeline *telemetryv1alpha1.LogPipeline) string {
-	return fmt.Sprintf(EmitterTemplate, emitterConfig.InputTag, logPipeline.Name, logPipeline.Name, emitterConfig.StorageType, emitterConfig.BufferLimit)
+func generateEmitter(emitterConfig EmitterConfig, logPipelineName string) string {
+	return fmt.Sprintf(EmitterTemplate, emitterConfig.InputTag, logPipelineName, logPipelineName, emitterConfig.StorageType, emitterConfig.BufferLimit)
 }

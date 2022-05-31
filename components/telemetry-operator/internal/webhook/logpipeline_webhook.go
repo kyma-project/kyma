@@ -54,7 +54,15 @@ type LogPipelineValidator struct {
 	decoder *admission.Decoder
 }
 
-func NewLogPipeLineValidator(client client.Client, fluentBitConfigMap string, namespace string, configValidator fluentbit.ConfigValidator, pluginValidator fluentbit.PluginValidator, emitterConfig fluentbit.EmitterConfig, fsWrapper fs.Wrapper) *LogPipelineValidator {
+func NewLogPipeLineValidator(
+	client client.Client,
+	fluentBitConfigMap string,
+	namespace string,
+	configValidator fluentbit.ConfigValidator,
+	pluginValidator fluentbit.PluginValidator,
+	emitterConfig fluentbit.EmitterConfig,
+	fsWrapper fs.Wrapper) *LogPipelineValidator {
+
 	return &LogPipelineValidator{
 		Client: client,
 		fluentBitConfigMap: types.NamespacedName{
