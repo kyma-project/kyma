@@ -115,7 +115,7 @@ func (s *systemState) buildHorizontalPodAutoscaler(targetCPUUtilizationPercentag
 		ObjectMeta: metav1.ObjectMeta{
 			GenerateName: fmt.Sprintf("%s-", s.instance.GetName()),
 			Namespace:    s.instance.GetNamespace(),
-			Labels:       s.functionLabels(),
+			Labels:       s.instance.GetMergedLables(),
 		},
 		Spec: autoscalingv1.HorizontalPodAutoscalerSpec{
 			ScaleTargetRef: autoscalingv1.CrossVersionObjectReference{

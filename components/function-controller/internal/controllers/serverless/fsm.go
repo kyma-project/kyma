@@ -187,7 +187,7 @@ func stateFnGitCheckSources(ctx context.Context, r *reconciler, s *systemState) 
 
 	if skipGitSourceCheck(s.instance, r.cfg) {
 		r.log.Info(fmt.Sprintf("skipping function [%s] source check", s.instance.Name))
-		expectedJob := s.buildGitJob(options, r.cfg)
+		expectedJob := buildGitJob(s.instance, options, r.cfg)
 		return buildStateFnCheckImageJob(expectedJob)
 	}
 
