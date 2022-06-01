@@ -78,4 +78,5 @@ describe('SKR test', function() {
     }
     await unregisterKymaFromCompass(director, options.scenarioName);
   });
+
 });
