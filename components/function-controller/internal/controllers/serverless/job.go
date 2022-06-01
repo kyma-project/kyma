@@ -16,7 +16,7 @@ import (
 
 var fcManagedByLabel = map[string]string{serverlessv1alpha1.FunctionManagedByLabel: serverlessv1alpha1.FunctionControllerValue}
 
-var backoffLimitExceeded func(string) bool = func(reason string) bool {
+var backoffLimitExceeded = func(reason string) bool {
 	return reason == "BackoffLimitExceeded"
 }
 

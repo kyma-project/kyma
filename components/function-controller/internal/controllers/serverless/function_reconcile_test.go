@@ -292,7 +292,7 @@ func TestFunctionReconciler_Reconcile(t *testing.T) {
 		g.Expect(err).To(gomega.BeNil())
 		g.Expect(jobList.Items).To(gomega.HaveLen(1))
 
-		t.Log("accidently creating second job")
+		t.Log("accidentally creating second job")
 		excessJob := jobList.Items[0].DeepCopy()
 		excessJob.Name = "" // generateName will create this
 		excessJob.ResourceVersion = ""
@@ -950,7 +950,7 @@ func TestFunctionReconciler_Reconcile(t *testing.T) {
 		g.Expect(err).To(gomega.BeNil())
 	})
 
-	t.Run("should handle reconcilation lags", func(t *testing.T) {
+	t.Run("should handle reconciliation lags", func(t *testing.T) {
 		//GIVEN
 		g := gomega.NewGomegaWithT(t)
 
@@ -1146,7 +1146,7 @@ func TestFunctionReconciler_Reconcile(t *testing.T) {
 		request := ctrl.Request{NamespacedName: types.NamespacedName{Namespace: inFunction.GetNamespace(), Name: inFunction.GetName()}}
 
 		//WHEN
-		t.Log("succesfully deploying a function")
+		t.Log("successfully deploying a function")
 		_, err := reconciler.Reconcile(ctx, request)
 		g.Expect(err).To(gomega.BeNil())
 		assertSuccessfulFunctionBuild(t, resourceClient, reconciler, request, fnLabels, false)

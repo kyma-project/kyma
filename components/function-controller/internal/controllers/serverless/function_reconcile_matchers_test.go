@@ -57,14 +57,10 @@ func haveConditionReason(t serverlessv1alpha1.ConditionType, expected serverless
 
 var (
 	haveConditionCfgRdy          = haveCondition(serverlessv1alpha1.ConditionConfigurationReady, corev1.ConditionTrue)
-	haveFalseConditionCfgRdy     = haveCondition(serverlessv1alpha1.ConditionConfigurationReady, corev1.ConditionFalse)
-	haveUnknownConditionCfgRdy   = haveCondition(serverlessv1alpha1.ConditionConfigurationReady, corev1.ConditionUnknown)
 	haveConditionBuildRdy        = haveCondition(serverlessv1alpha1.ConditionBuildReady, corev1.ConditionTrue)
 	haveUnknownConditionBuildRdy = haveCondition(serverlessv1alpha1.ConditionBuildReady, corev1.ConditionUnknown)
-	haveFalseConditionBuildRdy   = haveCondition(serverlessv1alpha1.ConditionBuildReady, corev1.ConditionFalse)
 	haveConditionRunning         = haveCondition(serverlessv1alpha1.ConditionRunning, corev1.ConditionTrue)
 	haveUnknownConditionRunning  = haveCondition(serverlessv1alpha1.ConditionRunning, corev1.ConditionUnknown)
-	haveFalseConditionRunning    = haveCondition(serverlessv1alpha1.ConditionRunning, corev1.ConditionFalse)
 )
 
 func haveCondition(t serverlessv1alpha1.ConditionType, expected corev1.ConditionStatus) gtypes.GomegaMatcher {

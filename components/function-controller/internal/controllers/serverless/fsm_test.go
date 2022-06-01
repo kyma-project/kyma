@@ -14,7 +14,7 @@ import (
 
 var (
 	testResult ctrl.Result
-	testErr    = errors.New("test error")
+	errTest    = errors.New("test error")
 
 	testStateFn1 = func(_ context.Context, r *reconciler, s *systemState) stateFn {
 		r.log.Info("test state function #1")
@@ -33,7 +33,7 @@ var (
 
 	testStateFnErr = func(_ context.Context, r *reconciler, s *systemState) stateFn {
 		r.log.Info("test error state")
-		r.err = testErr
+		r.err = errTest
 		return nil
 	}
 )
@@ -59,7 +59,7 @@ func Test_reconciler_reconcile(t *testing.T) {
 			fields: fields{
 				fn: testStateFnErr,
 			},
-			wantErr: testErr,
+			wantErr: errTest,
 		},
 		{
 			name: "happy path nested",
@@ -72,7 +72,7 @@ func Test_reconciler_reconcile(t *testing.T) {
 			fields: fields{
 				fn: testStateFn3,
 			},
-			wantErr: testErr,
+			wantErr: errTest,
 			want:    testResult,
 		},
 	}

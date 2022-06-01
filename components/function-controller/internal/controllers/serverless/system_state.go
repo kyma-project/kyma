@@ -413,8 +413,8 @@ func (s *systemState) buildDeployment(cfg buildDeploymentArgs) appsv1.Deployment
 							}},
 							/*
 								In order to mark pod as ready we need to ensure the function is actually running and ready to serve traffic.
-								We do this but first ensuring that sidecar is raedy by using "proxy.istio.io/config": "{ \"holdApplicationUntilProxyStarts\": true }", annotation
-								Second thing is setting that probe which continously
+								We do this but first ensuring that sidecar is ready by using "proxy.istio.io/config": "{ \"holdApplicationUntilProxyStarts\": true }", annotation
+								Second thing is setting that probe which continuously
 							*/
 							StartupProbe: &corev1.Probe{
 								Handler: corev1.Handler{
@@ -552,7 +552,8 @@ func (s *systemState) hpaEqual(targetCPUUtilizationPercentage int32) bool {
 }
 
 func (s *systemState) defaultReplicas() (int32, int32) {
-	min, max := int32(1), int32(1)
+	var min = int32(1)
+	var max int32
 	spec := s.instance.Spec
 	if spec.MinReplicas != nil && *spec.MinReplicas > 0 {
 		min = *spec.MinReplicas

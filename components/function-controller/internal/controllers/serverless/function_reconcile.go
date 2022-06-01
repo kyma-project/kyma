@@ -12,7 +12,6 @@ import (
 	appsv1 "k8s.io/api/apps/v1"
 	autoscalingv1 "k8s.io/api/autoscaling/v1"
 	corev1 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/tools/record"
 	"k8s.io/client-go/util/workqueue"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -41,7 +40,6 @@ type FunctionReconciler struct {
 	client            resource.Client
 	recorder          record.EventRecorder
 	config            FunctionConfig
-	scheme            *runtime.Scheme
 	gitOperator       GitOperator
 	statsCollector    StatsCollector
 	healthCh          chan bool
@@ -196,13 +194,13 @@ func (r *FunctionReconciler) readDockerConfig(ctx context.Context, instance *ser
 				PushAddress:                    data["registryAddress"],
 				PullAddress:                    data["serverAddress"],
 			}, nil
-		} else {
-			return DockerConfig{
-				ActiveRegistryConfigSecretName: r.config.ImageRegistryDefaultDockerConfigSecretName,
-				PushAddress:                    data["registryAddress"],
-				PullAddress:                    data["registryAddress"],
-			}, nil
 		}
+		return DockerConfig{
+			ActiveRegistryConfigSecretName: r.config.ImageRegistryDefaultDockerConfigSecretName,
+			PushAddress:                    data["registryAddress"],
+			PullAddress:                    data["registryAddress"],
+		}, nil
+
 	}
 
 	return DockerConfig{}, errors.Errorf("Docker registry configuration not found, none of configuration secrets (%s, %s) found in function namespace", r.config.ImageRegistryDefaultDockerConfigSecretName, r.config.ImageRegistryExternalDockerConfigSecretName)
