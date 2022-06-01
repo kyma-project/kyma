@@ -38,7 +38,7 @@ spec:
           value: "false"
         # - name: "CUSTOM_FUNCTIONS"
         #   value: "nodejs14-xs nodejs14-s"
-         image: eu.gcr.io/kyma-project/serverless-bench:PR-14362
+        image: eu.gcr.io/kyma-project/serverless-bench:347b49eb
         imagePullPolicy: Always
         name: serverless-benchmark
         resources: {}
