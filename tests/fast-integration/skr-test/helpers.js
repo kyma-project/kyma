@@ -103,13 +103,18 @@ async function getSKRConfig(instanceID) {
 
 async function prepareCompassResources(shoot, options) {
   // check if compass scenario setup is needed
-  const compassScenarioAlreadyExist = await scenarioExistsInCompass(director, options.scenarioName);
-  if (compassScenarioAlreadyExist) {
+  const compassScenarioExists = await scenarioExistsInCompass(director, options.scenarioName);
+  if (compassScenarioExists) {
     console.log(`Compass scenario with the name ${options.scenarioName} already exist, do not register it again`);
   } else {
     console.log('Assigning SKR to scenario in Compass');
     // Create a new scenario (systems/formations) in compass for this test
-    await addScenarioInCompass(director, options.scenarioName);
+    try {
+      await addScenarioInCompass(director, options.scenarioName);
+    } catch (e) {
+      console.log(e);
+      throw new Error('Failed to add a scenario to compass');
+    }
   }
 
   // check if assigning the runtime to the scenario is needed
