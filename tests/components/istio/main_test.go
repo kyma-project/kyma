@@ -61,7 +61,11 @@ func TestIstio(t *testing.T) {
 		}
 		podList, err := k8sClient.CoreV1().Pods("istio-system").List(context.Background(), listOptions)
 		require.NoError(t, err)
-		require.Len(t, podList.Items, 2)
+		if os.Getenv("KYMA_PROFILE") == "evaluation" {
+			require.Len(t, podList.Items, 2)
+		} else {
+			require.Len(t, podList.Items, 5)
+		}
 
 		minReadySeconds := int32(3)
 		t.Run(fmt.Sprintf("and make sure they are available at least for %d seconds", minReadySeconds), func(t *testing.T) {
