@@ -61,8 +61,7 @@ const (
            "data":"` + EventData + `"
         }`
 
-	JSStreamName          = "kyma"
-	JSStreamSubjectPrefix = "prefix"
+	JSStreamName = "kyma"
 )
 
 type APIRuleOption func(r *apigatewayv1alpha1.APIRule)

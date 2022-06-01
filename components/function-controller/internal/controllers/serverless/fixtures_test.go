@@ -12,6 +12,7 @@ import (
 func newTestGitFunction(namespace, name string, minReplicas, maxReplicas int, continuousGitCheckout bool) *serverlessv1alpha1.Function {
 	one := int32(minReplicas)
 	two := int32(maxReplicas)
+	//nolint:gosec
 	suffix := rand.Int()
 	labels := map[string]string{}
 	if continuousGitCheckout {
@@ -63,6 +64,7 @@ func newFixFunctionWithCustomImage(namespace, name, runtimeImageOverride string,
 func newFixFunction(namespace, name string, minReplicas, maxReplicas int) *serverlessv1alpha1.Function {
 	one := int32(minReplicas)
 	two := int32(maxReplicas)
+	//nolint:gosec
 	suffix := rand.Int()
 
 	return &serverlessv1alpha1.Function{

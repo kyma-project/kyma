@@ -76,8 +76,6 @@ spec:
             value: {{ .Values.jetstream.maxMessages | quote }}
           - name: JS_STREAM_MAX_BYTES
             value: {{ .Values.jetstream.maxBytes | quote }}
-          - name: JS_STREAM_SUBJECT_PREFIX
-            value: {{ .Values.jetstream.subjectPrefix | quote }}
           resources:
             requests:
               cpu: {{ .Values.resources.requests.cpu }}

@@ -108,12 +108,12 @@ global:
   images:
     prometheus_operator:
       name: "prometheus-operator"
-      version: "v0.56.2"
+      version: "v0.56.3"
       directory: "external/quay.io/prometheus-operator"
       sha: ""
     prometheus_config_reloader:
       name: "prometheus-config-reloader"
-      version: "v0.56.2"
+      version: "v0.56.3"
       directory: "external/quay.io/prometheus-operator"
       sha: ""
     configmap_reload:
@@ -1824,7 +1824,7 @@ prometheusOperator:
   ##
   image:
     repository: quay.io/prometheus-operator/prometheus-operator
-    tag: v0.56.2
+    tag: v0.56.3
     sha: ""
     pullPolicy: IfNotPresent
 
@@ -1860,7 +1860,7 @@ prometheusOperator:
     # image to use for config and rule reloading
     image:
       repository: quay.io/prometheus-operator/prometheus-config-reloader
-      tag: v0.56.2
+      tag: v0.56.3
       sha: ""
 
     # resource config for prometheusConfigReloader

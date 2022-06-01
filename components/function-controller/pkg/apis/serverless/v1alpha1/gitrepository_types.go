@@ -34,7 +34,7 @@ type RepositoryAuthType string
 
 const (
 	RepositoryAuthBasic  RepositoryAuthType = "basic"
-	RepositoryAuthSSHKey                    = "key"
+	RepositoryAuthSSHKey RepositoryAuthType = "key"
 )
 
 // +kubebuilder:object:root=true
@@ -58,6 +58,7 @@ type GitRepositoryList struct {
 	Items           []GitRepository `json:"items"`
 }
 
+//nolint
 func init() {
 	SchemeBuilder.Register(&GitRepository{}, &GitRepositoryList{})
 }
