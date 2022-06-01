@@ -173,6 +173,7 @@ class DirectorClient {
     try {
       await this.callDirector(payload);
     } catch (err) {
+      console.log(err);
       throw new Error(`Error when updating label definition with key ${labelKey}: ${err.toString()}`);
     }
   }
