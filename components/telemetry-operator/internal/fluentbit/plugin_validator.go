@@ -65,7 +65,7 @@ func checkIfPluginIsValid(pluginType, pluginContent, logPipelineName string, all
 		return fmt.Errorf("%s plugin '%s' with match condition '*' (match all) is not allowed", pluginType, pluginName)
 	}
 
-	if isValid, logPipelinesNames := isMatchCondValid(pluginName, matchCond, logPipelineName, logPipelines); !isValid {
+	if isValid, logPipelinesNames := isMatchCondValid(matchCond, logPipelineName, logPipelines); !isValid {
 		validLogPipelinesNames := fmt.Sprintf("'%s' (current logpipeline name)", logPipelineName)
 		if len(logPipelinesNames) > 0 {
 			validLogPipelinesNames += fmt.Sprintf(" or '%s' (other existing logpipelines names)", logPipelinesNames)
@@ -102,7 +102,7 @@ func getMatchCondition(section map[string]string) string {
 	return ""
 }
 
-func isMatchCondValid(pluginName, matchCond, logPipelineName string, logPipelines *telemetryv1alpha1.LogPipelineList) (bool, []string) {
+func isMatchCondValid(matchCond, logPipelineName string, logPipelines *telemetryv1alpha1.LogPipelineList) (bool, []string) {
 
 	if strings.HasPrefix(matchCond, fmt.Sprintf("%s.", logPipelineName)) {
 		return true, nil
