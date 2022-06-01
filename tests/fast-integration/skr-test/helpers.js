@@ -47,6 +47,12 @@ function withSuffix(suffix) {
   };
 }
 
+function withCustomParams(customParams) {
+  return function(options) {
+    options.customParams = customParams;
+  };
+}
+
 function gatherOptions(...opts) {
   // If no opts provided the options object will be set to these default values.
   const options = {
@@ -72,6 +78,7 @@ function gatherOptions(...opts) {
     },
     kebUserId: getEnvOrThrow('KEB_USER_ID'),
     administrators1: ['admin1@acme.com', 'admin2@acme.com'],
+    customParams: null
   };
 
   opts.forEach((opt) => {
@@ -147,4 +154,5 @@ module.exports = {
   withScenarioName,
   withTestNS,
   withSuffix,
+  withCustomParams
 };
