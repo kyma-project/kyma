@@ -40,6 +40,7 @@ func TestValidateAllowedFilters(t *testing.T) {
 			},
 		},
 	}
+	logPipeline.Name = "tele"
 
 	logPipelines := &telemetryv1alpha1.LogPipelineList{
 		Items: []telemetryv1alpha1.LogPipeline{*logPipeline},
@@ -64,6 +65,7 @@ func TestValidateAllowedUpperCaseFilters(t *testing.T) {
 			},
 		},
 	}
+	logPipeline.Name = "tele"
 
 	logPipelines := &telemetryv1alpha1.LogPipelineList{
 		Items: []telemetryv1alpha1.LogPipeline{*logPipeline},
