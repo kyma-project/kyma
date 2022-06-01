@@ -122,6 +122,7 @@ class DirectorClient {
     console.log(`[HERE registerRuntime]` + payload);
     console.error(`[HERE registerRuntime]` + payload);
     console.dir(`[HERE registerRuntime]` + payload);
+    debug(`[HERE registerRuntime]` + payload);
     try {
       const res = await this.callDirector(payload);
       return res.id;
@@ -165,6 +166,7 @@ class DirectorClient {
     console.log(`[HERE queryLabelDefinition]` + payload);
     console.error(`[HERE queryLabelDefinition]` + payload);
     console.dir(`[HERE queryLabelDefinition]` + payload);
+    debug(`[HERE queryLabelDefinition]` + payload);
     try {
       const res = await this.callDirector(payload);
       if (res.schema) {
@@ -182,6 +184,7 @@ class DirectorClient {
     console.log(`[HERE updateLabelDefinition]` + payload);
     console.error(`[HERE updateLabelDefinition]` + payload);
     console.dir(`[HERE updateLabelDefinition]` + payload);
+    debug(`[HERE updateLabelDefinition]` + payload);
     try {
       await this.callDirector(payload);
     } catch (err) {
