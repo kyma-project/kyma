@@ -38,6 +38,7 @@ const {
 const {
   saveKubeconfig,
 } = require('../skr-svcat-migration-test/test-helpers');
+const {BTPOperatorCreds} = require('../smctl/helpers');
 
 describe('SKR-Upgrade-test', function() {
   switchDebug(on = true);
@@ -126,13 +127,14 @@ describe('SKR-Upgrade-test', function() {
   it(`Provision SKR with ID ${options.instanceID}`, async function() {
     console.log(`Provisioning SKR with version ${kymaVersion}`);
     debug(`Provision SKR with Custom Parameters ${JSON.stringify(options.customParams)}`);
+    const btpOperatorCreds = BTPOperatorCreds.fromEnv();
     skr = await provisionSKR(keb,
         kcp,
         gardener,
         options.instanceID,
         options.runtimeName,
         null,
-        null,
+        btpOperatorCreds,
         options.customParams,
         provisioningTimeout);
   });
