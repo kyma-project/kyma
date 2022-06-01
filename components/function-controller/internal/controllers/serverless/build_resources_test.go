@@ -189,7 +189,7 @@ func TestFunctionReconciler_buildHorizontalPodAutoscaler(t *testing.T) {
 				instance: *tt.args.instance,
 				deployments: v1.DeploymentList{
 					Items: []v1.Deployment{
-						v1.Deployment{
+						{
 							ObjectMeta: metav1.ObjectMeta{},
 						},
 					},
@@ -432,7 +432,7 @@ func TestFunctionReconciler_buildJob(t *testing.T) {
 	dockerCfg := DockerConfig{
 		ActiveRegistryConfigSecretName: "docker-secret-name",
 	}
-
+	//nolint:gosec
 	packageRegistryConfigSecretName := "pkg-config-secret"
 
 	testCases := []struct {
