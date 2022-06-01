@@ -32,11 +32,14 @@ test-k3d: provision-k3d kyma-deploy test ## Run tests on k3d cluster
 provision-k3d: ## Provision k3d cluster
 	kyma provision k3d --port 8080:80@loadbalancer --ci
 
-kyma-deploy: ## Deploy Kyma cluster-essentials and istio components on k8s cluster KUBECONFIG var points to
-	kyma deploy -s main --component cluster-essentials --component istio --ci
+kyma-istio-deploy: ## Deploy Kyma Istio using profile is set in KYMA_PROFILE env variable
+	kyma deploy -s main --component cluster-essentials --component istio --profile ${KYMA_PROFILE} --ci
 
-test-bdd: ## Run BDD-test using godog
-	godog run
+kyma-istio-deploy-prod: ## Deploy Kyma Istio using production profile
+	kyma deploy -s main --component cluster-essentials --component istio --profile production --ci
+
+kyma-istio-deploy-eval: ## Deploy Kyma Istio using evaluation profile
+	kyma deploy -s main --component cluster-essentials --component istio --profile evaluation --ci
 
 ## Help:
 help: ## Show this help.
