@@ -86,8 +86,6 @@
 
 /tests/application-gateway-legacy-tests  @VOID404 @akgalwas @koala7659 @janmedrek @Maladie @franpog859 @mvshao
 /tests/application-gateway-tests  @VOID404 @akgalwas @koala7659 @janmedrek @Maladie @franpog859 @mvshao
-/tests/application-operator-tests  @VOID404 @akgalwas @koala7659 @janmedrek @Maladie @franpog859 @mvshao
-/tests/compass-runtime-agent  @VOID404 @akgalwas @koala7659 @janmedrek @Maladie @franpog859 @mvshao
 /tests/telemetry-operator-perf-tests @a-thaler @rakesh-garimella @skhalash @chrkl @lindnerby @dennis-ge
 
 # Fast Integration Tests
