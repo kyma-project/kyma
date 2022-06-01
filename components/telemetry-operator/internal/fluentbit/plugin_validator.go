@@ -103,8 +103,6 @@ func getMatchCondition(section map[string]string) string {
 }
 
 func isMatchCondValid(pluginName, matchCond, logPipelineName string, logPipelines *telemetryv1alpha1.LogPipelineList) (bool, []string) {
-	matchCondValid := false
-	var pipelineNames []string
 
 	if strings.HasPrefix(matchCond, fmt.Sprintf("%s.", logPipelineName)) {
 		return true, nil
