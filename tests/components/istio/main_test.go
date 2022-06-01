@@ -61,10 +61,10 @@ func TestIstio(t *testing.T) {
 		}
 		podList, err := k8sClient.CoreV1().Pods("istio-system").List(context.Background(), listOptions)
 		require.NoError(t, err)
-		if os.Getenv("KYMA_PROFILE") == "evaluation" {
-			require.Len(t, podList.Items, 2)
-		} else {
+		if os.Getenv("KYMA_PROFILE") == "production" {
 			require.Len(t, podList.Items, 5)
+		} else {
+			require.Len(t, podList.Items, 2)
 		}
 
 		minReadySeconds := int32(3)
