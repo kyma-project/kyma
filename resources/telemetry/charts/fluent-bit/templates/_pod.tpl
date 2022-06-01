@@ -113,7 +113,7 @@ containers:
       protocol: TCP
     env:
       - name: MAX_FSBUFFER_SIZE
-        value: "90000000000"
+        value: "500000000"
     volumeMounts:
       - name: varfluentbit
         mountPath: /data
