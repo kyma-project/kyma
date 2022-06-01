@@ -27,9 +27,6 @@ const {
   checkInClusterEventDelivery,
   checkFunctionResponse,
   sendLegacyEventAndCheckResponse,
-} = require('../test/fixtures/commerce-mock');
-
-const {
   cleanMockTestFixture,
 } = require('../test/fixtures/commerce-mock');
 const {
@@ -225,10 +222,6 @@ describe('SKR-Upgrade-test', function() {
 
   it('order.created.v1 legacy event should trigger the lastorder function', async function() {
     await sendLegacyEventAndCheckResponse();
-  });
-
-  it('service instance provisioned by helm broker should be reachable', async function() {
-    await checkServiceInstanceExistence(testNS);
   });
 
   it('Should print report of restarted containers, skipped if no crashes happened', async function() {
