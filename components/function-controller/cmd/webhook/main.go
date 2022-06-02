@@ -33,6 +33,7 @@ var (
 	scheme = runtime.NewScheme()
 )
 
+//nolint
 func init() {
 	_ = serverlessv1alpha1.AddToScheme(scheme)
 	_ = admissionregistrationv1.AddToScheme(scheme)

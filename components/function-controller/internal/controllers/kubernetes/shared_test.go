@@ -94,7 +94,7 @@ func TestGetNamespaces(t *testing.T) {
 	t.Run("should successfully return non base, non excluded namespace", func(t *testing.T) {
 		//GIVEN
 		g := gomega.NewWithT(t)
-		fakeClient := fake.NewFakeClientWithScheme(scheme.Scheme, &ns1)
+		fakeClient := fake.NewClientBuilder().WithScheme(scheme.Scheme).WithObjects(&ns1).Build()
 
 		//WHEN
 		namespaces, err := getNamespaces(ctx, fakeClient, baseNs.Name, excludedNamespaces)
@@ -111,7 +111,7 @@ func TestGetNamespaces(t *testing.T) {
 		nsTerminating := corev1.Namespace{ObjectMeta: metav1.ObjectMeta{Name: "terminating"}, Status: corev1.NamespaceStatus{
 			Phase: corev1.NamespaceTerminating,
 		}}
-		fakeClient := fake.NewFakeClientWithScheme(scheme.Scheme, &ns1, &ns2, &nsTerminating)
+		fakeClient := fake.NewClientBuilder().WithScheme(scheme.Scheme).WithObjects(&ns1, &ns2, &nsTerminating).Build()
 
 		//WHEN
 		namespaces, err := getNamespaces(ctx, fakeClient, baseNs.Name, excludedNamespaces)
@@ -126,7 +126,7 @@ func TestGetNamespaces(t *testing.T) {
 	t.Run("should successfully omit base namespace", func(t *testing.T) {
 		//GIVEN
 		g := gomega.NewWithT(t)
-		fakeClient := fake.NewFakeClientWithScheme(scheme.Scheme, &baseNs)
+		fakeClient := fake.NewClientBuilder().WithScheme(scheme.Scheme).WithObjects(&baseNs).Build()
 
 		//WHEN
 		namespaces, err := getNamespaces(ctx, fakeClient, baseNs.Name, []string{"random"})
@@ -139,7 +139,7 @@ func TestGetNamespaces(t *testing.T) {
 	t.Run("should successfully excluded namespace", func(t *testing.T) {
 		//GIVEN
 		g := gomega.NewWithT(t)
-		fakeClient := fake.NewFakeClientWithScheme(scheme.Scheme, &excludedNs1)
+		fakeClient := fake.NewClientBuilder().WithScheme(scheme.Scheme).WithObjects(&excludedNs1).Build()
 
 		//WHEN
 		namespaces, err := getNamespaces(ctx, fakeClient, baseNs.Name, []string{excludedNs1.Name})

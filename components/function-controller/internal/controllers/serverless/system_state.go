@@ -69,6 +69,8 @@ func (s *systemState) inlineFnSrcChanged(dockerPullAddress string) bool {
 	if len(s.deployments.Items) == 1 &&
 		len(s.configMaps.Items) == 1 &&
 		s.deployments.Items[0].Spec.Template.Spec.Containers[0].Image == image &&
+		s.instance.Spec.Source == s.configMaps.Items[0].Data[FunctionSourceKey] &&
+		rtm.SanitizeDependencies(s.instance.Spec.Deps) == s.configMaps.Items[0].Data[FunctionDepsKey] &&
 		configurationStatus != corev1.ConditionUnknown &&
 		mapsEqual(s.configMaps.Items[0].Labels, labels) {
 		return false
@@ -411,8 +413,8 @@ func (s *systemState) buildDeployment(cfg buildDeploymentArgs) appsv1.Deployment
 							}},
 							/*
 								In order to mark pod as ready we need to ensure the function is actually running and ready to serve traffic.
-								We do this but first ensuring that sidecar is raedy by using "proxy.istio.io/config": "{ \"holdApplicationUntilProxyStarts\": true }", annotation
-								Second thing is setting that probe which continously
+								We do this but first ensuring that sidecar is ready by using "proxy.istio.io/config": "{ \"holdApplicationUntilProxyStarts\": true }", annotation
+								Second thing is setting that probe which continuously
 							*/
 							StartupProbe: &corev1.Probe{
 								Handler: corev1.Handler{
@@ -550,7 +552,8 @@ func (s *systemState) hpaEqual(targetCPUUtilizationPercentage int32) bool {
 }
 
 func (s *systemState) defaultReplicas() (int32, int32) {
-	min, max := int32(1), int32(1)
+	var min = int32(1)
+	var max int32
 	spec := s.instance.Spec
 	if spec.MinReplicas != nil && *spec.MinReplicas > 0 {
 		min = *spec.MinReplicas
@@ -616,4 +619,12 @@ func (s *systemState) getGitBuildJobVolumeMounts(rtmConfig runtime.Config) []cor
 	// add package registry config volume mount depending on the used runtime
 	volumeMounts = append(volumeMounts, getPackageConfigVolumeMountsForRuntime(rtmConfig.Runtime)...)
 	return volumeMounts
+}
+
+func (s *systemState) jobFailed(p func(reason string) bool) bool {
+	if len(s.jobs.Items) == 0 {
+		return false
+	}
+
+	return jobFailed(s.jobs.Items[0], p)
 }

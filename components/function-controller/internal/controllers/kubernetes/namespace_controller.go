@@ -87,7 +87,8 @@ func (r *NamespaceReconciler) Reconcile(ctx context.Context, request ctrl.Reques
 		return ctrl.Result{}, err
 	}
 	for _, configMap := range configMaps {
-		if err = r.configMapSvc.UpdateNamespace(ctx, logger, instance.GetName(), &configMap); err != nil {
+		c := configMap
+		if err := r.configMapSvc.UpdateNamespace(ctx, logger, instance.GetName(), &c); err != nil {
 			return ctrl.Result{}, err
 		}
 	}
@@ -99,7 +100,8 @@ func (r *NamespaceReconciler) Reconcile(ctx context.Context, request ctrl.Reques
 		return ctrl.Result{}, err
 	}
 	for _, secret := range secrets {
-		if err = r.secretSvc.UpdateNamespace(ctx, logger, instance.GetName(), &secret); err != nil {
+		s := secret
+		if err := r.secretSvc.UpdateNamespace(ctx, logger, instance.GetName(), &s); err != nil {
 			return ctrl.Result{}, err
 		}
 	}
@@ -111,7 +113,8 @@ func (r *NamespaceReconciler) Reconcile(ctx context.Context, request ctrl.Reques
 		return ctrl.Result{}, err
 	}
 	for _, role := range roles {
-		if err = r.roleService.UpdateNamespace(ctx, logger, instance.GetName(), &role); err != nil {
+		rr := role
+		if err := r.roleService.UpdateNamespace(ctx, logger, instance.GetName(), &rr); err != nil {
 			return ctrl.Result{}, err
 		}
 	}
@@ -123,7 +126,8 @@ func (r *NamespaceReconciler) Reconcile(ctx context.Context, request ctrl.Reques
 		return ctrl.Result{}, err
 	}
 	for _, roleBinding := range roleBindings {
-		if err = r.roleBindingService.UpdateNamespace(ctx, logger, instance.GetName(), &roleBinding); err != nil {
+		rb := roleBinding
+		if err := r.roleBindingService.UpdateNamespace(ctx, logger, instance.GetName(), &rb); err != nil {
 			return ctrl.Result{}, err
 		}
 	}
@@ -135,7 +139,8 @@ func (r *NamespaceReconciler) Reconcile(ctx context.Context, request ctrl.Reques
 		return ctrl.Result{}, err
 	}
 	for _, serviceAccount := range serviceAccounts {
-		if err = r.serviceAccountSvc.UpdateNamespace(ctx, logger, instance.GetName(), &serviceAccount); err != nil {
+		sa := serviceAccount
+		if err := r.serviceAccountSvc.UpdateNamespace(ctx, logger, instance.GetName(), &sa); err != nil {
 			return ctrl.Result{}, err
 		}
 	}
