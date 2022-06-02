@@ -143,7 +143,7 @@ func TestValidateAllowAll(t *testing.T) {
 				{
 					Content: `
     Name    http
-    Match   *`,
+Match   *`,
 				},
 			},
 			Filters: []telemetryv1alpha1.Filter{
@@ -156,6 +156,27 @@ func TestValidateAllowAll(t *testing.T) {
 			},
 		},
 	}
+
+	err := pluginValidator.Validate(logPipeline)
+	require.NoError(t, err)
+}
+
+func TestEnableAllPlugins(t *testing.T) {
+	pluginValidator := NewPluginValidator([]string{"lua", "multiline"}, []string{})
+
+	logPipeline := &telemetryv1alpha1.LogPipeline{
+		Spec: telemetryv1alpha1.LogPipelineSpec{
+			Filters: []telemetryv1alpha1.Filter{
+				{
+					Content: `
+    Name    grep
+    Match   *
+    Regex   $kubernetes['labels']['app'] my-deployment`,
+				},
+			},
+		},
+	}
+	logPipeline.Spec.EnableUnsupportedPlugins = true
 
 	err := pluginValidator.Validate(logPipeline)
 	require.NoError(t, err)

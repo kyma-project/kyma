@@ -48,7 +48,7 @@ func (v *pluginValidator) validateFilterPlugins(logPipeline *telemetryv1alpha1.L
 		if err != nil {
 			return err
 		}
-		if !isPluginAllowed(name, v.allowedFilterPlugins) {
+		if !isPluginAllowed(name, v.allowedFilterPlugins, logPipeline.Spec.EnableUnsupportedPlugins) {
 			return fmt.Errorf("filter plugin %s is not allowed", name)
 		}
 	}
@@ -65,15 +65,15 @@ func (v *pluginValidator) validateOutputPlugins(logPipeline *telemetryv1alpha1.L
 		if err != nil {
 			return err
 		}
-		if !isPluginAllowed(name, v.allowedOutputPlugins) {
+		if !isPluginAllowed(name, v.allowedOutputPlugins, logPipeline.Spec.EnableUnsupportedPlugins) {
 			return fmt.Errorf("output plugin %s is not allowed", name)
 		}
 	}
 	return nil
 }
 
-func isPluginAllowed(pluginName string, allowedPlugins []string) bool {
-	if len(allowedPlugins) == 0 {
+func isPluginAllowed(pluginName string, allowedPlugins []string, enableAllPlugins bool) bool {
+	if len(allowedPlugins) == 0 || enableAllPlugins {
 		return true
 	}
 	for _, allowedPlugin := range allowedPlugins {

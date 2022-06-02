@@ -1,0 +1,16 @@
+apiVersion: telemetry.kyma-project.io/v1alpha1
+kind: LogPipeline
+metadata:
+  annotations:
+    reconciler.kyma-project.io/managed-by-reconciler-disclaimer: |-
+      DO NOT EDIT - This resource is managed by Kyma.
+      Any modifications are discarded and the resource is reverted to the original state.
+  labels:
+    reconciler.kyma-project.io/managed-by: reconciler
+    reconciler.kyma-project.io/origin-version: local
+  name: foo
+spec:
+  filters:
+    - content: |
+         Name             grep
+         Match            tele.*
