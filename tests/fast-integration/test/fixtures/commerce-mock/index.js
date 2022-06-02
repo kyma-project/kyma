@@ -59,7 +59,7 @@ const {
   OAuthCredentials,
 } = require('../../../lib/oauth');
 
-const {bebBackend, eventMeshNamespace} = require('../../../eventing-test/common/common');
+const {bebBackend, getEventMeshNamespace} = require('../../../eventing-test/common/common');
 
 const commerceMockYaml = fs.readFileSync(
     path.join(__dirname, './commerce-mock.yaml'),
@@ -215,7 +215,7 @@ async function sendLegacyEventAndCheckResponse(mockNamespace = 'mocks') {
 async function sendCloudEventStructuredModeAndCheckResponse(backendType ='nats', mockNamespace = 'mocks') {
   let source = 'commerce';
   if (backendType === bebBackend) {
-    source = eventMeshNamespace;
+    source = getEventMeshNamespace();
   }
   const body = {
     'specversion': '1.0',
@@ -239,7 +239,7 @@ async function sendCloudEventStructuredModeAndCheckResponse(backendType ='nats',
 async function sendCloudEventBinaryModeAndCheckResponse(backendType = 'nats', mockNamespace = 'mocks') {
   let source = 'commerce';
   if (backendType === bebBackend) {
-    source = eventMeshNamespace;
+    source = getEventMeshNamespace();
   }
   const body = {
     'data': {'orderCode': '567'},
