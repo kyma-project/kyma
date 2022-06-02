@@ -28,7 +28,7 @@ type LogPipelineSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
 
-	EnableUnsupportedPlugins bool              `json:"enableUnsupportedPlugins,omitEmpty"`
+	EnableUnsupportedPlugins bool              `json:"enableUnsupportedPlugins"`
 	Parsers                  []Parser          `json:"parsers,omitempty"`
 	MultiLineParsers         []MultiLineParser `json:"multilineParsers,omitempty"`
 	Filters                  []Filter          `json:"filters,omitempty"`

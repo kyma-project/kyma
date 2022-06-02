@@ -28,13 +28,13 @@ type FluentBitDaemonSetConfig struct {
 	FluentBitParsersConfigMap  types.NamespacedName
 	FluentBitFilesConfigMap    types.NamespacedName
 	FluentBitEnvSecret         types.NamespacedName
-	EnableUnsupportedPlugin    bool
 }
 
 type LogPipelineSyncer struct {
 	client.Client
-	DaemonSetConfig FluentBitDaemonSetConfig
-	EmitterConfig   fluentbit.EmitterConfig
+	DaemonSetConfig         FluentBitDaemonSetConfig
+	EmitterConfig           fluentbit.EmitterConfig
+	EnableUnsupportedPlugin bool
 }
 
 func NewLogPipelineSyncer(client client.Client,
