@@ -57,7 +57,7 @@ $(cmds): %:
 
 # Example:
 #   make event-publisher-proxy.image
-$(cmds_images): %.image: build-local pull-licenses
+$(cmds_images): %.image: build-local
 	$(eval $@_img_name := $*)
 	@echo "+ Building container image $($@_img_name)"
 	docker image build -f cmd/$*/Dockerfile -t $($@_img_name) .
