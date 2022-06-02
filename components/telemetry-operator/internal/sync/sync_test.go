@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/api/v1alpha1"
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/fluentbit"
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/sync/mocks"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
@@ -16,10 +17,18 @@ import (
 )
 
 var (
-	sectionCm = types.NamespacedName{Name: "section-cm", Namespace: "cm-ns"}
-	parsersCm = types.NamespacedName{Name: "parsers-cm", Namespace: "cm-ns"}
-	filesCm   = types.NamespacedName{Name: "files-cm", Namespace: "cm-ns"}
-	envSecret = types.NamespacedName{Name: "env-secret", Namespace: "cm-ns"}
+	daemonSetConfig = FluentBitDaemonSetConfig{
+		FluentBitDaemonSetName:     types.NamespacedName{Name: "telemetry-fluent-bit", Namespace: "cm-ns"},
+		FluentBitSectionsConfigMap: types.NamespacedName{Name: "section-cm", Namespace: "cm-ns"},
+		FluentBitParsersConfigMap:  types.NamespacedName{Name: "parsers-cm", Namespace: "cm-ns"},
+		FluentBitFilesConfigMap:    types.NamespacedName{Name: "files-cm", Namespace: "cm-ns"},
+		FluentBitEnvSecret:         types.NamespacedName{Name: "env-secret", Namespace: "cm-ns"},
+	}
+	emitterConfig = fluentbit.EmitterConfig{
+		InputTag:    "kube",
+		BufferLimit: "10M",
+		StorageType: "filesystem",
+	}
 )
 
 func TestGetOrCreateWithConfigMapIsNotFoundCreatesNewWithGivenNamespacedNameAndNoError(t *testing.T) {
@@ -27,7 +36,7 @@ func TestGetOrCreateWithConfigMapIsNotFoundCreatesNewWithGivenNamespacedNameAndN
 	notFoundErr := errors.NewNotFound(schema.GroupResource{}, "")
 	mockClient.On("Get", mock.Anything, mock.Anything, mock.Anything).Return(notFoundErr)
 	mockClient.On("Create", mock.Anything, mock.Anything).Return(nil)
-	sut := NewLogPipelineSyncer(mockClient, sectionCm, parsersCm, filesCm, envSecret)
+	sut := NewLogPipelineSyncer(mockClient, daemonSetConfig, emitterConfig)
 
 	cm := corev1.ConfigMap{ObjectMeta: metav1.ObjectMeta{Name: "some-cm", Namespace: "cm-ns"}}
 	err := sut.getOrCreate(context.Background(), &cm)
@@ -41,7 +50,7 @@ func TestGetOrCreateWithConfigMapAnyOtherErrorPropagates(t *testing.T) {
 	mockClient := &mocks.Client{}
 	badReqErr := errors.NewBadRequest("")
 	mockClient.On("Get", mock.Anything, mock.Anything, mock.Anything).Return(badReqErr)
-	sut := NewLogPipelineSyncer(mockClient, sectionCm, parsersCm, filesCm, envSecret)
+	sut := NewLogPipelineSyncer(mockClient, daemonSetConfig, emitterConfig)
 
 	cm := corev1.ConfigMap{ObjectMeta: metav1.ObjectMeta{Name: "some-cm", Namespace: "cm-ns"}}
 	err := sut.getOrCreate(context.Background(), &cm)
@@ -54,7 +63,7 @@ func TestGetOrCreateWithSecretIsNotFoundCreatesNewWithGivenNamespacedNameAndNoEr
 	notFoundErr := errors.NewNotFound(schema.GroupResource{}, "")
 	mockClient.On("Get", mock.Anything, mock.Anything, mock.Anything).Return(notFoundErr)
 	mockClient.On("Create", mock.Anything, mock.Anything).Return(nil)
-	sut := NewLogPipelineSyncer(mockClient, sectionCm, parsersCm, filesCm, envSecret)
+	sut := NewLogPipelineSyncer(mockClient, daemonSetConfig, emitterConfig)
 
 	secret := corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: "some-secret", Namespace: "secret-ns"}}
 	err := sut.getOrCreate(context.Background(), &secret)
@@ -68,7 +77,7 @@ func TestGetOrCreateWithSecretAnyOtherErrorPropagates(t *testing.T) {
 	mockClient := &mocks.Client{}
 	badReqErr := errors.NewBadRequest("")
 	mockClient.On("Get", mock.Anything, mock.Anything, mock.Anything).Return(badReqErr)
-	sut := NewLogPipelineSyncer(mockClient, sectionCm, parsersCm, filesCm, envSecret)
+	sut := NewLogPipelineSyncer(mockClient, daemonSetConfig, emitterConfig)
 
 	secret := corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: "some-secret", Namespace: "secret-ns"}}
 	err := sut.getOrCreate(context.Background(), &secret)
@@ -80,7 +89,7 @@ func TestSyncSectionsConfigMapClientErrorReturnsError(t *testing.T) {
 	mockClient := &mocks.Client{}
 	badReqErr := errors.NewBadRequest("")
 	mockClient.On("Get", mock.Anything, mock.Anything, mock.Anything).Return(badReqErr)
-	sut := NewLogPipelineSyncer(mockClient, sectionCm, parsersCm, filesCm, envSecret)
+	sut := NewLogPipelineSyncer(mockClient, daemonSetConfig, emitterConfig)
 
 	lp := telemetryv1alpha1.LogPipeline{}
 	result, err := sut.syncSectionsConfigMap(context.Background(), &lp)
@@ -93,7 +102,7 @@ func TestSyncParsersConfigMapErrorClientErrorReturnsError(t *testing.T) {
 	mockClient := &mocks.Client{}
 	badReqErr := errors.NewBadRequest("")
 	mockClient.On("Get", mock.Anything, mock.Anything, mock.Anything).Return(badReqErr)
-	sut := NewLogPipelineSyncer(mockClient, sectionCm, parsersCm, filesCm, envSecret)
+	sut := NewLogPipelineSyncer(mockClient, daemonSetConfig, emitterConfig)
 
 	lp := telemetryv1alpha1.LogPipeline{}
 	result, err := sut.syncParsersConfigMap(context.Background(), &lp)
@@ -106,7 +115,7 @@ func TestSyncFilesConfigMapErrorClientErrorReturnsError(t *testing.T) {
 	mockClient := &mocks.Client{}
 	badReqErr := errors.NewBadRequest("")
 	mockClient.On("Get", mock.Anything, mock.Anything, mock.Anything).Return(badReqErr)
-	sut := NewLogPipelineSyncer(mockClient, sectionCm, parsersCm, filesCm, envSecret)
+	sut := NewLogPipelineSyncer(mockClient, daemonSetConfig, emitterConfig)
 
 	lp := telemetryv1alpha1.LogPipeline{}
 	result, err := sut.syncFilesConfigMap(context.Background(), &lp)
@@ -119,7 +128,7 @@ func TestSyncSecretRefsConfigMapErrorClientErrorReturnsError(t *testing.T) {
 	mockClient := &mocks.Client{}
 	badReqErr := errors.NewBadRequest("")
 	mockClient.On("Get", mock.Anything, mock.Anything, mock.Anything).Return(badReqErr)
-	sut := NewLogPipelineSyncer(mockClient, sectionCm, parsersCm, filesCm, envSecret)
+	sut := NewLogPipelineSyncer(mockClient, daemonSetConfig, emitterConfig)
 
 	lp := telemetryv1alpha1.LogPipeline{}
 	result, err := sut.syncSecretRefs(context.Background(), &lp)

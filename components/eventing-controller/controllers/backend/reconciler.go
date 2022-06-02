@@ -424,7 +424,7 @@ func (r *Reconciler) emitConditionEvent(backend *eventingv1alpha1.EventingBacken
 func (r *Reconciler) isPublisherDeploymentReady(publisher *appsv1.Deployment) bool {
 	result := *publisher.Spec.Replicas == publisher.Status.ReadyReplicas
 	if !result {
-		r.namedLogger().Errorf("Publisher Deployment not ready: expected replicas: %d, got: %d", *publisher.Spec.Replicas, publisher.Status.ReadyReplicas)
+		r.namedLogger().Debugf("Publisher Deployment not ready: expected replicas: %d, got: %d", *publisher.Spec.Replicas, publisher.Status.ReadyReplicas)
 	}
 	return result
 }

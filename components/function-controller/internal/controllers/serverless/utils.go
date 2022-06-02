@@ -301,3 +301,16 @@ func calculateGitImageTag(instance *serverlessv1alpha1.Function) string {
 	hash := sha256.Sum256([]byte(data))
 	return fmt.Sprintf("%x", hash)
 }
+
+func jobFailed(job batchv1.Job, p func(reason string) bool) bool {
+	for _, condition := range job.Status.Conditions {
+		isFailedType := condition.Type == batchv1.JobFailed
+		isStatusTrue := condition.Status == corev1.ConditionTrue
+
+		if isFailedType && isStatusTrue {
+			return p(condition.Reason)
+		}
+	}
+
+	return false
+}

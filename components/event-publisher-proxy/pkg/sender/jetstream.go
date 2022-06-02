@@ -6,7 +6,6 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
-	"strings"
 
 	"github.com/cloudevents/sdk-go/v2/event"
 	"github.com/kyma-project/kyma/components/event-publisher-proxy/internal"
@@ -109,8 +108,5 @@ func (s *JetstreamMessageSender) eventToNatsMsg(event *event.Event) (*nats.Msg, 
 
 // getJsSubjectToPublish appends stream name to subject if needed.
 func (s *JetstreamMessageSender) getJsSubjectToPublish(subject string) string {
-	if strings.HasPrefix(subject, s.envCfg.JSStreamSubjectPrefix) {
-		return subject
-	}
-	return fmt.Sprintf("%s.%s", s.envCfg.JSStreamSubjectPrefix, subject)
+	return fmt.Sprintf("%s.%s", env.JetstreamSubjectPrefix, subject)
 }
