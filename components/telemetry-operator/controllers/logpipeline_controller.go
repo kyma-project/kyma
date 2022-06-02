@@ -21,6 +21,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/fluentbit"
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/sync"
 
 	"github.com/prometheus/client_golang/prometheus"
@@ -51,18 +52,16 @@ type LogPipelineReconciler struct {
 }
 
 // NewLogPipelineReconciler returns a new LogPipelineReconciler using the given FluentBit config arguments
-func NewLogPipelineReconciler(client client.Client, scheme *runtime.Scheme, namespace string, sectionsCm string, parsersCm string, daemonSet string, envSecret string, filesCm string) *LogPipelineReconciler {
+func NewLogPipelineReconciler(client client.Client, scheme *runtime.Scheme, daemonSetConfig sync.FluentBitDaemonSetConfig, emitterConfig fluentbit.EmitterConfig) *LogPipelineReconciler {
 	var lpr LogPipelineReconciler
 	lpr.Client = client
 	lpr.Scheme = scheme
 	lpr.Syncer = sync.NewLogPipelineSyncer(client,
-		types.NamespacedName{Name: sectionsCm, Namespace: namespace},
-		types.NamespacedName{Name: parsersCm, Namespace: namespace},
-		types.NamespacedName{Name: filesCm, Namespace: namespace},
-		types.NamespacedName{Name: envSecret, Namespace: namespace},
+		daemonSetConfig,
+		emitterConfig,
 	)
+	lpr.FluentBitDaemonSet = daemonSetConfig.FluentBitDaemonSetName
 
-	lpr.FluentBitDaemonSet = types.NamespacedName{Name: daemonSet, Namespace: namespace}
 	lpr.FluentBitRestartsCount = prometheus.NewCounter(prometheus.CounterOpts{
 		Name: "telemetry_operator_fluentbit_restarts_total",
 		Help: "Number of triggered FluentBit restarts",
