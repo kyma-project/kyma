@@ -5,7 +5,7 @@ global:
   images:
     compass_runtime_agent:
       name: "compass-runtime-agent"
-      version: "PR-14398"
+      version: "3cffd7d4"
   istio:
     gateway:
       name: kyma-gateway
