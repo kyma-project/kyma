@@ -40,6 +40,9 @@ const {
 
 
 describe('Eventing tests preparation', function() {
+  throw new Error('Fail fast');
+  return;
+
   this.timeout(timeoutTime);
   this.slow(slowTime);
 
