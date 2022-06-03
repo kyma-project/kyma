@@ -83,9 +83,9 @@ func (_m *Client) InvalidateAndRetry(clientID string, clientSecret string, authU
 	return r0, r1
 }
 
-// InvalidateTokenCache provides a mock function with given fields: clientID
-func (_m *Client) InvalidateTokenCache(clientID string) {
-	_m.Called(clientID)
+// InvalidateTokenCache provides a mock function with given fields: clientID, authURL
+func (_m *Client) InvalidateTokenCache(clientID string, authURL string) {
+	_m.Called(clientID, authURL)
 }
 
 type NewClientT interface {

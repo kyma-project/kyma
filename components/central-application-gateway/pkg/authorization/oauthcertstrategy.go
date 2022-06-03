@@ -50,7 +50,7 @@ func (o oauthWithCertStrategy) AddAuthorization(r *http.Request, _ clientcert.Se
 }
 
 func (o oauthWithCertStrategy) Invalidate() {
-	o.oauthClient.InvalidateTokenCache(o.clientId)
+	o.oauthClient.InvalidateTokenCache(o.clientId, o.url)
 }
 
 func (o oauthWithCertStrategy) prepareCertificate() (tls.Certificate, error) {

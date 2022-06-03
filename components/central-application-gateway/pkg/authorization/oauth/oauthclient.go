@@ -28,8 +28,7 @@ type oauthResponse struct {
 type Client interface {
 	GetToken(clientID, clientSecret, authURL string, headers, queryParameters *map[string][]string) (string, apperrors.AppError)
 	GetTokenMTLS(clientID, authURL string, cert tls.Certificate, headers, queryParameters *map[string][]string) (string, apperrors.AppError)
-	//InvalidateAndRetry(clientID, clientSecret, authURL string, headers, queryParameters *map[string][]string) (string, apperrors.AppError)
-	InvalidateTokenCache(clientID string)
+	InvalidateTokenCache(clientID string, authURL string)
 }
 
 type client struct {
@@ -45,7 +44,7 @@ func NewOauthClient(timeoutDuration int, tokenCache tokencache.TokenCache) Clien
 }
 
 func (c *client) GetToken(clientID, clientSecret, authURL string, headers, queryParameters *map[string][]string) (string, apperrors.AppError) {
-	token, found := c.tokenCache.Get(clientID)
+	token, found := c.tokenCache.Get(c.makeOAuthTokenCacheKey(clientID, authURL))
 	if found {
 		return token, nil
 	}
@@ -55,15 +54,13 @@ func (c *client) GetToken(clientID, clientSecret, authURL string, headers, query
 		return "", err
 	}
 
-	c.tokenCache.Add(clientID, tokenResponse.AccessToken, tokenResponse.ExpiresIn)
+	c.tokenCache.Add(c.makeOAuthTokenCacheKey(clientID, authURL), tokenResponse.AccessToken, tokenResponse.ExpiresIn)
 
 	return tokenResponse.AccessToken, nil
 }
 
-// case of 2 endpoints and single clientID
-//
 func (c *client) GetTokenMTLS(clientID, authURL string, cert tls.Certificate, headers, queryParameters *map[string][]string) (string, apperrors.AppError) {
-	token, found := c.tokenCache.Get(clientID)
+	token, found := c.tokenCache.Get(c.makeOAuthTokenCacheKey(clientID, authURL))
 	if found {
 		return token, nil
 	}
@@ -73,26 +70,18 @@ func (c *client) GetTokenMTLS(clientID, authURL string, cert tls.Certificate, he
 		return "", err
 	}
 
-	c.tokenCache.Add(clientID, tokenResponse.AccessToken, tokenResponse.ExpiresIn)
+	c.tokenCache.Add(c.makeOAuthTokenCacheKey(clientID, authURL), tokenResponse.AccessToken, tokenResponse.ExpiresIn)
 
 	return tokenResponse.AccessToken, nil
 }
 
-//func (c *client) InvalidateAndRetry(clientID, clientSecret, authURL string, headers, queryParameters *map[string][]string) (string, apperrors.AppError) {
-//	c.tokenCache.Remove(clientID)
-//
-//	tokenResponse, err := c.requestToken(clientID, clientSecret, authURL, headers, queryParameters)
-//	if err != nil {
-//		return "", err
-//	}
-//
-//	c.tokenCache.Add(clientID, tokenResponse.AccessToken, tokenResponse.ExpiresIn)
-//
-//	return tokenResponse.AccessToken, nil
-//}
+func (c *client) InvalidateTokenCache(clientID, authURL string) {
+	c.tokenCache.Remove(c.makeOAuthTokenCacheKey(clientID, authURL))
+}
 
-func (c *client) InvalidateTokenCache(clientID string) {
-	c.tokenCache.Remove(clientID)
+// to avoid case of single clientID and different endpoints for MTLS and standard oauth
+func (c *client) makeOAuthTokenCacheKey(clientID, authURL string) string {
+	return clientID + authURL
 }
 
 func (c *client) requestToken(clientID, clientSecret, authURL string, headers, queryParameters *map[string][]string) (*oauthResponse, apperrors.AppError) {

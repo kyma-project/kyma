@@ -40,7 +40,7 @@ func TestAuthWithCerStrategy(t *testing.T) {
 	t.Run("should invalidate cache", func(t *testing.T) {
 		// given
 		oauthClientMock := &oauthMocks.Client{}
-		oauthClientMock.On("InvalidateTokenCache", "clientId").Return("token", nil).Once()
+		oauthClientMock.On("InvalidateTokenCache", "clientId", "www.example.com/token").Return("token", nil).Once()
 
 		authWithCertStrategy := newOAuthWithCertStrategy(oauthClientMock, "clientId", certificate, privateKey, "www.example.com/token", nil)
 

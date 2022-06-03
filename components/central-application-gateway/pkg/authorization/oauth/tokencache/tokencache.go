@@ -31,11 +31,6 @@ func (tc *tokenCache) Get(clientId string) (token string, found bool) {
 	return res.(string), found
 }
 
-//cacheKey {
-//	clientID string,
-//	URL string
-//}
-
 func (tc *tokenCache) Add(clientID, token string, expirationSeconds int) {
 	tc.cache.Set(clientID, token, time.Duration(expirationSeconds-2)*time.Second)
 }
