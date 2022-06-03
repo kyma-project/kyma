@@ -82,8 +82,29 @@ serviceMonitor:
 
 logProcessor: fluent-bit
 
-allowedPlugins:
-  filter: []
+deniedPlugins:
+  filter:
+    - kubernetes
+    - rewrite_tag
+    - multiline
+  output: []
+
+supportedPlugins:
+  filter:
+    - aws
+    - expect
+    - grep
+    - lua
+    - record_modifier
+    - nightfall
+    - stdout
+    - checklist
+    - geoip2
+    - parser
+    - modify
+    - nest
+    - throttle
+    - tensorflow
   output:
     - grafana-loki
     - http

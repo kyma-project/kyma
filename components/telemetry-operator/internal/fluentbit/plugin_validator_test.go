@@ -11,7 +11,7 @@ import (
 )
 
 func TestValidateEmpty(t *testing.T) {
-	pluginValidator := NewPluginValidator([]string{}, []string{})
+	pluginValidator := NewPluginValidator([]string{}, []string{}, []string{}, []string{})
 
 	logPipeline := &telemetryv1alpha1.LogPipeline{
 		Spec: telemetryv1alpha1.LogPipelineSpec{},
@@ -26,7 +26,7 @@ func TestValidateEmpty(t *testing.T) {
 }
 
 func TestValidateAllowedFilters(t *testing.T) {
-	pluginValidator := NewPluginValidator([]string{"grep", "lua", "multiline"}, []string{})
+	pluginValidator := NewPluginValidator([]string{"grep", "lua"}, []string{}, []string{}, []string{})
 
 	logPipeline := &telemetryv1alpha1.LogPipeline{
 		Spec: telemetryv1alpha1.LogPipelineSpec{
@@ -51,7 +51,7 @@ func TestValidateAllowedFilters(t *testing.T) {
 }
 
 func TestValidateAllowedUpperCaseFilters(t *testing.T) {
-	pluginValidator := NewPluginValidator([]string{"grep", "lua", "multiline"}, []string{})
+	pluginValidator := NewPluginValidator([]string{"grep", "lua"}, []string{}, []string{}, []string{})
 
 	logPipeline := &telemetryv1alpha1.LogPipeline{
 		Spec: telemetryv1alpha1.LogPipelineSpec{
@@ -76,7 +76,7 @@ func TestValidateAllowedUpperCaseFilters(t *testing.T) {
 }
 
 func TestValidateForbiddenFilters(t *testing.T) {
-	pluginValidator := NewPluginValidator([]string{"lua", "multiline"}, []string{})
+	pluginValidator := NewPluginValidator([]string{"lua"}, []string{}, []string{}, []string{})
 
 	logPipeline := &telemetryv1alpha1.LogPipeline{
 		Spec: telemetryv1alpha1.LogPipelineSpec{
@@ -100,7 +100,7 @@ func TestValidateForbiddenFilters(t *testing.T) {
 }
 
 func TestValidateAllowedOutputs(t *testing.T) {
-	pluginValidator := NewPluginValidator([]string{}, []string{"loki", "http"})
+	pluginValidator := NewPluginValidator([]string{}, []string{"loki", "http"}, []string{}, []string{})
 
 	logPipeline := &telemetryv1alpha1.LogPipeline{
 		Spec: telemetryv1alpha1.LogPipelineSpec{
@@ -124,7 +124,7 @@ func TestValidateAllowedOutputs(t *testing.T) {
 }
 
 func TestValidateForbiddenOutputs(t *testing.T) {
-	pluginValidator := NewPluginValidator([]string{}, []string{"loki", "http"})
+	pluginValidator := NewPluginValidator([]string{}, []string{"loki", "http"}, []string{}, []string{})
 
 	logPipeline := &telemetryv1alpha1.LogPipeline{
 		Spec: telemetryv1alpha1.LogPipelineSpec{
@@ -147,7 +147,7 @@ func TestValidateForbiddenOutputs(t *testing.T) {
 }
 
 func TestValidateUnnamedOutputs(t *testing.T) {
-	pluginValidator := NewPluginValidator([]string{}, []string{"loki", "http"})
+	pluginValidator := NewPluginValidator([]string{}, []string{"loki", "http"}, []string{}, []string{})
 
 	logPipeline := &telemetryv1alpha1.LogPipeline{
 		Spec: telemetryv1alpha1.LogPipelineSpec{
@@ -169,7 +169,7 @@ func TestValidateUnnamedOutputs(t *testing.T) {
 }
 
 func TestValidateDisallowAll(t *testing.T) {
-	pluginValidator := NewPluginValidator([]string{}, []string{})
+	pluginValidator := NewPluginValidator([]string{}, []string{}, []string{}, []string{})
 
 	logPipeline := &telemetryv1alpha1.LogPipeline{
 		Spec: telemetryv1alpha1.LogPipelineSpec{
@@ -200,7 +200,7 @@ Match   *`,
 }
 
 func TestValidateMatchCondWithFirstLogPipeline(t *testing.T) {
-	pluginValidator := NewPluginValidator([]string{}, []string{})
+	pluginValidator := NewPluginValidator([]string{}, []string{}, []string{}, []string{})
 
 	logPipeline := &telemetryv1alpha1.LogPipeline{
 
@@ -224,7 +224,7 @@ func TestValidateMatchCondWithFirstLogPipeline(t *testing.T) {
 }
 
 func TestValidateMatchCondWithExistingLogPipeline(t *testing.T) {
-	pluginValidator := NewPluginValidator([]string{}, []string{})
+	pluginValidator := NewPluginValidator([]string{}, []string{}, []string{}, []string{})
 
 	logPipeline1 := &telemetryv1alpha1.LogPipeline{
 		Spec: telemetryv1alpha1.LogPipelineSpec{
@@ -261,7 +261,7 @@ func TestValidateMatchCondWithExistingLogPipeline(t *testing.T) {
 }
 
 func TestValidatePipelineCreation(t *testing.T) {
-	pluginValidator := NewPluginValidator([]string{}, []string{})
+	pluginValidator := NewPluginValidator([]string{}, []string{}, []string{}, []string{})
 
 	logPipeline := &telemetryv1alpha1.LogPipeline{
 
@@ -284,7 +284,7 @@ func TestValidatePipelineCreation(t *testing.T) {
 }
 
 func TestEnableAllPlugins(t *testing.T) {
-	pluginValidator := NewPluginValidator([]string{"lua", "multiline"}, []string{})
+	pluginValidator := NewPluginValidator([]string{"lua", "multiline"}, []string{}, []string{}, []string{})
 
 	logPipeline := &telemetryv1alpha1.LogPipeline{
 		Spec: telemetryv1alpha1.LogPipelineSpec{
@@ -304,4 +304,27 @@ func TestEnableAllPlugins(t *testing.T) {
 
 	err := pluginValidator.Validate(logPipeline, logPipelines)
 	require.NoError(t, err)
+}
+
+func TestDeniedPlugins(t *testing.T) {
+	pluginValidator := NewPluginValidator([]string{"lua", "multiline"}, []string{}, []string{"kubernetes"}, []string{})
+
+	logPipeline := &telemetryv1alpha1.LogPipeline{
+		Spec: telemetryv1alpha1.LogPipelineSpec{
+			Filters: []telemetryv1alpha1.Filter{
+				{
+					Content: `
+    Name    kubernetes
+    Match   foo.*
+    Regex   $kubernetes['labels']['app'] my-deployment`,
+				},
+			},
+		},
+	}
+	logPipeline.Name = "foo"
+	logPipelines := &telemetryv1alpha1.LogPipelineList{}
+	logPipeline.Spec.EnableUnsupportedPlugins = true
+
+	err := pluginValidator.Validate(logPipeline, logPipelines)
+	require.Error(t, err)
 }
