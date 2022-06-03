@@ -292,14 +292,16 @@ func TestEnableAllPlugins(t *testing.T) {
 				{
 					Content: `
     Name    grep
-    Match   *
+    Match   foo.*
     Regex   $kubernetes['labels']['app'] my-deployment`,
 				},
 			},
 		},
 	}
+	logPipeline.Name = "foo"
+	logPipelines := &telemetryv1alpha1.LogPipelineList{}
 	logPipeline.Spec.EnableUnsupportedPlugins = true
 
-	err := pluginValidator.Validate(logPipeline)
+	err := pluginValidator.Validate(logPipeline, logPipelines)
 	require.NoError(t, err)
 }
