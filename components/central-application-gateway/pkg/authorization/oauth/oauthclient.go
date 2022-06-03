@@ -28,7 +28,7 @@ type oauthResponse struct {
 type Client interface {
 	GetToken(clientID, clientSecret, authURL string, headers, queryParameters *map[string][]string) (string, apperrors.AppError)
 	GetTokenMTLS(clientID, authURL string, cert tls.Certificate, headers, queryParameters *map[string][]string) (string, apperrors.AppError)
-	InvalidateAndRetry(clientID, clientSecret, authURL string, headers, queryParameters *map[string][]string) (string, apperrors.AppError)
+	//InvalidateAndRetry(clientID, clientSecret, authURL string, headers, queryParameters *map[string][]string) (string, apperrors.AppError)
 	InvalidateTokenCache(clientID string)
 }
 
@@ -60,6 +60,8 @@ func (c *client) GetToken(clientID, clientSecret, authURL string, headers, query
 	return tokenResponse.AccessToken, nil
 }
 
+// case of 2 endpoints and single clientID
+//
 func (c *client) GetTokenMTLS(clientID, authURL string, cert tls.Certificate, headers, queryParameters *map[string][]string) (string, apperrors.AppError) {
 	token, found := c.tokenCache.Get(clientID)
 	if found {
@@ -76,18 +78,18 @@ func (c *client) GetTokenMTLS(clientID, authURL string, cert tls.Certificate, he
 	return tokenResponse.AccessToken, nil
 }
 
-func (c *client) InvalidateAndRetry(clientID, clientSecret, authURL string, headers, queryParameters *map[string][]string) (string, apperrors.AppError) {
-	c.tokenCache.Remove(clientID)
-
-	tokenResponse, err := c.requestToken(clientID, clientSecret, authURL, headers, queryParameters)
-	if err != nil {
-		return "", err
-	}
-
-	c.tokenCache.Add(clientID, tokenResponse.AccessToken, tokenResponse.ExpiresIn)
-
-	return tokenResponse.AccessToken, nil
-}
+//func (c *client) InvalidateAndRetry(clientID, clientSecret, authURL string, headers, queryParameters *map[string][]string) (string, apperrors.AppError) {
+//	c.tokenCache.Remove(clientID)
+//
+//	tokenResponse, err := c.requestToken(clientID, clientSecret, authURL, headers, queryParameters)
+//	if err != nil {
+//		return "", err
+//	}
+//
+//	c.tokenCache.Add(clientID, tokenResponse.AccessToken, tokenResponse.ExpiresIn)
+//
+//	return tokenResponse.AccessToken, nil
+//}
 
 func (c *client) InvalidateTokenCache(clientID string) {
 	c.tokenCache.Remove(clientID)
