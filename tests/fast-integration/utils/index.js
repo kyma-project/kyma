@@ -116,28 +116,6 @@ function convertAxiosError(axiosError, message) {
   return new Error(message);
 }
 
-const updateNamespacedResource =
-  (client, group, version, pluralName) => async (name, namespace, updateFn) => {
-    const obj = await client.getNamespacedCustomObject(
-        group,
-        version,
-        namespace,
-        pluralName,
-        name,
-    );
-
-    const updatedObj = updateFn(_.cloneDeep(obj.body));
-
-    await client.replaceNamespacedCustomObject(
-        group,
-        version,
-        namespace,
-        pluralName,
-        name,
-        updatedObj,
-    );
-  };
-
 // "polyfill" for Promise.allSettled
 async function promiseAllSettled(promises) {
   return Promise.all(
