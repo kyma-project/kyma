@@ -2,6 +2,9 @@ package main
 
 import (
 	"fmt"
+	"os"
+	"time"
+
 	"github.com/go-logr/zapr"
 	"github.com/kyma-project/kyma/common/logging/logger"
 	k8s "github.com/kyma-project/kyma/components/function-controller/internal/controllers/kubernetes"
@@ -15,7 +18,6 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
-	"os"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/event"
 	"sigs.k8s.io/controller-runtime/pkg/handler"
@@ -24,7 +26,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 	"sigs.k8s.io/controller-runtime/pkg/source"
 	"sigs.k8s.io/controller-runtime/pkg/webhook"
-	"time"
 	// +kubebuilder:scaffold:imports
 )
 
