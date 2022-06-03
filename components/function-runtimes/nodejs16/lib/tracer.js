@@ -8,7 +8,7 @@ const { SimpleSpanProcessor } = require( '@opentelemetry/sdk-trace-base');
 const { JaegerExporter } = require( '@opentelemetry/exporter-jaeger');
 const { Resource } = require( '@opentelemetry/resources');
 const { SemanticResourceAttributes } = require( '@opentelemetry/semantic-conventions');
-const {B3Propagator, B3InjectEncoding} = require("@opentelemetry/propagator-b3");
+const { B3Propagator, B3InjectEncoding } = require("@opentelemetry/propagator-b3");
 const { ExpressInstrumentation, ExpressLayerType } = require( '@opentelemetry/instrumentation-express');
 const { HttpInstrumentation } = require('@opentelemetry/instrumentation-http');
 const axios = require("axios")
@@ -61,8 +61,6 @@ function setupTracer(serviceName){
     ],
   });
 
-
-
   provider.addSpanProcessor(new SimpleSpanProcessor(exporter));
 
   // Initialize the OpenTelemetry APIs to use the NodeTracerProvider bindings
@@ -72,8 +70,6 @@ function setupTracer(serviceName){
 
   return opentelemetry.trace.getTracer(serviceName);
 };
-
-// type FilterFunction = (spanName: string, spanKind: SpanKind, attributes: SpanAttributes) => boolean;
 
 module.exports = {
     setupTracer,
