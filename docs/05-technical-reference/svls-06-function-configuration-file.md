@@ -125,7 +125,7 @@ See all parameter descriptions.
 | ---------------------------------------- | :------------: | ---------| ---------| ------- |
 | **name**              | Yes | Function | | Specifies the name of your Function.         |
 | **namespace**             | No | Function | `default` | Defines the Namespace in which the Function is created.        |
-| **runtime**             | Yes | Function | | Specifies the execution environment for your Function. The available values are `nodejs14`, `nodejs16` and `python39`.      |
+| **runtime**             | Yes | Function | | Specifies the execution environment for your Function. The available values are `nodejs14`, `nodejs16`, and `python39`.      |
 | **runtimeImageOverride** | No | Function | | Specifies the runtimes image which must be used instead of default one. |
 | **labels**             | No | Function | | Specifies the Function's Pod labels. |
 | **source**            | Yes | Function | | Provides details on the type and location of your Function's source code and dependencies.         |

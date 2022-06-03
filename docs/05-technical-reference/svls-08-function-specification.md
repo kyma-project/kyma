@@ -164,7 +164,7 @@ See the detailed descriptions of these fields:
 |-------|-------------|
 | **function-name** | Name of the invoked Function |
 | **timeout** | Time, in seconds, after which the system cancels the request to invoke the Function |
-| **runtime** | Environment used to run the Function. You can use `nodejs14`, `nodejs16` or `python39`. |
+| **runtime** | Environment used to run the Function. You can use `nodejs14`, `nodejs16`, or `python39`. |
 | **memory-limit** | Maximum amount of memory assigned to run a Function |
 
 ## HTTP requests
