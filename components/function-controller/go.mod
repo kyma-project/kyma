@@ -15,6 +15,7 @@ replace (
 	k8s.io/apimachinery => k8s.io/apimachinery v0.22.7
 	k8s.io/client-go => k8s.io/client-go v0.22.7
 	k8s.io/component-base => k8s.io/component-base v0.22.7
+	github.com/kyma-project/kyma/common/logging => ../../common/logging
 )
 
 require (
@@ -23,6 +24,7 @@ require (
 	github.com/go-logr/zapr v1.2.0
 	github.com/google/gofuzz v1.2.0 // indirect
 	github.com/google/uuid v1.3.0 // indirect
+	github.com/kyma-project/kyma/common/logging v0.0.0-20220602092229-f2e29f34ed5e
 	github.com/libgit2/git2go/v31 v31.4.14
 	github.com/onsi/gomega v1.17.0
 	github.com/pkg/errors v0.9.1
