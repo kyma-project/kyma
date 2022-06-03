@@ -15,7 +15,6 @@ replace (
 	k8s.io/apimachinery => k8s.io/apimachinery v0.22.7
 	k8s.io/client-go => k8s.io/client-go v0.22.7
 	k8s.io/component-base => k8s.io/component-base v0.22.7
-	github.com/kyma-project/kyma/common/logging => ../../common/logging
 )
 
 require (
