@@ -62,8 +62,8 @@ func (_m *OAuthClient) GetTokenMTLS(clientID string, authURL string, cert tls.Ce
 }
 
 // InvalidateTokenCache provides a mock function with given fields: clientID
-func (_m *OAuthClient) InvalidateTokenCache(clientID string) {
-	_m.Called(clientID)
+func (_m *OAuthClient) InvalidateTokenCache(clientID string, authURL string) {
+	_m.Called(clientID, authURL)
 }
 
 type NewOAuthClientT interface {
