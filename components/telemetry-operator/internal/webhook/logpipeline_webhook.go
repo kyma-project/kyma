@@ -101,6 +101,16 @@ func (v *LogPipelineValidator) Handle(ctx context.Context, req admission.Request
 		}
 	}
 
+	if logPipeline.Spec.EnableUnsupportedPlugins {
+		warnMsg := "'enableUnsupportedPlugin' is enabled which would allow unsupported plugins to be used!"
+		return admission.Response{
+			AdmissionResponse: admissionv1.AdmissionResponse{
+				Allowed:  true,
+				Warnings: []string{warnMsg},
+			},
+		}
+	}
+
 	return admission.Allowed("LogPipeline validation successful")
 }
 
