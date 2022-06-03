@@ -173,6 +173,20 @@ type FunctionList struct {
 	Items           []Function `json:"items"`
 }
 
+//nolint
 func init() {
 	SchemeBuilder.Register(&Function{}, &FunctionList{})
+}
+
+func (s *FunctionStatus) Condition(c ConditionType) *Condition {
+	for _, cond := range s.Conditions {
+		if cond.Type == c {
+			return &cond
+		}
+	}
+	return nil
+}
+
+func (c *Condition) IsTrue() bool {
+	return c.Status == corev1.ConditionTrue
 }

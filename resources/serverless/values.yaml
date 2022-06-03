@@ -73,26 +73,26 @@ global:
   images:
     k8s_tools:
       name: "k8s-tools"
-      version: "20220516-9f87ea89"
+      version: "20220525-4bd6d72e"
       directory: "tpi"
     function_controller:
       name: "function-controller"
-      version: "PR-14249"
+      version: "b5672724"
     function_webhook:
       name: "function-webhook"
-      version: "PR-14249"
+      version: "b5672724"
     function_build_init:
       name: "function-build-init"
-      version: "PR-14249"
+      version: "b5672724"
     function_runtime_nodejs12:
       name: "function-runtime-nodejs12"
-      version: "PR-14284"
+      version: "6575f14c"
     function_runtime_nodejs14:
       name: "function-runtime-nodejs14"
-      version: "PR-14284"
+      version: "6575f14c"
     function_runtime_python39:
       name: "function-runtime-python39"
-      version: "PR-14284"
+      version: "6575f14c"
     kaniko_executor:
       name: "kaniko-executor"
       version: "1.8.0-a0c08196"
@@ -108,7 +108,7 @@ global:
   testImages:
     function_controller_test:
       name: "function-controller-test"
-      version: "708f6a87"
+      version: "91a9a810"
     git_server:
       name: "gitserver"
       version: "708f6a87"
@@ -128,8 +128,8 @@ deployment:
     successThreshold: 1
     failureThreshold: 3
     initialDelaySeconds: 50
-    timeoutSeconds: 10
-    periodSeconds: 30
+    timeoutSeconds: 60
+    periodSeconds: 120
   readinessProbe:
     successThreshold: 1
     failureThreshold: 3
@@ -157,10 +157,10 @@ containers:
   manager:
     resources:
       limits:
-        cpu: 100m
+        cpu: 300m
         memory: 160Mi #This is temporary. helm3 is using secrets as storage by default. I talked already with michalhudy to exclude secrets with helm labels from watching.
       requests:
-        cpu: 10m
+        cpu: 75m
         memory: 32Mi
     containerSecurityContext:
       privileged: false

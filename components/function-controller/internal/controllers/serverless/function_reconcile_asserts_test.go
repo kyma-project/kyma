@@ -36,7 +36,7 @@ func assertSuccessfulFunctionBuild(t *testing.T, resourceClient resource.Client,
 	result, err := reconciler.Reconcile(ctx, request)
 	g.Expect(err).To(gomega.BeNil())
 	g.Expect(result.Requeue).To(gomega.BeFalse())
-	g.Expect(result.RequeueAfter).To(gomega.Equal(time.Second * 0))
+	g.Expect(result.RequeueAfter).To(gomega.Equal(time.Second * 1))
 
 	function := &serverlessv1alpha1.Function{}
 	g.Expect(resourceClient.Get(context.TODO(), request.NamespacedName, function)).To(gomega.Succeed())
@@ -54,7 +54,7 @@ func assertSuccessfulFunctionBuild(t *testing.T, resourceClient resource.Client,
 	result, err = reconciler.Reconcile(ctx, request)
 	g.Expect(err).To(gomega.BeNil())
 	g.Expect(result.Requeue).To(gomega.BeFalse())
-	g.Expect(result.RequeueAfter).To(gomega.Equal(time.Second * 0))
+	g.Expect(result.RequeueAfter).To(gomega.Equal(time.Second * 1))
 
 	function = &serverlessv1alpha1.Function{}
 	g.Expect(resourceClient.Get(context.TODO(), request.NamespacedName, function)).To(gomega.Succeed())
@@ -77,7 +77,7 @@ func assertSuccessfulFunctionBuild(t *testing.T, resourceClient resource.Client,
 	result, err = reconciler.Reconcile(ctx, request)
 	g.Expect(err).To(gomega.BeNil())
 	g.Expect(result.Requeue).To(gomega.BeFalse())
-	g.Expect(result.RequeueAfter).To(gomega.Equal(time.Second * 0))
+	g.Expect(result.RequeueAfter).To(gomega.Equal(time.Second * 1))
 
 	function = &serverlessv1alpha1.Function{}
 	g.Expect(resourceClient.Get(context.TODO(), request.NamespacedName, function)).To(gomega.Succeed())
@@ -98,7 +98,7 @@ func assertSuccessfulFunctionDeployment(t *testing.T, resourceClient resource.Cl
 	result, err := reconciler.Reconcile(ctx, request)
 	g.Expect(err).To(gomega.BeNil())
 	g.Expect(result.Requeue).To(gomega.BeFalse())
-	g.Expect(result.RequeueAfter).To(gomega.Equal(time.Second * 0))
+	g.Expect(result.RequeueAfter).To(gomega.Equal(time.Second * 1))
 
 	function := &serverlessv1alpha1.Function{}
 	g.Expect(resourceClient.Get(context.TODO(), request.NamespacedName, function)).To(gomega.Succeed())
@@ -134,7 +134,7 @@ func assertSuccessfulFunctionDeployment(t *testing.T, resourceClient resource.Cl
 		result, err = reconciler.Reconcile(ctx, request)
 		g.Expect(err).To(gomega.BeNil())
 		g.Expect(result.Requeue).To(gomega.BeFalse())
-		g.Expect(result.RequeueAfter).To(gomega.Equal(time.Duration(0)))
+		g.Expect(result.RequeueAfter).To(gomega.Equal(time.Second * 1))
 
 		function = &serverlessv1alpha1.Function{}
 		g.Expect(resourceClient.Get(context.TODO(), request.NamespacedName, function)).To(gomega.Succeed())
@@ -171,7 +171,7 @@ func assertSuccessfulFunctionDeployment(t *testing.T, resourceClient resource.Cl
 		result, err = reconciler.Reconcile(ctx, request)
 		g.Expect(err).To(gomega.BeNil())
 		g.Expect(result.Requeue).To(gomega.BeFalse())
-		g.Expect(result.RequeueAfter).To(gomega.Equal(time.Duration(0)))
+		g.Expect(result.RequeueAfter).To(gomega.Equal(time.Second * 1))
 
 		function = &serverlessv1alpha1.Function{}
 		g.Expect(resourceClient.Get(context.TODO(), request.NamespacedName, function)).To(gomega.Succeed())

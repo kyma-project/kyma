@@ -47,7 +47,7 @@ func TestValidatingWebHook_Handle(t *testing.T) {
 			args: args{
 				ctx: context.Background(),
 				req: admission.Request{
-					v1.AdmissionRequest{
+					AdmissionRequest: v1.AdmissionRequest{
 						RequestKind: &metav1.GroupVersionKind{Kind: "Function"},
 						Object: runtime.RawExtension{
 							Raw: []byte(`{"apiVersion": "serverless.kyma-project.io/v1alpha1",
@@ -99,7 +99,7 @@ func TestValidatingWebHook_Handle(t *testing.T) {
 			args: args{
 				ctx: context.Background(),
 				req: admission.Request{
-					v1.AdmissionRequest{
+					AdmissionRequest: v1.AdmissionRequest{
 						RequestKind: &metav1.GroupVersionKind{Kind: "Function"},
 						Object: runtime.RawExtension{
 							Raw: []byte(`{"apiVersion": "serverless.kyma-project.io/v1alpha1",
@@ -128,7 +128,7 @@ func TestValidatingWebHook_Handle(t *testing.T) {
 			args: args{
 				ctx: context.Background(),
 				req: admission.Request{
-					v1.AdmissionRequest{
+					AdmissionRequest: v1.AdmissionRequest{
 						RequestKind: &metav1.GroupVersionKind{Kind: "Function"},
 						Object: runtime.RawExtension{
 							Raw: []byte(`{"bad request"`),
@@ -148,7 +148,7 @@ func TestValidatingWebHook_Handle(t *testing.T) {
 			args: args{
 				ctx: context.Background(),
 				req: admission.Request{
-					v1.AdmissionRequest{
+					AdmissionRequest: v1.AdmissionRequest{
 						RequestKind: &metav1.GroupVersionKind{Kind: "Function"},
 						Object: runtime.RawExtension{
 							Raw: []byte(`{
@@ -178,7 +178,7 @@ func TestValidatingWebHook_Handle(t *testing.T) {
 			args: args{
 				ctx: context.Background(),
 				req: admission.Request{
-					v1.AdmissionRequest{
+					AdmissionRequest: v1.AdmissionRequest{
 						RequestKind: &metav1.GroupVersionKind{Kind: "GitRepository"},
 						Object: runtime.RawExtension{
 							Raw: []byte(`{"apiVersion": "serverless.kyma-project.io/v1alpha1",
@@ -207,7 +207,7 @@ func TestValidatingWebHook_Handle(t *testing.T) {
 			args: args{
 				ctx: context.Background(),
 				req: admission.Request{
-					v1.AdmissionRequest{
+					AdmissionRequest: v1.AdmissionRequest{
 						RequestKind: &metav1.GroupVersionKind{Kind: "GitRepository"},
 						Object: runtime.RawExtension{
 							Raw: []byte(`{"apiVersion": "serverless.kyma-project.io/v1alpha1",
