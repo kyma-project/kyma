@@ -96,6 +96,10 @@ func (spec *FunctionSpec) defaultFunctionResources(config *DefaultingConfig, fn 
 
 func (spec *FunctionSpec) defaultBuildResources(config *DefaultingConfig, fn *Function) {
 	resources := spec.BuildResources
+	// if build resources are not set but the user we don't default them. However, if only part is set, we should correctly set missing defaults.v
+	if resources.Limits == nil && resources.Requests == nil {
+		return
+	}
 	defaultingConfig := config.BuildJob.Resources
 	resourcesPreset := mergeResourcesPreset(fn, BuildResourcesPresetLabel, defaultingConfig.Presets, defaultingConfig.DefaultPreset, nil)
 

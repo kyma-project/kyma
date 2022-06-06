@@ -141,29 +141,35 @@ func validateResources(resources corev1.ResourceRequirements, minMemory, minCPU 
 	limits := resources.Limits
 	requests := resources.Requests
 	allErrs := []string{}
-	if requests.Cpu().Cmp(minCPU) == -1 {
-		allErrs = append(allErrs, fmt.Sprintf("%s.requests.cpu(%s) should be higher than minimal value (%s)",
-			parent, requests.Cpu().String(), minCPU.String()))
+	// We will only validate if this is set.
+	if requests != nil {
+		if requests.Cpu().Cmp(minCPU) == -1 {
+			allErrs = append(allErrs, fmt.Sprintf("%s.requests.cpu(%s) should be higher than minimal value (%s)",
+				parent, requests.Cpu().String(), minCPU.String()))
+		}
+		if requests.Memory().Cmp(minMemory) == -1 {
+			allErrs = append(allErrs, fmt.Sprintf("%s.requests.memory(%s) should be higher than minimal value (%s)",
+				parent, requests.Memory().String(), minMemory.String()))
+		}
+		if requests.Cpu().Cmp(*limits.Cpu()) == 1 {
+			allErrs = append(allErrs, fmt.Sprintf("%s.limits.cpu(%s) should be higher than %s.requests.cpu(%s)",
+				parent, limits.Cpu().String(), parent, requests.Cpu().String()))
+		}
+		if requests.Memory().Cmp(*limits.Memory()) == 1 {
+			allErrs = append(allErrs, fmt.Sprintf("%s.limits.memory(%s) should be higher than %s.requests.memory(%s)",
+				parent, limits.Memory().String(), parent, requests.Memory().String()))
+		}
 	}
-	if requests.Memory().Cmp(minMemory) == -1 {
-		allErrs = append(allErrs, fmt.Sprintf("%s.requests.memory(%s) should be higher than minimal value (%s)",
-			parent, requests.Memory().String(), minMemory.String()))
-	}
-	if limits.Cpu().Cmp(minCPU) == -1 {
-		allErrs = append(allErrs, fmt.Sprintf("%s.limits.cpu(%s) should be higher than minimal value (%s)",
-			parent, limits.Cpu().String(), minCPU.String()))
-	}
-	if limits.Memory().Cmp(minMemory) == -1 {
-		allErrs = append(allErrs, fmt.Sprintf("%s.limits.memory(%s) should be higher than minimal value (%s)",
-			parent, limits.Memory().String(), minMemory.String()))
-	}
-	if requests.Cpu().Cmp(*limits.Cpu()) == 1 {
-		allErrs = append(allErrs, fmt.Sprintf("%s.limits.cpu(%s) should be higher than %s.requests.cpu(%s)",
-			parent, limits.Cpu().String(), parent, requests.Cpu().String()))
-	}
-	if requests.Memory().Cmp(*limits.Memory()) == 1 {
-		allErrs = append(allErrs, fmt.Sprintf("%s.limits.memory(%s) should be higher than %s.requests.memory(%s)",
-			parent, limits.Memory().String(), parent, requests.Memory().String()))
+	// We will only validate if this is set.
+	if limits != nil {
+		if limits.Cpu().Cmp(minCPU) == -1 {
+			allErrs = append(allErrs, fmt.Sprintf("%s.limits.cpu(%s) should be higher than minimal value (%s)",
+				parent, limits.Cpu().String(), minCPU.String()))
+		}
+		if limits.Memory().Cmp(minMemory) == -1 {
+			allErrs = append(allErrs, fmt.Sprintf("%s.limits.memory(%s) should be higher than minimal value (%s)",
+				parent, limits.Memory().String(), minMemory.String()))
+		}
 	}
 	return returnAllErrs("invalid function resources", allErrs)
 }
@@ -192,8 +198,8 @@ func (spec *FunctionSpec) validateLabels(_ *ValidationConfig) error {
 	labels := spec.Labels
 	fieldPath := field.NewPath("spec.labels")
 
-	errors := v1validation.ValidateLabels(labels, fieldPath)
-	return errors.ToAggregate()
+	errs := v1validation.ValidateLabels(labels, fieldPath)
+	return errs.ToAggregate()
 }
 
 type property struct {
