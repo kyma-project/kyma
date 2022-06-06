@@ -2,7 +2,7 @@ Feature: Istio is installed
   Istio needs to be installed
   as the core prerequisite.
 
-  Scenario: Istio component installed in evaluation profile has all required pods running
+  Scenario: Istio is installed with evaluation profile
     Given a running Kyma cluster with "evaluation" profile
     When Istio component is installed
     Then there is 1 pod for Pilot
