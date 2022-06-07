@@ -117,7 +117,7 @@ install-manager-k3d: build-image-function-controller
 	docker tag $(MANAGER_NAME) $(MANAGER_NAME):$(HASH_TAG)
 
 	k3d image import $(MANAGER_NAME):$(HASH_TAG) -c kyma
-	kubectl set image deployment serverless-webhook-svc -n kyma-system webhook=$(MANAGER_NAME):$(HASH_TAG)
+	kubectl set image deployment serverless-ctrl-mngr -n kyma-system manager=$(MANAGER_NAME):$(HASH_TAG)
 
 ######## function webhook
 
