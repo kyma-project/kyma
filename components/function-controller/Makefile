@@ -21,9 +21,6 @@ else
 GOBIN=$(shell go env GOBIN)
 endif
 
-pull-licenses-local:
-	@echo "Omitting licenses will not be pulled."	
-
 release:
 	$(MAKE) gomod-release-local
 

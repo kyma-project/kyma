@@ -14,6 +14,5 @@ USER nonroot:nonroot
 WORKDIR /
 COPY --from=builder /go/src/github.com/kyma-project/kyma/components/event-publisher-proxy/event-publisher-proxy .
 
-COPY licenses/ /licenses/
 
 ENTRYPOINT ["/event-publisher-proxy"]

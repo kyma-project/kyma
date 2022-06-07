@@ -28,7 +28,6 @@ const {
   isDebugEnabled,
   toBase64,
   ensureApplicationMapping,
-  patchApplicationGateway,
   eventingSubscription,
   k8sDelete,
   getSecretData,
@@ -552,12 +551,8 @@ async function ensureCommerceMockWithCompassTestFixture(
     appName,
     scenarioName,
     mockNamespace,
-    targetNamespace,
-    withCentralApplicationConnectivity = false,
-    compassScenarioAlreadyExist = false) {
-  const lastOrderFunction = withCentralApplicationConnectivity ?
-    prepareFunction('central-app-gateway-compass', `mp-${appName}`) :
-    prepareFunction();
+    targetNamespace) {
+  const lastOrderFunction = prepareFunction('central-app-gateway-compass', `mp-${appName}`);
 
   const mockHost = await provisionCommerceMockResources(
       `mp-${appName}`,
@@ -570,49 +565,8 @@ async function ensureCommerceMockWithCompassTestFixture(
     await retryPromise(() => registerAllApis(mockHost), 10, 30000);
   }
 
-
-  if (withCentralApplicationConnectivity) {
-    await waitForDeployment('central-application-gateway', 'kyma-system');
-    await waitForDeployment('central-application-connectivity-validator', 'kyma-system');
-  } else {
-    // deprecated after sc migration
-    // const commerceSC = await waitForServiceClass(appName, targetNamespace, 300 * 1000);
-    await waitForServicePlanByServiceClass(commerceSC.metadata.name, targetNamespace, 300 * 1000);
-    await retryPromise(
-        () => k8sApply([serviceInstanceObj('commerce', commerceSC.spec.externalName)], targetNamespace, false),
-        5,
-        2000,
-    );
-    // deprecated after sc migration
-    // await waitForServiceInstance('commerce', targetNamespace, 600 * 1000);
-    await waitForDeployment(`${targetNamespace}-gateway`, targetNamespace);
-    await patchApplicationGateway(`${targetNamespace}-gateway`, targetNamespace);
-
-    const serviceBinding = {
-      apiVersion: 'servicecatalog.k8s.io/v1beta1',
-      kind: 'ServiceBinding',
-      metadata: {name: 'commerce-binding'},
-      spec: {
-        instanceRef: {name: 'commerce'},
-      },
-    };
-    await k8sApply([serviceBinding], targetNamespace, false);
-    // deprecated after sc migration
-    // await waitForServiceBinding('commerce-binding', targetNamespace);
-
-    const serviceBindingUsage = {
-      apiVersion: 'servicecatalog.kyma-project.io/v1alpha1',
-      kind: 'ServiceBindingUsage',
-      metadata: {name: 'commerce-lastorder-sbu'},
-      spec: {
-        serviceBindingRef: {name: 'commerce-binding'},
-        usedBy: {kind: 'serverless-function', name: 'lastorder'},
-      },
-    };
-    await k8sApply([serviceBindingUsage], targetNamespace);
-    // deprecated after sc migration
-    // await waitForServiceBindingUsage('commerce-lastorder-sbu', targetNamespace);
-  }
+  await waitForDeployment('central-application-gateway', 'kyma-system');
+  await waitForDeployment('central-application-connectivity-validator', 'kyma-system');
 
   await waitForFunction('lastorder', targetNamespace);
 

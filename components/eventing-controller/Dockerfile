@@ -24,7 +24,6 @@ LABEL source = git@github.com:kyma-project/kyma.git
 
 WORKDIR /
 COPY --from=builder /go/src/github.com/kyma-project/kyma/components/eventing-controller/eventing-controller .
-COPY licenses/ /licenses/
 USER nonroot:nonroot
 
 ENTRYPOINT ["/eventing-controller"]
