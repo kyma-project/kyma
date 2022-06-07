@@ -104,7 +104,7 @@ release-dep: resolve dep-status verify build-image push-image ## Release dep bas
 
 ##@ Common Docker
 .PHONY: build-image push-image
-build-image: pull-licenses-local ## Build the docker image
+build-image: ## Build the docker image
 	docker build -t $(IMG_NAME) .
 push-image: post-pr-tag-image ## Build and push the docker image. Needs DOCKER_PUSH_REPOSITORY DOCKER_PUSH_DIRECTORY 
 	docker tag $(IMG_NAME) $(IMG_NAME):$(TAG)
@@ -209,15 +209,6 @@ check-gqlgen:
 		git status -s pkg/graphql; \
 		exit 1; \
 	fi;
-
-pull-licenses: pull-licenses-local
-
-pull-licenses-local: ## Download licenses to store them in the docker image
-ifdef LICENSE_PULLER_PATH
-	bash $(LICENSE_PULLER_PATH)
-else
-	mkdir -p licenses
-endif
 
 # Targets copying sources to buildpack
 COPY_TARGETS = test

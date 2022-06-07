@@ -111,7 +111,6 @@ describe('Eventing tests preparation', function() {
         scenarioName,
         mockNamespace,
         testNamespace,
-        false,
         compassScenarioAlreadyExist,
     );
   }
