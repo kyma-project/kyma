@@ -1,11 +1,14 @@
 package istio
 
 import (
+	"bytes"
 	"context"
 	"fmt"
 	"log"
 	"os"
+	"os/exec"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/cucumber/godog"
@@ -103,7 +106,14 @@ func (i *istioInstallledCase) getIstioPods() error {
 	return nil
 }
 
-func (i *istioInstallledCase) installedIstioProfile(profile string) error {
+func (i *istioInstallledCase) aRunningKymaClusterWithProfile(profile string) error {
+	isInstalled, err := isKymaInstalled("main")
+	if err != nil {
+		return err
+	}
+	if !isInstalled {
+		return fmt.Errorf("kyma is not installed with version main")
+	}
 	p, ok := os.LookupEnv(deployedKymaProfileVar)
 	if !ok {
 		return fmt.Errorf("KYMA_PROFILE env variable is not set")
@@ -114,7 +124,7 @@ func (i *istioInstallledCase) installedIstioProfile(profile string) error {
 	return nil
 }
 
-func (i *istioInstallledCase) hPAShouldNotBeDeployed() error {
+func (i *istioInstallledCase) hPAIsNotDeployed() error {
 	list, err := k8sClient.AutoscalingV1().HorizontalPodAutoscalers(istioNamespace).List(context.Background(), metav1.ListOptions{})
 	if err != nil {
 		return err
@@ -125,18 +135,15 @@ func (i *istioInstallledCase) hPAShouldNotBeDeployed() error {
 	return nil
 }
 
-func (i *istioInstallledCase) thereShouldBePodForPilotAndPodForIngressGateway(numberOfPilotPods, numberOfIGWPods int) error {
-	if len(i.pilotPods.Items) != numberOfPilotPods {
-		return fmt.Errorf("number of deployed Pilot pods %d does not equal %d", len(i.pilotPods.Items), numberOfPilotPods)
-	}
-
-	if len(i.ingressGwPods.Items) != numberOfIGWPods {
-		return fmt.Errorf("number of deployed ingressgw pods %d does not equal %d", len(i.ingressGwPods.Items), numberOfIGWPods)
+func (i *istioInstallledCase) istioComponentIsInstalled() error {
+	if i.pilotPods == nil && i.ingressGwPods == nil {
+		return fmt.Errorf("istio is not installed")
 	}
 	return nil
 }
 
-func (i *istioInstallledCase) podsShouldBeAvailableForAtLeastSeconds(minReadySeconds int) error {
+func (i *istioInstallledCase) istioPodsAreAvailable() error {
+	var minReadySeconds = 1
 	pods := append(i.pilotPods.Items, i.ingressGwPods.Items...)
 	for _, pod := range pods {
 		isPodAvailable := podutils.IsPodAvailable(&pod, int32(minReadySeconds), metav1.Now())
@@ -147,8 +154,20 @@ func (i *istioInstallledCase) podsShouldBeAvailableForAtLeastSeconds(minReadySec
 	return nil
 }
 
-func listPodsIstioNamespace(istiodPodsSelector metav1.ListOptions) (*corev1.PodList, error) {
-	return k8sClient.CoreV1().Pods(istioNamespace).List(context.Background(), istiodPodsSelector)
+func (i *istioInstallledCase) thereIsPodForIngressGateway(numberOfPodsRequired int) error {
+
+	if len(i.ingressGwPods.Items) != numberOfPodsRequired {
+		return fmt.Errorf("number of deployed IngressGW pods %d does not equal %d", len(i.pilotPods.Items), numberOfPodsRequired)
+	}
+	return nil
+}
+
+func (i *istioInstallledCase) thereIsPodForPilot(numberOfPodsRequired int) error {
+
+	if len(i.ingressGwPods.Items) != numberOfPodsRequired {
+		return fmt.Errorf("number of deployed Pilot pods %d does not equal %d", len(i.pilotPods.Items), numberOfPodsRequired)
+	}
+	return nil
 }
 
 func InitializeScenarioEvalProfile(ctx *godog.ScenarioContext) {
@@ -157,8 +176,26 @@ func InitializeScenarioEvalProfile(ctx *godog.ScenarioContext) {
 		err := installedCase.getIstioPods()
 		return ctx, err
 	})
-	ctx.Step(`^installed Istio "([^"]*)" profile$`, installedCase.installedIstioProfile)
-	ctx.Step(`^HPA should not be deployed$`, installedCase.hPAShouldNotBeDeployed)
-	ctx.Step(`^Istio pods should be available for at least (\d+) seconds$`, installedCase.podsShouldBeAvailableForAtLeastSeconds)
-	ctx.Step(`^there should be (\d+) pod for pilot and (\d+) pod for ingress gateway$`, installedCase.thereShouldBePodForPilotAndPodForIngressGateway)
+	ctx.Step(`^a running Kyma cluster with "([^"]*)" profile$`, installedCase.aRunningKymaClusterWithProfile)
+	ctx.Step(`^Istio component is installed$`, installedCase.istioComponentIsInstalled)
+	ctx.Step(`^there is (\d+) pod for Ingress gateway$`, installedCase.thereIsPodForIngressGateway)
+	ctx.Step(`^there is (\d+) pod for Pilot$`, installedCase.thereIsPodForPilot)
+	ctx.Step(`^Istio pods are available$`, installedCase.istioPodsAreAvailable)
+	ctx.Step(`^HPA is not deployed$`, installedCase.hPAIsNotDeployed)
+}
+
+func isKymaInstalled(version string) (bool, error) {
+	command := exec.Command("kyma", "version")
+	var out bytes.Buffer
+	command.Stdout = &out
+	err := command.Run()
+	if err != nil {
+		return false, fmt.Errorf("`kyma version` command returned error: %w", err)
+	}
+	contains := strings.Contains(out.String(), fmt.Sprintf("Kyma cluster version: %s", version))
+	return contains, nil
+}
+
+func listPodsIstioNamespace(istiodPodsSelector metav1.ListOptions) (*corev1.PodList, error) {
+	return k8sClient.CoreV1().Pods(istioNamespace).List(context.Background(), istiodPodsSelector)
 }

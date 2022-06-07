@@ -27,19 +27,16 @@ ifeq ($(EXPORT_RESULT), true)
 endif
 	$(GOTEST) -v -race ./... $(OUTPUT_OPTIONS)
 
-test-k3d: provision-k3d kyma-deploy test ## Run tests on k3d cluster
+test-k3d: provision-k3d kyma-istio-deploy test ## Run tests on k3d cluster
 
 provision-k3d: ## Provision k3d cluster
 	kyma provision k3d --port 8080:80@loadbalancer --ci
 
 kyma-istio-deploy: ## Deploy Kyma Istio using profile is set in KYMA_PROFILE env variable
+ifndef KYMA_PROFILE
+$(error KYMA_PROFILE is not set)
+endif
 	kyma deploy -s main --component cluster-essentials --component istio --profile ${KYMA_PROFILE} --ci
-
-kyma-istio-deploy-prod: ## Deploy Kyma Istio using production profile
-	kyma deploy -s main --component cluster-essentials --component istio --profile production --ci
-
-kyma-istio-deploy-eval: ## Deploy Kyma Istio using evaluation profile
-	kyma deploy -s main --component cluster-essentials --component istio --profile evaluation --ci
 
 ## Help:
 help: ## Show this help.

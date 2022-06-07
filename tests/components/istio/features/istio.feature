@@ -2,8 +2,10 @@ Feature: Istio is installed
   Istio needs to be installed
   as the core prerequisite.
 
-  Scenario: Istio is installed with evaluation profile
-    Given installed Istio "evaluation" profile
-    Then there should be 1 pod for pilot and 1 pod for ingress gateway
-    And HPA should not be deployed
-    And Istio pods should be available for at least 3 seconds
+  Scenario: Istio component installed in evaluation profile has all required pods running
+    Given a running Kyma cluster with "evaluation" profile
+    When Istio component is installed
+    Then there is 1 pod for Pilot
+    And there is 1 pod for Ingress gateway
+    And Istio pods are available
+    And HPA is not deployed
