@@ -74,6 +74,7 @@ func (s *LogPipelineSyncer) SyncAll(ctx context.Context, logPipeline *telemetryv
 	}
 	err = s.syncEnableUnsupportedPluginMetric(ctx)
 	if err != nil {
+		log.Error(err, "Failed to sync enable unsupported plugin metrics")
 		return false, err
 	}
 	return sectionsChanged || parsersChanged || filesChanged || secretsChanged, nil

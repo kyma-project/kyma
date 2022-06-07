@@ -68,7 +68,7 @@ func NewLogPipelineReconciler(client client.Client, scheme *runtime.Scheme, daem
 	})
 	lpr.EnableUnsupportedPlugin = prometheus.NewGauge(prometheus.GaugeOpts{
 		Name: "telemetry_enable_unsupported_plugins",
-		Help: "EnableUnsupportedPlugins flag state",
+		Help: "EnableUnsupportedPlugins flag state for all the logpipelines.",
 	})
 	metrics.Registry.MustRegister(lpr.FluentBitRestartsCount)
 	metrics.Registry.MustRegister(lpr.EnableUnsupportedPlugin)
