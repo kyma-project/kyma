@@ -164,7 +164,7 @@ func getSecretMutationWebhookCfg(config WebhookConfig) admissionregistrationv1.M
 				Rule: admissionregistrationv1.Rule{
 					APIGroups:   []string{""},
 					APIVersions: []string{"v1"},
-					Resources:   []string{"secret"},
+					Resources:   []string{"secrets"},
 				},
 				Operations: []admissionregistrationv1.OperationType{
 					admissionregistrationv1.Create,
