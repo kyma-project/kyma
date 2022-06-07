@@ -103,7 +103,7 @@ func getFunctionMutatingWebhookCfg(config WebhookConfig) admissionregistrationv1
 			Service: &admissionregistrationv1.ServiceReference{
 				Namespace: config.ServiceNamespace,
 				Name:      config.ServiceName,
-				Path:      pointer.String("/defaulting"),
+				Path:      pointer.String("/defaulting/functions"),
 				Port:      pointer.Int32(443),
 			},
 		},
@@ -145,7 +145,7 @@ func getSecretMutationWebhookCfg(config WebhookConfig) admissionregistrationv1.M
 			Service: &admissionregistrationv1.ServiceReference{
 				Namespace: config.ServiceNamespace,
 				Name:      config.ServiceName,
-				Path:      pointer.String("/mutate-v1-secret"),
+				Path:      pointer.String("/defaulting/config-registry-secrets"),
 				Port:      pointer.Int32(443),
 			},
 		},
