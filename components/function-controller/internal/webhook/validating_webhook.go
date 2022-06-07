@@ -23,16 +23,16 @@ func NewValidatingHook(config *serverlessv1alpha1.ValidationConfig, client ctrlc
 		client: client,
 	}
 }
-func (w *ValidatingWebHook) Handle(ctx context.Context, req admission.Request) admission.Response {
+func (w *ValidatingWebHook) Handle(_ context.Context, req admission.Request) admission.Response {
 	// We don't currently have any delete validation logic
 	if req.Operation == v1.Delete {
 		return admission.Allowed("")
 	}
 	if req.RequestKind.Kind == "Function" {
-		return w.handleFunctionValidation(ctx, req)
+		return w.handleFunctionValidation(req)
 	}
 	if req.RequestKind.Kind == "GitRepository" {
-		return w.handleGitRepoValidation(ctx, req)
+		return w.handleGitRepoValidation(req)
 	}
 	return admission.Errored(http.StatusBadRequest, fmt.Errorf("invalid kind: %v", req.RequestKind.Kind))
 }
@@ -42,7 +42,7 @@ func (w *ValidatingWebHook) InjectDecoder(decoder *admission.Decoder) error {
 	return nil
 }
 
-func (w *ValidatingWebHook) handleFunctionValidation(ctx context.Context, req admission.Request) admission.Response {
+func (w *ValidatingWebHook) handleFunctionValidation(req admission.Request) admission.Response {
 	f := &serverlessv1alpha1.Function{}
 	if err := w.decoder.Decode(req, f); err != nil {
 		return admission.Errored(http.StatusBadRequest, err)
@@ -53,7 +53,7 @@ func (w *ValidatingWebHook) handleFunctionValidation(ctx context.Context, req ad
 	return admission.Allowed("")
 }
 
-func (w *ValidatingWebHook) handleGitRepoValidation(ctx context.Context, req admission.Request) admission.Response {
+func (w *ValidatingWebHook) handleGitRepoValidation(req admission.Request) admission.Response {
 	g := &serverlessv1alpha1.GitRepository{}
 	if err := w.decoder.Decode(req, g); err != nil {
 		return admission.Errored(http.StatusBadRequest, err)

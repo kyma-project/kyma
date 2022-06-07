@@ -134,7 +134,7 @@ func getBuildJobVolumeMounts(rtmConfig runtime.Config) []corev1.VolumeMount {
 
 func getPackageConfigVolumeMountsForRuntime(rtm serverlessv1alpha1.Runtime) []corev1.VolumeMount {
 	switch rtm {
-	case serverlessv1alpha1.Nodejs12, serverlessv1alpha1.Nodejs14:
+	case serverlessv1alpha1.Nodejs12, serverlessv1alpha1.Nodejs14, serverlessv1alpha1.Nodejs16:
 		return []corev1.VolumeMount{
 			{
 				Name:      "registry-config",
@@ -300,4 +300,17 @@ func calculateGitImageTag(instance *serverlessv1alpha1.Function) string {
 	}, "-")
 	hash := sha256.Sum256([]byte(data))
 	return fmt.Sprintf("%x", hash)
+}
+
+func jobFailed(job batchv1.Job, p func(reason string) bool) bool {
+	for _, condition := range job.Status.Conditions {
+		isFailedType := condition.Type == batchv1.JobFailed
+		isStatusTrue := condition.Status == corev1.ConditionTrue
+
+		if isFailedType && isStatusTrue {
+			return p(condition.Reason)
+		}
+	}
+
+	return false
 }

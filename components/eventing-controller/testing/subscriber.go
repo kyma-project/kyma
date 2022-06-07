@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	"net"
 	"net/http"
 	"net/http/httptest"
 	"strconv"
@@ -23,6 +24,8 @@ type Subscriber struct {
 	checkRetriesURL  string
 }
 
+type SubscriberOption func(*Subscriber)
+
 const (
 	maxNoOfData           = 10
 	maxAttempts           = 10
@@ -32,7 +35,7 @@ const (
 	checkRetriesEndpoint  = "/check_retries"
 )
 
-func NewSubscriber() *Subscriber {
+func getServeMux() *http.ServeMux {
 	store := make(chan string, maxNoOfData)
 	retries := atomic.Int32{}
 	mux := http.NewServeMux()
@@ -78,20 +81,43 @@ func NewSubscriber() *Subscriber {
 			return
 		}
 	})
+	return mux
+}
 
-	server := httptest.NewServer(mux)
+func NewSubscriber(opts ...SubscriberOption) *Subscriber {
+	subscriber := &Subscriber{}
+	for _, opt := range opts {
+		opt(subscriber)
+	}
 
-	return &Subscriber{
-		server:           server,
-		SinkURL:          fmt.Sprintf("%s%s", server.URL, storeEndpoint),
-		checkURL:         fmt.Sprintf("%s%s", server.URL, checkEndpoint),
-		InternalErrorURL: fmt.Sprintf("%s%s", server.URL, internalErrorEndpoint),
-		checkRetriesURL:  fmt.Sprintf("%s%s", server.URL, checkRetriesEndpoint),
+	if subscriber.server == nil {
+		mux := getServeMux()
+		subscriber.server = httptest.NewServer(mux)
+	}
+
+	subscriber.SinkURL = fmt.Sprintf("%s%s", subscriber.server.URL, storeEndpoint)
+	subscriber.checkURL = fmt.Sprintf("%s%s", subscriber.server.URL, checkEndpoint)
+	subscriber.InternalErrorURL = fmt.Sprintf("%s%s", subscriber.server.URL, internalErrorEndpoint)
+	subscriber.checkRetriesURL = fmt.Sprintf("%s%s", subscriber.server.URL, checkRetriesEndpoint)
+	return subscriber
+}
+
+func WithListener(listener net.Listener) SubscriberOption {
+	return func(subscriber *Subscriber) {
+		mux := getServeMux()
+		subscriber.server = httptest.NewUnstartedServer(mux)
+		subscriber.server.Listener.Close()
+		subscriber.server.Listener = listener
+		subscriber.server.Start()
 	}
 }
 
 func (s *Subscriber) Shutdown() {
 	s.server.Close()
+}
+
+func (s *Subscriber) GetSubscriberListener() net.Listener {
+	return s.server.Listener
 }
 
 func (s *Subscriber) IsRunning() bool {

@@ -297,6 +297,7 @@ config:
         HTTP_Listen 0.0.0.0
         HTTP_Port {{ .Values.metricsPort }}
         Health_Check On
+        storage.path /data/flb-storage/
 
   ## https://docs.fluentbit.io/manual/pipeline/inputs
   inputs: |
@@ -304,17 +305,17 @@ config:
         Name tail
         Path /var/log/containers/*.log
         multiline.parser docker, cri
-        Tag kube.*
+        Tag tele.*
         Mem_Buf_Limit 5MB
         Skip_Long_Lines On
         Refresh_Interval 10
-        DB /data/flb_kube_loki.db
+        DB /data/flb_kube.db
 
   ## https://docs.fluentbit.io/manual/pipeline/filters
   filters: |
     [FILTER]
         Name kubernetes
-        Match kube.*
+        Match tele.*
         Merge_Log On
         K8S-Logging.Parser On
         K8S-Logging.Exclude On

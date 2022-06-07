@@ -9,7 +9,7 @@ import (
 
 //go:generate mockery --name PluginValidator --filename plugin_validator.go
 type PluginValidator interface {
-	Validate(logPipeline *telemetryv1alpha1.LogPipeline) error
+	Validate(logPipeline *telemetryv1alpha1.LogPipeline, logPipelines *telemetryv1alpha1.LogPipelineList) error
 }
 
 type pluginValidator struct {
@@ -24,50 +24,54 @@ func NewPluginValidator(allowedFilterPlugins []string, allowedOutputPlugins []st
 	}
 }
 
-func (v *pluginValidator) Validate(logPipeline *telemetryv1alpha1.LogPipeline) error {
-	err := v.validateFilterPlugins(logPipeline)
-	if err != nil {
-		return err
-	}
+func (v *pluginValidator) Validate(logPipeline *telemetryv1alpha1.LogPipeline, logPipelines *telemetryv1alpha1.LogPipelineList) error {
 
-	err = v.validateOutputPlugins(logPipeline)
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (v *pluginValidator) validateFilterPlugins(logPipeline *telemetryv1alpha1.LogPipeline) error {
 	for _, filterPlugin := range logPipeline.Spec.Filters {
-		section, err := parseSection(filterPlugin.Content)
-		if err != nil {
+		if err := checkIfPluginIsValid("filter", filterPlugin.Content, logPipeline.Name, v.allowedFilterPlugins, logPipelines); err != nil {
 			return err
-		}
-		name, err := getSectionName(section)
-		if err != nil {
-			return err
-		}
-		if !isPluginAllowed(name, v.allowedFilterPlugins) {
-			return fmt.Errorf("filter plugin %s is not allowed", name)
 		}
 	}
+
+	for _, outputPlugin := range logPipeline.Spec.Outputs {
+		if err := checkIfPluginIsValid("output", outputPlugin.Content, logPipeline.Name, v.allowedOutputPlugins, logPipelines); err != nil {
+			return err
+		}
+	}
+
 	return nil
 }
 
-func (v *pluginValidator) validateOutputPlugins(logPipeline *telemetryv1alpha1.LogPipeline) error {
-	for _, outputPlugin := range logPipeline.Spec.Outputs {
-		section, err := parseSection(outputPlugin.Content)
-		if err != nil {
-			return err
+func checkIfPluginIsValid(pluginType, pluginContent, logPipelineName string, allowedPlugins []string, logPipelines *telemetryv1alpha1.LogPipelineList) error {
+	var err error
+	var section map[string]string
+	var pluginName string
+
+	if section, err = parseSection(pluginContent); err != nil {
+		return err
+	}
+	if pluginName, err = getSectionName(section); err != nil {
+		return err
+	}
+
+	if !isPluginAllowed(pluginName, allowedPlugins) {
+		return fmt.Errorf("%s plugin '%s' is not allowed", pluginType, pluginName)
+	}
+
+	matchCond := getMatchCondition(section)
+	if matchCond == "" {
+		return nil
+	}
+	if matchCond == "*" {
+		return fmt.Errorf("%s plugin '%s' with match condition '*' (match all) is not allowed", pluginType, pluginName)
+	}
+
+	if isValid, logPipelinesNames := isMatchCondValid(matchCond, logPipelineName, logPipelines); !isValid {
+		validLogPipelinesNames := fmt.Sprintf("'%s' (current logpipeline name)", logPipelineName)
+		if len(logPipelinesNames) > 0 {
+			validLogPipelinesNames += fmt.Sprintf(" or '%s' (other existing logpipelines names)", logPipelinesNames)
 		}
-		name, err := getSectionName(section)
-		if err != nil {
-			return err
-		}
-		if !isPluginAllowed(name, v.allowedOutputPlugins) {
-			return fmt.Errorf("output plugin %s is not allowed", name)
-		}
+		return fmt.Errorf("%s plugin '%s' with match condition '%s' is not allowed. Valid match conditions are: %s",
+			pluginType, pluginName, matchCond, validLogPipelinesNames)
 	}
 	return nil
 }
@@ -89,4 +93,28 @@ func getSectionName(section map[string]string) (string, error) {
 		return name, nil
 	}
 	return "", fmt.Errorf("configuration section does not have name attribute")
+}
+
+func getMatchCondition(section map[string]string) string {
+	if matchCond, hasKey := section["match"]; hasKey {
+		return matchCond
+	}
+	return ""
+}
+
+func isMatchCondValid(matchCond, logPipelineName string, logPipelines *telemetryv1alpha1.LogPipelineList) (bool, []string) {
+
+	if strings.HasPrefix(matchCond, fmt.Sprintf("%s.", logPipelineName)) {
+		return true, nil
+	}
+
+	var pipelineNames []string
+	for _, l := range logPipelines.Items {
+		if strings.HasPrefix(matchCond, fmt.Sprintf("%s.", l.Name)) {
+			return true, nil
+		}
+		pipelineNames = append(pipelineNames, l.Name)
+	}
+
+	return false, pipelineNames
 }

@@ -28,7 +28,6 @@ var availableScenarios = map[string][]scenario{
 	"serverless-integration": {
 		{displayName: "simple", testSuite: scenarios.SimpleFunctionTest},
 		{displayName: "gitops", testSuite: scenarios.GitopsSteps}},
-	"kyma-integration":     {{displayName: "full", testSuite: scenarios.FunctionTestStep}},
 	"git-auth-integration": {{displayName: "gitauth", testSuite: scenarios.GitAuthTestSteps}},
 }
 

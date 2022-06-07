@@ -78,8 +78,6 @@ jetstream:
   # Configs for the stream used for storing events
   # Name of the JetStream stream where all events are stored.
   streamName: sap
-  # Subject prefix for the JetStream stream when eventTypePrefix is not provided.
-  subjectPrefix: kyma
   # Retention policy determines when messages are deleted from the stream:
   # (more info https://docs.nats.io/using-nats/developer/develop_jetstream/model_deep_dive#stream-limits-retention-and-policy):
   # - interest: When all known observables have acknowledged a message, it can be removed.
