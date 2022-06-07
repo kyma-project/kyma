@@ -4,7 +4,6 @@ import (
 	"context"
 	"crypto/tls"
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"net/http"
 	"net/url"
@@ -137,7 +136,6 @@ func (c *client) requestToken(clientID, clientSecret, authURL string, headers, q
 }
 
 func (c *client) requestTokenMTLS(clientID, authURL string, cert tls.Certificate, headers, queryParameters *map[string][]string) (*oauthResponse, apperrors.AppError) {
-
 	transport := &http.Transport{
 		TLSClientConfig: &tls.Config{
 			Certificates: []tls.Certificate{cert},
@@ -145,9 +143,12 @@ func (c *client) requestTokenMTLS(clientID, authURL string, cert tls.Certificate
 	}
 	client := &http.Client{Transport: transport}
 
-	bodyReq := strings.TrimSpace(fmt.Sprintf("%s%s", "grant_type=client_credentials&client_id=", clientID))
+	form := url.Values{}
+	form.Add("client_id", clientID)
+	form.Add("grant_type", "client_credentials")
 
-	req, err := http.NewRequest(http.MethodPost, authURL, strings.NewReader(bodyReq))
+	req, err := http.NewRequest(http.MethodPost, authURL, strings.NewReader(form.Encode()))
+
 	if err != nil {
 		return nil, apperrors.Internal("failed to create token request: %s", err.Error())
 	}
