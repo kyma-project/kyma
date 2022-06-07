@@ -63,7 +63,6 @@ func initK8sClient() kubernetes.Interface {
 }
 
 func TestIstioInstalled(t *testing.T) {
-
 	suite := godog.TestSuite{
 		Name:                evalProfile,
 		ScenarioInitializer: InitializeScenarioEvalProfile,
