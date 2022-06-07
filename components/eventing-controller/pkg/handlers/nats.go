@@ -9,6 +9,8 @@ import (
 	"strings"
 	"sync"
 
+	pkgmetrics "github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/metrics"
+
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/tracing"
 	"github.com/kyma-project/kyma/components/eventing-controller/utils"
 	"k8s.io/apimachinery/pkg/types"
@@ -59,14 +61,16 @@ type Nats struct {
 	subscriptions     map[string]*nats.Subscription
 	sinks             sync.Map
 	connClosedHandler ConnClosedHandler
+	metricsCollector  *pkgmetrics.Collector
 }
 
-func NewNats(config env.NatsConfig, subsConfig env.DefaultSubscriptionConfig, logger *logger.Logger) *Nats {
+func NewNats(config env.NatsConfig, subsConfig env.DefaultSubscriptionConfig, metricsCollector *pkgmetrics.Collector, logger *logger.Logger) *Nats {
 	return &Nats{
 		config:            config,
 		defaultSubsConfig: subsConfig,
 		logger:            logger,
 		subscriptions:     make(map[string]*nats.Subscription),
+		metricsCollector:  metricsCollector,
 	}
 }
 
@@ -163,7 +167,7 @@ func (n *Nats) SyncSubscription(sub *eventingv1alpha1.Subscription) error {
 	}
 
 	for _, subject := range sub.Status.CleanEventTypes {
-		callback := n.getCallback(subKeyPrefix)
+		callback := n.getCallback(subKeyPrefix, sub.Name)
 
 		if n.connection.Status() != nats.CONNECTED {
 			if err := n.Initialize(n.connClosedHandler); err != nil {
@@ -268,7 +272,7 @@ func (n *Nats) deleteSubscriptionFromNATS(natsSub *nats.Subscription, subKey str
 	return nil
 }
 
-func (n *Nats) getCallback(subKeyPrefix string) nats.MsgHandler {
+func (n *Nats) getCallback(subKeyPrefix, subscriptionName string) nats.MsgHandler {
 	return func(msg *nats.Msg) {
 		// fetch sink info from storage
 		sinkValue, ok := n.sinks.Load(subKeyPrefix)
@@ -305,13 +309,14 @@ func (n *Nats) getCallback(subKeyPrefix string) nats.MsgHandler {
 			Period:   n.defaultSubsConfig.DispatcherRetryPeriod,
 		}
 		if result := n.doWithRetry(traceCtxWithCE, retryParams, ce); !cev2.IsACK(result) {
+			n.metricsCollector.RecordDeliveryPerSubscription(subscriptionName, ce.Type(), sink, http.StatusInternalServerError)
 			n.namedLogger().Errorw("event dispatch failed after retries", "id", ce.ID(), "source", ce.Source(), "type", ce.Type(), "sink", sink, "error", result)
 			return
 		}
+		n.metricsCollector.RecordDeliveryPerSubscription(subscriptionName, ce.Type(), sink, http.StatusOK)
 		n.namedLogger().Infow("event dispatched", "id", ce.ID(), "source", ce.Source(), "type", ce.Type(), "sink", sink)
 	}
 }
-
 func (n *Nats) doWithRetry(ctx context.Context, params cev2context.RetryParams, ce *cev2event.Event) cev2protocol.Result {
 	retry := 0
 	for {
