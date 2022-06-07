@@ -155,7 +155,6 @@ func (i *istioInstallledCase) istioPodsAreAvailable() error {
 }
 
 func (i *istioInstallledCase) thereIsPodForIngressGateway(numberOfPodsRequired int) error {
-
 	if len(i.ingressGwPods.Items) != numberOfPodsRequired {
 		return fmt.Errorf("number of deployed IngressGW pods %d does not equal %d", len(i.pilotPods.Items), numberOfPodsRequired)
 	}
