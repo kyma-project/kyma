@@ -24,7 +24,7 @@ tests:
     resources:
       requests:
         memory: 128Mi
-        cpu: 100m
+        cpu: 10m
       limits:
         memory: 256Mi
         cpu: 200m
@@ -40,7 +40,7 @@ tests:
   resources:
     requests:
       memory: 32Mi
-      cpu: 100m
+      cpu: 10m
     limits:
       memory: 64Mi
       cpu: 200m
@@ -163,7 +163,7 @@ containers:
         cpu: 300m
         memory: 160Mi #This is temporary. helm3 is using secrets as storage by default. I talked already with michalhudy to exclude secrets with helm labels from watching.
       requests:
-        cpu: 75m
+        cpu: 10m
         memory: 32Mi
     containerSecurityContext:
       privileged: false

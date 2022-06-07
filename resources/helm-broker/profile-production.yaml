@@ -5,7 +5,7 @@ ctrl:
       cpu: 100m
     requests:
       memory: 64Mi
-      cpu: 100m
+      cpu: 10m
 
 broker:
   resources:
@@ -14,7 +14,7 @@ broker:
       cpu: 100m
     requests:
       memory: 96Mi
-      cpu: 60m
+      cpu: 10m
 
 etcd-stateful:
   etcd:
@@ -23,5 +23,5 @@ etcd-stateful:
         cpu: 200m
         memory: 320Mi
       requests:
-        cpu: 60m
+        cpu: 10m
         memory: 64Mi

@@ -6,7 +6,7 @@ ctrl:
       cpu: 100m
     requests:
       memory: 32Mi
-      cpu: 30m
+      cpu: 10m
 
 broker:
   resources:
@@ -15,7 +15,7 @@ broker:
       cpu: 60m
     requests:
       memory: 60Mi
-      cpu: 20m
+      cpu: 10m
 
 etcd-stateful:
   etcd:
@@ -24,7 +24,7 @@ etcd-stateful:
         cpu: 200m
         memory: 256Mi
       requests:
-        cpu: 20m
+        cpu: 10m
         memory: 28Mi
 
 addons-ui:
@@ -33,5 +33,5 @@ addons-ui:
       cpu: 1m
       memory: 16Mi
     limits:
-      cpu: 30m
+      cpu: 10m
       memory: 32Mi
