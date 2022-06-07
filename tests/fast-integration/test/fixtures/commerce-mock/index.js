@@ -139,7 +139,7 @@ async function checkFunctionResponse(functionNamespace, mockNamespace = 'mocks')
   // expect error when unauthorized
   let errorOccurred = false;
   try {
-    res = await axios.post(`https://lastorder.${host}/function`, {orderCode: '789'}, {timeout: 5000});
+    await axios.post(`https://lastorder.${host}/function`, {orderCode: '789'}, {timeout: 5000});
   } catch (err) {
     errorOccurred = true;
     expect(err.response.status).to.be.equal(401);
@@ -551,7 +551,8 @@ async function ensureCommerceMockWithCompassTestFixture(
     appName,
     scenarioName,
     mockNamespace,
-    targetNamespace) {
+    targetNamespace,
+    compassScenarioAlreadyExist = false) {
   const lastOrderFunction = prepareFunction('central-app-gateway-compass', `mp-${appName}`);
 
   const mockHost = await provisionCommerceMockResources(
