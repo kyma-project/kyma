@@ -95,7 +95,7 @@ require (
 )
 
 replace (
-	github.com/prometheus/client_golang => github.com/prometheus/client_golang v1.12.1
-	golang.org/x/crypto => golang.org/x/crypto v0.0.0-20220331220935-ae2d96664a29
+	github.com/prometheus/client_golang => github.com/prometheus/client_golang v1.12.2
+	golang.org/x/crypto => golang.org/x/crypto v0.0.0-20220525230936-793ad666bf5e
 	k8s.io/utils => k8s.io/utils v0.0.0-20220210201930-3a6ce19ff2f9
 )
