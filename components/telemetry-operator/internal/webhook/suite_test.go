@@ -25,6 +25,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/fluentbit"
 	fluentbitmocks "github.com/kyma-project/kyma/components/telemetry-operator/internal/fluentbit/mocks"
 	fsmocks "github.com/kyma-project/kyma/components/telemetry-operator/internal/fs/mocks"
 	"k8s.io/client-go/kubernetes/scheme"
@@ -104,6 +105,12 @@ var _ = BeforeSuite(func() {
 	})
 	Expect(err).NotTo(HaveOccurred())
 
+	emitterConfig := fluentbit.EmitterConfig{
+		InputTag:    "kube",
+		BufferLimit: "10M",
+		StorageType: "filesystem",
+	}
+
 	configValidatorMock = &fluentbitmocks.ConfigValidator{}
 	pluginValidatorMock = &fluentbitmocks.PluginValidator{}
 	fsWrapperMock = &fsmocks.Wrapper{}
@@ -113,6 +120,7 @@ var _ = BeforeSuite(func() {
 		ControllerNamespace,
 		configValidatorMock,
 		pluginValidatorMock,
+		emitterConfig,
 		fsWrapperMock,
 	)
 

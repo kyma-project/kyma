@@ -87,7 +87,7 @@ describe('Telemetry Operator tests', function() {
   });
 
   it('Should push the logs to the loki output', async () => {
-    const labels = '{job="telemetry-fluent-bit"}';
+    const labels = '{job="telemetry-fluent-bit", namespace="kyma-system"}';
     const logsPresent = await logsPresentInLoki(labels, testStartTimestamp);
     assert.isTrue(logsPresent, 'No logs present in Loki');
   });

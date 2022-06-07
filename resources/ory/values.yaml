@@ -30,7 +30,7 @@ global:
   images:
     k8s_tools:
       name: "k8s-tools"
-      version: "20220516-9f87ea89"
+      version: "20220525-4bd6d72e"
       directory: "tpi"
     ## Google Cloud SQL Proxy image
     ## ref: https://cloud.google.com/sql/docs/mysql/sql-proxy
@@ -227,6 +227,11 @@ oathkeeper:
         api:
           port: 4456
   deployment:
+    strategy:
+      type: RollingUpdate
+      rollingUpdate:
+        maxSurge: "50%"
+        maxUnavailable: "0%"
     resources:
       limits:
         cpu: 100m

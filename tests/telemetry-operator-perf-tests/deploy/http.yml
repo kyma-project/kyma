@@ -10,7 +10,7 @@ spec:
         Name   rewrite_tag
         Match  kube.*
         Rule   $log "^.*$" {{ .Tag }} true
-        Emitter_Name  {{ .Name }}
+        Emitter_Name  {{ .Name }}-emitter
         Emitter_Storage.type filesystem
   outputs:
     - content: |

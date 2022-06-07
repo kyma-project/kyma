@@ -89,7 +89,7 @@ spec:
             httpGet:
               path: /health/alive
               port: http-api
-            initialDelaySeconds: 45
+            initialDelaySeconds: 15
             periodSeconds: 10
             failureThreshold: 10
           readinessProbe:
@@ -99,6 +99,13 @@ spec:
             initialDelaySeconds: 45
             periodSeconds: 10
             failureThreshold: 10
+          startupProbe:
+            httpGet:
+              path: /health/alive
+              port: http-api
+            initialDelaySeconds: 45
+            periodSeconds: 10
+            failureThreshold: 30
           resources:
             {{- toYaml .Values.deployment.resources | nindent 12 }}
           securityContext:
@@ -135,7 +142,7 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
     {{- if .Values.global.priorityClassName }}
-       priorityClassName: {{ .Values.global.priorityClassName }}
+      priorityClassName: {{ .Values.global.priorityClassName }}
     {{- end }}
     {{- with .Values.affinity }}
       affinity:
