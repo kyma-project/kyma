@@ -4,10 +4,6 @@ const path = require('path');
 
 const {
   k8sApply,
-  waitForServiceClass,
-  waitForServiceInstance,
-  waitForConfigMap,
-  getServiceInstance,
 } = require('../../../utils');
 
 const sampleAddonsYaml = fs.readFileSync(
@@ -29,13 +25,16 @@ const serviceInstanceObj = k8s.loadYaml(testingServiceInstanceYaml);
 
 async function ensureHelmBrokerTestFixture(targetNamespace) {
   await k8sApply([clusterAddonsCfgObj]);
-  await waitForServiceClass('testing', targetNamespace);
+  // deprecated after sc migration
+  // await waitForServiceClass('testing', targetNamespace);
   await k8sApply([serviceInstanceObj]);
-  await waitForServiceInstance('testing', targetNamespace);
+  // deprecated after sc migration
+  // await waitForServiceInstance('testing', targetNamespace);
 }
 
 async function checkServiceInstanceExistence(targetNamespace) {
-  await getServiceInstance('testing', targetNamespace);
+  // deprecated after sc migration
+  // await getServiceInstance('testing', targetNamespace);
   await waitForConfigMap('testing', targetNamespace);
 }
 

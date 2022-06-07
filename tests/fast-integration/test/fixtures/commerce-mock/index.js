@@ -15,11 +15,6 @@ const {
   sleep,
   k8sApply,
   waitForApplicationCr,
-  waitForServiceClass,
-  waitForServicePlanByServiceClass,
-  waitForServiceInstance,
-  waitForServiceBinding,
-  waitForServiceBindingUsage,
   waitForVirtualService,
   waitForDeployment,
   waitForFunction,
@@ -38,7 +33,6 @@ const {
   k8sDelete,
   getSecretData,
   namespaceObj,
-  serviceInstanceObj,
   getTraceDAG,
   printStatusOfInClusterEventingInfrastructure,
 } = require('../../../utils');
@@ -581,14 +575,16 @@ async function ensureCommerceMockWithCompassTestFixture(
     await waitForDeployment('central-application-gateway', 'kyma-system');
     await waitForDeployment('central-application-connectivity-validator', 'kyma-system');
   } else {
-    const commerceSC = await waitForServiceClass(appName, targetNamespace, 300 * 1000);
+    // deprecated after sc migration
+    // const commerceSC = await waitForServiceClass(appName, targetNamespace, 300 * 1000);
     await waitForServicePlanByServiceClass(commerceSC.metadata.name, targetNamespace, 300 * 1000);
     await retryPromise(
         () => k8sApply([serviceInstanceObj('commerce', commerceSC.spec.externalName)], targetNamespace, false),
         5,
         2000,
     );
-    await waitForServiceInstance('commerce', targetNamespace, 600 * 1000);
+    // deprecated after sc migration
+    // await waitForServiceInstance('commerce', targetNamespace, 600 * 1000);
     await waitForDeployment(`${targetNamespace}-gateway`, targetNamespace);
     await patchApplicationGateway(`${targetNamespace}-gateway`, targetNamespace);
 
@@ -601,7 +597,8 @@ async function ensureCommerceMockWithCompassTestFixture(
       },
     };
     await k8sApply([serviceBinding], targetNamespace, false);
-    await waitForServiceBinding('commerce-binding', targetNamespace);
+    // deprecated after sc migration
+    // await waitForServiceBinding('commerce-binding', targetNamespace);
 
     const serviceBindingUsage = {
       apiVersion: 'servicecatalog.kyma-project.io/v1alpha1',
@@ -613,7 +610,8 @@ async function ensureCommerceMockWithCompassTestFixture(
       },
     };
     await k8sApply([serviceBindingUsage], targetNamespace);
-    await waitForServiceBindingUsage('commerce-lastorder-sbu', targetNamespace);
+    // deprecated after sc migration
+    // await waitForServiceBindingUsage('commerce-lastorder-sbu', targetNamespace);
   }
 
   await waitForFunction('lastorder', targetNamespace);
