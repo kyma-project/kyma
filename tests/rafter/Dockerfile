@@ -12,7 +12,6 @@ COPY ./pkg/ ${BASE_APP_DIR}/pkg/
 COPY ./main_test.go ${BASE_APP_DIR}
 COPY ./go.mod ${BASE_APP_DIR}
 COPY ./go.sum ${BASE_APP_DIR}
-COPY ./licenses/ ${BASE_APP_DIR}/licenses/
 
 #
 # Build tests
@@ -40,7 +39,6 @@ RUN apk upgrade --no-cache && \
 
 RUN mkdir -p /app/tests
 COPY --from=builder ${TEST_DIR}/main.test /app/
-COPY --from=builder ${TEST_DIR}/licenses/ /app/licenses/
 
 #
 # Run tests

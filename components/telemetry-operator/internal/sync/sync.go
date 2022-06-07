@@ -23,26 +23,28 @@ const (
 	filesFinalizer             = "FLUENT_BIT_FILES"
 )
 
-type LogPipelineSyncer struct {
-	client.Client
+type FluentBitDaemonSetConfig struct {
+	FluentBitDaemonSetName     types.NamespacedName
 	FluentBitSectionsConfigMap types.NamespacedName
 	FluentBitParsersConfigMap  types.NamespacedName
 	FluentBitFilesConfigMap    types.NamespacedName
 	FluentBitEnvSecret         types.NamespacedName
 }
 
+type LogPipelineSyncer struct {
+	client.Client
+	DaemonSetConfig FluentBitDaemonSetConfig
+	EmitterConfig   fluentbit.EmitterConfig
+}
+
 func NewLogPipelineSyncer(client client.Client,
-	sectionsCm types.NamespacedName,
-	parsersCm types.NamespacedName,
-	filesCm types.NamespacedName,
-	envSecret types.NamespacedName,
+	daemonSetConfig FluentBitDaemonSetConfig,
+	emitterConfig fluentbit.EmitterConfig,
 ) *LogPipelineSyncer {
 	var lps LogPipelineSyncer
 	lps.Client = client
-	lps.FluentBitSectionsConfigMap = sectionsCm
-	lps.FluentBitParsersConfigMap = parsersCm
-	lps.FluentBitFilesConfigMap = filesCm
-	lps.FluentBitEnvSecret = envSecret
+	lps.DaemonSetConfig = daemonSetConfig
+	lps.EmitterConfig = emitterConfig
 	return &lps
 }
 
@@ -75,7 +77,7 @@ func (s *LogPipelineSyncer) SyncAll(ctx context.Context, logPipeline *telemetryv
 // Synchronize LogPipeline with ConfigMap of FluentBit sections (Input, Filter and Output).
 func (s *LogPipelineSyncer) syncSectionsConfigMap(ctx context.Context, logPipeline *telemetryv1alpha1.LogPipeline) (bool, error) {
 	log := logf.FromContext(ctx)
-	cm, err := s.getOrCreateConfigMap(ctx, s.FluentBitSectionsConfigMap)
+	cm, err := s.getOrCreateConfigMap(ctx, s.DaemonSetConfig.FluentBitSectionsConfigMap)
 	if err != nil {
 		return false, err
 	}
@@ -90,7 +92,10 @@ func (s *LogPipelineSyncer) syncSectionsConfigMap(ctx context.Context, logPipeli
 			changed = true
 		}
 	} else {
-		fluentBitConfig := fluentbit.MergeSectionsConfig(logPipeline)
+		fluentBitConfig, err := fluentbit.MergeSectionsConfig(logPipeline, s.EmitterConfig)
+		if err != nil {
+			return false, err
+		}
 		if cm.Data == nil {
 			data := make(map[string]string)
 			data[cmKey] = fluentBitConfig
@@ -120,7 +125,7 @@ func (s *LogPipelineSyncer) syncSectionsConfigMap(ctx context.Context, logPipeli
 // Synchronize LogPipeline with ConfigMap of FluentBit parsers (Parser and MultiLineParser).
 func (s *LogPipelineSyncer) syncParsersConfigMap(ctx context.Context, logPipeline *telemetryv1alpha1.LogPipeline) (bool, error) {
 	log := logf.FromContext(ctx)
-	cm, err := s.getOrCreateConfigMap(ctx, s.FluentBitParsersConfigMap)
+	cm, err := s.getOrCreateConfigMap(ctx, s.DaemonSetConfig.FluentBitParsersConfigMap)
 	if err != nil {
 		return false, err
 	}
@@ -193,7 +198,7 @@ func (s *LogPipelineSyncer) syncParsersConfigMap(ctx context.Context, logPipelin
 // Synchronize file references with Fluent Bit files ConfigMap.
 func (s *LogPipelineSyncer) syncFilesConfigMap(ctx context.Context, logPipeline *telemetryv1alpha1.LogPipeline) (bool, error) {
 	log := logf.FromContext(ctx)
-	cm, err := s.getOrCreateConfigMap(ctx, s.FluentBitFilesConfigMap)
+	cm, err := s.getOrCreateConfigMap(ctx, s.DaemonSetConfig.FluentBitFilesConfigMap)
 	if err != nil {
 		return false, err
 	}
@@ -237,7 +242,7 @@ func (s *LogPipelineSyncer) syncFilesConfigMap(ctx context.Context, logPipeline 
 // Copy referenced secrets to global Fluent Bit environment secret.
 func (s *LogPipelineSyncer) syncSecretRefs(ctx context.Context, logPipeline *telemetryv1alpha1.LogPipeline) (bool, error) {
 	log := logf.FromContext(ctx)
-	secret, err := s.getOrCreateSecret(ctx, s.FluentBitEnvSecret)
+	secret, err := s.getOrCreateSecret(ctx, s.DaemonSetConfig.FluentBitEnvSecret)
 	if err != nil {
 		return false, err
 	}

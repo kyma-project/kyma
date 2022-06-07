@@ -164,7 +164,7 @@ See the detailed descriptions of these fields:
 |-------|-------------|
 | **function-name** | Name of the invoked Function |
 | **timeout** | Time, in seconds, after which the system cancels the request to invoke the Function |
-| **runtime** | Environment used to run the Function. You can use `nodejs14` or `python39`. |
+| **runtime** | Environment used to run the Function. You can use `nodejs14`, `nodejs16`, or `python39`. |
 | **memory-limit** | Maximum amount of memory assigned to run a Function |
 
 ## HTTP requests
@@ -175,7 +175,7 @@ You can use the **event.extensions.request** object to access properties and met
 
 By default, a failing Function simply throws an error to tell the Event Service to reinject the event at a later point. Such an HTTP-based Function returns the HTTP status code `500`. On the contrary, if you manage to invoke a Function successfully, the system returns the default HTTP status code `200`.
 
-Apart from these two default codes, you can define custom responses in both Node.js 12 and Node.js 14 environments using the **event.extensions.response** object.
+Apart from these two default codes, you can define custom responses in all Node.js runtimes using the **event.extensions.response** object.
 
 This object is created by the Express framework and can be customized. For more information, read [Node.js API documentation](https://nodejs.org/docs/latest-v12.x/api/http.html#http_class_http_serverresponse).
 
