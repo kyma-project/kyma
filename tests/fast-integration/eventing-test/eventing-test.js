@@ -48,6 +48,7 @@ const {
   isJetStreamEnabled,
   isFileStorage,
   getNatsPods,
+  subscriptionNames,
 } = require('./utils');
 const {
   bebBackend,
@@ -120,8 +121,8 @@ describe('Eventing tests', function() {
       const eventIdStructured = getRandomEventId(encodingStructured);
       const sink = `http://lastorder.${testNamespace}.svc.cluster.local`;
       const subscriptions = [
-        eventingSubscription(`sap.kyma.custom.inapp.order.received.v1`, sink, 'order-received', testNamespace),
-        eventingSubscription(`sap.kyma.custom.commerce.order.created.v1`, sink, 'order-created', testNamespace),
+        eventingSubscription(`sap.kyma.custom.inapp.order.received.v1`, sink, subscriptionNames.orderReceived, testNamespace),
+        eventingSubscription(`sap.kyma.custom.commerce.order.created.v1`, sink, subscriptionNames.orderCreated, testNamespace),
       ];
 
       it('Delete subscriptions', async function() {

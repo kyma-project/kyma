@@ -11,6 +11,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/prometheus/client_golang/prometheus"
+
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	k8sruntime "k8s.io/apimachinery/pkg/runtime"
@@ -26,6 +28,7 @@ import (
 )
 
 const charset = "abcdefghijklmnopqrstuvwxyz0123456789"
+const DeliveryMetricKey = "delivery_per_subscription" // metric to collect the dispatched events
 
 // NameMapper is used to map Kyma-specific resource names to their corresponding name on other
 // (external) systems, e.g. on different eventing backends, the same Kyma subscription name
@@ -296,4 +299,15 @@ func APIRuleGroupVersionResource() schema.GroupVersionResource {
 		Group:    apigatewayv1alpha1.GroupVersion.Group,
 		Resource: "apirules",
 	}
+}
+
+// NewDeliverPerSubscriptionMetric return a new delivery_per_subscription metrics Collector.
+func NewDeliverPerSubscriptionMetric() *prometheus.CounterVec {
+	return prometheus.NewCounterVec(
+		prometheus.CounterOpts{
+			Name: DeliveryMetricKey,
+			Help: "Subscription sink",
+		},
+		[]string{"subscription_name", "event_type", "sink", "response_code"},
+	)
 }

@@ -9,6 +9,9 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/prometheus/client_golang/prometheus"
+	"sigs.k8s.io/controller-runtime/pkg/metrics"
+
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/tracing"
 	"github.com/kyma-project/kyma/components/eventing-controller/utils"
 	"k8s.io/apimachinery/pkg/types"
@@ -51,23 +54,28 @@ type NatsBackend interface {
 }
 
 type Nats struct {
-	config            env.NatsConfig
-	defaultSubsConfig env.DefaultSubscriptionConfig
-	logger            *logger.Logger
-	client            cev2.Client
-	connection        *nats.Conn
-	subscriptions     map[string]*nats.Subscription
-	sinks             sync.Map
-	connClosedHandler ConnClosedHandler
+	config                     env.NatsConfig
+	defaultSubsConfig          env.DefaultSubscriptionConfig
+	logger                     *logger.Logger
+	client                     cev2.Client
+	connection                 *nats.Conn
+	subscriptions              map[string]*nats.Subscription
+	sinks                      sync.Map
+	connClosedHandler          ConnClosedHandler
+	subscriptionDeliveryMetric *prometheus.CounterVec
 }
 
 func NewNats(config env.NatsConfig, subsConfig env.DefaultSubscriptionConfig, logger *logger.Logger) *Nats {
-	return &Nats{
-		config:            config,
-		defaultSubsConfig: subsConfig,
-		logger:            logger,
-		subscriptions:     make(map[string]*nats.Subscription),
+	n := &Nats{
+		config:                     config,
+		defaultSubsConfig:          subsConfig,
+		logger:                     logger,
+		subscriptions:              make(map[string]*nats.Subscription),
+		subscriptionDeliveryMetric: NewDeliverPerSubscriptionMetric(),
 	}
+	metrics.Registry.Unregister(n.subscriptionDeliveryMetric)
+	metrics.Registry.MustRegister(n.subscriptionDeliveryMetric)
+	return n
 }
 
 // Initialize creates a connection to NATS.
@@ -163,7 +171,7 @@ func (n *Nats) SyncSubscription(sub *eventingv1alpha1.Subscription) error {
 	}
 
 	for _, subject := range sub.Status.CleanEventTypes {
-		callback := n.getCallback(subKeyPrefix)
+		callback := n.getCallback(subKeyPrefix, sub.Name)
 
 		if n.connection.Status() != nats.CONNECTED {
 			if err := n.Initialize(n.connClosedHandler); err != nil {
@@ -268,7 +276,7 @@ func (n *Nats) deleteSubscriptionFromNATS(natsSub *nats.Subscription, subKey str
 	return nil
 }
 
-func (n *Nats) getCallback(subKeyPrefix string) nats.MsgHandler {
+func (n *Nats) getCallback(subKeyPrefix, subscriptionName string) nats.MsgHandler {
 	return func(msg *nats.Msg) {
 		// fetch sink info from storage
 		sinkValue, ok := n.sinks.Load(subKeyPrefix)
@@ -305,11 +313,18 @@ func (n *Nats) getCallback(subKeyPrefix string) nats.MsgHandler {
 			Period:   n.defaultSubsConfig.DispatcherRetryPeriod,
 		}
 		if result := n.doWithRetry(traceCtxWithCE, retryParams, ce); !cev2.IsACK(result) {
+			n.emitDeliveryMetric(subscriptionName, ce.Type(), sinkValue, http.StatusBadRequest)
 			n.namedLogger().Errorw("event dispatch failed after retries", "id", ce.ID(), "source", ce.Source(), "type", ce.Type(), "sink", sink, "error", result)
 			return
 		}
+		n.emitDeliveryMetric(subscriptionName, ce.Type(), sinkValue, http.StatusOK)
 		n.namedLogger().Infow("event dispatched", "id", ce.ID(), "source", ce.Source(), "type", ce.Type(), "sink", sink)
 	}
+}
+
+// emitDeliveryMetric emits a prometheus metric for a subscription delivery
+func (n *Nats) emitDeliveryMetric(subscriptionName, eventType string, sink interface{}, statusCode int) {
+	n.subscriptionDeliveryMetric.WithLabelValues(subscriptionName, eventType, fmt.Sprintf("%v", sink), fmt.Sprintf("%v", statusCode)).Inc()
 }
 
 func (n *Nats) doWithRetry(ctx context.Context, params cev2context.RetryParams, ce *cev2event.Event) cev2protocol.Result {

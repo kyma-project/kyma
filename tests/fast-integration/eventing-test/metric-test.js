@@ -14,6 +14,7 @@ const {
 } = require('../utils');
 
 const {queryPrometheus} = require('../monitoring/client');
+const {subscriptionNames} = require('./utils');
 
 const dashboards = {
   // The delivery dashboard
@@ -41,6 +42,21 @@ const dashboards = {
     backends: ['nats'],
     assert: function(result) {
       const foundMetric = result.find((res) => res.metric.destination_workload.startsWith('lastorder'));
+      expect(foundMetric).to.be.not.undefined;
+    },
+  },
+  delivery_per_subscription: {
+    title: 'Delivery per Subscription',
+    query: `
+         sum (delivery_per_subscription{response_code=~"[245].*"}) 
+          by (namespace, subscription_name,event_type,sink,response_code)`,
+    backends: ['nats'],
+    assert: function(result) {
+      const foundMetric = result.find((res) =>
+        res.metric.subscription_name &&
+          res.metric.subscription_name === subscriptionNames.orderReceived &&
+          res.metric.response_code === '200',
+      );
       expect(foundMetric).to.be.not.undefined;
     },
   },

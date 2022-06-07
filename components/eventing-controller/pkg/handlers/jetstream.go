@@ -10,6 +10,9 @@ import (
 	"sync"
 	"time"
 
+	"github.com/prometheus/client_golang/prometheus"
+	"sigs.k8s.io/controller-runtime/pkg/metrics"
+
 	cev2 "github.com/cloudevents/sdk-go/v2"
 	cev2protocol "github.com/cloudevents/sdk-go/v2/protocol"
 	"github.com/nats-io/nats.go"
@@ -93,16 +96,21 @@ type JetStream struct {
 	subscriptions map[SubscriptionSubjectIdentifier]*nats.Subscription
 	sinks         sync.Map
 	// connClosedHandler gets called by the NATS server when conn is closed and retry attempts are exhausted.
-	connClosedHandler ConnClosedHandler
-	logger            *logger.Logger
+	connClosedHandler          ConnClosedHandler
+	logger                     *logger.Logger
+	subscriptionDeliveryMetric *prometheus.CounterVec
 }
 
 func NewJetStream(config env.NatsConfig, logger *logger.Logger) *JetStream {
-	return &JetStream{
-		config:        config,
-		logger:        logger,
-		subscriptions: make(map[SubscriptionSubjectIdentifier]*nats.Subscription),
+	js := &JetStream{
+		config:                     config,
+		logger:                     logger,
+		subscriptions:              make(map[SubscriptionSubjectIdentifier]*nats.Subscription),
+		subscriptionDeliveryMetric: NewDeliverPerSubscriptionMetric(),
 	}
+	metrics.Registry.Unregister(js.subscriptionDeliveryMetric)
+	metrics.Registry.MustRegister(js.subscriptionDeliveryMetric)
+	return js
 }
 
 func (js *JetStream) initCloudEventClient(config env.NatsConfig) error {
@@ -157,7 +165,7 @@ func (js *JetStream) SyncSubscription(subscription *eventingv1alpha1.Subscriptio
 	}
 
 	// async callback for maxInflight messages
-	callback := js.getCallback(subKeyPrefix)
+	callback := js.getCallback(subKeyPrefix, subscription.Name)
 	asyncCallback := func(m *nats.Msg) {
 		go callback(m)
 	}
@@ -427,7 +435,7 @@ func (js *JetStream) getDefaultSubscriptionOptions(consumer SubscriptionSubjectI
 	return defaultOpts
 }
 
-func (js *JetStream) getCallback(subKeyPrefix string) nats.MsgHandler {
+func (js *JetStream) getCallback(subKeyPrefix, subscriptionName string) nats.MsgHandler {
 	return func(msg *nats.Msg) {
 		// fetch sink info from storage
 		sinkValue, ok := js.sinks.Load(subKeyPrefix)
@@ -458,15 +466,24 @@ func (js *JetStream) getCallback(subKeyPrefix string) nats.MsgHandler {
 		// dispatch the event to sink
 		result := js.client.Send(traceCtxWithCE, *ce)
 		if !cev2protocol.IsACK(result) {
+			js.emitDeliveryMetric(subscriptionName, ce.Type(), sinkValue, http.StatusBadRequest)
 			js.namedLogger().Errorw("failed to dispatch an event", "id", ce.ID(), "source", ce.Source(), "type", ce.Type(), "sink", sink)
 			// Do not NAK the msg so that the server waits for AckWait and then redeliver the msg.
 			return
 		}
 		if err := msg.Ack(); err != nil {
+			js.emitDeliveryMetric(subscriptionName, ce.Type(), sinkValue, http.StatusInternalServerError)
 			js.namedLogger().Errorw("failed to ACK an event on JetStream", "id", ce.ID(), "source", ce.Source(), "type", ce.Type(), "sink", sink)
 		}
+
+		js.emitDeliveryMetric(subscriptionName, ce.Type(), sinkValue, http.StatusOK)
 		js.namedLogger().Infow("event dispatched", "id", ce.ID(), "source", ce.Source(), "type", ce.Type(), "sink", sink)
 	}
+}
+
+// emitDeliveryMetric emits a prometheus metric for a subscription delivery
+func (js *JetStream) emitDeliveryMetric(subscriptionName, eventType string, sink interface{}, statusCode int) {
+	js.subscriptionDeliveryMetric.WithLabelValues(subscriptionName, eventType, fmt.Sprintf("%v", sink), fmt.Sprintf("%v", statusCode)).Inc()
 }
 
 // isJsSubAssociatedWithKymaSub returns true if the given SubscriptionSubjectIdentifier and Kyma subscription

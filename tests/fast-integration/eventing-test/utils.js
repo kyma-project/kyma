@@ -27,6 +27,10 @@ const backendK8sSecretName = process.env.BACKEND_SECRET_NAME || 'eventing-backen
 const backendK8sSecretNamespace = process.env.BACKEND_SECRET_NAMESPACE || 'default';
 const timeoutTime = 10 * 60 * 1000;
 const slowTime = 5000;
+const subscriptionNames = {
+  orderCreated: 'order-created',
+  orderReceived: 'order-received',
+};
 
 // SKR related constants
 let gardener = null;
@@ -109,4 +113,5 @@ module.exports = {
   isJetStreamEnabled,
   isFileStorage,
   getNatsPods,
+  subscriptionNames,
 };
