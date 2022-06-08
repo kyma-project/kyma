@@ -3,6 +3,7 @@ package handlers
 import (
 	"errors"
 	"fmt"
+	"net"
 	"reflect"
 	"testing"
 	"time"
@@ -1135,6 +1136,94 @@ func TestJetStream_ServerRestart(t *testing.T) {
 			require.NoError(t, subscriber.CheckEvent(expectedEv2Data))
 		})
 	}
+}
+
+// TestJetStream_ServerAndSinkRestart tests that the messages persisted (not ack'd) in the stream
+// when the sink is down reach the subscriber even when the NATS server is restarted.
+func TestJetStream_ServerAndSinkRestart(t *testing.T) {
+	// given
+	subscriber := evtesting.NewSubscriber()
+	defer subscriber.Shutdown()
+	require.True(t, subscriber.IsRunning())
+	listener := subscriber.GetSubscriberListener()
+	listenerNetwork, listenerAddress := listener.Addr().Network(), listener.Addr().String()
+	defaultSubsConfig := env.DefaultSubscriptionConfig{MaxInFlightMessages: 10}
+
+	testEnvironment := setupTestEnvironment(t)
+	jsBackend := testEnvironment.jsBackend
+	defer testEnvironment.natsServer.Shutdown()
+	defer testEnvironment.jsClient.natsConn.Close()
+	defer func() { _ = testEnvironment.jsClient.DeleteStream(defaultStreamName) }()
+
+	jsBackend.config.JSStreamStorageType = JetStreamStorageTypeFile
+	jsBackend.config.MaxReconnects = 0
+	initErr := jsBackend.Initialize(nil)
+	require.NoError(t, initErr)
+
+	// Create a subscription
+	sub := evtesting.NewSubscription("sub", "foo",
+		evtesting.WithNotCleanFilter(),
+		evtesting.WithSinkURL(subscriber.SinkURL),
+		evtesting.WithStatusConfig(defaultSubsConfig),
+	)
+	require.NoError(t, addJSCleanEventTypesToStatus(sub, testEnvironment.cleaner))
+
+	// when
+	err := jsBackend.SyncSubscription(sub)
+
+	// then
+	require.NoError(t, err)
+	ev1data := "sampledata"
+	require.NoError(t, SendEventToJetStream(jsBackend, ev1data))
+	expectedEv1Data := fmt.Sprintf("%q", ev1data)
+	require.NoError(t, subscriber.CheckEvent(expectedEv1Data))
+
+	// given
+	subscriber.Shutdown() // shutdown the subscriber intentionally here
+	require.False(t, subscriber.IsRunning())
+	ev2data := "newsampletestdata"
+	require.NoError(t, SendEventToJetStream(jsBackend, ev2data)) // send an event
+	// check that the stream contains one message that was not acknowledged
+	info, err := testEnvironment.jsClient.StreamInfo(defaultStreamName)
+	require.NoError(t, err)
+	require.Equal(t, info.State.Msgs, uint64(1))
+	// shutdown the nats server
+	testEnvironment.natsServer.Shutdown()
+	require.Eventually(t, func() bool {
+		return !jsBackend.conn.IsConnected()
+	}, 30*time.Second, 2*time.Second)
+
+	// when
+	// restart the NATS server
+	_ = evtesting.RunNatsServerOnPort(
+		evtesting.WithPort(testEnvironment.natsPort),
+		evtesting.WithJetStreamEnabled())
+	// the unacknowledged message must still be present in the stream
+	require.Eventually(t, func() bool {
+		info, err = testEnvironment.jsClient.StreamInfo(defaultStreamName)
+		require.NoError(t, err)
+		return info.State.Msgs == uint64(1)
+	}, 60*time.Second, 5*time.Second)
+	// sync the subscription again to recreate invalid subscriptions or consumers, if any
+	err = jsBackend.SyncSubscription(sub)
+	require.NoError(t, err)
+	// restart the subscriber
+	listener, err = net.Listen(listenerNetwork, listenerAddress)
+	require.NoError(t, err)
+	newSubscriber := evtesting.NewSubscriber(evtesting.WithListener(listener))
+	defer newSubscriber.Shutdown()
+	require.True(t, newSubscriber.IsRunning())
+
+	// then
+	// no messages should be present in the stream
+	require.Eventually(t, func() bool {
+		info, err = testEnvironment.jsClient.StreamInfo(defaultStreamName)
+		require.NoError(t, err)
+		return info.State.Msgs == uint64(0)
+	}, 60*time.Second, 5*time.Second)
+	// check if the event is received
+	expectedEv2Data := fmt.Sprintf("%q", ev2data)
+	require.NoError(t, newSubscriber.CheckEvent(expectedEv2Data))
 }
 
 func defaultNatsConfig(url string) env.NatsConfig {
