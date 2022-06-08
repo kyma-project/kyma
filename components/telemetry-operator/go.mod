@@ -23,6 +23,8 @@ replace (
 	golang.org/x/crypto => golang.org/x/crypto v0.0.0-20220525230936-793ad666bf5e
 	// Fix CVE-2022-28948
 	gopkg.in/yaml.v3 => gopkg.in/yaml.v3 v3.0.1
+	// Fix CVE-2021-25741
+	k8s.io/utils => k8s.io/utils v0.0.0-20220210201930-3a6ce19ff2f9
 )
 
 require (
