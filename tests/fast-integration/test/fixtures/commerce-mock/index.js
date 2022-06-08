@@ -551,7 +551,8 @@ async function ensureCommerceMockWithCompassTestFixture(
     appName,
     scenarioName,
     mockNamespace,
-    targetNamespace) {
+    targetNamespace,
+    compassScenarioAlreadyExist = false) {
   const lastOrderFunction = prepareFunction('central-app-gateway-compass', `mp-${appName}`);
 
   const mockHost = await provisionCommerceMockResources(
