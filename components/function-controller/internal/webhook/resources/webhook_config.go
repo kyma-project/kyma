@@ -145,7 +145,7 @@ func getSecretMutationWebhookCfg(config WebhookConfig) admissionregistrationv1.M
 			Service: &admissionregistrationv1.ServiceReference{
 				Namespace: config.ServiceNamespace,
 				Name:      config.ServiceName,
-				Path:      pointer.String("/defaulting/config-registry-secrets"),
+				Path:      pointer.String("/defaulting/registry-config-secrets"),
 				Port:      pointer.Int32(443),
 			},
 		},

@@ -3,7 +3,6 @@ package webhook
 import (
 	"context"
 	"encoding/json"
-	"log"
 	"net/http"
 
 	"github.com/kyma-project/kyma/components/function-controller/internal/docker"
@@ -31,7 +30,6 @@ type registryWatcher struct {
 }
 
 func (r *registryWatcher) Handle(ctx context.Context, req admission.Request) admission.Response {
-	log.Println("Secret webhook triggered")
 	var secret corev1.Secret
 	if err := r.Decoder.Decode(req, &secret); err != nil {
 		return admission.Errored(http.StatusBadRequest, err)
@@ -46,7 +44,6 @@ func (r *registryWatcher) Handle(ctx context.Context, req admission.Request) adm
 	if err != nil {
 		return admission.Errored(http.StatusInternalServerError, err)
 	}
-	log.Printf("%+v", secret)
 	return patchResponseFromRaw(req.Object.Raw, &secret)
 }
 

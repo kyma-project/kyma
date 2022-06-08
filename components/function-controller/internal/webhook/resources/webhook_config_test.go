@@ -157,7 +157,7 @@ func validateMutatingWebhook(t *testing.T, wc WebhookConfig, webhooks []admissio
 	require.NotNil(t, secretWebhook.ClientConfig.Service.Port)
 	require.Equal(t, int32(443), *secretWebhook.ClientConfig.Service.Port)
 	require.NotNil(t, secretWebhook.ClientConfig.Service.Path)
-	require.Equal(t, "/defaulting/config-registry-secrets", *secretWebhook.ClientConfig.Service.Path)
+	require.Equal(t, "/defaulting/registry-config-secrets", *secretWebhook.ClientConfig.Service.Path)
 	require.Equal(t, wc.ServiceName, secretWebhook.ClientConfig.Service.Name)
 	require.Equal(t, wc.ServiceNamespace, secretWebhook.ClientConfig.Service.Namespace)
 	require.Len(t, secretWebhook.Rules, 1)

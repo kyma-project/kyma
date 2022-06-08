@@ -95,7 +95,7 @@ func main() {
 		},
 	)
 
-	whs.Register("/defaulting/config-registry-secrets",
+	whs.Register("/defaulting/registry-config-secrets",
 		&ctrlwebhook.Admission{
 			Handler: webhook.NewRegistryWatcher(),
 		},
