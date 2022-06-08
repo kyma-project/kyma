@@ -7,7 +7,7 @@ RUN go mod download && go mod verify
 
 COPY . .
 
-RUN CGO_ENABLED=0 go test -v -c -o test .
+RUN CGO_ENABLED=0 go test -v -c -o test ./...
 
 FROM scratch
 
