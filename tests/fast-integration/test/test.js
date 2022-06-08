@@ -36,7 +36,7 @@ describe('Executing Standard Testsuite:', function() {
   monitoringTests();
 
   apiExposureTests();
-  commerceMockTests(testNamespace);
+  // commerceMockTests(testNamespace);
   // unusuble because of redis dependency that is not usable in the current form after SC migration
   // gettingStartedGuideTests();
 
