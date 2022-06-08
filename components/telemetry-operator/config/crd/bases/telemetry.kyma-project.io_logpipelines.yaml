@@ -106,8 +106,6 @@ spec:
                       type: string
                   type: object
                 type: array
-            required:
-            - enableUnsupportedPlugins
             type: object
           status:
             description: LogPipelineStatus defines the observed state of LogPipeline

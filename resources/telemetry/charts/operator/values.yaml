@@ -90,21 +90,7 @@ deniedPlugins:
   output: []
 
 supportedPlugins:
-  filter:
-    - aws
-    - expect
-    - grep
-    - lua
-    - record_modifier
-    - nightfall
-    - stdout
-    - checklist
-    - geoip2
-    - parser
-    - modify
-    - nest
-    - throttle
-    - tensorflow
+  filter: []
   output:
     - grafana-loki
     - http
