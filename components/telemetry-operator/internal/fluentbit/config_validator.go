@@ -55,10 +55,10 @@ func (v *configValidator) Validate(ctx context.Context, configFilePath string) e
 
 	out, err := v.RunCmd(ctx, v.FluentBitPath, fluentBitArgs...)
 	if err != nil {
-		if strings.Contains(out, "Error") {
+		if strings.Contains(out, "error") || strings.Contains(out, "Error") {
 			return errors.New(errDescription + extractError(out))
 		}
-		return fmt.Errorf("Error while validating Fluent Bit config: %v", err)
+		return fmt.Errorf("error while validating Fluent Bit config: %v", err.Error())
 	}
 
 	return nil
@@ -81,23 +81,29 @@ func listPlugins(pluginPath string) ([]string, error) {
 
 // extractError extracts the error message from the output of fluent-bit
 // Thereby, it supports the following error patterns:
-// 1. Error <msg>\nError: Configuration file contains errors. Aborting
-// 2. Error: <msg>. Aborting
-// 3. [<time>] [  Error] File <filename>\n[<time>] [  Error] Error in line 4: <msg> Error: Configuration file contains errors. Aborting
+// 1. [<time>] [error] [config] error in path/to/file.conf:3: <msg>
+// 2. [<time>] [error] [config] <msg>
+// 3. [<time>] [error] <msg>
+// 4. error<msg>
 func extractError(output string) string {
 	rColors := regexp.MustCompile(ansiColorsRegex)
 	output = rColors.ReplaceAllString(output, "")
 
-	r1 := regexp.MustCompile(`(?P<description>Error[^\]].+)\n(?P<label>Error:.+)`)
+	r1 := regexp.MustCompile(`.*(?P<label>\[error]\s\[config].+:\s)(?P<description>.+)`)
 	if r1Matches := r1.FindStringSubmatch(output); r1Matches != nil {
-		return r1Matches[1] // 0: complete output, 1: description, 2: label
+		return r1Matches[2] // 0: complete output, 1: label, 2: description
 	}
 
-	r2 := regexp.MustCompile(`.*(?P<label>Error:\s)(?P<description>.+\.)`)
+	r2 := regexp.MustCompile(`.*(?P<label>\[error]\s\[config]\s)(?P<description>.+)`)
 	if r2Matches := r2.FindStringSubmatch(output); r2Matches != nil {
 		return r2Matches[2] // 0: complete output, 1: label, 2: description
 	}
 
-	r3 := regexp.MustCompile(`Error\s.+`)
-	return r3.FindString(output)
+	r3 := regexp.MustCompile(`.*(?P<label>\[error]\s)(?P<description>.+)`)
+	if r3Matches := r3.FindStringSubmatch(output); r3Matches != nil {
+		return r3Matches[2] // 0: complete output, 1: label, 2: description
+	}
+
+	r4 := regexp.MustCompile(`error.+`)
+	return r4.FindString(output)
 }

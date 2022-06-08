@@ -5,10 +5,10 @@ metadata:
 spec:
   parsers: [ ]
   multilineParsers: [ ]
-  filters: [ ]
-  outputs:
+  filters:
     - content: |
-        Name               stdout
-          Match              *
+        Name               abc
+        Match              logpipeline-test.*
+  outputs: []
   files: []
   secretRefs: [ ]
