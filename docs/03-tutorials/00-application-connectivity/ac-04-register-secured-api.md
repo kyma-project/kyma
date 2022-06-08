@@ -2,7 +2,7 @@
 title: Register a secured API
 ---
 
-Application Connectivity allows you to register a secured API exposed by your external solution. The supported authentication methods are [Basic Authentication](https://tools.ietf.org/html/rfc7617), [OAuth](https://tools.ietf.org/html/rfc6750), [OAuth 2.0 Mutual-TLS](https://datatracker.ietf.org/doc/html/rfc8705), and client certificates.
+Application Connectivity allows you to register a secured API exposed by your external solution. The supported authentication methods are [Basic Authentication](https://tools.ietf.org/html/rfc7617), [OAuth](https://tools.ietf.org/html/rfc6750), [OAuth 2.0 mTLS](https://datatracker.ietf.org/doc/html/rfc8705), and client certificates.
 
 You can specify only one authentication method for every secured API you register. 
 
@@ -41,8 +41,8 @@ The **credentials** object must contain the following fields:
 | Field                 | Description                                                                 |
 | --------------------- |-----------------------------------------------------------------------------|
 | **secretName**        | Name of a Secret storing credentials                                        |
-| **type**              | Authentication method type. Supported values: `Basic`, `OAuth`, `CertGen`.  |
-| **authenticationUrl** | Optional OAuth token URL, valid only for the OAuth and OAuthWithCert types. |
+| **type**              | Authentication method type. Supported values: `Basic`, `OAuth`, `OAuthWithCert `, `CertGen`.  |
+| **authenticationUrl** | Optional OAuth token URL, valid only for the `OAuth` and `OAuthWithCert` types. |
 
 ## Register a  Basic Authentication-secured API
 
@@ -118,14 +118,14 @@ To create such a Secret, run this command:
 ```bash
 kubectl create secret generic {SECRET_NAME} --from-literal clientId={CLIENT_ID} --from-literal clientSecret={CLIENT_SECRET} -n kyma-integration
 ```
-## Register an OAuth-secured API with token obtained from client certificate-secured endpoint
+## Register an OAuth 2.0 mTLS-secured API
 
-This is an example of the **service** object for an API secured with OAuth, where the token is fetched from Mutual-TLS secured endpoint:
+This is an example of the **service** object for an API secured with OAuth where the token is fetched from an mTLS-secured endpoint:
 
 ```yaml
   - id: {TARGET_UUID}
-    name: my-oauth-service
-    displayName: "My MTLS OAuth Service"    
+    name: my-mTLS-oauth-service
+    displayName: "My mTLS OAuth Service"    
     description: "My service"
     providerDisplayName: "My organisation"
     entries:
