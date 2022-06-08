@@ -18,8 +18,12 @@ require (
 	sigs.k8s.io/controller-runtime v0.12.1
 )
 
-// Fix CVE-2022-28948
-replace gopkg.in/yaml.v3 => gopkg.in/yaml.v3 v3.0.1
+replace (
+	// Fix CVE-2022-27191
+	golang.org/x/crypto => golang.org/x/crypto v0.0.0-20220525230936-793ad666bf5e
+	// Fix CVE-2022-28948
+	gopkg.in/yaml.v3 => gopkg.in/yaml.v3 v3.0.1
+)
 
 require (
 	cloud.google.com/go v0.81.0 // indirect
