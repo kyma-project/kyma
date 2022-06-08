@@ -2,7 +2,7 @@
 title: Register a secured API
 ---
 
-Application Connectivity allows you to register a secured API exposed by your external solution. The supported authentication methods are [Basic Authentication](https://tools.ietf.org/html/rfc7617), [OAuth](https://tools.ietf.org/html/rfc6750), and client certificates.
+Application Connectivity allows you to register a secured API exposed by your external solution. The supported authentication methods are [Basic Authentication](https://tools.ietf.org/html/rfc7617), [OAuth](https://tools.ietf.org/html/rfc6750), [OAuth 2.0 mTLS](https://datatracker.ietf.org/doc/html/rfc8705), and client certificates.
 
 You can specify only one authentication method for every secured API you register. 
 
@@ -38,11 +38,11 @@ The **entries** object must contain the following fields:
 
 The **credentials** object must contain the following fields:
 
-| Field                 | Description                                                  |
-| --------------------- | ------------------------------------------------------------ |
-| **secretName**        | Name of a Secret storing credentials                         |
-| **type**              | Authentication method type. Supported values: `Basic`, `OAuth`, `CertGen`. |
-| **authenticationUrl** | Optional OAuth token URL, valid only for the OAuth type.           |
+| Field                 | Description                                                                 |
+| --------------------- |-----------------------------------------------------------------------------|
+| **secretName**        | Name of a Secret storing credentials                                        |
+| **type**              | Authentication method type. Supported values: `Basic`, `OAuth`, `OAuthWithCert `, `CertGen`.  |
+| **authenticationUrl** | Optional OAuth token URL, valid only for the `OAuth` and `OAuthWithCert` types. |
 
 ## Register a  Basic Authentication-secured API
 
@@ -117,6 +117,44 @@ To create such a Secret, run this command:
 
 ```bash
 kubectl create secret generic {SECRET_NAME} --from-literal clientId={CLIENT_ID} --from-literal clientSecret={CLIENT_SECRET} -n kyma-integration
+```
+## Register an OAuth 2.0 mTLS-secured API
+
+This is an example of the **service** object for an API secured with OAuth where the token is fetched from an mTLS-secured endpoint:
+
+```yaml
+  - id: {TARGET_UUID}
+    name: my-mTLS-oauth-service
+    displayName: "My mTLS OAuth Service"    
+    description: "My service"
+    providerDisplayName: "My organisation"
+    entries:
+    - credentials:
+        secretName: {SECRET_NAME}
+        authenticationUrl: {OAUTH_TOKEN_URL}
+        type: OAuthWithCert
+      targetUrl: {TARGET_API_URL}
+      type: API
+```
+
+This is an example of the Secret containing credentials:
+
+```yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {SECRET_NAME}
+  namespace: kyma-integration
+data:
+  clientId: {BASE64_ENCODED_CLIENT_ID}
+  crt: {BASE64_ENCODED_CERTIFICATE}
+  key: {BASE64_ENCODED_PRIVATE_KEY}
+```
+
+To create such a Secret, run this command:
+
+```bash
+kubectl create secret generic {SECRET_NAME} --from-literal clientId={CLIENT_ID} --from-literal crt={CERTIFICATE} --from-literal key={PRIVATE_KEY} -n kyma-integration
 ```
 
 ## Register a client certificate-secured API
