@@ -80,7 +80,7 @@ global:
       version: "PR-14486"
     function_webhook:
       name: "function-webhook"
-      version: "PR-144864"
+      version: "PR-14486"
     function_build_init:
       name: "function-build-init"
       version: "PR-14486"
