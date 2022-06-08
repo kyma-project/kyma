@@ -80,7 +80,7 @@ func createMutatingWebhookConfiguration(config WebhookConfig) *admissionregistra
 		},
 		Webhooks: []admissionregistrationv1.MutatingWebhook{
 			getFunctionMutatingWebhookCfg(config),
-			getSecretMutationWebhookCfg(config),
+			getRegistryConfigSecretMutatingWebhook(config),
 		},
 	}
 }
@@ -133,7 +133,7 @@ func getFunctionMutatingWebhookCfg(config WebhookConfig) admissionregistrationv1
 	}
 }
 
-func getSecretMutationWebhookCfg(config WebhookConfig) admissionregistrationv1.MutatingWebhook {
+func getRegistryConfigSecretMutatingWebhook(config WebhookConfig) admissionregistrationv1.MutatingWebhook {
 	failurePolicy := admissionregistrationv1.Fail
 	matchPolicy := admissionregistrationv1.Exact
 	sideEffects := admissionregistrationv1.SideEffectClassNone
