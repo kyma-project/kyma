@@ -10,7 +10,8 @@ It [proxies the requests](../../../05-technical-reference/00-architecture/ac-03-
 Application Gateway can call services which are not secured, or are secured with:
 
 - [Basic Authentication](https://tools.ietf.org/html/rfc7617)
-- OAuth
+- [OAuth](https://tools.ietf.org/html/rfc6750)
+- [OAuth 2.0 mTLS](https://datatracker.ietf.org/doc/html/rfc8705)
 - Client certificates
 
 Additionally, Application Gateway supports cross-site request forgery (CSRF) tokens as an optional layer of API protection.
