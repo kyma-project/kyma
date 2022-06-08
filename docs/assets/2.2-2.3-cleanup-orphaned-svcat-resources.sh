@@ -24,7 +24,6 @@ echo "Deleting Service Catalog"
 
 kubectl delete crd addonsconfigurations.addons.kyma-project.io
 kubectl delete crd clusteraddonsconfigurations.addons.kyma-project.io
-kubectl delete crd podpresets.settings.svcat.k8s.io
 kubectl delete crd clusterservicebrokers.servicecatalog.k8s.io
 kubectl delete crd clusterserviceclasses.servicecatalog.k8s.io
 kubectl delete crd clusterserviceplans.servicecatalog.k8s.io
