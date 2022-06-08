@@ -69,7 +69,7 @@ function deleteApplicationLabel(appID, key) {
 }
 
 function escapeForGQL(str) {
-  let parsed = str.split('"').join(`\\\\\\"`);
+  const parsed = str.split('"').join(`\\\\\\"`);
   return parsed.replace(/\\\\s/g, '\\\\\\\\\\\\\\\\s');
 }
 

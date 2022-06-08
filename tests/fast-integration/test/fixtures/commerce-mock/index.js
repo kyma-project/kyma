@@ -123,7 +123,7 @@ async function checkFunctionResponse(functionNamespace, mockNamespace = 'mocks')
   const accessToken = await oAuthTokenGetter.getToken(['read', 'write']);
 
   // expect no error when authorized
-  let res = await retryPromise(
+  const res = await retryPromise(
       () => axios.post(`https://lastorder.${host}/function`, {orderCode: '789'}, {
         timeout: 5000,
         headers: {Authorization: `bearer ${accessToken}`},
