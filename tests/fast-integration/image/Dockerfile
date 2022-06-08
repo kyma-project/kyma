@@ -1,4 +1,4 @@
-FROM debian:11
+FROM alpine:3.14.6
 
 ENV KUBECONFIG=/KUBECONFIG/kubeconfig.yaml
 ENV EVENTMESH_SECRET_FILE=/EMS/ems.json
@@ -7,18 +7,12 @@ ENV FIT_MAKE_TARGET=ci-skr
 VOLUME /KUBECONFIG
 VOLUME /EMS
 
-SHELL ["/bin/bash", "-o", "pipefail", "-c"]
+SHELL ["/bin/ash", "-o", "pipefail", "-c"]
 
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    build-essential \
-    ca-certificates \
-    curl \
+RUN apk --no-cache add \
+    build-base \
     git \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*
-
-RUN curl -fLSs https://deb.nodesource.com/setup_14.x | bash -
-RUN apt-get -y --no-install-recommends install nodejs
+    nodejs=14.19.0-r0
 
 WORKDIR /
 COPY clone-and-run-fit.sh /clone-and-run-fit.sh

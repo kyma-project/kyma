@@ -24,10 +24,11 @@ type oauthResponse struct {
 	Scope       string `json:"scope"`
 }
 
+//go:generate mockery --name=Client
 type Client interface {
 	GetToken(clientID, clientSecret, authURL string, headers, queryParameters *map[string][]string) (string, apperrors.AppError)
-	InvalidateAndRetry(clientID, clientSecret, authURL string, headers, queryParameters *map[string][]string) (string, apperrors.AppError)
-	InvalidateTokenCache(clientID string)
+	GetTokenMTLS(clientID, authURL string, cert tls.Certificate, headers, queryParameters *map[string][]string) (string, apperrors.AppError)
+	InvalidateTokenCache(clientID string, authURL string)
 }
 
 type client struct {
@@ -43,7 +44,7 @@ func NewOauthClient(timeoutDuration int, tokenCache tokencache.TokenCache) Clien
 }
 
 func (c *client) GetToken(clientID, clientSecret, authURL string, headers, queryParameters *map[string][]string) (string, apperrors.AppError) {
-	token, found := c.tokenCache.Get(clientID)
+	token, found := c.tokenCache.Get(c.makeOAuthTokenCacheKey(clientID, authURL))
 	if found {
 		return token, nil
 	}
@@ -53,26 +54,34 @@ func (c *client) GetToken(clientID, clientSecret, authURL string, headers, query
 		return "", err
 	}
 
-	c.tokenCache.Add(clientID, tokenResponse.AccessToken, tokenResponse.ExpiresIn)
+	c.tokenCache.Add(c.makeOAuthTokenCacheKey(clientID, authURL), tokenResponse.AccessToken, tokenResponse.ExpiresIn)
 
 	return tokenResponse.AccessToken, nil
 }
 
-func (c *client) InvalidateAndRetry(clientID, clientSecret, authURL string, headers, queryParameters *map[string][]string) (string, apperrors.AppError) {
-	c.tokenCache.Remove(clientID)
+func (c *client) GetTokenMTLS(clientID, authURL string, cert tls.Certificate, headers, queryParameters *map[string][]string) (string, apperrors.AppError) {
+	token, found := c.tokenCache.Get(c.makeOAuthTokenCacheKey(clientID, authURL))
+	if found {
+		return token, nil
+	}
 
-	tokenResponse, err := c.requestToken(clientID, clientSecret, authURL, headers, queryParameters)
+	tokenResponse, err := c.requestTokenMTLS(clientID, authURL, cert, headers, queryParameters)
 	if err != nil {
 		return "", err
 	}
 
-	c.tokenCache.Add(clientID, tokenResponse.AccessToken, tokenResponse.ExpiresIn)
+	c.tokenCache.Add(c.makeOAuthTokenCacheKey(clientID, authURL), tokenResponse.AccessToken, tokenResponse.ExpiresIn)
 
 	return tokenResponse.AccessToken, nil
 }
 
-func (c *client) InvalidateTokenCache(clientID string) {
-	c.tokenCache.Remove(clientID)
+func (c *client) InvalidateTokenCache(clientID, authURL string) {
+	c.tokenCache.Remove(c.makeOAuthTokenCacheKey(clientID, authURL))
+}
+
+// to avoid case of single clientID and different endpoints for MTLS and standard oauth
+func (c *client) makeOAuthTokenCacheKey(clientID, authURL string) string {
+	return clientID + authURL
 }
 
 func (c *client) requestToken(clientID, clientSecret, authURL string, headers, queryParameters *map[string][]string) (*oauthResponse, apperrors.AppError) {
@@ -92,6 +101,58 @@ func (c *client) requestToken(clientID, clientSecret, authURL string, headers, q
 	}
 
 	util.AddBasicAuthHeader(req, clientID, clientSecret)
+	req.Header.Add(httpconsts.HeaderContentType, httpconsts.ContentTypeApplicationURLEncoded)
+
+	setCustomQueryParameters(req.URL, queryParameters)
+	setCustomHeaders(req.Header, headers)
+
+	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(c.timeoutDuration)*time.Second)
+	defer cancel()
+	requestWithContext := req.WithContext(ctx)
+
+	response, err := client.Do(requestWithContext)
+	if err != nil {
+		return nil, apperrors.UpstreamServerCallFailed("failed to make a request to '%s': %s", authURL, err.Error())
+	}
+
+	if response.StatusCode != http.StatusOK {
+		return nil, apperrors.UpstreamServerCallFailed("incorrect response code '%d' while getting token from %s", response.StatusCode, authURL)
+	}
+
+	body, err := ioutil.ReadAll(response.Body)
+	defer response.Body.Close()
+	if err != nil {
+		return nil, apperrors.UpstreamServerCallFailed("failed to read token response body from '%s': %s", authURL, err.Error())
+	}
+
+	tokenResponse := &oauthResponse{}
+
+	err = json.Unmarshal(body, tokenResponse)
+	if err != nil {
+		return nil, apperrors.UpstreamServerCallFailed("failed to unmarshal token response body: %s", err.Error())
+	}
+
+	return tokenResponse, nil
+}
+
+func (c *client) requestTokenMTLS(clientID, authURL string, cert tls.Certificate, headers, queryParameters *map[string][]string) (*oauthResponse, apperrors.AppError) {
+	transport := &http.Transport{
+		TLSClientConfig: &tls.Config{
+			Certificates: []tls.Certificate{cert},
+		},
+	}
+	client := &http.Client{Transport: transport}
+
+	form := url.Values{}
+	form.Add("client_id", clientID)
+	form.Add("grant_type", "client_credentials")
+
+	req, err := http.NewRequest(http.MethodPost, authURL, strings.NewReader(form.Encode()))
+
+	if err != nil {
+		return nil, apperrors.Internal("failed to create token request: %s", err.Error())
+	}
+
 	req.Header.Add(httpconsts.HeaderContentType, httpconsts.ContentTypeApplicationURLEncoded)
 
 	setCustomQueryParameters(req.URL, queryParameters)

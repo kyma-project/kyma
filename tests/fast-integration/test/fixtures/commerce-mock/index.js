@@ -15,11 +15,6 @@ const {
   sleep,
   k8sApply,
   waitForApplicationCr,
-  waitForServiceClass,
-  waitForServicePlanByServiceClass,
-  waitForServiceInstance,
-  waitForServiceBinding,
-  waitForServiceBindingUsage,
   waitForVirtualService,
   waitForDeployment,
   waitForFunction,
@@ -33,12 +28,10 @@ const {
   isDebugEnabled,
   toBase64,
   ensureApplicationMapping,
-  patchApplicationGateway,
   eventingSubscription,
   k8sDelete,
   getSecretData,
   namespaceObj,
-  serviceInstanceObj,
   getTraceDAG,
   printStatusOfInClusterEventingInfrastructure,
 } = require('../../../utils');
@@ -130,7 +123,7 @@ async function checkFunctionResponse(functionNamespace, mockNamespace = 'mocks')
   const accessToken = await oAuthTokenGetter.getToken(['read', 'write']);
 
   // expect no error when authorized
-  let res = await retryPromise(
+  const res = await retryPromise(
       () => axios.post(`https://lastorder.${host}/function`, {orderCode: '789'}, {
         timeout: 5000,
         headers: {Authorization: `bearer ${accessToken}`},
@@ -146,7 +139,7 @@ async function checkFunctionResponse(functionNamespace, mockNamespace = 'mocks')
   // expect error when unauthorized
   let errorOccurred = false;
   try {
-    res = await axios.post(`https://lastorder.${host}/function`, {orderCode: '789'}, {timeout: 5000});
+    await axios.post(`https://lastorder.${host}/function`, {orderCode: '789'}, {timeout: 5000});
   } catch (err) {
     errorOccurred = true;
     expect(err.response.status).to.be.equal(401);
@@ -559,11 +552,8 @@ async function ensureCommerceMockWithCompassTestFixture(
     scenarioName,
     mockNamespace,
     targetNamespace,
-    withCentralApplicationConnectivity = false,
     compassScenarioAlreadyExist = false) {
-  const lastOrderFunction = withCentralApplicationConnectivity ?
-    prepareFunction('central-app-gateway-compass', `mp-${appName}`) :
-    prepareFunction();
+  const lastOrderFunction = prepareFunction('central-app-gateway-compass', `mp-${appName}`);
 
   const mockHost = await provisionCommerceMockResources(
       `mp-${appName}`,
@@ -576,45 +566,8 @@ async function ensureCommerceMockWithCompassTestFixture(
     await retryPromise(() => registerAllApis(mockHost), 10, 30000);
   }
 
-
-  if (withCentralApplicationConnectivity) {
-    await waitForDeployment('central-application-gateway', 'kyma-system');
-    await waitForDeployment('central-application-connectivity-validator', 'kyma-system');
-  } else {
-    const commerceSC = await waitForServiceClass(appName, targetNamespace, 300 * 1000);
-    await waitForServicePlanByServiceClass(commerceSC.metadata.name, targetNamespace, 300 * 1000);
-    await retryPromise(
-        () => k8sApply([serviceInstanceObj('commerce', commerceSC.spec.externalName)], targetNamespace, false),
-        5,
-        2000,
-    );
-    await waitForServiceInstance('commerce', targetNamespace, 600 * 1000);
-    await waitForDeployment(`${targetNamespace}-gateway`, targetNamespace);
-    await patchApplicationGateway(`${targetNamespace}-gateway`, targetNamespace);
-
-    const serviceBinding = {
-      apiVersion: 'servicecatalog.k8s.io/v1beta1',
-      kind: 'ServiceBinding',
-      metadata: {name: 'commerce-binding'},
-      spec: {
-        instanceRef: {name: 'commerce'},
-      },
-    };
-    await k8sApply([serviceBinding], targetNamespace, false);
-    await waitForServiceBinding('commerce-binding', targetNamespace);
-
-    const serviceBindingUsage = {
-      apiVersion: 'servicecatalog.kyma-project.io/v1alpha1',
-      kind: 'ServiceBindingUsage',
-      metadata: {name: 'commerce-lastorder-sbu'},
-      spec: {
-        serviceBindingRef: {name: 'commerce-binding'},
-        usedBy: {kind: 'serverless-function', name: 'lastorder'},
-      },
-    };
-    await k8sApply([serviceBindingUsage], targetNamespace);
-    await waitForServiceBindingUsage('commerce-lastorder-sbu', targetNamespace);
-  }
+  await waitForDeployment('central-application-gateway', 'kyma-system');
+  await waitForDeployment('central-application-connectivity-validator', 'kyma-system');
 
   await waitForFunction('lastorder', targetNamespace);
 
