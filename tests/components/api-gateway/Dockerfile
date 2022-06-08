@@ -4,7 +4,6 @@ ENV BASE_DIR /workspace/go/src/github.com/kyma-project/kyma/tests/components/api
 WORKDIR ${BASE_DIR}
 
 COPY . ${BASE_DIR}/
-COPY ./licenses/ ${BASE_DIR}/licenses/
 
 ##
 # BUILD APP
@@ -18,9 +17,7 @@ RUN cd ${BASE_DIR}/gateway-tests &&\
 # EXTRACT SCRIPT AND BINARY
 ##
 RUN mkdir /test &&\
-	mv ${BASE_DIR}/app.test /test/app.test  &&\
-	mv ${BASE_DIR}/licenses /test/licenses
-
+	mv ${BASE_DIR}/app.test /test/app.test
 FROM eu.gcr.io/kyma-project/tpi/k8s-tools:20220525-4bd6d72e
 LABEL source=git@github.com:kyma-project/kyma.git
 WORKDIR /test

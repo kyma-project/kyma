@@ -23,6 +23,5 @@ COPY --from=builder /go/src/github.com/kyma-project/kyma/tests/application-opera
 COPY --from=builder /go/src/github.com/kyma-project/kyma/tests/application-operator-tests/applicationcontroller.test .
 COPY --from=builder /go/src/github.com/kyma-project/kyma/tests/application-operator-tests/serviceinstancecontroller.test .
 COPY --from=builder /go/src/github.com/kyma-project/kyma/tests/application-operator-tests/applicationtests.test .
-COPY --from=builder /go/src/github.com/kyma-project/kyma/tests/application-operator-tests/licenses ./licenses
 
 ENTRYPOINT ["./entrypoint.sh"]

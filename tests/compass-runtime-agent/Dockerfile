@@ -19,6 +19,5 @@ WORKDIR /app
 COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 COPY --from=builder /go/src/github.com/kyma-project/kyma/tests/compass-runtime-agent/scripts/entrypoint.sh .
 COPY --from=builder /go/src/github.com/kyma-project/kyma/tests/compass-runtime-agent/test.test .
-COPY --from=builder /go/src/github.com/kyma-project/kyma/tests/compass-runtime-agent/licenses ./licenses
 
 ENTRYPOINT ["./entrypoint.sh"]
