@@ -16,9 +16,9 @@ type ReplicasPreset struct {
 }
 
 type ResourcesPreset struct {
-	RequestCpu    string `json:"requestCpu,omitempty"`
+	RequestCPU    string `json:"requestCpu,omitempty"`
 	RequestMemory string `json:"requestMemory,omitempty"`
-	LimitCpu      string `json:"limitCpu,omitempty"`
+	LimitCPU      string `json:"limitCpu,omitempty"`
 	LimitMemory   string `json:"limitMemory,omitempty"`
 }
 
@@ -91,7 +91,7 @@ func (spec *FunctionSpec) defaultFunctionResources(config *DefaultingConfig, fn 
 	defaultingConfig := config.Function.Resources
 	resourcesPreset := mergeResourcesPreset(fn, FunctionResourcesPresetLabel, defaultingConfig.Presets, defaultingConfig.DefaultPreset, defaultingConfig.RuntimePresets)
 
-	spec.Resources = defaultResources(resources, resourcesPreset.RequestMemory, resourcesPreset.RequestCpu, resourcesPreset.LimitMemory, resourcesPreset.LimitCpu)
+	spec.Resources = defaultResources(resources, resourcesPreset.RequestMemory, resourcesPreset.RequestCPU, resourcesPreset.LimitMemory, resourcesPreset.LimitCPU)
 }
 
 func (spec *FunctionSpec) defaultBuildResources(config *DefaultingConfig, fn *Function) {
@@ -99,7 +99,7 @@ func (spec *FunctionSpec) defaultBuildResources(config *DefaultingConfig, fn *Fu
 	defaultingConfig := config.BuildJob.Resources
 	resourcesPreset := mergeResourcesPreset(fn, BuildResourcesPresetLabel, defaultingConfig.Presets, defaultingConfig.DefaultPreset, nil)
 
-	spec.BuildResources = defaultResources(resources, resourcesPreset.RequestMemory, resourcesPreset.RequestCpu, resourcesPreset.LimitMemory, resourcesPreset.LimitCpu)
+	spec.BuildResources = defaultResources(resources, resourcesPreset.RequestMemory, resourcesPreset.RequestCPU, resourcesPreset.LimitMemory, resourcesPreset.LimitCPU)
 }
 
 func (spec *FunctionSpec) defaultRuntime(config *DefaultingConfig) {
@@ -108,7 +108,7 @@ func (spec *FunctionSpec) defaultRuntime(config *DefaultingConfig) {
 	}
 }
 
-func defaultResources(res corev1.ResourceRequirements, requestMemory, requestCpu, limitMemory, limitCpu string) corev1.ResourceRequirements {
+func defaultResources(res corev1.ResourceRequirements, requestMemory, requestCPU, limitMemory, limitCPU string) corev1.ResourceRequirements {
 	copiedRes := res.DeepCopy()
 
 	if copiedRes.Requests == nil {
@@ -123,7 +123,7 @@ func defaultResources(res corev1.ResourceRequirements, requestMemory, requestCpu
 		copiedRes.Requests[corev1.ResourceMemory] = newResource
 	}
 	if copiedRes.Requests.Cpu().IsZero() {
-		newResource := resource.MustParse(requestCpu)
+		newResource := resource.MustParse(requestCPU)
 		if !copiedRes.Limits.Cpu().IsZero() && copiedRes.Limits.Cpu().Cmp(newResource) == -1 {
 			newResource = *copiedRes.Limits.Cpu()
 		}
@@ -143,7 +143,7 @@ func defaultResources(res corev1.ResourceRequirements, requestMemory, requestCpu
 		copiedRes.Limits[corev1.ResourceMemory] = newResource
 	}
 	if copiedRes.Limits.Cpu().IsZero() {
-		newResource := resource.MustParse(limitCpu)
+		newResource := resource.MustParse(limitCPU)
 		if copiedRes.Requests.Cpu().Cmp(newResource) == 1 {
 			newResource = *copiedRes.Requests.Cpu()
 		}
@@ -193,9 +193,9 @@ func mergeResourcesPreset(fn *Function, presetLabel string, presets map[string]R
 	resourcesPreset := presets[preset]
 	resourcesDefaultPreset := presets[defaultPreset]
 
-	resources.RequestCpu = resourcesPreset.RequestCpu
-	if resources.RequestCpu == "" {
-		resources.RequestCpu = resourcesDefaultPreset.RequestCpu
+	resources.RequestCPU = resourcesPreset.RequestCPU
+	if resources.RequestCPU == "" {
+		resources.RequestCPU = resourcesDefaultPreset.RequestCPU
 	}
 
 	resources.RequestMemory = resourcesPreset.RequestMemory
@@ -203,9 +203,9 @@ func mergeResourcesPreset(fn *Function, presetLabel string, presets map[string]R
 		resources.RequestMemory = resourcesDefaultPreset.RequestMemory
 	}
 
-	resources.LimitCpu = resourcesPreset.LimitCpu
-	if resources.LimitCpu == "" {
-		resources.LimitCpu = resourcesDefaultPreset.LimitCpu
+	resources.LimitCPU = resourcesPreset.LimitCPU
+	if resources.LimitCPU == "" {
+		resources.LimitCPU = resourcesDefaultPreset.LimitCPU
 	}
 
 	resources.LimitMemory = resourcesPreset.LimitMemory

@@ -230,11 +230,11 @@ func SendEventToJetStream(jsClient *JetStream, data string) error {
 	eventType := eventingtesting.OrderCreatedEventType
 	eventTime := time.Now().Format(time.RFC3339)
 	sampleEvent := NewNatsMessagePayload(data, "id", eventingtesting.EventSource, eventTime, eventType)
-	return jsClient.conn.Publish(jsClient.GetJsSubjectToSubscribe(eventType), []byte(sampleEvent))
+	return jsClient.conn.Publish(jsClient.GetJetstreamSubject(eventType), []byte(sampleEvent))
 }
 
 func SendEventToJetStreamOnEventType(jsClient *JetStream, eventType string, data string) error {
 	eventTime := time.Now().Format(time.RFC3339)
 	sampleEvent := NewNatsMessagePayload(data, "id", eventingtesting.EventSource, eventTime, eventType)
-	return jsClient.conn.Publish(jsClient.GetJsSubjectToSubscribe(eventType), []byte(sampleEvent))
+	return jsClient.conn.Publish(jsClient.GetJetstreamSubject(eventType), []byte(sampleEvent))
 }

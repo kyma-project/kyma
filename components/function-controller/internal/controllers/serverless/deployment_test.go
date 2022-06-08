@@ -671,7 +671,7 @@ func TestFunctionReconciler_isDeploymentReady(t *testing.T) {
 			s := systemState{
 				deployments: appsv1.DeploymentList{
 					Items: []appsv1.Deployment{
-						appsv1.Deployment{
+						{
 							Status: appsv1.DeploymentStatus{Conditions: tt.args.conditions},
 						},
 					},

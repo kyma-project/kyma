@@ -73,26 +73,29 @@ global:
   images:
     k8s_tools:
       name: "k8s-tools"
-      version: "20220516-9f87ea89"
+      version: "20220525-4bd6d72e"
       directory: "tpi"
     function_controller:
       name: "function-controller"
-      version: "PR-14251"
+      version: "PR-14503"
     function_webhook:
       name: "function-webhook"
-      version: "PR-14251"
+      version: "PR-14503"
     function_build_init:
       name: "function-build-init"
-      version: "PR-14251"
+      version: "PR-14503"
     function_runtime_nodejs12:
       name: "function-runtime-nodejs12"
-      version: "PR-14284"
+      version: "PR-14334"
     function_runtime_nodejs14:
       name: "function-runtime-nodejs14"
-      version: "PR-14284"
+      version: "PR-14334"
+    function_runtime_nodejs16:
+      name: "function-runtime-nodejs16"
+      version: "PR-14334"
     function_runtime_python39:
       name: "function-runtime-python39"
-      version: "PR-14284"
+      version: "6575f14c"
     kaniko_executor:
       name: "kaniko-executor"
       version: "1.8.0-a0c08196"
@@ -108,7 +111,7 @@ global:
   testImages:
     function_controller_test:
       name: "function-controller-test"
-      version: "708f6a87"
+      version: "91a9a810"
     git_server:
       name: "gitserver"
       version: "708f6a87"

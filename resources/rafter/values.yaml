@@ -13,7 +13,7 @@ global:
       directory: "tpi/minio"
     k8s_tools:
       name: "k8s-tools"
-      version: "20220516-9f87ea89"
+      version: "20220525-4bd6d72e"
       directory: "tpi"
     rafter_controller_manager:
       name: "rafter-controller-manager"
