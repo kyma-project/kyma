@@ -159,7 +159,6 @@ describe('SKR-Upgrade-test', function() {
 
   // Upgrade Test Praparation
   const director = new DirectorClient(DirectorConfig.fromEnv());
-  const withCentralAppConnectivity = (process.env.WITH_CENTRAL_APP_CONNECTIVITY === 'true');
   const testNS = 'test';
 
   it('Assign SKR to scenario', async function() {
@@ -173,7 +172,7 @@ describe('SKR-Upgrade-test', function() {
         scenarioName,
         'mocks',
         testNS,
-        withCentralAppConnectivity);
+    );
   });
 
   it('Helm Broker test fixture should be ready', async function() {

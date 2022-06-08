@@ -28,7 +28,6 @@ COPY --from=builder --chown=appuser /tmp /tmp
 
 COPY --from=builder ./application-broker /root/application-broker
 COPY --from=certs /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
-COPY ./licenses/ /root/licenses
 
 LABEL source=git@github.com:kyma-project/kyma.git
 
