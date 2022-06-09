@@ -299,6 +299,7 @@ func getStreamConfig(natsConfig env.NatsConfig) (*nats.StreamConfig, error) {
 	streamConfig := &nats.StreamConfig{
 		Name:      natsConfig.JSStreamName,
 		Storage:   storage,
+		Replicas:  natsConfig.JSStreamReplicas,
 		Retention: retentionPolicy,
 		MaxMsgs:   natsConfig.JSStreamMaxMessages,
 		MaxBytes:  natsConfig.JSStreamMaxBytes,
