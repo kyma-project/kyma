@@ -69,7 +69,7 @@ func TestIstioInstalled(t *testing.T) {
 		ScenarioInitializer: InitializeScenarioEvalProfile,
 		Options: &godog.Options{
 			Format:   "pretty",
-			Paths:    []string{"features"},
+			Paths:    []string{"features/istio.feature"},
 			TestingT: t,
 		},
 	}
@@ -85,6 +85,21 @@ func TestIstioInstalled(t *testing.T) {
 type istioInstallledCase struct {
 	pilotPods     *corev1.PodList
 	ingressGwPods *corev1.PodList
+}
+
+func TestKubeSystemSidecar(t *testing.T) {
+	suite := godog.TestSuite{
+		Name:                kubeSystemNamespace,
+		ScenarioInitializer: InitializeScenarioKubeSystem,
+		Options: &godog.Options{
+			Format:   "pretty",
+			Paths:    []string{"features/kube-system.feature"},
+			TestingT: t,
+		},
+	}
+	if suite.Run() != 0 {
+		t.Fatal("non-zero status returned, failed to run feature tests")
+	}
 }
 
 func (i *istioInstallledCase) getIstioPods() error {
@@ -209,4 +224,14 @@ func isKymaInstalled(version string) (bool, error) {
 
 func listPodsIstioNamespace(istiodPodsSelector metav1.ListOptions) (*corev1.PodList, error) {
 	return k8sClient.CoreV1().Pods(istioNamespace).List(context.Background(), istiodPodsSelector)
+}
+
+func InitializeScenarioKubeSystem(ctx *godog.ScenarioContext) {
+	installedCase := istioInstallledCase{}
+	ctx.Before(func(ctx context.Context, sc *godog.Scenario) (context.Context, error) {
+		err := installedCase.getIstioPods()
+		return ctx, err
+	})
+	ctx.Step(`^Istio component is installed$`, installedCase.istioComponentIsInstalled)
+	ctx.Step(`^there should be no pods with istio sidecar in kube-system namespace$`, installedCase.kubeSystemPodsShouldNotHaveSidecar)
 }
