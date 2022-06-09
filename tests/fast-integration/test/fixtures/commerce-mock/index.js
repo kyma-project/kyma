@@ -27,7 +27,6 @@ const {
   debug,
   isDebugEnabled,
   toBase64,
-  ensureApplicationMapping,
   eventingSubscription,
   k8sDelete,
   getSecretData,
@@ -524,8 +523,6 @@ async function connectMockCompass(client, appName, scenarioName, mockHost, targe
   debug(`Connecting ${mockHost}`);
   await connectCommerceMock(mockHost, pairingBody);
 
-  debug(`Creating application mapping for mp-${appName} in ${targetNamespace}`);
-  await ensureApplicationMapping(`mp-${appName}`, targetNamespace);
   debug('Commerce mock connected to Compass');
 }
 
@@ -670,7 +667,6 @@ function getResourcePaths(namespace) {
     `/apis/gateway.kyma-project.io/v1alpha1/namespaces/${namespace}/apirules`,
     `/apis/apps/v1/namespaces/${namespace}/deployments`,
     `/api/v1/namespaces/${namespace}/services`,
-    `/apis/applicationconnector.kyma-project.io/v1alpha1/namespaces/${namespace}/applicationmappings`,
   ];
 }
 

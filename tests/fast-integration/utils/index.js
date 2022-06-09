@@ -1347,19 +1347,6 @@ function wait(fn, checkFn, timeout, interval) {
   });
 }
 
-async function ensureApplicationMapping(name, ns) {
-  const applicationMapping = {
-    apiVersion: 'applicationconnector.kyma-project.io/v1alpha1',
-    kind: 'ApplicationMapping',
-    metadata: {name: name, namespace: ns},
-  };
-  await k8sDynamicApi.delete(applicationMapping).catch(() => {});
-  return await k8sDynamicApi.create(applicationMapping).catch((ex) => {
-    debug(ex);
-    throw ex;
-  });
-}
-
 async function patchApplicationGateway(name, ns) {
   const deployment = await retryPromise(
       async () => {
@@ -1856,7 +1843,6 @@ module.exports = {
   genRandom,
   getEnvOrThrow,
   wait,
-  ensureApplicationMapping,
   patchApplicationGateway,
   eventingSubscription,
   getVirtualService,
