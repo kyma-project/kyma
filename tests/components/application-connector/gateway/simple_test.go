@@ -20,6 +20,13 @@ func TestSimpleCases(t *testing.T) {
 
 	require.Nil(t, err)
 
+	t.Cleanup(func() {
+		_, err := http.Post("http://localhost:15000/quitquitquit", "", nil)
+		assert.Nil(t, err)
+		_, err = http.Post("http://localhost:15020/quitquitquit", "", nil)
+		assert.Nil(t, err)
+	})
+
 	app, err := cl.ApplicationconnectorV1alpha1().Applications().Get(context.Background(), "test-app", v1.GetOptions{})
 
 	require.Nil(t, err)
