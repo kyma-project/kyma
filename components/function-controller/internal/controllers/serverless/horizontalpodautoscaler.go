@@ -3,6 +3,7 @@ package serverless
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
 	autoscalingv1 "k8s.io/api/autoscaling/v1"
@@ -10,6 +11,14 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	apilabels "k8s.io/apimachinery/pkg/labels"
 )
+
+func initStateFnCheckHPA(ctx context.Context, r *reconciler, s *systemState) stateFn {
+	if v, ok := s.instance.Labels[disableHorizontalPodAutoscaler]; ok && strings.ToLower(v) == "true" {
+		return nil
+	}
+
+	return stateFnCheckHPA
+}
 
 func stateFnCheckHPA(ctx context.Context, r *reconciler, s *systemState) stateFn {
 	namespace := s.instance.GetNamespace()

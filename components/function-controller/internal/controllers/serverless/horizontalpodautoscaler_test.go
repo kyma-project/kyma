@@ -385,7 +385,7 @@ func TestFunctionReconciler_isOnHorizontalPodAutoscalerChange(t *testing.T) {
 		{
 			name: "no deployments",
 			args: args{
-				deployments: []appsv1.Deployment{}, //FIXME tutaj!
+				deployments: []appsv1.Deployment{},
 			},
 			want: false,
 		},

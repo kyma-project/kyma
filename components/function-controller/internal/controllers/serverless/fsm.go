@@ -52,6 +52,7 @@ type reconciler struct {
 
 const (
 	continuousGitCheckoutAnnotation = "serverless.kyma-project.io/continuousGitCheckout"
+	disableHorizontalPodAutoscaler  = "serverless.kyma-project.io/disableHorizontalPodAutoscaler"
 )
 
 func (m *reconciler) reconcile(ctx context.Context, f serverlessv1alpha1.Function) (ctrl.Result, error) {
