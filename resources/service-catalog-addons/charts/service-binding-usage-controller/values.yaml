@@ -14,4 +14,4 @@ resources:
     cpu: 100m
   requests:
     memory: 32Mi
-    cpu: 30m
+    cpu: 10m

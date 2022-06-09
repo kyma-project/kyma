@@ -14,7 +14,7 @@ controller:
       cpu: 500m
       memory: 1Gi
     requests:
-      cpu: 50m
+      cpu: 10m
       memory: 512Mi
   publisherProxy:
     resources:
@@ -22,7 +22,7 @@ controller:
         cpu: 500m
         memory: 512Mi
       requests:
-        cpu: 50m
+        cpu: 10m
         memory: 256Mi
 
 nats:
@@ -43,7 +43,7 @@ nats:
         cpu: 500m
         memory: 1Gi
       requests:
-        cpu: 50m
+        cpu: 10m
         memory: 512Mi
     logging:
       debug: false

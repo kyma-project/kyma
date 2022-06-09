@@ -9,7 +9,7 @@ helmValues:
     proxy:
       resources:
         requests:
-          cpu: 100m
+          cpu: 10m
           memory: 192Mi
         limits:
           cpu: 1000m
@@ -36,7 +36,7 @@ components:
           cpu: 2000m
           memory: 1024Mi
         requests:
-          cpu: 100m
+          cpu: 10m
           memory: 128Mi
       affinity:
         podAntiAffinity:

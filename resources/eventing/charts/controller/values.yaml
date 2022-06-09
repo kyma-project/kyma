@@ -21,7 +21,7 @@ resources:
     cpu: 300m
     memory: 100Mi
   requests:
-    cpu: 100m
+    cpu: 10m
     memory: 20Mi
 
 publisherProxy:
@@ -34,7 +34,7 @@ publisherProxy:
       cpu: 100m
       memory: 128Mi
     requests:
-      cpu: 32m
+      cpu: 10m
       memory: 64Mi
 
 metrics:

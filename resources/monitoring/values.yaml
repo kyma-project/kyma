@@ -2582,7 +2582,7 @@ prometheus:
         cpu: 600m
         memory: 2Gi
       requests:
-        cpu: 50m
+        cpu: 10m
         memory: 600Mi
 
     ## Prometheus StorageSpec for persistent data
