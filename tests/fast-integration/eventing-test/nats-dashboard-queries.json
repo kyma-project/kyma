@@ -102,5 +102,9 @@
   {
     "title":"NATS JetStream: Message Acks Pending",
     "query":"sum(nats_consumer_num_ack_pending{pod=~\"$server\",stream_name=~\"$stream\",consumer_name=~\"$consumer\"}) by (consumer_name)"
+  },
+  {
+    "title":"NATS JetStream: Event Types Summary",
+    "query":"event_type_subscribed"
   }
 ]
