@@ -12,10 +12,11 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
-const logPath = "../data/log/flb-storage/" // pass as flag and check dockerfile entrypoint vs run
+// TODO pass as arg or get from env
+const logPath = "../data/log/flb-storage/"
 
 func recordMetrics() {
-	ticker := time.NewTicker(5 * time.Second)
+	ticker := time.NewTicker(10 * time.Second)
 	quit := make(chan struct{})
 	go func() {
 		for {

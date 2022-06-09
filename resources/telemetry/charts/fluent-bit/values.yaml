@@ -351,10 +351,7 @@ config:
         Buffer_Size 1MB
 
   ## https://docs.fluentbit.io/manual/pipeline/outputs
-  outputs: |
-    [OUTPUT]
-        Name null
-        Match *
+  outputs: |-
 
   ## https://docs.fluentbit.io/manual/pipeline/parsers
   customParsers: |
