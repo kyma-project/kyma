@@ -1866,10 +1866,10 @@ prometheusOperator:
     # resource config for prometheusConfigReloader
     resources:
       requests:
-        cpu: 100m
+        cpu: 10m
         memory: 50Mi
       limits:
-        cpu: 10m
+        cpu: 100m
         memory: 50Mi
 
   ## Thanos side-car image when configured
