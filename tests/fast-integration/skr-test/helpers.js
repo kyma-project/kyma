@@ -78,7 +78,7 @@ function gatherOptions(...opts) {
     },
     kebUserId: getEnvOrThrow('KEB_USER_ID'),
     administrators1: ['admin1@acme.com', 'admin2@acme.com'],
-    customParams: null
+    customParams: null,
   };
 
   opts.forEach((opt) => {
@@ -154,5 +154,5 @@ module.exports = {
   withScenarioName,
   withTestNS,
   withSuffix,
-  withCustomParams
+  withCustomParams,
 };

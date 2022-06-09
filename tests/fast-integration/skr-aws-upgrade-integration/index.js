@@ -7,7 +7,7 @@ const {
 } = require('../compass');
 const {
   gatherOptions,
-  withCustomParams
+  withCustomParams,
 } = require('../skr-test/helpers');
 const {
   KEBConfig,
@@ -52,8 +52,8 @@ describe('SKR-Upgrade-test', function() {
     'kymaVersion': kymaVersion,
   };
 
-  let options = gatherOptions(
-      withCustomParams(customParams)
+  const options = gatherOptions(
+      withCustomParams(customParams),
   );
 
   debug(
