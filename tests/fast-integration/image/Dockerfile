@@ -1,11 +1,6 @@
 FROM alpine:3.14.6
 
-ENV KUBECONFIG=/KUBECONFIG/kubeconfig.yaml
-ENV EVENTMESH_SECRET_FILE=/EMS/ems.json
 ENV FIT_MAKE_TARGET=ci-skr
-
-VOLUME /KUBECONFIG
-VOLUME /EMS
 
 SHELL ["/bin/ash", "-o", "pipefail", "-c"]
 
