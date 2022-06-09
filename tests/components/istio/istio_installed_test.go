@@ -161,26 +161,6 @@ func (i *istioInstallledCase) thereIsPodForIngressGateway(numberOfPodsRequired i
 	return nil
 }
 
-func (i *istioInstallledCase) kubeSystemPodsShouldNotHaveSidecar() error {
-	istioPods, err := k8sClient.CoreV1().Pods(kubeSystemNamespace).List(context.Background(), metav1.ListOptions{
-		LabelSelector: "security.istio.io/tlsMode=istio",
-	})
-	if err != nil {
-		return err
-	}
-	if len(istioPods.Items) != 0 {
-		return fmt.Errorf("istio sidecars should not be deployed in %s", kubeSystemNamespace)
-	}
-	return nil
-}
-
-func (i *istioInstallledCase) thereIsPodForIngressGateway(numberOfPodsRequired int) error {
-	if len(i.ingressGwPods.Items) != numberOfPodsRequired {
-		return fmt.Errorf("number of deployed IngressGW pods %d does not equal %d", len(i.pilotPods.Items), numberOfPodsRequired)
-	}
-	return nil
-}
-
 func (i *istioInstallledCase) thereIsPodForPilot(numberOfPodsRequired int) error {
 	if len(i.ingressGwPods.Items) != numberOfPodsRequired {
 		return fmt.Errorf("number of deployed Pilot pods %d does not equal %d", len(i.pilotPods.Items), numberOfPodsRequired)
