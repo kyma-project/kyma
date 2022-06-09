@@ -58,28 +58,6 @@ func TestSetDefaults(t *testing.T) {
 }
 `
 
-	// normalBuildResources := corev1.ResourceRequirements{
-	// 	Limits: corev1.ResourceList{
-	// 		corev1.ResourceCPU:    resource.MustParse("1100m"),
-	// 		corev1.ResourceMemory: resource.MustParse("1100Mi"),
-	// 	},
-	// 	Requests: corev1.ResourceList{
-	// 		corev1.ResourceCPU:    resource.MustParse("700m"),
-	// 		corev1.ResourceMemory: resource.MustParse("700Mi"),
-	// 	},
-	// }
-
-	// fastBuildResources := corev1.ResourceRequirements{
-	// 	Limits: corev1.ResourceList{
-	// 		corev1.ResourceCPU:    resource.MustParse("1800m"),
-	// 		corev1.ResourceMemory: resource.MustParse("1800Mi"),
-	// 	},
-	// 	Requests: corev1.ResourceList{
-	// 		corev1.ResourceCPU:    resource.MustParse("1100m"),
-	// 		corev1.ResourceMemory: resource.MustParse("1100Mi"),
-	// 	},
-	// }
-
 	for testName, testData := range map[string]struct {
 		givenFunc    Function
 		expectedFunc Function
@@ -497,6 +475,66 @@ func TestSetDefaults(t *testing.T) {
 				MinReplicas: &one,
 				MaxReplicas: &one,
 			}},
+		},
+		"Should properly merge resources presets - case case with missing buildResources Requests": {
+			givenFunc: Function{
+				ObjectMeta: v1.ObjectMeta{
+					Labels: map[string]string{
+						ReplicasPresetLabel:          "L",
+						FunctionResourcesPresetLabel: "S",
+						BuildResourcesPresetLabel:    "slow",
+					},
+				},
+				Spec: FunctionSpec{
+					Runtime: Nodejs14,
+					Resources: corev1.ResourceRequirements{
+						Requests: corev1.ResourceList{
+							corev1.ResourceCPU:    resource.MustParse("15m"),
+							corev1.ResourceMemory: resource.MustParse("15Mi"),
+						},
+					},
+					BuildResources: corev1.ResourceRequirements{
+						Limits: corev1.ResourceList{
+							corev1.ResourceCPU:    resource.MustParse("700m"),
+							corev1.ResourceMemory: resource.MustParse("700Mi"),
+						},
+					},
+					MinReplicas: &two,
+				},
+			},
+			expectedFunc: Function{
+				ObjectMeta: v1.ObjectMeta{
+					Labels: map[string]string{
+						ReplicasPresetLabel:          "L",
+						FunctionResourcesPresetLabel: "S",
+						BuildResourcesPresetLabel:    "slow",
+					},
+				}, Spec: FunctionSpec{
+					Runtime: Nodejs14,
+					Resources: corev1.ResourceRequirements{
+						Limits: corev1.ResourceList{
+							corev1.ResourceCPU:    resource.MustParse("50m"),
+							corev1.ResourceMemory: resource.MustParse("64Mi"),
+						},
+						Requests: corev1.ResourceList{
+							corev1.ResourceCPU:    resource.MustParse("15m"),
+							corev1.ResourceMemory: resource.MustParse("15Mi"),
+						},
+					},
+					BuildResources: corev1.ResourceRequirements{
+						Limits: corev1.ResourceList{
+							corev1.ResourceCPU:    resource.MustParse("700m"),
+							corev1.ResourceMemory: resource.MustParse("700Mi"),
+						},
+						Requests: corev1.ResourceList{
+							corev1.ResourceCPU:    resource.MustParse("350m"),
+							corev1.ResourceMemory: resource.MustParse("350Mi"),
+						},
+					},
+					MinReplicas: &two,
+					MaxReplicas: &two,
+				},
+			},
 		},
 	}
 
