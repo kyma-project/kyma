@@ -27,5 +27,5 @@ spec:
           targetUrl: "http://test-app.{{ .Values.namespace  }}.svc.cluster.local/basic-auth/admin/nimda"
           centralGatewayUrl: http://central-application-gateway.kyma-system:8080/test-app/basic-auth/
           credentials:
-            secretName: basic-auth
+            secretName: basic-auth-test
             type: Basic

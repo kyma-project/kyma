@@ -1,20 +1,23 @@
-IMAGE = ""
+GATEWAY_IMAGE ?= ""
+NAMESPACE ?= "test"
 
-.PHONY: image publish
+.PHONY: test image publish clean image-gateway publish-gateway test-gateway
 
-test-gateway: publish
-	helm template deployments/gateway-test --set testImage=$(IMAGE) | kubectl apply -f -
-	kubectl wait --for=condition=complete job/myjob &
-	completion_pid=$$!
-	kubectl wait --for=condition=failed job/myjob && exit 1 &
-	failure_pid=$$!
-	wait $$completion_pid $$failure_pid
+test: test-gateway
+image: image-gateway
+clean: clean-gateway
+publish: publish-gateway
 
-clean:
-	helm template deployments/gateway-test --set testImage=$(IMAGE) | kubectl delete -f -
+test-gateway:
+	kubectl create namespace $(NAMESPACE) --dry-run=client -o yaml | kubectl apply -f -
+	helm template k8s/gateway-test --set testImage=$(IMAGE),namespace=$(NAMESPACE) | kubectl apply -f -
+	kubectl -n $(NAMESPACE) wait --for=condition=complete job/connectivity-test --timeout 60s
 
-publish: image
-	docker push $(IMAGE)
+clean-gateway:
+	helm template k8s/gateway-test --set testImage=$(IMAGE) | kubectl delete -f -
 
-image:
-	docker build . -t $(IMAGE)
+publish-gateway: image
+	docker push $(GATEWAY_IMAGE)
+
+image-gateway:
+	docker build -t $(GATEWAY_IMAGE) -f Dockerfile.gateway .

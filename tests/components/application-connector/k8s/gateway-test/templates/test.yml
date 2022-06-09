@@ -6,6 +6,11 @@ metadata:
 spec:
   template:
     spec:
+      initContainers:
+        - name: wait-for-services
+          image: opsfleet/depends-on
+          args:
+            - "-service=test-app"
       containers:
         - name: connectivity-test
           image: "{{ .Values.testImage }}"
