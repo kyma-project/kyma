@@ -31,13 +31,6 @@ kind: TokenRequest
 metadata:
   name: commerce-mock
 ---
-apiVersion: applicationconnector.kyma-project.io/v1alpha1
-kind: ApplicationMapping
-metadata:
-  name: commerce-mock
-  namespace: orders-service
-
----
 apiVersion: serverless.kyma-project.io/v1alpha1
 kind: Function
 metadata:

@@ -44,10 +44,11 @@ var (
 // LogPipelineReconciler reconciles a LogPipeline object
 type LogPipelineReconciler struct {
 	client.Client
-	Scheme                 *runtime.Scheme
-	Syncer                 *sync.LogPipelineSyncer
-	FluentBitDaemonSet     types.NamespacedName
-	FluentBitRestartsCount prometheus.Counter
+	Scheme                  *runtime.Scheme
+	Syncer                  *sync.LogPipelineSyncer
+	FluentBitDaemonSet      types.NamespacedName
+	FluentBitRestartsCount  prometheus.Counter
+	EnableUnsupportedPlugin prometheus.Gauge
 }
 
 // NewLogPipelineReconciler returns a new LogPipelineReconciler using the given FluentBit config arguments
@@ -65,7 +66,12 @@ func NewLogPipelineReconciler(client client.Client, scheme *runtime.Scheme, daem
 		Name: "telemetry_operator_fluentbit_restarts_total",
 		Help: "Number of triggered FluentBit restarts",
 	})
+	lpr.EnableUnsupportedPlugin = prometheus.NewGauge(prometheus.GaugeOpts{
+		Name: "telemetry_enable_unsupported_plugins",
+		Help: "EnableUnsupportedPlugins flag state for all the logpipelines.",
+	})
 	metrics.Registry.MustRegister(lpr.FluentBitRestartsCount)
+	metrics.Registry.MustRegister(lpr.EnableUnsupportedPlugin)
 
 	return &lpr
 }
@@ -102,6 +108,12 @@ func (r *LogPipelineReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 	var changed, err = r.Syncer.SyncAll(ctx, &logPipeline)
 	if err != nil {
 		return ctrl.Result{Requeue: shouldRetryOn(err)}, nil
+	}
+
+	if r.Syncer.EnableUnsupportedPlugin {
+		r.EnableUnsupportedPlugin.Set(1)
+	} else {
+		r.EnableUnsupportedPlugin.Set(0)
 	}
 
 	if changed {
