@@ -27,9 +27,13 @@ const (
 	serverlessAPIGroup   = "serverless.kyma-project.io"
 	serverlessAPIVersion = "v1alpha1"
 
-	DefaultingWebhookName     = "defaulting.webhook.serverless.kyma-project.io"
-	SecretMutationWebhookName = "mutating.secret.serverless.k8s.io"
-	ValidationWebhookName     = "validation.webhook.serverless.kyma-project.io"
+	DefaultingWebhookName     = "function.defaulting.webhook.serverless.kyma-project.io"
+	SecretMutationWebhookName = "mutating.secret.webhook.serverless.kyma-project.io"
+	ValidationWebhookName     = "function.validation.webhook.serverless.kyma-project.io"
+
+	FunctionDefaultingWebhookPath       = "/defaulting/functions"
+	RegistryConfigDefaultingWebhookPath = "/defaulting/registry-config-secrets"
+	FunctionValidationWebhookPath       = "/validation/function"
 
 	RemoteRegistryLabelKey = "serverless.kyma-project.io/remote-registry"
 )
@@ -103,7 +107,7 @@ func getFunctionMutatingWebhookCfg(config WebhookConfig) admissionregistrationv1
 			Service: &admissionregistrationv1.ServiceReference{
 				Namespace: config.ServiceNamespace,
 				Name:      config.ServiceName,
-				Path:      pointer.String("/defaulting/functions"),
+				Path:      pointer.String(FunctionDefaultingWebhookPath),
 				Port:      pointer.Int32(443),
 			},
 		},
@@ -145,7 +149,7 @@ func getRegistryConfigSecretMutatingWebhook(config WebhookConfig) admissionregis
 			Service: &admissionregistrationv1.ServiceReference{
 				Namespace: config.ServiceNamespace,
 				Name:      config.ServiceName,
-				Path:      pointer.String("/defaulting/registry-config-secrets"),
+				Path:      pointer.String(RegistryConfigDefaultingWebhookPath),
 				Port:      pointer.Int32(443),
 			},
 		},
@@ -197,7 +201,7 @@ func createValidatingWebhookConfiguration(config WebhookConfig) *admissionregist
 					Service: &admissionregistrationv1.ServiceReference{
 						Namespace: config.ServiceNamespace,
 						Name:      config.ServiceName,
-						Path:      pointer.String("/validation"),
+						Path:      pointer.String(FunctionValidationWebhookPath),
 						Port:      pointer.Int32(443),
 					},
 				},

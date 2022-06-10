@@ -84,18 +84,18 @@ func main() {
 	whs := mgr.GetWebhookServer()
 	whs.CertName = resources.CertFile
 	whs.KeyName = resources.KeyFile
-	whs.Register("/defaulting/functions",
+	whs.Register(resources.FunctionDefaultingWebhookPath,
 		&ctrlwebhook.Admission{
 			Handler: webhook.NewDefaultingWebhook(defaultingConfig, mgr.GetClient()),
 		},
 	)
-	whs.Register("/validation",
+	whs.Register(resources.FunctionValidationWebhookPath,
 		&ctrlwebhook.Admission{
 			Handler: webhook.NewValidatingHook(validationConfig, mgr.GetClient()),
 		},
 	)
 
-	whs.Register("/defaulting/registry-config-secrets",
+	whs.Register(resources.RegistryConfigDefaultingWebhookPath,
 		&ctrlwebhook.Admission{
 			Handler: webhook.NewRegistryWatcher(),
 		},
