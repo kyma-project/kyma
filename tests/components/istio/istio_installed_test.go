@@ -29,7 +29,7 @@ const (
 	evalProfile            = "evaluation"
 	prodProfile            = "production"
 	deployedKymaProfileVar = "KYMA_PROFILE"
-	exportResultVar        = "EXPORT_RESULR"
+	exportResultVar        = "EXPORT_RESULT"
 )
 
 func TestMain(m *testing.M) {
