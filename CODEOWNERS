@@ -20,20 +20,16 @@
 /common/logging @franpog859 @dbadura @janmedrek
 
 /components/application-broker @wozniakjan @PK85 @piotrmiskiewicz @szwedm @ralikio @hanngos @tillknuesting
-/components/application-connectivity-certs-setup-job  @VOID404 @akgalwas @koala7659 @janmedrek @Maladie @franpog859 @mvshao
 /components/application-connectivity-validator  @VOID404 @akgalwas @koala7659 @janmedrek @Maladie @franpog859 @mvshao
 /components/application-gateway  @VOID404 @akgalwas @koala7659 @janmedrek @Maladie @franpog859 @mvshao
 /components/application-operator  @VOID404 @akgalwas @koala7659 @janmedrek @Maladie @franpog859 @mvshao
-/components/application-registry  @VOID404 @akgalwas @koala7659 @janmedrek @Maladie @franpog859 @mvshao
 /components/binding @wozniakjan @PK85 @piotrmiskiewicz @szwedm @ralikio @hanngos @tillknuesting
 /components/busola-migrator @m00g3n @pPrecel @dbadura @kwiatekus @moelsayed @cortey
 /components/central-application-connectivity-validator  @VOID404 @akgalwas @koala7659 @janmedrek @Maladie @franpog859 @mvshao
 /components/central-application-gateway  @VOID404 @akgalwas @koala7659 @janmedrek @Maladie @franpog859 @mvshao
 /components/compass-runtime-agent  @VOID404 @akgalwas @koala7659 @janmedrek @Maladie @franpog859 @mvshao @PK85 @dbadura
-/components/connection-token-handler  @VOID404 @akgalwas @koala7659 @janmedrek @Maladie @franpog859 @mvshao
-/components/connector-service  @VOID404 @akgalwas @koala7659 @janmedrek @Maladie @franpog859 @mvshao
-/components/event-publisher-proxy @k15r @nachtmaar @marcobebway @pxsalehi @mfaizanse @friedrichwilken @vladislavpaskar @raypinto @lilitgh
-/components/eventing-controller @k15r @nachtmaar @marcobebway @pxsalehi @mfaizanse @friedrichwilken @vladislavpaskar @raypinto @lilitgh
+/components/event-publisher-proxy @k15r @nachtmaar @marcobebway @mfaizanse @friedrichwilken @vladislavpaskar @raypinto @lilitgh
+/components/eventing-controller @k15r @nachtmaar @marcobebway @mfaizanse @friedrichwilken @vladislavpaskar @raypinto @lilitgh
 /components/function-controller @m00g3n @pPrecel @dbadura @kwiatekus @moelsayed @cortey
 /components/function-runtimes @m00g3n @pPrecel @dbadura @kwiatekus @moelsayed @cortey
 /components/service-binding-usage-controller @wozniakjan @PK85 @piotrmiskiewicz @szwedm @ralikio @hanngos @tillknuesting
@@ -49,7 +45,7 @@
 /installation/resources/crds/api-gateway @strekm @werdes72 @mjakobczyk @veichtj @dariusztutaj @cnvergence @piotrkpc
 /installation/resources/crds/application-connector  @VOID404 @akgalwas @koala7659 @janmedrek @Maladie @franpog859 @mvshao
 /installation/resources/crds/compass-runtime-agent  @VOID404 @akgalwas @koala7659 @janmedrek @Maladie @franpog859 @mvshao
-/installation/resources/crds/eventing @k15r @nachtmaar @marcobebway @pxsalehi @mfaizanse @friedrichwilken @vladislavpaskar @raypinto @lilitgh
+/installation/resources/crds/eventing @k15r @nachtmaar @marcobebway @mfaizanse @friedrichwilken @vladislavpaskar @raypinto @lilitgh
 /installation/resources/crds/monitoring @a-thaler @rakesh-garimella @skhalash @chrkl @lindnerby @dennis-ge @lilitgh
 /installation/resources/crds/ory @strekm @werdes72 @mjakobczyk @veichtj @dariusztutaj @cnvergence @piotrkpc
 /installation/resources/crds/rafter @m00g3n @pPrecel @dbadura @kwiatekus @moelsayed @cortey
@@ -63,18 +59,15 @@
 /resources/application-connector  @VOID404 @akgalwas @koala7659 @janmedrek @Maladie @franpog859 @mvshao
 /resources/application-connector/charts/application-broker @wozniakjan @PK85 @piotrmiskiewicz @szwedm @ralikio @hanngos @tillknuesting
 /resources/application-connector/charts/application-operator  @VOID404 @akgalwas @koala7659 @janmedrek @Maladie @franpog859 @mvshao
-/resources/application-connector/charts/application-registry  @VOID404 @akgalwas @koala7659 @janmedrek @Maladie @franpog859 @mvshao
 /resources/application-connector/charts/central-application-connectivity-validator  @VOID404 @akgalwas @koala7659 @janmedrek @Maladie @franpog859 @mvshao
 /resources/application-connector/charts/central-application-gateway  @VOID404 @akgalwas @koala7659 @janmedrek @Maladie @franpog859 @mvshao
-/resources/application-connector/charts/connection-token-handler  @VOID404 @akgalwas @koala7659 @janmedrek @Maladie @franpog859 @mvshao
-/resources/application-connector/charts/connector-service  @VOID404 @akgalwas @koala7659 @janmedrek @Maladie @franpog859 @mvshao
 /resources/busola-migrator @m00g3n @pPrecel @dbadura @kwiatekus @moelsayed @cortey
 /resources/certificates @mjakobczyk @veichtj @dariusztutaj @cnvergence @piotrkpc @strekm @werdes72
 /resources/cluster-essentials @janmedrek @a-thaler @strekm @dariusztutaj @cnvergence @veichtj @piotrkpc @PK85
 /resources/cluster-essentials/charts/pod-preset @wozniakjan @PK85 @piotrmiskiewicz @szwedm @ralikio @hanngos @tillknuesting
 /resources/cluster-users @cnvergence @piotrkpc @strekm @werdes72 @mjakobczyk @veichtj @dariusztutaj
 /resources/compass-runtime-agent  @VOID404 @akgalwas @koala7659 @janmedrek @Maladie @franpog859 @mvshao
-/resources/eventing @k15r @nachtmaar @marcobebway @pxsalehi @mfaizanse @friedrichwilken @vladislavpaskar @raypinto @lilitgh
+/resources/eventing @k15r @nachtmaar @marcobebway @mfaizanse @friedrichwilken @vladislavpaskar @raypinto @lilitgh
 /resources/helm-broker @wozniakjan @PK85 @piotrmiskiewicz @szwedm @ralikio @hanngos @tillknuesting
 /resources/istio @strekm @werdes72 @mjakobczyk @veichtj @dariusztutaj @cnvergence @piotrkpc
 /resources/istio-resources @strekm @werdes72 @mjakobczyk @veichtj @dariusztutaj @cnvergence @piotrkpc
@@ -91,20 +84,15 @@
 /resources/telemetry @a-thaler @rakesh-garimella @skhalash @chrkl @lindnerby @dennis-ge @lilitgh
 /resources/tracing @a-thaler @rakesh-garimella @skhalash @chrkl @lindnerby @dennis-ge @lilitgh
 
-/tests/application-connector-tests  @VOID404 @akgalwas @koala7659 @janmedrek @Maladie @franpog859 @mvshao
 /tests/application-gateway-legacy-tests  @VOID404 @akgalwas @koala7659 @janmedrek @Maladie @franpog859 @mvshao
 /tests/application-gateway-tests  @VOID404 @akgalwas @koala7659 @janmedrek @Maladie @franpog859 @mvshao
-/tests/application-operator-tests  @VOID404 @akgalwas @koala7659 @janmedrek @Maladie @franpog859 @mvshao
-/tests/application-registry-tests  @VOID404 @akgalwas @koala7659 @janmedrek @Maladie @franpog859 @mvshao
-/tests/compass-runtime-agent  @VOID404 @akgalwas @koala7659 @janmedrek @Maladie @franpog859 @mvshao
-/tests/connection-token-handler-tests  @VOID404 @akgalwas @koala7659 @janmedrek @Maladie @franpog859 @mvshao
-/tests/connector-service-tests  @VOID404 @akgalwas @koala7659 @janmedrek @Maladie @franpog859 @mvshao
 /tests/telemetry-operator-perf-tests @a-thaler @rakesh-garimella @skhalash @chrkl @lindnerby @dennis-ge
 
 # Fast Integration Tests
 /tests/fast-integration @lindnerby @skhalash @voigt @rakesh-garimella @jeremyharisch @khlifi411 @ruanxin @tobiscr @clebs @pbochynski @dennis-ge @jakobmoellersap @Tomasz-Smelcerz-SAP
 
-/tests/fast-integration/eventing-test @k15r @nachtmaar @marcobebway @pxsalehi @mfaizanse @friedrichwilken @vladislavpaskar @raypinto @lilitgh
+/tests/fast-integration/eventing-test @k15r @nachtmaar @marcobebway @mfaizanse @friedrichwilken @vladislavpaskar @raypinto @lilitgh
+/tests/fast-integration/image @k15r @nachtmaar @marcobebway @mfaizanse @friedrichwilken @vladislavpaskar @raypinto @lilitgh
 /tests/fast-integration/kcp @PK85 @piotrmiskiewicz @szwedm @wozniakjan @hanngos @tillknuesting @ralikio
 /tests/fast-integration/kyma-environment-broker @PK85 @piotrmiskiewicz @szwedm @wozniakjan @hanngos @tillknuesting @ralikio
 /tests/fast-integration/skr-aws-upgrade-integration @hanngos @tillknuesting @ralikio @PK85 @piotrmiskiewicz @szwedm @wozniakjan
@@ -124,7 +112,7 @@
 /tests/service-catalog @wozniakjan @PK85 @piotrmiskiewicz @szwedm @ralikio @hanngos @tillknuesting
 
 # The tools/event-subscriber directory
-/tools/event-subscriber/ @lilitgh @k15r @nachtmaar @marcobebway @pxsalehi @mfaizanse @friedrichwilken @vladislavpaskar @raypinto
+/tools/event-subscriber/ @lilitgh @k15r @nachtmaar @marcobebway @mfaizanse @friedrichwilken @vladislavpaskar @raypinto
 
 # The tools/gitserver directory
 /tools/gitserver/ @m00g3n @pPrecel @dbadura @kwiatekus @moelsayed @cortey
