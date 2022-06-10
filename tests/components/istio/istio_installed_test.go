@@ -28,16 +28,10 @@ const (
 	evalProfile            = "evaluation"
 	prodProfile            = "production"
 	deployedKymaProfileVar = "KYMA_PROFILE"
-	exportResultVar        = "EXPORT_RESULT"
 )
 
 func TestMain(m *testing.M) {
 	k8sClient = initK8sClient()
-	if os.Getenv(exportResultVar) == "true" {
-		godogFormat = "junit"
-	} else {
-		godogFormat = "pretty"
-	}
 	os.Exit(m.Run())
 }
 
@@ -74,7 +68,7 @@ func TestIstioInstalledEvaluation(t *testing.T) {
 		Name:                evalProfile,
 		ScenarioInitializer: InitializeScenarioEvalProfile,
 		Options: &godog.Options{
-			Format:   godogFormat,
+			Format:   "pretty",
 			Paths:    []string{"features/istio_installed/istio_evaluation.feature"},
 			TestingT: t,
 		},
@@ -93,7 +87,7 @@ func TestIstioInstalledProduction(t *testing.T) {
 		Name:                prodProfile,
 		ScenarioInitializer: InitializeScenarioProdProfile,
 		Options: &godog.Options{
-			Format:   godogFormat,
+			Format:   "pretty",
 			Paths:    []string{"features/istio_installed/istio_production.feature"},
 			TestingT: t,
 		},
