@@ -1,3 +1,5 @@
+const {commerceMockCleanup} = require("../skr-test");
+const {deprovisionSKRInstance} = require("../skr-test/provision/deprovision-skr");
 const {
   DirectorConfig,
   DirectorClient,
@@ -35,6 +37,8 @@ const {
 } = require('../kcp/client');
 const {saveKubeconfig} = require('../skr-svcat-migration-test/test-helpers');
 const {BTPOperatorCreds} = require('../smctl/helpers');
+
+const skipProvisioning = process.env.SKIP_PROVISIONING === 'true';
 
 describe('SKR-Upgrade-test', function() {
   switchDebug(on = true);
@@ -111,7 +115,6 @@ describe('SKR-Upgrade-test', function() {
   let skr;
 
   // SKR Provisioning
-
   it(`Perform kcp login`, async function() {
     const version = await kcp.version([]);
     debug(version);
@@ -172,7 +175,6 @@ describe('SKR-Upgrade-test', function() {
   });
 
   // Upgrade
-
   it('Perform Upgrade', async function() {
     await kcp.upgradeKyma(options.instanceID, kymaUpgradeVersion, upgradeTimeoutMin);
     debug('Upgrade Done!');
@@ -185,7 +187,6 @@ describe('SKR-Upgrade-test', function() {
   });
 
   // Perform Tests after Upgrade
-
   it('Listing all pods in cluster', async function() {
     await getContainerRestartsForAllNamespaces();
   });
@@ -197,21 +198,16 @@ describe('SKR-Upgrade-test', function() {
   // Cleanup
   const skipCleanup = getEnvOrThrow('SKIP_CLEANUP');
   if (skipCleanup === 'FALSE') {
-    it('Unregister Kyma resources from Compass', async function() {
-      await unregisterKymaFromCompass(director, options.scenarioName);
-    });
-
-    it('Test fixtures should be deleted', async function() {
-      await cleanMockTestFixture('mocks', testNS, true);
-    });
-
-    it('Deprovision SKR', async function() {
-      try {
-        await deprovisionSKR(keb, kcp, options.instanceID, deprovisioningTimeout);
-      } finally {
-        const runtimeStatus = await kcp.getRuntimeStatusOperations(options.instanceID);
-        await kcp.reconcileInformationLog(runtimeStatus);
+    after('Cleanup the resources', async function() {
+      this.timeout(deprovisioningTimeout);
+      //await cleanMockTestFixture('mocks', testNS, true);
+      await commerceMockCleanup(options.testNS);
+      if (!skipProvisioning) {
+        await deprovisionSKRInstance(options, deprovisioningTimeout);
+      } else {
+        console.log('An external SKR cluster was used, de-provisioning skipped');
       }
+      await unregisterKymaFromCompass(director, options.scenarioName);
     });
   }
 });
