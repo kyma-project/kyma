@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<testsuites name="production" tests="1" skipped="0" failures="0" errors="0" time="0.316744667">
-  <testsuite name="Istio is installed" tests="1" skipped="0" failures="0" errors="0" time="0.315853445">
-    <testcase name="Istio component installed in production profile has all required pods running" status="passed" time="0.315853445"></testcase>
-  </testsuite>
-</testsuites>
