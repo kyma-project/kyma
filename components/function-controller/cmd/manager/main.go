@@ -2,11 +2,11 @@ package main
 
 import (
 	"fmt"
+	serverlessLogging "github.com/kyma-project/kyma/components/function-controller/internal/logging"
 	"os"
 	"time"
 
 	"github.com/go-logr/zapr"
-	"github.com/kyma-project/kyma/common/logging/logger"
 	k8s "github.com/kyma-project/kyma/components/function-controller/internal/controllers/kubernetes"
 	"github.com/kyma-project/kyma/components/function-controller/internal/controllers/serverless"
 	"github.com/kyma-project/kyma/components/function-controller/internal/controllers/serverless/metrics"
@@ -66,31 +66,13 @@ func main() {
 		setupLog.Error(err, "unable to load config")
 		os.Exit(1)
 	}
-
-	logLevel, err := logger.MapLevel(config.LogLevel)
+	l, err := serverlessLogging.ConfigureLogger(config.LogLevel, config.LogFormat)
 	if err != nil {
 		ctrl.SetLogger(ctrlzap.New())
-		setupLog.Error(err, "unable to set logging level")
-		os.Exit(2)
-	}
-	format, err := logger.MapFormat(config.LogFormat)
-	if err != nil {
-		ctrl.SetLogger(ctrlzap.New())
-		setupLog.Error(err, "unable to set logging format")
+		setupLog.Error(err, "unable to configure logger")
 		os.Exit(1)
 	}
 
-	l, err := logger.New(format, logLevel)
-	if err != nil {
-		ctrl.SetLogger(ctrlzap.New())
-		setupLog.Error(err, "unable to set setup logger level")
-		os.Exit(3)
-	}
-
-	if err := logger.InitKlog(l, logLevel); err != nil {
-		setupLog.Error(err, "unable to set setup logger level")
-		os.Exit(5)
-	}
 	ctrl.SetLogger(zapr.NewLogger(l.WithContext().Desugar()))
 
 	zapLogger := l.WithContext()
