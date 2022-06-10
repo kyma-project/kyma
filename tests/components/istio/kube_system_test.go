@@ -55,10 +55,11 @@ func (i *istioInstallledCase) kubeSystemPodsShouldNotHaveSidecar() error {
 	if err != nil {
 		return err
 	}
+
 	for _, pod := range pods.Items {
 		if strings.Contains(pod.Name, "httpbin") {
 			err := wait.Poll(1*time.Second, 1*time.Minute, func() (done bool, err error) {
-				ready := podutils.IsPodAvailable(&pod, int32(1), metav1.Now())
+				ready := podutils.IsPodReady(&pod)
 				return ready, nil
 			})
 			if err != nil {
@@ -98,7 +99,6 @@ func (i *istioInstallledCase) deleteHttpBinInKubeSystem() error {
 	for _, r := range resources {
 		_ = dynClient.Resource(gvr(r)).Namespace(kubeSystemNamespace).Delete(context.Background(), r.GetName(), metav1.DeleteOptions{})
 	}
-
 	return nil
 }
 
@@ -107,7 +107,6 @@ func readFile(filepath string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-
 	return string(data), nil
 }
 
@@ -116,6 +115,7 @@ func readManifestToUnstructured(filepath string) ([]*unstructured.Unstructured, 
 	if err != nil {
 		return nil, err
 	}
+
 	var result []*unstructured.Unstructured
 	for _, resourceYAML := range strings.Split(string(manifest), "---") {
 		if strings.TrimSpace(resourceYAML) == "" {
@@ -129,7 +129,6 @@ func readManifestToUnstructured(filepath string) ([]*unstructured.Unstructured, 
 		}
 		result = append(result, obj)
 	}
-
 	return result, nil
 }
 
