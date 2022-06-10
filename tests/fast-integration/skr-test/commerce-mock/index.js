@@ -1,3 +1,5 @@
+const {getContainerRestartsForAllNamespaces} = require("../../utils");
+const {printRestartReport} = require("../../utils");
 const {
   checkFunctionResponse,
   checkInClusterEventDelivery,
@@ -58,8 +60,11 @@ function commerceMockTestPreparation(options) {
 
 // executes the actual commerce mock tests
 function commerceMockTests(testNamespace) {
+
+  let initialRestarts = undefined;
+
   it('in-cluster event should be delivered (structured and binary mode)', async function() {
-    await checkInClusterEventDelivery(testNamespace);
+    initialRestarts = await checkInClusterEventDelivery(testNamespace);
   });
 
   it('function should be reachable through secured API Rule', async function() {
@@ -77,6 +82,12 @@ function commerceMockTests(testNamespace) {
   it('order.created.v1 cloud event in binary mode should trigger the lastorder function', async function() {
     await sendCloudEventBinaryModeAndCheckResponse();
   });
+
+  it('Should print report of restarted containers, skipped if no crashes happened', async function() {
+    const afterTestRestarts = await getContainerRestartsForAllNamespaces();
+    printRestartReport(initialRestarts, afterTestRestarts);
+  });
+
 }
 
 function commerceMockCleanup(testNamespace) {
