@@ -20,6 +20,9 @@ spec:
     - jsonPath: .status.conditions[-1].type
       name: Status
       type: string
+    - jsonPath: .spec.enableUnsupportedPlugins
+      name: Unsupported-Plugins
+      type: boolean
     - jsonPath: .metadata.creationTimestamp
       name: Age
       type: date
@@ -43,6 +46,8 @@ spec:
           spec:
             description: LogPipelineSpec defines the desired state of LogPipeline
             properties:
+              enableUnsupportedPlugins:
+                type: boolean
               files:
                 items:
                   description: FileMount provides file content to be consumed by a

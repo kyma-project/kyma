@@ -31,6 +31,7 @@ The following authentication methods for your secured APIs are supported:
 
 - Basic Authentication
 - OAuth
+- OAuth 2.0 mTLS
 - Client Certificates
 
 > **NOTE:** Non-secured APIs are supported too, however, they are not recommended in the production environment.

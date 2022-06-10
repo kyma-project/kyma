@@ -65,8 +65,10 @@ var (
 	logFormat                  string
 	logLevel                   string
 	certDir                    string
-	allowedFilterPlugins       string
-	allowedOutputPlugins       string
+	supportedFilterPlugins     string
+	supportedOutputPlugins     string
+	deniedFilterPlugins        string
+	deniedOutputPlugins        string
 )
 
 //nolint:gochecknoinits
@@ -107,8 +109,11 @@ func main() {
 	flag.StringVar(&logFormat, "log-format", getEnvOrDefault("APP_LOG_FORMAT", "text"), "Log format (json or text)")
 	flag.StringVar(&logLevel, "log-level", getEnvOrDefault("APP_LOG_LEVEL", "debug"), "Log level (debug, info, warn, error, fatal)")
 	flag.StringVar(&certDir, "cert-dir", "/var/run/telemetry-webhook", "Webhook TLS certificate directory")
-	flag.StringVar(&allowedFilterPlugins, "allowed-filter-plugins", "", "Comma separated list of allowed filter plugins. If empty, all filter plugins are allowed.")
-	flag.StringVar(&allowedOutputPlugins, "allowed-output-plugins", "", "Comma separated list of allowed output plugins. If empty, all output plugins are allowed.")
+	flag.StringVar(&supportedFilterPlugins, "supported-filter-plugins", "", "Comma separated list of supported filter plugins. If empty, all filter plugins are allowed.")
+	flag.StringVar(&supportedOutputPlugins, "supported-output-plugins", "", "Comma separated list of supported output plugins. If empty, all output plugins are allowed.")
+	flag.StringVar(&deniedFilterPlugins, "denied-filter-plugins", "", "Comma separated list of denied filter plugins even if allowUnsupportedPlugins is enabled. If empty, all filter plugins are allowed.")
+	flag.StringVar(&deniedOutputPlugins, "denied-output-plugins", "", "Comma separated list of denied output plugins even if allowUnsupportedPlugins is enabled. If empty, all output plugins are allowed.")
+
 	flag.Parse()
 
 	ctrLogger, err := logger.New(logFormat, logLevel)
@@ -176,8 +181,11 @@ func main() {
 		fluentBitNs,
 		fluentbit.NewConfigValidator(fluentBitPath, fluentBitPluginDirectory),
 		fluentbit.NewPluginValidator(
-			strings.SplitN(strings.ReplaceAll(allowedFilterPlugins, " ", ""), ",", len(allowedFilterPlugins)),
-			strings.SplitN(strings.ReplaceAll(allowedOutputPlugins, " ", ""), ",", len(allowedOutputPlugins))),
+			strings.SplitN(strings.ReplaceAll(supportedFilterPlugins, " ", ""), ",", len(supportedFilterPlugins)),
+			strings.SplitN(strings.ReplaceAll(supportedOutputPlugins, " ", ""), ",", len(supportedOutputPlugins)),
+			strings.SplitN(strings.ReplaceAll(deniedFilterPlugins, " ", ""), ",", len(deniedFilterPlugins)),
+			strings.SplitN(strings.ReplaceAll(deniedOutputPlugins, " ", ""), ",", len(deniedOutputPlugins))),
+
 		emitterConfig,
 		fs.NewWrapper(),
 	)

@@ -47,7 +47,7 @@ global:
       version: "6567eccc"
     central_application_gateway:
       name: "central-application-gateway"
-      version: "3cffd7d4"
+      version: "PR-14401"
     busybox:
       name: "busybox"
       version: "1.34.1"
@@ -56,13 +56,3 @@ global:
     application_gateway_legacy_tests:
       name: "application-gateway-legacy-tests"
       version: "38a18642"
-
-tests:
-  application_connector_tests:
-    labels:
-      integration: true
-      after-upgrade: true
-    enabled: true
-    skipSslVerify: true
-    image:
-      pullPolicy: IfNotPresent

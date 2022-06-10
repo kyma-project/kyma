@@ -18,16 +18,9 @@ path-to-referenced-charts:
 
 release: build-image push-image
 
-build-image: pull-licenses
+build-image:
 	docker build -t $(IMG_NAME) .
 
 push-image:
 	docker tag $(IMG_NAME) $(IMG_NAME):$(TAG)
 	docker push $(IMG_NAME):$(TAG)
-
-pull-licenses:
-ifdef LICENSE_PULLER_PATH
-	bash $(LICENSE_PULLER_PATH)
-else
-	mkdir -p licenses
-endif
