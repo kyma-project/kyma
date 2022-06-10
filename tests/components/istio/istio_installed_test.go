@@ -21,7 +21,6 @@ import (
 )
 
 var k8sClient kubernetes.Interface
-var godogFormat string
 
 const (
 	istioNamespace         = "istio-system"
