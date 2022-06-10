@@ -4,6 +4,7 @@ go 1.18
 
 require (
 	github.com/kyma-project/kyma/components/application-operator v0.0.0-20220603121114-e1491c4678e0
+	github.com/kyma-project/kyma/components/compass-runtime-agent v0.0.0-20220610104048-9a7c7cab9342
 	github.com/stretchr/testify v1.7.1
 	k8s.io/apimachinery v0.24.1
 	k8s.io/client-go v0.24.1
@@ -21,7 +22,7 @@ require (
 	github.com/gogo/protobuf v1.3.2 // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/google/gnostic v0.5.7-v3refs // indirect
-	github.com/google/gofuzz v1.1.0 // indirect
+	github.com/google/gofuzz v1.2.0 // indirect
 	github.com/josharian/intern v1.0.0 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
 	github.com/mailru/easyjson v0.7.6 // indirect
