@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"context"
 	"fmt"
+	"io"
 	"log"
 	"os"
 	"path/filepath"
@@ -60,19 +61,29 @@ func initK8sClient() kubernetes.Interface {
 
 func TestIstioIstalled(t *testing.T) {
 	k8sClient = initK8sClient()
-	outputFile, err := os.Create(junitFileName)
-	if err != nil {
-		t.Fatal("could not create output junit file")
+	var writer io.Writer
+	godogFormat := "pretty"
+	if shouldExportJunit() {
+		outputFile, err := os.Create(junitFileName)
+		if err != nil {
+			t.Fatal("could not create output junit file")
+		}
+		fileWriter := bufio.NewWriter(outputFile)
+		defer fileWriter.Flush()
+		writer = fileWriter
+		godogFormat = "junit"
+	} else {
+		outWriter := os.Stdout
+		defer outWriter.Close()
+		writer = outWriter
 	}
-	writer := bufio.NewWriter(outputFile)
-	defer writer.Flush()
 
 	t.Run("TestIstioInstalledEvaluation", func(t *testing.T) {
 		suite := godog.TestSuite{
 			Name:                evalProfile,
 			ScenarioInitializer: InitializeScenarioEvalProfile,
 			Options: &godog.Options{
-				Format:   "junit",
+				Format:   godogFormat,
 				Paths:    []string{"features/istio_installed/istio_evaluation.feature"},
 				TestingT: t,
 				Output:   writer,
@@ -92,7 +103,7 @@ func TestIstioIstalled(t *testing.T) {
 			Name:                prodProfile,
 			ScenarioInitializer: InitializeScenarioProdProfile,
 			Options: &godog.Options{
-				Format:   "junit",
+				Format:   godogFormat,
 				Paths:    []string{"features/istio_installed/istio_production.feature"},
 				TestingT: t,
 				Output:   writer,
@@ -229,4 +240,8 @@ func InitializeScenarioProdProfile(ctx *godog.ScenarioContext) {
 
 func listPodsIstioNamespace(istiodPodsSelector metav1.ListOptions) (*corev1.PodList, error) {
 	return k8sClient.CoreV1().Pods(istioNamespace).List(context.Background(), istiodPodsSelector)
+}
+
+func shouldExportJunit() bool {
+	return os.Getenv(exportResultVar) == "true"
 }
