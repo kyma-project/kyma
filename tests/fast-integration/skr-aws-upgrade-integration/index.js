@@ -117,7 +117,6 @@ describe('SKR-Upgrade-test', function() {
     debug(version);
 
     await kcp.login();
-    // debug(loginOutput)
   });
 
   it(`Provision SKR with ID ${options.instanceID}`, async function() {
@@ -158,19 +157,21 @@ describe('SKR-Upgrade-test', function() {
     await assignRuntimeToScenario(director, skr.shoot.compassID, options.scenarioName);
   });
 
-  it('Execute commerceMockTest', async function() {
+  // Perform Tests before Upgrade
+
+  it('Execute commerceMockTestPreparation', async function() {
     commerceMockTestPreparation(options);
   });
-
-  // Perform Tests before Upgrade
 
   it('Listing all pods in cluster', async function() {
     await getContainerRestartsForAllNamespaces();
   });
 
-  it('Execute commerceMockTest', async function() {
+  it('Execute commerceMockTests', async function() {
     commerceMockTests(options.testNS);
   });
+
+  // Upgrade
 
   it('Perform Upgrade', async function() {
     await kcp.upgradeKyma(options.instanceID, kymaUpgradeVersion, upgradeTimeoutMin);
@@ -184,6 +185,7 @@ describe('SKR-Upgrade-test', function() {
   });
 
   // Perform Tests after Upgrade
+
   it('Listing all pods in cluster', async function() {
     await getContainerRestartsForAllNamespaces();
   });
