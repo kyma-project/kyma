@@ -1,12 +1,10 @@
 package istio
 
 import (
-	"bytes"
 	"context"
 	"fmt"
 	"log"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"testing"
 
@@ -125,13 +123,6 @@ func (i *istioInstallledCase) getIstioPods() error {
 }
 
 func (i *istioInstallledCase) aRunningKymaClusterWithProfile(profile string) error {
-	isInstalled, err := isKymaInstalled("main")
-	if err != nil {
-		return err
-	}
-	if !isInstalled {
-		return fmt.Errorf("kyma is not installed with version main")
-	}
 	p, ok := os.LookupEnv(deployedKymaProfileVar)
 	if !ok {
 		return fmt.Errorf("KYMA_PROFILE env variable is not set")
@@ -223,18 +214,6 @@ func InitializeScenarioProdProfile(ctx *godog.ScenarioContext) {
 	ctx.Step(`^there is (\d+) pod for Pilot$`, installedCase.thereIsPodForPilot)
 	ctx.Step(`^Istio pods are available$`, installedCase.istioPodsAreAvailable)
 	ctx.Step(`^HPA is deployed$`, installedCase.hPAIsDeployed)
-}
-
-func isKymaInstalled(version string) (bool, error) {
-	command := exec.Command("kyma", "version")
-	var out bytes.Buffer
-	command.Stdout = &out
-	err := command.Run()
-	if err != nil {
-		return false, fmt.Errorf("`kyma version` command returned error: %w", err)
-	}
-	fmt.Printf("Kyma cluster version: %s", version)
-	return true, nil
 }
 
 func listPodsIstioNamespace(istiodPodsSelector metav1.ListOptions) (*corev1.PodList, error) {
