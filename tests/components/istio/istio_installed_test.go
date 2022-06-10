@@ -241,8 +241,8 @@ func isKymaInstalled(version string) (bool, error) {
 	if err != nil {
 		return false, fmt.Errorf("`kyma version` command returned error: %w", err)
 	}
-	contains := strings.Contains(out.String(), fmt.Sprintf("Kyma cluster version: %s", version))
-	return contains, nil
+	fmt.Printf("Kyma cluster version: %s", version)
+	return true, nil
 }
 
 func listPodsIstioNamespace(istiodPodsSelector metav1.ListOptions) (*corev1.PodList, error) {
