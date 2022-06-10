@@ -22,15 +22,23 @@ import (
 )
 
 var k8sClient kubernetes.Interface
+var godogFormat string
 
 const (
 	istioNamespace         = "istio-system"
 	evalProfile            = "evaluation"
+	prodProfile            = "production"
 	deployedKymaProfileVar = "KYMA_PROFILE"
+	exportResultVar        = "EXPORT_RESULR"
 )
 
 func TestMain(m *testing.M) {
 	k8sClient = initK8sClient()
+	if os.Getenv(exportResultVar) == "true" {
+		godogFormat = "junit"
+	} else {
+		godogFormat = "pretty"
+	}
 	os.Exit(m.Run())
 }
 
@@ -62,13 +70,32 @@ func initK8sClient() kubernetes.Interface {
 	return k8sClient
 }
 
-func TestIstioInstalled(t *testing.T) {
+func TestIstioInstalledEvaluation(t *testing.T) {
 	suite := godog.TestSuite{
 		Name:                evalProfile,
 		ScenarioInitializer: InitializeScenarioEvalProfile,
 		Options: &godog.Options{
-			Format:   "pretty",
-			Paths:    []string{"features"},
+			Format:   godogFormat,
+			Paths:    []string{"features/istio_installed/istio_evaluation.feature"},
+			TestingT: t,
+		},
+	}
+	if suite.Name != os.Getenv(deployedKymaProfileVar) {
+		t.Skip()
+	}
+	if suite.Run() != 0 {
+		t.Fatal("non-zero status returned, failed to run feature tests")
+	}
+
+}
+
+func TestIstioInstalledProduction(t *testing.T) {
+	suite := godog.TestSuite{
+		Name:                prodProfile,
+		ScenarioInitializer: InitializeScenarioProdProfile,
+		Options: &godog.Options{
+			Format:   godogFormat,
+			Paths:    []string{"features/istio_installed/istio_production.feature"},
 			TestingT: t,
 		},
 	}
@@ -134,6 +161,17 @@ func (i *istioInstallledCase) hPAIsNotDeployed() error {
 	return nil
 }
 
+func (i *istioInstallledCase) hPAIsDeployed() error {
+	list, err := k8sClient.AutoscalingV1().HorizontalPodAutoscalers(istioNamespace).List(context.Background(), metav1.ListOptions{})
+	if err != nil {
+		return err
+	}
+	if len(list.Items) == 0 {
+		return fmt.Errorf("hpa should be deployed in %s", istioNamespace)
+	}
+	return nil
+}
+
 func (i *istioInstallledCase) istioComponentIsInstalled() error {
 	if i.pilotPods == nil && i.ingressGwPods == nil {
 		return fmt.Errorf("istio is not installed")
@@ -155,13 +193,13 @@ func (i *istioInstallledCase) istioPodsAreAvailable() error {
 
 func (i *istioInstallledCase) thereIsPodForIngressGateway(numberOfPodsRequired int) error {
 	if len(i.ingressGwPods.Items) != numberOfPodsRequired {
-		return fmt.Errorf("number of deployed IngressGW pods %d does not equal %d", len(i.pilotPods.Items), numberOfPodsRequired)
+		return fmt.Errorf("number of deployed IngressGW pods %d does not equal %d", len(i.ingressGwPods.Items), numberOfPodsRequired)
 	}
 	return nil
 }
 
 func (i *istioInstallledCase) thereIsPodForPilot(numberOfPodsRequired int) error {
-	if len(i.ingressGwPods.Items) != numberOfPodsRequired {
+	if len(i.pilotPods.Items) != numberOfPodsRequired {
 		return fmt.Errorf("number of deployed Pilot pods %d does not equal %d", len(i.pilotPods.Items), numberOfPodsRequired)
 	}
 	return nil
@@ -179,6 +217,20 @@ func InitializeScenarioEvalProfile(ctx *godog.ScenarioContext) {
 	ctx.Step(`^there is (\d+) pod for Pilot$`, installedCase.thereIsPodForPilot)
 	ctx.Step(`^Istio pods are available$`, installedCase.istioPodsAreAvailable)
 	ctx.Step(`^HPA is not deployed$`, installedCase.hPAIsNotDeployed)
+}
+
+func InitializeScenarioProdProfile(ctx *godog.ScenarioContext) {
+	installedCase := istioInstallledCase{}
+	ctx.Before(func(ctx context.Context, sc *godog.Scenario) (context.Context, error) {
+		err := installedCase.getIstioPods()
+		return ctx, err
+	})
+	ctx.Step(`^a running Kyma cluster with "([^"]*)" profile$`, installedCase.aRunningKymaClusterWithProfile)
+	ctx.Step(`^Istio component is installed$`, installedCase.istioComponentIsInstalled)
+	ctx.Step(`^there is (\d+) pod for Ingress gateway$`, installedCase.thereIsPodForIngressGateway)
+	ctx.Step(`^there is (\d+) pod for Pilot$`, installedCase.thereIsPodForPilot)
+	ctx.Step(`^Istio pods are available$`, installedCase.istioPodsAreAvailable)
+	ctx.Step(`^HPA is deployed$`, installedCase.hPAIsDeployed)
 }
 
 func isKymaInstalled(version string) (bool, error) {
