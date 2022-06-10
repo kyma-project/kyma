@@ -30,11 +30,6 @@ const (
 	junitFileName          = "junit-report.xml"
 )
 
-func TestMain(m *testing.M) {
-	k8sClient = initK8sClient()
-	os.Exit(m.Run())
-}
-
 func initK8sClient() kubernetes.Interface {
 	var kubeconfig string
 	if kConfig, ok := os.LookupEnv("KUBECONFIG"); !ok {
@@ -63,63 +58,55 @@ func initK8sClient() kubernetes.Interface {
 	return k8sClient
 }
 
-func TestIstioInstalledEvaluation(t *testing.T) {
-	suite := godog.TestSuite{
-		Name:                evalProfile,
-		ScenarioInitializer: InitializeScenarioEvalProfile,
-		Options: &godog.Options{
-			Format:   "pretty",
-			Paths:    []string{"features/istio_installed/istio_evaluation.feature"},
-			TestingT: t,
-		},
+func TestIstioIstalled(t *testing.T) {
+	k8sClient = initK8sClient()
+	outputFile, err := os.Create(junitFileName)
+	if err != nil {
+		t.Fatal("could not create output junit file")
 	}
-	if shouldExportJunit() {
-		suite.Options.Format = "junit"
-		outputFile, err := os.Create(junitFileName)
-		if err != nil {
-			t.Fatal("couldn't create output junit file")
+	writer := bufio.NewWriter(outputFile)
+	defer writer.Flush()
+
+	t.Run("TestIstioInstalledEvaluation", func(t *testing.T) {
+		suite := godog.TestSuite{
+			Name:                evalProfile,
+			ScenarioInitializer: InitializeScenarioEvalProfile,
+			Options: &godog.Options{
+				Format:   "junit",
+				Paths:    []string{"features/istio_installed/istio_evaluation.feature"},
+				TestingT: t,
+				Output:   writer,
+			},
 		}
-		writer := bufio.NewWriter(outputFile)
-		suite.Options.Output = writer
-		defer writer.Flush()
-	}
 
-	if suite.Name != os.Getenv(deployedKymaProfileVar) {
-		t.Skip()
-	}
-	if suite.Run() != 0 {
-		t.Fatal("non-zero status returned, failed to run feature tests")
-	}
-}
-
-func TestIstioInstalledProduction(t *testing.T) {
-	suite := godog.TestSuite{
-		Name:                prodProfile,
-		ScenarioInitializer: InitializeScenarioProdProfile,
-		Options: &godog.Options{
-			Format:   "pretty",
-			Paths:    []string{"features/istio_installed/istio_production.feature"},
-			TestingT: t,
-		},
-	}
-	if shouldExportJunit() {
-		suite.Options.Format = "junit"
-		outputFile, err := os.Create(junitFileName)
-		if err != nil {
-			t.Fatal("couldn't create output junit file")
+		if suite.Name != os.Getenv(deployedKymaProfileVar) {
+			t.Skip()
 		}
-		writer := bufio.NewWriter(outputFile)
-		suite.Options.Output = writer
-		defer writer.Flush()
-	}
+		if suite.Run() != 0 {
+			t.Fatal("non-zero status returned, failed to run feature tests")
+		}
+	})
 
-	if suite.Name != os.Getenv(deployedKymaProfileVar) {
-		t.Skip()
-	}
-	if suite.Run() != 0 {
-		t.Fatal("non-zero status returned, failed to run feature tests")
-	}
+	t.Run("TestIstioInstalledProduction", func(t *testing.T) {
+		suite := godog.TestSuite{
+			Name:                prodProfile,
+			ScenarioInitializer: InitializeScenarioProdProfile,
+			Options: &godog.Options{
+				Format:   "junit",
+				Paths:    []string{"features/istio_installed/istio_production.feature"},
+				TestingT: t,
+				Output:   writer,
+			},
+		}
 
+		if suite.Name != os.Getenv(deployedKymaProfileVar) {
+			t.Skip()
+		}
+		if suite.Run() != 0 {
+			t.Fatal("non-zero status returned, failed to run feature tests")
+		}
+
+	})
 }
 
 type istioInstallledCase struct {
@@ -242,8 +229,4 @@ func InitializeScenarioProdProfile(ctx *godog.ScenarioContext) {
 
 func listPodsIstioNamespace(istiodPodsSelector metav1.ListOptions) (*corev1.PodList, error) {
 	return k8sClient.CoreV1().Pods(istioNamespace).List(context.Background(), istiodPodsSelector)
-}
-
-func shouldExportJunit() bool {
-	return os.Getenv(exportResultVar) == "true"
 }
