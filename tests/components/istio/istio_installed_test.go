@@ -15,27 +15,32 @@ import (
 	"github.com/pkg/errors"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/client-go/discovery"
+	memory "k8s.io/client-go/discovery/cached"
+	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/kubernetes"
+	"k8s.io/client-go/restmapper"
 	"k8s.io/client-go/tools/clientcmd"
 	"k8s.io/client-go/util/homedir"
 	"k8s.io/kubectl/pkg/util/podutils"
 )
 
 var k8sClient kubernetes.Interface
+var dynClient dynamic.Interface
+var mapper *restmapper.DeferredDiscoveryRESTMapper
 
 const (
 	istioNamespace         = "istio-system"
 	evalProfile            = "evaluation"
 	deployedKymaProfileVar = "KYMA_PROFILE"
-	kubeSystemNamespace    = "kube-system"
 )
 
 func TestMain(m *testing.M) {
-	k8sClient = initK8sClient()
+	k8sClient, dynClient, mapper = initK8sClient()
 	os.Exit(m.Run())
 }
 
-func initK8sClient() kubernetes.Interface {
+func initK8sClient() (kubernetes.Interface, dynamic.Interface, *restmapper.DeferredDiscoveryRESTMapper) {
 	var kubeconfig string
 	if kConfig, ok := os.LookupEnv("KUBECONFIG"); !ok {
 		if home := homedir.HomeDir(); home != "" {
@@ -60,7 +65,17 @@ func initK8sClient() kubernetes.Interface {
 	if err != nil {
 		log.Fatalf(err.Error())
 	}
-	return k8sClient
+	dynClient, err := dynamic.NewForConfig(config)
+	if err != nil {
+		log.Fatalf(err.Error())
+	}
+	dc, err := discovery.NewDiscoveryClientForConfig(config)
+	if err != nil {
+		log.Fatalf(err.Error())
+	}
+
+	mapper := restmapper.NewDeferredDiscoveryRESTMapper(memory.NewMemCacheClient(dc))
+	return k8sClient, dynClient, mapper
 }
 
 func TestIstioInstalled(t *testing.T) {
@@ -85,21 +100,6 @@ func TestIstioInstalled(t *testing.T) {
 type istioInstallledCase struct {
 	pilotPods     *corev1.PodList
 	ingressGwPods *corev1.PodList
-}
-
-func TestKubeSystemSidecar(t *testing.T) {
-	suite := godog.TestSuite{
-		Name:                kubeSystemNamespace,
-		ScenarioInitializer: InitializeScenarioKubeSystem,
-		Options: &godog.Options{
-			Format:   "pretty",
-			Paths:    []string{"features/kube-system.feature"},
-			TestingT: t,
-		},
-	}
-	if suite.Run() != 0 {
-		t.Fatal("non-zero status returned, failed to run feature tests")
-	}
 }
 
 func (i *istioInstallledCase) getIstioPods() error {
@@ -183,19 +183,6 @@ func (i *istioInstallledCase) thereIsPodForPilot(numberOfPodsRequired int) error
 	return nil
 }
 
-func (i *istioInstallledCase) kubeSystemPodsShouldNotHaveSidecar() error {
-	istioPods, err := k8sClient.CoreV1().Pods(kubeSystemNamespace).List(context.Background(), metav1.ListOptions{
-		LabelSelector: "security.istio.io/tlsMode=istio",
-	})
-	if err != nil {
-		return err
-	}
-	if len(istioPods.Items) != 0 {
-		return fmt.Errorf("istio sidecars should not be deployed in %s", kubeSystemNamespace)
-	}
-	return nil
-}
-
 func InitializeScenarioEvalProfile(ctx *godog.ScenarioContext) {
 	installedCase := istioInstallledCase{}
 	ctx.Before(func(ctx context.Context, sc *godog.Scenario) (context.Context, error) {
@@ -224,14 +211,4 @@ func isKymaInstalled(version string) (bool, error) {
 
 func listPodsIstioNamespace(istiodPodsSelector metav1.ListOptions) (*corev1.PodList, error) {
 	return k8sClient.CoreV1().Pods(istioNamespace).List(context.Background(), istiodPodsSelector)
-}
-
-func InitializeScenarioKubeSystem(ctx *godog.ScenarioContext) {
-	installedCase := istioInstallledCase{}
-	ctx.Before(func(ctx context.Context, sc *godog.Scenario) (context.Context, error) {
-		err := installedCase.getIstioPods()
-		return ctx, err
-	})
-	ctx.Step(`^Istio component is installed$`, installedCase.istioComponentIsInstalled)
-	ctx.Step(`^there should be no pods with istio sidecar in kube-system namespace$`, installedCase.kubeSystemPodsShouldNotHaveSidecar)
 }
