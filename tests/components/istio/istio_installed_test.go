@@ -1,6 +1,7 @@
 package istio
 
 import (
+	"bufio"
 	"context"
 	"fmt"
 	"log"
@@ -25,6 +26,8 @@ const (
 	evalProfile            = "evaluation"
 	prodProfile            = "production"
 	deployedKymaProfileVar = "KYMA_PROFILE"
+	exportResultVar        = "EXPORT_RESULT"
+	junitFileName          = "junit-report.xml"
 )
 
 func TestMain(m *testing.M) {
@@ -70,13 +73,23 @@ func TestIstioInstalledEvaluation(t *testing.T) {
 			TestingT: t,
 		},
 	}
+	if shouldExportJunit() {
+		suite.Options.Format = "junit"
+		outputFile, err := os.Create(junitFileName)
+		if err != nil {
+			t.Fatal("couldn't create output junit file")
+		}
+		writer := bufio.NewWriter(outputFile)
+		suite.Options.Output = writer
+		defer writer.Flush()
+	}
+
 	if suite.Name != os.Getenv(deployedKymaProfileVar) {
 		t.Skip()
 	}
 	if suite.Run() != 0 {
 		t.Fatal("non-zero status returned, failed to run feature tests")
 	}
-
 }
 
 func TestIstioInstalledProduction(t *testing.T) {
@@ -89,6 +102,17 @@ func TestIstioInstalledProduction(t *testing.T) {
 			TestingT: t,
 		},
 	}
+	if shouldExportJunit() {
+		suite.Options.Format = "junit"
+		outputFile, err := os.Create(junitFileName)
+		if err != nil {
+			t.Fatal("couldn't create output junit file")
+		}
+		writer := bufio.NewWriter(outputFile)
+		suite.Options.Output = writer
+		defer writer.Flush()
+	}
+
 	if suite.Name != os.Getenv(deployedKymaProfileVar) {
 		t.Skip()
 	}
@@ -218,4 +242,8 @@ func InitializeScenarioProdProfile(ctx *godog.ScenarioContext) {
 
 func listPodsIstioNamespace(istiodPodsSelector metav1.ListOptions) (*corev1.PodList, error) {
 	return k8sClient.CoreV1().Pods(istioNamespace).List(context.Background(), istiodPodsSelector)
+}
+
+func shouldExportJunit() bool {
+	return os.Getenv(exportResultVar) == "true"
 }
