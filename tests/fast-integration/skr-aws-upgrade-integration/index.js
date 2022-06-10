@@ -1,4 +1,4 @@
-const {commerceMockTest} = require("../skr-test");
+const {commerceMockTestPreparation, commerceMockTests} = require("../skr-test");
 const {
   DirectorConfig,
   DirectorClient,
@@ -171,6 +171,9 @@ describe('SKR-Upgrade-test', function() {
   //       testNS,
   //   );
   // });
+  it('Execute commerceMockTest', async function() {
+    commerceMockTestPreparation(options);
+  });
 
   // Perform Tests before Upgrade
 
@@ -198,7 +201,7 @@ describe('SKR-Upgrade-test', function() {
   // });
 
   it('Execute commerceMockTest', async function() {
-    commerceMockTest(options);
+    commerceMockTests(options.testNS);
   });
 
   it('Perform Upgrade', async function() {
@@ -237,7 +240,7 @@ describe('SKR-Upgrade-test', function() {
   // });
 
   it('Execute commerceMockTest', async function() {
-    commerceMockTest(options);
+    commerceMockTests(options.testNS);
   });
 
   // Cleanup

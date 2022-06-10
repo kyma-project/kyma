@@ -118,4 +118,5 @@ function checkAuditLogsForAWS() {
 module.exports = {
   commerceMockTestPreparation,
   commerceMockTest,
+  commerceMockTests,
 };
