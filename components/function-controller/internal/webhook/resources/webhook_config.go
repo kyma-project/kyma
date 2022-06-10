@@ -141,6 +141,9 @@ func getRegistryConfigSecretMutatingWebhook(config WebhookConfig) admissionregis
 	failurePolicy := admissionregistrationv1.Fail
 	matchPolicy := admissionregistrationv1.Exact
 	sideEffects := admissionregistrationv1.SideEffectClassNone
+	secretSelector := map[string]string{
+		RemoteRegistryLabelKey: "config",
+	}
 
 	return admissionregistrationv1.MutatingWebhook{
 		Name: SecretMutationWebhookName,
@@ -159,9 +162,7 @@ func getRegistryConfigSecretMutatingWebhook(config WebhookConfig) admissionregis
 		SideEffects:             &sideEffects,
 		AdmissionReviewVersions: []string{"v1beta1", "v1"},
 		ObjectSelector: &metav1.LabelSelector{
-			MatchLabels: map[string]string{
-				RemoteRegistryLabelKey: "config",
-			},
+			MatchLabels: secretSelector,
 		},
 		Rules: []admissionregistrationv1.RuleWithOperations{
 			{
