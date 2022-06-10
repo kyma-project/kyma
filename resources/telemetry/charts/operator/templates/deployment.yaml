@@ -38,8 +38,10 @@ spec:
             - --env-secret={{ .Release.Name }}-{{ .Values.logProcessor }}-env
             - --files-cm={{ .Release.Name }}-{{ .Values.logProcessor }}-files
             - --fluent-bit-ns={{ .Release.Namespace }}
-            - --allowed-filter-plugins={{ join "," .Values.allowedPlugins.filter}}
-            - --allowed-output-plugins={{ join "," .Values.allowedPlugins.output}}
+            - --supported-filter-plugins={{ join "," .Values.supportedPlugins.filter}}
+            - --supported-output-plugins={{ join "," .Values.supportedPlugins.output}}
+            - --denied-filter-plugins={{ join "," .Values.deniedPlugins.filter}}
+            - --denied-output-plugins={{ join "," .Values.deniedPlugins.output}}
           name: manager
           ports:
           - containerPort: 9443

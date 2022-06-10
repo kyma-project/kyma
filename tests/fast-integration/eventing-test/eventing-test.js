@@ -51,8 +51,7 @@ const {
 } = require('./utils');
 const {
   bebBackend,
-  natsBackend,
-  eventMeshNamespace,
+  natsBackend, getEventMeshNamespace,
 } = require('./common/common');
 const {
   assert,
@@ -219,7 +218,7 @@ describe('Eventing tests', function() {
 
   context('with BEB backend', function() {
     // skip publishing cloud events for beb backend when event mesh credentials file is missing
-    if (eventMeshNamespace === undefined) {
+    if (getEventMeshNamespace() === undefined) {
       debug('Skipping E2E eventing tests for BEB backend due to missing EVENTMESH_SECRET_FILE');
       return;
     }

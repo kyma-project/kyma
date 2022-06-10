@@ -32,6 +32,8 @@ type NatsConfig struct {
 	JSStreamName string `envconfig:"JS_STREAM_NAME" required:"true"`
 	// Storage type of the stream, memory or file.
 	JSStreamStorageType string `envconfig:"JS_STREAM_STORAGE_TYPE" default:"memory"`
+	// Number of replicas for the JetStream stream
+	JSStreamReplicas int `envconfig:"JS_STREAM_REPLICAS" default:"1"`
 	// Retention policy specifies when to delete events from the stream.
 	//  interest: when all known observables have acknowledged a message, it can be removed.
 	//  limits: messages are retained until any given limit is reached.

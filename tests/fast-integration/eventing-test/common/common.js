@@ -1,6 +1,5 @@
 const fs = require('fs');
 const eventMeshSecretFilePath = process.env.EVENTMESH_SECRET_FILE || '';
-const eventMeshNamespace = getEventMeshNamespace();
 const natsBackend = 'nats';
 const bebBackend = 'beb';
 
@@ -20,7 +19,7 @@ function getEventMeshNamespace() {
 
 module.exports = {
   eventMeshSecretFilePath,
-  eventMeshNamespace,
+  getEventMeshNamespace,
   natsBackend,
   bebBackend,
 };

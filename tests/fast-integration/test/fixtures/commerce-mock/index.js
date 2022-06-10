@@ -27,7 +27,6 @@ const {
   debug,
   isDebugEnabled,
   toBase64,
-  ensureApplicationMapping,
   eventingSubscription,
   k8sDelete,
   getSecretData,
@@ -52,7 +51,7 @@ const {
   OAuthCredentials,
 } = require('../../../lib/oauth');
 
-const {bebBackend, eventMeshNamespace} = require('../../../eventing-test/common/common');
+const {bebBackend, getEventMeshNamespace} = require('../../../eventing-test/common/common');
 
 const commerceMockYaml = fs.readFileSync(
     path.join(__dirname, './commerce-mock.yaml'),
@@ -208,7 +207,7 @@ async function sendLegacyEventAndCheckResponse(mockNamespace = 'mocks') {
 async function sendCloudEventStructuredModeAndCheckResponse(backendType ='nats', mockNamespace = 'mocks') {
   let source = 'commerce';
   if (backendType === bebBackend) {
-    source = eventMeshNamespace;
+    source = getEventMeshNamespace();
   }
   const body = {
     'specversion': '1.0',
@@ -232,7 +231,7 @@ async function sendCloudEventStructuredModeAndCheckResponse(backendType ='nats',
 async function sendCloudEventBinaryModeAndCheckResponse(backendType = 'nats', mockNamespace = 'mocks') {
   let source = 'commerce';
   if (backendType === bebBackend) {
-    source = eventMeshNamespace;
+    source = getEventMeshNamespace();
   }
   const body = {
     'data': {'orderCode': '567'},
@@ -524,8 +523,6 @@ async function connectMockCompass(client, appName, scenarioName, mockHost, targe
   debug(`Connecting ${mockHost}`);
   await connectCommerceMock(mockHost, pairingBody);
 
-  debug(`Creating application mapping for mp-${appName} in ${targetNamespace}`);
-  await ensureApplicationMapping(`mp-${appName}`, targetNamespace);
   debug('Commerce mock connected to Compass');
 }
 
@@ -670,7 +667,6 @@ function getResourcePaths(namespace) {
     `/apis/gateway.kyma-project.io/v1alpha1/namespaces/${namespace}/apirules`,
     `/apis/apps/v1/namespaces/${namespace}/deployments`,
     `/api/v1/namespaces/${namespace}/services`,
-    `/apis/applicationconnector.kyma-project.io/v1alpha1/namespaces/${namespace}/applicationmappings`,
   ];
 }
 
