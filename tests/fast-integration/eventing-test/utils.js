@@ -25,7 +25,9 @@ const backendK8sSecretName = process.env.BACKEND_SECRET_NAME || 'eventing-backen
 const backendK8sSecretNamespace = process.env.BACKEND_SECRET_NAMESPACE || 'default';
 const timeoutTime = 10 * 60 * 1000;
 const slowTime = 5000;
-const streamConfig = {};
+const streamConfig = {
+  isJetStreamEnabled: 'false',
+};
 
 // SKR related constants
 let gardener = null;
@@ -98,6 +100,10 @@ async function getStreamConfigForJetStream() {
   res.body?.items[0]?.spec.containers.find((container) =>
     container.name === 'controller',
   ).env.forEach((env) => {
+    if (env.name === 'ENABLE_JETSTREAM_BACKEND') {
+      streamConfig['isJetStreamEnabled'] = env.value;
+      envsCount++;
+    }
     if (env.name === 'JS_STREAM_RETENTION_POLICY') {
       streamConfig['retention_policy'] = env.value;
       envsCount++;
@@ -108,12 +114,16 @@ async function getStreamConfigForJetStream() {
     }
   });
   // check to make sure the environment variables exist
-  return envsCount === 2;
+  return envsCount === 3;
 }
 
 function skipAtLeastOnceDeliveryTest() {
   return !(streamConfig['retention_policy'] === 'limits' &&
       streamConfig['consumer_deliver_policy'] === 'all');
+}
+
+function isJetStreamEnabled() {
+  return streamConfig['isJetStreamEnabled'] === 'true';
 }
 
 module.exports = {
@@ -135,4 +145,5 @@ module.exports = {
   getNatsPods,
   getStreamConfigForJetStream,
   skipAtLeastOnceDeliveryTest,
+  isJetStreamEnabled,
 };

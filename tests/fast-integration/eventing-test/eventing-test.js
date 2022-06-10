@@ -48,6 +48,7 @@ const {
   getNatsPods,
   getStreamConfigForJetStream,
   skipAtLeastOnceDeliveryTest,
+  isJetStreamEnabled,
 } = require('./utils');
 const {
   bebBackend,
@@ -223,8 +224,10 @@ describe('Eventing tests', function() {
     eventingTestSuite(natsBackend, isSKR);
     // Running Eventing tracing tests
     eventingTracingTestSuite(isSKR);
-    // Running Eventing Monitoring tests
-    eventingMonitoringTest(natsBackend, isSKR);
+
+    it('Run Eventing Monitoring tests', async function() {
+      await eventingMonitoringTest(natsBackend, isSKR, isJetStreamEnabled());
+    });
   });
 
   context('with BEB backend', function() {
@@ -248,8 +251,10 @@ describe('Eventing tests', function() {
     });
     // Running Eventing end-to-end tests
     eventingTestSuite(bebBackend, isSKR);
-    // Running Eventing Monitoring tests
-    eventingMonitoringTest(bebBackend, isSKR);
+
+    it('Run Eventing Monitoring tests', async function() {
+      await eventingMonitoringTest(bebBackend, isSKR, isJetStreamEnabled());
+    });
   });
 
   context('with Nats backend switched back from BEB', async function() {
@@ -267,8 +272,10 @@ describe('Eventing tests', function() {
     eventingTestSuite(natsBackend, isSKR);
     // Running Eventing tracing tests
     eventingTracingTestSuite(isSKR);
-    // Running Eventing Monitoring tests
-    eventingMonitoringTest(natsBackend, isSKR);
+
+    it('Run Eventing Monitoring tests', async function() {
+      await eventingMonitoringTest(natsBackend, isSKR, isJetStreamEnabled());
+    });
   });
 
   after('Unexpose Grafana', async function() {
