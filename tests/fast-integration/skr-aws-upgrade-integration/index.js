@@ -1,4 +1,3 @@
-const {commerceMockTestPreparation, commerceMockTests} = require("../skr-test");
 const {
   DirectorConfig,
   DirectorClient,
@@ -20,25 +19,21 @@ const {GardenerConfig, GardenerClient} = require('../gardener');
 const {
   debug,
   initializeK8sClient,
-  printRestartReport,
   getContainerRestartsForAllNamespaces,
   getEnvOrThrow,
   switchDebug,
 } = require('../utils');
 const {
-  ensureCommerceMockWithCompassTestFixture,
-  checkInClusterEventDelivery,
-  checkFunctionResponse,
-  sendLegacyEventAndCheckResponse,
+  commerceMockTestPreparation,
+  commerceMockTests} = require('../skr-test');
+const {
   cleanMockTestFixture,
 } = require('../test/fixtures/commerce-mock');
 const {
   KCPConfig,
   KCPWrapper,
 } = require('../kcp/client');
-const {
-  saveKubeconfig,
-} = require('../skr-svcat-migration-test/test-helpers');
+const {saveKubeconfig} = require('../skr-svcat-migration-test/test-helpers');
 const {BTPOperatorCreds} = require('../smctl/helpers');
 
 describe('SKR-Upgrade-test', function() {
@@ -163,14 +158,6 @@ describe('SKR-Upgrade-test', function() {
     await assignRuntimeToScenario(director, skr.shoot.compassID, options.scenarioName);
   });
 
-  // it('CommerceMock test fixture should be ready', async function() {
-  //   await ensureCommerceMockWithCompassTestFixture(director,
-  //       options.appName,
-  //       options.scenarioName,
-  //       'mocks',
-  //       testNS,
-  //   );
-  // });
   it('Execute commerceMockTest', async function() {
     commerceMockTestPreparation(options);
   });
@@ -180,25 +167,6 @@ describe('SKR-Upgrade-test', function() {
   it('Listing all pods in cluster', async function() {
     await getContainerRestartsForAllNamespaces();
   });
-
-  // let initialRestarts;
-  //
-  // it('in-cluster event should be delivered', async function() {
-  //   initialRestarts = await checkInClusterEventDelivery(testNS);
-  // });
-  //
-  // it('function should be reachable through secured API Rule', async function() {
-  //   await checkFunctionResponse(testNS);
-  // });
-  //
-  // it('order.created.v1 legacy event should trigger the lastorder function', async function() {
-  //   await sendLegacyEventAndCheckResponse();
-  // });
-  //
-  // it('Should print report of restarted containers, skipped if no crashes happened', async function() {
-  //   const afterTestRestarts = await getContainerRestartsForAllNamespaces();
-  //   printRestartReport(initialRestarts, afterTestRestarts);
-  // });
 
   it('Execute commerceMockTest', async function() {
     commerceMockTests(options.testNS);
@@ -219,25 +187,6 @@ describe('SKR-Upgrade-test', function() {
   it('Listing all pods in cluster', async function() {
     await getContainerRestartsForAllNamespaces();
   });
-
-  // initialRestarts = undefined;
-  //
-  // it('in-cluster event should be delivered', async function() {
-  //   initialRestarts = await checkInClusterEventDelivery(testNS);
-  // });
-  //
-  // it('function should be reachable through secured API Rule', async function() {
-  //   await checkFunctionResponse(testNS);
-  // });
-  //
-  // it('order.created.v1 legacy event should trigger the lastorder function', async function() {
-  //   await sendLegacyEventAndCheckResponse();
-  // });
-  //
-  // it('Should print report of restarted containers, skipped if no crashes happened', async function() {
-  //   const afterTestRestarts = await getContainerRestartsForAllNamespaces();
-  //   printRestartReport(initialRestarts, afterTestRestarts);
-  // });
 
   it('Execute commerceMockTest', async function() {
     commerceMockTests(options.testNS);

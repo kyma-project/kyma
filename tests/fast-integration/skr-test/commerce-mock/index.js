@@ -1,5 +1,7 @@
-const {getContainerRestartsForAllNamespaces} = require("../../utils");
-const {printRestartReport} = require("../../utils");
+const {
+  getContainerRestartsForAllNamespaces,
+  printRestartReport,
+} = require('../../utils');
 const {
   checkFunctionResponse,
   checkInClusterEventDelivery,
@@ -60,7 +62,6 @@ function commerceMockTestPreparation(options) {
 
 // executes the actual commerce mock tests
 function commerceMockTests(testNamespace) {
-
   let initialRestarts = undefined;
 
   it('in-cluster event should be delivered (structured and binary mode)', async function() {
@@ -87,7 +88,6 @@ function commerceMockTests(testNamespace) {
     const afterTestRestarts = await getContainerRestartsForAllNamespaces();
     printRestartReport(initialRestarts, afterTestRestarts);
   });
-
 }
 
 function commerceMockCleanup(testNamespace) {
