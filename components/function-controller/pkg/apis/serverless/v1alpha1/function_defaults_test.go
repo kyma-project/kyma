@@ -50,6 +50,17 @@ func TestSetDefaults(t *testing.T) {
 		},
 	}
 
+	MRuntimeResources := corev1.ResourceRequirements{
+		Requests: corev1.ResourceList{
+			corev1.ResourceCPU:    resource.MustParse("50m"),
+			corev1.ResourceMemory: resource.MustParse("64Mi"),
+		},
+		Limits: corev1.ResourceList{
+			corev1.ResourceCPU:    resource.MustParse("100m"),
+			corev1.ResourceMemory: resource.MustParse("128Mi"),
+		},
+	}
+
 	buildResources := `
 {
 "slow":{"requestCpu": "350m","requestMemory": "350Mi","limitCpu": "700m","limitMemory": "700Mi"},
@@ -57,6 +68,17 @@ func TestSetDefaults(t *testing.T) {
 "fast":{"requestCpu": "1100m","requestMemory": "1100Mi", "limitCpu": "1800m","limitMemory": "1800Mi"}
 }
 `
+
+	fastBuildResources := corev1.ResourceRequirements{
+		Limits: corev1.ResourceList{
+			corev1.ResourceCPU:    resource.MustParse("1800m"),
+			corev1.ResourceMemory: resource.MustParse("1800Mi"),
+		},
+		Requests: corev1.ResourceList{
+			corev1.ResourceCPU:    resource.MustParse("1100m"),
+			corev1.ResourceMemory: resource.MustParse("1100Mi"),
+		},
+	}
 
 	for testName, testData := range map[string]struct {
 		givenFunc    Function
@@ -451,27 +473,32 @@ func TestSetDefaults(t *testing.T) {
 					BuildResourcesPresetLabel:    "fast",
 				},
 			}, Spec: FunctionSpec{
-				Runtime:     Nodejs14,
-				Resources:   LRuntimeResources,
-				MinReplicas: &two,
-				MaxReplicas: &two,
+				Runtime:        Nodejs14,
+				Resources:      LRuntimeResources,
+				BuildResources: fastBuildResources,
+				MinReplicas:    &two,
+				MaxReplicas:    &two,
 			},
 			},
 		},
-		"Should set function profile to function presets L instead of default value": {
+		"Should set function profile to function presets M instead of default value": {
 			givenFunc: Function{
 				ObjectMeta: v1.ObjectMeta{
-					Labels: map[string]string{},
+					Labels: map[string]string{
+						FunctionResourcesPresetLabel: "M",
+					},
 				},
 				Spec: FunctionSpec{
 					Runtime: Python39,
 				},
 			},
 			expectedFunc: Function{ObjectMeta: v1.ObjectMeta{
-				Labels: map[string]string{},
+				Labels: map[string]string{
+					FunctionResourcesPresetLabel: "M",
+				},
 			}, Spec: FunctionSpec{
 				Runtime:     Python39,
-				Resources:   LRuntimeResources,
+				Resources:   MRuntimeResources,
 				MinReplicas: &one,
 				MaxReplicas: &one,
 			}},
