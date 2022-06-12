@@ -808,7 +808,7 @@ kyma:
         cpu: 50m
         memory: 100Mi
       requests:
-        cpu: 10m
+        cpu: 20m
         memory: 15Mi
 
 global:

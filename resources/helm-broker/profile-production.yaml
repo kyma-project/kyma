@@ -23,5 +23,5 @@ etcd-stateful:
         cpu: 200m
         memory: 320Mi
       requests:
-        cpu: 10m
+        cpu: 25m
         memory: 64Mi
