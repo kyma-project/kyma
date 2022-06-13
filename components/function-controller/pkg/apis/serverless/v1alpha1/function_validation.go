@@ -141,16 +141,31 @@ func validateResources(resources corev1.ResourceRequirements, minMemory, minCPU 
 	limits := resources.Limits
 	requests := resources.Requests
 	allErrs := []string{}
-	// We will only validate if this is set.
+
 	if requests != nil {
-		if requests.Cpu().Cmp(minCPU) == -1 {
-			allErrs = append(allErrs, fmt.Sprintf("%s.requests.cpu(%s) should be higher than minimal value (%s)",
-				parent, requests.Cpu().String(), minCPU.String()))
-		}
-		if requests.Memory().Cmp(minMemory) == -1 {
-			allErrs = append(allErrs, fmt.Sprintf("%s.requests.memory(%s) should be higher than minimal value (%s)",
-				parent, requests.Memory().String(), minMemory.String()))
-		}
+		allErrs = append(allErrs, validateRequests(resources, minMemory, minCPU, parent)...)
+	}
+
+	if limits != nil {
+		allErrs = append(allErrs, validateLimites(resources, minMemory, minCPU, parent)...)
+	}
+	return returnAllErrs("invalid function resources", allErrs)
+}
+
+func validateRequests(resources corev1.ResourceRequirements, minMemory, minCPU resource.Quantity, parent string) []string {
+	limits := resources.Limits
+	requests := resources.Requests
+	allErrs := []string{}
+
+	if requests.Cpu().Cmp(minCPU) == -1 {
+		allErrs = append(allErrs, fmt.Sprintf("%s.requests.cpu(%s) should be higher than minimal value (%s)",
+			parent, requests.Cpu().String(), minCPU.String()))
+	}
+	if requests.Memory().Cmp(minMemory) == -1 {
+		allErrs = append(allErrs, fmt.Sprintf("%s.requests.memory(%s) should be higher than minimal value (%s)",
+			parent, requests.Memory().String(), minMemory.String()))
+	}
+	if limits != nil {
 		if requests.Cpu().Cmp(*limits.Cpu()) == 1 {
 			allErrs = append(allErrs, fmt.Sprintf("%s.limits.cpu(%s) should be higher than %s.requests.cpu(%s)",
 				parent, limits.Cpu().String(), parent, requests.Cpu().String()))
@@ -160,7 +175,14 @@ func validateResources(resources corev1.ResourceRequirements, minMemory, minCPU 
 				parent, limits.Memory().String(), parent, requests.Memory().String()))
 		}
 	}
-	// We will only validate if this is set.
+
+	return allErrs
+}
+
+func validateLimites(resources corev1.ResourceRequirements, minMemory, minCPU resource.Quantity, parent string) []string {
+	limits := resources.Limits
+	allErrs := []string{}
+
 	if limits != nil {
 		if limits.Cpu().Cmp(minCPU) == -1 {
 			allErrs = append(allErrs, fmt.Sprintf("%s.limits.cpu(%s) should be higher than minimal value (%s)",
@@ -171,9 +193,8 @@ func validateResources(resources corev1.ResourceRequirements, minMemory, minCPU 
 				parent, limits.Memory().String(), minMemory.String()))
 		}
 	}
-	return returnAllErrs("invalid function resources", allErrs)
+	return allErrs
 }
-
 func (spec *FunctionSpec) validateReplicas(vc *ValidationConfig) error {
 	minValue := vc.Function.Replicas.MinValue
 	maxReplicas := spec.MaxReplicas

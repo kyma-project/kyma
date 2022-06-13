@@ -503,7 +503,7 @@ func TestSetDefaults(t *testing.T) {
 				MaxReplicas: &one,
 			}},
 		},
-		"Should properly merge resources presets - case case with missing buildResources Requests": {
+		"Should properly merge resources presets - case with missing buildResources Requests": {
 			givenFunc: Function{
 				ObjectMeta: v1.ObjectMeta{
 					Labels: map[string]string{
