@@ -183,21 +183,19 @@ function runDashboardTestCase(dashboardName, test) {
   }, 120, 5000);
 }
 
-function eventingMonitoringTest(backend, isSkr, isJetStreamEnabled = false) {
+async function eventingMonitoringTest(backend, isSkr, isJetStreamEnabled = false) {
   let allDashboards = dashboards;
+  if (isJetStreamEnabled) {
+    allDashboards = Object.assign(allDashboards, getJetStreamDashboardTests());
+  }
   if (isSkr) {
     allDashboards = Object.assign(allDashboards, skrDashboards);
   }
 
-  if (isJetStreamEnabled) {
-    allDashboards = Object.assign(allDashboards, getJetStreamDashboardTests());
-  }
-
   for (const [dashboardName, test] of Object.entries(allDashboards)) {
     if (test.backends.includes(backend)) {
-      it('Testing dashboard: ' + test.title, async () => {
-        await runDashboardTestCase(dashboardName, test);
-      });
+      console.log('Testing dashboard: ' + test.title);
+      await runDashboardTestCase(dashboardName, test);
     }
   }
 }

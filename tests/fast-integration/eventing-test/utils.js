@@ -16,8 +16,6 @@ const {GardenerClient, GardenerConfig} = require('../gardener');
 const {eventMeshSecretFilePath} = require('./common/common');
 const isSKR = process.env.KYMA_TYPE === 'SKR';
 const skipResourceCleanup = process.env.SKIP_CLEANUP || false;
-const isJetStreamEnabled = process.env.BACKEND === 'nats_jetstream';
-const isFileStorage = process.env.STORAGE === 'file';
 const suffix = getSuffix(isSKR);
 const appName = `app-${suffix}`;
 const scenarioName = `test-${suffix}`;
@@ -27,6 +25,9 @@ const backendK8sSecretName = process.env.BACKEND_SECRET_NAME || 'eventing-backen
 const backendK8sSecretNamespace = process.env.BACKEND_SECRET_NAMESPACE || 'default';
 const timeoutTime = 10 * 60 * 1000;
 const slowTime = 5000;
+const streamConfig = {
+  isJetStreamEnabled: 'false',
+};
 
 // SKR related constants
 let gardener = null;
@@ -90,6 +91,41 @@ async function getNatsPods() {
   return await listPods(labelSelector, 'kyma-system');
 }
 
+// getStreamConfigForJetStream gets the stream retention policy and the consumer deliver policy env variables
+// from the eventing controller pod and also checks if these env variables exist on the pod.
+async function getStreamConfigForJetStream() {
+  const labelSelector = 'app.kubernetes.io/instance=eventing,app.kubernetes.io/name=controller';
+  const res = await listPods(labelSelector, 'kyma-system');
+  let envsCount = 0;
+  res.body?.items[0]?.spec.containers.find((container) =>
+    container.name === 'controller',
+  ).env.forEach((env) => {
+    if (env.name === 'ENABLE_JETSTREAM_BACKEND') {
+      streamConfig['isJetStreamEnabled'] = env.value;
+      envsCount++;
+    }
+    if (env.name === 'JS_STREAM_RETENTION_POLICY') {
+      streamConfig['retention_policy'] = env.value;
+      envsCount++;
+    }
+    if (env.name === 'JS_CONSUMER_DELIVER_POLICY') {
+      streamConfig['consumer_deliver_policy'] = env.value;
+      envsCount++;
+    }
+  });
+  // check to make sure the environment variables exist
+  return envsCount === 3;
+}
+
+function skipAtLeastOnceDeliveryTest() {
+  return !(streamConfig['retention_policy'] === 'limits' &&
+      streamConfig['consumer_deliver_policy'] === 'all');
+}
+
+function isJetStreamEnabled() {
+  return streamConfig['isJetStreamEnabled'] === 'true';
+}
+
 module.exports = {
   appName,
   scenarioName,
@@ -106,7 +142,8 @@ module.exports = {
   suffix,
   cleanupTestingResources,
   getRegisteredCompassScenarios,
-  isJetStreamEnabled,
-  isFileStorage,
   getNatsPods,
+  getStreamConfigForJetStream,
+  skipAtLeastOnceDeliveryTest,
+  isJetStreamEnabled,
 };

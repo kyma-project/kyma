@@ -27,7 +27,6 @@ const {
   debug,
   isDebugEnabled,
   toBase64,
-  ensureApplicationMapping,
   eventingSubscription,
   k8sDelete,
   getSecretData,
@@ -52,7 +51,7 @@ const {
   OAuthCredentials,
 } = require('../../../lib/oauth');
 
-const {bebBackend, eventMeshNamespace} = require('../../../eventing-test/common/common');
+const {bebBackend, getEventMeshNamespace} = require('../../../eventing-test/common/common');
 
 const commerceMockYaml = fs.readFileSync(
     path.join(__dirname, './commerce-mock.yaml'),
@@ -123,7 +122,7 @@ async function checkFunctionResponse(functionNamespace, mockNamespace = 'mocks')
   const accessToken = await oAuthTokenGetter.getToken(['read', 'write']);
 
   // expect no error when authorized
-  let res = await retryPromise(
+  const res = await retryPromise(
       () => axios.post(`https://lastorder.${host}/function`, {orderCode: '789'}, {
         timeout: 5000,
         headers: {Authorization: `bearer ${accessToken}`},
@@ -139,7 +138,7 @@ async function checkFunctionResponse(functionNamespace, mockNamespace = 'mocks')
   // expect error when unauthorized
   let errorOccurred = false;
   try {
-    res = await axios.post(`https://lastorder.${host}/function`, {orderCode: '789'}, {timeout: 5000});
+    await axios.post(`https://lastorder.${host}/function`, {orderCode: '789'}, {timeout: 5000});
   } catch (err) {
     errorOccurred = true;
     expect(err.response.status).to.be.equal(401);
@@ -208,7 +207,7 @@ async function sendLegacyEventAndCheckResponse(mockNamespace = 'mocks') {
 async function sendCloudEventStructuredModeAndCheckResponse(backendType ='nats', mockNamespace = 'mocks') {
   let source = 'commerce';
   if (backendType === bebBackend) {
-    source = eventMeshNamespace;
+    source = getEventMeshNamespace();
   }
   const body = {
     'specversion': '1.0',
@@ -232,7 +231,7 @@ async function sendCloudEventStructuredModeAndCheckResponse(backendType ='nats',
 async function sendCloudEventBinaryModeAndCheckResponse(backendType = 'nats', mockNamespace = 'mocks') {
   let source = 'commerce';
   if (backendType === bebBackend) {
-    source = eventMeshNamespace;
+    source = getEventMeshNamespace();
   }
   const body = {
     'data': {'orderCode': '567'},
@@ -524,8 +523,6 @@ async function connectMockCompass(client, appName, scenarioName, mockHost, targe
   debug(`Connecting ${mockHost}`);
   await connectCommerceMock(mockHost, pairingBody);
 
-  debug(`Creating application mapping for mp-${appName} in ${targetNamespace}`);
-  await ensureApplicationMapping(`mp-${appName}`, targetNamespace);
   debug('Commerce mock connected to Compass');
 }
 
@@ -551,7 +548,8 @@ async function ensureCommerceMockWithCompassTestFixture(
     appName,
     scenarioName,
     mockNamespace,
-    targetNamespace) {
+    targetNamespace,
+    compassScenarioAlreadyExist = false) {
   const lastOrderFunction = prepareFunction('central-app-gateway-compass', `mp-${appName}`);
 
   const mockHost = await provisionCommerceMockResources(
@@ -666,7 +664,6 @@ function getResourcePaths(namespace) {
     `/apis/gateway.kyma-project.io/v1alpha1/namespaces/${namespace}/apirules`,
     `/apis/apps/v1/namespaces/${namespace}/deployments`,
     `/api/v1/namespaces/${namespace}/services`,
-    `/apis/applicationconnector.kyma-project.io/v1alpha1/namespaces/${namespace}/applicationmappings`,
   ];
 }
 

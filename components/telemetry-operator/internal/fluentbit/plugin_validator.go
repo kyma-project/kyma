@@ -13,27 +13,31 @@ type PluginValidator interface {
 }
 
 type pluginValidator struct {
-	allowedFilterPlugins []string
-	allowedOutputPlugins []string
+	supportedFilterPlugins []string
+	supportedOutputPlugins []string
+	deniedFilterPlugins    []string
+	deniedOutputPlugins    []string
 }
 
-func NewPluginValidator(allowedFilterPlugins []string, allowedOutputPlugins []string) PluginValidator {
+func NewPluginValidator(supportedFilerPlugins, supportedOutputPlugins, deniedFilterPlugins, deniedOutputPlugins []string) PluginValidator {
 	return &pluginValidator{
-		allowedFilterPlugins: allowedFilterPlugins,
-		allowedOutputPlugins: allowedOutputPlugins,
+		supportedFilterPlugins: supportedFilerPlugins,
+		supportedOutputPlugins: supportedOutputPlugins,
+		deniedFilterPlugins:    deniedFilterPlugins,
+		deniedOutputPlugins:    deniedOutputPlugins,
 	}
 }
 
 func (v *pluginValidator) Validate(logPipeline *telemetryv1alpha1.LogPipeline, logPipelines *telemetryv1alpha1.LogPipelineList) error {
 
 	for _, filterPlugin := range logPipeline.Spec.Filters {
-		if err := checkIfPluginIsValid("filter", filterPlugin.Content, logPipeline.Name, v.allowedFilterPlugins, logPipelines); err != nil {
+		if err := checkIfPluginIsValid("filter", filterPlugin.Content, logPipeline, v.supportedFilterPlugins, v.deniedFilterPlugins, logPipelines); err != nil {
 			return err
 		}
 	}
 
 	for _, outputPlugin := range logPipeline.Spec.Outputs {
-		if err := checkIfPluginIsValid("output", outputPlugin.Content, logPipeline.Name, v.allowedOutputPlugins, logPipelines); err != nil {
+		if err := checkIfPluginIsValid("output", outputPlugin.Content, logPipeline, v.supportedOutputPlugins, v.deniedOutputPlugins, logPipelines); err != nil {
 			return err
 		}
 	}
@@ -41,7 +45,7 @@ func (v *pluginValidator) Validate(logPipeline *telemetryv1alpha1.LogPipeline, l
 	return nil
 }
 
-func checkIfPluginIsValid(pluginType, pluginContent, logPipelineName string, allowedPlugins []string, logPipelines *telemetryv1alpha1.LogPipelineList) error {
+func checkIfPluginIsValid(pluginType, pluginContent string, logPipeline *telemetryv1alpha1.LogPipeline, supportedPlugins, deniedPlugins []string, logPipelines *telemetryv1alpha1.LogPipelineList) error {
 	var err error
 	var section map[string]string
 	var pluginName string
@@ -53,8 +57,8 @@ func checkIfPluginIsValid(pluginType, pluginContent, logPipelineName string, all
 		return err
 	}
 
-	if !isPluginAllowed(pluginName, allowedPlugins) {
-		return fmt.Errorf("%s plugin '%s' is not allowed", pluginType, pluginName)
+	if !isPluginSupported(pluginName, supportedPlugins, deniedPlugins, logPipeline.Spec.EnableUnsupportedPlugins) {
+		return fmt.Errorf("%s plugin '%s' is not supported. Following plugins are supported '%s' ", pluginType, pluginName, supportedPlugins)
 	}
 
 	matchCond := getMatchCondition(section)
@@ -65,8 +69,8 @@ func checkIfPluginIsValid(pluginType, pluginContent, logPipelineName string, all
 		return fmt.Errorf("%s plugin '%s' with match condition '*' (match all) is not allowed", pluginType, pluginName)
 	}
 
-	if isValid, logPipelinesNames := isMatchCondValid(matchCond, logPipelineName, logPipelines); !isValid {
-		validLogPipelinesNames := fmt.Sprintf("'%s' (current logpipeline name)", logPipelineName)
+	if isValid, logPipelinesNames := isMatchCondValid(matchCond, logPipeline.Name, logPipelines); !isValid {
+		validLogPipelinesNames := fmt.Sprintf("'%s' (current logpipeline name)", logPipeline.Name)
 		if len(logPipelinesNames) > 0 {
 			validLogPipelinesNames += fmt.Sprintf(" or '%s' (other existing logpipelines names)", logPipelinesNames)
 		}
@@ -76,12 +80,18 @@ func checkIfPluginIsValid(pluginType, pluginContent, logPipelineName string, all
 	return nil
 }
 
-func isPluginAllowed(pluginName string, allowedPlugins []string) bool {
-	if len(allowedPlugins) == 0 {
+func isPluginSupported(pluginName string, supportedPlugins, deniedPlugins []string, enableAllPlugins bool) bool {
+	for _, deniedPlugin := range deniedPlugins {
+		if strings.EqualFold(pluginName, deniedPlugin) {
+			return false
+		}
+	}
+
+	if len(supportedPlugins) == 0 || enableAllPlugins {
 		return true
 	}
-	for _, allowedPlugin := range allowedPlugins {
-		if strings.EqualFold(pluginName, allowedPlugin) {
+	for _, supportedPlugin := range supportedPlugins {
+		if strings.EqualFold(pluginName, supportedPlugin) {
 			return true
 		}
 	}

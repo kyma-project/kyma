@@ -1,10 +1,11 @@
 global:
   jetstream:
-    storage: memory
+    storage: file
 
 controller:
   jetstream:
     retentionPolicy: interest
+    streamReplicas: 1
     consumerDeliverPolicy: new
     maxMessages: -1
     maxBytes: -1
