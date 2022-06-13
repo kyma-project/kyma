@@ -63,7 +63,7 @@ func (i *istioInstallledCase) kubeSystemPodsShouldNotHaveSidecar() error {
 				return ready, nil
 			})
 			if err != nil {
-				return err
+				return fmt.Errorf("httpbin is not ready: %s", err)
 			}
 		}
 		for _, container := range pod.Spec.Containers {
@@ -84,7 +84,7 @@ func (i *istioInstallledCase) deployHttpBinInKubeSystem() error {
 	for _, r := range resources {
 		_, err = dynamicClient.Resource(getGroupVersionResource(r)).Namespace(kubeSystemNamespace).Create(context.Background(), r, metav1.CreateOptions{})
 		if err != nil {
-			return err
+			return fmt.Errorf("could not deploy httpbin deployment in %s", kubeSystemNamespace)
 		}
 	}
 	return nil
@@ -97,7 +97,10 @@ func (i *istioInstallledCase) deleteHttpBinInKubeSystem() error {
 	}
 
 	for _, r := range resources {
-		_ = dynamicClient.Resource(getGroupVersionResource(r)).Namespace(kubeSystemNamespace).Delete(context.Background(), r.GetName(), metav1.DeleteOptions{})
+		err = dynamicClient.Resource(getGroupVersionResource(r)).Namespace(kubeSystemNamespace).Delete(context.Background(), r.GetName(), metav1.DeleteOptions{})
+		if err != nil {
+			return fmt.Errorf("could not delete httpbin deployment from %s", kubeSystemNamespace)
+		}
 	}
 	return nil
 }
