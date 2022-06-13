@@ -1,12 +1,15 @@
 GATEWAY_IMAGE ?= ""
 NAMESPACE ?= "test"
 
-.PHONY: test image publish clean image-gateway publish-gateway test-gateway
+.PHONY: release test-os test image publish clean image-gateway publish-gateway test-gateway
 
 test: test-gateway
 image: image-gateway
 clean: clean-gateway
 publish: publish-gateway
+
+release: publish
+test-os: test-gateway
 
 test-gateway:
 	kubectl create namespace $(NAMESPACE) --dry-run=client -o yaml | kubectl apply -f -
