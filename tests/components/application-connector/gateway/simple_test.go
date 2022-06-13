@@ -3,46 +3,26 @@ package main_test
 import (
 	"context"
 	"net/http"
-	"testing"
 
-	cli "github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/client-go/rest"
 )
 
-func TestSimpleCases(t *testing.T) {
-	cfg, err := rest.InClusterConfig()
-	require.Nil(t, err)
+func (gs *GatewaySuite) TestSimpleCases() {
+	app, err := gs.cli.ApplicationconnectorV1alpha1().Applications().Get(context.Background(), "test-app", v1.GetOptions{})
 
-	cl, err := cli.NewForConfig(cfg)
-
-	require.Nil(t, err)
-
-	t.Cleanup(func() {
-		_, err := http.Post("http://localhost:15000/quitquitquit", "", nil)
-		assert.Nil(t, err)
-		_, err = http.Post("http://localhost:15020/quitquitquit", "", nil)
-		assert.Nil(t, err)
-	})
-
-	app, err := cl.ApplicationconnectorV1alpha1().Applications().Get(context.Background(), "test-app", v1.GetOptions{})
-
-	require.Nil(t, err)
+	gs.Nil(err)
 
 	for _, service := range app.Spec.Services {
-		t.Run(service.DisplayName, func(t *testing.T) {
+		gs.Run(service.DisplayName, func() {
 			for _, entry := range service.Entries {
 				if entry.Type != "API" {
-					t.Log("Skipping event entry")
+					gs.T().Log("Skipping event entry")
 					continue
 				}
-
-				t.Log("Calling", entry.CentralGatewayUrl)
+				gs.T().Log("Calling", entry.CentralGatewayUrl)
 				res, err := http.Get(entry.CentralGatewayUrl)
-				assert.Nil(t, err)
-				assert.Equal(t, 200, res.StatusCode)
+				gs.Nil(err)
+				gs.Equal(200, res.StatusCode)
 			}
 		})
 	}
