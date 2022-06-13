@@ -26,10 +26,10 @@ const (
 func TestKubeSystemSidecar(t *testing.T) {
 	suite := godog.TestSuite{
 		Name:                kubeSystemNamespace,
-		ScenarioInitializer: InitializeScenarioKubeSystem,
+		ScenarioInitializer: InitializeScenarioKubeSystemSidecar,
 		Options: &godog.Options{
 			Format:   "pretty",
-			Paths:    []string{"features/kube-system.feature"},
+			Paths:    []string{"features/kube-system-sidecar.feature"},
 			TestingT: t,
 		},
 	}
@@ -38,7 +38,7 @@ func TestKubeSystemSidecar(t *testing.T) {
 	}
 }
 
-func InitializeScenarioKubeSystem(ctx *godog.ScenarioContext) {
+func InitializeScenarioKubeSystemSidecar(ctx *godog.ScenarioContext) {
 	installedCase := istioInstallledCase{}
 	ctx.Before(func(ctx context.Context, sc *godog.Scenario) (context.Context, error) {
 		err := installedCase.getIstioPods()
@@ -82,7 +82,7 @@ func (i *istioInstallledCase) deployHttpBinInKubeSystem() error {
 	}
 
 	for _, r := range resources {
-		_, err = dynClient.Resource(gvr(r)).Namespace(kubeSystemNamespace).Create(context.Background(), r, metav1.CreateOptions{})
+		_, err = dynamicClient.Resource(getGroupVersionResource(r)).Namespace(kubeSystemNamespace).Create(context.Background(), r, metav1.CreateOptions{})
 		if err != nil {
 			return err
 		}
@@ -97,7 +97,7 @@ func (i *istioInstallledCase) deleteHttpBinInKubeSystem() error {
 	}
 
 	for _, r := range resources {
-		_ = dynClient.Resource(gvr(r)).Namespace(kubeSystemNamespace).Delete(context.Background(), r.GetName(), metav1.DeleteOptions{})
+		_ = dynamicClient.Resource(getGroupVersionResource(r)).Namespace(kubeSystemNamespace).Delete(context.Background(), r.GetName(), metav1.DeleteOptions{})
 	}
 	return nil
 }
@@ -132,7 +132,7 @@ func readManifestToUnstructured(filepath string) ([]*unstructured.Unstructured, 
 	return result, nil
 }
 
-func gvr(resource *unstructured.Unstructured) schema.GroupVersionResource {
+func getGroupVersionResource(resource *unstructured.Unstructured) schema.GroupVersionResource {
 	mapping, err := mapper.RESTMapping(resource.GroupVersionKind().GroupKind(), resource.GroupVersionKind().Version)
 	if err != nil {
 		log.Fatal(err)

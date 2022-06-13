@@ -16,7 +16,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/discovery"
-	memory "k8s.io/client-go/discovery/cached"
+	"k8s.io/client-go/discovery/cached/memory"
 	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/restmapper"
@@ -26,7 +26,7 @@ import (
 )
 
 var k8sClient kubernetes.Interface
-var dynClient dynamic.Interface
+var dynamicClient dynamic.Interface
 var mapper *restmapper.DeferredDiscoveryRESTMapper
 
 const (
@@ -36,7 +36,7 @@ const (
 )
 
 func TestMain(m *testing.M) {
-	k8sClient, dynClient, mapper = initK8sClient()
+	k8sClient, dynamicClient, mapper = initK8sClient()
 	os.Exit(m.Run())
 }
 
@@ -122,12 +122,12 @@ func (i *istioInstallledCase) getIstioPods() error {
 }
 
 func (i *istioInstallledCase) aRunningKymaClusterWithProfile(profile string) error {
-	isInstalled, err := isKymaInstalled("main")
+	isInstalled, err := isKymaInstalled()
 	if err != nil {
 		return err
 	}
 	if !isInstalled {
-		return fmt.Errorf("kyma is not installed with version main")
+		return fmt.Errorf("Kyma is not installed")
 	}
 	p, ok := os.LookupEnv(deployedKymaProfileVar)
 	if !ok {
@@ -177,7 +177,7 @@ func (i *istioInstallledCase) thereIsPodForIngressGateway(numberOfPodsRequired i
 }
 
 func (i *istioInstallledCase) thereIsPodForPilot(numberOfPodsRequired int) error {
-	if len(i.ingressGwPods.Items) != numberOfPodsRequired {
+	if len(i.pilotPods.Items) != numberOfPodsRequired {
 		return fmt.Errorf("number of deployed Pilot pods %d does not equal %d", len(i.pilotPods.Items), numberOfPodsRequired)
 	}
 	return nil
@@ -197,7 +197,7 @@ func InitializeScenarioEvalProfile(ctx *godog.ScenarioContext) {
 	ctx.Step(`^HPA is not deployed$`, installedCase.hPAIsNotDeployed)
 }
 
-func isKymaInstalled(version string) (bool, error) {
+func isKymaInstalled() (bool, error) {
 	command := exec.Command("kyma", "version")
 	var out bytes.Buffer
 	command.Stdout = &out
@@ -205,7 +205,7 @@ func isKymaInstalled(version string) (bool, error) {
 	if err != nil {
 		return false, fmt.Errorf("`kyma version` command returned error: %w", err)
 	}
-	contains := strings.Contains(out.String(), fmt.Sprintf("Kyma cluster version: %s", version))
+	contains := strings.Contains(out.String(), "Kyma cluster version")
 	return contains, nil
 }
 
