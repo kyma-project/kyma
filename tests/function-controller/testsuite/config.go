@@ -21,7 +21,6 @@ const (
 )
 
 type Config struct {
-	UsageKindName                   string           `envconfig:"default=serverless-function"`
 	Namespace                       string           `envconfig:"default=test-function"`
 	DomainName                      string           `envconfig:"default=kyma.local"`
 	Verbose                         bool             `envconfig:"default=false"`

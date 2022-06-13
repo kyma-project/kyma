@@ -251,9 +251,6 @@ grafanaDashboard:
   functionMetrics:
     enabled: false
 
-usageKind:
-  name: serverless-function
-
 dockerRegistry:
   enableInternal: true
   username: "{{ randAlphaNum 20 | b64enc }}" # for gcr "_json_key"
