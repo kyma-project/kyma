@@ -28,8 +28,6 @@ COMPASS_CLIENT_ID=           # Only required if KYMA_TYPE=SKR
 COMPASS_CLIENT_SECRET=       # Only required if KYMA_TYPE=SKR
 COMPASS_TENANT=              # Only required if KYMA_TYPE=SKR
 GARDENER_KUBECONFIG=         # Only required if KYMA_TYPE=SKR
-BACKEND=                     # nats_jetstream
-STORAGE=                     # file
 ```
 >**IMPORTANT:** The `TEST_SUFFIX` is required for every test run for SKR cluster. It needs to be 4 characters long, as it is the name for the compass scenario.
 > The eventing tests add a scenario with the `"test-${TEST_SUFFIX}"` name.
@@ -51,6 +49,7 @@ npm run test-eventing
 ```bash
 npm run test-eventing TEST_SUFFIX=abcd
 ```
+>**NOTE:** The `at least once` delivery test for JetStream is only run when the `STREAM_RETENTION_POLICY` is set to `limits` and the `CONSUMER_DELIVER_POLICY` is set to `all`.
 
 ## Troubleshooting ##
 

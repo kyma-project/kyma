@@ -1,4 +1,3 @@
-const uuid = require('uuid');
 const {
   DirectorConfig,
   DirectorClient,
@@ -6,6 +5,10 @@ const {
   assignRuntimeToScenario,
   unregisterKymaFromCompass,
 } = require('../compass');
+const {
+  gatherOptions,
+  withCustomParams,
+} = require('../skr-test/helpers');
 const {
   KEBConfig,
   KEBClient,
@@ -15,7 +18,6 @@ const {
 const {GardenerConfig, GardenerClient} = require('../gardener');
 const {
   debug,
-  genRandom,
   initializeK8sClient,
   printRestartReport,
   getContainerRestartsForAllNamespaces,
@@ -27,12 +29,6 @@ const {
   checkInClusterEventDelivery,
   checkFunctionResponse,
   sendLegacyEventAndCheckResponse,
-} = require('../test/fixtures/commerce-mock');
-const {
-  checkServiceInstanceExistence,
-  ensureHelmBrokerTestFixture,
-} = require('../upgrade-test/fixtures/helm-broker');
-const {
   cleanMockTestFixture,
 } = require('../test/fixtures/commerce-mock');
 const {
@@ -42,26 +38,31 @@ const {
 const {
   saveKubeconfig,
 } = require('../skr-svcat-migration-test/test-helpers');
+const {BTPOperatorCreds} = require('../smctl/helpers');
 
 describe('SKR-Upgrade-test', function() {
   switchDebug(on = true);
   const keb = new KEBClient(KEBConfig.fromEnv());
   const gardener = new GardenerClient(GardenerConfig.fromEnv());
 
-  const suffix = genRandom(4);
-  const appName = `app-${suffix}`;
-  const runtimeName = `kyma-${suffix}`;
-  const scenarioName = `test-${suffix}`;
-  const instanceID = uuid.v4();
-  const subAccountID = keb.subaccountID;
+  const kymaVersion = getEnvOrThrow('KYMA_VERSION');
+  const kymaUpgradeVersion = getEnvOrThrow('KYMA_UPGRADE_VERSION');
+
+  const customParams = {
+    'kymaVersion': kymaVersion,
+  };
+
+  const options = gatherOptions(
+      withCustomParams(customParams),
+  );
 
   debug(
       `PlanID ${getEnvOrThrow('KEB_PLAN_ID')}`,
-      `SubAccountID ${subAccountID}`,
-      `InstanceID ${instanceID}`,
-      `Scenario ${scenarioName}`,
-      `Runtime ${runtimeName}`,
-      `Application ${appName}`,
+      `SubAccountID ${keb.subaccountID}`,
+      `InstanceID ${options.instanceID}`,
+      `Scenario ${options.scenarioName}`,
+      `Runtime ${options.runtimeName}`,
+      `Application ${options.appName}`,
   );
 
   // debug(
@@ -104,9 +105,6 @@ describe('SKR-Upgrade-test', function() {
 
   const kcp = new KCPWrapper(KCPConfig.fromEnv());
 
-  const kymaVersion = getEnvOrThrow('KYMA_VERSION');
-  const kymaUpgradeVersion = getEnvOrThrow('KYMA_UPGRADE_VERSION');
-
   this.timeout(60 * 60 * 1000 * 3); // 3h
   this.slow(5000);
 
@@ -126,31 +124,29 @@ describe('SKR-Upgrade-test', function() {
     // debug(loginOutput)
   });
 
-  it(`Provision SKR with ID ${instanceID}`, async function() {
+  it(`Provision SKR with ID ${options.instanceID}`, async function() {
     console.log(`Provisioning SKR with version ${kymaVersion}`);
-    const customParams = {
-      'kymaVersion': kymaVersion,
-    };
-    debug(`Provision SKR with Custom Parameters ${JSON.stringify(customParams)}`);
+    debug(`Provision SKR with Custom Parameters ${JSON.stringify(options.customParams)}`);
+    const btpOperatorCreds = BTPOperatorCreds.fromEnv();
     skr = await provisionSKR(keb,
         kcp,
         gardener,
-        instanceID,
-        runtimeName,
+        options.instanceID,
+        options.runtimeName,
         null,
-        null,
-        customParams,
+        btpOperatorCreds,
+        options.customParams,
         provisioningTimeout);
   });
 
   it(`Should get Runtime Status after provisioning`, async function() {
-    const runtimeStatus = await kcp.getRuntimeStatusOperations(instanceID);
+    const runtimeStatus = await kcp.getRuntimeStatusOperations(options.instanceID);
     console.log(`\nRuntime status: ${runtimeStatus}`);
     await kcp.reconcileInformationLog(runtimeStatus);
   });
 
   it(`Should save kubeconfig for the SKR to ~/.kube/config`, async function() {
-    saveKubeconfig(skr.shoot.kubeconfig);
+    await saveKubeconfig(skr.shoot.kubeconfig);
   });
 
   it('Should initialize K8s client', async function() {
@@ -159,28 +155,20 @@ describe('SKR-Upgrade-test', function() {
 
   // Upgrade Test Praparation
   const director = new DirectorClient(DirectorConfig.fromEnv());
-  const withCentralAppConnectivity = (process.env.WITH_CENTRAL_APP_CONNECTIVITY === 'true');
   const testNS = 'test';
 
   it('Assign SKR to scenario', async function() {
-    await addScenarioInCompass(director, scenarioName);
-    await assignRuntimeToScenario(director, skr.shoot.compassID, scenarioName);
+    await addScenarioInCompass(director, options.scenarioName);
+    await assignRuntimeToScenario(director, skr.shoot.compassID, options.scenarioName);
   });
 
   it('CommerceMock test fixture should be ready', async function() {
     await ensureCommerceMockWithCompassTestFixture(director,
-        appName,
-        scenarioName,
+        options.appName,
+        options.scenarioName,
         'mocks',
         testNS,
-        withCentralAppConnectivity);
-  });
-
-  it('Helm Broker test fixture should be ready', async function() {
-    await ensureHelmBrokerTestFixture(testNS).catch((err) => {
-      console.dir(err); // first error is logged
-      return ensureHelmBrokerTestFixture(testNS);
-    });
+    );
   });
 
   // Perform Tests before Upgrade
@@ -203,22 +191,18 @@ describe('SKR-Upgrade-test', function() {
     await sendLegacyEventAndCheckResponse();
   });
 
-  it('service instance provisioned by helm broker should be reachable', async function() {
-    await checkServiceInstanceExistence(testNS);
-  });
-
   it('Should print report of restarted containers, skipped if no crashes happened', async function() {
     const afterTestRestarts = await getContainerRestartsForAllNamespaces();
     printRestartReport(initialRestarts, afterTestRestarts);
   });
 
   it('Perform Upgrade', async function() {
-    await kcp.upgradeKyma(instanceID, kymaUpgradeVersion, upgradeTimeoutMin);
+    await kcp.upgradeKyma(options.instanceID, kymaUpgradeVersion, upgradeTimeoutMin);
     debug('Upgrade Done!');
   });
 
   it('Should get Runtime Status after upgrade', async function() {
-    const runtimeStatus = await kcp.getRuntimeStatusOperations(instanceID);
+    const runtimeStatus = await kcp.getRuntimeStatusOperations(options.instanceID);
     console.log(`\nRuntime status: ${runtimeStatus}`);
     await kcp.reconcileInformationLog(runtimeStatus);
   });
@@ -242,10 +226,6 @@ describe('SKR-Upgrade-test', function() {
     await sendLegacyEventAndCheckResponse();
   });
 
-  it('service instance provisioned by helm broker should be reachable', async function() {
-    await checkServiceInstanceExistence(testNS);
-  });
-
   it('Should print report of restarted containers, skipped if no crashes happened', async function() {
     const afterTestRestarts = await getContainerRestartsForAllNamespaces();
     printRestartReport(initialRestarts, afterTestRestarts);
@@ -255,7 +235,7 @@ describe('SKR-Upgrade-test', function() {
   const skipCleanup = getEnvOrThrow('SKIP_CLEANUP');
   if (skipCleanup === 'FALSE') {
     it('Unregister Kyma resources from Compass', async function() {
-      await unregisterKymaFromCompass(director, scenarioName);
+      await unregisterKymaFromCompass(director, options.scenarioName);
     });
 
     it('Test fixtures should be deleted', async function() {
@@ -264,9 +244,9 @@ describe('SKR-Upgrade-test', function() {
 
     it('Deprovision SKR', async function() {
       try {
-        await deprovisionSKR(keb, kcp, instanceID, deprovisioningTimeout);
+        await deprovisionSKR(keb, kcp, options.instanceID, deprovisioningTimeout);
       } finally {
-        const runtimeStatus = await kcp.getRuntimeStatusOperations(instanceID);
+        const runtimeStatus = await kcp.getRuntimeStatusOperations(options.instanceID);
         await kcp.reconcileInformationLog(runtimeStatus);
       }
     });

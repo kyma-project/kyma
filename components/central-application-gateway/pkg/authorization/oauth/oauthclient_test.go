@@ -45,9 +45,11 @@ func TestOauthClient_GetToken(t *testing.T) {
 		}))
 		defer ts.Close()
 
+		tokenKey := "testID" + ts.URL
+
 		tokenCache := mocks.TokenCache{}
-		tokenCache.On("Get", "testID").Return("", false)
-		tokenCache.On("Add", "testID", "123456789", 3600).Return()
+		tokenCache.On("Get", tokenKey).Return("", false)
+		tokenCache.On("Add", tokenKey, "123456789", 3600).Return()
 
 		oauthClient := NewOauthClient(10, &tokenCache)
 
@@ -81,9 +83,11 @@ func TestOauthClient_GetToken(t *testing.T) {
 		}))
 		defer ts.Close()
 
+		tokenKey := "testID" + ts.URL
+
 		tokenCache := mocks.TokenCache{}
-		tokenCache.On("Get", "testID").Return("", false)
-		tokenCache.On("Add", "testID", "123456789", 3600).Return()
+		tokenCache.On("Get", tokenKey).Return("", false)
+		tokenCache.On("Add", tokenKey, "123456789", 3600).Return()
 
 		oauthClient := NewOauthClient(10, &tokenCache)
 
@@ -104,8 +108,10 @@ func TestOauthClient_GetToken(t *testing.T) {
 		}))
 		defer ts.Close()
 
+		tokenKey := "testID" + ts.URL
+
 		tokenCache := mocks.TokenCache{}
-		tokenCache.On("Get", "testID").Return("", false)
+		tokenCache.On("Get", tokenKey).Return("", false)
 
 		oauthClient := NewOauthClient(10, &tokenCache)
 
@@ -128,8 +134,10 @@ func TestOauthClient_GetToken(t *testing.T) {
 		}))
 		defer ts.Close()
 
+		tokenKey := "testID" + ts.URL
+
 		tokenCache := mocks.TokenCache{}
-		tokenCache.On("Get", "testID").Return("", false)
+		tokenCache.On("Get", tokenKey).Return("", false)
 
 		oauthClient := NewOauthClient(10, &tokenCache)
 
@@ -144,107 +152,15 @@ func TestOauthClient_GetToken(t *testing.T) {
 
 	t.Run("should fail if OAuth address is incorrect", func(t *testing.T) {
 		// given
+		tokenKey := "testID" + "http://some_no_existent_address.com/token"
+
 		tokenCache := mocks.TokenCache{}
-		tokenCache.On("Get", "testID").Return("", false)
+		tokenCache.On("Get", tokenKey).Return("", false)
 
 		oauthClient := NewOauthClient(10, &tokenCache)
 
 		// when
 		token, err := oauthClient.GetToken("testID", "testSecret", "http://some_no_existent_address.com/token", nil, nil)
-
-		// then
-		require.Error(t, err)
-		assert.Equal(t, "", token)
-		tokenCache.AssertExpectations(t)
-	})
-}
-
-func TestOauthClient_InvalidateAndRetry(t *testing.T) {
-	t.Run("should fetch token from EC", func(t *testing.T) {
-		// given
-		ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-
-			checkAccessTokenRequest(t, r)
-
-			response := oauthResponse{AccessToken: "123456789", TokenType: "bearer", ExpiresIn: 3600, Scope: "basic"}
-
-			w.WriteHeader(http.StatusOK)
-			json.NewEncoder(w).Encode(response)
-		}))
-		defer ts.Close()
-
-		tokenCache := mocks.TokenCache{}
-		tokenCache.On("Remove", "testID")
-		tokenCache.On("Add", "testID", "123456789", 3600).Return()
-
-		oauthClient := NewOauthClient(10, &tokenCache)
-
-		// when
-		token, err := oauthClient.InvalidateAndRetry("testID", "testSecret", ts.URL, nil, nil)
-
-		// then
-		require.NoError(t, err)
-		assert.Equal(t, "123456789", token)
-		tokenCache.AssertExpectations(t)
-	})
-
-	t.Run("should fail when unable to get token", func(t *testing.T) {
-		// given
-		ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-
-			checkAccessTokenRequest(t, r)
-
-			w.WriteHeader(http.StatusInternalServerError)
-		}))
-		defer ts.Close()
-
-		tokenCache := mocks.TokenCache{}
-		tokenCache.On("Remove", "testID")
-
-		oauthClient := NewOauthClient(10, &tokenCache)
-
-		// when
-		token, err := oauthClient.InvalidateAndRetry("testID", "testSecret", ts.URL, nil, nil)
-
-		// then
-		require.Error(t, err)
-		assert.Equal(t, "", token)
-		tokenCache.AssertExpectations(t)
-	})
-
-	t.Run("should fail if payload is empty", func(t *testing.T) {
-		// given
-		ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-
-			checkAccessTokenRequest(t, r)
-
-			w.WriteHeader(http.StatusOK)
-		}))
-		defer ts.Close()
-
-		tokenCache := mocks.TokenCache{}
-		tokenCache.On("Remove", "testID")
-
-		oauthClient := NewOauthClient(10, &tokenCache)
-
-		// when
-		token, err := oauthClient.InvalidateAndRetry("testID", "testSecret", ts.URL, nil, nil)
-
-		// then
-		require.Error(t, err)
-		assert.Equal(t, "", token)
-		tokenCache.AssertExpectations(t)
-	})
-
-	t.Run("should fail if OAuth address is incorrect", func(t *testing.T) {
-		// given
-		tokenCache := mocks.TokenCache{}
-		tokenCache.On("Remove", "testID")
-
-		oauthClient := NewOauthClient(10, &tokenCache)
-
-		// when
-		token, err := oauthClient.InvalidateAndRetry("testID", "testSecret", "http://some_no_existent_address.com/token", nil, nil)
 
 		// then
 		require.Error(t, err)
