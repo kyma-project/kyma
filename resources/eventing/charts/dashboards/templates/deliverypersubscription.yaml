@@ -25,11 +25,12 @@ data:
       "editable": true,
       "gnetId": null,
       "graphTooltip": 0,
-      "id": 145,
       "links": [],
       "panels": [
         {
-          "aliasColors": {},
+          "aliasColors": {
+            "test-noapp(sink=http://test.tunas-testing.svc.cluster.local, eventType=sap.kyma.custom.noapp.order.created.v1)": "red"
+          },
           "bars": false,
           "dashLength": 10,
           "dashes": false,
@@ -77,9 +78,11 @@ data:
           "targets": [
             {
               "exemplar": true,
-              "expr": "sum (rate(delivery_per_subscription{response_code=~\"[45].*\"}[5m])) by (subscription_name,event_type,sink,response_code)",
+              "expr": "sum by(subscription_name, event_type, response_code, sink) (rate(delivery_per_subscription{response_code=~\"[45].*\"}[1m]))",
+              "hide": false,
+              "instant": false,
               "interval": "",
-              "legendFormat": "{{`{{subscription_name}}`}}({{`sink={{sink}}, eventType={{event_type}}`}})",
+              "legendFormat": "{{`{{subscription_name}}`}}(eventType={{`{{event_type}}`}}, sink={{`{{sink}}`}})",
               "refId": "A"
             }
           ],
@@ -103,6 +106,7 @@ data:
           },
           "yaxes": [
             {
+              "$$hashKey": "object:222",
               "format": "short",
               "label": null,
               "logBase": 1,
@@ -111,6 +115,7 @@ data:
               "show": true
             },
             {
+              "$$hashKey": "object:223",
               "format": "short",
               "label": null,
               "logBase": 1,
@@ -173,9 +178,9 @@ data:
           "targets": [
             {
               "exemplar": true,
-              "expr": "sum (rate(delivery_per_subscription{response_code=~\"[2].*\"}[5m])) by (subscription_name,event_type,sink,response_code)",
+              "expr": "sum by(subscription_name, event_type, response_code, sink) (rate(delivery_per_subscription{response_code=~\"[2].*\"}[1m]))",
               "interval": "",
-              "legendFormat": "{{`{{subscription_name}}`}}({{`sink={{sink}}, eventType={{event_type}}`}})",
+              "legendFormat": "{{`{{subscription_name}}`}}(eventType={{`{{event_type}}`}}, sink={{`{{sink}}`}})",
               "refId": "A"
             }
           ],
@@ -200,6 +205,7 @@ data:
           },
           "yaxes": [
             {
+              "$$hashKey": "object:301",
               "format": "short",
               "label": null,
               "logBase": 1,
@@ -208,6 +214,7 @@ data:
               "show": true
             },
             {
+              "$$hashKey": "object:302",
               "format": "short",
               "label": null,
               "logBase": 1,
@@ -220,6 +227,93 @@ data:
             "align": false,
             "alignLevel": null
           }
+        },
+        {
+          "datasource": null,
+          "description": "This table displays the amount of events grouped by event type nad response code",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "custom": {
+                "align": null,
+                "filterable": false
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 9,
+            "w": 24,
+            "x": 0,
+            "y": 17
+          },
+          "id": 3,
+          "options": {
+            "showHeader": true
+          },
+          "pluginVersion": "",
+          "targets": [
+            {
+              "exemplar": true,
+              "expr": "delivery_per_subscription",
+              "format": "table",
+              "instant": true,
+              "interval": "",
+              "legendFormat": "{{`{{event_type}}`}} {{`{{response_code}}`}}",
+              "refId": "A"
+            }
+          ],
+          "title": "Event delivery count",
+          "transformations": [
+            {
+              "id": "filterFieldsByName",
+              "options": {
+                "include": {
+                  "names": [
+                    "event_type",
+                    "response_code",
+                    "Value"
+                  ]
+                }
+              }
+            },
+            {
+              "id": "organize",
+              "options": {
+                "excludeByName": {
+                  "response_code": false
+                },
+                "indexByName": {
+                  "Value": 3,
+                  "event_type": 0,
+                  "response_code": 2,
+                  "sink": 1
+                },
+                "renameByName": {
+                  "Value": "Amount of Events",
+                  "event_type": "Event Type",
+                  "response_code": "Response code"
+                }
+              }
+            }
+          ],
+          "type": "table"
         }
       ],
       "refresh": "10s",
@@ -233,12 +327,12 @@ data:
         "list": []
       },
       "time": {
-        "from": "now-1h",
+        "from": "now-30m",
         "to": "now"
       },
       "timepicker": {},
       "timezone": "",
       "title": "Kyma / Eventing / Delivery per Subscription",
       "uid": "TDCzNzCnk",
-      "version": 1
+      "version": 2
     }
