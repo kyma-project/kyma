@@ -317,6 +317,7 @@ func (n *Nats) getCallback(subKeyPrefix, subscriptionName string) nats.MsgHandle
 		n.namedLogger().Infow("event dispatched", "id", ce.ID(), "source", ce.Source(), "type", ce.Type(), "sink", sink)
 	}
 }
+
 func (n *Nats) doWithRetry(ctx context.Context, params cev2context.RetryParams, ce *cev2event.Event) cev2protocol.Result {
 	retry := 0
 	for {

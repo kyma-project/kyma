@@ -82,7 +82,7 @@ data:
               "hide": false,
               "instant": false,
               "interval": "",
-              "legendFormat": "{{`{{subscription_name}}`}}(eventType={{`{{event_type}}`}}, sink={{`{{sink}}`}})",
+              "legendFormat": "{{`{{subscription_name}}`}} (eventType={{`{{event_type}}`}}, sink={{`{{sink}}`}})",
               "refId": "A"
             }
           ],
@@ -180,7 +180,7 @@ data:
               "exemplar": true,
               "expr": "sum by(subscription_name, event_type, response_code, sink) (rate(delivery_per_subscription{response_code=~\"[2].*\"}[1m]))",
               "interval": "",
-              "legendFormat": "{{`{{subscription_name}}`}}(eventType={{`{{event_type}}`}}, sink={{`{{sink}}`}})",
+              "legendFormat": "{{`{{subscription_name}}`}} (eventType={{`{{event_type}}`}}, sink={{`{{sink}}`}})",
               "refId": "A"
             }
           ],
@@ -229,18 +229,13 @@ data:
           }
         },
         {
-          "datasource": null,
-          "description": "This table displays the amount of events grouped by event type nad response code",
+          "description": "This table displays the amount of events grouped by event type and response code",
           "fieldConfig": {
             "defaults": {
-              "color": {
-                "mode": "thresholds"
-              },
               "custom": {
                 "align": null,
                 "filterable": false
               },
-              "mappings": [],
               "thresholds": {
                 "mode": "absolute",
                 "steps": [
@@ -253,6 +248,10 @@ data:
                     "value": 80
                   }
                 ]
+              },
+              "mappings": [],
+              "color": {
+                "mode": "thresholds"
               }
             },
             "overrides": []
@@ -267,15 +266,14 @@ data:
           "options": {
             "showHeader": true
           },
-          "pluginVersion": "",
           "targets": [
             {
-              "exemplar": true,
               "expr": "delivery_per_subscription",
+              "legendFormat": "{{`{{subscription_name}}`}} {{`{{event_type}}`}} {{`{{response_code}}`}}",
+              "interval": "",
+              "exemplar": true,
               "format": "table",
               "instant": true,
-              "interval": "",
-              "legendFormat": "{{`{{event_type}}`}} {{`{{response_code}}`}}",
               "refId": "A"
             }
           ],
@@ -288,7 +286,8 @@ data:
                   "names": [
                     "event_type",
                     "response_code",
-                    "Value"
+                    "Value",
+                    "subscription_name"
                   ]
                 }
               }
@@ -300,20 +299,23 @@ data:
                   "response_code": false
                 },
                 "indexByName": {
-                  "Value": 3,
-                  "event_type": 0,
+                  "subscription_name": 0,
+                  "event_type": 1,
                   "response_code": 2,
-                  "sink": 1
+                  "Value": 3
                 },
                 "renameByName": {
                   "Value": "Amount of Events",
                   "event_type": "Event Type",
-                  "response_code": "Response code"
+                  "response_code": "Response code",
+                  "subscription_name": "Subscription Name"
                 }
               }
             }
           ],
-          "type": "table"
+          "type": "table",
+          "pluginVersion": "",
+          "datasource": null
         }
       ],
       "refresh": "10s",
