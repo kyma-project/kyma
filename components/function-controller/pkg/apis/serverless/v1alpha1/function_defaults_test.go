@@ -481,7 +481,7 @@ func TestSetDefaults(t *testing.T) {
 			},
 			},
 		},
-		"Should set function profile to function presets M instead of default value": {
+		"Should set function profile to function presets M instead of default L value": {
 			givenFunc: Function{
 				ObjectMeta: v1.ObjectMeta{
 					Labels: map[string]string{
