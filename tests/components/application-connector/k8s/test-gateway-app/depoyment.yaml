@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: mtls-server
+  name: mtls-server
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mtls-server
+  template:
+    metadata:
+      labels:
+        app: mtls-server
+    spec:
+      containers:
+        - image: koala7659/mtls-server:latest
+          name: mtls-server
+          readinessProbe:
+            httpGet:
+              scheme: HTTPS
+              path: /health
+              port: 8080
+            initialDelaySeconds: 10
+            periodSeconds: 5
+          env:
+            - name: APP_RETURNED_TOKEN
+              value: "returned-token"
+          ports:
+            - containerPort: 8080
+          imagePullPolicy: Always
+          volumeMounts:
+            - name: secret-volume
+              mountPath: /etc/secret-volume
+      volumes:
+        - name: secret-volume
+          secret:
+            secretName: mtls-cert-secret
