@@ -119,4 +119,5 @@ module.exports = {
   commerceMockTestPreparation,
   commerceMockTest,
   commerceMockTests,
+  commerceMockCleanup,
 };
