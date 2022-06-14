@@ -21,7 +21,11 @@ all: help
 ## Test:
 
 test: ## Run the tests of the project
-	$(GOTEST) -v -race ./...
+ifeq ($(EXPORT_RESULT), true)
+	GO111MODULE=off go get -u github.com/jstemmer/go-junit-report
+	$(eval OUTPUT_OPTIONS = | go-junit-report -set-exit-code > junit-report.xml)
+endif
+	$(GOTEST) -v -race ./... $(OUTPUT_OPTIONS)
 
 test-k3d: provision-k3d kyma-istio-deploy test ## Run tests on k3d cluster
 
