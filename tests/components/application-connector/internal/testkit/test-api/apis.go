@@ -18,10 +18,10 @@ func AddAPIHandler(router *mux.Router, oauthTokesCache map[string]bool, csrfToke
 
 	echoHandler := NewEchoHandler()
 
-	apiHandler.HandleFunc("/v1/api/oauth/any", NewOAuthHandler(oauthTokesCache, mutex, alwaysOKHandler)).Methods("GET")
-	apiHandler.HandleFunc("/v1/api/oauth/echo", NewOAuthHandler(oauthTokesCache, mutex, echoHandler)).Methods("GET")
-	apiHandler.HandleFunc("/v1/api/basic/any", NewBasicAuthHandler(basicAuthCredentials, alwaysOKHandler)).Methods("GET")
-	apiHandler.HandleFunc("/v1/api/basic/echo", NewBasicAuthHandler(basicAuthCredentials, echoHandler)).Methods("GET")
+	apiHandler.HandleFunc("/v1/api/oauth/any", NewOAuthHandler(oauthTokesCache, mutex, alwaysOKHandler)).Methods("GET", "PUT", "POST")
+	apiHandler.HandleFunc("/v1/api/oauth/echo", NewOAuthHandler(oauthTokesCache, mutex, echoHandler)).Methods("GET", "PUT", "POST")
+	apiHandler.HandleFunc("/v1/api/basic/any", NewBasicAuthHandler(basicAuthCredentials, alwaysOKHandler)).Methods("GET", "PUT", "POST")
+	apiHandler.HandleFunc("/v1/api/basic/echo", NewBasicAuthHandler(basicAuthCredentials, echoHandler)).Methods("GET", "PUT", "POST")
 	apiHandler.HandleFunc("/v1/health", alwaysOKHandler).Methods("GET")
 }
 

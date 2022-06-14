@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"github.com/gorilla/mux"
 	"github.com/kyma-project/kyma/tests/components/application-connector/internal/testkit/test-api"
 	"github.com/pkg/errors"
@@ -31,9 +32,9 @@ func main() {
 
 	apiRouter := mux.NewRouter()
 
-	basciAuthCredentails := test_api.BasicAuthCredentials{User: cfg.BasicAuthUser, Password: cfg.BasicAuthPassword}
+	basicAuthCredentials := test_api.BasicAuthCredentials{User: cfg.BasicAuthUser, Password: cfg.BasicAuthPassword}
 
-	test_api.AddAPIHandler(apiRouter, oauthTokesCache, csrfTokensCache, mutex, basciAuthCredentails)
+	test_api.AddAPIHandler(apiRouter, oauthTokesCache, csrfTokensCache, mutex, basicAuthCredentials)
 
 	oauthCredentials := test_api.OAuthCredentials{ClientID: cfg.OAuthClientID, ClientSecret: cfg.OAuthClientSecret}
 	test_api.AddTokensHandler(apiRouter, oauthTokesCache, csrfTokensCache, oauthCredentials, mutex)
@@ -42,17 +43,17 @@ func main() {
 	test_api.AddTokensHandler(tokensRouter, oauthTokesCache, csrfTokensCache, oauthCredentials, mutex)
 
 	// TODO This implementation must be fixed
-
 	wg := sync.WaitGroup{}
 	wg.Add(2)
 
 	go func() {
-		log.Fatal(http.ListenAndServeTLS(":"+string(cfg.MtlsPort), "/etc/secret-volume/tls.crt", "./etc/secret-volume/tls.key", tokensRouter))
+		//log.Fatal(http.ListenAndServeTLS(":"+string(cfg.MtlsPort), "/etc/secret-volume/tls.crt", "./etc/secret-volume/tls.key", tokensRouter))
 		wg.Done()
 	}()
 
 	go func() {
-		log.Fatal(http.ListenAndServe(":"+string(cfg.Port), apiRouter))
+		address := fmt.Sprintf(":%d", cfg.Port)
+		log.Fatal(http.ListenAndServe(address, apiRouter))
 		wg.Done()
 	}()
 

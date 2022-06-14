@@ -12,7 +12,7 @@ type Config struct {
 	BasicAuthUser     string `envconfig:"default=user"`
 	BasicAuthPassword string `envconfig:"default=passwd"`
 	OAuthClientID     string `envconfig:"default=clientID"`
-	OAuthClientSecret string `envconfig:"default=clientID"`
+	OAuthClientSecret string `envconfig:"default=clientSecret"`
 }
 
 func (c *Config) String() string {
