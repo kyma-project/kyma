@@ -1,0 +1,20 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: connectivity-test
+  namespace: "{{ .Values.namespace }}"
+spec:
+  template:
+    spec:
+      initContainers:
+        - name: wait-for-services
+          image: opsfleet/depends-on
+          args:
+            - "-service=test-app"
+      containers:
+        - name: connectivity-test
+          image: "{{ .Values.testImage }}"
+          imagePullPolicy: Always
+      restartPolicy: Never
+      serviceAccountName: "{{ .Values.saName }}"
+  backoffLimit: 4
