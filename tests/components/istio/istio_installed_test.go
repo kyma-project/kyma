@@ -12,13 +12,19 @@ import (
 	"github.com/pkg/errors"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/client-go/discovery"
+	"k8s.io/client-go/discovery/cached/memory"
+	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/kubernetes"
+	"k8s.io/client-go/restmapper"
 	"k8s.io/client-go/tools/clientcmd"
 	"k8s.io/client-go/util/homedir"
 	"k8s.io/kubectl/pkg/util/podutils"
 )
 
 var k8sClient kubernetes.Interface
+var dynamicClient dynamic.Interface
+var mapper *restmapper.DeferredDiscoveryRESTMapper
 
 const (
 	istioNamespace         = "istio-system"
@@ -30,11 +36,11 @@ const (
 )
 
 func TestMain(m *testing.M) {
-	k8sClient = initK8sClient()
+	k8sClient, dynamicClient, mapper = initK8sClient()
 	os.Exit(m.Run())
 }
 
-func initK8sClient() kubernetes.Interface {
+func initK8sClient() (kubernetes.Interface, dynamic.Interface, *restmapper.DeferredDiscoveryRESTMapper) {
 	var kubeconfig string
 	if kConfig, ok := os.LookupEnv("KUBECONFIG"); !ok {
 		if home := homedir.HomeDir(); home != "" {
@@ -59,7 +65,17 @@ func initK8sClient() kubernetes.Interface {
 	if err != nil {
 		log.Fatalf(err.Error())
 	}
-	return k8sClient
+	dynClient, err := dynamic.NewForConfig(config)
+	if err != nil {
+		log.Fatalf(err.Error())
+	}
+	dc, err := discovery.NewDiscoveryClientForConfig(config)
+	if err != nil {
+		log.Fatalf(err.Error())
+	}
+
+	mapper := restmapper.NewDeferredDiscoveryRESTMapper(memory.NewMemCacheClient(dc))
+	return k8sClient, dynClient, mapper
 }
 
 func TestIstioInstalledEvaluation(t *testing.T) {

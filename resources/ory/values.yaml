@@ -244,7 +244,7 @@ oathkeeper:
       minReplicas: 1
       maxReplicas: 3
       targetMemoryUtilizationPercentage: 75
-      targetCPUUtilizationPercentage: 80    
+      targetCPUUtilizationPercentage: 80
   oathkeeper-maester:
     deployment:
       annotations:
@@ -267,6 +267,9 @@ postgresql:
       memory: 1024Mi
       cpu: 750m
   master:
+    podAnnotations:
+      sidecar.istio.io/inject: "false"
+  slave:
     podAnnotations:
       sidecar.istio.io/inject: "false"
   # Must be in-sync with hydra.hydra.config.existingSecret

@@ -16,7 +16,7 @@ This tutorial shows how JetStream persists events, even when the sink is not rea
 
 1. Create a [Function](../../02-get-started/04-trigger-workload-with-event.md#create-a-function), [Subscription](../../02-get-started/04-trigger-workload-with-event.md#create-a-subscription) and [trigger the workload with an event](../../02-get-started/04-trigger-workload-with-event.md#trigger-the-workload-with-an-event).
 
-2. Once you have JetStream enabled, delete your Function (the sink of Subscription).
+2. Once you have verified that the event has reached the sink, delete your Function (the sink of Subscription).
 
 ```bash
 kubectl -n default delete function lastorder
@@ -44,3 +44,5 @@ kubectl -n default delete function lastorder
        ```
 
 5. Recreate your [Function](../../02-get-started/04-trigger-workload-with-event.md#create-a-function). The stream no longer contains any undelivered messages and the event is delivered. Follow the [tutorial](../../02-get-started/04-trigger-workload-with-event.md#verify-the-event-delivery) to verify the event delivery.
+
+>**NOTE:** The retention policy for the stream is set to `interest` by default. Hence, once the messages are consumed, they are not persisted in the stream. 

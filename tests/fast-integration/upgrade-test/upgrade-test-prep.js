@@ -1,5 +1,4 @@
 const {ensureCommerceMockLocalTestFixture} = require('../test/fixtures/commerce-mock');
-
 const {error} = require('../utils');
 
 describe('Upgrade test preparation', function() {

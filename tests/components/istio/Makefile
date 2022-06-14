@@ -21,7 +21,7 @@ all: help
 ## Test:
 
 test: ## Run the tests of the project
-	$(GOTEST) -v -race ./... $(OUTPUT_OPTIONS)
+	$(GOTEST) -v -race ./...
 
 test-k3d: provision-k3d kyma-istio-deploy test ## Run tests on k3d cluster
 

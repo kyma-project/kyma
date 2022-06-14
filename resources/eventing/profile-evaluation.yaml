@@ -1,6 +1,6 @@
 global:
   jetstream:
-    storage: memory
+    storage: file
 
 controller:
   jetstream:
