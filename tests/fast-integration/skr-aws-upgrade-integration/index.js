@@ -1,5 +1,4 @@
-const {commerceMockCleanup} = require("../skr-test");
-const {deprovisionSKRInstance} = require("../skr-test/provision/deprovision-skr");
+const {deprovisionSKRInstance} = require('../skr-test/provision/deprovision-skr');
 const {
   DirectorConfig,
   DirectorClient,
@@ -15,7 +14,6 @@ const {
   KEBConfig,
   KEBClient,
   provisionSKR,
-  deprovisionSKR,
 } = require('../kyma-environment-broker');
 const {GardenerConfig, GardenerClient} = require('../gardener');
 const {
@@ -27,10 +25,9 @@ const {
 } = require('../utils');
 const {
   commerceMockTestPreparation,
-  commerceMockTests} = require('../skr-test');
-const {
-  cleanMockTestFixture,
-} = require('../test/fixtures/commerce-mock');
+  commerceMockTests,
+  commerceMockCleanup,
+} = require('../skr-test');
 const {
   KCPConfig,
   KCPWrapper,
@@ -153,7 +150,6 @@ describe('SKR-Upgrade-test', function() {
 
   // Upgrade Test Praparation
   const director = new DirectorClient(DirectorConfig.fromEnv());
-  const testNS = 'test';
 
   it('Assign SKR to scenario', async function() {
     await addScenarioInCompass(director, options.scenarioName);
@@ -200,7 +196,7 @@ describe('SKR-Upgrade-test', function() {
   if (skipCleanup === 'FALSE') {
     after('Cleanup the resources', async function() {
       this.timeout(deprovisioningTimeout);
-      //await cleanMockTestFixture('mocks', testNS, true);
+      // await cleanMockTestFixture('mocks', testNS, true);
       await commerceMockCleanup(options.testNS);
       if (!skipProvisioning) {
         await deprovisionSKRInstance(options, deprovisioningTimeout);
