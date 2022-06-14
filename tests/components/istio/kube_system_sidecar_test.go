@@ -1,20 +1,24 @@
 package istio
 
 import (
+	"bytes"
 	"context"
 	_ "embed"
 	"fmt"
+	"io"
 	"log"
-	"strings"
 	"testing"
 	"time"
 
 	"github.com/cucumber/godog"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
+
 	"k8s.io/apimachinery/pkg/runtime/serializer/yaml"
 	"k8s.io/apimachinery/pkg/util/wait"
+	yamlutil "k8s.io/apimachinery/pkg/util/yaml"
 	"k8s.io/kubectl/pkg/util/podutils"
 )
 
@@ -24,7 +28,7 @@ const (
 )
 
 //go:embed test/httpbin.yaml
-var httpbin string
+var httpbin []byte
 
 func TestKubeSystemSidecar(t *testing.T) {
 	suite := godog.TestSuite{
@@ -78,9 +82,9 @@ func (i *istioInstallledCase) deployHttpBinInKubeSystem() error {
 	}
 
 	for _, r := range resources {
-		_, err = dynamicClient.Resource(getGroupVersionResource(r)).Namespace(kubeSystemNamespace).Create(context.Background(), r, metav1.CreateOptions{})
+		_, err := dynamicClient.Resource(getGroupVersionResource(r)).Namespace(kubeSystemNamespace).Create(context.Background(), &r, metav1.CreateOptions{})
 		if err != nil {
-			return fmt.Errorf("could not deploy httpbin deployment in %s", kubeSystemNamespace)
+			return fmt.Errorf("could not deploy httpbin deployment in %s: %s", kubeSystemNamespace, err)
 		}
 	}
 	return nil
@@ -121,24 +125,35 @@ func (i *istioInstallledCase) deleteHttpBinInKubeSystem() error {
 	return nil
 }
 
-func readManifestToUnstructured() ([]*unstructured.Unstructured, error) {
-	var result []*unstructured.Unstructured
-	for _, resourceYAML := range strings.Split(httpbin, "---") {
-		if strings.TrimSpace(resourceYAML) == "" {
-			continue
+func readManifestToUnstructured() ([]unstructured.Unstructured, error) {
+	var err error
+	var unstructList []unstructured.Unstructured
+
+	decoder := yamlutil.NewYAMLOrJSONDecoder(bytes.NewReader(httpbin), 200)
+	for {
+		var rawObj runtime.RawExtension
+		if err = decoder.Decode(&rawObj); err != nil {
+			break
 		}
-		obj := &unstructured.Unstructured{}
-		dec := yaml.NewDecodingSerializer(unstructured.UnstructuredJSONScheme)
-		_, _, err := dec.Decode([]byte(resourceYAML), nil, obj)
+		obj, _, err := yaml.NewDecodingSerializer(unstructured.UnstructuredJSONScheme).Decode(rawObj.Raw, nil, nil)
 		if err != nil {
-			return nil, err
+			break
 		}
-		result = append(result, obj)
+		unstructuredMap, err := runtime.DefaultUnstructuredConverter.ToUnstructured(obj)
+		if err != nil {
+			break
+		}
+		unstructuredObj := unstructured.Unstructured{Object: unstructuredMap}
+		unstructList = append(unstructList, unstructuredObj)
 	}
-	return result, nil
+	if err != io.EOF {
+		return unstructList, err
+	}
+
+	return unstructList, nil
 }
 
-func getGroupVersionResource(resource *unstructured.Unstructured) schema.GroupVersionResource {
+func getGroupVersionResource(resource unstructured.Unstructured) schema.GroupVersionResource {
 	mapping, err := mapper.RESTMapping(resource.GroupVersionKind().GroupKind(), resource.GroupVersionKind().Version)
 	if err != nil {
 		log.Fatal(err)
