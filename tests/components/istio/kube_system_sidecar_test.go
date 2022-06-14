@@ -2,9 +2,9 @@ package istio
 
 import (
 	"context"
+	_ "embed"
 	"fmt"
 	"log"
-	"os"
 	"strings"
 	"testing"
 	"time"
@@ -22,6 +22,9 @@ const (
 	kubeSystemNamespace = "kube-system"
 	proxyName           = "istio-proxy"
 )
+
+//go:embed test/httpbin.yaml
+var httpbin string
 
 func TestKubeSystemSidecar(t *testing.T) {
 	suite := godog.TestSuite{
@@ -45,7 +48,9 @@ func InitializeScenarioKubeSystemSidecar(ctx *godog.ScenarioContext) {
 		return ctx, err
 	})
 	ctx.Step(`^Istio component is installed$`, installedCase.istioComponentIsInstalled)
+	ctx.Step(`^there should be no pods with istio sidecar in kube-system namespace$`, installedCase.kubeSystemPodsShouldNotHaveSidecar)
 	ctx.Step(`^Httpbin deployment is created in kube-system$`, installedCase.deployHttpBinInKubeSystem)
+	ctx.Step(`^Httpbin deployment should be deployed and ready$`, installedCase.waitForHttpBinInKubeSystem)
 	ctx.Step(`^there should be no pods with istio sidecar in kube-system namespace$`, installedCase.kubeSystemPodsShouldNotHaveSidecar)
 	ctx.Step(`^Httpbin deployment is deleted from kube-system$`, installedCase.deleteHttpBinInKubeSystem)
 }
@@ -57,15 +62,6 @@ func (i *istioInstallledCase) kubeSystemPodsShouldNotHaveSidecar() error {
 	}
 
 	for _, pod := range pods.Items {
-		if strings.Contains(pod.Name, "httpbin") {
-			err := wait.Poll(1*time.Second, 1*time.Minute, func() (done bool, err error) {
-				ready := podutils.IsPodReady(&pod)
-				return ready, nil
-			})
-			if err != nil {
-				return fmt.Errorf("httpbin is not ready: %s", err)
-			}
-		}
 		for _, container := range pod.Spec.Containers {
 			if container.Name == proxyName {
 				return fmt.Errorf("istio sidecars should not be deployed in %s", kubeSystemNamespace)
@@ -76,7 +72,7 @@ func (i *istioInstallledCase) kubeSystemPodsShouldNotHaveSidecar() error {
 }
 
 func (i *istioInstallledCase) deployHttpBinInKubeSystem() error {
-	resources, err := readManifestToUnstructured("test/httpbin.yaml")
+	resources, err := readManifestToUnstructured()
 	if err != nil {
 		return err
 	}
@@ -90,8 +86,28 @@ func (i *istioInstallledCase) deployHttpBinInKubeSystem() error {
 	return nil
 }
 
+func (i *istioInstallledCase) waitForHttpBinInKubeSystem() error {
+	err := wait.Poll(1*time.Second, 1*time.Minute, func() (done bool, err error) {
+		pods, err := k8sClient.CoreV1().Pods(kubeSystemNamespace).List(context.Background(), metav1.ListOptions{
+			LabelSelector: "app=httpbin",
+		})
+		if err != nil {
+			return false, err
+		}
+		for _, pod := range pods.Items {
+			ready := podutils.IsPodReady(&pod)
+			return ready, nil
+		}
+		return false, err
+	})
+	if err != nil {
+		return fmt.Errorf("httpbin is not ready: %s", err)
+	}
+	return nil
+}
+
 func (i *istioInstallledCase) deleteHttpBinInKubeSystem() error {
-	resources, err := readManifestToUnstructured("test/httpbin.yaml")
+	resources, err := readManifestToUnstructured()
 	if err != nil {
 		return err
 	}
@@ -105,22 +121,9 @@ func (i *istioInstallledCase) deleteHttpBinInKubeSystem() error {
 	return nil
 }
 
-func readFile(filepath string) (string, error) {
-	data, err := os.ReadFile(filepath)
-	if err != nil {
-		return "", err
-	}
-	return string(data), nil
-}
-
-func readManifestToUnstructured(filepath string) ([]*unstructured.Unstructured, error) {
-	manifest, err := readFile(filepath)
-	if err != nil {
-		return nil, err
-	}
-
+func readManifestToUnstructured() ([]*unstructured.Unstructured, error) {
 	var result []*unstructured.Unstructured
-	for _, resourceYAML := range strings.Split(string(manifest), "---") {
+	for _, resourceYAML := range strings.Split(httpbin, "---") {
 		if strings.TrimSpace(resourceYAML) == "" {
 			continue
 		}
