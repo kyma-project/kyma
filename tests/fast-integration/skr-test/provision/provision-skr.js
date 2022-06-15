@@ -7,21 +7,11 @@ const {
   gatherOptions,
   keb,
   kcp,
-  director,
   gardener,
 } = require('../helpers');
-const {getEnvOrThrow, genRandom} = require('../../utils');
-const {KEBConfig, KEBClient, provisionSKR}= require('../../kyma-environment-broker');
-const {GardenerClient, GardenerConfig} = require('../../gardener');
-const {DirectorClient, DirectorConfig, addScenarioInCompass, assignRuntimeToScenario} = require('../../compass');
-const {KCPWrapper, KCPConfig} = require('../../kcp/client');
-const {debug} = require('../../utils');
-
-const keb = new KEBClient(KEBConfig.fromEnv());
-const gardener = new GardenerClient(GardenerConfig.fromEnv());
-const director = new DirectorClient(DirectorConfig.fromEnv());
-const kcp = new KCPWrapper(KCPConfig.fromEnv());
-
+const {getEnvOrThrow, genRandom, debug} = require('../../utils');
+const {addScenarioInCompass, assignRuntimeToScenario} = require('../../compass');
+const {provisionSKR}= require('../../kyma-environment-broker');
 const {BTPOperatorCreds} = require('../../smctl/helpers');
 
 async function getOrProvisionSKR(options, shoot, skipProvisioning, provisioningTimeout) {

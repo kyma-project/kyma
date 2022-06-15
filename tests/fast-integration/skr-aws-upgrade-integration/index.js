@@ -120,7 +120,7 @@ describe('SKR-Upgrade-test', function() {
 
   // Upgrade
   it('Perform Upgrade', async function() {
-    await upgradeSKRInstance(options.instanceID, kymaUpgradeVersion, upgradeTimeoutMin);
+    await upgradeSKRInstance(options, kymaUpgradeVersion, upgradeTimeoutMin);
   });
 
   // Perform Tests after Upgrade
