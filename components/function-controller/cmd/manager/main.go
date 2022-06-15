@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	serverlessLogging "github.com/kyma-project/kyma/components/function-controller/internal/logging"
 	"os"
 	"time"
 
@@ -11,6 +10,7 @@ import (
 	"github.com/kyma-project/kyma/components/function-controller/internal/controllers/serverless"
 	"github.com/kyma-project/kyma/components/function-controller/internal/controllers/serverless/metrics"
 	"github.com/kyma-project/kyma/components/function-controller/internal/git"
+	serverlessLogging "github.com/kyma-project/kyma/components/function-controller/internal/logging"
 	internalresource "github.com/kyma-project/kyma/components/function-controller/internal/resource"
 	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
 	"github.com/vrischmann/envconfig"
@@ -68,7 +68,6 @@ func main() {
 	}
 	l, err := serverlessLogging.ConfigureLogger(config.LogLevel, config.LogFormat)
 	if err != nil {
-		ctrl.SetLogger(ctrlzap.New())
 		setupLog.Error(err, "unable to configure logger")
 		os.Exit(1)
 	}
