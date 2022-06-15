@@ -1,25 +1,17 @@
-const {deprovisionSKRInstance} = require('../skr-test/provision/deprovision-skr');
 const {
-  DirectorConfig,
-  DirectorClient,
-  addScenarioInCompass,
-  assignRuntimeToScenario,
   unregisterKymaFromCompass,
 } = require('../compass');
 const {
+  keb,
+  director,
   gatherOptions,
   withCustomParams,
 } = require('../skr-test/helpers');
-const {
-  KEBConfig,
-  KEBClient,
-  provisionSKR,
-} = require('../kyma-environment-broker');
-const {GardenerConfig, GardenerClient} = require('../gardener');
+const {getOrProvisionSKR} = require('../skr-test/provision/provision-skr');
+const {deprovisionSKRInstance} = require('../skr-test/provision/deprovision-skr');
 const {upgradeSKRInstance} = require('./upgrade/upgrade-skr');
 const {
   debug,
-  initializeK8sClient,
   getContainerRestartsForAllNamespaces,
   getEnvOrThrow,
   switchDebug,
@@ -33,15 +25,11 @@ const {
   KCPConfig,
   KCPWrapper,
 } = require('../kcp/client');
-const {saveKubeconfig} = require('../skr-svcat-migration-test/test-helpers');
-const {BTPOperatorCreds} = require('../smctl/helpers');
 
 const skipProvisioning = process.env.SKIP_PROVISIONING === 'true';
 
 describe('SKR-Upgrade-test', function() {
   switchDebug(on = true);
-  const keb = new KEBClient(KEBConfig.fromEnv());
-  const gardener = new GardenerClient(GardenerConfig.fromEnv());
 
   const kymaVersion = getEnvOrThrow('KYMA_VERSION');
   const kymaUpgradeVersion = getEnvOrThrow('KYMA_UPGRADE_VERSION');
@@ -123,38 +111,8 @@ describe('SKR-Upgrade-test', function() {
   it(`Provision SKR with ID ${options.instanceID}`, async function() {
     console.log(`Provisioning SKR with version ${kymaVersion}`);
     debug(`Provision SKR with Custom Parameters ${JSON.stringify(options.customParams)}`);
-    const btpOperatorCreds = BTPOperatorCreds.fromEnv();
-    skr = await provisionSKR(keb,
-        kcp,
-        gardener,
-        options.instanceID,
-        options.runtimeName,
-        null,
-        btpOperatorCreds,
-        options.customParams,
-        provisioningTimeout);
-  });
-
-  it(`Should get Runtime Status after provisioning`, async function() {
-    const runtimeStatus = await kcp.getRuntimeStatusOperations(options.instanceID);
-    console.log(`\nRuntime status: ${runtimeStatus}`);
-    await kcp.reconcileInformationLog(runtimeStatus);
-  });
-
-  it(`Should save kubeconfig for the SKR to ~/.kube/config`, async function() {
-    await saveKubeconfig(skr.shoot.kubeconfig);
-  });
-
-  it('Should initialize K8s client', async function() {
-    await initializeK8sClient({kubeconfig: skr.shoot.kubeconfig});
-  });
-
-  // Upgrade Test Praparation
-  const director = new DirectorClient(DirectorConfig.fromEnv());
-
-  it('Assign SKR to scenario', async function() {
-    await addScenarioInCompass(director, options.scenarioName);
-    await assignRuntimeToScenario(director, skr.shoot.compassID, options.scenarioName);
+    this.timeout(provisioningTimeout);
+    await getOrProvisionSKR(options, skr, skipProvisioning, provisioningTimeout);
   });
 
   // Perform Tests before Upgrade
