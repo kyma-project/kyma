@@ -2,7 +2,7 @@ controller-manager:
   pod:
     resources:
       requests:
-        cpu: 150m
+        cpu: 10m
         memory: 64Mi
   envs:
     loglevel: "warn"
@@ -11,19 +11,19 @@ upload-service:
   pod:
     resources:
       requests:
-        cpu: 100m
+        cpu: 10m
         memory: 64Mi
 
 asyncapi-service:
   pod:
     resources:
       requests:
-        cpu: 100m
+        cpu: 10m
         memory: 64Mi
 
 front-matter-service:
   pod:
     resources:
       requests:
-        cpu: 100m
+        cpu: 10m
         memory: 64Mi
