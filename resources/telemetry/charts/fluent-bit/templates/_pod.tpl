@@ -1,14 +1,16 @@
 {{- define "fluent-bit.pod" -}}
+serviceAccountName: {{ include "fluent-bit.serviceAccountName" . }}
 {{- with .Values.imagePullSecrets }}
 imagePullSecrets:
   {{- toYaml . | nindent 2 }}
 {{- end }}
-{{- if or .Values.priorityClassName .Values.global.highPriorityClassName -}}
+{{- if or .Values.priorityClassName .Values.global.highPriorityClassName }}
 priorityClassName: {{ coalesce .Values.priorityClassName .Values.global.highPriorityClassName }}
 {{- end }}
-serviceAccountName: {{ include "fluent-bit.serviceAccountName" . }}
+{{- with .Values.podSecurityContext }}
 securityContext:
-  {{- toYaml .Values.podSecurityContext | nindent 2 }}
+  {{- toYaml . | nindent 2 }}
+{{- end }}
 hostNetwork: {{ .Values.hostNetwork }}
 dnsPolicy: {{ .Values.dnsPolicy }}
 {{- with .Values.dnsConfig }}
@@ -19,27 +21,31 @@ dnsConfig:
 hostAliases:
   {{- toYaml . | nindent 2 }}
 {{- end }}
-{{- if .Values.initContainers }}
-initContainers:  {{ range $container := .Values.initContainers}}
-  - name: {{ $container.name }}
-    image: "{{ include "imageurl" (dict "reg" $.Values.global.containerRegistry "img" $.Values.global.images.busybox) }}"
-    command:
-      {{- toYaml $container.command | nindent 4 }}
-  {{- if $container.volumeMounts }}
-    volumeMounts:
-      {{- toYaml $container.volumeMounts | nindent 4 }}
-  {{- end }}
-  {{ end }}
+{{- with .Values.initContainers }}
+initContainers:
+{{- if kindIs "string" . }}
+  {{- tpl . $ | nindent 2 }}
+{{- else }}
+  {{-  toYaml . | nindent 2 }}
+{{- end -}}
 {{- end }}
 containers:
   - name: {{ .Chart.Name }}
+  {{- with .Values.securityContext }}
     securityContext:
-      {{- toYaml .Values.securityContext | nindent 6 }}
+      {{- toYaml . | nindent 6 }}
+  {{- end }}
     image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.fluent_bit) }}"
     imagePullPolicy: {{ .Values.image.pullPolicy }}
-  {{- if .Values.env }}
+  {{- if or .Values.env .Values.envWithTpl }}
     env:
-      {{- toYaml .Values.env | nindent 6 }}
+    {{- with .Values.env }}
+      {{- toYaml . | nindent 6 }}
+    {{- end }}
+    {{- range $item := .Values.envWithTpl }}
+      - name: {{ $item.name }}
+        value: {{ tpl $item.value $ | quote }}
+    {{- end }}
   {{- end }}
   {{- if .Values.envFrom }}
     envFrom:
@@ -55,7 +61,7 @@ containers:
   {{- end }}
     ports:
       - name: http
-        containerPort: 2020
+        containerPort: {{ .Values.metricsPort }}
         protocol: TCP
     {{- if .Values.extraPorts }}
       {{- range .Values.extraPorts }}
@@ -64,21 +70,25 @@ containers:
         protocol: {{ .protocol }}
       {{- end }}
     {{- end }}
+  {{- with .Values.lifecycle }}
+    lifecycle:
+      {{- toYaml . | nindent 6 }}
+  {{- end }}
     livenessProbe:
       {{- toYaml .Values.livenessProbe | nindent 6 }}
     readinessProbe:
       {{- toYaml .Values.readinessProbe | nindent 6 }}
+  {{- with .Values.resources }}
     resources:
-      {{- toYaml .Values.resources | nindent 6 }}
+      {{- toYaml . | nindent 6 }}
+  {{- end }}
     volumeMounts:
-      {{- if .Values.dynamicConfigMap }}
-      - name: shared-fluent-bit-config
-        mountPath: /fluent-bit/etc
-      {{- else }}
-      - name: config
-        mountPath: /fluent-bit/etc
-      {{- end }}
       {{- toYaml .Values.volumeMounts | nindent 6 }}
+    {{- range $key, $val := .Values.config.extraFiles }}
+      - name: config
+        mountPath: /fluent-bit/etc/{{ $key }}
+        subPath: {{ $key }}
+    {{- end }}
     {{- range $key, $value := .Values.luaScripts }}
       - name: luascripts
         mountPath: /fluent-bit/scripts/{{ $key }}
@@ -86,11 +96,6 @@ containers:
     {{- end }}
     {{- if eq .Values.kind "DaemonSet" }}
       {{- toYaml .Values.daemonSetVolumeMounts | nindent 6 }}
-      {{- if .Values.volumes.mountMachineIdFile }}
-      - name: etcmachineid
-        mountPath: /etc/machine-id
-        readOnly: true
-      {{- end }}
     {{- end }}
     {{- if .Values.extraVolumeMounts }}
       {{- toYaml .Values.extraVolumeMounts | nindent 6 }}
@@ -102,20 +107,6 @@ volumes:
   - name: config
     configMap:
       name: {{ if .Values.existingConfigMap }}{{ .Values.existingConfigMap }}{{- else }}{{ include "fluent-bit.fullname" . }}{{- end }}
-  {{- if .Values.dynamicConfigMap }}
-  - name: shared-fluent-bit-config
-    emptyDir: {}
-  - name: dynamic-config
-    configMap:
-      name: {{ .Values.dynamicConfigMap }}
-      optional: true
-  {{- end }}
-    {{- if .Values.dynamicParsersConfigMap }}
-  - name: dynamic-parsers-config
-    configMap:
-      name: {{ .Values.dynamicParsersConfigMap }}
-      optional: true
-  {{- end }}
 {{- if gt (len .Values.luaScripts) 0 }}
   - name: luascripts
     configMap:
@@ -123,12 +114,6 @@ volumes:
 {{- end }}
 {{- if eq .Values.kind "DaemonSet" }}
   {{- toYaml .Values.daemonSetVolumes | nindent 2 }}
-  {{- if .Values.volumes.mountMachineIdFile }}
-  - name: etcmachineid
-    hostPath:
-      path: /etc/machine-id
-      type: File
-  {{- end }}
 {{- end }}
 {{- if .Values.extraVolumes }}
   {{- toYaml .Values.extraVolumes | nindent 2 }}

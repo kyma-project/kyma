@@ -28,12 +28,13 @@ type LogPipelineSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
 
-	Parsers          []Parser          `json:"parsers,omitempty"`
-	MultiLineParsers []MultiLineParser `json:"multilineParsers,omitempty"`
-	Filters          []Filter          `json:"filters,omitempty"`
-	Outputs          []Output          `json:"outputs,omitempty"`
-	Files            []FileMount       `json:"files,omitempty"`
-	SecretRefs       []SecretReference `json:"secretRefs,omitempty"`
+	EnableUnsupportedPlugins bool              `json:"enableUnsupportedPlugins,omitempty"`
+	Parsers                  []Parser          `json:"parsers,omitempty"`
+	MultiLineParsers         []MultiLineParser `json:"multilineParsers,omitempty"`
+	Filters                  []Filter          `json:"filters,omitempty"`
+	Outputs                  []Output          `json:"outputs,omitempty"`
+	Files                    []FileMount       `json:"files,omitempty"`
+	SecretRefs               []SecretReference `json:"secretRefs,omitempty"`
 }
 
 // Parser describes a Fluent Bit parser configuration section
@@ -136,6 +137,9 @@ func filterOutCondition(conds []LogPipelineCondition, condType LogPipelineCondit
 //+kubebuilder:object:root=true
 //+kubebuilder:resource:scope=Cluster
 //+kubebuilder:subresource:status
+//+kubebuilder:printcolumn:name="Status",type=string,JSONPath=`.status.conditions[-1].type`
+//+kubebuilder:printcolumn:name="Unsupported-Plugins",type=boolean,JSONPath=`.spec.enableUnsupportedPlugins`
+//+kubebuilder:printcolumn:name="Age",type=date,JSONPath=`.metadata.creationTimestamp`
 
 // LogPipeline is the Schema for the logpipelines API
 type LogPipeline struct {

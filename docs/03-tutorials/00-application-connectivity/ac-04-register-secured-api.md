@@ -2,184 +2,308 @@
 title: Register a secured API
 ---
 
-Application Registry allows you to register a secured API for every service. The supported authentication methods are [Basic Authentication](https://tools.ietf.org/html/rfc7617), [OAuth](https://tools.ietf.org/html/rfc6750) (Client Credentials Grant), and client certificates.
+Application Connectivity allows you to register a secured API exposed by your external solution. The supported authentication methods are [Basic Authentication](https://tools.ietf.org/html/rfc7617), [OAuth](https://tools.ietf.org/html/rfc6750), [OAuth 2.0 mTLS](https://datatracker.ietf.org/doc/html/rfc8705), and client certificates.
 
-You can specify only one authentication method for every secured API you register. If you try to register and specify more than one authentication method, Application Registry returns the `400` code response.
+You can specify only one authentication method for every secured API you register. 
 
 Additionally, you can secure the API against cross-site request forgery (CSRF) attacks. CSRF tokens are an additional layer of protection and can accompany any authentication method.
 
->**NOTE:** Registering a secured API is a part of registering services of an external solution connected to Kyma. To learn more about this process, follow the [tutorial](ac-03-register-manage-services.md).
+>**NOTE:** Registering a secured API is a part of [registering services](ac-03-register-manage-services.md) of an external solution connected to Kyma.
 
-## Register a Basic Authentication-secured API
+## Register a secured API
 
-To register an API secured with Basic Authentication, add a **credentials.basic** object to the **api** section of the service registration request body. You must include these fields:
+To register a secured API, add a **service** object to the **services** section of the Application CR. You must include these fields:
 
 | Field   |  Description |
 |----------|------|
-| **username** | Basic Authorization username |
-| **password** | Basic Authorization password |
+| **id** | Identifier of the service. Must be unique in the scope of Application CR. |
+| **name** | Name of the service. Must be unique in the scope of Application CR. Allowed characters include: lowercase letters, numbers, and hyphens. |
+| **displayName** | Display name of the service. Must be unique in the scope of Application CR. Its normalized form constitutes a part of the **GATEWAY_URL** path. The normalized version of **displayName** in the path is stripped of all non-lowercase, non-alphanumeric characters except hyphens, and of all trailing hyphens. |
+| **description** | Description of the service |
+| **providerDisplayName** | Name of the service provider |
+| **entries** | Object containing service details |
 
-This is an example of the **api** section of the request body for an API secured with Basic Authentication:
+### Entries
 
-```json
-    "api": {
-        "targetUrl": "https://sampleapi.targeturl/v1",
-        "credentials": {
-            "basic": {
-                "username": "{USERNAME}",
-                "password": "{PASSWORD}"
-            }
-        }
-    }
+The **entries** object must contain the following fields:
+
+| Field                           | Description                                                  |
+| ------------------------------- | ------------------------------------------------------------ |
+| **credentials**                 | Optional object containing credentials used for authentication. Must be specified for secured APIs. |
+| **targetUrl**                   | URL to the API                                               |
+| **type**                        | Entry type. Use the `API` type when registering an API.        |
+| **requestParametersSecretName** | Optional name of a Secret with additional request parameters and headers |
+
+#### Credentials
+
+The **credentials** object must contain the following fields:
+
+| Field                 | Description                                                                 |
+| --------------------- |-----------------------------------------------------------------------------|
+| **secretName**        | Name of a Secret storing credentials                                        |
+| **type**              | Authentication method type. Supported values: `Basic`, `OAuth`, `OAuthWithCert `, `CertGen`.  |
+| **authenticationUrl** | Optional OAuth token URL, valid only for the `OAuth` and `OAuthWithCert` types. |
+
+## Register a  Basic Authentication-secured API
+
+This is an example of the **service** object for an API secured with Basic Authentication:
+
+```yaml
+  - id: {TARGET_UUID}
+    name: my-basic-auth-service
+    displayName: "My Basic Auth Service"
+    description: "My service"
+    providerDisplayName: "My organisation"
+    entries:
+    - credentials:
+        secretName: {SECRET_NAME}
+        type: Basic
+      targetUrl: {TARGET_API_URL}
+      type: API
+```
+
+This is an example Secret containing credentials: 
+
+```yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {SECRET_NAME}
+  namespace: kyma-integration
+data:
+  username: {BASE64_ENCODED_USER_NAME}
+  password: {BASE64_ENCODED_PASSWORD}
+```
+
+To create such a Secret, run this command:
+
+```bash
+kubectl create secret generic {SECRET_NAME} --from-literal username={USER_NAME} --from-literal password={PASSWORD} -n kyma-integration
 ```
 
 ## Register an OAuth-secured API
 
-To register an API secured with OAuth, add a **credentials.oauth** object to the **api** section of the service registration request body. Include these fields in the request body:
+This is an example of the **service** object for an API secured with OAuth:
 
-| Field   |  Description |
-|----------|------|
-| **url** |  OAuth token exchange endpoint of the service |
-| **clientId** | OAuth client ID |
-| **clientSecret** | OAuth client Secret |    
-| **requestParameters.headers** | Custom request headers (optional)|   
-| **requestParameters.queryParameters** | Custom query parameters (optional)|    
+```yaml
+  - id: {TARGET_UUID}
+    name: my-oauth-service
+    displayName: "My OAuth Service"    
+    description: "My service"
+    providerDisplayName: "My organisation"
+    entries:
+    - credentials:
+        secretName: {SECRET_NAME}
+        authenticationUrl: {OAUTH_TOKEN_URL}
+        type: OAuth
+      targetUrl: {TARGET_API_URL}
+      type: API
+```
 
-This is an example of the **api** section of the request body for an API secured with OAuth:
+This is an example of the Secret containing credentials: 
 
-```json
-    "api": {
-        "targetUrl": "https://sampleapi.targeturl/v1",
-        "credentials": {
-            "oauth": {
-                "url": "https://sampleapi.targeturl/authorizationserver/oauth/token",
-                "clientId": "{CLIENT_ID}",
-                "clientSecret": "{CLIENT_SECRET}",
-                "requestParameters": {
-                    "headers": {
-                        "{CUSTOM_HEADER_NAME}": ["{CUSTOM_HEADER_VALUE}"]
-                    },
-                    "queryParameters":  {
-                        "{CUSTOM_QUERY_PARAMETER_NAME}": ["{CUSTOM_QUERY_PARAMETER_VALUE}"]
-                    }
-                }
-            }
-        }
-    }
+```yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {SECRET_NAME}
+  namespace: kyma-integration
+data:
+  clientId: {BASE64_ENCODED_CLIENT_ID}
+  clientSecret: {BASE64_ENCODED_CLIENT_SECRET}
+```
+
+To create such a Secret, run this command:
+
+```bash
+kubectl create secret generic {SECRET_NAME} --from-literal clientId={CLIENT_ID} --from-literal clientSecret={CLIENT_SECRET} -n kyma-integration
+```
+## Register an OAuth 2.0 mTLS-secured API
+
+This is an example of the **service** object for an API secured with OAuth where the token is fetched from an mTLS-secured endpoint:
+
+```yaml
+  - id: {TARGET_UUID}
+    name: my-mTLS-oauth-service
+    displayName: "My mTLS OAuth Service"    
+    description: "My service"
+    providerDisplayName: "My organisation"
+    entries:
+    - credentials:
+        secretName: {SECRET_NAME}
+        authenticationUrl: {OAUTH_TOKEN_URL}
+        type: OAuthWithCert
+      targetUrl: {TARGET_API_URL}
+      type: API
+```
+
+This is an example of the Secret containing credentials:
+
+```yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {SECRET_NAME}
+  namespace: kyma-integration
+data:
+  clientId: {BASE64_ENCODED_CLIENT_ID}
+  crt: {BASE64_ENCODED_CERTIFICATE}
+  key: {BASE64_ENCODED_PRIVATE_KEY}
+```
+
+To create such a Secret, run this command:
+
+```bash
+kubectl create secret generic {SECRET_NAME} --from-literal clientId={CLIENT_ID} --from-literal crt={CERTIFICATE} --from-literal key={PRIVATE_KEY} -n kyma-integration
 ```
 
 ## Register a client certificate-secured API
 
-To register an API and secure it with client certificates, you must add the **credentials.certificateGen** object to the **api** section of the service registration request body. Application Registry generates a ready to use certificate and key pair for every API registered this way. You can use the generated pair or replace it with your own certificate and key.
+This is an example of the **service** object for an API secured with a client certificate:
 
-Include this field in the service registration request body:
-
-| Field   |  Description |
-|----------|------|
-| **commonName** |  Name of the generated certificate. Set as the **CN** field of the certificate Subject.  |
-
-This is an example of the `api` section of the request body for an API secured with generated client certificates:
-
-```json
-    "api": {
-        "targetUrl": "https://sampleapi.targeturl/v1",
-        "credentials": {
-            "certificateGen": {
-                "commonName": "{CERT_NAME}"
-            }
-        }
-    }
+```yaml
+  - id: {TARGET_UUID}
+    name: my-client-cert-service
+    displayName: "My Client Cert Service"
+    description: "My service"
+    providerDisplayName: "My organisation"
+    entries:
+    - credentials:
+        secretName: {SECRET_NAME}
+        type: CertificateGen
+      targetUrl: {TARGET_API_URL}
+      type: API
 ```
 
->**NOTE:** If you update the registered API and change the **certificateGen.commonName**, Application Registry generates a new certificate-key pair for that API. When you delete an API secured with generated client certificates, Application Registry deletes the corresponding certificate and key.
+This is an example of the Secret containing credentials: 
 
-### Details
-
-When you register an API with the **credentials.certificateGen** object, Application Registry generates a SHA256withRSA-encrypted certificate and a matching key. To enable communication between Kyma and an API secured with this authentication method, set the certificate as a valid authentication medium for all calls coming from Kyma in your external solution.
-
-You can retrieve the client certificate by sending the following request:
-
-```bash
-curl https://gateway.$CLUSTER_DOMAIN/$APP_NAME/v1/metadata/services/$SERVICE_ID --cert $CLIENT_CERT_FILE_NAME.crt --key $KEY_FILE_NAME.key
+```yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {SECRET_NAME}
+  namespace: kyma-integration
+data:
+  crt: {BASE64_ENCODED_CERTIFICATE}
+  key: {BASE64_ENCODED_PRIVATE_KEY}
 ```
 
-> **CAUTION:** On a local Kyma deployment, skip SSL certificate verification when making a `curl` call, by adding the `-k` flag to it. Alternatively, add the Kyma certificates to your local certificate storage on your machine using the `kyma import certs` command.
-
-A successful call returns a response body with the details of a registered service and a base64-encoded client certificate.
-
-The certificate and key pair is stored in a Secret in the `kyma-integration` Namespace. List all Secrets and find the one created for your API:
+To create such a Secret, run this command:
 
 ```bash
-kubectl -n kyma-integration get secrets
-```
-
-To fetch the certificate and key encoded with base64, run this command:
-
-```bash
-kubectl -n kyma-integration get secrets $APP_NAME-$SERVICE_ID -o yaml
-```
-
->**NOTE:** `APP_NAME` is the name of the Application used to connect the external solution that is the origin of the API. `SERVICE_ID` is the ID of the registered service to which the API belongs. You get this ID after you register an external solution's service in Kyma.
-
-
-If the API you registered provides a certificate-key pair or the generated certificate doesn't meet your security standards or specific needs, you can use a custom certificate-key pair for authentication. To replace the Kyma-generated pair with your certificate and key, run this command:
-
-```bash
-kubectl -n kyma-integration patch secrets $APP_NAME-$SERVICE_ID --patch 'data:
-  crt: {BASE64_ENCODED_CRT}
-  key: {BASE64_ENCODED_KEY}'
+kubectl create secret generic {SECRET_NAME} --from-literal crt={CERTIFICATE} --from-literal key={PRIVATE_KEY} -n kyma-integration
 ```
 
 ## Register a CSRF-protected API
 
-Application Registry supports CSRF tokens as an additional layer of API protection. To register a CSRF-protected API, add the **credentials.{AUTHENTICATION_METHOD}.csrfInfo** object to the **api** section of the service registration request body.
+This is an example of the **service** object for an API secured with both Basic Authentication and a CSRF token:
 
-Include this field in the service registration request body:
-
-| Field | Description |
-|-----|-----------|
-| **tokenEndpointURL** | The URL to the upstream service endpoint that exposes CSRF tokens. |
-
-This is an example of the **api** section of the request body for an API secured with both Basic Authentication and a CSRF token.
-
-```json
-    "api": {
-        "targetUrl": "https://sampleapi.targeturl/v1",
-        "credentials": {
-            "basic": {
-                "username": "{USERNAME}",
-                "password": "{PASSWORD}",
-                "csrfInfo": {
-                    "tokenEndpointURL": "{TOKEN_ENDPOINT_URL}"
-                }
-            }
-        }
-    }
+```yaml
+  - id: {TARGET_UUID} 
+    name: my-csrf-service
+    displayName: "My CSRF Service" 
+    description: "My service"
+    providerDisplayName: "My organisation"
+    entries:
+    - credentials:
+        secretName: {SECRET_NAME}
+        type: Basic
+        csrfInfo:
+          tokenEndpointURL: {CSRF_TOKEN_URL}
+      targetUrl: {TARGET_API_URL}
+      type: API
 ```
 
+> **NOTE:** It is assumed that the CSRF token endpoint service uses the same credentials as the target API.
+
+This is an example of the Secret containing credentials: 
+
+```yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {SECRET_NAME}
+  namespace: kyma-integration
+data:
+  username: {BASE64_ENCODED_USER_NAME}
+  password: {BASE64_ENCODED_PASSWORD}
+```
+
+To create such a Secret, run this command:
+
+```bash
+kubectl create secret generic {SECRET_NAME} --from-literal username={USER_NAME} --from-literal password={PASSWORD} -n kyma-integration
+```
 
 ## Use headers and query parameters for custom authentication
 
-You can specify additional headers and query parameters to inject to requests made to the target API.
+You can specify additional headers and query parameters to inject to requests made to the target API. You can use it with any authentication method.
 
-This is an example of the **api** section of the request body for an API secured with Basic Authentication.
+This is an example of the **service** object for an API secured with Basic Authentication and including additional headers and query parameters.
+
+```yaml
+  - id: {TARGET_UUID}
+    name: my-headers-params-service
+    displayName: "My Headers Params Service"
+    description: "My service"
+    providerDisplayName: "My organisation"
+    entries:
+    - credentials:
+        secretName: {SECRET_NAME}
+        type: Basic
+      targetUrl: {TARGET_API_URL}
+      requestParametersSecretName: {QUERY_PARAMS_SECRET_NAME}
+      type: API
+```
+
+This is an example of the Secret containing credentials: 
+
+```yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {SECRET_NAME}
+  namespace: kyma-integration
+data:
+  username: {BASE64_ENCODED_USER_NAME}
+  password: {BASE64_ENCODED_PASSWORD}
+```
+
+To create such a Secret, run this command:
+
+```bash
+kubectl create secret generic {SECRET_NAME} --from-literal username={USER_NAME} --from-literal password={PASSWORD} -n kyma-integration
+```
+
+This is an example of the Secret containing headers and request parameters: 
+
+```yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {SECRET_NAME}
+  namespace: kyma-integration
+data:
+  headers: {BASE64_ENCODED_HEADERS_JSON}
+  queryParameters: {BASE64_ENCODED_QUERY_PARAMS_JSON}
+```
+
+To create such a Secret, run this command:
+
+```bash
+kubectl create secret generic {SECRET_NAME} --from-literal headers={HEADERS_JSON} --from-literal headers={QUERY_PARAMS_JSON} -n kyma-integration
+```
+
+Additional headers stored in the Secret must be provided in the form of a valid JSON document. This is an example of a headers JSON containing one entry:
 
 ```json
-    "api": {
-        "targetUrl": "https://sampleapi.targeturl/v1",
-        "requestParameters": {
-            "headers": {
-                "{CUSTOM_HEADER_NAME}" : ["{CUSTOM_HEADER_VALUE}"]
-            },
-            "queryParameters": {
-                "{CUSTOM_QUERY_PARAMETER_NAME}" : ["{CUSTOM_QUERY_PARAMETER_VALUE}"]
-            }
-        },
-        "credentials": {
-            "basic": {
-                "username": "{USERNAME}",
-                "password": "{PASSWORD}"
-            }
-        }
-    }
+{"{MY_HEADER}":["{MY_HEADER_VALUE}"]}
 ```
+
+Additional query parameters stored in the Secret must be provided in the form of a valid JSON document. This is an example of a headers JSON containing one entry:
+
+```json
+{"{MY_QUERY_PARAM}":["{MY_QUERY_PARAM_VALUE}"]}
+```
+
+ 

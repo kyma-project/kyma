@@ -73,17 +73,6 @@ These sections will lead you through the whole installation, configuration, and 
   - `handler.py` with the Function's code and the simple "Hello World" logic
   - `requirements.txt` with an empty file for your Function's custom dependencies
 
-  It will also set **sourcePath** in the `config.yaml` file to the full path of the workspace folder:
-
-  ```yaml
-  name: my-function
-  namespace: default
-  runtime: python39
-  source:
-      sourceType: inline
-      sourcePath: {FULL_PATH_TO_WORKSPACE_FOLDER}
-  ```
-
 ### Install and configure Flux
 
 You can now install the Flux operator, connect it with a specific Git repository folder, and authorize Flux to automatically pull changes from this repository folder and apply them on your cluster.

@@ -115,7 +115,7 @@ func (c *Commander) Start() error {
 	c.logger.Info("Informers are synced successfully")
 
 	// configure event type cleaner
-	eventTypeCleaner := eventtype.NewCleaner(c.envCfg.LegacyEventTypePrefix, applicationLister, c.logger)
+	eventTypeCleaner := eventtype.NewCleaner(c.envCfg.EventTypePrefix, applicationLister, c.logger)
 
 	// start handler which blocks until it receives a shutdown signal
 	if err := nats.NewHandler(messageReceiver, &messageSenderToNats, c.envCfg.RequestTimeout, legacyTransformer, c.opts,

@@ -1,10 +1,14 @@
 package main
 
 import (
-	"errors"
 	"fmt"
 	"os"
 	"time"
+
+	"sigs.k8s.io/controller-runtime/pkg/healthz"
+	"sigs.k8s.io/controller-runtime/pkg/webhook"
+
+	ctrl "sigs.k8s.io/controller-runtime"
 
 	"github.com/kyma-project/kyma/components/function-controller/internal/controllers/serverless/metrics"
 
@@ -21,21 +25,20 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
-	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/event"
 	"sigs.k8s.io/controller-runtime/pkg/handler"
 	ctrlzap "sigs.k8s.io/controller-runtime/pkg/log/zap"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 	"sigs.k8s.io/controller-runtime/pkg/source"
-	"sigs.k8s.io/controller-runtime/pkg/webhook"
 	// +kubebuilder:scaffold:imports
 )
 
 var (
 	scheme   = runtime.NewScheme()
-	setupLog = ctrl.Log.WithName("setup")
+	setupLog = ctrlzap.New().WithName("setup")
 )
 
+//nolint
 func init() {
 	_ = clientgoscheme.AddToScheme(scheme)
 
@@ -56,7 +59,7 @@ type config struct {
 
 type healthzConfig struct {
 	Address         string        `envconfig:"default=:8090"`
-	LivenessTimeout time.Duration `envconfig:"default=1s"`
+	LivenessTimeout time.Duration `envconfig:"default=10s"`
 }
 
 func main() {
@@ -75,7 +78,7 @@ func main() {
 	}
 
 	atomicLevel := zap.NewAtomicLevelAt(logLevel)
-	zapLogger := ctrlzap.NewRaw(ctrlzap.UseDevMode(true), ctrlzap.Level(&atomicLevel))
+	zapLogger := ctrlzap.NewRaw(ctrlzap.Level(&atomicLevel))
 	ctrl.SetLogger(zapr.NewLogger(zapLogger))
 
 	setupLog.Info("Generating Kubernetes client config")
@@ -115,13 +118,18 @@ func main() {
 
 	events := make(chan event.GenericEvent)
 	healthCh := make(chan bool)
-	healthHandler := serverless.NewHealthChecker(events, healthCh, config.Healthz.LivenessTimeout, zapLogger.Named("healthz"))
+	healthHandler := serverless.NewHealthChecker(events, healthCh, config.Healthz.LivenessTimeout, zapLogger.Named("healthz").Sugar())
 	if err := mgr.AddHealthzCheck("health check", healthHandler.Checker); err != nil {
 		setupLog.Error(err, "unable to register healthz")
 		os.Exit(1)
 	}
 
-	fnRecon := serverless.NewFunction(resourceClient, ctrl.Log, config.Function, git.NewGit2Go(), mgr.GetEventRecorderFor(serverlessv1alpha1.FunctionControllerValue), prometheusCollector, healthCh)
+	if err := mgr.AddReadyzCheck("readiness check", healthz.Ping); err != nil {
+		setupLog.Error(err, "unable to register readyz")
+		os.Exit(1)
+	}
+
+	fnRecon := serverless.NewFunction(resourceClient, zapLogger.Sugar(), config.Function, git.NewGit2Go(), mgr.GetEventRecorderFor(serverlessv1alpha1.FunctionControllerValue), prometheusCollector, healthCh)
 	fnCtrl, err := fnRecon.SetupWithManager(mgr)
 	if err != nil {
 		setupLog.Error(err, "unable to create Function controller")
@@ -134,37 +142,37 @@ func main() {
 		os.Exit(1)
 	}
 
-	if err := k8s.NewConfigMap(mgr.GetClient(), ctrl.Log, config.Kubernetes, configMapSvc).
+	if err := k8s.NewConfigMap(mgr.GetClient(), zapLogger.Sugar(), config.Kubernetes, configMapSvc).
 		SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create ConfigMap controller")
 		os.Exit(1)
 	}
 
-	if err := k8s.NewNamespace(mgr.GetClient(), ctrl.Log, config.Kubernetes, configMapSvc, secretSvc, serviceAccountSvc, roleSvc, roleBindingSvc).
+	if err := k8s.NewNamespace(mgr.GetClient(), zapLogger.Sugar(), config.Kubernetes, configMapSvc, secretSvc, serviceAccountSvc, roleSvc, roleBindingSvc).
 		SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create Namespace controller")
 		os.Exit(1)
 	}
 
-	if err := k8s.NewSecret(mgr.GetClient(), ctrl.Log, config.Kubernetes, secretSvc).
+	if err := k8s.NewSecret(mgr.GetClient(), zapLogger.Sugar(), config.Kubernetes, secretSvc).
 		SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create Secret controller")
 		os.Exit(1)
 	}
 
-	if err := k8s.NewServiceAccount(mgr.GetClient(), ctrl.Log, config.Kubernetes, serviceAccountSvc).
+	if err := k8s.NewServiceAccount(mgr.GetClient(), zapLogger.Sugar(), config.Kubernetes, serviceAccountSvc).
 		SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create ServiceAccount controller")
 		os.Exit(1)
 	}
 
-	if err := k8s.NewRole(mgr.GetClient(), ctrl.Log, config.Kubernetes, roleSvc).
+	if err := k8s.NewRole(mgr.GetClient(), zapLogger.Sugar(), config.Kubernetes, roleSvc).
 		SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create Role controller")
 		os.Exit(1)
 	}
 
-	if err := k8s.NewRoleBinding(mgr.GetClient(), ctrl.Log, config.Kubernetes, roleBindingSvc).
+	if err := k8s.NewRoleBinding(mgr.GetClient(), zapLogger.Sugar(), config.Kubernetes, roleBindingSvc).
 		SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create RoleBinding controller")
 		os.Exit(1)
@@ -201,6 +209,6 @@ func toZapLogLevel(level string) (zapcore.Level, error) {
 	case "error":
 		return zapcore.ErrorLevel, nil
 	default:
-		return 0, errors.New(fmt.Sprintf("Desired log level: %s not exist", level))
+		return 0, fmt.Errorf("Desired log level: %s not exist", level)
 	}
 }

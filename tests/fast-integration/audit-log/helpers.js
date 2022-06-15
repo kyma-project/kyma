@@ -29,13 +29,12 @@ function parseAuditLogs(logs, groups) {
 async function checkAuditLogs(client, groups) {
   let retries = 0;
   let notFound = [
-    {'resName': 'commerce-binding', 'groupName': 'servicecatalog.k8s.io', 'action': 'create'},
-    {'resName': 'commerce-binding', 'groupName': 'servicecatalog.k8s.io', 'action': 'delete'},
     {'resName': 'lastorder', 'groupName': 'serverless.kyma-project.io', 'action': 'create'},
     {'resName': 'lastorder', 'groupName': 'serverless.kyma-project.io', 'action': 'delete'},
     {'resName': 'commerce-mock', 'groupName': 'deployments', 'action': 'create'},
     {'resName': 'commerce-mock', 'groupName': 'deployments', 'action': 'delete'},
   ];
+
   while (retries < 15) {
     const logs = await client.fetchLogs();
     assert.isNotEmpty(logs);

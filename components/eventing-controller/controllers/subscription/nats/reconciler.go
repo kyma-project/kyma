@@ -246,6 +246,10 @@ func (r *Reconciler) syncInitialStatus(subscription *eventingv1alpha1.Subscripti
 	cleanEventTypes, err := handlers.GetCleanSubjects(subscription, r.eventTypeCleaner)
 	if err != nil {
 		log.Errorw("get clean subject failed", "error", err)
+		if len(subscription.Status.CleanEventTypes) != 0 {
+			subscription.Status.CleanEventTypes = nil
+			return true, err
+		}
 		return false, err
 	}
 	if !reflect.DeepEqual(subscription.Status.CleanEventTypes, cleanEventTypes) {

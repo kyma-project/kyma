@@ -1,6 +1,7 @@
 package fluentbit
 
 import (
+	"fmt"
 	"strings"
 
 	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/api/v1alpha1"
@@ -8,11 +9,24 @@ import (
 
 type ConfigHeader string
 
+type EmitterConfig struct {
+	InputTag    string
+	BufferLimit string
+	StorageType string
+}
+
 const (
 	ParserConfigHeader          ConfigHeader = "[PARSER]"
 	MultiLineParserConfigHeader ConfigHeader = "[MULTILINE_PARSER]"
 	FilterConfigHeader          ConfigHeader = "[FILTER]"
 	OutputConfigHeader          ConfigHeader = "[OUTPUT]"
+	EmitterTemplate             string       = `
+name                  rewrite_tag
+match                 %s.*
+Rule                  $log "^.*$" %s.$TAG true
+Emitter_Name          %s
+Emitter_Storage.type  %s
+Emitter_Mem_Buf_Limit %s`
 )
 
 func BuildConfigSection(header ConfigHeader, content string) string {
@@ -20,7 +34,9 @@ func BuildConfigSection(header ConfigHeader, content string) string {
 	sb.WriteString(string(header))
 	sb.WriteByte('\n')
 	for _, line := range strings.Split(content, "\n") {
-		sb.WriteString("    " + line + "\n") // 4 indentations
+		if len(strings.TrimSpace(line)) > 0 { // Skip empty lines to do not break rendering in yaml output
+			sb.WriteString("    " + strings.TrimSpace(line) + "\n") // 4 indentations
+		}
 	}
 	sb.WriteByte('\n')
 
@@ -28,15 +44,41 @@ func BuildConfigSection(header ConfigHeader, content string) string {
 }
 
 // MergeSectionsConfig merges Fluent Bit filters and outputs to a single Fluent Bit configuration.
-func MergeSectionsConfig(logPipeline *telemetryv1alpha1.LogPipeline) string {
+func MergeSectionsConfig(logPipeline *telemetryv1alpha1.LogPipeline, emitterConfig EmitterConfig) (string, error) {
 	var sb strings.Builder
+
+	if len(logPipeline.Spec.Outputs) > 0 {
+		sb.WriteString(BuildConfigSection(FilterConfigHeader, generateEmitter(emitterConfig, logPipeline.Name)))
+	}
 	for _, filter := range logPipeline.Spec.Filters {
-		sb.WriteString(BuildConfigSection(FilterConfigHeader, filter.Content))
+		filterSection, err := ensureMatchCondIsValid(filter.Content, logPipeline.Name)
+		if err != nil {
+			return "", err
+		}
+		sb.WriteString(BuildConfigSection(FilterConfigHeader, filterSection))
 	}
 	for _, output := range logPipeline.Spec.Outputs {
-		sb.WriteString(BuildConfigSection(OutputConfigHeader, output.Content))
+		outputSection, err := ensureMatchCondIsValid(output.Content, logPipeline.Name)
+		if err != nil {
+			return "", err
+		}
+		sb.WriteString(BuildConfigSection(OutputConfigHeader, outputSection))
 	}
-	return sb.String()
+	return sb.String(), nil
+}
+
+func ensureMatchCondIsValid(content, logPipelineName string) (string, error) {
+	section, err := parseSection(content)
+	if err != nil {
+		return "", err
+	}
+
+	matchCond := getMatchCondition(section)
+	if matchCond == "" {
+		content += fmt.Sprintf("\nMatch              %s.*", logPipelineName)
+	}
+
+	return content, nil
 }
 
 // MergeParsersConfig merges Fluent Bit parsers and multiLine parsers to a single Fluent Bit configuration.
@@ -53,4 +95,8 @@ func MergeParsersConfig(logPipelines *telemetryv1alpha1.LogPipelineList) string 
 		}
 	}
 	return sb.String()
+}
+
+func generateEmitter(emitterConfig EmitterConfig, logPipelineName string) string {
+	return fmt.Sprintf(EmitterTemplate, emitterConfig.InputTag, logPipelineName, logPipelineName, emitterConfig.StorageType, emitterConfig.BufferLimit)
 }

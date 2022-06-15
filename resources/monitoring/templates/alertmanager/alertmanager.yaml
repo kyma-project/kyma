@@ -1,3 +1,7 @@
+{{- /*
+  Customizations:
+    - images are referenced from global values
+*/ -}}
 {{- if .Values.alertmanager.enabled }}
 apiVersion: monitoring.coreos.com/v1
 kind: Alertmanager
@@ -59,6 +63,10 @@ spec:
 {{ toYaml .Values.alertmanager.alertmanagerSpec.alertmanagerConfigNamespaceSelector | indent 4}}
 {{ else }}
   alertmanagerConfigNamespaceSelector: {}
+{{- end }}
+{{- if .Values.alertmanager.alertmanagerSpec.alertmanagerConfiguration }}
+  alertmanagerConfiguration:
+{{ toYaml .Values.alertmanager.alertmanagerSpec.alertmanagerConfiguration | indent 4 }}
 {{- end }}
 {{- if .Values.alertmanager.alertmanagerSpec.resources }}
   resources:

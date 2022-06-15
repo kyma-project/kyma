@@ -1,7 +1,0 @@
-reviewers:
-  - uaa-activator-reviewers
-approvers:
-  - uaa-activator-approvers
-
-labels:
-  - area/service-management

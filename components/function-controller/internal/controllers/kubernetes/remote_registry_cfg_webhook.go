@@ -57,7 +57,7 @@ func patchResponseFromRaw(raw []byte, secret *corev1.Secret) admission.Response 
 	return admission.PatchResponseFromRaw(raw, current)
 }
 
-func (a *registryWatcher) InjectDecoder(d *admission.Decoder) error {
-	a.Decoder = d
+func (r *registryWatcher) InjectDecoder(d *admission.Decoder) error {
+	r.Decoder = d
 	return nil
 }

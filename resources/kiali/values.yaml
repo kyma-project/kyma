@@ -9,11 +9,11 @@ global:
   images:
     kiali:
       name: kiali
-      version: 1.44.0-581a4014
+      version: 1.49.0-b79686f9
       directory: tpi
     oauth2_proxy:
       name: oauth2-proxy
-      version: 7.2.1-581a4014
+      version: 7.3.0-6b2bc161
       directory: tpi
   kymaRuntime:
     adminGroup: runtimeAdmin
@@ -99,6 +99,7 @@ deployment:
     node: {}
     pod: {}
     pod_anti: {}
+  configmap_annotations: {}
   custom_secrets: []
   host_aliases: []
   hpa:
@@ -150,6 +151,7 @@ external_services:
   istio:
     enabled: true
     root_namespace: "istio-system"
+    url_service_version: "http://istiod.istio-system:15014/version" # not needed anymore after https://github.com/kiali/kiali/issues/4985
     component_status:
       components:
       - app_label: istiod
@@ -184,12 +186,16 @@ identity: {}
 
 kiali_feature_flags:
   certificates_information_indicators:
-   enabled: false
-   secrets:
-   - cacerts
-   - istio-ca-secret
+    enabled: true
+    secrets:
+    - cacerts
+    - istio-ca-secret
   clustering:
-    enabled: false
+    enabled: true
+  disabled_features: []
+  validations:
+    ignore: ["KIA1201"]
+
 login_token:
   signing_key: ""
 

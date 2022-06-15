@@ -1,40 +1,52 @@
 const axios = require('axios');
 const https = require('https');
+const httpsAgent = new https.Agent({
+  rejectUnauthorized: false, // curl -k
+});
+axios.defaults.httpsAgent = httpsAgent;
 
 const {
-  kc,
-  kubectlPortForward,
-  retryPromise,
   convertAxiosError,
-  listPods,
+  retryPromise,
+  getVirtualService,
   debug,
+  error,
 } = require('../utils');
 
-const SECOND = 1000;
-const jaegerPort = 16686;
+async function getGrafanaUrl() {
+  const vs = await getVirtualService('kyma-system', 'monitoring-grafana');
+  const host = vs.spec.hosts[0];
+  return `https://${host}`;
+}
 
-async function prometheusGet(path) {
-  const opts = {};
-  await kc.applyToRequest(opts);
+async function getGrafanaDatasourceId(grafanaUrl, datasourceName) {
+  const url = `${grafanaUrl}/api/datasources/id/${datasourceName}`;
+  const responseBody = await retryPromise(async () => await axios.get(url), 5, 1000);
+  return responseBody.data.id;
+}
 
-  const httpsAgent = new https.Agent({
-    rejectUnauthorized: false,
-    ca: opts.ca,
-    key: opts.key,
-    cert: opts.cert,
-    timeout: 10000,
-  });
+async function proxyGrafanaDatasource(datasourceName, path, retries, interval,
+    timeout, debugMsg = undefined) {
+  const grafanaUrl = await getGrafanaUrl();
+  const datasourceId = await getGrafanaDatasourceId(grafanaUrl, datasourceName);
+  const url = `${grafanaUrl}/api/datasources/proxy/${datasourceId}/${path}`;
 
-  const server = kc.getCurrentCluster().server;
-  const prometheusProxyUrl = 'api/v1/namespaces/kyma-system/services/monitoring-prometheus:9090/proxy';
-  const url = `${server}/${prometheusProxyUrl}${path}`;
-  return retryPromise(() => axios.get(url, {httpsAgent: httpsAgent, headers: opts.headers}), 5);
+  return retryPromise(async () => {
+    if (debugMsg) {
+      debug(debugMsg);
+    }
+    return await axios.get(url, {timeout: timeout});
+  }, retries, interval);
+}
+
+async function getPrometheusViaGrafana(path, retries = 5, interval = 30, timeout = 10000) {
+  return await proxyGrafanaDatasource('Prometheus', path, retries, interval, timeout);
 }
 
 async function getPrometheusActiveTargets() {
-  const path = '/api/v1/targets?state=active';
+  const path = 'api/v1/targets?state=active';
   try {
-    const responseBody = await prometheusGet(path);
+    const responseBody = await getPrometheusViaGrafana(path);
     return responseBody.data.data.activeTargets;
   } catch (err) {
     throw convertAxiosError(err, 'cannot get prometheus targets');
@@ -42,9 +54,9 @@ async function getPrometheusActiveTargets() {
 }
 
 async function getPrometheusAlerts() {
-  const path = '/api/v1/alerts';
+  const path = 'api/v1/alerts';
   try {
-    const responseBody = await prometheusGet(path);
+    const responseBody = await getPrometheusViaGrafana(path);
     return responseBody.data.data.alerts;
   } catch (err) {
     throw convertAxiosError(err, 'cannot get prometheus alerts');
@@ -52,9 +64,9 @@ async function getPrometheusAlerts() {
 }
 
 async function getPrometheusRuleGroups() {
-  const path = '/api/v1/rules';
+  const path = 'api/v1/rules';
   try {
-    const responseBody = await prometheusGet(path);
+    const responseBody = await getPrometheusViaGrafana(path);
     return responseBody.data.data.groups;
   } catch (err) {
     throw convertAxiosError(err, 'cannot get prometheus rules');
@@ -62,93 +74,53 @@ async function getPrometheusRuleGroups() {
 }
 
 async function queryPrometheus(query) {
-  const path = `/api/v1/query?query=${encodeURIComponent(query)}`;
+  const path = `api/v1/query?query=${encodeURIComponent(query)}`;
   try {
-    const responseBody = await prometheusGet(path);
+    const responseBody = await getPrometheusViaGrafana(path);
     return responseBody.data.data.result;
   } catch (err) {
     throw convertAxiosError(err, 'cannot query prometheus');
   }
 }
 
-async function queryGrafana(url, redirectURL, ignoreSSL, httpErrorCode) {
+async function checkIfGrafanaIsReachable(redirectURL, httpErrorCode) {
+  const url = await getGrafanaUrl();
+  let ignoreSSL = false;
+  if (url.includes('local.kyma.dev')) {
+    ignoreSSL = true; // Ignore SSL certificate for self signed certificates
+  }
+
+  // For more details see here: https://oauth2-proxy.github.io/oauth2-proxy/docs/behaviour
+  delete axios.defaults.headers.common['Accept'];
+  const agent = new https.Agent({
+    rejectUnauthorized: !ignoreSSL, // reject unauthorized when ssl should not be ignored
+  });
+
   try {
-    // For more details see here: https://oauth2-proxy.github.io/oauth2-proxy/docs/behaviour
-    delete axios.defaults.headers.common['Accept'];
-    // Ignore SSL certificate for self signed certificates
-    const agent = new https.Agent({
-      rejectUnauthorized: !ignoreSSL,
-    });
-    const res = await axios.get(url, {httpsAgent: agent});
-    if (res.status === httpErrorCode) {
-      if (res.request.res.responseUrl.includes(redirectURL)) {
-        return true;
-      }
+    const response = await axios.get(url, {httpsAgent: agent});
+    if (response.status === httpErrorCode && response.request.res.responseUrl.includes(redirectURL)) {
+      return true;
     }
-    return false;
   } catch (err) {
     const msg = 'Error when querying Grafana: ';
     if (err.response) {
-      if (err.response.status === httpErrorCode) {
-        if (err.response.data.includes(redirectURL)) {
-          return true;
-        }
+      if (err.response.status === httpErrorCode && err.response.data.includes(redirectURL)) {
+        return true;
       }
-      console.log(msg + err.response.status + ' : ' + err.response.data);
-      return false;
+      error(msg + err.response.status + ' : ' + err.response.data);
     } else {
-      console.log(`${msg}: ${err.toString()}`);
-      return false;
+      error(`${msg}: ${err.toString()}`);
     }
   }
-}
 
-async function jaegerPortForward() {
-  const res = await getJaegerPods();
-  if (res.body.items.length === 0) {
-    throw new Error('cannot find any jaeger pods');
-  }
-
-  return kubectlPortForward('kyma-system', res.body.items[0].metadata.name, jaegerPort);
-}
-
-async function getJaegerPods() {
-  const labelSelector = 'app=jaeger,' +
-    'app.kubernetes.io/component=all-in-one,' +
-    'app.kubernetes.io/instance=tracing-jaeger,' +
-    'app.kubernetes.io/managed-by=jaeger-operator,' +
-    'app.kubernetes.io/name=tracing-jaeger,' +
-    'app.kubernetes.io/part-of=jaeger';
-  return listPods(labelSelector, 'kyma-system');
-}
-
-async function getJaegerTrace(traceId) {
-  const path = `/api/traces/${traceId}`;
-  const url = `http://localhost:${jaegerPort}${path}`;
-
-  try {
-    debug(`fetching trace: ${traceId} from jaeger`);
-    const responseBody = await retryPromise(
-        () => {
-          debug(`waiting for trace (id: ${traceId}) from jaeger...`);
-          return axios.get(url, {timeout: 30 * SECOND});
-        },
-        30,
-        1000,
-    );
-
-    return responseBody.data;
-  } catch (err) {
-    throw convertAxiosError(err, 'cannot get jaeger trace');
-  }
+  return false;
 }
 
 module.exports = {
+  proxyGrafanaDatasource,
   getPrometheusActiveTargets,
   getPrometheusAlerts,
   getPrometheusRuleGroups,
   queryPrometheus,
-  queryGrafana,
-  jaegerPortForward,
-  getJaegerTrace,
+  checkIfGrafanaIsReachable,
 };

@@ -4,6 +4,8 @@ import (
 	"context"
 	"testing"
 
+	"go.uber.org/zap"
+
 	"github.com/kyma-project/kyma/components/function-controller/internal/resource"
 	"k8s.io/client-go/kubernetes/scheme"
 
@@ -13,7 +15,6 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/event"
-	"sigs.k8s.io/controller-runtime/pkg/log"
 )
 
 func TestSecretReconciler_Reconcile(t *testing.T) {
@@ -31,7 +32,7 @@ func TestSecretReconciler_Reconcile(t *testing.T) {
 	g.Expect(resourceClient.Create(context.TODO(), userNamespace)).To(gomega.Succeed())
 
 	secretSvc := NewSecretService(resourceClient, testCfg)
-	reconciler := NewSecret(k8sClient, log.Log, testCfg, secretSvc)
+	reconciler := NewSecret(k8sClient, zap.NewNop().Sugar(), testCfg, secretSvc)
 
 	namespace := userNamespace.GetName()
 	ctx, cancel := context.WithCancel(context.Background())

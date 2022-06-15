@@ -28,7 +28,7 @@ const (
 	InstanceLabelValue       = "eventing"
 	DashboardLabelKey        = "kyma-project.io/dashboard"
 	DashboardLabelValue      = "eventing"
-	BackendLabelKey          = "kyma-project.io/eventingBackend"
+	BackendLabelKey          = "eventing.kyma-project.io/backend"
 	publisherPortName        = "http"
 	publisherPortNum         = int32(8080)
 	publisherMetricsPortName = "http-metrics"
@@ -105,7 +105,8 @@ func WithLabels(backendType v1alpha1.BackendType) DeployOpt {
 	labels := map[string]string{
 		AppLabelKey:       PublisherName,
 		InstanceLabelKey:  InstanceLabelValue,
-		DashboardLabelKey: DashboardLabelValue}
+		DashboardLabelKey: DashboardLabelValue,
+	}
 	return func(d *appsv1.Deployment) {
 		d.Spec.Selector = metav1.SetAsLabelSelector(labels)
 		d.Spec.Template.ObjectMeta.Labels = labels
@@ -308,17 +309,6 @@ func getNATSEnvVars(natsConfig env.NatsConfig, publisherConfig env.PublisherConf
 		{Name: "REQUEST_TIMEOUT", Value: publisherConfig.RequestTimeout},
 		{Name: "LEGACY_NAMESPACE", Value: "kyma"},
 		{
-			Name: "LEGACY_EVENT_TYPE_PREFIX",
-			ValueFrom: &v1.EnvVarSource{
-				ConfigMapKeyRef: &v1.ConfigMapKeySelector{
-					LocalObjectReference: v1.LocalObjectReference{
-						Name: configMapName,
-					},
-					Key: configMapKeyEventTypePrefix,
-				},
-			},
-		},
-		{
 			Name: "EVENT_TYPE_PREFIX",
 			ValueFrom: &v1.EnvVarSource{
 				ConfigMapKeyRef: &v1.ConfigMapKeySelector{
@@ -329,10 +319,9 @@ func getNATSEnvVars(natsConfig env.NatsConfig, publisherConfig env.PublisherConf
 				},
 			},
 		},
-		// jetstream-specific config
+		// Jetstream-specific config
 		{Name: "ENABLE_JETSTREAM_BACKEND", Value: strconv.FormatBool(natsConfig.EnableJetStreamBackend)},
 		{Name: "JS_STREAM_NAME", Value: natsConfig.JSStreamName},
-		{Name: "JS_STREAM_SUBJECT_PREFIX", Value: natsConfig.JSStreamSubjectPrefix},
 	}
 }
 

@@ -1,7 +1,0 @@
-{
-  "url": "https://faros.test.graph.ql",
-  "headers": {
-    "faros-xf-user": "connector-service",
-    "faros-xf-groups": "kyma-admins"
-  }
-}

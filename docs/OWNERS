@@ -1,8 +1,0 @@
-reviewers:
-  - documentation-reviewers
-
-approvers:
-  - documentation-approvers
-
-labels:
-  - area/documentation

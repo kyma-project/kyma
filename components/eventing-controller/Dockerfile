@@ -1,5 +1,5 @@
 # Build the controller binary
-FROM eu.gcr.io/kyma-project/external/golang:1.18.0-alpine3.15 as builder
+FROM eu.gcr.io/kyma-project/external/golang:1.18.3-alpine3.16 as builder
 ARG DOCK_PKG_DIR=/go/src/github.com/kyma-project/kyma/components/eventing-controller
 WORKDIR $DOCK_PKG_DIR
 
@@ -24,7 +24,6 @@ LABEL source = git@github.com:kyma-project/kyma.git
 
 WORKDIR /
 COPY --from=builder /go/src/github.com/kyma-project/kyma/components/eventing-controller/eventing-controller .
-COPY licenses/ /licenses/
 USER nonroot:nonroot
 
 ENTRYPOINT ["/eventing-controller"]

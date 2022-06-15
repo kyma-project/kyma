@@ -2,9 +2,47 @@
 title: Environment variables
 ---
 
+You can use environment variables to configure an existing runtime, to read existing configuration or to build your own runtime based on them.
+
+## Environments passed to runtimes
+
+Every runtime provides its own unique environment configuration which can be read by a server and the `handler.js` file during the container run:
+
+### Common environments
+
+| Environment | Default | Description |
+|---------------|-----------|-------------|
+| **FUNC_HANDLER** | `main` | The name of the exported Function inside the `MOD_NAME` file. |
+| **MOD_NAME** | `handler` | The name of the main exported file. The extension must be added on the server side and must be equal to `.py` for the Python runtimes and `.js` for the Node.js ones. |
+| **FUNC_PORT** | `8080` | The right port, a server listens to. |
+| **SERVICE_NAMESPACE** | | The Namespace where the right Function exists on a cluster. |
+| **KUBELESS_INSTALL_VOLUME** | `/kubeless` | Full path to volume mount with users source code. |
+| **FUNC_RUNTIME** | | The name of the actual runtime. Possible values: `python39`, `nodejs12`, `nodejs14`, `nodejs16`. |
+| **JAEGER_SERVICE_ENDPOINT** | `http://tracing-jaeger-collector.kyma-system.svc.cluster.local:14268/api/traces` | Full address of the Jaeger service. |
+| **PUBLISHER_PROXY_ADDRESS** | `http://eventing-publisher-proxy.kyma-system.svc.cluster.local/publish` | Full address of the Publisher Proxy service. |
+
+### Specific environments
+
+There are a few environments that occur only for a specific runtimes. The following list includes all of them:
+
+#### Node.js runtimes-specific environments
+
+| Environment | Default | Description |
+|---------------|-----------|-------------|
+| **NODE_PATH** | `$(KUBELESS_INSTALL_VOLUME)/node_modules` | Full path to fetched users dependencies. |
+
+#### Python runtime-specific environment variables
+
+| Environment | Default | Description |
+|---------------|-----------|-------------|
+| **PYTHONPATH** | `$(KUBELESS_INSTALL_VOLUME)/lib.python3.9/site-packages:$(KUBELESS_INSTALL_VOLUME)` | List of directories that Python must add to the sys.path directory list. |
+| **PYTHONUNBUFFERED** | `TRUE` | Defines if Python's logs must be buffered before printing them out. |
+
+## Configure runtime
+
 You can configure environment variables either separately for a given runtime or make them runtime-agnostic using a Config Map.
 
-## Define environment variables in a Config Map
+### Define environment variables in a Config Map
 
 Config Maps allow you to define Function's environment variables for any runtime through key-value pairs. After you define the values in a Config Map, simply reference it in the Function custom resource (CR) through the **valueFrom** parameter. See an example of such a Function CR that specifies the `my-var` value as a reference to the key stored in the `my-vars-cm` Config Map as the `MY_VAR` environment variable.
 
@@ -29,7 +67,7 @@ spec:
     }
 ```
 
-## NodeJS runtime-specific environment variables
+### Node.js runtime-specific environment variables
 
 To configure the Function with the Node.js runtime, override the default values of these environment variables:
 
@@ -63,7 +101,7 @@ spec:
     }
 ```
 
-## Python runtime-specific environment variables
+### Python runtime-specific environment variables
 
 To configure a Function with the Python runtime, override the default values of these environment variables:
 
