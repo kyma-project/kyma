@@ -51,7 +51,7 @@ const {
   OAuthCredentials,
 } = require('../../../lib/oauth');
 
-const {bebBackend, eventMeshNamespace} = require('../../../eventing-test/common/common');
+const {bebBackend, getEventMeshNamespace} = require('../../../eventing-test/common/common');
 
 const commerceMockYaml = fs.readFileSync(
     path.join(__dirname, './commerce-mock.yaml'),
@@ -207,7 +207,7 @@ async function sendLegacyEventAndCheckResponse(mockNamespace = 'mocks') {
 async function sendCloudEventStructuredModeAndCheckResponse(backendType ='nats', mockNamespace = 'mocks') {
   let source = 'commerce';
   if (backendType === bebBackend) {
-    source = eventMeshNamespace;
+    source = getEventMeshNamespace();
   }
   const body = {
     'specversion': '1.0',
@@ -231,7 +231,7 @@ async function sendCloudEventStructuredModeAndCheckResponse(backendType ='nats',
 async function sendCloudEventBinaryModeAndCheckResponse(backendType = 'nats', mockNamespace = 'mocks') {
   let source = 'commerce';
   if (backendType === bebBackend) {
-    source = eventMeshNamespace;
+    source = getEventMeshNamespace();
   }
   const body = {
     'data': {'orderCode': '567'},
@@ -659,9 +659,6 @@ async function provisionCommerceMockResources(appName, mockNamespace, targetName
 
 function getResourcePaths(namespace) {
   return [
-    `/apis/servicecatalog.kyma-project.io/v1alpha1/namespaces/${namespace}/servicebindingusages`,
-    `/apis/servicecatalog.k8s.io/v1beta1/namespaces/${namespace}/servicebindings`,
-    `/apis/servicecatalog.k8s.io/v1beta1/namespaces/${namespace}/serviceinstances`,
     `/apis/serverless.kyma-project.io/v1alpha1/namespaces/${namespace}/functions`,
     `/apis/addons.kyma-project.io/v1alpha1/namespaces/${namespace}/addonsconfigurations`,
     `/apis/gateway.kyma-project.io/v1alpha1/namespaces/${namespace}/apirules`,
@@ -695,25 +692,6 @@ async function cleanMockTestFixture(mockNamespace, targetNamespace, wait = true)
 }
 
 async function deleteMockTestFixture(mockNamespace) {
-  const serviceBindingUsage = {
-    apiVersion: 'servicecatalog.kyma-project.io/v1alpha1',
-    kind: 'ServiceBindingUsage',
-    metadata: {name: 'commerce-lastorder-sbu'},
-    spec: {
-      serviceBindingRef: {name: 'commerce-binding'},
-      usedBy: {kind: 'serverless-function', name: 'lastorder'},
-    },
-  };
-  await k8sDelete([serviceBindingUsage], mockNamespace);
-  const serviceBinding = {
-    apiVersion: 'servicecatalog.k8s.io/v1beta1',
-    kind: 'ServiceBinding',
-    metadata: {name: 'commerce-binding'},
-    spec: {
-      instanceRef: {name: 'commerce'},
-    },
-  };
-  await k8sDelete([serviceBinding], mockNamespace, false);
   await k8sDelete(lastorderObjs);
   await k8sDelete(prepareCommerceObjs(mockNamespace));
   await k8sDelete(applicationObjs);

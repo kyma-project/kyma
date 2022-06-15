@@ -45,7 +45,7 @@ resources:
     cpu: 100m
     memory: 300Mi
   requests:
-    cpu: 100m
+    cpu: 10m
     memory: 200Mi
 
 terminationGracePeriodSeconds: 10

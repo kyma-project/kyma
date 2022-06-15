@@ -5,5 +5,5 @@ service-binding-usage-controller:
       cpu: 100m
     requests:
       memory: 48Mi
-      cpu: 50m
+      cpu: 10m
       

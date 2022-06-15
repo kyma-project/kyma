@@ -6,7 +6,7 @@ application-broker:
         cpu: 100m
       requests:
         memory: 48Mi
-        cpu: 60m
+        cpu: 10m
 application-operator:
   controller:
     resources:
@@ -15,7 +15,7 @@ application-operator:
         cpu: 100m
         memory: 256Mi
       requests:
-        cpu: 100m
+        cpu: 10m
         memory: 128Mi
 central-application-gateway:
   autoscaling:
@@ -29,7 +29,7 @@ central-application-gateway:
         cpu: 100m
         memory: 128Mi
       requests:
-        cpu: 50m
+        cpu: 10m
         memory: 64Mi
 central-application-connectivity-validator:
   deployment:
@@ -38,5 +38,5 @@ central-application-connectivity-validator:
         cpu: 100m
         memory: 128Mi
       requests:
-        cpu: 50m
+        cpu: 10m
         memory: 64Mi

@@ -4,7 +4,8 @@ global:
 
 controller:
   jetstream:
-    retentionPolicy: limits
+    retentionPolicy: interest
+    streamReplicas: 3
     consumerDeliverPolicy: new
     maxMessages: -1
     maxBytes: -1
@@ -13,7 +14,7 @@ controller:
       cpu: 500m
       memory: 1Gi
     requests:
-      cpu: 400m
+      cpu: 10m
       memory: 512Mi
   publisherProxy:
     resources:
@@ -21,7 +22,7 @@ controller:
         cpu: 500m
         memory: 512Mi
       requests:
-        cpu: 400m
+        cpu: 10m
         memory: 256Mi
 
 nats:
@@ -42,7 +43,7 @@ nats:
         cpu: 500m
         memory: 1Gi
       requests:
-        cpu: 400m
+        cpu: 10m
         memory: 512Mi
     logging:
       debug: false
