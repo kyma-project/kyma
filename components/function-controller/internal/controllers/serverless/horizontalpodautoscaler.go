@@ -13,7 +13,7 @@ import (
 )
 
 func initStateFnCheckHPA(ctx context.Context, r *reconciler, s *systemState) stateFn {
-	if v, ok := s.instance.Labels[disableHorizontalPodAutoscaler]; ok && strings.ToLower(v) == "true" {
+	if v, ok := s.instance.Annotations[disableHorizontalPodAutoscaler]; ok && strings.ToLower(v) == "true" {
 		return nil
 	}
 
