@@ -16,7 +16,6 @@ RUN GO111MODULE=on go mod download
 COPY ./testsuite/ ${BASE_APP_DIR}/testsuite/
 COPY ./pkg/ ${BASE_APP_DIR}/pkg/
 COPY ./cmd/ ${BASE_APP_DIR}/cmd/
-COPY ./licenses/ ${BASE_APP_DIR}/licenses/
 
 #
 # Build tests
@@ -42,7 +41,6 @@ RUN apk add --no-cache ca-certificates && \
 #
 
 COPY --from=builder ${TEST_DIR}/main.test /app/
-COPY --from=builder ${TEST_DIR}/licenses/ /app/licenses/
 
 #
 # Run tests

@@ -72,6 +72,10 @@
     "query":"sum(nats_stream_total_bytes) by (stream_name)"
   },
   {
+    "title":"NATS JetStream: Stream consumer count",
+    "query":"sum(nats_stream_consumer_count) by (stream_name)"
+  },
+  {
     "title":"NATS JetStream: Stream message count",
     "query":"sum(nats_stream_total_messages) by (stream_name)"
   },
@@ -88,8 +92,8 @@
     "query":"- sum(rate(nats_consumer_delivered_consumer_seq{pod=~\"$server\",stream_name=~\"$stream\",consumer_name=~\"$consumer\",consumer_name=~\"$consumer\"}[$__rate_interval])) by (consumer_name)"
   },
   {
-    "title":"NATS JetStream: Total delivered messages",
-    "query":"sum(nats_consumer_delivered_consumer_seq{pod=~\"$server\",stream_name=~\"$stream\",consumer_name=~\"$consumer\"}) by (consumer_name)"
+    "title":"NATS JetStream: Pending Re-delivery Messages",
+    "query":"sum(nats_consumer_num_redelivered{pod=~\"$server\",stream_name=~\"$stream\",consumer_name=~\"$consumer\"}) by (consumer_name)"
   },
   {
     "title":"NATS JetStream: Pending messages",

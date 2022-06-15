@@ -4,7 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/go-logr/logr"
+	"go.uber.org/zap"
+
 	corev1 "k8s.io/api/core/v1"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -13,7 +14,7 @@ import (
 )
 
 type NamespaceReconciler struct {
-	Log                logr.Logger
+	Log                *zap.SugaredLogger
 	client             client.Client
 	config             Config
 	configMapSvc       ConfigMapService
@@ -23,12 +24,12 @@ type NamespaceReconciler struct {
 	roleBindingService RoleBindingService
 }
 
-func NewNamespace(client client.Client, log logr.Logger, config Config,
+func NewNamespace(client client.Client, log *zap.SugaredLogger, config Config,
 	configMapSvc ConfigMapService, secretSvc SecretService, serviceAccountSvc ServiceAccountService,
 	roleService RoleService, roleBindingService RoleBindingService) *NamespaceReconciler {
 	return &NamespaceReconciler{
 		client:             client,
-		Log:                log.WithName("controllers").WithName("namespace"),
+		Log:                log.Named("controllers").Named("namespace"),
 		config:             config,
 		configMapSvc:       configMapSvc,
 		secretSvc:          secretSvc,
@@ -77,7 +78,7 @@ func (r *NamespaceReconciler) Reconcile(ctx context.Context, request ctrl.Reques
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
 
-	logger := r.Log.WithValues("name", instance.GetName())
+	logger := r.Log.With("name", instance.GetName())
 
 	logger.Info(fmt.Sprintf("Updating ConfigMaps in namespace '%s'", instance.GetName()))
 	configMaps, err := r.configMapSvc.ListBase(ctx)
@@ -86,7 +87,8 @@ func (r *NamespaceReconciler) Reconcile(ctx context.Context, request ctrl.Reques
 		return ctrl.Result{}, err
 	}
 	for _, configMap := range configMaps {
-		if err = r.configMapSvc.UpdateNamespace(ctx, logger, instance.GetName(), &configMap); err != nil {
+		c := configMap
+		if err := r.configMapSvc.UpdateNamespace(ctx, logger, instance.GetName(), &c); err != nil {
 			return ctrl.Result{}, err
 		}
 	}
@@ -98,7 +100,8 @@ func (r *NamespaceReconciler) Reconcile(ctx context.Context, request ctrl.Reques
 		return ctrl.Result{}, err
 	}
 	for _, secret := range secrets {
-		if err = r.secretSvc.UpdateNamespace(ctx, logger, instance.GetName(), &secret); err != nil {
+		s := secret
+		if err := r.secretSvc.UpdateNamespace(ctx, logger, instance.GetName(), &s); err != nil {
 			return ctrl.Result{}, err
 		}
 	}
@@ -110,7 +113,8 @@ func (r *NamespaceReconciler) Reconcile(ctx context.Context, request ctrl.Reques
 		return ctrl.Result{}, err
 	}
 	for _, role := range roles {
-		if err = r.roleService.UpdateNamespace(ctx, logger, instance.GetName(), &role); err != nil {
+		rr := role
+		if err := r.roleService.UpdateNamespace(ctx, logger, instance.GetName(), &rr); err != nil {
 			return ctrl.Result{}, err
 		}
 	}
@@ -122,7 +126,8 @@ func (r *NamespaceReconciler) Reconcile(ctx context.Context, request ctrl.Reques
 		return ctrl.Result{}, err
 	}
 	for _, roleBinding := range roleBindings {
-		if err = r.roleBindingService.UpdateNamespace(ctx, logger, instance.GetName(), &roleBinding); err != nil {
+		rb := roleBinding
+		if err := r.roleBindingService.UpdateNamespace(ctx, logger, instance.GetName(), &rb); err != nil {
 			return ctrl.Result{}, err
 		}
 	}
@@ -134,7 +139,8 @@ func (r *NamespaceReconciler) Reconcile(ctx context.Context, request ctrl.Reques
 		return ctrl.Result{}, err
 	}
 	for _, serviceAccount := range serviceAccounts {
-		if err = r.serviceAccountSvc.UpdateNamespace(ctx, logger, instance.GetName(), &serviceAccount); err != nil {
+		sa := serviceAccount
+		if err := r.serviceAccountSvc.UpdateNamespace(ctx, logger, instance.GetName(), &sa); err != nil {
 			return ctrl.Result{}, err
 		}
 	}

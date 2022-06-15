@@ -20,10 +20,13 @@ import (
 	"errors"
 	"flag"
 	"os"
+	"strings"
 
 	"github.com/go-logr/zapr"
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/fluentbit"
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/fs"
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/sync"
+	"k8s.io/apimachinery/pkg/types"
 
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/webhook"
 	k8sWebhook "sigs.k8s.io/controller-runtime/pkg/webhook"
@@ -54,8 +57,18 @@ var (
 	fluentBitNs                string
 	fluentBitEnvSecret         string
 	fluentBitFilesConfigMap    string
+	fluentBitPath              string
+	fluentBitPluginDirectory   string
+	fluentBitInputTag          string
+	fluentBitBufferLimit       string
+	fluentBitStorageType       string
 	logFormat                  string
 	logLevel                   string
+	certDir                    string
+	supportedFilterPlugins     string
+	supportedOutputPlugins     string
+	deniedFilterPlugins        string
+	deniedOutputPlugins        string
 )
 
 //nolint:gochecknoinits
@@ -88,8 +101,19 @@ func main() {
 	flag.StringVar(&fluentBitEnvSecret, "env-secret", "", "Secret for environment variables")
 	flag.StringVar(&fluentBitFilesConfigMap, "files-cm", "", "ConfigMap for referenced files")
 	flag.StringVar(&fluentBitNs, "fluent-bit-ns", "", "Fluent Bit namespace")
+	flag.StringVar(&fluentBitPath, "fluent-bit-path", "fluent-bit/bin/fluent-bit", "Fluent Bit binary path")
+	flag.StringVar(&fluentBitPluginDirectory, "fluent-bit-plugin-directory", "fluent-bit/lib", "Fluent Bit plugin directory")
+	flag.StringVar(&fluentBitInputTag, "fluent-bit-input-tag", "tele", "Fluent Bit base tag of the input to use")
+	flag.StringVar(&fluentBitBufferLimit, "fluent-bit-buffer-limit", "10M", "Fluent Bit buffer limit per log pipeline")
+	flag.StringVar(&fluentBitStorageType, "fluent-bit-storage-type", "filesystem", "Fluent Bit buffering mechanism (filesystem or memory)")
 	flag.StringVar(&logFormat, "log-format", getEnvOrDefault("APP_LOG_FORMAT", "text"), "Log format (json or text)")
 	flag.StringVar(&logLevel, "log-level", getEnvOrDefault("APP_LOG_LEVEL", "debug"), "Log level (debug, info, warn, error, fatal)")
+	flag.StringVar(&certDir, "cert-dir", "/var/run/telemetry-webhook", "Webhook TLS certificate directory")
+	flag.StringVar(&supportedFilterPlugins, "supported-filter-plugins", "", "Comma separated list of supported filter plugins. If empty, all filter plugins are allowed.")
+	flag.StringVar(&supportedOutputPlugins, "supported-output-plugins", "", "Comma separated list of supported output plugins. If empty, all output plugins are allowed.")
+	flag.StringVar(&deniedFilterPlugins, "denied-filter-plugins", "", "Comma separated list of denied filter plugins even if allowUnsupportedPlugins is enabled. If empty, all filter plugins are allowed.")
+	flag.StringVar(&deniedOutputPlugins, "denied-output-plugins", "", "Comma separated list of denied output plugins even if allowUnsupportedPlugins is enabled. If empty, all output plugins are allowed.")
+
 	flag.Parse()
 
 	ctrLogger, err := logger.New(logFormat, logLevel)
@@ -116,17 +140,53 @@ func main() {
 		HealthProbeBindAddress: probeAddr,
 		LeaderElection:         enableLeaderElection,
 		LeaderElectionID:       "cdd7ef0b.kyma-project.io",
-		CertDir:                "/var/run/telemetry-webhook",
+		CertDir:                certDir,
 	})
 	if err != nil {
 		setupLog.Error(err, "Failed to start manager")
 		os.Exit(1)
 	}
 
+	emitterConfig := fluentbit.EmitterConfig{
+		InputTag:    fluentBitInputTag,
+		BufferLimit: fluentBitBufferLimit,
+		StorageType: fluentBitStorageType,
+	}
+
+	daemonSetConfig := sync.FluentBitDaemonSetConfig{
+		FluentBitDaemonSetName: types.NamespacedName{
+			Namespace: fluentBitNs,
+			Name:      fluentBitDaemonSet,
+		},
+		FluentBitSectionsConfigMap: types.NamespacedName{
+			Name:      fluentBitSectionsConfigMap,
+			Namespace: fluentBitNs,
+		},
+		FluentBitParsersConfigMap: types.NamespacedName{
+			Name:      fluentBitParsersConfigMap,
+			Namespace: fluentBitNs,
+		},
+		FluentBitFilesConfigMap: types.NamespacedName{
+			Name:      fluentBitFilesConfigMap,
+			Namespace: fluentBitNs,
+		},
+		FluentBitEnvSecret: types.NamespacedName{
+			Name:      fluentBitEnvSecret,
+			Namespace: fluentBitNs,
+		},
+	}
+
 	logPipelineValidator := webhook.NewLogPipeLineValidator(mgr.GetClient(),
 		fluentBitConfigMap,
 		fluentBitNs,
-		fluentbit.NewConfigValidator(),
+		fluentbit.NewConfigValidator(fluentBitPath, fluentBitPluginDirectory),
+		fluentbit.NewPluginValidator(
+			strings.SplitN(strings.ReplaceAll(supportedFilterPlugins, " ", ""), ",", len(supportedFilterPlugins)),
+			strings.SplitN(strings.ReplaceAll(supportedOutputPlugins, " ", ""), ",", len(supportedOutputPlugins)),
+			strings.SplitN(strings.ReplaceAll(deniedFilterPlugins, " ", ""), ",", len(deniedFilterPlugins)),
+			strings.SplitN(strings.ReplaceAll(deniedOutputPlugins, " ", ""), ",", len(deniedOutputPlugins))),
+
+		emitterConfig,
 		fs.NewWrapper(),
 	)
 	mgr.GetWebhookServer().Register(
@@ -136,12 +196,8 @@ func main() {
 	reconciler := controllers.NewLogPipelineReconciler(
 		mgr.GetClient(),
 		mgr.GetScheme(),
-		fluentBitNs,
-		fluentBitSectionsConfigMap,
-		fluentBitParsersConfigMap,
-		fluentBitDaemonSet,
-		fluentBitEnvSecret,
-		fluentBitFilesConfigMap)
+		daemonSetConfig,
+		emitterConfig)
 	if err = reconciler.SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "Failed to create controller", "controller", "LogPipeline")
 		os.Exit(1)
@@ -191,6 +247,9 @@ func validateFlags() error {
 	}
 	if logLevel != "debug" && logLevel != "info" && logLevel != "warn" && logLevel != "error" && logLevel != "fatal" {
 		return errors.New("--log-level has to be one of debug, info, warn, error, fatal")
+	}
+	if fluentBitStorageType != "filesystem" && fluentBitStorageType != "memory" {
+		return errors.New("--fluent-bit-storage-type has to be either filesystem or memory")
 	}
 	return nil
 }

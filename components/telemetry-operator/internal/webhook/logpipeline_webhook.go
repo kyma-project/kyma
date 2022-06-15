@@ -46,21 +46,33 @@ type LogPipelineValidator struct {
 	client.Client
 
 	fluentBitConfigMap types.NamespacedName
-	cfg                fluentbit.ConfigValidator
+	configValidator    fluentbit.ConfigValidator
+	pluginValidator    fluentbit.PluginValidator
+	emitterConfig      fluentbit.EmitterConfig
 	fsWrapper          fs.Wrapper
 
 	decoder *admission.Decoder
 }
 
-func NewLogPipeLineValidator(client client.Client, fluentBitConfigMap string, namespace string, cfg fluentbit.ConfigValidator, fsWrapper fs.Wrapper) *LogPipelineValidator {
+func NewLogPipeLineValidator(
+	client client.Client,
+	fluentBitConfigMap string,
+	namespace string,
+	configValidator fluentbit.ConfigValidator,
+	pluginValidator fluentbit.PluginValidator,
+	emitterConfig fluentbit.EmitterConfig,
+	fsWrapper fs.Wrapper) *LogPipelineValidator {
+
 	return &LogPipelineValidator{
 		Client: client,
 		fluentBitConfigMap: types.NamespacedName{
 			Name:      fluentBitConfigMap,
 			Namespace: namespace,
 		},
-		cfg:       cfg,
-		fsWrapper: fsWrapper,
+		configValidator: configValidator,
+		pluginValidator: pluginValidator,
+		fsWrapper:       fsWrapper,
+		emitterConfig:   emitterConfig,
 	}
 }
 
@@ -89,6 +101,16 @@ func (v *LogPipelineValidator) Handle(ctx context.Context, req admission.Request
 		}
 	}
 
+	if logPipeline.Spec.EnableUnsupportedPlugins {
+		warnMsg := "'enableUnsupportedPlugin' is enabled which would allow unsupported plugins to be used!"
+		return admission.Response{
+			AdmissionResponse: admissionv1.AdmissionResponse{
+				Allowed:  true,
+				Warnings: []string{warnMsg},
+			},
+		}
+	}
+
 	return admission.Allowed("LogPipeline validation successful")
 }
 
@@ -108,13 +130,23 @@ func (v *LogPipelineValidator) validateLogPipeline(ctx context.Context, currentB
 
 	log.Info("Fluent Bit config files count", "count", len(configFiles))
 	for _, configFile := range configFiles {
-		if err := v.fsWrapper.CreateAndWrite(configFile); err != nil {
+		if err = v.fsWrapper.CreateAndWrite(configFile); err != nil {
 			log.Error(err, "Failed to write Fluent Bit config file", "filename", configFile.Name, "path", configFile.Path)
 			return err
 		}
 	}
 
-	if err = v.cfg.Validate(ctx, fmt.Sprintf("%s/fluent-bit.conf", currentBaseDirectory)); err != nil {
+	var logPipelines telemetryv1alpha1.LogPipelineList
+	if err := v.List(ctx, &logPipelines); err != nil {
+		return err
+	}
+
+	if err = v.pluginValidator.Validate(logPipeline, &logPipelines); err != nil {
+		log.Error(err, "Failed to validate plugins")
+		return err
+	}
+
+	if err = v.configValidator.Validate(ctx, fmt.Sprintf("%s/fluent-bit.conf", currentBaseDirectory)); err != nil {
 		log.Error(err, "Failed to validate Fluent Bit config")
 		return err
 	}
@@ -148,7 +180,10 @@ func (v *LogPipelineValidator) getFluentBitConfig(ctx context.Context, currentBa
 		})
 	}
 
-	sectionsConfig := fluentbit.MergeSectionsConfig(logPipeline)
+	sectionsConfig, err := fluentbit.MergeSectionsConfig(logPipeline, v.emitterConfig)
+	if err != nil {
+		return []fs.File{}, err
+	}
 	configFiles = append(configFiles, fs.File{
 		Path: fluentBitSectionsConfigDirectory,
 		Name: logPipeline.Name + ".conf",

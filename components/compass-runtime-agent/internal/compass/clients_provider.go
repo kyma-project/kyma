@@ -56,10 +56,8 @@ func (cp *clientsProvider) UpdateConnectionData(data cache.ConnectionData) error
 	var transport *http.Transport
 	if cp.mtlsHTTPClient == nil {
 		cp.mtlsHTTPClient = &http.Client{Timeout: 30 * time.Second}
-		transport = http.DefaultTransport.(*http.Transport).Clone()
-	} else {
-		transport = cp.mtlsHTTPClient.Transport.(*http.Transport)
 	}
+	transport = http.DefaultTransport.(*http.Transport).Clone()
 
 	transport.TLSClientConfig.InsecureSkipVerify = cp.skipCompassTLSVerification
 	transport.TLSClientConfig.Certificates = []tls.Certificate{data.Certificate}

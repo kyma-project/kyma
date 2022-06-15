@@ -9,7 +9,6 @@ require (
 	github.com/go-logr/zapr v0.1.1 // indirect
 	github.com/hashicorp/errwrap v1.0.0
 	github.com/hashicorp/go-multierror v1.1.0
-	github.com/kubernetes-sigs/service-catalog v0.3.0
 	github.com/kyma-project/helm-broker v1.1.0
 	github.com/kyma-project/kyma/components/eventing-controller v0.0.0-20210315102435-c682d6366c7d
 	github.com/kyma-project/kyma/components/function-controller v0.0.0-20210708083136-5479837a0948

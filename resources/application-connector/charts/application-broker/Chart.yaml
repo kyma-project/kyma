@@ -1,4 +1,0 @@
-apiVersion: v1
-description: Application broker deployment chart.
-name: application-broker
-version: 0.1.1

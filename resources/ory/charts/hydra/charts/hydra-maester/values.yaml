@@ -13,6 +13,9 @@ globalAccess: false
 #The Controller have CREATE and READ access to all Secrets in the namespaces listed below.
 enabledNamespaces: []
 
+# -- Single namespace mode. If enabled the controller will watch for resources only from namespace it is deployed in, ignoring others
+singleNamespaceMode: false
+
 image:
   # Image pull policy
   pullPolicy: IfNotPresent
@@ -65,3 +68,9 @@ deployment:
 
 # Configure node affinity
 affinity: {}
+
+# -- PodDistributionBudget configuration
+pdb:
+  enabled: false
+  spec:
+    minAvailable: 1

@@ -19,7 +19,7 @@ type RepositoryAuthType string
 
 const (
 	RepositoryAuthBasic  RepositoryAuthType = "basic"
-	RepositoryAuthSSHKey                    = "key"
+	RepositoryAuthSSHKey RepositoryAuthType = "key"
 )
 
 type AuthOptions struct {
@@ -56,7 +56,7 @@ func GetAuth(options *AuthOptions) (git2go.RemoteCallbacks, error) {
 			if !ok {
 				return git2go.RemoteCallbacks{}, fmt.Errorf("missing field %s", KeyKey)
 			}
-			passphrase, _ := options.Credentials[PasswordKey]
+			passphrase := options.Credentials[PasswordKey]
 			var err error
 			if passphrase == "" {
 				_, err = ssh.ParsePrivateKey([]byte(key))

@@ -1,0 +1,78 @@
+# Mode for oathkeeper controller
+# Two possible modes are: controller or sidecar
+global:
+  ory:
+    oathkeeper:
+      maester:
+        mode: controller
+
+replicaCount: 1
+
+# -- Single namespace mode. If enabled the controller will watch for resources only from namespace it is deployed in, ignoring others
+singleNamespaceMode: false
+
+# oathkeeperFullnameOverride: oathkeeper
+
+# rulesConfigmapNamespace: some-namespace
+# rulesFileName: access-rules.json
+
+image:
+  # ORY Oathkeeper Rule Controller image
+  repository: oryd/oathkeeper-maester
+  # ORY Oathkeeper Rule Controller version
+  tag: "v0.1.0"
+  # Image pull policy
+  pullPolicy: IfNotPresent
+
+# -- Image pull secrets
+imagePullSecrets: []
+
+port:
+  metrics: 8080
+
+deployment:
+  strategy: {} # Read more: https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#strategy
+
+  resources: {}
+    #  We usually recommend not to specify default resources and to leave this as a conscious
+    #  choice for the user. This also increases chances charts run on environments with little
+    #  resources, such as Minikube. If you do want to specify resources, uncomment the following
+    #  lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+    # limits:
+    #   cpu: 100m
+    #   memory: 30Mi
+    # requests:
+    #   cpu: 100m
+    #   memory: 20Mi
+  securityContext:
+    capabilities:
+      drop:
+      - ALL
+    readOnlyRootFilesystem: true
+    runAsNonRoot: true
+    runAsUser: 1000
+    allowPrivilegeEscalation: false
+    privileged: false
+
+  # Node labels for pod assignment.
+  nodeSelector: {}
+  # If you do want to specify node labels, uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'annotations:'.
+  #   foo: bar
+
+  # Configure node tolerations.
+  tolerations: []
+
+  # Configure annotations.
+  annotations: {}
+
+  envs: {}
+
+# Configure node affinity
+affinity: {}
+
+# -- PodDistributionBudget configuration
+pdb:
+  enabled: false
+  spec:
+    minAvailable: 1

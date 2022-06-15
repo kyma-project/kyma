@@ -3,7 +3,6 @@
     * prometheus image
     * config-reloader image
     * priorityClassName
-    * podSecurityContext
     * Liveness/readiness probes
 */ -}}
 {{- $namespace := printf "%s" (include "kube-prometheus-stack.namespace" .) }}
@@ -36,7 +35,7 @@ spec:
 {{ toYaml .Values.prometheusOperator.podAnnotations | indent 8 }}
 {{- end }}
     spec:
-    {{- if or .Values.prometheusOperator.priorityClassName .Values.global.priorityClassName }}
+ {{- if or .Values.prometheusOperator.priorityClassName .Values.global.priorityClassName }}
       priorityClassName: {{ coalesce .Values.prometheusOperator.priorityClassName .Values.global.priorityClassName }}
     {{- end }}
       containers:
@@ -143,10 +142,8 @@ spec:
           {{- end }}
           resources:
 {{ toYaml .Values.prometheusOperator.resources | indent 12 }}
-{{- if .Values.prometheusOperator.securityContext }}
           securityContext:
-{{ toYaml .Values.prometheusOperator.securityContext | indent 12 }}
-{{- end }}
+{{ toYaml .Values.prometheusOperator.containerSecurityContext | indent 12 }}
 {{- if .Values.prometheusOperator.tls.enabled }}
           volumeMounts:
             - name: tls-secret
@@ -162,9 +159,9 @@ spec:
       dnsConfig:
 {{ toYaml . | indent 8 }}
     {{- end }}
-{{- if .Values.prometheusOperator.podSecurityContext }}
+{{- if .Values.prometheusOperator.securityContext }}
       securityContext:
-{{ toYaml .Values.prometheusOperator.podSecurityContext | indent 8 }}
+{{ toYaml .Values.prometheusOperator.securityContext | indent 8 }}
 {{- end }}
       serviceAccountName: {{ template "kube-prometheus-stack.operator.serviceAccountName" . }}
 {{- if .Values.prometheusOperator.hostNetwork }}

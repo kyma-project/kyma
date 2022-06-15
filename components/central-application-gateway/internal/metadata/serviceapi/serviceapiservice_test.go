@@ -22,7 +22,6 @@ const (
 	secretName   = "credentialsSecret-name"
 	username     = "username"
 	password     = "password"
-	commonName   = "commonName"
 )
 
 var (
@@ -65,6 +64,33 @@ func TestDefaultService_Read(t *testing.T) {
 			},
 		},
 		{
+			description: "api with oauth with certificate credentials",
+			applicationAPI: &applications.ServiceAPI{
+				TargetURL: targetUrl,
+				Credentials: &applications.Credentials{
+					Type:       TypeOAuthWithCert,
+					SecretName: secretName,
+					URL:        oauthUrl,
+				},
+			},
+			credentialsSecret: map[string][]byte{
+				ClientIDKey:    []byte(clientId),
+				CertificateKey: certificate,
+				PrivateKeyKey:  privateKey,
+			},
+			resultingAPI: &model.API{
+				TargetUrl: targetUrl,
+				Credentials: &authorization.Credentials{
+					OAuthWithCert: &authorization.OAuthWithCert{
+						ClientID:    clientId,
+						Certificate: certificate,
+						PrivateKey:  privateKey,
+						URL:         oauthUrl,
+					},
+				},
+			},
+		},
+		{
 			description: "api with basic auth credentials",
 			applicationAPI: &applications.ServiceAPI{
 				TargetURL: targetUrl,
@@ -99,7 +125,6 @@ func TestDefaultService_Read(t *testing.T) {
 				},
 			},
 			credentialsSecret: map[string][]byte{
-				CommonNameKey:  []byte(commonName),
 				CertificateKey: certificate,
 				PrivateKeyKey:  privateKey,
 			},
@@ -107,7 +132,6 @@ func TestDefaultService_Read(t *testing.T) {
 				TargetUrl: targetUrl,
 				Credentials: &authorization.Credentials{
 					CertificateGen: &authorization.CertificateGen{
-						CommonName:  commonName,
 						Certificate: certificate,
 						PrivateKey:  privateKey,
 					},

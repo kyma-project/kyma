@@ -26,11 +26,11 @@ global:
   images:
     fluent_bit:
       name: fluent-bit
-      version: 1.8.15-581a4014
+      version: 1.9.4-7114f989
       directory: tpi
     loki:
       name: loki
-      version: 2.2.1-581a4014
+      version: 2.2.1-0f8bfdfb
       directory: tpi
     alpine:
       name: "alpine"
@@ -45,6 +45,8 @@ global:
     gateway:
       name: kyma-gateway
       namespace: kyma-system
+  telemetry:
+    enabled: false
   tracing:
     enabled: true
   highPriorityClassName: "kyma-system-priority"

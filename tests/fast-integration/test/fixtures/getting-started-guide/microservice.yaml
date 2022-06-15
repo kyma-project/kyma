@@ -20,7 +20,7 @@ spec:
     spec:
       containers:
         - name: orders-service
-          image: "eu.gcr.io/kyma-project/develop/orders-service:e8175c63"
+          image: "eu.gcr.io/kyma-project/orders-service:ff1444fb"
           imagePullPolicy: IfNotPresent
           resources:
             limits:

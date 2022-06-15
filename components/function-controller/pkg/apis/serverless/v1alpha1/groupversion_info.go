@@ -21,7 +21,6 @@ limitations under the License.
 // +groupName=serverless.kyma-project.io
 // +kubebuilder:object:generate=true
 // +groupName=serverless.kyma-project.io
-
 package v1alpha1
 
 import (

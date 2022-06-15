@@ -12,7 +12,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 )
 
-var beOKReconcileResult = recResultMatcher(false, 0)
+var beOKReconcileResult = recResultMatcher(false, time.Second*1)
 var beFinishedReconcileResult = recResultMatcher(false, time.Minute*5)
 
 func recResultMatcher(requeue bool, requeueAfter time.Duration) gtypes.GomegaMatcher {
@@ -51,27 +51,21 @@ var (
 
 func haveConditionReason(t serverlessv1alpha1.ConditionType, expected serverlessv1alpha1.ConditionReason) gtypes.GomegaMatcher {
 	return gomega.WithTransform(func(fn *serverlessv1alpha1.Function) serverlessv1alpha1.ConditionReason {
-		rec := &FunctionReconciler{} //TODO refactor with FunctionReconciler
-		return rec.getConditionReason(fn.Status.Conditions, t)
+		return getConditionReason(fn.Status.Conditions, t)
 	}, gomega.Equal(expected))
 }
 
 var (
 	haveConditionCfgRdy          = haveCondition(serverlessv1alpha1.ConditionConfigurationReady, corev1.ConditionTrue)
-	haveFalseConditionCfgRdy     = haveCondition(serverlessv1alpha1.ConditionConfigurationReady, corev1.ConditionFalse)
-	haveUnknownConditionCfgRdy   = haveCondition(serverlessv1alpha1.ConditionConfigurationReady, corev1.ConditionUnknown)
 	haveConditionBuildRdy        = haveCondition(serverlessv1alpha1.ConditionBuildReady, corev1.ConditionTrue)
 	haveUnknownConditionBuildRdy = haveCondition(serverlessv1alpha1.ConditionBuildReady, corev1.ConditionUnknown)
-	haveFalseConditionBuildRdy   = haveCondition(serverlessv1alpha1.ConditionBuildReady, corev1.ConditionFalse)
 	haveConditionRunning         = haveCondition(serverlessv1alpha1.ConditionRunning, corev1.ConditionTrue)
 	haveUnknownConditionRunning  = haveCondition(serverlessv1alpha1.ConditionRunning, corev1.ConditionUnknown)
-	haveFalseConditionRunning    = haveCondition(serverlessv1alpha1.ConditionRunning, corev1.ConditionFalse)
 )
 
 func haveCondition(t serverlessv1alpha1.ConditionType, expected corev1.ConditionStatus) gtypes.GomegaMatcher {
 	return gomega.WithTransform(func(fn *serverlessv1alpha1.Function) corev1.ConditionStatus {
-		rec := &FunctionReconciler{} //TODO refactor with FunctionReconciler
-		return rec.getConditionStatus(fn.Status.Conditions, t)
+		return getConditionStatus(fn.Status.Conditions, t)
 	}, gomega.Equal(expected))
 }
 
