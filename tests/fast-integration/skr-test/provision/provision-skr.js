@@ -1,15 +1,46 @@
+const {
+  initK8sConfig,
+  prepareCompassResources,
+  getSKRConfig,
+  withSuffix,
+  withInstanceID,
+  gatherOptions,
+} = require('../helpers');
+const {getEnvOrThrow, genRandom} = require('../../utils');
 const {KEBConfig, KEBClient, provisionSKR}= require('../../kyma-environment-broker');
 const {GardenerClient, GardenerConfig} = require('../../gardener');
-const {DirectorClient, DirectorConfig} = require('../../compass');
-const {addScenarioInCompass, assignRuntimeToScenario} = require('../../compass');
+const {DirectorClient, DirectorConfig, addScenarioInCompass, assignRuntimeToScenario} = require('../../compass');
 const {KCPWrapper, KCPConfig} = require('../../kcp/client');
-const {BTPOperatorCreds} = require('../../smctl/helpers');
 const {debug} = require('../../utils');
 
 const keb = new KEBClient(KEBConfig.fromEnv());
 const gardener = new GardenerClient(GardenerConfig.fromEnv());
 const director = new DirectorClient(DirectorConfig.fromEnv());
 const kcp = new KCPWrapper(KCPConfig.fromEnv());
+
+const {BTPOperatorCreds} = require('../../smctl/helpers');
+
+
+async function getOrProvisionSKR(options, shoot, skipProvisioning, provisioningTimeout) {
+  this.timeout(provisioningTimeout);
+  if (skipProvisioning) {
+    console.log('Gather information from externally provisioned SKR and prepare the compass resources');
+    const instanceID = getEnvOrThrow('INSTANCE_ID');
+    let suffix = process.env.TEST_SUFFIX;
+    if (suffix === undefined) {
+      suffix = genRandom(4);
+    }
+    options = gatherOptions(
+        withInstanceID(instanceID),
+        withSuffix(suffix),
+    );
+    shoot = await getSKRConfig(instanceID);
+  } else {
+    shoot = await provisionSKRInstance(options, provisioningTimeout);
+  }
+  await prepareCompassResources(shoot, options);
+  await initK8sConfig(shoot);
+}
 
 async function provisionSKRInstance(options, timeout) {
   try {
@@ -53,5 +84,6 @@ module.exports = {
   director,
   gardener,
   provisionSKRInstance,
+  getOrProvisionSKR,
 };
 
