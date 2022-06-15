@@ -16,6 +16,7 @@ const {
   provisionSKR,
 } = require('../kyma-environment-broker');
 const {GardenerConfig, GardenerClient} = require('../gardener');
+const {upgradeSKRInstance} = require('./upgrade/upgrade-skr');
 const {
   debug,
   initializeK8sClient,
@@ -171,14 +172,7 @@ describe('SKR-Upgrade-test', function() {
 
   // Upgrade
   it('Perform Upgrade', async function() {
-    await kcp.upgradeKyma(options.instanceID, kymaUpgradeVersion, upgradeTimeoutMin);
-    debug('Upgrade Done!');
-  });
-
-  it('Should get Runtime Status after upgrade', async function() {
-    const runtimeStatus = await kcp.getRuntimeStatusOperations(options.instanceID);
-    console.log(`\nRuntime status: ${runtimeStatus}`);
-    await kcp.reconcileInformationLog(runtimeStatus);
+    await upgradeSKRInstance(options.instanceID, kymaUpgradeVersion, upgradeTimeoutMin);
   });
 
   // Perform Tests after Upgrade
