@@ -1,22 +1,21 @@
 const {
-  unregisterKymaFromCompass,
-} = require('../compass');
-const {
   keb,
   director,
   kcp,
   gatherOptions,
   withCustomParams,
 } = require('../skr-test/helpers');
+const {
+  debug,
+  getEnvOrThrow,
+  switchDebug,
+} = require('../utils');
 const {getOrProvisionSKR} = require('../skr-test/provision/provision-skr');
 const {deprovisionSKRInstance} = require('../skr-test/provision/deprovision-skr');
 const {upgradeSKRInstance} = require('./upgrade/upgrade-skr');
 const {
-  debug,
-  getContainerRestartsForAllNamespaces,
-  getEnvOrThrow,
-  switchDebug,
-} = require('../utils');
+  unregisterKymaFromCompass,
+} = require('../compass');
 const {
   commerceMockTestPreparation,
   commerceMockTests,
@@ -34,7 +33,7 @@ describe('SKR-Upgrade-test', function() {
   switchDebug(on = true);
 
   if (!skipProvisioning) {
-    globalTimeout += provisioningTimeout + deprovisioningTimeout;  // 3h
+    globalTimeout += provisioningTimeout + deprovisioningTimeout; // 3h
   }
   this.timeout(globalTimeout);
   this.slow(slowTime);
@@ -60,7 +59,6 @@ describe('SKR-Upgrade-test', function() {
       `Application ${options.appName}`,
   );
 
-  //TODO
   // debug(
   //   `KEB_HOST: ${getEnvOrThrow("KEB_HOST")}`,
   //   `KEB_CLIENT_ID: ${getEnvOrThrow("KEB_CLIENT_ID")}`,
@@ -108,7 +106,6 @@ describe('SKR-Upgrade-test', function() {
     await getOrProvisionSKR(options, skr, skipProvisioning, provisioningTimeout);
   });
 
-  //TODO
   it(`Perform kcp login`, async function() {
     const version = await kcp.version([]);
     debug(version);
