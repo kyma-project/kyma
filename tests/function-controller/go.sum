@@ -546,7 +546,6 @@ github.com/kr/text v0.1.0/go.mod h1:4Jbv+DJW3UT/LiOwJeYQe1efqtUx/iVham/4vfdArNI=
 github.com/kr/text v0.2.0 h1:5Nx0Ya0ZqY2ygV366QzturHI13Jq95ApcVaJBhpS+AY=
 github.com/kr/text v0.2.0/go.mod h1:eLer722TekiGuMkidMxC/pM04lWEeraHUUmBw8l2grE=
 github.com/kubernetes-sigs/go-open-service-broker-client v0.0.0-20190909175253-906fa5f9c249/go.mod h1:s8wBC55/DEkNa3YMY1WLgpT33Ghpmw7v+waIxh15dYI=
-github.com/kubernetes-sigs/service-catalog v0.3.0 h1:uQaQcWnJf2qJ0ODaKHktOMN0daF+hi3inqrXzACyI1Y=
 github.com/kubernetes-sigs/service-catalog v0.3.0/go.mod h1:zRfgMd1T9HuXR24Qj4GOu/TGWABVGw62MGlyHVcpWnU=
 github.com/kyma-incubator/api-gateway v0.0.0-20200930072023-5d3f2107a1ef/go.mod h1:DGeKJ2GUH1cOAxUKVbUUl55DuIX6w2DXgZjlg8UTwrU=
 github.com/kyma-project/helm-broker v1.1.0 h1:DW/Hnisd9WifTgTGfdTzlTa5p8YaiB0+/lZE4dumiRE=

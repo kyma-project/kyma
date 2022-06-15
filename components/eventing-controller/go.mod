@@ -10,19 +10,19 @@ require (
 	github.com/go-logr/zapr v1.2.3
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/kyma-incubator/api-gateway v0.0.0-20220318061314-9fd030a8cbd1
-	github.com/kyma-project/kyma/common/logging v0.0.0-20220603121114-e1491c4678e0
-	github.com/kyma-project/kyma/components/application-operator v0.0.0-20220603121114-e1491c4678e0
+	github.com/kyma-project/kyma/common/logging v0.0.0-20220609154355-1465f7118404
+	github.com/kyma-project/kyma/components/application-operator v0.0.0-20220609154355-1465f7118404
 	github.com/mitchellh/hashstructure/v2 v2.0.2
-	github.com/nats-io/nats-server/v2 v2.8.2
-	github.com/nats-io/nats.go v1.15.0
+	github.com/nats-io/nats-server/v2 v2.8.4
+	github.com/nats-io/nats.go v1.16.0
 	github.com/onsi/ginkgo v1.16.5
 	github.com/onsi/gomega v1.19.0
 	github.com/pkg/errors v0.9.1
 	github.com/stretchr/testify v1.7.2
 	go.uber.org/atomic v1.9.0
 	go.uber.org/zap v1.21.0
-	golang.org/x/oauth2 v0.0.0-20220524215830-622c5d57e401
-	golang.org/x/xerrors v0.0.0-20220517211312-f3a8303e98df
+	golang.org/x/oauth2 v0.0.0-20220608161450-d0670ef3b1eb
+	golang.org/x/xerrors v0.0.0-20220609144429-65e65417b02f
 	k8s.io/api v0.24.1
 	k8s.io/apimachinery v0.24.1
 	k8s.io/client-go v0.24.1

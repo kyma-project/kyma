@@ -30,6 +30,14 @@ podSecurityPolicy:
   create: false
   annotations: {}
 
+openShift:
+  # Sets Openshift support
+  enabled: false
+  # Creates SCC for Fluent-bit when Openshift support is enabled
+  securityContextConstraints:
+    create: true
+    annotations: {}
+
 podSecurityContext: {}
 #   fsGroup: 2000
 
@@ -66,6 +74,7 @@ service:
   port: 2020
   labels: {}
   # nodePort: 30020
+  # clusterIP: 172.16.10.1
   annotations: {}
 #   prometheus.io/path: "/api/v1/metrics/prometheus"
 #   prometheus.io/port: "2020"
