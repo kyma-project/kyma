@@ -165,15 +165,18 @@ func validateRequests(resources corev1.ResourceRequirements, minMemory, minCPU r
 		allErrs = append(allErrs, fmt.Sprintf("%s.requests.memory(%s) should be higher than minimal value (%s)",
 			parent, requests.Memory().String(), minMemory.String()))
 	}
-	if limits != nil {
-		if requests.Cpu().Cmp(*limits.Cpu()) == 1 {
-			allErrs = append(allErrs, fmt.Sprintf("%s.limits.cpu(%s) should be higher than %s.requests.cpu(%s)",
-				parent, limits.Cpu().String(), parent, requests.Cpu().String()))
-		}
-		if requests.Memory().Cmp(*limits.Memory()) == 1 {
-			allErrs = append(allErrs, fmt.Sprintf("%s.limits.memory(%s) should be higher than %s.requests.memory(%s)",
-				parent, limits.Memory().String(), parent, requests.Memory().String()))
-		}
+
+	if limits == nil {
+		return allErrs
+	}
+
+	if requests.Cpu().Cmp(*limits.Cpu()) == 1 {
+		allErrs = append(allErrs, fmt.Sprintf("%s.limits.cpu(%s) should be higher than %s.requests.cpu(%s)",
+			parent, limits.Cpu().String(), parent, requests.Cpu().String()))
+	}
+	if requests.Memory().Cmp(*limits.Memory()) == 1 {
+		allErrs = append(allErrs, fmt.Sprintf("%s.limits.memory(%s) should be higher than %s.requests.memory(%s)",
+			parent, limits.Memory().String(), parent, requests.Memory().String()))
 	}
 
 	return allErrs
