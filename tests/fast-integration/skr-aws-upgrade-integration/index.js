@@ -116,15 +116,8 @@ describe('SKR-Upgrade-test', function() {
   });
 
   // Perform Tests before Upgrade
-  it('Execute commerceMockTestPreparation', async function() {
+  it('Execute Commerce Mock Tests', async function() {
     commerceMockTestPreparation(options);
-  });
-
-  it('Listing all pods in cluster', async function() {
-    await getContainerRestartsForAllNamespaces();
-  });
-
-  it('Execute commerceMockTests', async function() {
     commerceMockTests(options.testNS);
   });
 
@@ -134,10 +127,6 @@ describe('SKR-Upgrade-test', function() {
   });
 
   // Perform Tests after Upgrade
-  it('Listing all pods in cluster', async function() {
-    await getContainerRestartsForAllNamespaces();
-  });
-
   it('Execute commerceMockTests', async function() {
     commerceMockTests(options.testNS);
   });

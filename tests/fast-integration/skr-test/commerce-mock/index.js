@@ -68,8 +68,12 @@ function commerceMockTestPreparation(options) {
 function commerceMockTests(testNamespace) {
   let initialRestarts = undefined;
 
+  it('Listing all pods in cluster', async function() {
+    initialRestarts = await getContainerRestartsForAllNamespaces();
+  });
+
   it('in-cluster event should be delivered (structured and binary mode)', async function() {
-    initialRestarts = await checkInClusterEventDelivery(testNamespace);
+    await checkInClusterEventDelivery(testNamespace);
   });
 
   it('function should be reachable through secured API Rule', async function() {
