@@ -39,7 +39,6 @@ Runtime Agent uses these environment variables:
 - **APP_SKIP_COMPASS_TLS_VERIFY** specifies whether to communicate with Connector and Director with disabled TLS verification.
 - **APP_SKIP_APPS_TLS_VERIFY** specifies whether to set up Applications synchronized from Compass to communicate with external systems with disabled TLS verification.
 - **APP_GATEWAY_PORT** specifies the Application Gateway port.
-- **APP_UPLOAD_SERVICE_URL** specifies the URL of the upload service.
 - **APP_QUERY_LOGGING** specifies whether to log GraphQL queries.
 - **APP_RUNTIME_EVENTS_URL** specifies the Events URL of the cluster that Runtime Agent runs on.
 - **APP_RUNTIME_CONSOLE_URL** specifies the Console URL of the cluster that Runtime Agent runs on. <!-- TODO: To be removed after it's been removed from the code. See https://github.com/kyma-project/kyma/pull/13984, the comment: discussion_r861476457. -->
