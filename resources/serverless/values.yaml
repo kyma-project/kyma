@@ -111,7 +111,7 @@ global:
   testImages:
     function_controller_test:
       name: "function-controller-test"
-      version: "91a9a810"
+      version: "PR-14572"
     git_server:
       name: "gitserver"
       version: "708f6a87"
@@ -250,9 +250,6 @@ grafanaDashboard:
   enabled: true
   functionMetrics:
     enabled: false
-
-usageKind:
-  name: serverless-function
 
 dockerRegistry:
   enableInternal: true
