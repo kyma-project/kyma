@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"os"
 	"time"
-
 	"github.com/go-logr/zapr"
 	k8s "github.com/kyma-project/kyma/components/function-controller/internal/controllers/kubernetes"
 	"github.com/kyma-project/kyma/components/function-controller/internal/controllers/serverless"
@@ -102,13 +101,6 @@ func main() {
 	serviceAccountSvc := k8s.NewServiceAccountService(resourceClient, config.Kubernetes)
 	roleSvc := k8s.NewRoleService(resourceClient, config.Kubernetes)
 	roleBindingSvc := k8s.NewRoleBindingService(resourceClient, config.Kubernetes)
-
-	mgr.GetWebhookServer().Register(
-		"/mutate-v1-secret",
-		&webhook.Admission{
-			Handler: k8s.NewRegistryWatcher(mgr.GetClient()),
-		},
-	)
 
 	events := make(chan event.GenericEvent)
 	healthCh := make(chan bool)

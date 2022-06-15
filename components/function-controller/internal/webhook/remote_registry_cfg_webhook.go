@@ -1,4 +1,4 @@
-package kubernetes
+package webhook
 
 import (
 	"context"
@@ -7,7 +7,6 @@ import (
 
 	"github.com/kyma-project/kyma/components/function-controller/internal/docker"
 	corev1 "k8s.io/api/core/v1"
-	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
 )
 
@@ -22,7 +21,7 @@ type RemoteRegistryCfgUpdater interface {
 	InjectDecoder(*admission.Decoder) error
 }
 
-func NewRegistryWatcher(c client.Client) RemoteRegistryCfgUpdater {
+func NewRegistryWatcher() RemoteRegistryCfgUpdater {
 	return &registryWatcher{}
 }
 
@@ -45,7 +44,6 @@ func (r *registryWatcher) Handle(ctx context.Context, req admission.Request) adm
 	if err != nil {
 		return admission.Errored(http.StatusInternalServerError, err)
 	}
-
 	return patchResponseFromRaw(req.Object.Raw, &secret)
 }
 
