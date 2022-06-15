@@ -148,7 +148,7 @@ resources:
     cpu: 400m
     memory: 256Mi
   requests:
-    cpu: 20m
+    cpu: 10m
     memory: 50Mi
 
 ## only available if kind is Deployment

@@ -4,7 +4,7 @@ catalog:
     # Ref: http://kubernetes.io/docs/user-guide/compute-resources/
     resources:
       requests:
-        cpu: 50m
+        cpu: 10m
         memory: 30Mi
       limits:
         cpu: 100m
@@ -17,7 +17,7 @@ catalog:
     # Ref: http://kubernetes.io/docs/user-guide/compute-resources/
     resources:
       requests:
-        cpu: 50m
+        cpu: 10m
         memory: 48Mi
       limits:
         cpu: 100m

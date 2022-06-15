@@ -1866,7 +1866,7 @@ prometheusOperator:
     # resource config for prometheusConfigReloader
     resources:
       requests:
-        cpu: 100m
+        cpu: 10m
         memory: 50Mi
       limits:
         cpu: 100m
@@ -2582,7 +2582,7 @@ prometheus:
         cpu: 600m
         memory: 2Gi
       requests:
-        cpu: 200m
+        cpu: 10m
         memory: 600Mi
 
     ## Prometheus StorageSpec for persistent data

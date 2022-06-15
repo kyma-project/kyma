@@ -14,7 +14,7 @@ jaeger:
         cpu: 50m
         memory: 200Mi
       requests:
-        cpu: 10m
+        cpu: 20m
         memory: 40Mi
     storage:
       type: memory
