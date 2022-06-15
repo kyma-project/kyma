@@ -17,7 +17,11 @@ const {
   checkAuditLogs,
 } = require('../../audit-log');
 const {debug} = require('../../utils');
-const {director} = require('../provision/provision-skr');
+const {director} = require('../helpers');
+const {
+  exposeGrafana,
+  unexposeGrafana,
+} = require('../../monitoring');
 
 const AWS_PLAN_ID = '361c511f-f939-4621-b228-d0fb79a1fe15';
 // rate of audit events generated in 60 minutes. The value is derived from the actual prometheus query.

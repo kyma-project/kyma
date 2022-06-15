@@ -1,4 +1,4 @@
-const {kcp} = require('../../skr-test/provision/provision-skr');
+const {kcp} = require('../../skr-test/helpers');
 
 async function upgradeSKRInstance(options, kymaUpgradeVersion, timeout) {
   try {

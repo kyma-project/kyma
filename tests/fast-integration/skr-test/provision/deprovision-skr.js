@@ -1,5 +1,5 @@
 const {deprovisionSKR} = require('../../kyma-environment-broker');
-const {keb, kcp} = require('../provision/provision-skr');
+const {keb, kcp} = require('../helpers');
 
 
 async function deprovisionSKRInstance(options, timeout, ensureSuccess=true) {

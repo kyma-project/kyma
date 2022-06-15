@@ -5,6 +5,10 @@ const {
   withSuffix,
   withInstanceID,
   gatherOptions,
+  keb,
+  kcp,
+  director,
+  gardener,
 } = require('../helpers');
 const {getEnvOrThrow, genRandom} = require('../../utils');
 const {KEBConfig, KEBClient, provisionSKR}= require('../../kyma-environment-broker');
@@ -19,7 +23,6 @@ const director = new DirectorClient(DirectorConfig.fromEnv());
 const kcp = new KCPWrapper(KCPConfig.fromEnv());
 
 const {BTPOperatorCreds} = require('../../smctl/helpers');
-
 
 async function getOrProvisionSKR(options, shoot, skipProvisioning, provisioningTimeout) {
   this.timeout(provisioningTimeout);
@@ -79,10 +82,6 @@ async function provisionSKRInstance(options, timeout) {
 
 
 module.exports = {
-  keb,
-  kcp,
-  director,
-  gardener,
   provisionSKRInstance,
   getOrProvisionSKR,
 };

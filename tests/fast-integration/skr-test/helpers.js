@@ -1,13 +1,22 @@
 const uuid = require('uuid');
 const {genRandom, getEnvOrThrow, initializeK8sClient} = require('../utils');
-const {keb, gardener, director} = require('./provision/provision-skr');
-const {
-  scenarioExistsInCompass,
-  addScenarioInCompass,
-  isRuntimeAssignedToScenario,
-  assignRuntimeToScenario,
-} = require('../compass');
 const {saveKubeconfig} = require('../skr-svcat-migration-test/test-helpers');
+const {KEBConfig, KEBClient}= require('../kyma-environment-broker');
+const {GardenerClient, GardenerConfig} = require('../gardener');
+const {
+  DirectorClient,
+  DirectorConfig,
+  addScenarioInCompass,
+  assignRuntimeToScenario,
+  scenarioExistsInCompass,
+  isRuntimeAssignedToScenario,
+} = require('../compass');
+const {KCPWrapper, KCPConfig} = require('../kcp/client');
+
+const keb = new KEBClient(KEBConfig.fromEnv());
+const gardener = new GardenerClient(GardenerConfig.fromEnv());
+const director = new DirectorClient(DirectorConfig.fromEnv());
+const kcp = new KCPWrapper(KCPConfig.fromEnv());
 
 const testNS = 'skr-test';
 
@@ -140,6 +149,10 @@ async function initK8sConfig(shoot) {
 }
 
 module.exports = {
+  keb,
+  kcp,
+  director,
+  gardener,
   testNS,
   getSKRConfig,
   prepareCompassResources,
