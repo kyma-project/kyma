@@ -108,7 +108,7 @@ deployment:
   image_name: quay.io/kiali/kiali
   image_pull_policy: "Always"
   image_pull_secrets: []
-  image_version: ${HELM_IMAGE_TAG} # version like "v1.39" (see: https://quay.io/repository/kiali/kiali?tab=tags) or a digest hash
+  image_version: ""
   ingress:
     additional_labels: {}
     class_name: "nginx"
@@ -138,7 +138,7 @@ deployment:
   service_annotations: {}
   service_type: ""
   tolerations: []
-  version_label: ${HELM_IMAGE_TAG} # v1.39 # v1.39.0 # see: https://quay.io/repository/kiali/kiali?tab=tags
+  version_label: ""
   view_only_mode: true
 
 external_services:
