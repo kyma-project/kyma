@@ -1,3 +1,8 @@
+{{- /*
+    Customization:
+    * imageurl
+    * checksum
+  */ -}}
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -25,7 +30,7 @@ spec:
         {{- toYaml .Values.deployment.pod_labels | nindent 8 }}
         {{- end }}
       annotations:
-        checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
+        checksum/config: {{ tpl (toYaml (print .Values.deployment .Values.auth .Values.istio_namespace .Values.kiali_feature_flags .Values.server .Values.identity)) . | sha256sum }}
         {{- if .Values.server.metrics_enabled }}
         prometheus.io/scrape: "true"
         prometheus.io/port: {{ .Values.server.metrics_port | quote }}
@@ -53,7 +58,7 @@ spec:
       {{- toYaml .Values.deployment.host_aliases | nindent 6 }}
       {{- end }}
       containers:
-      - image: "{{ .Values.deployment.image_name }}{{ if .Values.deployment.image_digest }}@{{ .Values.deployment.image_digest }}{{ end }}:{{ .Values.deployment.image_version }}"
+      - image: {{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.kiali) }}
         imagePullPolicy: {{ .Values.deployment.image_pull_policy | default "Always" }}
         name: {{ include "kiali-server.fullname" . }}
         command:

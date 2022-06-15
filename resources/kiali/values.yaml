@@ -1,3 +1,66 @@
+global:
+  domainName: "kyma.example.com"
+  istio:
+    gateway:
+      name: kyma-gateway
+      namespace: kyma-system
+  containerRegistry:
+    path: eu.gcr.io/kyma-project
+  images:
+    kiali:
+      name: kiali
+      version: 1.49.0-b79686f9
+      directory: tpi
+    oauth2_proxy:
+      name: oauth2-proxy
+      version: 7.3.0-6b2bc161
+      directory: tpi
+  kymaRuntime:
+    adminGroup: runtimeAdmin
+    operatorGroup: runtimeOperator
+    developerGroup: runtimeDeveloper
+    namespaceAdminGroup: runtimeNamespaceAdmin
+  tracing:
+    enabled: true
+
+virtualservice:
+    enabled: true
+
+authProxy:
+  enabled: true
+  replicaCount: 1
+  port: 3000
+  configDocsLink: "https://kyma-project.io/docs/kyma/latest/04-operation-guides/security/sec-06-access-expose-kiali-grafana"
+  config:
+    clientId: "dummy"
+    clientSecret: "dummy"
+    tlsVerify: true
+    emailDomains: "*"
+    groups: ""
+    useKymaGroups: false
+    scopes: "groups"
+    authLogging: true
+    requestLogging: false
+    passHostHeader: false
+    cookieExpire: 24h
+    cookieRefresh: 1h
+  env: {}
+  nodeSelector: {}
+  securityContext:
+    allowPrivilegeEscalation: false
+    privileged: false
+    runAsNonRoot: true
+  image:
+    pullPolicy: IfNotPresent
+  priorityClassName: "kyma-system-priority"
+  resources:
+    limits:
+      cpu: 50m
+      memory: 100Mi
+    requests:
+      cpu: 10m
+      memory: 15Mi
+
 # 'fullnameOverride' is deprecated. Use 'deployment.instance_name' instead.
 # This is only supported for backward compatibility and will be removed in a future version.
 # If 'fullnameOverride' is not "kiali" and 'deployment.instance_name' is "kiali",
@@ -18,12 +81,12 @@ kiali_route_url: ""
 # Note that only those values used by the Helm Chart will be here.
 #
 
-istio_namespace: "" # default is where Kiali is installed
+istio_namespace: "istio-system" # default is where Kiali is installed
 
 auth:
   openid: {}
   openshift: {}
-  strategy: ""
+  strategy: "anonymous"
 
 deployment:
   # This only limits what Kiali will attempt to see, but Kiali Service Account has permissions to see everything.
@@ -59,28 +122,65 @@ deployment:
     time_field_format: "2006-01-02T15:04:05Z07:00"
     sampler_rate: "1"
   node_selector: {}
-  pod_annotations: {}
+  pod_annotations:
+    "sidecar.istio.io/inject": "true"
   pod_labels: {}
-  priority_class_name: ""
+  priority_class_name: "kyma-system-priority"
   replicas: 1
   resources:
     requests:
-      cpu: "10m"
-      memory: "64Mi"
+      cpu: 10m
+      memory: 20Mi
     limits:
-      memory: "1Gi"
+      cpu: 100m
+      memory: 140Mi
   secret_name: "kiali"
   service_annotations: {}
   service_type: ""
   tolerations: []
   version_label: ${HELM_IMAGE_TAG} # v1.39 # v1.39.0 # see: https://quay.io/repository/kiali/kiali?tab=tags
-  view_only_mode: false
+  view_only_mode: true
 
 external_services:
   custom_dashboards:
-    enabled: true
+    enabled: false
+
+  grafana:
+    enabled: false
+    in_cluster_url: "http://monitoring-grafana.kyma-system:80"
+    url: "https://grafana.{{ .Values.global.domainName }}"
+
   istio:
-    root_namespace: ""
+    enabled: true
+    root_namespace: "istio-system"
+    url_service_version: "http://istiod.istio-system:15014/version" # not needed anymore after https://github.com/kiali/kiali/issues/4985
+    component_status:
+      components:
+      - app_label: istiod
+        is_core: true
+        is_proxy: false
+      - app_label: istio-ingressgateway
+        is_core: true
+        is_proxy: true
+
+  prometheus:
+    component_status:
+      namespace: "kyma-system"
+      # will search for deployments only but prometheus is a statefuleset, so using label of the operator instead, see https://github.com/kiali/kiali/blob/755a5f59a2e402b6c7bc0aa934d70715eb6c80c0/business/istio_status.go#L78
+      app_label: "monitoring-operator"
+      is_core: true
+    url: "http://monitoring-prometheus.kyma-system:9090"
+
+  tracing:
+    # 'enabled' will be overwritten by .Values.global.tracing.enabled in the configmap template
+    # enabled: true
+    component_status:
+      namespace: kyma-system
+      app_label: "jaeger"
+      is_core: false
+    in_cluster_url: "http://tracing-jaeger-query.kyma-system:16686"
+    url: "https://jaeger.{{ .Values.global.domainName }}"
+    use_grpc: false
 
 identity: {}
   #cert_file:

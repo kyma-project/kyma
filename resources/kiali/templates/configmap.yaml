@@ -1,3 +1,9 @@
+{{- /*
+    Customizations:
+    * exclude "global", "authProxy", and "virtualservices" sections from being rendered as a part of the config
+    * enable or disable tracing based on .Values.global.tracing.enabled
+    * call tpl before toYaml since some values contain templates
+  */ -}}
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -13,7 +19,7 @@ metadata:
 data:
   config.yaml: |
     {{- /* Most of .Values is simply the ConfigMap - strip out the keys that are not part of the ConfigMap */}}
-    {{- $cm := omit .Values "nameOverride" "fullnameOverride" "kiali_route_url" }}
+    {{- $cm := omit .Values "nameOverride" "fullnameOverride" "kiali_route_url" "global" "authProxy" "virtualservice" }}
     {{- /* The helm chart defines namespace for us, but pass it to the ConfigMap in case the server needs it */}}
     {{- $_ := set $cm.deployment "namespace" .Release.Namespace }}
     {{- /* Some values of the ConfigMap are generated, but might not be identical, from .Values */}}
@@ -26,5 +32,6 @@ data:
     {{- $_ := set $cm.login_token "signing_key" (include "kiali-server.login_token.signing_key" .) }}
     {{- $_ := set $cm.external_services.istio "root_namespace" (include "kiali-server.external_services.istio.root_namespace" .) }}
     {{- $_ := set $cm.server "web_root" (include "kiali-server.server.web_root" .) }}
-    {{- toYaml $cm | nindent 4 }}
+    {{- $_ := set $cm.external_services.tracing "enabled" .Values.global.tracing.enabled }}
+    {{- tpl (toYaml $cm | nindent 4) . }}
 ...
