@@ -37,6 +37,13 @@ spec:
         - name: serverless-webhook
           secret:
             secretName: {{ .Values.container.envs.webhookSecretName.value }}
+      initContainers:
+        - name: remove-old-mutating-secret
+          image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.k8s_tools) }}"
+          command:
+            - "sh"
+            - "-c"
+            - "kubectl delete mutatingwebhookconfigurations mutating.secrets --ignore-not-found=true"
       containers:
         - name: webhook
           volumeMounts:
