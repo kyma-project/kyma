@@ -4,6 +4,7 @@ const {
 const {
   keb,
   director,
+  kcp,
   gatherOptions,
   withCustomParams,
 } = require('../skr-test/helpers');
@@ -21,15 +22,22 @@ const {
   commerceMockTests,
   commerceMockCleanup,
 } = require('../skr-test');
-const {
-  KCPConfig,
-  KCPWrapper,
-} = require('../kcp/client');
 
 const skipProvisioning = process.env.SKIP_PROVISIONING === 'true';
+const provisioningTimeout = 1000 * 60 * 60; // 1h
+const deprovisioningTimeout = 1000 * 60 * 30; // 30m
+const upgradeTimeoutMin = 30; // 30m
+let globalTimeout = 1000 * 60 * 90; // 90m
+const slowTime = 5000;
 
 describe('SKR-Upgrade-test', function() {
   switchDebug(on = true);
+
+  if (!skipProvisioning) {
+    globalTimeout += provisioningTimeout + deprovisioningTimeout;  // 3h
+  }
+  this.timeout(globalTimeout);
+  this.slow(slowTime);
 
   const kymaVersion = getEnvOrThrow('KYMA_VERSION');
   const kymaUpgradeVersion = getEnvOrThrow('KYMA_UPGRADE_VERSION');
@@ -41,6 +49,7 @@ describe('SKR-Upgrade-test', function() {
   const options = gatherOptions(
       withCustomParams(customParams),
   );
+  let skr;
 
   debug(
       `PlanID ${getEnvOrThrow('KEB_PLAN_ID')}`,
@@ -51,6 +60,7 @@ describe('SKR-Upgrade-test', function() {
       `Application ${options.appName}`,
   );
 
+  //TODO
   // debug(
   //   `KEB_HOST: ${getEnvOrThrow("KEB_HOST")}`,
   //   `KEB_CLIENT_ID: ${getEnvOrThrow("KEB_CLIENT_ID")}`,
@@ -77,7 +87,7 @@ describe('SKR-Upgrade-test', function() {
   //   `KCP_OIDC_ISSUER_URL: ${KCP_OIDC_ISSUER_URL}\n`
   // )
 
-  // Credentials for KCP ODIC Login
+  // Credentials for KCP OIDC Login
 
   // process.env.KCP_TECH_USER_LOGIN    =
   // process.env.KCP_TECH_USER_PASSWORD =
@@ -89,30 +99,20 @@ describe('SKR-Upgrade-test', function() {
   process.env.KCP_MOTHERSHIP_API_URL = 'https://mothership-reconciler.cp.dev.kyma.cloud.sap/v1';
   process.env.KCP_KUBECONFIG_API_URL = 'https://kubeconfig-service.cp.dev.kyma.cloud.sap';
 
-  const kcp = new KCPWrapper(KCPConfig.fromEnv());
-
-  this.timeout(60 * 60 * 1000 * 3); // 3h
-  this.slow(5000);
-
-  const provisioningTimeout = 1000 * 60 * 60; // 1h
-  const deprovisioningTimeout = 1000 * 60 * 30; // 30m
-  const upgradeTimeoutMin = 30; // 30m
-
-  let skr;
 
   // SKR Provisioning
-  it(`Perform kcp login`, async function() {
-    const version = await kcp.version([]);
-    debug(version);
-
-    await kcp.login();
-  });
-
-  it(`Provision SKR with ID ${options.instanceID}`, async function() {
+  before(`Provision SKR with ID ${options.instanceID}`, async function() {
     console.log(`Provisioning SKR with version ${kymaVersion}`);
     debug(`Provision SKR with Custom Parameters ${JSON.stringify(options.customParams)}`);
     this.timeout(provisioningTimeout);
     await getOrProvisionSKR(options, skr, skipProvisioning, provisioningTimeout);
+  });
+
+  //TODO
+  it(`Perform kcp login`, async function() {
+    const version = await kcp.version([]);
+    debug(version);
+    await kcp.login();
   });
 
   // Perform Tests before Upgrade
@@ -138,7 +138,7 @@ describe('SKR-Upgrade-test', function() {
     await getContainerRestartsForAllNamespaces();
   });
 
-  it('Execute commerceMockTest', async function() {
+  it('Execute commerceMockTests', async function() {
     commerceMockTests(options.testNS);
   });
 
@@ -147,7 +147,6 @@ describe('SKR-Upgrade-test', function() {
   if (skipCleanup === 'FALSE') {
     after('Cleanup the resources', async function() {
       this.timeout(deprovisioningTimeout);
-      // await cleanMockTestFixture('mocks', testNS, true);
       await commerceMockCleanup(options.testNS);
       if (!skipProvisioning) {
         await deprovisionSKRInstance(options, deprovisioningTimeout);
