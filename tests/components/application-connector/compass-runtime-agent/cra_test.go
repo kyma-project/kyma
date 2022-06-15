@@ -31,7 +31,7 @@ func TestCompassRuntimeAgentFunctionalities(t *testing.T) {
 
 	// TODO: Log explicitly that it's Compass fault if the test fails there!
 
-	clusterID := "and-id-that-will-be-read-from-some-env-variable"
+	clusterID := "an-id-that-will-be-read-from-some-env-variable"
 	clusterTenant := "a-tenant-that-will-be-read-from-some-env-variable"
 
 	connectionToken, err := getConnectionToken(clusterID, clusterTenant)
@@ -83,7 +83,7 @@ func TestCompassRuntimeAgentFunctionalities(t *testing.T) {
 		err := retry(5, 5, func() error {
 			compassConnection, err = compassConnections.Get(context.Background(), "compass-connection", metav1.GetOptions{})
 			if err != nil {
-				require.True(t, k8serrors.IsNotFound(err), "failed to get a Compass Connection: %v", err)
+				require.True(t, k8serrors.IsNotFound(err), "failed to get a Compass Connection, it's not Compass Runtime Agent's fault: %v", err)
 				return err
 			}
 			return nil
@@ -105,7 +105,7 @@ func TestCompassRuntimeAgentFunctionalities(t *testing.T) {
 		err := retry(5, 5, func() error {
 			listedApplications, err = applications.List(context.Background(), metav1.ListOptions{})
 			if err != nil {
-				require.True(t, k8serrors.IsNotFound(err), "failed to list Applications: %v", err)
+				require.True(t, k8serrors.IsNotFound(err), "failed to list Applications, it's not Compass Runtime Agent's fault: %v", err)
 				return err
 			}
 			return nil
