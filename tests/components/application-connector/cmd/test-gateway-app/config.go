@@ -6,7 +6,9 @@ import (
 
 type Config struct {
 	LogLevel          string `envconfig:"default=info"`
-	MTLSCertPath      string `envconfig:"default=/etc/secret-volume/"`
+	CaCertPath        string `envconfig:"default="`
+	ServerCertPath    string `envconfig:"default="`
+	ServerKeyPath     string `envconfig:"default="`
 	Port              int    `envconfig:"default=8080"`
 	MtlsPort          int    `envconfig:"default=8090"`
 	BasicAuthUser     string `envconfig:"default=user"`
@@ -16,5 +18,5 @@ type Config struct {
 }
 
 func (c *Config) String() string {
-	return fmt.Sprintf("LogLevel: %s, MTLSCertPath: %s" + c.LogLevel + c.MTLSCertPath)
+	return fmt.Sprintf("LogLevel: %s, CaCertPath: %s, ServerCertPath: %s", c.LogLevel, c.CaCertPath, c.ServerCertPath)
 }

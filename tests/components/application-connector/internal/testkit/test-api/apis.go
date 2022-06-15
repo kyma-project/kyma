@@ -11,18 +11,20 @@ import (
 )
 
 func AddAPIHandler(router *mux.Router, oauthTokesCache map[string]bool, csrfTokensCache map[string]bool, mutex *sync.RWMutex, basicAuthCredentials BasicAuthCredentials) {
-	apiHandler := router
+
 	alwaysOKHandler := func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 	}
 
 	echoHandler := NewEchoHandler()
 
-	apiHandler.HandleFunc("/v1/api/oauth/any", NewOAuthHandler(oauthTokesCache, mutex, alwaysOKHandler)).Methods("GET", "PUT", "POST")
-	apiHandler.HandleFunc("/v1/api/oauth/echo", NewOAuthHandler(oauthTokesCache, mutex, echoHandler)).Methods("GET", "PUT", "POST")
-	apiHandler.HandleFunc("/v1/api/basic/any", NewBasicAuthHandler(basicAuthCredentials, alwaysOKHandler)).Methods("GET", "PUT", "POST")
-	apiHandler.HandleFunc("/v1/api/basic/echo", NewBasicAuthHandler(basicAuthCredentials, echoHandler)).Methods("GET", "PUT", "POST")
-	apiHandler.HandleFunc("/v1/health", alwaysOKHandler).Methods("GET")
+	router.HandleFunc("/v1/api/unsecure/ok", alwaysOKHandler).Methods("GET", "PUT", "POST")
+	router.HandleFunc("/v1/api/unsecure/echo", echoHandler).Methods("GET", "PUT", "POST")
+	router.HandleFunc("/v1/api/basic/ok", NewBasicAuthHandler(basicAuthCredentials, alwaysOKHandler)).Methods("GET", "PUT", "POST")
+	router.HandleFunc("/v1/api/basic/echo", NewBasicAuthHandler(basicAuthCredentials, echoHandler)).Methods("GET", "PUT", "POST")
+	router.HandleFunc("/v1/api/oauth/ok", NewOAuthHandler(oauthTokesCache, mutex, alwaysOKHandler)).Methods("GET", "PUT", "POST")
+	router.HandleFunc("/v1/api/oauth/echo", NewOAuthHandler(oauthTokesCache, mutex, echoHandler)).Methods("GET", "PUT", "POST")
+	router.HandleFunc("/v1/health", alwaysOKHandler).Methods("GET")
 }
 
 func NewOAuthHandler(oauthTokesCache map[string]bool, mutex *sync.RWMutex, next http.HandlerFunc) http.HandlerFunc {

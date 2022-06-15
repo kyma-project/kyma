@@ -9,10 +9,14 @@ import (
 
 func NewEchoHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		// TODO: handle Query parameters
+		extractQueryRequest(w, r)
 		extractHeaders(w, r)
 		extractBody(w, r)
 	}
+}
+
+func extractQueryRequest(w http.ResponseWriter, req *http.Request) {
+	fmt.Fprintf(w, "%s --> %s\n", req.Method, req.URL)
 }
 
 func extractHeaders(w http.ResponseWriter, req *http.Request) {

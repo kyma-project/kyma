@@ -1,12 +1,15 @@
 package main
 
 import (
+	"crypto/tls"
+	"crypto/x509"
 	"fmt"
 	"github.com/gorilla/mux"
 	"github.com/kyma-project/kyma/tests/components/application-connector/internal/testkit/test-api"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	"github.com/vrischmann/envconfig"
+	"io/ioutil"
 	"net/http"
 	"sync"
 )
@@ -37,17 +40,20 @@ func main() {
 	test_api.AddAPIHandler(apiRouter, oauthTokesCache, csrfTokensCache, mutex, basicAuthCredentials)
 
 	oauthCredentials := test_api.OAuthCredentials{ClientID: cfg.OAuthClientID, ClientSecret: cfg.OAuthClientSecret}
-	test_api.AddTokensHandler(apiRouter, oauthTokesCache, csrfTokensCache, oauthCredentials, mutex)
+	test_api.AddOAuthTokensHandler(apiRouter, oauthTokesCache, csrfTokensCache, oauthCredentials, mutex)
 
 	tokensRouter := mux.NewRouter()
-	test_api.AddTokensHandler(tokensRouter, oauthTokesCache, csrfTokensCache, oauthCredentials, mutex)
+	test_api.AddOAuthTokensHandler(tokensRouter, oauthTokesCache, csrfTokensCache, oauthCredentials, mutex)
 
-	// TODO This implementation must be fixed
+	// TODO Use https://github.com/oklog/run instead.
+	// Note: it is used here: https://github.com/kyma-project/kyma/blob/main/components/central-application-connectivity-validator/cmd/centralapplicationconnectivityvalidator/centralapplicationconnectivityvalidator.go
 	wg := sync.WaitGroup{}
 	wg.Add(2)
 
 	go func() {
-		//log.Fatal(http.ListenAndServeTLS(":"+string(cfg.MtlsPort), "/etc/secret-volume/tls.crt", "./etc/secret-volume/tls.key", tokensRouter))
+		address := fmt.Sprintf(":%d", cfg.MtlsPort)
+		mtlsServer := newMTLSServer(cfg.CaCertPath, address, tokensRouter)
+		log.Fatal(mtlsServer.ListenAndServeTLS(cfg.ServerCertPath, cfg.ServerKeyPath))
 		wg.Done()
 	}()
 
@@ -58,6 +64,28 @@ func main() {
 	}()
 
 	wg.Wait()
+}
+
+func newMTLSServer(caCertPath, address string, handler http.Handler) *http.Server {
+	// Create a CA certificate pool and add cert.pem to it
+	caCert, err := ioutil.ReadFile(caCertPath)
+	if err != nil {
+		log.Fatal(err)
+	}
+	caCertPool := x509.NewCertPool()
+	caCertPool.AppendCertsFromPEM(caCert)
+
+	// Create the TLS Config with the CA pool and enable Client certificate validation
+	tlsConfig := &tls.Config{
+		ClientCAs:  caCertPool,
+		ClientAuth: tls.RequireAndVerifyClientCert,
+	}
+
+	return &http.Server{
+		Addr:      address,
+		Handler:   handler,
+		TLSConfig: tlsConfig,
+	}
 }
 
 func exitOnError(err error, context string) {
