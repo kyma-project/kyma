@@ -11,7 +11,7 @@ webhook:
   timeout: 10
   resources:
     requests:
-      cpu: 20m
+      cpu: 10m
       memory: 24Mi
     limits:
       cpu: 100m

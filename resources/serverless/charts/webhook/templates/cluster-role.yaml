@@ -23,6 +23,7 @@ rules:
       - validatingwebhookconfigurations
     verbs:
       - create
+      - delete
       - get
       - update
       - list

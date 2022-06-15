@@ -5,10 +5,8 @@ import (
 	"os"
 	"time"
 
-	"sigs.k8s.io/controller-runtime/pkg/healthz"
-	"sigs.k8s.io/controller-runtime/pkg/webhook"
-
 	ctrl "sigs.k8s.io/controller-runtime"
+	"sigs.k8s.io/controller-runtime/pkg/healthz"
 
 	"github.com/kyma-project/kyma/components/function-controller/internal/controllers/serverless/metrics"
 
@@ -108,13 +106,6 @@ func main() {
 	serviceAccountSvc := k8s.NewServiceAccountService(resourceClient, config.Kubernetes)
 	roleSvc := k8s.NewRoleService(resourceClient, config.Kubernetes)
 	roleBindingSvc := k8s.NewRoleBindingService(resourceClient, config.Kubernetes)
-
-	mgr.GetWebhookServer().Register(
-		"/mutate-v1-secret",
-		&webhook.Admission{
-			Handler: k8s.NewRegistryWatcher(mgr.GetClient()),
-		},
-	)
 
 	events := make(chan event.GenericEvent)
 	healthCh := make(chan bool)
