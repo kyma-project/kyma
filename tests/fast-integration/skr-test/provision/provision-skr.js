@@ -25,7 +25,6 @@ const kcp = new KCPWrapper(KCPConfig.fromEnv());
 const {BTPOperatorCreds} = require('../../smctl/helpers');
 
 async function getOrProvisionSKR(options, shoot, skipProvisioning, provisioningTimeout) {
-  this.timeout(provisioningTimeout);
   if (skipProvisioning) {
     console.log('Gather information from externally provisioned SKR and prepare the compass resources');
     const instanceID = getEnvOrThrow('INSTANCE_ID');

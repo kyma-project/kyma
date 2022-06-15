@@ -30,6 +30,7 @@ describe('SKR test', function() {
   };
 
   before('Ensure SKR is provisioned', async function() {
+    this.timeout(provisioningTimeout);
     await getOrProvisionSKR(options, shoot, skipProvisioning, provisioningTimeout);
   });
 
