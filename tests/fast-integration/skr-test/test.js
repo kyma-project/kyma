@@ -21,7 +21,7 @@ describe('SKR test', function() {
   this.timeout(globalTimeout);
   this.slow(slowTime);
 
-  let options = gatherOptions(); // with default values
+  const options = gatherOptions(); // with default values
   let shoot;
   const getShootInfoFunc = function() {
     return shoot;

@@ -33,9 +33,6 @@ const testTimeout = 1000 * 60 * 30; // 30m
 function commerceMockTest(options) {
   describe('CommerceMock Test', function() {
     this.timeout(testTimeout);
-    if (options === undefined) {
-      throw new Error('Empty configuration given');
-    }
     commerceMockTestPreparation(options);
     commerceMockTests(options.testNS);
     commerceMockCleanup(options.testNS);
