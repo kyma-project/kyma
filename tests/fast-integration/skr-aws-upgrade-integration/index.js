@@ -66,7 +66,7 @@ describe('SKR-Upgrade-test', function() {
     after('Cleanup the resources', async function() {
       this.timeout(deprovisioningTimeout);
       await commerceMockCleanup(options.testNS);
-      await deprovisionAndUnregisterSKR(deprovisioningTimeout, skipProvisioning);
+      await deprovisionAndUnregisterSKR(options, deprovisioningTimeout, skipProvisioning);
     });
   }
 });

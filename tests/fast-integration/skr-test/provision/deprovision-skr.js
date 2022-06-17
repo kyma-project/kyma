@@ -2,7 +2,7 @@ const {deprovisionSKR} = require('../../kyma-environment-broker');
 const {unregisterKymaFromCompass} = require('../../compass');
 const {keb, kcp, director} = require('../helpers');
 
-async function deprovisionAndUnregisterSKR(deprovisioningTimeout, skipProvisioning) {
+async function deprovisionAndUnregisterSKR(options, deprovisioningTimeout, skipProvisioning) {
   if (!skipProvisioning) {
     await deprovisionSKRInstance(options, deprovisioningTimeout);
   } else {
