@@ -48,6 +48,10 @@ spec:
             value: "{{ .Values.publisherProxy.replicas }}"
           - name: PUBLISHER_REQUEST_TIMEOUT
             value: "{{ .Values.publisherProxy.requestTimeout }}"
+          {{- if .Values.global.priorityClassName }}
+          - name: PUBLISHER_PRIORITY_CLASS_NAME
+            value: "{{ .Values.global.priorityClassName }}"
+          {{- end }}
           - name: DEFAULT_MAX_IN_FLIGHT_MESSAGES
             value: "{{ .Values.eventingBackend.defaultMaxInflightMessages }}"
           - name: DEFAULT_DISPATCHER_RETRY_PERIOD
@@ -59,7 +63,21 @@ spec:
           - name: APP_LOG_LEVEL
             value: {{ .Values.global.log.level | quote }}
           - name: ENABLE_JETSTREAM_BACKEND
-            value: {{ .Values.global.features.enableJetStream | quote }}
+            value: {{ .Values.global.jetstream.enabled | quote }}
+          - name: JS_STREAM_NAME
+            value: {{ .Values.jetstream.streamName | quote }}
+          - name: JS_STREAM_STORAGE_TYPE
+            value: {{ .Values.global.jetstream.storage | quote }}
+          - name: JS_STREAM_REPLICAS
+            value: {{ .Values.jetstream.streamReplicas | quote }}
+          - name: JS_STREAM_RETENTION_POLICY
+            value: {{ .Values.jetstream.retentionPolicy | quote }}
+          - name: JS_CONSUMER_DELIVER_POLICY
+            value: {{ .Values.jetstream.consumerDeliverPolicy | quote }}
+          - name: JS_STREAM_MAX_MSGS
+            value: {{ .Values.jetstream.maxMessages | quote }}
+          - name: JS_STREAM_MAX_BYTES
+            value: {{ .Values.jetstream.maxBytes | quote }}
           resources:
             requests:
               cpu: {{ .Values.resources.requests.cpu }}

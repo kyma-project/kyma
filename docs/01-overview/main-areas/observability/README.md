@@ -2,20 +2,30 @@
 title: What is Observability in Kyma?
 ---
 
-## Observability tools
+The term "Observability" can be defined as a measure of how well the internal states of single components can be reflected by the application's external outputs. The insights that are exposed are called "telemetry" or "signals" and they are usually displayed in the form of metrics, traces, and logs. They can be exposed by employing modern instrumentation.
 
-Kyma comes with tools that give you the most accurate and up-to-date monitoring, logging and tracing data.
+Out of the box, Kyma provides tools to collect and expose **telemetry** data, such as metrics, traces, and log data. Of course, you'll want to view and analyze the data you're collecting. This is where **observability** tools come in.
 
-- [Prometheus](https://prometheus.io/) is the open source monitoring and alerting toolkit that provides the telemetry data. This data is consumed by different addons, including [Grafana](https://grafana.com/) for analytics and monitoring, and [Alertmanager](https://prometheus.io/docs/alerting/alertmanager/) for handling alerts. By default, Prometheus stores up to 15 GB of data for a maximum period of 30 days. If the default size or time is exceeded, the oldest records are removed first.
-- For logging, Kyma uses [Loki](https://github.com/grafana/loki), a Prometheus-like log management system. By default, Loki stores up to 30 GB of data for a maximum of 5 days, with maximum ingestion rate of 3 MB/s. If the default time is exceeded, the oldest logs are removed first.
-- With the [Jaeger](https://github.com/jaegertracing) distributed tracing system, you can analyze the path of a request chain going through your distributed applications. This information helps you to, for example, troubleshoot your applications, or optimize the latency and performance of your solution.
+## Collecting data
 
-## Benefits of distributed tracing
+Kyma collects telemetry data with several in-cluster components:
 
-Observability tools should clearly show the big picture, no matter if you're monitoring just a few or many components. In a cloud-native microservice architecture, a user request often flows through dozens of different microservices. Tools such as logging or monitoring help to track the request's path. However, they treat each component or microservice in isolation. This individual treatment results in operational issues.
+- [Prometheus](https://prometheus.io/docs/introduction) collects metrics from Pods. Metrics are the time-stamped data that provide information on the running jobs, workload, CPU consumption, memory usage, and more. All metrics relevant for observing the in-cluster Istio Service Mesh are collected separately.
 
-Distributed tracing charts out the transactions in cloud-native systems, helping you to understand the application behavior and relations between the frontend actions and backend implementation.
+- [Fluent Bit](https://fluentbit.io/) collects logs.
 
-The diagram shows how distributed tracing helps to track the request path.
+- Traces are sent to [Jaeger](https://www.jaegertracing.io/docs).
 
-![Distributed tracing](./assets/distributed-tracing.svg)
+The collected telemetry data are exposed so that you can view and analyze them with observability tools.
+
+## Analyzing data
+
+You can use the following in-cluster components to observe your applications' telemetry data:
+
+- [Prometheus](https://prometheus.io/docs/introduction), a lightweight backend for metrics.
+- [Loki](https://github.com/grafana/loki), a lightweight Prometheus-like backend for logs.
+- [Jaeger](https://www.jaegertracing.io/docs/) as a backend, which serves as the query mechanism for displaying information about traces.
+
+- [Alertmanager](https://prometheus.io/docs/alerting/alertmanager/) to receive and manage alerts coming from Prometheus. It can then forward the notifications about fired alerts to specific channels, such as Slack or an on-call paging system of your choice.
+- [Grafana](https://grafana.com/docs/guides/getting_started/) to provide a dashboard and a query editor to visualize metrics and logs collected from Prometheus and Loki.
+- [Kiali](https://www.kiali.io) to enable validation, observe the Istio Service Mesh, and provide details on microservices included in the Service Mesh and connections between them.

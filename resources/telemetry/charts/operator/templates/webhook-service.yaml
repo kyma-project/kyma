@@ -1,0 +1,16 @@
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "operator.fullname" . }}-webhook
+  labels:
+    {{- include "operator.selectorLabels" . | nindent 4 }}
+    {{- toYaml .Values.extraLabels | nindent 4 }}
+spec:
+  ports:
+    - port: {{ .Values.webhook.service.port }}
+      protocol: {{ .Values.webhook.service.protocol }}
+      targetPort: {{ .Values.webhook.service.targetPort }}
+  selector:
+    {{- include "operator.selectorLabels" . | nindent 6 }}
+    {{- toYaml .Values.extraLabels | nindent 6 }}

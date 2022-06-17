@@ -6,7 +6,7 @@ We already know how to create and expose a workload ([Function](02-deploy-expose
 Now it's time to actually use them.
 We're going to trigger a workload with an event. 
 
-## Create a Function 
+## Create a Function
 
 For this purpose, we are going to create a new Function and expose it with an APIRule. As this is a sample Function, we'll make it so that it both sends and receives the events. 
 

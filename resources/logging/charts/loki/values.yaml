@@ -176,7 +176,7 @@ resources:
     cpu: 200m
     memory: 300Mi
   requests:
-    cpu: 100m
+    cpu: 10m
     memory: 128Mi
 
 podSecurityContext:
@@ -281,6 +281,12 @@ kyma:
   auth:
     useKymaGroups: false
     groups: ""
+  logPipeline:
+    match: "loki.*"
+    logLevel: warn
+    lineFormat: json
+    removeKeys: "kubernetes, stream"
+
 chunkCleaner:
   enabled: true
   targetSizePercentage: 5

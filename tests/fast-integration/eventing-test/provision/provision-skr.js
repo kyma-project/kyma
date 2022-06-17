@@ -1,57 +1,63 @@
-const uuid = require('uuid');
 const {
+  KEBConfig,
+  KEBClient,
   provisionSKR,
-  saveKubeconfig,
 } = require('../../kyma-environment-broker');
-
+const {GardenerConfig, GardenerClient} = require('../../gardener');
+const {
+  debug,
+  getEnvOrThrow,
+} = require('../../utils');
 const {
   KCPConfig,
   KCPWrapper,
 } = require('../../kcp/client');
-
 const {
-  gardener,
-  keb,
-} = require('../../skr-test');
+  saveKubeconfig,
+} = require('../../skr-svcat-migration-test/test-helpers');
+const {slowTime} = require('../utils');
 
-const {
-  getEnvOrThrow,
-  debug,
-} = require('../../utils');
+describe('SKR eventing test', function() {
+  this.timeout(60 * 60 * 1000 * 3); // 3h
+  this.slow(slowTime);
+  const provisioningTimeout = 1000 * 60 * 60; // 1h
 
-const instanceId = process.env.INSTANCE_ID || uuid.v4();
-const runtimeName = getEnvOrThrow('RUNTIME_NAME');
-const kymaVersion = getEnvOrThrow('KYMA_VERSION');
-const kymaOverridesVersion = process.env.KYMA_OVERRIDES_VERSION || '';
-const kcp = new KCPWrapper(KCPConfig.fromEnv());
+  // initialize the clients required for skr provisioning
+  const keb = new KEBClient(KEBConfig.fromEnv());
+  const gardener = new GardenerClient(GardenerConfig.fromEnv());
+  const kcp = new KCPWrapper(KCPConfig.fromEnv());
 
-let skr;
+  const kymaVersion = getEnvOrThrow('KYMA_VERSION');
+  const runtimeName = getEnvOrThrow('RUNTIME_NAME');
+  const instanceId = getEnvOrThrow('INSTANCE_ID');
+  const subAccountID = keb.subaccountID;
+  const kymaOverridesVersion = process.env.KYMA_OVERRIDES_VERSION || '';
 
-describe('Provision SKR cluster', function() {
-  this.timeout(60 * 60 * 1000 * 2); // 2h
-  this.slow(5000);
-  before('Provision new SKR', async function() {
-    // login to kcp, required by provisionSKR method
+  let skr;
+
+  debug(
+      `PlanID ${getEnvOrThrow('KEB_PLAN_ID')}`,
+      `SubAccountID ${subAccountID}`,
+      `instanceId ${instanceId}`,
+      `Runtime ${runtimeName}`,
+  );
+
+  const customParams = {'kymaVersion': kymaVersion};
+  if (kymaOverridesVersion) {
+    customParams['overridesVersion'] = kymaOverridesVersion;
+  }
+
+  // SKR Provisioning
+  it(`Perform kcp login`, async function() {
     const version = await kcp.version([]);
-    debug('Login to KCP. Version: ', version);
+    debug(version);
+
     await kcp.login();
+  });
 
-    // define params required by provisionSKR method
-    const provisioningTimeout = 1000 * 60 * 60; // 1h
-
-    const customParams = {'kymaVersion': kymaVersion};
-    if (kymaOverridesVersion) {
-      customParams['overridesVersion'] = kymaOverridesVersion;
-    }
-
-    debug(`Parameters:\n`,
-        `runtime ID: ${instanceId}\n`,
-        `runtime name: ${runtimeName}\n`,
-        `kyma version: ${kymaVersion}\n`,
-        `custom params: ${JSON.stringify(customParams)}\n`,
-    );
-
-    // Finally, call the provision SKR method with the provided params
+  it(`Provision SKR with ID ${instanceId}`, async function() {
+    console.log(`Provisioning SKR with version ${kymaVersion}`);
+    debug(`Provision SKR with Custom Parameters ${JSON.stringify(customParams)}`);
     skr = await provisionSKR(
         keb,
         kcp,
@@ -61,17 +67,16 @@ describe('Provision SKR cluster', function() {
         null,
         null,
         customParams,
-        provisioningTimeout,
-    );
+        provisioningTimeout);
   });
 
-  describe('Check provisioned SKR', function() {
-    it('Should get Runtime Status after provisioning', async function() {
-      const runtimeStatus = await kcp.getRuntimeStatusOperations(instanceId);
-      debug(`\nRuntime status: ${runtimeStatus}`);
-    });
-    it(`Should save kubeconfig for the SKR to ~/.kube/config`, async function() {
-      await saveKubeconfig(skr.shoot.kubeconfig);
-    });
+  it(`Should get Runtime Status after provisioning`, async function() {
+    const runtimeStatus = await kcp.getRuntimeStatusOperations(instanceId);
+    console.log(`\nRuntime status: ${runtimeStatus}`);
+    await kcp.reconcileInformationLog(runtimeStatus);
+  });
+
+  it(`Should save kubeconfig for the SKR to ~/.kube/config`, async function() {
+    await saveKubeconfig(skr.shoot.kubeconfig);
   });
 });

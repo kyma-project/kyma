@@ -4,18 +4,14 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/kyma-project/kyma/components/function-controller/internal/controllers/serverless/runtime"
+	ctrl "sigs.k8s.io/controller-runtime"
 
-	"github.com/go-logr/logr"
-	"github.com/pkg/errors"
+	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
 	"gopkg.in/yaml.v2"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	apilabels "k8s.io/apimachinery/pkg/labels"
-	ctrl "sigs.k8s.io/controller-runtime"
-
-	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
 )
 
 const (
@@ -31,176 +27,178 @@ const (
 	MinimumReplicasUnavailable = "MinimumReplicasUnavailable"
 )
 
-func (r *FunctionReconciler) isOnDeploymentChange(instance *serverlessv1alpha1.Function, rtmConfig runtime.Config, deployments []appsv1.Deployment, dockerConfig DockerConfig) bool {
-	expectedDeployment := r.buildDeployment(instance, rtmConfig, dockerConfig)
-	resourceOk := len(deployments) == 1 && r.equalDeployments(deployments[0], expectedDeployment, isScalingEnabled(instance))
+func stateFnCheckDeployments(ctx context.Context, r *reconciler, s *systemState) stateFn {
+	labels := s.internalFunctionLabels()
 
-	return !resourceOk
+	r.err = r.client.ListByLabel(ctx, s.instance.GetNamespace(), labels, &s.deployments)
+	if r.err != nil {
+		return nil
+	}
+
+	if r.err = ctx.Err(); r.err != nil {
+		return nil
+	}
+
+	args := buildDeploymentArgs{
+		DockerPullAddress:     r.cfg.docker.PullAddress,
+		JaegerServiceEndpoint: r.cfg.fn.JaegerServiceEndpoint,
+		PublisherProxyAddress: r.cfg.fn.PublisherProxyAddress,
+		ImagePullAccountName:  r.cfg.fn.ImagePullAccountName,
+	}
+
+	expectedDeployment := s.buildDeployment(args)
+
+	deploymentChanged := !s.deploymentEqual(expectedDeployment)
+
+	if !deploymentChanged {
+		return stateFnCheckService
+	}
+
+	if len(s.deployments.Items) == 0 {
+		return buildStateFnCreateDeployment(expectedDeployment)
+	}
+
+	if len(s.deployments.Items) > 1 {
+		return stateFnDeleteDeployments
+	}
+
+	if !equalDeployments(s.deployments.Items[0], expectedDeployment, isScalingEnabled(&s.instance)) {
+		return buildStateFnUpdateDeployment(expectedDeployment.Spec, expectedDeployment.Labels)
+	}
+
+	return stateFnUpdateDeploymentStatus
 }
 
-func (r *FunctionReconciler) onDeploymentChange(ctx context.Context, log logr.Logger, instance *serverlessv1alpha1.Function, rtmConfig runtime.Config, deployments []appsv1.Deployment, dockerConfig DockerConfig) (ctrl.Result, error) {
-	newDeployment := r.buildDeployment(instance, rtmConfig, dockerConfig)
+func buildStateFnCreateDeployment(d appsv1.Deployment) stateFn {
+	return func(ctx context.Context, r *reconciler, s *systemState) stateFn {
+		r.err = r.client.CreateWithReference(ctx, &s.instance, &d)
+		if r.err != nil {
+			return nil
+		}
 
-	switch {
-	case len(deployments) == 0:
-		return ctrl.Result{}, r.createDeployment(ctx, log, instance, newDeployment)
-	case len(deployments) > 1: // this step is needed, as sometimes informers lag behind reality, and then we create 2 (or more) deployments by accident
-		return ctrl.Result{}, r.deleteAllDeployments(ctx, instance, log)
-	case !r.equalDeployments(deployments[0], newDeployment, isScalingEnabled(instance)):
-		return ctrl.Result{}, r.updateDeployment(ctx, log, instance, deployments[0], newDeployment)
-	default:
-		return r.updateDeploymentStatus(ctx, log, instance, deployments, corev1.ConditionUnknown)
+		condition := serverlessv1alpha1.Condition{
+			Type:               serverlessv1alpha1.ConditionRunning,
+			Status:             corev1.ConditionUnknown,
+			LastTransitionTime: metav1.Now(),
+			Reason:             serverlessv1alpha1.ConditionReasonDeploymentCreated,
+			Message:            fmt.Sprintf("Deployment %s created", d.GetName()),
+		}
+
+		return buildStateFnUpdateStateFnFunctionCondition(condition)
 	}
 }
 
-func (r *FunctionReconciler) createDeployment(ctx context.Context, log logr.Logger, instance *serverlessv1alpha1.Function, deployment appsv1.Deployment) error {
-	log.Info("Creating Deployment")
-	if err := r.client.CreateWithReference(ctx, instance, &deployment); err != nil {
-		log.Error(err, fmt.Sprintf("Cannot create Deployment with name %s", deployment.GetName()))
-		return err
+func stateFnDeleteDeployments(ctx context.Context, r *reconciler, s *systemState) stateFn {
+	r.log.Info("deleting function")
+
+	labels := s.internalFunctionLabels()
+	selector := apilabels.SelectorFromSet(labels)
+
+	r.err = r.client.DeleteAllBySelector(ctx, &appsv1.Deployment{}, s.instance.GetNamespace(), selector)
+	return nil
+}
+
+func buildStateFnUpdateDeployment(expectedSpec appsv1.DeploymentSpec, expectedLabels map[string]string) stateFn {
+	return func(ctx context.Context, r *reconciler, s *systemState) stateFn {
+
+		s.deployments.Items[0].Spec = expectedSpec
+		s.deployments.Items[0].Labels = expectedLabels
+		deploymentName := s.deployments.Items[0].GetName()
+
+		r.log.Info(fmt.Sprintf("updating Deployment %s", deploymentName))
+
+		r.err = r.client.Update(ctx, &s.deployments.Items[0])
+		if r.err != nil {
+			return nil
+		}
+
+		condition := serverlessv1alpha1.Condition{
+			Type:               serverlessv1alpha1.ConditionRunning,
+			Status:             corev1.ConditionUnknown,
+			LastTransitionTime: metav1.Now(),
+			Reason:             serverlessv1alpha1.ConditionReasonDeploymentUpdated,
+			Message:            fmt.Sprintf("Deployment %s updated", deploymentName),
+		}
+
+		return buildStateFnUpdateStateFnFunctionCondition(condition)
 	}
-	log.Info(fmt.Sprintf("Deployment %s created", deployment.GetName()))
-
-	return r.updateStatusWithoutRepository(ctx, instance, serverlessv1alpha1.Condition{
-		Type:               serverlessv1alpha1.ConditionRunning,
-		Status:             corev1.ConditionUnknown,
-		LastTransitionTime: metav1.Now(),
-		Reason:             serverlessv1alpha1.ConditionReasonDeploymentCreated,
-		Message:            fmt.Sprintf("Deployment %s created", deployment.GetName()),
-	})
 }
 
-func (r *FunctionReconciler) updateDeployment(ctx context.Context, log logr.Logger, instance *serverlessv1alpha1.Function, oldDeployment appsv1.Deployment, newDeployment appsv1.Deployment) error {
-	deploy := oldDeployment.DeepCopy()
-	deploy.Spec = newDeployment.Spec
-	deploy.ObjectMeta.Labels = newDeployment.GetLabels()
-
-	log.Info(fmt.Sprintf("Updating Deployment %s", deploy.GetName()))
-	if err := r.client.Update(ctx, deploy); err != nil {
-		log.Error(err, fmt.Sprintf("Cannot update Deployment with name %s", deploy.GetName()))
-		return err
+func stateFnUpdateDeploymentStatus(ctx context.Context, r *reconciler, s *systemState) stateFn {
+	if r.err = ctx.Err(); r.err != nil {
+		return nil
 	}
-	log.Info(fmt.Sprintf("Deployment %s updated", deploy.GetName()))
 
-	return r.updateStatusWithoutRepository(ctx, instance, serverlessv1alpha1.Condition{
-		Type:               serverlessv1alpha1.ConditionRunning,
-		Status:             corev1.ConditionUnknown,
-		LastTransitionTime: metav1.Now(),
-		Reason:             serverlessv1alpha1.ConditionReasonDeploymentUpdated,
-		Message:            fmt.Sprintf("Deployment %s updated", deploy.GetName()),
-	})
-}
+	deploymentName := s.deployments.Items[0].GetName()
 
-func (r *FunctionReconciler) equalDeployments(existing appsv1.Deployment, expected appsv1.Deployment, scalingEnabled bool) bool {
-	return len(existing.Spec.Template.Spec.Containers) == 1 &&
-		len(existing.Spec.Template.Spec.Containers) == len(expected.Spec.Template.Spec.Containers) &&
-		existing.Spec.Template.Spec.Containers[0].Image == expected.Spec.Template.Spec.Containers[0].Image &&
-		r.envsEqual(existing.Spec.Template.Spec.Containers[0].Env, expected.Spec.Template.Spec.Containers[0].Env) &&
-		r.mapsEqual(existing.GetLabels(), expected.GetLabels()) &&
-		r.mapsEqual(existing.Spec.Template.GetLabels(), expected.Spec.Template.GetLabels()) &&
-		equalResources(existing.Spec.Template.Spec.Containers[0].Resources, expected.Spec.Template.Spec.Containers[0].Resources) &&
-		(scalingEnabled || equalInt32Pointer(existing.Spec.Replicas, expected.Spec.Replicas))
-}
+	// ready deployment
+	if s.isDeploymentReady() {
+		r.log.Info(fmt.Sprintf("deployment ready %q", deploymentName))
 
-func (r *FunctionReconciler) updateDeploymentStatus(ctx context.Context, log logr.Logger, instance *serverlessv1alpha1.Function, deployments []appsv1.Deployment, runningStatus corev1.ConditionStatus) (ctrl.Result, error) {
-	switch {
-	// this step is both in onDeploymentChange and as last step in reconcile
-	// it's checked here in onDeploymentChange to prevent nasty data races, where somehow deployment becomes ready before we
-	// trigger next reconcile loop, in which we should create svc
-	case r.isDeploymentReady(deployments[0]):
-		log.Info(fmt.Sprintf("Deployment %s is ready", deployments[0].GetName()))
-		return ctrl.Result{
-				RequeueAfter: r.config.FunctionReadyRequeueDuration,
-			}, r.updateStatusWithoutRepository(ctx, instance, serverlessv1alpha1.Condition{
-				Type:               serverlessv1alpha1.ConditionRunning,
-				Status:             runningStatus,
-				LastTransitionTime: metav1.Now(),
-				Reason:             serverlessv1alpha1.ConditionReasonDeploymentReady,
-				Message:            fmt.Sprintf("Deployment %s is ready", deployments[0].GetName()),
-			})
-	case r.hasDeploymentConditionFalseStatusWithReason(deployments[0], appsv1.DeploymentAvailable, MinimumReplicasUnavailable):
-		log.Info(fmt.Sprintf("Deployment %s is ready but not all replicas are healthy", deployments[0].GetName()))
-		return ctrl.Result{}, r.updateStatusWithoutRepository(ctx, instance, serverlessv1alpha1.Condition{
+		condition := serverlessv1alpha1.Condition{
+			Type:               serverlessv1alpha1.ConditionRunning,
+			Status:             corev1.ConditionTrue,
+			LastTransitionTime: metav1.Now(),
+			Reason:             serverlessv1alpha1.ConditionReasonDeploymentReady,
+			Message:            fmt.Sprintf("Deployment %s is ready", deploymentName),
+		}
+
+		r.result = ctrl.Result{
+			RequeueAfter: r.cfg.fn.FunctionReadyRequeueDuration,
+		}
+
+		return buildStateFnUpdateStateFnFunctionCondition(condition)
+	}
+
+	// unhealthy deployment
+	if s.hasDeploymentConditionFalseStatusWithReason(appsv1.DeploymentAvailable, MinimumReplicasUnavailable) {
+		r.log.Info(fmt.Sprintf("deployment unhealthy: %q", deploymentName))
+
+		condition := serverlessv1alpha1.Condition{
 			Type:               serverlessv1alpha1.ConditionRunning,
 			Status:             corev1.ConditionUnknown,
 			LastTransitionTime: metav1.Now(),
 			Reason:             serverlessv1alpha1.ConditionReasonMinReplicasNotAvailable,
-			Message:            fmt.Sprintf("Minimum replcas not available for deployment %s", deployments[0].GetName()),
-		})
-	case r.hasDeploymentConditionTrueStatus(deployments[0], appsv1.DeploymentProgressing):
-		log.Info(fmt.Sprintf("Deployment %s is not ready yet", deployments[0].GetName()))
-		return ctrl.Result{}, r.updateStatusWithoutRepository(ctx, instance, serverlessv1alpha1.Condition{
+			Message:            fmt.Sprintf("Minimum replcas not available for deployment %s", deploymentName),
+		}
+
+		return buildStateFnUpdateStateFnFunctionCondition(condition)
+	}
+
+	// deployment not ready
+	if s.hasDeploymentConditionTrueStatus(appsv1.DeploymentProgressing) {
+		r.log.Info(fmt.Sprintf("deployment %q not ready", deploymentName))
+
+		condition := serverlessv1alpha1.Condition{
 			Type:               serverlessv1alpha1.ConditionRunning,
 			Status:             corev1.ConditionUnknown,
 			LastTransitionTime: metav1.Now(),
 			Reason:             serverlessv1alpha1.ConditionReasonDeploymentWaiting,
-			Message:            fmt.Sprintf("Deployment %s is not ready yet", deployments[0].GetName()),
-		})
-	default:
-		log.Info(fmt.Sprintf("Deployment %s failed", deployments[0].GetName()))
-		yamlConditions, err := yaml.Marshal(deployments[0].Status.Conditions)
-		if err != nil {
-			return ctrl.Result{}, errors.Wrap(err, "while marshalling deployment status to yaml")
+			Message:            fmt.Sprintf("Deployment %s is not ready yet", deploymentName),
 		}
-		return ctrl.Result{RequeueAfter: r.config.RequeueDuration}, r.updateStatusWithoutRepository(ctx, instance, serverlessv1alpha1.Condition{
-			Type:               serverlessv1alpha1.ConditionRunning,
-			Status:             corev1.ConditionFalse,
-			LastTransitionTime: metav1.Now(),
-			Reason:             serverlessv1alpha1.ConditionReasonDeploymentFailed,
-			Message:            fmt.Sprintf("Deployment %s failed with condition: \n%s", deployments[0].GetName(), yamlConditions),
-		})
-	}
-}
 
-func (r *FunctionReconciler) isDeploymentReady(deployment appsv1.Deployment) bool {
-	return r.hasDeploymentConditionTrueStatusWithReason(deployment, appsv1.DeploymentAvailable, MinimumReplicasAvailable) &&
-		r.hasDeploymentConditionTrueStatusWithReason(deployment, appsv1.DeploymentProgressing, NewRSAvailableReason)
-}
-
-func (r *FunctionReconciler) hasDeploymentConditionTrueStatus(deployment appsv1.Deployment, conditionType appsv1.DeploymentConditionType) bool {
-	for _, condition := range deployment.Status.Conditions {
-		if condition.Type == conditionType {
-			return condition.Status == corev1.ConditionTrue
-		}
-	}
-	return false
-}
-
-func (r *FunctionReconciler) hasDeploymentConditionTrueStatusWithReason(deployment appsv1.Deployment, conditionType appsv1.DeploymentConditionType, reason string) bool {
-	for _, condition := range deployment.Status.Conditions {
-		if condition.Type == conditionType {
-			return condition.Status == corev1.ConditionTrue &&
-				condition.Reason == reason
-		}
-	}
-	return false
-}
-
-func (r *FunctionReconciler) hasDeploymentConditionFalseStatusWithReason(deployment appsv1.Deployment, conditionType appsv1.DeploymentConditionType, reason string) bool {
-	for _, condition := range deployment.Status.Conditions {
-		if condition.Type == conditionType {
-			return condition.Status == corev1.ConditionFalse &&
-				condition.Reason == reason
-		}
-	}
-	return false
-}
-
-func equalResources(existing, expected corev1.ResourceRequirements) bool {
-	return existing.Requests.Memory().Equal(*expected.Requests.Memory()) &&
-		existing.Requests.Cpu().Equal(*expected.Requests.Cpu()) &&
-		existing.Limits.Memory().Equal(*expected.Limits.Memory()) &&
-		existing.Limits.Cpu().Equal(*expected.Limits.Cpu())
-}
-
-func (r *FunctionReconciler) deleteAllDeployments(ctx context.Context, instance *serverlessv1alpha1.Function, log logr.Logger) error {
-	log.Info("Deleting all underlying Deployments")
-	selector := apilabels.SelectorFromSet(r.internalFunctionLabels(instance))
-	if err := r.client.DeleteAllBySelector(ctx, &appsv1.Deployment{}, instance.GetNamespace(), selector); err != nil {
-		log.Error(err, "Cannot delete underlying Deployments")
-		return err
+		return buildStateFnUpdateStateFnFunctionCondition(condition)
 	}
 
-	log.Info("Underlying Deployments deleted")
-	return nil
+	// deployment failed
+	r.log.Info(fmt.Sprintf("deployment %q failed", deploymentName))
+
+	var yamlConditions []byte
+	yamlConditions, r.err = yaml.Marshal(s.deployments.Items[0].Status.Conditions)
+
+	if r.err != nil {
+		return nil
+	}
+
+	msg := fmt.Sprintf("Deployment %s failed with condition: \n%s", deploymentName, yamlConditions)
+
+	condition := serverlessv1alpha1.Condition{
+		Type:               serverlessv1alpha1.ConditionRunning,
+		Status:             corev1.ConditionFalse,
+		LastTransitionTime: metav1.Now(),
+		Reason:             serverlessv1alpha1.ConditionReasonDeploymentFailed,
+		Message:            msg,
+	}
+
+	return buildStateFnUpdateStateFnFunctionCondition(condition)
 }

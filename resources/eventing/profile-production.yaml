@@ -1,10 +1,20 @@
+global:
+  jetstream:
+    storage: file
+
 controller:
+  jetstream:
+    retentionPolicy: interest
+    streamReplicas: 3
+    consumerDeliverPolicy: new
+    maxMessages: -1
+    maxBytes: -1
   resources:
     limits:
       cpu: 500m
       memory: 1Gi
     requests:
-      cpu: 400m
+      cpu: 10m
       memory: 512Mi
   publisherProxy:
     resources:
@@ -12,9 +22,8 @@ controller:
         cpu: 500m
         memory: 512Mi
       requests:
-        cpu: 400m
+        cpu: 10m
         memory: 256Mi
-
 
 nats:
   cluster:
@@ -24,19 +33,17 @@ nats:
     enabled: false
   nats:
     jetstream:
-      enabled: false
       memStorage:
         enabled: true
         size: 1Gi
       fileStorage:
-        enabled: false
         size: 1Gi
     resources:
       limits:
         cpu: 500m
         memory: 1Gi
       requests:
-        cpu: 400m
+        cpu: 10m
         memory: 512Mi
     logging:
       debug: false

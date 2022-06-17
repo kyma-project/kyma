@@ -18,11 +18,27 @@ hydra:
             matchLabels:
               app.kubernetes.io/name: hydra
           topologyKey: "kubernetes.io/hostname"
+  hydra-maester:
+    deployment:
+      resources:
+        requests:
+          cpu: "10m"
+          memory: "256Mi"
+        limits:
+          cpu: "400m"
+          memory: "1Gi"
   deployment:
+    resources:
+      requests:
+        cpu: "10m"
+        memory: "256Mi"
+      limits:
+        cpu: "500m"
+        memory: "1Gi"
     autoscaling:
       enabled: true
-      minReplicas: 1
-      maxReplicas: 3
+      minReplicas: 2
+      maxReplicas: 5
       targetMemoryUtilizationPercentage: 75
       targetCPUUtilizationPercentage: 80          
 oathkeeper:
@@ -30,12 +46,23 @@ oathkeeper:
     resources:
       limits:
         cpu: "800m"
+        memory: "512Mi"
       requests:
-        cpu: "200m"
+        cpu: "10m"
+        memory: "64Mi"
     autoscaling:
       enabled: true
       minReplicas: 3
-      maxReplicas: 10        
+      maxReplicas: 10 
+  oathkeeper-maester:
+    deployment:
+      resources:
+        requests:
+          cpu: "10m"
+          memory: "32Mi"
+        limits:
+          cpu: "400m"
+          memory: "1Gi"       
   affinity:
     podAntiAffinity:
       preferredDuringSchedulingIgnoredDuringExecution:

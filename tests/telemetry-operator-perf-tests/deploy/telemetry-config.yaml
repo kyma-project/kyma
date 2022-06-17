@@ -1,0 +1,58 @@
+apiVersion: v1
+data:
+  custom_parsers.conf: |
+    [PARSER]
+        Name docker_no_time
+        Format json
+        Time_Keep Off
+        Time_Key time
+        Time_Format %Y-%m-%dT%H:%M:%S.%L
+  fluent-bit.conf: |
+    [SERVICE]
+        Daemon Off
+        Flush 1
+        Log_Level warn
+        Parsers_File parsers.conf
+        Parsers_File custom_parsers.conf
+        Parsers_File dynamic-parsers/parsers.conf
+        HTTP_Server On
+        HTTP_Listen 0.0.0.0
+        HTTP_Port 2020
+        Health_Check On
+        storage.path /data/log/flb-storage/
+        HC_Retry_Failure_Count 1000000000
+        HC_Errors_Count 1000000000
+        HC_Period 1
+
+    [INPUT]
+        Name tail
+        alias tail
+        storage.type filesystem
+        Path /var/log/containers/*.log
+        multiline.parser docker, cri
+        Tag kube.*
+        Mem_Buf_Limit 5MB
+        Skip_Long_Lines On
+        Refresh_Interval 10
+        DB /data/flb_kube_loki.db
+
+    [FILTER]
+        Name kubernetes
+        Match kube.*
+        Merge_Log On
+        K8S-Logging.Parser On
+        K8S-Logging.Exclude On
+        Buffer_Size 1MB
+
+    @INCLUDE dynamic/*.conf
+
+kind: ConfigMap
+metadata:
+  labels:
+    app.kubernetes.io/instance: telemetry
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: fluent-bit
+    app.kubernetes.io/version: 1.8.3
+    helm.sh/chart: fluent-bit-0.16.2
+  name: telemetry-fluent-bit
+  namespace: kyma-system

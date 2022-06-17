@@ -10,6 +10,7 @@ rules:
     resources:
       - configmaps
       - secrets
+      - namespaces
     verbs:
       - get
       - list
@@ -21,6 +22,8 @@ rules:
       - mutatingwebhookconfigurations
       - validatingwebhookconfigurations
     verbs:
+      - create
+      - delete
       - get
       - update
       - list

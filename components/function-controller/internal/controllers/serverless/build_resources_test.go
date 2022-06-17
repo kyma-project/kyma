@@ -5,11 +5,20 @@ import (
 	"testing"
 
 	"github.com/kyma-project/kyma/components/function-controller/internal/controllers/serverless/runtime"
+	fnRuntime "github.com/kyma-project/kyma/components/function-controller/internal/controllers/serverless/runtime"
 	serverlessv1alpha1 "github.com/kyma-project/kyma/components/function-controller/pkg/apis/serverless/v1alpha1"
 	"github.com/onsi/gomega"
+	v1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/validation"
+)
+
+var (
+	rtmNodeJS12 = fnRuntime.GetRuntimeConfig(serverlessv1alpha1.Nodejs12)
+	rtmNodeJS14 = fnRuntime.GetRuntimeConfig(serverlessv1alpha1.Nodejs14)
+	rtmNodeJS16 = fnRuntime.GetRuntimeConfig(serverlessv1alpha1.Nodejs16)
+	rtmPython39 = fnRuntime.GetRuntimeConfig(serverlessv1alpha1.Python39)
 )
 
 func TestFunctionReconciler_buildConfigMap(t *testing.T) {
@@ -47,9 +56,12 @@ func TestFunctionReconciler_buildConfigMap(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			g := gomega.NewGomegaWithT(t)
-			r := &FunctionReconciler{}
-			got := r.buildConfigMap(tt.fn, runtime.GetRuntime(serverlessv1alpha1.Nodejs14))
+			g := gomega.NewWithT(t)
+			s := systemState{
+				//TODO: https://github.com/kyma-project/kyma/issues/14079
+				instance: *tt.fn,
+			}
+			got := s.buildConfigMap()
 			g.Expect(got).To(gomega.Equal(tt.want))
 		})
 	}
@@ -59,7 +71,7 @@ func TestFunctionReconciler_buildDeployment(t *testing.T) {
 	type args struct {
 		instance *serverlessv1alpha1.Function
 	}
-	rtmCfg := runtime.GetRuntimeConfig(serverlessv1alpha1.Python39)
+	rtmCfg := runtime.GetRuntimeConfig(serverlessv1alpha1.Nodejs12)
 
 	tests := []struct {
 		name string
@@ -67,14 +79,20 @@ func TestFunctionReconciler_buildDeployment(t *testing.T) {
 	}{
 		{
 			name: "spec.template.labels should contain every element from spec.selector.MatchLabels",
-			args: args{instance: newFixFunction("ns", "name", 1, 2)},
+			args: args{
+				instance: newFixFunction("ns", "name", 1, 2),
+			},
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			g := gomega.NewGomegaWithT(t)
-			r := &FunctionReconciler{}
-			got := r.buildDeployment(tt.args.instance, rtmCfg, DockerConfig{})
+			s := systemState{
+				//TODO https://github.com/kyma-project/kyma/issues/14079
+				instance: *tt.args.instance,
+			}
+
+			got := s.buildDeployment(buildDeploymentArgs{})
 
 			for key, value := range got.Spec.Selector.MatchLabels {
 				g.Expect(got.Spec.Template.Labels[key]).To(gomega.Equal(value))
@@ -168,8 +186,18 @@ func TestFunctionReconciler_buildHorizontalPodAutoscaler(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			g := gomega.NewGomegaWithT(t)
-			r := &FunctionReconciler{}
-			got := r.buildHorizontalPodAutoscaler(tt.args.instance, "foo-bar")
+			s := systemState{
+				instance: *tt.args.instance,
+				deployments: v1.DeploymentList{
+					Items: []v1.Deployment{
+						{
+							ObjectMeta: metav1.ObjectMeta{},
+						},
+					},
+				},
+			}
+
+			got := s.buildHorizontalPodAutoscaler(0)
 
 			g.Expect(*got.Spec.MinReplicas).To(gomega.Equal(tt.wants.minReplicas))
 			g.Expect(got.Spec.MaxReplicas).To(gomega.Equal(tt.wants.maxReplicas))
@@ -386,8 +414,11 @@ func TestFunctionReconciler_functionLabels(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			g := gomega.NewGomegaWithT(t)
-			r := &FunctionReconciler{}
-			got := r.functionLabels(tt.args.instance)
+			s := systemState{
+				//TODO https://github.com/kyma-project/kyma/issues/14079
+				instance: *tt.args.instance,
+			}
+			got := s.functionLabels()
 			g.Expect(got).To(gomega.Equal(tt.want))
 		})
 	}
@@ -397,26 +428,13 @@ func TestFunctionReconciler_buildJob(t *testing.T) {
 	g := gomega.NewWithT(t)
 
 	// GIVEN
-	fnName := "my-function"
 	cmName := "test-configmap"
-	rtmCfg := runtime.Config{
-		DependencyFile:          "deps.txt",
-		FunctionFile:            "function.abap",
-		DockerfileConfigMapName: "dockerfile-runtime-abap",
-		RuntimeEnvs:             nil,
-	}
+
 	dockerCfg := DockerConfig{
 		ActiveRegistryConfigSecretName: "docker-secret-name",
 	}
-	instance := serverlessv1alpha1.Function{
-		ObjectMeta: metav1.ObjectMeta{Name: fnName},
-		Spec:       serverlessv1alpha1.FunctionSpec{},
-	}
-	r := FunctionReconciler{
-		config: FunctionConfig{
-			PackageRegistryConfigSecretName: "pkg-config-secret",
-		},
-	}
+	//nolint:gosec
+	packageRegistryConfigSecretName := "pkg-config-secret"
 
 	testCases := []struct {
 		Name                 string
@@ -432,14 +450,14 @@ func TestFunctionReconciler_buildJob(t *testing.T) {
 			ExpectedVolumesLen: 4,
 			ExpectedVolumes: []expectedVolume{
 				{name: "sources", localObjectReference: cmName},
-				{name: "runtime", localObjectReference: rtmCfg.DockerfileConfigMapName},
+				{name: "runtime", localObjectReference: rtmNodeJS12.DockerfileConfigMapName},
 				{name: "credentials", localObjectReference: dockerCfg.ActiveRegistryConfigSecretName},
-				{name: "registry-config", localObjectReference: r.config.PackageRegistryConfigSecretName},
+				{name: "registry-config", localObjectReference: packageRegistryConfigSecretName},
 			},
 			ExpectedMountsLen: 5,
 			ExpectedVolumeMounts: []corev1.VolumeMount{
-				{Name: "sources", MountPath: "/workspace/src/deps.txt", SubPath: FunctionDepsKey, ReadOnly: true},
-				{Name: "sources", MountPath: "/workspace/src/function.abap", SubPath: FunctionSourceKey, ReadOnly: true},
+				{Name: "sources", MountPath: "/workspace/src/package.json", SubPath: FunctionDepsKey, ReadOnly: true},
+				{Name: "sources", MountPath: "/workspace/src/handler.js", SubPath: FunctionSourceKey, ReadOnly: true},
 				{Name: "runtime", MountPath: "/workspace/Dockerfile", SubPath: "Dockerfile", ReadOnly: true},
 				{Name: "credentials", MountPath: "/docker", ReadOnly: true},
 				{Name: "registry-config", MountPath: "/workspace/registry-config/.npmrc", SubPath: ".npmrc", ReadOnly: true},
@@ -451,14 +469,33 @@ func TestFunctionReconciler_buildJob(t *testing.T) {
 			ExpectedVolumesLen: 4,
 			ExpectedVolumes: []expectedVolume{
 				{name: "sources", localObjectReference: cmName},
-				{name: "runtime", localObjectReference: rtmCfg.DockerfileConfigMapName},
+				{name: "runtime", localObjectReference: rtmNodeJS14.DockerfileConfigMapName},
 				{name: "credentials", localObjectReference: dockerCfg.ActiveRegistryConfigSecretName},
-				{name: "registry-config", localObjectReference: r.config.PackageRegistryConfigSecretName},
+				{name: "registry-config", localObjectReference: packageRegistryConfigSecretName},
 			},
 			ExpectedMountsLen: 5,
 			ExpectedVolumeMounts: []corev1.VolumeMount{
-				{Name: "sources", MountPath: "/workspace/src/deps.txt", SubPath: FunctionDepsKey, ReadOnly: true},
-				{Name: "sources", MountPath: "/workspace/src/function.abap", SubPath: FunctionSourceKey, ReadOnly: true},
+				{Name: "sources", MountPath: "/workspace/src/package.json", SubPath: FunctionDepsKey, ReadOnly: true},
+				{Name: "sources", MountPath: "/workspace/src/handler.js", SubPath: FunctionSourceKey, ReadOnly: true},
+				{Name: "runtime", MountPath: "/workspace/Dockerfile", SubPath: "Dockerfile", ReadOnly: true},
+				{Name: "credentials", MountPath: "/docker", ReadOnly: true},
+				{Name: "registry-config", MountPath: "/workspace/registry-config/.npmrc", SubPath: ".npmrc", ReadOnly: true},
+			},
+		},
+		{
+			Name:               "Success Node16",
+			Runtime:            serverlessv1alpha1.Nodejs16,
+			ExpectedVolumesLen: 4,
+			ExpectedVolumes: []expectedVolume{
+				{name: "sources", localObjectReference: cmName},
+				{name: "runtime", localObjectReference: rtmNodeJS16.DockerfileConfigMapName},
+				{name: "credentials", localObjectReference: dockerCfg.ActiveRegistryConfigSecretName},
+				{name: "registry-config", localObjectReference: packageRegistryConfigSecretName},
+			},
+			ExpectedMountsLen: 5,
+			ExpectedVolumeMounts: []corev1.VolumeMount{
+				{Name: "sources", MountPath: "/workspace/src/package.json", SubPath: FunctionDepsKey, ReadOnly: true},
+				{Name: "sources", MountPath: "/workspace/src/handler.js", SubPath: FunctionSourceKey, ReadOnly: true},
 				{Name: "runtime", MountPath: "/workspace/Dockerfile", SubPath: "Dockerfile", ReadOnly: true},
 				{Name: "credentials", MountPath: "/docker", ReadOnly: true},
 				{Name: "registry-config", MountPath: "/workspace/registry-config/.npmrc", SubPath: ".npmrc", ReadOnly: true},
@@ -470,14 +507,14 @@ func TestFunctionReconciler_buildJob(t *testing.T) {
 			ExpectedVolumesLen: 4,
 			ExpectedVolumes: []expectedVolume{
 				{name: "sources", localObjectReference: cmName},
-				{name: "runtime", localObjectReference: rtmCfg.DockerfileConfigMapName},
+				{name: "runtime", localObjectReference: rtmPython39.DockerfileConfigMapName},
 				{name: "credentials", localObjectReference: dockerCfg.ActiveRegistryConfigSecretName},
-				{name: "registry-config", localObjectReference: r.config.PackageRegistryConfigSecretName},
+				{name: "registry-config", localObjectReference: packageRegistryConfigSecretName},
 			},
 			ExpectedMountsLen: 5,
 			ExpectedVolumeMounts: []corev1.VolumeMount{
-				{Name: "sources", MountPath: "/workspace/src/deps.txt", SubPath: FunctionDepsKey, ReadOnly: true},
-				{Name: "sources", MountPath: "/workspace/src/function.abap", SubPath: FunctionSourceKey, ReadOnly: true},
+				{Name: "sources", MountPath: "/workspace/src/requirements.txt", SubPath: FunctionDepsKey, ReadOnly: true},
+				{Name: "sources", MountPath: "/workspace/src/handler.py", SubPath: FunctionSourceKey, ReadOnly: true},
 				{Name: "runtime", MountPath: "/workspace/Dockerfile", SubPath: "Dockerfile", ReadOnly: true},
 				{Name: "credentials", MountPath: "/docker", ReadOnly: true},
 				{Name: "registry-config", MountPath: "/workspace/registry-config/pip.conf", SubPath: "pip.conf", ReadOnly: true},
@@ -487,13 +524,27 @@ func TestFunctionReconciler_buildJob(t *testing.T) {
 
 	for _, testCase := range testCases {
 		t.Run(testCase.Name, func(t *testing.T) {
-			rtmCfg.Runtime = testCase.Runtime
+
+			functionName := "my-function"
+			s := systemState{
+				instance: serverlessv1alpha1.Function{
+					ObjectMeta: metav1.ObjectMeta{Name: functionName},
+					Spec: serverlessv1alpha1.FunctionSpec{
+						Runtime: testCase.Runtime,
+					},
+				},
+			}
 
 			// when
-			job := r.buildJob(&instance, rtmCfg, cmName, dockerCfg)
+			job := s.buildJob(cmName, cfg{
+				docker: dockerCfg,
+				fn: FunctionConfig{
+					PackageRegistryConfigSecretName: "pkg-config-secret",
+				},
+			})
 
 			// then
-			g.Expect(job.ObjectMeta.GenerateName).To(gomega.Equal(fmt.Sprintf("%s-build-", fnName)))
+			g.Expect(job.ObjectMeta.GenerateName).To(gomega.Equal(fmt.Sprintf("%s-build-", functionName)))
 			g.Expect(job.Spec.Template.Spec.Volumes).To(gomega.HaveLen(testCase.ExpectedVolumesLen))
 			assertVolumes(g, job.Spec.Template.Spec.Volumes, testCase.ExpectedVolumes)
 

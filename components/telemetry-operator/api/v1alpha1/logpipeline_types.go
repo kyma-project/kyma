@@ -28,12 +28,13 @@ type LogPipelineSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
 
-	Parsers          []Parser          `json:"parsers,omitempty"`
-	MultiLineParsers []MultiLineParser `json:"multilineParsers,omitempty"`
-	Filters          []Filter          `json:"filters,omitempty"`
-	Outputs          []Output          `json:"outputs,omitempty"`
-	Files            []FileMount       `json:"files,omitempty"`
-	SecretRefs       []SecretReference `json:"secretRefs,omitempty"`
+	EnableUnsupportedPlugins bool              `json:"enableUnsupportedPlugins,omitempty"`
+	Parsers                  []Parser          `json:"parsers,omitempty"`
+	MultiLineParsers         []MultiLineParser `json:"multilineParsers,omitempty"`
+	Filters                  []Filter          `json:"filters,omitempty"`
+	Outputs                  []Output          `json:"outputs,omitempty"`
+	Files                    []FileMount       `json:"files,omitempty"`
+	SecretRefs               []SecretReference `json:"secretRefs,omitempty"`
 }
 
 // Parser describes a Fluent Bit parser configuration section
@@ -68,15 +69,77 @@ type SecretReference struct {
 	Namespace string `json:"namespace,omitempty"`
 }
 
+type LogPipelineConditionType string
+
+// These are the valid statuses of LogPipeline.
+const (
+	LogPipelinePending LogPipelineConditionType = "Pending"
+	LogPipelineRunning LogPipelineConditionType = "Running"
+)
+
+const (
+	FluentBitDSRestartedReason        = "FluentBitDaemonSetRestarted"
+	FluentBitDSRestartCompletedReason = "FluentBitDaemonSetRestartCompleted"
+)
+
+// LogPipelineCondition contains details for the current condition of this LogPipeline
+type LogPipelineCondition struct {
+	LastTransitionTime metav1.Time              `json:"lastTransitionTime,omitempty"`
+	Reason             string                   `json:"reason,omitempty"`
+	Type               LogPipelineConditionType `json:"type,omitempty"`
+}
+
 // LogPipelineStatus defines the observed state of LogPipeline
 type LogPipelineStatus struct {
-	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
-	// Important: Run "make" to regenerate code after modifying this file
+	Conditions []LogPipelineCondition `json:"conditions,omitempty"`
+}
+
+func NewLogPipelineCondition(reason string, condType LogPipelineConditionType) *LogPipelineCondition {
+	return &LogPipelineCondition{
+		LastTransitionTime: metav1.Now(),
+		Reason:             reason,
+		Type:               condType,
+	}
+}
+
+func (lps *LogPipelineStatus) GetCondition(condType LogPipelineConditionType) *LogPipelineCondition {
+	for cond := range lps.Conditions {
+		if lps.Conditions[cond].Type == condType {
+			return &lps.Conditions[cond]
+		}
+	}
+	return nil
+}
+
+func (lps *LogPipelineStatus) SetCondition(cond LogPipelineCondition) {
+	currentCond := lps.GetCondition(cond.Type)
+	if currentCond != nil && currentCond.Reason == cond.Reason {
+		return
+	}
+	if currentCond != nil {
+		cond.LastTransitionTime = currentCond.LastTransitionTime
+	}
+	newConditions := filterOutCondition(lps.Conditions, cond.Type)
+	lps.Conditions = append(newConditions, cond)
+}
+
+func filterOutCondition(conds []LogPipelineCondition, condType LogPipelineConditionType) []LogPipelineCondition {
+	var newConditions []LogPipelineCondition
+	for _, cond := range conds {
+		if cond.Type == condType {
+			continue
+		}
+		newConditions = append(newConditions, cond)
+	}
+	return newConditions
 }
 
 //+kubebuilder:object:root=true
 //+kubebuilder:resource:scope=Cluster
 //+kubebuilder:subresource:status
+//+kubebuilder:printcolumn:name="Status",type=string,JSONPath=`.status.conditions[-1].type`
+//+kubebuilder:printcolumn:name="Unsupported-Plugins",type=boolean,JSONPath=`.spec.enableUnsupportedPlugins`
+//+kubebuilder:printcolumn:name="Age",type=date,JSONPath=`.metadata.creationTimestamp`
 
 // LogPipeline is the Schema for the logpipelines API
 type LogPipeline struct {

@@ -10,11 +10,11 @@ The Istio Resources Helm chart includes Kyma configuration of Istio and consists
 - Istio Ingress Gateway configuring incoming traffic to Kyma
 - Mutual TLS (mTLS) configuration enabling mTLS cluster-wide in the STRICT mode
 - Service Monitor configuring monitoring for the Istio component
-- Istio [VirtualService](https://istio.io/docs/reference/config/networking/virtual-service/) informing whether Istio is up and running
+- Istio [Virtual Service](https://istio.io/docs/reference/config/networking/virtual-service/) informing whether Istio is up and running
 
 ## Prerequisites
 
-Installation of Istio Resources chart requires Kyma prerequisties, namely [`cluster essentials`](../cluster-essentials),[`istio`](../istio-configuration), and [`certificates`](../certificates), to be installed first.
+Installation of Istio Resources chart requires Kyma prerequisties, namely [`cluster essentials`](../cluster-essentials),[`istio`](../istio), and [`certificates`](../certificates), to be installed first.
 
 ## Installation
 
@@ -24,4 +24,4 @@ To install Istio Resources, run:
 kyma deploy --component istio-resources
 ```
 
-For more details regarding the installation of Istio itself in Kyma, see the [Istio chart](../istio-configuration/README.md).
+For more details regarding the installation of Istio itself in Kyma, see the [Istio chart](../istio/README.md).

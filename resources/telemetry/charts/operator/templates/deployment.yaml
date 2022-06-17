@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "operator.fullname" . }}-controller-manager
+  name: {{ include "operator.fullname" . }}
   labels:
     {{- include "operator.labels" . | nindent 4 }}
     {{- toYaml .Values.extraLabels | nindent 4 }}
@@ -13,11 +13,13 @@ spec:
       {{- toYaml .Values.extraLabels | nindent 6 }}
   template:
     metadata:
+      annotations:
+        sidecar.istio.io/inject: "false"
       labels:
         {{- include "operator.selectorLabels" . | nindent 8 }}
         {{- toYaml .Values.extraLabels | nindent 8 }}
     spec:
-      serviceAccountName: {{ include "operator.serviceAccountName" . }}-controller-manager
+      serviceAccountName: {{ include "operator.serviceAccountName" . }}
       terminationGracePeriodSeconds: {{ .Values.terminationGracePeriodSeconds }}
       {{- if or .Values.priorityClassName .Values.global.priorityClassName -}}
       priorityClassName: {{ coalesce .Values.priorityClassName .Values.global.priorityClassName }}
@@ -29,13 +31,21 @@ spec:
             - /manager
           args:
             - --leader-elect
-            - --cm-name={{ .Release.Name }}-{{ .Values.logProcessor }}-sections
+            - --cm-name={{ .Release.Name }}-{{ .Values.logProcessor }}
+            - --sections-cm-name={{ .Release.Name }}-{{ .Values.logProcessor }}-sections
             - --parser-cm-name={{ .Release.Name }}-{{ .Values.logProcessor }}-parsers
             - --ds-name={{ .Release.Name }}-{{ .Values.logProcessor }}
             - --env-secret={{ .Release.Name }}-{{ .Values.logProcessor }}-env
             - --files-cm={{ .Release.Name }}-{{ .Values.logProcessor }}-files
             - --fluent-bit-ns={{ .Release.Namespace }}
+            - --supported-filter-plugins={{ join "," .Values.supportedPlugins.filter}}
+            - --supported-output-plugins={{ join "," .Values.supportedPlugins.output}}
+            - --denied-filter-plugins={{ join "," .Values.deniedPlugins.filter}}
+            - --denied-output-plugins={{ join "," .Values.deniedPlugins.output}}
           name: manager
+          ports:
+          - containerPort: 9443
+            protocol: TCP
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
           image: "{{ include "imageurl" (dict "reg" .Values.global.containerRegistry "img" .Values.global.images.telemetry_operator) }}"
@@ -51,3 +61,16 @@ spec:
               value: {{ .Values.global.log.format | quote }}
             - name: APP_LOG_LEVEL
               value: {{ .Values.global.log.level | quote }}
+          volumeMounts:
+          - mountPath: /var/run/telemetry-webhook
+            name: telemetry-webhook-cert
+            readOnly: true
+      volumes:
+      - name: telemetry-webhook-cert
+        secret:
+          secretName: {{ template "fullname" . }}-webhook-cert
+          items:
+          - key: tls.crt
+            path: tls.crt
+          - key: tls.key
+            path: tls.key

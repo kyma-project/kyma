@@ -33,10 +33,10 @@ ci-test-skr-nightly:
 	npm install
 	npm run test-nightly-skr
 
-.PHONY: ci-skr-kyma-to-kyma2-upgrade
-ci-skr-kyma-to-kyma2-upgrade:
+.PHONY: ci-skr-aws-upgrade-integration
+ci-skr-aws-upgrade-integration:
 	npm install
-	npm run test-skr-kyma-to-kyma2-upgrade
+	npm run test-skr-aws-upgrade-integration
 
 .PHONY: ci-skr-svcat-migration
 ci-skr-svcat-migration:
@@ -54,11 +54,6 @@ ci-post-upgrade:
 	npm install
 	npm run upgrade-test-tests
 	npm run upgrade-test-cleanup
-
-.PHONY: ci-application-connectivity-2
-ci-application-connectivity-2:
-	npm install
-	npm test
 
 .PHONY: ci-application-connectivity-2-compass
 ci-application-connectivity-2-compass:

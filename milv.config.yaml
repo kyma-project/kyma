@@ -41,9 +41,6 @@ files:
   - path: "./kyma/docs/helm-broker/08-01-configure-hb.md"
     config:
       external-links-to-ignore: [ "https://{host}/{path}/{bundle_repo_version" ]
-  - path: "./kyma/docs/03-tutorials/00-application-connectivity/ac-07-revoke-client-cert.md"
-    config:
-      external-links-to-ignore: [ "https://gateway.{CLUSTER_DOMAIN}/v1/applications/certificates/revocations" ]
   - path: "./kyma/docs/migration-guides/0.8-0.9.md"
     config:
       external-links-to-ignore: [ "https://github.com/kyma-project/kyma/releases/tag/0.9.0" ]
@@ -105,3 +102,13 @@ files:
   - path: "./kyma/docs/04-operation-guides/operations/02-install-kyma.md"
     config:
       external-links-to-ignore: [ "https://dashboard.kyma-project.io/" ]
+  - path: "./kyma/docs/03-tutorials/00-api-exposure/apix-04-get-jwt.md"
+    config:
+      external-links-to-ignore: [ "https://YOUR_OIDC_COMPLIANT_IDENTITY_PROVIDER_INSTANCE/.well-known/openid-configuration" ]
+  - path: "./kyma/docs/05-technical-reference/00-configuration-parameters/svls-02-environment-variables.md"
+    config:
+      external-links-to-ignore: [ "http://tracing-jaeger-collector.kyma-system.svc.cluster.local:14268/api/traces",
+                                  "http://eventing-publisher-proxy.kyma-system.svc.cluster.local/publish" ]
+  - path: "./kyma/docs/04-operation-guides/troubleshooting/evnt-02-jetstream-troubleshooting.md"
+    config:
+      external-links-to-ignore: [ "https://grafana.com/grafana/dashboards/14725" ]

@@ -15,7 +15,7 @@ ctrl:
       cpu: 100m
     requests:
       memory: 32Mi
-      cpu: 80m
+      cpu: 10m
   internalPort: 8080
   statusPort: 8081
   # enable/disable docs topics support for helm controller
@@ -29,7 +29,7 @@ broker:
       cpu: 60m
     requests:
       memory: 96Mi
-      cpu: 30m
+      cpu: 10m
   tillerTLSInsecure: true
   tillerTLSEnabled: true
   internalPort: 8070
@@ -56,7 +56,7 @@ webhook:
   # Ref: http://kubernetes.io/docs/user-guide/compute-resources/
   resources:
     requests:
-      cpu: 100m
+      cpu: 10m
       memory: 20Mi
     limits:
       cpu: 100m
@@ -109,17 +109,14 @@ global:
   images:
     helm_broker_webhook:
       name: "helm-broker-webhook"
-      version: "f2f2f3d9"
+      version: "7e9eee5e"
     helm_broker:
       name: "helm-broker"
-      version: "bf0bcbb3"
+      version: "7e9eee5e"
     helm_controller:
       name: "helm-controller"
-      version: "f2f2f3d9"
+      version: "7e9eee5e"
     etcd:
       name: "etcd"
-      version: "v3.3.25-b582f7ea"
+      version: "v3.3.27-979d1ebd"
       directory: "tpi/quay.io/coreos"
-    add_ons_ui:
-      name: "add-ons-ui"
-      version: "c60a3c68"

@@ -30,7 +30,6 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
-	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 var _ = Describe("LogPipeline controller", func() {
@@ -38,19 +37,27 @@ var _ = Describe("LogPipeline controller", func() {
 		LogPipelineName                = "log-pipeline"
 		FluentBitParserConfig          = "Name   dummy_test\nFormat   regex\nRegex   ^(?<INT>[^ ]+) (?<FLOAT>[^ ]+) (?<BOOL>[^ ]+) (?<STRING>.+)$"
 		FluentBitMultiLineParserConfig = "Name          multiline-custom-regex\nType          regex\nFlush_timeout 1000\nRule      \"start_state\"   \"/(Dec \\d+ \\d+\\:\\d+\\:\\d+)(.*)/\"  \"cont\"\nRule      \"cont\"          \"/^\\s+at.*/\"                     \"cont\""
-		FluentBitFilterConifg          = "Name   grep\nMatch   *\nRegex   $kubernetes['labels']['app'] my-deployment"
-		FluentBitOutputConfig          = "Name   stdout\nMatch   *"
+		FluentBitFilterConfig          = "Name   grep\nMatch   *\nRegex   $kubernetes['labels']['app'] my-deployment"
+		FluentBitOutputConfig          = "Name   stdout\nMatch   log-pipeline.*"
 		timeout                        = time.Second * 10
 		interval                       = time.Millisecond * 250
 	)
 	var expectedFluentBitConfig = `[FILTER]
+    name                  rewrite_tag
+    match                 kube.*
+    Rule                  $log "^.*$" log-pipeline.$TAG true
+    Emitter_Name          log-pipeline
+    Emitter_Storage.type  filesystem
+    Emitter_Mem_Buf_Limit 10M
+
+[FILTER]
     Name   grep
     Match   *
     Regex   $kubernetes['labels']['app'] my-deployment
 
 [OUTPUT]
     Name   stdout
-    Match   *`
+    Match   log-pipeline.*`
 	var expectedFluentBitParserConfig = `[PARSER]
     Name   dummy_test
     Format   regex
@@ -75,7 +82,7 @@ var _ = Describe("LogPipeline controller", func() {
 				},
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      "my-secret",
-					Namespace: ControllerNamespace,
+					Namespace: daemonSetConfig.FluentBitDaemonSetName.Namespace,
 				},
 				StringData: map[string]string{
 					"key": "value",
@@ -97,8 +104,8 @@ var _ = Describe("LogPipeline controller", func() {
 					Kind:       "DaemonSet",
 				},
 				ObjectMeta: metav1.ObjectMeta{
-					Name:      FluentBitDaemonSet,
-					Namespace: ControllerNamespace,
+					Name:      daemonSetConfig.FluentBitDaemonSetName.Name,
+					Namespace: daemonSetConfig.FluentBitDaemonSetName.Namespace,
 				},
 				Spec: appsv1.DaemonSetSpec{
 					Selector: &metav1.LabelSelector{
@@ -124,8 +131,8 @@ var _ = Describe("LogPipeline controller", func() {
 					Kind:       "Pod",
 				},
 				ObjectMeta: metav1.ObjectMeta{
-					Name:      FluentBitDaemonSet + "-123",
-					Namespace: ControllerNamespace,
+					Name:      daemonSetConfig.FluentBitDaemonSetName.Name + "-123",
+					Namespace: daemonSetConfig.FluentBitDaemonSetName.Namespace,
 					Labels:    podLabels,
 				},
 				Spec: corev1.PodSpec{
@@ -142,7 +149,7 @@ var _ = Describe("LogPipeline controller", func() {
 			}
 			secretRef := telemetryv1alpha1.SecretReference{
 				Name:      "my-secret",
-				Namespace: ControllerNamespace,
+				Namespace: daemonSetConfig.FluentBitDaemonSetName.Namespace,
 			}
 			parser := telemetryv1alpha1.Parser{
 				Content: FluentBitParserConfig,
@@ -151,7 +158,7 @@ var _ = Describe("LogPipeline controller", func() {
 				Content: FluentBitMultiLineParserConfig,
 			}
 			filter := telemetryv1alpha1.Filter{
-				Content: FluentBitFilterConifg,
+				Content: FluentBitFilterConfig,
 			}
 			output := telemetryv1alpha1.Output{
 				Content: FluentBitOutputConfig,
@@ -179,8 +186,8 @@ var _ = Describe("LogPipeline controller", func() {
 			Eventually(func() string {
 				cmFileName := LogPipelineName + ".conf"
 				configMapLookupKey := types.NamespacedName{
-					Name:      FluentBitSectionsConfigMap,
-					Namespace: ControllerNamespace,
+					Name:      daemonSetConfig.FluentBitSectionsConfigMap.Name,
+					Namespace: daemonSetConfig.FluentBitSectionsConfigMap.Namespace,
 				}
 				var fluentBitCm corev1.ConfigMap
 				err := k8sClient.Get(ctx, configMapLookupKey, &fluentBitCm)
@@ -194,8 +201,8 @@ var _ = Describe("LogPipeline controller", func() {
 			Eventually(func() string {
 				cmFileName := "parsers.conf"
 				configMapLookupKey := types.NamespacedName{
-					Name:      FluentBitParsersConfigMap,
-					Namespace: ControllerNamespace,
+					Name:      daemonSetConfig.FluentBitParsersConfigMap.Name,
+					Namespace: daemonSetConfig.FluentBitParsersConfigMap.Namespace,
 				}
 				var fluentBitParsersCm corev1.ConfigMap
 				err := k8sClient.Get(ctx, configMapLookupKey, &fluentBitParsersCm)
@@ -208,8 +215,8 @@ var _ = Describe("LogPipeline controller", func() {
 			// File content should be copied to ConfigMap
 			Eventually(func() string {
 				filesConfigMapLookupKey := types.NamespacedName{
-					Name:      FluentBitFilesConfigMap,
-					Namespace: ControllerNamespace,
+					Name:      daemonSetConfig.FluentBitFilesConfigMap.Name,
+					Namespace: daemonSetConfig.FluentBitFilesConfigMap.Namespace,
 				}
 				var filesCm corev1.ConfigMap
 				err := k8sClient.Get(ctx, filesConfigMapLookupKey, &filesCm)
@@ -222,8 +229,8 @@ var _ = Describe("LogPipeline controller", func() {
 			// Secret reference should be copied to environment Secret
 			Eventually(func() string {
 				envSecretLookupKey := types.NamespacedName{
-					Name:      FluentBitEnvSecret,
-					Namespace: ControllerNamespace,
+					Name:      daemonSetConfig.FluentBitEnvSecret.Name,
+					Namespace: daemonSetConfig.FluentBitEnvSecret.Namespace,
 				}
 				var envSecret corev1.Secret
 				err := k8sClient.Get(ctx, envSecretLookupKey, &envSecret)
@@ -237,7 +244,7 @@ var _ = Describe("LogPipeline controller", func() {
 			Eventually(func() []string {
 				loggingConfigLookupKey := types.NamespacedName{
 					Name:      LogPipelineName,
-					Namespace: ControllerNamespace,
+					Namespace: daemonSetConfig.FluentBitDaemonSetName.Namespace,
 				}
 				var updatedLogPipeline telemetryv1alpha1.LogPipeline
 				err := k8sClient.Get(ctx, loggingConfigLookupKey, &updatedLogPipeline)
@@ -245,19 +252,22 @@ var _ = Describe("LogPipeline controller", func() {
 					return []string{err.Error()}
 				}
 				return updatedLogPipeline.Finalizers
-			}, timeout, interval).Should(ContainElement(sectionsConfigMapFinalizer))
+			}, timeout, interval).Should(ContainElement("FLUENT_BIT_SECTIONS_CONFIG_MAP"))
 
 			Expect(k8sClient.Delete(ctx, loggingConfiguration)).Should(Succeed())
 
-			// Fluent Bit pods should have been deleted for restart
+			// Fluent Bit daemon set should rollout-restarted (generation changes from 1 to 2)
 			Eventually(func() int {
-				var fluentBitPods corev1.PodList
-				err := k8sClient.List(ctx, &fluentBitPods, client.InNamespace(ControllerNamespace), client.MatchingLabels(podLabels))
+				var fluentBitDaemonSet appsv1.DaemonSet
+				err := k8sClient.Get(ctx, types.NamespacedName{
+					Name:      daemonSetConfig.FluentBitDaemonSetName.Name,
+					Namespace: daemonSetConfig.FluentBitDaemonSetName.Namespace,
+				}, &fluentBitDaemonSet)
 				if err != nil {
-					return 1
+					return 0
 				}
-				return len(fluentBitPods.Items)
-			}, timeout, interval).Should(Equal(0))
+				return int(fluentBitDaemonSet.Generation)
+			}, timeout, interval).Should(Equal(2))
 
 			// Custom metrics should be exported
 			Eventually(func() bool {

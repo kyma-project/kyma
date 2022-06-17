@@ -7,6 +7,10 @@ import (
 	"testing"
 	"time"
 
+	"github.com/kyma-incubator/compass/components/director/pkg/str"
+
+	"github.com/kyma-incubator/compass/components/director/pkg/correlation"
+
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 
 	"github.com/kyma-project/kyma/components/compass-runtime-agent/internal/compass/cache"
@@ -63,12 +67,11 @@ var (
 	}
 	connectorTokenHeadersFunc = mock.MatchedBy(func(input map[string]string) bool {
 		for k, v := range connectorTokenHeaders {
-			if k != RequestIDHeader && input[k] != v {
+			if input[k] != v {
 				return false
 			}
 		}
-		// only check if x-request-id header was set
-		return input[RequestIDHeader] != ""
+		return true
 	})
 	nilHeaders map[string]string
 
@@ -106,8 +109,18 @@ var (
 	}
 
 	kymaModelApps = []kymaModel.Application{{Name: "App-1", ID: "abcd-efgh"}}
+	testCtx       = correlation.SaveCorrelationIDHeaderToContext(context.Background(), str.Ptr(correlation.RequestIDHeaderKey), str.Ptr("test-correlation-id-123"))
 
-	operationResults = []kyma.Result{{ApplicationName: "App-1", ApplicationID: "abcd-efgh", Operation: kyma.Create}}
+	operationResults    = []kyma.Result{{ApplicationName: "App-1", ApplicationID: "abcd-efgh", Operation: kyma.Create}}
+	requestIDCtxMatcher = mock.MatchedBy(func(ctx context.Context) bool {
+		if val := ctx.Value(correlation.HeadersContextKey); val != nil {
+			if h, ok := val.(correlation.Headers); ok {
+				_, res := h[correlation.RequestIDHeaderKey]
+				return res
+			}
+		}
+		return false
+	})
 )
 
 func TestCompassConnectionController(t *testing.T) {
@@ -128,12 +141,12 @@ func TestCompassConnectionController(t *testing.T) {
 	// Config provider
 	configProviderMock := configProviderMock()
 	// Connector clients
-	tokensConnectorClientMock := connectorTokensClientMock()
-	certsConnectorClientMock := connectorCertClientMock()
+	tokensConnectorClientMock := connectorTokensClientMock(requestIDCtxMatcher)
+	certsConnectorClientMock := connectorCertClientMock(requestIDCtxMatcher)
 	// Director config client
 	configurationClientMock := &directorMocks.DirectorClient{}
-	configurationClientMock.On("FetchConfiguration").Return(kymaModelApps, graphql.Labels{}, nil)
-	configurationClientMock.On("SetURLsLabels", runtimeURLsConfig, graphql.Labels{}).Return(runtimeLabels, nil)
+	configurationClientMock.On("FetchConfiguration", requestIDCtxMatcher).Return(kymaModelApps, graphql.Labels{}, nil)
+	configurationClientMock.On("SetURLsLabels", requestIDCtxMatcher, runtimeURLsConfig, graphql.Labels{}).Return(runtimeLabels, nil)
 	// Director proxy configurator
 	directorProxyConfiguratorMock := &directorMocks.ProxyConfigurator{}
 	directorProxyConfiguratorMock.On("SetURLAndCerts", mock.AnythingOfType("cache.ConnectionData")).Return(nil)
@@ -179,7 +192,7 @@ func TestCompassConnectionController(t *testing.T) {
 	cancelFunc, _ := StartTestManager(t, ctrlManager)
 	defer cancelFunc()
 
-	connection, err := supervisor.InitializeCompassConnection()
+	connection, err := supervisor.InitializeCompassConnection(testCtx)
 	require.NoError(t, err)
 	assert.NotEmpty(t, connection)
 
@@ -199,8 +212,8 @@ func TestCompassConnectionController(t *testing.T) {
 			clientsProviderMock,
 			configProviderMock,
 			credentialsManagerMock)
-		certsConnectorClientMock.AssertCalled(t, "Configuration", nilHeaders)
-		certsConnectorClientMock.AssertNotCalled(t, "SignCSR", mock.AnythingOfType("string"), nilHeaders)
+		certsConnectorClientMock.AssertCalled(t, "Configuration", requestIDCtxMatcher, nilHeaders)
+		certsConnectorClientMock.AssertNotCalled(t, "SignCSR", requestIDCtxMatcher, mock.AnythingOfType("string"), nilHeaders)
 	})
 
 	t.Run("Compass Connection should be reinitialized if deleted", func(t *testing.T) {
@@ -223,15 +236,15 @@ func TestCompassConnectionController(t *testing.T) {
 			clientsProviderMock,
 			configProviderMock,
 			credentialsManagerMock)
-		certsConnectorClientMock.AssertCalled(t, "Configuration", nilHeaders)
-		certsConnectorClientMock.AssertNotCalled(t, "SignCSR", mock.AnythingOfType("string"), nilHeaders)
+		certsConnectorClientMock.AssertCalled(t, "Configuration", requestIDCtxMatcher, nilHeaders)
+		certsConnectorClientMock.AssertNotCalled(t, "SignCSR", requestIDCtxMatcher, mock.AnythingOfType("string"), nilHeaders)
 	})
 
 	t.Run("Should not reinitialized connection if connection is in Synchronized state", func(t *testing.T) {
 		// when
 		credentialsManagerMock.On("GetClientCredentials").Return(credentials.ClientCredentials, nil)
 
-		connection, err := supervisor.InitializeCompassConnection()
+		connection, err := supervisor.InitializeCompassConnection(context.Background())
 
 		// then
 		require.NoError(t, err)
@@ -251,7 +264,7 @@ func TestCompassConnectionController(t *testing.T) {
 
 		err = waitFor(checkInterval, testTimeout, func() bool {
 			fakeT := &testing.T{}
-			called := certsConnectorClientMock.AssertCalled(fakeT, "SignCSR", mock.AnythingOfType("string"), nilHeaders)
+			called := certsConnectorClientMock.AssertCalled(fakeT, "SignCSR", requestIDCtxMatcher, mock.AnythingOfType("string"), nilHeaders)
 			return called
 		})
 
@@ -261,18 +274,18 @@ func TestCompassConnectionController(t *testing.T) {
 
 		assertCertificateRenewed(t)
 		assertManagementInfoSetInCR(t)
-		certsConnectorClientMock.AssertCalled(t, "SignCSR", mock.AnythingOfType("string"), nilHeaders)
+		certsConnectorClientMock.AssertCalled(t, "SignCSR", requestIDCtxMatcher, mock.AnythingOfType("string"), nilHeaders)
 	})
 
 	t.Run("Compass Connection should be in MetadataUpdateFailed state if failed to set labels on Runtime", func(t *testing.T) {
 		// given
 		clearMockCalls(&configurationClientMock.Mock)
-		configurationClientMock.On("FetchConfiguration").Return(kymaModelApps, graphql.Labels{}, nil)
-		configurationClientMock.On("SetURLsLabels", runtimeURLsConfig, graphql.Labels{}).Return(nil, apperrors.Internal("error"))
+		configurationClientMock.On("FetchConfiguration", requestIDCtxMatcher).Return(kymaModelApps, graphql.Labels{}, nil)
+		configurationClientMock.On("SetURLsLabels", requestIDCtxMatcher, runtimeURLsConfig, graphql.Labels{}).Return(nil, apperrors.Internal("error"))
 
 		// when
 		err = waitFor(checkInterval, testTimeout, func() bool {
-			return mockFunctionCalled(&configurationClientMock.Mock, "SetURLsLabels", runtimeURLsConfig, graphql.Labels{})
+			return mockFunctionCalled(&configurationClientMock.Mock, "SetURLsLabels", requestIDCtxMatcher, runtimeURLsConfig, graphql.Labels{})
 		})
 
 		// then
@@ -282,8 +295,8 @@ func TestCompassConnectionController(t *testing.T) {
 
 		clearMockCalls(&configurationClientMock.Mock)
 		// restore previous director mock configuration to not interfere with other tests
-		configurationClientMock.On("FetchConfiguration").Return(kymaModelApps, graphql.Labels{}, nil)
-		configurationClientMock.On("SetURLsLabels", runtimeURLsConfig, graphql.Labels{}).Return(runtimeLabels, nil)
+		configurationClientMock.On("FetchConfiguration", requestIDCtxMatcher).Return(kymaModelApps, graphql.Labels{}, nil)
+		configurationClientMock.On("SetURLsLabels", requestIDCtxMatcher, runtimeURLsConfig, graphql.Labels{}).Return(runtimeLabels, nil)
 	})
 
 	t.Run("Compass Connection should be in ResourceApplicationFailed state if failed to apply resources", func(t *testing.T) {
@@ -310,11 +323,11 @@ func TestCompassConnectionController(t *testing.T) {
 	t.Run("Compass Connection should be in SynchronizationFailed state if failed to fetch configuration from Director", func(t *testing.T) {
 		// given
 		clearMockCalls(&configurationClientMock.Mock)
-		configurationClientMock.On("FetchConfiguration").Return(nil, nil, errors.New("error"))
+		configurationClientMock.On("FetchConfiguration", requestIDCtxMatcher).Return(nil, nil, errors.New("error"))
 
 		// when
 		err = waitFor(checkInterval, testTimeout, func() bool {
-			return mockFunctionCalled(&configurationClientMock.Mock, "FetchConfiguration")
+			return mockFunctionCalled(&configurationClientMock.Mock, "FetchConfiguration", requestIDCtxMatcher)
 		})
 
 		// then
@@ -325,222 +338,8 @@ func TestCompassConnectionController(t *testing.T) {
 
 		// restore previous director mock configuration to not interfere with other tests
 		clearMockCalls(&configurationClientMock.Mock)
-		configurationClientMock.On("FetchConfiguration").Return(kymaModelApps, graphql.Labels{}, nil)
-		configurationClientMock.On("SetURLsLabels", runtimeURLsConfig, graphql.Labels{}).Return(runtimeLabels, nil)
-	})
-
-	// Control path A in controller - fetching config from Connector fails during connection initialisation
-	t.Run("Compass Connection Controller should skip all attempts of Connection Initialisation if failed to fetch configuration from Connector AND minimalConfigSyncTime HAS NOT passed", func(t *testing.T) {
-		// given
-		badConnectorMock := &connectorMocks.Client{}
-		badConnectorMock.On("Configuration", connectorTokenHeadersFunc).After(1*time.Second).Return(gqlschema.Configuration{}, errors.New("Failed to get configuration during initialisation. Timeout!!!"))
-
-		clearMockCalls(&clientsProviderMock.Mock)
-		clientsProviderMock.On("GetConnectorTokensClient", connectorURL).Return(badConnectorMock, nil)
-
-		//this will enforce immediate connection reinitialisation. Then connection will be set to v1alpha1.ConnectionFailed
-		err := compassConnectionCRClient.Delete(context.Background(), compassConnectionName, v1.DeleteOptions{})
-		require.NoError(t, err)
-
-		// when
-		// 1 second for timeout
-		err = waitFor(checkInterval, testTimeout, func() bool {
-			return mockFunctionCalled(&badConnectorMock.Mock, "Configuration", connectorTokenHeadersFunc)
-		})
-		require.NoError(t, err)
-
-		err = waitFor(checkInterval, testTimeout, func() bool {
-			return isConnectionInState(v1alpha1.ConnectionFailed)
-		})
-		require.NoError(t, err)
-		assertConnectionStatusError(t)
-
-		// Now wait for 2 seconds. Reconcile loop should run in the background.
-		// Since minimalConfigSyncTime (4s) not pass all calls to connector should be skipped.
-		time.Sleep(2 * time.Second)
-
-		require.Equal(t, true, isConnectionInState(v1alpha1.ConnectionFailed))
-		assertConnectionStatusError(t)
-
-		badConnectorMock.AssertNumberOfCalls(t, "Configuration", 1)
-
-		clearMockCalls(&clientsProviderMock.Mock)
-		clientsProviderMock.On("GetDirectorClient", runtimeConfig).Return(configurationClientMock, nil)
-		clientsProviderMock.On("GetConnectorCertSecuredClient").Return(certsConnectorClientMock, nil)
-		clientsProviderMock.On("GetConnectorTokensClient", connectorURL).Return(tokensConnectorClientMock, nil)
-	})
-
-	t.Run("Compass Connection Controller should resume attempts of Connection Initialisation if failed to fetch configuration from Connector AND minimalConfigSyncTime HAS passed", func(t *testing.T) {
-		// given
-		badConnectorMock := &connectorMocks.Client{}
-		badConnectorMock.On("Configuration", connectorTokenHeadersFunc).After(1*time.Second).Return(gqlschema.Configuration{}, errors.New("Failed to get configuration during initialisation. Timeout!!!"))
-
-		clearMockCalls(&clientsProviderMock.Mock)
-		clientsProviderMock.On("GetConnectorTokensClient", connectorURL).Return(badConnectorMock, nil)
-
-		// this will enforce connection reinitialisation. Then connection will be set to v1alpha1.ConnectionFailed
-		err := compassConnectionCRClient.Delete(context.Background(), compassConnectionName, v1.DeleteOptions{})
-		require.NoError(t, err)
-
-		// when
-		// 1 second for timeout
-		err = waitFor(checkInterval, testTimeout, func() bool {
-			return mockFunctionCalled(&badConnectorMock.Mock, "Configuration", connectorTokenHeadersFunc)
-		})
-		require.NoError(t, err)
-
-		err = waitFor(checkInterval, testTimeout, func() bool {
-			return isConnectionInState(v1alpha1.ConnectionFailed)
-		})
-		require.NoError(t, err)
-		assertConnectionStatusError(t)
-
-		// Now wait for minimalConfigSyncTime + 1s. Reconcile loop should run in the background.
-		// After minimalConfigSyncTime passed calls to director can be resumed.
-		time.Sleep(minimalConfigSyncTime + 2*time.Second)
-
-		require.Equal(t, true, isConnectionInState(v1alpha1.ConnectionFailed))
-		assertConnectionStatusError(t)
-
-		badConnectorMock.AssertNumberOfCalls(t, "Configuration", 2)
-
-		clearMockCalls(&clientsProviderMock.Mock)
-		clientsProviderMock.On("GetDirectorClient", runtimeConfig).Return(configurationClientMock, nil)
-		clientsProviderMock.On("GetConnectorCertSecuredClient").Return(certsConnectorClientMock, nil)
-		clientsProviderMock.On("GetConnectorTokensClient", connectorURL).Return(tokensConnectorClientMock, nil)
-	})
-
-	// Control path B in controller - fetching config from Connector fails during connection maintenance
-	t.Run("Compass Connection Controller should skip all attempts of Connection Maintenance if failed to fetch configuration from Connector AND minimalConfigSyncTime HAS NOT passed", func(t *testing.T) {
-		// given
-		assertRecreateSynchronizedConnection(t)
-		badConnectorMock := &connectorMocks.Client{}
-		badConnectorMock.On("Configuration", nilHeaders).After(1*time.Second).Return(gqlschema.Configuration{}, errors.New("Failed to get configuration during connection maintenance. Timeout!!!"))
-
-		clearMockCalls(&clientsProviderMock.Mock)
-		clientsProviderMock.On("GetConnectorCertSecuredClient").Return(badConnectorMock, nil)
-
-		// when
-		// 2 seconds wait for call + 1 second for timeout
-		err = waitFor(checkInterval, testTimeout, func() bool {
-			return mockFunctionCalled(&badConnectorMock.Mock, "Configuration", nilHeaders)
-		})
-		require.NoError(t, err)
-
-		// Now wait for a second. Reconcile loop should run in the background.
-		// Since minimalConfigSyncTime (4s) not pass all calls to connector should be skipped.
-		time.Sleep(2 * time.Second)
-
-		require.Equal(t, true, isConnectionInState(v1alpha1.ConnectionMaintenanceFailed))
-		assertConnectionStatusError(t)
-		badConnectorMock.AssertNumberOfCalls(t, "Configuration", 1)
-
-		// restore previous connector mock configuration to not interfere with other tests
-		clearMockCalls(&clientsProviderMock.Mock)
-		clientsProviderMock.On("GetDirectorClient", runtimeConfig).Return(configurationClientMock, nil)
-		clientsProviderMock.On("GetConnectorCertSecuredClient").Return(certsConnectorClientMock, nil)
-		clientsProviderMock.On("GetConnectorTokensClient", connectorURL).Return(tokensConnectorClientMock, nil)
-	})
-
-	t.Run("Compass Connection Controller should resume attempts of Connection maintenance if failed to fetch configuration from Connector AND minimalConfigSyncTime HAS passed", func(t *testing.T) {
-		// given
-		assertRecreateSynchronizedConnection(t)
-		badConnectorMock := &connectorMocks.Client{}
-		badConnectorMock.On("Configuration", nilHeaders).After(1*time.Second).Return(gqlschema.Configuration{}, errors.New("Failed to get configuration during connection maintenance. Timeout!!!"))
-
-		clearMockCalls(&clientsProviderMock.Mock)
-		clientsProviderMock.On("GetConnectorCertSecuredClient").Return(badConnectorMock, nil)
-
-		// when
-		// 2 seconds wait for call + 1 second for timeout
-		err = waitFor(checkInterval, testTimeout, func() bool {
-			return mockFunctionCalled(&badConnectorMock.Mock, "Configuration", nilHeaders)
-		})
-		require.NoError(t, err)
-
-		// Now wait for a minimalConfigSyncTime + 1s. Reconcile loop should run in the background.
-		// After minimalConfigSyncTime passed calls to director can be resumed.
-		time.Sleep(minimalConfigSyncTime + 2*time.Second)
-
-		require.NoError(t, waitForResourceUpdate(v1alpha1.ConnectionMaintenanceFailed))
-		assertConnectionStatusError(t)
-		badConnectorMock.AssertNumberOfCalls(t, "Configuration", 2)
-
-		// restore previous connector mock configuration to not interfere with other tests
-		clearMockCalls(&clientsProviderMock.Mock)
-		clientsProviderMock.On("GetDirectorClient", runtimeConfig).Return(configurationClientMock, nil)
-		clientsProviderMock.On("GetConnectorCertSecuredClient").Return(certsConnectorClientMock, nil)
-		clientsProviderMock.On("GetConnectorTokensClient", connectorURL).Return(tokensConnectorClientMock, nil)
-	})
-
-	t.Run("Compass Connection Controller should wait at least minimalConfigSyncTime to retry fetch configuration from Director", func(t *testing.T) {
-		// given
-		assertRecreateSynchronizedConnection(t)
-		require.Equal(t, true, isConnectionInState(v1alpha1.Synchronized))
-
-		clearMockCalls(&configurationClientMock.Mock)
-		configurationClientMock.On("FetchConfiguration").After(1*time.Second).Return(nil, nil, errors.New("Director timeout error!!!"))
-
-		// ensure stability
-		connectedConnection, err := compassConnectionCRClient.Get(context.Background(), compassConnectionName, v1.GetOptions{})
-		minuteBefore := v1.NewTime(time.Now().Add(time.Minute * -1))
-		connectedConnection.Status.ConnectionStatus.LastSync = minuteBefore
-		connectedConnection.Status.SynchronizationStatus.LastAttempt = minuteBefore
-		connectedConnection, err = compassConnectionCRClient.Update(context.Background(), connectedConnection, v1.UpdateOptions{})
-		require.NoError(t, err)
-
-		//t.Logf("go back in time for the first time")
-		// when
-		// 1 seconds wait for call + 1 second for timeout
-		err = waitFor(time.Second, testTimeout, func() bool {
-			return mockFunctionCalled(&configurationClientMock.Mock, "FetchConfiguration")
-		})
-
-		time.Sleep(time.Second)
-		require.Equal(t, true, isConnectionInState(v1alpha1.SynchronizationFailed))
-		assertSynchronizationStatusError(t)
-
-		// get time of synchronization error
-		// and lastSync to -6 second back in time to make reconcile allow to attemt application sync
-		connectedConnection, err = compassConnectionCRClient.Get(context.Background(), compassConnectionName, v1.GetOptions{})
-		require.NoError(t, err)
-		require.NotNil(t, connectedConnection.Status.SynchronizationStatus)
-		firstSyncAttempt := connectedConnection.Status.SynchronizationStatus.LastAttempt // moment of the first error
-
-		timeBefore := v1.NewTime(time.Now().Add(time.Second * -6))
-		connectedConnection.Status.ConnectionStatus.LastSync = timeBefore
-		connectedConnection, err = compassConnectionCRClient.Update(context.Background(), connectedConnection, v1.UpdateOptions{})
-		require.NoError(t, err)
-
-		// reset the mock
-		configurationClientMock.Calls = nil
-		// now let's check when second time we will call to director
-		err = waitFor(time.Second, testTimeout, func() bool {
-			return mockFunctionCalled(&configurationClientMock.Mock, "FetchConfiguration")
-		})
-
-		time.Sleep(time.Second)
-		require.Equal(t, true, isConnectionInState(v1alpha1.SynchronizationFailed))
-		assertSynchronizationStatusError(t)
-
-		// get time of second synchronization error
-		connectedConnection, err = compassConnectionCRClient.Get(context.Background(), compassConnectionName, v1.GetOptions{})
-		require.NoError(t, err)
-		require.NotNil(t, connectedConnection.Status.SynchronizationStatus)
-		secondSyncAttempt := connectedConnection.Status.SynchronizationStatus.LastAttempt
-
-		passedSeconds := secondSyncAttempt.Unix() - firstSyncAttempt.Unix()
-		minimalConfigSyncTime.Seconds()
-		t.Logf("Number of seconds between attempts: %d", passedSeconds)
-
-		require.Equal(t, true, passedSeconds >= int64(minimalConfigSyncTime/time.Second))
-
-		configurationClientMock.AssertNumberOfCalls(t, "FetchConfiguration", 1)
-
-		// restore previous director mock configuration to not interfere with other tests
-		clearMockCalls(&configurationClientMock.Mock)
-		configurationClientMock.On("FetchConfiguration").Return(kymaModelApps, graphql.Labels{}, nil)
-		configurationClientMock.On("SetURLsLabels", runtimeURLsConfig, graphql.Labels{}).Return(runtimeLabels, nil)
+		configurationClientMock.On("FetchConfiguration", requestIDCtxMatcher).Return(kymaModelApps, graphql.Labels{}, nil)
+		configurationClientMock.On("SetURLsLabels", requestIDCtxMatcher, runtimeURLsConfig, graphql.Labels{}).Return(runtimeLabels, nil)
 	})
 
 	t.Run("Compass Connection should be in SynchronizationFailed state if failed create Director config client", func(t *testing.T) {
@@ -591,11 +390,11 @@ func TestCompassConnectionController(t *testing.T) {
 	t.Run("Compass Connection should be in ConnectionMaintenanceFailed if Management Info is empty and no error", func(t *testing.T) {
 		// given
 		certsConnectorClientMock.ExpectedCalls = nil
-		certsConnectorClientMock.On("Configuration", nilHeaders).Return(gqlschema.Configuration{ManagementPlaneInfo: nil}, nil)
+		certsConnectorClientMock.On("Configuration", requestIDCtxMatcher, nilHeaders).Return(gqlschema.Configuration{ManagementPlaneInfo: nil}, nil)
 
 		// when
 		err = waitFor(checkInterval, testTimeout, func() bool {
-			return mockFunctionCalled(&certsConnectorClientMock.Mock, "Configuration", nilHeaders)
+			return mockFunctionCalled(&certsConnectorClientMock.Mock, "Configuration", requestIDCtxMatcher, nilHeaders)
 		})
 
 		// then
@@ -608,11 +407,11 @@ func TestCompassConnectionController(t *testing.T) {
 	t.Run("Compass Connection should be in ConnectionMaintenanceFailed if failed to access Connector Configuration query", func(t *testing.T) {
 		// given
 		certsConnectorClientMock.ExpectedCalls = nil
-		certsConnectorClientMock.On("Configuration", nilHeaders).Return(gqlschema.Configuration{}, errors.New("error"))
+		certsConnectorClientMock.On("Configuration", requestIDCtxMatcher, nilHeaders).Return(gqlschema.Configuration{}, errors.New("error"))
 
 		// when
 		err = waitFor(checkInterval, testTimeout, func() bool {
-			return mockFunctionCalled(&certsConnectorClientMock.Mock, "Configuration", nilHeaders)
+			return mockFunctionCalled(&certsConnectorClientMock.Mock, "Configuration", requestIDCtxMatcher, nilHeaders)
 		})
 
 		// then
@@ -645,7 +444,7 @@ func TestFailedToInitializeConnection(t *testing.T) {
 	require.NoError(t, err)
 
 	// Connector token client
-	connectorTokenClientMock := connectorTokensClientMock()
+	connectorTokenClientMock := connectorTokensClientMock(requestIDCtxMatcher)
 	// Config provider
 	configProviderMock := configProviderMock()
 	// Clients provider
@@ -685,7 +484,7 @@ func TestFailedToInitializeConnection(t *testing.T) {
 				t.Fatalf("Failed to initialize Connection: %s", err.Error())
 			}
 
-			connection, err := supervisor.InitializeCompassConnection()
+			connection, err := supervisor.InitializeCompassConnection(testCtx)
 			require.NoError(t, err)
 			assert.NotEmpty(t, connection)
 		}
@@ -710,8 +509,8 @@ func TestFailedToInitializeConnection(t *testing.T) {
 			description: "failed to sign CSR",
 			setupFunc: func() {
 				clearMockCalls(&connectorTokenClientMock.Mock)
-				connectorTokenClientMock.On("Configuration", connectorTokenHeadersFunc).Return(connectorConfigurationResponse, nil)
-				connectorTokenClientMock.On("SignCSR", mock.AnythingOfType("string"), connectorTokenHeadersFunc).Return(gqlschema.CertificationResult{}, errors.New("error"))
+				connectorTokenClientMock.On("Configuration", requestIDCtxMatcher, connectorTokenHeadersFunc).Return(connectorConfigurationResponse, nil)
+				connectorTokenClientMock.On("SignCSR", requestIDCtxMatcher, mock.AnythingOfType("string"), connectorTokenHeadersFunc).Return(gqlschema.CertificationResult{}, errors.New("error"))
 			},
 			waitFunction: func() bool {
 				return mockFunctionCalled(&connectorTokenClientMock.Mock, "SignCSR", mock.AnythingOfType("string"), connectorTokenHeaders)
@@ -721,11 +520,11 @@ func TestFailedToInitializeConnection(t *testing.T) {
 			description: "failed to fetch Configuration",
 			setupFunc: func() {
 				clearMockCalls(&connectorTokenClientMock.Mock)
-				connectorTokenClientMock.On("Configuration", connectorTokenHeadersFunc).Return(gqlschema.Configuration{}, errors.New("error"))
-				connectorTokenClientMock.On("SignCSR", mock.AnythingOfType("string"), connectorTokenHeadersFunc).Return(gqlschema.CertificationResult{}, errors.New("error"))
+				connectorTokenClientMock.On("Configuration", requestIDCtxMatcher, connectorTokenHeadersFunc).Return(gqlschema.Configuration{}, errors.New("error"))
+				connectorTokenClientMock.On("SignCSR", requestIDCtxMatcher, mock.AnythingOfType("string"), connectorTokenHeadersFunc).Return(gqlschema.CertificationResult{}, errors.New("error"))
 			},
 			waitFunction: func() bool {
-				return mockFunctionCalled(&connectorTokenClientMock.Mock, "Configuration", connectorTokenHeaders)
+				return mockFunctionCalled(&connectorTokenClientMock.Mock, "Configuration", requestIDCtxMatcher, connectorTokenHeaders)
 			},
 		},
 		{
@@ -891,18 +690,18 @@ func clientsProviderMock(configClient *directorMocks.DirectorClient, connectorTo
 	return clientsProviderMock
 }
 
-func connectorCertClientMock() *connectorMocks.Client {
+func connectorCertClientMock(contextMatcher interface{}) *connectorMocks.Client {
 	connectorMock := &connectorMocks.Client{}
-	connectorMock.On("Configuration", nilHeaders).Return(connectorConfigurationResponse, nil)
-	connectorMock.On("SignCSR", mock.AnythingOfType("string"), nilHeaders).Return(connectorCertResponse, nil)
+	connectorMock.On("Configuration", contextMatcher, nilHeaders).Return(connectorConfigurationResponse, nil)
+	connectorMock.On("SignCSR", contextMatcher, mock.AnythingOfType("string"), nilHeaders).Return(connectorCertResponse, nil)
 
 	return connectorMock
 }
 
-func connectorTokensClientMock() *connectorMocks.Client {
+func connectorTokensClientMock(contextMatcher interface{}) *connectorMocks.Client {
 	connectorMock := &connectorMocks.Client{}
-	connectorMock.On("Configuration", connectorTokenHeadersFunc).Return(connectorConfigurationResponse, nil)
-	connectorMock.On("SignCSR", mock.AnythingOfType("string"), connectorTokenHeadersFunc).Return(connectorCertResponse, nil)
+	connectorMock.On("Configuration", contextMatcher, connectorTokenHeadersFunc).Return(connectorConfigurationResponse, nil)
+	connectorMock.On("SignCSR", contextMatcher, mock.AnythingOfType("string"), connectorTokenHeadersFunc).Return(connectorCertResponse, nil)
 
 	return connectorMock
 }

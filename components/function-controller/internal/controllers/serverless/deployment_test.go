@@ -365,8 +365,7 @@ func TestFunctionReconciler_equalDeployments(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			g := gomega.NewGomegaWithT(t)
-			r := &FunctionReconciler{}
-			got := r.equalDeployments(tt.args.existing, tt.args.expected, tt.args.scalingEnabled)
+			got := equalDeployments(tt.args.existing, tt.args.expected, tt.args.scalingEnabled)
 			g.Expect(got).To(gomega.Equal(tt.want))
 		})
 	}
@@ -517,10 +516,15 @@ func TestFunctionReconciler_hasDeploymentConditionTrueStatus(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			g := gomega.NewGomegaWithT(t)
-			r := &FunctionReconciler{}
-			got := r.hasDeploymentConditionTrueStatus(appsv1.Deployment{
-				Status: appsv1.DeploymentStatus{Conditions: tt.args.conditions},
-			}, tt.args.conditionType)
+			s := systemState{
+				deployments: appsv1.DeploymentList{
+					Items: []appsv1.Deployment{
+						{Status: appsv1.DeploymentStatus{Conditions: tt.args.conditions}},
+					},
+				},
+			}
+
+			got := s.hasDeploymentConditionTrueStatus(tt.args.conditionType)
 			g.Expect(got).To(gomega.Equal(tt.want))
 		})
 	}
@@ -596,10 +600,16 @@ func TestFunctionReconciler_hasDeploymentConditionTrueStatusWithReason(t *testin
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			g := gomega.NewGomegaWithT(t)
-			r := &FunctionReconciler{}
-			got := r.hasDeploymentConditionTrueStatusWithReason(appsv1.Deployment{
-				Status: appsv1.DeploymentStatus{Conditions: tt.args.conditions},
-			}, tt.args.conditionType, tt.args.conditionReason)
+			s := systemState{
+				deployments: appsv1.DeploymentList{
+					Items: []appsv1.Deployment{
+						{
+							Status: appsv1.DeploymentStatus{Conditions: tt.args.conditions},
+						},
+					},
+				},
+			}
+			got := s.hasDeploymentConditionTrueStatusWithReason(tt.args.conditionType, tt.args.conditionReason)
 			g.Expect(got).To(gomega.Equal(tt.want))
 		})
 	}
@@ -658,10 +668,15 @@ func TestFunctionReconciler_isDeploymentReady(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			g := gomega.NewGomegaWithT(t)
-			r := &FunctionReconciler{}
-			got := r.isDeploymentReady(appsv1.Deployment{
-				Status: appsv1.DeploymentStatus{Conditions: tt.args.conditions},
-			})
+			s := systemState{
+				deployments: appsv1.DeploymentList{
+					Items: []appsv1.Deployment{
+						{
+							Status: appsv1.DeploymentStatus{Conditions: tt.args.conditions},
+						},
+					},
+				}}
+			got := s.isDeploymentReady()
 			g.Expect(got).To(gomega.Equal(tt.want))
 		})
 	}

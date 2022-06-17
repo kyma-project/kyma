@@ -29,7 +29,19 @@ const (
 )
 
 // compile time check
-var _ MessagingBackend = &BEB{}
+var _ BEBBackend = &BEB{}
+
+type BEBBackend interface {
+	// Initialize should initialize the communication layer with the messaging backend system
+	Initialize(cfg env.Config) error
+
+	// SyncSubscription should synchronize the Kyma eventing subscription with the subscriber infrastructure of messaging backend system.
+	// It should return true if Kyma eventing subscription status was changed during this synchronization process.
+	SyncSubscription(subscription *eventingv1alpha1.Subscription, cleaner eventtype.Cleaner, apiRule *apigatewayv1alpha1.APIRule) (bool, error)
+
+	// DeleteSubscription should delete the corresponding subscriber data of messaging backend
+	DeleteSubscription(subscription *eventingv1alpha1.Subscription) error
+}
 
 type OAuth2ClientCredentials struct {
 	ClientID     string
@@ -91,21 +103,9 @@ func getWebHookAuth(cfg env.Config, credentials *OAuth2ClientCredentials) *types
 }
 
 // SyncSubscription synchronize the EV2 subscription with the EMS subscription. It returns true, if the EV2 subscription status was changed
-func (b *BEB) SyncSubscription(subscription *eventingv1alpha1.Subscription, params ...interface{}) (bool, error) {
+func (b *BEB) SyncSubscription(subscription *eventingv1alpha1.Subscription, cleaner eventtype.Cleaner, apiRule *apigatewayv1alpha1.APIRule) (bool, error) {
 	// Format logger
 	log := utils.LoggerWithSubscription(b.namedLogger(), subscription)
-
-	cleaner, ok := params[0].(eventtype.Cleaner)
-	if !ok {
-		err := fmt.Errorf("get cleaner from params[0] failed: %v", params[0])
-		log.Errorw("wrong parameter for subscription", ErrorLogKey, err)
-	}
-
-	apiRule, ok := params[1].(*apigatewayv1alpha1.APIRule)
-	if !ok {
-		err := fmt.Errorf("get ApiRule from params[0] failed: %v", params[0])
-		log.Errorw("wrong parameter for subscription", ErrorLogKey, err)
-	}
 
 	// get the internal view for the ev2 subscription
 	var statusChanged = false
@@ -124,6 +124,8 @@ func (b *BEB) SyncSubscription(subscription *eventingv1alpha1.Subscription, para
 	var bebSubscription *types.Subscription
 	// check the hash values for ev2 and EMS
 	if newEv2Hash != subscription.Status.Ev2hash {
+		// reset the cleanEventTypes
+		subscription.Status.CleanEventTypes = nil
 		// delete & create a new EMS subscription
 		var newEMSHash int64
 		bebSubscription, newEMSHash, err = b.deleteCreateAndHashSubscription(sEv2, cleaner, log)
@@ -157,6 +159,8 @@ func (b *BEB) SyncSubscription(subscription *eventingv1alpha1.Subscription, para
 			return false, err
 		}
 		if newEmsHash != subscription.Status.Emshash {
+			// reset the cleanEventTypes
+			subscription.Status.CleanEventTypes = nil
 			// delete & create a new EMS subscription
 			bebSubscription, newEmsHash, err = b.deleteCreateAndHashSubscription(sEv2, cleaner, log)
 			if err != nil {
@@ -263,6 +267,9 @@ func cleanEventTypes(subscription *types.Subscription, cleaner eventtype.Cleaner
 // setEmsSubscriptionStatus sets the status of bebSubscription in ev2Subscription
 func (b *BEB) setEmsSubscriptionStatus(subscription *eventingv1alpha1.Subscription, bebSubscription *types.Subscription) bool {
 	var statusChanged = false
+	if subscription.Status.EmsSubscriptionStatus == nil {
+		subscription.Status.EmsSubscriptionStatus = &eventingv1alpha1.EmsSubscriptionStatus{}
+	}
 	if subscription.Status.EmsSubscriptionStatus.SubscriptionStatus != string(bebSubscription.SubscriptionStatus) {
 		subscription.Status.EmsSubscriptionStatus.SubscriptionStatus = string(bebSubscription.SubscriptionStatus)
 		statusChanged = true

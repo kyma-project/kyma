@@ -3,7 +3,8 @@ package kubernetes
 import (
 	"context"
 
-	"github.com/go-logr/logr"
+	"go.uber.org/zap"
+
 	corev1 "k8s.io/api/core/v1"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -12,16 +13,16 @@ import (
 )
 
 type SecretReconciler struct {
-	Log    logr.Logger
+	Log    *zap.SugaredLogger
 	client client.Client
 	config Config
 	svc    SecretService
 }
 
-func NewSecret(client client.Client, log logr.Logger, config Config, secretSvc SecretService) *SecretReconciler {
+func NewSecret(client client.Client, log *zap.SugaredLogger, config Config, secretSvc SecretService) *SecretReconciler {
 	return &SecretReconciler{
 		client: client,
-		Log:    log.WithName("controllers").WithName("secret"),
+		Log:    log.Named("controllers").Named("secret"),
 		config: config,
 		svc:    secretSvc,
 	}
@@ -72,16 +73,13 @@ func (r *SecretReconciler) predicate() predicate.Predicate {
 // +kubebuilder:rbac:groups="",resources=secrets,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups="",resources=namespaces,verbs=get;list;watch
 
-func (r *SecretReconciler) Reconcile(request ctrl.Request) (ctrl.Result, error) {
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
-
+func (r *SecretReconciler) Reconcile(ctx context.Context, request ctrl.Request) (ctrl.Result, error) {
 	instance := &corev1.Secret{}
 	if err := r.client.Get(ctx, request.NamespacedName, instance); err != nil {
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
 
-	logger := r.Log.WithValues("namespace", instance.GetNamespace(), "name", instance.GetName())
+	logger := r.Log.With("namespace", instance.GetNamespace(), "name", instance.GetName())
 
 	namespaces, err := getNamespaces(ctx, r.client, r.config.BaseNamespace, r.config.ExcludedNamespaces)
 	if err != nil {

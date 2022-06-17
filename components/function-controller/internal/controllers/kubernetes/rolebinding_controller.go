@@ -3,7 +3,8 @@ package kubernetes
 import (
 	"context"
 
-	"github.com/go-logr/logr"
+	"go.uber.org/zap"
+
 	rbacv1 "k8s.io/api/rbac/v1"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -12,16 +13,16 @@ import (
 )
 
 type RoleBindingReconciler struct {
-	Log    logr.Logger
+	Log    *zap.SugaredLogger
 	client client.Client
 	config Config
 	svc    RoleBindingService
 }
 
-func NewRoleBinding(client client.Client, log logr.Logger, config Config, service RoleBindingService) *RoleBindingReconciler {
+func NewRoleBinding(client client.Client, log *zap.SugaredLogger, config Config, service RoleBindingService) *RoleBindingReconciler {
 	return &RoleBindingReconciler{
 		client: client,
-		Log:    log.WithName("controllers").WithName("role"),
+		Log:    log.Named("controllers").Named("role"),
 		config: config,
 		svc:    service,
 	}
@@ -66,16 +67,13 @@ func (r *RoleBindingReconciler) predicate() predicate.Predicate {
 
 // +kubebuilder:rbac:groups=rbac.authorization.k8s.io,resources=rolebindings,verbs=get;list;watch;create;update;patch;delete
 
-func (r *RoleBindingReconciler) Reconcile(request ctrl.Request) (ctrl.Result, error) {
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
-
+func (r *RoleBindingReconciler) Reconcile(ctx context.Context, request ctrl.Request) (ctrl.Result, error) {
 	instance := &rbacv1.RoleBinding{}
 	if err := r.client.Get(ctx, request.NamespacedName, instance); err != nil {
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
 
-	logger := r.Log.WithValues("namespace", instance.GetNamespace(), "name", instance.GetName())
+	logger := r.Log.With("namespace", instance.GetNamespace(), "name", instance.GetName())
 
 	namespaces, err := getNamespaces(ctx, r.client, r.config.BaseNamespace, r.config.ExcludedNamespaces)
 	if err != nil {

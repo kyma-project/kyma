@@ -4,7 +4,6 @@ deployment:
   args:
     proxyPort: &proxyPort 8080
     externalAPIPort: &externalAPIPort 8081
-    appRegistryHost: application-registry-external-api.kyma-integration:8081
     cacheExpirationSeconds: 90
     cacheCleanupIntervalSeconds: 15
   resources:
@@ -12,7 +11,7 @@ deployment:
       cpu: 100m
       memory: 128Mi
     requests:
-      cpu: 50m
+      cpu: 10m
       memory: 64Mi
 
 service:

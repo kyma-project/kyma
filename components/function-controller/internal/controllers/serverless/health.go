@@ -6,7 +6,8 @@ import (
 	"time"
 
 	"go.uber.org/zap"
-
+	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/event"
 	"sigs.k8s.io/controller-runtime/pkg/healthz"
@@ -24,30 +25,36 @@ type HealthChecker struct {
 	checkCh  chan event.GenericEvent
 	healthCh chan bool
 	timeout  time.Duration
-	logger   *zap.Logger
+	log      *zap.SugaredLogger
 }
 
-func NewHealthChecker(checkCh chan event.GenericEvent, returnCh chan bool, timeout time.Duration, logger *zap.Logger) HealthChecker {
-	return HealthChecker{checkCh: checkCh, healthCh: returnCh, timeout: timeout, logger: logger}
+func NewHealthChecker(checkCh chan event.GenericEvent, returnCh chan bool, timeout time.Duration, logger *zap.SugaredLogger) HealthChecker {
+	return HealthChecker{checkCh: checkCh, healthCh: returnCh, timeout: timeout, log: logger}
 }
 
 func (h HealthChecker) Checker(req *http.Request) error {
-	h.logger.Debug("Liveness handler triggered")
+	h.log.Debug("Liveness handler triggered")
 
-	checkEvent := event.GenericEvent{Meta: &ctrl.ObjectMeta{Name: HealthEvent}}
+	checkEvent := event.GenericEvent{
+		Object: &corev1.Event{
+			ObjectMeta: metav1.ObjectMeta{
+				Name: HealthEvent,
+			},
+		},
+	}
 	select {
 	case h.checkCh <- checkEvent:
 	case <-time.After(h.timeout):
 		return errors.New("timeout when sending check event")
 	}
 
-	h.logger.Debug("check event send to reconcile loop")
+	h.log.Debug("check event send to reconcile loop")
 	select {
 	case <-h.healthCh:
-		h.logger.Debug("reconcile loop is healthy")
+		h.log.Debug("reconcile loop is healthy")
 		return nil
 	case <-time.After(h.timeout):
-		h.logger.Debug("reconcile timeout")
+		h.log.Debug("reconcile timeout")
 		return errors.New("reconcile didn't send confirmation")
 	}
 }

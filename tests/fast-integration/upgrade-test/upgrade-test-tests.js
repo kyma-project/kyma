@@ -1,15 +1,17 @@
 const {
-  checkInClusterEventDelivery,
-  checkFunctionResponse,
-  sendLegacyEventAndCheckResponse,
-} = require('../test/fixtures/commerce-mock');
-const {
   printRestartReport,
   getContainerRestartsForAllNamespaces,
 } = require('../utils');
+const {loggingTests} = require('../logging');
 const {
-  checkServiceInstanceExistence,
-} = require('./fixtures/helm-broker');
+  monitoringTests,
+  unexposeGrafana,
+} = require('../monitoring');
+const {tracingTests} = require('../tracing');
+const {
+  checkInClusterEventDelivery,
+  checkFunctionResponse,
+} = require('../test/fixtures/commerce-mock');
 
 describe('Upgrade test tests', function() {
   this.timeout(10 * 60 * 1000);
@@ -21,7 +23,7 @@ describe('Upgrade test tests', function() {
     initialRestarts = await getContainerRestartsForAllNamespaces();
   });
 
-  it('in-cluster event should be delivered', async function() {
+  it('in-cluster event should be delivered (legacy events, structured and binary cloud events)', async function() {
     await checkInClusterEventDelivery(testNamespace);
   });
 
@@ -29,16 +31,16 @@ describe('Upgrade test tests', function() {
     await checkFunctionResponse(testNamespace);
   });
 
-  it('order.created.v1 legacy event should trigger the lastorder function', async function() {
-    await sendLegacyEventAndCheckResponse();
-  });
-
-  it('service instance provisioned by helm broker should be reachable', async function() {
-    await checkServiceInstanceExistence(testNamespace);
-  });
-
   it('Should print report of restarted containers, skipped if no crashes happened', async function() {
     const afterTestRestarts = await getContainerRestartsForAllNamespaces();
     printRestartReport(initialRestarts, afterTestRestarts);
+  });
+
+  monitoringTests();
+  loggingTests();
+  tracingTests(testNamespace);
+
+  after('Unexpose Grafana', async () => {
+    await unexposeGrafana();
   });
 });

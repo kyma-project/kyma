@@ -37,7 +37,8 @@ describe('Kyma with Compass test', async function() {
         appName,
         scenarioName,
         'mocks',
-        testNS);
+        testNS,
+    );
   });
 
   it('function should be reachable through secured API Rule', async function() {

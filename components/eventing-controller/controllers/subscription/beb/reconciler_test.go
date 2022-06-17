@@ -11,6 +11,10 @@ import (
 	"testing"
 	"time"
 
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/sink"
+
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/eventtype"
+
 	bebreconciler "github.com/kyma-project/kyma/components/eventing-controller/controllers/subscription/beb"
 
 	corev1 "k8s.io/api/core/v1"
@@ -125,7 +129,7 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 							eventingv1alpha1.ConditionSubscriptionActive,
 							eventingv1alpha1.ConditionReasonSubscriptionActive,
 							v1.ConditionTrue, "")),
-						reconcilertesting.HaveCleanEventTypes(nil),
+						reconcilertesting.HaveCleanEventTypesEmpty(),
 					))
 				})
 			})
@@ -207,6 +211,43 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 					))
 				})
 			})
+
+			Context("Updating the Subscription filter with an invalid prefix", func() {
+				By("updating the Subscription filter", func() {
+					subscription.Spec.Filter.Filters[0].EventType.Value = fmt.Sprintf("invalid%s", reconcilertesting.OrderCreatedEventType)
+					ensureSubscriptionUpdated(ctx, subscription)
+				})
+
+				By("checking if Subscription status has no 'cleanEventTypes' and has ConditionSubscribed status set to false", func() {
+					getSubscription(ctx, subscription).Should(And(
+						reconcilertesting.HaveSubscriptionName(subscriptionName),
+						reconcilertesting.HaveCondition(eventingv1alpha1.MakeCondition(
+							eventingv1alpha1.ConditionSubscribed,
+							eventingv1alpha1.ConditionReasonSubscriptionCreationFailed,
+							v1.ConditionFalse, "")),
+						reconcilertesting.HaveCleanEventTypesEmpty(),
+					))
+				})
+			})
+
+			Context("Updating the invalid Subscription filter with a valid prefix", func() {
+				bebSubscriptionName := "test-validc1971deb47ad85e05c215e9271f111b0d3051283"
+				By("updating the Subscription filter", func() {
+					subscription.Spec.Filter.Filters[0].EventType.Value = reconcilertesting.OrderCreatedEventType
+					ensureSubscriptionUpdated(ctx, subscription)
+				})
+
+				By("checking if Subscription status has 'cleanEventTypes' with the correct filter value", func() {
+					getSubscription(ctx, subscription).Should(And(
+						reconcilertesting.HaveSubscriptionName(subscriptionName),
+						reconcilertesting.HaveCondition(eventingv1alpha1.MakeCondition(
+							eventingv1alpha1.ConditionSubscribed,
+							eventingv1alpha1.ConditionReasonSubscriptionCreated,
+							v1.ConditionTrue, fmt.Sprintf("BEB-subscription-name=%s", bebSubscriptionName))),
+						reconcilertesting.HaveCleanEventTypes([]string{reconcilertesting.OrderCreatedEventType}),
+					))
+				})
+			})
 		})
 	})
 
@@ -220,7 +261,8 @@ var _ = Describe("Subscription Reconciliation Tests", func() {
 			givenSubscription := reconcilertesting.NewSubscription(subscriptionName, namespaceName,
 				reconcilertesting.WithOrderCreatedFilter(),
 				reconcilertesting.WithWebhookAuthForBEB(),
-				reconcilertesting.WithInvalidSink(),
+				// The following sink is invalid because it is missing a scheme.
+				reconcilertesting.WithSinkMissingScheme(subscriberSvc.Namespace, subscriberSvc.Name),
 			)
 			ensureSubscriptionCreated(ctx, givenSubscription)
 
@@ -1397,14 +1439,16 @@ var _ = BeforeSuite(func(done Done) {
 	// prepare application-lister
 	app := applicationtest.NewApplication(reconcilertesting.ApplicationName, nil)
 	applicationLister := fake.NewApplicationListerOrDie(context.Background(), app)
-
 	defaultLogger, err := logger.New(string(kymalogger.JSON), string(kymalogger.INFO))
 	Expect(err).To(BeNil())
-
+	cleaner := eventtype.NewCleaner(envConf.EventTypePrefix, applicationLister, defaultLogger)
 	nameMapper = handlers.NewBEBSubscriptionNameMapper(domain, handlers.MaxBEBSubscriptionNameLength)
+	bebHandler := handlers.NewBEB(credentials, nameMapper, defaultLogger)
 
-	err = bebreconciler.NewReconciler(context.Background(), k8sManager.GetClient(), applicationLister, defaultLogger,
-		k8sManager.GetEventRecorderFor("eventing-controller"), envConf, credentials, nameMapper).SetupUnmanaged(k8sManager)
+	recorder := k8sManager.GetEventRecorderFor("eventing-controller")
+	sinkValidator := sink.NewValidator(context.Background(), k8sManager.GetClient(), recorder, defaultLogger)
+	err = bebreconciler.NewReconciler(context.Background(), k8sManager.GetClient(), defaultLogger,
+		recorder, envConf, cleaner, bebHandler, credentials, nameMapper, sinkValidator).SetupUnmanaged(k8sManager)
 	Expect(err).ToNot(HaveOccurred())
 
 	go func() {

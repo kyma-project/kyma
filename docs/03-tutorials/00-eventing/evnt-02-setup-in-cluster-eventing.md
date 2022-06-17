@@ -11,7 +11,7 @@ apiVersion: eventing.kyma-project.io/v1alpha1
 kind: Subscription
 metadata:
   name: mysub
-  namespace: mynamespace
+  namespace: default
 spec:
   filter:
     filters:
@@ -23,7 +23,7 @@ spec:
         property: type
         type: exact
         value: sap.kyma.custom.nonexistingapp.order.created.v1
-  sink: http://myservice.mynamespace.svc.cluster.local
+  sink: http://myservice.default.svc.cluster.local
 ```
 
 2. On the publisher side, include the exact same Application name in the `type` field, like in the following example:

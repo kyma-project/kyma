@@ -21,9 +21,6 @@ else
 GOBIN=$(shell go env GOBIN)
 endif
 
-pull-licenses-local:
-	@echo "Omitting licenses will not be pulled."	
-
 release:
 	$(MAKE) gomod-release-local
 
@@ -112,6 +109,13 @@ else
 	@echo "Image signing skipped"
 endif
 
+install-manager-k3d: build-image-function-controller
+	$(eval HASH_TAG=$(shell docker images $(MANAGER_NAME):latest --quiet))
+	docker tag $(MANAGER_NAME) $(MANAGER_NAME):$(HASH_TAG)
+
+	k3d image import $(MANAGER_NAME):$(HASH_TAG) -c kyma
+	kubectl set image deployment serverless-ctrl-mngr -n kyma-system manager=$(MANAGER_NAME):$(HASH_TAG)
+
 ######## function webhook
 
 WEBHOOK_NAME = function-webhook
@@ -131,6 +135,13 @@ ifeq ($(JOB_TYPE), postsubmit)
 else
 	@echo "Image signing skipped"
 endif
+
+install-webhook-k3d: build-image-function-webhook
+	$(eval HASH_TAG=$(shell docker images $(WEBHOOK_NAME):latest --quiet))
+	docker tag $(WEBHOOK_NAME) $(WEBHOOK_NAME):$(HASH_TAG)
+
+	k3d image import $(WEBHOOK_NAME):$(HASH_TAG) -c kyma
+	kubectl set image deployment serverless-webhook-svc -n kyma-system webhook=$(WEBHOOK_NAME):$(HASH_TAG)
 
 ######## builder init container image
 

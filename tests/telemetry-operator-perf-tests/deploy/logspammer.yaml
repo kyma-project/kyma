@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  creationTimestamp: null
+  labels:
+    app: log-generator
+  name: log-generator
+spec:
+  selector:
+    matchLabels:
+      app: log-generator
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: log-generator
+    spec:
+      containers:
+        - image: mingrammer/flog
+          args:
+            - -b=1
+            - -f=json
+            - -l
+          name: flog
+          resources:
+            requests:
+              cpu: 0.1
+              memory: 50Mi
+            limits:
+              cpu: 0.1
+              memory: 100Mi

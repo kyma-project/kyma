@@ -28,7 +28,7 @@ To run integration tests, follow these instructions:
 
    Alternatively, build the image and push it to a registry, such as Docker Hub.
 
-3. Edit the TestDefinition CR and update its `.spec.template.spec.containers[0].image` field to `function-controller-test:latest` using this command:
+3. Edit the Test Definition CR and update its `.spec.template.spec.containers[0].image` field to `function-controller-test:latest` using this command:
 
    ```bash
    kubectl edit testdefinitions.testing.kyma-project.io -n kyma-system function-controller
@@ -65,11 +65,10 @@ Use the following environment variables to configure the application:
 | **APP_TEST_FUNCTION_NAME**              | No       | `test-function`             | The name of the Function created and deleted during integration tests                                                                                 |
 | **APP_TEST_APIRULE_NAME**               | No       | `test-apirule`              | The name of the API Rule created and deleted during integration tests                                                                                 |
 | **APP_TEST_TRIGGER_NAME**               | No       | `test-trigger`              | The name of the Trigger created and deleted during integration tests                                                                                 |
-| **APP_TEST_ADDON_NAME**                 | No       | `test-addon`                | The name of the AddonsConfiguration created and deleted during integration tests                                                                                 |
-| **APP_TEST_SERVICE_INSTANCE_NAME**      | No       | `test-service-instance`     | The name of the ServiceInstance created and deleted during integration tests                                                                                 |
-| **APP_TEST_SERVICE_BINDING_NAME**       | No       | `test-service-binding`      | The name of the ServiceBinding created and deleted during integration tests                                                                                 |
-| **APP_TEST_SERVICE_BINDING_USAGE_NAME** | No       | `test-service-binding-usage`| The name of the ServiceBindingUsage created and deleted during integration tests                                                                                 |
-| **APP_TEST_USAGE_KIND_NAME**            | No       | `function`                  | The name of the UsageKind used during integration tests                                                                                 |
+| **APP_TEST_ADDON_NAME**                 | No       | `test-addon`                | The name of the Addons Configuration created and deleted during integration tests                                                                                 |
+| **APP_TEST_SERVICE_INSTANCE_NAME**      | No       | `test-service-instance`     | The name of the Service Instance created and deleted during integration tests                                                                                 |
+| **APP_TEST_SERVICE_BINDING_NAME**       | No       | `test-service-binding`      | The name of the Service Binding created and deleted during integration tests                                                                                 |
+| **APP_TEST_SERVICE_BINDING_USAGE_NAME** | No       | `test-service-binding-usage`| The name of the Service Binding Usage created and deleted during integration tests                                                                                 |
 | **APP_TEST_DOMAIN_NAME**                | No       | `test-function`             | The domain name used in the API Rule CR                                                                                                                |
 | **APP_TEST_INGRESS_HOST**               | No       | `kyma.local`                | The Ingress host address                                                                                                                              |
 | **APP_TEST_DOMAIN_PORT**                | No       | `80`                        | The port of the Service exposed by the API Rule in a given domain                                                                                     |

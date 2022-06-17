@@ -17,9 +17,13 @@ limitations under the License.
 package controllers
 
 import (
+	"context"
 	"path/filepath"
 	"testing"
 
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/fluentbit"
+	"github.com/kyma-project/kyma/components/telemetry-operator/internal/sync"
+	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
 
 	. "github.com/onsi/ginkgo"
@@ -35,20 +39,25 @@ import (
 	//+kubebuilder:scaffold:imports
 )
 
-const (
-	ControllerNamespace        = "default"
-	FluentBitSectionsConfigMap = "logging-fluent-bit-sections"
-	FluentBitParsersConfigMap  = "logging-fluent-bit-parsers"
-	FluentBitDaemonSet         = "logging-fluent-bit"
-	FluentBitEnvSecret         = "logging-fluent-bit-env"
-	FluentBitFilesConfigMap    = "logging-fluent-bit-files"
+var (
+	daemonSetConfig = sync.FluentBitDaemonSetConfig{
+		FluentBitDaemonSetName:     types.NamespacedName{Name: "telemetry-fluent-bit", Namespace: "default"},
+		FluentBitSectionsConfigMap: types.NamespacedName{Name: "logging-fluent-bit-sections", Namespace: "default"},
+		FluentBitParsersConfigMap:  types.NamespacedName{Name: "logging-fluent-bit-parsers", Namespace: "default"},
+		FluentBitFilesConfigMap:    types.NamespacedName{Name: "logging-fluent-bit-files", Namespace: "default"},
+		FluentBitEnvSecret:         types.NamespacedName{Name: "logging-fluent-bit-env", Namespace: "default"},
+	}
 )
 
 // These tests use Ginkgo (BDD-style Go testing framework). Refer to
 // http://onsi.github.io/ginkgo/ to learn more about Ginkgo.
 
-var k8sClient client.Client
-var testEnv *envtest.Environment
+var (
+	k8sClient client.Client
+	testEnv   *envtest.Environment
+	ctx       context.Context
+	cancel    context.CancelFunc
+)
 
 func TestAPIs(t *testing.T) {
 	RegisterFailHandler(Fail)
@@ -60,6 +69,8 @@ func TestAPIs(t *testing.T) {
 
 var _ = BeforeSuite(func() {
 	logf.SetLogger(zap.New(zap.WriteTo(GinkgoWriter), zap.UseDevMode(true)))
+
+	ctx, cancel = context.WithCancel(context.TODO())
 
 	By("bootstrapping test environment")
 	testEnv = &envtest.Environment{
@@ -80,7 +91,7 @@ var _ = BeforeSuite(func() {
 	Expect(err).NotTo(HaveOccurred())
 	Expect(k8sClient).NotTo(BeNil())
 
-	k8sManager, err := ctrl.NewManager(cfg, ctrl.Options{
+	mgr, err := ctrl.NewManager(cfg, ctrl.Options{
 		Scheme:                 scheme.Scheme,
 		MetricsBindAddress:     ":8080",
 		Port:                   9443,
@@ -90,25 +101,29 @@ var _ = BeforeSuite(func() {
 	})
 	Expect(err).ToNot(HaveOccurred())
 
+	emitterConfig := fluentbit.EmitterConfig{
+		InputTag:    "kube",
+		BufferLimit: "10M",
+		StorageType: "filesystem",
+	}
+
 	reconciler := NewLogPipelineReconciler(
-		k8sManager.GetClient(),
-		k8sManager.GetScheme(),
-		ControllerNamespace,
-		FluentBitSectionsConfigMap,
-		FluentBitParsersConfigMap,
-		FluentBitDaemonSet,
-		FluentBitEnvSecret,
-		FluentBitFilesConfigMap)
-	err = reconciler.SetupWithManager(k8sManager)
+		mgr.GetClient(),
+		mgr.GetScheme(),
+		daemonSetConfig,
+		emitterConfig)
+	err = reconciler.SetupWithManager(mgr)
 	Expect(err).ToNot(HaveOccurred())
 
 	go func() {
-		err := k8sManager.Start(ctrl.SetupSignalHandler())
+		defer GinkgoRecover()
+		err := mgr.Start(ctx)
 		Expect(err).ToNot(HaveOccurred())
 	}()
 }, 60)
 
 var _ = AfterSuite(func() {
+	cancel()
 	By("tearing down the test environment")
 	err := testEnv.Stop()
 	Expect(err).NotTo(HaveOccurred())

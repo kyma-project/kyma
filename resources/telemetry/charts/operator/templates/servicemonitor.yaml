@@ -3,16 +3,14 @@ kind: ServiceMonitor
 metadata:
   labels:
     {{- toYaml .Values.extraLabels | nindent 4 }}
-  name: {{ include "operator.fullname" . }}-controller-manager-metrics-monitor
+  name: {{ include "operator.fullname" . }}-metrics
   namespace: {{ .Release.Namespace }}
 spec:
   endpoints:
     - path: {{ .Values.serviceMonitor.endpoints.path }}
       port: {{ .Values.serviceMonitor.endpoints.port }}
-      scheme: {{ .Values.serviceMonitor.endpoints.scheme }}
-      bearerTokenFile: {{ .Values.serviceMonitor.endpoints.bearerTokenFile }}
-      tlsConfig:
-        {{- toYaml .Values.serviceMonitor.endpoints.tlsConfig | nindent 8 }}
+      metricRelabelings:
+        {{- toYaml .Values.serviceMonitor.endpoints.metricRelabelings | nindent 8 }}
   selector:
     matchLabels:
       {{- toYaml .Values.extraLabels | nindent 6 }}

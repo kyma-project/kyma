@@ -1,23 +1,19 @@
 package v1alpha1
 
 import (
-	"context"
 	"os"
 	"testing"
 
 	"github.com/vrischmann/envconfig"
-
-	"github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/utils/pointer"
+
+	"github.com/onsi/gomega"
 )
 
 func TestFunctionSpec_validateResources(t *testing.T) {
-	minusOne := int32(-1)
-	zero := int32(0)
-	one := int32(1)
-
 	g := gomega.NewWithT(t)
 	err := os.Setenv("RESERVED_ENVS", "K_CONFIGURATION")
 	g.Expect(err).ShouldNot(gomega.HaveOccurred())
@@ -34,8 +30,8 @@ func TestFunctionSpec_validateResources(t *testing.T) {
 				ObjectMeta: metav1.ObjectMeta{Name: "test", Namespace: "test"},
 				Spec: FunctionSpec{
 					Source:      "test-source",
-					MinReplicas: &one,
-					MaxReplicas: &one,
+					MinReplicas: pointer.Int32(1),
+					MaxReplicas: pointer.Int32(1),
 					Runtime:     Nodejs12,
 					Resources: corev1.ResourceRequirements{
 						Limits: corev1.ResourceList{
@@ -82,8 +78,8 @@ func TestFunctionSpec_validateResources(t *testing.T) {
 						"shoul-be-ok": "test",
 						"test":        "test",
 					},
-					MinReplicas: &one,
-					MaxReplicas: &one,
+					MinReplicas: pointer.Int32(1),
+					MaxReplicas: pointer.Int32(1),
 					Resources: corev1.ResourceRequirements{
 						Limits: corev1.ResourceList{
 							corev1.ResourceCPU:    resource.MustParse("100m"),
@@ -189,8 +185,8 @@ func TestFunctionSpec_validateResources(t *testing.T) {
 				Spec: FunctionSpec{
 					Source:      "test-source",
 					Runtime:     Nodejs12,
-					MinReplicas: &one,
-					MaxReplicas: &minusOne,
+					MinReplicas: pointer.Int32(1),
+					MaxReplicas: pointer.Int32(-1),
 				},
 			},
 			expectedError: gomega.HaveOccurred(),
@@ -206,8 +202,8 @@ func TestFunctionSpec_validateResources(t *testing.T) {
 				Spec: FunctionSpec{
 					Source:      "test-source",
 					Runtime:     Nodejs12,
-					MinReplicas: &zero, // HPA needs this value to be greater then 0
-					MaxReplicas: &one,
+					MinReplicas: pointer.Int32(0), // HPA needs this value to be greater then 0
+					MaxReplicas: pointer.Int32(1),
 				},
 			},
 			expectedError: gomega.HaveOccurred(),
@@ -286,8 +282,8 @@ func TestFunctionSpec_validateResources(t *testing.T) {
 				ObjectMeta: metav1.ObjectMeta{Name: "test", Namespace: "test"},
 				Spec: FunctionSpec{
 					Source:      "test-source",
-					MinReplicas: &zero,
-					MaxReplicas: &zero,
+					MinReplicas: pointer.Int32(0),
+					MaxReplicas: pointer.Int32(0),
 					Runtime:     Nodejs12,
 					Resources: corev1.ResourceRequirements{
 						Limits: corev1.ResourceList{
@@ -350,8 +346,8 @@ func TestFunctionSpec_validateResources(t *testing.T) {
 							corev1.ResourceMemory: resource.MustParse("300Mi"),
 						},
 					},
-					MinReplicas: &one,
-					MaxReplicas: &one,
+					MinReplicas: pointer.Int32(1),
+					MaxReplicas: pointer.Int32(1),
 					Type:        SourceTypeGit,
 					Runtime:     Nodejs12,
 					Repository: Repository{
@@ -377,8 +373,8 @@ func TestFunctionSpec_validateResources(t *testing.T) {
 							corev1.ResourceMemory: resource.MustParse("64Mi"),
 						},
 					},
-					MinReplicas: &one,
-					MaxReplicas: &one,
+					MinReplicas: pointer.Int32(1),
+					MaxReplicas: pointer.Int32(1),
 					Runtime:     Nodejs12,
 					Type:        SourceTypeGit,
 				},
@@ -397,11 +393,8 @@ func TestFunctionSpec_validateResources(t *testing.T) {
 			err := envconfig.Init(config)
 			g.Expect(err).ShouldNot(gomega.HaveOccurred())
 
-			ctx := context.WithValue(context.Background(), ValidationConfigKey, *config)
-
 			// when
-			errs := testData.givenFunc.Validate(ctx)
-
+			errs := testData.givenFunc.Validate(config)
 			// then
 			g.Expect(errs).To(testData.expectedError)
 			if testData.specifiedExpectedError != nil {

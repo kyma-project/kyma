@@ -14,6 +14,7 @@ All you need before you start is to have the following:
 - Git repository
 - [Homebrew](https://docs.brew.sh/Installation)
 - Kyma CLI
+- Kubeconfig file to your Kyma cluster
 
 ## Steps
 
@@ -39,10 +40,10 @@ These sections will lead you through the whole installation, configuration, and 
   kubectl cluster-info
   ```
 
-3. Apply the `functions.serverless.kyma-project.io` CRD from sources in the [`kyma`](https://github.com/kyma-project/kyma/tree/main/resources/cluster-essentials/files) repository. You will need it to create the Function CR on the cluster.
+3. Apply the `functions.serverless.kyma-project.io` CRD from sources in the [`kyma`](https://github.com/kyma-project/kyma/tree/main/installation/resources/crds/serverless) repository. You will need it to create the Function CR on the cluster.
 
   ```bash
-  kubectl apply -f https://raw.githubusercontent.com/kyma-project/kyma/main/resources/cluster-essentials/files/functions.serverless.crd.yaml
+  kubectl apply -f https://raw.githubusercontent.com/kyma-project/kyma/main/installation/resources/crds/serverless/functions.serverless.crd.yaml
   ```
 4. Run this command to make sure the CRs are applied:
 
@@ -71,17 +72,6 @@ These sections will lead you through the whole installation, configuration, and 
   - `config.yaml`	with the Function's configuration
   - `handler.py` with the Function's code and the simple "Hello World" logic
   - `requirements.txt` with an empty file for your Function's custom dependencies
-
-  It will also set **sourcePath** in the `config.yaml` file to the full path of the workspace folder:
-
-  ```yaml
-  name: my-function
-  namespace: default
-  runtime: python39
-  source:
-      sourceType: inline
-      sourcePath: {FULL_PATH_TO_WORKSPACE_FOLDER}
-  ```
 
 ### Install and configure Flux
 
@@ -177,8 +167,9 @@ In this section, you will create a sample inline Function.
 1. Back in the terminal, clone this GitHub repository to your current workspace location:
 
   ```bash
-  git clone git@github.com:${GH_USER}/${GH_REPO}.git
+  git clone https://github.com/${GH_USER}/${GH_REPO}.git
   ```
+  >**NOTE:** You can also clone the repository using SSH. To do that, you need to [generate a new SSH key and add it to the ssh-agent](https://docs.github.com/en/authentication/connecting-to-github-with-ssh/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent).
 
 2. Go to the repository folder:
 

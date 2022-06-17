@@ -10,10 +10,24 @@ const express = require('express');
 const helper = require('./lib/helper');
 const ce = require('./lib/ce');
 const morgan = require('morgan');
-
+const {ServerlessTracerProvider} = require('./lib/tracer')
 const bodySizeLimit = Number(process.env.REQ_MB_LIMIT || '1');
 
+// Open telemetry metrics
+const api = require('@opentelemetry/api');
+
 const app = express();
+
+// Tracing Imports
+const podName = process.env.HOSTNAME
+const serviceNamespace = process.env.SERVICE_NAMESPACE
+
+// remove generated pods suffix ( two last sections )
+let serviceName = podName.substring(0, podName.lastIndexOf("-"));
+serviceName = serviceName.substring(0, serviceName.lastIndexOf("-"))
+
+const jaegerServiceEndpoint = process.env.JAEGER_SERVICE_ENDPOINT
+let tracerProvider = new ServerlessTracerProvider([serviceName, serviceNamespace].join('.'), jaegerServiceEndpoint);
 
 if (process.env["KYMA_INTERNAL_LOGGER_ENABLED"]) {
     app.use(morgan("combined"));
@@ -24,8 +38,8 @@ const bodParserOptions = {
     limit: `${bodySizeLimit}mb`,
 };
 app.use(bodyParser.raw(bodParserOptions));
-app.use(bodyParser.json({ limit: `${bodySizeLimit}mb` }));
-app.use(bodyParser.urlencoded({ limit: `${bodySizeLimit}mb`, extended: true }));
+app.use(bodyParser.json({limit: `${bodySizeLimit}mb`}));
+app.use(bodyParser.urlencoded({limit: `${bodySizeLimit}mb`, extended: true}));
 
 const modName = process.env.MOD_NAME;
 const funcHandler = process.env.FUNC_HANDLER;
@@ -40,18 +54,18 @@ const libPath = path.join(modRootPath, 'node_modules');
 const pkgPath = path.join(modRootPath, 'package.json');
 const libDeps = helper.readDependencies(pkgPath);
 
-const { timeHistogram, callsCounter, errorsCounter } = helper.prepareStatistics('method', client);
+const {timeHistogram, callsCounter, errorsCounter} = helper.prepareStatistics('method', client);
 helper.routeLivenessProbe(app);
 helper.routeMetrics(app, client);
 
 const context = {
     'function-name': funcHandler,
-    'timeout' : timeout,
+    'timeout': timeout,
     'runtime': process.env.FUNC_RUNTIME,
     'memory-limit': process.env.FUNC_MEMORY_LIMIT
 };
 
-const script = new vm.Script('\nrequire(\'kubeless\')(require(\''+ modPath +'\'));\n', {
+const script = new vm.Script('\nrequire(\'kubeless\')(require(\'' + modPath + '\'));\n', {
     filename: modPath,
     displayErrors: true,
 });
@@ -81,9 +95,10 @@ function modExecute(handler, req, res, end) {
         throw new Error(`Unable to load ${handler}`);
 
     try {
-        const event = ce.buildEvent(req, res);
+        let tracer = tracerProvider.getTracer(req.headers)
+        let event = ce.buildEvent(req, res, tracer);
         Promise.resolve(func(event, context))
-        // Finalize
+            // Finalize
             .then(rval => modFinalize(rval, res, end))
             // Catch asynchronous errors
             .catch(err => handleError(err, res, funcLabel(req), end))
@@ -95,7 +110,7 @@ function modExecute(handler, req, res, end) {
 }
 
 function modFinalize(result, res, end) {
-    if (!res.finished) switch(typeof result) {
+    if (!res.finished) switch (typeof result) {
         case 'string':
             res.end(result);
             break;
@@ -142,7 +157,9 @@ app.all('*', (req, res) => {
         });
 
         try {
-            script.runInNewContext(sandbox, { timeout : timeout * 1000 });
+            api.context.with(api.propagation.extract(api.ROOT_CONTEXT, req.headers), () => {
+                script.runInNewContext(sandbox, {timeout: timeout * 1000});
+            });
         } catch (err) {
             if (err.toString().match('Error: Script execution timed out')) {
                 res.status(408).send(err);

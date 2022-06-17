@@ -148,6 +148,7 @@ metricDenylist: []
 metricLabelsAllowlist:
   # - namespaces=[k8s-label-1,k8s-label-n]
   - pods=[kyma-project.io/component,kyma-project.io/dashboard]
+  - services=[serverless.kyma-project.io/function-name]
 
 # Comma-separated list of Kubernetes annotations keys that will be used in the resource'
 # labels metric. By default the metric contains only name and namespace labels.
@@ -168,7 +169,7 @@ collectors:
   - deployments
   - endpoints
   - horizontalpodautoscalers
-  - ingresses
+  # - ingresses # kube-state-metrics panics for badly configured ingress: https://github.com/kyma-project/kyma/issues/13768
   - jobs
   - limitranges
   - mutatingwebhookconfigurations

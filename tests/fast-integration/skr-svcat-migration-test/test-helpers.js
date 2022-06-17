@@ -1,8 +1,6 @@
-const execa = require('execa');
 const fs = require('fs');
 const os = require('os');
 const {
-  getEnvOrThrow,
   getConfigMap,
   kubectlExecInPod,
   listPods,
@@ -10,26 +8,8 @@ const {
   sleep,
   deleteK8sObjects,
   listResources,
+  getFunction,
 } = require('../utils');
-
-class SMCreds {
-  static fromEnv() {
-    return new SMCreds(
-        // TODO: rename to BTP_SM_ADMIN_CLIENTID
-        getEnvOrThrow('BTP_OPERATOR_CLIENTID'),
-        // TODO: rename to BTP_SM_ADMIN_CLIENTID
-        getEnvOrThrow('BTP_OPERATOR_CLIENTSECRET'),
-        // TODO: rename to BTP_SM_URL
-        getEnvOrThrow('BTP_OPERATOR_URL'),
-    );
-  }
-
-  constructor(clientid, clientsecret, url) {
-    this.clientid = clientid;
-    this.clientsecret = clientsecret;
-    this.url = url;
-  }
-}
 
 const functions = [
   {name: 'svcat-auditlog-api-1', checkEnvVars: 'uaa url vendor'},
@@ -49,31 +29,43 @@ async function readClusterID() {
   return cm.data.id;
 }
 
-async function getFunctionPod(functionName) {
+async function functionReady(functionName) {
+  const fn = await getFunction(functionName, 'default');
+  return fn.status.conditions.reduce((acc, val) => acc && val.status == 'True', true);
+}
+
+async function getFunctionPod(functionName, timeoutInMinutes = 5) {
   const labelSelector = `serverless.kyma-project.io/function-name=${functionName},` +
     'serverless.kyma-project.io/resource=deployment';
   let res = {};
-  for (let i = 0; i < 30; i++) {
-    res = await listPods(labelSelector);
-    if (res.body.items.length == 1) {
-      const pod = res.body.items[0];
-      if (pod.status.phase == 'Running') {
-        return pod;
+  for (let i = 0; i < timeoutInMinutes*6; i++) {
+    const ready = await functionReady(functionName);
+    if (ready) {
+      res = await listPods(labelSelector);
+      // sometimes functions controller spins up two deployments
+      // and it acts slow to delete the extra pods
+      if (res.body.items.length > 0) {
+        const pod = res.body.items[0];
+        if (pod.status.phase == 'Running') {
+          return pod;
+        }
       }
     }
-    sleep(10000);
+    await sleep(10000);
   }
   const podNames = res.body.items.map((p) => p.metadata.name);
   const phases = res.body.items.map((p) => p.status.phase);
-  throw new Error(`Failed to find function ${functionName} pod in 5 minutes.
-  Expected 1 ${labelSelector} pod with phase "Running" but found ${res.body.items.length}, ${podNames}, ${phases}`);
+  const fn = await getFunction(functionName, 'default');
+  throw new Error(`Failed to find function ${functionName} pod in ${timeoutInMinutes} minutes.
+  Expected 1 ${labelSelector} pod with phase "Running" but found ${res.body.items.length}, ${podNames}, ${phases}\n
+  function status: ${JSON.stringify(fn.status)}`);
 }
 
-async function checkPodPresetEnvInjected() {
+async function checkPodPresetEnvInjected(timeoutInMinutes) {
   const cmd = 'for v in {vars}; do x="$(eval echo \\$$v)"; if [[ -z "$x" ]];' +
     'then echo missing $v env variable; exit 1; else echo found $v env variable; fi; done';
   for (const f of functions) {
-    const pod = await getFunctionPod(f.name);
+    const pod = await getFunctionPod(f.name, timeoutInMinutes);
     const envCmd = cmd.replace('{vars}', f.checkEnvVars);
     await kubectlExecInPod(pod.metadata.name, 'function', ['sh', '-c', envCmd]);
   }
@@ -145,163 +137,48 @@ async function restartFunctionsPods() {
   console.log('functions pods successfully restarted');
 }
 
-async function provisionPlatform(creds, svcatPlatform) {
-  let args = [];
-  try {
-    args = ['login',
-      '-a',
-      creds.url,
-      '--param',
-      'subdomain=e2etestingscmigration',
-      '--auth-flow',
-      'client-credentials'];
-    await execa('smctl', args.concat(['--client-id', creds.clientid, '--client-secret', creds.clientsecret]));
+async function checkMigratedBTPResources() {
+  const btpGroup = 'services.cloud.sap.com';
+  const btpVersion = 'v1alpha1';
+  const scGroup = 'servicecatalog.k8s.io';
+  const scVersion = 'v1beta1';
+  const instances = 'serviceinstances';
+  const bindings = 'servicebindings';
 
-    // $ smctl register-platform <name> kubernetes -o json
-    // Output:
-    // {
-    //   "id": "<platform-id/cluster-id>",
-    //   "name": "<name>",
-    //   "type": "kubernetes",
-    //   "created_at": "...",
-    //   "updated_at": "...",
-    //   "credentials": {
-    //     "basic": {
-    //       "username": "...",
-    //       "password": "..."
-    //     }
-    //   },
-    //   "labels": {
-    //     "subaccount_id": [
-    //       "..."
-    //     ]
-    //   },
-    //   "ready": true
-    // }
-    args = ['register-platform', svcatPlatform, 'kubernetes', '-o', 'json'];
-    const registerPlatformOut = await execa('smctl', args);
-    const platform = JSON.parse(registerPlatformOut.stdout);
-
-    return {
-      clusterId: platform.id,
-      name: platform.name,
-      credentials: platform.credentials.basic,
-    };
-  } catch (error) {
-    if (error.stderr === undefined) {
-      throw new Error(`failed to process output of "smctl ${args.join(' ')}"`);
-    }
-    throw new Error(`failed "smctl ${args.join(' ')}": ${error.stderr}`);
-  }
-}
-
-async function smInstanceBinding(btpOperatorInstance, btpOperatorBinding) {
-  let args = [];
-  try {
-    args = ['provision', btpOperatorInstance, 'service-manager', 'service-operator-access', '--mode=sync'];
-    await execa('smctl', args);
-
-    // Move to Operator Install
-    args = ['bind', btpOperatorInstance, btpOperatorBinding, '--mode=sync'];
-    await execa('smctl', args);
-    args = ['get-binding', btpOperatorBinding, '-o', 'json'];
-    const out = await execa('smctl', args);
-    const b = JSON.parse(out.stdout);
-    const c = b.items[0].credentials;
-
-    return {
-      clientId: c.clientid,
-      clientSecret: c.clientsecret,
-      smURL: c.sm_url,
-      url: c.url,
-      instanceId: b.items[0].service_instance_id,
-    };
-  } catch (error) {
-    if (error.stderr === undefined) {
-      throw new Error(`failed to process output of "smctl ${args.join(' ')}"`);
-    }
-    throw new Error(`failed "smctl ${args.join(' ')}": ${error.stderr}`);
-  }
-}
-
-async function markForMigration(creds, svcatPlatform, btpOperatorInstanceId) {
   let errors = [];
-  let args = [];
-  try {
-    args = ['login',
-      '-a',
-      creds.url,
-      '--param',
-      'subdomain=e2etestingscmigration',
-      '--auth-flow',
-      'client-credentials'];
-    await execa('smctl', args.concat(['--client-id', creds.clientid, '--client-secret', creds.clientsecret]));
-  } catch (error) {
-    errors = errors.concat([`failed "smctl ${args.join(' ')}": ${error.stderr}\n`]);
-  }
-
-  try {
-    // usage: smctl curl -X PUT -d '{"sourcePlatformID": ":platformID"}' /v1/migrate/service_operator/:instanceID
-    const data = {sourcePlatformID: svcatPlatform};
-    args = ['curl', '-X', 'PUT', '-d', JSON.stringify(data), '/v1/migrate/service_operator/' + btpOperatorInstanceId];
-    await execa('smctl', args);
-  } catch (error) {
-    errors = errors.concat([`failed "smctl ${args.join(' ')}": ${error.stderr}\n`]);
-  }
-  if (errors.length > 0) {
-    throw new Error(errors.join(', '));
-  }
-}
-
-async function cleanupInstanceBinding(creds, svcatPlatform, btpOperatorInstance, btpOperatorBinding) {
-  let errors = [];
-  let args = [];
-  try {
-    args = ['login',
-      '-a',
-      creds.url,
-      '--param',
-      'subdomain=e2etestingscmigration',
-      '--auth-flow',
-      'client-credentials'];
-    await execa('smctl', args.concat(['--client-id', creds.clientid, '--client-secret', creds.clientsecret]));
-  } catch (error) {
-    errors = errors.concat([`failed "smctl ${args.join(' ')}": ${error.stderr}\n`]);
-  }
-
-  try {
-    args = ['unbind', btpOperatorInstance, btpOperatorBinding, '-f', '--mode=sync'];
-    const {stdout} = await execa('smctl', args);
-    if (stdout !== 'Service Binding successfully deleted.') {
-      errors = errors.concat([`failed "smctl ${args.join(' ')}": ${stdout}`]);
+  // the test shouldn't wait here too long, it's just elementary re-try to reduce flakiness
+  // the reconciler is supposed to keep the update operation in pending for the time of migrating and cleanup
+  for (let i = 0; i < 3; i++) {
+    errors = [];
+    const btpBindings = await listResources(`/apis/${btpGroup}/${btpVersion}/${bindings}`);
+    const bindingsReady = btpBindings.reduce((ready, binding) => ready && binding.status.ready === 'True', true);
+    if (btpBindings.length != 3 || !bindingsReady) {
+      const bs = JSON.stringify(btpBindings, null, 2);
+      errors.push(`Expected 3 BTP bindings ready but found ${btpBindings.length}:\n${bs}`);
     }
-  } catch (error) {
-    errors = errors.concat([`failed "smctl ${args.join(' ')}": ${error.stderr}\n${error}`]);
-  }
-
-  try {
-    // hint: probably should fail cause that instance created other instannces (after the migration is done)
-    args = ['deprovision', btpOperatorInstance, '-f', '--mode=sync'];
-    const {stdout} = await execa('smctl', args);
-    if (stdout !== 'Service Instance successfully deleted.') {
-      errors = errors.concat([`failed "smctl ${args.join(' ')}": ${stdout}`]);
+    const btpInstances = await listResources(`/apis/${btpGroup}/${btpVersion}/${instances}`);
+    const instancesReady = btpInstances.reduce((ready, instance) => ready && instance.status.ready === 'True', true);
+    if (btpInstances.length != 3 || !instancesReady) {
+      const is = JSON.stringify(btpInstances, null, 2);
+      errors.push(`Expected 3 BTP instances ready but found ${btpInstances.length}:\n${is}`);
     }
-  } catch (error) {
-    errors = errors.concat([`failed "smctl ${args.join(' ')}": ${error.stderr}\n${error}`]);
+    const scBindings = await listResources(`/apis/${scGroup}/${scVersion}/${bindings}`);
+    if (scBindings.length != 0) {
+      errors.push(`Expected 0 Service Catalog bindings but found ${scBindings.length}`);
+    }
+    const scInstances = await listResources(`/apis/${scGroup}/${scVersion}/${instances}`);
+    if (scInstances.length != 0) {
+      errors.push(`Expected 0 Service Catalog instances but found ${scInstances.length}`);
+    }
+    if (errors.length != 0) {
+      await sleep(1000);
+    } else {
+      break;
+    }
   }
-
-  try {
-    args = ['delete-platform', svcatPlatform, '-f', '--cascade'];
-    await execa('smctl', args);
-    // if (stdout !== "Platform(s) successfully deleted.") {
-    //     errors = errors.concat([`failed "smctl ${args.join(' ')}": ${stdout}`])
-    // }
-  } catch (error) {
-    errors = errors.concat([`failed "smctl ${args.join(' ')}": ${error.stderr}\n`]);
-  }
-
-  if (errors.length > 0) {
-    throw new Error(errors.join(', '));
+  if (errors.length != 0) {
+    const info = JSON.stringify(errors, null, 2);
+    throw new Error(`Failed to observe migrated ServiceInstances and ServiceBindings.\n${info}`);
   }
 }
 
@@ -337,14 +214,10 @@ async function deleteBTPResources() {
 }
 
 module.exports = {
-  provisionPlatform,
-  smInstanceBinding,
-  cleanupInstanceBinding,
   saveKubeconfig,
-  markForMigration,
   readClusterID,
-  SMCreds,
   checkPodPresetEnvInjected,
   restartFunctionsPods,
   deleteBTPResources,
+  checkMigratedBTPResources,
 };

@@ -7,15 +7,6 @@ spec:
   repositories:
     - url: github.com/sap/xf-addons/addons/index.yaml
 ---
-apiVersion: servicecatalog.k8s.io/v1beta1
-kind: ServiceInstance
-metadata:
-  name: commerce-mock
-  namespace: orders-service
-spec:
-  serviceClassExternalName: commerce-mock
-  servicePlanExternalName: default
----
 apiVersion: applicationconnector.kyma-project.io/v1alpha1
 kind: Application
 metadata:
@@ -30,13 +21,6 @@ apiVersion: applicationconnector.kyma-project.io/v1alpha1
 kind: TokenRequest
 metadata:
   name: commerce-mock
----
-apiVersion: applicationconnector.kyma-project.io/v1alpha1
-kind: ApplicationMapping
-metadata:
-  name: commerce-mock
-  namespace: orders-service
-
 ---
 apiVersion: serverless.kyma-project.io/v1alpha1
 kind: Function
@@ -221,27 +205,4 @@ spec:
     host: orders-function
     name: orders-function
     port: 80
----
-apiVersion: servicecatalog.k8s.io/v1beta1
-kind: ServiceBinding
-metadata:
-  name: orders-function
-  namespace: orders-service
-spec:
-  instanceRef:
-    name: redis-service
----
-apiVersion: servicecatalog.kyma-project.io/v1alpha1
-kind: ServiceBindingUsage
-metadata:
-  name: orders-function
-  namespace: orders-service
-spec:
-  serviceBindingRef:
-    name: orders-function
-  usedBy:
-    kind: serverless-function
-    name: orders-function
-  parameters:
-    envPrefix:
-      name: "REDIS_"
+

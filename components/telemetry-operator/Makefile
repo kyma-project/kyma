@@ -1,13 +1,18 @@
 
 APP_NAME = telemetry-operator
 APP_PATH = components/$(APP_NAME)
-BUILDPACK = eu.gcr.io/kyma-project/test-infra/buildpack-golang:v20210723-91c9654f
+BUILDPACK = eu.gcr.io/kyma-project/test-infra/buildpack-golang:v20220428-6e81d2c4
 SCRIPTS_DIR = $(realpath $(shell pwd)/../..)/common/makefiles
+PROJECT_DIR := $(shell pwd)
+OS := $(shell uname)
 
 include $(SCRIPTS_DIR)/generic-make-go.mk
 
 # Produce CRDs that work back to Kubernetes 1.11 (no version conversion)
 CRD_OPTIONS ?= "crd:trivialVersions=true,preserveUnknownFields=false"
+
+# ENVTEST_K8S_VERSION refers to the version of kubebuilder assets to be downloaded by envtest binary.
+ENVTEST_K8S_VERSION = 1.21
 
 # Get the currently used golang install path (in GOPATH/bin, unless GOBIN is set)
 ifneq (,$(shell which go))
@@ -46,6 +51,9 @@ help: ## Display this help.
 manifests-local: controller-gen-local
 	$(CONTROLLER_GEN) $(CRD_OPTIONS) rbac:roleName=manager-role webhook paths="./..." output:crd:artifacts:config=config/crd/bases
 
+copy-crds-local: manifests-local
+	@cp ./config/crd/bases/telemetry.kyma-project.io_logpipelines.yaml ./../../installation/resources/crds/telemetry/logpipelines.crd.yaml
+
 generate-local: controller-gen-local
 	$(CONTROLLER_GEN) object:headerFile="hack/boilerplate.go.txt" paths="./..."
 
@@ -64,77 +72,48 @@ dep-status-local:
 mod-verify-local:
 	GO111MODULE=on go mod verify
 
-ENVTEST_ASSETS_DIR=$(shell pwd)/testbin
  ## Run tests.
-test-local: manifests-local generate-local fmt-local vet-local
-	mkdir -p ${ENVTEST_ASSETS_DIR}
-	test -f ${ENVTEST_ASSETS_DIR}/setup-envtest.sh || curl -sSLo ${ENVTEST_ASSETS_DIR}/setup-envtest.sh https://raw.githubusercontent.com/kubernetes-sigs/controller-runtime/v0.8.3/hack/setup-envtest.sh
-	source ${ENVTEST_ASSETS_DIR}/setup-envtest.sh; fetch_envtest_tools $(ENVTEST_ASSETS_DIR); setup_envtest_env $(ENVTEST_ASSETS_DIR); go test ./... -coverprofile cover.out
+test-local: manifests-local generate-local fmt-local vet-local envtest
+	KUBEBUILDER_ASSETS="$(shell $(ENVTEST) use $(ENVTEST_K8S_VERSION) -p path)" go test ./... -coverprofile cover.out
 
 build: generate fmt vet ## Build manager binary.
 	go build -o bin/manager main.go
 
-run-local: manifests-local generate-local fmt-local vet-local ## Run a controller from your host.
-	go run ./main.go --cm-name=telemetry-fluent-bit-sections --parser-cm-name=telemetry-fluent-bit-parsers --ds-name=telemetry-fluent-bit --env-secret=telemetry-fluent-bit-env --files-cm=telemetry-fluent-bit-files --fluent-bit-ns=kyma-system
+tls.key:
+	@openssl genrsa -out tls.key 4096
+
+tls.crt: tls.key
+	@openssl req -sha256 -new -key tls.key -out tls.csr -subj '/CN=localhost'
+	@openssl x509 -req -sha256 -days 3650 -in tls.csr -signkey tls.key -out tls.crt
+	@rm tls.csr
+
+gen-webhook-cert-local: tls.key tls.crt
+
+run-local: gen-webhook-cert-local manifests-local generate-local fmt-local vet-local ## Run a controller from your host.
+	go run ./main.go --cm-name=telemetry-fluent-bit --sections-cm-name=telemetry-fluent-bit-sections --parser-cm-name=telemetry-fluent-bit-parsers --ds-name=telemetry-fluent-bit --env-secret=telemetry-fluent-bit-env --files-cm=telemetry-fluent-bit-files --fluent-bit-ns=kyma-system --cert-dir=.
 
 ## Will be called from Prow-Pipeline; using targets from generic make file
 release: resolve generate verify build-image push-image
 
 ##@ Deployment
 
-install-local: manifests-local ## Install CRDs into the K8s cluster specified in ~/.kube/config.
+install-crds-local: manifests-local ## Install CRDs into the K8s cluster specified in ~/.kube/config.
 	kustomize build config/crd | kubectl apply -f -
 
-uninstall-local: manifests-local ## Uninstall CRDs from the K8s cluster specified in ~/.kube/config.
+uninstall-crds-local: manifests-local ## Uninstall CRDs from the K8s cluster specified in ~/.kube/config.
 	kustomize build config/crd | kubectl delete -f -
 
-deploy-local: manifests-local ## Deploy controller to the K8s cluster specified in ~/.kube/config.
-	cd config/manager && kustomize edit set image controller=${IMG_NAME}:${TAG}
-	kustomize build config/default | kubectl apply -f -
+ENVTEST = $(PROJECT_DIR)/bin/$(OS)/setup-envtest
+.PHONY: envtest
+envtest: ## Download envtest-setup locally if necessary.
+	$(call go-get-tool,$(ENVTEST),sigs.k8s.io/controller-runtime/tools/setup-envtest@latest)
 
-undeploy-local: ## Undeploy controller from the K8s cluster specified in ~/.kube/config.
-	kustomize build config/default | kubectl delete -f -
-
-# find or download controller-gen
-# download controller-gen if necessary
+CONTROLLER_GEN = $(PROJECT_DIR)/bin/$(OS)/controller-gen
 .PHONY: controller-gen-local
-controller-gen-local:
-ifeq (, $(shell which controller-gen))
-	@{ \
-	set -e ;\
-	CONTROLLER_GEN_TMP_DIR=$$(mktemp -d) ;\
-	cd $$CONTROLLER_GEN_TMP_DIR ;\
-	if [ ! $(which go) ]; then \
-		go mod init tmp ; \
-		go get sigs.k8s.io/controller-tools/cmd/controller-gen@v0.5.0 ; \
-		rm -rf $$CONTROLLER_GEN_TMP_DIR ; \
-	fi; \
-	}
-CONTROLLER_GEN=$(GOBIN)/controller-gen
-else
-CONTROLLER_GEN=$(shell which controller-gen)
-endif
-
-.PHONY: controller-gen
-controller-gen:
-ifeq (, $(shell which controller-gen))
-	@{ \
-	set -e ;\
-	CONTROLLER_GEN_TMP_DIR=$$(mktemp -d) ;\
-	cd $$CONTROLLER_GEN_TMP_DIR ;\
-	if [ ! $(which go) ]; then \
-		go mod init tmp ; \
-		go get sigs.k8s.io/controller-tools/cmd/controller-gen@v0.5.0 ; \
-		rm -rf $$CONTROLLER_GEN_TMP_DIR ; \
-	fi; \
-	}
-CONTROLLER_GEN=$(GOBIN)/controller-gen
-else
-CONTROLLER_GEN=$(shell which controller-gen)
-endif
+controller-gen-local: ## find or download controller-gen if necessary
+	$(call go-get-tool,$(CONTROLLER_GEN),sigs.k8s.io/controller-tools/cmd/controller-gen@v0.6.0)
 
 # go-get-tool will 'go get' any package $2 and install it to $1.
-PROJECT_DIR := $(shell dirname $(abspath $(lastword $(MAKEFILE_LIST))))
 define go-get-tool
 @[ -f $(1) ] || { \
 set -e ;\
@@ -142,7 +121,7 @@ TMP_DIR=$$(mktemp -d) ;\
 cd $$TMP_DIR ;\
 go mod init tmp ;\
 echo "Downloading $(2)" ;\
-GOBIN=$(PROJECT_DIR)/bin go get $(2) ;\
+GOBIN=$(PROJECT_DIR)/bin/$(OS) go install $(2) ;\
 rm -rf $$TMP_DIR ;\
 }
 endef
