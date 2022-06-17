@@ -1,4 +1,4 @@
-FROM golang:1.18 as builder
+FROM eu.gcr.io/kyma-project/external/golang:1.18.2-alpine3.15 as builder
 
 WORKDIR /connectivity-test/
 
