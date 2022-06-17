@@ -19,7 +19,6 @@
 # Logging library
 /common/logging @franpog859 @dbadura @janmedrek
 
-/components/application-broker @wozniakjan @PK85 @piotrmiskiewicz @szwedm @ralikio @hanngos @tillknuesting
 /components/application-connectivity-validator  @VOID404 @akgalwas @koala7659 @janmedrek @Maladie @franpog859 @mvshao
 /components/application-gateway  @VOID404 @akgalwas @koala7659 @janmedrek @Maladie @franpog859 @mvshao
 /components/application-operator  @VOID404 @akgalwas @koala7659 @janmedrek @Maladie @franpog859 @mvshao
@@ -57,7 +56,6 @@
 
 /resources/api-gateway @strekm @werdes72 @mjakobczyk @veichtj @dariusztutaj @cnvergence @piotrkpc
 /resources/application-connector  @VOID404 @akgalwas @koala7659 @janmedrek @Maladie @franpog859 @mvshao
-/resources/application-connector/charts/application-broker @wozniakjan @PK85 @piotrmiskiewicz @szwedm @ralikio @hanngos @tillknuesting
 /resources/application-connector/charts/application-operator  @VOID404 @akgalwas @koala7659 @janmedrek @Maladie @franpog859 @mvshao
 /resources/application-connector/charts/central-application-connectivity-validator  @VOID404 @akgalwas @koala7659 @janmedrek @Maladie @franpog859 @mvshao
 /resources/application-connector/charts/central-application-gateway  @VOID404 @akgalwas @koala7659 @janmedrek @Maladie @franpog859 @mvshao
