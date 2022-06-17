@@ -76,13 +76,13 @@ global:
       directory: "tpi"
     function_controller:
       name: "function-controller"
-      version: "PR-14501"
+      version: "PR-14486"
     function_webhook:
       name: "function-webhook"
-      version: "PR-14501"
+      version: "PR-14486"
     function_build_init:
       name: "function-build-init"
-      version: "PR-14501"
+      version: "PR-14486"
     function_runtime_nodejs12:
       name: "function-runtime-nodejs12"
       version: "PR-14334"
@@ -208,6 +208,8 @@ containers:
         value: "5"
       logLevel:
         value: "info"
+      logFormat:
+        value: "json"
       healthzLivenessTimeout:
         value: "10s"
 
