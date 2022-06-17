@@ -1,10 +1,8 @@
 const {
-  keb,
   gatherOptions,
   withCustomParams,
 } = require('../skr-test/helpers');
 const {
-  debug,
   getEnvOrThrow,
   switchDebug,
 } = require('../utils');
@@ -45,51 +43,24 @@ describe('SKR-Upgrade-test', function() {
   );
   let skr;
 
-  debug(
-      `PlanID ${getEnvOrThrow('KEB_PLAN_ID')}`,
-      `SubAccountID ${keb.subaccountID}`,
-      `InstanceID ${options.instanceID}`,
-      `Scenario ${options.scenarioName}`,
-      `Runtime ${options.runtimeName}`,
-      `Application ${options.appName}`,
-  );
-
-  // Credentials for KCP OIDC Login
-
-  // process.env.KCP_TECH_USER_LOGIN    =
-  // process.env.KCP_TECH_USER_PASSWORD =
-  process.env.KCP_OIDC_ISSUER_URL = 'https://kymatest.accounts400.ondemand.com';
-  // process.env.KCP_OIDC_CLIENT_ID     =
-  // process.env.KCP_OIDC_CLIENT_SECRET =
-  process.env.KCP_KEB_API_URL = 'https://kyma-env-broker.cp.dev.kyma.cloud.sap';
-  process.env.KCP_GARDENER_NAMESPACE = 'garden-kyma-dev';
-  process.env.KCP_MOTHERSHIP_API_URL = 'https://mothership-reconciler.cp.dev.kyma.cloud.sap/v1';
-  process.env.KCP_KUBECONFIG_API_URL = 'https://kubeconfig-service.cp.dev.kyma.cloud.sap';
-
-
-  // SKR Provisioning
   before(`Provision SKR with ID ${options.instanceID} and version ${kymaVersion}`, async function() {
     this.timeout(provisioningTimeout);
     await getOrProvisionSKR(options, skr, skipProvisioning, provisioningTimeout);
   });
 
-  // Perform Tests before Upgrade
   it('Execute Commerce Mock Tests', async function() {
     commerceMockTestPreparation(options);
     commerceMockTests(options.testNS);
   });
 
-  // Upgrade
   it('Perform Upgrade', async function() {
     await upgradeSKRInstance(options, kymaUpgradeVersion, upgradeTimeoutMin);
   });
 
-  // Perform Tests after Upgrade
   it('Execute commerceMockTests', async function() {
     commerceMockTests(options.testNS);
   });
 
-  // Cleanup
   const skipCleanup = getEnvOrThrow('SKIP_CLEANUP');
   if (skipCleanup === 'FALSE') {
     after('Cleanup the resources', async function() {
