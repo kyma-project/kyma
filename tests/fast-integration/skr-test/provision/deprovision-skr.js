@@ -1,6 +1,15 @@
 const {deprovisionSKR} = require('../../kyma-environment-broker');
-const {keb, kcp} = require('../helpers');
+const {unregisterKymaFromCompass} = require('../../compass');
+const {keb, kcp, director} = require('../helpers');
 
+async function deprovisionAndUnregisterSKR(deprovisioningTimeout, skipProvisioning) {
+  if (!skipProvisioning) {
+    await deprovisionSKRInstance(options, deprovisioningTimeout);
+  } else {
+    console.log('An external SKR cluster was used, de-provisioning skipped');
+  }
+  await unregisterKymaFromCompass(director, options.scenarioName);
+}
 
 async function deprovisionSKRInstance(options, timeout, ensureSuccess=true) {
   try {
@@ -16,4 +25,5 @@ async function deprovisionSKRInstance(options, timeout, ensureSuccess=true) {
 
 module.exports = {
   deprovisionSKRInstance,
+  deprovisionAndUnregisterSKR,
 };

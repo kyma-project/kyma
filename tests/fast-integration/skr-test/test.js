@@ -1,14 +1,12 @@
 const {
   gatherOptions,
-  director,
   commerceMockTest,
   oidcE2ETest,
 } = require('./index');
 const {
 } = require('../utils');
-const {unregisterKymaFromCompass} = require('../compass');
-const {deprovisionSKRInstance} = require('./provision/deprovision-skr');
 const {getOrProvisionSKR} = require('./provision/provision-skr');
+const {deprovisionAndUnregisterSKR} = require('./provision/deprovision-skr');
 
 const skipProvisioning = process.env.SKIP_PROVISIONING === 'true';
 const provisioningTimeout = 1000 * 60 * 30; // 30m
@@ -42,11 +40,6 @@ describe('SKR test', function() {
 
   after('Cleanup the resources', async function() {
     this.timeout(deprovisioningTimeout);
-    if (!skipProvisioning) {
-      await deprovisionSKRInstance(options, deprovisioningTimeout, false);
-    } else {
-      console.log('An external SKR cluster was used, de-provisioning skipped');
-    }
-    await unregisterKymaFromCompass(director, options.scenarioName);
+    await deprovisionAndUnregisterSKR(deprovisioningTimeout, skipProvisioning);
   });
 });

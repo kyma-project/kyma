@@ -1,6 +1,5 @@
 const {
   keb,
-  director,
   gatherOptions,
   withCustomParams,
 } = require('../skr-test/helpers');
@@ -10,11 +9,8 @@ const {
   switchDebug,
 } = require('../utils');
 const {getOrProvisionSKR} = require('../skr-test/provision/provision-skr');
-const {deprovisionSKRInstance} = require('../skr-test/provision/deprovision-skr');
+const {deprovisionAndUnregisterSKR} = require('../skr-test/provision/deprovision-skr');
 const {upgradeSKRInstance} = require('./upgrade/upgrade-skr');
-const {
-  unregisterKymaFromCompass,
-} = require('../compass');
 const {
   commerceMockTestPreparation,
   commerceMockTests,
@@ -99,12 +95,7 @@ describe('SKR-Upgrade-test', function() {
     after('Cleanup the resources', async function() {
       this.timeout(deprovisioningTimeout);
       await commerceMockCleanup(options.testNS);
-      if (!skipProvisioning) {
-        await deprovisionSKRInstance(options, deprovisioningTimeout);
-      } else {
-        console.log('An external SKR cluster was used, de-provisioning skipped');
-      }
-      await unregisterKymaFromCompass(director, options.scenarioName);
+      await deprovisionAndUnregisterSKR(deprovisioningTimeout, skipProvisioning);
     });
   }
 });
