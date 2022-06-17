@@ -1,0 +1,2 @@
+namespace: test-app
+secretNamespace: kyma-integration

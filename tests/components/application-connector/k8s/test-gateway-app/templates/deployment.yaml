@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: test-gateway-app
+  name: test-gateway-app
+  namespace: "{{.Values.namespace}}"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: test-gateway-app
+  template:
+    metadata:
+      labels:
+        app: test-gateway-app
+    spec:
+      containers:
+        - image: mvshao/test-gateway-app:latest
+          name: test-gateway-app
+          env:
+            - name: APP_CACERTPATH
+              value: "/etc/secret-volume/ca.crt"
+            - name: APP_SERVERCERTPATH
+              value: "/etc/secret-volume/server.crt"
+            - name: APP_SERVERKEYPATH
+              value: "/etc/secret-volume/server.key"
+          ports:
+            - containerPort: 8080
+          imagePullPolicy: Always
+          volumeMounts:
+            - name: secret-volume
+              mountPath: /etc/secret-volume
+      volumes:
+        - name: secret-volume
+          secret:
+            secretName: mtls-cert-secret

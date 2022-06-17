@@ -6,9 +6,9 @@ import (
 
 type Config struct {
 	LogLevel          string `envconfig:"default=info"`
-	CaCertPath        string `envconfig:"default="`
-	ServerCertPath    string `envconfig:"default="`
-	ServerKeyPath     string `envconfig:"default="`
+	CaCertPath        string `envconfig:"default=/etc/secret-volume/ca.cert"`
+	ServerCertPath    string `envconfig:"default=/etc/secret-volume/server.cert"`
+	ServerKeyPath     string `envconfig:"default=/etc/secret-volume/server.key"`
 	Port              int    `envconfig:"default=8080"`
 	MtlsPort          int    `envconfig:"default=8090"`
 	BasicAuthUser     string `envconfig:"default=user"`
