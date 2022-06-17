@@ -29,6 +29,8 @@ containers:
         value: "1"
       logLevel:
         value: "warn"
+      logFormat:
+        value: "json"
     resources:
       limits:
         cpu: 200m
