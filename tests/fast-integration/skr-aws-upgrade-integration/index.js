@@ -1,7 +1,6 @@
 const {
   keb,
   director,
-  kcp,
   gatherOptions,
   withCustomParams,
 } = require('../skr-test/helpers');
@@ -29,6 +28,9 @@ const upgradeTimeoutMin = 30; // 30m
 let globalTimeout = 1000 * 60 * 90; // 90m
 const slowTime = 5000;
 
+const kymaVersion = getEnvOrThrow('KYMA_VERSION');
+const kymaUpgradeVersion = getEnvOrThrow('KYMA_UPGRADE_VERSION');
+
 describe('SKR-Upgrade-test', function() {
   switchDebug(on = true);
 
@@ -38,14 +40,11 @@ describe('SKR-Upgrade-test', function() {
   this.timeout(globalTimeout);
   this.slow(slowTime);
 
-  const kymaVersion = getEnvOrThrow('KYMA_VERSION');
-  const kymaUpgradeVersion = getEnvOrThrow('KYMA_UPGRADE_VERSION');
-
   const customParams = {
     'kymaVersion': kymaVersion,
   };
 
-  const options = gatherOptions(
+  let options = gatherOptions(
       withCustomParams(customParams),
   );
   let skr;
@@ -58,32 +57,6 @@ describe('SKR-Upgrade-test', function() {
       `Runtime ${options.runtimeName}`,
       `Application ${options.appName}`,
   );
-
-  // debug(
-  //   `KEB_HOST: ${getEnvOrThrow("KEB_HOST")}`,
-  //   `KEB_CLIENT_ID: ${getEnvOrThrow("KEB_CLIENT_ID")}`,
-  //   `KEB_CLIENT_SECRET: ${getEnvOrThrow("KEB_CLIENT_SECRET")}`,
-  //   `KEB_GLOBALACCOUNT_ID: ${getEnvOrThrow("KEB_GLOBALACCOUNT_ID")}`,
-  //   `KEB_SUBACCOUNT_ID: ${getEnvOrThrow("KEB_SUBACCOUNT_ID")}`,
-  //   `KEB_USER_ID: ${getEnvOrThrow("KEB_USER_ID")}`,
-  //   `KEB_PLAN_ID: ${getEnvOrThrow("KEB_PLAN_ID")}`
-  // );
-
-  // debug(
-  //   `COMPASS_HOST: ${getEnvOrThrow("COMPASS_HOST")}`,
-  //   `COMPASS_CLIENT_ID: ${getEnvOrThrow("COMPASS_CLIENT_ID")}`,
-  //   `COMPASS_CLIENT_SECRET: ${getEnvOrThrow("COMPASS_CLIENT_SECRET")}`,
-  //   `COMPASS_TENANT: ${getEnvOrThrow("COMPASS_TENANT")}`,
-  // )
-
-  // debug(
-  //   `KCP_TECH_USER_LOGIN: ${KCP_TECH_USER_LOGIN}\n`,
-  //   `KCP_TECH_USER_PASSWORD: ${KCP_TECH_USER_PASSWORD}\n`,
-  //   `KCP_OIDC_CLIENT_ID: ${KCP_OIDC_CLIENT_ID}\n`,
-  //   `KCP_OIDC_CLIENT_SECRET: ${KCP_OIDC_CLIENT_SECRET}\n`,
-  //   `KCP_KEB_API_URL: ${KCP_KEB_API_URL}\n`,
-  //   `KCP_OIDC_ISSUER_URL: ${KCP_OIDC_ISSUER_URL}\n`
-  // )
 
   // Credentials for KCP OIDC Login
 
@@ -99,17 +72,9 @@ describe('SKR-Upgrade-test', function() {
 
 
   // SKR Provisioning
-  before(`Provision SKR with ID ${options.instanceID}`, async function() {
-    console.log(`Provisioning SKR with version ${kymaVersion}`);
-    debug(`Provision SKR with Custom Parameters ${JSON.stringify(options.customParams)}`);
+  before(`Provision SKR with ID ${options.instanceID} and version ${kymaVersion}`, async function() {
     this.timeout(provisioningTimeout);
     await getOrProvisionSKR(options, skr, skipProvisioning, provisioningTimeout);
-  });
-
-  it(`Perform kcp login`, async function() {
-    const version = await kcp.version([]);
-    debug(version);
-    await kcp.login();
   });
 
   // Perform Tests before Upgrade
