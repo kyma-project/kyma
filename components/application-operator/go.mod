@@ -7,7 +7,7 @@ require (
 	github.com/kubernetes-sigs/service-catalog v0.3.1
 	github.com/pkg/errors v0.9.1
 	github.com/sirupsen/logrus v1.8.1
-	github.com/stretchr/testify v1.7.0
+	github.com/stretchr/testify v1.7.2
 	github.com/vrischmann/envconfig v1.3.0
 	helm.sh/helm/v3 v3.6.3
 	k8s.io/apimachinery v0.22.9
@@ -128,7 +128,7 @@ require (
 	gopkg.in/gorp.v1 v1.7.2 // indirect
 	gopkg.in/inf.v0 v0.9.1 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
-	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b // indirect
+	gopkg.in/yaml.v3 v3.0.1 // indirect
 	k8s.io/api v0.22.9 // indirect
 	k8s.io/apiextensions-apiserver v0.21.3 // indirect
 	k8s.io/apiserver v0.21.3 // indirect
