@@ -8,24 +8,45 @@ spec:
   labels:
     app: test-app
   services:
-    - displayName: no auth
-      name: httbin
-      providerDisplayName: Kenneth Reitz
-      description: No auth in HTTPbin
+    # - displayName: no auth
+    #   name: httbin
+    #   providerDisplayName: Kenneth Reitz
+    #   description: No auth in HTTPbin
+    #   id: "{{ uuidv4 }}"
+    #   entries:
+    #     - type: API
+    #       targetUrl: "http://test-app.{{ .Values.namespace }}.svc.cluster.local/get"
+    #       centralGatewayUrl: http://central-application-gateway.kyma-system:8080/test-app/no-auth/
+    # - displayName: basic auth
+    #   name: httbin
+    #   providerDisplayName: Kenneth Reitz
+    #   description: Basic auth in HTTPbin
+    #   id: "{{ uuidv4 }}"
+    #   entries:
+    #     - type: API
+    #       targetUrl: "http://test-app.{{ .Values.namespace  }}.svc.cluster.local/basic-auth/admin/nimda"
+    #       centralGatewayUrl: http://central-application-gateway.kyma-system:8080/test-app/basic-auth/
+    #       credentials:
+    #         secretName: basic-auth-test
+    #         type: Basic
+    - displayName: always ok
+      name: alwaysok
+      providerDisplayName: Rafał
+      description: Always Ok in testapp
       id: "{{ uuidv4 }}"
       entries:
         - type: API
-          targetUrl: "http://test-app.{{ .Values.namespace }}.svc.cluster.local/get"
-          centralGatewayUrl: http://central-application-gateway.kyma-system:8080/test-app/no-auth/
-    - displayName: basic auth
-      name: httbin
-      providerDisplayName: Kenneth Reitz
-      description: Basic auth in HTTPbin
+          targetUrl: "http://test-app-srv.test-app.svc.cluster.local:8080/v1/api/unsecure/ok"
+          centralGatewayUrl: "http://central-application-gateway.kyma-system:8080/test-app/always-ok"
+    - displayName: basic
+      name: basic
+      providerDisplayName: Rafał
+      description: Always Ok in testapp
       id: "{{ uuidv4 }}"
       entries:
         - type: API
-          targetUrl: "http://test-app.{{ .Values.namespace  }}.svc.cluster.local/basic-auth/admin/nimda"
-          centralGatewayUrl: http://central-application-gateway.kyma-system:8080/test-app/basic-auth/
+          targetUrl: "http://test-app-srv.test-app.svc.cluster.local:8080/v1/api/basic/ok"
+          centralGatewayUrl: "http://central-application-gateway.kyma-system:8080/test-app/basic"
           credentials:
-            secretName: basic-auth-test
+            secretName: basic-test
             type: Basic
