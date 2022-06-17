@@ -208,6 +208,8 @@ containers:
         value: "5"
       logLevel:
         value: "info"
+      logFormat:
+        value: "text"
       healthzLivenessTimeout:
         value: "10s"
 
