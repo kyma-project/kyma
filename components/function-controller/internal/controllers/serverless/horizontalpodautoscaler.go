@@ -17,7 +17,7 @@ func initStateFnCheckHPA(ctx context.Context, r *reconciler, s *systemState) sta
 		return nil
 	}
 
-	return stateFnCheckHPA
+	return stateFnCheckHPA(ctx, r, s)
 }
 
 func stateFnCheckHPA(ctx context.Context, r *reconciler, s *systemState) stateFn {
