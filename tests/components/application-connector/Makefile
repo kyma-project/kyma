@@ -1,5 +1,7 @@
-GATEWAY_IMAGE ?= ""
 NAMESPACE ?= "test"
+TAG := $(DOCKER_TAG)
+TAG ?= "latest"
+GATEWAY_IMAGE ?= "$(DOCKER_PUSH_REPOSITORY)$(DOCKER_PUSH_DIRECTORY)/gateway-test:$(TAG)"
 
 .PHONY: release test-os test image publish clean image-gateway publish-gateway test-gateway
 
