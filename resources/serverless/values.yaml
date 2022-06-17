@@ -209,7 +209,7 @@ containers:
       logLevel:
         value: "info"
       logFormat:
-        value: "text"
+        value: "json"
       healthzLivenessTimeout:
         value: "10s"
 
