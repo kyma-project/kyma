@@ -1,6 +1,8 @@
 package git
 
 import (
+	"fmt"
+
 	git2go "github.com/libgit2/git2go/v31"
 	"github.com/pkg/errors"
 )
@@ -9,19 +11,42 @@ type git2goFetcher struct {
 }
 
 func (g *git2goFetcher) git2goFetch(url, outputPath string, remoteCallbacks git2go.RemoteCallbacks) (*git2go.Repository, error) {
-	repo, err := git2go.InitRepository(outputPath, true)
+	repo, err := g.openInitRepo(outputPath)
 	if err != nil {
-		return nil, errors.Wrap(err, "while initializing repository")
+		return nil, errors.Wrap(err, "while initializing/opening repository")
 	}
 
-	remote, err := repo.Remotes.Create("origin", url)
+	remote, err := g.lookupCreateRemote(repo, url, outputPath)
 	if err != nil {
-		return nil, errors.Wrap(err, "while creating remote")
+		return nil, errors.Wrap(err, "while creating/using remote")
 	}
 	defer remote.Free()
+
 	err = remote.Fetch(nil, &git2go.FetchOptions{RemoteCallbacks: remoteCallbacks}, "")
 	if err != nil {
 		return nil, errors.Wrap(err, "while fetching remote")
 	}
 	return repo, nil
+}
+
+func (g *git2goFetcher) openInitRepo(outputPath string) (*git2go.Repository, error) {
+	var repo *git2go.Repository
+	var err error
+	repo, err = git2go.OpenRepository(outputPath)
+	if err == nil {
+		return repo, nil
+	}
+	// TODO: this should be in debug
+	fmt.Errorf("failed to open existing repo at [%s]: %v", outputPath, err)
+	return git2go.InitRepository(outputPath, true)
+}
+
+func (g *git2goFetcher) lookupCreateRemote(repo *git2go.Repository, url, outputPath string) (*git2go.Remote, error) {
+	remote, err := repo.Remotes.Lookup("origin")
+	if err == nil {
+		return remote, nil
+	}
+	// TODO: this should be in debug
+	fmt.Errorf("failed to use existing origin remote at [%s]: %v", outputPath, err)
+	return repo.Remotes.Create("origin", url)
 }
