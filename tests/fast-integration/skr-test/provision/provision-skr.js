@@ -4,6 +4,7 @@ const {DirectorClient, DirectorConfig} = require('../../compass');
 const {addScenarioInCompass, assignRuntimeToScenario} = require('../../compass');
 const {KCPWrapper, KCPConfig} = require('../../kcp/client');
 const {BTPOperatorCreds} = require('../../smctl/helpers');
+const {debug} = require('../../utils');
 
 const keb = new KEBClient(KEBConfig.fromEnv());
 const gardener = new GardenerClient(GardenerConfig.fromEnv());
@@ -25,14 +26,20 @@ async function provisionSKRInstance(options, timeout) {
         btpOperatorCreds,
         options.customParams,
         timeout);
+
+    debug("SKR is provisioned!");
     const shoot = skr.shoot;
 
+    debug("Adding scenario to compass...");
     await addScenarioInCompass(director, options.scenarioName);
+
+    debug("Assigning runtime to scenario...");
     await assignRuntimeToScenario(director, shoot.compassID, options.scenarioName);
     return shoot;
   } catch (e) {
     throw new Error(`Provisioning failed: ${e.toString()}`);
   } finally {
+    debug("Fetching runtime status...");
     const runtimeStatus = await kcp.getRuntimeStatusOperations(options.instanceID);
     console.log(`\nRuntime status after provisioning: ${runtimeStatus}`);
     await kcp.reconcileInformationLog(runtimeStatus);
