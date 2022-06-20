@@ -21,6 +21,7 @@ import (
 	"flag"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/go-logr/zapr"
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/fluentbit"
@@ -132,8 +133,10 @@ func main() {
 		setupLog.Error(err, "Invalid flag provided")
 		os.Exit(1)
 	}
+	var syncPeriod = 1 * time.Minute
 
 	mgr, err := ctrl.NewManager(ctrl.GetConfigOrDie(), ctrl.Options{
+		SyncPeriod:             &syncPeriod,
 		Scheme:                 scheme,
 		MetricsBindAddress:     metricsAddr,
 		Port:                   9443,

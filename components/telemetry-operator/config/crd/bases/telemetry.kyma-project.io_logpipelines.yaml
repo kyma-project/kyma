@@ -95,15 +95,25 @@ spec:
                       type: string
                   type: object
                 type: array
-              secretRefs:
+              variables:
                 items:
                   description: SecretReference is a pointer to a Kubernetes secret
                     that should be provided as environment variable to Fluent Bit
                   properties:
                     name:
                       type: string
-                    namespace:
-                      type: string
+                    valueFrom:
+                      properties:
+                        secretKeyRef:
+                          properties:
+                            key:
+                              type: string
+                            name:
+                              type: string
+                            namespace:
+                              type: string
+                          type: object
+                      type: object
                   type: object
                 type: array
             type: object

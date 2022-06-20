@@ -131,8 +131,44 @@ func TestSyncSecretRefsConfigMapErrorClientErrorReturnsError(t *testing.T) {
 	sut := NewLogPipelineSyncer(mockClient, daemonSetConfig, emitterConfig)
 
 	lp := telemetryv1alpha1.LogPipeline{}
-	result, err := sut.syncSecretRefs(context.Background(), &lp)
+	result, err := sut.syncSecrets(context.Background(), &lp)
 
 	require.Error(t, err)
 	require.Equal(t, result, false)
 }
+
+func TestFetchSecret(t *testing.T) {
+	mockClient := &mocks.Client{}
+	retSecret := corev1.Secret{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "fooSecret",
+			Namespace: "fooNamespace",
+		},
+		StringData: map[string]string{"foo": "bar"},
+	}
+	//mockClient.CoreV1().Secrets("fooNamespace").Create(context.TODO(), &retSecret, metav1.CreateOptions{})
+	mockClient.On("Get", context.Background(), types.NamespacedName{Namespace: "fooNamespace", Name: "fooSecret"}, &corev1.Secret{}).Return(nil)
+	mockClient.On("fetchSecret", context.Background(), mock.Anything, mock.Anything).Return(retSecret, nil)
+	sut := NewLogPipelineSyncer(mockClient, daemonSetConfig, emitterConfig)
+	fromLogPipeline :=
+		telemetryv1alpha1.SecretKeyRef{
+			Name:      "fooSecret",
+			Namespace: "fooNamespace",
+			Key:       "foo",
+		}
+	gotSecret, err := sut.syncSecrets(context.Background(), &from)
+	require.NoError(t, err)
+	t.Log(gotSecret)
+}
+
+//func TestSyncSecretRefsSecretsCorrectlyAdded(t *testing.T) {
+//	mockClient := &mocks.Client{}
+//	secret := corev1.Secret{}
+//	referencedSecret := corev1.Secret{
+//		ObjectMeta: metav1.ObjectMeta{Name: "foo"},
+//		StringData: map[string]string{"sec1": "val1"},
+//	}
+//	sut := NewLogPipelineSyncer(mockClient, daemonSetConfig, emitterConfig)
+//	sut.syncSecretsRef(referencedSecret, secret)
+//
+//}

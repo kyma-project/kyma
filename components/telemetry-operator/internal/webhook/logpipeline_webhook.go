@@ -141,6 +141,11 @@ func (v *LogPipelineValidator) validateLogPipeline(ctx context.Context, currentB
 		return err
 	}
 
+	if err = fluentbit.ValidateVariables(logPipeline, &logPipelines); err != nil {
+		log.Error(err, "Failed to validate variables")
+		return err
+	}
+
 	if err = v.pluginValidator.Validate(logPipeline, &logPipelines); err != nil {
 		log.Error(err, "Failed to validate plugins")
 		return err
