@@ -1031,14 +1031,14 @@
       "targets": [
         {
           "exemplar": true,
-          "expr": "fluentbit_fsbuffer_size{pod=\"$pod\"}",
+          "expr": "telemetry_fsbuffer_size{pod=\"$pod\"}",
           "interval": "",
           "legendFormat": "{{"{{"}} pod {{"}}"}}",
           "refId": "A"
         },
         {
           "exemplar": true,
-          "expr": "fluentbit_fsbuffer_max{pod=\"$pod\"}",
+          "expr": "telemetry_fsbuffer_limit{pod=\"$pod\"}",
           "hide": false,
           "interval": "",
           "legendFormat": "{{"{{"}} pod {{"}}"}} - limit",

@@ -39,7 +39,7 @@ var (
 	fsbufferSize = promauto.NewGauge(prometheus.GaugeOpts{
 		Namespace:   "",
 		Subsystem:   "",
-		Name:        "fluentbit_fsbuffer_size",
+		Name:        "telemetry_fsbuffer_size",
 		Help:        "The total disk size of the fluentbit chunk buffer",
 		ConstLabels: nil,
 	})
@@ -47,7 +47,7 @@ var (
 	fsbufferMax = promauto.NewGauge(prometheus.GaugeOpts{
 		Namespace:   "",
 		Subsystem:   "",
-		Name:        "fluentbit_fsbuffer_max",
+		Name:        "telemetry_fsbuffer_limit",
 		Help:        "The maximum defined size of the fluentbit chunk buffer",
 		ConstLabels: nil,
 	})
