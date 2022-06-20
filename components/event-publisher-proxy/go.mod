@@ -85,6 +85,12 @@ require (
 )
 
 replace (
+	github.com/emicklei/go-restful/v3 => github.com/emicklei/go-restful/v3 v3.8.0
+	// fix cve-2022-1996, might be okay to be removed after k8s > 1.24.2
+	k8s.io/kube-openapi => k8s.io/kube-openapi v0.0.0-20220611174630-77c5a1ef51a0
+)
+
+replace (
 	// keep all following packages at the same version
 	k8s.io/api => k8s.io/api v0.24.2
 	k8s.io/apiextensions-apiserver => k8s.io/apiextensions-apiserver v0.24.2
@@ -102,6 +108,5 @@ replace (
 	github.com/opencontainers/runc => github.com/opencontainers/runc v1.0.0-rc93
 	github.com/prometheus/client_golang => github.com/prometheus/client_golang v1.12.2
 	golang.org/x/crypto => golang.org/x/crypto v0.0.0-20220331220935-ae2d96664a29
-	k8s.io/kube-openapi => k8s.io/kube-openapi v0.0.0-20220611174630-77c5a1ef51a0 // fix cve-2022-1996, might be okay to be removed after k8s > 1.24.2
 	k8s.io/utils => k8s.io/utils v0.0.0-20220210201930-3a6ce19ff2f9
 )
