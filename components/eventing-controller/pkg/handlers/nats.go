@@ -304,7 +304,7 @@ func (n *Nats) getCallback(subKeyPrefix string) nats.MsgHandler {
 			MaxTries: n.defaultSubsConfig.DispatcherMaxRetries,
 			Period:   n.defaultSubsConfig.DispatcherRetryPeriod,
 		}
-		if result := n.doWithRetry(traceCtxWithCE, retryParams, ce); !cev2.IsACK(result) {
+		if result := n.doWithRetry(traceCtxWithCE, retryParams, *ce); !cev2.IsACK(result) {
 			n.namedLogger().Errorw("event dispatch failed after retries", "id", ce.ID(), "source", ce.Source(), "type", ce.Type(), "sink", sink, "error", result)
 			return
 		}
@@ -312,7 +312,7 @@ func (n *Nats) getCallback(subKeyPrefix string) nats.MsgHandler {
 	}
 }
 
-func (n *Nats) doWithRetry(ctx context.Context, params cev2context.RetryParams, ce *cev2event.Event) cev2protocol.Result {
+func (n *Nats) doWithRetry(ctx context.Context, params cev2context.RetryParams, ce cev2event.Event) cev2protocol.Result {
 	retry := 0
 	for {
 		ceEvent := ce.Clone()
@@ -320,7 +320,7 @@ func (n *Nats) doWithRetry(ctx context.Context, params cev2context.RetryParams, 
 		if cev2protocol.IsACK(result) {
 			return result
 		}
-		n.namedLogger().Errorw("event dispatch failed", "id", ceEvent.ID(), "source", ceEvent.Source(), "type", ceEvent.Type(), "error", result, "retry", retry)
+		n.namedLogger().Errorw("event dispatch failed 2", "id", ceEvent.ID(), "source", ceEvent.Source(), "type", ceEvent.Type(), "error", result, "retry", retry)
 		// Try again?
 		if err := params.Backoff(ctx, retry+1); err != nil {
 			// do not try again.
