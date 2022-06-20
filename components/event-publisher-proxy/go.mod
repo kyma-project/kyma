@@ -7,8 +7,8 @@ require (
 	github.com/cloudevents/sdk-go/v2 v2.10.1
 	github.com/google/uuid v1.3.0
 	github.com/kelseyhightower/envconfig v1.4.0
-	github.com/kyma-project/kyma/components/application-operator v0.0.0-20220617084352-bf759135fe8d
-	github.com/kyma-project/kyma/components/eventing-controller v0.0.0-20220617084352-bf759135fe8d
+	github.com/kyma-project/kyma/components/application-operator v0.0.0-20220620092658-f1f8e3668674
+	github.com/kyma-project/kyma/components/eventing-controller v0.0.0-20220620092658-f1f8e3668674
 	github.com/nats-io/nats-server/v2 v2.8.4
 	github.com/nats-io/nats.go v1.16.0
 	github.com/onsi/gomega v1.19.0
