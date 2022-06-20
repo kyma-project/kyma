@@ -315,11 +315,12 @@ func (n *Nats) getCallback(subKeyPrefix string) nats.MsgHandler {
 func (n *Nats) doWithRetry(ctx context.Context, params cev2context.RetryParams, ce *cev2event.Event) cev2protocol.Result {
 	retry := 0
 	for {
-		result := n.client.Send(ctx, *ce)
+		ceEvent := ce.Clone()
+		result := n.client.Send(ctx, ceEvent)
 		if cev2protocol.IsACK(result) {
 			return result
 		}
-		n.namedLogger().Errorw("event dispatch failed", "id", ce.ID(), "source", ce.Source(), "type", ce.Type(), "error", result, "retry", retry)
+		n.namedLogger().Errorw("event dispatch failed", "id", ceEvent.ID(), "source", ceEvent.Source(), "type", ceEvent.Type(), "error", result, "retry", retry)
 		// Try again?
 		if err := params.Backoff(ctx, retry+1); err != nil {
 			// do not try again.
