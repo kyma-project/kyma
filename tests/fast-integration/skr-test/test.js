@@ -35,6 +35,9 @@ describe('SKR test', function() {
 
   let options = gatherOptions(); // with default values
   let shoot;
+  const getShootInfoFunc = function () {
+    return shoot
+  }
 
   before('Ensure SKR is provisioned', async function() {
     this.timeout(provisioningTimeout);
@@ -51,7 +54,7 @@ describe('SKR test', function() {
       );
       shoot = await getSKRConfig(instanceID);
     } else {
-      debug("Provisioning new SKR instance...")
+      debug("Provisioning new SKR instance...8")
       shoot = await provisionSKRInstance(options, provisioningTimeout);
     }
     debug("Preparing compass resources on the SKR instance...")
@@ -61,15 +64,16 @@ describe('SKR test', function() {
     await initK8sConfig(shoot);
   });
 
-  it('Execute the tests', async function() {
-    oidcE2ETest(options, shoot);
-    commerceMockTest(options);
-  });
+  // Run the OIDC tests
+  oidcE2ETest(options, getShootInfoFunc);
+
+  // Run the commerce mock tests
+  commerceMockTest(options);
 
   after('Cleanup the resources', async function() {
     this.timeout(deprovisioningTimeout);
     if (!skipProvisioning) {
-      await deprovisionSKRInstance(options, deprovisioningTimeout);
+      await deprovisionSKRInstance(options, deprovisioningTimeout, false);
     } else {
       console.log('An external SKR cluster was used, de-provisioning skipped');
     }

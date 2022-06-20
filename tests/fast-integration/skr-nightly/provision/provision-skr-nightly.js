@@ -41,6 +41,9 @@ describe('SKR nightly', function() {
   const provisioningTimeout = 1000 * 60 * 60; // 1h
   const deprovisioningTimeout = 1000 * 60 * 30; // 30m
   let shoot;
+  const getShootInfoFunc = function () {
+    return shoot
+  }
   const options = gatherOptions(
       withRuntimeName('kyma-nightly'),
       withScenarioName('test-nightly'));
@@ -93,6 +96,6 @@ describe('SKR nightly', function() {
       throw new Error(`before hook failed: ${e.toString()}`);
     }
   });
-  oidcE2ETest(options, shoot);
+  oidcE2ETest(options, getShootInfoFunc);
   commerceMockTest(options);
 });

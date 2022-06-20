@@ -2,9 +2,9 @@ const {deprovisionSKR} = require('../../kyma-environment-broker');
 const {keb, kcp} = require('../provision/provision-skr');
 
 
-async function deprovisionSKRInstance(options, timeout) {
+async function deprovisionSKRInstance(options, timeout, ensureSuccess=true) {
   try {
-    await deprovisionSKR(keb, kcp, options.instanceID, timeout);
+    await deprovisionSKR(keb, kcp, options.instanceID, timeout, ensureSuccess);
   } catch (e) {
     throw new Error(`De-provisioning failed: ${e.toString()}`);
   } finally {
