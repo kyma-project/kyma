@@ -25,6 +25,7 @@ require (
 )
 
 require (
+	cloud.google.com/go v0.81.0 // indirect
 	github.com/PuerkitoBio/purell v1.1.1 // indirect
 	github.com/PuerkitoBio/urlesc v0.0.0-20170810143723-de5bf2ad4578 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
@@ -83,10 +84,9 @@ require (
 	sigs.k8s.io/yaml v1.3.0 // indirect
 )
 
+// fix cve-2022-1996, might be okay to be removed after k8s > 1.24.2
 replace (
 	github.com/emicklei/go-restful/v3 => github.com/emicklei/go-restful/v3 v3.8.0
-	// fix cve-2022-1996, might be okay to be removed after k8s > 1.24.2
-	k8s.io/client-go => k8s.io/client-go v0.0.0-20220615235819-acab036eff57
 	k8s.io/kube-openapi => k8s.io/kube-openapi v0.0.0-20220611174630-77c5a1ef51a0
 )
 
