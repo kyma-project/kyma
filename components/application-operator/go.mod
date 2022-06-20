@@ -36,7 +36,7 @@ require (
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b // indirect
 	k8s.io/api v0.22.9 // indirect
-	k8s.io/klog/v2 v2.9.0 // indirect
+	k8s.io/klog/v2 v2.60.1 // indirect
 	k8s.io/kube-openapi v0.0.0-20211109043538-20434351676c // indirect
 	k8s.io/utils v0.0.0-20211116205334-6203023598ed // indirect
 	sigs.k8s.io/structured-merge-diff/v4 v4.2.1 // indirect
@@ -48,7 +48,6 @@ replace (
 	github.com/docker/distribution => github.com/docker/distribution v0.0.0-20191216044856-a8371794149d
 	github.com/docker/docker => github.com/docker/docker v20.10.8+incompatible
 	github.com/opencontainers/runc => github.com/opencontainers/runc v1.0.0-rc93
-
 	golang.org/x/crypto => golang.org/x/crypto v0.0.0-20220518034528-6f7dac969898
 	golang.org/x/text => golang.org/x/text v0.3.7
 )
