@@ -3,8 +3,6 @@ const {
   commerceMockTest,
   oidcE2ETest,
 } = require('./index');
-const {
-} = require('../utils');
 const {getOrProvisionSKR} = require('./provision/provision-skr');
 const {deprovisionAndUnregisterSKR} = require('./provision/deprovision-skr');
 

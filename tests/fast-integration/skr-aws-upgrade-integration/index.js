@@ -1,7 +1,8 @@
 const {
   gatherOptions,
+  commerceMockTest,
   withCustomParams,
-} = require('../skr-test/helpers');
+} = require('../skr-test');
 const {
   getEnvOrThrow,
   switchDebug,
@@ -9,7 +10,6 @@ const {
 const {getOrProvisionSKR} = require('../skr-test/provision/provision-skr');
 const {deprovisionAndUnregisterSKR} = require('../skr-test/provision/deprovision-skr');
 const {upgradeSKRInstance} = require('./upgrade/upgrade-skr');
-const {commerceMockTest} = require('../skr-test');
 
 const skipProvisioning = process.env.SKIP_PROVISIONING === 'true';
 const provisioningTimeout = 1000 * 60 * 60; // 1h
@@ -22,7 +22,7 @@ const kymaVersion = getEnvOrThrow('KYMA_VERSION');
 const kymaUpgradeVersion = getEnvOrThrow('KYMA_UPGRADE_VERSION');
 
 describe('SKR-Upgrade-test', function() {
-  switchDebug(on = true);
+  switchDebug(true);
 
   if (!skipProvisioning) {
     globalTimeout += provisioningTimeout + deprovisioningTimeout; // 3h
@@ -37,11 +37,11 @@ describe('SKR-Upgrade-test', function() {
   const options = gatherOptions(
       withCustomParams(customParams),
   );
-  let skr;
+  let shoot;
 
   before(`Provision SKR with ID ${options.instanceID} and version ${kymaVersion}`, async function() {
     this.timeout(provisioningTimeout);
-    await getOrProvisionSKR(options, skr, skipProvisioning, provisioningTimeout);
+    await getOrProvisionSKR(options, shoot, skipProvisioning, provisioningTimeout);
   });
 
   it('Execute Commerce Mock Tests', async function() {
