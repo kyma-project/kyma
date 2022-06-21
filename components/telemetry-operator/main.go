@@ -182,6 +182,7 @@ func main() {
 	logPipelineValidator := webhook.NewLogPipeLineValidator(mgr.GetClient(),
 		fluentBitConfigMap,
 		fluentBitNs,
+		fluentbit.NewVariablesValidator(mgr.GetClient()),
 		fluentbit.NewConfigValidator(fluentBitPath, fluentBitPluginDirectory),
 		fluentbit.NewPluginValidator(
 			strings.SplitN(strings.ReplaceAll(supportedFilterPlugins, " ", ""), ",", len(supportedFilterPlugins)),

@@ -131,7 +131,7 @@ func TestSyncSecretRefsConfigMapErrorClientErrorReturnsError(t *testing.T) {
 	sut := NewLogPipelineSyncer(mockClient, daemonSetConfig, emitterConfig)
 
 	lp := telemetryv1alpha1.LogPipeline{}
-	result, err := sut.syncSecrets(context.Background(), &lp)
+	result, err := sut.syncVariables(context.Background(), &lp)
 
 	require.Error(t, err)
 	require.Equal(t, result, false)
@@ -150,13 +150,19 @@ func TestFetchSecret(t *testing.T) {
 	mockClient.On("Get", context.Background(), types.NamespacedName{Namespace: "fooNamespace", Name: "fooSecret"}, &corev1.Secret{}).Return(nil)
 	mockClient.On("fetchSecret", context.Background(), mock.Anything, mock.Anything).Return(retSecret, nil)
 	sut := NewLogPipelineSyncer(mockClient, daemonSetConfig, emitterConfig)
-	fromLogPipeline :=
-		telemetryv1alpha1.SecretKeyRef{
-			Name:      "fooSecret",
-			Namespace: "fooNamespace",
-			Key:       "foo",
-		}
-	gotSecret, err := sut.syncSecrets(context.Background(), &from)
+	secretKey := telemetryv1alpha1.SecretKeyRef{
+		Name:      "foo",
+		Namespace: "fooNs",
+		Key:       "fooKey",
+	}
+	fromType := telemetryv1alpha1.VariableReference{Name: "foo", ValueFrom: telemetryv1alpha1.ValueFromType{SecretKey: secretKey}}
+	fromLogPipeline := telemetryv1alpha1.LogPipeline{
+		Spec: telemetryv1alpha1.LogPipelineSpec{
+			Variables: []telemetryv1alpha1.VariableReference{fromType},
+		},
+	}
+
+	gotSecret, err := sut.syncVariables(context.Background(), &fromLogPipeline)
 	require.NoError(t, err)
 	t.Log(gotSecret)
 }
@@ -169,6 +175,6 @@ func TestFetchSecret(t *testing.T) {
 //		StringData: map[string]string{"sec1": "val1"},
 //	}
 //	sut := NewLogPipelineSyncer(mockClient, daemonSetConfig, emitterConfig)
-//	sut.syncSecretsRef(referencedSecret, secret)
+//	sut.fetchSecretData(referencedSecret, secret)
 //
 //}

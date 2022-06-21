@@ -61,7 +61,7 @@ type FileMount struct {
 	Content string `json:"content,omitempty"`
 }
 
-// SecretReference is a pointer to a Kubernetes secret that should be provided as environment variable to Fluent Bit
+// VariableReference is a pointer to a Kubernetes secret that should be provided as environment variable to Fluent Bit
 type VariableReference struct {
 	Name      string        `json:"name,omitempty"`
 	ValueFrom ValueFromType `json:"valueFrom,omitempty"`

@@ -3,6 +3,7 @@ package sync
 import (
 	"bytes"
 	"context"
+	"fmt"
 	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/api/v1alpha1"
 	"github.com/kyma-project/kyma/components/telemetry-operator/internal/fluentbit"
 	corev1 "k8s.io/api/core/v1"
@@ -66,9 +67,9 @@ func (s *LogPipelineSyncer) SyncAll(ctx context.Context, logPipeline *telemetryv
 		log.Error(err, "Failed to sync mounted files")
 		return false, err
 	}
-	secretsChanged, err := s.syncSecrets(ctx, logPipeline)
+	variablesChanged, err := s.syncVariables(ctx, logPipeline)
 	if err != nil {
-		log.Error(err, "Failed to sync secret references")
+		log.Error(err, "Failed to sync variables")
 		return false, err
 	}
 	err = s.syncEnableUnsupportedPluginMetric(ctx)
@@ -76,7 +77,7 @@ func (s *LogPipelineSyncer) SyncAll(ctx context.Context, logPipeline *telemetryv
 		log.Error(err, "Failed to sync enable unsupported plugin metrics")
 		return false, err
 	}
-	return sectionsChanged || parsersChanged || filesChanged || secretsChanged, nil
+	return sectionsChanged || parsersChanged || filesChanged || variablesChanged, nil
 }
 
 // Synchronize LogPipeline with ConfigMap of FluentBit sections (Input, Filter and Output).
@@ -256,120 +257,163 @@ func (s *LogPipelineSyncer) syncFilesConfigMap(ctx context.Context, logPipeline 
 	return changed, nil
 }
 
+func isSecretRef(fromType telemetryv1alpha1.ValueFromType) bool {
+	return fromType.SecretKey.Name != "" && fromType.SecretKey.Key != ""
+}
+
 func (s *LogPipelineSyncer) fetchSecret(ctx context.Context, fromType telemetryv1alpha1.ValueFromType) (*corev1.Secret, error) {
 	log := logf.FromContext(ctx)
 
-	if fromType.SecretKey.Name != "" && fromType.SecretKey.Key != "" {
-		secretKey := fromType.SecretKey
-		var referencedSecret corev1.Secret
-		if err := s.Get(ctx, types.NamespacedName{Name: secretKey.Name, Namespace: secretKey.Namespace}, &referencedSecret); err != nil {
-			log.Error(err, "Failed reading secret %s from namespace %s", secretKey.Name, secretKey.Namespace)
-			return nil, err
-		}
-		return &referencedSecret, nil
+	secretKey := fromType.SecretKey
+	var referencedSecret corev1.Secret
+	if err := s.Get(ctx, types.NamespacedName{Name: secretKey.Name, Namespace: secretKey.Namespace}, &referencedSecret); err != nil {
+		log.Error(err, "Failed reading secret %s from namespace %s", secretKey.Name, secretKey.Namespace)
+		return nil, err
 	}
+	return &referencedSecret, nil
 
-	return nil, nil
 }
 
-// Copy referenced secrets to global Fluent Bit environment secret.
-func (s *LogPipelineSyncer) syncSecrets(ctx context.Context, logPipeline *telemetryv1alpha1.LogPipeline) (bool, error) {
-	//log := logf.FromContext(ctx)
-	secret, err := s.getOrCreateSecret(ctx, s.DaemonSetConfig.FluentBitEnvSecret)
+// syncVariables copies referenced secrets to global Fluent Bit environment secret.
+func (s *LogPipelineSyncer) syncVariables(ctx context.Context, logPipeline *telemetryv1alpha1.LogPipeline) (bool, error) {
+	log := logf.FromContext(ctx)
+	oldSecret, err := s.getOrCreateSecret(ctx, s.DaemonSetConfig.FluentBitEnvSecret)
 	if err != nil {
 		return false, err
 	}
 
-	changed := false
-	needsSecretUpdate := false
-	for _, secretRef := range logPipeline.Spec.Variables {
-		referencedSecret, err := s.fetchSecret(ctx, secretRef.ValueFrom)
-		if err != nil {
-			continue
-		}
-		// Check if any secret has been changed
-		secret, changed = s.syncSecretsRef(ctx, *referencedSecret, secret, logPipeline, secretRef)
-		if changed {
-			needsSecretUpdate = true
-		}
+	newSecret := oldSecret
+	newSecret.Data = make(map[string][]byte)
+
+	var logPipelines telemetryv1alpha1.LogPipelineList
+	err = s.List(ctx, &logPipelines)
+	if err != nil {
+		return false, err
 	}
 
+	if logPipeline.DeletionTimestamp != nil {
+		controllerutil.RemoveFinalizer(logPipeline, secretRefsFinalizer)
+	}
+
+	for _, l := range logPipelines.Items {
+		for _, varRef := range l.Spec.Variables {
+			var referencedSecret *corev1.Secret
+			if isSecretRef(varRef.ValueFrom) {
+				referencedSecret, err = s.fetchSecret(ctx, varRef.ValueFrom)
+				if err != nil {
+					continue
+				}
+				// Check if any secret has been changed
+				secretData, err := s.fetchSecretData(ctx, *referencedSecret, varRef)
+				if err != nil {
+					log.Error(err, "unable to fetch secrets")
+					return false, err
+				}
+
+				for k, v := range secretData {
+					newSecret.Data[k] = v
+				}
+			}
+		}
+	}
+	log.Info("comparing secret data", "newSecret", newSecret.Data, "oldSecret", oldSecret.Data)
+
+	needsSecretUpdate := checkIfSecrethasChanged(newSecret.Data, oldSecret.Data)
+	log.Info("needSecretUpdate", "val", needsSecretUpdate)
 	if !needsSecretUpdate {
 		return false, nil
 	}
 
-	// Check if the secret keys have been changed. In such a case we need to remove the secret key that is not present any more.
-	secret, err = s.removeObsolteSecretKeys(ctx, secret)
-	if err != nil {
+	if err = s.Update(ctx, &newSecret); err != nil {
+		log.Error(err, err.Error())
 		return false, err
 	}
-
-	if err = s.Update(ctx, &secret); err != nil {
-		return false, err
-	}
-
+	log.Info("needssecret update", "val", needsSecretUpdate)
 	return needsSecretUpdate, nil
 }
 
-func (s *LogPipelineSyncer) removeObsolteSecretKeys(ctx context.Context, secret corev1.Secret) (corev1.Secret, error) {
-	//log := logf.FromContext(ctx)
-	var logPipelines telemetryv1alpha1.LogPipelineList
-	deleteKeyMap := make(map[string]bool)
-	err := s.List(ctx, &logPipelines)
-	if err != nil {
-		return secret, err
+func checkIfSecrethasChanged(newSecret, oldSecret map[string][]byte) bool {
+
+	if len(newSecret) != len(oldSecret) {
+		return true
 	}
-	for key, _ := range secret.Data {
-		for _, l := range logPipelines.Items {
-			for _, v := range l.Spec.Variables {
-				if key != v.Name {
-					deleteKeyMap[key] = true
-				} else {
-					deleteKeyMap[key] = false
-					break
-				}
-			}
+	for k, newSecretVal := range newSecret {
+		if oldSecretVal, ok := oldSecret[k]; !ok || bytes.Compare(newSecretVal, oldSecretVal) != 0 {
+			return true
 		}
 	}
-	for k, v := range deleteKeyMap {
-		if v {
-			delete(secret.Data, k)
-		}
-	}
-	return secret, err
+	return false
 }
 
-func (s *LogPipelineSyncer) syncSecretsRef(ctx context.Context, referencedSecret, secret corev1.Secret, logPipeline *telemetryv1alpha1.LogPipeline, secretRef telemetryv1alpha1.VariableReference) (corev1.Secret, bool) {
-	var changed bool
+//func (s *LogPipelineSyncer) removeObsolteSecretKeys(ctx context.Context, secret corev1.Secret) (corev1.Secret, error) {
+//	//log := logf.FromContext(ctx)
+//	var logPipelines telemetryv1alpha1.LogPipelineList
+//	deleteKeyMap := make(map[string]bool)
+//	err := s.List(ctx, &logPipelines)
+//	if err != nil {
+//		return secret, err
+//	}
+//	for key, _ := range secret.Data {
+//		for _, l := range logPipelines.Items {
+//			for _, v := range l.Spec.Variables {
+//				if key != v.Name {
+//					deleteKeyMap[key] = true
+//				} else {
+//					deleteKeyMap[key] = false
+//					break
+//				}
+//			}
+//		}
+//	}
+//	for k, v := range deleteKeyMap {
+//		if v {
+//			delete(secret.Data, k)
+//		}
+//	}
+//	return secret, err
+//}
+
+func (s *LogPipelineSyncer) fetchSecretData(ctx context.Context, referencedSecret corev1.Secret, secretRef telemetryv1alpha1.VariableReference) (map[string][]byte, error) {
+	//var changed bool
 	valFrom := secretRef.ValueFrom
+	data := make(map[string][]byte)
 	for k, v := range referencedSecret.Data {
 		if k == valFrom.SecretKey.Key {
-			if logPipeline.DeletionTimestamp != nil {
-				if _, hasKey := secret.Data[secretRef.Name]; hasKey {
-					delete(secret.Data, secretRef.Name)
-					controllerutil.RemoveFinalizer(logPipeline, secretRefsFinalizer)
-					changed = true
-				}
-			} else {
-				if secret.Data == nil {
-					data := make(map[string][]byte)
-					data[secretRef.Name] = v
-					secret.Data = data
-					changed = true
-				} else {
-					if oldEnv, hasKey := secret.Data[secretRef.Name]; !hasKey || !bytes.Equal(oldEnv, v) {
-						secret.Data[secretRef.Name] = v
-						changed = true
-					}
-				}
-				if !controllerutil.ContainsFinalizer(logPipeline, secretRefsFinalizer) {
-					controllerutil.AddFinalizer(logPipeline, secretRefsFinalizer)
-					changed = true
-				}
-			}
+			data[secretRef.Name] = v
+			return data, nil
 		}
 	}
-	return secret, changed
+	return data, fmt.Errorf("the key %s cannot be found in the given secret %s", valFrom.SecretKey.Key, referencedSecret.Name)
+
+	//for k, v := range referencedSecret.Data {
+	//	if k == valFrom.SecretKey.Key {
+	//		if logPipeline.DeletionTimestamp != nil {
+	//			if _, hasKey := secret.Data[secretRef.Name]; hasKey {
+	//				delete(secret.Data, secretRef.Name)
+	//				controllerutil.RemoveFinalizer(logPipeline, secretRefsFinalizer)
+	//				changed = true
+	//			}
+	//		} else {
+	//			if secret.Data == nil {
+	//				data[secretRef.Name] = v
+	//				secret.Data = data
+	//				changed = true
+	//				break
+	//			} else {
+	//				if oldEnv, hasKey := secret.Data[secretRef.Name]; !hasKey || !bytes.Equal(oldEnv, v) {
+	//					secret.Data[secretRef.Name] = v
+	//					changed = true
+	//				}
+	//			}
+	//			if !controllerutil.ContainsFinalizer(logPipeline, secretRefsFinalizer) {
+	//				controllerutil.AddFinalizer(logPipeline, secretRefsFinalizer)
+	//				changed = true
+	//			}
+	//		}
+	//	}
+	//
+	//}
+	//return secret, changed
 }
 
 func (s *LogPipelineSyncer) getOrCreateConfigMap(ctx context.Context, name types.NamespacedName) (corev1.ConfigMap, error) {

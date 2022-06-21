@@ -46,6 +46,7 @@ type LogPipelineValidator struct {
 	client.Client
 
 	fluentBitConfigMap types.NamespacedName
+	variablesValidator fluentbit.VariablesValidator
 	configValidator    fluentbit.ConfigValidator
 	pluginValidator    fluentbit.PluginValidator
 	emitterConfig      fluentbit.EmitterConfig
@@ -58,6 +59,7 @@ func NewLogPipeLineValidator(
 	client client.Client,
 	fluentBitConfigMap string,
 	namespace string,
+	variablesValidator fluentbit.VariablesValidator,
 	configValidator fluentbit.ConfigValidator,
 	pluginValidator fluentbit.PluginValidator,
 	emitterConfig fluentbit.EmitterConfig,
@@ -69,10 +71,11 @@ func NewLogPipeLineValidator(
 			Name:      fluentBitConfigMap,
 			Namespace: namespace,
 		},
-		configValidator: configValidator,
-		pluginValidator: pluginValidator,
-		fsWrapper:       fsWrapper,
-		emitterConfig:   emitterConfig,
+		variablesValidator: variablesValidator,
+		configValidator:    configValidator,
+		pluginValidator:    pluginValidator,
+		fsWrapper:          fsWrapper,
+		emitterConfig:      emitterConfig,
 	}
 }
 
@@ -141,7 +144,7 @@ func (v *LogPipelineValidator) validateLogPipeline(ctx context.Context, currentB
 		return err
 	}
 
-	if err = fluentbit.ValidateVariables(logPipeline, &logPipelines); err != nil {
+	if err = v.variablesValidator.Validate(ctx, logPipeline, &logPipelines); err != nil {
 		log.Error(err, "Failed to validate variables")
 		return err
 	}
