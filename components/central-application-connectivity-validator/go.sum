@@ -126,8 +126,6 @@ github.com/evanphx/json-patch v4.12.0+incompatible/go.mod h1:50XU6AFN0ol/bzJsmQL
 github.com/fatih/color v1.7.0/go.mod h1:Zm6kSWBoL9eyXnKyktHP6abPY2pDugNf5KwzbycvMj4=
 github.com/form3tech-oss/jwt-go v3.2.2+incompatible/go.mod h1:pbq4aXjuKjdthFRnoDwaVPLA+WlJuPGy+QneDUgJi2k=
 github.com/form3tech-oss/jwt-go v3.2.3+incompatible/go.mod h1:pbq4aXjuKjdthFRnoDwaVPLA+WlJuPGy+QneDUgJi2k=
-github.com/franpog859/kyma/components/application-operator v0.0.0-20220617091550-a2f359bebb52 h1:uqYFX7buJ/qv+V4cpKYXelyH8SPnCxBVC+vg+qPzLF0=
-github.com/franpog859/kyma/components/application-operator v0.0.0-20220617091550-a2f359bebb52/go.mod h1:8YuPAgJ82WverEJEN3BRTy6cK2CpcBoXPB5xd/RkDWs=
 github.com/fsnotify/fsnotify v1.4.7/go.mod h1:jwhsz4b93w/PPRr/qN1Yymfu8t87LnFCMoQvtojpjFo=
 github.com/fsnotify/fsnotify v1.4.9 h1:hsms1Qyu0jgnwNXIxa+/V/PDsU6CfLf6CNO8H7IWoS4=
 github.com/fsnotify/fsnotify v1.4.9/go.mod h1:znqG4EE+3YCdAaPaxE2ZRY/06pZUdp0tY4IgpuI1SZQ=
@@ -307,6 +305,8 @@ github.com/kr/text v0.2.0 h1:5Nx0Ya0ZqY2ygV366QzturHI13Jq95ApcVaJBhpS+AY=
 github.com/kr/text v0.2.0/go.mod h1:eLer722TekiGuMkidMxC/pM04lWEeraHUUmBw8l2grE=
 github.com/kyma-project/kyma/common/logging v0.0.0-20210318081026-665ca4cda3f6 h1:fp1f90G+uyyOhTe/k4m8Pc74nV/za0tC6TRGqDZYUoM=
 github.com/kyma-project/kyma/common/logging v0.0.0-20210318081026-665ca4cda3f6/go.mod h1:7FWH0Lyls2xumj836aa+LVP8jhnJSv6wSlxC+2HAJ1s=
+github.com/kyma-project/kyma/components/application-operator v0.0.0-20220621091145-14285840357e h1:FFkopoVhX22+UvXXMKPcizwgm2kyT87utIcMdqDgJ6Q=
+github.com/kyma-project/kyma/components/application-operator v0.0.0-20220621091145-14285840357e/go.mod h1:4jh1Qn1DLbQRdCHqEdHsV4Tk9b6L4i9nhgGdEc2XaIg=
 github.com/magiconair/properties v1.8.1/go.mod h1:PppfXfuXeibc/6YijjN8zIbojt8czPbwD3XqdrwzmxQ=
 github.com/mailru/easyjson v0.0.0-20190614124828-94de47d64c63/go.mod h1:C1wdFJiN94OJF2b5HbByQZoLdCWB1Yqtg26g4irojpc=
 github.com/mailru/easyjson v0.0.0-20190626092158-b2ccc519800e/go.mod h1:C1wdFJiN94OJF2b5HbByQZoLdCWB1Yqtg26g4irojpc=
