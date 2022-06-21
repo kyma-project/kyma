@@ -24,7 +24,7 @@ tests:
     resources:
       requests:
         memory: 128Mi
-        cpu: 100m
+        cpu: 10m
       limits:
         memory: 256Mi
         cpu: 200m
@@ -40,7 +40,7 @@ tests:
   resources:
     requests:
       memory: 32Mi
-      cpu: 100m
+      cpu: 10m
     limits:
       memory: 64Mi
       cpu: 200m
@@ -62,7 +62,6 @@ global:
     version: "{{ .Values.global.images.function_controller.version }}"
     app.kubernetes.io/name: '{{ template "name" . }}'
     app.kubernetes.io/instance: "{{ .Release.Name }}"
-    app.kubernetes.io/managed-by: "{{ .Release.Service }}"
     app.kubernetes.io/version: "{{ .Values.global.images.function_controller.version }}"
     helm.sh/chart: '{{ include "chart" . }}'
   dockerServicePort: 5000
@@ -77,13 +76,13 @@ global:
       directory: "tpi"
     function_controller:
       name: "function-controller"
-      version: "PR-14458"
+      version: "PR-14486"
     function_webhook:
       name: "function-webhook"
-      version: "PR-14458"
+      version: "PR-14486"
     function_build_init:
       name: "function-build-init"
-      version: "PR-14458"
+      version: "PR-14486"
     function_runtime_nodejs12:
       name: "function-runtime-nodejs12"
       version: "PR-14334"
@@ -111,7 +110,7 @@ global:
   testImages:
     function_controller_test:
       name: "function-controller-test"
-      version: "91a9a810"
+      version: "PR-14572"
     git_server:
       name: "gitserver"
       version: "708f6a87"
@@ -163,7 +162,7 @@ containers:
         cpu: 300m
         memory: 160Mi #This is temporary. helm3 is using secrets as storage by default. I talked already with michalhudy to exclude secrets with helm labels from watching.
       requests:
-        cpu: 75m
+        cpu: 10m
         memory: 32Mi
     containerSecurityContext:
       privileged: false
@@ -209,6 +208,8 @@ containers:
         value: "5"
       logLevel:
         value: "info"
+      logFormat:
+        value: "json"
       healthzLivenessTimeout:
         value: "10s"
 
@@ -250,9 +251,6 @@ grafanaDashboard:
   enabled: true
   functionMetrics:
     enabled: false
-
-usageKind:
-  name: serverless-function
 
 dockerRegistry:
   enableInternal: true

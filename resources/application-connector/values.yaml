@@ -30,9 +30,6 @@ global:
   containerRegistry:
     path: eu.gcr.io/kyma-project
   images:
-    application_broker:
-      name: "application-broker"
-      version: "35ab62e8"
     application_connectivity_validator:
       name: "application-connectivity-validator"
       version: "3cffd7d4"

@@ -9,7 +9,6 @@ require (
 	github.com/kyma-incubator/compass/components/connector v0.0.0-20220104122431-99ed924ea212
 	github.com/kyma-incubator/compass/components/director v0.0.0-20220126084901-92232f5eced0
 	github.com/kyma-project/kyma/components/application-operator v0.0.0-20211110074047-13002528fca2
-	github.com/kyma-project/rafter v0.0.0-20200626063334-5a8dd27d1976
 	github.com/machinebox/graphql v0.2.3-0.20181106130121-3a9253180225
 	github.com/pkg/errors v0.9.1
 	github.com/sirupsen/logrus v1.8.1
