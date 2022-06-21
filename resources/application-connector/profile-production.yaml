@@ -1,13 +1,3 @@
-application-operator:
-  controller:
-    resources:
-      profile: "production"
-      limits:
-        cpu: 100m
-        memory: 256Mi
-      requests:
-        cpu: 10m
-        memory: 128Mi
 central-application-gateway:
   autoscaling:
     enable: true
