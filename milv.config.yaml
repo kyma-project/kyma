@@ -1,5 +1,5 @@
 #TODO: remove https://dashboard.kyma-project, https://kiali.kyma.example.com/oauth2/callback  after it's available
-external-links-to-ignore: [ "localhost", "kyma.local", "https://dashboard.kyma-project", "https://kiali.kyma.example.com/oauth2/callback", "https://grafana.{DOMAIN", "CLUSTER_NAME.kyma.cluster.cx", "$yourClusterDomain", "svc.cluster.local:8081", "https://goreportcard.com", "orders.com", "azure.microsoft.com", "$KYMA_RELEASE_VERSION", "$DOMAIN", "$LATEST", "http://xip.io", "https://github.com/kyma-project/rafter", "https://storage.{DOMAIN}/minio", "https://$", "https://commerce-orders-service", "http://azure.com" ]
+external-links-to-ignore: [ "localhost", "kyma.local", "https://dashboard.kyma-project", "https://kiali.kyma.example.com/oauth2/callback", "https://grafana.{DOMAIN", "CLUSTER_NAME.kyma.cluster.cx", "$yourClusterDomain", "svc.cluster.local:8081", "https://goreportcard.com", "orders.com", "azure.microsoft.com", "$KYMA_RELEASE_VERSION", "$DOMAIN", "$LATEST", "http://xip.io", "https://storage.{DOMAIN}/minio", "https://$", "https://commerce-orders-service", "http://azure.com" ]
 files-to-ignore: [ "/vendor/", "/testdata/" ]
 timeout: 60
 request-repeats: 5
@@ -20,9 +20,6 @@ files:
   - path: "./kyma/tools/stability-checker/README.md"
     config:
       external-links-to-ignore: [ "https://github.com/kyma-project/stability-checker/raw/{branchName}/deploy/chart/stability-checker-0.1.0.tgz" ]
-  - path: "./kyma/components/helm-broker/docs/proposals/addon-git-support.md"
-    config:
-      external-links-to-ignore: [ "https://github.com/kyma-project/addons/blob/master/addons/index.yaml", "https://gitlab.com/kyma-project/addons/blob/master/addons/index.yaml", "https://bitbucket.org/kyma-project/addons/src/master/addons/index.yaml" ]
   - path: "./kyma/resources/core/charts/monitoring/charts/alertmanager/README.md"
     config:
       external-links-to-ignore: [ "https://alert.victorops.com/integrations/generic/20131114/alert" ]
@@ -38,9 +35,6 @@ files:
   - path: "./kyma/docs/kyma/04-06-gke-xip.io-domain.md"
     config:
       external-links-to-ignore: [ "https://console.{WILDCARD_DNS}.xip.io" ]
-  - path: "./kyma/docs/helm-broker/08-01-configure-hb.md"
-    config:
-      external-links-to-ignore: [ "https://{host}/{path}/{bundle_repo_version" ]
   - path: "./kyma/docs/migration-guides/0.8-0.9.md"
     config:
       external-links-to-ignore: [ "https://github.com/kyma-project/kyma/releases/tag/0.9.0" ]

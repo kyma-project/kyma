@@ -45,8 +45,6 @@ clusterRoles:
     ory:
       - "oathkeeper.ory.sh"
       - "hydra.ory.sh"
-    rafter:
-      - "rafter.kyma-project.io"
     kymaEventing: []
     svcat:
       - "settings.svcat.k8s.io"

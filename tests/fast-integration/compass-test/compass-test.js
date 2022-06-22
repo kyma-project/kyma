@@ -18,7 +18,6 @@ const {
 
 describe('Kyma with Compass test', async function() {
   const director = new DirectorClient(DirectorConfig.fromEnv());
-
   const suffix = genRandom(4);
   const appName = `app-${suffix}`;
   const runtimeName = `kyma-${suffix}`;

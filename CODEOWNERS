@@ -47,7 +47,6 @@
 /installation/resources/crds/eventing @k15r @nachtmaar @marcobebway @mfaizanse @friedrichwilken @vladislavpaskar @raypinto @lilitgh
 /installation/resources/crds/monitoring @a-thaler @rakesh-garimella @skhalash @chrkl @lindnerby @dennis-ge @lilitgh
 /installation/resources/crds/ory @strekm @werdes72 @mjakobczyk @veichtj @dariusztutaj @cnvergence @piotrkpc
-/installation/resources/crds/rafter @m00g3n @pPrecel @dbadura @kwiatekus @moelsayed @cortey
 /installation/resources/crds/serverless @m00g3n @pPrecel @dbadura @kwiatekus @moelsayed @cortey
 /installation/resources/crds/service-catalog @wozniakjan @PK85 @piotrmiskiewicz @szwedm @ralikio @hanngos @tillknuesting
 /installation/resources/crds/service-catalog-addons @wozniakjan @PK85 @piotrmiskiewicz @szwedm @ralikio @hanngos @tillknuesting
@@ -74,7 +73,6 @@
 /resources/logging @a-thaler @rakesh-garimella @skhalash @chrkl @lindnerby @dennis-ge @lilitgh
 /resources/monitoring @a-thaler @rakesh-garimella @skhalash @chrkl @lindnerby @dennis-ge @lilitgh
 /resources/ory @strekm @werdes72 @mjakobczyk @veichtj @dariusztutaj @cnvergence @piotrkpc
-/resources/rafter @m00g3n @pPrecel @dbadura @kwiatekus @moelsayed @cortey
 /resources/serverless @m00g3n @pPrecel @dbadura @kwiatekus @moelsayed @cortey
 /resources/service-catalog @wozniakjan @PK85 @piotrmiskiewicz @szwedm @ralikio @hanngos @tillknuesting
 /resources/service-catalog-addons @wozniakjan @PK85 @piotrmiskiewicz @szwedm @ralikio @hanngos @tillknuesting
@@ -104,7 +102,6 @@
 
 # performance tests
 /tests/perf @a-thaler @clebs @rakesh-garimella @skhalash @jeremyharisch @chrkl @lindnerby @dennis-ge @lilitgh
-/tests/rafter @m00g3n @pPrecel @dbadura @kwiatekus @moelsayed @cortey
 /tests/serverless-bench @m00g3n @pPrecel @dbadura @kwiatekus @moelsayed @cortey
 /tests/service-catalog @wozniakjan @PK85 @piotrmiskiewicz @szwedm @ralikio @hanngos @tillknuesting
 

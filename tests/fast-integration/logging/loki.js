@@ -17,13 +17,10 @@ async function checkCommerceMockLogs(startTimestamp) {
 
 async function checkKymaLogs(startTimestamp) {
   const systemLabel = '{namespace="kyma-system"}';
-  const integrationLabel = '{namespace="kyma-integration"}';
 
   const kymaSystemLogsPresent = await logsPresentInLoki(systemLabel, startTimestamp);
-  const kymaIntegrationLogsPresent = await logsPresentInLoki(integrationLabel, startTimestamp);
 
   assert.isTrue(kymaSystemLogsPresent, 'No logs from kyma-system namespace present in Loki');
-  assert.isTrue(kymaIntegrationLogsPresent, 'No logs from kyma-integration namespace present in Loki');
 }
 
 async function checkRetentionPeriod() {

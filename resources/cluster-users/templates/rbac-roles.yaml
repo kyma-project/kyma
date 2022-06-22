@@ -18,7 +18,6 @@ rules:
     - "list"
 - apiGroups:
     - "servicecatalog.k8s.io"
-    - "rafter.kyma-project.io"
   resources:
     - "*"
   verbs:
@@ -152,8 +151,6 @@ aggregationRule:
       rbac.authorization.kyma-project.io/aggregate-to-addons-view: "true"
   - matchLabels:
       rbac.authorization.kyma-project.io/aggregate-to-ory-view: "true"
-  - matchLabels:
-      rbac.authorization.kyma-project.io/aggregate-to-kyma-rafter-view: "true"
   - matchLabels:
       rbac.authorization.kyma-project.io/aggregate-to-gardener-cert-view: "true"
   - matchLabels:
