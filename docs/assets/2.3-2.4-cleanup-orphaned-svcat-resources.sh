@@ -23,7 +23,7 @@ kubectl -n kyma-integration delete serviceaccount application-operator
 
 kubectl delete serviceinstance --all-namespaces --all
 
-echo "Deleting rafter"
+echo "Deleting Rafter"
 
 kubectl delete crd assetgroups.rafter.kyma-project.io
 kubectl delete crd assets.rafter.kyma-project.io
