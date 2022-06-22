@@ -8,11 +8,11 @@ require (
 	github.com/kofalt/go-memoize v0.0.0-20200917044458-9b55a8d73e1c
 	github.com/kyma-incubator/compass/components/connector v0.0.0-20220104122431-99ed924ea212
 	github.com/kyma-incubator/compass/components/director v0.0.0-20220126084901-92232f5eced0
-	github.com/kyma-project/kyma/components/application-operator v0.0.0-20211110074047-13002528fca2
+	github.com/kyma-project/kyma/components/application-operator v0.0.0-20220621091145-14285840357e
 	github.com/machinebox/graphql v0.2.3-0.20181106130121-3a9253180225
 	github.com/pkg/errors v0.9.1
 	github.com/sirupsen/logrus v1.8.1
-	github.com/stretchr/testify v1.7.0
+	github.com/stretchr/testify v1.7.4
 	github.com/vrischmann/envconfig v1.3.0
 	k8s.io/api v0.24.2
 	k8s.io/apimachinery v0.24.2
@@ -63,7 +63,7 @@ require (
 	github.com/prometheus/common v0.28.0 // indirect
 	github.com/prometheus/procfs v0.6.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
-	github.com/stretchr/objx v0.3.0 // indirect
+	github.com/stretchr/objx v0.4.0 // indirect
 	github.com/vektah/gqlparser/v2 v2.1.0 // indirect
 	github.com/xeipuuv/gojsonpointer v0.0.0-20190905194746-02993c407bfb // indirect
 	github.com/xeipuuv/gojsonreference v0.0.0-20180127040603-bd5ef7bd5415 // indirect
@@ -80,7 +80,7 @@ require (
 	google.golang.org/protobuf v1.27.1 // indirect
 	gopkg.in/inf.v0 v0.9.1 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
-	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b // indirect
+	gopkg.in/yaml.v3 v3.0.1 // indirect
 	k8s.io/apiextensions-apiserver v0.23.0 // indirect
 	k8s.io/component-base v0.23.0 // indirect
 	k8s.io/klog/v2 v2.60.1 // indirect
@@ -95,5 +95,4 @@ replace (
 	github.com/containerd/containerd => github.com/containerd/containerd v1.4.11
 	github.com/docker/distribution => github.com/docker/distribution v0.0.0-20191216044856-a8371794149d
 	github.com/docker/docker => github.com/docker/docker v20.10.8+incompatible
-	github.com/kyma-project/kyma/components/application-operator => github.com/franpog859/kyma/components/application-operator v0.0.0-20220617091550-a2f359bebb52
 )
