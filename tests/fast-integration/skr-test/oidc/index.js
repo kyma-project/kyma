@@ -103,6 +103,45 @@ function oidcE2ETest(options, getShootInfoFunc) {
       await ensureKymaAdminBindingExistsForUser(options.administrators1[1]);
       await ensureKymaAdminBindingDoesNotExistsForUser(options.kebUserId);
     });
+
+    it('Update SKR service instance with initial OIDC config and admins', async function() {
+      this.timeout(updateTimeout);
+      const customParams = {
+        oidc: givenOidcConfig,
+        administrators: options.kebUserId,
+      };
+      const skr = await updateSKR(keb,
+          kcp,
+          gardener,
+          options.instanceID,
+          shoot.name,
+          customParams,
+          updateTimeout,
+          null,
+          false);
+
+      shoot = skr.shoot;
+    });
+
+    it('Should get Runtime Status after updating OIDC config and admins', async function() {
+      const runtimeStatus = await kcp.getRuntimeStatusOperations(options.instanceID);
+      console.log(`\nRuntime status: ${runtimeStatus}`);
+      await kcp.reconcileInformationLog(runtimeStatus);
+    });
+
+    it('Assure updated (with initial values) OIDC config is applied on shoot cluster', async function() {
+      ensureValidShootOIDCConfig(shoot, givenOidcConfig);
+    });
+
+    it('Assure updated (with initial values) OIDC config is part of kubeconfig', async function() {
+      await ensureValidOIDCConfigInCustomerFacingKubeconfig(keb, options.instanceID, givenOidcConfig);
+    });
+
+    it('Assure only initial cluster admins are configured', async function() {
+      await ensureKymaAdminBindingDoesNotExistsForUser(options.administrators1[0]);
+      await ensureKymaAdminBindingDoesNotExistsForUser(options.administrators1[1]);
+      await ensureKymaAdminBindingExistsForUser(options.kebUserId);
+    });
   });
 }
 

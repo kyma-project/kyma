@@ -1,6 +1,7 @@
 const {
   gatherOptions,
   commerceMockTest,
+  oidcE2ETest,
   withCustomParams,
 } = require('../skr-test');
 const {
@@ -45,6 +46,7 @@ describe('SKR-Upgrade-test', function() {
   });
 
   it('Execute Commerce Mock Tests', async function() {
+    oidcE2ETest(options, shoot);
     commerceMockTest(options);
   });
 
@@ -53,6 +55,7 @@ describe('SKR-Upgrade-test', function() {
   });
 
   it('Execute commerceMockTests', async function() {
+    oidcE2ETest(options, shoot);
     commerceMockTest(options);
   });
 
