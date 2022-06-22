@@ -3,6 +3,7 @@ package fluentbit
 import (
 	"context"
 	"fmt"
+
 	telemetryv1alpha1 "github.com/kyma-project/kyma/components/telemetry-operator/api/v1alpha1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/types"
@@ -25,6 +26,9 @@ func NewVariablesValidator(client client.Client) VariablesValidator {
 }
 
 func (v *variablesValidator) Validate(context context.Context, logPipeline *telemetryv1alpha1.LogPipeline, logPipelines *telemetryv1alpha1.LogPipelineList) error {
+	if len(logPipeline.Spec.Variables) == 0 {
+		return nil
+	}
 	for _, l := range logPipelines.Items {
 		if l.Name != logPipeline.Name {
 			for _, variable := range l.Spec.Variables {
