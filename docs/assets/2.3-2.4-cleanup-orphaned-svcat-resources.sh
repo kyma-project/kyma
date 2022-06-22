@@ -1,4 +1,12 @@
 #!/usr/bin/env bash
+echo "Deleting deprecated Application Connector resources"
+
+kubectl -n kyma-integration delete deployment application-broker
+kubectl -n kyma-integration delete statefulset application-operator
+# Make sure that Application Operator is removed before triggering the Service Instances deletion
+kubectl -n kyma-integration wait --for delete pod --selector=control-plane=application-operator
+kubectl delete serviceinstance --all-namespaces --all
+
 echo "Deleting rafter"
 
 kubectl delete crd assetgroups.rafter.kyma-project.io
