@@ -8,6 +8,8 @@ kubectl -n kyma-integration delete authorizationpolicy application-connector-app
 kubectl delete clusterrolebinding application-broker
 kubectl delete clusterrole application-broker
 kubectl -n kyma-integration delete serviceaccount application-broker
+# Remove Application Broker related Authorization Policy from Compass Runtime Agent
+kubectl -n compass-system delete authorizationpolicy compass-runtime-agent
 
 kubectl -n kyma-integration delete statefulset application-operator
 # Make sure that Application Operator is removed before triggering the Service Instances deletion
@@ -20,8 +22,6 @@ kubectl delete podsecuritypolicy application-operator
 kubectl delete clusterrolebinding application-operator
 kubectl delete clusterrole application-operator
 kubectl -n kyma-integration delete serviceaccount application-operator
-
-kubectl delete serviceinstance --all-namespaces --all
 
 echo "Deleting Rafter"
 
