@@ -2,9 +2,25 @@
 echo "Deleting deprecated Application Connector resources"
 
 kubectl -n kyma-integration delete deployment application-broker
+kubectl -n kyma-integration delete service application-broker
+kubectl -n kyma-integration delete configmap app-broker-config-map
+kubectl -n kyma-integration delete authorizationpolicy application-connector-application-broker
+kubectl delete clusterrolebinding application-broker
+kubectl delete clusterrole application-broker
+kubectl -n kyma-integration delete serviceaccount application-broker
+
 kubectl -n kyma-integration delete statefulset application-operator
 # Make sure that Application Operator is removed before triggering the Service Instances deletion
 kubectl -n kyma-integration wait --for delete pod --selector=control-plane=application-operator
+kubectl -n kyma-integration delete service application-operator-health
+kubectl -n kyma-integration delete service application-operator-service
+kubectl -n kyma-integration delete virtualservice application-operator
+kubectl -n kyma-integration delete destinationrule application-operator-health-rule
+kubectl delete podsecuritypolicy application-operator
+kubectl delete clusterrolebinding application-operator
+kubectl delete clusterrole application-operator
+kubectl -n kyma-integration delete serviceaccount application-operator
+
 kubectl delete serviceinstance --all-namespaces --all
 
 echo "Deleting rafter"
