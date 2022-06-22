@@ -54,7 +54,7 @@ describe('SKR test', function() {
       );
       shoot = await getSKRConfig(instanceID);
     } else {
-      debug("Provisioning new SKR instance...8")
+      debug("Provisioning new SKR instance...")
       shoot = await provisionSKRInstance(options, provisioningTimeout);
     }
     debug("Preparing compass resources on the SKR instance...")
