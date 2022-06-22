@@ -5,7 +5,7 @@ import (
 )
 
 type Config struct {
-	LogLevel          string `envconfig:"default=info"`
+	LogLevel          string `envconfig:"default=debug"`
 	CaCertPath        string `envconfig:"default=/etc/secret-volume/ca.cert"`
 	ServerCertPath    string `envconfig:"default=/etc/secret-volume/server.cert"`
 	ServerKeyPath     string `envconfig:"default=/etc/secret-volume/server.key"`

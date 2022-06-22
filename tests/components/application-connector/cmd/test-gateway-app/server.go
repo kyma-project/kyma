@@ -36,10 +36,10 @@ func main() {
 	apiRouter := mux.NewRouter()
 
 	basicAuthCredentials := test_api.BasicAuthCredentials{User: cfg.BasicAuthUser, Password: cfg.BasicAuthPassword}
-
-	test_api.AddAPIHandler(apiRouter, oauthTokesCache, csrfTokensCache, mutex, basicAuthCredentials)
-
 	oauthCredentials := test_api.OAuthCredentials{ClientID: cfg.OAuthClientID, ClientSecret: cfg.OAuthClientSecret}
+
+	test_api.AddAPIHandler(apiRouter, oauthTokesCache, csrfTokensCache, mutex, basicAuthCredentials, oauthCredentials)
+
 	test_api.AddOAuthTokensHandler(apiRouter, oauthTokesCache, csrfTokensCache, oauthCredentials, mutex)
 
 	tokensRouter := mux.NewRouter()

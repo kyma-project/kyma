@@ -10,7 +10,7 @@ import (
 	"sync"
 )
 
-func AddAPIHandler(router *mux.Router, oauthTokesCache map[string]bool, csrfTokensCache map[string]bool, mutex *sync.RWMutex, basicAuthCredentials BasicAuthCredentials) {
+func AddAPIHandler(router *mux.Router, oauthTokesCache map[string]bool, csrfTokensCache map[string]bool, mutex *sync.RWMutex, basicAuthCredentials BasicAuthCredentials, credentials OAuthCredentials) {
 
 	alwaysOKHandler := func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
@@ -25,6 +25,7 @@ func AddAPIHandler(router *mux.Router, oauthTokesCache map[string]bool, csrfToke
 	router.HandleFunc("/v1/api/oauth/ok", NewOAuthHandler(oauthTokesCache, mutex, alwaysOKHandler)).Methods("GET", "PUT", "POST")
 	router.HandleFunc("/v1/api/oauth/echo", NewOAuthHandler(oauthTokesCache, mutex, echoHandler)).Methods("GET", "PUT", "POST")
 	router.HandleFunc("/v1/health", alwaysOKHandler).Methods("GET")
+	router.HandleFunc("/v1/server/oauth/token", NewOAuthServerHandler(oauthTokesCache, credentials, mutex)).Methods("POST")
 }
 
 func NewOAuthHandler(oauthTokesCache map[string]bool, mutex *sync.RWMutex, next http.HandlerFunc) http.HandlerFunc {
@@ -70,7 +71,7 @@ func NewBasicAuthHandler(credentials BasicAuthCredentials, next http.HandlerFunc
 		}
 
 		if user != credentials.User || password != credentials.Password {
-			handleError(w, http.StatusForbidden, "Incorrect username or Password")
+			handleError(w, http.StatusForbidden, "Incorrect username or Password"+user+" "+password)
 			return
 		}
 

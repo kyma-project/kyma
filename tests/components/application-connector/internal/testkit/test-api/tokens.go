@@ -10,7 +10,6 @@ import (
 )
 
 func AddOAuthTokensHandler(router *mux.Router, oauthTokesCache map[string]bool, csrfTokensCache map[string]bool, credentials OAuthCredentials, mutex *sync.RWMutex) {
-	router.HandleFunc("/v1/server/oauth/token", NewOAuthServerHandler(oauthTokesCache, credentials, mutex)).Methods("POST")
 }
 
 type OAuthCredentials struct {
@@ -43,6 +42,10 @@ func NewOAuthServerHandler(oauthTokesCache map[string]bool, credentials OAuthCre
 		clientSecret := r.FormValue(clientSecretKey)
 		grantType := r.FormValue(grantTypeKey)
 
+		fmt.Printf("clientID: " + clientID + "\n")
+		fmt.Printf("clientScret: " + clientSecret + "\n")
+		fmt.Printf("grantType: " + grantType + "\n")
+
 		if clientID != credentials.ClientID || clientSecret != credentials.ClientSecret || grantType != "client_credentials" {
 			handleError(w, http.StatusForbidden, "Invalid token")
 			return
@@ -62,6 +65,7 @@ func NewOAuthServerHandler(oauthTokesCache map[string]bool, credentials OAuthCre
 			return
 		}
 
+		fmt.Printf("token: ", token)
 		w.WriteHeader(http.StatusOK)
 	}
 }
