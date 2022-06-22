@@ -17,20 +17,6 @@ rules:
   verbs:
     - "list"
 - apiGroups:
-    - "servicecatalog.k8s.io"
-  resources:
-    - "*"
-  verbs:
-    - "list"
-    - "get"
-- apiGroups:
-    - servicecatalog.kyma-project.io
-  resources:
-    - usagekinds
-  verbs:
-    - "list"
-    - "get"
-- apiGroups:
     - applicationconnector.kyma-project.io
   resources:
     - applications
