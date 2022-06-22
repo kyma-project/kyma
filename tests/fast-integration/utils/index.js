@@ -217,6 +217,16 @@ async function getAllCRDs() {
   return body.items;
 }
 
+async function getClusteraddonsconfigurations() {
+  const path =
+    '/apis/addons.kyma-project.io/v1alpha1/clusteraddonsconfigurations';
+  const response = await k8sDynamicApi.requestPromise({
+    url: k8sDynamicApi.basePath + path,
+  });
+  const body = JSON.parse(response.body);
+  return body.items;
+}
+
 async function getSecrets(namespace) {
   const path = `/api/v1/namespaces/${namespace}/secrets`;
   const response = await k8sDynamicApi.requestPromise({
@@ -342,6 +352,18 @@ function waitForNamespace(name, timeout = 30000) {
       },
       timeout,
       `Waiting for ${name} namespace timeout 3000 ms)`,
+  );
+}
+
+function waitForClusterAddonsConfiguration(name, timeout = 90000) {
+  return waitForK8sObject(
+      '/apis/addons.kyma-project.io/v1alpha1/clusteraddonsconfigurations',
+      {},
+      (_type, _apiObj, watchObj) => {
+        return watchObj.object.metadata.name === name;
+      },
+      timeout,
+      `Waiting for ${name} ClusterAddonsConfiguration timeout (${timeout} ms)`,
   );
 }
 
@@ -1594,6 +1616,7 @@ module.exports = {
   k8sDelete,
   waitForK8sObject,
   waitForNamespace,
+  waitForClusterAddonsConfiguration,
   waitForVirtualService,
   waitForDeployment,
   waitForDaemonSet,
@@ -1610,6 +1633,7 @@ module.exports = {
   deleteAllK8sResources,
   getAllResourceTypes,
   getAllCRDs,
+  getClusteraddonsconfigurations,
   ensureKymaAdminBindingExistsForUser,
   ensureKymaAdminBindingDoesNotExistsForUser,
   getSecret,

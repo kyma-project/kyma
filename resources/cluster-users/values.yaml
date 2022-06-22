@@ -38,6 +38,8 @@ clusterRoles:
       - "kyma.cx"
       - "serverless.kyma-project.io"
       - "eventing.kyma-project.io"
+    addons:
+      - "addons.kyma-project.io"
     monitoring:
       - "monitoring.coreos.com"
     ory:
