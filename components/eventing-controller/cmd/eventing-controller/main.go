@@ -4,6 +4,8 @@ import (
 	"context"
 	"os"
 
+	pkgmetrics "github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/metrics"
+
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/env"
 
 	"github.com/go-logr/zapr"
@@ -48,16 +50,19 @@ func main() {
 	restCfg := ctrl.GetConfigOrDie()
 	scheme := runtime.NewScheme()
 
+	metricsCollector := pkgmetrics.NewCollector()
+	metricsCollector.RegisterMetrics()
+
 	var natsSubMgr subscriptionmanager.Manager
 	natsConfig := env.GetNatsConfig(opts.MaxReconnects, opts.ReconnectWait)
 	if opts.EnableJetStreamBackend {
-		natsSubMgr = jetstream.NewSubscriptionManager(restCfg, natsConfig, opts.MetricsAddr, ctrLogger)
+		natsSubMgr = jetstream.NewSubscriptionManager(restCfg, natsConfig, opts.MetricsAddr, metricsCollector, ctrLogger)
 		if err := jetstream.AddToScheme(scheme); err != nil {
 			setupLogger.Error(err, "start manager failed")
 			os.Exit(1)
 		}
 	} else {
-		natsSubMgr = nats.NewSubscriptionManager(restCfg, natsConfig, opts.MetricsAddr, ctrLogger)
+		natsSubMgr = nats.NewSubscriptionManager(restCfg, natsConfig, opts.MetricsAddr, metricsCollector, ctrLogger)
 		if err := nats.AddToScheme(scheme); err != nil {
 			setupLogger.Error(err, "start manager failed")
 			os.Exit(1)

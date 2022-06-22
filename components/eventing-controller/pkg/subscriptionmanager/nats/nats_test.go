@@ -6,6 +6,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/metrics"
+
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/eventtype"
 
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/subscriptionmanager"
@@ -70,7 +72,7 @@ func TestCleanup(t *testing.T) {
 		EventTypePrefix: controllertesting.EventTypePrefix,
 	}
 	subsConfig := env.DefaultSubscriptionConfig{MaxInFlightMessages: 9}
-	natsBackend := handlers.NewNats(envConf, subsConfig, defaultLogger)
+	natsBackend := handlers.NewNats(envConf, subsConfig, metrics.NewCollector(), defaultLogger)
 	natsSubMgr.Backend = natsBackend
 	err = natsSubMgr.Backend.Initialize(nil)
 	g.Expect(err).To(gomega.BeNil())

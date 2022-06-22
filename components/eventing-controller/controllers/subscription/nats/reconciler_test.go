@@ -9,6 +9,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/metrics"
+
 	utils "github.com/kyma-project/kyma/components/eventing-controller/controllers/subscription/testing"
 
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/sink"
@@ -640,10 +642,13 @@ func startReconciler(eventTypePrefix string, ens *natsTestEnsemble) *natsTestEns
 	app := applicationtest.NewApplication(reconcilertesting.ApplicationNameNotClean, nil)
 	applicationLister := fake.NewApplicationListerOrDie(context.Background(), app)
 
+	// init the metrics collector
+	metricsCollector := metrics.NewCollector()
+
 	defaultLogger, err := logger.New(string(kymalogger.JSON), string(kymalogger.INFO))
 	g.Expect(err).To(gomega.BeNil())
 
-	natsHandler := handlers.NewNats(envConf, ens.DefaultSubscriptionConfig, defaultLogger)
+	natsHandler := handlers.NewNats(envConf, ens.DefaultSubscriptionConfig, metricsCollector, defaultLogger)
 	cleaner := eventtype.NewCleaner(envConf.EventTypePrefix, applicationLister, defaultLogger)
 
 	k8sClient := k8sManager.GetClient()

@@ -28,6 +28,10 @@ const slowTime = 5000;
 const streamConfig = {
   isJetStreamEnabled: 'false',
 };
+const subscriptionNames = {
+  orderCreated: 'order-created',
+  orderReceived: 'order-received',
+};
 
 // SKR related constants
 let gardener = null;
@@ -146,4 +150,5 @@ module.exports = {
   getStreamConfigForJetStream,
   skipAtLeastOnceDeliveryTest,
   isJetStreamEnabled,
+  subscriptionNames,
 };

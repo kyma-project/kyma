@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 
+	pkgmetrics "github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/metrics"
+
 	"github.com/pkg/errors"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -46,22 +48,24 @@ func AddToScheme(scheme *runtime.Scheme) error {
 }
 
 type SubscriptionManager struct {
-	cancel      context.CancelFunc
-	envCfg      env.NatsConfig
-	restCfg     *rest.Config
-	metricsAddr string
-	mgr         manager.Manager
-	backend     handlers.JetStreamBackend
-	logger      *logger.Logger
+	cancel           context.CancelFunc
+	envCfg           env.NatsConfig
+	restCfg          *rest.Config
+	metricsAddr      string
+	metricsCollector *pkgmetrics.Collector
+	mgr              manager.Manager
+	backend          handlers.JetStreamBackend
+	logger           *logger.Logger
 }
 
 // NewSubscriptionManager creates the subscription manager for JetStream.
-func NewSubscriptionManager(restCfg *rest.Config, natsConfig env.NatsConfig, metricsAddr string, logger *logger.Logger) *SubscriptionManager {
+func NewSubscriptionManager(restCfg *rest.Config, natsConfig env.NatsConfig, metricsAddr string, metricsCollector *pkgmetrics.Collector, logger *logger.Logger) *SubscriptionManager {
 	return &SubscriptionManager{
-		envCfg:      natsConfig,
-		restCfg:     restCfg,
-		metricsAddr: metricsAddr,
-		logger:      logger,
+		envCfg:           natsConfig,
+		restCfg:          restCfg,
+		metricsAddr:      metricsAddr,
+		metricsCollector: metricsCollector,
+		logger:           logger,
 	}
 }
 
@@ -81,7 +85,7 @@ func (sm *SubscriptionManager) Start(defaultSubsConfig env.DefaultSubscriptionCo
 
 	client := sm.mgr.GetClient()
 	recorder := sm.mgr.GetEventRecorderFor("eventing-controller-jetstream")
-	jetStreamHandler := handlers.NewJetStream(sm.envCfg, sm.logger)
+	jetStreamHandler := handlers.NewJetStream(sm.envCfg, sm.metricsCollector, sm.logger)
 	dynamicClient := dynamic.NewForConfigOrDie(sm.restCfg)
 	applicationLister := application.NewLister(ctx, dynamicClient)
 	cleaner := eventtype.NewCleaner(sm.envCfg.EventTypePrefix, applicationLister, sm.logger)
