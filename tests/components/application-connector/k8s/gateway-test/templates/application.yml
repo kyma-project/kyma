@@ -5,30 +5,10 @@ metadata:
   namespace: "{{ .Values.namespace }}"
 spec:
   description: This is the test service
+  skipVerify: true
   labels:
     app: test-app
   services:
-    # - displayName: no auth
-    #   name: httbin
-    #   providerDisplayName: Kenneth Reitz
-    #   description: No auth in HTTPbin
-    #   id: "{{ uuidv4 }}"
-    #   entries:
-    #     - type: API
-    #       targetUrl: "http://test-app.{{ .Values.namespace }}.svc.cluster.local/get"
-    #       centralGatewayUrl: http://central-application-gateway.kyma-system:8080/test-app/no-auth/
-    # - displayName: basic auth
-    #   name: httbin
-    #   providerDisplayName: Kenneth Reitz
-    #   description: Basic auth in HTTPbin
-    #   id: "{{ uuidv4 }}"
-    #   entries:
-    #     - type: API
-    #       targetUrl: "http://test-app.{{ .Values.namespace  }}.svc.cluster.local/basic-auth/admin/nimda"
-    #       centralGatewayUrl: http://central-application-gateway.kyma-system:8080/test-app/basic-auth/
-    #       credentials:
-    #         secretName: basic-auth-test
-    #         type: Basic
     - displayName: always ok
       name: alwaysok
       providerDisplayName: Rafał
@@ -36,17 +16,30 @@ spec:
       id: "{{ uuidv4 }}"
       entries:
         - type: API
-          targetUrl: "http://test-app-srv.test-app.svc.cluster.local:8080/v1/api/unsecure/ok"
+          targetUrl: "http://test-app.{{ .Values.namespace  }}.svc.cluster.local:8080/v1/api/unsecure/ok"
           centralGatewayUrl: "http://central-application-gateway.kyma-system:8080/test-app/always-ok"
     - displayName: basic
       name: basic
       providerDisplayName: Rafał
-      description: Always Ok in testapp
+      description: Basic Auth Optimistic scenario
       id: "{{ uuidv4 }}"
       entries:
         - type: API
-          targetUrl: "http://test-app-srv.test-app.svc.cluster.local:8080/v1/api/basic/ok"
+          targetUrl: "http://test-app.{{ .Values.namespace  }}.svc.cluster.local:8080/v1/api/basic/ok"
           centralGatewayUrl: "http://central-application-gateway.kyma-system:8080/test-app/basic"
           credentials:
             secretName: basic-test
             type: Basic
+    - displayName: oauth
+      name: oauth
+      providerDisplayName: Rafał
+      description: OAuth Optimistic Scenario
+      id: "{{ uuidv4 }}"
+      entries:
+        - type: API
+          targetUrl: "http://test-app.{{ .Values.namespace  }}.svc.cluster.local:8080/v1/api/oauth/ok"
+          centralGatewayUrl: "http://central-application-gateway.kyma-system:8080/test-app/oauth"
+          credentials:
+            secretName: oauth-test
+            authenticationUrl: "http://test-app.{{ .Values.namespace  }}.svc.cluster.local:8080/v1/server/oauth/token?client_secret=clientSecret"
+            type: OAuthWithCert

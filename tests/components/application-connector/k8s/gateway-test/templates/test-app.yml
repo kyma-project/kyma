@@ -1,10 +1,10 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: test-app
-  namespace: "{{ .Values.namespace }}"
   labels:
     app: test-app
+  name: test-app
+  namespace: "{{.Values.namespace}}"
 spec:
   replicas: 1
   selector:
@@ -16,10 +16,32 @@ spec:
         app: test-app
     spec:
       containers:
-        - name: test-app
-          image: kennethreitz/httpbin
+        - image: mvshao/test-gateway-app:test
+          name: test-app
+          env:
+            - name: APP_CACERTPATH
+              value: "/etc/secret-volume/ca.crt"
+            - name: APP_SERVERCERTPATH
+              value: "/etc/secret-volume/server.crt"
+            - name: APP_SERVERKEYPATH
+              value: "/etc/secret-volume/server.key"
           ports:
-            - containerPort: 80
+            - containerPort: 8080
+            - containerPort: 8090
+          imagePullPolicy: Always
+          volumeMounts:
+            - name: secret-volume
+              mountPath: /etc/secret-volume
+          livenessProbe:
+            httpGet:
+              path: /v1/health
+              port: 8080
+            initialDelaySeconds: 3
+            periodSeconds: 3
+      volumes:
+        - name: secret-volume
+          secret:
+            secretName: mtls-cert-secret
 ---
 apiVersion: v1
 kind: Service
@@ -30,5 +52,9 @@ spec:
   selector:
     app: test-app
   ports:
-    - protocol: TCP
-      port: 80
+    - name: "http"
+      protocol: TCP
+      port: 8080
+    - name: "https"
+      protocol: TCP
+      port: 8090
