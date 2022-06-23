@@ -54,13 +54,13 @@ describe('SKR test', function() {
       );
       shoot = await getSKRConfig(instanceID);
     } else {
-      debug("Provisioning new SKR instance...")
+      console.log("Provisioning new SKR instance...")
       shoot = await provisionSKRInstance(options, provisioningTimeout);
     }
-    debug("Preparing compass resources on the SKR instance...")
+    console.log("Preparing compass resources on the SKR instance...")
     await prepareCompassResources(shoot, options);
 
-    debug("Initiating K8s config...")
+    console.log("Initiating K8s config...")
     await initK8sConfig(shoot);
   });
 

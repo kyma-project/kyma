@@ -30,10 +30,10 @@ async function provisionSKRInstance(options, timeout) {
     debug("SKR is provisioned!");
     const shoot = skr.shoot;
 
-    debug("Adding scenario to compass...");
+    console.log("Adding scenario to compass...");
     await addScenarioInCompass(director, options.scenarioName);
 
-    debug("Assigning runtime to scenario...");
+    console.log("Assigning runtime to scenario...");
     await assignRuntimeToScenario(director, shoot.compassID, options.scenarioName);
     return shoot;
   } catch (e) {
