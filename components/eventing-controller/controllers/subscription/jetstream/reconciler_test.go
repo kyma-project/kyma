@@ -9,8 +9,8 @@ import (
 	"time"
 
 	"github.com/kyma-project/kyma/components/eventing-controller/pkg/handlers/metrics"
-
 	"github.com/nats-io/nats.go"
+	v1 "k8s.io/api/core/v1"
 
 	utils "github.com/kyma-project/kyma/components/eventing-controller/controllers/subscription/testing"
 
@@ -28,7 +28,6 @@ import (
 	natsserver "github.com/nats-io/nats-server/v2/server"
 	"github.com/onsi/gomega"
 	gomegatypes "github.com/onsi/gomega/types"
-	v1 "k8s.io/api/core/v1"
 	"k8s.io/client-go/kubernetes/scheme"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/envtest"
@@ -60,19 +59,27 @@ func TestUnavailableNATSServer(t *testing.T) {
 		reconcilertesting.WithSinkURLFromSvc(ens.SubscriberSvc),
 	)
 
-	utils.TestSubscriptionOnK8s(ens.TestEnsemble, subscription,
+	utils.TestSubscriptionOnK8s(
+		ens.TestEnsemble,
+		subscription,
 		reconcilertesting.HaveCondition(reconcilertesting.DefaultReadyCondition()),
 		reconcilertesting.HaveSubscriptionReady(),
 		reconcilertesting.HaveCleanEventTypes([]string{utils.NewCleanEventType("")}),
 	)
 
 	ens.NatsServer.Shutdown()
-	utils.TestSubscriptionOnK8s(ens.TestEnsemble, subscription,
+	utils.TestSubscriptionOnK8s(
+		ens.TestEnsemble,
+		subscription,
 		reconcilertesting.HaveSubscriptionNotReady(),
 	)
 
 	ens.NatsServer = startJetStream(natsPort)
-	utils.TestSubscriptionOnK8s(ens.TestEnsemble, subscription, reconcilertesting.HaveSubscriptionReady())
+	utils.TestSubscriptionOnK8s(
+		ens.TestEnsemble,
+		subscription,
+		reconcilertesting.HaveSubscriptionReady(),
+	)
 
 	t.Cleanup(ens.Cancel)
 }
@@ -86,6 +93,7 @@ func TestCreateSubscription(t *testing.T) {
 	g.Expect(err).ToNot(gomega.HaveOccurred())
 
 	ens := setupTestEnsemble(ctx, reconcilertesting.EventTypePrefix, g, natsPort)
+	t.Cleanup(ens.Cancel)
 
 	var testCases = []struct {
 		name                  string
@@ -104,10 +112,12 @@ func TestCreateSubscription(t *testing.T) {
 					reconcilertesting.HaveCondition(reconcilertesting.DefaultReadyCondition()),
 					reconcilertesting.HaveSubsConfiguration(utils.ConfigDefault(ens.DefaultSubscriptionConfig.MaxInFlightMessages)),
 				},
-				NatsSubscription: []gomegatypes.GomegaMatcher{
-					natstesting.BeExistingSubscription(),
-					natstesting.BeValidSubscription(),
-					natstesting.BeJetStreamSubscriptionWithSubject(reconcilertesting.OrderCreatedEventType),
+				NatsSubscriptions: map[string][]gomegatypes.GomegaMatcher{
+					reconcilertesting.OrderCreatedEventType: {
+						natstesting.BeExistingSubscription(),
+						natstesting.BeValidSubscription(),
+						natstesting.BeJetStreamSubscriptionWithSubject(reconcilertesting.OrderCreatedEventType),
+					},
 				},
 			},
 		},
@@ -267,10 +277,12 @@ func TestCreateSubscription(t *testing.T) {
 				K8sSubscription: []gomegatypes.GomegaMatcher{
 					reconcilertesting.HaveCondition(reconcilertesting.DefaultReadyCondition()),
 				},
-				NatsSubscription: []gomegatypes.GomegaMatcher{
-					natstesting.BeExistingSubscription(),
-					natstesting.BeValidSubscription(),
-					natstesting.BeJetStreamSubscriptionWithSubject(reconcilertesting.OrderCreatedEventType),
+				NatsSubscriptions: map[string][]gomegatypes.GomegaMatcher{
+					reconcilertesting.OrderCreatedEventType: {
+						natstesting.BeExistingSubscription(),
+						natstesting.BeValidSubscription(),
+						natstesting.BeJetStreamSubscriptionWithSubject(reconcilertesting.OrderCreatedEventType),
+					},
 				},
 			},
 		},
@@ -278,14 +290,33 @@ func TestCreateSubscription(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
+			// The new testing.T instance needs to be used for making assertions. If ignored, errors like this will be printed:
+			// testing.go:1336: test executed panic(nil) or runtime.Goexit: subtest may have called FailNow on a parent test
+			ens := ens
+			ens.G = gomega.NewGomegaWithT(t)
+
+			t.Log("creating the k8s subscription")
 			subscription := utils.CreateSubscription(ens.TestEnsemble, tc.givenSubscriptionOpts...)
+			t.Log("testing the k8s subscription")
 			utils.TestSubscriptionOnK8s(ens.TestEnsemble, subscription, tc.want.K8sSubscription...)
+
+			t.Log("testing the k8s events")
 			utils.TestEventsOnK8s(ens.TestEnsemble, tc.want.K8sEvents...)
-			testSubscriptionOnNATS(ens, subscription, reconcilertesting.OrderCreatedEventType, tc.want.NatsSubscription...)
-			testDeletion(ens, subscription, reconcilertesting.OrderCreatedEventType)
+
+			t.Log("testing the nats subscriptions")
+			for eventType, matchers := range tc.want.NatsSubscriptions {
+				testSubscriptionOnNATS(ens, subscription, eventType, matchers...)
+			}
+
+			t.Log("testing the deletion of the subscription")
+			testSubscriptionDeletion(ens, subscription)
+
+			t.Log("testing the deletion of the NATS subscription(s)")
+			for _, filter := range subscription.Spec.Filter.Filters {
+				ensureNATSSubscriptionIsDeleted(ens, subscription, filter.EventType.Value)
+			}
 		})
 	}
-	t.Cleanup(ens.Cancel)
 }
 
 // TestChangeSubscription tests if existing subscriptions are reconciled properly after getting changed.
@@ -304,6 +335,131 @@ func TestChangeSubscription(t *testing.T) {
 		changeSubscription    func(subscription *eventingv1alpha1.Subscription)
 		wantAfter             utils.Want
 	}{
+		{
+			// Ensure subscriptions on NATS are added when adding a Subscription filter and providing an invalid sink.
+			// issue: https://github.com/kyma-project/kyma/issues/14152
+			name: "NATS subscriptions are in sync even though the sink becomes invalid: adding a filter",
+			givenSubscriptionOpts: []reconcilertesting.SubscriptionOpt{
+				reconcilertesting.WithFilter(reconcilertesting.EventSource, utils.NewCleanEventType("0")),
+				// valid sink
+				reconcilertesting.WithSinkURLFromSvc(ens.SubscriberSvc),
+			},
+			wantBefore: utils.Want{
+				K8sSubscription: []gomegatypes.GomegaMatcher{
+					reconcilertesting.HaveSubscriptionReady(),
+					// for each filter we want to have a clean event type
+					reconcilertesting.HaveCleanEventTypes([]string{
+						utils.NewCleanEventType("0"),
+					}),
+				},
+				K8sEvents: nil,
+				// ensure that each filter results in a NATS consumer
+				NatsSubscriptions: map[string][]gomegatypes.GomegaMatcher{
+					utils.NewCleanEventType("0"): {
+						natstesting.BeExistingSubscription(),
+						natstesting.BeValidSubscription(),
+						natstesting.BeJetStreamSubscriptionWithSubject(utils.NewCleanEventType("0")),
+					},
+				},
+			},
+			changeSubscription: func(subscription *eventingv1alpha1.Subscription) {
+				reconcilertesting.AddFilter(reconcilertesting.EventSource, utils.NewCleanEventType("1"), subscription)
+
+				// provoke an error by making the subscription unready
+				subscription.Spec.Sink = "invalid"
+			},
+			wantAfter: utils.Want{
+				K8sSubscription: []gomegatypes.GomegaMatcher{
+					reconcilertesting.HaveSubscriptionNotReady(),
+					// for each filter we want to have a clean event type
+					reconcilertesting.HaveCleanEventTypes([]string{
+						utils.NewCleanEventType("0"),
+						utils.NewCleanEventType("1"),
+					}),
+				},
+				K8sEvents: nil,
+				// ensure that each filter results in a NATS consumer
+				NatsSubscriptions: map[string][]gomegatypes.GomegaMatcher{
+					utils.NewCleanEventType("0"): {
+						natstesting.BeExistingSubscription(),
+					},
+					// ensure the newly added filter is synced to NATS
+					utils.NewCleanEventType("1"): {
+						natstesting.BeExistingSubscription(),
+					},
+				},
+			},
+		},
+		{
+			// Ensure subscriptions on NATS are deleted when deleting a Subscription filter and providing an invalid sink.
+			// issue: https://github.com/kyma-project/kyma/issues/14152
+			name: "NATS subscriptions are in sync even though the sink becomes invalid: deleting a filter",
+			givenSubscriptionOpts: []reconcilertesting.SubscriptionOpt{
+				reconcilertesting.WithFilter(reconcilertesting.EventSource, utils.NewCleanEventType("0")),
+				reconcilertesting.WithFilter(reconcilertesting.EventSource, utils.NewCleanEventType("1")),
+				// some valid sink
+				reconcilertesting.WithSinkURLFromSvc(ens.SubscriberSvc),
+			},
+			wantBefore: utils.Want{
+				K8sSubscription: []gomegatypes.GomegaMatcher{
+					reconcilertesting.HaveSubscriptionReady(),
+					// // for each filter we want to have a clean event type
+					reconcilertesting.HaveCleanEventTypes([]string{
+						utils.NewCleanEventType("0"),
+						utils.NewCleanEventType("1"),
+					}),
+				},
+				K8sEvents: nil,
+				// ensure that each filter results in a NATS consumer
+				NatsSubscriptions: map[string][]gomegatypes.GomegaMatcher{
+					utils.NewCleanEventType("0"): {
+						natstesting.BeExistingSubscription(),
+						natstesting.BeValidSubscription(),
+						natstesting.BeJetStreamSubscriptionWithSubject(utils.NewCleanEventType("0")),
+					},
+					utils.NewCleanEventType("1"): {
+						natstesting.BeExistingSubscription(),
+						natstesting.BeValidSubscription(),
+						natstesting.BeJetStreamSubscriptionWithSubject(utils.NewCleanEventType("1")),
+					},
+				},
+			},
+			changeSubscription: func(subscription *eventingv1alpha1.Subscription) {
+				// delete the first filter
+				subscription.Spec.Filter.Filters = nil
+				reconcilertesting.AddFilter(reconcilertesting.EventSource, utils.NewCleanEventType("1"), subscription)
+
+				// provoke an error by making the subscription unready
+				subscription.Spec.Sink = "invalid"
+			},
+			wantAfter: utils.Want{
+				K8sSubscription: []gomegatypes.GomegaMatcher{
+					reconcilertesting.HaveSubscriptionNotReady(),
+					// filter was deleted
+					gomega.Not(reconcilertesting.HaveCleanEventTypes([]string{
+						utils.NewCleanEventType("0"),
+					})),
+					// filter is still there
+					reconcilertesting.HaveCleanEventTypes([]string{
+						utils.NewCleanEventType("1"),
+					}),
+				},
+				K8sEvents: nil,
+				// ensure that each filter results in a NATS consumer
+				NatsSubscriptions: map[string][]gomegatypes.GomegaMatcher{
+					// the filter was removed from the subscription -> it should be removed on NATS as well
+					utils.NewCleanEventType("0"): {
+						gomega.Not(natstesting.BeExistingSubscription()),
+					},
+					// nothing changed for this filter
+					utils.NewCleanEventType("1"): {
+						natstesting.BeExistingSubscription(),
+						natstesting.BeValidSubscription(),
+						natstesting.BeJetStreamSubscriptionWithSubject(utils.NewCleanEventType("1")),
+					},
+				},
+			},
+		},
 		{
 			name: "CleanEventTypes; add filters to subscription without filters",
 			givenSubscriptionOpts: []reconcilertesting.SubscriptionOpt{
@@ -430,10 +586,12 @@ func TestChangeSubscription(t *testing.T) {
 						},
 					),
 				},
-				NatsSubscription: []gomegatypes.GomegaMatcher{
-					natstesting.BeExistingSubscription(),
-					natstesting.BeValidSubscription(),
-					natstesting.BeSubscriptionWithSubject(utils.NewCleanEventType("")),
+				NatsSubscriptions: map[string][]gomegatypes.GomegaMatcher{
+					utils.NewCleanEventType(""): {
+						natstesting.BeExistingSubscription(),
+						natstesting.BeValidSubscription(),
+						natstesting.BeJetStreamSubscriptionWithSubject(utils.NewCleanEventType("")),
+					},
 				},
 			},
 		},
@@ -502,27 +660,55 @@ func TestChangeSubscription(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
+			// The new t instance needs to be used for making assertions. If ignored, errors like this will be printed:
+			// testing.go:1336: test executed panic(nil) or runtime.Goexit: subtest may have called FailNow on a parent test
+			ens := ens
+			g = gomega.NewGomegaWithT(t)
+			ens.G = g
+
 			// given
+			t.Log("creating the k8s subscription")
 			subscription := utils.CreateSubscription(ens.TestEnsemble, tc.givenSubscriptionOpts...)
 
+			t.Log("testing the k8s subscription")
 			utils.TestSubscriptionOnK8s(ens.TestEnsemble, subscription, tc.wantBefore.K8sSubscription...)
+
+			t.Log("testing the k8s events")
 			utils.TestEventsOnK8s(ens.TestEnsemble, tc.wantBefore.K8sEvents...)
-			testSubscriptionOnNATS(ens, subscription,
-				reconcilertesting.OrderCreatedEventType, tc.wantBefore.NatsSubscription...)
+
+			t.Log("testing the nats subscriptions")
+			for eventType, matchers := range tc.wantBefore.NatsSubscriptions {
+				testSubscriptionOnNATS(ens, subscription, eventType, matchers...)
+			}
 
 			// when
-			tc.changeSubscription(subscription)
-			utils.UpdateSubscriptionOnK8s(ens.TestEnsemble, subscription)
+			t.Log("change and update the subscription")
+			utils.UpdateSubscriptionOnK8sWithFreshCopy(ens.TestEnsemble, ctx, subscription, func(sub *eventingv1alpha1.Subscription) error {
+				tc.changeSubscription(sub)
+				return utils.UpdateSubscriptionOnK8s(ens.TestEnsemble, sub)
+			}).Should(gomega.BeNil())
 
 			// then
+			t.Log("testing the k8s subscription")
 			utils.TestSubscriptionOnK8s(ens.TestEnsemble, subscription, tc.wantAfter.K8sSubscription...)
+
+			t.Log("testing the k8s events")
 			utils.TestEventsOnK8s(ens.TestEnsemble, tc.wantAfter.K8sEvents...)
-			testSubscriptionOnNATS(ens, subscription,
-				reconcilertesting.OrderCreatedEventType, tc.wantBefore.NatsSubscription...)
-			testDeletion(ens, subscription, reconcilertesting.OrderCreatedEventType)
+
+			t.Log("testing the nats subscriptions")
+			for eventType, matchers := range tc.wantAfter.NatsSubscriptions {
+				testSubscriptionOnNATS(ens, subscription, eventType, matchers...)
+			}
+
+			t.Log("testing the deletion of the subscription")
+			testSubscriptionDeletion(ens, subscription)
+
+			t.Log("testing the deletion of the NATS subscription(s)")
+			for _, filter := range subscription.Spec.Filter.Filters {
+				ensureNATSSubscriptionIsDeleted(ens, subscription, filter.EventType.Value)
+			}
 		})
 	}
-	t.Cleanup(ens.Cancel)
 }
 
 // TestEmptyEventTypePrefix tests if a subscription is reconciled properly if the EventTypePrefix is empty.
@@ -556,20 +742,30 @@ func TestEmptyEventTypePrefix(t *testing.T) {
 
 	testSubscriptionOnNATS(ens, subscription, reconcilertesting.OrderCreatedEventTypePrefixEmpty, expectedNatsSubscription...)
 
-	testDeletion(ens, subscription, reconcilertesting.OrderCreatedEventTypePrefixEmpty)
+	testSubscriptionDeletion(ens, subscription)
+	ensureNATSSubscriptionIsDeleted(ens, subscription, reconcilertesting.OrderCreatedEventTypePrefixEmpty)
 
 	t.Cleanup(ens.Cancel)
 }
 
 func testSubscriptionOnNATS(ens *jetStreamTestEnsemble, subscription *eventingv1alpha1.Subscription, subject string, expectations ...gomegatypes.GomegaMatcher) {
-	getSubscriptionFromJetStream(ens, subscription, ens.jetStreamBackend.GetJetstreamSubject(subject)).Should(gomega.And(expectations...))
+	description := "nats subscriptions should be as defined"
+	getSubscriptionFromJetStream(ens, subscription, ens.jetStreamBackend.GetJetstreamSubject(subject)).Should(gomega.And(expectations...), description)
 }
 
-func testDeletion(ens *jetStreamTestEnsemble, subscription *eventingv1alpha1.Subscription, subject string) {
+// testSubscriptionDeletion deletes the subscription and ensures it is not found anymore on the apiserver.
+func testSubscriptionDeletion(ens *jetStreamTestEnsemble, subscription *eventingv1alpha1.Subscription) {
 	g := ens.G
-	g.Expect(ens.K8sClient.Delete(ens.Ctx, subscription)).Should(gomega.BeNil())
-	utils.IsSubscriptionDeletedOnK8s(ens.TestEnsemble, subscription).Should(reconcilertesting.HaveNotFoundSubscription())
-	getSubscriptionFromJetStream(ens, subscription, subject).ShouldNot(natstesting.BeExistingSubscription())
+	g.Eventually(func() error {
+		return ens.K8sClient.Delete(ens.Ctx, subscription)
+	}, utils.SmallTimeout, utils.SmallPollingInterval).ShouldNot(gomega.HaveOccurred())
+	utils.IsSubscriptionDeletedOnK8s(ens.TestEnsemble, subscription).Should(reconcilertesting.HaveNotFoundSubscription(), "subscription should be deleted")
+}
+
+// ensureNATSSubscriptionIsDeleted ensures that the NATS subscription is not found anymore.
+// This ensures the controller did delete it correctly then the Subscription was deleted.
+func ensureNATSSubscriptionIsDeleted(ens *jetStreamTestEnsemble, subscription *eventingv1alpha1.Subscription, subject string) {
+	getSubscriptionFromJetStream(ens, subscription, subject).ShouldNot(natstesting.BeExistingSubscription(), "NATS subscription should be deleted")
 }
 
 func setupTestEnsemble(ctx context.Context, eventTypePrefix string, g *gomega.GomegaWithT, natsPort int) *jetStreamTestEnsemble {
@@ -598,6 +794,7 @@ func setupTestEnsemble(ctx context.Context, eventTypePrefix string, g *gomega.Go
 	utils.StartTestEnv(ens)
 	startReconciler(eventTypePrefix, jsTestEnsemble)
 	utils.StartSubscriberSvc(ens)
+	// TODO: stop this via context: utils.StartSubscriberSvc(ens)
 
 	return jsTestEnsemble
 }
@@ -687,10 +884,13 @@ func startReconciler(eventTypePrefix string, ens *jetStreamTestEnsemble) *jetStr
 	return ens
 }
 
-func getSubscriptionFromJetStream(ens *jetStreamTestEnsemble, subscription *eventingv1alpha1.Subscription, subject string) gomega.Assertion {
+// getSubscriptionFromJetStream returns a NATS subscription for a given subscription and subject.
+// NOTE: We need to give the controller enough time to react on the changes. Otherwise, the returned NATS subscription could have the wrong state.
+//       For this reason Eventually is used here.
+func getSubscriptionFromJetStream(ens *jetStreamTestEnsemble, subscription *eventingv1alpha1.Subscription, subject string) gomega.AsyncAssertion {
 	g := ens.G
 
-	return g.Expect(func() *nats.Subscription {
+	return g.Eventually(func() *nats.Subscription {
 		subscriptions := ens.jetStreamBackend.GetAllSubscriptions()
 		subscriptionSubject := handlers.NewSubscriptionSubjectIdentifier(subscription, subject)
 		for key, sub := range subscriptions {
@@ -699,5 +899,5 @@ func getSubscriptionFromJetStream(ens *jetStreamTestEnsemble, subscription *even
 			}
 		}
 		return nil
-	}())
+	}, utils.SmallTimeout, utils.SmallPollingInterval)
 }

@@ -12,6 +12,7 @@ import (
 	natsserver "github.com/nats-io/nats-server/v2/server"
 	"github.com/onsi/gomega"
 	gomegatypes "github.com/onsi/gomega/types"
+	"github.com/pkg/errors"
 	v1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -22,8 +23,8 @@ import (
 )
 
 const (
-	smallTimeout           = 10 * time.Second
-	smallPollingInterval   = 1 * time.Second
+	SmallTimeout           = 10 * time.Second
+	SmallPollingInterval   = 1 * time.Second
 	subscriptionNameFormat = "nats-sub-%d"
 )
 
@@ -41,16 +42,33 @@ type TestEnsemble struct {
 }
 
 type Want struct {
-	K8sSubscription  []gomegatypes.GomegaMatcher
-	K8sEvents        []v1.Event
-	NatsSubscription []gomegatypes.GomegaMatcher
+	K8sSubscription []gomegatypes.GomegaMatcher
+	K8sEvents       []v1.Event
+	// NatsSubscriptions holds gomega matchers for a NATS subscription per event-type.
+	NatsSubscriptions map[string][]gomegatypes.GomegaMatcher
 }
 
-func UpdateSubscriptionOnK8s(ens *TestEnsemble, subscription *eventingv1alpha1.Subscription) {
-	g := ens.G
+func UpdateSubscriptionOnK8s(ens *TestEnsemble, subscription *eventingv1alpha1.Subscription) error {
+	return ens.K8sClient.Update(ens.Ctx, subscription)
+}
 
-	err := ens.K8sClient.Update(ens.Ctx, subscription)
-	g.Expect(err).Should(gomega.BeNil())
+// UpdateSubscriptionOnK8sWithFreshCopy gets a fresh copy of the sub, changes it and updates it until the operation meets the caller expectation.
+func UpdateSubscriptionOnK8sWithFreshCopy(ens *TestEnsemble, ctx context.Context, sub *eventingv1alpha1.Subscription, updateFunc func(*eventingv1alpha1.Subscription) error) gomega.GomegaAsyncAssertion {
+	return ens.G.Eventually(func() error {
+
+		// get a fresh version of the Subscription
+		lookupKey := types.NamespacedName{
+			Namespace: sub.Namespace,
+			Name:      sub.Name,
+		}
+		if err := ens.K8sClient.Get(ctx, lookupKey, sub); err != nil {
+			return errors.Wrapf(err, "error while fetching subscription %s", lookupKey.String())
+		}
+		if err := updateFunc(sub); err != nil {
+			return err
+		}
+		return nil
+	}, SmallTimeout, SmallPollingInterval)
 }
 
 func CreateSubscription(ens *TestEnsemble, subscriptionOpts ...reconcilertesting.SubscriptionOpt) *eventingv1alpha1.Subscription {
@@ -62,13 +80,14 @@ func CreateSubscription(ens *TestEnsemble, subscriptionOpts ...reconcilertesting
 }
 
 func TestSubscriptionOnK8s(ens *TestEnsemble, subscription *eventingv1alpha1.Subscription, expectations ...gomegatypes.GomegaMatcher) {
+	description := "eventing subscription did not match the requirements"
 	subExpectations := append(expectations, reconcilertesting.HaveSubscriptionName(subscription.Name))
-	getSubscriptionOnK8S(ens, subscription).Should(gomega.And(subExpectations...))
+	getSubscriptionOnK8S(ens, subscription).Should(gomega.And(subExpectations...), description)
 }
 
 func TestEventsOnK8s(ens *TestEnsemble, expectations ...v1.Event) {
 	for _, event := range expectations {
-		getK8sEvents(ens).Should(reconcilertesting.HaveEvent(event))
+		getK8sEvents(ens).Should(reconcilertesting.HaveEvent(event), "k8s events should be as defined")
 	}
 }
 
@@ -101,7 +120,7 @@ func IsSubscriptionDeletedOnK8s(ens *TestEnsemble, subscription *eventingv1alpha
 			return k8serrors.IsNotFound(err)
 		}
 		return false
-	}, smallTimeout, smallPollingInterval)
+	}, SmallTimeout, SmallPollingInterval)
 }
 
 func ConfigDefault(maxInFlightMsg int) *eventingv1alpha1.SubscriptionConfig {
@@ -144,17 +163,19 @@ func createSubscriberSvcInK8s(ens *TestEnsemble) {
 	if ens.SubscriberSvc.Namespace != "default " {
 		namespace := fixtureNamespace(ens.SubscriberSvc.Namespace)
 		if namespace.Name != "default" {
-			err := ens.K8sClient.Create(ens.Ctx, namespace)
-			if !k8serrors.IsAlreadyExists(err) {
-				fmt.Println(err)
-				g.Expect(err).ShouldNot(gomega.HaveOccurred())
-			}
+			g.Eventually(func() error {
+				if err := ens.K8sClient.Create(ens.Ctx, namespace); !k8serrors.IsAlreadyExists(err) {
+					return err
+				}
+				return nil
+			}, SmallTimeout, SmallPollingInterval).ShouldNot(gomega.HaveOccurred())
 		}
 	}
 
-	// create subscriber svc on cluster
-	err := ens.K8sClient.Create(ens.Ctx, ens.SubscriberSvc)
-	g.Expect(err).Should(gomega.BeNil())
+	g.Eventually(func() error {
+		// create subscriber svc on cluster
+		return ens.K8sClient.Create(ens.Ctx, ens.SubscriberSvc)
+	}, SmallTimeout, SmallPollingInterval).ShouldNot(gomega.HaveOccurred())
 }
 
 // createSubscriptionInK8s creates a Subscription on the K8s client of the testEnsemble. All the reconciliation
@@ -169,14 +190,15 @@ func createSubscriptionInK8s(ens *TestEnsemble, subscription *eventingv1alpha1.S
 			err := ens.K8sClient.Create(ens.Ctx, namespace)
 			if !k8serrors.IsAlreadyExists(err) {
 				fmt.Println(err)
-				g.Expect(err).ShouldNot(gomega.HaveOccurred())
+				g.Expect(err).ShouldNot(gomega.HaveOccurred(), "unable to create the subscription")
 			}
 		}
 	}
 
 	// create subscription on cluster
-	err := ens.K8sClient.Create(ens.Ctx, subscription)
-	g.Expect(err).Should(gomega.BeNil())
+	g.Eventually(func() error {
+		return ens.K8sClient.Create(ens.Ctx, subscription)
+	}, SmallTimeout, SmallPollingInterval).ShouldNot(gomega.HaveOccurred())
 	return subscription
 }
 
@@ -193,13 +215,12 @@ func fixtureNamespace(name string) *v1.Namespace {
 	return &namespace
 }
 
-//
-// getSubscription fetches a subscription using the lookupKey and allows making assertions on it
+// getSubscriptionOnK8S fetches a subscription using the lookupKey and allows making assertions on it.
 func getSubscriptionOnK8S(ens *TestEnsemble, subscription *eventingv1alpha1.Subscription, intervals ...interface{}) gomega.AsyncAssertion {
 	g := ens.G
 
 	if len(intervals) == 0 {
-		intervals = []interface{}{smallTimeout, smallPollingInterval}
+		intervals = []interface{}{SmallTimeout, SmallPollingInterval}
 	}
 	return g.Eventually(func() *eventingv1alpha1.Subscription {
 		lookupKey := types.NamespacedName{
@@ -225,5 +246,5 @@ func getK8sEvents(ens *TestEnsemble) gomega.AsyncAssertion {
 			return v1.EventList{}
 		}
 		return eventList
-	}, smallTimeout, smallPollingInterval)
+	}, SmallTimeout, SmallPollingInterval)
 }
