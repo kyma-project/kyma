@@ -276,6 +276,9 @@ func (s *LogPipelineSyncer) syncVariables(ctx context.Context) (bool, error) {
 	}
 
 	for _, l := range logPipelines.Items {
+		if l.DeletionTimestamp != nil {
+			continue
+		}
 		for _, varRef := range l.Spec.Variables {
 			var referencedSecret *corev1.Secret
 			if secret.IsSecretRef(varRef.ValueFrom) {
