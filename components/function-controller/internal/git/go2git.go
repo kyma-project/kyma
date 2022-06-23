@@ -10,6 +10,7 @@ import (
 
 	git2go "github.com/libgit2/git2go/v31"
 	"github.com/pkg/errors"
+	"go.uber.org/zap"
 )
 
 const (
@@ -36,10 +37,10 @@ type Git2GoClient struct {
 	fetcher
 }
 
-func NewGit2Go() *Git2GoClient {
+func NewGit2Go(logger *zap.SugaredLogger) *Git2GoClient {
 	return &Git2GoClient{
 		cloner:  &git2goCloner{},
-		fetcher: &git2goFetcher{},
+		fetcher: &git2goFetcher{logger: logger},
 	}
 }
 
