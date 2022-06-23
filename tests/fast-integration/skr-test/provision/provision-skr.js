@@ -28,9 +28,13 @@ async function getOrProvisionSKR(options, shoot, skipProvisioning, provisioningT
     );
     shoot = await getSKRConfig(instanceID);
   } else {
+    console.log('Provisioning new SKR instance...');
     shoot = await provisionSKRInstance(options, provisioningTimeout);
   }
+  console.log('Preparing compass resources on the SKR instance...');
   await prepareCompassResources(shoot, options);
+
+  console.log('Initiating K8s config...');
   await initK8sConfig(shoot);
 }
 

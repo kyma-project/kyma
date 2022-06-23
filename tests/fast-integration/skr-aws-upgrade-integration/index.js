@@ -39,31 +39,34 @@ describe('SKR-Upgrade-test', function() {
       withCustomParams(customParams),
   );
   let shoot;
+  const getShootInfoFunc = function() {
+    return shoot;
+  };
 
   before(`Provision SKR with ID ${options.instanceID} and version ${kymaVersion}`, async function() {
     this.timeout(provisioningTimeout);
     await getOrProvisionSKR(options, shoot, skipProvisioning, provisioningTimeout);
   });
 
-  it('Execute Commerce Mock Tests', async function() {
-    oidcE2ETest(options, shoot);
-    commerceMockTest(options);
-  });
+  // Run the OIDC tests
+  oidcE2ETest(options, getShootInfoFunc);
+  // Run the commerce mock tests
+  commerceMockTest(options);
 
   it('Perform Upgrade', async function() {
     await upgradeSKRInstance(options, kymaUpgradeVersion, upgradeTimeoutMin);
   });
 
-  it('Execute commerceMockTests', async function() {
-    oidcE2ETest(options, shoot);
-    commerceMockTest(options);
-  });
+  // Run the OIDC tests
+  oidcE2ETest(options, getShootInfoFunc);
+  // Run the commerce mock tests
+  commerceMockTest(options);
 
   const skipCleanup = getEnvOrThrow('SKIP_CLEANUP');
   if (skipCleanup === 'FALSE') {
     after('Cleanup the resources', async function() {
       this.timeout(deprovisioningTimeout);
-      await deprovisionAndUnregisterSKR(options, deprovisioningTimeout, skipProvisioning);
+      await deprovisionAndUnregisterSKR(options, deprovisioningTimeout, skipProvisioning, false);
     });
   }
 });
