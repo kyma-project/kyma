@@ -14,26 +14,26 @@ func IsNotFunctionStatusUpdate(log *zap.SugaredLogger) func(event.UpdateEvent) b
 			return true
 		}
 
-		log.Debug("old", event.ObjectOld.GetName())
-		log.Debug("new:", event.ObjectNew.GetName())
+		log.Debug("old: ", event.ObjectOld.GetName())
+		log.Debug("new: ", event.ObjectNew.GetName())
 
 		oldFn, ok := event.ObjectOld.(*serverlessv1alpha1.Function)
 		if !ok {
-			v := reflect.ValueOf(oldFn)
-			log.Debug("Can't cast to function:", v.Type())
+			v := reflect.ValueOf(event.ObjectOld)
+			log.Debug("Can't cast to function from type: ", v.Type())
 			return true
 		}
 
 		newFn, ok := event.ObjectNew.(*serverlessv1alpha1.Function)
 		if !ok {
-			v := reflect.ValueOf(newFn)
-			log.Debug("Can't cast to function:", v.Type())
+			v := reflect.ValueOf(event.ObjectNew)
+			log.Debug("Can't cast to function from type: ", v.Type())
 			return true
 		}
 
-		equalStasus := equalFunctionStatus(oldFn.Status, newFn.Status)
-		log.Debug("Statuses are equal: ", equalStasus)
+		equalStatus := equalFunctionStatus(oldFn.Status, newFn.Status)
+		log.Debug("Statuses are equal: ", equalStatus)
 
-		return equalStasus
+		return equalStatus
 	}
 }
