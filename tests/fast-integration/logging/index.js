@@ -6,7 +6,7 @@ function loggingTests() {
     this.timeout(5 * 60 * 1000); // 5 min
     this.slow(5000);
 
-    it('Check Loki logs from kyma-system and kyma-integration namespaces', async () => {
+    it('Check Loki logs from kyma-system namespace', async () => {
       await loki.checkKymaLogs(testStartTimestamp);
     });
 

@@ -1,4 +1,0 @@
-name: catalog
-description: service-catalog webhook server and controller-manager helm chart
-version: 0.3.0
-apiVersion: v1

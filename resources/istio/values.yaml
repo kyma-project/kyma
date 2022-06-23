@@ -11,7 +11,7 @@ helmValues:
       readinessPeriodSeconds: 5
       resources:
         requests:
-          cpu: 75m
+          cpu: 100m
           memory: 64Mi
         limits:
           cpu: 250m
@@ -103,7 +103,7 @@ components:
           cpu: 500m
           memory: 1024Mi
         requests:
-          cpu: 250m
+          cpu: 100m
           memory: 512Mi
       securityContext:
         runAsUser: 65534
@@ -126,12 +126,12 @@ global:
     # these definitions aren't used by the chart, but they are required by external tool for list generation
     istio_proxyv2:
       name: "proxyv2"
-      version: "1.13.2-distroless"
+      version: "1.14.1-distroless"
       directory: "external/istio"
       containerRegistryPath: "eu.gcr.io/kyma-project"
     istio_pilot:
       name: "pilot"
-      version: "1.13.2-distroless"
+      version: "1.14.1-distroless"
       directory: "external/istio"
       containerRegistryPath: "eu.gcr.io/kyma-project"
   tracing:
