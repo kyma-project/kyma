@@ -10,7 +10,6 @@ const {
 const {
   getEnvOrThrow,
   genRandom,
-  debug,
 } = require('../utils');
 const {unregisterKymaFromCompass} = require('../compass');
 const {deprovisionSKRInstance} = require('./provision/deprovision-skr');
@@ -35,9 +34,9 @@ describe('SKR test', function() {
 
   let options = gatherOptions(); // with default values
   let shoot;
-  const getShootInfoFunc = function () {
-    return shoot
-  }
+  const getShootInfoFunc = function() {
+    return shoot;
+  };
 
   before('Ensure SKR is provisioned', async function() {
     this.timeout(provisioningTimeout);
@@ -54,13 +53,13 @@ describe('SKR test', function() {
       );
       shoot = await getSKRConfig(instanceID);
     } else {
-      console.log("Provisioning new SKR instance...")
+      console.log('Provisioning new SKR instance...');
       shoot = await provisionSKRInstance(options, provisioningTimeout);
     }
-    console.log("Preparing compass resources on the SKR instance...")
+    console.log('Preparing compass resources on the SKR instance...');
     await prepareCompassResources(shoot, options);
 
-    console.log("Initiating K8s config...")
+    console.log('Initiating K8s config...');
     await initK8sConfig(shoot);
   });
 

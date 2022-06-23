@@ -27,19 +27,19 @@ async function provisionSKRInstance(options, timeout) {
         options.customParams,
         timeout);
 
-    debug("SKR is provisioned!");
+    debug('SKR is provisioned!');
     const shoot = skr.shoot;
 
-    console.log("Adding scenario to compass...");
+    console.log('Adding scenario to compass...');
     await addScenarioInCompass(director, options.scenarioName);
 
-    console.log("Assigning runtime to scenario...");
+    console.log('Assigning runtime to scenario...');
     await assignRuntimeToScenario(director, shoot.compassID, options.scenarioName);
     return shoot;
   } catch (e) {
     throw new Error(`Provisioning failed: ${e.toString()}`);
   } finally {
-    debug("Fetching runtime status...");
+    debug('Fetching runtime status...');
     const runtimeStatus = await kcp.getRuntimeStatusOperations(options.instanceID);
     console.log(`\nRuntime status after provisioning: ${runtimeStatus}`);
     await kcp.reconcileInformationLog(runtimeStatus);

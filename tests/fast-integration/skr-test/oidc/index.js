@@ -18,7 +18,7 @@ function oidcE2ETest(options, getShootInfoFunc) {
     let givenOidcConfig = undefined;
 
     before('Get provisioned Shoot Info', async function() {
-      shoot = getShootInfoFunc()
+      shoot = getShootInfoFunc();
       expect(shoot).to.not.be.undefined;
       givenOidcConfig = shoot.oidcConfig;
     });
